@@ -23,7 +23,7 @@ jobs:
           otp-version: '28'
           gleam-version: '1.18.1'
 
-      - name: Rulu la plenan kontrolon de Stadio 1
+      - name: Rulu la diagnozan kontrolon de Stadio 1
         shell: bash
         run: |
           mkdir -p artifacts/stage-01
@@ -38,31 +38,44 @@ jobs:
           gleam --version
           erl -noshell -eval 'io:format("OTP ~s / ERTS ~s~n", [erlang:system_info(otp_release), erlang:system_info(version)]), halt().'
 
-          echo '--- FORMATO ---'
+          echo '--- ORIGINALA FORMATA KONTROLO ---'
           set +e
           gleam format --check src test
           format_status=$?
 
-          echo '--- TESTOJ ---'
+          echo '--- DIAGNOZA AŬTOMATA FORMATO ---'
+          gleam format src test
+          autoformat_status=$?
+
+          echo '--- FORMATA KONTROLO POST AŬTOMATA FORMATO ---'
+          gleam format --check src test
+          post_format_status=$?
+
+          echo '--- TESTOJ POST AŬTOMATA FORMATO ---'
           gleam test
           test_status=$?
           set -e
 
           echo '--- REZULTOJ ---'
           echo "format_exit=${format_status}"
+          echo "autoformat_exit=${autoformat_status}"
+          echo "post_format_exit=${post_format_status}"
           echo "test_exit=${test_status}"
 
-          if [ "$format_status" -ne 0 ] || [ "$test_status" -ne 0 ]; then
+          if [ "$format_status" -ne 0 ] || [ "$autoformat_status" -ne 0 ] || [ "$post_format_status" -ne 0 ] || [ "$test_status" -ne 0 ]; then
             echo 'STADIO_01_REZULTO=FAIL'
             exit 1
           fi
 
           echo 'STADIO_01_REZULTO=PASS'
 
-      - name: Konservu la kontrolprotokolon
+      - name: Konservu la diagnozajn artefaktojn
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: stage-01-verification-log
-          path: artifacts/stage-01/verification.log
+          path: |
+            artifacts/stage-01/verification.log
+            src
+            test
           if-no-files-found: error
