@@ -1,0 +1,11 @@
+{
+  "name": "pastafari-calendar-javascript-interlingue-occidental",
+  "version": "0.0.1-stage-01",
+  "private": true,
+  "description": "Linea independent de implementation por JavaScript con Interlingue / Occidental quam lingue-fonte.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "generate-fixtures": "node tests/generate-fixtures.js"
+  }
+}
