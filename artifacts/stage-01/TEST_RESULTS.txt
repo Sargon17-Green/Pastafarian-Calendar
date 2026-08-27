@@ -1,0 +1,19 @@
+Etapa 1 — rezultat lokalnih testova
+
+Naredbe predviđene za stvarno izvršavanje:
+
+  ozc -c src/SourceLanguageCatalog.oz -o src/SourceLanguageCatalog.ozf
+  ozc -c src/MonsterBootstrap.oz -o src/MonsterBootstrap.ozf
+  ozc -c test/NormativeReference.oz -o test/NormativeReference.ozf
+  ozc -x test/Stage01Tests.oz -o stage01-tests
+  ./stage01-tests
+
+Očekivani završni redak:
+
+  SVE PROVJERE ETAPE 1 SU PROŠLE
+
+Stvarni rezultat u ovom okruženju:
+
+  NIJE IZVRŠENO — ozc/ozengine nisu dostupni.
+
+Ovo nije tvrdnja o zelenom izvršnom rezultatu. Paket je kandidat spreman za prijenos i izvršnu provjeru u Oz-sposobnom okruženju.

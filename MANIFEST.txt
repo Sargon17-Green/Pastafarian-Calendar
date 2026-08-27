@@ -1,0 +1,14 @@
+README.md
+DEVELOPMENT_STAGE.md
+SOURCE_LANGUAGE_CATALOG.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+HANDOFF_STAGE_01.md
+MANIFEST.txt
+src/SourceLanguageCatalog.oz
+src/MonsterBootstrap.oz
+test/NormativeReference.oz
+test/Stage01Tests.oz
+artifacts/stage-01/EXPECTED_FIXTURES.md
+artifacts/stage-01/RUNTIME_PROBE.txt
+artifacts/stage-01/STATIC_REVIEW.txt
+artifacts/stage-01/TEST_RESULTS.txt

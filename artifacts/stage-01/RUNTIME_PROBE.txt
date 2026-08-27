@@ -1,0 +1,15 @@
+Etapa 1 — provjera dostupnosti Oz/Mozart izvršnoga okruženja
+
+Tražene naredbe:
+- ozc
+- ozengine
+- oz
+- mozart
+
+Rezultat u radnom okruženju izrade:
+- nijedna naredba nije pronađena u PATH-u
+- apt-cache nije ponudio paket mozart/mozart2
+- pokušaj dohvaćanja službenoga binarnog paketa iz SourceForgea nije uspio zbog nedostupnoga DNS/mrežnog pristupa iz izvršnoga spremnika
+
+Zaključak:
+Izvorni paket može biti pripremljen i statički pregledan, ali stvarna kompilacija i izvršavanje Oz testova moraju se obaviti u okruženju koje ima Mozart 2 ili kompatibilan Mozart/Oz.

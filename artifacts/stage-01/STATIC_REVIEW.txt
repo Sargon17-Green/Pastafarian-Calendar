@@ -1,0 +1,18 @@
+Etapa 1 — statički pregled
+
+Pregledano je sljedeće:
+
+1. Repozitorij je stvarno izgrađen od nule; nema nadređenoga implementacijskog stabla niti uvoza iz druge programske linije.
+2. Izvršni izvorni kod postoji samo u jeziku Oz.
+3. `src/SourceLanguageCatalog.oz` ima 17 kotleta i 47 mjeseci, s neprekidnim `canonicalIndex` vrijednostima.
+4. Proizvodni `src/MonsterBootstrap.oz` sadrži samo neutralni kontekst, validaciju i ulaznu funkciju koja u etapi 1 eksplicitno odbija vratiti kalendarski rezultat.
+5. Proizvodni kod ne uvozi `test/NormativeReference.oz`.
+6. Testni referentni modul sadrži cjelobrojni `SAVE`, brojanje dana, pet kamenova, skrivene i vidljive kapi, zdjele, 12 završnih miješanja, tok odgovora, kratki i široki odabir, vrata, godine, kotlete, mjesečne kompozicije, DP tkanje i završni zapis s pet normativnih polja.
+7. Miješanje zdjela računa svaku novu zdjelu iz jednoga starog snimka; međuzbroj se prvo sastavi, zatim kvadrira, pa se tek tada dodaje umnožak susjednih zdjela, kako nalaže normativni dodatak.
+8. Spremljeni zbroj u 12 završnih miješanja jest `SAVE(sum(oldBowls)+149*stir)` i isti se spremljeni broj dodaje svakoj zdjeli.
+9. Poredak naziva u semantici koristi samo indekse; hrvatske niske razrješavaju se u završnome sloju.
+10. Testovi sadrže ručno izvedene male očekivane vrijednosti i provjere determinističkih invarijanti.
+
+Ograničenje pregleda:
+
+Oz prevoditelj nije dostupan u ovom izvršnom okruženju. Zato ovaj pregled nije zamjena za stvarno parsiranje, prevođenje i izvršavanje testnoga paketa.
