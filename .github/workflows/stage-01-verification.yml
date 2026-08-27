@@ -3,7 +3,7 @@ name: Kontrolo de Stadio 1
 on:
   push:
     branches:
-      - 'Gleam+Esperanto'
+      - 'Gleam\+Esperanto'
 
 permissions:
   contents: read
