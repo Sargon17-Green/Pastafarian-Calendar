@@ -171,7 +171,6 @@ fn replace_at1_loop(
 
 pub fn remove_at1(items: List(a), index: Int) -> List(a) {
   remove_at1_loop(items, index, 1, [])
-  |> list.reverse
 }
 
 fn remove_at1_loop(
@@ -181,7 +180,7 @@ fn remove_at1_loop(
   acc: List(a),
 ) -> List(a) {
   case items {
-    [] -> acc
+    [] -> list.reverse(acc)
     [head, ..tail] ->
       case current == index {
         True -> {
