@@ -1,15 +1,28 @@
-Etapa 1 — provjera dostupnosti Oz/Mozart izvršnoga okruženja
+Etapa 1 — provjera dostupnosti izvornoga Oz/Mozart izvršnoga okruženja
 
-Tražene naredbe:
-- ozc
-- ozengine
-- oz
-- mozart
+Radno okruženje provjere:
+- operacijski sustav: Debian GNU/Linux 13 (trixie)
+- arhitektura: amd64 / x86_64
+- jezgra: Linux 6.18.35
+- glibc: 2.41
 
-Rezultat u radnom okruženju izrade:
-- nijedna naredba nije pronađena u PATH-u
-- apt-cache nije ponudio paket mozart/mozart2
-- pokušaj dohvaćanja službenoga binarnog paketa iz SourceForgea nije uspio zbog nedostupnoga DNS/mrežnog pristupa iz izvršnoga spremnika
+Odabrano odgovarajuće izvršno okruženje:
+- Mozart 2, izdanje 2.0.1
+- službeni Linux paket: mozart2-2.0.1-x86_64-linux.deb
+- službeni GitHub release asset: 8527104
+
+Pokušaji dostupnosti i instalacije:
+- `command -v ozc` — nije pronađen
+- `command -v ozengine` — nije pronađen
+- `command -v oz` — nije pronađen
+- `apt-cache` ne nudi paket mozart/mozart2 u dostupnim lokalnim indeksima
+- osvježavanje APT indeksa nije moguće jer izvršni spremnik nema djelatan vanjski DNS/mrežni pristup
+- dohvat službenoga binarnog paketa s GitHub Releasesa odnosno SourceForgea iz izvršnoga spremnika nije uspio zbog istoga mrežnog ograničenja
+
+RUNTIME_INSTALLED=NO
+RUNTIME_VERSION=NIJE_DOSTUPNA
+NATIVE_COMPILATION_PERFORMED=NO
+NATIVE_TEST_EXECUTION_PERFORMED=NO
 
 Zaključak:
-Izvorni paket može biti pripremljen i statički pregledan, ali stvarna kompilacija i izvršavanje Oz testova moraju se obaviti u okruženju koje ima Mozart 2 ili kompatibilan Mozart/Oz.
+Odgovarajući Mozart 2 paket je identificiran, ali ga u ovom izvršnom spremniku nije moguće stvarno preuzeti i instalirati. Ovaj zapis nije dokaz prolaska testova i ne dopušta označavanje etape 1 dovršenom.

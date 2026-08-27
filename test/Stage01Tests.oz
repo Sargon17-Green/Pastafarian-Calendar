@@ -51,6 +51,12 @@ define
       Weave22 = {Ref.makeWeavingFamily [2 2]}
       Weave111 = {Ref.makeWeavingFamily [1 1 1]}
       WideRank = {Ref.chooseRankWide answerStream(first:1 directionStep:1) M+1}
+      HugeExact = M*M
+      GateEngine = {Ref.makeGateEngine}
+      GateMinusOne = {GateEngine.get ~1}
+      GateZero = {GateEngine.get 0}
+      GatePlusOne = {GateEngine.get 1}
+      AnchorYear = {Ref.year5000 F GateEngine}
       Context = {Bootstrap.newMonsterContext F F}
    in
       {AssertTrue catalogValid {Catalog.validateCatalog}}
@@ -77,6 +83,8 @@ define
       {AssertEqual saveM {Ref.save M} M}
       {AssertEqual saveMPlusOne {Ref.save M+1} 1}
       {AssertEqual saveTwoM {Ref.save 2*M} M}
+      {AssertTrue exactArithmeticBeyondM HugeExact>M}
+      {AssertEqual exactArithmeticDivision {Ref.floorDiv HugeExact M} M}
 
       {AssertEqual dayCountFoundation {Ref.dayCount F} 1}
       {AssertEqual dayCountBefore {Ref.dayCount F-1} 2}
@@ -113,6 +121,17 @@ define
       {AssertEqual chooseShortM {Ref.chooseRankShort answerStream(first:M directionStep:1) M} M}
       {AssertTrue chooseWideRange WideRank>=1 andthen WideRank=<M+1}
 
+      {AssertEqual foundationGate GateZero F}
+      {AssertTrue negativeGateGap F-GateMinusOne>=42 andthen F-GateMinusOne=<963}
+      {AssertTrue positiveGateGap GatePlusOne-F>=42 andthen GatePlusOne-F=<963}
+      {AssertTrue gateOrder GateMinusOne<GateZero andthen GateZero<GatePlusOne}
+
+      {AssertEqual year5000Number AnchorYear.number 5000}
+      {AssertTrue year5000ContainsCalculationDay AnchorYear.openGateDay<F andthen F=<AnchorYear.closeGateDay}
+      {AssertTrue year5000MinimumSixGaps AnchorYear.closeGateIndex-AnchorYear.openGateIndex>=6}
+      {AssertTrue year5000Length AnchorYear.closeGateDay-AnchorYear.openGateDay>=252
+                                      andthen AnchorYear.closeGateDay-AnchorYear.openGateDay=<5778}
+
       {AssertEqual fallingFactorial {Ref.fallingFactorial 5 3} 60}
       {AssertEqual distinctRank1 {Ref.unrankDistinctIndices 3 2 1} [1 2]}
       {AssertEqual distinctRank2 {Ref.unrankDistinctIndices 3 2 2} [1 3]}
@@ -133,6 +152,12 @@ define
       {AssertEqual weave22Second {Weave22.unrank1 2} [1 2 1 2]}
       {AssertEqual weave111Count {Weave111.count} 1}
       {AssertEqual weave111Only {Weave111.unrank1 1} [1 2 3]}
+
+      {System.showInfo 'IZVORNA PROVJERA: TOČNA CJELOBROJNA ARITMETIKA — PROŠLA'}
+      {System.showInfo 'IZVORNA PROVJERA: KRATKI I ŠIROKI ODABIR — PROŠLI'}
+      {System.showInfo 'IZVORNA PROVJERA: VRATA — PROŠLA'}
+      {System.showInfo 'IZVORNA PROVJERA: TKANJE MJESECI — PROŠLO'}
+      {System.showInfo 'IZVORNA PROVJERA: GODINA 5000 — PROŠLA'}
 
       {AssertTrue bootstrapContext {Bootstrap.validateMonsterContext Context}}
       try

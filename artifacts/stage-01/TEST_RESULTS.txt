@@ -1,6 +1,10 @@
-Etapa 1 — rezultat lokalnih testova
+Etapa 1 — izvorna provjera
 
-Naredbe predviđene za stvarno izvršavanje:
+Status:
+
+  BLOKIRANO — Mozart/Oz izvršno okruženje nije moguće instalirati u ovom izvršnom spremniku zbog nedostupnoga vanjskog mrežnog pristupa.
+
+Tražene naredbe iz korijena repozitorija:
 
   ozc -c src/SourceLanguageCatalog.oz -o src/SourceLanguageCatalog.ozf
   ozc -c src/MonsterBootstrap.oz -o src/MonsterBootstrap.ozf
@@ -8,12 +12,45 @@ Naredbe predviđene za stvarno izvršavanje:
   ozc -x test/Stage01Tests.oz -o stage01-tests
   ./stage01-tests
 
-Očekivani završni redak:
+Stvarni pokušaj u ovom okruženju:
 
+  ozc -c src/SourceLanguageCatalog.oz -o src/SourceLanguageCatalog.ozf
+  -> bash: ozc: command not found
+  -> izlazni kod 127
+
+  ozc -c src/MonsterBootstrap.oz -o src/MonsterBootstrap.ozf
+  -> bash: ozc: command not found
+  -> izlazni kod 127
+
+  ozc -c test/NormativeReference.oz -o test/NormativeReference.ozf
+  -> bash: ozc: command not found
+  -> izlazni kod 127
+
+  ozc -x test/Stage01Tests.oz -o stage01-tests
+  -> bash: ozc: command not found
+  -> izlazni kod 127
+
+  ./stage01-tests
+  -> datoteka nije nastala jer prevođenje nije izvršeno
+  -> izlazni kod 127
+
+Uočeni propust ispitnoga sklopa tijekom pregleda zahtjeva izvorne provjere:
+- prethodna inačica stvarno je pozivala točnu cjelobrojnu aritmetiku, kratki i široki odabir te male DP primjere tkanja;
+- definirala je vrata i godinu 5000 u referentnom modulu, ali ih `Stage01Tests.oz` nije pozivao;
+- ispitni sklop je zato dopunjen isključivo provjerama etape 1: izvozi testne ulaze `MakeGateEngine` i `Year5000`, izračunava vrata -1/0/+1, stvarno poziva `Year5000`, te provjerava aritmetiku iznad M preko `M*M`.
+- proizvodni kod nije mijenjan i nije uveden nijedan dio etape 2.
+
+Kad je Mozart/Oz dostupan, uspješan zapis mora sadržavati sve retke:
+
+  IZVORNA PROVJERA: TOČNA CJELOBROJNA ARITMETIKA — PROŠLA
+  IZVORNA PROVJERA: KRATKI I ŠIROKI ODABIR — PROŠLI
+  IZVORNA PROVJERA: VRATA — PROŠLA
+  IZVORNA PROVJERA: TKANJE MJESECI — PROŠLO
+  IZVORNA PROVJERA: GODINA 5000 — PROŠLA
   SVE PROVJERE ETAPE 1 SU PROŠLE
 
-Stvarni rezultat u ovom okruženju:
+Očekivani završni status nakon takva stvarnoga izvršavanja:
 
-  NIJE IZVRŠENO — ozc/ozengine nisu dostupni.
+  izlazni kod 0
 
-Ovo nije tvrdnja o zelenom izvršnom rezultatu. Paket je kandidat spreman za prijenos i izvršnu provjeru u Oz-sposobnom okruženju.
+Do tada `LAST_COMPLETED_STAGE` mora ostati `0`.

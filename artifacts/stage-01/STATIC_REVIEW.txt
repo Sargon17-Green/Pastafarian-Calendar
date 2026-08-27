@@ -1,18 +1,20 @@
-Etapa 1 — statički pregled
+Etapa 1 — statički pregled prije izvorne provjere
 
 Pregledano je sljedeće:
 
-1. Repozitorij je stvarno izgrađen od nule; nema nadređenoga implementacijskog stabla niti uvoza iz druge programske linije.
-2. Izvršni izvorni kod postoji samo u jeziku Oz.
+1. Repozitorij je izgrađen od nule; nema uvoza semantičkih podataka iz druge implementacijske linije.
+2. Izvršni izvorni kod implementacije i testova napisan je u jeziku Oz.
 3. `src/SourceLanguageCatalog.oz` ima 17 kotleta i 47 mjeseci, s neprekidnim `canonicalIndex` vrijednostima.
 4. Proizvodni `src/MonsterBootstrap.oz` sadrži samo neutralni kontekst, validaciju i ulaznu funkciju koja u etapi 1 eksplicitno odbija vratiti kalendarski rezultat.
 5. Proizvodni kod ne uvozi `test/NormativeReference.oz`.
-6. Testni referentni modul sadrži cjelobrojni `SAVE`, brojanje dana, pet kamenova, skrivene i vidljive kapi, zdjele, 12 završnih miješanja, tok odgovora, kratki i široki odabir, vrata, godine, kotlete, mjesečne kompozicije, DP tkanje i završni zapis s pet normativnih polja.
-7. Miješanje zdjela računa svaku novu zdjelu iz jednoga starog snimka; međuzbroj se prvo sastavi, zatim kvadrira, pa se tek tada dodaje umnožak susjednih zdjela, kako nalaže normativni dodatak.
-8. Spremljeni zbroj u 12 završnih miješanja jest `SAVE(sum(oldBowls)+149*stir)` i isti se spremljeni broj dodaje svakoj zdjeli.
-9. Poredak naziva u semantici koristi samo indekse; hrvatske niske razrješavaju se u završnome sloju.
-10. Testovi sadrže ručno izvedene male očekivane vrijednosti i provjere determinističkih invarijanti.
+6. Testni referentni modul sadrži cjelobrojni `SAVE`, brojanje dana, kamenje, skrivene i vidljive kapi, zdjele, 12 završnih miješanja, tok odgovora, kratki i široki odabir, vrata, godinu 5000, uzastopne godine, kotlete, mjesečne kompozicije, DP tkanje i završni zapis s pet normativnih polja.
+7. Oz cijeli brojevi koriste se bez pretvorbe u brojeve s pomičnim zarezom; ispitni sklop sada izričito računa `M*M`, vrijednost mnogo veću od `M`, i provjerava točnu cjelobrojnu podjelu natrag s `M`.
+8. Ispitni sklop sada izričito stvara mehanizam vrata, računa vrata -1, 0 i +1, provjerava raspon razmaka 42..963 i stvarno poziva normativnu funkciju `Year5000`.
+9. Tkanje mjeseci stvarno se pokreće na malim točno prebrojivim obiteljima `[2 2]` i `[1 1 1]`; provjeravaju se broj i leksikografski unrank.
+10. Kratki i široki odabir stvarno se pozivaju, uključujući široki prostor `N=M+1`.
+11. Miješanje zdjela računa svaku novu zdjelu iz jednoga starog snimka; spremljeni zbroj u 12 završnih miješanja jest `SAVE(sum(oldBowls)+149*stir)`.
+12. Poredak naziva u semantici koristi indekse; hrvatske niske razrješavaju se u završnome sloju.
 
 Ograničenje pregleda:
 
-Oz prevoditelj nije dostupan u ovom izvršnom okruženju. Zato ovaj pregled nije zamjena za stvarno parsiranje, prevođenje i izvršavanje testnoga paketa.
+Oz prevoditelj i izvršni stroj nisu dostupni u ovom izvršnom okruženju, a vanjski mrežni pristup potreban za instalaciju nije dostupan. Zato ovaj pregled ne zamjenjuje stvarno parsiranje, prevođenje i izvršavanje. `LAST_COMPLETED_STAGE` ostaje `0`.

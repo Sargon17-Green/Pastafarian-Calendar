@@ -27,6 +27,8 @@ export
    MakeBoundedCompositionFamily
    MakeCutletPartitionFamily
    MakeWeavingFamily
+   MakeGateEngine
+   Year5000
    CalendarDate
 
 define
