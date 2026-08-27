@@ -1,0 +1,275 @@
+; Exakta entjero per bazo-10000 ciferi. Nula floating-point operaco esas uzata.
+
+make "BI.BASE 10000
+
+to bi.zero
+  output (list 0 (list 0))
+end
+
+to bi.strip.high :digits
+  if (count :digits) = 1 [output :digits]
+  if (last :digits) = 0 [output bi.strip.high butlast :digits]
+  output :digits
+end
+
+to bi.make :sign :digits
+  localmake "d bi.strip.high :digits
+  if and ((count :d) = 1) ((first :d) = 0) [output bi.zero]
+  if :sign < 0 [output (list -1 :d)]
+  output (list 1 :d)
+end
+
+to bi.sign :x
+  output first :x
+end
+
+to bi.digits :x
+  output last :x
+end
+
+to bi.small :n
+  if :n = 0 [output bi.zero]
+  if :n > 0 [output bi.make 1 (list :n)]
+  output bi.make -1 (list minus :n)
+end
+
+to bi.abs :x
+  output bi.make 1 bi.digits :x
+end
+
+to bi.neg :x
+  output bi.make minus bi.sign :x bi.digits :x
+end
+
+to bi.mag.compare :a :b
+  localmake "aa bi.strip.high :a
+  localmake "bb bi.strip.high :b
+  if (count :aa) < (count :bb) [output -1]
+  if (count :aa) > (count :bb) [output 1]
+  output bi.mag.compare.rev reverse :aa reverse :bb
+end
+
+to bi.mag.compare.rev :a :b
+  if emptyp :a [output 0]
+  if (first :a) < (first :b) [output -1]
+  if (first :a) > (first :b) [output 1]
+  output bi.mag.compare.rev butfirst :a butfirst :b
+end
+
+to bi.compare :a :b
+  if (bi.sign :a) < (bi.sign :b) [output -1]
+  if (bi.sign :a) > (bi.sign :b) [output 1]
+  if (bi.sign :a) = 0 [output 0]
+  localmake "m bi.mag.compare bi.digits :a bi.digits :b
+  if (bi.sign :a) < 0 [output minus :m]
+  output :m
+end
+
+to bi.eq :a :b
+  output (bi.compare :a :b) = 0
+end
+
+to bi.lt :a :b
+  output (bi.compare :a :b) < 0
+end
+
+to bi.le :a :b
+  output (bi.compare :a :b) <= 0
+end
+
+to bi.gt :a :b
+  output (bi.compare :a :b) > 0
+end
+
+to bi.ge :a :b
+  output (bi.compare :a :b) >= 0
+end
+
+to bi.mag.add :a :b
+  output bi.mag.add.carry :a :b 0
+end
+
+to bi.mag.add.carry :a :b :carry
+  if and (emptyp :a) (emptyp :b) [
+    if :carry = 0 [output []]
+    output (list :carry)
+  ]
+  localmake "av 0
+  localmake "bv 0
+  localmake "ar []
+  localmake "br []
+  if not emptyp :a [make "av first :a make "ar butfirst :a]
+  if not emptyp :b [make "bv first :b make "br butfirst :b]
+  localmake "s (:av + :bv + :carry)
+  if :s >= :BI.BASE [
+    output fput (:s - :BI.BASE) bi.mag.add.carry :ar :br 1
+  ]
+  output fput :s bi.mag.add.carry :ar :br 0
+end
+
+to bi.mag.sub :a :b
+  ; Prekondico: a >= b.
+  output bi.strip.high bi.mag.sub.borrow :a :b 0
+end
+
+to bi.mag.sub.borrow :a :b :borrow
+  if emptyp :a [output []]
+  localmake "av first :a
+  localmake "bv 0
+  localmake "br []
+  if not emptyp :b [make "bv first :b make "br butfirst :b]
+  localmake "v (:av - :bv - :borrow)
+  if :v < 0 [
+    output fput (:v + :BI.BASE) bi.mag.sub.borrow butfirst :a :br 1
+  ]
+  output fput :v bi.mag.sub.borrow butfirst :a :br 0
+end
+
+to bi.add :a :b
+  if (bi.sign :a) = 0 [output :b]
+  if (bi.sign :b) = 0 [output :a]
+  if (bi.sign :a) = (bi.sign :b) [
+    output bi.make bi.sign :a bi.mag.add bi.digits :a bi.digits :b
+  ]
+  localmake "cmp bi.mag.compare bi.digits :a bi.digits :b
+  if :cmp = 0 [output bi.zero]
+  if :cmp > 0 [output bi.make bi.sign :a bi.mag.sub bi.digits :a bi.digits :b]
+  output bi.make bi.sign :b bi.mag.sub bi.digits :b bi.digits :a
+end
+
+to bi.sub :a :b
+  output bi.add :a bi.neg :b
+end
+
+to bi.small.split.base :n
+  output bi.small.split.base.work :n 0
+end
+
+to bi.small.split.base.work :n :q
+  if :n >= 10000000 [output bi.small.split.base.work (:n - 10000000) (:q + 1000)]
+  if :n >= 1000000 [output bi.small.split.base.work (:n - 1000000) (:q + 100)]
+  if :n >= 100000 [output bi.small.split.base.work (:n - 100000) (:q + 10)]
+  if :n >= 10000 [output bi.small.split.base.work (:n - 10000) (:q + 1)]
+  output (list :q :n)
+end
+
+to bi.mag.mul.small :digits :n
+  output bi.strip.high bi.mag.mul.small.carry :digits :n 0
+end
+
+to bi.mag.mul.small.carry :digits :n :carry
+  if emptyp :digits [
+    if :carry = 0 [output []]
+    output (list :carry)
+  ]
+  localmake "raw ((first :digits) * :n + :carry)
+  localmake "qr bi.small.split.base :raw
+  output fput (last :qr) bi.mag.mul.small.carry butfirst :digits :n first :qr
+end
+
+to bi.mag.shift :digits :places
+  if :places = 0 [output :digits]
+  output bi.mag.shift fput 0 :digits (:places - 1)
+end
+
+to bi.mag.mul :a :b
+  output bi.mag.mul.walk :a :b 0 (list 0)
+end
+
+to bi.mag.mul.walk :a :b :shift :acc
+  if emptyp :b [output bi.strip.high :acc]
+  localmake "part bi.mag.mul.small :a first :b
+  localmake "shifted bi.mag.shift :part :shift
+  localmake "next bi.mag.add :acc :shifted
+  output bi.mag.mul.walk :a butfirst :b (:shift + 1) :next
+end
+
+to bi.mul :a :b
+  if or ((bi.sign :a) = 0) ((bi.sign :b) = 0) [output bi.zero]
+  localmake "sgn 1
+  if (bi.sign :a) <> (bi.sign :b) [make "sgn -1]
+  output bi.make :sgn bi.mag.mul bi.digits :a bi.digits :b
+end
+
+to bi.mul.small :a :n
+  output bi.mul :a bi.small :n
+end
+
+to bi.square :a
+  output bi.mul :a :a
+end
+
+to bi.mag.qdigit :rem :den
+  output bi.mag.qdigit.work :rem :den 0
+end
+
+to bi.mag.qdigit.work :rem :den :q
+  if (bi.mag.compare :rem :den) < 0 [output (list :q :rem)]
+  output bi.mag.qdigit.work bi.mag.sub :rem :den (:q + 1)
+end
+
+to bi.mag.divmod :num :den
+  output bi.mag.divmod.walk reverse bi.strip.high :num :den [] (list 0)
+end
+
+to bi.mag.divmod.walk :msd :den :qmsd :rem
+  if emptyp :msd [
+    output (list bi.strip.high reverse :qmsd bi.strip.high :rem)
+  ]
+  localmake "newrem bi.strip.high fput first :msd :rem
+  localmake "qr bi.mag.qdigit :newrem :den
+  localmake "qd first :qr
+  localmake "rr last :qr
+  output bi.mag.divmod.walk butfirst :msd :den lput :qd :qmsd :rr
+end
+
+to bi.divmod.floor :a :d
+  if (bi.sign :d) <= 0 [print [ERORO: divisor devas esar pozitiva.] stop]
+  localmake "raw bi.mag.divmod bi.digits bi.abs :a bi.digits :d
+  localmake "qmag first :raw
+  localmake "rmag last :raw
+  localmake "qpos bi.make 1 :qmag
+  localmake "rpos bi.make 1 :rmag
+  if (bi.sign :a) >= 0 [output (list :qpos :rpos)]
+  if (bi.sign :rpos) = 0 [output (list bi.neg :qpos bi.zero)]
+  localmake "qneg bi.neg bi.add :qpos bi.small 1
+  localmake "rnew bi.sub :d :rpos
+  output (list :qneg :rnew)
+end
+
+to bi.floor.div :a :d
+  output first bi.divmod.floor :a :d
+end
+
+to bi.regmod :a :d
+  output last bi.divmod.floor :a :d
+end
+
+to bi.ceildiv :a :d
+  if (bi.sign :a) < 0 [print [ERORO: ceilDiv bezonas nenegativa a.] stop]
+  if (bi.sign :a) = 0 [output bi.zero]
+  output bi.floor.div bi.add :a bi.sub :d bi.small 1 :d
+end
+
+to bi.to.small :x
+  if (count bi.digits :x) > 1 [print [ERORO: la entjero ne esas mikra.] stop]
+  output (bi.sign :x) * first bi.digits :x
+end
+
+to bi.pow :base :exp
+  if :exp = 0 [output bi.small 1]
+  output bi.mul :base bi.pow :base (:exp - 1)
+end
+
+; Konstanti del normativa referenco.
+to nr.M
+  output bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]
+end
+
+to nr.foundation
+  output bi.make -1 [5671 1505]
+end
+
+to nr.tablets
+  output bi.make -1 [8522 27]
+end

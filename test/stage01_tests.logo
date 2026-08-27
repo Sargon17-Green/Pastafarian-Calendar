@@ -1,0 +1,86 @@
+; Testi por Stage 1. Omna executable test-kodo esas Logo.
+
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "test/normative_reference.logo
+
+make "TEST.FAIL false
+
+to t.require :condition :message
+  if not :condition [
+    make "TEST.FAIL true
+    print sentence [TESTO_FALIIS:] :message
+  ]
+end
+
+to t.big.eq :actual :expected :message
+  t.require bi.eq :actual :expected :message
+end
+
+to t.catalog
+  t.require source.catalog.validp [La fonto-linguo katalogo devas havar 17 e 47 stabila indexi.]
+  t.require equalp source.catalog.cutlet.name 6 [quar de non egala parti] [La sesma koteleto-nomo devas esar la Ido frazo por quar nonimi.]
+  t.require equalp source.catalog.month.name 7 [tri de kin egala parti] [La sepesma monato-nomo devas esar la Ido frazo por tri kinimi.]
+end
+
+to t.exact
+  localmake "m nr.M
+  t.big.eq nr.save :m :m [SAVE de M devas esar M.]
+  t.big.eq nr.save bi.mul.small :m 2 :m [SAVE de du M devas esar M.]
+  t.big.eq nr.save bi.add :m bi.small 1 bi.small 1 [SAVE de M plus un devas esar un.]
+  localmake "qr bi.divmod.floor bi.add bi.mul.small :m 2 bi.small 7 :m
+  t.big.eq first :qr bi.small 2 [Exakta divido devas donar quotient du.]
+  t.big.eq last :qr bi.small 7 [Exakta divido devas konservor resto sep.]
+end
+
+to t.counts
+  localmake "f nr.foundation
+  t.big.eq nr.day.count :f bi.small 1 [La Fundamento devas havar dayCount un.]
+  t.big.eq nr.day.count bi.add :f bi.small 1 bi.small 3 [La unesma dio pos Fundamento devas havar dayCount tri.]
+  t.big.eq nr.day.count bi.sub :f bi.small 1 bi.small 2 [La unesma dio ante Fundamento devas havar dayCount du.]
+  localmake "c nr.work.counts :f :f
+  t.big.eq nr.count.distance :c bi.small 1 [Egala dii devas havar distanco un.]
+  t.require (nr.count.direction :c) = 2 [Egala dii devas havar direkto du.]
+end
+
+to t.permutation
+  t.require equalp nr.order.from.number 1 [1 2 3 4 5 6] [La unesma permuto devas esar ascendanta.]
+  t.require equalp nr.order.from.number 720 [6 5 4 3 2 1] [La 720ma permuto devas esar descendanta.]
+end
+
+to t.compositions
+  nr.bc.reset
+  t.big.eq nr.bc.count 4 2 1 3 bi.small 3 [La mikra kompozura familio devas havar tri membri.]
+  t.require equalp nr.bc.unrank 4 2 1 3 bi.small 2 [2 2] [La duesma kompozuro devas esar du-du.]
+end
+
+to t.weaving
+  nr.weave.reset [2 2]
+  t.big.eq nr.weave.count [2 2] 0 0 bi.small 2 [La familio de texaji 2-2 devas havar du membri.]
+  t.require equalp nr.weave.unrank [2 2] bi.small 1 [1 1 2 2] [La unesma texajo 2-2 devas esar 1122.]
+  t.require equalp nr.weave.unrank [2 2] bi.small 2 [1 2 1 2] [La duesma texajo 2-2 devas esar 1212.]
+end
+
+to t.monster.bootstrap
+  localmake "a monster.context.new nr.foundation nr.foundation
+  localmake "b monster.context.new nr.foundation bi.add nr.foundation bi.small 1
+  make "a monster.context.put :a "status "SHANJITA
+  t.require equalp monster.context.get :b "status "NEW [Du invocation-contexti devas restar separita.]
+  localmake "prod calendarDateSpaghetti nr.foundation nr.foundation
+  t.require equalp monster.context.get :prod "status "STAGE_1_ONLY [Production devas restar nur neutrala en Stage 1.]
+end
+
+to stage01.run
+  t.catalog
+  t.exact
+  t.counts
+  t.permutation
+  t.compositions
+  t.weaving
+  t.monster.bootstrap
+  if :TEST.FAIL [print [STAGE_1_TESTI_FALIIS] stop]
+  print [STAGE_1_TESTI_PASIS]
+end
+
+stage01.run

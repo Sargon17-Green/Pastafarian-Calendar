@@ -1,0 +1,109 @@
+; Frozita SourceLanguageCatalog 1.0.0 por Ido.
+; La canonicalIndex esas la sola normala ordino; la teksto esas nur prezental.
+
+to source.catalog.version
+  output "1.0.0
+end
+
+to source.catalog.cutlets
+  output [
+    [1 [Ard]]
+    [2 [vulpo]]
+    [3 [reno]]
+    [4 [larico]]
+    [5 [penso]]
+    [6 [quar de non egala parti]]
+    [7 [Palgurash]]
+    [8 [papiruso]]
+    [9 [grapolo]]
+    [10 [skorpiono]]
+    [11 [cindro]]
+    [12 [tritiko]]
+    [13 [rivero]]
+    [14 [rido]]
+    [15 [Akad]]
+    [16 [korno]]
+    [17 [la vakua krucho]]
+  ]
+end
+
+to source.catalog.months
+  output [
+    [1 [argilo]]
+    [2 [granato]]
+    [3 [kubito]]
+    [4 [invidio]]
+    [5 [Eridu]]
+    [6 [dentopasto]]
+    [7 [tri de kin egala parti]]
+    [8 [Karshumav]]
+    [9 [tigro]]
+    [10 [stano]]
+    [11 [nebulo]]
+    [12 [olibano]]
+    [13 [spindelo]]
+    [14 [kosto]]
+    [15 [karobo]]
+    [16 [Uruk]]
+    [17 [honto]]
+    [18 [kamelo]]
+    [19 [kupro]]
+    [20 [puto]]
+    [21 [ovoflavo]]
+    [22 [stelo]]
+    [23 [mielo]]
+    [24 [spleno]]
+    [25 [kalkopetro]]
+    [26 [joyo]]
+    [27 [figo]]
+    [28 [Ninive]]
+    [29 [rano]]
+    [30 [bitumo]]
+    [31 [kandelo]]
+    [32 [la klozita pordo]]
+    [33 [sezamo]]
+    [34 [nuko]]
+    [35 [arjento]]
+    [36 [lilio]]
+    [37 [tempesto]]
+    [38 [asno]]
+    [39 [farino]]
+    [40 [regreto]]
+    [41 [Babilono]]
+    [42 [lango]]
+    [43 [lino]]
+    [44 [salo]]
+    [45 [piro]]
+    [46 [arko]]
+    [47 [sablo]]
+  ]
+end
+
+to source.catalog.lookup :catalog :index
+  if emptyp :catalog [output []]
+  localmake "entry first :catalog
+  if (first :entry) = :index [output last :entry]
+  output source.catalog.lookup butfirst :catalog :index
+end
+
+to source.catalog.cutlet.name :index
+  output source.catalog.lookup source.catalog.cutlets :index
+end
+
+to source.catalog.month.name :index
+  output source.catalog.lookup source.catalog.months :index
+end
+
+to source.catalog.indices.ok :catalog :expected
+  if :expected > (count :catalog) [output true]
+  if (first item :expected :catalog) <> :expected [output false]
+  output source.catalog.indices.ok :catalog (:expected + 1)
+end
+
+to source.catalog.validp
+  if (count source.catalog.cutlets) <> 17 [output false]
+  if (count source.catalog.months) <> 47 [output false]
+  if not source.catalog.indices.ok source.catalog.cutlets 1 [output false]
+  if not source.catalog.indices.ok source.catalog.months 1 [output false]
+  output true
+end

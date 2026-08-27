@@ -1,0 +1,63 @@
+; Neutrala monster-fundamento de Stage 1. Nula futura fliko esas hike.
+
+to monster.context.new :calculationDay :targetDay
+  output (list
+    (list "calculationDay :calculationDay)
+    (list "targetDay :targetDay)
+    (list "phase "BOOTSTRAP)
+    (list "subPhase 0)
+    (list "mode "STAGE_1)
+    (list "status "NEW)
+    (list "metrics [])
+    (list "logs [])
+    (list "diagnostics [])
+    (list "lastError []))
+end
+
+to monster.context.get :ctx :key
+  if emptyp :ctx [output []]
+  localmake "entry first :ctx
+  if equalp first :entry :key [output last :entry]
+  output monster.context.get butfirst :ctx :key
+end
+
+to monster.context.put :ctx :key :value
+  if emptyp :ctx [output (list (list :key :value))]
+  localmake "entry first :ctx
+  if equalp first :entry :key [output fput (list :key :value) butfirst :ctx]
+  output fput :entry monster.context.put butfirst :ctx :key :value
+end
+
+to monster.metrics.bump :ctx :name
+  localmake "metrics monster.context.get :ctx "metrics
+  output monster.context.put :ctx "metrics lput :name :metrics
+end
+
+to monster.logs.append :ctx :event
+  localmake "logs monster.context.get :ctx "logs
+  output monster.context.put :ctx "logs lput :event :logs
+end
+
+to monster.validate.input :ctx
+  if emptyp monster.context.get :ctx "calculationDay [output false]
+  if emptyp monster.context.get :ctx "targetDay [output false]
+  output true
+end
+
+to monster.dispatch.bootstrap :ctx
+  localmake "work monster.metrics.bump :ctx "bootstrap.dispatch
+  make "work monster.logs.append :work "bootstrap.enter
+  if not monster.validate.input :work [
+    output monster.context.put :work "status "FAILED_VALIDATION
+  ]
+  make "work monster.context.put :work "phase "READY_FOR_HISTORICAL_GROWTH
+  make "work monster.context.put :work "status "STAGE_1_ONLY
+  output :work
+end
+
+to calendarDateSpaghetti :calculationDay :targetDay
+  localmake "ctx monster.context.new :calculationDay :targetDay
+  make "ctx monster.dispatch.bootstrap :ctx
+  print [La kalendarala rezulto ankore ne existas en Stage 1.]
+  output :ctx
+end

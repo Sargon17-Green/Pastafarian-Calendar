@@ -1,0 +1,1047 @@
+; Pura normativa referenco derivita nur de Appendix A. Ca dosiero esas test-only.
+
+make "NR.GATES []
+make "NR.MIN.GATE bi.zero
+make "NR.MAX.GATE bi.zero
+make "NR.BC.MEMO []
+make "NR.CP.MEMO []
+make "NR.WEAVE.MEMO []
+
+to nr.small.divmod :n :d
+  output nr.small.divmod.work :n :d 0
+end
+
+to nr.small.divmod.work :n :d :q
+  if :n < :d [output (list :q :n)]
+  output nr.small.divmod.work (:n - :d) :d (:q + 1)
+end
+
+to nr.small.floor.div :n :d
+  output first nr.small.divmod :n :d
+end
+
+to nr.list.remove :items :index
+  if :index = 1 [output butfirst :items]
+  output fput first :items nr.list.remove butfirst :items (:index - 1)
+end
+
+to nr.list.replace :items :index :value
+  if :index = 1 [output fput :value butfirst :items]
+  output fput first :items nr.list.replace butfirst :items (:index - 1) :value
+end
+
+to nr.index.of :items :value
+  output nr.index.of.work :items :value 1
+end
+
+to nr.index.of.work :items :value :index
+  if emptyp :items [output 0]
+  if equalp first :items :value [output :index]
+  output nr.index.of.work butfirst :items :value (:index + 1)
+end
+
+to nr.range :a :b
+  if :a > :b [output []]
+  output fput :a nr.range (:a + 1) :b
+end
+
+to nr.big.sum :items
+  if emptyp :items [output bi.zero]
+  output bi.add first :items nr.big.sum butfirst :items
+end
+
+to nr.factorial :n
+  if :n <= 1 [output 1]
+  output :n * nr.factorial (:n - 1)
+end
+
+to nr.wrap1 :position :size
+  localmake "p :position
+  if :p < 1 [output nr.wrap1 (:p + :size) :size]
+  if :p > :size [output nr.wrap1 (:p - :size) :size]
+  output :p
+end
+
+to nr.save :x
+  output bi.add (bi.small 1) bi.regmod (bi.sub :x (bi.small 1)) nr.M
+end
+
+to nr.day.count :day
+  if bi.eq :day nr.foundation [output bi.small 1]
+  if bi.gt :day nr.foundation [
+    output bi.add (bi.mul.small (bi.sub :day nr.foundation) 2) (bi.small 1)
+  ]
+  output bi.mul.small (bi.sub nr.foundation :day) 2
+end
+
+to nr.work.counts :calculationDay :targetDay
+  localmake "c nr.day.count :calculationDay
+  localmake "t nr.day.count :targetDay
+  localmake "distance bi.add bi.abs bi.sub :targetDay :calculationDay bi.small 1
+  localmake "connection bi.add :c :t
+  localmake "direction 2
+  if bi.lt :targetDay :calculationDay [make "direction 1]
+  if bi.gt :targetDay :calculationDay [make "direction 3]
+  output (list :c :t :distance :connection :direction)
+end
+
+to nr.count.action :counts
+  output item 1 :counts
+end
+
+to nr.count.target :counts
+  output item 2 :counts
+end
+
+to nr.count.distance :counts
+  output item 3 :counts
+end
+
+to nr.count.connection :counts
+  output item 4 :counts
+end
+
+to nr.count.direction :counts
+  output item 5 :counts
+end
+
+to nr.stone.first
+  output (list (bi.small 17) (bi.small 29) (bi.small 43) (bi.small 71) (bi.small 101))
+end
+
+to nr.stone.next :i :old
+  localmake "w item 1 :old
+  localmake "b item 2 :old
+  localmake "s item 3 :old
+  localmake "m item 4 :old
+  localmake "r item 5 :old
+  localmake "nw nr.save bi.add bi.add bi.square :w bi.mul.small :b 3 bi.small :i
+  localmake "nb nr.save bi.add bi.add bi.square :b bi.mul.small :s 5 :w
+  localmake "ns nr.save bi.add bi.add bi.square :s bi.mul.small :m 7 :b
+  localmake "nm nr.save bi.add bi.add bi.square :m bi.mul.small :r 11 :s
+  localmake "nr nr.save bi.add bi.add bi.square :r bi.mul.small :w 13 :m
+  output (list :nw :nb :ns :nm :nr)
+end
+
+to nr.stones
+  output nr.stones.work 2 nr.stone.first (list nr.stone.first)
+end
+
+to nr.stones.work :i :old :acc
+  if :i > 46 [output :acc]
+  localmake "next nr.stone.next :i :old
+  output nr.stones.work (:i + 1) :next lput :next :acc
+end
+
+to nr.hidden.coeffs
+  output [[3 4 6 8] [5 7 10 12] [7 10 14 16] [9 13 18 20] [11 16 22 24] [13 19 26 28] [15 22 30 32]]
+end
+
+to nr.hidden.grind.kinds
+  output [1 2 3 4 5 1 2]
+end
+
+to nr.hidden.one :k :counts :stones
+  localmake "co item :k nr.hidden.coeffs
+  localmake "stone item :k :stones
+  localmake "x nr.count.action :counts
+  make "x bi.add :x bi.mul.small nr.count.target :counts item 1 :co
+  make "x bi.add :x bi.mul.small nr.count.distance :counts item 2 :co
+  make "x bi.add :x bi.mul.small nr.count.connection :counts item 3 :co
+  make "x bi.add :x bi.mul.small bi.small nr.count.direction :counts item 4 :co
+  make "x bi.add :x nr.big.sum :stone
+  make "x nr.save :x
+  output nr.hidden.grind 1 :x :stone
+end
+
+to nr.hidden.grind :g :x :stone
+  if :g > 7 [output :x]
+  localmake "kind item :g nr.hidden.grind.kinds
+  localmake "next nr.save bi.add bi.add bi.add bi.square :x bi.mul.small :x 3 item :kind :stone bi.small :g
+  output nr.hidden.grind (:g + 1) :next :stone
+end
+
+to nr.hidden.build :counts :stones
+  output nr.hidden.build.work 1 :counts :stones []
+end
+
+to nr.hidden.build.work :k :counts :stones :acc
+  if :k > 7 [output :acc]
+  output nr.hidden.build.work (:k + 1) :counts :stones lput nr.hidden.one :k :counts :stones :acc
+end
+
+to nr.visible.grinds
+  output [[3 5 7 11 1] [5 7 11 13 2] [7 11 13 17 3] [11 13 17 19 4] [13 17 19 23 5] [17 19 23 29 1] [19 23 29 31 2] [23 29 31 37 3] [29 31 37 41 4] [31 37 41 43 5] [37 41 43 47 1]]
+end
+
+to nr.prior :visible :hidden :i :back
+  localmake "slot (:i - :back)
+  if :slot >= 1 [output item :slot :visible]
+  output item (1 - :slot) :hidden
+end
+
+to nr.visible.initial :i :counts :stone :p1 :p3 :p7
+  localmake "x bi.mul (item 1 :stone) nr.count.action :counts
+  make "x bi.add :x bi.mul (item 2 :stone) nr.count.target :counts
+  make "x bi.add :x bi.mul (item 3 :stone) nr.count.distance :counts
+  make "x bi.add :x bi.mul (item 4 :stone) nr.count.connection :counts
+  make "x bi.add :x bi.mul.small (item 5 :stone) nr.count.direction :counts
+  make "x bi.add :x :p1
+  make "x bi.add :x bi.mul.small :p3 3
+  make "x bi.add :x bi.mul.small :p7 5
+  make "x bi.add :x bi.small :i
+  output nr.save :x
+end
+
+to nr.visible.grind :g :x :stone :p1 :p3 :p7
+  if :g > 11 [output :x]
+  localmake "row item :g nr.visible.grinds
+  localmake "next bi.square :x
+  make "next bi.add :next bi.mul.small :x item 1 :row
+  make "next bi.add :next bi.mul.small :p1 item 2 :row
+  make "next bi.add :next bi.mul.small :p3 item 3 :row
+  make "next bi.add :next bi.mul.small :p7 item 4 :row
+  make "next bi.add :next item item 5 :row :stone
+  make "next nr.save :next
+  output nr.visible.grind (:g + 1) :next :stone :p1 :p3 :p7
+end
+
+to nr.visible.one :i :counts :stones :hidden :visible
+  localmake "p1 nr.prior :visible :hidden :i 1
+  localmake "p3 nr.prior :visible :hidden :i 3
+  localmake "p7 nr.prior :visible :hidden :i 7
+  localmake "stone item :i :stones
+  localmake "x nr.visible.initial :i :counts :stone :p1 :p3 :p7
+  output nr.visible.grind 1 :x :stone :p1 :p3 :p7
+end
+
+to nr.visible.build :counts :stones :hidden
+  output nr.visible.build.work 1 :counts :stones :hidden []
+end
+
+to nr.visible.build.work :i :counts :stones :hidden :visible
+  if :i > 46 [output :visible]
+  localmake "x nr.visible.one :i :counts :stones :hidden :visible
+  output nr.visible.build.work (:i + 1) :counts :stones :hidden lput :x :visible
+end
+
+to nr.perm.unrank0 :rank0 :items
+  if emptyp :items [output []]
+  localmake "block nr.factorial ((count :items) - 1)
+  localmake "qr nr.small.divmod :rank0 :block
+  localmake "q first :qr
+  localmake "r last :qr
+  localmake "chosen item (:q + 1) :items
+  output fput :chosen nr.perm.unrank0 :r nr.list.remove :items (:q + 1)
+end
+
+to nr.order.from.number :orderNumber
+  output nr.perm.unrank0 (:orderNumber - 1) [1 2 3 4 5 6]
+end
+
+to nr.order.from.drop :drop
+  localmake "r bi.regmod bi.sub :drop bi.small 1 bi.small 720
+  output nr.order.from.number ((bi.to.small :r) + 1)
+end
+
+to nr.initial.bowls :counts
+  output nr.initial.bowls.work 1 :counts []
+end
+
+to nr.initial.bowls.work :id :counts :acc
+  if :id > 6 [output :acc]
+  localmake "prime item :id [17 19 23 29 31 37]
+  localmake "s nr.count.action :counts
+  make "s bi.add :s bi.mul.small nr.count.target :counts :id
+  make "s bi.add :s nr.count.distance :counts
+  make "s bi.add :s nr.count.connection :counts
+  make "s bi.add :s bi.small nr.count.direction :counts
+  make "s bi.add :s bi.small (:prime * :prime)
+  localmake "v nr.save bi.add bi.square :s bi.small :id
+  output nr.initial.bowls.work (:id + 1) :counts lput :v :acc
+end
+
+to nr.pours :i :drop :stone :old :order
+  localmake "p1 nr.save bi.add bi.add bi.square :drop bi.mul (item 1 :stone) (item (item 1 :order) :old) bi.small (3 * :i)
+  localmake "p2 nr.save bi.add bi.add bi.square :drop bi.mul (item 2 :stone) (item (item 2 :order) :old) bi.small (5 * :i)
+  localmake "p3 nr.save bi.add bi.add bi.square :drop bi.mul (item 3 :stone) (item (item 3 :order) :old) bi.small (7 * :i)
+  output (list :p1 :p2 :p3 bi.zero bi.zero bi.zero)
+end
+
+to nr.bowl.position.value :position :i :drop :stone :old :order :pours
+  localmake "id item :position :order
+  localmake "prev item nr.wrap1 (:position - 1) 6 :order
+  localmake "next item nr.wrap1 (:position + 1) 6 :order
+  localmake "stoneKind item :position [1 2 3 4 5 1]
+  localmake "s item :id :old
+  localmake "mix bi.add :s bi.mul.small (item :prev :old) 2
+  make "mix bi.add :mix bi.mul.small (item :next :old) 3
+  make "mix bi.add :mix item :position :pours
+  make "mix bi.add :mix :drop
+  make "mix bi.add :mix item :stoneKind :stone
+  localmake "v bi.square :mix
+  make "v bi.add :v bi.mul.small bi.mul (item :prev :old) (item :next :old) 5
+  make "v bi.add :v bi.small (:i * :position)
+  output nr.save :v
+end
+
+to nr.bowl.round :position :i :drop :stone :old :order :pours :pending
+  if :position > 6 [output :pending]
+  localmake "id item :position :order
+  localmake "v nr.bowl.position.value :position :i :drop :stone :old :order :pours
+  output nr.bowl.round (:position + 1) :i :drop :stone :old :order :pours nr.list.replace :pending :id :v
+end
+
+to nr.apply.drops :i :bowls :visible :stones :latch
+  if :i > 46 [output (list :bowls :latch)]
+  localmake "drop item :i :visible
+  localmake "order nr.order.from.drop :drop
+  localmake "old :bowls
+  localmake "stone item :i :stones
+  localmake "pours nr.pours :i :drop :stone :old :order
+  localmake "next nr.bowl.round 1 :i :drop :stone :old :order :pours :old
+  localmake "newLatch :latch
+  if :i = 46 [make "newLatch :order]
+  output nr.apply.drops (:i + 1) :next :visible :stones :newLatch
+end
+
+to nr.post.stir.value :position :old :order :saved :stir
+  localmake "id item :position :order
+  localmake "prev item nr.wrap1 (:position - 1) 6 :order
+  localmake "next item nr.wrap1 (:position + 1) 6 :order
+  localmake "s item :id :old
+  localmake "mix bi.add :s bi.mul.small (item :prev :old) 3
+  make "mix bi.add :mix bi.mul.small (item :next :old) 5
+  make "mix bi.add :mix :saved
+  make "mix bi.add :mix bi.small :stir
+  make "mix bi.add :mix bi.small (:position * :position)
+  localmake "v bi.square :mix
+  make "v bi.add :v bi.mul.small bi.mul (item :prev :old) (item :next :old) 7
+  output nr.save :v
+end
+
+to nr.post.stir.round :position :old :order :saved :stir :pending
+  if :position > 6 [output :pending]
+  localmake "id item :position :order
+  localmake "v nr.post.stir.value :position :old :order :saved :stir
+  output nr.post.stir.round (:position + 1) :old :order :saved :stir nr.list.replace :pending :id :v
+end
+
+to nr.post.stirs :stir :bowls
+  if :stir > 12 [output :bowls]
+  localmake "old :bowls
+  localmake "saved nr.save bi.add nr.big.sum :old bi.small (149 * :stir)
+  localmake "r bi.regmod bi.sub :saved bi.small 1 bi.small 720
+  localmake "order nr.order.from.number ((bi.to.small :r) + 1)
+  localmake "next nr.post.stir.round 1 :old :order :saved :stir :old
+  output nr.post.stirs (:stir + 1) :next
+end
+
+to nr.sauce :calculationDay :targetDay
+  localmake "counts nr.work.counts :calculationDay :targetDay
+  localmake "stones nr.stones
+  localmake "hidden nr.hidden.build :counts :stones
+  localmake "visible nr.visible.build :counts :stones :hidden
+  localmake "bowls nr.initial.bowls :counts
+  localmake "dropResult nr.apply.drops 1 :bowls :visible :stones []
+  localmake "after item 1 :dropResult
+  localmake "latch item 2 :dropResult
+  localmake "final nr.post.stirs 1 :after
+  output (list :final :latch)
+end
+
+to nr.sauce.bowls :sauce
+  output item 1 :sauce
+end
+
+to nr.sauce.order46 :sauce
+  output item 2 :sauce
+end
+
+to nr.next.bowl :sauce :queriedId
+  localmake "order nr.sauce.order46 :sauce
+  localmake "p nr.index.of :order :queriedId
+  output item nr.wrap1 (:p + 1) 6 :order
+end
+
+to nr.ask :sauce :queriedId :seal
+  localmake "bowls nr.sauce.bowls :sauce
+  localmake "nextId nr.next.bowl :sauce :queriedId
+  localmake "firstv nr.save bi.add bi.add bi.square bi.add bi.add (item :queriedId :bowls) (bi.small :seal) (bi.small 181) bi.mul.small (item :nextId :bowls) 179 bi.small :seal
+  localmake "dirbase bi.add bi.add :firstv bi.small :seal bi.small 194
+  localmake "direction nr.save bi.add bi.add bi.square :dirbase bi.mul.small :firstv 193 bi.mul.small (item 6 :bowls) 197
+  localmake "parity bi.to.small bi.regmod :direction bi.small 2
+  localmake "step -1
+  if :parity = 1 [make "step 1]
+  output (list :firstv :step)
+end
+
+to nr.answer.at :stream :k
+  localmake "firstv item 1 :stream
+  localmake "step item 2 :stream
+  output bi.add bi.small 1 bi.regmod bi.add bi.sub :firstv bi.small 1 bi.small (:step * :k) nr.M
+end
+
+to nr.choose.short :stream :N
+  localmake "limit bi.mul bi.floor.div nr.M :N :N
+  output nr.choose.short.walk :stream :N :limit 0
+end
+
+to nr.choose.short.walk :stream :N :limit :k
+  localmake "x nr.answer.at :stream :k
+  if bi.le :x :limit [output bi.add bi.small 1 bi.regmod bi.sub :x bi.small 1 :N]
+  output nr.choose.short.walk :stream :N :limit (:k + 1)
+end
+
+to nr.smallest.power :base :N
+  output nr.smallest.power.work :base :N 1 :base
+end
+
+to nr.smallest.power.work :base :N :k :space
+  if bi.ge :space :N [output (list :k :space)]
+  output nr.smallest.power.work :base :N (:k + 1) bi.mul :space :base
+end
+
+to nr.wide.initial :stream :places
+  output nr.wide.initial.work :stream :places 0 (bi.small 1) (bi.small 1)
+end
+
+to nr.wide.initial.work :stream :places :j :wide :weight
+  if :j >= :places [output :wide]
+  localmake "digit bi.sub nr.answer.at :stream :j bi.small 1
+  localmake "next bi.add :wide bi.mul :digit :weight
+  output nr.wide.initial.work :stream :places (:j + 1) :next bi.mul :weight nr.M
+end
+
+to nr.choose.wide :stream :N
+  localmake "power nr.smallest.power nr.M :N
+  localmake "places item 1 :power
+  localmake "space item 2 :power
+  localmake "wide nr.wide.initial :stream :places
+  localmake "limit bi.mul bi.floor.div :space :N :N
+  output nr.choose.wide.walk :stream :N :space :limit :wide
+end
+
+to nr.choose.wide.walk :stream :N :space :limit :wide
+  if bi.le :wide :limit [output bi.add bi.small 1 bi.regmod bi.sub :wide bi.small 1 :N]
+  localmake "step item 2 :stream
+  localmake "next bi.add bi.small 1 bi.regmod bi.add bi.sub :wide bi.small 1 bi.small :step :space
+  output nr.choose.wide.walk :stream :N :space :limit :next
+end
+
+to nr.choose.rank :stream :N
+  if bi.le :N nr.M [output nr.choose.short :stream :N]
+  output nr.choose.wide :stream :N
+end
+
+to nr.falling :n :k
+  if :k = 0 [output bi.small 1]
+  output bi.mul.small nr.falling :n (:k - 1) (:n - :k + 1)
+end
+
+to nr.unrank.names :masterCount :k :rank1
+  output nr.unrank.names.work nr.range 1 :masterCount :k :rank1 []
+end
+
+to nr.unrank.names.work :remaining :left :rank1 :out
+  if :left = 0 [output :out]
+  localmake "block nr.falling ((count :remaining) - 1) (:left - 1)
+  localmake "zeroBased bi.sub :rank1 bi.small 1
+  localmake "q bi.to.small bi.floor.div :zeroBased :block
+  localmake "chosen item (:q + 1) :remaining
+  localmake "nextRank bi.add bi.small 1 bi.regmod :zeroBased :block
+  output nr.unrank.names.work nr.list.remove :remaining (:q + 1) (:left - 1) :nextRank lput :chosen :out
+end
+
+to nr.memo.find :entries :key
+  if emptyp :entries [output "MISS]
+  localmake "entry first :entries
+  if equalp first :entry :key [output last :entry]
+  output nr.memo.find butfirst :entries :key
+end
+
+to nr.bc.reset
+  make "NR.BC.MEMO []
+end
+
+to nr.bc.count :rem :slots :lo :hi
+  if :slots = 0 [
+    if :rem = 0 [output bi.small 1]
+    output bi.zero
+  ]
+  if :rem < (:slots * :lo) [output bi.zero]
+  if :rem > (:slots * :hi) [output bi.zero]
+  localmake "key (list :rem :slots :lo :hi)
+  localmake "cached nr.memo.find :NR.BC.MEMO :key
+  if not equalp :cached "MISS [output :cached]
+  localmake "v nr.bc.count.x :rem :slots :lo :hi :lo
+  make "NR.BC.MEMO fput (list :key :v) :NR.BC.MEMO
+  output :v
+end
+
+to nr.bc.count.x :rem :slots :lo :hi :x
+  if :x > :hi [output bi.zero]
+  localmake "here nr.bc.count (:rem - :x) (:slots - 1) :lo :hi
+  output bi.add :here nr.bc.count.x :rem :slots :lo :hi (:x + 1)
+end
+
+to nr.bc.unrank :total :slots :lo :hi :rank1
+  nr.bc.reset
+  localmake "all nr.bc.count :total :slots :lo :hi
+  if bi.lt :rank1 bi.small 1 [print [ERORO: ranko tro mikra en kompozuro.] stop]
+  if bi.gt :rank1 :all [print [ERORO: ranko tro granda en kompozuro.] stop]
+  output nr.bc.unrank.pos :total :slots :lo :hi :rank1 []
+end
+
+to nr.bc.unrank.pos :rem :slots :lo :hi :rank1 :out
+  if :slots = 0 [output :out]
+  output nr.bc.unrank.x :rem :slots :lo :hi :rank1 :out :lo
+end
+
+to nr.bc.unrank.x :rem :slots :lo :hi :rank1 :out :x
+  if :x > :hi [print [ERORO: kompozura unrank ne trovis bloko.] stop]
+  localmake "block nr.bc.count (:rem - :x) (:slots - 1) :lo :hi
+  if bi.gt :rank1 :block [
+    output nr.bc.unrank.x :rem :slots :lo :hi bi.sub :rank1 :block :out (:x + 1)
+  ]
+  output nr.bc.unrank.pos (:rem - :x) (:slots - 1) :lo :hi :rank1 lput :x :out
+end
+
+to nr.cp.reset
+  make "NR.CP.MEMO []
+end
+
+to nr.cp.count :rem :slots :cumulative :hit :required
+  if :slots = 0 [
+    if :rem <> 0 [output bi.zero]
+    if :required < 0 [output bi.small 1]
+    if :hit [output bi.small 1]
+    output bi.zero
+  ]
+  if :rem < :slots [output bi.zero]
+  localmake "key (list :rem :slots :cumulative :hit :required)
+  localmake "cached nr.memo.find :NR.CP.MEMO :key
+  if not equalp :cached "MISS [output :cached]
+  localmake "v nr.cp.count.x :rem :slots :cumulative :hit :required 1
+  make "NR.CP.MEMO fput (list :key :v) :NR.CP.MEMO
+  output :v
+end
+
+to nr.cp.count.x :rem :slots :cumulative :hit :required :x
+  localmake "maxx (:rem - (:slots - 1))
+  if :x > :maxx [output bi.zero]
+  localmake "nextCum (:cumulative + :x)
+  localmake "nextHit :hit
+  if and (:required >= 0) (not :hit) [
+    if :nextCum = :required [make "nextHit true]
+    if :nextCum > :required [output nr.cp.count.x :rem :slots :cumulative :hit :required (:x + 1)]
+  ]
+  localmake "here nr.cp.count (:rem - :x) (:slots - 1) :nextCum :nextHit :required
+  output bi.add :here nr.cp.count.x :rem :slots :cumulative :hit :required (:x + 1)
+end
+
+to nr.cp.unrank :G :K :required :rank1
+  nr.cp.reset
+  localmake "all nr.cp.count :G :K 0 false :required
+  if bi.gt :rank1 :all [print [ERORO: ranko tro granda en koteleto-partigo.] stop]
+  output nr.cp.unrank.pos :G :K 0 false :required :rank1 []
+end
+
+to nr.cp.unrank.pos :rem :slots :cumulative :hit :required :rank1 :out
+  if :slots = 0 [output :out]
+  output nr.cp.unrank.x :rem :slots :cumulative :hit :required :rank1 :out 1
+end
+
+to nr.cp.unrank.x :rem :slots :cumulative :hit :required :rank1 :out :x
+  localmake "maxx (:rem - (:slots - 1))
+  if :x > :maxx [print [ERORO: koteleto-unrank ne trovis bloko.] stop]
+  localmake "nextCum (:cumulative + :x)
+  localmake "nextHit :hit
+  if and (:required >= 0) (not :hit) [
+    if :nextCum = :required [make "nextHit true]
+    if :nextCum > :required [output nr.cp.unrank.x :rem :slots :cumulative :hit :required :rank1 :out (:x + 1)]
+  ]
+  localmake "block nr.cp.count (:rem - :x) (:slots - 1) :nextCum :nextHit :required
+  if bi.gt :rank1 :block [
+    output nr.cp.unrank.x :rem :slots :cumulative :hit :required bi.sub :rank1 :block :out (:x + 1)
+  ]
+  output nr.cp.unrank.pos (:rem - :x) (:slots - 1) :nextCum :nextHit :required :rank1 lput :x :out
+end
+
+to nr.small.sum :items
+  if emptyp :items [output 0]
+  output (first :items) + nr.small.sum butfirst :items
+end
+
+to nr.weave.reset :lengths
+  make "NR.WEAVE.MEMO []
+  make "NR.WEAVE.LENGTHS :lengths
+end
+
+to nr.weave.legalp :remaining :opened :closed :j
+  if (item :j :remaining) = 0 [output false]
+  localmake "already ((item :j :remaining) < (item :j :NR.WEAVE.LENGTHS))
+  if and (not :already) (:j <> (:opened + 1)) [output false]
+  localmake "willClose ((item :j :remaining) = 1)
+  if and :willClose (:j <> (:closed + 1)) [output false]
+  output true
+end
+
+to nr.weave.apply :remaining :opened :closed :j
+  localmake "newOpened :opened
+  localmake "newClosed :closed
+  if (item :j :remaining) = (item :j :NR.WEAVE.LENGTHS) [make "newOpened :j]
+  localmake "newRemaining nr.list.replace :remaining :j ((item :j :remaining) - 1)
+  if (item :j :newRemaining) = 0 [make "newClosed :j]
+  output (list :newRemaining :newOpened :newClosed)
+end
+
+to nr.weave.all.zero :items
+  if emptyp :items [output true]
+  if (first :items) <> 0 [output false]
+  output nr.weave.all.zero butfirst :items
+end
+
+to nr.weave.count :remaining :opened :closed
+  if nr.weave.all.zero :remaining [output bi.small 1]
+  localmake "key (list :remaining :opened :closed)
+  localmake "cached nr.memo.find :NR.WEAVE.MEMO :key
+  if not equalp :cached "MISS [output :cached]
+  localmake "v nr.weave.count.j :remaining :opened :closed 1
+  make "NR.WEAVE.MEMO fput (list :key :v) :NR.WEAVE.MEMO
+  output :v
+end
+
+to nr.weave.count.j :remaining :opened :closed :j
+  if :j > (count :remaining) [output bi.zero]
+  localmake "rest nr.weave.count.j :remaining :opened :closed (:j + 1)
+  if not nr.weave.legalp :remaining :opened :closed :j [output :rest]
+  localmake "next nr.weave.apply :remaining :opened :closed :j
+  localmake "here nr.weave.count (item 1 :next) (item 2 :next) (item 3 :next)
+  output bi.add :here :rest
+end
+
+to nr.weave.unrank :lengths :rank1
+  nr.weave.reset :lengths
+  localmake "all nr.weave.count :lengths 0 0
+  if bi.gt :rank1 :all [print [ERORO: ranko tro granda en monato-texado.] stop]
+  output nr.weave.unrank.state :lengths 0 0 :rank1 []
+end
+
+to nr.weave.unrank.state :remaining :opened :closed :rank1 :out
+  if nr.weave.all.zero :remaining [output :out]
+  output nr.weave.unrank.j :remaining :opened :closed :rank1 :out 1
+end
+
+to nr.weave.unrank.j :remaining :opened :closed :rank1 :out :j
+  if :j > (count :remaining) [print [ERORO: texada unrank ne trovis bloko.] stop]
+  if not nr.weave.legalp :remaining :opened :closed :j [
+    output nr.weave.unrank.j :remaining :opened :closed :rank1 :out (:j + 1)
+  ]
+  localmake "next nr.weave.apply :remaining :opened :closed :j
+  localmake "block nr.weave.count (item 1 :next) (item 2 :next) (item 3 :next)
+  if bi.gt :rank1 :block [
+    output nr.weave.unrank.j :remaining :opened :closed bi.sub :rank1 :block :out (:j + 1)
+  ]
+  output nr.weave.unrank.state (item 1 :next) (item 2 :next) (item 3 :next) :rank1 lput :j :out
+end
+
+to nr.gate.reset
+  make "NR.GATES (list (list bi.zero nr.foundation))
+  make "NR.MIN.GATE bi.zero
+  make "NR.MAX.GATE bi.zero
+end
+
+to nr.gate.find :entries :index
+  if emptyp :entries [output "MISS]
+  localmake "entry first :entries
+  if bi.eq first :entry :index [output last :entry]
+  output nr.gate.find butfirst :entries :index
+end
+
+to nr.gate.store :index :day
+  make "NR.GATES fput (list :index :day) :NR.GATES
+end
+
+to nr.gate.known :index
+  output nr.gate.find :NR.GATES :index
+end
+
+to nr.gate.gap :signedStep
+  localmake "target bi.add nr.foundation :signedStep
+  localmake "s nr.sauce nr.foundation :target
+  localmake "stream nr.ask :s 1 1
+  localmake "chosen nr.choose.rank :stream bi.small 922
+  output bi.add bi.small 41 :chosen
+end
+
+to nr.gate.extend.forward
+  localmake "nextIndex bi.add :NR.MAX.GATE bi.small 1
+  localmake "prevDay nr.gate.known :NR.MAX.GATE
+  localmake "day bi.add :prevDay nr.gate.gap :nextIndex
+  nr.gate.store :nextIndex :day
+  make "NR.MAX.GATE :nextIndex
+  output :day
+end
+
+to nr.gate.extend.backward
+  localmake "nextIndex bi.sub :NR.MIN.GATE bi.small 1
+  localmake "nextDay nr.gate.known :NR.MIN.GATE
+  localmake "day bi.sub :nextDay nr.gate.gap :nextIndex
+  nr.gate.store :nextIndex :day
+  make "NR.MIN.GATE :nextIndex
+  output :day
+end
+
+to nr.gate.ensure :index
+  localmake "known nr.gate.known :index
+  if not equalp :known "MISS [output :known]
+  if bi.gt :index :NR.MAX.GATE [
+    nr.gate.extend.forward
+    output nr.gate.ensure :index
+  ]
+  if bi.lt :index :NR.MIN.GATE [
+    nr.gate.extend.backward
+    output nr.gate.ensure :index
+  ]
+  print [ERORO: porta indexo ne esas trovebla en konocata intervalo.]
+  stop
+end
+
+to nr.gate.cover :lowDay :highDay
+  localmake "minDay nr.gate.ensure :NR.MIN.GATE
+  if bi.gt :minDay :lowDay [
+    nr.gate.extend.backward
+    output nr.gate.cover :lowDay :highDay
+  ]
+  localmake "maxDay nr.gate.ensure :NR.MAX.GATE
+  if bi.lt :maxDay :highDay [
+    nr.gate.extend.forward
+    output nr.gate.cover :lowDay :highDay
+  ]
+  output true
+end
+
+to nr.gate.index.before :day
+  nr.gate.cover :day :day
+  output nr.gate.binary.before :day :NR.MIN.GATE :NR.MAX.GATE
+end
+
+to nr.gate.binary.before :day :lo :hi
+  if bi.eq :lo :hi [output :lo]
+  localmake "mid bi.floor.div bi.add bi.add :lo :hi bi.small 1 bi.small 2
+  localmake "midDay nr.gate.ensure :mid
+  if bi.le :midDay :day [output nr.gate.binary.before :day :mid :hi]
+  output nr.gate.binary.before :day :lo bi.sub :mid bi.small 1
+end
+
+to nr.gate.index.after :day
+  localmake "i nr.gate.index.before :day
+  if bi.eq nr.gate.ensure :i :day [output :i]
+  localmake "j bi.add :i bi.small 1
+  nr.gate.ensure :j
+  output :j
+end
+
+to nr.gate.exact :day
+  localmake "i nr.gate.index.before :day
+  if bi.eq nr.gate.ensure :i :day [output :i]
+  output "NONE
+end
+
+to nr.year.make :number :openIndex :closeIndex
+  output (list :number :openIndex :closeIndex nr.gate.ensure :openIndex nr.gate.ensure :closeIndex)
+end
+
+to nr.year.number :year
+  output item 1 :year
+end
+
+to nr.year.open.index :year
+  output item 2 :year
+end
+
+to nr.year.close.index :year
+  output item 3 :year
+end
+
+to nr.year.open.day :year
+  output item 4 :year
+end
+
+to nr.year.close.day :year
+  output item 5 :year
+end
+
+to nr.year.length.indices :openIndex :closeIndex
+  output bi.sub nr.gate.ensure :closeIndex nr.gate.ensure :openIndex
+end
+
+to nr.year.valid.pair :openIndex :closeIndex
+  localmake "gaps bi.sub :closeIndex :openIndex
+  if bi.lt :gaps bi.small 6 [output false]
+  localmake "len nr.year.length.indices :openIndex :closeIndex
+  if bi.lt :len bi.small 252 [output false]
+  if bi.gt :len bi.small 5778 [output false]
+  output true
+end
+
+to nr.year5000.scan.j :i :j :maxIndex :calculationDay
+  if bi.gt :j :maxIndex [output []]
+  localmake "rest nr.year5000.scan.j :i bi.add :j bi.small 1 :maxIndex :calculationDay
+  if not nr.year.valid.pair :i :j [output :rest]
+  localmake "openDay nr.gate.ensure :i
+  localmake "closeDay nr.gate.ensure :j
+  if not and (bi.lt :openDay :calculationDay) (bi.le :calculationDay :closeDay) [output :rest]
+  output fput (list :i :j) :rest
+end
+
+to nr.year5000.scan.i :i :maxIndex :calculationDay
+  if bi.ge :i :maxIndex [output []]
+  localmake "here nr.year5000.scan.j :i bi.add :i bi.small 1 :maxIndex :calculationDay
+  localmake "rest nr.year5000.scan.i bi.add :i bi.small 1 :maxIndex :calculationDay
+  output sentence :here :rest
+end
+
+to nr.year.pair.beforep :a :b
+  localmake "la nr.year.length.indices (item 1 :a) (item 2 :a)
+  localmake "lb nr.year.length.indices (item 1 :b) (item 2 :b)
+  if bi.lt :la :lb [output true]
+  if bi.gt :la :lb [output false]
+  output bi.lt nr.gate.ensure item 1 :a nr.gate.ensure item 1 :b
+end
+
+to nr.year.pair.insert :pair :items
+  if emptyp :items [output (list :pair)]
+  if nr.year.pair.beforep :pair first :items [output fput :pair :items]
+  output fput first :items nr.year.pair.insert :pair butfirst :items
+end
+
+to nr.year.pair.sort :items
+  if emptyp :items [output []]
+  output nr.year.pair.insert first :items nr.year.pair.sort butfirst :items
+end
+
+to nr.year5000 :calculationDay
+  nr.gate.cover bi.sub :calculationDay bi.small 5778 bi.add :calculationDay bi.small 5778
+  localmake "raw nr.year5000.scan.i :NR.MIN.GATE :NR.MAX.GATE :calculationDay
+  localmake "candidates nr.year.pair.sort :raw
+  if emptyp :candidates [print [ERORO: nula kandidata yaro 5000.] stop]
+  localmake "s nr.sauce :calculationDay :calculationDay
+  localmake "stream nr.ask :s 1 10
+  localmake "rank nr.choose.rank :stream bi.small count :candidates
+  localmake "chosen item bi.to.small :rank :candidates
+  output nr.year.make bi.small 5000 item 1 :chosen item 2 :chosen
+end
+
+to nr.next.candidates :openIndex :j
+  localmake "closeDay nr.gate.ensure :j
+  localmake "len bi.sub :closeDay nr.gate.ensure :openIndex
+  if bi.gt :len bi.small 5778 [output []]
+  localmake "rest nr.next.candidates :openIndex bi.add :j bi.small 1
+  if nr.year.valid.pair :openIndex :j [output fput :j :rest]
+  output :rest
+end
+
+to nr.next.year :calculationDay :known
+  localmake "openIndex nr.year.close.index :known
+  localmake "candidates nr.next.candidates :openIndex bi.add :openIndex bi.small 1
+  if emptyp :candidates [print [ERORO: nula kandidato por sequanta yaro.] stop]
+  localmake "s nr.sauce :calculationDay nr.gate.ensure :openIndex
+  localmake "stream nr.ask :s 1 11
+  localmake "rank nr.choose.rank :stream bi.small count :candidates
+  localmake "closeIndex item bi.to.small :rank :candidates
+  output nr.year.make bi.add nr.year.number :known bi.small 1 :openIndex :closeIndex
+end
+
+to nr.previous.candidates :closeIndex :i
+  localmake "openDay nr.gate.ensure :i
+  localmake "len bi.sub nr.gate.ensure :closeIndex :openDay
+  if bi.gt :len bi.small 5778 [output []]
+  localmake "rest nr.previous.candidates :closeIndex bi.sub :i bi.small 1
+  if nr.year.valid.pair :i :closeIndex [output fput :i :rest]
+  output :rest
+end
+
+to nr.previous.year :calculationDay :known
+  localmake "closeIndex nr.year.open.index :known
+  localmake "candidates nr.previous.candidates :closeIndex bi.sub :closeIndex bi.small 1
+  if emptyp :candidates [print [ERORO: nula kandidato por precedanta yaro.] stop]
+  localmake "s nr.sauce :calculationDay nr.gate.ensure :closeIndex
+  localmake "stream nr.ask :s 1 12
+  localmake "rank nr.choose.rank :stream bi.small count :candidates
+  localmake "openIndex item bi.to.small :rank :candidates
+  output nr.year.make bi.sub nr.year.number :known bi.small 1 :openIndex :closeIndex
+end
+
+to nr.find.year :calculationDay :targetDay
+  nr.gate.reset
+  output nr.find.year.walk :calculationDay :targetDay nr.year5000 :calculationDay
+end
+
+to nr.find.year.walk :calculationDay :targetDay :year
+  if bi.gt :targetDay nr.year.close.day :year [
+    output nr.find.year.walk :calculationDay :targetDay nr.next.year :calculationDay :year
+  ]
+  if bi.le :targetDay nr.year.open.day :year [
+    output nr.find.year.walk :calculationDay :targetDay nr.previous.year :calculationDay :year
+  ]
+  output :year
+end
+
+to nr.cutlet.count.candidates :k :gaps
+  if :k > 17 [output []]
+  localmake "rest nr.cutlet.count.candidates (:k + 1) :gaps
+  if :k <= :gaps [output fput :k :rest]
+  output :rest
+end
+
+to nr.choose.cutlet.count :structureSauce :year
+  localmake "gaps bi.to.small bi.sub nr.year.close.index :year nr.year.open.index :year
+  localmake "candidates nr.cutlet.count.candidates 6 :gaps
+  localmake "stream nr.ask :structureSauce 2 20
+  localmake "rank nr.choose.rank :stream bi.small count :candidates
+  output item bi.to.small :rank :candidates
+end
+
+to nr.choose.cutlet.partition :calculationDay :structureSauce :year :K
+  localmake "G bi.to.small bi.sub nr.year.close.index :year nr.year.open.index :year
+  localmake "required -1
+  localmake "exact nr.gate.exact :calculationDay
+  if not equalp :exact "NONE [
+    if and (bi.gt :exact nr.year.open.index :year) (bi.lt :exact nr.year.close.index :year) [
+      make "required bi.to.small bi.sub :exact nr.year.open.index :year
+    ]
+  ]
+  nr.cp.reset
+  localmake "N nr.cp.count :G :K 0 false :required
+  localmake "stream nr.ask :structureSauce 2 21
+  localmake "rank nr.choose.rank :stream :N
+  output nr.cp.unrank :G :K :required :rank
+end
+
+to nr.choose.cutlet.names :structureSauce :K
+  localmake "N nr.falling 17 :K
+  localmake "stream nr.ask :structureSauce 5 22
+  localmake "rank nr.choose.rank :stream :N
+  output nr.unrank.names 17 :K :rank
+end
+
+to nr.materialize.cutlets :year :partition :names
+  output nr.materialize.cutlets.work nr.year.open.index :year :partition :names []
+end
+
+to nr.materialize.cutlets.work :cursor :partition :names :out
+  if emptyp :partition [output :out]
+  localmake "openIndex :cursor
+  localmake "closeIndex bi.add :cursor bi.small first :partition
+  localmake "firstDay bi.add nr.gate.ensure :openIndex bi.small 1
+  localmake "lastDay nr.gate.ensure :closeIndex
+  localmake "record (list first :names :openIndex :closeIndex :firstDay :lastDay)
+  output nr.materialize.cutlets.work :closeIndex butfirst :partition butfirst :names lput :record :out
+end
+
+to nr.choose.month.count :structureSauce :year
+  localmake "Lbig bi.sub nr.year.close.day :year nr.year.open.day :year
+  localmake "L bi.to.small :Lbig
+  localmake "minMonths nr.small.floor.div (:L + 122) 123
+  localmake "maxMonths nr.small.floor.div :L 4
+  if :maxMonths > 47 [make "maxMonths 47]
+  localmake "candidates nr.range :minMonths :maxMonths
+  localmake "stream nr.ask :structureSauce 3 30
+  localmake "rank nr.choose.rank :stream bi.small count :candidates
+  output item bi.to.small :rank :candidates
+end
+
+to nr.choose.month.lengths :structureSauce :year :monthCount
+  localmake "L bi.to.small bi.sub nr.year.close.day :year nr.year.open.day :year
+  nr.bc.reset
+  localmake "N nr.bc.count :L :monthCount 4 123
+  localmake "stream nr.ask :structureSauce 3 31
+  localmake "rank nr.choose.rank :stream :N
+  output nr.bc.unrank :L :monthCount 4 123 :rank
+end
+
+to nr.choose.weaving :structureSauce :lengths
+  nr.weave.reset :lengths
+  localmake "N nr.weave.count :lengths 0 0
+  localmake "stream nr.ask :structureSauce 4 32
+  localmake "rank nr.choose.rank :stream :N
+  output nr.weave.unrank :lengths :rank
+end
+
+to nr.choose.month.names :structureSauce :K
+  localmake "N nr.falling 47 :K
+  localmake "stream nr.ask :structureSauce 5 33
+  localmake "rank nr.choose.rank :stream :N
+  output nr.unrank.names 47 :K :rank
+end
+
+to nr.structure.make :year :cutletCount :partition :cutletNames :cutlets :monthCount :monthLengths :weave :monthNames
+  output (list :year :cutletCount :partition :cutletNames :cutlets :monthCount :monthLengths :weave :monthNames)
+end
+
+to nr.structure.year :s
+  output item 1 :s
+end
+
+to nr.structure.cutlets :s
+  output item 5 :s
+end
+
+to nr.structure.weave :s
+  output item 8 :s
+end
+
+to nr.structure.month.names :s
+  output item 9 :s
+end
+
+to nr.build.structure :calculationDay :year
+  localmake "firstDay bi.add nr.year.open.day :year bi.small 1
+  localmake "r nr.sauce :calculationDay :firstDay
+  localmake "cutletCount nr.choose.cutlet.count :r :year
+  localmake "partition nr.choose.cutlet.partition :calculationDay :r :year :cutletCount
+  localmake "cutletNames nr.choose.cutlet.names :r :cutletCount
+  localmake "cutlets nr.materialize.cutlets :year :partition :cutletNames
+  localmake "monthCount nr.choose.month.count :r :year
+  localmake "monthLengths nr.choose.month.lengths :r :year :monthCount
+  localmake "weave nr.choose.weaving :r :monthLengths
+  localmake "monthNames nr.choose.month.names :r :monthCount
+  output nr.structure.make :year :cutletCount :partition :cutletNames :cutlets :monthCount :monthLengths :weave :monthNames
+end
+
+to nr.find.cutlet :cutlets :targetDay :index
+  if emptyp :cutlets [output 0]
+  localmake "c first :cutlets
+  if and (bi.le (item 4 :c) :targetDay) (bi.le :targetDay (item 5 :c)) [output :index]
+  output nr.find.cutlet butfirst :cutlets :targetDay (:index + 1)
+end
+
+to nr.count.month.occurrences :weave :limit :monthId :pos :counted
+  if :pos > :limit [output :counted]
+  localmake "next :counted
+  if (item :pos :weave) = :monthId [make "next (:counted + 1)]
+  output nr.count.month.occurrences :weave :limit :monthId (:pos + 1) :next
+end
+
+to nr.calendar.date :calculationDay :targetDay
+  localmake "year nr.find.year :calculationDay :targetDay
+  localmake "structure nr.build.structure :calculationDay :year
+  localmake "cutlets nr.structure.cutlets :structure
+  localmake "cutletId nr.find.cutlet :cutlets :targetDay 1
+  if :cutletId = 0 [print [ERORO: la targeto ne esas en koteleto.] stop]
+  localmake "cutlet item :cutletId :cutlets
+  localmake "dayInCutlet bi.add bi.sub :targetDay item 4 :cutlet bi.small 1
+  localmake "offset bi.to.small bi.sub :targetDay bi.add nr.year.open.day :year bi.small 1
+  localmake "weave nr.structure.weave :structure
+  localmake "monthId item (:offset + 1) :weave
+  localmake "monthNameId item :monthId nr.structure.month.names :structure
+  localmake "dayInMonth nr.count.month.occurrences :weave (:offset + 1) :monthId 1 0
+  output (list
+    nr.year.number :year
+    source.catalog.cutlet.name item 1 :cutlet
+    :dayInCutlet
+    source.catalog.month.name :monthNameId
+    bi.small :dayInMonth)
+end
