@@ -1,0 +1,1155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="Oracle" script:language="StarBasic"><![CDATA[
+Option Explicit
+
+Public Const ORACLE_TABLETS_DAY As Long = -278522
+Public Const ORACLE_FOUNDATION_DAY As Long = -15055671
+Public Const ORACLE_TABLETS_DAY_TEXT As String = "-278522"
+Public Const ORACLE_FOUNDATION_DAY_TEXT As String = "-15055671"
+Public Const ORACLE_GATE_GAP_MIN As Long = 42
+Public Const ORACLE_GATE_GAP_MAX As Long = 963
+Public Const ORACLE_YEAR_MIN_DAYS As Long = 252
+Public Const ORACLE_YEAR_MAX_DAYS As Long = 5778
+Public Const ORACLE_MIN_CUTLETS As Long = 6
+Public Const ORACLE_MAX_CUTLETS As Long = 17
+Public Const ORACLE_MIN_MONTHS As Long = 3
+Public Const ORACLE_MAX_MONTHS As Long = 47
+Public Const ORACLE_MIN_MONTH_DAYS As Long = 4
+Public Const ORACLE_MAX_MONTH_DAYS As Long = 123
+
+Public Const SEAL_GATE_GAP As Long = 1
+Public Const SEAL_YEAR_5000 As Long = 10
+Public Const SEAL_NEXT_YEAR As Long = 11
+Public Const SEAL_PREVIOUS_YEAR As Long = 12
+Public Const SEAL_CUTLET_COUNT As Long = 20
+Public Const SEAL_CUTLET_PARTITION As Long = 21
+Public Const SEAL_CUTLET_NAMES As Long = 22
+Public Const SEAL_MONTH_COUNT As Long = 30
+Public Const SEAL_MONTH_LENGTHS As Long = 31
+Public Const SEAL_MONTH_WEAVING As Long = 32
+Public Const SEAL_MONTH_NAMES As Long = 33
+
+Private Const WHEAT As Long = 1
+Private Const BARLEY As Long = 2
+Private Const SALT As Long = 3
+Private Const BITTER As Long = 4
+Private Const REDSTONE As Long = 5
+
+Private gateReady As Boolean
+Private gatePos() As String
+Private gateNeg() As String
+Private gatePosMaxIndex As String
+Private gateNegMaxMagnitude As String
+Private gatePosCount As Long
+Private gateNegCount As Long
+
+Private bcMemo() As String
+Private bcMemoTotal As Long
+Private oracleStoneReady As Boolean
+Private oracleStoneTable As Variant
+Private bcMemoSlots As Long
+Private bcLo As Long
+Private bcHi As Long
+
+Private cpMemoKeys() As String
+Private cpMemoVals() As String
+Private cpMemoCount As Long
+Private cpRequired As Long
+Private cpHasRequired As Boolean
+
+Private weaveLengths() As Long
+Private weaveM As Long
+Private weaveMemoKeys() As String
+Private weaveMemoVals() As String
+Private weaveMemoCount As Long
+
+Public Function OracleDayCount(ByVal dayValue As String) As String
+    Dim cmpValue As Integer, delta As String
+    dayValue = BI_Normalize(dayValue)
+    cmpValue = BI_Cmp(dayValue, ORACLE_FOUNDATION_DAY_TEXT)
+    If cmpValue = 0 Then
+        OracleDayCount = "1"
+    ElseIf cmpValue > 0 Then
+        delta = BI_Sub(dayValue, ORACLE_FOUNDATION_DAY_TEXT)
+        OracleDayCount = BI_AddSmall(BI_MulSmall(delta, 2), 1)
+    Else
+        delta = BI_Sub(ORACLE_FOUNDATION_DAY_TEXT, dayValue)
+        OracleDayCount = BI_MulSmall(delta, 2)
+    End If
+End Function
+
+Public Function OracleWorkCounts(ByVal calculationDay As String, ByVal targetDay As String) As Variant
+    Dim r(0 To 4) As Variant
+    Dim cmpValue As Integer
+    calculationDay = BI_Normalize(calculationDay)
+    targetDay = BI_Normalize(targetDay)
+    r(0) = OracleDayCount(calculationDay)
+    r(1) = OracleDayCount(targetDay)
+    r(2) = BI_AddSmall(BI_Abs(BI_Sub(targetDay, calculationDay)), 1)
+    r(3) = BI_Add(CStr(r(0)), CStr(r(1)))
+    cmpValue = BI_Cmp(targetDay, calculationDay)
+    If cmpValue < 0 Then
+        r(4) = 1
+    ElseIf cmpValue = 0 Then
+        r(4) = 2
+    Else
+        r(4) = 3
+    End If
+    OracleWorkCounts = r
+End Function
+
+Private Function OracleSquare(ByVal x As String) As String
+    OracleSquare = BI_Mul(x, x)
+End Function
+
+Public Function OracleBuildStones() As Variant
+    Dim s(1 To 46, 1 To 5) As String
+    Dim oldW As String, oldB As String, oldS As String, oldM As String, oldR As String
+    Dim i As Long
+    s(1, WHEAT) = "17"
+    s(1, BARLEY) = "29"
+    s(1, SALT) = "43"
+    s(1, BITTER) = "71"
+    s(1, REDSTONE) = "101"
+    For i = 2 To 46
+        oldW = s(i - 1, WHEAT)
+        oldB = s(i - 1, BARLEY)
+        oldS = s(i - 1, SALT)
+        oldM = s(i - 1, BITTER)
+        oldR = s(i - 1, REDSTONE)
+        s(i, WHEAT) = BI_Save(BI_Add(BI_Add(OracleSquare(oldW), BI_MulSmall(oldB, 3)), CStr(i)))
+        s(i, BARLEY) = BI_Save(BI_Add(BI_Add(OracleSquare(oldB), BI_MulSmall(oldS, 5)), oldW))
+        s(i, SALT) = BI_Save(BI_Add(BI_Add(OracleSquare(oldS), BI_MulSmall(oldM, 7)), oldB))
+        s(i, BITTER) = BI_Save(BI_Add(BI_Add(OracleSquare(oldM), BI_MulSmall(oldR, 11)), oldS))
+        s(i, REDSTONE) = BI_Save(BI_Add(BI_Add(OracleSquare(oldR), BI_MulSmall(oldW, 13)), oldM))
+    Next i
+    OracleBuildStones = s
+End Function
+
+Private Function OracleGetStoneTable() As Variant
+    If Not oracleStoneReady Then
+        oracleStoneTable = OracleBuildStones()
+        oracleStoneReady = True
+    End If
+    OracleGetStoneTable = oracleStoneTable
+End Function
+
+Private Function HiddenCoeff(ByVal k As Long, ByVal position As Long) As Long
+    Dim a(1 To 7, 1 To 4) As Long
+    a(1,1)=3: a(1,2)=4: a(1,3)=6: a(1,4)=8
+    a(2,1)=5: a(2,2)=7: a(2,3)=10: a(2,4)=12
+    a(3,1)=7: a(3,2)=10: a(3,3)=14: a(3,4)=16
+    a(4,1)=9: a(4,2)=13: a(4,3)=18: a(4,4)=20
+    a(5,1)=11: a(5,2)=16: a(5,3)=22: a(5,4)=24
+    a(6,1)=13: a(6,2)=19: a(6,3)=26: a(6,4)=28
+    a(7,1)=15: a(7,2)=22: a(7,3)=30: a(7,4)=32
+    HiddenCoeff = a(k, position)
+End Function
+
+Private Function HiddenGrindStone(ByVal grind As Long) As Long
+    Dim k(1 To 7) As Long
+    k(1)=WHEAT: k(2)=BARLEY: k(3)=SALT: k(4)=BITTER: k(5)=REDSTONE: k(6)=WHEAT: k(7)=BARLEY
+    HiddenGrindStone = k(grind)
+End Function
+
+Public Function OracleBuildHidden(ByRef counts As Variant, ByRef stones As Variant) As Variant
+    Dim h(1 To 7) As String
+    Dim k As Long, g As Long, kind As Long
+    Dim x As String, oldX As String
+    For k = 1 To 7
+        x = CStr(counts(0))
+        x = BI_Add(x, BI_MulSmall(CStr(counts(1)), HiddenCoeff(k,1)))
+        x = BI_Add(x, BI_MulSmall(CStr(counts(2)), HiddenCoeff(k,2)))
+        x = BI_Add(x, BI_MulSmall(CStr(counts(3)), HiddenCoeff(k,3)))
+        x = BI_Add(x, BI_MulSmall(CStr(counts(4)), HiddenCoeff(k,4)))
+        For kind = 1 To 5
+            x = BI_Add(x, CStr(stones(k, kind)))
+        Next kind
+        x = BI_Save(x)
+        For g = 1 To 7
+            oldX = x
+            x = BI_Add(OracleSquare(oldX), BI_MulSmall(oldX, 3))
+            x = BI_Add(x, CStr(stones(k, HiddenGrindStone(g))))
+            x = BI_AddSmall(x, g)
+            x = BI_Save(x)
+        Next g
+        h(k) = x
+    Next k
+    OracleBuildHidden = h
+End Function
+
+Private Function VisibleGrindCoeff(ByVal grind As Long, ByVal position As Long) As Long
+    Dim a(1 To 11, 1 To 4) As Long
+    a(1,1)=3: a(1,2)=5: a(1,3)=7: a(1,4)=11
+    a(2,1)=5: a(2,2)=7: a(2,3)=11: a(2,4)=13
+    a(3,1)=7: a(3,2)=11: a(3,3)=13: a(3,4)=17
+    a(4,1)=11: a(4,2)=13: a(4,3)=17: a(4,4)=19
+    a(5,1)=13: a(5,2)=17: a(5,3)=19: a(5,4)=23
+    a(6,1)=17: a(6,2)=19: a(6,3)=23: a(6,4)=29
+    a(7,1)=19: a(7,2)=23: a(7,3)=29: a(7,4)=31
+    a(8,1)=23: a(8,2)=29: a(8,3)=31: a(8,4)=37
+    a(9,1)=29: a(9,2)=31: a(9,3)=37: a(9,4)=41
+    a(10,1)=31: a(10,2)=37: a(10,3)=41: a(10,4)=43
+    a(11,1)=37: a(11,2)=41: a(11,3)=43: a(11,4)=47
+    VisibleGrindCoeff = a(grind, position)
+End Function
+
+Private Function VisibleGrindKind(ByVal grind As Long) As Long
+    Dim k(1 To 11) As Long
+    k(1)=WHEAT: k(2)=BARLEY: k(3)=SALT: k(4)=BITTER: k(5)=REDSTONE
+    k(6)=WHEAT: k(7)=BARLEY: k(8)=SALT: k(9)=BITTER: k(10)=REDSTONE: k(11)=WHEAT
+    VisibleGrindKind = k(grind)
+End Function
+
+Private Function TimelineValue(ByRef visible As Variant, ByRef hidden As Variant, ByVal slot As Long) As String
+    If slot >= 1 Then
+        TimelineValue = CStr(visible(slot))
+    Else
+        TimelineValue = CStr(hidden(1 - slot))
+    End If
+End Function
+
+Public Function OracleBuildVisible(ByRef counts As Variant, ByRef stones As Variant, ByRef hidden As Variant) As Variant
+    Dim v(1 To 46) As String
+    Dim i As Long, g As Long
+    Dim p1 As String, p3 As String, p7 As String, x As String, oldX As String
+    For i = 1 To 46
+        p1 = TimelineValue(v, hidden, i - 1)
+        p3 = TimelineValue(v, hidden, i - 3)
+        p7 = TimelineValue(v, hidden, i - 7)
+        x = BI_Mul(CStr(stones(i,WHEAT)), CStr(counts(0)))
+        x = BI_Add(x, BI_Mul(CStr(stones(i,BARLEY)), CStr(counts(1))))
+        x = BI_Add(x, BI_Mul(CStr(stones(i,SALT)), CStr(counts(2))))
+        x = BI_Add(x, BI_Mul(CStr(stones(i,BITTER)), CStr(counts(3))))
+        x = BI_Add(x, BI_Mul(CStr(stones(i,REDSTONE)), CStr(counts(4))))
+        x = BI_Add(x, p1)
+        x = BI_Add(x, BI_MulSmall(p3, 3))
+        x = BI_Add(x, BI_MulSmall(p7, 5))
+        x = BI_AddSmall(x, i)
+        x = BI_Save(x)
+        For g = 1 To 11
+            oldX = x
+            x = OracleSquare(oldX)
+            x = BI_Add(x, BI_MulSmall(oldX, VisibleGrindCoeff(g,1)))
+            x = BI_Add(x, BI_MulSmall(p1, VisibleGrindCoeff(g,2)))
+            x = BI_Add(x, BI_MulSmall(p3, VisibleGrindCoeff(g,3)))
+            x = BI_Add(x, BI_MulSmall(p7, VisibleGrindCoeff(g,4)))
+            x = BI_Add(x, CStr(stones(i,VisibleGrindKind(g))))
+            x = BI_Save(x)
+        Next g
+        v(i) = x
+    Next i
+    OracleBuildVisible = v
+End Function
+
+Public Function OraclePermutationUnrank(ByVal rank1 As Long) As Variant
+    Dim remaining(1 To 6) As Long, result(1 To 6) As Long
+    Dim remainingCount As Long, position As Long, slotsLeft As Long, block As Long, q As Long
+    Dim rank0 As Long, i As Long, j As Long
+    If rank1 < 1 Or rank1 > 720 Then Err.Raise 9201, "OraclePermutationUnrank", "E_PERM_RANK"
+    For i = 1 To 6: remaining(i) = i: Next i
+    remainingCount = 6
+    rank0 = rank1 - 1
+    position = 1
+    For slotsLeft = 6 To 1 Step -1
+        block = 1
+        For i = 2 To slotsLeft - 1: block = block * i: Next i
+        If slotsLeft = 1 Then block = 1
+        q = rank0 \ block
+        rank0 = rank0 Mod block
+        result(position) = remaining(q + 1)
+        For j = q + 1 To remainingCount - 1
+            remaining(j) = remaining(j + 1)
+        Next j
+        remainingCount = remainingCount - 1
+        position = position + 1
+    Next slotsLeft
+    OraclePermutationUnrank = result
+End Function
+
+Public Function OracleOrderFromValue(ByVal value As String) As Variant
+    Dim n As Long
+    n = BI_ModSmall(BI_Sub(value, "1"), 720) + 1
+    OracleOrderFromValue = OraclePermutationUnrank(n)
+End Function
+
+Public Function OracleInitialBowls(ByRef counts As Variant) As Variant
+    Dim b(1 To 6) As String, primes(1 To 6) As Long
+    Dim id As Long, s As String
+    primes(1)=17: primes(2)=19: primes(3)=23: primes(4)=29: primes(5)=31: primes(6)=37
+    For id = 1 To 6
+        s = CStr(counts(0))
+        s = BI_Add(s, BI_MulSmall(CStr(counts(1)), id))
+        s = BI_Add(s, CStr(counts(2)))
+        s = BI_Add(s, CStr(counts(3)))
+        s = BI_Add(s, CStr(counts(4)))
+        s = BI_AddSmall(s, primes(id) * primes(id))
+        b(id) = BI_Save(BI_AddSmall(OracleSquare(s), id))
+    Next id
+    OracleInitialBowls = b
+End Function
+
+Private Function Wrap6(ByVal p As Long) As Long
+    Do While p < 1: p = p + 6: Loop
+    Do While p > 6: p = p - 6: Loop
+    Wrap6 = p
+End Function
+
+Public Function OracleApplyDropsToBowls(ByRef bowlsIn As Variant, ByRef visible As Variant, ByRef stones As Variant) As Variant
+    Dim bowls As Variant, oldB As Variant, nextB(1 To 6) As String
+    Dim order As Variant, order46 As Variant
+    Dim pour(1 To 6) As String, stoneByPos(1 To 6) As Long
+    Dim i As Long, p As Long, id As Long, prevId As Long, nextId As Long
+    Dim drop As String, s As String, x As String
+    Dim result(0 To 1) As Variant
+    stoneByPos(1)=WHEAT: stoneByPos(2)=BARLEY: stoneByPos(3)=SALT: stoneByPos(4)=BITTER: stoneByPos(5)=REDSTONE: stoneByPos(6)=WHEAT
+    bowls = bowlsIn
+    For i = 1 To 46
+        drop = CStr(visible(i))
+        order = OracleOrderFromValue(drop)
+        oldB = bowls
+        pour(1) = BI_Save(BI_Add(BI_Add(OracleSquare(drop), BI_Mul(CStr(stones(i,WHEAT)), CStr(oldB(order(1))))), CStr(3*i)))
+        pour(2) = BI_Save(BI_Add(BI_Add(OracleSquare(drop), BI_Mul(CStr(stones(i,BARLEY)), CStr(oldB(order(2))))), CStr(5*i)))
+        pour(3) = BI_Save(BI_Add(BI_Add(OracleSquare(drop), BI_Mul(CStr(stones(i,SALT)), CStr(oldB(order(3))))), CStr(7*i)))
+        pour(4)="0": pour(5)="0": pour(6)="0"
+        For p = 1 To 6
+            id = order(p)
+            prevId = order(Wrap6(p - 1))
+            nextId = order(Wrap6(p + 1))
+            s = CStr(oldB(id))
+            s = BI_Add(s, BI_MulSmall(CStr(oldB(prevId)), 2))
+            s = BI_Add(s, BI_MulSmall(CStr(oldB(nextId)), 3))
+            s = BI_Add(s, pour(p))
+            s = BI_Add(s, drop)
+            s = BI_Add(s, CStr(stones(i,stoneByPos(p))))
+            x = OracleSquare(s)
+            x = BI_Add(x, BI_MulSmall(BI_Mul(CStr(oldB(prevId)), CStr(oldB(nextId))), 5))
+            x = BI_AddSmall(x, i * p)
+            nextB(id) = BI_Save(x)
+        Next p
+        For id = 1 To 6: bowls(id) = nextB(id): Next id
+        If i = 46 Then order46 = order
+    Next i
+    result(0) = bowls
+    result(1) = order46
+    OracleApplyDropsToBowls = result
+End Function
+
+Public Function OraclePostStir12(ByRef bowlsIn As Variant) As Variant
+    Dim bowls As Variant, oldB As Variant, order As Variant
+    Dim nextB(1 To 6) As String
+    Dim stir As Long, p As Long, id As Long, prevId As Long, nextId As Long
+    Dim raw As String, saved As String, s As String, x As String, orderNumber As Long
+    bowls = bowlsIn
+    For stir = 1 To 12
+        oldB = bowls
+        raw = "0"
+        For id = 1 To 6: raw = BI_Add(raw, CStr(oldB(id))): Next id
+        saved = BI_Save(BI_AddSmall(raw, 149 * stir))
+        orderNumber = BI_ModSmall(BI_Sub(saved,"1"),720) + 1
+        order = OraclePermutationUnrank(orderNumber)
+        For p = 1 To 6
+            id = order(p)
+            prevId = order(Wrap6(p - 1))
+            nextId = order(Wrap6(p + 1))
+            s = CStr(oldB(id))
+            s = BI_Add(s, BI_MulSmall(CStr(oldB(prevId)),3))
+            s = BI_Add(s, BI_MulSmall(CStr(oldB(nextId)),5))
+            s = BI_Add(s, saved)
+            s = BI_AddSmall(s, stir + p*p)
+            x = OracleSquare(s)
+            x = BI_Add(x, BI_MulSmall(BI_Mul(CStr(oldB(prevId)),CStr(oldB(nextId))),7))
+            nextB(id) = BI_Save(x)
+        Next p
+        For id = 1 To 6: bowls(id) = nextB(id): Next id
+    Next stir
+    OraclePostStir12 = bowls
+End Function
+
+Public Function OracleSauce(ByVal calculationDay As String, ByVal targetDay As String) As Variant
+    Dim counts As Variant, stones As Variant, hidden As Variant, visible As Variant
+    Dim bowls As Variant, afterDrops As Variant, result(0 To 1) As Variant
+    counts = OracleWorkCounts(calculationDay, targetDay)
+    stones = OracleGetStoneTable()
+    hidden = OracleBuildHidden(counts, stones)
+    visible = OracleBuildVisible(counts, stones, hidden)
+    bowls = OracleInitialBowls(counts)
+    afterDrops = OracleApplyDropsToBowls(bowls, visible, stones)
+    result(0) = OraclePostStir12(afterDrops(0))
+    result(1) = afterDrops(1)
+    OracleSauce = result
+End Function
+
+Public Function OracleAskBowl(ByRef sauceResult As Variant, ByVal queriedId As Long, ByVal seal As Long) As Variant
+    Dim bowls As Variant, order As Variant
+    Dim p As Long, nextId As Long
+    Dim firstValue As String, directionNumber As String
+    Dim r(0 To 1) As Variant
+    bowls = sauceResult(0)
+    order = sauceResult(1)
+    p = 1
+    Do While order(p) <> queriedId: p = p + 1: Loop
+    nextId = order(Wrap6(p + 1))
+    firstValue = BI_Add(CStr(bowls(queriedId)), CStr(seal + 181))
+    firstValue = OracleSquare(firstValue)
+    firstValue = BI_Add(firstValue, BI_MulSmall(CStr(bowls(nextId)),179))
+    firstValue = BI_AddSmall(firstValue, seal)
+    firstValue = BI_Save(firstValue)
+    directionNumber = BI_Add(firstValue, CStr(seal + 194))
+    directionNumber = OracleSquare(directionNumber)
+    directionNumber = BI_Add(directionNumber, BI_MulSmall(firstValue,193))
+    directionNumber = BI_Add(directionNumber, BI_MulSmall(CStr(bowls(6)),197))
+    directionNumber = BI_Save(directionNumber)
+    r(0) = firstValue
+    If BI_ModSmall(directionNumber,2) = 1 Then r(1)=1 Else r(1)=-1
+    OracleAskBowl = r
+End Function
+
+Public Function OracleAnswerAt(ByRef stream As Variant, ByVal k As String) As String
+    Dim x As String
+    k = BI_Normalize(k)
+    If BI_Cmp(k, "0") < 0 Then Err.Raise 9210, "OracleAnswerAt", "E_NEGATIVE_ANSWER_OFFSET"
+    x = BI_Add(CStr(stream(0)), BI_Mul(k, CStr(stream(1))))
+    OracleAnswerAt = BI_Add(BI_RegularMod(BI_Sub(x,"1"),BI_M),"1")
+End Function
+
+Public Function OracleChooseRank(ByRef stream As Variant, ByVal n As String) As String
+    Dim limitValue As String, q As String, x As String, k As String
+    Dim places As Long, space As String, wide As String, weight As String, j As Long
+    n = BI_Normalize(n)
+    If BI_Cmp(n,"1") < 0 Then Err.Raise 9202, "OracleChooseRank", "E_CHOOSE_N"
+    If BI_Cmp(n, BI_M) <= 0 Then
+        q = BI_DivPositive(BI_M,n)
+        limitValue = BI_Mul(q,n)
+        k = "0"
+        Do
+            x = OracleAnswerAt(stream,k)
+            If BI_Cmp(x,limitValue) <= 0 Then Exit Do
+            k = BI_AddSmall(k, 1)
+        Loop
+        OracleChooseRank = BI_Add(BI_ModPositive(BI_Sub(x,"1"),n),"1")
+        Exit Function
+    End If
+    places = 1
+    space = BI_M
+    Do While BI_Cmp(space,n) < 0
+        places = places + 1
+        space = BI_Mul(space,BI_M)
+    Loop
+    wide = "1"
+    weight = "1"
+    For j = 0 To places - 1
+        wide = BI_Add(wide, BI_Mul(BI_Sub(OracleAnswerAt(stream,CStr(j)),"1"),weight))
+        weight = BI_Mul(weight,BI_M)
+    Next j
+    q = BI_DivPositive(space,n)
+    limitValue = BI_Mul(q,n)
+    Do While BI_Cmp(wide,limitValue) > 0
+        wide = BI_Add(BI_RegularMod(BI_Add(BI_Sub(wide,"1"),CStr(stream(1))),space),"1")
+    Loop
+    OracleChooseRank = BI_Add(BI_ModPositive(BI_Sub(wide,"1"),n),"1")
+End Function
+
+Public Function OracleUnrankDistinctIndices(ByVal masterCount As Long, ByVal k As Long, ByVal rank1 As String) As Variant
+    Dim remaining() As Long, out() As Long
+    Dim remainingCount As Long, position As Long, candidate As Long, suffixLen As Long, i As Long
+    Dim block As String, r As String
+    ReDim remaining(1 To masterCount) As Long
+    ReDim out(1 To k) As Long
+    For i = 1 To masterCount: remaining(i)=i: Next i
+    remainingCount = masterCount
+    r = BI_Normalize(rank1)
+    For position = 1 To k
+        suffixLen = k - position
+        block = BI_FallingFactorial(remainingCount - 1, suffixLen)
+        For candidate = 1 To remainingCount
+            If BI_Cmp(r,block) > 0 Then
+                r = BI_Sub(r,block)
+            Else
+                out(position) = remaining(candidate)
+                For i = candidate To remainingCount - 1: remaining(i)=remaining(i+1): Next i
+                remainingCount = remainingCount - 1
+                Exit For
+            End If
+        Next candidate
+    Next position
+    OracleUnrankDistinctIndices = out
+End Function
+
+Private Function BCCount(ByVal remn As Long, ByVal slots As Long) As String
+    Dim x As Long, total As String
+    If slots = 0 Then
+        If remn = 0 Then BCCount="1" Else BCCount="0"
+        Exit Function
+    End If
+    If remn < slots*bcLo Or remn > slots*bcHi Then
+        BCCount = "0"
+        Exit Function
+    End If
+    If bcMemo(remn,slots) <> "" Then
+        BCCount = bcMemo(remn,slots)
+        Exit Function
+    End If
+    total = "0"
+    For x = bcLo To bcHi
+        If remn - x < 0 Then Exit For
+        total = BI_Add(total,BCCount(remn-x,slots-1))
+    Next x
+    bcMemo(remn,slots)=total
+    BCCount=total
+End Function
+
+Private Sub BCReset(ByVal total As Long, ByVal slots As Long, ByVal lo As Long, ByVal hi As Long)
+    bcMemoTotal=total: bcMemoSlots=slots: bcLo=lo: bcHi=hi
+    ReDim bcMemo(0 To total, 0 To slots) As String
+End Sub
+
+Public Function OracleBoundedCompositionCount(ByVal total As Long, ByVal slots As Long, ByVal lo As Long, ByVal hi As Long) As String
+    BCReset total,slots,lo,hi
+    OracleBoundedCompositionCount=BCCount(total,slots)
+End Function
+
+Public Function OracleUnrankBoundedComposition(ByVal total As Long, ByVal slots As Long, ByVal lo As Long, ByVal hi As Long, ByVal rank1 As String) As Variant
+    Dim out() As Long, position As Long, x As Long, remn As Long, leftSlots As Long
+    Dim r As String, block As String
+    BCReset total,slots,lo,hi
+    ReDim out(1 To slots) As Long
+    r=BI_Normalize(rank1): remn=total: leftSlots=slots
+    For position=1 To slots
+        For x=lo To hi
+            If remn-x < 0 Then Exit For
+            block=BCCount(remn-x,leftSlots-1)
+            If BI_Cmp(r,block)>0 Then
+                r=BI_Sub(r,block)
+            Else
+                out(position)=x
+                remn=remn-x
+                leftSlots=leftSlots-1
+                Exit For
+            End If
+        Next x
+    Next position
+    OracleUnrankBoundedComposition=out
+End Function
+
+Private Function CPMemoLookup(ByVal key As String) As String
+    Dim i As Long
+    For i=1 To cpMemoCount
+        If cpMemoKeys(i)=key Then CPMemoLookup=cpMemoVals(i): Exit Function
+    Next i
+    CPMemoLookup=""
+End Function
+
+Private Sub CPMemoPut(ByVal key As String, ByVal value As String)
+    If cpMemoCount = 2147483647 Then Err.Raise 9212, "CPMemoPut", "E_CP_MEMO_RESOURCE_LIMIT"
+    cpMemoCount=cpMemoCount+1
+    ReDim Preserve cpMemoKeys(1 To cpMemoCount) As String
+    ReDim Preserve cpMemoVals(1 To cpMemoCount) As String
+    cpMemoKeys(cpMemoCount)=key: cpMemoVals(cpMemoCount)=value
+End Sub
+
+Private Function CPCount(ByVal remn As Long, ByVal slots As Long, ByVal cumulative As Long, ByVal hitBoundary As Boolean) As String
+    Dim key As String, got As String, total As String, x As Long, maxX As Long
+    Dim nextCum As Long, nextHit As Boolean
+    If slots=0 Then
+        If remn<>0 Then CPCount="0": Exit Function
+        If Not cpHasRequired Or hitBoundary Then CPCount="1" Else CPCount="0"
+        Exit Function
+    End If
+    If remn<slots Then CPCount="0": Exit Function
+    key=CStr(remn)&"|"&CStr(slots)&"|"&CStr(cumulative)&"|"&CStr(Abs(CInt(hitBoundary)))
+    got=CPMemoLookup(key)
+    If got<>"" Then CPCount=got: Exit Function
+    total="0": maxX=remn-(slots-1)
+    For x=1 To maxX
+        nextCum=cumulative+x: nextHit=hitBoundary
+        If cpHasRequired And Not hitBoundary Then
+            If nextCum=cpRequired Then
+                nextHit=True
+            ElseIf nextCum>cpRequired Then
+                GoTo CPSkip
+            End If
+        End If
+        total=BI_Add(total,CPCount(remn-x,slots-1,nextCum,nextHit))
+CPSkip:
+    Next x
+    CPMemoPut key,total
+    CPCount=total
+End Function
+
+Private Sub CPReset(ByVal requiredBoundary As Long, ByVal hasRequired As Boolean)
+    cpRequired=requiredBoundary: cpHasRequired=hasRequired: cpMemoCount=0
+    ReDim cpMemoKeys(1 To 1) As String: ReDim cpMemoVals(1 To 1) As String
+End Sub
+
+Public Function OracleCutletPartitionCount(ByVal gateGaps As Long, ByVal cutletCount As Long, ByVal requiredBoundary As Long, ByVal hasRequired As Boolean) As String
+    CPReset requiredBoundary,hasRequired
+    OracleCutletPartitionCount=CPCount(gateGaps,cutletCount,0,False)
+End Function
+
+Public Function OracleUnrankCutletPartition(ByVal gateGaps As Long, ByVal cutletCount As Long, ByVal requiredBoundary As Long, ByVal hasRequired As Boolean, ByVal rank1 As String) As Variant
+    Dim out() As Long, remn As Long, slots As Long, cumulative As Long, hit As Boolean
+    Dim pos As Long, x As Long, maxX As Long, nextCum As Long, nextHit As Boolean
+    Dim r As String, block As String
+    CPReset requiredBoundary,hasRequired
+    ReDim out(1 To cutletCount) As Long
+    remn=gateGaps: slots=cutletCount: cumulative=0: hit=False: r=rank1
+    For pos=1 To cutletCount
+        maxX=remn-(slots-1)
+        For x=1 To maxX
+            nextCum=cumulative+x: nextHit=hit
+            If cpHasRequired And Not hit Then
+                If nextCum=cpRequired Then
+                    nextHit=True
+                ElseIf nextCum>cpRequired Then
+                    GoTo CPUnrankSkip
+                End If
+            End If
+            block=CPCount(remn-x,slots-1,nextCum,nextHit)
+            If BI_Cmp(r,block)>0 Then
+                r=BI_Sub(r,block)
+            Else
+                out(pos)=x: remn=remn-x: slots=slots-1: cumulative=nextCum: hit=nextHit
+                Exit For
+            End If
+CPUnrankSkip:
+        Next x
+    Next pos
+    OracleUnrankCutletPartition=out
+End Function
+
+Private Function OracleCopyLongArray(ByRef sourceArray As Variant) As Variant
+    Dim out() As Long, i As Long, lo As Long, hi As Long
+    lo = LBound(sourceArray): hi = UBound(sourceArray)
+    ReDim out(lo To hi) As Long
+    For i = lo To hi: out(i) = sourceArray(i): Next i
+    OracleCopyLongArray = out
+End Function
+
+Private Function WeaveKey(ByRef remn As Variant, ByVal openedUpTo As Long, ByVal closedUpTo As Long) As String
+    Dim j As Long, s As String
+    s=CStr(openedUpTo)&"|"&CStr(closedUpTo)
+    For j=1 To weaveM: s=s & "|"&CStr(remn(j)): Next j
+    WeaveKey=s
+End Function
+
+Private Function WeaveMemoLookup(ByVal key As String) As String
+    Dim i As Long
+    For i=1 To weaveMemoCount
+        If weaveMemoKeys(i)=key Then WeaveMemoLookup=weaveMemoVals(i): Exit Function
+    Next i
+    WeaveMemoLookup=""
+End Function
+
+Private Sub WeaveMemoPut(ByVal key As String, ByVal value As String)
+    If weaveMemoCount = 2147483647 Then Err.Raise 9213, "WeaveMemoPut", "E_WEAVE_MEMO_RESOURCE_LIMIT"
+    weaveMemoCount=weaveMemoCount+1
+    ReDim Preserve weaveMemoKeys(1 To weaveMemoCount) As String
+    ReDim Preserve weaveMemoVals(1 To weaveMemoCount) As String
+    weaveMemoKeys(weaveMemoCount)=key: weaveMemoVals(weaveMemoCount)=value
+End Sub
+
+Private Function WeaveAllZero(ByRef remn As Variant) As Boolean
+    Dim j As Long
+    For j=1 To weaveM
+        If remn(j)<>0 Then WeaveAllZero=False: Exit Function
+    Next j
+    WeaveAllZero=True
+End Function
+
+Private Function WeaveLegal(ByRef remn As Variant, ByVal openedUpTo As Long, ByVal closedUpTo As Long, ByVal j As Long) As Boolean
+    Dim alreadyOpened As Boolean, willClose As Boolean
+    If remn(j)=0 Then WeaveLegal=False: Exit Function
+    alreadyOpened=(remn(j)<weaveLengths(j))
+    If Not alreadyOpened And j<>openedUpTo+1 Then WeaveLegal=False: Exit Function
+    willClose=(remn(j)=1)
+    If willClose And j<>closedUpTo+1 Then WeaveLegal=False: Exit Function
+    WeaveLegal=True
+End Function
+
+Private Function WeaveCount(ByRef remn As Variant, ByVal openedUpTo As Long, ByVal closedUpTo As Long) As String
+    Dim key As String, got As String, total As String, j As Long
+    Dim nextRem As Variant, nextOpened As Long, nextClosed As Long
+    If WeaveAllZero(remn) Then WeaveCount="1": Exit Function
+    key=WeaveKey(remn,openedUpTo,closedUpTo)
+    got=WeaveMemoLookup(key)
+    If got<>"" Then WeaveCount=got: Exit Function
+    total="0"
+    For j=1 To weaveM
+        If WeaveLegal(remn,openedUpTo,closedUpTo,j) Then
+            nextRem=OracleCopyLongArray(remn): nextOpened=openedUpTo: nextClosed=closedUpTo
+            If nextRem(j)=weaveLengths(j) Then nextOpened=j
+            nextRem(j)=nextRem(j)-1
+            If nextRem(j)=0 Then nextClosed=j
+            total=BI_Add(total,WeaveCount(nextRem,nextOpened,nextClosed))
+        End If
+    Next j
+    WeaveMemoPut key,total
+    WeaveCount=total
+End Function
+
+Private Sub WeaveReset(ByRef lengths As Variant)
+    Dim j As Long
+    weaveM=UBound(lengths)
+    ReDim weaveLengths(1 To weaveM) As Long
+    For j=1 To weaveM: weaveLengths(j)=lengths(j): Next j
+    weaveMemoCount=0
+    ReDim weaveMemoKeys(1 To 1) As String: ReDim weaveMemoVals(1 To 1) As String
+End Sub
+
+Public Function OracleWeavingCount(ByRef lengths As Variant) As String
+    Dim remn As Variant
+    WeaveReset lengths
+    remn=OracleCopyLongArray(lengths)
+    OracleWeavingCount=WeaveCount(remn,0,0)
+End Function
+
+Public Function OracleUnrankWeaving(ByRef lengths As Variant, ByVal rank1 As String) As Variant
+    Dim remn As Variant, out() As Long, totalLen As Long, pos As Long, j As Long
+    Dim openedUpTo As Long, closedUpTo As Long, nextOpened As Long, nextClosed As Long
+    Dim nextRem As Variant, r As String, block As String
+    WeaveReset lengths
+    remn=OracleCopyLongArray(lengths): openedUpTo=0: closedUpTo=0: totalLen=0
+    For j=1 To weaveM: totalLen=totalLen+lengths(j): Next j
+    ReDim out(1 To totalLen) As Long
+    r=rank1
+    For pos=1 To totalLen
+        For j=1 To weaveM
+            If WeaveLegal(remn,openedUpTo,closedUpTo,j) Then
+                nextRem=OracleCopyLongArray(remn): nextOpened=openedUpTo: nextClosed=closedUpTo
+                If nextRem(j)=weaveLengths(j) Then nextOpened=j
+                nextRem(j)=nextRem(j)-1
+                If nextRem(j)=0 Then nextClosed=j
+                block=WeaveCount(nextRem,nextOpened,nextClosed)
+                If BI_Cmp(r,block)>0 Then
+                    r=BI_Sub(r,block)
+                Else
+                    out(pos)=j: remn=nextRem: openedUpTo=nextOpened: closedUpTo=nextClosed
+                    Exit For
+                End If
+            End If
+        Next j
+    Next pos
+    OracleUnrankWeaving=out
+End Function
+
+Public Function OracleOneGateGap(ByVal signedGateStep As String) As Long
+    Dim questionDay As String, sauceResult As Variant, stream As Variant, rankValue As String
+    signedGateStep = BI_Normalize(signedGateStep)
+    If signedGateStep = "0" Then Err.Raise 9203, "OracleOneGateGap", "E_GATE_ZERO_STEP"
+    questionDay = BI_Add(ORACLE_FOUNDATION_DAY_TEXT, signedGateStep)
+    sauceResult = OracleSauce(ORACLE_FOUNDATION_DAY_TEXT, questionDay)
+    stream = OracleAskBowl(sauceResult, 1, SEAL_GATE_GAP)
+    rankValue = OracleChooseRank(stream, "922")
+    OracleOneGateGap = 41 + CLng(rankValue)
+End Function
+
+Private Sub OracleInitGates()
+    If gateReady Then Exit Sub
+    ReDim gatePos(0 To 0) As String
+    ReDim gateNeg(0 To 0) As String
+    gatePos(0) = ORACLE_FOUNDATION_DAY_TEXT
+    gateNeg(0) = ORACLE_FOUNDATION_DAY_TEXT
+    gatePosMaxIndex = "0"
+    gateNegMaxMagnitude = "0"
+    gatePosCount = 0
+    gateNegCount = 0
+    gateReady = True
+End Sub
+
+Private Sub OracleRequireGateCacheSlot(ByVal currentCount As Long, ByVal sourceName As String)
+    If currentCount = 2147483647 Then Err.Raise 9211, sourceName, "E_GATE_CACHE_RESOURCE_LIMIT"
+End Sub
+
+Public Sub OracleEnsureGate(ByVal gateIndex As String)
+    Dim nextIndex As String, gapValue As Long
+    OracleInitGates
+    gateIndex = BI_Normalize(gateIndex)
+    If BI_Cmp(gateIndex, "0") >= 0 Then
+        Do While BI_Cmp(gatePosMaxIndex, gateIndex) < 0
+            OracleRequireGateCacheSlot gatePosCount, "OracleEnsureGate"
+            nextIndex = BI_AddSmall(gatePosMaxIndex, 1)
+            gapValue = OracleOneGateGap(nextIndex)
+            gatePosCount = gatePosCount + 1
+            ReDim Preserve gatePos(0 To gatePosCount) As String
+            gatePos(gatePosCount) = BI_AddSmall(gatePos(gatePosCount - 1), gapValue)
+            gatePosMaxIndex = nextIndex
+        Loop
+    Else
+        Do While BI_Cmp(gateNegMaxMagnitude, BI_Abs(gateIndex)) < 0
+            OracleRequireGateCacheSlot gateNegCount, "OracleEnsureGate"
+            nextIndex = BI_AddSmall(gateNegMaxMagnitude, 1)
+            gapValue = OracleOneGateGap(BI_Neg(nextIndex))
+            gateNegCount = gateNegCount + 1
+            ReDim Preserve gateNeg(0 To gateNegCount) As String
+            gateNeg(gateNegCount) = BI_AddSmall(gateNeg(gateNegCount - 1), -gapValue)
+            gateNegMaxMagnitude = nextIndex
+        Loop
+    End If
+End Sub
+
+Public Function OracleGateDay(ByVal gateIndex As String) As String
+    Dim slot As Long
+    gateIndex = BI_Normalize(gateIndex)
+    OracleEnsureGate gateIndex
+    If BI_Cmp(gateIndex, "0") >= 0 Then
+        slot = CLng(gateIndex)
+        OracleGateDay = gatePos(slot)
+    Else
+        slot = CLng(BI_Abs(gateIndex))
+        OracleGateDay = gateNeg(slot)
+    End If
+End Function
+
+Public Function OracleGateIndexAtOrBefore(ByVal dayValue As String) As String
+    Dim lo As Long, hi As Long, mid As Long, n As Long
+    dayValue = BI_Normalize(dayValue)
+    OracleInitGates
+    If BI_Cmp(dayValue, ORACLE_FOUNDATION_DAY_TEXT) >= 0 Then
+        Do While BI_Cmp(gatePos(gatePosCount), dayValue) < 0
+            OracleEnsureGate BI_AddSmall(gatePosMaxIndex, 1)
+        Loop
+        lo = 0: hi = gatePosCount
+        Do While lo < hi
+            mid = lo + ((hi - lo + 1) \ 2)
+            If BI_Cmp(gatePos(mid), dayValue) <= 0 Then lo = mid Else hi = mid - 1
+        Loop
+        OracleGateIndexAtOrBefore = CStr(lo)
+        Exit Function
+    End If
+    Do While BI_Cmp(gateNeg(gateNegCount), dayValue) > 0
+        OracleEnsureGate BI_Neg(BI_AddSmall(gateNegMaxMagnitude, 1))
+    Loop
+    lo = 1: hi = gateNegCount
+    Do While lo < hi
+        mid = lo + ((hi - lo) \ 2)
+        If BI_Cmp(gateNeg(mid), dayValue) <= 0 Then hi = mid Else lo = mid + 1
+    Loop
+    n = lo
+    OracleGateIndexAtOrBefore = BI_Neg(CStr(n))
+End Function
+
+Public Function OracleGateIndexAtOrAfter(ByVal dayValue As String) As String
+    Dim i As String
+    i = OracleGateIndexAtOrBefore(dayValue)
+    If BI_Cmp(OracleGateDay(i), dayValue) = 0 Then
+        OracleGateIndexAtOrAfter = i
+    Else
+        i = BI_AddSmall(i, 1)
+        OracleEnsureGate i
+        OracleGateIndexAtOrAfter = i
+    End If
+End Function
+
+Public Function OracleExactGateIndex(ByVal dayValue As String, ByRef found As Boolean) As String
+    Dim i As String
+    i = OracleGateIndexAtOrBefore(dayValue)
+    found = (BI_Cmp(OracleGateDay(i), dayValue) = 0)
+    OracleExactGateIndex = i
+End Function
+
+Private Function OracleYearRecord(ByVal numberValue As String, ByVal openIndex As String, ByVal closeIndex As String) As Variant
+    Dim y(0 To 4) As Variant
+    y(0) = BI_Normalize(numberValue)
+    y(1) = BI_Normalize(openIndex)
+    y(2) = BI_Normalize(closeIndex)
+    y(3) = OracleGateDay(openIndex)
+    y(4) = OracleGateDay(closeIndex)
+    OracleYearRecord = y
+End Function
+
+Private Function OracleValidYearPair(ByVal openIndex As String, ByVal closeIndex As String) As Boolean
+    Dim lengthText As String
+    If BI_Cmp(BI_Sub(closeIndex, openIndex), "6") < 0 Then OracleValidYearPair = False: Exit Function
+    lengthText = BI_Sub(OracleGateDay(closeIndex), OracleGateDay(openIndex))
+    OracleValidYearPair = (BI_Cmp(lengthText, CStr(ORACLE_YEAR_MIN_DAYS)) >= 0 And BI_Cmp(lengthText, CStr(ORACLE_YEAR_MAX_DAYS)) <= 0)
+End Function
+
+Private Sub OracleSortYearPairs(ByRef opens() As String, ByRef closes() As String, ByRef lengths() As Long, ByVal countValue As Long, ByVal tieByOpening As Boolean)
+    Dim i As Long, j As Long, o As String, c As String, l As Long
+    Dim shouldMove As Boolean
+    For i = 2 To countValue
+        o = opens(i): c = closes(i): l = lengths(i)
+        j = i - 1
+        Do While j >= 1
+            shouldMove = (lengths(j) > l)
+            If tieByOpening And lengths(j) = l Then
+                If BI_Cmp(OracleGateDay(opens(j)), OracleGateDay(o)) > 0 Then shouldMove = True
+            End If
+            If Not shouldMove Then Exit Do
+            opens(j + 1) = opens(j)
+            closes(j + 1) = closes(j)
+            lengths(j + 1) = lengths(j)
+            j = j - 1
+        Loop
+        opens(j + 1) = o
+        closes(j + 1) = c
+        lengths(j + 1) = l
+    Next i
+End Sub
+
+Public Function OracleYear5000(ByVal calculationDay As String) As Variant
+    Dim minIndex As String, maxIndex As String, i As String, j As String
+    Dim candidateCount As Long, lengthValue As Long, rankValue As Long
+    Dim lengthText As String
+    Dim opens() As String, closes() As String, lengths() As Long
+    Dim sauceResult As Variant, stream As Variant, rankText As String
+    calculationDay = BI_Normalize(calculationDay)
+    minIndex = OracleGateIndexAtOrBefore(BI_AddSmall(calculationDay, -ORACLE_YEAR_MAX_DAYS))
+    maxIndex = OracleGateIndexAtOrAfter(BI_AddSmall(calculationDay, ORACLE_YEAR_MAX_DAYS))
+    candidateCount = 0
+    ReDim opens(1 To 1) As String: ReDim closes(1 To 1) As String: ReDim lengths(1 To 1) As Long
+    i = minIndex
+    Do While BI_Cmp(i, BI_AddSmall(maxIndex, -6)) <= 0
+        j = BI_AddSmall(i, 6)
+        Do While BI_Cmp(j, maxIndex) <= 0
+            lengthText = BI_Sub(OracleGateDay(j), OracleGateDay(i))
+            If BI_Cmp(lengthText, CStr(ORACLE_YEAR_MAX_DAYS)) > 0 Then Exit Do
+            If BI_Cmp(lengthText, CStr(ORACLE_YEAR_MIN_DAYS)) >= 0 Then
+                If BI_Cmp(OracleGateDay(i), calculationDay) < 0 And BI_Cmp(calculationDay, OracleGateDay(j)) <= 0 Then
+                    lengthValue = CLng(lengthText)
+                    candidateCount = candidateCount + 1
+                    ReDim Preserve opens(1 To candidateCount) As String
+                    ReDim Preserve closes(1 To candidateCount) As String
+                    ReDim Preserve lengths(1 To candidateCount) As Long
+                    opens(candidateCount) = i
+                    closes(candidateCount) = j
+                    lengths(candidateCount) = lengthValue
+                End If
+            End If
+            j = BI_AddSmall(j, 1)
+        Loop
+        i = BI_AddSmall(i, 1)
+    Loop
+    If candidateCount = 0 Then Err.Raise 9204, "OracleYear5000", "E_YEAR5000_EMPTY"
+    OracleSortYearPairs opens, closes, lengths, candidateCount, True
+    sauceResult = OracleSauce(calculationDay, calculationDay)
+    stream = OracleAskBowl(sauceResult, 1, SEAL_YEAR_5000)
+    rankText = OracleChooseRank(stream, CStr(candidateCount))
+    rankValue = CLng(rankText)
+    OracleYear5000 = OracleYearRecord("5000", opens(rankValue), closes(rankValue))
+End Function
+
+Public Function OracleNextYear(ByVal calculationDay As String, ByRef knownYear As Variant) As Variant
+    Dim openIndex As String, j As String, candidateCount As Long, lengthValue As Long, rankValue As Long
+    Dim lengthText As String
+    Dim opens() As String, closes() As String, lengths() As Long
+    Dim sauceResult As Variant, stream As Variant
+    calculationDay = BI_Normalize(calculationDay)
+    openIndex = CStr(knownYear(2))
+    candidateCount = 0
+    ReDim opens(1 To 1) As String: ReDim closes(1 To 1) As String: ReDim lengths(1 To 1) As Long
+    j = BI_AddSmall(openIndex, 1)
+    Do
+        OracleEnsureGate j
+        lengthText = BI_Sub(OracleGateDay(j), OracleGateDay(openIndex))
+        If BI_Cmp(lengthText, CStr(ORACLE_YEAR_MAX_DAYS)) > 0 Then Exit Do
+        If OracleValidYearPair(openIndex, j) Then
+            lengthValue = CLng(lengthText)
+            candidateCount = candidateCount + 1
+            ReDim Preserve opens(1 To candidateCount) As String
+            ReDim Preserve closes(1 To candidateCount) As String
+            ReDim Preserve lengths(1 To candidateCount) As Long
+            opens(candidateCount) = openIndex: closes(candidateCount) = j: lengths(candidateCount) = lengthValue
+        End If
+        j = BI_AddSmall(j, 1)
+    Loop
+    If candidateCount = 0 Then Err.Raise 9205, "OracleNextYear", "E_NEXT_YEAR_EMPTY"
+    OracleSortYearPairs opens, closes, lengths, candidateCount, False
+    sauceResult = OracleSauce(calculationDay, OracleGateDay(openIndex))
+    stream = OracleAskBowl(sauceResult, 1, SEAL_NEXT_YEAR)
+    rankValue = CLng(OracleChooseRank(stream, CStr(candidateCount)))
+    OracleNextYear = OracleYearRecord(BI_AddSmall(CStr(knownYear(0)), 1), openIndex, closes(rankValue))
+End Function
+
+Public Function OraclePreviousYear(ByVal calculationDay As String, ByRef knownYear As Variant) As Variant
+    Dim closeIndex As String, i As String, candidateCount As Long, lengthValue As Long, rankValue As Long
+    Dim lengthText As String
+    Dim opens() As String, closes() As String, lengths() As Long
+    Dim sauceResult As Variant, stream As Variant
+    calculationDay = BI_Normalize(calculationDay)
+    closeIndex = CStr(knownYear(1))
+    candidateCount = 0
+    ReDim opens(1 To 1) As String: ReDim closes(1 To 1) As String: ReDim lengths(1 To 1) As Long
+    i = BI_AddSmall(closeIndex, -1)
+    Do
+        OracleEnsureGate i
+        lengthText = BI_Sub(OracleGateDay(closeIndex), OracleGateDay(i))
+        If BI_Cmp(lengthText, CStr(ORACLE_YEAR_MAX_DAYS)) > 0 Then Exit Do
+        If OracleValidYearPair(i, closeIndex) Then
+            lengthValue = CLng(lengthText)
+            candidateCount = candidateCount + 1
+            ReDim Preserve opens(1 To candidateCount) As String
+            ReDim Preserve closes(1 To candidateCount) As String
+            ReDim Preserve lengths(1 To candidateCount) As Long
+            opens(candidateCount) = i: closes(candidateCount) = closeIndex: lengths(candidateCount) = lengthValue
+        End If
+        i = BI_AddSmall(i, -1)
+    Loop
+    If candidateCount = 0 Then Err.Raise 9206, "OraclePreviousYear", "E_PREVIOUS_YEAR_EMPTY"
+    OracleSortYearPairs opens, closes, lengths, candidateCount, False
+    sauceResult = OracleSauce(calculationDay, OracleGateDay(closeIndex))
+    stream = OracleAskBowl(sauceResult, 1, SEAL_PREVIOUS_YEAR)
+    rankValue = CLng(OracleChooseRank(stream, CStr(candidateCount)))
+    OraclePreviousYear = OracleYearRecord(BI_AddSmall(CStr(knownYear(0)), -1), opens(rankValue), closeIndex)
+End Function
+
+Public Function OracleFindTargetYear(ByVal calculationDay As String, ByVal targetDay As String) As Variant
+    Dim y As Variant
+    calculationDay = BI_Normalize(calculationDay)
+    targetDay = BI_Normalize(targetDay)
+    y = OracleYear5000(calculationDay)
+    Do While BI_Cmp(targetDay, CStr(y(4))) > 0
+        y = OracleNextYear(calculationDay, y)
+    Loop
+    Do While BI_Cmp(targetDay, CStr(y(3))) <= 0
+        y = OraclePreviousYear(calculationDay, y)
+    Loop
+    OracleFindTargetYear = y
+End Function
+
+Private Function OracleChooseCutletCount(ByRef structureSauce As Variant, ByRef yearValue As Variant) As Long
+    Dim gapCount As Long, values() As Long, countValue As Long, k As Long
+    Dim stream As Variant, rankValue As Long
+    gapCount = CLng(BI_Sub(CStr(yearValue(2)), CStr(yearValue(1))))
+    ReDim values(1 To 12) As Long
+    countValue = 0
+    For k = ORACLE_MIN_CUTLETS To ORACLE_MAX_CUTLETS
+        If k <= gapCount Then countValue = countValue + 1: values(countValue) = k
+    Next k
+    stream = OracleAskBowl(structureSauce, 2, SEAL_CUTLET_COUNT)
+    rankValue = CLng(OracleChooseRank(stream, CStr(countValue)))
+    OracleChooseCutletCount = values(rankValue)
+End Function
+
+Private Function OracleChooseCutletPartition(ByVal calculationDay As String, ByRef structureSauce As Variant, ByRef yearValue As Variant, ByVal cutletCount As Long) As Variant
+    Dim gateGaps As Long, exactIndex As String, requiredBoundary As Long, found As Boolean, hasRequired As Boolean
+    Dim familyCount As String, stream As Variant, rankValue As String
+    calculationDay = BI_Normalize(calculationDay)
+    gateGaps = CLng(BI_Sub(CStr(yearValue(2)), CStr(yearValue(1))))
+    exactIndex = OracleExactGateIndex(calculationDay, found)
+    hasRequired = False: requiredBoundary = 0
+    If found Then
+        If BI_Cmp(CStr(yearValue(1)), exactIndex) < 0 And BI_Cmp(exactIndex, CStr(yearValue(2))) < 0 Then
+            hasRequired = True
+            requiredBoundary = CLng(BI_Sub(exactIndex, CStr(yearValue(1))))
+        End If
+    End If
+    familyCount = OracleCutletPartitionCount(gateGaps, cutletCount, requiredBoundary, hasRequired)
+    stream = OracleAskBowl(structureSauce, 2, SEAL_CUTLET_PARTITION)
+    rankValue = OracleChooseRank(stream, familyCount)
+    OracleChooseCutletPartition = OracleUnrankCutletPartition(gateGaps, cutletCount, requiredBoundary, hasRequired, rankValue)
+End Function
+
+Private Function OracleChooseNameIndices(ByRef structureSauce As Variant, ByVal bowlId As Long, ByVal seal As Long, ByVal masterCount As Long, ByVal chosenCount As Long) As Variant
+    Dim stream As Variant, familyCount As String, rankValue As String
+    familyCount = BI_FallingFactorial(masterCount, chosenCount)
+    stream = OracleAskBowl(structureSauce, bowlId, seal)
+    rankValue = OracleChooseRank(stream, familyCount)
+    OracleChooseNameIndices = OracleUnrankDistinctIndices(masterCount, chosenCount, rankValue)
+End Function
+
+Private Function OracleChooseMonthCount(ByRef structureSauce As Variant, ByRef yearValue As Variant) As Long
+    Dim lengthValue As Long, lo As Long, hi As Long, stream As Variant, rankValue As Long
+    lengthValue = CLng(BI_Sub(CStr(yearValue(4)), CStr(yearValue(3))))
+    lo = BI_CeilDivPositiveLong(lengthValue, ORACLE_MAX_MONTH_DAYS)
+    hi = lengthValue \ ORACLE_MIN_MONTH_DAYS
+    If hi > ORACLE_MAX_MONTHS Then hi = ORACLE_MAX_MONTHS
+    If lo < ORACLE_MIN_MONTHS Then lo = ORACLE_MIN_MONTHS
+    If lo > hi Then Err.Raise 9207, "OracleChooseMonthCount", "E_MONTH_COUNT_RANGE"
+    stream = OracleAskBowl(structureSauce, 3, SEAL_MONTH_COUNT)
+    rankValue = CLng(OracleChooseRank(stream, CStr(hi - lo + 1)))
+    OracleChooseMonthCount = lo + rankValue - 1
+End Function
+
+Private Function OracleChooseMonthLengths(ByRef structureSauce As Variant, ByRef yearValue As Variant, ByVal monthCount As Long) As Variant
+    Dim lengthValue As Long, familyCount As String, rankValue As String, stream As Variant
+    lengthValue = CLng(BI_Sub(CStr(yearValue(4)), CStr(yearValue(3))))
+    familyCount = OracleBoundedCompositionCount(lengthValue, monthCount, ORACLE_MIN_MONTH_DAYS, ORACLE_MAX_MONTH_DAYS)
+    stream = OracleAskBowl(structureSauce, 3, SEAL_MONTH_LENGTHS)
+    rankValue = OracleChooseRank(stream, familyCount)
+    OracleChooseMonthLengths = OracleUnrankBoundedComposition(lengthValue, monthCount, ORACLE_MIN_MONTH_DAYS, ORACLE_MAX_MONTH_DAYS, rankValue)
+End Function
+
+Private Function OracleChooseMonthWeaving(ByRef structureSauce As Variant, ByRef monthLengths As Variant) As Variant
+    Dim familyCount As String, rankValue As String, stream As Variant
+    familyCount = OracleWeavingCount(monthLengths)
+    stream = OracleAskBowl(structureSauce, 4, SEAL_MONTH_WEAVING)
+    rankValue = OracleChooseRank(stream, familyCount)
+    OracleChooseMonthWeaving = OracleUnrankWeaving(monthLengths, rankValue)
+End Function
+
+Public Function OracleBuildYearStructure(ByVal calculationDay As String, ByRef yearValue As Variant) As Variant
+    Dim structure(0 To 9) As Variant
+    Dim structureSauce As Variant, partition As Variant, cutletNames As Variant
+    Dim cutletFirst() As String, cutletLast() As String, cursorGate As String, k As Long
+    Dim cutletCount As Long, monthCount As Long, monthLengths As Variant, monthWeaving As Variant, monthNames As Variant
+    Dim firstDayText As String
+    calculationDay = BI_Normalize(calculationDay)
+    firstDayText = BI_AddSmall(CStr(yearValue(3)), 1)
+    structureSauce = OracleSauce(calculationDay, firstDayText)
+    cutletCount = OracleChooseCutletCount(structureSauce, yearValue)
+    partition = OracleChooseCutletPartition(calculationDay, structureSauce, yearValue, cutletCount)
+    cutletNames = OracleChooseNameIndices(structureSauce, 5, SEAL_CUTLET_NAMES, 17, cutletCount)
+    ReDim cutletFirst(1 To cutletCount) As String
+    ReDim cutletLast(1 To cutletCount) As String
+    cursorGate = CStr(yearValue(1))
+    For k = 1 To cutletCount
+        cutletFirst(k) = BI_AddSmall(OracleGateDay(cursorGate), 1)
+        cursorGate = BI_AddSmall(cursorGate, CLng(partition(k)))
+        cutletLast(k) = OracleGateDay(cursorGate)
+    Next k
+    monthCount = OracleChooseMonthCount(structureSauce, yearValue)
+    monthLengths = OracleChooseMonthLengths(structureSauce, yearValue, monthCount)
+    monthWeaving = OracleChooseMonthWeaving(structureSauce, monthLengths)
+    monthNames = OracleChooseNameIndices(structureSauce, 5, SEAL_MONTH_NAMES, 47, monthCount)
+    structure(0) = cutletCount
+    structure(1) = partition
+    structure(2) = cutletNames
+    structure(3) = cutletFirst
+    structure(4) = cutletLast
+    structure(5) = monthCount
+    structure(6) = monthLengths
+    structure(7) = monthWeaving
+    structure(8) = monthNames
+    structure(9) = firstDayText
+    OracleBuildYearStructure = structure
+End Function
+
+Public Function OracleCalendarDate(ByVal calculationDay As String, ByVal targetDay As String) As Variant
+    Dim result(0 To 4) As Variant
+    Dim yearValue As Variant, structure As Variant, cutletNames As Variant, firstDays As Variant, lastDays As Variant
+    Dim weave As Variant, monthNames As Variant
+    Dim cutletId As Long, monthId As Long, offsetValue As Long, p As Long, dayInMonth As Long
+    calculationDay = BI_Normalize(calculationDay)
+    targetDay = BI_Normalize(targetDay)
+    yearValue = OracleFindTargetYear(calculationDay, targetDay)
+    structure = OracleBuildYearStructure(calculationDay, yearValue)
+    cutletNames = structure(2): firstDays = structure(3): lastDays = structure(4)
+    cutletId = 0
+    For p = 1 To CLng(structure(0))
+        If BI_Cmp(CStr(firstDays(p)), targetDay) <= 0 And BI_Cmp(targetDay, CStr(lastDays(p))) <= 0 Then cutletId = p: Exit For
+    Next p
+    If cutletId = 0 Then Err.Raise 9208, "OracleCalendarDate", "E_CUTLET_NOT_FOUND"
+    offsetValue = CLng(BI_Sub(targetDay, CStr(structure(9))))
+    weave = structure(7)
+    monthNames = structure(8)
+    monthId = weave(offsetValue + 1)
+    dayInMonth = 0
+    For p = 1 To offsetValue + 1
+        If weave(p) = monthId Then dayInMonth = dayInMonth + 1
+    Next p
+    result(0) = CStr(yearValue(0))
+    result(1) = CatalogCutletName(cutletNames(cutletId))
+    result(2) = CLng(BI_AddSmall(BI_Sub(targetDay, CStr(firstDays(cutletId))), 1))
+    result(3) = CatalogMonthName(monthNames(monthId))
+    result(4) = dayInMonth
+    OracleCalendarDate = result
+End Function
+
+Public Function OracleReferenceReady() As Boolean
+    ' Bootstrap ਵਿੱਚ oracle ਦਾ clean reference path legacy ਜਾਂ patch ਕੋਡ ਤੋਂ ਖਾਲੀ ਹੈ।
+    OracleReferenceReady = (ORACLE_TABLETS_DAY - ORACLE_FOUNDATION_DAY = 14777149) And (ORACLE_YEAR_MAX_DAYS = 5778)
+End Function
+]]></script:module>

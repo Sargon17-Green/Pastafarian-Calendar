@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="Catalog" script:language="StarBasic"><![CDATA[
+Option Explicit
+
+Private catalogReady As Boolean
+Private catalogFrozenFlag As Boolean
+Private cutletNames(1 To 17) As String
+Private monthNames(1 To 47) As String
+
+Public Const SOURCE_LANGUAGE_CATALOG_VERSION As String = "pa-Guru-1.0.0"
+Public Const SOURCE_LANGUAGE_TAG As String = "pa-Guru"
+
+Public Sub CatalogInitialize()
+    If catalogReady Then Exit Sub
+
+    ' ਕਟਲੈਟਾਂ ਦੇ ਨਾਂ ਸਿਰਫ਼ canonicalIndex ਨਾਲ ਕ੍ਰਮਬੱਧ ਹਨ; ਲਿਖਤ ਦਾ ਅੱਖਰੀ ਕ੍ਰਮ ਕੋਈ ਅਰਥਕ ਭੂਮਿਕਾ ਨਹੀਂ ਨਿਭਾਉਂਦਾ।
+    cutletNames(1) = "ਕਾਂਸਾ"
+    cutletNames(2) = "ਲੂਮੜੀ"
+    cutletNames(3) = "ਗੁਰਦਾ"
+    cutletNames(4) = "ਲਗਸ਼"
+    cutletNames(5) = "ਵਿਚਾਰ"
+    cutletNames(6) = "ਨੌਂ ਵਿੱਚੋਂ ਚਾਰ ਹਿੱਸੇ"
+    cutletNames(7) = "ਪਲਗੂਰਸ਼"
+    cutletNames(8) = "ਸਰਕੰਡਾ"
+    cutletNames(9) = "ਗੁੱਛਾ"
+    cutletNames(10) = "ਬਿਛੂ"
+    cutletNames(11) = "ਰਾਖ"
+    cutletNames(12) = "ਕਣਕ"
+    cutletNames(13) = "ਦਰਿਆ"
+    cutletNames(14) = "ਹਾਸਾ"
+    cutletNames(15) = "ਅੱਕਾਦ"
+    cutletNames(16) = "ਸਿੰਗ"
+    cutletNames(17) = "ਖਾਲੀ ਘੜਾ"
+
+    ' ਮਹੀਨਿਆਂ ਦੇ ਨਾਂ ਵੀ ਸਿਰਫ਼ canonicalIndex ਨਾਲ ਕ੍ਰਮਬੱਧ ਹਨ।
+    monthNames(1) = "ਮਿੱਟੀ"
+    monthNames(2) = "ਅਨਾਰ"
+    monthNames(3) = "ਕੋਹਣੀ"
+    monthNames(4) = "ਈਰਖਾ"
+    monthNames(5) = "ਏਰੀਡੂ"
+    monthNames(6) = "ਦੰਦ ਮੰਜਨ"
+    monthNames(7) = "ਪੰਜ ਵਿੱਚੋਂ ਤਿੰਨ ਹਿੱਸੇ"
+    monthNames(8) = "ਕਰਸ਼ੂਮਬ"
+    monthNames(9) = "ਤਿੰਦੂਆ"
+    monthNames(10) = "ਟਿਨ"
+    monthNames(11) = "ਧੁੰਦ"
+    monthNames(12) = "ਲੋਬਾਨ"
+    monthNames(13) = "ਤਕਲਾ"
+    monthNames(14) = "ਪੱਸਲੀ"
+    monthNames(15) = "ਕੈਰਬ ਫਲੀ"
+    monthNames(16) = "ਉਰੂਕ"
+    monthNames(17) = "ਸ਼ਰਮ"
+    monthNames(18) = "ਊਂਟ"
+    monthNames(19) = "ਤਾਂਬਾ"
+    monthNames(20) = "ਖੂਹ"
+    monthNames(21) = "ਅੰਡੇ ਦੀ ਜਰਦੀ"
+    monthNames(22) = "ਤਾਰਾ"
+    monthNames(23) = "ਸ਼ਹਿਦ"
+    monthNames(24) = "ਤਿਲਲੀ"
+    monthNames(25) = "ਚੂਨਾ ਪੱਥਰ"
+    monthNames(26) = "ਖੁਸ਼ੀ"
+    monthNames(27) = "ਅੰਜੀਰ"
+    monthNames(28) = "ਨੀਨਵੇ"
+    monthNames(29) = "ਡੱਡੂ"
+    monthNames(30) = "ਤਾਰਕੋਲ"
+    monthNames(31) = "ਮੋਮਬੱਤੀ"
+    monthNames(32) = "ਬੰਦ ਦਰਵਾਜ਼ਾ"
+    monthNames(33) = "ਤਿਲ"
+    monthNames(34) = "ਗਰਦਨ ਦਾ ਪਿਛਲਾ ਹਿੱਸਾ"
+    monthNames(35) = "ਚਾਂਦੀ"
+    monthNames(36) = "ਲਿਲੀ"
+    monthNames(37) = "ਤੂਫ਼ਾਨ"
+    monthNames(38) = "ਖੋਤਾ"
+    monthNames(39) = "ਆਟਾ"
+    monthNames(40) = "ਪਛਤਾਵਾ"
+    monthNames(41) = "ਬਾਬਲ"
+    monthNames(42) = "ਜੀਭ"
+    monthNames(43) = "ਅਲਸੀ"
+    monthNames(44) = "ਨਮਕ"
+    monthNames(45) = "ਨਾਸ਼ਪਾਤੀ"
+    monthNames(46) = "ਧਨੁਸ਼"
+    monthNames(47) = "ਰੇਤ"
+
+    catalogReady = True
+    catalogFrozenFlag = True
+End Sub
+
+Public Function CatalogFrozen() As Boolean
+    CatalogInitialize
+    CatalogFrozen = catalogFrozenFlag
+End Function
+
+Public Function CatalogCutletCount() As Long
+    CatalogCutletCount = 17
+End Function
+
+Public Function CatalogMonthCount() As Long
+    CatalogMonthCount = 47
+End Function
+
+Public Function CatalogCutletName(ByVal canonicalIndex As Long) As String
+    CatalogInitialize
+    If canonicalIndex < 1 Or canonicalIndex > 17 Then Err.Raise 9101, "CatalogCutletName", "E_CUTLET_INDEX"
+    CatalogCutletName = cutletNames(canonicalIndex)
+End Function
+
+Public Function CatalogMonthName(ByVal canonicalIndex As Long) As String
+    CatalogInitialize
+    If canonicalIndex < 1 Or canonicalIndex > 47 Then Err.Raise 9102, "CatalogMonthName", "E_MONTH_INDEX"
+    CatalogMonthName = monthNames(canonicalIndex)
+End Function
+
+Public Function CatalogCutletCanonicalIndex(ByVal canonicalIndex As Long) As Long
+    If canonicalIndex < 1 Or canonicalIndex > 17 Then Err.Raise 9103, "CatalogCutletCanonicalIndex", "E_CUTLET_INDEX"
+    CatalogCutletCanonicalIndex = canonicalIndex
+End Function
+
+Public Function CatalogMonthCanonicalIndex(ByVal canonicalIndex As Long) As Long
+    If canonicalIndex < 1 Or canonicalIndex > 47 Then Err.Raise 9104, "CatalogMonthCanonicalIndex", "E_MONTH_INDEX"
+    CatalogMonthCanonicalIndex = canonicalIndex
+End Function
+]]></script:module>

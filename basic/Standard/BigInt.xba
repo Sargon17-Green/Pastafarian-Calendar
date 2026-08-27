@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="BigInt" script:language="StarBasic"><![CDATA[
+Option Explicit
+
+Public Const BI_M As String = "170141183460469231731687303715884105727"
+
+Public Function BI_Normalize(ByVal s As String) As String
+    Dim neg As Boolean, i As Long, body As String
+    s = Trim(s)
+    If s = "" Then
+        BI_Normalize = "0"
+        Exit Function
+    End If
+    neg = False
+    If Left(s, 1) = "-" Then
+        neg = True
+        body = Mid(s, 2)
+    ElseIf Left(s, 1) = "+" Then
+        body = Mid(s, 2)
+    Else
+        body = s
+    End If
+    i = 1
+    Do While i < Len(body) And Mid(body, i, 1) = "0"
+        i = i + 1
+    Loop
+    body = Mid(body, i)
+    If body = "" Then body = "0"
+    If body = "0" Then neg = False
+    If neg Then
+        BI_Normalize = "-" & body
+    Else
+        BI_Normalize = body
+    End If
+End Function
+
+Public Function BI_IsNegative(ByVal s As String) As Boolean
+    s = BI_Normalize(s)
+    BI_IsNegative = (Left(s, 1) = "-")
+End Function
+
+Public Function BI_Abs(ByVal s As String) As String
+    s = BI_Normalize(s)
+    If Left(s, 1) = "-" Then s = Mid(s, 2)
+    BI_Abs = s
+End Function
+
+Public Function BI_Neg(ByVal s As String) As String
+    s = BI_Normalize(s)
+    If s = "0" Then
+        BI_Neg = "0"
+    ElseIf Left(s, 1) = "-" Then
+        BI_Neg = Mid(s, 2)
+    Else
+        BI_Neg = "-" & s
+    End If
+End Function
+
+Public Function BI_CmpAbs(ByVal a As String, ByVal b As String) As Integer
+    a = BI_Abs(a)
+    b = BI_Abs(b)
+    If Len(a) < Len(b) Then
+        BI_CmpAbs = -1
+        Exit Function
+    ElseIf Len(a) > Len(b) Then
+        BI_CmpAbs = 1
+        Exit Function
+    End If
+    If a < b Then
+        BI_CmpAbs = -1
+    ElseIf a > b Then
+        BI_CmpAbs = 1
+    Else
+        BI_CmpAbs = 0
+    End If
+End Function
+
+Public Function BI_Cmp(ByVal a As String, ByVal b As String) As Integer
+    Dim na As Boolean, nb As Boolean, c As Integer
+    a = BI_Normalize(a)
+    b = BI_Normalize(b)
+    na = (Left(a, 1) = "-")
+    nb = (Left(b, 1) = "-")
+    If na And Not nb Then
+        BI_Cmp = -1
+        Exit Function
+    ElseIf nb And Not na Then
+        BI_Cmp = 1
+        Exit Function
+    End If
+    c = BI_CmpAbs(a, b)
+    If na Then c = -c
+    BI_Cmp = c
+End Function
+
+Private Function BI_AddAbs(ByVal a As String, ByVal b As String) As String
+    Dim ia As Long, ib As Long, carry As Long, d As Long
+    Dim out As String
+    a = BI_Abs(a)
+    b = BI_Abs(b)
+    ia = Len(a)
+    ib = Len(b)
+    carry = 0
+    out = ""
+    Do While ia > 0 Or ib > 0 Or carry > 0
+        d = carry
+        If ia > 0 Then d = d + CLng(Mid(a, ia, 1))
+        If ib > 0 Then d = d + CLng(Mid(b, ib, 1))
+        out = CStr(d Mod 10) & out
+        carry = d \ 10
+        ia = ia - 1
+        ib = ib - 1
+    Loop
+    BI_AddAbs = BI_Normalize(out)
+End Function
+
+Private Function BI_SubAbs(ByVal a As String, ByVal b As String) As String
+    Dim ia As Long, ib As Long, borrow As Long, da As Long, db As Long, d As Long
+    Dim out As String
+    a = BI_Abs(a)
+    b = BI_Abs(b)
+    ia = Len(a)
+    ib = Len(b)
+    borrow = 0
+    out = ""
+    Do While ia > 0
+        da = CLng(Mid(a, ia, 1)) - borrow
+        db = 0
+        If ib > 0 Then db = CLng(Mid(b, ib, 1))
+        If da < db Then
+            da = da + 10
+            borrow = 1
+        Else
+            borrow = 0
+        End If
+        d = da - db
+        out = CStr(d) & out
+        ia = ia - 1
+        ib = ib - 1
+    Loop
+    BI_SubAbs = BI_Normalize(out)
+End Function
+
+Public Function BI_Add(ByVal a As String, ByVal b As String) As String
+    Dim na As Boolean, nb As Boolean, c As Integer, r As String
+    a = BI_Normalize(a)
+    b = BI_Normalize(b)
+    na = (Left(a, 1) = "-")
+    nb = (Left(b, 1) = "-")
+    If na = nb Then
+        r = BI_AddAbs(a, b)
+        If na And r <> "0" Then r = "-" & r
+        BI_Add = r
+        Exit Function
+    End If
+    c = BI_CmpAbs(a, b)
+    If c = 0 Then
+        BI_Add = "0"
+    ElseIf c > 0 Then
+        r = BI_SubAbs(a, b)
+        If na Then r = "-" & r
+        BI_Add = r
+    Else
+        r = BI_SubAbs(b, a)
+        If nb Then r = "-" & r
+        BI_Add = r
+    End If
+End Function
+
+Public Function BI_Sub(ByVal a As String, ByVal b As String) As String
+    BI_Sub = BI_Add(a, BI_Neg(b))
+End Function
+
+Public Function BI_Mul(ByVal a As String, ByVal b As String) As String
+    Dim na As Boolean, nb As Boolean, aa As String, bb As String
+    Dim la As Long, lb As Long, i As Long, j As Long, idx As Long
+    Dim da As Long, db As Long, carry As Long, total As Long
+    Dim acc() As Long, out As String, r As String
+    a = BI_Normalize(a)
+    b = BI_Normalize(b)
+    If a = "0" Or b = "0" Then
+        BI_Mul = "0"
+        Exit Function
+    End If
+    na = BI_IsNegative(a)
+    nb = BI_IsNegative(b)
+    aa = BI_Abs(a)
+    bb = BI_Abs(b)
+    la = Len(aa)
+    lb = Len(bb)
+    If la > 2147483647 - lb Then Err.Raise 9007, "BI_Mul", "E_BIGINT_RESOURCE_LIMIT"
+    ReDim acc(0 To la + lb - 1) As Long
+    For i = la To 1 Step -1
+        da = CLng(Mid(aa, i, 1))
+        carry = 0
+        For j = lb To 1 Step -1
+            db = CLng(Mid(bb, j, 1))
+            idx = i + j - 1
+            total = acc(idx) + da * db + carry
+            acc(idx) = total Mod 10
+            carry = total \ 10
+        Next j
+        acc(i - 1) = acc(i - 1) + carry
+    Next i
+    i = 0
+    Do While i < la + lb - 1 And acc(i) = 0
+        i = i + 1
+    Loop
+    out = ""
+    For j = i To la + lb - 1
+        out = out & CStr(acc(j))
+    Next j
+    r = BI_Normalize(out)
+    If na Xor nb Then r = "-" & r
+    BI_Mul = r
+End Function
+
+Public Function BI_MulSmall(ByVal a As String, ByVal n As Long) As String
+    BI_MulSmall = BI_Mul(a, CStr(n))
+End Function
+
+Public Function BI_AddSmall(ByVal a As String, ByVal n As Long) As String
+    BI_AddSmall = BI_Add(a, CStr(n))
+End Function
+
+Public Function BI_DivModPositive(ByVal dividend As String, ByVal divisor As String) As Variant
+    Dim i As Long, qdigit As Long, q As String, remn As String, digit As String
+    Dim result(0 To 1) As String
+    dividend = BI_Abs(BI_Normalize(dividend))
+    divisor = BI_Abs(BI_Normalize(divisor))
+    If divisor = "0" Then Err.Raise 9001, "BI_DivModPositive", "E_DIV_ZERO"
+    q = ""
+    remn = "0"
+    For i = 1 To Len(dividend)
+        digit = Mid(dividend, i, 1)
+        remn = BI_Add(BI_MulSmall(remn, 10), digit)
+        qdigit = 0
+        Do While BI_CmpAbs(remn, divisor) >= 0
+            remn = BI_SubAbs(remn, divisor)
+            qdigit = qdigit + 1
+        Loop
+        q = q & CStr(qdigit)
+    Next i
+    result(0) = BI_Normalize(q)
+    result(1) = BI_Normalize(remn)
+    BI_DivModPositive = result
+End Function
+
+Public Function BI_DivPositive(ByVal dividend As String, ByVal divisor As String) As String
+    Dim dm As Variant
+    dm = BI_DivModPositive(dividend, divisor)
+    BI_DivPositive = dm(0)
+End Function
+
+Public Function BI_ModPositive(ByVal dividend As String, ByVal divisor As String) As String
+    Dim dm As Variant
+    dm = BI_DivModPositive(dividend, divisor)
+    BI_ModPositive = dm(1)
+End Function
+
+Public Function BI_RegularMod(ByVal x As String, ByVal d As String) As String
+    Dim ax As String, r As String
+    x = BI_Normalize(x)
+    d = BI_Abs(BI_Normalize(d))
+    If d = "0" Then Err.Raise 9002, "BI_RegularMod", "E_MOD_ZERO"
+    ax = BI_Abs(x)
+    r = BI_ModPositive(ax, d)
+    If BI_IsNegative(x) And r <> "0" Then r = BI_Sub(d, r)
+    BI_RegularMod = r
+End Function
+
+Public Function BI_Save(ByVal x As String) As String
+    BI_Save = BI_Add(BI_RegularMod(BI_Sub(x, "1"), BI_M), "1")
+End Function
+
+Public Function BI_Pow(ByVal baseValue As String, ByVal exponent As Long) As String
+    Dim r As String, b As String, e As Long
+    If exponent < 0 Then Err.Raise 9003, "BI_Pow", "E_NEGATIVE_POWER"
+    r = "1"
+    b = BI_Normalize(baseValue)
+    e = exponent
+    Do While e > 0
+        If (e Mod 2) = 1 Then r = BI_Mul(r, b)
+        e = e \ 2
+        If e > 0 Then b = BI_Mul(b, b)
+    Loop
+    BI_Pow = r
+End Function
+
+Public Function BI_ModSmall(ByVal a As String, ByVal d As Long) As Long
+    If d <= 0 Then Err.Raise 9004, "BI_ModSmall", "E_MOD_SMALL"
+    BI_ModSmall = CLng(BI_RegularMod(a, CStr(d)))
+End Function
+
+Public Function BI_ToLong(ByVal a As String) As Long
+    a = BI_Normalize(a)
+    If BI_Cmp(a, "2147483647") > 0 Or BI_Cmp(a, "-2147483648") < 0 Then Err.Raise 9006, "BI_ToLong", "E_LONG_RANGE"
+    BI_ToLong = CLng(a)
+End Function
+
+Public Function BI_FallingFactorial(ByVal n As Long, ByVal k As Long) As String
+    Dim r As String, j As Long
+    If k < 0 Or k > n Then
+        BI_FallingFactorial = "0"
+        Exit Function
+    End If
+    r = "1"
+    For j = 0 To k - 1
+        r = BI_MulSmall(r, n - j)
+    Next j
+    BI_FallingFactorial = r
+End Function
+
+Public Function BI_CeilDivPositiveLong(ByVal a As Long, ByVal b As Long) As Long
+    Dim q As Long
+    If a < 0 Or b <= 0 Then Err.Raise 9005, "BI_CeilDivPositiveLong", "E_CEIL_DIV"
+    q = a \ b
+    If (a Mod b) <> 0 Then q = q + 1
+    BI_CeilDivPositiveLong = q
+End Function
+]]></script:module>

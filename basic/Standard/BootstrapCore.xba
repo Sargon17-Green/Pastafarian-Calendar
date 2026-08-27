@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="BootstrapCore" script:language="StarBasic"><![CDATA[
+Option Explicit
+
+Public Const CTX_CALCULATION_DAY As Long = 0
+Public Const CTX_TARGET_DAY As Long = 1
+Public Const CTX_PHASE As Long = 2
+Public Const CTX_SUBPHASE As Long = 3
+Public Const CTX_MODE As Long = 4
+Public Const CTX_STATUS As Long = 5
+Public Const CTX_RETRY_BUDGET As Long = 6
+Public Const CTX_RECOVERY_DEPTH As Long = 7
+Public Const CTX_CURRENT_HANDLER As Long = 8
+Public Const CTX_PREVIOUS_HANDLER As Long = 9
+Public Const CTX_BRANCH_TRACE As Long = 10
+Public Const CTX_METRIC_COUNT As Long = 11
+Public Const CTX_LOG_COUNT As Long = 12
+Public Const CTX_DIAGNOSTIC_COUNT As Long = 13
+Public Const CTX_LAST_ERROR As Long = 14
+Public Const CTX_VALIDATION_FAILURES As Long = 15
+Public Const CTX_SEMANTIC_OWNER As Long = 16
+Public Const CTX_SIZE As Long = 17
+
+Public Function BootstrapNewContext(ByVal calculationDay As String, ByVal targetDay As String) As Variant
+    Dim ctx(0 To CTX_SIZE - 1) As Variant
+    calculationDay = BI_Normalize(calculationDay)
+    targetDay = BI_Normalize(targetDay)
+    ctx(CTX_CALCULATION_DAY) = calculationDay
+    ctx(CTX_TARGET_DAY) = targetDay
+    ctx(CTX_PHASE) = "BOOTSTRAP_ENTRY"
+    ctx(CTX_SUBPHASE) = 0
+    ctx(CTX_MODE) = "NEUTRAL_BASE"
+    ctx(CTX_STATUS) = "NEW"
+    ctx(CTX_RETRY_BUDGET) = 0
+    ctx(CTX_RECOVERY_DEPTH) = 0
+    ctx(CTX_CURRENT_HANDLER) = "NONE"
+    ctx(CTX_PREVIOUS_HANDLER) = "NONE"
+    ctx(CTX_BRANCH_TRACE) = "BOOTSTRAP_ENTRY"
+    ctx(CTX_METRIC_COUNT) = "0"
+    ctx(CTX_LOG_COUNT) = "0"
+    ctx(CTX_DIAGNOSTIC_COUNT) = "0"
+    ctx(CTX_LAST_ERROR) = "NONE"
+    ctx(CTX_VALIDATION_FAILURES) = "0"
+    ' ਇਹ token ਦੱਸਦਾ ਹੈ ਕਿ semantic state ਇੱਕੋ invocation ਦੀ ਮਲਕੀਅਤ ਹੈ; ਕੋਈ ਸਾਂਝਾ mutable semantic state ਨਹੀਂ ਹੈ।
+    ctx(CTX_SEMANTIC_OWNER) = "INVOCATION_LOCAL"
+    BootstrapNewContext = ctx
+End Function
+
+Public Sub BootstrapMetricBump(ByRef ctx As Variant)
+    ' ਇਹ ਸਿਰਫ਼ observability state ਹੈ ਅਤੇ normative ਫੈਸਲੇ ਵਿੱਚ ਵਾਪਸ ਨਹੀਂ ਪੜ੍ਹਿਆ ਜਾਂਦਾ।
+    ctx(CTX_METRIC_COUNT) = BI_AddSmall(CStr(ctx(CTX_METRIC_COUNT)), 1)
+End Sub
+
+Public Sub BootstrapLogBump(ByRef ctx As Variant)
+    ' ਇਹ ਗਿਣਤੀ ਸਿਰਫ਼ ਨਿਰੀਖਣ ਲਈ ਹੈ; ਇਸ ਨਾਲ ਕੋਈ semantic branch ਨਹੀਂ ਬਦਲਦੀ।
+    ctx(CTX_LOG_COUNT) = BI_AddSmall(CStr(ctx(CTX_LOG_COUNT)), 1)
+End Sub
+
+Public Function BootstrapValidateContext(ByRef ctx As Variant) As Boolean
+    Dim ok As Boolean
+    ok = True
+    If CStr(ctx(CTX_SEMANTIC_OWNER)) <> "INVOCATION_LOCAL" Then ok = False
+    If CStr(ctx(CTX_MODE)) <> "NEUTRAL_BASE" Then ok = False
+    If CLng(ctx(CTX_RECOVERY_DEPTH)) <> 0 Then ok = False
+    If Not ok Then
+        ctx(CTX_VALIDATION_FAILURES) = BI_AddSmall(CStr(ctx(CTX_VALIDATION_FAILURES)), 1)
+        ctx(CTX_LAST_ERROR) = "E_BOOTSTRAP_CONTEXT"
+    End If
+    BootstrapValidateContext = ok
+End Function
+
+Public Sub BootstrapDispatch(ByRef ctx As Variant, ByVal phaseCode As String)
+    ctx(CTX_PREVIOUS_HANDLER) = ctx(CTX_CURRENT_HANDLER)
+    ctx(CTX_CURRENT_HANDLER) = "BasePhaseHandler"
+    ctx(CTX_PHASE) = phaseCode
+    ctx(CTX_BRANCH_TRACE) = CStr(ctx(CTX_BRANCH_TRACE)) & ">" & phaseCode
+    BootstrapMetricBump ctx
+    BootstrapLogBump ctx
+End Sub
+
+Public Function BootstrapWrapError(ByVal code As String, ByVal phaseCode As String) As String
+    ' ਮਨੁੱਖੀ fallback ਸੁਨੇਹੇ ਦੀ ਥਾਂ machine-readable code ਬਣਦਾ ਹੈ।
+    BootstrapWrapError = code & "@" & phaseCode
+End Function
+
+Public Function BootstrapNeutralRun(ByVal calculationDay As String, ByVal targetDay As String) As String
+    Dim ctx As Variant
+    ctx = BootstrapNewContext(calculationDay, targetDay)
+    BootstrapDispatch ctx, "BOOTSTRAP_VALIDATE"
+    If Not BootstrapValidateContext(ctx) Then
+        BootstrapNeutralRun = BootstrapWrapError("E_BOOTSTRAP_VALIDATE", CStr(ctx(CTX_PHASE)))
+        Exit Function
+    End If
+    BootstrapDispatch ctx, "BOOTSTRAP_READY"
+    ctx(CTX_STATUS) = "READY"
+    BootstrapNeutralRun = "BOOTSTRAP_OK"
+End Function
+]]></script:module>

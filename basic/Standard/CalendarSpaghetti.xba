@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="CalendarSpaghetti" script:language="StarBasic"><![CDATA[
+Option Explicit
+
+Public Function CalendarSpaghettiStage() As Long
+    CalendarSpaghettiStage = 1
+End Function
+
+Public Function CalendarSpaghettiSkeletonReady() As Boolean
+    Dim ctx As Variant
+    ctx = BootstrapNewContext(ORACLE_FOUNDATION_DAY_TEXT, ORACLE_FOUNDATION_DAY_TEXT)
+    BootstrapDispatch ctx, "PRODUCTION_SKELETON"
+    CalendarSpaghettiSkeletonReady = BootstrapValidateContext(ctx)
+End Function
+
+Public Function calendarDateSpaghetti(ByVal calculationDay As String, ByVal targetDay As String) As Variant
+    Dim ctx As Variant
+    ctx = BootstrapNewContext(calculationDay, targetDay)
+    BootstrapDispatch ctx, "PRODUCTION_SKELETON"
+    If Not BootstrapValidateContext(ctx) Then Err.Raise 9301, "calendarDateSpaghetti", "E_BOOTSTRAP_CONTEXT"
+    ' Stage 1 ਵਿੱਚ production ਦਾ ਸਿਰਫ਼ ਨਿਰਪੱਖ ਢਾਂਚਾ ਮੌਜੂਦ ਹੈ; ਕੋਈ legacy defect ਜਾਂ ਭਵਿੱਖਲਾ patch ਪਹਿਲਾਂ ਨਹੀਂ ਜੋੜਿਆ ਜਾਂਦਾ।
+    Err.Raise 9302, "calendarDateSpaghetti", "E_STAGE_01_ONLY"
+End Function
+]]></script:module>

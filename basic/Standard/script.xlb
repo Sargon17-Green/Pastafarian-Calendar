@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE library:library PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "library.dtd">
+<library:library xmlns:library="http://openoffice.org/2000/library" library:name="Standard" library:readonly="false" library:passwordprotected="false">
+ <library:element library:name="BigInt"/>
+ <library:element library:name="Fixtures"/>
+ <library:element library:name="Catalog"/>
+ <library:element library:name="BootstrapCore"/>
+ <library:element library:name="CalendarSpaghetti"/>
+ <library:element library:name="Oracle"/>
+ <library:element library:name="Tests"/>
+</library:library>

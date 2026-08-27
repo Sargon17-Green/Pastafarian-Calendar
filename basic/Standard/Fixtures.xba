@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="Fixtures" script:language="StarBasic"><![CDATA[
+Option Explicit
+
+Public Const FIXTURE_DAY_FOUNDATION As String = "1"
+Public Const FIXTURE_DAY_FOUNDATION_MINUS_ONE As String = "2"
+Public Const FIXTURE_DAY_FOUNDATION_PLUS_ONE As String = "3"
+Public Const FIXTURE_SAVE_NEGATIVE_ONE As String = "170141183460469231731687303715884105726"
+Public Const FIXTURE_TWO_POWER_127 As String = "170141183460469231731687303715884105728"
+Public Const FIXTURE_HUGE_DAY As String = "999999999999999999999999999999999999999"
+Public Const FIXTURE_HUGE_DAY_COUNT As String = "2000000000000000000000000000000030111341"
+Public Const FIXTURE_BEYOND_LONG_OFFSET As String = "2147483648"
+Public Const FIXTURE_BEYOND_LONG_ANSWER As String = "2147483649"
+
+Public Function FixtureCatalogReady() As Boolean
+    ' ਇਹ fixture ਸਮੂਹ ਸਿਰਫ਼ ਇਸੇ BASIC ਲਾਈਨ ਦੇ Appendix A ਤੋਂ ਮੁੜ ਕੱਢੇ expected ਮੁੱਲ ਰੱਖਦਾ ਹੈ।
+    FixtureCatalogReady = True
+End Function
+]]></script:module>

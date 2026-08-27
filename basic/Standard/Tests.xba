@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="Tests" script:language="StarBasic"><![CDATA[
+Option Explicit
+
+Private testFile As Integer
+Private testFailures As Long
+
+Private Sub CheckString(ByVal code As String, ByVal actualValue As String, ByVal expectedValue As String)
+    If actualValue = expectedValue Then
+        Print #testFile, code & "=PASS"
+    Else
+        Print #testFile, code & "=FAIL"
+        Print #testFile, code & "_ACTUAL=" & actualValue
+        Print #testFile, code & "_EXPECTED=" & expectedValue
+        testFailures = testFailures + 1
+    End If
+End Sub
+
+Private Sub CheckLong(ByVal code As String, ByVal actualValue As Long, ByVal expectedValue As Long)
+    CheckString code, CStr(actualValue), CStr(expectedValue)
+End Sub
+
+Private Sub CheckBoolean(ByVal code As String, ByVal actualValue As Boolean)
+    If actualValue Then
+        Print #testFile, code & "=PASS"
+    Else
+        Print #testFile, code & "=FAIL"
+        testFailures = testFailures + 1
+    End If
+End Sub
+
+Private Function CatalogCutletsUnique() As Boolean
+    Dim i As Long, j As Long
+    For i = 1 To CatalogCutletCount()
+        If CatalogCutletName(i) = "" Then CatalogCutletsUnique = False: Exit Function
+        For j = i + 1 To CatalogCutletCount()
+            If CatalogCutletName(i) = CatalogCutletName(j) Then CatalogCutletsUnique = False: Exit Function
+        Next j
+    Next i
+    CatalogCutletsUnique = True
+End Function
+
+Private Function CatalogMonthsUnique() As Boolean
+    Dim i As Long, j As Long
+    For i = 1 To CatalogMonthCount()
+        If CatalogMonthName(i) = "" Then CatalogMonthsUnique = False: Exit Function
+        For j = i + 1 To CatalogMonthCount()
+            If CatalogMonthName(i) = CatalogMonthName(j) Then CatalogMonthsUnique = False: Exit Function
+        Next j
+    Next i
+    CatalogMonthsUnique = True
+End Function
+
+Sub Main
+    Dim perm As Variant, comp As Variant, part As Variant, names As Variant, weave As Variant
+    Dim lengths(1 To 2) As Long
+    Dim ctxA As Variant, ctxB As Variant
+    Dim answerStreamHuge(0 To 1) As Variant
+    Dim i As Long
+    On Error GoTo Fatal
+
+    testFailures = 0
+    testFile = FreeFile
+    Open "/tmp/pastafari_basic_stage1_test_results.txt" For Output As #testFile
+
+    CheckString "BIGINT_NORMALIZE", BI_Normalize("-00000123"), "-123"
+    CheckString "BIGINT_ADD", BI_Add("999999999999999999999999", "1"), "1000000000000000000000000"
+    CheckString "BIGINT_SUB", BI_Sub("1000000000000000000000000", "1"), "999999999999999999999999"
+    CheckString "BIGINT_MUL", BI_Mul("12345678901234567890", "9876543210"), "121932631124828532111263526900"
+    CheckString "BIGINT_DIV", BI_DivPositive("1000", "7"), "142"
+    CheckString "BIGINT_MOD", BI_ModPositive("1000", "7"), "6"
+    CheckString "BIGINT_NEGATIVE_MOD", BI_RegularMod("-1", "10"), "9"
+    CheckString "BIGINT_POWER_2_127", BI_Pow("2", 127), FIXTURE_TWO_POWER_127
+    CheckString "SAVE_ZERO", BI_Save("0"), BI_M
+    CheckString "SAVE_M", BI_Save(BI_M), BI_M
+    CheckString "SAVE_M_PLUS_1", BI_Save(BI_Add(BI_M, "1")), "1"
+    CheckString "SAVE_NEGATIVE_1", BI_Save("-1"), FIXTURE_SAVE_NEGATIVE_ONE
+    answerStreamHuge(0) = "1": answerStreamHuge(1) = 1
+    CheckString "ANSWER_OFFSET_BEYOND_LONG", OracleAnswerAt(answerStreamHuge, FIXTURE_BEYOND_LONG_OFFSET), FIXTURE_BEYOND_LONG_ANSWER
+
+    CheckString "DAY_FOUNDATION", OracleDayCount(ORACLE_FOUNDATION_DAY_TEXT), FIXTURE_DAY_FOUNDATION
+    CheckString "DAY_FOUNDATION_MINUS_1", OracleDayCount(BI_AddSmall(ORACLE_FOUNDATION_DAY_TEXT, -1)), FIXTURE_DAY_FOUNDATION_MINUS_ONE
+    CheckString "DAY_FOUNDATION_PLUS_1", OracleDayCount(BI_AddSmall(ORACLE_FOUNDATION_DAY_TEXT, 1)), FIXTURE_DAY_FOUNDATION_PLUS_ONE
+    CheckString "DAY_ARBITRARY_PRECISION", OracleDayCount(FIXTURE_HUGE_DAY), FIXTURE_HUGE_DAY_COUNT
+    CheckString "GATE_INDEX_FOUNDATION_TEXT", OracleGateIndexAtOrBefore(ORACLE_FOUNDATION_DAY_TEXT), "0"
+    CheckBoolean "ORACLE_REFERENCE_READY", OracleReferenceReady()
+
+    perm = OraclePermutationUnrank(1)
+    For i = 1 To 6: CheckLong "PERM_1_" & CStr(i), perm(i), i: Next i
+    perm = OraclePermutationUnrank(720)
+    For i = 1 To 6: CheckLong "PERM_720_" & CStr(i), perm(i), 7 - i: Next i
+
+    CheckString "FALLING_17_6", BI_FallingFactorial(17, 6), "8910720"
+    CheckString "BOUNDED_COUNT", OracleBoundedCompositionCount(9, 2, 4, 5), "2"
+    comp = OracleUnrankBoundedComposition(9, 2, 4, 5, "2")
+    CheckLong "BOUNDED_UNRANK_1", comp(1), 5
+    CheckLong "BOUNDED_UNRANK_2", comp(2), 4
+
+    CheckString "CUTLET_FILTERED_COUNT", OracleCutletPartitionCount(6, 3, 2, True), "4"
+    part = OracleUnrankCutletPartition(6, 3, 2, True, "1")
+    CheckLong "CUTLET_UNRANK_1_A", part(1), 1
+    CheckLong "CUTLET_UNRANK_1_B", part(2), 1
+    CheckLong "CUTLET_UNRANK_1_C", part(3), 4
+    part = OracleUnrankCutletPartition(6, 3, 2, True, "4")
+    CheckLong "CUTLET_UNRANK_4_A", part(1), 2
+    CheckLong "CUTLET_UNRANK_4_B", part(2), 3
+    CheckLong "CUTLET_UNRANK_4_C", part(3), 1
+
+    names = OracleUnrankDistinctIndices(5, 3, "1")
+    CheckLong "DISTINCT_FIRST_A", names(1), 1
+    CheckLong "DISTINCT_FIRST_B", names(2), 2
+    CheckLong "DISTINCT_FIRST_C", names(3), 3
+    names = OracleUnrankDistinctIndices(5, 3, "60")
+    CheckLong "DISTINCT_LAST_A", names(1), 5
+    CheckLong "DISTINCT_LAST_B", names(2), 4
+    CheckLong "DISTINCT_LAST_C", names(3), 3
+
+    lengths(1) = 2: lengths(2) = 2
+    CheckString "WEAVE_COUNT_2_2", OracleWeavingCount(lengths), "2"
+    weave = OracleUnrankWeaving(lengths, "1")
+    CheckLong "WEAVE_R1_1", weave(1), 1
+    CheckLong "WEAVE_R1_2", weave(2), 1
+    CheckLong "WEAVE_R1_3", weave(3), 2
+    CheckLong "WEAVE_R1_4", weave(4), 2
+    weave = OracleUnrankWeaving(lengths, "2")
+    CheckLong "WEAVE_R2_1", weave(1), 1
+    CheckLong "WEAVE_R2_2", weave(2), 2
+    CheckLong "WEAVE_R2_3", weave(3), 1
+    CheckLong "WEAVE_R2_4", weave(4), 2
+
+    CheckBoolean "CATALOG_FROZEN", CatalogFrozen()
+    CheckBoolean "FIXTURE_CATALOG_READY", FixtureCatalogReady()
+    CheckLong "CATALOG_CUTLET_COUNT", CatalogCutletCount(), 17
+    CheckLong "CATALOG_MONTH_COUNT", CatalogMonthCount(), 47
+    CheckBoolean "CATALOG_CUTLET_UNIQUE", CatalogCutletsUnique()
+    CheckBoolean "CATALOG_MONTH_UNIQUE", CatalogMonthsUnique()
+    For i = 1 To 17: CheckLong "CUTLET_INDEX_" & CStr(i), CatalogCutletCanonicalIndex(i), i: Next i
+    For i = 1 To 47: CheckLong "MONTH_INDEX_" & CStr(i), CatalogMonthCanonicalIndex(i), i: Next i
+    CheckString "CATALOG_WHEAT", CatalogCutletName(12), "ਕਣਕ"
+    CheckString "CATALOG_SALT", CatalogMonthName(44), "ਨਮਕ"
+
+    ctxA = BootstrapNewContext("000123", "-000456")
+    ctxB = BootstrapNewContext("123", "-456")
+    CheckString "CTX_NORMALIZED_CALC", CStr(ctxA(CTX_CALCULATION_DAY)), "123"
+    CheckString "CTX_NORMALIZED_TARGET", CStr(ctxA(CTX_TARGET_DAY)), "-456"
+    CheckString "CTX_OWNER_A", CStr(ctxA(CTX_SEMANTIC_OWNER)), "INVOCATION_LOCAL"
+    CheckString "CTX_OWNER_B", CStr(ctxB(CTX_SEMANTIC_OWNER)), "INVOCATION_LOCAL"
+    BootstrapMetricBump ctxA
+    BootstrapMetricBump ctxA
+    BootstrapLogBump ctxA
+    CheckLong "CTX_METRICS_A", CLng(ctxA(CTX_METRIC_COUNT)), 2
+    CheckLong "CTX_METRICS_B", CLng(ctxB(CTX_METRIC_COUNT)), 0
+    CheckBoolean "CTX_VALIDATE_A", BootstrapValidateContext(ctxA)
+    CheckBoolean "CTX_VALIDATE_B", BootstrapValidateContext(ctxB)
+    CheckString "BOOTSTRAP_NEUTRAL", BootstrapNeutralRun(ORACLE_FOUNDATION_DAY_TEXT, ORACLE_FOUNDATION_DAY_TEXT), "BOOTSTRAP_OK"
+    CheckBoolean "PRODUCTION_SKELETON_READY", CalendarSpaghettiSkeletonReady()
+    CheckLong "PRODUCTION_STAGE", CalendarSpaghettiStage(), 1
+
+    If testFailures = 0 Then
+        Print #testFile, "OVERALL=PASS"
+    Else
+        Print #testFile, "OVERALL=FAIL"
+        Print #testFile, "FAILURES=" & CStr(testFailures)
+    End If
+    Close #testFile
+    Exit Sub
+
+Fatal:
+    On Error Resume Next
+    Print #testFile, "OVERALL=ERROR"
+    Close #testFile
+End Sub
+]]></script:module>
