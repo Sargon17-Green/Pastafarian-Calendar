@@ -31,11 +31,11 @@ mut:
 
 pub struct BaseValidationManager {}
 
-pub fn (BaseValidationManager) require_discrete_integer(_ BigInt) ! {
+pub fn (_ BaseValidationManager) require_discrete_integer(_ BigInt) ! {
 	return
 }
 
-pub fn (BaseValidationManager) require_catalog_shape(catalog []CanonicalName) ! {
+pub fn (_ BaseValidationManager) require_catalog_shape(catalog []CanonicalName) ! {
 	mut cutlets := 0
 	mut months := 0
 	for item in catalog {
@@ -51,13 +51,13 @@ pub fn (BaseValidationManager) require_catalog_shape(catalog []CanonicalName) ! 
 
 pub struct BaseErrorWrapper {}
 
-pub fn (BaseErrorWrapper) wrap(message string, phase string) string {
+pub fn (_ BaseErrorWrapper) wrap(message string, phase string) string {
 	return '${phase}: ${message}'
 }
 
 pub struct BaseMetricsManager {}
 
-pub fn (BaseMetricsManager) bump(mut context MonsterContext, key string) {
+pub fn (_ BaseMetricsManager) bump(mut context MonsterContext, key string) {
 	context.metrics[key] = context.metrics[key] + 1
 }
 
@@ -71,27 +71,27 @@ pub:
 pub fn new_base_dispatcher() BaseDispatcher {
 	return BaseDispatcher{
 		validation: BaseValidationManager{}
-		errors: BaseErrorWrapper{}
-		metrics: BaseMetricsManager{}
+		errors:     BaseErrorWrapper{}
+		metrics:    BaseMetricsManager{}
 	}
 }
 
 pub fn new_monster_context(calculation_day BigInt, target_day BigInt) MonsterContext {
 	return MonsterContext{
-		calculation_day: calculation_day
-		target_day: target_day
-		phase: 'BOOTSTRAP'
-		sub_phase: 0
-		mode: 'BASE_ONLY'
-		status: 'NEW'
-		current_handler: 'BaseDispatcher'
-		previous_handler: ''
-		branch_trace: []string{}
-		metrics: map[string]u64{}
-		logs: []string{}
-		diagnostics: []string{}
-		warnings: []string{}
-		last_error: ''
+		calculation_day:     calculation_day
+		target_day:          target_day
+		phase:               'BOOTSTRAP'
+		sub_phase:           0
+		mode:                'BASE_ONLY'
+		status:              'NEW'
+		current_handler:     'BaseDispatcher'
+		previous_handler:    ''
+		branch_trace:        []string{}
+		metrics:             map[string]u64{}
+		logs:                []string{}
+		diagnostics:         []string{}
+		warnings:            []string{}
+		last_error:          ''
 		validation_failures: []string{}
 	}
 }

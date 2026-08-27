@@ -17,7 +17,7 @@ struct OracleStone {
 }
 
 struct OracleSauceResult {
-	bowls          []BigInt
+	bowls           []BigInt
 	order_at_drop46 []int
 }
 
@@ -71,7 +71,7 @@ fn new_oracle_engine() OracleEngine {
 	gates['0'] = foundation
 	return OracleEngine{
 		gate_cache: OracleGateCache{
-			gates: gates
+			gates:     gates
 			min_index: big_zero()
 			max_index: big_zero()
 		}
@@ -123,14 +123,19 @@ fn oracle_work_counts(calculation_day BigInt, target_day BigInt) OracleWorkCount
 	target := oracle_day_count(target_day)
 	distance := big_add(big_abs(big_sub(target_day, calculation_day)), big_one())
 	connection := big_add(action, target)
-	direction := if big_cmp(target_day, calculation_day) < 0 { 1 } else if big_cmp(target_day,
-		calculation_day) == 0 { 2 } else { 3 }
+	direction := if big_cmp(target_day, calculation_day) < 0 {
+		1
+	} else if big_cmp(target_day, calculation_day) == 0 {
+		2
+	} else {
+		3
+	}
 	return OracleWorkCounts{
-		action: action
-		target: target
-		distance: distance
+		action:     action
+		target:     target
+		distance:   distance
 		connection: connection
-		direction: direction
+		direction:  direction
 	}
 }
 
@@ -145,7 +150,8 @@ fn oracle_build_stones() []OracleStone {
 	}
 	for i in 2 .. 47 {
 		old := stones[i - 2]
-		next_w := oracle_save(big_add(big_add(big_square(old.w), big_mul_small(old.b, 3)), big_from_int(i)))
+		next_w := oracle_save(big_add(big_add(big_square(old.w), big_mul_small(old.b, 3)),
+			big_from_int(i)))
 		next_b := oracle_save(big_add(big_add(big_square(old.b), big_mul_small(old.s, 5)), old.w))
 		next_s := oracle_save(big_add(big_add(big_square(old.s), big_mul_small(old.m, 7)), old.b))
 		next_m := oracle_save(big_add(big_add(big_square(old.m), big_mul_small(old.r, 11)), old.s))
@@ -353,13 +359,13 @@ fn oracle_apply_visible_drops_to_bowls(initial []BigInt, visible []BigInt, stone
 			mixed = big_add(mixed, big_from_int(i * position))
 			next_bowls[id - 1] = oracle_save(mixed)
 		}
-		bowls = next_bowls
+		bowls = next_bowls.clone()
 		if i == 46 {
 			order_at_drop46 = order.clone()
 		}
 	}
 	return OracleSauceResult{
-		bowls: bowls
+		bowls:           bowls
 		order_at_drop46: order_at_drop46
 	}
 }
@@ -390,7 +396,7 @@ fn oracle_post_stir12(initial []BigInt) []BigInt {
 			mixed = big_add(mixed, big_mul_small(big_mul(old[prev_id - 1], old[next_id - 1]), 7))
 			next_bowls[id - 1] = oracle_save(mixed)
 		}
-		bowls = next_bowls
+		bowls = next_bowls.clone()
 	}
 	return bowls
 }
@@ -404,7 +410,7 @@ fn oracle_sauce(calculation_day BigInt, target_day BigInt) OracleSauceResult {
 	after_drops := oracle_apply_visible_drops_to_bowls(bowls, visible, stones)
 	final_bowls := oracle_post_stir12(after_drops.bowls)
 	return OracleSauceResult{
-		bowls: final_bowls
+		bowls:           final_bowls
 		order_at_drop46: after_drops.order_at_drop46
 	}
 }
@@ -438,13 +444,14 @@ fn oracle_ask_bowl(result OracleSauceResult, queried_id int, seal int) OracleAns
 	step := if big_mod_small_nonnegative(direction_number, 2) == 1 { 1 } else { -1 }
 	return OracleAnswerStream{
 		first: first
-		step: step
+		step:  step
 	}
 }
 
 fn oracle_answer_at(stream OracleAnswerStream, k BigInt) BigInt {
 	offset := if stream.step > 0 { k } else { big_neg(k) }
-	return big_add(big_one(), big_regular_mod(big_add(big_sub(stream.first, big_one()), offset), oracle_m()))
+	return big_add(big_one(), big_regular_mod(big_add(big_sub(stream.first, big_one()), offset),
+		oracle_m()))
 }
 
 fn oracle_choose_rank_short(stream OracleAnswerStream, n BigInt) BigInt {
@@ -540,9 +547,9 @@ fn new_oracle_bounded_counter(total int, slots int, lo int, hi int) OracleBounde
 	return OracleBoundedCompositionCounter{
 		total: total
 		slots: slots
-		lo: lo
-		hi: hi
-		memo: map[string]BigInt{}
+		lo:    lo
+		hi:    hi
+		memo:  map[string]BigInt{}
 	}
 }
 
@@ -584,6 +591,7 @@ fn (mut c OracleBoundedCompositionCounter) unrank1(rank1 BigInt) []int {
 				break
 			}
 		}
+	}
 	return out
 }
 
@@ -597,10 +605,10 @@ mut:
 
 fn new_oracle_cutlet_partition_counter(g int, k int, required int) OracleCutletPartitionCounter {
 	return OracleCutletPartitionCounter{
-		g: g
-		k: k
+		g:        g
+		k:        k
 		required: required
-		memo: map[string]BigInt{}
+		memo:     map[string]BigInt{}
 	}
 }
 
@@ -674,11 +682,12 @@ fn (mut c OracleCutletPartitionCounter) unrank1(rank1 BigInt) []int {
 				break
 			}
 		}
+	}
 	return out
 }
 
 struct OracleWeaveState {
-	remaining   []int
+	remaining    []int
 	opened_up_to int
 	closed_up_to int
 }
@@ -692,7 +701,7 @@ mut:
 fn new_oracle_weave_counter(lengths []int) OracleWeaveCounter {
 	return OracleWeaveCounter{
 		lengths: lengths.clone()
-		memo: map[string]BigInt{}
+		memo:    map[string]BigInt{}
 	}
 }
 
@@ -736,7 +745,7 @@ fn (c OracleWeaveCounter) apply_move(state OracleWeaveState, j int) OracleWeaveS
 		closed = j
 	}
 	return OracleWeaveState{
-		remaining: remaining
+		remaining:    remaining
 		opened_up_to: opened
 		closed_up_to: closed
 	}
@@ -769,7 +778,7 @@ fn (mut c OracleWeaveCounter) count(state OracleWeaveState) BigInt {
 
 fn (mut c OracleWeaveCounter) initial_state() OracleWeaveState {
 	return OracleWeaveState{
-		remaining: c.lengths.clone()
+		remaining:    c.lengths.clone()
 		opened_up_to: 0
 		closed_up_to: 0
 	}
@@ -953,13 +962,13 @@ fn (mut e OracleEngine) year5000(calculation_day BigInt) OracleYear {
 			if big_cmp(length, big_from_int(5778)) > 0 {
 				break
 			}
-			if oracle_valid_year_pair(mut e, i, j)
-				&& big_cmp(open_day, calculation_day) < 0 && big_cmp(calculation_day, close_day) <= 0 {
+			if oracle_valid_year_pair(mut e, i, j) && big_cmp(open_day, calculation_day) < 0
+				&& big_cmp(calculation_day, close_day) <= 0 {
 				candidates << OracleYearCandidate{
-					open_index: i
+					open_index:  i
 					close_index: j
-					length: length
-					open_day: open_day
+					length:      length
+					open_day:    open_day
 				}
 			}
 			j = big_add(j, big_one())
@@ -976,11 +985,11 @@ fn (mut e OracleEngine) year5000(calculation_day BigInt) OracleYear {
 	index := (big_to_int(rank) or { panic(err.msg()) }) - 1
 	chosen := candidates[index]
 	return OracleYear{
-		number: big_from_int(5000)
-		open_gate_index: chosen.open_index
+		number:           big_from_int(5000)
+		open_gate_index:  chosen.open_index
 		close_gate_index: chosen.close_index
-		open_gate_day: e.gate_value(chosen.open_index)
-		close_gate_day: e.gate_value(chosen.close_index)
+		open_gate_day:    e.gate_value(chosen.open_index)
+		close_gate_day:   e.gate_value(chosen.close_index)
 	}
 }
 
@@ -999,10 +1008,10 @@ fn (mut e OracleEngine) next_year(calculation_day BigInt, known OracleYear) Orac
 		}
 		if oracle_valid_year_pair(mut e, open_index, close_index) {
 			candidates << OracleYearCandidate{
-				open_index: open_index
+				open_index:  open_index
 				close_index: close_index
-				length: length
-				open_day: open_day
+				length:      length
+				open_day:    open_day
 			}
 		}
 		close_index = big_add(close_index, big_one())
@@ -1017,18 +1026,19 @@ fn (mut e OracleEngine) next_year(calculation_day BigInt, known OracleYear) Orac
 	index := (big_to_int(rank) or { panic(err.msg()) }) - 1
 	chosen := candidates[index]
 	return OracleYear{
-		number: big_add(known.number, big_one())
-		open_gate_index: chosen.open_index
+		number:           big_add(known.number, big_one())
+		open_gate_index:  chosen.open_index
 		close_gate_index: chosen.close_index
-		open_gate_day: open_day
-		close_gate_day: e.gate_value(chosen.close_index)
+		open_gate_day:    open_day
+		close_gate_day:   e.gate_value(chosen.close_index)
 	}
 }
 
 fn (mut e OracleEngine) previous_year(calculation_day BigInt, known OracleYear) OracleYear {
 	close_index := known.open_gate_index
 	close_day := e.gate_value(close_index)
-	e.ensure_gates_cover(big_sub(close_day, big_from_int(5778)), e.gate_cache.gates[e.gate_cache.max_index.str()])
+	e.ensure_gates_cover(big_sub(close_day, big_from_int(5778)),
+		e.gate_cache.gates[e.gate_cache.max_index.str()])
 	mut candidates := []OracleYearCandidate{}
 	mut open_index := big_sub(close_index, big_one())
 	for {
@@ -1039,10 +1049,10 @@ fn (mut e OracleEngine) previous_year(calculation_day BigInt, known OracleYear) 
 		}
 		if oracle_valid_year_pair(mut e, open_index, close_index) {
 			candidates << OracleYearCandidate{
-				open_index: open_index
+				open_index:  open_index
 				close_index: close_index
-				length: length
-				open_day: open_day
+				length:      length
+				open_day:    open_day
 			}
 		}
 		open_index = big_sub(open_index, big_one())
@@ -1057,11 +1067,11 @@ fn (mut e OracleEngine) previous_year(calculation_day BigInt, known OracleYear) 
 	index := (big_to_int(rank) or { panic(err.msg()) }) - 1
 	chosen := candidates[index]
 	return OracleYear{
-		number: big_sub(known.number, big_one())
-		open_gate_index: chosen.open_index
+		number:           big_sub(known.number, big_one())
+		open_gate_index:  chosen.open_index
 		close_gate_index: chosen.close_index
-		open_gate_day: e.gate_value(chosen.open_index)
-		close_gate_day: close_day
+		open_gate_day:    e.gate_value(chosen.open_index)
+		close_gate_day:   close_day
 	}
 }
 
@@ -1073,7 +1083,8 @@ fn (mut e OracleEngine) find_target_year(calculation_day BigInt, target_day BigI
 	for big_cmp(target_day, year.open_gate_day) <= 0 {
 		year = e.previous_year(calculation_day, year)
 	}
-	if !(big_cmp(year.open_gate_day, target_day) < 0 && big_cmp(target_day, year.close_gate_day) <= 0) {
+	if !(big_cmp(year.open_gate_day, target_day) < 0
+		&& big_cmp(target_day, year.close_gate_day) <= 0) {
 		panic('የታለመው ቀን በተመረጠው ዓመት ውስጥ አይደለም')
 	}
 	return year
@@ -1123,11 +1134,11 @@ fn (mut e OracleEngine) materialize_cutlets(year OracleYear, partition []int, na
 		open_index := cursor
 		close_index := big_add(cursor, big_from_int(width))
 		cutlets << OracleCutlet{
-			name_index: names[i]
-			open_gate_index: open_index
+			name_index:       names[i]
+			open_gate_index:  open_index
 			close_gate_index: close_index
-			first_day: big_add(e.gate_value(open_index), big_one())
-			last_day: e.gate_value(close_index)
+			first_day:        big_add(e.gate_value(open_index), big_one())
+			last_day:         e.gate_value(close_index)
 		}
 		cursor = close_index
 	}
@@ -1185,14 +1196,14 @@ fn (mut e OracleEngine) build_year_structure(calculation_day BigInt, year Oracle
 	month_weaving := oracle_choose_month_weaving(result, month_lengths)
 	month_names := oracle_choose_month_names(result, month_count)
 	return OracleYearStructure{
-		cutlet_count: cutlet_count
+		cutlet_count:     cutlet_count
 		cutlet_partition: partition
-		cutlet_names: cutlet_names
-		cutlets: cutlets
-		month_count: month_count
-		month_lengths: month_lengths
-		month_weaving: month_weaving
-		month_names: month_names
+		cutlet_names:     cutlet_names
+		cutlets:          cutlets
+		month_count:      month_count
+		month_lengths:    month_lengths
+		month_weaving:    month_weaving
+		month_names:      month_names
 	}
 }
 
@@ -1222,11 +1233,13 @@ fn (mut e OracleEngine) calendar_date_normative(calculation_day BigInt, target_d
 		}
 	}
 	return CalendarResult{
-		year_number: year.number
-		cutlet_name: cutlet_name_by_index(cutlet.name_index) or { panic(err.msg()) }
+		year_number:   year.number
+		cutlet_name:   cutlet_name_by_index(cutlet.name_index) or { panic(err.msg()) }
 		day_in_cutlet: day_in_cutlet
-		month_name: month_name_by_index(structure.month_names[month_id - 1]) or { panic(err.msg()) }
-		day_in_month: big_from_int(day_in_month)
+		month_name:    month_name_by_index(structure.month_names[month_id - 1]) or {
+			panic(err.msg())
+		}
+		day_in_month:  big_from_int(day_in_month)
 	}
 }
 

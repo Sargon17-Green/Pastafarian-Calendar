@@ -94,16 +94,16 @@ pub fn source_language_catalog() []CanonicalName {
 	mut out := []CanonicalName{cap: cutlets.len + months.len}
 	for i, text in cutlets {
 		out << CanonicalName{
-			kind: .cutlet
+			kind:            .cutlet
 			canonical_index: i + 1
-			text: text
+			text:            text
 		}
 	}
 	for i, text in months {
 		out << CanonicalName{
-			kind: .month
+			kind:            .month
 			canonical_index: i + 1
-			text: text
+			text:            text
 		}
 	}
 	return out

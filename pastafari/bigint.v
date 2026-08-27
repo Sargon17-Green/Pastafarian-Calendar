@@ -14,7 +14,7 @@ pub fn big_zero() BigInt {
 
 pub fn big_one() BigInt {
 	return BigInt{
-		sign: 1
+		sign:  1
 		limbs: [u32(1)]
 	}
 }
@@ -53,7 +53,7 @@ fn big_from_u64_with_sign(value u64, sign int) BigInt {
 		n /= bigint_base
 	}
 	return BigInt{
-		sign: sign
+		sign:  sign
 		limbs: limbs
 	}
 }
@@ -68,7 +68,7 @@ fn big_normalized(sign int, limbs []u32) BigInt {
 	}
 	actual_sign := if sign < 0 { -1 } else { 1 }
 	return BigInt{
-		sign: actual_sign
+		sign:  actual_sign
 		limbs: limbs[..end].clone()
 	}
 }
@@ -82,7 +82,7 @@ pub fn big_abs(a BigInt) BigInt {
 		return big_zero()
 	}
 	return BigInt{
-		sign: 1
+		sign:  1
 		limbs: a.limbs.clone()
 	}
 }
@@ -92,7 +92,7 @@ pub fn big_neg(a BigInt) BigInt {
 		return big_zero()
 	}
 	return BigInt{
-		sign: -a.sign
+		sign:  -a.sign
 		limbs: a.limbs.clone()
 	}
 }
@@ -172,20 +172,20 @@ fn big_sub_abs(a BigInt, b BigInt) BigInt {
 pub fn big_add(a BigInt, b BigInt) BigInt {
 	if a.is_zero() {
 		return BigInt{
-			sign: b.sign
+			sign:  b.sign
 			limbs: b.limbs.clone()
 		}
 	}
 	if b.is_zero() {
 		return BigInt{
-			sign: a.sign
+			sign:  a.sign
 			limbs: a.limbs.clone()
 		}
 	}
 	if a.sign == b.sign {
 		sum := big_add_abs(a, b)
 		return BigInt{
-			sign: a.sign
+			sign:  a.sign
 			limbs: sum.limbs
 		}
 	}
@@ -196,13 +196,13 @@ pub fn big_add(a BigInt, b BigInt) BigInt {
 	if cmp > 0 {
 		diff := big_sub_abs(a, b)
 		return BigInt{
-			sign: a.sign
+			sign:  a.sign
 			limbs: diff.limbs
 		}
 	}
 	diff := big_sub_abs(b, a)
 	return BigInt{
-		sign: b.sign
+		sign:  b.sign
 		limbs: diff.limbs
 	}
 }
@@ -266,7 +266,7 @@ fn big_shift_base_add(a BigInt, limb u32) BigInt {
 			return big_zero()
 		}
 		return BigInt{
-			sign: 1
+			sign:  1
 			limbs: [limb]
 		}
 	}

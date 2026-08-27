@@ -1,0 +1,9 @@
+=== የV ስሪት ===
+V 0.5.2 7647ce1
+=== v fmt -verify ./pastafari ===
+exit=0
+=== v test ./pastafari ===
+---- Testing... ----------------------------------------------------------------
+--------------------------------------------------------------------------------
+Summary for all V _test.v files: 1 passed, 1 total. Elapsed time: 208 ms, on 1 job. Comptime: 171 ms. Runtime: 33 ms.
+exit=0
