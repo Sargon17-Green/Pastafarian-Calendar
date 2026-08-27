@@ -96,8 +96,18 @@ pub fn wrap1(position: Int, size: Int) -> Int {
 }
 
 pub fn at1(items: List(a), index: Int) -> a {
-  let assert Ok(value) = list.at(items, index - 1)
-  value
+  at1_loop(items, index)
+}
+
+fn at1_loop(items: List(a), index: Int) -> a {
+  case items {
+    [] -> panic as "Indekso ekster la listo"
+    [head, ..tail] ->
+      case index == 1 {
+        True -> head
+        False -> at1_loop(tail, index - 1)
+      }
+  }
 }
 
 pub fn replace_at1(items: List(a), index: Int, value: a) -> List(a) {
