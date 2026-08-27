@@ -1,0 +1,14 @@
+{
+  "name": "pastafari-calendar-typescript-marathi",
+  "version": "0.1.0-stage.1",
+  "private": true,
+  "type": "module",
+  "description": "मगिलत हाएतिमच्या नियमाधारित दिनदर्शिकेसाठी स्वतंत्र TypeScript आणि मराठी अंमलबजावणी मार्ग",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --experimental-strip-types test/run.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
