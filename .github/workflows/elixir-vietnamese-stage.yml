@@ -1,0 +1,20 @@
+name: Kiểm thử Elixir tiếng Việt
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lấy cây làm việc
+        uses: actions/checkout@v4
+      - name: Cài Erlang và Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27'
+          elixir-version: '1.18'
+      - name: Chạy kiểm thử giai đoạn 1
+        run: mix test
