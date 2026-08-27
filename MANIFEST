@@ -1,0 +1,13 @@
+README.md
+ARCHITECTURE_STAGE_01.md
+SOURCE_LANGUAGE_CATALOG.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+DEVELOPMENT_STAGE.md
+HANDOFF_STAGE_01.md
+MANIFEST
+sql/00_schema.sql
+sql/01_source_language_catalog.sql
+sql/02_monster_bootstrap.sql
+sql/test/10_normative_reference.sql
+sql/test/20_stage01_tests.sql
+artifacts/stage-01/TEST_RESULTS.md
