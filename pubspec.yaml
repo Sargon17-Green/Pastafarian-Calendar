@@ -1,0 +1,6 @@
+name: pastafari_calendar_dart_hebrew
+version: 0.1.0
+publish_to: none
+description: מימוש עצמאי של מגילת העיתים ב־Dart עם עברית כשפת המקור האנושית.
+environment:
+  sdk: '>=3.0.0 <4.0.0'
