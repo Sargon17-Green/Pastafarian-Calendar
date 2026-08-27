@@ -50,30 +50,42 @@ pub fn new_context(calculation_day: Int, target_day: Int) -> MonsterContext {
   )
 }
 
-pub fn validate_context(context: MonsterContext) -> Result(MonsterContext, BootstrapError) {
+pub fn validate_context(
+  context: MonsterContext,
+) -> Result(MonsterContext, BootstrapError) {
   case context.retry_budget < 0, context.recovery_depth < 0 {
     True, _ -> Error(InvalidRetryBudget)
     _, True -> Error(InvalidRecoveryDepth)
     False, False ->
-      Ok(MonsterContext(
-        ..context,
-        phase: BootstrapValidation,
-        status: Validated,
-        branch_trace: ["BOOTSTRAP_VALIDATE", ..context.branch_trace],
-      ))
+      Ok(
+        MonsterContext(
+          ..context,
+          phase: BootstrapValidation,
+          status: Validated,
+          branch_trace: ["BOOTSTRAP_VALIDATE", ..context.branch_trace],
+        ),
+      )
   }
 }
 
-pub fn dispatch_context(context: MonsterContext) -> Result(MonsterContext, BootstrapError) {
+pub fn dispatch_context(
+  context: MonsterContext,
+) -> Result(MonsterContext, BootstrapError) {
   case validate_context(context) {
     Error(error) -> Error(error)
     Ok(validated) ->
-      Ok(MonsterContext(
-        ..validated,
-        phase: BootstrapComplete,
-        sub_phase: 1,
-        status: Complete,
-        branch_trace: ["BOOTSTRAP_COMPLETE", "BOOTSTRAP_DISPATCH", ..validated.branch_trace],
-      ))
+      Ok(
+        MonsterContext(
+          ..validated,
+          phase: BootstrapComplete,
+          sub_phase: 1,
+          status: Complete,
+          branch_trace: [
+            "BOOTSTRAP_COMPLETE",
+            "BOOTSTRAP_DISPATCH",
+            ..validated.branch_trace
+          ],
+        ),
+      )
   }
 }

@@ -2,8 +2,11 @@
 // La normiga ordo dependas nur de canonicalIndex, neniam de la montrata teksto.
 
 pub const catalog_version = "1.0.0"
+
 pub const natural_language = "Esperanto"
+
 pub const cutlet_count = 17
+
 pub const month_count = 47
 
 pub fn cutlet_name(canonical_index: Int) -> String {
