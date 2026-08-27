@@ -82,19 +82,27 @@ fn negative_gate_gap(n: Int) -> Int {
 }
 
 pub fn ensure_gate_index(state: GateState, index: Int) -> GateState {
-  if index > state.max_index {
+  case index > state.max_index {
+    True -> {
     ensure_forward(state, state.max_index + 1, index)
-  } else if index < state.min_index {
+  }
+    False -> case index < state.min_index {
+    True -> {
     ensure_backward(state, state.min_index - 1, index)
-  } else {
+  }
+    False -> {
     state
+  }
+  }
   }
 }
 
 fn ensure_forward(state: GateState, next_index: Int, wanted: Int) -> GateState {
-  if next_index > wanted {
+  case next_index > wanted {
+    True -> {
     state
-  } else {
+  }
+    False -> {
     let previous = gate_value(state, next_index - 1)
     let value = previous + positive_gate_gap(next_index)
     let next_state = GateState(
@@ -104,12 +112,15 @@ fn ensure_forward(state: GateState, next_index: Int, wanted: Int) -> GateState {
     )
     ensure_forward(next_state, next_index + 1, wanted)
   }
+  }
 }
 
 fn ensure_backward(state: GateState, next_index: Int, wanted: Int) -> GateState {
-  if next_index < wanted {
+  case next_index < wanted {
+    True -> {
     state
-  } else {
+  }
+    False -> {
     let later = gate_value(state, next_index + 1)
     let value = later - negative_gate_gap(core.abs_int(next_index))
     let next_state = GateState(
@@ -119,17 +130,24 @@ fn ensure_backward(state: GateState, next_index: Int, wanted: Int) -> GateState 
     )
     ensure_backward(next_state, next_index - 1, wanted)
   }
+  }
 }
 
 pub fn ensure_gates_cover(state: GateState, low_day: Int, high_day: Int) -> GateState {
   let low_gate = gate_value(state, state.min_index)
   let high_gate = gate_value(state, state.max_index)
-  if low_gate > low_day {
+  case low_gate > low_day {
+    True -> {
     ensure_gates_cover(ensure_gate_index(state, state.min_index - 1), low_day, high_day)
-  } else if high_gate < high_day {
+  }
+    False -> case high_gate < high_day {
+    True -> {
     ensure_gates_cover(ensure_gate_index(state, state.max_index + 1), low_day, high_day)
-  } else {
+  }
+    False -> {
     state
+  }
+  }
   }
 }
 
@@ -139,31 +157,43 @@ pub fn gate_index_at_or_before(state: GateState, day: Int) -> #(Int, GateState) 
 }
 
 fn binary_gate_before(state: GateState, day: Int, low: Int, high: Int) -> Int {
-  if low >= high {
+  case low >= high {
+    True -> {
     low
-  } else {
+  }
+    False -> {
     let mid = low + core.floor_div(high - low + 1, 2)
-    if gate_value(state, mid) <= day {
+    case gate_value(state, mid) <= day {
+      True -> {
       binary_gate_before(state, day, mid, high)
-    } else {
+    }
+      False -> {
       binary_gate_before(state, day, low, mid - 1)
     }
+    }
+  }
   }
 }
 
 pub fn gate_index_at_or_after(state: GateState, day: Int) -> #(Int, GateState) {
   let #(before, covered) = gate_index_at_or_before(state, day)
-  if gate_value(covered, before) == day {
+  case gate_value(covered, before) == day {
+    True -> {
     #(before, covered)
-  } else {
+  }
+    False -> {
     let next = ensure_gate_index(covered, before + 1)
     #(before + 1, next)
+  }
   }
 }
 
 pub fn exact_gate_index(state: GateState, day: Int) -> #(Option(Int), GateState) {
   let #(before, covered) = gate_index_at_or_before(state, day)
-  if gate_value(covered, before) == day { #(Some(before), covered) } else { #(None, covered) }
+  case gate_value(covered, before) == day {
+    True -> { #(Some(before), covered) }
+    False -> { #(None, covered) }
+  }
 }
 
 fn valid_year_pair(state: GateState, open_index: Int, close_index: Int) -> Bool {
@@ -203,28 +233,37 @@ pub fn year_5000(calculation_day: Int, state: GateState) -> #(Year, GateState) {
 }
 
 fn collect_anchor_candidates(state: GateState, calculation_day: Int, open_index: Int, max_index: Int, acc: List(YearCandidate)) -> List(YearCandidate) {
-  if open_index >= max_index {
+  case open_index >= max_index {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let with_open = collect_anchor_closes(state, calculation_day, open_index, open_index + 1, max_index, acc)
     collect_anchor_candidates(state, calculation_day, open_index + 1, max_index, with_open)
+  }
   }
 }
 
 fn collect_anchor_closes(state: GateState, calculation_day: Int, open_index: Int, close_index: Int, max_index: Int, acc: List(YearCandidate)) -> List(YearCandidate) {
-  if close_index > max_index {
+  case close_index > max_index {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let length = gate_value(state, close_index) - gate_value(state, open_index)
     let accepted = valid_year_pair(state, open_index, close_index)
       && gate_value(state, open_index) < calculation_day
       && calculation_day <= gate_value(state, close_index)
-    let next_acc = if accepted {
+    let next_acc = case accepted {
+      True -> {
       [YearCandidate(open_index: open_index, close_index: close_index, length: length), ..acc]
-    } else {
+    }
+      False -> {
       acc
     }
+    }
     collect_anchor_closes(state, calculation_day, open_index, close_index + 1, max_index, next_acc)
+  }
   }
 }
 
@@ -243,10 +282,13 @@ fn insert_anchor(candidate: YearCandidate, sorted: List(YearCandidate), state: G
       let head_open = gate_value(state, head.open_index)
       let comes_first = candidate.length < head.length
         || (candidate.length == head.length && candidate_open < head_open)
-      if comes_first {
+      case comes_first {
+        True -> {
         [candidate, ..sorted]
-      } else {
+      }
+        False -> {
         [head, ..insert_anchor(candidate, tail, state)]
+      }
       }
     }
   }
@@ -276,15 +318,21 @@ pub fn next_year(calculation_day: Int, known: Year, state: GateState) -> #(Year,
 
 fn collect_next_candidates(state: GateState, open_index: Int, close_index: Int, acc: List(YearCandidate)) -> List(YearCandidate) {
   let length = gate_value(state, close_index) - gate_value(state, open_index)
-  if length > core.year_max_days {
+  case length > core.year_max_days {
+    True -> {
     acc
-  } else {
-    let next_acc = if valid_year_pair(state, open_index, close_index) {
+  }
+    False -> {
+    let next_acc = case valid_year_pair(state, open_index, close_index) {
+      True -> {
       [YearCandidate(open_index: open_index, close_index: close_index, length: length), ..acc]
-    } else {
+    }
+      False -> {
       acc
     }
+    }
     collect_next_candidates(state, open_index, close_index + 1, next_acc)
+  }
   }
 }
 
@@ -312,15 +360,21 @@ pub fn previous_year(calculation_day: Int, known: Year, state: GateState) -> #(Y
 
 fn collect_previous_candidates(state: GateState, close_index: Int, open_index: Int, acc: List(YearCandidate)) -> List(YearCandidate) {
   let length = gate_value(state, close_index) - gate_value(state, open_index)
-  if length > core.year_max_days {
+  case length > core.year_max_days {
+    True -> {
     acc
-  } else {
-    let next_acc = if valid_year_pair(state, open_index, close_index) {
+  }
+    False -> {
+    let next_acc = case valid_year_pair(state, open_index, close_index) {
+      True -> {
       [YearCandidate(open_index: open_index, close_index: close_index, length: length), ..acc]
-    } else {
+    }
+      False -> {
       acc
     }
+    }
     collect_previous_candidates(state, close_index, open_index - 1, next_acc)
+  }
   }
 }
 
@@ -335,10 +389,13 @@ fn insert_length_stable(candidate: YearCandidate, sorted: List(YearCandidate)) -
   case sorted {
     [] -> [candidate]
     [head, ..tail] ->
-      if candidate.length < head.length {
+      case candidate.length < head.length {
+        True -> {
         [candidate, ..sorted]
-      } else {
+      }
+        False -> {
         [head, ..insert_length_stable(candidate, tail)]
+      }
       }
   }
 }
@@ -349,14 +406,20 @@ pub fn find_target_year(calculation_day: Int, target_day: Int, state: GateState)
 }
 
 fn walk_year(calculation_day: Int, target_day: Int, year: Year, state: GateState) -> #(Year, GateState) {
-  if target_day > year.close_gate_day {
+  case target_day > year.close_gate_day {
+    True -> {
     let #(next, next_state) = next_year(calculation_day, year, state)
     walk_year(calculation_day, target_day, next, next_state)
-  } else if target_day <= year.open_gate_day {
+  }
+    False -> case target_day <= year.open_gate_day {
+    True -> {
     let #(previous, next_state) = previous_year(calculation_day, year, state)
     walk_year(calculation_day, target_day, previous, next_state)
-  } else {
+  }
+    False -> {
     #(year, state)
+  }
+  }
   }
 }
 
@@ -365,9 +428,11 @@ pub fn unrank_distinct_indices(master_count: Int, k: Int, rank1: Int) -> List(In
 }
 
 fn unrank_distinct_loop(remaining: List(Int), k: Int, rank: Int, position: Int, acc: List(Int)) -> List(Int) {
-  if position > k {
+  case position > k {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let suffix_length = k - position
     let block = core.falling_factorial(list.length(remaining) - 1, suffix_length)
     let #(chosen_position, next_rank) = choose_block_position(rank, block, 1)
@@ -380,13 +445,17 @@ fn unrank_distinct_loop(remaining: List(Int), k: Int, rank: Int, position: Int, 
       [chosen, ..acc],
     )
   }
+  }
 }
 
 fn choose_block_position(rank: Int, block: Int, position: Int) -> #(Int, Int) {
-  if rank > block {
+  case rank > block {
+    True -> {
     choose_block_position(rank - block, block, position + 1)
-  } else {
+  }
+    False -> {
     #(position, rank)
+  }
   }
 }
 
@@ -401,50 +470,77 @@ fn choose_cutlet_count(structure_sauce: core.SauceResult, year: Year) -> Int {
 type CutletMemoKey = #(Int, Int, Int, Bool)
 
 fn count_cutlet_partitions(rem: Int, slots: Int, cumulative: Int, hit: Bool, required: Option(Int), memo: Dict(CutletMemoKey, Int)) -> #(Int, Dict(CutletMemoKey, Int)) {
-  if slots == 0 {
-    let value = if rem != 0 { 0 } else {
+  case slots == 0 {
+    True -> {
+    let value = case rem != 0 {
+      True -> { 0 }
+      False -> {
       case required {
         None -> 1
-        Some(_) -> if hit { 1 } else { 0 }
+        Some(_) -> case hit {
+          True -> { 1 }
+          False -> { 0 }
+        }
       }
     }
+    }
     #(value, memo)
-  } else if rem < slots {
+  }
+    False -> case rem < slots {
+    True -> {
     #(0, memo)
-  } else {
+  }
+    False -> {
     let key = #(rem, slots, cumulative, hit)
     case dict.get(memo, key) {
       Ok(value) -> #(value, memo)
       Error(_) -> count_cutlet_choices(1, rem - (slots - 1), rem, slots, cumulative, hit, required, memo, 0, key)
     }
   }
+  }
+  }
 }
 
 fn count_cutlet_choices(x: Int, max_x: Int, rem: Int, slots: Int, cumulative: Int, hit: Bool, required: Option(Int), memo: Dict(CutletMemoKey, Int), total: Int, key: CutletMemoKey) -> #(Int, Dict(CutletMemoKey, Int)) {
-  if x > max_x {
+  case x > max_x {
+    True -> {
     #(total, dict.insert(memo, key, total))
-  } else {
+  }
+    False -> {
     let next_cumulative = cumulative + x
     let decision = case required {
       None -> #(True, hit)
       Some(boundary) ->
-        if hit {
+        case hit {
+          True -> {
           #(True, True)
-        } else if next_cumulative == boundary {
+        }
+          False -> case next_cumulative == boundary {
+          True -> {
           #(True, True)
-        } else if next_cumulative > boundary {
+        }
+          False -> case next_cumulative > boundary {
+          True -> {
           #(False, False)
-        } else {
+        }
+          False -> {
           #(True, False)
+        }
+        }
+        }
         }
     }
     let #(allowed, next_hit) = decision
-    if allowed {
+    case allowed {
+      True -> {
       let #(block, next_memo) = count_cutlet_partitions(rem - x, slots - 1, next_cumulative, next_hit, required, memo)
       count_cutlet_choices(x + 1, max_x, rem, slots, cumulative, hit, required, next_memo, total + block, key)
-    } else {
+    }
+      False -> {
       count_cutlet_choices(x + 1, max_x, rem, slots, cumulative, hit, required, memo, total, key)
     }
+    }
+  }
   }
 }
 
@@ -453,42 +549,63 @@ fn unrank_cutlet_partition(gaps: Int, slots: Int, required: Option(Int), rank1: 
 }
 
 fn unrank_cutlet_loop(rem: Int, slots: Int, cumulative: Int, hit: Bool, required: Option(Int), rank: Int, memo: Dict(CutletMemoKey, Int), acc: List(Int)) -> List(Int) {
-  if slots == 0 {
+  case slots == 0 {
+    True -> {
     list.reverse(acc)
-  } else {
+  }
+    False -> {
     unrank_cutlet_choice(1, rem - (slots - 1), rem, slots, cumulative, hit, required, rank, memo, acc)
+  }
   }
 }
 
 fn unrank_cutlet_choice(x: Int, max_x: Int, rem: Int, slots: Int, cumulative: Int, hit: Bool, required: Option(Int), rank: Int, memo: Dict(CutletMemoKey, Int), acc: List(Int)) -> List(Int) {
-  if x > max_x {
+  case x > max_x {
+    True -> {
     panic as "Nevalida rango por kotleta dispartigo"
-  } else {
+  }
+    False -> {
     let next_cumulative = cumulative + x
     let decision = case required {
       None -> #(True, hit)
       Some(boundary) ->
-        if hit {
+        case hit {
+          True -> {
           #(True, True)
-        } else if next_cumulative == boundary {
+        }
+          False -> case next_cumulative == boundary {
+          True -> {
           #(True, True)
-        } else if next_cumulative > boundary {
+        }
+          False -> case next_cumulative > boundary {
+          True -> {
           #(False, False)
-        } else {
+        }
+          False -> {
           #(True, False)
+        }
+        }
+        }
         }
     }
     let #(allowed, next_hit) = decision
-    if allowed {
+    case allowed {
+      True -> {
       let #(block, next_memo) = count_cutlet_partitions(rem - x, slots - 1, next_cumulative, next_hit, required, memo)
-      if rank > block {
+      case rank > block {
+        True -> {
         unrank_cutlet_choice(x + 1, max_x, rem, slots, cumulative, hit, required, rank - block, next_memo, acc)
-      } else {
+      }
+        False -> {
         unrank_cutlet_loop(rem - x, slots - 1, next_cumulative, next_hit, required, rank, next_memo, [x, ..acc])
       }
-    } else {
+      }
+    }
+      False -> {
       unrank_cutlet_choice(x + 1, max_x, rem, slots, cumulative, hit, required, rank, memo, acc)
     }
+    }
+  }
   }
 }
 
@@ -496,10 +613,13 @@ fn choose_cutlet_partition(calculation_day: Int, structure_sauce: core.SauceResu
   let #(gate_option, covered) = exact_gate_index(state, calculation_day)
   let required = case gate_option {
     Some(index) ->
-      if index > year.open_gate_index && index < year.close_gate_index {
+      case index > year.open_gate_index && index < year.close_gate_index {
+        True -> {
         Some(index - year.open_gate_index)
-      } else {
+      }
+        False -> {
         None
+      }
       }
     None -> None
   }
@@ -550,25 +670,37 @@ fn choose_month_count(structure_sauce: core.SauceResult, year: Year) -> Int {
 type BoundedMemoKey = #(Int, Int)
 
 fn count_bounded(rem: Int, slots: Int, low: Int, high: Int, memo: Dict(BoundedMemoKey, Int)) -> #(Int, Dict(BoundedMemoKey, Int)) {
-  if slots == 0 {
-    #(if rem == 0 { 1 } else { 0 }, memo)
-  } else if rem < slots * low || rem > slots * high {
+  case slots == 0 {
+    True -> {
+    #(case rem == 0 {
+      True -> { 1 }
+      False -> { 0 }
+    }, memo)
+  }
+    False -> case rem < slots * low || rem > slots * high {
+    True -> {
     #(0, memo)
-  } else {
+  }
+    False -> {
     let key = #(rem, slots)
     case dict.get(memo, key) {
       Ok(value) -> #(value, memo)
       Error(_) -> count_bounded_choices(low, high, rem, slots, low, high, memo, 0, key)
     }
   }
+  }
+  }
 }
 
 fn count_bounded_choices(x: Int, max_x: Int, rem: Int, slots: Int, low: Int, high: Int, memo: Dict(BoundedMemoKey, Int), total: Int, key: BoundedMemoKey) -> #(Int, Dict(BoundedMemoKey, Int)) {
-  if x > max_x {
+  case x > max_x {
+    True -> {
     #(total, dict.insert(memo, key, total))
-  } else {
+  }
+    False -> {
     let #(block, next_memo) = count_bounded(rem - x, slots - 1, low, high, memo)
     count_bounded_choices(x + 1, max_x, rem, slots, low, high, next_memo, total + block, key)
+  }
   }
 }
 
@@ -577,23 +709,32 @@ fn unrank_bounded(total: Int, slots: Int, low: Int, high: Int, rank1: Int) -> Li
 }
 
 fn unrank_bounded_loop(rem: Int, slots: Int, low: Int, high: Int, rank: Int, memo: Dict(BoundedMemoKey, Int), acc: List(Int)) -> List(Int) {
-  if slots == 0 {
+  case slots == 0 {
+    True -> {
     list.reverse(acc)
-  } else {
+  }
+    False -> {
     unrank_bounded_choice(low, high, rem, slots, low, high, rank, memo, acc)
+  }
   }
 }
 
 fn unrank_bounded_choice(x: Int, max_x: Int, rem: Int, slots: Int, low: Int, high: Int, rank: Int, memo: Dict(BoundedMemoKey, Int), acc: List(Int)) -> List(Int) {
-  if x > max_x {
+  case x > max_x {
+    True -> {
     panic as "Nevalida rango por monataj longoj"
-  } else {
+  }
+    False -> {
     let #(block, next_memo) = count_bounded(rem - x, slots - 1, low, high, memo)
-    if rank > block {
+    case rank > block {
+      True -> {
       unrank_bounded_choice(x + 1, max_x, rem, slots, low, high, rank - block, next_memo, acc)
-    } else {
+    }
+      False -> {
       unrank_bounded_loop(rem - x, slots - 1, low, high, rank, next_memo, [x, ..acc])
     }
+    }
+  }
   }
 }
 
@@ -610,54 +751,81 @@ type WeaveMemoKey = #(List(Int), Int, Int)
 fn all_zero(items: List(Int)) -> Bool {
   case items {
     [] -> True
-    [head, ..tail] -> if head == 0 { all_zero(tail) } else { False }
+    [head, ..tail] -> case head == 0 {
+      True -> { all_zero(tail) }
+      False -> { False }
+    }
   }
 }
 
 fn legal_weave_move(remaining: List(Int), opened_up_to: Int, closed_up_to: Int, original: List(Int), month_id: Int) -> Bool {
   let rem = core.at1(remaining, month_id)
-  if rem == 0 {
+  case rem == 0 {
+    True -> {
     False
-  } else {
+  }
+    False -> {
     let already_opened = rem < core.at1(original, month_id)
-    if already_opened == False && month_id != opened_up_to + 1 {
+    case already_opened == False && month_id != opened_up_to + 1 {
+      True -> {
       False
-    } else {
-      let will_close = rem == 1
-      if will_close && month_id != closed_up_to + 1 { False } else { True }
     }
+      False -> {
+      let will_close = rem == 1
+      case will_close && month_id != closed_up_to + 1 {
+        True -> { False }
+        False -> { True }
+      }
+    }
+    }
+  }
   }
 }
 
 fn apply_weave_move(remaining: List(Int), opened_up_to: Int, closed_up_to: Int, original: List(Int), month_id: Int) -> #(List(Int), Int, Int) {
   let rem = core.at1(remaining, month_id)
-  let next_opened = if rem == core.at1(original, month_id) { month_id } else { opened_up_to }
+  let next_opened = case rem == core.at1(original, month_id) {
+    True -> { month_id }
+    False -> { opened_up_to }
+  }
   let next_remaining = core.replace_at1(remaining, month_id, rem - 1)
-  let next_closed = if rem - 1 == 0 { month_id } else { closed_up_to }
+  let next_closed = case rem - 1 == 0 {
+    True -> { month_id }
+    False -> { closed_up_to }
+  }
   #(next_remaining, next_opened, next_closed)
 }
 
 fn count_weavings(remaining: List(Int), opened_up_to: Int, closed_up_to: Int, original: List(Int), memo: Dict(WeaveMemoKey, Int)) -> #(Int, Dict(WeaveMemoKey, Int)) {
-  if all_zero(remaining) {
+  case all_zero(remaining) {
+    True -> {
     #(1, memo)
-  } else {
+  }
+    False -> {
     let key = #(remaining, opened_up_to, closed_up_to)
     case dict.get(memo, key) {
       Ok(value) -> #(value, memo)
       Error(_) -> count_weave_choices(1, list.length(original), remaining, opened_up_to, closed_up_to, original, memo, 0, key)
     }
   }
+  }
 }
 
 fn count_weave_choices(month_id: Int, max_month: Int, remaining: List(Int), opened_up_to: Int, closed_up_to: Int, original: List(Int), memo: Dict(WeaveMemoKey, Int), total: Int, key: WeaveMemoKey) -> #(Int, Dict(WeaveMemoKey, Int)) {
-  if month_id > max_month {
+  case month_id > max_month {
+    True -> {
     #(total, dict.insert(memo, key, total))
-  } else if legal_weave_move(remaining, opened_up_to, closed_up_to, original, month_id) {
+  }
+    False -> case legal_weave_move(remaining, opened_up_to, closed_up_to, original, month_id) {
+    True -> {
     let #(next_remaining, next_opened, next_closed) = apply_weave_move(remaining, opened_up_to, closed_up_to, original, month_id)
     let #(block, next_memo) = count_weavings(next_remaining, next_opened, next_closed, original, memo)
     count_weave_choices(month_id + 1, max_month, remaining, opened_up_to, closed_up_to, original, next_memo, total + block, key)
-  } else {
+  }
+    False -> {
     count_weave_choices(month_id + 1, max_month, remaining, opened_up_to, closed_up_to, original, memo, total, key)
+  }
+  }
   }
 }
 
@@ -666,26 +834,38 @@ fn unrank_weaving(lengths: List(Int), rank1: Int) -> List(Int) {
 }
 
 fn unrank_weaving_loop(remaining: List(Int), opened_up_to: Int, closed_up_to: Int, original: List(Int), rank: Int, memo: Dict(WeaveMemoKey, Int), acc: List(Int)) -> List(Int) {
-  if all_zero(remaining) {
+  case all_zero(remaining) {
+    True -> {
     list.reverse(acc)
-  } else {
+  }
+    False -> {
     unrank_weave_choice(1, list.length(original), remaining, opened_up_to, closed_up_to, original, rank, memo, acc)
+  }
   }
 }
 
 fn unrank_weave_choice(month_id: Int, max_month: Int, remaining: List(Int), opened_up_to: Int, closed_up_to: Int, original: List(Int), rank: Int, memo: Dict(WeaveMemoKey, Int), acc: List(Int)) -> List(Int) {
-  if month_id > max_month {
+  case month_id > max_month {
+    True -> {
     panic as "Nevalida rango por monata teksado"
-  } else if legal_weave_move(remaining, opened_up_to, closed_up_to, original, month_id) {
+  }
+    False -> case legal_weave_move(remaining, opened_up_to, closed_up_to, original, month_id) {
+    True -> {
     let #(next_remaining, next_opened, next_closed) = apply_weave_move(remaining, opened_up_to, closed_up_to, original, month_id)
     let #(block, next_memo) = count_weavings(next_remaining, next_opened, next_closed, original, memo)
-    if rank > block {
+    case rank > block {
+      True -> {
       unrank_weave_choice(month_id + 1, max_month, remaining, opened_up_to, closed_up_to, original, rank - block, next_memo, acc)
-    } else {
+    }
+      False -> {
       unrank_weaving_loop(next_remaining, next_opened, next_closed, original, rank, next_memo, [month_id, ..acc])
     }
-  } else {
+    }
+  }
+    False -> {
     unrank_weave_choice(month_id + 1, max_month, remaining, opened_up_to, closed_up_to, original, rank, memo, acc)
+  }
+  }
   }
 }
 
@@ -733,7 +913,10 @@ fn cutlet_for_day(cutlets: List(Cutlet), day: Int) -> Cutlet {
   case cutlets {
     [] -> panic as "Neniu kotleto enhavas la celan tagon"
     [head, ..tail] ->
-      if head.first_day <= day && day <= head.last_day { head } else { cutlet_for_day(tail, day) }
+      case head.first_day <= day && day <= head.last_day {
+        True -> { head }
+        False -> { cutlet_for_day(tail, day) }
+      }
   }
 }
 
@@ -745,10 +928,16 @@ fn occurrence_loop(items: List(Int), wanted: Int, through_position: Int, positio
   case items {
     [] -> acc
     [head, ..tail] ->
-      if position > through_position {
+      case position > through_position {
+        True -> {
         acc
-      } else {
-        occurrence_loop(tail, wanted, through_position, position + 1, if head == wanted { acc + 1 } else { acc })
+      }
+        False -> {
+        occurrence_loop(tail, wanted, through_position, position + 1, case head == wanted {
+          True -> { acc + 1 }
+          False -> { acc }
+        })
+      }
       }
   }
 }

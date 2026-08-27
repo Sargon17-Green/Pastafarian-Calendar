@@ -38,9 +38,11 @@ pub fn build_hidden_drops(counts: WorkCounts, stones: List(Stone)) -> List(Int) 
 }
 
 fn build_hidden_loop(k: Int, counts: WorkCounts, stones: List(Stone), acc: List(Int)) -> List(Int) {
-  if k > 7 {
+  case k > 7 {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let coeff = core.at1(hidden_coefficients(), k)
     let #(a, b, c, d) = coeff
     let stone = core.at1(stones, k)
@@ -59,24 +61,31 @@ fn build_hidden_loop(k: Int, counts: WorkCounts, stones: List(Stone), acc: List(
     let x = hidden_grind_loop(1, x0, stone)
     build_hidden_loop(k + 1, counts, stones, [x, ..acc])
   }
+  }
 }
 
 fn hidden_grind_loop(grind: Int, x: Int, stone: Stone) -> Int {
-  if grind > 7 {
+  case grind > 7 {
+    True -> {
     x
-  } else {
+  }
+    False -> {
     let kind = core.at1(hidden_grind_stone(), grind)
     let next = core.save(core.square(x) + 3 * x + core.stone_value(stone, kind) + grind)
     hidden_grind_loop(grind + 1, next, stone)
+  }
   }
 }
 
 fn prior(visible_so_far: List(Int), hidden: List(Int), i: Int, back: Int) -> Int {
   let slot = i - back
-  if slot >= 1 {
+  case slot >= 1 {
+    True -> {
     core.at1(visible_so_far, slot)
-  } else {
+  }
+    False -> {
     core.at1(hidden, 1 - slot)
+  }
   }
 }
 
@@ -85,9 +94,11 @@ pub fn build_visible_drops(counts: WorkCounts, stones: List(Stone), hidden: List
 }
 
 fn build_visible_loop(i: Int, counts: WorkCounts, stones: List(Stone), hidden: List(Int), visible: List(Int)) -> List(Int) {
-  if i > 46 {
+  case i > 46 {
+    True -> {
     visible
-  } else {
+  }
+    False -> {
     let p1 = prior(visible, hidden, i, 1)
     let p3 = prior(visible, hidden, i, 3)
     let p7 = prior(visible, hidden, i, 7)
@@ -105,6 +116,7 @@ fn build_visible_loop(i: Int, counts: WorkCounts, stones: List(Stone), hidden: L
     )
     let x = visible_grind_loop(visible_grinds(), x0, p1, p3, p7, stone)
     build_visible_loop(i + 1, counts, stones, hidden, list.append(visible, [x]))
+  }
   }
 }
 
@@ -131,9 +143,11 @@ pub fn initial_bowls(counts: WorkCounts) -> List(Int) {
 }
 
 fn initial_bowls_loop(bowl_id: Int, counts: WorkCounts, primes: List(Int), acc: List(Int)) -> List(Int) {
-  if bowl_id > 6 {
+  case bowl_id > 6 {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let prime = core.at1(primes, bowl_id)
     let s = counts.action
       + counts.target * bowl_id
@@ -144,6 +158,7 @@ fn initial_bowls_loop(bowl_id: Int, counts: WorkCounts, primes: List(Int), acc: 
     let value = core.save(core.square(s) + bowl_id)
     initial_bowls_loop(bowl_id + 1, counts, primes, [value, ..acc])
   }
+  }
 }
 
 pub fn apply_visible_drops_to_bowls(bowls: List(Int), visible: List(Int), stones: List(Stone)) -> #(List(Int), List(Int)) {
@@ -151,16 +166,22 @@ pub fn apply_visible_drops_to_bowls(bowls: List(Int), visible: List(Int), stones
 }
 
 fn apply_drop_loop(i: Int, bowls: List(Int), visible: List(Int), stones: List(Stone), order_at_46: List(Int)) -> #(List(Int), List(Int)) {
-  if i > 46 {
+  case i > 46 {
+    True -> {
     #(bowls, order_at_46)
-  } else {
+  }
+    False -> {
     let drop = core.at1(visible, i)
     let order = core.bowl_order_from_drop(drop)
     let stone = core.at1(stones, i)
     let pours = build_pours(drop, i, stone, bowls, order)
     let next_bowls = stir_drop_positions(1, bowls, order, pours, stone, drop, i, []) |> list.reverse
-    let latch = if i == 46 { order } else { order_at_46 }
+    let latch = case i == 46 {
+      True -> { order }
+      False -> { order_at_46 }
+    }
     apply_drop_loop(i + 1, next_bowls, visible, stones, latch)
+  }
   }
 }
 
@@ -179,9 +200,11 @@ fn build_pours(drop: Int, i: Int, stone: Stone, bowls: List(Int), order: List(In
 }
 
 fn stir_drop_positions(position: Int, old: List(Int), order: List(Int), pours: List(Int), stone: Stone, drop: Int, i: Int, acc_by_id: List(Int)) -> List(Int) {
-  if position > 6 {
+  case position > 6 {
+    True -> {
     acc_by_id
-  } else {
+  }
+    False -> {
     let bowl_id = position
     let order_position = core.position_of(order, bowl_id)
     let prev_id = core.at1(order, core.wrap1(order_position - 1, 6))
@@ -201,6 +224,7 @@ fn stir_drop_positions(position: Int, old: List(Int), order: List(Int), pours: L
     )
     stir_drop_positions(position + 1, old, order, pours, stone, drop, i, [value, ..acc_by_id])
   }
+  }
 }
 
 pub fn post_stir_12(bowls: List(Int)) -> List(Int) {
@@ -208,21 +232,26 @@ pub fn post_stir_12(bowls: List(Int)) -> List(Int) {
 }
 
 fn post_stir_loop(stir: Int, bowls: List(Int)) -> List(Int) {
-  if stir > 12 {
+  case stir > 12 {
+    True -> {
     bowls
-  } else {
+  }
+    False -> {
     let saved_bowl_sum = core.save(sum_list(bowls) + 149 * stir)
     let order_number = core.regular_mod(saved_bowl_sum - 1, 720) + 1
     let order = core.bowl_order_from_number(order_number)
     let next = post_stir_bowls_by_id(1, bowls, order, saved_bowl_sum, stir, []) |> list.reverse
     post_stir_loop(stir + 1, next)
   }
+  }
 }
 
 fn post_stir_bowls_by_id(bowl_id: Int, old: List(Int), order: List(Int), saved_bowl_sum: Int, stir: Int, acc: List(Int)) -> List(Int) {
-  if bowl_id > 6 {
+  case bowl_id > 6 {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let position = core.position_of(order, bowl_id)
     let prev_id = core.at1(order, core.wrap1(position - 1, 6))
     let next_id = core.at1(order, core.wrap1(position + 1, 6))
@@ -234,6 +263,7 @@ fn post_stir_bowls_by_id(bowl_id: Int, old: List(Int), order: List(Int), saved_b
       + position * position
     let value = core.save(core.square(s) + 7 * core.at1(old, prev_id) * core.at1(old, next_id))
     post_stir_bowls_by_id(bowl_id + 1, old, order, saved_bowl_sum, stir, [value, ..acc])
+  }
   }
 }
 
@@ -269,7 +299,10 @@ pub fn ask_bowl(result: SauceResult, queried_bowl_id: Int, seal: Int) -> AnswerS
     + 193 * first
     + 197 * core.at1(result.bowls, 6),
   )
-  let step = if core.regular_mod(direction_number, 2) == 1 { 1 } else { -1 }
+  let step = case core.regular_mod(direction_number, 2) == 1 {
+    True -> { 1 }
+    False -> { -1 }
+  }
   core.AnswerStream(first: first, direction_step: step)
 }
 
@@ -284,10 +317,13 @@ pub fn choose_rank_short(stream: AnswerStream, n: Int) -> Int {
 
 fn choose_rank_short_loop(stream: AnswerStream, n: Int, limit: Int, k: Int) -> Int {
   let x = answer_at(stream, k)
-  if x <= limit {
+  case x <= limit {
+    True -> {
     core.regular_mod(x - 1, n) + 1
-  } else {
+  }
+    False -> {
     choose_rank_short_loop(stream, n, limit, k + 1)
+  }
   }
 }
 
@@ -296,7 +332,10 @@ pub fn smallest_power_count(base: Int, n: Int) -> #(Int, Int) {
 }
 
 fn smallest_power_loop(base: Int, n: Int, k: Int, space: Int) -> #(Int, Int) {
-  if space >= n { #(k, space) } else { smallest_power_loop(base, n, k + 1, space * base) }
+  case space >= n {
+    True -> { #(k, space) }
+    False -> { smallest_power_loop(base, n, k + 1, space * base) }
+  }
 }
 
 pub fn choose_rank_wide(stream: AnswerStream, n: Int) -> Int {
@@ -307,23 +346,32 @@ pub fn choose_rank_wide(stream: AnswerStream, n: Int) -> Int {
 }
 
 fn build_wide(stream: AnswerStream, j: Int, k: Int, weight: Int, acc: Int) -> Int {
-  if j >= k {
+  case j >= k {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let digit = answer_at(stream, j) - 1
     build_wide(stream, j + 1, k, weight * core.m, acc + digit * weight)
+  }
   }
 }
 
 fn choose_wide_loop(stream: AnswerStream, n: Int, space: Int, limit: Int, wide: Int) -> Int {
-  if wide <= limit {
+  case wide <= limit {
+    True -> {
     core.regular_mod(wide - 1, n) + 1
-  } else {
+  }
+    False -> {
     let next = 1 + core.regular_mod(wide - 1 + stream.direction_step, space)
     choose_wide_loop(stream, n, space, limit, next)
+  }
   }
 }
 
 pub fn choose_rank(stream: AnswerStream, n: Int) -> Int {
-  if n <= core.m { choose_rank_short(stream, n) } else { choose_rank_wide(stream, n) }
+  case n <= core.m {
+    True -> { choose_rank_short(stream, n) }
+    False -> { choose_rank_wide(stream, n) }
+  }
 }

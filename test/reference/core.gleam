@@ -54,12 +54,18 @@ pub type AnswerStream {
 }
 
 pub fn abs_int(x: Int) -> Int {
-  if x < 0 { -x } else { x }
+  case x < 0 {
+    True -> { -x }
+    False -> { x }
+  }
 }
 
 pub fn regular_mod(x: Int, d: Int) -> Int {
   let r = x % d
-  if r < 0 { r + d } else { r }
+  case r < 0 {
+    True -> { r + d }
+    False -> { r }
+  }
 }
 
 pub fn floor_div(a: Int, b: Int) -> Int {
@@ -102,7 +108,10 @@ fn replace_at1_loop(items: List(a), index: Int, value: a, current: Int, acc: Lis
   case items {
     [] -> acc
     [head, ..tail] -> {
-      let chosen = if current == index { value } else { head }
+      let chosen = case current == index {
+        True -> { value }
+        False -> { head }
+      }
       replace_at1_loop(tail, index, value, current + 1, [chosen, ..acc])
     }
   }
@@ -117,10 +126,13 @@ fn remove_at1_loop(items: List(a), index: Int, current: Int, acc: List(a)) -> Li
   case items {
     [] -> acc
     [head, ..tail] ->
-      if current == index {
+      case current == index {
+        True -> {
         list.reverse(acc) |> list.append(tail)
-      } else {
+      }
+        False -> {
         remove_at1_loop(tail, index, current + 1, [head, ..acc])
+      }
       }
   }
 }
@@ -133,16 +145,25 @@ fn position_of_loop(items: List(Int), wanted: Int, position: Int) -> Int {
   case items {
     [] -> panic as "Mankas atendita kanona ero"
     [head, ..tail] ->
-      if head == wanted { position } else { position_of_loop(tail, wanted, position + 1) }
+      case head == wanted {
+        True -> { position }
+        False -> { position_of_loop(tail, wanted, position + 1) }
+      }
   }
 }
 
 pub fn range_inclusive(first: Int, last: Int) -> List(Int) {
-  if first > last { [] } else { [first, ..range_inclusive(first + 1, last)] }
+  case first > last {
+    True -> { [] }
+    False -> { [first, ..range_inclusive(first + 1, last)] }
+  }
 }
 
 pub fn min_int(a: Int, b: Int) -> Int {
-  if a < b { a } else { b }
+  case a < b {
+    True -> { a }
+    False -> { b }
+  }
 }
 
 pub fn factorial(n: Int) -> Int {
@@ -150,7 +171,10 @@ pub fn factorial(n: Int) -> Int {
 }
 
 fn factorial_loop(n: Int, acc: Int) -> Int {
-  if n <= 1 { acc } else { factorial_loop(n - 1, acc * n) }
+  case n <= 1 {
+    True -> { acc }
+    False -> { factorial_loop(n - 1, acc * n) }
+  }
 }
 
 pub fn falling_factorial(n: Int, k: Int) -> Int {
@@ -158,23 +182,38 @@ pub fn falling_factorial(n: Int, k: Int) -> Int {
 }
 
 fn falling_factorial_loop(n: Int, k: Int, j: Int, acc: Int) -> Int {
-  if j >= k { acc } else { falling_factorial_loop(n, k, j + 1, acc * (n - j)) }
+  case j >= k {
+    True -> { acc }
+    False -> { falling_factorial_loop(n, k, j + 1, acc * (n - j)) }
+  }
 }
 
 pub fn day_count(day: Int) -> Int {
-  if day == foundation_day {
+  case day == foundation_day {
+    True -> {
     1
-  } else if day > foundation_day {
+  }
+    False -> case day > foundation_day {
+    True -> {
     2 * (day - foundation_day) + 1
-  } else {
+  }
+    False -> {
     2 * (foundation_day - day)
+  }
+  }
   }
 }
 
 pub fn work_counts(calculation_day: Int, target_day: Int) -> WorkCounts {
   let action = day_count(calculation_day)
   let target = day_count(target_day)
-  let direction = if target_day < calculation_day { 1 } else if target_day == calculation_day { 2 } else { 3 }
+  let direction = case target_day < calculation_day {
+    True -> { 1 }
+    False -> case target_day == calculation_day {
+    True -> { 2 }
+    False -> { 3 }
+  }
+  }
   WorkCounts(
     action: action,
     target: target,
@@ -201,9 +240,11 @@ pub fn build_stones() -> List(Stone) {
 }
 
 fn build_stones_loop(i: Int, old: Stone, acc: List(Stone)) -> List(Stone) {
-  if i > 46 {
+  case i > 46 {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let next = Stone(
       wheat: save(square(old.wheat) + 3 * old.barley + i),
       barley: save(square(old.barley) + 5 * old.salt + old.wheat),
@@ -213,6 +254,7 @@ fn build_stones_loop(i: Int, old: Stone, acc: List(Stone)) -> List(Stone) {
     )
     build_stones_loop(i + 1, next, [next, ..acc])
   }
+  }
 }
 
 pub fn permutation_unrank1(rank1: Int, items_ascending: List(Int)) -> List(Int) {
@@ -221,15 +263,18 @@ pub fn permutation_unrank1(rank1: Int, items_ascending: List(Int)) -> List(Int) 
 }
 
 fn permutation_loop(rank0: Int, remaining: List(Int), slots_left: Int, acc: List(Int)) -> List(Int) {
-  if slots_left == 0 {
+  case slots_left == 0 {
+    True -> {
     acc
-  } else {
+  }
+    False -> {
     let block = factorial(slots_left - 1)
     let q = floor_div(rank0, block)
     let next_rank0 = regular_mod(rank0, block)
     let chosen = at1(remaining, q + 1)
     let next_remaining = remove_at1(remaining, q + 1)
     permutation_loop(next_rank0, next_remaining, slots_left - 1, [chosen, ..acc])
+  }
   }
 }
 
