@@ -71,10 +71,11 @@ pub fn regular_mod(x: Int, d: Int) -> Int {
 pub fn floor_div(a: Int, b: Int) -> Int {
   let q = a / b
   let r = a % b
-  case r == 0, (r < 0) != (b < 0) {
-    True, _ -> q
-    False, True -> q - 1
-    False, False -> q
+  case r == 0, r < 0, b < 0 {
+    True, _, _ -> q
+    False, True, False -> q - 1
+    False, False, True -> q - 1
+    False, _, _ -> q
   }
 }
 
@@ -184,7 +185,7 @@ pub fn falling_factorial(n: Int, k: Int) -> Int {
 fn falling_factorial_loop(n: Int, k: Int, j: Int, acc: Int) -> Int {
   case j >= k {
     True -> { acc }
-    False -> { falling_factorial_loop(n, k, j + 1, acc * (n - j)) }
+    False -> { falling_factorial_loop(n, k, j + 1, acc * { n - j }) }
   }
 }
 
@@ -195,10 +196,10 @@ pub fn day_count(day: Int) -> Int {
   }
     False -> case day > foundation_day {
     True -> {
-    2 * (day - foundation_day) + 1
+    2 * { day - foundation_day } + 1
   }
     False -> {
-    2 * (foundation_day - day)
+    2 * { foundation_day - day }
   }
   }
   }

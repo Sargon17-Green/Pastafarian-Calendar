@@ -281,7 +281,7 @@ fn insert_anchor(candidate: YearCandidate, sorted: List(YearCandidate), state: G
       let candidate_open = gate_value(state, candidate.open_index)
       let head_open = gate_value(state, head.open_index)
       let comes_first = candidate.length < head.length
-        || (candidate.length == head.length && candidate_open < head_open)
+        || { candidate.length == head.length && candidate_open < head_open }
       case comes_first {
         True -> {
         [candidate, ..sorted]
@@ -494,7 +494,7 @@ fn count_cutlet_partitions(rem: Int, slots: Int, cumulative: Int, hit: Bool, req
     let key = #(rem, slots, cumulative, hit)
     case dict.get(memo, key) {
       Ok(value) -> #(value, memo)
-      Error(_) -> count_cutlet_choices(1, rem - (slots - 1), rem, slots, cumulative, hit, required, memo, 0, key)
+      Error(_) -> count_cutlet_choices(1, rem - { slots - 1 }, rem, slots, cumulative, hit, required, memo, 0, key)
     }
   }
   }
@@ -554,7 +554,7 @@ fn unrank_cutlet_loop(rem: Int, slots: Int, cumulative: Int, hit: Bool, required
     list.reverse(acc)
   }
     False -> {
-    unrank_cutlet_choice(1, rem - (slots - 1), rem, slots, cumulative, hit, required, rank, memo, acc)
+    unrank_cutlet_choice(1, rem - { slots - 1 }, rem, slots, cumulative, hit, required, rank, memo, acc)
   }
   }
 }
@@ -948,7 +948,7 @@ pub fn calendar_date(calculation_day: Int, target_day: Int) -> CalendarDate {
   let #(structure, _) = build_year_structure(calculation_day, year, state)
   let cutlet = cutlet_for_day(structure.cutlets, target_day)
   let day_in_cutlet = target_day - cutlet.first_day + 1
-  let year_offset0 = target_day - (year.open_gate_day + 1)
+  let year_offset0 = target_day - { year.open_gate_day + 1 }
   let month_id = core.at1(structure.month_weaving, year_offset0 + 1)
   let month_index = core.at1(structure.month_name_indices, month_id)
   let day_in_month = occurrence_count(structure.month_weaving, month_id, year_offset0 + 1)
