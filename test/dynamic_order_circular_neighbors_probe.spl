@@ -1,0 +1,101 @@
+ആറ് bowl ID-കളുടെ dynamic order stdin-ൽ നിന്ന് വായിച്ച് Appendix A-യിലെ circular prev/current/next topology ഓരോ position 1..6-ലും output ചെയ്യുന്ന clean Stage 1 probe. position 1-ന്റെ prev position 6 ആണ്; position 6-ന്റെ next position 1 ആണ്. fixture order 3,1,6,2,5,4 ആണെങ്കിൽ outputs: 4,3,1, 3,1,6, 1,6,2, 6,2,5, 2,5,4, 5,4,3.
+
+Hamlet, order position 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, order position 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, order position 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, order position 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, order position 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, order position 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: dynamic order വായിക്കുന്നു.
+
+Scene I: positions 1..3.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Scene II: positions 4..6.
+[Enter Prospero and Othello]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Act II: circular neighbor triples.
+
+Scene I: position 1 = prev6,current1,next2.
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene II: position 2 = prev1,current2,next3.
+[Enter Prospero and Hamlet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene III: position 3 = prev2,current3,next4.
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene IV: position 4 = prev3,current4,next5.
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene V: position 5 = prev4,current5,next6.
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene VI: position 6 = prev5,current6,next1.
+[Enter Prospero and Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Open your heart.
+[Exeunt]

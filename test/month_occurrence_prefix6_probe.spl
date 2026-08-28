@@ -1,0 +1,180 @@
+വർഷാരംഭം മുതൽ target ഉൾപ്പെടെ തിരഞ്ഞെടുത്ത month ID എത്ര തവണ വന്നുവെന്ന് ചെറിയ prefix-ിൽ എണ്ണുന്ന പരിശോധന.
+
+Hamlet, എണ്ണേണ്ട month ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ഉൾപ്പെടുത്തേണ്ട അവസാന position സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, position ഒന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, position രണ്ട് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, position മൂന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, position നാല് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, position അഞ്ച് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, position ആറു സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, occurrence count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, input-output control സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: ആറു സ്ഥാനമുള്ള ചെറിയ weaving prefix-ിൽ inclusive occurrence count കണക്കാക്കുന്നു.
+
+Scene I: month ID, അവസാന position, ആറു month IDs വായിക്കുന്നു.
+[Enter Falstaff and Hamlet]
+Falstaff:
+ Listen to your heart.
+[Exeunt]
+[Enter Falstaff and Juliet]
+Falstaff:
+ Listen to your heart.
+[Exeunt]
+[Enter Falstaff and Romeo]
+Falstaff:
+ Listen to your heart.
+[Exeunt]
+[Enter Falstaff and Othello]
+Falstaff:
+ Listen to your heart.
+[Exeunt]
+[Enter Falstaff and Macbeth]
+Falstaff:
+ Listen to your heart.
+[Exeunt]
+[Enter Falstaff and Lady Macbeth]
+Falstaff:
+ Listen to your heart.
+[Exeunt]
+[Enter Falstaff and Ophelia]
+Falstaff:
+ Listen to your heart.
+[Exeunt]
+[Enter Falstaff and Prospero]
+Falstaff:
+ Listen to your heart.
+[Exeunt]
+[Enter Falstaff and Miranda]
+Falstaff:
+ You are nothing.
+
+Scene II: position ഒന്ന് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Falstaff and Juliet]
+Falstaff:
+ Are you worse than a hero?
+ If so, let us proceed to scene XIV.
+[Exeunt]
+[Enter Falstaff and Romeo]
+Falstaff:
+ Are you better than Hamlet?
+ If so, let us proceed to scene III.
+ Are you worse than Hamlet?
+ If so, let us proceed to scene III.
+[Exeunt]
+[Enter Falstaff and Miranda]
+Falstaff:
+ You are as good as the sum of yourself and a hero.
+
+Scene III: position രണ്ട് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Falstaff and Juliet]
+Falstaff:
+ Are you worse than a big hero?
+ If so, let us proceed to scene XIV.
+[Exeunt]
+[Enter Falstaff and Othello]
+Falstaff:
+ Are you better than Hamlet?
+ If so, let us proceed to scene IV.
+ Are you worse than Hamlet?
+ If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Falstaff and Miranda]
+Falstaff:
+ You are as good as the sum of yourself and a hero.
+
+Scene IV: position മൂന്ന് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Falstaff and Juliet]
+Falstaff:
+ Are you worse than the sum of a big hero and a hero?
+ If so, let us proceed to scene XIV.
+[Exeunt]
+[Enter Falstaff and Macbeth]
+Falstaff:
+ Are you better than Hamlet?
+ If so, let us proceed to scene V.
+ Are you worse than Hamlet?
+ If so, let us proceed to scene V.
+[Exeunt]
+[Enter Falstaff and Miranda]
+Falstaff:
+ You are as good as the sum of yourself and a hero.
+
+Scene V: position നാല് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Falstaff and Juliet]
+Falstaff:
+ Are you worse than a big big hero?
+ If so, let us proceed to scene XIV.
+[Exeunt]
+[Enter Falstaff and Lady Macbeth]
+Falstaff:
+ Are you better than Hamlet?
+ If so, let us proceed to scene VI.
+ Are you worse than Hamlet?
+ If so, let us proceed to scene VI.
+[Exeunt]
+[Enter Falstaff and Miranda]
+Falstaff:
+ You are as good as the sum of yourself and a hero.
+
+Scene VI: position അഞ്ച് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Falstaff and Juliet]
+Falstaff:
+ Are you worse than the sum of a big big hero and a hero?
+ If so, let us proceed to scene XIV.
+[Exeunt]
+[Enter Falstaff and Ophelia]
+Falstaff:
+ Are you better than Hamlet?
+ If so, let us proceed to scene VII.
+ Are you worse than Hamlet?
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Falstaff and Miranda]
+Falstaff:
+ You are as good as the sum of yourself and a hero.
+
+Scene VII: position ആറു പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Falstaff and Juliet]
+Falstaff:
+ Are you worse than the sum of a big big hero and a big hero?
+ If so, let us proceed to scene XIV.
+[Exeunt]
+[Enter Falstaff and Prospero]
+Falstaff:
+ Are you better than Hamlet?
+ If so, let us proceed to scene XIV.
+ Are you worse than Hamlet?
+ If so, let us proceed to scene XIV.
+[Exeunt]
+[Enter Falstaff and Miranda]
+Falstaff:
+ You are as good as the sum of yourself and a hero.
+ Let us proceed to scene XIV.
+
+Scene VIII: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+[Exeunt]
+
+Scene IX: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+
+Scene X: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+
+Scene XI: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+
+Scene XII: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+
+Scene XIII: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+
+Scene XIV: inclusive occurrence count പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Falstaff and Miranda]
+Falstaff:
+ Open your heart.
+[Exeunt]

@@ -1,0 +1,384 @@
+Appendix A stone table-ന്റെ 46 actual rows transactional ആയി നിർമ്മിച്ച് അഞ്ച് backward archive stack-ുകളിൽ സൂക്ഷിക്കുകയും, reversal സമയത്ത് ഓരോ അഞ്ച്-value row-യും hidden consumer-നും visible consumer-നും വേണ്ടി രണ്ട് സ്വതന്ത്ര forward replay families-ലേക്ക് duplicate ചെയ്യുകയും ചെയ്യുന്ന clean Stage 1 ownership probe. hidden consumer ആദ്യം rows 1..7 consume ചെയ്യുന്നു; visible consumer അതിൽ നിന്ന് സ്വതന്ത്രമായി rows 1..46 consume ചെയ്യുന്നു. expected outputs: reverse count 46; hidden consume count 7; visible first row 17,29,43,71,101; visible consume count 46.
+
+Hamlet, current wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, current barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, current salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, current bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, current red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, pending wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, pending barleyയും പിന്നീട് reverse count-ഉം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, pending salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, pending bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, pending red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, current row index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, committed transition count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, archived row count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, Mയും പിന്നീട് stack helper-ഉം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, wheat archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Benedick, barley archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Mercutio, salt archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Tybalt, bitter archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Iago, red archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, wheat replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, barley replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, salt replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, bitter replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, red replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+
+Act I: M, row 1, ആദ്യ archive.
+
+Scene I: M = 2^127 - 1 നിർമ്മിക്കുന്നു.
+[Enter Caliban and Prospero]
+Caliban: You are a hero.
+[Exeunt]
+[Enter Caliban and Ophelia]
+Caliban: You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+
+Scene II: exact doubling.
+Prospero: Are you better than nothing?
+Ophelia:
+ If not, let us proceed to scene III.
+Prospero: You are as good as the difference between yourself and a hero.
+Ophelia:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene II.
+
+Scene III: subtract one.
+[Exeunt]
+[Enter Caliban and Prospero]
+Caliban: You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene IV: normative row 1.
+[Enter Caliban and Hamlet]
+Caliban: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Caliban and Juliet]
+Caliban: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Caliban and Romeo]
+Caliban: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Caliban and Othello]
+Caliban: You are as good as the sum of a big big big big big big hero and the sum of a big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Caliban and Macbeth]
+Caliban: You are as good as the sum of a big big big big big big hero and the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+
+Scene V: row 1 അഞ്ച് archive stack-ുകളിലേക്ക് push ചെയ്യുന്നു.
+[Enter Hamlet and Beatrice]
+Hamlet: You are as good as Hamlet. Remember yourself.
+[Exeunt]
+[Enter Juliet and Benedick]
+Juliet: You are as good as Juliet. Remember yourself.
+[Exeunt]
+[Enter Romeo and Mercutio]
+Romeo: You are as good as Romeo. Remember yourself.
+[Exeunt]
+[Enter Othello and Tybalt]
+Othello: You are as good as Othello. Remember yourself.
+[Exeunt]
+[Enter Macbeth and Iago]
+Macbeth: You are as good as Macbeth. Remember yourself.
+[Exeunt]
+
+Scene VI: i=2, transitions=0, archived=1.
+[Enter Caliban and Viola]
+Caliban: You are a big hero.
+[Exeunt]
+[Enter Caliban and Miranda]
+Caliban: You are nothing.
+[Exeunt]
+[Enter Viola and Caliban]
+Viola: You are a hero.
+[Exeunt]
+
+Act II: row 2 മുതൽ row 46 വരെ transactional generation.
+
+Scene I: pending wheat = SAVE(wheat^2 + 3*barley + i).
+[Enter Caliban and Lady Macbeth]
+Caliban:
+ You are as good as the sum of the product of Hamlet and Hamlet and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and Viola.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: pending barley = SAVE(barley^2 + 5*salt + wheat).
+[Enter Caliban and Ophelia]
+Caliban:
+ You are as good as the sum of the product of Juliet and Juliet and the product of the sum of a big big hero and a hero and Romeo.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: pending salt = SAVE(salt^2 + 7*bitter + barley).
+[Enter Caliban and Cordelia]
+Caliban:
+ You are as good as the sum of the product of Romeo and Romeo and the product of the sum of the sum of a big big hero and a big hero and a hero and Othello.
+ You are as good as the sum of yourself and Juliet.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene IV: pending bitter = SAVE(bitter^2 + 11*red + salt).
+[Enter Caliban and Desdemona]
+Caliban:
+ You are as good as the sum of the product of Othello and Othello and the product of the sum of the sum of a big big big hero and a big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene V: pending red = SAVE(red^2 + 13*wheat + bitter).
+[Enter Caliban and Portia]
+Caliban:
+ You are as good as the sum of the product of Macbeth and Macbeth and the product of the sum of the sum of a big big big hero and a big big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Act III: commit, archive, loop.
+
+Scene I: അഞ്ച് pending values commit ചെയ്യുന്നു.
+[Enter Lady Macbeth and Hamlet]
+Lady Macbeth: You are as good as Lady Macbeth.
+[Exeunt]
+[Enter Ophelia and Juliet]
+Ophelia: You are as good as Ophelia.
+[Exeunt]
+[Enter Cordelia and Romeo]
+Cordelia: You are as good as Cordelia.
+[Exeunt]
+[Enter Desdemona and Othello]
+Desdemona: You are as good as Desdemona.
+[Exeunt]
+[Enter Portia and Macbeth]
+Portia: You are as good as Portia.
+[Exeunt]
+
+Scene II: committed row archive stack-ുകളിൽ push ചെയ്യുന്നു.
+[Enter Hamlet and Beatrice]
+Hamlet: You are as good as Hamlet. Remember yourself.
+[Exeunt]
+[Enter Juliet and Benedick]
+Juliet: You are as good as Juliet. Remember yourself.
+[Exeunt]
+[Enter Romeo and Mercutio]
+Romeo: You are as good as Romeo. Remember yourself.
+[Exeunt]
+[Enter Othello and Tybalt]
+Othello: You are as good as Othello. Remember yourself.
+[Exeunt]
+[Enter Macbeth and Iago]
+Macbeth: You are as good as Macbeth. Remember yourself.
+[Exeunt]
+
+Scene III: counters പുതുക്കുന്നു.
+[Enter Caliban and Miranda]
+Caliban: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Viola and Caliban]
+Viola: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene IV: row 46 archive ചെയ്തോ എന്ന് നോക്കുന്നു.
+[Enter Viola and Caliban]
+Viola: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Caliban: If so, let us proceed to act IV.
+[Exeunt]
+[Enter Caliban and Viola]
+Caliban: You are as good as the sum of yourself and a hero. Let us return to act II.
+[Exeunt]
+
+
+Act IV: archive reversal രണ്ട് സ്വതന്ത്ര five-value replay families-ലേക്ക്.
+
+Scene I: reverse count = 0.
+[Enter Viola and Ophelia]
+Viola: You are nothing.
+[Exeunt]
+
+Scene II: wheat archive pop; hidden replay Ariel-ലേക്കും visible replay Hamlet-ലേക്കും duplicate ചെയ്യുന്നു.
+[Enter Prospero and Beatrice]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Beatrice and Ariel]
+Beatrice: You are as good as Beatrice. Remember yourself.
+[Exeunt]
+[Enter Beatrice and Hamlet]
+Beatrice: You are as good as Beatrice. Remember yourself.
+[Exeunt]
+
+Scene III: barley archive -> Falstaff + Juliet.
+[Enter Prospero and Benedick]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Benedick and Falstaff]
+Benedick: You are as good as Benedick. Remember yourself.
+[Exeunt]
+[Enter Benedick and Juliet]
+Benedick: You are as good as Benedick. Remember yourself.
+[Exeunt]
+
+Scene IV: salt archive -> Rosalind + Romeo.
+[Enter Prospero and Mercutio]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Mercutio and Rosalind]
+Mercutio: You are as good as Mercutio. Remember yourself.
+[Exeunt]
+[Enter Mercutio and Romeo]
+Mercutio: You are as good as Mercutio. Remember yourself.
+[Exeunt]
+
+Scene V: bitter archive -> Horatio + Othello.
+[Enter Prospero and Tybalt]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Tybalt and Horatio]
+Tybalt: You are as good as Tybalt. Remember yourself.
+[Exeunt]
+[Enter Tybalt and Othello]
+Tybalt: You are as good as Tybalt. Remember yourself.
+[Exeunt]
+
+Scene VI: red archive -> Polonius + Macbeth.
+[Enter Prospero and Iago]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Iago and Polonius]
+Iago: You are as good as Iago. Remember yourself.
+[Exeunt]
+[Enter Iago and Macbeth]
+Iago: You are as good as Iago. Remember yourself.
+[Exeunt]
+
+Scene VII: reverse count increment; 46 ആയാൽ hidden consumer-ലേക്ക്.
+[Enter Viola and Ophelia]
+Viola: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Ophelia and Viola]
+Ophelia: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Viola: If so, let us proceed to act V. Let us return to scene II.
+[Exeunt]
+
+Act V: hidden consumer rows 1..7 മാത്രം consume ചെയ്യുന്നു.
+
+Scene I: hidden count = 0; reverse count output.
+[Enter Prospero and Miranda]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene II: next hidden five-value row pop.
+[Enter Prospero and Ariel]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Prospero and Falstaff]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Prospero and Rosalind]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Prospero and Horatio]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Prospero and Polonius]
+Prospero: Recall your newest memory.
+[Exeunt]
+
+Scene III: hidden count++.
+[Enter Prospero and Miranda]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene IV: hidden count 7 ആയാൽ visible consumer setup; അല്ലെങ്കിൽ അടുത്ത hidden row.
+[Enter Miranda and Prospero]
+Miranda: Am I as good as the sum of the sum of a big big hero and a big hero and a hero?
+Prospero: If so, let us proceed to act VI. Let us return to scene II.
+[Exeunt]
+
+Act VI: hidden count output, visible consumer count reset.
+
+Scene I: hidden count.
+[Enter Prospero and Miranda]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene II: visible count = 0.
+[Enter Prospero and Caliban]
+Prospero: You are nothing.
+[Exeunt]
+
+Act VII: visible consumer rows 1..46 consume ചെയ്യുന്നു.
+
+Scene I: next visible five-value row pop.
+[Enter Prospero and Hamlet]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Recall your newest memory.
+[Exeunt]
+
+Scene II: ആദ്യ visible row ആണെങ്കിൽ row 1 അഞ്ച് values output ചെയ്യുന്നു.
+[Enter Caliban and Prospero]
+Caliban: Am I as good as nothing?
+Prospero: If so, let us proceed to scene III. Let us proceed to scene IV.
+[Exeunt]
+
+Scene III: visible first row = normative row 1.
+[Enter Prospero and Hamlet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene IV: visible count++.
+[Enter Prospero and Caliban]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene V: 46 rows consume ചെയ്താൽ completion; അല്ലെങ്കിൽ loop.
+[Enter Caliban and Prospero]
+Caliban: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to act VIII. Let us return to scene I.
+[Exeunt]
+
+Act VIII: visible consumer completion.
+
+Scene I: visible consume count 46.
+[Enter Prospero and Caliban]
+Prospero: Open your heart.
+[Exeunt]

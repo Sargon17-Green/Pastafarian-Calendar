@@ -1,0 +1,164 @@
+latched order-ിൽ കണ്ടെത്തിയ queried bowl value, അതിന്റെ successor bowl value, സ്ഥിര-ID bowl 6, seal എന്നിവയിൽ നിന്ന് askBowl first/step കണക്കാക്കി, ആദ്യ answer acceptance limit-ൽ തന്നെയാണെന്ന fixture-ിൽ short rank-ും gate gap-ും ഒരൊറ്റ clean Stage 1 source path-ൽ കണക്കാക്കുന്ന പരിശോധന.
+
+Hamlet, queried bowl-ന്റെ final value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, latched order successor bowl-ന്റെ final value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, സ്ഥിര-ID bowl 6-ന്റെ final value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, seal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, selection family size N സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, first answer സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, direction number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, direction step സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, selected short rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, gate gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, M നിർമ്മിക്കുന്ന കഥാപാത്രം.
+Horatio, M നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: askBowl input വായിക്കുന്നു.
+
+Scene I: queried, successor, bowl 6, seal, N വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: M = 2^127 - 1 നിർമ്മിക്കുന്നു.
+[Enter Viola and Horatio]
+Horatio:
+ You are a hero.
+Viola:
+ You are as good as the difference between a big big big big big big big hero and a hero.
+
+Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Viola:
+ Are you better than nothing?
+Horatio:
+ If not, let us proceed to scene IV.
+ You are as good as the product of yourself and a big hero.
+Viola:
+ You are as good as the difference between yourself and a hero.
+ Let us return to scene III.
+
+Scene IV: അവസാന കുറവ്.
+Horatio:
+ You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Act II: askBowl scalar path.
+
+Scene I: first = SAVE((queried+seal+181)^2 + 179*successor + seal).
+[Enter Viola and Lady Macbeth]
+Viola:
+ You are as good as the sum of Hamlet and Othello.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+ You are as good as the sum of yourself and a big big hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the product of yourself and yourself.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Juliet.
+ You are as good as the sum of yourself and the product of a big big big big big hero and Juliet.
+ You are as good as the sum of yourself and the product of a big big big big hero and Juliet.
+ You are as good as the sum of yourself and the product of a big hero and Juliet.
+ You are as good as the sum of yourself and Juliet.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Viola.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: direction number = SAVE((first+seal+1+193)^2 + 193*first + 197*bowl6).
+[Enter Viola and Ophelia]
+Viola:
+ You are as good as the sum of Lady Macbeth and Othello.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the product of yourself and yourself.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Lady Macbeth.
+ You are as good as the sum of yourself and the product of a big big big big big big hero and Lady Macbeth.
+ You are as good as the sum of yourself and Lady Macbeth.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Romeo.
+ You are as good as the sum of yourself and the product of a big big big big big big hero and Romeo.
+ You are as good as the sum of yourself and the product of a big big hero and Romeo.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Viola.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: parity-യിൽ നിന്ന് direction step.
+[Enter Ophelia and Cordelia]
+Ophelia:
+ You are as good as the remainder of the quotient between Ophelia and a big hero.
+Cordelia:
+ Am I as good as a hero?
+Ophelia:
+ If so, let us proceed to scene IV.
+ Let us proceed to scene V.
+[Exeunt]
+
+Scene IV: odd -> plus one.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are a hero.
+ Let us proceed to scene VI.
+[Exeunt]
+
+Scene V: even -> minus one.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the difference between nothing and a hero.
+[Exeunt]
+
+Scene VI: ആദ്യ answer സ്വീകരിക്കപ്പെടുന്ന fixture-ൽ rank = regularMod(first-1,N)+1.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as the difference between Lady Macbeth and a hero.
+ You are as good as the remainder of the quotient between yourself and Macbeth.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene VII: gate gap = 41 + rank.
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as Desdemona.
+ You are as good as the sum of yourself and a big big big big big hero.
+ You are as good as the sum of yourself and a big big big hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene VIII: first, step, rank, gap പുറത്തിടുന്നു.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ Open your heart.
+[Exeunt]

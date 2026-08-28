@@ -1,0 +1,92 @@
+നിയമപരമായ month-weaving move പ്രയോഗിച്ച ശേഷം remaining, openedUpTo, closedUpTo പുതുക്കുന്ന പരിശോധന.
+
+Hamlet, തിരഞ്ഞെടുത്ത മാസത്തിന്റെ remaining എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, തിരഞ്ഞെടുത്ത മാസത്തിന്റെ original length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, തിരഞ്ഞെടുത്ത month ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, openedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, closedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, പുതിയ remaining സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, പുതിയ openedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, പുതിയ closedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: Appendix A-യിലെ applyWeaveMove state transition isolate ചെയ്യുന്നു.
+
+Scene I: remaining, original, j, openedUpTo, closedUpTo വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: output state-ന്റെ opened/closed ഭാഗങ്ങൾ പഴയ state-ൽ നിന്ന് പകർത്തുന്നു.
+[Enter Miranda and Ophelia]
+Miranda:
+ You are as good as Othello.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are as good as Macbeth.
+[Exeunt]
+
+Scene III: remaining original-നോട് തുല്യമെങ്കിൽ ഈ move ആദ്യ തുറക്കലാണ്.
+[Enter Miranda and Hamlet]
+Miranda:
+ Are you better than Juliet?
+ If so, let us proceed to scene V.
+ Are you worse than Juliet?
+ If so, let us proceed to scene V.
+ Let us proceed to scene IV.
+
+Scene IV: openedUpTo month ID ആക്കുന്നു.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ You are as good as Romeo.
+ Let us proceed to scene V.
+
+Scene V: remaining ഒന്ന് കുറയ്ക്കുന്നു.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are as good as the difference between Hamlet and a hero.
+ Are you better than nothing?
+ If so, let us proceed to scene VII.
+ Let us proceed to scene VI.
+
+Scene VI: പുതിയ remaining ശൂന്യമായതിനാൽ closedUpTo month ID ആക്കുന്നു.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are as good as Romeo.
+ Let us proceed to scene VII.
+
+Scene VII: പുതിയ remaining, openedUpTo, closedUpTo പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ Open your heart.
+[Exeunt]

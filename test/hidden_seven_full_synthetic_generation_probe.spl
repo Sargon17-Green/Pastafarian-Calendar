@@ -1,0 +1,218 @@
+Appendix A-യിലെ ഏഴ് hidden drops-ും ഓരോന്നിലെ ഏഴ് grind commits-ും ഒരേ control source-ൽ നടത്തുന്നതായ clean Stage 1 arithmetic-integration probe. ഇത് legal workCounts fixture അല്ല; coefficient mapping വേറെയുള്ള probe-ൽ പരിശോധിക്കുന്നു. ഇവിടെ counts contribution 26 മാത്രം, synthetic stone row `M, M-5, M-6, M-7, M-8` ആണ്. അതിനാൽ ഓരോ hidden seed-ും SAVE കഴിഞ്ഞ് M ആകുന്നു; ഏഴ് grinds കഴിഞ്ഞ് ഓരോ hidden value-വും 132 ആകണം. ഏഴ് outputs കഴിഞ്ഞ് generated hidden count 7 കൂടി പുറത്തിടുന്നു.
+
+Hamlet, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, wheat synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, barley synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, salt synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, bitter synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, red synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, ഇപ്പോഴത്തെ hidden x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, hidden index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, grind index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, generated hidden count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, assignment, SAVE, output സഹായിക്കുന്ന കഥാപാത്രം.
+Miranda, M doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+
+Act I: Mയും synthetic stone row-വും.
+
+Scene I: M നിർമ്മാണത്തിന്റെ തുടക്കം.
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Hamlet and Miranda]
+
+Scene II: exact doubling loop.
+Hamlet: Are you better than nothing?
+Miranda:
+ If not, let us proceed to scene III.
+Hamlet: You are as good as the difference between yourself and a hero.
+Miranda:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene II.
+
+Scene III: M = 2^127 - 1.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene IV: synthetic stones.
+[Enter Hamlet and Juliet]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the difference between Hamlet and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the difference between Hamlet and the sum of a big big hero and a big hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the difference between Hamlet and the sum of the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the difference between Hamlet and a big big big hero.
+[Exeunt]
+
+Scene V: hidden index 1, generated count 0.
+[Enter Prospero and Cordelia]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are nothing.
+[Exeunt]
+
+Act II: hidden seed and seven grinds.
+
+Scene I: ആദ്യ hidden generation ആരംഭിക്കുന്നു.
+[Enter Cordelia and Prospero]
+Cordelia: Am I better than the sum of the sum of a big big hero and a big hero and a hero?
+Prospero: If so, let us proceed to act III.
+[Exeunt]
+
+Scene II: seed = SAVE(26 + five synthetic stones) = M; grind=1.
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of Juliet and Romeo.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the sum of yourself and Macbeth.
+ You are as good as the sum of yourself and Lady Macbeth.
+ You are as good as the sum of yourself and the sum of a big big big big hero and the sum of a big big big hero and a big hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are a hero. Let us proceed to scene III.
+
+Scene III: grind dispatch 1..7; ഓരോ പ്രവേശനത്തിലും stage പുതുക്കുന്നു.
+[Exeunt]
+[Enter Desdemona and Prospero]
+Desdemona: Am I as good as a hero?
+Prospero: If so, let us proceed to scene IV.
+Desdemona: Am I as good as a big hero?
+Prospero: If so, let us proceed to scene V.
+Desdemona: Am I as good as the sum of a big hero and a hero?
+Prospero: If so, let us proceed to scene VI.
+Desdemona: Am I as good as a big big hero?
+Prospero: If so, let us proceed to scene VII.
+Desdemona: Am I as good as the sum of a big big hero and a hero?
+Prospero: If so, let us proceed to scene VIII.
+Desdemona: Am I as good as the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to scene IX.
+Desdemona: Am I as good as the sum of the sum of a big big hero and a big hero and a hero?
+Prospero: If so, let us proceed to scene X.
+Prospero: Let us proceed to scene XI.
+
+Scene IV: grind 1 uses wheat.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of the product of Ophelia and Ophelia and the product of the sum of a big hero and a hero and Ophelia.
+ You are as good as the sum of yourself and Juliet.
+ You are as good as the sum of yourself and a hero.
+ Let us proceed to scene XII.
+
+Scene V: grind 2 uses barley.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of the product of Ophelia and Ophelia and the product of the sum of a big hero and a hero and Ophelia.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the sum of yourself and a big hero.
+ Let us proceed to scene XII.
+
+Scene VI: grind 3 uses salt.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of the product of Ophelia and Ophelia and the product of the sum of a big hero and a hero and Ophelia.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the sum of yourself and the sum of a big hero and a hero.
+ Let us proceed to scene XII.
+
+Scene VII: grind 4 uses bitter.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of the product of Ophelia and Ophelia and the product of the sum of a big hero and a hero and Ophelia.
+ You are as good as the sum of yourself and Macbeth.
+ You are as good as the sum of yourself and a big big hero.
+ Let us proceed to scene XII.
+
+Scene VIII: grind 5 uses red.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of the product of Ophelia and Ophelia and the product of the sum of a big hero and a hero and Ophelia.
+ You are as good as the sum of yourself and Lady Macbeth.
+ You are as good as the sum of yourself and the sum of a big big hero and a hero.
+ Let us proceed to scene XII.
+
+Scene IX: grind 6 uses wheat again.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of the product of Ophelia and Ophelia and the product of the sum of a big hero and a hero and Ophelia.
+ You are as good as the sum of yourself and Juliet.
+ You are as good as the sum of yourself and the sum of a big big hero and a big hero.
+ Let us proceed to scene XII.
+
+Scene X: grind 7 uses barley again.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of the product of Ophelia and Ophelia and the product of the sum of a big hero and a hero and Ophelia.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the sum of yourself and the sum of the sum of a big big hero and a big hero and a hero.
+ Let us proceed to scene XII.
+
+Scene XI: hidden complete; output, count, next hidden index.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of yourself and a hero.
+Cordelia: Am I better than the sum of the sum of a big big hero and a big hero and a hero?
+Prospero: If so, let us proceed to act III. Let us proceed to scene XIII.
+
+Scene XII: SAVE current grind result; increment grind; return to dispatch.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to scene III.
+
+Scene XIII: അടുത്ത hidden seed വീണ്ടും അതേ synthetic fixture-ൽ നിർമ്മിക്കുന്നു.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of Juliet and Romeo.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the sum of yourself and Macbeth.
+ You are as good as the sum of yourself and Lady Macbeth.
+ You are as good as the sum of yourself and the sum of a big big big big hero and the sum of a big big big hero and a big hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are a hero. Let us return to scene III.
+
+Act III: cardinality output.
+
+Scene I: exactly seven hidden outputs were generated.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: Open your heart.
+[Exeunt]

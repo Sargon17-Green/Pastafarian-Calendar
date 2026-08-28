@@ -1,0 +1,68 @@
+Foundation gate-നെ ചുറ്റിയുള്ള രണ്ടു positive gap-ുകളും രണ്ടു negative gap-ുകളും ഉപയോഗിച്ച് gate[-2], gate[-1], gate[0], gate[1], gate[2] ഒരേ ചെറിയ signed store ആയി materialize ചെയ്യുന്ന clean Stage 1 പരീക്ഷണം. gap values ഇതിനകം normative sauce/selection-ൽ നിന്നുള്ളവയെന്ന isolation കരാർ ഇവിടെ സ്വീകരിക്കുന്നു.
+
+Hamlet, foundation gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, positive gap 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, positive gap 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, negative gap 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, negative gap 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, gate minus 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, gate minus 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, gate plus 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, gate plus 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: inputs.
+
+Scene I: foundation-ും നാല് gaps-ും വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Act II: signed gate store.
+
+Scene I: negative side.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the difference between Hamlet and Othello.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the difference between Lady Macbeth and Macbeth.
+[Exeunt]
+
+Scene II: positive side.
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of Hamlet and Juliet.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of Cordelia and Romeo.
+[Exeunt]
+
+Act III: -2,-1,0,+1,+2 output.
+
+Scene I: outputs.
+[Enter Prospero and Ophelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: Open your heart.
+[Exeunt]

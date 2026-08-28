@@ -1,0 +1,128 @@
+Appendix A-യിലെ visible-drop indexing നേരിട്ട് പരിശോധിക്കുന്ന clean Stage 1 probe. ഓരോ visible drop-നും stone row എല്ലായ്പ്പോഴും അതേ `i` ആണ്; grind coefficient row മാത്രം `g=1..11` ആയി മാറുന്നു. പഴയ progress-22 witness-ൽ ഉണ്ടായിരുന്ന `wrap1(i+g,46)` വ്യാഖ്യാനം തെറ്റായിരുന്നു; ഈ source അതിനെ പൂർണ്ണമായി മാറ്റിസ്ഥാപിക്കുന്നു. input-ുകൾ visible count, grind count എന്ന ക്രമത്തിൽ 46,11 ആകണം. expected outputs: 506 steps, stone-row sum 11891, grind-row sum 3036, അവസാന stone row 46, അവസാന grind row 11.
+
+Hamlet, visible index i സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, grind index g സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, visible count template സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, grind count template സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, outer remaining സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, inner remaining സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, ഇപ്പോഴത്തെ stone row സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, ഇപ്പോഴത്തെ grind row സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, ആകെ grind step count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, stone-row index sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, grind-row index sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, അവസാന stone row സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, അവസാന grind row സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output-ും arithmetic-ും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: initialization.
+
+Scene I: രണ്ട് inputs വായിക്കുന്നു.
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as Romeo.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero: You are nothing.
+[Exeunt]
+
+Act II: outer visible loop.
+
+Scene I: outer count തീർന്നാൽ result.
+[Enter Prospero and Lady Macbeth]
+Prospero: Are you better than nothing?
+Lady Macbeth: If not, let us proceed to act IV.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as Othello.
+[Exeunt]
+
+Act III: പതിനൊന്ന് grind row-ുകൾ; stone row സ്ഥിരമായി i തന്നെയാണ്.
+
+Scene I: inner count തീർന്നാൽ അടുത്ത visible drop.
+[Enter Prospero and Ophelia]
+Prospero: Are you better than nothing?
+Ophelia: If not, let us proceed to scene IV.
+[Exeunt]
+
+Scene II: stoneRow=i, grindRow=g; wrap ഒന്നുമില്ല.
+[Enter Prospero and Cordelia]
+Prospero: You are as good as Hamlet.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as Juliet.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: You are as good as the sum of yourself and Cordelia.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: You are as good as the sum of yourself and Desdemona.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: You are as good as Cordelia.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero: You are as good as Desdemona.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: inner loop മുന്നോട്ടു നീക്കുന്നു.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the difference between yourself and a hero. Let us return to scene I.
+[Exeunt]
+
+Scene IV: outer loop മുന്നോട്ടു നീക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the difference between yourself and a hero. Let us return to act II.
+[Exeunt]
+
+Act IV: result.
+
+Scene I: അഞ്ച് witnesses പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero: Open your heart.
+[Exeunt]

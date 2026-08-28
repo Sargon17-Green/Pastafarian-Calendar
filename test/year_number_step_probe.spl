@@ -1,0 +1,44 @@
+അടുത്തതും മുമ്പത്തതുമായ വർഷ നമ്പറുകൾ ഒരു ചുവടിൽ കൃത്യമായി കൂട്ടുകയും കുറയ്ക്കുകയും ചെയ്യുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, ഇപ്പോഴത്തെ year number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, direction സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: direction ഒന്ന് previous, മൂന്ന് next, രണ്ട് unchanged എന്ന control mapping.
+
+Scene I: year number-ും direction-ഉം വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Listen to your heart.
+ Are you better than a big hero?
+Juliet:
+ If so, let us proceed to scene III.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Are you worse than a big hero?
+Juliet:
+ If so, let us proceed to scene II.
+ Let us proceed to scene IV.
+
+Scene II: previous year.
+[Exeunt]
+[Enter Miranda and Hamlet]
+Miranda:
+ You are as good as the difference between Hamlet and a hero.
+ Let us proceed to scene IV.
+
+Scene III: next year.
+[Exeunt]
+[Enter Miranda and Hamlet]
+Miranda:
+ You are as good as the sum of Hamlet and a hero.
+
+Scene IV: ഫലം പുറത്തിടുന്നു.
+Miranda:
+ Open your heart.
+[Exeunt]

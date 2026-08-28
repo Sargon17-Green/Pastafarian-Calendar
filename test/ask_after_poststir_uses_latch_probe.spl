@@ -1,0 +1,61 @@
+12 post-stir ഘട്ടങ്ങൾ കഴിഞ്ഞ ശേഷവും askBowl successor lookup drop-46 latch-ൽ നിന്നുതന്നെയാകണം എന്ന clean Stage 1 integration fixture. latched order `3,1,6,2,5,4`; post-stir diagnostic order `1,2,3,4,5,6`; queried bowl ID `4`. അതിനാൽ authoritative successor `3`, diagnostic-only successor `5`. ഈ വ്യത്യാസം latch overwrite ചെയ്യരുതെന്ന invariant വ്യക്തമാക്കുന്നു.
+
+Hamlet, queried bowl ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, latched position 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, latched position 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, latched position 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, latched position 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, latched position 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, latched position 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, authoritative successor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, diagnostic-only successor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, assignment-വും output-വും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: രണ്ടു order-ുകളുടെ distinguishing fixture.
+
+Scene I: queried=4; latched order 3,1,6,2,5,4.
+[Enter Prospero and Hamlet]
+Prospero: You are a big big hero.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big big hero and a big hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are a big big hero.
+[Exeunt]
+
+Act II: latched successor lookup.
+
+Scene I: queried 4 latched position 6-ൽ; circular successor position 1 = 3.
+[Enter Juliet and Cordelia]
+Juliet: You are as good as Juliet.
+[Exeunt]
+
+Act III: post-stir diagnostic order-ന്റെ വേർതിരിച്ച lookup.
+
+Scene I: identity diagnostic order-ൽ 4-ന്റെ successor 5.
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of a big big hero and a hero.
+[Exeunt]
+
+Act IV: രണ്ടും output; authoritative answer ആദ്യത്തേത്.
+
+Scene I: latched successor, diagnostic successor.
+[Enter Prospero and Cordelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: Open your heart.
+[Exeunt]

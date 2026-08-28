@@ -1,0 +1,205 @@
+മൂന്ന് year-pair candidates-ന്റെ gate-gap count, day length എന്നിവ clean Appendix A predicate `gaps >= 6` കൂടാതെ `252 <= length <= 5778` പ്രകാരം പരിശോധിച്ച് മൂന്ന് validity bit-ുകളും ആകെ valid count-ും പുറത്തിടുന്ന Stage 1 പരീക്ഷണം.
+
+Hamlet, candidate 1 gate-gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, candidate 1 length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, candidate 2 gate-gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, candidate 2 length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, candidate 3 gate-gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, candidate 3 length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, candidate 1 validity bit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, candidate 2 validity bit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, candidate 3 validity bit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, valid count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, കുറഞ്ഞ വർഷദൈർഘ്യം 252 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, കൂടിയ വർഷദൈർഘ്യം 5778 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: മൂന്ന് clean candidate predicates.
+
+Scene I: inputs, bounds, flags, count.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as the difference between a big big big big big big big big hero and a big big hero.
+[Exeunt]
+[Enter Prospero and Beatrice]
+Prospero:
+ You are a big big big big big big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+ You are as good as the sum of yourself and a big hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are nothing.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ You are nothing.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero:
+ You are nothing.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are nothing.
+
+Scene II: candidate 1 bounds പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Hamlet and Prospero]
+Hamlet:
+ Am I worse than the sum of a big big hero and a big hero?
+Prospero:
+ If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Juliet and Rosalind]
+Juliet:
+ Am I worse than you?
+Rosalind:
+ If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Juliet and Beatrice]
+Juliet:
+ Am I better than you?
+Beatrice:
+ If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+
+Scene III: candidate 1 valid output, candidate 2-ലേക്ക്.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ Open your heart.
+ Let us proceed to scene V.
+
+Scene IV: candidate 1 invalid output.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ Open your heart.
+
+Scene V: candidate 2 bounds പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Romeo and Prospero]
+Romeo:
+ Am I worse than the sum of a big big hero and a big hero?
+Prospero:
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Othello and Rosalind]
+Othello:
+ Am I worse than you?
+Rosalind:
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Othello and Beatrice]
+Othello:
+ Am I better than you?
+Beatrice:
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+
+Scene VI: candidate 2 valid output, candidate 3-ലേക്ക്.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ Open your heart.
+ Let us proceed to scene VIII.
+
+Scene VII: candidate 2 invalid output.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ Open your heart.
+
+Scene VIII: candidate 3 bounds പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Macbeth and Prospero]
+Macbeth:
+ Am I worse than the sum of a big big hero and a big hero?
+Prospero:
+ If so, let us proceed to scene X.
+[Exeunt]
+[Enter Lady Macbeth and Rosalind]
+Lady Macbeth:
+ Am I worse than you?
+Rosalind:
+ If so, let us proceed to scene X.
+[Exeunt]
+[Enter Lady Macbeth and Beatrice]
+Lady Macbeth:
+ Am I better than you?
+Beatrice:
+ If so, let us proceed to scene X.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+
+Scene IX: candidate 3 valid output, total count.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ Open your heart.
+ Let us proceed to scene XI.
+
+Scene X: candidate 3 invalid output, total count.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ Open your heart.
+
+Scene XI: മൂന്ന് candidates പൂർത്തിയായി.
+[Exeunt]

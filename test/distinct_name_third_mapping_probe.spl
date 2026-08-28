@@ -1,0 +1,91 @@
+ആദ്യ രണ്ടു canonicalIndex ordinal-ുകൾ നീക്കിയ ശേഷമുള്ള remaining-list ordinal-നെ original canonicalIndex ordinal-ിലേക്ക് മാപ്പ് ചെയ്യുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, ആദ്യ നീക്കിയ original ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, രണ്ടാം നീക്കിയ original ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, മൂന്നാം remaining-list ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ചെറിയ removed ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, വലിയ removed ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, original ordinal result സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: രണ്ടു removals ascending threshold ആയി പ്രയോഗിക്കുന്നു.
+
+Scene I: രണ്ടു removed ordinal-ുകളും remaining ordinal-ും വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: min/max removed ordinal കണ്ടെത്തുന്നു.
+[Enter Hamlet and Juliet]
+Hamlet:
+ Am I worse than you?
+Juliet:
+ If so, let us proceed to scene III.
+ Let us proceed to scene IV.
+
+Scene III: first ചെറിയത്.
+[Exeunt]
+[Enter Hamlet and Othello]
+Hamlet:
+ You are as good as myself.
+[Exeunt]
+[Enter Juliet and Macbeth]
+Juliet:
+ You are as good as myself.
+ Let us proceed to scene V.
+
+Scene IV: second ചെറിയത്.
+[Exeunt]
+[Enter Juliet and Othello]
+Juliet:
+ You are as good as myself.
+[Exeunt]
+[Enter Hamlet and Macbeth]
+Hamlet:
+ You are as good as myself.
+
+Scene V: result ആദ്യം remaining ordinal തന്നെ.
+[Exeunt]
+[Enter Romeo and Lady Macbeth]
+Romeo:
+ You are as good as myself.
+
+Scene VI: ചെറിയ removed ordinal-ന്റെ സ്ഥാനമൊഴിവ് കടന്നാൽ result കൂട്ടുന്നു.
+[Exeunt]
+[Enter Lady Macbeth and Prospero]
+Lady Macbeth:
+ Am I worse than Othello?
+Prospero:
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+
+Scene VII: വലിയ removed ordinal-ന്റെ സ്ഥാനമൊഴിവ് കടന്നാൽ result വീണ്ടും കൂട്ടുന്നു.
+[Exeunt]
+[Enter Lady Macbeth and Prospero]
+Lady Macbeth:
+ Am I worse than Macbeth?
+Prospero:
+ If so, let us proceed to scene VIII.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+
+Scene VIII: original ordinal പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ Open your heart.
+[Exeunt]

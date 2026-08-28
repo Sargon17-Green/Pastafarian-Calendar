@@ -1,0 +1,83 @@
+Distinct-name lexicographic unranking-ന്റെ ആദ്യ position തിരഞ്ഞെടുപ്പ് exact block arithmetic ഉപയോഗിച്ച് isolate ചെയ്യുന്ന പരിശോധന.
+
+Hamlet, remaining master-name എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, suffix length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, block വലിപ്പം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, candidate ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, candidate block-ിനുള്ള residual one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, zero-based falling-factorial index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input/output സഹായിക്കുന്ന കഥാപാത്രം.
+Cordelia, rank-1 താൽക്കാലികമായി സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+
+Act I: block = fallingFactorial(n-1, suffixLength), പിന്നെ quotient/remainder വഴി ആദ്യ candidate.
+
+Scene I: inputs വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: block ഒന്നായി, index ശൂന്യമായി തുടങ്ങുന്നു.
+[Enter Miranda and Othello]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are nothing.
+
+Scene III: index suffix length-നെ എത്തിയോ എന്ന് നോക്കുന്നു.
+[Enter Juliet and Prospero]
+Juliet:
+ Am I as good as Prospero?
+Prospero:
+ If so, let us proceed to scene V.
+[Exeunt]
+
+Scene IV: block-നെ n-1-index കൊണ്ട് ഗുണിച്ച് index കൂട്ടുന്നു.
+[Enter Miranda and Othello]
+Miranda:
+ You are as good as the product of Othello and the difference between the difference between Hamlet and a hero and Prospero.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are as good as the sum of Prospero and a hero.
+ Let us return to scene III.
+
+Scene V: rank-1 നിർമ്മിക്കുന്നു.
+[Exeunt]
+[Enter Romeo and Cordelia]
+Romeo:
+ You are as good as the difference between myself and a hero.
+[Exeunt]
+
+Scene VI: candidate ordinal = floor((rank-1)/block)+1.
+[Enter Cordelia and Macbeth]
+Cordelia:
+ You are as good as the sum of the quotient between Cordelia and Othello and a hero.
+[Exeunt]
+
+Scene VII: residual rank = mod(rank-1,block)+1.
+[Enter Othello and Lady Macbeth]
+Othello:
+ You are as good as the sum of the remainder of the quotient between Cordelia and Othello and a hero.
+[Exeunt]
+
+Scene VIII: രണ്ട് ഫലങ്ങളും പുറത്തിടുന്നു.
+[Enter Miranda and Macbeth]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ Open your heart.
+[Exeunt]

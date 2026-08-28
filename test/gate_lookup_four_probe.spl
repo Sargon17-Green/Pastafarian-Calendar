@@ -1,0 +1,177 @@
+നാലു കർശനമായി ഉയരുന്ന gate day-കളിൽ target-ന്റെ at-or-before, at-or-after, exact ordinal കണ്ടെത്തുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, target day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ഒന്നാം gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, രണ്ടാം gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, മൂന്നാം gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, നാലാം gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, at-or-before ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, at-or-after ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, exact ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, input output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: നാല് gate day-കളും target-ഉം വായിക്കുന്നു.
+
+Scene I: input വായിക്കുന്നു.
+[Enter Polonius and Juliet]
+Polonius:
+ Listen to your heart.
+[Exeunt]
+[Enter Polonius and Romeo]
+Polonius:
+ Listen to your heart.
+[Exeunt]
+[Enter Polonius and Othello]
+Polonius:
+ Listen to your heart.
+[Exeunt]
+[Enter Polonius and Macbeth]
+Polonius:
+ Listen to your heart.
+[Exeunt]
+[Enter Polonius and Hamlet]
+Polonius:
+ Listen to your heart.
+
+Scene II: default at-or-before ഒന്നും exact ഒന്നും ഇല്ല; at-or-after ഒന്നാമത്തേതായി തുടങ്ങുന്നു.
+[Exeunt]
+[Enter Polonius and Prospero]
+Polonius:
+ You are nothing.
+[Exeunt]
+[Enter Polonius and Miranda]
+Polonius:
+ You are a hero.
+[Exeunt]
+[Enter Polonius and Ariel]
+Polonius:
+ You are nothing.
+
+Scene III: gate ഒന്ന് പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Hamlet and Juliet]
+Hamlet:
+ Are you worse than Juliet?
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Polonius and Prospero]
+Polonius:
+ You are a hero.
+[Exeunt]
+[Enter Hamlet and Juliet]
+Hamlet:
+ Are you as good as Juliet?
+ If so, let us proceed to scene IV.
+ Let us proceed to scene V.
+
+Scene IV: exact gate ഒന്ന്.
+[Exeunt]
+[Enter Polonius and Ariel]
+Polonius:
+ You are a hero.
+ Let us proceed to scene VII.
+
+Scene V: gate രണ്ട് പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Polonius and Miranda]
+Polonius:
+ You are a big hero.
+[Exeunt]
+[Enter Hamlet and Romeo]
+Hamlet:
+ Are you worse than Romeo?
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Polonius and Prospero]
+Polonius:
+ You are a big hero.
+[Exeunt]
+[Enter Hamlet and Romeo]
+Hamlet:
+ Are you as good as Romeo?
+ If so, let us proceed to scene VI.
+ Let us proceed to scene VIII.
+
+Scene VI: exact gate രണ്ട്.
+[Exeunt]
+[Enter Polonius and Ariel]
+Polonius:
+ You are a big hero.
+ Let us proceed to scene VII.
+
+Scene VII: ആദ്യ രണ്ടു gate-ുകളിൽ നിന്നുള്ള ഫലം പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Polonius and Prospero]
+Polonius:
+ Open your heart.
+[Exeunt]
+[Enter Polonius and Miranda]
+Polonius:
+ Open your heart.
+[Exeunt]
+[Enter Polonius and Ariel]
+Polonius:
+ Open your heart.
+[Exeunt]
+
+Scene VIII: gate മൂന്ന് പരിശോധിക്കുന്നു.
+[Enter Polonius and Miranda]
+Polonius:
+ You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Hamlet and Othello]
+Hamlet:
+ Are you worse than Othello?
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Polonius and Prospero]
+Polonius:
+ You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Hamlet and Othello]
+Hamlet:
+ Are you as good as Othello?
+ If so, let us proceed to scene IX.
+ Let us proceed to scene X.
+
+Scene IX: exact gate മൂന്ന്.
+[Exeunt]
+[Enter Polonius and Ariel]
+Polonius:
+ You are as good as the sum of a big hero and a hero.
+ Let us proceed to scene VII.
+
+Scene X: gate നാല് പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Polonius and Miranda]
+Polonius:
+ You are a big big hero.
+[Exeunt]
+[Enter Hamlet and Macbeth]
+Hamlet:
+ Are you worse than Macbeth?
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Polonius and Prospero]
+Polonius:
+ You are a big big hero.
+[Exeunt]
+[Enter Hamlet and Macbeth]
+Hamlet:
+ Are you as good as Macbeth?
+ If so, let us proceed to scene XI.
+ Let us proceed to scene XII.
+
+Scene XI: exact gate നാല്.
+[Exeunt]
+[Enter Polonius and Ariel]
+Polonius:
+ You are a big big hero.
+ Let us proceed to scene VII.
+
+Scene XII: target നാലാമത്തെ gate-നുശേഷം; at-or-after ഇല്ലെന്ന് zero ഉപയോഗിക്കുന്നു.
+[Exeunt]
+[Enter Polonius and Miranda]
+Polonius:
+ You are nothing.
+ Let us proceed to scene VII.

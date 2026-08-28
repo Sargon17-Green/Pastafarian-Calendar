@@ -1,0 +1,228 @@
+രണ്ട് തുടർച്ചയായ post-stir six-bowl rounds-ൽ ആദ്യ round-ന്റെ ആറു pending values commit ചെയ്ത ശേഷം രണ്ടാം round അതേ committed state മാത്രം old snapshot ആയി വായിക്കുന്ന transactional ownership പരീക്ഷണം. isolation fixture-ക്കായി savedBowlSum രണ്ടു round-ലും 1 ആയും order identity ആയും നിശ്ചയിച്ചിരിക്കുന്നു; അതിനാൽ ഇത് 1A/order തിരഞ്ഞെടുപ്പ് വീണ്ടും പരിശോധിക്കാതെ snapshot -> six pending -> commit -> next snapshot എന്ന ശൃംഖല മാത്രം പരിശോധിക്കുന്നു.
+
+Hamlet, bowl 1 current state സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, bowl 2 current state സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, bowl 3 current state സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, bowl 4 current state സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, bowl 5 current state സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, bowl 6 current state സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, pending 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, pending 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, pending 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, pending 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, pending 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, pending 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, pre-square s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: round 1; old state എല്ലാം പൂജ്യം, saved value 1, stir 1, identity order.
+
+Scene I: bowl 1 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Juliet.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the product of Rosalind and Rosalind.
+[Exeunt]
+
+Scene II: bowl 2 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Romeo.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the product of Rosalind and Rosalind.
+[Exeunt]
+
+Scene III: bowl 3 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Othello.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the product of Rosalind and Rosalind.
+[Exeunt]
+
+Scene IV: bowl 4 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Othello.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big big big big hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are as good as the product of Rosalind and Rosalind.
+[Exeunt]
+
+Scene V: bowl 5 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Othello.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and the sum of a big big big big hero and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: You are as good as the product of Rosalind and Rosalind.
+[Exeunt]
+
+Scene VI: bowl 6 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Lady Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and the sum of a big big big big big hero and a big big hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: You are as good as the product of Rosalind and Rosalind.
+[Exeunt]
+
+Act II: round 1 commit.
+
+Scene I: pending values current bowls-ിലേക്ക് ഒരുമിച്ചു logical commit ചെയ്യുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: You are as good as Ophelia.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are as good as Cordelia.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as Desdemona.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as Portia.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as Viola.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as Miranda.
+[Exeunt]
+
+Act III: round 2; saved value 1, stir 2, identity order, committed round-1 state old snapshot ആണ്.
+
+Scene I: bowl 1 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Juliet.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Lady Macbeth and Juliet.
+ Open your heart.
+[Exeunt]
+
+Scene II: bowl 2 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Romeo.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the sum of yourself and a big big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Hamlet and Romeo.
+ Open your heart.
+[Exeunt]
+
+Scene III: bowl 3 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Othello.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the sum of yourself and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Juliet and Othello.
+ Open your heart.
+[Exeunt]
+
+Scene IV: bowl 4 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Othello.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Romeo and Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene V: bowl 5 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Othello.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the sum of yourself and the sum of a big big big big hero and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Othello and Lady Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene VI: bowl 6 pending.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Lady Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the sum of yourself and the sum of a big big big big big hero and a big big hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Macbeth and Hamlet.
+ Open your heart.
+[Exeunt]

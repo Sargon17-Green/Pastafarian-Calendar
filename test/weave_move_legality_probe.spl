@@ -1,0 +1,110 @@
+മാസ നെയ്ത്ത് DP-യിൽ ഒരു മാസം അടുത്ത സ്ഥാനത്ത് വെക്കാമോ എന്ന് നിർണ്ണയിക്കുന്ന legal-move പരിശോധന.
+
+Hamlet, തിരഞ്ഞെടുത്ത മാസത്തിന്റെ remaining എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, തിരഞ്ഞെടുത്ത മാസത്തിന്റെ original length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, തിരഞ്ഞെടുത്ത month ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, openedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, closedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, ആവശ്യമായ അടുത്ത open ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, ആവശ്യമായ അടുത്ത close ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, നിയമസാധുതാ ഫലം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: remaining, first-opening order, last-closing order എന്നീ മൂന്ന് നിയമങ്ങൾ പരിശോധിക്കുന്നു.
+
+Scene I: remaining, original, j, openedUpTo, closedUpTo വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: remaining ശൂന്യമെങ്കിൽ move അസാധുവാണ്.
+[Enter Miranda and Hamlet]
+Miranda:
+ Are you better than nothing?
+ If so, let us proceed to scene III.
+ Let us proceed to scene XII.
+
+Scene III: മാസം മുമ്പ് തുറന്നിട്ടുണ്ടോ എന്ന് പരിശോധിക്കുന്നു.
+Miranda:
+ Are you worse than Juliet?
+ If so, let us proceed to scene VII.
+ Let us proceed to scene IV.
+
+Scene IV: തുറന്നിട്ടില്ലെങ്കിൽ j നിർബന്ധമായി openedUpTo plus one ആയിരിക്കണം.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are as good as the sum of Othello and a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Are you better than Lady Macbeth?
+ If so, let us proceed to scene XII.
+ Are you worse than Lady Macbeth?
+ If so, let us proceed to scene XII.
+ Let us proceed to scene VII.
+
+Scene V: diagnostic ആയി ഉപയോഗിക്കാത്ത ശൂന്യ രംഗം.
+[Exeunt]
+
+Scene VI: diagnostic ആയി ഉപയോഗിക്കാത്ത ശൂന്യ രംഗം.
+
+Scene VII: ഈ move മാസത്തെ അടയ്ക്കുമോ എന്ന് പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Miranda and Hamlet]
+Miranda:
+ Are you better than a hero?
+ If so, let us proceed to scene XI.
+ Let us proceed to scene VIII.
+
+Scene VIII: remaining ഒന്ന് ആയതിനാൽ j നിർബന്ധമായി closedUpTo plus one ആയിരിക്കണം.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ You are as good as the sum of Macbeth and a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Are you better than Ophelia?
+ If so, let us proceed to scene XII.
+ Are you worse than Ophelia?
+ If so, let us proceed to scene XII.
+ Let us proceed to scene XI.
+
+Scene IX: diagnostic ആയി ഉപയോഗിക്കാത്ത ശൂന്യ രംഗം.
+[Exeunt]
+
+Scene X: diagnostic ആയി ഉപയോഗിക്കാത്ത ശൂന്യ രംഗം.
+
+Scene XI: എല്ലാ നിയമങ്ങളും പാലിച്ചതിനാൽ move സാധുവാണ്.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are a hero.
+ Open your heart.
+[Exeunt]
+
+Scene XII: move അസാധുവാണ്.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are nothing.
+ Open your heart.
+[Exeunt]

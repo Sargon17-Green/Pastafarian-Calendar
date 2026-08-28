@@ -1,0 +1,117 @@
+lengths 3,2 എന്ന ചെറിയ exact weaving family-യുടെ lexicographic rank തുറക്കുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, position ഒന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, position രണ്ട് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, position മൂന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, position നാല് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, position അഞ്ച് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: നിയമാനുസൃത family 11122, 11212, 12112 എന്ന ക്രമത്തിൽ rank resolve ചെയ്യുന്നു.
+
+Scene I: rank വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+ Are you better than a big hero?
+Hamlet:
+ If so, let us proceed to scene III.
+[Exeunt]
+[Enter Miranda and Hamlet]
+Miranda:
+ Are you better than a hero?
+Hamlet:
+ If so, let us proceed to scene II.
+ Let us proceed to scene IV.
+
+Scene II: rank രണ്ട് -> 11212.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are a big hero.
+ Let us proceed to scene V.
+
+Scene III: rank മൂന്ന് -> 12112.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are a big hero.
+ Let us proceed to scene V.
+
+Scene IV: rank ഒന്ന് -> 11122.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are a big hero.
+
+Scene V: അഞ്ചു monthId-കൾ പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ Open your heart.
+[Exeunt]

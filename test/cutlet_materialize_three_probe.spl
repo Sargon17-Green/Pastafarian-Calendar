@@ -1,0 +1,61 @@
+മൂന്ന് cutlet-ുകളുടെ gate boundary day-കളിൽ നിന്ന് firstDay/lastDay materialize ചെയ്യുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, opening gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ഒന്നാം closing gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, രണ്ടാം closing gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, മൂന്നാം closing gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, താൽക്കാലിക firstDay സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: നാല് അനുക്രമ gate day-കൾ വായിച്ച് മൂന്ന് inclusive cutlet intervals പുറത്തിടുന്നു.
+
+Scene I: input വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Listen to your heart.
+
+Scene II: ഒന്നാം cutlet firstDay=open+1, lastDay=first close.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are as good as the sum of Hamlet and a hero.
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Open your heart.
+
+Scene III: രണ്ടാം cutlet firstDay=previous close+1, lastDay=second close.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are as good as the sum of Juliet and a hero.
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Open your heart.
+
+Scene IV: മൂന്നാം cutlet firstDay=previous close+1, lastDay=third close.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are as good as the sum of Romeo and a hero.
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Open your heart.
+[Exeunt]

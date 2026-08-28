@@ -1,0 +1,88 @@
+ഒരു കിണ്ണത്തിന്റെ ആദ്യ മൂല്യം നോർമറ്റീവ് സൂത്രത്തിൽ നിന്ന് കണക്കാക്കുന്ന പരിശോധന.
+
+Hamlet, കർമ്മമനുഷ്യന്റെ എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ചോദിക്കപ്പെട്ട മനുഷ്യന്റെ എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, ദൂരം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ബന്ധം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, ദിശ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കിണ്ണത്തിന്റെ സ്ഥിര ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, അതേ കിണ്ണത്തിന്റെ അഭാജ്യസംഖ്യ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ ഇടക്കാലവും അന്തിമവും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, മഹാമനുഷ്യൻ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, മഹാമനുഷ്യൻ നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: initialBowls-ന്റെ ഒരു ID-യ്ക്കുള്ള exact formula.
+
+Scene I: ഏഴ് scalar input-ുകൾ വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+[Enter Portia and Viola]
+Viola:
+ You are a hero.
+Portia:
+ You are as good as the difference between a big big big big big big big hero and a hero.
+
+Scene III: നൂറ്റിയിരുപത്തേഴു കൃത്യമായ ഇരട്ടിക്കലുകൾ.
+Portia:
+ Are you better than nothing?
+Viola:
+ If not, let us proceed to scene IV.
+ You are as good as the product of yourself and a big hero.
+Portia:
+ You are as good as the difference between yourself and a hero.
+ Let us return to scene III.
+
+Scene IV: മഹാമനുഷ്യന്റെ അവസാന കുറവ്.
+Viola:
+ You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene V: s പിന്നെ SAVE(s squared plus bowlId).
+[Enter Portia and Prospero]
+Portia:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of Juliet and Lady Macbeth.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the sum of yourself and Macbeth.
+ You are as good as the sum of yourself and the product of Ophelia and Ophelia.
+ You are as good as the sum of the product of yourself and yourself and Lady Macbeth.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Portia.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene VI: അന്തിമ കിണ്ണമൂല്യം പുറത്തിടുന്നു.
+[Enter Miranda and Prospero]
+Miranda:
+ Open your heart.
+[Exeunt]

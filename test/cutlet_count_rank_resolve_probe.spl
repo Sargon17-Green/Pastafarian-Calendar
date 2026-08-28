@@ -1,0 +1,66 @@
+Gate-gap count-ിൽ നിന്ന് cutlet-count candidate family-യും one-based rank-ന്റെ തിരഞ്ഞെടുപ്പും കണക്കാക്കുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, year-ിലെ gate-gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, candidate count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, തിരഞ്ഞെടുത്ത cutlet count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: candidate range 6 മുതൽ min(17,gateGaps) വരെ.
+
+Scene I: gate-gap countയും rank-ഉം വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: ആറിനും താഴെയെങ്കിൽ family ശൂന്യം.
+[Enter Prospero and Hamlet]
+Prospero:
+ Are you worse than the sum of a big hero and a big big hero?
+ If so, let us proceed to scene VI.
+[Exeunt]
+
+Scene III: candidate count ആദ്യം gateGaps-5.
+[Enter Prospero and Romeo]
+Prospero:
+ You are as good as the difference between Hamlet and the sum of a big big hero and a hero.
+ Are you better than the product of a big big hero and the sum of a big hero and a hero?
+ If so, let us proceed to scene IV.
+ Let us proceed to scene V.
+
+Scene IV: പതിനേഴിന് മുകളിലുള്ള gateGaps-ൽ candidate count പന്ത്രണ്ടായി cap ചെയ്യുന്നു.
+Prospero:
+ You are as good as the product of a big big hero and the sum of a big hero and a hero.
+
+Scene V: chosen K = 5 + rank; countയും Kയും പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ You are as good as the sum of Juliet and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Open your heart.
+[Exeunt]
+
+Scene VI: ശൂന്യ family-യ്ക്ക് 0,0.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ You are nothing.
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ You are nothing.
+ Open your heart.
+[Exeunt]

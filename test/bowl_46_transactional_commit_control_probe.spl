@@ -1,0 +1,122 @@
+നാല്പത്താറ് bowl round commit epoch-ുകൾ മുഴുവൻ transactional snapshot discipline പാലിക്കുന്നുണ്ടോ എന്ന് പരിശോധിക്കുന്ന clean Stage 1 control. ഓരോ round r-ലും ആറു pending values ആദ്യം old bowl[r] + r ആയി കണക്കാക്കുന്നു; ആറു pending-ഉം തയ്യാറായശേഷം മാത്രമാണ് ആറു old values commit ചെയ്യുന്നത്. ഇത് normative bowl formula-യുടെ പകരമല്ല; full 46-round ownership invariant മാത്രം isolate ചെയ്യുന്നു.
+
+Hamlet, bowl 1 old value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, bowl 2 old value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, bowl 3 old value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, bowl 4 old value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, bowl 5 old value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, bowl 6 old value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, pending 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, pending 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, pending 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, pending 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, pending 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, pending 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, ഇപ്പോഴത്തെ round index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, ശേഷിക്കുന്ന round count-ും input-output control-ും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: initialization.
+
+Scene I: round count വായിക്കുകയും bowls 1..6 ആക്കുകയും ചെയ്യുന്നു.
+[Enter Ariel and Prospero]
+Ariel: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a big big hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big hero and a big hero.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: You are a hero.
+
+Act II: transactional rounds.
+
+Scene I: round count തീർന്നാൽ result.
+[Exeunt]
+[Enter Ariel and Prospero]
+Ariel: Are you better than nothing?
+Prospero: If not, let us proceed to act III.
+
+Scene II: ആറു pending values പഴയ snapshot-ിൽ നിന്ന് നിർമ്മിക്കുന്നു.
+[Exeunt]
+[Enter Ariel and Ophelia]
+Ariel: You are as good as the sum of Hamlet and Ariel.
+[Exeunt]
+[Enter Ariel and Cordelia]
+Ariel: You are as good as the sum of Juliet and Ariel.
+[Exeunt]
+[Enter Ariel and Desdemona]
+Ariel: You are as good as the sum of Romeo and Ariel.
+[Exeunt]
+[Enter Ariel and Portia]
+Ariel: You are as good as the sum of Othello and Ariel.
+[Exeunt]
+[Enter Ariel and Viola]
+Ariel: You are as good as the sum of Macbeth and Ariel.
+[Exeunt]
+[Enter Ariel and Miranda]
+Ariel: You are as good as the sum of Lady Macbeth and Ariel.
+
+Scene III: pending snapshot മുഴുവനും തയ്യാറായശേഷം commit ചെയ്യുന്നു.
+[Exeunt]
+[Enter Ophelia and Hamlet]
+Ophelia: You are as good as myself.
+[Exeunt]
+[Enter Cordelia and Juliet]
+Cordelia: You are as good as myself.
+[Exeunt]
+[Enter Desdemona and Romeo]
+Desdemona: You are as good as myself.
+[Exeunt]
+[Enter Portia and Othello]
+Portia: You are as good as myself.
+[Exeunt]
+[Enter Viola and Macbeth]
+Viola: You are as good as myself.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda: You are as good as myself.
+
+Scene IV: round index കൂട്ടുകയും remaining കുറയ്ക്കുകയും ചെയ്യുന്നു.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Ariel and Prospero]
+Ariel: You are as good as the difference between yourself and a hero. Let us return to scene I.
+
+Act III: result.
+
+Scene I: committed six-bowl state പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]

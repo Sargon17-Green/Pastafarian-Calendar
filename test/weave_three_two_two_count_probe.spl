@@ -1,0 +1,38 @@
+lengths `3,2,2` ആയ മൂന്ന് മാസങ്ങളുടെ legal weaving family-യുടെ exact small-case count പരിശോധിക്കുന്ന clean Stage 1 regression. ആദ്യ മാസം ആദ്യമായി തുറക്കണം, മൂന്നാം മാസം അവസാനം അടയണം. അകത്തെ ഏക മൂന്നാം-month occurrence ഏത് സ്ഥാനത്താണെന്ന അഞ്ച് cases-ൽ valid binary placements `0,1,2,3,3` ആയി എണ്ണപ്പെടുന്നു; ആകെ 9. ഇത് arbitrary-m DP-യുടെ പകരം അല്ല, ചെറിയ exact brute-force witness മാത്രമാണ്.
+
+Hamlet, case 1 count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, case 2 count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, case 3 count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, case 4 count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, case 5 count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, total count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: five exact cases.
+
+Scene I: case counts 0,1,2,3,3.
+[Enter Prospero and Hamlet]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero.
+
+Scene II: exact total.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the sum of Hamlet and Juliet.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the sum of yourself and Macbeth.
+ Open your heart.
+[Exeunt]

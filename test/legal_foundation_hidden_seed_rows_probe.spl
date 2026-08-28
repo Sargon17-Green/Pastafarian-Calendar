@@ -1,0 +1,107 @@
+Appendix A-യിലെ ഏഴ് hidden coefficient rows ഒരു legal same-Foundation workCounts fixture-ിൽ പരിശോധിക്കുന്ന clean Stage 1 no-wrap പരീക്ഷണം. action day = target day = Foundation ആയതിനാൽ action=1,target=1,distance=1,connection=2,direction=2. stone-row sum ഓരോ row-ക്കും 0 ആയി isolate ചെയ്യുന്നു. expected raw/SAVE-identical seed outputs: 36,57,78,99,120,141,162.
+
+Hamlet, action 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, target 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, distance 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, connection 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, direction 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, current seed സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, assignment, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: legal same-Foundation workCounts.
+
+Scene I: 1,1,1,2,2.
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+
+Act II: seven coefficient rows.
+
+Scene I: row 1 = 3,4,6,8.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of a big big hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a big hero and Othello.
+ You are as good as the sum of yourself and the product of a big big big hero and Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene II: row 2 = 5,7,10,12.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big hero and a big hero and a hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big big big hero and a big hero and Othello.
+ You are as good as the sum of yourself and the product of the sum of a big big big hero and a big big hero and Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene III: row 3 = 7,10,14,16.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big hero and a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big big big hero and a big hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big hero and a big big hero and a big hero and Othello.
+ You are as good as the sum of yourself and the product of a big big big big hero and Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene IV: row 4 = 9,13,18,20.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big big big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big hero and a big big hero and a hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big big big big hero and a big hero and Othello.
+ You are as good as the sum of yourself and the product of the sum of a big big big big hero and a big big hero and Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene V: row 5 = 11,16,22,24.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big hero and a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of a big big big big hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big hero and a big hero and Othello.
+ You are as good as the sum of yourself and the product of the sum of a big big big big hero and a big big big hero and Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene VI: row 6 = 13,19,26,28.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big big big hero and the sum of a big big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big big big big hero and the sum of a big hero and a hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big big big big hero and the sum of a big big big hero and a big hero and Othello.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and a big big hero and Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene VII: row 7 = 15,22,30,32.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big hero and a big big hero and the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big hero and a big hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and Othello.
+ You are as good as the sum of yourself and the product of a big big big big big hero and Macbeth.
+ Open your heart.
+[Exeunt]

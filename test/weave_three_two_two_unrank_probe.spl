@@ -1,0 +1,283 @@
+lengths 3,2,2 clean weaving family-യുടെ ഒൻപത് legal rows മുഴുവൻ lexicographic ക്രമത്തിൽ one-based rank വഴി materialize ചെയ്യുന്ന Stage 1 exact-family പരീക്ഷണം. first-open order 1,2,3യും last-close order 1,2,3യും ഒരേസമയം പാലിക്കണം.
+
+Hamlet, rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, position 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, position 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, position 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, position 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, position 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, position 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, position 7 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: rank dispatch.
+
+Scene I: rank വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you as good as a hero?
+Hamlet: If so, let us proceed to scene II.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you as good as a big hero?
+Hamlet: If so, let us proceed to scene III.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you as good as the sum of a big hero and a hero?
+Hamlet: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you as good as a big big hero?
+Hamlet: If so, let us proceed to scene V.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you as good as the sum of a big big hero and a hero?
+Hamlet: If so, let us proceed to scene VI.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you as good as the sum of a big big hero and a big hero?
+Hamlet: If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you as good as the sum of a big big hero and the sum of a big hero and a hero?
+Hamlet: If so, let us proceed to scene VIII.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you as good as a big big big hero?
+Hamlet: If so, let us proceed to scene IX.
+ Let us proceed to scene X.
+
+Scene II: rank 1 -> 1112233.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act II.
+
+Scene III: rank 2 -> 1112323.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act II.
+
+Scene IV: rank 3 -> 1121233.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act II.
+
+Scene V: rank 4 -> 1121323.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act II.
+
+Scene VI: rank 5 -> 1123123.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act II.
+
+Scene VII: rank 6 -> 1211233.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act II.
+
+Scene VIII: rank 7 -> 1211323.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act II.
+
+Scene IX: rank 8 -> 1213123.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act II.
+
+Scene X: rank 9 -> 1231123.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big hero and a hero.
+
+Act II: ഏഴ് positions output.
+
+Scene I: row പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: Open your heart.
+[Exeunt]

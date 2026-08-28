@@ -1,0 +1,194 @@
+Appendix A-യിലെ legal same-Foundation workCounts, actual stone row 1-ൽ നിന്നുള്ള transactional row 2, പിന്നെ visible drop i=2 seed-ും ആദ്യ grind-ും ഒരൊറ്റ clean Stage 1 path-ൽ ബന്ധിപ്പിക്കുന്ന probe. expected outputs: seed 37213, first grind 1384919409.
+
+Hamlet, action count 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, target count 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, distance count 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, connection count 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, direction count 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, current wheat stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, current barley stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, current salt stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, current bitter stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, current red stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, pending wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, pending barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, pending salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, pending bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, pending red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, visible current x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, M doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, assignment, SAVE, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: legal workCounts, M, stone row 1.
+
+Scene I: workCounts = 1,1,1,2,2.
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+
+Scene II: M = 2^127 - 1.
+[Enter Prospero and Horatio]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Polonius]
+Prospero: You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Horatio and Polonius]
+
+Scene III: exact doubling.
+Horatio: Are you better than nothing?
+Polonius:
+ If not, let us proceed to scene IV.
+Horatio: You are as good as the difference between yourself and a hero.
+Polonius:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene III.
+
+Scene IV: subtract one.
+[Exeunt]
+[Enter Prospero and Horatio]
+Prospero: You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene V: row 1 = 17,29,43,71,101.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of a big big big big big big hero and the sum of a big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are as good as the sum of a big big big big big big hero and the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+
+Act II: row 2-ന്റെ അഞ്ചു pending values ഒരേ row-1 snapshot-ൽ നിന്ന്.
+
+Scene I: pending wheat = SAVE(wheat^2 + 3*barley + 2).
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as the product of Lady Macbeth and Lady Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Ophelia.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Horatio.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: pending barley = SAVE(barley^2 + 5*salt + wheat).
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Ophelia and Ophelia.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Cordelia.
+ You are as good as the sum of yourself and Lady Macbeth.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Horatio.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: pending salt = SAVE(salt^2 + 7*bitter + barley).
+[Enter Prospero and Ariel]
+Prospero:
+ You are as good as the product of Cordelia and Cordelia.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big hero and a big hero and a hero and Desdemona.
+ You are as good as the sum of yourself and Ophelia.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Horatio.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene IV: pending bitter = SAVE(bitter^2 + 11*red + salt).
+[Enter Prospero and Caliban]
+Prospero:
+ You are as good as the product of Desdemona and Desdemona.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big hero and a big hero and a hero and Portia.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Horatio.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene V: pending red = SAVE(red^2 + 13*wheat + bitter).
+[Enter Prospero and Falstaff]
+Prospero:
+ You are as good as the product of Portia and Portia.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big hero and a big big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and Desdemona.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Horatio.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Act III: transactional commit row 2.
+
+Scene I: അഞ്ചു pending values committed stone state ആക്കുന്നു.
+[Enter Viola and Lady Macbeth]
+Viola: You are as good as Viola.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda: You are as good as Miranda.
+[Exeunt]
+[Enter Ariel and Cordelia]
+Ariel: You are as good as Ariel.
+[Exeunt]
+[Enter Caliban and Desdemona]
+Caliban: You are as good as Caliban.
+[Exeunt]
+[Enter Falstaff and Portia]
+Falstaff: You are as good as Falstaff.
+[Exeunt]
+
+Act IV: visible drop i=2 seed, predecessor fixture 1,1,1.
+
+Scene I: seed = SAVE(weighted row 2 + 1 + 3 + 5 + 2).
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as the product of Lady Macbeth and Hamlet.
+ You are as good as the sum of yourself and the product of Ophelia and Juliet.
+ You are as good as the sum of yourself and the product of Cordelia and Romeo.
+ You are as good as the sum of yourself and the product of Desdemona and Othello.
+ You are as good as the sum of yourself and the product of Portia and Macbeth.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and the sum of a big hero and a hero.
+ You are as good as the sum of yourself and the sum of a big big hero and a hero.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Horatio.
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+[Exeunt]
+
+Act V: visible grind 1 = 3,5,7,11,WHEAT; stone row remains 2.
+
+Scene I: first grind, i*grind term does not exist in Appendix A visible recurrence.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Rosalind.
+ You are as good as the sum of yourself and the sum of a big big hero and a hero.
+ You are as good as the sum of yourself and the sum of the sum of a big big hero and a big hero and a hero.
+ You are as good as the sum of yourself and the sum of the sum of a big big big hero and a big hero and a hero.
+ You are as good as the sum of yourself and Lady Macbeth.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Horatio.
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+[Exeunt]

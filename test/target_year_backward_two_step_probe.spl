@@ -1,0 +1,80 @@
+(open,close] membership പാലിച്ച് target day current open gate-ൽ അല്ലെങ്കിൽ അതിനു മുമ്പിൽ വന്നാൽ previousYear sequential ആയി പരമാവധി രണ്ടു ചുവടുകൾ നടക്കുന്നതു പരിശോധിക്കുന്ന clean Stage 1 probe. jump search ഒന്നുമില്ല.
+
+Hamlet, target day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ഇപ്പോഴത്തെ year number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, ഇപ്പോഴത്തെ open gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ഇപ്പോഴത്തെ close gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, ആദ്യ previous open gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, രണ്ടാം previous open gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: inputs.
+
+Scene I: ആറു values വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Listen to your heart.
+
+Act II: sequential previous-year walk.
+
+Scene I: target current open-നേക്കാൾ വലുതെങ്കിൽ current year തന്നെയാണ്.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you better than Romeo?
+Hamlet: If so, let us proceed to act III.
+
+Scene II: ആദ്യ previousYear transition; old open പുതിയ close ആകുന്നു.
+[Exeunt]
+[Enter Romeo and Othello]
+Romeo: You are as good as myself.
+[Exeunt]
+[Enter Macbeth and Romeo]
+Macbeth: You are as good as myself.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are as good as the difference between yourself and a hero.
+
+Scene III: target പുതിയ open-നേക്കാൾ വലുതെങ്കിൽ ഇവിടെ നിൽക്കുന്നു.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you better than Romeo?
+Hamlet: If so, let us proceed to act III.
+
+Scene IV: രണ്ടാം previousYear transition.
+[Exeunt]
+[Enter Romeo and Othello]
+Romeo: You are as good as myself.
+[Exeunt]
+[Enter Lady Macbeth and Romeo]
+Lady Macbeth: You are as good as myself.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are as good as the difference between yourself and a hero.
+
+Act III: result.
+
+Scene I: year number, open, close പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]

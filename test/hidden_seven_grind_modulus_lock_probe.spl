@@ -1,0 +1,102 @@
+Appendix A-യിലെ hidden-drop ഏഴ് grind recurrence-കളും SAVE-യും ഒരൊറ്റ loop-ൽ പരിശോധിക്കുന്ന clean Stage 1 modulus-lock fixture. ആരംഭ x=M ആണ്; grind g-ൽ synthetic stone value M-g ആകുന്നതിനാൽ ഓരോ update-നും result വീണ്ടും M തന്നെയാകണം.
+
+Hamlet, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ഇപ്പോഴത്തെ hidden value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, grind number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ഇപ്പോഴത്തെ synthetic stone value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, pending raw/SAVE value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, flow-വും assignment-വും സഹായിക്കുന്ന കഥാപാത്രം.
+Miranda, M നിർമ്മിക്കാൻ ശേഷിക്കുന്ന doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+
+Act I: M നിർമ്മിക്കുന്നു.
+
+Scene I: ഒന്നിൽ നിന്ന് 2 power 127 minus 1 വരെ.
+[Enter Prospero and Hamlet]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Hamlet and Miranda]
+
+Scene II: 127 doublings.
+Hamlet:
+ Are you better than nothing?
+Miranda:
+ If not, let us proceed to scene III.
+Hamlet:
+ You are as good as the difference between yourself and a hero.
+Miranda:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene II.
+
+Scene III: M-ന്റെ അവസാന minus one.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero:
+ You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Act II: ഏഴ് hidden grinds.
+
+Scene I: x=M, grind=1.
+[Enter Hamlet and Juliet]
+Hamlet:
+ You are as good as Hamlet.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ You are a hero.
+
+Scene II: ഏഴ് grind-ുകളും തീർന്നോ എന്ന് നോക്കുന്നു.
+Romeo:
+ Am I better than the sum of the sum of a big big hero and a big hero and a hero?
+Prospero:
+ If so, let us proceed to scene VIII.
+
+Scene III: ഈ grind-ന്റെ stone=M-g.
+[Exeunt]
+[Enter Hamlet and Othello]
+Hamlet:
+ You are as good as the difference between Hamlet and Romeo.
+
+Scene IV: x squared plus 3x plus stone plus grind.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ You are as good as the product of Juliet and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ Are you worse than nothing?
+Macbeth:
+ If so, let us proceed to scene V.
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us proceed to scene VI.
+
+Scene V: negative Euclidean remainder repair.
+Prospero:
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+
+Scene VI: pending value commit ചെയ്ത് output ചെയ്യുന്നു.
+[Exeunt]
+[Enter Macbeth and Juliet]
+Macbeth:
+ You are as good as Macbeth.
+ Open your heart.
+
+Scene VII: grind number കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene II.
+
+Scene VIII: ഏഴ് grinds പൂർത്തിയായി.
+[Exeunt]

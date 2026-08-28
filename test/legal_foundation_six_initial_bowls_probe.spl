@@ -1,0 +1,85 @@
+Appendix A-യിലെ initialBowls formula ഒരു legal workCounts fixture-ോടെ ആറു bowl ID-കളിലും പരിശോധിക്കുന്ന clean Stage 1 no-wrap പരീക്ഷണം. action day = target day = Foundation ആയതിനാൽ workCounts കൃത്യമായി action=1,target=1,distance=1,connection=2,direction=2. prime values 17,19,23,29,31,37. formula `s = action + target*bowlId + distance + connection + direction + prime^2`, ശേഷം `bowl = SAVE(s^2+bowlId)`. ഈ fixture M-നെക്കാൾ ചെറുതാണ്. expected outputs: 87617,136163,289447,724205,944789,1907167.
+
+Hamlet, bowl 1 prime 17 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, bowl 2 prime 19 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, bowl 3 prime 23 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, bowl 4 prime 29 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, bowl 5 prime 31 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, bowl 6 prime 37 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, current s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, current bowl result സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, assignment, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: legal Foundation workCounts-നുള്ള fixed primes.
+
+Scene I: primes 17,19,23.
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and the sum of a big hero and a hero.
+[Exeunt]
+
+Scene II: primes 29,31,37.
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+
+Act II: six legal initial bowls.
+
+Scene I: bowl 1, s=17^2+7=296.
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the product of Hamlet and Hamlet and the sum of the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the product of Ophelia and Ophelia and a hero. Open your heart.
+[Exeunt]
+
+Scene II: bowl 2, s=19^2+8=369.
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the product of Juliet and Juliet and a big big big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the product of Ophelia and Ophelia and a big hero. Open your heart.
+[Exeunt]
+
+Scene III: bowl 3, s=23^2+9=538.
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the product of Romeo and Romeo and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the product of Ophelia and Ophelia and the sum of a big hero and a hero. Open your heart.
+[Exeunt]
+
+Scene IV: bowl 4, s=29^2+10=851.
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the product of Othello and Othello and the sum of a big big big hero and a big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the product of Ophelia and Ophelia and a big big hero. Open your heart.
+[Exeunt]
+
+Scene V: bowl 5, s=31^2+11=972.
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the product of Macbeth and Macbeth and the sum of the sum of a big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the product of Ophelia and Ophelia and the sum of a big big hero and a hero. Open your heart.
+[Exeunt]
+
+Scene VI: bowl 6, s=37^2+12=1381.
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the product of Lady Macbeth and Lady Macbeth and the sum of a big big big hero and a big big hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the product of Ophelia and Ophelia and the sum of a big big hero and a big hero. Open your heart.
+[Exeunt]

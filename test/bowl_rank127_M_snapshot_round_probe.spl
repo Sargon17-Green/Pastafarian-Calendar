@@ -1,0 +1,286 @@
+rank 127-ന്റെ materialized order 2,1,4,3,5,6, drop=M, six old bowls എല്ലാം M, actual stone row 1 എന്നിവ ഉപയോഗിച്ച് മൂന്ന് pours-ും six-position bowl update-ും ഒരൊറ്റ clean Stage 1 source-ൽ പരിശോധിക്കുന്ന probe. outputs bowl-ID order-ൽ 1158,401,5045,2503,10206,295; തുടർന്ന് raw bowl sum 19608, post-stir-1 saved sum 19757, അതിന്റെ bowl-order rank 317.
+
+Hamlet, M-sized drop-ും common old-bowl value-ും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, WHEAT 17 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, BARLEY 29 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, SALT 43 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, BITTER 71 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, RED 101 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, position 1 pour സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, position 2 pour സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, position 3 pour സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, pending bowl ID 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, pending bowl ID 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, pending bowl ID 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, pending bowl ID 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, pending bowl ID 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, pending bowl ID 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, pre-square sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, raw bowl sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, post-stir saved sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Shylock, 720 divisor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, M doubling count പിന്നീട് rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, assignment, SAVE, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: M, row-1 stones, divisor.
+
+Scene I: M = 2^127 - 1.
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Beatrice]
+Prospero: You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Hamlet and Beatrice]
+
+Scene II: exact doubling.
+Hamlet: Are you better than nothing?
+Beatrice:
+ If not, let us proceed to scene III.
+Hamlet: You are as good as the difference between yourself and a hero.
+Beatrice:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene II.
+
+Scene III: subtract one.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene IV: actual row 1 stones.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big big big big big big hero and the sum of a big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big big big big big hero and the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+
+Scene V: 720 = 512+128+64+16.
+[Enter Prospero and Shylock]
+Prospero:
+ You are a big big big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+[Exeunt]
+
+Act II: rank-127 order 2,1,4,3,5,6-ന്റെ ആദ്യ മൂന്ന് positions-ലേക്കുള്ള pours.
+
+Scene I: position 1, bowl 2, WHEAT, +3.
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and the product of Juliet and Hamlet.
+ You are as good as the sum of yourself and the sum of a big hero and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: position 2, bowl 1, BARLEY, +5.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and the product of Romeo and Hamlet.
+ You are as good as the sum of yourself and the sum of a big big hero and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: position 3, bowl 4, SALT, +7.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and the product of Othello and Hamlet.
+ You are as good as the sum of yourself and the sum of the sum of a big big hero and a big hero and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Act III: six bowl positions; എല്ലാ old reads-ും common M snapshot-ൽ നിന്ന്.
+
+Scene I: position 1 -> bowl 2, stone WHEAT, pour 1.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of a big hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Ophelia.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the sum of yourself and Juliet.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: position 2 -> bowl 1, stone BARLEY, pour 2.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of a big hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the sum of yourself and Romeo.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: position 3 -> bowl 4, stone SALT, pour 3.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of a big hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Desdemona.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the sum of yourself and Othello.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and the sum of a big hero and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene IV: position 4 -> bowl 3, stone BITTER, no pour.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of a big hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the sum of yourself and Macbeth.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and a big big hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene V: position 5 -> bowl 5, stone RED, no pour.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of a big hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the sum of yourself and Lady Macbeth.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and the sum of a big big hero and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene VI: position 6 -> bowl 6, stone WHEAT, no pour.
+[Enter Prospero and Rosalind]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of a big hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the sum of yourself and Juliet.
+[Exeunt]
+[Enter Prospero and Falstaff]
+Prospero:
+ You are as good as the product of Rosalind and Rosalind.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and the sum of a big big hero and a big hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Act IV: bowl-ID outputs, തുടർന്ന് post-stir-1 bridge.
+
+Scene I: six committed candidates bowl ID 1..6 order-ൽ output.
+[Enter Prospero and Portia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Falstaff]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene II: raw bowl sum.
+[Enter Prospero and Horatio]
+Prospero:
+ You are as good as Portia.
+ You are as good as the sum of yourself and Viola.
+ You are as good as the sum of yourself and Miranda.
+ You are as good as the sum of yourself and Ariel.
+ You are as good as the sum of yourself and Caliban.
+ You are as good as the sum of yourself and Falstaff.
+ Open your heart.
+[Exeunt]
+
+Scene III: savedStirSum = SAVE(rawSum + 149).
+[Enter Prospero and Polonius]
+Prospero:
+ You are as good as Horatio.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+ You are as good as the sum of yourself and a big big hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+[Exeunt]
+
+Scene IV: rank = 1 + regularMod(saved-1,720).
+[Enter Prospero and Beatrice]
+Prospero:
+ You are as good as the difference between Polonius and a hero.
+ You are as good as the remainder of the quotient between yourself and Shylock.
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+[Exeunt]

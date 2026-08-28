@@ -1,0 +1,97 @@
+Appendix A-യിലെ ആദ്യ stone row `17,29,43,71,101` എന്ന പഴയ snapshot-ിൽ നിന്ന് row 2-ന്റെ അഞ്ചു പുതിയ stone values ഒരുമിച്ച് കണക്കാക്കുന്ന Stage 1 no-wrap fixture. ഈ fixture-യിലെ എല്ലാ raw values-ും 1 മുതൽ M വരെ ആയതിനാൽ SAVE അവയെ മാറ്റുന്നില്ല.
+
+Hamlet, പഴയ wheat value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, പഴയ barley value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, പഴയ salt value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, പഴയ bitter value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, പഴയ red value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, row index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, പുതിയ wheat value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, പുതിയ barley value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, പുതിയ salt value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, പുതിയ bitter value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, പുതിയ red value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, initialization-ും output-ും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: ആദ്യ stone snapshot.
+
+Scene I: row 1-ന്റെ അഞ്ചു values-ും row index 2-വും സ്ഥാപിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big big big big big hero and a big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big big big hero and a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a big hero.
+[Exeunt]
+
+Act II: അഞ്ചു simultaneous formulas.
+
+Scene I: wheat2 = wheat1^2 + 3*barley1 + 2.
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and Lady Macbeth.
+[Exeunt]
+
+Scene II: barley2 = barley1^2 + 5*salt1 + wheat1.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the product of Juliet and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Romeo.
+ You are as good as the sum of yourself and Hamlet.
+[Exeunt]
+
+Scene III: salt2 = salt1^2 + 7*bitter1 + barley1.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as the product of Romeo and Romeo.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big hero and a big hero and a hero and Othello.
+ You are as good as the sum of yourself and Juliet.
+[Exeunt]
+
+Scene IV: bitter2 = bitter1^2 + 11*red1 + salt1.
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Othello and Othello.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big hero and a big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and Romeo.
+[Exeunt]
+
+Scene V: red2 = red1^2 + 13*wheat1 + bitter1.
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as the product of Macbeth and Macbeth.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big hero and a big big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Othello.
+[Exeunt]
+
+Act III: row 2 പുറത്തിടുന്നു.
+
+Scene I: അഞ്ചു values output.
+[Enter Prospero and Ophelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: Open your heart.
+[Exeunt]

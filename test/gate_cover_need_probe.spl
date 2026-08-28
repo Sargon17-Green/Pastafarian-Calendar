@@ -1,0 +1,75 @@
+ഇപ്പോൾ അറിയുന്ന ഏറ്റവും ഇടത്തേയും വലത്തേയും gate day-കളോട് ഒരു day താരതമ്യം ചെയ്ത് backward അല്ലെങ്കിൽ forward വിപുലീകരണം വേണമോ എന്ന് പറയുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, അറിയുന്ന ഇടത്തേയറ്റം gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, അറിയുന്ന വലത്തേയറ്റം gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, ചോദിക്കുന്ന day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, backward expansion flag സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, forward expansion flag സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: lazy gate coverage direction.
+
+Scene I: known minimum, known maximum, day വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+
+Scene II: flags ശൂന്യമാക്കുന്നു.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ You are nothing.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ You are nothing.
+
+Scene III: day ഇടത്തേയറ്റത്തേക്കാൾ ചെറുതാണെങ്കിൽ backward flag.
+[Exeunt]
+[Enter Romeo and Hamlet]
+Romeo:
+ Are you worse than Hamlet?
+Hamlet:
+ If so, let us proceed to scene IV.
+ Let us proceed to scene V.
+
+Scene IV: backward മാത്രം.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ You are a hero.
+ Let us proceed to scene VII.
+
+Scene V: day വലത്തേയറ്റത്തേക്കാൾ വലുതാണെങ്കിൽ forward flag.
+[Exeunt]
+[Enter Romeo and Juliet]
+Romeo:
+ Are you better than Juliet?
+Juliet:
+ If so, let us proceed to scene VI.
+ Let us proceed to scene VII.
+
+Scene VI: forward മാത്രം.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ You are a hero.
+
+Scene VII: flags പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ Open your heart.
+[Exeunt]

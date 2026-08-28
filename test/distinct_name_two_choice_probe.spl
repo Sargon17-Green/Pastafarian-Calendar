@@ -1,0 +1,158 @@
+Distinct-name lexicographic unrank-ന്റെ ആദ്യ രണ്ടു canonicalIndex തിരഞ്ഞെടുപ്പുകളും residual rank-ഉം പരിശോധിക്കുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, remaining master-name count n സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, തിരഞ്ഞെടുക്കേണ്ട മൊത്തം പേരുകളുടെ എണ്ണം k സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ആദ്യ block size സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, രണ്ടാം block size സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, loop factor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, loop count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, ആദ്യ original candidate ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, ആദ്യ residual rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, രണ്ടാം remaining-list ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, രണ്ടാം original candidate ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, രണ്ടാം residual rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: രണ്ട് falling-factorial block-ുകൾ നിർമ്മിക്കുന്നു.
+
+Scene I: n, k, rank വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: ആദ്യ block P(n-1,k-1) ആരംഭിക്കുന്നു.
+[Enter Prospero and Othello]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the difference between Hamlet and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the difference between Juliet and a hero.
+
+Scene III: ആദ്യ falling factorial loop.
+Prospero:
+ Are you better than nothing?
+ If not, let us proceed to scene IV.
+[Exeunt]
+[Enter Lady Macbeth and Othello]
+Lady Macbeth:
+ You are as good as the product of Othello and myself.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the difference between yourself and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the difference between yourself and a hero.
+ Let us return to scene III.
+
+Scene IV: ആദ്യ candidate, residual rank.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the difference between Romeo and a hero.
+ You are as good as the remainder of the quotient between yourself and Othello.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the difference between Romeo and a hero.
+ You are as good as the quotient between yourself and Othello.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene V: രണ്ടാം block P(n-2,k-2) ആരംഭിക്കുന്നു.
+[Enter Prospero and Macbeth]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the difference between Hamlet and a big hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the difference between Juliet and a big hero.
+
+Scene VI: രണ്ടാം falling factorial loop.
+Prospero:
+ Are you better than nothing?
+ If not, let us proceed to scene VII.
+[Exeunt]
+[Enter Lady Macbeth and Macbeth]
+Lady Macbeth:
+ You are as good as the product of Macbeth and myself.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the difference between yourself and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the difference between yourself and a hero.
+ Let us return to scene VI.
+
+Scene VII: രണ്ടാം remaining ordinal, residual rank.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero:
+ You are as good as the difference between Portia and a hero.
+ You are as good as the remainder of the quotient between yourself and Macbeth.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as the difference between Portia and a hero.
+ You are as good as the quotient between yourself and Macbeth.
+ You are as good as the sum of yourself and a hero.
+
+Scene VIII: ആദ്യ തിരഞ്ഞെടുപ്പ് നീക്കിയ original list-ിലേക്ക് രണ്ടാം ordinal മാപ്പ് ചെയ്യുന്നു.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero:
+ Are you worse than Cordelia?
+ If so, let us proceed to scene IX.
+ Let us proceed to scene X.
+
+Scene IX: രണ്ടാം original ordinal unchanged.
+[Exeunt]
+[Enter Viola and Miranda]
+Viola:
+ You are as good as myself.
+ Let us proceed to scene XI.
+
+Scene X: ആദ്യ ordinal കടന്നാൽ original ordinal ഒന്നുകൂടി.
+[Exeunt]
+[Enter Viola and Miranda]
+Viola:
+ You are as good as the sum of myself and a hero.
+
+Scene XI: മൂന്ന് outputs പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero:
+ Open your heart.
+[Exeunt]

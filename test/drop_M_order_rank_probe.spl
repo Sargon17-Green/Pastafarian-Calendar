@@ -1,0 +1,58 @@
+Appendix A bowl-order rank formula `1+regularMod(drop-1,720)` കൃത്യമായ M-sized drop-ിൽ പരിശോധിക്കുന്ന clean Stage 1 probe. ഈ fixture-ൽ drop=M=2^127-1; expected one-based rank 127 ആണ്.
+
+Hamlet, Mയും drop-ും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, 720 divisor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, flow-വും assignment-വും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: M നിർമ്മിക്കുന്നു.
+
+Scene I: one, count 127.
+[Enter Prospero and Hamlet]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Hamlet and Juliet]
+
+Scene II: doubling loop.
+Hamlet:
+ Are you better than nothing?
+Juliet:
+ If not, let us proceed to scene III.
+Hamlet:
+ You are as good as the difference between yourself and a hero.
+Juliet:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene II.
+
+Scene III: M=2 power 127 minus 1.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero:
+ You are as good as the difference between yourself and a hero.
+
+Act II: 720 divisor-ും rank-ും.
+
+Scene I: 720 നിർമ്മിക്കുന്നു.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ You are a big big big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+
+Scene II: one-based rank.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ You are as good as the difference between Hamlet and a hero.
+ You are as good as the remainder of the quotient between yourself and Romeo.
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+[Exeunt]

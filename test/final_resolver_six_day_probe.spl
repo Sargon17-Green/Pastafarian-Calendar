@@ -1,0 +1,393 @@
+ആറ് ദിവസമുള്ള ചെറിയ materialized structure-ൽ നിന്ന് canonical indices ഉപയോഗിച്ച് കൃത്യമായി അഞ്ചു normative fields resolve ചെയ്യുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, year number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, target day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, year first day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ഒന്നാം cutlet last day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, ഒന്നാം cutlet canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, രണ്ടാം cutlet canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, ഒന്നാം weaving monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, രണ്ടാം weaving monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, മൂന്നാം weaving monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, നാലാം weaving monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, അഞ്ചാം weaving monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, ആറാം weaving monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, month ഒന്ന് canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, month രണ്ട് canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Shylock, selected cutlet canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, dayInCutlet സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, selected monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, selected month canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+King Lear, dayInMonth സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, control input output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: structure fixture വായിക്കുന്നു.
+
+Scene I: year, target, first day, cutlet boundary/name IDs വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ Listen to your heart.
+
+Scene II: ആറു weaving monthId-കൾ വായിക്കുന്നു.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Cordelia]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Desdemona]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Portia]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Viola]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ Listen to your heart.
+
+Scene III: രണ്ട് month canonicalIndex-കൾ വായിക്കുന്നു.
+[Exeunt]
+[Enter Miranda and Ariel]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Caliban]
+Miranda:
+ Listen to your heart.
+
+Act II: cutlet-ും dayInCutlet-ും resolve ചെയ്യുന്നു.
+
+Scene I: target ഒന്നാം cutlet-ൽ ആണോ എന്ന് പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Juliet and Othello]
+Juliet:
+ Are you better than Othello?
+ If so, let us proceed to scene III.
+[Exeunt]
+[Enter Miranda and Shylock]
+Miranda:
+ You are as good as Macbeth.
+[Exeunt]
+[Enter Miranda and Falstaff]
+Miranda:
+ You are as good as the sum of the difference between Juliet and Romeo and a hero.
+ Let us proceed to scene IV.
+
+Scene III: രണ്ടാം cutlet; first day ഒന്നാം last day+1.
+[Exeunt]
+[Enter Miranda and Shylock]
+Miranda:
+ You are as good as Lady Macbeth.
+[Exeunt]
+[Enter Miranda and Falstaff]
+Miranda:
+ You are as good as the difference between Juliet and Othello.
+
+Scene IV: year offset one-based position കണക്കാക്കുന്നു.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ You are as good as the sum of the difference between Juliet and Romeo and a hero.
+ Are you better than the sum of a big big hero and a big hero?
+Horatio:
+ If so, let us proceed to scene X.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ Are you better than the sum of a big big hero and a hero?
+Horatio:
+ If so, let us proceed to scene IX.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ Are you better than a big big hero?
+Horatio:
+ If so, let us proceed to scene VIII.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ Are you better than the sum of a big hero and a hero?
+Horatio:
+ If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ Are you better than a big hero?
+Horatio:
+ If so, let us proceed to scene VI.
+ Let us proceed to scene V.
+
+Scene V: position ഒന്ന്.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ You are as good as Ophelia.
+ Let us proceed to scene XI.
+
+Scene VI: position രണ്ട്.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ You are as good as Cordelia.
+ Let us proceed to scene XII.
+
+Scene VII: position മൂന്ന്.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ You are as good as Desdemona.
+ Let us proceed to scene XIII.
+
+Scene VIII: position നാല്.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ You are as good as Portia.
+ Let us proceed to scene XIV.
+
+Scene IX: position അഞ്ച്.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ You are as good as Viola.
+ Let us proceed to scene XV.
+
+Scene X: position ആറു.
+[Exeunt]
+[Enter Miranda and Horatio]
+Miranda:
+ You are as good as Prospero.
+ Let us proceed to scene XVI.
+
+Act III: selected monthId-ന്റെ prefix occurrence count.
+
+Scene XI: prefix ഒന്ന്.
+[Exeunt]
+[Enter Miranda and King Lear]
+Miranda:
+ You are a hero.
+ Let us proceed to scene XX.
+
+Scene XII: prefix രണ്ട്.
+[Exeunt]
+[Enter Miranda and King Lear]
+Miranda:
+ You are nothing.
+[Exeunt]
+[Enter Horatio and Ophelia]
+Horatio:
+ Are you as good as Ophelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Cordelia]
+Horatio:
+ Are you as good as Cordelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+ Let us proceed to scene XX.
+
+Scene XIII: prefix മൂന്ന്.
+[Exeunt]
+[Enter Miranda and King Lear]
+Miranda:
+ You are nothing.
+[Exeunt]
+[Enter Horatio and Ophelia]
+Horatio:
+ Are you as good as Ophelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Cordelia]
+Horatio:
+ Are you as good as Cordelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Desdemona]
+Horatio:
+ Are you as good as Desdemona?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+ Let us proceed to scene XX.
+
+Scene XIV: prefix നാല്.
+[Exeunt]
+[Enter Miranda and King Lear]
+Miranda:
+ You are nothing.
+[Exeunt]
+[Enter Horatio and Ophelia]
+Horatio:
+ Are you as good as Ophelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Cordelia]
+Horatio:
+ Are you as good as Cordelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Desdemona]
+Horatio:
+ Are you as good as Desdemona?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Portia]
+Horatio:
+ Are you as good as Portia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+ Let us proceed to scene XX.
+
+Scene XV: prefix അഞ്ച്.
+[Exeunt]
+[Enter Miranda and King Lear]
+Miranda:
+ You are nothing.
+[Exeunt]
+[Enter Horatio and Ophelia]
+Horatio:
+ Are you as good as Ophelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Cordelia]
+Horatio:
+ Are you as good as Cordelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Desdemona]
+Horatio:
+ Are you as good as Desdemona?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Portia]
+Horatio:
+ Are you as good as Portia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Viola]
+Horatio:
+ Are you as good as Viola?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+ Let us proceed to scene XX.
+
+Scene XVI: prefix ആറു.
+[Exeunt]
+[Enter Miranda and King Lear]
+Miranda:
+ You are nothing.
+[Exeunt]
+[Enter Horatio and Ophelia]
+Horatio:
+ Are you as good as Ophelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Cordelia]
+Horatio:
+ Are you as good as Cordelia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Desdemona]
+Horatio:
+ Are you as good as Desdemona?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Portia]
+Horatio:
+ Are you as good as Portia?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Viola]
+Horatio:
+ Are you as good as Viola?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Horatio and Prospero]
+Horatio:
+ Are you as good as Prospero?
+King Lear:
+ If so, you are as good as the sum of yourself and a hero.
+
+Scene XX: month canonicalIndex resolve ചെയ്ത് അഞ്ചു fields പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Horatio and Ariel]
+Horatio:
+ Are you as good as a hero?
+ If so, let us proceed to scene XXI.
+[Exeunt]
+[Enter Miranda and Polonius]
+Miranda:
+ You are as good as Caliban.
+ Let us proceed to scene XXII.
+
+Scene XXI: month ഒന്ന് canonicalIndex.
+[Exeunt]
+[Enter Miranda and Polonius]
+Miranda:
+ You are as good as Ariel.
+
+Scene XXII: year, cutlet canonicalIndex, dayInCutlet, month canonicalIndex, dayInMonth എന്ന അഞ്ചു fields മാത്രം.
+[Exeunt]
+[Enter Miranda and Hamlet]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Shylock]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Falstaff]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Polonius]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and King Lear]
+Miranda:
+ Open your heart.
+[Exeunt]

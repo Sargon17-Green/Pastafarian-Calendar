@@ -1,0 +1,177 @@
+ഒരു known year-ന്റെ close gate പുതിയ open gate ആകുന്ന next-year isolation-ൽ, മൂന്ന് ascending close-gate candidates `gaps >= 6` കൂടാതെ `252 <= length <= 5778` പ്രകാരം scan ചെയ്ത് valid candidates-ന്റെ one-based rank resolve ചെയ്യുന്ന clean Stage 1 പരീക്ഷണം. ഒരേ open gate ഉള്ളതിനാൽ close day ascending scan തന്നെയാണ് length ascending order.
+
+Hamlet, open gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, candidate 1 close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, candidate 2 close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, candidate 3 close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, candidate 1 gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, candidate 2 gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, candidate 3 gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, requested one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, valid count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, selected close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, current candidate length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, കുറഞ്ഞ വർഷദൈർഘ്യം 252 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, കൂടിയ വർഷദൈർഘ്യം 5778 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: inputs, bounds, counters.
+
+Scene I: values വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Rosalind]
+Prospero: You are as good as the difference between a big big big big big big big big hero and a big big hero.
+[Exeunt]
+[Enter Prospero and Beatrice]
+Prospero:
+ You are a big big big big big big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+ You are as good as the sum of yourself and a big hero.
+[Exeunt]
+
+Act II: candidate 1.
+
+Scene I: length കണക്കാക്കി clean bounds പരിശോധിക്കുന്നു.
+[Enter Prospero and Viola]
+Prospero: You are as good as the difference between Juliet and Hamlet.
+[Exeunt]
+[Enter Macbeth and Prospero]
+Macbeth: Am I worse than the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Viola and Rosalind]
+Viola: Am I worse than you?
+Rosalind: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Viola and Beatrice]
+Viola: Am I better than you?
+Beatrice: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: requested rank എത്തിയെങ്കിൽ close 1 തിരഞ്ഞെടുക്കുന്നു.
+[Enter Desdemona and Cordelia]
+Desdemona: Am I as good as you?
+Cordelia: If not, let us proceed to scene IV.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are as good as Juliet.
+
+Scene III: candidate 1 selection പൂർത്തിയായി.
+[Exeunt]
+
+Scene IV: candidate 2-ലേക്ക്.
+
+Act III: candidate 2.
+
+Scene I: length കണക്കാക്കി clean bounds പരിശോധിക്കുന്നു.
+[Enter Prospero and Viola]
+Prospero: You are as good as the difference between Romeo and Hamlet.
+[Exeunt]
+[Enter Lady Macbeth and Prospero]
+Lady Macbeth: Am I worse than the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Viola and Rosalind]
+Viola: Am I worse than you?
+Rosalind: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Viola and Beatrice]
+Viola: Am I better than you?
+Beatrice: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: requested rank എത്തിയെങ്കിൽ close 2 തിരഞ്ഞെടുക്കുന്നു.
+[Enter Desdemona and Cordelia]
+Desdemona: Am I as good as you?
+Cordelia: If not, let us proceed to scene IV.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are as good as Romeo.
+
+Scene III: candidate 2 selection പൂർത്തിയായി.
+[Exeunt]
+
+Scene IV: candidate 3-ലേക്ക്.
+
+Act IV: candidate 3.
+
+Scene I: length കണക്കാക്കി clean bounds പരിശോധിക്കുന്നു.
+[Enter Prospero and Viola]
+Prospero: You are as good as the difference between Othello and Hamlet.
+[Exeunt]
+[Enter Ophelia and Prospero]
+Ophelia: Am I worse than the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Viola and Rosalind]
+Viola: Am I worse than you?
+Rosalind: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Viola and Beatrice]
+Viola: Am I better than you?
+Beatrice: If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: requested rank എത്തിയെങ്കിൽ close 3 തിരഞ്ഞെടുക്കുന്നു.
+[Enter Desdemona and Cordelia]
+Desdemona: Am I as good as you?
+Cordelia: If not, let us proceed to scene IV.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are as good as Othello.
+
+Scene III: candidate 3 selection പൂർത്തിയായി.
+[Exeunt]
+
+Scene IV: scan പൂർത്തിയായി.
+
+Act V: result.
+
+Scene I: valid countയും selected close dayയും output.
+[Enter Prospero and Desdemona]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: Open your heart.
+[Exeunt]

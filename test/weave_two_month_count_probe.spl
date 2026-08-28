@@ -1,0 +1,95 @@
+രണ്ട് മാസം മാത്രമുള്ള weaving family-യുടെ exact count ചെറിയ closed-form വഴി പരിശോധിക്കുന്ന Stage 1 sanity test. ആദ്യ മാസം ആദ്യം തുറക്കുകയും ആദ്യം അടയ്ക്കുകയും വേണം.
+
+Hamlet, ആദ്യ മാസം length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, രണ്ടാം മാസം length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, n=a+b-2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, k=min(a-1,b-1) സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, loop index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, binomial result സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, factor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, a-1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, b-1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: C(a+b-2,a-1) കൃത്യമായി കണക്കാക്കുന്നു.
+
+Scene I: രണ്ടു lengths വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: n, a-1, b-1 നിർമ്മിക്കുന്നു.
+[Enter Prospero and Romeo]
+Prospero:
+ You are as good as the sum of Hamlet and Juliet.
+ You are as good as the difference between yourself and a big hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the difference between Hamlet and a hero.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as the difference between Juliet and a hero.
+ Are you worse than Portia?
+ If so, let us proceed to scene III.
+ Let us proceed to scene IV.
+
+Scene III: k=b-1.
+[Exeunt]
+[Enter Viola and Othello]
+Viola:
+ You are as good as myself.
+ Let us proceed to scene V.
+
+Scene IV: k=a-1.
+[Exeunt]
+[Enter Portia and Othello]
+Portia:
+ You are as good as myself.
+
+Scene V: result=1, i=1.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ You are a hero.
+
+Scene VI: i>k ആണെങ്കിൽ തീരുന്നു.
+Prospero:
+ Are you better than Othello?
+ If so, let us proceed to scene IX.
+
+Scene VII: factor=n-i+1; result=result*factor/i.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the difference between Romeo and Macbeth.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Ophelia and Lady Macbeth]
+Ophelia:
+ You are as good as the product of Lady Macbeth and myself.
+ You are as good as the quotient between yourself and Macbeth.
+
+Scene VIII: i കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene VI.
+
+Scene IX: exact count പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ Open your heart.
+[Exeunt]

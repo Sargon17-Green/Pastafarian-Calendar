@@ -1,0 +1,125 @@
+നാല്പത്താറ് visible drop index-ുകളിലുടനീളം prev1, prev3, prev7 predecessor source hidden ആണോ ഇതിനകം committed visible ആണോ എന്ന് കൃത്യമായി എണ്ണുന്ന clean Stage 1 ownership control. input visible count 46 ആയിരിക്കണം; ഈ probe value recurrence കണക്കാക്കുന്നില്ല, rolling timeline source boundary മാത്രം മുഴുവൻ range-ൽ പരിശോധിക്കുന്നു.
+
+Hamlet, ഇപ്പോഴത്തെ visible index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, prev1 hidden count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, prev1 visible count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, prev3 hidden count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, prev3 visible count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, prev7 hidden count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, prev7 visible count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, ശേഷിക്കുന്ന visible index-ുകളുടെ എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output-ും control flow-വും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: initialization.
+
+Scene I: visible count വായിച്ച് counters ശൂന്യമാക്കുന്നു.
+[Enter Prospero and Cordelia]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are nothing.
+
+Act II: ഓരോ visible index-ഉം source ownership classify ചെയ്യുന്നു.
+
+Scene I: ഒന്നും ശേഷിക്കുന്നില്ലെങ്കിൽ result.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: Are you better than nothing?
+Cordelia: If not, let us proceed to act III.
+
+Scene II: prev1 source; i=1 മാത്രം hidden.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you better than a hero?
+Hamlet: If so, let us proceed to scene IV.
+
+Scene III: prev1 hidden count കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of yourself and a hero. Let us proceed to scene V.
+
+Scene IV: prev1 visible count കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of yourself and a hero.
+
+Scene V: prev3 source; i=1..3 hidden.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you better than the sum of a big hero and a hero?
+Hamlet: If so, let us proceed to scene VII.
+
+Scene VI: prev3 hidden count കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of yourself and a hero. Let us proceed to scene VIII.
+
+Scene VII: prev3 visible count കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of yourself and a hero.
+
+Scene VIII: prev7 source; i=1..7 hidden.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Are you better than the difference between a big big big hero and a hero?
+Hamlet: If so, let us proceed to scene X.
+
+Scene IX: prev7 hidden count കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of yourself and a hero. Let us proceed to scene XI.
+
+Scene X: prev7 visible count കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of yourself and a hero.
+
+Scene XI: അടുത്ത index-ിലേക്ക് നീങ്ങുന്നു.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the difference between yourself and a hero. Let us return to scene I.
+
+Act III: result.
+
+Scene I: hidden-visible counts prev1, prev3, prev7 ക്രമത്തിൽ പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: Open your heart.
+[Exeunt]

@@ -1,0 +1,61 @@
+Foundation-ന്റെ ഇരുവശത്തും rank-ിൽ നിന്ന് gate gap നിർമ്മിച്ച് signed direction അനുസരിച്ച് കൂട്ടുകയോ കുറയ്ക്കുകയോ ചെയ്യുന്ന Stage 1 no-wrap fixture. rank `1..922` ആണെങ്കിൽ gap `41+rank`, അതായത് `42..963`.
+
+Hamlet, Foundation day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, positive side rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, negative side rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, positive gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, negative gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, gate plus one സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, gate minus one സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: inputs.
+
+Scene I: Foundation, positive rank, negative rank വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Act II: gaps and signed gates.
+
+Scene I: positive gap = 41 + rank.
+[Enter Prospero and Othello]
+Prospero:
+ You are as good as Juliet.
+ You are as good as the sum of yourself and a big big big big big hero.
+ You are as good as the sum of yourself and a big big big hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: negative gap = 41 + rank.
+[Enter Prospero and Macbeth]
+Prospero:
+ You are as good as Romeo.
+ You are as good as the sum of yourself and a big big big big big hero.
+ You are as good as the sum of yourself and a big big big hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: gate +1 and gate -1.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of Hamlet and Othello.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the difference between Hamlet and Macbeth.
+[Exeunt]
+
+Act III: outputs.
+
+Scene I: positive പിന്നെ negative gate.
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: Open your heart.
+[Exeunt]

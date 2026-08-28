@@ -1,0 +1,20 @@
+Gate-gap selector-ന്റെ 1..922 rank-നെ 42..963 ദിവസങ്ങളിലേക്കു മാറ്റുന്ന clean Appendix A പരിശോധന.
+
+Hamlet, തിരഞ്ഞെടുക്കപ്പെട്ട one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, അന്തിമ gate gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: rank-ിൽ നാല്പത്തൊന്ന് കൂട്ടുന്നു.
+
+Scene I: rank വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: gap = 41 + rank.
+[Enter Prospero and Juliet]
+Prospero:
+ You are as good as the sum of Hamlet and the sum of a big big big big big hero and the sum of a big big big hero and a hero.
+ Open your heart.
+[Exeunt]

@@ -1,0 +1,175 @@
+Appendix A stone table-ന്റെ ഒരേ 46-row ordered family hidden generation-നും visible generation-നും സ്വതന്ത്രമായി forward consume ചെയ്യേണ്ട ownership രൂപം പരിശോധിക്കുന്ന clean Stage 1 control probe. row IDs 1..46 ആദ്യം backward archive-ൽ സൂക്ഷിച്ച്, reversal സമയത്ത് രണ്ട് സ്വതന്ത്ര replay stack-ുകളിലേക്ക് duplicate ചെയ്യുന്നു. hidden consumer ആദ്യ 7 rows മാത്രം consume ചെയ്യുന്നു; visible consumer അതിൽ നിന്ന് സ്വതന്ത്രമായി മുഴുവൻ 46 rows consume ചെയ്യുന്നു. expected outputs: reverse count 46; hidden count 7, first 1, last 7; visible count 46, first 1, last 46.
+
+Hamlet, current row ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, backward archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, hidden forward replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, visible forward replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, reverse countയും പിന്നീട് hidden first row-വും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, hidden consume count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, visible consume count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, stack helperയും output helper-ഉം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, hidden last row സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, visible first row സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, visible last row സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+
+Act I: row IDs 1..46 backward archive-ലേക്ക്.
+
+Scene I: row=1.
+[Enter Cordelia and Hamlet]
+Cordelia: You are a hero.
+[Exeunt]
+
+Scene II: current row archive ചെയ്യുന്നു.
+[Enter Hamlet and Juliet]
+Hamlet: You are as good as Hamlet. Remember yourself.
+[Exeunt]
+
+Scene III: row 46 ആണെങ്കിൽ reversal.
+[Enter Hamlet and Cordelia]
+Hamlet: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Cordelia: If so, let us proceed to act II.
+[Exeunt]
+[Enter Cordelia and Hamlet]
+Cordelia: You are as good as the sum of yourself and a hero. Let us return to scene II.
+[Exeunt]
+
+Act II: backward archive രണ്ട് forward replay stack-ുകളിലേക്ക് duplicate ചെയ്യുന്നു.
+
+Scene I: reverse count=0.
+[Enter Cordelia and Macbeth]
+Cordelia: You are nothing.
+[Exeunt]
+
+Scene II: ഒരു row pop ചെയ്യുന്നു.
+[Enter Cordelia and Juliet]
+Cordelia: Recall your newest memory.
+[Exeunt]
+
+Scene III: popped row hidden replay-ലേക്ക് push ചെയ്യുന്നു.
+[Enter Juliet and Romeo]
+Juliet: You are as good as Juliet. Remember yourself.
+[Exeunt]
+
+Scene IV: അതേ popped row visible replay-ലേക്ക് push ചെയ്യുന്നു.
+[Enter Juliet and Othello]
+Juliet: You are as good as Juliet. Remember yourself.
+[Exeunt]
+
+Scene V: reverse count++.
+[Enter Cordelia and Macbeth]
+Cordelia: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene VI: 46 rows reverse ചെയ്താൽ hidden consumer.
+[Enter Macbeth and Cordelia]
+Macbeth: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Cordelia: If so, let us proceed to act III. Let us return to scene II.
+[Exeunt]
+
+Act III: hidden consumer rows 1..7 consume ചെയ്യുന്നു.
+
+Scene I: count=0, first=0, last=0; reverse count output.
+[Enter Cordelia and Lady Macbeth]
+Cordelia: You are nothing.
+[Exeunt]
+[Enter Cordelia and Desdemona]
+Cordelia: You are nothing.
+[Exeunt]
+[Enter Cordelia and Macbeth]
+Cordelia: Open your heart.
+[Exeunt]
+
+Scene II: next hidden row pop.
+[Enter Cordelia and Romeo]
+Cordelia: Recall your newest memory.
+[Exeunt]
+
+Scene III: ആദ്യ pop ആണെങ്കിൽ first row Macbeth-ൽ.
+[Enter Lady Macbeth and Cordelia]
+Lady Macbeth: Am I as good as nothing?
+Cordelia: If not, let us proceed to scene IV.
+[Exeunt]
+[Enter Romeo and Macbeth]
+Romeo: You are as good as Romeo.
+[Exeunt]
+
+Scene IV: last row പുതുക്കി count++.
+[Enter Romeo and Desdemona]
+Romeo: You are as good as Romeo.
+[Exeunt]
+[Enter Cordelia and Lady Macbeth]
+Cordelia: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene V: count 7 ആണെങ്കിൽ hidden outputs.
+[Enter Lady Macbeth and Cordelia]
+Lady Macbeth: Am I as good as the sum of the sum of a big big hero and a big hero and a hero?
+Cordelia: If so, let us proceed to act IV. Let us return to scene II.
+[Exeunt]
+
+Act IV: hidden outputs, visible consumer setup.
+
+Scene I: hidden count, first, last.
+[Enter Cordelia and Lady Macbeth]
+Cordelia: Open your heart.
+[Exeunt]
+[Enter Cordelia and Macbeth]
+Cordelia: Open your heart.
+[Exeunt]
+[Enter Cordelia and Desdemona]
+Cordelia: Open your heart.
+[Exeunt]
+
+Scene II: visible count=0, first=0, last=0.
+[Enter Cordelia and Ophelia]
+Cordelia: You are nothing.
+[Exeunt]
+[Enter Cordelia and Portia]
+Cordelia: You are nothing.
+[Exeunt]
+[Enter Cordelia and Viola]
+Cordelia: You are nothing.
+[Exeunt]
+
+Act V: visible consumer rows 1..46 consume ചെയ്യുന്നു.
+
+Scene I: next visible row pop.
+[Enter Cordelia and Othello]
+Cordelia: Recall your newest memory.
+[Exeunt]
+
+Scene II: ആദ്യ pop ആണെങ്കിൽ first row Portia-യിൽ.
+[Enter Ophelia and Cordelia]
+Ophelia: Am I as good as nothing?
+Cordelia: If not, let us proceed to scene III.
+[Exeunt]
+[Enter Othello and Portia]
+Othello: You are as good as Othello.
+[Exeunt]
+
+Scene III: last row പുതുക്കി count++.
+[Enter Othello and Viola]
+Othello: You are as good as Othello.
+[Exeunt]
+[Enter Cordelia and Ophelia]
+Cordelia: You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene IV: count 46 ആണെങ്കിൽ outputs.
+[Enter Ophelia and Cordelia]
+Ophelia: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Cordelia: If so, let us proceed to act VI. Let us return to scene I.
+[Exeunt]
+
+Act VI: visible outputs.
+
+Scene I: visible count, first, last.
+[Enter Cordelia and Ophelia]
+Cordelia: Open your heart.
+[Exeunt]
+[Enter Cordelia and Portia]
+Cordelia: Open your heart.
+[Exeunt]
+[Enter Cordelia and Viola]
+Cordelia: Open your heart.
+[Exeunt]

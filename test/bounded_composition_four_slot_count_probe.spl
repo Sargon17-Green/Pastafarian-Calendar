@@ -1,0 +1,125 @@
+നാല് slot ഉള്ള bounded composition family-യുടെ exact count exhaustive lexicographic scan ഉപയോഗിച്ച് ഉറപ്പിക്കുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, total സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, താഴത്തെ പരിധി lo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, മേലത്തെ പരിധി hi സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ഒന്നാം ഭാഗം x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, രണ്ടാം ഭാഗം y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, മൂന്നാം ഭാഗം z സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, നാലാം ഭാഗം w സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, exact count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: നാല് ഭാഗങ്ങളുടെ exact scan.
+
+Scene I: total, lo, hi വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+
+Scene II: count=0, x=lo.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ You are nothing.
+[Exeunt]
+[Enter Juliet and Othello]
+Juliet:
+ You are as good as myself.
+
+Scene III: x>hi ആണെങ്കിൽ scan അവസാനിക്കുന്നു.
+[Exeunt]
+[Enter Othello and Romeo]
+Othello:
+ Are you better than Romeo?
+ If so, let us proceed to scene XV.
+
+Scene IV: y=lo.
+[Exeunt]
+[Enter Juliet and Macbeth]
+Juliet:
+ You are as good as myself.
+
+Scene V: y>hi ആണെങ്കിൽ x കൂട്ടുന്നു.
+[Exeunt]
+[Enter Macbeth and Romeo]
+Macbeth:
+ Are you better than Romeo?
+ If so, let us proceed to scene XIV.
+
+Scene VI: z=lo.
+[Exeunt]
+[Enter Juliet and Lady Macbeth]
+Juliet:
+ You are as good as myself.
+
+Scene VII: z>hi ആണെങ്കിൽ y കൂട്ടുന്നു.
+[Exeunt]
+[Enter Lady Macbeth and Romeo]
+Lady Macbeth:
+ Are you better than Romeo?
+ If so, let us proceed to scene XIII.
+
+Scene VIII: w=total-x-y-z.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the difference between Hamlet and Othello.
+ You are as good as the difference between yourself and Macbeth.
+ You are as good as the difference between yourself and Lady Macbeth.
+
+Scene IX: w<lo ആണെങ്കിൽ member അസാധു.
+[Exeunt]
+[Enter Ophelia and Juliet]
+Ophelia:
+ Are you worse than Juliet?
+ If so, let us proceed to scene XII.
+
+Scene X: w>hi ആണെങ്കിൽ member അസാധു.
+[Exeunt]
+[Enter Ophelia and Romeo]
+Ophelia:
+ Are you better than Romeo?
+ If so, let us proceed to scene XII.
+
+Scene XI: സാധുവായ member count കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+
+Scene XII: z കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene VII.
+
+Scene XIII: y കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene V.
+
+Scene XIV: x കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene III.
+
+Scene XV: exact count പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ Open your heart.
+[Exeunt]

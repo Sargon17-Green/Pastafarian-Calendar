@@ -1,0 +1,288 @@
+മൂന്ന് dynamic bowl-order positions hard-code ചെയ്യാതെ order ID അനുസരിച്ച് old bowl snapshot-ിൽ നിന്ന് value തിരഞ്ഞെടുക്കുകയും, Appendix A-യിലെ position pours 1..3 SAVE സഹിതം കണക്കാക്കുകയും ചെയ്യുന്ന clean Stage 1 probe. stdin ക്രമം: order1,order2,order3, old1..old6, drop, i, WHEAT, BARLEY, SALT.
+
+Hamlet, order position 1 bowl ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, order position 2 bowl ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, order position 3 bowl ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, old bowl 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, old bowl 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, old bowl 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, old bowl 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, old bowl 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, old bowl 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, drop value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, visible drop index i സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, WHEAT stone value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, BARLEY stone value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, SALT stone value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, position 1 selected old bowl value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Benedick, position 2 selected old bowl value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Mercutio, position 3 selected old bowl value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Tybalt, pour 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Iago, pour 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, pour 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Shylock, M = 2^127-1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, M doubling counter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input, branch, arithmetic സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: M നിർമ്മിച്ച് inputs വായിക്കുന്നു.
+
+Scene I: M doubling seedയും count 127-ഉം.
+[Enter Prospero and Shylock]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Polonius]
+Prospero: You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Shylock and Polonius]
+
+Scene II: exact doubling.
+Shylock: Are you better than nothing?
+Polonius: If not, let us proceed to scene III.
+Shylock: You are as good as the difference between yourself and a hero.
+Polonius: You are as good as the product of yourself and a big hero. Let us return to scene II.
+
+Scene III: 2^127-ൽ നിന്ന് ഒന്ന് കുറയ്ക്കുന്നു.
+[Exeunt]
+[Enter Prospero and Shylock]
+Prospero: You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene IV: order positions വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Scene V: old bowls 1..6 വായിക്കുന്നു.
+[Enter Prospero and Othello]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Scene VI: drop, i, stones വായിക്കുന്നു.
+[Enter Prospero and Portia]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Act II: order position 1 dynamic old-bowl dispatch.
+
+Scene I: ID range 1..6 branch.
+[Enter Hamlet and Prospero]
+Hamlet:
+ Am I better than the sum of a big big hero and a hero?
+Prospero: If so, let us proceed to scene VII.
+Hamlet: Am I better than a big big hero?
+Prospero: If so, let us proceed to scene VI.
+Hamlet: Am I better than the sum of a big hero and a hero?
+Prospero: If so, let us proceed to scene V.
+Hamlet: Am I better than a big hero?
+Prospero: If so, let us proceed to scene IV.
+Hamlet: Am I better than a hero?
+Prospero: If so, let us proceed to scene III.
+Prospero: Let us proceed to scene II.
+
+Scene II: ID 1.
+[Exeunt]
+[Enter Othello and Beatrice]
+Othello: You are as good as myself. Let us proceed to act III.
+
+Scene III: ID 2.
+[Exeunt]
+[Enter Macbeth and Beatrice]
+Macbeth: You are as good as myself. Let us proceed to act III.
+
+Scene IV: ID 3.
+[Exeunt]
+[Enter Lady Macbeth and Beatrice]
+Lady Macbeth: You are as good as myself. Let us proceed to act III.
+
+Scene V: ID 4.
+[Exeunt]
+[Enter Ophelia and Beatrice]
+Ophelia: You are as good as myself. Let us proceed to act III.
+
+Scene VI: ID 5.
+[Exeunt]
+[Enter Cordelia and Beatrice]
+Cordelia: You are as good as myself. Let us proceed to act III.
+
+Scene VII: ID 6.
+[Exeunt]
+[Enter Desdemona and Beatrice]
+Desdemona: You are as good as myself. Let us proceed to act III.
+
+Act III: order position 2 dynamic old-bowl dispatch.
+
+Scene I: ID range 1..6 branch.
+[Exeunt]
+[Enter Juliet and Prospero]
+Juliet:
+ Am I better than the sum of a big big hero and a hero?
+Prospero: If so, let us proceed to scene VII.
+Juliet: Am I better than a big big hero?
+Prospero: If so, let us proceed to scene VI.
+Juliet: Am I better than the sum of a big hero and a hero?
+Prospero: If so, let us proceed to scene V.
+Juliet: Am I better than a big hero?
+Prospero: If so, let us proceed to scene IV.
+Juliet: Am I better than a hero?
+Prospero: If so, let us proceed to scene III.
+Prospero: Let us proceed to scene II.
+
+Scene II: ID 1.
+[Exeunt]
+[Enter Othello and Benedick]
+Othello: You are as good as myself. Let us proceed to act IV.
+
+Scene III: ID 2.
+[Exeunt]
+[Enter Macbeth and Benedick]
+Macbeth: You are as good as myself. Let us proceed to act IV.
+
+Scene IV: ID 3.
+[Exeunt]
+[Enter Lady Macbeth and Benedick]
+Lady Macbeth: You are as good as myself. Let us proceed to act IV.
+
+Scene V: ID 4.
+[Exeunt]
+[Enter Ophelia and Benedick]
+Ophelia: You are as good as myself. Let us proceed to act IV.
+
+Scene VI: ID 5.
+[Exeunt]
+[Enter Cordelia and Benedick]
+Cordelia: You are as good as myself. Let us proceed to act IV.
+
+Scene VII: ID 6.
+[Exeunt]
+[Enter Desdemona and Benedick]
+Desdemona: You are as good as myself. Let us proceed to act IV.
+
+Act IV: order position 3 dynamic old-bowl dispatch.
+
+Scene I: ID range 1..6 branch.
+[Exeunt]
+[Enter Romeo and Prospero]
+Romeo:
+ Am I better than the sum of a big big hero and a hero?
+Prospero: If so, let us proceed to scene VII.
+Romeo: Am I better than a big big hero?
+Prospero: If so, let us proceed to scene VI.
+Romeo: Am I better than the sum of a big hero and a hero?
+Prospero: If so, let us proceed to scene V.
+Romeo: Am I better than a big hero?
+Prospero: If so, let us proceed to scene IV.
+Romeo: Am I better than a hero?
+Prospero: If so, let us proceed to scene III.
+Prospero: Let us proceed to scene II.
+
+Scene II: ID 1.
+[Exeunt]
+[Enter Othello and Mercutio]
+Othello: You are as good as myself. Let us proceed to act V.
+
+Scene III: ID 2.
+[Exeunt]
+[Enter Macbeth and Mercutio]
+Macbeth: You are as good as myself. Let us proceed to act V.
+
+Scene IV: ID 3.
+[Exeunt]
+[Enter Lady Macbeth and Mercutio]
+Lady Macbeth: You are as good as myself. Let us proceed to act V.
+
+Scene V: ID 4.
+[Exeunt]
+[Enter Ophelia and Mercutio]
+Ophelia: You are as good as myself. Let us proceed to act V.
+
+Scene VI: ID 5.
+[Exeunt]
+[Enter Cordelia and Mercutio]
+Cordelia: You are as good as myself. Let us proceed to act V.
+
+Scene VII: ID 6.
+[Exeunt]
+[Enter Desdemona and Mercutio]
+Desdemona: You are as good as myself. Let us proceed to act V.
+
+Act V: മൂന്ന് position pours SAVE സഹിതം കണക്കാക്കുന്നു.
+
+Scene I: pour 1 = SAVE(drop^2 + WHEAT*old[order1] + 3*i).
+[Exeunt]
+[Enter Prospero and Tybalt]
+Prospero:
+ You are as good as the product of Portia and Portia.
+ You are as good as the sum of yourself and the product of Miranda and Beatrice.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Viola.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Shylock.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: pour 2 = SAVE(drop^2 + BARLEY*old[order2] + 5*i).
+[Enter Prospero and Iago]
+Prospero:
+ You are as good as the product of Portia and Portia.
+ You are as good as the sum of yourself and the product of Ariel and Benedick.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Viola.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Shylock.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: pour 3 = SAVE(drop^2 + SALT*old[order3] + 7*i).
+[Enter Prospero and Horatio]
+Prospero:
+ You are as good as the product of Portia and Portia.
+ You are as good as the sum of yourself and the product of Caliban and Mercutio.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and Viola.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Shylock.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Act VI: outputs.
+
+Scene I: pours 1..3.
+[Enter Prospero and Tybalt]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Iago]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Horatio]
+Prospero: Open your heart.
+[Exeunt]

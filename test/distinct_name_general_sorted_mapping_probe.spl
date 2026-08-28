@@ -1,0 +1,77 @@
+Distinct-name partial-permutation unrank-ന്റെ remaining-list ordinal -> original canonical ordinal mapping fixed first/eighth probes-ിൽ നിന്ന് dynamic removal-count helper ആയി ഉയർത്തുന്ന clean Stage 1 probe. input: removalCount, remainingOrdinal, തുടർന്ന് removed original ordinals descending order-ൽ. removed values Hamlet-ന്റെ stack-ൽ push ചെയ്യുന്നു; recall അവയെ ascending order-ൽ നൽകുന്നു. ഓരോ removed ordinal current candidate-നെ കവിയാത്തപ്പോൾ candidate ഒന്നുകൂടി നീക്കുന്നു. removed set-ന്റെ semantic order പ്രസക്തമല്ല; ഈ helper sorted set representation മാത്രം ഉപയോഗിക്കുന്നു. output original canonical ordinal.
+
+Hamlet, removed ordinal-ുകളുടെ stackയും current recalled removal-ും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, removal count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, remaining-list ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, original ordinal candidate സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, read/process counter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input, flow, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: dynamic input and stack materialization.
+
+Scene I: removal count and remaining ordinal.
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Romeo and Othello]
+Romeo: You are as good as myself.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are nothing.
+[Exeunt]
+
+Scene II: read exactly removalCount ordinals in descending order and remember each.
+[Enter Macbeth and Juliet]
+Macbeth: Am I as good as Juliet?
+Juliet: If so, let us proceed to act II.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart. Remember yourself.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to scene II.
+[Exeunt]
+
+Act II: recall ascending removals and shift candidate.
+
+Scene I: reset process counter.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are nothing.
+
+Scene II: all removals processed.
+[Exeunt]
+[Enter Macbeth and Juliet]
+Macbeth: Am I as good as Juliet?
+Juliet: If so, let us proceed to act III.
+[Exeunt]
+
+Scene III: recall next smallest removed ordinal.
+[Enter Prospero and Hamlet]
+Prospero: Recall your newest memory.
+[Exeunt]
+
+Scene IV: removed current candidate-നെക്കാൾ വലുതാണെങ്കിൽ shift വേണ്ട; അല്ലെങ്കിൽ candidate increment ചെയ്യുന്നു.
+[Enter Hamlet and Othello]
+Hamlet: Am I better than Othello?
+Othello: If so, let us proceed to scene VI.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of yourself and a hero.
+
+Scene VI: next removal.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to scene II.
+[Exeunt]
+
+Act III: result.
+
+Scene I: original canonical ordinal.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]

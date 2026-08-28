@@ -1,0 +1,272 @@
+Appendix A-യിലെ 11 visible-grind rows-നെ grind index-ിൽ നിന്ന് `a,b,c,d,stoneKind` ആയി map ചെയ്യുന്ന Stage 1 control. stoneKind machine code: wheat=1, barley=2, salt=3, bitter=4, red=5.
+
+Hamlet, grind index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, coefficient a സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, coefficient b സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, coefficient c സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, coefficient d സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, stone kind code സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output-ും branching-ും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: grind index വായിക്കുന്നു.
+
+Scene I: input.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Act II: row തിരഞ്ഞെടുക്കുന്നു.
+
+Scene I: grind 1..11 dispatch.
+[Enter Prospero and Hamlet]
+Hamlet: Am I as good as a hero?
+Prospero: If so, let us proceed to scene II.
+Hamlet: Am I as good as a big hero?
+Prospero: If so, let us proceed to scene III.
+Hamlet: Am I as good as the sum of a big hero and a hero?
+Prospero: If so, let us proceed to scene IV.
+Hamlet: Am I as good as a big big hero?
+Prospero: If so, let us proceed to scene V.
+Hamlet: Am I as good as the sum of a big big hero and a hero?
+Prospero: If so, let us proceed to scene VI.
+Hamlet: Am I as good as the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to scene VII.
+Hamlet: Am I as good as the sum of the sum of a big big hero and a big hero and a hero?
+Prospero: If so, let us proceed to scene VIII.
+Hamlet: Am I as good as a big big big hero?
+Prospero: If so, let us proceed to scene IX.
+Hamlet: Am I as good as the sum of a big big big hero and a hero?
+Prospero: If so, let us proceed to scene X.
+Hamlet: Am I as good as the sum of a big big big hero and a big hero?
+Prospero: If so, let us proceed to scene XI.
+Hamlet: Am I as good as the sum of the sum of a big big big hero and a big hero and a hero?
+Prospero: If so, let us proceed to scene XII.
+Prospero: Let us proceed to act IV.
+
+Scene II: row 1 = 3,5,7,11,wheat.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a hero. Let us proceed to act III.
+[Exeunt]
+
+Scene III: row 2 = 5,7,11,13,barley.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a big hero. Let us proceed to act III.
+[Exeunt]
+
+Scene IV: row 3 = 7,11,13,17,salt.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act III.
+[Exeunt]
+
+Scene V: row 4 = 11,13,17,19,bitter.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a big big hero. Let us proceed to act III.
+[Exeunt]
+
+Scene VI: row 5 = 13,17,19,23,red.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big hero and a hero. Let us proceed to act III.
+[Exeunt]
+
+Scene VII: row 6 = 17,19,23,29,wheat.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a hero. Let us proceed to act III.
+[Exeunt]
+
+Scene VIII: row 7 = 19,23,29,31,barley.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a big hero. Let us proceed to act III.
+[Exeunt]
+
+Scene IX: row 8 = 23,29,31,37,salt.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act III.
+[Exeunt]
+
+Scene X: row 9 = 29,31,37,41,bitter.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a big big hero. Let us proceed to act III.
+[Exeunt]
+
+Scene XI: row 10 = 31,37,41,43,red.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big hero and a hero. Let us proceed to act III.
+[Exeunt]
+
+Scene XII: row 11 = 37,41,43,47,wheat.
+[Enter Prospero and Juliet]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are a hero. Let us proceed to act III.
+[Exeunt]
+
+Act III: valid row output.
+
+Scene I: a,b,c,d,kind പുറത്തിടുന്നു.
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]
+
+Act IV: invalid row.
+
+[Exeunt]
+
+Scene I: അഞ്ചു zero sentinel values.
+[Enter Prospero and Juliet]
+Prospero: You are nothing. Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: You are nothing. Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: You are nothing. Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are nothing. Open your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are nothing. Open your heart.
+[Exeunt]

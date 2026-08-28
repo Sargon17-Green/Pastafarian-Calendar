@@ -1,0 +1,169 @@
+Appendix A stone table-ന്റെ row 1 മുതൽ row 46 വരെ മുഴുവൻ transactional recurrence ഒരൊറ്റ clean Stage 1 source-ൽ സഞ്ചരിക്കുന്ന ownership/integration probe. ഓരോ പുതിയ row-ലെയും അഞ്ച് pending values ഒരേ old five-stone snapshot മാത്രം വായിക്കുന്നു; അഞ്ച് pending values തയ്യാറായ ശേഷമേ commit ഉണ്ടാകൂ. row 2, row 3 exact value probes വേറെയുണ്ട്; ഇവിടെ full path cardinalityയും commit boundaryയും പരിശോധിക്കുന്നു. expected outputs: 45 committed transitions, final committed row index 46.
+
+Hamlet, old wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, old barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, old salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, old bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, old red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, pending wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, pending barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, pending salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, pending bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, pending red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, current row index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, committed transition count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, M doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, assignment, SAVE, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: Mയും row 1-ഉം.
+
+Scene I: M നിർമ്മിക്കുന്നു.
+[Enter Caliban and Prospero]
+Caliban: You are a hero.
+[Exeunt]
+[Enter Caliban and Ariel]
+Caliban: You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ariel]
+
+Scene II: exact doubling.
+Prospero: Are you better than nothing?
+Ariel:
+ If not, let us proceed to scene III.
+Prospero: You are as good as the difference between yourself and a hero.
+Ariel:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene II.
+
+Scene III: M minus one.
+[Exeunt]
+[Enter Caliban and Prospero]
+Caliban: You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene IV: normative row 1.
+[Enter Caliban and Hamlet]
+Caliban: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Caliban and Juliet]
+Caliban: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Caliban and Romeo]
+Caliban: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Caliban and Othello]
+Caliban: You are as good as the sum of a big big big big big big hero and the sum of a big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Caliban and Macbeth]
+Caliban: You are as good as the sum of a big big big big big big hero and the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+
+Scene V: row index 2, commit count 0.
+[Enter Caliban and Viola]
+Caliban: You are a big hero.
+[Exeunt]
+[Enter Caliban and Miranda]
+Caliban: You are nothing.
+[Exeunt]
+
+Act II: one full simultaneous stone transition.
+
+Scene I: stop after row 46 is committed.
+[Enter Viola and Caliban]
+Viola: Am I better than the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Caliban: If so, let us proceed to act IV.
+[Exeunt]
+
+Scene II: pending wheat = SAVE(wheat^2 + 3*barley + i).
+[Enter Caliban and Lady Macbeth]
+Caliban:
+ You are as good as the sum of the product of Hamlet and Hamlet and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and Viola.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: pending barley = SAVE(barley^2 + 5*salt + wheat).
+[Enter Caliban and Ophelia]
+Caliban:
+ You are as good as the sum of the product of Juliet and Juliet and the product of the sum of a big big hero and a hero and Romeo.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene IV: pending salt = SAVE(salt^2 + 7*bitter + barley).
+[Enter Caliban and Cordelia]
+Caliban:
+ You are as good as the sum of the product of Romeo and Romeo and the product of the sum of the sum of a big big hero and a big hero and a hero and Othello.
+ You are as good as the sum of yourself and Juliet.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene V: pending bitter = SAVE(bitter^2 + 11*red + salt).
+[Enter Caliban and Desdemona]
+Caliban:
+ You are as good as the sum of the product of Othello and Othello and the product of the sum of the sum of a big big big hero and a big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene VI: pending red = SAVE(red^2 + 13*wheat + bitter).
+[Enter Caliban and Portia]
+Caliban:
+ You are as good as the sum of the product of Macbeth and Macbeth and the product of the sum of the sum of a big big big hero and a big big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Prospero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Act III: commit five pending values only after all reads are complete.
+
+Scene I: commit wheat and barley.
+[Enter Lady Macbeth and Hamlet]
+Lady Macbeth: You are as good as Lady Macbeth.
+[Exeunt]
+[Enter Ophelia and Juliet]
+Ophelia: You are as good as Ophelia.
+[Exeunt]
+
+Scene II: commit salt, bitter, red.
+[Enter Cordelia and Romeo]
+Cordelia: You are as good as Cordelia.
+[Exeunt]
+[Enter Desdemona and Othello]
+Desdemona: You are as good as Desdemona.
+[Exeunt]
+[Enter Portia and Macbeth]
+Portia: You are as good as Portia.
+[Exeunt]
+
+Scene III: count commit; if row 46 just committed, finish; otherwise increment row.
+[Enter Caliban and Miranda]
+Caliban: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Viola and Caliban]
+Viola: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Caliban: If so, let us proceed to act IV.
+[Exeunt]
+[Enter Caliban and Viola]
+Caliban: You are as good as the sum of yourself and a hero. Let us return to act II.
+[Exeunt]
+
+Act IV: full-table control outputs.
+
+Scene I: transition count and final row index.
+[Enter Caliban and Miranda]
+Caliban: Open your heart.
+[Exeunt]
+[Enter Caliban and Viola]
+Caliban: Open your heart.
+[Exeunt]

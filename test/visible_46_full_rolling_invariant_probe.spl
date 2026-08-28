@@ -1,0 +1,389 @@
+Appendix A-യിലെ 46 visible-drop outer loop, ഓരോ drop-ലെയും 11 normative grind coefficient rows, ഏഴ്-slot rolling predecessor state എന്നിവ ഒരൊറ്റ clean Stage 1 source path-ൽ ബന്ധിപ്പിക്കുന്ന exact invariant probe. ഇത് actual generated stone table fixture അല്ല: എല്ലാ grind stone values-ും M ആണ്, seed base ഓരോ i-ക്കും M-i ആയി isolate ചെയ്യുന്നു. ഏഴ് rolling predecessor values M ആണെങ്കിൽ seed raw = 10M, SAVE ശേഷം M; എല്ലാ 11 normative grind rows-ലും raw expression M-ന്റെ ഗുണിതം, SAVE ശേഷം M. അതിനാൽ 46 commits കഴിഞ്ഞും rolling state M തന്നെയായിരിക്കണം. expected outputs: 46, 47, M, M, M.
+
+Hamlet, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, current x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, prev1 snapshot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, prev3 snapshot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, prev7 snapshot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, coefficient a സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, coefficient b സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, coefficient c സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, coefficient d സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, synthetic selected stone M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, visible drop index i സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, grind index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, committed visible count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, rolling last1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, rolling last2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Benedick, rolling last3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Mercutio, rolling last4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Tybalt, rolling last5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Iago, rolling last6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, rolling last7 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, M doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, seed base M-i സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, flow, assignment, SAVE, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: M-യും rolling state-ും.
+
+Scene I: M നിർമ്മാണം ആരംഭിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Rosalind]
+Prospero: You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Hamlet and Rosalind]
+
+Scene II: exact doubling loop.
+Hamlet: Are you better than nothing?
+Rosalind:
+ If not, let us proceed to scene III.
+Hamlet: You are as good as the difference between yourself and a hero.
+Rosalind:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene II.
+
+Scene III: M = 2^127 - 1.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene IV: seven rolling slots, synthetic stone = M.
+[Enter Hamlet and Caliban]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Hamlet and Beatrice]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Hamlet and Benedick]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Hamlet and Mercutio]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Hamlet and Tybalt]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Hamlet and Iago]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Hamlet and Falstaff]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Hamlet and Portia]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+
+Scene V: i=1, committed count=0.
+[Enter Prospero and Viola]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: You are nothing.
+[Exeunt]
+
+Act II: one visible seed from seven-slot rolling state.
+
+Scene I: stop after i=46 has committed.
+[Enter Viola and Prospero]
+Viola: Am I better than the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to act V.
+[Exeunt]
+
+Scene II: base=M-i; seed=SAVE(base+prev1+3*prev3+5*prev7+i)=M.
+[Enter Prospero and Horatio]
+Prospero: You are as good as the difference between Hamlet and Viola.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ You are as good as Horatio.
+ You are as good as the sum of yourself and Caliban.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Benedick.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Falstaff.
+ You are as good as the sum of yourself and Viola.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: predecessor snapshot and grind=1.
+[Enter Caliban and Romeo]
+Caliban: You are as good as Caliban.
+[Exeunt]
+[Enter Benedick and Othello]
+Benedick: You are as good as Benedick.
+[Exeunt]
+[Enter Falstaff and Macbeth]
+Falstaff: You are as good as Falstaff.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: You are a hero.
+[Exeunt]
+
+Act III: eleven normative grind rows.
+
+Scene I: grind dispatch.
+[Enter Miranda and Prospero]
+Miranda: Am I as good as a hero?
+Prospero: If so, let us proceed to scene II.
+Miranda: Am I as good as a big hero?
+Prospero: If so, let us proceed to scene III.
+Miranda: Am I as good as the sum of a big hero and a hero?
+Prospero: If so, let us proceed to scene IV.
+Miranda: Am I as good as a big big hero?
+Prospero: If so, let us proceed to scene V.
+Miranda: Am I as good as the sum of a big big hero and a hero?
+Prospero: If so, let us proceed to scene VI.
+Miranda: Am I as good as the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to scene VII.
+Miranda: Am I as good as the sum of the sum of a big big hero and a big hero and a hero?
+Prospero: If so, let us proceed to scene VIII.
+Miranda: Am I as good as a big big big hero?
+Prospero: If so, let us proceed to scene IX.
+Miranda: Am I as good as the sum of a big big big hero and a hero?
+Prospero: If so, let us proceed to scene X.
+Miranda: Am I as good as the sum of a big big big hero and a big hero?
+Prospero: If so, let us proceed to scene XI.
+Miranda: Am I as good as the sum of the sum of a big big big hero and a big hero and a hero?
+Prospero: If so, let us proceed to scene XII.
+Prospero: Let us proceed to act IV.
+
+Scene II: row 1 = 3,5,7,11.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene III: row 2 = 5,7,11,13.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene IV: row 3 = 7,11,13,17.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of a big big big big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene V: row 4 = 11,13,17,19.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene VI: row 5 = 13,17,19,23.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene VII: row 6 = 17,19,23,29.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene VIII: row 7 = 19,23,29,31.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene IX: row 8 = 23,29,31,37.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene X: row 9 = 29,31,37,41.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene XI: row 10 = 31,37,41,43.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene XII: row 11 = 37,41,43,47.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and the sum of a big hero and a hero. Let us proceed to scene XIII.
+[Exeunt]
+
+Scene XIII: recurrence + SAVE.
+[Enter Hamlet and Juliet]
+Hamlet:
+ You are as good as the product of Juliet and Juliet.
+ You are as good as the sum of yourself and the product of Lady Macbeth and Juliet.
+ You are as good as the sum of yourself and the product of Ophelia and Romeo.
+ You are as good as the sum of yourself and the product of Cordelia and Othello.
+ You are as good as the sum of yourself and the product of Desdemona and Macbeth.
+ You are as good as the sum of yourself and Portia.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene XIV: next grind.
+[Enter Prospero and Miranda]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to scene I.
+[Exeunt]
+
+Act IV: commit current visible value into seven-slot ring.
+
+Scene I: shift last7 <- last6.
+[Enter Iago and Falstaff]
+Iago: You are as good as Iago.
+[Exeunt]
+
+Scene II: shift last6 <- last5.
+[Enter Tybalt and Iago]
+Tybalt: You are as good as Tybalt.
+[Exeunt]
+
+Scene III: shift last5 <- last4.
+[Enter Mercutio and Tybalt]
+Mercutio: You are as good as Mercutio.
+[Exeunt]
+
+Scene IV: shift last4 <- last3.
+[Enter Benedick and Mercutio]
+Benedick: You are as good as Benedick.
+[Exeunt]
+
+Scene V: shift last3 <- last2.
+[Enter Beatrice and Benedick]
+Beatrice: You are as good as Beatrice.
+[Exeunt]
+
+Scene VI: shift last2 <- last1.
+[Enter Caliban and Beatrice]
+Caliban: You are as good as Caliban.
+[Exeunt]
+
+Scene VII: last1 <- current x.
+[Enter Juliet and Caliban]
+Juliet: You are as good as Juliet.
+[Exeunt]
+
+Scene VIII: count++, i++, next visible drop.
+[Enter Prospero and Ariel]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to act II.
+[Exeunt]
+
+Act V: completion outputs.
+
+Scene I: committed count, next i, current x, last1, last7.
+[Enter Prospero and Ariel]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Falstaff]
+Prospero: Open your heart.
+[Exeunt]

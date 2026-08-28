@@ -1,0 +1,130 @@
+ഒരു കിണ്ണശ്രോതസ്സിന്റെ ആദ്യ answer സംഖ്യയും സ്ഥിര ദിശയും കണക്കാക്കുന്ന പരിശോധന.
+
+Hamlet, ചോദിച്ച കിണ്ണത്തിന്റെ അന്തിമ മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, പൂട്ടിയ order-ിലുള്ള അടുത്ത കിണ്ണത്തിന്റെ അന്തിമ മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, ആറാം സ്ഥിര-ID കിണ്ണത്തിന്റെ അന്തിമ മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, seal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, ആദ്യ answer സംഖ്യ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, direction number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, parity സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, direction step സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, മഹാമനുഷ്യൻ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, മഹാമനുഷ്യൻ നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: askBowl-ന്റെ scalar core.
+
+Scene I: നാലു input-ുകൾ വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+[Enter Portia and Viola]
+Viola:
+ You are a hero.
+Portia:
+ You are as good as the difference between a big big big big big big big hero and a hero.
+
+Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Portia:
+ Are you better than nothing?
+Viola:
+ If not, let us proceed to scene IV.
+ You are as good as the product of yourself and a big hero.
+Portia:
+ You are as good as the difference between yourself and a hero.
+ Let us return to scene III.
+
+Scene IV: മഹാമനുഷ്യന്റെ അവസാന കുറവ്.
+Viola:
+ You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene V: first answer കണക്കാക്കി SAVE ചെയ്യുന്നു.
+[Enter Portia and Macbeth]
+Portia:
+ You are as good as the sum of Hamlet and Othello.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+ You are as good as the sum of yourself and a big big hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the product of yourself and yourself.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Juliet.
+ You are as good as the sum of yourself and the product of a big big big big big hero and Juliet.
+ You are as good as the sum of yourself and the product of a big big big big hero and Juliet.
+ You are as good as the sum of yourself and the product of a big hero and Juliet.
+ You are as good as the sum of yourself and Juliet.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Portia.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene VI: direction number കണക്കാക്കി SAVE ചെയ്യുന്നു.
+[Enter Portia and Lady Macbeth]
+Portia:
+ You are as good as the sum of Macbeth and Othello.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big hero.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the product of yourself and yourself.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Macbeth.
+ You are as good as the sum of yourself and the product of a big big big big big big hero and Macbeth.
+ You are as good as the sum of yourself and Macbeth.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Romeo.
+ You are as good as the sum of yourself and the product of a big big big big big big hero and Romeo.
+ You are as good as the sum of yourself and the product of a big big hero and Romeo.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Portia.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene VII: direction number-ന്റെ parity കണ്ടെത്തുന്നു.
+[Enter Lady Macbeth and Ophelia]
+Lady Macbeth:
+ You are as good as the remainder of the quotient between Lady Macbeth and a big hero.
+Ophelia:
+ Am I as good as a hero?
+Lady Macbeth:
+ If so, let us proceed to scene VIII.
+ Let us proceed to scene IX.
+[Exeunt]
+
+Scene VIII: odd ആണെങ്കിൽ step plus one.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are a hero.
+ Let us proceed to scene X.
+[Exeunt]
+
+Scene IX: even ആണെങ്കിൽ step minus one.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the difference between nothing and a hero.
+[Exeunt]
+
+Scene X: first, step എന്നിവ പുറത്തിടുന്നു.
+[Enter Prospero and Macbeth]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ Open your heart.
+[Exeunt]

@@ -1,0 +1,108 @@
+ആറ് canonicalIndex ordinal-ുകൾ ഇതിനകം നീക്കിയ ശേഷം ഏഴാം distinct-name തിരഞ്ഞെടുപ്പിന്റെ remaining ordinal original master-list ordinal-ിലേക്ക് map ചെയ്യുന്ന clean Stage 1 പരീക്ഷണം. translated strings semantic comparison-ൽ പങ്കെടുക്കുന്നില്ല.
+
+Hamlet, ആദ്യ നീക്കപ്പെട്ട ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, രണ്ടാം നീക്കപ്പെട്ട ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, മൂന്നാം നീക്കപ്പെട്ട ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, നാലാം നീക്കപ്പെട്ട ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, അഞ്ചാം നീക്കപ്പെട്ട ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, ആറാം നീക്കപ്പെട്ട ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, remaining-list ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, ഇപ്പോഴത്തെ original candidate ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, ഇതുവരെ കണ്ട remaining candidates എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, resolved original ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: ആറു removals കടന്ന് ഏഴാം remaining ordinal കണ്ടെത്തുന്നു.
+
+Scene I: ആറു removed ordinal-ുകളും remaining ordinal-ും വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Scene II: candidate=1, seen=0.
+[Enter Prospero and Cordelia]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are nothing.
+
+Scene III: ആദ്യ removal ആണെങ്കിൽ skip.
+[Exeunt]
+[Enter Cordelia and Hamlet]
+Cordelia: Am I as good as you?
+Hamlet: If so, let us proceed to scene XI.
+[Exeunt]
+
+Scene IV: രണ്ടാം removal ആണെങ്കിൽ skip.
+[Enter Cordelia and Juliet]
+Cordelia: Am I as good as you?
+Juliet: If so, let us proceed to scene XI.
+[Exeunt]
+
+Scene V: മൂന്നാം removal ആണെങ്കിൽ skip.
+[Enter Cordelia and Romeo]
+Cordelia: Am I as good as you?
+Romeo: If so, let us proceed to scene XI.
+[Exeunt]
+
+Scene VI: നാലാം removal ആണെങ്കിൽ skip.
+[Enter Cordelia and Othello]
+Cordelia: Am I as good as you?
+Othello: If so, let us proceed to scene XI.
+[Exeunt]
+
+Scene VII: അഞ്ചാം removal ആണെങ്കിൽ skip.
+[Enter Cordelia and Macbeth]
+Cordelia: Am I as good as you?
+Macbeth: If so, let us proceed to scene XI.
+[Exeunt]
+
+Scene VIII: ആറാം removal ആണെങ്കിൽ skip.
+[Enter Cordelia and Lady Macbeth]
+Cordelia: Am I as good as you?
+Lady Macbeth: If so, let us proceed to scene XI.
+[Exeunt]
+
+Scene IX: remaining candidate ആയതിനാൽ seen കൂട്ടി target ordinal പരിശോധിക്കുന്നു.
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Desdemona and Ophelia]
+Desdemona:
+ Am I as good as you?
+Ophelia:
+ If so, let us proceed to scene X.
+ Let us proceed to scene XI.
+
+Scene X: original ordinal output ചെയ്യുന്നു.
+[Exeunt]
+[Enter Cordelia and Portia]
+Cordelia: You are as good as myself.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene XI: അടുത്ത candidate.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene III.

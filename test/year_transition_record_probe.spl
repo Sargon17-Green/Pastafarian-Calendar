@@ -1,0 +1,87 @@
+അറിയുന്ന വർഷരേഖയിൽ നിന്ന് അടുത്തതോ മുമ്പത്തേതോ ആയ വർഷത്തിന്റെ number-ും shared gate boundary-യും കൃത്യമായി നിർമ്മിക്കുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, അറിയുന്ന year number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, അറിയുന്ന open gate index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, അറിയുന്ന close gate index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, തിരഞ്ഞെടുത്ത പുതിയ outer gate index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, direction സൂക്ഷിക്കുന്ന കഥാപാത്രം; 1 അടുത്ത വർഷം, -1 മുമ്പത്തെ വർഷം.
+Lady Macbeth, പുതിയ year number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, പുതിയ open index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, പുതിയ close index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: shared boundary സംരക്ഷിച്ചുള്ള year transition.
+
+Scene I: year, open, close, selected outer index, direction വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ Listen to your heart.
+
+Scene II: direction positive ആണെങ്കിൽ next year.
+[Exeunt]
+[Enter Macbeth and Prospero]
+Macbeth:
+ Are you better than nothing?
+Prospero:
+ If so, let us proceed to scene III.
+ Let us proceed to scene IV.
+
+Scene III: next year number+1; open=old close; close=selected outer.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the sum of Hamlet and a hero.
+[Exeunt]
+[Enter Romeo and Ophelia]
+Romeo:
+ You are as good as myself.
+[Exeunt]
+[Enter Othello and Cordelia]
+Othello:
+ You are as good as myself.
+ Let us proceed to scene V.
+
+Scene IV: previous year number-1; close=old open; open=selected outer.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the difference between Hamlet and a hero.
+[Exeunt]
+[Enter Othello and Ophelia]
+Othello:
+ You are as good as myself.
+[Exeunt]
+[Enter Juliet and Cordelia]
+Juliet:
+ You are as good as myself.
+
+Scene V: പുതിയ year record പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ Open your heart.
+[Exeunt]

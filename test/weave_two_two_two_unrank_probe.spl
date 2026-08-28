@@ -1,0 +1,200 @@
+lengths 2,2,2 എന്ന ചെറിയ weaving family-യിലെ അഞ്ചു നിയമാനുസൃത rows-ന്റെ മുഴുവൻ lexicographic unrank പരിശോധന.
+
+Hamlet, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ഒന്നാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, രണ്ടാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, മൂന്നാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, നാലാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, അഞ്ചാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, ആറാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: family 112233, 112323, 121233, 121323, 123123 എന്ന കൃത്യമായ ക്രമത്തിൽ rank resolve ചെയ്യുന്നു.
+
+Scene I: rank വായിച്ച് branch തിരഞ്ഞെടുക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+ Are you better than a big big hero?
+Hamlet:
+ If so, let us proceed to scene VI.
+[Exeunt]
+[Enter Miranda and Hamlet]
+Miranda:
+ Are you better than the sum of a big hero and a hero?
+Hamlet:
+ If so, let us proceed to scene V.
+[Exeunt]
+[Enter Miranda and Hamlet]
+Miranda:
+ Are you better than a big hero?
+Hamlet:
+ If so, let us proceed to scene IV.
+[Exeunt]
+[Enter Miranda and Hamlet]
+Miranda:
+ Are you better than a hero?
+Hamlet:
+ If so, let us proceed to scene III.
+ Let us proceed to scene II.
+
+Scene II: rank 1 -> 112233.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+ Let us proceed to scene VII.
+
+Scene III: rank 2 -> 112323.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+ Let us proceed to scene VII.
+
+Scene IV: rank 3 -> 121233.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+ Let us proceed to scene VII.
+
+Scene V: rank 4 -> 121323.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+ Let us proceed to scene VII.
+
+Scene VI: rank 5 -> 123123.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ You are a hero.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ You are a big hero.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ You are as good as the sum of a big hero and a hero.
+
+Scene VII: ആറു monthId-കൾ പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Macbeth]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ Open your heart.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ Open your heart.
+[Exeunt]

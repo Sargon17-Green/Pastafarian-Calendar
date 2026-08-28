@@ -1,0 +1,83 @@
+Year 5000 candidate രണ്ട് pair-ുകളുടെ Appendix A sort order പരിശോധിക്കുന്ന പരിശോധന: ആദ്യം ചെറിയ length, tie ആണെങ്കിൽ ചെറിയ opening gate day.
+
+Hamlet, ആദ്യ pair-ന്റെ open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ആദ്യ pair-ന്റെ close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, രണ്ടാം pair-ന്റെ open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, രണ്ടാം pair-ന്റെ close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, ആദ്യ length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, രണ്ടാം length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, output സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: രണ്ടു candidate pair-ുകൾ താരതമ്യം ചെയ്യുന്നു.
+
+Scene I: നാല് ദിവസങ്ങൾ വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: രണ്ടു length-ുകൾ കണക്കാക്കുന്നു.
+[Enter Hamlet and Macbeth]
+Hamlet:
+ You are as good as the difference between Juliet and myself.
+[Exeunt]
+[Enter Romeo and Lady Macbeth]
+Romeo:
+ You are as good as the difference between Othello and myself.
+[Exeunt]
+
+Scene III: length താരതമ്യം ചെയ്യുന്നു.
+[Enter Prospero and Macbeth]
+Prospero:
+ Are you worse than Lady Macbeth?
+ If so, let us proceed to scene VI.
+ Are you better than Lady Macbeth?
+ If so, let us proceed to scene VII.
+ Let us proceed to scene IV.
+
+Scene IV: tie ആണെങ്കിൽ opening day താരതമ്യം ചെയ്യുന്നു.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero:
+ Are you worse than Romeo?
+ If so, let us proceed to scene VI.
+ Are you better than Romeo?
+ If so, let us proceed to scene VII.
+ Let us proceed to scene V.
+
+Scene V: രണ്ടും ഒരേ sort key ആണെങ്കിൽ zero.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are nothing.
+ Open your heart.
+[Exeunt]
+
+Scene VI: ആദ്യ pair മുമ്പാണ്.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are a hero.
+ Open your heart.
+[Exeunt]
+
+Scene VII: രണ്ടാം pair മുമ്പാണ്.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are a big hero.
+ Open your heart.
+[Exeunt]

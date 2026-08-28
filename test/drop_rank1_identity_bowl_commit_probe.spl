@@ -1,0 +1,154 @@
+visible drop value 1, drop index 1, stone contribution ശൂന്യം എന്ന clean control fixture-ൽ order rank 1 identity permutation ആകുന്നതും position 1..3 pours ആദ്യം നിർമ്മിച്ചതിനു ശേഷം ആറു pending bowl values ഒരേ പഴയ snapshot-ിൽ നിന്ന് കണക്കാക്കുന്നതും ഒരൊറ്റ Stage 1 source path-ൽ ബന്ധിപ്പിക്കുന്ന പരീക്ഷണം.
+
+Hamlet, പഴയ bowl 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, പഴയ bowl 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, പഴയ bowl 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, പഴയ bowl 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, പഴയ bowl 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, പഴയ bowl 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, order rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, pour 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, pour 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, pour 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, pre-square s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, pending value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: പഴയ snapshot-ും rank-1 fixture-ും.
+
+Scene I: ആറു പഴയ bowl values വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Scene II: drop 1-ന്റെ 1..720 rank 1 ആണ്.
+[Enter Prospero and Ophelia]
+Prospero: You are a hero. Open your heart.
+[Exeunt]
+
+Scene III: stone values zero ആയതിനാൽ pours 4,6,8.
+[Enter Prospero and Cordelia]
+Prospero: You are a big big hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of a big big hero and a big hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: You are a big big big hero.
+[Exeunt]
+
+Act II: identity order-ിലെ ആറു pending values.
+
+Scene I: position 1, current=1 prev=6 next=2, pour=4.
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of a big hero and Lady Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Viola and Viola.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Lady Macbeth and Juliet.
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+[Exeunt]
+
+Scene II: position 2, current=2 prev=1 next=3, pour=6.
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as Juliet.
+ You are as good as the sum of yourself and the product of a big hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Romeo.
+ You are as good as the sum of yourself and Desdemona.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Viola and Viola.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Hamlet and Romeo.
+ You are as good as the sum of yourself and a big hero.
+ Open your heart.
+[Exeunt]
+
+Scene III: position 3, current=3 prev=2 next=4, pour=8.
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as Romeo.
+ You are as good as the sum of yourself and the product of a big hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Othello.
+ You are as good as the sum of yourself and Portia.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Viola and Viola.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Juliet and Othello.
+ You are as good as the sum of yourself and the sum of a big hero and a hero.
+ Open your heart.
+[Exeunt]
+
+Scene IV: position 4, current=4 prev=3 next=5.
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as Othello.
+ You are as good as the sum of yourself and the product of a big hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Viola and Viola.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Romeo and Macbeth.
+ You are as good as the sum of yourself and a big big hero.
+ Open your heart.
+[Exeunt]
+
+Scene V: position 5, current=5 prev=4 next=6.
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as Macbeth.
+ You are as good as the sum of yourself and the product of a big hero and Othello.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Viola and Viola.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Othello and Lady Macbeth.
+ You are as good as the sum of yourself and the sum of a big big hero and a hero.
+ Open your heart.
+[Exeunt]
+
+Scene VI: position 6, current=6 prev=5 next=1.
+[Enter Prospero and Viola]
+Prospero:
+ You are as good as Lady Macbeth.
+ You are as good as the sum of yourself and the product of a big hero and Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ You are as good as the product of Viola and Viola.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and the product of Macbeth and Hamlet.
+ You are as good as the sum of yourself and the sum of a big big hero and a big hero.
+ Open your heart.
+[Exeunt]

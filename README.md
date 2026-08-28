@@ -1,1003 +1,365 @@
-# Il-Kalendarju taz-Zalza u taż-Żminijiet
-## Dwar iż-żmien, l-iskutelli, ix-xtiebi u l-ħidma tal-Ħolqien
+# Shakespeare Programming Language / മലയാളം — ഘട്ടം 1 ആരംഭം
 
-Id-dinja nħolqot mill-Mostru tal-Ispagetti li Jtir, u sal-lum għadha turi l-marki ta’ xogħlu. Iż-żmien huwa zalza magħmula minn pali, għaddijiet, ġebliet, qtar, skutelli, passi ta’ tħawwid, xtiebi, pulpetti u ħjut ta’ xhur. Kull dettall f’din is-sistema ġie stabbilit waqt il-Ħolqien, u minn dakinhar ’l hawn kull ma ġie stabbilit iservi ta’ liġi.
+ഈ ഡയറക്ടറി മുമ്പുണ്ടായിരുന്ന repository-യിലേക്കുള്ള delta അല്ല. ഉപയോക്താവിന്റെ നിർദ്ദേശപ്രകാരം ഈ implementation line ഒരു പുതിയ repository ആയി ശൂന്യത്തിൽ നിന്ന് ആരംഭിക്കുന്നു.
 
-Il-Mostru huwa magħmul minn għaġin, u l-ħidma tiegħu timxi pass pass. Jibda, juża dak li jkun diġà fuq il-mejda, jagħmel xi tiswijiet meta jkun hemm bżonn, u kultant iħalli struzzjoni qadima f’postha anki wara li jkun żied saff ġdid. L-ismijiet jingħataw waqt ix-xogħol u jibqgħu marbuta mal-affarijiet li jsemmu. Hekk kiber il-Ħolqien, saff fuq saff.
+ഈ ശ്രമത്തിന്റെ ഏക പ്രോഗ്രാമിങ് ഭാഷ Shakespeare Programming Language ആണ്. മനുഷ്യർ വായിക്കേണ്ട നടപ്പാക്കൽ ഗദ്യത്തിന്റെ ഏക ഉറവിടഭാഷ മലയാളമാണ്. മറ്റൊരു implementation-ന്റെ code, tests, fixtures, expected outputs, generated tables, caches, logs, hashes, checksums, oracle, അല്ലെങ്കിൽ differential ഫലങ്ങൾ ഇവിടെ ഉപയോഗിച്ചിട്ടില്ല.
 
-Dawn is-saffi kollha tal-ħidma jiffurmaw sistema deterministika: kull pass jiġi ddeterminat mill-passi ta’ qablu.
+നിലവിലുള്ള repository ഒന്നും മുൻകൂർ കരുതുന്നില്ല. ഈ package തന്നെയാണ് പുതിയ repository-യുടെ ആരംഭ working tree. Git history സൃഷ്ടിച്ചിട്ടില്ല; commit, tag, branch, push, pull, fetch, PR, issue, release, GitHub Actions എന്നിവ ഒന്നും നിർവഹിച്ചിട്ടില്ല.
 
-Hekk sar il-Ħolqien: b’irqajja’, żidiet u tiswijiet li saru fejn kien hemm bżonnhom. Il-Mostru jitfixkel, jerġa’ jgħodd, jinsa xi struzzjoni, iduq mill-iskutella ta’ ħdejh u jżid regola ġdida fejn tkun meħtieġa. Il-Kalendarju taż-Żminijiet jinqara billi wieħed jgħaddi minn dawn is-saffi b’eżattezza, wieħed wara l-ieħor.
+ഈ package-ൽ ഇതിനകം തയ്യാറാക്കിയിരിക്കുന്നത്:
 
-Għalhekk, il-prinċipju fundamentali tal-Kalendarju taż-Żminijiet huwa:
+- 17 കട്ട്ലറ്റ് പേരുകളും 47 മാസം പേരുകളും സ്ഥിരമായ `canonicalIndex` സഹിതം ഉൾക്കൊള്ളുന്ന versioned source-language catalog;
+- അർത്ഥമുള്ള പേരുകൾ മലയാളത്തിലേക്ക് അർത്ഥാനുവാദം ചെയ്യുകയും സ്ഥലനാമങ്ങൾ, വ്യക്തിനാമങ്ങൾ, അർത്ഥമില്ലാത്ത ശബ്ദസംയോജനങ്ങൾ നിർണ്ണിതമായി ലിപ്യന്തരം ചെയ്യുകയും ചെയ്യുന്ന നിയമം;
+- ഭാവിയിലെ patch 01–26 ഒന്നും ഉൾക്കൊള്ളാത്ത നിഷ്പക്ഷ SPL bootstrap skeleton;
+- exact-integer runtime contractയും `2^127-1` probe-ഉം;
+- `regularMod`, `SAVE`, `dayCount`, `workCounts` എന്നിവ SPL-ൽ നടപ്പാക്കുന്ന test-only primitive oracle അരങ്ങ്;
+- primitive expected outputs-ന്റെ സ്വതന്ത്ര Stage 1 പട്ടിക;
+- ശേഷിക്കുന്ന Appendix A ഭാഗങ്ങളുടെ implementation map.
 
-> **Kull stadju jiġi kkalkulat b’eżattezza.**
+ഘട്ടം 1 ഇനിയും പൂർത്തിയായിട്ടില്ല. കാരണം repository അഭാവമല്ല. Appendix A-യുടെ പൂർണ്ണ test-only oracle ഇനിയും source-ൽ പൂർത്തിയായിട്ടില്ല; കൂടാതെ ഈ execution environment-ൽ പ്രാദേശികമായി പ്രവർത്തിപ്പിക്കാവുന്ന SPL runner/compiler ലഭ്യമല്ല. അതിനാൽ എഴുതിയ SPL source syntax/runtime-ൽ പ്രവർത്തിപ്പിച്ച് GREEN തെളിവ് നേടാനായിട്ടില്ല.
 
-Żball ta’ unità waħda f’waħda mill-ewwel qatriet jibdel il-qatriet ta’ warajha, l-iskutelli, ix-xtiebi, is-sena, il-pulpetti, ix-xhur u l-isem tal-jum fir-riżultat finali.
+ഇനി ചെയ്യാതെ ബാക്കിയുള്ള നിർബന്ധിത ജോലികൾ:
 
----
+- stones മുതൽ final five-field tuple വരെ Appendix A-യുടെ ശേഷിക്കുന്ന മുഴുവൻ oracle SPL-ൽ എഴുതുക;
+- runtime exact arbitrary-precision arithmetic probe കടക്കുന്നതായി തെളിയിക്കുക;
+- SPL-only fixtures, helper differential checks, end-to-end expected values എന്നിവ പൂർത്തിയാക്കുക;
+- SPL runtime-ൽ എല്ലാ Stage 1 tests-ഉം പ്രവർത്തിപ്പിച്ച് GREEN തെളിവ് നേടുക;
+- അതിനു ശേഷമേ `LAST_COMPLETED_STAGE=1` ആക്കാവൂ.
 
-# A. Iż-żmien jitwieled meta jum jistaqsi lil ieħor
+മറ്റൊരു implementation-ന്റെ output ഉപയോഗിച്ച് expected values സൃഷ്ടിക്കരുത്. Stage 1 GREEN ആകുന്നതിന് മുമ്പ് Stage 2-ലെ legacy bug അല്ലെങ്കിൽ patch code ഒന്നും ചേർക്കരുത്.
 
-Kull kalkolu jinvolvi jumejn, u l-ordni tagħhom tagħmel differenza:
+## ഏറ്റവും പുതിയ ഘട്ടം 1 പുരോഗതി
 
-1. **Jum il-Kalkolu** — il-jum li fih isir il-kalkolu.
-2. **Il-Jum Mitlub** — il-jum li għalih irid jinstab l-isem.
+പൂർണ്ണ oracle-ിലേക്കുള്ള അടുത്ത ഭാഗങ്ങളായി stack runtime gate, simultaneous stone recurrence, hidden-drop trace, visible seed, visible grind-step probe എന്നിവ SPL-ൽ ചേർത്തിട്ടുണ്ട്. ഇവ test-only reference നിർമ്മാണത്തിന്റെ ഭാഗങ്ങളാണ്; production bootstrap-ിലേക്ക് future legacy/patch code ചേർത്തിട്ടില്ല. bowls, post-stirs, answer streams, gates, years, cutlets, months, weaving, final tuple എന്നിവ ഇനിയും പൂർത്തിയാക്കേണ്ടതിനാൽ Stage 1 പൂർത്തിയായതായി ഈ tree അവകാശപ്പെടുന്നില്ല.
 
-Il-Mostru ħoloq il-kalendarju bħala relazzjoni bejn żewġ jiem għax, fil-bidu ta’ xogħlu, kien iżomm żewġ taljarini mmarkati: wieħed għall-jum li fih kien jistaqsi u l-ieħor għall-jum li dwaru kien jistaqsi. Ftit wara ma baqax jiftakar liema wieħed minnhom kellu jintrema. Baqgħu t-tnejn.
+## ഇപ്പോഴത്തെ Stage 1 പുരോഗതി
 
-Ir-riżultat tal-kalendarju huwa funzjoni:
+Test-only oracle source ഇപ്പോൾ primitive arithmetic, work counts, short/wide selection, stone step, hidden-drop trace, visible seed/ഒറ്റ grind എന്നിവയ്ക്ക് പുറമേ പതിനൊന്ന്-grind loop, answer-ring offset, six-item factoradic rank decomposition, year-pair validity predicate എന്നിവയും ഉൾക്കൊള്ളുന്നു. ഇത് ഇനിയും Appendix A-യുടെ end-to-end oracle അല്ല; Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
-```text
-F(c,t)
-```
+## ഇപ്പോഴത്തെ Stage 1 പുരോഗതി
 
-fejn `c` huwa Jum il-Kalkolu u `t` huwa l-Jum Mitlub. Ġeneralment:
+Test-only oracle source ഇപ്പോൾ primitive counts/selection/stones/drops ഭാഗങ്ങൾക്കൊപ്പം bowl/sauce scalar ഭാഗങ്ങളിലേക്കും എത്തിയിട്ടുണ്ട്: initial bowl formula, മൂന്ന് order-position pours, old-snapshot bowl update, 1A saved post-stir sum, post-stir bowl update, drop-46 latched successor, askBowl first/direction. ഇത് full calendar oracle അല്ല. Stage 1 പൂർത്തിയാകുന്നതിന് മുമ്പ് ഇവയെ actual permutation, 46-drop timeline, six-bowl simultaneous rounds, 12 post-stirs, gates, years, cutlets, months, weaving, five-field resolver എന്നിവയുമായി ബന്ധിപ്പിക്കണം; തുടർന്ന് SPL-only runtime test suite യഥാർത്ഥമായി GREEN ആകണം.
 
-```text
-F(c,t) ≠ F(t,c)
-```
+## ഏറ്റവും പുതിയ Stage 1 clean continuation
 
-Minn dan il-par jiġu kkalkulati ħames għaddijiet:
+ഈ revision factoradic decomposition-ന്റെ പിന്നാലെയുള്ള remaining-item selection primitive, പൊതുവായ `wrap1`, `ceilDiv`, six-position bowl-round control fixture, month-count bounds, distinct-name family count-ന്റെ falling factorial എന്നിവ SPL test-only source ആയി ചേർക്കുന്നു. production bootstrap-ിൽ future legacy scar അല്ലെങ്കിൽ patch code ഒന്നും ചേർത്തിട്ടില്ല.
 
-- **l-Għadd tal-Kalkolu** — l-għadd tal-jum `c`.
-- **l-Għadd Mitlub** — l-għadd tal-jum `t`.
-- **l-Għadd tad-Distanza** — `|t-c|+1`.
-- **l-Għadd tas-Somma** — is-somma tal-Għadd tal-Kalkolu u l-Għadd Mitlub.
-- **l-Għadd tad-Direzzjoni** — `1` jekk `t<c`, `2` jekk `t=c`, u `3` jekk `t>c`.
+local static scan പ്രകാരം tree-ൽ 40 files ഉണ്ട്; അവയിൽ 30 SPL files ആണ്. അറിയാവുന്ന future-patch identifiers-ഉം `5781`-ഉം SPL source-ൽ ഇല്ല. ഇത് runtime GREEN തെളിവല്ല. full permutation integration മുതൽ final five-field resolver വരെ ശേഷിക്കുന്ന reference source-ും local SPL execution-ഉം പൂർത്തിയാകാതെ Stage 1 complete ആയി കണക്കാക്കരുത്.
 
-L-Għadd tad-Distanza jibda minn wieħed għax il-Mostru ma kienx iħobb post vojt. L-Għadd tad-Direzzjoni żdied wara li l-Mostru ntebaħ li d-distanza waħedha ma tindikax jekk il-mixja kinitx ’il quddiem jew lura.
+## ഏറ്റവും പുതിയ Stage 1 തുടർച്ച — timeline, interval, boundary controls
 
----
+ഈ revision Appendix A-യിലെ control semantics-ന്റെ അഞ്ചു ഭാഗങ്ങൾ കൂടി SPL test-only source ആയി ചേർക്കുന്നു: hidden/visible predecessor source mux, 1 മുതൽ 12 വരെ post-stir schedule, നിർബന്ധിത `(open,close]` year membership, internal exact calculation-gate cutlet boundary offset, sequential target-year walk direction. ഇവ future patch code അല്ല; clean oracle bootstrap-ന്റെ ചെറു ഘടകങ്ങൾ മാത്രം ആണ്.
 
-# B. Il-Pal
+Stage 1 ഇനിയും പൂർത്തിയായിട്ടില്ല. rolling drop values, full six-ID permutation materialization, full bowl/post-stir state chain, gates, year selection, cutlet/month combinatorics, weaving, final five-field result, കൂടാതെ SPL runtime GREEN തെളിവ് ഇനിയും വേണം.
 
-Il-Mostru għażel jum wieħed mis-sensiela tal-jiem, waħħal pal fih, u lil dak il-jum semmieh **Jum il-Pedament**.
+## ഏറ്റവും പുതിയ Stage 1 തുടർച്ച — permutation materialization, composition window, weaving controls
 
-F’numerazzjoni kontinwa li fiha, fil-kalendarju Gregorjan, l-1 ta’ Jannar tas-sena 1 W.K. huwa l-jum `1`:
+ഈ revision ആറു factoradic digits-നെ active-set removal സഹിതം actual six-ID permutation ആക്കുന്ന SPL probe ചേർക്കുന്നു. കൂടാതെ bounded-composition candidate window, month-weaving legal move, weaving state transition, inclusive month-occurrence prefix count എന്നിവ clean Appendix A test-only source ആയി ചേർത്തിട്ടുണ്ട്. future legacy/patch code ഒന്നും production bootstrap-ിലേക്ക് ചേർത്തിട്ടില്ല.
 
-```text
-Jum l-Għoti tat-Twavel = -278,522
-Jum il-Pedament         = -15,055,671
-```
+ഇതോടെ factoradic digit-ുകളിൽ നിന്ന് actual permutation-ലേക്കുള്ള local source gap അടഞ്ഞുവെങ്കിലും end-to-end oracle ഇനിയും പൂർത്തിയായിട്ടില്ല. 46-drop rolling timeline, മുഴുവൻ bowl/post-stir state chain, gates, year selection/walk, full composition/weaving DP count+unrank, distinct-name unrank, final five-field result, SPL runtime GREEN തെളിവ് എന്നിവ ഇനിയും വേണം.
 
-Id-differenza hija:
+## ഏറ്റവും പുതിയ Stage 1 തുടർച്ച — gate/year/name integration primitives
 
-```text
-14,777,149 jum
-```
+ഈ revision permutation rank-ന്റെ ആദ്യ 120-size block/residual rank, signed gate question day, ചെറിയ three-gap signed gate chain, clean Year 5000 candidate predicate, distinct-name unrank-ന്റെ ആദ്യ falling-factorial block എന്നിവ SPL test-only source ആയി ചേർക്കുന്നു. ഇവ Appendix A-യുടെ clean semantics മാത്രം ആണ്; future legacy ceiling, cache scar, negative-gate patch, name-repeat detour എന്നിവ Stage 1-ൽ ചേർത്തിട്ടില്ല.
 
-Jum l-Għoti tat-Twavel jaqa’ fi żmien Aššur-dān III, fis-sena tal-*limmu* ta’ Būr-Sagallē, gvernatur ta’ Guzana, fix-xahar ta’ Simanu, dakinhar li seħħet eklissi tax-xemx. Għall-kalkolu normattiv, dan huwa l-15 ta’ Ġunju 763 Q.K. fil-kalendarju Ġuljan prolettiku, jew is-7 ta’ Ġunju tal-istess sena fil-kalendarju Gregorjan prolettiku.
+ഇതിനു ശേഷവും Stage 1 പൂർത്തിയായിട്ടില്ല. full rank-to-permutation integration, sauce-ൽ നിന്നുള്ള actual gate-gap generation, lazy gate cache/indexing, candidate enumeration/sorting/selection, full distinct-name repeated positions, cutlet/month DP count+unrank, weaving count+unrank, final five-field resolver, SPL runtime GREEN തെളിവ് എന്നിവ ഇനിയും വേണം.
 
-Jum il-Pedament jiġi deskritt kif ġej:
+## ഏറ്റവും പുതിയ Stage 1 clean continuation — gate ordering, repeated-name, small exact family counts
 
-- **Gregorjan:** 22 ta’ Diċembru 41,222 Q.K.
-- **Ebrajk:** 19 ta’ Sivan, is-sena 37,460 qabel il-Ħolqien tad-Dinja.
-- **Kalendarju Iżlamiku aritmetiku:** 27 ta’ Rabiʿ al-Awwal, is-sena `−43,126` tal-Eġira.
-- **Kalendarju solari Persjan aritmetiku taċ-ċiklu ta’ 2,820 sena:** 18 ta’ Azar, is-sena `−41,843`.
-- **Ġuljan:** 28 ta’ Ottubru 41,221 Q.K.
-- **Ċiniż tradizzjonali**, skont l-estensjoni magħmula bl-algoritmu preskritt: iċ-ċiklu `−643`, is-sena 57 taċ-ċiklu, Geng-Shen, l-ewwel xahar, il-jum 22; ix-xahar mhuwiex interkalarju.
-- **Ħindu**, skont l-estensjoni magħmula bl-algoritmu stabbilit: is-sena `−41,162` tal-era Vikrama, Kartika, is-16-il jum lunari, mingħajr xahar interkalarju u mingħajr jum interkalarju.
-- **Saka:** l-1 ta’ Pausha, is-sena `−41,299`.
-- **Buddist Tajlandiż:** 22 ta’ Diċembru, is-sena `−40,678`.
-- **Etjopiku:** l-1 ta’ Hidar, is-sena `−41,227`.
-- **Koptiku:** l-1 ta’ Hathor, is-sena `−41,503`.
-- **Kōki Ġappuniż prolettiku:** 22 ta’ Diċembru, is-sena `−40,561`.
-- **Minguo:** 22 ta’ Diċembru, is-sena `−43,132`.
-- **Bahá’í prolettiku:** is-sena `−43,064`, il-11-il jum ta’ Masá’il; Kull-i-Shay’ `−119`, Váḥid 14, sena 9.
-- **L-Għadd Twil tal-Maja**, skont GMT 584283 u b’diviżjoni Ewklidjana tal-komponenti negattivi: `−97.6.17.7.11`.
+ഈ revision-ൽ full Appendix A oracle-ിലേക്കുള്ള ഏഴ് അടുത്ത slices കൂടി SPL source ആയി ചേർത്തു:
 
----
+- `test/gate_gap_choice_probe.spl`: 1..922 selector rank-നെ 42..963 gate gap ആക്കുന്ന exact conversion;
+- `test/year5000_pair_order_probe.spl`: Year 5000 candidate sort-ിന്റെ length-first, opening-day-tie-break order;
+- `test/cutlet_count_candidate_count_probe.spl`: `6..min(17,gateGaps)` candidate family cardinality;
+- `test/month_count_rank_resolve_probe.spl`: exact month-count bounds-ിൽ നിന്ന് one-based rank resolve;
+- `test/distinct_name_two_choice_probe.spl`: distinct-name unrank-ന്റെ ആദ്യ രണ്ടു canonicalIndex തിരഞ്ഞെടുപ്പുകൾ, removal-aware mapping സഹിതം;
+- `test/bounded_composition_two_slot_probe.spl`: രണ്ട്-slot bounded composition family-യുടെ exact count + lexicographic unrank;
+- `test/weave_two_month_count_probe.spl`: രണ്ട് month threads-ന്റെ legal weaving family-യ്ക്ക് exact ചെറിയ count sanity gate.
 
-# C. Żewġ Ħjut ta’ Numri
+ഇവ clean reference slices മാത്രമാണ്. rolling 7+46 values, 46 bowl-state commits, 12 full post-stirs, sauce-derived lazy gates, full year enumeration/selection/walk, general composition memo/unrank, general weaving memo/unrank, മുഴുവൻ distinct-name positions, final five-field resolver എന്നിവ ഇനിയും പൂർത്തിയാക്കണം. Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
-Jum il-Pedament jingħata l-valur `1`.
+## ഏറ്റവും പുതിയ Stage 1 തുടർച്ച — rank-to-order integration, മൂന്ന്-slot families, cutlet/month final-resolution helpers
 
-Jekk `d>Foundation`:
+ഈ revision clean Appendix A reference-ന്റെ അടുത്ത integration ഭാഗങ്ങൾ SPL test-only source ആയി ചേർക്കുന്നു. `bowl_order_rank6_integrated_probe.spl` one-based rank `1..720` നേരിട്ട് factoradic digits-ആക്കി active six-ID set-ിൽ removal-aware ആയി materialize ചെയ്യുന്നു; അതിനാൽ rank decomposition-നും actual bowl order-നും ഇടയിലെ source gap ഇപ്പോൾ ഒരൊറ്റ SPL path-ൽ അടഞ്ഞു.
 
-```text
-N(d) = 2(d-Foundation)+1
-```
+കൂടാതെ മൂന്ന്-slot bounded composition family-യ്ക്ക് exact countയും lexicographic unrank-ഉം, മൂന്ന് cutlet positive-composition family-യ്ക്ക് internal required-boundary filter സഹിതം exact count/unrank, cutlet interval-ിൽ നിന്ന് canonicalIndex + `dayInCutlet` resolve, weaving position-ിൽ നിന്ന് monthId resolve, ആദ്യ രണ്ടു name removals കഴിഞ്ഞ third ordinal mapping എന്നിവ ചേർത്തിട്ടുണ്ട്.
 
-Jekk `d<Foundation`:
+ഇവ future patch code അല്ല. production bootstrap ഇനിയും നിഷ്പക്ഷമാണ്. Stage 1 ഇനിയും പൂർത്തിയായിട്ടില്ല: rolling 7+46 drop timeline, 46 full bowl rounds, 12 full post-stir state chain, sauce-derived lazy gates, complete year enumeration/selection/walk, arbitrary-slot cutlet/month DP, arbitrary-month weaving memo/unrank, arbitrary-k distinct-name unrank, source-language string presentation resolve, exact five-field end-to-end result, SPL runtime GREEN തെളിവ് എന്നിവ ഇനിയും വേണം.
 
-```text
-N(d) = 2(Foundation-d)
-```
+local static scan പ്രകാരം tree-ൽ 70 files ഉണ്ട്; അവയിൽ 60 SPL files ആണ്. അറിയാവുന്ന future-patch identifiers-ഉം `5781`-ഉം SPL source-ൽ ഇല്ല. ഇത് runtime execution-ന്റെ പകരം അല്ല.
 
-Għalhekk:
+## ഏറ്റവും പുതിയ Stage 1 തുടർച്ച — ordered gate lookup മുതൽ five-field resolver വരെ
 
-```text
-F-3 → 6
-F-2 → 4
-F-1 → 2
-F   → 1
-F+1 → 3
-F+2 → 5
-F+3 → 7
-```
+ഈ revision clean Appendix A test-only source-ൽ ആറു അടുത്ത integration slices ചേർക്കുന്നു: നാല് gate-ുകളുള്ള ordered lookup, മൂന്ന് cutlet interval materialization, lengths `3,2` weaving family-യുടെ complete lexicographic unrank sanity slice, structure sauce target ആയി `openGateDay+1`, year number unit-step continuity, കൂടാതെ ചെറിയ materialized structure-ിൽ canonicalIndex-only semantics ഉപയോഗിച്ച് exactly five output fields resolve ചെയ്യുന്ന integrated probe.
 
-Il-Mostru, mela, rabat żewġ ħjut — tal-pari u tal-fard — madwar l-istess pal. L-għadd tal-jum jidentifika jum; il-qabel u l-wara jibqgħu fuq l-istess assi.
+ഇത് പ്രധാന പുരോഗതിയാണ്, കാരണം final resolver-ന്റെ അഞ്ചു fields ഇപ്പോൾ ഒരൊറ്റ SPL source path-ൽ കാണുന്നു. എന്നാൽ inputs ഇതിനകം materialized structure ആണ്; sauce, lazy gates, year candidate generation, arbitrary DP/unrank, full SourceLanguageCatalog presentation resolution എന്നിവ ഈ probe സൃഷ്ടിക്കുന്നില്ല. അതിനാൽ Stage 1 ഇനിയും പൂർത്തിയായിട്ടില്ല, Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
----
+## ഏറ്റവും പുതിയ Stage 1 clean continuation — four-slot families, post-stir order rank, lazy-cover/year-record controls
 
-# D. L-Għadd il-Kbir u l-Bqija Miżmuma
+ഈ revision clean Appendix A oracle-ന്റെ ആറു അടുത്ത source slices SPL test-only tree-ലേക്ക് ചേർക്കുന്നു:
 
-Il-limitu taz-zalza huwa dan:
+- `test/post_stir_order_rank_probe.spl`: 1A saved bowl sum-ിൽ നിന്ന് `1..720` post-stir bowl-order rank;
+- `test/bounded_composition_four_slot_count_probe.spl`: നാല്-slot bounded composition family exact count;
+- `test/bounded_composition_four_slot_unrank_probe.spl`: നാല്-slot family-യുടെ exact lexicographic unrank;
+- `test/weave_two_two_one_unrank_probe.spl`: lengths `2,2,1` weaving family-യുടെ complete ചെറിയ lexicographic unrank;
+- `test/year_transition_record_probe.spl`: next/previous year record-ൽ shared gate boundary + unit year-number step;
+- `test/gate_cover_need_probe.spl`: lazy gate store ഏത് ദിശയിൽ മാത്രം വിപുലീകരിക്കണം എന്ന exact boundary control.
 
-```text
-M = 2^127 - 1
-```
+ഇവ future legacy/patch code അല്ല. clean reference family semantics slots=3-ൽ നിന്ന് slots=4 വരെ നീണ്ടു; post-stir saved value ഇപ്പോൾ order-rank derivation-ുമായി source-ൽ ബന്ധപ്പെട്ടു; year transition record-ന്റെ boundary ownership ചെറിയ integration path ആയി ഉണ്ട്. Stage 1 ഇനിയും complete അല്ല: rolling 7+46 drops, 46 full bowl commits, 12 full six-bowl post-stirs, sauce-derived gate gaps/store, full year candidate enumeration/selection/walk, arbitrary-K/general DP, arbitrary-m weaving memo/unrank, arbitrary-k distinct names, മലയാള presentation resolution, end-to-end generated five-field result, local SPL runtime GREEN എന്നിവ ഇനിയും വേണം.
+## ഏറ്റവും പുതിയ Stage 1 തിരുത്തൽ — കിണ്ണ recurrence-കളിലെ square സ്ഥാനത്തിന്റെ ശരിയാക്കൽ
 
-Meta l-istruzzjoni tgħid **żomm**:
+Appendix A വീണ്ടും വരി-വരി പരിശോധിക്കുമ്പോൾ രണ്ട് clean oracle probe-ുകളിൽ ഒരേ രൂപത്തിലുള്ള പിഴവ് കണ്ടെത്തി: `bowl_shadow_stir_probe.spl`-ൽ square മുഴുവൻ pre-square sum-ിന് പകരം `oldCurrent`-ന് മാത്രം പ്രയോഗിച്ചിരുന്നു; `post_stir_bowl_probe.spl`-ലും അതേ തെറ്റ് ഉണ്ടായിരുന്നു. Stage 1 ഇനിയും പൂർത്തിയായിട്ടില്ലാത്തതിനാൽ ഇത് historical patch അല്ല; അപൂർണ്ണ clean oracle-ന്റെ നേരിട്ടുള്ള തിരുത്തലാണ്. ഇപ്പോൾ ആദ്യ probe `s = oldCurrent + 2*oldPrev + 3*oldNext + pour + drop + stoneValue` കണക്കാക്കി `SAVE(s^2 + 5*oldPrev*oldNext + i*position)` ഉപയോഗിക്കുന്നു. രണ്ടാം probe `s = oldCurrent + 3*oldPrev + 5*oldNext + savedBowlSum + stirNumber + position^2` കണക്കാക്കി `SAVE(s^2 + 7*oldPrev*oldNext)` ഉപയോഗിക്കുന്നു. ബന്ധപ്പെട്ട ചെറിയ expected outputs യഥാക്രമം `16846`, `17130` ആയി തിരുത്തി. future patch code ഒന്നും ചേർത്തിട്ടില്ല; Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
-```text
-SAVE(x) = 1 + ((x-1) mod M)
-```
+## ഏറ്റവും പുതിയ Stage 1 clean continuation — six-position bowl/post-stir integration, latch, four-slot boundary family
 
-għalhekk ir-riżultat ikun dejjem fil-medda `1..M`.
+ഈ revision progress-15-ലെ corrected recurrence semantics-ിൽ നിന്ന് മാത്രം തുടരുന്നു. പുതിയ test-only SPL slices:
 
-B’mod partikolari:
+- `test/bowl_round_uniform_snapshot_probe.spl`: ഒരേ old snapshot ഉപയോഗിച്ച് ഒരു visible-drop round-ന്റെ ആറു positions-ും corrected pre-square formula പ്രകാരം output ചെയ്യുന്നു;
+- `test/post_stir_uniform_round_probe.spl`: 1A saved sum-ിൽ നിന്ന് ഒരു മുഴുവൻ six-position post-stir scalar round വരെ ബന്ധിപ്പിക്കുന്നു;
+- `test/drop46_latch_twelve_post_probe.spl`: drop-46 order latch പന്ത്രണ്ട് post-stir order reads കൊണ്ട് overwrite ആകുന്നില്ലെന്ന് source-level control gate;
+- `test/cutlet_partition_four_slot_filter_probe.spl`: four-part positive-composition family-ൽ internal required-boundary prefix filter + exact count/unrank;
+- `test/distinct_name_fourth_mapping_probe.spl`: മൂന്ന് removals കഴിഞ്ഞ fourth remaining ordinal original canonicalIndex ordinal-ിലേക്ക് map ചെയ്യൽ;
+- `test/gate_gap_stream_short_probe.spl`: synthetic AnswerStream short selection മുതൽ exact `42..963` gate-gap conversion വരെ ഒരൊറ്റ source path.
 
-```text
-SAVE(M)   = M
-SAVE(2M)  = M
-SAVE(M+1) = 1
-SAVE(0)   = M
-```
+ഇവ future historical scars അല്ല. production bootstrap നിഷ്പക്ഷമായി തുടരുന്നു. full oracle ഇനിയും complete അല്ല; പ്രത്യേകിച്ച് arbitrary order-ിലുള്ള 46 bowl rounds, rolling 7+46 drop values, actual twelve committed post-stir states, sauce-derived lazy gates, full years, arbitrary-K/m combinatorial DP/unrank, full name unrank, frozen മലയാള presentation resolve, generated five-field end-to-end result, local SPL runtime GREEN എന്നിവ ഇനിയും വേണം.
 
-Meta l-istruzzjoni titlob **bqija ordinarja** fid-diviżjoni b’`d`, ir-riżultat ikun fil-medda `0..d-1`.
+## ഏറ്റവും പുതിയ Stage 1 തുടർച്ച — progress 17
 
-Fit-tnaqqis ukoll, meta jinqabeż il-limitu, il-valur jerġa’ jibda min-naħa l-oħra tal-medda: fil-kalkolu jista’ jintuża `SAVE(a-b)`.
+ഈ revision clean test-only oracle-ിൽ rolling predecessor boundary നാല് visible positions വരെ നീക്കുന്നു; identity order-ിൽ six distinct old bowl values ഒരേ snapshot ആയി ഉപയോഗിക്കുന്ന full no-wrap round ചേർക്കുന്നു; 1A saved sum rank 1 ആകുന്ന fixture-ൽ six distinct post-stir pending values source-ൽ ബന്ധിപ്പിക്കുന്നു; distinct-name removal mapping അഞ്ചാം position വരെ നീക്കുന്നു; മൂന്ന് year-pair candidates-ന്റെ clean validity batch ചേർക്കുന്നു.
 
----
+production bootstrap-ിൽ future legacy scar ഒന്നും ചേർത്തിട്ടില്ല. `5781`, old remainder/day-tag/distance paths, negative-gate legacy question, bad year cache key, repeated-name generator, ghost weaving, contiguous-month guess എന്നിവ Stage 1 source-ൽ ഇല്ല.
 
-# E. Il-Ħames Ġebliet
+Stage 1 ഇപ്പോഴും പൂർത്തിയായിട്ടില്ല. 46-drop exact rolling recurrence, arbitrary-order 46 bowl commits, committed 12 post-stirs, sauce-derived gates, full years, general DP/unrank, full name unrank, presentation resolve, generated five-field end-to-end result, local SPL runtime GREEN എന്നിവ ഇനിയും വേണം.
 
-Kull qatra viżibbli għandha ħames ġebliet:
+## ഏറ്റവും പുതിയ Stage 1 clean continuation — progress 18
 
-```text
-qamħ, xgħir, melħ, morra, ħamra
-```
+ഈ revision progress-17-ൽ നിന്ന് മാത്രം തുടരുന്നു. clean test-only Appendix A source-ിൽ ആറു അടുത്ത integration slices ചേർത്തു:
 
-Għall-qatra 1:
+- `test/rolling_two_visible_full_grinds_probe.spl`: hidden predecessor values-ിൽ നിന്ന് visible drop 1 seed, പതിനൊന്ന് grinds, commit, തുടർന്ന് അതേ committed value visible drop 2-ന്റെ `prev1` ആക്കി seed + പതിനൊന്ന് grinds വരെ ഒരൊറ്റ rolling source path;
+- `test/bowl_nonidentity_order_round_probe.spl`: fixed non-identity order `3,1,6,2,5,4`-ൽ six distinct old bowl values ഒരേ snapshot ആയി വായിക്കുന്ന full six-position round;
+- `test/post_stir_nonidentity_order_probe.spl`: 1A saved value `255` -> rank 255 order `3,1,5,4,2,6` -> six distinct pending post-stir values;
+- `test/sauce_query_short_selection_probe.spl`: askBowl scalar output -> direction -> accepted short rank -> gate-gap conversion എന്ന integrated path;
+- `test/distinct_name_sixth_mapping_probe.spl`: അഞ്ചു removals കഴിഞ്ഞ sixth remaining ordinal original canonical ordinal-ിലേക്ക്;
+- `test/weave_two_two_two_unrank_probe.spl`: lengths `2,2,2` legal weaving family-യിലെ അഞ്ചു rows-ന്റെ complete small lexicographic unrank.
 
-```text
-[17, 29, 43, 71, 101]
-```
+ഈ continuation-ൽ ഒരു Stage 1 clean-source mismatch കൂടി കണ്ടെത്തി: `post_stir_identity_order_no_wrap_probe.spl`-ന്റെ position 6 expression `position^2=36` ആകേണ്ടിടത്ത് source literal `20` ആയിരുന്നു, എന്നാൽ documented expected value ഇതിനകം `36` അനുസരിച്ചായിരുന്നു. source മാത്രം നേരിട്ട് ശരിയാക്കി; historical scar/patch ഒന്നും സൃഷ്ടിച്ചിട്ടില്ല. പുതിയ non-identity post-stir probe-ിലും position 6 `36` തന്നെയാണ്.
 
-Għall-qatra `i>=2`, il-ħames valuri l-ġodda jiġu kkalkulati kollha minn `snapshot` wieħed tal-istat tal-qatra ta’ qabilha:
+ഇതിനു ശേഷവും Stage 1 പൂർത്തിയായിട്ടില്ല. full seven-hidden generation, all 46 visible recurrences, actual 46 bowl commits, stir 1..12 മുഴുവൻ committed state chain, sauce-derived lazy gates, complete year enumeration/selection/walk, arbitrary-size memoized composition/weaving families, arbitrary-k name unrank, frozen മലയാള presentation resolution, generated end-to-end five-field calendar output, SPL-only runtime GREEN എന്നിവ ഇനിയും വേണം. Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
-```text
-qamħ_i  = SAVE(qamħ² + 3·xgħir + i)
-xgħir_i = SAVE(xgħir² + 5·melħ + qamħ)
-melħ_i  = SAVE(melħ² + 7·morra + xgħir)
-morra_i = SAVE(morra² + 11·ħamra + melħ)
-ħamra_i = SAVE(ħamra² + 13·qamħ + morra)
-```
+## ഏറ്റവും പുതിയ Stage 1 clean continuation — progress 19
 
-Il-ħames valuri l-ġodda jiġu assenjati fl-istess ħin.
+ഈ revision progress-18-ൽ നിന്ന് മാത്രം തുടരുന്നു. പുതിയ test-only SPL slices അഞ്ച്:
 
----
+- `test/rolling_three_visible_full_grinds_probe.spl`: three committed visible drops വരെ predecessor ownership + seed + 11 zero-row grind loop;
+- `test/post_stir_two_committed_rounds_probe.spl`: six pending values -> logical commit -> അടുത്ത six-bowl old snapshot എന്ന രണ്ടു-round transactional chain;
+- `test/gate_signed_store_five_probe.spl`: Foundation-നെ ചുറ്റിയുള്ള `gate[-2..2]` ചെറിയ signed store materialization;
+- `test/next_year_three_candidate_rank_probe.spl`: same-open next-year candidate scan, `gaps>=6`, `252..5778`, one-based rank resolve;
+- `test/distinct_name_seventh_mapping_probe.spl`: six removals കഴിഞ്ഞ seventh-position canonical ordinal mapping.
 
-# F. Is-Seba’ Qatriet Moħbija
+ഇവ future historical scars അല്ല. production bootstrap നിഷ്പക്ഷമായി തുടരുന്നു. പ്രധാന blockers ഇപ്പോഴും full seven-hidden generation + 46 visible recurrences, 46 drop-derived bowl rounds, twelve normative committed post-stirs, sauce-derived arbitrary lazy gates, Year 5000/next/previous full candidate machinery, arbitrary-K/m DP/unrank, full distinct-name unrank, frozen മലയാള presentation resolution, generated end-to-end five-field result, local SPL runtime GREEN എന്നിവയാണ്.
 
-Qabel l-ewwel qatra viżibbli hemm dawn:
+## Stage 1 progress 20
 
-```text
-moħbija 7, moħbija 6, moħbija 5, moħbija 4,
-moħbija 3, moħbija 2, moħbija 1, viżibbli 1
-```
+clean test-only reference coverage ഇപ്പോൾ നാലാമത്തെ visible drop predecessor boundary, previous-year ranked candidate scan, five-slot bounded composition/count, five-slot internal-boundary cutlet partition count, eighth distinct-name mapping, lengths `3,2,2` weaving exact count എന്നിവ വരെ എത്തിയിട്ടുണ്ട്. Stage 2 ആരംഭിച്ചിട്ടില്ല; future legacy/patch code ഒന്നും ചേർത്തിട്ടില്ല. full Appendix A oracleയും local SPL-only GREEN execution-ഉം ഇനിയും പൂർത്തിയായിട്ടില്ല.
 
-Kull qatra moħbija `k` għandha erba’ koeffiċjenti:
+## Stage 1 clean continuation — progress 21
 
-| `k` | ×Mitlub | ×Distanza | ×Somma | ×Direzzjoni |
-|---:|---:|---:|---:|---:|
-| 1 | 3 | 4 | 6 | 8 |
-| 2 | 5 | 7 | 10 | 12 |
-| 3 | 7 | 10 | 14 | 16 |
-| 4 | 9 | 13 | 18 | 20 |
-| 5 | 11 | 16 | 22 | 24 |
-| 6 | 13 | 19 | 26 | 28 |
-| 7 | 15 | 22 | 30 | 32 |
+ഈ revision clean test-only oracle-ൽ അഞ്ച് integration slices കൂടി ചേർക്കുന്നു. ഏഴ് hidden coefficient rows ഒരേ source path-ൽ പരിശോധിക്കുന്നു; drop value 1-ന്റെ rank-1 identity bowl round-ൽ order/pours/shared-old-snapshot pending values ഒരുമിക്കുന്നു; target-year walk രണ്ട് unit next transitions വരെ നീളുന്നു; രണ്ട് accepted short stream values positive gate gaps ആക്കി cumulative gates materialize ചെയ്യുന്നു; lengths `3,2,2` weaving family count-ൽ നിന്ന് ഒൻപത് rows മുഴുവൻ lexicographic unrank witness ആയി വികസിക്കുന്നു. wide selector expectations-ൽ `N=M^2+1` boundaryയും ചേർത്തു.
 
-Hawnhekk tapplika r-regola sħiħa, mingħajr ma jitħalla barra xejn:
+ഇവ future historical defects അല്ല. production bootstrap നിഷ്പക്ഷമായി തുടരുന്നു; Stage 2 ആരംഭിച്ചിട്ടില്ല. full 7-hidden generation, 46-drop recurrence, 46 bowl commits, 12 normative post-stirs, sauce-derived lazy gates, full years/general combinatorial DP, source-language presentation, end-to-end five-field result, SPL runtime GREEN എന്നിവ ഇനിയും വേണം.
 
-Nirrappreżentaw l-erba’ koeffiċjenti tal-qatra moħbija `k` b’`a_k,b_k,c_k,d_k`. Il-ħames ġebliet tal-qatra viżibbli `k` nirrappreżentawhom b’`stones[k,*]`. Il-valur tal-bidu huwa:
+## Stage 1 continuation — progress 22
 
-```text
-x₀(k) = SAVE(
-    Għadd_tal_Kalkolu
-  + a_k·Għadd_Mitlub
-  + b_k·Għadd_tad_Distanza
-  + c_k·Għadd_tas_Somma
-  + d_k·Għadd_tad_Direzzjoni
-  + qamħ_k + xgħir_k + melħ_k + morra_k + ħamra_k
-)
-```
+ഈ snapshot full-range control invariants-ിലേക്ക് നീങ്ങുന്നു. `rolling_46_source_ownership_counts_probe.spl` എല്ലാ 46 visible index-ുകളിലും prev1/prev3/prev7 hidden-to-visible ownership boundaries എണ്ണുന്നു; `visible_46x11_row_schedule_probe.spl` 46×11 grind row schedule മുഴുവൻ nested SPL control path-ൽ പരിശോധിക്കുന്നു. `bowl_46_transactional_commit_control_probe.spl` exactly 46 six-bowl pending-before-commit epochs isolate ചെയ്യുന്നു; `post_stir_12_transactional_commit_control_probe.spl` exactly 12 post-stir transactional commit epochs isolate ചെയ്യുന്നു. ഇവ normative arithmetic-ന്റെ പകരമല്ല; shared-old-snapshot ownership invariant full required cardinality വരെ നീട്ടുന്ന control witnesses ആണ്.
 
-Wara dan isiru seba’ passi ta’ tħin. L-ordni tal-ġebliet hija:
+Year walking-ൽ `target_year_backward_two_step_probe.spl` forward two-step witness-ന്റെ symmetric previousYear path നൽകുന്നു. Year 5000 ordering-ൽ `year5000_three_candidate_sort_probe.spl` pairwise comparator-ിൽ നിന്ന് മൂന്ന് valid candidates-ന്റെ exact `length,open` ranking-ിലേക്ക് നീങ്ങുന്നു.
 
-```text
-[qamħ, xgħir, melħ, morra, ħamra, qamħ, xgħir]
-```
+Stage 1 ഇപ്പോഴും incomplete ആണ്: actual seven hidden generation, all 46 visible value recurrence, arbitrary drop-derived bowl order/pours/formula, normative 12 post-stir state chain, sauce-derived gates, full candidate enumeration/selection, general DP/unrank, മലയാള presentation resolve, end-to-end five-field oracle, local SPL runtime GREEN എന്നിവ ശേഷിക്കുന്നു.
 
-u għal kull `r=1..7`:
+## Stage 1 continuation — progress 23
 
-```text
-x_r(k) = SAVE(
-    x_(r-1)(k)²
-  + 3·x_(r-1)(k)
-  + stone_of_visible_drop_k_for_grind_r
-  + r
-)
-```
+clean Appendix A reference-ിന്റെ sauce അടിത്തറയിൽ ആറു source slices കൂടി ചേർത്തു: ആദ്യ stone transition-ന്റെ actual simultaneous row, ആറു initial bowl formula family, non-identity order-ിൽ position-mapped pours, drop-46 latched order circular successor lookup, Foundation-ന്റെ ഇരുവശ signed gate step, കൂടാതെ 11 visible-grind rows-ന്റെ മുഴുവൻ `a,b,c,d,stoneKind` mapping. ഇവ future legacy patch logic അല്ല; Stage 1 test-only clean oracle-ന്റെ നേരിട്ടുള്ള ഭാഗങ്ങളാണ്.
 
-F’kull pass ta’ tħin, il-ġebla tittieħed **mil-lista fissa tal-ġebliet tal-qatra viżibbli `k`**, skont l-ordni tas-seba’ passi ta’ tħin.
+ഇതോടെ stone/bowl/grind table semantics കൂടുതൽ concrete ആയി, പക്ഷേ full 46-drop state machine, 12 normative post-stir chain, generic gate/year/combinatorial DP, presentation resolve, end-to-end five-field oracle എന്നിവ ഇനിയും പൂർത്തിയായിട്ടില്ല.
 
-Il-qatra moħbija `k` hija `x₇(k)`.
+## Stage 1 clean continuation — progress 24
 
----
+ഈ revision Appendix A clean oracle-ന്റെ വലിയ exact-integer integration ശക്തിപ്പെടുത്തുന്നു. പുതിയ six test-only SPL slices `M=2^127-1` source-ൽ തന്നെ നിർമ്മിച്ച് hidden seven-grind recurrence-ന്റെ modulus lock, drop-derived 720 rank, ഒരു full visible bowl round, 1A post-stir saved sum + six-position arithmetic, നിർബന്ധിത `N=M^2+1` wide boundary, latched-wrap companion askBowl arithmetic എന്നിവ പരിശോധിക്കുന്നു.
 
-# G. Is-Sitta u Erbgħin Qatra Viżibbli
+ഈ fixtures small no-wrap arithmetic മാത്രം ആശ്രയിക്കുന്നില്ല: square/product intermediate values M-നെ വളരെ കവിയുന്നു, തുടർന്ന് SAVE അല്ലെങ്കിൽ wide modulo വഴി exact result-ിലേക്ക് മടങ്ങുന്നു. ഇതുകൊണ്ട് arbitrary-precision requirement source-level ആയി കൂടുതൽ നേരിട്ട് stress ചെയ്യുന്നു. എങ്കിലും full stone generation -> seven hidden values -> all 46 visible drops -> 46 bowl commits -> 12 committed post-stirs എന്ന ഒരൊറ്റ end-to-end sauce path ഇനിയും പൂർത്തിയായിട്ടില്ല. Stage 2 ആരംഭിച്ചിട്ടില്ല; future defect/patch code ഒന്നും ചേർത്തിട്ടില്ല.
 
-Fil-bidu tal-ħidma fuq il-qtar kien hemm 48 qatra. Żewġ qatriet minnhom inxterdu mal-art, u fis-sensiela taz-zalza baqgħu 46 qatra viżibbli.
+## ഏറ്റവും പുതിയ Stage 1 clean continuation — progress 25
 
-Għall-qatra `i` hemm bżonn tal-qatriet fil-pożizzjonijiet `i-1`, `i-3` u `i-7`. Qabel il-qatra viżibbli 1 hemm il-qatriet moħbija, b’mod li l-qatra moħbija 1 tinsab fil-pożizzjoni `0`, u l-qatra moħbija 7 fil-pożizzjoni `−6`.
+ഈ continuation clean Appendix A oracle-ന്റെ വേർതിരിച്ചിരുന്ന sauce primitives തമ്മിലുള്ള integration gap കുറയ്ക്കുന്നു; historical defect അല്ലെങ്കിൽ future patch behavior ഒന്നും ചേർത്തിട്ടില്ല.
 
-L-għaġina tal-qatra hija:
+- `test/stones_row2_to_row3_snapshot_probe.spl` row 2 commit കഴിഞ്ഞ് row 3-ന്റെ അഞ്ചു values ഒരേ old snapshot മാത്രം വായിച്ച് നിർമ്മിക്കുന്ന second consecutive stone transition witness ആണ്.
+- `test/visible_eleven_M_integrated_table_probe.spl` 11-row coefficient dispatch-നെ generic visible recurrence-ുമായി ഒരേ execution path-ൽ ബന്ധിപ്പിക്കുന്നു; M-sized modulus-lock fixture ഓരോ row-ലും exact SAVE commit തെളിയിക്കാൻ രൂപപ്പെടുത്തിയതാണ്.
+- `test/two_drop_two_bowl_commits_probe.spl` രണ്ട് consecutive visible-drop bowl rounds actual pour + six-position formulas സഹിതം നടത്തുകയും round 2 round 1-ന്റെ committed six-bowl snapshot മാത്രം വായിക്കണമെന്ന് ഉറപ്പാക്കുകയും ചെയ്യുന്നു.
+- `test/sauce_46_12_latch_phase_probe.spl` 46 drop commits-ിൽ നിന്ന് 12 post-stir commits-ിലേക്കുള്ള phase boundary-യും drop-46 latch ഒരിക്കൽ മാത്രം എഴുതപ്പെടുന്നതും full-cardinality control ആയി ബന്ധിപ്പിക്കുന്നു.
+- `test/ask_after_poststir_uses_latch_probe.spl` post-stir diagnostic order drop-46 latch-ിൽ നിന്ന് വ്യത്യസ്തമാക്കിയ fixture ഉപയോഗിച്ച് ask successor authoritative latch-ൽ നിന്നുതന്നെയാണെന്ന് distinguishing control നൽകുന്നു.
 
-```text
-dough_i = SAVE(
-    qamħ_i·Għadd_tal_Kalkolu
-  + xgħir_i·Għadd_Mitlub
-  + melħ_i·Għadd_tad_Distanza
-  + morra_i·Għadd_tas_Somma
-  + ħamra_i·Għadd_tad_Direzzjoni
-  + drop[i-1]
-  + 3·drop[i-3]
-  + 5·drop[i-7]
-  + i
-)
-```
+ഇതോടെ stone snapshot continuity, visible grind-table recurrence integration, multi-round bowl commit ownership, sauce phase cardinality, query/latch separation എന്നിവ source-level ആയി കൂടുതൽ ബന്ധപ്പെട്ടു. എന്നിരുന്നാലും complete 46-row stone table, generated seven hidden values, generated all-46 visible values, all-46 actual bowl rounds, 12 actual post-stir values, sauce-derived gates, complete years/general DP/weaving/name-unrank/presentation/final resolver, കൂടാതെ SPL runtime GREEN ഇനിയും വേണം.
 
-Wara dan isiru 11-il pass ta’ tħin:
+## Stage 1 continuation — progress 26
 
-| Pass ta’ tħin | × il-valur preċedenti | ×`i-1` | ×`i-3` | ×`i-7` | Ġebla |
-|---:|---:|---:|---:|---:|---|
-| 1 | 3 | 5 | 7 | 11 | qamħ |
-| 2 | 5 | 7 | 11 | 13 | xgħir |
-| 3 | 7 | 11 | 13 | 17 | melħ |
-| 4 | 11 | 13 | 17 | 19 | morra |
-| 5 | 13 | 17 | 19 | 23 | ħamra |
-| 6 | 17 | 19 | 23 | 29 | qamħ |
-| 7 | 19 | 23 | 29 | 31 | xgħir |
-| 8 | 23 | 29 | 31 | 37 | melħ |
-| 9 | 29 | 31 | 37 | 41 | morra |
-| 10 | 31 | 37 | 41 | 43 | ħamra |
-| 11 | 37 | 41 | 43 | 47 | qamħ |
+ഈ continuation clean Appendix A test-only reference-ൽ fixed small probes-ിൽ നിന്ന് കൂടുതൽ full-cardinality/source-path coverage-ിലേക്ക് നീങ്ങുന്നു. ഏഴ് hidden drops-ന്റെ full seven-grind synthetic integration, row 1 മുതൽ row 46 വരെ transactional stone recurrence, 12 post-stir 1A saved-sum/rank schedule, clean 5778..5781 year ceiling boundary, dynamic sorted-removal canonical ordinal mapper, seal-10 Year 5000 short-selection bridge, closing-boundary five-field resolver fixture എന്നിവ ചേർന്നു.
 
-Jekk ir-ringiela tkun `[a,b,c,d,stone]`:
+ഇവയിൽ ചിലത് deliberately isolation/control fixtures ആണ്. അവ legal end-to-end workCounts അല്ലെങ്കിൽ complete generated sauce path എന്ന് അവകാശപ്പെടുന്നില്ല. production bootstrap ഇപ്പോഴും neutral ആണ്; test-only reference-ന്റെ source coverage മാത്രം വികസിപ്പിക്കുന്നു.
 
-```text
-x ← SAVE(
-    x²
-  + a·x_old
-  + b·drop[i-1]
-  + c·drop[i-3]
-  + d·drop[i-7]
-  + stone_i
-)
-```
+ഈ progress audit-ൽ `distinct_name_eighth_mapping_probe.spl`-ന്റെ പഴയ order-sensitive threshold shortcut കണ്ടെത്തി candidate-scan ആയി തിരുത്തി. expected canonicalIndex fixtures മാറിയിട്ടില്ല. ഇത് Stage 1 clean-reference correction മാത്രമാണ്.
 
-Il-qatra tkun lesta biss wara l-ħdax-il pass ta’ tħin.
+## Stage 1 continuation — legal workCounts + full-46 rolling visible control
 
----
+ഈ progress-ൽ clean Appendix A oracle-ന്റെ രണ്ട് വേർതിരിച്ചിരുന്ന ഭാഗങ്ങൾ കൂടുതൽ അടുത്ത് ബന്ധിപ്പിച്ചു. `work_counts_full_probe.spl` raw action/target day-ുകളിൽ നിന്ന് dayCount parity, chronological distance, connection, direction എന്നിവ മുഴുവൻ ഒരേ SPL source-ൽ നിർമ്മിക്കുന്നു. അതിൽ നിന്നുള്ള legal same-Foundation fixture `1,1,1,2,2` ഉപയോഗിച്ച് hidden coefficient rows-നും six initial bowls-നും പുതിയ exact witnesses ചേർത്തു.
 
-# H. Is-Sitt Skutelli
+കൂടാതെ `visible_46_full_rolling_invariant_probe.spl` 46 visible-drop outer commits, ഓരോ drop-ലെയും 11 normative grind coefficient rows, seven-slot predecessor rolling state എന്നിവ ഒരൊറ്റ source path-ൽ നടത്തുന്നു. ഇതിലെ stones/base synthetic invariant fixture ആണ്; അതിനാൽ actual generated 46-row stone lookup-ന്റെ പകരക്കാരനല്ല. Appendix A പ്രകാരം ഓരോ visible drop `i`-ലും എല്ലാ 11 grind-ുകളും അതേ `stones[i]` row തന്നെയാണ് ഉപയോഗിക്കുന്നത്; grind coefficient row മാത്രം `g=1..11` ആയി മാറുന്നു. അടുത്ത integration blocker actual retained stone row `i` values-നെ ഈ full-46 path-ലേക്ക് നൽകുകയും seed base-നെ legal workCounts/stone contribution-ൽ നിന്ന് നിർമ്മിക്കുകയും ചെയ്യുന്നതാണ്.
 
-L-istat taz-zalza jinżamm f’sitt skutelli. L-identitajiet fissi tagħhom huma `1..6`.
+Stage 1 ഇനിയും incomplete ആണ്; production neutral bootstrap തന്നെയാണ്, test-only oracle production path-ൽ ചേർന്നിട്ടില്ല, Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
-In-numri marbuta magħhom huma:
+## Stage 1 clean continuation — progress 28
 
-```text
-[17, 19, 23, 29, 31, 37]
-```
+ഈ revision ആദ്യം clean oracle-ിലെ ഒരു indexing പിഴവ് തിരുത്തുന്നു. progress 22-ൽ `visible_46x11_row_schedule_probe.spl` visible grind stone row `wrap1(i+g,46)` ആണെന്ന് തെറ്റായി രേഖപ്പെടുത്തിയിരുന്നു. Appendix A പ്രകാരം visible drop `i`-ന്റെ എല്ലാ 11 grind-ുകളും അതേ `stones[i]` row തന്നെയാണ് ഉപയോഗിക്കുന്നത്; `g` coefficient row-യും stone kind-ഉം മാത്രമാണ് മാറ്റുന്നത്. probe source, expectations, implementation map, handoff എന്നിവ ഈ revision-ൽ തിരുത്തി.
 
-Għall-iskutella `b`:
+അതിനുശേഷം രണ്ട് test-only SPL integration slices ചേർത്തു. `visible_row1_two_grinds_legal_probe.spl` legal same-Foundation workCounts, actual stone row 1, മൂന്ന് predecessor fixtures എന്നിവയിൽ നിന്ന് seed `443`, grind-1 `197618`, grind-2 `39053862074` വരെ clean recurrence നേരിട്ട് ബന്ധിപ്പിക്കുന്നു. `visible_same_stone_row_kind_cycle_probe.spl` ഒരേ stone row-ൽ 11 grind kind cycle മുഴുവൻ isolate ചെയ്യുന്നു; row-1 values-ന്റെ selected sum `539` ആണ്.
 
-```text
-s_b = Għadd_tal_Kalkolu
-    + b·Għadd_Mitlub
-    + Għadd_tad_Distanza
-    + Għadd_tas_Somma
-    + Għadd_tad_Direzzjoni
-    + p_b²
+production bootstrap-ിൽ future historical scar ഒന്നും ചേർത്തിട്ടില്ല. Stage 1 ഇനിയും incomplete ആണ്: actual 46-row stone values later lookup ചെയ്യാവുന്ന state-ൽ സൂക്ഷിക്കൽ, legal workCounts + generated stones -> seven hidden values, actual full-46 visible recurrence, all 46 bowl rounds, 12 post-stirs, gates, years, general DP/unrank, മലയാള presentation, generated five-field result, native SPL runtime GREEN എന്നിവ ശേഷിക്കുന്നു.
 
-B_b = SAVE(s_b² + b)
-```
+## Stage 1 clean continuation — progress 29
 
----
+ഈ revision full stone table traversal-നെ പിന്നീട് sauce phase-ൽ consume ചെയ്യാവുന്ന state ownership-ലേക്ക് നീക്കുന്നു. `stones_full_46_forward_replay_probe.spl` actual row 1..46 transactional recurrence നിർമ്മിച്ച് അഞ്ച് stone families സ്വതന്ത്ര archive stack-ുകളിൽ സൂക്ഷിക്കുന്നു; generation കഴിഞ്ഞ് stack reversal വഴി row 1 ആദ്യം കിട്ടുന്ന forward replay രൂപപ്പെടുത്തുന്നു. expected control `45 transitions, 46 archived, 46 reversed`, replay first row `17,29,43,71,101` ആണ്.
 
-# I. Is-720 Permutazzjoni tal-Iskutelli
+അതോടൊപ്പം `hidden1_actual_row1_first_grind_probe.spl` legal workCounts + actual stone row 1-നെ hidden approach 1 seed-ലും ആദ്യ grind-ലും SAVE സഹിതം ബന്ധിപ്പിക്കുന്നു: `297 -> 89118`. `drop_M_factoradic_digits_probe.spl` M-sized visible drop-നെ 720 order rank 127-ലേക്ക്, തുടർന്ന് factoradic digits `1,0,1,0,0,0`-ലേക്ക് ബന്ധിപ്പിക്കുന്നു.
 
-Il-permutazzjonijiet kollha tas-sitt skutelli — b’kollox `6! = 720` — jitqiegħdu f’ordni lessikografika skont l-identitajiet fissi tal-iskutelli.
+ഇതോടെ actual 46-row stone values forward-consumable ആയി retain ചെയ്യാനുള്ള source pattern ലഭിച്ചു. ഇനിയും blocker: ഈ replay stack-ുകൾ legal seven-hidden generation-ലും 46-visible outer loop-ലും ഒരേ sauce source-ൽ consume ചെയ്യുക; ഓരോ visible drop-നും rank digits active-ID removal വഴി complete six-bowl order ആക്കി pours + six pending + commit ചെയ്യുക; 12 post-stirs, gates, years, general DP/name/presentation/five-field path, runtime GREEN എന്നിവ പൂർത്തിയാക്കുക.
 
-L-ewwel waħda hija:
+## Stage 1 clean continuation — progress 30
 
-```text
-[1,2,3,4,5,6]
-```
+ഈ continuation progress-29-ൽ നിന്ന് മാത്രം തുടരുന്നു; Stage 2 ആരംഭിച്ചിട്ടില്ല, future legacy defect/patch behavior ഒന്നും production-ൽ ചേർത്തിട്ടില്ല.
 
-L-aħħar waħda hija:
+ഈ revision retained stone replay-നെ ഒരു row മാത്രം തെളിയിക്കുന്ന witness-ിൽ നിന്ന് sequential two-row consumption വരെ നീട്ടി: full 46-row generation/reversal കഴിഞ്ഞ് row 1 `17,29,43,71,101` മാത്രമല്ല, അടുത്ത replay row 2 `378,1073,2375,6195,10493` ആണെന്നും source-level ആയി പരിശോധിക്കുന്നു. row 1 snapshot-ൽ നിന്ന് row 2 transactional ആയി നിർമ്മിച്ച് same-Foundation legal workCounts-ോടുകൂടി visible drop `i=2` seed `37213`, first grind `1384919409` വരെ പുതിയ integration path ചേർന്നു.
 
-```text
-[6,5,4,3,2,1]
-```
+Drop/order/bowl ഭാഗത്തും രണ്ട് bridge ചേർന്നു. rank 127-ന്റെ factoradic digits `1,0,1,0,0,0` active-ID removal വഴി order `2,1,4,3,5,6` ആയി materialize ചെയ്യുന്നു. അതേ order, `drop=M`, six old bowls `M`, actual row-1 stones എന്നിവയിൽ മൂന്ന് pours + six bowl formulas ചേർന്ന് bowl-ID order-ൽ `1158,401,5045,2503,10206,295` നൽകുന്നു. അവയുടെ sum `19608`; stir 1-ന്റെ 1A saved sum `19757`; bowl-order rank `317`. rank 317-നും full materialized order `3,5,1,6,2,4` ആയി പുതിയ bridge ഉണ്ട്.
 
-Għall-qatra `D`:
+ഇതോടെ full sauce path ഇനിയും പൂർത്തിയായിട്ടില്ല. പ്രധാന blocker actual seven hidden values + retained forward stones + all 46 visible values ഒരേ source-ൽ ബന്ധിപ്പിക്കൽ, തുടർന്ന് drop-derived order/pours/all-46 bowl commits, 12 committed post-stirs, sauce-derived gates, complete year machinery, general composition/weaving/name-unrank, മലയാള presentation resolution, generated final five-field result, SPL runtime GREEN എന്നിവയാണ്.
 
-```text
-orderNumber = 1 + ((D-1) mod 720)
-```
+## Stage 1 continuation — actual seven-hidden path and seven-slot timeline ring
 
-L-identità fissa ta’ skutella u l-pożizzjoni temporanja tagħha f’ordni partikolari għandhom jiġu distinti minn xulxin.
+ഈ continuation retained 46-row stone table-ന്റെ forward replay-ൽ നിന്ന് rows 1..7 നേരിട്ട് consume ചെയ്ത് same-Foundation legal workCounts fixture-നൊപ്പം ഏഴ് hidden values പൂർണ്ണമായി കണക്കാക്കുന്നു. ഓരോ hidden value-നും ഏഴ് normative grinds commit ചെയ്ത ശേഷം backward archive-ൽ സൂക്ഷിക്കുന്നു; archive പിന്നീട് Appendix A timeline positions-നുസരിച്ച് seven-slot rolling ring-ലേക്ക് seed ചെയ്യുന്നു.
 
----
+ഇതോടൊപ്പം ring index mapping മുഴുവൻ i=1..46-ൽ പരിശോധിക്കുന്ന control-ും hidden→visible handoff കാണിക്കുന്ന eight-commit synthetic ownership witness-ും ചേർന്നു. ഇവ production semantics മാറ്റുന്നില്ല; test-only clean oracle slices ആണ്. Stage 1 ഇനിയും പൂർത്തിയായിട്ടില്ല.
 
-# J. It-Tferrigħ u t-Tħawwid ta’ Kull Qatra
+## Stage 1 continuation — actual hidden-to-visible bridge and dual stone replay ownership
 
-Fit-tliet skutelli li jkunu fil-pożizzjonijiet 1–3 isiru tliet tferrigħat diretti:
+clean test-only oracle-ൽ actual 46-row stones ഉപയോഗിച്ച് ഉണ്ടാക്കിയ ഏഴ് hidden values ഇപ്പോൾ visible generation-ലേക്ക് നേരിട്ട് കടക്കുന്നു. `hidden_actual_to_visible_two_full_probe.spl` hidden ring-ൽ നിന്ന് visible 1 predecessor snapshot എടുത്ത് actual row 1-ൽ 11 grinds മുഴുവനായി നടത്തുന്നു; committed visible 1 ഉപയോഗിച്ച് row 2 transactional stone update ചെയ്യുകയും visible 2-ന്റെ predecessor snapshot-ലേക്ക് committed visible1 ചേർത്ത് row 2-ൽ വീണ്ടും 11 grinds നടത്തുകയും ചെയ്യുന്നു. രണ്ടാം committed drop bowl-order one-based rank domain-ലേക്കും ബന്ധിപ്പിക്കുന്നു.
 
-```text
-pour₁ = SAVE(D² + qamħ_i · old(position1) + 3i)
-pour₂ = SAVE(D² + xgħir_i· old(position2) + 5i)
-pour₃ = SAVE(D² + melħ_i  · old(position3) + 7i)
-```
+`stone_dual_consumer_replay_control_probe.spl` ഒരേ ordered 46-row stone family hidden generation-നും visible generation-നും സ്വതന്ത്ര forward consumers ആയി ലഭിക്കേണ്ട ownership pattern വ്യക്തമാക്കുന്നു. future patch behavior ഒന്നും production-ൽ ചേർത്തിട്ടില്ല; production bootstrap ഇപ്പോഴും neutral ആണ്.
 
-Qabel it-tħawwid jittieħed `snapshot` tal-istat tas-sitt skutelli. L-iskutelli jitqiegħdu f’ċirku skont l-ordni ddeterminata minn dik il-qatra.
+അതേ integrated source actual visible 2-ന്റെ one-based rank-നെ six factoradic digits-ആക്കി തുറന്ന് ഓരോ digit-ന്റെയും നിയമാനുസൃത domain source-ൽ പരിശോധിക്കുന്നു. ഇതോടെ actual generated drop -> rank -> factoradic-digit bridge clean oracle-ൽ ഒരൊറ്റ execution path-ൽ എത്തിയിരിക്കുന്നു; full active-ID removal order materialization അടുത്ത integration blocker ആണ്.
 
-Dawn il-ġebliet jintrabtu mal-pożizzjonijiet 1–6 kif ġej:
+## Stage 1 continuation — progress 33
 
-```text
-qamħ, xgħir, melħ, morra, ħamra, qamħ
-```
+clean test-only oracle ഇപ്പോൾ actual five-value stone ownership-നെ രണ്ടു consumers-ലേക്ക് duplicate ചെയ്യുന്നു; hidden consumer rows `1..7` consume ചെയ്താലും visible consumer independent ആയി rows `1..46` consume ചെയ്യുന്നു. അതിന് മുകളിൽ പുതിയ integrated source same-Foundation legal workCounts-ൽ full 46-row stone generation, seven actual hidden drops, hidden history seed, എല്ലാ 46 actual visible drops, ഓരോ visible drop-ലും 11 normative grinds, rolling commit എന്നിവ ഒരൊറ്റ SPL path-ൽ ബന്ധിപ്പിക്കുന്നു.
 
-Jekk l-iskutella `B` tinsab fil-pożizzjoni `q`, l-iskutella ta’ qabilha hija `P` u dik ta’ warajha hija `N`:
+അവസാന committed visible value drop 46 ആയി `1+regularMod(drop46-1,720)` bowl-order rank domain-ലേക്കും, തുടർന്ന് factoradic digit domain-ലേക്കും same source-ൽ എത്തുന്നു. full active-ID removal/materialized order, 46 bowl rounds, 12 post-stirs, gates/years/general DP/final five-field path ഇനിയും പൂർത്തിയായിട്ടില്ല. production bootstrap test oracle-നെ വിളിക്കുന്നില്ല; Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
-```text
-u = old(B)
-  + 2·old(P)
-  + 3·old(N)
-  + directPour(q)
-  + D
-  + stone(q)
+progress 33 audit-ൽ progress 31/32 hidden loop-ിലെ ഒരു clean-reference control-flow reset കൂടി കണ്ടെത്തി. hidden index/count initialization ഇപ്പോൾ reversal completion-ൽ ഒരിക്കൽ മാത്രം നടക്കുന്നു; ഓരോ hidden commit-നും ശേഷം loop entry അവ വീണ്ടും reset ചെയ്യുന്നില്ല. ഇത് historical patch അല്ല; Stage 1 പൂർത്തിയാകുന്നതിന് മുമ്പുള്ള test-only oracle correction ആണ്.
 
-new(B) = SAVE(u² + 5·old(P)·old(N) + i·q)
-```
+## Stage 1 continuation — progress 34
 
-Is-sitt riżultati kollha jiġu kkalkulati mill-istess `snapshot` tal-istat, u s-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
+clean test-only oracle-ൽ full sauce path drop46 factoradic digit decomposition-ൽ നിന്ന് ഇനി six active bowl IDs removal-aware ആയി materialize ചെയ്യുന്നു. dynamic rank/drop/order hard-code ചെയ്തിട്ടില്ല: generated drop46 -> rank -> six digits -> six selections എന്ന same path ആണ്. ഓരോ selected ID-യും backward archive stack-ൽ push ചെയ്യുന്നു; ആറു selections കഴിഞ്ഞ് archive reverse ചെയ്ത് position 1 ആദ്യം ലഭിക്കുന്ന forward-order replay stack ഉണ്ടാക്കുന്നു. structural invariants selection count `6`, selected-ID sum `21`, product `720`, reverse count `6` ആണ്.
 
-Wara l-qatra 46, l-ordni tinħażen bħala `orderAt46`.
+`dynamic_order_three_pours_dispatch_probe.spl` materialized order-ന്റെ ആദ്യ മൂന്ന് IDs arbitrary input ആയി സ്വീകരിച്ച് old six-bowl snapshot-ൽ നിന്ന് ID അനുസരിച്ച് value തിരഞ്ഞെടുക്കുകയും position pours 1..3 `SAVE` സഹിതം കണക്കാക്കുകയും ചെയ്യുന്നു. fixture order `3,1,6`, old bowls `2,3,5,7,11,13`, drop/i `1/1`, stones `17,29,43` ഉപയോഗിച്ച് pours `89,64,567` ലഭിക്കണം.
 
----
+ഇതോടെ blocker dynamic drop46 digits -> full six-ID order വരെ മാറി. ഇനിയും all 46 visible drops-ന്റെ ഓരോ dynamic order-വും materialize ചെയ്ത് initial bowls മുതൽ six-pending shared-old-snapshot update, transactional commit, drop46 order latch, 12 post-stirs, gates/years/general DP/name-unrank/final five-field path പൂർത്തിയാക്കണം. production bootstrap neutral ആണ്; Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
-# K. It-Tnax-il Pass Sussegwenti ta’ Tħawwid
+### progress 34 clean-reference correction — active ID 5
 
-Wara l-qatra 46 isiru tnax-il pass sussegwenti ta’ tħawwid.
+source audit-ൽ മുമ്പത്തെ four permutation materializer probes-ൽ active ID 5-ന്റെ zero-digit branch തെറ്റായി decrement path-ലേക്ക് പോകുന്നതായി കണ്ടെത്തി. zero digit ഇപ്പോൾ ID 5 തന്നെ തിരഞ്ഞെടുക്കുന്നു; positive digit മാത്രം decrement ചെയ്ത് ID 6 scan-ലേക്ക് നീങ്ങുന്നു. rank `481 -> 5,1,2,3,4,6` fixture ഈ branch നേരിട്ട് cover ചെയ്യുന്നു. same correction പുതിയ full sauce drop46 materializer-ലും ബാധകമാണ്. ഇത് historical patch അല്ല; Stage 1 clean oracle പൂർത്തിയാകുന്നതിന് മുമ്പുള്ള correction ആണ്.
 
-F’kull pass ta’ tħawwid `r`:
+## Stage 1 continuation — progress 35
 
-```text
-S_r = SAVE(sum(oldBowls) + 149·r)
-```
+clean oracle-ന്റെ വലിയ same-Foundation sauce integration ഇപ്പോൾ visible generation കഴിഞ്ഞ് bowl phase-നാവശ്യമായ state നഷ്ടപ്പെടുത്തുന്നില്ല. ഓരോ visible iteration-ലും actual five-value stone row, committed drop value എന്നിവ backward archive ചെയ്യുന്നു; 46 drops കഴിഞ്ഞാൽ ആ ആറു archives forward replay-കളാക്കി മാറ്റുന്നു. അതിന്റെ ആദ്യ consume actual `stones[1]=17,29,43,71,101`യും actual `visible[1]`-ഉം bowl-phase cursor-ലേക്ക് കൊണ്ടുവരുന്നു. തുടർന്ന് actual drop 1-ൽ നിന്ന് one-based `1..720` rankയും six factoradic digits-ും same source path-ൽ കണക്കാക്കി domain-check ചെയ്യുന്നു.
 
-L-istess valur jiżdied ma’ kull skutella u, fl-istess ħin, jintuża biex jiġi ddeterminat in-numru tal-ordni:
+`dynamic_order_circular_neighbors_probe.spl` arbitrary six-ID order-ന്റെ circular `prev/current/next` topology positions 1..6 മുഴുവൻ isolate ചെയ്യുന്നു. ഇതോടെ അടുത്ത integration target actual drop 1 digits -> full order materialization -> three pours -> six shared-old-snapshot pending bowl values എന്നതാണ്.
 
-```text
-1 + ((S_r-1) mod 720)
-```
+## Stage 1 തുടർച്ച — initial bowl state മുതൽ full six-position bowl formula വരെ
 
-Jekk l-iskutella `B` tinsab fil-pożizzjoni `q` fl-ordni ta’ dak il-pass ta’ tħawwid, u l-iskutelli ġirien tagħha huma `P,N`:
+ഈ progress-ൽ bowl phase-ന്റെ രണ്ട് വേർതിരിച്ച integration gaps അടച്ചു. same-Foundation legal workCounts-ൽ നിന്നുള്ള six initial bowls ഇപ്പോൾ order positions `3,1,6` ഉപയോഗിച്ച direct pours-ലേക്ക് same SPL source-ൽ കടക്കുന്നു. കൂടാതെ non-identity six-position order fixture-ൽ position stone cycle `WHEAT,BARLEY,SALT,BITTER,RED,WHEAT`, circular neighbors, first-three direct pours, drop contribution, `i*position`, shared-old-snapshot pending computation എന്നിവ ഒരുമിച്ച് പരിശോധിക്കുന്ന full bowl-round source ചേർന്നു.
 
-```text
-u = old(B)
-  + 3·old(P)
-  + 5·old(N)
-  + S_r
-  + r
-  + q²
+ഇത് actual generated drop1-ന്റെ order materialization അല്ല; അതിനാൽ integrated all-46 sauce path-ന്റെ അടുത്ത ഘട്ടം ഇനിയും വേറെയുണ്ട്. ഇപ്പോഴത്തെ ലക്ഷ്യം actual drop1 factoradic digits-നെ full six-ID order-ലേക്ക് materialize ചെയ്ത് legal initial bowls + actual row1/drop1-ൽ ഇതേ round semantics പ്രയോഗിക്കുകയാണ്.
 
-new(B) = SAVE(u² + 7·old(P)·old(N))
-```
+## Stage 1 clean-reference progress 37
 
-Hawn ukoll, is-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
+valid progress 36-ൽ നിന്ന് clean continuation. `sauce_foundation_actual_hidden_visible46_probe.spl` actual generated visible drop 1-ന്റെ factoradic digits ഇനി six active bowl IDs-ൽ removal-aware ആയി materialize ചെയ്യുന്നു; count/sum/product invariants `6,21,720`, reverse count `6` ആണ്. അതേ source same-Foundation legal initial bowls `87617,136163,289447,724205,944789,1907167` പുനർനിർമ്മിക്കുന്നു, `M=2^127-1` വീണ്ടും exact ആയി നിർമ്മിക്കുന്നു, actual materialized order positions 1..3-ന് old-bowl snapshot dynamic ID lookup നടത്തി row-1 stones + actual drop1 ഉപയോഗിച്ച് three direct pours `SAVE` സഹിതം കണക്കാക്കുന്നു. pour numeric values hard-code ചെയ്തിട്ടില്ല; ഓരോ result-ും `1..M` range control വഴി പരിശോധിക്കുന്നു.
 
-Meta jsiru l-mistoqsijiet, “l-iskutella ta’ wara” tibqa’ ddeterminata minn `orderAt46`. Dawn it-tnax-il pass ta’ tħawwid jużaw l-ordnijiet tagħhom stess waqt it-tħawwid, filwaqt li l-ordni rreġistrata tal-qatra 46 tibqa’ tintuża meta jsiru l-mistoqsijiet.
+ഇതോടെ actual drop1 full order + legal old-bowl snapshot + actual first-three position-based pours same integrated sauce source-ൽ ഒരുമിച്ചു. first real six-bowl pending vector/transactional commit ഇനിയും അടുത്ത blocker ആണ്; production bootstrap neutral തന്നെയാണ്, Stage 2 ആരംഭിച്ചിട്ടില്ല.
 
----
+## Stage 1 continuation — actual drop1 first transactional bowl commit
 
-# L. Is-Siġilli
+clean test-only oracle-ന്റെ integrated same-Foundation path ഇനി actual generated visible drop 1-ന്റെ first real six-bowl round വരെ എത്തുന്നു. actual drop1-ൽ നിന്ന് materialize ചെയ്ത full order, legal initial bowls, actual row1 stones, exact direct pours എന്നിവ ഉപയോഗിച്ച് circular position snapshot നിർമ്മിക്കുന്നു. commit-target bowl IDs memory archive-ൽ വേർതിരിച്ച് സൂക്ഷിക്കുന്നതിനാൽ position scalars old-bowl values ആയി മാറ്റിയാലും identity നഷ്ടപ്പെടുന്നില്ല.
 
-| Siġill | Mistoqsija |
-|---:|---|
-| 1 | id-distanza bejn ix-xtiebi tal-pulpetti |
-| 10 | is-sena 5000 |
-| 11 | is-sena ta’ wara |
-| 12 | is-sena ta’ qabel |
-| 20 | l-għadd tal-pulpetti |
-| 21 | it-tqassim tal-medda bejn ix-xtiebi |
-| 22 | l-ismijiet tal-pulpetti |
-| 30 | l-għadd tax-xhur |
-| 31 | it-tulijiet tax-xhur |
-| 32 | l-insiġ tax-xhur |
-| 33 | l-ismijiet tax-xhur |
+ആറ് pending bowls മുഴുവൻ immutable old snapshot-ൽ നിന്ന് കണക്കാക്കി memory-ൽ സൂക്ഷിച്ചശേഷം മാത്രമാണ് bowl ID state mutate ചെയ്യുന്നത്. അതിനാൽ Stage 1 clean oracle-ൽ first actual bowl round transactional ownership source-ൽ explicit ആയി lock ചെയ്തിരിക്കുന്നു. അടുത്ത ലക്ഷ്യം ഇതേ machinery drops `2..46`-ലേക്ക് iterate ചെയ്ത് generated drop46 order latch ചെയ്യുന്നതാണ്.
 
-Il-post maħsub għas-siġill 40 jibqa’ vojt. Kien maħsub għall-mistoqsija tal-ġobon, u l-abbozz tagħha ttiekel qabel ma ġiet stabbilita l-mistoqsija.
+## Stage 1 clean continuation — progress 39
 
----
+ഈ revision progress 38-ലെ first actual generated-drop bowl commit കഴിഞ്ഞ state-ൽ നിന്ന് തുടരുന്നു. `test/sauce_foundation_actual_hidden_visible46_probe.spl` bowl state മാറ്റാതെ retained actual visible-drop replay-ന്റെ ശേഷിക്കുന്ന `drop2..drop46` consume ചെയ്യുന്നു. ഓരോ actual drop-നും one-based 720 rank, zero-based residual, blocks `120,24,6,2,1` ഉപയോഗിച്ച factoradic digits source-ൽ exact ആയി കണക്കാക്കുന്നു.
 
-# M. Kif Twieġeb Skutella
+Drop 1 ഇതിനുമുമ്പ് same source-ൽ rank/factoradic/full-order ആയി process ചെയ്തതിനാൽ all-drop coverage counter `1`-ൽ ആരംഭിക്കുന്നു; 45 retained drops consume ചെയ്ത ശേഷം count `46`, next index `47`, final drop46 rank-domain flag `1`, factoradic-domain flag `1` ലഭിക്കേണ്ടതാണ്.
 
-Meta ssir mistoqsija lill-iskutella `B`, “l-iskutella ta’ wara” hija dik li tiġi warajha fiċ-ċirku ddefinit minn `orderAt46`.
+ഇത് all-46 bowl rounds പൂർത്തിയായെന്ന അവകാശവാദമല്ല. progress 39 all actual drops-ന്റെ rank/factoradic decomposition path മാത്രമാണ് full-cardinality ആക്കുന്നത്. അടുത്ത integration step ഈ dynamic digits ഓരോ round-ലും six-ID materialization, position pours, shared-old-snapshot pending values, transactional commit എന്നിവയിലേക്ക് ബന്ധിപ്പിക്കുകയാണ്; i=46-ൽ order latch വേർതിരിച്ച് നിലനിർത്തണം.
 
-Jekk `z` huwa s-siġill:
+## Stage 1 continuation — progress 40: dedicated drop46 full-order latch and preserved actual-drop replay
 
-```text
-A₀ = SAVE((Q[B] + z + 181)² + 179·Q[next] + z)
-```
+Clean test-only sauce integration ഇപ്പോൾ actual drop46 six-ID order working materialization-ിൽ നിന്ന് വേറിട്ട dedicated latch archive-ൽ copy ചെയ്യുന്നു. first drop bowl commit + retained drops 2..46 rank/factoradic scan കഴിഞ്ഞിട്ടും latch touch ചെയ്യപ്പെടുന്നില്ല; scan completion-ൽ അത് forward order-ലേക്ക് reverse ചെയ്ത് `count=6, sum=21, product=720` structural invariants തെളിയിക്കുന്നു.
 
-Biex tiġi ddeterminata d-direzzjoni tal-fluss tat-tweġibiet, jiġi kkalkulat il-valur `D` li ġej:
+അതോടൊപ്പം rank scan actual generated drops `2..46` വീണ്ടും backward archive-ൽ preserve ചെയ്യുന്നു; completion-ൽ 45 values future forward replay ആയി മാറ്റുന്നു. ഇതാണ് അടുത്ത all-46 order/pour/bowl loop-ന് input ownership. പുതിയ `drop46_full_order_latch_probe.spl` rank-only latch-നേക്കാൾ ശക്തമായി six exact order positions പന്ത്രണ്ട് diagnostic reads കഴിഞ്ഞിട്ടും മാറാത്തത് fixture-ൽ ഉറപ്പാക്കുന്നു.
 
-```text
-D = SAVE((A₀ + z + 1 + 193)² + 193·A₀ + 197·Q[6])
-```
+Stage 1 ഇപ്പോഴും incomplete ആണ്: actual drops `2..46` full order materialization + pours + six-bowl transactional commits, 12 normative post-stirs, SauceResult/askBowl, signed gates, years, general DP/weaving/name-unrank, മലയാള presentation resolve, generated five-field end-to-end result, compliant SPL runtime GREEN എന്നിവ ബാക്കി.
 
-Jekk `D` ikun numru fard — il-fluss jimxi ’l quddiem; jekk ikun numru pari — jimxi lura.
+## Stage 1 continuation — progress 41: all actual drops full-order materialization coverage
 
-```text
-A_k = 1 + ((A₀ - 1 + s·k) mod M)
-```
+progress 40-ലെ preserved actual drops `2..46` forward replay ഇപ്പോൾ same integrated clean-oracle source വീണ്ടും consume ചെയ്യുന്നു. ഓരോ drop-നും one-based 720-rank, factoradic digits, six-ID active-set removal എന്നിവ source-ൽ നേരിട്ട് നടത്തുന്നു. ഓരോ resulting order-നും `count=6`, `sum=21`, `product=720` satisfy ചെയ്താൽ മാത്രം loop മുന്നോട്ട് പോകുന്നു.
 
-fejn `s=+1` jew `−1`.
+ഈ pass committed six-bowl state clobber ചെയ്യാതിരിക്കാനായി active flags വേറിട്ട scalar characters-ൽ ആണ്; progress 38-ലെ actual drop1 transactional bowl state untouched ആണ്. ഓരോ processed actual drop വേറൊരു backward archive-ൽ preserve ചെയ്ത് completion-ൽ വീണ്ടും exactly 45-value forward replay ആക്കുന്നു. dedicated drop46 full-order latch ഇതിനിടയിൽ mutate ചെയ്യുന്നില്ല.
 
----
+integrated structural output sequence-ന്റെ പുതിയ suffix `0,45` ആണ്: all-45 full-order loop remaining count zero, rebuilt drop replay count 45.
 
-# N. Għażla Qasira u Għażla Wiesgħa
+Stage 1 ഇപ്പോഴും incomplete ആണ്: drops `2..46` position pours + shared-old-snapshot six pending values + transactional commits, 12 normative post-stirs, complete SauceResult/askBowl, signed gates, years, general composition/weaving/name unrank, മലയാള presentation resolve, generated five-field end-to-end result, compliant SPL runtime GREEN എന്നിവ ബാക്കി.
 
-Jekk `1<=N<=M`:
+## Stage 1 clean continuation — progress 42: bowl-phase ownership separation and 270-ID order replay
 
-```text
-L = floor(M/N)·N
-```
+progress 41-ന്റെ all-45 full-order materialization pass audit ചെയ്യുമ്പോൾ future bowl phase-നായി reuse ചെയ്തിരുന്ന memory owners clean semantic ownership ലംഘിക്കുന്നതായി കണ്ടെത്തി. barley stone replay നിലനിൽക്കുന്ന `Juliet` memory-ൽ drop46 latch കൂടി വയ്ക്കുന്നതും salt stone replay നിലനിൽക്കുന്ന `Romeo` memory-ൽ drops `2..46` replay കൂടി വയ്ക്കുന്നതും stack intermix സൃഷ്ടിക്കാമായിരുന്നു. ഇത് historical defect അല്ല; Stage 1 clean oracle-ന്റെ incomplete ownership model ആണ്.
 
-Tweġibiet akbar minn `L` jiġu miċħuda, u l-ewwel tweġiba aċċettata tiddetermina l-għażla:
+progress 42 owners വ്യക്തമായി വേർതിരിക്കുന്നു: `Hamlet/Juliet/Romeo/Othello/Macbeth` memories stones rows `2..46` മാത്രം സൂക്ഷിക്കുന്നു; `Caliban` actual drops `2..46` forward replay മാത്രം; `Antony` dedicated drop46 six-ID forward latch മാത്രം; `Cleopatra` drops `2..46`-ന്റെ 45 full orders backward archive; `Brutus` completion-ൽ 270-ID forward order replay.
 
-```text
-1 + ((A-1) mod N)
-```
+ഓരോ current full order Helena memory-ൽ position order-ൽ push ചെയ്യുന്നതിനാൽ direct pop position6..1 ആയിരിക്കും. source ആദ്യം ആ ആറു IDs `Brutus` temporary memory-ലേക്ക് reverse ചെയ്യുന്നു; തുടർന്ന് `Brutus`-ൽ നിന്ന് position1..6 ആയി pop ചെയ്ത് `Cleopatra` global backward archive-ലേക്ക് push ചെയ്യുന്നു. 45 orders കഴിഞ്ഞ് മുഴുവൻ `Cleopatra` archive `Brutus`-ലേക്ക് reverse ചെയ്യുമ്പോൾ future pop sequence കൃത്യമായി `drop2 position1..6, drop3 position1..6, ... drop46 position1..6` ആകുന്നു. structural suffix `270` ആണ്.
 
-Jekk `N>M`, jittieħed l-iżgħar `k` li għalih `M^k>=N`, u jinbena dan in-numru:
+`bowl_phase_separated_replay_probe.spl` ഈ ownership model ഒരു ചെറിയ source witness ആയി isolate ചെയ്യുന്നു: stones, future drop, future order, dedicated drop46 latch എന്നിവ വേർതിരിച്ച memories-ൽ നിന്ന് വായിച്ചിട്ടും അടുത്ത stone row untouched ആയി തുടരുന്നു. expected outputs: `2,3,4,5,6,12,1,2,3,4,5,6,3,1,6,2,5,4,7,8,9,10,11`.
 
-```text
-W = 1 + Σ(A_j-1)·M^j
-```
+Stage 1 ഇപ്പോഴും incomplete ആണ്. അടുത്ത integration target ഈ separated replays ഉപയോഗിച്ച് drops `2..46`-ന്റെ position pours, circular-neighbor lookup, immutable committed old-bowl snapshot, six pending values, transactional commits എന്നിവ all-45 loop ആയി പൂർത്തിയാക്കുന്നതാണ്; തുടർന്ന് dedicated drop46 latch ഉപയോഗിച്ച് 12 normative post-stirs, SauceResult/askBowl, gates, years, general DP/name-unrank, മലയാള presentation resolve, generated five-field result എന്നിവ പൂർത്തിയാക്കണം.
 
-fejn `A₀` hija ċ-ċifra l-inqas sinifikanti.
+## Stage 1 clean continuation — progress 43: remaining 45 bowl rounds integrated
 
-```text
-L_w = floor(M^k/N)·N
-```
+progress 42-ൽ തയ്യാറാക്കിയ separated bowl-phase state ഇനി `test/sauce_foundation_actual_hidden_visible46_probe.spl`-ൽ drops `2..46` മുഴുവൻ consume ചെയ്യുന്നു. ഓരോ round-ലും stone row, actual drop, six order IDs load ചെയ്ത് committed bowl state-ന്റെ six position values ആദ്യം old snapshot ആയി വേർതിരിക്കുന്നു. അതിന് ശേഷം മാത്രം three position pours, six circular-neighbor pending formulas എന്നിവ കണക്കാക്കുന്നു.
 
-Jekk `W>L_w`, il-proċedura tibda minn `W` stess u timxi pass wieħed kull darba, fl-istess direzzjoni, fuq iċ-ċirku `1..M^k` sakemm jintlaħaq valur aċċettabbli; imbagħad:
+ആറ് pending values മുഴുവൻ memory-ൽ തയ്യാറായി count `6` ആയ ശേഷം മാത്രമാണ് six archived bowl IDs-ലേക്ക് transactional commit നടക്കുന്നത്. ഇതിലൂടെ Appendix A ആവശ്യപ്പെടുന്ന same-old-state semantics source structure-ൽ explicit ആണ്. 45 rounds കഴിഞ്ഞാൽ index `47`; final six committed bowls `1..M` SAVE-domain controls pass ചെയ്യേണ്ട structural suffix `45,47,1,1,1,1,1,1` ആണ്.
 
-```text
-1 + ((W-1) mod N)
-```
+`Antony` memory-യിലെ dedicated drop46 order latch ഈ loop touch ചെയ്യുന്നില്ല. അതിനാൽ അടുത്ത clean Stage 1 target 12 normative post-stirs ആണ്; അവയ്ക്കുശേഷം SauceResult/askBowl, gates, years, cutlet/month/weaving DP, distinct-name unrank, മലയാള presentation resolve, final five-field result, compliant SPL runtime GREEN എന്നിവ ഇനിയും പൂർത്തിയാക്കണം.
 
-L-isem kanoniku ta’ dan il-mekkaniżmu huwa **Għażla Ugwali**. Iċ-ċifri tal-ewwel numru wiesa’ jittieħdu minn numri konsekuttivi fis-sekwenza tat-tweġibiet. Minħabba din l-istruttura, il-valuri f’`1..M^k` ma jingħatawx l-istess piż; u meta l-ispazju jkun kbir biżżejjed, xi possibbiltajiet jingħataw piż ta’ żero u għalhekk ma jistgħux jintgħażlu qatt. Din hija d-distribuzzjoni preskritta tal-mekkaniżmu tal-għażla wiesgħa.
+## Stage 1 clean continuation — progress 44: twelve normative post-stirs integrated
 
----
+progress 43-ൽ drops `1..46` മുഴുവൻ transactional bowl recurrence complete ആയ committed state-ൽ നിന്ന് same integrated test-only oracle ഇപ്പോൾ Appendix A Interpretation 1A-യിലെ `12` post-stirs നടത്തുന്നു. ഓരോ stir-ന്റെ തുടക്കത്തിൽ committed bowls മാറ്റാതെ `savedBowlSum = SAVE(sum(oldBowls)+149*stir)` ഒരിക്കൽ മാത്രം കണക്കാക്കുന്നു; അതിൽ നിന്ന് one-based rank/factoradic six-ID order source-ൽ materialize ചെയ്യുന്നു.
 
-# O. Ix-Xtiebi tal-Pulpetti
+ആ order positions-ൽ six committed bowls immutable old snapshot ആയി copy ചെയ്തശേഷം മാത്രം six pending values കണക്കാക്കുന്നു. എല്ലാ pending formulas-ും അതേ old snapshot-ും അതേ saved value-ും ഉപയോഗിക്കുന്നു: `s = current + 3*prev + 5*next + savedBowlSum + stir + position^2`, തുടർന്ന് `SAVE(s^2 + 7*prev*next)`. six pending complete ആയതിന് ശേഷം മാത്രം matching order IDs-ലേക്ക് transactional commit നടക്കുന്നു. ഈ cycle exact 12 times ആവർത്തിക്കുന്നു.
 
-`Foundation` hija x-xatba bl-indiċi 0.
+`Antony` memory-യിലെ dedicated actual-drop46 six-ID latch executable post-stir path touch ചെയ്യുന്നില്ല; അതിനാൽ പിന്നീട് `askBowl` successor lookup-നായി intact ആണ്. structural suffix `12,13,1,1,1,1,1,1`: 12 committed stirs, next-stir sentinel 13, final six bowl SAVE-domain flags.
 
-Biex tinstab ix-xatba pożittiva bin-numru `n`, titħejja z-zalza billi jintuża l-par:
+Stage 1 ഇപ്പോഴും incomplete ആണ്. അടുത്ത clean integration target final bowl state + dedicated drop46 latch എന്നിവ `SauceResult` ownership ആയി ബന്ധിപ്പിച്ച് `nextBowlInDrop46Order`/`askBowl` exact stream നിർമ്മിക്കുന്നതാണ്; തുടർന്ന് short/wide selection, signed lazy gates, Year 5000 + adjacent-year walk, general cutlet/month/weaving DP, distinct-name unrank, മലയാള presentation resolve, exact five-field result, compliant SPL runtime GREEN എന്നിവ ബാക്കി.
 
-```text
-(Foundation, Foundation+n)
-```
+## ഏറ്റവും പുതിയ Stage 1 പുരോഗതി — progress 45 SauceResult, askBowl, short/wide selection
 
-Issir mistoqsija lill-iskutella 1 bis-siġill 1, jintgħażel numru minn `1..922`, u mbagħad jiżdied 41 ma’ dak in-numru.
+progress 44-ന്റെ 46-drop + 12-post-stir final bowls ഇപ്പോൾ dedicated actual-drop46 `Antony` order latch-ുമായി same integrated test-only oracle path-ൽ ബന്ധിപ്പിച്ചിട്ടുണ്ട്. latch six position scalars-ലേക്ക് materialize ചെയ്യുമ്പോൾ destructive pop ഉപയോഗിച്ചാലും temporary reverse archive വഴി original forward order-ൽ ഉടൻ restore ചെയ്യുന്നു; final bowls read-only ആണ്.
 
-Biex tinstab ix-xatba negattiva bin-numru `n`, jintuża l-par:
+അതേ path Appendix A `nextBowlInDrop46Order`, `askBowl` first/directionNumber/fixed directionStep, `N=922` exact short rejection ring, `N=M+1` exact wide `smallestPowerCount` + wide-number rejection ring എന്നിവ നിർവഹിക്കുന്നു. wide rejection പുതിയ answer digits എടുക്കുന്നില്ല.
 
-```text
-(Foundation, Foundation-n)
-```
-
-Għalhekk it-tul ta’ kull medda bejn żewġ xtiebi jkun fil-medda:
-
-```text
-42..963
-```
-
-u japplikaw ir-relazzjonijiet li ġejjin:
-
-```text
-G_0  = Foundation
-G_n  = G_(n-1) + positiveGap(n)
-G_-n = G_-(n-1) - negativeGap(n)
-```
-
----
-
-# P. Is-Sena
-
-Sena hija l-medda:
-
-```text
-(openGate, closeGate]
-```
-
-Għandha tinkludi mill-inqas 6 meded bejn ix-xtiebi, u t-tul tagħha għandu jkun:
-
-```text
-252..5778
-```
-
-It-tul massimu tas-sena huwa `5778`, u dan jirriżulta mis-sitt meded massimi:
-
-```text
-6·963 = 5778
-```
-
----
-
-# Q. Is-Sena 5000
-
-Għall-Jum tal-Kalkolu `c`, jinstabu l-pari kollha eliġibbli ta’ xtiebi li jiddefinixxu sena li fiha jaqa’ dak il-jum:
-
-```text
-open < c <= close
-```
-
-Dawn jiġu ordnati skont:
-
-1. tul is-sena, mill-iqsar għall-itwal;
-2. jekk it-tul ikun l-istess — ix-xatba tal-ftuħ li tiġi l-ewwel.
-
-Titħejja z-zalza għal `(c,c)`, issir mistoqsija lill-iskutella 1 bis-siġill 10, u tintgħażel sena waħda.
-
-Is-sena magħżula hija **s-sena 5000 mill-Ħolqien tad-Dinja**.
-
-In-numru 5000 huwa kostanta strutturali. Il-Mostru kiteb in-numru fuq l-iskutella tas-sena qabel ma kien spiċċa jagħżel ix-xtiebi tagħha, u minn dak iż-żmien id-dinja baqgħet irranġata hekk.
-
----
-
-# R. Iż-Żewġ Mogħdijiet mis-Sena 5000
-
-Biex tinstab is-sena li fiha jaqa’ l-Jum Mitlub, nibdew mis-sena 5000 determinata minn Jum il-Kalkolu.
-
-Meta l-Jum Mitlub ikun wara x-xatba tal-għeluq tas-sena magħrufa, fil-mixja ’l quddiem tintuża l-operazzjoni tas-sena ta’ wara:
-
-```text
-NEXT₁₁(c,Y)
-```
-
-Ix-xatba tal-għeluq ta’ `Y` issir ix-xatba tal-ftuħ tas-snin kandidati. Dik l-istess xatba tintuża bħala l-Jum Mitlub fit-tħejjija taz-zalza. Is-snin eliġibbli li jibdew minn dik ix-xatba jiġu ordnati mill-iqsar għall-itwal, issir mistoqsija lill-iskutella 1 bis-siġill 11, u tintgħażel sena waħda. In-numru tas-sena jiżdied b’wieħed.
-
-Meta l-Jum Mitlub jaħbat max-xatba tal-ftuħ tas-sena magħrufa, jew ikun qabilha, fil-mixja lura tintuża l-operazzjoni tas-sena ta’ qabel:
-
-```text
-PREVIOUS₁₂(c,Y)
-```
-
-Ix-xatba tal-ftuħ ta’ `Y` issir ix-xatba tal-għeluq tas-snin kandidati. Dik l-istess xatba tintuża bħala l-Jum Mitlub fit-tħejjija taz-zalza. Is-snin eliġibbli li jintemmu f’dik ix-xatba jiġu ordnati mill-iqsar għall-itwal, issir mistoqsija lill-iskutella 1 bis-siġill 12, u tintgħażel sena waħda. In-numru tas-sena jonqos b’wieħed.
-
-Għalhekk, il-proċedura biex tinstab is-sena hija:
-
-```text
-y = year5000(c)
-
-while t > y.closeGate:
-    y = NEXT₁₁(c,y)
-
-while t <= y.openGate:
-    y = PREVIOUS₁₂(c,y)
-
-return y
-```
-
-B’hekk iż-żewġ operazzjonijiet jiffurmaw is-sekwenza kanonika miż-żewġ naħat tas-sena 5000: l-operazzjoni `NEXT₁₁` tifforma s-snin ta’ wara, u l-operazzjoni `PREVIOUS₁₂` tifforma dawk ta’ qabel.
-
----
-
-# S. Il-Pulpetti
-
-Kull sena tinqasam f’għadd ta’ pulpetti li jvarja bejn 6 u 17. Kull pulpetta tibda fil-jum ta’ wara x-xatba tal-ftuħ tagħha u tintemm fix-xatba tal-għeluq tagħha.
-
-Il-mistoqsijiet kollha dwar l-istruttura tas-sena jużaw l-istess zalza:
-
-```text
-(c, firstDayOfYear)
-```
-
-Jekk is-sena fiha `G` meded bejn ix-xtiebi, l-għadd tal-pulpetti jintgħażel minn:
-
-```text
-6..min(17,G)
-```
-
-permezz ta’ mistoqsija lill-iskutella 2 bis-siġill 20.
-
-Imbagħad tintgħażel kompożizzjoni ta’ numri sħaħ pożittivi:
-
-```text
-(x₁,...,x_K)
-Σx_i = G
-x_i >= 1
-```
-
-Il-kompożizzjonijiet eliġibbli jiġu ordnati lessikografikament. Jekk Jum il-Kalkolu jaħbat ma’ xatba interna tas-sena, waħda mis-somom parzjali għandha tikkorrispondi eżattament ma’ dik ix-xatba. L-għażla ssir permezz ta’ mistoqsija lill-iskutella 2 bis-siġill 21.
-
----
-
-# T. Is-Sbatax-il Isem tal-Pulpetti
-
-```text
-1  Bronż
-2  Volpi
-3  Kilwa
-4  Lagaš
-5  Ħsieb
-6  Erbgħa minn Disgħa
-7  Palgurax
-8  Buda
-9  Għanqud
-10 Skorpjun
-11 Rmied
-12 Qamħ
-13 Xmara
-14 Daħk
-15 Akkad
-16 Qarn
-17 Il-Buqar Vojt
-```
-
-Għal `K` pulpetti jintgħażlu `K` ismijiet differenti. Is-sekwenzi kollha possibbli tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi tagħhom, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 22.
-
----
-
-# U. Ix-Xhur
-
-Kull sena tinqasam f’għadd ta’ xhur li jvarja bejn 3 u 47. Kull xahar ikollu bejn 4 u 123 jum.
-
-Jekk it-tul tas-sena huwa `L`:
-
-```text
-minMonths = ceil(L/123)
-maxMonths = min(47, floor(L/4))
-```
-
-L-għadd tax-xhur jintgħażel permezz ta’ mistoqsija lill-iskutella 3 bis-siġill 30.
-
-Imbagħad tintgħażel sekwenza ta’ tulijiet:
-
-```text
-(L₁,...,L_m)
-4 <= L_i <= 123
-ΣL_i = L
-```
-
-Is-sekwenzi jiġu ordnati lessikografikament, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 3 bis-siġill 31.
-
----
-
-# V. L-Insiġ tax-Xhur
-
-Xahar huwa ħajta minsuġa tul is-sena, u l-jiem tiegħu jistgħu jidhru bejn il-jiem ta’ xhur oħra.
-
-Nisġa eliġibbli hija kelma ta’ tul `L` li fiha x-xahar `j` jidher eżattament `L_j` darbiet, u barra minn hekk:
-
-1. kull xahar jidher għall-ewwel darba fl-ordni `1,2,...,m`;
-2. kull xahar jidher għall-aħħar darba wkoll fl-ordni `1,2,...,m`.
-
-In-nisġiet eliġibbli kollha jiġu ordnati lessikografikament skont in-numru tax-xahar assenjat lil kull jum.
-
-Tintgħażel in-**nisġa kollha** permezz ta’ mistoqsija lill-iskutella 4 bis-siġill 32.
-
-Għal kull prefiss, l-implimentazzjoni tikkalkula eżattament id-daqs tal-blokk tat-tkomplijiet u tapplika `unrank` għall-pożizzjoni magħżula. Il-kalkolu permezz ta’ blokki jagħti direttament l-istess ordni lessikografika u l-istess element magħżul.
-
----
-
-# W. Is-Sebgħa u Erbgħin Isem tax-Xhur
-
-```text
-1  Tajn
-2  Rummiena
-3  Minkeb
-4  Għira
-5  Eridu
-6  Tutpejst
-7  Tlieta minn Ħamsa
-8  Karxumab
-9  Leopard
-10 Landa
-11 Ċpar
-12 Libien
-13 Magħżel
-14 Kustilja
-15 Ħarrub
-16 Uruk
-17 Mistħija
-18 Ġemel
-19 Ram
-20 Bir
-21 Isfar tal-Bajd
-22 Kewkba
-23 Għasel
-24 Milsa
-25 Ġebla tal-Ġir
-26 Ferħ
-27 Tina
-28 Ninwe
-29 Żrinġ
-30 Żift
-31 Xemgħa
-32 Il-Bieb Magħluq
-33 Ġulġlien
-34 Kozz
-35 Fidda
-36 Ġilju
-37 Maltempata
-38 Ħmar
-39 Dqiq
-40 Dispjaċir
-41 Babilonja
-42 Ilsien
-43 Kittien
-44 Melħ
-45 Lanġasa
-46 Qaws
-47 Ramel
-```
-
-Għal sena b’`m` xhur jintgħażlu `m` ismijiet differenti. Is-sekwenzi tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 33.
-
----
-
-# X. Il-Ħames Komponenti tal-Jum
-
-Biex jiġi kkalkulat ir-riżultat għal `t` fir-rigward ta’ `c`:
-
-1. tinstab is-sena 5000 determinata minn `c`;
-2. minn dik is-sena tintuża biss `NEXT₁₁` għall-mixja ’l quddiem, jew biss `PREVIOUS₁₂` għall-mixja lura, skont fejn jinsab `t`;
-3. l-istruttura tas-sena tiġi kkalkulata darba biss billi jintuża `(c, firstDayOfYear)`;
-4. jiġi stabbilit fejn jaqa’ `t` fil-pulpetti u fin-nisġa tax-xhur.
-
-Ir-riżultat jikkonsisti eżattament f’ħames komponenti:
-
-```text
-(
-  yearNumber,
-  cutletName,
-  dayInCutlet,
-  monthName,
-  dayInMonth
-)
-```
-
-`dayInMonth` jindika kemm-il darba dak ix-xahar ikun deher mill-bidu tas-sena sa `t`, inkluż `t` innifsu.
-
----
-
-# Y. L-Eżistenza u l-Uniċità
-
-Għal kull par ordnat `(c,t)` jinkiseb riżultat wieħed biss:
-
-- kull jum għandu għadd uniku;
-- kull sett ġdid ta’ ġebliet jiġi kkalkulat minn `snapshot` wieħed tal-istat;
-- kull qatra tiddependi biss minn dak li jkun diġà ġie stabbilit;
-- waqt kull pass ta’ tħawwid, is-sitt skutelli kollha jaqraw mill-istess passat;
-- kull sett ta’ possibbiltajiet jitqiegħed f’ordni preskritta;
-- kull medda bejn żewġ xtiebi tkun bejn 42 u 963 jum;
-- kull sena tkun twila bejn 252 u 5778 jum;
-- il-proċess biex tinstab is-sena dejjem jibda mis-sena 5000 u jimxi f’direzzjoni waħda skont fejn jinsab il-Jum Mitlub;
-- l-istruttura tas-sena tiġi kkalkulata minn par fiss ta’ jiem.
-
-Il-magna taż-żmien inbniet b’irqajja’: għal kull ħtieġa li nqalgħet matul ix-xogħol ġiet stabbilita regola, u kull regola saret saff ieħor fil-mekkaniżmu.
-
----
-
-# Z. Meta l-Jum Idur
-
-Il-jum lokali jinbidel meta **ċ-ċentru ta’ Venere jilħaq il-kulminazzjoni inferjuri tiegħu fuq il-meridjan lokali**.
-
-Din hija r-regola astronomika tal-jum.
-
-Il-qalba tal-Kalendarju taz-Zalza tirċievi żewġ jiem diskreti `c,t` u tipproċessahom fuq l-assi tal-jiem b’mod li r-riżultat jista’ jiġi riprodott għalkollox.
-
-Il-konverżjoni:
-
-```text
-instant + location -> discrete day
-```
-
-teħtieġ profil astronomiku numeriku: `ephemeris` u l-verżjoni tiegħu, `timescales`, definizzjoni tal-`Earth orientation`, it-trattament ta’ `ΔT`, koordinati u konvenzjonijiet tal-avveniment. Il-vetturi ta’ konformità tal-qalba huma ddefiniti direttament f’termini ta’ `c,t`, li huma numri diskreti li jirrappreżentaw jiem.
-
----
-
-# AA. Il-Lingwa li Tagħti Ġisem lill-Ismijiet
-
-Kull implimentazzjoni għandha lingwa waħda ta’ programmar u lingwa naturali waħda li sservi bħala l-lingwa tas-sors.
-
-F’`Stage 1` ta’ dik l-implimentazzjoni jinħoloq **`SourceLanguageCatalog` kanoniku u immutabbli**, li jkun fih eżattament:
-
-- 17-il isem ta’ pulpetti bħala sekwenzi ta’ karattri;
-- 47 isem ta’ xhur bħala sekwenzi ta’ karattri;
-- l-indiċi kanoniku ta’ kull wieħed minnhom.
-
-Meta isem iġorr tifsira, tintgħażel il-kelma jew l-espressjoni l-aktar naturali biex twassal dik it-tifsira fil-lingwa tas-sors. L-ismijiet proprji, l-ismijiet ta’ postijiet, l-ismijiet ivvintati u s-sekwenzi ta’ ħsejjes mingħajr tifsira lessikali jiġu translitterati skont regola fissa u dokumentata, speċifika għal dik il-lingwa tas-sors.
-
-Wara li l-katalgu jiġi stabbilit fil-forma definittiva tiegħu, ikun hemm korrispondenza unika:
-
-```text
-canonicalIndex -> exactly one source-language string
-```
-
-Il-katalgu fil-forma definittiva tiegħu jistabbilixxi s-sekwenza unika ta’ karattri għal kull indiċi. Fil-livell semantiku jintuża `canonicalIndex`, u l-forma testwali korrispondenti tiġi ddeterminata fis-saff li jipproduċi r-riżultat. Il-`locales` futuri jkunu traduzzjonijiet tal-katalgu tal-lingwa tas-sors maħsuba għall-wiri, filwaqt li `rank`, `unrank`, il-`cache keys` u l-proċessi tal-għażla jibqgħu jużaw l-indiċijiet kanoniċi.
-
----
-
-# AB. L-Istruttura tar-Repożitorju u l-Fergħat
-
-Kull par għandu l-forma:
-
-```text
-[LANGUAGE] + [NATURAL_LANGUAGE]
-```
-
-Għal kull par bħal dan tinħoloq implimentazzjoni indipendenti f’fergħa `orphan`; din tinbena mill-bidu nett. Il-kodiċi, il-`tests`, il-`fixtures`, l-`expected outputs`, l-`oracle`, it-tabelli ġġenerati, il-`caches` u d-dejta ta’ validazzjoni tal-fergħa jinħolqu u jitħejjew kollha fi ħdan il-fergħa ta’ dik l-implimentazzjoni, direttament skont l-ispeċifikazzjoni komuni. Il-konformità ta’ kull implimentazzjoni tiġi vverifikata billi l-implimentazzjoni titqabbel mal-`oracle` lokali tagħha u mal-vetturi kanoniċi ta’ konformità.
-
-Il-fergħa `main` tinkludi dan it-trattat u d-dejta komuni ta’ konformità. Il-fergħat tal-implimentazzjonijiet jinħolqu bħala fergħat `orphan` indipendenti.
-
----
-
-# AC. Il-Vetturi Kanoniċi ta’ Konformità
-
-Il-vetturi ta’ konformità huma dejta komuni li tagħmel parti mill-ispeċifikazzjoni għall-implimentazzjonijiet kollha. Kull implimentazzjoni tużahom bħala parti mit-test ta’ konformità tagħha.
-
-Iż-żewġ komponenti tal-isem fil-vetturi jiġu rreġistrati bħala indiċijiet kanoniċi, u għalhekk l-istess sett ta’ vetturi jista’ jintuża mal-lingwi tas-sors kollha:
-
-```text
-(yearNumber, cutletCanonicalIndex, dayInCutlet,
- monthCanonicalIndex, dayInMonth)
-```
-
-Il-valuri kollha f’dan il-kapitlu nkisbu permezz tat-tħaddim tal-`oracle` normattiv bl-`inputs` espliċiti, u nżammu bħala vetturi kanoniċi ta’ konformità.
-
-Il-valur ta’ `F` huwa:
-
-```text
-F = -15,055,671
-```
-
-| # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | -15,055,671 | -15,055,671 | 5000 | 10 | 503 | 20 | 56 |
-| 2 | -15,055,671 | -15,055,672 | 5000 | 10 | 502 | 32 | 21 |
-| 3 | -15,055,671 | -15,055,670 | 5000 | 14 | 1 | 29 | 38 |
-| 4 | -15,055,671 | -15,056,171 | 5000 | 10 | 3 | 1 | 29 |
-| 5 | -15,055,671 | -15,055,171 | 5000 | 14 | 500 | 18 | 76 |
-| 6 | -15,055,671 | -15,061,671 | 4999 | 5 | 158 | 43 | 3 |
-| 7 | -15,055,671 | -15,049,671 | 5001 | 12 | 95 | 5 | 81 |
-| 8 | -15,056,905 | -15,056,448 | 5000 | 9 | 167 | 10 | 65 |
-| 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 10 | 1 | 45 |
-| 10 | -15,058,171 | -15,053,171 | 5002 | 5 | 288 | 29 | 13 |
-
-Il-vetturi 6, 7 u 10 jittestjaw b’mod espliċitu l-każijiet li fihom il-proċedura tgħaddi lil hinn mis-sena 5000: il-vettur 6 permezz ta’ `PREVIOUS₁₂`, u l-vetturi 7 u 10 permezz ta’ `NEXT₁₁`.
-
-## `checkpoint` dettaljat: `c=t=F`
-
-Għall-vettur 1, il-ħames għaddijiet użati fil-kalkolu huma:
-
-```text
-Għadd_tal_Kalkolu   = 1
-Għadd_Mitlub        = 1
-Għadd_tad_Distanza  = 1
-Għadd_tas_Somma     = 2
-Għadd_tad_Direzzjoni = 2
-```
-
-Is-seba’ qatriet moħbija wara seba’ passi ta’ tħin:
-
-```text
-1: 119390830530032782664128530203002080344
-2: 11877236279154673426874867061566696749
-3: 24217814924229232987463457533828175476
-4: 166629231917547214614573522551290204247
-5: 81202913407267092008896220686064041568
-6: 73551520026920072430116213847585486272
-7: 6164285870955721082771365327359496898
-```
-
-L-ewwel qatra viżibbli:
-
-```text
-56644603826892212324764499696091907135
-```
-
-Il-qatra viżibbli numru 46:
-
-```text
-141872771689426650819909896585756512282
-```
-
-L-ordni tal-iskutelli tal-qatra 46:
-
-```text
-[4, 5, 2, 3, 6, 1]
-```
-
-Is-sitt skutelli wara t-12-il pass addizzjonali ta’ tħawwid, skont l-identitajiet fissi `1..6`:
-
-```text
-1: 65286679584284972964194865805379907599
-2: 127720283375330263615328810127751035299
-3: 54364069496183805843611594721403108554
-4: 93072329024469476118876155742008280619
-5: 54867842942953573450868747713087920246
-6: 111207247632761530752404582123499651367
-```
-
-Il-konfini tas-sena 5000 f’dan l-istess vettur:
-
-```text
-openGate  = -15,057,703
-closeGate = -15,053,459
-```
-
-Ir-rappreżentazzjoni testwali tal-istess riżultat fil-katalgu Malti hija:
-
-```text
-5000, Skorpjun, 503, Bir, 56
-```
-
-Il-komponenti kanoniċi ta’ konformità hawnhekk huma l-indiċijiet 10 u 20; fil-katalgu Malti dawn jingħataw il-forom `Skorpjun` u `Bir`.
-
----
-
-# AD. Il-Ħidma tal-Ħolqien
-
-Il-Kalendarju taż-Żminijiet huwa l-espressjoni preċiża tal-Ħolqien.
-
-Il-Mostru ħoloq:
-
-- pal fis-sensiela tal-jiem;
-- żewġ ħjut tal-għadd tal-jiem;
-- l-Għadd il-Kbir li fih iż-żero taz-zalza jidher bħala `M`;
-- ħames ġebliet li jiġu aġġornati flimkien;
-- seba’ qatriet moħbija;
-- 46 qatra viżibbli;
-- sitt skutelli li jibdlu l-ordni tagħhom;
-- tliet tferrigħat diretti;
-- tħawwid simultanju;
-- 12-il pass sussegwenti ta’ tħawwid;
-- ħażna fissa tal-ordni tal-qatra 46;
-- siġilli separati;
-- fluss ċirkolari ta’ tweġibiet;
-- Għażla Qasira;
-- Għażla Wiesgħa li l-isem kanoniku tagħha huwa **Għażla Ugwali**;
-- xtiebi fuq iż-żewġ naħat tal-pal;
-- is-sena 5000 bħala kostanta strutturali;
-- żewġ mogħdijiet li jibdew minnha u jimxu f’direzzjonijiet opposti;
-- pulpetti li l-konfini tagħhom jaħbtu max-xtiebi;
-- xhur minsuġa bħal ħjut;
-- ismijiet kanoniċi;
-- u eżattament ħames komponenti fir-riżultat tal-jum.
-
-Hekk huwa rranġat iż-żmien: kull saff jinsab f’postu, u kull riżultat jitnissel mis-saffi li ġew qablu. Il-kalendarju jinqara billi wieħed jimxi mal-liġi u mal-ordni u jwettaq il-kalkolu sal-aħħar.
-
-**R’amen.**
+Stage 1 ഇനിയും incomplete ആണ്. അടുത്ത blocker arbitrary target-day sauce orchestration ഉപയോഗിച്ച് signed lazy gate gaps നിർമ്മിക്കുകയാണ്; തുടർന്ന് Year 5000/adjacent walk, general DP/weaving/name unrank, മലയാള presentation resolve, exact five-field result, native SPL GREEN വേണം.

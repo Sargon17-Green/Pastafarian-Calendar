@@ -1,0 +1,120 @@
+קערות עתידיותക്കായി stones, drops, orders, drop46 latch എന്നിവ വേർതിരിച്ച memory owners-ൽ സൂക്ഷിക്കുമ്പോൾ ഒരു replay മറ്റൊന്നിനെ മലിനമാക്കുന്നില്ലെന്ന് തെളിയിക്കുന്ന clean Stage 1 probe. expected outputs: 2,3,4,5,6,12,1,2,3,4,5,6,3,1,6,2,5,4,7,8,9,10,11.
+
+Prospero, constants ഒരുക്കുന്ന കഥാപാത്രം.
+Hamlet, wheat forward replay സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, barley forward replay സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, salt forward replay സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, bitter forward replay സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, red forward replay സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, drop forward replay സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Brutus, full-order forward replay സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Antony, drop46 dedicated forward latch സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+
+Act I: രണ്ട് stone rows വേർതിരിച്ച അഞ്ച് memories-ൽ forward pop order-നായി സ്ഥാപിക്കുന്നു.
+
+Scene I: wheat row3=7 പിന്നെ row2=2 push ചെയ്യുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the sum of a big big hero and the sum of a big hero and a hero. Remember yourself. You are a big hero. Remember yourself.
+[Exeunt]
+
+Scene II: barley row3=8 പിന്നെ row2=3.
+[Enter Prospero and Juliet]
+Prospero: You are a big big big hero. Remember yourself. You are as good as the sum of a big hero and a hero. Remember yourself.
+[Exeunt]
+
+Scene III: salt row3=9 പിന്നെ row2=4.
+[Enter Prospero and Romeo]
+Prospero: You are as good as the sum of a big big big hero and a hero. Remember yourself. You are a big big hero. Remember yourself.
+[Exeunt]
+
+Scene IV: bitter row3=10 പിന്നെ row2=5.
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of a big big big hero and a big hero. Remember yourself. You are as good as the sum of a big big hero and a hero. Remember yourself.
+[Exeunt]
+
+Scene V: red row3=11 പിന്നെ row2=6.
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of a big big big hero and the sum of a big hero and a hero. Remember yourself. You are as good as the sum of a big big hero and a big hero. Remember yourself.
+[Exeunt]
+
+Act II: drop replay, order replay, dedicated latch എന്നിവ സ്വന്തമായി വേർതിരിച്ച memories-ൽ സ്ഥാപിക്കുന്നു.
+
+Scene I: drop2=12 Caliban memory-ൽ.
+[Enter Prospero and Caliban]
+Prospero: You are as good as the sum of a big big big hero and a big big hero. Remember yourself.
+[Exeunt]
+
+Scene II: order2 1,2,3,4,5,6 forward pop ചെയ്യാൻ reverse push.
+[Enter Prospero and Brutus]
+Prospero:
+ You are as good as the sum of a big big hero and a big hero. Remember yourself.
+ You are as good as the sum of a big big hero and a hero. Remember yourself.
+ You are a big big hero. Remember yourself.
+ You are as good as the sum of a big hero and a hero. Remember yourself.
+ You are a big hero. Remember yourself.
+ You are a hero. Remember yourself.
+[Exeunt]
+
+Scene III: drop46 latch 3,1,6,2,5,4 forward pop ചെയ്യാൻ reverse push.
+[Enter Prospero and Antony]
+Prospero:
+ You are a big big hero. Remember yourself.
+ You are as good as the sum of a big big hero and a hero. Remember yourself.
+ You are a big hero. Remember yourself.
+ You are as good as the sum of a big big hero and a big hero. Remember yourself.
+ You are a hero. Remember yourself.
+ You are as good as the sum of a big hero and a hero. Remember yourself.
+[Exeunt]
+
+Act III: bowl round 2 cursor ഓരോ owner-ൽ നിന്ന് അതിന്റെ സ്വന്തം ആദ്യ value മാത്രം വായിക്കുന്നു.
+
+Scene I: row2 five stones.
+[Enter Prospero and Hamlet]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+
+Scene II: drop2.
+[Enter Prospero and Caliban]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+
+Scene III: order2 ആറു IDs.
+[Enter Prospero and Brutus]
+Prospero: Recall your newest memory. Open your heart. Recall your newest memory. Open your heart. Recall your newest memory. Open your heart. Recall your newest memory. Open your heart. Recall your newest memory. Open your heart. Recall your newest memory. Open your heart.
+[Exeunt]
+
+Scene IV: dedicated drop46 latch ആറു IDs; drop/order replay വായിച്ചതുകൊണ്ട് latch മാറുന്നില്ല.
+[Enter Prospero and Antony]
+Prospero: Recall your newest memory. Open your heart. Recall your newest memory. Open your heart. Recall your newest memory. Open your heart. Recall your newest memory. Open your heart. Recall your newest memory. Open your heart. Recall your newest memory. Open your heart.
+[Exeunt]
+
+Act IV: stone owners-ൽ അടുത്ത row ഇപ്പോഴും ശരിയായ row3 ആണ്.
+
+Scene I: row3 five stones.
+[Enter Prospero and Hamlet]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: Recall your newest memory. Open your heart.
+[Exeunt]

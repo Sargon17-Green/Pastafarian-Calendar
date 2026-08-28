@@ -1,0 +1,70 @@
+ഒരൊറ്റ answer stream-ൽ offset സ്ഥാനത്തെ നോർമറ്റീവ് ഉത്തരത്തിന്റെ പരിശോധന.
+
+Hamlet, ആദ്യ ഉത്തരം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, സ്ഥിര ദിശയുടെ ഒറ്റചുവട് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, offset സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, മഹാമനുഷ്യൻ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, മഹാമനുഷ്യൻ നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, അന്തിമ ഉത്തരം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, input വായിക്കാൻ സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: answer ring-ന്റെ കൃത്യമായ offset.
+
+Scene I: stream മൂല്യങ്ങളും offset-ഉം വായിക്കുന്നു.
+[Enter Ophelia and Hamlet]
+Ophelia:
+ Listen to your heart.
+[Exeunt]
+[Enter Ophelia and Juliet]
+Ophelia:
+ Listen to your heart.
+[Exeunt]
+[Enter Ophelia and Romeo]
+Ophelia:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+[Enter Othello and Macbeth]
+Macbeth:
+ You are a hero.
+Othello:
+ You are as good as the difference between a big big big big big big big hero and a hero.
+
+Scene III: നൂറ്റിയിരുപത്തേഴു കൃത്യമായ ഇരട്ടിക്കലുകൾ.
+Othello:
+ Are you better than nothing?
+Macbeth:
+ If not, let us proceed to scene IV.
+ You are as good as the product of yourself and a big hero.
+Othello:
+ You are as good as the difference between yourself and a hero.
+ Let us return to scene III.
+
+Scene IV: മഹാമനുഷ്യന്റെ അവസാന കുറവ്.
+Macbeth:
+ You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Scene V: first-ൽ നിന്ന് directionStep ഗുണിച്ച offset ചേർത്ത് ring-ൽ ചുറ്റുന്നു.
+[Enter Othello and Lady Macbeth]
+Othello:
+ You are as good as the difference between Hamlet and a hero.
+ You are as good as the sum of yourself and the product of Juliet and Romeo.
+ You are as good as the remainder of the quotient between yourself and Othello.
+ Are you worse than nothing?
+Lady Macbeth:
+ If so, let us proceed to scene VI.
+Othello:
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+ Let us proceed to scene VII.
+
+Scene VI: നെഗറ്റീവ് Euclidean ശേഷിപ്പിനെ അതേ ring-ലേക്ക് തിരിക്കുന്നു.
+Othello:
+ You are as good as the sum of yourself and Othello.
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+
+Scene VII: പരിശോധന അവസാനിക്കുന്നു.
+[Exeunt]

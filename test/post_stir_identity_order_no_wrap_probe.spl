@@ -1,0 +1,165 @@
+1A saved sum-ന്റെ 720-rank identity order ആകുന്ന ചെറിയ fixture-ൽ, ആറു വ്യത്യസ്ത പഴയ bowl values ഉപയോഗിച്ച് ഒരു മുഴുവൻ post-stir pending round കണക്കാക്കുന്ന clean Stage 1 no-wrap പരീക്ഷണം. input fixture saved value-നെ 720-ൽ rank 1 ആക്കണം.
+
+Hamlet, പഴയ bowl 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, പഴയ bowl 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, പഴയ bowl 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, പഴയ bowl 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, പഴയ bowl 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, പഴയ bowl 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, stir number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, 1A saved bowl sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, pre-square s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, pending bowl value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: പഴയ state വായിച്ച് 1A saved value നിർമ്മിക്കുന്നു.
+
+Scene I: ആറു പഴയ bowl values-ും stir number-ും വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: saved = raw sum + 149*stir; ഈ fixture-ൽ M wrap ആവശ്യമില്ല.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and Juliet.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the sum of yourself and Macbeth.
+ You are as good as the sum of yourself and Lady Macbeth.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Ophelia.
+ You are as good as the sum of yourself and the product of a big big big big hero and Ophelia.
+ You are as good as the sum of yourself and the product of a big big hero and Ophelia.
+ You are as good as the sum of yourself and Ophelia.
+ Open your heart.
+[Exeunt]
+
+Act II: identity order 1,2,3,4,5,6 പ്രകാരം ആറു pending values.
+
+Scene I: position 1.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Juliet.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the sum of yourself and Ophelia.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Desdemona and Desdemona.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Lady Macbeth and Juliet.
+ Open your heart.
+[Exeunt]
+
+Scene II: position 2.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Romeo.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the sum of yourself and Ophelia.
+ You are as good as the sum of yourself and a big big hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Desdemona and Desdemona.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Hamlet and Romeo.
+ Open your heart.
+[Exeunt]
+
+Scene III: position 3.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Othello.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the sum of yourself and Ophelia.
+ You are as good as the sum of yourself and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Desdemona and Desdemona.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Juliet and Othello.
+ Open your heart.
+[Exeunt]
+
+Scene IV: position 4.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as Othello.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the sum of yourself and Ophelia.
+ You are as good as the sum of yourself and a big big big big hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Desdemona and Desdemona.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Romeo and Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene V: position 5.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Othello.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the sum of yourself and Ophelia.
+ You are as good as the sum of yourself and the sum of a big big big big hero and the sum of a big big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Desdemona and Desdemona.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Othello and Lady Macbeth.
+ Open your heart.
+[Exeunt]
+
+Scene VI: position 6.
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as Lady Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and Cordelia.
+ You are as good as the sum of yourself and Ophelia.
+ You are as good as the sum of yourself and the sum of a big big big big big hero and a big big hero.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are as good as the product of Desdemona and Desdemona.
+ You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and the product of Macbeth and Hamlet.
+ Open your heart.
+[Exeunt]

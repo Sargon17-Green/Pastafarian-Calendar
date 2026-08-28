@@ -1,0 +1,51 @@
+രണ്ട് already-accepted short answer values `N=922` family-യിലെ ranks ആക്കി `41+rank` gate gaps നിർമ്മിച്ച് foundation മുതൽ രണ്ടു positive gates തുടർച്ചയായി materialize ചെയ്യുന്ന clean Stage 1 integration പരീക്ഷണം. ഈ isolation-ൽ input answer values acceptance limit-നുള്ളിലാണെന്ന് precondition ആണ്; rejection loop വേറെയുള്ള short-selector probe പരിശോധിക്കുന്നു.
+
+Hamlet, foundation day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ആദ്യ accepted answer സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, രണ്ടാം accepted answer സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ആദ്യ rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, രണ്ടാം rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, gate plus 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, gate plus 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: inputs.
+
+Scene I: foundation-ും രണ്ട് accepted answers-ും വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+
+Act II: rank-ുകളും gaps-ും.
+
+Scene I: answer values 1..922 ആയതിനാൽ rank അതേ value.
+[Enter Prospero and Othello]
+Prospero: You are as good as Juliet.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as Romeo.
+[Exeunt]
+
+Scene II: gate +1 = foundation + 41 + rank1.
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as Hamlet.
+ You are as good as the sum of yourself and the sum of a big big big big big hero and the sum of a big big big hero and a hero.
+ You are as good as the sum of yourself and Othello.
+ Open your heart.
+[Exeunt]
+
+Scene III: gate +2 = gate +1 + 41 + rank2.
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as Lady Macbeth.
+ You are as good as the sum of yourself and the sum of a big big big big big hero and the sum of a big big big hero and a hero.
+ You are as good as the sum of yourself and Macbeth.
+ Open your heart.
+[Exeunt]

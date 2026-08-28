@@ -1,0 +1,41 @@
+visible drop 46-ൽ പിടിച്ച bowl order rank പന്ത്രണ്ട് post-stir order rank-ുകൾ വായിച്ചാലും മാറരുതെന്ന് പരിശോധിക്കുന്ന clean Stage 1 latch പരീക്ഷണം.
+
+Hamlet, drop 46-ൽ പിടിച്ച one-based bowl-order rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ഇപ്പോഴത്തെ post-stir diagnostic rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, എത്ര post-stir rank-ുകൾ വായിച്ചുവെന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: latch ഒരിക്കൽ മാത്രം എഴുതുന്നു.
+
+Scene I: drop 46 order rank വായിച്ച് latch-ൽ സൂക്ഷിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ You are nothing.
+
+Scene II: പന്ത്രണ്ട് post-stir ranks മുഴുവൻ വായിച്ചോ എന്ന് നോക്കുന്നു.
+Prospero:
+ Are you better than the sum of a big big big hero and the sum of a big hero and a hero?
+Romeo:
+ If so, let us proceed to scene IV.
+[Exeunt]
+
+Scene III: അടുത്ത post-stir rank diagnostic ആയി മാത്രം വായിക്കുന്നു; latch-ൽ എഴുത്തില്ല.
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene II.
+
+Scene IV: പന്ത്രണ്ട് diagnostic reads കഴിഞ്ഞിട്ടും drop-46 latch പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero:
+ Open your heart.
+[Exeunt]

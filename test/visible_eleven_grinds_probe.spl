@@ -1,0 +1,122 @@
+ഒരു ദൃശ്യമുള്ള തുള്ളിയുടെ പതിനൊന്ന് ടച്ചാണികൾ തുടർച്ചയായി കൃത്യമായി നടത്താനുള്ള പരിശോധന.
+
+Hamlet, ഇപ്പോഴത്തെ തുള്ളിമൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, ഒന്നാമത്തെ മുൻതുള്ളി സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, മൂന്നാമത്തെ മുൻതുള്ളി സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ഏഴാമത്തെ മുൻതുള്ളി സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, പഴയ തുള്ളിയുടെ ഗുണകം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, ഒന്നാമത്തെ മുൻതുള്ളിയുടെ ഗുണകം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, മൂന്നാമത്തെ മുൻതുള്ളിയുടെ ഗുണകം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, ഏഴാമത്തെ മുൻതുള്ളിയുടെ ഗുണകം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, ഇപ്പോഴത്തെ കല്ല് മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, മഹാമനുഷ്യൻ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, മഹാമനുഷ്യൻ നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, ശേഷിക്കുന്ന ടച്ചാണികളുടെ എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, input വായിക്കാൻ സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: ഒരേ predecessor snapshot ഉപയോഗിച്ച് പതിനൊന്ന് recurrence ചുവടുകൾ.
+
+Scene I: seed-ഉം മൂന്ന് predecessor-ുകളും വായിക്കുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Juliet]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Romeo]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Othello]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+[Enter Portia and Viola]
+Viola:
+ You are a hero.
+Portia:
+ You are as good as the difference between a big big big big big big big hero and a hero.
+
+Scene III: നൂറ്റിയിരുപത്തേഴു കൃത്യമായ ഇരട്ടിക്കലുകൾ.
+Portia:
+ Are you better than nothing?
+Viola:
+ If not, let us proceed to scene IV.
+ You are as good as the product of yourself and a big hero.
+Portia:
+ You are as good as the difference between yourself and a hero.
+ Let us return to scene III.
+
+Scene IV: മഹാമനുഷ്യന്റെ അവസാന കുറവും പതിനൊന്ന് ചുവടുകളുടെ എണ്ണവും.
+Viola:
+ You are as good as the difference between yourself and a hero.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are as good as the sum of a big big big hero and the sum of a big hero and a hero.
+[Exeunt]
+
+Scene V: അടുത്ത grind row-യിലെ നാല് ഗുണകങ്ങളും കല്ലുമൂല്യവും വായിക്കുന്നു.
+[Enter Miranda and Macbeth]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Lady Macbeth]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Ophelia]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Cordelia]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+[Enter Miranda and Desdemona]
+Miranda:
+ Listen to your heart.
+[Exeunt]
+
+Scene VI: പഴയ x-ൽ നിന്ന് അടുത്ത x കണക്കാക്കി SAVE ചെയ്യുന്നു.
+[Enter Portia and Hamlet]
+Portia:
+ You are as good as the product of Hamlet and Hamlet.
+ You are as good as the sum of yourself and the product of Macbeth and Hamlet.
+ You are as good as the sum of yourself and the product of Lady Macbeth and Juliet.
+ You are as good as the sum of yourself and the product of Ophelia and Romeo.
+ You are as good as the sum of yourself and the product of Cordelia and Othello.
+ You are as good as the sum of yourself and Desdemona.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Portia.
+ Are you worse than nothing?
+Hamlet:
+ If so, let us proceed to scene VII.
+Portia:
+ You are as good as the sum of yourself and a hero.
+ Let us proceed to scene VIII.
+
+Scene VII: നെഗറ്റീവ് Euclidean ശേഷിപ്പിനെ SAVE പരിധിയിലേക്ക് തിരിക്കുന്നു.
+Portia:
+ You are as good as the sum of yourself and Portia.
+ You are as good as the sum of yourself and a hero.
+
+Scene VIII: ഒരു grind പൂർത്തിയായി; പതിനൊന്നും കഴിഞ്ഞോ എന്ന് പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Miranda and Prospero]
+Miranda:
+ You are as good as the difference between yourself and a hero.
+ Are you better than nothing?
+Prospero:
+ If so, let us return to scene V.
+[Exeunt]
+
+Scene IX: അന്തിമ തുള്ളിമൂല്യം പുറത്തിടുന്നു.
+[Enter Miranda and Hamlet]
+Miranda:
+ Open your heart.
+[Exeunt]

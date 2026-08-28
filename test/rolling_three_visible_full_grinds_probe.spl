@@ -1,0 +1,214 @@
+ആദ്യ മൂന്ന് visible drop-ുകൾ hidden predecessor timeline-ുമായി ബന്ധിപ്പിച്ച് ഓരോ drop-നും seed നിർമിച്ച ശേഷം പതിനൊന്ന് zero-coefficient grind ഘട്ടങ്ങൾ നടത്തുകയും committed visible values അടുത്ത drop-ുകളിൽ predecessor ആയി ഉപയോഗിക്കുകയും ചെയ്യുന്ന clean Stage 1 ownership പരീക്ഷണം. ഈ probe-ിലെ fixture-ൽ എല്ലാ grind coefficient-ുകളും stone contribution-വും ശൂന്യമാകുന്നതിനാൽ ഓരോ grind-ും SAVE(x*x) മാത്രമാണ്.
+
+Hamlet, hidden 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, hidden 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, hidden 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, hidden 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, hidden 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, hidden 7 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, drop 1 base contribution സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, drop 2 base contribution സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, drop 3 base contribution സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, ഇപ്പോഴത്തെ x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, committed visible 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, committed visible 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, committed visible 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, grind counter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, M നിർമാണ counter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lear, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: inputsയും M-യും.
+
+Scene I: hidden values-ും മൂന്ന് base contributions-ും വായിക്കുന്നു.
+[Enter Lear and Hamlet]
+Lear: Listen to your heart.
+[Exeunt]
+[Enter Lear and Juliet]
+Lear: Listen to your heart.
+[Exeunt]
+[Enter Lear and Romeo]
+Lear: Listen to your heart.
+[Exeunt]
+[Enter Lear and Othello]
+Lear: Listen to your heart.
+[Exeunt]
+[Enter Lear and Macbeth]
+Lear: Listen to your heart.
+[Exeunt]
+[Enter Lear and Lady Macbeth]
+Lear: Listen to your heart.
+[Exeunt]
+[Enter Lear and Ophelia]
+Lear: Listen to your heart.
+[Exeunt]
+[Enter Lear and Cordelia]
+Lear: Listen to your heart.
+[Exeunt]
+[Enter Lear and Desdemona]
+Lear: Listen to your heart.
+[Exeunt]
+
+Scene II: M = 2^127 - 1 നിർമിക്കുന്നു.
+[Enter Ariel and Horatio]
+Horatio: You are a hero.
+Ariel: You are as good as the difference between a big big big big big big big hero and a hero.
+
+Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Ariel: Are you better than nothing?
+Horatio: If not, let us proceed to scene IV. You are as good as the product of yourself and a big hero.
+Ariel: You are as good as the difference between yourself and a hero. Let us return to scene III.
+
+Scene IV: അവസാന കുറവ്.
+Horatio: You are as good as the difference between yourself and a hero.
+[Exeunt]
+
+Act II: visible drop 1.
+
+Scene I: seed1 = SAVE(base1 + hidden1 + 3*hidden3 + 5*hidden7 + 1).
+[Enter Ariel and Portia]
+Ariel:
+ You are as good as Ophelia.
+ You are as good as the sum of yourself and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Romeo.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Lady Macbeth.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Ariel.
+ Are you worse than nothing?
+Portia: If so, let us proceed to scene II.
+Ariel: You are as good as the sum of yourself and a hero. Let us proceed to scene III.
+
+Scene II: negative Euclidean remainder repair.
+Ariel: You are as good as the sum of yourself and Ariel. You are as good as the sum of yourself and a hero.
+
+Scene III: grind counter പതിനൊന്നാക്കുന്നു.
+[Exeunt]
+[Enter Lear and Prospero]
+Lear: You are as good as the sum of a big big big hero and the sum of a big hero and a hero.
+
+Scene IV: zero-row grind recurrence.
+[Exeunt]
+[Enter Ariel and Portia]
+Ariel:
+ You are as good as the product of Portia and Portia.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Ariel.
+ Are you worse than nothing?
+Portia: If so, let us proceed to scene V.
+Ariel: You are as good as the sum of yourself and a hero. Let us proceed to scene VI.
+
+Scene V: negative Euclidean remainder repair.
+Ariel: You are as good as the sum of yourself and Ariel. You are as good as the sum of yourself and a hero.
+
+Scene VI: counter കുറയ്ക്കുന്നു.
+[Exeunt]
+[Enter Lear and Prospero]
+Lear: You are as good as the difference between yourself and a hero. Are you better than nothing?
+Prospero: If so, let us return to scene IV.
+[Exeunt]
+
+Scene VII: visible 1 commit-ും output-ും.
+[Enter Lear and Viola]
+Lear: You are as good as Portia. Open your heart.
+[Exeunt]
+
+Act III: visible drop 2.
+
+Scene I: seed2 = SAVE(base2 + visible1 + 3*hidden2 + 5*hidden6 + 2).
+[Enter Ariel and Portia]
+Ariel:
+ You are as good as Cordelia.
+ You are as good as the sum of yourself and Viola.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Macbeth.
+ You are as good as the sum of yourself and a big hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Ariel.
+ Are you worse than nothing?
+Portia: If so, let us proceed to scene II.
+Ariel: You are as good as the sum of yourself and a hero. Let us proceed to scene III.
+
+Scene II: negative Euclidean remainder repair.
+Ariel: You are as good as the sum of yourself and Ariel. You are as good as the sum of yourself and a hero.
+
+Scene III: grind counter പതിനൊന്നാക്കുന്നു.
+[Exeunt]
+[Enter Lear and Prospero]
+Lear: You are as good as the sum of a big big big hero and the sum of a big hero and a hero.
+
+Scene IV: zero-row grind recurrence.
+[Exeunt]
+[Enter Ariel and Portia]
+Ariel:
+ You are as good as the product of Portia and Portia.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Ariel.
+ Are you worse than nothing?
+Portia: If so, let us proceed to scene V.
+Ariel: You are as good as the sum of yourself and a hero. Let us proceed to scene VI.
+
+Scene V: negative Euclidean remainder repair.
+Ariel: You are as good as the sum of yourself and Ariel. You are as good as the sum of yourself and a hero.
+
+Scene VI: counter കുറയ്ക്കുന്നു.
+[Exeunt]
+[Enter Lear and Prospero]
+Lear: You are as good as the difference between yourself and a hero. Are you better than nothing?
+Prospero: If so, let us return to scene IV.
+[Exeunt]
+
+Scene VII: visible 2 commit-ും output-ും.
+[Enter Lear and Miranda]
+Lear: You are as good as Portia. Open your heart.
+[Exeunt]
+
+Act IV: visible drop 3.
+
+Scene I: seed3 = SAVE(base3 + visible2 + 3*hidden1 + 5*hidden5 + 3).
+[Enter Ariel and Portia]
+Ariel:
+ You are as good as Desdemona.
+ You are as good as the sum of yourself and Miranda.
+ You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Hamlet.
+ You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Othello.
+ You are as good as the sum of yourself and the sum of a big hero and a hero.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Ariel.
+ Are you worse than nothing?
+Portia: If so, let us proceed to scene II.
+Ariel: You are as good as the sum of yourself and a hero. Let us proceed to scene III.
+
+Scene II: negative Euclidean remainder repair.
+Ariel: You are as good as the sum of yourself and Ariel. You are as good as the sum of yourself and a hero.
+
+Scene III: grind counter പതിനൊന്നാക്കുന്നു.
+[Exeunt]
+[Enter Lear and Prospero]
+Lear: You are as good as the sum of a big big big hero and the sum of a big hero and a hero.
+
+Scene IV: zero-row grind recurrence.
+[Exeunt]
+[Enter Ariel and Portia]
+Ariel:
+ You are as good as the product of Portia and Portia.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Ariel.
+ Are you worse than nothing?
+Portia: If so, let us proceed to scene V.
+Ariel: You are as good as the sum of yourself and a hero. Let us proceed to scene VI.
+
+Scene V: negative Euclidean remainder repair.
+Ariel: You are as good as the sum of yourself and Ariel. You are as good as the sum of yourself and a hero.
+
+Scene VI: counter കുറയ്ക്കുന്നു.
+[Exeunt]
+[Enter Lear and Prospero]
+Lear: You are as good as the difference between yourself and a hero. Are you better than nothing?
+Prospero: If so, let us return to scene IV.
+[Exeunt]
+
+Scene VII: visible 3 commit-ും output-ും.
+[Enter Lear and Rosalind]
+Lear: You are as good as Portia. Open your heart.
+[Exeunt]

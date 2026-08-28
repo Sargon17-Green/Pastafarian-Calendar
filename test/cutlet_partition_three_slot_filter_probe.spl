@@ -1,0 +1,183 @@
+മൂന്ന് cutlet slot ഉള്ള positive-composition family-ൽ നിർബന്ധിത internal gate prefix filter, exact count, one-based lexicographic unrank എന്നിവ ഒരുമിച്ച് പരിശോധിക്കുന്ന clean Stage 1 പരിശോധന.
+
+Hamlet, ആകെ gate-gap എണ്ണം G സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, required boundary offset സൂക്ഷിക്കുന്ന കഥാപാത്രം; ശൂന്യം എന്നത് boundary filter ഇല്ല എന്ന diagnostic test convention ആണ്.
+Romeo, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ആദ്യ part x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, രണ്ടാം part y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, മൂന്നാം part z സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, x+y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, accepted member count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, തിരഞ്ഞെടുത്ത member ഇതിനകം capture ചെയ്തോ എന്ന flag സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, തിരഞ്ഞെടുത്ത x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, തിരഞ്ഞെടുത്ത y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, തിരഞ്ഞെടുത്ത z സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, outer maximum G-2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, inner maximum G-x-1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: lexicographic positive compositions scan ചെയ്യുന്നു.
+
+Scene I: G, required, rank വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero:
+ Listen to your heart.
+[Exeunt]
+
+Scene II: count=0, capture flag=0, x=1, maxX=G-2.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are nothing.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are nothing.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero:
+ You are as good as the difference between Hamlet and a big hero.
+
+Scene III: x>maxX ആണെങ്കിൽ scan തീരുന്നു.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ Are you better than Caliban?
+ If so, let us proceed to scene XV.
+
+Scene IV: y=1, maxY=G-x-1.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Horatio]
+Prospero:
+ You are as good as the difference between Hamlet and Othello.
+ You are as good as the difference between yourself and a hero.
+
+Scene V: y>maxY ആണെങ്കിൽ അടുത്ത x.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ Are you better than Horatio?
+ If so, let us proceed to scene XIV.
+
+Scene VI: z=G-x-y, sumxy=x+y.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the difference between Hamlet and Othello.
+ You are as good as the difference between yourself and Macbeth.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of Othello and Macbeth.
+
+Scene VII: required ശൂന്യമെങ്കിൽ member സ്വീകരിക്കുന്നു.
+[Exeunt]
+[Enter Juliet and Prospero]
+Juliet:
+ Am I as good as nothing?
+Prospero:
+ If so, let us proceed to scene X.
+[Exeunt]
+
+Scene VIII: x required boundary ആണോ.
+[Enter Othello and Juliet]
+Othello:
+ Am I as good as you?
+Juliet:
+ If so, let us proceed to scene X.
+[Exeunt]
+
+Scene IX: x+y required boundary ആണോ; അല്ലെങ്കിൽ reject.
+[Enter Ophelia and Juliet]
+Ophelia:
+ Am I as good as you?
+Juliet:
+ If so, let us proceed to scene X.
+ Let us proceed to scene XIII.
+
+Scene X: accepted count കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+
+Scene XI: ഇതിനകം capture ചെയ്തിട്ടുണ്ടെങ്കിൽ അടുത്ത y; അല്ലെങ്കിൽ count==rank പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Portia and Prospero]
+Portia:
+ Am I better than nothing?
+Prospero:
+ If so, let us proceed to scene XIII.
+[Exeunt]
+[Enter Cordelia and Romeo]
+Cordelia:
+ Am I as good as you?
+Romeo:
+ If so, let us proceed to scene XII.
+ Let us proceed to scene XIII.
+
+Scene XII: ഈ member capture ചെയ്യുന്നു.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Othello and Viola]
+Othello:
+ You are as good as myself.
+[Exeunt]
+[Enter Macbeth and Miranda]
+Macbeth:
+ You are as good as myself.
+[Exeunt]
+[Enter Lady Macbeth and Ariel]
+Lady Macbeth:
+ You are as good as myself.
+
+Scene XIII: y കൂട്ടി inner loop തുടരുന്നു.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene V.
+
+Scene XIV: x കൂട്ടി outer loop തുടരുന്നു.
+[Exeunt]
+[Enter Prospero and Othello]
+Prospero:
+ You are as good as the sum of yourself and a hero.
+ Let us return to scene III.
+
+Scene XV: countയും തിരഞ്ഞെടുത്ത triple-ഉം പുറത്തിടുന്നു.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Viola]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero:
+ Open your heart.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero:
+ Open your heart.
+[Exeunt]

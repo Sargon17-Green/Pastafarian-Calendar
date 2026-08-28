@@ -1,0 +1,162 @@
+Appendix A-യിലെ timeline positions-നെ ഏഴ്-slot rolling ring-ൽ സൂക്ഷിക്കാൻ വേണ്ട index mapping clean Stage 1 control. slot(p)=1+regularMod(p,7). negative hidden positions-നായി source നേരിട്ട് negative remainder ആശ്രയിക്കാതെ തുല്യ positive representatives ഉപയോഗിക്കുന്നു. i=1-ൽ current,prev1,prev3,prev7 = 2,1,6,2; i=46-ൽ = 5,4,2,5; current slot prev7 slot-നോട് 46 തവണയും തുല്യമാണ്, commit പഴയ prev7 വായിച്ചതിന് ശേഷമേ നടക്കാവൂ.
+
+Hamlet, visible drop index i സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, current slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, prev1 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, prev3 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, prev7 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, current-prev7 equality count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, first current slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, first prev1 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, first prev3 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, first prev7 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, last current slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, last prev1 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, last prev3 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, last prev7 slot സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, assignment, branch, output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: counters.
+
+Scene I: i=1, equality count=0.
+[Enter Prospero and Hamlet]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are nothing.
+[Exeunt]
+
+Act II: slot mapping for i=1..46.
+
+Scene I: current slot = 1 + i mod 7.
+[Enter Prospero and Juliet]
+Prospero:
+ You are as good as the remainder of the quotient between Hamlet and the sum of the sum of a big big hero and a big hero and a hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: prev1 slot = 1 + (i-1) mod 7.
+[Enter Prospero and Romeo]
+Prospero:
+ You are as good as the difference between Hamlet and a hero.
+ You are as good as the remainder of the quotient between yourself and the sum of the sum of a big big hero and a big hero and a hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene III: prev3 slot = 1 + regularMod(i-3,7) = 1 + (i+4) mod 7 for i>=1.
+[Enter Prospero and Othello]
+Prospero:
+ You are as good as the sum of Hamlet and a big big hero.
+ You are as good as the remainder of the quotient between yourself and the sum of the sum of a big big hero and a big hero and a hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene IV: prev7 slot = 1 + regularMod(i-7,7) = current slot.
+[Enter Prospero and Macbeth]
+Prospero:
+ You are as good as the remainder of the quotient between Hamlet and the sum of the sum of a big big hero and a big hero and a hero.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene V: current == prev7 count.
+[Enter Juliet and Prospero]
+Juliet: Am I as good as Macbeth?
+Prospero: If so, let us proceed to scene VI. Let us proceed to scene VII.
+[Exeunt]
+
+Scene VI: equality count increment.
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of yourself and a hero. Let us proceed to scene VII.
+[Exeunt]
+
+Scene VII: i=1 mapping capture.
+[Enter Hamlet and Prospero]
+Hamlet: Am I as good as a hero?
+Prospero: If so, let us proceed to scene VIII. Let us proceed to scene XII.
+[Exeunt]
+
+Scene VIII: first current.
+[Enter Juliet and Ophelia]
+Juliet: You are as good as Juliet.
+[Exeunt]
+
+Scene IX: first prev1.
+[Enter Romeo and Cordelia]
+Romeo: You are as good as Romeo.
+[Exeunt]
+
+Scene X: first prev3.
+[Enter Othello and Desdemona]
+Othello: You are as good as Othello.
+[Exeunt]
+
+Scene XI: first prev7.
+[Enter Macbeth and Portia]
+Macbeth: You are as good as Macbeth.
+[Exeunt]
+
+Scene XII: i=46 mapping capture or loop.
+[Enter Hamlet and Prospero]
+Hamlet: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
+Prospero: If so, let us proceed to scene XIII. Let us proceed to scene XVII.
+[Exeunt]
+
+Scene XIII: last current.
+[Enter Juliet and Viola]
+Juliet: You are as good as Juliet.
+[Exeunt]
+
+Scene XIV: last prev1.
+[Enter Romeo and Miranda]
+Romeo: You are as good as Romeo.
+[Exeunt]
+
+Scene XV: last prev3.
+[Enter Othello and Ariel]
+Othello: You are as good as Othello.
+[Exeunt]
+
+Scene XVI: last prev7.
+[Enter Macbeth and Caliban]
+Macbeth: You are as good as Macbeth. Let us proceed to act III.
+[Exeunt]
+
+Scene XVII: i increment.
+[Enter Prospero and Hamlet]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to scene I.
+[Exeunt]
+
+Act III: expected mapping outputs.
+
+Scene I: i=1 -> 2,1,6,2.
+[Enter Prospero and Ophelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Portia]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene II: i=46 -> 5,4,2,5.
+[Enter Prospero and Viola]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Miranda]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Ariel]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Caliban]
+Prospero: Open your heart.
+[Exeunt]
+
+Scene III: current-prev7 equality count = 46.
+[Enter Prospero and Lady Macbeth]
+Prospero: Open your heart.
+[Exeunt]

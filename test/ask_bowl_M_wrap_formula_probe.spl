@@ -1,0 +1,133 @@
+Appendix A askBowl arithmetic വലിയ exact bowl values-ോടെ പരിശോധിക്കുന്ന clean Stage 1 fixture. latched-order companion fixture `3,1,6,2,5,4`-ൽ queried bowl 4-ന്റെ circular successor bowl 3 ആണ്; ഇവിടെ bowl4=M, bowl3=M-1, fixed bowl6=M, seal=1. expected first=32946, directionStep=+1.
+
+Hamlet, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, queried bowl value M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, latched successor bowl value M-1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, fixed bowl 6 value M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, seal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, first answer സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, direction number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, direction step സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, flow-വും assignment-വും സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: Mയും fixture values-ും.
+
+Scene I: M നിർമ്മിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero:
+ You are a hero.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero:
+ You are as good as the difference between a big big big big big big big hero and a hero.
+[Exeunt]
+[Enter Hamlet and Desdemona]
+
+Scene II: doubling loop.
+Hamlet:
+ Are you better than nothing?
+Desdemona:
+ If not, let us proceed to scene III.
+Hamlet:
+ You are as good as the difference between yourself and a hero.
+Desdemona:
+ You are as good as the product of yourself and a big hero.
+ Let us return to scene II.
+
+Scene III: M=2 power 127 minus 1.
+[Exeunt]
+[Enter Prospero and Hamlet]
+Prospero:
+ You are as good as the difference between yourself and a hero.
+
+Scene IV: queried=M, successor=M-1, bowl6=M, seal=1.
+[Exeunt]
+[Enter Hamlet and Juliet]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Hamlet and Romeo]
+Hamlet: You are as good as the difference between Hamlet and a hero.
+[Exeunt]
+[Enter Hamlet and Othello]
+Hamlet: You are as good as Hamlet.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are a hero.
+[Exeunt]
+
+Act II: first answer.
+
+Scene I: SAVE((queried+seal+181)^2 + 179*successor + seal).
+[Enter Prospero and Lady Macbeth]
+Prospero:
+ You are as good as the sum of Juliet and Macbeth.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big hero.
+ You are as good as the sum of yourself and a big big big big hero.
+ You are as good as the sum of yourself and a big big hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the product of yourself and yourself.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Romeo.
+ You are as good as the sum of yourself and the product of a big big big big big hero and Romeo.
+ You are as good as the sum of yourself and the product of a big big big big hero and Romeo.
+ You are as good as the sum of yourself and the product of a big hero and Romeo.
+ You are as good as the sum of yourself and Romeo.
+ You are as good as the sum of yourself and Macbeth.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+ Open your heart.
+[Exeunt]
+
+Act III: direction.
+
+Scene I: SAVE((first+seal+1+193)^2 + 193*first + 197*bowl6).
+[Enter Prospero and Ophelia]
+Prospero:
+ You are as good as the sum of Lady Macbeth and Macbeth.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the sum of yourself and a big big big big big big big hero.
+ You are as good as the sum of yourself and a big big big big big big hero.
+ You are as good as the sum of yourself and a hero.
+ You are as good as the product of yourself and yourself.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Lady Macbeth.
+ You are as good as the sum of yourself and the product of a big big big big big big hero and Lady Macbeth.
+ You are as good as the sum of yourself and Lady Macbeth.
+ You are as good as the sum of yourself and the product of a big big big big big big big hero and Othello.
+ You are as good as the sum of yourself and the product of a big big big big big big hero and Othello.
+ You are as good as the sum of yourself and the product of a big big hero and Othello.
+ You are as good as the sum of yourself and Othello.
+ You are as good as the difference between yourself and a hero.
+ You are as good as the remainder of the quotient between yourself and Hamlet.
+ You are as good as the sum of yourself and a hero.
+[Exeunt]
+
+Scene II: parity odd -> plus one, even -> minus one.
+[Enter Ophelia and Cordelia]
+Ophelia:
+ You are as good as the remainder of the quotient between Ophelia and a big hero.
+Cordelia:
+ Am I as good as a hero?
+Ophelia:
+ If so, let us proceed to scene III.
+ Let us proceed to scene IV.
+[Exeunt]
+
+Scene III: plus one.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are a hero.
+ Open your heart.
+ Let us proceed to scene V.
+[Exeunt]
+
+Scene IV: minus one.
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the difference between nothing and a hero.
+ Open your heart.
+[Exeunt]
+
+Scene V: askBowl fixture പൂർത്തിയായി.
+[Exeunt]

@@ -1,0 +1,117 @@
+അഞ്ച് slot bounded composition family-യുടെ exact count brute-force ആയി പരിശോധിക്കുന്ന clean Stage 1 ചെറിയ regression. ആദ്യ നാല് ഭാഗങ്ങൾ lexicographic ascending loops ആയി സഞ്ചരിക്കുന്നു; അഞ്ചാമത്തെ ഭാഗം total-ൽ നിന്ന് കൃത്യമായി നിർണയിക്കുന്നു. floating point ഒന്നുമില്ല.
+
+Hamlet, total സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, lo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, hi സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, ആദ്യ ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, രണ്ടാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, മൂന്നാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, നാലാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, അഞ്ചാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, exact count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+
+Act I: inputsയും counters-ഉം.
+
+Scene I: total, lo, hi വായിക്കുന്നു.
+[Enter Prospero and Hamlet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Juliet]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Romeo]
+Prospero: Listen to your heart.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Juliet and Othello]
+Juliet: You are as good as myself.
+
+Act II: ആദ്യ ഭാഗം.
+
+Scene I: ആദ്യ ഭാഗം hi കടന്നാൽ result.
+[Exeunt]
+[Enter Othello and Romeo]
+Othello: Are you better than Romeo?
+Romeo: If so, let us proceed to act VI.
+[Exeunt]
+[Enter Juliet and Macbeth]
+Juliet: You are as good as myself.
+
+Act III: രണ്ടാം ഭാഗം.
+
+Scene I: രണ്ടാം ഭാഗം hi കടന്നാൽ ആദ്യ ഭാഗം കൂട്ടുന്നു.
+[Exeunt]
+[Enter Macbeth and Romeo]
+Macbeth: Are you better than Romeo?
+Romeo: If so, let us proceed to act V.
+[Exeunt]
+[Enter Juliet and Lady Macbeth]
+Juliet: You are as good as myself.
+
+Act IV: മൂന്നാം ഭാഗം.
+
+Scene I: മൂന്നാം ഭാഗം hi കടന്നാൽ രണ്ടാം ഭാഗം കൂട്ടുന്നു.
+[Exeunt]
+[Enter Lady Macbeth and Romeo]
+Lady Macbeth: Are you better than Romeo?
+Romeo: If so, let us proceed to scene V.
+[Exeunt]
+[Enter Juliet and Ophelia]
+Juliet: You are as good as myself.
+
+Scene II: നാലാം ഭാഗം hi കടന്നാൽ മൂന്നാം ഭാഗം കൂട്ടുന്നു.
+[Exeunt]
+[Enter Ophelia and Romeo]
+Ophelia: Are you better than Romeo?
+Romeo: If so, let us proceed to scene IV.
+
+Scene III: അഞ്ചാം ഭാഗം നിർണയിച്ച് bounds പരിശോധിക്കുന്നു.
+[Exeunt]
+[Enter Prospero and Cordelia]
+Prospero:
+ You are as good as the difference between Hamlet and Othello.
+ You are as good as the difference between yourself and Macbeth.
+ You are as good as the difference between yourself and Lady Macbeth.
+ You are as good as the difference between yourself and Ophelia.
+[Exeunt]
+[Enter Cordelia and Juliet]
+Cordelia: Are you worse than Juliet?
+Juliet: If so, let us proceed to scene VI.
+[Exeunt]
+[Enter Cordelia and Romeo]
+Cordelia: Are you better than Romeo?
+Romeo: If so, let us proceed to scene VI.
+[Exeunt]
+[Enter Prospero and Desdemona]
+Prospero: You are as good as the sum of yourself and a hero.
+
+Scene VI: നാലാം ഭാഗം കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Ophelia]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to scene II.
+
+Scene IV: മൂന്നാം ഭാഗം കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Lady Macbeth]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to scene I.
+
+Scene V: രണ്ടാം ഭാഗം കൂട്ടുന്നു.
+[Exeunt]
+[Enter Prospero and Macbeth]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to act III.
+
+Act V: ആദ്യ ഭാഗം കൂട്ടുന്നു.
+
+Scene I: ആദ്യ ഭാഗം കൂട്ടുന്നു.
+[Enter Prospero and Othello]
+Prospero: You are as good as the sum of yourself and a hero. Let us return to act II.
+
+Act VI: result.
+
+Scene I: exact count പുറത്തിടുന്നു.
+[Enter Prospero and Desdemona]
+Prospero: Open your heart.
+[Exeunt]
