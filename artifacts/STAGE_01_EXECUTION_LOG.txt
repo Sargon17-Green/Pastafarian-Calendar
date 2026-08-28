@@ -1,0 +1,106 @@
+STAGE 1 — LOG DE EXECUTION DEL VERIFICATION RIGOROSI
+
+Runtime local:
+v22.16.0
+
+Regeneration de fixtures:
+Fixtures de Stage 1 regenerat independentmen ex li reference normativ local.
+Comparation local ante/pos regeneration: IDENTIC
+
+Execution 1 de npm test:
+
+> pastafari-calendar-javascript-interlingue-occidental@0.0.1-stage-01 test
+> node tests/run-tests.js && node tests/verify-stage-01.js
+
+PASS constant exact e relation del dies de base
+PASS SAVE conserva li interval 1..M e tracta multiplicas de M quam M
+PASS dayCount usa paritá correct circum li die de fundation
+PASS workCounts usa distance cronologic inclusiv
+PASS li table de stones deriva simultanmen ex chascun snapshot precedent
+PASS unranking lexicografic del six boles respecta rangs 1 e 720
+PASS li sauce normativ local es determinist al fundation
+PASS li question de bole usa li órdine del drop 46 e un direction unic
+PASS compositiones limitat es contat exactmen e unrankat lexicograficmen
+PASS li DP de intertexe selecte un intertexe complet e legal
+PASS li annu 5000 rejecte implicitmen longores super 5778
+PASS SourceLanguageCatalog es congelat, complet e index-stabil
+PASS li infrastructura monster neutral crea un context isolat e validat
+PASS li function final resta intentionalmen absent in Stage 1
+
+14 tests passat; Stage 1 es GREEN.
+PASS syntax de omni JavaScript es valid con li runtime local
+PASS li linea ne declara null dependentie extern e usa solmen Node por scripts
+PASS production resta isolat del reference test-only
+PASS null textu hebreic o code de patches futur contamina production
+PASS regularMod e floorDiv satisfá lor identities exact in un gril exhaustiv
+PASS SAVE es exact circum multipplicás positiv e negativ de M
+PASS dayCount e workCounts satisfá exhaustivmen li reguli circum Foundation
+PASS omni 46 rows de stones veni del sam snapshot precedent
+PASS hidden drops e visible drops concorda con un copy de validation independent
+PASS omni 720 permutationes es unic, complete e strictmen lexicografic
+PASS li sauce complet concorda con un copy validation por pluri pares e conserva li latch 46
+PASS question de bole usa sempre li successor del latch 46, includet li ultim bole
+PASS selection curt concorda con rejection independent por limites e divisores divers
+PASS selection larg tracta M+1, M^2 e un rejection de un sol pass exact
+PASS unranking de nomes distinct concorda exhaustivmen con permutationes partial
+PASS DP de compositiones limitat concorda exhaustivmen con enumeration micri
+PASS DP de partition de cutlettes concorda con li familie legacy filtrat in órdine lexicografic
+PASS DP de intertexe de mensus concorda con enumeration complet por spaces micri
+PASS portes cresce strictmen, have gaps 42..963 e li du directiones es questionat independentmen
+PASS limites de annu 252 e 5778 es acceptat, 5779 e gap-count 5 es rejectet
+PASS annu 5000 e adjacent annus respecta continuitá e proprietá del porte de apertura
+PASS helpers de structura conserva limites, sumas e nomes distinct sin intertexe gigant
+PASS SourceLanguageCatalog es profundmen congelat, complet, unic e index-stabil
+PASS li infrastructura neutral conserva isolation, ownership e non-semantic metrics
+PASS errores de Bootstrap es explicit e li final function resta absent ante Stage 2
+
+25 gruppes de verification passat; 60226 assertions passat; Stage 1 resta GREEN.
+
+Execution 2 de npm test:
+
+> pastafari-calendar-javascript-interlingue-occidental@0.0.1-stage-01 test
+> node tests/run-tests.js && node tests/verify-stage-01.js
+
+PASS constant exact e relation del dies de base
+PASS SAVE conserva li interval 1..M e tracta multiplicas de M quam M
+PASS dayCount usa paritá correct circum li die de fundation
+PASS workCounts usa distance cronologic inclusiv
+PASS li table de stones deriva simultanmen ex chascun snapshot precedent
+PASS unranking lexicografic del six boles respecta rangs 1 e 720
+PASS li sauce normativ local es determinist al fundation
+PASS li question de bole usa li órdine del drop 46 e un direction unic
+PASS compositiones limitat es contat exactmen e unrankat lexicograficmen
+PASS li DP de intertexe selecte un intertexe complet e legal
+PASS li annu 5000 rejecte implicitmen longores super 5778
+PASS SourceLanguageCatalog es congelat, complet e index-stabil
+PASS li infrastructura monster neutral crea un context isolat e validat
+PASS li function final resta intentionalmen absent in Stage 1
+
+14 tests passat; Stage 1 es GREEN.
+PASS syntax de omni JavaScript es valid con li runtime local
+PASS li linea ne declara null dependentie extern e usa solmen Node por scripts
+PASS production resta isolat del reference test-only
+PASS null textu hebreic o code de patches futur contamina production
+PASS regularMod e floorDiv satisfá lor identities exact in un gril exhaustiv
+PASS SAVE es exact circum multipplicás positiv e negativ de M
+PASS dayCount e workCounts satisfá exhaustivmen li reguli circum Foundation
+PASS omni 46 rows de stones veni del sam snapshot precedent
+PASS hidden drops e visible drops concorda con un copy de validation independent
+PASS omni 720 permutationes es unic, complete e strictmen lexicografic
+PASS li sauce complet concorda con un copy validation por pluri pares e conserva li latch 46
+PASS question de bole usa sempre li successor del latch 46, includet li ultim bole
+PASS selection curt concorda con rejection independent por limites e divisores divers
+PASS selection larg tracta M+1, M^2 e un rejection de un sol pass exact
+PASS unranking de nomes distinct concorda exhaustivmen con permutationes partial
+PASS DP de compositiones limitat concorda exhaustivmen con enumeration micri
+PASS DP de partition de cutlettes concorda con li familie legacy filtrat in órdine lexicografic
+PASS DP de intertexe de mensus concorda con enumeration complet por spaces micri
+PASS portes cresce strictmen, have gaps 42..963 e li du directiones es questionat independentmen
+PASS limites de annu 252 e 5778 es acceptat, 5779 e gap-count 5 es rejectet
+PASS annu 5000 e adjacent annus respecta continuitá e proprietá del porte de apertura
+PASS helpers de structura conserva limites, sumas e nomes distinct sin intertexe gigant
+PASS SourceLanguageCatalog es profundmen congelat, complet, unic e index-stabil
+PASS li infrastructura neutral conserva isolation, ownership e non-semantic metrics
+PASS errores de Bootstrap es explicit e li final function resta absent ante Stage 2
+
+25 gruppes de verification passat; 60226 assertions passat; Stage 1 resta GREEN.

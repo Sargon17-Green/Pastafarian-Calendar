@@ -34,3 +34,21 @@ npm test
 ```
 
 Null interpreter, runtime, bridge, FFI, WASM o generator de un altri lingue de programmation es necessi o admisset.
+
+## Porta rigorosi ante Stage 2
+
+Ante iniciar li prim discovery historic, `tests/verify-stage-01.js` adjunte un verification mult plu larg quam li baseline. It usa copies de validation independent, enumeration exhaustiv de spaces combinatori micri, verification de omni 720 permutationes, griles exhaustiv por aritmetica e counts, probes de portes e annus, isolation de state, audit de imports e audit contra contamination de patches futur.
+
+Commande principal:
+
+```text
+npm test
+```
+
+Ti commande executa li 14 tests de baseline e poy li porta rigorosi de 25 gruppes / 60226 assertions. Un execution separat es disponibil per:
+
+```text
+npm run verify:stage1
+```
+
+Vide `STAGE_01_VERIFICATION_REPORT.md` por li scope exact e por li observation documentat de performance del oracle end-to-end.
