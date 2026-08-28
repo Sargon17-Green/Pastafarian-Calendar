@@ -12,12 +12,12 @@ Elixir dùng số nguyên có độ chính xác tùy ý, vì vậy phép tính c
 
 ## Xác minh giai đoạn 1
 
-Quy trình GitHub Actions của dòng triển khai đã chạy `mix test` bằng Elixir 1.18.4 trên Erlang/OTP 27 và hoàn tất thành công với 16 kiểm thử, 0 lỗi.
+Giai đoạn 1 đã hoàn tất. Quy trình GitHub Actions đã xác minh cây sau gói đóng và sau khi loại bỏ tệp bàn giao khỏi kho. Lần xác minh mới nhất chạy `mix test` bằng Elixir 1.18.5 trên Erlang/OTP 27 và hoàn tất với 16 kiểm thử, 0 lỗi, không còn cảnh báo biên dịch từ bộ tham chiếu.
 
-Lệnh kiểm thử tại gốc kho vẫn là:
+Lệnh kiểm thử tại gốc kho là:
 
 ```text
 mix test
 ```
 
-Sau khi áp dụng gói đóng giai đoạn 1, cần để quy trình CI chạy lại. Chỉ khi lần chạy mới vẫn xanh mới bắt đầu giai đoạn 2, tức DISCOVERY 01.
+Bước phát triển kế tiếp là giai đoạn 2/55, `DISCOVERY 01`. Chỉ ở giai đoạn đó mới được đưa khuyết tật legacy đầu tiên vào đường thực thi; không được đưa trước bản vá của giai đoạn 3.

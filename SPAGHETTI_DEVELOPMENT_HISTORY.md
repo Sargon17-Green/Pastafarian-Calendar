@@ -8,4 +8,6 @@ Dòng triển khai được bắt đầu từ số không bằng Elixir. Tiếng
 
 Bộ tham chiếu sạch của phụ lục A được dựng riêng dưới kiểm thử. Nó không được nhập vào đường sản xuất.
 
-Việc xác minh độc lập của giai đoạn 1 đã được thực hiện bằng GitHub Actions với Elixir 1.18.4 và Erlang/OTP 27. `mix test` hoàn tất với 16 kiểm thử và 0 lỗi. Lần đóng giai đoạn 1 chỉ sửa trạng thái/tài liệu, Việt hóa tệp giấy phép còn sót lại và loại bỏ hai cảnh báo biến không dùng trong bộ tham chiếu chỉ dành cho kiểm thử; không thêm khuyết tật legacy, bản vá tương lai hay hành vi sản xuất mới.
+Trong lần đóng giai đoạn 1, tệp giấy phép còn sót lại đã được Việt hóa, kiểm tra văn bản được mở rộng để bao gồm cả giấy phép và YAML, và hai cảnh báo biến không dùng trong bộ tham chiếu chỉ dành cho kiểm thử đã được loại bỏ bằng thay đổi tên biến không mang ý nghĩa ngữ nghĩa. Không có khuyết tật legacy, bản vá tương lai hay hành vi sản xuất mới nào được thêm.
+
+Việc xác minh đóng cuối cùng đã chạy thành công trên GitHub Actions bằng Elixir 1.18.5 và Erlang/OTP 27. `mix test` hoàn tất với 16 kiểm thử và 0 lỗi. Sau lần xác minh này, giai đoạn 1 được đánh dấu hoàn tất; bước lịch sử kế tiếp là giai đoạn 2, `DISCOVERY 01`.
