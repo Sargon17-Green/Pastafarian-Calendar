@@ -205,7 +205,7 @@ end
 
 to bi.mag.qdigit.work :rem :den :q
   if (bi.mag.compare :rem :den) < 0 [output (list :q :rem)]
-  output bi.mag.qdigit.work bi.mag.sub :rem :den (:q + 1)
+  output bi.mag.qdigit.work (bi.mag.sub :rem :den) :den (:q + 1)
 end
 
 to bi.mag.divmod :num :den

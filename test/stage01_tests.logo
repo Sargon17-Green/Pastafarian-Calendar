@@ -5,11 +5,11 @@ load "src/source_language_catalog.logo
 load "src/monster_bootstrap.logo
 load "test/normative_reference.logo
 
-make "TEST.FAIL false
+make "TEST.FAIL "false
 
 to t.require :condition :message
   if not :condition [
-    make "TEST.FAIL true
+    make "TEST.FAIL "true
     print sentence [TESTO_FALIIS:] :message
   ]
 end

@@ -18,4 +18,6 @@ La neutrala shelo ne kalkulas kalendarala rezulto. Ol nur valida la input-formo 
 
 ### Stato
 
-La repository e la Stage-1 fonti esas preparita de zero. La sola restanta validigo esas reala rulado dil Logo test-harness. En la aktuala livera medio nula Logo runtime esas disponebla; do la etapo ne esas ankore deklarita kompletigita.
+La Stage-1 fonti esis verifikita per Berkeley Logo / UCBLogo 6.2.5. Dum la unesma native-rulado, kelka Logo-vorti `true` e `false` bezonis explicita quotado, e la rekursiva helper `bi.mag.qdigit.work` bezonis la mankanta denominator-argumento. Nur ca Stage-1 erori esis korektita; nula Stage-2 kodo esis adicionita.
+
+La fina komando `logo test/stage01_tests.logo` finis kun exit-statuso 0 e atingis la marker `STAGE_1_TESTI_PASIS`. Pro to Stage 1 esas kompletigita e `LAST_COMPLETED_STAGE=1`.

@@ -533,7 +533,7 @@ to nr.cp.count.x :rem :slots :cumulative :hit :required :x
   localmake "nextCum (:cumulative + :x)
   localmake "nextHit :hit
   if and (:required >= 0) (not :hit) [
-    if :nextCum = :required [make "nextHit true]
+    if :nextCum = :required [make "nextHit "true]
     if :nextCum > :required [output nr.cp.count.x :rem :slots :cumulative :hit :required (:x + 1)]
   ]
   localmake "here nr.cp.count (:rem - :x) (:slots - 1) :nextCum :nextHit :required
@@ -542,9 +542,9 @@ end
 
 to nr.cp.unrank :G :K :required :rank1
   nr.cp.reset
-  localmake "all nr.cp.count :G :K 0 false :required
+  localmake "all nr.cp.count :G :K 0 "false :required
   if bi.gt :rank1 :all [print [ERORO: ranko tro granda en koteleto-partigo.] stop]
-  output nr.cp.unrank.pos :G :K 0 false :required :rank1 []
+  output nr.cp.unrank.pos :G :K 0 "false :required :rank1 []
 end
 
 to nr.cp.unrank.pos :rem :slots :cumulative :hit :required :rank1 :out
@@ -558,7 +558,7 @@ to nr.cp.unrank.x :rem :slots :cumulative :hit :required :rank1 :out :x
   localmake "nextCum (:cumulative + :x)
   localmake "nextHit :hit
   if and (:required >= 0) (not :hit) [
-    if :nextCum = :required [make "nextHit true]
+    if :nextCum = :required [make "nextHit "true]
     if :nextCum > :required [output nr.cp.unrank.x :rem :slots :cumulative :hit :required :rank1 :out (:x + 1)]
   ]
   localmake "block nr.cp.count (:rem - :x) (:slots - 1) :nextCum :nextHit :required
@@ -579,12 +579,12 @@ to nr.weave.reset :lengths
 end
 
 to nr.weave.legalp :remaining :opened :closed :j
-  if (item :j :remaining) = 0 [output false]
+  if (item :j :remaining) = 0 [output "false]
   localmake "already ((item :j :remaining) < (item :j :NR.WEAVE.LENGTHS))
-  if and (not :already) (:j <> (:opened + 1)) [output false]
+  if and (not :already) (:j <> (:opened + 1)) [output "false]
   localmake "willClose ((item :j :remaining) = 1)
-  if and :willClose (:j <> (:closed + 1)) [output false]
-  output true
+  if and :willClose (:j <> (:closed + 1)) [output "false]
+  output "true
 end
 
 to nr.weave.apply :remaining :opened :closed :j
@@ -597,8 +597,8 @@ to nr.weave.apply :remaining :opened :closed :j
 end
 
 to nr.weave.all.zero :items
-  if emptyp :items [output true]
-  if (first :items) <> 0 [output false]
+  if emptyp :items [output "true]
+  if (first :items) <> 0 [output "false]
   output nr.weave.all.zero butfirst :items
 end
 
@@ -719,7 +719,7 @@ to nr.gate.cover :lowDay :highDay
     nr.gate.extend.forward
     output nr.gate.cover :lowDay :highDay
   ]
-  output true
+  output "true
 end
 
 to nr.gate.index.before :day
@@ -779,11 +779,11 @@ end
 
 to nr.year.valid.pair :openIndex :closeIndex
   localmake "gaps bi.sub :closeIndex :openIndex
-  if bi.lt :gaps bi.small 6 [output false]
+  if bi.lt :gaps bi.small 6 [output "false]
   localmake "len nr.year.length.indices :openIndex :closeIndex
-  if bi.lt :len bi.small 252 [output false]
-  if bi.gt :len bi.small 5778 [output false]
-  output true
+  if bi.lt :len bi.small 252 [output "false]
+  if bi.gt :len bi.small 5778 [output "false]
+  output "true
 end
 
 to nr.year5000.scan.j :i :j :maxIndex :calculationDay
@@ -806,8 +806,8 @@ end
 to nr.year.pair.beforep :a :b
   localmake "la nr.year.length.indices (item 1 :a) (item 2 :a)
   localmake "lb nr.year.length.indices (item 1 :b) (item 2 :b)
-  if bi.lt :la :lb [output true]
-  if bi.gt :la :lb [output false]
+  if bi.lt :la :lb [output "true]
+  if bi.gt :la :lb [output "false]
   output bi.lt nr.gate.ensure item 1 :a nr.gate.ensure item 1 :b
 end
 
@@ -914,7 +914,7 @@ to nr.choose.cutlet.partition :calculationDay :structureSauce :year :K
     ]
   ]
   nr.cp.reset
-  localmake "N nr.cp.count :G :K 0 false :required
+  localmake "N nr.cp.count :G :K 0 "false :required
   localmake "stream nr.ask :structureSauce 2 21
   localmake "rank nr.choose.rank :stream :N
   output nr.cp.unrank :G :K :required :rank

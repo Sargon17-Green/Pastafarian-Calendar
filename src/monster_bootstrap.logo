@@ -39,9 +39,9 @@ to monster.logs.append :ctx :event
 end
 
 to monster.validate.input :ctx
-  if emptyp monster.context.get :ctx "calculationDay [output false]
-  if emptyp monster.context.get :ctx "targetDay [output false]
-  output true
+  if emptyp monster.context.get :ctx "calculationDay [output "false]
+  if emptyp monster.context.get :ctx "targetDay [output "false]
+  output "true
 end
 
 to monster.dispatch.bootstrap :ctx

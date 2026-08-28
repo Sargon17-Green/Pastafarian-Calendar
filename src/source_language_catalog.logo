@@ -95,15 +95,15 @@ to source.catalog.month.name :index
 end
 
 to source.catalog.indices.ok :catalog :expected
-  if :expected > (count :catalog) [output true]
-  if (first item :expected :catalog) <> :expected [output false]
+  if :expected > (count :catalog) [output "true]
+  if (first item :expected :catalog) <> :expected [output "false]
   output source.catalog.indices.ok :catalog (:expected + 1)
 end
 
 to source.catalog.validp
-  if (count source.catalog.cutlets) <> 17 [output false]
-  if (count source.catalog.months) <> 47 [output false]
-  if not source.catalog.indices.ok source.catalog.cutlets 1 [output false]
-  if not source.catalog.indices.ok source.catalog.months 1 [output false]
-  output true
+  if (count source.catalog.cutlets) <> 17 [output "false]
+  if (count source.catalog.months) <> 47 [output "false]
+  if not source.catalog.indices.ok source.catalog.cutlets 1 [output "false]
+  if not source.catalog.indices.ok source.catalog.months 1 [output "false]
+  output "true
 end

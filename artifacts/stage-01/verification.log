@@ -1,0 +1,21 @@
+STAGE=1
+PROGRAMLINGUO=Logo
+RUNTIME=Berkeley Logo / UCBLogo
+VERSION=6.2.5
+KOMANDO=logo test/stage01_tests.logo
+STDIN=/dev/null
+EXIT_STATUS=0
+FINAL_MARKER=STAGE_1_TESTI_PASIS
+REZULTO=PASS
+
+=== VERSION_OUTPUT ===
+Welcome to Berkeley Logo version 6.2.5
+Thank you for using Logo.
+Have a nice day.
+
+=== TEST_OUTPUT ===
+La kalendarala rezulto ankore ne existas en Stage 1.
+STAGE_1_TESTI_PASIS
+
+Thank you for using Logo.
+Have a nice day.

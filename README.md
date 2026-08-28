@@ -38,8 +38,8 @@ La atendata fina lineo esas:
 
 `STAGE_1_TESTI_PASIS`
 
-En la aktuala livera medio nula Logo runtime esas disponebla. Pro to la testi ne povis esar rulita. Nula altra programlinguo esis uzita kom substituto.
+La native verification esis rulita per Berkeley Logo / UCBLogo 6.2.5. La komando `logo test/stage01_tests.logo` finis kun exit-statuso 0 e la fina Stage-1 marker esis `STAGE_1_TESTI_PASIS`. La log esas konservita en `artifacts/stage-01/verification.log`.
 
 ## Etapa limito
 
-Stage 2 ne komencez til la Stage-1 Logo-testi esas reale rulina e verda. La fakto ke ca repository komencas de zero esas normala e ne esas blokilo.
+Stage 1 esas kompletigita. Stage 2 ne esas komencita en ca transdono; la sequanta historiala etapo povas komencar nur kom separita labor-unajo.
