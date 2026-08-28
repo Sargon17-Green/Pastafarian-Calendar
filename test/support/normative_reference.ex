@@ -572,7 +572,7 @@ defmodule PastafariCalendarElixirVietnamese.TestOnly.NormativeReference do
     {next_remaining, next_opened, next_closed}
   end
 
-  defp weave_unrank_loop(state, original, rank, memo, total, acc) when length(acc) == total do
+  defp weave_unrank_loop(state, _original, _rank, memo, total, acc) when length(acc) == total do
     {Enum.reverse(acc), state, memo}
   end
 

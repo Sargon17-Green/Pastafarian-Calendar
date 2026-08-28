@@ -166,11 +166,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage01Test do
     Enum.each(forbidden, fn token -> refute source =~ token end)
   end
 
-  test "văn bản do dòng triển khai tạo không chứa chữ Hebrew" do
+  test "văn bản của dòng triển khai không chứa chữ Hebrew và giấy phép không hồi quy sang tiếng Anh" do
     implementation_root = Path.expand("..", __DIR__)
 
     files =
-      ["**/*.ex", "**/*.exs", "**/*.md"]
+      ["**/*.ex", "**/*.exs", "**/*.md", "**/*.yml", "**/*.yaml", "LICENSE"]
       |> Enum.flat_map(fn pattern -> Path.wildcard(Path.join(implementation_root, pattern)) end)
       |> Enum.uniq()
 
@@ -178,5 +178,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage01Test do
       content = File.read!(path)
       refute Regex.match?(~r/[\x{0590}-\x{05FF}]/u, content), "phát hiện chữ Hebrew trong #{path}"
     end)
+
+    license = implementation_root |> Path.join("LICENSE") |> File.read!()
+    assert license =~ "Bản quyền"
+    assert license =~ "Phần mềm"
+    refute license =~ "Permission is hereby granted"
+    refute license =~ "THE SOFTWARE IS PROVIDED"
   end
 end
