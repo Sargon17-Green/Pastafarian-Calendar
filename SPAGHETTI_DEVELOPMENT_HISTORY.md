@@ -1444,3 +1444,42 @@ Omnes tres legacy ordines saltem unum `canonicalIndex` repetunt. Regressio Gradu
 ### Fines historici
 
 Correctio PATCH 22 nondum adest. Nullus `RepeatedNamePatchWrapper`, nullus partial-permutation unrank productionis et nullus detour qui `bad` contra `correct` comparat additus est. Codex PATCH 23 et posterior quoque abest. Gradus 44 manet sola detectio defectus.
+
+## Gradus 45 — PATCH 22: bad legacy servatur, correct partialis permutatio output regit
+
+### Cicatrix servata
+
+Generator Gradus 44 non reparatur. `legacyNameRowWithRepeats` eandem conversionem `rank-1` in digitos basis XVII a parte minima retinet, `LegacyRepeatedNameGenerator` eum directe vocat, et `Discovery22RepeatedCutletNameHandler` eundem bad legacy in contextu ponit. Via diagnostica `executeUnpatchedDiscovery22RepeatedCutletNamesDiagnostic` totam hanc viam sine PATCH 22 adhuc exsequitur.
+
+Via activa etiam cicatricem vere tangit: `Patch22RepeatedCutletNameHandler` ante omnem correctionem ipsum `Discovery22RepeatedCutletNameHandler` vocat. Ergo bad, answer ring, rank, repeat flag et priora PATCH 20/21 omnia sunt eventus reales eiusdem invocationis, non copia ficta post factum.
+
+### Correctio addita
+
+Addita est `partialPermutationNameRowUnrank`. Lista master distincta servantur, et rank one-based per blocos lexicographicos exactos resolvitur. In positione quaque block est falling factorial numeri residuorum pro suffixu; candidati ordine master currenti temptantur, blocka ante candidatum e rank subtrahuntur, candidatus electus e lista removetur. Ita idem canonicalIndex bis eligi non potest.
+
+`RepeatedNamePatchWrapper` non simpliciter generator veterem bypass-at. Is accipit bad iam computatum et separatam correct computat. Deinde regulam historicam PATCH 22 literaliter applicat:
+
+```text
+si bad == correct -> bad
+aliter -> correct
+```
+
+Haec bifurcatio etiam cum in plurimis witness bad defectivus sit servatur ut cicatrix. Casus parvus K=1 demonstrat ramum ubi bad iam correct est et vere redditur; casus K=2 rank 1 demonstrat bad repetitum `[1,1]` contra correct `[1,2]`, unde correct redditur.
+
+### Stratum monstri additum
+
+Contextus novos campos raw/correct/semantic et flags detour recipit. `RepeatedNamePatchDecision`, `RepeatedNamePatchWrapper`, `Patch22RepeatedCutletNameHandler`, dispatcher PATCH 22 et validator proprius adduntur. `BaseMonsterManager::executeDiscovery22RepeatedCutletNames` nunc viam patched vocat, dum methodus diagnostica separata viam Gradus 44 servat.
+
+State semanticum solum `patch22SemanticNameIndices` est. Raw bad et correct diagnosticum servantur invocation-local; metrics et branch trace output eligere non possunt. Validator rursus partialem permutationem productionis computat et invariantias comparationis bad/correct coercet.
+
+### Probatio exacta
+
+Regressio Gradus 44 adaptata non mutationem historiae celat: tres raw discrepantiae manent et omnes tres ordines legacy repetitiones servant, sed output semanticus cum oracle C++ concordat et sine repetitionibus est. Diagnosticum unpatched eundem bad quam via activa reddit.
+
+Regressio Gradus 45 force-brute C++ super omnes masterCount 1..6 et K 0..masterCount familias parvas directe enumerat. Pro omni rank confirmatur unrank productionis exactum ordinem lexicographicum enumerationis reddere. Eadem regressio duos ramos `bad==correct` et `bad!=correct` probat atque tres witness reales Gradus 44 reparatos cum oracle normativo eiusdem lineae comparat.
+
+Compilator `g++ (Debian 14.2.0-19) 14.2.0`, C++20. Bootstrap et regressiones Graduum 1–45 omnes transeunt.
+
+### Audit et limes proximus
+
+`SourceLanguageCatalog` et reference C++ non mutantur. Nullus runtime externus adhibetur. Nullus `VirtualLegacyList`, nullus PATCH 23 et nullus codex PATCH 24 praemature additur. Gradus proximus est 46/55 — DISCOVERY 23 tantum.

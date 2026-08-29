@@ -27,15 +27,6 @@ static bool hasRepeat(const std::vector<int>& values) {
     return false;
 }
 
-static std::string listText(const std::vector<int>& values) {
-    std::string out = "[";
-    for (std::size_t i = 0; i < values.size(); ++i) {
-        if (i != 0) out += ",";
-        out += std::to_string(values[i]);
-    }
-    return out + "]";
-}
-
 static std::vector<int> masterCutletIndices() {
     std::vector<int> out;
     out.reserve(17);
@@ -66,7 +57,7 @@ int main() {
             Integer{0}, Integer{1}, Integer{2}
         };
 
-        int discrepancies = 0;
+        int rawDiscrepancies = 0;
         for (const Integer& calculationGateIndex : calculationGateIndices) {
             const Integer calculationDay = oracle.gateValueForTest(calculationGateIndex);
             const Year year5000 = oracle.year5000(calculationDay);
@@ -79,80 +70,68 @@ int main() {
                 calculationDay,
                 yearFirstDay);
             const int cutletCount = oracle.chooseCutletCount(structureSauce, year5000);
-            const Integer normativeSpace = pastafari::reference::fallingFactorial(
-                17,
-                cutletCount);
-            const auto normativeStream = pastafari::reference::askBowl(
-                structureSauce,
-                5,
-                pastafari::reference::SEAL_CUTLET_NAMES);
-            const Integer normativeRank = pastafari::reference::chooseRank(
-                normativeStream,
-                normativeSpace);
             const std::vector<int> normativeNames = oracle.chooseCutletNameIndices(
                 structureSauce,
                 cutletCount);
-
             const LegacyYearAnchor anchor{
                 year5000.number,
                 yearFirstDay,
                 year5000.closeGateDay
             };
+
             const auto report = manager.executeDiscovery22RepeatedCutletNames(
                 anchor,
                 yearFirstDay,
                 calculationDay,
                 calculationGateIndex,
                 cutletCount);
+            require(report.ready && report.patch22Applied,
+                    "PATCH 22 regressionem DISCOVERY 22 corrigere debet");
+            require(report.handler == "Patch22RepeatedCutletNameHandler",
+                    "handler PATCH 22 viae activae expectatus est");
+            require(report.patch22LegacyExecuted,
+                    "generator legacy ante PATCH 22 vere exsequi debet");
+            require(report.legacyContainsRepeat && hasRepeat(report.legacyNameIndices),
+                    "cicatrix DISCOVERY 22 repetitionem servare debet");
+            require(report.patch22CorrectComputed,
+                    "partial-permutation correct PATCH 22 computari debet");
+            require(report.patch22CorrectNameIndices == normativeNames,
+                    "correct PATCH 22 ab oracle normativo differt");
+            require(report.semanticNameIndices == normativeNames,
+                    "output semanticus PATCH 22 ab oracle normativo differt");
+            require(!hasRepeat(report.semanticNameIndices),
+                    "output semanticus PATCH 22 repetitionem continere non debet");
 
-            require(report.ready,
-                    "report DISCOVERY 22 paratus esse debet");
-            require(report.handler == "Discovery22RepeatedCutletNameHandler",
-                    "handler DISCOVERY 22 expectatus est");
-            require(report.patch20Prepared && report.patch21Prepared,
-                    "DISCOVERY 22 PATCH 20 et PATCH 21 antecedentes vere exercere debet");
-            require(report.masterNameCount == 17,
-                    "catalogus XVII nominum segmentorum servandus est");
-            require(report.cutletCount == cutletCount,
-                    "numerus nominum legacy a numero segmentorum differt");
-            require(report.selectionSpaceCount == normativeSpace,
-                    "spatium selectionis nominum a falling factorial normativo differt");
-            require(report.selectionRank == normativeRank,
-                    "rank selectionis legacy a rank normativo eiusdem annuli differt");
-            require(report.legacyNameIndices.size() ==
-                        static_cast<std::size_t>(cutletCount),
-                    "generator legacy numerum nominum falsum reddidit");
-            require(report.legacyContainsRepeat,
-                    "witness DISCOVERY 22 repetitionem canonicalIndex detegere debet");
-            require(hasRepeat(report.legacyNameIndices),
-                    "ordo legacy witness duplicationem re vera continere debet");
+            const auto diagnostic = manager.executeUnpatchedDiscovery22RepeatedCutletNamesDiagnostic(
+                anchor,
+                yearFirstDay,
+                calculationDay,
+                calculationGateIndex,
+                cutletCount);
+            require(diagnostic.ready,
+                    "diagnosticum DISCOVERY 22 paratum esse debet");
+            require(diagnostic.handler == "Discovery22RepeatedCutletNameHandler",
+                    "diagnosticum handler historicum servare debet");
+            require(!diagnostic.patch22Applied,
+                    "diagnosticum DISCOVERY 22 PATCH 22 applicare non debet");
+            require(diagnostic.legacyNameIndices == report.legacyNameIndices,
+                    "candidatus bad inter viam activam et diagnosticum mutatus est");
+            require(diagnostic.legacyContainsRepeat,
+                    "diagnosticum repetitionem historicam servare debet");
 
             if (report.legacyNameIndices != normativeNames) {
-                ++discrepancies;
-                std::cout << "DISCREPANTIA_NOMINUM_REPETITORUM"
-                          << " calculationGateIndex=" << calculationGateIndex
-                          << " calculationDay=" << calculationDay
-                          << " cutletCount=" << cutletCount
-                          << " rank=" << report.selectionRank
-                          << " legacy=" << listText(report.legacyNameIndices)
-                          << " normativus=" << listText(normativeNames)
-                          << "\n";
+                ++rawDiscrepancies;
             }
         }
 
-        if (discrepancies == 0) {
-            std::cout << "REGRESSIO_DISCOVERY_22_TRANSIIT\n";
-            return 0;
-        }
-        if (discrepancies == 3) {
-            std::cerr << "REGRESSIO_DISCOVERY_22_DEFECIT: 3 ordines legacy canonicalIndex repetitos loco partialium permutationum distinctarum reddiderunt\n";
-            return 1;
-        }
-        std::cerr << "REGRESSIO_DISCOVERY_22_INEXPECTATA: discrepantiae="
-                  << discrepancies << "\n";
-        return 2;
+        require(rawDiscrepancies == 3,
+                "tres discrepantiae raw DISCOVERY 22 post PATCH 22 servandae sunt");
+        std::cout << "REGRESSIO_DISCOVERY_22_POST_PATCH_TRANSIIT\n";
+        std::cout << "RAW_DISCOVERY_22_DISCREPANCIES=3\n";
+        std::cout << "SEMANTIC_DISCOVERY_22_DISCREPANCIES=0\n";
+        return 0;
     } catch (const std::exception& error) {
-        std::cerr << "REGRESSIO_DISCOVERY_22_ERROR: " << error.what() << "\n";
-        return 3;
+        std::cerr << "REGRESSIO_DISCOVERY_22_POST_PATCH_ERROR: " << error.what() << "\n";
+        return 1;
     }
 }

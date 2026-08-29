@@ -310,6 +310,19 @@ std::vector<int> legacyNameRowWithRepeats(const std::vector<int>& masterList,
                                           const Integer& rank1,
                                           int itemCount);
 bool legacyNameRowContainsRepeat(const std::vector<int>& row);
+std::vector<int> partialPermutationNameRowUnrank(const std::vector<int>& masterList,
+                                                  const Integer& rank1,
+                                                  int itemCount);
+
+struct RepeatedNamePatchDecision {
+    std::vector<int> badNameIndices{};
+    std::vector<int> correctNameIndices{};
+    std::vector<int> outputNameIndices{};
+    bool badEqualsCorrect = false;
+    bool legacyReturned = false;
+    bool correctComputed = false;
+    bool patchApplied = false;
+};
 
 struct LegacyRepeatedNameReport {
     Integer calculationDay{};
@@ -325,6 +338,13 @@ struct LegacyRepeatedNameReport {
     bool legacyContainsRepeat = false;
     bool patch20Prepared = false;
     bool patch21Prepared = false;
+    std::vector<int> patch22CorrectNameIndices{};
+    std::vector<int> semanticNameIndices{};
+    bool patch22LegacyExecuted = false;
+    bool patch22CorrectComputed = false;
+    bool patch22BadEqualsCorrect = false;
+    bool patch22LegacyReturned = false;
+    bool patch22Applied = false;
     bool ready = false;
     std::string phase;
     std::string status;
@@ -674,6 +694,14 @@ struct BaseMonsterContext {
     bool discovery22Patch20Prepared=false;
     bool discovery22Patch21Prepared=false;
     bool discovery22RepeatedNamesReady=false;
+    std::vector<int> patch22CorrectNameIndices{};
+    std::vector<int> patch22SemanticNameIndices{};
+    bool patch22LegacyExecuted=false;
+    bool patch22CorrectComputed=false;
+    bool patch22BadEqualsCorrect=false;
+    bool patch22LegacyReturned=false;
+    bool patch22Applied=false;
+    bool patch22RepeatedNamesReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1046,6 +1074,7 @@ public:
     void requireDiscovery21CutletPartitionReady(const BaseMonsterContext& ctx) const;
     void requirePatch21CutletPartitionReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery22RepeatedNamesReady(const BaseMonsterContext& ctx) const;
+    void requirePatch22RepeatedNamesReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1168,6 +1197,14 @@ public:
     std::vector<int> call(const std::vector<int>& masterList,
                           const Integer& rank1,
                           int itemCount) const;
+};
+
+class RepeatedNamePatchWrapper {
+public:
+    RepeatedNamePatchDecision repair(const std::vector<int>& masterList,
+                                     const Integer& rank1,
+                                     int itemCount,
+                                     const std::vector<int>& badNameIndices) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1714,6 +1751,18 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Patch22RepeatedCutletNameHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const Discovery22RepeatedCutletNameHandler& legacyHandler,
+                const LegacyRepeatedNameGenerator& generator,
+                const RepeatedNamePatchWrapper& wrapper,
+                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                const Patch13RejectionWrapper& rejectionWrapper,
+                const Patch14WideDetourWrapper& wideWrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -2003,6 +2052,16 @@ public:
                                                 const Patch14WideDetourWrapper& wideWrapper,
                                                 const BaseValidationManager& validator,
                                                 const BaseMetricsShell& metrics) const;
+    void dispatchPatchedRepeatedCutletNames(BaseMonsterContext& ctx,
+                                            const Patch22RepeatedCutletNameHandler& handler,
+                                            const Discovery22RepeatedCutletNameHandler& legacyHandler,
+                                            const LegacyRepeatedNameGenerator& generator,
+                                            const RepeatedNamePatchWrapper& wrapper,
+                                            const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                            const Patch13RejectionWrapper& rejectionWrapper,
+                                            const Patch14WideDetourWrapper& wideWrapper,
+                                            const BaseValidationManager& validator,
+                                            const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -2145,6 +2204,12 @@ public:
         const Integer& calculationGateIndex,
         int cutletCount) const;
     LegacyRepeatedNameReport executeDiscovery22RepeatedCutletNames(
+        const LegacyYearAnchor& anchor,
+        const Integer& originalTargetDay,
+        const Integer& calculationDay,
+        const Integer& calculationGateIndex,
+        int cutletCount) const;
+    LegacyRepeatedNameReport executeUnpatchedDiscovery22RepeatedCutletNamesDiagnostic(
         const LegacyYearAnchor& anchor,
         const Integer& originalTargetDay,
         const Integer& calculationDay,

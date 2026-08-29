@@ -1232,6 +1232,57 @@ bool legacyNameRowContainsRepeat(const std::vector<int>& row) {
     return false;
 }
 
+std::vector<int> partialPermutationNameRowUnrank(const std::vector<int>& masterList,
+                                                  const Integer& rank1,
+                                                  int itemCount) {
+    if (masterList.empty()) {
+        throw BaseValidationError("lista nominum magistrorum vacua esse non potest");
+    }
+    if (itemCount < 0 || itemCount > static_cast<int>(masterList.size())) {
+        throw BaseValidationError("numerus nominum partialis permutationis extra fines est");
+    }
+    for (std::size_t i = 0; i < masterList.size(); ++i) {
+        for (std::size_t j = i + 1; j < masterList.size(); ++j) {
+            if (masterList[i] == masterList[j]) {
+                throw BaseValidationError("lista nominum magistrorum canonicalIndex duplicatum continet");
+            }
+        }
+    }
+    const Integer total = legacyCutletNameSelectionSpaceCount(
+        static_cast<int>(masterList.size()),
+        itemCount);
+    if (rank1 < 1 || rank1 > total) {
+        throw BaseValidationError("gradus partialis permutationis nominum extra fines est");
+    }
+
+    std::vector<int> remaining = masterList;
+    std::vector<int> out;
+    out.reserve(static_cast<std::size_t>(itemCount));
+    Integer r = rank1;
+    for (int position = 0; position < itemCount; ++position) {
+        const int suffixLength = itemCount - position - 1;
+        Integer block = 1;
+        for (int j = 0; j < suffixLength; ++j) {
+            block *= static_cast<int>(remaining.size()) - 1 - j;
+        }
+        bool chosen = false;
+        for (std::size_t candidateIndex = 0; candidateIndex < remaining.size(); ++candidateIndex) {
+            if (r > block) {
+                r -= block;
+                continue;
+            }
+            out.push_back(remaining[candidateIndex]);
+            remaining.erase(remaining.begin() + static_cast<std::ptrdiff_t>(candidateIndex));
+            chosen = true;
+            break;
+        }
+        if (!chosen) {
+            throw BaseValidationError("partial-permutation unrank nomen eligere non potuit");
+        }
+    }
+    return out;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -4070,6 +4121,52 @@ void BaseValidationManager::requireDiscovery22RepeatedNamesReady(
     }
 }
 
+void BaseValidationManager::requirePatch22RepeatedNamesReady(
+    const BaseMonsterContext& ctx) const {
+    requireDiscovery22RepeatedNamesReady(ctx);
+    if (!ctx.patch22RepeatedNamesReady || !ctx.patch22Applied) {
+        throw BaseValidationError("PATCH 22 nondum applicatus est");
+    }
+    if (!ctx.patch22LegacyExecuted || !ctx.patch22CorrectComputed) {
+        throw BaseValidationError("PATCH 22 bad et correct ambos computare debet");
+    }
+    std::vector<int> masterList;
+    masterList.reserve(static_cast<std::size_t>(ctx.discovery22MasterNameCount));
+    for (int canonicalIndex = 1;
+         canonicalIndex <= ctx.discovery22MasterNameCount;
+         ++canonicalIndex) {
+        masterList.push_back(canonicalIndex);
+    }
+    const std::vector<int> expectedCorrect = partialPermutationNameRowUnrank(
+        masterList,
+        ctx.discovery22SelectionRank,
+        ctx.discovery22CutletCount);
+    if (ctx.patch22CorrectNameIndices != expectedCorrect) {
+        throw BaseValidationError("correct partial-permutation PATCH 22 discrepat");
+    }
+    if (legacyNameRowContainsRepeat(ctx.patch22CorrectNameIndices)) {
+        throw BaseValidationError("correct partial-permutation PATCH 22 repetitionem continet");
+    }
+    const bool equal = ctx.discovery22LegacyNameIndices == ctx.patch22CorrectNameIndices;
+    if (ctx.patch22BadEqualsCorrect != equal) {
+        throw BaseValidationError("comparatio bad==correct PATCH 22 discrepat");
+    }
+    if (equal) {
+        if (!ctx.patch22LegacyReturned ||
+            ctx.patch22SemanticNameIndices != ctx.discovery22LegacyNameIndices) {
+            throw BaseValidationError("PATCH 22 bad solum cum bad==correct reddere debet");
+        }
+    } else {
+        if (ctx.patch22LegacyReturned ||
+            ctx.patch22SemanticNameIndices != ctx.patch22CorrectNameIndices) {
+            throw BaseValidationError("PATCH 22 correct cum bad!=correct reddere debet");
+        }
+    }
+    if (legacyNameRowContainsRepeat(ctx.patch22SemanticNameIndices)) {
+        throw BaseValidationError("output semanticus PATCH 22 repetitionem continet");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -4390,6 +4487,30 @@ std::vector<int> LegacyRepeatedNameGenerator::call(
     const Integer& rank1,
     int itemCount) const {
     return legacyNameRowWithRepeats(masterList, rank1, itemCount);
+}
+
+RepeatedNamePatchDecision RepeatedNamePatchWrapper::repair(
+    const std::vector<int>& masterList,
+    const Integer& rank1,
+    int itemCount,
+    const std::vector<int>& badNameIndices) const {
+    if (badNameIndices.size() != static_cast<std::size_t>(itemCount)) {
+        throw BaseValidationError("candidatus bad PATCH 22 magnitudine falsa est");
+    }
+    const std::vector<int> correct = partialPermutationNameRowUnrank(
+        masterList,
+        rank1,
+        itemCount);
+    const bool equal = badNameIndices == correct;
+    return RepeatedNamePatchDecision{
+        badNameIndices,
+        correct,
+        equal ? badNameIndices : correct,
+        equal,
+        equal,
+        true,
+        true
+    };
 }
 
 Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
@@ -5661,6 +5782,57 @@ void Discovery22RepeatedCutletNameHandler::handle(
     validator.requireDiscovery22RepeatedNamesReady(ctx);
 }
 
+void Patch22RepeatedCutletNameHandler::handle(
+    BaseMonsterContext& ctx,
+    const Discovery22RepeatedCutletNameHandler& legacyHandler,
+    const LegacyRepeatedNameGenerator& generator,
+    const RepeatedNamePatchWrapper& wrapper,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    legacyHandler.handle(
+        ctx,
+        generator,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+    ctx.patch22LegacyExecuted = ctx.discovery22RepeatedNamesReady;
+
+    std::vector<int> masterList;
+    masterList.reserve(static_cast<std::size_t>(ctx.discovery22MasterNameCount));
+    for (int canonicalIndex = 1;
+         canonicalIndex <= ctx.discovery22MasterNameCount;
+         ++canonicalIndex) {
+        masterList.push_back(canonicalIndex);
+    }
+    const RepeatedNamePatchDecision decision = wrapper.repair(
+        masterList,
+        ctx.discovery22SelectionRank,
+        ctx.discovery22CutletCount,
+        ctx.discovery22LegacyNameIndices);
+    ctx.patch22CorrectNameIndices = decision.correctNameIndices;
+    ctx.patch22SemanticNameIndices = decision.outputNameIndices;
+    ctx.patch22CorrectComputed = decision.correctComputed;
+    ctx.patch22BadEqualsCorrect = decision.badEqualsCorrect;
+    ctx.patch22LegacyReturned = decision.legacyReturned;
+    ctx.patch22Applied = decision.patchApplied;
+    ctx.patch22RepeatedNamesReady = true;
+    ctx.currentHandler = "Patch22RepeatedCutletNameHandler";
+    ctx.phase = "PATCH_22_DISTINCT_CUTLET_NAMES";
+    ctx.status = ctx.patch22BadEqualsCorrect
+        ? "BAD_EQUALS_CORRECT_LEGACY_RETURNED"
+        : "BAD_DIFFERS_CORRECT_PARTIAL_PERMUTATION_RETURNED";
+    ctx.branchTrace.push_back(ctx.patch22BadEqualsCorrect
+        ? "PATCH22:BAD_EQUALS_CORRECT"
+        : "PATCH22:CORRECT_REPLACES_BAD");
+    metrics.bump(ctx, "patch22.cutlet.names.calls");
+    validator.requirePatch22RepeatedNamesReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -6400,6 +6572,30 @@ void BaseDispatcher::dispatchDiscovery22RepeatedCutletNames(
         metrics);
 }
 
+void BaseDispatcher::dispatchPatchedRepeatedCutletNames(
+    BaseMonsterContext& ctx,
+    const Patch22RepeatedCutletNameHandler& handler,
+    const Discovery22RepeatedCutletNameHandler& legacyHandler,
+    const LegacyRepeatedNameGenerator& generator,
+    const RepeatedNamePatchWrapper& wrapper,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:PATCH22_REPEATED_CUTLET_NAMES");
+    handler.handle(
+        ctx,
+        legacyHandler,
+        generator,
+        wrapper,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+}
+
 void BaseDispatcher::dispatchPatchedYear5000Tie(
     BaseMonsterContext& ctx,
     const Patch17Year5000TieHandler& handler,
@@ -7116,7 +7312,93 @@ LegacyRepeatedNameReport BaseMonsterManager::executeDiscovery22RepeatedCutletNam
         calculationGateIndex,
         cutletCount);
     if (!partition.ready || !partition.patch21Applied) {
-        throw BaseValidationError("DISCOVERY 22 partitionem PATCH 21 paratam requirit");
+        throw BaseValidationError("PATCH 22 partitionem PATCH 21 paratam requirit");
+    }
+
+    const Patch20StructureSauceResult structure = structureSaucePatch(
+        calculationDay,
+        originalTargetDay,
+        partition.resolvedYear);
+
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery20OriginalTargetDay = originalTargetDay;
+    ctx.discovery20YearFirstDay = partition.resolvedYear.openGateDay + 1;
+    ctx.discovery20ResolvedYear = partition.resolvedYear;
+    ctx.patch20SemanticStructureSauce = structure.semanticSauce;
+    ctx.patch20Applied = true;
+    ctx.discovery22CutletCount = cutletCount;
+    ctx.discovery22Patch20Prepared = structure.ghostExecuted;
+    ctx.discovery22Patch21Prepared = partition.patch21Applied;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyRepeatedNameGenerator generator;
+    const RepeatedNamePatchWrapper wrapper;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const Patch14WideDetourWrapper wideWrapper;
+    const Discovery22RepeatedCutletNameHandler legacyHandler;
+    const Patch22RepeatedCutletNameHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedRepeatedCutletNames(
+        ctx,
+        handler,
+        legacyHandler,
+        generator,
+        wrapper,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+
+    return LegacyRepeatedNameReport{
+        calculationDay,
+        originalTargetDay,
+        calculationGateIndex,
+        partition.resolvedYear,
+        ctx.discovery22CutletCount,
+        ctx.discovery22MasterNameCount,
+        ctx.discovery22SelectionSpaceCount,
+        ctx.discovery22SelectionRing,
+        ctx.discovery22SelectionRank,
+        ctx.discovery22LegacyNameIndices,
+        ctx.discovery22LegacyContainsRepeat,
+        ctx.discovery22Patch20Prepared,
+        ctx.discovery22Patch21Prepared,
+        ctx.patch22CorrectNameIndices,
+        ctx.patch22SemanticNameIndices,
+        ctx.patch22LegacyExecuted,
+        ctx.patch22CorrectComputed,
+        ctx.patch22BadEqualsCorrect,
+        ctx.patch22LegacyReturned,
+        ctx.patch22Applied,
+        ctx.patch22RepeatedNamesReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+LegacyRepeatedNameReport BaseMonsterManager::executeUnpatchedDiscovery22RepeatedCutletNamesDiagnostic(
+    const LegacyYearAnchor& anchor,
+    const Integer& originalTargetDay,
+    const Integer& calculationDay,
+    const Integer& calculationGateIndex,
+    int cutletCount) const {
+    const LegacyCutletPartitionReport partition = executeDiscovery21CutletPartition(
+        anchor,
+        originalTargetDay,
+        calculationDay,
+        calculationGateIndex,
+        cutletCount);
+    if (!partition.ready || !partition.patch21Applied) {
+        throw BaseValidationError("diagnosticum DISCOVERY 22 partitionem PATCH 21 paratam requirit");
     }
 
     const Patch20StructureSauceResult structure = structureSaucePatch(
@@ -7170,6 +7452,13 @@ LegacyRepeatedNameReport BaseMonsterManager::executeDiscovery22RepeatedCutletNam
         ctx.discovery22LegacyContainsRepeat,
         ctx.discovery22Patch20Prepared,
         ctx.discovery22Patch21Prepared,
+        {},
+        {},
+        false,
+        false,
+        false,
+        false,
+        false,
         ctx.discovery22RepeatedNamesReady,
         ctx.phase,
         ctx.status,

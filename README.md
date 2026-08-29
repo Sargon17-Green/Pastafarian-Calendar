@@ -789,3 +789,64 @@ Omnes tres ordines legacy repetitionem realem continent et ab oracle C++ test-on
 ### Quod consulto nondum adest
 
 Nullus `RepeatedNamePatchWrapper`, nullus unrank partialis permutationis distinctae, nullus selector corrected et nullus PATCH 22 adest. Etiam nullus `VirtualLegacyList` aut codex PATCH 23 praemature additus est. Gradus 45 debet generator legacy activum servare et correctionem separatam tantum super eum addere.
+
+## PATCH 22 — nomina segmentorum partiali permutatione distincta eliguntur
+
+Gradus 45 cicatricem DISCOVERY 22 non delet. `legacyNameRowWithRepeats(masterList, rank1, K)` et `LegacyRepeatedNameGenerator` manent physice atque semantice veteres: rank adhuc ut digiti basis XVII a parte minima interpretatur et eundem `canonicalIndex` repetere potest. `Discovery22RepeatedCutletNameHandler` quoque manet via historica integra et per diagnosticum separatam adhuc exsequitur.
+
+Via activa PATCH 22 primum ipsum handler DISCOVERY 22 vere exsequitur. Sic `bad` non est simulatum nec ex testibus mutuatur: est ordo legacy realiter productus ex eodem answer ring, eodem rank et eodem numero segmentorum. Tantum postquam bad in contextu invocationis servatum est, `RepeatedNamePatchWrapper` correctionem separatam computat.
+
+Correctio est exactus unrank partialis permutationis, in ordine master list canonico 1..17. Pro positione quaque numerus completionum residuarum est falling factorial exactus; rank one-based per blocos lexicographicos decrescit, et index electus e lista residuorum removetur. Nulla stringa Neo-Latina in rank vel ordinem semanticum intrat; omnia fiunt per `canonicalIndex`.
+
+Regula detour ex specificatione servatur literaliter:
+
+```text
+bad = legacy candidate
+correct = partial-permutation unrank
+si bad == correct:
+    output = bad
+aliter:
+    output = correct
+```
+
+Ita legacy output reddi potest tantum quando iam exacte cum correct congruit. Si bad repetitionem habet, correct eam habere non potest, ergo output semanticus distinctus fit sine mutatione generatoris veteris.
+
+`Patch22RepeatedCutletNameHandler` in contextu separat:
+
+```text
+discovery22LegacyNameIndices   = bad
+patch22CorrectNameIndices      = correct
+patch22SemanticNameIndices     = output
+patch22BadEqualsCorrect        = comparatio
+patch22LegacyReturned          = utrum bad vere redditum sit
+```
+
+Validator correctionem independently re-apert per productionis `partialPermutationNameRowUnrank`, confirmat correct sine repetitionibus esse, et vetat bad defectivum ad output semanticum pervenire. Diagnostica et metrics numquam in decisionem semanticam reingrediuntur.
+
+### Regressio Gradus 44 post correctionem
+
+Tres witness Gradus 44 manent raw identici:
+
+```text
+porta 0: bad=[17,17,1,1,10,6]
+porta 1: bad=[6,5,5,10,15,6]
+porta 2: bad=[14,14,17,1,11,17,4]
+```
+
+Via activa autem eodem rank partialem permutationem distinctam reddit et in omnibus tribus cum oracle C++ normativo congruit:
+
+```text
+porta 0: correct=[15,17,10,14,8,13]
+porta 1: correct=[16,14,12,13,1,7]
+porta 2: correct=[17,11,5,13,15,2,12]
+```
+
+`executeUnpatchedDiscovery22RepeatedCutletNamesDiagnostic` tres repetitiones historicas separatam servat. Regressio Gradus 44 nunc GREEN est quia semantic output correctum comparat, dum raw discrepantiae tres observabiles manent.
+
+Regressio Gradus 45 praeterea force-brute C++ facit pro masterCount 1..6 et omnibus K 0..masterCount: omnes partiales permutationes distinctas directe enumerat et confirmat `partialPermutationNameRowUnrank` eundem numerum et eundem ordinem lexicographicum exacte reddere. Ramus `bad==correct` separatim probatur cum K=1, et ramus `bad!=correct` cum repetitione separatim probatur.
+
+Bootstrap et omnes regressiones Graduum 1–45 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus `VirtualLegacyList`, nulla materializatio mensium enormis, nullus PATCH 23 et nullus codex posterior praemature adest. Gradus 46 debet DISCOVERY 23 tantum introducere: API legacy quod omnes vias mensium materializare fingit, sine correctione virtualis listae.
