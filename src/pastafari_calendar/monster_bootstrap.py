@@ -6,6 +6,7 @@ from .legacy_day_counts import LegacyDayTagAdapter
 from .legacy_distance import LegacyDistanceAdapter
 from .legacy_stones import LegacyStoneBuilderAdapter
 from .legacy_hidden import LegacyHiddenDropAdapter
+from .legacy_prior import LegacyPriorAdapter
 
 
 class MonsterError(RuntimeError):
@@ -77,6 +78,11 @@ class MonsterContext:
     patch05_legacy_direct_value: int | None = None
     patch05_corrected_value: int | None = None
     patch05_applied: bool = False
+    legacy_prior_i: int | None = None
+    legacy_prior_back: int | None = None
+    legacy_prior_slot: int | None = None
+    legacy_prior_value: int | None = None
+    legacy_prior_probe_value: int | None = None
 
 
 class BaseMetrics:
@@ -134,3 +140,4 @@ class MonsterManager:
         self.legacy_distance = LegacyDistanceAdapter()
         self.legacy_stones = LegacyStoneBuilderAdapter()
         self.legacy_hidden = LegacyHiddenDropAdapter()
+        self.legacy_prior = LegacyPriorAdapter()

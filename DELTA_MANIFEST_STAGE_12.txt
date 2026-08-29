@@ -1,0 +1,25 @@
+Aşama 12/55 — DISCOVERY 06
+
+Bu paket yalnızca Aşama 12 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_prior.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_12_discovery_06.py
+artifacts/stage-12/BASELINE_STAGE_11_GREEN.txt
+artifacts/stage-12/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-12/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_12.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 11 baseline: GREEN
+Değişiklik sonrası Aşama 1–11 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+Yeni kusur: legacyPrior yalnızca dropStore[i-back] visible slotunu biliyor
+PATCH 06 priorPatch hidden fallback: YOK
+07–26 gelecek kusur/yama kodu: YOK

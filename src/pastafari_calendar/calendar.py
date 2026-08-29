@@ -102,7 +102,32 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
 
         manager.metrics.bump(local_ctx, "legacy.hidden.builds")
         local_ctx.status = "ESKİ_GİZLİ_DAMLALAR_HAZIR"
-        local_ctx.phase = "AŞAMA_10_BEKLEME"
+        local_ctx.phase = "ESKİ_GÖRÜNÜR_GEÇMİŞ"
+
+    def legacy_prior_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Discovery 06 sırasında visible-drop hesabı henüz kurulmaz.
+        # Bu probe, legacyPrior'ın gerçek state-machine yolunda çalıştığını kanıtlar.
+        probe_store = {
+            1: local_ctx.patch05_corrected_value
+            if local_ctx.patch05_corrected_value is not None
+            else 0
+        }
+        local_ctx.legacy_prior_probe_value = manager.legacy_prior.call(
+            local_ctx,
+            probe_store,
+            2,
+            1,
+        )
+
+        manager.metrics.bump(local_ctx, "legacy.prior.probes")
+        local_ctx.status = "ESKİ_GÖRÜNÜR_GEÇMİŞ_HAZIR"
+        local_ctx.phase = "AŞAMA_12_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -110,6 +135,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_MESAFE", legacy_distance_handler)
     manager.dispatcher.register("ESKİ_TAŞ_TABLOSU", legacy_stone_handler)
     manager.dispatcher.register("ESKİ_GİZLİ_DAMLALAR", legacy_hidden_handler)
+    manager.dispatcher.register("ESKİ_GÖRÜNÜR_GEÇMİŞ", legacy_prior_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -118,5 +145,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "On birinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "On ikinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

@@ -414,3 +414,45 @@ patch uygulanma durumu
 ```
 
 Logs, metrics ve diagnostics hidden erişim sonucuna girdi değildir. Bu aşamada visible-drop history veya negative-index düzeltmesi başlatılmamıştır.
+
+
+## Aşama 12 — Keşif 06: görünür history'nin hidden geçmişini bilmemesi
+
+### Ne sanıldı
+
+Görünür damla geçmişi için ilk legacy yardımcı yalnızca görünür drop deposunu tanıyordu:
+
+```text
+legacyPrior(dropStore, i, back)
+    -> dropStore[i-back]
+```
+
+Bu fonksiyon ancak `i-back >= 1` olduğunda anlamlı bir görünür slot bulabilir.
+
+`LegacyPriorAdapter`, bu eski yardımcıyı production state-machine yoluna bağlar. Visible-drop hesabı henüz kurulmadığı için gerçek calendar yolu yalnızca valid `slot=1` probe çalıştırır; probe semantic calendar çıktısına beslenmez.
+
+### Ne keşfedildi
+
+İlk görünür damlalarda `i-1`, `i-3` ve `i-7` isteklerinin bir kısmı sıfır veya negatif slotlara düşer.
+
+Normatif timeline bu slotları hidden damlalarla doldurur:
+
+```text
+slot 0  -> hidden1
+slot -1 -> hidden2
+slot -2 -> hidden3
+...
+slot -6 -> hidden7
+```
+
+Legacy `dropStore[i-back]` yolu bunları bilmez. Python uygulamasında visible `dropStore` yalnızca pozitif integer anahtarlarla temsil edildiği için `slot<=0` erişimi `KeyError` ile açığa çıkar.
+
+Yeni normatif regresyon adapter yolunu `slot=0`, `slot=-2` ve `slot=-6` için test-only normatif hidden değerleriyle karşılaştırır. Üç alt örnek de bilinçli olarak kırmızıdır.
+
+### Bu aşamada eklenen canavar katmanı
+
+`LegacyPriorAdapter`, son `i`, `back`, hesaplanan slot ve başarılıysa okunan legacy değeri invocation'a ait `MonsterContext` içinde tutar.
+
+Gerçek state-machine probe yalnızca valid görünür slotu kullanarak eski fonksiyonun gerçek üretim zincirinde çağrıldığını kanıtlar; hidden geçmişinin yanlışlığı yeni regresyonda gerçek adapter üzerinden ölçülür.
+
+Bu aşamada `priorPatch` yoktur. `slot<=0` için `hiddenK=1-slot` hesabı yapılmaz ve `hiddenByNearness` çağrılmaz. Grind-table sentinel veya visible-drop grind hesapları da başlatılmamıştır.

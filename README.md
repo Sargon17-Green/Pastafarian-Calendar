@@ -1,29 +1,25 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on ikinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 11/55, `PATCH 05` durumundadır. Beşinci tarihsel kusurun fiziksel storage'ı aynen korunur:
+Aşama 12/55, `DISCOVERY 06` durumundadır. Altıncı tarihsel kusur eklenmiştir:
 
 ```text
-legacyHidden[1] = hidden7
-...
-legacyHidden[7] = hidden1
+legacyPrior(dropStore, i, back)
+    -> dropStore[i-back]
 ```
 
-Aşama 10'un yanlış direct accessor'ı da kodda kalır. Düzeltme yalnızca üst erişim katmanındadır:
+Bu legacy history yardımcı yalnızca `i-back >= 1` olduğunda görünür `dropStore` slotunu bulabilir. İlk görünür damlalarda gereken `slot=0..-6` hidden geçmişini bilmez.
 
-```text
-hiddenByNearness(legacyHidden, k)
-    -> legacyHidden[8-k]
-```
+`LegacyPriorAdapter`, fonksiyonu gerçek `calendar_date_spaghetti` state-machine yoluna bağlar. Visible-drop hesabı henüz kurulmadığı için ana yol semantic sonucu etkilemeyen valid-slot probe çalıştırır.
 
-`LegacyHiddenDropAdapter.read_by_nearness`, `HiddenNearnessPatchWrapper` üzerinden önce yanlış direct accessor'ı gerçekten çalıştırır, ham legacy değerini scar olarak tutar ve authoritative sonuç olarak 8-k çevirmeninin değerini döndürür.
+Yeni normatif regresyon gerçek adapter yolunu `slot=0`, `slot=-2` ve `slot=-6` için test-only normatif hidden değerleriyle karşılaştırır ve bilinçli olarak kırmızıdır.
 
-Aşama 10'un normatif hidden near-ness regresyonu değiştirilmeden artık yeşildir. Backward storage fiziksel olarak ters çevrilmemiştir.
+Henüz `PATCH 06` yoktur: `priorPatch`, `hiddenK=1-slot` ve `hiddenByNearness` üzerinden nonpositive slot çevirisi eklenmemiştir.
 
-Önceki bütün regresyonlar yeşildir. Gelecekteki 06–26 kusur ve yamaları üretime eklenmemiştir.
+Önceki Aşama 1–11 regresyonlarının tamamı yeşildir. Gelecekteki 07–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -39,10 +35,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam on birinci aşama paketi:
+Tam on ikinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 10'da kırmızı olan `k=1,2,6,7` hidden near-ness alt örnekleri aynı regresyon gövdesiyle yeşile dönmelidir; backward physical storage ve yanlış direct accessor ayrı testlerde korunmaya devam eder.
+Beklenen sonuç: önceki Aşama 1–11 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni prior/history normatif regresyonunun `slot=0`, `slot=-2` ve `slot=-6` alt örnekleri başarısız olur.
