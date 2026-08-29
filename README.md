@@ -1,22 +1,37 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 38/55, `DISCOVERY 19` durumundadır.
+Aşama 39/55, `PATCH 19` durumundadır.
 
-`LegacyYearNumberOnlyCacheMap` map key olarak yalnız `year.number` kullanır. Request `calculation_day`, `open_gate` ve `close_gate` bilgilerini taşısa da legacy hit kararı bunları görmez.
+Legacy cache map key olarak yalnız `year.number` kullanmaya devam eder.
 
-Real calendar state-machine cache key'ini Stage 37 `LegacyYearJumpAdapter` tarafından semantic olarak çözülen year number üzerinden alır ve aynı year number için calculation day değiştirilmiş ikinci request'i aynı cache'e yollar.
+Raw `legacyYearNumberOnlyLookup` yalnız bu kötü key ile entry arar ve guard kontrollerinden önce gerçekten çağrılır.
 
-Legacy cache ikinci request'te stale ilk value değerini semantic token olarak yeniden kullanır.
+Map value artık:
 
-Yeni normatif regression aynı year number altında calculation day, open gate ve close gate değişimlerini ayrı ayrı yoklar ve üç alt örneği bilinçli kırmızı bırakır.
+```text
+calculationDayFingerprint
+openGate
+closeGate
+value
+```
 
-Henüz `PATCH 19` yoktur: guarded cache entry içinde `calculationDayFingerprint/openGate/closeGate/value` tutulmaz ve hit için üç guard karşılaştırılmaz.
+alanlarını taşır.
 
-Patch 20 `oldStructureSauce` kodu da henüz yoktur.
+`calculationDayFingerprint` doğrudan current `calculation_day` değeridir.
+
+Hit yalnız calculation day fingerprint, open gate ve close gate guard'larının üçü de eşleşirse kabul edilir.
+
+Herhangi bir guard mismatch `MISS` olur ve aynı `year.number` key altında yeni guarded entry yazılır.
+
+Composite key kullanılmaz.
+
+Aşama 38 normatif stale-cache regression gövdesi değiştirilmeden yeşile dönmüştür.
+
+Patch 20 `oldStructureSauce` ghost kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -32,10 +47,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuz sekizinci aşama paketi:
+Tam otuz dokuzuncu aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–37 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni year-number-only cache regressionunun calculation day, open gate ve close gate alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 38'de kırmızı olan calculation day, open gate ve close gate cache alt örnekleri aynı normatif regression gövdesiyle yeşile dönmelidir.

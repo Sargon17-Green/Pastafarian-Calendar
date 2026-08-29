@@ -249,6 +249,16 @@ class MonsterContext:
     legacy_year_cache_hit_count: int = 0
     legacy_year_cache_miss_count: int = 0
     legacy_year_cache_semantic_token: str | None = None
+    patch19_legacy_key_hit: bool = False
+    patch19_calculation_day_match: bool = False
+    patch19_open_gate_match: bool = False
+    patch19_close_gate_match: bool = False
+    patch19_all_guards_match: bool = False
+    patch19_last_written_calculation_day_fingerprint: int | None = None
+    patch19_last_written_open_gate: int | None = None
+    patch19_last_written_close_gate: int | None = None
+    patch19_last_written_token: str | None = None
+    patch19_applied: bool = False
 
 
 class BaseMetrics:

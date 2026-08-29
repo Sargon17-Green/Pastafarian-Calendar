@@ -13,6 +13,7 @@ from pastafari_calendar.legacy_year_cache import (
     LegacyYearCacheRequest,
     LegacyYearCacheValue,
     LegacyYearNumberOnlyCacheMap,
+    legacyYearNumberOnlyLookup,
 )
 from pastafari_calendar.monster_bootstrap import (
     MonsterContext,
@@ -83,10 +84,24 @@ class Stage38Discovery19Tests(unittest.TestCase):
 
         self.assertEqual(cache.raw_keys(), (5000,))
         self.assertEqual(first_value, LegacyYearCacheValue(token="ilk"))
-        self.assertEqual(second_value, first_value)
-        self.assertNotEqual(second_value, changed.value)
+        self.assertEqual(second_value, changed.value)
 
-    def test_cache_state_records_one_miss_then_one_hit(self):
+        raw_entry = cache.raw_entry(5000)
+
+        self.assertIsNotNone(raw_entry)
+        self.assertEqual(
+            legacyYearNumberOnlyLookup(
+                cache._map,
+                5000,
+            ),
+            raw_entry,
+        )
+        self.assertEqual(
+            raw_entry.value,
+            changed.value,
+        )
+
+    def test_cache_state_records_guard_mismatch_as_miss(self):
         ctx = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY)
         cache = LegacyYearNumberOnlyCacheMap()
 
@@ -99,10 +114,10 @@ class Stage38Discovery19Tests(unittest.TestCase):
             ),
         )
 
-        self.assertEqual(ctx.legacy_year_cache_miss_count, 1)
-        self.assertEqual(ctx.legacy_year_cache_hit_count, 1)
-        self.assertTrue(ctx.legacy_year_cache_last_hit)
-        self.assertEqual(ctx.legacy_year_cache_last_returned_token, "ilk")
+        self.assertEqual(ctx.legacy_year_cache_miss_count, 2)
+        self.assertEqual(ctx.legacy_year_cache_hit_count, 0)
+        self.assertFalse(ctx.legacy_year_cache_last_hit)
+        self.assertEqual(ctx.legacy_year_cache_last_returned_token, "ikinci")
         self.assertEqual(ctx.legacy_year_cache_map_keys, (5000,))
 
     def test_separate_cache_instances_do_not_share_map_state(self):

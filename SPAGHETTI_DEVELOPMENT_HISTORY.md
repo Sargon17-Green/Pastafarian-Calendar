@@ -1730,3 +1730,65 @@ Aynı manager-owned cache'e aynı resolved year number ile iki request yapılır
 Yeni regression aynı year number için calculation day, open gate ve close gate değişimlerini ayrı ayrı sınar. Üç alt örnek bilinçli kırmızıdır.
 
 Production içinde `calculationDayFingerprint` guarded entry, openGate/closeGate hit guard veya Patch 20 `oldStructureSauce` ghost kodu yoktur.
+
+
+## Aşama 39 — Yama 19: kötü year.number key üstünde action guards
+
+### Kötü key aynen kalır
+
+Map hâlâ yalnız:
+
+```text
+year.number
+```
+
+ile anahtarlanır.
+
+`legacyYearNumberOnlyLookup` yalnız bu key ile `map.get` eşdeğerini yapar ve gerçek lookup yolunda guard kontrollerinden önce çağrılır.
+
+### Guarded value
+
+Map value artık exact dört alan taşır:
+
+```text
+calculationDayFingerprint
+openGate
+closeGate
+value
+```
+
+`calculationDayFingerprint` doğrudan request `calculation_day` yani authoritative pseudocode içindeki `cDay` değeridir.
+
+### Hit kuralı
+
+`YearCacheActionGuardPatchWrapper.cacheGetWithActionGuard` önce kötü legacy key ile entry arar.
+
+Entry yoksa MISS.
+
+`calculationDayFingerprint != calculation_day` ise MISS.
+
+`openGate != open_gate` ise MISS.
+
+`closeGate != close_gate` ise MISS.
+
+Yalnız üç guard eşleşirse cached `value` HIT olarak döner.
+
+### Miss overwrite
+
+MISS durumunda `cachePutWithGuard` aynı `year.number` key altında yeni guarded entry yazar.
+
+Composite key yapılmaz.
+
+Böylece key'in tarihsel kusuru fiziksel olarak kalır; yanlış reuse guard ile engellenir.
+
+### Stage 38 regression
+
+Aşama 38 normatif stale-cache regression gövdesi byte-for-byte değiştirilmedi ve üç guard-source alt örneği yeşile döndü.
+
+Aşama 38'in yalnız historical bug state'ini donduran iki non-normative testi yeni patch contract'ına minimal uyarlanır: key'in hâlâ tek `year.number` olduğu ve guard mismatch'in MISS olduğu doğrulanır.
+
+### Sınır
+
+Patch 20 `oldStructureSauce` ghost kodu henüz yoktur.
+
+Structure target replacement veya year.firstDay sauce recomputation production'a eklenmemiştir.

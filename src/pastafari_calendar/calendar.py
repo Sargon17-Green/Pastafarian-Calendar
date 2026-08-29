@@ -559,7 +559,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.yearCache.probes",
         )
         local_ctx.status = "ESKİ_YALNIZ_YIL_NUMARASI_CACHE_HAZIR"
-        local_ctx.phase = "AŞAMA_38_BEKLEME"
+        local_ctx.phase = "AŞAMA_39_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -603,5 +603,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Otuz sekizinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Otuz dokuzuncu aşamada üretim takvim yolu henüz birleştirilmedi"
     )
