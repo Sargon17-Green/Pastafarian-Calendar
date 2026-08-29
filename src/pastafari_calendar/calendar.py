@@ -330,7 +330,29 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.selection.wideAttempts",
         )
         local_ctx.status = "ESKİ_YALNIZ_KISA_GENEL_SEÇİM_HAZIR"
-        local_ctx.phase = "AŞAMA_29_BEKLEME"
+        local_ctx.phase = "ESKİ_GATE_SORU_GÜNÜ"
+
+    def legacy_gate_question_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Keşif 15: gerçek production yolu negatif gate adımını legacy helper'a verir.
+        manager.legacy_gate_question.call(
+            local_ctx,
+            -1,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.gateQuestion.probes",
+        )
+        local_ctx.status = "ESKİ_GATE_SORU_GÜNÜ_HAZIR"
+        local_ctx.phase = "AŞAMA_30_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -347,6 +369,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_SABİT_ID_SONRAKİ_KÂSE", legacy_next_bowl_handler)
     manager.dispatcher.register("ESKİ_YANLI_MODULO_SEÇİM", legacy_biased_selection_handler)
     manager.dispatcher.register("ESKİ_YALNIZ_KISA_GENEL_SEÇİM", legacy_short_only_general_selection_handler)
+    manager.dispatcher.register("ESKİ_GATE_SORU_GÜNÜ", legacy_gate_question_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -364,5 +388,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Yirmi dokuzuncu aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Otuzuncu aşamada üretim takvim yolu henüz birleştirilmedi"
     )

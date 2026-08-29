@@ -1,0 +1,26 @@
+Aşama 30/55 — DISCOVERY 15
+
+Bu paket yalnızca Aşama 30 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_gate_question.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_30_discovery_15.py
+artifacts/stage-30/BASELINE_STAGE_29_GREEN.txt
+artifacts/stage-30/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-30/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_30.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 29 baseline: GREEN
+Değişiklik sonrası Aşama 1–29 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+oldGateQuestionDay positive-side scar: EKLENDİ
+real production signed_step=-1 probe: EKLENDİ
+PATCH 15 negative-side detour: YOK
+PATCH 16 LEGACY_YEAR_MAX: YOK

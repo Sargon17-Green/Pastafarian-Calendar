@@ -1,35 +1,28 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 29/55, `PATCH 14` durumundadır.
+Aşama 30/55, `DISCOVERY 15` durumundadır.
 
-Discovery 14 short-only scar'ı korunur ve `N>M_OLD` için eski short adapter diagnostic olarak gerçekten çağrılır.
-
-Semantic dispatcher:
+Yeni tarihsel helper:
 
 ```text
-N<=M_OLD -> Stage 27 short path
-N>M_OLD  -> wideDetour
+oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n
 ```
 
-şeklindedir.
+olarak korunur.
 
-Wide path minimal `places` ve `space=M_OLD^places` kurar, `digits[j]=answerAtRing(j)-1` değerlerini yalnız bir kez alır ve:
+`LegacyGateQuestionAdapter`, signed step işaretini kaybedip `abs(signed_step)` değerini helper'a verir. Sonuç olarak negatif gate sorguları Foundation'ın negatif tarafı yerine pozitif tarafını sorar.
 
-```text
-wide = 1 + Σ digits[j]*M_OLD^j
-```
+Real calendar state-machine bu yolu `signed_step=-1` ile gerçekten çalıştırır.
 
-oluşturur.
+Yeni normatif regresyon `-1`, `-2` ve `-10` değerlerinde actual adapter sonucunu `FOUNDATION_DAY-abs(step)` beklentisiyle karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
 
-Rejection bundan sonra yalnız combined `wide` üzerinde `direction_step` ile ilerler. Yeni digit üretilmez.
+Henüz `PATCH 15` yoktur. Negatif signed step için corrected question-day detour'u eklenmemiştir.
 
-Aşama 28 normatif wide-selection regresyonu değiştirilmeden yeşile dönmüştür.
-
-Patch 15 negative-gate kodu henüz yoktur.
+Patch 16 year-limit kodu da henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -45,10 +38,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirmi dokuzuncu aşama paketi:
+Tam otuzuncu aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 28'de kırmızı olan `M_OLD+1`, `M_OLD^2` ve `M_OLD^3` wide-selection alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–29 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni negative-gate normatif regresyonunun `-1`, `-2` ve `-10` alt örnekleri başarısız olur.

@@ -1389,3 +1389,79 @@ Synthetic -1 ve +1 direction testleri rejection boyunca answerAtRing çağrı sa
 Patch 15 negative gate question kodu henüz yoktur.
 
 Stage 27 short rejection, Stage 25 next-bowl, Stage 23 latch ve tüm önceki scar'lar korunur.
+
+
+## Aşama 30 — Keşif 15: negatif gate sorusunu pozitif tarafa yöneltmek
+
+### Tarihsel helper
+
+Yeni legacy helper fiziksel olarak:
+
+```text
+oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n
+```
+
+davranışını taşır.
+
+Helper yön işareti bilmez; yalnız sıfır veya pozitif uzaklık alır.
+
+### Legacy adapter
+
+`LegacyGateQuestionAdapter` signed gate step değerini alır fakat:
+
+```text
+magnitude=abs(signed_step)
+question_day=oldGateQuestionDay(magnitude)
+```
+
+uygular.
+
+Bu nedenle pozitif step değerleri legacy ile uyumludur fakat negatif step değerleri Foundation'ın yanlış tarafına gider.
+
+### Gerçek production yolu
+
+`calendar_date_spaghetti` Stage 29 wide-selection probe'undan sonra:
+
+```text
+signed_step=-1
+```
+
+ile legacy gate-question adapter'ı gerçekten çalıştırır.
+
+Patch 15 detour'u olmadığı için real path yanlış positive-side günü üretir.
+
+### Normatif regresyon
+
+Yeni normatif regresyon actual adapter yolunu:
+
+```text
+-1
+-2
+-10
+```
+
+signed step değerlerinde çalıştırır.
+
+Beklenen gün:
+
+```text
+FOUNDATION_DAY-abs(signed_step)
+```
+
+olur.
+
+Legacy actual gün:
+
+```text
+FOUNDATION_DAY+abs(signed_step)
+```
+
+olduğu için üç alt örnek bilinçli kırmızıdır.
+
+### Sınır
+
+Bu aşamada `signed_step<0` için ayrı corrected detour yoktur.
+
+`oldGateQuestionDay` değiştirilmemiştir.
+
+Patch 16 `LEGACY_YEAR_MAX=5781` kodu henüz yoktur.

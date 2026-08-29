@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=29
-CURRENT_KIND=PATCH
-CURRENT_PATCH=14
-LAST_COMPLETED_STAGE=29
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=30
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=15
+LAST_COMPLETED_STAGE=30
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=LegacyShortOnlySelectionDispatcher adı ve N>M için short-adapter ValueError scar'ı korunur; WideSelectionPatchWrapper N<=M için Stage 27 short path'ı aynen kullanır, N>M için old short attempt'i diagnostic scar olarak gerçekten çalıştırıp wideDetour'a geçer; wideDetour minimal places/space kurar, answerAtRing digits değerlerini yalnız bir kez toplar, combined wide number üretir ve rejection boyunca yeni digit almadan wide değerini direction_step ile 1..space halkasında ilerletir
+MONSTER_ARCHITECTURE_GROWTH=oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n tarihsel helper'ı eklenir; LegacyGateQuestionAdapter signed_step işaretini semantik olarak korumak yerine abs(signed_step) büyüklüğünü old helper'a verir, böylece negatif gate sorguları yanlış olarak Foundation'ın pozitif tarafına gider; real calendar state-machine -1 negative probe ile bu yolu gerçekten çalıştırır; signedStep<0 düzeltmesi henüz yok
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

@@ -17,6 +17,7 @@ from .legacy_selection import (
     LegacyBiasedSelectionAdapter,
     LegacyShortOnlySelectionDispatcher,
 )
+from .legacy_gate_question import LegacyGateQuestionAdapter
 
 
 class MonsterError(RuntimeError):
@@ -181,6 +182,9 @@ class MonsterContext:
     patch14_accepted_wide: int | None = None
     patch14_result: int | None = None
     patch14_applied: bool = False
+    legacy_gate_signed_step: int | None = None
+    legacy_gate_magnitude: int | None = None
+    legacy_gate_question_day: int | None = None
 
 
 class BaseMetrics:
@@ -247,3 +251,4 @@ class MonsterManager:
         self.legacy_next_bowl = LegacyNextBowlAdapter()
         self.legacy_selection = LegacyBiasedSelectionAdapter()
         self.legacy_general_selection = LegacyShortOnlySelectionDispatcher()
+        self.legacy_gate_question = LegacyGateQuestionAdapter()
