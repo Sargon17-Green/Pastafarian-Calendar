@@ -29,6 +29,8 @@ using StoneTable = std::array<Stone, 47>;
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
+Stone stonePatch(int i, Stone state);
+StoneTable buildStonesThroughLegacyBuilder();
 
 struct BaseMonsterContext {
     Integer calculationDay;
@@ -57,6 +59,8 @@ struct BaseMonsterContext {
     bool patch03Applied = false;
     StoneTable legacyStoneTable{};
     bool legacyStoneTableReady = false;
+    StoneTable patchedStoneTable{};
+    bool patch04Applied = false;
 };
 
 struct BaseRunReport {
@@ -105,6 +109,8 @@ struct LegacyStoneTableReport {
     std::string status;
     std::string handler;
     std::size_t branchCount;
+    StoneTable legacyOutput{};
+    bool patch04Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -122,6 +128,7 @@ public:
     void requireLegacyDistanceReady(const BaseMonsterContext& ctx) const;
     void requirePatch03Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyStoneTableReady(const BaseMonsterContext& ctx) const;
+    void requirePatch04Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -225,6 +232,20 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch04StoneSnapshotWrapper {
+public:
+    StoneTable repair() const;
+};
+
+class Patch04StoneMutationHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyStoneMutationAdapter& adapter,
+                const Patch04StoneSnapshotWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -275,6 +296,13 @@ public:
                                      const LegacyStoneMutationAdapter& adapter,
                                      const BaseValidationManager& validator,
                                      const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedStoneMutation(BaseMonsterContext& ctx,
+                                      const Patch04StoneMutationHandler& handler,
+                                      const LegacyStoneMutationAdapter& adapter,
+                                      const Patch04StoneSnapshotWrapper& wrapper,
+                                      const BaseValidationManager& validator,
+                                      const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -288,6 +316,7 @@ public:
     LegacyDistanceReport executeUnpatchedDistanceDiagnostic(const Integer& calculationDay,
                                                             const Integer& targetDay) const;
     LegacyStoneTableReport executeStoneTable() const;
+    LegacyStoneTableReport executeUnpatchedStoneTableDiagnostic() const;
 };
 
 } // namespace pastafari

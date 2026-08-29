@@ -189,3 +189,31 @@ Norma requirit ut quinque valores lapidis `i` omnes ex uno snapshot lapidis `i-1
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `Stone`, `StoneTable`, status `legacyStoneTable` et `legacyStoneTableReady`, `LegacyStoneMutationAdapter`, `Discovery04StoneMutationHandler`, dispatchatio propria, relatio `LegacyStoneTableReport` et validatio readiness. Validatio semen confirmat et completionem viae requirit, sed valores posteriores non normalizat. Omnis mutatio tabulae intra contextum unius invocationis manet et observationes non determinant semanticam.
+
+## Gradus 9 — Emendatio 04: snapshot quinque lapidum super mutationem sequentialem
+
+### Quid putabatur
+
+Vitium Gradus 8 integrum relinquitur. `mutateStonesWrong` adhuc recordum quinque partium ordine mutat, ita partes posteriores valores iam novos eiusdem transitionis legunt. Functio non refacta nec ad formulam simultaneam conversa est.
+
+### Quid repertum est
+
+Regressio Gradus 8 monstraverat 224 discrepantias componentium. Ex forma ipsius mutationis patet causam esse contaminationem intra unam transitionem: prima pars lapidis secundi adhuc ex semine veteri procedit, sed hordeum iam triticum novum legit, sal hordeum novum, amarum sal novum, atque rubrum plures partes mutatas.
+
+Probatio Gradus 8 etiam metadata exacta handler/status figebat. Haec metadata non sunt semantica normativa et necessario mutari debent cum wrapper PATCH 04 in viam auctoritative additur. Assertio metadata igitur ad duas formas historice legitimas dilatata est; indices, expected values et comparatio tabulae cum oraculo non mutata sunt. Eadem forma probationis contra codicem Gradus 8 pristinum iterum currens 224 discrepantias et exitum `1` adhuc produxit.
+
+### Quid circumventum est
+
+Addita est `stonePatch(i, state)`. Ea `old = state` capit, deinde `mutateStonesWrong(i, state)` re vera vocat et exitum in `garbage` accipit. Legacy igitur non est codex mortuus neque vocatio ficta. Postea omnes quinque partes `garbage` expresse superimponuntur formulis quarum omnes reads ex `old` veniunt.
+
+`buildStonesThroughLegacyBuilder` transit per `stonePatch` pro lapidibus 2–46. `Patch04StoneMutationHandler` etiam tabulam totam legacy per adapter separatam computat et in contextu servat ut cicatrix observabilis maneat. Via `executeUnpatchedStoneTableDiagnostic` adhuc tabulam veterem sine patch reddit.
+
+### Cur hoc aequivalet normae
+
+Pro quolibet gradu `i`, `old` est exacta copia lapidis `i-1`. Quinque formulae overwrite legunt tantum `old`, ergo nulla pars nova potest aliam partem novam eiusdem gradus contaminare. Formulae quinque sunt eadem quae Appendix normativa pro tritico, hordeo, sale, amaro et rubro praescribit; substitutio fit tantum postquam omnes valores ex eodem snapshot computati sunt.
+
+Vocatio `mutateStonesWrong` semanticam finalem non mutat, quia quinque eius exitus omnes ante return superimponuntur. Sic cicatrix legacy physice et operationaliter manet, dum tabula auctoritative exacte cum tabula normativa congruit.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `patchedStoneTable`, `patch04Applied`, `Patch04StoneSnapshotWrapper`, `Patch04StoneMutationHandler`, dispatchatio patch separata, via diagnostica legacy et `requirePatch04Ready`. Validator computationem quinque partium ex snapshot iterat ut COPY_VALIDATION; discrepantia invariant error est, non electio inter responsiones. Report utramque tabulam servat, sed solum `patchedStoneTable` est exitus auctoritative.

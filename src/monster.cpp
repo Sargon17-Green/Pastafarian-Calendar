@@ -86,6 +86,33 @@ StoneTable buildStonesThroughWrongLegacyMutation() {
     return table;
 }
 
+Stone stonePatch(int i, Stone state) {
+    const Stone old = state;
+
+    // Vocatio legacy consulto manet. Exitus eius est receptaculum "garbage",
+    // non fons semanticus postquam quinque partes ex uno snapshot veteri
+    // denuo scribuntur.
+    Stone garbage = mutateStonesWrong(i, state);
+
+    garbage[0] = savePatch(old[0] * old[0] + 3 * old[1] + i);
+    garbage[1] = savePatch(old[1] * old[1] + 5 * old[2] + old[0]);
+    garbage[2] = savePatch(old[2] * old[2] + 7 * old[3] + old[1]);
+    garbage[3] = savePatch(old[3] * old[3] + 11 * old[4] + old[2]);
+    garbage[4] = savePatch(old[4] * old[4] + 13 * old[0] + old[3]);
+    return garbage;
+}
+
+StoneTable buildStonesThroughLegacyBuilder() {
+    StoneTable table{};
+    Stone state{Integer{17}, Integer{29}, Integer{43}, Integer{71}, Integer{101}};
+    table[1] = state;
+    for (int i = 2; i <= 46; ++i) {
+        state = stonePatch(i, state);
+        table[i] = state;
+    }
+    return table;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -166,6 +193,33 @@ void BaseValidationManager::requireLegacyStoneTableReady(const BaseMonsterContex
     const Stone initium{Integer{17}, Integer{29}, Integer{43}, Integer{71}, Integer{101}};
     if (ctx.legacyStoneTable[1] != initium) {
         throw BaseValidationError("primus lapis legacy mutatus est");
+    }
+}
+
+void BaseValidationManager::requirePatch04Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyStoneTableReady(ctx);
+    if (!ctx.patch04Applied) {
+        throw BaseValidationError("emendatio quarta nondum applicata est");
+    }
+
+    const Stone initium{Integer{17}, Integer{29}, Integer{43}, Integer{71}, Integer{101}};
+    if (ctx.patchedStoneTable[1] != initium) {
+        throw BaseValidationError("primus lapis post emendationem quartam mutatus est");
+    }
+
+    Stone state = initium;
+    for (int i = 2; i <= 46; ++i) {
+        const Stone old = state;
+        Stone expectatus{};
+        expectatus[0] = savePatch(old[0] * old[0] + 3 * old[1] + i);
+        expectatus[1] = savePatch(old[1] * old[1] + 5 * old[2] + old[0]);
+        expectatus[2] = savePatch(old[2] * old[2] + 7 * old[3] + old[1]);
+        expectatus[3] = savePatch(old[3] * old[3] + 11 * old[4] + old[2]);
+        expectatus[4] = savePatch(old[4] * old[4] + 13 * old[0] + old[3]);
+        if (ctx.patchedStoneTable[i] != expectatus) {
+            throw BaseValidationError("emendatio quarta omnes partes ex eodem snapshot veteri non derivavit");
+        }
+        state = expectatus;
     }
 }
 
@@ -395,6 +449,42 @@ void Discovery04StoneMutationHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery04.stoneMutation.exposed");
 }
 
+StoneTable Patch04StoneSnapshotWrapper::repair() const {
+    return buildStonesThroughLegacyBuilder();
+}
+
+void Patch04StoneMutationHandler::handle(BaseMonsterContext& ctx,
+                                         const LegacyStoneMutationAdapter& adapter,
+                                         const Patch04StoneSnapshotWrapper& wrapper,
+                                         const BaseValidationManager& validator,
+                                         const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch04StoneMutationHandler";
+    ctx.phase = "PATCH_04_LEGACY_STONE_TABLE_CALL";
+    ctx.status = "LEGACY_STONE_TABLE_CALLED_BEFORE_PATCH";
+    ctx.branchTrace.push_back("PATCH_04_LEGACY_STONE_TABLE_CALL");
+    metrics.bump(ctx, "patch04.legacyStoneTable.calls");
+
+    // Haec tabula vitiosa servatur ut cicatrix observabilis; praeterea
+    // stonePatch ipse mutateStonesWrong in singulis gradibus revera vocat.
+    ctx.legacyStoneTable = adapter.buildWrongStoneTable();
+    ctx.legacyStoneTableReady = true;
+
+    ctx.phase = "PATCH_04_SNAPSHOT_OVERWRITE";
+    ctx.branchTrace.push_back("PATCH_04_SNAPSHOT_OVERWRITE");
+    ctx.patchedStoneTable = wrapper.repair();
+    ctx.patch04Applied = true;
+    metrics.bump(ctx, "patch04.snapshotOverwrite.calls");
+
+    ctx.phase = "PATCH_04_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_04_VALIDATE");
+    validator.requirePatch04Ready(ctx);
+
+    ctx.phase = "PATCH_04_STONE_TABLE_READY";
+    ctx.status = "PATCHED_STONE_TABLE_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_04_STONE_TABLE_READY");
+    metrics.bump(ctx, "patch04.stoneTable.ready");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -513,6 +603,21 @@ void BaseDispatcher::dispatchLegacyStoneMutation(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery04.dispatch.calls");
 
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedStoneMutation(BaseMonsterContext& ctx,
+                                                  const Patch04StoneMutationHandler& handler,
+                                                  const LegacyStoneMutationAdapter& adapter,
+                                                  const Patch04StoneSnapshotWrapper& wrapper,
+                                                  const BaseValidationManager& validator,
+                                                  const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_04_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_04_DISPATCH");
+    metrics.bump(ctx, "patch04.dispatch.calls");
+
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -710,7 +815,34 @@ LegacyStoneTableReport BaseMonsterManager::executeStoneTable() const {
     BaseMonsterContext ctx;
     ctx.calculationDay = 0;
     ctx.targetDay = 0;
-    ctx.phase = "DISCOVERY_04_NEW";
+    ctx.phase = "PATCH_04_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyStoneMutationAdapter adapter;
+    const Patch04StoneSnapshotWrapper wrapper;
+    const Patch04StoneMutationHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedStoneMutation(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return LegacyStoneTableReport{
+        ctx.patchedStoneTable,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyStoneTable,
+        ctx.patch04Applied,
+    };
+}
+
+LegacyStoneTableReport BaseMonsterManager::executeUnpatchedStoneTableDiagnostic() const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_04_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
 
@@ -727,6 +859,8 @@ LegacyStoneTableReport BaseMonsterManager::executeStoneTable() const {
         ctx.status,
         ctx.currentHandler,
         ctx.branchTrace.size(),
+        ctx.legacyStoneTable,
+        false,
     };
 }
 

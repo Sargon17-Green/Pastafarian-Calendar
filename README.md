@@ -4,63 +4,64 @@ Hoc directorium Gradum 8 evolutionis continet. Linea implementationis ab initio 
 
 ## Status praesentis gradus
 
-Gradus 8 est `DISCOVERY 04`. Tres cicatrices priores cum emendationibus suis integrae manent. Hoc gradu vitium novum in fabricam lapidum introductum et in viam activam coniunctum est:
+Gradus 9 est `PATCH 04`. Vitium sequentiale Gradus 8 non deletum est: `mutateStonesWrong` eodem modo quinque partes eiusdem recordi ordine mutat et adhuc directe exerceri potest. Correctio super hanc cicatricem addita est, non intra eam.
 
-```text
-mutateStonesWrong(i, S)
-```
+`stonePatch(i, state)` primum snapshot immutatum `old` capit. Deinde `mutateStonesWrong(i, state)` re vera vocatur super copiam valoris; exitus eius in variabili `garbage` servatur. Tantum post hanc vocationem omnes quinque partes `garbage` denuo scribuntur formulis quae solum `old` legunt.
 
-Functio quinque partes lapidis non ex uno statu veteri computat. Ipsa `S` ordine mutatur: triticum primum scribitur, hordeum deinde triticum iam novum legit, sal hordeum iam novum legit, amarum sal iam novum legit, et rubrum etiam valores huius ipsius transitionis mutatos legit.
-
-`buildStonesThroughWrongLegacyMutation` hunc mechanismum re vera adhibet ad lapides 2–46. Via activa transit per:
+Via auctoritative huius gradus transit per:
 
 ```text
 BaseMonsterManager::executeStoneTable
--> BaseDispatcher::dispatchLegacyStoneMutation
--> Discovery04StoneMutationHandler
+-> BaseDispatcher::dispatchPatchedStoneMutation
+-> Patch04StoneMutationHandler
 -> LegacyStoneMutationAdapter
--> buildStonesThroughWrongLegacyMutation
--> mutateStonesWrong
+-> buildStonesThroughWrongLegacyMutation       [cicatrix observabilis]
+-> Patch04StoneSnapshotWrapper
+-> buildStonesThroughLegacyBuilder
+-> stonePatch
+-> mutateStonesWrong                           [vocatio legacy realis]
+-> overwrite quinque partium ex snapshot old
 ```
 
-Nulla correctio huius vitii adhuc adest. Status huius gradus est `EXPECTED_RED`.
+Via diagnostica `executeUnpatchedStoneTableDiagnostic` adhuc Gradum 8 exercet et tabulam sequentialiter contaminatam reddit.
 
-## Quid regressio demonstrat
+## Quid regressiones demonstrant
 
-Probatio `tests/stage_08_discovery_04_tests.cpp` tabulam viae activae cum `buildStones()` oraculi localis eiusdem lineae comparat. Lapis 1 recte idem est, quia est semen immutatum. In lapide 2 pars prima etiam fortuito recta est, quia prima assignatio adhuc totum input vetus legit. Partes 2–5 autem statum intra eandem transitionem iam contaminatum legunt.
+Probatio `tests/stage_08_discovery_04_tests.cpp` eadem tabula normativa et eosdem indices ac Gradus 8 servat. Solum assertio de nomine handler/status dilatata est, quia metadata viae inter DISCOVERY et PATCH necessario mutatur. Forma haec contra productionem veterem Gradus 8 denuo probata est et adhuc exactly 224 discrepantias cum exitu `1` produxit.
 
-Exempla prima:
+Contra productionem Gradus 9 eadem regressio transit:
 
 ```text
-i=2 pars=2: normativum 1073, legacy 1434
-i=2 pars=3: normativum 2375, legacy 3780
-i=2 pars=4: normativum 6195, legacy 9932
-i=2 pars=5: normativum 10493, legacy 25047
+REGRESSIO_DISCOVERY_04_TRANSIIT
 ```
 
-A lapide 3 etiam prima pars discrepans fit, quia semen totius transitionis iam ex lapide 2 contaminato venit. In tota tabula 224 ex 230 componentibus inspectis post semen non congruunt.
+Probatio nova `tests/stage_09_patch_04_tests.cpp` insuper confirmat:
 
-Regressio consulto exitum `1` reddit. Hic rubor est conditio correcta DISCOVERY, non defectus regressionum priorum.
+- `mutateStonesWrong(2, initium)` adhuc a lapide normativo secundo discrepare;
+- `stonePatch(2, initium)` cum norma congruere;
+- builder reparatum omnes lapides 1–46 cum oraculo locali congruere;
+- report productionis simul tabulam rectam et tabulam legacy ante patch servare;
+- viam diagnosticam patch non applicare;
+- in fonte apparere tum vocationem realem `mutateStonesWrong` tum overwrite quinque partium ex `old`.
 
 ## Cicatrix legacy et stratum monstri
 
-Gradus 8 addit:
+Gradus 9 addit:
 
-- `Stone` et `StoneTable` ut state productionis huius cicatricis;
-- `mutateStonesWrong` cum mutatione sequentiali;
-- `buildStonesThroughWrongLegacyMutation`;
-- `legacyStoneTable` et `legacyStoneTableReady` in `BaseMonsterContext`;
-- `LegacyStoneMutationAdapter`;
-- `Discovery04StoneMutationHandler`;
-- dispatchationem propriam;
-- `LegacyStoneTableReport`;
-- validatorem readiness qui semen tantum confirmat, non vitium corrigit.
+- `patchedStoneTable` et `patch04Applied` in `BaseMonsterContext`;
+- `stonePatch` et `buildStonesThroughLegacyBuilder`;
+- `Patch04StoneSnapshotWrapper`;
+- `Patch04StoneMutationHandler`;
+- dispatchationem PATCH 04 separatam;
+- viam diagnosticam tabulae lapidum legacy;
+- `requirePatch04Ready`, quae computationem quinque partium ex snapshot veteri separatim repetit ad validationem tantum;
+- in `LegacyStoneTableReport` utramque tabulam, auctoritative rectam et legacy vitiosam.
 
-Omne state semanticum huius tabulae contextui invocationis proprium est. Metrics et branch trace observabilia sunt et in calculum lapidum non redeunt.
+Validatio duplicated exitum non eligit nec oraculum productionis vocat. Semantica provenit ex `stonePatch`; validatio solum invariantiam confirmat.
 
 ## Quod consulto nondum adest
 
-Gradus 8 non continet snapshot veteris lapidis, vocationem legacy super clone cum overwrite tardivo, `stonePatch`, `Patch04` aut aliam correctionem mutationis sequentialis. Illa pertinent ad Gradum 9 tantum.
+Nulla logica DISCOVERY 05/PATCH 05 de septem guttis occultis, storage inverso aut `hiddenByNearness` introducta est. Ea ad gradus posteriores pertinet.
 
 ## Lingua computationis
 
@@ -72,7 +73,7 @@ Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congela
 
 ## Probationes
 
-Regressiones usque ad Gradum 7 virides manent:
+Regressiones usque ad Gradum 9 virides sunt:
 
 ```text
 OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
@@ -82,12 +83,8 @@ REGRESSIO_DISCOVERY_02_TRANSIIT
 REGRESSIO_PATCH_02_TRANSIIT
 REGRESSIO_DISCOVERY_03_TRANSIIT
 REGRESSIO_PATCH_03_TRANSIIT
+REGRESSIO_DISCOVERY_04_TRANSIIT
+REGRESSIO_PATCH_04_TRANSIIT
 ```
 
-Regressio nova consulto rubra est:
-
-```text
-REGRESSIO_DISCOVERY_04_DEFECIT: 224 discrepantiae componentium normativae inventae sunt
-```
-
-Gradus proximus est `PATCH 04`; nullum eius codicem hic gradus continet.
+Gradus proximus est `DISCOVERY 05`; nullum eius codicem hic gradus continet.

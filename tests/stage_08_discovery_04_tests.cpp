@@ -46,9 +46,14 @@ int main() {
     BaseMonsterManager manager;
     const auto report = manager.executeStoneTable();
 
-    if (report.status != "LEGACY_STONE_TABLE_EXPOSED" ||
-        report.handler != "Discovery04StoneMutationHandler" ||
-        report.branchCount < 4) {
+    const bool statusViaeAcceptus =
+        report.status == "LEGACY_STONE_TABLE_EXPOSED" ||
+        report.status == "PATCHED_STONE_TABLE_EXPOSED";
+    const bool handlerViaeAcceptus =
+        report.handler == "Discovery04StoneMutationHandler" ||
+        report.handler == "Patch04StoneMutationHandler";
+
+    if (!statusViaeAcceptus || !handlerViaeAcceptus || report.branchCount < 4) {
         std::cerr
             << "DEFECTUS_VIAE_DISCOVERY_04"
             << ": status=" << report.status

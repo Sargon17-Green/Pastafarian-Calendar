@@ -1,0 +1,56 @@
+Gradus 9 — probationes locales
+
+Compilator: g++
+Norma: C++20
+
+1. Probationes Bootstrap
+Exitus actualis:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+
+2. Regressio Gradus 2
+Exitus actualis:
+REGRESSIO_DISCOVERY_01_TRANSIIT
+
+3. Regressio Gradus 3
+Exitus actualis:
+REGRESSIO_PATCH_01_TRANSIIT
+
+4. Regressio Gradus 4
+Exitus actualis:
+REGRESSIO_DISCOVERY_02_TRANSIIT
+
+5. Regressio Gradus 5
+Exitus actualis:
+REGRESSIO_PATCH_02_TRANSIIT
+
+6. Regressio Gradus 6
+Exitus actualis:
+REGRESSIO_DISCOVERY_03_TRANSIIT
+
+7. Regressio Gradus 7
+Exitus actualis:
+REGRESSIO_PATCH_03_TRANSIIT
+
+8. Regressio Gradus 8 post PATCH 04
+Exitus actualis:
+REGRESSIO_DISCOVERY_04_TRANSIIT
+
+9. Regressio PATCH 04
+Exitus actualis:
+REGRESSIO_PATCH_04_TRANSIIT
+
+10. Confirmatio regressionis Gradus 8 contra productionem pristinam Gradus 8
+Eadem probatio, cum sola assertione metadatae viae historicae dilatata, contra src/monster.cpp Gradus 8 pristinum compilata et exsecuta est.
+Exitus actualis:
+REGRESSIO_DISCOVERY_04_DEFECIT: 224 discrepantiae componentium normativae inventae sunt
+PREPATCH_EXIT_CODE=1
+
+11. Auditum cicatricis et contaminationis futurae
+- mutateStonesWrong manet et directe exercetur.
+- stonePatch servat snapshot old, vocat mutateStonesWrong, deinde quinque partes ex old superimponit.
+- executeUnpatchedStoneTableDiagnostic tabulam legacy sine PATCH 04 adhuc reddit.
+- Discovery05, Patch05, hiddenByNearness, LEGACY_HIDDEN et legacyHidden in include/src/tests absunt.
+
+Status finalis: GREEN
+Regressiones anteriores: PASS
+Emendatio futura PATCH 05 / detectio 05: ABSENS
