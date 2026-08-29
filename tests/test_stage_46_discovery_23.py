@@ -228,8 +228,14 @@ class Stage46Discovery23Tests(unittest.TestCase):
             10,
         )
 
-        self.assertTrue(
+        self.assertFalse(
             attempt.blocked,
+        )
+        self.assertTrue(
+            first.legacy_month_length_materialization_blocked,
+        )
+        self.assertTrue(
+            first.patch23_virtual_backend_active,
         )
         self.assertEqual(
             first.legacy_month_length_materialization_calls,
@@ -246,7 +252,7 @@ class Stage46Discovery23Tests(unittest.TestCase):
             second.legacy_month_length_lower_bound,
         )
 
-    def test_virtual_legacy_list_backend_is_not_present_in_discovery(self):
+    def test_virtual_legacy_list_backend_is_present_but_concrete_legacy_api_remains(self):
         production = (
             ROOT
             / "src"
@@ -256,16 +262,16 @@ class Stage46Discovery23Tests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        forbidden = (
-            "VirtualLegacyList",
-            "itemAt1",
-            "exactDpCount",
+        required = (
+            "class LegacyAllMonthLengthWaysAPI:",
+            "class VirtualLegacyList:",
+            "def itemAt1(",
             "virtual_backend",
             "patch23_applied",
         )
 
-        for token in forbidden:
-            self.assertNotIn(
+        for token in required:
+            self.assertIn(
                 token,
                 production,
             )

@@ -1,0 +1,32 @@
+Aşama 47/55 — PATCH 23
+
+Bu paket yalnızca Aşama 47 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_month_length_materialization.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_46_discovery_23.py
+tests/test_stage_47_patch_23.py
+artifacts/stage-47/BASELINE_STAGE_46_EXPECTED_RED.txt
+artifacts/stage-47/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_47.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 46 baseline: EXPECTED_RED, 303 test / 3 expected failure
+Aşama 47 full suite: GREEN, 313/313
+Aşama 46 normatif regression: GÖVDE DEĞİŞMEDEN PASS
+Legacy concrete list_all_ways metot gövdesi: BYTE-FOR-BYTE KORUNDU VE ÖNCE ÇALIŞIR
+VirtualLegacyList: EKLENDİ
+count(): EXACT DP
+itemAt1(): EXACT LEXICOGRAPHIC UNRANK
+Huge family concrete materialization: YOK
+Huge legacy scar blocked state: KORUNDU
+Small legacy concrete scar: KORUNDU
+Stage01 future guard: YALNIZ VirtualLegacyList SERBEST BIRAKILDI
+Patch 24/25 future tokens: HÂLÂ YASAK

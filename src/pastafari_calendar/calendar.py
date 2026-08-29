@@ -677,7 +677,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.monthLengthMaterialization.probes",
         )
         local_ctx.status = "ESKİ_AY_UZUNLUĞU_TÜM_YOLLAR_LISTESİ_HAZIR"
-        local_ctx.phase = "AŞAMA_46_BEKLEME"
+        local_ctx.phase = "AŞAMA_47_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)

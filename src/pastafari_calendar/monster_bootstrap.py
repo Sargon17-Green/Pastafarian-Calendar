@@ -334,6 +334,12 @@ class MonsterContext:
     legacy_month_length_materialized_count: int | None = None
     legacy_month_length_concrete_ways: tuple[tuple[int, ...], ...] | None = None
     legacy_month_length_materialization_calls: int = 0
+    patch23_legacy_materialization_blocked: bool = False
+    patch23_legacy_concrete_count: int | None = None
+    patch23_virtual_backend_active: bool = False
+    patch23_exact_count: int | None = None
+    patch23_semantic_blocked: bool = False
+    patch23_applied: bool = False
 
 
 class BaseMetrics:

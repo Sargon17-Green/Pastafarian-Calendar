@@ -1,22 +1,33 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 46/55, `DISCOVERY 23` durumundadır.
+Aşama 47/55, `PATCH 23` durumundadır.
 
-`LegacyAllMonthLengthWaysAPI`, bounded month-length composition family'yi literal concrete “bütün yollar listesi” olarak materialize eder.
+Aşama 46 concrete `LegacyAllMonthLengthWaysAPI.list_all_ways` scar'ı aynen kalır ve semantic adapter içinde önce gerçekten çalışır.
 
-Küçük uzaylar Python force brute ile exact doğrulanır.
+Huge family'de old backend safe cap nedeniyle blocked diagnostic state bırakır.
 
-`proveLegacyMonthLengthFamilyLowerBound`, exact DP count kullanmadan tamamen legal bir Cartesian alt-family kurar ve family'nin milyarlarca veya daha fazla eleman içerebildiğini OOM oluşturmadan kanıtlar.
+Yeni `VirtualLegacyList`, aynı “bütün yollar” family için:
 
-Legacy concrete backend safe recovery sınırını aşan proof gördüğünde allocation başlamadan block olur.
+```text
+count() = exact DP count
+itemAt1(rank1) = exact lexicographic unrank
+```
 
-Real calendar state-machine 300 gün / 10 ay witness'ı ile bu kusurlu API'yi gerçekten çağırır.
+sağlar.
 
-Henüz `VirtualLegacyList`, exact DP `count`, exact lexicographic `itemAt1` veya Patch 24 kodu yoktur.
+Bütün family hiçbir zaman materialize edilmez.
+
+Semantic `LegacyMaterializationAttempt` huge family'yi `blocked=False` olarak expose eder; `exposed_count` exact virtual count, `itemAt1` virtual unrank sonucudur.
+
+Small family'de old concrete scar da oluşur, fakat semantic backend yine virtual'dır ve sıra birebir aynıdır.
+
+Aşama 46 normatif huge-family regression gövdesi değiştirilmeden yeşile dönmüştür.
+
+Patch 24 month weaving kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -32,10 +43,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırk altıncı aşama paketi:
+Tam kırk yedinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki 295 test geçer. Yeni Discovery 23 non-normative kontrolleri geçer; yalnız `test_current_legacy_all_ways_api_cannot_expose_huge_family` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.
+Beklenen sonuç: 313 testin tamamı geçer ve depo durumu `GREEN` olur. Aşama 46'da kırmızı olan üç huge-family witness aynı normatif regression gövdesiyle yeşile dönmelidir.

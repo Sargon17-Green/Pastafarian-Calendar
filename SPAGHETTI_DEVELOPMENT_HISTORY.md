@@ -2000,3 +2000,33 @@ Real calendar path 300 gün / 10 ay witness'ını gerçekten adapter'a geçirir.
 `VirtualLegacyList`, exact DP count, exact lexicographic `itemAt1` ve `patch23_applied` henüz production'da yoktur.
 
 Patch 24 `legacyChooseEachDaySeparately` kodu da eklenmemiştir.
+
+
+## Aşama 47 — Yama 23: VirtualLegacyList exact DP backend
+
+Aşama 46 `LegacyAllMonthLengthWaysAPI.list_all_ways` concrete materializer metodu byte-for-byte korunur.
+
+`LegacyMonthLengthMaterializationAdapter.call` her invocation'da önce bu old backend'i gerçekten çağırır. Küçük family'de concrete tuple listesi oluşur; huge family'de Aşama 46 safe cap scar'ı allocation başlamadan blocked olur. Her iki durumda da historical state `legacy_month_length_*` alanlarında kalır.
+
+Bundan sonra `MonthLengthVirtualPatchWrapper` çalışır.
+
+`VirtualLegacyList` API contract:
+
+```text
+count()   = bounded composition family exact DP count
+itemAt1(r)= exact 1-based lexicographic unrank
+```
+
+DP tablo yapısı slots ve subtotal eksenlerinde sliding-window recurrence kullanır. Dolayısıyla bütün family materialize edilmez.
+
+`itemAt1` her pozisyonda 4..123 değerlerini ascending dener ve suffix DP block count değerlerini rank'ten çıkarır. Bu nedenle sıra, old concrete materializer'ın lexicographic sırasıyla exact aynıdır.
+
+Semantic `LegacyMaterializationAttempt` huge family'de `blocked=False` döner, `exposed_count` virtual exact count verir ve `itemAt1` virtual backend'e delegasyon yapar. `concrete_ways` huge family'de `None` kalır.
+
+Small family'de old concrete scar yine gerçekten materialize edilir; semantic backend yine VirtualLegacyList'tir ve virtual itemAt1 bütün old concrete rows ile aynı sırayı verir.
+
+Aşama 46 normatif huge-family regression gövdesi değiştirilmeden yeşile dönmüştür.
+
+Aşama 1 future-token guard yalnız artık current Patch 23 olan `VirtualLegacyList` tokenını yasak listesinden çıkarmak üzere minimal güncellenmiştir; Patch 24 ve Patch 25 tokenları hâlâ yasaktır.
+
+Patch 24 month weaving ghost/DP detour kodu henüz yoktur.
