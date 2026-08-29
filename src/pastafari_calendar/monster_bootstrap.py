@@ -20,6 +20,7 @@ from .legacy_selection import (
 from .legacy_gate_question import LegacyGateQuestionAdapter
 from .legacy_year_candidates import LegacyYearCandidateAdapter
 from .legacy_year_jump import LegacyYearJumpAdapter
+from .legacy_year_cache import LegacyYearNumberOnlyCacheMap
 
 
 class MonsterError(RuntimeError):
@@ -238,6 +239,16 @@ class MonsterContext:
     patch18_result_open_day: int | None = None
     patch18_result_close_day: int | None = None
     patch18_applied: bool = False
+    legacy_year_cache_last_year_number: int | None = None
+    legacy_year_cache_last_calculation_day: int | None = None
+    legacy_year_cache_last_open_gate: int | None = None
+    legacy_year_cache_last_close_gate: int | None = None
+    legacy_year_cache_last_hit: bool | None = None
+    legacy_year_cache_last_returned_token: str | None = None
+    legacy_year_cache_map_keys: tuple[int, ...] | None = None
+    legacy_year_cache_hit_count: int = 0
+    legacy_year_cache_miss_count: int = 0
+    legacy_year_cache_semantic_token: str | None = None
 
 
 class BaseMetrics:
@@ -307,3 +318,4 @@ class MonsterManager:
         self.legacy_gate_question = LegacyGateQuestionAdapter()
         self.legacy_year_candidates = LegacyYearCandidateAdapter()
         self.legacy_year_jump = LegacyYearJumpAdapter()
+        self.legacy_year_cache = LegacyYearNumberOnlyCacheMap()

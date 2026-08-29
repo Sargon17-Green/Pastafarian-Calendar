@@ -3,6 +3,7 @@ from .legacy_selection import buildAnswerRingFromSauceState
 from .legacy_day_counts import FOUNDATION_DAY_OLD
 from .legacy_year_candidates import LegacyYearCandidate
 from .legacy_year_jump import LegacyYearJumpAnchor
+from .legacy_year_cache import LegacyYearCacheRequest, LegacyYearCacheValue
 from .monster_bootstrap import (
     MonsterContext,
     MonsterManager,
@@ -493,7 +494,72 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.yearJump.probes",
         )
         local_ctx.status = "ESKİ_365_YIL_SIÇRAMA_TAHMİNİ_HAZIR"
-        local_ctx.phase = "AŞAMA_37_BEKLEME"
+        local_ctx.phase = "ESKİ_YALNIZ_YIL_NUMARASI_CACHE"
+
+    def legacy_year_cache_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        if local_ctx.legacy_jump_semantic_year_number is None:
+            raise RuntimeError(
+                "Year cache başlamadan önce semantic year number hazır olmalıdır"
+            )
+
+        if (
+            local_ctx.patch18_result_open_day is None
+            or local_ctx.patch18_result_close_day is None
+        ):
+            raise RuntimeError(
+                "Year cache başlamadan önce semantic year sınırları hazır olmalıdır"
+            )
+
+        year_number = local_ctx.legacy_jump_semantic_year_number
+        open_gate = local_ctx.patch18_result_open_day
+        close_gate = local_ctx.patch18_result_close_day
+
+        first_request = LegacyYearCacheRequest(
+            year_number=year_number,
+            calculation_day=calculation_day,
+            open_gate=open_gate,
+            close_gate=close_gate,
+            value=LegacyYearCacheValue(
+                token="ilk-yıl-yapısı",
+            ),
+        )
+
+        second_request = LegacyYearCacheRequest(
+            year_number=year_number,
+            calculation_day=calculation_day + 1,
+            open_gate=open_gate,
+            close_gate=close_gate,
+            value=LegacyYearCacheValue(
+                token="ikinci-yıl-yapısı",
+            ),
+        )
+
+        manager.legacy_year_cache.lookup_or_store(
+            local_ctx,
+            first_request,
+        )
+        reused = manager.legacy_year_cache.lookup_or_store(
+            local_ctx,
+            second_request,
+        )
+
+        # Keşif 19 kusuru: yalnız year.number key stale ilk value'yu döndürür.
+        local_ctx.legacy_year_cache_semantic_token = reused.token
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.yearCache.probes",
+        )
+        local_ctx.status = "ESKİ_YALNIZ_YIL_NUMARASI_CACHE_HAZIR"
+        local_ctx.phase = "AŞAMA_38_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -514,6 +580,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_5781_YIL_ADAYLARI", legacy_year_candidate_handler)
     manager.dispatcher.register("ESKİ_5000_STABLE_LENGTH_TIE", legacy_year5000_tie_handler)
     manager.dispatcher.register("ESKİ_365_YIL_SIÇRAMA_TAHMİNİ", legacy_year_jump_handler)
+    manager.dispatcher.register("ESKİ_YALNIZ_YIL_NUMARASI_CACHE", legacy_year_cache_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -535,5 +603,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Otuz yedinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Otuz sekizinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

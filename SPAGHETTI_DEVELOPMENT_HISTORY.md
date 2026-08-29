@@ -1715,3 +1715,18 @@ Aşama 36 normatif `/365` regression gövdesi byte-for-byte değiştirilmeden ye
 Patch wrapper arbitrary uzak hedeflerde caller tarafından verilen gerçek transition callback'leriyle bir yıl bir yıl yürür. Real Stage 37 production witness yalnız `close_day+1` adımını gerektirdiği için local fallback yalnız bu tek boundary adımını çözer; uzak hedefte gerçek transition provider zorunludur.
 
 Patch 19 cache-by-year-number code henüz yoktur.
+
+
+## Aşama 38 — Keşif 19: cache key olarak yalnız year.number kullanmak
+
+Production içine `LegacyYearNumberOnlyCacheMap` eklenir. Map key'i yalnız `year.number` değeridir.
+
+Request üzerinde `calculation_day`, `open_gate` ve `close_gate` bulunur, fakat legacy hit kararında bu alanların hiçbiri okunmaz. Map value yalnız opaque `LegacyYearCacheValue` değeridir; Patch 19 guard entry biçimi henüz yoktur.
+
+Real state-machine cache key'ini doğrudan Stage 37 `LegacyYearJumpAdapter` semantic sonucundaki `legacy_jump_semantic_year_number` değerinden alır.
+
+Aynı manager-owned cache'e aynı resolved year number ile iki request yapılır. İkinci request calculation day değerini değiştirir ve farklı value ister; legacy map yalnız year number gördüğü için ilk value yeniden kullanılır.
+
+Yeni regression aynı year number için calculation day, open gate ve close gate değişimlerini ayrı ayrı sınar. Üç alt örnek bilinçli kırmızıdır.
+
+Production içinde `calculationDayFingerprint` guarded entry, openGate/closeGate hit guard veya Patch 20 `oldStructureSauce` ghost kodu yoktur.

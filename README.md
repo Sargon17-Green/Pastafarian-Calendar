@@ -1,22 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 37/55, `PATCH 18` durumundadır.
+Aşama 38/55, `DISCOVERY 19` durumundadır.
 
-`oldJumpGuess(.../365...)` fiziksel olarak aynen korunur ve her jump çağrısında telemetry için gerçekten hesaplanır. Ancak guess artık semantic year number değildir.
+`LegacyYearNumberOnlyCacheMap` map key olarak yalnız `year.number` kullanır. Request `calculation_day`, `open_gate` ve `close_gate` bilgilerini taşısa da legacy hit kararı bunları görmez.
 
-`SequentialYearWalkPatchWrapper` anchor Year 5000'den başlayarak hedef current interval içine girene kadar `nextYear` veya `previousYear` callback'ini bir yıl bir yıl çağırır.
+Real calendar state-machine cache key'ini Stage 37 `LegacyYearJumpAdapter` tarafından semantic olarak çözülen year number üzerinden alır ve aynı year number için calculation day değiştirilmiş ikinci request'i aynı cache'e yollar.
 
-Forward step `number+1` ve shared close/open boundary ister. Backward step `number-1` ve shared open/close boundary ister.
+Legacy cache ikinci request'te stale ilk value değerini semantic token olarak yeniden kullanır.
 
-Hedef interval kuralı `open_day < target_day <= close_day` olarak uygulanır.
+Yeni normatif regression aynı year number altında calculation day, open gate ve close gate değişimlerini ayrı ayrı yoklar ve üç alt örneği bilinçli kırmızı bırakır.
 
-Aşama 36 normatif `/365` regresyonu değiştirilmeden yeşile dönmüştür. Yalnız historical state'i donduran non-normative Stage 36 testi yeni telemetry-only contract'a uyarlanmıştır.
+Henüz `PATCH 19` yoktur: guarded cache entry içinde `calculationDayFingerprint/openGate/closeGate/value` tutulmaz ve hit için üç guard karşılaştırılmaz.
 
-Patch 19 cache-by-year-number kodu henüz yoktur.
+Patch 20 `oldStructureSauce` kodu da henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -32,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuz yedinci aşama paketi:
+Tam otuz sekizinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 36'da kırmızı olan üç `/365` jump alt örneği aynı normatif regression gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–37 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni year-number-only cache regressionunun calculation day, open gate ve close gate alt örnekleri başarısız olur.

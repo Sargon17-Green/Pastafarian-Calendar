@@ -1,0 +1,27 @@
+Aşama 38/55 — DISCOVERY 19
+
+Bu paket yalnızca Aşama 38 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_year_cache.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_38_discovery_19.py
+artifacts/stage-38/BASELINE_STAGE_37_GREEN.txt
+artifacts/stage-38/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-38/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_38.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 37 baseline: GREEN
+Değişiklik sonrası Aşama 1–37 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+cache key yalnız year.number: EVET
+LegacyYearJumpAdapter resolved year key: AKTİF
+calculation day/open gate/close gate guards: YOK
+Patch 19 guarded entry: YOK
+Patch 20 oldStructureSauce: YOK

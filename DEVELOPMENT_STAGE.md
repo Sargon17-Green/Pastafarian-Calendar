@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=37
-CURRENT_KIND=PATCH
-CURRENT_PATCH=18
-LAST_COMPLETED_STAGE=37
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=38
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=19
+LAST_COMPLETED_STAGE=38
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=oldJumpGuess(anchor,targetDay)=anchor.number+floorDiv(targetDay-anchor.first_day,365) fiziksel helper olarak aynen korunur ve her call'da telemetry için gerçekten çalıştırılır; Semantic result artık guess'ten gelmez; SequentialYearWalkPatchWrapper anchor Year 5000 interval'ından başlayıp target_day>close_day iken nextYear ve target_day<=open_day iken previousYear callback'ini tam bir year adımı olarak tekrar tekrar çağırır, number ±1 ve shared boundary continuity guard'larını doğrular; raw guess diagnostic state'te kalır ve semantic selection'dan ayrılır
+MONSTER_ARCHITECTURE_GROWTH=LegacyYearNumberOnlyCacheMap tek map taşır ve key olarak yalnız LegacyYearJumpAdapter tarafından semantic olarak çözülmüş year.number değerini kullanır; calculation_day, open_gate ve close_gate request üzerinde bulunmasına rağmen hit kararında hiç okunmaz; real calendar state-machine aynı resolved year number için calculation day değiştirilmiş ikinci isteği aynı manager-owned cache'e gönderir ve ilk value semantic token olarak yanlış biçimde yeniden kullanılır; calculationDayFingerprint/openGate/closeGate guarded cache entry henüz yoktur
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
