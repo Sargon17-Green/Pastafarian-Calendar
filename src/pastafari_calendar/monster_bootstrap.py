@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
+from .legacy_arithmetic import LegacyRemainderAdapter
+
 
 class MonsterError(RuntimeError):
     pass
@@ -33,6 +35,8 @@ class MonsterContext:
     warnings: list[str] = field(default_factory=list)
     last_error: Exception | None = None
     validation_failures: list[str] = field(default_factory=list)
+    legacy_remainder_input: int | None = None
+    legacy_remainder_value: int | None = None
 
 
 class BaseMetrics:
@@ -85,3 +89,4 @@ class MonsterManager:
         self.validator = BaseValidator()
         self.error_wrapper = BaseErrorWrapper()
         self.dispatcher = BaseDispatcher()
+        self.legacy_arithmetic = LegacyRemainderAdapter()

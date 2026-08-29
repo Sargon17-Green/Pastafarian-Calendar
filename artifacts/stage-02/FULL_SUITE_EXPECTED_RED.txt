@@ -1,0 +1,77 @@
+test_bounded_composition_lexicographic_order (test_stage_01.Stage01Tests.test_bounded_composition_lexicographic_order) ... ok
+test_context_is_per_invocation (test_stage_01.Stage01Tests.test_context_is_per_invocation) ... ok
+test_cutlet_partition_filter (test_stage_01.Stage01Tests.test_cutlet_partition_filter) ... ok
+test_day_axis_and_save (test_stage_01.Stage01Tests.test_day_axis_and_save) ... ok
+test_distinct_name_unrank (test_stage_01.Stage01Tests.test_distinct_name_unrank) ... ok
+test_month_weaving_all_small_domains (test_stage_01.Stage01Tests.test_month_weaving_all_small_domains) ... ok
+test_month_weaving_matches_bruteforce (test_stage_01.Stage01Tests.test_month_weaving_matches_bruteforce) ... ok
+test_no_future_patch_names_in_production (test_stage_01.Stage01Tests.test_no_future_patch_names_in_production) ... ok
+test_normative_year5000_and_structure_smoke (test_stage_01.Stage01Tests.test_normative_year5000_and_structure_smoke) ... ok
+test_permutation_edges (test_stage_01.Stage01Tests.test_permutation_edges) ... ok
+test_production_does_not_call_oracle (test_stage_01.Stage01Tests.test_production_does_not_call_oracle) ... ok
+test_sauce_determinism_and_query_wrap (test_stage_01.Stage01Tests.test_sauce_determinism_and_query_wrap) ... ok
+test_short_and_wide_selection_ranges (test_stage_01.Stage01Tests.test_short_and_wide_selection_ranges) ... ok
+test_source_language_catalog_is_frozen_and_index_stable (test_stage_01.Stage01Tests.test_source_language_catalog_is_frozen_and_index_stable) ... ok
+test_work_counts (test_stage_01.Stage01Tests.test_work_counts) ... ok
+test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) ... 
+  test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=170141183460469231731687303715884105727) ... FAIL
+  test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=340282366920938463463374607431768211454) ... FAIL
+  test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=510423550381407695195061911147652317181) ... FAIL
+test_legacy_remainder_is_on_the_real_calendar_path (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_is_on_the_real_calendar_path) ... ok
+test_patch_is_not_present_yet (test_stage_02_discovery_01.Stage02Discovery01Tests.test_patch_is_not_present_yet) ... ok
+
+======================================================================
+FAIL: test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=170141183460469231731687303715884105727)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage02-work/pastafari-calendar-python-turkish-stage-02-discovery-01/tests/test_stage_02_discovery_01.py", line 44, in test_legacy_remainder_diverges_from_normative_save
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        oldRemainder(value),
+        ^^^^^^^^^^^^^^^^^^^^
+        save(value),
+        ^^^^^^^^^^^^
+        msg="Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 0 != 170141183460469231731687303715884105727 : Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı
+
+======================================================================
+FAIL: test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=340282366920938463463374607431768211454)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage02-work/pastafari-calendar-python-turkish-stage-02-discovery-01/tests/test_stage_02_discovery_01.py", line 44, in test_legacy_remainder_diverges_from_normative_save
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        oldRemainder(value),
+        ^^^^^^^^^^^^^^^^^^^^
+        save(value),
+        ^^^^^^^^^^^^
+        msg="Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 0 != 170141183460469231731687303715884105727 : Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı
+
+======================================================================
+FAIL: test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=510423550381407695195061911147652317181)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage02-work/pastafari-calendar-python-turkish-stage-02-discovery-01/tests/test_stage_02_discovery_01.py", line 44, in test_legacy_remainder_diverges_from_normative_save
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        oldRemainder(value),
+        ^^^^^^^^^^^^^^^^^^^^
+        save(value),
+        ^^^^^^^^^^^^
+        msg="Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 0 != 170141183460469231731687303715884105727 : Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı
+
+----------------------------------------------------------------------
+Ran 18 tests in 11.049s
+
+FAILED (failures=3)

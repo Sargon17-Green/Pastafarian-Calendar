@@ -1,0 +1,20 @@
+Aşama 2/55 — DISCOVERY 01
+Bu paket yalnızca bu aşamanın farkını içerir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+HANDOFF_STAGE_02_DISCOVERY_01.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_arithmetic.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_02_discovery_01.py
+artifacts/stage-02/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-02/FULL_SUITE_EXPECTED_RED.txt
+
+Silinen dosya yoktur.
+Beklenen depo durumu: EXPECTED_RED
+Önceki regresyonlar: PASS
+Yeni regresyon: M, 2*M ve 3*M için beklenen başarısızlık; M+1 geçer.
