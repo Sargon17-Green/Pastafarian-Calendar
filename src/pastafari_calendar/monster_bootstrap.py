@@ -3,6 +3,7 @@ from typing import Any, Callable
 
 from .legacy_arithmetic import LegacyRemainderAdapter
 from .legacy_day_counts import LegacyDayTagAdapter
+from .legacy_distance import LegacyDistanceAdapter
 
 
 class MonsterError(RuntimeError):
@@ -52,6 +53,9 @@ class MonsterContext:
     patch02_target_day_tag_value: int | None = None
     patch02_target_applied: bool = False
     patch02_foundation_guard_seen: bool = False
+    legacy_distance_calculation_day: int | None = None
+    legacy_distance_target_day: int | None = None
+    legacy_distance_value: int | None = None
 
 
 class BaseMetrics:
@@ -106,3 +110,4 @@ class MonsterManager:
         self.dispatcher = BaseDispatcher()
         self.legacy_arithmetic = LegacyRemainderAdapter()
         self.legacy_day_tags = LegacyDayTagAdapter()
+        self.legacy_distance = LegacyDistanceAdapter()

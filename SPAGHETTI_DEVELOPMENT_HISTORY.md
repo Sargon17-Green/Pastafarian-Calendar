@@ -124,3 +124,42 @@ Keşif anında adapter'ın doğrudan yanlış sonucunu sabitleyen geçici sahipl
 `DayTagPatchWrapper`, `LegacyDayTagAdapter` ile eski hesap arasına eklendi. Her çağrıda ham eski değer ile yama sonrası değer ayrı alanlarda tutulur. Eylem ve hedef yolu için ayrı yama durumları vardır.
 
 Günlük, ölçüm ve tanı durumu normatif hesaba geri okunmaz. İki farklı `MonsterContext` arasında ham veya yamalı gün etiketi durumu paylaşılmaz.
+
+
+## Aşama 6 — Keşif 03: gün etiketi farkını kronolojik mesafe sanmak
+
+### Ne sanıldı
+
+Üçüncü tarihsel hesap katmanı, iki günün mesafesini düzeltilmiş gün etiketlerinin mutlak farkı olarak aldı:
+
+```text
+oldDistance(calculationDay, targetDay) =
+    abs(
+        dayTagWithFoundationScar(calculationDay)
+        - dayTagWithFoundationScar(targetDay)
+    )
+```
+
+Bu eski fonksiyon gerçek `calendar_date_spaghetti` yoluna `LegacyDistanceAdapter` üzerinden bağlanmıştır.
+
+### Ne keşfedildi
+
+Gün etiketleri kronolojik eksende her yerde birer birer ilerlemez. Kuruluş gününden sonra aynı yöndeki her günlük hareket etikette iki birim değiştirir; kuruluş çevresinde ise iki tarafın çift/tek yapısı farkı daha da yanıltabilir.
+
+Ayrıca normatif mesafe uç günlerin ikisini de içerir:
+
+```text
+abs(targetDay - calculationDay) + 1
+```
+
+Bu nedenle aynı gün için eski mesafe `0` iken normatif mesafe `1` olur. Kuruluş gününden üç gün sonrasında eski değer `6`, normatif değer `4` olur. Kuruluşun iki yanını aşan örneklerde de etiket farkı kronolojik uzaklığı temsil etmez.
+
+Bir günlük `FOUNDATION_DAY -> FOUNDATION_DAY + 1` örneği eski yolun tesadüfen doğru normatif sonuç verebildiğini gösterir: iki yol da `2` üretir.
+
+### Bu aşamada eklenen canavar katmanı
+
+`LegacyDistanceAdapter`, `MonsterManager` zincirine ayrı bir eski hesap yöneticisi olarak eklendi. Girdi günleri ve eski mesafe sonucu yalnızca çağrıya ait `MonsterContext` içinde tutulur.
+
+`oldDistance`, önceki yamanın `dayTagWithFoundationScar` yolunu gerçekten yeniden çağırır; bu nedenle gün etiketi katmanı artık bir çağrı içinde hem kendi aşamasında hem mesafe legacy hesabının içinde görülebilir.
+
+Bu aşamada kronolojik karşılaştırma, legacy değeri kronolojik değerle değiştiren guard veya son `+1` henüz yoktur. Bunların hiçbiri erken eklenmemiştir.

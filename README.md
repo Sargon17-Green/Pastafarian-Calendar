@@ -1,28 +1,26 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 5/55, `PATCH 02` durumundadır. İkinci tarihsel kusur kodda korunur:
+Aşama 6/55, `DISCOVERY 03` durumundadır. Üçüncü tarihsel kusur gerçek çağrı zincirine eklenmiştir:
 
 ```text
-oldDayTag(day) = 2 * abs(day - FOUNDATION_DAY_OLD)
+oldDistance(calculationDay, targetDay) =
+    abs(
+        dayTagWithFoundationScar(calculationDay)
+        - dayTagWithFoundationScar(targetDay)
+    )
 ```
 
-Düzeltme onun üstündeki `dayTagWithFoundationScar` ve `DayTagPatchWrapper` katmanındadır:
+`LegacyDistanceAdapter` bu yanlış değeri gerçek `calendar_date_spaghetti` yolunda üretir ve çağrıya ait `MonsterContext` içinde saklar.
 
-```text
-n = oldDayTag(day)
-if day >= FOUNDATION_DAY_OLD:
-    n += 1
-if day == FOUNDATION_DAY_OLD and n != 1:
-    n = 1
-```
+Yeni normatif regresyon gerçek adapter yolunu `abs(targetDay-calculationDay)+1` mesafesiyle karşılaştırır. Aynı gün, daha uzun aynı-yön örneği ve kuruluşu aşan örnekler bilinçli olarak kırmızıdır. Bir günlük kuruluş-sonrası örneği tesadüfen geçer.
 
-`LegacyDayTagAdapter` gerçek çağrı yolunda bu yamadan geçer. Ham eski değer ve düzeltilmiş değer çağrıya ait `MonsterContext` içinde ayrı tutulur.
+Henüz `PATCH 03` yoktur: kronolojik farkla karşılaştırma, legacy sonucu kronolojik değerle değiştirme ve son `+1` eklenmemiştir.
 
-Aşama 4'teki normatif regresyon değiştirilmeden artık yeşildir. `oldDayTag` yardımcısının yanlış formülü ayrıca testte korunur. Birinci tarihsel yara ve Yama 01 de aynen kalır. Gelecekteki 03–26 kusur ve yamaları üretime eklenmemiştir.
+Yama 01 ve Yama 02 ile önceki tarihsel yaralar korunur; önceki bütün regresyonlar yeşil kalır. Gelecekteki 04–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -38,10 +36,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam beşinci aşama paketi:
+Tam altıncı aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 4'te kırmızı olan gün etiketi normatif regresyonu aynı gövdeyle yeşile dönmelidir; `oldDayTag` kusurunu doğrudan koruyan testler ise eski yanlış değerleri doğrulamaya devam eder.
+Beklenen sonuç: önceki Aşama 1–5 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni mesafe normatif regresyonunun gerçekten ayrışan alt örnekleri başarısız olur. Bu kırmızılık `DISCOVERY 03` aşamasının beklenen sonucudur.
