@@ -592,7 +592,33 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.structureSauce.probes",
         )
         local_ctx.status = "ESKİ_ORİJİNAL_TARGET_STRUCTURE_SAUCE_HAZIR"
-        local_ctx.phase = "AŞAMA_41_BEKLEME"
+        local_ctx.phase = "ESKİ_GATE_FİLTRESİZ_KÖFTE_BÖLÜMÜ"
+
+    def legacy_cutlet_partition_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Keşif 21 witness ailesi: yıl içinde 9 gate aralığı ve 6 köfte vardır.
+        # calculation-day gate, opening gate'ten 4 aralık sonra iç gate olarak taşınır.
+        # Legacy aile bu bilgiyi kaydeder fakat hiçbir semantic filtre uygulamaz.
+        manager.legacy_cutlet_partition.call(
+            local_ctx,
+            9,
+            6,
+            4,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.cutletPartition.probes",
+        )
+        local_ctx.status = "ESKİ_GATE_FİLTRESİZ_KÖFTE_BÖLÜMÜ_HAZIR"
+        local_ctx.phase = "AŞAMA_42_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -615,6 +641,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_365_YIL_SIÇRAMA_TAHMİNİ", legacy_year_jump_handler)
     manager.dispatcher.register("ESKİ_YALNIZ_YIL_NUMARASI_CACHE", legacy_year_cache_handler)
     manager.dispatcher.register("ESKİ_ORİJİNAL_TARGET_STRUCTURE_SAUCE", legacy_structure_sauce_handler)
+    manager.dispatcher.register("ESKİ_GATE_FİLTRESİZ_KÖFTE_BÖLÜMÜ", legacy_cutlet_partition_handler)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -635,6 +662,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
+    manager.dispatcher.dispatch(ctx)
+
     manager.dispatcher.dispatch(ctx)
 
     # Aşama 39 terminal mesajı önceki regression scar'ı olarak bilerek korunur.

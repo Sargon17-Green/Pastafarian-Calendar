@@ -1858,3 +1858,42 @@ Real calendar path old original-target sauce için mevcut final bowls/drop-46 la
 Aşama 40 normatif original-target-versus-year-first-day regression gövdesi byte-for-byte değiştirilmeden yeşile döner. Historical bug state'ini donduran non-normative Stage 40 testleri yalnız patch'in zorunlu olarak değiştirdiği ghost-versus-selector contract'ına uyarlanır.
 
 Patch 21 cutlet partition prefix-gate filter kodu henüz yoktur.
+
+
+## Aşama 42 — Keşif 21: internal calculation-day gate'i yok sayan köfte bölümü
+
+### Ne sanıldı
+
+Köfte partition ailesinin yalnızca `gate_gap_count` toplamına sahip bütün pozitif `cutlet_count` bileşimlerinden oluşmasının yeterli olduğu sanıldı.
+
+Bu historical family `LegacyAllPositiveCutletPartitionFamily` ile exact count ve lexicographic unrank olarak temsil edilir; dev bir liste materialize edilmez.
+
+### Gerçek production yolu
+
+`LegacyCutletPartitionAdapter`, Aşama 20 tarafından üretilen semantic structure sauce bowls/drop-46 order state'inden bowl 2, seal 21 answer ring kurar.
+
+Seçim current kısa seçim semantiğiyle yapılır. Rank compatibility ayrı regresyonda aynı Python çizgisinin test-only normatif seçimiyle doğrulanır; böylece kırmızılığın seçim bias/rejection kusurundan gelmediği sabitlenir.
+
+Real calendar state-machine witness olarak:
+
+```text
+gate_gap_count=9
+cutlet_count=6
+internal_gate_offset=4
+```
+
+verilerini gerçekten adapter'a geçirir.
+
+### Ne keşfedildi
+
+Legacy family internal calculation-day gate offsetini yalnız state'te kaydeder ve semantic family üzerinde hiçbir filtre uygulamaz.
+
+Üç bağımsız structure-sauce witness'ında aynı bowl 2 / seal 21 answer stream kullanıldığında all-positive legacy family'den seçilen composition, test-only authoritative `CutletPartitionFamily(..., required_boundary=4)` seçimiyle ayrışır.
+
+Bu üç alt örnek Aşama 42'nin beklenen tek kırmızılığıdır.
+
+### Bilinçli sınır
+
+`CutletPartitionGatePatchWrapper`, filtered legacy family, prefix-boundary semantic filter veya `patch21_applied` henüz production'da yoktur.
+
+Patch 22 repeated-name generator kodu da eklenmemiştir.

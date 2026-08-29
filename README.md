@@ -1,30 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk ikinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 41/55, `PATCH 20` durumundadır.
+Aşama 42/55, `DISCOVERY 21` durumundadır.
 
-Stage 40 `oldStructureSauce(cDay,originalTargetDay)` helper gövdesi aynen korunur ve her structure call'da gerçekten çalışır.
+Yeni `LegacyAllPositiveCutletPartitionFamily`, `gate_gap_count` toplamının bütün pozitif `cutlet_count` bileşimlerini lexicographic sırada temsil eder.
 
-Old result artık ghost state'te saklanır ve selector'a verilmez.
+`LegacyCutletPartitionAdapter`, Aşama 20 semantic structure sauce state'inden bowl 2 / seal 21 answer ring kurar ve bu tam legacy family'den seçim yapar.
 
-`originalTargetDay != year_first_day` olduğunda `StructureSaucePatchWrapper` current Python implementation ile:
+Internal calculation-day gate offset state'te gerçekten taşınır, fakat legacy family bundan dolayı filtrelenmez.
 
-```text
-sauceWithCurrentScars(cDay,year_first_day)
-```
+Real calendar path 9 gate aralığı, 6 köfte ve internal offset 4 witness'ını çalıştırır.
 
-sonucunu yeniden hesaplar.
+Üç normatif witness bilinçli olarak kırmızıdır: authoritative family internal gate offsetinin bir partial sum ile vurulmasını zorunlu tutarken current legacy family bunu yok sayar.
 
-`LegacyStructureSelectorAdapter` yalnız bu semantic year-first-day sauce sonucunu görür.
-
-İki target eşitse old result zaten authoritative olduğu için ekstra recomputation yapılmaz.
-
-Aşama 40 normatif regression gövdesi değiştirilmeden yeşile dönmüştür.
-
-Patch 21 cutlet partition prefix-gate filter kodu henüz yoktur.
+Patch 21 prefix-boundary düzeltmesi henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -40,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırk birinci aşama paketi:
+Tam kırk ikinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 40'ta kırmızı olan üç original-target-versus-year-first-day selector alt örneği aynı normatif regression gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki 263 test geçer. Aşama 42 yeni testlerinin non-normative kontrolleri geçer; yalnız `test_current_all_positive_cutlet_family_ignores_internal_gate_boundary` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.

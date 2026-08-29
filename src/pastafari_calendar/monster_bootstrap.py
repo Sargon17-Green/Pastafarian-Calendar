@@ -22,6 +22,7 @@ from .legacy_year_candidates import LegacyYearCandidateAdapter
 from .legacy_year_jump import LegacyYearJumpAdapter
 from .legacy_year_cache import LegacyYearNumberOnlyCacheMap
 from .legacy_structure_sauce import LegacyStructureSauceAdapter
+from .legacy_cutlet_partition import LegacyCutletPartitionAdapter
 
 
 class MonsterError(RuntimeError):
@@ -283,6 +284,17 @@ class MonsterContext:
     patch20_semantic_order_at_drop_46: tuple[int, ...] | None = None
     patch20_old_ghost_reached_selector: bool = False
     patch20_applied: bool = False
+    legacy_cutlet_gate_gap_count: int | None = None
+    legacy_cutlet_count: int | None = None
+    legacy_cutlet_internal_gate_offset: int | None = None
+    legacy_cutlet_all_positive_family_count: int | None = None
+    legacy_cutlet_selected_rank: int | None = None
+    legacy_cutlet_selected_partition: tuple[int, ...] | None = None
+    legacy_cutlet_used_all_positive_family: bool = False
+    legacy_cutlet_internal_gate_was_ignored: bool = False
+    legacy_cutlet_answer_first: int | None = None
+    legacy_cutlet_answer_direction_step: int | None = None
+    legacy_cutlet_partition_calls: int = 0
 
 
 class BaseMetrics:
@@ -354,3 +366,4 @@ class MonsterManager:
         self.legacy_year_jump = LegacyYearJumpAdapter()
         self.legacy_year_cache = LegacyYearNumberOnlyCacheMap()
         self.legacy_structure_sauce = LegacyStructureSauceAdapter()
+        self.legacy_cutlet_partition = LegacyCutletPartitionAdapter()

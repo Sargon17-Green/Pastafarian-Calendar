@@ -1,0 +1,27 @@
+Aşama 42/55 — DISCOVERY 21
+
+Bu paket yalnızca Aşama 42 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_cutlet_partition.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_42_discovery_21.py
+artifacts/stage-42/BASELINE_STAGE_41_GREEN.txt
+artifacts/stage-42/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-42/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_42.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 41 baseline: GREEN, 263/263
+Aşama 42 tam suite: 270 test, tam 3 beklenen subTest failure
+Beklenen depo durumu: EXPECTED_RED
+Legacy family: bütün positive compositions
+Internal calculation-day gate offset: state'te taşınır, semantic olarak yok sayılır
+Selection source: Aşama 20 semantic structure sauce, bowl 2, seal 21
+Patch 21 prefix-boundary filter: YOK
+Patch 22 ve sonrası production code: YOK

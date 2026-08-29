@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=41
-CURRENT_KIND=PATCH
-CURRENT_PATCH=20
-LAST_COMPLETED_STAGE=41
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=42
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=21
+LAST_COMPLETED_STAGE=42
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=oldStructureSauce(cDay,originalTargetDay) Aşama 40 helper gövdesi byte-for-byte korunur ve her structure call'da semantic patch'ten önce gerçekten çalıştırılır; old result Patch 20 ghost state'e kaydedilir ve selector'a ulaşmaz; StructureSaucePatchWrapper originalTargetDay!=year_first_day olduğunda current Python implementation sauceWithCurrentScars(cDay,year_first_day) sonucunu yeniden hesaplar ve yalnız bu semantic result'u LegacyStructureSelectorAdapter'a verir; eşit target durumunda old result zaten authoritative olduğu için ikinci recomputation yapılmaz; semantic recomputation current production function gövdelerini doğrudan kullanırken eski real-path instrumentation call-count scars ikinci historical traversal olarak sayılmaz
+MONSTER_ARCHITECTURE_GROWTH=LegacyAllPositiveCutletPartitionFamily gate_gap_count toplamının bütün pozitif cutlet_count-bileşimlerini exact count ve lexicographic unrank ile temsil eder; LegacyCutletPartitionAdapter Stage 20 semantic structure sauce state'inden bowl 2 seal 21 answer ring kurar ve current short-selection semantiğiyle bu tam legacy family'den seçim yapar; internal calculation-day gate offset invocation-local state'te taşınır fakat semantic family üzerinde hiçbir filtre uygulamaz; real calendar state-machine 9 gate aralığı, 6 köfte ve internal offset 4 witness'ını gerçekten çalıştırır; Patch 21 prefix-boundary detour henüz yok
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
