@@ -1537,3 +1537,81 @@ Regressio Gradus 46 hoc ipsum defectum observat et intentionaliter `REGRESSIO_DI
 ### Audit et limes proximus
 
 `SourceLanguageCatalog` et reference C++ manent byte pro byte intacti; probationes Graduum 42–45 non mutantur. Nullus runtime externus adhibetur. Nullus `VirtualLegacyList`, nullus backend DP `count/itemAt1`, nullus `monthLengthFamilyPatch` et nullus PATCH 23 praemature adest. Nullus PATCH 24 adest. Gradus proximus est 47/55 — PATCH 23 tantum.
+
+## Gradus 47 — PATCH 23: lista legacy manet, backend virtualis count/itemAt1 substituit
+
+### Cicatrix servata
+
+Defectus Gradus 46 non deletur nec helper vetus reficitur. `legacyMaterializeAllMonthLengthWays` adhuc `vector<vector<int>>` concretum producit quando familia parva est, et `LegacyMonthLengthMaterializationAdapter::inspect` adhuc contractum listae concretae attingit. In familia enormi inspection legacy numerum exactum diagnosticum servat et ante allocationem sistitur. `Discovery23MonthLengthMaterializationHandler` idem corpus historicum retinet.
+
+Via activa PATCH 23 non haec elementa bypass-at. `Patch23MonthLengthMaterializationHandler` primum handler DISCOVERY 23 realiter vocat. Ergo campi sequentes sunt raw cicatrix eiusdem invocationis:
+
+```text
+exactFamilyCount
+concreteListIndexCapacity
+legacyConcreteListContractReached
+legacyConcreteEnumerationEntered
+legacyConcreteMaterializationCompleted
+blockedBeforeAllocation
+materializedItemCount
+```
+
+Via `executeUnpatchedDiscovery23MonthLengthMaterializationDiagnostic` hanc historiam separatam sine correctione adhuc exponit.
+
+### Correctio addita
+
+Addita est classis `VirtualLegacyList(yearLength, monthCount)`. API semanticum non enumerat omnes compositiones. Backend habet duas operationes exactas:
+
+```text
+count()
+itemAt1(rank1)
+```
+
+`count` dynamic programming memoratum adhibet. State `(remaining,slots)` numerum exactum suffixorum legit. Bounds 4..123 in omni slot coercuntur. Integer multi-precision native C++ adhibetur, ergo cardinalitates supra `std::size_t`, supra M et supra 64 bits sine approximatione servantur.
+
+`itemAt1` 1-based unrank lexicographicum est. Pro positione quaque, candidati longitudinis ordine 4 ad 123 considerantur. Count DP suffixi est magnitudo blocci illius candidati. Blocca ante rank subtrahuntur donec candidatus pertinens inveniatur. Totum output exacte ad `yearLength` summatur et magnitudinem `monthCount` habet.
+
+### Wrapper et stratum monstri
+
+Addita sunt:
+
+```text
+VirtualLegacyList
+MonthLengthMaterializationPatchDecision
+MonthLengthMaterializationPatchWrapper
+Patch23MonthLengthMaterializationHandler
+BaseValidationManager::requirePatch23MonthLengthMaterializationReady
+BaseDispatcher::dispatchPatchedMonthLengthMaterialization
+executeUnpatchedDiscovery23MonthLengthMaterializationDiagnostic
+```
+
+`MonthLengthMaterializationPatchWrapper` inspectionem legacy iam factam accipit. Backend virtualem creat, count DP contra `legacyInspection.exactFamilyCount` comparat et probe rank medium legit. Handler raw state et virtualem state in campis distinctis conservat. `patch23Applied` verum fieri non potest nisi legacy exsecutum est, backend virtualis adhibetur et count DP cum probatione exacta concordat.
+
+### Regressio Gradus 46 post correctionem
+
+Tres witness enormes manent raw identici:
+
+```text
+porta 0: L=4244, K=45
+count=28267369127220710176329716843724118975520840014877906533654334421021017631241800900
+
+porta 1: L=4677, K=40
+count=1130199237207385122412737191720843978989936770400
+
+porta 2: L=4677, K=41
+count=36861642729255180261458221372975022866131399690235443380
+```
+
+In omnibus tribus cicatrix concreta ante allocationem sistitur et zero membra materializat. PATCH 23 tamen eandem cardinalitatem per DP exactum reddit et medium item per unrank accedit. Diagnosticum unpatched adhuc defectum Gradus 46 solum ostendit. Sic regressio DISCOVERY 23 nunc GREEN est sine abolitione cicatricis.
+
+### Probatio Gradus 47
+
+Probatio C++ parva 65 familias examinat, cum monthCount 1..5 et totalibus a minimo legali usque ad minimum plus 12. `legacyMaterializeAllMonthLengthWays` omnes 8,567 membra concreta producit. Omne membrum et omnis rank cum `VirtualLegacyList` atque `BoundedCompositionFamily` oracle test-only comparantur. Count DP, ordo lexicographicus et `itemAt1` congruunt exacte. Ranks invalidi 0 et `count+1` recusantur.
+
+Pro tribus familiis enormibus item rank 1, rank medium et rank ultimum contra oracle C++ comparantur. Nulla materializatio enormis fit et nullus OOM actualis accidit.
+
+Compilator `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap et regressiones Graduum 1–46 in serie processuum isolatorum transeunt; regressio Gradus 47 etiam separatim transeunt. Ex hac verificatione `REGRESSIONES_1_47=PASS` constat.
+
+### Audit et limes proximus
+
+`SourceLanguageCatalog` et reference C++ manent byte pro byte intacti. Probationes Graduum 42–45 non mutantur. Test Gradus 46 mutatur solum ut post PATCH 23 simul cicatricem raw et backend semanticum virtualem comprobet. Nullus runtime externus adhibetur. Nullus `legacyChooseEachDaySeparately`, nullus `DPUnrankLegalWeaving`, nullus DISCOVERY 24 et nullus PATCH 24 praemature adest. Gradus proximus est 48/55 — DISCOVERY 24 tantum.

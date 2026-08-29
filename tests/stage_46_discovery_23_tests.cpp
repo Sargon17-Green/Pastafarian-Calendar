@@ -45,7 +45,7 @@ int main() {
         const Integer platformCapacity{
             std::numeric_limits<std::size_t>::max()};
 
-        int enormousFamilies = 0;
+        int preservedEnormousLegacyFamilies = 0;
         for (const Integer& calculationGateIndex : calculationGateIndices) {
             const Integer calculationDay = oracle.gateValueForTest(calculationGateIndex);
             const Year year5000 = oracle.year5000(calculationDay);
@@ -78,17 +78,27 @@ int main() {
                 monthCount);
 
             require(report.ready,
-                    "DISCOVERY 23 paratus esse debet");
-            require(report.handler == "Discovery23MonthLengthMaterializationHandler",
-                    "handler DISCOVERY 23 expectatus est");
+                    "PATCH 23 materializationem mensium paratam reddere debet");
+            require(report.handler == "Patch23MonthLengthMaterializationHandler",
+                    "handler PATCH 23 viae activae expectatus est");
             require(report.patch22Prepared,
-                    "DISCOVERY 23 PATCH 22 paratum servare debet");
-            require(!report.patch23Applied,
-                    "PATCH 23 in DISCOVERY 23 praemature adesse non debet");
+                    "PATCH 23 PATCH 22 paratum servare debet");
+            require(report.patch23Applied,
+                    "PATCH 23 via activa applicari debet");
+            require(report.patch23LegacyExecuted,
+                    "cicatrix materializationis legacy ante PATCH 23 vere exsequi debet");
+            require(report.patch23VirtualBackendUsed,
+                    "PATCH 23 backend VirtualLegacyList uti debet");
+            require(report.patch23CountMatchesLegacyProof,
+                    "count DP PATCH 23 probationi exactae legacy congruere debet");
             require(report.yearLength == yearLength && report.monthCount == monthCount,
-                    "fines familiae mensium DISCOVERY 23 discrepare non debent");
+                    "fines familiae mensium PATCH 23 discrepare non debent");
             require(report.exactFamilyCount == normativeCount,
                     "probatio exacta familiae legacy ab oracle C++ differt");
+            require(report.virtualCount == normativeCount,
+                    "count VirtualLegacyList ab oracle C++ differt");
+            require(report.virtualProbeItem == normativeFamily.unrank1(report.virtualProbeRank),
+                    "itemAt1 VirtualLegacyList ab unrank normativo C++ differt");
             require(report.concreteListIndexCapacity == platformCapacity,
                     "capacitas concretae listae platformae discrepat");
             require(report.legacyConcreteListContractReached,
@@ -96,32 +106,55 @@ int main() {
             require(report.exactFamilyCount > report.concreteListIndexCapacity,
                     "witness DISCOVERY 23 familiam ultra capacitatem concretam requirit");
             require(report.blockedBeforeAllocation,
-                    "familia enormis ante allocationem actualem tuto sisti debet");
+                    "cicatrix familiae enormis ante allocationem actualem tuto sistere debet");
             require(!report.legacyConcreteEnumerationEntered,
-                    "enumeratio concreta familiae enormis incipi non debet");
+                    "enumeratio concreta cicatricis enormis incipi non debet");
             require(!report.legacyConcreteMaterializationCompleted,
-                    "materializatio concreta familiae enormis compleri non potest");
+                    "materializatio concreta cicatricis enormis compleri non potest");
             require(report.materializedItemCount == 0,
                     "familia enormis nullum membrum materializatum relinquere debet");
 
-            ++enormousFamilies;
+            const auto diagnostic =
+                manager.executeUnpatchedDiscovery23MonthLengthMaterializationDiagnostic(
+                    anchor,
+                    yearFirstDay,
+                    calculationDay,
+                    calculationGateIndex,
+                    cutletCount,
+                    monthCount);
+            require(diagnostic.ready,
+                    "diagnosticum DISCOVERY 23 paratum esse debet");
+            require(diagnostic.handler == "Discovery23MonthLengthMaterializationHandler",
+                    "diagnosticum handler DISCOVERY 23 servare debet");
+            require(!diagnostic.patch23Applied,
+                    "diagnosticum DISCOVERY 23 PATCH 23 applicare non debet");
+            require(!diagnostic.patch23VirtualBackendUsed,
+                    "diagnosticum DISCOVERY 23 VirtualLegacyList uti non debet");
+            require(diagnostic.exactFamilyCount == report.exactFamilyCount,
+                    "diagnosticum eundem numerum familiae legacy servare debet");
+            require(diagnostic.blockedBeforeAllocation &&
+                    !diagnostic.legacyConcreteEnumerationEntered &&
+                    diagnostic.materializedItemCount == 0,
+                    "diagnosticum cicatricem materializationis enormis servare debet");
+
+            ++preservedEnormousLegacyFamilies;
             std::cout << "WITNESS_GATE=" << calculationGateIndex
                       << " YEAR_LENGTH=" << yearLength
                       << " MONTH_COUNT=" << monthCount
-                      << " FAMILY_COUNT=" << report.exactFamilyCount << "\n";
+                      << " FAMILY_COUNT=" << report.exactFamilyCount
+                      << " VIRTUAL_PROBE_RANK=" << report.virtualProbeRank
+                      << "\n";
         }
 
-        require(enormousFamilies == 3,
-                "tres witness familiae enormis DISCOVERY 23 requiruntur");
+        require(preservedEnormousLegacyFamilies == 3,
+                "tres cicatrices familiae enormis DISCOVERY 23 post PATCH 23 servandae sunt");
 
-        std::cout << "LEGACY_SMALL_CONCRETE_LIST=PASS\n";
-        std::cout << "ENORMOUS_FAMILIES=3\n";
-        std::cout << "OOM_ACTUALIS=NO\n";
-        std::cout << "VIRTUAL_LEGACY_LIST=NO\n";
-        std::cout << "FAILURE=REGRESSIO_DISCOVERY_23_DEFECIT\n";
-        return 1;
+        std::cout << "REGRESSIO_DISCOVERY_23_POST_PATCH_TRANSIIT\n";
+        std::cout << "LEGACY_ENORMOUS_FAMILIES_PRESERVED=3\n";
+        std::cout << "SEMANTIC_VIRTUAL_BACKEND=PASS\n";
+        return 0;
     } catch (const std::exception& error) {
-        std::cerr << "REGRESSIO_DISCOVERY_23_ERROR: " << error.what() << "\n";
-        return 2;
+        std::cerr << "REGRESSIO_DISCOVERY_23_POST_PATCH_ERROR: " << error.what() << "\n";
+        return 1;
     }
 }

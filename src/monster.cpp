@@ -1364,6 +1364,91 @@ LegacyMonthLengthWays legacyMaterializeAllMonthLengthWays(int yearLength,
     return out;
 }
 
+VirtualLegacyList::VirtualLegacyList(int yearLength, int monthCount)
+    : yearLength_(yearLength), monthCount_(monthCount) {
+    if (yearLength_ < 1) {
+        throw BaseValidationError("VirtualLegacyList longitudinem anni positivam requirit");
+    }
+    if (monthCount_ < 1) {
+        throw BaseValidationError("VirtualLegacyList numerum mensium positivum requirit");
+    }
+}
+
+Integer VirtualLegacyList::countSuffix(int remaining, int slots) const {
+    if (slots == 0) {
+        return remaining == 0 ? Integer{1} : Integer{0};
+    }
+    if (remaining < slots * LEGACY_MONTH_LENGTH_MIN ||
+        remaining > slots * LEGACY_MONTH_LENGTH_MAX) {
+        return Integer{0};
+    }
+    const std::pair<int, int> key{remaining, slots};
+    const auto found = memo_.find(key);
+    if (found != memo_.end()) {
+        return found->second;
+    }
+
+    Integer total = 0;
+    for (int length = LEGACY_MONTH_LENGTH_MIN;
+         length <= LEGACY_MONTH_LENGTH_MAX;
+         ++length) {
+        total += countSuffix(remaining - length, slots - 1);
+    }
+    memo_[key] = total;
+    return total;
+}
+
+Integer VirtualLegacyList::count() const {
+    return countSuffix(yearLength_, monthCount_);
+}
+
+std::vector<int> VirtualLegacyList::itemAt1(const Integer& rank1) const {
+    const Integer familyCount = count();
+    if (rank1 < 1 || rank1 > familyCount) {
+        throw BaseValidationError("VirtualLegacyList itemAt1 gradum extra fines accepit");
+    }
+
+    Integer remainingRank = rank1;
+    int remainingTotal = yearLength_;
+    std::vector<int> out;
+    out.reserve(static_cast<std::size_t>(monthCount_));
+
+    for (int position = 0; position < monthCount_; ++position) {
+        bool chosen = false;
+        const int slotsAfter = monthCount_ - position - 1;
+        for (int length = LEGACY_MONTH_LENGTH_MIN;
+             length <= LEGACY_MONTH_LENGTH_MAX;
+             ++length) {
+            const Integer blockCount = countSuffix(
+                remainingTotal - length,
+                slotsAfter);
+            if (remainingRank > blockCount) {
+                remainingRank -= blockCount;
+                continue;
+            }
+            out.push_back(length);
+            remainingTotal -= length;
+            chosen = true;
+            break;
+        }
+        if (!chosen) {
+            throw BaseValidationError("VirtualLegacyList itemAt1 membrum lexicographicum invenire non potuit");
+        }
+    }
+    if (remainingTotal != 0) {
+        throw BaseValidationError("VirtualLegacyList itemAt1 summam finalem non servavit");
+    }
+    return out;
+}
+
+int VirtualLegacyList::yearLength() const {
+    return yearLength_;
+}
+
+int VirtualLegacyList::monthCount() const {
+    return monthCount_;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -4297,6 +4382,51 @@ void BaseValidationManager::requireDiscovery23MonthLengthMaterializationReady(
     }
 }
 
+void BaseValidationManager::requirePatch23MonthLengthMaterializationReady(
+    const BaseMonsterContext& ctx) const {
+    requireDiscovery23MonthLengthMaterializationReady(ctx);
+    if (!ctx.patch23MonthLengthMaterializationReady || !ctx.patch23Applied) {
+        throw BaseValidationError("PATCH 23 nondum applicatus est");
+    }
+    if (!ctx.patch23LegacyExecuted) {
+        throw BaseValidationError("PATCH 23 cicatricem materializationis legacy vere exsequi debet");
+    }
+    if (!ctx.patch23VirtualBackendUsed) {
+        throw BaseValidationError("PATCH 23 backend VirtualLegacyList uti debet");
+    }
+    if (!ctx.patch23CountMatchesLegacyProof) {
+        throw BaseValidationError("count DP PATCH 23 probationi exactae legacy congruere debet");
+    }
+    if (ctx.patch23VirtualCount != ctx.discovery23ExactFamilyCount) {
+        throw BaseValidationError("count VirtualLegacyList PATCH 23 a familia exacta differt");
+    }
+    if (ctx.patch23VirtualProbeRank < 1 ||
+        ctx.patch23VirtualProbeRank > ctx.patch23VirtualCount) {
+        throw BaseValidationError("probe rank VirtualLegacyList PATCH 23 extra fines est");
+    }
+    if (ctx.patch23VirtualProbeItem.size() !=
+        static_cast<std::size_t>(ctx.discovery23MonthCount)) {
+        throw BaseValidationError("probe item VirtualLegacyList PATCH 23 magnitudine falsa est");
+    }
+    int sum = 0;
+    for (const int length : ctx.patch23VirtualProbeItem) {
+        if (length < LEGACY_MONTH_LENGTH_MIN || length > LEGACY_MONTH_LENGTH_MAX) {
+            throw BaseValidationError("probe item VirtualLegacyList PATCH 23 longitudinem extra fines continet");
+        }
+        sum += length;
+    }
+    if (sum != ctx.discovery23YearLength) {
+        throw BaseValidationError("probe item VirtualLegacyList PATCH 23 summam anni non servat");
+    }
+    VirtualLegacyList replay(
+        ctx.discovery23YearLength,
+        ctx.discovery23MonthCount);
+    if (replay.count() != ctx.patch23VirtualCount ||
+        replay.itemAt1(ctx.patch23VirtualProbeRank) != ctx.patch23VirtualProbeItem) {
+        throw BaseValidationError("VirtualLegacyList PATCH 23 invocationem non reproducit");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -4666,6 +4796,37 @@ LegacyMonthLengthMaterializationAdapter::inspect(int yearLength,
     out.materializedItemCount = ways.size();
     out.concreteMaterializationCompleted = true;
     return out;
+}
+
+MonthLengthMaterializationPatchDecision
+MonthLengthMaterializationPatchWrapper::repair(
+    int yearLength,
+    int monthCount,
+    const LegacyMonthLengthMaterializationInspection& legacyInspection) const {
+    if (!legacyInspection.concreteListContractReached) {
+        throw BaseValidationError("PATCH 23 API legacy listae concretae prius attingere debet");
+    }
+    if (legacyInspection.yearLength != yearLength ||
+        legacyInspection.monthCount != monthCount) {
+        throw BaseValidationError("PATCH 23 fines inspectionis legacy mutare non debet");
+    }
+
+    VirtualLegacyList virtualList(yearLength, monthCount);
+    const Integer virtualCount = virtualList.count();
+    if (virtualCount < 1) {
+        throw BaseValidationError("PATCH 23 VirtualLegacyList familiam non vacuam requirit");
+    }
+    const Integer probeRank = (virtualCount + 1) / 2;
+    const std::vector<int> probeItem = virtualList.itemAt1(probeRank);
+    return MonthLengthMaterializationPatchDecision{
+        virtualCount,
+        probeRank,
+        probeItem,
+        true,
+        true,
+        virtualCount == legacyInspection.exactFamilyCount,
+        true
+    };
 }
 
 Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
@@ -6019,6 +6180,52 @@ void Discovery23MonthLengthMaterializationHandler::handle(
     validator.requireDiscovery23MonthLengthMaterializationReady(ctx);
 }
 
+void Patch23MonthLengthMaterializationHandler::handle(
+    BaseMonsterContext& ctx,
+    const Discovery23MonthLengthMaterializationHandler& legacyHandler,
+    const LegacyMonthLengthMaterializationAdapter& adapter,
+    const MonthLengthMaterializationPatchWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    legacyHandler.handle(ctx, adapter, validator, metrics);
+
+    LegacyMonthLengthMaterializationInspection legacyInspection;
+    legacyInspection.yearLength = ctx.discovery23YearLength;
+    legacyInspection.monthCount = ctx.discovery23MonthCount;
+    legacyInspection.exactFamilyCount = ctx.discovery23ExactFamilyCount;
+    legacyInspection.concreteListIndexCapacity =
+        ctx.discovery23ConcreteListIndexCapacity;
+    legacyInspection.concreteListContractReached =
+        ctx.discovery23LegacyConcreteListContractReached;
+    legacyInspection.concreteEnumerationEntered =
+        ctx.discovery23LegacyConcreteEnumerationEntered;
+    legacyInspection.concreteMaterializationCompleted =
+        ctx.discovery23LegacyConcreteMaterializationCompleted;
+    legacyInspection.blockedBeforeAllocation =
+        ctx.discovery23BlockedBeforeAllocation;
+    legacyInspection.materializedItemCount =
+        ctx.discovery23MaterializedItemCount;
+
+    const MonthLengthMaterializationPatchDecision decision = wrapper.repair(
+        ctx.discovery23YearLength,
+        ctx.discovery23MonthCount,
+        legacyInspection);
+    ctx.patch23VirtualCount = decision.virtualCount;
+    ctx.patch23VirtualProbeRank = decision.probeRank;
+    ctx.patch23VirtualProbeItem = decision.probeItem;
+    ctx.patch23LegacyExecuted = decision.legacyExecuted;
+    ctx.patch23VirtualBackendUsed = decision.virtualBackendUsed;
+    ctx.patch23CountMatchesLegacyProof = decision.countMatchesLegacyProof;
+    ctx.patch23Applied = decision.patchApplied;
+    ctx.patch23MonthLengthMaterializationReady = true;
+    ctx.currentHandler = "Patch23MonthLengthMaterializationHandler";
+    ctx.phase = "PATCH_23_VIRTUAL_MONTH_LENGTH_LIST";
+    ctx.status = "VIRTUAL_LEGACY_LIST_ACTIVE";
+    ctx.branchTrace.push_back("PATCH23:VIRTUAL_LEGACY_LIST_COUNT_ITEMAT1");
+    metrics.bump(ctx, "patch23.month.length.virtual.list.calls");
+    validator.requirePatch23MonthLengthMaterializationReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -6790,6 +6997,24 @@ void BaseDispatcher::dispatchDiscovery23MonthLengthMaterialization(
     const BaseMetricsShell& metrics) const {
     ctx.branchTrace.push_back("DISPATCH:DISCOVERY23_MONTH_LENGTH_MATERIALIZATION");
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedMonthLengthMaterialization(
+    BaseMonsterContext& ctx,
+    const Patch23MonthLengthMaterializationHandler& handler,
+    const Discovery23MonthLengthMaterializationHandler& legacyHandler,
+    const LegacyMonthLengthMaterializationAdapter& adapter,
+    const MonthLengthMaterializationPatchWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:PATCH23_MONTH_LENGTH_MATERIALIZATION");
+    handler.handle(
+        ctx,
+        legacyHandler,
+        adapter,
+        wrapper,
+        validator,
+        metrics);
 }
 
 void BaseDispatcher::dispatchPatchedYear5000Tie(
@@ -7699,6 +7924,86 @@ BaseMonsterManager::executeDiscovery23MonthLengthMaterialization(
     const BaseValidationManager validator;
     const BaseMetricsShell metrics;
     const LegacyMonthLengthMaterializationAdapter adapter;
+    const MonthLengthMaterializationPatchWrapper wrapper;
+    const Discovery23MonthLengthMaterializationHandler legacyHandler;
+    const Patch23MonthLengthMaterializationHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedMonthLengthMaterialization(
+        ctx,
+        handler,
+        legacyHandler,
+        adapter,
+        wrapper,
+        validator,
+        metrics);
+
+    return LegacyMonthLengthMaterializationReport{
+        calculationDay,
+        originalTargetDay,
+        calculationGateIndex,
+        names.resolvedYear,
+        cutletCount,
+        ctx.discovery23YearLength,
+        ctx.discovery23MonthCount,
+        ctx.discovery23ExactFamilyCount,
+        ctx.discovery23ConcreteListIndexCapacity,
+        ctx.discovery23Patch22Prepared,
+        ctx.discovery23LegacyConcreteListContractReached,
+        ctx.discovery23LegacyConcreteEnumerationEntered,
+        ctx.discovery23LegacyConcreteMaterializationCompleted,
+        ctx.discovery23BlockedBeforeAllocation,
+        ctx.discovery23MaterializedItemCount,
+        ctx.patch23VirtualCount,
+        ctx.patch23VirtualProbeRank,
+        ctx.patch23VirtualProbeItem,
+        ctx.patch23LegacyExecuted,
+        ctx.patch23VirtualBackendUsed,
+        ctx.patch23CountMatchesLegacyProof,
+        ctx.patch23Applied,
+        ctx.patch23MonthLengthMaterializationReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+LegacyMonthLengthMaterializationReport
+BaseMonsterManager::executeUnpatchedDiscovery23MonthLengthMaterializationDiagnostic(
+    const LegacyYearAnchor& anchor,
+    const Integer& originalTargetDay,
+    const Integer& calculationDay,
+    const Integer& calculationGateIndex,
+    int cutletCount,
+    int monthCount) const {
+    const LegacyRepeatedNameReport names = executeDiscovery22RepeatedCutletNames(
+        anchor,
+        originalTargetDay,
+        calculationDay,
+        calculationGateIndex,
+        cutletCount);
+    if (!names.ready || !names.patch22Applied) {
+        throw BaseValidationError("diagnosticum DISCOVERY 23 PATCH 22 paratum requirit");
+    }
+
+    const Integer yearLengthInteger =
+        names.resolvedYear.closeGateDay - names.resolvedYear.openGateDay;
+    if (yearLengthInteger < 1 || yearLengthInteger > REAL_YEAR_MAX_PATCH) {
+        throw BaseValidationError("longitudo anni diagnostici DISCOVERY 23 invalida est");
+    }
+
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery23YearLength = yearLengthInteger.convert_to<int>();
+    ctx.discovery23MonthCount = monthCount;
+    ctx.discovery23Patch22Prepared = names.patch22Applied;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyMonthLengthMaterializationAdapter adapter;
     const Discovery23MonthLengthMaterializationHandler handler;
     const BaseDispatcher dispatcher;
     dispatcher.dispatchDiscovery23MonthLengthMaterialization(
@@ -7724,6 +8029,12 @@ BaseMonsterManager::executeDiscovery23MonthLengthMaterialization(
         ctx.discovery23LegacyConcreteMaterializationCompleted,
         ctx.discovery23BlockedBeforeAllocation,
         ctx.discovery23MaterializedItemCount,
+        {},
+        {},
+        {},
+        false,
+        false,
+        false,
         false,
         ctx.discovery23MonthLengthMaterializationReady,
         ctx.phase,

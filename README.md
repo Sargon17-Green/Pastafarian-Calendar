@@ -895,3 +895,51 @@ Bootstrap et omnes regressiones Graduum 1–45 transeunt.
 ### Quod consulto nondum adest
 
 Nullus `VirtualLegacyList`, nullus `monthLengthFamilyPatch`, nullus backend DP cum `count` et `itemAt1`, nullus `DPUnrankBoundedCompositionLex` et nullus PATCH 23 adest. Gradus 47 debet eundem contractum legacy servare sed backend virtualem exactum sub eo addere. Nullus codex PATCH 24 praemature adest.
+
+## PATCH 23 — backend virtualis pro lista longitudinum mensium
+
+Gradus 47 cicatricem DISCOVERY 23 non delet. `legacyMaterializeAllMonthLengthWays(yearLength, monthCount)` et `LegacyMonthLengthMaterializationAdapter` manent: API vetus adhuc omnes vias quasi listam concretam exponit. In via activa, `Patch23MonthLengthMaterializationHandler` primum ipsum `Discovery23MonthLengthMaterializationHandler` exsequitur; ideo contractus legacy, exactum count diagnosticum, bariera ante allocationem et status materializationis historicae omnes invocation-local servantur ante correctionem.
+
+Correctio addit backend nomine `VirtualLegacyList`. Is listam enormem non materializat. Contractus semanticus est:
+
+```text
+count   = exact DP count
+itemAt1 = exact lexicographic unrank
+```
+
+`count()` per dynamic programming memoratum numerat suffixa bounded compositionum. Status DP clavem `(remaining, slots)` habet; casus impossibiles statim zero reddunt; aliter omnes longitudines 4..123 ordine crescente summantur. Arithmeticum est integer exactum `boost::multiprecision::cpp_int`; nullum floating point, approximationem, saturationem aut truncationem adhibet.
+
+`itemAt1(rank1)` eodem DP utitur ad magnitudinem cuiusque blocci lexicographici. In positione quaque candidati 4..123 ordine crescente temptantur. Si rank ultra blocum est, magnitudo blocci ex rank subtrahitur; aliter candidatus eligitur et processus in suffixum transit. Ita item 1-based exacte idem ordo est quem materializatio legacy concreta in familia parva producebat, sine constructione totius familiae.
+
+`MonthLengthMaterializationPatchWrapper` inspectionem legacy iam exsecutam accipit, `VirtualLegacyList` creat, count DP contra exactam probationem legacy comparat et unum probe medium per `itemAt1` legit. `Patch23MonthLengthMaterializationHandler` raw legacy state et virtualem state separatim servat. Semanticum backend solum virtuale est; diagnostics legacy numquam in decisionem semanticam reingrediuntur.
+
+### Regressio DISCOVERY 23 post patch
+
+Tres familiae enormis Gradus 46 raw manent. Via legacy adhuc contractum listae concretae attingit et ante allocationem enormous sistitur; `materializedItemCount=0` manet. Via activa tamen `VirtualLegacyList` count exactum reddit et probe item lexicographicum legit, ergo regression Gradus 46 nunc GREEN est. `executeUnpatchedDiscovery23MonthLengthMaterializationDiagnostic` separatam viam historicam sine PATCH 23 servat.
+
+Cardinalitates testatae manent:
+
+```text
+L=4244, K=45 -> 28267369127220710176329716843724118975520840014877906533654334421021017631241800900
+L=4677, K=40 -> 1130199237207385122412737191720843978989936770400
+L=4677, K=41 -> 36861642729255180261458221372975022866131399690235443380
+```
+
+Nulla harum familiarum materializatur. `itemAt1` probatur in rank primo, medio et ultimo contra oracle C++ test-only eiusdem lineae.
+
+### Probatio exacta PATCH 23
+
+Regressio Gradus 47 comparat 65 familias parvas. Pro his familiis 8,567 membra concreta legacy enumerantur, et pro omni rank confirmatur simul:
+
+```text
+VirtualLegacyList.count == concreteLegacy.size
+VirtualLegacyList.count == normative C++ count
+VirtualLegacyList.itemAt1(rank) == concreteLegacy[rank-1]
+VirtualLegacyList.itemAt1(rank) == normative C++ unrank(rank)
+```
+
+Ranks 0 et `count+1` recusantur. Tres witness enormes deinde count et `itemAt1` sine materializatione probant. Bootstrap et regressiones Graduum 1–47 transeunt; nullus OOM actualis fit.
+
+### Quod consulto nondum adest
+
+Nullus `legacyChooseEachDaySeparately`, nullus ghost electionis mensis die-per-diem, nullus `DPUnrankLegalWeaving`, nullus DISCOVERY 24 et nullus PATCH 24 praemature adest. Gradus 48 debet DISCOVERY 24 tantum introducere.

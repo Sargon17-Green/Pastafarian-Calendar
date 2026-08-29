@@ -361,6 +361,31 @@ Integer legacyMonthLengthConcreteFamilyCountProof(int yearLength,
 LegacyMonthLengthWays legacyMaterializeAllMonthLengthWays(int yearLength,
                                                           int monthCount);
 
+class VirtualLegacyList {
+public:
+    VirtualLegacyList(int yearLength, int monthCount);
+    Integer count() const;
+    std::vector<int> itemAt1(const Integer& rank1) const;
+    int yearLength() const;
+    int monthCount() const;
+
+private:
+    int yearLength_ = 0;
+    int monthCount_ = 0;
+    mutable std::map<std::pair<int, int>, Integer> memo_{};
+    Integer countSuffix(int remaining, int slots) const;
+};
+
+struct MonthLengthMaterializationPatchDecision {
+    Integer virtualCount{};
+    Integer probeRank{};
+    std::vector<int> probeItem{};
+    bool legacyExecuted = false;
+    bool virtualBackendUsed = false;
+    bool countMatchesLegacyProof = false;
+    bool patchApplied = false;
+};
+
 struct LegacyMonthLengthMaterializationInspection {
     int yearLength = 0;
     int monthCount = 0;
@@ -389,6 +414,12 @@ struct LegacyMonthLengthMaterializationReport {
     bool legacyConcreteMaterializationCompleted = false;
     bool blockedBeforeAllocation = false;
     std::size_t materializedItemCount = 0;
+    Integer virtualCount{};
+    Integer virtualProbeRank{};
+    std::vector<int> virtualProbeItem{};
+    bool patch23LegacyExecuted = false;
+    bool patch23VirtualBackendUsed = false;
+    bool patch23CountMatchesLegacyProof = false;
     bool patch23Applied = false;
     bool ready = false;
     std::string phase;
@@ -758,6 +789,14 @@ struct BaseMonsterContext {
     bool discovery23BlockedBeforeAllocation=false;
     std::size_t discovery23MaterializedItemCount=0;
     bool discovery23MonthLengthMaterializationReady=false;
+    Integer patch23VirtualCount{};
+    Integer patch23VirtualProbeRank{};
+    std::vector<int> patch23VirtualProbeItem{};
+    bool patch23LegacyExecuted=false;
+    bool patch23VirtualBackendUsed=false;
+    bool patch23CountMatchesLegacyProof=false;
+    bool patch23Applied=false;
+    bool patch23MonthLengthMaterializationReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1133,6 +1172,8 @@ public:
     void requirePatch22RepeatedNamesReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery23MonthLengthMaterializationReady(
         const BaseMonsterContext& ctx) const;
+    void requirePatch23MonthLengthMaterializationReady(
+        const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1269,6 +1310,14 @@ class LegacyMonthLengthMaterializationAdapter {
 public:
     LegacyMonthLengthMaterializationInspection inspect(int yearLength,
                                                        int monthCount) const;
+};
+
+class MonthLengthMaterializationPatchWrapper {
+public:
+    MonthLengthMaterializationPatchDecision repair(
+        int yearLength,
+        int monthCount,
+        const LegacyMonthLengthMaterializationInspection& legacyInspection) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1834,6 +1883,15 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Patch23MonthLengthMaterializationHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const Discovery23MonthLengthMaterializationHandler& legacyHandler,
+                const LegacyMonthLengthMaterializationAdapter& adapter,
+                const MonthLengthMaterializationPatchWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -2139,6 +2197,14 @@ public:
         const LegacyMonthLengthMaterializationAdapter& adapter,
         const BaseValidationManager& validator,
         const BaseMetricsShell& metrics) const;
+    void dispatchPatchedMonthLengthMaterialization(
+        BaseMonsterContext& ctx,
+        const Patch23MonthLengthMaterializationHandler& handler,
+        const Discovery23MonthLengthMaterializationHandler& legacyHandler,
+        const LegacyMonthLengthMaterializationAdapter& adapter,
+        const MonthLengthMaterializationPatchWrapper& wrapper,
+        const BaseValidationManager& validator,
+        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -2293,6 +2359,13 @@ public:
         const Integer& calculationGateIndex,
         int cutletCount) const;
     LegacyMonthLengthMaterializationReport executeDiscovery23MonthLengthMaterialization(
+        const LegacyYearAnchor& anchor,
+        const Integer& originalTargetDay,
+        const Integer& calculationDay,
+        const Integer& calculationGateIndex,
+        int cutletCount,
+        int monthCount) const;
+    LegacyMonthLengthMaterializationReport executeUnpatchedDiscovery23MonthLengthMaterializationDiagnostic(
         const LegacyYearAnchor& anchor,
         const Integer& originalTargetDay,
         const Integer& calculationDay,
