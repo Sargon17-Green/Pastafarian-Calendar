@@ -219,3 +219,66 @@ class LegacyBiasedSelectionAdapter:
             ring,
             n,
         )
+
+
+class LegacyShortOnlySelectionDispatcher:
+    def __init__(self) -> None:
+        self.short_adapter = LegacyBiasedSelectionAdapter()
+
+    def call_with_ring(
+        self,
+        ctx,
+        ring: LegacyAnswerRing,
+        n: int,
+    ) -> int | None:
+        ctx.branch_trace.append(
+            (
+                "ESKİ_YALNIZ_KISA_SEÇİM",
+                n,
+            )
+        )
+        ctx.logs.append(
+            (
+                "eski-yalnız-kısa-seçim",
+                n,
+            )
+        )
+
+        ctx.legacy_general_selection_n = n
+        ctx.legacy_general_selection_used_short_path = True
+
+        try:
+            result = self.short_adapter.call_with_ring(
+                ctx,
+                ring,
+                n,
+            )
+        except ValueError as exc:
+            # Keşif 14 scar'ı: legacy dispatcher N>M için başka yol bilmez.
+            ctx.legacy_wide_selection_unsupported = True
+            ctx.legacy_wide_selection_error = str(exc)
+            ctx.legacy_general_selection_result = None
+            return None
+
+        ctx.legacy_wide_selection_unsupported = False
+        ctx.legacy_wide_selection_error = None
+        ctx.legacy_general_selection_result = result
+        return result
+
+    def call(
+        self,
+        ctx,
+        queried_bowl_id: int,
+        seal: int,
+        n: int,
+    ) -> int | None:
+        ring = buildAnswerRingFromSauceState(
+            ctx,
+            queried_bowl_id,
+            seal,
+        )
+        return self.call_with_ring(
+            ctx,
+            ring,
+            n,
+        )

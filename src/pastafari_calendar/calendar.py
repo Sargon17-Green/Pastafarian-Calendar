@@ -302,7 +302,35 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.selection.probes",
         )
         local_ctx.status = "ESKİ_YANLI_MODULO_SEÇİM_HAZIR"
-        local_ctx.phase = "AŞAMA_26_BEKLEME"
+        local_ctx.phase = "ESKİ_YALNIZ_KISA_GENEL_SEÇİM"
+
+    def legacy_short_only_general_selection_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        ring = buildAnswerRingFromSauceState(
+            local_ctx,
+            1,
+            21,
+        )
+
+        manager.legacy_general_selection.call_with_ring(
+            local_ctx,
+            ring,
+            M_OLD + 1,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.selection.wideAttempts",
+        )
+        local_ctx.status = "ESKİ_YALNIZ_KISA_GENEL_SEÇİM_HAZIR"
+        local_ctx.phase = "AŞAMA_28_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -318,6 +346,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_YAZILABİLİR_ORDER_HAFIZASI", legacy_order_memory_handler)
     manager.dispatcher.register("ESKİ_SABİT_ID_SONRAKİ_KÂSE", legacy_next_bowl_handler)
     manager.dispatcher.register("ESKİ_YANLI_MODULO_SEÇİM", legacy_biased_selection_handler)
+    manager.dispatcher.register("ESKİ_YALNIZ_KISA_GENEL_SEÇİM", legacy_short_only_general_selection_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -334,5 +364,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Yirmi yedinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Yirmi sekizinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

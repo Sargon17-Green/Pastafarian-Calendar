@@ -1,26 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 27/55, `PATCH 13` durumundadır.
+Aşama 28/55, `DISCOVERY 14` durumundadır.
 
-`biasedLegacyPick(x,N)` direct-modulo scar olarak fiziksel korunur.
+Stage 27 short-selection yolu aynen korunur.
 
-Corrected kısa seçim önce:
+Yeni tarihsel kusur `LegacyShortOnlySelectionDispatcher` içindedir: family size değerini ayrıştırmadan her zaman short adapter'a gönderir.
 
-```text
-limit = floor(M_OLD/N)*N
-```
+`N>M_OLD` için short adapter input'u reddeder; dispatcher bunu unsupported-wide scar olarak kaydeder ve semantic rank üretemez.
 
-hesaplar; sonra aynı answer ring üzerinde `x<=limit` olana kadar ilerler ve legacy helper'ı yalnız accepted `x` ile çağırır.
+Real calendar path gerçek sauce-derived answer ring üzerinde `N=M_OLD+1` wide attempt çalıştırır.
 
-Aşama 26 normatif biased-selection regresyonu değiştirilmeden yeşile dönmüştür.
+Yeni normatif regresyon `M_OLD+1`, `M_OLD^2` ve `M_OLD^3` family size değerlerinde actual dispatcher sonucunu test-only exact wide selection ile karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
 
-Real calendar probe bounded tutulur; bu stage-only probe herhangi bir tarihte uzun rejection yürüyüşü oluşturmaz.
-
-Henüz `N>M_OLD` wide dispatcher veya `wideDetour` yoktur; Patch 14 başlamamıştır.
+Henüz `PATCH 14` yoktur: `N<=M`/`N>M` ayrımı, multi-place base-M number ve wide-number rejection production'a eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -36,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirmi yedinci aşama paketi:
+Tam yirmi sekizinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 26'da kırmızı olan üç sauce-derived short-selection alt örneği aynı normatif regresyon gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–27 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni short-only-versus-wide normatif regresyonunun üç wide-family alt örneği başarısız olur.

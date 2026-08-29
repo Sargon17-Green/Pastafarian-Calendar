@@ -1228,3 +1228,79 @@ Aşama 26 normatif biased-selection regresyonunun gövdesi byte-for-byte değiş
 Real calendar probe, eski testlerin kullandığı herhangi bir tarihte uzun ring yürüyüşü oluşturmamak için bounded tutulur: direction `-1` ve first `M/2` üstündeyse `N=first-1` ile tek-adımlı rejection kullanılır; diğer durumlarda `N=M_OLD` seçilip first answer hemen kabul edilir. Bu yalnız stage probe güvenliğidir; semantic short-selection wrapper aynı authoritative rejection kuralını uygular.
 
 `N>M_OLD` wide dispatcher ve `wideDetour` henüz yoktur.
+
+
+## Aşama 28 — Keşif 14: N>M ailesini short-only dispatcher'a zorlamak
+
+### Tarihsel varsayım
+
+Legacy selection katmanı yalnız kısa aileleri bilir.
+
+Stage 27 short path contract'ı:
+
+```text
+1 <= N <= M_OLD
+```
+
+ile sınırlıdır.
+
+Yeni `LegacyShortOnlySelectionDispatcher`, family size ne olursa olsun bu short adapter'ı çağırır.
+
+### N>M davranışı
+
+`N>M_OLD` geldiğinde short adapter doğal olarak `ValueError` üretir.
+
+Discovery dispatcher bu exception'ı wide destek yokluğunun scar'ı olarak kaydeder:
+
+```text
+legacy_wide_selection_unsupported = True
+legacy_wide_selection_error = ...
+legacy_general_selection_result = None
+```
+
+Bu recovery yalnız stage state-machine'in StageNotIntegratedError noktasına ulaşmasını sağlar; semantic wide rank değildir.
+
+### Gerçek production yolu
+
+Real calendar path Stage 27 short probe'undan sonra aynı exact answer ring ile:
+
+```text
+N = M_OLD + 1
+```
+
+wide family girişimini gerçekten çalıştırır.
+
+Bu girişim short-only dispatcher tarafından unsupported olarak kaydedilir.
+
+### Normatif regresyon
+
+Normatif regresyon aynı production adapter'ı üç wide family size için çağırır:
+
+```text
+M_OLD + 1
+M_OLD^2
+M_OLD^3
+```
+
+Test-only oracle her biri için exact wide rank üretir.
+
+Legacy dispatcher ise üçünde de semantic result üretemez; üç alt örnek bilinçli kırmızıdır.
+
+### Sınır
+
+Bu aşamada production içinde:
+
+```text
+if N<=M: short
+else: patched wide path
+```
+
+dispatcher yoktur.
+
+Multi-place base-M wide number inşası yoktur.
+
+Wide number rejection walk yoktur.
+
+Rejection sırasında digits üretme veya üretmeme davranışı production'da henüz başlamamıştır.
+
+Stage 29 yalnız bu kusuru patch edecektir.

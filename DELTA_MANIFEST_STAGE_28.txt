@@ -1,0 +1,27 @@
+Aşama 28/55 — DISCOVERY 14
+
+Bu paket yalnızca Aşama 28 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_selection.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_28_discovery_14.py
+artifacts/stage-28/BASELINE_STAGE_27_GREEN.txt
+artifacts/stage-28/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-28/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_28.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 27 baseline: GREEN
+Değişiklik sonrası Aşama 1–27 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+LegacyShortOnlySelectionDispatcher scar: EKLENDİ
+real production N=M_OLD+1 attempt: EKLENDİ
+N>M semantic wide rank: YOK
+PATCH 14 wide arithmetic: YOK
+PATCH 15+ future code: YOK

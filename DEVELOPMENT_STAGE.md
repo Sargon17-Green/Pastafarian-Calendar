@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=27
-CURRENT_KIND=PATCH
-CURRENT_PATCH=13
-LAST_COMPLETED_STAGE=27
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=28
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=14
+LAST_COMPLETED_STAGE=28
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=biasedLegacyPick doğrudan modulo scar olarak fiziksel korunur; SelectionRejectionPatchWrapper limit=(M_OLD//N)*N hesaplar, offset=0 ile aynı LegacyAnswerRing üzerinde x<=limit olana kadar answerAtRing ilerletir ve biasedLegacyPick helper'ını yalnız accepted x ile çağırır; production probe +1 ringlerde sınırsız yürümemek için N=M_OLD kullanır, -1 ve first>M/2 durumunda tek-adımlı rejection fixture'ını korur
+MONSTER_ARCHITECTURE_GROWTH=LegacyShortOnlySelectionDispatcher bütün family size değerlerini Stage 27 short-selection adapter'a yönlendirir; N>M geldiğinde short adapter ValueError üretir, dispatcher bu unsupported-wide scar'ını invocation-local durumda kaydeder ve semantic wide rank üretemez; real calendar path N=M_OLD+1 ile bu kusuru gerçekten çalıştırır; wide arithmetic ve patched N<=M/N>M dispatcher henüz yok
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
