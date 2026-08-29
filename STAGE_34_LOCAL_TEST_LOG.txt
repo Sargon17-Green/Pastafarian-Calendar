@@ -1,0 +1,26 @@
+Gradus 34 / DISCOVERY 17
+Compiler: g++ C++20
+Status expectatus: EXPECTED_RED
+
+Regressiones antecedentes:
+Gradus 1-4: PASS
+Gradus 5-10: PASS
+Gradus 11-16: PASS
+Gradus 17-22: PASS
+Gradus 23-28: PASS
+Gradus 29-33: PASS
+
+Probatio Gradus 34:
+DISCREPANTIA_TIE_YEAR_5000 positio=1 opening_expectatus=0 opening_actualis=4 longitudo=300
+DISCREPANTIA_TIE_YEAR_5000 positio=2 opening_expectatus=2 opening_actualis=0 longitudo=300
+DISCREPANTIA_TIE_YEAR_5000 positio=3 opening_expectatus=4 opening_actualis=2 longitudo=300
+CALCULATION_DAY=-15055446
+ORDO_INPUT=4,0,2
+ORDO_LEGACY_LENGTH_ONLY=4,0,2
+ORDO_NORMATIVUS_OPENING_GATE=0,2,4
+FAMILIA_SELECTIONIS=3
+REGRESSIO_DISCOVERY_17_DEFECIT: 3 positiones run aequalis longitudinis ordinem inputuum legacy servant loco opening gate maturioris
+EXIT_CODE=1
+
+Interpretatio:
+Tres candidati anni 5000 longitudinis 300 ceiling PATCH 16 servant et calculationDay continent. Stable sort legacy per longitudinem solam ordinem inputuum 4,0,2 servat. Regula normativa intra run aequalis longitudinis opening gate maturiorem requirit, ergo 0,2,4. Tres discrepantiae exactae sunt unicum rubrum intentionale.

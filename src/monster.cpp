@@ -79,6 +79,29 @@ Patch16YearCandidateDecision yearCandidateAfterFootnotePatch(
     };
 }
 
+LegacyYear5000TiePreparation legacyYear5000TiePreparation(
+    const std::vector<Integer>& gates,
+    const std::vector<LegacyYearCandidatePair>& pairs,
+    const Integer& calculationDay) {
+    LegacyYear5000TiePreparation out;
+    for (const LegacyYearCandidatePair& pair : pairs) {
+        const Patch16YearCandidateDecision decision = yearCandidateAfterFootnotePatch(
+            gates,
+            pair.openIndex,
+            pair.closeIndex);
+        if (!decision.semanticAccepted) {
+            continue;
+        }
+        if (!(gates[pair.openIndex] < calculationDay &&
+              calculationDay <= gates[pair.closeIndex])) {
+            continue;
+        }
+        out.preSort.push_back(decision.candidate);
+    }
+    out.sorted = legacyStableLengthOnlyYearCandidates(out.preSort);
+    return out;
+}
+
 Integer oldRemainder(const Integer& x) {
     return regularMod(x, M_OLD);
 }
@@ -3375,6 +3398,68 @@ void BaseValidationManager::requirePatch16YearCandidateCeilingReady(
     }
 }
 
+void BaseValidationManager::requireDiscovery17Year5000TieReady(
+    const BaseMonsterContext& ctx) const {
+    if (!ctx.discovery17Year5000Ready) {
+        throw BaseValidationError("DISCOVERY 17 nondum paratus est");
+    }
+    const LegacyYear5000TiePreparation expectata = legacyYear5000TiePreparation(
+        ctx.legacyYearGates,
+        ctx.legacyYearCandidatePairs,
+        ctx.calculationDay);
+    const auto requireList = [](const LegacyYearCandidateList& a,
+                                const LegacyYearCandidateList& b,
+                                const char* nuntius) {
+        if (a.size() != b.size()) {
+            throw BaseValidationError(nuntius);
+        }
+        for (std::size_t i = 0; i < a.size(); ++i) {
+            if (a[i].openIndex != b[i].openIndex ||
+                a[i].closeIndex != b[i].closeIndex ||
+                a[i].length != b[i].length) {
+                throw BaseValidationError(nuntius);
+            }
+        }
+    };
+    requireList(expectata.preSort, ctx.discovery17Year5000PreSort,
+                "familia year 5000 ante sortem discrepat");
+    requireList(expectata.sorted, ctx.discovery17Year5000Sorted,
+                "stable sort year 5000 per longitudinem solam discrepat");
+    if (ctx.discovery17Year5000Sorted.size() < 2) {
+        throw BaseValidationError("DISCOVERY 17 run aequalis longitudinis non habet");
+    }
+    bool aequalisRun = false;
+    for (std::size_t i = 1; i < ctx.discovery17Year5000Sorted.size(); ++i) {
+        if (ctx.discovery17Year5000Sorted[i - 1].length ==
+            ctx.discovery17Year5000Sorted[i].length) {
+            aequalisRun = true;
+            break;
+        }
+    }
+    if (!aequalisRun) {
+        throw BaseValidationError("DISCOVERY 17 nullum tie longitudinis observat");
+    }
+    if (!ctx.discovery17Year5000SelectionCalled) {
+        throw BaseValidationError("selectio year 5000 legacy non vocata est");
+    }
+    if (ctx.discovery17Year5000SelectionFamilySize !=
+        Integer{ctx.discovery17Year5000Sorted.size()}) {
+        throw BaseValidationError("magnitudo familiae selectionis year 5000 falsa est");
+    }
+    if (ctx.discovery17Year5000SelectedOrdinal < 1 ||
+        ctx.discovery17Year5000SelectedOrdinal > ctx.discovery17Year5000SelectionFamilySize) {
+        throw BaseValidationError("ordinalis year 5000 extra fines est");
+    }
+    const std::size_t index =
+        (ctx.discovery17Year5000SelectedOrdinal - 1).convert_to<std::size_t>();
+    const LegacyYearCandidate& expectatus = ctx.discovery17Year5000Sorted[index];
+    if (ctx.discovery17Year5000SelectedCandidate.openIndex != expectatus.openIndex ||
+        ctx.discovery17Year5000SelectedCandidate.closeIndex != expectatus.closeIndex ||
+        ctx.discovery17Year5000SelectedCandidate.length != expectatus.length) {
+        throw BaseValidationError("candidatus year 5000 non ex stable sort legacy venit");
+    }
+}
+
 void BaseValidationManager::requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const {
     requireLegacyBiasedSelectionReady(ctx);
     if (!ctx.patch13Applied) {
@@ -3517,6 +3602,28 @@ Patch16YearCandidatePreparation YearCandidateCeilingPatchWrapper::prepare(
     }
     out.semanticSorted = legacyStableLengthOnlyYearCandidates(out.semanticPreSort);
     return out;
+}
+
+LegacyYear5000TiePreparation LegacyYear5000TieAdapter::prepare(
+    const std::vector<Integer>& gates,
+    const std::vector<LegacyYearCandidatePair>& pairs,
+    const Integer& calculationDay) const {
+    return legacyYear5000TiePreparation(gates, pairs, calculationDay);
+}
+
+Integer LegacyYear5000TieAdapter::select(
+    const LegacyAnswerRing& stream,
+    const LegacyYearCandidateList& sorted,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper) const {
+    const LegacyYearCandidateAdapter legacyAdapter;
+    return legacyAdapter.select(
+        stream,
+        sorted,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper);
 }
 
 Integer LegacyGateQuestionAdapter::ask(const Integer& magnitude) const {
@@ -4199,6 +4306,51 @@ void Patch16YearCandidateCeilingHandler::handle(
     validator.requirePatch16YearCandidateCeilingReady(ctx);
 }
 
+void Discovery17Year5000TieHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyYear5000TieAdapter& adapter,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_17_YEAR_5000_TIE";
+    ctx.currentHandler = "Discovery17Year5000TieHandler";
+    ctx.branchTrace.push_back("handler:discovery17:year5000:length-only-tie");
+
+    const LegacyYear5000TiePreparation prepared = adapter.prepare(
+        ctx.legacyYearGates,
+        ctx.legacyYearCandidatePairs,
+        ctx.calculationDay);
+    ctx.discovery17Year5000PreSort = prepared.preSort;
+    ctx.discovery17Year5000Sorted = prepared.sorted;
+    if (ctx.discovery17Year5000Sorted.empty()) {
+        throw BaseValidationError("familia year 5000 legacy vacua est");
+    }
+    ctx.discovery17Year5000SelectionRing = answerRingThroughPatchedNextBowl(
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.legacyYearQueriedBowlId,
+        ctx.patchedNextBowlOutput,
+        ctx.legacyYearSeal);
+    ctx.discovery17Year5000SelectionFamilySize =
+        Integer{ctx.discovery17Year5000Sorted.size()};
+    ctx.discovery17Year5000SelectionCalled = true;
+    ctx.discovery17Year5000SelectedOrdinal = adapter.select(
+        ctx.discovery17Year5000SelectionRing,
+        ctx.discovery17Year5000Sorted,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper);
+    const std::size_t index =
+        (ctx.discovery17Year5000SelectedOrdinal - 1).convert_to<std::size_t>();
+    ctx.discovery17Year5000SelectedCandidate =
+        ctx.discovery17Year5000Sorted[index];
+    ctx.discovery17Year5000Ready = true;
+    ctx.status = "YEAR_5000_TIE_LENGTH_ONLY_STABLE_ORDER_ACTIVE";
+    metrics.bump(ctx, "discovery17.year5000.tie.length-only");
+    validator.requireDiscovery17Year5000TieReady(ctx);
+}
+
 void BaseDispatcher::dispatchPatchedGateQuestion(
     BaseMonsterContext& ctx,
     const Patch15GateQuestionHandler& handler,
@@ -4777,6 +4929,26 @@ void BaseDispatcher::dispatchPatchedYearCandidates(
     handler.handle(ctx, wrapper, adapter, selectionAdapter, rejectionWrapper, wideWrapper, validator, metrics);
 }
 
+void BaseDispatcher::dispatchLegacyYear5000Tie(
+    BaseMonsterContext& ctx,
+    const Discovery17Year5000TieHandler& handler,
+    const LegacyYear5000TieAdapter& adapter,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("dispatcher:discovery17:year5000:length-only-tie");
+    handler.handle(
+        ctx,
+        adapter,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+}
+
 LegacyGateQuestionReport BaseMonsterManager::executeLegacyGateQuestionDay(
     const Integer& signedStep) const {
     BaseMonsterContext ctx;
@@ -4977,6 +5149,80 @@ LegacyYearCandidateReport BaseMonsterManager::executeUnpatchedYearCandidateDisco
         ctx.legacyYearSelectedOrdinal,
         ctx.legacyYearSelectedCandidate,
         ctx.patch15Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+LegacyYear5000TieReport BaseMonsterManager::executeLegacyYear5000TieDiscovery(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    const std::vector<Integer>& gates,
+    const std::vector<LegacyYearCandidatePair>& pairs,
+    int queriedBowlId,
+    int seal) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_17_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyGateQuestionSignedStep = 0;
+    ctx.legacyNextBowlQueriedId = queriedBowlId;
+    ctx.legacyYearQueriedBowlId = queriedBowlId;
+    ctx.legacyYearSeal = seal;
+    ctx.legacyYearGates = gates;
+    ctx.legacyYearCandidatePairs = pairs;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyGateQuestionAdapter gateAdapter;
+    const Discovery15GateQuestionHandler gateLegacyHandler;
+    const Patch15NegativeGateQuestionWrapper gateWrapper;
+    const Patch15GateQuestionHandler gateHandler;
+    const LegacyOrderMemorySauceAdapter orderMemoryAdapter;
+    const Patch11OrderAt46LatchWrapper latchWrapper;
+    const Patch11OrderAt46LatchHandler latchHandler;
+    const LegacyNextBowlAdapter nextBowlAdapter;
+    const Patch12NextBowlWrapper nextBowlWrapper;
+    const Patch12NextBowlHandler nextBowlHandler;
+    const LegacyYear5000TieAdapter yearTieAdapter;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const Patch14WideDetourWrapper wideWrapper;
+    const Discovery17Year5000TieHandler tieHandler;
+    const BaseDispatcher dispatcher;
+
+    dispatcher.dispatchPatchedGateQuestion(
+        ctx, gateHandler, gateLegacyHandler, gateAdapter, gateWrapper, validator, metrics);
+    dispatcher.dispatchPatchedOrderAt46Latch(
+        ctx, latchHandler, orderMemoryAdapter, latchWrapper, validator, metrics);
+    dispatcher.dispatchPatchedNextBowl(
+        ctx, nextBowlHandler, nextBowlAdapter, nextBowlWrapper, validator, metrics);
+    dispatcher.dispatchLegacyYear5000Tie(
+        ctx,
+        tieHandler,
+        yearTieAdapter,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+
+    return LegacyYear5000TieReport{
+        calculationDay,
+        gates,
+        pairs,
+        ctx.discovery17Year5000PreSort,
+        ctx.discovery17Year5000Sorted,
+        ctx.discovery17Year5000SelectionRing,
+        ctx.discovery17Year5000SelectionFamilySize,
+        ctx.discovery17Year5000SelectionCalled,
+        ctx.discovery17Year5000SelectedOrdinal,
+        ctx.discovery17Year5000SelectedCandidate,
+        ctx.discovery17Year5000Ready,
         ctx.phase,
         ctx.status,
         ctx.currentHandler,

@@ -344,3 +344,63 @@ Eadem versio probationis contra fontem Gradus 32 pristinum adhuc 5779..5781 ad s
 Probe additivum duas candidatas longitudinis 490 in ordine inputuum `openIndex 2,0` ponit. Post PATCH 16 ordo idem `2,0` manet. Hoc demonstrat filter 5778 ante ordinationem recte insertum esse, sed tie repair per opening gate nondum exsistere.
 
 Omnes regressiones Graduum 1–33 transeunt. Nullus `sortEqualLengthRunsByOpeningGate`, nullus PATCH 17, nullus `patch17Applied` et nullus `oldJumpGuess` in productione adsunt.
+
+
+## DISCOVERY 17 — tie in anno 5000 sub stable sort per longitudinem solam
+
+Gradus 34 viam candidatorum anni 5000 separatam addit post correctionem ceiling Gradus 33. `legacyYear5000TiePreparation` singulum par portarum per `yearCandidateAfterFootnotePatch` transit, ergo `LEGACY_YEAR_MAX=5781` et filter semanticus `REAL_YEAR_MAX_PATCH=5778` manent in effectu. Deinde candidatus tantum retinetur si:
+
+```text
+GATE[open] < calculationDay <= GATE[close]
+```
+
+Familia sic parata adhuc per cicatricem `legacyStableLengthOnlyYearCandidates` ordinatur. Nulla clavis secundaria ad opening gate adhibetur.
+
+Via activa est:
+
+```text
+BaseMonsterManager::executeLegacyYear5000TieDiscovery
+-> Patch 15
+-> Patch 11
+-> Patch 12
+-> BaseDispatcher::dispatchLegacyYear5000Tie
+-> Discovery17Year5000TieHandler
+-> LegacyYear5000TieAdapter
+-> legacyYear5000TiePreparation
+-> legacyStableLengthOnlyYearCandidates
+-> selectio iam emendata
+```
+
+### Witness tie
+
+Portae testis distant 50 dies. `calculationDay` est 225 dies post portam basis. Tres pares consulto hoc ordine traduntur:
+
+```text
+(openIndex,closeIndex) = (4,10), (0,6), (2,8)
+```
+
+Omnes tres sex intervalla habent, longitudinem 300 habent, ceiling 5778 servant et diem calculationis continent. Ordo inputuum opening indices est:
+
+```text
+4,0,2
+```
+
+Quia omnes longitudines aequales sunt, stable sort legacy per longitudinem solam eundem ordinem servat:
+
+```text
+4,0,2
+```
+
+Regula normativa post futura correctione intra run aequalis longitudinis opening gate maturiorem anteponit, unde ordo expectatus est:
+
+```text
+0,2,4
+```
+
+Tres positiones omnes discrepant. Regressio Gradus 34 hunc numerum exactum exspectat et exitum 1 reddit. Selectio ipsa vere vocatur cum familia magnitudinis 3; defectus igitur non est familia vacua neque ceiling, sed sola ordinatio tie.
+
+Omnes regressiones Graduum 1–33 denuo compilatae et exsecutae sunt; omnes transeunt.
+
+### Quod consulto nondum adest
+
+Nulla functio `sortEqualLengthRunsByOpeningGate`, nullus comparator secundarius, nullus PATCH 17 et nullus `patch17Applied` adsunt. Stable sort length-only manet cicatrix productionis. Gradus 35 solus debet post hunc primum sort invenire runs aequalis longitudinis et solum singulos runs per opening gate maturiorem ordinare; non licet in sort duarum clavium mundum reficere.

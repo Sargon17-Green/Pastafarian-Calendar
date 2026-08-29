@@ -1036,3 +1036,32 @@ Additi sunt `REAL_YEAR_MAX_PATCH`, `Patch16YearCandidateDecision`, `Patch16YearC
 ### Quod consulto nondum adest
 
 Nulla ordinatio runs aequalium per opening gate, nullus `sortEqualLengthRunsByOpeningGate`, nullus PATCH 17 et nullus `oldJumpGuess` adsunt. Gradus 34 debet esse DISCOVERY 17 et stable sort per longitudinem solam in tie reali exponere.
+
+
+## Gradus 34 — DISCOVERY 17: tie anni 5000 ordinem inputuum legacy servat
+
+### Quid putabatur
+
+Post PATCH 16 ceiling candidatorum iam correctum est, sed anchor anni 5000 adhuc ordinationem historicam stabilem secundum longitudinem solam retinet. Defectus tie non corrigendus est hoc gradu; primo per viam activam manifestandus est.
+
+### Via anni 5000
+
+`legacyYear5000TiePreparation` candidatas ex paribus portarum construit. Singulus par primum `yearCandidateAfterFootnotePatch` transit, deinde conditio inclusionis anni 5000 `openDay < calculationDay <= closeDay` verificatur. Familia admissorum tandem per `legacyStableLengthOnlyYearCandidates` ordinatur.
+
+`LegacyYear5000TieAdapter` praeparationem et selectionem involvit. `Discovery17Year5000TieHandler` familiam ante sortem, familiam sortatam, answer ring, magnitudinem selectionis, ordinalem et candidatum electum in contextu invocationis servat. `requireDiscovery17Year5000TieReady` eandem praeparationem legacy repetit et confirmat saltem unum run aequalis longitudinis adesse, sine oracle et sine correctione tie.
+
+### Witness
+
+Tres candidati longitudinis 300 diem calculationis continent. Input opening indices sunt `4,0,2`. Quia stable sort tantum longitudinem videt, output legacy manet `4,0,2`. Ordo normativus intra run per opening gate maturiorem est `0,2,4`. Tres positiones discrepant et regressio exitum 1 reddit.
+
+Selectio post sortem vere currit cum familia magnitudinis 3. Sic defectus non est in ceiling, containment, selector, answer ring aut generatione candidatorum; solum tie stable-sort legacy est.
+
+Omnes regressiones Graduum 1–33 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `LegacyYear5000TiePreparation`, `legacyYear5000TiePreparation`, campi contextus Discovery 17, `LegacyYear5000TieReport`, `LegacyYear5000TieAdapter`, `Discovery17Year5000TieHandler`, `requireDiscovery17Year5000TieReady`, `dispatchLegacyYear5000Tie` et `executeLegacyYear5000TieDiscovery`.
+
+### Quod consulto nondum adest
+
+Nullus `sortEqualLengthRunsByOpeningGate`, nullus PATCH 17, nullus `patch17Applied`, nullus `oldJumpGuess` et nullus codex PATCH 18 adsunt. Gradus 35 debet stable sort primum servare et postea solum runs aequalis longitudinis ordinare secundum opening gate maturiorem.
