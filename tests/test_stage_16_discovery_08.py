@@ -14,6 +14,7 @@ from pastafari_calendar.legacy_permutation import (
     LegacyPermutationOrderAdapter,
     legacyOrderFromDropWrong,
     oldPermutationUnrank0,
+    patchedOrderFromDrop,
 )
 from pastafari_calendar.legacy_stones import LegacyStoneBuilderAdapter
 from pastafari_calendar.legacy_visible_grinds import (
@@ -82,7 +83,7 @@ class Stage16Discovery08Tests(unittest.TestCase):
                 720,
             )
 
-    def test_wrong_rank_conversion_is_on_the_real_calendar_path(self):
+    def test_zero_based_unrank_helper_remains_on_the_real_calendar_path(self):
         with patch(
             "pastafari_calendar.legacy_permutation.oldPermutationUnrank0",
             wraps=oldPermutationUnrank0,

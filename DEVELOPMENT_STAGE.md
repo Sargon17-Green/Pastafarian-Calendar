@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=16
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=17
+CURRENT_KIND=PATCH
 CURRENT_PATCH=08
-LAST_COMPLETED_STAGE=16
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=17
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=oldPermutationUnrank0 0-based tarihsel helper olarak eklendi; legacyOrderFromDropWrong drop değerinden 1-based 1..720 sıra numarası üretip bunu yanlışlıkla doğrudan rank0 olarak helper'a veriyor; LegacyPermutationOrderAdapter 46 görünür damlanın order tablosunu gerçek state-machine zincirine bağladı, pours henüz başlatılmadı
+MONSTER_ARCHITECTURE_GROWTH=oldPermutationUnrank0 ve legacyOrderFromDropWrong fiziksel scar olarak korundu; PermutationRankPatchWrapper yanlış caller'ı gerçekten çalıştırıp ham order/error scar'ını tuttu ve authoritative oneBased -> legacyRank0=oneBased-1 -> oldPermutationUnrank0 zincirini uyguladı; 46-drop order tablosu patched yol üzerinden exact hâle geldi
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

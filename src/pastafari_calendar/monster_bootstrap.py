@@ -105,6 +105,13 @@ class MonsterContext:
     legacy_permutation_last_order: tuple[int, ...] | None = None
     legacy_permutation_invalid_one_based: int | None = None
     legacy_permutation_invalid_drop_index: int | None = None
+    patch08_drop_index: int | None = None
+    patch08_one_based: int | None = None
+    patch08_legacy_rank0: int | None = None
+    patch08_legacy_wrong_order: tuple[int, ...] | None = None
+    patch08_legacy_wrong_error: str | None = None
+    patch08_corrected_order: tuple[int, ...] | None = None
+    patch08_applied: bool = False
 
 
 class BaseMetrics:

@@ -714,3 +714,64 @@ Invocation bağlamında 46-order tablosu, son drop indeksi/değeri, hesaplanan 1
 Varsa `oneBased=720` uç durumu ayrıca invocation-local scar alanlarında tutulur.
 
 Bu aşamada `legacyRank0 = oneBased - 1` yoktur. Patch 08 zinciri henüz eklenmemiştir. Stage 15 sentinel olduğu gibi korunur.
+
+
+## Aşama 17 — Yama 08: 1-based order numarasını legacy rank0'a çevirmek
+
+### Ne aşıldı
+
+`oldPermutationUnrank0(rank0)` değiştirilmedi.
+
+Discovery 08'in yanlış caller'ı da fiziksel olarak korunur:
+
+```text
+oneBased = regularMod(drop-1,720)+1
+legacyOrderFromDropWrong(drop)
+    -> oldPermutationUnrank0(oneBased)
+```
+
+Patch authoritative zinciri ayrı fonksiyondadır:
+
+```text
+oneBased = regularMod(drop-1,720)+1
+legacyRank0 = oneBased-1
+order = oldPermutationUnrank0(legacyRank0)
+```
+
+### Neden normatif olarak eşdeğer
+
+Normatif bowl order numarası 1-based `1..720` aralığındadır.
+
+Tarihsel unrank helper 0-based `0..719` aralığını bekler.
+
+Bu iki coordinate sistemi arasındaki tek exact dönüşüm:
+
+```text
+legacyRank0 = oneBased - 1
+```
+
+eşitliğidir.
+
+Böylece `oneBased=1 -> rank0=0` ve `oneBased=720 -> rank0=719` olur.
+
+### Ne korundu
+
+`PermutationRankPatchWrapper`, Discovery 08'in yanlış caller'ını önce gerçekten çağırır.
+
+Yanlış caller başarılıysa yanlış order scar olarak tutulur.
+
+`oneBased=720` durumunda yanlış caller'ın `ValueError` üretmesi de scar olarak tutulur; authoritative patch yine rank0=719 ile doğru order'ı üretir.
+
+Ardından zorunlu patched chain çalışır ve yalnızca corrected order semantic sonuç olarak döner.
+
+Aşama 16'nın normatif order regresyonunun gövdesi byte-for-byte değiştirilmedi ve yalnızca bu rank çevirisi sayesinde yeşile döndü.
+
+### Bu aşamada eklenen canavar katmanı
+
+Invocation bağlamında drop index, oneBased, legacyRank0, yanlış caller order/error scar'ı, corrected order ve patch uygulanma durumu ayrı tutulur.
+
+Bütün 46 visible-drop order'ı test-only normatif bowl order ile eşleşir.
+
+Stage 15'in kalıcı grind sentinel row'u aynen korunur.
+
+Pours, bowlAlias ve Patch 09 henüz başlatılmamıştır.

@@ -45,7 +45,79 @@ def legacyOrderFromDropWrong(
     )
 
 
+def patchedOrderFromDrop(
+    drop_value: int,
+) -> tuple[int, ...]:
+    one_based = regularMod(
+        drop_value - 1,
+        720,
+    ) + 1
+    legacy_rank0 = one_based - 1
+    return oldPermutationUnrank0(
+        legacy_rank0,
+    )
+
+
+class PermutationRankPatchWrapper:
+    def repair(
+        self,
+        ctx,
+        drop_index: int,
+        drop_value: int,
+    ) -> tuple[int, ...]:
+        one_based = regularMod(
+            drop_value - 1,
+            720,
+        ) + 1
+        legacy_rank0 = one_based - 1
+
+        ctx.branch_trace.append(
+            (
+                "YAMA_08_PERMÜTASYON_RANKI",
+                drop_index,
+                one_based,
+                legacy_rank0,
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-08-permütasyon-rankı",
+                drop_index,
+                one_based,
+                legacy_rank0,
+            )
+        )
+
+        legacy_wrong = None
+        legacy_wrong_error = None
+
+        # Discovery 08 caller scar'ı kaldırılmaz; gerçekten çalıştırılır.
+        try:
+            legacy_wrong = legacyOrderFromDropWrong(
+                drop_value,
+            )
+        except ValueError as error:
+            legacy_wrong_error = str(error)
+
+        corrected = patchedOrderFromDrop(
+            drop_value,
+        )
+
+        ctx.patch08_drop_index = drop_index
+        ctx.patch08_one_based = one_based
+        ctx.patch08_legacy_rank0 = legacy_rank0
+        ctx.patch08_legacy_wrong_order = legacy_wrong
+        ctx.patch08_legacy_wrong_error = legacy_wrong_error
+        ctx.patch08_corrected_order = corrected
+        ctx.patch08_applied = True
+
+        return corrected
+
+
 class LegacyPermutationOrderAdapter:
+    def __init__(self) -> None:
+        self.patch_wrapper = PermutationRankPatchWrapper()
+
     def order_from_drop(
         self,
         ctx,
@@ -80,7 +152,9 @@ class LegacyPermutationOrderAdapter:
         ctx.legacy_permutation_last_one_based = one_based
         ctx.legacy_permutation_last_order = None
 
-        order = legacyOrderFromDropWrong(
+        order = self.patch_wrapper.repair(
+            ctx,
+            drop_index,
             drop_value,
         )
 
@@ -96,25 +170,11 @@ class LegacyPermutationOrderAdapter:
 
         i = 1
         while i <= 46:
-            try:
-                orders[i] = self.order_from_drop(
-                    ctx,
-                    i,
-                    visible_drops[i],
-                )
-            except ValueError:
-                ctx.legacy_permutation_invalid_one_based = (
-                    regularMod(
-                        visible_drops[i] - 1,
-                        720,
-                    )
-                    + 1
-                )
-                ctx.legacy_permutation_invalid_drop_index = i
-                ctx.warnings.append(
-                    "Eski permütasyon yolu 1-based 720 değerini rank0 olarak kullanamadı"
-                )
-                orders[i] = tuple()
+            orders[i] = self.order_from_drop(
+                ctx,
+                i,
+                visible_drops[i],
+            )
             i += 1
 
         result = tuple(orders)

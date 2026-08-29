@@ -1,31 +1,34 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 16/55, `DISCOVERY 08` durumundadır. Sekizinci tarihsel kusur gerçek state-machine zincirine eklenmiştir.
+Aşama 17/55, `PATCH 08` durumundadır.
 
-`oldPermutationUnrank0(rank0)` fiziksel olarak 0-based helper'dır ve `0..719` rank aralığında doğru lexicographic permütasyonu üretir.
+Tarihsel 0-based helper fiziksel olarak değişmez:
 
-Kusur çağrı katmanındadır:
+```text
+oldPermutationUnrank0(rank0)
+```
+
+Discovery 08'in yanlış caller'ı da scar olarak kodda kalır.
+
+Authoritative patch chain tam olarak:
 
 ```text
 oneBased = regularMod(drop-1,720)+1
-order = oldPermutationUnrank0(oneBased)
+legacyRank0 = oneBased-1
+order = oldPermutationUnrank0(legacyRank0)
 ```
 
-Yani 1-based `1..720` order numarası yanlışlıkla doğrudan rank0 olarak kullanılır.
+biçimindedir.
 
-Böylece `oneBased=1` ilk permütasyon yerine ikinci permütasyona gider; `oneBased=720` ise helper aralığının dışındadır.
+`PermutationRankPatchWrapper` önce yanlış caller'ı gerçekten çalıştırır ve yanlış order veya `oneBased=720` hata scar'ını invocation-local bağlamda tutar. Sonra patched chain sonucunu semantic order olarak döndürür.
 
-`LegacyPermutationOrderAdapter`, 46 görünür damlanın legacy order tablosunu gerçek `calendar_date_spaghetti` state-machine yoluna bağlar. Pours henüz başlatılmamıştır.
+Aşama 16'nın normatif permutation-rank regresyonu değiştirilmeden yeşile dönmüştür. 46 görünür drop order'ının tamamı test-only normatif bowl order ile eşleşir.
 
-Yeni normatif regresyon gerçek order-table yolunun `i=1`, `i=2` ve `i=46` değerlerini test-only normatif bowl order ile karşılaştırır ve bilinçli olarak kırmızıdır.
-
-Henüz `PATCH 08` yoktur: `legacyRank0 = oneBased-1` çevirisi eklenmemiştir.
-
-Stage 15'in kalıcı grind sentinel row'u korunur. Önceki Aşama 1–15 regresyonlarının tamamı yeşildir. Gelecekteki 09–26 kusur ve yamaları üretime eklenmemiştir.
+Stage 15'in kalıcı sentinel row'u korunur. Pours ve `bowlAlias` henüz eklenmemiştir. Gelecekteki 09–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -41,10 +44,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam on altıncı aşama paketi:
+Tam on yedinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–15 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni permutation-rank normatif regresyonunun `i=1`, `i=2` ve `i=46` alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 16'da kırmızı olan `i=1`, `i=2` ve `i=46` permutation-order alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.
