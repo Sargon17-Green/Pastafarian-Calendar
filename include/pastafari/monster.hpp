@@ -28,6 +28,7 @@ using Stone = std::array<Integer, 5>;
 using StoneTable = std::array<Stone, 47>;
 using HiddenDrops = std::array<Integer, 7>;
 using VisibleDropStore = std::vector<Integer>;
+using PermutationOrder = std::array<int, 6>;
 
 enum class GrindStoneKind {
     NONE = -1,
@@ -56,6 +57,7 @@ const std::array<VisibleGrindRow, 11>& legacyVisibleGrindTableZeroBased();
 LegacyGrindLookup legacyGrindRow(int grind);
 const std::array<VisibleGrindRow, 12>& grindTableWithSentinel();
 LegacyGrindLookup grindRowWithSentinel(int grind);
+PermutationOrder oldPermutationUnrank0(int rank0);
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -127,6 +129,11 @@ struct BaseMonsterContext {
     VisibleGrindRow patchedGrindOutput{};
     bool patchedGrindFound = false;
     bool patch07Applied = false;
+    int legacyPermutationCallerRank1 = 0;
+    int legacyPermutationRank0Input = -1;
+    PermutationOrder legacyPermutationOutput{};
+    bool legacyPermutationFound = false;
+    bool legacyPermutationReady = false;
 };
 
 struct BaseRunReport {
@@ -207,6 +214,17 @@ struct LegacyPriorReport {
     bool patch06Applied = false;
 };
 
+struct PermutationRankReport {
+    int oneBasedRank = 0;
+    PermutationOrder output{};
+    bool found = false;
+    int legacyRank0Input = -1;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 struct GrindLookupReport {
     int grind = 0;
     VisibleGrindRow output{};
@@ -243,6 +261,7 @@ public:
     void requirePatch06Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyGrindReady(const BaseMonsterContext& ctx) const;
     void requirePatch07Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyPermutationReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -280,6 +299,11 @@ public:
 class LegacyPriorAdapter {
 public:
     Integer read(const VisibleDropStore& dropStore, int i, int back) const;
+};
+
+class LegacyPermutationAdapter {
+public:
+    PermutationOrder unrank0(int rank0) const;
 };
 
 class LegacyGrindTableAdapter {
@@ -446,6 +470,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery08PermutationRankHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyPermutationAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -536,6 +568,12 @@ public:
                                   const BaseValidationManager& validator,
                                   const BaseMetricsShell& metrics) const;
 
+    void dispatchLegacyPermutationRank(BaseMonsterContext& ctx,
+                                       const Discovery08PermutationRankHandler& handler,
+                                       const LegacyPermutationAdapter& adapter,
+                                       const BaseValidationManager& validator,
+                                       const BaseMetricsShell& metrics) const;
+
     void dispatchPatchedGrindIndex(BaseMonsterContext& ctx,
                                    const Patch07GrindIndexHandler& handler,
                                    const LegacyGrindTableAdapter& adapter,
@@ -572,6 +610,7 @@ public:
                                                       int back) const;
     GrindLookupReport executeGrindRow(int grind) const;
     GrindLookupReport executeUnpatchedGrindDiagnostic(int grind) const;
+    PermutationRankReport executePermutationOrder(int oneBasedRank) const;
 };
 
 } // namespace pastafari

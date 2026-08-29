@@ -289,6 +289,30 @@ LegacyGrindLookup grindRowWithSentinel(int grind) {
     return LegacyGrindLookup{table[static_cast<std::size_t>(physicalIndex)], physicalIndex, true};
 }
 
+PermutationOrder oldPermutationUnrank0(int rank0) {
+    if (rank0 < 0 || rank0 >= 720) {
+        throw BaseValidationError("gradus permutationis legacy inter nullum et DCCXIX requiritur");
+    }
+
+    std::vector<int> available{1, 2, 3, 4, 5, 6};
+    PermutationOrder order{};
+    const std::array<int, 6> divisors{{120, 24, 6, 2, 1, 1}};
+    int remnant = rank0;
+
+    for (std::size_t pos = 0; pos < order.size(); ++pos) {
+        const int divisor = divisors[pos];
+        const int choice = remnant / divisor;
+        remnant %= divisor;
+        if (choice < 0 || choice >= static_cast<int>(available.size())) {
+            throw BaseValidationError("digitus factoradicus legacy extra fines est");
+        }
+        order[pos] = available[static_cast<std::size_t>(choice)];
+        available.erase(available.begin() + choice);
+    }
+
+    return order;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -477,6 +501,32 @@ void BaseValidationManager::requirePatch07Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyPermutationReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyPermutationReady) {
+        throw BaseValidationError("permutatio legacy nondum perfecta est");
+    }
+    if (ctx.legacyPermutationCallerRank1 < 1 || ctx.legacyPermutationCallerRank1 > 720) {
+        throw BaseValidationError("ordinalis permutationis caller inter unum et DCCXX requiritur");
+    }
+    if (ctx.legacyPermutationRank0Input != ctx.legacyPermutationCallerRank1) {
+        throw BaseValidationError("caller legacy ordinalem one-based directe ut rank0 non servavit");
+    }
+    if (!ctx.legacyPermutationFound) {
+        if (ctx.legacyPermutationRank0Input != 720) {
+            throw BaseValidationError("rank0 legacy intra fines permutationem non reddidit");
+        }
+        return;
+    }
+
+    std::array<bool, 7> seen{};
+    for (const int value : ctx.legacyPermutationOutput) {
+        if (value < 1 || value > 6 || seen[static_cast<std::size_t>(value)]) {
+            throw BaseValidationError("permutatio legacy structuram sex elementorum non servavit");
+        }
+        seen[static_cast<std::size_t>(value)] = true;
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -525,6 +575,10 @@ LegacyGrindLookup LegacyGrindTableAdapter::read(int grind) const {
 
 LegacyGrindLookup Patch07SentinelGrindWrapper::read(int grind) const {
     return grindRowWithSentinel(grind);
+}
+
+PermutationOrder LegacyPermutationAdapter::unrank0(int rank0) const {
+    return oldPermutationUnrank0(rank0);
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -959,6 +1013,40 @@ void Patch07GrindIndexHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch07.grind.ready");
 }
 
+void Discovery08PermutationRankHandler::handle(BaseMonsterContext& ctx,
+                                                const LegacyPermutationAdapter& adapter,
+                                                const BaseValidationManager& validator,
+                                                const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery08PermutationRankHandler";
+    ctx.phase = "DISCOVERY_08_PERMUTATION_ZERO_BASED_CALL";
+    ctx.status = "LEGACY_PERMUTATION_ZERO_BASED_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_08_PERMUTATION_ZERO_BASED_CALL");
+    metrics.bump(ctx, "discovery08.permutation.calls");
+
+    ctx.legacyPermutationRank0Input = ctx.legacyPermutationCallerRank1;
+    try {
+        ctx.legacyPermutationOutput = adapter.unrank0(ctx.legacyPermutationRank0Input);
+        ctx.legacyPermutationFound = true;
+    } catch (const BaseValidationError&) {
+        ctx.legacyPermutationOutput = PermutationOrder{};
+        ctx.legacyPermutationFound = false;
+    }
+    ctx.legacyPermutationReady = true;
+
+    ctx.phase = "DISCOVERY_08_PERMUTATION_ZERO_BASED_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_08_PERMUTATION_ZERO_BASED_VALIDATE");
+    validator.requireLegacyPermutationReady(ctx);
+
+    ctx.phase = "DISCOVERY_08_PERMUTATION_ZERO_BASED_EXPOSED";
+    ctx.status = ctx.legacyPermutationFound
+        ? "LEGACY_PERMUTATION_SHIFTED_ORDER_EXPOSED"
+        : "LEGACY_PERMUTATION_RANK_REJECTED";
+    ctx.branchTrace.push_back("DISCOVERY_08_PERMUTATION_ZERO_BASED_EXPOSED");
+    metrics.bump(ctx, ctx.legacyPermutationFound
+        ? "discovery08.permutation.shifted"
+        : "discovery08.permutation.rejected");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -1178,6 +1266,19 @@ void BaseDispatcher::dispatchPatchedGrindIndex(BaseMonsterContext& ctx,
     ctx.branchTrace.push_back("PATCH_07_DISPATCH");
     metrics.bump(ctx, "patch07.dispatch.calls");
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void BaseDispatcher::dispatchLegacyPermutationRank(BaseMonsterContext& ctx,
+                                                   const Discovery08PermutationRankHandler& handler,
+                                                   const LegacyPermutationAdapter& adapter,
+                                                   const BaseValidationManager& validator,
+                                                   const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_08_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_08_DISPATCH");
+    metrics.bump(ctx, "discovery08.dispatch.calls");
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -1602,6 +1703,34 @@ GrindLookupReport BaseMonsterManager::executeUnpatchedGrindDiagnostic(int grind)
     return GrindLookupReport{ctx.legacyGrindOrdinal, ctx.legacyGrindOutput, ctx.legacyGrindFound,
         ctx.legacyGrindPhysicalIndex, ctx.phase, ctx.status, ctx.currentHandler, ctx.branchTrace.size(),
         ctx.legacyGrindOutput, ctx.legacyGrindFound, false};
+}
+
+PermutationRankReport BaseMonsterManager::executePermutationOrder(int oneBasedRank) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_08_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyPermutationCallerRank1 = oneBasedRank;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyPermutationAdapter adapter;
+    const Discovery08PermutationRankHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyPermutationRank(ctx, handler, adapter, validator, metrics);
+
+    return PermutationRankReport{
+        ctx.legacyPermutationCallerRank1,
+        ctx.legacyPermutationOutput,
+        ctx.legacyPermutationFound,
+        ctx.legacyPermutationRank0Input,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+    };
 }
 
 } // namespace pastafari

@@ -387,3 +387,31 @@ Additio valoris enum technici `NONE` warning in printer testis Gradus 14 creabat
 Additi sunt `GrindStoneKind::NONE`, `grindTableWithSentinel`, `grindRowWithSentinel`, `patchedGrindOutput`, `patchedGrindFound`, `patch07Applied`, `Patch07SentinelGrindWrapper`, `Patch07GrindIndexHandler`, `dispatchPatchedGrindIndex`, `requirePatch07Ready` et `executeUnpatchedGrindDiagnostic`. `GrindLookupReport` nunc exitum legacy ante patch et signum patch servat.
 
 Nullus codex DISCOVERY 08 vel PATCH 08 additus est.
+
+## Gradus 16 — Detectio 08: rank permutationis zero-based sub ordinali one-based
+
+### Quid putabatur
+
+Post sentinellam molitionis, subsystema ad ordinem sex craterum pervenit. Helper vetus permutationis ab indice mathematico nullo incipiebat: `oldPermutationUnrank0(rank0)` spatium exactum `0..719` in ordinem lexicographicum sex elementorum vertebat. Caller autem numerum ordinis iam semanticum et one-based tractabat. Quia utraque pars numeros parvos integros videbat, conventio diversae originis diu latere potuit.
+
+### Quid repertum est
+
+Helper legacy in proprio dominio rectus est. `oldPermutationUnrank0(0)` identitatem `[1,2,3,4,5,6]` reddit et `oldPermutationUnrank0(719)` ultimam permutationem `[6,5,4,3,2,1]` reddit; rank0 720 rite reicitur.
+
+Vitium nascitur in via activa. `Discovery08PermutationRankHandler` ordinalem calleris `1..720` sine ulla translatione in `legacyPermutationRank0Input` ponit et ad adapter transmittit. Itaque ordinalis 1 permutationem rank0 1, ordinalis 2 rank0 2 et sic porro legit. Ordinalis 720 omnino extra dominium helperis cadit.
+
+Regressio localis quinque puncta marginis et initii probat. Omnia quinque discrepant: 1, 2, 3 et 719 permutationem sequentem accipiunt; 720 absentem accipit. Omnes regressiones priorum graduum manent virides.
+
+### Quid circumventum est
+
+Nihil hoc gradu circumventum est. `oldPermutationUnrank0` non mutatur ad conventionem one-based neque caller subtractio unius facit. `LegacyPermutationAdapter` helper zero-based directe vocat; `Discovery08PermutationRankHandler` rank one-based directe ut rank0 servat et eventum vel reiectionem exponit.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Norma permutationis ordinales `1..720` requirit, ubi 1 est prima permutatio et 720 ultima. Via activa autem functioni zero-based eosdem numeros transmittit. Pro `1..719` hoc est exacta translatio +1 in ordine lexicographico; pro 720 est extra fines. Ergo ne primus neque ultimus terminus normativus recte redditur.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `PermutationOrder`, campi contextus rank calleris et rank0 legacy, `PermutationRankReport`, `oldPermutationUnrank0`, `LegacyPermutationAdapter`, `Discovery08PermutationRankHandler`, validator structurae permutationis et dispatchatio propria. Error rank0 720 in handler in statum `found=false` convertitur ut regressio divergence totam viam observare possit; nulla substitutio semantica fit.
+
+Nullus bridge one-based, nullus wrapper PATCH 08 et nulla structura pours sequentis gradus addita est.
