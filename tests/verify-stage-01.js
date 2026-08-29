@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('production resta pur de textu hebreic e correctiones futur pos Patch 25', () => {
+group('production resta pur de textu hebreic e correction reparativ de Patch 26 durant Discovery 26', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('production resta pur de textu hebreic e correctiones futur pos Patch 25',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'OpeningGateIntervalPatchWrapper'
+    'OpeningGateIntervalPatchWrapper', 'correctOpeningGateInterval'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
@@ -2166,7 +2166,29 @@ group('Patch 25 superscri li guess contigui per occurrence count til target incl
   ok(!('OpeningGateIntervalPatchWrapper' in production));
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 25', () => {
+group('Discovery 26 conserva li interval legacy cludet al opening gate e lassa Patch 26 absent', () => {
+  ok(typeof production.legacyFindYearClosedOpeningInterval === 'function');
+  ok(typeof production.LegacyOpeningGateIntervalAdapter === 'function');
+  ok(typeof production.Discovery26OpeningGateIntervalHandler === 'function');
+  ok(typeof production.discovery26LegacyOpeningGateIntervalThroughMonsterPath === 'function');
+  const source = production.legacyFindYearClosedOpeningInterval.toString();
+  ok(source.includes('targetDay < current.openDay'));
+  ok(source.includes('current.openDay <= targetDay'));
+  ok(!source.includes('targetDay <= current.openDay'));
+  const anchor = { number: 5001n, openDay: 100n, firstDay: 101n, closeDay: 200n };
+  const result = production.legacyFindYearClosedOpeningInterval(
+    anchor, 100n,
+    (year) => ({ number: year.number + 1n, openDay: year.closeDay, firstDay: year.closeDay + 1n, closeDay: year.closeDay + 100n }),
+    (year) => ({ number: year.number - 1n, openDay: year.openDay - 100n, firstDay: year.openDay - 99n, closeDay: year.openDay })
+  );
+  eq(result.year.number, 5001n);
+  eq(result.stepCount, 0n);
+  ok(result.openingBoundaryAccepted);
+  ok(!('OpeningGateIntervalPatchWrapper' in production));
+  ok(!('correctOpeningGateInterval' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 26', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2178,4 +2200,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 25.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 26.');

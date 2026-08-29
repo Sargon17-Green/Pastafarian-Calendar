@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=51
-CURRENT_KIND=PATCH
-CURRENT_PATCH=25
-LAST_COMPLETED_STAGE=51
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=52
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=26
+LAST_COMPLETED_STAGE=52
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,17 +15,17 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus countMonthOccurrencesThroughTarget e MonthDayOccurrencePatchWrapper: oldContiguousMonthDayGuess resta activ e es executet prim, ma li semantic day-in-month es sempre superscrit per li occurrence count del monthId desde li initie del year til li target inclusiv.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus legacyFindYearClosedOpeningInterval, LegacyOpeningGateIntervalAdapter e Discovery26OpeningGateIntervalHandler: li final layer legacy tracta li year quam [open,close] e accepte li opening gate quam proprietá del year quel comensa ta.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 51 es finit quam **PATCH 25** e li repository local es `GREEN`.
+Stage 52 es finit quam **DISCOVERY 26** e li repository local es intentionalmen `EXPECTED_RED`.
 
-`oldContiguousMonthDayGuess(weaving,targetPosition)` resta fisicmen sin modification e li route reparat executa realmen Discovery 25 ante li patch. Li guess 78 del witness, su monthId, first position e intertexe resta state diagnostic invocation-local.
+`legacyFindYearClosedOpeningInterval(anchor,targetDay,nextYear,previousYear)` conserva li defect historic final: it camina avante quand `targetDay>closeDay`, ma camina retro solmen quand `targetDay<openDay`. Ergo `targetDay==openDay` es acceptet in li year current e li interval legacy es `[open,close]`.
 
-`countMonthOccurrencesThroughTarget` prende li monthId exact al target e conta solmen su occurrences in positions 1..targetPosition inclusiv. `MonthDayOccurrencePatchWrapper` exige li resultate de Discovery 25 e superscri li semantic day-in-month per ti count sin condition: si li guess old ja es correct li valore resta egal; si occurrences es intertexet, li distance contigui es ignorat semanticmen.
+`Discovery26OpeningGateIntervalHandler` veni pos Patch 25. Por un target exact al close gate del year authoritative ja resoluet, li handler expone li ownership errat per reancrar al adjacent year quel comensa al sam gate e poy executar li finder legacy. Li scar retorna Year 5001 por li shared gate, durante que li state authoritative de Patch 18 conserva Year 5000. Null correction es applicat in ti stage.
 
-Li witness real conserva target position 92, monthId 9, first position 15 e guess old 78; li count correct es 14 e li resultate semantic es 14. Omni regressions, li verifier, `test:patch-25` e `npm test` passa. Null correction de Patch 26 es present.
+Li witness real usa li shared gate `-15054661`: li legacy semantic year es 5001, li year normativ precedent es 5000 e li backward step count legacy es 0. `test:previous` e li verifier passa; `test:discovery-26` e `npm test` falla solmen per ti divergence intentional. Null `OpeningGateIntervalPatchWrapper` ni `correctOpeningGateInterval` es present.

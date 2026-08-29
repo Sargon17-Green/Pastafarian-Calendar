@@ -1123,3 +1123,20 @@ Un `MonthDayOccurrencePatchWrapper` es insertet pos `Discovery25ContiguousMonthD
 ### Limite historic
 
 Patch 26 ne es anticipat. Null strate nov por ownership del opening gate o por li interval de membership del year es adjunt in Stage 51. Li proxim action historic deve esser Discovery 26 in Stage 52.
+
+
+## Stage 52 — DISCOVERY 26
+
+### Quo li ultim layer legacy credeva
+
+Li system historic finit per reintroducir un defect de ownership al limite annual. `legacyFindYearClosedOpeningInterval` tracta chascun year quam `[open,close]`. Su loop retro usa solmen `targetDay < current.openDay`; egalitá al opening gate ne move al year precedent. Li helper resta separat de `findYearByWalkPatch`, quel ja contene li semantics correcte de Patch 18.
+
+### Exposition pos omni patches precedent
+
+`LegacyOpeningGateIntervalAdapter` e `Discovery26OpeningGateIntervalHandler` es insertet pos `MonthDayOccurrencePatchWrapper`. Li state de Patch 25 resta complet e verde ante que li nov defect es executet. Por li boundary witness, li year authoritative fini al target; li adjacent year comensa al sam target. Li layer legacy prende ti adjacent opening-year quam anchor, accepte li target al limite sin passu retro e scri su numero quam semantic del Discovery.
+
+Li witness real conserva Year 5000 quam resolved year precedent, reancra al Year 5001 quel have `openDay=-15054661`, e li scar retorna 5001 con zero backward steps. Li expectation normativ resta 5000, nam un opening gate apartene al year quel fini ta. Ti mismatch es li unic EXPECTED_RED nov.
+
+### Limite vers Patch 26
+
+Stage 52 ne repara li helper old. Null `OpeningGateIntervalPatchWrapper` e null `correctOpeningGateInterval` es adjunt. Patch 26 deve arrivar solmen in Stage 53, conservar ti finder cludet quam scar real e aplicar separatmen li condition retro `targetDay<=openDay` con membership final `openDay<targetDay<=closeDay`.

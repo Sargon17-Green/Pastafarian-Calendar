@@ -476,3 +476,20 @@ Null helper de occurrence count e null wrapper reparativ es present. In particul
 ### Witness e limite historic
 
 Li route real conserva target position 92, monthId 9, first position 15 e guess old 78. Li prefix inclusiv contene 14 occurrences de monthId 9, ergo li semantic day-in-month deven 14. Omni regressions e li suite complet torna verd. Null code de Patch 26 — ni un correction del ownership del opening gate — es anticipat.
+
+
+## Stage 52 — DISCOVERY 26
+
+### Li opening gate esset atribuit al year quel comensa ta
+
+Li ultim assumption historic usa un interval annual cludet a ambi lateres. `legacyFindYearClosedOpeningInterval` camina avante si li target es pos `closeDay`, ma camina retro solmen si li target es strictmen ante `openDay`. Quande li target es exactmen `openDay`, null transition retro ocurre e li current year es acceptet. Ti es exactmen li scar `[open,close]`.
+
+### Route real pos Patch 25
+
+`LegacyOpeningGateIntervalAdapter` voca li finder old directmen. `Discovery26OpeningGateIntervalHandler` exige `PATCH_25_RESULT` e conserva li year authoritative ja resoluet per Patch 18. Si li target es li closing gate de ti year, li sam die es anc li opening gate del adjacent year; li layer historic trata ti adjacent year quam ownership anchor e executa li interval legacy sur it. Talmen li defect es executet pos omni 25 patches precedent e resta separat del caminada sequential ja reparat in Patch 18.
+
+In li witness real, Year 5000 fini al die `-15054661`. Li adjacent Year 5001 comensa exactmen al sam gate. Li finder old usa `targetDay < openDay`, fa 0 passus retro e retorna Year 5001, durante que li interval normativ `(open,close]` atribui ti gate a Year 5000. Li regression nov resta intentionalmen red.
+
+### Limite historic
+
+Null `OpeningGateIntervalPatchWrapper`, null `correctOpeningGateInterval` e null detour reparativ de Patch 26 es present. Li `<=` semantic existe ja in li caminada authoritative de Patch 18 ma ne es copiat in ti nov layer legacy. Li proxim stage mandat es Stage 53 — PATCH 26.
