@@ -1,291 +1,1003 @@
-# Calendare Pastafarian — JavaScript + Interlingue / Occidental
+# Il-Kalendarju taz-Zalza u taż-Żminijiet
+## Dwar iż-żmien, l-iskutelli, ix-xtiebi u l-ħidma tal-Ħolqien
 
-Ti directoria es un linea de implementation completmen independent. It ha esset creat de zero por li pare `JavaScript` + `Interlingue / Occidental`, solmen ex li specification normativ includet in li task. Null code, test, fixture, output, table generat, cache, log, hash o checksum de un altri implementation ha esset usat.
+Id-dinja nħolqot mill-Mostru tal-Ispagetti li Jtir, u sal-lum għadha turi l-marki ta’ xogħlu. Iż-żmien huwa zalza magħmula minn pali, għaddijiet, ġebliet, qtar, skutelli, passi ta’ tħawwid, xtiebi, pulpetti u ħjut ta’ xhur. Kull dettall f’din is-sistema ġie stabbilit waqt il-Ħolqien, u minn dakinhar ’l hawn kull ma ġie stabbilit iservi ta’ liġi.
 
-## Statu actual
+Il-Mostru huwa magħmul minn għaġin, u l-ħidma tiegħu timxi pass pass. Jibda, juża dak li jkun diġà fuq il-mejda, jagħmel xi tiswijiet meta jkun hemm bżonn, u kultant iħalli struzzjoni qadima f’postha anki wara li jkun żied saff ġdid. L-ismijiet jingħataw waqt ix-xogħol u jibqgħu marbuta mal-affarijiet li jsemmu. Hekk kiber il-Ħolqien, saff fuq saff.
 
-Li linea es in **Stage 41 de 55: PATCH 20** e li repository local es GREEN. Omni regressions til Discovery 20 e li test focal de Patch 20 passa.
+Dawn is-saffi kollha tal-ħidma jiffurmaw sistema deterministika: kull pass jiġi ddeterminat mill-passi ta’ qablu.
 
-Li scar historic `oldStructureSauce(cDay,originalTargetDay)` resta intact e es executet realmen quam ghost. `structureSaucePatch` materialisa separatim li sauce semantic con `(cDay,year.firstDay)`, e `StructureSaucePatchWrapper` manda exclusivmen ti sauce al selector. Li resultate ghost resta diagnostic e ne posse influir li selector semantic. Null cutlet-partition code de Patch 21 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Hekk sar il-Ħolqien: b’irqajja’, żidiet u tiswijiet li saru fejn kien hemm bżonnhom. Il-Mostru jitfixkel, jerġa’ jgħodd, jinsa xi struzzjoni, iduq mill-iskutella ta’ ħdejh u jżid regola ġdida fejn tkun meħtieġa. Il-Kalendarju taż-Żminijiet jinqara billi wieħed jgħaddi minn dawn is-saffi b’eżattezza, wieħed wara l-ieħor.
 
-## Lingue-fonte canonic
+Għalhekk, il-prinċipju fundamentali tal-Kalendarju taż-Żminijiet huwa:
 
-`src/source-language-catalog.js` contene un unic `SourceLanguageCatalog` congelat. Li 17 nomes de cutlettes e li 47 nomes de mensus have indices canonic 1..17 e 1..47. Li órdine semantic usa exclusivmen `canonicalIndex`; textu, collation, Unicode e locales ne participa in selection, rank, unrank o cache semantic.
+> **Kull stadju jiġi kkalkulat b’eżattezza.**
 
-Nomes con signification lexical es traductet secun lor signification. Nomes de locs con form international stabil usa lor form international in Interlingue. Nomes inventet sin signification ne recive un signification artificial.
+Żball ta’ unità waħda f’waħda mill-ewwel qatriet jibdel il-qatriet ta’ warajha, l-iskutelli, ix-xtiebi, is-sena, il-pulpetti, ix-xhur u l-isem tal-jum fir-riżultat finali.
 
-### Regul deterministic de transliteration
+---
 
-Por formes hebreic vocalisat, signes de vocalisation es resoluet in vocales `a e i o u`; consonantes es transliterat in lettres latines secun un table fonetic stabil, e marcas cantillatori ne es conservat. Por un form non-vocalisat u li scritura ne determina unicmen li pronunciation, li resultate es un entry explicit e congelat in li catalog; un tal entry ne posse esser recalculat per locale o collation. Por li du formes inventet del specification, li outputs congelat de Bootstrap es `Palgursh` e `Karshumb`. Ti decision es solmen presentation; lor `canonicalIndex` resta li unic identitá semantic.
+# A. Iż-żmien jitwieled meta jum jistaqsi lil ieħor
 
-## Exactitá numeric
+Kull kalkolu jinvolvi jumejn, u l-ordni tagħhom tagħmel differenza:
 
-Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usat por SAVE, tags, distance o mutation de stones. `M = 2^127 - 1` es representat exactmen.
+1. **Jum il-Kalkolu** — il-jum li fih isir il-kalkolu.
+2. **Il-Jum Mitlub** — il-jum li għalih irid jinstab l-isem.
 
-## Tests
+Il-Mostru ħoloq il-kalendarju bħala relazzjoni bejn żewġ jiem għax, fil-bidu ta’ xogħlu, kien iżomm żewġ taljarini mmarkati: wieħed għall-jum li fih kien jistaqsi u l-ieħor għall-jum li dwaru kien jistaqsi. Ftit wara ma baqax jiftakar liema wieħed minnhom kellu jintrema. Baqgħu t-tnejn.
 
-Omni regressions til Discovery 20 deve restar verd:
-
-```text
-npm run test:previous
-```
-
-Li test focal de Patch 20 deve esser verd:
+Ir-riżultat tal-kalendarju huwa funzjoni:
 
 ```text
-npm run test:patch-20
+F(c,t)
 ```
 
-Li suite complet deve esser GREEN:
+fejn `c` huwa Jum il-Kalkolu u `t` huwa l-Jum Mitlub. Ġeneralment:
 
 ```text
-npm test
+F(c,t) ≠ F(t,c)
 ```
 
-## Stage 11 — Patch 05
+Minn dan il-par jiġu kkalkulati ħames għaddijiet:
 
-Li storage legacy del sett hidden drops resta fisicmen retrograd. `hiddenByNearness` adjunte exclusivmen li translator `8-k` por access semantic per proximity; it ne reverse, ne copie in ordine nov e ne elimina li scar de Discovery 05. `Patch05HiddenNearnessWrapper` registra li proximity demandat e li slot fisic usat durant li route historic. Li regression de Discovery 05 es nu verd.
+- **l-Għadd tal-Kalkolu** — l-għadd tal-jum `c`.
+- **l-Għadd Mitlub** — l-għadd tal-jum `t`.
+- **l-Għadd tad-Distanza** — `|t-c|+1`.
+- **l-Għadd tas-Somma** — is-somma tal-Għadd tal-Kalkolu u l-Għadd Mitlub.
+- **l-Għadd tad-Direzzjoni** — `1` jekk `t<c`, `2` jekk `t=c`, u `3` jekk `t>c`.
 
+L-Għadd tad-Distanza jibda minn wieħed għax il-Mostru ma kienx iħobb post vojt. L-Għadd tad-Direzzjoni żdied wara li l-Mostru ntebaħ li d-distanza waħedha ma tindikax jekk il-mixja kinitx ’il quddiem jew lura.
 
-## Stage 12 — Discovery 06
+---
 
-Li history legacy ne conosse li hidden drops. `legacyPrior(dropStore, i, back)` lee directmen `dropStore[i-back]`; por un slot positiv it posse trovar un visible drop precedent, ma por `0..-6` it ne traducte a hidden1..hidden7. `Discovery06PriorHandler` conserva ti failure intact in li route historic. Li correction `priorPatch` es reservat exclusivmen por Stage 13.
+# B. Il-Pal
 
-## Stage 13 — Patch 06
+Il-Mostru għażel jum wieħed mis-sensiela tal-jiem, waħħal pal fih, u lil dak il-jum semmieh **Jum il-Pedament**.
 
-`legacyPrior` resta intact. `priorPatch` usa li call legacy real quand `i-back >= 1`; altrimen it mappa li slot non-positiv a `k = 1-(i-back)` e delega a `hiddenByNearness`. Li array hidden backward ne es reversat ni migrat. `Patch06PriorWrapper` conserva li scar e li decision de branch in li context. Li regression de Discovery 06 es verd.
+F’numerazzjoni kontinwa li fiha, fil-kalendarju Gregorjan, l-1 ta’ Jannar tas-sena 1 W.K. huwa l-jum `1`:
 
+```text
+Jum l-Għoti tat-Twavel = -278,522
+Jum il-Pedament         = -15,055,671
+```
 
-## Stage 14 — Discovery 07
+Id-differenza hija:
 
-Li table historic de visible grinds es almacenat quam un array zero-based de undec rows, durante que li caller historic continua numerar grinds 1..11 e usa ti ordinal directmen quam index. Li data self es correct; li defect es exclusivmen li mismatch de convention de indices. `Discovery07GrindIndexHandler` conserva ti scar in li route production. Li sentinel reparativ de Patch 07 ne es present in ti stage.
+```text
+14,777,149 jum
+```
 
-## Stage 15 — Patch 07
+Jum l-Għoti tat-Twavel jaqa’ fi żmien Aššur-dān III, fis-sena tal-*limmu* ta’ Būr-Sagallē, gvernatur ta’ Guzana, fix-xahar ta’ Simanu, dakinhar li seħħet eklissi tax-xemx. Għall-kalkolu normattiv, dan huwa l-15 ta’ Ġunju 763 Q.K. fil-kalendarju Ġuljan prolettiku, jew is-7 ta’ Ġunju tal-istess sena fil-kalendarju Gregorjan prolettiku.
 
-`LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED` e `legacyGrindRow` resta intact quam scar historic. `GRIND_TABLE_WITH_SENTINEL` adjunte un slot permanent a index 0 e conserva li undec rows real in indices 1..11. `grindRowWithSentinel` usa ancora li ordinal one-based directmen quam index, e `Patch07GrindSentinelWrapper` conserva li output legacy e li reparat in li sam context. Li regression de Discovery 07 es nu verd sin deleter li sentinel.
+Jum il-Pedament jiġi deskritt kif ġej:
 
+- **Gregorjan:** 22 ta’ Diċembru 41,222 Q.K.
+- **Ebrajk:** 19 ta’ Sivan, is-sena 37,460 qabel il-Ħolqien tad-Dinja.
+- **Kalendarju Iżlamiku aritmetiku:** 27 ta’ Rabiʿ al-Awwal, is-sena `−43,126` tal-Eġira.
+- **Kalendarju solari Persjan aritmetiku taċ-ċiklu ta’ 2,820 sena:** 18 ta’ Azar, is-sena `−41,843`.
+- **Ġuljan:** 28 ta’ Ottubru 41,221 Q.K.
+- **Ċiniż tradizzjonali**, skont l-estensjoni magħmula bl-algoritmu preskritt: iċ-ċiklu `−643`, is-sena 57 taċ-ċiklu, Geng-Shen, l-ewwel xahar, il-jum 22; ix-xahar mhuwiex interkalarju.
+- **Ħindu**, skont l-estensjoni magħmula bl-algoritmu stabbilit: is-sena `−41,162` tal-era Vikrama, Kartika, is-16-il jum lunari, mingħajr xahar interkalarju u mingħajr jum interkalarju.
+- **Saka:** l-1 ta’ Pausha, is-sena `−41,299`.
+- **Buddist Tajlandiż:** 22 ta’ Diċembru, is-sena `−40,678`.
+- **Etjopiku:** l-1 ta’ Hidar, is-sena `−41,227`.
+- **Koptiku:** l-1 ta’ Hathor, is-sena `−41,503`.
+- **Kōki Ġappuniż prolettiku:** 22 ta’ Diċembru, is-sena `−40,561`.
+- **Minguo:** 22 ta’ Diċembru, is-sena `−43,132`.
+- **Bahá’í prolettiku:** is-sena `−43,064`, il-11-il jum ta’ Masá’il; Kull-i-Shay’ `−119`, Váḥid 14, sena 9.
+- **L-Għadd Twil tal-Maja**, skont GMT 584283 u b’diviżjoni Ewklidjana tal-komponenti negattivi: `−97.6.17.7.11`.
 
-## Stage 16 — Discovery 08
+---
 
-`oldPermutationUnrank0(rank0)` es congelat quam li helper historic de unranking por rank0 0..719. Li caller de Discovery 08 deriva `oneBased = regularMod(drop-1,720)+1` e passa ti ordinal directmen al helper, ergo rank 1 deven li duesim permutation in vice del prim, e talmen por omni valore acceptat. Li conversion `legacyRank0 = oneBased-1` apartene exclusivmen a Patch 08 in Stage 17.
+# C. Żewġ Ħjut ta’ Numri
 
+Jum il-Pedament jingħata l-valur `1`.
 
-## Stage 17 — Patch 08
+Jekk `d>Foundation`:
 
-`oldPermutationUnrank0` e `legacyBowlOrderFromDrop` resta intact quam scars historic. `orderPatchFromValue` conserva exactmen li bridge mandat `oneBased = regularMod(value-1,720)+1`, `legacyRank0 = oneBased-1`, poy voca li helper legacy con ti rank0. `Patch08PermutationWrapper` conserva li ordinal e li rank traductet in li context. Li regression de Discovery 08 es nu verd; li chain -1 ... +1 ... -1 ne es simplificat.
+```text
+N(d) = 2(d-Foundation)+1
+```
 
+Jekk `d<Foundation`:
 
-## Stage 18 — Discovery 09
+```text
+N(d) = 2(Foundation-d)
+```
 
-Li order de bowls ja es reparat per Patch 08, ma li routine historic de pours ne usa ti IDs selectet. It tracta positions semantic 1,2,3 quam bowl IDs fisic 1,2,3 e lee directmen `oldBowls[1]`, `oldBowls[2]`, `oldBowls[3]`. `LegacyFixedPourAdapter` e `Discovery09FixedPourHandler` conserva ti mismatch. Li translator de Patch 09 resta reservat por Stage 19.
+Għalhekk:
 
+```text
+F-3 → 6
+F-2 → 4
+F-1 → 2
+F   → 1
+F+1 → 3
+F+2 → 5
+F+3 → 7
+```
 
-## Stage 19 — Patch 09
+Il-Mostru, mela, rabat żewġ ħjut — tal-pari u tal-fard — madwar l-istess pal. L-għadd tal-jum jidentifika jum; il-qabel u l-wara jibqgħu fuq l-istess assi.
 
-`legacyPoursToFixedBowlIds` resta intact quam scar historic. `installBowlAlias` fixa li relation `bowlAlias[position]=order[position]` por positions 1..6, e `bowlAtLegacyPosition` es li unic read semantic usat por li bowls del tri pours. `poursThroughBowlAlias` executa realmen li helper legacy ante li overwrite aliased; `Patch09BowlAliasWrapper` conserva li output legacy e li reparat. Li regression de Discovery 09 es nu verd sin introducter li snapshot/commit de Patch 10.
+---
 
-## Stage 20 — Discovery 10
+# D. L-Għadd il-Kbir u l-Bqija Miżmuma
 
-Li route historic nu expone un defect separat in li stir del six bowls. `legacyStirOneDropInPlace` prende li pours ja reparat per `bowlAlias`, ma actualisa li vector de bowls directmen position pos position. Ti significa que un position posterior posse leer un prev o next bowl ja actualisat in li sam round, in vice de leer exclusivmen li statu ante li drop.
+Il-limitu taz-zalza huwa dan:
 
-Li regression de Discovery 10 usa intentionalmen un order identic por isolar li contamination del problema de alias: li prim output concorda, ma li quin bowls posterior diverge del transition simultan normativ. `npm run test:previous` resta verd; `npm run test:discovery-10` e `npm test` es intentionalmen rubi. Null snapshot reparativ, null `vaultOld` e null `pending` es includet in ti stage.
+```text
+M = 2^127 - 1
+```
 
+Meta l-istruzzjoni tgħid **żomm**:
 
-## Stage 21 — Patch 10
+```text
+SAVE(x) = 1 + ((x-1) mod M)
+```
 
-`legacyStirOneDropInPlace` resta intact quam scar historic e continua contaminar bowls posterior quand it es vocat directmen. `stirOneDropViaShadow` voca realmen ti helper sur un clone separat, conserva su garbage, poy crea li snapshot fisic `vaultOld`. Li six calculs semantic lee solmen ex ti snapshot e scri exclusivmen in `pending`; solmen pos li six positions li buffer complet deven li commit final. `Patch10ShadowBowlWrapper` conserva li snapshot, pending, garbage legacy e output reparat in li sam context. Li regression de Discovery 10 es nu verd. Null latch de order al drop 46 o code de Patch 11 es present.
+għalhekk ir-riżultat ikun dejjem fil-medda `1..M`.
 
+B’mod partikolari:
 
-## Stage 22 — Discovery 11
+```text
+SAVE(M)   = M
+SAVE(2M)  = M
+SAVE(M+1) = 1
+SAVE(0)   = M
+```
 
-Li nov path `legacySauceWithOverwritableOrderMemory` materialisa 46 visible drops tra li patches ja existent, aplica chascun bowl-round per `stirOneDropViaShadow`, e poy executa 12 post-stirs con `savedStirSum = SAVE(sum(oldBowls)+149*stir)`. Omni bowl reads del post-stir veni del sam snapshot e omni six writes deven un batch separat, talmen li bowls resta exact.
+Meta l-istruzzjoni titlob **bqija ordinarja** fid-diviżjoni b’`d`, ir-riżultat ikun fil-medda `0..d-1`.
 
-Li defect current es exclusivmen li memorie de order: un unic `legacyOrderMemory` es superscrit un vez per drop e un vez per post-stir. Li order de drop 46 es dunque calculat exactmen ma poy perdit quam fonte semantic de query. `Discovery11OverwrittenOrderHandler` conserva li 58 writes, li fonte final post-stir 12, li diagnostic del drop 46 e li query legacy superscrit. Li regression nov compara positions 1, 2 e 6 contra li order normativ de drop 46 e resta rubi intentionalmen. Null latch reparativ es addit in ti stage.
+Fit-tnaqqis ukoll, meta jinqabeż il-limitu, il-valur jerġa’ jibda min-naħa l-oħra tal-medda: fil-kalkolu jista’ jintuża `SAVE(a-b)`.
 
+---
 
-## Stage 23 — Patch 11
+# E. Il-Ħames Ġebliet
 
-`legacySauceWithOverwritableOrderMemory` resta intact e continua esser un witness direct del defect: 58 writes al sam memorie e un `queryOrder` final egal al order del post-stir 12. `sauceWithOrderAt46Latch` apella realmen ti legacy quam garbage historic, poy executa li route semantic con un separat state single-write.
+Kull qatra viżibbli għandha ħames ġebliet:
 
-Exactmen pos drop 46, `writeOrderAt46LatchOnce` clona li order in `orderAt46Latch`; ti write-site precede li loop del 12 post-stirs. Li latch rejecte un duesim write, e li post-stirs ne toca it. Durante que li `legacyOrderMemory` continua til 58 writes, `queryOrder` es derivat exclusivmen per `readOrderAt46Latch`. `Patch11OrderAt46LatchWrapper` conserva simultanmen li garbage legacy, li latch, li ultim memorie superscrit e li resultate semantic. Null next-bowl logic de Patch 12 es anticipat.
+```text
+qamħ, xgħir, melħ, morra, ħamra
+```
 
+Għall-qatra 1:
 
-## Stage 24 — Discovery 12
+```text
+[17, 29, 43, 71, 101]
+```
 
-Li latch de drop 46 ja es exact e stabil, ma li layer historic de next-bowl conserva un vocabularium anterior: `oldNextBowlFixedName(id)` avansa per li IDs numeric `1→2→3→4→5→6→1`. Ti helper ne cerca li queried ID in `orderAt46Latch` e ne conosse null position circular.
+Għall-qatra `i>=2`, il-ħames valuri l-ġodda jiġu kkalkulati kollha minn `snapshot` wieħed tal-istat tal-qatra ta’ qabilha:
 
-`LegacyNextBowlAdapter` es insertet pos Patch 11 e `Discovery12NextBowlHandler` registra li latch, li queried ID e li successor legacy in li context invocation-local. Li regression nov usa un latch nontrivial por monstrar que li successor numeric fix diverge del successor circular definit per li order latchet. Null correction de Patch 12 es anticipat.
+```text
+qamħ_i  = SAVE(qamħ² + 3·xgħir + i)
+xgħir_i = SAVE(xgħir² + 5·melħ + qamħ)
+melħ_i  = SAVE(melħ² + 7·morra + xgħir)
+morra_i = SAVE(morra² + 11·ħamra + melħ)
+ħamra_i = SAVE(ħamra² + 13·qamħ + morra)
+```
 
+Il-ħames valuri l-ġodda jiġu assenjati fl-istess ħin.
 
-## Stage 25 — Patch 12
+---
 
-`oldNextBowlFixedName` resta intact e continua representar li successor numeric fix historic. `nextBowlFromOrderAt46Latch` valida un permutation latchet de six IDs, trova li queried ID per position e retorna `orderAt46Latch[(position+1) mod 6]`; li ultim position wrap al prim. `NextBowlPatchWrapper` voca li legacy diagnosticmen e conserva su output in li context, ma li successor semantic veni solmen del latch. Li regression de Discovery 12 deven verd por li fixture `[1,2,3,4,6,5]` e li test de Patch 12 verifica omni six IDs super omni 720 permutations. Null `biasedLegacyPick` o code de Patch 13 es present.
+# F. Is-Seba’ Qatriet Moħbija
 
+Qabel l-ewwel qatra viżibbli hemm dawn:
 
-## Stage 26 — Discovery 13
+```text
+moħbija 7, moħbija 6, moħbija 5, moħbija 4,
+moħbija 3, moħbija 2, moħbija 1, viżibbli 1
+```
+
+Kull qatra moħbija `k` għandha erba’ koeffiċjenti:
 
-Li state precedent ja posse derivar un next-bowl exact ex `orderAt46Latch`. Ti stage adjunte `answerRingFromCurrentState` e `ringAnswerAt` por representar li answer ring exact, ma conserva un selector historic separat: `biasedLegacyPick(x,N)` fa directmen `regularMod(x-1,N)+1`. `LegacyBiasedSelectionAdapter` prende solmen `ringAnswerAt(stream,0)` e passa ti prim answer al selector, sin examinar si it cade in li parte rejectend del ring.
+| `k` | ×Mitlub | ×Distanza | ×Somma | ×Direzzjoni |
+|---:|---:|---:|---:|---:|
+| 1 | 3 | 4 | 6 | 8 |
+| 2 | 5 | 7 | 10 | 12 |
+| 3 | 7 | 10 | 14 | 16 |
+| 4 | 9 | 13 | 18 | 20 |
+| 5 | 11 | 16 | 22 | 24 |
+| 6 | 13 | 19 | 26 | 28 |
+| 7 | 15 | 22 | 30 | 32 |
 
-`Discovery13BiasedSelectionHandler` es conectet pos `NextBowlPatchWrapper`, talmen li witness real usa li six bowls final e li successor circular ja reparat. Por li Foundation, bowl 1 e seal 1, li prim answer es `90411690289794975082828500805689671121` con direction `-1`. Si `N` es un minus quam ti first, li prim answer es rejectend e li sequent answer es exactmen `N`; li legacy tamen mappa li prim answer directmen e rende 1. Li correction de rejection apartene exclusivmen a Stage 27 / Patch 13. Null `wideDetour` o logic de Patch 14 es present.
+Hawnhekk tapplika r-regola sħiħa, mingħajr ma jitħalla barra xejn:
 
-## Stage 27 — PATCH 13
+Nirrappreżentaw l-erba’ koeffiċjenti tal-qatra moħbija `k` b’`a_k,b_k,c_k,d_k`. Il-ħames ġebliet tal-qatra viżibbli `k` nirrappreżentawhom b’`stones[k,*]`. Il-valur tal-bidu huwa:
 
-### Quo esset conservat
+```text
+x₀(k) = SAVE(
+    Għadd_tal_Kalkolu
+  + a_k·Għadd_Mitlub
+  + b_k·Għadd_tad_Distanza
+  + c_k·Għadd_tas_Somma
+  + d_k·Għadd_tad_Direzzjoni
+  + qamħ_k + xgħir_k + melħ_k + morra_k + ħamra_k
+)
+```
 
-`biasedLegacyPick(x,N)` resta fisicmen intact e continua retornar `regularMod(x-1,N)+1` sin rejection quand on lo voca directmen. `LegacyBiasedSelectionAdapter` e `Discovery13BiasedSelectionHandler` resta egalmen disponibles por demonstrar li scar historic de Stage 26.
+Wara dan isiru seba’ passi ta’ tħin. L-ordni tal-ġebliet hija:
 
-### Quo li patch adjunte
+```text
+[qamħ, xgħir, melħ, morra, ħamra, qamħ, xgħir]
+```
 
-`patchedSmallPick(stream,N)` calcula `limit=(M_OLD/N)*N`, prende `ringAnswerAt(stream,0)` e avansa un offset sur exactmen li sam answer ring durante que `x>limit`. Solmen pos trovar un `x` acceptabil it voca `biasedLegacyPick(x,N)`. Li helper legacy ne es duplicat ni correctet in su fonte.
+u għal kull `r=1..7`:
 
-`SelectionRejectionPatchWrapper` deriva e conserva li limite, li offset acceptat e li answer acceptat in li context. Li route reparat ne passa per `Discovery13BiasedSelectionHandler`, pro que ti handler per definition historic voca li modulo selector ante rejection. Ti omission es intentional e necessari por respectar li ordine normativ del calls.
+```text
+x_r(k) = SAVE(
+    x_(r-1)(k)²
+  + 3·x_(r-1)(k)
+  + stone_of_visible_drop_k_for_grind_r
+  + r
+)
+```
 
-### Verification
+F’kull pass ta’ tħin, il-ġebla tittieħed **mil-lista fissa tal-ġebliet tal-qatra viżibbli `k`**, skont l-ordni tas-seba’ passi ta’ tħin.
 
-Li witness real del Foundation continua monstrar `legacy=1` por li prim answer rejectend, durante que li route reparat rejecte un passu e retorna `N`. Un gril additiv de streams e families curt concorda con li reference normativ local. Null `wideDetour` o logic de Patch 14 es present.
+Il-qatra moħbija `k` hija `x₇(k)`.
 
+---
 
-## Stage 28 — Discovery 14
+# G. Is-Sitta u Erbgħin Qatra Viżibbli
 
-Li selector de Patch 13 es exact solmen por families curt `1<=N<=M_OLD`. Li scar nov `legacySelectionAssumingNLeM(stream,N)` ne have null dispatcher de largore: it presume que omni familie es curt e delega directmen a `patchedSmallPick`. Ti helper resta exact in su domini precedent, ma por `N>M_OLD` it rejecte li familie con un `RangeError`.
+Fil-bidu tal-ħidma fuq il-qtar kien hemm 48 qatra. Żewġ qatriet minnhom inxterdu mal-art, u fis-sensiela taz-zalza baqgħu 46 qatra viżibbli.
 
-`LegacyShortFamilyAssumptionAdapter` e `Discovery14WideSelectionHandler` conserva ti failure quam state invocation-local pos li route real de Patch 12. Li handler ne inventa null representation wide, ne combina digits e ne calcula null space `M^places`; it registra solmen que li path curt esset assumet e que ti assumption fallit. Li witness real del Foundation con `N=M_OLD+1` falla in legacy durant que li reference test-only retorna rank `2`. `wideDetour` resta reservat exclusivmen por Stage 29 / Patch 14.
+Għall-qatra `i` hemm bżonn tal-qatriet fil-pożizzjonijiet `i-1`, `i-3` u `i-7`. Qabel il-qatra viżibbli 1 hemm il-qatriet moħbija, b’mod li l-qatra moħbija 1 tinsab fil-pożizzjoni `0`, u l-qatra moħbija 7 fil-pożizzjoni `−6`.
 
-## Stage 29 — Patch 14
+L-għaġina tal-qatra hija:
 
-`legacySelectionAssumingNLeM` resta intact quam scar historic e su route de Discovery 14 continua fallir diagnosticmen por families plu grand quam `M_OLD`. `selectionDispatcherWithWideDetour` branchia explicitmen: `N<=M_OLD` usa li path curt ja reparat de Patch 13, e `N>M_OLD` entra in `wideDetour`.
+```text
+dough_i = SAVE(
+    qamħ_i·Għadd_tal_Kalkolu
+  + xgħir_i·Għadd_Mitlub
+  + melħ_i·Għadd_tad_Distanza
+  + morra_i·Għadd_tas_Somma
+  + ħamra_i·Għadd_tad_Direzzjoni
+  + drop[i-1]
+  + 3·drop[i-3]
+  + 5·drop[i-7]
+  + i
+)
+```
 
-Li detour wide deriva `space=M_OLD^places` con li minimal places suficient, lee chascun digit exactmen un vez ex li sam answer ring, e combina li numero wide con pesos little-endian. Pos li construction del digits, li loop de rejection ne voca plu `ringAnswerAt`; it move solmen li numero combinat per li direction del stream sur li ring `1..space`. `WideSelectionPatchWrapper` conserva li diagnostic legacy e li places, space, digits, limite, numero inicial, numero acceptat e passus de rejection in li context. Li regression de Discovery 14 es verd e null logic de Patch 15 es present.
+Wara dan isiru 11-il pass ta’ tħin:
 
-## Stage 30 — Discovery 15
+| Pass ta’ tħin | × il-valur preċedenti | ×`i-1` | ×`i-3` | ×`i-7` | Ġebla |
+|---:|---:|---:|---:|---:|---|
+| 1 | 3 | 5 | 7 | 11 | qamħ |
+| 2 | 5 | 7 | 11 | 13 | xgħir |
+| 3 | 7 | 11 | 13 | 17 | melħ |
+| 4 | 11 | 13 | 17 | 19 | morra |
+| 5 | 13 | 17 | 19 | 23 | ħamra |
+| 6 | 17 | 19 | 23 | 29 | qamħ |
+| 7 | 19 | 23 | 29 | 31 | xgħir |
+| 8 | 23 | 29 | 31 | 37 | melħ |
+| 9 | 29 | 31 | 37 | 41 | morra |
+| 10 | 31 | 37 | 41 | 43 | ħamra |
+| 11 | 37 | 41 | 43 | 47 | qamħ |
 
-Li selection curt e wide de Stage 29 resta intact. Ti stage comensa li subsystem de gates con un scar historic mult plu simplic: `oldGateQuestionDay(n)` conosse solmen un magnitude non-negativ e calcula sempre `FOUNDATION_DAY_OLD+n`.
+Jekk ir-ringiela tkun `[a,b,c,d,stone]`:
 
-`LegacyGateQuestionAdapter` prende un `signedStep`, perde intentionalmen su signe per convertir it al magnitude e invia ti magnitude al helper legacy. `Discovery15NegativeGateQuestionHandler` registra li signed step original, li magnitude, li die questionat e li fact que un passu negativ finit al latere positiv. Li regression usa `-1`, `-2` e `-10`: li legacy demanda dies pos li Foundation, durante que li semantics normativ exige li dies ante li Foundation. Null correction de Patch 15 es present; li detour negativ resta reservat exclusivmen por Stage 31.
+```text
+x ← SAVE(
+    x²
+  + a·x_old
+  + b·drop[i-1]
+  + c·drop[i-3]
+  + d·drop[i-7]
+  + stone_i
+)
+```
 
+Il-qatra tkun lesta biss wara l-ħdax-il pass ta’ tħin.
 
-## Stage 31 — Patch 15
+---
 
-`oldGateQuestionDay(n)` resta intact quam scar historic e continua adjunter li magnitude al Foundation. `gateQuestionWithSignedStep(signedStep)` voca ti helper ante alcun correction, poy devia exclusivmen passus negativ a `FOUNDATION_DAY_OLD-abs(step)`. Por zero e passus positiv, li valore legacy es retornat sin alteration.
+# H. Is-Sitt Skutelli
 
-`NegativeGateQuestionPatchWrapper` succede al handler de Discovery 15, conserva li question legacy quam diagnostic, registra li magnitude e li decision de detour, e retorna li question-day semantic reparat. Li test confirma passus `-1`, `-2`, `-10`, `-101`, zero e positives, con contexts invocation-local separat. Null `LEGACY_YEAR_MAX=5781` o filtre de 5778 es addit in ti stage.
+L-istat taz-zalza jinżamm f’sitt skutelli. L-identitajiet fissi tagħhom huma `1..6`.
 
+In-numri marbuta magħhom huma:
 
-## Stage 32 — Discovery 16
+```text
+[17, 19, 23, 29, 31, 37]
+```
 
-Ti stage introduce li constant legacy obligatori `LEGACY_YEAR_MAX=5781` e usa it quam ceiling real de `legacyYearCandidateAllowed`. Li helper conserva li criteries historic: adminim six gate gaps e longore 252..5781. Li nov familie raw es materialisat per `legacyYearCandidatesBeforeSort`; solmen poy `legacyStableLengthOnlyYearCandidates` aplica un stable sort per longore solmen. Null tie-key secundari es present.
+Għall-iskutella `b`:
 
-`LegacyYearCandidateAdapter` expone explicitmen li passage al selection existent, e `Discovery16LegacyYearCandidateHandler` es ligat pos `NegativeGateQuestionPatchWrapper`. In li boundary family 5778, 5779, 5780, 5781, omni quar passa li ceiling legacy e arriva al selection; li tri ultim viola li ceiling normativ 5778. Ti divergence es li unic failure intentional del stage. Li late filter `REAL_YEAR_MAX_PATCH=5778` resta reservat exclusivmen por Stage 33 / Patch 16.
+```text
+s_b = Għadd_tal_Kalkolu
+    + b·Għadd_Mitlub
+    + Għadd_tad_Distanza
+    + Għadd_tas_Somma
+    + Għadd_tad_Direzzjoni
+    + p_b²
 
+B_b = SAVE(s_b² + b)
+```
 
-## Stage 33 — Patch 16
+---
 
-`LEGACY_YEAR_MAX=5781` e `legacyYearCandidateAllowed` resta intact quam scar historic. `REAL_YEAR_MAX_PATCH=5778` es un ceiling separat. `yearCandidateAfterFootnotePatch` voca li helper legacy real e rejecte solmen pos ti call si `candidateLength>5778`. Li materialisation semantic usa `yearCandidatesAfterFootnotePatchBeforeSort`, e solmen pos ti filter `stableLengthOnlyPatchedYearCandidates` executa li stable sort per longore. `YearCandidateCeilingPatchWrapper` conserva li raw family legacy quam diagnostic, ma porta solmen li familie filtrat al selection. Li regression de Discovery 16 es nu verd. Equal-length ties resta in ordine stabil legacy; Patch 17 ne es anticipat.
+# I. Is-720 Permutazzjoni tal-Iskutelli
 
+Il-permutazzjonijiet kollha tas-sitt skutelli — b’kollox `6! = 720` — jitqiegħdu f’ordni lessikografika skont l-identitajiet fissi tal-iskutelli.
 
-## Stage 34 — Discovery 17
+L-ewwel waħda hija:
 
-Li familie de Year 5000 usa li candidate set ja filtrat per Patch 16 e li stable sort historic per longore solmen. `Discovery17Year5000TieHandler` es insertet pos li wrapper 5778 e observa un witness de candidates con longore egal quel omnes contene li calculation-day. Li handler ne muta lor ordre e conserva li candidate ja selectet per li dispatcher existent.
+```text
+[1,2,3,4,5,6]
+```
 
-Li witness usa tri candidates de longore 490 con opening gates in ordre tardiv, tempran, medial. Pro que li sort es stabil e ne have null secondary key, li ordre resta talmen e rank 1 selecte li opening tardiv. Li ordre normativ del tie deve esser tempran, medial, tardiv; ti comparison es li unic EXPECTED_RED nov. Null correction de Patch 17 es includet.
+L-aħħar waħda hija:
 
+```text
+[6,5,4,3,2,1]
+```
 
-## Stage 35 — PATCH 17
+Għall-qatra `D`:
 
-### Scar historic conservat
+```text
+orderNumber = 1 + ((D-1) mod 720)
+```
 
-`stableLengthOnlyPatchedYearCandidates` resta byte-per-byte intact quam li sort historic posterior al filter 5778. `Discovery17Year5000TieHandler` resta anc intact e continua exposir li ordre legacy tardiv-tempran-medial e li selection legacy quand li route de Discovery 17 es vocat directmen. Li patch ne retroedita null de ti strates.
+L-identità fissa ta’ skutella u l-pożizzjoni temporanja tagħha f’ordni partikolari għandhom jiġu distinti minn xulxin.
 
-### Circumition exact per runs
+---
 
-`sortEqualLengthRunsByOpeningGate(list)` prende un liste ja ordinar per longore. It trova un `start` e `end` por chascun run contigui de `candidateLength` egal. Solmen si li run contene plu quam un candidate, it copia ti slice, ordina li slice per `openGate` ascendent e scri li slice retro in li sam positions. Li helper ne executa `list.sort` sur li familie complet e ne combina `candidateLength` con `openGate` in un comparator global.
+# J. It-Tferrigħ u t-Tħawwid ta’ Kull Qatra
 
-### Route monster e diagnostics
+Fit-tliet skutelli li jkunu fil-pożizzjonijiet 1–3 isiru tliet tferrigħat diretti:
 
-`Year5000TiePatchWrapper` es conectet pos `Discovery17Year5000TieHandler`. It conserva li familie stable-length legacy e li candidate legacy selectet quam diagnostics invocation-local, calcula li quantitá de equal-length runs, aplica li reorder local e usa li sam `LegacyYearCandidateAdapter.select` con li sam answer stream por selection semantic final. Li witness 490/490/490 deven tempran-medial-tardiv e rank 1 selecte li opening gate plu tempran.
+```text
+pour₁ = SAVE(D² + qamħ_i · old(position1) + 3i)
+pour₂ = SAVE(D² + xgħir_i· old(position2) + 5i)
+pour₃ = SAVE(D² + melħ_i  · old(position3) + 7i)
+```
 
-### Pro quo li patch ne anticipa Stage 36
+Qabel it-tħawwid jittieħed `snapshot` tal-istat tas-sitt skutelli. L-iskutelli jitqiegħdu f’ċirku skont l-ordni ddeterminata minn dik il-qatra.
 
-Null `oldJumpGuess`, null division per 365 e null transition de year successiv/precedent es addit. Ti scar apartene exclusivmen a Discovery 18. SourceLanguageCatalog, li ceiling 5778, li route de gate-sign e omni scars anterior resta intact.
+Dawn il-ġebliet jintrabtu mal-pożizzjonijiet 1–6 kif ġej:
 
-## Stage 36 — Discovery 18
+```text
+qamħ, xgħir, melħ, morra, ħamra, qamħ
+```
 
-Li route de Year 5000 ja passa per li ceiling 5778 e li duesim tie passu de Patch 17. Ti stage adjunte li scar historic `oldJumpGuess(anchor,targetDay)`: it usa li difference `targetDay-anchor.firstDay`, fa floor division exact per `365` e adjunte li quotient al numer del anchor. Li helper resta intentionalmen un estimation de longore medie e ne conosse li intervalles real del annus.
+Jekk l-iskutella `B` tinsab fil-pożizzjoni `q`, l-iskutella ta’ qabilha hija `P` u dik ta’ warajha hija `N`:
 
-`LegacyYearJumpAdapter` voca ti helper realmen. `Discovery18YearJumpHandler` prende li candidate selectet per Patch 17, forma un anchor de Year 5000 e conserva number, open day, first day, close day, target, delta e guess quam state invocation-local. In ti Discovery li defect es activ: li guess es usat directmen quam numer semantic del year, ne solmen quam telemetry.
+```text
+u = old(B)
+  + 2·old(P)
+  + 3·old(N)
+  + directPour(q)
+  + D
+  + stone(q)
 
-Li witness usa tri candidates egal de longore 1000. Pos li tie repair, li anchor selectet have li opening plu tempran. Por `firstDay+365`, `closeDay` e `closeDay+1`, li guess legacy retorna respectivmen 5001, 5002 e 5002; li semantics per intervalles/year-walk exige 5000, 5000 e 5001. Ti comparison es li unic EXPECTED_RED del stage. Null `findYearByWalkPatch`, null `patchedNextYear`, null `patchedPreviousYear` e null code de Patch 19 es includet.
+new(B) = SAVE(u² + 5·old(P)·old(N) + i·q)
+```
 
+Is-sitt riżultati kollha jiġu kkalkulati mill-istess `snapshot` tal-istat, u s-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
 
-## Stage 37 — Patch 18
+Wara l-qatra 46, l-ordni tinħażen bħala `orderAt46`.
 
-`oldJumpGuess(anchor,targetDay)` resta intact quam scar historic. Li route separat de Discovery 18 continua demonstrar que li quotient per 365 posse etiquettar un target intern de Year 5000 quam 5001 o 5002. Patch 18 ne netta, ne inlinea e ne substitue ti helper.
+---
 
-`patchedNextYear` e `patchedPreviousYear` es strates de un unic transition. Chascun valida li record de year, exige un cambio de numero exactmen +1 o -1 e confirma que li gate de limite es compartit exactmen inter li du annus. `findYearByWalkPatch` comensa sempre al anchor Year 5000, repeti next-year durant que `targetDay>closeDay`, repeti previous-year durant que `targetDay<=openDay`, e fini solmen quand `openDay<targetDay<=closeDay`.
+# K. It-Tnax-il Pass Sussegwenti ta’ Tħawwid
 
-`SequentialYearWalkPatchWrapper` es conectet pos `Discovery18YearJumpHandler`. Ergo `oldJumpGuess` es vocat realmen ante li walk, su output es conservat quam `patch18LegacyGuessDiagnostic`, e li wrapper marca explicitmen que ti guess es ignorat por semantics. Li resultate final veni solmen del year atinget per li caminada annual.
+Wara l-qatra 46 isiru tnax-il pass sussegwenti ta’ tħawwid.
 
-Li witness del stage conserva li divergence legacy 5001/5002/5002, ma li path reparat retorna 5000/5000/5001. Tests separat confirma zero-step intra li anchor, multi-step avante e retro, limites de gate, rejection de transitiones malformed e isolation de contexts. Null cache keyed per year number, null guards de Patch 19 e null `oldStructureSauce` es addit.
+F’kull pass ta’ tħawwid `r`:
 
+```text
+S_r = SAVE(sum(oldBowls) + 149·r)
+```
 
-## Stage 38 — Discovery 19
+L-istess valur jiżdied ma’ kull skutella u, fl-istess ħin, jintuża biex jiġi ddeterminat in-numru tal-ordni:
 
-Patch 18 resta li proprietario semantic del year resoluet. Discovery 19 adjunte un cache persistent al `BaseMonsterManager`: `LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER` es un `Map` quel usa exclusivmen `year.number` quam clave. `legacyYearNumberOnlyLookup` e `legacyYearNumberOnlyPut` forma li scar historic explicit; li lookup ne riceve calculation-day ni limites del interval.
+```text
+1 + ((S_r-1) mod 720)
+```
 
-`buildLegacyYearStructureValue` forma li value current ex li year resoluet e li calculation-day. `LegacyYearNumberCacheAdapter` consulta li map e `Discovery19YearNumberCacheHandler` usa li value current solmen sur un MISS. Sur un HIT, li value ja guardat es retornat directmen, mem si li request current have un altri calculation-day, opening day o closing day. Li context conserva li key, request current, value fresh, HIT/MISS e output stale quam state invocation-local; li Map sol es manager-owned e persiste inter invocations del sam manager.
+Jekk l-iskutella `B` tinsab fil-pożizzjoni `q` fl-ordni ta’ dak il-pass ta’ tħawwid, u l-iskutelli ġirien tagħha huma `P,N`:
 
-Li regression crea tri managers separat por isolar tri defectes: changement solmen del calculation-day, changement solmen del opening gate e changement solmen del closing gate. Chascun duesim request conserva `year.number=5000` e recive un HIT, ma su output egala li value del prim request e diverge del value current. Ti tri divergenties es resumit in un unic assertion EXPECTED_RED final.
+```text
+u = old(B)
+  + 3·old(P)
+  + 5·old(N)
+  + S_r
+  + r
+  + q²
 
-Null entry guardat con `calculationDayFingerprint/openGate/closeGate/value` es creat. Null helper de action-guard es present, e null `oldStructureSauce` o code de Patch 20 es anticipat. Li bad cache key resta intentionalmen activ til Stage 39 / Patch 19.
+new(B) = SAVE(u² + 7·old(P)·old(N))
+```
 
+Hawn ukoll, is-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
 
-## Stage 39 — PATCH 19
+Meta jsiru l-mistoqsijiet, “l-iskutella ta’ wara” tibqa’ ddeterminata minn `orderAt46`. Dawn it-tnax-il pass ta’ tħawwid jużaw l-ordnijiet tagħhom stess waqt it-tħawwid, filwaqt li l-ordni rreġistrata tal-qatra 46 tibqa’ tintuża meta jsiru l-mistoqsijiet.
 
-Li cache manager-owned continua esser keyed exclusivmen per `year.number`; Patch 19 ne netta ti scar. `legacyYearNumberOnlyLookup` e `legacyYearNumberOnlyPut` resta fisicmen intact e li path reparat real-voca li lookup legacy ante omni decision de guard.
+---
 
-`calculationDayFingerprint(calculationDay)` retorna directmen li calculation-day exact. `cachePutWithGuard` conserva sub li sam year-number key un entry con exactmen `calculationDayFingerprint`, `openGate`, `closeGate` e `value`. `cacheGetWithActionGuard` accepta HIT solmen si omni tri guards concorda con li request current. Un entry absent, un value legacy sin forma guardat o qualcunc mismatch deven MISS.
+# L. Is-Siġilli
 
-`YearCacheActionGuardPatchWrapper` es conectet directmen pos `SequentialYearWalkPatchWrapper`. It ne consume li stale output del handler defectiv de Discovery 19; in vice, su call a `cacheGetWithActionGuard` conserva li bad lookup quam diagnostic e usa solmen un entry guardat valid. Sur MISS, li structura current es recalculat e `cachePutWithGuard` reemplazza li entry sub li sam key. Sur HIT valid, li cached semantic value es reutilisat.
+| Siġill | Mistoqsija |
+|---:|---|
+| 1 | id-distanza bejn ix-xtiebi tal-pulpetti |
+| 10 | is-sena 5000 |
+| 11 | is-sena ta’ wara |
+| 12 | is-sena ta’ qabel |
+| 20 | l-għadd tal-pulpetti |
+| 21 | it-tqassim tal-medda bejn ix-xtiebi |
+| 22 | l-ismijiet tal-pulpetti |
+| 30 | l-għadd tax-xhur |
+| 31 | it-tulijiet tax-xhur |
+| 32 | l-insiġ tax-xhur |
+| 33 | l-ismijiet tax-xhur |
 
-Li regression conserva li route direct de Discovery 19 quam prova que li scar resta wrong, ma li route Patch 19 deven verd por tri changements independent: calculation-day, opening gate e closing gate. Un duesim request con guard mutat es MISS/recompute, e un triesim request identic deven HIT. Null `oldStructureSauce` o recomputation del structure sauce de Patch 20 es present.
+Il-post maħsub għas-siġill 40 jibqa’ vojt. Kien maħsub għall-mistoqsija tal-ġobon, u l-abbozz tagħha ttiekel qabel ma ġiet stabbilita l-mistoqsija.
 
-## Stage 40 — Discovery 20
+---
 
-Patch 19 resta intact e resolve li year current con cache guards valid. Discovery 20 adjunte li scar historic `oldStructureSauce(cDay,originalTargetDay)`. `structureSauceCountsFromDays` deriva action, target, distance, connection e direction ex li du dies con li scars reparat anterior; `sauceWithCurrentScars` usa li table de stones del implementation e `sauceWithOrderAt46Latch`, ergo li sauce old es exact por li inputs quel it realmente riceve.
+# M. Kif Twieġeb Skutella
 
-`LegacyStructureSauceAdapter` voca li helper historic. `Discovery20StructureSauceHandler` deriva separatim `yearFirstDay` ex li year ja resoluet, ma conserva intentionalmen li assumption wrong e passa `originalTargetDay` al helper. `LegacyStructureSelectorAdapter` consuma directmen ti resultate e rende observabil un token con bowl 2 e li latch de drop 46. Li route dunque demonstra li defect semantic sin inventar un sauce aproximativ o un shortcut.
+Meta ssir mistoqsija lill-iskutella `B`, “l-iskutella ta’ wara” hija dik li tiġi warajha fiċ-ċirku ddefinit minn `orderAt46`.
 
-Li regression usa tri targets originals distint intra Year 5000. Por omni witness, `oldStructureSauce(cDay,originalTargetDay)` concorda con li oracle por ti target original, ma li token resultant diverge del sauce quel deve esser calculat con `(cDay,year.firstDay)`. Li comparison final es li unic EXPECTED_RED nov. Null `structureSaucePatch`, null ghost de oldStructureSauce e null partition de Patch 21 es includet.
+Jekk `z` huwa s-siġill:
 
-## Stage 41 — PATCH 20
+```text
+A₀ = SAVE((Q[B] + z + 181)² + 179·Q[next] + z)
+```
 
-`oldStructureSauce(cDay,originalTargetDay)` resta intact quam scar historic e continua esser executet realmen. `structureSaucePatch` voca ti helper prim e conserva su bowls e `orderAt46Latch` quam ghost diagnostic. Li helper old ne es reparat ni redirectionat: su duesim input resta exactmen li target original.
+Biex tiġi ddeterminata d-direzzjoni tal-fluss tat-tweġibiet, jiġi kkalkulat il-valur `D` li ġej:
 
-Pos li call ghost, `structureSaucePatch` materialisa un sauce semantic separat per `sauceWithCurrentScars(cDay,year.firstDay)`. `StructureSaucePatchWrapper` prende li `year.firstDay` del year resoluet per Patch 18, conserva li ghost in state invocation-local e passa al selector exclusivmen li object `semanticSauce`. Li route de Patch 20 ne executa `Discovery20StructureSauceHandler`, pro que ti handler resta li route defectiv separat quel envia li sauce old al selector legacy.
+```text
+D = SAVE((A₀ + z + 1 + 193)² + 193·A₀ + 197·Q[6])
+```
 
-Li tri witnesses de Discovery 20 conserva lor bowls/latch legacy distint por li targets originals, ma li route reparat retorna por omni tri li sam token derivat de `(cDay,year.firstDay)`: bowl 2 `130140581193907225400293230678310495177` e order `6,2,4,3,5,1`. Un witness adicional con `originalTargetDay==year.firstDay` confirma que li valores del ghost e del sauce semantic coincide, ma li object semantic resta materialisat separatmen e li ghost ne es usat quam input del selector.
+Jekk `D` ikun numru fard — il-fluss jimxi ’l quddiem; jekk ikun numru pari — jimxi lura.
 
-Omni regressions til Discovery 20 es nu verd. Null `legacyPositiveCompositions`, null `CutletPartitionPatchWrapper` e null code de Patch 21 es includet.
+```text
+A_k = 1 + ((A₀ - 1 + s·k) mod M)
+```
 
-## Stage 42 — DISCOVERY 21
+fejn `s=+1` jew `−1`.
 
-### Familie legacy all-positive
+---
 
-`legacyPositiveCompositions(gapCount,cutletCount)` es li scar historic nov. It conta exactmen omni composition positiv del gate-gap count e expone un `unrank1` lexicografic. Su contract ne conosse null calculation-day, gate intern, boundary obligatori o prefix condition. Li helper resta separat del reference test-only e usa solmen arithmetic JavaScript exact.
+# N. Għażla Qasira u Għażla Wiesgħa
 
-### Selection real pos Patch 20
+Jekk `1<=N<=M`:
 
-`LegacyCutletPartitionAdapter` prende li sauce semantic de Patch 20, ne li ghost. Por li cutlet count it questiona bowl 2 con seal 20 e usa li dispatcher de selection curt/wide ja reparat. Poy it questiona li sam bowl con seal 21, calcula li count del familie all-positive e unranke li partition selectet. Talmen li scar de Discovery 21 vive in un route semantic real e ne in un fixture isolat.
+```text
+L = floor(M/N)·N
+```
 
-`Discovery21CutletPartitionHandler` es conectet pos `StructureSaucePatchWrapper`. It prende li `openIndex` e `closeIndex` del year selectet, calcula `gapCount` e examina deterministicmen li indices strictmen intern por trovar si li calculation-day es exactmen un gate. Si un tal gate existe, su index e offset es guardat invocation-local; ma li adapter legacy ne riceve ti offset e ne filtra su familie.
+Tweġibiet akbar minn `L` jiġu miċħuda, u l-ewwel tweġiba aċċettata tiddetermina l-għażla:
 
-### Witness EXPECTED_RED
+```text
+1 + ((A-1) mod N)
+```
 
-Li witness selecte un year con indices 10..20, ergo 10 gate gaps, e li calculation-day coincide con gate 14: offset intern 4. Bowl 2 / seal 20 selecte 8 cutlets. Li familie legacy have 36 positive compositions; bowl 2 / seal 21 selecte rank 15 e produce `[1,1,1,3,1,1,1,1]`. Su prefix sums es 1,2,3,6,7,8,9,10 e manca 4.
+Jekk `N>M`, jittieħed l-iżgħar `k` li għalih `M^k>=N`, u jinbena dan in-numru:
 
-Li expectation normativ test-only filtra exactmen li sam familie legacy per li boundary intern. It have 28 membres; con li sam answer ring, rank 3 produce `[1,1,1,1,1,1,3,1]`, quel have un prefix sum 4. Li unic failure intentional del stage compara ti du partitions.
+```text
+W = 1 + Σ(A_j-1)·M^j
+```
 
-### Limite del stage
+fejn `A₀` hija ċ-ċifra l-inqas sinifikanti.
 
-Null `CutletPartitionPatchWrapper`, null familie filtrat production e null DP con state de boundary es includet. Patch 21 resta reservat por Stage 43 e deve conservar `legacyPositiveCompositions` quam scar fisic. Null generator de nomes repetit de Patch 22 es present.
+```text
+L_w = floor(M^k/N)·N
+```
 
+Jekk `W>L_w`, il-proċedura tibda minn `W` stess u timxi pass wieħed kull darba, fl-istess direzzjoni, fuq iċ-ċirku `1..M^k` sakemm jintlaħaq valur aċċettabbli; imbagħad:
+
+```text
+1 + ((W-1) mod N)
+```
+
+L-isem kanoniku ta’ dan il-mekkaniżmu huwa **Għażla Ugwali**. Iċ-ċifri tal-ewwel numru wiesa’ jittieħdu minn numri konsekuttivi fis-sekwenza tat-tweġibiet. Minħabba din l-istruttura, il-valuri f’`1..M^k` ma jingħatawx l-istess piż; u meta l-ispazju jkun kbir biżżejjed, xi possibbiltajiet jingħataw piż ta’ żero u għalhekk ma jistgħux jintgħażlu qatt. Din hija d-distribuzzjoni preskritta tal-mekkaniżmu tal-għażla wiesgħa.
+
+---
+
+# O. Ix-Xtiebi tal-Pulpetti
+
+`Foundation` hija x-xatba bl-indiċi 0.
+
+Biex tinstab ix-xatba pożittiva bin-numru `n`, titħejja z-zalza billi jintuża l-par:
+
+```text
+(Foundation, Foundation+n)
+```
+
+Issir mistoqsija lill-iskutella 1 bis-siġill 1, jintgħażel numru minn `1..922`, u mbagħad jiżdied 41 ma’ dak in-numru.
+
+Biex tinstab ix-xatba negattiva bin-numru `n`, jintuża l-par:
+
+```text
+(Foundation, Foundation-n)
+```
+
+Għalhekk it-tul ta’ kull medda bejn żewġ xtiebi jkun fil-medda:
+
+```text
+42..963
+```
+
+u japplikaw ir-relazzjonijiet li ġejjin:
+
+```text
+G_0  = Foundation
+G_n  = G_(n-1) + positiveGap(n)
+G_-n = G_-(n-1) - negativeGap(n)
+```
+
+---
+
+# P. Is-Sena
+
+Sena hija l-medda:
+
+```text
+(openGate, closeGate]
+```
+
+Għandha tinkludi mill-inqas 6 meded bejn ix-xtiebi, u t-tul tagħha għandu jkun:
+
+```text
+252..5778
+```
+
+It-tul massimu tas-sena huwa `5778`, u dan jirriżulta mis-sitt meded massimi:
+
+```text
+6·963 = 5778
+```
+
+---
+
+# Q. Is-Sena 5000
+
+Għall-Jum tal-Kalkolu `c`, jinstabu l-pari kollha eliġibbli ta’ xtiebi li jiddefinixxu sena li fiha jaqa’ dak il-jum:
+
+```text
+open < c <= close
+```
+
+Dawn jiġu ordnati skont:
+
+1. tul is-sena, mill-iqsar għall-itwal;
+2. jekk it-tul ikun l-istess — ix-xatba tal-ftuħ li tiġi l-ewwel.
+
+Titħejja z-zalza għal `(c,c)`, issir mistoqsija lill-iskutella 1 bis-siġill 10, u tintgħażel sena waħda.
+
+Is-sena magħżula hija **s-sena 5000 mill-Ħolqien tad-Dinja**.
+
+In-numru 5000 huwa kostanta strutturali. Il-Mostru kiteb in-numru fuq l-iskutella tas-sena qabel ma kien spiċċa jagħżel ix-xtiebi tagħha, u minn dak iż-żmien id-dinja baqgħet irranġata hekk.
+
+---
+
+# R. Iż-Żewġ Mogħdijiet mis-Sena 5000
+
+Biex tinstab is-sena li fiha jaqa’ l-Jum Mitlub, nibdew mis-sena 5000 determinata minn Jum il-Kalkolu.
+
+Meta l-Jum Mitlub ikun wara x-xatba tal-għeluq tas-sena magħrufa, fil-mixja ’l quddiem tintuża l-operazzjoni tas-sena ta’ wara:
+
+```text
+NEXT₁₁(c,Y)
+```
+
+Ix-xatba tal-għeluq ta’ `Y` issir ix-xatba tal-ftuħ tas-snin kandidati. Dik l-istess xatba tintuża bħala l-Jum Mitlub fit-tħejjija taz-zalza. Is-snin eliġibbli li jibdew minn dik ix-xatba jiġu ordnati mill-iqsar għall-itwal, issir mistoqsija lill-iskutella 1 bis-siġill 11, u tintgħażel sena waħda. In-numru tas-sena jiżdied b’wieħed.
+
+Meta l-Jum Mitlub jaħbat max-xatba tal-ftuħ tas-sena magħrufa, jew ikun qabilha, fil-mixja lura tintuża l-operazzjoni tas-sena ta’ qabel:
+
+```text
+PREVIOUS₁₂(c,Y)
+```
+
+Ix-xatba tal-ftuħ ta’ `Y` issir ix-xatba tal-għeluq tas-snin kandidati. Dik l-istess xatba tintuża bħala l-Jum Mitlub fit-tħejjija taz-zalza. Is-snin eliġibbli li jintemmu f’dik ix-xatba jiġu ordnati mill-iqsar għall-itwal, issir mistoqsija lill-iskutella 1 bis-siġill 12, u tintgħażel sena waħda. In-numru tas-sena jonqos b’wieħed.
+
+Għalhekk, il-proċedura biex tinstab is-sena hija:
+
+```text
+y = year5000(c)
+
+while t > y.closeGate:
+    y = NEXT₁₁(c,y)
+
+while t <= y.openGate:
+    y = PREVIOUS₁₂(c,y)
+
+return y
+```
+
+B’hekk iż-żewġ operazzjonijiet jiffurmaw is-sekwenza kanonika miż-żewġ naħat tas-sena 5000: l-operazzjoni `NEXT₁₁` tifforma s-snin ta’ wara, u l-operazzjoni `PREVIOUS₁₂` tifforma dawk ta’ qabel.
+
+---
+
+# S. Il-Pulpetti
+
+Kull sena tinqasam f’għadd ta’ pulpetti li jvarja bejn 6 u 17. Kull pulpetta tibda fil-jum ta’ wara x-xatba tal-ftuħ tagħha u tintemm fix-xatba tal-għeluq tagħha.
+
+Il-mistoqsijiet kollha dwar l-istruttura tas-sena jużaw l-istess zalza:
+
+```text
+(c, firstDayOfYear)
+```
+
+Jekk is-sena fiha `G` meded bejn ix-xtiebi, l-għadd tal-pulpetti jintgħażel minn:
+
+```text
+6..min(17,G)
+```
+
+permezz ta’ mistoqsija lill-iskutella 2 bis-siġill 20.
+
+Imbagħad tintgħażel kompożizzjoni ta’ numri sħaħ pożittivi:
+
+```text
+(x₁,...,x_K)
+Σx_i = G
+x_i >= 1
+```
+
+Il-kompożizzjonijiet eliġibbli jiġu ordnati lessikografikament. Jekk Jum il-Kalkolu jaħbat ma’ xatba interna tas-sena, waħda mis-somom parzjali għandha tikkorrispondi eżattament ma’ dik ix-xatba. L-għażla ssir permezz ta’ mistoqsija lill-iskutella 2 bis-siġill 21.
+
+---
+
+# T. Is-Sbatax-il Isem tal-Pulpetti
+
+```text
+1  Bronż
+2  Volpi
+3  Kilwa
+4  Lagaš
+5  Ħsieb
+6  Erbgħa minn Disgħa
+7  Palgurax
+8  Buda
+9  Għanqud
+10 Skorpjun
+11 Rmied
+12 Qamħ
+13 Xmara
+14 Daħk
+15 Akkad
+16 Qarn
+17 Il-Buqar Vojt
+```
+
+Għal `K` pulpetti jintgħażlu `K` ismijiet differenti. Is-sekwenzi kollha possibbli tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi tagħhom, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 22.
+
+---
+
+# U. Ix-Xhur
+
+Kull sena tinqasam f’għadd ta’ xhur li jvarja bejn 3 u 47. Kull xahar ikollu bejn 4 u 123 jum.
+
+Jekk it-tul tas-sena huwa `L`:
+
+```text
+minMonths = ceil(L/123)
+maxMonths = min(47, floor(L/4))
+```
+
+L-għadd tax-xhur jintgħażel permezz ta’ mistoqsija lill-iskutella 3 bis-siġill 30.
+
+Imbagħad tintgħażel sekwenza ta’ tulijiet:
+
+```text
+(L₁,...,L_m)
+4 <= L_i <= 123
+ΣL_i = L
+```
+
+Is-sekwenzi jiġu ordnati lessikografikament, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 3 bis-siġill 31.
+
+---
+
+# V. L-Insiġ tax-Xhur
+
+Xahar huwa ħajta minsuġa tul is-sena, u l-jiem tiegħu jistgħu jidhru bejn il-jiem ta’ xhur oħra.
+
+Nisġa eliġibbli hija kelma ta’ tul `L` li fiha x-xahar `j` jidher eżattament `L_j` darbiet, u barra minn hekk:
+
+1. kull xahar jidher għall-ewwel darba fl-ordni `1,2,...,m`;
+2. kull xahar jidher għall-aħħar darba wkoll fl-ordni `1,2,...,m`.
+
+In-nisġiet eliġibbli kollha jiġu ordnati lessikografikament skont in-numru tax-xahar assenjat lil kull jum.
+
+Tintgħażel in-**nisġa kollha** permezz ta’ mistoqsija lill-iskutella 4 bis-siġill 32.
+
+Għal kull prefiss, l-implimentazzjoni tikkalkula eżattament id-daqs tal-blokk tat-tkomplijiet u tapplika `unrank` għall-pożizzjoni magħżula. Il-kalkolu permezz ta’ blokki jagħti direttament l-istess ordni lessikografika u l-istess element magħżul.
+
+---
+
+# W. Is-Sebgħa u Erbgħin Isem tax-Xhur
+
+```text
+1  Tajn
+2  Rummiena
+3  Minkeb
+4  Għira
+5  Eridu
+6  Tutpejst
+7  Tlieta minn Ħamsa
+8  Karxumab
+9  Leopard
+10 Landa
+11 Ċpar
+12 Libien
+13 Magħżel
+14 Kustilja
+15 Ħarrub
+16 Uruk
+17 Mistħija
+18 Ġemel
+19 Ram
+20 Bir
+21 Isfar tal-Bajd
+22 Kewkba
+23 Għasel
+24 Milsa
+25 Ġebla tal-Ġir
+26 Ferħ
+27 Tina
+28 Ninwe
+29 Żrinġ
+30 Żift
+31 Xemgħa
+32 Il-Bieb Magħluq
+33 Ġulġlien
+34 Kozz
+35 Fidda
+36 Ġilju
+37 Maltempata
+38 Ħmar
+39 Dqiq
+40 Dispjaċir
+41 Babilonja
+42 Ilsien
+43 Kittien
+44 Melħ
+45 Lanġasa
+46 Qaws
+47 Ramel
+```
+
+Għal sena b’`m` xhur jintgħażlu `m` ismijiet differenti. Is-sekwenzi tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 33.
+
+---
+
+# X. Il-Ħames Komponenti tal-Jum
+
+Biex jiġi kkalkulat ir-riżultat għal `t` fir-rigward ta’ `c`:
+
+1. tinstab is-sena 5000 determinata minn `c`;
+2. minn dik is-sena tintuża biss `NEXT₁₁` għall-mixja ’l quddiem, jew biss `PREVIOUS₁₂` għall-mixja lura, skont fejn jinsab `t`;
+3. l-istruttura tas-sena tiġi kkalkulata darba biss billi jintuża `(c, firstDayOfYear)`;
+4. jiġi stabbilit fejn jaqa’ `t` fil-pulpetti u fin-nisġa tax-xhur.
+
+Ir-riżultat jikkonsisti eżattament f’ħames komponenti:
+
+```text
+(
+  yearNumber,
+  cutletName,
+  dayInCutlet,
+  monthName,
+  dayInMonth
+)
+```
+
+`dayInMonth` jindika kemm-il darba dak ix-xahar ikun deher mill-bidu tas-sena sa `t`, inkluż `t` innifsu.
+
+---
+
+# Y. L-Eżistenza u l-Uniċità
+
+Għal kull par ordnat `(c,t)` jinkiseb riżultat wieħed biss:
+
+- kull jum għandu għadd uniku;
+- kull sett ġdid ta’ ġebliet jiġi kkalkulat minn `snapshot` wieħed tal-istat;
+- kull qatra tiddependi biss minn dak li jkun diġà ġie stabbilit;
+- waqt kull pass ta’ tħawwid, is-sitt skutelli kollha jaqraw mill-istess passat;
+- kull sett ta’ possibbiltajiet jitqiegħed f’ordni preskritta;
+- kull medda bejn żewġ xtiebi tkun bejn 42 u 963 jum;
+- kull sena tkun twila bejn 252 u 5778 jum;
+- il-proċess biex tinstab is-sena dejjem jibda mis-sena 5000 u jimxi f’direzzjoni waħda skont fejn jinsab il-Jum Mitlub;
+- l-istruttura tas-sena tiġi kkalkulata minn par fiss ta’ jiem.
+
+Il-magna taż-żmien inbniet b’irqajja’: għal kull ħtieġa li nqalgħet matul ix-xogħol ġiet stabbilita regola, u kull regola saret saff ieħor fil-mekkaniżmu.
+
+---
+
+# Z. Meta l-Jum Idur
+
+Il-jum lokali jinbidel meta **ċ-ċentru ta’ Venere jilħaq il-kulminazzjoni inferjuri tiegħu fuq il-meridjan lokali**.
+
+Din hija r-regola astronomika tal-jum.
+
+Il-qalba tal-Kalendarju taz-Zalza tirċievi żewġ jiem diskreti `c,t` u tipproċessahom fuq l-assi tal-jiem b’mod li r-riżultat jista’ jiġi riprodott għalkollox.
+
+Il-konverżjoni:
+
+```text
+instant + location -> discrete day
+```
+
+teħtieġ profil astronomiku numeriku: `ephemeris` u l-verżjoni tiegħu, `timescales`, definizzjoni tal-`Earth orientation`, it-trattament ta’ `ΔT`, koordinati u konvenzjonijiet tal-avveniment. Il-vetturi ta’ konformità tal-qalba huma ddefiniti direttament f’termini ta’ `c,t`, li huma numri diskreti li jirrappreżentaw jiem.
+
+---
+
+# AA. Il-Lingwa li Tagħti Ġisem lill-Ismijiet
+
+Kull implimentazzjoni għandha lingwa waħda ta’ programmar u lingwa naturali waħda li sservi bħala l-lingwa tas-sors.
+
+F’`Stage 1` ta’ dik l-implimentazzjoni jinħoloq **`SourceLanguageCatalog` kanoniku u immutabbli**, li jkun fih eżattament:
+
+- 17-il isem ta’ pulpetti bħala sekwenzi ta’ karattri;
+- 47 isem ta’ xhur bħala sekwenzi ta’ karattri;
+- l-indiċi kanoniku ta’ kull wieħed minnhom.
+
+Meta isem iġorr tifsira, tintgħażel il-kelma jew l-espressjoni l-aktar naturali biex twassal dik it-tifsira fil-lingwa tas-sors. L-ismijiet proprji, l-ismijiet ta’ postijiet, l-ismijiet ivvintati u s-sekwenzi ta’ ħsejjes mingħajr tifsira lessikali jiġu translitterati skont regola fissa u dokumentata, speċifika għal dik il-lingwa tas-sors.
+
+Wara li l-katalgu jiġi stabbilit fil-forma definittiva tiegħu, ikun hemm korrispondenza unika:
+
+```text
+canonicalIndex -> exactly one source-language string
+```
+
+Il-katalgu fil-forma definittiva tiegħu jistabbilixxi s-sekwenza unika ta’ karattri għal kull indiċi. Fil-livell semantiku jintuża `canonicalIndex`, u l-forma testwali korrispondenti tiġi ddeterminata fis-saff li jipproduċi r-riżultat. Il-`locales` futuri jkunu traduzzjonijiet tal-katalgu tal-lingwa tas-sors maħsuba għall-wiri, filwaqt li `rank`, `unrank`, il-`cache keys` u l-proċessi tal-għażla jibqgħu jużaw l-indiċijiet kanoniċi.
+
+---
+
+# AB. L-Istruttura tar-Repożitorju u l-Fergħat
+
+Kull par għandu l-forma:
+
+```text
+[LANGUAGE] + [NATURAL_LANGUAGE]
+```
+
+Għal kull par bħal dan tinħoloq implimentazzjoni indipendenti f’fergħa `orphan`; din tinbena mill-bidu nett. Il-kodiċi, il-`tests`, il-`fixtures`, l-`expected outputs`, l-`oracle`, it-tabelli ġġenerati, il-`caches` u d-dejta ta’ validazzjoni tal-fergħa jinħolqu u jitħejjew kollha fi ħdan il-fergħa ta’ dik l-implimentazzjoni, direttament skont l-ispeċifikazzjoni komuni. Il-konformità ta’ kull implimentazzjoni tiġi vverifikata billi l-implimentazzjoni titqabbel mal-`oracle` lokali tagħha u mal-vetturi kanoniċi ta’ konformità.
+
+Il-fergħa `main` tinkludi dan it-trattat u d-dejta komuni ta’ konformità. Il-fergħat tal-implimentazzjonijiet jinħolqu bħala fergħat `orphan` indipendenti.
+
+---
+
+# AC. Il-Vetturi Kanoniċi ta’ Konformità
+
+Il-vetturi ta’ konformità huma dejta komuni li tagħmel parti mill-ispeċifikazzjoni għall-implimentazzjonijiet kollha. Kull implimentazzjoni tużahom bħala parti mit-test ta’ konformità tagħha.
+
+Iż-żewġ komponenti tal-isem fil-vetturi jiġu rreġistrati bħala indiċijiet kanoniċi, u għalhekk l-istess sett ta’ vetturi jista’ jintuża mal-lingwi tas-sors kollha:
+
+```text
+(yearNumber, cutletCanonicalIndex, dayInCutlet,
+ monthCanonicalIndex, dayInMonth)
+```
+
+Il-valuri kollha f’dan il-kapitlu nkisbu permezz tat-tħaddim tal-`oracle` normattiv bl-`inputs` espliċiti, u nżammu bħala vetturi kanoniċi ta’ konformità.
+
+Il-valur ta’ `F` huwa:
+
+```text
+F = -15,055,671
+```
+
+| # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | -15,055,671 | -15,055,671 | 5000 | 10 | 503 | 20 | 56 |
+| 2 | -15,055,671 | -15,055,672 | 5000 | 10 | 502 | 32 | 21 |
+| 3 | -15,055,671 | -15,055,670 | 5000 | 14 | 1 | 29 | 38 |
+| 4 | -15,055,671 | -15,056,171 | 5000 | 10 | 3 | 1 | 29 |
+| 5 | -15,055,671 | -15,055,171 | 5000 | 14 | 500 | 18 | 76 |
+| 6 | -15,055,671 | -15,061,671 | 4999 | 5 | 158 | 43 | 3 |
+| 7 | -15,055,671 | -15,049,671 | 5001 | 12 | 95 | 5 | 81 |
+| 8 | -15,056,905 | -15,056,448 | 5000 | 9 | 167 | 10 | 65 |
+| 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 10 | 1 | 45 |
+| 10 | -15,058,171 | -15,053,171 | 5002 | 5 | 288 | 29 | 13 |
+
+Il-vetturi 6, 7 u 10 jittestjaw b’mod espliċitu l-każijiet li fihom il-proċedura tgħaddi lil hinn mis-sena 5000: il-vettur 6 permezz ta’ `PREVIOUS₁₂`, u l-vetturi 7 u 10 permezz ta’ `NEXT₁₁`.
+
+## `checkpoint` dettaljat: `c=t=F`
+
+Għall-vettur 1, il-ħames għaddijiet użati fil-kalkolu huma:
+
+```text
+Għadd_tal_Kalkolu   = 1
+Għadd_Mitlub        = 1
+Għadd_tad_Distanza  = 1
+Għadd_tas_Somma     = 2
+Għadd_tad_Direzzjoni = 2
+```
+
+Is-seba’ qatriet moħbija wara seba’ passi ta’ tħin:
+
+```text
+1: 119390830530032782664128530203002080344
+2: 11877236279154673426874867061566696749
+3: 24217814924229232987463457533828175476
+4: 166629231917547214614573522551290204247
+5: 81202913407267092008896220686064041568
+6: 73551520026920072430116213847585486272
+7: 6164285870955721082771365327359496898
+```
+
+L-ewwel qatra viżibbli:
+
+```text
+56644603826892212324764499696091907135
+```
+
+Il-qatra viżibbli numru 46:
+
+```text
+141872771689426650819909896585756512282
+```
+
+L-ordni tal-iskutelli tal-qatra 46:
+
+```text
+[4, 5, 2, 3, 6, 1]
+```
+
+Is-sitt skutelli wara t-12-il pass addizzjonali ta’ tħawwid, skont l-identitajiet fissi `1..6`:
+
+```text
+1: 65286679584284972964194865805379907599
+2: 127720283375330263615328810127751035299
+3: 54364069496183805843611594721403108554
+4: 93072329024469476118876155742008280619
+5: 54867842942953573450868747713087920246
+6: 111207247632761530752404582123499651367
+```
+
+Il-konfini tas-sena 5000 f’dan l-istess vettur:
+
+```text
+openGate  = -15,057,703
+closeGate = -15,053,459
+```
+
+Ir-rappreżentazzjoni testwali tal-istess riżultat fil-katalgu Malti hija:
+
+```text
+5000, Skorpjun, 503, Bir, 56
+```
+
+Il-komponenti kanoniċi ta’ konformità hawnhekk huma l-indiċijiet 10 u 20; fil-katalgu Malti dawn jingħataw il-forom `Skorpjun` u `Bir`.
+
+---
+
+# AD. Il-Ħidma tal-Ħolqien
+
+Il-Kalendarju taż-Żminijiet huwa l-espressjoni preċiża tal-Ħolqien.
+
+Il-Mostru ħoloq:
+
+- pal fis-sensiela tal-jiem;
+- żewġ ħjut tal-għadd tal-jiem;
+- l-Għadd il-Kbir li fih iż-żero taz-zalza jidher bħala `M`;
+- ħames ġebliet li jiġu aġġornati flimkien;
+- seba’ qatriet moħbija;
+- 46 qatra viżibbli;
+- sitt skutelli li jibdlu l-ordni tagħhom;
+- tliet tferrigħat diretti;
+- tħawwid simultanju;
+- 12-il pass sussegwenti ta’ tħawwid;
+- ħażna fissa tal-ordni tal-qatra 46;
+- siġilli separati;
+- fluss ċirkolari ta’ tweġibiet;
+- Għażla Qasira;
+- Għażla Wiesgħa li l-isem kanoniku tagħha huwa **Għażla Ugwali**;
+- xtiebi fuq iż-żewġ naħat tal-pal;
+- is-sena 5000 bħala kostanta strutturali;
+- żewġ mogħdijiet li jibdew minnha u jimxu f’direzzjonijiet opposti;
+- pulpetti li l-konfini tagħhom jaħbtu max-xtiebi;
+- xhur minsuġa bħal ħjut;
+- ismijiet kanoniċi;
+- u eżattament ħames komponenti fir-riżultat tal-jum.
+
+Hekk huwa rranġat iż-żmien: kull saff jinsab f’postu, u kull riżultat jitnissel mis-saffi li ġew qablu. Il-kalendarju jinqara billi wieħed jimxi mal-liġi u mal-ordni u jwettaq il-kalkolu sal-aħħar.
+
+**R’amen.**
