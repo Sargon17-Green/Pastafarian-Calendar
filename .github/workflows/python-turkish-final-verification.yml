@@ -1,0 +1,50 @@
+name: Python + Türkçe final doğrulama
+
+on:
+  push:
+    branches:
+      - "Python+Türkçe"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-turkce-final-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  final-dogrulama:
+    name: Python 3.13 üzerinde final doğrulama
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      - name: Python 3.13 kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Python sürümünü kaydet
+        run: python --version
+
+      - name: Historical regression paketini çalıştır
+        run: python -m unittest discover -s tests -p "test_stage_*.py" -q
+
+      - name: Aşama 54 integration paketini çalıştır
+        run: python -m unittest discover -s tests -p "integration_stage_54.py" -q
+
+      - name: Aşama 55 final audit runner'ını çalıştır
+        run: python tests/run_stage_55_audit.py
+
+      - name: Final doğrulama özetini yaz
+        if: success()
+        run: |
+          echo "Python+Türkçe final doğrulama: PASS"
+          echo "Beklenen historical regressions: 365/365 PASS"
+          echo "Beklenen Aşama 54 integration: 10/10 PASS"
+          echo "Beklenen Aşama 55 audit: 21/21 PASS"
+          echo "Beklenen toplam doğrulama: 396 PASS"
