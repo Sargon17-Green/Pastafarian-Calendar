@@ -1,0 +1,45 @@
+Gradus 18 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Omnes unitates C++ recompiletae sunt contra caput et productionem Gradus 18. Quia una catena compilationum longa limitem temporis ambitus tangere potest, compilationes in plures invocationes C++ divisae sunt; fontes et optiones probationum non mutatae sunt.
+
+Regressiones Graduum 1–17:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+REGRESSIO_DISCOVERY_01_TRANSIIT
+REGRESSIO_PATCH_01_TRANSIIT
+REGRESSIO_DISCOVERY_02_TRANSIIT
+REGRESSIO_PATCH_02_TRANSIIT
+REGRESSIO_DISCOVERY_03_TRANSIIT
+REGRESSIO_PATCH_03_TRANSIIT
+REGRESSIO_DISCOVERY_04_TRANSIIT
+REGRESSIO_PATCH_04_TRANSIIT
+REGRESSIO_DISCOVERY_05_TRANSIIT
+REGRESSIO_PATCH_05_TRANSIIT
+REGRESSIO_DISCOVERY_06_TRANSIIT
+REGRESSIO_PATCH_06_TRANSIIT
+REGRESSIO_DISCOVERY_07_TRANSIIT
+REGRESSIO_PATCH_07_TRANSIIT
+REGRESSIO_DISCOVERY_08_TRANSIIT
+REGRESSIO_PATCH_08_TRANSIIT
+
+Regressio DISCOVERY 09:
+CASUS_FUSIONIS drop=1 ordo=[1,2,3,4,5,6] discrepantiae_legacy=0 discrepantiae_activae=0
+CASUS_FUSIONIS drop=241 ordo=[3,1,2,4,5,6] discrepantiae_legacy=3 discrepantiae_activae=3
+DISCREPANTIA FUSIONIS drop=241 positio=1 crater_normativus=3 crater_legacy=1 expectatus=58127 actualis=58115
+DISCREPANTIA FUSIONIS drop=241 positio=2 crater_normativus=1 crater_legacy=2 expectatus=58134 actualis=58140
+DISCREPANTIA FUSIONIS drop=241 positio=3 crater_normativus=2 crater_legacy=3 expectatus=58174 actualis=58194
+REGRESSIO_DISCOVERY_09_DEFECIT: 3 discrepantiae normativae ex crateris fixis inventae sunt
+EXIT_CODE=1
+
+Exitus regressioni Gradus 18 exspectatus est 1. Omnes regressiones anteriores transeunt.
+
+Auditum contaminationis futurae:
+BOWL_ALIAS_ABSENS=YES
+PATCH_09_ABSENS=YES
+VAULT_OLD_ABSENS=YES
+PENDING_ABSENS=YES
+PATCH_10_ABSENS=YES
+
+Status finalis: EXPECTED_RED

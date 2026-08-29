@@ -29,6 +29,8 @@ using StoneTable = std::array<Stone, 47>;
 using HiddenDrops = std::array<Integer, 7>;
 using VisibleDropStore = std::vector<Integer>;
 using PermutationOrder = std::array<int, 6>;
+using BowlState = std::array<Integer, 6>;
+using PourTriplet = std::array<Integer, 3>;
 
 enum class GrindStoneKind {
     NONE = -1,
@@ -58,6 +60,17 @@ LegacyGrindLookup legacyGrindRow(int grind);
 const std::array<VisibleGrindRow, 12>& grindTableWithSentinel();
 LegacyGrindLookup grindRowWithSentinel(int grind);
 PermutationOrder oldPermutationUnrank0(int rank0);
+
+struct LegacyFixedPourComputation {
+    PermutationOrder order{};
+    std::array<int, 3> fixedBowlIds{{1, 2, 3}};
+    PourTriplet pours{};
+};
+
+LegacyFixedPourComputation legacyPoursToFixedBowlIds(const Integer& drop,
+                                                     int index,
+                                                     const BowlState& oldBowls,
+                                                     const Stone& stoneRow);
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -140,6 +153,14 @@ struct BaseMonsterContext {
     PermutationOrder patchedPermutationOutput{};
     bool patchedPermutationFound = false;
     bool patch08Applied = false;
+    Integer legacyFixedPourDrop{};
+    int legacyFixedPourIndex = 0;
+    BowlState legacyFixedPourOldBowls{};
+    Stone legacyFixedPourStoneRow{};
+    PermutationOrder legacyFixedPourOrder{};
+    std::array<int, 3> legacyFixedPourBowlIds{{1, 2, 3}};
+    PourTriplet legacyFixedPourOutput{};
+    bool legacyFixedPourReady = false;
 };
 
 struct BaseRunReport {
@@ -251,6 +272,20 @@ struct GrindLookupReport {
     bool patch07Applied = false;
 };
 
+struct LegacyFixedPourReport {
+    Integer drop{};
+    int index = 0;
+    BowlState oldBowls{};
+    Stone stoneRow{};
+    PermutationOrder order{};
+    std::array<int, 3> fixedBowlIds{{1, 2, 3}};
+    PourTriplet output{};
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 class BaseValidationError final : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
@@ -275,6 +310,7 @@ public:
     void requirePatch07Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyPermutationReady(const BaseMonsterContext& ctx) const;
     void requirePatch08Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyFixedPourReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -322,6 +358,14 @@ public:
 class LegacyGrindTableAdapter {
 public:
     LegacyGrindLookup read(int grind) const;
+};
+
+class LegacyFixedPourAdapter {
+public:
+    LegacyFixedPourComputation compute(const Integer& drop,
+                                       int index,
+                                       const BowlState& oldBowls,
+                                       const Stone& stoneRow) const;
 };
 
 class Discovery01RemainderHandler {
@@ -512,6 +556,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery09FixedPourHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyFixedPourAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -621,6 +673,12 @@ public:
                                    const Patch07SentinelGrindWrapper& wrapper,
                                    const BaseValidationManager& validator,
                                    const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyFixedPours(BaseMonsterContext& ctx,
+                                  const Discovery09FixedPourHandler& handler,
+                                  const LegacyFixedPourAdapter& adapter,
+                                  const BaseValidationManager& validator,
+                                  const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -654,6 +712,10 @@ public:
     PermutationRankReport executePermutationOrder(int oneBasedRank) const;
     PermutationRankReport executePermutationFromDrop(const Integer& drop) const;
     PermutationRankReport executeUnpatchedPermutationDiagnostic(int oneBasedRank) const;
+    LegacyFixedPourReport executeFixedPours(const Integer& drop,
+                                            int index,
+                                            const BowlState& oldBowls,
+                                            const Stone& stoneRow) const;
 };
 
 } // namespace pastafari

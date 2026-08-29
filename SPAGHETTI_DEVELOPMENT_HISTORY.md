@@ -455,3 +455,29 @@ Regressio PATCH 08 addita etiam `drop=721`, `0`, `-1` et `1441` probat, ut reduc
 Additi sunt `Patch08PermutationResolution`, `Patch08PermutationRankWrapper`, `Patch08PermutationRankHandler`, `dispatchPatchedPermutationRank`, `executePermutationFromDrop`, `executeUnpatchedPermutationDiagnostic`, status permutationis emendatae, exitus legacy ante patch et `requirePatch08Ready`. `Patch08PermutationRankHandler` duas vocationes auxiliatoris continet: unam legacy pravum observabilem et alteram per pontem emendatum.
 
 Nullus `bowlAlias`, nullus PATCH 09 et nulla logica fusionum introducta est.
+
+## Gradus 18 — Detectio 09: fusiones ad crateres fixos pro positionibus ordinis
+
+### Quid putabatur
+
+Post PATCH 08, ordo sex craterum per permutationem one-based iam exactus erat. Vetus subsystema fusionum tamen ante hanc conventionem stabilitam nata erat et tres primas fusionum lecturas quasi tres primae positiones semper crateres cum ID 1, 2 et 3 significarent tractabat. Quia ordo identitas in aliquibus guttis occurrit, error diu latere potuit.
+
+### Quid repertum est
+
+`legacyPoursToFixedBowlIds` ordinem permutationis recte computat, sed ipsum ordinem ad lecturas craterum non applicat. Prima fusio tritici semper `oldBowls[0]`, secunda hordei semper `oldBowls[1]`, tertia salis semper `oldBowls[2]` legit. Sic loca semantica 1,2,3 falso cum IDs craterum fixis 1,2,3 confunduntur.
+
+Regressio duos casus ostendit. `drop=1` ordinem identitatem reddit et defectus accidentaliter non apparet. `drop=241` ordinem `[3,1,2,4,5,6]` reddit; ibi omnes tres fusiones differunt a formula normativa quia norma crateres 3,1,2 per positionem legit, legacy autem 1,2,3.
+
+### Quid circumventum est
+
+Nihil hoc gradu circumventum est. `LegacyFixedPourAdapter` functionem legacy directe vocat, `Discovery09FixedPourHandler` tres exitus pravas in contextu servat et eas per viam activam exponit. Ordo rectus in contextu simul servatur ut causa discrepantiae observabilis maneat.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Norma fusionis definit lecturam crateris per positionem ordinis permutationis. Via activa autem ipsos IDs fixos 1,2,3 legit. Ubi `order[1..3]` non sunt `1,2,3`, termini multiplicativi mutantur et exitus SAVE mutantur. Ergo via huius gradus consulto non est normativae aequivalens.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `BowlState`, `PourTriplet`, `LegacyFixedPourComputation`, `legacyPoursToFixedBowlIds`, campi contextus fusionum, `LegacyFixedPourReport`, `LegacyFixedPourAdapter`, `Discovery09FixedPourHandler`, `requireLegacyFixedPourReady`, `dispatchLegacyFixedPours` et `executeFixedPours`. Contextus servat simul ordinem rectum et IDs fixos erratos, ut cicatrix semantica ante correctionem sequentem clare observetur.
+
+Nullus `bowlAlias`, nullus PATCH 09, nullus `vaultOld` et nulla logica PATCH 10 addita est.

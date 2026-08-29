@@ -1,61 +1,54 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 17 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 18 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 17 est `PATCH 08`; status repositorii exspectatus est `GREEN`.
+Gradus 18 est `DISCOVERY 09`; status repositorii exspectatus est `EXPECTED_RED`.
 
-Vitium Gradus 16 manet physice intactum. `oldPermutationUnrank0(rank0)` adhuc solum rank zero-based `0..719` accipit. Via diagnostica veterem errorem adhuc demonstrat: ordinalis one-based 1 directe ut rank0 1 permutationem sequentem legit, et ordinalis 720 tamquam rank0 720 reicitur.
+Post PATCH 08 ordo sex craterum iam recte e `drop` derivatur. Novum vitium historicum tamen apparet in tribus fusionibus: codex veteris viae ordinem rectum computat, sed lecturas craterum adhuc quasi positiones 1, 2, 3 essent identicae crateribus cum ID 1, 2, 3 facit.
 
-Correctio auxiliatorem legacy non mutat. Additur catena praescripta:
+Routine legacy est:
 
 ```text
-oneBased = regularMod(drop-1,720)+1
-legacyRank0 = oneBased-1
-order = oldPermutationUnrank0(legacyRank0)
+legacyPoursToFixedBowlIds(drop,index,oldBowls,stoneRow)
 ```
+
+Ea ordinem per eandem conventionem PATCH 08 obtinet, sed tres formulas fusionis legunt semper:
+
+```text
+oldBowls[1]
+oldBowls[2]
+oldBowls[3]
+```
+
+sensu ID crateris, id est indices C++ `0`, `1`, `2`. Ordo computatus nondum ad has lecturas applicatur.
 
 ## Via activa
 
-`BaseMonsterManager::executePermutationOrder` nunc ad `executePermutationFromDrop` delegat. Via emendata transit per:
-
 ```text
-BaseMonsterManager::executePermutationFromDrop
--> BaseDispatcher::dispatchPatchedPermutationRank
--> Patch08PermutationRankHandler
--> LegacyPermutationAdapter::unrank0            [vocatio legacy prior]
--> Patch08PermutationRankWrapper::resolve
--> regularMod(drop-1,720)+1
--> legacyRank0 = oneBased-1
--> LegacyPermutationAdapter::unrank0
--> oldPermutationUnrank0
+BaseMonsterManager::executeFixedPours
+-> BaseDispatcher::dispatchLegacyFixedPours
+-> Discovery09FixedPourHandler
+-> LegacyFixedPourAdapter::compute
+-> legacyPoursToFixedBowlIds
 ```
 
-`Patch08PermutationRankHandler` primum exitum legacy pravum re vera computat et in relatione retinet. Deinde `Patch08PermutationRankWrapper` eundem `drop` ad ordinalem one-based canonicum redigit, unum subtrahit et auxiliatorem zero-based iterum vocat. `executeUnpatchedPermutationDiagnostic` viam Gradus 16 separatam conservat.
+Contextus huius viae servat `drop`, indicem guttae, sex crateres veteres, ordinem sex craterum, tres IDs fixos `1,2,3`, ordinem lapidis et tres exitus fusionis. Validator confirmat tantum structuram defectus legacy; nullam correctionem semanticae facit.
 
-## Regressio DISCOVERY 08
+## Regressio DISCOVERY 09
 
-`tests/stage_16_discovery_08_tests.cpp` immutatus manet. Contra Gradum 16 pristinum quinque discrepantias et exitum `1` reddit. Contra Gradum 17 eadem quinque ordines `1`, `2`, `3`, `719`, `720` recte recipiunt et regressio transit.
+`tests/stage_18_discovery_09_tests.cpp` duos casus separat.
 
-Hoc confirmat patch productionis, non mutatio valores exspectatos, defectum sanavisse.
+Pro `drop=1`, ordo est identitas `[1,2,3,4,5,6]`. Hic vitium latent: crateres fixi `1,2,3` forte iidem sunt ac tres crateres positi in primis tribus positionibus, ergo nulla discrepantia apparet.
 
-## Regressio PATCH 08
-
-`tests/stage_17_patch_08_tests.cpp` separat:
-
-- cicatricem `oldPermutationUnrank0(0..719)` et reiectionem rank0 720;
-- viam diagnosticam sine patch pro ordinalibus 1 et 720;
-- catena exacta `drop -> oneBased -> legacyRank0 -> oldPermutationUnrank0`;
-- reductionem modularem pro `drop=721`, `drop=0`, `drop=-1` et `drop=1441`;
-- conservationem exitus legacy ante patch in relatione;
-- signum `patch08Applied` et indices emendati observabiles.
+Pro `drop=241`, ordo est `[3,1,2,4,5,6]`. Norma tres fusiones e crateribus `3,1,2` legere iubet, dum legacy adhuc `1,2,3` legit. Cum crateribus veteribus distinctis et lapide distincto, tres discrepantiae exactae apparent. Regressio consulto exitum `1` reddit.
 
 Omnes regressiones Graduum 1–17 transeunt.
 
 ## Quod consulto nondum adest
 
-Nullus `bowlAlias`, nullus `Patch09`, nullus status `patch09Applied`, nulla logica fusionum et nulla lectio crateris per positionem alias introducta est. Gradus 18 nondum incohatus est.
+Nullus `bowlAlias`, nullus `Patch09`, nullus status `patch09Applied` et nulla translatio `position -> order[position]` ad lecturas fusionum introducta est. Item nullus `vaultOld`, nullum `pending` et nulla logica PATCH 10 praemature adest.
 
 ## Lingua computationis
 

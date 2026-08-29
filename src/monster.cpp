@@ -313,6 +313,27 @@ PermutationOrder oldPermutationUnrank0(int rank0) {
     return order;
 }
 
+LegacyFixedPourComputation legacyPoursToFixedBowlIds(const Integer& drop,
+                                                     int index,
+                                                     const BowlState& oldBowls,
+                                                     const Stone& stoneRow) {
+    if (index < 1 || index > 46) {
+        throw BaseValidationError("index guttae visibilis inter unum et quadraginta sex requiritur");
+    }
+
+    const Integer oneBasedInteger = regularMod(drop - 1, Integer{720}) + 1;
+    const int oneBased = oneBasedInteger.convert_to<int>();
+    const PermutationOrder order = oldPermutationUnrank0(oneBased - 1);
+
+    const Integer dropSquare = drop * drop;
+    PourTriplet pours{};
+    pours[0] = savePatch(dropSquare + stoneRow[0] * oldBowls[0] + 3 * index);
+    pours[1] = savePatch(dropSquare + stoneRow[1] * oldBowls[1] + 5 * index);
+    pours[2] = savePatch(dropSquare + stoneRow[2] * oldBowls[2] + 7 * index);
+
+    return LegacyFixedPourComputation{order, {{1, 2, 3}}, pours};
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -545,6 +566,26 @@ void BaseValidationManager::requirePatch08Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyFixedPourReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyFixedPourReady) {
+        throw BaseValidationError("tres fusiones legacy nondum paratae sunt");
+    }
+    if (ctx.legacyFixedPourIndex < 1 || ctx.legacyFixedPourIndex > 46) {
+        throw BaseValidationError("index fusionis legacy extra fines est");
+    }
+    if (ctx.legacyFixedPourBowlIds != std::array<int, 3>{{1, 2, 3}}) {
+        throw BaseValidationError("legacy IDs craterarum fixos unum duo tria non servavit");
+    }
+
+    std::array<bool, 7> seen{};
+    for (const int bowlId : ctx.legacyFixedPourOrder) {
+        if (bowlId < 1 || bowlId > 6 || seen[static_cast<std::size_t>(bowlId)]) {
+            throw BaseValidationError("ordo craterarum fusionis legacy permutatio valida non est");
+        }
+        seen[static_cast<std::size_t>(bowlId)] = true;
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -589,6 +630,13 @@ Integer Patch06PriorWrapper::read(const VisibleDropStore& dropStore,
 
 LegacyGrindLookup LegacyGrindTableAdapter::read(int grind) const {
     return legacyGrindRow(grind);
+}
+
+LegacyFixedPourComputation LegacyFixedPourAdapter::compute(const Integer& drop,
+                                                           int index,
+                                                           const BowlState& oldBowls,
+                                                           const Stone& stoneRow) const {
+    return legacyPoursToFixedBowlIds(drop, index, oldBowls, stoneRow);
 }
 
 LegacyGrindLookup Patch07SentinelGrindWrapper::read(int grind) const {
@@ -1117,6 +1165,36 @@ void Patch08PermutationRankHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch08.permutation.ready");
 }
 
+void Discovery09FixedPourHandler::handle(BaseMonsterContext& ctx,
+                                         const LegacyFixedPourAdapter& adapter,
+                                         const BaseValidationManager& validator,
+                                         const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery09FixedPourHandler";
+    ctx.phase = "DISCOVERY_09_FIXED_BOWL_POURS_CALL";
+    ctx.status = "LEGACY_FIXED_BOWL_POURS_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_09_FIXED_BOWL_POURS_CALL");
+    metrics.bump(ctx, "discovery09.pours.calls");
+
+    const LegacyFixedPourComputation legacy = adapter.compute(
+        ctx.legacyFixedPourDrop,
+        ctx.legacyFixedPourIndex,
+        ctx.legacyFixedPourOldBowls,
+        ctx.legacyFixedPourStoneRow);
+    ctx.legacyFixedPourOrder = legacy.order;
+    ctx.legacyFixedPourBowlIds = legacy.fixedBowlIds;
+    ctx.legacyFixedPourOutput = legacy.pours;
+    ctx.legacyFixedPourReady = true;
+
+    ctx.phase = "DISCOVERY_09_FIXED_BOWL_POURS_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_09_FIXED_BOWL_POURS_VALIDATE");
+    validator.requireLegacyFixedPourReady(ctx);
+
+    ctx.phase = "DISCOVERY_09_FIXED_BOWL_POURS_EXPOSED";
+    ctx.status = "LEGACY_FIXED_BOWL_POURS_EXPOSED";
+    ctx.branchTrace.push_back("DISCOVERY_09_FIXED_BOWL_POURS_EXPOSED");
+    metrics.bump(ctx, "discovery09.pours.exposed");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -1363,6 +1441,19 @@ void BaseDispatcher::dispatchPatchedPermutationRank(BaseMonsterContext& ctx,
     ctx.branchTrace.push_back("PATCH_08_DISPATCH");
     metrics.bump(ctx, "patch08.dispatch.calls");
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void BaseDispatcher::dispatchLegacyFixedPours(BaseMonsterContext& ctx,
+                                              const Discovery09FixedPourHandler& handler,
+                                              const LegacyFixedPourAdapter& adapter,
+                                              const BaseValidationManager& validator,
+                                              const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_09_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_09_DISPATCH");
+    metrics.bump(ctx, "discovery09.dispatch.calls");
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -1859,6 +1950,43 @@ PermutationRankReport BaseMonsterManager::executeUnpatchedPermutationDiagnostic(
         ctx.legacyPermutationOutput,
         ctx.legacyPermutationFound,
         false,
+    };
+}
+
+LegacyFixedPourReport BaseMonsterManager::executeFixedPours(const Integer& drop,
+                                                            int index,
+                                                            const BowlState& oldBowls,
+                                                            const Stone& stoneRow) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_09_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyFixedPourDrop = drop;
+    ctx.legacyFixedPourIndex = index;
+    ctx.legacyFixedPourOldBowls = oldBowls;
+    ctx.legacyFixedPourStoneRow = stoneRow;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyFixedPourAdapter adapter;
+    const Discovery09FixedPourHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyFixedPours(ctx, handler, adapter, validator, metrics);
+
+    return LegacyFixedPourReport{
+        ctx.legacyFixedPourDrop,
+        ctx.legacyFixedPourIndex,
+        ctx.legacyFixedPourOldBowls,
+        ctx.legacyFixedPourStoneRow,
+        ctx.legacyFixedPourOrder,
+        ctx.legacyFixedPourBowlIds,
+        ctx.legacyFixedPourOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
     };
 }
 
