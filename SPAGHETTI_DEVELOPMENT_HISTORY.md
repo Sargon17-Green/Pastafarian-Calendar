@@ -1101,3 +1101,30 @@ Additi sunt `Patch17Year5000TiePreparation`, `sortEqualLengthRunsByOpeningGate`,
 ### Quod nondum fit
 
 Nullus `oldJumpGuess`, nullus PATCH 18, nullus saltus per annum medium et nulla substitutio iterationis sequentialis addita est. Gradus 36 debet DISCOVERY 18 tantum introducere.
+
+
+## Gradus 36 — DISCOVERY 18: saltus /365 ab anno 5000
+
+### Cicatrix introducta
+
+Additus est `LegacyYearAnchor` cum `number`, `firstDay` et `lastDay`. `oldJumpGuess(anchor,targetDay)` numerum anchoris cum `floorDiv(targetDay-anchor.firstDay,365)` componit. Helper non est diagnosticus solum: `Discovery18LegacyYearJumpHandler` eius exitum directe in `discovery18JumpOutputYearNumber` ponit et `discovery18GuessUsedAsOutput=true` servat.
+
+`LegacyYearJumpAdapter` unicum ingressum ad helper veterem praebet. `BaseDispatcher::dispatchLegacyYearJump` et `BaseMonsterManager::executeLegacyYearJump` cicatricem per manager/dispatcher/handler chain realem exercent. `requireDiscovery18LegacyYearJumpReady` formulam legacy sine oracle repetit et confirmat guess ipsum output activum esse.
+
+### Regressio
+
+Probatio test-only `NormativeOracle` localem tantum ad anchor annum 5000 et ambulationem sequentialem comparandam adhibet. Anchor Fundationis est annus 5000 longitudinis 4244 dierum. Control in primo die 5000 concordat; tres alii target dies discrepant:
+
+- post 365 dies guess 5001 est, sed target adhuc anno 5000 est;
+- in ultimo die anchoris guess 5011 est, sed target adhuc anno 5000 est;
+- in primo die anni sequentis guess 5011 est, dum ambulatio uno `nextYear` ad 5001 pervenit.
+
+Regressio tres discrepantias exactas et unum control concordantem exspectat. Exitus consulto 1 est. Omnes regressiones Graduum 1–35 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `LegacyYearAnchor`, `oldJumpGuess`, campi contextus Discovery 18, `LegacyYearJumpReport`, `LegacyYearJumpAdapter`, `Discovery18LegacyYearJumpHandler`, `requireDiscovery18LegacyYearJumpReady`, `dispatchLegacyYearJump` et manager route `executeLegacyYearJump`.
+
+### Quod nondum fit
+
+`oldJumpGuess` nondum telemetry tantum est. Nulla ambulatio productionis per `patchedNextYear`/`patchedPreviousYear`, nullus `findYearByWalkPatch`, nullus PATCH 18 et nullus bad-cache-key Patch 19 praemature adest. Gradus 37 debet cicatricem servare, guess ignorare ad decisionem, et annum target sequentialiter determinare.

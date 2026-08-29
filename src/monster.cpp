@@ -19,6 +19,16 @@ Integer oldGateQuestionDay(const Integer& n) {
     return FOUNDATION_DAY_OLD + n;
 }
 
+Integer oldJumpGuess(const LegacyYearAnchor& anchor, const Integer& targetDay) {
+    const Integer delta = targetDay - anchor.firstDay;
+    Integer q = delta / 365;
+    const Integer r = delta % 365;
+    if (r < 0) {
+        --q;
+    }
+    return anchor.number + q;
+}
+
 bool legacyYearCandidateAllowed(const std::vector<Integer>& gates,
                                 std::size_t openIndex,
                                 std::size_t closeIndex) {
@@ -3483,6 +3493,24 @@ void BaseValidationManager::requireDiscovery17Year5000TieReady(
     }
 }
 
+void BaseValidationManager::requireDiscovery18LegacyYearJumpReady(
+    const BaseMonsterContext& ctx) const {
+    if (!ctx.discovery18JumpReady) {
+        throw BaseValidationError("saltus anni legacy nondum paratus est");
+    }
+    if (ctx.discovery18JumpAnchor.firstDay > ctx.discovery18JumpAnchor.lastDay) {
+        throw BaseValidationError("fines anni anchoris inversi sunt");
+    }
+    const Integer expectatus = oldJumpGuess(
+        ctx.discovery18JumpAnchor,
+        ctx.discovery18JumpTargetDay);
+    if (ctx.discovery18OldJumpGuess != expectatus ||
+        ctx.discovery18JumpOutputYearNumber != expectatus ||
+        !ctx.discovery18GuessUsedAsOutput) {
+        throw BaseValidationError("oldJumpGuess non est output activus legacy");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -3707,6 +3735,11 @@ Integer LegacyYear5000TieAdapter::select(
         selectionAdapter,
         rejectionWrapper,
         wideWrapper);
+}
+
+Integer LegacyYearJumpAdapter::guess(const LegacyYearAnchor& anchor,
+                                     const Integer& targetDay) const {
+    return oldJumpGuess(anchor, targetDay);
 }
 
 Patch17Year5000TiePreparation Year5000TiePatchWrapper::repair(
@@ -4457,6 +4490,26 @@ void Discovery17Year5000TieHandler::handle(
     validator.requireDiscovery17Year5000TieReady(ctx);
 }
 
+void Discovery18LegacyYearJumpHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyYearJumpAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery18LegacyYearJumpHandler";
+    ctx.phase = "DISCOVERY_18_LEGACY_JUMP";
+    ctx.status = "OLD_JUMP_GUESS_ACTIVE_OUTPUT";
+    ctx.branchTrace.push_back("DISCOVERY18:OLD_JUMP_GUESS");
+    metrics.bump(ctx, "discovery18.oldJumpGuess.calls");
+
+    ctx.discovery18OldJumpGuess = adapter.guess(
+        ctx.discovery18JumpAnchor,
+        ctx.discovery18JumpTargetDay);
+    ctx.discovery18JumpOutputYearNumber = ctx.discovery18OldJumpGuess;
+    ctx.discovery18GuessUsedAsOutput = true;
+    ctx.discovery18JumpReady = true;
+    validator.requireDiscovery18LegacyYearJumpReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -5101,6 +5154,16 @@ void BaseDispatcher::dispatchLegacyYear5000Tie(
         metrics);
 }
 
+void BaseDispatcher::dispatchLegacyYearJump(
+    BaseMonsterContext& ctx,
+    const Discovery18LegacyYearJumpHandler& handler,
+    const LegacyYearJumpAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:DISCOVERY18_LEGACY_YEAR_JUMP");
+    handler.handle(ctx, adapter, validator, metrics);
+}
+
 void BaseDispatcher::dispatchPatchedYear5000Tie(
     BaseMonsterContext& ctx,
     const Patch17Year5000TieHandler& handler,
@@ -5491,6 +5554,36 @@ LegacyYear5000TieReport BaseMonsterManager::executeUnpatchedYear5000TieDiagnosti
         ctx.discovery17Year5000SelectedCandidate,
         0,
         false
+    };
+}
+
+LegacyYearJumpReport BaseMonsterManager::executeLegacyYearJump(
+    const LegacyYearAnchor& anchor,
+    const Integer& targetDay) const {
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.discovery18JumpAnchor = anchor;
+    ctx.discovery18JumpTargetDay = targetDay;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyYearJumpAdapter adapter;
+    const Discovery18LegacyYearJumpHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyYearJump(ctx, handler, adapter, validator, metrics);
+
+    return LegacyYearJumpReport{
+        ctx.discovery18JumpAnchor,
+        ctx.discovery18JumpTargetDay,
+        ctx.discovery18OldJumpGuess,
+        ctx.discovery18JumpOutputYearNumber,
+        ctx.discovery18GuessUsedAsOutput,
+        ctx.discovery18JumpReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
     };
 }
 

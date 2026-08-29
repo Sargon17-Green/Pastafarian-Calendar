@@ -153,6 +153,14 @@ int oldNextBowlFixedName(int id);
 int nextBowlThroughOrderAt46Latch(const PermutationOrder& orderAt46Latch,
                                   int queriedBowlId);
 
+struct LegacyYearAnchor {
+    Integer number{};
+    Integer firstDay{};
+    Integer lastDay{};
+};
+
+Integer oldJumpGuess(const LegacyYearAnchor& anchor, const Integer& targetDay);
+
 struct LegacyAnswerRing {
     Integer first{};
     int directionStep = 0;
@@ -450,6 +458,25 @@ struct BaseMonsterContext {
     Integer patch17Year5000SelectedOrdinal{};
     LegacyYearCandidate patch17Year5000SelectedCandidate{};
     bool patch17Applied = false;
+    LegacyYearAnchor discovery18JumpAnchor{};
+    Integer discovery18JumpTargetDay{};
+    Integer discovery18OldJumpGuess{};
+    Integer discovery18JumpOutputYearNumber{};
+    bool discovery18GuessUsedAsOutput = false;
+    bool discovery18JumpReady = false;
+};
+
+struct LegacyYearJumpReport {
+    LegacyYearAnchor anchor{};
+    Integer targetDay{};
+    Integer oldGuess{};
+    Integer outputYearNumber{};
+    bool guessUsedAsOutput = false;
+    bool ready = false;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
 };
 
 struct LegacyYearCandidateReport {
@@ -793,6 +820,7 @@ public:
     void requirePatch16YearCandidateCeilingReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery17Year5000TieReady(const BaseMonsterContext& ctx) const;
     void requirePatch17Year5000TieReady(const BaseMonsterContext& ctx) const;
+    void requireDiscovery18LegacyYearJumpReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -853,6 +881,11 @@ public:
     Patch17Year5000TiePreparation repair(
         const std::vector<Integer>& gates,
         const LegacyYearCandidateList& legacySorted) const;
+};
+
+class LegacyYearJumpAdapter {
+public:
+    Integer guess(const LegacyYearAnchor& anchor, const Integer& targetDay) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1346,6 +1379,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery18LegacyYearJumpHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyYearJumpAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1590,6 +1631,12 @@ public:
                                     const Patch14WideDetourWrapper& wideWrapper,
                                     const BaseValidationManager& validator,
                                     const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyYearJump(BaseMonsterContext& ctx,
+                                const Discovery18LegacyYearJumpHandler& handler,
+                                const LegacyYearJumpAdapter& adapter,
+                                const BaseValidationManager& validator,
+                                const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1709,6 +1756,8 @@ public:
         const std::vector<LegacyYearCandidatePair>& pairs,
         int queriedBowlId,
         int seal) const;
+    LegacyYearJumpReport executeLegacyYearJump(const LegacyYearAnchor& anchor,
+                                               const Integer& targetDay) const;
 };
 
 } // namespace pastafari

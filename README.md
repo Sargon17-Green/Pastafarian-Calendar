@@ -457,3 +457,54 @@ Probe additivum helperi listam non length-sortatam `300(open 4), 200(open 0), 30
 Regressio DISCOVERY 17 eadem expectatione opening gate nunc transit. Eadem versio probationis contra fontem Stage 34 pristinum adhuc tres discrepantias et exitum 1 reddit. Omnes regressiones Graduum 1–35 transeunt.
 
 Nullus `oldJumpGuess`, nullus PATCH 18 et nullus codex saltus annorum praemature additur.
+
+
+## DISCOVERY 18 — oldJumpGuess per divisorem 365 annum activum determinat
+
+Gradus 36 cicatricem historicam saltus ab anno 5000 introducit sine correctione futura. Recordum minimum `LegacyYearAnchor` numerum anni, primum diem anni et ultimum diem servat. Helper legacy est:
+
+```text
+oldJumpGuess(anchor,targetDay)
+= anchor.number + floorDiv(targetDay-anchor.firstDay,365)
+```
+
+Quia divisio `cpp_int` versus zero truncat, helper pro delta negativo residuum inspicit et quotientem uno minuit, ut vera `floorDiv` cum divisore positivo 365 servetur.
+
+Via activa est:
+
+```text
+BaseMonsterManager::executeLegacyYearJump
+-> BaseDispatcher::dispatchLegacyYearJump
+-> Discovery18LegacyYearJumpHandler
+-> LegacyYearJumpAdapter::guess
+-> oldJumpGuess
+```
+
+`Discovery18LegacyYearJumpHandler` guess veterem non ut telemetry sed ut `outputYearNumber` activum ponit. Validator eandem formulam legacy iterum computat et requirit ut output activus exacte guess sit. Nulla ambulatio per `nextYear` aut `previousYear` in production hoc gradu adest.
+
+### Witness ex anno 5000 Fundationis
+
+Oracle C++ localis test-only annum 5000 pro die Fundationis construit. Hic anchor habet:
+
+```text
+number=5000
+firstDay=-15057702
+lastDay=-15053459
+length=4244
+```
+
+Quattuor target dies probantur. Primus dies anchoris control est et 5000 recte reddit. Reliqui tres defectum detegunt:
+
+```text
+firstDay+365  -> old guess 5001, sequential 5000
+lastDay       -> old guess 5011, sequential 5000
+next.firstDay -> old guess 5011, sequential 5001
+```
+
+In primis duobus casibus ambulatio normativa nullum transitum anni facit; in tertio unum `nextYear` facit. Regressio igitur tres discrepantias exactas exigit et exitum 1 reddit.
+
+Omnes regressiones Graduum 1–35 denuo compilatae et exsecutae sunt; omnes transeunt.
+
+### Quod consulto nondum adest
+
+Nullus `findYearByWalkPatch`, nullus `patchedNextYear`, nullus `patchedPreviousYear`, nullus `ignoredGuess`, nullus PATCH 18 et nullus cache Patch 19 adest. Gradus 37 solus debet `oldJumpGuess` servare sed ad telemetry relegare atque annum target anno post annum determinare.
