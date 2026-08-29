@@ -17,6 +17,14 @@ Integer oldRemainder(const Integer& x) {
     return regularMod(x, M_OLD);
 }
 
+Integer savePatch(const Integer& x) {
+    Integer r = oldRemainder(x);
+    if (r == 0) {
+        r = M_OLD;
+    }
+    return r;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -26,6 +34,20 @@ void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContex
 void BaseValidationManager::requireLegacyArithmeticReady(const BaseMonsterContext& ctx) const {
     if (!ctx.legacyArithmeticReady) {
         throw BaseValidationError("res arithmetica legacy nondum parata est");
+    }
+}
+
+void BaseValidationManager::requirePatch01Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyArithmeticReady(ctx);
+    if (!ctx.patch01Applied) {
+        throw BaseValidationError("emendatio prima nondum applicata est");
+    }
+    if (ctx.legacyArithmeticOutput == 0) {
+        if (ctx.patchedArithmeticOutput != M_OLD) {
+            throw BaseValidationError("emendatio prima multiplum M non servavit");
+        }
+    } else if (ctx.patchedArithmeticOutput != ctx.legacyArithmeticOutput) {
+        throw BaseValidationError("emendatio prima residuum non-nullum mutavit");
     }
 }
 
@@ -65,6 +87,40 @@ void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery01.remainder.exposed");
 }
 
+Integer Patch01SaveWrapper::repair(const Integer& x) const {
+    return savePatch(x);
+}
+
+void Patch01RemainderHandler::handle(BaseMonsterContext& ctx,
+                                     const LegacyArithmeticAdapter& adapter,
+                                     const Patch01SaveWrapper& wrapper,
+                                     const BaseValidationManager& validator,
+                                     const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch01RemainderHandler";
+    ctx.phase = "PATCH_01_LEGACY_CALL";
+    ctx.status = "LEGACY_CALLED_BEFORE_PATCH";
+    ctx.branchTrace.push_back("PATCH_01_LEGACY_CALL");
+    metrics.bump(ctx, "patch01.legacy.calls");
+
+    ctx.legacyArithmeticOutput = adapter.callOldRemainder(ctx.legacyArithmeticInput);
+    ctx.legacyArithmeticReady = true;
+
+    ctx.phase = "PATCH_01_SAVE_WRAPPER";
+    ctx.branchTrace.push_back("PATCH_01_SAVE_WRAPPER");
+    ctx.patchedArithmeticOutput = wrapper.repair(ctx.legacyArithmeticInput);
+    ctx.patch01Applied = true;
+    metrics.bump(ctx, "patch01.wrapper.calls");
+
+    ctx.phase = "PATCH_01_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_01_VALIDATE");
+    validator.requirePatch01Ready(ctx);
+
+    ctx.phase = "PATCH_01_REMAINDER_READY";
+    ctx.status = "PATCHED_RESULT_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_01_REMAINDER_READY");
+    metrics.bump(ctx, "patch01.remainder.ready");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -98,6 +154,21 @@ void BaseDispatcher::dispatchLegacyRemainder(BaseMonsterContext& ctx,
     handler.handle(ctx, adapter, validator, metrics);
 }
 
+void BaseDispatcher::dispatchPatchedRemainder(BaseMonsterContext& ctx,
+                                              const Patch01RemainderHandler& handler,
+                                              const LegacyArithmeticAdapter& adapter,
+                                              const Patch01SaveWrapper& wrapper,
+                                              const BaseValidationManager& validator,
+                                              const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_01_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_01_DISPATCH");
+    metrics.bump(ctx, "patch01.dispatch.calls");
+
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
@@ -117,7 +188,36 @@ LegacyRemainderReport BaseMonsterManager::executeLegacyRemainder(const Integer& 
     BaseMonsterContext ctx;
     ctx.calculationDay = 0;
     ctx.targetDay = 0;
-    ctx.phase = "DISCOVERY_01_NEW";
+    ctx.phase = "PATCH_01_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyArithmeticInput = x;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyArithmeticAdapter adapter;
+    const Patch01SaveWrapper wrapper;
+    const Patch01RemainderHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedRemainder(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return LegacyRemainderReport{
+        ctx.legacyArithmeticInput,
+        ctx.patchedArithmeticOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyArithmeticOutput,
+        ctx.patch01Applied
+    };
+}
+
+LegacyRemainderReport BaseMonsterManager::executeUnpatchedRemainderDiagnostic(const Integer& x) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_01_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyArithmeticInput = x;
@@ -135,7 +235,9 @@ LegacyRemainderReport BaseMonsterManager::executeLegacyRemainder(const Integer& 
         ctx.phase,
         ctx.status,
         ctx.currentHandler,
-        ctx.branchTrace.size()
+        ctx.branchTrace.size(),
+        ctx.legacyArithmeticOutput,
+        false
     };
 }
 
