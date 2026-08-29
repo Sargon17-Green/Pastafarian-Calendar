@@ -8,8 +8,9 @@ assert.equal(typeof production.oldContiguousMonthDayGuess, 'function');
 assert.equal(typeof production.LegacyContiguousMonthDayAdapter, 'function');
 assert.equal(typeof production.Discovery25ContiguousMonthDayHandler, 'function');
 assert.equal(typeof production.discovery25LegacyContiguousMonthDayThroughMonsterPath, 'function');
-assert.equal('countMonthOccurrencesThroughTarget' in production, false);
-assert.equal('MonthDayOccurrencePatchWrapper' in production, false);
+assert.equal(typeof production.countMonthOccurrencesThroughTarget, 'function');
+assert.equal(typeof production.MonthDayOccurrencePatchWrapper, 'function');
+assert.equal(typeof production.historicMonthDayOccurrenceThroughMonsterPath, 'function');
 assert.equal('OpeningGateIntervalPatchWrapper' in production, false);
 
 const helperSource = production.oldContiguousMonthDayGuess.toString();
@@ -74,8 +75,8 @@ console.log('first position: ' + routed.result.firstPosition);
 console.log('legacy contiguous guess: ' + routed.result.dayInMonth);
 console.log('normativ occurrence count til target inclusiv: ' + expectedOccurrenceCount);
 
-assert.equal(
+assert.notEqual(
   routed.result.dayInMonth,
   expectedOccurrenceCount,
-  'Discovery 25 deve restar EXPECTED_RED: li guess contigui ne conta solmen occurrences del monthId til target inclusiv.'
+  'Li scar de Discovery 25 deve continuar demonstrar li divergence historic, ma Patch 25 es testat separatmen.'
 );

@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('production resta pur de textu hebreic e correctiones futur pos Discovery 25', () => {
+group('production resta pur de textu hebreic e correctiones futur pos Patch 25', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('production resta pur de textu hebreic e correctiones futur pos Discovery 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'countMonthOccurrencesThroughTarget', 'MonthDayOccurrencePatchWrapper'
+    'OpeningGateIntervalPatchWrapper'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
@@ -2131,7 +2131,7 @@ group('Discovery 24 conserva li chooser die-per-die legacy quam ghost real', () 
   ok(typeof production.DPUnrankLegalWeaving === 'function');
   ok(typeof production.MonthWeavingPatchWrapper === 'function');
   ok(typeof production.oldContiguousMonthDayGuess === 'function');
-  ok(!('countMonthOccurrencesThroughTarget' in production));
+  ok(typeof production.countMonthOccurrencesThroughTarget === 'function');
 });
 
 group('Patch 24 conserva li ghost e selecte li intertexe legal complet per DP', () => {
@@ -2142,22 +2142,31 @@ group('Patch 24 conserva li ghost e selecte li intertexe legal complet per DP', 
   ok(typeof production.MonthWeavingPatchWrapper === 'function');
   ok(typeof production.historicMonthWeavingThroughMonsterPath === 'function');
   ok(typeof production.oldContiguousMonthDayGuess === 'function');
-  ok(!('MonthDayOccurrencePatchWrapper' in production));
+  ok(typeof production.MonthDayOccurrencePatchWrapper === 'function');
 });
 
-group('Discovery 25 conserva li guess contigui legacy quam state semantic red', () => {
+group('Discovery 25 conserva li guess contigui legacy quam scar real' , () => {
   ok(typeof production.oldContiguousMonthDayGuess === 'function');
   ok(typeof production.LegacyContiguousMonthDayAdapter === 'function');
   ok(typeof production.Discovery25ContiguousMonthDayHandler === 'function');
   ok(typeof production.discovery25LegacyContiguousMonthDayThroughMonsterPath === 'function');
   const weaving = [1,1,2,1,3,3,1,2,2,2,3,3];
   eq(production.oldContiguousMonthDayGuess(weaving, 4), 4);
-  eq(weaving.slice(0, 4).filter((value) => value === 1).length, 3);
-  ok(!('countMonthOccurrencesThroughTarget' in production));
-  ok(!('MonthDayOccurrencePatchWrapper' in production));
+  eq(production.countMonthOccurrencesThroughTarget(weaving, 4), 3);
+  ok(typeof production.MonthDayOccurrencePatchWrapper === 'function');
+  ok(typeof production.historicMonthDayOccurrenceThroughMonsterPath === 'function');
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 25', () => {
+group('Patch 25 superscri li guess contigui per occurrence count til target inclusiv', () => {
+  const weaving = [1,1,2,1,3,3,1,2,2,2,3,3];
+  eq(production.countMonthOccurrencesThroughTarget(weaving, 4), 3);
+  eq(production.countMonthOccurrencesThroughTarget(weaving, 8), 2);
+  eq(production.countMonthOccurrencesThroughTarget(weaving, 6), 2);
+  ok(typeof production.MonthDayOccurrencePatchWrapper === 'function');
+  ok(!('OpeningGateIntervalPatchWrapper' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 25', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2169,4 +2178,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 25.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 25.');

@@ -10,7 +10,7 @@ assert.equal(typeof production.DPUnrankLegalWeaving, 'function');
 assert.equal(typeof production.MonthWeavingPatchWrapper, 'function');
 assert.equal(typeof production.historicMonthWeavingThroughMonsterPath, 'function');
 assert.equal(typeof production.legacyChooseEachDaySeparately, 'function');
-assert.equal('countMonthOccurrencesThroughTarget' in production, false);
+assert.equal(typeof production.countMonthOccurrencesThroughTarget, 'function');
 
 const legacySource = production.legacyChooseEachDaySeparately.toString();
 assert.match(legacySource, /ringAnswerAt/);

@@ -1100,3 +1100,26 @@ In un intertexe legal, occurrences del sam monthId posse esser separat per altri
 ### Limite historic
 
 Null `countMonthOccurrencesThroughTarget` e null `MonthDayOccurrencePatchWrapper` es adjunt. Patch 25 reparativ resta reservat por Stage 51 e deve conservar `oldContiguousMonthDayGuess` quam scar real. Null code de Patch 26 es anticipat.
+
+
+## Stage 51 — PATCH 25
+
+### Quo esset circumit
+
+Li guess historic ne esset reparat in loco. `oldContiguousMonthDayGuess` resta li sam helper quel trova li unesim occurrence e calcula li distance inclusiv til target. Li route nov executa Discovery 25 realmen ante li patch, talmen que li guess wrong resta observabil e invocation-local.
+
+Supra ti scar es adjunt `countMonthOccurrencesThroughTarget`. Li helper prende li monthId al target e conta exactmen su occurrences in li prefix del intertexe desde position 1 til targetPosition inclusiv. `MonthDayOccurrencePatchWrapper` conserva li guess old diagnosticmen ma superscri li semantic day-in-month sempre per ti count.
+
+### Pro quo li detour es normativmen exact
+
+In un month weaving, day-in-month es li ordinal del occurrence current de ti monthId. Li ordinal del target es exactmen li quantitá de occurrences del sam monthId in li prefix inclusiv terminant al target. Dies de altri mensus ne incrementa ti count. Ergo li prefix occurrence count defini directmen li valore normativ sin depender de contiguitá.
+
+Li witness real demonstra li correction: position 92 have monthId 9; li scar usa first position 15 e rende 78, ma li prefix contene 14 occurrences de monthId 9. Patch 25 conserva 78 quam diagnostic e rende 14 semanticmen. Un case local u li guess old ja coincide con li occurrence ordinal confirma que li overwrite ne crea un shift artificial.
+
+### Crescentie monster in ti stage
+
+Un `MonthDayOccurrencePatchWrapper` es insertet pos `Discovery25ContiguousMonthDayHandler`. Li context conserva simultanmen weaving, target, monthId, guess legacy, flag de preservation, occurrence count e resultate semantic. Ti duplication es intentionalmen spaghetti e resta proprietá del invocation current.
+
+### Limite historic
+
+Patch 26 ne es anticipat. Null strate nov por ownership del opening gate o por li interval de membership del year es adjunt in Stage 51. Li proxim action historic deve esser Discovery 26 in Stage 52.

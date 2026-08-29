@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 50 de 55: DISCOVERY 25** e li repository local es intentionalmen `EXPECTED_RED`. Omni regressions til Patch 24 e li verifier passa; solmen li regression nov de Discovery 25 es red.
+Li linea es in **Stage 51 de 55: PATCH 25** e li repository local es `GREEN`. Omni regressions til Discovery 25, li verifier, li test focal de Patch 25 e li suite complet passa.
 
-Patch 24 resta intact e produce li intertexe legal complet. Pos ti resultate, `oldContiguousMonthDayGuess` es executet realmen quam scar nov: it mesura day-in-month quam distance desde li unesim occurrence del monthId, quasi li occurrences esset contigui. In un intertexe legal ti assumption es fals. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Patch 24 resta intact e produce li intertexe legal complet. Pos it, `oldContiguousMonthDayGuess` continua esser executet realmen quam scar diagnostic. `MonthDayOccurrencePatchWrapper` superscri li semantic day-in-month per li quantitá de occurrences del monthId desde li initie del year til li target inclusiv. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -24,7 +24,7 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 24 deve restar verd:
+Omni regressions til Discovery 25 deve restar verd:
 
 ```text
 npm run test:previous
@@ -36,13 +36,13 @@ Li verifier deve esser verd:
 node tests/verify-stage-01.js
 ```
 
-Li test focal de Discovery 25 deve esser intentionalmen red:
+Li test focal de Patch 25 deve esser verd:
 
 ```text
-npm run test:discovery-25
+npm run test:patch-25
 ```
 
-Li suite complet deve esser intentionalmen red exclusivmen pro Discovery 25:
+Li suite complet deve esser verd:
 
 ```text
 npm test
@@ -459,3 +459,20 @@ In li witness del route real, target position 92 have monthId 9. Li unesim occur
 ### Limite historic
 
 Null helper de occurrence count e null wrapper reparativ es present. In particular, `countMonthOccurrencesThroughTarget` e `MonthDayOccurrencePatchWrapper` ne existe. Patch 26 concernent li opening gate ne es anticipat. Li proxim stage mandat es Stage 51 — PATCH 25.
+
+
+## Stage 51 — PATCH 25
+
+### Li guess contigui resta un scar real
+
+`oldContiguousMonthDayGuess`, `LegacyContiguousMonthDayAdapter.guess` e `Discovery25ContiguousMonthDayHandler.handle` ne es modificat. Li route de Patch 25 traversa Discovery 25 prim, ergo li distance historic desde li unesim occurrence es calculat realmen e conserva su valore diagnostic ante li overwrite semantic.
+
+### Occurrence count inclusiv
+
+`countMonthOccurrencesThroughTarget(weaving,targetPosition)` prende li monthId al target e examina exclusivmen li prefix positions 1..targetPosition. It incrementa li count solmen quand li item current have li sam monthId. Li target self es ergo includet exactmen un vez. Null assumption de contiguitá resta in ti calcul.
+
+`MonthDayOccurrencePatchWrapper` exige un `DISCOVERY_25_LEGACY_RESULT`, conserva li guess old e su diagnostics, calcula li occurrence count e superscri sempre `legacyMonthDaySemantic` e `patch25SemanticMonthDay` per li count. In un case contigui old e correct posse esser egal; in un case intertexet li resultate correct prende sempre precedence.
+
+### Witness e limite historic
+
+Li route real conserva target position 92, monthId 9, first position 15 e guess old 78. Li prefix inclusiv contene 14 occurrences de monthId 9, ergo li semantic day-in-month deven 14. Omni regressions e li suite complet torna verd. Null code de Patch 26 — ni un correction del ownership del opening gate — es anticipat.

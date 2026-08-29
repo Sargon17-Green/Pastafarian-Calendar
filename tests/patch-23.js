@@ -9,7 +9,7 @@ assert.equal(typeof production.MonthLengthVirtualPatchWrapper, 'function');
 assert.equal(typeof production.historicMonthLengthVirtualListThroughMonsterPath, 'function');
 assert.equal(typeof production.legacyChooseEachDaySeparately, 'function');
 assert.equal(typeof production.DPUnrankLegalWeaving, 'function');
-assert.equal('countMonthOccurrencesThroughTarget' in production, false);
+assert.equal(typeof production.countMonthOccurrencesThroughTarget, 'function');
 
 const legacyMaterializerSource = production.legacyMaterializeMonthLengthWays.toString();
 const legacyApiSource = production.LegacyMonthLengthAllWaysAPI.prototype.allWays.toString();
