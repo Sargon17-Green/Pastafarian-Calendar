@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 23 contamina production', () => {
+group('production resta pur de textu hebreic e correctiones futur pos Discovery 25', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Patch 23 contamina production', () 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'oldContiguousMonthDayGuess'
+    'countMonthOccurrencesThroughTarget', 'MonthDayOccurrencePatchWrapper'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
@@ -2130,7 +2130,8 @@ group('Discovery 24 conserva li chooser die-per-die legacy quam ghost real', () 
   deepEq(production.legacyChooseEachDaySeparately([2,1], { first: 1n, directionStep: 1n }), [1,2,1]);
   ok(typeof production.DPUnrankLegalWeaving === 'function');
   ok(typeof production.MonthWeavingPatchWrapper === 'function');
-  ok(!('oldContiguousMonthDayGuess' in production));
+  ok(typeof production.oldContiguousMonthDayGuess === 'function');
+  ok(!('countMonthOccurrencesThroughTarget' in production));
 });
 
 group('Patch 24 conserva li ghost e selecte li intertexe legal complet per DP', () => {
@@ -2140,10 +2141,23 @@ group('Patch 24 conserva li ghost e selecte li intertexe legal complet per DP', 
   eq(production.compatibleMonthWeavingRank({ first: 216n, directionStep: 1n }, 1301n), 216n);
   ok(typeof production.MonthWeavingPatchWrapper === 'function');
   ok(typeof production.historicMonthWeavingThroughMonsterPath === 'function');
-  ok(!('oldContiguousMonthDayGuess' in production));
+  ok(typeof production.oldContiguousMonthDayGuess === 'function');
+  ok(!('MonthDayOccurrencePatchWrapper' in production));
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 24', () => {
+group('Discovery 25 conserva li guess contigui legacy quam state semantic red', () => {
+  ok(typeof production.oldContiguousMonthDayGuess === 'function');
+  ok(typeof production.LegacyContiguousMonthDayAdapter === 'function');
+  ok(typeof production.Discovery25ContiguousMonthDayHandler === 'function');
+  ok(typeof production.discovery25LegacyContiguousMonthDayThroughMonsterPath === 'function');
+  const weaving = [1,1,2,1,3,3,1,2,2,2,3,3];
+  eq(production.oldContiguousMonthDayGuess(weaving, 4), 4);
+  eq(weaving.slice(0, 4).filter((value) => value === 1).length, 3);
+  ok(!('countMonthOccurrencesThroughTarget' in production));
+  ok(!('MonthDayOccurrencePatchWrapper' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 25', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2155,4 +2169,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 24.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 25.');

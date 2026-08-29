@@ -10,7 +10,7 @@ assert.equal(typeof production.RepeatedNamePatchWrapper, 'function');
 assert.equal(typeof production.historicRepeatedNamesThroughMonsterPath, 'function');
 assert.equal(typeof production.VirtualLegacyList, 'function');
 assert.equal(typeof production.legacyChooseEachDaySeparately, 'function');
-assert.equal('oldContiguousMonthDayGuess' in production, false);
+assert.equal('countMonthOccurrencesThroughTarget' in production, false);
 
 const legacyFamilySource = production.legacyNameRowWithRepeats.toString();
 const legacyGeneratorSource = production.LegacyRepeatedNameGenerator.prototype.select.toString();

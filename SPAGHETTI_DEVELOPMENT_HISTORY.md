@@ -1081,3 +1081,22 @@ Li witness `[4,4,4]` conserva li old ghost `[3,1,2,3,1,2,3,1,2,3,1,2]`, ma li fa
 ### Limite historic
 
 Patch 25 ne es anticipat. `oldContiguousMonthDayGuess` e `ContiguousMonthDayPatchWrapper` resta absent, e null logic de month-in-day contigui es introductet.
+
+
+## Stage 50 — DISCOVERY 25
+
+### Quo li old calcul credeva
+
+Li intertexe legal de Patch 24 solve li órdine del occurrences, ma un calcul posterior historic continua imaginar que un mensu ocupa un bloc contigui. `oldContiguousMonthDayGuess` prende li monthId del target, trova li unesim occurrence e usa li distance inclusiv desde ti position quam day-in-month. Li helper ne examina si dies de altri mensus es intercalat.
+
+### Quo esset trovat
+
+In un intertexe legal, occurrences del sam monthId posse esser separat per altri mensus. Ergo li distance desde li unesim occurrence ne es li quantitá de occurrences de ti mensu. Li route real de Stage 50 demonstra ti defect pos omni correctiones precedent: target position 92 es monthId 9, first position 15 e li guess old es 78, durante que li prefix inclusiv contene solmen 14 occurrences de monthId 9.
+
+### Integrare sin correction
+
+`LegacyContiguousMonthDayAdapter` voca li helper old realmen. `Discovery25ContiguousMonthDayHandler` es conectet pos `MonthWeavingPatchWrapper`, deriva li target position del year resoluet e conserva li guess old quam diagnostic invocation-local. Por respectar li stage de Discovery, ti guess es anc li semantic day-in-month current e li regression resta EXPECTED_RED.
+
+### Limite historic
+
+Null `countMonthOccurrencesThroughTarget` e null `MonthDayOccurrencePatchWrapper` es adjunt. Patch 25 reparativ resta reservat por Stage 51 e deve conservar `oldContiguousMonthDayGuess` quam scar real. Null code de Patch 26 es anticipat.

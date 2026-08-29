@@ -627,6 +627,12 @@ class BaseValidationManager {
     }
   }
 
+  requirePatch24Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_24_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un intertexe semantic valid por Discovery 25.');
+    }
+  }
+
   requireStructureSauceResult(result) {
     if (!result || typeof result !== 'object' || !Array.isArray(result.bowls) || result.bowls.length < 7 ||
         !Array.isArray(result.orderAt46Latch) || result.orderAt46Latch.length !== 6) {
@@ -4297,6 +4303,75 @@ class MonthWeavingPatchWrapper {
   }
 }
 
+function oldContiguousMonthDayGuess(weaving, targetPosition) {
+  if (!Array.isArray(weaving) || weaving.length < 1) {
+    throw new RangeError('Li intertexe legacy por day-in-month ne posse esser vacui.');
+  }
+  if (!Number.isInteger(targetPosition) || targetPosition < 1 || targetPosition > weaving.length) {
+    throw new RangeError('Li position target legacy es extra li intertexe.');
+  }
+  const monthId = weaving[targetPosition - 1];
+  const firstPosition = weaving.indexOf(monthId) + 1;
+  return targetPosition - firstPosition + 1;
+}
+
+class LegacyContiguousMonthDayAdapter {
+  guess(weaving, targetPosition) {
+    return oldContiguousMonthDayGuess(weaving, targetPosition);
+  }
+}
+
+class Discovery25ContiguousMonthDayHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, targetDay) {
+    this.validationManager.requirePatch24Result(context);
+    this.validationManager.requireExactInteger(targetDay);
+    const weaving = context.patch24SemanticMonthWeaving;
+    const year = context.patch18ResolvedYear;
+    if (!Array.isArray(weaving) || weaving.length < 1 || !year || typeof year.openDay !== 'bigint') {
+      throw new BootstrapStageError('Discovery 25 exige li intertexe semantic e li year resoluet de Patch 24.');
+    }
+    const targetPositionBig = targetDay - year.openDay;
+    if (targetPositionBig < 1n || targetPositionBig > BigInt(weaving.length)) {
+      throw new BootstrapStageError('Discovery 25 exige un target intra li positions del intertexe selectet.');
+    }
+    const targetPosition = Number(targetPositionBig);
+    const monthId = weaving[targetPosition - 1];
+    const firstPosition = weaving.indexOf(monthId) + 1;
+    const guess = this.legacyAdapter.guess(weaving, targetPosition);
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery25ContiguousMonthDayHandler';
+    context.phase = 'DISCOVERY_25_CONTIGUOUS_MONTH_DAY_GUESS';
+    context.branchTrace.push('DISCOVERY_25_CONTIGUOUS_MONTH_DAY_GUESS');
+    context.legacyMonthDayWeaving = weaving;
+    context.legacyMonthDayTargetDay = targetDay;
+    context.legacyMonthDayTargetPosition = targetPosition;
+    context.legacyMonthDayMonthId = monthId;
+    context.legacyMonthDayFirstPosition = firstPosition;
+    context.legacyMonthDayGuess = guess;
+    context.legacyMonthDaySemantic = guess;
+    context.legacyMonthDayHelperExecuted = true;
+    context.status = 'DISCOVERY_25_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery25.oldContiguousMonthDayGuess.calls');
+
+    return {
+      monthWeaving: weaving,
+      targetDay,
+      targetPosition,
+      monthId,
+      firstPosition,
+      dayInMonth: guess,
+      helperExecuted: true
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -5142,6 +5217,12 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    this.legacyContiguousMonthDayAdapter = new LegacyContiguousMonthDayAdapter();
+    this.discovery25ContiguousMonthDayHandler = new Discovery25ContiguousMonthDayHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyContiguousMonthDayAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -5983,6 +6064,38 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery25ContiguousMonthDay(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      this.cutletPartitionPatchWrapper.repair(context);
+      this.discovery22RepeatedNameHandler.handle(context);
+      this.repeatedNamePatchWrapper.repair(context);
+      this.discovery23MonthLengthMaterializationHandler.handle(context);
+      this.monthLengthVirtualPatchWrapper.repair(context);
+      this.discovery24MonthWeavingHandler.handle(context);
+      this.monthWeavingPatchWrapper.repair(context);
+      const result = this.discovery25ContiguousMonthDayHandler.handle(context, originalTargetDay);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -6317,8 +6430,20 @@ function historicMonthWeavingThroughMonsterPath(
   );
 }
 
+
+function discovery25LegacyContiguousMonthDayThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Discovery 25 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executeDiscovery25ContiguousMonthDay(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 24; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 25; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -6406,6 +6531,8 @@ module.exports = Object.freeze({
   Discovery24MonthWeavingHandler,
   LegalMonthWeavingDP,
   MonthWeavingPatchWrapper,
+  LegacyContiguousMonthDayAdapter,
+  Discovery25ContiguousMonthDayHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -6499,6 +6626,7 @@ module.exports = Object.freeze({
   legacyChooseEachDaySeparately,
   compatibleMonthWeavingRank,
   DPUnrankLegalWeaving,
+  oldContiguousMonthDayGuess,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -6548,5 +6676,6 @@ module.exports = Object.freeze({
   historicMonthLengthVirtualListThroughMonsterPath,
   discovery24LegacyMonthWeavingThroughMonsterPath,
   historicMonthWeavingThroughMonsterPath,
+  discovery25LegacyContiguousMonthDayThroughMonsterPath,
   calendarDateSpaghetti
 });

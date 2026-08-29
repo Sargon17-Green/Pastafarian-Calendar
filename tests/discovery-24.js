@@ -12,7 +12,7 @@ assert.equal(typeof production.Discovery24MonthWeavingHandler, 'function');
 assert.equal(typeof production.discovery24LegacyMonthWeavingThroughMonsterPath, 'function');
 assert.equal(typeof production.DPUnrankLegalWeaving, 'function');
 assert.equal(typeof production.MonthWeavingPatchWrapper, 'function');
-assert.equal('oldContiguousMonthDayGuess' in production, false);
+assert.equal('countMonthOccurrencesThroughTarget' in production, false);
 
 const legacySource = production.legacyChooseEachDaySeparately.toString();
 assert.match(legacySource, /ringAnswerAt/);

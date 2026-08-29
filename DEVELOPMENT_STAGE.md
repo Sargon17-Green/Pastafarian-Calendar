@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=49
-CURRENT_KIND=PATCH
-CURRENT_PATCH=24
-LAST_COMPLETED_STAGE=49
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=50
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=25
+LAST_COMPLETED_STAGE=50
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,21 +15,19 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus LegalMonthWeavingDP, compatibleMonthWeavingRank, DPUnrankLegalWeaving e MonthWeavingPatchWrapper: li chooser die-per-die old continua esser executet quam ghost real, poy un backend exact conta e unranka li familie legal complet con li sam bowl 4 / seal 32 ring.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus oldContiguousMonthDayGuess, LegacyContiguousMonthDayAdapter e Discovery25ContiguousMonthDayHandler: li intertexe legal de Patch 24 es preservat, ma li helper old assume que omni occurrences del monthId inter target e su unesim occurrence es contigui.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 49 es finit quam **PATCH 24** e li repository local es `GREEN`.
+Stage 50 es finit quam **DISCOVERY 25** e li repository local es intentionalmen `EXPECTED_RED`.
 
-`legacyChooseEachDaySeparately(lengths,answerStream)` resta fisicmen sin modification e continua esser executet realmen ante li correction. Su resultate resta in `legacyMonthWeavingGhost` e in `patch24Ghost` quam scar diagnostic invocation-local.
+`oldContiguousMonthDayGuess(weaving,targetPosition)` es li scar historic nov. It prende li monthId al target, trova su unesim occurrence e retorna `targetPosition-firstPosition+1`. Ti formule es correct solmen si omni occurrences de ti mensu inter li unesim occurrence e li target es contigui; in un intertexe legal it posse contar dies de altri mensus quam si ili apartene al mensu target.
 
-`LegalMonthWeavingDP` conta exactmen li familie de intertexes complet in quel li unesim occurrences de monthIds 1..m es in órdine e li ultim occurrences anc es in órdine. Li backend usa un DP exact por li labels futur e un count combinatoric exact por li labels ja apert; null familie complet es materialisat. `unrank1` examina moves per monthId ascendent e salta blocs exact, ergo su ordre es exactmen lexicografic.
+`LegacyContiguousMonthDayAdapter` voca li helper old realmen. `Discovery25ContiguousMonthDayHandler` exige un `PATCH_24_RESULT`, deriva li position del target intra li year ja resoluet e conserva guess, monthId, unesim position e intertexe quam state invocation-local. Durant ti Discovery, li guess old deven intentionalmen anc li current semantic day-in-month.
 
-`compatibleMonthWeavingRank` usa li sam answer ring de bowl 4 / seal 32 e li dispatcher curt/wide existent. `DPUnrankLegalWeaving` calcula li `correct`; `MonthWeavingPatchWrapper` retorna li object ghost solmen si it es identic element-per-element al correct, altrimen retorna li correct.
+Li witness real usa target position 92. Li monthId es 9, su unesim occurrence es position 15, ergo li guess contigui es 78. Li occurrence count real del monthId 9 ab initie del year til target inclusiv es 14. Ti divergence es li unic EXPECTED_RED nov.
 
-Por li witness `[4,4,4]`, li familie legal have 1301 membres, wanted rank 216, ghost `[3,1,2,3,1,2,3,1,2,3,1,2]` e correct `[1,1,2,1,3,3,1,2,2,2,3,3]`. Li route real del year de 1000 dies produce un familie legal con un count de 1064 cifras e usa efectivmen li wide selection, sin cambiar li ring semantic.
-
-Null `oldContiguousMonthDayGuess`, `ContiguousMonthDayPatchWrapper` o code de Patch 25 es present.
+Null `countMonthOccurrencesThroughTarget`, null `MonthDayOccurrencePatchWrapper` e null code de Patch 25 reparativ o Patch 26 es present.
