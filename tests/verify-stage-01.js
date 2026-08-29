@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 06 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 06 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,7 @@ group('null textu hebreic o code posterior a Discovery 06 contamina production',
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'patchedCounts', 'priorPatch', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
+    'patchedCounts', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
@@ -941,7 +941,36 @@ group('Discovery 06 conserva legacyPrior limitat al storage de visible drops', (
   eq(routed.context.metrics['discovery06.legacyPrior.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 06', () => {
+group('Patch 06 traducte slots hidden e conserva legacyPrior por history visibil', () => {
+  const f = o.FOUNDATION_DAY;
+  const dropStore = [];
+  dropStore[1] = 101n;
+  dropStore[2] = 202n;
+  dropStore[3] = 303n;
+  const hidden = [null, 7007n, 6006n, 5005n, 4004n, 3003n, 2002n, 1001n];
+  const snapshot = hidden.slice();
+  for (let back = 1; back <= 7; back += 1) {
+    eq(production.priorPatch(dropStore, hidden, 1, back), production.hiddenByNearness(hidden, back));
+  }
+  eq(production.priorPatch(dropStore, hidden, 3, 1), 202n);
+  deepEq(hidden, snapshot);
+  const hiddenRoute = production.historicPriorThroughMonsterPath(f, f, dropStore, hidden, 1, 7);
+  eq(hiddenRoute.result, 7007n);
+  eq(hiddenRoute.context.legacyPriorOutput, undefined);
+  eq(hiddenRoute.context.patch06PriorSlot, -6);
+  eq(hiddenRoute.context.patch06HiddenNearness, 7);
+  eq(hiddenRoute.context.patch06LegacyVisibleCallUsed, false);
+  eq(hiddenRoute.context.currentHandler, 'Patch06PriorWrapper');
+  eq(hiddenRoute.context.status, 'PATCH_06_RESULT');
+  eq(hiddenRoute.context.metrics['patch06.prior.calls'], 1n);
+  const visibleRoute = production.historicPriorThroughMonsterPath(f, f, dropStore, hidden, 3, 1);
+  eq(visibleRoute.result, 202n);
+  eq(visibleRoute.context.patch06PriorSlot, 2);
+  eq(visibleRoute.context.patch06HiddenNearness, null);
+  eq(visibleRoute.context.patch06LegacyVisibleCallUsed, true);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 06', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -953,4 +982,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression rubi de Discovery 06.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passat; Stage 13 es GREEN.');

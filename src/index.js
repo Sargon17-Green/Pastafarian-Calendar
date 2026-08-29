@@ -71,6 +71,11 @@ class BaseMonsterContext {
     this.legacyPriorSlot = null;
     this.legacyPriorSlotIsVisible = false;
     this.legacyPriorOutput = null;
+    this.patch06HiddenStorage = null;
+    this.patch06PriorSlot = null;
+    this.patch06HiddenNearness = null;
+    this.patch06LegacyVisibleCallUsed = false;
+    this.patch06Output = null;
   }
 }
 
@@ -163,6 +168,12 @@ class BaseValidationManager {
   requireDiscovery05Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_05_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un storage legacy valid por Patch 05.');
+    }
+  }
+
+  requireDiscovery06Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_06_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 06.');
     }
   }
 }
@@ -387,6 +398,20 @@ function legacyPrior(dropStore, i, back) {
   }
   // Li scar historic conosse solmen li storage de visible drops e tenta leer directmen i-back.
   return dropStore[i - back];
+}
+
+function priorPatch(dropStore, legacyHidden, i, back) {
+  if (!Number.isInteger(i) || i < 1 || !Number.isInteger(back) || back < 1) {
+    throw new RangeError('Li indices de history reparat deve esser integers positiv.');
+  }
+  const slot = i - back;
+  if (slot >= 1) {
+    // Por history visibil li call legacy resta real e decide li valore retornat.
+    return legacyPrior(dropStore, i, back);
+  }
+  const k = 1 - slot;
+  // Por slots 0..-6 li patch traducte al proximity hidden, sin inventar slots negativ in dropStore.
+  return hiddenByNearness(legacyHidden, k);
 }
 
 class LegacyRemainderAdapter {
@@ -713,6 +738,32 @@ class Discovery06PriorHandler {
   }
 }
 
+class Patch06PriorWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, dropStore, legacyHidden, i, back) {
+    this.validationManager.requireDiscovery06Result(context);
+    this.validationManager.requireDropStore(dropStore);
+    this.validationManager.requireHistoryIndex(i, 'Li index current del visible drop');
+    this.validationManager.requireHistoryIndex(back, 'Li retro-distance del history');
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Patch06PriorWrapper';
+    context.phase = 'PATCH_06_PRIOR_HIDDEN_MAPPING';
+    context.branchTrace.push('PATCH_06_PRIOR_HIDDEN_MAPPING');
+    context.patch06HiddenStorage = legacyHidden;
+    context.patch06PriorSlot = i - back;
+    context.patch06LegacyVisibleCallUsed = context.patch06PriorSlot >= 1;
+    context.patch06HiddenNearness = context.patch06PriorSlot >= 1 ? null : 1 - context.patch06PriorSlot;
+    context.patch06Output = priorPatch(dropStore, legacyHidden, i, back);
+    context.status = 'PATCH_06_RESULT';
+    this.metricsManager.bump(context, 'patch06.prior.calls');
+    return context.patch06Output;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -762,6 +813,10 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager,
       this.legacyPriorAdapter
+    );
+    this.patch06PriorWrapper = new Patch06PriorWrapper(
+      this.validationManager,
+      this.metricsManager
     );
   }
 
@@ -912,6 +967,19 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch06Prior(calculationDay, targetDay, dropStore, legacyHidden, i, back) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery06PriorHandler.handle(context, dropStore, i, back);
+      const result = this.patch06PriorWrapper.repair(context, dropStore, legacyHidden, i, back);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -962,8 +1030,12 @@ function discovery06LegacyPriorThroughMonsterPath(calculationDay, targetDay, dro
   return new BaseMonsterManager().executeDiscovery06Prior(calculationDay, targetDay, dropStore, i, back);
 }
 
+function historicPriorThroughMonsterPath(calculationDay, targetDay, dropStore, legacyHidden, i, back) {
+  return new BaseMonsterManager().executePatch06Prior(calculationDay, targetDay, dropStore, legacyHidden, i, back);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 06; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 06; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -994,6 +1066,7 @@ module.exports = Object.freeze({
   Patch05HiddenNearnessWrapper,
   LegacyPriorAdapter,
   Discovery06PriorHandler,
+  Patch06PriorWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -1013,6 +1086,7 @@ module.exports = Object.freeze({
   buildHiddenWithBackwardStorage,
   hiddenByNearness,
   legacyPrior,
+  priorPatch,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -1025,5 +1099,6 @@ module.exports = Object.freeze({
   discovery05LegacyHiddenStorageThroughMonsterPath,
   historicHiddenByNearnessThroughMonsterPath,
   discovery06LegacyPriorThroughMonsterPath,
+  historicPriorThroughMonsterPath,
   calendarDateSpaghetti
 });

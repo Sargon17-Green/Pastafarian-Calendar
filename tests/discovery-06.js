@@ -27,35 +27,55 @@ const probes = [
 
 const legacy = probes.map(({ i, back }) => production.legacyPrior(dropStore, i, back));
 const expected = probes.map(({ nearness }) => production.hiddenByNearness(legacyHidden, nearness));
+const patched = probes.map(({ i, back }) => production.priorPatch(dropStore, legacyHidden, i, back));
 
-const routed = production.discovery06LegacyPriorThroughMonsterPath(f, f, dropStore, 1, 3);
-assert.equal(routed.result, undefined);
-assert.equal(routed.context.currentHandler, 'Discovery06PriorHandler');
-assert.equal(routed.context.phase, 'DISCOVERY_06_LEGACY_PRIOR_VISIBLE_ONLY');
-assert.equal(routed.context.status, 'DISCOVERY_06_LEGACY_RESULT');
-assert.deepEqual(routed.context.branchTrace, [
+assert.deepEqual(
+  legacy,
+  [undefined, undefined, undefined, undefined],
+  'Li scar de Discovery 06 deve restar directmen observabil in legacyPrior.'
+);
+assert.deepEqual(
+  patched,
+  expected,
+  'Li mem regression normativ de Discovery 06 deve devenir verd exclusivmen tra Patch 06.'
+);
+
+const routedLegacy = production.discovery06LegacyPriorThroughMonsterPath(f, f, dropStore, 1, 3);
+assert.equal(routedLegacy.result, undefined);
+assert.equal(routedLegacy.context.currentHandler, 'Discovery06PriorHandler');
+assert.equal(routedLegacy.context.phase, 'DISCOVERY_06_LEGACY_PRIOR_VISIBLE_ONLY');
+assert.equal(routedLegacy.context.status, 'DISCOVERY_06_LEGACY_RESULT');
+assert.deepEqual(routedLegacy.context.branchTrace, [
   'BOOTSTRAP_VALIDATED',
   'DISCOVERY_06_LEGACY_PRIOR_VISIBLE_ONLY'
 ]);
-assert.equal(routed.context.legacyPriorVisibleIndex, 1);
-assert.equal(routed.context.legacyPriorBack, 3);
-assert.equal(routed.context.legacyPriorSlot, -2);
-assert.equal(routed.context.legacyPriorSlotIsVisible, false);
-assert.equal(routed.context.legacyPriorOutput, undefined);
-assert.equal(routed.context.metrics['discovery06.legacyPrior.calls'], 1n);
+assert.equal(routedLegacy.context.legacyPriorVisibleIndex, 1);
+assert.equal(routedLegacy.context.legacyPriorBack, 3);
+assert.equal(routedLegacy.context.legacyPriorSlot, -2);
+assert.equal(routedLegacy.context.legacyPriorSlotIsVisible, false);
+assert.equal(routedLegacy.context.legacyPriorOutput, undefined);
+assert.equal(routedLegacy.context.metrics['discovery06.legacyPrior.calls'], 1n);
+
+const routedPatched = production.historicPriorThroughMonsterPath(f, f, dropStore, legacyHidden, 1, 3);
+assert.equal(routedPatched.result, 303n);
+assert.equal(routedPatched.context.patch06PriorSlot, -2);
+assert.equal(routedPatched.context.patch06HiddenNearness, 3);
+assert.equal(routedPatched.context.patch06LegacyVisibleCallUsed, false);
+assert.equal(routedPatched.context.patch06Output, 303n);
+assert.equal(routedPatched.context.currentHandler, 'Patch06PriorWrapper');
+assert.equal(routedPatched.context.status, 'PATCH_06_RESULT');
+assert.deepEqual(routedPatched.context.branchTrace, [
+  'BOOTSTRAP_VALIDATED',
+  'DISCOVERY_06_LEGACY_PRIOR_VISIBLE_ONLY',
+  'PATCH_06_PRIOR_HIDDEN_MAPPING'
+]);
 
 const realCounts = normative.workCounts(f, f);
 const realStones = production.getStoneTableThroughLegacyBuilder();
 const realHidden = production.buildHiddenWithBackwardStorage(realCounts, realStones);
 assert.equal(production.hiddenByNearness(realHidden, 1), normative.buildHiddenDrops(realCounts, normative.STONES)[0]);
 
-console.log('DISCOVERY 06: legacyPrior conosse solmen dropStore[i-back] e ne posse resolver slots 0..-6 quam hidden drops.');
-console.log('slots:    ' + probes.map(({ i, back }) => i - back).join(', '));
-console.log('legacy:   ' + legacy.map((value) => value === undefined ? 'undefined' : value.toString()).join(', '));
-console.log('normativ: ' + expected.map((value) => value.toString()).join(', '));
-
-assert.deepEqual(
-  legacy,
-  expected,
-  'DISCOVERY 06 EXPECTED RED: legacyPrior ne conosse li mapping de slots non-positiv a hidden1..hidden7.'
-);
+console.log('DISCOVERY 06: PASS pos Patch 06 — legacyPrior resta ciec por slots 0..-6, ma li route historic traducte a hidden drops.');
+console.log('slots legacy:  ' + probes.map(({ i, back }) => i - back).join(', '));
+console.log('legacy direct: ' + legacy.map((value) => value === undefined ? 'undefined' : value.toString()).join(', '));
+console.log('patched:       ' + patched.map((value) => value.toString()).join(', '));

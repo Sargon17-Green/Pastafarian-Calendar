@@ -250,3 +250,21 @@ Un `LegacyPriorAdapter` e un `Discovery06PriorHandler` ha esset addit. Li handle
 ### Pro quo li strat nov ne adjunte un defect extra
 
 Li adapter apella exactmen `legacyPrior`. Li handler ne consulta li hidden storage, ne fabrica un fallback e ne usa metrics por decisiones. Li scars e patches 01..05 resta separatmen testabil. Ergo li unic divergentie nov es precis li ignorance de slots hidden mandat de Discovery 06.
+
+## Stage 13 — PATCH 06
+
+### Quo esset circumit
+
+`legacyPrior` ne esset modificat. Li nov `priorPatch(dropStore, legacyHidden, i, back)` calcula `slot = i-back`. Quand `slot >= 1`, it voca realmen `legacyPrior(dropStore, i, back)` e usa su resultate. Quand `slot <= 0`, it calcula `k = 1-slot` e rende `hiddenByNearness(legacyHidden, k)`. Ti branche cobre exactmen slots `0..-6` quam hidden1..hidden7.
+
+### Pro quo li patch es normativmen equivalent
+
+Por un visible predecessor, li value semantic es ja li visible drop in `dropStore[slot]`, dunc conservar li call legacy rende exactmen li predecessor normativ. Por un predecessor ante li prim visible drop, li convention historic es `slot 0 = hidden1`, `slot -1 = hidden2`, ... `slot -6 = hidden7`; algebraicmen ti es `k = 1-slot`. Patch 05 ja defini `hiddenByNearness` quam translator semantic exact super li storage retrograd, ergo li combination rende li history normativ sin restructurar li arrays.
+
+### Crescentie monster in ti stage
+
+Un `Patch06PriorWrapper` ha esset insertet pos `Discovery06PriorHandler`. Li context conserva li storage hidden legacy, li slot historic, li proximity hidden solmen quand necessi, un flag `patch06LegacyVisibleCallUsed` e li output final. `BaseMonsterManager` expone un route historic quel executa discovery e patch in li sam invocation.
+
+### Scar conservat
+
+`legacyPrior` continua retornar `undefined` por slots `0..-6` quand it es vocat directmen. Li storage hidden continua fisicmen retrograd e `hiddenByNearness` resta li unic translator semantic. Null slots negativ es fabricat in `dropStore`; null `reverse()` es usat. `GRIND_TABLE_WITH_SENTINEL` e omni code de Patch 07 o posterior resta absent.
