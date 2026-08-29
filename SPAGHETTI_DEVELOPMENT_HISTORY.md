@@ -987,3 +987,79 @@ Altı position boyunca current, previous ve next bowl read'lerinin tamamı yaln�
 Aşama 20 normatif bowl-update regresyonunun gövdesi byte-for-byte değiştirilmeden yeşile döner.
 
 Stage 21 hâlâ tek-drop bowl-update katmanını düzeltir. 46-drop full pass, order-at-46 latch ve post-stir henüz yoktur. Stage 15 sentinel, Stage 17 permutation patch ve Stage 19 bowlAlias patch korunur.
+
+
+## Aşama 22 — Keşif 11: drop 46 order değerini genel order belleğinde tutup post-stir sırasında ezmek
+
+### Ne sanıldı
+
+Legacy katmanda tek bir genel order belleği yeterli sayıldı.
+
+46 drop boyunca her yeni drop order değeri aynı alana yazılır.
+
+Drop 46 tamamlandığında alan geçici olarak doğru drop 46 order değerini taşır.
+
+Ardından 12 post-stir başlar ve her stir kendi order değerini yine aynı genel alana yazar.
+
+Sonuçta query katmanı drop 46 order yerine stir 12 order değerini görür.
+
+### Tam 46-drop ve 12-stir yolu
+
+Bu aşamada production ilk kez:
+
+```text
+46 drop bowl round
+12 post-stir round
+```
+
+zincirini tam olarak yürütür.
+
+Her drop için Stage 19 corrected pour ve Stage 21 snapshot bowl update kullanılır.
+
+Post-stir round formülü exact olarak:
+
+```text
+savedStirSum = SAVE(sum(oldBowls) + 149*stir)
+order = permutation(savedStirSum)
+all reads = same old snapshot
+all writes = one pending batch
+```
+
+şeklindedir.
+
+Bu tam bowl yolu test-only normatif bowl sonuçlarıyla eşleşir.
+
+Yeni kusur bowl değerlerinde değil, order belleğinin sahipliğindedir.
+
+### Overwrite scar
+
+`legacy_overwritable_order_memory` toplam 58 kez yazılır:
+
+```text
+46 drop write
+12 stir write
+```
+
+Son kaynak `("stir",12)` olur.
+
+`query_order` bu genel belleği döndürür.
+
+Drop 46 için ayrı latch yoktur.
+
+Yeni normatif regresyon semantic `query_order` sonucunu drop 46 exact order ile karşılaştırır. Position 1, 2 ve 6 alt örnekleri bilinçli kırmızıdır.
+
+### Önceki instrumentation genişletmesi
+
+Aşama 18 fixed-pour ve Aşama 20 in-place-update real-path spy testleri daha önce tam bir çağrı bekliyordu.
+
+Full 46-drop production yolu bu scar helper'ları doğal olarak daha fazla çağırdığı için yalnızca instrumentation koşulu genişletildi: ilk gerçek çağrının hâlâ drop 1 probe'u olduğu doğrulanır.
+
+Önceki normatif regresyonlara dokunulmadı.
+
+### Sınır
+
+Bu aşamada drop 46 için ayrı latch yoktur ve `query_order` son yazılan genel order belleğini okur.
+
+Bir sonraki yama latch'i post-stir öncesi tek kez kurmalıdır ve sonra onu bir daha yazmamalıdır.
+
+Queried next-bowl ID mantığı olan Patch 12 henüz eklenmemiştir.

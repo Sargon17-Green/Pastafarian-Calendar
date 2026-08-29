@@ -11,6 +11,7 @@ from .legacy_visible_grinds import LegacyVisibleDropBuilderAdapter
 from .legacy_permutation import LegacyPermutationOrderAdapter
 from .legacy_pours import LegacyPourAdapter
 from .legacy_bowl_updates import LegacyBowlUpdateAdapter
+from .legacy_order_memory import LegacyOverwritableOrderMemoryAdapter
 
 
 class MonsterError(RuntimeError):
@@ -134,6 +135,12 @@ class MonsterContext:
     patch10_corrected_result: tuple[int, ...] | None = None
     patch10_commit_after_six: bool = False
     patch10_applied: bool = False
+    legacy_overwritable_order_memory: tuple[int, ...] | None = None
+    legacy_order_memory_write_count: int = 0
+    legacy_order_memory_last_source: tuple[str, int] | None = None
+    legacy_bowls_after_46_drops: tuple[int, ...] | None = None
+    legacy_post_stir_last_saved_sum: int | None = None
+    legacy_post_stir_final_bowls: tuple[int, ...] | None = None
 
 
 class BaseMetrics:
@@ -196,3 +203,4 @@ class MonsterManager:
         self.legacy_permutation = LegacyPermutationOrderAdapter()
         self.legacy_pours = LegacyPourAdapter()
         self.legacy_bowl_updates = LegacyBowlUpdateAdapter()
+        self.legacy_order_memory = LegacyOverwritableOrderMemoryAdapter()

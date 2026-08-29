@@ -1,0 +1,34 @@
+Aşama 22/55 — DISCOVERY 11
+
+Bu paket yalnızca Aşama 22 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_order_memory.py
+src/pastafari_calendar/legacy_pours.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_18_discovery_09.py
+tests/test_stage_20_discovery_10.py
+tests/test_stage_22_discovery_11.py
+artifacts/stage-22/BASELINE_STAGE_21_GREEN.txt
+artifacts/stage-22/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-22/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_22.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 21 baseline: GREEN
+Değişiklik sonrası Aşama 1–21 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+46-drop bowl pass: EXACT
+12 post-stir bowl pass: EXACT
+legacy overwritable order memory: EKLENDİ
+drop 46 için ayrı latch: YOK
+PATCH 12 next-bowl kodu: YOK
+Aşama 15 sentinel: KORUNDU
+Aşama 17 permutation patch: KORUNDU
+Aşama 19 bowlAlias patch: KORUNDU
+Aşama 21 snapshot/pending patch: KORUNDU

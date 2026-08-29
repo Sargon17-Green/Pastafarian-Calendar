@@ -215,10 +215,11 @@ class LegacyPourAdapter:
 
         return ctx.legacy_initial_bowls
 
-    def call(
+    def call_with_bowls(
         self,
         ctx,
         i: int,
+        old_bowls: tuple[int, ...],
     ) -> tuple[int, ...]:
         if ctx.legacy_stone_table is None:
             raise RuntimeError("Taş tablosu legacy pour erişiminden önce hazır olmalıdır")
@@ -227,9 +228,6 @@ class LegacyPourAdapter:
         if ctx.legacy_permutation_order_table is None:
             raise RuntimeError("Permütasyon sıraları legacy pour erişiminden önce hazır olmalıdır")
 
-        old_bowls = self.ensure_initial_bowls(
-            ctx,
-        )
         drop = ctx.legacy_visible_drop_table[i]
         order = ctx.legacy_permutation_order_table[i]
 
@@ -262,3 +260,17 @@ class LegacyPourAdapter:
         ctx.legacy_pour_last_values = pours
 
         return pours
+
+    def call(
+        self,
+        ctx,
+        i: int,
+    ) -> tuple[int, ...]:
+        old_bowls = self.ensure_initial_bowls(
+            ctx,
+        )
+        return self.call_with_bowls(
+            ctx,
+            i,
+            old_bowls,
+        )

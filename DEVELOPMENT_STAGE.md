@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=21
-CURRENT_KIND=PATCH
-CURRENT_PATCH=10
-LAST_COMPLETED_STAGE=21
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=22
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=11
+LAST_COMPLETED_STAGE=22
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=legacyInPlaceBowlUpdateWrong fiziksel scar olarak korundu; BowlMutationPatchWrapper yanlış helper'ı gerçekten çalıştırıp raw contaminated result'u tuttu, ardından vaultOld=clone(B) snapshot'ını kurdu, bütün read'leri vaultOld'dan yaptı, altı write'ı pending buffer'a topladı ve yalnızca altı position tamamlandıktan sonra pending tuple'ını semantic commit sonucu olarak döndürdü
+MONSTER_ARCHITECTURE_GROWTH=LegacyOverwritableOrderMemoryAdapter 46 exact drop bowl roundunu ve 12 exact post-stir roundunu çalıştırır; drop ve stir order'ları tek legacy_overwritable_order_memory alanına yazılır, böylece drop 46 order ayrı tutulmadan 12 post-stir write'ı tarafından ezilir; query_order son yazılan bu genel belleği döndürür
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

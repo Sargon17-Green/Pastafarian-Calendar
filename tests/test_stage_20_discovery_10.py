@@ -111,12 +111,12 @@ class Stage20Discovery10Tests(unittest.TestCase):
                     FOUNDATION_DAY,
                 )
 
-            self.assertEqual(
+            self.assertGreaterEqual(
                 wrong_update.call_count,
                 1,
             )
             self.assertEqual(
-                wrong_update.call_args.args[0],
+                wrong_update.call_args_list[0].args[0],
                 1,
             )
 

@@ -213,7 +213,30 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.bowlUpdate.probes",
         )
         local_ctx.status = "ESKİ_YERİNDE_KÂSE_GÜNCELLEME_HAZIR"
-        local_ctx.phase = "AŞAMA_20_BEKLEME"
+        local_ctx.phase = "ESKİ_YAZILABİLİR_ORDER_HAFIZASI"
+
+    def legacy_order_memory_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        manager.legacy_order_memory.run(
+            local_ctx,
+        )
+
+        # Discovery 11 semantic query yolu latch yerine son yazılan belleği okur.
+        manager.legacy_order_memory.query_order(
+            local_ctx,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.orderMemory.fullPasses",
+        )
+        local_ctx.status = "ESKİ_YAZILABİLİR_ORDER_HAFIZASI_HAZIR"
+        local_ctx.phase = "AŞAMA_22_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -226,6 +249,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_PERMÜTASYON_SIRALARI", legacy_permutation_handler)
     manager.dispatcher.register("ESKİ_SABİT_KÂSE_POURS", legacy_pour_handler)
     manager.dispatcher.register("ESKİ_YERİNDE_KÂSE_GÜNCELLEME", legacy_bowl_update_handler)
+    manager.dispatcher.register("ESKİ_YAZILABİLİR_ORDER_HAFIZASI", legacy_order_memory_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -239,5 +264,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Yirmi birinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Yirmi ikinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )
