@@ -63,6 +63,10 @@ class MonsterContext:
     patch03_applied: bool = False
     legacy_stone_table: tuple[tuple[int, ...], ...] | None = None
     legacy_stone_rows_built: int = 0
+    patch04_rows_patched: int = 0
+    patch04_last_old_stones: tuple[int, ...] | None = None
+    patch04_last_legacy_garbage: tuple[int, ...] | None = None
+    patch04_last_committed_stones: tuple[int, ...] | None = None
 
 
 class BaseMetrics:

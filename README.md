@@ -1,20 +1,29 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 8/55, `DISCOVERY 04` durumundadır. Dördüncü tarihsel kusur gerçek çağrı zincirine eklenmiştir.
+Aşama 9/55, `PATCH 04` durumundadır. Dördüncü tarihsel kusur kodda aynen korunur: `mutateStonesWrong` hâlâ aynı mutable state'i sequential biçimde kirletir.
 
-`mutateStonesWrong`, beş taş değerini aynı mutable state üzerinde sırayla değiştirir. İlk `w` hesabı eski satırı görürken sonraki hesaplar daha önce aynı çağrıda yazılmış yeni değerleri okur.
+Düzeltme onun üstündeki `stonePatch` katmanındadır:
 
-`getStoneTableThroughLegacyBuilder`, 1 numaralı başlangıç satırından sonra 2–46 satırlarını bu yanlış in-place mutasyonla üretir. `LegacyStoneBuilderAdapter` tabloyu gerçek `calendar_date_spaghetti` yoluna bağlar.
+```text
+old = clone(S)
+garbage = mutateStonesWrong(i, clone(S))
 
-Yeni normatif regresyon gerçek builder yolunun 2, 3 ve 46 numaralı satırlarını test-only normatif taş tablosuyla karşılaştırır ve bilinçli olarak kırmızıdır.
+garbage.w = savePatch(old.w*old.w + 3*old.b + i)
+garbage.b = savePatch(old.b*old.b + 5*old.s + old.w)
+garbage.s = savePatch(old.s*old.s + 7*old.m + old.b)
+garbage.m = savePatch(old.m*old.m + 11*old.r + old.s)
+garbage.r = savePatch(old.r*old.r + 13*old.w + old.m)
+```
 
-Henüz `PATCH 04` yoktur: eski snapshot, clone üzerinde korunmuş legacy çağrısı, `garbage` sonucu veya beş alanı snapshot'tan yeniden yazan `stonePatch` eklenmemiştir.
+Legacy çağrısı gerçek bir clone üzerinde çalışır ve gerçek garbage üretir; ardından beş alanın tamamı yalnızca old snapshot okuyan formüllerle ezilir.
 
-Önceki Aşama 1–7 regresyonlarının tamamı yeşildir. Gelecekteki 05–26 kusur ve yamaları üretime eklenmemiştir.
+`getStoneTableThroughLegacyBuilder` artık 2–46 satırlarını `stonePatch` üzerinden üretir. Aşama 8'in normatif taş-tablosu regresyonu değiştirilmeden yeşile dönmüştür.
+
+Adapter son patch satırının old snapshot, legacy garbage ve committed row scar durumlarını invocation'a ait `MonsterContext` içinde ayrı tutar. Önceki bütün regresyonlar yeşildir. Gelecekteki 05–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -30,10 +39,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam sekizinci aşama paketi:
+Tam dokuzuncu aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–7 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni taş-tablosu normatif regresyonunun 2, 3 ve 46 numaralı satır alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 8'de kırmızı olan 2, 3 ve 46 numaralı taş satırı regresyonları aynı gövdeyle yeşile dönmelidir; `mutateStonesWrong` kusurunu doğrudan doğrulayan testler eski yanlış davranışı korumaya devam eder.

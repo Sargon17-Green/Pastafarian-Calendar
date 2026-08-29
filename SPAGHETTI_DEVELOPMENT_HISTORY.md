@@ -255,3 +255,57 @@ Bu nedenle yalnızca instrumentation koşulu geleceğe dayanıklı hâle getiril
 `LegacyStoneBuilderAdapter`, bu yanlış tabloyu gerçek `calendar_date_spaghetti` state machine'ine bağlar. Tablo ve üretilen satır sayısı yalnızca invocation'a ait `MonsterContext` içinde tutulur.
 
 Bu aşamada snapshot alınmaz, legacy clone üzerinde ayrıca çalıştırılmaz, `garbage` sonucu yoktur ve beş alanı eski snapshot formülleriyle yeniden yazan `stonePatch` henüz eklenmemiştir.
+
+
+## Aşama 9 — Yama 04: sequential taş mutasyonunu snapshot ile etkisizleştirme
+
+### Ne aşıldı
+
+`mutateStonesWrong` değiştirilmedi. Aynı mutable state üzerinde beş alanı sırayla güncellemeye ve sonraki formüllerin yeni ara değerleri okumasına devam eder.
+
+Düzeltme onun üstündeki `stonePatch` katmanındadır:
+
+```text
+old = clone(S)
+garbage = mutateStonesWrong(i, clone(S))
+
+garbage.w = savePatch(old.w*old.w + 3*old.b + i)
+garbage.b = savePatch(old.b*old.b + 5*old.s + old.w)
+garbage.s = savePatch(old.s*old.s + 7*old.m + old.b)
+garbage.m = savePatch(old.m*old.m + 11*old.r + old.s)
+garbage.r = savePatch(old.r*old.r + 13*old.w + old.m)
+
+return garbage
+```
+
+Legacy çağrısı kaldırılmaz ve sahte bir diagnostic çağrıya dönüştürülmez. `mutateStonesWrong`, gerçek bir clone üzerinde çalışır ve gerçek `garbage` state üretir. Daha sonra aynı garbage nesnesindeki beş alanın tamamı old snapshot kullanan formüllerle ezilir.
+
+### Neden normatif olarak eşdeğer
+
+Her taş formülü yalnızca önceki satırın aynı `old` snapshot değerlerini okur.
+
+Bu nedenle beş sonuç, test-only normatif taş tablosunun aynı satır formülleriyle birebir eşdeğerdir. Legacy mutasyonunun kirli ara değerleri hiçbir normatif formülde okunmaz; tamamı overwrite edilir.
+
+`getStoneTableThroughLegacyBuilder` artık 2–46 satırlarında doğrudan `mutateStonesWrong` yerine `stonePatch` çağırır. Böylece yanlış fonksiyon fiziksel olarak korunur ve çalıştırılır, fakat tabloya commit edilen satırlar snapshot semantiğine döner.
+
+### Ne korundu
+
+Aşama 8'in normatif taş-tablosu regresyonunun gövdesi byte-for-byte değiştirilmedi ve yalnızca yeni patch sayesinde yeşile döndü.
+
+`mutateStonesWrong` fonksiyonunun in-place ve yanlış sequential davranışını doğrulayan testler korunur.
+
+Patch ayrıca gerçek legacy `garbage` ile overwrite sonrası committed satırı ayrı gözlemleyebilir. Bu gözlem durumu semantik hesaba geri okunmaz.
+
+### Bu aşamada eklenen canavar katmanı
+
+`LegacyStoneBuilderAdapter`, builder'ın patch trace bilgisinden son satır için üç scar snapshot tutar:
+
+```text
+old snapshot
+legacy garbage
+committed patched row
+```
+
+Ayrıca kaç satırın `stonePatch` üzerinden geçtiği tutulur.
+
+Bu alanlar yalnızca invocation'a ait `MonsterContext` içinde bulunur. Logs, metrics ve diagnostics taş hesabına girdi değildir.
