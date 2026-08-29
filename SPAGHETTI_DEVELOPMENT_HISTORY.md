@@ -1213,3 +1213,18 @@ Production answer ring üzerinde rejection ilerlemesi yapmaz.
 Aşama 1 future-name guard içinde `biasedLegacyPick` artık current Discovery 13 olduğu için yalnızca bu token gelecek-kod listesinden çıkarılmıştır.
 
 Patch 14 wide selection kodu henüz yoktur.
+
+
+## Aşama 27 — Yama 13: aynı answer ring üzerinde rejection, sonra legacy modulo
+
+Discovery 13'ün `biasedLegacyPick(x,N)` helper'ı fiziksel olarak ve doğrudan modulo davranışıyla korunur.
+
+`SelectionRejectionPatchWrapper` kısa seçimde `limit=floor(M_OLD/N)*N` hesaplar, offset 0'dan başlar ve yalnız aynı `LegacyAnswerRing` üzerinde `x<=limit` olana kadar ilerler. Legacy helper rejected answer için çağrılmaz; yalnız accepted answer bulunduktan sonra çağrılır.
+
+Aşama 26 normatif biased-selection regresyonunun gövdesi byte-for-byte değiştirilmeden yeşile döner. Üç sauce-derived fixture'da first answer reddedilir ve aynı ring'de offset 1 accepted answer olur.
+
+`x==limit`, `N=1` ve `N=M_OLD` sınırları ayrıca doğrulanır.
+
+Real calendar probe, eski testlerin kullandığı herhangi bir tarihte uzun ring yürüyüşü oluşturmamak için bounded tutulur: direction `-1` ve first `M/2` üstündeyse `N=first-1` ile tek-adımlı rejection kullanılır; diğer durumlarda `N=M_OLD` seçilip first answer hemen kabul edilir. Bu yalnız stage probe güvenliğidir; semantic short-selection wrapper aynı authoritative rejection kuralını uygular.
+
+`N>M_OLD` wide dispatcher ve `wideDetour` henüz yoktur.

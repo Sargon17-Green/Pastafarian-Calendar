@@ -102,14 +102,74 @@ def biasedLegacyPick(
     ) + 1
 
 
+class SelectionRejectionPatchWrapper:
+    def repair(
+        self,
+        ctx,
+        ring: LegacyAnswerRing,
+        n: int,
+    ) -> int:
+        if n < 1 or n > M_OLD:
+            raise ValueError("Kısa seçim büyüklüğü 1 ile M arasında olmalıdır")
+
+        limit = (M_OLD // n) * n
+        offset = 0
+        x = answerAtRing(
+            ring,
+            offset,
+        )
+
+        ctx.branch_trace.append(
+            (
+                "YAMA_13_REJECTION",
+                x,
+                n,
+                limit,
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-13-rejection",
+                x,
+                n,
+                limit,
+            )
+        )
+
+        while x > limit:
+            offset += 1
+            x = answerAtRing(
+                ring,
+                offset,
+            )
+
+        # Tarihsel helper yalnız accepted answer bulunduktan sonra çağrılır.
+        result = biasedLegacyPick(
+            x,
+            n,
+        )
+
+        ctx.patch13_limit = limit
+        ctx.patch13_accepted_offset = offset
+        ctx.patch13_accepted_answer = x
+        ctx.patch13_rejection_count = offset
+        ctx.patch13_legacy_pick_result = result
+        ctx.patch13_applied = True
+
+        return result
+
+
 class LegacyBiasedSelectionAdapter:
+    def __init__(self) -> None:
+        self.patch_wrapper = SelectionRejectionPatchWrapper()
+
     def call_with_ring(
         self,
         ctx,
         ring: LegacyAnswerRing,
         n: int,
     ) -> int:
-        x = answerAtRing(
+        first = answerAtRing(
             ring,
             0,
         )
@@ -117,25 +177,25 @@ class LegacyBiasedSelectionAdapter:
         ctx.branch_trace.append(
             (
                 "ESKİ_YANLI_MODULO_SEÇİM",
-                x,
+                first,
                 n,
             )
         )
         ctx.logs.append(
             (
                 "eski-yanlı-modulo-seçim",
-                x,
+                first,
                 n,
             )
         )
 
-        # Discovery 13: biased helper rejection olmadan hemen çağrılır.
-        result = biasedLegacyPick(
-            x,
+        result = self.patch_wrapper.repair(
+            ctx,
+            ring,
             n,
         )
 
-        ctx.legacy_selection_first_answer = x
+        ctx.legacy_selection_first_answer = first
         ctx.legacy_selection_direction_step = ring.direction_step
         ctx.legacy_selection_n = n
         ctx.legacy_selection_result = result

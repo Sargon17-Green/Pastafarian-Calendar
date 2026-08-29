@@ -157,6 +157,12 @@ class MonsterContext:
     legacy_selection_direction_step: int | None = None
     legacy_selection_n: int | None = None
     legacy_selection_result: int | None = None
+    patch13_limit: int | None = None
+    patch13_accepted_offset: int | None = None
+    patch13_accepted_answer: int | None = None
+    patch13_rejection_count: int = 0
+    patch13_legacy_pick_result: int | None = None
+    patch13_applied: bool = False
 
 
 class BaseMetrics:

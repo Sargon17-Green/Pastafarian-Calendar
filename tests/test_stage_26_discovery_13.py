@@ -82,7 +82,7 @@ def _rejection_pick_test_only(
 
 
 class Stage26Discovery13Tests(unittest.TestCase):
-    def test_biased_pick_is_on_the_real_calendar_path_before_any_rejection(self):
+    def test_biased_pick_scar_is_still_on_the_real_calendar_path(self):
         with patch(
             "pastafari_calendar.legacy_selection.biasedLegacyPick",
             wraps=biasedLegacyPick,

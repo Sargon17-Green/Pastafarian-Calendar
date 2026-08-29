@@ -275,7 +275,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
 
         # Keşif 13 probe'u gerçek sauce state'inden bowl 1 / seal 21
         # answer ring'ini kurar. N, mevcut ilk cevaptan türetilir;
-        # production burada acceptance limit veya rejection hesaplamaz.
+        # güvenli probe rejection gerekiyorsa tek geri adımda kabul verir; diğer durumlarda N=M_OLD kullanır.
         ring = buildAnswerRingFromSauceState(
             local_ctx,
             1,
@@ -283,8 +283,12 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
         )
         n = (
             ring.first - 1
-            if ring.first > 1
-            else 1
+            if (
+                ring.direction_step == -1
+                and ring.first > M_OLD // 2
+                and ring.first > 1
+            )
+            else M_OLD
         )
 
         manager.legacy_selection.call_with_ring(
@@ -330,5 +334,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Yirmi altıncı aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Yirmi yedinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

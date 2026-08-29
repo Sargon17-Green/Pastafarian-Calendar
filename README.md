@@ -1,29 +1,26 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 26/55, `DISCOVERY 13` durumundadır.
+Aşama 27/55, `PATCH 13` durumundadır.
 
-Production artık final bowl state üstünde exact answer ring kurar. First answer ve ±1 direction test-only normatif stream ile eşleşir.
+`biasedLegacyPick(x,N)` direct-modulo scar olarak fiziksel korunur.
 
-Yeni tarihsel kusur:
+Corrected kısa seçim önce:
 
 ```text
-biasedLegacyPick(x,N)
-    -> regularMod(x-1,N)+1
+limit = floor(M_OLD/N)*N
 ```
 
-helper'ının acceptance/rejection yapılmadan hemen çağrılmasıdır.
+hesaplar; sonra aynı answer ring üzerinde `x<=limit` olana kadar ilerler ve legacy helper'ı yalnız accepted `x` ile çağırır.
 
-`LegacyBiasedSelectionAdapter` bu wrong direct-modulo yolu gerçek `calendar_date_spaghetti` state-machine zincirine bağlar.
+Aşama 26 normatif biased-selection regresyonu değiştirilmeden yeşile dönmüştür.
 
-Yeni normatif regresyon üç gerçek sauce-derived answer ring için legacy direct modulo sonucunu aynı answer ring üzerinde rejection sonrası seçimle karşılaştırır ve bilinçli olarak kırmızıdır.
+Real calendar probe bounded tutulur; bu stage-only probe herhangi bir tarihte uzun rejection yürüyüşü oluşturmaz.
 
-Henüz `PATCH 13` yoktur: production `limit=floor(M/N)*N` hesaplamaz ve accepted answer bulunana kadar ring üzerinde ilerlemez.
-
-Patch 14 wide-selection kodu da henüz yoktur.
+Henüz `N>M_OLD` wide dispatcher veya `wideDetour` yoktur; Patch 14 başlamamıştır.
 
 ## Korunan birinci aşama temeli
 
@@ -39,10 +36,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirmi altıncı aşama paketi:
+Tam yirmi yedinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–25 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni biased-modulo normatif regresyonunun üç sauce-derived alt örneği başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 26'da kırmızı olan üç sauce-derived short-selection alt örneği aynı normatif regresyon gövdesiyle yeşile dönmelidir.
