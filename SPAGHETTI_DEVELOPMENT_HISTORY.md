@@ -600,3 +600,26 @@ Li answer ring usa solmen state invocation-local ja derivat per patches preceden
 ### Pro quo li patch es equivalent
 
 Por `1<=N<=M_OLD`, li accepted region ha grandore multipli exact de `N`; ergo li direct modulo historic es unbiased solmen pos rejection. Avansar per `ringAnswerAt` conserva li unic answer ring e su direction; null stream alternativ es creat. Li witness del Foundation rejecte exactmen un answer e retorna `N`, e tests additiv concorda con li reference normativ local. Null `wideDetour` o logic de Patch 14 es addit.
+
+
+## Stage 28 — DISCOVERY 14
+
+### Quo on pensat
+
+Pos Patch 13, li selector curt ja rejecte li caude biased correctmen, ma li architectura historic continua presumir que chascun familie ordonat posse esser tractat per ti sam path. Null dispatcher examina si `N` es plu grand quam `M_OLD`; li call site envia li grandore directmen al selector curt.
+
+### Quo esset decovrit
+
+Un answer ring individual contene solmen `M_OLD` valores. Ergo un familie con `N>M_OLD` ne posse esser representat per un unic answer e ne posse intrar in li contract de `patchedSmallPick`. In li witness real del Foundation, `N=M_OLD+1`: li route historic curta falla con `RangeError`, ma li selection wide normativ deriva un rank exact `2` ex plu quam un position del sam ring.
+
+### Quo esset circumit
+
+Null circumition existe in Discovery 14. `legacySelectionAssumingNLeM(stream,N)` conserva intentionalmen li assumption defectiv e delega directmen a `patchedSmallPick`, sin branch de largore e sin representation wide. `Discovery14WideSelectionHandler` captura solmen li failure quam diagnostic invocation-local por que li divergence posse esser testat deterministicmen. Li correction `wideDetour` apartene exclusivmen a PATCH 14.
+
+### Crescentie monster in ti stage
+
+Li monster adjunte `LegacyShortFamilyAssumptionAdapter` e `Discovery14WideSelectionHandler`. Li route prepara li sauce, latch e next-bowl per patches precedent, deriva un answer ring real, poy registra seal, first, direction, `N`, li flag de assumption curt, li nom del errore e su message. Un metric separat conta li tentative wide fallit.
+
+### Pro quo li nov layer ne change altri semantics
+
+Li selector `biasedLegacyPick` e `patchedSmallPick` resta textualmen e semanticmen intact. Families `N<=M_OLD` continua usar li route GREEN de Patch 13. Li nov handler es apellet solmen per li route de Discovery 14 e ne adjunte null `wideDetour`, null digits, null `M^places` e null rejection wide. Omni regressions precedent resta verd; li unic failure intentional es li comparison final del nov discovery.

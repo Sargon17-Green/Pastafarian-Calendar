@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 13 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 14 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -1383,7 +1383,35 @@ group('Patch 13 rejecte sur li sam answer ring ante li unic call semantic al sel
   ok(!routed.context.branchTrace.includes('DISCOVERY_13_BIASED_MODULO_SELECTION'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 13', () => {
+group('Discovery 14 expone li assumption N<=M ante li detour wide', () => {
+  const N = production.M_OLD + 1n;
+  const synthetic = { first: production.M_OLD, directionStep: 1n };
+  throws(() => production.legacySelectionAssumingNLeM(synthetic, N), RangeError);
+  eq(o.chooseRankWide(synthetic, N), production.M_OLD);
+  const legacySource = production.legacySelectionAssumingNLeM.toString();
+  ok(legacySource.includes('return patchedSmallPick(stream, N);'));
+  ok(!legacySource.includes('wideDetour'));
+
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const routed = production.discovery14LegacyWideSelectionThroughMonsterPath(
+    f, f, counts, stones, 1, 1n, N
+  );
+  eq(routed.context.currentHandler, 'Discovery14WideSelectionHandler');
+  eq(routed.context.previousHandler, 'NextBowlPatchWrapper');
+  eq(routed.context.status, 'DISCOVERY_14_LEGACY_RESULT');
+  eq(routed.context.legacyWideSelectionAssumedShort, true);
+  eq(routed.context.legacyWideSelectionFailed, true);
+  eq(routed.context.legacyWideSelectionErrorName, 'RangeError');
+  eq(routed.result.output, null);
+  eq(o.chooseRankWide(routed.stream, N), 2n);
+  eq(routed.context.metrics['discovery14.shortOnlyAssumption.calls'], 1n);
+  eq(routed.context.metrics['patch13.selectionRejection.calls'], undefined);
+  ok(!production.Discovery14WideSelectionHandler.prototype.handle.toString().includes('wideDetour'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 14', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1395,4 +1423,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in li statu GREEN de Patch 13.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression EXPECTED_RED de Discovery 14.');

@@ -158,6 +158,15 @@ class BaseMonsterContext {
     this.patch13AcceptedAnswer = null;
     this.patch13LegacyCallPreserved = false;
     this.patch13Output = null;
+    this.legacyWideSelectionSeal = null;
+    this.legacyWideSelectionStreamFirst = null;
+    this.legacyWideSelectionDirectionStep = null;
+    this.legacyWideSelectionN = null;
+    this.legacyWideSelectionAssumedShort = false;
+    this.legacyWideSelectionFailed = false;
+    this.legacyWideSelectionErrorName = null;
+    this.legacyWideSelectionErrorMessage = null;
+    this.legacyWideSelectionOutput = null;
   }
 }
 
@@ -325,6 +334,13 @@ class BaseValidationManager {
     this.requireExactInteger(value);
     if (value < 1n || value > M_OLD) {
       throw new RangeError('Li familie legacy curt deve haver un grandore inter 1 e M.');
+    }
+  }
+
+  requirePositiveFamilySize(value) {
+    this.requireExactInteger(value);
+    if (value < 1n) {
+      throw new RangeError('Li familie legacy deve haver un grandore positiv.');
     }
   }
 
@@ -1219,6 +1235,11 @@ function biasedLegacyPick(x, N) {
   return regularMod(x - 1n, N) + 1n;
 }
 
+function legacySelectionAssumingNLeM(stream, N) {
+  // Li dispatcher historic manca: it presume que omni familie es curt e invia N directmen al selector reparat de Patch 13.
+  return patchedSmallPick(stream, N);
+}
+
 function patchedSmallPick(stream, N) {
   if (!stream || typeof stream.first !== 'bigint' || typeof stream.directionStep !== 'bigint') {
     throw new TypeError('Li selector curt reparat exige un answer ring exact.');
@@ -1469,6 +1490,53 @@ class SelectionRejectionPatchWrapper {
     context.status = 'PATCH_13_RESULT';
     this.metricsManager.bump(context, 'patch13.selectionRejection.calls');
     return context.patch13Output;
+  }
+}
+
+class LegacyShortFamilyAssumptionAdapter {
+  call(stream, N) {
+    return legacySelectionAssumingNLeM(stream, N);
+  }
+}
+
+class Discovery14WideSelectionHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, stream, seal, N) {
+    this.validationManager.requirePatch12Result(context);
+    this.validationManager.requireAnswerRing(stream);
+    this.validationManager.requireExactInteger(seal);
+    this.validationManager.requirePositiveFamilySize(N);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery14WideSelectionHandler';
+    context.phase = 'DISCOVERY_14_LEGACY_ASSUMES_N_LE_M';
+    context.branchTrace.push('DISCOVERY_14_LEGACY_ASSUMES_N_LE_M');
+    context.legacyWideSelectionSeal = seal;
+    context.legacyWideSelectionStreamFirst = stream.first;
+    context.legacyWideSelectionDirectionStep = stream.directionStep;
+    context.legacyWideSelectionN = N;
+    context.legacyWideSelectionAssumedShort = true;
+    try {
+      context.legacyWideSelectionOutput = this.legacyAdapter.call(stream, N);
+      context.legacyWideSelectionFailed = false;
+    } catch (error) {
+      context.legacyWideSelectionFailed = true;
+      context.legacyWideSelectionErrorName = error && error.name ? error.name : 'Error';
+      context.legacyWideSelectionErrorMessage = error && error.message ? error.message : String(error);
+      context.legacyWideSelectionOutput = null;
+    }
+    context.status = 'DISCOVERY_14_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery14.shortOnlyAssumption.calls');
+    return {
+      failed: context.legacyWideSelectionFailed,
+      output: context.legacyWideSelectionOutput,
+      errorName: context.legacyWideSelectionErrorName,
+      errorMessage: context.legacyWideSelectionErrorMessage
+    };
   }
 }
 
@@ -2199,6 +2267,12 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    this.legacyShortFamilyAssumptionAdapter = new LegacyShortFamilyAssumptionAdapter();
+    this.discovery14WideSelectionHandler = new Discovery14WideSelectionHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyShortFamilyAssumptionAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -2553,6 +2627,25 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery14WideSelection(calculationDay, targetDay, counts, stones, queriedBowlId, seal, N) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery11OverwrittenOrderHandler.handle(context, counts, stones);
+      const latched = this.patch11OrderAt46LatchWrapper.repair(context, counts, stones);
+      this.discovery12NextBowlHandler.handle(context, latched.orderAt46Latch, queriedBowlId);
+      const nextBowlId = this.nextBowlPatchWrapper.repair(context, latched.orderAt46Latch, queriedBowlId);
+      const stream = answerRingFromCurrentState(
+        context.patch11FinalBowls, queriedBowlId, nextBowlId, seal
+      );
+      const result = this.discovery14WideSelectionHandler.handle(context, stream, seal, N);
+      return { result, context, stream: { first: stream.first, directionStep: stream.directionStep } };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -2683,8 +2776,16 @@ function historicSmallSelectionThroughMonsterPath(
   );
 }
 
+function discovery14LegacyWideSelectionThroughMonsterPath(
+  calculationDay, targetDay, counts, stones, queriedBowlId, seal, N
+) {
+  return new BaseMonsterManager().executeDiscovery14WideSelection(
+    calculationDay, targetDay, counts, stones, queriedBowlId, seal, N
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 13; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 14; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -2737,6 +2838,8 @@ module.exports = Object.freeze({
   LegacyBiasedSelectionAdapter,
   Discovery13BiasedSelectionHandler,
   SelectionRejectionPatchWrapper,
+  LegacyShortFamilyAssumptionAdapter,
+  Discovery14WideSelectionHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -2785,6 +2888,7 @@ module.exports = Object.freeze({
   answerRingFromCurrentState,
   ringAnswerAt,
   biasedLegacyPick,
+  legacySelectionAssumingNLeM,
   patchedSmallPick,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
@@ -2813,5 +2917,6 @@ module.exports = Object.freeze({
   historicNextBowlThroughMonsterPath,
   discovery13LegacyBiasedSelectionThroughMonsterPath,
   historicSmallSelectionThroughMonsterPath,
+  discovery14LegacyWideSelectionThroughMonsterPath,
   calendarDateSpaghetti
 });

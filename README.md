@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 27 de 55: PATCH 13**. Omni scars e patches til Patch 12 resta intact e testabil. `biasedLegacyPick(x,N)` continua representar li selector historic biased, durante que `patchedSmallPick(stream,N)` rejecte li caude non-uniform ante vocar li old helper.
+Li linea es in **Stage 28 de 55: DISCOVERY 14**. Omni scars e patches til Patch 13 resta intact e testabil. `legacySelectionAssumingNLeM(stream,N)` representa li assumption historic que omni familie have `N<=M_OLD`; it envia mem un `N>M_OLD` al selector curt reparat de Patch 13 e registra li consequent failure de contract.
 
-Li route semantic de Patch 13 passa per li latch de Patch 11 e li next-bowl circular de Patch 12, deriva li answer ring exact e usa `SelectionRejectionPatchWrapper`. Ti route ne voca `Discovery13BiasedSelectionHandler`, pro que li handler historic executa li selector ante rejection. Omni regressions til Discovery 13 es verd. Null `wideDetour` o Patch 14 es present.
+Li route real passa per li latch de Patch 11 e li next-bowl circular de Patch 12, deriva li answer ring exact e poy intra in `Discovery14WideSelectionHandler`. Por `N=M_OLD+1`, li legacy ne produce null rank, durante que li reference test-only produce un rank wide exact. Null `wideDetour` o correction de Patch 14 es present.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 12 deve restar verd:
+Omni regressions til Patch 13 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal del discovery deve esser rubi exactmen per li modulo bias ante rejection:
+Li test focal del discovery deve esser rubi exactmen pro li assumption `N<=M_OLD` in un familie wide:
 
 ```text
-npm run test:discovery-13
+npm run test:discovery-14
 ```
 
-Li suite complet deve esser `EXPECTED_RED` exclusivmen in Discovery 13:
+Li suite complet deve esser `EXPECTED_RED` exclusivmen in Discovery 14:
 
 ```text
 npm test
@@ -145,3 +145,10 @@ Li state precedent ja posse derivar un next-bowl exact ex `orderAt46Latch`. Ti s
 ### Verification
 
 Li witness real del Foundation continua monstrar `legacy=1` por li prim answer rejectend, durante que li route reparat rejecte un passu e retorna `N`. Un gril additiv de streams e families curt concorda con li reference normativ local. Null `wideDetour` o logic de Patch 14 es present.
+
+
+## Stage 28 — Discovery 14
+
+Li selector de Patch 13 es exact solmen por families curt `1<=N<=M_OLD`. Li scar nov `legacySelectionAssumingNLeM(stream,N)` ne have null dispatcher de largore: it presume que omni familie es curt e delega directmen a `patchedSmallPick`. Ti helper resta exact in su domini precedent, ma por `N>M_OLD` it rejecte li familie con un `RangeError`.
+
+`LegacyShortFamilyAssumptionAdapter` e `Discovery14WideSelectionHandler` conserva ti failure quam state invocation-local pos li route real de Patch 12. Li handler ne inventa null representation wide, ne combina digits e ne calcula null space `M^places`; it registra solmen que li path curt esset assumet e que ti assumption fallit. Li witness real del Foundation con `N=M_OLD+1` falla in legacy durant que li reference test-only retorna rank `2`. `wideDetour` resta reservat exclusivmen por Stage 29 / Patch 14.
