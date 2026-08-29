@@ -527,6 +527,24 @@ void BaseValidationManager::requireLegacyPermutationReady(const BaseMonsterConte
     }
 }
 
+void BaseValidationManager::requirePatch08Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyPermutationReady(ctx);
+    if (!ctx.patch08Applied || !ctx.patchedPermutationFound) {
+        throw BaseValidationError("emendatio octava permutationis nondum applicata est");
+    }
+
+    const Integer oneBasedInteger = regularMod(ctx.patch08PermutationDrop - 1, Integer{720}) + 1;
+    const int oneBased = oneBasedInteger.convert_to<int>();
+    const int legacyRank0 = oneBased - 1;
+    if (ctx.patchedPermutationOneBased != oneBased ||
+        ctx.patchedPermutationLegacyRank0 != legacyRank0) {
+        throw BaseValidationError("pons one-based ad rank0 permutationis non servatus est");
+    }
+    if (ctx.patchedPermutationOutput != oldPermutationUnrank0(legacyRank0)) {
+        throw BaseValidationError("ordo permutationis post pontem rank0 normam non servat");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -579,6 +597,15 @@ LegacyGrindLookup Patch07SentinelGrindWrapper::read(int grind) const {
 
 PermutationOrder LegacyPermutationAdapter::unrank0(int rank0) const {
     return oldPermutationUnrank0(rank0);
+}
+
+// Vitium legacy consulto manet: helper rank0 non mutatur; pons one-based tantum ante eum additur, quia oneBased-1 eundem ordinem normativum eligit.
+Patch08PermutationResolution Patch08PermutationRankWrapper::resolve(
+    const Integer& drop, const LegacyPermutationAdapter& adapter) const {
+    const Integer oneBasedInteger = regularMod(drop - 1, Integer{720}) + 1;
+    const int oneBased = oneBasedInteger.convert_to<int>();
+    const int legacyRank0 = oneBased - 1;
+    return Patch08PermutationResolution{oneBased, legacyRank0, adapter.unrank0(legacyRank0)};
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -1047,6 +1074,49 @@ void Discovery08PermutationRankHandler::handle(BaseMonsterContext& ctx,
         : "discovery08.permutation.rejected");
 }
 
+void Patch08PermutationRankHandler::handle(BaseMonsterContext& ctx,
+                                            const LegacyPermutationAdapter& adapter,
+                                            const Patch08PermutationRankWrapper& wrapper,
+                                            const BaseValidationManager& validator,
+                                            const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch08PermutationRankHandler";
+    ctx.phase = "PATCH_08_LEGACY_PERMUTATION_CALL";
+    ctx.status = "LEGACY_PERMUTATION_CALLED_BEFORE_PATCH";
+    ctx.branchTrace.push_back("PATCH_08_LEGACY_PERMUTATION_CALL");
+    metrics.bump(ctx, "patch08.permutation.legacy.calls");
+
+    const Integer normalizedOneBasedInteger = regularMod(ctx.patch08PermutationDrop - 1, Integer{720}) + 1;
+    ctx.legacyPermutationCallerRank1 = normalizedOneBasedInteger.convert_to<int>();
+    ctx.legacyPermutationRank0Input = ctx.legacyPermutationCallerRank1;
+    try {
+        ctx.legacyPermutationOutput = adapter.unrank0(ctx.legacyPermutationRank0Input);
+        ctx.legacyPermutationFound = true;
+    } catch (const BaseValidationError&) {
+        ctx.legacyPermutationOutput = PermutationOrder{};
+        ctx.legacyPermutationFound = false;
+    }
+    ctx.legacyPermutationReady = true;
+
+    ctx.phase = "PATCH_08_ONE_BASED_TO_ZERO_BASED_BRIDGE";
+    ctx.branchTrace.push_back("PATCH_08_ONE_BASED_TO_ZERO_BASED_BRIDGE");
+    const Patch08PermutationResolution repaired = wrapper.resolve(ctx.patch08PermutationDrop, adapter);
+    ctx.patchedPermutationOneBased = repaired.oneBased;
+    ctx.patchedPermutationLegacyRank0 = repaired.legacyRank0;
+    ctx.patchedPermutationOutput = repaired.order;
+    ctx.patchedPermutationFound = true;
+    ctx.patch08Applied = true;
+    metrics.bump(ctx, "patch08.permutation.bridge.calls");
+
+    ctx.phase = "PATCH_08_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_08_VALIDATE");
+    validator.requirePatch08Ready(ctx);
+
+    ctx.phase = "PATCH_08_PERMUTATION_READY";
+    ctx.status = "PATCHED_PERMUTATION_ORDER_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_08_PERMUTATION_READY");
+    metrics.bump(ctx, "patch08.permutation.ready");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -1279,6 +1349,20 @@ void BaseDispatcher::dispatchLegacyPermutationRank(BaseMonsterContext& ctx,
     ctx.branchTrace.push_back("DISCOVERY_08_DISPATCH");
     metrics.bump(ctx, "discovery08.dispatch.calls");
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedPermutationRank(BaseMonsterContext& ctx,
+                                                       const Patch08PermutationRankHandler& handler,
+                                                       const LegacyPermutationAdapter& adapter,
+                                                       const Patch08PermutationRankWrapper& wrapper,
+                                                       const BaseValidationManager& validator,
+                                                       const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_08_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_08_DISPATCH");
+    metrics.bump(ctx, "patch08.dispatch.calls");
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -1706,10 +1790,49 @@ GrindLookupReport BaseMonsterManager::executeUnpatchedGrindDiagnostic(int grind)
 }
 
 PermutationRankReport BaseMonsterManager::executePermutationOrder(int oneBasedRank) const {
+    return executePermutationFromDrop(Integer{oneBasedRank});
+}
+
+PermutationRankReport BaseMonsterManager::executePermutationFromDrop(const Integer& drop) const {
     BaseMonsterContext ctx;
     ctx.calculationDay = 0;
     ctx.targetDay = 0;
-    ctx.phase = "DISCOVERY_08_NEW";
+    ctx.phase = "PATCH_08_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.patch08PermutationDrop = drop;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyPermutationAdapter adapter;
+    const Patch08PermutationRankWrapper wrapper;
+    const Patch08PermutationRankHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedPermutationRank(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return PermutationRankReport{
+        ctx.patchedPermutationOneBased,
+        ctx.patchedPermutationOutput,
+        ctx.patchedPermutationFound,
+        ctx.legacyPermutationRank0Input,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.patch08PermutationDrop,
+        ctx.patchedPermutationOneBased,
+        ctx.patchedPermutationLegacyRank0,
+        ctx.legacyPermutationOutput,
+        ctx.legacyPermutationFound,
+        ctx.patch08Applied,
+    };
+}
+
+PermutationRankReport BaseMonsterManager::executeUnpatchedPermutationDiagnostic(int oneBasedRank) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_08_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyPermutationCallerRank1 = oneBasedRank;
@@ -1730,6 +1853,12 @@ PermutationRankReport BaseMonsterManager::executePermutationOrder(int oneBasedRa
         ctx.status,
         ctx.currentHandler,
         ctx.branchTrace.size(),
+        Integer{oneBasedRank},
+        0,
+        -1,
+        ctx.legacyPermutationOutput,
+        ctx.legacyPermutationFound,
+        false,
     };
 }
 

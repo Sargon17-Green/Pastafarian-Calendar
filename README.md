@@ -1,50 +1,61 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 16 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 17 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 16 est `DISCOVERY 08`; status repository exspectatus est `EXPECTED_RED`.
+Gradus 17 est `PATCH 08`; status repositorii exspectatus est `GREEN`.
 
-Vitium huius gradus est conventio rank permutationis. `oldPermutationUnrank0(rank0)` est helper legacy rectus in proprio dominio zero-based `0..719`. Caller autem ordinalem semanticum one-based `1..720` directe ad eundem argumentum mittit, sine subtractione unius.
+Vitium Gradus 16 manet physice intactum. `oldPermutationUnrank0(rank0)` adhuc solum rank zero-based `0..719` accipit. Via diagnostica veterem errorem adhuc demonstrat: ordinalis one-based 1 directe ut rank0 1 permutationem sequentem legit, et ordinalis 720 tamquam rank0 720 reicitur.
 
-Ergo ordines `1..719` permutationem sequentem legunt, dum ordinalis `720` tamquam rank0 extra fines reicitur. Helper zero-based ipse non est corruptus: rank0 `0` identitatem `[1,2,3,4,5,6]` et rank0 `719` inversionem `[6,5,4,3,2,1]` reddit.
+Correctio auxiliatorem legacy non mutat. Additur catena praescripta:
+
+```text
+oneBased = regularMod(drop-1,720)+1
+legacyRank0 = oneBased-1
+order = oldPermutationUnrank0(legacyRank0)
+```
 
 ## Via activa
 
-`BaseMonsterManager::executePermutationOrder` transit per:
+`BaseMonsterManager::executePermutationOrder` nunc ad `executePermutationFromDrop` delegat. Via emendata transit per:
 
 ```text
-BaseMonsterManager::executePermutationOrder
--> BaseDispatcher::dispatchLegacyPermutationRank
--> Discovery08PermutationRankHandler
+BaseMonsterManager::executePermutationFromDrop
+-> BaseDispatcher::dispatchPatchedPermutationRank
+-> Patch08PermutationRankHandler
+-> LegacyPermutationAdapter::unrank0            [vocatio legacy prior]
+-> Patch08PermutationRankWrapper::resolve
+-> regularMod(drop-1,720)+1
+-> legacyRank0 = oneBased-1
 -> LegacyPermutationAdapter::unrank0
 -> oldPermutationUnrank0
 ```
 
-Handler `legacyPermutationCallerRank1` in `legacyPermutationRank0Input` directe transfert. Si helper rankum accipit, ordo legacy exponitur; si ordinalis 720 ad rank0=720 transit, status absentiae exponitur. Nulla correctio, nullus fallback et nulla lectio oracle in productione fiunt.
+`Patch08PermutationRankHandler` primum exitum legacy pravum re vera computat et in relatione retinet. Deinde `Patch08PermutationRankWrapper` eundem `drop` ad ordinalem one-based canonicum redigit, unum subtrahit et auxiliatorem zero-based iterum vocat. `executeUnpatchedPermutationDiagnostic` viam Gradus 16 separatam conservat.
 
 ## Regressio DISCOVERY 08
 
-`tests/stage_16_discovery_08_tests.cpp` primum ipsam conventionem zero-based helperis verificat. Deinde ordines one-based `1`, `2`, `3`, `719` et `720` per viam activam cum `permutationUnrank1` oraculi C++ localis comparat.
+`tests/stage_16_discovery_08_tests.cpp` immutatus manet. Contra Gradum 16 pristinum quinque discrepantias et exitum `1` reddit. Contra Gradum 17 eadem quinque ordines `1`, `2`, `3`, `719`, `720` recte recipiunt et regressio transit.
 
-Exitus actualis huius gradus est quinque discrepantiae:
+Hoc confirmat patch productionis, non mutatio valores exspectatos, defectum sanavisse.
 
-```text
-rank 1   : [1,2,3,4,5,6] -> [1,2,3,4,6,5]
-rank 2   : [1,2,3,4,6,5] -> [1,2,3,5,4,6]
-rank 3   : [1,2,3,5,4,6] -> [1,2,3,5,6,4]
-rank 719 : [6,5,4,3,1,2] -> [6,5,4,3,2,1]
-rank 720 : [6,5,4,3,2,1] -> ABSENS
-```
+## Regressio PATCH 08
 
-Regressio exitum `1` reddit, ut DISCOVERY rubrum exspectatum.
+`tests/stage_17_patch_08_tests.cpp` separat:
 
-Omnes regressiones Graduum 1–15 transeunt.
+- cicatricem `oldPermutationUnrank0(0..719)` et reiectionem rank0 720;
+- viam diagnosticam sine patch pro ordinalibus 1 et 720;
+- catena exacta `drop -> oneBased -> legacyRank0 -> oldPermutationUnrank0`;
+- reductionem modularem pro `drop=721`, `drop=0`, `drop=-1` et `drop=1441`;
+- conservationem exitus legacy ante patch in relatione;
+- signum `patch08Applied` et indices emendati observabiles.
+
+Omnes regressiones Graduum 1–17 transeunt.
 
 ## Quod consulto nondum adest
 
-Nulla conversio `oneBased = regularMod(drop-1,720)+1`, nulla subtractio ad rank0 legacy, nullus wrapper PATCH 08 et nulla logica pours Gradus 18 introducta est. `oldPermutationUnrank0` manet solum helper zero-based cum caller one-based directo.
+Nullus `bowlAlias`, nullus `Patch09`, nullus status `patch09Applied`, nulla logica fusionum et nulla lectio crateris per positionem alias introducta est. Gradus 18 nondum incohatus est.
 
 ## Lingua computationis
 

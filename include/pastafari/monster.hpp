@@ -134,6 +134,12 @@ struct BaseMonsterContext {
     PermutationOrder legacyPermutationOutput{};
     bool legacyPermutationFound = false;
     bool legacyPermutationReady = false;
+    Integer patch08PermutationDrop{};
+    int patchedPermutationOneBased = 0;
+    int patchedPermutationLegacyRank0 = -1;
+    PermutationOrder patchedPermutationOutput{};
+    bool patchedPermutationFound = false;
+    bool patch08Applied = false;
 };
 
 struct BaseRunReport {
@@ -223,6 +229,12 @@ struct PermutationRankReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    Integer dropInput{};
+    int patchedOneBasedRank = 0;
+    int patchedLegacyRank0 = -1;
+    PermutationOrder legacyOutputBeforePatch{};
+    bool legacyFoundBeforePatch = false;
+    bool patch08Applied = false;
 };
 
 struct GrindLookupReport {
@@ -262,6 +274,7 @@ public:
     void requireLegacyGrindReady(const BaseMonsterContext& ctx) const;
     void requirePatch07Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyPermutationReady(const BaseMonsterContext& ctx) const;
+    void requirePatch08Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -478,6 +491,27 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+struct Patch08PermutationResolution {
+    int oneBased = 0;
+    int legacyRank0 = -1;
+    PermutationOrder order{};
+};
+
+class Patch08PermutationRankWrapper {
+public:
+    Patch08PermutationResolution resolve(const Integer& drop,
+                                         const LegacyPermutationAdapter& adapter) const;
+};
+
+class Patch08PermutationRankHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyPermutationAdapter& adapter,
+                const Patch08PermutationRankWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -574,6 +608,13 @@ public:
                                        const BaseValidationManager& validator,
                                        const BaseMetricsShell& metrics) const;
 
+    void dispatchPatchedPermutationRank(BaseMonsterContext& ctx,
+                                        const Patch08PermutationRankHandler& handler,
+                                        const LegacyPermutationAdapter& adapter,
+                                        const Patch08PermutationRankWrapper& wrapper,
+                                        const BaseValidationManager& validator,
+                                        const BaseMetricsShell& metrics) const;
+
     void dispatchPatchedGrindIndex(BaseMonsterContext& ctx,
                                    const Patch07GrindIndexHandler& handler,
                                    const LegacyGrindTableAdapter& adapter,
@@ -611,6 +652,8 @@ public:
     GrindLookupReport executeGrindRow(int grind) const;
     GrindLookupReport executeUnpatchedGrindDiagnostic(int grind) const;
     PermutationRankReport executePermutationOrder(int oneBasedRank) const;
+    PermutationRankReport executePermutationFromDrop(const Integer& drop) const;
+    PermutationRankReport executeUnpatchedPermutationDiagnostic(int oneBasedRank) const;
 };
 
 } // namespace pastafari

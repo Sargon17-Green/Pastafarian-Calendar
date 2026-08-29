@@ -320,7 +320,7 @@ Addita est functio `priorPatch(dropStore, backwardStorage, i, back)`. Ea primum 
 
 Pro `slot >= 1`, valor normativus est gutta visibilis iam scripta in indice `slot`; `legacyPrior` exactum eundem locum legit. Pro `slot <= 0`, definitio patch dat `k = 1-slot`; hic est exacte numerus propinquitatis guttae occultae. PATCH 05 iam probavit `hiddenByNearness` valorem hidden k per storage retrogradum recte reddere. Ergo utraque pars partitionis slot valorem normativum reddit.
 
-Validator productionis logicam iterum ut COPY_VALIDATION computat, non oracle testium vocat. Responsum semanticum ab una via patch venit.
+Comprobator productionis logicam iterum ut COPY_VALIDATION computat, non oracle testium vocat. Responsum semanticum ab una via patch venit.
 
 ### Regressio Gradus 12 recognita
 
@@ -376,7 +376,7 @@ Sentinella non est temporalis. Ex hoc gradu pars cicatricis permanens est et in 
 
 Pro omni molitione semantica `g` inter 1 et 11, tabula patched ordinem normativum `g` exacte in loco physico `g` servat. Caller directe locum `g` petit. Ergo lectio patched exactum ordinem normativum reddit sine conversione indicis.
 
-Validator productionis eandem relationem per COPY_VALIDATION confirmat. Testis PATCH 07 sentinellam exactam, omnes undecim ordines, cicatricem tabulae veteris et diagnosticum sine patch simul probat.
+Comprobator productionis eandem relationem per COPY_VALIDATION confirmat. Testis PATCH 07 sentinellam exactam, omnes undecim ordines, cicatricem tabulae veteris et diagnosticum sine patch simul probat.
 
 ### Regressio Gradus 14 recognita
 
@@ -415,3 +415,43 @@ Norma permutationis ordinales `1..720` requirit, ubi 1 est prima permutatio et 7
 Additi sunt `PermutationOrder`, campi contextus rank calleris et rank0 legacy, `PermutationRankReport`, `oldPermutationUnrank0`, `LegacyPermutationAdapter`, `Discovery08PermutationRankHandler`, validator structurae permutationis et dispatchatio propria. Error rank0 720 in handler in statum `found=false` convertitur ut regressio divergence totam viam observare possit; nulla substitutio semantica fit.
 
 Nullus bridge one-based, nullus wrapper PATCH 08 et nulla structura pours sequentis gradus addita est.
+
+## Gradus 17 — PATCH 08: pons one-based ad rank zero-based permutationis
+
+### Quid repertum erat
+
+Gradus 16 demonstravit `oldPermutationUnrank0(rank0)` in proprio dominio `0..719` rectum esse. Defectus erat conventio calleris: ordinalis semanticus one-based directe in argumentum zero-based mittebatur. Inde ordines 1..719 ad permutationem sequentem movebantur et 720 reiciebatur.
+
+Auxiliatorem legacy corrigere aut ad conventionem one-based mutare cicatricem deleretur. Praescriptum etiam expresse iubet catena per `drop` servari: ordinalis one-based primum per modulo normativum formandus est, deinde unum subtrahendum ante auxiliatorem zero-based.
+
+### Quid circumventum est
+
+`oldPermutationUnrank0` immutatus manet. `Patch08PermutationRankHandler` primum ordinem one-based normalizatum directe ut rank0 ad `LegacyPermutationAdapter` mittit et exitum pravum vel reiectionem in contextu retinet. Haec vocatio legacy non deletur.
+
+Postea `Patch08PermutationRankWrapper::resolve` exactam catenam exsequitur:
+
+```text
+oneBased = regularMod(drop-1,720)+1
+legacyRank0 = oneBased-1
+order = oldPermutationUnrank0(legacyRank0)
+```
+
+Exitus emendatus, uterque rank et `drop` originalis in contextu servantur. `executePermutationOrder` compatibilitatem testium priorum servat delegando ad `executePermutationFromDrop`; `executeUnpatchedPermutationDiagnostic` viam erratam veterem separatam retinet.
+
+### Cur hoc aequivalet normae
+
+`regularMod(drop-1,720)+1` semper ordinalem in `1..720` reddit. Subtractio unius bijectionem exactam ad indices `0..719` facit. `oldPermutationUnrank0` iam Gradus 16 probavit se hunc dominium lexicographicum recte unrankare. Compositio igitur exactam permutationem ordinalis one-based normativi reddit.
+
+Comprobator productionis hanc relationem iterum ut COPY_VALIDATION computat et exitum helperis zero-based cum exitu emendato comparat. Oracle testium productione non vocatur.
+
+### Regressio Gradus 16 immutata
+
+`tests/stage_16_discovery_08_tests.cpp` nullo modo mutatus est. Contra codicem Gradus 16 pristinum adhuc exactas quinque discrepantias et exitum `1` producit. Contra Gradum 17 eadem probatio transit, quia `executePermutationOrder` nunc per patch transit.
+
+Regressio PATCH 08 addita etiam `drop=721`, `0`, `-1` et `1441` probat, ut reductionem modularem ipsam, non sola subtractio rank, verificetur. Via diagnostica confirmat cicatricem veterem adhuc observabilem esse.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `Patch08PermutationResolution`, `Patch08PermutationRankWrapper`, `Patch08PermutationRankHandler`, `dispatchPatchedPermutationRank`, `executePermutationFromDrop`, `executeUnpatchedPermutationDiagnostic`, status permutationis emendatae, exitus legacy ante patch et `requirePatch08Ready`. `Patch08PermutationRankHandler` duas vocationes auxiliatoris continet: unam legacy pravum observabilem et alteram per pontem emendatum.
+
+Nullus `bowlAlias`, nullus PATCH 09 et nulla logica fusionum introducta est.
