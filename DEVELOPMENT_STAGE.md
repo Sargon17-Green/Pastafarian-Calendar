@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=7
-CURRENT_KIND=PATCH
-CURRENT_PATCH=03
-LAST_COMPLETED_STAGE=7
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=8
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=04
+LAST_COMPLETED_STAGE=8
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura de Bootstrap, li scars de Patch 01 e Patch 02, li oldDistance defectiv de Discovery 03, e Patch03DistanceWrapper quel substitue li mesure cronologic solmen si li legacy diverge e adjunte li unit inclusiv.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus LegacyStoneMutationAdapter e Discovery04StoneMutationHandler quel expone mutateStonesWrong sequential in-place sin snapshot reparativ.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 7 es finit quam **PATCH 03**. `oldDistance(calculationDay, targetDay)` resta sin modification e continua mesurar li diferentie absolut inter tags de die. Li nov `distanceWithChronologyDetour` calcula separatmen `abs(targetDay-calculationDay)`, substitue li valore legacy solmen si ili diverge, e adjunte poy `1` por li distance inclusiv.
+Stage 8 es finit quam **DISCOVERY 04**. `mutateStonesWrong(index, state)` muta `w`, `b`, `s`, `m` e `r` in ti órdine e usa immediatmen li valores ja mutat por li calculs posterior. Li operation es conectet a un path real de production tra `LegacyStoneMutationAdapter` e `Discovery04StoneMutationHandler`.
 
-Li route historic passa per `Discovery03DistanceHandler` e poy `Patch03DistanceWrapper`. Li context conserva li output legacy, li distance cronologic, si un substitution esset necessi, li valore ante li unit inclusiv e li output final. Li regression de Stage 6 es nu verd, durant que li scar legacy resta directmen testabil. Null `patchedCounts` o code de Patch 04 o de stages posterior es present.
+Por li transition inicial con index `2`, li legacy rende `378, 1434, 3780, 9932, 25047`, contra li transition simultan normativ `378, 1073, 2375, 6195, 10493`. Li regression nov es intentionalmen rubi; omni regressions precedent resta verd. Null `stonePatch`, null overwrite ex un copie `old` e null code de Patch 04 o posterior es present.

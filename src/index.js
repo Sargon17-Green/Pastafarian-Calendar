@@ -47,6 +47,11 @@ class BaseMonsterContext {
     this.patch03LegacyReplaced = false;
     this.patch03DistanceBeforeInclusive = null;
     this.patch03Output = null;
+    this.legacyStoneIndex = null;
+    this.legacyStoneInputBefore = null;
+    this.legacyStoneWorkingState = null;
+    this.legacyStoneOutput = null;
+    this.legacyStoneReturnedSameObject = false;
   }
 }
 
@@ -59,6 +64,15 @@ class BaseValidationManager {
 
   requireDiscreteDay(value) {
     this.requireExactInteger(value);
+  }
+
+  requireStoneState(state) {
+    if (!state || typeof state !== 'object') {
+      throw new TypeError('Un statu de stones deve esser un object con quin integers BigInt.');
+    }
+    for (const key of ['w', 'b', 's', 'm', 'r']) {
+      this.requireExactInteger(state[key]);
+    }
   }
 
   requireFreshContext(context) {
@@ -187,6 +201,16 @@ function distanceWithChronologyDetour(calculationDay, targetDay) {
   }
   const distance = legacy + 1n;
   return distance;
+}
+
+function mutateStonesWrong(index, state) {
+  // Ti operation legacy muta li object in-place e usa immediatmen valores ja mutat in li passus sequent.
+  state.w = savePatch(state.w * state.w + 3n * state.b + index);
+  state.b = savePatch(state.b * state.b + 5n * state.s + state.w);
+  state.s = savePatch(state.s * state.s + 7n * state.m + state.b);
+  state.m = savePatch(state.m * state.m + 11n * state.r + state.s);
+  state.r = savePatch(state.r * state.r + 13n * state.w + state.m);
+  return state;
 }
 
 class LegacyRemainderAdapter {
@@ -355,6 +379,44 @@ class Patch03DistanceWrapper {
   }
 }
 
+class LegacyStoneMutationAdapter {
+  call(index, state) {
+    return mutateStonesWrong(index, state);
+  }
+}
+
+class Discovery04StoneMutationHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, index, sourceState) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireExactInteger(index);
+    this.validationManager.requireStoneState(sourceState);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery04StoneMutationHandler';
+    context.phase = 'DISCOVERY_04_SEQUENTIAL_STONE_MUTATION';
+    context.branchTrace.push('DISCOVERY_04_MUTATE_STONES_WRONG');
+    context.legacyStoneIndex = index;
+    context.legacyStoneInputBefore = {
+      w: sourceState.w, b: sourceState.b, s: sourceState.s, m: sourceState.m, r: sourceState.r
+    };
+    const working = {
+      w: sourceState.w, b: sourceState.b, s: sourceState.s, m: sourceState.m, r: sourceState.r
+    };
+    context.legacyStoneWorkingState = working;
+    const result = this.legacyAdapter.call(index, working);
+    context.legacyStoneReturnedSameObject = result === working;
+    context.legacyStoneOutput = result;
+    context.status = 'DISCOVERY_04_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery04.legacyStoneMutation.calls');
+    return result;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -382,6 +444,12 @@ class BaseMonsterManager {
       this.legacyDistanceAdapter
     );
     this.patch03DistanceWrapper = new Patch03DistanceWrapper(this.validationManager, this.metricsManager);
+    this.legacyStoneMutationAdapter = new LegacyStoneMutationAdapter();
+    this.discovery04StoneMutationHandler = new Discovery04StoneMutationHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyStoneMutationAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -469,6 +537,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery04StoneMutation(calculationDay, targetDay, index, stoneState) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery04StoneMutationHandler.handle(context, index, stoneState);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -499,8 +579,12 @@ function historicDistanceThroughMonsterPath(calculationDay, targetDay) {
   return new BaseMonsterManager().executePatch03Distance(calculationDay, targetDay);
 }
 
+function discovery04LegacyStoneMutationThroughMonsterPath(calculationDay, targetDay, index, stoneState) {
+  return new BaseMonsterManager().executeDiscovery04StoneMutation(calculationDay, targetDay, index, stoneState);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 03; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 04; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -523,6 +607,8 @@ module.exports = Object.freeze({
   LegacyDistanceAdapter,
   Discovery03DistanceHandler,
   Patch03DistanceWrapper,
+  LegacyStoneMutationAdapter,
+  Discovery04StoneMutationHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -531,6 +617,7 @@ module.exports = Object.freeze({
   dayTagWithFoundationScar,
   oldDistance,
   distanceWithChronologyDetour,
+  mutateStonesWrong,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -538,5 +625,6 @@ module.exports = Object.freeze({
   historicDayTagThroughMonsterPath,
   discovery03LegacyDistanceThroughMonsterPath,
   historicDistanceThroughMonsterPath,
+  discovery04LegacyStoneMutationThroughMonsterPath,
   calendarDateSpaghetti
 });

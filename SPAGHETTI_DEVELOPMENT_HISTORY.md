@@ -149,3 +149,26 @@ Un `Patch03DistanceWrapper` ha esset insertet pos `Discovery03DistanceHandler`. 
 ### Pro quo li strat nov ne altera semantics ultra li patch
 
 Li wrapper usa solmen li du dies exact e li output legacy del sam invocation. Li trace, flags e metrics resta observatori e ne alimenta null decision semantic. Null oracle es consultat in production, null fallback existe, e `oldDistance` resta fisicmen e comportamentalmen intact. `patchedCounts` ne es creat in ti stage; ergo null parte de Patch 04 o posterior es anticipat.
+
+## Stage 8 — DISCOVERY 04
+
+### Quo on pensat
+
+Li quaresim design historic tractat li transition del quin stones quam un serie de assignationes direct al sam object. `mutateStonesWrong(index, state)` actualisa `w`, poy `b`, `s`, `m` e `r`, e li assignationes posterior lege li state ja modificat. Ti operation legacy es nu conectet a production per un adapter e un handler real.
+
+### Quo esset decovrit
+
+Li transition normativ es simultan: omni quin nov valores deve esser calculat ex li sam statu anterior. Li mutation sequential contamina li calculs posterior intra li sam passu. Con li statu inicial `{w:17,b:29,s:43,m:71,r:101}` e index `2`, `w` coincide a `378` pro que it es calculat prim, ma li legacy rende poy `b=1434, s=3780, m=9932, r=25047` contra li valores simultan `1073, 2375, 6195, 10493`.
+
+### Quo esset circumit
+
+Null circumventione existe in ti stage. Li legacy call resta sin neutralisation, e li regression nov deve restar rubi. Null `stonePatch` e null calcul ex un copie anterior es present.
+
+### Crescentie monster in ti stage
+
+Un `LegacyStoneMutationAdapter` e un `Discovery04StoneMutationHandler` ha esset addit. Li manager crea li context fresc, li handler conserva li intrada por diagnostics, crea un statu de labor del invocation e passa ti object al legacy. Li context conserva index, intrada, object mutat, un flag de identitá, trace e metric non-semantic.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li adapter apella exactmen `mutateStonesWrong`; li handler ne recomputa null valore, ne consulta li oracle e ne corrige li mutation. Li copie de intrada al statu de labor servi solmen por ownership del invocation e ne es usat quam snapshot semantic por recalcular li transition. Ergo li divergentie nov es precis li defect sequential mandat de Discovery 04.
+

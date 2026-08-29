@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 7 de 55: PATCH 03**. Li scars de `oldRemainder`/Patch 01 e `oldDayTag`/Patch 02 resta intact e testabil. `oldDistance(calculationDay, targetDay)` resta anc intentionalmen defectiv: it mesura li diferentie inter tags. Li nov detour cronologic ne modifica ti function.
+Li linea es in **Stage 8 de 55: DISCOVERY 04**. Li scars de Patch 01, Patch 02 e Patch 03 resta intact e testabil. Li nov defect historic es `mutateStonesWrong(index, state)`: it muta li quin stones sequentialmen in-place e li passus posterior usa immediatmen valores ja mutat.
 
-Li path real passa per `LegacyDistanceAdapter`, `Discovery03DistanceHandler` e `Patch03DistanceWrapper`. Li wrapper calcula li distance cronologic absolut, substitue li valore legacy si necessi e adjunte poy li unit inclusiv. Li context conserva ambi versiones e li decision de substitution. Li repository es **GREEN**.
+Li path real passa per `LegacyStoneMutationAdapter` e `Discovery04StoneMutationHandler`. Li handler conserva li valores de intrada por diagnostics, crea un statu de labor proprietari al invocation e passa ti object al legacy. Li legacy rende li sam object quel it mutat. Null `stonePatch`, null snapshot normativ e null code de Patch 04 es present. Li repository es intentionalmen **EXPECTED_RED** solmen por li nov regression de Discovery 04.
 
-Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; `patchedCounts` e null defect de stage posterior posse aparir ante su stage historic.
+Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
 ## Lingue-fonte canonic
 
@@ -22,29 +22,29 @@ Por formes hebreic vocalisat, signes de vocalisation es resoluet in vocales `a e
 
 ## Exactitá numeric
 
-Omni calcul normativ usa `BigInt`. Null floating-point es usat por SAVE, rangs, counts, gates, annus, compositiones o intertexes. `M = 2^127 - 1` es representat exactmen. Counts combinatori posse crescer ultra `M` sin truncation.
+Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usat por SAVE, tags, distance o mutation de stones. `M = 2^127 - 1` es representat exactmen.
 
 ## Tests
 
-Li suite precedent, includente li regression original de Discovery 03 tra li patch actual, deve restar verd:
+Omni regressions precedent, includente Patch 03, deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li commande principal es nu verd:
+Li commande principal es intentionalmen rubi in Discovery 04:
 
 ```text
 npm test
 ```
 
-Por executar solmen li prova nov de Patch 03:
+Por executar solmen li regression nov:
 
 ```text
-npm run test:patch-03
+npm run test:discovery-04
 ```
 
-Li tests confirma que `oldDistance` resta defectiv e que `distanceWithChronologyDetour` es equivalent al `distance` de `workCounts` sur un gril exhaustiv circum li Foundation e sur cases lontan. Li correction usa exactmen li ordine historic: legacy, comparation con li distance cronologic, substitution si necessi, poy `+1`.
+Por li prim transition de stones, li legacy rende `[378,1434,3780,9932,25047]`, durante que li transition simultan normativ rende `[378,1073,2375,6195,10493]`. Li prim stone coincide pro que it es calculat ante quelcunc contamination; li altri quar demonstra li dependentie sequential intra li sam passu.
 
 ## Independentie
 

@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 03 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 04 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,7 @@ group('null textu hebreic o code posterior a Patch 03 contamina production', () 
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'patchedCounts', 'mutateStonesWrong',
+    'patchedCounts', 'stonePatch', 'Patch04StoneWrapper', 'getStoneTableThroughLegacyBuilder',
     'hiddenByNearness', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
@@ -808,7 +808,42 @@ group('Patch 03 conserva oldDistance ma rende li distance inclusiv exact per un 
   eq(execution.context.metrics['patch03.distance.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 03', () => {
+group('Discovery 04 conserva li mutation sequential in-place e su divergentie precis', () => {
+  const start = { w: 17n, b: 29n, s: 43n, m: 71n, r: 101n };
+  const direct = { ...start };
+  const directResult = production.mutateStonesWrong(2n, direct);
+  ok(directResult === direct);
+  deepEq(
+    [direct.w, direct.b, direct.s, direct.m, direct.r],
+    [378n, 1434n, 3780n, 9932n, 25047n]
+  );
+  const normativeRow = o.STONES[1];
+  eq(direct.w, normativeRow[0]);
+  ok(direct.b !== normativeRow[1]);
+  ok(direct.s !== normativeRow[2]);
+  ok(direct.m !== normativeRow[3]);
+  ok(direct.r !== normativeRow[4]);
+
+  const execution = production.discovery04LegacyStoneMutationThroughMonsterPath(
+    o.FOUNDATION_DAY, o.FOUNDATION_DAY, 2n, start
+  );
+  deepEq(execution.context.legacyStoneInputBefore, start);
+  eq(execution.context.legacyStoneReturnedSameObject, true);
+  eq(execution.context.currentHandler, 'Discovery04StoneMutationHandler');
+  eq(execution.context.phase, 'DISCOVERY_04_SEQUENTIAL_STONE_MUTATION');
+  eq(execution.context.status, 'DISCOVERY_04_LEGACY_RESULT');
+  deepEq(execution.context.branchTrace, [
+    'BOOTSTRAP_VALIDATED',
+    'DISCOVERY_04_MUTATE_STONES_WRONG'
+  ]);
+  eq(execution.context.metrics['discovery04.legacyStoneMutation.calls'], 1n);
+  deepEq(
+    [execution.result.w, execution.result.b, execution.result.s, execution.result.m, execution.result.r],
+    [378n, 1434n, 3780n, 9932n, 25047n]
+  );
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 04', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -820,4 +855,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in Patch 03.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in Discovery 04 ante li regression rubi.');
