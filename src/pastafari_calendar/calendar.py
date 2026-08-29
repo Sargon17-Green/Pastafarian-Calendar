@@ -4,6 +4,7 @@ from .legacy_day_counts import FOUNDATION_DAY_OLD
 from .legacy_year_candidates import LegacyYearCandidate
 from .legacy_year_jump import LegacyYearJumpAnchor
 from .legacy_year_cache import LegacyYearCacheRequest, LegacyYearCacheValue
+from .source_language_catalog import SOURCE_LANGUAGE_CATALOG
 from .monster_bootstrap import (
     MonsterContext,
     MonsterManager,
@@ -618,7 +619,38 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.cutletPartition.probes",
         )
         local_ctx.status = "ESKİ_GATE_FİLTRESİZ_KÖFTE_BÖLÜMÜ_HAZIR"
-        local_ctx.phase = "AŞAMA_43_BEKLEME"
+        local_ctx.phase = "ESKİ_TEKRARLI_KÖFTE_ADLARI"
+
+    def legacy_repeated_cutlet_names_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        if local_ctx.legacy_cutlet_count is None:
+            raise RuntimeError(
+                "Köfte adları seçilmeden önce köfte sayısı hazır olmalıdır"
+            )
+
+        selected = manager.legacy_repeated_names.call_cutlet_names(
+            local_ctx,
+            len(
+                SOURCE_LANGUAGE_CATALOG.cutlets
+            ),
+            local_ctx.legacy_cutlet_count,
+        )
+
+        local_ctx.legacy_cutlet_name_indices = selected
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.repeatedCutletNames.probes",
+        )
+        local_ctx.status = "ESKİ_TEKRARLI_KÖFTE_ADLARI_HAZIR"
+        local_ctx.phase = "AŞAMA_44_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -642,6 +674,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_YALNIZ_YIL_NUMARASI_CACHE", legacy_year_cache_handler)
     manager.dispatcher.register("ESKİ_ORİJİNAL_TARGET_STRUCTURE_SAUCE", legacy_structure_sauce_handler)
     manager.dispatcher.register("ESKİ_GATE_FİLTRESİZ_KÖFTE_BÖLÜMÜ", legacy_cutlet_partition_handler)
+    manager.dispatcher.register("ESKİ_TEKRARLI_KÖFTE_ADLARI", legacy_repeated_cutlet_names_handler)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -662,6 +695,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
+    manager.dispatcher.dispatch(ctx)
+
     manager.dispatcher.dispatch(ctx)
 
     manager.dispatcher.dispatch(ctx)

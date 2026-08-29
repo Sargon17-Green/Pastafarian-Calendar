@@ -1,0 +1,30 @@
+Aşama 44/55 — DISCOVERY 22
+
+Bu paket yalnızca Aşama 44 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_repeated_names.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_44_discovery_22.py
+artifacts/stage-44/BASELINE_STAGE_43_GREEN.txt
+artifacts/stage-44/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-44/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_44.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 43 baseline: GREEN, 278/278
+Aşama 44 full suite: 286 test, tam 3 expected subTest failure
+Beklenen depo durumu: EXPECTED_RED
+Legacy name family: master_count^item_count bütün lexicographic diziler
+Repeated canonicalIndex: İZİNLİ VE GERÇEK WITNESS İLE GÖSTERİLDİ
+Selection source: Aşama 20 semantic structure sauce, bowl 5, seal 22
+Selection compatibility copy: CURRENT SHORT/WIDE İLE EŞİT
+Eski selection call-count scars: KORUNDU
+Frozen source catalog semantics: canonicalIndex only
+Patch 22 partial-permutation correction: YOK
+Patch 23 VirtualLegacyList: YOK

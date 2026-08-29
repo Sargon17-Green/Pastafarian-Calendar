@@ -23,6 +23,7 @@ from .legacy_year_jump import LegacyYearJumpAdapter
 from .legacy_year_cache import LegacyYearNumberOnlyCacheMap
 from .legacy_structure_sauce import LegacyStructureSauceAdapter
 from .legacy_cutlet_partition import LegacyCutletPartitionAdapter
+from .legacy_repeated_names import LegacyRepeatedNameGenerator
 
 
 class MonsterError(RuntimeError):
@@ -303,6 +304,18 @@ class MonsterContext:
     patch21_semantic_partition: tuple[int, ...] | None = None
     patch21_boundary_hit: bool = False
     patch21_applied: bool = False
+    legacy_name_source_kind: str | None = None
+    legacy_name_master_count: int | None = None
+    legacy_name_item_count: int | None = None
+    legacy_name_family_count: int | None = None
+    legacy_name_selected_rank: int | None = None
+    legacy_name_candidate_indices: tuple[int, ...] | None = None
+    legacy_name_candidate_has_repeats: bool = False
+    legacy_name_semantic_indices: tuple[int, ...] | None = None
+    legacy_name_answer_first: int | None = None
+    legacy_name_answer_direction_step: int | None = None
+    legacy_name_generation_calls: int = 0
+    legacy_cutlet_name_indices: tuple[int, ...] | None = None
 
 
 class BaseMetrics:
@@ -375,3 +388,4 @@ class MonsterManager:
         self.legacy_year_cache = LegacyYearNumberOnlyCacheMap()
         self.legacy_structure_sauce = LegacyStructureSauceAdapter()
         self.legacy_cutlet_partition = LegacyCutletPartitionAdapter()
+        self.legacy_repeated_names = LegacyRepeatedNameGenerator()

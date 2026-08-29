@@ -1,24 +1,20 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk üçüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk dördüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 43/55, `PATCH 21` durumundadır.
+Aşama 44/55, `DISCOVERY 22` durumundadır.
 
-Aşama 42 all-positive legacy family ve raw `call_with_ring` scar'ı aynen kalır ve gerçekten çalışır.
+Yeni `LegacyRepeatedNameGenerator`, `master_count^item_count` büyüklüğündeki bütün canonicalIndex dizilerini legacy family kabul eder ve repeated canonicalIndex değerlerine izin verir.
 
-Yeni `FilteredLegacyCutletPartitionFamily`, internal calculation-day gate offsetini bir partial prefix sum olarak vuran legacy composition'ların tam alt ailesini DP count/unrank ile temsil eder.
+Köfte adları için real path Aşama 20 semantic structure sauce üzerinden bowl 5 / seal 22 answer ring kurar ve frozen `SourceLanguageCatalog` içindeki 17 canonicalIndex ile actual cutlet count kullanır.
 
-Filtered aile legacy family'nin aynı lexicographic sırasını korur.
+Rank compatibility copy current short/wide selection semantiğine eşittir fakat eski real-path selection instrumentation call-count scars'ını ikinci kez tetiklemez.
 
-`CutletPartitionGatePatchWrapper`, internal gate varsa aynı bowl 2 / seal 21 answer ring üzerinde filtered family count ile selection yapar ve yalnız filtered semantic partition döndürür.
+Üç normatif witness'ın üçünde old candidate gerçekten tekrar içerir ve correct partial-permutation unrank sonucundan ayrışır.
 
-Internal gate yoksa raw legacy sonuç aynen kullanılır.
-
-Aşama 42 normatif regression gövdesi değiştirilmeden yeşile dönmüştür.
-
-Patch 22 repeated-name generator kodu henüz yoktur.
+Henüz `PATCH 22` correction yoktur. Patch 23 `VirtualLegacyList` kodu da yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -34,10 +30,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırk üçüncü aşama paketi:
+Tam kırk dördüncü aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: 278 testin tamamı geçer ve depo durumu `GREEN` olur. Aşama 42'de kırmızı olan üç internal-gate witness aynı normatif regression gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki 278 test geçer. Yeni Discovery 22 non-normative kontrolleri geçer; yalnız `test_current_repeated_name_generator_diverges_from_partial_permutation_unrank` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.

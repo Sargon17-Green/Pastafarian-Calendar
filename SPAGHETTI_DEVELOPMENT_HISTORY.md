@@ -1914,3 +1914,18 @@ DP unrank, all-positive legacy family'nin aynı lexicographic sırasını korur;
 Internal gate yoksa filtered detour uygulanmaz ve raw legacy partition aynen semantic sonuç olur.
 
 Aşama 42 normatif regression gövdesi byte-for-byte değiştirilmeden yeşile dönmüştür. Patch 22 repeated-name generator kodu henüz yoktur.
+
+
+## Aşama 44 — Keşif 22: tekrar kabul eden ad üreteci
+
+Bir yıl içindeki köfte adlarını seçmek için her pozisyonun frozen canonicalIndex havuzundan bağımsız alınabileceği sanıldı.
+
+Historical family `master_count^item_count` büyüklüğündeki bütün lexicographic canonicalIndex dizileridir. `LegacyRepeatedNameGenerator` aynı canonicalIndex'in birden fazla pozisyonda görünmesine izin verir.
+
+Aşama 20 semantic structure sauce state'inden bowl 5, seal 22 answer ring kurulur. Rank seçimi ayrı bir compatibility copy ile current short/wide selection semantiğine eşit tutulur; eski Patches 13–14 real-path instrumentation call-count scars ikinci historical traversal olarak tetiklenmez.
+
+Aşama 43 semantic cutlet partition sonrasında real calendar handler frozen `SourceLanguageCatalog` içindeki 17 köfte canonicalIndex'i ve actual cutlet count ile generator'ı gerçekten çağırır. Türkçe name text selection/rank hesabına girmez.
+
+Üç bağımsız witness'ın her birinde old `17^6` candidate gerçekten repeated canonicalIndex içerir. Expected test-only normative path `falling_factorial(17,6)`, bowl 5 / seal 22 rank seçimi ve `unrank_distinct_indices` ile hesaplanır. Üç witness yalnız repeated-name family yanlışlığı nedeniyle kırmızıdır.
+
+Production içinde partial-permutation correction, `RepeatedNamePatchWrapper` veya `patch22_applied` yoktur. Patch 23 `VirtualLegacyList` kodu da eklenmemiştir.
