@@ -1,0 +1,25 @@
+Aşama 4/55 — DISCOVERY 02
+
+Bu paket yalnızca Aşama 4 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_day_counts.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_04_discovery_02.py
+artifacts/stage-04/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-04/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_04.txt
+
+Silinen dosya yoktur.
+Beklenen depo durumu: EXPECTED_RED
+Önceki Aşama 1–3 regresyonları: PASS
+Yeni kusur: oldDayTag(day)=2*abs(day-FOUNDATION_DAY_OLD)
+Yeni normatif regresyon: kuruluş günü ve sonraki günlerde beklenen ayrışma
+PATCH 02: YOK
+03–26 gelecek kusur/yama kodu: YOK

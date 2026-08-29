@@ -56,3 +56,30 @@ bütün tam sayı girdileri için gömülü normatif `SAVE(x)` işlemiyle aynıd
 `SavePatchWrapper`, eski adapter ile çağrının geri kalanı arasına yerleştirildi. Yamanın girdisi, çıktısı ve uygulanma durumu yalnızca o çağrıya ait `MonsterContext` içinde tutulur. Günlükler, ölçümler ve tanı verileri yamaya girdi değildir; önceden doldurulmuş gözlem durumu sonuç üzerinde etkisizdir.
 
 Aşama 2'deki “yama henüz yok” nöbetçisi aşama-geçişi gereği artık doğru bir önerme olmadığından, aynı dosyada tarihsel yaranın hâlâ mevcut olduğunu doğrulayan daha güçlü bir nöbetçiyle değiştirilmiştir. Normatif kırmızı regresyonun kendisi değiştirilmemiştir.
+
+
+## Aşama 4 — Keşif 02: iki tarafı da çift gün etiketi sanmak
+
+### Ne sanıldı
+
+İkinci tarihsel hesap katmanı, kuruluş gününe olan uzaklığın iki katının doğrudan gün etiketi olduğunu varsaydı:
+
+```text
+oldDayTag(day) = 2 * abs(day - FOUNDATION_DAY_OLD)
+```
+
+Bu eski formül artık yalnızca kenarda duran bir yardımcı değildir. `LegacyDayTagAdapter` üzerinden gerçek `calendar_date_spaghetti` zincirine bağlanır ve hem eylem günü hem hedef günü için çağrılır.
+
+### Ne keşfedildi
+
+Kuruluş gününden önceki günlerde eski formül normatif sayımla tesadüfen aynıdır: uzaklığın iki katı doğru çift değeri verir.
+
+Kuruluş gününün kendisinde ve sonraki günlerde ise varsayım yanlıştır. Kuruluş gününün normatif sayımı `1` olmalıdır; eski yol `0` verir. Kuruluş gününden sonraki günlerin normatif sayımları tek olmalıdır; eski yol onları çift bırakır.
+
+Yeni normatif regresyon bu ayrışmayı gerçek adapter yolunda gösterir. Kuruluş gününden önceki örnekler geçer; kuruluş günü ile sonraki örnekler bilinçli olarak kırmızıdır. Birinci yamanın bütün regresyonları yeşil kalır.
+
+### Bu aşamada eklenen canavar katmanı
+
+`LegacyDayTagAdapter`, `MonsterManager` içine ayrı bir eski-hesap bileşeni olarak eklendi. Eylem ve hedef günlerine ait eski etiket girdileri ve sonuçları ayrı alanlarda, yalnızca tek çağrının `MonsterContext` nesnesinde tutulur. Günlük ve ölçüm güncellemeleri sonuç hesabına geri okunmaz.
+
+Bu aşamada kuruluş günü yarası için hiçbir `+1` düzeltmesi, özel kuruluş koruması veya başka bir gelecek yama eklenmemiştir.

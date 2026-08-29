@@ -1,14 +1,20 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin ikinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin dördüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 3/55, `PATCH 01` durumundadır. `oldRemainder(x)` tarihsel kusuruyla birlikte korunur ve büyük sayacın tam katlarında hâlâ `0` döndürür.
+Aşama 4/55, `DISCOVERY 02` durumundadır. Yeni tarihsel kusur gerçek üretim zincirine bağlanmıştır:
 
-Düzeltme onun üstündeki `savePatch(x)` ve `SavePatchWrapper` katmanına eklenmiştir. Gerçek `LegacyRemainderAdapter` yolu bu yamadan geçer; `M`, `2M`, `3M` ve `M+1` için Aşama 2'de eklenen normatif regresyon değiştirilmeden artık yeşildir.
+```text
+oldDayTag(day) = 2 * abs(day - FOUNDATION_DAY_OLD)
+```
 
-Gözlem durumu yamaya semantik girdi değildir ve yama durumu yalnızca çağrıya ait `MonsterContext` içinde tutulur. Gelecekteki 02–26 yamalarından hiçbiri eklenmemiştir.
+Bu eski hesap kuruluş gününden önce normatif gün sayımıyla uyuşur; kuruluş gününde `0` yerine `1` gerekir ve kuruluş gününden sonraki normatif tek değerler eski yolda çift kalır.
+
+`LegacyDayTagAdapter` hem eylem hem hedef günü için bu yanlış hesabı çalıştırır. Yeni regresyon bu gerçek adapter yolunu temiz normatif başvuruyla karşılaştırır ve kuruluş günü ile sonraki örneklerde bilerek kırmızıdır. Henüz `PATCH 02` eklenmemiştir.
+
+Birinci tarihsel yara ve Yama 01 aynen korunur; önceki bütün regresyonlar yeşildir. Gelecekteki 03–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -24,10 +30,12 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam üçüncü aşama paketi:
+Önceki Aşama 1–3 regresyonları ayrı olarak çalıştırılabilir.
+
+Tam dördüncü aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 2'de kırmızı olan normatif kalan regresyonu aynı gövdeyle yeşile dönmelidir; `oldRemainder` kusurunu koruyan test ise hâlâ `0` sonucunu bekler.
+Beklenen sonuç: önceki regresyonlar geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni gün etiketi normatif regresyonunun kuruluş günü ve kuruluş gününden sonraki alt örnekleri başarısız olur. Bu kırmızılık `DISCOVERY 02` aşamasının beklenen sonucudur.

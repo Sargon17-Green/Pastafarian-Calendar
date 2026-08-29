@@ -38,13 +38,35 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
         )
         manager.metrics.bump(local_ctx, "legacy.remainder.calls")
         local_ctx.status = "ESKİ_KALAN_HAZIR"
-        local_ctx.phase = "AŞAMA_02_BEKLEME"
+        local_ctx.phase = "ESKİ_GÜN_ETİKETLERİ"
+
+    def legacy_day_tag_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+        manager.legacy_day_tags.call(
+            local_ctx,
+            local_ctx.calculation_day,
+            "action",
+        )
+        manager.legacy_day_tags.call(
+            local_ctx,
+            local_ctx.target_day,
+            "target",
+        )
+        manager.metrics.bump(local_ctx, "legacy.dayTag.pairs")
+        local_ctx.status = "ESKİ_GÜN_ETİKETLERİ_HAZIR"
+        local_ctx.phase = "AŞAMA_04_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
+    manager.dispatcher.register("ESKİ_GÜN_ETİKETLERİ", legacy_day_tag_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Üçüncü aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Dördüncü aşamada üretim takvim yolu henüz birleştirilmedi"
     )

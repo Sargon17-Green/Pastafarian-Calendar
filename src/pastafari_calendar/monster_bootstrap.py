@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from .legacy_arithmetic import LegacyRemainderAdapter
+from .legacy_day_counts import LegacyDayTagAdapter
 
 
 class MonsterError(RuntimeError):
@@ -40,6 +41,10 @@ class MonsterContext:
     patch01_input: int | None = None
     patch01_value: int | None = None
     patch01_applied: bool = False
+    legacy_action_day_tag_input: int | None = None
+    legacy_action_day_tag_value: int | None = None
+    legacy_target_day_tag_input: int | None = None
+    legacy_target_day_tag_value: int | None = None
 
 
 class BaseMetrics:
@@ -93,3 +98,4 @@ class MonsterManager:
         self.error_wrapper = BaseErrorWrapper()
         self.dispatcher = BaseDispatcher()
         self.legacy_arithmetic = LegacyRemainderAdapter()
+        self.legacy_day_tags = LegacyDayTagAdapter()
