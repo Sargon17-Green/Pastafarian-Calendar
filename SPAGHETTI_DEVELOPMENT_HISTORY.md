@@ -398,3 +398,25 @@ Un `Patch09BowlAliasWrapper` ha esset insertet pos `Discovery09FixedPourHandler`
 ### Pro quo li strat nov ne adjunte un defect extra
 
 Li alias es un permutation direct del order exact e ne participa in selection, SAVE o mutation de state. Li wrapper ne muta `oldBowls` ni `stoneRow`, e metrics/diagnostics ne decide null valore semantic. Ergo li unic change semantic es li correction local mandat de positions a bowl IDs.
+
+## Stage 20 — Discovery 10: contamination in-place del bowl-round
+
+### Quo on pensat
+
+Pos li correction de bowlAlias, on tractat li six updates del bowls quam un serie natural de assignationes al sam vector: calcular un position, scrir su bowl, continuar al position sequent. On supposit que li order circular sufficet por conservar li relation inter neighbors.
+
+### Quo esset decovrit
+
+Li semantics normativ exige que omni six outputs de un drop nasce ex li sam statu anterior. Li routine legacy scri directmen in `bowls[bowlId]`; consequentmen un position posterior posse usar un `prevId` o `nextId` ja mutat. Con drop 1 e order identic, li prim bowl concorda ma omni bowls 2..6 diverge, quo isola li contamination sin depender de un permutation nontrivial.
+
+### Quo esset circumit
+
+Null circumition existe ancor in ti stage. Li regression resta rubi intentionalmen e li routine in-place resta li unic behavior nov expost.
+
+### Crescente del monster
+
+`LegacyInPlaceBowlAdapter` e `Discovery10InPlaceBowlHandler` adjunte un nov route. Li handler clona li input extern solmen por ownership del invocation, registra li statu ante li mutation, li order, li pours, li vector de labor e li output legacy, e demonstra que li helper retorna exactmen li sam object mutat.
+
+### Pro quo li nov layer ne change altri semantics
+
+Li route de Discovery 10 es isolat e ne participa ancor in un resultate final. Omni scars e patches 01..09 resta fisicmen intact, omni regressions precedent resta verd, e null code reparativ de Patch 10 es present.

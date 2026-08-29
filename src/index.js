@@ -103,6 +103,14 @@ class BaseMonsterContext {
     this.patch09AliasedBowlIds = null;
     this.patch09LegacyCallPreserved = false;
     this.patch09Output = null;
+    this.legacyBowlRoundDrop = null;
+    this.legacyBowlRoundIndex = null;
+    this.legacyBowlRoundOrder = null;
+    this.legacyBowlRoundPours = null;
+    this.legacyBowlRoundInputBefore = null;
+    this.legacyBowlRoundWorkingState = null;
+    this.legacyBowlRoundOutput = null;
+    this.legacyBowlRoundReturnedSameObject = false;
   }
 }
 
@@ -635,6 +643,55 @@ function poursThroughBowlAlias(drop, index, oldBowls, stoneRow) {
   return { order, bowlAlias, pours };
 }
 
+const BOWL_STIR_STONE_BY_POSITION_LEGACY = Object.freeze([null, 'w', 'b', 's', 'm', 'r', 'w']);
+
+function legacyStirOneDropInPlace(drop, index, bowls, stoneRow) {
+  if (typeof drop !== 'bigint' || typeof index !== 'bigint') {
+    throw new TypeError('Li drop e su index por li bowl-round legacy deve esser BigInt exact.');
+  }
+  if (index < 1n || index > 46n) {
+    throw new RangeError('Li index legacy del bowl-round deve esser inter 1 e 46.');
+  }
+  if (!Array.isArray(bowls) || bowls.length < 7) {
+    throw new TypeError('Li bowls legacy del round deve conservar indices 1..6.');
+  }
+  for (let id = 1; id <= 6; id += 1) {
+    if (typeof bowls[id] !== 'bigint') {
+      throw new TypeError('Chascun bowl del round legacy deve esser un BigInt exact.');
+    }
+  }
+  if (!stoneRow || typeof stoneRow !== 'object') {
+    throw new TypeError('Li row de stones por li bowl-round legacy deve esser un object.');
+  }
+  for (const key of ['w', 'b', 's', 'm', 'r']) {
+    if (typeof stoneRow[key] !== 'bigint') {
+      throw new TypeError('Li row de stones por li bowl-round legacy deve contener quin BigInt.');
+    }
+  }
+  const poured = poursThroughBowlAlias(drop, index, bowls, stoneRow);
+  const order = poured.order.slice();
+  const pours = poured.pours.slice();
+  for (let position = 1; position <= 6; position += 1) {
+    const bowlId = order[position - 1];
+    const prevId = order[(position + 4) % 6];
+    const nextId = order[position % 6];
+    const stoneKind = BOWL_STIR_STONE_BY_POSITION_LEGACY[position];
+    // Li scar historic scri directmen in bowls; li passus posterior lee dunque valores ja mutat del sam round.
+    const s = bowls[bowlId]
+      + 2n * bowls[prevId]
+      + 3n * bowls[nextId]
+      + pours[position]
+      + drop
+      + stoneRow[stoneKind];
+    bowls[bowlId] = savePatch(
+      s * s
+      + 5n * bowls[prevId] * bowls[nextId]
+      + index * BigInt(position)
+    );
+  }
+  return { order, pours, bowls };
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -1161,6 +1218,45 @@ class Patch09BowlAliasWrapper {
   }
 }
 
+class LegacyInPlaceBowlAdapter {
+  call(drop, index, bowls, stoneRow) {
+    return legacyStirOneDropInPlace(drop, index, bowls, stoneRow);
+  }
+}
+
+class Discovery10InPlaceBowlHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, drop, index, sourceBowls, stoneRow) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireExactInteger(drop);
+    this.validationManager.requireVisibleDropIndex(index);
+    this.validationManager.requireBowlVector(sourceBowls);
+    this.validationManager.requireStoneState(stoneRow);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery10InPlaceBowlHandler';
+    context.phase = 'DISCOVERY_10_IN_PLACE_BOWL_CONTAMINATION';
+    context.branchTrace.push('DISCOVERY_10_BOWLS_IN_PLACE');
+    context.legacyBowlRoundDrop = drop;
+    context.legacyBowlRoundIndex = index;
+    context.legacyBowlRoundInputBefore = sourceBowls.slice();
+    const working = sourceBowls.slice();
+    context.legacyBowlRoundWorkingState = working;
+    const result = this.legacyAdapter.call(drop, index, working, stoneRow);
+    context.legacyBowlRoundReturnedSameObject = result.bowls === working;
+    context.legacyBowlRoundOrder = result.order.slice();
+    context.legacyBowlRoundPours = result.pours.slice();
+    context.legacyBowlRoundOutput = result.bowls.slice();
+    context.status = 'DISCOVERY_10_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery10.inPlaceBowl.calls');
+    return { order: result.order.slice(), pours: result.pours.slice(), bowls: result.bowls.slice() };
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -1244,6 +1340,12 @@ class BaseMonsterManager {
     this.patch09BowlAliasWrapper = new Patch09BowlAliasWrapper(
       this.validationManager,
       this.metricsManager
+    );
+    this.legacyInPlaceBowlAdapter = new LegacyInPlaceBowlAdapter();
+    this.discovery10InPlaceBowlHandler = new Discovery10InPlaceBowlHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyInPlaceBowlAdapter
     );
   }
 
@@ -1482,6 +1584,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery10InPlaceBowls(calculationDay, targetDay, drop, index, bowls, stoneRow) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery10InPlaceBowlHandler.handle(context, drop, index, bowls, stoneRow);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -1564,8 +1678,14 @@ function historicPoursThroughMonsterPath(calculationDay, targetDay, drop, index,
   );
 }
 
+function discovery10LegacyInPlaceBowlsThroughMonsterPath(calculationDay, targetDay, drop, index, bowls, stoneRow) {
+  return new BaseMonsterManager().executeDiscovery10InPlaceBowls(
+    calculationDay, targetDay, drop, index, bowls, stoneRow
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 09; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 10; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -1606,6 +1726,8 @@ module.exports = Object.freeze({
   LegacyFixedPourAdapter,
   Discovery09FixedPourHandler,
   Patch09BowlAliasWrapper,
+  LegacyInPlaceBowlAdapter,
+  Discovery10InPlaceBowlHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -1637,6 +1759,8 @@ module.exports = Object.freeze({
   installBowlAlias,
   bowlAtLegacyPosition,
   poursThroughBowlAlias,
+  BOWL_STIR_STONE_BY_POSITION_LEGACY,
+  legacyStirOneDropInPlace,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -1656,5 +1780,6 @@ module.exports = Object.freeze({
   historicBowlOrderThroughMonsterPath,
   discovery09LegacyFixedPoursThroughMonsterPath,
   historicPoursThroughMonsterPath,
+  discovery10LegacyInPlaceBowlsThroughMonsterPath,
   calendarDateSpaghetti
 });
