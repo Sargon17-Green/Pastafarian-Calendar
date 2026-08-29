@@ -1392,3 +1392,55 @@ Compilator `g++ (Debian 14.2.0-19) 14.2.0`, C++20. Bootstrap et regressiones Gra
 ### Audit et limes proximus
 
 `SourceLanguageCatalog` et reference C++ manent byte pro byte intacti. Nullus runtime externus adhibetur. Nullus codex PATCH 22 in productione additus est: generator nominum repetitorum, partial-permutation repair et strata posteriora nondum introducuntur. Gradus proximus est 44/55 — DISCOVERY 22 tantum.
+
+## Gradus 44 — DISCOVERY 22: generator nominum repetitiones admittit
+
+### Assumptio historica nova
+
+Post correctionem partitionis segmentorum, implementatio nomina segmentorum eligere incipit. Selector iam answer ring rectum habet et spatium rank distinctarum selectionum numerat, sed generator vetus rank male interpretatur. Putabatur satis esse `rank-1` in digitos basis XVII convertere et eos directe in `canonicalIndex` vertere.
+
+Haec interpretatio non est unrank partialis permutationis. Eadem cifra pluribus positionibus apparere potest, ergo nomen idem intra eundem annum bis vel saepius eligi potest.
+
+### Cicatrix addita
+
+Additae sunt functiones:
+
+```text
+legacyCutletNameSelectionSpaceCount(masterCount,itemCount)
+legacyNameRowWithRepeats(masterList,rank1,itemCount)
+legacyNameRowContainsRepeat(row)
+```
+
+Prima numerum rank exactum per productum descendentem computat. Secunda autem ipsum defectum servat: `q=rank1-1`, deinde in singulis positionibus `q mod n` sumit, `q` per `n` dividit et digitum minimam ante superiores consumit. Nulla memoria nominum iam adhibitorum exsistit.
+
+`LegacyRepeatedNameGenerator` hanc functionem sine correctione vocat. Contextus Gradus 44 servat `selectionSpaceCount`, answer ring, rank, ordinem legacy et diagnosticum repetitionis. `Discovery22RepeatedCutletNameHandler` post confirmationem PATCH 20 et PATCH 21 craterem 5 cum sigillo 22 interrogat et ordinem legacy directe producit.
+
+### Connexio ad viam activam
+
+`BaseMonsterManager::executeDiscovery22RepeatedCutletNames` primum viam PATCH 21 activam vere exsequitur. Recordus anni inde acceptus ad sauce structuralem PATCH 20 adhibetur, et tantum post haec duo strata dispatcher Gradus 44 generatori veteri imperat. Sic defectus novus non bypass-at correctiones superiores et non reintroducit bias selectionis priorum graduum.
+
+Nullus textus catalogi ordinem semanticum regit; generator operatur tantum super indices canonicos 1..17. `SourceLanguageCatalog` ipse manet immutatus.
+
+### Witness et regressio
+
+Tres calculation-gates 0, 1 et 2 intra annos 5000 proprios adhibentur. Oracle C++ test-only eadem sauce `(calculationDay,yearFirstDay)`, craterem 5, sigillum 22 et selectionem normativam distinctam adhibet.
+
+```text
+index 0: K=6, rank=7851263
+legacy=[17,17,1,1,10,6]
+normativus=[15,17,10,14,8,13]
+
+index 1: K=6, rank=8314026
+legacy=[6,5,5,10,15,6]
+normativus=[16,14,12,13,1,7]
+
+index 2: K=7, rank=95970488
+legacy=[14,14,17,1,11,17,4]
+normativus=[17,11,5,13,15,2,12]
+```
+
+Omnes tres legacy ordines saltem unum `canonicalIndex` repetunt. Regressio Gradus 44 eas tres discrepantias colligit et intentionaliter exitu 1 terminat. Bootstrap atque regressiones Graduum 1–43 omnes transeunt.
+
+### Fines historici
+
+Correctio PATCH 22 nondum adest. Nullus `RepeatedNamePatchWrapper`, nullus partial-permutation unrank productionis et nullus detour qui `bad` contra `correct` comparat additus est. Codex PATCH 23 et posterior quoque abest. Gradus 44 manet sola detectio defectus.

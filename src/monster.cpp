@@ -1182,6 +1182,56 @@ Integer biasedLegacyPick(const Integer& x, const Integer& N) {
     return regularMod(x - 1, N) + 1;
 }
 
+Integer legacyCutletNameSelectionSpaceCount(int masterCount, int itemCount) {
+    if (masterCount < 1) {
+        throw BaseValidationError("numerus nominum magistrorum positivus requiritur");
+    }
+    if (itemCount < 0 || itemCount > masterCount) {
+        throw BaseValidationError("numerus nominum selectorum extra fines est");
+    }
+    Integer count = 1;
+    for (int i = 0; i < itemCount; ++i) {
+        count *= (masterCount - i);
+    }
+    return count;
+}
+
+std::vector<int> legacyNameRowWithRepeats(const std::vector<int>& masterList,
+                                          const Integer& rank1,
+                                          int itemCount) {
+    if (masterList.empty()) {
+        throw BaseValidationError("lista nominum magistrorum vacua esse non potest");
+    }
+    if (rank1 < 1) {
+        throw BaseValidationError("gradus legacy nominum debet esse saltem unus");
+    }
+    if (itemCount < 0) {
+        throw BaseValidationError("numerus nominum negativus esse non potest");
+    }
+    const Integer n = Integer{masterList.size()};
+    Integer q = rank1 - 1;
+    std::vector<int> row;
+    row.reserve(static_cast<std::size_t>(itemCount));
+    for (int p = 1; p <= itemCount; ++p) {
+        const Integer digit = regularMod(q, n);
+        const std::size_t index = digit.convert_to<std::size_t>();
+        row.push_back(masterList.at(index));
+        q /= n;
+    }
+    return row;
+}
+
+bool legacyNameRowContainsRepeat(const std::vector<int>& row) {
+    for (std::size_t i = 0; i < row.size(); ++i) {
+        for (std::size_t j = i + 1; j < row.size(); ++j) {
+            if (row[i] == row[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -3966,6 +4016,60 @@ void BaseValidationManager::requirePatch21CutletPartitionReady(const BaseMonster
     }
 }
 
+void BaseValidationManager::requireDiscovery22RepeatedNamesReady(
+    const BaseMonsterContext& ctx) const {
+    if (!ctx.discovery22RepeatedNamesReady) {
+        throw BaseValidationError("DISCOVERY 22 nondum paratus est");
+    }
+    if (!ctx.discovery22Patch20Prepared || !ctx.discovery22Patch21Prepared) {
+        throw BaseValidationError("DISCOVERY 22 gradus anteriores paratos requirit");
+    }
+    if (ctx.discovery22MasterNameCount != 17) {
+        throw BaseValidationError("DISCOVERY 22 catalogum XVII nominum requirit");
+    }
+    if (ctx.discovery22CutletCount < 1 ||
+        ctx.discovery22CutletCount > ctx.discovery22MasterNameCount) {
+        throw BaseValidationError("numerus nominum segmentorum DISCOVERY 22 invalidus est");
+    }
+    const Integer expectedSpace = legacyCutletNameSelectionSpaceCount(
+        ctx.discovery22MasterNameCount,
+        ctx.discovery22CutletCount);
+    if (ctx.discovery22SelectionSpaceCount != expectedSpace) {
+        throw BaseValidationError("spatium selectionis nominum DISCOVERY 22 discrepat");
+    }
+    if (ctx.discovery22SelectionRank < 1 ||
+        ctx.discovery22SelectionRank > ctx.discovery22SelectionSpaceCount) {
+        throw BaseValidationError("gradus nominum DISCOVERY 22 extra fines est");
+    }
+    if (ctx.discovery22LegacyNameIndices.size() !=
+        static_cast<std::size_t>(ctx.discovery22CutletCount)) {
+        throw BaseValidationError("ordo nominum legacy DISCOVERY 22 magnitudine falsa est");
+    }
+    std::vector<int> masterList;
+    masterList.reserve(static_cast<std::size_t>(ctx.discovery22MasterNameCount));
+    for (int canonicalIndex = 1;
+         canonicalIndex <= ctx.discovery22MasterNameCount;
+         ++canonicalIndex) {
+        masterList.push_back(canonicalIndex);
+    }
+    const std::vector<int> replay = legacyNameRowWithRepeats(
+        masterList,
+        ctx.discovery22SelectionRank,
+        ctx.discovery22CutletCount);
+    if (replay != ctx.discovery22LegacyNameIndices) {
+        throw BaseValidationError("generator legacy nominum DISCOVERY 22 non reproducitur");
+    }
+    for (const int canonicalIndex : ctx.discovery22LegacyNameIndices) {
+        if (canonicalIndex < 1 || canonicalIndex > ctx.discovery22MasterNameCount) {
+            throw BaseValidationError("canonicalIndex legacy DISCOVERY 22 extra catalogum est");
+        }
+    }
+    if (legacyNameRowContainsRepeat(ctx.discovery22LegacyNameIndices) !=
+        ctx.discovery22LegacyContainsRepeat) {
+        throw BaseValidationError("diagnosticum repetitionis DISCOVERY 22 discrepat");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -4279,6 +4383,13 @@ Patch21CutletPartitionResult CutletPartitionPatchWrapper::repair(
         }
     }
     return out;
+}
+
+std::vector<int> LegacyRepeatedNameGenerator::call(
+    const std::vector<int>& masterList,
+    const Integer& rank1,
+    int itemCount) const {
+    return legacyNameRowWithRepeats(masterList, rank1, itemCount);
 }
 
 Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
@@ -5486,6 +5597,70 @@ void Patch21CutletPartitionHandler::handle(
     validator.requirePatch21CutletPartitionReady(ctx);
 }
 
+void Discovery22RepeatedCutletNameHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyRepeatedNameGenerator& generator,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    if (!ctx.discovery22Patch20Prepared || !ctx.discovery22Patch21Prepared) {
+        throw BaseValidationError("DISCOVERY 22 sine PATCH 20 et PATCH 21 currere non potest");
+    }
+    ctx.discovery22MasterNameCount = 17;
+    ctx.discovery22SelectionSpaceCount = legacyCutletNameSelectionSpaceCount(
+        ctx.discovery22MasterNameCount,
+        ctx.discovery22CutletCount);
+
+    const int queriedBowlId = 5;
+    const int nextBowlId = nextBowlThroughOrderAt46Latch(
+        ctx.patch20SemanticStructureSauce.orderAt46Latch,
+        queriedBowlId);
+    ctx.discovery22SelectionRing = answerRingThroughPatchedNextBowl(
+        ctx.patch20SemanticStructureSauce.finalBowls,
+        queriedBowlId,
+        nextBowlId,
+        22);
+
+    if (ctx.discovery22SelectionSpaceCount <= M_OLD) {
+        ctx.discovery22SelectionRank = rejectionWrapper.repair(
+            ctx.discovery22SelectionRing,
+            ctx.discovery22SelectionSpaceCount,
+            selectionAdapter).outputRank;
+    } else {
+        ctx.discovery22SelectionRank = wideWrapper.repair(
+            ctx.discovery22SelectionRing,
+            ctx.discovery22SelectionSpaceCount,
+            selectionAdapter).outputRank;
+    }
+
+    std::vector<int> masterList;
+    masterList.reserve(static_cast<std::size_t>(ctx.discovery22MasterNameCount));
+    for (int canonicalIndex = 1;
+         canonicalIndex <= ctx.discovery22MasterNameCount;
+         ++canonicalIndex) {
+        masterList.push_back(canonicalIndex);
+    }
+    ctx.discovery22LegacyNameIndices = generator.call(
+        masterList,
+        ctx.discovery22SelectionRank,
+        ctx.discovery22CutletCount);
+    ctx.discovery22LegacyContainsRepeat = legacyNameRowContainsRepeat(
+        ctx.discovery22LegacyNameIndices);
+    ctx.discovery22RepeatedNamesReady = true;
+    ctx.currentHandler = "Discovery22RepeatedCutletNameHandler";
+    ctx.phase = "DISCOVERY_22_REPEATED_CUTLET_NAMES";
+    ctx.status = ctx.discovery22LegacyContainsRepeat
+        ? "LEGACY_NAME_ROW_CONTAINS_REPEAT"
+        : "LEGACY_NAME_ROW_HAS_NO_REPEAT_FOR_THIS_INPUT";
+    ctx.branchTrace.push_back(ctx.discovery22LegacyContainsRepeat
+        ? "DISCOVERY22:REPEATED_CANONICAL_INDEX"
+        : "DISCOVERY22:NO_REPEAT_THIS_INPUT");
+    metrics.bump(ctx, "discovery22.cutlet.names.calls");
+    validator.requireDiscovery22RepeatedNamesReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -6205,6 +6380,26 @@ void BaseDispatcher::dispatchPatchedCutletPartition(
         metrics);
 }
 
+void BaseDispatcher::dispatchDiscovery22RepeatedCutletNames(
+    BaseMonsterContext& ctx,
+    const Discovery22RepeatedCutletNameHandler& handler,
+    const LegacyRepeatedNameGenerator& generator,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:DISCOVERY22_REPEATED_CUTLET_NAMES");
+    handler.handle(
+        ctx,
+        generator,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+}
+
 void BaseDispatcher::dispatchPatchedYear5000Tie(
     BaseMonsterContext& ctx,
     const Patch17Year5000TieHandler& handler,
@@ -6901,6 +7096,81 @@ LegacyCutletPartitionReport BaseMonsterManager::executeUnpatchedDiscovery21Cutle
         false,
         false,
         ctx.discovery21CutletPartitionReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+LegacyRepeatedNameReport BaseMonsterManager::executeDiscovery22RepeatedCutletNames(
+    const LegacyYearAnchor& anchor,
+    const Integer& originalTargetDay,
+    const Integer& calculationDay,
+    const Integer& calculationGateIndex,
+    int cutletCount) const {
+    const LegacyCutletPartitionReport partition = executeDiscovery21CutletPartition(
+        anchor,
+        originalTargetDay,
+        calculationDay,
+        calculationGateIndex,
+        cutletCount);
+    if (!partition.ready || !partition.patch21Applied) {
+        throw BaseValidationError("DISCOVERY 22 partitionem PATCH 21 paratam requirit");
+    }
+
+    const Patch20StructureSauceResult structure = structureSaucePatch(
+        calculationDay,
+        originalTargetDay,
+        partition.resolvedYear);
+
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery20OriginalTargetDay = originalTargetDay;
+    ctx.discovery20YearFirstDay = partition.resolvedYear.openGateDay + 1;
+    ctx.discovery20ResolvedYear = partition.resolvedYear;
+    ctx.patch20SemanticStructureSauce = structure.semanticSauce;
+    ctx.patch20Applied = true;
+    ctx.discovery22CutletCount = cutletCount;
+    ctx.discovery22Patch20Prepared = structure.ghostExecuted;
+    ctx.discovery22Patch21Prepared = partition.patch21Applied;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyRepeatedNameGenerator generator;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const Patch14WideDetourWrapper wideWrapper;
+    const Discovery22RepeatedCutletNameHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchDiscovery22RepeatedCutletNames(
+        ctx,
+        handler,
+        generator,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+
+    return LegacyRepeatedNameReport{
+        calculationDay,
+        originalTargetDay,
+        calculationGateIndex,
+        partition.resolvedYear,
+        ctx.discovery22CutletCount,
+        ctx.discovery22MasterNameCount,
+        ctx.discovery22SelectionSpaceCount,
+        ctx.discovery22SelectionRing,
+        ctx.discovery22SelectionRank,
+        ctx.discovery22LegacyNameIndices,
+        ctx.discovery22LegacyContainsRepeat,
+        ctx.discovery22Patch20Prepared,
+        ctx.discovery22Patch21Prepared,
+        ctx.discovery22RepeatedNamesReady,
         ctx.phase,
         ctx.status,
         ctx.currentHandler,

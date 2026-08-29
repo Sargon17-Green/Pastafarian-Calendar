@@ -743,3 +743,49 @@ Bootstrap et omnes regressiones Graduum 1–43 transeunt.
 ### Quod consulto nondum adest
 
 Nullus generator legacy nominum repetitorum, nulla correctio partial-permutation nominum et nullus PATCH 22 adest. Gradus 44 debet DISCOVERY 22 tantum introducere.
+
+## DISCOVERY 22 — generator nominum `canonicalIndex` repetere potest
+
+Gradus 44 post PATCH 21 cicatricem sequentem introducit sine correctione futura. Numerus nominum segmentorum iam ex structura segmentorum venit, et catalogus XVII nominum manet congelatus secundum `canonicalIndex`.
+
+Spatium rank quod selector interrogat est numerus ordinum distinctorum qui normativis nominibus opus esset:
+
+```text
+N = 17 * 16 * ... * (17-K+1)
+```
+
+Answer ring ex sauce structurali iam reparata venit: crater 5, successor circularis ex `orderAt46Latch`, sigillum 22. Rank per semanticas selectionis PATCH 13/14 eligitur. Defectus non est in answer ring neque in rank; defectus est in interpretatione rank ab generatore vetere.
+
+`legacyNameRowWithRepeats(masterList, rank1, K)` servat interpretationem historicam:
+
+```text
+q = rank1 - 1
+pro positione 1..K:
+    digit = q mod numerusNominum
+    q = floor(q / numerusNominum)
+    adde masterList[digit+1]
+```
+
+Ita digitus minimus primus legitur et eadem valor `canonicalIndex` pluribus positionibus apparere potest. `LegacyRepeatedNameGenerator` hanc functionem realiter vocat; `Discovery22RepeatedCutletNameHandler` output eius directe ut ordinem nominum activum huius gradus servat. Nulla correctio distinctarum partialium permutationum in productione adest.
+
+Tres witness C++ locales defectum demonstrant:
+
+```text
+porta calculationis 0, K=6, rank=7851263
+legacy=[17,17,1,1,10,6]
+normativus=[15,17,10,14,8,13]
+
+porta calculationis 1, K=6, rank=8314026
+legacy=[6,5,5,10,15,6]
+normativus=[16,14,12,13,1,7]
+
+porta calculationis 2, K=7, rank=95970488
+legacy=[14,14,17,1,11,17,4]
+normativus=[17,11,5,13,15,2,12]
+```
+
+Omnes tres ordines legacy repetitionem realem continent et ab oracle C++ test-only eiusdem lineae discrepant. Regressio Gradus 44 igitur consulto `EXIT_CODE=1` cum tribus discrepantiis exactis reddit. Bootstrap et regressiones Graduum 1–43 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus `RepeatedNamePatchWrapper`, nullus unrank partialis permutationis distinctae, nullus selector corrected et nullus PATCH 22 adest. Etiam nullus `VirtualLegacyList` aut codex PATCH 23 praemature additus est. Gradus 45 debet generator legacy activum servare et correctionem separatam tantum super eum addere.

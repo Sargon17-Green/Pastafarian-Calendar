@@ -305,6 +305,33 @@ Integer ringAnswer(const LegacyAnswerRing& stream, const Integer& offset);
 Integer biasedLegacyPick(const Integer& x, const Integer& N);
 Integer oldGateQuestionDay(const Integer& n);
 
+Integer legacyCutletNameSelectionSpaceCount(int masterCount, int itemCount);
+std::vector<int> legacyNameRowWithRepeats(const std::vector<int>& masterList,
+                                          const Integer& rank1,
+                                          int itemCount);
+bool legacyNameRowContainsRepeat(const std::vector<int>& row);
+
+struct LegacyRepeatedNameReport {
+    Integer calculationDay{};
+    Integer originalTargetDay{};
+    Integer calculationGateIndex{};
+    Patch18YearRecord resolvedYear{};
+    int cutletCount = 0;
+    int masterNameCount = 0;
+    Integer selectionSpaceCount{};
+    LegacyAnswerRing answerRing{};
+    Integer selectionRank{};
+    std::vector<int> legacyNameIndices{};
+    bool legacyContainsRepeat = false;
+    bool patch20Prepared = false;
+    bool patch21Prepared = false;
+    bool ready = false;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 struct LegacyYearCandidatePair {
     std::size_t openIndex = 0;
     std::size_t closeIndex = 0;
@@ -637,6 +664,16 @@ struct BaseMonsterContext {
     bool patch21LegacyPartitionReused=false;
     bool patch21Applied=false;
     bool discovery21CutletPartitionReady=false;
+    int discovery22CutletCount=0;
+    int discovery22MasterNameCount=0;
+    Integer discovery22SelectionSpaceCount{};
+    LegacyAnswerRing discovery22SelectionRing{};
+    Integer discovery22SelectionRank{};
+    std::vector<int> discovery22LegacyNameIndices{};
+    bool discovery22LegacyContainsRepeat=false;
+    bool discovery22Patch20Prepared=false;
+    bool discovery22Patch21Prepared=false;
+    bool discovery22RepeatedNamesReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1008,6 +1045,7 @@ public:
     void requirePatch20StructureSauceReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery21CutletPartitionReady(const BaseMonsterContext& ctx) const;
     void requirePatch21CutletPartitionReady(const BaseMonsterContext& ctx) const;
+    void requireDiscovery22RepeatedNamesReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1123,6 +1161,13 @@ public:
         const LegacyBiasedSelectionAdapter& selectionAdapter,
         const Patch13RejectionWrapper& rejectionWrapper,
         const Patch14WideDetourWrapper& wideWrapper) const;
+};
+
+class LegacyRepeatedNameGenerator {
+public:
+    std::vector<int> call(const std::vector<int>& masterList,
+                          const Integer& rank1,
+                          int itemCount) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1659,6 +1704,16 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Discovery22RepeatedCutletNameHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyRepeatedNameGenerator& generator,
+                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                const Patch13RejectionWrapper& rejectionWrapper,
+                const Patch14WideDetourWrapper& wideWrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -1940,6 +1995,14 @@ public:
                                         const Patch14WideDetourWrapper& wideWrapper,
                                         const BaseValidationManager& validator,
                                         const BaseMetricsShell& metrics) const;
+    void dispatchDiscovery22RepeatedCutletNames(BaseMonsterContext& ctx,
+                                                const Discovery22RepeatedCutletNameHandler& handler,
+                                                const LegacyRepeatedNameGenerator& generator,
+                                                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                                const Patch13RejectionWrapper& rejectionWrapper,
+                                                const Patch14WideDetourWrapper& wideWrapper,
+                                                const BaseValidationManager& validator,
+                                                const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -2076,6 +2139,12 @@ public:
         const Integer& calculationGateIndex,
         int cutletCount) const;
     LegacyCutletPartitionReport executeUnpatchedDiscovery21CutletPartitionDiagnostic(
+        const LegacyYearAnchor& anchor,
+        const Integer& originalTargetDay,
+        const Integer& calculationDay,
+        const Integer& calculationGateIndex,
+        int cutletCount) const;
+    LegacyRepeatedNameReport executeDiscovery22RepeatedCutletNames(
         const LegacyYearAnchor& anchor,
         const Integer& originalTargetDay,
         const Integer& calculationDay,
