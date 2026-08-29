@@ -836,3 +836,44 @@ Nullus dispatcher inter viam brevem et latam, nullus `wideDetour`, nullum minimu
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `LegacyWideSelectionAttempt`, campi contextus selectionis latae, `LegacyWideSelectionReport`, `LegacyShortOnlyWideSelectionAdapter`, `Discovery14WideAssumptionHandler`, `requireDiscovery14WideAssumptionReady`, `dispatchLegacyWideSelectionAssumption` et `executeLegacyWideSelectionAssumption`. Strata Patch 11–13 manent intacta.
+
+
+## Gradus 29 — PATCH 14: wideDetour cum digits semel lectis
+
+### Quid repertum erat
+
+Gradus 28 ostendit `LegacyShortOnlyWideSelectionAdapter` familiam `N>M_OLD` per `Patch13RejectionWrapper` brevem mittere. Guard brevis eam recte repudiabat, sed nulla via lata exsistebat; tres familiae `M_OLD+1`, `M_OLD^2` et `M_OLD^3` output semanticum non habebant.
+
+### Quid circumventum est
+
+Cicatrix short-only non mutatur. `Patch14WideSelectionHandler` eam ante dispatcherem vere vocat et campos ante patch servat. Pro `N<=M_OLD` output eodem itinere brevi Patch 13 sumitur. Pro `N>M_OLD`, `Patch14WideDetourWrapper` minimum `places` eligit cum `space=M_OLD^places>=N`.
+
+Digits `ringAnswer(stream,j)` pro omnibus locis semel tantum leguntur. Numerus latus construitur positione-wise in basi `M_OLD`:
+
+```text
+wide = 1 + Σ((digit[j]-1)*M_OLD^j)
+```
+
+Rejectio postea nullam digit novam petit. Solum numerus `wide` ipse per `directionStep` intra `1..space` movetur donec `wide<=floor(space/N)*N`. Tum eundem `biasedLegacyPick` historicum in numero accepto vocamus.
+
+### Cur hoc aequivalet normae latae
+
+`space` est potentia minima `M_OLD^places` quae familiam continet. Vector digits semel lectus unicum punctum in spatio uniformi definit. Cauda supra `floor(space/N)*N` reicitur; progressus ±1 in ipso numero composito sequence deterministicam servat sine mutatione fontis randomici. Modulo post acceptance classes aequales in `1..N` reddit.
+
+Validator productionis sine oracle verificat minimum `places`, potentiam `space`, identitatem singulae digit cum annulo, compositionem initialem, acceptance limit, iterationem rejectionis in numero lato et output finalem per selector legacy.
+
+### Regressio Gradus 28
+
+Testis Discovery 14 observabilitatem cicatricis ante patch a resultatu activo separavit. Contra fontem Gradus 28 pristinum, compilatum cum header compatibili, adhuc tres familiae latae `ABSENS` sunt et exitus 1 manet. Contra Gradum 29 eadem regressio transit.
+
+### Regressio PATCH 14
+
+Nova probatio tres familias latas cum `reference::chooseRankWide` comparat, viam diagnosticam short-only servat et omnem metadata wide comprobat. `N=M_OLD` per viam brevem transit sine digits. Witness `N=wide2-1` rejectionem unius gradus demonstrat: initialis `N+1`, limes `N`, acceptus `N`, duo digits semel lecti.
+
+Omnes regressiones Graduum 1–29 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `Patch14WideDetourSelection`, campi contextus ante-patch et wide, campi report observabilitatis, `Patch14WideDetourWrapper`, `Patch14WideSelectionHandler`, `requirePatch14WideSelectionReady`, `dispatchPatchedWideSelection` et `executeUnpatchedWideSelectionDiagnostic`. `biasedLegacyPick` et `LegacyShortOnlyWideSelectionAdapter::attempt` intacta manent.
+
+Nullus `oldGateQuestionDay`, nullus PATCH 15, nullus `LEGACY_YEAR_MAX` et nullus codex posterior praemature additus est.

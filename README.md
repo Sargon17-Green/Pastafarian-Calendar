@@ -1,10 +1,10 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 27 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 29 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 27 est `PATCH 13`; status repositorii est `GREEN`.
+Gradus 29 est `PATCH 14`; status repositorii est `GREEN`.
 
 Gradus 26 cicatricem `biasedLegacyPick(x,N)=regularMod(x-1,N)+1` exposuit et eam ante rejectionem statim vocavit. Gradus 27 helper ipsum non mutat. Handler novus primum eandem vocationem legacy vere exsequitur et exitum eius servat, deinde rejectionem brevem in eodem `LegacyAnswerRing` applicat.
 
@@ -109,3 +109,51 @@ BaseMonsterManager::executeLegacyWideSelectionAssumption
 `tests/stage_28_discovery_14_tests.cpp` tres familias latas probat: `M_OLD+1`, `M_OLD^2`, `M_OLD^3`. Answer ring productionis cum oracle C++ locali concordat, sed via activa in omnibus tribus output non habet, dum `reference::chooseRankWide` rank normativum definit. Ergo status huius gradus consulto `EXPECTED_RED` est.
 
 Nullus dispatcher `N<=M / N>M`, nullus `wideDetour`, nullum `space=M^places`, nullae digits base-M, nullus numerus wide et nulla rejectio super numero wide in productione huius gradus adsunt. Haec omnia reservantur Gradui 29 / PATCH 14.
+
+
+## PATCH 14 — dispatcher brevis/latus et wideDetour
+
+Gradus 28 demonstravit viam short-only familiam `N>M_OLD` repudiavisse. Gradus 29 cicatricem illam non delet. `Patch14WideSelectionHandler` primum `LegacyShortOnlyWideSelectionAdapter::attempt` vere vocat et exitum vel defectum eius separat servat. Deinde dispatcher semanticus unam tantum viam eligit:
+
+```text
+si N<=M_OLD:
+    via brevis Patch 13
+si N>M_OLD:
+    wideDetour
+```
+
+Via brevis nullas digits wide legit et eundem output rejectionis brevis servat. Via lata minimum numerum locorum invenit:
+
+```text
+places = minimum k cum M_OLD^k >= N
+space = M_OLD^places
+digits[j] = ringAnswer(stream,j), j=0..places-1
+wide = 1 + sum((digits[j]-1)*M_OLD^j)
+acceptanceLimit = floor(space/N)*N
+```
+
+Omnes digits semel ante rejectionem leguntur et in `Patch14WideDetourSelection` servantur. Post compositionem nullus `ringAnswer` iterum vocatur. Dum `wide>acceptanceLimit`, idem numerus compositus in spatio `1..space` per `directionStep` movetur:
+
+```text
+wide = 1 + regularMod(wide-1+directionStep, space)
+```
+
+Cum primum numerus acceptabilis inventus est, `LegacyBiasedSelectionAdapter::selectAcceptedAnswer` eundem `biasedLegacyPick` historicum vocat. Ergo selector legacy manet, sed rejectio lata aequam massam in spatio composito applicat.
+
+### Cicatrix Gradus 28 servata
+
+`executeUnpatchedWideSelectionDiagnostic` adhuc `Discovery14WideAssumptionHandler` et `LegacyShortOnlyWideSelectionAdapter` exercet; pro familia lata output deest et defectus short-only manet. Via activa Patch 14 eundem conatum ante correctionem facit et campos `legacy*BeforePatch` servat.
+
+`tests/stage_28_discovery_14_tests.cpp` tantum ad observabilitatem ante/post patch accommodata est. Eadem versio testis contra fontem Gradus 28 pristinum adhuc tres discrepantias exactas et exitum 1 reddit; contra Gradum 29 transit.
+
+### Regressio PATCH 14
+
+`tests/stage_29_patch_14_tests.cpp` tres familias latas `M_OLD+1`, `M_OLD^2`, `M_OLD^3` contra oracle C++ locale probat. Pro singulis verificat minimum `places`, `space`, digits semel lectas, compositionem wide, acceptance limit, rejectionem super eodem numero composito et output finalem.
+
+Casus `N=M_OLD` demonstrat dispatcher viam brevem servare sine ulla digit wide. Witness rejectionis latae construit `N=wide2-1`; quia `directionStep=-1`, numerus initialis est `N+1`, limes est `N`, unus tantum gradus rejectionis fit et output finalis est `N`. `wideDigitReadCount` ante et post rejectionem manet 2.
+
+Omnes regressiones Graduum 1–29 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus `oldGateQuestionDay`, nullus signed-step gate detour, nullus PATCH 15 et nullus `LEGACY_YEAR_MAX` in productione adsunt. Gradus 30 debet esse `DISCOVERY 15`: helper legacy `oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n` latus positivum semper rogabit quando caller signum gradus negativi amittit; nulla correctio negativa eo gradu addetur.

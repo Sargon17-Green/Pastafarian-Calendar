@@ -38,8 +38,16 @@ int main() {
             std::cerr << "DEFECTUS_ANNULI_DISCOVERY_14 N=" << N << '\n';
             ++defectusInopinati;
         }
-        if (!actualis.legacyShortFailure || actualis.legacyFailure.empty() ||
-            actualis.outputAvailable) {
+        const bool cicatrixDefecit = actualis.patch14Applied
+            ? actualis.legacyShortFailureBeforePatch
+            : actualis.legacyShortFailure;
+        const bool cicatrixOutputHabuit = actualis.patch14Applied
+            ? actualis.legacyOutputAvailableBeforePatch
+            : actualis.outputAvailable;
+        const std::string& cicatrixCausa = actualis.patch14Applied
+            ? actualis.legacyFailureBeforePatch
+            : actualis.legacyFailure;
+        if (!cicatrixDefecit || cicatrixCausa.empty() || cicatrixOutputHabuit) {
             std::cerr << "DEFECTUS_ASSUMPTIONIS_LEGACY_DISCOVERY_14 N=" << N << '\n';
             ++defectusInopinati;
         }
@@ -54,7 +62,7 @@ int main() {
             } else {
                 std::cout << "ABSENS";
             }
-            std::cout << " causa_legacy=" << actualis.legacyFailure << '\n';
+            std::cout << " causa_legacy=" << cicatrixCausa << '\n';
         }
     }
 

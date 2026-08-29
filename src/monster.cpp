@@ -3052,6 +3052,87 @@ void BaseValidationManager::requireDiscovery14WideAssumptionReady(const BaseMons
     }
 }
 
+void BaseValidationManager::requirePatch14WideSelectionReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.patch11Applied || !ctx.patch12Applied || !ctx.patch14Applied) {
+        throw BaseValidationError("patches undecimus, duodecimus et quartus decimus parati esse debent");
+    }
+    const Integer N = ctx.legacyWideSelectionFamilySize;
+    if (N < 1) {
+        throw BaseValidationError("familia selectionis vacua est");
+    }
+    if (!ctx.legacyWideSelectionOutputAvailable) {
+        throw BaseValidationError("patch quartus decimus output selectionis non paravit");
+    }
+    if (ctx.patch14UsedShortPath == ctx.patch14UsedWideDetour) {
+        throw BaseValidationError("dispatcher patch quarti decimi unam tantum viam eligere debet");
+    }
+    if (N <= M_OLD) {
+        if (!ctx.patch14UsedShortPath || ctx.patch14UsedWideDetour) {
+            throw BaseValidationError("familia brevis non per viam short missa est");
+        }
+        if (ctx.patch14WidePlaces != 0 || ctx.patch14WideDigitReadCount != 0 ||
+            !ctx.patch14WideDigits.empty()) {
+            throw BaseValidationError("via brevis digits wide legere non debet");
+        }
+        return;
+    }
+    if (!ctx.patch14UsedWideDetour || ctx.patch14UsedShortPath) {
+        throw BaseValidationError("familia lata non per wideDetour missa est");
+    }
+    if (!ctx.patch14LegacyShortFailureBeforePatch ||
+        ctx.patch14LegacyFailureBeforePatch.empty() ||
+        ctx.patch14LegacyOutputAvailableBeforePatch) {
+        throw BaseValidationError("cicatrix short-only ante wideDetour non servata est");
+    }
+    if (ctx.patch14WidePlaces < 2 ||
+        ctx.patch14WideDigitReadCount != ctx.patch14WidePlaces ||
+        static_cast<int>(ctx.patch14WideDigits.size()) != ctx.patch14WidePlaces) {
+        throw BaseValidationError("digits wide semel pro omnibus locis legi debent");
+    }
+    Integer expectatumSpatium = M_OLD;
+    for (int i = 1; i < ctx.patch14WidePlaces; ++i) {
+        expectatumSpatium *= M_OLD;
+    }
+    if (ctx.patch14WideSpace != expectatumSpatium || ctx.patch14WideSpace < N) {
+        throw BaseValidationError("spatium wide non est M^places minimum");
+    }
+    if (ctx.patch14WidePlaces > 1 && ctx.patch14WideSpace / M_OLD >= N) {
+        throw BaseValidationError("places wide minimum non sunt");
+    }
+    Integer expectatusWide = 1;
+    Integer pondus = 1;
+    for (int j = 0; j < ctx.patch14WidePlaces; ++j) {
+        const Integer expectataDigit = ringAnswer(ctx.legacyWideSelectionRing, Integer{j});
+        if (ctx.patch14WideDigits[static_cast<std::size_t>(j)] != expectataDigit) {
+            throw BaseValidationError("digit wide non ex annulo semel lecta est");
+        }
+        expectatusWide += (expectataDigit - 1) * pondus;
+        pondus *= M_OLD;
+    }
+    if (ctx.patch14WideInitialValue != expectatusWide) {
+        throw BaseValidationError("numerus wide initialis ex digits male compositus est");
+    }
+    const Integer expectatusLimes = (ctx.patch14WideSpace / N) * N;
+    if (ctx.patch14WideAcceptanceLimit != expectatusLimes) {
+        throw BaseValidationError("limes rejectionis wide non est floor(space/N)*N");
+    }
+    Integer acceptus = ctx.patch14WideInitialValue;
+    Integer gradus = 0;
+    while (acceptus > expectatusLimes) {
+        acceptus = 1 + regularMod(
+            acceptus - 1 + Integer{ctx.legacyWideSelectionRing.directionStep},
+            ctx.patch14WideSpace);
+        ++gradus;
+    }
+    if (ctx.patch14WideAcceptedValue != acceptus || ctx.patch14WideRejectionSteps != gradus) {
+        throw BaseValidationError("rejectio wide non super eodem numero composito processit");
+    }
+    const Integer expectatusOutput = biasedLegacyPick(acceptus, N);
+    if (ctx.legacyWideSelectionOutput != expectatusOutput) {
+        throw BaseValidationError("output wide post rejectionem non per selector legacy reductus est");
+    }
+}
+
 void BaseValidationManager::requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const {
     requireLegacyBiasedSelectionReady(ctx);
     if (!ctx.patch13Applied) {
@@ -3171,6 +3252,55 @@ LegacyWideSelectionAttempt LegacyShortOnlyWideSelectionAdapter::attempt(
             error.what()
         };
     }
+}
+
+Patch14WideDetourSelection Patch14WideDetourWrapper::repair(
+    const LegacyAnswerRing& stream,
+    const Integer& N,
+    const LegacyBiasedSelectionAdapter& selectionAdapter) const {
+    if (N <= M_OLD) {
+        throw BaseValidationError("wideDetour familiam supra M requirit");
+    }
+    int places = 1;
+    Integer space = M_OLD;
+    while (space < N) {
+        ++places;
+        space *= M_OLD;
+    }
+
+    std::vector<Integer> digits;
+    digits.reserve(static_cast<std::size_t>(places));
+    for (int j = 0; j < places; ++j) {
+        digits.push_back(ringAnswer(stream, Integer{j}));
+    }
+
+    Integer wide = 1;
+    Integer weight = 1;
+    for (const Integer& digit : digits) {
+        wide += (digit - 1) * weight;
+        weight *= M_OLD;
+    }
+    const Integer initialWide = wide;
+    const Integer acceptanceLimit = (space / N) * N;
+    Integer rejectionSteps = 0;
+    while (wide > acceptanceLimit) {
+        wide = 1 + regularMod(
+            wide - 1 + Integer{stream.directionStep},
+            space);
+        ++rejectionSteps;
+    }
+
+    return Patch14WideDetourSelection{
+        places,
+        space,
+        digits,
+        places,
+        initialWide,
+        acceptanceLimit,
+        wide,
+        rejectionSteps,
+        selectionAdapter.selectAcceptedAnswer(wide, N)
+    };
 }
 
 void Discovery11OverwrittenOrderHandler::handle(
@@ -3531,6 +3661,115 @@ void BaseDispatcher::dispatchLegacyWideSelectionAssumption(
     handler.handle(ctx, adapter, selectionAdapter, rejectionWrapper, validator, metrics);
 }
 
+void Patch14WideSelectionHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyShortOnlyWideSelectionAdapter& legacyAdapter,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch14WideSelectionHandler";
+    ctx.phase = "PATCH_14_BUILD_ANSWER_RING";
+    ctx.status = "LEGACY_SHORT_ONLY_ATTEMPT_PRESERVED_BEFORE_DISPATCH";
+    ctx.branchTrace.push_back("PATCH_14_BUILD_ANSWER_RING");
+    metrics.bump(ctx, "patch14.answerRing.calls");
+
+    ctx.legacyWideSelectionRing = answerRingThroughPatchedNextBowl(
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.legacyBiasedSelectionQueriedBowlId,
+        ctx.patchedNextBowlOutput,
+        ctx.legacyBiasedSelectionSeal);
+    ctx.legacyWideSelectionFamilySize = ctx.legacyBiasedSelectionFamilySize;
+
+    ctx.phase = "PATCH_14_LEGACY_SHORT_ONLY_ATTEMPT";
+    ctx.branchTrace.push_back("PATCH_14_LEGACY_SHORT_ONLY_ATTEMPT");
+    const LegacyWideSelectionAttempt legacyAttempt = legacyAdapter.attempt(
+        ctx.legacyWideSelectionRing,
+        ctx.legacyWideSelectionFamilySize,
+        selectionAdapter,
+        rejectionWrapper);
+    ctx.patch14LegacyOutputAvailableBeforePatch = legacyAttempt.outputAvailable;
+    ctx.patch14LegacyOutputBeforePatch = legacyAttempt.outputRank;
+    ctx.patch14LegacyShortFailureBeforePatch = legacyAttempt.legacyShortFailure;
+    ctx.patch14LegacyFailureBeforePatch = legacyAttempt.legacyFailure;
+    metrics.bump(ctx, "patch14.legacyShortOnly.calls");
+
+    if (ctx.legacyWideSelectionFamilySize <= M_OLD) {
+        ctx.phase = "PATCH_14_SHORT_DISPATCH";
+        ctx.branchTrace.push_back("PATCH_14_SHORT_DISPATCH");
+        if (!legacyAttempt.outputAvailable || legacyAttempt.legacyShortFailure) {
+            throw BaseValidationError("via brevis legacy-compatible output non dedit");
+        }
+        ctx.legacyWideSelectionOutputAvailable = true;
+        ctx.legacyWideSelectionOutput = legacyAttempt.outputRank;
+        ctx.legacyWideSelectionShortFailure = false;
+        ctx.legacyWideSelectionFailure.clear();
+        ctx.patch14UsedShortPath = true;
+        ctx.patch14UsedWideDetour = false;
+        metrics.bump(ctx, "patch14.shortPath.calls");
+    } else {
+        ctx.phase = "PATCH_14_WIDE_DETOUR";
+        ctx.branchTrace.push_back("PATCH_14_WIDE_DETOUR");
+        const Patch14WideDetourSelection wide = wideWrapper.repair(
+            ctx.legacyWideSelectionRing,
+            ctx.legacyWideSelectionFamilySize,
+            selectionAdapter);
+        ctx.legacyWideSelectionOutputAvailable = true;
+        ctx.legacyWideSelectionOutput = wide.outputRank;
+        ctx.legacyWideSelectionShortFailure = false;
+        ctx.legacyWideSelectionFailure.clear();
+        ctx.patch14UsedShortPath = false;
+        ctx.patch14UsedWideDetour = true;
+        ctx.patch14WidePlaces = wide.places;
+        ctx.patch14WideSpace = wide.space;
+        ctx.patch14WideDigits = wide.digits;
+        ctx.patch14WideDigitReadCount = wide.digitReadCount;
+        ctx.patch14WideInitialValue = wide.initialWide;
+        ctx.patch14WideAcceptanceLimit = wide.acceptanceLimit;
+        ctx.patch14WideAcceptedValue = wide.acceptedWide;
+        ctx.patch14WideRejectionSteps = wide.rejectionSteps;
+        metrics.bump(ctx, "patch14.wideDetour.calls");
+    }
+
+    ctx.patch14Applied = true;
+    ctx.legacyWideSelectionReady = true;
+    ctx.phase = "PATCH_14_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_14_VALIDATE");
+    validator.requirePatch14WideSelectionReady(ctx);
+
+    ctx.phase = "PATCH_14_WIDE_SELECTION_READY";
+    ctx.status = ctx.patch14UsedWideDetour
+        ? "WIDE_DETOUR_REUSES_SINGLE_DIGIT_VECTOR"
+        : "SHORT_PATH_REMAINS_LEGACY_COMPATIBLE";
+    ctx.branchTrace.push_back("PATCH_14_WIDE_SELECTION_READY");
+    metrics.bump(ctx, "patch14.wideSelection.ready");
+}
+
+void BaseDispatcher::dispatchPatchedWideSelection(
+    BaseMonsterContext& ctx,
+    const Patch14WideSelectionHandler& handler,
+    const LegacyShortOnlyWideSelectionAdapter& legacyAdapter,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_14_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_14_DISPATCH");
+    metrics.bump(ctx, "patch14.dispatch.calls");
+    handler.handle(
+        ctx,
+        legacyAdapter,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+}
+
 LegacyOrderMemoryReport BaseMonsterManager::executeOverwritableOrderMemorySauce(
     const Integer& calculationDay,
     const Integer& targetDay) const {
@@ -3880,7 +4119,101 @@ LegacyWideSelectionReport BaseMonsterManager::executeLegacyWideSelectionAssumpti
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
     ctx.targetDay = targetDay;
-    ctx.phase = "DISCOVERY_14_NEW";
+    ctx.phase = "PATCH_14_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyNextBowlQueriedId = queriedBowlId;
+    ctx.legacyBiasedSelectionQueriedBowlId = queriedBowlId;
+    ctx.legacyBiasedSelectionSeal = seal;
+    ctx.legacyBiasedSelectionFamilySize = familySize;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyOrderMemorySauceAdapter orderMemoryAdapter;
+    const Patch11OrderAt46LatchWrapper latchWrapper;
+    const Patch11OrderAt46LatchHandler latchHandler;
+    const LegacyNextBowlAdapter nextBowlAdapter;
+    const Patch12NextBowlWrapper nextBowlWrapper;
+    const Patch12NextBowlHandler nextBowlHandler;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const LegacyShortOnlyWideSelectionAdapter wideLegacyAdapter;
+    const Patch14WideDetourWrapper wideWrapper;
+    const Patch14WideSelectionHandler wideHandler;
+    const BaseDispatcher dispatcher;
+
+    dispatcher.dispatchPatchedOrderAt46Latch(
+        ctx,
+        latchHandler,
+        orderMemoryAdapter,
+        latchWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchPatchedNextBowl(
+        ctx,
+        nextBowlHandler,
+        nextBowlAdapter,
+        nextBowlWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchPatchedWideSelection(
+        ctx,
+        wideHandler,
+        wideLegacyAdapter,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+
+    return LegacyWideSelectionReport{
+        calculationDay,
+        targetDay,
+        queriedBowlId,
+        seal,
+        familySize,
+        ctx.legacyWideSelectionRing,
+        ctx.legacyWideSelectionOutputAvailable,
+        ctx.legacyWideSelectionOutput,
+        ctx.legacyWideSelectionShortFailure,
+        ctx.legacyWideSelectionFailure,
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.patch11LatchedOrderSauce.orderAt46Latch,
+        ctx.patchedNextBowlOutput,
+        ctx.patch11Applied,
+        ctx.patch12Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.patch14LegacyOutputAvailableBeforePatch,
+        ctx.patch14LegacyOutputBeforePatch,
+        ctx.patch14LegacyShortFailureBeforePatch,
+        ctx.patch14LegacyFailureBeforePatch,
+        ctx.patch14Applied,
+        ctx.patch14UsedShortPath,
+        ctx.patch14UsedWideDetour,
+        ctx.patch14WidePlaces,
+        ctx.patch14WideSpace,
+        ctx.patch14WideDigits,
+        ctx.patch14WideDigitReadCount,
+        ctx.patch14WideInitialValue,
+        ctx.patch14WideAcceptanceLimit,
+        ctx.patch14WideAcceptedValue,
+        ctx.patch14WideRejectionSteps
+    };
+}
+
+LegacyWideSelectionReport BaseMonsterManager::executeUnpatchedWideSelectionDiagnostic(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    int queriedBowlId,
+    int seal,
+    const Integer& familySize) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_14_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyNextBowlQueriedId = queriedBowlId;

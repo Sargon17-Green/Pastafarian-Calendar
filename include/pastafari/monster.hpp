@@ -177,6 +177,18 @@ struct LegacyWideSelectionAttempt {
     std::string legacyFailure;
 };
 
+struct Patch14WideDetourSelection {
+    int places = 0;
+    Integer space{};
+    std::vector<Integer> digits{};
+    int digitReadCount = 0;
+    Integer initialWide{};
+    Integer acceptanceLimit{};
+    Integer acceptedWide{};
+    Integer rejectionSteps{};
+    Integer outputRank{};
+};
+
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
 Stone stonePatch(int i, Stone state);
@@ -312,6 +324,21 @@ struct BaseMonsterContext {
     bool legacyWideSelectionShortFailure = false;
     std::string legacyWideSelectionFailure;
     bool legacyWideSelectionReady = false;
+    bool patch14LegacyOutputAvailableBeforePatch = false;
+    Integer patch14LegacyOutputBeforePatch{};
+    bool patch14LegacyShortFailureBeforePatch = false;
+    std::string patch14LegacyFailureBeforePatch;
+    bool patch14UsedShortPath = false;
+    bool patch14UsedWideDetour = false;
+    int patch14WidePlaces = 0;
+    Integer patch14WideSpace{};
+    std::vector<Integer> patch14WideDigits{};
+    int patch14WideDigitReadCount = 0;
+    Integer patch14WideInitialValue{};
+    Integer patch14WideAcceptanceLimit{};
+    Integer patch14WideAcceptedValue{};
+    Integer patch14WideRejectionSteps{};
+    bool patch14Applied = false;
 };
 
 struct LegacyWideSelectionReport {
@@ -334,6 +361,21 @@ struct LegacyWideSelectionReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    bool legacyOutputAvailableBeforePatch = false;
+    Integer legacyOutputBeforePatch{};
+    bool legacyShortFailureBeforePatch = false;
+    std::string legacyFailureBeforePatch;
+    bool patch14Applied = false;
+    bool usedShortPath = false;
+    bool usedWideDetour = false;
+    int widePlaces = 0;
+    Integer wideSpace{};
+    std::vector<Integer> wideDigits{};
+    int wideDigitReadCount = 0;
+    Integer wideInitialValue{};
+    Integer wideAcceptanceLimit{};
+    Integer wideAcceptedValue{};
+    Integer wideRejectionSteps{};
 };
 
 struct BaseRunReport {
@@ -578,6 +620,7 @@ public:
     void requireLegacyBiasedSelectionReady(const BaseMonsterContext& ctx) const;
     void requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery14WideAssumptionReady(const BaseMonsterContext& ctx) const;
+    void requirePatch14WideSelectionReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -689,6 +732,13 @@ public:
                                        const Integer& N,
                                        const LegacyBiasedSelectionAdapter& selectionAdapter,
                                        const Patch13RejectionWrapper& rejectionWrapper) const;
+};
+
+class Patch14WideDetourWrapper {
+public:
+    Patch14WideDetourSelection repair(const LegacyAnswerRing& stream,
+                                      const Integer& N,
+                                      const LegacyBiasedSelectionAdapter& selectionAdapter) const;
 };
 
 class Patch10DeferredBowlWrapper {
@@ -993,6 +1043,17 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch14WideSelectionHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyShortOnlyWideSelectionAdapter& legacyAdapter,
+                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                const Patch13RejectionWrapper& rejectionWrapper,
+                const Patch14WideDetourWrapper& wideWrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1175,6 +1236,15 @@ public:
                                                const Patch13RejectionWrapper& rejectionWrapper,
                                                const BaseValidationManager& validator,
                                                const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedWideSelection(BaseMonsterContext& ctx,
+                                      const Patch14WideSelectionHandler& handler,
+                                      const LegacyShortOnlyWideSelectionAdapter& legacyAdapter,
+                                      const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                      const Patch13RejectionWrapper& rejectionWrapper,
+                                      const Patch14WideDetourWrapper& wideWrapper,
+                                      const BaseValidationManager& validator,
+                                      const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1253,6 +1323,12 @@ public:
         int seal,
         const Integer& familySize) const;
     LegacyWideSelectionReport executeLegacyWideSelectionAssumption(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        int queriedBowlId,
+        int seal,
+        const Integer& familySize) const;
+    LegacyWideSelectionReport executeUnpatchedWideSelectionDiagnostic(
         const Integer& calculationDay,
         const Integer& targetDay,
         int queriedBowlId,
