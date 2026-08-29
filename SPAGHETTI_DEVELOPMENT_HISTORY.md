@@ -517,3 +517,29 @@ Regressio PATCH 09 omnes 720 permutationis residua probat. `bowlAlias` semper or
 Additi sunt `BowlAlias`, `BowlAliasPourComputation`, `installBowlAlias`, `bowlAtAliasedPosition`, `poursThroughBowlAlias`, campi contextus alias et output emendati, `Patch09BowlAliasWrapper`, `Patch09BowlAliasHandler`, `dispatchPatchedFixedPours`, `requirePatch09Ready`, `executeUnpatchedFixedPoursDiagnostic` et campi report cicatricis ante patch.
 
 Nullum `vaultOld`, nullum `pending`, nullus PATCH 10 et nulla logica contaminationis craterum sequentis gradus addita est.
+
+## Gradus 20 — Detectio 10: contaminatio craterum per scripturam immediatam
+
+### Quid putabatur
+
+Post PATCH 09 tres fusiones iam crateres rectos per `bowlAlias` legebant. Vetus commotio autem tempore anteriori scripta erat, cum una structura craterum simul pro lectione et scriptione adhibebatur. Quia formula cuiusque positionis localis videbatur et omnis cratera semel per circuitum scribitur, credebatur hanc mutationem sequentialem exitum finalem non mutare.
+
+### Quid repertum est
+
+`legacyStirBowlsInPlace` sex positiones ordine percurrit et statim post singulam formulam in ipsum `bowls` scribit. Formula positionis sequentis igitur non necessario statum ante circuitum legit: si `prev` vel `next` iam in positione priore scriptus est, valor novus in calculum praesentem intrat.
+
+Regressio duos casus probat. Pro `drop=1` et pro `drop=241` prima cratera scripta cum formula quae omnes lecturas ex statu antiquo facit concordat; quinque craterae reliquae in utroque casu discrepant. Summa exacta decem discrepantiarum demonstrat contaminationem intra unum circuitum, non errorem permutationis vel fusionum.
+
+### Quid circumventum est
+
+Nihil hoc gradu circumventum est. `LegacyInPlaceBowlAdapter` copiam inputis accipit tantum ut mutationem ab argumento calleris externo contineat, deinde `legacyStirBowlsInPlace` ipsam mutationem sequentialem exsequitur. `Discovery10InPlaceBowlHandler` output legacy in contextu servat et eum directe exponit.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Norma unius commotionis postulat ut omnes sex formulae eosdem sex valores craterum ante circuitum legant. Via huius gradus autem lectiones posteriores ex obiecto iam partim mutato facit. Quamvis eadem algebra et idem `SAVE` adhibeantur, input termini `B[id]`, `B[prev]` vel `B[next]` iam alii esse possunt; inde exitus finalis non est normativae aequivalens.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `legacyStirBowlsInPlace`, campi contextus commotionis craterum, `LegacyInPlaceBowlReport`, `LegacyInPlaceBowlAdapter`, `Discovery10InPlaceBowlHandler`, `requireLegacyInPlaceBowlReady`, `dispatchLegacyInPlaceBowlStir` et `executeInPlaceBowlStir`. Comprobator repetit computationem legacy solum ad determinismum confirmandum; nulla copia normativa productionis et nullus fallback introducitur.
+
+Nullum snapshot semanticum separatum, nulla regio scripturae separata, nullus PATCH 10 et nulla logica Gradus 21 praemature addita est.

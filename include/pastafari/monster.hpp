@@ -87,6 +87,12 @@ BowlAliasPourComputation poursThroughBowlAlias(const Integer& drop,
                                                const BowlState& oldBowls,
                                                const Stone& stoneRow,
                                                const PermutationOrder& order);
+void legacyStirBowlsInPlace(BowlState& bowls,
+                            int index,
+                            const Integer& drop,
+                            const Stone& stoneRow,
+                            const PermutationOrder& order,
+                            const PourTriplet& firstThreePours);
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -181,6 +187,14 @@ struct BaseMonsterContext {
     std::array<int, 3> aliasedFixedPourBowlIds{{1, 2, 3}};
     PourTriplet patchedFixedPourOutput{};
     bool patch09Applied = false;
+    BowlState legacyInPlaceBowlInput{};
+    Integer legacyInPlaceBowlDrop{};
+    int legacyInPlaceBowlIndex = 0;
+    Stone legacyInPlaceBowlStoneRow{};
+    PermutationOrder legacyInPlaceBowlOrder{};
+    PourTriplet legacyInPlaceBowlPours{};
+    BowlState legacyInPlaceBowlOutput{};
+    bool legacyInPlaceBowlReady = false;
 };
 
 struct BaseRunReport {
@@ -311,6 +325,20 @@ struct LegacyFixedPourReport {
     bool patch09Applied = false;
 };
 
+struct LegacyInPlaceBowlReport {
+    BowlState input{};
+    Integer drop{};
+    int index = 0;
+    Stone stoneRow{};
+    PermutationOrder order{};
+    PourTriplet firstThreePours{};
+    BowlState output{};
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 class BaseValidationError final : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
@@ -337,6 +365,7 @@ public:
     void requirePatch08Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyFixedPourReady(const BaseMonsterContext& ctx) const;
     void requirePatch09Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyInPlaceBowlReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -392,6 +421,16 @@ public:
                                        int index,
                                        const BowlState& oldBowls,
                                        const Stone& stoneRow) const;
+};
+
+class LegacyInPlaceBowlAdapter {
+public:
+    BowlState stir(const BowlState& bowls,
+                   int index,
+                   const Integer& drop,
+                   const Stone& stoneRow,
+                   const PermutationOrder& order,
+                   const PourTriplet& firstThreePours) const;
 };
 
 class Patch09BowlAliasWrapper {
@@ -608,6 +647,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery10InPlaceBowlHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyInPlaceBowlAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -730,6 +777,12 @@ public:
                                    const Patch09BowlAliasWrapper& wrapper,
                                    const BaseValidationManager& validator,
                                    const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyInPlaceBowlStir(BaseMonsterContext& ctx,
+                                        const Discovery10InPlaceBowlHandler& handler,
+                                        const LegacyInPlaceBowlAdapter& adapter,
+                                        const BaseValidationManager& validator,
+                                        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -771,6 +824,12 @@ public:
                                                                int index,
                                                                const BowlState& oldBowls,
                                                                const Stone& stoneRow) const;
+    LegacyInPlaceBowlReport executeInPlaceBowlStir(const BowlState& bowls,
+                                                     int index,
+                                                     const Integer& drop,
+                                                     const Stone& stoneRow,
+                                                     const PermutationOrder& order,
+                                                     const PourTriplet& firstThreePours) const;
 };
 
 } // namespace pastafari

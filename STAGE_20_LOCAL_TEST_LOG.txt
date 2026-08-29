@@ -1,0 +1,39 @@
+Gradus 20 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Libraria productionis et oracle test-only C++ separatim compilata sunt. Regressiones veteres in greges minores aedificatae sunt quia una catena compilationum longa limitem temporis ambitus attingebat; codex et condiciones probationum propter hanc partitionem non mutati sunt.
+
+Exitus regressionum priorum:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+REGRESSIO_DISCOVERY_01_TRANSIIT
+REGRESSIO_PATCH_01_TRANSIIT
+REGRESSIO_DISCOVERY_02_TRANSIIT
+REGRESSIO_PATCH_02_TRANSIIT
+REGRESSIO_DISCOVERY_03_TRANSIIT
+REGRESSIO_PATCH_03_TRANSIIT
+REGRESSIO_DISCOVERY_04_TRANSIIT
+REGRESSIO_PATCH_04_TRANSIIT
+REGRESSIO_DISCOVERY_05_TRANSIIT
+REGRESSIO_PATCH_05_TRANSIIT
+REGRESSIO_DISCOVERY_06_TRANSIIT
+REGRESSIO_PATCH_06_TRANSIIT
+REGRESSIO_DISCOVERY_07_TRANSIIT
+REGRESSIO_PATCH_07_TRANSIIT
+REGRESSIO_DISCOVERY_08_TRANSIIT
+REGRESSIO_PATCH_08_TRANSIIT
+REGRESSIO_DISCOVERY_09_TRANSIIT
+REGRESSIO_PATCH_09_TRANSIIT
+
+Regressio DISCOVERY 10:
+CASUS_COMMOTIONIS drop=1 discrepantiae=5
+CASUS_COMMOTIONIS drop=241 discrepantiae=5
+REGRESSIO_DISCOVERY_10_DEFECIT: 10 discrepantiae craterum ex contaminatione in-place inventae sunt
+EXIT_CODE=1
+
+Prima cratera ordinis in utroque casu cum norma concordat; quinque posteriores discrepant. Exitus 1 est consulto exspectatus quia Gradus 20 est DISCOVERY.
+
+Status finalis: EXPECTED_RED
+Regressiones anteriores: PASS
+Emendatio futura PATCH 10: ABSENS
