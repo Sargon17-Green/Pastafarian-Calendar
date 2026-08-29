@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 12 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 12 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -1271,7 +1271,42 @@ group('Discovery 12 conserva li successor numeric fix de bowl ID pos li latch de
   ok(!source.includes('indexOf'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 12', () => {
+group('Patch 12 conserva li scar fixed-ID e rende li successor circular del latch', () => {
+  const fixtureLatch = [1, 2, 3, 4, 6, 5];
+  deepEq([4, 5, 6].map((id) => production.oldNextBowlFixedName(id)), [5, 6, 1]);
+  deepEq([4, 5, 6].map((id) => production.nextBowlFromOrderAt46Latch(fixtureLatch, id)), [6, 1, 5]);
+  for (let rank0 = 0n; rank0 < 720n; rank0 += 1n) {
+    const order = production.oldPermutationUnrank0(rank0);
+    for (let id = 1; id <= 6; id += 1) {
+      eq(
+        production.nextBowlFromOrderAt46Latch(order, id),
+        o.nextBowlInDrop46Order({ orderAtDrop46: order }, id)
+      );
+    }
+  }
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const expected = o.sauce(f, f);
+  const queriedId = expected.orderAtDrop46[3];
+  const routed = production.historicNextBowlThroughMonsterPath(f, f, counts, stones, queriedId);
+  eq(routed.context.currentHandler, 'NextBowlPatchWrapper');
+  eq(routed.context.previousHandler, 'Discovery12NextBowlHandler');
+  eq(routed.context.phase, 'PATCH_12_LATCH_CIRCULAR_SUCCESSOR');
+  eq(routed.context.status, 'PATCH_12_RESULT');
+  eq(routed.context.patch12LegacyDiagnosticPreserved, true);
+  eq(routed.context.patch12LegacyDiagnostic, production.oldNextBowlFixedName(queriedId));
+  eq(routed.result, o.nextBowlInDrop46Order(expected, queriedId));
+  eq(routed.context.metrics['patch12.nextBowl.calls'], 1n);
+  const legacySource = production.oldNextBowlFixedName.toString();
+  ok(legacySource.includes('return id === 6 ? 1 : id + 1;'));
+  ok(!legacySource.includes('indexOf'));
+  const patchSource = production.nextBowlFromOrderAt46Latch.toString();
+  ok(patchSource.includes('orderAt46Latch.indexOf(queriedBowlId)'));
+  ok(patchSource.includes('(position + 1) % orderAt46Latch.length'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 12', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1283,4 +1318,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 12.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 12.');

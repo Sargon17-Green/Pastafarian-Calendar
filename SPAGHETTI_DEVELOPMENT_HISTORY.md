@@ -512,3 +512,26 @@ Li monster adjunte `LegacyNextBowlAdapter` e `Discovery12NextBowlHandler`. Li ma
 ### Pro quo li nov layer ne change altri semantics
 
 Li helper ne muta li latch, bowls, drops o stones. Li route usa li output de Patch 11 solmen quam state precedent valid e li regression nov es isolat al next-bowl. Omni regressions precedent resta verd e null logic de Patch 12 o Patch 13 es present.
+
+
+## Stage 25 — PATCH 12
+
+### Quo esset circumit
+
+`oldNextBowlFixedName` ne esset modificat. Li nov `NextBowlPatchWrapper` recive li `orderAt46Latch` ja valid de Patch 11 pos que `Discovery12NextBowlHandler` ha executet li scar fixed-ID. Li wrapper voca li helper legacy denov quam diagnostic explicit e conserva ti raw valore, ma deriva li output semantic per `nextBowlFromOrderAt46Latch`.
+
+### Pro quo li patch es normativmen equivalent
+
+Li specification defini next-bowl quam li successor del queried bowl in li order latchet de drop 46. Trovar li position del ID in un permutation de six IDs e leer li position sequent con wrap modulo six implementa exactmen ti relation circular. Null valore de bowl, drop, sauce o post-stir es recalculat per ti patch.
+
+### Crescentie monster in ti stage
+
+Li context obtene `patch12OrderAt46Latch`, `patch12QueriedId`, `patch12QueriedPosition`, `patch12LegacyDiagnostic`, un flag que li diagnostic legacy esset realmen executet, e `patch12Output`. Li route complet passa per Discovery 11, Patch 11, Discovery 12 e finalmen `NextBowlPatchWrapper`, con metrics separat por li scar e li detour.
+
+### Scar conservat
+
+Li helper `oldNextBowlFixedName(id)` continua retornar li ring numeric fix `1→2→3→4→5→6→1` e ne conosse null latch. It resta directmen testabil e su source ne contene null lookup positional. Ti duplicat diagnostic ne es simplificat.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+`nextBowlFromOrderAt46Latch` valida que li latch es un permutation complet de 1..6 e que li queried ID es valid. It ne muta li latch e ne usa state global. Un sweep de omni 720 permutations e omni six queried IDs concorda con li reference normativ local. Null `biasedLegacyPick` o code de Patch 13 es addit.

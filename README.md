@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 24 de 55: DISCOVERY 12**. Omni scars e patches til Patch 11 resta intact e testabil. `orderAt46Latch` continua esser single-write e li fonte semantic del order de drop 46, ma li nov `oldNextBowlFixedName(id)` interpreta next-bowl quam successor numeric fix del ID.
+Li linea es in **Stage 25 de 55: PATCH 12**. Omni scars e patches til Patch 11 resta intact e testabil. `oldNextBowlFixedName(id)` continua esser li scar fixed-ID de Discovery 12, ma li route semantic nov trova li queried ID in `orderAt46Latch` e usa su successor circular.
 
-`LegacyNextBowlAdapter` e `Discovery12NextBowlHandler` es conectet pos li route de Patch 11. Li handler conserva li latch valid in li context, ma li call legacy self usa solmen li queried ID e ignora su position in ti latch. Li correction circular de Patch 12 ne es present; li nov regression es intentionalmen rubi.
+`NextBowlPatchWrapper` es conectet pos `Discovery12NextBowlHandler`. It conserva un call diagnostic real a `oldNextBowlFixedName`, ma ti valore ne decide li output. `nextBowlFromOrderAt46Latch` es li unic fonte semantic del next-bowl reparat. Li regression de Discovery 12 es nu verd; Patch 13 ne es present.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 11 deve restar verd:
+Omni regressions til Discovery 12 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal del discovery deve esser rubi intentionalmen:
+Li test focal del patch deve esser verd:
 
 ```text
-npm run test:discovery-12
+npm run test:patch-12
 ```
 
-Li suite complet deve finir in li sam regression expectat:
+Li suite complet deve esser verd:
 
 ```text
 npm test
@@ -117,3 +117,8 @@ Exactmen pos drop 46, `writeOrderAt46LatchOnce` clona li order in `orderAt46Latc
 Li latch de drop 46 ja es exact e stabil, ma li layer historic de next-bowl conserva un vocabularium anterior: `oldNextBowlFixedName(id)` avansa per li IDs numeric `1→2→3→4→5→6→1`. Ti helper ne cerca li queried ID in `orderAt46Latch` e ne conosse null position circular.
 
 `LegacyNextBowlAdapter` es insertet pos Patch 11 e `Discovery12NextBowlHandler` registra li latch, li queried ID e li successor legacy in li context invocation-local. Li regression nov usa un latch nontrivial por monstrar que li successor numeric fix diverge del successor circular definit per li order latchet. Null correction de Patch 12 es anticipat.
+
+
+## Stage 25 — Patch 12
+
+`oldNextBowlFixedName` resta intact e continua representar li successor numeric fix historic. `nextBowlFromOrderAt46Latch` valida un permutation latchet de six IDs, trova li queried ID per position e retorna `orderAt46Latch[(position+1) mod 6]`; li ultim position wrap al prim. `NextBowlPatchWrapper` voca li legacy diagnosticmen e conserva su output in li context, ma li successor semantic veni solmen del latch. Li regression de Discovery 12 deven verd por li fixture `[1,2,3,4,6,5]` e li test de Patch 12 verifica omni six IDs super omni 720 permutations. Null `biasedLegacyPick` o code de Patch 13 es present.

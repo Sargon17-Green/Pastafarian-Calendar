@@ -141,6 +141,12 @@ class BaseMonsterContext {
     this.legacyNextBowlOrderAt46Latch = null;
     this.legacyNextBowlQueriedId = null;
     this.legacyNextBowlOutput = null;
+    this.patch12OrderAt46Latch = null;
+    this.patch12QueriedId = null;
+    this.patch12QueriedPosition = null;
+    this.patch12LegacyDiagnostic = null;
+    this.patch12LegacyDiagnosticPreserved = false;
+    this.patch12Output = null;
   }
 }
 
@@ -275,6 +281,12 @@ class BaseValidationManager {
   requirePatch11Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_11_RESULT') {
       throw new BootstrapStageError('Li context ne contene un latch valid de Patch 11 por Discovery 12.');
+    }
+  }
+
+  requireDiscovery12Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_12_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un next-bowl legacy valid por Patch 12.');
     }
   }
 
@@ -1096,6 +1108,28 @@ function oldNextBowlFixedName(id) {
   return id === 6 ? 1 : id + 1;
 }
 
+function nextBowlFromOrderAt46Latch(orderAt46Latch, queriedBowlId) {
+  if (!Array.isArray(orderAt46Latch) || orderAt46Latch.length !== 6) {
+    throw new TypeError('Li orderAt46Latch por next-bowl deve contener exactmen six bowl IDs.');
+  }
+  if (!Number.isInteger(queriedBowlId) || queriedBowlId < 1 || queriedBowlId > 6) {
+    throw new RangeError('Li ID questionat por next-bowl deve esser un integer inter 1 e 6.');
+  }
+  const seen = new Set();
+  for (const id of orderAt46Latch) {
+    if (!Number.isInteger(id) || id < 1 || id > 6 || seen.has(id)) {
+      throw new RangeError('Li orderAt46Latch deve esser un permutation valid de bowl IDs 1..6.');
+    }
+    seen.add(id);
+  }
+  const position = orderAt46Latch.indexOf(queriedBowlId);
+  if (position < 0) {
+    throw new BootstrapStageError('Li bowl questionat manca ex orderAt46Latch.');
+  }
+  // Li successor semantic es positional e circular; li wrap del ultim position retorna al prim.
+  return orderAt46Latch[(position + 1) % orderAt46Latch.length];
+}
+
 
 class LegacyOverwritableOrderMemoryAdapter {
   call(counts, stones) {
@@ -1222,6 +1256,34 @@ class Discovery12NextBowlHandler {
     context.status = 'DISCOVERY_12_LEGACY_RESULT';
     this.metricsManager.bump(context, 'discovery12.fixedIdNextBowl.calls');
     return context.legacyNextBowlOutput;
+  }
+}
+
+class NextBowlPatchWrapper {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  repair(context, orderAt46Latch, queriedBowlId) {
+    this.validationManager.requireDiscovery12Result(context);
+    this.validationManager.requireLatchedBowlOrder(orderAt46Latch);
+    this.validationManager.requireBowlId(queriedBowlId);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'NextBowlPatchWrapper';
+    context.phase = 'PATCH_12_LATCH_CIRCULAR_SUCCESSOR';
+    context.branchTrace.push('PATCH_12_LATCH_CIRCULAR_SUCCESSOR');
+    context.patch12OrderAt46Latch = orderAt46Latch.slice();
+    context.patch12QueriedId = queriedBowlId;
+    context.patch12QueriedPosition = orderAt46Latch.indexOf(queriedBowlId);
+    // Li helper legacy resta intact e es vocat diagnosticmen; su output ne decide li successor semantic.
+    context.patch12LegacyDiagnostic = this.legacyAdapter.call(queriedBowlId);
+    context.patch12LegacyDiagnosticPreserved = true;
+    context.patch12Output = nextBowlFromOrderAt46Latch(orderAt46Latch, queriedBowlId);
+    context.status = 'PATCH_12_RESULT';
+    this.metricsManager.bump(context, 'patch12.nextBowl.calls');
+    return context.patch12Output;
   }
 }
 
@@ -1937,6 +1999,11 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyNextBowlAdapter
     );
+    this.nextBowlPatchWrapper = new NextBowlPatchWrapper(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyNextBowlAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -2238,6 +2305,21 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch12NextBowl(calculationDay, targetDay, counts, stones, queriedBowlId) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery11OverwrittenOrderHandler.handle(context, counts, stones);
+      const latched = this.patch11OrderAt46LatchWrapper.repair(context, counts, stones);
+      this.discovery12NextBowlHandler.handle(context, latched.orderAt46Latch, queriedBowlId);
+      const result = this.nextBowlPatchWrapper.repair(context, latched.orderAt46Latch, queriedBowlId);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -2346,8 +2428,14 @@ function discovery12LegacyNextBowlThroughMonsterPath(calculationDay, targetDay, 
   );
 }
 
+function historicNextBowlThroughMonsterPath(calculationDay, targetDay, counts, stones, queriedBowlId) {
+  return new BaseMonsterManager().executePatch12NextBowl(
+    calculationDay, targetDay, counts, stones, queriedBowlId
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 12; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 12; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -2396,6 +2484,7 @@ module.exports = Object.freeze({
   Patch11OrderAt46LatchWrapper,
   LegacyNextBowlAdapter,
   Discovery12NextBowlHandler,
+  NextBowlPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -2440,6 +2529,7 @@ module.exports = Object.freeze({
   readOrderAt46Latch,
   sauceWithOrderAt46Latch,
   oldNextBowlFixedName,
+  nextBowlFromOrderAt46Latch,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -2464,5 +2554,6 @@ module.exports = Object.freeze({
   discovery11LegacyOverwrittenOrderThroughMonsterPath,
   historicOrderAt46ThroughMonsterPath,
   discovery12LegacyNextBowlThroughMonsterPath,
+  historicNextBowlThroughMonsterPath,
   calendarDateSpaghetti
 });
