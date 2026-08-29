@@ -236,7 +236,34 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.orderMemory.fullPasses",
         )
         local_ctx.status = "ESKİ_YAZILABİLİR_ORDER_HAFIZASI_HAZIR"
-        local_ctx.phase = "AŞAMA_22_BEKLEME"
+        local_ctx.phase = "ESKİ_SABİT_ID_SONRAKİ_KÂSE"
+
+    def legacy_next_bowl_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        if local_ctx.orderAt46Latch is None:
+            raise RuntimeError(
+                "Drop 46 order latch sonraki kâse probe'undan önce hazır olmalıdır"
+            )
+
+        # Discovery 12 production probe, latch içindeki gerçek bir queried ID kullanır.
+        queried_id = local_ctx.orderAt46Latch[3]
+
+        manager.legacy_next_bowl.call(
+            local_ctx,
+            queried_id,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.nextBowl.probes",
+        )
+        local_ctx.status = "ESKİ_SABİT_ID_SONRAKİ_KÂSE_HAZIR"
+        local_ctx.phase = "AŞAMA_24_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -250,6 +277,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_SABİT_KÂSE_POURS", legacy_pour_handler)
     manager.dispatcher.register("ESKİ_YERİNDE_KÂSE_GÜNCELLEME", legacy_bowl_update_handler)
     manager.dispatcher.register("ESKİ_YAZILABİLİR_ORDER_HAFIZASI", legacy_order_memory_handler)
+    manager.dispatcher.register("ESKİ_SABİT_ID_SONRAKİ_KÂSE", legacy_next_bowl_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -264,5 +293,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Yirmi üçüncü aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Yirmi dördüncü aşamada üretim takvim yolu henüz birleştirilmedi"
     )

@@ -1,0 +1,27 @@
+Aşama 24/55 — DISCOVERY 12
+
+Bu paket yalnızca Aşama 24 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_next_bowl.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_24_discovery_12.py
+artifacts/stage-24/BASELINE_STAGE_23_GREEN.txt
+artifacts/stage-24/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-24/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_24.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 23 baseline: GREEN
+Değişiklik sonrası Aşama 1–23 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+oldNextBowlFixedName fixed-ID scar: EKLENDİ
+real production next-bowl probe: EKLENDİ
+orderAt46Latch: KORUNDU
+PATCH 12 latch-position circular successor detour: YOK
+PATCH 13+ future code: YOK

@@ -1084,3 +1084,16 @@ Aşama 22 normatif overwritten-order regresyonunun gövdesi byte-for-byte deği�
 Aşama 1 future-patch isim guard'ında `orderAt46Latch` artık gelecek kod olmadığı için yalnızca bu token yasak listesinden çıkarılmıştır; Patch 12 ve sonrası yasakları korunur.
 
 Stage 15 sentinel, Stage 17 permutation patch, Stage 19 bowlAlias patch ve Stage 21 snapshot/pending patch aynen korunur. Patch 12 queried next-bowl logic henüz yoktur.
+
+
+## Aşama 24 — Keşif 12: sonraki kâseyi current order yerine sabit ID halkasından almak
+
+Legacy kod bowl ID değerlerinin doğal olarak fiziksel sırada dizildiğini varsayar. `oldNextBowlFixedName(id)` bu nedenle `1->2->3->4->5->6->1` halkasını "sonraki kâse" kabul eder.
+
+Stage 23 exact drop 46 order değerini `orderAt46Latch` içinde korur. Bu fixture'da latch `(1,2,3,4,6,5)` değeridir. Dolayısıyla queried 4 için next 6, queried 6 için next 5 ve queried 5 için next 1 olmalıdır. Legacy helper sırasıyla 5, 1 ve 6 üretir.
+
+`LegacyNextBowlAdapter`, Stage 23 latch hazırlandıktan sonra gerçek `calendar_date_spaghetti` state-machine zincirine bağlanır. Production probe queried ID'yi latch'in dördüncü position'ından alır; yani geçersiz veya yapay bir ID kullanmaz.
+
+Yeni normatif regresyon actual adapter yolunu queried ID 4, 5 ve 6 için test eder ve expected değeri test-only olarak latch içindeki circular successor'dan hesaplar. Üç alt örnek bilinçli kırmızıdır.
+
+Bu aşamada production içinde latch-position arama veya corrected circular-successor detour'u yoktur. Aşama 1 future-name guard zaten Patch 13+ isimleriyle sınırlı olduğundan değiştirilmemiştir. Patch 13 ve sonrası kod eklenmemiştir.

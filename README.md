@@ -1,31 +1,27 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi üçüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi dördüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 23/55, `PATCH 11` durumundadır.
+Aşama 24/55, `DISCOVERY 12` durumundadır.
 
-Discovery 11'in overwrite scar'ı aynen korunur:
-
-```text
-legacy_overwritable_order_memory
-46 drop + 12 post-stir = 58 write
-```
-
-Drop 46 tamamlandıktan ve post-stir başlamadan hemen önce exact order fiziksel clone ile ayrı latch'e yazılır:
+Yeni tarihsel kusur:
 
 ```text
-orderAt46Latch = clone(order46)
+oldNextBowlFixedName(id)
+1->2->3->4->5->6->1
 ```
 
-Bu latch invocation başına yalnızca bir kez yazılır ve post-stir sırasında hiçbir zaman yeniden yazılmaz.
+Legacy next-bowl sorgusu queried ID'nin `orderAt46Latch` içindeki gerçek position'ını dikkate almaz.
 
-`query_order` artık overwritable belleği değil yalnızca `orderAt46Latch` değerini okur.
+`LegacyNextBowlAdapter` bu wrong fixed-ID helper'ını Stage 23 latch tamamlandıktan sonra gerçek production state-machine yoluna bağlar.
 
-Aşama 22'nin normatif overwritten-order regresyonu değiştirilmeden yeşile dönmüştür.
+Fixture latch `(1,2,3,4,6,5)` için queried ID 4, 5 ve 6 sonuçları latch-based circular successor değerlerinden bilinçli olarak ayrışır.
 
-Patch 12 queried next-bowl logic henüz yoktur.
+Henüz `PATCH 12` yoktur: queried ID latch içinde aranmaz ve circular successor detour'u production'a eklenmemiştir.
+
+Aşama 1 future-name guard zaten Patch 13+ isimleriyle sınırlıdır ve bu aşamada değiştirilmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -41,10 +37,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirmi üçüncü aşama paketi:
+Tam yirmi dördüncü aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 22'de kırmızı olan position 1, 2 ve 6 query-order alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–23 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni fixed-ID next-bowl normatif regresyonunun queried ID 4, 5 ve 6 alt örnekleri başarısız olur.

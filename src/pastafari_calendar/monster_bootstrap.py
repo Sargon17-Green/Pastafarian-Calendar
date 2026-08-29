@@ -12,6 +12,7 @@ from .legacy_permutation import LegacyPermutationOrderAdapter
 from .legacy_pours import LegacyPourAdapter
 from .legacy_bowl_updates import LegacyBowlUpdateAdapter
 from .legacy_order_memory import LegacyOverwritableOrderMemoryAdapter
+from .legacy_next_bowl import LegacyNextBowlAdapter
 
 
 class MonsterError(RuntimeError):
@@ -145,6 +146,8 @@ class MonsterContext:
     patch11_latch_write_count: int = 0
     patch11_latch_source: tuple[str, int] | None = None
     patch11_applied: bool = False
+    legacy_next_bowl_queried_id: int | None = None
+    legacy_next_bowl_fixed_result: int | None = None
 
 
 class BaseMetrics:
@@ -208,3 +211,4 @@ class MonsterManager:
         self.legacy_pours = LegacyPourAdapter()
         self.legacy_bowl_updates = LegacyBowlUpdateAdapter()
         self.legacy_order_memory = LegacyOverwritableOrderMemoryAdapter()
+        self.legacy_next_bowl = LegacyNextBowlAdapter()
