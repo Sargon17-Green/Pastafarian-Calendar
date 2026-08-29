@@ -1235,29 +1235,45 @@ Additi sunt `Patch19GuardedYearCacheResolution`, campi contextus/report cicatric
 
 Nulla `oldStructureSauce`, nulla sauce structurae cum `originalTargetDay`, nullus ghost sauce et nullus PATCH 20 adest. Gradus 40 debet DISCOVERY 20 solum introducere et oldStructureSauce realiter ad selectoris inputum mittere.
 
-## Gradus 40 — DISCOVERY 20: oldStructureSauce cum target originali ad selector
+## Gradus 40 — DISCOVERY 20: sauce structurae target originalem sequitur
 
-### Cicatrix nova
+### Quid putabatur
 
-`oldStructureSauce(calculationDay, originalTargetDay)` directe `sauceWithOrderAt46Latch(calculationDay, originalTargetDay)` reddit. Nulla abstractione falsa, nulla constantia et nullus oracle productionis adhibetur.
+Putabatur sauce quae structuram anni regit posse eodem `targetDay` uti quo invocatio calendarii originalis utitur. Quia annus target iam per PATCH 18 et PATCH 19 recte resolvitur, haec assumptio primo aspectu innocua videbatur.
 
-`BaseMonsterManager::executeDiscovery20StructureSauce` annum target primum per viam PATCH 19 iam reparatam resolvit. `yearFirstDay` ex `resolvedYear.openGateDay + 1` derivatur, sed in hoc gradu solum observatur. `Discovery20StructureSauceHandler` target originalem ad `LegacyStructureSauceAdapter` mittit, deinde `LegacyStructureSelectorAdapter` bowl2 et orderAt46Latch ex sauce veteri directe consumit.
+### Cicatrix introducta
 
-### Witness et regressio
+Additus est helper legacy:
 
-Anchor est annus 5000 Fundationis. Control cum `originalTargetDay == yearFirstDay` congruit. Tres target originales distincti intra eundem annum sauce legacy diversas generant. Test localis C++ confirmat simul:
+```text
+oldStructureSauce(calculationDay, originalTargetDay)
+```
 
-- `oldStructureSauce(cDay, originalTargetDay)` cum oracle sauce eiusdem target exacta congruere;
-- annum resolutum et `yearFirstDay` immutatos manere;
-- selectoris token directe ex sauce legacy venire;
-- token selectoris pro tribus witness a sauce normativa `(cDay, yearFirstDay)` discrepare.
+Corpus eius directe `sauceWithOrderAt46Latch(calculationDay, originalTargetDay)` vocat. `LegacyStructureSauceAdapter` helper ipsum realiter exsequitur; `Discovery20StructureSauceHandler` exitum veterem in contextu servat et `LegacyStructureSelectorAdapter` ex eo `bowl2` atque `orderAt46Latch` directe consumit.
 
-Regressio consulto exitum 1 cum tribus discrepantiis exactis reddit. Omnes regressiones 1–39 transeunt.
+Annus target ante hoc stratum per viam iam emendatam resolvitur. `yearFirstDay=resolvedYear.openGateDay+1` observabiliter servatur, sed in DISCOVERY 20 ad computationem sauce nondum refertur.
+
+### Quid repertum est
+
+Structura anni non ex target originali sed ex primo die anni dependere debet. Oracle C++ localis eodem ramo implementationis utens sauce normativam cum `(calculationDay,yearFirstDay)` computat. Control ubi target originalis ipse `yearFirstDay` est concordat. Tres alii dies eiusdem anni discrepant:
+
+```text
+yearFirstDay=-15057702
+normativum bowl2=78471368830660551745973228614769007971
+
+target=-15057701 -> legacy bowl2=29001013031617316860744466450956859255
+target=-15057337 -> legacy bowl2=151461796081607109225261975213019450234
+target=-15053459 -> legacy bowl2=25789834078876683529875735033651414536
+```
+
+In omnibus tribus selector ipsum legacy resultatum consumit. Regressio igitur intentionaliter rubra est et tres discrepantias exactas cum exitu 1 reddit. Omnes regressiones Graduum 1–39 transeunt.
 
 ### Stratum monstri hoc gradu additum
 
-Additi sunt `LegacyStructureSelectorToken`, `LegacyStructureSauceReport`, campi contextus Discovery 20, `LegacyStructureSauceAdapter`, `LegacyStructureSelectorAdapter`, `Discovery20StructureSauceHandler`, validator, dispatchatio et manager route propria.
+Additi sunt `LegacyStructureSelectorToken`, `LegacyStructureSauceReport`, campi contextus Discovery 20, `LegacyStructureSauceAdapter`, `LegacyStructureSelectorAdapter`, `Discovery20StructureSauceHandler`, `requireDiscovery20StructureSauceReady`, `dispatchDiscovery20StructureSauce` et manager route `executeDiscovery20StructureSauce`.
 
-### Quod nondum fit
+Validator confirmat annum resolutum continere target originalem, `yearFirstDay` ex opening gate recte derivari, et selector token exacte ex `oldStructureSauce` venire. Ita defectus historicus non solum diagnosticus est sed in via Discovery realiter exercetur.
 
-Nulla separatio ghost/semantic adest. `oldStructureSauce` adhuc ipsum inputum selectoris gubernat. Nulla sauce structurae cum `yearFirstDay` in production recomputatur et nullus PATCH 20 praemature additur.
+### Quod nondum circumvenitur
+
+Nulla correctio fit. `oldStructureSauce` nondum ghost est; nullum sauce novum cum `yearFirstDay` ad selector mittitur; nullus `Patch20` aut wrapper correctionis adest. Gradus hic historiam tantum usque ad detectionem defectus complet.

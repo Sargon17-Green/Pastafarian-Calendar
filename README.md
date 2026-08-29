@@ -598,16 +598,50 @@ Regressio Gradus 38 post adaptationem metadata tantum contra Stage 38 pristinum 
 
 Nulla clavis composita cache adest; map non mutatur a `year.number`. Nulla `oldStructureSauce`, nulla structure sauce cum target originali, nullus ghost sauce et nullus PATCH 20 praemature additus est. Gradus 40 debet DISCOVERY 20 tantum introducere.
 
-## DISCOVERY 20 — structure sauce ex target originali
+## DISCOVERY 20 — structure sauce ex `originalTargetDay` ad selector pervenit
 
-Gradus 40 `oldStructureSauce(calculationDay, originalTargetDay)` introducit. Helper non est token fictus: eandem `sauceWithOrderAt46Latch` productionis cum target originali vere exsequitur.
+Gradus 40 cicatricem historicam structuralem introducit sine correctione futura. Helper legacy est:
 
-Via activa annum primum per PATCH 18 et cache guardatum PATCH 19 resolvit. Ex recordo anni `yearFirstDay = openGateDay + 1` derivatur et in report servatur. Tamen `Discovery20StructureSauceHandler` assumptionem historicam consulto servat et `LegacyStructureSauceAdapter` cum `originalTargetDay` vocat.
+```text
+oldStructureSauce(calculationDay, originalTargetDay)
+= sauceWithOrderAt46Latch(calculationDay, originalTargetDay)
+```
 
-`LegacyStructureSelectorAdapter` sauce legacy immediate consumit. Token selectoris duas partes observabiles servat: `bowl2` et `orderAt46Latch`. Validator confirmat has partes ex ipsa `oldStructureSauce` venire; nullam sauce novam cum `yearFirstDay` computat.
+Via activa annum target primum per ambulatiōnem PATCH 18 et cache PATCH 19 guardatum resolvit. Ex recordo anni recte derivatur:
 
-Witness anni 5000 cum calculationDay Fundationis tres target originales intra eundem annum probat. Sauce normativa structurae semper ex `(calculationDay, yearFirstDay)` venit; sauce legacy pro tribus target distinctis differt et ad selector transit. Tres discrepantiae exactae fiunt. Omnes regressiones Graduum 1–39 transeunt.
+```text
+yearFirstDay = resolvedYear.openGateDay + 1
+```
+
+Sed `Discovery20StructureSauceHandler` hunc diem nondum ad sauce structuralem adhibet. Potius assumptionem veterem realiter exercet:
+
+```text
+LegacyStructureSauceAdapter.call(calculationDay, originalTargetDay)
+-> oldStructureSauce(calculationDay, originalTargetDay)
+-> LegacyStructureSelectorAdapter.consume(legacyStructureSauce)
+```
+
+Selector igitur `bowl2` et `orderAt46Latch` directe ex sauce target originalis accipit. Nullum token fictum et nullum oracle productionis adhibetur.
+
+### Witness anni 5000
+
+Cum calculationDay sit dies Fundationis, annus 5000 habet:
+
+```text
+yearFirstDay=-15057702
+bowl2 normativus ex sauce(cDay,yearFirstDay)=78471368830660551745973228614769007971
+```
+
+Control cum `originalTargetDay==yearFirstDay` transit. Tres target dies intra eundem annum defectum detegunt:
+
+```text
+-15057701 -> bowl2 legacy=29001013031617316860744466450956859255
+-15057337 -> bowl2 legacy=151461796081607109225261975213019450234
+-15053459 -> bowl2 legacy=25789834078876683529875735033651414536
+```
+
+In omnibus tribus casibus selector sauce legacy target originalis videt et a sauce normativa structurae, quae ex primo die anni nascitur, differt. Regressio Gradus 40 igitur consulto `EXIT_CODE=1` cum tribus discrepantiis exactis reddit. Omnes regressiones Graduum 1–39 transeunt.
 
 ### Quod consulto nondum adest
 
-Nullus ghost sauce, nullus selector semanticus separatus, nulla recomputatio `sauce(calculationDay, yearFirstDay)` in production et nullus PATCH 20 adest. Gradus 41 debet oldStructureSauce vere exsequi sed output eius tantum ghost servare; selector tum solam sauce novam ex `yearFirstDay` videre debet.
+Nullus `Patch20`, nullus `structureSaucePatch`, nulla separatio ghost, nulla recomputatio semantica sauce cum `yearFirstDay` et nullus selector qui old sauce praetermittit adest. Correctio huius cicatricis ad gradum sequentem pertinet; Gradus 40 manet DISCOVERY 20 tantum.
