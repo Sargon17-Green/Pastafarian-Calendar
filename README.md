@@ -1,66 +1,69 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 21 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 22 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 21 est `PATCH 10`; status repositorii exspectatus est `GREEN`.
+Gradus 22 est `DISCOVERY 11`; status repositorii exspectatus est `EXPECTED_RED`.
 
-Gradus 20 contaminatio craterum in-place demonstravit. Helper `legacyStirBowlsInPlace` sex crateres sequentialiter in eodem obiecto legebat et scribebat; prima cratera recta manebat, quinque posteriores in duobus witness casibus divergebant.
+Gradus 21 contaminationem craterum per `vaultOld` et `pending` correxit. Gradus 22 novum vitium historicum exponit: memoria ordinis unica per omnes 46 guttas visibiles et per omnes 12 post-commotiones scribitur. Ordo guttae 46 recte computatur, sed ante query finalem a post-commotionibus superscribitur.
 
-## PATCH 10 — vaultOld, pending et commit tardivus
+## DISCOVERY 11 — memoria ordinis superscribilis
 
-Cicatrix legacy non mutata est. Via PATCH eam primum vere exsequitur et output pravum in contextu servat. Deinde stratum separatum facit:
+Via nova `legacySauceWithOverwritableOrderMemory` iter reale limitatum ad defectum praesentem exercet:
+
+- calculat numeros actionis, target, distantiae, connectionis et directionis per cicatrices iam emendatas;
+- construit 46 lapides per builder legacy cum snapshot patch;
+- construit septem guttas occultas in storage retrogrado et eas per accessum iam emendatum legit;
+- construit 46 guttas visibiles per `priorPatch` et grind table cum sentinella;
+- obtinet ordinem cuiusque guttae per detour rank0 iam emendatum;
+- vocat vere cicatricem fusionum ad crateres fixos, sed output semanticum per `bowlAlias` accipit;
+- vocat vere cicatricem commotionis in-place in clone separato, sed output semanticum per `vaultOld`/`pending` accipit;
+- post guttam 46 executat 12 post-commotiones ex snapshot antiquo uniuscuiusque circuitus.
+
+Unica memoria `legacyOrderMemory` post omnem ordinem scribitur. Sunt exacte 58 scripturae: 46 e guttis et 12 e post-commotionibus. `orderAtDrop46Diagnostic` tantum observationem diagnosticam servat; non est fons query. `queryOrder` tandem e memoria generali post ultimam post-commotionem legitur.
+
+## Witness Foundationis
+
+Pro die calculationis et die target aequalibus diei Fundationis:
 
 ```text
-vaultOld = clone(B)
-pending = clone(B)
+ordo guttae 46       = [4,5,2,3,6,1]
+ordo query legacy    = [1,6,5,2,4,3]
+ordo post-commotionis 12 = [1,6,5,2,4,3]
+scripturae memoriae  = 58
+fons finalis         = post-commotio 12
 ```
 
-Omnes sex formulae legunt exclusive ex `vaultOld`. Nulla formula legit valorem ex `pending`. Quaelibet formula scribit solum in `pending[id]`. Tantum postquam sex positiones computatae sunt, `pending` fit output semanticum circuitus.
-
-Helper emendatus est:
-
-```text
-stirBowlsThroughVaultOld(bowls,index,drop,stoneRow,order,firstThreePours)
-```
-
-et reddit simul `vaultOld`, `pending` et output finalem.
+Omnes sex positiones query finalis ab ordine normativo guttae 46 discrepant. Hoc est defectum exactum huius gradus; output craterum non est causa regressionis.
 
 ## Via activa
 
 ```text
-BaseMonsterManager::executeInPlaceBowlStir
--> BaseDispatcher::dispatchPatchedInPlaceBowlStir
--> Patch10InPlaceBowlHandler
--> LegacyInPlaceBowlAdapter::stir
--> legacyStirBowlsInPlace              (cicatrix vera)
--> Patch10DeferredBowlWrapper::repair
--> stirBowlsThroughVaultOld
--> requirePatch10Ready
+BaseMonsterManager::executeOverwritableOrderMemorySauce
+-> BaseDispatcher::dispatchLegacyOverwrittenOrder
+-> Discovery11OverwrittenOrderHandler
+-> LegacyOrderMemorySauceAdapter::run
+-> legacySauceWithOverwritableOrderMemory
 ```
 
-`executeUnpatchedInPlaceBowlStirDiagnostic` viam Gradus 20 separatam servat et contaminationem veterem adhuc exponit.
+Comprobator productionis solum structuram memoriae legacy verificat: 58 scripturas, fontem finalem post-commotionis 12, permutationes validas et identitatem `queryOrder == finalPostStirOrder`. Nullus oracle testium in productione vocatur.
 
 ## Probationes
 
-Regressio Gradus 20 eadem data normativa servat. Metadatum temporale handleris relaxatum est tantum ne DISCOVERY nomen perpetuum fiat; directum `legacyStirBowlsInPlace` adhuc quinque discrepantias in utroque witness casu habere debet. Contra baseline Gradus 20 regressio adhuc 10 discrepantias et exitum `1` reddit. Contra Gradum 21 via activa nullam discrepantiam reddit et regressio transit.
+Omnes regressiones Graduum 1–21 transeunt. `tests/stage_22_discovery_11_tests.cpp` contra reference test-only ordinem guttae 46 derivat ex 46 guttis visibilibus et confirmat:
 
-`tests/stage_21_patch_10_tests.cpp` omnes 720 ordines permutationis probat. Pro unoquoque casu:
+- ordo guttae 46 in via productionis ipse rectus est;
+- memoria ordinis 58 vicibus scribitur;
+- fons ultimus est post-commotio 12;
+- query legacy est idem ac ordo ultimae post-commotionis;
+- query legacy a gutta 46 in omnibus sex positionibus discrepat.
 
-- `vaultOld` input initialem integre servat;
-- `pending` sex exitus normativos continet;
-- output finalis idem est ac `pending`;
-- output legacy ante patch separatim retinetur;
-- via diagnostica unpatched cicatricem pristinam reddit.
-
-In omnibus 720 casibus helper legacy a norma divergit, dum PATCH 10 in omnibus transit.
-
-Omnes regressiones Graduum 1–21 transeunt.
+Regressio nova exitum `1` reddit consulto.
 
 ## Quod consulto nondum adest
 
-Nullus `orderAt46Latch`, nullus `Patch11`, nullus status `patch11Applied` et nulla memoria ordinis post-stirs hoc gradu introducta est.
+Nulla memoria separata semel scripta pro ordine guttae 46, nullus PATCH 11 et nulla logica next-bowl huius gradus adsunt. Correctio huius defectus ad Gradum 23 pertinet.
 
 ## Lingua computationis
 

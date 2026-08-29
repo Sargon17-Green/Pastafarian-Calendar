@@ -469,6 +469,177 @@ Patch10DeferredBowlComputation stirBowlsThroughVaultOld(const BowlState& bowls,
 
     return Patch10DeferredBowlComputation{vaultOld, pending, pending};
 }
+
+LegacySauceCounts sauceCountsThroughScars(const Integer& calculationDay,
+                                          const Integer& targetDay) {
+    const Integer action = dayTagWithFoundationScar(calculationDay);
+    const Integer target = dayTagWithFoundationScar(targetDay);
+    const Integer legacyDistantia = oldDistance(calculationDay, targetDay);
+    const Integer distance = distanceWithChronologicalPatch(
+        calculationDay, targetDay, legacyDistantia);
+    const Integer connection = action + target;
+    const int direction = targetDay < calculationDay ? 1
+                        : targetDay == calculationDay ? 2
+                                                      : 3;
+    return LegacySauceCounts{action, target, distance, connection, direction};
+}
+
+VisibleDropStore buildVisibleDropsThroughPatchedHistory(const LegacySauceCounts& counts,
+                                                        const StoneTable& stones,
+                                                        const HiddenDrops& backwardStorage) {
+    VisibleDropStore visible;
+    visible.reserve(46);
+
+    for (int i = 1; i <= 46; ++i) {
+        const Integer p1 = priorPatch(visible, backwardStorage, i, 1);
+        const Integer p3 = priorPatch(visible, backwardStorage, i, 3);
+        const Integer p7 = priorPatch(visible, backwardStorage, i, 7);
+
+        Integer x = savePatch(
+            stones[static_cast<std::size_t>(i)][0] * counts.action
+            + stones[static_cast<std::size_t>(i)][1] * counts.target
+            + stones[static_cast<std::size_t>(i)][2] * counts.distance
+            + stones[static_cast<std::size_t>(i)][3] * counts.connection
+            + stones[static_cast<std::size_t>(i)][4] * counts.direction
+            + p1 + 3 * p3 + 5 * p7 + i);
+
+        for (int grind = 1; grind <= 11; ++grind) {
+            // Lectio legacy fit vere, sed index directus eius iam cicatrix diagnostica est.
+            (void)legacyGrindRow(grind);
+            const LegacyGrindLookup lookup = grindRowWithSentinel(grind);
+            if (!lookup.found) {
+                throw BaseValidationError("ordo molitionis post sentinellam abest");
+            }
+            const int kind = static_cast<int>(lookup.row.kind);
+            if (kind < 0 || kind > 4) {
+                throw BaseValidationError("genus lapidis molitionis visibilis invalidum est");
+            }
+            const Integer oldX = x;
+            x = savePatch(
+                oldX * oldX
+                + lookup.row.a * oldX
+                + lookup.row.b * p1
+                + lookup.row.c * p3
+                + lookup.row.d * p7
+                + stones[static_cast<std::size_t>(i)][static_cast<std::size_t>(kind)]);
+        }
+        visible.push_back(x);
+    }
+    return visible;
+}
+
+BowlState initialBowlsThroughCounts(const LegacySauceCounts& counts) {
+    static constexpr std::array<int, 6> primes{{17, 19, 23, 29, 31, 37}};
+    BowlState bowls{};
+    for (int bowlId = 1; bowlId <= 6; ++bowlId) {
+        const Integer s = counts.action
+                        + counts.target * bowlId
+                        + counts.distance
+                        + counts.connection
+                        + counts.direction
+                        + Integer{primes[static_cast<std::size_t>(bowlId - 1)]}
+                            * primes[static_cast<std::size_t>(bowlId - 1)];
+        bowls[static_cast<std::size_t>(bowlId - 1)] = savePatch(s * s + bowlId);
+    }
+    return bowls;
+}
+
+LegacyOrderMemorySauceResult legacySauceWithOverwritableOrderMemory(
+    const Integer& calculationDay,
+    const Integer& targetDay) {
+    const LegacySauceCounts counts = sauceCountsThroughScars(calculationDay, targetDay);
+    const StoneTable stones = buildStonesThroughLegacyBuilder();
+    const HiddenDrops hiddenBackward = buildHiddenWithBackwardStorage(
+        calculationDay, targetDay, stones);
+    const VisibleDropStore visible = buildVisibleDropsThroughPatchedHistory(
+        counts, stones, hiddenBackward);
+
+    BowlState bowls = initialBowlsThroughCounts(counts);
+    PermutationOrder legacyOrderMemory{};
+    PermutationOrder orderAtDrop46Diagnostic{};
+    PermutationOrder finalPostStirOrder{};
+    std::size_t writes = 0;
+    std::string finalSource;
+
+    for (int i = 1; i <= 46; ++i) {
+        const Integer& drop = visible[static_cast<std::size_t>(i - 1)];
+        const int oneBased = (regularMod(drop - 1, Integer{720}) + 1).convert_to<int>();
+
+        // Cicatrix rank0 vocatur reapse ante pontem one-based; error 720 tantum diagnosticus est.
+        try {
+            (void)oldPermutationUnrank0(oneBased);
+        } catch (const BaseValidationError&) {
+        }
+        const PermutationOrder order = oldPermutationUnrank0(oneBased - 1);
+
+        // Cicatrix fusionum ad IDs fixos etiam currit, sed bowlAlias dat exitum semanticum.
+        (void)legacyPoursToFixedBowlIds(
+            drop, i, bowls, stones[static_cast<std::size_t>(i)]);
+        const BowlAliasPourComputation pours = poursThroughBowlAlias(
+            drop, i, bowls, stones[static_cast<std::size_t>(i)], order);
+
+        // Cicatrix contaminationis in-place currit in clone separato; vaultOld/pending reparant viam semanticam.
+        BowlState garbage = bowls;
+        legacyStirBowlsInPlace(
+            garbage, i, drop, stones[static_cast<std::size_t>(i)], order, pours.pours);
+        const Patch10DeferredBowlComputation repaired = stirBowlsThroughVaultOld(
+            bowls, i, drop, stones[static_cast<std::size_t>(i)], order, pours.pours);
+        bowls = repaired.output;
+
+        legacyOrderMemory = order;
+        ++writes;
+        finalSource = "gutta visibilis " + std::to_string(i);
+        if (i == 46) {
+            orderAtDrop46Diagnostic = order;
+        }
+    }
+
+    for (int stir = 1; stir <= 12; ++stir) {
+        const BowlState old = bowls;
+        Integer savedBowlSum = 0;
+        for (const Integer& bowl : old) {
+            savedBowlSum += bowl;
+        }
+        savedBowlSum = savePatch(savedBowlSum + 149 * stir);
+        const int oneBased = (regularMod(savedBowlSum - 1, Integer{720}) + 1).convert_to<int>();
+        const PermutationOrder order = oldPermutationUnrank0(oneBased - 1);
+
+        BowlState pending = old;
+        for (int position = 1; position <= 6; ++position) {
+            const std::size_t pos = static_cast<std::size_t>(position - 1);
+            const std::size_t prevPos = static_cast<std::size_t>((position + 4) % 6);
+            const std::size_t nextPos = static_cast<std::size_t>(position % 6);
+            const int id = order[pos];
+            const int prev = order[prevPos];
+            const int next = order[nextPos];
+            const Integer s = old[static_cast<std::size_t>(id - 1)]
+                            + 3 * old[static_cast<std::size_t>(prev - 1)]
+                            + 5 * old[static_cast<std::size_t>(next - 1)]
+                            + savedBowlSum
+                            + stir
+                            + position * position;
+            pending[static_cast<std::size_t>(id - 1)] = savePatch(
+                s * s
+                + 7 * old[static_cast<std::size_t>(prev - 1)]
+                    * old[static_cast<std::size_t>(next - 1)]);
+        }
+        bowls = pending;
+
+        legacyOrderMemory = order;
+        finalPostStirOrder = order;
+        ++writes;
+        finalSource = "post-commotio " + std::to_string(stir);
+    }
+
+    return LegacyOrderMemorySauceResult{
+        bowls,
+        legacyOrderMemory,
+        orderAtDrop46Diagnostic,
+        finalPostStirOrder,
+        writes,
+        finalSource
+    };
+}
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -2564,4 +2735,110 @@ LegacyInPlaceBowlReport BaseMonsterManager::executeUnpatchedInPlaceBowlStirDiagn
     };
 }
 
+
+void BaseValidationManager::requireLegacyOrderMemorySauceReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyOrderMemorySauceReady) {
+        throw BaseValidationError("memoria ordinis legacy nondum parata est");
+    }
+    const LegacyOrderMemorySauceResult& result = ctx.legacyOrderMemorySauce;
+    if (result.orderWriteCount != 58) {
+        throw BaseValidationError("memoria ordinis legacy quinquaginta octo scripturas requirit");
+    }
+    if (result.finalOrderSource != "post-commotio 12") {
+        throw BaseValidationError("memoria ordinis legacy fonte post-commotionis duodecimae terminare debet");
+    }
+    if (result.queryOrder != result.finalPostStirOrder) {
+        throw BaseValidationError("query ordinis legacy memoriam ultimam non legit");
+    }
+
+    auto requirePermutation = [](const PermutationOrder& order) {
+        std::array<bool, 7> seen{};
+        for (const int id : order) {
+            if (id < 1 || id > 6 || seen[static_cast<std::size_t>(id)]) {
+                throw BaseValidationError("ordo craterum in memoria legacy permutatio valida non est");
+            }
+            seen[static_cast<std::size_t>(id)] = true;
+        }
+    };
+    requirePermutation(result.orderAtDrop46Diagnostic);
+    requirePermutation(result.queryOrder);
+}
+
+LegacyOrderMemorySauceResult LegacyOrderMemorySauceAdapter::run(
+    const Integer& calculationDay,
+    const Integer& targetDay) const {
+    return legacySauceWithOverwritableOrderMemory(calculationDay, targetDay);
+}
+
+void Discovery11OverwrittenOrderHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyOrderMemorySauceAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery11OverwrittenOrderHandler";
+    ctx.phase = "DISCOVERY_11_ORDER_MEMORY_RUN";
+    ctx.status = "LEGACY_ORDER_MEMORY_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_11_ORDER_MEMORY_RUN");
+    metrics.bump(ctx, "discovery11.orderMemory.calls");
+
+    ctx.legacyOrderMemorySauce = adapter.run(ctx.calculationDay, ctx.targetDay);
+    ctx.legacyOrderMemorySauceReady = true;
+
+    ctx.phase = "DISCOVERY_11_ORDER_MEMORY_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_11_ORDER_MEMORY_VALIDATE");
+    validator.requireLegacyOrderMemorySauceReady(ctx);
+
+    ctx.phase = "DISCOVERY_11_ORDER_MEMORY_EXPOSED";
+    ctx.status = "OVERWRITTEN_QUERY_ORDER_EXPOSED";
+    ctx.branchTrace.push_back("DISCOVERY_11_ORDER_MEMORY_EXPOSED");
+    metrics.bump(ctx, "discovery11.orderMemory.exposed");
+}
+
+void BaseDispatcher::dispatchLegacyOverwrittenOrder(
+    BaseMonsterContext& ctx,
+    const Discovery11OverwrittenOrderHandler& handler,
+    const LegacyOrderMemorySauceAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_11_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_11_DISPATCH");
+    metrics.bump(ctx, "discovery11.dispatch.calls");
+    handler.handle(ctx, adapter, validator, metrics);
+}
+
+LegacyOrderMemoryReport BaseMonsterManager::executeOverwritableOrderMemorySauce(
+    const Integer& calculationDay,
+    const Integer& targetDay) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_11_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyOrderMemorySauceAdapter adapter;
+    const Discovery11OverwrittenOrderHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyOverwrittenOrder(ctx, handler, adapter, validator, metrics);
+
+    const LegacyOrderMemorySauceResult& result = ctx.legacyOrderMemorySauce;
+    return LegacyOrderMemoryReport{
+        calculationDay,
+        targetDay,
+        result.finalBowls,
+        result.queryOrder,
+        result.orderAtDrop46Diagnostic,
+        result.finalPostStirOrder,
+        result.orderWriteCount,
+        result.finalOrderSource,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
 } // namespace pastafari

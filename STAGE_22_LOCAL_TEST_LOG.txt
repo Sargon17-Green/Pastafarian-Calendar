@@ -1,0 +1,50 @@
+Gradus 22 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Libraria productionis et oracle test-only separatim compilata sunt. Regessiones maiores in greges parallelos parvos compilatae sunt, ne una invocatio longa limitem temporis ambitus attingeret. Codex et probationes propter hanc partitionem non mutati sunt.
+
+1. Regressiones anteriores
+
+Bootstrap:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+
+Gradus 2–21:
+Omnes exitum 0 reddiderunt.
+Ultimi indices confirmati:
+REGRESSIO_DISCOVERY_10_TRANSIIT
+ORDINES_PROBATI=720
+CICATRICES_LEGACY_DIVERGENTES=720
+
+Status regressiones anteriores: PASS
+
+2. Regressio DISCOVERY 11
+
+Mandata principalia:
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/stage_22_discovery_11_tests.cpp -o build/stage_22_discovery_11_tests.o
+g++ build/stage_22_discovery_11_tests.o build/normative_reference.o build/monster.o -o build/stage_22_discovery_11_tests
+./build/stage_22_discovery_11_tests
+
+Exitus actualis:
+ORDO_GUTTAE_46=[4,5,2,3,6,1]
+ORDO_QUERY_LEGACY=[1,6,5,2,4,3]
+ORDO_POST_COMMOTIONIS_12=[1,6,5,2,4,3]
+SCRIPTURAE_MEMORIAE=58
+FONS_FINALIS=post-commotio 12
+REGRESSIO_DISCOVERY_11_DEFECIT: 6 positiones query ordinis post superscriptionem a gutta 46 discrepant
+EXIT_CODE=1
+
+Exitus exspectatus huius DISCOVERY: 1.
+Status finalis: EXPECTED_RED
+
+3. Auditum contaminationis futurae
+
+Nulla memoria separata semel scripta pro ordine guttae 46 in include/src/tests.
+Nullus Patch11 aut status patch11Applied.
+Nullus oldNextBowlFixedName, nextBowlQueryPatch aut biasedLegacyPick.
+Nulla importatio oracle/reference in productione.
+Nullus codex Gradus 23 aut posterior praemature additus est.

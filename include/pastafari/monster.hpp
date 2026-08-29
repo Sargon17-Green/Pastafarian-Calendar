@@ -93,6 +93,23 @@ struct Patch10DeferredBowlComputation {
     BowlState output{};
 };
 
+struct LegacySauceCounts {
+    Integer action{};
+    Integer target{};
+    Integer distance{};
+    Integer connection{};
+    int direction = 0;
+};
+
+struct LegacyOrderMemorySauceResult {
+    BowlState finalBowls{};
+    PermutationOrder queryOrder{};
+    PermutationOrder orderAtDrop46Diagnostic{};
+    PermutationOrder finalPostStirOrder{};
+    std::size_t orderWriteCount = 0;
+    std::string finalOrderSource;
+};
+
 Patch10DeferredBowlComputation stirBowlsThroughVaultOld(const BowlState& bowls,
                                                         int index,
                                                         const Integer& drop,
@@ -106,6 +123,16 @@ void legacyStirBowlsInPlace(BowlState& bowls,
                             const Stone& stoneRow,
                             const PermutationOrder& order,
                             const PourTriplet& firstThreePours);
+
+LegacySauceCounts sauceCountsThroughScars(const Integer& calculationDay,
+                                          const Integer& targetDay);
+VisibleDropStore buildVisibleDropsThroughPatchedHistory(const LegacySauceCounts& counts,
+                                                        const StoneTable& stones,
+                                                        const HiddenDrops& backwardStorage);
+BowlState initialBowlsThroughCounts(const LegacySauceCounts& counts);
+LegacyOrderMemorySauceResult legacySauceWithOverwritableOrderMemory(
+    const Integer& calculationDay,
+    const Integer& targetDay);
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -212,6 +239,8 @@ struct BaseMonsterContext {
     BowlState bowlPending{};
     BowlState patchedInPlaceBowlOutput{};
     bool patch10Applied = false;
+    LegacyOrderMemorySauceResult legacyOrderMemorySauce{};
+    bool legacyOrderMemorySauceReady = false;
 };
 
 struct BaseRunReport {
@@ -360,6 +389,21 @@ struct LegacyInPlaceBowlReport {
     bool patch10Applied = false;
 };
 
+struct LegacyOrderMemoryReport {
+    Integer calculationDay{};
+    Integer targetDay{};
+    BowlState finalBowls{};
+    PermutationOrder queryOrder{};
+    PermutationOrder orderAtDrop46Diagnostic{};
+    PermutationOrder finalPostStirOrder{};
+    std::size_t orderWriteCount = 0;
+    std::string finalOrderSource;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 class BaseValidationError final : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
@@ -388,6 +432,7 @@ public:
     void requirePatch09Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyInPlaceBowlReady(const BaseMonsterContext& ctx) const;
     void requirePatch10Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyOrderMemorySauceReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -453,6 +498,12 @@ public:
                    const Stone& stoneRow,
                    const PermutationOrder& order,
                    const PourTriplet& firstThreePours) const;
+};
+
+class LegacyOrderMemorySauceAdapter {
+public:
+    LegacyOrderMemorySauceResult run(const Integer& calculationDay,
+                                     const Integer& targetDay) const;
 };
 
 class Patch10DeferredBowlWrapper {
@@ -696,6 +747,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery11OverwrittenOrderHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyOrderMemorySauceAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -831,6 +890,12 @@ public:
                                          const Patch10DeferredBowlWrapper& wrapper,
                                          const BaseValidationManager& validator,
                                          const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyOverwrittenOrder(BaseMonsterContext& ctx,
+                                        const Discovery11OverwrittenOrderHandler& handler,
+                                        const LegacyOrderMemorySauceAdapter& adapter,
+                                        const BaseValidationManager& validator,
+                                        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -884,6 +949,8 @@ public:
                                                                         const Stone& stoneRow,
                                                                         const PermutationOrder& order,
                                                                         const PourTriplet& firstThreePours) const;
+    LegacyOrderMemoryReport executeOverwritableOrderMemorySauce(const Integer& calculationDay,
+                                                                const Integer& targetDay) const;
 };
 
 } // namespace pastafari

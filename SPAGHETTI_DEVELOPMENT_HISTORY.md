@@ -588,3 +588,31 @@ Omnes regressiones Graduum 1–21 transeunt.
 Additi sunt `Patch10DeferredBowlComputation`, `stirBowlsThroughVaultOld`, campi contextus `bowlVaultOld`, `bowlPending`, `patchedInPlaceBowlOutput`, `patch10Applied`, campi report cicatricis, `Patch10DeferredBowlWrapper`, `Patch10InPlaceBowlHandler`, `dispatchPatchedInPlaceBowlStir`, `requirePatch10Ready` et via diagnostica unpatched.
 
 `legacyStirBowlsInPlace` non mutatur. Nullus `orderAt46Latch`, nullus PATCH 11 et nulla logica post-stirs Gradus 22 praemature addita est.
+
+## Gradus 22 — Detectio 11: ordo guttae 46 a memoria posteriori superscriptus
+
+### Quid putabatur
+
+Post PATCH 10 circuitus craterum iam snapshots rectos utebatur. Una memoria `order` quae ad permutationem praesentem pertinebat videbatur sufficere, quia quilibet circuitus ordinem suum statim consumebat. Credebatur igitur memoriam eandem per guttas et post-commotiones reutilizare sine damno posse.
+
+### Quid repertum est
+
+Query posterior non debet ordinem ultimae operationis videre; norma structuram query ad ordinem exactum guttae visibilis 46 ligat. Via legacy tamen unam memoriam superscribilem habet. Ea 46 vicibus in guttis visibilibus et deinde 12 vicibus in post-commotionibus scribitur.
+
+Pro witness Fundationis ordo guttae 46 est `[4,5,2,3,6,1]`, sed memoria post post-commotionem 12 continet `[1,6,5,2,4,3]`. Query legacy hunc ultimum valorem legit. Omnes sex positiones discrepant. Numerus scripturarum est exacte 58 et fons ultimus `post-commotio 12`.
+
+### Quid circumventum est
+
+Nihil hoc gradu circumventum est. `legacySauceWithOverwritableOrderMemory` defectum consulto servat: `orderAtDrop46Diagnostic` ordinem rectum solum ad observationem retinet, dum `queryOrder` e memoria superscripta finali provenit.
+
+Via tamen cicatrices anteriores vere exsequitur ante strata eorum reparativa: rank0 call diagnosticus, fusiones ad IDs fixos et commotio in-place in clone separato. Output semanticum intermediorum per sentinellam, rank bridge, `bowlAlias` et `vaultOld/pending` procedit, ne defectus huius gradus aliis erroribus confundatur.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Ordo guttae 46 ipse recte calculatur. Sed semantica query requirit eundem ordinem postquam 12 post-commotiones finitae sunt. Quia memoria unica post guttam 46 iterum scribitur, valor query historicus non iam est valor guttae 46. Ergo via huius gradus consulto non est normae aequivalens.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `LegacySauceCounts`, `LegacyOrderMemorySauceResult`, `sauceCountsThroughScars`, `buildVisibleDropsThroughPatchedHistory`, `initialBowlsThroughCounts`, `legacySauceWithOverwritableOrderMemory`, campi contextus memoriae ordinis, `LegacyOrderMemoryReport`, `LegacyOrderMemorySauceAdapter`, `Discovery11OverwrittenOrderHandler`, `requireLegacyOrderMemorySauceReady`, `dispatchLegacyOverwrittenOrder` et `executeOverwritableOrderMemorySauce`.
+
+Memoria ordinis una est et consulto superscribitur. Nullum latch reparativum, nullus PATCH 11, nulla logica next-bowl aut codex posterior additus est.
