@@ -1,0 +1,69 @@
+Gradus 6 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Obiecta communia:
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
+
+Probationes Gradus 1–5 singillatim compilatae et cum eisdem obiectis conexae sunt. Propter limitem temporis ambitus, compilationes in invocationes breves divisae sunt; codex C++ et probationes non mutati sunt propter hanc partitionem.
+
+1. Bootstrap
+Exitus actualis:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+
+2. Regressio Gradus 2
+Exitus actualis:
+CONCORDANTIA oldRemainder M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder 2M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder 3M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder M+1: valor=1
+REGRESSIO_DISCOVERY_01_TRANSIIT
+
+3. Regressio Gradus 3
+Exitus actualis:
+REGRESSIO_PATCH_01_TRANSIIT
+
+4. Regressio Gradus 4
+Exitus actualis:
+CONCORDANTIA VIAE_DIEI FOUNDATION: valor=1
+CONCORDANTIA VIAE_DIEI FOUNDATION+1: valor=3
+CONCORDANTIA VIAE_DIEI FOUNDATION+2: valor=5
+CONCORDANTIA VIAE_DIEI FOUNDATION-1: valor=2
+CONCORDANTIA VIAE_DIEI FOUNDATION-2: valor=4
+REGRESSIO_DISCOVERY_02_TRANSIIT
+
+5. Regressio Gradus 5
+Exitus actualis:
+REGRESSIO_PATCH_02_TRANSIIT
+
+Nota de auditu temporali Gradus 5:
+Probatio Gradus 5 olim nomen oldDistance inter contaminationes futuras numerabat. In Gradus 6 ipsum oldDistance est vitium legacy quod introduci debet; ideo auditum temporalem restrictum est ad PATCH 03 ipsum: patchedCounts, Patch03 et patch03 manent prohibita. Valores normativi, casus diei et probationes PATCH 02 non mutati sunt.
+
+6. Regressio DISCOVERY 03
+Mandatum:
+./build/stage_06_discovery_03_tests src/monster.cpp
+
+Exitus actualis:
+DISCREPANTIA VIAE_DISTANTIAE IDEM_FOUNDATION: expectatus=1 actualis=0
+DISCREPANTIA VIAE_DISTANTIAE IDEM_POST: expectatus=1 actualis=0
+CONCORDANTIA VIAE_DISTANTIAE ADIACENS_POST: valor=2
+DISCREPANTIA VIAE_DISTANTIAE DUO_POST: expectatus=3 actualis=4
+CONCORDANTIA VIAE_DISTANTIAE ADIACENS_ANTE: valor=2
+DISCREPANTIA VIAE_DISTANTIAE DUO_ANTE: expectatus=3 actualis=4
+DISCREPANTIA VIAE_DISTANTIAE TRANS_FOUNDATION: expectatus=3 actualis=1
+CONCORDANTIA VIAE_DISTANTIAE FOUNDATION_AD_POST: valor=2
+REGRESSIO_DISCOVERY_03_DEFECIT: 5 discrepantiae normativae inventae sunt
+EXIT_CODE=1
+
+Auditum contaminationis:
+oldDistance: PRAESENS, ut vitium legacy huius gradus requirit.
+patchedCounts: ABSENS
+Patch03: ABSENS
+patch03: ABSENS
+chronological: ABSENS in codice productionis.
+
+Status finalis: EXPECTED_RED
+Regressiones anteriores: PASS
+Emendatio PATCH 03: ABSENS

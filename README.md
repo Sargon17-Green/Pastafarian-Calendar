@@ -1,75 +1,70 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium gradum 5 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nullus codex, nulla probatio, nullum datum ex alia implementatione adhibitum est.
+Hoc directorium Gradum 6 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 5 est `PATCH 02`. Vitium Gradus 4 physice integrum manet:
+Gradus 6 est `DISCOVERY 03`. Emendationes 01 et 02 integrae manent. Vitium novum legacy nunc in viam activam inductum est:
 
 ```text
-oldDayTag(day) = 2 * abs(day - FOUNDATION_DAY_OLD)
+oldDistance(cDay, tDay) = abs(dayTagWithFoundationScar(cDay) - dayTagWithFoundationScar(tDay))
 ```
 
-Haec functio adhuc in die Fundationis `0`, uno die post `2`, duobus diebus post `4` reddit. Non correcta neque rescripta est.
-
-Super eam addita est functio historica `dayTagWithFoundationScar`. Ea primum `oldDayTag(day)` re vera vocat; deinde, si dies non est ante Fundationem, unum addit. Custos secundus, consulto redundans sed historice obligatus, manet:
+Haec functio distantiam inter notas dierum computat, non distantiam chronologicam inclusivam quae norma requirit:
 
 ```text
-n = oldDayTag(day)
-if day >= FOUNDATION_DAY_OLD:
-    n += 1
-if day == FOUNDATION_DAY_OLD and n != 1:
-    n = 1
+abs(targetDay - calculationDay) + 1
 ```
 
-Via productionis transit per `BaseMonsterManager`, `BaseDispatcher`, `Patch02DayTagHandler`, `LegacyDayTagAdapter` et `Patch02DayTagWrapper`. Handler primum valorem legacy captat, postea patch applicat, tum `BaseValidationManager` copiam validationis separatam computat antequam exitum patefaciat.
+Nulla correctio huius vitii hoc gradu adest. `patchedCounts`, `Patch03`, status specificus PATCH 03 et calculus `chronological` absunt.
 
-Via diagnostica `executeUnpatchedDayTagDiagnostic` adhuc per `Discovery02DayTagHandler` transit et valorem vitiosum `oldDayTag` sine emendatione reddit.
+Via activa transit per `BaseMonsterManager::executeDistance`, `BaseDispatcher::dispatchLegacyDistance`, `Discovery03DistanceHandler` et `LegacyDistanceAdapter`, donec ad `oldDistance` pervenit. `LegacyDistanceReport` exitum legacy separatim servat ut cicatrix in gradibus futuris probari possit.
 
-Status gradus est `GREEN`.
+Status huius gradus est `EXPECTED_RED`.
 
-## Correctio structurae regressionis Gradus 4
+## Quid regressio nova demonstrat
 
-Probatio Gradus 4 initio duas res simul faciebat: viam productionis exercebat, sed numerum discrepantiarum etiam ex vocatione directa `oldDayTag` deducebat. Talis forma non poterat umquam viridis fieri post patch, nisi ipsa cicatrix legacy deleretur, quod specimine vetatur.
+Octo casus adhibentur. Tres casus fortuito cum norma concordant: duo dies adiacentes eodem latere Fundationis et transitus a Fundatione ad diem proximum posteriorem. Quinque casus discrepantiam manifestant:
 
-Gradus 5 igitur structuram probationis corrigit, non valores exspectatos: eadem quinque dies et idem `dayCount` oraculi localis servantur, sed discrepantia ex exitu viae productionis metitur. Haec forma correcta contra codicem Gradus 4 pristinum separatim exsecuta est et easdem tres discrepantias cum exitus codice `1` invenit. Contra PATCH 02 eadem regressio viridis fit. Probatio nova Gradus 5 seorsum confirmat `oldDayTag` adhuc vitiosum esse.
+```text
+IDEM_FOUNDATION: 0 pro 1
+IDEM_POST: 0 pro 1
+DUO_POST: 4 pro 3
+DUO_ANTE: 4 pro 3
+TRANS_FOUNDATION: 1 pro 3
+```
 
-## Aequivalentia localis PATCH 02
+Ita vitium non est mera omissio constantis unius. Notae dierum ipsae iam normativae sunt post PATCH 02, sed earum differentia non est mensura chronologica dierum.
 
-Pro die ante Fundationem `oldDayTag(day) = 2 * (FOUNDATION_DAY_OLD - day)`, quod iam est `dayCount` normativum; patch nihil addit.
+## Correctio auditus temporalis Gradus 5
 
-Pro die Fundationis vel post eum `oldDayTag(day) = 2 * (day - FOUNDATION_DAY_OLD)`. Additio unius exacte seriem imparem normativam efficit. Custos secundus diei Fundationis post primam additionem non mutat valorem in via ordinaria, sed manet tamquam cicatrix historica obligata.
+Probatio PATCH 02 continebat auditum temporale quo etiam nomen `oldDistance` prohibebatur, quia in Gradus 5 nondum adesse debebat. In Gradus 6 `oldDistance` ipsum est legacy obligatorie introducendum; illa prohibitio igitur invariant perpetuum esse non potest.
 
-Ita `dayTagWithFoundationScar(day) == dayCount(day)` pro omni integro die.
+Probatio Gradus 5 hoc gradu tantum in hac parte temporali contracta est: adhuc vetat `patchedCounts`, `Patch03` et `patch03`, sed iam non vetat `oldDistance`. Casus normativi, valores exspectati et omnes assertiones PATCH 02 manent idem. Regressio Gradus 5 post hanc correctionem transit.
+
+## Stratum monstri additum
+
+Gradus 6 addit:
+
+- `legacyDistanceCalculationDay`, `legacyDistanceTargetDay`, `legacyDistanceOutput` et `legacyDistanceReady` in contextu invocationis;
+- `LegacyDistanceAdapter`;
+- `Discovery03DistanceHandler`;
+- dispatchationem propriam distantiae;
+- `LegacyDistanceReport` qui exitum activum et exitum legacy separatam servare potest.
+
+Haec strata correctionem nondum faciunt. Tantum vitium legacy per viam realem exponunt et readiness determinant. Metrics et branch trace semanticam non mutant.
 
 ## Lingua computationis
 
-Omnis codex exsecutus huius lineae est C++. Ad numeros integros sine limite finito adhibetur `boost::multiprecision::cpp_int`, bibliotheca C++ ex solis capitibus constans. Nullus interpres externus nec runtime alterius linguae requiritur.
+Omnis codex exsecutus huius lineae est C++. Integra arbitraria per `boost::multiprecision::cpp_int` tractantur. Nullus interpres externus, FFI, runtime alienus aut generator in alia lingua adhibetur.
 
 ## Catalogus linguae fontis
 
-Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congelatus manet. Ordo normativus semper per `canonicalIndex` definitur; textus Neo-Latinus non participat sortitionem, gradum, cache semanticum aut unranking.
+Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congelatus manet. Ordo normativus per `canonicalIndex` tantum definitur; textus linguae fontis non participat ranking, unranking, cache semanticum aut electionem.
 
-## Aedificatio et probationes
+## Probationes
 
-Ex radice directorii:
-
-```text
-g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
-g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
-```
-
-Singulae probationes deinde compilantur et cum duobus obiectis communibus conectuntur. Probationes exsecutendae sunt:
-
-```text
-./build/bootstrap_tests . tests/fixtures/bootstrap_expected.tsv
-./build/stage_02_discovery_01_tests
-./build/stage_03_patch_01_tests
-./build/stage_04_discovery_02_tests
-./build/stage_05_patch_02_tests src/monster.cpp
-```
-
-Exitus huius gradus:
+Gradus 1–5 virides manent. Regressio Gradus 6 consulto rubra est:
 
 ```text
 OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
@@ -77,6 +72,7 @@ REGRESSIO_DISCOVERY_01_TRANSIIT
 REGRESSIO_PATCH_01_TRANSIIT
 REGRESSIO_DISCOVERY_02_TRANSIIT
 REGRESSIO_PATCH_02_TRANSIIT
+REGRESSIO_DISCOVERY_03_DEFECIT: 5 discrepantiae normativae inventae sunt
 ```
 
-Nullus codex `DISCOVERY 03` aut `PATCH 03` adest.
+Hoc est status rectus pro `DISCOVERY 03`.

@@ -44,6 +44,14 @@ Integer dayTagWithFoundationScar(const Integer& day) {
     return n;
 }
 
+Integer oldDistance(const Integer& calculationDay, const Integer& targetDay) {
+    Integer d = dayTagWithFoundationScar(calculationDay) - dayTagWithFoundationScar(targetDay);
+    if (d < 0) {
+        d = -d;
+    }
+    return d;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -95,6 +103,12 @@ void BaseValidationManager::requirePatch02Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyDistanceReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyDistanceReady) {
+        throw BaseValidationError("distantia legacy nondum parata est");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -110,6 +124,10 @@ Integer LegacyArithmeticAdapter::callOldRemainder(const Integer& x) const {
 
 Integer LegacyDayTagAdapter::callOldDayTag(const Integer& day) const {
     return oldDayTag(day);
+}
+
+Integer LegacyDistanceAdapter::callOldDistance(const Integer& calculationDay, const Integer& targetDay) const {
+    return oldDistance(calculationDay, targetDay);
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -226,6 +244,30 @@ void Patch02DayTagHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch02.dayTag.ready");
 }
 
+void Discovery03DistanceHandler::handle(BaseMonsterContext& ctx,
+                                        const LegacyDistanceAdapter& adapter,
+                                        const BaseValidationManager& validator,
+                                        const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery03DistanceHandler";
+    ctx.phase = "DISCOVERY_03_DISTANCE_CALL";
+    ctx.status = "LEGACY_DISTANCE_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_03_DISTANCE_CALL");
+    metrics.bump(ctx, "discovery03.distance.calls");
+
+    ctx.legacyDistanceOutput = adapter.callOldDistance(
+        ctx.legacyDistanceCalculationDay, ctx.legacyDistanceTargetDay);
+    ctx.legacyDistanceReady = true;
+
+    ctx.phase = "DISCOVERY_03_DISTANCE_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_03_DISTANCE_VALIDATE");
+    validator.requireLegacyDistanceReady(ctx);
+
+    ctx.phase = "DISCOVERY_03_DISTANCE_EXPOSED";
+    ctx.status = "LEGACY_DISTANCE_RESULT_EXPOSED";
+    ctx.branchTrace.push_back("DISCOVERY_03_DISTANCE_EXPOSED");
+    metrics.bump(ctx, "discovery03.distance.exposed");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -301,6 +343,20 @@ void BaseDispatcher::dispatchPatchedDayTag(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch02.dispatch.calls");
 
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void BaseDispatcher::dispatchLegacyDistance(BaseMonsterContext& ctx,
+                                            const Discovery03DistanceHandler& handler,
+                                            const LegacyDistanceAdapter& adapter,
+                                            const BaseValidationManager& validator,
+                                            const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_03_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_03_DISPATCH");
+    metrics.bump(ctx, "discovery03.dispatch.calls");
+
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -429,6 +485,35 @@ LegacyDayTagReport BaseMonsterManager::executeUnpatchedDayTagDiagnostic(const In
         ctx.branchTrace.size(),
         ctx.legacyDayTagOutput,
         false
+    };
+}
+
+LegacyDistanceReport BaseMonsterManager::executeDistance(const Integer& calculationDay, const Integer& targetDay) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_03_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyDistanceCalculationDay = calculationDay;
+    ctx.legacyDistanceTargetDay = targetDay;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyDistanceAdapter adapter;
+    const Discovery03DistanceHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyDistance(ctx, handler, adapter, validator, metrics);
+
+    return LegacyDistanceReport{
+        ctx.legacyDistanceCalculationDay,
+        ctx.legacyDistanceTargetDay,
+        ctx.legacyDistanceOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyDistanceOutput,
     };
 }
 
