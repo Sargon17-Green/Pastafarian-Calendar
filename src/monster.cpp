@@ -3547,6 +3547,11 @@ void BaseValidationManager::requirePatch18YearWalkReady(
         throw BaseValidationError("numerus anni non congruit cum gradibus sequentialibus");
     }
 }
+void BaseValidationManager::requireDiscovery19YearCacheReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.discovery19CacheReady) throw BaseValidationError("cache anni legacy nondum paratus est");
+    if (ctx.discovery19CacheKeyYearNumber != ctx.discovery19CacheRequest.value.number) throw BaseValidationError("clavis cache anni a numero request differt");
+    if (ctx.discovery19CacheOutput.number != ctx.discovery19CachedEntry.value.number) throw BaseValidationError("output cache anni a value servato differt");
+}
 
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
@@ -3777,6 +3782,9 @@ Integer LegacyYear5000TieAdapter::select(
 Integer LegacyYearJumpAdapter::guess(const LegacyYearAnchor& anchor,
                                      const Integer& targetDay) const {
     return oldJumpGuess(anchor, targetDay);
+}
+LegacyYearCacheEntry LegacyYearNumberOnlyCacheAdapter::getOrPut(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, bool& hit) const {
+    const auto found=cache.find(yearNumber); if(found!=cache.end()){hit=true; return found->second;} hit=false; cache[yearNumber]=current; return current;
 }
 
 Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
@@ -4797,6 +4805,10 @@ void Patch18SequentialYearWalkHandler::handle(
     metrics.bump(ctx, "patch18.sequential.year.walk");
     validator.requirePatch18YearWalkReady(ctx);
 }
+void Discovery19YearNumberCacheHandler::handle(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const {
+    ctx.currentHandler="Discovery19YearNumberCacheHandler"; ctx.phase="DISCOVERY_19_YEAR_NUMBER_CACHE"; ctx.status="YEAR_NUMBER_ONLY_CACHE_KEY_ACTIVE"; ctx.branchTrace.push_back("DISCOVERY19:CACHE_KEY_YEAR_NUMBER_ONLY"); metrics.bump(ctx,"discovery19.year.cache.calls");
+    bool hit=false; ctx.discovery19CachedEntry=adapter.getOrPut(cache,ctx.discovery19CacheKeyYearNumber,ctx.discovery19CacheRequest,hit); ctx.discovery19CacheHit=hit; ctx.discovery19CacheOutput=ctx.discovery19CachedEntry.value; ctx.discovery19CacheReady=true; metrics.bump(ctx, hit?"discovery19.year.cache.hit":"discovery19.year.cache.miss"); validator.requireDiscovery19YearCacheReady(ctx);
+}
 
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
@@ -5463,6 +5475,7 @@ void BaseDispatcher::dispatchPatchedYearWalk(
     ctx.branchTrace.push_back("DISPATCH:PATCH18_SEQUENTIAL_YEAR_WALK");
     handler.handle(ctx, legacyHandler, adapter, wrapper, validator, metrics);
 }
+void BaseDispatcher::dispatchLegacyYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Discovery19YearNumberCacheHandler& handler, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const { handler.handle(ctx,cache,adapter,validator,metrics); }
 
 void BaseDispatcher::dispatchPatchedYear5000Tie(
     BaseMonsterContext& ctx,
@@ -5934,5 +5947,11 @@ LegacyYearJumpReport BaseMonsterManager::executeUnpatchedYearJumpDiagnostic(
         ctx.branchTrace.size()
     };
 }
+LegacyYearCacheReport BaseMonsterManager::executeLegacyYearNumberCache(const LegacyYearAnchor& anchor, const Integer& targetDay, const Integer& calculationDay) const {
+    const LegacyYearJumpReport fresh=executeLegacyYearJump(anchor,targetDay,calculationDay); BaseMonsterContext ctx; ctx.phase="ENTRY"; ctx.status="NEW"; ctx.calculationDay=calculationDay; ctx.targetDay=targetDay; ctx.discovery19CacheKeyYearNumber=fresh.outputYear.number; ctx.discovery19CacheRequest=LegacyYearCacheEntry{calculationDay,fresh.outputYear.openGateDay,fresh.outputYear.closeGateDay,fresh.outputYear};
+    const BaseValidationManager validator; const BaseMetricsShell metrics; const LegacyYearNumberOnlyCacheAdapter adapter; const Discovery19YearNumberCacheHandler handler; const BaseDispatcher dispatcher; dispatcher.dispatchLegacyYearNumberCache(ctx,legacyYearNumberCache_,handler,adapter,validator,metrics);
+    return LegacyYearCacheReport{ctx.discovery19CacheKeyYearNumber,ctx.discovery19CacheRequest,ctx.discovery19CachedEntry,ctx.discovery19CacheOutput,ctx.discovery19CacheHit,ctx.discovery19CacheReady,ctx.phase,ctx.status,ctx.currentHandler,ctx.branchTrace.size()};
+}
+void BaseMonsterManager::clearLegacyYearNumberCacheDiagnostic() const { legacyYearNumberCache_.clear(); }
 
 } // namespace pastafari

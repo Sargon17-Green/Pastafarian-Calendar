@@ -542,3 +542,24 @@ Omnes regressiones Graduum 1–37 transeunt.
 ### Quod consulto nondum adest
 
 Nullus cache annorum persistens, nulla map keyed tantum per year number, nullus `calculationDayFingerprint`, nullus guard cache et nullus PATCH 19 adest. Workspace portarum tantum invocationi proprium est et post manager invocationem perit.
+
+## DISCOVERY 19 — cache anni keyed tantum per `year.number`
+
+Gradus 38 cache persistens in `BaseMonsterManager` introducit. Clavis map est tantum `year.number`. Value tamen iam formam historicam plenam habet:
+
+```text
+calculationDayFingerprint
+openGate
+closeGate
+value
+```
+
+`LegacyYearNumberOnlyCacheAdapter::getOrPut` nullum horum trium guardorum legit ad HIT decernendum. Si eadem clavis numeri anni iam exstat, entry vetus statim redditur. Via activa annum currentem primum per PATCH 18 sequentialiter resolvit, ex eo request entry currentem format, deinde per `Discovery19YearNumberCacheHandler` cache legacy consulit. Sic defectus est in reuse cache, non in ambulatione anni.
+
+Witness est annus 5001 cum eodem target die et calculationDay Fundationis, Fundationis+1, +2 et +3. Numerus anni et opening gate manent iidem; closing gate cum calculationDay mutatur. Prima invocatio MISS facit et entry Fundationis servat. Tres invocationes sequentes eadem clave 5001 HIT faciunt et closing gate vetus reddunt. Regressio tres HIT stale exactos exspectat et consulto exitum 1 reddit.
+
+Omnes regressiones Graduum 1–37 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus guard HIT super `calculationDayFingerprint`, `openGate` aut `closeGate` adest; nullus mismatch ad MISS convertitur; nullus overwrite guarded PATCH 19 adest. Nulla `oldStructureSauce` nec logica PATCH 20 praemature addita est.

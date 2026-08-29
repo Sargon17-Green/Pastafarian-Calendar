@@ -1,0 +1,18 @@
+GRADUS_38_PROBATIONES_LOCALES
+COMPILATOR=g++ 14.2.0
+NORMA=C++20
+BASELINE=Gradus 37 localis canonicus
+
+CLEAN_REBUILD=C++ et mandata build/run tantum
+PREVIOUS_REGRESSIONS_STAGE_01_07=PASS
+PREVIOUS_REGRESSIONS_STAGE_08_37=PASS
+PREVIOUS_REGRESSION_TOTAL=37
+
+DISCOVERY_19_EXPECTED=EXPECTED_RED
+DISCREPANTIA_CACHE_ANNI cDay=-15055670 key=5001 fingerprint_servatus=-15055671 fingerprint_request=-15055670 close_servatus=-15047892 close_request=-15048629
+DISCREPANTIA_CACHE_ANNI cDay=-15055669 key=5001 fingerprint_servatus=-15055671 fingerprint_request=-15055669 close_servatus=-15047892 close_request=-15049049
+DISCREPANTIA_CACHE_ANNI cDay=-15055668 key=5001 fingerprint_servatus=-15055671 fingerprint_request=-15055668 close_servatus=-15047892 close_request=-15049315
+REGRESSIO_DISCOVERY_19_DEFECIT: 3 HIT stale ex clave year.number sola inventa sunt
+EXITUS_DISCOVERY_19=1
+
+STATUS=EXPECTED_RED

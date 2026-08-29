@@ -1171,3 +1171,23 @@ In omnibus quinque casibus oldJumpGuess differt a numero normativo et tamen ut t
 ### Quod nondum fit
 
 Nullus cache persistens annorum, nullus key ex solo `year.number`, nullus `calculationDayFingerprint`, nulli guards `openGate`/`closeGate`/fingerprint pro cache et nullus PATCH 19 adest. Gradus 38 debet DISCOVERY 19 tantum introducere.
+
+## Gradus 38 — DISCOVERY 19: cache anni ex sola clave `year.number`
+
+### Quid putabatur
+
+Putabatur numerum anni solum satis esse ad reutilizandam structuram anni. Ideo `BaseMonsterManager` map persistentem possidet cuius clavis est `year.number` tantum.
+
+### Quid repertum est
+
+Idem numerus anni sub calculationDay diverso potest contextum semanticum diversum habere. `LegacyYearCacheEntry` iam `calculationDayFingerprint`, `openGate`, `closeGate` et `value` servat, sed `LegacyYearNumberOnlyCacheAdapter::getOrPut` eos campos non inspicit. HIT ex sola praesentia eiusdem numeri anni conceditur.
+
+Witness anni 5001 primum calculationDay Fundationis in cache ponit. Sub Fundatione+1, +2 et +3 annus 5001 current per PATCH 18 rite resolvitur, sed closing gate differt. Cache tamen entry primam reddit. Tres HIT stale exacti fiunt; regressio consulto rubra est. Omnes regressiones 1–37 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `LegacyYearCacheEntry`, `LegacyYearCacheReport`, cache persistens manageris keyed per `Integer year.number`, campi contextus Discovery 19, `LegacyYearNumberOnlyCacheAdapter`, `Discovery19YearNumberCacheHandler`, validator, dispatcher, manager route `executeLegacyYearNumberCache` et via purgationis diagnostica ad probationes.
+
+### Quod nondum fit
+
+Tres guardi value nondum potestatem habent. Nulla comparatio `calculationDayFingerprint`, `openGate` vel `closeGate` fit ante HIT; mismatch nondum MISS est et entry nondum currentibus guardis overwrititur. Nullus PATCH 19 nec `oldStructureSauce` PATCH 20 praemature adest.

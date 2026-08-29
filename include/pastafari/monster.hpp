@@ -176,6 +176,9 @@ struct Patch18YearWalkResult {
     std::size_t backwardSteps = 0;
 };
 
+struct LegacyYearCacheEntry { Integer calculationDayFingerprint{}; Integer openGate{}; Integer closeGate{}; Patch18YearRecord value{}; };
+struct LegacyYearCacheReport { Integer cacheKeyYearNumber{}; LegacyYearCacheEntry requestEntry{}; LegacyYearCacheEntry cachedEntry{}; Patch18YearRecord outputValue{}; bool cacheHit=false; bool ready=false; std::string phase; std::string status; std::string handler; std::size_t branchCount=0; };
+
 struct LegacyAnswerRing {
     Integer first{};
     int directionStep = 0;
@@ -486,6 +489,7 @@ struct BaseMonsterContext {
     std::size_t patch18BackwardSteps = 0;
     bool patch18GuessTelemetryOnly = false;
     bool patch18Applied = false;
+    Integer discovery19CacheKeyYearNumber{}; LegacyYearCacheEntry discovery19CacheRequest{}; LegacyYearCacheEntry discovery19CachedEntry{}; Patch18YearRecord discovery19CacheOutput{}; bool discovery19CacheHit=false; bool discovery19CacheReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -851,6 +855,7 @@ public:
     void requirePatch17Year5000TieReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery18LegacyYearJumpReady(const BaseMonsterContext& ctx) const;
     void requirePatch18YearWalkReady(const BaseMonsterContext& ctx) const;
+    void requireDiscovery19YearCacheReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -942,6 +947,7 @@ public:
                                  const LegacyYearAnchor& anchor,
                                  const Integer& targetDay) const;
 };
+class LegacyYearNumberOnlyCacheAdapter { public: LegacyYearCacheEntry getOrPut(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, bool& hit) const; };
 
 class LegacyArithmeticAdapter {
 public:
@@ -1451,6 +1457,7 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Discovery19YearNumberCacheHandler { public: void handle(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
 
 class BaseDispatcher {
 public:
@@ -1710,6 +1717,7 @@ public:
                                  const Patch18SequentialYearWalkWrapper& wrapper,
                                  const BaseValidationManager& validator,
                                  const BaseMetricsShell& metrics) const;
+    void dispatchLegacyYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Discovery19YearNumberCacheHandler& handler, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1835,6 +1843,10 @@ public:
     LegacyYearJumpReport executeUnpatchedYearJumpDiagnostic(
         const LegacyYearAnchor& anchor,
         const Integer& targetDay) const;
+    LegacyYearCacheReport executeLegacyYearNumberCache(const LegacyYearAnchor& anchor, const Integer& targetDay, const Integer& calculationDay) const;
+    void clearLegacyYearNumberCacheDiagnostic() const;
+private:
+    mutable std::map<Integer, LegacyYearCacheEntry> legacyYearNumberCache_{};
 };
 
 } // namespace pastafari
