@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 07 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 07 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,7 @@ group('null textu hebreic o code posterior a Discovery 07 contamina production',
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'patchedCounts', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
+    'patchedCounts', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
@@ -998,7 +998,40 @@ group('Discovery 07 conserva li table zero-based e expone li indexing legacy 1..
   eq(routed.context.metrics['discovery07.legacyGrindIndex.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 07', () => {
+group('Patch 07 conserva li legacy indexing e adjunte un sentinel permanent por ordinals 1..11', () => {
+  const expected = [
+    ['w', 3n, 5n, 7n, 11n],
+    ['b', 5n, 7n, 11n, 13n],
+    ['s', 7n, 11n, 13n, 17n],
+    ['m', 11n, 13n, 17n, 19n],
+    ['r', 13n, 17n, 19n, 23n],
+    ['w', 17n, 19n, 23n, 29n],
+    ['b', 19n, 23n, 29n, 31n],
+    ['s', 23n, 29n, 31n, 37n],
+    ['m', 29n, 31n, 37n, 41n],
+    ['r', 31n, 37n, 41n, 43n],
+    ['w', 37n, 41n, 43n, 47n]
+  ];
+  const shape = (row) => row === undefined || row === null ? row : [row.kind, row.a, row.b, row.c, row.d];
+  eq(production.GRIND_TABLE_WITH_SENTINEL.length, 12);
+  eq(production.GRIND_TABLE_WITH_SENTINEL[0], null);
+  ok(Object.isFrozen(production.GRIND_TABLE_WITH_SENTINEL));
+  deepEq(production.GRIND_TABLE_WITH_SENTINEL.slice(1).map(shape), expected);
+  deepEq(shape(production.legacyGrindRow(1)), expected[1]);
+  eq(production.legacyGrindRow(11), undefined);
+  for (let grind = 1; grind <= 11; grind += 1) {
+    deepEq(shape(production.grindRowWithSentinel(grind)), expected[grind - 1]);
+  }
+  const routed = production.historicGrindRowThroughMonsterPath(1n, 1n, 11);
+  eq(routed.context.legacyGrindMissing, true);
+  eq(routed.context.patch07SentinelPreserved, true);
+  eq(routed.context.currentHandler, 'Patch07GrindSentinelWrapper');
+  eq(routed.context.status, 'PATCH_07_RESULT');
+  deepEq(shape(routed.result), expected[10]);
+  eq(routed.context.metrics['patch07.grindSentinel.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 07', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1010,4 +1043,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression rubi de Discovery 07.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in li statu GREEN de Patch 07.');

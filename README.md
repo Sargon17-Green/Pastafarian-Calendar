@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 14 de 55: DISCOVERY 07**. Omni scars e patches 01..06 resta intact e testabil. Li nov `LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED` contene li undec rows real in lor ordine normativ, ma `legacyGrindRow(grind)` usa li ordinal historic 1..11 directmen quam index zero-based.
+Li linea es in **Stage 15 de 55: PATCH 07**. Omni scars e patches 01..06 resta intact e testabil. `legacyGrindRow(grind)` conserva li defect de Discovery 07 e usa ancora li ordinal historic 1..11 directmen quam index contra li table zero-based.
 
-Isto deplazza li lookup per un row: grind 1 rende li duesim row, grind 10 rende li undecim, e grind 11 rende un valore absent. `LegacyGrindTableAdapter` e `Discovery07GrindIndexHandler` expone ti defect in un route production real e conserva li index demandat, li index fisic e li absentie del ultim row in li context. Null sentinel reparativ existe ancor.
+Li correction adjunte `GRIND_TABLE_WITH_SENTINEL`: index 0 resta un sentinel permanent, e li undec rows real ocupa indices 1..11. `grindRowWithSentinel(grind)` posse dunc conservar exactmen li caller one-based sin desplazzar li data. `Patch07GrindSentinelWrapper` passa pos li handler legacy e conserva separatmen li output defectiv e li output reparat.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -32,19 +32,20 @@ Omni regressions precedent deve restar verd:
 npm run test:previous
 ```
 
-Li prova focal de Discovery 07 deve esser rubi intentionalmen e monstrar li displacement del indexing:
+Li regression de Discovery 07 resta executabil e deve esser verd pos li patch, durante que li output legacy desplazat resta observabil:
 
 ```text
 npm run test:discovery-07
 ```
 
-Li suite complet es intentionalmen rubi in ti stage, e li unic failure nov deve esser Discovery 07:
+Li prova focal del patch e li suite complet deve esser verd:
 
 ```text
+npm run test:patch-07
 npm test
 ```
 
-Li verifier confirma que li data del undec rows self es exact, que li legacy lookup continua usar index direct 1..11, que grind 11 es absent, e que `GRIND_TABLE_WITH_SENTINEL` e code de Patch 08 o posterior ne contamina production.
+Li verifier confirma que li table legacy zero-based resta intact, que li sentinel resta fisicmen in index 0, que indices 1..11 rende li undec rows exact e que `oldPermutationUnrank0` o code de Patch 08 o posterior ne contamina production.
 
 ## Independentie
 
@@ -67,3 +68,7 @@ Li history legacy ne conosse li hidden drops. `legacyPrior(dropStore, i, back)` 
 ## Stage 14 — Discovery 07
 
 Li table historic de visible grinds es almacenat quam un array zero-based de undec rows, durante que li caller historic continua numerar grinds 1..11 e usa ti ordinal directmen quam index. Li data self es correct; li defect es exclusivmen li mismatch de convention de indices. `Discovery07GrindIndexHandler` conserva ti scar in li route production. Li sentinel reparativ de Patch 07 ne es present in ti stage.
+
+## Stage 15 — Patch 07
+
+`LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED` e `legacyGrindRow` resta intact quam scar historic. `GRIND_TABLE_WITH_SENTINEL` adjunte un slot permanent a index 0 e conserva li undec rows real in indices 1..11. `grindRowWithSentinel` usa ancora li ordinal one-based directmen quam index, e `Patch07GrindSentinelWrapper` conserva li output legacy e li reparat in li sam context. Li regression de Discovery 07 es nu verd sin deleter li sentinel.

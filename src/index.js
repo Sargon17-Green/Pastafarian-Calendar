@@ -80,6 +80,10 @@ class BaseMonsterContext {
     this.legacyGrindPhysicalIndex = null;
     this.legacyGrindOutput = null;
     this.legacyGrindMissing = false;
+    this.patch07RequestedIndex = null;
+    this.patch07PhysicalIndex = null;
+    this.patch07SentinelPreserved = false;
+    this.patch07Output = null;
   }
 }
 
@@ -178,6 +182,12 @@ class BaseValidationManager {
   requireDiscovery06Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_06_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 06.');
+    }
+  }
+
+  requireDiscovery07Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_07_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 07.');
     }
   }
 
@@ -444,6 +454,19 @@ function legacyGrindRow(grind) {
   }
   // Li table es zero-based, ma li caller historic continua usar ordinals 1..11 directmen.
   return LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED[grind];
+}
+
+const GRIND_TABLE_WITH_SENTINEL = Object.freeze([
+  null,
+  ...LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED
+]);
+
+function grindRowWithSentinel(grind) {
+  if (!Number.isInteger(grind) || grind < 1 || grind > 11) {
+    throw new RangeError('Li ordinal reparat de grind visibil deve esser inter 1 e 11.');
+  }
+  // Li caller conserva su index one-based; li sentinel ocupa fisicmen index 0 e ne es removet.
+  return GRIND_TABLE_WITH_SENTINEL[grind];
 }
 
 class LegacyRemainderAdapter {
@@ -826,6 +849,32 @@ class Discovery07GrindIndexHandler {
   }
 }
 
+class Patch07GrindSentinelWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, grind) {
+    this.validationManager.requireDiscovery07Result(context);
+    this.validationManager.requireVisibleGrindIndex(grind);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Patch07GrindSentinelWrapper';
+    context.phase = 'PATCH_07_GRIND_SENTINEL';
+    context.branchTrace.push('PATCH_07_GRIND_SENTINEL');
+    context.patch07RequestedIndex = grind;
+    context.patch07PhysicalIndex = grind;
+    context.patch07SentinelPreserved = GRIND_TABLE_WITH_SENTINEL[0] === null;
+    if (!context.patch07SentinelPreserved) {
+      throw new BootstrapStageError('Li sentinel de Patch 07 deve restar fisicmen in index 0.');
+    }
+    context.patch07Output = grindRowWithSentinel(grind);
+    context.status = 'PATCH_07_RESULT';
+    this.metricsManager.bump(context, 'patch07.grindSentinel.calls');
+    return context.patch07Output;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -885,6 +934,10 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager,
       this.legacyGrindTableAdapter
+    );
+    this.patch07GrindSentinelWrapper = new Patch07GrindSentinelWrapper(
+      this.validationManager,
+      this.metricsManager
     );
   }
 
@@ -1060,6 +1113,19 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch07GrindIndex(calculationDay, targetDay, grind) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery07GrindIndexHandler.handle(context, grind);
+      const result = this.patch07GrindSentinelWrapper.repair(context, grind);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -1118,8 +1184,12 @@ function discovery07LegacyGrindRowThroughMonsterPath(calculationDay, targetDay, 
   return new BaseMonsterManager().executeDiscovery07GrindIndex(calculationDay, targetDay, grind);
 }
 
+function historicGrindRowThroughMonsterPath(calculationDay, targetDay, grind) {
+  return new BaseMonsterManager().executePatch07GrindIndex(calculationDay, targetDay, grind);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 07; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 07; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -1153,6 +1223,7 @@ module.exports = Object.freeze({
   Patch06PriorWrapper,
   LegacyGrindTableAdapter,
   Discovery07GrindIndexHandler,
+  Patch07GrindSentinelWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -1175,6 +1246,8 @@ module.exports = Object.freeze({
   priorPatch,
   LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED,
   legacyGrindRow,
+  GRIND_TABLE_WITH_SENTINEL,
+  grindRowWithSentinel,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -1189,5 +1262,6 @@ module.exports = Object.freeze({
   discovery06LegacyPriorThroughMonsterPath,
   historicPriorThroughMonsterPath,
   discovery07LegacyGrindRowThroughMonsterPath,
+  historicGrindRowThroughMonsterPath,
   calendarDateSpaghetti
 });

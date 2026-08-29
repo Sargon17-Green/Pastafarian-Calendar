@@ -291,3 +291,22 @@ Null circumventione existe in ti stage. Null sentinel row es addit e `GRIND_TABL
 ### Pro quo li strat nov ne adjunte un defect extra
 
 Li adapter delega exclusivmen a `legacyGrindRow`; li handler ne shift, ne fallback, ne consulta li oracle e ne fabrica un row. Li table self usa li undec rows real in ordine correct. Ergo li unic divergentie nov es precis li mismatch one-based/zero-based mandat de Discovery 07. Omni scars e patches precedent resta separatmen testabil.
+
+
+## Stage 15 — PATCH 07
+
+### Quo esset circumit
+
+`legacyGrindRow` e `LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED` ne esset modificat. Li nov `GRIND_TABLE_WITH_SENTINEL` reserva fisicmen index 0 quam sentinel e copia li undec rows real in indices 1..11. `grindRowWithSentinel(grind)` conserva exactmen li convention del caller historic: grind 1 usa index 1, e talmen til grind 11 usa index 11.
+
+### Pro quo li patch es normativmen equivalent
+
+Li table de Discovery 07 ja contene li undec rows correct in ordine. Prefixar un sentinel ne cambia null row; it solmen deplazza lor indices fisic per un unit, quel alinea li storage con li ordinals semantic 1..11 del caller. Ergo chascun grind rende exactmen li sam row normativ sin recalcular, reordinar o duplicar li data semantic.
+
+### Crescentie monster in ti stage
+
+Un `Patch07GrindSentinelWrapper` ha esset insertet pos `Discovery07GrindIndexHandler`. Li context conserva li ordinal demandat, li index fisic direct, un flag quel confirma que li sentinel resta in index 0, li output legacy e li output reparat. `BaseMonsterManager` expone un route historic separat quel executa discovery e patch in li sam invocation.
+
+### Scar conservat
+
+`legacyGrindRow(1)` continua rendre li duesim row e `legacyGrindRow(11)` continua rendre `undefined`. Li sentinel ne es removet pos lookup e ne es tratat quam un grind real. Null `oldPermutationUnrank0` o code de Patch 08 o posterior es present.

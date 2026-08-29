@@ -18,45 +18,51 @@ const expected = [
 ];
 
 function rowShape(row) {
-  return row === undefined ? undefined : [row.kind, row.a, row.b, row.c, row.d];
+  return row === undefined || row === null ? row : [row.kind, row.a, row.b, row.c, row.d];
 }
 
 assert.equal(production.LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED.length, 11);
 assert.deepEqual(
   production.LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED.map(rowShape),
   expected,
-  'Li data del table legacy self deve conservar li deciun rows normativ in ordine zero-based.'
+  'Li data del table legacy self deve conservar li undec rows normativ in ordine zero-based.'
 );
 
-const actual = [];
+const legacyActual = [];
+const patchedActual = [];
 for (let grind = 1; grind <= 11; grind += 1) {
-  const routed = production.discovery07LegacyGrindRowThroughMonsterPath(1n, 1n, grind);
-  assert.equal(routed.context.currentHandler, 'Discovery07GrindIndexHandler');
-  assert.equal(routed.context.phase, 'DISCOVERY_07_LEGACY_GRIND_INDEX');
-  assert.equal(routed.context.status, 'DISCOVERY_07_LEGACY_RESULT');
-  assert.equal(routed.context.legacyGrindRequestedIndex, grind);
-  assert.equal(routed.context.legacyGrindPhysicalIndex, grind);
-  assert.equal(routed.context.legacyGrindMissing, grind === 11);
-  assert.equal(routed.context.metrics['discovery07.legacyGrindIndex.calls'], 1n);
-  assert.deepEqual(routed.context.branchTrace, [
+  const legacyRoute = production.discovery07LegacyGrindRowThroughMonsterPath(1n, 1n, grind);
+  assert.equal(legacyRoute.context.currentHandler, 'Discovery07GrindIndexHandler');
+  assert.equal(legacyRoute.context.phase, 'DISCOVERY_07_LEGACY_GRIND_INDEX');
+  assert.equal(legacyRoute.context.status, 'DISCOVERY_07_LEGACY_RESULT');
+  assert.equal(legacyRoute.context.legacyGrindRequestedIndex, grind);
+  assert.equal(legacyRoute.context.legacyGrindPhysicalIndex, grind);
+  assert.equal(legacyRoute.context.legacyGrindMissing, grind === 11);
+  assert.equal(legacyRoute.context.metrics['discovery07.legacyGrindIndex.calls'], 1n);
+  legacyActual.push(rowShape(legacyRoute.result));
+
+  const patchedRoute = production.historicGrindRowThroughMonsterPath(1n, 1n, grind);
+  assert.equal(patchedRoute.context.legacyGrindRequestedIndex, grind);
+  assert.equal(patchedRoute.context.legacyGrindPhysicalIndex, grind);
+  assert.equal(patchedRoute.context.patch07RequestedIndex, grind);
+  assert.equal(patchedRoute.context.patch07PhysicalIndex, grind);
+  assert.equal(patchedRoute.context.patch07SentinelPreserved, true);
+  assert.equal(patchedRoute.context.currentHandler, 'Patch07GrindSentinelWrapper');
+  assert.equal(patchedRoute.context.phase, 'PATCH_07_GRIND_SENTINEL');
+  assert.equal(patchedRoute.context.status, 'PATCH_07_RESULT');
+  assert.equal(patchedRoute.context.metrics['discovery07.legacyGrindIndex.calls'], 1n);
+  assert.equal(patchedRoute.context.metrics['patch07.grindSentinel.calls'], 1n);
+  assert.deepEqual(patchedRoute.context.branchTrace, [
     'BOOTSTRAP_VALIDATED',
-    'DISCOVERY_07_LEGACY_GRIND_INDEX'
+    'DISCOVERY_07_LEGACY_GRIND_INDEX',
+    'PATCH_07_GRIND_SENTINEL'
   ]);
-  actual.push(rowShape(routed.result));
+  patchedActual.push(rowShape(patchedRoute.result));
 }
 
-assert.deepEqual(actual[0], expected[1]);
-assert.deepEqual(actual[9], expected[10]);
-assert.equal(actual[10], undefined);
+assert.deepEqual(legacyActual[0], expected[1]);
+assert.deepEqual(legacyActual[9], expected[10]);
+assert.equal(legacyActual[10], undefined);
+assert.deepEqual(patchedActual, expected);
 
-console.log('DISCOVERY 07 EXPECTED RED: li caller usa ordinals 1..11 quam indices direct in un table zero-based.');
-console.log('legacy grind 1:  ' + String(actual[0]));
-console.log('normativ grind 1:' + String(expected[0]));
-console.log('legacy grind 11: ' + String(actual[10]));
-console.log('normativ grind 11:' + String(expected[10]));
-
-assert.deepEqual(
-  actual,
-  expected,
-  'DISCOVERY 07 EXPECTED RED: grind 1 prende li duesim row e grind 11 cade ultra li table zero-based.'
-);
+console.log('DISCOVERY 07 REGRESSION: PASS pos Patch 07; li legacy indexing resta deplazzat e li sentinel rende ordinals 1..11 exact.');
