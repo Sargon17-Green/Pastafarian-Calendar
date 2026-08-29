@@ -889,3 +889,25 @@ Li structura del year ne depende del target arbitrari intra li year. Su sauce de
 ### Witness e limite del stage
 
 Tri targets originals intra Year 5000 es diferent de `year.firstDay`. Li sauce historic por chascun target concorda con li oracle por exactmen ti target, ma bowl 2 e li order latch diverge del sauce normativ `(cDay,year.firstDay)`. Li selector continua consumir li old resultate, talmen li regression nov es intentionalmen rubi. Li correction de Patch 20 — executar oldStructureSauce quam ghost e impedir que su output atinge li selector, calculante un sauce autoritativ nov con `(cDay,year.firstDay)` — ne es present. Null code de Patch 21 es anticipat.
+
+## Stage 41 — PATCH 20
+
+### Scar historic conservat
+
+`oldStructureSauce(cDay,originalTargetDay)` resta byte-per-byte intact desde Discovery 20. Su contract continua calcular un sauce exact por li calculation-day e li target original quel it riceve. `Discovery20StructureSauceHandler` anc resta un route separat quel passa ti resultate directmen al selector legacy, por que li defect historic resta observabil e testabil.
+
+### Ghost real ante li sauce semantic
+
+Patch 20 adjunte `structureSaucePatch(cDay,originalTargetDay,yearFirstDay)`. Li prim operation semantic relevant del helper es un call real a `oldStructureSauce(cDay,originalTargetDay)`. Ti resultate es copiat in un record ghost. Li helper old ne es mutat, ne redirectat e ne recebe `yearFirstDay`.
+
+Pos ti ghost, li patch construi separatim `semanticSauce=sauceWithCurrentScars(cDay,yearFirstDay)`. Anc quand `originalTargetDay==yearFirstDay`, li sauce semantic es un object separat: talmen li provenance del ghost ne posse devenir accidentalmen li input del selector.
+
+### Wrapper e selector
+
+`StructureSaucePatchWrapper` es conectet directmen pos `YearCacheActionGuardPatchWrapper`. It deriva e valida `year.firstDay` ex `patch18ResolvedYear.openDay+1`, executa `structureSaucePatch`, conserva ghost e sauce semantic in campos invocation-local, e voca `LegacyStructureSelectorAdapter.select` exclusivmen con `patched.semanticSauce`. Null branch del wrapper passa `patched.ghost` al selector.
+
+### Regression
+
+Li tri witnesses de Discovery 20 continua provar que li route legacy directe produce tokens distinct por targets originals intra Year 5000. Li route Patch 20, con li sam calculation-day e year resoluet, produce por omni tri exactmen li bowl 2 e `orderAt46Latch` del sauce `(cDay,year.firstDay)`. Tests separat confirma li ordre ghost-ante-semantic, li invariance fisic de `oldStructureSauce`, li case target==firstDay e li absence de code de Patch 21.
+
+Omni regressions til Discovery 20 es verd. Li proxim defect mandat — cutlet partition sin li gate intern del calculation-day — resta completmen absent.

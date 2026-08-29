@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 20 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 20 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,8 +319,7 @@ group('null textu hebreic o code posterior a Discovery 20 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'structureSaucePatch',
-    'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
+    'legacyPositiveCompositions', 'CutletPartitionPatchWrapper', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
@@ -1929,7 +1928,69 @@ group('Discovery 20 usa realmente oldStructureSauce con li target original e env
   ok(!production.Discovery20StructureSauceHandler.prototype.handle.toString().includes('structureSaucePatch'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 20', () => {
+group('Patch 20 executa oldStructureSauce quam ghost ma alimenta li selector solmen con year.firstDay', () => {
+  const oldSource = production.oldStructureSauce.toString();
+  ok(oldSource.includes('sauceWithCurrentScars(cDay, originalTargetDay)'));
+  ok(!oldSource.includes('yearFirstDay'));
+  const patchSource = production.structureSaucePatch.toString();
+  ok(patchSource.includes('const ghost = oldStructureSauce(cDay, originalTargetDay)'));
+  ok(patchSource.includes('const semanticSauce = sauceWithCurrentScars(cDay, yearFirstDay)'));
+  ok(patchSource.indexOf('oldStructureSauce(cDay, originalTargetDay)') < patchSource.indexOf('sauceWithCurrentScars(cDay, yearFirstDay)'));
+  ok(!patchSource.includes('legacyStructureSelectorToken'));
+  const wrapperSource = production.StructureSaucePatchWrapper.prototype.repair.toString();
+  ok(wrapperSource.includes('this.selectorAdapter.select(patched.semanticSauce)'));
+  ok(!wrapperSource.includes('select(patched.ghost)'));
+
+  const f = o.FOUNDATION_DAY;
+  const calculationDay = f + 100n;
+  const originalTargetDay = f + 365n;
+  const yearFirstDay = f + 11n;
+  const direct = production.structureSaucePatch(calculationDay, originalTargetDay, yearFirstDay);
+  const oldExpected = o.sauce(calculationDay, originalTargetDay);
+  const authoritative = o.sauce(calculationDay, yearFirstDay);
+  ok(direct.targetsDiffer);
+  eq(direct.ghost.bowls[2], oldExpected.bowls[1]);
+  deepEq(direct.ghost.orderAt46Latch, oldExpected.orderAtDrop46);
+  eq(direct.semanticSauce.bowls[2], authoritative.bowls[1]);
+  deepEq(direct.semanticSauce.orderAt46Latch, authoritative.orderAtDrop46);
+  ok(direct.ghost.bowls[2] !== direct.semanticSauce.bowls[2]);
+
+  const manager = new production.BaseMonsterManager();
+  const gates = {
+    10: f + 10n, 16: f + 1010n,
+    20: f + 20n, 26: f + 1020n,
+    30: f + 30n, 36: f + 1030n
+  };
+  const pairs = [
+    { openIndex: 30, closeIndex: 36 },
+    { openIndex: 10, closeIndex: 16 },
+    { openIndex: 20, closeIndex: 26 }
+  ];
+  const stream = { first: 1n, directionStep: 1n };
+  const noWalk = {
+    nextYear() { throw new Error('Null next-year expectat in Patch 20.'); },
+    previousYear() { throw new Error('Null previous-year expectat in Patch 20.'); }
+  };
+  const routed = manager.executePatch20StructureSauce(
+    calculationDay, originalTargetDay, -1n, gates, pairs, stream, noWalk
+  );
+  eq(routed.context.status, 'PATCH_20_RESULT');
+  eq(routed.context.previousHandler, 'YearCacheActionGuardPatchWrapper');
+  ok(routed.context.patch20GhostExecuted);
+  ok(routed.context.patch20GhostIgnoredForSelector);
+  ok(routed.context.patch20SelectorUsedYearFirstDaySauce);
+  eq(routed.result.ghostTargetDay, originalTargetDay);
+  eq(routed.result.semanticTargetDay, yearFirstDay);
+  eq(routed.result.ghostSauce.bowls[2], oldExpected.bowls[1]);
+  eq(routed.result.selectorToken.bowl2, authoritative.bowls[1]);
+  deepEq(routed.result.selectorToken.orderAt46Latch, authoritative.orderAtDrop46);
+  eq(routed.context.metrics['patch20.oldStructureSauce.ghost.calls'], 1n);
+  eq(routed.context.metrics['patch20.semanticSelector.calls'], 1n);
+  ok(routed.context.metrics['discovery20.legacySelector.calls'] === undefined);
+  ok(!('legacyPositiveCompositions' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 20', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1941,4 +2002,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 20.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 20.');

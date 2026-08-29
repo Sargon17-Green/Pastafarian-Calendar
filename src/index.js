@@ -272,6 +272,18 @@ class BaseMonsterContext {
     this.legacyStructureSauceOrderAt46Latch = null;
     this.legacyStructureSelectorToken = null;
     this.legacyStructureSelectorUsedOriginalTargetSauce = false;
+    this.patch20GhostCalculationDay = null;
+    this.patch20GhostOriginalTargetDay = null;
+    this.patch20YearFirstDay = null;
+    this.patch20TargetsDiffer = false;
+    this.patch20GhostSauceBowls = null;
+    this.patch20GhostOrderAt46Latch = null;
+    this.patch20GhostExecuted = false;
+    this.patch20GhostIgnoredForSelector = false;
+    this.patch20SemanticSauceBowls = null;
+    this.patch20SemanticOrderAt46Latch = null;
+    this.patch20SemanticSelectorToken = null;
+    this.patch20SelectorUsedYearFirstDaySauce = false;
   }
 }
 
@@ -2906,6 +2918,87 @@ class Discovery20StructureSauceHandler {
   }
 }
 
+function structureSaucePatch(cDay, originalTargetDay, yearFirstDay) {
+  if (typeof cDay !== 'bigint' || typeof originalTargetDay !== 'bigint' || typeof yearFirstDay !== 'bigint') {
+    throw new TypeError('Patch 20 exige cDay, target original e year.firstDay quam BigInt exact.');
+  }
+  // Li helper historic resta intact e es executet realmen quam ghost; su bug vive in li duesim argument, ne in su formulas.
+  const ghost = oldStructureSauce(cDay, originalTargetDay);
+  // Ne reparar oldStructureSauce: li sauce semantic es materialisat separatim ex year.firstDay, talmen li ghost ne posse atinger li selector.
+  const semanticSauce = sauceWithCurrentScars(cDay, yearFirstDay);
+  return Object.freeze({
+    targetsDiffer: originalTargetDay !== yearFirstDay,
+    ghost: Object.freeze({
+      bowls: Object.freeze(ghost.bowls.slice()),
+      orderAt46Latch: Object.freeze(ghost.orderAt46Latch.slice())
+    }),
+    semanticSauce: Object.freeze({
+      bowls: Object.freeze(semanticSauce.bowls.slice()),
+      orderAt46Latch: Object.freeze(semanticSauce.orderAt46Latch.slice())
+    })
+  });
+}
+
+class StructureSaucePatchWrapper {
+  constructor(validationManager, metricsManager, selectorAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.selectorAdapter = selectorAdapter;
+  }
+
+  repair(context, calculationDay, originalTargetDay, yearFirstDay) {
+    this.validationManager.requirePatch19Result(context);
+    this.validationManager.requireDiscreteDay(calculationDay);
+    this.validationManager.requireDiscreteDay(originalTargetDay);
+    this.validationManager.requireDiscreteDay(yearFirstDay);
+    if (!context.patch18ResolvedYear || yearFirstDay !== context.patch18ResolvedYear.openDay + 1n) {
+      throw new BootstrapStageError('Patch 20 deve usar exactmen year.firstDay ex li year resoluet per Patch 18.');
+    }
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'StructureSaucePatchWrapper';
+    context.phase = 'PATCH_20_STRUCTURE_SAUCE_YEAR_FIRST_DAY_GHOST';
+    context.branchTrace.push('PATCH_20_STRUCTURE_SAUCE_YEAR_FIRST_DAY_GHOST');
+    context.patch20GhostCalculationDay = calculationDay;
+    context.patch20GhostOriginalTargetDay = originalTargetDay;
+    context.patch20YearFirstDay = yearFirstDay;
+
+    const patched = structureSaucePatch(calculationDay, originalTargetDay, yearFirstDay);
+    context.patch20TargetsDiffer = patched.targetsDiffer;
+    context.patch20GhostSauceBowls = patched.ghost.bowls.slice();
+    context.patch20GhostOrderAt46Latch = patched.ghost.orderAt46Latch.slice();
+    context.patch20GhostExecuted = true;
+    context.patch20GhostIgnoredForSelector = true;
+    context.patch20SemanticSauceBowls = patched.semanticSauce.bowls.slice();
+    context.patch20SemanticOrderAt46Latch = patched.semanticSauce.orderAt46Latch.slice();
+
+    // Solmen li sauce recalculat con year.firstDay entra li selector; null data del ghost es usat quam input.
+    const token = this.selectorAdapter.select(patched.semanticSauce);
+    context.patch20SemanticSelectorToken = {
+      bowl2: token.bowl2,
+      orderAt46Latch: token.orderAt46Latch.slice()
+    };
+    context.patch20SelectorUsedYearFirstDaySauce = true;
+    context.status = 'PATCH_20_RESULT';
+    this.metricsManager.bump(context, 'patch20.oldStructureSauce.ghost.calls');
+    this.metricsManager.bump(context, 'patch20.yearFirstDaySauce.calls');
+    this.metricsManager.bump(context, 'patch20.semanticSelector.calls');
+    if (patched.targetsDiffer) this.metricsManager.bump(context, 'patch20.targetDetour.calls');
+    return {
+      ghostTargetDay: originalTargetDay,
+      semanticTargetDay: yearFirstDay,
+      targetsDiffer: patched.targetsDiffer,
+      ghostSauce: {
+        bowls: patched.ghost.bowls.slice(),
+        orderAt46Latch: patched.ghost.orderAt46Latch.slice()
+      },
+      selectorToken: {
+        bowl2: token.bowl2,
+        orderAt46Latch: token.orderAt46Latch.slice()
+      }
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -3706,6 +3799,11 @@ class BaseMonsterManager {
       this.legacyStructureSauceAdapter,
       this.legacyStructureSelectorAdapter
     );
+    this.structureSaucePatchWrapper = new StructureSaucePatchWrapper(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyStructureSelectorAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -4297,6 +4395,32 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch20StructureSauce(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      // Discovery 20 resta un route defectiv separat; li patch real-voca oldStructureSauce quam ghost sin passar su resultate al selector.
+      const result = this.structureSaucePatchWrapper.repair(
+        context, calculationDay, originalTargetDay, yearFirstDay
+      );
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -4532,8 +4656,19 @@ function discovery20LegacyStructureSauceThroughMonsterPath(
   );
 }
 
+function historicStructureSauceThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Patch 20 exige un BaseMonsterManager persistent por li cache guardat precedent.');
+  }
+  return manager.executePatch20StructureSauce(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 20; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 20; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -4606,6 +4741,7 @@ module.exports = Object.freeze({
   LegacyStructureSauceAdapter,
   LegacyStructureSelectorAdapter,
   Discovery20StructureSauceHandler,
+  StructureSaucePatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -4684,6 +4820,7 @@ module.exports = Object.freeze({
   sauceWithCurrentScars,
   oldStructureSauce,
   legacyStructureSelectorToken,
+  structureSaucePatch,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -4724,5 +4861,6 @@ module.exports = Object.freeze({
   discovery19LegacyYearNumberCacheThroughMonsterPath,
   historicYearNumberCacheThroughMonsterPath,
   discovery20LegacyStructureSauceThroughMonsterPath,
+  historicStructureSauceThroughMonsterPath,
   calendarDateSpaghetti
 });

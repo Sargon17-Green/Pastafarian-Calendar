@@ -4,11 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 38 de 55: DISCOVERY 19** e li repository local es intentionalmen EXPECTED_RED. Omni regressions til Patch 18 resta verd; li unic failure nov demonstra li cache historic keyed solmen per `year.number`.
+Li linea es in **Stage 41 de 55: PATCH 20** e li repository local es GREEN. Omni regressions til Discovery 20 e li test focal de Patch 20 passa.
 
-Li route complet de Patch 18 continua determinar li year semantic per caminada annual exact. Pos ti resultate, `Discovery19YearNumberCacheHandler` consulta un `Map` manager-owned nominat `LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER`. Li lookup historic usa solmen li year number e ne compara li calculation-day ni li limites del year.
-
-Li regression usa year 5000 con li sam key e cambia separatmen calculation-day, opening gate e closing gate. In chascun casu li prim request es un MISS e li duesim es un HIT stale quel retorna li value del prim request. Null `calculationDayFingerprint`, null guard de Patch 19 e null `oldStructureSauce` de Patch 20 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Li scar historic `oldStructureSauce(cDay,originalTargetDay)` resta intact e es executet realmen quam ghost. `structureSaucePatch` materialisa separatim li sauce semantic con `(cDay,year.firstDay)`, e `StructureSaucePatchWrapper` manda exclusivmen ti sauce al selector. Li resultate ghost resta diagnostic e ne posse influir li selector semantic. Null cutlet-partition code de Patch 21 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -26,16 +24,16 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 18 deve restar verd:
+Omni regressions til Discovery 20 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal de Patch 18 deve esser verd:
+Li test focal de Patch 20 deve esser verd:
 
 ```text
-npm run test:patch-18
+npm run test:patch-20
 ```
 
 Li suite complet deve esser GREEN:
@@ -258,3 +256,13 @@ Patch 19 resta intact e resolve li year current con cache guards valid. Discover
 `LegacyStructureSauceAdapter` voca li helper historic. `Discovery20StructureSauceHandler` deriva separatim `yearFirstDay` ex li year ja resoluet, ma conserva intentionalmen li assumption wrong e passa `originalTargetDay` al helper. `LegacyStructureSelectorAdapter` consuma directmen ti resultate e rende observabil un token con bowl 2 e li latch de drop 46. Li route dunque demonstra li defect semantic sin inventar un sauce aproximativ o un shortcut.
 
 Li regression usa tri targets originals distint intra Year 5000. Por omni witness, `oldStructureSauce(cDay,originalTargetDay)` concorda con li oracle por ti target original, ma li token resultant diverge del sauce quel deve esser calculat con `(cDay,year.firstDay)`. Li comparison final es li unic EXPECTED_RED nov. Null `structureSaucePatch`, null ghost de oldStructureSauce e null partition de Patch 21 es includet.
+
+## Stage 41 — PATCH 20
+
+`oldStructureSauce(cDay,originalTargetDay)` resta intact quam scar historic e continua esser executet realmen. `structureSaucePatch` voca ti helper prim e conserva su bowls e `orderAt46Latch` quam ghost diagnostic. Li helper old ne es reparat ni redirectionat: su duesim input resta exactmen li target original.
+
+Pos li call ghost, `structureSaucePatch` materialisa un sauce semantic separat per `sauceWithCurrentScars(cDay,year.firstDay)`. `StructureSaucePatchWrapper` prende li `year.firstDay` del year resoluet per Patch 18, conserva li ghost in state invocation-local e passa al selector exclusivmen li object `semanticSauce`. Li route de Patch 20 ne executa `Discovery20StructureSauceHandler`, pro que ti handler resta li route defectiv separat quel envia li sauce old al selector legacy.
+
+Li tri witnesses de Discovery 20 conserva lor bowls/latch legacy distint por li targets originals, ma li route reparat retorna por omni tri li sam token derivat de `(cDay,year.firstDay)`: bowl 2 `130140581193907225400293230678310495177` e order `6,2,4,3,5,1`. Un witness adicional con `originalTargetDay==year.firstDay` confirma que li valores del ghost e del sauce semantic coincide, ma li object semantic resta materialisat separatmen e li ghost ne es usat quam input del selector.
+
+Omni regressions til Discovery 20 es nu verd. Null `legacyPositiveCompositions`, null `CutletPartitionPatchWrapper` e null code de Patch 21 es includet.

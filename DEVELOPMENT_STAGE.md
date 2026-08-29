@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=40
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=41
+CURRENT_KIND=PATCH
 CURRENT_PATCH=20
-LAST_COMPLETED_STAGE=40
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=41
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus structureSauceCountsFromDays, sauceWithCurrentScars, oldStructureSauce, LegacyStructureSauceAdapter, LegacyStructureSelectorAdapter e Discovery20StructureSauceHandler quel usa li target original del request por li sauce structural e envia ti resultate directmen al selector legacy.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, oldStructureSauce e Discovery20StructureSauceHandler, plus structureSaucePatch e StructureSaucePatchWrapper quel executa li sauce old quam ghost, materialisa separatim sauce(cDay,year.firstDay) e manda exclusivmen ti sauce semantic al selector.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 40 es finit quam **DISCOVERY 20**. `oldStructureSauce(cDay,originalTargetDay)` es li nov scar historic e es vocat realmen in li route production. It deriva li comptes exact del sam implementation, construi li stones per li chain ja reparat e usa `sauceWithOrderAt46Latch`, talmen su sauce concorda con li semantics current por exactmen li du dies quel it riceve.
+Stage 41 es finit quam **PATCH 20**. `oldStructureSauce(cDay,originalTargetDay)` resta fisicmen sin modification e li route separat de Discovery 20 continua usar su resultate directmen quam input legacy del selector quand ti route historic es vocat separatmen.
 
-Li defect ne es in li intern formulas del sauce ma in su duesim input. Pos Patch 19 li route ja conosse li year resoluet e deriva `yearFirstDay=openDay+1`, ma `Discovery20StructureSauceHandler` continua vocar li helper historic con `originalTargetDay`. `LegacyStructureSelectorAdapter` riceve directmen ti sauce old e expone bowl 2 e li orderAt46Latch quam token observabil. Tri witnesses intra Year 5000 usa targets originals diferent de `year.firstDay`; li selector token diverge del sauce normativ `(cDay,year.firstDay)`. Null ghost, null recomputation autoritativ e null `structureSaucePatch` de Patch 20 es present.
+`structureSaucePatch` voca prim li helper old realmen e conserva su resultate quam ghost. Poy it materialisa un object sauce separat ex `(cDay,year.firstDay)` per li sam implementation current. `StructureSaucePatchWrapper` es conectet pos Patch 19 e manda al `LegacyStructureSelectorAdapter` exclusivmen `patched.semanticSauce`; null object ghost es passat al selector semantic. Si li target original difere de `year.firstDay`, ti separation corrige li bowls e li `orderAt46Latch`; si ili coincide, li du sauces have li sam valores ma resta objects separat. Null code de Patch 21 es present.
