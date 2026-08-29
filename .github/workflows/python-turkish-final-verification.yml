@@ -3,7 +3,7 @@ name: Python + Türkçe final doğrulama
 on:
   push:
     branches:
-      - "Python+Türkçe"
+      - 'Python\+Türkçe'
   workflow_dispatch:
 
 permissions:
