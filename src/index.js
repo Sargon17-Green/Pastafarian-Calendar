@@ -313,6 +313,15 @@ class BaseMonsterContext {
     this.patch21SemanticPrefixSums = null;
     this.patch21SemanticBoundaryHit = null;
     this.patch21SelectionChangedFromLegacy = false;
+    this.legacyCutletNameMasterIndices = null;
+    this.legacyCutletNameCount = null;
+    this.legacyCutletNameFamilyCount = null;
+    this.legacyCutletNameStream = null;
+    this.legacyCutletNameSelectedRank = null;
+    this.legacyCutletNameIndices = null;
+    this.legacyCutletNameHasRepeatedCanonicalIndex = false;
+    this.legacyCutletNameUsedSemanticStructureSauce = false;
+    this.legacyRepeatedNameGeneratorExecuted = false;
   }
 }
 
@@ -579,6 +588,12 @@ class BaseValidationManager {
   requireDiscovery21Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_21_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un cutlet partition legacy valid por Patch 21.');
+    }
+  }
+
+  requirePatch21Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_21_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un cutlet partition reparat valid por Discovery 22.');
     }
   }
 
@@ -3405,6 +3420,125 @@ class CutletPartitionPatchWrapper {
   }
 }
 
+function legacyNameRowWithRepeats(masterCount, itemCount) {
+  if (!Number.isInteger(masterCount) || masterCount < 1) {
+    throw new RangeError('Li generator legacy de nomes exige un master count positiv.');
+  }
+  if (!Number.isInteger(itemCount) || itemCount < 1) {
+    throw new RangeError('Li generator legacy de nomes exige un item count positiv.');
+  }
+  const base = BigInt(masterCount);
+  let totalCount = 1n;
+  for (let position = 0; position < itemCount; position += 1) totalCount *= base;
+  return Object.freeze({
+    count() {
+      return totalCount;
+    },
+    unrank1(rank1) {
+      if (typeof rank1 !== 'bigint' || rank1 < 1n || rank1 > totalCount) {
+        throw new RangeError('Li rank legacy de nomes es extra li familie con repetition.');
+      }
+      let rank0 = rank1 - 1n;
+      const out = new Array(itemCount);
+      for (let position = itemCount - 1; position >= 0; position -= 1) {
+        out[position] = Number(rank0 % base) + 1;
+        rank0 /= base;
+      }
+      return out;
+    }
+  });
+}
+
+function cutletNameAnswerRingFromSauce(sauceResult) {
+  if (!sauceResult || !Array.isArray(sauceResult.bowls) || !Array.isArray(sauceResult.orderAt46Latch)) {
+    throw new TypeError('Li selection de nomes de cutlet exige un structure sauce complet.');
+  }
+  const nextBowl = nextBowlFromOrderAt46Latch(sauceResult.orderAt46Latch, 5);
+  return answerRingFromCurrentState(sauceResult.bowls, 5, nextBowl, 22n);
+}
+
+class LegacyRepeatedNameGenerator {
+  select(sauceResult, masterIndices, itemCount) {
+    if (!Array.isArray(masterIndices) || masterIndices.length < 1) {
+      throw new TypeError('Li generator legacy de nomes exige un liste master de indices canonic.');
+    }
+    const seen = new Set();
+    for (const index of masterIndices) {
+      if (!Number.isInteger(index) || index < 1 || seen.has(index)) {
+        throw new RangeError('Li liste master de nomes deve contener indices canonic distinct e positiv.');
+      }
+      seen.add(index);
+    }
+    if (!Number.isInteger(itemCount) || itemCount < 1 || itemCount > masterIndices.length) {
+      throw new RangeError('Li quantitá de nomes legacy deve esser positiv e ne plu grand quam li catalog master.');
+    }
+    // Li errore historic tracta chascun position independentmen e talmen permisse que li sam indice canonic reapari.
+    const family = legacyNameRowWithRepeats(masterIndices.length, itemCount);
+    const stream = cutletNameAnswerRingFromSauce(sauceResult);
+    const picked = selectionDispatcherWithWideDetour(stream, family.count());
+    const ordinalRow = family.unrank1(picked.output);
+    const nameIndices = ordinalRow.map((ordinal) => masterIndices[ordinal - 1]);
+    return {
+      familyCount: family.count(),
+      stream,
+      selectedRank: picked.output,
+      ordinalRow,
+      nameIndices
+    };
+  }
+}
+
+class Discovery22RepeatedNameHandler {
+  constructor(validationManager, metricsManager, legacyGenerator) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyGenerator = legacyGenerator;
+  }
+
+  handle(context) {
+    this.validationManager.requirePatch21Result(context);
+    const masterIndices = SourceLanguageCatalog.cutlets.map((row) => row.canonicalIndex);
+    const itemCount = context.patch21SemanticPartition.length;
+    if (itemCount !== context.legacyCutletCount) {
+      throw new BootstrapStageError('Discovery 22 exige que li quantitá de nomes corresponde exactmen al cutlet count semantic.');
+    }
+    const semanticSauce = {
+      bowls: context.patch20SemanticSauceBowls.slice(),
+      orderAt46Latch: context.patch20SemanticOrderAt46Latch.slice()
+    };
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery22RepeatedNameHandler';
+    context.phase = 'DISCOVERY_22_LEGACY_REPEATED_CUTLET_NAMES';
+    context.branchTrace.push('DISCOVERY_22_LEGACY_REPEATED_CUTLET_NAMES');
+    const selected = this.legacyGenerator.select(semanticSauce, masterIndices, itemCount);
+    const hasRepeatedCanonicalIndex = new Set(selected.nameIndices).size !== selected.nameIndices.length;
+
+    context.legacyCutletNameMasterIndices = masterIndices.slice();
+    context.legacyCutletNameCount = itemCount;
+    context.legacyCutletNameFamilyCount = selected.familyCount;
+    context.legacyCutletNameStream = { ...selected.stream };
+    context.legacyCutletNameSelectedRank = selected.selectedRank;
+    context.legacyCutletNameIndices = selected.nameIndices.slice();
+    context.legacyCutletNameHasRepeatedCanonicalIndex = hasRepeatedCanonicalIndex;
+    context.legacyCutletNameUsedSemanticStructureSauce = true;
+    context.legacyRepeatedNameGeneratorExecuted = true;
+    context.status = 'DISCOVERY_22_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery22.repeatedNameGenerator.calls');
+    this.metricsManager.bump(context, 'discovery22.nameSelection.calls');
+    if (hasRepeatedCanonicalIndex) this.metricsManager.bump(context, 'discovery22.repeatedCanonicalIndex.calls');
+    return {
+      masterIndices: masterIndices.slice(),
+      cutletCount: itemCount,
+      familyCount: selected.familyCount,
+      selectedRank: selected.selectedRank,
+      nameIndices: selected.nameIndices.slice(),
+      hasRepeatedCanonicalIndex,
+      stream: { ...selected.stream }
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -4220,6 +4354,12 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    this.legacyRepeatedNameGenerator = new LegacyRepeatedNameGenerator();
+    this.discovery22RepeatedNameHandler = new Discovery22RepeatedNameHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyRepeatedNameGenerator
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -4887,6 +5027,32 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery22RepeatedCutletNames(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      this.cutletPartitionPatchWrapper.repair(context);
+      const result = this.discovery22RepeatedNameHandler.handle(context);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -5155,8 +5321,19 @@ function historicCutletPartitionThroughMonsterPath(
   );
 }
 
+function discovery22LegacyRepeatedNamesThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Discovery 22 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executeDiscovery22RepeatedCutletNames(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 21; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 22; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -5233,6 +5410,8 @@ module.exports = Object.freeze({
   LegacyCutletPartitionAdapter,
   Discovery21CutletPartitionHandler,
   CutletPartitionPatchWrapper,
+  LegacyRepeatedNameGenerator,
+  Discovery22RepeatedNameHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -5314,6 +5493,8 @@ module.exports = Object.freeze({
   structureSaucePatch,
   legacyPositiveCompositions,
   filteredCutletCompositions,
+  legacyNameRowWithRepeats,
+  cutletNameAnswerRingFromSauce,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -5357,5 +5538,6 @@ module.exports = Object.freeze({
   historicStructureSauceThroughMonsterPath,
   discovery21LegacyCutletPartitionThroughMonsterPath,
   historicCutletPartitionThroughMonsterPath,
+  discovery22LegacyRepeatedNamesThroughMonsterPath,
   calendarDateSpaghetti
 });

@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 43 de 55: PATCH 21** e li repository local es GREEN. Omni regressions til Discovery 21 e li test focal de Patch 21 passa.
+Li linea es in **Stage 44 de 55: DISCOVERY 22** e li repository local es intentionalmen `EXPECTED_RED`. Omni regressions til Patch 21 resta verd; li unic divergence nov es li generator legacy de nomes de cutlet, quel permisse repetition de `canonicalIndex`.
 
-Li scar historic `legacyPositiveCompositions(gapCount,cutletCount)` e li raw selection de Discovery 21 resta fisicmen intact e es executet realmen quam diagnostic. `CutletPartitionPatchWrapper` usa un familie semantic separat: si li calculation-day es un gate strictmen intern, `filteredCutletCompositions` representa exactmen li subsequence lexicografic del familie legacy con un prefix sum egal a `internalGateOffset`; si null gate intern existe, li raw legacy partition passa sin alteration. Null code de Patch 22 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+`legacyNameRowWithRepeats(masterCount,itemCount)` materialisa li familie historic de `masterCount^itemCount` rows lexicografic. `LegacyRepeatedNameGenerator` usa bowl 5 / seal 22 del structure sauce semantic de Patch 20, e `Discovery22RepeatedNameHandler` executa ti generator realmen pos li partition semantic de Patch 21. Null correction de Patch 22 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -24,19 +24,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 21 deve restar verd:
+Omni regressions til Patch 21 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal de Patch 21 deve esser verd:
+Li test focal de Discovery 22 deve esser intentionalmen red:
 
 ```text
-npm run test:patch-21
+npm run test:discovery-22
 ```
 
-Li suite complet deve esser GREEN:
+Li suite complet deve esser `EXPECTED_RED` exclusivmen in Discovery 22:
 
 ```text
 npm test
@@ -309,3 +309,24 @@ Null `CutletPartitionPatchWrapper`, null familie filtrat production e null DP co
 Li witness 10 gaps / 8 cutlets / offset 4 continua producer raw diagnostic `36 / rank 15 / [1,1,1,3,1,1,1,1]`, con prefixes quel manca 4. Li familie semantic have 28 membres; li sam answer stream selecte rank 3 e produce `[1,1,1,1,1,1,3,1]`, con prefix 4. Un witness separat sin gate intern confirma li pass-through exact del raw legacy partition.
 
 Omni regressions es verd. Null `legacyNameRowWithRepeats`, null partial-permutation correction e null `VirtualLegacyList` es addit; Patch 22 resta completmen absent.
+
+
+## Stage 44 — DISCOVERY 22
+
+### Generator legacy con repetition
+
+`legacyNameRowWithRepeats(masterCount,itemCount)` interpreta li old familie de nomes quam omni rows de longore `itemCount` sur li master indices 1..`masterCount`. Li count exact es `masterCount^itemCount`. Li unrank es one-based e lexicografic, ma null statu memora indices ja usat; repetition es talmen possibil e intentional por ti discovery.
+
+### Route real pos Patch 21
+
+`LegacyRepeatedNameGenerator` prende li 17 `canonicalIndex` directmen ex li `SourceLanguageCatalog` congelat. It reconstrui un answer ring ex li structure sauce semantic ja reparat de Patch 20, questiona bowl 5 con seal 22, usa li dispatcher curt/wide existent, e unranka li row legacy. Textu de nomes ne participa in selection.
+
+`Discovery22RepeatedNameHandler` exige un `PATCH_21_RESULT` complet e usa exactmen li cutlet count semantic. Li candidate legacy deven li resultate current del route Discovery 22 e es conservat invocation-local con family count, stream, rank e flag de repetition.
+
+### Witness EXPECTED_RED
+
+Con li witness selectet, li cutlet count es 6. Li familie legacy have `17^6 = 24137569` membres e bowl 5 / seal 22 selecte rank `7563989`. Li row old es `[6,6,10,10,17,9]`, quel repeti `canonicalIndex` 6 e 10. Li expectation normativ test-only usa six indices distinct e retorna `[3,11,4,9,12,5]`. Li final comparison es intentionalmen red.
+
+### Limite del stage
+
+Null `RepeatedNamePatchWrapper`, null `partialPermutationUnrank`, null falling-factorial helper production e null `VirtualLegacyList` es includet. Patch 22 deve esser implementat solmen in Stage 45, conservante ti generator legacy quam scar activ.

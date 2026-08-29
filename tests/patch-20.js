@@ -135,6 +135,7 @@ assert.equal(sameRouted.context.patch20GhostIgnoredForSelector, true);
 assert.ok(!production.StructureSaucePatchWrapper.prototype.repair.toString().includes('legacyPositiveCompositions'));
 assert.equal(typeof production.CutletPartitionPatchWrapper, 'function');
 assert.equal(typeof production.filteredCutletCompositions, 'function');
-assert.equal('legacyNameRowWithRepeats' in production, false);
+assert.equal('RepeatedNamePatchWrapper' in production, false);
+assert.equal('partialPermutationUnrank' in production, false);
 
 console.log('PATCH 20: PASS — oldStructureSauce resta un ghost real, ma solmen sauce(cDay,year.firstDay) atinge li selector semantic.');

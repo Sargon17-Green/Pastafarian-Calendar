@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 21 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 22 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Patch 21 contamina production', () 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'legacyNameRowWithRepeats', 'VirtualLegacyList',
+    'RepeatedNamePatchWrapper', 'partialPermutationUnrank', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
@@ -2061,10 +2061,23 @@ group('Discovery 21 resta un scar real e Patch 21 filtra exactmen li familie sem
   ok(patched.context.patch21SelectionChangedFromLegacy);
   ok(typeof production.CutletPartitionPatchWrapper === 'function');
   ok(typeof production.filteredCutletCompositions === 'function');
-  ok(!('legacyNameRowWithRepeats' in production));
+  ok(typeof production.legacyNameRowWithRepeats === 'function');
+  ok(typeof production.LegacyRepeatedNameGenerator === 'function');
+  ok(!('RepeatedNamePatchWrapper' in production));
+  ok(!('partialPermutationUnrank' in production));
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 21', () => {
+group('li generator legacy de Discovery 22 materialisa repetition sin anticipar Patch 22', () => {
+  const family = production.legacyNameRowWithRepeats(3, 2);
+  eq(family.count(), 9n);
+  deepEq(family.unrank1(1n), [1,1]);
+  deepEq(family.unrank1(5n), [2,2]);
+  deepEq(family.unrank1(9n), [3,3]);
+  ok(typeof production.Discovery22RepeatedNameHandler === 'function');
+  ok(!('RepeatedNamePatchWrapper' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 22', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2076,4 +2089,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 21.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 22.');

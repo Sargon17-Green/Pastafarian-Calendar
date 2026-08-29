@@ -9,7 +9,8 @@ assert.match(legacyFamilySource, /positiveCompositionCountExact/);
 assert.doesNotMatch(legacyFamilySource, /internalGate|internal_gate|prefix|boundary|required/);
 assert.equal(typeof production.CutletPartitionPatchWrapper, 'function');
 assert.equal(typeof production.filteredCutletCompositions, 'function');
-assert.equal('legacyNameRowWithRepeats' in production, false);
+assert.equal('RepeatedNamePatchWrapper' in production, false);
+assert.equal('partialPermutationUnrank' in production, false);
 
 const small = production.legacyPositiveCompositions(5, 3);
 assert.equal(small.count(), 6n);

@@ -956,3 +956,22 @@ Li witness 10/8/4 conserva li raw selection de Stage 42: familie 36, rank 15, pa
 ### Limite del stage
 
 Omni regressions, li verifier e li suite complet es verd. Li code de names con repeats, partial-permutation repair e `VirtualLegacyList` ne es present. Patch 22 ne es anticipat.
+
+
+## Stage 44 — DISCOVERY 22
+
+### Familie historic de nomes
+
+Pos Patch 21, li proxim assumption old tracta li assignment de nomes quam selection independent por chascun cutlet. `legacyNameRowWithRepeats(masterCount,itemCount)` conserva exactmen ti errore: li familie es omni rows lexicografic sur li master indices, con count `masterCount^itemCount`, e un indice ja usat ne es removet ex li choices del position sequent.
+
+### Generator e state invocation-local
+
+`LegacyRepeatedNameGenerator` usa li dispatcher de selection ja reparat e un ring construit ex bowl 5 / seal 22 del structure sauce semantic de Patch 20. `Discovery22RepeatedNameHandler` veni pos `CutletPartitionPatchWrapper`; it prende li cutlet count semantic, deriva li 17 indices canonic del catalog frozen, executa li generator old, e conserva master list, count, stream, rank, row e repetition flag in li context del invocation. Null textu traductet participa in ti calcul.
+
+### Divergence observat
+
+Li witness con calculation-day offset 102 desde Foundation fini con six cutlets. Li familie old have `24137569` rows. Rank `7563989` produce `[6,6,10,10,17,9]`, con repetition real de indices 6 e 10. Li reference test-only, secun li familie normativ de nomes distinct, selecte `[3,11,4,9,12,5]`. Solmen li comparison nov es red; omni regressions til Patch 21 resta verd.
+
+### Limite historic
+
+Stage 44 ne contene null correction. `RepeatedNamePatchWrapper`, `partialPermutationUnrank` e `VirtualLegacyList` es absent. Li proxim stage mandat es Stage 45 — PATCH 22, quel deve conservar li generator old e calcular li candidate distinct in un detour separat.

@@ -6,7 +6,8 @@ const normative = require('./normative-reference');
 
 assert.equal(typeof production.filteredCutletCompositions, 'function');
 assert.equal(typeof production.CutletPartitionPatchWrapper, 'function');
-assert.equal('legacyNameRowWithRepeats' in production, false);
+assert.equal('RepeatedNamePatchWrapper' in production, false);
+assert.equal('partialPermutationUnrank' in production, false);
 assert.equal('VirtualLegacyList' in production, false);
 
 const legacySource = production.legacyPositiveCompositions.toString();
