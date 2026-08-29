@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 05 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 06 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,7 @@ group('null textu hebreic o code posterior a Patch 05 contamina production', () 
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'patchedCounts', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
+    'patchedCounts', 'priorPatch', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
@@ -921,7 +921,27 @@ group('Patch 05 traducte access per proximity sin reversar li storage retrograd'
   eq(routed.context.metrics['patch05.hiddenNearness.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 05', () => {
+group('Discovery 06 conserva legacyPrior limitat al storage de visible drops', () => {
+  const f = o.FOUNDATION_DAY;
+  const dropStore = [];
+  dropStore[1] = 101n;
+  dropStore[2] = 202n;
+  dropStore[3] = 303n;
+  eq(production.legacyPrior(dropStore, 3, 1), 202n);
+  eq(production.legacyPrior(dropStore, 1, 1), undefined);
+  eq(production.legacyPrior(dropStore, 1, 3), undefined);
+  eq(production.legacyPrior(dropStore, 1, 7), undefined);
+  const routed = production.discovery06LegacyPriorThroughMonsterPath(f, f, dropStore, 2, 3);
+  eq(routed.result, undefined);
+  eq(routed.context.legacyPriorSlot, -1);
+  eq(routed.context.legacyPriorSlotIsVisible, false);
+  eq(routed.context.currentHandler, 'Discovery06PriorHandler');
+  eq(routed.context.status, 'DISCOVERY_06_LEGACY_RESULT');
+  deepEq(routed.context.branchTrace, ['BOOTSTRAP_VALIDATED', 'DISCOVERY_06_LEGACY_PRIOR_VISIBLE_ONLY']);
+  eq(routed.context.metrics['discovery06.legacyPrior.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 06', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -933,4 +953,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa pos Patch 05.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression rubi de Discovery 06.');

@@ -227,3 +227,26 @@ Pos Discovery 05 on acceptat que li array legacy self ne deve esser restructurat
 ### Scar conservat
 
 `buildHiddenWithBackwardStorage` continua scrir hidden7 in slot 1 e hidden1 in slot 7. Null `reverse()` es usat quam correction. Li divergence fisic resta observabil e testabil.
+
+
+## Stage 12 — DISCOVERY 06
+
+### Quo on pensat
+
+Li sixesim design historic assumet que omni predecessor de un visible drop ja trova se in `dropStore`. Li function nov `legacyPrior(dropStore, i, back)` calcula `i-back` e retorna directmen ti slot, sin un duesim fonte de history.
+
+### Quo esset decovrit
+
+Por li prim visible drops, `i-back` posse esser `0` o negativ. Ti slots ne es visible drops: `0` significa hidden1, `-1` hidden2 e talmen usque `-6` hidden7. Li storage hidden existe ja, e Patch 05 posse leer it per proximity, ma `legacyPrior` ne conosse ni ti storage ni li translation. In un probe isolat con slots `0, -2, -6, -1`, li legacy rende quatre valores absent contra hidden1, hidden3, hidden7 e hidden2.
+
+### Quo esset circumit
+
+Null circumventione existe in ti stage. `priorPatch` ne es present. Null branch por slot negativ, null mapping `k = 1-slot` e null call a `hiddenByNearness` ha esset addit. Ti correction apartene exclusivmen a PATCH 06 in Stage 13.
+
+### Crescentie monster in ti stage
+
+Un `LegacyPriorAdapter` e un `Discovery06PriorHandler` ha esset addit. Li handler valida li storage indexabil e li du indices, calcula e conserva li slot historic, registra si ti slot es visibil, executa li legacy e conserva su output. `BaseMonsterManager` expone un route separat con un context fresc e un metric non-semantic.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li adapter apella exactmen `legacyPrior`. Li handler ne consulta li hidden storage, ne fabrica un fallback e ne usa metrics por decisiones. Li scars e patches 01..05 resta separatmen testabil. Ergo li unic divergentie nov es precis li ignorance de slots hidden mandat de Discovery 06.

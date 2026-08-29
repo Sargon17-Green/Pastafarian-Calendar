@@ -4,9 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 10 de 55: DISCOVERY 05**. Li scars de Patch 01 til Patch 04 resta intact e testabil. Li nov legacy `buildHiddenWithBackwardStorage(counts, stones)` calcula li sett hidden drops con li coefficients exact, ma conserva les fisicmen in ordine retrograd: hidden7, hidden6, ..., hidden1.
+Li linea es in **Stage 12 de 55: DISCOVERY 06**. Li scars de Patch 01 til Patch 05 resta intact e testabil. Li nov legacy `legacyPrior(dropStore, i, back)` tenta resolver history exclusivmen per `dropStore[i-back]`.
 
-Un `LegacyHiddenStorageAdapter` e un `Discovery05HiddenStorageHandler` conecta ti storage a un path real del monster. Li context conserva li comptes, li storage legacy e du probes direct de slots 1 e 7. Li translator per proximity ne existe ancor; ergo li nov regression es **EXPECTED RED**.
+Ti design functiona por un slot positiv quel refere a un visible drop ja calculat. Ma li prim visible drops necessita history de slots `0..-6`, quel semanticmen corresponde a hidden1..hidden7. Li legacy ne conosse ti mapping e ne consulta `hiddenByNearness`; ergo li nov regression es **EXPECTED RED**.
+
+Un `LegacyPriorAdapter` e un `Discovery06PriorHandler` conecta li defect a un path real del monster. Li context conserva li index current, li retro-distance, li slot calculat, un flag indicant si li slot es visibil e li output legacy. Null `priorPatch` existe ancor.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,16 +28,16 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions precedent deve restar verd:
+Omni regressions precedent, includente Patch 05, deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li regression de Discovery 05 deve esser rubi pro que li storage legacy es retrograd e null translator de access existe ancor:
+Li regression de Discovery 06 deve esser rubi pro que `legacyPrior` ne posse resolver slots non-positiv a hidden drops:
 
 ```text
-npm run test:discovery-05
+npm run test:discovery-06
 ```
 
 Li commande principal deve finir rubi solmen in ti regression nov:
@@ -44,7 +46,7 @@ Li commande principal deve finir rubi solmen in ti regression nov:
 npm test
 ```
 
-Li verifier precedent confirma separatmen que li sett values self es exact e que slots 1..7 es precis li serie normativ reversat.
+Li verifier precedent confirma separatmen que `legacyPrior` continua functionar por un slot visibil positiv e que li route monster conserva exactmen li slot negativ e li output absent sin correction.
 
 ## Independentie
 
@@ -53,3 +55,8 @@ Li reference normativ complet por tests trova se in `tests/normative-reference.j
 ## Stage 11 — Patch 05
 
 Li storage legacy del sett hidden drops resta fisicmen retrograd. `hiddenByNearness` adjunte exclusivmen li translator `8-k` por access semantic per proximity; it ne reverse, ne copie in ordine nov e ne elimina li scar de Discovery 05. `Patch05HiddenNearnessWrapper` registra li proximity demandat e li slot fisic usat durant li route historic. Li regression de Discovery 05 es nu verd.
+
+
+## Stage 12 — Discovery 06
+
+Li history legacy ne conosse li hidden drops. `legacyPrior(dropStore, i, back)` lee directmen `dropStore[i-back]`; por un slot positiv it posse trovar un visible drop precedent, ma por `0..-6` it ne traducte a hidden1..hidden7. `Discovery06PriorHandler` conserva ti failure intact in li route historic. Li correction `priorPatch` es reservat exclusivmen por Stage 13.

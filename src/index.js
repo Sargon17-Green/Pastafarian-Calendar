@@ -65,6 +65,12 @@ class BaseMonsterContext {
     this.patch05PhysicalSlot = null;
     this.patch05Output = null;
     this.patch05StoragePreserved = false;
+    this.legacyPriorDropStore = null;
+    this.legacyPriorVisibleIndex = null;
+    this.legacyPriorBack = null;
+    this.legacyPriorSlot = null;
+    this.legacyPriorSlotIsVisible = false;
+    this.legacyPriorOutput = null;
   }
 }
 
@@ -103,6 +109,18 @@ class BaseValidationManager {
     }
     for (let index = 0; index < stones.length; index += 1) {
       this.requireStoneState(stones[index]);
+    }
+  }
+
+  requireDropStore(dropStore) {
+    if (!dropStore || typeof dropStore !== 'object') {
+      throw new TypeError('Li storage legacy de visible drops deve esser un object indexabil.');
+    }
+  }
+
+  requireHistoryIndex(value, label) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new RangeError(label + ' deve esser un integer positiv.');
     }
   }
 
@@ -358,6 +376,17 @@ function hiddenByNearness(legacyHidden, k) {
   }
   // Li array ne es reversat: li translator historic converte proximity k al slot fisic 8-k.
   return legacyHidden[8 - k];
+}
+
+function legacyPrior(dropStore, i, back) {
+  if (!dropStore || typeof dropStore !== 'object') {
+    throw new TypeError('Li storage legacy de visible drops deve esser un object indexabil.');
+  }
+  if (!Number.isInteger(i) || i < 1 || !Number.isInteger(back) || back < 1) {
+    throw new RangeError('Li indices legacy de history deve esser integers positiv.');
+  }
+  // Li scar historic conosse solmen li storage de visible drops e tenta leer directmen i-back.
+  return dropStore[i - back];
 }
 
 class LegacyRemainderAdapter {
@@ -650,6 +679,40 @@ class Patch05HiddenNearnessWrapper {
   }
 }
 
+class LegacyPriorAdapter {
+  call(dropStore, i, back) {
+    return legacyPrior(dropStore, i, back);
+  }
+}
+
+class Discovery06PriorHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, dropStore, i, back) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireDropStore(dropStore);
+    this.validationManager.requireHistoryIndex(i, 'Li index current del visible drop');
+    this.validationManager.requireHistoryIndex(back, 'Li retro-distance del history');
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery06PriorHandler';
+    context.phase = 'DISCOVERY_06_LEGACY_PRIOR_VISIBLE_ONLY';
+    context.branchTrace.push('DISCOVERY_06_LEGACY_PRIOR_VISIBLE_ONLY');
+    context.legacyPriorDropStore = dropStore;
+    context.legacyPriorVisibleIndex = i;
+    context.legacyPriorBack = back;
+    context.legacyPriorSlot = i - back;
+    context.legacyPriorSlotIsVisible = context.legacyPriorSlot >= 1;
+    context.legacyPriorOutput = this.legacyAdapter.call(dropStore, i, back);
+    context.status = 'DISCOVERY_06_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery06.legacyPrior.calls');
+    return context.legacyPriorOutput;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -693,6 +756,12 @@ class BaseMonsterManager {
     this.patch05HiddenNearnessWrapper = new Patch05HiddenNearnessWrapper(
       this.validationManager,
       this.metricsManager
+    );
+    this.legacyPriorAdapter = new LegacyPriorAdapter();
+    this.discovery06PriorHandler = new Discovery06PriorHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyPriorAdapter
     );
   }
 
@@ -831,6 +900,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery06Prior(calculationDay, targetDay, dropStore, i, back) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery06PriorHandler.handle(context, dropStore, i, back);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -877,8 +958,12 @@ function historicHiddenByNearnessThroughMonsterPath(calculationDay, targetDay, c
   return new BaseMonsterManager().executePatch05HiddenNearness(calculationDay, targetDay, counts, stones, k);
 }
 
+function discovery06LegacyPriorThroughMonsterPath(calculationDay, targetDay, dropStore, i, back) {
+  return new BaseMonsterManager().executeDiscovery06Prior(calculationDay, targetDay, dropStore, i, back);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 05; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 06; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -907,6 +992,8 @@ module.exports = Object.freeze({
   LegacyHiddenStorageAdapter,
   Discovery05HiddenStorageHandler,
   Patch05HiddenNearnessWrapper,
+  LegacyPriorAdapter,
+  Discovery06PriorHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -925,6 +1012,7 @@ module.exports = Object.freeze({
   makeHiddenPatched,
   buildHiddenWithBackwardStorage,
   hiddenByNearness,
+  legacyPrior,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -936,5 +1024,6 @@ module.exports = Object.freeze({
   historicStoneMutationThroughMonsterPath,
   discovery05LegacyHiddenStorageThroughMonsterPath,
   historicHiddenByNearnessThroughMonsterPath,
+  discovery06LegacyPriorThroughMonsterPath,
   calendarDateSpaghetti
 });
