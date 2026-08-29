@@ -32,7 +32,7 @@ const oldSource = production.oldStructureSauce.toString();
 assert.match(oldSource, /sauceWithCurrentScars\(cDay, originalTargetDay\)/);
 assert.doesNotMatch(oldSource, /yearFirstDay|structureSaucePatch|ghost/);
 assert.equal(typeof production.structureSaucePatch, 'function');
-assert.equal('legacyPositiveCompositions' in production, false);
+assert.ok(!production.Discovery20StructureSauceHandler.prototype.handle.toString().includes('legacyPositiveCompositions'));
 
 const authoritativeSauce = normative.sauce(calculationDay, yearFirstDay);
 const expectedToken = {

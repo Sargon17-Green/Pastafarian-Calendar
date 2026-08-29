@@ -911,3 +911,26 @@ Pos ti ghost, li patch construi separatim `semanticSauce=sauceWithCurrentScars(c
 Li tri witnesses de Discovery 20 continua provar que li route legacy directe produce tokens distinct por targets originals intra Year 5000. Li route Patch 20, con li sam calculation-day e year resoluet, produce por omni tri exactmen li bowl 2 e `orderAt46Latch` del sauce `(cDay,year.firstDay)`. Tests separat confirma li ordre ghost-ante-semantic, li invariance fisic de `oldStructureSauce`, li case target==firstDay e li absence de code de Patch 21.
 
 Omni regressions til Discovery 20 es verd. Li proxim defect mandat — cutlet partition sin li gate intern del calculation-day — resta completmen absent.
+
+## Stage 42 — DISCOVERY 21
+
+### Familie legacy all-positive
+
+`legacyPositiveCompositions(gapCount,cutletCount)` es li scar historic nov. It conta exactmen omni composition positiv del gate-gap count e expone un `unrank1` lexicografic. Su contract ne conosse null calculation-day, gate intern, boundary obligatori o prefix condition. Li helper resta separat del reference test-only e usa solmen arithmetic JavaScript exact.
+
+### Selection real pos Patch 20
+
+`LegacyCutletPartitionAdapter` prende li sauce semantic de Patch 20, ne li ghost. Por li cutlet count it questiona bowl 2 con seal 20 e usa li dispatcher de selection curt/wide ja reparat. Poy it questiona li sam bowl con seal 21, calcula li count del familie all-positive e unranke li partition selectet. Talmen li scar de Discovery 21 vive in un route semantic real e ne in un fixture isolat.
+
+`Discovery21CutletPartitionHandler` es conectet pos `StructureSaucePatchWrapper`. It prende li `openIndex` e `closeIndex` del year selectet, calcula `gapCount` e examina deterministicmen li indices strictmen intern por trovar si li calculation-day es exactmen un gate. Si un tal gate existe, su index e offset es guardat invocation-local; ma li adapter legacy ne riceve ti offset e ne filtra su familie.
+
+### Witness EXPECTED_RED
+
+Li witness selecte un year con indices 10..20, ergo 10 gate gaps, e li calculation-day coincide con gate 14: offset intern 4. Bowl 2 / seal 20 selecte 8 cutlets. Li familie legacy have 36 positive compositions; bowl 2 / seal 21 selecte rank 15 e produce `[1,1,1,3,1,1,1,1]`. Su prefix sums es 1,2,3,6,7,8,9,10 e manca 4.
+
+Li expectation normativ test-only filtra exactmen li sam familie legacy per li boundary intern. It have 28 membres; con li sam answer ring, rank 3 produce `[1,1,1,1,1,1,3,1]`, quel have un prefix sum 4. Li unic failure intentional del stage compara ti du partitions.
+
+### Limite del stage
+
+Null `CutletPartitionPatchWrapper`, null familie filtrat production e null DP con state de boundary es includet. Patch 21 resta reservat por Stage 43 e deve conservar `legacyPositiveCompositions` quam scar fisic. Null generator de nomes repetit de Patch 22 es present.
+

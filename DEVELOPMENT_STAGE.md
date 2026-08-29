@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=41
-CURRENT_KIND=PATCH
-CURRENT_PATCH=20
-LAST_COMPLETED_STAGE=41
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=42
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=21
+LAST_COMPLETED_STAGE=42
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,15 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, oldStructureSauce e Discovery20StructureSauceHandler, plus structureSaucePatch e StructureSaucePatchWrapper quel executa li sauce old quam ghost, materialisa separatim sauce(cDay,year.firstDay) e manda exclusivmen ti sauce semantic al selector.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus legacyPositiveCompositions, LegacyCutletPartitionAdapter e Discovery21CutletPartitionHandler quel selecte li cutlet count e li partition ex omni positive compositions del gate-gap count e ignora intentionalmen un gate intern del calculation-day.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 41 es finit quam **PATCH 20**. `oldStructureSauce(cDay,originalTargetDay)` resta fisicmen sin modification e li route separat de Discovery 20 continua usar su resultate directmen quam input legacy del selector quand ti route historic es vocat separatmen.
+Stage 42 es finit quam **DISCOVERY 21**. Li scar nov `legacyPositiveCompositions(gapCount,cutletCount)` representa exactmen omni positive compositions del total in ordine lexicografic e ne have null argument, branch o filtre por un gate intern.
 
-`structureSaucePatch` voca prim li helper old realmen e conserva su resultate quam ghost. Poy it materialisa un object sauce separat ex `(cDay,year.firstDay)` per li sam implementation current. `StructureSaucePatchWrapper` es conectet pos Patch 19 e manda al `LegacyStructureSelectorAdapter` exclusivmen `patched.semanticSauce`; null object ghost es passat al selector semantic. Si li target original difere de `year.firstDay`, ti separation corrige li bowls e li `orderAt46Latch`; si ili coincide, li du sauces have li sam valores ma resta objects separat. Null code de Patch 21 es present.
+`LegacyCutletPartitionAdapter` usa li structure sauce semantic ja reparat de Patch 20. It selecte li quantitá de cutlets per bowl 2 / seal 20, poy usa bowl 2 / seal 21 por selecter un rank ex li familie all-positive. `Discovery21CutletPartitionHandler` detecte si li calculation-day coincide con un gate strictmen intern del year selectet e conserva su offset solmen quam diagnostic; ti offset ne es passat al familie legacy.
+
+Li witness have 10 gate gaps, cutlet count 8 e un calculation-day al gate intern con offset 4. Li familie legacy have 36 membres, rank 15 produce `[1,1,1,3,1,1,1,1]` e su prefix sums es `[1,2,3,6,7,8,9,10]`, ergo li gate intern 4 ne deven un boundary. Li familie normativ filtrat have 28 membres e selecte `[1,1,1,1,1,1,3,1]`. Ti divergence es li unic EXPECTED_RED nov. Null filtre/DP de Patch 21 e null code de Patch 22 es present.

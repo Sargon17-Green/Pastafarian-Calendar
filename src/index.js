@@ -284,6 +284,20 @@ class BaseMonsterContext {
     this.patch20SemanticOrderAt46Latch = null;
     this.patch20SemanticSelectorToken = null;
     this.patch20SelectorUsedYearFirstDaySauce = false;
+    this.legacyCutletGapCount = null;
+    this.legacyCutletCountCandidates = null;
+    this.legacyCutletCountStream = null;
+    this.legacyCutletCountSelectedOrdinal = null;
+    this.legacyCutletCount = null;
+    this.legacyCutletInternalGateIndex = null;
+    this.legacyCutletInternalGateOffset = null;
+    this.legacyCutletFamilyCount = null;
+    this.legacyCutletPartitionStream = null;
+    this.legacyCutletSelectedRank = null;
+    this.legacyCutletSelectedPartition = null;
+    this.legacyCutletPrefixSums = null;
+    this.legacyCutletInternalBoundaryHit = null;
+    this.legacyCutletIgnoredInternalGate = false;
   }
 }
 
@@ -538,6 +552,12 @@ class BaseValidationManager {
   requirePatch19Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_19_RESULT') {
       throw new BootstrapStageError('Li context ne contene un cache guardat valid por Discovery 20.');
+    }
+  }
+
+  requirePatch20Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_20_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un structure sauce reparat valid por Discovery 21.');
     }
   }
 
@@ -2999,6 +3019,184 @@ class StructureSaucePatchWrapper {
   }
 }
 
+
+function positiveCompositionCountExact(gapCount, cutletCount) {
+  if (!Number.isInteger(gapCount) || !Number.isInteger(cutletCount) || gapCount < 1 || cutletCount < 1) {
+    throw new RangeError('Li gap count e cutlet count deve esser integers positiv.');
+  }
+  if (cutletCount > gapCount) return 0n;
+  let n = BigInt(gapCount - 1);
+  let k = BigInt(cutletCount - 1);
+  if (k > n - k) k = n - k;
+  let result = 1n;
+  for (let i = 1n; i <= k; i += 1n) {
+    result = (result * (n - k + i)) / i;
+  }
+  return result;
+}
+
+function legacyPositiveCompositions(gapCount, cutletCount) {
+  if (!Number.isInteger(gapCount) || !Number.isInteger(cutletCount) || gapCount < 1 || cutletCount < 1) {
+    throw new RangeError('Li familie legacy de partitions exige gapCount e cutletCount integers positiv.');
+  }
+  if (cutletCount > gapCount) {
+    throw new RangeError('Li familie legacy ne posse haver plu cutlets quam gate gaps.');
+  }
+  const totalCount = positiveCompositionCountExact(gapCount, cutletCount);
+  return Object.freeze({
+    count() {
+      return totalCount;
+    },
+    unrank1(rank1) {
+      if (typeof rank1 !== 'bigint' || rank1 < 1n || rank1 > totalCount) {
+        throw new RangeError('Li rank legacy de cutlet partition es extra li familie.');
+      }
+      let rank = rank1;
+      let remaining = gapCount;
+      let slots = cutletCount;
+      const out = [];
+      while (slots > 0) {
+        if (slots === 1) {
+          out.push(remaining);
+          break;
+        }
+        const maxPart = remaining - (slots - 1);
+        for (let part = 1; part <= maxPart; part += 1) {
+          const block = positiveCompositionCountExact(remaining - part, slots - 1);
+          if (rank > block) {
+            rank -= block;
+            continue;
+          }
+          out.push(part);
+          remaining -= part;
+          slots -= 1;
+          break;
+        }
+      }
+      return out;
+    }
+  });
+}
+
+function cutletAnswerRingFromSauce(sauceResult, seal) {
+  if (!sauceResult || !Array.isArray(sauceResult.bowls) || !Array.isArray(sauceResult.orderAt46Latch)) {
+    throw new TypeError('Li cutlet selection exige un structure sauce complet.');
+  }
+  if (typeof seal !== 'bigint') {
+    throw new TypeError('Li seal de cutlet selection deve esser un BigInt exact.');
+  }
+  const nextBowl = nextBowlFromOrderAt46Latch(sauceResult.orderAt46Latch, 2);
+  return answerRingFromCurrentState(sauceResult.bowls, 2, nextBowl, seal);
+}
+
+class LegacyCutletPartitionAdapter {
+  selectAllPositive(sauceResult, gapCount) {
+    if (!Number.isInteger(gapCount) || gapCount < 6) {
+      throw new RangeError('Li year legacy deve contener adminim six gate gaps por cutlets.');
+    }
+    const cutletCountCandidates = [];
+    for (let cutletCount = 6; cutletCount <= 17 && cutletCount <= gapCount; cutletCount += 1) {
+      cutletCountCandidates.push(cutletCount);
+    }
+    const countStream = cutletAnswerRingFromSauce(sauceResult, 20n);
+    const countPick = selectionDispatcherWithWideDetour(countStream, BigInt(cutletCountCandidates.length));
+    const cutletCount = cutletCountCandidates[Number(countPick.output - 1n)];
+
+    // Li scar historic materialisa li familie de omni positive compositions; null gate intern es consultat ci.
+    const family = legacyPositiveCompositions(gapCount, cutletCount);
+    const partitionStream = cutletAnswerRingFromSauce(sauceResult, 21n);
+    const partitionPick = selectionDispatcherWithWideDetour(partitionStream, family.count());
+    const partition = family.unrank1(partitionPick.output);
+    return {
+      cutletCountCandidates,
+      countStream,
+      cutletCountSelectedOrdinal: countPick.output,
+      cutletCount,
+      familyCount: family.count(),
+      partitionStream,
+      selectedRank: partitionPick.output,
+      partition
+    };
+  }
+}
+
+class Discovery21CutletPartitionHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, calculationDay, gates) {
+    this.validationManager.requirePatch20Result(context);
+    this.validationManager.requireDiscreteDay(calculationDay);
+    this.validationManager.requireYearGateStore(gates);
+    if (!context.patch17Selected || !Number.isInteger(context.patch17Selected.openIndex) ||
+        !Number.isInteger(context.patch17Selected.closeIndex)) {
+      throw new BootstrapStageError('Discovery 21 exige li indices del year selectet per Patch 17.');
+    }
+    const openIndex = context.patch17Selected.openIndex;
+    const closeIndex = context.patch17Selected.closeIndex;
+    const gapCount = closeIndex - openIndex;
+    let internalGateIndex = null;
+    for (let gateIndex = openIndex + 1; gateIndex < closeIndex; gateIndex += 1) {
+      if (gates[gateIndex] === calculationDay) {
+        if (internalGateIndex !== null) {
+          throw new BootstrapStageError('Li calculation-day ne posse corresponder a plu quam un gate intern in Discovery 21.');
+        }
+        internalGateIndex = gateIndex;
+      }
+    }
+    const internalGateOffset = internalGateIndex === null ? null : internalGateIndex - openIndex;
+    const semanticSauce = {
+      bowls: context.patch20SemanticSauceBowls.slice(),
+      orderAt46Latch: context.patch20SemanticOrderAt46Latch.slice()
+    };
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery21CutletPartitionHandler';
+    context.phase = 'DISCOVERY_21_ALL_POSITIVE_CUTLET_PARTITION';
+    context.branchTrace.push('DISCOVERY_21_ALL_POSITIVE_CUTLET_PARTITION');
+    context.legacyCutletGapCount = gapCount;
+    context.legacyCutletInternalGateIndex = internalGateIndex;
+    context.legacyCutletInternalGateOffset = internalGateOffset;
+
+    const selected = this.legacyAdapter.selectAllPositive(semanticSauce, gapCount);
+    context.legacyCutletCountCandidates = selected.cutletCountCandidates.slice();
+    context.legacyCutletCountStream = { ...selected.countStream };
+    context.legacyCutletCountSelectedOrdinal = selected.cutletCountSelectedOrdinal;
+    context.legacyCutletCount = selected.cutletCount;
+    context.legacyCutletFamilyCount = selected.familyCount;
+    context.legacyCutletPartitionStream = { ...selected.partitionStream };
+    context.legacyCutletSelectedRank = selected.selectedRank;
+    context.legacyCutletSelectedPartition = selected.partition.slice();
+    let cumulative = 0;
+    context.legacyCutletPrefixSums = selected.partition.map((part) => {
+      cumulative += part;
+      return cumulative;
+    });
+    context.legacyCutletInternalBoundaryHit = internalGateOffset === null ? null :
+      context.legacyCutletPrefixSums.includes(internalGateOffset);
+    context.legacyCutletIgnoredInternalGate = internalGateOffset !== null;
+    context.status = 'DISCOVERY_21_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery21.allPositiveFamily.calls');
+    this.metricsManager.bump(context, 'discovery21.cutletCountSelection.calls');
+    this.metricsManager.bump(context, 'discovery21.partitionSelection.calls');
+    if (internalGateOffset !== null) this.metricsManager.bump(context, 'discovery21.internalGateIgnored.calls');
+    return {
+      gapCount,
+      cutletCount: selected.cutletCount,
+      familyCount: selected.familyCount,
+      selectedRank: selected.selectedRank,
+      partition: selected.partition.slice(),
+      internalGateIndex,
+      internalGateOffset,
+      prefixSums: context.legacyCutletPrefixSums.slice(),
+      internalBoundaryHit: context.legacyCutletInternalBoundaryHit
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -3804,6 +4002,12 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyStructureSelectorAdapter
     );
+    this.legacyCutletPartitionAdapter = new LegacyCutletPartitionAdapter();
+    this.discovery21CutletPartitionHandler = new Discovery21CutletPartitionHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyCutletPartitionAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -4421,6 +4625,30 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery21CutletPartition(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      const result = this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -4667,8 +4895,19 @@ function historicStructureSauceThroughMonsterPath(
   );
 }
 
+function discovery21LegacyCutletPartitionThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Discovery 21 exige un BaseMonsterManager persistent por li chain de cache precedent.');
+  }
+  return manager.executeDiscovery21CutletPartition(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 20; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 21; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -4742,6 +4981,8 @@ module.exports = Object.freeze({
   LegacyStructureSelectorAdapter,
   Discovery20StructureSauceHandler,
   StructureSaucePatchWrapper,
+  LegacyCutletPartitionAdapter,
+  Discovery21CutletPartitionHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -4821,6 +5062,7 @@ module.exports = Object.freeze({
   oldStructureSauce,
   legacyStructureSelectorToken,
   structureSaucePatch,
+  legacyPositiveCompositions,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -4862,5 +5104,6 @@ module.exports = Object.freeze({
   historicYearNumberCacheThroughMonsterPath,
   discovery20LegacyStructureSauceThroughMonsterPath,
   historicStructureSauceThroughMonsterPath,
+  discovery21LegacyCutletPartitionThroughMonsterPath,
   calendarDateSpaghetti
 });
