@@ -25,6 +25,14 @@ Integer savePatch(const Integer& x) {
     return r;
 }
 
+Integer oldDayTag(const Integer& day) {
+    Integer distantia = day - FOUNDATION_DAY_OLD;
+    if (distantia < 0) {
+        distantia = -distantia;
+    }
+    return 2 * distantia;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -51,6 +59,12 @@ void BaseValidationManager::requirePatch01Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyDayTagReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyDayTagReady) {
+        throw BaseValidationError("nota diei legacy nondum parata est");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -62,6 +76,10 @@ void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) con
 
 Integer LegacyArithmeticAdapter::callOldRemainder(const Integer& x) const {
     return oldRemainder(x);
+}
+
+Integer LegacyDayTagAdapter::callOldDayTag(const Integer& day) const {
+    return oldDayTag(day);
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -121,6 +139,29 @@ void Patch01RemainderHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch01.remainder.ready");
 }
 
+void Discovery02DayTagHandler::handle(BaseMonsterContext& ctx,
+                                      const LegacyDayTagAdapter& adapter,
+                                      const BaseValidationManager& validator,
+                                      const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery02DayTagHandler";
+    ctx.phase = "DISCOVERY_02_DAY_TAG_CALL";
+    ctx.status = "LEGACY_DAY_TAG_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_02_DAY_TAG_CALL");
+    metrics.bump(ctx, "discovery02.dayTag.calls");
+
+    ctx.legacyDayTagOutput = adapter.callOldDayTag(ctx.legacyDayTagInput);
+    ctx.legacyDayTagReady = true;
+
+    ctx.phase = "DISCOVERY_02_DAY_TAG_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_02_DAY_TAG_VALIDATE");
+    validator.requireLegacyDayTagReady(ctx);
+
+    ctx.phase = "DISCOVERY_02_DAY_TAG_EXPOSED";
+    ctx.status = "LEGACY_DAY_TAG_RESULT_EXPOSED";
+    ctx.branchTrace.push_back("DISCOVERY_02_DAY_TAG_EXPOSED");
+    metrics.bump(ctx, "discovery02.dayTag.exposed");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -167,6 +208,20 @@ void BaseDispatcher::dispatchPatchedRemainder(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch01.dispatch.calls");
 
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void BaseDispatcher::dispatchLegacyDayTag(BaseMonsterContext& ctx,
+                                          const Discovery02DayTagHandler& handler,
+                                          const LegacyDayTagAdapter& adapter,
+                                          const BaseValidationManager& validator,
+                                          const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_02_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_02_DISPATCH");
+    metrics.bump(ctx, "discovery02.dispatch.calls");
+
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -238,6 +293,32 @@ LegacyRemainderReport BaseMonsterManager::executeUnpatchedRemainderDiagnostic(co
         ctx.branchTrace.size(),
         ctx.legacyArithmeticOutput,
         false
+    };
+}
+
+LegacyDayTagReport BaseMonsterManager::executeLegacyDayTag(const Integer& day) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = day;
+    ctx.targetDay = day;
+    ctx.phase = "DISCOVERY_02_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyDayTagInput = day;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyDayTagAdapter adapter;
+    const Discovery02DayTagHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyDayTag(ctx, handler, adapter, validator, metrics);
+
+    return LegacyDayTagReport{
+        ctx.legacyDayTagInput,
+        ctx.legacyDayTagOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
     };
 }
 

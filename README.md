@@ -1,20 +1,30 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium gradum 3 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nullus codex, nulla probatio, nullum datum ex alia implementatione adhibitum est.
+Hoc directorium gradum 4 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nullus codex, nulla probatio, nullum datum ex alia implementatione adhibitum est.
 
 ## Status praesentis gradus
 
-Gradus 3 est `PATCH 01`. Functio historice vitiosa `oldRemainder(x)` integra et callable manet atque residuum Euclideum ordinarium modulo `M_OLD` reddit. Ea consulto non correcta est.
+Gradus 4 est `DISCOVERY 02`. Emendatio prior `PATCH 01` integra et viridis manet: `oldRemainder(x)` adhuc cicatrix vitiosa est, dum `savePatch(x)` eam postea exacte corrigit.
 
-Super eam addita est functio `savePatch(x)`. Haec primum `oldRemainder(x)` vocat; si residuum zerum est, valorem ad `M_OLD` mutat; aliter residuum legacy intactum relinquit. Via productionis transit nunc per `BaseMonsterManager`, `BaseDispatcher`, `Patch01RemainderHandler`, `LegacyArithmeticAdapter` et `Patch01SaveWrapper`.
+Hoc gradu nova opinio historice falsa in productionem inducta est:
 
-Regressio Gradus 2 nullo modo mutata est. Eadem probatio, quae in Gradus 2 consulto rubra erat, nunc viridis fit quia via productionis emendationem super legacy applicat. Probationes Bootstrap etiam virides manent.
+```text
+oldDayTag(day) = 2 * abs(day - FOUNDATION_DAY_OLD)
+```
+
+Functio `oldDayTag` consulto nondum correcta est. Via activa transit per `BaseMonsterManager`, `BaseDispatcher`, `Discovery02DayTagHandler` et `LegacyDayTagAdapter`, atque ipsum valorem legacy manifestum reddit.
+
+Regressio nova cum `dayCount` oraculi localis comparat. In die Fundationis via legacy `0` reddit pro normativo `1`; uno et duobus diebus post Fundationem valores legacy respective `2` et `4` sunt pro normativis `3` et `5`. Uno et duobus diebus ante Fundationem viae concordant. Hic gradus igitur consulto `EXPECTED_RED` est.
+
+Nulla emendatio `PATCH 02`, nullum incrementum pro parte posteriore, nullus custos specialis diei Fundationis hoc gradu adest.
 
 Oracle normativum ad probationes tantum in `tests/reference/` positum est. Pars productionis oraculum non vocat.
 
-## Cur emendatio exacte aequivalet
+## Quid nunc demonstratum est
 
-Pro omni integro `x`, `oldRemainder(x)` residuum Euclideum in intervallo `0..M_OLD-1` reddit. Regula normativa `SAVE(x)` idem residuum servat, sed classi residui zerum repraesentantem valorem `M_OLD` attribuit. Ergo sola discrepantia est `r == 0`; substitutio `M_OLD` in illo solo casu exacte `SAVE` reddit.
+Formula legacy distantiam a Fundatione recte duplicat, sed duplicatio sola signum lateris non continet. Pars ante Fundationem ex norma numeros pares accipit et cum formula legacy congruit. Dies Fundationis ipse atque pars posterior numeris imparibus egent; ibi formula legacy zerum vel numeros pares reddit et normam violat.
+
+Haec discrepantia hoc gradu tantum detegitur. Correctio historica sequentis gradus nondum scripta est.
 
 ## Lingua computationis
 
@@ -37,12 +47,17 @@ g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. tests/stage_02_discover
 
 g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. tests/stage_03_patch_01_tests.cpp tests/reference/normative_reference.cpp src/monster.cpp -o build/stage_03_patch_01_tests
 ./build/stage_03_patch_01_tests
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. tests/stage_04_discovery_02_tests.cpp tests/reference/normative_reference.cpp src/monster.cpp -o build/stage_04_discovery_02_tests
+./build/stage_04_discovery_02_tests
 ```
 
-Exitus exspectati:
+Exitus exspectati trium regressionum priorum sunt virides:
 
 ```text
 OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
 REGRESSIO_DISCOVERY_01_TRANSIIT
 REGRESSIO_PATCH_01_TRANSIIT
 ```
+
+Regressio Gradus 4 consulto exitum `1` reddit et tres discrepantias normativas indicat. Hic est status `EXPECTED_RED`, non defectus inopinatus.

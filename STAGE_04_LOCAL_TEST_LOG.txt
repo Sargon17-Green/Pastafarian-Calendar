@@ -1,0 +1,66 @@
+Gradus 4 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Aedificatio facta est per obiecta C++ communia, quia una invocatio quattuor compilationes continuas complectens limitem temporis ambitus exsecutionis attigit. Codex et probationes non mutati sunt propter hanc partitionem aedificationis.
+
+Mandata fundamentalia aedificationis:
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/bootstrap_tests.cpp -o build/bootstrap_tests.o
+g++ build/bootstrap_tests.o build/normative_reference.o build/monster.o -o build/bootstrap_tests
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/stage_02_discovery_01_tests.cpp -o build/stage_02_discovery_01_tests.o
+g++ build/stage_02_discovery_01_tests.o build/normative_reference.o build/monster.o -o build/stage_02_discovery_01_tests
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/stage_03_patch_01_tests.cpp -o build/stage_03_patch_01_tests.o
+g++ build/stage_03_patch_01_tests.o build/normative_reference.o build/monster.o -o build/stage_03_patch_01_tests
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/stage_04_discovery_02_tests.cpp -o build/stage_04_discovery_02_tests.o
+g++ build/stage_04_discovery_02_tests.o build/normative_reference.o build/monster.o -o build/stage_04_discovery_02_tests
+
+1. Probationes Bootstrap
+Mandatum:
+./build/bootstrap_tests . tests/fixtures/bootstrap_expected.tsv
+
+Exitus actualis:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+
+2. Regressio Gradus 2
+Mandatum:
+./build/stage_02_discovery_01_tests
+
+Exitus actualis:
+CONCORDANTIA oldRemainder M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder 2M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder 3M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder M+1: valor=1
+REGRESSIO_DISCOVERY_01_TRANSIIT
+
+3. Regressio Gradus 3
+Mandatum:
+./build/stage_03_patch_01_tests
+
+Exitus actualis:
+REGRESSIO_PATCH_01_TRANSIIT
+
+4. Regressio DISCOVERY 02
+Mandatum:
+./build/stage_04_discovery_02_tests
+
+Exitus actualis:
+CONCORDANTIA oldDayTag FOUNDATION-1: valor=2
+CONCORDANTIA oldDayTag FOUNDATION-2: valor=4
+DISCREPANTIA oldDayTag FOUNDATION: expectatus=1 actualis=0
+DISCREPANTIA oldDayTag FOUNDATION+1: expectatus=3 actualis=2
+DISCREPANTIA oldDayTag FOUNDATION+2: expectatus=5 actualis=4
+REGRESSIO_DISCOVERY_02_DEFECIT: 3 discrepantiae normativae exspectatae inventae sunt
+EXIT_CODE=1
+
+Exitus exspectatus regressioni Gradus 4: 1, quia hic gradus detectio est et discrepantia nova consulto manet.
+Status finalis: EXPECTED_RED
+Regressiones anteriores: PASS
+Emendatio futura PATCH 02: ABSENS
