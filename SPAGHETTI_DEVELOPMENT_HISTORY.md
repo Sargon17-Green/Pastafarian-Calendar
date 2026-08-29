@@ -732,3 +732,26 @@ Li context adjunte diagnostics de raw legacy, flag de calls legacy preservat, lo
 ### Pro quo Patch 17 ne es anticipat
 
 Li sort posterior resta exactmen per `candidateLength` solmen e depende de stabilitá por ties. Null secondary key, null `sortEqualLengthRunsByOpeningGate` e null reorder per opening gate existe. Ti defect e su circumition apartene al pair Discovery 17 / Patch 17.
+
+
+## Stage 34 — DISCOVERY 17
+
+### Quo on pensat
+
+Pos li ceiling 5778, li stable sort historic per longore sembla suficient por preparar li familie de Year 5000 al selection. JavaScript conserva li ordre de input quand li comparator retorna zero, ergo li familie es deterministic.
+
+### Quo esset decovrit
+
+Li specification exige un duesim passu solmen intra chascun run de longore egal: li candidate con opening gate plu tempran deve venir ante li candidate con opening gate plu tardiv. Li sort current ne fa ti passu. Ergo un ordre de input tardiv-tempran-medial por tri candidates 490 resta tardiv-tempran-medial e cambia li candidate selectet per rank 1.
+
+### Quo resta intentionalmen defectiv
+
+Null circumition es addit in Discovery 17. `stableLengthOnlyPatchedYearCandidates` resta fisicmen intact e continua comparar exclusivmen `candidateLength`. `Discovery17Year5000TieHandler` prende li familie ja produet e selectet per Patch 16, verifica que omni candidate contene li calculation-day del witness Year 5000, registra li longore egal del witness e conserva exactmen li ordre legacy.
+
+### Crescentie monster in ti stage
+
+Li context adjunte calculation-day de Year 5000, familie preparat, longore egal e grandore del witness, ordre de opening gates, ordinal selectet, candidate selectet e flag que li scar stable-length resta preservat. Li handler es connectet pos `YearCandidateCeilingPatchWrapper`; metrics registra solmen li call del discovery. Omni state es invocation-local.
+
+### Pro quo Patch 17 ne es anticipat
+
+Production ne contene null sort secundari, null comparator per `openGate`, null reorder de runs e null `sortEqualLengthRunsByOpeningGate`. Li expected order tempran-medial-tardiv existe solmen in li test normativ, e li suite complet resta rubi intentionalmen til Stage 35 / Patch 17. `oldJumpGuess` de Patch 18 anc resta absent.

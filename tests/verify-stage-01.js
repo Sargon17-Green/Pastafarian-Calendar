@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 16 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 17 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -1613,7 +1613,39 @@ group('Patch 16 filtra 5779..5781 ante sort e selection semantic', () => {
   eq(routed.context.metrics['discovery16.selectionReached.calls'], undefined);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 16', () => {
+group('Discovery 17 expone li tie de Year 5000 sin reorder per opening gate', () => {
+  const f = o.FOUNDATION_DAY;
+  const calculationDay = f + 100n;
+  const gates = {
+    10: f + 10n, 16: f + 500n,
+    20: f + 20n, 26: f + 510n,
+    30: f + 30n, 36: f + 520n
+  };
+  const pairs = [
+    { openIndex: 30, closeIndex: 36 },
+    { openIndex: 10, closeIndex: 16 },
+    { openIndex: 20, closeIndex: 26 }
+  ];
+  const routed = production.discovery17LegacyYear5000TieThroughMonsterPath(
+    calculationDay, calculationDay, -1n, gates, pairs, { first: 1n, directionStep: 1n }
+  );
+  eq(routed.context.currentHandler, 'Discovery17Year5000TieHandler');
+  eq(routed.context.previousHandler, 'YearCandidateCeilingPatchWrapper');
+  eq(routed.context.status, 'DISCOVERY_17_LEGACY_TIE_RESULT');
+  deepEq(routed.context.patch16RejectedOverlongLengths, []);
+  deepEq(routed.context.discovery17OpeningOrder, [f + 30n, f + 10n, f + 20n]);
+  eq(routed.context.discovery17WitnessCandidateLength, 490n);
+  eq(routed.context.discovery17WitnessFamilySize, 3);
+  eq(routed.context.discovery17SelectedOrdinal, 1n);
+  eq(routed.context.discovery17Selected.openGate, f + 30n);
+  eq(routed.context.discovery17StableLengthOnlyScarPreserved, true);
+  eq(routed.context.metrics['discovery17.year5000Tie.calls'], 1n);
+  eq(routed.context.metrics['discovery17.equalLengthRuns.observed'], undefined);
+  ok(!production.Discovery17Year5000TieHandler.prototype.handle.toString().includes('.sort('));
+  ok(!production.stableLengthOnlyPatchedYearCandidates.toString().includes('sortEqualLengthRunsByOpeningGate'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 17', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1625,4 +1657,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa posterior a Patch 16.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 17.');

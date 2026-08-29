@@ -208,6 +208,14 @@ class BaseMonsterContext {
     this.patch16SelectionStream = null;
     this.patch16SelectedOrdinal = null;
     this.patch16Selected = null;
+    this.discovery17Year5000CalculationDay = null;
+    this.discovery17PreparedForSelection = null;
+    this.discovery17WitnessCandidateLength = null;
+    this.discovery17WitnessFamilySize = null;
+    this.discovery17OpeningOrder = null;
+    this.discovery17SelectedOrdinal = null;
+    this.discovery17Selected = null;
+    this.discovery17StableLengthOnlyScarPreserved = false;
   }
 }
 
@@ -411,6 +419,12 @@ class BaseValidationManager {
   requirePatch15Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_15_RESULT') {
       throw new BootstrapStageError('Li context ne contene un question de gate reparat valid por Discovery 16.');
+    }
+  }
+
+  requirePatch16Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_16_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un familie de year candidates reparat valid por Discovery 17.');
     }
   }
 
@@ -2073,6 +2087,54 @@ class YearCandidateCeilingPatchWrapper {
   }
 }
 
+class Discovery17Year5000TieHandler {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  handle(context, calculationDay) {
+    this.validationManager.requirePatch16Result(context);
+    this.validationManager.requireDiscreteDay(calculationDay);
+    const prepared = context.patch16SortedFamily.map((candidate) => ({ ...candidate }));
+    if (prepared.length < 2) {
+      throw new RangeError('Discovery 17 exige adminim du year candidates filtrat por observar un tie.');
+    }
+    for (const candidate of prepared) {
+      if (!(candidate.openGate < calculationDay && calculationDay <= candidate.closeGate)) {
+        throw new BootstrapStageError('Li familie de Discovery 17 deve contener li calculation-day in chascun candidate de Year 5000.');
+      }
+    }
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery17Year5000TieHandler';
+    context.phase = 'DISCOVERY_17_YEAR_5000_EQUAL_LENGTH_TIE';
+    context.branchTrace.push('DISCOVERY_17_YEAR_5000_EQUAL_LENGTH_TIE');
+    context.discovery17Year5000CalculationDay = calculationDay;
+    context.discovery17PreparedForSelection = prepared.map((candidate) => ({ ...candidate }));
+    context.discovery17OpeningOrder = prepared.map((candidate) => candidate.openGate);
+    const witnessLength = prepared[0].candidateLength;
+    for (const candidate of prepared) {
+      if (candidate.candidateLength !== witnessLength) {
+        throw new BootstrapStageError('Li witness de Discovery 17 deve usar candidates con longore egal.');
+      }
+    }
+    context.discovery17WitnessCandidateLength = witnessLength;
+    context.discovery17WitnessFamilySize = prepared.length;
+    context.discovery17SelectedOrdinal = context.patch16SelectedOrdinal;
+    context.discovery17Selected = { ...context.patch16Selected };
+    // Discovery 17 observa solmen li ordre stabil heredat; null reorder per opening gate es executet ci.
+    context.discovery17StableLengthOnlyScarPreserved = true;
+    context.status = 'DISCOVERY_17_LEGACY_TIE_RESULT';
+    this.metricsManager.bump(context, 'discovery17.year5000Tie.calls');
+    return {
+      preparedForSelection: prepared.map((candidate) => ({ ...candidate })),
+      selectedOrdinal: context.discovery17SelectedOrdinal,
+      selected: { ...context.discovery17Selected }
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -2831,6 +2893,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyYearCandidateAdapter
     );
+    this.discovery17Year5000TieHandler = new Discovery17Year5000TieHandler(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -3282,6 +3348,21 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery17Year5000Tie(calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      const result = this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -3452,8 +3533,16 @@ function historicYearCandidatesThroughMonsterPath(
   );
 }
 
+function discovery17LegacyYear5000TieThroughMonsterPath(
+  calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+) {
+  return new BaseMonsterManager().executeDiscovery17Year5000Tie(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 16; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 17; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -3515,6 +3604,7 @@ module.exports = Object.freeze({
   LegacyYearCandidateAdapter,
   Discovery16LegacyYearCandidateHandler,
   YearCandidateCeilingPatchWrapper,
+  Discovery17Year5000TieHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -3610,5 +3700,6 @@ module.exports = Object.freeze({
   historicGateQuestionThroughMonsterPath,
   discovery16LegacyYearCandidatesThroughMonsterPath,
   historicYearCandidatesThroughMonsterPath,
+  discovery17LegacyYear5000TieThroughMonsterPath,
   calendarDateSpaghetti
 });

@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 33 de 55: PATCH 16** e li repository local es GREEN. Discovery 16 resta observabil quam scar separat: `LEGACY_YEAR_MAX=5781` e `legacyYearCandidateAllowed` continua acceptar 5779..5781 quand on voca li route legacy directmen.
+Li linea es in **Stage 34 de 55: DISCOVERY 17** e li repository local es EXPECTED_RED. Patch 16 resta verd e continua filtrar omni year candidate supra 5778 ante sort e selection.
 
-Patch 16 adjunte `REAL_YEAR_MAX_PATCH=5778` sin mutar li constant historic. `yearCandidateAfterFootnotePatch` passa prim per li helper legacy e aplica poy li filter 5778. Li familie semantic es materialisat per `yearCandidatesAfterFootnotePatchBeforeSort`, ergo omni candidate supra 5778 es rejectet ante que `stableLengthOnlyPatchedYearCandidates` executa li sort e ante que li dispatcher de selection es vocat.
+Li defect current es li tie de Year 5000. `stableLengthOnlyPatchedYearCandidates` es ancora un stable sort per longore solmen; si du o plu candidates have li sam `candidateLength`, lor ordre de input resta intact mem si un opening gate plu tempran deve preceder un plu tardiv. `Discovery17Year5000TieHandler` observa ti familie real pos Patch 16 e conserva li selection ja executet con li ordre legacy.
 
-Li sort current resta intentionalmen stabil per longore solmen. Null repair de equal-length runs per opening gate es present; ti defect apartene exclusivmen a Discovery 17 / Patch 17. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Null reorder per opening gate es implementat in production. Li correction `sortEqualLengthRunsByOpeningGate` apartene exclusivmen a Stage 35 / Patch 17. `oldJumpGuess` de Patch 18 anc ne es present, e li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 16 deve restar verd:
+Omni regressions til Patch 16 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal del patch deve esser verd:
+Li test focal del discovery deve esser rubi intentionalmen:
 
 ```text
-npm run test:patch-16
+npm run test:discovery-17
 ```
 
-Li suite complet deve esser GREEN:
+Li suite complet deve esser EXPECTED_RED exclusivmen in Discovery 17:
 
 ```text
 npm test
@@ -183,3 +183,10 @@ Ti stage introduce li constant legacy obligatori `LEGACY_YEAR_MAX=5781` e usa it
 ## Stage 33 — Patch 16
 
 `LEGACY_YEAR_MAX=5781` e `legacyYearCandidateAllowed` resta intact quam scar historic. `REAL_YEAR_MAX_PATCH=5778` es un ceiling separat. `yearCandidateAfterFootnotePatch` voca li helper legacy real e rejecte solmen pos ti call si `candidateLength>5778`. Li materialisation semantic usa `yearCandidatesAfterFootnotePatchBeforeSort`, e solmen pos ti filter `stableLengthOnlyPatchedYearCandidates` executa li stable sort per longore. `YearCandidateCeilingPatchWrapper` conserva li raw family legacy quam diagnostic, ma porta solmen li familie filtrat al selection. Li regression de Discovery 16 es nu verd. Equal-length ties resta in ordine stabil legacy; Patch 17 ne es anticipat.
+
+
+## Stage 34 — Discovery 17
+
+Li familie de Year 5000 usa li candidate set ja filtrat per Patch 16 e li stable sort historic per longore solmen. `Discovery17Year5000TieHandler` es insertet pos li wrapper 5778 e observa un witness de candidates con longore egal quel omnes contene li calculation-day. Li handler ne muta lor ordre e conserva li candidate ja selectet per li dispatcher existent.
+
+Li witness usa tri candidates de longore 490 con opening gates in ordre tardiv, tempran, medial. Pro que li sort es stabil e ne have null secondary key, li ordre resta talmen e rank 1 selecte li opening tardiv. Li ordre normativ del tie deve esser tempran, medial, tardiv; ti comparison es li unic EXPECTED_RED nov. Null correction de Patch 17 es includet.
