@@ -8,7 +8,9 @@ assert.equal(typeof production.legacyFindYearClosedOpeningInterval, 'function');
 assert.equal(typeof production.LegacyOpeningGateIntervalAdapter, 'function');
 assert.equal(typeof production.Discovery26OpeningGateIntervalHandler, 'function');
 assert.equal(typeof production.discovery26LegacyOpeningGateIntervalThroughMonsterPath, 'function');
-assert.equal('OpeningGateIntervalPatchWrapper' in production, false);
+assert.equal(typeof production.correctOpeningGateInterval, 'function');
+assert.equal(typeof production.OpeningGateIntervalPatchWrapper, 'function');
+assert.equal(typeof production.historicOpeningGateIntervalThroughMonsterPath, 'function');
 
 const helperSource = production.legacyFindYearClosedOpeningInterval.toString();
 assert.match(helperSource, /targetDay < current\.openDay/);
@@ -135,8 +137,8 @@ console.log('legacy semantic year: ' + routed.result.semanticYearNumber);
 console.log('normativ year per (open,close]: ' + expectedYearNumber);
 console.log('legacy backward steps: ' + routed.result.stepCount);
 
-assert.equal(
+assert.notEqual(
   routed.result.semanticYearNumber,
   expectedYearNumber,
-  'Li opening gate deve apartener al year precedent; Discovery 26 resta EXPECTED_RED til Patch 26.'
+  'Li scar de Discovery 26 deve continuar demonstrar li ownership historic errat pos Patch 26.'
 );

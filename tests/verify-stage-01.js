@@ -310,17 +310,14 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('production resta pur de textu hebreic e correction reparativ de Patch 26 durant Discovery 26', () => {
+group('production resta pur de textu hebreic e isolat del integration future pos Patch 26', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
     const source = fs.readFileSync(file, 'utf8');
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
-  const futureTokens = [
-    'patchedCounts', 'bowlOrderWithRankBridge',
-    'OpeningGateIntervalPatchWrapper', 'correctOpeningGateInterval'
-  ];
+  const futureTokens = ['patchedCounts', 'bowlOrderWithRankBridge'];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
 });
@@ -2163,10 +2160,10 @@ group('Patch 25 superscri li guess contigui per occurrence count til target incl
   eq(production.countMonthOccurrencesThroughTarget(weaving, 8), 2);
   eq(production.countMonthOccurrencesThroughTarget(weaving, 6), 2);
   ok(typeof production.MonthDayOccurrencePatchWrapper === 'function');
-  ok(!('OpeningGateIntervalPatchWrapper' in production));
+  ok(typeof production.OpeningGateIntervalPatchWrapper === 'function');
 });
 
-group('Discovery 26 conserva li interval legacy cludet al opening gate e lassa Patch 26 absent', () => {
+group('Discovery 26 conserva li interval legacy cludet al opening gate quam scar real', () => {
   ok(typeof production.legacyFindYearClosedOpeningInterval === 'function');
   ok(typeof production.LegacyOpeningGateIntervalAdapter === 'function');
   ok(typeof production.Discovery26OpeningGateIntervalHandler === 'function');
@@ -2184,11 +2181,27 @@ group('Discovery 26 conserva li interval legacy cludet al opening gate e lassa P
   eq(result.year.number, 5001n);
   eq(result.stepCount, 0n);
   ok(result.openingBoundaryAccepted);
-  ok(!('OpeningGateIntervalPatchWrapper' in production));
-  ok(!('correctOpeningGateInterval' in production));
+  ok(typeof production.OpeningGateIntervalPatchWrapper === 'function');
+  ok(typeof production.correctOpeningGateInterval === 'function');
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 26', () => {
+group('Patch 26 usa <= retro e membership authoritative (open,close]', () => {
+  const anchor = { number: 5001n, openDay: 100n, firstDay: 101n, closeDay: 200n };
+  const result = production.correctOpeningGateInterval(
+    anchor, 100n,
+    (year) => ({ number: year.number + 1n, openDay: year.closeDay, firstDay: year.closeDay + 1n, closeDay: year.closeDay + 100n }),
+    (year) => ({ number: year.number - 1n, openDay: year.openDay - 100n, firstDay: year.openDay - 99n, closeDay: year.openDay })
+  );
+  eq(result.year.number, 5000n);
+  eq(result.stepCount, 1n);
+  ok(result.openingBoundaryMovedBackward);
+  const source = production.correctOpeningGateInterval.toString();
+  ok(source.includes('targetDay <= current.openDay'));
+  ok(source.includes('current.openDay < targetDay'));
+  ok(typeof production.historicOpeningGateIntervalThroughMonsterPath === 'function');
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 26', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2200,4 +2213,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 26.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 26.');

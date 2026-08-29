@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 51 de 55: PATCH 25** e li repository local es `GREEN`. Omni regressions til Discovery 25, li verifier, li test focal de Patch 25 e li suite complet passa.
+Li linea es in **Stage 53 de 55: PATCH 26** e li repository local es `GREEN`. Omni regressions til Discovery 26, li verifier, li test focal de Patch 26 e li suite complet passa.
 
-Patch 24 resta intact e produce li intertexe legal complet. Pos it, `oldContiguousMonthDayGuess` continua esser executet realmen quam scar diagnostic. `MonthDayOccurrencePatchWrapper` superscri li semantic day-in-month per li quantitá de occurrences del monthId desde li initie del year til li target inclusiv. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Li finder historic `legacyFindYearClosedOpeningInterval` resta activ e tracta diagnosticmen li year quam `[open,close]`. `OpeningGateIntervalPatchWrapper` passa separatmen per `correctOpeningGateInterval`, quel usa `targetDay<=openDay` durant li caminada retro e valida li membership `openDay<targetDay<=closeDay`. Li function final `calendarDateSpaghetti` resta intentionalmen ne integrat til Stage 54.
 
 ## Lingue-fonte canonic
 
@@ -24,7 +24,7 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 25 deve restar verd:
+Omni regressions til Discovery 26 deve restar verd:
 
 ```text
 npm run test:previous
@@ -36,10 +36,10 @@ Li verifier deve esser verd:
 node tests/verify-stage-01.js
 ```
 
-Li test focal de Patch 25 deve esser verd:
+Li test focal de Patch 26 deve esser verd:
 
 ```text
-npm run test:patch-25
+npm run test:patch-26
 ```
 
 Li suite complet deve esser verd:
@@ -493,3 +493,22 @@ In li witness real, Year 5000 fini al die `-15054661`. Li adjacent Year 5001 com
 ### Limite historic
 
 Null `OpeningGateIntervalPatchWrapper`, null `correctOpeningGateInterval` e null detour reparativ de Patch 26 es present. Li `<=` semantic existe ja in li caminada authoritative de Patch 18 ma ne es copiat in ti nov layer legacy. Li proxim stage mandat es Stage 53 — PATCH 26.
+
+
+## Stage 53 — PATCH 26
+
+### Li interval cludet old resta un scar real
+
+Patch 26 ne modifica `legacyFindYearClosedOpeningInterval`, ne `LegacyOpeningGateIntervalAdapter.call`, ne `Discovery26OpeningGateIntervalHandler.handle`. Li route reparat executa Discovery 26 prim. Ergo li opening-year adjacent es ancor usat quam ownership anchor al shared gate, li condition strict `targetDay<openDay` lassa li year errat in loco, e ti resultate resta observabil quam diagnostic.
+
+### Detour authoritative `(open,close]`
+
+`correctOpeningGateInterval` usa li sam contract de year-walk e conserva li branch avante `targetDay>closeDay`. Li unic mutation semantic mandat es in li branch retro: tant que `targetDay<=current.openDay`, it passa al year precedent. Li validation final es exactmen `current.openDay<targetDay && targetDay<=current.closeDay`.
+
+`OpeningGateIntervalPatchWrapper` exige li state de Discovery 26, conserva li year legacy e su numero semantic raw, poy executa li detour ex li sam ownership anchor. Li context registra separatmen li trace reparat, li count de passus, li flag de equality moved backward e li year semantic final.
+
+### Witness e verification
+
+Al shared gate `-15054661`, Discovery 26 conserva Year 5001 e zero backward steps. Patch 26 fa exactmen un passu retro e rende Year 5000. Witnesses local adicional con annus positiv e negativ confirma que equality al opening gate sempre move retro, durante que dies strictmen intra li interval e li closing gate resta in li year current.
+
+`test:previous`, li verifier, `test:patch-26` e li suite complet es verd. Li verifier passa 74 gruppes / 66832 assertions. Null integration de Stage 54 es anticipat; `calendarDateSpaghetti` resta explicitmen ne integrat.

@@ -8,7 +8,7 @@ assert.equal(typeof production.oldContiguousMonthDayGuess, 'function');
 assert.equal(typeof production.countMonthOccurrencesThroughTarget, 'function');
 assert.equal(typeof production.MonthDayOccurrencePatchWrapper, 'function');
 assert.equal(typeof production.historicMonthDayOccurrenceThroughMonsterPath, 'function');
-assert.equal('OpeningGateIntervalPatchWrapper' in production, false);
+assert.equal(typeof production.OpeningGateIntervalPatchWrapper, 'function');
 
 const oldSource = production.oldContiguousMonthDayGuess.toString();
 assert.match(oldSource, /indexOf/);

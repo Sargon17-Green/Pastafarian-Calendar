@@ -1140,3 +1140,24 @@ Li witness real conserva Year 5000 quam resolved year precedent, reancra al Year
 ### Limite vers Patch 26
 
 Stage 52 ne repara li helper old. Null `OpeningGateIntervalPatchWrapper` e null `correctOpeningGateInterval` es adjunt. Patch 26 deve arrivar solmen in Stage 53, conservar ti finder cludet quam scar real e aplicar separatmen li condition retro `targetDay<=openDay` con membership final `openDay<targetDay<=closeDay`.
+
+
+## Stage 53 — PATCH 26
+
+### Quo esset circumit
+
+Li ultim defect historic ne esset correctet in loco. `legacyFindYearClosedOpeningInterval` conserva su loop retro strict `targetDay<current.openDay` e su membership `openDay<=targetDay<=closeDay`. `LegacyOpeningGateIntervalAdapter` e `Discovery26OpeningGateIntervalHandler` resta li sam scars de Stage 52 e es executet realmen ante li nov wrapper.
+
+Supra ti resultate es adjunt `correctOpeningGateInterval`. Li helper conserva li caminada avante existent, ma usa `targetDay<=current.openDay` por li caminada retro. Li postcondition es `current.openDay<targetDay && targetDay<=current.closeDay`, exactmen li interval authoritative `(open,close]`.
+
+### Ownership e overwrite semantic
+
+`OpeningGateIntervalPatchWrapper` prende li target e li ownership anchor conservat per Discovery 26. It preserva `legacyOpeningGateResolvedYear` e li raw semantic year number quam diagnostics, executa li detour reparat e poy superscri `legacyOpeningGateSemanticYearNumber` per li year correct. Li state conserva simultanmen ambi answers; null scar precedent es deletet.
+
+Al witness real, li opening-year Year 5001 have `openDay=-15054661`, exactmen li target. Li scar old accepta Year 5001 con zero passus retro. Li helper reparat detecte equality per `<=`, passa un vez a Year 5000 e verifica que `openDay<target<=closeDay`. Talmen li shared gate apartene al year quel fini ta.
+
+### Porta final ante integration
+
+Li tests direct verifica li boundary equality sur annus 5001, -12 e 9000, e verifica anc que targets interior e closing gates ne es movet. Li route real conserva legacy 5001 e rende semantic 5000. Omni regressions precedent, li verifier, li test focal e li suite complet passa; li verifier reporta 74 gruppes e 66832 assertions.
+
+Stage 54 resta separat e reservat por integration de omni scars e patches. Null integration final es addit in Stage 53.

@@ -645,6 +645,12 @@ class BaseValidationManager {
     }
   }
 
+  requireDiscovery26Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_26_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un ownership legacy del opening gate valid por Patch 26.');
+    }
+  }
+
   requireStructureSauceResult(result) {
     if (!result || typeof result !== 'object' || !Array.isArray(result.bowls) || result.bowls.length < 7 ||
         !Array.isArray(result.orderAt46Latch) || result.orderAt46Latch.length !== 6) {
@@ -4546,6 +4552,96 @@ class Discovery26OpeningGateIntervalHandler {
   }
 }
 
+function correctOpeningGateInterval(anchor, targetDay, nextYear, previousYear) {
+  let current = requireWalkYearRecord(anchor, 'Li anchor reparat por li interval annual apert al opening gate');
+  if (typeof targetDay !== 'bigint') {
+    throw new TypeError('Li target-day del interval reparat deve esser un BigInt exact.');
+  }
+  const trace = [];
+  while (targetDay > current.closeDay) {
+    const before = current;
+    current = patchedNextYear(current, nextYear);
+    trace.push({ direction: 'next', fromNumber: before.number, toNumber: current.number, sharedGate: before.closeDay });
+  }
+  while (targetDay <= current.openDay) {
+    const before = current;
+    current = patchedPreviousYear(current, previousYear);
+    trace.push({ direction: 'previous', fromNumber: before.number, toNumber: current.number, sharedGate: before.openDay });
+  }
+  if (!(current.openDay < targetDay && targetDay <= current.closeDay)) {
+    throw new BootstrapStageError('Li interval reparat (open,close] ne contene li target-day pos su caminada.');
+  }
+  return {
+    year: { ...current },
+    stepCount: BigInt(trace.length),
+    trace: trace.map((step) => ({ ...step })),
+    openingBoundaryMovedBackward: trace.some((step) => step.direction === 'previous' && step.sharedGate === targetDay),
+    authoritativeMembership: true
+  };
+}
+
+class OpeningGateIntervalPatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, yearWalkSource) {
+    this.validationManager.requireDiscovery26Result(context);
+    this.validationManager.requireYearWalkSource(yearWalkSource);
+    const targetDay = context.legacyOpeningGateTargetDay;
+    const ownershipAnchor = context.legacyOpeningGateOwnershipAnchor;
+    const legacyYear = context.legacyOpeningGateResolvedYear;
+    if (typeof targetDay !== 'bigint' || !ownershipAnchor || !legacyYear) {
+      throw new BootstrapStageError('Patch 26 exige target, ownership anchor e resultate legacy de Discovery 26.');
+    }
+
+    const correct = correctOpeningGateInterval(
+      ownershipAnchor,
+      targetDay,
+      (year) => yearWalkSource.nextYear({ ...year }),
+      (year) => yearWalkSource.previousYear({ ...year })
+    );
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'OpeningGateIntervalPatchWrapper';
+    context.phase = 'PATCH_26_OPENING_GATE_PREVIOUS_YEAR';
+    context.branchTrace.push('PATCH_26_OPENING_GATE_PREVIOUS_YEAR');
+    context.patch26LegacyYear = { ...legacyYear };
+    context.patch26LegacySemanticYearNumber = context.legacyOpeningGateSemanticYearNumber;
+    context.patch26LegacyDiagnosticPreserved = true;
+    context.patch26OwnershipAnchor = { ...ownershipAnchor };
+    context.patch26BackwardUsesLessOrEqual = true;
+    context.patch26AuthoritativeInterval = '(open,close]';
+    context.patch26WalkTrace = correct.trace.map((step) => ({ ...step }));
+    context.patch26WalkStepCount = correct.stepCount;
+    context.patch26OpeningBoundaryMovedBackward = correct.openingBoundaryMovedBackward;
+    context.patch26ResolvedYear = { ...correct.year };
+    context.patch26SemanticYearNumber = correct.year.number;
+    context.legacyOpeningGateSemanticYearNumber = correct.year.number;
+    context.status = 'PATCH_26_RESULT';
+    this.metricsManager.bump(context, 'patch26.legacyDiagnosticPreserved.calls');
+    this.metricsManager.bump(context, 'patch26.correctOpeningGateInterval.calls');
+    this.metricsManager.bump(context, 'patch26.semanticYearOverwrite.calls');
+    if (correct.openingBoundaryMovedBackward) {
+      this.metricsManager.bump(context, 'patch26.openingBoundaryMovedBackward.calls');
+    }
+
+    return {
+      targetDay,
+      ownershipAnchor: { ...ownershipAnchor },
+      legacyYear: { ...legacyYear },
+      legacySemanticYearNumber: context.patch26LegacySemanticYearNumber,
+      year: { ...correct.year },
+      semanticYearNumber: correct.year.number,
+      stepCount: correct.stepCount,
+      trace: correct.trace.map((step) => ({ ...step })),
+      openingBoundaryMovedBackward: correct.openingBoundaryMovedBackward,
+      authoritativeInterval: '(open,close]'
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -5406,6 +5502,10 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager,
       this.legacyOpeningGateIntervalAdapter
+    );
+    this.openingGateIntervalPatchWrapper = new OpeningGateIntervalPatchWrapper(
+      this.validationManager,
+      this.metricsManager
     );
   }
 
@@ -6348,6 +6448,42 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch26OpeningGateInterval(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      this.cutletPartitionPatchWrapper.repair(context);
+      this.discovery22RepeatedNameHandler.handle(context);
+      this.repeatedNamePatchWrapper.repair(context);
+      this.discovery23MonthLengthMaterializationHandler.handle(context);
+      this.monthLengthVirtualPatchWrapper.repair(context);
+      this.discovery24MonthWeavingHandler.handle(context);
+      this.monthWeavingPatchWrapper.repair(context);
+      this.discovery25ContiguousMonthDayHandler.handle(context, originalTargetDay);
+      this.monthDayOccurrencePatchWrapper.repair(context);
+      // Li finder cludet de Discovery 26 resta un scar activ e es executet realmen ante li detour final.
+      this.discovery26OpeningGateIntervalHandler.handle(context, originalTargetDay, yearWalkSource);
+      const result = this.openingGateIntervalPatchWrapper.repair(context, yearWalkSource);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -6716,8 +6852,19 @@ function discovery26LegacyOpeningGateIntervalThroughMonsterPath(
   );
 }
 
+function historicOpeningGateIntervalThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Patch 26 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executePatch26OpeningGateInterval(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 26; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor integrat in Patch 26; Stage 54 resta reservat por integration.');
 }
 
 module.exports = Object.freeze({
@@ -6810,6 +6957,7 @@ module.exports = Object.freeze({
   MonthDayOccurrencePatchWrapper,
   LegacyOpeningGateIntervalAdapter,
   Discovery26OpeningGateIntervalHandler,
+  OpeningGateIntervalPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -6906,6 +7054,7 @@ module.exports = Object.freeze({
   oldContiguousMonthDayGuess,
   countMonthOccurrencesThroughTarget,
   legacyFindYearClosedOpeningInterval,
+  correctOpeningGateInterval,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -6958,5 +7107,6 @@ module.exports = Object.freeze({
   discovery25LegacyContiguousMonthDayThroughMonsterPath,
   historicMonthDayOccurrenceThroughMonsterPath,
   discovery26LegacyOpeningGateIntervalThroughMonsterPath,
+  historicOpeningGateIntervalThroughMonsterPath,
   calendarDateSpaghetti
 });

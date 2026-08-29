@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=52
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=53
+CURRENT_KIND=PATCH
 CURRENT_PATCH=26
-LAST_COMPLETED_STAGE=52
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=53
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,17 +15,19 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus legacyFindYearClosedOpeningInterval, LegacyOpeningGateIntervalAdapter e Discovery26OpeningGateIntervalHandler: li final layer legacy tracta li year quam [open,close] e accepte li opening gate quam proprietá del year quel comensa ta.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus correctOpeningGateInterval e OpeningGateIntervalPatchWrapper: li finder [open,close] de Discovery 26 resta activ quam diagnostic, poy un detour separat usa <= al opening gate e membership (open,close] por li semantic year.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 52 es finit quam **DISCOVERY 26** e li repository local es intentionalmen `EXPECTED_RED`.
+Stage 53 es finit quam **PATCH 26** e li repository local es `GREEN`.
 
-`legacyFindYearClosedOpeningInterval(anchor,targetDay,nextYear,previousYear)` conserva li defect historic final: it camina avante quand `targetDay>closeDay`, ma camina retro solmen quand `targetDay<openDay`. Ergo `targetDay==openDay` es acceptet in li year current e li interval legacy es `[open,close]`.
+`legacyFindYearClosedOpeningInterval`, `LegacyOpeningGateIntervalAdapter.call` e `Discovery26OpeningGateIntervalHandler.handle` resta fisicmen sin modification. Li route de Patch 26 traversa Discovery 26 prim, ergo li ownership legacy `[open,close]` es ancor calculat realmen e conservat quam diagnostic invocation-local.
 
-`Discovery26OpeningGateIntervalHandler` veni pos Patch 25. Por un target exact al close gate del year authoritative ja resoluet, li handler expone li ownership errat per reancrar al adjacent year quel comensa al sam gate e poy executar li finder legacy. Li scar retorna Year 5001 por li shared gate, durante que li state authoritative de Patch 18 conserva Year 5000. Null correction es applicat in ti stage.
+`correctOpeningGateInterval(anchor,targetDay,nextYear,previousYear)` aplica li unic correction mandat: durant li caminada retro it usa `targetDay<=current.openDay`. Pos li caminada, membership es valid solmen si `current.openDay<targetDay && targetDay<=current.closeDay`. `OpeningGateIntervalPatchWrapper` conserva li year legacy e superscri li semantic year per ti resultate reparat.
 
-Li witness real usa li shared gate `-15054661`: li legacy semantic year es 5001, li year normativ precedent es 5000 e li backward step count legacy es 0. `test:previous` e li verifier passa; `test:discovery-26` e `npm test` falla solmen per ti divergence intentional. Null `OpeningGateIntervalPatchWrapper` ni `correctOpeningGateInterval` es present.
+Li witness real usa li shared gate `-15054661`. Discovery 26 rende diagnosticmen Year 5001 con zero passus retro; Patch 26 usa li sam ownership anchor, fa un passu retro e rende Year 5000 semanticmen. Li interval final es exactmen `(open,close]`.
+
+`npm run test:previous`, li verifier, `npm run test:patch-26` e `npm test` passa. Li verifier reporta 74 gruppes e 66832 assertions. Stage 54 resta reservat por integration; `calendarDateSpaghetti` ne es ancor integrat.

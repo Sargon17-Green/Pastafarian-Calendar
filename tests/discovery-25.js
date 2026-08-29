@@ -11,7 +11,7 @@ assert.equal(typeof production.discovery25LegacyContiguousMonthDayThroughMonster
 assert.equal(typeof production.countMonthOccurrencesThroughTarget, 'function');
 assert.equal(typeof production.MonthDayOccurrencePatchWrapper, 'function');
 assert.equal(typeof production.historicMonthDayOccurrenceThroughMonsterPath, 'function');
-assert.equal('OpeningGateIntervalPatchWrapper' in production, false);
+assert.equal(typeof production.OpeningGateIntervalPatchWrapper, 'function');
 
 const helperSource = production.oldContiguousMonthDayGuess.toString();
 assert.match(helperSource, /indexOf/);
