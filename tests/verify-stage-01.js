@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 04 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 05 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -868,7 +868,41 @@ group('Patch 04 conserva li call legacy ma li builder usa snapshot simultan por 
   }
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 04', () => {
+group('Discovery 05 conserva li hidden values exact ma li stores in ordine retrograd', () => {
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const expected = o.buildHiddenDrops(counts, o.STONES);
+  const legacy = production.buildHiddenWithBackwardStorage(counts, stones);
+  eq(legacy.length, 8);
+  eq(legacy[0], null);
+  deepEq(legacy.slice(1), expected.slice().reverse());
+  eq(legacy[1], expected[6]);
+  eq(legacy[7], expected[0]);
+  ok(legacy[1] !== expected[0]);
+  ok(legacy[7] !== expected[6]);
+  const expectedCoeff = [
+    [3n, 4n, 6n, 8n],
+    [5n, 7n, 10n, 12n],
+    [7n, 10n, 14n, 16n],
+    [9n, 13n, 18n, 20n],
+    [11n, 16n, 22n, 24n],
+    [13n, 19n, 26n, 28n],
+    [15n, 22n, 30n, 32n]
+  ];
+  for (let k = 1; k <= 7; k += 1) deepEq(production.coeffForHidden(k), expectedCoeff[k - 1]);
+  const execution = production.discovery05LegacyHiddenStorageThroughMonsterPath(f, f, counts, stones);
+  deepEq(execution.result.slice(1), expected.slice().reverse());
+  eq(execution.context.currentHandler, 'Discovery05HiddenStorageHandler');
+  eq(execution.context.phase, 'DISCOVERY_05_HIDDEN_BACKWARD_STORAGE');
+  eq(execution.context.status, 'DISCOVERY_05_LEGACY_RESULT');
+  deepEq(execution.context.branchTrace, ['BOOTSTRAP_VALIDATED', 'DISCOVERY_05_HIDDEN_BACKWARD_STORAGE']);
+  eq(execution.context.legacyHiddenNearestReadAsSlotOne, expected[6]);
+  eq(execution.context.legacyHiddenFarthestReadAsSlotSeven, expected[0]);
+  eq(execution.context.metrics['discovery05.hiddenBackward.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 05', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -880,4 +914,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in Patch 04.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression rubi de Discovery 05.');

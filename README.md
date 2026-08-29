@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 9 de 55: PATCH 04**. Li scars de Patch 01, Patch 02 e Patch 03 resta intact e testabil. `mutateStonesWrong(index, state)` anc resta intact quam li mutation sequential in-place decovrit in Stage 8.
+Li linea es in **Stage 10 de 55: DISCOVERY 05**. Li scars de Patch 01 til Patch 04 resta intact e testabil. Li nov legacy `buildHiddenWithBackwardStorage(counts, stones)` calcula li sett hidden drops con li coefficients exact, ma conserva les fisicmen in ordine retrograd: hidden7, hidden6, ..., hidden1.
 
-Li correction historic nov es `stonePatch(index, state)`: it prende un snapshot `old`, voca realmen `mutateStonesWrong` sur un clone e conserva ti call legacy, ma poy superscri omni quin outputs con formules quel lege exclusivmen `old`. `getStoneTableThroughLegacyBuilder()` usa ti route por construir li 46 stones. Un `Patch04StoneWrapper` es insertet pos `Discovery04StoneMutationHandler`, e li context conserva li garbage legacy ante overwrite e li resultate reparat separatmen. Li repository es **GREEN**.
+Un `LegacyHiddenStorageAdapter` e un `Discovery05HiddenStorageHandler` conecta ti storage a un path real del monster. Li context conserva li comptes, li storage legacy e du probes direct de slots 1 e 7. Li translator per proximity ne existe ancor; ergo li nov regression es **EXPECTED RED**.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,25 +26,25 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions precedent, includente li scar de Discovery 04, deve restar verd:
+Omni regressions precedent deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li commande principal deve esser verd in Patch 04:
+Li regression de Discovery 05 deve esser rubi pro que li storage legacy es retrograd e null translator de access existe ancor:
+
+```text
+npm run test:discovery-05
+```
+
+Li commande principal deve finir rubi solmen in ti regression nov:
 
 ```text
 npm test
 ```
 
-Por executar solmen li patch nov:
-
-```text
-npm run test:patch-04
-```
-
-Por li prim transition, li legacy continua rendre `[378,1434,3780,9932,25047]`, ma `stonePatch` rende `[378,1073,2375,6195,10493]`. Li builder reparat concorda row-per-row con omni 46 stones del reference local test-only.
+Li verifier precedent confirma separatmen que li sett values self es exact e que slots 1..7 es precis li serie normativ reversat.
 
 ## Independentie
 

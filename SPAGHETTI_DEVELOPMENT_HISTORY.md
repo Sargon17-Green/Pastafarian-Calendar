@@ -191,3 +191,25 @@ Un `Patch04StoneWrapper` ha esset insertet pos `Discovery04StoneMutationHandler`
 ### Pro quo li strat nov ne altera semantics ultra li patch
 
 Li wrapper ne consulta li oracle e ne usa metrics o diagnostics por decisiones. Li source state es validat ma ne mutat; li call legacy opera sur clones. Solmen li quin overwrites mandad de Patch 04 decide li output. `mutateStonesWrong` resta directmen invocabil e demonstra ancora su divergentie. Null storage retrograd de hidden drops, `hiddenByNearness` o altri code de Patch 05 es present.
+
+## Stage 10 — DISCOVERY 05
+
+### Quo on pensat
+
+Li quinesim design historic tractat li array de sett hidden drops quam un contenitor u li orientation fisic ne importat. Li coefficients legacy es mantenet in `LEGACY_HIDDEN_COEFF_REVERSED`, e li builder scri chascun hidden k in slot `8-k`, resultante in li sequence fisic hidden7, hidden6, ..., hidden1. On assumet que un consumidor posterior vell posser leer slot k directmen quam hidden k.
+
+### Quo esset decovrit
+
+Li hidden drops have un signification per proximity al prim visible drop: hidden1 es li plu proxim e hidden7 li plu lontan. Li storage inversat ne preserva ti convention. Li values calculat self es exact; li defect es exclusivmen orientation de storage. Por li casu Foundation/Foundation, slots 1..7 es exactmen li reversal del serie normativ, e un access direct a slot 1 rende hidden7 in vice de hidden1.
+
+### Quo esset circumit
+
+Null circumventione existe in ti stage. Li array ne es reversat e null translator de access es present. Li function reservat quel va mappar chascun access logic a hidden k vers slot `8-k` apartene exclusivmen a PATCH 05 in Stage 11.
+
+### Crescentie monster in ti stage
+
+Un `LegacyHiddenStorageAdapter` e un `Discovery05HiddenStorageHandler` ha esset addit. Li handler valida li comptes e li table de stones, executa li builder retrograd, conserva un copie del comptes, li storage legacy e probes de slots 1 e 7 in li context, e registra un metric non-semantic.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+`makeHiddenPatched` usa li coefficients, checksum de stone, sett grinds e `savePatch` secun li pseudocode historic, e li table de stones veni del builder ja reparat de Patch 04. Null oracle es consultat in production. Li handler ne reordina, ne traducte e ne corrige li storage. Ergo li unic divergentie nov es precis li orientation retrograd mandat de Discovery 05.

@@ -57,6 +57,10 @@ class BaseMonsterContext {
     this.patch04LegacyGarbageBeforeOverwrite = null;
     this.patch04Output = null;
     this.patch04LegacyCallPreserved = false;
+    this.legacyHiddenCounts = null;
+    this.legacyHiddenStorage = null;
+    this.legacyHiddenNearestReadAsSlotOne = null;
+    this.legacyHiddenFarthestReadAsSlotSeven = null;
   }
 }
 
@@ -77,6 +81,24 @@ class BaseValidationManager {
     }
     for (const key of ['w', 'b', 's', 'm', 'r']) {
       this.requireExactInteger(state[key]);
+    }
+  }
+
+  requireHiddenCounts(counts) {
+    if (!counts || typeof counts !== 'object') {
+      throw new TypeError('Li comptes por hidden drops deve esser un object exact.');
+    }
+    for (const key of ['action', 'target', 'distance', 'connection', 'direction']) {
+      this.requireExactInteger(counts[key]);
+    }
+  }
+
+  requireStoneTableForHidden(stones) {
+    if (!Array.isArray(stones) || stones.length < 7) {
+      throw new TypeError('Li table de stones por hidden drops deve contener adminim sett rows.');
+    }
+    for (let index = 0; index < stones.length; index += 1) {
+      this.requireStoneState(stones[index]);
     }
   }
 
@@ -250,6 +272,73 @@ function getStoneTableThroughLegacyBuilder() {
     index += 1n;
   }
   return table;
+}
+
+const LEGACY_HIDDEN_COEFF_REVERSED = Object.freeze([
+  null,
+  Object.freeze([15n, 22n, 30n, 32n]),
+  Object.freeze([13n, 19n, 26n, 28n]),
+  Object.freeze([11n, 16n, 22n, 24n]),
+  Object.freeze([9n, 13n, 18n, 20n]),
+  Object.freeze([7n, 10n, 14n, 16n]),
+  Object.freeze([5n, 7n, 10n, 12n]),
+  Object.freeze([3n, 4n, 6n, 8n])
+]);
+
+const HIDDEN_STONE_KIND_STRANGE = Object.freeze([null, 'w', 'b', 's', 'm', 'r', 'w', 'b']);
+
+function requireHiddenOrdinal(value, label) {
+  if (!Number.isInteger(value) || value < 1 || value > 7) {
+    throw new RangeError(label + ' deve esser un index integer inter 1 e 7.');
+  }
+}
+
+function coeffForHidden(k) {
+  requireHiddenOrdinal(k, 'Li ordinal de hidden drop');
+  // Li table legacy es fisicmen inversat; ti lookup conserva su orientation historic.
+  return LEGACY_HIDDEN_COEFF_REVERSED[8 - k];
+}
+
+function hiddenStoneKind(grind) {
+  requireHiddenOrdinal(grind, 'Li ordinal de grind por hidden drop');
+  return HIDDEN_STONE_KIND_STRANGE[grind];
+}
+
+function makeHiddenPatched(k, counts, stones) {
+  requireHiddenOrdinal(k, 'Li ordinal de hidden drop');
+  const [a, b, c, d] = coeffForHidden(k);
+  const row = stones[k - 1];
+  let x = counts.action
+    + a * counts.target
+    + b * counts.distance
+    + c * counts.connection
+    + d * counts.direction;
+  // Li checksum legacy resta quam un loop generic super li quin species de stone.
+  for (const kind of ['w', 'b', 's', 'm', 'r']) {
+    x += row[kind];
+  }
+  x = savePatch(x);
+  let grind = 1;
+  while (grind <= 7) {
+    const beforeSquare = x;
+    x = savePatch(
+      beforeSquare * beforeSquare
+      + 3n * beforeSquare
+      + row[hiddenStoneKind(grind)]
+      + BigInt(grind)
+    );
+    grind += 1;
+  }
+  return x;
+}
+
+function buildHiddenWithBackwardStorage(counts, stones) {
+  // Index 0 resta vacui por conservar li convention historic 1..7.
+  const legacyHidden = new Array(8).fill(null);
+  for (let k = 1; k <= 7; k += 1) {
+    legacyHidden[8 - k] = makeHiddenPatched(k, counts, stones);
+  }
+  return legacyHidden;
 }
 
 class LegacyRemainderAdapter {
@@ -481,6 +570,44 @@ class Patch04StoneWrapper {
   }
 }
 
+
+class LegacyHiddenStorageAdapter {
+  call(counts, stones) {
+    return buildHiddenWithBackwardStorage(counts, stones);
+  }
+}
+
+class Discovery05HiddenStorageHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, counts, stones) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireHiddenCounts(counts);
+    this.validationManager.requireStoneTableForHidden(stones);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery05HiddenStorageHandler';
+    context.phase = 'DISCOVERY_05_HIDDEN_BACKWARD_STORAGE';
+    context.branchTrace.push('DISCOVERY_05_HIDDEN_BACKWARD_STORAGE');
+    context.legacyHiddenCounts = {
+      action: counts.action,
+      target: counts.target,
+      distance: counts.distance,
+      connection: counts.connection,
+      direction: counts.direction
+    };
+    context.legacyHiddenStorage = this.legacyAdapter.call(counts, stones);
+    context.legacyHiddenNearestReadAsSlotOne = context.legacyHiddenStorage[1];
+    context.legacyHiddenFarthestReadAsSlotSeven = context.legacyHiddenStorage[7];
+    context.status = 'DISCOVERY_05_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery05.hiddenBackward.calls');
+    return context.legacyHiddenStorage;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -515,6 +642,12 @@ class BaseMonsterManager {
       this.legacyStoneMutationAdapter
     );
     this.patch04StoneWrapper = new Patch04StoneWrapper(this.validationManager, this.metricsManager);
+    this.legacyHiddenStorageAdapter = new LegacyHiddenStorageAdapter();
+    this.discovery05HiddenStorageHandler = new Discovery05HiddenStorageHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyHiddenStorageAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -627,6 +760,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery05HiddenStorage(calculationDay, targetDay, counts, stones) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery05HiddenStorageHandler.handle(context, counts, stones);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -665,8 +810,12 @@ function historicStoneMutationThroughMonsterPath(calculationDay, targetDay, inde
   return new BaseMonsterManager().executePatch04StoneMutation(calculationDay, targetDay, index, stoneState);
 }
 
+function discovery05LegacyHiddenStorageThroughMonsterPath(calculationDay, targetDay, counts, stones) {
+  return new BaseMonsterManager().executeDiscovery05HiddenStorage(calculationDay, targetDay, counts, stones);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 04; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 05; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -692,6 +841,8 @@ module.exports = Object.freeze({
   LegacyStoneMutationAdapter,
   Discovery04StoneMutationHandler,
   Patch04StoneWrapper,
+  LegacyHiddenStorageAdapter,
+  Discovery05HiddenStorageHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -704,6 +855,11 @@ module.exports = Object.freeze({
   cloneStoneState,
   stonePatch,
   getStoneTableThroughLegacyBuilder,
+  LEGACY_HIDDEN_COEFF_REVERSED,
+  coeffForHidden,
+  hiddenStoneKind,
+  makeHiddenPatched,
+  buildHiddenWithBackwardStorage,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -713,5 +869,6 @@ module.exports = Object.freeze({
   historicDistanceThroughMonsterPath,
   discovery04LegacyStoneMutationThroughMonsterPath,
   historicStoneMutationThroughMonsterPath,
+  discovery05LegacyHiddenStorageThroughMonsterPath,
   calendarDateSpaghetti
 });
