@@ -543,3 +543,48 @@ Norma unius commotionis postulat ut omnes sex formulae eosdem sex valores crater
 Additi sunt `legacyStirBowlsInPlace`, campi contextus commotionis craterum, `LegacyInPlaceBowlReport`, `LegacyInPlaceBowlAdapter`, `Discovery10InPlaceBowlHandler`, `requireLegacyInPlaceBowlReady`, `dispatchLegacyInPlaceBowlStir` et `executeInPlaceBowlStir`. Comprobator repetit computationem legacy solum ad determinismum confirmandum; nulla copia normativa productionis et nullus fallback introducitur.
 
 Nullum snapshot semanticum separatum, nulla regio scripturae separata, nullus PATCH 10 et nulla logica Gradus 21 praemature addita est.
+
+## Gradus 21 — PATCH 10: vaultOld, pending et commit tardivus craterum
+
+### Quid repertum erat
+
+Gradus 20 demonstravit `legacyStirBowlsInPlace` eundem `BowlState` ad lectiones et scriptiones intra unum circuitum adhibere. Prima positio omnia ex statu vetere legebat, sed quinque positiones posteriores vicinum iam scriptum videre poterant. In duobus witness casibus quinque craterae ex sex divergebant, summa decem discrepantiarum.
+
+### Quid circumventum est
+
+Helper legacy intactum manet et in via PATCH vere vocatur. `Patch10InPlaceBowlHandler` eius output contaminatum in `legacyInPlaceBowlOutput` servat ante quam correctionem ullam faciat.
+
+Deinde `Patch10DeferredBowlWrapper` functionem `stirBowlsThroughVaultOld` vocat. Haec duas regiones semanticam separatas instituit:
+
+```text
+vaultOld = clone(B)
+pending = clone(B)
+```
+
+Omnes termini `B[id]`, `B[prev]` et `B[next]` exclusive ex `vaultOld` leguntur. Sex exitus computati solum in `pending` scribuntur. Nulla lectio sequens ex `pending` fit. Post sextam computationem tantum `pending` ut status novus exponitur. `vaultOld`, `pending`, output emendatus et flag `patch10Applied` in contextu servantur.
+
+Via diagnostica `executeUnpatchedInPlaceBowlStirDiagnostic` adhuc `Discovery10InPlaceBowlHandler` et helper legacy directe exsequitur.
+
+### Cur hoc aequivalet normae
+
+Norma commotionis unius circuitus sex formulas ex eodem statu ante circuitum definit. `vaultOld` est copia exacta illius status et numquam mutatur. Quia omnis formula solum ex ea copia legit, omnes sex formulae eosdem valores priores vident. `pending` solum destinationem scriptionis praebet et ante completionem circuitus in nullam formulam reingreditur. Commit post sex calculationes igitur idem est ac sex updates simultanei normativi.
+
+`requirePatch10Ready` computationem independenter repetit ex input antiquo, non ex output wrapperis, et `vaultOld`, `pending` atque output finalem cum hac copia comprobationis comparat. Oracle testium productione non vocatur.
+
+### Regressio Gradus 20
+
+Regressio Gradus 20 data et formulas normativas non mutat. Solum assertiones quae output active necessario cum output legacy et nomine handleris DISCOVERY ligabant sublatae sunt. Cicatrix directa adhuc quinque discrepantias pro `drop=1` et quinque pro `drop=241` requirit.
+
+Eadem regressio contra codicem Gradus 20 pristinum adhuc decem discrepantias et exitum `1` reddit. Contra Gradum 21 output activum nullas discrepantias habet et probatio transit.
+
+### Regressio PATCH 10
+
+Nova probatio omnes 720 ordines permutationis exercet. `stirBowlsThroughVaultOld` et via manageris semper output normativum reddunt; `vaultOld` input immutatum et `pending` output completum servant. Via diagnostica unpatched output legacy servat. Cicatrix legacy in omnibus 720 casibus probatis divergit.
+
+Omnes regressiones Graduum 1–21 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `Patch10DeferredBowlComputation`, `stirBowlsThroughVaultOld`, campi contextus `bowlVaultOld`, `bowlPending`, `patchedInPlaceBowlOutput`, `patch10Applied`, campi report cicatricis, `Patch10DeferredBowlWrapper`, `Patch10InPlaceBowlHandler`, `dispatchPatchedInPlaceBowlStir`, `requirePatch10Ready` et via diagnostica unpatched.
+
+`legacyStirBowlsInPlace` non mutatur. Nullus `orderAt46Latch`, nullus PATCH 11 et nulla logica post-stirs Gradus 22 praemature addita est.

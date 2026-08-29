@@ -1,54 +1,66 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 20 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 21 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 20 est `DISCOVERY 10`; status repositorii exspectatus est `EXPECTED_RED`.
+Gradus 21 est `PATCH 10`; status repositorii exspectatus est `GREEN`.
 
-Gradus 19 relationem `bowlAlias[position]=order[position]` ad tres fusiones recte instituit. Hic gradus vitium proximum separat: subsystema veteris commotionis sex crateres in eodem obiecto legit et statim scribit.
+Gradus 20 contaminatio craterum in-place demonstravit. Helper `legacyStirBowlsInPlace` sex crateres sequentialiter in eodem obiecto legebat et scribebat; prima cratera recta manebat, quinque posteriores in duobus witness casibus divergebant.
 
-## DISCOVERY 10 — contaminatio scripturae immediatae
+## PATCH 10 — vaultOld, pending et commit tardivus
 
-Helper legacy novus est:
+Cicatrix legacy non mutata est. Via PATCH eam primum vere exsequitur et output pravum in contextu servat. Deinde stratum separatum facit:
 
 ```text
-legacyStirBowlsInPlace(bowls,index,drop,stoneRow,order,firstThreePours)
+vaultOld = clone(B)
+pending = clone(B)
 ```
 
-Pro positionibus `1..6` ordinis, helper ID crateris praesentis, prioris et sequentis determinat. Formula ipsa coefficientes normativos servat, sed omnes lectiones fiunt ex eodem `bowls` quod eadem iteratio successive mutat. Statim post calculum cuiusque positionis valor novus in craterem scribitur.
+Omnes sex formulae legunt exclusive ex `vaultOld`. Nulla formula legit valorem ex `pending`. Quaelibet formula scribit solum in `pending[id]`. Tantum postquam sex positiones computatae sunt, `pending` fit output semanticum circuitus.
 
-Ita prima positio adhuc valores omnes veteres legit. Positiones posteriores autem craterem prius scriptum ut vicinum legere possunt et mutationem intra eundem circuitum propagant.
+Helper emendatus est:
+
+```text
+stirBowlsThroughVaultOld(bowls,index,drop,stoneRow,order,firstThreePours)
+```
+
+et reddit simul `vaultOld`, `pending` et output finalem.
 
 ## Via activa
 
 ```text
 BaseMonsterManager::executeInPlaceBowlStir
--> BaseDispatcher::dispatchLegacyInPlaceBowlStir
--> Discovery10InPlaceBowlHandler
+-> BaseDispatcher::dispatchPatchedInPlaceBowlStir
+-> Patch10InPlaceBowlHandler
 -> LegacyInPlaceBowlAdapter::stir
--> legacyStirBowlsInPlace
+-> legacyStirBowlsInPlace              (cicatrix vera)
+-> Patch10DeferredBowlWrapper::repair
+-> stirBowlsThroughVaultOld
+-> requirePatch10Ready
 ```
 
-`BaseMonsterContext` input craterum, guttam, indicem, lapidem, ordinem, tres fusiones et output mutatum separat. Comprobator productionis vocationem legacy in copia inputis repetit ut determinismum viae probet; output alternum normativum non suppeditat.
+`executeUnpatchedInPlaceBowlStirDiagnostic` viam Gradus 20 separatam servat et contaminationem veterem adhuc exponit.
 
-## Regressio
+## Probationes
 
-`tests/stage_20_discovery_10_tests.cpp` duos ordines probat: `drop=1` cum ordine identitate et `drop=241` cum ordine non identitate. Formula test-only normativa omnes sex lecturas ex una copia immutabili inputis facit et sex scriptiones in obiectum output separatum ponit.
+Regressio Gradus 20 eadem data normativa servat. Metadatum temporale handleris relaxatum est tantum ne DISCOVERY nomen perpetuum fiat; directum `legacyStirBowlsInPlace` adhuc quinque discrepantias in utroque witness casu habere debet. Contra baseline Gradus 20 regressio adhuc 10 discrepantias et exitum `1` reddit. Contra Gradum 21 via activa nullam discrepantiam reddit et regressio transit.
 
-In utroque casu prima cratera quae scribitur cum norma concordat, quia nulla scriptura prior in eodem circuitu facta est. Reliquae quinque craterae discrepant. Summa exacta est decem discrepantiae:
+`tests/stage_21_patch_10_tests.cpp` omnes 720 ordines permutationis probat. Pro unoquoque casu:
 
-```text
-drop=1   -> 5 discrepantiae
-drop=241 -> 5 discrepantiae
-summa    -> 10 discrepantiae
-```
+- `vaultOld` input initialem integre servat;
+- `pending` sex exitus normativos continet;
+- output finalis idem est ac `pending`;
+- output legacy ante patch separatim retinetur;
+- via diagnostica unpatched cicatricem pristinam reddit.
 
-Regressio Gradus 20 igitur consulto exitum `1` reddit. Omnes regressiones Graduum 1–19 transeunt.
+In omnibus 720 casibus helper legacy a norma divergit, dum PATCH 10 in omnibus transit.
+
+Omnes regressiones Graduum 1–21 transeunt.
 
 ## Quod consulto nondum adest
 
-Nullum snapshot craterum separatum, nullum spatium scripturae separatum, nullus `Patch10`, nullus status `patch10Applied` et nullum commit sex craterum aggregatum hoc gradu introductum est.
+Nullus `orderAt46Latch`, nullus `Patch11`, nullus status `patch11Applied` et nulla memoria ordinis post-stirs hoc gradu introducta est.
 
 ## Lingua computationis
 

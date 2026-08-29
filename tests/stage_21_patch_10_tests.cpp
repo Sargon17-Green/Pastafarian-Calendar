@@ -69,94 +69,73 @@ BowlState commotioNormativa(const BowlState& bowls,
     return nova;
 }
 
-std::string decimal(const Integer& x) {
-    return x.convert_to<std::string>();
-}
-
 } // namespace
 
 int main() {
     using pastafari::BaseMonsterManager;
     using pastafari::legacyStirBowlsInPlace;
+    using pastafari::stirBowlsThroughVaultOld;
 
     const BowlState bowls{{Integer{11}, Integer{13}, Integer{17}, Integer{19}, Integer{23}, Integer{29}}};
     const Stone stone{{Integer{2}, Integer{3}, Integer{5}, Integer{7}, Integer{11}}};
-    constexpr int index = 4;
-    const std::array<Integer, 2> drops{{Integer{1}, Integer{241}}};
 
     BaseMonsterManager manager;
-    int defectusViae = 0;
-    int discrepantiae = 0;
+    int defectus = 0;
+    int cicatricesDivergentes = 0;
 
-    for (const Integer& drop : drops) {
+    for (int raw = 1; raw <= 720; ++raw) {
+        const Integer drop = raw;
+        const int index = ((raw - 1) % 46) + 1;
         const PermutationOrder order = ordoNormativus(drop);
         const PourTriplet pours = fusionesNormativae(drop, index, bowls, stone, order);
         const BowlState expectatae = commotioNormativa(bowls, index, drop, stone, order, pours);
 
-        BowlState legacyDirectae = bowls;
-        legacyStirBowlsInPlace(legacyDirectae, index, drop, stone, order, pours);
-        const auto report = manager.executeInPlaceBowlStir(bowls, index, drop, stone, order, pours);
+        BowlState legacy = bowls;
+        legacyStirBowlsInPlace(legacy, index, drop, stone, order, pours);
+        if (legacy != expectatae) {
+            ++cicatricesDivergentes;
+        }
 
-        if (report.input != bowls || report.drop != drop || report.index != index ||
-            report.stoneRow != stone || report.order != order || report.firstThreePours != pours ||
-            report.branchCount < 4) {
-            std::cerr << "DEFECTUS_VIAE_DISCOVERY_10 drop=" << decimal(drop) << "\n";
-            ++defectusViae;
+        const auto directa = stirBowlsThroughVaultOld(bowls, index, drop, stone, order, pours);
+        if (directa.vaultOld != bowls || directa.pending != expectatae || directa.output != expectatae) {
+            std::cerr << "DEFECTUS_DIRECTUS_PATCH_10 raw=" << raw << "\n";
+            ++defectus;
             continue;
         }
 
-        int discrepantiaeLegacy = 0;
-        int discrepantiaeCasus = 0;
-        for (std::size_t bowl = 0; bowl < report.output.size(); ++bowl) {
-            if (legacyDirectae[bowl] != expectatae[bowl]) {
-                ++discrepantiaeLegacy;
-            }
-            if (report.output[bowl] != expectatae[bowl]) {
-                std::cerr
-                    << "DISCREPANTIA CRATERIS drop=" << decimal(drop)
-                    << " id=" << (bowl + 1)
-                    << " expectatus=" << decimal(expectatae[bowl])
-                    << " actualis=" << decimal(report.output[bowl])
-                    << "\n";
-                ++discrepantiaeCasus;
-                ++discrepantiae;
-            }
+        const auto report = manager.executeInPlaceBowlStir(bowls, index, drop, stone, order, pours);
+        if (report.output != expectatae || report.legacyOutputBeforePatch != legacy ||
+            report.vaultOld != bowls || report.pending != expectatae || !report.patch10Applied ||
+            report.handler != "Patch10InPlaceBowlHandler" ||
+            report.status != "PATCHED_DEFERRED_BOWL_STIR_EXPOSED" ||
+            report.branchCount < 5) {
+            std::cerr << "DEFECTUS_VIAE_PATCH_10 raw=" << raw << "\n";
+            ++defectus;
+            continue;
         }
 
-        const std::size_t primusId = static_cast<std::size_t>(order[0] - 1);
-        if (discrepantiaeLegacy != 5 || legacyDirectae[primusId] != expectatae[primusId]) {
-            std::cerr << "CICATRIX_LEGACY_INOPINATA drop=" << decimal(drop)
-                      << " discrepantiae_legacy=" << discrepantiaeLegacy << "\n";
-            ++defectusViae;
+        const auto diagnosticum = manager.executeUnpatchedInPlaceBowlStirDiagnostic(
+            bowls, index, drop, stone, order, pours);
+        if (diagnosticum.output != legacy || diagnosticum.patch10Applied ||
+            diagnosticum.handler != "Discovery10InPlaceBowlHandler" ||
+            diagnosticum.status != "LEGACY_IN_PLACE_BOWL_STIR_EXPOSED") {
+            std::cerr << "DEFECTUS_CICATRICIS_PATCH_10 raw=" << raw << "\n";
+            ++defectus;
         }
-        if (discrepantiaeCasus != 0 && discrepantiaeCasus != 5) {
-            std::cerr << "FORMA_CONTAMINATIONIS_INOPINATA drop=" << decimal(drop)
-                      << " discrepantiae=" << discrepantiaeCasus << "\n";
-            ++defectusViae;
-        }
-        std::cout << "CASUS_COMMOTIONIS drop=" << decimal(drop)
-                  << " discrepantiae_legacy=" << discrepantiaeLegacy
-                  << " discrepantiae_activae=" << discrepantiaeCasus << "\n";
     }
 
-    if (defectusViae != 0) {
-        std::cerr << "REGRESSIO_DISCOVERY_10_INOPINATE_DEFECIT: "
-                  << defectusViae << " defectus viae inventi sunt\n";
-        return 2;
+    if (cicatricesDivergentes == 0) {
+        std::cerr << "CICATRIX_LEGACY_NON_OBSERVATA\n";
+        ++defectus;
     }
 
-    if (discrepantiae == 0) {
-        std::cout << "REGRESSIO_DISCOVERY_10_TRANSIIT\n";
-        return 0;
-    }
-
-    if (discrepantiae == 10) {
-        std::cerr << "REGRESSIO_DISCOVERY_10_DEFECIT: 10 discrepantiae craterum ex contaminatione in-place inventae sunt\n";
+    if (defectus != 0) {
+        std::cerr << "REGRESSIO_PATCH_10_DEFECIT: " << defectus << " defectus inventi sunt\n";
         return 1;
     }
 
-    std::cerr << "REGRESSIO_DISCOVERY_10_INOPINATE_DEFECIT: "
-              << discrepantiae
-              << " discrepantiae craterum inventae sunt, sed nulla aut decem exspectabantur\n";
-    return 2;
+    std::cout << "REGRESSIO_PATCH_10_TRANSIIT\n";
+    std::cout << "ORDINES_PROBATI=720\n";
+    std::cout << "CICATRICES_LEGACY_DIVERGENTES=" << cicatricesDivergentes << "\n";
+    return 0;
 }

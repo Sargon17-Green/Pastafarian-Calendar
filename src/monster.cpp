@@ -421,6 +421,54 @@ void legacyStirBowlsInPlace(BowlState& bowls,
     }
 }
 
+
+// Emendatio PATCH 10 cicatricem legacy non delet: omnes lectiones ex vaultOld fiunt,
+// omnes sex exitus primum in pending conduntur, deinde tantum ut status novus exponuntur.
+Patch10DeferredBowlComputation stirBowlsThroughVaultOld(const BowlState& bowls,
+                                                        int index,
+                                                        const Integer& drop,
+                                                        const Stone& stoneRow,
+                                                        const PermutationOrder& order,
+                                                        const PourTriplet& firstThreePours) {
+    if (index < 1 || index > 46) {
+        throw BaseValidationError("index commotionis craterum inter unum et quadraginta sex requiritur");
+    }
+
+    std::array<bool, 7> seen{};
+    for (const int bowlId : order) {
+        if (bowlId < 1 || bowlId > 6 || seen[static_cast<std::size_t>(bowlId)]) {
+            throw BaseValidationError("ordo craterum pro commotione patch decima permutatio valida non est");
+        }
+        seen[static_cast<std::size_t>(bowlId)] = true;
+    }
+
+    const BowlState vaultOld = bowls;
+    BowlState pending = bowls;
+    const std::array<std::size_t, 6> stoneByPosition{{0, 1, 2, 3, 4, 0}};
+
+    for (std::size_t position = 0; position < order.size(); ++position) {
+        const std::size_t prevPosition = (position + order.size() - 1) % order.size();
+        const std::size_t nextPosition = (position + 1) % order.size();
+        const int id = order[position];
+        const int prev = order[prevPosition];
+        const int next = order[nextPosition];
+        const Integer pour = position < firstThreePours.size() ? firstThreePours[position] : Integer{0};
+
+        const Integer s = vaultOld[static_cast<std::size_t>(id - 1)]
+            + 2 * vaultOld[static_cast<std::size_t>(prev - 1)]
+            + 3 * vaultOld[static_cast<std::size_t>(next - 1)]
+            + pour
+            + drop
+            + stoneRow[stoneByPosition[position]];
+
+        pending[static_cast<std::size_t>(id - 1)] = savePatch(
+            s * s
+            + 5 * vaultOld[static_cast<std::size_t>(prev - 1)] * vaultOld[static_cast<std::size_t>(next - 1)]
+            + index * static_cast<int>(position + 1));
+    }
+
+    return Patch10DeferredBowlComputation{vaultOld, pending, pending};
+}
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -734,6 +782,53 @@ void BaseValidationManager::requireLegacyInPlaceBowlReady(const BaseMonsterConte
     }
 }
 
+
+void BaseValidationManager::requirePatch10Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyInPlaceBowlReady(ctx);
+    if (!ctx.patch10Applied) {
+        throw BaseValidationError("emendatio decima nondum applicata est");
+    }
+    if (ctx.bowlVaultOld != ctx.legacyInPlaceBowlInput) {
+        throw BaseValidationError("vaultOld statum craterum initialem integre servare debet");
+    }
+
+    BowlState expectata = ctx.legacyInPlaceBowlInput;
+    const BowlState antiqua = ctx.legacyInPlaceBowlInput;
+    const std::array<std::size_t, 6> stoneByPosition{{0, 1, 2, 3, 4, 0}};
+    std::array<bool, 7> seen{};
+    for (const int bowlId : ctx.legacyInPlaceBowlOrder) {
+        if (bowlId < 1 || bowlId > 6 || seen[static_cast<std::size_t>(bowlId)]) {
+            throw BaseValidationError("ordo craterum patch decima permutatio valida non est");
+        }
+        seen[static_cast<std::size_t>(bowlId)] = true;
+    }
+
+    for (std::size_t position = 0; position < ctx.legacyInPlaceBowlOrder.size(); ++position) {
+        const std::size_t prevPosition = (position + ctx.legacyInPlaceBowlOrder.size() - 1)
+            % ctx.legacyInPlaceBowlOrder.size();
+        const std::size_t nextPosition = (position + 1) % ctx.legacyInPlaceBowlOrder.size();
+        const int id = ctx.legacyInPlaceBowlOrder[position];
+        const int prev = ctx.legacyInPlaceBowlOrder[prevPosition];
+        const int next = ctx.legacyInPlaceBowlOrder[nextPosition];
+        const Integer pour = position < ctx.legacyInPlaceBowlPours.size()
+            ? ctx.legacyInPlaceBowlPours[position]
+            : Integer{0};
+        const Integer s = antiqua[static_cast<std::size_t>(id - 1)]
+            + 2 * antiqua[static_cast<std::size_t>(prev - 1)]
+            + 3 * antiqua[static_cast<std::size_t>(next - 1)]
+            + pour
+            + ctx.legacyInPlaceBowlDrop
+            + ctx.legacyInPlaceBowlStoneRow[stoneByPosition[position]];
+        expectata[static_cast<std::size_t>(id - 1)] = savePatch(
+            s * s
+            + 5 * antiqua[static_cast<std::size_t>(prev - 1)] * antiqua[static_cast<std::size_t>(next - 1)]
+            + ctx.legacyInPlaceBowlIndex * static_cast<int>(position + 1));
+    }
+
+    if (ctx.bowlPending != expectata || ctx.patchedInPlaceBowlOutput != expectata) {
+        throw BaseValidationError("pending et exitus patch decimae non respondent calculationi ex vaultOld");
+    }
+}
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -806,6 +901,16 @@ BowlState LegacyInPlaceBowlAdapter::stir(const BowlState& bowls,
     return altered;
 }
 
+
+Patch10DeferredBowlComputation Patch10DeferredBowlWrapper::repair(
+    const BowlState& bowls,
+    int index,
+    const Integer& drop,
+    const Stone& stoneRow,
+    const PermutationOrder& order,
+    const PourTriplet& firstThreePours) const {
+    return stirBowlsThroughVaultOld(bowls, index, drop, stoneRow, order, firstThreePours);
+}
 LegacyGrindLookup Patch07SentinelGrindWrapper::read(int grind) const {
     return grindRowWithSentinel(grind);
 }
@@ -1436,6 +1541,51 @@ void Discovery10InPlaceBowlHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery10.inPlaceBowl.exposed");
 }
 
+
+void Patch10InPlaceBowlHandler::handle(BaseMonsterContext& ctx,
+                                       const LegacyInPlaceBowlAdapter& adapter,
+                                       const Patch10DeferredBowlWrapper& wrapper,
+                                       const BaseValidationManager& validator,
+                                       const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch10InPlaceBowlHandler";
+    ctx.phase = "PATCH_10_LEGACY_IN_PLACE_CALL";
+    ctx.status = "LEGACY_IN_PLACE_CALLED_BEFORE_PATCH";
+    ctx.branchTrace.push_back("PATCH_10_LEGACY_IN_PLACE_CALL");
+    metrics.bump(ctx, "patch10.legacyInPlace.calls");
+
+    ctx.legacyInPlaceBowlOutput = adapter.stir(
+        ctx.legacyInPlaceBowlInput,
+        ctx.legacyInPlaceBowlIndex,
+        ctx.legacyInPlaceBowlDrop,
+        ctx.legacyInPlaceBowlStoneRow,
+        ctx.legacyInPlaceBowlOrder,
+        ctx.legacyInPlaceBowlPours);
+    ctx.legacyInPlaceBowlReady = true;
+
+    ctx.phase = "PATCH_10_VAULT_OLD_AND_PENDING";
+    ctx.branchTrace.push_back("PATCH_10_VAULT_OLD_AND_PENDING");
+    const Patch10DeferredBowlComputation repaired = wrapper.repair(
+        ctx.legacyInPlaceBowlInput,
+        ctx.legacyInPlaceBowlIndex,
+        ctx.legacyInPlaceBowlDrop,
+        ctx.legacyInPlaceBowlStoneRow,
+        ctx.legacyInPlaceBowlOrder,
+        ctx.legacyInPlaceBowlPours);
+    ctx.bowlVaultOld = repaired.vaultOld;
+    ctx.bowlPending = repaired.pending;
+    ctx.patchedInPlaceBowlOutput = repaired.output;
+    ctx.patch10Applied = true;
+    metrics.bump(ctx, "patch10.deferredWrite.calls");
+
+    ctx.phase = "PATCH_10_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_10_VALIDATE");
+    validator.requirePatch10Ready(ctx);
+
+    ctx.phase = "PATCH_10_BOWL_STIR_READY";
+    ctx.status = "PATCHED_DEFERRED_BOWL_STIR_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_10_BOWL_STIR_READY");
+    metrics.bump(ctx, "patch10.bowlStir.ready");
+}
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -1724,6 +1874,20 @@ void BaseDispatcher::dispatchLegacyInPlaceBowlStir(BaseMonsterContext& ctx,
     handler.handle(ctx, adapter, validator, metrics);
 }
 
+
+void BaseDispatcher::dispatchPatchedInPlaceBowlStir(BaseMonsterContext& ctx,
+                                                     const Patch10InPlaceBowlHandler& handler,
+                                                     const LegacyInPlaceBowlAdapter& adapter,
+                                                     const Patch10DeferredBowlWrapper& wrapper,
+                                                     const BaseValidationManager& validator,
+                                                     const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_10_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_10_DISPATCH");
+    metrics.bump(ctx, "patch10.dispatch.calls");
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
@@ -2317,7 +2481,54 @@ LegacyInPlaceBowlReport BaseMonsterManager::executeInPlaceBowlStir(
     BaseMonsterContext ctx;
     ctx.calculationDay = 0;
     ctx.targetDay = 0;
-    ctx.phase = "DISCOVERY_10_NEW";
+    ctx.phase = "PATCH_10_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyInPlaceBowlInput = bowls;
+    ctx.legacyInPlaceBowlIndex = index;
+    ctx.legacyInPlaceBowlDrop = drop;
+    ctx.legacyInPlaceBowlStoneRow = stoneRow;
+    ctx.legacyInPlaceBowlOrder = order;
+    ctx.legacyInPlaceBowlPours = firstThreePours;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyInPlaceBowlAdapter adapter;
+    const Patch10DeferredBowlWrapper wrapper;
+    const Patch10InPlaceBowlHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedInPlaceBowlStir(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return LegacyInPlaceBowlReport{
+        ctx.legacyInPlaceBowlInput,
+        ctx.legacyInPlaceBowlDrop,
+        ctx.legacyInPlaceBowlIndex,
+        ctx.legacyInPlaceBowlStoneRow,
+        ctx.legacyInPlaceBowlOrder,
+        ctx.legacyInPlaceBowlPours,
+        ctx.patchedInPlaceBowlOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyInPlaceBowlOutput,
+        ctx.bowlVaultOld,
+        ctx.bowlPending,
+        ctx.patch10Applied,
+    };
+}
+
+LegacyInPlaceBowlReport BaseMonsterManager::executeUnpatchedInPlaceBowlStirDiagnostic(
+    const BowlState& bowls,
+    int index,
+    const Integer& drop,
+    const Stone& stoneRow,
+    const PermutationOrder& order,
+    const PourTriplet& firstThreePours) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_10_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyInPlaceBowlInput = bowls;
@@ -2346,6 +2557,10 @@ LegacyInPlaceBowlReport BaseMonsterManager::executeInPlaceBowlStir(
         ctx.status,
         ctx.currentHandler,
         ctx.branchTrace.size(),
+        ctx.legacyInPlaceBowlOutput,
+        BowlState{},
+        BowlState{},
+        false,
     };
 }
 

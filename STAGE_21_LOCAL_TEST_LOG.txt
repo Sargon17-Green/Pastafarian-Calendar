@@ -1,0 +1,56 @@
+Gradus 21 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+Optiones: -O2 -Wall -Wextra -pedantic
+
+PATCH 10 secundum speciem:
+- legacyStirBowlsInPlace intactum manet et vere vocatur ante patch.
+- vaultOld est copia status craterum ante circuitum.
+- pending accipit omnes sex scriptiones.
+- omnis lectio formulae fit ex vaultOld.
+- pending exponitur ut status novus tantum post sex calculationes.
+
+Probatio pre-patch:
+Eadem regressio Gradus 20, cum data et expected values immutatis, contra codicem Gradus 20 pristinum:
+CASUS_COMMOTIONIS drop=1 discrepantiae_legacy=5 discrepantiae_activae=5
+CASUS_COMMOTIONIS drop=241 discrepantiae_legacy=5 discrepantiae_activae=5
+REGRESSIO_DISCOVERY_10_DEFECIT: 10 discrepantiae craterum ex contaminatione in-place inventae sunt
+PREPATCH_EXIT_CODE=1
+
+Gradus 20 contra PATCH 10:
+CASUS_COMMOTIONIS drop=1 discrepantiae_legacy=5 discrepantiae_activae=0
+CASUS_COMMOTIONIS drop=241 discrepantiae_legacy=5 discrepantiae_activae=0
+REGRESSIO_DISCOVERY_10_TRANSIIT
+
+Gradus 21:
+REGRESSIO_PATCH_10_TRANSIIT
+ORDINES_PROBATI=720
+CICATRICES_LEGACY_DIVERGENTES=720
+
+Regressiones anteriores:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+REGRESSIO_DISCOVERY_01_TRANSIIT
+REGRESSIO_PATCH_01_TRANSIIT
+REGRESSIO_DISCOVERY_02_TRANSIIT
+REGRESSIO_PATCH_02_TRANSIIT
+REGRESSIO_DISCOVERY_03_TRANSIIT
+REGRESSIO_PATCH_03_TRANSIIT
+REGRESSIO_DISCOVERY_04_TRANSIIT
+REGRESSIO_PATCH_04_TRANSIIT
+REGRESSIO_DISCOVERY_05_TRANSIIT
+REGRESSIO_PATCH_05_TRANSIIT
+REGRESSIO_DISCOVERY_06_TRANSIIT
+REGRESSIO_PATCH_06_TRANSIIT
+REGRESSIO_DISCOVERY_07_TRANSIIT
+REGRESSIO_PATCH_07_TRANSIIT
+REGRESSIO_DISCOVERY_08_TRANSIIT
+REGRESSIO_PATCH_08_TRANSIIT
+REGRESSIO_DISCOVERY_09_TRANSIIT
+REGRESSIO_PATCH_09_TRANSIIT
+REGRESSIO_DISCOVERY_10_TRANSIIT
+REGRESSIO_PATCH_10_TRANSIIT
+
+Status finalis: GREEN
+Regressiones anteriores: PASS
+Codex futurus DISCOVERY/PATCH 11: ABSENS
