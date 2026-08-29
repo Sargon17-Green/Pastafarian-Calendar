@@ -1,22 +1,35 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 28/55, `DISCOVERY 14` durumundadır.
+Aşama 29/55, `PATCH 14` durumundadır.
 
-Stage 27 short-selection yolu aynen korunur.
+Discovery 14 short-only scar'ı korunur ve `N>M_OLD` için eski short adapter diagnostic olarak gerçekten çağrılır.
 
-Yeni tarihsel kusur `LegacyShortOnlySelectionDispatcher` içindedir: family size değerini ayrıştırmadan her zaman short adapter'a gönderir.
+Semantic dispatcher:
 
-`N>M_OLD` için short adapter input'u reddeder; dispatcher bunu unsupported-wide scar olarak kaydeder ve semantic rank üretemez.
+```text
+N<=M_OLD -> Stage 27 short path
+N>M_OLD  -> wideDetour
+```
 
-Real calendar path gerçek sauce-derived answer ring üzerinde `N=M_OLD+1` wide attempt çalıştırır.
+şeklindedir.
 
-Yeni normatif regresyon `M_OLD+1`, `M_OLD^2` ve `M_OLD^3` family size değerlerinde actual dispatcher sonucunu test-only exact wide selection ile karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
+Wide path minimal `places` ve `space=M_OLD^places` kurar, `digits[j]=answerAtRing(j)-1` değerlerini yalnız bir kez alır ve:
 
-Henüz `PATCH 14` yoktur: `N<=M`/`N>M` ayrımı, multi-place base-M number ve wide-number rejection production'a eklenmemiştir.
+```text
+wide = 1 + Σ digits[j]*M_OLD^j
+```
+
+oluşturur.
+
+Rejection bundan sonra yalnız combined `wide` üzerinde `direction_step` ile ilerler. Yeni digit üretilmez.
+
+Aşama 28 normatif wide-selection regresyonu değiştirilmeden yeşile dönmüştür.
+
+Patch 15 negative-gate kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -32,10 +45,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirmi sekizinci aşama paketi:
+Tam yirmi dokuzuncu aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–27 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni short-only-versus-wide normatif regresyonunun üç wide-family alt örneği başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 28'de kırmızı olan `M_OLD+1`, `M_OLD^2` ve `M_OLD^3` wide-selection alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.

@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=28
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=29
+CURRENT_KIND=PATCH
 CURRENT_PATCH=14
-LAST_COMPLETED_STAGE=28
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=29
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=LegacyShortOnlySelectionDispatcher bütün family size değerlerini Stage 27 short-selection adapter'a yönlendirir; N>M geldiğinde short adapter ValueError üretir, dispatcher bu unsupported-wide scar'ını invocation-local durumda kaydeder ve semantic wide rank üretemez; real calendar path N=M_OLD+1 ile bu kusuru gerçekten çalıştırır; wide arithmetic ve patched N<=M/N>M dispatcher henüz yok
+MONSTER_ARCHITECTURE_GROWTH=LegacyShortOnlySelectionDispatcher adı ve N>M için short-adapter ValueError scar'ı korunur; WideSelectionPatchWrapper N<=M için Stage 27 short path'ı aynen kullanır, N>M için old short attempt'i diagnostic scar olarak gerçekten çalıştırıp wideDetour'a geçer; wideDetour minimal places/space kurar, answerAtRing digits değerlerini yalnız bir kez toplar, combined wide number üretir ve rejection boyunca yeni digit almadan wide değerini direction_step ile 1..space halkasında ilerletir
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

@@ -82,7 +82,7 @@ class Stage28Discovery14Tests(unittest.TestCase):
                 M_OLD + 1,
             )
 
-    def test_legacy_dispatcher_records_wide_family_as_unsupported(self):
+    def test_legacy_dispatcher_keeps_unsupported_short_attempt_as_scar(self):
         ctx = _ready_context(
             FOUNDATION_DAY,
             FOUNDATION_DAY + 3,
@@ -99,8 +99,9 @@ class Stage28Discovery14Tests(unittest.TestCase):
             M_OLD + 1,
         )
 
-        self.assertIsNone(
+        self.assertIsInstance(
             actual,
+            int,
         )
         self.assertTrue(
             ctx.legacy_general_selection_used_short_path,
@@ -111,8 +112,12 @@ class Stage28Discovery14Tests(unittest.TestCase):
         self.assertIsNotNone(
             ctx.legacy_wide_selection_error,
         )
-        self.assertIsNone(
+        self.assertEqual(
             ctx.legacy_general_selection_result,
+            actual,
+        )
+        self.assertTrue(
+            ctx.patch14_used_wide_path,
         )
 
     def test_short_family_still_delegates_to_patched_short_path(self):

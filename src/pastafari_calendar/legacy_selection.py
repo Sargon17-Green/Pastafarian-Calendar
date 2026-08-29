@@ -221,16 +221,128 @@ class LegacyBiasedSelectionAdapter:
         )
 
 
+def wideDetour(
+    ctx,
+    ring: LegacyAnswerRing,
+    n: int,
+) -> int:
+    if n <= M_OLD:
+        raise ValueError("Geniş seçim büyüklüğü M değerinden büyük olmalıdır")
+
+    places = 1
+    space = M_OLD
+
+    while space < n:
+        places += 1
+        space *= M_OLD
+
+    digits: list[int] = []
+    wide = 1
+    weight = 1
+
+    j = 0
+    while j < places:
+        digit = answerAtRing(
+            ring,
+            j,
+        ) - 1
+        digits.append(
+            digit,
+        )
+        wide += digit * weight
+        weight *= M_OLD
+        j += 1
+
+    initial_wide = wide
+    acceptance_limit = (
+        space // n
+    ) * n
+    rejection_count = 0
+
+    while wide > acceptance_limit:
+        wide = 1 + regularMod(
+            wide
+            - 1
+            + ring.direction_step,
+            space,
+        )
+        rejection_count += 1
+
+    result = regularMod(
+        wide - 1,
+        n,
+    ) + 1
+
+    ctx.patch14_places = places
+    ctx.patch14_space = space
+    ctx.patch14_digits = tuple(digits)
+    ctx.patch14_initial_wide = initial_wide
+    ctx.patch14_acceptance_limit = acceptance_limit
+    ctx.patch14_rejection_count = rejection_count
+    ctx.patch14_accepted_wide = wide
+    ctx.patch14_result = result
+    ctx.patch14_applied = True
+
+    return result
+
+
+class WideSelectionPatchWrapper:
+    def __init__(
+        self,
+        short_adapter: LegacyBiasedSelectionAdapter,
+    ) -> None:
+        self.short_adapter = short_adapter
+
+    def repair(
+        self,
+        ctx,
+        ring: LegacyAnswerRing,
+        n: int,
+    ) -> int:
+        if n < 1:
+            raise ValueError("Seçim ailesi boş olamaz")
+
+        if n <= M_OLD:
+            ctx.patch14_used_wide_path = False
+            return self.short_adapter.call_with_ring(
+                ctx,
+                ring,
+                n,
+            )
+
+        # Discovery 14 scar'ı fiziksel olarak korunur:
+        # wide input önce eski short-only varsayıma gerçekten çarptırılır.
+        try:
+            self.short_adapter.call_with_ring(
+                ctx,
+                ring,
+                n,
+            )
+        except ValueError as exc:
+            ctx.legacy_wide_selection_unsupported = True
+            ctx.legacy_wide_selection_error = str(exc)
+
+        ctx.patch14_used_wide_path = True
+        return wideDetour(
+            ctx,
+            ring,
+            n,
+        )
+
+
 class LegacyShortOnlySelectionDispatcher:
     def __init__(self) -> None:
         self.short_adapter = LegacyBiasedSelectionAdapter()
+        self.patch_wrapper = WideSelectionPatchWrapper(
+            self.short_adapter,
+        )
 
     def call_with_ring(
         self,
         ctx,
         ring: LegacyAnswerRing,
         n: int,
-    ) -> int | None:
+    ) -> int:
         ctx.branch_trace.append(
             (
                 "ESKİ_YALNIZ_KISA_SEÇİM",
@@ -247,22 +359,18 @@ class LegacyShortOnlySelectionDispatcher:
         ctx.legacy_general_selection_n = n
         ctx.legacy_general_selection_used_short_path = True
 
-        try:
-            result = self.short_adapter.call_with_ring(
-                ctx,
-                ring,
-                n,
-            )
-        except ValueError as exc:
-            # Keşif 14 scar'ı: legacy dispatcher N>M için başka yol bilmez.
-            ctx.legacy_wide_selection_unsupported = True
-            ctx.legacy_wide_selection_error = str(exc)
-            ctx.legacy_general_selection_result = None
-            return None
+        result = self.patch_wrapper.repair(
+            ctx,
+            ring,
+            n,
+        )
 
-        ctx.legacy_wide_selection_unsupported = False
-        ctx.legacy_wide_selection_error = None
         ctx.legacy_general_selection_result = result
+
+        if n <= M_OLD:
+            ctx.legacy_wide_selection_unsupported = False
+            ctx.legacy_wide_selection_error = None
+
         return result
 
     def call(
@@ -271,7 +379,7 @@ class LegacyShortOnlySelectionDispatcher:
         queried_bowl_id: int,
         seal: int,
         n: int,
-    ) -> int | None:
+    ) -> int:
         ring = buildAnswerRingFromSauceState(
             ctx,
             queried_bowl_id,

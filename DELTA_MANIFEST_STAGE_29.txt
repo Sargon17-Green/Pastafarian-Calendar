@@ -1,0 +1,29 @@
+Aşama 29/55 — PATCH 14
+
+Bu paket yalnızca Aşama 29 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_selection.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_28_discovery_14.py
+tests/test_stage_29_patch_14.py
+artifacts/stage-29/BASELINE_STAGE_28_EXPECTED_RED.txt
+artifacts/stage-29/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_29.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 28 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 28 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+Legacy short-only wide failure scar: KORUNDU VE DIAGNOSTIC OLARAK ÇALIŞIYOR
+N<=M_OLD short path: KORUNDU
+N>M_OLD wideDetour: EKLENDİ
+minimal places/space: EKLENDİ
+digits only once: DOĞRULANDI
+rejection only on combined wide number: DOĞRULANDI
+PATCH 15 negative-gate code: YOK

@@ -171,6 +171,16 @@ class MonsterContext:
     legacy_general_selection_result: int | None = None
     legacy_wide_selection_unsupported: bool = False
     legacy_wide_selection_error: str | None = None
+    patch14_used_wide_path: bool = False
+    patch14_places: int | None = None
+    patch14_space: int | None = None
+    patch14_digits: tuple[int, ...] | None = None
+    patch14_initial_wide: int | None = None
+    patch14_acceptance_limit: int | None = None
+    patch14_rejection_count: int = 0
+    patch14_accepted_wide: int | None = None
+    patch14_result: int | None = None
+    patch14_applied: bool = False
 
 
 class BaseMetrics:

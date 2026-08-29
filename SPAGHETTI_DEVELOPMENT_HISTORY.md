@@ -1304,3 +1304,88 @@ Wide number rejection walk yoktur.
 Rejection sırasında digits üretme veya üretmeme davranışı production'da henüz başlamamıştır.
 
 Stage 29 yalnız bu kusuru patch edecektir.
+
+
+## Aşama 29 — Yama 14: wide dispatcher ve tek-seferlik base-M digits
+
+### Legacy scar
+
+Discovery 14'ün `LegacyShortOnlySelectionDispatcher` adı ve short-only varsayımı fiziksel olarak korunur.
+
+`N>M_OLD` geldiğinde patched wrapper eski short adapter'ı diagnostic scar olarak gerçekten çağırır. Short adapter ValueError üretir ve unsupported-wide scar durumu saklanır.
+
+Bu error artık semantic sonucu durdurmaz.
+
+### Dispatcher
+
+`WideSelectionPatchWrapper`:
+
+```text
+if N<=M_OLD:
+    Stage 27 short path
+else:
+    diagnostic old short attempt
+    wideDetour
+```
+
+zincirini uygular.
+
+Short path değiştirilmez.
+
+### Wide detour
+
+`N>M_OLD` için minimal places bulunur:
+
+```text
+places = 1
+space = M_OLD
+while space < N:
+    places += 1
+    space *= M_OLD
+```
+
+Digits yalnız bir kez aynı answer ring'den alınır:
+
+```text
+digits[j] = answerAtRing(ring,j)-1
+wide = 1 + Σ digits[j]*M_OLD^j
+```
+
+Digits little-endian base-M ağırlıklarıyla birleşir.
+
+### Wide rejection
+
+Acceptance limit:
+
+```text
+acceptance_limit = floor(space/N)*N
+```
+
+olur.
+
+`wide > acceptance_limit` olduğu sürece:
+
+```text
+wide = 1 + regularMod(
+    wide - 1 + direction_step,
+    space
+)
+```
+
+uygulanır.
+
+Rejection sırasında `answerAtRing` yeniden çağrılmaz ve yeni digit üretilmez.
+
+### Regresyon
+
+Aşama 28 normatif wide-selection regresyonunun gövdesi byte-for-byte değiştirilmedi.
+
+`M_OLD+1`, `M_OLD^2` ve `M_OLD^3` alt örnekleri yalnız wide detour sayesinde yeşile döner.
+
+Synthetic -1 ve +1 direction testleri rejection boyunca answerAtRing çağrı sayısının yalnız `places` kadar kaldığını doğrular.
+
+### Sınır
+
+Patch 15 negative gate question kodu henüz yoktur.
+
+Stage 27 short rejection, Stage 25 next-bowl, Stage 23 latch ve tüm önceki scar'lar korunur.
