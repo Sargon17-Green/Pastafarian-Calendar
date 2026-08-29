@@ -161,3 +161,31 @@ Validatio separata eandem quantitatem iterum computat et solum invariantiam conf
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `patchedDistanceOutput`, `patch03Applied`, `Patch03DistanceWrapper`, `Patch03DistanceHandler`, dispatchatio patch separata, via diagnostica legacy et `requirePatch03Ready`. Relatio distantiae simul exitum auctoritative correctum et exitum legacy ante patch servat. Haec duplicatio audibilitatem cicatricis auget, sed semanticam unicam non bifurcat.
+
+## Gradus 8 — Detectio 04: mutatio lapidum sequentialis
+
+### Quid putabatur
+
+Post arithmeticam fundamentalem emendatam systema vetus fabricam quinque lapidum ut mutationem ordinariam eiusdem recordi implementavit. `mutateStonesWrong(i, S)` partes quinque ordine scribit et putat unamquamque formulam adhuc statum eiusdem lapidis veterem legere.
+
+In re autem assignmentes iam factae statum mutant. Hordeum triticum novum legit; sal hordeum novum; amarum sal novum; rubrum plures valores iam mutatos. Ita una translatio conceptu simultanea in seriem dependentiarum intra eandem iterationem conversa est.
+
+### Quid repertum est
+
+`buildStonesThroughWrongLegacyMutation` mechanismum legacy ad lapides 2–46 adhibet et via activa eum per `LegacyStoneMutationAdapter` atque `Discovery04StoneMutationHandler` exponit. Regressio tabulam hanc cum `buildStones()` oraculi C++ localis comparat.
+
+Lapis primus concordat omnino. In lapide secundo pars tritici adhuc concordat, quia prima formula solum semen vetus legit; partes autem 2–5 iam discrepant. Exempli gratia hordeum normativum `1073` est, legacy `1434`; sal `2375` contra `3780`; amarum `6195` contra `9932`; rubrum `10493` contra `25047`.
+
+A lapide tertio contaminatio prioris lapidis etiam ad triticum propagatur. Summa regressionis est 224 discrepantiae componentium, cum regressiones Graduum 1–7 omnes transeant.
+
+### Quid circumventum est
+
+Nihil hoc gradu circumventum est. `mutateStonesWrong` et builder eius sunt ipsa via activa. Nullus snapshot status veteris, nullus clone ad vocationem legacy, nullum overwrite quinque valorum et nullus `stonePatch` introductus est. Regressio igitur consulto rubra manet.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Norma requirit ut quinque valores lapidis `i` omnes ex uno snapshot lapidis `i-1` computentur et tantum deinde simul substituantur. Legacy autem mutationes medias in computationes subsequentes eiusdem gradus reducit. Quia tabula activa in 224 componentibus a tabula normativa differt, aequivalentia hoc gradu nondum obtinetur.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `Stone`, `StoneTable`, status `legacyStoneTable` et `legacyStoneTableReady`, `LegacyStoneMutationAdapter`, `Discovery04StoneMutationHandler`, dispatchatio propria, relatio `LegacyStoneTableReport` et validatio readiness. Validatio semen confirmat et completionem viae requirit, sed valores posteriores non normalizat. Omnis mutatio tabulae intra contextum unius invocationis manet et observationes non determinant semanticam.

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <map>
 #include <stdexcept>
@@ -22,6 +23,12 @@ Integer oldDistance(const Integer& calculationDay, const Integer& targetDay);
 Integer distanceWithChronologicalPatch(const Integer& calculationDay,
                                        const Integer& targetDay,
                                        const Integer& legacyDistance);
+
+using Stone = std::array<Integer, 5>;
+using StoneTable = std::array<Stone, 47>;
+
+Stone mutateStonesWrong(int i, Stone state);
+StoneTable buildStonesThroughWrongLegacyMutation();
 
 struct BaseMonsterContext {
     Integer calculationDay;
@@ -48,6 +55,8 @@ struct BaseMonsterContext {
     Integer patchedDistanceOutput;
     bool legacyDistanceReady = false;
     bool patch03Applied = false;
+    StoneTable legacyStoneTable{};
+    bool legacyStoneTableReady = false;
 };
 
 struct BaseRunReport {
@@ -90,6 +99,14 @@ struct LegacyDistanceReport {
     bool patch03Applied = false;
 };
 
+struct LegacyStoneTableReport {
+    StoneTable output;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount;
+};
+
 class BaseValidationError final : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
@@ -104,6 +121,7 @@ public:
     void requirePatch02Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyDistanceReady(const BaseMonsterContext& ctx) const;
     void requirePatch03Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyStoneTableReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -124,6 +142,11 @@ public:
 class LegacyDistanceAdapter {
 public:
     Integer callOldDistance(const Integer& calculationDay, const Integer& targetDay) const;
+};
+
+class LegacyStoneMutationAdapter {
+public:
+    StoneTable buildWrongStoneTable() const;
 };
 
 class Discovery01RemainderHandler {
@@ -194,6 +217,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery04StoneMutationHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyStoneMutationAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -238,6 +269,12 @@ public:
                                  const Patch03DistanceWrapper& wrapper,
                                  const BaseValidationManager& validator,
                                  const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyStoneMutation(BaseMonsterContext& ctx,
+                                     const Discovery04StoneMutationHandler& handler,
+                                     const LegacyStoneMutationAdapter& adapter,
+                                     const BaseValidationManager& validator,
+                                     const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -250,6 +287,7 @@ public:
     LegacyDistanceReport executeDistance(const Integer& calculationDay, const Integer& targetDay) const;
     LegacyDistanceReport executeUnpatchedDistanceDiagnostic(const Integer& calculationDay,
                                                             const Integer& targetDay) const;
+    LegacyStoneTableReport executeStoneTable() const;
 };
 
 } // namespace pastafari

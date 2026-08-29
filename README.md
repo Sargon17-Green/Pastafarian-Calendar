@@ -1,78 +1,66 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 7 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
+Hoc directorium Gradum 8 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 7 est `PATCH 03`. Vitium Gradus 6 non deletum est:
+Gradus 8 est `DISCOVERY 04`. Tres cicatrices priores cum emendationibus suis integrae manent. Hoc gradu vitium novum in fabricam lapidum introductum et in viam activam coniunctum est:
 
 ```text
-oldDistance(cDay, tDay) = abs(dayTagWithFoundationScar(cDay) - dayTagWithFoundationScar(tDay))
+mutateStonesWrong(i, S)
 ```
 
-`oldDistance` adhuc eundem exitum historicum reddit et per viam diagnosticam separatim exerceri potest.
+Functio quinque partes lapidis non ex uno statu veteri computat. Ipsa `S` ordine mutatur: triticum primum scribitur, hordeum deinde triticum iam novum legit, sal hordeum iam novum legit, amarum sal iam novum legit, et rubrum etiam valores huius ipsius transitionis mutatos legit.
 
-Super eam addita est emendatio localis:
+`buildStonesThroughWrongLegacyMutation` hunc mechanismum re vera adhibet ad lapides 2–46. Via activa transit per:
 
 ```text
-d = oldDistance(cDay, tDay)
-chronological = abs(tDay - cDay)
-si d != chronological: d = chronological
-distance = d + 1
+BaseMonsterManager::executeStoneTable
+-> BaseDispatcher::dispatchLegacyStoneMutation
+-> Discovery04StoneMutationHandler
+-> LegacyStoneMutationAdapter
+-> buildStonesThroughWrongLegacyMutation
+-> mutateStonesWrong
 ```
 
-Functio concreta est `distanceWithChronologicalPatch`. Via auctoritaria huius gradus transit per `BaseMonsterManager::executeDistance`, `BaseDispatcher::dispatchPatchedDistance`, `Patch03DistanceHandler`, `LegacyDistanceAdapter` et `Patch03DistanceWrapper`.
+Nulla correctio huius vitii adhuc adest. Status huius gradus est `EXPECTED_RED`.
 
-Status huius gradus est `GREEN`.
+## Quid regressio demonstrat
 
-## Cicatrix legacy servata
+Probatio `tests/stage_08_discovery_04_tests.cpp` tabulam viae activae cum `buildStones()` oraculi localis eiusdem lineae comparat. Lapis 1 recte idem est, quia est semen immutatum. In lapide 2 pars prima etiam fortuito recta est, quia prima assignatio adhuc totum input vetus legit. Partes 2–5 autem statum intra eandem transitionem iam contaminatum legunt.
 
-`Patch03DistanceHandler` primum `oldDistance` re vera vocat et exitum eius in `legacyDistanceOutput` servat. Tantum post hanc vocationem wrapper distantiam chronologicam computat. `executeUnpatchedDistanceDiagnostic` adhuc viam `Discovery03DistanceHandler` exercet et exitum legacy incorreptum reddit.
-
-Probatio Gradus 7 manifeste confirmat exempla historica:
+Exempla prima:
 
 ```text
-oldDistance(FOUNDATION, FOUNDATION) = 0
-oldDistance(FOUNDATION+1, FOUNDATION+3) = 4
-oldDistance(FOUNDATION-1, FOUNDATION+1) = 1
+i=2 pars=2: normativum 1073, legacy 1434
+i=2 pars=3: normativum 2375, legacy 3780
+i=2 pars=4: normativum 6195, legacy 9932
+i=2 pars=5: normativum 10493, legacy 25047
 ```
 
-Ita cicatrix physice et exsecutabiliter manet.
+A lapide 3 etiam prima pars discrepans fit, quia semen totius transitionis iam ex lapide 2 contaminato venit. In tota tabula 224 ex 230 componentibus inspectis post semen non congruunt.
 
-## Cur patch normae aequivalet
+Regressio consulto exitum `1` reddit. Hic rubor est conditio correcta DISCOVERY, non defectus regressionum priorum.
 
-Norma distantiam operis definit ex axe dierum ipso:
+## Cicatrix legacy et stratum monstri
 
-```text
-abs(targetDay - calculationDay) + 1
-```
+Gradus 8 addit:
 
-Wrapper primum exitum legacy recipit. Deinde `chronological = abs(targetDay - calculationDay)` computat. Si legacy discrepat, valor legacy localis eodem `chronological` superatur; si iam concordat, manet. Post utrumque ramum unum additur. Ergo exitus semper est exacte distantia chronologica inclusiva normativa.
+- `Stone` et `StoneTable` ut state productionis huius cicatricis;
+- `mutateStonesWrong` cum mutatione sequentiali;
+- `buildStonesThroughWrongLegacyMutation`;
+- `legacyStoneTable` et `legacyStoneTableReady` in `BaseMonsterContext`;
+- `LegacyStoneMutationAdapter`;
+- `Discovery04StoneMutationHandler`;
+- dispatchationem propriam;
+- `LegacyStoneTableReport`;
+- validatorem readiness qui semen tantum confirmat, non vitium corrigit.
 
-`BaseValidationManager::requirePatch03Ready` eandem aequivalentiam copia validationis separata verificat. Haec copia tantum errorem invariantiae iacere potest; non est fallback neque fons alterius responsi.
+Omne state semanticum huius tabulae contextui invocationis proprium est. Metrics et branch trace observabilia sunt et in calculum lapidum non redeunt.
 
-## Correctio auditum temporalium priorum
+## Quod consulto nondum adest
 
-Regressiones Graduum 5 et 6 continebant prohibitiones temporales contra codicem PATCH 03, quia in illis gradibus patch futurum erat. Post adventum Gradus 7 illae prohibitiones iam invariant perpetua esse non possunt.
-
-- In probatione Gradus 5 remotum est solum auditum qui nomina `Patch03`/`patch03` vetabat. Assertiones PATCH 02, duo custodes Fundationis et omnes valores normativi manent intacti.
-- In probatione Gradus 6 auditum futurum substitutum est assertione perpetua quae praesentiam physicam `oldDistance` requirit. Eadem inputs et eadem expected values manent.
-
-Forma correcta regressionis Gradus 6 contra codicem Gradus 6 pristinum separatim probata est et adhuc quinque discrepantias cum exitu `1` produxit. Ergo mutatio probationis vitium historicum non abscondit.
-
-## Stratum monstri additum
-
-Gradus 7 addit:
-
-- `patchedDistanceOutput` et `patch03Applied` in contextu invocationis;
-- `Patch03DistanceWrapper`;
-- `Patch03DistanceHandler`;
-- dispatchationem propriam patch;
-- viam diagnosticam legacy separatam;
-- `requirePatch03Ready` cum computatione validationis duplicata;
-- memoriam exitus legacy in relatione etiam post correctionem.
-
-State semanticum manet proprium invocationi. Metrics et branch trace non leguntur ad decisionem normativam.
+Gradus 8 non continet snapshot veteris lapidis, vocationem legacy super clone cum overwrite tardivo, `stonePatch`, `Patch04` aut aliam correctionem mutationis sequentialis. Illa pertinent ad Gradum 9 tantum.
 
 ## Lingua computationis
 
@@ -84,7 +72,7 @@ Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congela
 
 ## Probationes
 
-Omnes regressiones usque ad Gradum 7 virides sunt:
+Regressiones usque ad Gradum 7 virides manent:
 
 ```text
 OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
@@ -96,4 +84,10 @@ REGRESSIO_DISCOVERY_03_TRANSIIT
 REGRESSIO_PATCH_03_TRANSIIT
 ```
 
-Gradus proximus est `DISCOVERY 04`; nullum eius codicem hic gradus continet.
+Regressio nova consulto rubra est:
+
+```text
+REGRESSIO_DISCOVERY_04_DEFECIT: 224 discrepantiae componentium normativae inventae sunt
+```
+
+Gradus proximus est `PATCH 04`; nullum eius codicem hic gradus continet.

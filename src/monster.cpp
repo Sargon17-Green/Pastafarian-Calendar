@@ -66,6 +66,26 @@ Integer distanceWithChronologicalPatch(const Integer& calculationDay,
     return d + 1;
 }
 
+Stone mutateStonesWrong(int i, Stone state) {
+    state[0] = savePatch(state[0] * state[0] + 3 * state[1] + i);
+    state[1] = savePatch(state[1] * state[1] + 5 * state[2] + state[0]);
+    state[2] = savePatch(state[2] * state[2] + 7 * state[3] + state[1]);
+    state[3] = savePatch(state[3] * state[3] + 11 * state[4] + state[2]);
+    state[4] = savePatch(state[4] * state[4] + 13 * state[0] + state[3]);
+    return state;
+}
+
+StoneTable buildStonesThroughWrongLegacyMutation() {
+    StoneTable table{};
+    Stone state{Integer{17}, Integer{29}, Integer{43}, Integer{71}, Integer{101}};
+    table[1] = state;
+    for (int i = 2; i <= 46; ++i) {
+        state = mutateStonesWrong(i, state);
+        table[i] = state;
+    }
+    return table;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -139,6 +159,16 @@ void BaseValidationManager::requirePatch03Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyStoneTableReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyStoneTableReady) {
+        throw BaseValidationError("tabula lapidum legacy nondum parata est");
+    }
+    const Stone initium{Integer{17}, Integer{29}, Integer{43}, Integer{71}, Integer{101}};
+    if (ctx.legacyStoneTable[1] != initium) {
+        throw BaseValidationError("primus lapis legacy mutatus est");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -158,6 +188,10 @@ Integer LegacyDayTagAdapter::callOldDayTag(const Integer& day) const {
 
 Integer LegacyDistanceAdapter::callOldDistance(const Integer& calculationDay, const Integer& targetDay) const {
     return oldDistance(calculationDay, targetDay);
+}
+
+StoneTable LegacyStoneMutationAdapter::buildWrongStoneTable() const {
+    return buildStonesThroughWrongLegacyMutation();
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -338,6 +372,29 @@ void Patch03DistanceHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch03.distance.ready");
 }
 
+void Discovery04StoneMutationHandler::handle(BaseMonsterContext& ctx,
+                                             const LegacyStoneMutationAdapter& adapter,
+                                             const BaseValidationManager& validator,
+                                             const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery04StoneMutationHandler";
+    ctx.phase = "DISCOVERY_04_STONE_MUTATION_CALL";
+    ctx.status = "LEGACY_STONE_MUTATION_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_04_STONE_MUTATION_CALL");
+    metrics.bump(ctx, "discovery04.stoneMutation.calls");
+
+    ctx.legacyStoneTable = adapter.buildWrongStoneTable();
+    ctx.legacyStoneTableReady = true;
+
+    ctx.phase = "DISCOVERY_04_STONE_MUTATION_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_04_STONE_MUTATION_VALIDATE");
+    validator.requireLegacyStoneTableReady(ctx);
+
+    ctx.phase = "DISCOVERY_04_STONE_MUTATION_EXPOSED";
+    ctx.status = "LEGACY_STONE_TABLE_EXPOSED";
+    ctx.branchTrace.push_back("DISCOVERY_04_STONE_MUTATION_EXPOSED");
+    metrics.bump(ctx, "discovery04.stoneMutation.exposed");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -442,6 +499,20 @@ void BaseDispatcher::dispatchPatchedDistance(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch03.dispatch.calls");
 
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void BaseDispatcher::dispatchLegacyStoneMutation(BaseMonsterContext& ctx,
+                                                 const Discovery04StoneMutationHandler& handler,
+                                                 const LegacyStoneMutationAdapter& adapter,
+                                                 const BaseValidationManager& validator,
+                                                 const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_04_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_04_DISPATCH");
+    metrics.bump(ctx, "discovery04.dispatch.calls");
+
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -632,6 +703,30 @@ LegacyDistanceReport BaseMonsterManager::executeUnpatchedDistanceDiagnostic(
         ctx.branchTrace.size(),
         ctx.legacyDistanceOutput,
         false,
+    };
+}
+
+LegacyStoneTableReport BaseMonsterManager::executeStoneTable() const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_04_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyStoneMutationAdapter adapter;
+    const Discovery04StoneMutationHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyStoneMutation(ctx, handler, adapter, validator, metrics);
+
+    return LegacyStoneTableReport{
+        ctx.legacyStoneTable,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
     };
 }
 

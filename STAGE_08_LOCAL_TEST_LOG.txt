@@ -1,0 +1,35 @@
+Gradus 8 — probationes locales
+
+Compilator: g++
+Norma: C++20
+
+Aedificatio divisa est in obiecta C++ communia, quia compilatio omnium regressionum una invocatione limitem temporis ambitus attingebat. Nulla logica, nullus generator et nullum runtime alterius linguae adhibitum est.
+
+Regressiones priores:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+REGRESSIO_DISCOVERY_01_TRANSIIT
+REGRESSIO_PATCH_01_TRANSIIT
+REGRESSIO_DISCOVERY_02_TRANSIIT
+REGRESSIO_PATCH_02_TRANSIIT
+REGRESSIO_DISCOVERY_03_TRANSIIT
+REGRESSIO_PATCH_03_TRANSIIT
+
+Regressio DISCOVERY 04:
+DISCREPANTIA LAPIDUM i=2 pars=2: expectatus=1073 actualis=1434
+DISCREPANTIA LAPIDUM i=2 pars=3: expectatus=2375 actualis=3780
+DISCREPANTIA LAPIDUM i=2 pars=4: expectatus=6195 actualis=9932
+DISCREPANTIA LAPIDUM i=2 pars=5: expectatus=10493 actualis=25047
+DISCREPANTIA LAPIDUM i=3 pars=1: expectatus=146106 actualis=147189
+DISCREPANTIA LAPIDUM i=3 pars=2: expectatus=1163582 actualis=2222445
+DISCREPANTIA LAPIDUM i=3 pars=3: expectatus=5685063 actualis=16580369
+DISCREPANTIA LAPIDUM i=3 pars=4: expectatus=38495823 actualis=115500510
+DISCREPANTIA LAPIDUM i=3 pars=5: expectatus=110114158 actualis=744766176
+DISCREPANTIA LAPIDUM i=4 pars=1: expectatus=21350453986 actualis=21671269060
+REGRESSIO_DISCOVERY_04_DEFECIT: 224 discrepantiae componentium normativae inventae sunt
+EXIT_CODE=1
+
+Interpretatio: lapis 1 concordat. In lapide 2 pars prima adhuc concordat, sed partes 2–5 valores iam mutatos eiusdem transitionis legunt. A lapide 3 contaminatio etiam ad partem primam propagatur.
+
+Status finalis: EXPECTED_RED
+Regressiones anteriores: PASS
+Emendatio futura PATCH 04: ABSENS
