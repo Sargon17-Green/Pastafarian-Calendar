@@ -208,6 +208,26 @@ Integer legacyPrior(const VisibleDropStore& dropStore, int i, int back) {
     return dropStore[slot];
 }
 
+Integer priorPatch(const VisibleDropStore& dropStore,
+                   const HiddenDrops& backwardStorage,
+                   int i,
+                   int back) {
+    if (i < 1) {
+        throw BaseValidationError("index guttae visibilis positivus requiritur");
+    }
+    if (back < 1) {
+        throw BaseValidationError("distantia retro positiva requiritur");
+    }
+
+    const int slot = i - back;
+    if (slot >= 1) {
+        return legacyPrior(dropStore, i, back);
+    }
+
+    const int hiddenK = 1 - slot;
+    return hiddenByNearness(backwardStorage, hiddenK);
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -343,6 +363,34 @@ void BaseValidationManager::requireLegacyPriorReady(const BaseMonsterContext& ct
     }
 }
 
+void BaseValidationManager::requirePatch06Ready(const BaseMonsterContext& ctx) const {
+    if (!ctx.patch06Applied) {
+        throw BaseValidationError("emendatio sexta nondum applicata est");
+    }
+    if (ctx.patch06LegacyPathUsed == ctx.patch06HiddenPathUsed) {
+        throw BaseValidationError("emendatio sexta unam tantum viam prioris eligere debet");
+    }
+
+    const int slot = ctx.legacyPriorI - ctx.legacyPriorBack;
+    Integer expectatus{};
+    if (slot >= 1) {
+        expectatus = legacyPrior(ctx.legacyPriorDropStore, ctx.legacyPriorI, ctx.legacyPriorBack);
+        if (!ctx.patch06LegacyPathUsed) {
+            throw BaseValidationError("emendatio sexta historiam visibilem sine helper legacy legit");
+        }
+    } else {
+        const int hiddenK = 1 - slot;
+        expectatus = hiddenByNearness(ctx.patch06HiddenBackward, hiddenK);
+        if (!ctx.patch06HiddenPathUsed) {
+            throw BaseValidationError("emendatio sexta historiam occultam non elegit");
+        }
+    }
+
+    if (ctx.patchedPriorOutput != expectatus) {
+        throw BaseValidationError("emendatio sexta valorem prioris normativum non servavit");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -376,6 +424,13 @@ HiddenDrops LegacyHiddenStorageAdapter::buildBackward(const Integer& calculation
 
 Integer LegacyPriorAdapter::read(const VisibleDropStore& dropStore, int i, int back) const {
     return legacyPrior(dropStore, i, back);
+}
+
+Integer Patch06PriorWrapper::read(const VisibleDropStore& dropStore,
+                                  const HiddenDrops& backwardStorage,
+                                  int i,
+                                  int back) const {
+    return priorPatch(dropStore, backwardStorage, i, back);
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -703,6 +758,52 @@ void Discovery06PriorHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery06.prior.exposed");
 }
 
+void Patch06PriorHandler::handle(BaseMonsterContext& ctx,
+                                 const LegacyPriorAdapter& adapter,
+                                 const Patch06PriorWrapper& wrapper,
+                                 const BaseValidationManager& validator,
+                                 const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch06PriorHandler";
+    ctx.phase = "PATCH_06_PREPARE_HIDDEN";
+    ctx.status = "PATCH_06_PRIOR_ACTIVE";
+    ctx.branchTrace.push_back("PATCH_06_PREPARE_HIDDEN");
+    metrics.bump(ctx, "patch06.prior.calls");
+
+    const StoneTable stones = buildStonesThroughLegacyBuilder();
+    ctx.patch06HiddenBackward = buildHiddenWithBackwardStorage(
+        ctx.calculationDay, ctx.targetDay, stones);
+
+    const int slot = ctx.legacyPriorI - ctx.legacyPriorBack;
+    ctx.phase = "PATCH_06_ROUTE_PRIOR";
+    ctx.branchTrace.push_back("PATCH_06_ROUTE_PRIOR");
+    if (slot >= 1) {
+        ctx.legacyPriorOutput = adapter.read(
+            ctx.legacyPriorDropStore, ctx.legacyPriorI, ctx.legacyPriorBack);
+        ctx.legacyPriorReady = true;
+        ctx.patch06LegacyPathUsed = true;
+        ctx.patchedPriorOutput = ctx.legacyPriorOutput;
+        metrics.bump(ctx, "patch06.prior.legacyPath");
+    } else {
+        ctx.patch06HiddenPathUsed = true;
+        ctx.patchedPriorOutput = wrapper.read(
+            ctx.legacyPriorDropStore,
+            ctx.patch06HiddenBackward,
+            ctx.legacyPriorI,
+            ctx.legacyPriorBack);
+        metrics.bump(ctx, "patch06.prior.hiddenPath");
+    }
+    ctx.patch06Applied = true;
+
+    ctx.phase = "PATCH_06_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_06_VALIDATE");
+    validator.requirePatch06Ready(ctx);
+
+    ctx.phase = "PATCH_06_PRIOR_READY";
+    ctx.status = "PATCHED_PRIOR_RESULT_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_06_PRIOR_READY");
+    metrics.bump(ctx, "patch06.prior.ready");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -879,6 +980,21 @@ void BaseDispatcher::dispatchLegacyPrior(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery06.dispatch.calls");
 
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedPrior(BaseMonsterContext& ctx,
+                                          const Patch06PriorHandler& handler,
+                                          const LegacyPriorAdapter& adapter,
+                                          const Patch06PriorWrapper& wrapper,
+                                          const BaseValidationManager& validator,
+                                          const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_06_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_06_DISPATCH");
+    metrics.bump(ctx, "patch06.dispatch.calls");
+
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -1192,7 +1308,48 @@ LegacyPriorReport BaseMonsterManager::executePrior(const Integer& calculationDay
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
     ctx.targetDay = targetDay;
-    ctx.phase = "DISCOVERY_06_NEW";
+    ctx.phase = "PATCH_06_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyPriorDropStore = dropStore;
+    ctx.legacyPriorI = i;
+    ctx.legacyPriorBack = back;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyPriorAdapter adapter;
+    const Patch06PriorWrapper wrapper;
+    const Patch06PriorHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedPrior(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return LegacyPriorReport{
+        ctx.calculationDay,
+        ctx.targetDay,
+        ctx.legacyPriorI,
+        ctx.legacyPriorBack,
+        ctx.patchedPriorOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyPriorOutput,
+        ctx.patch06LegacyPathUsed,
+        ctx.patch06HiddenPathUsed,
+        ctx.patch06Applied,
+    };
+}
+
+LegacyPriorReport BaseMonsterManager::executeUnpatchedPriorDiagnostic(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    const VisibleDropStore& dropStore,
+    int i,
+    int back) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_06_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyPriorDropStore = dropStore;
@@ -1216,6 +1373,10 @@ LegacyPriorReport BaseMonsterManager::executePrior(const Integer& calculationDay
         ctx.status,
         ctx.currentHandler,
         ctx.branchTrace.size(),
+        ctx.legacyPriorOutput,
+        true,
+        false,
+        false,
     };
 }
 

@@ -49,11 +49,16 @@ int main() {
 
     BaseMonsterManager manager;
     const auto validum = manager.executePrior(calculationDay, targetDay, visibiles, 4, 2);
+    const bool viaLegacy =
+        validum.status == "LEGACY_PRIOR_VISIBLE_RESULT_EXPOSED" &&
+        validum.handler == "Discovery06PriorHandler";
+    const bool viaPatch =
+        validum.status == "PATCHED_PRIOR_RESULT_EXPOSED" &&
+        validum.handler == "Patch06PriorHandler";
     if (validum.output != 202 ||
         validum.i != 4 ||
         validum.back != 2 ||
-        validum.status != "LEGACY_PRIOR_VISIBLE_RESULT_EXPOSED" ||
-        validum.handler != "Discovery06PriorHandler" ||
+        (!viaLegacy && !viaPatch) ||
         validum.branchCount < 4) {
         std::cerr << "DEFECTUS_VIAE_DISCOVERY_06: via activa historiam visibilem recte non exposuit\n";
         ++defectusStructurae;

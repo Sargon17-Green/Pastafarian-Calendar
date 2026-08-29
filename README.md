@@ -1,57 +1,61 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 12 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
+Hoc directorium Gradum 13 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 12 est `DISCOVERY 06` et consulto `EXPECTED_RED`. Quinque emendationes anteriores integrae et virides manent. Hoc gradu introducitur helper legacy ad historiam guttarum visibilium:
+Gradus 13 est `PATCH 06` et status repository exspectatus est `GREEN`. Sex detectio prioris gradus ostendit `legacyPrior(dropStore,i,back)` tantum historiam visibilem `dropStore[i-back]` intellegere. Helper legacy ipse non mutatus est et pro indicibus conceptu occultis adhuc errorem mittit.
+
+Emendatio nova contractum normativum sequitur:
 
 ```text
-legacyPrior(dropStore, i, back) = dropStore[i-back]
+slot = i - back
+if slot >= 1:
+    return legacyPrior(dropStore, i, back)
+hiddenK = 1 - slot
+return hiddenByNearness(legacyHidden, hiddenK)
 ```
 
-Semantica eius veteris contractus stricte limitatur ad indices iam visibiles `1..i-1`. Si `i-back < 1`, helper errorem mittit. Quare in prima gutta visibili, ubi `i=1`, petitiones `back=1..7` nullum indicem visibilem habent et omnes septem reiciuntur.
+Hoc schema in `priorPatch` servatur. Nulla inversio array occultarum fit; `hiddenByNearness` ex PATCH 05 mapping `8-k` retinet.
 
-Via activa huius gradus transit per:
+## Via activa
+
+`BaseMonsterManager::executePrior` nunc transit per:
 
 ```text
 BaseMonsterManager::executePrior
--> BaseDispatcher::dispatchLegacyPrior
--> Discovery06PriorHandler
--> LegacyPriorAdapter
--> legacyPrior
+-> BaseDispatcher::dispatchPatchedPrior
+-> Patch06PriorHandler
+-> Patch06PriorWrapper
+-> priorPatch
 ```
 
-`calculationDay` et `targetDay` iam per contextum huius viae transeunt, sed handler DISCOVERY 06 eis ad guttas occultas resolvendas consulto non utitur. Hoc spatium necessarium est ut PATCH 06 postea supplementum ad historiam occultam supra eundem helper legacy addere possit sine helper veteri delendo.
+Handler tabulam lapidum per viam productionis iam emendatam construit, deinde septem guttas occultas in repositione retrograda legacy fabricat. `priorPatch` eligens slot positivum ad `legacyPrior` redit; slot non positivum ad `hiddenByNearness` transit.
 
-## Quid regressio demonstrat
+`executeUnpatchedPriorDiagnostic` viam `Discovery06PriorHandler -> LegacyPriorAdapter -> legacyPrior` integram servat. Sic cicatrix prioris gradus adhuc directe exerceri potest.
 
-`tests/stage_12_discovery_06_tests.cpp` duas proprietates distinguit.
+## Regressio Gradus 12
 
-Primum, helper legacy in historia visibili recte operatur. Cum `dropStore = [101,202,303]` et `i=4`, petitiones `back=1,2,3` valores `303,202,101` reddunt. Petitio `back=4` recte reicitur quia index prior iam non est inter `1..i-1`.
+Probatio `tests/stage_12_discovery_06_tests.cpp` una mutatione harness indiguit: nomen handler et status Gradus 12 erant nimis stricte fixi ad viam DISCOVERY. Expected values, casus `back=1..7`, verificatio quod `legacyPrior` directus occultas reicit, et numerus discrepantiarum ante patch non mutati sunt.
 
-Deinde probatio eadem computatione diei utitur qua Gradus 10–11 septem guttas occultas normativas iam habent. Pro `i=1`, omnis petitio `back=1..7` semantice correspondet `hidden1..hidden7`. `legacyPrior` autem septies errorem mittit:
+Forma correcta contra productionem Gradus 12 pristinam adhuc exactas septem petitiones `NON_RESOLUTUS` et exitum `1` producit. Contra Gradum 13 eadem probatio nullas discrepantias producit et transit.
 
-```text
-DISCREPANTIA PRIOR_OCCULTUS back=1 ... actualis=NON_RESOLUTUS
-...
-DISCREPANTIA PRIOR_OCCULTUS back=7 ... actualis=NON_RESOLUTUS
-REGRESSIO_DISCOVERY_06_DEFECIT: 7 petitiones historiae occultae a helper legacy non resolutae sunt
-```
+## Probatio PATCH 06
 
-Exitus est `1`, sicut gradus DISCOVERY postulat. Forma probationis iam PATCH-compatibilis est: si via activa postea omnes septem valores occultos recte resolvet, eadem probatio sine mutatione ad nullas discrepantias et transitum perveniet; helper `legacyPrior` directus tamen adhuc debet indices non visibiles reicere.
+`tests/stage_13_patch_06_tests.cpp` separat cicatricem et exitum auctoritative:
 
-## Cicatrix legacy et stratum monstri
+- `legacyPrior` directus pro `i=1, back=1..7` adhuc reicitur;
+- `priorPatch` pro iisdem septem casibus hidden1..hidden7 recte reddit;
+- pro slot positivo `priorPatch` viam legacy servat;
+- relatio productionis indicat utrum via legacy an via occulta adhibita sit;
+- diagnosticum sine patch pro historia occulta adhuc deficit;
+- petitio ultra septem occultas reicitur.
 
-Additi sunt `VisibleDropStore`, `legacyPrior`, campi prioris in `BaseMonsterContext`, `LegacyPriorReport`, `LegacyPriorAdapter`, `Discovery06PriorHandler`, validatio `requireLegacyPriorReady` et dispatchatio separata.
-
-Helper legacy non cognoscit `HiddenDrops`, non vocat `hiddenByNearness`, non aedificat guttas occultas et non habet ramum pro indicibus `0..-6`. Error eius est pars defectus historici observabilis.
-
-Omne state semantically activum huic invocationi proprium manet. Metricae et trace tantum observant; exitum semanticum non eligunt.
+Omnes regressiones Graduum 1–13 transeunt.
 
 ## Quod consulto nondum adest
 
-Nullum codicem PATCH 06 introduximus. Absunt `priorPatch`, `Patch06`, `patch06Applied` et omnis resolver qui, post defectum `legacyPrior`, guttam occultam eligat. Nulla mutatio formulae guttarum visibilium hoc gradu facta est.
+Nullum codicem DISCOVERY 07 aut PATCH 07 introductum est. Absunt sentinel tabulae molendi, `Patch07`, `patch07Applied` et omnis emendatio indexing molitionis futurae.
 
 ## Lingua computationis
 
@@ -59,11 +63,9 @@ Omnis codex exsecutus huius lineae est C++. Integra arbitraria per `boost::multi
 
 ## Catalogus linguae fontis
 
-Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congelatus manet. Ordo normativus per `canonicalIndex` tantum definitur; textus linguae fontis non participat ranking, unranking, cache semanticum aut electionem.
+Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congelatus manet. Semantica ordinis per `canonicalIndex` tantum definitur; textus presentationis computationem non mutat.
 
-## Probationes
-
-Omnes regressiones usque ad Gradum 11 virides sunt. Regressio nova Gradus 12 est consulto rubra:
+## Exitus probationum
 
 ```text
 OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
@@ -77,7 +79,8 @@ REGRESSIO_DISCOVERY_04_TRANSIIT
 REGRESSIO_PATCH_04_TRANSIIT
 REGRESSIO_DISCOVERY_05_TRANSIIT
 REGRESSIO_PATCH_05_TRANSIIT
-REGRESSIO_DISCOVERY_06_DEFECIT: 7 petitiones historiae occultae a helper legacy non resolutae sunt
+REGRESSIO_DISCOVERY_06_TRANSIIT
+REGRESSIO_PATCH_06_TRANSIIT
 ```
 
-Gradus proximus est `PATCH 06`; nullum eius codicem hic gradus continet.
+Gradus proximus est `DISCOVERY 07`; nullum eius codicem hic gradus continet.

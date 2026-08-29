@@ -303,3 +303,33 @@ Septem petitiones fundamenti testis iam demonstrant domain gap exactum. Quia via
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `VisibleDropStore`, campi `legacyPriorDropStore`, `legacyPriorI`, `legacyPriorBack`, `legacyPriorOutput`, `legacyPriorReady`, relatio `LegacyPriorReport`, `LegacyPriorAdapter`, `Discovery06PriorHandler`, dispatchatio propria et validatio readiness. Haec structura errorem historicum per viam realem exponit et locum organicum futuro PATCH 06 parat, sed ipsum patch nondum continet.
+
+## Gradus 13 — PATCH 06: historia occulta supra helper visibilem
+
+### Quid repertum erat
+
+Gradus 12 demonstravit `legacyPrior(dropStore,i,back)` in suo dominio visibili rectum esse, sed indices `0..-6` ignorare. Pro prima gutta visibili hoc septem predecessors semantice existentes tamquam absentia tractabat. Helper ipsum corrigere vetitum est, quia cicatrix historica manere debet.
+
+### Quid circumventum est
+
+Addita est functio `priorPatch(dropStore, backwardStorage, i, back)`. Ea primum `slot = i-back` calculat. Si `slot >= 1`, exactum helper `legacyPrior` vocat. Aliter `hiddenK = 1-slot` calculat et `hiddenByNearness(backwardStorage, hiddenK)` reddit. Ergo mapping normativum `slot=0 -> hidden1`, `slot=-1 -> hidden2`, usque ad `slot=-6 -> hidden7` servatur.
+
+`Patch06PriorHandler` repositionem occultam productionis ex lapidibus iam per PATCH 04 correctis fabricat, deinde viam slot positivam vel occultam expresse notat. `Patch06PriorWrapper` solum ad `priorPatch` delegat. `executeUnpatchedPriorDiagnostic` handler Gradus 12 adhuc exercet, itaque petitio occulta sine patch adhuc errorem legacy producit.
+
+### Cur hoc aequivalet normae
+
+Pro `slot >= 1`, valor normativus est gutta visibilis iam scripta in indice `slot`; `legacyPrior` exactum eundem locum legit. Pro `slot <= 0`, definitio patch dat `k = 1-slot`; hic est exacte numerus propinquitatis guttae occultae. PATCH 05 iam probavit `hiddenByNearness` valorem hidden k per storage retrogradum recte reddere. Ergo utraque pars partitionis slot valorem normativum reddit.
+
+Validator productionis logicam iterum ut COPY_VALIDATION computat, non oracle testium vocat. Responsum semanticum ab una via patch venit.
+
+### Regressio Gradus 12 recognita
+
+Forma Gradus 12 fixerat `status` et `handler` ad nomina DISCOVERY, quae mutationem organicam ad handler PATCH impediebant. Solum haec verificatio meta-path relaxata est ut vel via DISCOVERY vetus vel via PATCH nova legitima sit. Expected values et assertiones semanticae non mutatae sunt.
+
+Contra codicem Gradus 12 pristinum forma correcta adhuc septem `NON_RESOLUTUS`, `REGRESSIO_DISCOVERY_06_DEFECIT` et exitum `1` produxit. Contra Gradum 13 eadem probatio transit.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `priorPatch`, `patch06HiddenBackward`, `patchedPriorOutput`, duae notae viae, `patch06Applied`, `Patch06PriorWrapper`, `Patch06PriorHandler`, `dispatchPatchedPrior`, `requirePatch06Ready` et `executeUnpatchedPriorDiagnostic`. Relatio prioris nunc exitum legacy ante patch et viam electam retinet. `legacyPrior` ipse immutatus manet.
+
+Nulla structura Gradus 14 vel PATCH 07 addita est.

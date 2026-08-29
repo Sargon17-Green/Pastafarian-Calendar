@@ -43,6 +43,10 @@ HiddenDrops buildHiddenWithBackwardStorage(const Integer& calculationDay,
 Integer hiddenByNearness(const HiddenDrops& backwardStorage, int k);
 HiddenDrops buildHiddenNearnessView(const HiddenDrops& backwardStorage);
 Integer legacyPrior(const VisibleDropStore& dropStore, int i, int back);
+Integer priorPatch(const VisibleDropStore& dropStore,
+                   const HiddenDrops& backwardStorage,
+                   int i,
+                   int back);
 
 struct BaseMonsterContext {
     Integer calculationDay;
@@ -82,6 +86,11 @@ struct BaseMonsterContext {
     int legacyPriorBack = 0;
     Integer legacyPriorOutput{};
     bool legacyPriorReady = false;
+    HiddenDrops patch06HiddenBackward{};
+    Integer patchedPriorOutput{};
+    bool patch06LegacyPathUsed = false;
+    bool patch06HiddenPathUsed = false;
+    bool patch06Applied = false;
 };
 
 struct BaseRunReport {
@@ -156,6 +165,10 @@ struct LegacyPriorReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    Integer legacyOutputBeforePatch{};
+    bool legacyPathUsed = false;
+    bool hiddenPathUsed = false;
+    bool patch06Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -177,6 +190,7 @@ public:
     void requireLegacyHiddenBackwardReady(const BaseMonsterContext& ctx) const;
     void requirePatch05Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyPriorReady(const BaseMonsterContext& ctx) const;
+    void requirePatch06Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -336,6 +350,23 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch06PriorWrapper {
+public:
+    Integer read(const VisibleDropStore& dropStore,
+                 const HiddenDrops& backwardStorage,
+                 int i,
+                 int back) const;
+};
+
+class Patch06PriorHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyPriorAdapter& adapter,
+                const Patch06PriorWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -412,6 +443,13 @@ public:
                              const LegacyPriorAdapter& adapter,
                              const BaseValidationManager& validator,
                              const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedPrior(BaseMonsterContext& ctx,
+                              const Patch06PriorHandler& handler,
+                              const LegacyPriorAdapter& adapter,
+                              const Patch06PriorWrapper& wrapper,
+                              const BaseValidationManager& validator,
+                              const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -435,6 +473,11 @@ public:
                                    const VisibleDropStore& dropStore,
                                    int i,
                                    int back) const;
+    LegacyPriorReport executeUnpatchedPriorDiagnostic(const Integer& calculationDay,
+                                                      const Integer& targetDay,
+                                                      const VisibleDropStore& dropStore,
+                                                      int i,
+                                                      int back) const;
 };
 
 } // namespace pastafari
