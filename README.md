@@ -1,22 +1,24 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin elli birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin elli ikinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 51/55, `PATCH 25` durumundadır.
+Aşama 52/55, `DISCOVERY 26` durumundadır.
 
-Aşama 50 `oldContiguousMonthDayGuess` helper'ı aynen kalır ve önce gerçekten çalışır.
+Yeni `legacyFindYearClosedOpeningInterval`, historical year interval'ını `[open,close]` kabul eder.
 
-Yeni `countMonthOccurrencesThroughTarget`, target dahil year-prefix içinde target monthId occurrence sayısını exact hesaplar.
+Backward search yalnız `target_day < current.open_day` iken geri yürür.
 
-`MonthDayOccurrencePatchWrapper` old guessed value'yu diagnostic scar olarak bırakır ve current semantic day-in-month değerini occurrence count ile overwrite eder.
+Bu yüzden target tam opening gate olduğunda current year yanlışlıkla seçilir.
 
-Contiguous month occurrence durumunda old ve correct değer aynı olabilir; interleaved durumda old mesafe tahmini düzeltilir.
+Authoritative interval `(open,close]` olduğundan opening gate önceki year'in closing boundary günüdür.
 
-Aşama 50 expected hesabı ve final semantic equality assertion'ı korunarak üç normatif witness yeşile dönmüştür.
+`LegacyOpeningGateIntervalAdapter` bu kusuru real calendar path sonunda, Aşama 18 resolved year anchor'ının tam open-day boundary witness'ında gerçekten çalıştırır.
 
-Patch 26 opening-gate interval kodu henüz yoktur.
+Üç normatif witness yalnız bu boundary koşulu yüzünden expected previous year'dan ayrışır.
+
+Patch 26 correction henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -32,10 +34,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam elli birinci aşama paketi:
+Tam elli ikinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: 348 testin tamamı geçer ve depo durumu `GREEN` olur. Aşama 50'de kırmızı olan üç contiguous-month-day witness occurrence-count overwrite ile yeşile dönmelidir.
+Beklenen sonuç: önceki 348 test geçer. Yeni Discovery 26 non-normative kontrolleri geçer; yalnız `test_current_closed_opening_interval_assigns_open_gate_to_wrong_year` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.

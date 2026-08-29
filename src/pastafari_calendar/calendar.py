@@ -3,6 +3,7 @@ from .legacy_selection import buildAnswerRingFromSauceState
 from .legacy_day_counts import FOUNDATION_DAY_OLD
 from .legacy_year_candidates import LegacyYearCandidate
 from .legacy_year_jump import LegacyYearJumpAnchor
+from .legacy_opening_gate_interval import LegacyOpeningGateYear
 from .legacy_year_cache import LegacyYearCacheRequest, LegacyYearCacheValue
 from .source_language_catalog import SOURCE_LANGUAGE_CATALOG
 from .monster_bootstrap import (
@@ -736,7 +737,56 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.contiguousMonthDay.probes",
         )
         local_ctx.status = "ESKİ_AY_GÜNÜ_SÜREKLİYMİŞ_GİBİ_HAZIR"
-        local_ctx.phase = "AŞAMA_51_BEKLEME"
+        local_ctx.phase = "ESKİ_KAPALI_OPENING_GATE_YIL_ARALIĞI"
+
+    def legacy_opening_gate_interval_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        if (
+            local_ctx.patch18_result_number is None
+            or local_ctx.patch18_result_open_day is None
+            or local_ctx.patch18_result_close_day is None
+        ):
+            raise RuntimeError(
+                "Legacy opening-gate year interval başlamadan resolved year hazır olmalıdır"
+            )
+
+        anchor = LegacyOpeningGateYear(
+            number=local_ctx.patch18_result_number,
+            open_day=local_ctx.patch18_result_open_day,
+            close_day=local_ctx.patch18_result_close_day,
+        )
+
+        def previous_year(
+            known: LegacyOpeningGateYear,
+        ) -> LegacyOpeningGateYear:
+            return LegacyOpeningGateYear(
+                number=known.number - 1,
+                open_day=known.open_day - 1,
+                close_day=known.open_day,
+            )
+
+        # Keşif 26 yalnız opening gate boundary witness'ını hedefler.
+        # Legacy [open,close] varsayımı target == open olduğunda geri yürümez.
+        manager.legacy_opening_gate_interval.call(
+            local_ctx,
+            anchor,
+            anchor.open_day,
+            previous_year,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.openingGateClosedInterval.probes",
+        )
+        local_ctx.status = "ESKİ_KAPALI_OPENING_GATE_YIL_ARALIĞI_HAZIR"
+        local_ctx.phase = "AŞAMA_52_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -764,6 +814,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_AY_UZUNLUĞU_TÜM_YOLLAR_LISTESİ", legacy_month_length_materialization_handler)
     manager.dispatcher.register("ESKİ_GÜN_GÜN_AY_SEÇİMİ", legacy_month_weaving_handler)
     manager.dispatcher.register("ESKİ_AY_GÜNÜ_SÜREKLİYMİŞ_GİBİ", legacy_contiguous_month_day_handler)
+    manager.dispatcher.register("ESKİ_KAPALI_OPENING_GATE_YIL_ARALIĞI", legacy_opening_gate_interval_handler)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -784,6 +835,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
+    manager.dispatcher.dispatch(ctx)
+
     manager.dispatcher.dispatch(ctx)
 
     manager.dispatcher.dispatch(ctx)

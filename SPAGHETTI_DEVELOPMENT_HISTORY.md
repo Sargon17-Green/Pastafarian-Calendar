@@ -2192,3 +2192,67 @@ Bu nedenle contiguous month occurrence durumunda old ve correct sayılar eşit k
 Aşama 50 expected occurrence-count hesabı ve final `actual == expected` assertion'ı korunmuştur. Historical `old > expected` witness assertion'ı final semantic result yerine raw `legacy_month_day_guessed_day` scar'ına yönlendirilmiştir.
 
 Patch 26 opening-gate interval correction kodu henüz yoktur.
+
+
+## Aşama 52 — Keşif 26: opening gate'i current year'a bağlayan kapalı-sol interval
+
+### Historical interval
+
+`legacyFindYearClosedOpeningInterval` historical year containment kuralını:
+
+```text
+[open, close]
+```
+
+olarak uygular.
+
+Backward search condition:
+
+```text
+while target_day < current.open_day
+```
+
+şeklindedir.
+
+Bu nedenle `target_day == current.open_day` olduğunda `previousYear` hiç çağrılmaz.
+
+Opening gate current year'a atanır.
+
+### Authoritative divergence
+
+Normatif year interval:
+
+```text
+(open, close]
+```
+
+olmalıdır.
+
+Dolayısıyla current year'in opening gate günü current year'e ait değildir; önceki year'in closing gate günüdür.
+
+Discovery 26 bunu üç bağımsız numeric year witness ile gösterir.
+
+Her witness'ta actual legacy result current year number'dır, expected previous year number'dır.
+
+### Real production yolu
+
+Aşama 51 month-day occurrence patch tamamlandıktan sonra dispatcher yeni `LegacyOpeningGateIntervalAdapter` katmanına geçer.
+
+Anchor, Aşama 18 resolved year state'inden alınır.
+
+Witness target doğrudan `anchor.open_day` yapılır.
+
+Safe previous-year provider boundary continuity'yi taşır:
+
+```text
+previous.number = current.number - 1
+previous.close_day = current.open_day
+```
+
+Legacy `<` condition nedeniyle provider real witness'ta çağrılmaz ve backward step 0 kalır.
+
+### Bilinçli sınır
+
+`OpeningGateIntervalPatchWrapper`, `correctOpeningGateInterval`, `patch26_applied` veya bu yeni layer içinde `while target_day <= current.open_day` correction path'i yoktur.
+
+Aşama 18'in daha önceki authoritative sequential-year walk implementation'ı değiştirilmemiştir; Keşif 26 kendi historical interval layer'ını gerçek dispatcher path sonunda açıkça taşır.

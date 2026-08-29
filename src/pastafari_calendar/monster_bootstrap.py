@@ -27,6 +27,7 @@ from .legacy_repeated_names import LegacyRepeatedNameGenerator
 from .legacy_month_length_materialization import LegacyMonthLengthMaterializationAdapter
 from .legacy_month_weaving import LegacyMonthWeavingAdapter
 from .legacy_month_day_position import LegacyContiguousMonthDayAdapter
+from .legacy_opening_gate_interval import LegacyOpeningGateIntervalAdapter
 
 
 class MonsterError(RuntimeError):
@@ -367,6 +368,17 @@ class MonsterContext:
     patch25_overwrite_needed: bool = False
     patch25_semantic_day_in_month: int | None = None
     patch25_applied: bool = False
+    legacy_opening_interval_anchor_number: int | None = None
+    legacy_opening_interval_anchor_open_day: int | None = None
+    legacy_opening_interval_anchor_close_day: int | None = None
+    legacy_opening_interval_target_day: int | None = None
+    legacy_opening_interval_backward_steps: int = 0
+    legacy_opening_interval_result_number: int | None = None
+    legacy_opening_interval_result_open_day: int | None = None
+    legacy_opening_interval_result_close_day: int | None = None
+    legacy_opening_interval_closed_open_assumption: bool = False
+    legacy_opening_interval_semantic_year_number: int | None = None
+    legacy_opening_interval_calls: int = 0
 
 
 class BaseMetrics:
@@ -443,3 +455,4 @@ class MonsterManager:
         self.legacy_month_length_materialization = LegacyMonthLengthMaterializationAdapter()
         self.legacy_month_weaving = LegacyMonthWeavingAdapter()
         self.legacy_contiguous_month_day = LegacyContiguousMonthDayAdapter()
+        self.legacy_opening_gate_interval = LegacyOpeningGateIntervalAdapter()

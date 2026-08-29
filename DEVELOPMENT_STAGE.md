@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=51
-CURRENT_KIND=PATCH
-CURRENT_PATCH=25
-LAST_COMPLETED_STAGE=51
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=52
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=26
+LAST_COMPLETED_STAGE=52
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Aşama 50 oldContiguousMonthDayGuess raw historical helper gövdesi byte-for-byte korunur ve LegacyContiguousMonthDayAdapter her call'da Patch 24 corrected semantic weaving üzerinde önce bu helper'ı gerçekten çalıştırıp guessed day scar'ını kaydeder; countMonthOccurrencesThroughTarget target position dahil weaving prefix'inde target monthId ile eşit occurrence'ları exact sayar; MonthDayOccurrencePatchWrapper old wrong_guess state'ini korur ve authoritative semantic day-in-month değerini unconditional olarak occurrence count ile overwrite eder; contiguous occurrence durumunda sayı aynı kalabilir, interleaved durumda old guess düzeltilir; Patch 26 opening-gate interval correction henüz production'da yoktur
+MONSTER_ARCHITECTURE_GROWTH=legacyFindYearClosedOpeningInterval year interval'ını historical biçimde [open,close] kabul eder ve backward search yalnız target_day<current.open_day olduğunda previousYear çağırır; target_day==open_day boundary'sinde geri yürümez ve opening gate'i current year'a yanlış bağlar; LegacyOpeningGateIntervalAdapter bu path'i invocation-local state ile gerçek calendar dispatcher sonunda Patch 18 resolved year anchor'ının tam open_day boundary witness'ında çalıştırır; semantic year number intentional olarak wrong legacy result olur; authoritative correction target_day<=year.open_day ve (open,close] semantics henüz bu Discovery 26 layer'ına uygulanmaz
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

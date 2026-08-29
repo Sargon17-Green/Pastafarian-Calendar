@@ -1,0 +1,28 @@
+Aşama 52/55 — DISCOVERY 26
+
+Bu paket yalnızca Aşama 52 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_opening_gate_interval.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_52_discovery_26.py
+artifacts/stage-52/BASELINE_STAGE_51_GREEN.txt
+artifacts/stage-52/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-52/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_52.txt
+
+Silinen dosya yoktur.
+Başlangıç yüklenen Aşama 51 baseline: GREEN, 348/348
+Aşama 1–51 regressions: 348/348 PASS
+Aşama 52 full suite: 356 test, tam 3 expected subTest failure
+Beklenen depo durumu: EXPECTED_RED
+Legacy interval: [open,close]
+Legacy backward condition: target_day<current.open_day
+Opening-gate target: CURRENT YEAR'A YANLIŞ BAĞLANIR
+Authoritative interval: (open,close]
+Patch26 correction: YOK
