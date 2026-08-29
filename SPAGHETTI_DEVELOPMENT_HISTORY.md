@@ -1465,3 +1465,50 @@ Bu aşamada `signed_step<0` için ayrı corrected detour yoktur.
 `oldGateQuestionDay` değiştirilmemiştir.
 
 Patch 16 `LEGACY_YEAR_MAX=5781` kodu henüz yoktur.
+
+
+## Aşama 31 — Yama 15: yalnız negatif gate adımında Foundation'ın negatif tarafına geçmek
+
+### Korunan legacy scar
+
+`oldGateQuestionDay(n)` fiziksel olarak değişmeden kalır:
+
+```text
+oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n
+```
+
+`NegativeGatePatchWrapper`, bütün signed step değerleri için bu helper'ı diagnostic scar olarak gerçekten çağırır.
+
+### Semantic detour
+
+Wrapper:
+
+```text
+magnitude=abs(signed_step)
+legacy_positive_day=oldGateQuestionDay(magnitude)
+
+if signed_step<0:
+    corrected_day=FOUNDATION_DAY_OLD-magnitude
+else:
+    corrected_day=legacy_positive_day
+```
+
+uygular.
+
+Bu nedenle zero ve positive step davranışı legacy ile aynen kalır.
+
+Yalnız negative step semantic question day Foundation'ın negatif tarafına taşınır.
+
+### Regresyon
+
+Aşama 30 normatif negative-gate regresyonunun gövdesi byte-for-byte değiştirilmedi.
+
+`-1`, `-2` ve `-10` alt örnekleri yalnız Patch 15 detour'u sayesinde yeşile döner.
+
+Ek testler `-101`, zero/positive uyumluluğu, invocation-local patch state ve gözlem verilerinin semantic sonucu değiştirmemesi durumlarını doğrular.
+
+### Sınır
+
+Patch 16 `LEGACY_YEAR_MAX=5781` ve 5778 late-filter kodu henüz yoktur.
+
+Stage 29 wide patch ve tüm önceki scar'lar aynen korunur.

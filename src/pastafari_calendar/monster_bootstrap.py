@@ -185,6 +185,11 @@ class MonsterContext:
     legacy_gate_signed_step: int | None = None
     legacy_gate_magnitude: int | None = None
     legacy_gate_question_day: int | None = None
+    patch15_signed_step: int | None = None
+    patch15_legacy_positive_day: int | None = None
+    patch15_corrected_day: int | None = None
+    patch15_used_negative_detour: bool = False
+    patch15_applied: bool = False
 
 
 class BaseMetrics:

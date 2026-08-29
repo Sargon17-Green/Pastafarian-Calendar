@@ -1,28 +1,31 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 30/55, `DISCOVERY 15` durumundadır.
+Aşama 31/55, `PATCH 15` durumundadır.
 
-Yeni tarihsel helper:
+Discovery 15 helper scar'ı fiziksel olarak korunur:
 
 ```text
 oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n
 ```
 
-olarak korunur.
+`NegativeGatePatchWrapper` bu helper'ı diagnostic olarak gerçekten çağırır.
 
-`LegacyGateQuestionAdapter`, signed step işaretini kaybedip `abs(signed_step)` değerini helper'a verir. Sonuç olarak negatif gate sorguları Foundation'ın negatif tarafı yerine pozitif tarafını sorar.
+Semantic sonuç:
 
-Real calendar state-machine bu yolu `signed_step=-1` ile gerçekten çalıştırır.
+```text
+signed_step<0 -> FOUNDATION_DAY_OLD-abs(step)
+signed_step>=0 -> oldGateQuestionDay(abs(step))
+```
 
-Yeni normatif regresyon `-1`, `-2` ve `-10` değerlerinde actual adapter sonucunu `FOUNDATION_DAY-abs(step)` beklentisiyle karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
+şeklindedir.
 
-Henüz `PATCH 15` yoktur. Negatif signed step için corrected question-day detour'u eklenmemiştir.
+Aşama 30 normatif negative-gate regresyonu değiştirilmeden yeşile dönmüştür.
 
-Patch 16 year-limit kodu da henüz yoktur.
+Patch 16 year-limit kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -38,10 +41,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuzuncu aşama paketi:
+Tam otuz birinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–29 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni negative-gate normatif regresyonunun `-1`, `-2` ve `-10` alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 30'da kırmızı olan `-1`, `-2` ve `-10` negative-gate alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.
