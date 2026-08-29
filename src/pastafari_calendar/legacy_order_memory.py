@@ -101,6 +101,23 @@ class LegacyOverwritableOrderMemoryAdapter:
 
         ctx.legacy_bowls_after_46_drops = bowls
 
+        # Yama 11: drop 46 order post-stir başlamadan hemen önce
+        # ayrı bir latch'e fiziksel clone olarak yalnızca bir kez yazılır.
+        if ctx.orderAt46Latch is not None:
+            raise RuntimeError("Drop 46 order latch bir çağrıda yalnızca bir kez yazılabilir")
+
+        ctx.orderAt46Latch = tuple(
+            list(
+                ctx.legacy_permutation_order_table[46]
+            )
+        )
+        ctx.patch11_latch_write_count += 1
+        ctx.patch11_latch_source = (
+            "drop",
+            46,
+        )
+        ctx.patch11_applied = True
+
         stir = 1
         while stir <= 12:
             bowls, stir_order, saved_stir_sum = postStirRoundExact(
@@ -129,8 +146,8 @@ class LegacyOverwritableOrderMemoryAdapter:
         self,
         ctx,
     ) -> tuple[int, ...]:
-        if ctx.legacy_overwritable_order_memory is None:
-            raise RuntimeError("Eski sorgu order belleği henüz hazırlanmadı")
+        if ctx.orderAt46Latch is None:
+            raise RuntimeError("Drop 46 order latch henüz hazırlanmadı")
 
-        # Discovery 11: sorgu katmanı hâlâ son yazılan genel order belleğini okur.
-        return ctx.legacy_overwritable_order_memory
+        # Yama 11: semantic sorgu yalnızca tek-yazımlı drop 46 latch'i okur.
+        return ctx.orderAt46Latch

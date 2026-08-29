@@ -141,6 +141,10 @@ class MonsterContext:
     legacy_bowls_after_46_drops: tuple[int, ...] | None = None
     legacy_post_stir_last_saved_sum: int | None = None
     legacy_post_stir_final_bowls: tuple[int, ...] | None = None
+    orderAt46Latch: tuple[int, ...] | None = None
+    patch11_latch_write_count: int = 0
+    patch11_latch_source: tuple[str, int] | None = None
+    patch11_applied: bool = False
 
 
 class BaseMetrics:

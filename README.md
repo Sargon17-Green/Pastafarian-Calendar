@@ -1,28 +1,31 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi ikinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi üçüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 22/55, `DISCOVERY 11` durumundadır.
+Aşama 23/55, `PATCH 11` durumundadır.
 
-Production yolu artık 46 exact drop bowl roundunu ve 12 exact post-stir roundunu tam olarak yürütür. Bowl sonuçları test-only normatif sonuçlarla eşleşir.
-
-Yeni tarihsel kusur order belleğindedir. Legacy katman tek genel alan kullanır:
+Discovery 11'in overwrite scar'ı aynen korunur:
 
 ```text
-drop 1..46 -> aynı order belleğine yaz
-stir 1..12 -> yine aynı order belleğine yaz
-query order -> son yazılan genel belleği oku
+legacy_overwritable_order_memory
+46 drop + 12 post-stir = 58 write
 ```
 
-Bu nedenle drop 46 tamamlandığında doğru order geçici olarak bellekte olsa da 12 post-stir tarafından ezilir; semantic query yolu sonunda stir 12 order değerini görür.
+Drop 46 tamamlandıktan ve post-stir başlamadan hemen önce exact order fiziksel clone ile ayrı latch'e yazılır:
 
-Yeni normatif regresyon query order'ı exact drop 46 order ile karşılaştırır ve position 1, 2 ve 6 alt örneklerinde bilinçli olarak kırmızıdır.
+```text
+orderAt46Latch = clone(order46)
+```
 
-Henüz `PATCH 11` latch'i yoktur. Drop 46 order için ayrı, tek-yazımlı bellek kurulmamıştır.
+Bu latch invocation başına yalnızca bir kez yazılır ve post-stir sırasında hiçbir zaman yeniden yazılmaz.
 
-Patch 12'nin queried next-bowl mantığı da henüz eklenmemiştir.
+`query_order` artık overwritable belleği değil yalnızca `orderAt46Latch` değerini okur.
+
+Aşama 22'nin normatif overwritten-order regresyonu değiştirilmeden yeşile dönmüştür.
+
+Patch 12 queried next-bowl logic henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -38,10 +41,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirmi ikinci aşama paketi:
+Tam yirmi üçüncü aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–21 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni overwritten-order normatif regresyonunun position 1, 2 ve 6 alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 22'de kırmızı olan position 1, 2 ve 6 query-order alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.

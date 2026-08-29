@@ -118,7 +118,7 @@ class Stage22Discovery11Tests(unittest.TestCase):
             expected_final,
         )
 
-    def test_general_order_memory_is_overwritten_by_all_post_stirs(self):
+    def test_general_order_memory_is_still_overwritten_by_all_post_stirs(self):
         ctx = _ready_context(
             FOUNDATION_DAY,
             FOUNDATION_DAY + 3,
@@ -142,7 +142,7 @@ class Stage22Discovery11Tests(unittest.TestCase):
         )
         self.assertEqual(
             adapter.query_order(ctx),
-            ctx.legacy_overwritable_order_memory,
+            expected_drop_46_order,
         )
 
     def test_order_memory_state_is_owned_by_one_invocation(self):
@@ -168,6 +168,17 @@ class Stage22Discovery11Tests(unittest.TestCase):
         self.assertIsNotNone(
             first.legacy_post_stir_final_bowls,
         )
+        self.assertIsNotNone(
+            first.orderAt46Latch,
+        )
+        self.assertEqual(
+            first.patch11_latch_write_count,
+            1,
+        )
+        self.assertEqual(
+            first.patch11_latch_source,
+            ("drop", 46),
+        )
 
         self.assertIsNone(
             second.legacy_overwritable_order_memory,
@@ -178,6 +189,19 @@ class Stage22Discovery11Tests(unittest.TestCase):
         )
         self.assertIsNone(
             second.legacy_post_stir_final_bowls,
+        )
+        self.assertIsNone(
+            second.orderAt46Latch,
+        )
+        self.assertEqual(
+            second.patch11_latch_write_count,
+            0,
+        )
+        self.assertIsNone(
+            second.patch11_latch_source,
+        )
+        self.assertFalse(
+            second.patch11_applied,
         )
 
     def test_current_query_order_is_overwritten_instead_of_preserving_drop_46_order(self):

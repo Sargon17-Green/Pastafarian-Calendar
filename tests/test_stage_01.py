@@ -218,7 +218,6 @@ class Stage01Tests(unittest.TestCase):
             for path in (ROOT / "src" / "pastafari_calendar").glob("*.py")
         )
         forbidden = (
-            "orderAt46Latch",
             "biasedLegacyPick",
             "LEGACY_YEAR_MAX",
             "oldJumpGuess",

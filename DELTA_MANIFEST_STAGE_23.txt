@@ -1,0 +1,30 @@
+Aşama 23/55 — PATCH 11
+
+Bu paket yalnızca Aşama 23 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_order_memory.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_22_discovery_11.py
+tests/test_stage_23_patch_11.py
+artifacts/stage-23/BASELINE_STAGE_22_EXPECTED_RED.txt
+artifacts/stage-23/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_23.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 22 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 22 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+legacy overwritable order memory 58-write scar: KORUNDU
+orderAt46Latch physical clone: EKLENDİ
+latch write count per invocation: 1
+post-stir latch rewrite: YOK
+query_order source: orderAt46Latch
+Stage 1 future-name guard: current Patch 11 token serbest, Patch 12+ yasak
+PATCH 12 queried next-bowl code: YOK

@@ -1063,3 +1063,24 @@ Bu aşamada drop 46 için ayrı latch yoktur ve `query_order` son yazılan genel
 Bir sonraki yama latch'i post-stir öncesi tek kez kurmalıdır ve sonra onu bir daha yazmamalıdır.
 
 Queried next-bowl ID mantığı olan Patch 12 henüz eklenmemiştir.
+
+
+## Aşama 23 — Yama 11: drop 46 order için tek-yazımlı latch
+
+Discovery 11'in genel order belleği fiziksel olarak korunur. Bu alan 46 drop ve 12 post-stir boyunca toplam 58 kez yazılır ve sonunda stir 12 order değerini taşır.
+
+Drop 46 bowl roundu bittikten ve ilk post-stir başlamadan hemen önce exact drop 46 order fiziksel clone ile ayrı latch'e yazılır:
+
+```text
+orderAt46Latch = clone(order46)
+```
+
+Latch invocation başına yalnızca bir kez yazılır. İkinci yazma girişimi reddedilir. Post-stir sırasında latch'e hiçbir write yapılmaz.
+
+`query_order` artık genel overwritable belleği değil yalnızca `orderAt46Latch` değerini okur.
+
+Aşama 22 normatif overwritten-order regresyonunun gövdesi byte-for-byte değiştirilmeden yeşile döner.
+
+Aşama 1 future-patch isim guard'ında `orderAt46Latch` artık gelecek kod olmadığı için yalnızca bu token yasak listesinden çıkarılmıştır; Patch 12 ve sonrası yasakları korunur.
+
+Stage 15 sentinel, Stage 17 permutation patch, Stage 19 bowlAlias patch ve Stage 21 snapshot/pending patch aynen korunur. Patch 12 queried next-bowl logic henüz yoktur.
