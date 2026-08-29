@@ -1,32 +1,31 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 15/55, `PATCH 07` durumundadır.
+Aşama 16/55, `DISCOVERY 08` durumundadır. Sekizinci tarihsel kusur gerçek state-machine zincirine eklenmiştir.
 
-Legacy grind indexing aynen korunur:
+`oldPermutationUnrank0(rank0)` fiziksel olarak 0-based helper'dır ve `0..719` rank aralığında doğru lexicographic permütasyonu üretir.
 
-```text
-legacyGrindRow(table, grind)
-    -> table[grind]
-```
-
-Düzeltme tablo hizasındadır. `LEGACY_VISIBLE_GRIND_TABLE` 11 gerçek satırı eski zero-based 0..10 biçimiyle fiziksel scar olarak tutmaya devam eder.
-
-Üstünde kalıcı patch tablosu vardır:
+Kusur çağrı katmanındadır:
 
 ```text
-GRIND_TABLE_WITH_SENTINEL[0] = SENTINEL_GRIND_ROW
-GRIND_TABLE_WITH_SENTINEL[1..11] = gerçek grind row 1..11
+oneBased = regularMod(drop-1,720)+1
+order = oldPermutationUnrank0(oneBased)
 ```
 
-Görünür drop builder bu sentinel tablosunu kullanır. Normal `grind=1..11` loop sentinel row'u okumaz; sentinel yalnızca 1-based legacy indexing'i fiziksel olarak hizalar.
+Yani 1-based `1..720` order numarası yanlışlıkla doğrudan rank0 olarak kullanılır.
 
-Aşama 14'ün normatif visible-drop regresyonu değiştirilmeden yeşile dönmüştür. 46 görünür damlanın tamamı test-only normatif builder ile eşleşir.
+Böylece `oneBased=1` ilk permütasyon yerine ikinci permütasyona gider; `oneBased=720` ise helper aralığının dışındadır.
 
-Sentinel gelecekte silinmemelidir. Gelecekteki 08–26 kusur ve yamaları üretime eklenmemiştir.
+`LegacyPermutationOrderAdapter`, 46 görünür damlanın legacy order tablosunu gerçek `calendar_date_spaghetti` state-machine yoluna bağlar. Pours henüz başlatılmamıştır.
+
+Yeni normatif regresyon gerçek order-table yolunun `i=1`, `i=2` ve `i=46` değerlerini test-only normatif bowl order ile karşılaştırır ve bilinçli olarak kırmızıdır.
+
+Henüz `PATCH 08` yoktur: `legacyRank0 = oneBased-1` çevirisi eklenmemiştir.
+
+Stage 15'in kalıcı grind sentinel row'u korunur. Önceki Aşama 1–15 regresyonlarının tamamı yeşildir. Gelecekteki 09–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -42,10 +41,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam on beşinci aşama paketi:
+Tam on altıncı aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 14'te kırmızı olan görünür damla `i=1`, `i=2` ve `i=46` alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir; legacy `table[grind]` indexing ve index 0 sentinel fiziksel olarak korunur.
+Beklenen sonuç: önceki Aşama 1–15 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni permutation-rank normatif regresyonunun `i=1`, `i=2` ve `i=46` alt örnekleri başarısız olur.

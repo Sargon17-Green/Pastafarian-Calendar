@@ -651,3 +651,66 @@ Invocation bağlamı sentinel tablosunun kullanıldığını, tablo uzunluğunu 
 Görünür drop builder'ın 46 satırının tamamı test-only normatif visible-drop builder ile aynı sonucu verir.
 
 Permutation rank kusuru veya Patch 08 henüz eklenmemiştir.
+
+
+## Aşama 16 — Keşif 08: 1-based order numarasını rank0 sanmak
+
+### Ne sanıldı
+
+Eski permütasyon helper'ı sıfır tabanlı bir rank bekler:
+
+```text
+oldPermutationUnrank0(rank0)
+```
+
+Geçerli aralığı:
+
+```text
+0..719
+```
+
+ve bu aralıkta lexicographic altı-kâse permütasyonunu doğru biçimde unrank eder.
+
+Yeni tarihsel kusur helper'ın içinde değildir.
+
+Drop değerinden önce 1-based order numarası üretilir:
+
+```text
+oneBased = regularMod(drop-1,720)+1
+```
+
+Legacy çağrı yolu bu `1..720` değerini yanlışlıkla doğrudan `rank0` sanır:
+
+```text
+order = oldPermutationUnrank0(oneBased)
+```
+
+### Ne keşfedildi
+
+Normatif order numarası `oneBased` ise sıfır tabanlı helper'a verilmesi gereken değer bir eksiktir.
+
+Discovery yolunda bu eksiltme yoktur.
+
+Bu nedenle `oneBased=1` normatif ilk permütasyon yerine rank0=1 olan ikinci permütasyonu döndürür.
+
+Aynı off-by-one bütün 1..719 değerlerinde sürer.
+
+`oneBased=720` ise 0-based helper'ın aralığının dışındadır. Order-table adapter bu tarihsel uç durumu warning/scar olarak kaydeder; bu recovery Patch 08 değildir.
+
+### Gerçek production yolu
+
+`LegacyPermutationOrderAdapter`, Stage 15'te exact hâle gelen 46 görünür drop değerinin her biri için legacy order türetir.
+
+Bu order tablosu gerçek `calendar_date_spaghetti` state-machine zincirine bağlanmıştır.
+
+Pours ve bowl alias katmanı henüz başlatılmaz; Stage 16 yalnızca permutation rank kusurunu görünür kılar.
+
+Yeni normatif regresyon gerçek order-table yolunun `i=1`, `i=2` ve `i=46` order değerlerini test-only normatif `bowl_order_from_drop` ile karşılaştırır. Üç alt örnek bilinçli olarak kırmızıdır.
+
+### Bu aşamada eklenen canavar katmanı
+
+Invocation bağlamında 46-order tablosu, son drop indeksi/değeri, hesaplanan 1-based değer ve dönen legacy order tutulur.
+
+Varsa `oneBased=720` uç durumu ayrıca invocation-local scar alanlarında tutulur.
+
+Bu aşamada `legacyRank0 = oneBased - 1` yoktur. Patch 08 zinciri henüz eklenmemiştir. Stage 15 sentinel olduğu gibi korunur.

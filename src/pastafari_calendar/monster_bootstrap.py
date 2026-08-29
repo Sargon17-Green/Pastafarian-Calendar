@@ -8,6 +8,7 @@ from .legacy_stones import LegacyStoneBuilderAdapter
 from .legacy_hidden import LegacyHiddenDropAdapter
 from .legacy_prior import LegacyPriorAdapter
 from .legacy_visible_grinds import LegacyVisibleDropBuilderAdapter
+from .legacy_permutation import LegacyPermutationOrderAdapter
 
 
 class MonsterError(RuntimeError):
@@ -96,6 +97,14 @@ class MonsterContext:
     patch07_sentinel_present: bool = False
     patch07_table_length: int = 0
     patch07_applied: bool = False
+    legacy_permutation_order_table: tuple[tuple[int, ...], ...] | None = None
+    legacy_permutation_order_count: int = 0
+    legacy_permutation_last_drop_index: int | None = None
+    legacy_permutation_last_drop_value: int | None = None
+    legacy_permutation_last_one_based: int | None = None
+    legacy_permutation_last_order: tuple[int, ...] | None = None
+    legacy_permutation_invalid_one_based: int | None = None
+    legacy_permutation_invalid_drop_index: int | None = None
 
 
 class BaseMetrics:
@@ -155,3 +164,4 @@ class MonsterManager:
         self.legacy_hidden = LegacyHiddenDropAdapter()
         self.legacy_prior = LegacyPriorAdapter()
         self.legacy_visible_drops = LegacyVisibleDropBuilderAdapter()
+        self.legacy_permutation = LegacyPermutationOrderAdapter()

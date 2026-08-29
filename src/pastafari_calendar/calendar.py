@@ -140,7 +140,31 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
 
         manager.metrics.bump(local_ctx, "legacy.visibleDrop.builds")
         local_ctx.status = "ESKİ_GÖRÜNÜR_DAMLALAR_HAZIR"
-        local_ctx.phase = "AŞAMA_14_BEKLEME"
+        local_ctx.phase = "ESKİ_PERMÜTASYON_SIRALARI"
+
+    def legacy_permutation_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        if local_ctx.legacy_visible_drop_table is None:
+            raise RuntimeError(
+                "Görünür damlalar permütasyon sıralarından önce hazır olmalıdır"
+            )
+
+        manager.legacy_permutation.build_order_table(
+            local_ctx,
+            local_ctx.legacy_visible_drop_table,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.permutation.orderTables",
+        )
+        local_ctx.status = "ESKİ_PERMÜTASYON_SIRALARI_HAZIR"
+        local_ctx.phase = "AŞAMA_16_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -150,6 +174,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_GİZLİ_DAMLALAR", legacy_hidden_handler)
     manager.dispatcher.register("ESKİ_GÖRÜNÜR_GEÇMİŞ", legacy_prior_handler)
     manager.dispatcher.register("ESKİ_GÖRÜNÜR_DAMLALAR", legacy_visible_drop_handler)
+    manager.dispatcher.register("ESKİ_PERMÜTASYON_SIRALARI", legacy_permutation_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -160,5 +186,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "On beşinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "On altıncı aşamada üretim takvim yolu henüz birleştirilmedi"
     )
