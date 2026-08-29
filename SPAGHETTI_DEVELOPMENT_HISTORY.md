@@ -996,3 +996,22 @@ Li correction vive in un detour separat. `fallingFactorialDistinct` usa arithmet
 Li witness repeated old `[6,6,10,10,17,9]` resta demonstrabil, ma li route semantic retorna `[3,11,4,9,12,5]`. Li suite complet deven verd. Tests adicional confirma falling factorial exact, unrank exhaustiv por spaces micri, raw-before-patch, same-ring selection, identity-return quand bad==correct, state invocation-local e absence de code futur.
 
 Patch 23 ne es anticipat: `VirtualLegacyList` e li month-length materialization defect resta por Stage 46/47 secun li progression historic.
+
+
+## Stage 46 — DISCOVERY 23
+
+### Quo li old API credeva
+
+Pos li correction de nomes distinct, li implementation historic arriva al structure de mensus e tracta li familie de longores quam un collection que deve esser materialisat completmen ante selection. `legacyMaterializeMonthLengthWays` enumera recursivmen omni row legal in ordre lexicografic e retorna un `Array` real. `LegacyMonthLengthAllWaysAPI` conserva ti façade "all ways" quam scar explicit.
+
+### Quo esset trovat
+
+Li defect ne es un ordine semantic wrong in un familie micri; it es li assumption que li familie posse esser materialisat. In li route real de Discovery 23, li year selectet have 1000 dies e li structure sauce selecte 16 mensus. Li familie de bounded compositions por ti request have exactmen `5239332298078798668173613753510` membres secun li reference JavaScript test-only. Un liste concret de tal magnitude ne posse esser constructet practicmen.
+
+### Demonstration sin OOM
+
+Por ne transformar li discovery in un crash de memoria, li handler executa li sam enumerator legacy con un cap diagnostic de 2048 rows. Li first 2048 arrays es materialisat realmen; li enumerator detecte un row ulterior e marca `exceededLimit`. Li production ne calcula li count complet e ne introducte un structure virtual. Li count gigant es derivat exclusivmen in li test de reference del sam linea JavaScript.
+
+### Limite historic
+
+Stage 46 resta intentionalmen red. `VirtualLegacyList` ne existe ancor; ne existe anc un DP count production o un `itemAt1` lexicografic. Patch 23 deve venir solmen in Stage 47 e deve conservar li API legacy quam scar, durant que un backend virtual furni count exact e unrank exact sin materialisation complet. Li defect de month weaving de Patch 24 resta absent.

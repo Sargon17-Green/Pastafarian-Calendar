@@ -603,6 +603,12 @@ class BaseValidationManager {
     }
   }
 
+  requirePatch22Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_22_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un selection de nomes distinct valid por Discovery 23.');
+    }
+  }
+
   requireStructureSauceResult(result) {
     if (!result || typeof result !== 'object' || !Array.isArray(result.bowls) || result.bowls.length < 7 ||
         !Array.isArray(result.orderAt46Latch) || result.orderAt46Latch.length !== 6) {
@@ -3651,6 +3657,168 @@ class RepeatedNamePatchWrapper {
   }
 }
 
+
+function legacyEnumerateConcreteMonthLengthWays(totalDays, monthCount, stopAfter) {
+  if (!Number.isInteger(totalDays) || totalDays < 1) {
+    throw new RangeError('Li API legacy de longores de mensus exige un total de dies positiv.');
+  }
+  if (!Number.isInteger(monthCount) || monthCount < 1) {
+    throw new RangeError('Li API legacy de longores de mensus exige un quantitá de mensus positiv.');
+  }
+  if (stopAfter !== null && (!Number.isInteger(stopAfter) || stopAfter < 1)) {
+    throw new RangeError('Li limite diagnostic del materialisation legacy deve esser un integer positiv o null.');
+  }
+  const minTotal = monthCount * 4;
+  const maxTotal = monthCount * 123;
+  if (totalDays < minTotal || totalDays > maxTotal) return { ways: [], exceededLimit: false };
+
+  const ways = [];
+  const prefix = new Array(monthCount);
+  let exceededLimit = false;
+  function visit(position, remaining) {
+    if (exceededLimit) return;
+    if (position === monthCount) {
+      if (remaining === 0) {
+        if (stopAfter !== null && ways.length >= stopAfter) {
+          exceededLimit = true;
+          return;
+        }
+        ways.push(prefix.slice());
+      }
+      return;
+    }
+    const slotsAfter = monthCount - position - 1;
+    const minimumAfter = slotsAfter * 4;
+    const maximumAfter = slotsAfter * 123;
+    for (let length = 4; length <= 123; length += 1) {
+      const nextRemaining = remaining - length;
+      if (nextRemaining < minimumAfter) break;
+      if (nextRemaining > maximumAfter) continue;
+      prefix[position] = length;
+      visit(position + 1, nextRemaining);
+      if (exceededLimit) return;
+    }
+  }
+  visit(0, totalDays);
+  return { ways, exceededLimit };
+}
+
+function legacyMaterializeMonthLengthWays(totalDays, monthCount) {
+  // Li scar historic retorna un Array concret con omni vias; it ne have null backend virtual.
+  return legacyEnumerateConcreteMonthLengthWays(totalDays, monthCount, null).ways;
+}
+
+function monthCountAnswerRingFromSauce(sauceResult) {
+  if (!sauceResult || !Array.isArray(sauceResult.bowls) || !Array.isArray(sauceResult.orderAt46Latch)) {
+    throw new TypeError('Li selection del quantitá de mensus exige un structure sauce complet.');
+  }
+  const nextBowl = nextBowlFromOrderAt46Latch(sauceResult.orderAt46Latch, 3);
+  return answerRingFromCurrentState(sauceResult.bowls, 3, nextBowl, 30n);
+}
+
+function monthLengthAnswerRingFromSauce(sauceResult) {
+  if (!sauceResult || !Array.isArray(sauceResult.bowls) || !Array.isArray(sauceResult.orderAt46Latch)) {
+    throw new TypeError('Li selection de longores de mensus exige un structure sauce complet.');
+  }
+  const nextBowl = nextBowlFromOrderAt46Latch(sauceResult.orderAt46Latch, 3);
+  return answerRingFromCurrentState(sauceResult.bowls, 3, nextBowl, 31n);
+}
+
+class LegacyMonthLengthAllWaysAPI {
+  allWays(totalDays, monthCount) {
+    return legacyMaterializeMonthLengthWays(totalDays, monthCount);
+  }
+
+  probeAllWays(totalDays, monthCount, probeLimit) {
+    // Discovery 23 usa li sam enumeration concret ma arresta un probe diagnostic ante allocation gigant; ti cap ne es semantic.
+    const probed = legacyEnumerateConcreteMonthLengthWays(totalDays, monthCount, probeLimit);
+    return {
+      ways: probed.ways,
+      exceededLimit: probed.exceededLimit,
+      concreteArrayContract: true
+    };
+  }
+}
+
+class Discovery23MonthLengthMaterializationHandler {
+  constructor(validationManager, metricsManager, legacyApi) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyApi = legacyApi;
+  }
+
+  handle(context) {
+    this.validationManager.requirePatch22Result(context);
+    const year = context.patch18ResolvedYear;
+    if (!year || typeof year !== 'object' || typeof year.openDay !== 'bigint' || typeof year.closeDay !== 'bigint') {
+      throw new BootstrapStageError('Discovery 23 exige li year semantic resoluet del chain precedent.');
+    }
+    const yearLengthBig = year.closeDay - year.openDay;
+    if (yearLengthBig < 1n || yearLengthBig > 5778n) {
+      throw new BootstrapStageError('Discovery 23 exige un longore de year intra li limite semantic 5778.');
+    }
+    const yearLength = Number(yearLengthBig);
+    let minMonths = Number((yearLengthBig + 122n) / 123n);
+    if (minMonths < 3) minMonths = 3;
+    let maxMonths = Number(yearLengthBig / 4n);
+    if (maxMonths > 47) maxMonths = 47;
+    if (minMonths > maxMonths) {
+      throw new BootstrapStageError('Li limites legacy del quantitá de mensus es inconsistent por Discovery 23.');
+    }
+    const semanticSauce = {
+      bowls: context.patch20SemanticSauceBowls.slice(),
+      orderAt46Latch: context.patch20SemanticOrderAt46Latch.slice()
+    };
+    const countStream = monthCountAnswerRingFromSauce(semanticSauce);
+    const countPick = selectionDispatcherWithWideDetour(countStream, BigInt(maxMonths - minMonths + 1));
+    const monthCount = minMonths + Number(countPick.output - 1n);
+    const lengthStream = monthLengthAnswerRingFromSauce(semanticSauce);
+    const probeLimit = 2048;
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery23MonthLengthMaterializationHandler';
+    context.phase = 'DISCOVERY_23_LEGACY_CONCRETE_MONTH_LENGTH_ALL_WAYS';
+    context.branchTrace.push('DISCOVERY_23_LEGACY_CONCRETE_MONTH_LENGTH_ALL_WAYS');
+
+    // Li old API es executet realmen sur li request semantic, ma solmen quam probe capat por demonstrar li materialisation sin provocar OOM.
+    const probe = this.legacyApi.probeAllWays(yearLength, monthCount, probeLimit);
+    context.legacyMonthLengthYearLength = yearLengthBig;
+    context.legacyMonthLengthMinMonths = minMonths;
+    context.legacyMonthLengthMaxMonths = maxMonths;
+    context.legacyMonthLengthCountStream = { ...countStream };
+    context.legacyMonthLengthCountSelectedRank = countPick.output;
+    context.legacyMonthLengthMonthCount = monthCount;
+    context.legacyMonthLengthSelectionStream = { ...lengthStream };
+    context.legacyMonthLengthApiContract = 'ALL_WAYS_CONCRETE_ARRAY';
+    context.legacyMonthLengthProbeLimit = probeLimit;
+    context.legacyMonthLengthProbeSample = probe.ways.map((row) => row.slice());
+    context.legacyMonthLengthProbeExceededLimit = probe.exceededLimit;
+    context.legacyMonthLengthConcreteArrayContract = probe.concreteArrayContract;
+    context.legacyMonthLengthMaterializerExecuted = true;
+    context.status = 'DISCOVERY_23_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery23.monthLengthConcreteApi.calls');
+    this.metricsManager.bump(context, 'discovery23.monthLengthProbe.calls');
+    if (probe.exceededLimit) this.metricsManager.bump(context, 'discovery23.monthLengthProbe.exceeded.calls');
+
+    return {
+      yearLength: yearLengthBig,
+      minMonths,
+      maxMonths,
+      monthCount,
+      countSelectedRank: countPick.output,
+      countStream: { ...countStream },
+      monthLengthStream: { ...lengthStream },
+      apiContract: context.legacyMonthLengthApiContract,
+      probeLimit,
+      probeSampleCount: probe.ways.length,
+      probeExceededLimit: probe.exceededLimit,
+      concreteArrayContract: probe.concreteArrayContract,
+      probeFirstWay: probe.ways.length > 0 ? probe.ways[0].slice() : null,
+      probeLastStoredWay: probe.ways.length > 0 ? probe.ways[probe.ways.length - 1].slice() : null
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -4476,6 +4644,12 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    this.legacyMonthLengthAllWaysAPI = new LegacyMonthLengthAllWaysAPI();
+    this.discovery23MonthLengthMaterializationHandler = new Discovery23MonthLengthMaterializationHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyMonthLengthAllWaysAPI
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -5197,6 +5371,34 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery23MonthLengthMaterialization(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      this.cutletPartitionPatchWrapper.repair(context);
+      this.discovery22RepeatedNameHandler.handle(context);
+      this.repeatedNamePatchWrapper.repair(context);
+      const result = this.discovery23MonthLengthMaterializationHandler.handle(context);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -5487,8 +5689,19 @@ function historicRepeatedNamesThroughMonsterPath(
   );
 }
 
+function discovery23LegacyMonthLengthMaterializationThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Discovery 23 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executeDiscovery23MonthLengthMaterialization(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 22; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 23; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -5568,6 +5781,8 @@ module.exports = Object.freeze({
   LegacyRepeatedNameGenerator,
   Discovery22RepeatedNameHandler,
   RepeatedNamePatchWrapper,
+  LegacyMonthLengthAllWaysAPI,
+  Discovery23MonthLengthMaterializationHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -5653,6 +5868,9 @@ module.exports = Object.freeze({
   fallingFactorialDistinct,
   partialPermutationUnrank,
   cutletNameAnswerRingFromSauce,
+  legacyMaterializeMonthLengthWays,
+  monthCountAnswerRingFromSauce,
+  monthLengthAnswerRingFromSauce,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -5698,5 +5916,6 @@ module.exports = Object.freeze({
   historicCutletPartitionThroughMonsterPath,
   discovery22LegacyRepeatedNamesThroughMonsterPath,
   historicRepeatedNamesThroughMonsterPath,
+  discovery23LegacyMonthLengthMaterializationThroughMonsterPath,
   calendarDateSpaghetti
 });

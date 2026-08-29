@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 45 de 55: PATCH 22** e li repository local es `GREEN`. Li generator repeated de Discovery 22 resta activ quam scar diagnostic, ma li resultate semantic de nomes usa nu un partial permutation distinct.
+Li linea es in **Stage 46 de 55: DISCOVERY 23** e li repository local es intentionalmen `EXPECTED_RED`. Omni regressions til Patch 22 resta verd; li unic divergence nov es que li API historic de month-lengths ancor expone un liste concret de "omni vias".
 
-`legacyNameRowWithRepeats(masterCount,itemCount)`, `LegacyRepeatedNameGenerator` e `Discovery22RepeatedNameHandler` resta intact. `RepeatedNamePatchWrapper` veni pos ti route legacy, conta li familie distinct per falling factorial, unranka lexicograficmen li partial permutation selectet ex li sam bowl 5 / seal 22 ring, e retorna li candidate legacy solmen si it es ja identic al candidate correct. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+`legacyMaterializeMonthLengthWays` e `LegacyMonthLengthAllWaysAPI` conserva ti contract concret. `Discovery23MonthLengthMaterializationHandler` veni pos li route complet de Patch 22, selecte li month count per bowl 3 / seal 30 e executa li enumerator old sur li request semantic quam un sondage capat. Por li witness de year length 1000 e 16 mensus, li sondage atinge 2048 rows e ancor have plu; li reference test-only demonstra un familie exact de `5239332298078798668173613753510` membres. Null `VirtualLegacyList` o code de Patch 23 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -24,20 +24,25 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 22 deve restar verd:
+Omni regressions til Patch 22 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li verifier e li test focal de Patch 22 deve esser verd:
+Li verifier deve esser verd:
 
 ```text
 node tests/verify-stage-01.js
-npm run test:patch-22
 ```
 
-Li suite complet deve esser `GREEN`:
+Li regression focal de Discovery 23 deve esser intentionalmen red:
+
+```text
+npm run test:discovery-23
+```
+
+Li suite complet deve esser `EXPECTED_RED` exclusivmen in Discovery 23:
 
 ```text
 npm test
@@ -354,3 +359,22 @@ Li decision final conserva exactmen li regul mandat: si `bad` e `correct` es ide
 Li witness de Stage 44 resta observabil: familie old `24137569`, rank `7563989`, `bad=[6,6,10,10,17,9]`. Li detour distinct usa familie `8910720`, rank `1348551` e rende `[3,11,4,9,12,5]`, identic al reference test-only. Un audit exhaustiv de 28 pares `(n,k)` micri e 16064 membres confirma li ordre lexicografic exact del unrank distinct.
 
 Omni regressions, li verifier, li test focal e li suite complet es verd. Null `VirtualLegacyList` de Patch 23, null `legacyChooseEachDaySeparately` de Patch 24 e null `oldContiguousMonthDayGuess` de Patch 25 es present.
+
+
+## Stage 46 — DISCOVERY 23
+
+### API legacy de "omni vias" concret
+
+Li proxim scar tracta li familie de longores de mensus quam un liste complet materialisat. `legacyMaterializeMonthLengthWays(totalDays,monthCount)` enumera compositions in ordine lexicografic per longore ascendent; chascun part es 4..123 e li summa deve esser `totalDays`. Li return es un `Array` concret de arrays. `LegacyMonthLengthAllWaysAPI.allWays` expone ti comportament directmen e ne have null count/unrank virtual.
+
+### Route real e sondage anti-OOM
+
+`Discovery23MonthLengthMaterializationHandler` exige un `PATCH_22_RESULT`, ergo li generator repeated legacy e li detour distinct ja ha esset executet. Ex li year semantic it deriva li longore, calcula li interval legal de month counts, questiona bowl 3 / seal 30 e selecte li month count con li dispatcher curt/wide existent. Li answer ring por li selection posterior de longores es derivat ex bowl 3 / seal 31 e conservat diagnosticmen.
+
+Executar `allWays` complet por li witness real vell esser destructiv. Por demonstrar li scar sin provocar OOM, li sam recursive enumerator es executet per `probeAllWays` con un cap diagnostic de 2048 rows. Ti sondage materialisa realmen arrays in li sam ordre e signala que li limite es superat; it ne conta li familie complet e ne decide null resultate semantic.
+
+### Witness EXPECTED_RED
+
+Li witness selecte un year de 1000 dies. Li limits de month count es 9..47 e bowl 3 / seal 30 selecte li octesim option, ergo 16 mensus. Li sondage old materialisa 2048 rows e signala que li enumeration continua. Li reference test-only usa su bounded-composition counter normativ e trova exactmen `5239332298078798668173613753510` membres legal.
+
+Li regression nov exige un representation virtual scalabil e dunque falla contra li actual contract `ALL_WAYS_CONCRETE_ARRAY`. Omni tests precedent resta verd. Null `VirtualLegacyList`, null DP count production e null `itemAt1` lexicografic es includet; ili apartene solmen a Stage 47 — PATCH 23. Null code de Patch 24 es anticipat.

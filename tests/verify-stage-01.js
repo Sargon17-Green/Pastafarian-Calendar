@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 22 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 23 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -2087,7 +2087,22 @@ group('Patch 22 conserva li candidate legacy e selecte un partial permutation di
   ok(!('legacyChooseEachDaySeparately' in production));
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 22', () => {
+group('Discovery 23 expone li materialisation concret legacy sin materialisar li familie gigant', () => {
+  ok(typeof production.legacyMaterializeMonthLengthWays === 'function');
+  ok(typeof production.LegacyMonthLengthAllWaysAPI === 'function');
+  ok(typeof production.Discovery23MonthLengthMaterializationHandler === 'function');
+  deepEq(production.legacyMaterializeMonthLengthWays(13, 3), [[4,4,5],[4,5,4],[5,4,4]]);
+  const api = new production.LegacyMonthLengthAllWaysAPI();
+  const probe = api.probeAllWays(40, 5, 16);
+  ok(Array.isArray(probe.ways));
+  eq(probe.ways.length, 16);
+  ok(probe.exceededLimit);
+  ok(probe.concreteArrayContract);
+  ok(!('VirtualLegacyList' in production));
+  ok(!('legacyChooseEachDaySeparately' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 23', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2099,4 +2114,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 22.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 23.');
