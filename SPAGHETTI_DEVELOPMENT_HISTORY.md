@@ -582,3 +582,21 @@ Li monster adjunte `answerRingFromCurrentState`, quel deriva `first` e `directio
 ### Pro quo li nov layer ne change altri semantics
 
 Li answer ring usa solmen state invocation-local ja derivat per patches precedent e ne muta bowls, latch, stones o catalog. `biasedLegacyPick` ne es usat retroactivmen in alcun selector anterior, e null acceptance-limit o wide selection existe in production. Omni regressions til Patch 12 resta verd; li unic failure intentional es li comparison normativ de Discovery 13.
+
+## Stage 27 — PATCH 13
+
+### Scar historic conservat
+
+`biasedLegacyPick(x,N)` resta sin modification. It continua mappar directmen `x` per `regularMod(x-1,N)+1`, e li route separat de Discovery 13 continua esser disponibil por provar que ti call es biased si `x` cade in li caude rejectend.
+
+### Circumition exact
+
+`patchedSmallPick(stream,N)` implementa li ordine mandat: `limit=(M_OLD/N)*N`, `offset=0`, poy `x=ringAnswerAt(stream,offset)`; durante que `x>limit`, it incrementa offset e lee denov ex li sam ring. Solmen pos que `x<=limit`, li function voca `biasedLegacyPick(x,N)`. Li helper legacy ne es correctet in-place.
+
+### Route monster
+
+`SelectionRejectionPatchWrapper` es conectet directmen pos `NextBowlPatchWrapper`. Li route reparat ne passa per `Discovery13BiasedSelectionHandler`, nam ti handler es li scar quel voca li selector legacy ante rejection. Li wrapper conserva li acceptance-limit, accepted offset, accepted answer e li output semantic in `BaseMonsterContext`, e un metric separat registra li call de Patch 13.
+
+### Pro quo li patch es equivalent
+
+Por `1<=N<=M_OLD`, li accepted region ha grandore multipli exact de `N`; ergo li direct modulo historic es unbiased solmen pos rejection. Avansar per `ringAnswerAt` conserva li unic answer ring e su direction; null stream alternativ es creat. Li witness del Foundation rejecte exactmen un answer e retorna `N`, e tests additiv concorda con li reference normativ local. Null `wideDetour` o logic de Patch 14 es addit.

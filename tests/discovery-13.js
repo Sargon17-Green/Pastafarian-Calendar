@@ -14,6 +14,7 @@ assert.notEqual(
   production.biasedLegacyPick(syntheticInitial, syntheticN),
   normative.chooseRankShort(syntheticStream, syntheticN)
 );
+assert.equal(production.patchedSmallPick(syntheticStream, syntheticN), 1n);
 
 const calculationDay = normative.FOUNDATION_DAY;
 const targetDay = normative.FOUNDATION_DAY;
@@ -35,14 +36,13 @@ const expectedStream = production.answerRingFromCurrentState(
 assert.ok(expectedStream.first * 2n > production.M_OLD);
 assert.equal(expectedStream.directionStep, -1n);
 
-// Ti N rende li prim answer exactmen un unit supra li limite curt, ergo li rejection normativ es de un passu solmen.
 const N = expectedStream.first - 1n;
 const acceptanceLimit = (production.M_OLD / N) * N;
 assert.equal(acceptanceLimit, N);
 assert.equal(production.ringAnswerAt(expectedStream, 0n), N + 1n);
 assert.equal(production.ringAnswerAt(expectedStream, 1n), N);
 
-const routed = production.discovery13LegacyBiasedSelectionThroughMonsterPath(
+const legacyRouted = production.discovery13LegacyBiasedSelectionThroughMonsterPath(
   calculationDay,
   targetDay,
   counts,
@@ -51,39 +51,46 @@ const routed = production.discovery13LegacyBiasedSelectionThroughMonsterPath(
   seal,
   N
 );
-assert.deepEqual(routed.stream, expectedStream);
-assert.equal(routed.context.currentHandler, 'Discovery13BiasedSelectionHandler');
-assert.equal(routed.context.previousHandler, 'NextBowlPatchWrapper');
-assert.equal(routed.context.phase, 'DISCOVERY_13_BIASED_MODULO_SELECTION');
-assert.equal(routed.context.status, 'DISCOVERY_13_LEGACY_RESULT');
-assert.equal(routed.context.legacySelectionSeal, seal);
-assert.equal(routed.context.legacySelectionStreamFirst, expectedStream.first);
-assert.equal(routed.context.legacySelectionDirectionStep, expectedStream.directionStep);
-assert.equal(routed.context.legacySelectionN, N);
-assert.equal(routed.context.legacySelectionInitialAnswer, N + 1n);
-assert.equal(routed.result, 1n);
-assert.equal(routed.context.metrics['discovery13.biasedModulo.calls'], 1n);
-assert.deepEqual(routed.context.branchTrace.slice(-4), [
-  'PATCH_11_ORDER_AT_46_LATCH',
-  'DISCOVERY_12_FIXED_ID_NEXT_BOWL',
-  'PATCH_12_LATCH_CIRCULAR_SUCCESSOR',
-  'DISCOVERY_13_BIASED_MODULO_SELECTION'
-]);
+assert.deepEqual(legacyRouted.stream, expectedStream);
+assert.equal(legacyRouted.context.currentHandler, 'Discovery13BiasedSelectionHandler');
+assert.equal(legacyRouted.context.previousHandler, 'NextBowlPatchWrapper');
+assert.equal(legacyRouted.context.phase, 'DISCOVERY_13_BIASED_MODULO_SELECTION');
+assert.equal(legacyRouted.context.status, 'DISCOVERY_13_LEGACY_RESULT');
+assert.equal(legacyRouted.context.legacySelectionInitialAnswer, N + 1n);
+assert.equal(legacyRouted.result, 1n);
+assert.equal(legacyRouted.context.metrics['discovery13.biasedModulo.calls'], 1n);
+assert.notEqual(legacyRouted.result, normative.chooseRankShort(legacyRouted.stream, N));
+
+const patchedRouted = production.historicSmallSelectionThroughMonsterPath(
+  calculationDay,
+  targetDay,
+  counts,
+  stones,
+  queriedBowlId,
+  seal,
+  N
+);
+assert.deepEqual(patchedRouted.stream, expectedStream);
+assert.equal(patchedRouted.result, N);
+assert.equal(patchedRouted.result, normative.chooseRankShort(patchedRouted.stream, N));
+assert.equal(patchedRouted.context.patch13AcceptanceLimit, N);
+assert.equal(patchedRouted.context.patch13AcceptedOffset, 1n);
+assert.equal(patchedRouted.context.patch13AcceptedAnswer, N);
+assert.equal(patchedRouted.context.patch13LegacyCallPreserved, true);
+assert.ok(!patchedRouted.context.branchTrace.includes('DISCOVERY_13_BIASED_MODULO_SELECTION'));
 
 const legacySource = production.biasedLegacyPick.toString();
 assert.match(legacySource, /regularMod\(x - 1n, N\) \+ 1n/);
-assert.doesNotMatch(legacySource, /while|acceptanceLimit|floorDiv|ringAnswerAt/);
+assert.doesNotMatch(legacySource, /while|limit|ringAnswerAt/);
 const adapterSource = production.LegacyBiasedSelectionAdapter.prototype.call.toString();
 assert.match(adapterSource, /ringAnswerAt\(stream, 0n\)/);
 assert.match(adapterSource, /biasedLegacyPick\(x, N\)/);
-assert.doesNotMatch(adapterSource, /while|limit|offset \+=|offset = offset \+/);
+assert.doesNotMatch(adapterSource, /while|limit|offset \+=/);
+const patchSource = production.patchedSmallPick.toString();
+assert.match(patchSource, /const limit = \(M_OLD \/ N\) \* N/);
+assert.match(patchSource, /while \(x > limit\)/);
+assert.match(patchSource, /offset \+= 1n/);
+assert.match(patchSource, /return biasedLegacyPick\(x, N\)/);
+assert.ok(patchSource.indexOf('while (x > limit)') < patchSource.indexOf('biasedLegacyPick(x, N)'));
 
-const normativeExpected = normative.chooseRankShort(routed.stream, N);
-assert.equal(normativeExpected, N);
-console.log('DISCOVERY 13: li selector legacy usa directmen li prim answer e ne fa rejection sur li answer ring.');
-console.log('first=' + routed.stream.first + ', N=' + N + ', legacy=' + routed.result + ', normative=' + normativeExpected);
-assert.equal(
-  routed.result,
-  normativeExpected,
-  'DISCOVERY 13 EXPECTED RED: biasedLegacyPick es vocat ante rejection; li prim answer rejectet ne deve esser mappat directmen al familie.'
-);
+console.log('DISCOVERY 13 REGRESSION: PASS pos Patch 13; li selector legacy resta biased, ma li route reparat rejecte ante li call legacy.');

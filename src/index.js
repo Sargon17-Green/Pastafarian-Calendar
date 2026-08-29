@@ -153,6 +153,11 @@ class BaseMonsterContext {
     this.legacySelectionN = null;
     this.legacySelectionInitialAnswer = null;
     this.legacySelectionOutput = null;
+    this.patch13AcceptanceLimit = null;
+    this.patch13AcceptedOffset = null;
+    this.patch13AcceptedAnswer = null;
+    this.patch13LegacyCallPreserved = false;
+    this.patch13Output = null;
   }
 }
 
@@ -1214,6 +1219,31 @@ function biasedLegacyPick(x, N) {
   return regularMod(x - 1n, N) + 1n;
 }
 
+function patchedSmallPick(stream, N) {
+  if (!stream || typeof stream.first !== 'bigint' || typeof stream.directionStep !== 'bigint') {
+    throw new TypeError('Li selector curt reparat exige un answer ring exact.');
+  }
+  if (stream.first < 1n || stream.first > M_OLD ||
+      (stream.directionStep !== 1n && stream.directionStep !== -1n)) {
+    throw new RangeError('Li answer ring del selector curt es extra su contract.');
+  }
+  if (typeof N !== 'bigint') {
+    throw new TypeError('Li grandore del familie curt reparat deve esser un BigInt exact.');
+  }
+  if (N < 1n || N > M_OLD) {
+    throw new RangeError('Li familie curt reparat deve haver un grandore inter 1 e M.');
+  }
+  const limit = (M_OLD / N) * N;
+  let offset = 0n;
+  let x = ringAnswerAt(stream, offset);
+  while (x > limit) {
+    offset += 1n;
+    x = ringAnswerAt(stream, offset);
+  }
+  // Li helper legacy resta intact e es vocat solmen pos que li rejection ha removet li modulo bias.
+  return biasedLegacyPick(x, N);
+}
+
 
 class LegacyOverwritableOrderMemoryAdapter {
   call(counts, stones) {
@@ -1404,6 +1434,41 @@ class Discovery13BiasedSelectionHandler {
     context.status = 'DISCOVERY_13_LEGACY_RESULT';
     this.metricsManager.bump(context, 'discovery13.biasedModulo.calls');
     return context.legacySelectionOutput;
+  }
+}
+
+class SelectionRejectionPatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, stream, seal, N) {
+    // Ti route ne voca Discovery13BiasedSelectionHandler: li helper legacy ne deve esser vocat ante rejection.
+    this.validationManager.requirePatch12Result(context);
+    this.validationManager.requireAnswerRing(stream);
+    this.validationManager.requireExactInteger(seal);
+    this.validationManager.requireShortFamilySize(N);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'SelectionRejectionPatchWrapper';
+    context.phase = 'PATCH_13_REJECTION_BEFORE_LEGACY_PICK';
+    context.branchTrace.push('PATCH_13_REJECTION_BEFORE_LEGACY_PICK');
+    const limit = (M_OLD / N) * N;
+    let offset = 0n;
+    let x = ringAnswerAt(stream, offset);
+    while (x > limit) {
+      offset += 1n;
+      x = ringAnswerAt(stream, offset);
+    }
+    context.patch13AcceptanceLimit = limit;
+    context.patch13AcceptedOffset = offset;
+    context.patch13AcceptedAnswer = x;
+    // patchedSmallPick repete li traversal intentionalmen quam layer compatibil e voca li old helper solmen pos rejection.
+    context.patch13Output = patchedSmallPick(stream, N);
+    context.patch13LegacyCallPreserved = true;
+    context.status = 'PATCH_13_RESULT';
+    this.metricsManager.bump(context, 'patch13.selectionRejection.calls');
+    return context.patch13Output;
   }
 }
 
@@ -2130,6 +2195,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyBiasedSelectionAdapter
     );
+    this.selectionRejectionPatchWrapper = new SelectionRejectionPatchWrapper(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -2465,6 +2534,25 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch13SmallSelection(calculationDay, targetDay, counts, stones, queriedBowlId, seal, N) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery11OverwrittenOrderHandler.handle(context, counts, stones);
+      const latched = this.patch11OrderAt46LatchWrapper.repair(context, counts, stones);
+      this.discovery12NextBowlHandler.handle(context, latched.orderAt46Latch, queriedBowlId);
+      const nextBowlId = this.nextBowlPatchWrapper.repair(context, latched.orderAt46Latch, queriedBowlId);
+      const stream = answerRingFromCurrentState(
+        context.patch11FinalBowls, queriedBowlId, nextBowlId, seal
+      );
+      const result = this.selectionRejectionPatchWrapper.repair(context, stream, seal, N);
+      return { result, context, stream: { first: stream.first, directionStep: stream.directionStep } };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -2587,8 +2675,16 @@ function discovery13LegacyBiasedSelectionThroughMonsterPath(
   );
 }
 
+function historicSmallSelectionThroughMonsterPath(
+  calculationDay, targetDay, counts, stones, queriedBowlId, seal, N
+) {
+  return new BaseMonsterManager().executePatch13SmallSelection(
+    calculationDay, targetDay, counts, stones, queriedBowlId, seal, N
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 13; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 13; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -2640,6 +2736,7 @@ module.exports = Object.freeze({
   NextBowlPatchWrapper,
   LegacyBiasedSelectionAdapter,
   Discovery13BiasedSelectionHandler,
+  SelectionRejectionPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -2688,6 +2785,7 @@ module.exports = Object.freeze({
   answerRingFromCurrentState,
   ringAnswerAt,
   biasedLegacyPick,
+  patchedSmallPick,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -2714,5 +2812,6 @@ module.exports = Object.freeze({
   discovery12LegacyNextBowlThroughMonsterPath,
   historicNextBowlThroughMonsterPath,
   discovery13LegacyBiasedSelectionThroughMonsterPath,
+  historicSmallSelectionThroughMonsterPath,
   calendarDateSpaghetti
 });

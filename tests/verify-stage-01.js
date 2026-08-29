@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 13 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 13 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,6 @@ group('null textu hebreic o code posterior a Discovery 13 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'patchedSmallPick', 'SelectionRejectionPatchWrapper',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
@@ -1345,7 +1344,46 @@ group('Discovery 13 expone li modulo bias ante rejection e conserva li patches p
   ok(!adapterSource.includes('while'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 13', () => {
+group('Patch 13 rejecte sur li sam answer ring ante li unic call semantic al selector legacy', () => {
+  const oldSource = production.biasedLegacyPick.toString();
+  ok(oldSource.includes('return regularMod(x - 1n, N) + 1n;'));
+  ok(!oldSource.includes('while'));
+  const patchSource = production.patchedSmallPick.toString();
+  ok(patchSource.includes('const limit = (M_OLD / N) * N;'));
+  ok(patchSource.includes('while (x > limit)'));
+  ok(patchSource.includes('offset += 1n'));
+  ok(patchSource.indexOf('while (x > limit)') < patchSource.indexOf('return biasedLegacyPick(x, N);'));
+
+  const synthetic = { first: production.M_OLD, directionStep: 1n };
+  eq(production.patchedSmallPick(synthetic, 10n), o.chooseRankShort(synthetic, 10n));
+
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const sauce = production.sauceWithOrderAt46Latch(counts, stones);
+  const queriedId = 1;
+  const seal = 1n;
+  const nextId = production.nextBowlFromOrderAt46Latch(sauce.orderAt46Latch, queriedId);
+  const stream = production.answerRingFromCurrentState(sauce.bowls, queriedId, nextId, seal);
+  const N = stream.first - 1n;
+  const routed = production.historicSmallSelectionThroughMonsterPath(
+    f, f, counts, stones, queriedId, seal, N
+  );
+  eq(routed.result, o.chooseRankShort(stream, N));
+  eq(routed.context.currentHandler, 'SelectionRejectionPatchWrapper');
+  eq(routed.context.previousHandler, 'NextBowlPatchWrapper');
+  eq(routed.context.phase, 'PATCH_13_REJECTION_BEFORE_LEGACY_PICK');
+  eq(routed.context.status, 'PATCH_13_RESULT');
+  eq(routed.context.patch13AcceptanceLimit, N);
+  eq(routed.context.patch13AcceptedOffset, 1n);
+  eq(routed.context.patch13AcceptedAnswer, N);
+  eq(routed.context.patch13LegacyCallPreserved, true);
+  eq(routed.context.metrics['patch13.selectionRejection.calls'], 1n);
+  eq(routed.context.metrics['discovery13.biasedModulo.calls'], undefined);
+  ok(!routed.context.branchTrace.includes('DISCOVERY_13_BIASED_MODULO_SELECTION'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 13', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1357,4 +1395,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression EXPECTED_RED de Discovery 13.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in li statu GREEN de Patch 13.');

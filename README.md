@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 26 de 55: DISCOVERY 13**. Omni scars e patches til Patch 12 resta intact e testabil. `biasedLegacyPick(x,N)` conserva li selector historic quel applica directmen `regularMod(x-1,N)+1` al prim answer del ring, sin un rejection precedent.
+Li linea es in **Stage 27 de 55: PATCH 13**. Omni scars e patches til Patch 12 resta intact e testabil. `biasedLegacyPick(x,N)` continua representar li selector historic biased, durante que `patchedSmallPick(stream,N)` rejecte li caude non-uniform ante vocar li old helper.
 
-Li route real de Discovery 13 passa per li latch de Patch 11 e li next-bowl circular de Patch 12, deriva un answer ring exact ex li six bowls final, e poy `LegacyBiasedSelectionAdapter` voca `biasedLegacyPick` immediatmen sur `ringAnswerAt(stream,0)`. Li regression nov es intentionalmen rubi. Null acceptance-limit, null progression de rejection e null Patch 13 es present.
+Li route semantic de Patch 13 passa per li latch de Patch 11 e li next-bowl circular de Patch 12, deriva li answer ring exact e usa `SelectionRejectionPatchWrapper`. Ti route ne voca `Discovery13BiasedSelectionHandler`, pro que li handler historic executa li selector ante rejection. Omni regressions til Discovery 13 es verd. Null `wideDetour` o Patch 14 es present.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -129,3 +129,19 @@ Li latch de drop 46 ja es exact e stabil, ma li layer historic de next-bowl cons
 Li state precedent ja posse derivar un next-bowl exact ex `orderAt46Latch`. Ti stage adjunte `answerRingFromCurrentState` e `ringAnswerAt` por representar li answer ring exact, ma conserva un selector historic separat: `biasedLegacyPick(x,N)` fa directmen `regularMod(x-1,N)+1`. `LegacyBiasedSelectionAdapter` prende solmen `ringAnswerAt(stream,0)` e passa ti prim answer al selector, sin examinar si it cade in li parte rejectend del ring.
 
 `Discovery13BiasedSelectionHandler` es conectet pos `NextBowlPatchWrapper`, talmen li witness real usa li six bowls final e li successor circular ja reparat. Por li Foundation, bowl 1 e seal 1, li prim answer es `90411690289794975082828500805689671121` con direction `-1`. Si `N` es un minus quam ti first, li prim answer es rejectend e li sequent answer es exactmen `N`; li legacy tamen mappa li prim answer directmen e rende 1. Li correction de rejection apartene exclusivmen a Stage 27 / Patch 13. Null `wideDetour` o logic de Patch 14 es present.
+
+## Stage 27 — PATCH 13
+
+### Quo esset conservat
+
+`biasedLegacyPick(x,N)` resta fisicmen intact e continua retornar `regularMod(x-1,N)+1` sin rejection quand on lo voca directmen. `LegacyBiasedSelectionAdapter` e `Discovery13BiasedSelectionHandler` resta egalmen disponibles por demonstrar li scar historic de Stage 26.
+
+### Quo li patch adjunte
+
+`patchedSmallPick(stream,N)` calcula `limit=(M_OLD/N)*N`, prende `ringAnswerAt(stream,0)` e avansa un offset sur exactmen li sam answer ring durante que `x>limit`. Solmen pos trovar un `x` acceptabil it voca `biasedLegacyPick(x,N)`. Li helper legacy ne es duplicat ni correctet in su fonte.
+
+`SelectionRejectionPatchWrapper` deriva e conserva li limite, li offset acceptat e li answer acceptat in li context. Li route reparat ne passa per `Discovery13BiasedSelectionHandler`, pro que ti handler per definition historic voca li modulo selector ante rejection. Ti omission es intentional e necessari por respectar li ordine normativ del calls.
+
+### Verification
+
+Li witness real del Foundation continua monstrar `legacy=1` por li prim answer rejectend, durante que li route reparat rejecte un passu e retorna `N`. Un gril additiv de streams e families curt concorda con li reference normativ local. Null `wideDetour` o logic de Patch 14 es present.
