@@ -61,10 +61,6 @@ class Stage40Discovery20Tests(unittest.TestCase):
             sauce_result = selector_call.call_args.args[2]
 
             self.assertEqual(
-                sauce_result.target_day,
-                FOUNDATION_DAY + 3,
-            )
-            self.assertEqual(
                 ctx.legacy_structure_original_target_day,
                 FOUNDATION_DAY + 3,
             )
@@ -72,7 +68,11 @@ class Stage40Discovery20Tests(unittest.TestCase):
                 ctx.legacy_structure_year_first_day,
                 ctx.legacy_structure_original_target_day,
             )
-            self.assertTrue(
+            self.assertEqual(
+                sauce_result.target_day,
+                ctx.legacy_structure_year_first_day,
+            )
+            self.assertFalse(
                 ctx.legacy_structure_old_used_by_selector,
             )
             self.assertTrue(
@@ -80,7 +80,13 @@ class Stage40Discovery20Tests(unittest.TestCase):
             )
             self.assertEqual(
                 ctx.legacy_structure_semantic_source,
-                "original-target",
+                "year-first-day",
+            )
+            self.assertTrue(
+                ctx.patch20_old_ghost_recorded,
+            )
+            self.assertFalse(
+                ctx.patch20_old_ghost_reached_selector,
             )
 
     def test_current_line_structure_sauce_core_matches_test_only_reference(self):
@@ -146,22 +152,33 @@ class Stage40Discovery20Tests(unittest.TestCase):
 
         self.assertEqual(
             core_call.call_count,
-            1,
+            2,
         )
         self.assertEqual(
-            core_call.call_args.args,
+            core_call.call_args_list[0].args,
             (
                 FOUNDATION_DAY,
                 FOUNDATION_DAY + 3,
             ),
         )
         self.assertNotEqual(
-            core_call.call_args.args[1],
+            core_call.call_args_list[0].args[1],
             year_first_day,
         )
         self.assertEqual(
-            ctx.legacy_structure_selector_input_target_day,
+            core_call.call_args_list[1].args,
+            (
+                FOUNDATION_DAY,
+                year_first_day,
+            ),
+        )
+        self.assertEqual(
+            ctx.patch20_old_ghost_target_day,
             FOUNDATION_DAY + 3,
+        )
+        self.assertEqual(
+            ctx.legacy_structure_selector_input_target_day,
+            year_first_day,
         )
 
     def test_structure_sauce_state_is_invocation_local(self):
@@ -185,8 +202,11 @@ class Stage40Discovery20Tests(unittest.TestCase):
             first.legacy_structure_calls,
             1,
         )
-        self.assertTrue(
+        self.assertFalse(
             first.legacy_structure_old_used_by_selector,
+        )
+        self.assertTrue(
+            first.patch20_old_ghost_recorded,
         )
         self.assertIsNotNone(
             first.legacy_structure_selector_token,

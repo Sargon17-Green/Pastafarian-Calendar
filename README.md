@@ -1,28 +1,28 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırkıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 40/55, `DISCOVERY 20` durumundadır.
+Aşama 41/55, `PATCH 20` durumundadır.
 
-Exact historical helper:
+Stage 40 `oldStructureSauce(cDay,originalTargetDay)` helper gövdesi aynen korunur ve her structure call'da gerçekten çalışır.
+
+Old result artık ghost state'te saklanır ve selector'a verilmez.
+
+`originalTargetDay != year_first_day` olduğunda `StructureSaucePatchWrapper` current Python implementation ile:
 
 ```text
-oldStructureSauce(cDay,originalTargetDay)
+sauceWithCurrentScars(cDay,year_first_day)
 ```
 
-production'a eklenmiştir.
+sonucunu yeniden hesaplar.
 
-Real calendar path user original target için sauce'u daha önce zaten hesapladığından helper mevcut final bowls ve drop-46 latch sonucunu invocation-local binding üzerinden kullanır; eski sauce phases ikinci kez çalıştırılmaz.
+`LegacyStructureSelectorAdapter` yalnız bu semantic year-first-day sauce sonucunu görür.
 
-Standalone `sauceWithCurrentScars` current Python implementation'ın kendi production adapter zinciriyle aynı sauce sonucunu yeniden üretebilir.
+İki target eşitse old result zaten authoritative olduğu için ekstra recomputation yapılmaz.
 
-Real state-machine resolved year first day değerini bilir, fakat old helper hâlâ user original target ile çağrılır ve old sauce doğrudan `LegacyStructureSelectorAdapter` inputuna gider.
-
-Yeni normatif regression üç witness üzerinde actual selector token değerini test-only `sauce(cDay,yearFirstDay)` sonucu ile karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
-
-Henüz `PATCH 20` yoktur: old sauce ghost değildir, `(cDay,year.firstDay)` authoritative recomputation semantic yola girmez ve old result selector'dan ayrılmaz.
+Aşama 40 normatif regression gövdesi değiştirilmeden yeşile dönmüştür.
 
 Patch 21 cutlet partition prefix-gate filter kodu henüz yoktur.
 
@@ -40,10 +40,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırkıncı aşama paketi:
+Tam kırk birinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–39 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni original-target structure sauce versus year-first-day selector regressionunun üç alt örneği başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 40'ta kırmızı olan üç original-target-versus-year-first-day selector alt örneği aynı normatif regression gövdesiyle yeşile dönmelidir.

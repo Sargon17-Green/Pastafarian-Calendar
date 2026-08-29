@@ -272,6 +272,17 @@ class MonsterContext:
     legacy_structure_selector_token: int | None = None
     legacy_structure_selector_order_at_drop_46: tuple[int, ...] | None = None
     legacy_structure_calls: int = 0
+    patch20_old_ghost_target_day: int | None = None
+    patch20_old_ghost_bowls: tuple[int, ...] | None = None
+    patch20_old_ghost_order_at_drop_46: tuple[int, ...] | None = None
+    patch20_old_ghost_recorded: bool = False
+    patch20_recompute_needed: bool = False
+    patch20_authoritative_recomputed: bool = False
+    patch20_semantic_target_day: int | None = None
+    patch20_semantic_bowls: tuple[int, ...] | None = None
+    patch20_semantic_order_at_drop_46: tuple[int, ...] | None = None
+    patch20_old_ghost_reached_selector: bool = False
+    patch20_applied: bool = False
 
 
 class BaseMetrics:

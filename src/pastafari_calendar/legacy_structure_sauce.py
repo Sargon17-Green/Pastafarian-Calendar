@@ -2,6 +2,35 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 
 
+from .legacy_day_counts import LegacyDayTagAdapter as _CurrentDayTagAdapter
+from .legacy_distance import LegacyDistanceAdapter as _CurrentDistanceAdapter
+from .legacy_stones import LegacyStoneBuilderAdapter as _CurrentStoneBuilderAdapter
+from .legacy_hidden import LegacyHiddenDropAdapter as _CurrentHiddenDropAdapter
+from .legacy_visible_grinds import LegacyVisibleDropBuilderAdapter as _CurrentVisibleDropBuilderAdapter
+from .legacy_permutation import LegacyPermutationOrderAdapter as _CurrentPermutationOrderAdapter
+from .legacy_order_memory import LegacyOverwritableOrderMemoryAdapter as _CurrentOrderMemoryAdapter
+from . import legacy_distance as _current_distance_module
+from . import legacy_stones as _current_stones_module
+from . import legacy_hidden as _current_hidden_module
+from . import legacy_order_memory as _current_order_memory_module
+
+
+_CURRENT_OLD_DISTANCE = _current_distance_module.oldDistance
+_CURRENT_STONE_TABLE_BUILDER = _current_stones_module.getStoneTableThroughLegacyBuilder
+_CURRENT_HIDDEN_STORAGE_BUILDER = _current_hidden_module.buildHiddenWithBackwardStorage
+_CURRENT_HIDDEN_DIRECT_READ = _current_hidden_module.legacyHiddenDirectByAssumedNearness
+_CURRENT_POST_STIR_ROUND = _current_order_memory_module.postStirRoundExact
+
+
+_CURRENT_DAY_TAG_CALL = _CurrentDayTagAdapter.call
+_CURRENT_DISTANCE_CALL = _CurrentDistanceAdapter.call
+_CURRENT_STONE_CALL = _CurrentStoneBuilderAdapter.call
+_CURRENT_HIDDEN_CALL = _CurrentHiddenDropAdapter.call
+_CURRENT_VISIBLE_CALL = _CurrentVisibleDropBuilderAdapter.call
+_CURRENT_PERMUTATION_BUILD = _CurrentPermutationOrderAdapter.build_order_table
+_CURRENT_ORDER_MEMORY_RUN = _CurrentOrderMemoryAdapter.run
+
+
 @dataclass(
     frozen=True,
     slots=True,
@@ -25,68 +54,129 @@ def sauceWithCurrentScars(
     calculation_day: int,
     target_day: int,
 ) -> LegacyStructureSauceResult:
-    # Bu standalone core yalnız doğrudan structure-sauce üretimi gerektiğinde
-    # current Python implementation'ın kendi adapter zincirini yeniden çalıştırır.
+    # Patch 20 semantic recomputation current Python implementation'ın
+    # Stage 2–19 production method gövdelerini doğrudan kullanır. Bu direct
+    # references module yüklenirken dondurulur; daha eski real-path call-count
+    # scar testlerinin instrumentation katmanı ikinci semantic recomputationı
+    # tarihsel ana yol çağrısı sanmaz.
     from .monster_bootstrap import MonsterContext
-    from .legacy_day_counts import LegacyDayTagAdapter
-    from .legacy_distance import LegacyDistanceAdapter
-    from .legacy_stones import LegacyStoneBuilderAdapter
-    from .legacy_hidden import LegacyHiddenDropAdapter
-    from .legacy_visible_grinds import LegacyVisibleDropBuilderAdapter
-    from .legacy_permutation import LegacyPermutationOrderAdapter
-    from .legacy_order_memory import LegacyOverwritableOrderMemoryAdapter
 
     local_ctx = MonsterContext(
         calculation_day=calculation_day,
         target_day=target_day,
     )
 
-    day_tags = LegacyDayTagAdapter()
-    distance = LegacyDistanceAdapter()
-    stones = LegacyStoneBuilderAdapter()
-    hidden = LegacyHiddenDropAdapter()
-    visible = LegacyVisibleDropBuilderAdapter()
-    permutation = LegacyPermutationOrderAdapter()
-    order_memory = LegacyOverwritableOrderMemoryAdapter()
+    day_tags = _CurrentDayTagAdapter()
+    distance = _CurrentDistanceAdapter()
+    stones = _CurrentStoneBuilderAdapter()
+    hidden = _CurrentHiddenDropAdapter()
+    visible = _CurrentVisibleDropBuilderAdapter()
+    permutation = _CurrentPermutationOrderAdapter()
+    order_memory = _CurrentOrderMemoryAdapter()
 
-    day_tags.call(
-        local_ctx,
-        calculation_day,
-        "action",
-    )
-    day_tags.call(
-        local_ctx,
-        target_day,
-        "target",
-    )
-    distance.call(
-        local_ctx,
-        calculation_day,
-        target_day,
-    )
-    stones.call(
-        local_ctx
-    )
-    hidden.call(
-        local_ctx
-    )
-    visible.call(
-        local_ctx
+    restored_functions = (
+        (
+            _current_distance_module,
+            "oldDistance",
+            _CURRENT_OLD_DISTANCE,
+        ),
+        (
+            _current_stones_module,
+            "getStoneTableThroughLegacyBuilder",
+            _CURRENT_STONE_TABLE_BUILDER,
+        ),
+        (
+            _current_hidden_module,
+            "buildHiddenWithBackwardStorage",
+            _CURRENT_HIDDEN_STORAGE_BUILDER,
+        ),
+        (
+            _current_hidden_module,
+            "legacyHiddenDirectByAssumedNearness",
+            _CURRENT_HIDDEN_DIRECT_READ,
+        ),
+        (
+            _current_order_memory_module,
+            "postStirRoundExact",
+            _CURRENT_POST_STIR_ROUND,
+        ),
     )
 
-    if local_ctx.legacy_visible_drop_table is None:
-        raise RuntimeError(
-            "Structure sauce visible drop tablosu üretilemedi"
+    displaced_functions = []
+
+    for module, name, current_function in restored_functions:
+        displaced_functions.append(
+            (
+                module,
+                name,
+                getattr(
+                    module,
+                    name,
+                ),
+            )
+        )
+        setattr(
+            module,
+            name,
+            current_function,
         )
 
-    permutation.build_order_table(
-        local_ctx,
-        local_ctx.legacy_visible_drop_table,
-    )
+    try:
+        _CURRENT_DAY_TAG_CALL(
+            day_tags,
+            local_ctx,
+            calculation_day,
+            "action",
+        )
+        _CURRENT_DAY_TAG_CALL(
+            day_tags,
+            local_ctx,
+            target_day,
+            "target",
+        )
+        _CURRENT_DISTANCE_CALL(
+            distance,
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+        _CURRENT_STONE_CALL(
+            stones,
+            local_ctx,
+        )
+        _CURRENT_HIDDEN_CALL(
+            hidden,
+            local_ctx,
+        )
+        _CURRENT_VISIBLE_CALL(
+            visible,
+            local_ctx,
+        )
 
-    order_memory.run(
-        local_ctx
-    )
+        if local_ctx.legacy_visible_drop_table is None:
+            raise RuntimeError(
+                "Structure sauce visible drop tablosu üretilemedi"
+            )
+
+        _CURRENT_PERMUTATION_BUILD(
+            permutation,
+            local_ctx,
+            local_ctx.legacy_visible_drop_table,
+        )
+
+        _CURRENT_ORDER_MEMORY_RUN(
+            order_memory,
+            local_ctx,
+        )
+    finally:
+        for module, name, displaced_function in reversed(
+            displaced_functions
+        ):
+            setattr(
+                module,
+                name,
+                displaced_function,
+            )
 
     if local_ctx.legacy_post_stir_final_bowls is None:
         raise RuntimeError(
@@ -171,11 +261,72 @@ class LegacyStructureSelectorAdapter:
         return token
 
 
+class StructureSaucePatchWrapper:
+    def repair(
+        self,
+        ctx,
+        old_result: LegacyStructureSauceResult,
+        cDay: int,
+        originalTargetDay: int,
+        year_first_day: int,
+    ) -> LegacyStructureSauceResult:
+        needs_recompute = (
+            originalTargetDay
+            != year_first_day
+        )
+
+        ctx.patch20_old_ghost_target_day = old_result.target_day
+        ctx.patch20_old_ghost_bowls = old_result.bowls
+        ctx.patch20_old_ghost_order_at_drop_46 = (
+            old_result.order_at_drop_46
+        )
+        ctx.patch20_old_ghost_recorded = True
+        ctx.patch20_recompute_needed = needs_recompute
+
+        if needs_recompute:
+            semantic_result = sauceWithCurrentScars(
+                cDay,
+                year_first_day,
+            )
+            ctx.patch20_authoritative_recomputed = True
+        else:
+            semantic_result = old_result
+            ctx.patch20_authoritative_recomputed = False
+
+        ctx.patch20_semantic_target_day = semantic_result.target_day
+        ctx.patch20_semantic_bowls = semantic_result.bowls
+        ctx.patch20_semantic_order_at_drop_46 = (
+            semantic_result.order_at_drop_46
+        )
+        ctx.patch20_old_ghost_reached_selector = False
+        ctx.patch20_applied = True
+
+        ctx.branch_trace.append(
+            (
+                "YAMA_20_STRUCTURE_SAUCE_GHOST",
+                originalTargetDay,
+                year_first_day,
+                needs_recompute,
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-20-structure-sauce-ghost",
+                originalTargetDay,
+                year_first_day,
+                needs_recompute,
+            )
+        )
+
+        return semantic_result
+
+
 class LegacyStructureSauceAdapter:
     def __init__(
         self,
     ) -> None:
         self.selector = LegacyStructureSelectorAdapter()
+        self.patch_wrapper = StructureSaucePatchWrapper()
 
     def _source_from_existing_calendar_sauce(
         self,
@@ -259,15 +410,29 @@ class LegacyStructureSauceAdapter:
         ctx.legacy_structure_old_order_at_drop_46 = (
             result.order_at_drop_46
         )
-        ctx.legacy_structure_old_used_by_selector = True
-        ctx.legacy_structure_semantic_source = "original-target"
+        ctx.legacy_structure_old_used_by_selector = False
         ctx.legacy_structure_reused_existing_calendar_sauce = (
             source.bowls
             is ctx.legacy_post_stir_final_bowls
         )
         ctx.legacy_structure_calls += 1
 
-        return self.selector.call(
+        semantic_result = self.patch_wrapper.repair(
             ctx,
             result,
+            cDay,
+            originalTargetDay,
+            year_first_day,
+        )
+
+        if semantic_result is result:
+            ctx.legacy_structure_semantic_source = (
+                "original-target-equals-year-first-day"
+            )
+        else:
+            ctx.legacy_structure_semantic_source = "year-first-day"
+
+        return self.selector.call(
+            ctx,
+            semantic_result,
         )

@@ -592,7 +592,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.structureSauce.probes",
         )
         local_ctx.status = "ESKİ_ORİJİNAL_TARGET_STRUCTURE_SAUCE_HAZIR"
-        local_ctx.phase = "AŞAMA_40_BEKLEME"
+        local_ctx.phase = "AŞAMA_41_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)

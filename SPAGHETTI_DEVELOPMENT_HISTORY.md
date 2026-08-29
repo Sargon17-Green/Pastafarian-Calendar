@@ -1843,3 +1843,18 @@ Authoritative `(cDay,year.firstDay)` recomputation semantic yola eklenmemiştir.
 Old result selector'dan ayrılmamıştır.
 
 Patch 21 cutlet partition prefix-gate filter kodu henüz yoktur.
+
+
+## Aşama 41 — Yama 20: old structure sauce'u ghost yapıp year first day sauce kullanmak
+
+Aşama 40 `oldStructureSauce(cDay,originalTargetDay)` helper gövdesi byte-for-byte korunur ve her structure adapter çağrısında semantic patch'ten önce gerçekten çalışır.
+
+Old result `patch20_old_ghost_*` state alanlarında saklanır; `patch20_old_ghost_reached_selector=False` olur.
+
+`originalTargetDay!=year_first_day` ise `StructureSaucePatchWrapper`, current Python implementation ile `sauceWithCurrentScars(cDay,year_first_day)` sonucunu yeniden hesaplar. Selector yalnız bu semantic result'u görür. İki target eşitse old result zaten authoritative olduğu için ikinci recomputation yapılmaz.
+
+Real calendar path old original-target sauce için mevcut final bowls/drop-46 latch sonucunu invocation-local binding ile reuse eder. Ayrı year-first-day semantic recomputation current production function gövdelerini kullanır; eski aşamaların real-path call-count instrumentation'ı bu semantic shadow calculation'ı ikinci historical traversal olarak saymaz.
+
+Aşama 40 normatif original-target-versus-year-first-day regression gövdesi byte-for-byte değiştirilmeden yeşile döner. Historical bug state'ini donduran non-normative Stage 40 testleri yalnız patch'in zorunlu olarak değiştirdiği ghost-versus-selector contract'ına uyarlanır.
+
+Patch 21 cutlet partition prefix-gate filter kodu henüz yoktur.

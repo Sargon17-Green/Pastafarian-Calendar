@@ -1,0 +1,29 @@
+Aşama 41/55 — PATCH 20
+
+Bu paket yalnızca Aşama 41 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_structure_sauce.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_40_discovery_20.py
+tests/test_stage_41_patch_20.py
+artifacts/stage-41/BASELINE_STAGE_40_EXPECTED_RED.txt
+artifacts/stage-41/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_41.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 40 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 40 normatif regression: GÖVDE DEĞİŞMEDEN PASS
+oldStructureSauce helper: BYTE-FOR-BYTE KORUNDU VE AKTİF
+old result ghost state: EKLENDİ
+old ghost selector'a ulaşır: HAYIR
+year.firstDay semantic recomputation: EKLENDİ
+equal target no-recompute: EKLENDİ
+Aşama 39 terminal scar: KORUNDU
+Patch 21 cutlet prefix filter: YOK
