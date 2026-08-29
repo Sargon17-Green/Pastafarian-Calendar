@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 06 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 07 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -970,7 +970,35 @@ group('Patch 06 traducte slots hidden e conserva legacyPrior por history visibil
   eq(visibleRoute.context.patch06LegacyVisibleCallUsed, true);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 06', () => {
+group('Discovery 07 conserva li table zero-based e expone li indexing legacy 1..11', () => {
+  const expected = [
+    ['w', 3n, 5n, 7n, 11n],
+    ['b', 5n, 7n, 11n, 13n],
+    ['s', 7n, 11n, 13n, 17n],
+    ['m', 11n, 13n, 17n, 19n],
+    ['r', 13n, 17n, 19n, 23n],
+    ['w', 17n, 19n, 23n, 29n],
+    ['b', 19n, 23n, 29n, 31n],
+    ['s', 23n, 29n, 31n, 37n],
+    ['m', 29n, 31n, 37n, 41n],
+    ['r', 31n, 37n, 41n, 43n],
+    ['w', 37n, 41n, 43n, 47n]
+  ];
+  const shape = (row) => row === undefined ? undefined : [row.kind, row.a, row.b, row.c, row.d];
+  deepEq(production.LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED.map(shape), expected);
+  deepEq(shape(production.legacyGrindRow(1)), expected[1]);
+  deepEq(shape(production.legacyGrindRow(10)), expected[10]);
+  eq(production.legacyGrindRow(11), undefined);
+  const routed = production.discovery07LegacyGrindRowThroughMonsterPath(1n, 1n, 11);
+  eq(routed.context.currentHandler, 'Discovery07GrindIndexHandler');
+  eq(routed.context.phase, 'DISCOVERY_07_LEGACY_GRIND_INDEX');
+  eq(routed.context.legacyGrindRequestedIndex, 11);
+  eq(routed.context.legacyGrindPhysicalIndex, 11);
+  eq(routed.context.legacyGrindMissing, true);
+  eq(routed.context.metrics['discovery07.legacyGrindIndex.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 07', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -982,4 +1010,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passat; Stage 13 es GREEN.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression rubi de Discovery 07.');

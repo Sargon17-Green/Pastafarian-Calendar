@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=13
-CURRENT_KIND=PATCH
-CURRENT_PATCH=06
-LAST_COMPLETED_STAGE=13
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=14
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=07
+LAST_COMPLETED_STAGE=14
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, legacyPrior de Discovery 06, e Patch06PriorWrapper quel conserva li call legacy por slots visibil e traducte slots 0..-6 a hiddenByNearness per k=1-slot.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED, legacyGrindRow, LegacyGrindTableAdapter e Discovery07GrindIndexHandler quel usa ordinals 1..11 directmen quam indices zero-based.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 13 es finit quam **PATCH 06**. `legacyPrior(dropStore, i, back)` resta sin modification e continua conosser solmen `dropStore[i-back]`. Li nov `priorPatch(dropStore, legacyHidden, i, back)` calcula li sam slot. Si `slot >= 1`, it executa realmen `legacyPrior`; si `slot <= 0`, it calcula `k = 1-slot` e rende `hiddenByNearness(legacyHidden, k)`.
+Stage 14 es finit quam **DISCOVERY 07**. Li undec rows real del table de grinds es conservat in ordine correct, ma li legacy caller usa grind 1..11 directmen quam indices del array zero-based. Consequentmen grind 1 prende li duesim row, grind 10 prende li undecim row e grind 11 cade ultra li table.
 
-Li route historic passa per `Discovery06PriorHandler` e poy per `Patch06PriorWrapper`. Li context conserva li storage hidden, li slot historic, li proximity hidden quand necessi, un flag indicant si li call legacy visibil esset usat e li output final. Li regression de Stage 12 es verd, durant que `legacyPrior` self resta ciec por slots `0..-6`. Null `GRIND_TABLE_WITH_SENTINEL` o code de Patch 07 o posterior es present.
+Li defect es conectet a un path real de production tra `LegacyGrindTableAdapter` e `Discovery07GrindIndexHandler`. Li regression nov es intentionalmen rubi. Null sentinel row, null `GRIND_TABLE_WITH_SENTINEL`, null correction de Patch 07 e null code posterior es present.

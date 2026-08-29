@@ -76,6 +76,10 @@ class BaseMonsterContext {
     this.patch06HiddenNearness = null;
     this.patch06LegacyVisibleCallUsed = false;
     this.patch06Output = null;
+    this.legacyGrindRequestedIndex = null;
+    this.legacyGrindPhysicalIndex = null;
+    this.legacyGrindOutput = null;
+    this.legacyGrindMissing = false;
   }
 }
 
@@ -174,6 +178,12 @@ class BaseValidationManager {
   requireDiscovery06Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_06_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 06.');
+    }
+  }
+
+  requireVisibleGrindIndex(value) {
+    if (!Number.isInteger(value) || value < 1 || value > 11) {
+      throw new RangeError('Li ordinal de grind visibil deve esser un integer inter 1 e 11.');
     }
   }
 }
@@ -412,6 +422,28 @@ function priorPatch(dropStore, legacyHidden, i, back) {
   const k = 1 - slot;
   // Por slots 0..-6 li patch traducte al proximity hidden, sin inventar slots negativ in dropStore.
   return hiddenByNearness(legacyHidden, k);
+}
+
+const LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED = Object.freeze([
+  Object.freeze({ kind: 'w', a: 3n, b: 5n, c: 7n, d: 11n }),
+  Object.freeze({ kind: 'b', a: 5n, b: 7n, c: 11n, d: 13n }),
+  Object.freeze({ kind: 's', a: 7n, b: 11n, c: 13n, d: 17n }),
+  Object.freeze({ kind: 'm', a: 11n, b: 13n, c: 17n, d: 19n }),
+  Object.freeze({ kind: 'r', a: 13n, b: 17n, c: 19n, d: 23n }),
+  Object.freeze({ kind: 'w', a: 17n, b: 19n, c: 23n, d: 29n }),
+  Object.freeze({ kind: 'b', a: 19n, b: 23n, c: 29n, d: 31n }),
+  Object.freeze({ kind: 's', a: 23n, b: 29n, c: 31n, d: 37n }),
+  Object.freeze({ kind: 'm', a: 29n, b: 31n, c: 37n, d: 41n }),
+  Object.freeze({ kind: 'r', a: 31n, b: 37n, c: 41n, d: 43n }),
+  Object.freeze({ kind: 'w', a: 37n, b: 41n, c: 43n, d: 47n })
+]);
+
+function legacyGrindRow(grind) {
+  if (!Number.isInteger(grind) || grind < 1 || grind > 11) {
+    throw new RangeError('Li ordinal legacy de grind visibil deve esser inter 1 e 11.');
+  }
+  // Li table es zero-based, ma li caller historic continua usar ordinals 1..11 directmen.
+  return LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED[grind];
 }
 
 class LegacyRemainderAdapter {
@@ -764,6 +796,36 @@ class Patch06PriorWrapper {
   }
 }
 
+class LegacyGrindTableAdapter {
+  call(grind) {
+    return legacyGrindRow(grind);
+  }
+}
+
+class Discovery07GrindIndexHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, grind) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireVisibleGrindIndex(grind);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery07GrindIndexHandler';
+    context.phase = 'DISCOVERY_07_LEGACY_GRIND_INDEX';
+    context.branchTrace.push('DISCOVERY_07_LEGACY_GRIND_INDEX');
+    context.legacyGrindRequestedIndex = grind;
+    context.legacyGrindPhysicalIndex = grind;
+    context.legacyGrindOutput = this.legacyAdapter.call(grind);
+    context.legacyGrindMissing = context.legacyGrindOutput === undefined;
+    context.status = 'DISCOVERY_07_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery07.legacyGrindIndex.calls');
+    return context.legacyGrindOutput;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -817,6 +879,12 @@ class BaseMonsterManager {
     this.patch06PriorWrapper = new Patch06PriorWrapper(
       this.validationManager,
       this.metricsManager
+    );
+    this.legacyGrindTableAdapter = new LegacyGrindTableAdapter();
+    this.discovery07GrindIndexHandler = new Discovery07GrindIndexHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyGrindTableAdapter
     );
   }
 
@@ -980,6 +1048,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery07GrindIndex(calculationDay, targetDay, grind) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery07GrindIndexHandler.handle(context, grind);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -1034,8 +1114,12 @@ function historicPriorThroughMonsterPath(calculationDay, targetDay, dropStore, l
   return new BaseMonsterManager().executePatch06Prior(calculationDay, targetDay, dropStore, legacyHidden, i, back);
 }
 
+function discovery07LegacyGrindRowThroughMonsterPath(calculationDay, targetDay, grind) {
+  return new BaseMonsterManager().executeDiscovery07GrindIndex(calculationDay, targetDay, grind);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 06; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 07; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -1067,6 +1151,8 @@ module.exports = Object.freeze({
   LegacyPriorAdapter,
   Discovery06PriorHandler,
   Patch06PriorWrapper,
+  LegacyGrindTableAdapter,
+  Discovery07GrindIndexHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -1087,6 +1173,8 @@ module.exports = Object.freeze({
   hiddenByNearness,
   legacyPrior,
   priorPatch,
+  LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED,
+  legacyGrindRow,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -1100,5 +1188,6 @@ module.exports = Object.freeze({
   historicHiddenByNearnessThroughMonsterPath,
   discovery06LegacyPriorThroughMonsterPath,
   historicPriorThroughMonsterPath,
+  discovery07LegacyGrindRowThroughMonsterPath,
   calendarDateSpaghetti
 });

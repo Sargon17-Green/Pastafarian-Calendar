@@ -268,3 +268,26 @@ Un `Patch06PriorWrapper` ha esset insertet pos `Discovery06PriorHandler`. Li con
 ### Scar conservat
 
 `legacyPrior` continua retornar `undefined` por slots `0..-6` quand it es vocat directmen. Li storage hidden continua fisicmen retrograd e `hiddenByNearness` resta li unic translator semantic. Null slots negativ es fabricat in `dropStore`; null `reverse()` es usat. `GRIND_TABLE_WITH_SENTINEL` e omni code de Patch 07 o posterior resta absent.
+
+
+## Stage 14 — DISCOVERY 07
+
+### Quo on pensat
+
+Li settesim design historic conservat li undec grinds visibil in un table ordinari de JavaScript. Li caller, heredat de un convention one-based, continua numerar chascun grind de 1 til 11 e usa ti ordinal directmen quam index del table. On assumet que li numeration semantic e li index fisic esset li sam.
+
+### Quo esset decovrit
+
+Li array fisic es zero-based. Su index 0 contene exactmen li prim row normativ, ma `legacyGrindRow(1)` prende index 1 e rende li duesim row. Li displacement continua til grind 10, quel prende li undecim row; grind 11 cade ultra li table e rende un valore absent. Li undec rows almacenat self concorda con li specification; li unic defect es li convention de lookup.
+
+### Quo esset circumit
+
+Null circumventione existe in ti stage. Null sentinel row es addit e `GRIND_TABLE_WITH_SENTINEL` ne existe. Li correction quel deve preservar li indexing legacy per un sentinel a index 0 apartene exclusivmen a PATCH 07 in Stage 15.
+
+### Crescentie monster in ti stage
+
+`LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED` conserva li data historic. Un `LegacyGrindTableAdapter` e un `Discovery07GrindIndexHandler` ha esset addit; li handler registra li ordinal demandat, li sam index fisic direct, si li row es absent e li output legacy. `BaseMonsterManager` expone un route separat con context fresc e metric non-semantic.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li adapter delega exclusivmen a `legacyGrindRow`; li handler ne shift, ne fallback, ne consulta li oracle e ne fabrica un row. Li table self usa li undec rows real in ordine correct. Ergo li unic divergentie nov es precis li mismatch one-based/zero-based mandat de Discovery 07. Omni scars e patches precedent resta separatmen testabil.

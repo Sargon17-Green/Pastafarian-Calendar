@@ -4,11 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 13 de 55: PATCH 06**. Li scars de Patch 01 til Patch 05 resta intact e testabil. `legacyPrior(dropStore, i, back)` continua esser li operation historic ciec quel lee solmen `dropStore[i-back]`.
+Li linea es in **Stage 14 de 55: DISCOVERY 07**. Omni scars e patches 01..06 resta intact e testabil. Li nov `LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED` contene li undec rows real in lor ordine normativ, ma `legacyGrindRow(grind)` usa li ordinal historic 1..11 directmen quam index zero-based.
 
-Li nov `priorPatch` ne modifica ti legacy. It calcula li slot historic; por un slot visibil positiv, it executa realmen `legacyPrior`. Por slots `0..-6`, it calcula `k = 1-slot` e passa per `hiddenByNearness`, preservante simultanmen li storage hidden retrograd de Patch 05.
-
-Un `Patch06PriorWrapper` es insertet pos `Discovery06PriorHandler`. Li context conserva li output legacy, li slot, li proximity hidden si aplicabil, si li call legacy visibil esset usat e li output reparat. Li regression de Discovery 06 es nu verd. Null code de Patch 07 existe ancor.
+Isto deplazza li lookup per un row: grind 1 rende li duesim row, grind 10 rende li undecim, e grind 11 rende un valore absent. `LegacyGrindTableAdapter` e `Discovery07GrindIndexHandler` expone ti defect in un route production real e conserva li index demandat, li index fisic e li absentie del ultim row in li context. Null sentinel reparativ existe ancor.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -28,25 +26,25 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions precedent, includente li regression de Discovery 06 nu routat tra su patch, deve restar verd:
+Omni regressions precedent deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li prova focal de Patch 06 confirma li du branches: call legacy real por slots visibil e mapping `k = 1-slot` por slots hidden:
+Li prova focal de Discovery 07 deve esser rubi intentionalmen e monstrar li displacement del indexing:
 
 ```text
-npm run test:patch-06
+npm run test:discovery-07
 ```
 
-Li suite complet deve esser verd:
+Li suite complet es intentionalmen rubi in ti stage, e li unic failure nov deve esser Discovery 07:
 
 ```text
 npm test
 ```
 
-Li verifier confirma anc que `legacyPrior` resta directmen defectiv por slots non-positiv, que li storage hidden ne es reversat, e que null code de Patch 07 o posterior contamina production.
+Li verifier confirma que li data del undec rows self es exact, que li legacy lookup continua usar index direct 1..11, que grind 11 es absent, e que `GRIND_TABLE_WITH_SENTINEL` e code de Patch 08 o posterior ne contamina production.
 
 ## Independentie
 
@@ -64,3 +62,8 @@ Li history legacy ne conosse li hidden drops. `legacyPrior(dropStore, i, back)` 
 ## Stage 13 — Patch 06
 
 `legacyPrior` resta intact. `priorPatch` usa li call legacy real quand `i-back >= 1`; altrimen it mappa li slot non-positiv a `k = 1-(i-back)` e delega a `hiddenByNearness`. Li array hidden backward ne es reversat ni migrat. `Patch06PriorWrapper` conserva li scar e li decision de branch in li context. Li regression de Discovery 06 es verd.
+
+
+## Stage 14 — Discovery 07
+
+Li table historic de visible grinds es almacenat quam un array zero-based de undec rows, durante que li caller historic continua numerar grinds 1..11 e usa ti ordinal directmen quam index. Li data self es correct; li defect es exclusivmen li mismatch de convention de indices. `Discovery07GrindIndexHandler` conserva ti scar in li route production. Li sentinel reparativ de Patch 07 ne es present in ti stage.
