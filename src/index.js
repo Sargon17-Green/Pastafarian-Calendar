@@ -199,6 +199,15 @@ class BaseMonsterContext {
     this.legacyYearCandidateSelectedOrdinal = null;
     this.legacyYearCandidateSelected = null;
     this.legacyYearCandidateOverlongLengths = null;
+    this.patch16LegacyPreSortFamily = null;
+    this.patch16LegacyCallsPreserved = false;
+    this.patch16RejectedOverlongLengths = null;
+    this.patch16FilteredPreSortFamily = null;
+    this.patch16SortedFamily = null;
+    this.patch16SelectionFamilySize = null;
+    this.patch16SelectionStream = null;
+    this.patch16SelectedOrdinal = null;
+    this.patch16Selected = null;
   }
 }
 
@@ -1447,6 +1456,7 @@ function gateQuestionWithSignedStep(signedStep) {
 }
 
 const LEGACY_YEAR_MAX = 5781n;
+const REAL_YEAR_MAX_PATCH = 5778n;
 
 function legacyYearCandidateAllowed(gates, openIndex, closeIndex) {
   if (!gates || typeof gates !== 'object') {
@@ -1464,6 +1474,19 @@ function legacyYearCandidateAllowed(gates, openIndex, closeIndex) {
   const candidateLength = closeGate - openGate;
   // Li scar historic conserva 5781 quam ceiling real e lassa 5779..5781 passar al familie posterior.
   return gapCount >= 6 && candidateLength >= 252n && candidateLength <= LEGACY_YEAR_MAX;
+}
+
+function yearCandidateAfterFootnotePatch(gates, openIndex, closeIndex) {
+  // Li helper legacy resta intact e es li prim porta real; Patch 16 ne muta LEGACY_YEAR_MAX.
+  if (!legacyYearCandidateAllowed(gates, openIndex, closeIndex)) {
+    return false;
+  }
+  const candidateLength = gates[closeIndex] - gates[openIndex];
+  // Li footnote 5778 es un filter tardiv separat, ma deve preceder omni sort e selection semantic.
+  if (candidateLength > REAL_YEAR_MAX_PATCH) {
+    return false;
+  }
+  return true;
 }
 
 function legacyYearCandidatesBeforeSort(gates, candidatePairs) {
@@ -1496,6 +1519,46 @@ function legacyYearCandidatesBeforeSort(gates, candidatePairs) {
 function legacyStableLengthOnlyYearCandidates(gates, candidatePairs) {
   const accepted = legacyYearCandidatesBeforeSort(gates, candidatePairs).map((candidate) => ({ ...candidate }));
   // Li sort legacy es intentionalmen solmen per longore e resta stabil por ties; Patch 17 ne es ancor present.
+  accepted.sort((left, right) => {
+    if (left.candidateLength < right.candidateLength) return -1;
+    if (left.candidateLength > right.candidateLength) return 1;
+    return 0;
+  });
+  return accepted;
+}
+
+function yearCandidatesAfterFootnotePatchBeforeSort(gates, candidatePairs) {
+  if (!Array.isArray(candidatePairs)) {
+    throw new TypeError('Li pares reparat de year candidates deve esser un array.');
+  }
+  const accepted = [];
+  for (let ordinal = 0; ordinal < candidatePairs.length; ordinal += 1) {
+    const pair = candidatePairs[ordinal];
+    if (!pair || !Number.isInteger(pair.openIndex) || !Number.isInteger(pair.closeIndex)) {
+      throw new TypeError('Chascun pare reparat de year candidate deve contener indices integers.');
+    }
+    if (!yearCandidateAfterFootnotePatch(gates, pair.openIndex, pair.closeIndex)) {
+      continue;
+    }
+    const openGate = gates[pair.openIndex];
+    const closeGate = gates[pair.closeIndex];
+    accepted.push({
+      inputOrdinal: ordinal,
+      openIndex: pair.openIndex,
+      closeIndex: pair.closeIndex,
+      openGate,
+      closeGate,
+      candidateLength: closeGate - openGate
+    });
+  }
+  return accepted;
+}
+
+function stableLengthOnlyPatchedYearCandidates(gates, candidatePairs) {
+  // Li familie ja es filtrat per 5778 ante que ti copia entra in li sort.
+  const accepted = yearCandidatesAfterFootnotePatchBeforeSort(gates, candidatePairs)
+    .map((candidate) => ({ ...candidate }));
+  // Patch 16 conserva intentionalmen li sort historic per longore solmen; li tie repair apartene a Patch 17.
   accepted.sort((left, right) => {
     if (left.candidateLength < right.candidateLength) return -1;
     if (left.candidateLength > right.candidateLength) return 1;
@@ -1952,6 +2015,58 @@ class Discovery16LegacyYearCandidateHandler {
     return {
       acceptedBeforeSort: prepared.acceptedBeforeSort.map((candidate) => ({ ...candidate })),
       preparedForSelection: prepared.sorted.map((candidate) => ({ ...candidate })),
+      selectedOrdinal: selected.pickedOrdinal,
+      selected: { ...selected.candidate }
+    };
+  }
+}
+
+class YearCandidateCeilingPatchWrapper {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  repair(context, gates, candidatePairs, selectionStream) {
+    this.validationManager.requirePatch15Result(context);
+    this.validationManager.requireYearGateStore(gates);
+    this.validationManager.requireYearCandidatePairs(candidatePairs);
+    this.validationManager.requireAnswerRing(selectionStream);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'YearCandidateCeilingPatchWrapper';
+    context.phase = 'PATCH_16_REAL_YEAR_MAX_5778_BEFORE_SORT';
+    context.branchTrace.push('PATCH_16_REAL_YEAR_MAX_5778_BEFORE_SORT');
+
+    // Li raw family legacy resta observabil, ma ti diagnostic ne es sortat ni selectet in li path semantic reparat.
+    const legacyRaw = legacyYearCandidatesBeforeSort(gates, candidatePairs);
+    context.patch16LegacyPreSortFamily = legacyRaw.map((candidate) => ({ ...candidate }));
+    context.patch16LegacyCallsPreserved = true;
+    context.patch16RejectedOverlongLengths = legacyRaw
+      .filter((candidate) => candidate.candidateLength > REAL_YEAR_MAX_PATCH)
+      .map((candidate) => candidate.candidateLength);
+
+    // Omni reject per 5778 fini ante que stableLengthOnlyPatchedYearCandidates executa su sort.
+    const filteredBeforeSort = yearCandidatesAfterFootnotePatchBeforeSort(gates, candidatePairs);
+    context.patch16FilteredPreSortFamily = filteredBeforeSort.map((candidate) => ({ ...candidate }));
+    const sorted = stableLengthOnlyPatchedYearCandidates(gates, candidatePairs);
+    context.patch16SortedFamily = sorted.map((candidate) => ({ ...candidate }));
+    context.patch16SelectionFamilySize = sorted.length;
+    context.patch16SelectionStream = {
+      first: selectionStream.first, directionStep: selectionStream.directionStep
+    };
+    const selected = this.legacyAdapter.select(sorted, selectionStream);
+    context.patch16SelectedOrdinal = selected.pickedOrdinal;
+    context.patch16Selected = { ...selected.candidate };
+    context.status = 'PATCH_16_RESULT';
+    this.metricsManager.bump(context, 'patch16.realYearCeiling.calls');
+    for (let index = 0; index < context.patch16RejectedOverlongLengths.length; index += 1) {
+      this.metricsManager.bump(context, 'patch16.overlongRejected.beforeSort');
+    }
+    return {
+      legacyAcceptedBeforeSort: legacyRaw.map((candidate) => ({ ...candidate })),
+      filteredBeforeSort: filteredBeforeSort.map((candidate) => ({ ...candidate })),
+      preparedForSelection: sorted.map((candidate) => ({ ...candidate })),
       selectedOrdinal: selected.pickedOrdinal,
       selected: { ...selected.candidate }
     };
@@ -2711,6 +2826,11 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyYearCandidateAdapter
     );
+    this.yearCandidateCeilingPatchWrapper = new YearCandidateCeilingPatchWrapper(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyYearCandidateAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -3145,6 +3265,23 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch16YearCandidates(calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      // Discovery 16 resta un route separat: su sort/selection overlong ne es executet ante li filter semantic de Patch 16.
+      const result = this.yearCandidateCeilingPatchWrapper.repair(
+        context, gates, candidatePairs, selectionStream
+      );
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -3307,8 +3444,16 @@ function discovery16LegacyYearCandidatesThroughMonsterPath(
   );
 }
 
+function historicYearCandidatesThroughMonsterPath(
+  calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+) {
+  return new BaseMonsterManager().executePatch16YearCandidates(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 16; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 16; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -3369,6 +3514,7 @@ module.exports = Object.freeze({
   NegativeGateQuestionPatchWrapper,
   LegacyYearCandidateAdapter,
   Discovery16LegacyYearCandidateHandler,
+  YearCandidateCeilingPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -3424,9 +3570,13 @@ module.exports = Object.freeze({
   oldGateQuestionDay,
   gateQuestionWithSignedStep,
   LEGACY_YEAR_MAX,
+  REAL_YEAR_MAX_PATCH,
   legacyYearCandidateAllowed,
+  yearCandidateAfterFootnotePatch,
   legacyYearCandidatesBeforeSort,
   legacyStableLengthOnlyYearCandidates,
+  yearCandidatesAfterFootnotePatchBeforeSort,
+  stableLengthOnlyPatchedYearCandidates,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -3459,5 +3609,6 @@ module.exports = Object.freeze({
   discovery15LegacyGateQuestionThroughMonsterPath,
   historicGateQuestionThroughMonsterPath,
   discovery16LegacyYearCandidatesThroughMonsterPath,
+  historicYearCandidatesThroughMonsterPath,
   calendarDateSpaghetti
 });

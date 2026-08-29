@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 16 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 16 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Discovery 16 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'REAL_YEAR_MAX_PATCH',
+    'sortEqualLengthRunsByOpeningGate',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
@@ -1554,7 +1554,7 @@ group('Patch 15 conserva li scar positiv e devia exclusivmen signedStep negativ'
   ok(!production.NegativeGateQuestionPatchWrapper.prototype.repair.toString().includes('LEGACY_YEAR_MAX'));
 });
 
-group('Discovery 16 usa realmen li ceiling legacy 5781 e passa overlong al selection', () => {
+group('Discovery 16 resta observabil quam scar 5781 separat', () => {
   eq(production.LEGACY_YEAR_MAX, 5781n);
   const source = production.legacyYearCandidateAllowed.toString();
   ok(source.includes('candidateLength <= LEGACY_YEAR_MAX'));
@@ -1573,7 +1573,6 @@ group('Discovery 16 usa realmen li ceiling legacy 5781 e passa overlong al selec
     f, f, -1n, gates, pairs, { first: 1n, directionStep: 1n }
   );
   eq(routed.context.currentHandler, 'Discovery16LegacyYearCandidateHandler');
-  eq(routed.context.previousHandler, 'NegativeGateQuestionPatchWrapper');
   eq(routed.context.status, 'DISCOVERY_16_LEGACY_RESULT');
   eq(routed.context.legacyYearCandidateSelectionFamilySize, 4);
   deepEq(routed.context.legacyYearCandidateOverlongLengths, [5779n, 5780n, 5781n]);
@@ -1581,7 +1580,40 @@ group('Discovery 16 usa realmen li ceiling legacy 5781 e passa overlong al selec
   ok(!production.legacyStableLengthOnlyYearCandidates.toString().includes('REAL_YEAR_MAX_PATCH'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 16', () => {
+group('Patch 16 filtra 5779..5781 ante sort e selection semantic', () => {
+  eq(production.REAL_YEAR_MAX_PATCH, 5778n);
+  const patchSource = production.yearCandidateAfterFootnotePatch.toString();
+  ok(patchSource.includes('legacyYearCandidateAllowed(gates, openIndex, closeIndex)'));
+  ok(patchSource.includes('candidateLength > REAL_YEAR_MAX_PATCH'));
+  ok(patchSource.indexOf('legacyYearCandidateAllowed') < patchSource.indexOf('candidateLength > REAL_YEAR_MAX_PATCH'));
+  const f = o.FOUNDATION_DAY;
+  const gates = { 0: f, 6: f + 5778n, 7: f + 5779n, 8: f + 5780n, 9: f + 5781n };
+  const pairs = [
+    { openIndex: 0, closeIndex: 9 },
+    { openIndex: 0, closeIndex: 7 },
+    { openIndex: 0, closeIndex: 6 },
+    { openIndex: 0, closeIndex: 8 }
+  ];
+  const beforeSort = production.yearCandidatesAfterFootnotePatchBeforeSort(gates, pairs);
+  deepEq(beforeSort.map((candidate) => candidate.candidateLength), [5778n]);
+  ok(!production.yearCandidatesAfterFootnotePatchBeforeSort.toString().includes('.sort('));
+  const sorted = production.stableLengthOnlyPatchedYearCandidates(gates, pairs);
+  deepEq(sorted.map((candidate) => candidate.candidateLength), [5778n]);
+  ok(!production.stableLengthOnlyPatchedYearCandidates.toString().includes('sortEqualLengthRunsByOpeningGate'));
+  const routed = production.historicYearCandidatesThroughMonsterPath(
+    f, f, -1n, gates, pairs, { first: 1n, directionStep: 1n }
+  );
+  eq(routed.context.currentHandler, 'YearCandidateCeilingPatchWrapper');
+  eq(routed.context.previousHandler, 'NegativeGateQuestionPatchWrapper');
+  eq(routed.context.status, 'PATCH_16_RESULT');
+  deepEq(routed.context.patch16RejectedOverlongLengths, [5781n, 5779n, 5780n]);
+  deepEq(routed.context.patch16SortedFamily.map((candidate) => candidate.candidateLength), [5778n]);
+  eq(routed.context.patch16SelectionFamilySize, 1);
+  eq(routed.context.metrics['patch16.overlongRejected.beforeSort'], 3n);
+  eq(routed.context.metrics['discovery16.selectionReached.calls'], undefined);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 16', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1593,4 +1625,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa posterior a Discovery 16.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa posterior a Patch 16.');

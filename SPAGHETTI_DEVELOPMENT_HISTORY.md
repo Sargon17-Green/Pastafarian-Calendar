@@ -709,3 +709,26 @@ Null circumition existe in Discovery 16. `legacyYearCandidateAllowed` usa explic
 ### Pro quo li nov layer ne change altri semantics
 
 Omni scars e patches til Patch 15 resta intact. Li nov helper de year candidate es un subsystem additiv e ne muta sauce, bowls, latch, selection mathematics, gate-sign detour o SourceLanguageCatalog. Li selection usa li dispatcher ja reparat e li unic divergence intentional es que 5779..5781 resta in li familie legacy. Li correction appartene exclusivmen a Stage 33 / Patch 16; li tie repair de Patch 17 ne es present.
+
+
+## Stage 33 — PATCH 16
+
+### Scar historic conservat
+
+`LEGACY_YEAR_MAX=5781`, `legacyYearCandidateAllowed`, `legacyYearCandidatesBeforeSort` e `legacyStableLengthOnlyYearCandidates` resta intact quam route historic. Li scar continua acceptar 5779, 5780 e 5781 e posse ancor esser executet directmen per Discovery 16. Li patch ne altera li constant 5781 ni reinterpreta li output legacy.
+
+### Footnote ceiling separat
+
+Li nov `REAL_YEAR_MAX_PATCH=5778` es intentionalmen un constant separat. `yearCandidateAfterFootnotePatch` voca prim `legacyYearCandidateAllowed`; si li candidate historic ne passa, it retorna false. Solmen pos un acceptation legacy, it calcula li longore e rejecte `candidateLength>REAL_YEAR_MAX_PATCH`. Ti ordine conserva li scar real e aplica li correction quam un filter tardiv.
+
+### Filter ante sort e selection
+
+`yearCandidatesAfterFootnotePatchBeforeSort` materialisa li familie semantic in ordine de input e ne contene null sort. `stableLengthOnlyPatchedYearCandidates` prende ti familie ja filtrat, copia it e aplica li stable comparator historic per longore solmen. `YearCandidateCeilingPatchWrapper` conserva separatmen li raw pre-sort family legacy e li longores rejectet, ma ne executa `Discovery16LegacyYearCandidateHandler` in su route semantic; ergo null overlong candidate atinge un sort o selection semantic ante li filter.
+
+### Crescentie monster e ownership
+
+Li context adjunte diagnostics de raw legacy, flag de calls legacy preservat, longores rejectet, familie filtrat ante sort, familie sortat, grandore de selection, stream e candidate selectet. Omni state resta invocation-local. Li wrapper es conectet directmen pos Patch 15 e usa li `LegacyYearCandidateAdapter.select` solmen con li familie sortat ja filtrat.
+
+### Pro quo Patch 17 ne es anticipat
+
+Li sort posterior resta exactmen per `candidateLength` solmen e depende de stabilitá por ties. Null secondary key, null `sortEqualLengthRunsByOpeningGate` e null reorder per opening gate existe. Ti defect e su circumition apartene al pair Discovery 17 / Patch 17.

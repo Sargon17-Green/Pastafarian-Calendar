@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 32 de 55: DISCOVERY 16** e li repository local es intentionalmen EXPECTED_RED. Patch 15 resta verd e `oldGateQuestionDay` resta intact. Ti stage crea li scar legacy mandat `LEGACY_YEAR_MAX=5781` e usa it realmen in li path de year candidates.
+Li linea es in **Stage 33 de 55: PATCH 16** e li repository local es GREEN. Discovery 16 resta observabil quam scar separat: `LEGACY_YEAR_MAX=5781` e `legacyYearCandidateAllowed` continua acceptar 5779..5781 quand on voca li route legacy directmen.
 
-`legacyYearCandidateAllowed` accepta adminim six gaps e longores 252..5781. `legacyYearCandidatesBeforeSort` conserva li familie raw acceptat, `legacyStableLengthOnlyYearCandidates` aplica li sort historic stabil per longore solmen, e `LegacyYearCandidateAdapter.select` porta ti familie al dispatcher de selection existent. Li witness de limite prova que 5779, 5780 e 5781 arriva al selection malgre li ceiling normativ 5778.
+Patch 16 adjunte `REAL_YEAR_MAX_PATCH=5778` sin mutar li constant historic. `yearCandidateAfterFootnotePatch` passa prim per li helper legacy e aplica poy li filter 5778. Li familie semantic es materialisat per `yearCandidatesAfterFootnotePatchBeforeSort`, ergo omni candidate supra 5778 es rejectet ante que `stableLengthOnlyPatchedYearCandidates` executa li sort e ante que li dispatcher de selection es vocat.
 
-Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat. Null `REAL_YEAR_MAX_PATCH`, null filter `candidateLength>5778` e null repair de tie de Patch 17 es anticipat.
+Li sort current resta intentionalmen stabil per longore solmen. Null repair de equal-length runs per opening gate es present; ti defect apartene exclusivmen a Discovery 17 / Patch 17. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 15 deve restar verd:
+Omni regressions til Discovery 16 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li regression focal del discovery deve esser intentionalmen rubi:
+Li test focal del patch deve esser verd:
 
 ```text
-npm run test:discovery-16
+npm run test:patch-16
 ```
 
-Li suite complet deve esser EXPECTED_RED exclusivmen in Discovery 16:
+Li suite complet deve esser GREEN:
 
 ```text
 npm test
@@ -178,3 +178,8 @@ Li selection curt e wide de Stage 29 resta intact. Ti stage comensa li subsystem
 Ti stage introduce li constant legacy obligatori `LEGACY_YEAR_MAX=5781` e usa it quam ceiling real de `legacyYearCandidateAllowed`. Li helper conserva li criteries historic: adminim six gate gaps e longore 252..5781. Li nov familie raw es materialisat per `legacyYearCandidatesBeforeSort`; solmen poy `legacyStableLengthOnlyYearCandidates` aplica un stable sort per longore solmen. Null tie-key secundari es present.
 
 `LegacyYearCandidateAdapter` expone explicitmen li passage al selection existent, e `Discovery16LegacyYearCandidateHandler` es ligat pos `NegativeGateQuestionPatchWrapper`. In li boundary family 5778, 5779, 5780, 5781, omni quar passa li ceiling legacy e arriva al selection; li tri ultim viola li ceiling normativ 5778. Ti divergence es li unic failure intentional del stage. Li late filter `REAL_YEAR_MAX_PATCH=5778` resta reservat exclusivmen por Stage 33 / Patch 16.
+
+
+## Stage 33 — Patch 16
+
+`LEGACY_YEAR_MAX=5781` e `legacyYearCandidateAllowed` resta intact quam scar historic. `REAL_YEAR_MAX_PATCH=5778` es un ceiling separat. `yearCandidateAfterFootnotePatch` voca li helper legacy real e rejecte solmen pos ti call si `candidateLength>5778`. Li materialisation semantic usa `yearCandidatesAfterFootnotePatchBeforeSort`, e solmen pos ti filter `stableLengthOnlyPatchedYearCandidates` executa li stable sort per longore. `YearCandidateCeilingPatchWrapper` conserva li raw family legacy quam diagnostic, ma porta solmen li familie filtrat al selection. Li regression de Discovery 16 es nu verd. Equal-length ties resta in ordine stabil legacy; Patch 17 ne es anticipat.

@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=32
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=33
+CURRENT_KIND=PATCH
 CURRENT_PATCH=16
-LAST_COMPLETED_STAGE=32
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=33
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus LEGACY_YEAR_MAX=5781, legacyYearCandidateAllowed, legacyYearCandidatesBeforeSort, legacyStableLengthOnlyYearCandidates, LegacyYearCandidateAdapter e Discovery16LegacyYearCandidateHandler quel lassa 5779..5781 passar al familie pre-sort e al selection legacy.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, LEGACY_YEAR_MAX=5781 e li route legacy de Discovery 16, plus REAL_YEAR_MAX_PATCH=5778, yearCandidateAfterFootnotePatch, yearCandidatesAfterFootnotePatchBeforeSort, stableLengthOnlyPatchedYearCandidates e YearCandidateCeilingPatchWrapper quel conserva li raw family legacy ma rejecte 5779..5781 ante sort e selection semantic.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 32 es finit quam **DISCOVERY 16**. Li constant legacy `LEGACY_YEAR_MAX=5781` es creat e usat realmen in `legacyYearCandidateAllowed`. Un candidate es acceptat si it ha adminim six gaps e un longore inter 252 e 5781 inclusive. Null ceiling semantic 5778 es present in production.
+Stage 33 es finit quam **PATCH 16**. `LEGACY_YEAR_MAX=5781` e `legacyYearCandidateAllowed` resta sin modification e continua acceptar 5779..5781 quand li scar es vocat directmen. Li constant separat `REAL_YEAR_MAX_PATCH=5778` ne reemplazza li ceiling historic.
 
-`LegacyYearCandidateAdapter` conserva separatmen li familie acceptat ante sort e li stable sort historic per longore solmen; su metode `select` usa li dispatcher de selection ja reparat. `Discovery16LegacyYearCandidateHandler` es conectet pos Patch 15 e fa li familie 5778, 5779, 5780, 5781 arrivar al selection real. Li regression nov es intentionalmen rubi pro que 5779..5781 supera li ceiling normativ 5778. Null `REAL_YEAR_MAX_PATCH`, null early reject de Patch 16 e null tie repair de Patch 17 es present.
+`yearCandidateAfterFootnotePatch` voca realmen li helper legacy quam prim porta e rejecte poy un candidate si su longore supera 5778. `yearCandidatesAfterFootnotePatchBeforeSort` materialisa solmen ti familie ja filtrat; `stableLengthOnlyPatchedYearCandidates` aplica posterior li sam stable sort historic per longore solmen. `YearCandidateCeilingPatchWrapper` conserva li raw pre-sort family legacy quam diagnostic, ma ne executa li sort o selection defectiv de Discovery 16 in li path semantic. Null tie repair de Patch 17 e null code posterior es present.

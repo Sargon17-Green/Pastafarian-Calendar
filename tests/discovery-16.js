@@ -5,6 +5,8 @@ const production = require('../src');
 const normative = require('./normative-reference');
 
 assert.equal(production.LEGACY_YEAR_MAX, 5781n);
+assert.equal(production.REAL_YEAR_MAX_PATCH, 5778n);
+
 const boundaryGates = { 0: 0n, 5: 252n, 6: 252n, 7: 251n, 8: 5781n, 9: 5782n };
 assert.equal(production.legacyYearCandidateAllowed(boundaryGates, 0, 5), false);
 assert.equal(production.legacyYearCandidateAllowed(boundaryGates, 0, 6), true);
@@ -13,7 +15,7 @@ assert.equal(production.legacyYearCandidateAllowed(boundaryGates, 0, 8), true);
 assert.equal(production.legacyYearCandidateAllowed(boundaryGates, 0, 9), false);
 const legacySource = production.legacyYearCandidateAllowed.toString();
 assert.match(legacySource, /candidateLength <= LEGACY_YEAR_MAX/);
-assert.doesNotMatch(legacySource, /REAL_YEAR_MAX_PATCH|5778n.*reject|candidateLength > 5778n/);
+assert.doesNotMatch(legacySource, /REAL_YEAR_MAX_PATCH|candidateLength > 5778n/);
 
 const f = normative.FOUNDATION_DAY;
 const gates = {
@@ -38,11 +40,11 @@ assert.equal(production.legacyYearCandidateAllowed(gates, 0, 8), true);
 assert.equal(production.legacyYearCandidateAllowed(gates, 0, 9), true);
 assert.equal(production.legacyYearCandidateAllowed(gates, 0, 10), false);
 
-const prepared = production.legacyStableLengthOnlyYearCandidates(gates, candidatePairs);
-assert.deepEqual(prepared.map((candidate) => candidate.candidateLength), [5778n, 5779n, 5780n, 5781n]);
-assert.deepEqual(prepared.map((candidate) => candidate.inputOrdinal), [2, 1, 3, 0]);
+const legacyPrepared = production.legacyStableLengthOnlyYearCandidates(gates, candidatePairs);
+assert.deepEqual(legacyPrepared.map((candidate) => candidate.candidateLength), [5778n, 5779n, 5780n, 5781n]);
+assert.deepEqual(legacyPrepared.map((candidate) => candidate.inputOrdinal), [2, 1, 3, 0]);
 
-const route = production.discovery16LegacyYearCandidatesThroughMonsterPath(
+const legacyRoute = production.discovery16LegacyYearCandidatesThroughMonsterPath(
   f,
   f,
   -1n,
@@ -50,46 +52,53 @@ const route = production.discovery16LegacyYearCandidatesThroughMonsterPath(
   candidatePairs,
   { first: 1n, directionStep: 1n }
 );
-assert.equal(route.context.currentHandler, 'Discovery16LegacyYearCandidateHandler');
-assert.equal(route.context.previousHandler, 'NegativeGateQuestionPatchWrapper');
-assert.equal(route.context.phase, 'DISCOVERY_16_LEGACY_YEAR_MAX_5781');
-assert.equal(route.context.status, 'DISCOVERY_16_LEGACY_RESULT');
-assert.equal(route.context.patch15Output, f - 1n);
+assert.equal(legacyRoute.context.currentHandler, 'Discovery16LegacyYearCandidateHandler');
+assert.equal(legacyRoute.context.status, 'DISCOVERY_16_LEGACY_RESULT');
+assert.deepEqual(legacyRoute.context.legacyYearCandidateOverlongLengths, [5779n, 5780n, 5781n]);
+assert.equal(legacyRoute.context.legacyYearCandidateSelectionFamilySize, 4);
+
+const routed = production.historicYearCandidatesThroughMonsterPath(
+  f,
+  f,
+  -1n,
+  gates,
+  candidatePairs,
+  { first: 1n, directionStep: 1n }
+);
+assert.equal(routed.context.currentHandler, 'YearCandidateCeilingPatchWrapper');
+assert.equal(routed.context.previousHandler, 'NegativeGateQuestionPatchWrapper');
+assert.equal(routed.context.phase, 'PATCH_16_REAL_YEAR_MAX_5778_BEFORE_SORT');
+assert.equal(routed.context.status, 'PATCH_16_RESULT');
+assert.equal(routed.context.patch15Output, f - 1n);
+assert.equal(routed.context.patch16LegacyCallsPreserved, true);
 assert.deepEqual(
-  route.context.legacyYearCandidatePreSortFamily.map((candidate) => candidate.candidateLength),
+  routed.context.patch16LegacyPreSortFamily.map((candidate) => candidate.candidateLength),
   [5781n, 5779n, 5778n, 5780n]
 );
+assert.deepEqual(routed.context.patch16RejectedOverlongLengths, [5781n, 5779n, 5780n]);
 assert.deepEqual(
-  route.context.legacyYearCandidateSortedFamily.map((candidate) => candidate.candidateLength),
-  [5778n, 5779n, 5780n, 5781n]
+  routed.context.patch16FilteredPreSortFamily.map((candidate) => candidate.candidateLength),
+  [5778n]
 );
-assert.deepEqual(route.context.legacyYearCandidateOverlongLengths, [5779n, 5780n, 5781n]);
-assert.equal(route.context.legacyYearCandidateSelectionFamilySize, 4);
-assert.equal(route.context.legacyYearCandidateSelectedOrdinal, 1n);
-assert.equal(route.context.legacyYearCandidateSelected.candidateLength, 5778n);
-assert.deepEqual(route.context.branchTrace.slice(-3), [
+assert.deepEqual(
+  routed.context.patch16SortedFamily.map((candidate) => candidate.candidateLength),
+  [5778n]
+);
+assert.equal(routed.context.patch16SelectionFamilySize, 1);
+assert.equal(routed.context.patch16SelectedOrdinal, 1n);
+assert.equal(routed.context.patch16Selected.candidateLength, 5778n);
+assert.deepEqual(routed.context.branchTrace.slice(-3), [
   'DISCOVERY_15_NEGATIVE_GATE_ASKS_POSITIVE_SIDE',
   'PATCH_15_NEGATIVE_GATE_SIGN_DETOUR',
-  'DISCOVERY_16_LEGACY_YEAR_MAX_5781'
+  'PATCH_16_REAL_YEAR_MAX_5778_BEFORE_SORT'
 ]);
-assert.equal(route.context.metrics['discovery16.legacy5781Candidate.calls'], 1n);
-assert.equal(route.context.metrics['discovery16.selectionReached.calls'], 1n);
+assert.equal(routed.context.metrics['patch16.realYearCeiling.calls'], 1n);
+assert.equal(routed.context.metrics['patch16.overlongRejected.beforeSort'], 3n);
+assert.equal(routed.context.metrics['discovery16.selectionReached.calls'], undefined);
 
-const sortSource = production.legacyStableLengthOnlyYearCandidates.toString();
-assert.match(sortSource, /candidateLength < right.candidateLength/);
-assert.match(sortSource, /candidateLength > right.candidateLength/);
-assert.doesNotMatch(sortSource, /openGate.*sort|opening|REAL_YEAR_MAX_PATCH/);
-assert.equal('REAL_YEAR_MAX_PATCH' in production, false);
-
-const normativeOverlong = route.context.legacyYearCandidateSortedFamily
+const normativeOverlong = routed.context.patch16SortedFamily
   .filter((candidate) => candidate.candidateLength > normative.YEAR_MAX_DAYS)
   .map((candidate) => candidate.candidateLength);
-console.log('DISCOVERY 16 DIAGNOSTIC: LEGACY_YEAR_MAX=5781 lassa candidates supra 5778 arrivar al familie de selection.');
-console.log('legacy familie:   ' + route.context.legacyYearCandidateSortedFamily.map((candidate) => candidate.candidateLength).join(', '));
-console.log('overlong legacy:  ' + normativeOverlong.join(', '));
+assert.deepEqual(normativeOverlong, []);
 
-assert.deepEqual(
-  normativeOverlong,
-  [],
-  'DISCOVERY 16 EXPECTED RED: 5779, 5780 e 5781 ne deve arrivar al sort/selection normativ ante li filter de Patch 16.'
-);
+console.log('DISCOVERY 16 REGRESSION: PASS — li scar 5781 resta demonstrabil, ma Patch 16 rejecte 5779..5781 ante sort e selection semantic.');
