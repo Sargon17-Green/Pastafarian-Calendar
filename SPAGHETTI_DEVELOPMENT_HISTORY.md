@@ -443,3 +443,26 @@ Li helper legacy continua mutar e retornar li sam vector. Li route reparat ne re
 ### Pro quo li strat nov ne adjunte un defect extra
 
 Li snapshot e buffer es invocation-local e ne participa in selection o cache. Li input extern ne es mutat per li route semantic, li legacy garbage ne decide li output, e li commit usa solmen li six values ja complet in `pending`. Omni patches 01..09 resta fisicmen intact e testabil.
+
+
+## Stage 22 — DISCOVERY 11
+
+### Quo on pensat
+
+On conservat un unic camp de memorie por li order current del bowls. Durante li 46 drops ti camp semblat suficient: chascun nov drop superscri li order anterior, e al fin de drop 46 li camp contene exactmen li order necessi. Li sam camp esset poy reutilisat durant li post-stirs quam diagnostic del order current.
+
+### Quo esset decovrit
+
+Li query posterior ne questiona li ultim order del post-stir; it besona li order exact del visible drop 46. Li memorie general es tamen superscrit 46 vezes durant li drops e anc 12 vezes durant li post-stirs. Consequentmen li valore correct de drop 46 existe solmen por un moment e, pos post-stir 12, li query legacy lee un permutation diferent. In li witness del Foundation, omni six bowls final resta exact, ma li positions 1, 2 e 6 del query order diverge del order de drop 46.
+
+### Quo esset circumit
+
+Null circumition existe in Discovery 11. Li memorie superscribil resta li unic fonte semantic de `queryOrder`. Un copie del order de drop 46 es conservat solmen quam diagnostic de test e context; it ne es leet por decidir li query. Li latch separat apartene exclusivmen a PATCH 11.
+
+### Crescentie monster in ti stage
+
+Li monster obtene un path complet de sauce partial: `initialBowlsForOrderMemoryDiscovery`, `visibleDropThroughCurrentLayers`, `postStirOneForOrderMemoryDiscovery` e `legacySauceWithOverwritableOrderMemory`. Supra ti path, `LegacyOverwritableOrderMemoryAdapter` e `Discovery11OverwrittenOrderHandler` conserva li 58 writes, li ultim fonte, li order diagnostic de drop 46, li ultim post-stir, li drops e li bowls final in un context invocation-local.
+
+### Pro quo li nov layer ne change altri semantics
+
+Li visible drops usa exclusivmen li access history de Patch 06 e li grind table con sentinel de Patch 07; li order usa Patch 08, li pours usa bowlAlias de Patch 09, e li six updates de chascun drop usa `vaultOld`/`pending` de Patch 10. Li 12 post-stirs usa un snapshot old e un pending complet por chascun round. Ergo li six bowls final concorda con li reference normativ local; li unic defect nov e intentional es li ownership historic del memorie de order.

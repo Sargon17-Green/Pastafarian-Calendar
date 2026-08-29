@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 10 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 11 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -1179,7 +1179,35 @@ group('Patch 10 conserva li scar in-place ma usa vaultOld, pending e commit tard
   eq(routed.context.metrics['patch10.shadowBowl.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 10', () => {
+group('Discovery 11 superscri li unic memorie de order durant 46 drops e 12 post-stirs', () => {
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const expected = o.sauce(f, f);
+  const direct = production.legacySauceWithOverwritableOrderMemory(counts, stones);
+  deepEq(direct.bowls.slice(1), expected.bowls);
+  deepEq(direct.drop46OrderDiagnostic, expected.orderAtDrop46);
+  eq(direct.orderWriteCount, 58);
+  deepEq(direct.lastSource, { kind: 'post-stir', ordinal: 12 });
+  deepEq(direct.legacyOrderMemory, direct.lastPostStirOrder);
+  deepEq(direct.queryOrder, direct.lastPostStirOrder);
+  ok(direct.queryOrder.some((id, index) => id !== expected.orderAtDrop46[index]));
+  const source = production.legacySauceWithOverwritableOrderMemory.toString();
+  ok(source.includes("lastSource = { kind: 'drop', ordinal: index }"));
+  ok(source.includes("lastSource = { kind: 'post-stir', ordinal: stir }"));
+  ok(source.includes('legacyOrderMemory = round.order.slice()'));
+  const routed = production.discovery11LegacyOverwrittenOrderThroughMonsterPath(f, f, counts, stones);
+  eq(routed.context.currentHandler, 'Discovery11OverwrittenOrderHandler');
+  eq(routed.context.phase, 'DISCOVERY_11_OVERWRITABLE_ORDER_MEMORY');
+  eq(routed.context.status, 'DISCOVERY_11_LEGACY_RESULT');
+  eq(routed.context.legacyOrderMemoryWriteCount, 58);
+  deepEq(routed.context.legacyOrderMemoryLastSource, { kind: 'post-stir', ordinal: 12 });
+  deepEq(routed.context.legacyDrop46OrderDiagnostic, expected.orderAtDrop46);
+  deepEq(routed.context.legacyQueryOrder, routed.result.lastPostStirOrder);
+  eq(routed.context.metrics['discovery11.overwritableOrder.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 11', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1191,4 +1219,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa pos Patch 10.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 11.');

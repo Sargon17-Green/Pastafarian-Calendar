@@ -26,25 +26,25 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions precedent, includente Discovery 10 nu reparat per li route Patch 10, deve restar verd:
+Omni regressions precedent til Patch 10 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test specific de Patch 10 deve esser verd:
+Li regression nov de Discovery 11 deve esser rubi intentionalmen:
 
 ```text
-npm run test:patch-10
+npm run test:discovery-11
 ```
 
-Li suite complet deve esser verd:
+Li suite complet deve finir `EXPECTED_RED` exclusivmen per ti regression:
 
 ```text
 npm test
 ```
 
-Li verifier confirma que li helper legacy continua mutar in-place, durante que li helper reparat executa un legacy call real sur un clone, conserva `vaultOld`, scri omni six resultates in `pending` e crea li commit solmen pos li loop complet. It confirma anc que null `orderAt46Latch` o code posterior contamina production.
+Li verifier confirma un path exact de 46 visible drops e 12 post-stirs, con six bowls final normativmen exact. It confirma anc que li unic memorie legacy de order es scrit 58 vezes e termina con li order del post-stir 12. Null latch separat por drop 46 o code de Patch 11 es present.
 
 ## Independentie
 
@@ -102,3 +102,10 @@ Li regression de Discovery 10 usa intentionalmen un order identic por isolar li 
 ## Stage 21 — Patch 10
 
 `legacyStirOneDropInPlace` resta intact quam scar historic e continua contaminar bowls posterior quand it es vocat directmen. `stirOneDropViaShadow` voca realmen ti helper sur un clone separat, conserva su garbage, poy crea li snapshot fisic `vaultOld`. Li six calculs semantic lee solmen ex ti snapshot e scri exclusivmen in `pending`; solmen pos li six positions li buffer complet deven li commit final. `Patch10ShadowBowlWrapper` conserva li snapshot, pending, garbage legacy e output reparat in li sam context. Li regression de Discovery 10 es nu verd. Null latch de order al drop 46 o code de Patch 11 es present.
+
+
+## Stage 22 — Discovery 11
+
+Li nov path `legacySauceWithOverwritableOrderMemory` materialisa 46 visible drops tra li patches ja existent, aplica chascun bowl-round per `stirOneDropViaShadow`, e poy executa 12 post-stirs con `savedStirSum = SAVE(sum(oldBowls)+149*stir)`. Omni bowl reads del post-stir veni del sam snapshot e omni six writes deven un batch separat, talmen li bowls resta exact.
+
+Li defect current es exclusivmen li memorie de order: un unic `legacyOrderMemory` es superscrit un vez per drop e un vez per post-stir. Li order de drop 46 es dunque calculat exactmen ma poy perdit quam fonte semantic de query. `Discovery11OverwrittenOrderHandler` conserva li 58 writes, li fonte final post-stir 12, li diagnostic del drop 46 e li query legacy superscrit. Li regression nov compara positions 1, 2 e 6 contra li order normativ de drop 46 e resta rubi intentionalmen. Null latch reparativ es addit in ti stage.

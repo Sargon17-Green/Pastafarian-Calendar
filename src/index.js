@@ -117,6 +117,16 @@ class BaseMonsterContext {
     this.patch10Pending = null;
     this.patch10CommitAfterAllSix = false;
     this.patch10Output = null;
+    this.legacyOrderMemory = null;
+    this.legacyOrderMemoryWriteCount = 0;
+    this.legacyOrderMemoryLastSource = null;
+    this.legacyDrop46OrderDiagnostic = null;
+    this.legacyLastPostStirOrder = null;
+    this.legacyLastPostStirSavedSum = null;
+    this.legacyDiscovery11Drops = null;
+    this.legacyDiscovery11BowlsAfterDrops = null;
+    this.legacyDiscovery11FinalBowls = null;
+    this.legacyQueryOrder = null;
   }
 }
 
@@ -239,6 +249,15 @@ class BaseValidationManager {
   requireDiscovery10Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_10_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un bowl-round legacy valid por Patch 10.');
+    }
+  }
+
+  requireStoneTableForOrderMemory(stones) {
+    if (!Array.isArray(stones) || stones.length < 46) {
+      throw new TypeError('Li table de stones por li memorie de order deve contener 46 rows.');
+    }
+    for (let index = 0; index < 46; index += 1) {
+      this.requireStoneState(stones[index]);
     }
   }
 
@@ -768,6 +787,207 @@ function stirOneDropViaShadow(drop, index, bowls, stoneRow) {
       bowls: legacyGarbage.bowls.slice()
     }
   };
+}
+
+const DISCOVERY11_BOWL_PRIMES = Object.freeze([null, 17n, 19n, 23n, 29n, 31n, 37n]);
+
+function initialBowlsForOrderMemoryDiscovery(counts) {
+  if (!counts || typeof counts !== 'object') {
+    throw new TypeError('Li comptes por li bowls inicial deve esser un object exact.');
+  }
+  for (const key of ['action', 'target', 'distance', 'connection', 'direction']) {
+    if (typeof counts[key] !== 'bigint') {
+      throw new TypeError('Li comptes por li bowls inicial deve contener BigInt exact.');
+    }
+  }
+  const bowls = new Array(7).fill(null);
+  for (let bowlId = 1; bowlId <= 6; bowlId += 1) {
+    const prime = DISCOVERY11_BOWL_PRIMES[bowlId];
+    const seed = counts.action
+      + counts.target * BigInt(bowlId)
+      + counts.distance
+      + counts.connection
+      + counts.direction
+      + prime * prime;
+    bowls[bowlId] = savePatch(seed * seed + BigInt(bowlId));
+  }
+  return bowls;
+}
+
+function visibleDropThroughCurrentLayers(index, counts, stones, dropStore, legacyHidden) {
+  if (!Number.isInteger(index) || index < 1 || index > 46) {
+    throw new RangeError('Li index del visible drop complet deve esser inter 1 e 46.');
+  }
+  if (!Array.isArray(stones) || stones.length < 46) {
+    throw new TypeError('Li table complet de stones deve contener 46 rows.');
+  }
+  const row = stones[index - 1];
+  if (!row || typeof row !== 'object') {
+    throw new TypeError('Li row del visible drop deve esser un object de stones.');
+  }
+  const prev1 = priorPatch(dropStore, legacyHidden, index, 1);
+  const prev3 = priorPatch(dropStore, legacyHidden, index, 3);
+  const prev7 = priorPatch(dropStore, legacyHidden, index, 7);
+  let x = savePatch(
+    row.w * counts.action
+    + row.b * counts.target
+    + row.s * counts.distance
+    + row.m * counts.connection
+    + row.r * counts.direction
+    + prev1
+    + 3n * prev3
+    + 5n * prev7
+    + BigInt(index)
+  );
+  for (let grind = 1; grind <= 11; grind += 1) {
+    const rule = grindRowWithSentinel(grind);
+    const oldX = x;
+    x = savePatch(
+      oldX * oldX
+      + rule.a * oldX
+      + rule.b * prev1
+      + rule.c * prev3
+      + rule.d * prev7
+      + row[rule.kind]
+    );
+  }
+  return x;
+}
+
+function postStirOneForOrderMemoryDiscovery(stirNumber, bowls) {
+  if (!Number.isInteger(stirNumber) || stirNumber < 1 || stirNumber > 12) {
+    throw new RangeError('Li ordinal del post-stir deve esser inter 1 e 12.');
+  }
+  if (!Array.isArray(bowls) || bowls.length < 7) {
+    throw new TypeError('Li bowls del post-stir deve conservar indices 1..6.');
+  }
+  const old = bowls.slice();
+  let rawSum = 0n;
+  for (let bowlId = 1; bowlId <= 6; bowlId += 1) {
+    if (typeof old[bowlId] !== 'bigint') {
+      throw new TypeError('Chascun bowl del post-stir deve esser un BigInt exact.');
+    }
+    rawSum += old[bowlId];
+  }
+  const savedStirSum = savePatch(rawSum + 149n * BigInt(stirNumber));
+  const order = orderPatchFromValue(savedStirSum);
+  const pending = new Array(7).fill(null);
+  for (let position = 1; position <= 6; position += 1) {
+    const bowlId = order[position - 1];
+    const prevId = order[(position + 4) % 6];
+    const nextId = order[position % 6];
+    const z = old[bowlId]
+      + 3n * old[prevId]
+      + 5n * old[nextId]
+      + savedStirSum
+      + BigInt(stirNumber)
+      + BigInt(position * position);
+    pending[bowlId] = savePatch(z * z + 7n * old[prevId] * old[nextId]);
+  }
+  return { bowls: pending.slice(), order: order.slice(), savedStirSum };
+}
+
+function legacySauceWithOverwritableOrderMemory(counts, stones) {
+  if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
+    throw new TypeError('Li path legacy de order-memory exige comptes e 46 rows de stones.');
+  }
+  const legacyHidden = buildHiddenWithBackwardStorage(counts, stones);
+  const drops = new Array(47).fill(null);
+  let bowls = initialBowlsForOrderMemoryDiscovery(counts);
+  let legacyOrderMemory = null;
+  let orderWriteCount = 0;
+  let lastSource = null;
+  let drop46OrderDiagnostic = null;
+
+  for (let index = 1; index <= 46; index += 1) {
+    const drop = visibleDropThroughCurrentLayers(index, counts, stones, drops, legacyHidden);
+    drops[index] = drop;
+    const round = stirOneDropViaShadow(drop, BigInt(index), bowls, stones[index - 1]);
+    bowls = round.bowls.slice();
+    // Li scar de Discovery 11 usa un unic memorie general: chascun drop superscri li order anterior.
+    legacyOrderMemory = round.order.slice();
+    orderWriteCount += 1;
+    lastSource = { kind: 'drop', ordinal: index };
+    if (index === 46) {
+      // Ti copie es diagnostic solmen; li query semantic legacy ne lee it.
+      drop46OrderDiagnostic = round.order.slice();
+    }
+  }
+
+  const bowlsAfterDrops = bowls.slice();
+  let lastPostStirOrder = null;
+  let lastPostStirSavedSum = null;
+  for (let stir = 1; stir <= 12; stir += 1) {
+    const round = postStirOneForOrderMemoryDiscovery(stir, bowls);
+    bowls = round.bowls.slice();
+    // Li sam memorie general es superscrit denov per chascun post-stir; li order de drop 46 es dunque perdit por query.
+    legacyOrderMemory = round.order.slice();
+    orderWriteCount += 1;
+    lastSource = { kind: 'post-stir', ordinal: stir };
+    lastPostStirOrder = round.order.slice();
+    lastPostStirSavedSum = round.savedStirSum;
+  }
+
+  return {
+    hiddenBackward: legacyHidden.slice(),
+    drops: drops.slice(),
+    bowlsAfterDrops,
+    bowls: bowls.slice(),
+    drop46OrderDiagnostic: drop46OrderDiagnostic.slice(),
+    lastPostStirOrder: lastPostStirOrder.slice(),
+    lastPostStirSavedSum,
+    legacyOrderMemory: legacyOrderMemory.slice(),
+    orderWriteCount,
+    lastSource,
+    queryOrder: legacyOrderMemory.slice()
+  };
+}
+
+class LegacyOverwritableOrderMemoryAdapter {
+  call(counts, stones) {
+    return legacySauceWithOverwritableOrderMemory(counts, stones);
+  }
+}
+
+class Discovery11OverwrittenOrderHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, counts, stones) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireHiddenCounts(counts);
+    this.validationManager.requireStoneTableForOrderMemory(stones);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery11OverwrittenOrderHandler';
+    context.phase = 'DISCOVERY_11_OVERWRITABLE_ORDER_MEMORY';
+    context.branchTrace.push('DISCOVERY_11_OVERWRITABLE_ORDER_MEMORY');
+    const result = this.legacyAdapter.call(counts, stones);
+    context.legacyOrderMemory = result.legacyOrderMemory.slice();
+    context.legacyOrderMemoryWriteCount = result.orderWriteCount;
+    context.legacyOrderMemoryLastSource = { ...result.lastSource };
+    context.legacyDrop46OrderDiagnostic = result.drop46OrderDiagnostic.slice();
+    context.legacyLastPostStirOrder = result.lastPostStirOrder.slice();
+    context.legacyLastPostStirSavedSum = result.lastPostStirSavedSum;
+    context.legacyDiscovery11Drops = result.drops.slice();
+    context.legacyDiscovery11BowlsAfterDrops = result.bowlsAfterDrops.slice();
+    context.legacyDiscovery11FinalBowls = result.bowls.slice();
+    context.legacyQueryOrder = result.queryOrder.slice();
+    context.status = 'DISCOVERY_11_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery11.overwritableOrder.calls');
+    return {
+      bowls: result.bowls.slice(),
+      drop46OrderDiagnostic: result.drop46OrderDiagnostic.slice(),
+      lastPostStirOrder: result.lastPostStirOrder.slice(),
+      lastPostStirSavedSum: result.lastPostStirSavedSum,
+      legacyOrderMemory: result.legacyOrderMemory.slice(),
+      orderWriteCount: result.orderWriteCount,
+      lastSource: { ...result.lastSource },
+      queryOrder: result.queryOrder.slice()
+    };
+  }
 }
 
 class LegacyRemainderAdapter {
@@ -1466,6 +1686,12 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    this.legacyOverwritableOrderMemoryAdapter = new LegacyOverwritableOrderMemoryAdapter();
+    this.discovery11OverwrittenOrderHandler = new Discovery11OverwrittenOrderHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyOverwritableOrderMemoryAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -1728,6 +1954,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery11OverwrittenOrder(calculationDay, targetDay, counts, stones) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery11OverwrittenOrderHandler.handle(context, counts, stones);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -1822,8 +2060,12 @@ function historicBowlRoundThroughMonsterPath(calculationDay, targetDay, drop, in
   );
 }
 
+function discovery11LegacyOverwrittenOrderThroughMonsterPath(calculationDay, targetDay, counts, stones) {
+  return new BaseMonsterManager().executeDiscovery11OverwrittenOrder(calculationDay, targetDay, counts, stones);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 10; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 11; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -1867,6 +2109,8 @@ module.exports = Object.freeze({
   LegacyInPlaceBowlAdapter,
   Discovery10InPlaceBowlHandler,
   Patch10ShadowBowlWrapper,
+  LegacyOverwritableOrderMemoryAdapter,
+  Discovery11OverwrittenOrderHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -1901,6 +2145,11 @@ module.exports = Object.freeze({
   BOWL_STIR_STONE_BY_POSITION_LEGACY,
   legacyStirOneDropInPlace,
   stirOneDropViaShadow,
+  DISCOVERY11_BOWL_PRIMES,
+  initialBowlsForOrderMemoryDiscovery,
+  visibleDropThroughCurrentLayers,
+  postStirOneForOrderMemoryDiscovery,
+  legacySauceWithOverwritableOrderMemory,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -1922,5 +2171,6 @@ module.exports = Object.freeze({
   historicPoursThroughMonsterPath,
   discovery10LegacyInPlaceBowlsThroughMonsterPath,
   historicBowlRoundThroughMonsterPath,
+  discovery11LegacyOverwrittenOrderThroughMonsterPath,
   calendarDateSpaghetti
 });
