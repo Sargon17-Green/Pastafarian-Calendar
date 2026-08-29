@@ -10,7 +10,9 @@ using pastafari::Integer;
 using pastafari::LEGACY_YEAR_MAX;
 using pastafari::LegacyYearCandidate;
 using pastafari::LegacyYearCandidatePair;
+using pastafari::legacyStableLengthOnlyYearCandidates;
 using pastafari::legacyYearCandidateAllowed;
+using pastafari::legacyYearCandidatesBeforeSort;
 
 static void require(bool condicio, const std::string& nuntius) {
     if (!condicio) {
@@ -66,6 +68,15 @@ int main() {
         require(!legacyYearCandidateAllowed(gates, 0, 10), "5782 a legacy admittitur");
         require(!legacyYearCandidateAllowed(gates, 1, 6), "gapCount infra sex non repudiatur");
 
+        const auto legacyPre = legacyYearCandidatesBeforeSort(gates, pairs);
+        const auto legacySorted = legacyStableLengthOnlyYearCandidates(legacyPre);
+        require(eadem(longitudines(legacyPre),
+                      {Integer{5781}, Integer{5779}, Integer{5778}, Integer{5780}}),
+                "ordo raw legacy ante sortem mutatus est");
+        require(eadem(longitudines(legacySorted),
+                      {Integer{5778}, Integer{5779}, Integer{5780}, Integer{5781}}),
+                "stable sort legacy per longitudinem non produxit cicatricem exspectatam");
+
         const BaseMonsterManager manager;
         const auto report = manager.executeLegacyYearCandidateDiscovery(
             pastafari::FOUNDATION_DAY_OLD,
@@ -76,20 +87,12 @@ int main() {
             10);
 
         require(report.patch15Prepared, "PATCH 15 ante Discovery 16 non praeparatus est");
-        require(report.selectionCalled, "familia legacy selectionem non attigit");
-        require(report.selectionFamilySize == 4, "magnitudo selectionis legacy non est quattuor");
-        require(report.selectedOrdinal >= 1 && report.selectedOrdinal <= 4,
-                "ordinalis selectionis extra familiam est");
-        require(report.status == "LEGACY_YEAR_MAX_5781_REACHES_SELECTION",
-                "status Discovery 16 inexpectatus est");
+        require(report.selectionCalled, "familia activa selectionem non attigit");
+        require(report.selectedOrdinal >= 1 && report.selectedOrdinal <= report.selectionFamilySize,
+                "ordinalis selectionis activae extra familiam est");
 
         const std::vector<Integer> pre = longitudines(report.preSort);
         const std::vector<Integer> sorted = longitudines(report.sorted);
-        require(eadem(pre, {Integer{5781}, Integer{5779}, Integer{5778}, Integer{5780}}),
-                "ordo raw ante sortem legacy mutatus est");
-        require(eadem(sorted, {Integer{5778}, Integer{5779}, Integer{5780}, Integer{5781}}),
-                "stable sort legacy per longitudinem non produxit familiam exspectatam");
-
         std::vector<Integer> supraNormam;
         for (const Integer& L : sorted) {
             if (L > 5778) {
@@ -98,14 +101,18 @@ int main() {
         }
 
         std::cout << "LEGACY_YEAR_MAX=" << LEGACY_YEAR_MAX << "\n";
-        std::cout << "FAMILIA_ANTE_SORTEM=" << series(pre) << "\n";
-        std::cout << "FAMILIA_SORTATA=" << series(sorted) << "\n";
+        std::cout << "CICATRIX_ANTE_SORTEM=" << series(longitudines(legacyPre)) << "\n";
+        std::cout << "CICATRIX_SORTATA=" << series(longitudines(legacySorted)) << "\n";
+        std::cout << "FAMILIA_ACTIVA_ANTE_SORTEM=" << series(pre) << "\n";
+        std::cout << "FAMILIA_ACTIVA_SORTATA=" << series(sorted) << "\n";
         std::cout << "FAMILIA_SELECTIONIS=" << report.selectionFamilySize << "\n";
-        std::cout << "ORDINALIS_ELECTUS=" << report.selectedOrdinal << "\n";
-        std::cout << "LONGITUDO_ELECTA=" << report.selectedCandidate.length << "\n";
         std::cout << "SUPRA_CULMEN_NORMATIVUM=" << series(supraNormam) << "\n";
 
         if (supraNormam.empty()) {
+            require(report.selectionFamilySize == 1,
+                    "familia semantic selectionis post ceiling non est unius candidati");
+            require(report.selectedCandidate.length == 5778,
+                    "candidatus semanticus electus non habet longitudinem 5778");
             std::cout << "REGRESSIO_DISCOVERY_16_TRANSIIT\n";
             return 0;
         }

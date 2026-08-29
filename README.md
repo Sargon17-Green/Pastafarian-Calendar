@@ -273,3 +273,74 @@ Omnes regressiones Graduum 1–31 denuo compilatae et exsecutae sunt; omnes tran
 ### Quod consulto nondum adest
 
 Nulla constans separata 5778 in productione, nullus early reject pro longitudine supra 5778, nullus PATCH 16 et nullus tie repair secundarius huius gradus adsunt. Gradus 33 / PATCH 16 solus filter separatum ante sortem et selectionem introducere debet, `LEGACY_YEAR_MAX=5781` intacto relicto.
+
+
+## PATCH 16 — ceiling realis 5778 post cicatricem legacy et ante ordinationem
+
+Gradus 33 constantem historicam non mutat:
+
+```text
+LEGACY_YEAR_MAX=5781
+```
+
+`legacyYearCandidateAllowed`, `legacyYearCandidatesBeforeSort`, `legacyStableLengthOnlyYearCandidates` et `Discovery16LegacyYearCandidateHandler` manent cicatrices separatae. Via diagnostica `executeUnpatchedYearCandidateDiscoveryDiagnostic` eas adhuc exercet et demonstrat familiam legacy `5778,5779,5780,5781` ad selectionem veterem pervenire.
+
+Correctio nova constantem separatam addit:
+
+```text
+REAL_YEAR_MAX_PATCH=5778
+```
+
+`yearCandidateAfterFootnotePatch` primum `legacyYearCandidateAllowed` vere vocat. Si helper legacy candidatum repudiat, nihil ulterius fit. Si helper legacy admittit, longitudo exacta materialisatur; demum candidata cum `candidateLength>REAL_YEAR_MAX_PATCH` ad `rejectedBeforeSort` movetur. Ergo 5779, 5780 et 5781 post acceptance legacy observabilia manent, sed nullam ordinationem semanticam neque selectionem attingunt.
+
+`YearCandidateCeilingPatchWrapper` quattuor familias invocationi proprias servat:
+
+```text
+legacyPreSort
+rejectedBeforeSort
+semanticPreSort
+semanticSorted
+```
+
+Solum `semanticPreSort` ad `legacyStableLengthOnlyYearCandidates` traditur. Sic cicatrix ordinationis veteris per longitudinem solam manet, sed overlong candidates iam ante ipsam ordinationem semanticam remoti sunt. Nullum criterium secundarium per opening gate hoc gradu adicitur.
+
+Via activa est:
+
+```text
+BaseMonsterManager::executeLegacyYearCandidateDiscovery
+-> Patch 15
+-> Patch 11
+-> Patch 12
+-> BaseDispatcher::dispatchPatchedYearCandidates
+-> Patch16YearCandidateCeilingHandler
+-> YearCandidateCeilingPatchWrapper
+-> legacyYearCandidateAllowed
+-> REAL_YEAR_MAX_PATCH filter
+-> ordinatio stabilis per longitudinem solam
+-> LegacyYearCandidateAdapter::select
+```
+
+### Regressio Discovery 16 post patch
+
+Eadem familia limitis cicatricem legacy directe adhuc demonstrat:
+
+```text
+legacy ante ordinationem: 5781,5779,5778,5780
+legacy ordinata:          5778,5779,5780,5781
+```
+
+Via activa autem dat:
+
+```text
+semantica ante ordinationem: 5778
+semantica ordinata:          5778
+familia selectionis:         1
+```
+
+Eadem versio probationis contra fontem Gradus 32 pristinum adhuc 5779..5781 ad selectionem transmittit et exitum 1 reddit; contra Gradum 33 transit.
+
+### Probatio contra anticipationem Patch 17
+
+Probe additivum duas candidatas longitudinis 490 in ordine inputuum `openIndex 2,0` ponit. Post PATCH 16 ordo idem `2,0` manet. Hoc demonstrat filter 5778 ante ordinationem recte insertum esse, sed tie repair per opening gate nondum exsistere.
+
+Omnes regressiones Graduum 1–33 transeunt. Nullus `sortEqualLengthRunsByOpeningGate`, nullus PATCH 17, nullus `patch17Applied` et nullus `oldJumpGuess` in productione adsunt.

@@ -14,6 +14,7 @@ using Integer = boost::multiprecision::cpp_int;
 inline const Integer M_OLD = (Integer{1} << 127) - 1;
 inline const Integer FOUNDATION_DAY_OLD = Integer{-15055671};
 inline constexpr int LEGACY_YEAR_MAX = 5781;
+inline constexpr int REAL_YEAR_MAX_PATCH = 5778;
 
 Integer regularMod(const Integer& x, const Integer& d);
 Integer oldRemainder(const Integer& x);
@@ -191,6 +192,24 @@ struct LegacyYearCandidatePreparation {
     LegacyYearCandidateList preSort{};
     LegacyYearCandidateList sorted{};
 };
+
+struct Patch16YearCandidateDecision {
+    bool legacyAccepted = false;
+    bool semanticAccepted = false;
+    LegacyYearCandidate candidate{};
+};
+
+struct Patch16YearCandidatePreparation {
+    LegacyYearCandidateList legacyPreSort{};
+    LegacyYearCandidateList rejectedBeforeSort{};
+    LegacyYearCandidateList semanticPreSort{};
+    LegacyYearCandidateList semanticSorted{};
+};
+
+Patch16YearCandidateDecision yearCandidateAfterFootnotePatch(
+    const std::vector<Integer>& gates,
+    std::size_t openIndex,
+    std::size_t closeIndex);
 
 struct Patch13RejectionSelection {
     Integer acceptanceLimit{};
@@ -387,6 +406,16 @@ struct BaseMonsterContext {
     int legacyYearQueriedBowlId = 0;
     int legacyYearSeal = 0;
     bool legacyYearCandidateReady = false;
+    LegacyYearCandidateList patch16LegacyYearCandidatesPreSort{};
+    LegacyYearCandidateList patch16RejectedBeforeSort{};
+    LegacyYearCandidateList patch16YearCandidatesPreSort{};
+    LegacyYearCandidateList patch16YearCandidatesSorted{};
+    LegacyAnswerRing patch16YearSelectionRing{};
+    Integer patch16YearSelectionFamilySize{};
+    bool patch16YearSelectionCalled = false;
+    Integer patch16YearSelectedOrdinal{};
+    LegacyYearCandidate patch16YearSelectedCandidate{};
+    bool patch16Applied = false;
 };
 
 struct LegacyYearCandidateReport {
@@ -404,6 +433,9 @@ struct LegacyYearCandidateReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    LegacyYearCandidateList legacyPreSortBeforePatch{};
+    LegacyYearCandidateList rejectedBeforeSort{};
+    bool patch16Applied = false;
 };
 
 struct LegacyWideSelectionReport {
@@ -701,6 +733,7 @@ public:
     void requireDiscovery15GateQuestionReady(const BaseMonsterContext& ctx) const;
     void requirePatch15GateQuestionReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery16LegacyYearCandidatesReady(const BaseMonsterContext& ctx) const;
+    void requirePatch16YearCandidateCeilingReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -734,6 +767,13 @@ public:
                    const LegacyBiasedSelectionAdapter& selectionAdapter,
                    const Patch13RejectionWrapper& rejectionWrapper,
                    const Patch14WideDetourWrapper& wideWrapper) const;
+};
+
+class YearCandidateCeilingPatchWrapper {
+public:
+    Patch16YearCandidatePreparation prepare(
+        const std::vector<Integer>& gates,
+        const std::vector<LegacyYearCandidatePair>& pairs) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1191,6 +1231,18 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch16YearCandidateCeilingHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const YearCandidateCeilingPatchWrapper& wrapper,
+                const LegacyYearCandidateAdapter& adapter,
+                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                const Patch13RejectionWrapper& rejectionWrapper,
+                const Patch14WideDetourWrapper& wideWrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1405,6 +1457,16 @@ public:
                                       const Patch14WideDetourWrapper& wideWrapper,
                                       const BaseValidationManager& validator,
                                       const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedYearCandidates(BaseMonsterContext& ctx,
+                                       const Patch16YearCandidateCeilingHandler& handler,
+                                       const YearCandidateCeilingPatchWrapper& wrapper,
+                                       const LegacyYearCandidateAdapter& adapter,
+                                       const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                       const Patch13RejectionWrapper& rejectionWrapper,
+                                       const Patch14WideDetourWrapper& wideWrapper,
+                                       const BaseValidationManager& validator,
+                                       const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1497,6 +1559,13 @@ public:
     LegacyGateQuestionReport executeLegacyGateQuestionDay(const Integer& signedStep) const;
     LegacyGateQuestionReport executeUnpatchedGateQuestionDayDiagnostic(const Integer& signedStep) const;
     LegacyYearCandidateReport executeLegacyYearCandidateDiscovery(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        const std::vector<Integer>& gates,
+        const std::vector<LegacyYearCandidatePair>& pairs,
+        int queriedBowlId,
+        int seal) const;
+    LegacyYearCandidateReport executeUnpatchedYearCandidateDiscoveryDiagnostic(
         const Integer& calculationDay,
         const Integer& targetDay,
         const std::vector<Integer>& gates,

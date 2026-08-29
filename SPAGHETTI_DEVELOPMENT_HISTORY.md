@@ -990,3 +990,49 @@ Additi sunt `LEGACY_YEAR_MAX`, `LegacyYearCandidatePair`, `LegacyYearCandidate`,
 ### Quod nondum fit
 
 Ceiling historicum 5781 non mutatur. Nullus filter separatus 5778, nullus reject ante sortem, nullus PATCH 16, nullus tie repair Patch 17 et nullus codex ulterior praemature additur.
+
+
+## Gradus 33 — PATCH 16: ceiling realis 5778 ante ordinationem et selectionem
+
+### Cicatrix servata
+
+`LEGACY_YEAR_MAX=5781` manet constans activa. `legacyYearCandidateAllowed`, `legacyYearCandidatesBeforeSort`, `legacyStableLengthOnlyYearCandidates` et `Discovery16LegacyYearCandidateHandler` non corriguntur in origine. Via `executeUnpatchedYearCandidateDiscoveryDiagnostic` totam cicatricem Discovery 16 adhuc exercet, cum 5779..5781 ad familiam sortatam et selectionem legacy perveniant.
+
+### Circumventio
+
+Addita est constans separata:
+
+```text
+REAL_YEAR_MAX_PATCH=5778
+```
+
+`yearCandidateAfterFootnotePatch` pro singulo pari portarum primum helperem `legacyYearCandidateAllowed` vocat. Tantum post acceptance legacy candidatum materialisat et longitudo supra 5778 a familia semantica excluditur.
+
+`YearCandidateCeilingPatchWrapper` familiam raw legacy separatim servat, candidatas supra 5778 in `rejectedBeforeSort` consignat, familiam semanticam admissam in ordine inputuum construit, et demum eandem functionem historicam `legacyStableLengthOnlyYearCandidates` solum super familia iam filtrata vocat. Sic rejectio ante ordinationem semanticam fit; tie repair nullum est.
+
+`Patch16YearCandidateCeilingHandler` answer ring ex Patch 11 et Patch 12 existentibus construit et selectionem tantum cum familia filtrata atque ordinata vocat. Validator productionis sine oracle iterum acceptance legacy, filter 5778, ordinem rejectionum, ordinationem length-only, limites selectionis et candidatum electum verificat.
+
+### Regressio Discovery 16
+
+Probatio Gradus 32 cicatricem legacy iam directe per helperes veteres verificat, sed RED/GREEN ex output activo determinat. Contra fontem Gradus 32 pristinum familia activa manet `5778,5779,5780,5781`, tres overlong candidates adsunt et exitus est 1. Contra Gradum 33 familia activa solum `5778` continet et regressio transit.
+
+### Regressio PATCH 16
+
+Nova probatio confirmat:
+
+- 5778 ab legacy et patch admitti;
+- 5779, 5780 et 5781 a legacy admitti sed postea ante ordinationem semanticam repudiari;
+- 5782 iam a ceiling legacy 5781 repudiari;
+- via diagnostica Discovery 16 familiam quattuor candidatorum servare;
+- via activa familiam semanticam unius candidati 5778 ad selectionem mittere;
+- duas candidatas longitudinis 490 ordinem inputuum `openIndex 2,0` post ordinationem servare, ne PATCH 17 anticipetur.
+
+Omnes regressiones Graduum 1–33 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `REAL_YEAR_MAX_PATCH`, `Patch16YearCandidateDecision`, `Patch16YearCandidatePreparation`, `yearCandidateAfterFootnotePatch`, campi contextus raw/rejecti/filtrati, `YearCandidateCeilingPatchWrapper`, `Patch16YearCandidateCeilingHandler`, `requirePatch16YearCandidateCeilingReady`, `dispatchPatchedYearCandidates` et via diagnostica Discovery 16 separata.
+
+### Quod consulto nondum adest
+
+Nulla ordinatio runs aequalium per opening gate, nullus `sortEqualLengthRunsByOpeningGate`, nullus PATCH 17 et nullus `oldJumpGuess` adsunt. Gradus 34 debet esse DISCOVERY 17 et stable sort per longitudinem solam in tie reali exponere.
