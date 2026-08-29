@@ -819,3 +819,26 @@ Patch 18 adjunte `patchedNextYear`, `patchedPreviousYear` e `findYearByWalkPatch
 ### Regression e limites
 
 Li witness de longore 1000 conserva li legacy outputs 5001, 5002 e 5002 por `firstDay+365`, `closeDay` e `closeDay+1`. Li route reparat retorna 5000, 5000 e 5001. Un suite separat exercita walks de pluri annus in ambi directiones, limites exact de interval, transitiones con numer o gate invalid e isolation invocation-local. Null cache de Patch 19, null `calculationDayFingerprint`, null `oldStructureSauce` e null code posterior es present.
+
+
+## Stage 38 — DISCOVERY 19
+
+### Quo on pensat
+
+Pos que Patch 18 resolve ja li year correct per caminada sequential, li implementation historic tentat reutilisar li structura de un year per un cache simplic. On considerat `year.number` suficient quam identitá del value guardat.
+
+### Quo esset decovrit
+
+Li sam numer annual posse esser evaluat sub un altri calculation-day o con limites de gate recalculat. Un cache quel consulta solmen li numer ne posse distinguer ti requests e posse retornar un value construit por un statu anterior.
+
+### Scar historic activ
+
+`BaseMonsterManager` possede un `LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER` persistent. `legacyYearNumberOnlyLookup(cacheMap,yearNumber)` consulta exclusivmen ti clave e retorna un HIT sin inspecter calculation-day, opening day o closing day. `legacyYearNumberOnlyPut` conserva li sam bad key. Null guards posterior existe in ti stage.
+
+### Route monster e ownership
+
+`Discovery19YearNumberCacheHandler` exige un resultate real de Patch 18, prende `patch18ResolvedYear`, deriva li value current e poy consulta `LegacyYearNumberCacheAdapter`. Un MISS guarda li value current; un HIT retorna li value old directmen. Li cache vive al manager por que it posse esser reutilisat inter invocations, durante que omni diagnostics del request current resta in su propri `BaseMonsterContext`.
+
+### Witness e limite del stage
+
+Tri scenarios conserva `year.number=5000`: un muta solmen li calculation-day, un muta solmen li opening gate e un muta solmen li closing gate. In chascun scenario li duesim request es un HIT e retorna li value del prim request, ergo li regression nov es intentionalmen rubi. Li correction de Patch 19 — guardar calculation-day fingerprint e du limites in li value e acceptar HIT solmen quand omni tri guards coincide — ne es present. `oldStructureSauce` de Patch 20 anc resta absent.

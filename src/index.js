@@ -242,6 +242,15 @@ class BaseMonsterContext {
     this.patch18WalkTrace = null;
     this.patch18ResolvedYear = null;
     this.patch18SemanticYearNumber = null;
+    this.legacyYearCacheKey = null;
+    this.legacyYearCacheRequestActionDay = null;
+    this.legacyYearCacheRequestOpeningDay = null;
+    this.legacyYearCacheRequestClosingDay = null;
+    this.legacyYearCacheFreshValue = null;
+    this.legacyYearCacheHit = false;
+    this.legacyYearCacheStoredBefore = null;
+    this.legacyYearCacheOutput = null;
+    this.legacyYearCacheOnlyNumberKeyPreserved = false;
   }
 }
 
@@ -484,6 +493,24 @@ class BaseValidationManager {
   requireDiscovery18Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_18_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un jump legacy valid por Patch 18.');
+    }
+  }
+
+  requirePatch18Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_18_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un year resoluet per caminada valid por Discovery 19.');
+    }
+  }
+
+  requireYearCacheRecord(year) {
+    if (!year || typeof year !== 'object') {
+      throw new TypeError('Li year por li cache legacy deve esser un object.');
+    }
+    for (const key of ['number', 'openDay', 'closeDay']) {
+      this.requireExactInteger(year[key]);
+    }
+    if (year.closeDay <= year.openDay) {
+      throw new RangeError('Li year por li cache legacy deve haver un interval positiv.');
     }
   }
 
@@ -2495,6 +2522,110 @@ class SequentialYearWalkPatchWrapper {
   }
 }
 
+function buildLegacyYearStructureValue(year, calculationDay) {
+  if (!year || typeof year !== 'object' || typeof year.number !== 'bigint' ||
+      typeof year.openDay !== 'bigint' || typeof year.closeDay !== 'bigint' ||
+      typeof calculationDay !== 'bigint') {
+    throw new TypeError('Li value current del cache legacy exige year e calculation-day exact.');
+  }
+  // Ti value representa li structura current quel li cache vell guardar; li hit legacy ne inspecte su causas.
+  return Object.freeze({
+    yearNumber: year.number,
+    actionDay: calculationDay,
+    openingDay: year.openDay,
+    closingDay: year.closeDay
+  });
+}
+
+function legacyYearNumberOnlyLookup(cacheMap, yearNumber) {
+  if (!(cacheMap instanceof Map)) {
+    throw new TypeError('Li cache legacy per year number deve esser un Map.');
+  }
+  if (typeof yearNumber !== 'bigint') {
+    throw new TypeError('Li clave legacy del cache deve esser un year number BigInt exact.');
+  }
+  // Li scar historic consulta solmen year.number; null altri parte del request participa in li decision HIT.
+  if (!cacheMap.has(yearNumber)) return { hit: false, value: null };
+  return { hit: true, value: cacheMap.get(yearNumber) };
+}
+
+function legacyYearNumberOnlyPut(cacheMap, yearNumber, value) {
+  if (!(cacheMap instanceof Map)) {
+    throw new TypeError('Li cache legacy per year number deve esser un Map.');
+  }
+  if (typeof yearNumber !== 'bigint') {
+    throw new TypeError('Li clave legacy del cache deve esser un year number BigInt exact.');
+  }
+  cacheMap.set(yearNumber, value);
+  return value;
+}
+
+class LegacyYearNumberCacheAdapter {
+  constructor(cacheMap) {
+    if (!(cacheMap instanceof Map)) {
+      throw new TypeError('LegacyYearNumberCacheAdapter exige un Map persistet per su manager.');
+    }
+    this.cacheMap = cacheMap;
+  }
+
+  lookup(year) {
+    return legacyYearNumberOnlyLookup(this.cacheMap, year.number);
+  }
+
+  put(year, value) {
+    return legacyYearNumberOnlyPut(this.cacheMap, year.number, value);
+  }
+}
+
+class Discovery19YearNumberCacheHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, year, calculationDay) {
+    this.validationManager.requirePatch18Result(context);
+    this.validationManager.requireYearCacheRecord(year);
+    this.validationManager.requireDiscreteDay(calculationDay);
+    if (context.patch18SemanticYearNumber !== year.number) {
+      throw new BootstrapStageError('Discovery 19 deve usar li year resoluet semanticmen per Patch 18.');
+    }
+    const freshValue = buildLegacyYearStructureValue(year, calculationDay);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery19YearNumberCacheHandler';
+    context.phase = 'DISCOVERY_19_YEAR_NUMBER_ONLY_CACHE';
+    context.branchTrace.push('DISCOVERY_19_YEAR_NUMBER_ONLY_CACHE');
+    context.legacyYearCacheKey = year.number;
+    context.legacyYearCacheRequestActionDay = calculationDay;
+    context.legacyYearCacheRequestOpeningDay = year.openDay;
+    context.legacyYearCacheRequestClosingDay = year.closeDay;
+    context.legacyYearCacheFreshValue = { ...freshValue };
+    context.legacyYearCacheOnlyNumberKeyPreserved = true;
+
+    const cached = this.legacyAdapter.lookup(year);
+    context.legacyYearCacheHit = cached.hit;
+    context.legacyYearCacheStoredBefore = cached.hit ? { ...cached.value } : null;
+    if (!cached.hit) {
+      this.legacyAdapter.put(year, freshValue);
+      context.legacyYearCacheOutput = { ...freshValue };
+      this.metricsManager.bump(context, 'discovery19.yearNumberOnlyCache.misses');
+    } else {
+      // Discovery 19 conserva li defect: un HIT per li sam year.number es acceptat sin gardes del request current.
+      context.legacyYearCacheOutput = { ...cached.value };
+      this.metricsManager.bump(context, 'discovery19.yearNumberOnlyCache.hits');
+    }
+    context.status = 'DISCOVERY_19_LEGACY_CACHE_RESULT';
+    this.metricsManager.bump(context, 'discovery19.yearNumberOnlyCache.calls');
+    return {
+      hit: context.legacyYearCacheHit,
+      key: context.legacyYearCacheKey,
+      freshValue: { ...context.legacyYearCacheFreshValue },
+      value: { ...context.legacyYearCacheOutput }
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -3272,6 +3403,16 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    // Li cache historic apartene al manager e persiste inter invocations, ma su clave es intentionalmen solmen year.number.
+    this.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER = new Map();
+    this.legacyYearNumberCacheAdapter = new LegacyYearNumberCacheAdapter(
+      this.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER
+    );
+    this.discovery19YearNumberCacheHandler = new Discovery19YearNumberCacheHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyYearNumberCacheAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -3791,6 +3932,29 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery19YearCache(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, targetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, targetDay, yearWalkSource);
+      const result = this.discovery19YearNumberCacheHandler.handle(
+        context, context.patch18ResolvedYear, calculationDay
+      );
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -3993,8 +4157,19 @@ function historicYearJumpThroughMonsterPath(
   );
 }
 
+function discovery19LegacyYearNumberCacheThroughMonsterPath(
+  manager, calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Discovery 19 exige un BaseMonsterManager persistent quam proprietor del cache legacy.');
+  }
+  return manager.executeDiscovery19YearCache(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 18; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 19; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -4061,6 +4236,8 @@ module.exports = Object.freeze({
   LegacyYearJumpAdapter,
   Discovery18YearJumpHandler,
   SequentialYearWalkPatchWrapper,
+  LegacyYearNumberCacheAdapter,
+  Discovery19YearNumberCacheHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -4129,6 +4306,9 @@ module.exports = Object.freeze({
   patchedNextYear,
   patchedPreviousYear,
   findYearByWalkPatch,
+  buildLegacyYearStructureValue,
+  legacyYearNumberOnlyLookup,
+  legacyYearNumberOnlyPut,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -4166,5 +4346,6 @@ module.exports = Object.freeze({
   historicYear5000TieThroughMonsterPath,
   discovery18LegacyYearJumpThroughMonsterPath,
   historicYearJumpThroughMonsterPath,
+  discovery19LegacyYearNumberCacheThroughMonsterPath,
   calendarDateSpaghetti
 });

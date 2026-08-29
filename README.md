@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 37 de 55: PATCH 18** e li repository local es GREEN. Li scars de year-candidate 5778 e tie de Year 5000 resta intact, e Discovery 18 continua exposir li estimation historic `oldJumpGuess(.../365...)` quam route defectiv separat.
+Li linea es in **Stage 38 de 55: DISCOVERY 19** e li repository local es intentionalmen EXPECTED_RED. Omni regressions til Patch 18 resta verd; li unic failure nov demonstra li cache historic keyed solmen per `year.number`.
 
-`oldJumpGuess` ne es modificat e es ancor vocat realmen ante li circumition semantic. `SequentialYearWalkPatchWrapper` conserva su valore quam telemetry, ma `findYearByWalkPatch` determina li year semantic exclusivmen per caminada desde li anchor Year 5000. `patchedNextYear` e `patchedPreviousYear` permitte solmen transitiones de un unic numer annual e exige continuitá exact del gate compartit.
+Li route complet de Patch 18 continua determinar li year semantic per caminada annual exact. Pos ti resultate, `Discovery19YearNumberCacheHandler` consulta un `Map` manager-owned nominat `LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER`. Li lookup historic usa solmen li year number e ne compara li calculation-day ni li limites del year.
 
-Li interval semantic resta `openDay < targetDay <= closeDay`: un target ja intra Year 5000 usa zero transitions, un target pos su close gate camina avante un year a un vez, e un target al opening gate o plu tempran camina retro un year a un vez. Null cache de Patch 19 es present, e li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Li regression usa year 5000 con li sam key e cambia separatmen calculation-day, opening gate e closing gate. In chascun casu li prim request es un MISS e li duesim es un HIT stale quel retorna li value del prim request. Null `calculationDayFingerprint`, null guard de Patch 19 e null `oldStructureSauce` de Patch 20 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -228,3 +228,14 @@ Li witness usa tri candidates egal de longore 1000. Pos li tie repair, li anchor
 `SequentialYearWalkPatchWrapper` es conectet pos `Discovery18YearJumpHandler`. Ergo `oldJumpGuess` es vocat realmen ante li walk, su output es conservat quam `patch18LegacyGuessDiagnostic`, e li wrapper marca explicitmen que ti guess es ignorat por semantics. Li resultate final veni solmen del year atinget per li caminada annual.
 
 Li witness del stage conserva li divergence legacy 5001/5002/5002, ma li path reparat retorna 5000/5000/5001. Tests separat confirma zero-step intra li anchor, multi-step avante e retro, limites de gate, rejection de transitiones malformed e isolation de contexts. Null cache keyed per year number, null guards de Patch 19 e null `oldStructureSauce` es addit.
+
+
+## Stage 38 — Discovery 19
+
+Patch 18 resta li proprietario semantic del year resoluet. Discovery 19 adjunte un cache persistent al `BaseMonsterManager`: `LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER` es un `Map` quel usa exclusivmen `year.number` quam clave. `legacyYearNumberOnlyLookup` e `legacyYearNumberOnlyPut` forma li scar historic explicit; li lookup ne riceve calculation-day ni limites del interval.
+
+`buildLegacyYearStructureValue` forma li value current ex li year resoluet e li calculation-day. `LegacyYearNumberCacheAdapter` consulta li map e `Discovery19YearNumberCacheHandler` usa li value current solmen sur un MISS. Sur un HIT, li value ja guardat es retornat directmen, mem si li request current have un altri calculation-day, opening day o closing day. Li context conserva li key, request current, value fresh, HIT/MISS e output stale quam state invocation-local; li Map sol es manager-owned e persiste inter invocations del sam manager.
+
+Li regression crea tri managers separat por isolar tri defectes: changement solmen del calculation-day, changement solmen del opening gate e changement solmen del closing gate. Chascun duesim request conserva `year.number=5000` e recive un HIT, ma su output egala li value del prim request e diverge del value current. Ti tri divergenties es resumit in un unic assertion EXPECTED_RED final.
+
+Null entry guardat con `calculationDayFingerprint/openGate/closeGate/value` es creat. Null helper de action-guard es present, e null `oldStructureSauce` o code de Patch 20 es anticipat. Li bad cache key resta intentionalmen activ til Stage 39 / Patch 19.
