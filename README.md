@@ -1,31 +1,32 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirminci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 20/55, `DISCOVERY 10` durumundadır.
+Aşama 21/55, `PATCH 10` durumundadır.
 
-Yeni tarihsel kusur bowl update loop'undadır:
+Discovery 10'un wrong in-place helper'ı fiziksel olarak korunur ve wrapper içinde gerçekten çalıştırılır.
+
+Corrected bowl update yolu:
 
 ```text
-read current/previous/next from working
-compute new bowl
-write new bowl back to working immediately
-continue with next position
+vaultOld = clone(B)
+pending = ayrı write buffer
+all six position reads -> vaultOld
+all six position writes -> pending
+commit -> only after all six positions
 ```
 
-Aynı logical drop içindeki sonraki positions böylece önceki position'ın yeni bowl değerini okuyabilir.
+biçimindedir.
 
-`LegacyBowlUpdateAdapter`, Stage 19 corrected pours üstünde bu wrong in-place yolu drop 1 için gerçek `calendar_date_spaghetti` state-machine zincirine bağlar.
+`BowlMutationPatchWrapper`, contaminated legacy sonucu invocation-local scar olarak saklar; ardından snapshot/write-buffer yolunu çalıştırır ve yalnızca committed `pending` tuple'ını semantic sonuç olarak döndürür.
 
-Yeni normatif regresyon drop 1 için position 2, 3 ve 6 bowl sonuçlarını tek eski snapshot kullanan test-only normatif formülle karşılaştırır ve bilinçli olarak kırmızıdır.
+Aşama 20'nin normatif bowl-update regresyonu değiştirilmeden yeşile dönmüştür.
 
-Henüz `PATCH 10` yoktur: eski bowl snapshot'ı, ayrı write buffer ve altı bowl sonrası toplu commit katmanı eklenmemiştir.
+Henüz 46-drop full bowl pass, order-at-46 latch veya post-stir eklenmemiştir; Patch 11 başlamamıştır.
 
-46-drop full bowl pass, order-at-46 latch ve post-stir de henüz yoktur.
-
-Stage 15 sentinel, Stage 17 permutation patch ve Stage 19 bowlAlias patch korunur. Önceki Aşama 1–19 regresyonlarının tamamı yeşildir.
+Stage 15 sentinel, Stage 17 permutation patch ve Stage 19 bowlAlias patch korunur.
 
 ## Korunan birinci aşama temeli
 
@@ -41,10 +42,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirminci aşama paketi:
+Tam yirmi birinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–19 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni in-place bowl contamination normatif regresyonunun position 2, 3 ve 6 alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 20'de kırmızı olan position 2, 3 ve 6 alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.

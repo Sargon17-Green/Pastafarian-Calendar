@@ -127,6 +127,13 @@ class MonsterContext:
     legacy_bowl_update_last_input: tuple[int, ...] | None = None
     legacy_bowl_update_last_pours: tuple[int, ...] | None = None
     legacy_bowl_update_last_result: tuple[int, ...] | None = None
+    patch10_drop_index: int | None = None
+    patch10_vaultOld: tuple[int, ...] | None = None
+    patch10_pending: tuple[int, ...] | None = None
+    patch10_legacy_wrong_result: tuple[int, ...] | None = None
+    patch10_corrected_result: tuple[int, ...] | None = None
+    patch10_commit_after_six: bool = False
+    patch10_applied: bool = False
 
 
 class BaseMetrics:

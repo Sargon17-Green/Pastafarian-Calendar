@@ -968,3 +968,22 @@ Invocation bağlamında son drop index, input bowl tuple, pour tuple ve yanlış
 Bu aşamada snapshot bowl clone, ayrı write buffer veya altı position sonrası toplu commit yoktur.
 
 Stage 15 sentinel, Stage 17 permutation patch ve Stage 19 bowlAlias patch aynen korunur.
+
+
+## Aşama 21 — Yama 10: tek eski snapshot, ayrı pending buffer ve altı position sonrası commit
+
+Discovery 10'un `legacyInPlaceBowlUpdateWrong` helper'ı fiziksel olarak korunur ve hâlâ aynı working storage'dan okuyup anında aynı storage'a yazar.
+
+Corrected yol önce fiziksel bir eski snapshot oluşturur:
+
+```text
+vaultOld = clone(B)
+```
+
+Altı position boyunca current, previous ve next bowl read'lerinin tamamı yalnızca `vaultOld` üzerinden yapılır. Yeni bowl değerleri `pending` buffer'a yazılır. Semantic commit ancak altı position tamamlandıktan sonra `pending` tuple olarak döner.
+
+`BowlMutationPatchWrapper` wrong helper'ı önce gerçekten çalıştırıp contaminated raw sonucu scar olarak tutar. Sonra snapshot patch'i çalıştırır. `vaultOld`, `pending`, wrong result, corrected result ve commit-after-six durumu invocation-local bağlamda saklanır.
+
+Aşama 20 normatif bowl-update regresyonunun gövdesi byte-for-byte değiştirilmeden yeşile döner.
+
+Stage 21 hâlâ tek-drop bowl-update katmanını düzeltir. 46-drop full pass, order-at-46 latch ve post-stir henüz yoktur. Stage 15 sentinel, Stage 17 permutation patch ve Stage 19 bowlAlias patch korunur.

@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=20
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=21
+CURRENT_KIND=PATCH
 CURRENT_PATCH=10
-LAST_COMPLETED_STAGE=20
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=21
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=legacyInPlaceBowlUpdateWrong altı position boyunca aynı working bowl listesinden okuyup her sonucu anında aynı listeye yazar; sonraki position'lar önceki yeni bowl değerlerini görebilir. LegacyBowlUpdateAdapter bu in-place contamination yolunu gerçek calendar state-machine zincirine drop 1 için bağladı; snapshot/ayrı write-buffer düzeltmesi henüz yok
+MONSTER_ARCHITECTURE_GROWTH=legacyInPlaceBowlUpdateWrong fiziksel scar olarak korundu; BowlMutationPatchWrapper yanlış helper'ı gerçekten çalıştırıp raw contaminated result'u tuttu, ardından vaultOld=clone(B) snapshot'ını kurdu, bütün read'leri vaultOld'dan yaptı, altı write'ı pending buffer'a topladı ve yalnızca altı position tamamlandıktan sonra pending tuple'ını semantic commit sonucu olarak döndürdü
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

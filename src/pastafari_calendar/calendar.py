@@ -239,5 +239,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Yirminci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Yirmi birinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

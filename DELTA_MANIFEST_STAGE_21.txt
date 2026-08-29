@@ -1,0 +1,31 @@
+Aşama 21/55 — PATCH 10
+
+Bu paket yalnızca Aşama 21 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_bowl_updates.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_21_patch_10.py
+artifacts/stage-21/BASELINE_STAGE_20_EXPECTED_RED.txt
+artifacts/stage-21/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_21.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 20 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 20 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+legacyInPlaceBowlUpdateWrong scar: KORUNDU VE WRAPPER İÇİNDE ÇALIŞTIRILIYOR
+vaultOld=clone(B): EKLENDİ
+all reads from vaultOld: EKLENDİ
+all writes to pending: EKLENDİ
+commit after six positions: EKLENDİ
+Aşama 15 sentinel: KORUNDU
+Aşama 17 permutation patch: KORUNDU
+Aşama 19 bowlAlias patch: KORUNDU
+PATCH 11 order-at-46 kodu: YOK
+11–26 gelecek kusur/yama kodu: YOK
