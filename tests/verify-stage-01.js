@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 19 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 20 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Patch 19 contamina production', () 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'oldStructureSauce', 'structureSaucePatch',
+    'structureSaucePatch',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
   ];
@@ -1876,7 +1876,60 @@ group('Patch 19 conserva li bad key ma accepta HIT solmen con tri guards exact',
   ok(!production.YearCacheActionGuardPatchWrapper.prototype.repair.toString().includes('oldStructureSauce'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 19', () => {
+group('Discovery 20 usa realmente oldStructureSauce con li target original e envia ti sauce al selector', () => {
+  const oldSource = production.oldStructureSauce.toString();
+  ok(oldSource.includes('sauceWithCurrentScars(cDay, originalTargetDay)'));
+  ok(!oldSource.includes('yearFirstDay'));
+  ok(!oldSource.includes('structureSaucePatch'));
+  const handlerSource = production.Discovery20StructureSauceHandler.prototype.handle.toString();
+  ok(handlerSource.includes('this.sauceAdapter.call(calculationDay, originalTargetDay)'));
+  ok(handlerSource.includes('this.selectorAdapter.select(legacySauce)'));
+  ok(handlerSource.indexOf('this.sauceAdapter.call(calculationDay, originalTargetDay)') < handlerSource.indexOf('this.selectorAdapter.select(legacySauce)'));
+  ok(!handlerSource.includes('sauceWithCurrentScars(calculationDay, yearFirstDay)'));
+
+  const f = o.FOUNDATION_DAY;
+  const calculationDay = f + 100n;
+  const originalTargetDay = f + 100n;
+  const yearFirstDay = f + 11n;
+  const old = production.oldStructureSauce(calculationDay, originalTargetDay);
+  const oldExpected = o.sauce(calculationDay, originalTargetDay);
+  const authoritative = o.sauce(calculationDay, yearFirstDay);
+  eq(old.bowls[2], oldExpected.bowls[1]);
+  deepEq(old.orderAt46Latch, oldExpected.orderAtDrop46);
+  ok(old.bowls[2] !== authoritative.bowls[1]);
+
+  const manager = new production.BaseMonsterManager();
+  const gates = {
+    10: f + 10n, 16: f + 1010n,
+    20: f + 20n, 26: f + 1020n,
+    30: f + 30n, 36: f + 1030n
+  };
+  const pairs = [
+    { openIndex: 30, closeIndex: 36 },
+    { openIndex: 10, closeIndex: 16 },
+    { openIndex: 20, closeIndex: 26 }
+  ];
+  const stream = { first: 1n, directionStep: 1n };
+  const noWalk = {
+    nextYear() { throw new Error('Null next-year expectat in Discovery 20.'); },
+    previousYear() { throw new Error('Null previous-year expectat in Discovery 20.'); }
+  };
+  const routed = manager.executeDiscovery20StructureSauce(
+    calculationDay, originalTargetDay, -1n, gates, pairs, stream, noWalk
+  );
+  eq(routed.context.status, 'DISCOVERY_20_LEGACY_RESULT');
+  eq(routed.context.previousHandler, 'YearCacheActionGuardPatchWrapper');
+  ok(routed.context.legacyStructureSauceTargetsDiffer);
+  ok(routed.context.legacyStructureSelectorUsedOriginalTargetSauce);
+  eq(routed.result.sauceTargetDay, originalTargetDay);
+  eq(routed.result.yearFirstDay, yearFirstDay);
+  eq(routed.result.selectorToken.bowl2, oldExpected.bowls[1]);
+  deepEq(routed.result.selectorToken.orderAt46Latch, oldExpected.orderAtDrop46);
+  ok(routed.result.selectorToken.bowl2 !== authoritative.bowls[1]);
+  ok(!production.Discovery20StructureSauceHandler.prototype.handle.toString().includes('structureSaucePatch'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 20', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1888,4 +1941,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 19.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 20.');

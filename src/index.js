@@ -264,6 +264,14 @@ class BaseMonsterContext {
     this.patch19EntryAfter = null;
     this.patch19Output = null;
     this.patch19OnlyNumberKeyPreserved = false;
+    this.legacyStructureSauceCalculationDay = null;
+    this.legacyStructureSauceOriginalTargetDay = null;
+    this.legacyStructureSauceYearFirstDay = null;
+    this.legacyStructureSauceTargetsDiffer = false;
+    this.legacyStructureSauceBowls = null;
+    this.legacyStructureSauceOrderAt46Latch = null;
+    this.legacyStructureSelectorToken = null;
+    this.legacyStructureSelectorUsedOriginalTargetSauce = false;
   }
 }
 
@@ -513,6 +521,23 @@ class BaseValidationManager {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_18_RESULT') {
       throw new BootstrapStageError('Li context ne contene un year resoluet per caminada valid por Discovery 19.');
     }
+  }
+
+  requirePatch19Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_19_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un cache guardat valid por Discovery 20.');
+    }
+  }
+
+  requireStructureSauceResult(result) {
+    if (!result || typeof result !== 'object' || !Array.isArray(result.bowls) || result.bowls.length < 7 ||
+        !Array.isArray(result.orderAt46Latch) || result.orderAt46Latch.length !== 6) {
+      throw new TypeError('Li structure sauce legacy deve contener bowls 1..6 e li orderAt46Latch exact.');
+    }
+    for (let bowlId = 1; bowlId <= 6; bowlId += 1) {
+      this.requireExactInteger(result.bowls[bowlId]);
+    }
+    this.requireLatchedBowlOrder(result.orderAt46Latch);
   }
 
   requireYearCacheRecord(year) {
@@ -2776,6 +2801,111 @@ class YearCacheActionGuardPatchWrapper {
   }
 }
 
+
+function structureSauceCountsFromDays(calculationDay, targetDay) {
+  if (typeof calculationDay !== 'bigint' || typeof targetDay !== 'bigint') {
+    throw new TypeError('Li dies por structure sauce deve esser BigInt exact.');
+  }
+  const action = dayTagWithFoundationScar(calculationDay);
+  const target = dayTagWithFoundationScar(targetDay);
+  return Object.freeze({
+    action,
+    target,
+    distance: distanceWithChronologyDetour(calculationDay, targetDay),
+    connection: action + target,
+    direction: targetDay < calculationDay ? 1n : targetDay === calculationDay ? 2n : 3n
+  });
+}
+
+function sauceWithCurrentScars(calculationDay, targetDay) {
+  const counts = structureSauceCountsFromDays(calculationDay, targetDay);
+  const stones = getStoneTableThroughLegacyBuilder();
+  const result = sauceWithOrderAt46Latch(counts, stones);
+  return Object.freeze({
+    bowls: Object.freeze(result.bowls.slice()),
+    orderAt46Latch: Object.freeze(result.orderAt46Latch.slice())
+  });
+}
+
+function oldStructureSauce(cDay, originalTargetDay) {
+  // Discovery 20 conserva li assumption historic: li sauce structural es calculat con li target original del request.
+  return sauceWithCurrentScars(cDay, originalTargetDay);
+}
+
+function legacyStructureSelectorToken(sauceResult) {
+  if (!sauceResult || typeof sauceResult !== 'object' || !Array.isArray(sauceResult.bowls) ||
+      sauceResult.bowls.length < 7 || !Array.isArray(sauceResult.orderAt46Latch) ||
+      sauceResult.orderAt46Latch.length !== 6) {
+    throw new TypeError('Li selector structural legacy exige un sauce complet con bowls e latch.');
+  }
+  return Object.freeze({
+    bowl2: sauceResult.bowls[2],
+    orderAt46Latch: Object.freeze(sauceResult.orderAt46Latch.slice())
+  });
+}
+
+class LegacyStructureSauceAdapter {
+  call(cDay, originalTargetDay) {
+    return oldStructureSauce(cDay, originalTargetDay);
+  }
+}
+
+class LegacyStructureSelectorAdapter {
+  select(sauceResult) {
+    return legacyStructureSelectorToken(sauceResult);
+  }
+}
+
+class Discovery20StructureSauceHandler {
+  constructor(validationManager, metricsManager, sauceAdapter, selectorAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.sauceAdapter = sauceAdapter;
+    this.selectorAdapter = selectorAdapter;
+  }
+
+  handle(context, calculationDay, originalTargetDay, yearFirstDay) {
+    this.validationManager.requirePatch19Result(context);
+    this.validationManager.requireDiscreteDay(calculationDay);
+    this.validationManager.requireDiscreteDay(originalTargetDay);
+    this.validationManager.requireDiscreteDay(yearFirstDay);
+    if (!context.patch18ResolvedYear || yearFirstDay !== context.patch18ResolvedYear.openDay + 1n) {
+      throw new BootstrapStageError('Discovery 20 deve derivar year.firstDay ex li year resoluet per Patch 18.');
+    }
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery20StructureSauceHandler';
+    context.phase = 'DISCOVERY_20_STRUCTURE_SAUCE_ORIGINAL_TARGET';
+    context.branchTrace.push('DISCOVERY_20_STRUCTURE_SAUCE_ORIGINAL_TARGET');
+    context.legacyStructureSauceCalculationDay = calculationDay;
+    context.legacyStructureSauceOriginalTargetDay = originalTargetDay;
+    context.legacyStructureSauceYearFirstDay = yearFirstDay;
+    context.legacyStructureSauceTargetsDiffer = originalTargetDay !== yearFirstDay;
+
+    const legacySauce = this.sauceAdapter.call(calculationDay, originalTargetDay);
+    this.validationManager.requireStructureSauceResult(legacySauce);
+    context.legacyStructureSauceBowls = legacySauce.bowls.slice();
+    context.legacyStructureSauceOrderAt46Latch = legacySauce.orderAt46Latch.slice();
+    const token = this.selectorAdapter.select(legacySauce);
+    context.legacyStructureSelectorToken = {
+      bowl2: token.bowl2,
+      orderAt46Latch: token.orderAt46Latch.slice()
+    };
+    context.legacyStructureSelectorUsedOriginalTargetSauce = true;
+    context.status = 'DISCOVERY_20_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery20.oldStructureSauce.calls');
+    this.metricsManager.bump(context, 'discovery20.legacySelector.calls');
+    return {
+      sauceTargetDay: originalTargetDay,
+      yearFirstDay,
+      targetsDiffer: context.legacyStructureSauceTargetsDiffer,
+      selectorToken: {
+        bowl2: token.bowl2,
+        orderAt46Latch: token.orderAt46Latch.slice()
+      }
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -3568,6 +3698,14 @@ class BaseMonsterManager {
       this.metricsManager,
       this.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER
     );
+    this.legacyStructureSauceAdapter = new LegacyStructureSauceAdapter();
+    this.legacyStructureSelectorAdapter = new LegacyStructureSelectorAdapter();
+    this.discovery20StructureSauceHandler = new Discovery20StructureSauceHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyStructureSauceAdapter,
+      this.legacyStructureSelectorAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -4134,6 +4272,31 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery20StructureSauce(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      const result = this.discovery20StructureSauceHandler.handle(
+        context, calculationDay, originalTargetDay, yearFirstDay
+      );
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -4358,8 +4521,19 @@ function historicYearNumberCacheThroughMonsterPath(
   );
 }
 
+function discovery20LegacyStructureSauceThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Discovery 20 exige un BaseMonsterManager persistent por li cache de Patch 19.');
+  }
+  return manager.executeDiscovery20StructureSauce(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 19; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 20; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -4429,6 +4603,9 @@ module.exports = Object.freeze({
   LegacyYearNumberCacheAdapter,
   Discovery19YearNumberCacheHandler,
   YearCacheActionGuardPatchWrapper,
+  LegacyStructureSauceAdapter,
+  LegacyStructureSelectorAdapter,
+  Discovery20StructureSauceHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -4503,6 +4680,10 @@ module.exports = Object.freeze({
   calculationDayFingerprint,
   cacheGetWithActionGuard,
   cachePutWithGuard,
+  structureSauceCountsFromDays,
+  sauceWithCurrentScars,
+  oldStructureSauce,
+  legacyStructureSelectorToken,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -4542,5 +4723,6 @@ module.exports = Object.freeze({
   historicYearJumpThroughMonsterPath,
   discovery19LegacyYearNumberCacheThroughMonsterPath,
   historicYearNumberCacheThroughMonsterPath,
+  discovery20LegacyStructureSauceThroughMonsterPath,
   calendarDateSpaghetti
 });

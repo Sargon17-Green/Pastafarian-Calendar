@@ -83,7 +83,7 @@ const lookupSource = production.legacyYearNumberOnlyLookup.toString();
 assert.match(lookupSource, /cacheMap\.has\(yearNumber\)/);
 assert.match(lookupSource, /cacheMap\.get\(yearNumber\)/);
 assert.doesNotMatch(lookupSource, /actionDay|openingDay|closingDay|calculationDayFingerprint/);
-assert.equal('oldStructureSauce' in production, false);
+assert.ok(!production.Discovery19YearNumberCacheHandler.prototype.handle.toString().includes('oldStructureSauce'));
 
 const cases = [
   {

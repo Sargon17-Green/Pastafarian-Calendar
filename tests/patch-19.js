@@ -187,5 +187,5 @@ assert.equal(afterHistory.result.key, freshCurrent.result.key);
 assert.equal(historyManager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER.size, 1);
 assert.equal(freshManager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER.size, 1);
 
-assert.equal('oldStructureSauce' in production, false);
+assert.ok(!production.YearCacheActionGuardPatchWrapper.prototype.repair.toString().includes('oldStructureSauce'));
 console.log('PATCH 19: PASS — li bad key year.number resta, ma calculation-day e du gate guards decide semanticmen HIT contra MISS.');

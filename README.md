@@ -250,3 +250,11 @@ Li cache manager-owned continua esser keyed exclusivmen per `year.number`; Patch
 `YearCacheActionGuardPatchWrapper` es conectet directmen pos `SequentialYearWalkPatchWrapper`. It ne consume li stale output del handler defectiv de Discovery 19; in vice, su call a `cacheGetWithActionGuard` conserva li bad lookup quam diagnostic e usa solmen un entry guardat valid. Sur MISS, li structura current es recalculat e `cachePutWithGuard` reemplazza li entry sub li sam key. Sur HIT valid, li cached semantic value es reutilisat.
 
 Li regression conserva li route direct de Discovery 19 quam prova que li scar resta wrong, ma li route Patch 19 deven verd por tri changements independent: calculation-day, opening gate e closing gate. Un duesim request con guard mutat es MISS/recompute, e un triesim request identic deven HIT. Null `oldStructureSauce` o recomputation del structure sauce de Patch 20 es present.
+
+## Stage 40 — Discovery 20
+
+Patch 19 resta intact e resolve li year current con cache guards valid. Discovery 20 adjunte li scar historic `oldStructureSauce(cDay,originalTargetDay)`. `structureSauceCountsFromDays` deriva action, target, distance, connection e direction ex li du dies con li scars reparat anterior; `sauceWithCurrentScars` usa li table de stones del implementation e `sauceWithOrderAt46Latch`, ergo li sauce old es exact por li inputs quel it realmente riceve.
+
+`LegacyStructureSauceAdapter` voca li helper historic. `Discovery20StructureSauceHandler` deriva separatim `yearFirstDay` ex li year ja resoluet, ma conserva intentionalmen li assumption wrong e passa `originalTargetDay` al helper. `LegacyStructureSelectorAdapter` consuma directmen ti resultate e rende observabil un token con bowl 2 e li latch de drop 46. Li route dunque demonstra li defect semantic sin inventar un sauce aproximativ o un shortcut.
+
+Li regression usa tri targets originals distint intra Year 5000. Por omni witness, `oldStructureSauce(cDay,originalTargetDay)` concorda con li oracle por ti target original, ma li token resultant diverge del sauce quel deve esser calculat con `(cDay,year.firstDay)`. Li comparison final es li unic EXPECTED_RED nov. Null `structureSaucePatch`, null ghost de oldStructureSauce e null partition de Patch 21 es includet.

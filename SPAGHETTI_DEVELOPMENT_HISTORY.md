@@ -867,3 +867,25 @@ Li Map resta manager-owned e persistent inter invocations del sam manager. Li st
 ### Limites de ti stage
 
 Null `oldStructureSauce`, null `structureSaucePatch` e null code de Patch 20 es addit. Li target original ne es ancor reemplazzat per `year.firstDay` por li sauce structural. Omni regressions til Discovery 19 es verd.
+
+## Stage 40 — DISCOVERY 20
+
+### Quo on pensat
+
+Pos resolver li year e stabilisar su cache, li implementation historic reutilisat li target original del request quam duesim input del sauce quel decide li structura del year. Li helper nov `oldStructureSauce(cDay,originalTargetDay)` sembla natural pro que li request original ja porta ambi dies.
+
+### Quo esset decovrit
+
+Li structura del year ne depende del target arbitrari intra li year. Su sauce deve usar li prim die semantic del year. Si `originalTargetDay != year.firstDay`, li sauce historic posse haver bowls e orderAt46Latch completmen diferent e dunque alimentar li selector con un state wrong.
+
+### Scar historic activ
+
+`oldStructureSauce` ne es un mock. It construi li comptes per li strates current, usa li stones producit per li builder historic reparat e executa `sauceWithOrderAt46Latch`. `LegacyStructureSauceAdapter` voca ti helper exactmen con calculation-day e target original. `LegacyStructureSelectorAdapter` prende su resultate directmen e deriva un token de bowl 2 e li latch, sin correction intermedial.
+
+### Route monster e ownership
+
+`executeDiscovery20StructureSauce` passa prim per li route complet de Patch 19: gate-sign, candidate ceiling, Year 5000 tie, year walk e cache guards. Solmen pos ti strates it calcula `yearFirstDay=openDay+1` por diagnostics e invoca `Discovery20StructureSauceHandler`. Omni bowl/latch diagnostics resta invocation-local in `BaseMonsterContext`; li cache persistent resta manager-owned e ne decide null valore del sauce.
+
+### Witness e limite del stage
+
+Tri targets originals intra Year 5000 es diferent de `year.firstDay`. Li sauce historic por chascun target concorda con li oracle por exactmen ti target, ma bowl 2 e li order latch diverge del sauce normativ `(cDay,year.firstDay)`. Li selector continua consumir li old resultate, talmen li regression nov es intentionalmen rubi. Li correction de Patch 20 — executar oldStructureSauce quam ghost e impedir que su output atinge li selector, calculante un sauce autoritativ nov con `(cDay,year.firstDay)` — ne es present. Null code de Patch 21 es anticipat.
