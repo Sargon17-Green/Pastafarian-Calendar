@@ -50,6 +50,127 @@ def legacyStableSortByLength(
     )
 
 
+class Year5000TiePatchWrapper:
+    def repair_after_legacy_sort(
+        self,
+        ctx,
+        legacy_sorted: tuple[LegacyYearCandidate, ...],
+    ) -> tuple[LegacyYearCandidate, ...]:
+        for index in range(
+            1,
+            len(legacy_sorted),
+        ):
+            if (
+                legacy_sorted[index - 1].length
+                > legacy_sorted[index].length
+            ):
+                raise ValueError(
+                    "Tie patch yalnız legacy length sort sonrasındaki family üzerinde çalışabilir"
+                )
+
+        working = list(
+            legacy_sorted
+        )
+        run_boundaries: list[tuple[int, int]] = []
+        run_before_labels: list[tuple[str, ...]] = []
+        run_after_labels: list[tuple[str, ...]] = []
+
+        start = 0
+
+        while start < len(working):
+            end = start + 1
+
+            while (
+                end < len(working)
+                and working[end].length
+                == working[start].length
+            ):
+                end += 1
+
+            if end - start > 1:
+                run_boundaries.append(
+                    (
+                        start,
+                        end,
+                    )
+                )
+
+                run_before_labels.append(
+                    tuple(
+                        candidate.label
+                        for candidate in working[
+                            start:end
+                        ]
+                    )
+                )
+
+                run = working[
+                    start:end
+                ]
+
+                run.sort(
+                    key=lambda candidate: candidate.open_day,
+                )
+
+                working[
+                    start:end
+                ] = run
+
+                run_after_labels.append(
+                    tuple(
+                        candidate.label
+                        for candidate in run
+                    )
+                )
+
+            start = end
+
+        result = tuple(
+            working
+        )
+
+        ctx.branch_trace.append(
+            (
+                "YAMA_17_5000_EQUAL_LENGTH_RUN",
+                len(run_boundaries),
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-17-5000-equal-length-run",
+                len(run_boundaries),
+            )
+        )
+
+        ctx.patch17_legacy_sorted_labels = tuple(
+            candidate.label
+            for candidate in legacy_sorted
+        )
+        ctx.patch17_equal_length_run_count = len(
+            run_boundaries
+        )
+        ctx.patch17_run_boundaries = tuple(
+            run_boundaries
+        )
+        ctx.patch17_run_before_labels = tuple(
+            run_before_labels
+        )
+        ctx.patch17_run_after_labels = tuple(
+            run_after_labels
+        )
+        ctx.patch17_corrected_labels = tuple(
+            candidate.label
+            for candidate in result
+        )
+        ctx.patch17_corrected_open_days = tuple(
+            candidate.open_day
+            for candidate in result
+        )
+        ctx.patch17_applied = True
+
+        return result
+
+
 class YearMaxPatchWrapper:
     def accept_after_legacy(
         self,
@@ -95,6 +216,7 @@ class LegacyYearCandidateAdapter:
     def __init__(self) -> None:
         self.selection = LegacyShortOnlySelectionDispatcher()
         self.patch_wrapper = YearMaxPatchWrapper()
+        self.tie_patch_wrapper = Year5000TiePatchWrapper()
 
     def prepare_for_selection(
         self,
@@ -204,7 +326,7 @@ class LegacyYearCandidateAdapter:
                     "Beş bininci yıl tie yolu yalnız patched candidate family almalıdır"
                 )
 
-        result = legacyStableSortByLength(
+        legacy_result = legacyStableSortByLength(
             candidates
         )
 
@@ -235,18 +357,21 @@ class LegacyYearCandidateAdapter:
         )
         ctx.legacy_year5000_tie_sorted_labels = tuple(
             candidate.label
-            for candidate in result
+            for candidate in legacy_result
         )
         ctx.legacy_year5000_tie_sorted_lengths = tuple(
             candidate.length
-            for candidate in result
+            for candidate in legacy_result
         )
         ctx.legacy_year5000_tie_sorted_open_days = tuple(
             candidate.open_day
-            for candidate in result
+            for candidate in legacy_result
         )
 
-        return result
+        return self.tie_patch_wrapper.repair_after_legacy_sort(
+            ctx,
+            legacy_result,
+        )
 
     def select(
         self,

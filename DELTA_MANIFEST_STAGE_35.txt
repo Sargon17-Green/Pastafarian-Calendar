@@ -1,0 +1,28 @@
+Aşama 35/55 — PATCH 17
+
+Bu paket yalnızca Aşama 35 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_year_candidates.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_35_patch_17.py
+artifacts/stage-35/BASELINE_STAGE_34_EXPECTED_RED.txt
+artifacts/stage-35/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_35.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 34 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 34 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+Stage 33 inline accepted.sort scar: KORUNDU
+Stage 34 legacyStableSortByLength: BYTE-FOR-BYTE KORUNDU
+legacy sort önce, tie patch sonra: DOĞRULANDI
+contiguous equal-length run taraması: EKLENDİ
+run-local open_day ascending: EKLENDİ
+global two-key sort: YOK
+PATCH 18 oldJumpGuess: YOK

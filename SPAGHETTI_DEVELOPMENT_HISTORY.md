@@ -1614,3 +1614,16 @@ Real `calendar_date_spaghetti` state-machine üç equal-length candidate içeren
 Test-only expected yol önce length sort yapar, sonra yalnız equal-length run içinde `open_day` ascending uygular. Üç farklı tie permütasyonunda expected `erken, orta, geç` iken actual input-stable run farklı kalır; üç alt örnek bilinçli kırmızıdır.
 
 Production içinde equal-length run taraması, run içi opening-day sort veya temiz `(length,open_day)` sort yoktur. Patch 18 `oldJumpGuess` da henüz yoktur.
+
+
+## Aşama 35 — Yama 17: legacy sort sonrasında yalnız equal-length runs düzeltmek
+
+Stage 33 fiziksel `accepted.sort(key=length)` ve Stage 34 `legacyStableSortByLength` helper'ı aynen korunur.
+
+Year-5000 adapter önce `legacy_result=legacyStableSortByLength(candidates)` çalıştırır ve raw legacy result mevcut `legacy_year5000_tie_sorted_*` alanlarında saklanır.
+
+Yalnız bundan sonra `Year5000TiePatchWrapper` çağrılır. Wrapper legacy-sorted family'nin nondecreasing length contract'ını doğrular, contiguous equal-length runs bulur ve yalnız run uzunluğu birden büyük olan parçaları `run.sort(key=open_day)` ile kendi içinde düzeltir. Singleton ve farklı-length bölümler değişmez. Global `(length,open_day)` sort kullanılmaz.
+
+Aşama 34 normatif Year-5000 tie regresyonunun gövdesi byte-for-byte değiştirilmeden yeşile döner. Raw legacy state yanlış input-stable sırayı göstermeye devam ederken semantic dönüş corrected earlier-opening sırasını verir.
+
+Patch 18 `oldJumpGuess` ve year-by-year traversal henüz yoktur.

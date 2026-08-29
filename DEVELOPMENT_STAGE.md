@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=34
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=35
+CURRENT_KIND=PATCH
 CURRENT_PATCH=17
-LAST_COMPLETED_STAGE=34
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=35
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage 33 prepare_for_selection içindeki fiziksel accepted.sort stable length-only scar aynen korunur; ayrıca legacyStableSortByLength Year-5000 historical helper'ı aynı yalnız-length stable davranışı taşır; LegacyYearCandidateAdapter.sort_year5000_candidates_after_filter calculation_day containment ve <=5778 post-filter contract'ını doğrulayıp Year-5000 candidate family'yi bu helper'a yollar; real calendar state-machine equal-length opening-order witness family ile bu actual adapter yolunu gerçekten çalıştırır; equal-length run repair henüz yoktur
+MONSTER_ARCHITECTURE_GROWTH=Stage 33 inline accepted.sort(key=length) ve Stage 34 legacyStableSortByLength helper'ı fiziksel stable length-only scar olarak aynen korunur; Year5000TiePatchWrapper yalnız legacy sort tamamlandıktan sonra contiguous equal-length runs tarar, yalnız run length>1 parçalarını candidate.open_day ascending ile yerinde yeniden sıralar ve singleton/non-tied bölümleri değiştirmez; LegacyYearCandidateAdapter raw legacy sorted state'i koruyup semantic dönüşte yalnız bu wrapper'ın sonucunu kullanır
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

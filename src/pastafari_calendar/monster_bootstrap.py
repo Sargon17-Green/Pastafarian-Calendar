@@ -209,6 +209,14 @@ class MonsterContext:
     legacy_year5000_tie_sorted_labels: tuple[str, ...] | None = None
     legacy_year5000_tie_sorted_lengths: tuple[int, ...] | None = None
     legacy_year5000_tie_sorted_open_days: tuple[int, ...] | None = None
+    patch17_legacy_sorted_labels: tuple[str, ...] | None = None
+    patch17_equal_length_run_count: int = 0
+    patch17_run_boundaries: tuple[tuple[int, int], ...] | None = None
+    patch17_run_before_labels: tuple[tuple[str, ...], ...] | None = None
+    patch17_run_after_labels: tuple[tuple[str, ...], ...] | None = None
+    patch17_corrected_labels: tuple[str, ...] | None = None
+    patch17_corrected_open_days: tuple[int, ...] | None = None
+    patch17_applied: bool = False
 
 
 class BaseMetrics:

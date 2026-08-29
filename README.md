@@ -1,30 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz dördüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 34/55, `DISCOVERY 17` durumundadır.
+Aşama 35/55, `PATCH 17` durumundadır.
 
-Stage 33 içindeki fiziksel stable length-only sort scar aynen korunur.
+Historical stable length-only scar'lar aynen korunur.
 
-Year-5000 historical yolu ayrıca:
+Year-5000 semantic yolu önce legacy sort'u çalıştırır ve raw input-stable sonucu diagnostic state'te saklar.
 
-```text
-legacyStableSortByLength(candidates)
-```
+Ardından `Year5000TiePatchWrapper` yalnız contiguous equal-length runs bulur. Yalnız run uzunluğu birden büyük olan parçalar `candidate.open_day` ascending ile earlier gate opening sırasına alınır.
 
-helper'ıyla aynı yalnız-length stable davranışı taşır.
+Singleton ve farklı-length bölümler değiştirilmez. Global `(length,open_day)` sort kullanılmaz.
 
-`LegacyYearCandidateAdapter.sort_year5000_candidates_after_filter` calculation-day containment ve patched 5778 ceiling contract'ından sonra Year-5000 tie family'yi bu historical sort'a yollar.
+Aşama 34 normatif tie regresyonu değiştirilmeden yeşile dönmüştür.
 
-Real calendar state-machine üç equal-length opening-order witness candidate ile actual adapter yolunu gerçekten çalıştırır.
-
-Yeni normatif regresyon üç farklı tie giriş sırasını, legacy stable-length sonucuyla test-only authoritative run-order beklentisi arasında karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
-
-Henüz `PATCH 17` yoktur: equal-length run taraması veya run içi opening-day sort production'a eklenmemiştir. Temiz iki-anahtarlı sort da yoktur.
-
-Patch 18 `oldJumpGuess` kodu henüz yoktur.
+Patch 18 `oldJumpGuess` ve year-by-year traversal kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -40,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuz dördüncü aşama paketi:
+Tam otuz beşinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–33 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni Year-5000 equal-length opening-order normatif regresyonunun üç alt örneği başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 34'te kırmızı olan üç Year-5000 tie permütasyonu aynı normatif regresyon gövdesiyle yeşile dönmelidir.
