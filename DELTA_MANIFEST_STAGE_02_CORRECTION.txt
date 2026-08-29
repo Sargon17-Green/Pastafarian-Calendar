@@ -1,0 +1,19 @@
+Aşama 2/55 — DISCOVERY 01 düzeltmesi
+
+Bu paket, daha önce teslim edilen Aşama 2 paketindeki regresyon hedefini düzeltir.
+Yeni bir geliştirme aşaması değildir ve Aşama 3 kodu içermez.
+
+Değiştirilen dosyalar:
+tests/test_stage_02_discovery_01.py
+HANDOFF_STAGE_02_DISCOVERY_01.md
+artifacts/stage-02/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-02/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_02_CORRECTION.txt
+
+Silinen dosya yoktur.
+
+Beklenen depo durumu: EXPECTED_RED
+Önceki regresyonlar: PASS
+Yeni kırmızı regresyon: LegacyRemainderAdapter yolu M, 2*M ve 3*M için normatif kaydetmeden ayrışır.
+Tarihsel yardımcı: oldRemainder tam katlarda 0 döndürmeye devam eder.
+Gelecek yama kodu: YOK

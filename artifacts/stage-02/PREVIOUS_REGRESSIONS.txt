@@ -15,6 +15,6 @@ test_source_language_catalog_is_frozen_and_index_stable (test_stage_01.Stage01Te
 test_work_counts (test_stage_01.Stage01Tests.test_work_counts) ... ok
 
 ----------------------------------------------------------------------
-Ran 15 tests in 10.787s
+Ran 15 tests in 11.076s
 
 OK

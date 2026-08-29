@@ -9,8 +9,8 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from pastafari_calendar.calendar import calendar_date_spaghetti
-from pastafari_calendar.legacy_arithmetic import M_OLD, oldRemainder
-from pastafari_calendar.monster_bootstrap import StageNotIntegratedError
+from pastafari_calendar.legacy_arithmetic import M_OLD, LegacyRemainderAdapter, oldRemainder
+from pastafari_calendar.monster_bootstrap import MonsterContext, StageNotIntegratedError
 from normative_reference import FOUNDATION_DAY, save
 
 
@@ -32,7 +32,13 @@ class Stage02Discovery01Tests(unittest.TestCase):
         )
         self.assertNotIn("savePatch", production_text)
 
-    def test_legacy_remainder_diverges_from_normative_save(self):
+    def test_legacy_helper_keeps_the_historical_zero_bug(self):
+        self.assertEqual(oldRemainder(M_OLD), 0)
+        self.assertEqual(oldRemainder(2 * M_OLD), 0)
+        self.assertEqual(oldRemainder(3 * M_OLD), 0)
+        self.assertEqual(oldRemainder(M_OLD + 1), 1)
+
+    def test_current_remainder_path_diverges_from_normative_save(self):
         cases = (
             M_OLD,
             2 * M_OLD,
@@ -41,10 +47,12 @@ class Stage02Discovery01Tests(unittest.TestCase):
         )
         for value in cases:
             with self.subTest(value=value):
+                ctx = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY)
+                actual = LegacyRemainderAdapter().call(ctx, value)
                 self.assertEqual(
-                    oldRemainder(value),
+                    actual,
                     save(value),
-                    msg="Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı",
+                    msg="Geçerli kalan yolu normatif kaydetme işlemiyle uyuşmadı",
                 )
 
 

@@ -13,65 +13,66 @@ test_sauce_determinism_and_query_wrap (test_stage_01.Stage01Tests.test_sauce_det
 test_short_and_wide_selection_ranges (test_stage_01.Stage01Tests.test_short_and_wide_selection_ranges) ... ok
 test_source_language_catalog_is_frozen_and_index_stable (test_stage_01.Stage01Tests.test_source_language_catalog_is_frozen_and_index_stable) ... ok
 test_work_counts (test_stage_01.Stage01Tests.test_work_counts) ... ok
-test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) ... 
-  test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=170141183460469231731687303715884105727) ... FAIL
-  test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=340282366920938463463374607431768211454) ... FAIL
-  test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=510423550381407695195061911147652317181) ... FAIL
+test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) ... 
+  test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) (value=170141183460469231731687303715884105727) ... FAIL
+  test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) (value=340282366920938463463374607431768211454) ... FAIL
+  test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) (value=510423550381407695195061911147652317181) ... FAIL
+test_legacy_helper_keeps_the_historical_zero_bug (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_helper_keeps_the_historical_zero_bug) ... ok
 test_legacy_remainder_is_on_the_real_calendar_path (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_is_on_the_real_calendar_path) ... ok
 test_patch_is_not_present_yet (test_stage_02_discovery_01.Stage02Discovery01Tests.test_patch_is_not_present_yet) ... ok
 
 ======================================================================
-FAIL: test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=170141183460469231731687303715884105727)
+FAIL: test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) (value=170141183460469231731687303715884105727)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/mnt/data/python-turkish-stage02-work/pastafari-calendar-python-turkish-stage-02-discovery-01/tests/test_stage_02_discovery_01.py", line 44, in test_legacy_remainder_diverges_from_normative_save
+  File "/mnt/data/python-turkish-stage02-corrected/pastafari-calendar-python-turkish-stage-02-discovery-01-corrected/tests/test_stage_02_discovery_01.py", line 52, in test_current_remainder_path_diverges_from_normative_save
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
-        oldRemainder(value),
-        ^^^^^^^^^^^^^^^^^^^^
+        actual,
+        ^^^^^^^
         save(value),
         ^^^^^^^^^^^^
-        msg="Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı",
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        msg="Geçerli kalan yolu normatif kaydetme işlemiyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-AssertionError: 0 != 170141183460469231731687303715884105727 : Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı
+AssertionError: 0 != 170141183460469231731687303715884105727 : Geçerli kalan yolu normatif kaydetme işlemiyle uyuşmadı
 
 ======================================================================
-FAIL: test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=340282366920938463463374607431768211454)
+FAIL: test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) (value=340282366920938463463374607431768211454)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/mnt/data/python-turkish-stage02-work/pastafari-calendar-python-turkish-stage-02-discovery-01/tests/test_stage_02_discovery_01.py", line 44, in test_legacy_remainder_diverges_from_normative_save
+  File "/mnt/data/python-turkish-stage02-corrected/pastafari-calendar-python-turkish-stage-02-discovery-01-corrected/tests/test_stage_02_discovery_01.py", line 52, in test_current_remainder_path_diverges_from_normative_save
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
-        oldRemainder(value),
-        ^^^^^^^^^^^^^^^^^^^^
+        actual,
+        ^^^^^^^
         save(value),
         ^^^^^^^^^^^^
-        msg="Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı",
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        msg="Geçerli kalan yolu normatif kaydetme işlemiyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-AssertionError: 0 != 170141183460469231731687303715884105727 : Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı
+AssertionError: 0 != 170141183460469231731687303715884105727 : Geçerli kalan yolu normatif kaydetme işlemiyle uyuşmadı
 
 ======================================================================
-FAIL: test_legacy_remainder_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_diverges_from_normative_save) (value=510423550381407695195061911147652317181)
+FAIL: test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) (value=510423550381407695195061911147652317181)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/mnt/data/python-turkish-stage02-work/pastafari-calendar-python-turkish-stage-02-discovery-01/tests/test_stage_02_discovery_01.py", line 44, in test_legacy_remainder_diverges_from_normative_save
+  File "/mnt/data/python-turkish-stage02-corrected/pastafari-calendar-python-turkish-stage-02-discovery-01-corrected/tests/test_stage_02_discovery_01.py", line 52, in test_current_remainder_path_diverges_from_normative_save
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
-        oldRemainder(value),
-        ^^^^^^^^^^^^^^^^^^^^
+        actual,
+        ^^^^^^^
         save(value),
         ^^^^^^^^^^^^
-        msg="Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı",
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        msg="Geçerli kalan yolu normatif kaydetme işlemiyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-AssertionError: 0 != 170141183460469231731687303715884105727 : Eski kalan işlemi normatif kaydetme işlemiyle uyuşmadı
+AssertionError: 0 != 170141183460469231731687303715884105727 : Geçerli kalan yolu normatif kaydetme işlemiyle uyuşmadı
 
 ----------------------------------------------------------------------
-Ran 18 tests in 11.049s
+Ran 19 tests in 11.193s
 
 FAILED (failures=3)
