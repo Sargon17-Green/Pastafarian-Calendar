@@ -1,24 +1,23 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 14 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 15 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 14 est `DISCOVERY 07`; status repository exspectatus est `EXPECTED_RED`.
+Gradus 15 est `PATCH 07`; status repository exspectatus est `GREEN`.
 
-Vitium historicum nunc in via productionis activa expositum est. Tabula molitionum visibilium undecim ordines reales in ordine recto continet, sed memoria physica a nullo numeratur, locis `0..10`. Vocator legacy autem numerum semanticum molitionis `1..11` directe ut indicem physicum adhibet.
+Vitium Gradus 14 non deletum est. Tabula legacy undecim ordines reales in locis `0..10` adhuc servat, et `legacyGrindRow(grind)` numerum semanticum `1..11` directe ut indicem physicum adhibet. Diagnosticum sine patch igitur adhuc ordines 2..11 et absentiam pro molitione 11 exponit.
 
-Ita fit:
+Super hanc cicatricem addita est tabula separata duodecim locorum:
 
 ```text
-molitionis 1  -> ordo realis 2
-molitionis 2  -> ordo realis 3
+index 0  -> [0,0,0,0,NONE]
+index 1  -> [3,5,7,11,WHEAT]
 ...
-molitionis 10 -> ordo realis 11
-molitionis 11 -> ordo absens
+index 11 -> [37,41,43,47,WHEAT]
 ```
 
-Primus ordo realis igitur omnino praeteritur.
+Sentinella in indice 0 est permanens et non removenda. Indexing calleris non mutatur: molitio `g` adhuc indicem physicum `g` petit.
 
 ## Via activa
 
@@ -26,29 +25,37 @@ Primus ordo realis igitur omnino praeteritur.
 
 ```text
 BaseMonsterManager::executeGrindRow
--> BaseDispatcher::dispatchLegacyGrindIndex
--> Discovery07GrindIndexHandler
--> LegacyGrindTableAdapter
--> legacyGrindRow
+-> BaseDispatcher::dispatchPatchedGrindIndex
+-> Patch07GrindIndexHandler
+-> LegacyGrindTableAdapter::read
+-> legacyGrindRow                 (cicatrix vere exercetur)
+-> Patch07SentinelGrindWrapper
+-> grindRowWithSentinel           (idem index directus in tabula sentinella)
 ```
 
-`legacyGrindRow(grind)` indicem physicum exacte aequat numero `grind`; nullam translationem facit. Si index 11 petitur, relatio `found=false` reddit et defectum non corrigit.
+Handler primum exitum legacy servat, deinde eodem numero molitionis tabulam cum sentinella legit. `requirePatch07Ready` COPY_VALIDATION separatim repetit lectionem tabulae sentinellae et confirmat exitum patch; oracle testium in productione non vocatur.
 
-Contextus invocationis ordinalem petitum, indicem physicum adhibitum, ordinem lectum et signum praesentiae servat. Metrics et branch trace observationes sunt tantum; exitum semanticum non corrigunt.
+`executeUnpatchedGrindDiagnostic` viam Gradus 14 adhuc exercet.
 
-## Regressio DISCOVERY 07
+## Regressio Gradus 14
 
-`tests/stage_14_discovery_07_tests.cpp` undecim ordines normativos ex eodem specimine huius lineae definit et eos cum via activa comparat. Praeterea cicatricem ipsam separat: tabula legacy undecim ordines habet; `legacyGrindRow(1)` secundum ordinem legit; `legacyGrindRow(10)` undecimum; `legacyGrindRow(11)` nihil invenit.
+`tests/stage_14_discovery_07_tests.cpp` eadem undecim expected values servat. Solum printer enum habet ramum `default`, quia PATCH 07 enum technicum `NONE` addit pro sentinella. Contra codicem Gradus 14 pristinum regressio adhuc undecim discrepantias et exitum `1` producit. Contra Gradum 15 eadem regressio omnes undecim molitiones concordantes invenit.
 
-Exitus actualis est undecim discrepantiae ex undecim molitionibus. Hic rubor consultus est.
+## Regressio PATCH 07
 
-## Regressiones anteriores
+`tests/stage_15_patch_07_tests.cpp` confirmat:
 
-Omnes probationes Graduum 1–13 denuo compilatae et exsecutae sunt; omnes transeunt. Nullum vitium antea correctum regressum est.
+- sentinellam exactam `[0,0,0,0,NONE]` in indice 0;
+- undecim ordines normativos exacte in indicibus 1..11;
+- tabulam legacy 0..10 et displacementem veterem adhuc exsistere;
+- viam productionis patched omnes molitiones 1..11 recte reddere;
+- diagnosticum sine patch exitum legacy non occultare.
+
+Omnes regressiones Graduum 1–15 transeunt.
 
 ## Quod consulto nondum adest
 
-Nulla linea custodiae in loco physico 0 addita est. Vocator legacy non mutatus est nec ad `grind-1` conversus. Nulla emendatio huius numerationis indicum in productione adest, et nullus codex sequentis vitii permutationis introductus est.
+Nullus `oldPermutationUnrank0`, nullus `Patch08`, nullus detour rank et nulla logica permutationis Gradus 16 introducta est.
 
 ## Lingua computationis
 

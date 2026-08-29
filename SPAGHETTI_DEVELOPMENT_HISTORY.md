@@ -357,3 +357,33 @@ Norma undecim molitiones reales ordine 1..11 requirit. Via activa autem ordines 
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `GrindStoneKind`, `VisibleGrindRow`, `LegacyGrindLookup`, tabula legacy a nullo numerata, `legacyGrindRow`, campi contextus molitionis, `GrindLookupReport`, `LegacyGrindTableAdapter`, `Discovery07GrindIndexHandler`, dispatchatio propria et validatio readiness. Validatio confirmat vocator legacy ordinalem semanticum directe ut indicem physicum adhibuisse; vitium non corrigit. Omne state adhuc uni invocationi proprium est.
+
+## Gradus 15 — PATCH 07: sentinella in indice nullo sine mutatione calleris
+
+### Quid repertum erat
+
+Gradus 14 demonstravit undecim ordines ipsos rectos esse, sed tabulam legacy a nullo numeratam et callerem ab uno numerantem inter se discrepare. Mutare callerem ad `grind-1` vitium historicum deleret et formam patch praescriptam violaret.
+
+### Quid circumventum est
+
+Tabula legacy `legacyVisibleGrindTableZeroBased()` cum undecim ordinibus in `0..10` integra manet, et `legacyGrindRow(grind)` adhuc indicem directum adhibet. Addita est altera tabula `grindTableWithSentinel()` cum duodecim locis. Locus 0 est sentinella exacta `{NONE,0,0,0,0}`; undecim ordines reales in locis 1..11 servantur.
+
+`Patch07GrindIndexHandler` primum `LegacyGrindTableAdapter::read` re vera vocat et exitum pravum in contextu retinet. Deinde `Patch07SentinelGrindWrapper` eundem numerum `grind` sine translatione ad `grindRowWithSentinel` mittit. Ita indexing legacy non corrigitur; structura datae circa eum mutatur.
+
+Sentinella non est temporalis. Ex hoc gradu pars cicatricis permanens est et in evolutione posteriore non removenda.
+
+### Cur hoc aequivalet normae
+
+Pro omni molitione semantica `g` inter 1 et 11, tabula patched ordinem normativum `g` exacte in loco physico `g` servat. Caller directe locum `g` petit. Ergo lectio patched exactum ordinem normativum reddit sine conversione indicis.
+
+Validator productionis eandem relationem per COPY_VALIDATION confirmat. Testis PATCH 07 sentinellam exactam, omnes undecim ordines, cicatricem tabulae veteris et diagnosticum sine patch simul probat.
+
+### Regressio Gradus 14 recognita
+
+Additio valoris enum technici `NONE` warning in printer testis Gradus 14 creabat. Printeri solum ramus `default` additus est; nulla expected value, nulla comparatio molitionis et nulla ratio discrepantiarum mutata est. Contra codicem Gradus 14 pristinum probatio recognita adhuc undecim discrepantias et exitum `1` reddit. Contra PATCH 07 nunc transit.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `GrindStoneKind::NONE`, `grindTableWithSentinel`, `grindRowWithSentinel`, `patchedGrindOutput`, `patchedGrindFound`, `patch07Applied`, `Patch07SentinelGrindWrapper`, `Patch07GrindIndexHandler`, `dispatchPatchedGrindIndex`, `requirePatch07Ready` et `executeUnpatchedGrindDiagnostic`. `GrindLookupReport` nunc exitum legacy ante patch et signum patch servat.
+
+Nullus codex DISCOVERY 08 vel PATCH 08 additus est.

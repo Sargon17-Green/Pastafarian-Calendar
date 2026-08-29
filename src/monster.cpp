@@ -262,6 +262,33 @@ LegacyGrindLookup legacyGrindRow(int grind) {
     };
 }
 
+const std::array<VisibleGrindRow, 12>& grindTableWithSentinel() {
+    static const std::array<VisibleGrindRow, 12> table{{
+        {GrindStoneKind::NONE, 0, 0, 0, 0},
+        {GrindStoneKind::WHEAT, 3, 5, 7, 11},
+        {GrindStoneKind::BARLEY, 5, 7, 11, 13},
+        {GrindStoneKind::SALT, 7, 11, 13, 17},
+        {GrindStoneKind::BITTER, 11, 13, 17, 19},
+        {GrindStoneKind::RED, 13, 17, 19, 23},
+        {GrindStoneKind::WHEAT, 17, 19, 23, 29},
+        {GrindStoneKind::BARLEY, 19, 23, 29, 31},
+        {GrindStoneKind::SALT, 23, 29, 31, 37},
+        {GrindStoneKind::BITTER, 29, 31, 37, 41},
+        {GrindStoneKind::RED, 31, 37, 41, 43},
+        {GrindStoneKind::WHEAT, 37, 41, 43, 47},
+    }};
+    return table;
+}
+
+LegacyGrindLookup grindRowWithSentinel(int grind) {
+    if (grind < 1 || grind > 11) {
+        throw BaseValidationError("numerus molitionis inter unum et undecim requiritur");
+    }
+    const auto& table = grindTableWithSentinel();
+    const int physicalIndex = grind;
+    return LegacyGrindLookup{table[static_cast<std::size_t>(physicalIndex)], physicalIndex, true};
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -437,6 +464,19 @@ void BaseValidationManager::requireLegacyGrindReady(const BaseMonsterContext& ct
     }
 }
 
+void BaseValidationManager::requirePatch07Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyGrindReady(ctx);
+    if (!ctx.patch07Applied || !ctx.patchedGrindFound) {
+        throw BaseValidationError("emendatio septima nondum applicata est");
+    }
+    const auto expected = grindRowWithSentinel(ctx.legacyGrindOrdinal);
+    if (!expected.found || ctx.patchedGrindOutput.kind != expected.row.kind ||
+        ctx.patchedGrindOutput.a != expected.row.a || ctx.patchedGrindOutput.b != expected.row.b ||
+        ctx.patchedGrindOutput.c != expected.row.c || ctx.patchedGrindOutput.d != expected.row.d) {
+        throw BaseValidationError("sentinella molitionis ordinem normativum non restituit");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -481,6 +521,10 @@ Integer Patch06PriorWrapper::read(const VisibleDropStore& dropStore,
 
 LegacyGrindLookup LegacyGrindTableAdapter::read(int grind) const {
     return legacyGrindRow(grind);
+}
+
+LegacyGrindLookup Patch07SentinelGrindWrapper::read(int grind) const {
+    return grindRowWithSentinel(grind);
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -880,6 +924,41 @@ void Discovery07GrindIndexHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, lookup.found ? "discovery07.grind.shifted" : "discovery07.grind.absent");
 }
 
+void Patch07GrindIndexHandler::handle(BaseMonsterContext& ctx,
+                                      const LegacyGrindTableAdapter& adapter,
+                                      const Patch07SentinelGrindWrapper& wrapper,
+                                      const BaseValidationManager& validator,
+                                      const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch07GrindIndexHandler";
+    ctx.phase = "PATCH_07_LEGACY_GRIND_READ";
+    ctx.status = "LEGACY_GRIND_READ_BEFORE_SENTINEL";
+    ctx.branchTrace.push_back("PATCH_07_LEGACY_GRIND_READ");
+    metrics.bump(ctx, "patch07.grind.legacy.calls");
+
+    const LegacyGrindLookup legacy = adapter.read(ctx.legacyGrindOrdinal);
+    ctx.legacyGrindPhysicalIndex = legacy.physicalIndex;
+    ctx.legacyGrindOutput = legacy.row;
+    ctx.legacyGrindFound = legacy.found;
+    ctx.legacyGrindReady = true;
+
+    ctx.phase = "PATCH_07_SENTINEL_TABLE_READ";
+    ctx.branchTrace.push_back("PATCH_07_SENTINEL_TABLE_READ");
+    const LegacyGrindLookup patched = wrapper.read(ctx.legacyGrindOrdinal);
+    ctx.patchedGrindOutput = patched.row;
+    ctx.patchedGrindFound = patched.found;
+    ctx.patch07Applied = true;
+    metrics.bump(ctx, "patch07.grind.sentinel.calls");
+
+    ctx.phase = "PATCH_07_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_07_VALIDATE");
+    validator.requirePatch07Ready(ctx);
+
+    ctx.phase = "PATCH_07_GRIND_READY";
+    ctx.status = "PATCHED_GRIND_ROW_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_07_GRIND_READY");
+    metrics.bump(ctx, "patch07.grind.ready");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -1085,6 +1164,20 @@ void BaseDispatcher::dispatchLegacyGrindIndex(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery07.dispatch.calls");
 
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedGrindIndex(BaseMonsterContext& ctx,
+                                               const Patch07GrindIndexHandler& handler,
+                                               const LegacyGrindTableAdapter& adapter,
+                                               const Patch07SentinelGrindWrapper& wrapper,
+                                               const BaseValidationManager& validator,
+                                               const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_07_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_07_DISPATCH");
+    metrics.bump(ctx, "patch07.dispatch.calls");
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -1474,7 +1567,7 @@ GrindLookupReport BaseMonsterManager::executeGrindRow(int grind) const {
     BaseMonsterContext ctx;
     ctx.calculationDay = 0;
     ctx.targetDay = 0;
-    ctx.phase = "DISCOVERY_07_NEW";
+    ctx.phase = "PATCH_07_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyGrindOrdinal = grind;
@@ -1482,20 +1575,33 @@ GrindLookupReport BaseMonsterManager::executeGrindRow(int grind) const {
     const BaseValidationManager validator;
     const BaseMetricsShell metrics;
     const LegacyGrindTableAdapter adapter;
+    const Patch07SentinelGrindWrapper wrapper;
+    const Patch07GrindIndexHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedGrindIndex(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return GrindLookupReport{ctx.legacyGrindOrdinal, ctx.patchedGrindOutput, ctx.patchedGrindFound,
+        ctx.legacyGrindOrdinal, ctx.phase, ctx.status, ctx.currentHandler, ctx.branchTrace.size(),
+        ctx.legacyGrindOutput, ctx.legacyGrindFound, ctx.patch07Applied};
+}
+
+GrindLookupReport BaseMonsterManager::executeUnpatchedGrindDiagnostic(int grind) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_07_DIAGNOSTIC_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyGrindOrdinal = grind;
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyGrindTableAdapter adapter;
     const Discovery07GrindIndexHandler handler;
     const BaseDispatcher dispatcher;
     dispatcher.dispatchLegacyGrindIndex(ctx, handler, adapter, validator, metrics);
-
-    return GrindLookupReport{
-        ctx.legacyGrindOrdinal,
-        ctx.legacyGrindOutput,
-        ctx.legacyGrindFound,
-        ctx.legacyGrindPhysicalIndex,
-        ctx.phase,
-        ctx.status,
-        ctx.currentHandler,
-        ctx.branchTrace.size(),
-    };
+    return GrindLookupReport{ctx.legacyGrindOrdinal, ctx.legacyGrindOutput, ctx.legacyGrindFound,
+        ctx.legacyGrindPhysicalIndex, ctx.phase, ctx.status, ctx.currentHandler, ctx.branchTrace.size(),
+        ctx.legacyGrindOutput, ctx.legacyGrindFound, false};
 }
 
 } // namespace pastafari

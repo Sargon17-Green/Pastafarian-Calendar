@@ -20,8 +20,8 @@ std::string nomen(GrindStoneKind kind) {
         case GrindStoneKind::SALT: return "SALT";
         case GrindStoneKind::BITTER: return "BITTER";
         case GrindStoneKind::RED: return "RED";
+        default: return "IGNOTUM";
     }
-    return "IGNOTUM";
 }
 
 void imprime(const VisibleGrindRow& row) {

@@ -30,6 +30,7 @@ using HiddenDrops = std::array<Integer, 7>;
 using VisibleDropStore = std::vector<Integer>;
 
 enum class GrindStoneKind {
+    NONE = -1,
     WHEAT = 0,
     BARLEY = 1,
     SALT = 2,
@@ -53,6 +54,8 @@ struct LegacyGrindLookup {
 
 const std::array<VisibleGrindRow, 11>& legacyVisibleGrindTableZeroBased();
 LegacyGrindLookup legacyGrindRow(int grind);
+const std::array<VisibleGrindRow, 12>& grindTableWithSentinel();
+LegacyGrindLookup grindRowWithSentinel(int grind);
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -121,6 +124,9 @@ struct BaseMonsterContext {
     VisibleGrindRow legacyGrindOutput{};
     bool legacyGrindFound = false;
     bool legacyGrindReady = false;
+    VisibleGrindRow patchedGrindOutput{};
+    bool patchedGrindFound = false;
+    bool patch07Applied = false;
 };
 
 struct BaseRunReport {
@@ -210,6 +216,9 @@ struct GrindLookupReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    VisibleGrindRow legacyOutputBeforePatch{};
+    bool legacyFoundBeforePatch = false;
+    bool patch07Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -233,6 +242,7 @@ public:
     void requireLegacyPriorReady(const BaseMonsterContext& ctx) const;
     void requirePatch06Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyGrindReady(const BaseMonsterContext& ctx) const;
+    void requirePatch07Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -422,6 +432,20 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch07SentinelGrindWrapper {
+public:
+    LegacyGrindLookup read(int grind) const;
+};
+
+class Patch07GrindIndexHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyGrindTableAdapter& adapter,
+                const Patch07SentinelGrindWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -511,6 +535,13 @@ public:
                                   const LegacyGrindTableAdapter& adapter,
                                   const BaseValidationManager& validator,
                                   const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedGrindIndex(BaseMonsterContext& ctx,
+                                   const Patch07GrindIndexHandler& handler,
+                                   const LegacyGrindTableAdapter& adapter,
+                                   const Patch07SentinelGrindWrapper& wrapper,
+                                   const BaseValidationManager& validator,
+                                   const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -540,6 +571,7 @@ public:
                                                       int i,
                                                       int back) const;
     GrindLookupReport executeGrindRow(int grind) const;
+    GrindLookupReport executeUnpatchedGrindDiagnostic(int grind) const;
 };
 
 } // namespace pastafari
