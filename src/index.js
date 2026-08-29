@@ -191,6 +191,14 @@ class BaseMonsterContext {
     this.patch15LegacyDiagnosticPreserved = false;
     this.patch15NegativeDetourUsed = false;
     this.patch15Output = null;
+    this.legacyYearCandidateInput = null;
+    this.legacyYearCandidatePreSortFamily = null;
+    this.legacyYearCandidateSortedFamily = null;
+    this.legacyYearCandidateSelectionFamilySize = null;
+    this.legacyYearCandidateSelectionStream = null;
+    this.legacyYearCandidateSelectedOrdinal = null;
+    this.legacyYearCandidateSelected = null;
+    this.legacyYearCandidateOverlongLengths = null;
   }
 }
 
@@ -388,6 +396,32 @@ class BaseValidationManager {
   requireDiscovery15Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_15_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un question legacy valid por Patch 15.');
+    }
+  }
+
+  requirePatch15Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_15_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un question de gate reparat valid por Discovery 16.');
+    }
+  }
+
+  requireYearGateStore(gates) {
+    if (!gates || typeof gates !== 'object') {
+      throw new TypeError('Li storage legacy de gates por year candidates deve esser un object indexabil.');
+    }
+  }
+
+  requireYearCandidatePairs(candidatePairs) {
+    if (!Array.isArray(candidatePairs) || candidatePairs.length < 1) {
+      throw new TypeError('Li familie legacy de year candidates deve contener adminim un pare de gates.');
+    }
+    for (const pair of candidatePairs) {
+      if (!pair || typeof pair !== 'object' || !Number.isInteger(pair.openIndex) || !Number.isInteger(pair.closeIndex)) {
+        throw new TypeError('Chascun year candidate legacy deve contener openIndex e closeIndex integers.');
+      }
+      if (pair.closeIndex <= pair.openIndex) {
+        throw new RangeError('Li closeIndex de un year candidate legacy deve esser plu grand quam openIndex.');
+      }
     }
   }
 
@@ -1412,6 +1446,64 @@ function gateQuestionWithSignedStep(signedStep) {
   return q;
 }
 
+const LEGACY_YEAR_MAX = 5781n;
+
+function legacyYearCandidateAllowed(gates, openIndex, closeIndex) {
+  if (!gates || typeof gates !== 'object') {
+    throw new TypeError('Li storage legacy de gates por year candidate deve esser un object indexabil.');
+  }
+  if (!Number.isInteger(openIndex) || !Number.isInteger(closeIndex) || closeIndex <= openIndex) {
+    throw new RangeError('Li indices legacy del year candidate deve esser integers con closeIndex>openIndex.');
+  }
+  const openGate = gates[openIndex];
+  const closeGate = gates[closeIndex];
+  if (typeof openGate !== 'bigint' || typeof closeGate !== 'bigint') {
+    throw new TypeError('Li gates terminal del year candidate legacy deve esser BigInt exact.');
+  }
+  const gapCount = closeIndex - openIndex;
+  const candidateLength = closeGate - openGate;
+  // Li scar historic conserva 5781 quam ceiling real e lassa 5779..5781 passar al familie posterior.
+  return gapCount >= 6 && candidateLength >= 252n && candidateLength <= LEGACY_YEAR_MAX;
+}
+
+function legacyYearCandidatesBeforeSort(gates, candidatePairs) {
+  if (!Array.isArray(candidatePairs)) {
+    throw new TypeError('Li pares legacy de year candidates deve esser un array.');
+  }
+  const accepted = [];
+  for (let ordinal = 0; ordinal < candidatePairs.length; ordinal += 1) {
+    const pair = candidatePairs[ordinal];
+    if (!pair || !Number.isInteger(pair.openIndex) || !Number.isInteger(pair.closeIndex)) {
+      throw new TypeError('Chascun pare legacy de year candidate deve contener indices integers.');
+    }
+    if (!legacyYearCandidateAllowed(gates, pair.openIndex, pair.closeIndex)) {
+      continue;
+    }
+    const openGate = gates[pair.openIndex];
+    const closeGate = gates[pair.closeIndex];
+    accepted.push({
+      inputOrdinal: ordinal,
+      openIndex: pair.openIndex,
+      closeIndex: pair.closeIndex,
+      openGate,
+      closeGate,
+      candidateLength: closeGate - openGate
+    });
+  }
+  return accepted;
+}
+
+function legacyStableLengthOnlyYearCandidates(gates, candidatePairs) {
+  const accepted = legacyYearCandidatesBeforeSort(gates, candidatePairs).map((candidate) => ({ ...candidate }));
+  // Li sort legacy es intentionalmen solmen per longore e resta stabil por ties; Patch 17 ne es ancor present.
+  accepted.sort((left, right) => {
+    if (left.candidateLength < right.candidateLength) return -1;
+    if (left.candidateLength > right.candidateLength) return 1;
+    return 0;
+  });
+  return accepted;
+}
+
 
 class LegacyOverwritableOrderMemoryAdapter {
   call(counts, stones) {
@@ -1799,6 +1891,70 @@ class NegativeGateQuestionPatchWrapper {
       this.metricsManager.bump(context, 'patch15.legacySidePreserved.calls');
     }
     return context.patch15Output;
+  }
+}
+
+class LegacyYearCandidateAdapter {
+  prepareForSelection(gates, candidatePairs) {
+    return {
+      acceptedBeforeSort: legacyYearCandidatesBeforeSort(gates, candidatePairs),
+      sorted: legacyStableLengthOnlyYearCandidates(gates, candidatePairs)
+    };
+  }
+
+  select(preparedCandidates, stream) {
+    if (!Array.isArray(preparedCandidates) || preparedCandidates.length < 1) {
+      throw new RangeError('Li familie legacy preparat por selection ne posse esser vacui.');
+    }
+    const picked = selectionDispatcherWithWideDetour(stream, BigInt(preparedCandidates.length));
+    return {
+      pickedOrdinal: picked.output,
+      candidate: preparedCandidates[Number(picked.output - 1n)]
+    };
+  }
+}
+
+class Discovery16LegacyYearCandidateHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, gates, candidatePairs, selectionStream) {
+    this.validationManager.requirePatch15Result(context);
+    this.validationManager.requireYearGateStore(gates);
+    this.validationManager.requireYearCandidatePairs(candidatePairs);
+    this.validationManager.requireAnswerRing(selectionStream);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery16LegacyYearCandidateHandler';
+    context.phase = 'DISCOVERY_16_LEGACY_YEAR_MAX_5781';
+    context.branchTrace.push('DISCOVERY_16_LEGACY_YEAR_MAX_5781');
+    context.legacyYearCandidateInput = candidatePairs.map((pair) => ({
+      openIndex: pair.openIndex, closeIndex: pair.closeIndex
+    }));
+    const prepared = this.legacyAdapter.prepareForSelection(gates, candidatePairs);
+    context.legacyYearCandidatePreSortFamily = prepared.acceptedBeforeSort.map((candidate) => ({ ...candidate }));
+    context.legacyYearCandidateSortedFamily = prepared.sorted.map((candidate) => ({ ...candidate }));
+    context.legacyYearCandidateSelectionFamilySize = prepared.sorted.length;
+    context.legacyYearCandidateSelectionStream = {
+      first: selectionStream.first, directionStep: selectionStream.directionStep
+    };
+    context.legacyYearCandidateOverlongLengths = prepared.sorted
+      .map((candidate) => candidate.candidateLength)
+      .filter((candidateLength) => candidateLength > 5778n);
+    const selected = this.legacyAdapter.select(prepared.sorted, selectionStream);
+    context.legacyYearCandidateSelectedOrdinal = selected.pickedOrdinal;
+    context.legacyYearCandidateSelected = { ...selected.candidate };
+    context.status = 'DISCOVERY_16_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery16.legacy5781Candidate.calls');
+    this.metricsManager.bump(context, 'discovery16.selectionReached.calls');
+    return {
+      acceptedBeforeSort: prepared.acceptedBeforeSort.map((candidate) => ({ ...candidate })),
+      preparedForSelection: prepared.sorted.map((candidate) => ({ ...candidate })),
+      selectedOrdinal: selected.pickedOrdinal,
+      selected: { ...selected.candidate }
+    };
   }
 }
 
@@ -2549,6 +2705,12 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    this.legacyYearCandidateAdapter = new LegacyYearCandidateAdapter();
+    this.discovery16LegacyYearCandidateHandler = new Discovery16LegacyYearCandidateHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyYearCandidateAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -2967,6 +3129,22 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery16YearCandidates(calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      const result = this.discovery16LegacyYearCandidateHandler.handle(
+        context, gates, candidatePairs, selectionStream
+      );
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -3121,8 +3299,16 @@ function historicGateQuestionThroughMonsterPath(calculationDay, targetDay, signe
   return new BaseMonsterManager().executePatch15GateQuestion(calculationDay, targetDay, signedStep);
 }
 
+function discovery16LegacyYearCandidatesThroughMonsterPath(
+  calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+) {
+  return new BaseMonsterManager().executeDiscovery16YearCandidates(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 15; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 16; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -3181,6 +3367,8 @@ module.exports = Object.freeze({
   LegacyGateQuestionAdapter,
   Discovery15NegativeGateQuestionHandler,
   NegativeGateQuestionPatchWrapper,
+  LegacyYearCandidateAdapter,
+  Discovery16LegacyYearCandidateHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -3235,6 +3423,10 @@ module.exports = Object.freeze({
   selectionDispatcherWithWideDetour,
   oldGateQuestionDay,
   gateQuestionWithSignedStep,
+  LEGACY_YEAR_MAX,
+  legacyYearCandidateAllowed,
+  legacyYearCandidatesBeforeSort,
+  legacyStableLengthOnlyYearCandidates,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -3266,5 +3458,6 @@ module.exports = Object.freeze({
   historicSelectionThroughMonsterPath,
   discovery15LegacyGateQuestionThroughMonsterPath,
   historicGateQuestionThroughMonsterPath,
+  discovery16LegacyYearCandidatesThroughMonsterPath,
   calendarDateSpaghetti
 });

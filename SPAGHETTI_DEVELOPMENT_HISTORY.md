@@ -686,3 +686,26 @@ Li route de Discovery 15 es separat del selector de Stage 29 e ne muta bowls, st
 ### Pro quo li patch es equivalent
 
 Por `signedStep<0`, li magnitude es `abs(step)` e li die normativ es exactmen `FOUNDATION_DAY_OLD-abs(step)`. Por zero e passus positiv, li specification ne manda null circumition; dunque li wrapper conserva exactmen `oldGateQuestionDay(magnitude)`. Li regression de Discovery 15 deven verd durant que li helper legacy resta divergent directmen. Null `LEGACY_YEAR_MAX`, null limite 5778 e null logic de Patch 16 es present.
+
+
+## Stage 32 — DISCOVERY 16
+
+### Quo on pensat
+
+Li architectura historic extraet 5781 quam un ceiling central de year candidate e lo congela quam `LEGACY_YEAR_MAX`. Un candidate con adminim six gate gaps e longore 252..5781 es dunque tractat quam eligibil por li family posterior.
+
+### Quo esset decovrit
+
+Li ceiling normativ real es 5778. Ergo longores 5779, 5780 e 5781 ne deve arribar ni al sort ni al selection. Li scar 5781 tamen deve existir realmen ante esser circumit; it ne posse esser silentmen remplazzat per 5778.
+
+### Quo esset circumit
+
+Null circumition existe in Discovery 16. `legacyYearCandidateAllowed` usa explicitmen `LEGACY_YEAR_MAX=5781`. `legacyYearCandidatesBeforeSort` conserva li candidates acceptat in ordine de input, e `legacyStableLengthOnlyYearCandidates` aplica solmen li stable sort historic per longore. `LegacyYearCandidateAdapter.select` continua portar ti familie al selection layer existent. Null `REAL_YEAR_MAX_PATCH` e null early filter es addit.
+
+### Crescentie monster in ti stage
+
+`BaseMonsterContext` adjunte li input family, familie pre-sort, familie sortat, grandore del selection family, answer stream, ordinal selectet, candidate selectet e li longores overlong diagnostic. `BaseValidationManager` adjunte guards por gate storage e candidate pairs. `Discovery16LegacyYearCandidateHandler` es insertet pos Patch 15 e mantene omni state invocation-local con phase, branch trace e metrics propri.
+
+### Pro quo li nov layer ne change altri semantics
+
+Omni scars e patches til Patch 15 resta intact. Li nov helper de year candidate es un subsystem additiv e ne muta sauce, bowls, latch, selection mathematics, gate-sign detour o SourceLanguageCatalog. Li selection usa li dispatcher ja reparat e li unic divergence intentional es que 5779..5781 resta in li familie legacy. Li correction appartene exclusivmen a Stage 33 / Patch 16; li tie repair de Patch 17 ne es present.

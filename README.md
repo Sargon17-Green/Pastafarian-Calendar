@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 31 de 55: PATCH 15** e li repository local es GREEN. Li scar `oldGateQuestionDay(n)` resta intact e continua questionar `FOUNDATION_DAY_OLD+n`. Li route semantic nov conserva ti output quam diagnostic, ma por `signedStep<0` usa exclusivmen `FOUNDATION_DAY_OLD-abs(step)`; zero e passus positiv resta sur li path legacy.
+Li linea es in **Stage 32 de 55: DISCOVERY 16** e li repository local es intentionalmen EXPECTED_RED. Patch 15 resta verd e `oldGateQuestionDay` resta intact. Ti stage crea li scar legacy mandat `LEGACY_YEAR_MAX=5781` e usa it realmen in li path de year candidates.
 
-`gateQuestionWithSignedStep` representa li circumition local e `NegativeGateQuestionPatchWrapper` conserva li scar, li magnitude, li flag de detour e li output final in `BaseMonsterContext`. Li regression de Discovery 15 es nu verd. Null `LEGACY_YEAR_MAX` o code de Patch 16 es anticipat.
+`legacyYearCandidateAllowed` accepta adminim six gaps e longores 252..5781. `legacyYearCandidatesBeforeSort` conserva li familie raw acceptat, `legacyStableLengthOnlyYearCandidates` aplica li sort historic stabil per longore solmen, e `LegacyYearCandidateAdapter.select` porta ti familie al dispatcher de selection existent. Li witness de limite prova que 5779, 5780 e 5781 arriva al selection malgre li ceiling normativ 5778.
 
-Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de Stage 32 o posterior es anticipat.
+Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat. Null `REAL_YEAR_MAX_PATCH`, null filter `candidateLength>5778` e null repair de tie de Patch 17 es anticipat.
 
 ## Lingue-fonte canonic
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 15 deve restar verd pos Patch 15:
+Omni regressions til Patch 15 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal del patch deve esser verd:
+Li regression focal del discovery deve esser intentionalmen rubi:
 
 ```text
-npm run test:patch-15
+npm run test:discovery-16
 ```
 
-Li suite complet deve esser GREEN:
+Li suite complet deve esser EXPECTED_RED exclusivmen in Discovery 16:
 
 ```text
 npm test
@@ -171,3 +171,10 @@ Li selection curt e wide de Stage 29 resta intact. Ti stage comensa li subsystem
 `oldGateQuestionDay(n)` resta intact quam scar historic e continua adjunter li magnitude al Foundation. `gateQuestionWithSignedStep(signedStep)` voca ti helper ante alcun correction, poy devia exclusivmen passus negativ a `FOUNDATION_DAY_OLD-abs(step)`. Por zero e passus positiv, li valore legacy es retornat sin alteration.
 
 `NegativeGateQuestionPatchWrapper` succede al handler de Discovery 15, conserva li question legacy quam diagnostic, registra li magnitude e li decision de detour, e retorna li question-day semantic reparat. Li test confirma passus `-1`, `-2`, `-10`, `-101`, zero e positives, con contexts invocation-local separat. Null `LEGACY_YEAR_MAX=5781` o filtre de 5778 es addit in ti stage.
+
+
+## Stage 32 — Discovery 16
+
+Ti stage introduce li constant legacy obligatori `LEGACY_YEAR_MAX=5781` e usa it quam ceiling real de `legacyYearCandidateAllowed`. Li helper conserva li criteries historic: adminim six gate gaps e longore 252..5781. Li nov familie raw es materialisat per `legacyYearCandidatesBeforeSort`; solmen poy `legacyStableLengthOnlyYearCandidates` aplica un stable sort per longore solmen. Null tie-key secundari es present.
+
+`LegacyYearCandidateAdapter` expone explicitmen li passage al selection existent, e `Discovery16LegacyYearCandidateHandler` es ligat pos `NegativeGateQuestionPatchWrapper`. In li boundary family 5778, 5779, 5780, 5781, omni quar passa li ceiling legacy e arriva al selection; li tri ultim viola li ceiling normativ 5778. Ti divergence es li unic failure intentional del stage. Li late filter `REAL_YEAR_MAX_PATCH=5778` resta reservat exclusivmen por Stage 33 / Patch 16.
