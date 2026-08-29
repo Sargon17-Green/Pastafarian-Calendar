@@ -31,7 +31,7 @@ assert.match(production.calendarDateSpaghetti.toString(), /calendarDateSpaghetti
 assert.match(production.Stage54MonsterIntegrationManager.prototype.executeCalendarDate.toString(), /programCounter/);
 assert.match(production.Stage54MonsterIntegrationManager.prototype.executeCalendarDate.toString(), /switch/);
 
-const first = production.calendarDateSpaghettiWithContext(production.FOUNDATION_DAY_OLD, production.FOUNDATION_DAY_OLD);
+const first = production.calendarDateSpaghettiStage55HistoricalWithContext(production.FOUNDATION_DAY_OLD, production.FOUNDATION_DAY_OLD);
 assert.equal(first.result.length, 5);
 assert.equal(first.result[0], 5000n);
 assert.equal(typeof first.result[1], 'string');
@@ -55,9 +55,9 @@ for (const required of [
   'cutlet-names', 'month-length-concrete-scar', 'month-weaving-ghost', 'month-names', 'contiguous-month-ghost'
 ]) assert.equal(labels.has(required), true, 'Manca diagnostic integrat: ' + required);
 
-const direct = production.calendarDateSpaghetti(production.FOUNDATION_DAY_OLD, production.FOUNDATION_DAY_OLD);
+const direct = production.calendarDateSpaghettiStage55Historical(production.FOUNDATION_DAY_OLD, production.FOUNDATION_DAY_OLD);
 assert.deepEqual(direct, first.result);
-const warm = production.calendarDateSpaghettiWithContext(production.FOUNDATION_DAY_OLD, production.FOUNDATION_DAY_OLD);
+const warm = production.calendarDateSpaghettiStage55HistoricalWithContext(production.FOUNDATION_DAY_OLD, production.FOUNDATION_DAY_OLD);
 assert.deepEqual(warm.result, first.result);
 const cacheProbe = warm.context.diagnostics.find((row) => row && row.label === 'pre-structure-cache-probe');
 assert.ok(cacheProbe);

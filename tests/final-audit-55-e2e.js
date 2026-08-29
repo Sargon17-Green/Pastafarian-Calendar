@@ -259,7 +259,7 @@ if (require.main === module) {
   for (const [c, t, label] of [[F, F, 'Foundation'], [F, F - 1n, 'ante Foundation'], [F, F + 1n, 'pos Foundation']]) {
     audit('differential end-to-end — ' + label, () => {
       const expected = auditOracle.calendarDate(c, t);
-      const actual = production.calendarDateSpaghettiWithContext(c, t);
+      const actual = production.calendarDateSpaghettiStage55HistoricalWithContext(c, t);
       sameArray(actual.result, expected.result, 'Divergentie end-to-end: ' + label);
       assert.equal(actual.result.length, 5);
       if (label === 'Foundation') { foundationExpected = expected; foundationActual = actual; }

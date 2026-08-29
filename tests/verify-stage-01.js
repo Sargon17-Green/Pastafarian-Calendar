@@ -2212,20 +2212,63 @@ group('Stage 54 conecta li route final e sauceWithScars sin production oracle', 
   ok(!source.includes("require('../tests/normative-reference')"));
 });
 
-group('Stage 55 confirma completation sin mutation de production e con du shards audit', () => {
+group('Stage 55 resta li certificate historic complet sin esser rescrit', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   const stage = fs.readFileSync(path.join(__dirname, '..', 'DEVELOPMENT_STAGE.md'), 'utf8');
   const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'index.js'), 'utf8');
-  eq(pkg.version, '0.0.55-stage-55');
   eq(pkg.scripts['test:audit-55-core'], 'node tests/final-audit-55.js');
   eq(pkg.scripts['test:audit-55-e2e'], 'node tests/final-audit-55-e2e.js');
   ok(fs.existsSync(path.join(__dirname, 'final-audit-55.js')));
   ok(fs.existsSync(path.join(__dirname, 'final-audit-55-e2e.js')));
   ok(fs.existsSync(path.join(__dirname, 'final-audit-55-cross.js')));
-  ok(stage.includes('LAST_COMPLETED_STAGE=55'));
+  ok(fs.existsSync(path.join(__dirname, '..', 'FINAL_AUDIT_STAGE_55.md')));
+  ok(stage.includes('HISTORIC_COMPLETION_STAGE=55'));
   ok(stage.includes('SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES'));
-  ok(!source.includes('Stage55'));
+  ok(source.includes('calendarDateSpaghettiStage55Historical'));
   ok(!source.includes('AUDIT55'));
+});
+
+group('Stage 56 aplica rawBowlSum pos li scar legacy e conserva li route historic', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  const stage = fs.readFileSync(path.join(__dirname, '..', 'DEVELOPMENT_STAGE.md'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'index.js'), 'utf8');
+  eq(pkg.version, '0.0.56-stage-56-corrective');
+  eq(pkg.scripts['test:stage-56-core'], 'node tests/stage-56-corrective.js');
+  eq(pkg.scripts['test:stage-56-foundation'], 'node tests/stage-56-e2e-foundation.js');
+  eq(pkg.scripts['test:stage-56-near-foundation'], 'node tests/stage-56-e2e-near-foundation.js');
+  eq(pkg.scripts['test:stage-56-reference'], 'node tests/stage-56-e2e-reference.js');
+  ok(fs.existsSync(path.join(__dirname, 'stage-56-reference.js')));
+  ok(fs.existsSync(path.join(__dirname, 'stage-56-corrective.js')));
+  ok(fs.existsSync(path.join(__dirname, 'stage-56-e2e-foundation.js')));
+  ok(fs.existsSync(path.join(__dirname, 'stage-56-e2e-near-foundation.js')));
+  ok(fs.existsSync(path.join(__dirname, 'stage-56-e2e-reference.js')));
+  ok(stage.includes('CURRENT_STAGE=56'));
+  ok(stage.includes('LAST_COMPLETED_STAGE=56'));
+  ok(stage.includes('POST_COMPLETION_CORRECTIVE_STAGE=56'));
+  ok(stage.includes('STAGE_56_CORRECTIVE=COMPLETE'));
+  ok(stage.includes('HISTORIC_COMPLETION_STAGE=55'));
+  eq(typeof production.createStage56PostStirContext, 'function');
+  eq(typeof production.stage56RawBowlSumPostStirDetour, 'function');
+  eq(typeof production.sauceWithStage56RawBowlSumDetour, 'function');
+  eq(typeof production.sauceWithScarsStage56, 'function');
+  eq(typeof production.calendarDateSpaghettiStage55Historical, 'function');
+  eq(typeof production.calendarDateSpaghettiStage55HistoricalWithContext, 'function');
+  eq(typeof production.Stage56MonsterIntegrationManager, 'function');
+  ok(production.postStirOneForOrderMemoryDiscovery.toString().includes('+ savedStirSum'));
+  ok(production.stage56RawBowlSumPostStirDetour.toString().includes('+ rawBowlSum'));
+  ok(source.includes('legacyScarCallCount'));
+  ok(!source.includes("require('../tests/stage-56-reference')"));
+  ok(!source.includes("require('../tests/normative-reference')"));
+  const bowls = [null, 1n, 2n, 3n, 4n, 5n, 6n];
+  const legacy = production.postStirOneForOrderMemoryDiscovery(1, bowls);
+  const context = production.createStage56PostStirContext();
+  context.legacyScarCallCount += 1;
+  const corrected = production.stage56RawBowlSumPostStirDetour(1, bowls, legacy, context);
+  eq(context.rawBowlSum, 21n);
+  eq(context.savedOrderNumber, 170n);
+  ok(context.rawBowlSum !== context.savedOrderNumber);
+  eq(JSON.stringify(corrected.order), JSON.stringify(legacy.order));
+  ok(JSON.stringify(corrected.bowls.map(String)) !== JSON.stringify(legacy.bowls.map(String)));
 });
 
 group('errores de base es explicit e li final function es integrat in Stage 54', () => {
@@ -2240,4 +2283,4 @@ group('errores de base es explicit e li final function es integrat in Stage 54',
   eq(typeof production.calendarDateSpaghetti, 'function');
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Stage 55.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Stage 56 corrective.');

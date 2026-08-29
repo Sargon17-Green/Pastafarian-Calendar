@@ -1358,6 +1358,108 @@ function postStirOneForOrderMemoryDiscovery(stirNumber, bowls) {
   return { bowls: pending.slice(), order: order.slice(), savedStirSum };
 }
 
+function createStage56PostStirContext() {
+  return {
+    oldResult: null,
+    correctedResult: null,
+    rawBowlSum: null,
+    savedOrderNumber: null,
+    stirIndex: 0,
+    appliedCount: 0,
+    appliedFlag: false,
+    legacyScarCallCount: 0,
+    history: []
+  };
+}
+
+function snapshotStage56PostStirContext(context) {
+  if (!context || typeof context !== 'object') {
+    throw new TypeError('Li context de Stage 56 deve esser un object invocation-local.');
+  }
+  return Object.freeze({
+    oldResult: context.oldResult,
+    correctedResult: context.correctedResult,
+    rawBowlSum: context.rawBowlSum,
+    savedOrderNumber: context.savedOrderNumber,
+    stirIndex: context.stirIndex,
+    appliedCount: context.appliedCount,
+    appliedFlag: context.appliedFlag,
+    legacyScarCallCount: context.legacyScarCallCount,
+    history: Object.freeze(context.history.slice())
+  });
+}
+
+function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context) {
+  if (!Number.isInteger(stirNumber) || stirNumber < 1 || stirNumber > 12) {
+    throw new RangeError('Li ordinal del detour Stage 56 deve esser inter 1 e 12.');
+  }
+  if (!Array.isArray(bowls) || bowls.length < 7) {
+    throw new TypeError('Li detour Stage 56 exige six bowls in indices 1..6.');
+  }
+  if (!legacyRound || !Array.isArray(legacyRound.bowls) || !Array.isArray(legacyRound.order) ||
+      typeof legacyRound.savedStirSum !== 'bigint') {
+    throw new TypeError('Li detour Stage 56 exige li resultate real del scar legacy precedent.');
+  }
+  if (!context || typeof context !== 'object' || !Array.isArray(context.history)) {
+    throw new TypeError('Li detour Stage 56 exige un context invocation-local explicit.');
+  }
+  const old = bowls.slice();
+  let rawBowlSum = 0n;
+  for (let bowlId = 1; bowlId <= 6; bowlId += 1) {
+    if (typeof old[bowlId] !== 'bigint') {
+      throw new TypeError('Chascun bowl del detour Stage 56 deve esser un BigInt exact.');
+    }
+    rawBowlSum += old[bowlId];
+  }
+  const savedOrderNumber = savePatch(rawBowlSum + 149n * BigInt(stirNumber));
+  const order = orderPatchFromValue(savedOrderNumber);
+  if (legacyRound.savedStirSum !== savedOrderNumber || !stage54ArraysEqual(legacyRound.order, order)) {
+    throw new BootstrapStageError('Stage 56 refusa mutar orderNumber o permutation; solmen rawBowlSum posse diferer in u.');
+  }
+  const pending = new Array(7).fill(null);
+  for (let position = 1; position <= 6; position += 1) {
+    const bowlId = order[position - 1];
+    const prevId = order[(position + 4) % 6];
+    const nextId = order[position % 6];
+    const u = old[bowlId]
+      + 3n * old[prevId]
+      + 5n * old[nextId]
+      + rawBowlSum
+      + BigInt(stirNumber)
+      + BigInt(position * position);
+    pending[bowlId] = savePatch(u * u + 7n * old[prevId] * old[nextId]);
+  }
+  const oldResult = Object.freeze({
+    bowls: Object.freeze(legacyRound.bowls.slice()),
+    order: Object.freeze(legacyRound.order.slice()),
+    savedOrderNumber: legacyRound.savedStirSum
+  });
+  const correctedResult = Object.freeze({
+    bowls: Object.freeze(pending.slice()),
+    order: Object.freeze(order.slice()),
+    savedOrderNumber
+  });
+  const historyRow = Object.freeze({
+    oldResult,
+    correctedResult,
+    rawBowlSum,
+    savedOrderNumber,
+    stirIndex: stirNumber,
+    appliedCount: context.appliedCount + 1,
+    appliedFlag: true,
+    legacyScarCallCount: context.legacyScarCallCount
+  });
+  context.oldResult = oldResult;
+  context.correctedResult = correctedResult;
+  context.rawBowlSum = rawBowlSum;
+  context.savedOrderNumber = savedOrderNumber;
+  context.stirIndex = stirNumber;
+  context.appliedCount += 1;
+  context.appliedFlag = true;
+  context.history.push(historyRow);
+  return { bowls: pending.slice(), order: order.slice(), rawBowlSum, savedOrderNumber };
+}
+
 function legacySauceWithOverwritableOrderMemory(counts, stones) {
   if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
     throw new TypeError('Li path legacy de order-memory exige comptes e 46 rows de stones.');
@@ -1519,6 +1621,42 @@ function oldNextBowlFixedName(id) {
   }
   // Li scar historic ignora li position latchet e avansa solmen sur li ring numeric fix de IDs.
   return id === 6 ? 1 : id + 1;
+}
+
+function sauceWithStage56RawBowlSumDetour(counts, stones) {
+  if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
+    throw new TypeError('Li sauce corrective Stage 56 exige comptes e 46 rows de stones.');
+  }
+  // Li sauce historic complet resta real e deven un ghost. Su post-stirs ne es mutat in loco.
+  const historical = sauceWithOrderAt46Latch(counts, stones);
+  let bowls = historical.bowlsAfterDrops.slice();
+  const stage56Context = createStage56PostStirContext();
+  let lastOrder = null;
+  let lastSavedOrderNumber = null;
+  for (let stir = 1; stir <= 12; stir += 1) {
+    const sourceSnapshot = bowls.slice();
+    // Li scar legacy es vocat realmen ante chascun detour e su resultate resta quam witness.
+    const legacyRound = postStirOneForOrderMemoryDiscovery(stir, sourceSnapshot);
+    stage56Context.legacyScarCallCount += 1;
+    const correctedRound = stage56RawBowlSumPostStirDetour(stir, sourceSnapshot, legacyRound, stage56Context);
+    bowls = correctedRound.bowls.slice();
+    lastOrder = correctedRound.order.slice();
+    lastSavedOrderNumber = correctedRound.savedOrderNumber;
+  }
+  if (stage56Context.appliedCount !== 12 || stage56Context.legacyScarCallCount !== 12 ||
+      stage56Context.stirIndex !== 12 || stage56Context.history.length !== 12) {
+    throw new BootstrapStageError('Stage 56 deve aplicar exactmen 12 detours pos 12 calls legacy.');
+  }
+  return {
+    ...historical,
+    bowls: bowls.slice(),
+    lastPostStirOrder: lastOrder.slice(),
+    lastPostStirSavedSum: lastSavedOrderNumber,
+    stage56HistoricalBowls: historical.bowls.slice(),
+    stage56HistoricalLastPostStirOrder: historical.lastPostStirOrder.slice(),
+    stage56PostStirContext: snapshotStage56PostStirContext(stage56Context),
+    stage56RawBowlSumApplied: true
+  };
 }
 
 function nextBowlFromOrderAt46Latch(orderAt46Latch, queriedBowlId) {
@@ -6976,6 +7114,90 @@ function sauceWithScars(calculationDay, targetDay) {
   }
 }
 
+function sauceWithScarsStage56(calculationDay, targetDay) {
+  stage54RequireDay(calculationDay, 'Li calculation-day del sauce Stage 56');
+  stage54RequireDay(targetDay, 'Li target-day del sauce Stage 56');
+  let programCounter = 0;
+  let counts = null;
+  let stones = null;
+  let duplicateHidden = null;
+  let result = null;
+  const trace = [];
+  const compatibility = Object.freeze({
+    useLegacyRemainder: true,
+    useLegacyDayTag: true,
+    useLegacyDistance: true,
+    useBackwardHiddenStorage: true,
+    useAliasPours: true,
+    useShadowBowls: true,
+    useLatchedQueryOrder: true,
+    useStage56RawBowlSumDetour: true
+  });
+  while (true) {
+    switch (programCounter) {
+      case 0:
+        trace.push('SAUCE_STAGE56_ENTRY');
+        programCounter = 10;
+        break;
+      case 10:
+        counts = structureSauceCountsFromDays(calculationDay, targetDay);
+        trace.push('PATCHED_COUNTS');
+        programCounter = 20;
+        break;
+      case 20:
+        stones = getStoneTableThroughLegacyBuilder();
+        trace.push('STONES_THROUGH_LEGACY_BUILDER');
+        programCounter = 30;
+        break;
+      case 30:
+        duplicateHidden = buildHiddenWithBackwardStorage(counts, stones);
+        hiddenByNearness(duplicateHidden, 1);
+        hiddenByNearness(duplicateHidden, 7);
+        trace.push('BACKWARD_HIDDEN_STORAGE_AND_PATCHED_PRIOR_READY');
+        programCounter = 40;
+        break;
+      case 40:
+        result = sauceWithStage56RawBowlSumDetour(counts, stones);
+        trace.push('LEGACY_POST12_GHOST_THEN_STAGE56_RAW_SUM_POST12');
+        programCounter = 50;
+        break;
+      case 50: {
+        if (!stage54ArraysEqual(result.hiddenBackward, duplicateHidden)) {
+          throw new BootstrapStageError('Li validation duplicat del hidden storage Stage 56 diverge del path authoritative.');
+        }
+        const nextDiagnostics = [];
+        for (let bowlId = 1; bowlId <= 6; bowlId += 1) {
+          const legacyNext = oldNextBowlFixedName(bowlId);
+          const semanticNext = nextBowlFromOrderAt46Latch(result.orderAt46Latch, bowlId);
+          nextDiagnostics.push(Object.freeze({ bowlId, legacyNext, semanticNext }));
+        }
+        trace.push('QUERY_THROUGH_LATCHED_ORDER');
+        return Object.freeze({
+          counts,
+          stones: Object.freeze(stones.map((row) => Object.freeze({ ...row }))),
+          hiddenBackward: Object.freeze(result.hiddenBackward.slice()),
+          drops: Object.freeze(result.drops.slice()),
+          bowlsAfterDrops: Object.freeze(result.bowlsAfterDrops.slice()),
+          bowls: Object.freeze(result.bowls.slice()),
+          stage56HistoricalBowls: Object.freeze(result.stage56HistoricalBowls.slice()),
+          orderAt46Latch: Object.freeze(result.orderAt46Latch.slice()),
+          orderAt46LatchWriteCount: result.orderAt46LatchWriteCount,
+          postStirOrderDiagnostic: Object.freeze(result.lastPostStirOrder.slice()),
+          legacyQueryOrderDiagnostic: Object.freeze(result.legacyGarbage.queryOrder.slice()),
+          queryOrder: Object.freeze(result.queryOrder.slice()),
+          nextDiagnostics: Object.freeze(nextDiagnostics),
+          stage56PostStirContext: result.stage56PostStirContext,
+          stage56RawBowlSumApplied: true,
+          compatibility,
+          stateMachineTrace: Object.freeze(trace.slice())
+        });
+      }
+      default:
+        throw new BootstrapStageError('Li state-machine del sauce Stage 56 atinge un program counter ínconosset.');
+    }
+  }
+}
+
 function stage54AnswerRingWithScar(sauceResult, bowlId, seal, context, label) {
   if (!sauceResult || !Array.isArray(sauceResult.bowls) || !Array.isArray(sauceResult.orderAt46Latch)) {
     throw new TypeError('Li question final exige un sauce complet.');
@@ -6992,7 +7214,9 @@ function stage54AnswerRingWithScar(sauceResult, bowlId, seal, context, label) {
 }
 
 class Stage54GateRegistry {
-  constructor() {
+  constructor(sauceProvider = sauceWithScars) {
+    if (typeof sauceProvider !== 'function') throw new TypeError('Li gate registry exige un provider de sauce.');
+    this.sauceProvider = sauceProvider;
     this.gates = new Map([[0n, FOUNDATION_DAY_OLD]]);
     this.minKnownGateIndex = 0n;
     this.maxKnownGateIndex = 0n;
@@ -7004,7 +7228,7 @@ class Stage54GateRegistry {
       throw new RangeError('Li index signat del gate gap final deve esser non-zero.');
     }
     const questionDay = gateQuestionWithSignedStep(signedIndex);
-    const sauceResult = sauceWithScars(FOUNDATION_DAY_OLD, questionDay);
+    const sauceResult = this.sauceProvider(FOUNDATION_DAY_OLD, questionDay);
     const stream = stage54AnswerRingWithScar(sauceResult, 1, 1n, null, 'gate-gap');
     const selected = selectionDispatcherWithWideDetour(stream, 922n);
     this.gapCalls += 1n;
@@ -7134,7 +7358,7 @@ function stage54SelectCandidateFamily(view, candidatePairs, stream, context, lab
   return { legacyPrepared, legacySelected, semanticPrepared, semanticSelected, semanticPick };
 }
 
-function stage54BuildYear5000(calculationDay, registry, context) {
+function stage54BuildYear5000(calculationDay, registry, context, sauceProvider = sauceWithScars) {
   registry.ensureCover(calculationDay - STAGE54_LEGACY_YEAR_MAX_DAYS, calculationDay + STAGE54_LEGACY_YEAR_MAX_DAYS);
   const lowIndex = registry.indexAtOrBefore(calculationDay - STAGE54_LEGACY_YEAR_MAX_DAYS);
   const highIndex = registry.indexAtOrAfter(calculationDay + STAGE54_LEGACY_YEAR_MAX_DAYS);
@@ -7150,7 +7374,8 @@ function stage54BuildYear5000(calculationDay, registry, context) {
       if (calculationDay <= closeDay) candidatePairs.push({ openIndex: i, closeIndex: j });
     }
   }
-  const sauceResult = sauceWithScars(calculationDay, calculationDay);
+  const sauceResult = sauceProvider(calculationDay, calculationDay);
+  stage56CaptureSauceState(context, sauceResult, 'year-5000');
   const stream = stage54AnswerRingWithScar(sauceResult, 1, 10n, context, 'year-5000');
   const selected = stage54SelectCandidateFamily(view, candidatePairs, stream, context, 'YEAR_5000');
   const year = stage54YearRecord(
@@ -7166,7 +7391,7 @@ function stage54BuildYear5000(calculationDay, registry, context) {
   return year;
 }
 
-function stage54BuildAdjacentYear(calculationDay, knownYear, direction, registry, context) {
+function stage54BuildAdjacentYear(calculationDay, knownYear, direction, registry, context, sauceProvider = sauceWithScars) {
   const known = stage54EnrichYear(registry, knownYear);
   const forward = direction === 'next';
   if (!forward && direction !== 'previous') throw new RangeError('Li direction annual final deve esser next o previous.');
@@ -7193,7 +7418,8 @@ function stage54BuildAdjacentYear(calculationDay, knownYear, direction, registry
     }
   }
   const sauceTarget = sharedDay;
-  const sauceResult = sauceWithScars(calculationDay, sauceTarget);
+  const sauceResult = sauceProvider(calculationDay, sauceTarget);
+  stage56CaptureSauceState(context, sauceResult, forward ? 'next-year' : 'previous-year');
   const seal = forward ? 11n : 12n;
   const stream = stage54AnswerRingWithScar(sauceResult, 1, seal, context, forward ? 'next-year' : 'previous-year');
   const selected = stage54SelectCandidateFamily(view, candidatePairs, stream, context, forward ? 'NEXT_YEAR' : 'PREVIOUS_YEAR');
@@ -7205,12 +7431,12 @@ function stage54BuildAdjacentYear(calculationDay, knownYear, direction, registry
   );
 }
 
-function stage54ResolveTargetYear(calculationDay, targetDay, registry, context) {
-  const year5000 = stage54BuildYear5000(calculationDay, registry, context);
+function stage54ResolveTargetYear(calculationDay, targetDay, registry, context, sauceProvider = sauceWithScars) {
+  const year5000 = stage54BuildYear5000(calculationDay, registry, context, sauceProvider);
   context.diagnostics.push(Object.freeze({ label: 'oldJumpGuess', value: oldJumpGuess(year5000, targetDay) }));
   const source = Object.freeze({
-    nextYear: (year) => stage54BuildAdjacentYear(calculationDay, year, 'next', registry, context),
-    previousYear: (year) => stage54BuildAdjacentYear(calculationDay, year, 'previous', registry, context)
+    nextYear: (year) => stage54BuildAdjacentYear(calculationDay, year, 'next', registry, context, sauceProvider),
+    previousYear: (year) => stage54BuildAdjacentYear(calculationDay, year, 'previous', registry, context, sauceProvider)
   });
   const walked = findYearByWalkPatch(
     year5000,
@@ -7221,7 +7447,7 @@ function stage54ResolveTargetYear(calculationDay, targetDay, registry, context) 
   const authoritativeBeforePatch26 = stage54EnrichYear(registry, walked.year);
   let ownershipAnchor = authoritativeBeforePatch26;
   if (targetDay === authoritativeBeforePatch26.closeDay) {
-    ownershipAnchor = stage54BuildAdjacentYear(calculationDay, authoritativeBeforePatch26, 'next', registry, context);
+    ownershipAnchor = stage54BuildAdjacentYear(calculationDay, authoritativeBeforePatch26, 'next', registry, context, sauceProvider);
   }
   const legacyInterval = legacyFindYearClosedOpeningInterval(
     ownershipAnchor,
@@ -7306,7 +7532,13 @@ function stage54MaterializeCutlets(year, partition, nameIndices, registry) {
   return Object.freeze(cutlets);
 }
 
-function stage54BuildStructure(manager, context, calculationDay, targetDay, year, registry) {
+function stage56CaptureSauceState(context, sauceResult, label) {
+  if (!context || !sauceResult || sauceResult.stage56RawBowlSumApplied !== true || !sauceResult.stage56PostStirContext) return;
+  if (!Array.isArray(context.stage56SauceStates)) context.stage56SauceStates = [];
+  context.stage56SauceStates.push(Object.freeze({ label, state: sauceResult.stage56PostStirContext }));
+}
+
+function stage54BuildStructure(manager, context, calculationDay, targetDay, year, registry, sauceProvider = sauceWithScars) {
   const guarded = cacheGetWithActionGuard(manager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER, year, calculationDay);
   context.cacheEvents.push(Object.freeze({ type: guarded.hit ? 'HIT' : 'MISS', reason: guarded.reason, year: year.number }));
   if (guarded.hit) {
@@ -7316,12 +7548,24 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
 
   const yearFirstDay = year.firstDay;
   const patch20Diagnostic = structureSaucePatch(calculationDay, targetDay, yearFirstDay);
-  const structureSauce = sauceWithScars(calculationDay, yearFirstDay);
-  if (!stage54ArraysEqual(patch20Diagnostic.semanticSauce.bowls, structureSauce.bowls) ||
-      !stage54ArraysEqual(patch20Diagnostic.semanticSauce.orderAt46Latch, structureSauce.orderAt46Latch)) {
-    throw new BootstrapStageError('Li sauceWithScars final diverge del sauce semantic de Patch 20.');
+  const structureSauce = sauceProvider(calculationDay, yearFirstDay);
+  stage56CaptureSauceState(context, structureSauce, 'structure-sauce');
+  if (manager.stage56Corrective === true) {
+    if (!stage54ArraysEqual(patch20Diagnostic.semanticSauce.orderAt46Latch, structureSauce.orderAt46Latch)) {
+      throw new BootstrapStageError('Stage 56 ne posse mutar li order latchet de drop 46.');
+    }
+    context.stage56HistoricalStructureSauceGhost = Object.freeze(patch20Diagnostic.semanticSauce.bowls.slice());
+    context.diagnostics.push(Object.freeze({
+      label: 'structure-sauce-ghost', executed: true, targetDiffers: targetDay !== yearFirstDay,
+      stage56Recomputed: true, historicalBowlsDiffer: !stage54ArraysEqual(patch20Diagnostic.semanticSauce.bowls, structureSauce.bowls)
+    }));
+  } else {
+    if (!stage54ArraysEqual(patch20Diagnostic.semanticSauce.bowls, structureSauce.bowls) ||
+        !stage54ArraysEqual(patch20Diagnostic.semanticSauce.orderAt46Latch, structureSauce.orderAt46Latch)) {
+      throw new BootstrapStageError('Li sauceWithScars final diverge del sauce semantic de Patch 20.');
+    }
+    context.diagnostics.push(Object.freeze({ label: 'structure-sauce-ghost', executed: true, targetDiffers: targetDay !== yearFirstDay }));
   }
-  context.diagnostics.push(Object.freeze({ label: 'structure-sauce-ghost', executed: true, targetDiffers: targetDay !== yearFirstDay }));
 
   const gapCountBig = year.closeGateIndex - year.openGateIndex;
   if (gapCountBig < 6n || gapCountBig > 10000n) throw new BootstrapStageError('Li gap count final es extra li limite operativ del year.');
@@ -7524,9 +7768,11 @@ class Stage54RecoveryManager {
 }
 
 class Stage54MonsterIntegrationManager extends BaseMonsterManager {
-  constructor(gateRegistry) {
+  constructor(gateRegistry, sauceProvider = sauceWithScars, stage56Corrective = false) {
     super();
     this.gateRegistry = gateRegistry;
+    this.sauceProvider = sauceProvider;
+    this.stage56Corrective = stage56Corrective;
     this.compatibilityManager = new Stage54CompatibilityManager();
     this.recoveryManager = new Stage54RecoveryManager();
     this.integrationHooks = Object.freeze({
@@ -7585,7 +7831,7 @@ class Stage54MonsterIntegrationManager extends BaseMonsterManager {
             break;
           case 10:
             context.subPhase = 'YEAR_RESOLUTION';
-            yearResolution = stage54ResolveTargetYear(calculationDay, targetDay, this.gateRegistry, context);
+            yearResolution = stage54ResolveTargetYear(calculationDay, targetDay, this.gateRegistry, context, this.sauceProvider);
             year = yearResolution.year;
             context.gatesTouched = [year.openDay, year.closeDay];
             context.status = 'STAGE_54_YEAR_READY';
@@ -7602,13 +7848,13 @@ class Stage54MonsterIntegrationManager extends BaseMonsterManager {
           }
           case 30:
             context.subPhase = 'STRUCTURE_BUILD';
-            structure = stage54BuildStructure(this, context, calculationDay, targetDay, year, this.gateRegistry);
+            structure = stage54BuildStructure(this, context, calculationDay, targetDay, year, this.gateRegistry, this.sauceProvider);
             context.status = 'STAGE_54_STRUCTURE_READY';
             committedSnapshot = this.recoveryManager.snapshot(context, 30);
             programCounter = 70;
             break;
           case 70:
-            if (structure === null) structure = stage54BuildStructure(this, context, calculationDay, targetDay, year, this.gateRegistry);
+            if (structure === null) structure = stage54BuildStructure(this, context, calculationDay, targetDay, year, this.gateRegistry, this.sauceProvider);
             context.structure = structure;
             context.commitToken = 'STAGE54_STRUCTURE_COMMITTED';
             programCounter = 80;
@@ -7650,8 +7896,37 @@ class Stage54MonsterIntegrationManager extends BaseMonsterManager {
 const STAGE54_GLOBAL_GATE_REGISTRY = new Stage54GateRegistry();
 const STAGE54_GLOBAL_MANAGER = new Stage54MonsterIntegrationManager(STAGE54_GLOBAL_GATE_REGISTRY);
 
-function calendarDateSpaghettiWithContext(calculationDay, targetDay) {
+function calendarDateSpaghettiStage55HistoricalWithContext(calculationDay, targetDay) {
   return STAGE54_GLOBAL_MANAGER.executeCalendarDate(calculationDay, targetDay);
+}
+
+function calendarDateSpaghettiStage55Historical(calculationDay, targetDay) {
+  return calendarDateSpaghettiStage55HistoricalWithContext(calculationDay, targetDay).result;
+}
+
+class Stage56MonsterIntegrationManager extends Stage54MonsterIntegrationManager {
+  constructor(gateRegistry) {
+    super(gateRegistry, sauceWithScarsStage56, true);
+  }
+
+  prepareFinal(calculationDay, targetDay) {
+    const context = super.prepareFinal(calculationDay, targetDay);
+    context.mode = 'AUTHORITATIVE_SPAGHETTI_STAGE_56';
+    context.stage56SauceStates = [];
+    context.stage56HistoricalStructureSauceGhost = null;
+    context.stage56CorrectiveApplied = true;
+    context.compatibilityFlags = Object.freeze({ ...context.compatibilityFlags, useStage56RawBowlSumDetour: true });
+    context.phase = 'STAGE_56_CORRECTIVE_ENTRY';
+    context.branchTrace.push('STAGE_56_CORRECTIVE_ENTRY');
+    return context;
+  }
+}
+
+const STAGE56_GLOBAL_GATE_REGISTRY = new Stage54GateRegistry(sauceWithScarsStage56);
+const STAGE56_GLOBAL_MANAGER = new Stage56MonsterIntegrationManager(STAGE56_GLOBAL_GATE_REGISTRY);
+
+function calendarDateSpaghettiWithContext(calculationDay, targetDay) {
+  return STAGE56_GLOBAL_MANAGER.executeCalendarDate(calculationDay, targetDay);
 }
 
 function calendarDateSpaghetti(calculationDay, targetDay) {
@@ -7787,11 +8062,14 @@ module.exports = Object.freeze({
   initialBowlsForOrderMemoryDiscovery,
   visibleDropThroughCurrentLayers,
   postStirOneForOrderMemoryDiscovery,
+  createStage56PostStirContext,
+  stage56RawBowlSumPostStirDetour,
   legacySauceWithOverwritableOrderMemory,
   createOrderAt46LatchState,
   writeOrderAt46LatchOnce,
   readOrderAt46Latch,
   sauceWithOrderAt46Latch,
+  sauceWithStage56RawBowlSumDetour,
   oldNextBowlFixedName,
   nextBowlFromOrderAt46Latch,
   answerRingFromCurrentState,
@@ -7900,12 +8178,16 @@ module.exports = Object.freeze({
   discovery26LegacyOpeningGateIntervalThroughMonsterPath,
   historicOpeningGateIntervalThroughMonsterPath,
   sauceWithScars,
+  sauceWithScarsStage56,
   Stage54GateRegistry,
   Stage54CompatibilityManager,
   Stage54RecoveryManager,
   Stage54MonsterIntegrationManager,
+  Stage56MonsterIntegrationManager,
   STAGE54_GLOBAL_GATE_REGISTRY,
   STAGE54_GLOBAL_MANAGER,
+  calendarDateSpaghettiStage55HistoricalWithContext,
+  calendarDateSpaghettiStage55Historical,
   calendarDateSpaghettiWithContext,
   calendarDateSpaghetti
 });

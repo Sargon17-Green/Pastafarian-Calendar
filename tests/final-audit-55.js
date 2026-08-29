@@ -483,12 +483,12 @@ audit('prose canonic ne contene script hebreic e declara Interlingue quam fonte 
 });
 
 
-const foundationActual = production.calendarDateSpaghettiWithContext(F, F);
+const foundationActual = production.calendarDateSpaghettiStage55HistoricalWithContext(F, F);
 assert.equal(foundationActual.result.length, 5);
 
 audit('cache cold/warm e calculationDay guards resta semanticmen neutri', () => {
-  const first = production.calendarDateSpaghettiWithContext(F, F);
-  const second = production.calendarDateSpaghettiWithContext(F, F);
+  const first = production.calendarDateSpaghettiStage55HistoricalWithContext(F, F);
+  const second = production.calendarDateSpaghettiStage55HistoricalWithContext(F, F);
   sameArray(first.result, second.result);
   const warmProbe = second.context.diagnostics.find((row) => row && row.label === 'pre-structure-cache-probe');
   assert.ok(warmProbe); assert.equal(warmProbe.hit, true);
@@ -567,7 +567,7 @@ audit('retry 0/1/2 resta deterministic e exhaustion jetta explicitmen', () => {
 });
 
 audit('du instances e calls repetit resta history-independent', () => {
-  production.calendarDateSpaghettiWithContext(F, F);
+  production.calendarDateSpaghettiStage55HistoricalWithContext(F, F);
   const validatedCache = new Map(production.STAGE54_GLOBAL_MANAGER.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER);
   const left = new production.Stage54MonsterIntegrationManager(production.STAGE54_GLOBAL_GATE_REGISTRY);
   const right = new production.Stage54MonsterIntegrationManager(production.STAGE54_GLOBAL_GATE_REGISTRY);
@@ -599,7 +599,7 @@ audit('compatibility flags authoritative es fix e deterministic', () => {
 });
 
 audit('semantic ownership, commits e observabilitá resta separat', () => {
-  const context = production.calendarDateSpaghettiWithContext(F, F).context;
+  const context = production.calendarDateSpaghettiStage55HistoricalWithContext(F, F).context;
   assert.equal(context.status, 'SUCCESS');
   assert.equal(context.pendingSnapshot, null);
   assert.equal(context.commitToken, 'STAGE54_RESULT_VALIDATED');

@@ -551,3 +551,15 @@ Li audit core confirma exact arithmetic, SAVE/modulo, day tags e distance, permu
 Li audit differential end-to-end concorda por Foundation, ante Foundation, pos Foundation e trans Foundation. Li Foundation rende `[5000, scorpion, 503, pute, 56]`; li crossing audit rende `[5000, Akkad, 1, pute, 15]`. Null mismatch es trovat.
 
 Production resta byte-for-byte identic a Stage 54. In li runner de construction li audit differential es executet in du processes separat: base Foundation/lateres e crossing trans Foundation. Li completation es declarat solmen pos que omni regressions precedent, li verifier, li audit core e ambi processes differential es GREEN. `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES`.
+
+## Stage 56 — corrective post-completion: raw bowl sum in post-stirs
+
+Stage 56 ne rescri li completion historic de Stage 55. It circumva un divergence provat in li 12 post-stirs pos drop 46. Li scar `postStirOneForOrderMemoryDiscovery` resta intact: it calcula `savedStirSum=SAVE(rawSum+149*stir)`, usa ti valore por li permutation e anc, incorrectmen, adjunte it in `u`.
+
+Li detour nov `stage56RawBowlSumPostStirDetour` es vocat solmen pos que li scar old ha esset executet realmen sur li sam snapshot. It recalcula `rawBowlSum=sum(oldBowls)`, conserva `savedOrderNumber=SAVE(rawBowlSum+149*stir)` quam unic fonte del permutation, verifica que order number e permutation es identic al scar, e usa `rawBowlSum` — ne li saved order number — quam operand in `u`. Omni six bowls es calculat ex li sam `old` e commitet junt.
+
+`sauceWithStage56RawBowlSumDetour` conserva li sauce Stage 55 complet quam ghost e recomputa li 12 post-stirs. `sauceWithScarsStage56` es li provider authoritative por `Stage56MonsterIntegrationManager`. Li aliases `calendarDateSpaghettiStage55Historical*` conserva li route historic; `calendarDateSpaghetti*` usa li corrective Stage 56.
+
+Li state invocation-local del corrective registra old result, corrected result, raw bowl sum, saved order number, stir index, applied count, applied flag, legacy-scar call count e un history de 12 rows. Null oracle test-only es importat in production.
+
+Li evidence local confirma omni 12 stirs contra `tests/stage-56-reference.js`, six bowls final e drop-46 order por Foundation e `c=t=-15048173`, e li quatre tuples canonical extern del corrective specification. Li reference SHA `d5cfe77ef7950a9a67ff0e6814833a3eedacae8a` ne esset disponibil directmen in li repository public durant ti session; ergo li formulas e bowls esset reconstructet independentmen e null code esset copiat ex ti commit.
