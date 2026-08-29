@@ -11,47 +11,52 @@ const stones = production.getStoneTableThroughLegacyBuilder();
 const expected = normative.sauce(calculationDay, targetDay);
 
 const direct = production.legacySauceWithOverwritableOrderMemory(counts, stones);
-assert.deepEqual(direct.bowls.slice(1), expected.bowls, 'Li six bowls final deve ja esser exact ante li defect de memorie de order.');
-assert.deepEqual(
-  direct.drop46OrderDiagnostic,
-  expected.orderAtDrop46,
-  'Li order real de drop 46 deve esser calculat exactmen ante que li post-stirs lo superscri.'
-);
-assert.equal(direct.orderWriteCount, 58, 'Li memorie legacy deve esser scrit 46 vezes per drops e 12 vezes per post-stirs.');
+assert.deepEqual(direct.bowls.slice(1), expected.bowls, 'Li six bowls final deve restar exact anc in li scar legacy.');
+assert.deepEqual(direct.drop46OrderDiagnostic, expected.orderAtDrop46);
+assert.equal(direct.orderWriteCount, 58);
 assert.deepEqual(direct.lastSource, { kind: 'post-stir', ordinal: 12 });
-assert.deepEqual(direct.queryOrder, direct.lastPostStirOrder, 'Li query legacy deve leer li ultim valore superscrit in li memorie general.');
-assert.notDeepEqual(
-  direct.queryOrder,
-  direct.drop46OrderDiagnostic,
-  'Li witness deve realmen demonstrar que li ultim post-stir ha superscrit li order de drop 46.'
+assert.deepEqual(direct.queryOrder, direct.lastPostStirOrder);
+const legacyMismatchPositions = [1, 2, 6].filter(
+  (position) => direct.queryOrder[position - 1] !== expected.orderAtDrop46[position - 1]
 );
+assert.deepEqual(legacyMismatchPositions, [1, 2, 6], 'Li scar legacy deve restar defectiv exactmen a ti witness.');
 
-const routed = production.discovery11LegacyOverwrittenOrderThroughMonsterPath(
+const routed = production.historicOrderAt46ThroughMonsterPath(
   calculationDay,
   targetDay,
   counts,
   stones
 );
-assert.equal(routed.context.currentHandler, 'Discovery11OverwrittenOrderHandler');
-assert.equal(routed.context.phase, 'DISCOVERY_11_OVERWRITABLE_ORDER_MEMORY');
-assert.equal(routed.context.status, 'DISCOVERY_11_LEGACY_RESULT');
+assert.equal(routed.context.currentHandler, 'Patch11OrderAt46LatchWrapper');
+assert.equal(routed.context.previousHandler, 'Discovery11OverwrittenOrderHandler');
+assert.equal(routed.context.phase, 'PATCH_11_ORDER_AT_46_LATCH');
+assert.equal(routed.context.status, 'PATCH_11_RESULT');
 assert.equal(routed.context.legacyOrderMemoryWriteCount, 58);
 assert.deepEqual(routed.context.legacyOrderMemoryLastSource, { kind: 'post-stir', ordinal: 12 });
 assert.deepEqual(routed.context.legacyDrop46OrderDiagnostic, expected.orderAtDrop46);
-assert.deepEqual(routed.context.legacyOrderMemory, routed.result.lastPostStirOrder);
-assert.deepEqual(routed.context.legacyQueryOrder, routed.result.queryOrder);
+assert.deepEqual(routed.context.legacyQueryOrder, direct.queryOrder);
+assert.equal(routed.context.patch11LegacyCallPreserved, true);
+assert.deepEqual(routed.context.patch11LegacyGarbage.queryOrder, direct.queryOrder);
+assert.deepEqual(routed.context.patch11OrderAt46Latch, expected.orderAtDrop46);
+assert.equal(routed.context.patch11OrderAt46LatchWriteCount, 1);
+assert.deepEqual(routed.context.patch11OrderAt46LatchSource, { kind: 'drop', ordinal: 46 });
+assert.equal(routed.context.patch11LegacyOrderMemoryWriteCount, 58);
+assert.deepEqual(routed.context.patch11LegacyOrderMemoryLastSource, { kind: 'post-stir', ordinal: 12 });
+assert.deepEqual(routed.context.patch11LegacyOrderMemory, routed.result.lastPostStirOrder);
+assert.deepEqual(routed.context.patch11QueryOrder, expected.orderAtDrop46);
+assert.deepEqual(routed.result.queryOrder, expected.orderAtDrop46);
+assert.deepEqual(routed.result.orderAt46Latch, expected.orderAtDrop46);
 assert.deepEqual(routed.result.bowls.slice(1), expected.bowls);
 assert.deepEqual(routed.context.branchTrace, [
   'BOOTSTRAP_VALIDATED',
-  'DISCOVERY_11_OVERWRITABLE_ORDER_MEMORY'
+  'DISCOVERY_11_OVERWRITABLE_ORDER_MEMORY',
+  'PATCH_11_ORDER_AT_46_LATCH'
 ]);
 assert.equal(routed.context.metrics['discovery11.overwritableOrder.calls'], 1n);
+assert.equal(routed.context.metrics['patch11.orderAt46Latch.calls'], 1n);
 
 const mismatchPositions = [1, 2, 6].filter(
   (position) => routed.result.queryOrder[position - 1] !== expected.orderAtDrop46[position - 1]
 );
-assert.deepEqual(
-  mismatchPositions,
-  [],
-  'DISCOVERY 11 EXPECTED RED: li query order es li post-stir 12 superscrit in vice del order de drop 46 a positions 1, 2 e 6.'
-);
+assert.deepEqual(mismatchPositions, []);
+console.log('DISCOVERY 11 REGRESSION: PASS pos Patch 11; li memorie legacy resta superscribil, ma queryOrder lee exclusivmen li latch single-write de drop 46.');

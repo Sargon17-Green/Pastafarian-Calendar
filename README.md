@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 21 de 55: PATCH 10**. Omni scars e patches 01..09 resta intact e testabil. `legacyStirOneDropInPlace` conserva li contamination sequential in-place de Discovery 10, ma `stirOneDropViaShadow` executa ti legacy quam garbage historic e isola li transition semantic per un snapshot `vaultOld` e un buffer `pending`.
+Li linea es in **Stage 23 de 55: PATCH 11**. Omni scars e patches 01..10 resta intact e testabil. `legacySauceWithOverwritableOrderMemory` continua superscrir li sam `legacyOrderMemory` durant 46 drops e 12 post-stirs, ma li nov path `sauceWithOrderAt46Latch` conserva separatmen li order exact de drop 46.
 
-Omni reads semantic del six bowl updates veni exclusivmen ex `vaultOld`; omni six writes intra li round va exclusivmen a `pending`; li commit evene solmen pos li six positions. `Patch10ShadowBowlWrapper` conserva li garbage legacy, li snapshot, li buffer e li output reparat in li context. Null `orderAt46Latch` e null code de Patch 11 existe in ti stage.
+Pos li round de drop 46 e ante post-stir 1, `orderAt46Latch` recive un clone fisic del order exact e ne posse esser scrit un duesim vez. Li post-stirs continua mutar solmen li memorie legacy. `queryOrder` lee exclusivmen li latch; li bowls final resta identic al path normativ. Null code de Patch 12 es present.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,29 +26,23 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions precedent til Patch 10 deve restar verd:
+Omni regressions til Discovery 11 deve restar verd sub Patch 11:
 
 ```text
 npm run test:previous
 ```
 
-Li regression nov de Discovery 11 deve esser rubi intentionalmen:
+Li test focal del patch deve esser verd:
 
 ```text
-npm run test:discovery-11
+npm run test:patch-11
 ```
 
-Li suite complet deve finir `EXPECTED_RED` exclusivmen per ti regression:
+Li suite complet deve esser verd:
 
 ```text
 npm test
 ```
-
-Li verifier confirma un path exact de 46 visible drops e 12 post-stirs, con six bowls final normativmen exact. It confirma anc que li unic memorie legacy de order es scrit 58 vezes e termina con li order del post-stir 12. Null latch separat por drop 46 o code de Patch 11 es present.
-
-## Independentie
-
-Li reference normativ complet por tests trova se in `tests/normative-reference.js`. It ne es importat de production e ne posse servir quam fallback runtime. Null implementation extern, artefact cross-implementation, hash, checksum o differential cross-implementation es usat.
 
 ## Stage 11 — Patch 05
 
@@ -109,3 +103,10 @@ Li regression de Discovery 10 usa intentionalmen un order identic por isolar li 
 Li nov path `legacySauceWithOverwritableOrderMemory` materialisa 46 visible drops tra li patches ja existent, aplica chascun bowl-round per `stirOneDropViaShadow`, e poy executa 12 post-stirs con `savedStirSum = SAVE(sum(oldBowls)+149*stir)`. Omni bowl reads del post-stir veni del sam snapshot e omni six writes deven un batch separat, talmen li bowls resta exact.
 
 Li defect current es exclusivmen li memorie de order: un unic `legacyOrderMemory` es superscrit un vez per drop e un vez per post-stir. Li order de drop 46 es dunque calculat exactmen ma poy perdit quam fonte semantic de query. `Discovery11OverwrittenOrderHandler` conserva li 58 writes, li fonte final post-stir 12, li diagnostic del drop 46 e li query legacy superscrit. Li regression nov compara positions 1, 2 e 6 contra li order normativ de drop 46 e resta rubi intentionalmen. Null latch reparativ es addit in ti stage.
+
+
+## Stage 23 — Patch 11
+
+`legacySauceWithOverwritableOrderMemory` resta intact e continua esser un witness direct del defect: 58 writes al sam memorie e un `queryOrder` final egal al order del post-stir 12. `sauceWithOrderAt46Latch` apella realmen ti legacy quam garbage historic, poy executa li route semantic con un separat state single-write.
+
+Exactmen pos drop 46, `writeOrderAt46LatchOnce` clona li order in `orderAt46Latch`; ti write-site precede li loop del 12 post-stirs. Li latch rejecte un duesim write, e li post-stirs ne toca it. Durante que li `legacyOrderMemory` continua til 58 writes, `queryOrder` es derivat exclusivmen per `readOrderAt46Latch`. `Patch11OrderAt46LatchWrapper` conserva simultanmen li garbage legacy, li latch, li ultim memorie superscrit e li resultate semantic. Null next-bowl logic de Patch 12 es anticipat.

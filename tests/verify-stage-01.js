@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 11 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 11 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Discovery 11 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
+    'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
@@ -1207,7 +1207,45 @@ group('Discovery 11 superscri li unic memorie de order durant 46 drops e 12 post
   eq(routed.context.metrics['discovery11.overwritableOrder.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 11', () => {
+group('Patch 11 conserva li memorie superscribil ma query usa un latch single-write de drop 46', () => {
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const expected = o.sauce(f, f);
+  const legacy = production.legacySauceWithOverwritableOrderMemory(counts, stones);
+  const patched = production.sauceWithOrderAt46Latch(counts, stones);
+  eq(legacy.orderWriteCount, 58);
+  deepEq(legacy.queryOrder, legacy.lastPostStirOrder);
+  ok(legacy.queryOrder.some((id, index) => id !== expected.orderAtDrop46[index]));
+  eq(patched.legacyGarbage.orderWriteCount, 58);
+  deepEq(patched.legacyGarbage.queryOrder, legacy.queryOrder);
+  deepEq(patched.orderAt46Latch, expected.orderAtDrop46);
+  eq(patched.orderAt46LatchWriteCount, 1);
+  deepEq(patched.orderAt46LatchSource, { kind: 'drop', ordinal: 46 });
+  eq(patched.orderWriteCount, 58);
+  deepEq(patched.legacyOrderMemory, patched.lastPostStirOrder);
+  deepEq(patched.queryOrder, expected.orderAtDrop46);
+  deepEq(patched.bowls.slice(1), expected.bowls);
+  const source = production.sauceWithOrderAt46Latch.toString();
+  ok(source.includes('legacySauceWithOverwritableOrderMemory(counts, stones)'));
+  ok(source.includes('writeOrderAt46LatchOnce(latchState, round.order)'));
+  ok(source.includes('queryOrder: readOrderAt46Latch(latchState)'));
+  ok(source.indexOf('writeOrderAt46LatchOnce(latchState, round.order)') < source.indexOf('for (let stir = 1; stir <= 12; stir += 1)'));
+  const latch = production.createOrderAt46LatchState();
+  production.writeOrderAt46LatchOnce(latch, [1, 2, 3, 4, 5, 6]);
+  throws(() => production.writeOrderAt46LatchOnce(latch, [6, 5, 4, 3, 2, 1]), production.BootstrapStageError);
+  const routed = production.historicOrderAt46ThroughMonsterPath(f, f, counts, stones);
+  eq(routed.context.currentHandler, 'Patch11OrderAt46LatchWrapper');
+  eq(routed.context.previousHandler, 'Discovery11OverwrittenOrderHandler');
+  eq(routed.context.status, 'PATCH_11_RESULT');
+  eq(routed.context.patch11LegacyCallPreserved, true);
+  eq(routed.context.patch11OrderAt46LatchWriteCount, 1);
+  deepEq(routed.context.patch11OrderAt46Latch, expected.orderAtDrop46);
+  deepEq(routed.context.patch11QueryOrder, expected.orderAtDrop46);
+  eq(routed.context.metrics['patch11.orderAt46Latch.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 11', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1219,4 +1257,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 11.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 11.');

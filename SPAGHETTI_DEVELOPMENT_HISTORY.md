@@ -466,3 +466,26 @@ Li monster obtene un path complet de sauce partial: `initialBowlsForOrderMemoryD
 ### Pro quo li nov layer ne change altri semantics
 
 Li visible drops usa exclusivmen li access history de Patch 06 e li grind table con sentinel de Patch 07; li order usa Patch 08, li pours usa bowlAlias de Patch 09, e li six updates de chascun drop usa `vaultOld`/`pending` de Patch 10. Li 12 post-stirs usa un snapshot old e un pending complet por chascun round. Ergo li six bowls final concorda con li reference normativ local; li unic defect nov e intentional es li ownership historic del memorie de order.
+
+
+## Stage 23 — PATCH 11
+
+### Quo esset circumit
+
+`legacySauceWithOverwritableOrderMemory` ne esset modificat. Li nov `sauceWithOrderAt46Latch` voca realmen ti route legacy quam garbage historic, poy repassa li 46 drops e 12 post-stirs con li sam patches numeric. Pos que li bowl-round de drop 46 es complet, ma ante que post-stir 1 comensa, `writeOrderAt46LatchOnce` clona li order exact in un state separat. Li loop de post-stirs continua superscrir solmen `legacyOrderMemory`; it ne ha null write-site al latch.
+
+### Pro quo li patch es normativmen equivalent
+
+Li specification demanda que queries posterior usa li order del visible drop 46, ne li order current de un post-stir. Al moment exact inter drop 46 e post-stir 1, li order calculat es ja normativmen exact per Patch 08 e ne depende de null state posterior. Un clone single-write conserva precis ti valore. Diriger `queryOrder` al latch cambia solmen ownership temporal del order; drops, bowls, post-stirs, SAVE e omni formules resta identic.
+
+### Crescentie monster in ti stage
+
+Li monster adjunte `createOrderAt46LatchState`, `writeOrderAt46LatchOnce`, `readOrderAt46Latch`, `sauceWithOrderAt46Latch` e `Patch11OrderAt46LatchWrapper`. Li context conserva in parallel li garbage legacy, li latch, su write-count e fonte, li memorie legacy final pos 58 writes, li ultim order de post-stir, li bowls final e li query reparat. Un tentative de duesim write al latch es explicitmen rejectet.
+
+### Scar conservat
+
+Li memorie legacy continua esser superscrit 46 + 12 vezes e termina con fonte `post-stir 12`. Su `queryOrder` direct continua esser fals in li witness del Foundation. Li helper legacy resta byte-per-byte identic e ne conosse null `orderAt46Latch`. Null `oldNextBowlFixedName` o logic de Patch 12 existe in ti stage.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li latch es invocation-local, contene un clone fisic de six IDs e posse esser scrit exactmen un vez. Reads retorna anc clones, ergo un consumer ne posse mutar li fonte semantic. Post-stirs conserva lor memorie legacy separat, e li garbage legacy ne decide li output reparat. Li six bowls final e omni regressions precedent resta invariat.
