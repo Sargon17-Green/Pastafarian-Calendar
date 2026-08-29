@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 08 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 09 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -1066,7 +1066,30 @@ group('Patch 08 conserva oldPermutationUnrank0 e traducte li ordinal one-based a
   eq(routed.context.metrics['patch08.permutationRank.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 08', () => {
+group('Discovery 09 conserva pours ligat a bowl IDs fix 1,2,3 in vice de positions in order', () => {
+  const oldBowls = [null, 11n, 13n, 17n, 19n, 23n, 29n];
+  const stoneRow = { w: 2n, b: 3n, s: 5n };
+  const legacy = production.legacyPoursToFixedBowlIds(127n, 4n, oldBowls, stoneRow);
+  deepEq(legacy.order, [2, 1, 4, 3, 5, 6]);
+  deepEq(legacy.pours.slice(1, 4), [16163n, 16188n, 16242n]);
+  const expected = [16167n, 16182n, 16252n];
+  ok(legacy.pours.slice(1, 4).some((value, index) => value !== expected[index]));
+  const source = production.legacyPoursToFixedBowlIds.toString();
+  ok(source.includes('oldBowls[1]'));
+  ok(source.includes('oldBowls[2]'));
+  ok(source.includes('oldBowls[3]'));
+  ok(source.includes('orderPatchFromValue(drop)'));
+  const routed = production.discovery09LegacyFixedPoursThroughMonsterPath(1n, 1n, 127n, 4n, oldBowls, stoneRow);
+  eq(routed.context.currentHandler, 'Discovery09FixedPourHandler');
+  eq(routed.context.phase, 'DISCOVERY_09_FIXED_BOWL_POURS');
+  eq(routed.context.status, 'DISCOVERY_09_LEGACY_RESULT');
+  deepEq(routed.context.legacyPourOrder, [2, 1, 4, 3, 5, 6]);
+  deepEq(routed.context.legacyPourFixedBowlIds, [1, 2, 3]);
+  deepEq(routed.result.pours.slice(1, 4), [16163n, 16188n, 16242n]);
+  eq(routed.context.metrics['discovery09.fixedPour.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 09', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1078,4 +1101,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in Patch 08.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression intentional de Discovery 09.');

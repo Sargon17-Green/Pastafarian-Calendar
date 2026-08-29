@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=17
-CURRENT_KIND=PATCH
-CURRENT_PATCH=08
-LAST_COMPLETED_STAGE=17
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=18
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=09
+LAST_COMPLETED_STAGE=18
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, li caller one-based defectiv de Discovery 08, e Patch08PermutationWrapper quel conserva li chain oneBased -> legacyRank0=oneBased-1 -> oldPermutationUnrank0.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus legacyPoursToFixedBowlIds, LegacyFixedPourAdapter e Discovery09FixedPourHandler quel calcula li order reparat ma usa ancora bowl IDs fix 1,2,3 por li tri pours.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 17 es finit quam **PATCH 08**. `oldPermutationUnrank0(rank0)` e `legacyBowlOrderFromDrop(drop)` resta sin modification, ergo li scar one-based continua directmen observabil. Li nov `orderPatchFromValue(value)` conserva intentionalmen li chain `oneBased = regularMod(value-1,720)+1`, `legacyRank0 = oneBased-1`, `oldPermutationUnrank0(legacyRank0)`.
+Stage 18 es finit quam **DISCOVERY 09**. `legacyPoursToFixedBowlIds(drop,index,oldBowls,stoneRow)` calcula li order exact per `orderPatchFromValue`, ma li tri pours continua leer `oldBowls[1]`, `oldBowls[2]` e `oldBowls[3]` quam si positions 1,2,3 esset bowl IDs fix.
 
-Li route historic passa per `Discovery08PermutationRankHandler` e poy `Patch08PermutationWrapper`. Li context conserva li ordinal one-based, li rank0 traductet e li output reparat. Li regression de Stage 16 es verd durant que li caller legacy resta defectiv. Null `bowlAlias` o code de Patch 09 o posterior es present.
+Li defect es conectet a un path real de production tra `LegacyFixedPourAdapter` e `Discovery09FixedPourHandler`. Por un order identic li scar posse coincider accidentalmen; por drop 127 li order es `[2,1,4,3,5,6]` e li pours legacy `16163,16188,16242` diverge de `16167,16182,16252`. Li regression nov es intentionalmen rubi. Null `bowlAlias`, null correction de Patch 09 e null code posterior es present.

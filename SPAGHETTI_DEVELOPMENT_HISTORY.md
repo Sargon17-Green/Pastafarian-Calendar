@@ -352,3 +352,26 @@ Un `Patch08PermutationWrapper` ha esset insertet pos `Discovery08PermutationRank
 ### Scar conservat
 
 `legacyBowlOrderFromDrop(1)` continua rendre li duesim permutation, e li caller legacy continua passar su ordinal directmen quam rank0. Li patch ne muta ni reordina li helper legacy. Null `bowlAlias`, pours de Patch 09 o code posterior es present.
+
+
+## Stage 18 — DISCOVERY 09
+
+### Quo on pensat
+
+Pos li correction del rank de permutation, li routine historic de pours ja possede un `order` exact. Tamen su design anterior considera numeration de position e identitá de bowl quam li sam cose, ergo li tri pours continua leer bowls fix 1,2,3.
+
+### Quo esset decovrit
+
+Li specification liga pour 1 al bowl in position 1 del `order`, pour 2 al bowl in position 2, e pour 3 al bowl in position 3. `legacyPoursToFixedBowlIds` calcula li sam order ma usa directmen `oldBowls[1]`, `oldBowls[2]`, `oldBowls[3]`. Quand li prim tri IDs del order ne es 1,2,3, li factors de WHEAT, BARLEY e SALT multiplica li bowl fals. Por drop 127 li order es `[2,1,4,3,5,6]`; li tri outputs legacy deven `16163,16188,16242` contra `16167,16182,16252`.
+
+### Quo esset circumit
+
+Null circumventione existe in ti stage. Null alias de position a bowl ID es addit. Li correction mandat quel deve traducter chascun position per li order apartene exclusivmen a PATCH 09 in Stage 19.
+
+### Crescentie monster in ti stage
+
+Un `LegacyFixedPourAdapter` e un `Discovery09FixedPourHandler` ha esset addit. Li context conserva li drop, su index, li order calculat, li lista explicit de bowl IDs fix `[1,2,3]`, li bowls anterior, li row de stones e li output legacy. `BaseMonsterManager` expone un route separat con context fresc e metric non-semantic.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li order veni exclusivmen de `orderPatchFromValue`, ergo Patch 08 resta activ e exact. Li routine de Discovery 09 ne muta bowls, ne implementa li update de six bowls e ne introduce contamination in-place de Patch 10. Li unic divergence nov es precis li confusion mandat inter position e bowl ID durant li tri pours. Null `bowlAlias`, null `vaultOld` e null code posterior es present.

@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 17 de 55: PATCH 08**. Omni scars e patches 01..07 resta intact e testabil. `oldPermutationUnrank0(rank0)` e li caller defectiv `legacyBowlOrderFromDrop` resta sin modification; `orderPatchFromValue` adjunte li bridge mandat de ordinal one-based a rank0 zero-based.
+Li linea es in **Stage 18 de 55: DISCOVERY 09**. Omni scars e patches 01..08 resta intact e testabil. Li nov `legacyPoursToFixedBowlIds` calcula un order valid, ma conserva li assumption historic que positions 1,2,3 del pour es bowl IDs fix 1,2,3.
 
-`Patch08PermutationWrapper` passa pos `Discovery08PermutationRankHandler` e conserva simultanmen li output legacy desplazzat e li order normativ reparat. Null `bowlAlias` o code de Patch 09 existe in ti stage.
+`Discovery09FixedPourHandler` expone ti defect in un route real de production e conserva separatmen li order, li IDs fix, li bowls anterior e li tri pours legacy. Null `bowlAlias`, null correction de Patch 09 e null code de Patch 10 existe in ti stage.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -32,20 +32,19 @@ Omni regressions precedent deve restar verd:
 npm run test:previous
 ```
 
-Li regression de Discovery 08 deve esser verd pos li patch, e li test specific de Patch 08 deve passar:
+Li regression specific de Discovery 09 deve esser intentionalmen rubi:
 
 ```text
-npm run test:discovery-08
-npm run test:patch-08
+npm run test:discovery-09
 ```
 
-Li suite complet deve finir verd:
+Li suite complet deve finir rubi exclusivmen in Discovery 09:
 
 ```text
 npm test
 ```
 
-Li verifier confirma que `oldPermutationUnrank0` e li caller legacy resta intact, que `orderPatchFromValue` conserva explicitmen `oneBased-1`, e que null `bowlAlias` o code posterior contamina production.
+Li verifier confirma que li pours legacy usa fisicmen bowls 1,2,3 quam IDs fix, que li order reparat es calculat ma ne traducte ancor ti reads, e que null `bowlAlias` o code posterior contamina production.
 
 ## Independentie
 
@@ -82,3 +81,8 @@ Li table historic de visible grinds es almacenat quam un array zero-based de und
 ## Stage 17 — Patch 08
 
 `oldPermutationUnrank0` e `legacyBowlOrderFromDrop` resta intact quam scars historic. `orderPatchFromValue` conserva exactmen li bridge mandat `oneBased = regularMod(value-1,720)+1`, `legacyRank0 = oneBased-1`, poy voca li helper legacy con ti rank0. `Patch08PermutationWrapper` conserva li ordinal e li rank traductet in li context. Li regression de Discovery 08 es nu verd; li chain -1 ... +1 ... -1 ne es simplificat.
+
+
+## Stage 18 — Discovery 09
+
+Li order de bowls ja es reparat per Patch 08, ma li routine historic de pours ne usa ti IDs selectet. It tracta positions semantic 1,2,3 quam bowl IDs fisic 1,2,3 e lee directmen `oldBowls[1]`, `oldBowls[2]`, `oldBowls[3]`. `LegacyFixedPourAdapter` e `Discovery09FixedPourHandler` conserva ti mismatch. Li translator de Patch 09 resta reservat por Stage 19.
