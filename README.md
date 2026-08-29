@@ -1,29 +1,29 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin onuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 9/55, `PATCH 04` durumundadır. Dördüncü tarihsel kusur kodda aynen korunur: `mutateStonesWrong` hâlâ aynı mutable state'i sequential biçimde kirletir.
+Aşama 10/55, `DISCOVERY 05` durumundadır. Beşinci tarihsel kusur gerçek çağrı zincirine eklenmiştir.
 
-Düzeltme onun üstündeki `stonePatch` katmanındadır:
+Gizli damlalar fiziksel olarak ters sırada saklanır:
 
 ```text
-old = clone(S)
-garbage = mutateStonesWrong(i, clone(S))
-
-garbage.w = savePatch(old.w*old.w + 3*old.b + i)
-garbage.b = savePatch(old.b*old.b + 5*old.s + old.w)
-garbage.s = savePatch(old.s*old.s + 7*old.m + old.b)
-garbage.m = savePatch(old.m*old.m + 11*old.r + old.s)
-garbage.r = savePatch(old.r*old.r + 13*old.w + old.m)
+legacyHidden[1] = hidden7
+legacyHidden[2] = hidden6
+...
+legacyHidden[7] = hidden1
 ```
 
-Legacy çağrısı gerçek bir clone üzerinde çalışır ve gerçek garbage üretir; ardından beş alanın tamamı yalnızca old snapshot okuyan formüllerle ezilir.
+`buildHiddenWithBackwardStorage` bu backward storage'ı üretir. `LegacyHiddenDropAdapter` onu gerçek `calendar_date_spaghetti` yoluna bağlar.
 
-`getStoneTableThroughLegacyBuilder` artık 2–46 satırlarını `stonePatch` üzerinden üretir. Aşama 8'in normatif taş-tablosu regresyonu değiştirilmeden yeşile dönmüştür.
+Discovery kusuru near-ness erişimindedir: `k` doğrudan `legacyHidden[k]` olarak okunur. Böylece `hidden1` isteği `hidden7` döndürür. `hidden4` ise ters düzenin orta noktası olduğu için tesadüfen doğru kalır.
 
-Adapter son patch satırının old snapshot, legacy garbage ve committed row scar durumlarını invocation'a ait `MonsterContext` içinde ayrı tutar. Önceki bütün regresyonlar yeşildir. Gelecekteki 05–26 kusur ve yamaları üretime eklenmemiştir.
+Yeni normatif regresyon `k=1,2,4,6,7` için gerçek adapter erişimini test-only normatif gizli damlalarla karşılaştırır. Dört alt örnek bilinçli olarak kırmızıdır; `k=4` geçer.
+
+Henüz `PATCH 05` yoktur: `hiddenByNearness(legacyHidden,k) -> legacyHidden[8-k]` erişim çevirmeni eklenmemiştir ve backward storage fiziksel olarak ters çevrilmemiştir.
+
+Önceki Aşama 1–9 regresyonlarının tamamı yeşildir. Gelecekteki 06–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -39,10 +39,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam dokuzuncu aşama paketi:
+Tam onuncu aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 8'de kırmızı olan 2, 3 ve 46 numaralı taş satırı regresyonları aynı gövdeyle yeşile dönmelidir; `mutateStonesWrong` kusurunu doğrudan doğrulayan testler eski yanlış davranışı korumaya devam eder.
+Beklenen sonuç: önceki Aşama 1–9 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni gizli-damla near-ness regresyonunun `k=1`, `k=2`, `k=6` ve `k=7` alt örnekleri başarısız olur. `k=4` ters storage'ın sabit orta noktası olarak geçer.

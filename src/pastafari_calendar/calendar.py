@@ -84,13 +84,33 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
         manager.legacy_stones.call(local_ctx)
         manager.metrics.bump(local_ctx, "legacy.stones.builds")
         local_ctx.status = "ESKİ_TAŞ_TABLOSU_HAZIR"
-        local_ctx.phase = "AŞAMA_08_BEKLEME"
+        local_ctx.phase = "ESKİ_GİZLİ_DAMLALAR"
+
+    def legacy_hidden_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+        manager.legacy_hidden.call(local_ctx)
+
+        # Discovery 05'in gerçek yanlış erişimi: hidden1 sanılarak doğrudan slot 1 okunur.
+        manager.legacy_hidden.read_by_nearness(
+            local_ctx,
+            1,
+        )
+
+        manager.metrics.bump(local_ctx, "legacy.hidden.builds")
+        local_ctx.status = "ESKİ_GİZLİ_DAMLALAR_HAZIR"
+        local_ctx.phase = "AŞAMA_10_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
     manager.dispatcher.register("ESKİ_GÜN_ETİKETLERİ", legacy_day_tag_handler)
     manager.dispatcher.register("ESKİ_MESAFE", legacy_distance_handler)
     manager.dispatcher.register("ESKİ_TAŞ_TABLOSU", legacy_stone_handler)
+    manager.dispatcher.register("ESKİ_GİZLİ_DAMLALAR", legacy_hidden_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -98,5 +118,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Dokuzuncu aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Onuncu aşamada üretim takvim yolu henüz birleştirilmedi"
     )

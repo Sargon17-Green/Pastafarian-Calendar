@@ -309,3 +309,47 @@ committed patched row
 Ayrıca kaç satırın `stonePatch` üzerinden geçtiği tutulur.
 
 Bu alanlar yalnızca invocation'a ait `MonsterContext` içinde bulunur. Logs, metrics ve diagnostics taş hesabına girdi değildir.
+
+
+## Aşama 10 — Keşif 05: gizli damlaları ters fiziksel sırada saklamak
+
+### Ne sanıldı
+
+Gizli damla katmanı fiziksel depoyu yakınlığa göre ileri sırada değil, eski bir yerleşim alışkanlığıyla ters sırada tuttu:
+
+```text
+slot 1 = hidden7
+slot 2 = hidden6
+slot 3 = hidden5
+slot 4 = hidden4
+slot 5 = hidden3
+slot 6 = hidden2
+slot 7 = hidden1
+```
+
+`buildHiddenWithBackwardStorage`, her normatif `k` değerini gerçekten `legacyHidden[8-k]` slotuna yazar.
+
+Gizli damlaların kendileri önceki yamalardan geçen exact sayımlar ve taş tablosu ile hesaplanır. Eski coefficient tablosu da fiziksel olarak ters tutulur; `coeffForHidden` yalnızca o coefficient storage scar'ını doğru `k` hesabına bağlar. Discovery 05'in yeni kusuru coefficient seçimi değil, üretilmiş hidden değerinin near-ness isteğinde yanlış physical slot'tan okunmasıdır.
+
+### Ne keşfedildi
+
+İlk erişim katmanı backward storage'ı normal bir near-ness dizisi sandı:
+
+```text
+legacyHiddenDirectByAssumedNearness(legacyHidden, k)
+    -> legacyHidden[k]
+```
+
+Bu nedenle `hidden1` istendiğinde fiziksel slot 1'de duran `hidden7` döner; `hidden2` istendiğinde `hidden6` döner. Yalnızca orta değer `hidden4`, ters çevirmede kendi slotunda kaldığı için tesadüfen doğrudur.
+
+Yeni normatif regresyon gerçek `LegacyHiddenDropAdapter` erişimini `k = 1,2,4,6,7` için test-only normatif hidden değerleriyle karşılaştırır. `k=4` geçer; diğer dört alt örnek bilinçli olarak kırmızıdır.
+
+### Bu aşamada eklenen canavar katmanı
+
+`LegacyHiddenDropAdapter`, gizli damla deposunu gerçek `calendar_date_spaghetti` state machine'ine bağlar.
+
+Gerçek main yolu storage'ı kurduktan sonra Discovery kusurunu çalıştırmak için `hidden1` near-ness isteğini yanlış direct accessor üzerinden gerçekten okur.
+
+Backward storage, son istenen `k` ve dönen legacy değer yalnızca invocation'a ait `MonsterContext` içinde tutulur.
+
+Bu aşamada `hiddenByNearness(legacyHidden,k) -> legacyHidden[8-k]` çevirmeni yoktur. Fiziksel dizi ters çevrilmez ve doğru erişim katmanı henüz eklenmez.
