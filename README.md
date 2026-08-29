@@ -4,9 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 1 de 55: Bootstrap**. Li production contene solmen un infrastructura neutral: un context de base per invocation, un dispatcher de base, validation, wrapping deterministic de errores e un shell de metrics. Li function final `calendarDateSpaghetti` es intentionalmen ne implementat, pro que null cicatrice o patch de un stage futur posse aparir ante su stage historic.
+Li linea es in **Stage 2 de 55: DISCOVERY 01**. Li prim defect historic es nu present e activ: `oldRemainder(value)` usa regular modulo con `M_OLD = 2^127 - 1`. Un `LegacyRemainderAdapter` e un `Discovery01RemainderHandler` porta ti operation tra li manager e li context de invocation.
 
-Li reference normativ complet por tests trova se in `tests/normative-reference.js`. It es scrit directmen in JavaScript con `BigInt`; it ne es importat de production e ne posse servir quam fallback runtime.
+Ti stage es intentionalmen **EXPECTED_RED**. Li regression demonstra que multiplicas de `M` deven `0` in li legacy, ma li reference normativ `SAVE` exige `M`. Li correction `savePatch` apartene solmen a Stage 3 e ne es present.
+
+Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null patch posterior posse aparir ante su stage historic.
 
 ## Lingue-fonte canonic
 
@@ -22,33 +24,28 @@ Por formes hebreic vocalisat, signes de vocalisation es resoluet in vocales `a e
 
 Omni calcul normativ usa `BigInt`. Null floating-point es usat por SAVE, rangs, counts, gates, annus, compositiones o intertexes. `M = 2^127 - 1` es representat exactmen. Counts combinatori posse crescer ultra `M` sin truncation.
 
-## Tests e fixtures
+## Tests
 
-`tests/generate-fixtures.js` genera novmen li fixtures local ex li reference normativ del sam linea. `tests/run-tests.js` usa solmen li reference, li fixtures e li skeleton de production de ti linea.
-
-Comandes:
-
-```text
-npm run generate-fixtures
-npm test
-```
-
-Null interpreter, runtime, bridge, FFI, WASM o generator de un altri lingue de programmation es necessi o admisset.
-
-## Porta rigorosi ante Stage 2
-
-Ante iniciar li prim discovery historic, `tests/verify-stage-01.js` adjunte un verification mult plu larg quam li baseline. It usa copies de validation independent, enumeration exhaustiv de spaces combinatori micri, verification de omni 720 permutationes, griles exhaustiv por aritmetica e counts, probes de portes e annus, isolation de state, audit de imports e audit contra contamination de patches futur.
-
-Commande principal:
+Li suites precedent resta verdes. Li commande principal fini intentionalmen con un regression red de Discovery 01:
 
 ```text
 npm test
 ```
 
-Ti commande executa li 14 tests de baseline e poy li porta rigorosi de 25 gruppes / 60226 assertions. Un execution separat es disponibil per:
+Por provar solmen omni regressions precedent:
 
 ```text
-npm run verify:stage1
+npm run test:previous
 ```
 
-Vide `STAGE_01_VERIFICATION_REPORT.md` por li scope exact e por li observation documentat de performance del oracle end-to-end.
+Por reproducer solmen li divergentie nov:
+
+```text
+npm run test:discovery-01
+```
+
+Li resultat expectat de Stage 2 es: regressions precedent PASS, regression de Discovery 01 FAIL exactmen pro `0` contra `M` por multiplicas de `M`.
+
+## Independentie
+
+Li reference normativ complet por tests trova se in `tests/normative-reference.js`. It ne es importat de production e ne posse servir quam fallback runtime. Null implementation extern, artefact cross-implementation, hash, checksum o differential cross-implementation es usat.
