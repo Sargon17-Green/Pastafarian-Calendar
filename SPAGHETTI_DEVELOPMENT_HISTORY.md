@@ -1143,3 +1143,73 @@ Ayrıca latch içindeki altı ID'nin tamamı corrected adapter üzerinden test e
 Patch 13 biased modulo selection kodu henüz yoktur.
 
 Stage 15 sentinel, Stage 17 permutation patch, Stage 19 bowlAlias patch, Stage 21 snapshot/pending patch ve Stage 23 orderAt46Latch aynen korunur.
+
+
+## Aşama 26 — Keşif 13: rejection öncesi doğrudan modulo selection
+
+### Answer ring
+
+Bu aşamada production answer ring katmanı eklenir.
+
+Final post-stir bowl state ve Stage 25 latch-based next-bowl semantics kullanılarak:
+
+```text
+first = SAVE((B[queried]+seal+181)^2 + B[next]*179 + seal)
+directionNumber = SAVE((first+seal+1+193)^2 + first*193 + B[6]*197)
+step = odd(directionNumber) ? +1 : -1
+answerAt(k) = 1 + regularMod(first-1 + step*k, M)
+```
+
+hesaplanır.
+
+Bu bölüm test-only normatif answer stream ile eşleşir.
+
+### Tarihsel kusur
+
+`biasedLegacyPick(x,N)` doğrudan:
+
+```text
+regularMod(x-1,N)+1
+```
+
+döndürür.
+
+Acceptance/rejection kontrolü yoktur.
+
+`LegacyBiasedSelectionAdapter`, real answer ring'in ilk cevabını alır ve helper'ı hemen çağırır.
+
+### Normatif ayrışma
+
+Test fixture'ları gerçek sauce state'inden üretilir.
+
+Queried/seal çiftleri:
+
+```text
+(1,21)
+(5,21)
+(2,31)
+```
+
+için ring direction `-1` ve first değeri `M/2` üstündedir.
+
+Test probe family size:
+
+```text
+N = first - 1
+```
+
+seçildiğinde first answer rejection bölgesindedir ve aynı answer ring'de tek geri adım kabul bölgesine girer.
+
+Legacy direct modulo ile rejection sonrası modulo bu üç gerçek adapter yolunda ayrışır.
+
+### Sınır
+
+Production bu aşamada `limit=floor(M/N)*N` hesaplamaz.
+
+Production answer ring üzerinde rejection ilerlemesi yapmaz.
+
+`biasedLegacyPick` acceptance yapılmadan çağrılır.
+
+Aşama 1 future-name guard içinde `biasedLegacyPick` artık current Discovery 13 olduğu için yalnızca bu token gelecek-kod listesinden çıkarılmıştır.
+
+Patch 14 wide selection kodu henüz yoktur.

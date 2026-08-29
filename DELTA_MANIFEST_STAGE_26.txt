@@ -1,0 +1,28 @@
+Aşama 26/55 — DISCOVERY 13
+
+Bu paket yalnızca Aşama 26 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_selection.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_26_discovery_13.py
+artifacts/stage-26/BASELINE_STAGE_25_GREEN.txt
+artifacts/stage-26/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-26/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_26.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 25 baseline: GREEN
+Değişiklik sonrası Aşama 1–25 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+exact answer ring: EKLENDİ
+biasedLegacyPick direct-modulo scar: EKLENDİ
+biased helper rejection öncesi call: AKTİF
+PATCH 13 acceptance limit/rejection detour: YOK
+PATCH 14 wideDetour: YOK

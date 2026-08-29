@@ -1,32 +1,29 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 25/55, `PATCH 12` durumundadır.
+Aşama 26/55, `DISCOVERY 13` durumundadır.
 
-Discovery 12 fixed-ID scar'ı fiziksel olarak korunur:
+Production artık final bowl state üstünde exact answer ring kurar. First answer ve ±1 direction test-only normatif stream ile eşleşir.
 
-```text
-oldNextBowlFixedName(id)
-1->2->3->4->5->6->1
-```
-
-`NextBowlPatchWrapper` bu helper'ı diagnostic olarak gerçekten çağırır, fakat semantic sonucu ondan almaz.
-
-Corrected yol:
+Yeni tarihsel kusur:
 
 ```text
-position = queriedId'nin orderAt46Latch içindeki konumu
-next = orderAt46Latch[(position+1) mod 6]
+biasedLegacyPick(x,N)
+    -> regularMod(x-1,N)+1
 ```
 
-şeklindedir.
+helper'ının acceptance/rejection yapılmadan hemen çağrılmasıdır.
 
-Aşama 24'ün normatif next-bowl regresyonu değiştirilmeden yeşile dönmüştür. Latch içindeki altı ID'nin tamamı circular successor semantiğiyle doğrulanır.
+`LegacyBiasedSelectionAdapter` bu wrong direct-modulo yolu gerçek `calendar_date_spaghetti` state-machine zincirine bağlar.
 
-Patch 13 biased modulo selection kodu henüz yoktur.
+Yeni normatif regresyon üç gerçek sauce-derived answer ring için legacy direct modulo sonucunu aynı answer ring üzerinde rejection sonrası seçimle karşılaştırır ve bilinçli olarak kırmızıdır.
+
+Henüz `PATCH 13` yoktur: production `limit=floor(M/N)*N` hesaplamaz ve accepted answer bulunana kadar ring üzerinde ilerlemez.
+
+Patch 14 wide-selection kodu da henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -42,10 +39,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirmi beşinci aşama paketi:
+Tam yirmi altıncı aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 24'te kırmızı olan queried ID 4, 5 ve 6 alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–25 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni biased-modulo normatif regresyonunun üç sauce-derived alt örneği başarısız olur.

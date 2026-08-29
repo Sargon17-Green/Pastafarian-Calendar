@@ -1,4 +1,5 @@
 from .legacy_arithmetic import M_OLD
+from .legacy_selection import buildAnswerRingFromSauceState
 from .monster_bootstrap import (
     MonsterContext,
     MonsterManager,
@@ -263,7 +264,41 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.nextBowl.probes",
         )
         local_ctx.status = "ESKİ_SABİT_ID_SONRAKİ_KÂSE_HAZIR"
-        local_ctx.phase = "AŞAMA_24_BEKLEME"
+        local_ctx.phase = "ESKİ_YANLI_MODULO_SEÇİM"
+
+    def legacy_biased_selection_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Keşif 13 probe'u gerçek sauce state'inden bowl 1 / seal 21
+        # answer ring'ini kurar. N, mevcut ilk cevaptan türetilir;
+        # production burada acceptance limit veya rejection hesaplamaz.
+        ring = buildAnswerRingFromSauceState(
+            local_ctx,
+            1,
+            21,
+        )
+        n = (
+            ring.first - 1
+            if ring.first > 1
+            else 1
+        )
+
+        manager.legacy_selection.call_with_ring(
+            local_ctx,
+            ring,
+            n,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.selection.probes",
+        )
+        local_ctx.status = "ESKİ_YANLI_MODULO_SEÇİM_HAZIR"
+        local_ctx.phase = "AŞAMA_26_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -278,6 +313,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_YERİNDE_KÂSE_GÜNCELLEME", legacy_bowl_update_handler)
     manager.dispatcher.register("ESKİ_YAZILABİLİR_ORDER_HAFIZASI", legacy_order_memory_handler)
     manager.dispatcher.register("ESKİ_SABİT_ID_SONRAKİ_KÂSE", legacy_next_bowl_handler)
+    manager.dispatcher.register("ESKİ_YANLI_MODULO_SEÇİM", legacy_biased_selection_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -293,5 +330,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Yirmi beşinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Yirmi altıncı aşamada üretim takvim yolu henüz birleştirilmedi"
     )

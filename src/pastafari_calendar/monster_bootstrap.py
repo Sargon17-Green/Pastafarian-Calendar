@@ -13,6 +13,7 @@ from .legacy_pours import LegacyPourAdapter
 from .legacy_bowl_updates import LegacyBowlUpdateAdapter
 from .legacy_order_memory import LegacyOverwritableOrderMemoryAdapter
 from .legacy_next_bowl import LegacyNextBowlAdapter
+from .legacy_selection import LegacyBiasedSelectionAdapter
 
 
 class MonsterError(RuntimeError):
@@ -152,6 +153,10 @@ class MonsterContext:
     patch12_legacy_diagnostic: int | None = None
     patch12_corrected_result: int | None = None
     patch12_applied: bool = False
+    legacy_selection_first_answer: int | None = None
+    legacy_selection_direction_step: int | None = None
+    legacy_selection_n: int | None = None
+    legacy_selection_result: int | None = None
 
 
 class BaseMetrics:
@@ -216,3 +221,4 @@ class MonsterManager:
         self.legacy_bowl_updates = LegacyBowlUpdateAdapter()
         self.legacy_order_memory = LegacyOverwritableOrderMemoryAdapter()
         self.legacy_next_bowl = LegacyNextBowlAdapter()
+        self.legacy_selection = LegacyBiasedSelectionAdapter()
