@@ -37,6 +37,9 @@ class MonsterContext:
     validation_failures: list[str] = field(default_factory=list)
     legacy_remainder_input: int | None = None
     legacy_remainder_value: int | None = None
+    patch01_input: int | None = None
+    patch01_value: int | None = None
+    patch01_applied: bool = False
 
 
 class BaseMetrics:

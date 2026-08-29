@@ -4,9 +4,11 @@ Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştire
 
 ## Güncel aşama
 
-Aşama 2/55, `DISCOVERY 01` durumundadır. Birinci tarihsel yanlış varsayım gerçek üretim çağrı zincirine eklenmiştir: `oldRemainder(x)` büyük sayaca göre sıradan kalanı alır ve tam katları `0` olarak bırakır.
+Aşama 3/55, `PATCH 01` durumundadır. `oldRemainder(x)` tarihsel kusuruyla birlikte korunur ve büyük sayacın tam katlarında hâlâ `0` döndürür.
 
-Bu aşamada düzeltme bilerek yoktur. `M`, `2M` ve `3M` örnekleri normatif kaydetme işlemiyle ayrıştığı için yeni regresyonun kırmızı olması beklenir. `M+1` örneği uyuşur. Birinci aşamadan kalan bütün regresyonların geçmesi gerekir.
+Düzeltme onun üstündeki `savePatch(x)` ve `SavePatchWrapper` katmanına eklenmiştir. Gerçek `LegacyRemainderAdapter` yolu bu yamadan geçer; `M`, `2M`, `3M` ve `M+1` için Aşama 2'de eklenen normatif regresyon değiştirilmeden artık yeşildir.
+
+Gözlem durumu yamaya semantik girdi değildir ve yama durumu yalnızca çağrıya ait `MonsterContext` içinde tutulur. Gelecekteki 02–26 yamalarından hiçbiri eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -22,16 +24,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Önceki regresyonlar:
-
-```text
-python -m unittest discover -s tests -p "test_stage_01.py" -v
-```
-
-Tam ikinci aşama paketi:
+Tam üçüncü aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-İkinci komutun yalnızca yeni `DISCOVERY 01` regresyonunda beklenen kırmızıyı göstermesi gerekir. Düzeltme bir sonraki aşamaya aittir.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 2'de kırmızı olan normatif kalan regresyonu aynı gövdeyle yeşile dönmelidir; `oldRemainder` kusurunu koruyan test ise hâlâ `0` sonucunu bekler.

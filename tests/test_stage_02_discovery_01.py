@@ -25,12 +25,13 @@ class Stage02Discovery01Tests(unittest.TestCase):
             self.assertEqual(legacy_call.call_count, 1)
             self.assertEqual(legacy_call.call_args.args, (M_OLD,))
 
-    def test_patch_is_not_present_yet(self):
+    def test_stage02_legacy_scar_still_exists_after_patch(self):
         production_text = "\n".join(
             path.read_text(encoding="utf-8")
             for path in (ROOT / "src" / "pastafari_calendar").glob("*.py")
         )
-        self.assertNotIn("savePatch", production_text)
+        self.assertIn("def oldRemainder", production_text)
+        self.assertEqual(oldRemainder(M_OLD), 0)
 
     def test_legacy_helper_keeps_the_historical_zero_bug(self):
         self.assertEqual(oldRemainder(M_OLD), 0)
