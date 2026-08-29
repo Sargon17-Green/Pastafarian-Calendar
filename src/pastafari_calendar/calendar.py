@@ -706,7 +706,37 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.monthWeavingDayByDay.probes",
         )
         local_ctx.status = "ESKİ_GÜN_GÜN_AY_SEÇİMİ_HAZIR"
-        local_ctx.phase = "AŞAMA_49_BEKLEME"
+        local_ctx.phase = "ESKİ_AY_GÜNÜ_SÜREKLİYMİŞ_GİBİ"
+
+    def legacy_contiguous_month_day_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        if local_ctx.patch24_semantic_weaving is None:
+            raise RuntimeError(
+                "Legacy ay-günü tahmini başlamadan önce corrected weaving hazır olmalıdır"
+            )
+
+        # Keşif 25 witness'i real path üzerinde yılın dördüncü gününü kullanır.
+        # Patch 24 semantic weaving içinde month 1 bu noktada non-contiguous olabilir.
+        # Legacy helper yalnız ilk occurrence ile target arasındaki mesafeyi day-in-month sanır.
+        manager.legacy_contiguous_month_day.call(
+            local_ctx,
+            local_ctx.patch24_semantic_weaving,
+            4,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.contiguousMonthDay.probes",
+        )
+        local_ctx.status = "ESKİ_AY_GÜNÜ_SÜREKLİYMİŞ_GİBİ_HAZIR"
+        local_ctx.phase = "AŞAMA_50_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -733,6 +763,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_TEKRARLI_KÖFTE_ADLARI", legacy_repeated_cutlet_names_handler)
     manager.dispatcher.register("ESKİ_AY_UZUNLUĞU_TÜM_YOLLAR_LISTESİ", legacy_month_length_materialization_handler)
     manager.dispatcher.register("ESKİ_GÜN_GÜN_AY_SEÇİMİ", legacy_month_weaving_handler)
+    manager.dispatcher.register("ESKİ_AY_GÜNÜ_SÜREKLİYMİŞ_GİBİ", legacy_contiguous_month_day_handler)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -753,6 +784,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
+    manager.dispatcher.dispatch(ctx)
+
     manager.dispatcher.dispatch(ctx)
 
     manager.dispatcher.dispatch(ctx)

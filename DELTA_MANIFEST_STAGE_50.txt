@@ -1,0 +1,30 @@
+Aşama 50/55 — DISCOVERY 25
+
+Bu paket yalnızca Aşama 50 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_month_day_position.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_47_patch_23.py
+tests/test_stage_50_discovery_25.py
+artifacts/stage-50/BASELINE_STAGE_49_GREEN.txt
+artifacts/stage-50/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-50/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_50.txt
+
+Silinen dosya yoktur.
+Başlangıç yüklenen Aşama 49 baseline: GREEN, 331/331
+Aşama 1–49 regressions: 331/331 PASS
+Aşama 50 full suite: 339 test, tam 3 expected subTest failure
+Beklenen depo durumu: EXPECTED_RED
+Legacy helper: oldContiguousMonthDayGuess
+Input: PATCH 24 CORRECTED SEMANTIC WEAVING
+Historical formula: target_position-first_position+1
+Occurrence-count correction: YOK
+Patch 26 opening-gate correction: YOK

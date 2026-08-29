@@ -217,9 +217,7 @@ class Stage01Tests(unittest.TestCase):
             path.read_text(encoding="utf-8")
             for path in (ROOT / "src" / "pastafari_calendar").glob("*.py")
         )
-        forbidden = (
-            "oldContiguousMonthDayGuess",
-        )
+        forbidden = ()
         for token in forbidden:
             self.assertNotIn(token, production_text)
 

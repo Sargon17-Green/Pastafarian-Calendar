@@ -1,26 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin ellinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 49/55, `PATCH 24` durumundadır.
+Aşama 50/55, `DISCOVERY 25` durumundadır.
 
-Aşama 48 `legacyChooseEachDaySeparately` helper'ı aynen kalır ve önce gerçek ghost üretir.
+Yeni `oldContiguousMonthDayGuess`, target month'un ilk occurrence position'ı ile target position arasındaki mesafeyi day-in-month sanır.
 
-Yeni `LegalMonthWeavingDP` legal whole-weaving family için exact count ve exact lexicographic unrank sağlar.
+Bu historical hesap month occurrence'larının contiguous olduğunu varsayar.
 
-Same bowl 4 / seal 32 answer ring üzerinde legal family count ile `wantedRank` seçilir.
+Patch 24 legal semantic weaving interleaved olabildiği için aradaki başka monthId positions yanlışlıkla aynı ayın günleri sayılır.
 
-`MonthWeavingPatchWrapper` correct weaving'i DP-unrank eder.
+`LegacyContiguousMonthDayAdapter` bu old helper'ı real calendar path üzerinde corrected weaving'den sonra gerçekten çalıştırır ve guessed value'yu current semantic day-in-month state yapar.
 
-Ghost correct ile tamamen aynıysa aynı ghost tuple döner; aksi halde correct semantic weaving döner.
+Üç normatif witness occurrence count ile karşılaştırıldığında tam üç expected divergence üretir.
 
-Historical ghost state'te kalır, current semantic weaving corrected result olur.
-
-Aşama 48 expected hesabı ve final semantic equality assertion'ı korunarak üç normatif witness yeşile dönmüştür.
-
-Patch 25 contiguous month-day kodu henüz yoktur.
+Henüz occurrence-count correction veya Patch 26 kodu yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -36,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırk dokuzuncu aşama paketi:
+Tam ellinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: 331 testin tamamı geçer ve depo durumu `GREEN` olur. Aşama 48'de kırmızı olan üç day-by-day weaving witness corrected legal whole-weaving semantic result ile yeşile dönmelidir.
+Beklenen sonuç: önceki 331 test geçer. Yeni Discovery 25 non-normative kontrolleri geçer; yalnız `test_current_contiguous_month_day_guess_diverges_from_occurrence_count` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.

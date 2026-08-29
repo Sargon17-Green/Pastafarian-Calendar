@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=49
-CURRENT_KIND=PATCH
-CURRENT_PATCH=24
-LAST_COMPLETED_STAGE=49
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=50
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=25
+LAST_COMPLETED_STAGE=50
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Aşama 48 legacyChooseEachDaySeparately raw historical helper gövdesi byte-for-byte korunur ve LegacyMonthWeavingAdapter her call'da aynı bowl 4 seal 32 answer ring üzerinde önce ghost'u gerçekten üretip historical state'e yazar; LegalMonthWeavingDP first-occurrence ve last-occurrence sırasını exact state-count/move DP ile temsil eder, count() exact legal family count verir ve unrank1 exact lexicographic legal weaving üretir; compatibleMonthWeavingRank aynı answer ring üzerinde current short/wide selection semantiğini legal family count'a uygular ve wantedRank üretir; MonthWeavingPatchWrapper correct weaving'i bu wantedRank ile DP-unrank eder, ghost==correct ise aynı ghost tuple nesnesini döndürür, aksi halde correct döndürür; ghost diagnostic scar olarak kalırken semantic weaving corrected result olur
+MONSTER_ARCHITECTURE_GROWTH=oldContiguousMonthDayGuess Stage 49 corrected semantic weaving içindeki target_position monthId'sini alır, aynı monthId'nin ilk occurrence position'ını bulur ve day-in-month değerini target_position-first_position+1 olarak historical biçimde tahmin eder; interleaved weaving içindeki başka monthId günlerini de yanlışlıkla aynı ayın günü sayar; LegacyContiguousMonthDayAdapter bu helper'ı real calendar path üzerinde Patch 24 semantic weaving'den sonra gerçekten çalıştırır ve guessed value'yu current semantic day-in-month state olarak tutar; occurrence count correction, MonthDayOccurrencePatchWrapper ve patch25_applied henüz production'da yoktur
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

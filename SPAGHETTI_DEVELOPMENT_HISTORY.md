@@ -2121,3 +2121,57 @@ Ghost diagnostic scar olarak `legacy_month_weaving_ghost` ve `patch24_ghost` iç
 Aşama 48 expected legal-weaving hesabı ve final `actual == expected` assertion'ı korunmuştur. Aynı regression içindeki historical “ghost ilk symbol month 1 değil” kanıtı final semantic result yerine raw ghost state'ine yönlendirilmiştir; bu Patch 24 sonrası zorunlu minimal uyarlamadır.
 
 Patch 25 `oldContiguousMonthDayGuess` kodu henüz yoktur.
+
+
+## Aşama 50 — Keşif 25: month occurrence'ları contiguous sanan day-in-month hesabı
+
+### Historical helper
+
+`oldContiguousMonthDayGuess(weaving,target_position)` target position'daki monthId'yi bulur.
+
+Sonra aynı monthId'nin yıl içindeki ilk occurrence position'ını arar ve:
+
+```text
+guessed_day = target_position - first_position + 1
+```
+
+hesaplar.
+
+Bu ancak o monthId'nin bütün occurrence'ları gerçekten contiguous ise doğrudur.
+
+Legal month weaving interleaved olabilir. Bu durumda aradaki başka monthId günleri de yanlışlıkla day-in-month hesabına eklenir.
+
+### Real production yolu
+
+`LegacyContiguousMonthDayAdapter` Patch 24 corrected semantic weaving hazırlandıktan sonra çalışır.
+
+Real calendar witness yılın dördüncü position'ını kullanır.
+
+Stage 49 semantic `(4,4,4)` weaving bu noktada month 1'i non-contiguous taşır; old helper ilk occurrence ile target arasındaki bütün positions'ı month 1 günü sanır.
+
+Adapter guessed value'yu hem diagnostic hem current semantic day-in-month state olarak kaydeder.
+
+### Normatif divergence
+
+Üç structure-sauce witness için Stage 49 legal semantic weaving kullanılır.
+
+Target positions sırasıyla 4, 5 ve 4'tür.
+
+Expected yalnız test tarafında:
+
+```text
+monthId = weaving[target_position-1]
+expected = count(weaving[1..target_position] == monthId)
+```
+
+şeklinde doğrudan occurrence count ile hesaplanır.
+
+Üç witness'ın üçünde old contiguous guess expected occurrence count'tan büyüktür ve yalnız bu nedenle kırmızıdır.
+
+### Bilinçli sınır
+
+Production içinde `countMonthOccurrencesThroughTarget`, `MonthDayOccurrencePatchWrapper`, `correct_day_in_month` veya `patch25_applied` yoktur.
+
+Patch 26 opening-gate interval correction kodu da henüz yoktur.
+
+Stage 1 future-token guard current oldContiguousMonthDayGuess tokenını artık yasaklamaz.
