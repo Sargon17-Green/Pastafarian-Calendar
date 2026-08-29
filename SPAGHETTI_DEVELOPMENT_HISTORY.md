@@ -68,3 +68,25 @@ Un `Patch01SaveWrapper` ha esset insertet pos `Discovery01RemainderHandler`. Li 
 ### Pro quo li strat nov ne altera semantics ultra li patch
 
 Li wrapper usa solmen li input exact e li output del operation legacy del sam invocation. Metrics e trace resta non-semantic. Null oracle es consultat in production, null fallback existe, e li correction aplica solmen li remappage `0 -> M` mandat per Patch 01.
+
+## Stage 4 — DISCOVERY 02
+
+### Quo on pensat
+
+Li duesim design historic assumet que un tag de die posse esser duplic li distance absolut al Foundation. Li nov operation legacy es `oldDayTag(day) = 2 * abs(day - FOUNDATION_DAY_OLD)`. It es conectet a production tra un adapter e un handler real, sin correction.
+
+### Quo esset decovrit
+
+Li formule perde li paritá mandat del latere posterior e anc li valore special del Foundation. Al Foundation, li legacy rende `0` in vice de `1`. Un die pos li Foundation it rende `2` in vice de `3`, e du dies pos it rende `4` in vice de `5`. Li latere anterior coincide por ti cases, dunc li defect es localisat e ne es un simplic offset global.
+
+### Quo esset circumit
+
+Null circumventione existe in ti stage. Li correction quel adjunte un unit por dies al o pos li Foundation, con li guard historic separat por li Foundation, es reservat exclusivmen por PATCH 02 in Stage 5.
+
+### Crescentie monster in ti stage
+
+Un `LegacyDayTagAdapter` e un `Discovery02DayTagHandler` ha esset addit. `BaseMonsterManager` crea un context fresc, passa it tra li dispatcher existent e route poy li die al handler nov. Li context conserva li input e output legacy, li handler current e precedent, un trace de branch e un metric non-semantic separat.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li adapter apella exactmen `oldDayTag` e li handler ne normalisa su resultate, ne consulta li oracle e ne usa metrics por decisiones. Ergo li unic divergentie nov es precis li defect historic mandat por Discovery 02, durant que Patch 01 e omni state anterior resta isolat e testabil.

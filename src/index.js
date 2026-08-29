@@ -3,6 +3,7 @@
 const { SourceLanguageCatalog, textByCanonicalIndex } = require('./source-language-catalog');
 
 const M_OLD = (1n << 127n) - 1n;
+const FOUNDATION_DAY_OLD = -15055671n;
 
 class BootstrapStageError extends Error {
   constructor(message) {
@@ -29,6 +30,8 @@ class BaseMonsterContext {
     this.patch01Input = null;
     this.patch01Output = null;
     this.patch01LegacyWasZero = false;
+    this.legacyDayTagInput = null;
+    this.legacyDayTagOutput = null;
   }
 }
 
@@ -51,7 +54,7 @@ class BaseValidationManager {
 
   requireHistoricReadyContext(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'READY_FOR_HISTORIC_DEVELOPMENT') {
-      throw new BootstrapStageError('Li context ne es pret por li passu historic de Discovery 01.');
+      throw new BootstrapStageError('Li context ne es pret por un passu historic de discovery.');
     }
   }
 
@@ -117,6 +120,13 @@ function savePatch(value) {
   return remainder;
 }
 
+function oldDayTag(day) {
+  const distance = day >= FOUNDATION_DAY_OLD
+    ? day - FOUNDATION_DAY_OLD
+    : FOUNDATION_DAY_OLD - day;
+  return 2n * distance;
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -167,6 +177,34 @@ class Patch01SaveWrapper {
   }
 }
 
+class LegacyDayTagAdapter {
+  call(day) {
+    return oldDayTag(day);
+  }
+}
+
+class Discovery02DayTagHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, day) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireExactInteger(day);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery02DayTagHandler';
+    context.phase = 'DISCOVERY_02_LEGACY_DAY_TAG';
+    context.branchTrace.push('DISCOVERY_02_OLD_DAY_TAG');
+    context.legacyDayTagInput = day;
+    context.legacyDayTagOutput = this.legacyAdapter.call(day);
+    context.status = 'DISCOVERY_02_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery02.legacyDayTag.calls');
+    return context.legacyDayTagOutput;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -180,6 +218,12 @@ class BaseMonsterManager {
       this.legacyRemainderAdapter
     );
     this.patch01SaveWrapper = new Patch01SaveWrapper(this.validationManager, this.metricsManager);
+    this.legacyDayTagAdapter = new LegacyDayTagAdapter();
+    this.discovery02DayTagHandler = new Discovery02DayTagHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyDayTagAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -217,6 +261,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery02DayTag(calculationDay, targetDay, day) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery02DayTagHandler.handle(context, day);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -231,14 +287,19 @@ function historicRemainderThroughMonsterPath(calculationDay, targetDay, value) {
   return new BaseMonsterManager().executePatch01Save(calculationDay, targetDay, value);
 }
 
+function discovery02LegacyDayTagThroughMonsterPath(calculationDay, targetDay, day) {
+  return new BaseMonsterManager().executeDiscovery02DayTag(calculationDay, targetDay, day);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 01; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 02; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
   SourceLanguageCatalog,
   textByCanonicalIndex,
   M_OLD,
+  FOUNDATION_DAY_OLD,
   BootstrapStageError,
   BaseMonsterContext,
   BaseValidationManager,
@@ -248,12 +309,16 @@ module.exports = Object.freeze({
   LegacyRemainderAdapter,
   Discovery01RemainderHandler,
   Patch01SaveWrapper,
+  LegacyDayTagAdapter,
+  Discovery02DayTagHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
   savePatch,
+  oldDayTag,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
+  discovery02LegacyDayTagThroughMonsterPath,
   calendarDateSpaghetti
 });

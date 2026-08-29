@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 3 de 55: PATCH 01**. Li defect historic de Stage 2 resta present: `oldRemainder(value)` usa regular modulo con `M_OLD = 2^127 - 1` e rende `0` por multiplicas de `M`.
+Li linea es in **Stage 4 de 55: DISCOVERY 02**. Li scar de Patch 01 resta intact e verd. Un nov defect historic es nu conectet a production: `oldDayTag(day)` calcula duplic li distance absolut al Foundation. Ti design rende `0` al Foundation e rende valores par anc pos li Foundation, contradient li numeration normativ quel exige `1` al Foundation e valores impar pos it.
 
-Li correction ne modifica ti function legacy. `savePatch(value)` apella `oldRemainder`, e si li residu es `0` it remappa it a `M_OLD`. Un `Patch01SaveWrapper` aplica ti correction pos `Discovery01RemainderHandler`, conservante li scar, li trace e li output legacy in li context de invocation. Li repository retorna a **GREEN**.
+Li legacy passa tra `LegacyDayTagAdapter` e `Discovery02DayTagHandler`, con input, output, handler, trace e metric conservat in li context de invocation. Null correction es present: Patch 02 es reservat por Stage 5. Li statu del repository es dunc intentionalmen **EXPECTED_RED**.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null patch posterior posse aparir ante su stage historic.
 
@@ -26,25 +26,25 @@ Omni calcul normativ usa `BigInt`. Null floating-point es usat por SAVE, rangs, 
 
 ## Tests
 
-Li commande principal es nu verd:
+Li commande principal es intentionalmen rubi in ti discovery:
 
 ```text
 npm test
 ```
 
-Por executar li suites anterior includente li regression de Discovery 01 in su form nu reparat:
+Por confirmar que omni regressions anterior resta verd:
 
 ```text
 npm run test:previous
 ```
 
-Por verificar directmen li equivalence local de Patch 01:
+Por executar solmen li regression nov de Discovery 02:
 
 ```text
-npm run test:patch-01
+npm run test:discovery-02
 ```
 
-Li tests confirma simultanmen que `oldRemainder(M) == 0` resta ver e que `savePatch(M) == M` concorda con li reference normativ.
+Ti regression compara `oldDayTag` con `dayCount` del reference local. Li failure es expectat exactmen al Foundation e al dies posterior. Ne changear li expected values e ne adjunter li correction ante Stage 5.
 
 ## Independentie
 

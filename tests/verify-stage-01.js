@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 01 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 02 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,8 @@ group('null textu hebreic o code posterior a Patch 01 contamina production', () 
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'oldDayTag', 'oldDistance', 'mutateStonesWrong',
+    'dayTagWithFoundationScar', 'Patch02DayTagWrapper', 'PATCH_02',
+    'oldDistance', 'mutateStonesWrong',
     'hiddenByNearness', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
@@ -705,7 +706,26 @@ group('li infrastructura neutral conserva isolation, ownership e non-semantic me
   deepEq(invalid.branchTrace, []);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 01', () => {
+group('Discovery 02 conserva li oldDayTag defectiv in un path real e isolat', () => {
+  const f = production.FOUNDATION_DAY_OLD;
+  eq(production.oldDayTag(f - 2n), 4n);
+  eq(production.oldDayTag(f - 1n), 2n);
+  eq(production.oldDayTag(f), 0n);
+  eq(production.oldDayTag(f + 1n), 2n);
+  eq(production.oldDayTag(f + 2n), 4n);
+
+  const execution = production.discovery02LegacyDayTagThroughMonsterPath(f, f, f + 1n);
+  eq(execution.result, 2n);
+  eq(execution.context.legacyDayTagInput, f + 1n);
+  eq(execution.context.legacyDayTagOutput, 2n);
+  eq(execution.context.currentHandler, 'Discovery02DayTagHandler');
+  eq(execution.context.phase, 'DISCOVERY_02_LEGACY_DAY_TAG');
+  eq(execution.context.status, 'DISCOVERY_02_LEGACY_RESULT');
+  deepEq(execution.context.branchTrace, ['BOOTSTRAP_VALIDATED', 'DISCOVERY_02_OLD_DAY_TAG']);
+  eq(execution.context.metrics['discovery02.legacyDayTag.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 02', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -717,4 +737,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passat in li statu GREEN de Patch 01.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions precedent passat ante li regression intentional de Discovery 02.');
