@@ -147,6 +147,7 @@ LegacyOrderMemorySauceResult legacySauceWithOverwritableOrderMemory(
 Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     const Integer& calculationDay,
     const Integer& targetDay);
+int oldNextBowlFixedName(int id);
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -257,6 +258,10 @@ struct BaseMonsterContext {
     bool legacyOrderMemorySauceReady = false;
     Patch11LatchedOrderSauceResult patch11LatchedOrderSauce{};
     bool patch11Applied = false;
+    int legacyNextBowlQueriedId = 0;
+    int legacyNextBowlOutput = 0;
+    PermutationOrder legacyNextBowlOrderAt46Latch{};
+    bool legacyNextBowlReady = false;
 };
 
 struct BaseRunReport {
@@ -424,6 +429,20 @@ struct LegacyOrderMemoryReport {
     std::size_t branchCount = 0;
 };
 
+struct LegacyNextBowlReport {
+    Integer calculationDay{};
+    Integer targetDay{};
+    int queriedBowlId = 0;
+    int outputBowlId = 0;
+    PermutationOrder orderAt46Latch{};
+    std::size_t latchWriteCount = 0;
+    bool patch11Prepared = false;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 class BaseValidationError final : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
@@ -454,6 +473,7 @@ public:
     void requirePatch10Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyOrderMemorySauceReady(const BaseMonsterContext& ctx) const;
     void requirePatch11Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyNextBowlReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -531,6 +551,11 @@ class Patch11OrderAt46LatchWrapper {
 public:
     Patch11LatchedOrderSauceResult repair(const Integer& calculationDay,
                                           const Integer& targetDay) const;
+};
+
+class LegacyNextBowlAdapter {
+public:
+    int nextFixedName(int queriedBowlId) const;
 };
 
 class Patch10DeferredBowlWrapper {
@@ -791,6 +816,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery12NextBowlHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyNextBowlAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -939,6 +972,12 @@ public:
                                        const Patch11OrderAt46LatchWrapper& wrapper,
                                        const BaseValidationManager& validator,
                                        const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyNextBowl(BaseMonsterContext& ctx,
+                                const Discovery12NextBowlHandler& handler,
+                                const LegacyNextBowlAdapter& adapter,
+                                const BaseValidationManager& validator,
+                                const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -997,6 +1036,9 @@ public:
     LegacyOrderMemoryReport executeUnpatchedOverwritableOrderMemoryDiagnostic(
         const Integer& calculationDay,
         const Integer& targetDay) const;
+    LegacyNextBowlReport executeLegacyNextBowl(const Integer& calculationDay,
+                                               const Integer& targetDay,
+                                               int queriedBowlId) const;
 };
 
 } // namespace pastafari

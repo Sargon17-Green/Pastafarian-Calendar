@@ -1,70 +1,74 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 23 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 24 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 23 est `PATCH 11`; status repositorii exspectatus est `GREEN`.
+Gradus 24 est `DISCOVERY 12`; status repositorii exspectatus est `EXPECTED_RED`.
 
-Gradus 22 demonstravit unicam memoriam `order` per 46 guttas visibiles et 12 post-commotiones scribi. Ordo guttae 46 recte computabatur, sed query finalis memoriam post post-commotionem 12 legebat. Gradus 23 memoriam legacy non mutat: 58 scripturae et fons finalis `post-commotio 12` servantur. Correctio addit latch separatum pro ordine guttae 46.
+Gradus 23 ordinem guttae 46 in `orderAt46Latch` semel scripto servavit. Gradus 24 hunc latch rectum non mutat. Vitium novum in ipsa quaestione next-bowl introducitur: helper legacy non quaerit positionem crateris interrogati in latch, sed successor numericum fixum per IDs craterum adhibet.
 
-## PATCH 11 — orderAt46Latch semel scriptum
+## DISCOVERY 12 — successor numericus fixus crateris
 
-`legacySauceWithOverwritableOrderMemory` byte-per-byte intactum manet et in via PATCH vere vocatur ante correctionem. Output eius superscriptum in contextu servatur ut cicatrix historica.
-
-Nova via `sauceWithOrderAt46Latch` eandem seriem semanticam repassat. Post round craterum guttae 46 et ante initium primae post-commotionis:
+Cicatrix nova est:
 
 ```text
-orderAt46Latch = clone(order)
-latchWriteCount = 1
+oldNextBowlFixedName(id)
+1 -> 2
+2 -> 3
+3 -> 4
+4 -> 5
+5 -> 6
+6 -> 1
 ```
 
-Si secunda scriptura tentaretur, error invariantiae excitaretur. Duodecim post-commotiones memoriam `legacyOrderMemory` pergere superscribunt, sed `orderAt46Latch` numquam tangunt. Post finem executionis `queryOrder` exclusive e latch separato provenit.
+`oldNextBowlFixedName` nullum `orderAt46Latch` accipit et nullam positionem quaerit. `LegacyNextBowlAdapter` hunc helper directe vocat.
 
-## Cicatrix legacy servata
-
-Memoria legacy adhuc:
-
-- recipit 46 scripturas e guttis visibilibus;
-- recipit 12 scripturas e post-commotionibus;
-- habet summam exactam 58 scripturarum;
-- terminat cum fonte `post-commotio 12`;
-- retinet query legacy aequalem ordini post-commotionis 12.
-
-Via `executeUnpatchedOverwritableOrderMemoryDiagnostic` hanc cicatricem sine PATCH 11 directe exponit.
+Via activa tamen prius Patch 11 vere exsequitur. Eodem `BaseMonsterContext` primum `dispatchPatchedOrderAt46Latch` currit, quo latch unius scripturae paratur. Deinde `dispatchLegacyNextBowl` ad `Discovery12NextBowlHandler` transit. Handler latch validum in contextu servat, sed adapter legacy solum `queriedBowlId` videt.
 
 ## Via activa
 
 ```text
-BaseMonsterManager::executeOverwritableOrderMemorySauce
+BaseMonsterManager::executeLegacyNextBowl
 -> BaseDispatcher::dispatchPatchedOrderAt46Latch
 -> Patch11OrderAt46LatchHandler
--> LegacyOrderMemorySauceAdapter::run
--> legacySauceWithOverwritableOrderMemory
--> Patch11OrderAt46LatchWrapper::repair
--> sauceWithOrderAt46Latch
+-> orderAt46Latch semel scriptum
+-> BaseDispatcher::dispatchLegacyNextBowl
+-> Discovery12NextBowlHandler
+-> LegacyNextBowlAdapter::nextFixedName
+-> oldNextBowlFixedName
 ```
 
-Comprobator productionis verificat 58 scripturas memoriae legacy, unam scripturam latch, identitatem query semanticum cum latch, identitatem cicatricis legacy cum ordine post-commotionis 12 et invariabilitatem craterum finalium inter viam legacy et viam PATCH. Nullus oracle testium in productione vocatur.
+`requireLegacyNextBowlReady` comprobatur Patch 11 iam applicatum esse, latch exactissime semel scriptum esse, latch in Discovery 12 non mutatum esse, et output legacy e successore numerico fixo provenire. Nullus oracle testium in productione vocatur.
+
+## Regressio
+
+Pro Fundatione, latch realis a via Patch 11 est:
+
+```text
+[4,5,2,3,6,1]
+```
+
+Successor circularis huius latch et successor numericus fixus comparantur pro omnibus sex crateribus interrogatis. Tres casus accidentaliter concordant et tres discrepant:
+
+```text
+queried 1: normativus 4, legacy 2
+queried 2: normativus 3, legacy 3
+queried 3: normativus 6, legacy 4
+queried 4: normativus 5, legacy 5
+queried 5: normativus 2, legacy 6
+queried 6: normativus 1, legacy 1
+```
+
+Ergo regressio Gradus 24 consulto exitum `1` reddit cum tribus discrepantiis exactis. Eadem probatio cicatricem directam separatim servat, ita ut PATCH 12 postea possit output activum corrigere sine `oldNextBowlFixedName` delendo.
 
 ## Probationes
 
-Omnes regressiones Graduum 1–23 transeunt.
-
-Regressio Gradus 22 conserva eosdem dies et eundem ordinem normativum guttae 46. Solum assertiones metadatae quae query active necessario cum memoria superscripta et handler DISCOVERY ligabant remotae sunt. Contra codicem Gradus 22 pristinum eadem probatio adhuc sex discrepantias et exitum `1` reddit; contra Gradum 23 transit.
-
-`tests/stage_23_patch_11_tests.cpp` tres casus probat: Fundationem, diem proximum post Fundationem et transitum trans Fundationem. In omnibus:
-
-- `orderAt46Latch` semel scribitur;
-- query semanticum ordine normativo guttae 46 concordat;
-- memoria legacy 58 scripturas retinet;
-- query legacy ante patch ordini post-commotionis 12 concordat;
-- via diagnostica unpatched defectum superscriptionis servat;
-- craterae finales a PATCH 11 non mutantur.
+Omnes regressiones Graduum 1–23 denuo compilatae sunt contra header et productionem Gradus 24 et omnes transeunt. `tests/stage_24_discovery_12_tests.cpp` solum est rubrum exspectatum.
 
 ## Quod consulto nondum adest
 
-Nulla logica next-bowl, nullus `oldNextBowlFixedName`, nullus PATCH 12 et nullus codex posterior additus est. Gradus 24 debet esse `DISCOVERY 12` tantum.
+Nullus lookup positionis `queriedBowlId` intra `orderAt46Latch`, nullus successor circularis productionis, nullus `Patch12`, nullus `patch12Applied`, nullus `NextBowlPatchWrapper` et nullus `biasedLegacyPick` additus est. Gradus 25 debet esse `PATCH 12` tantum.
 
 ## Lingua computationis
 

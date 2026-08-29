@@ -658,3 +658,33 @@ Omnes regressiones Graduum 1–23 transeunt.
 Additi sunt `Patch11LatchedOrderSauceResult`, `sauceWithOrderAt46Latch`, campi contextus latch et flag `patch11Applied`, campi report cicatricis, `Patch11OrderAt46LatchWrapper`, `Patch11OrderAt46LatchHandler`, `dispatchPatchedOrderAt46Latch`, `requirePatch11Ready` et `executeUnpatchedOverwritableOrderMemoryDiagnostic`.
 
 Memoria legacy cum 58 scripturis intacta manet. Nullus `oldNextBowlFixedName`, nullus PATCH 12 et nulla logica Gradus 24 praemature addita est.
+
+## Gradus 24 — DISCOVERY 12: next-bowl successor numericus fixus
+
+### Quid putabatur
+
+Post latch Gradus 23, query sauce iam ordinem exactum guttae 46 retinebat. Helper vetus next-bowl tamen ex tempore priore supponebat nomina craterum ipsam vicinitatem definire: post craterem 1 veniret 2, post 2 veniret 3, et post 6 rediret 1. Cum IDs ipsi omnes valide exstarent, helper simplex satis videbatur.
+
+### Quid repertum est
+
+Semantica next-bowl non sequitur ordinem numericum ID, sed successorem circulariter sequentem intra `orderAt46Latch`. `oldNextBowlFixedName(id)` nullum latch accipit et ideo ordinem permutationis ignorat.
+
+Pro Fundatione latch verus est `[4,5,2,3,6,1]`. Successores normativi sunt 4→5, 5→2, 2→3, 3→6, 6→1, 1→4. Helper numericus dat 4→5, 5→6, 2→3, 3→4, 6→1, 1→2. Tres ex sex casibus discrepant: queried IDs 1, 3 et 5.
+
+### Quid hoc gradu consulto non circumventum est
+
+Nihil reparatur. `BaseMonsterManager::executeLegacyNextBowl` primum eundem Patch 11 realem per dispatcher exsequitur, ut `orderAt46Latch` validum et semel scriptum praesens sit. Deinde `Discovery12NextBowlHandler` latch in contextu servat, sed `LegacyNextBowlAdapter` ad `oldNextBowlFixedName` solum ID interrogatum tradit.
+
+Validator confirmat latch non mutari et output legacy exactissime successorem numericum fixum esse. Nullus lookup positionis intra latch et nullus successor circularis productionis hoc gradu adest.
+
+### Regressio
+
+`tests/stage_24_discovery_12_tests.cpp` omnes sex IDs craterum in witness Fundationis exercet. Helper directus historicus separatim comprobatur. Output viae activae cum successore circulari latch comparatur. Tres concordantiae accidentales et tres discrepantiae exactae inveniuntur; regressio exitum `1` consulto reddit.
+
+Omnes regressiones Graduum 1–23 denuo compilatae contra ABI Gradus 24 et exsecutae sunt; omnes transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `oldNextBowlFixedName`, campi contextus next-bowl, `LegacyNextBowlReport`, `LegacyNextBowlAdapter`, `Discovery12NextBowlHandler`, `requireLegacyNextBowlReady`, `dispatchLegacyNextBowl` et `executeLegacyNextBowl`. Via eundem contextum per Patch 11 et deinde Discovery 12 ducit, quo dependentialis historia manifesta manet.
+
+Nullus `Patch12`, nullus lookup positional, nullus successor circularis reparativus, nullus `biasedLegacyPick` et nullus codex posterior additus est.

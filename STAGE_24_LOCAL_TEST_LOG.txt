@@ -1,0 +1,28 @@
+Gradus 24 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Productionis obiectum et oracle testium C++ separatim compilata sunt. Omnes probationes Graduum 1–23 denuo contra header et productionem Gradus 24 compilatae sunt et exsecutae sunt.
+
+STATUS_REGRESSIONUM_1_23=PASS
+
+Regressio DISCOVERY 12:
+
+DISCREPANTIA_NEXT_BOWL queried=1: latch=[4,5,2,3,6,1] expectatus=4 actualis=2 legacy=2
+CONCORDANTIA_NEXT_BOWL queried=2: valor=3
+DISCREPANTIA_NEXT_BOWL queried=3: latch=[4,5,2,3,6,1] expectatus=6 actualis=4 legacy=4
+CONCORDANTIA_NEXT_BOWL queried=4: valor=5
+DISCREPANTIA_NEXT_BOWL queried=5: latch=[4,5,2,3,6,1] expectatus=2 actualis=6 legacy=6
+CONCORDANTIA_NEXT_BOWL queried=6: valor=1
+REGRESSIO_DISCOVERY_12_DEFECIT: 3 discrepantiae normativae ex successore numerico fixo inventae sunt
+EXIT_CODE=1
+
+Exitus exspectatus Gradus 24: 1.
+Discrepantiae activae exspectatae: 3.
+Cicatrix legacy directa: oldNextBowlFixedName cum annulo numerico 1->2->3->4->5->6->1.
+orderAt46Latch Fundationis: [4,5,2,3,6,1].
+PATCH_12_ABSENS=YES
+BIASED_LEGACY_PICK_ABSENS=YES
+ORACLE_IN_PRODUCTION=NO
+Status finalis: EXPECTED_RED
