@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=32
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=33
+CURRENT_KIND=PATCH
 CURRENT_PATCH=16
-LAST_COMPLETED_STAGE=32
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=33
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=LEGACY_YEAR_MAX=5781 zorunlu legacy sabiti olarak oluşturulur ve legacyYearCandidateAllowed tarafından gerçekten kullanılır; LegacyYearCandidateAdapter 252..5781 ve en az 6 gate-gap adaylarını stable length-only sort girişine geçirir ve ayrıca mevcut selection katmanını çağırabilen gerçek adapter yolunu taşır; real calendar state-machine 5778,5779,5780,5781 boundary probe ailesini acceptance/sort girişinde gerçekten çalıştırır fakat önceki selection scar call-count sözleşmelerini korumak için ekstra selection çağrısı yapmaz; REAL_YEAR_MAX_PATCH=5778 filtresi henüz yoktur
+MONSTER_ARCHITECTURE_GROWTH=LEGACY_YEAR_MAX=5781 fiziksel ve aktif legacy ceiling olarak korunur; ayrı REAL_YEAR_MAX_PATCH=5778 eklenir; YearMaxPatchWrapper her candidate için önce legacyYearCandidateAllowed çağırıp 5781-ceiling scar family'yi diagnostic state'te tutar, sonra candidate.length>5778 değerlerini semantic accepted list'e girmeden reddeder; LegacyYearCandidateAdapter yalnız patched family'yi sort ve selection'a verir
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

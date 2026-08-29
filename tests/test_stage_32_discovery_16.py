@@ -98,7 +98,7 @@ class Stage32Discovery16Tests(unittest.TestCase):
             )
         )
 
-    def test_real_adapter_passes_all_four_boundary_candidates_to_sort_input(self):
+    def test_real_adapter_keeps_all_four_boundary_candidates_in_legacy_scar(self):
         ctx = MonsterContext(
             FOUNDATION_DAY,
             FOUNDATION_DAY,
@@ -116,29 +116,40 @@ class Stage32Discovery16Tests(unittest.TestCase):
         )
 
         self.assertEqual(
+            ctx.patch16_legacy_accepted_lengths,
+            (
+                5778,
+                5779,
+                5780,
+                5781,
+            ),
+        )
+        self.assertEqual(
+            ctx.patch16_rejected_overlong_lengths,
+            (
+                5779,
+                5780,
+                5781,
+            ),
+        )
+        self.assertEqual(
             tuple(
                 candidate.length
                 for candidate in prepared
             ),
             (
                 5778,
-                5779,
-                5780,
-                5781,
             ),
         )
         self.assertEqual(
             ctx.legacy_year_candidate_lengths_before_sort,
             (
                 5778,
-                5779,
-                5780,
-                5781,
             ),
         )
         self.assertEqual(
             ctx.legacy_year_candidate_count_for_selection,
-            4,
+            1,
         )
 
     def test_candidate_state_is_owned_by_one_invocation(self):
@@ -161,15 +172,27 @@ class Stage32Discovery16Tests(unittest.TestCase):
         )
 
         self.assertEqual(
-            first.legacy_year_candidate_lengths_before_sort,
+            first.patch16_legacy_accepted_lengths,
             (
                 5778,
                 5781,
             ),
         )
         self.assertEqual(
+            first.patch16_rejected_overlong_lengths,
+            (
+                5781,
+            ),
+        )
+        self.assertEqual(
+            first.legacy_year_candidate_lengths_before_sort,
+            (
+                5778,
+            ),
+        )
+        self.assertEqual(
             first.legacy_year_candidate_count_for_selection,
-            2,
+            1,
         )
 
         self.assertIsNone(
@@ -183,6 +206,22 @@ class Stage32Discovery16Tests(unittest.TestCase):
         )
         self.assertIsNone(
             second.legacy_year_candidate_count_for_selection,
+        )
+        self.assertIsNone(
+            second.patch16_legacy_accepted_lengths,
+        )
+        self.assertIsNone(
+            second.patch16_rejected_overlong_lengths,
+        )
+        self.assertIsNone(
+            second.patch16_semantic_accepted_lengths,
+        )
+        self.assertEqual(
+            second.patch16_filter_evaluations,
+            0,
+        )
+        self.assertFalse(
+            second.patch16_applied,
         )
 
     def test_current_5781_ceiling_passes_overlong_candidates_to_sort_selection(self):

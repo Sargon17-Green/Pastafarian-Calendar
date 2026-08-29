@@ -198,6 +198,11 @@ class MonsterContext:
     legacy_year_candidate_selected_rank: int | None = None
     legacy_year_candidate_selected_label: str | None = None
     legacy_year_candidate_selected_length: int | None = None
+    patch16_legacy_accepted_lengths: tuple[int, ...] | None = None
+    patch16_rejected_overlong_lengths: tuple[int, ...] | None = None
+    patch16_semantic_accepted_lengths: tuple[int, ...] | None = None
+    patch16_filter_evaluations: int = 0
+    patch16_applied: bool = False
 
 
 class BaseMetrics:

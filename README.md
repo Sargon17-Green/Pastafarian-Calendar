@@ -1,28 +1,34 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz ikinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz üçüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 32/55, `DISCOVERY 16` durumundadır.
+Aşama 33/55, `PATCH 16` durumundadır.
 
-Zorunlu legacy sabit:
+Discovery 16 legacy ceiling'i fiziksel olarak ve aktif biçimde korunur:
 
 ```text
 LEGACY_YEAR_MAX=5781
 ```
 
-oluşturulmuş ve candidate acceptance içinde gerçekten kullanılmaktadır.
+Ayrı patch ceiling:
 
-Legacy candidate family `gate_gap_count>=6` ve `252<=length<=5781` koşuluyla sort/selection girişine gider.
+```text
+REAL_YEAR_MAX_PATCH=5778
+```
 
-Real calendar state-machine `5778,5779,5780,5781` boundary probe ailesini actual adapter üzerinden acceptance/sort girişinde çalıştırır. Önceki real-path selection call-count scar'ları korunur; bu probe ekstra selection çağrısı yapmaz.
+olarak eklenmiştir.
 
-Yeni normatif regresyon 5779, 5780 ve 5781 günlük adayların normatif 5778 tavanına rağmen sort/selection öncesi family'ye sızdığını gösterir ve üç alt örneği bilinçli kırmızı bırakır.
+Her candidate önce legacy 5781 acceptance helper'ından geçer; bu sonuç diagnostic scar olarak saklanır. Ardından `candidate.length>5778` olan candidate semantic family'den atılır.
 
-Henüz `PATCH 16` yoktur: `REAL_YEAR_MAX_PATCH=5778` ve `candidateLength>5778` early reject filtresi eklenmemiştir.
+Filtre `accepted.sort(...)` ve selection çağrısından önce uygulanır.
 
-Patch 17 tie düzeltmesi de henüz yoktur.
+Böylece 5779, 5780 ve 5781 legacy scar katmanında hâlâ kabul edilmiş görünür, fakat sort/selection family'ye girmez.
+
+Aşama 32 normatif regresyonu değiştirilmeden yeşile dönmüştür.
+
+Patch 17 year-5000 tie düzeltmesi henüz yoktur; legacy stable length-only sort aynen kalır.
 
 ## Korunan birinci aşama temeli
 
@@ -38,10 +44,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuz ikinci aşama paketi:
+Tam otuz üçüncü aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–31 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni 5781-ceiling normatif regresyonunun 5779, 5780 ve 5781 alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 32'de kırmızı olan 5779, 5780 ve 5781 alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.

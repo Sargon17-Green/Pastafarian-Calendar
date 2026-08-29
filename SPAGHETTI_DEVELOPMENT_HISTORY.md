@@ -1534,3 +1534,68 @@ Real `calendar_date_spaghetti` state-machine Stage 31 gate-question katmanından
 Test-only normatif sınır `YEAR_MAX_DAYS=5778` olduğundan 5779, 5780 ve 5781 alt örnekleri bilinçli kırmızıdır.
 
 Production içinde `REAL_YEAR_MAX_PATCH=5778` veya 5778 üstünü sort/selection öncesi atan filtre henüz yoktur. Legacy sabit değiştirilmez. Patch 17 tie düzeltmesi de henüz yoktur.
+
+
+## Aşama 33 — Yama 16: 5781 scar üstünde 5778 early candidate filtresi
+
+### Değişmeyen legacy sabit
+
+Discovery 16 sabiti aynen korunur:
+
+```text
+LEGACY_YEAR_MAX=5781
+```
+
+`legacyYearCandidateAllowed` hâlâ bu legacy ceiling'i kullanır ve 5779, 5780, 5781 adaylarını kendi katmanında kabul eder.
+
+### Ayrı gerçek tavan
+
+Yeni patch sabiti:
+
+```text
+REAL_YEAR_MAX_PATCH=5778
+```
+
+olarak eklenir.
+
+`YearMaxPatchWrapper` her candidate için önce legacy helper'ı gerçekten çalıştırır ve legacy-accepted family'yi diagnostic scar state içinde saklar.
+
+Ardından yalnız legacy kabulünden geçmiş candidate için:
+
+```text
+if candidate.length>REAL_YEAR_MAX_PATCH:
+    reject
+```
+
+uygular.
+
+### Sıralama ve selection öncesi filtre
+
+Patch sonucu kabul edilmeyen candidate `accepted` listesine hiç eklenmez.
+
+Bu nedenle 5779..5781 adayları:
+
+```text
+legacy scar family: var
+semantic pre-sort family: yok
+sorted family: yok
+selection family: yok
+```
+
+durumundadır.
+
+Stable length-only legacy sort fiziksel olarak korunur ve yalnız patched family üzerinde çalışır.
+
+### Regresyon
+
+Aşama 32 normatif 5781-ceiling regresyonunun gövdesi byte-for-byte değiştirilmedi.
+
+5779, 5780 ve 5781 alt örnekleri yalnız early 5778 filter sayesinde yeşile döner.
+
+Ek testler legacy helper'ın gerçekten çağrılmasını, exact 5778/5779 sınırını, selection family size değerinin overlong adayları içermemesini, invocation-local scar state'i ve observability invariance davranışını doğrular.
+
+### Sınır
+
+Patch 17 year-5000 tie düzeltmesi henüz yoktur.
+
+Legacy stable sort by length only aynen kalır; eşit uzunluk runs için gate-opening düzeltmesi eklenmemiştir.

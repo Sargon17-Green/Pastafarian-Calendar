@@ -8,6 +8,7 @@ from .legacy_selection import (
 
 LEGACY_YEAR_MIN = 252
 LEGACY_YEAR_MAX = 5781
+REAL_YEAR_MAX_PATCH = 5778
 LEGACY_MIN_GATE_GAPS_PER_YEAR = 6
 
 
@@ -32,9 +33,51 @@ def legacyYearCandidateAllowed(
     )
 
 
+class YearMaxPatchWrapper:
+    def accept_after_legacy(
+        self,
+        ctx,
+        candidate: LegacyYearCandidate,
+    ) -> bool:
+        legacy_allowed = legacyYearCandidateAllowed(
+            candidate,
+        )
+
+        ctx.patch16_filter_evaluations += 1
+
+        if legacy_allowed:
+            ctx.patch16_legacy_accepted_lengths = (
+                ctx.patch16_legacy_accepted_lengths
+                + (
+                    candidate.length,
+                )
+            )
+
+        if not legacy_allowed:
+            return False
+
+        if candidate.length > REAL_YEAR_MAX_PATCH:
+            ctx.patch16_rejected_overlong_lengths = (
+                ctx.patch16_rejected_overlong_lengths
+                + (
+                    candidate.length,
+                )
+            )
+            return False
+
+        ctx.patch16_semantic_accepted_lengths = (
+            ctx.patch16_semantic_accepted_lengths
+            + (
+                candidate.length,
+            )
+        )
+        return True
+
+
 class LegacyYearCandidateAdapter:
     def __init__(self) -> None:
         self.selection = LegacyShortOnlySelectionDispatcher()
+        self.patch_wrapper = YearMaxPatchWrapper()
 
     def prepare_for_selection(
         self,
@@ -43,8 +86,15 @@ class LegacyYearCandidateAdapter:
     ) -> tuple[LegacyYearCandidate, ...]:
         accepted: list[LegacyYearCandidate] = []
 
+        ctx.patch16_legacy_accepted_lengths = ()
+        ctx.patch16_rejected_overlong_lengths = ()
+        ctx.patch16_semantic_accepted_lengths = ()
+        ctx.patch16_filter_evaluations = 0
+        ctx.patch16_applied = True
+
         for candidate in candidates:
-            if legacyYearCandidateAllowed(
+            if self.patch_wrapper.accept_after_legacy(
+                ctx,
                 candidate,
             ):
                 accepted.append(
@@ -55,13 +105,35 @@ class LegacyYearCandidateAdapter:
             (
                 "ESKİ_5781_YIL_ADAYLARI",
                 len(candidates),
-                len(accepted),
+                len(
+                    ctx.patch16_legacy_accepted_lengths
+                ),
             )
         )
         ctx.logs.append(
             (
                 "eski-5781-yıl-adayları",
                 len(candidates),
+                len(
+                    ctx.patch16_legacy_accepted_lengths
+                ),
+            )
+        )
+        ctx.branch_trace.append(
+            (
+                "YAMA_16_5778_ERKEN_FİLTRE",
+                len(
+                    ctx.patch16_legacy_accepted_lengths
+                ),
+                len(accepted),
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-16-5778-erken-filtre",
+                len(
+                    ctx.patch16_legacy_accepted_lengths
+                ),
                 len(accepted),
             )
         )
