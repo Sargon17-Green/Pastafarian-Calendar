@@ -192,8 +192,12 @@ class Stage48Discovery24Tests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            ctx.legacy_month_weaving_semantic,
+            ctx.patch24_ghost,
             ctx.legacy_month_weaving_ghost,
+        )
+        self.assertEqual(
+            ctx.legacy_month_weaving_semantic,
+            ctx.patch24_semantic_weaving,
         )
         self.assertEqual(
             ctx.legacy_month_weaving_calls,
@@ -242,7 +246,7 @@ class Stage48Discovery24Tests(unittest.TestCase):
             second.legacy_month_weaving_ghost,
         )
 
-    def test_patch24_dp_unrank_correction_is_not_present_in_production(self):
+    def test_patch24_dp_unrank_correction_is_present_and_legacy_helper_remains(self):
         production = (
             ROOT
             / "src"
@@ -252,16 +256,17 @@ class Stage48Discovery24Tests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        forbidden = (
-            "DPUnrankLegalWeaving",
-            "MonthWeavingPatchWrapper",
+        required = (
+            "def legacyChooseEachDaySeparately(",
+            "def DPUnrankLegalWeaving(",
+            "class MonthWeavingPatchWrapper:",
             "wantedRank",
             "correct_weaving",
             "patch24_applied",
         )
 
-        for token in forbidden:
-            self.assertNotIn(
+        for token in required:
+            self.assertIn(
                 token,
                 production,
             )
@@ -334,11 +339,11 @@ class Stage48Discovery24Tests(unittest.TestCase):
                 )
 
                 self.assertNotEqual(
-                    actual[
+                    ctx.legacy_month_weaving_ghost[
                         0
                     ],
                     1,
-                    msg="Discovery 24 witness old day-by-day chooser'ın legal first-occurrence sırasını gerçekten bozmalıdır",
+                    msg="Discovery 24 witness old day-by-day chooser scar'ının legal first-occurrence sırasını gerçekten bozmalıdır",
                 )
                 self.assertEqual(
                     actual,

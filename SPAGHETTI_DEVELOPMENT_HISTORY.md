@@ -2084,3 +2084,40 @@ Production içinde `wantedRank`, `DPUnrankLegalWeaving`, `MonthWeavingPatchWrapp
 Patch 25 `oldContiguousMonthDayGuess` da henüz yoktur.
 
 Stage 1 future-token guard'dan yalnız current Discovery 24 helper adı çıkarılmıştır; Patch 25 tokenı yasak kalır.
+
+
+## Aşama 49 — Yama 24: day-by-day ghost üstüne legal whole-weaving DP detour
+
+Aşama 48 `legacyChooseEachDaySeparately` raw helper gövdesi byte-for-byte korunur.
+
+`LegacyMonthWeavingAdapter.call` aynı bowl 4 / seal 32 answer ring üzerinde önce bu helper'ı gerçekten çalıştırır ve historical `ghost` state'ini kaydeder.
+
+`LegalMonthWeavingDP`, legal month weaving family'nin first-occurrence ve last-occurrence sırasını exact olarak temsil eder.
+
+`count()` exact legal family count verir.
+
+`unrank1(rank1)` move sırasını ascending monthId düzeninde dolaşır ve suffix state count değerlerini kullanarak exact 1-based lexicographic legal weaving unrank yapar.
+
+`compatibleMonthWeavingRank` same ring üzerinde current short/wide selection semantiğini legal family count'a uygular ve `wantedRank` üretir.
+
+`MonthWeavingPatchWrapper`:
+
+```text
+wantedRank = compatibleMonthWeavingRank(ring, legal_count)
+correct_weaving = DPUnrankLegalWeaving(lengths, wantedRank)
+
+if ghost == correct_weaving:
+    return ghost
+else:
+    return correct_weaving
+```
+
+semantiğini uygular.
+
+Ghost ve correct aynıysa aynı ghost tuple nesnesi döndürülür.
+
+Ghost diagnostic scar olarak `legacy_month_weaving_ghost` ve `patch24_ghost` içinde kalır. Current semantic weaving `patch24_semantic_weaving` olur.
+
+Aşama 48 expected legal-weaving hesabı ve final `actual == expected` assertion'ı korunmuştur. Aynı regression içindeki historical “ghost ilk symbol month 1 değil” kanıtı final semantic result yerine raw ghost state'ine yönlendirilmiştir; bu Patch 24 sonrası zorunlu minimal uyarlamadır.
+
+Patch 25 `oldContiguousMonthDayGuess` kodu henüz yoktur.

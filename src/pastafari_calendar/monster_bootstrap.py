@@ -347,6 +347,14 @@ class MonsterContext:
     legacy_month_weaving_ghost: tuple[int, ...] | None = None
     legacy_month_weaving_semantic: tuple[int, ...] | None = None
     legacy_month_weaving_calls: int = 0
+    patch24_ghost: tuple[int, ...] | None = None
+    patch24_legal_family_count: int | None = None
+    patch24_wanted_rank: int | None = None
+    patch24_correct_weaving: tuple[int, ...] | None = None
+    patch24_ghost_equals_correct: bool = False
+    patch24_returned_ghost: bool = False
+    patch24_semantic_weaving: tuple[int, ...] | None = None
+    patch24_applied: bool = False
 
 
 class BaseMetrics:

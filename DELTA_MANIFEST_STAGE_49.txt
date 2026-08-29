@@ -1,0 +1,34 @@
+Aşama 49/55 — PATCH 24
+
+Bu paket yalnızca Aşama 49 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_month_weaving.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_47_patch_23.py
+tests/test_stage_48_discovery_24.py
+tests/test_stage_49_patch_24.py
+artifacts/stage-49/BASELINE_STAGE_48_EXPECTED_RED.txt
+artifacts/stage-49/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-49/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_49.txt
+
+Silinen dosya yoktur.
+Başlangıç yüklenen Aşama 48 baseline: EXPECTED_RED, 321 test / 3 expected failure
+Patch sonrası Aşama 1–48 regressions: 321/321 PASS
+Aşama 49 full suite: GREEN, 331/331
+legacyChooseEachDaySeparately raw helper: BYTE-FOR-BYTE KORUNDU VE ÖNCE ÇALIŞIR
+LegalMonthWeavingDP count: EXACT
+LegalMonthWeavingDP unrank1: EXACT LEXICOGRAPHIC
+wantedRank: SAME BOWL-4/SEAL-32 RING + CURRENT SHORT/WIDE SELECTION
+ghost==correct: AYNI GHOST NESNESİ DÖNER
+ghost!=correct: CORRECT WEAVING DÖNER
+Stage48 expected calculation: KORUNDU
+Stage48 final semantic equality assertion: KORUNDU
+Patch23/Patch22 source: DEĞİŞMEDİ
+Patch25 code: YOK

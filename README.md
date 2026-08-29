@@ -1,24 +1,26 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 48/55, `DISCOVERY 24` durumundadır.
+Aşama 49/55, `PATCH 24` durumundadır.
 
-Yeni `legacyChooseEachDaySeparately`, bowl 4 / seal 32 answer ring'i kullanarak her günü ayrı ayrı bir monthId'ye yollar.
+Aşama 48 `legacyChooseEachDaySeparately` helper'ı aynen kalır ve önce gerçek ghost üretir.
 
-Dolu ay seçilirse `wrapMonth` ile circular olarak kalan kapasitesi olan sonraki aya geçer.
+Yeni `LegalMonthWeavingDP` legal whole-weaving family için exact count ve exact lexicographic unrank sağlar.
 
-Böylece exact month multiplicities korunur; fakat whole legal weaving family'nin first/last occurrence sırası uygulanmaz.
+Same bowl 4 / seal 32 answer ring üzerinde legal family count ile `wantedRank` seçilir.
 
-`LegacyMonthWeavingAdapter` old ghost'u doğrudan current semantic weaving olarak kullanır.
+`MonthWeavingPatchWrapper` correct weaving'i DP-unrank eder.
 
-Real calendar path Aşama 47'den sonra `(4,4,4)` witness'ını gerçekten çalıştırır.
+Ghost correct ile tamamen aynıysa aynı ghost tuple döner; aksi halde correct semantic weaving döner.
 
-Üç normatif witness'ın üçünde ghost legal first-occurrence sırasını bozar ve test-only `MonthWeavingFamily` rank sonucundan ayrışır.
+Historical ghost state'te kalır, current semantic weaving corrected result olur.
 
-Henüz wanted rank, legal-weaving DP unrank veya Patch 25 kodu yoktur.
+Aşama 48 expected hesabı ve final semantic equality assertion'ı korunarak üç normatif witness yeşile dönmüştür.
+
+Patch 25 contiguous month-day kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -34,10 +36,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırk sekizinci aşama paketi:
+Tam kırk dokuzuncu aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki 313 test geçer. Yeni Discovery 24 non-normative kontrolleri geçer; yalnız `test_current_day_by_day_month_choice_diverges_from_legal_weaving_rank` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.
+Beklenen sonuç: 331 testin tamamı geçer ve depo durumu `GREEN` olur. Aşama 48'de kırmızı olan üç day-by-day weaving witness corrected legal whole-weaving semantic result ile yeşile dönmelidir.
