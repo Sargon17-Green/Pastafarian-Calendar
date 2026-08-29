@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 02 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 03 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,7 @@ group('null textu hebreic o code posterior a Patch 02 contamina production', () 
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'oldDistance', 'mutateStonesWrong',
+    'patchedCounts', 'mutateStonesWrong',
     'hiddenByNearness', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
@@ -751,7 +751,37 @@ group('Patch 02 conserva li scar oldDayTag e rende li dayCount normativ exact', 
   eq(execution.context.metrics['patch02.dayTag.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 02', () => {
+group('Discovery 03 conserva li oldDistance defectiv in un path real e isolat', () => {
+  const f = production.FOUNDATION_DAY_OLD;
+  const cases = [
+    [f, f],
+    [f - 2n, f + 2n],
+    [f - 1n, f],
+    [f, f + 1n],
+    [f + 1n, f + 3n],
+    [f - 3n, f - 1n]
+  ];
+  const actual = cases.map(([c, t]) => production.oldDistance(c, t));
+  deepEq(actual, [0n, 1n, 1n, 2n, 4n, 4n]);
+  const normativeDistances = cases.map(([c, t]) => o.workCounts(c, t).distance);
+  deepEq(normativeDistances, [1n, 5n, 2n, 2n, 3n, 3n]);
+  ok(actual.some((value, index) => value !== normativeDistances[index]));
+
+  const execution = production.discovery03LegacyDistanceThroughMonsterPath(f - 2n, f + 2n);
+  eq(execution.result, 1n);
+  eq(execution.context.legacyDistanceCalculationDay, f - 2n);
+  eq(execution.context.legacyDistanceTargetDay, f + 2n);
+  eq(execution.context.legacyDistanceCalculationTag, 4n);
+  eq(execution.context.legacyDistanceTargetTag, 5n);
+  eq(execution.context.legacyDistanceOutput, 1n);
+  eq(execution.context.currentHandler, 'Discovery03DistanceHandler');
+  eq(execution.context.phase, 'DISCOVERY_03_LEGACY_DISTANCE');
+  eq(execution.context.status, 'DISCOVERY_03_LEGACY_RESULT');
+  deepEq(execution.context.branchTrace, ['BOOTSTRAP_VALIDATED', 'DISCOVERY_03_OLD_DISTANCE']);
+  eq(execution.context.metrics['discovery03.legacyDistance.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 03', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -763,4 +793,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passat in li repository verd de Patch 02.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions precedent passa ante li regression rubi de Discovery 03.');

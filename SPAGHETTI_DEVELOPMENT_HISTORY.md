@@ -108,3 +108,25 @@ Un `Patch02DayTagWrapper` ha esset insertet pos `Discovery02DayTagHandler`. Li c
 ### Pro quo li strat nov ne altera semantics ultra li patch
 
 Li wrapper consulta solmen li die exact e li resultate legacy del sam invocation. Metrics, flags observatori e trace ne participa in li calculation. Null oracle es consultat in production, null fallback existe, e li unic correction semantic es li unit posterior con li guard redundant mandat de Patch 02.
+
+## Stage 6 — DISCOVERY 03
+
+### Quo on pensat
+
+Li triesim design historic assumet que, pos reparar li tags de die, li distance inter du dies posse esser derivat directmen quam li diferentie absolut inter tis tags. Li operation legacy nov es `oldDistance(calculationDay, targetDay) = abs(dayTagWithFoundationScar(calculationDay) - dayTagWithFoundationScar(targetDay))`. It es conectet a production sin correction.
+
+### Quo esset decovrit
+
+Li tags codifica li du lateres del Foundation con paritá e direction, ne un axe metric linear. Lor diferentie ne es li distance cronologic inter li dies, e mem quand it coincide accidentalmen it manca li regul inclusiv `+1`. Por un die contra se self, li legacy rende `0` in vice de `1`; por `Foundation-2` a `Foundation+2` it rende `1` in vice de `5`; e por separation de du dies sur un unic latere it rende `4` in vice de `3`. Li pare `Foundation` a `Foundation+1` coincide accidentalmen a `2`, quel monstra pro quo un exemple unic ne suffi.
+
+### Quo esset circumit
+
+Null circumventione existe in ti stage. Li correction quel calcula `abs(targetDay-calculationDay)`, substitue ti valore si li legacy diverge e adjunte li unit inclusiv es reservat exclusivmen por PATCH 03 in Stage 7. `patchedCounts` ne es present.
+
+### Crescentie monster in ti stage
+
+Un `LegacyDistanceAdapter` e un `Discovery03DistanceHandler` ha esset addit. Li handler crea null state global: it usa li context fresc del `BaseMonsterManager`, conserva ambi dies, li du tags reparat, li output legacy, li handler current/precedent, un trace e un metric non-semantic.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li adapter apella exactmen `oldDistance`; li handler ne normalisa li resultate, ne consulta li oracle e ne usa metrics por decisiones. Li scars de Patch 01 e Patch 02 resta separatmen testabil. Ergo li unic divergentie nov es li assumption historic mandat de Discovery 03.

@@ -36,6 +36,11 @@ class BaseMonsterContext {
     this.patch02Output = null;
     this.patch02AddedParityUnit = false;
     this.patch02FoundationGuardChecked = false;
+    this.legacyDistanceCalculationDay = null;
+    this.legacyDistanceTargetDay = null;
+    this.legacyDistanceCalculationTag = null;
+    this.legacyDistanceTargetTag = null;
+    this.legacyDistanceOutput = null;
   }
 }
 
@@ -151,6 +156,14 @@ function dayTagWithFoundationScar(day) {
   return n;
 }
 
+function oldDistance(calculationDay, targetDay) {
+  const calculationTag = dayTagWithFoundationScar(calculationDay);
+  const targetTag = dayTagWithFoundationScar(targetDay);
+  return calculationTag >= targetTag
+    ? calculationTag - targetTag
+    : targetTag - calculationTag;
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -252,6 +265,38 @@ class Patch02DayTagWrapper {
   }
 }
 
+class LegacyDistanceAdapter {
+  call(calculationDay, targetDay) {
+    return oldDistance(calculationDay, targetDay);
+  }
+}
+
+class Discovery03DistanceHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, calculationDay, targetDay) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireExactInteger(calculationDay);
+    this.validationManager.requireExactInteger(targetDay);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery03DistanceHandler';
+    context.phase = 'DISCOVERY_03_LEGACY_DISTANCE';
+    context.branchTrace.push('DISCOVERY_03_OLD_DISTANCE');
+    context.legacyDistanceCalculationDay = calculationDay;
+    context.legacyDistanceTargetDay = targetDay;
+    context.legacyDistanceCalculationTag = dayTagWithFoundationScar(calculationDay);
+    context.legacyDistanceTargetTag = dayTagWithFoundationScar(targetDay);
+    context.legacyDistanceOutput = this.legacyAdapter.call(calculationDay, targetDay);
+    context.status = 'DISCOVERY_03_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery03.legacyDistance.calls');
+    return context.legacyDistanceOutput;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -272,6 +317,12 @@ class BaseMonsterManager {
       this.legacyDayTagAdapter
     );
     this.patch02DayTagWrapper = new Patch02DayTagWrapper(this.validationManager, this.metricsManager);
+    this.legacyDistanceAdapter = new LegacyDistanceAdapter();
+    this.discovery03DistanceHandler = new Discovery03DistanceHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyDistanceAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -334,6 +385,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery03Distance(calculationDay, targetDay) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery03DistanceHandler.handle(context, calculationDay, targetDay);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -356,8 +419,12 @@ function historicDayTagThroughMonsterPath(calculationDay, targetDay, day) {
   return new BaseMonsterManager().executePatch02DayTag(calculationDay, targetDay, day);
 }
 
+function discovery03LegacyDistanceThroughMonsterPath(calculationDay, targetDay) {
+  return new BaseMonsterManager().executeDiscovery03Distance(calculationDay, targetDay);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 02; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 03; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -377,16 +444,20 @@ module.exports = Object.freeze({
   LegacyDayTagAdapter,
   Discovery02DayTagHandler,
   Patch02DayTagWrapper,
+  LegacyDistanceAdapter,
+  Discovery03DistanceHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
   savePatch,
   oldDayTag,
   dayTagWithFoundationScar,
+  oldDistance,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
   discovery02LegacyDayTagThroughMonsterPath,
   historicDayTagThroughMonsterPath,
+  discovery03LegacyDistanceThroughMonsterPath,
   calendarDateSpaghetti
 });

@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 5 de 55: PATCH 02**. Li defect `oldDayTag(day)` de Discovery 02 resta intact e directmen testabil: it rende `0` al Foundation e valores par pos it. Li nov `dayTagWithFoundationScar(day)` circumit ti defect sin modificar li legacy: it adjunte un unit por dies al o pos li Foundation e conserva un guard redundant separat por li Foundation quam scar historic.
+Li linea es in **Stage 6 de 55: DISCOVERY 03**. Li scars de `oldRemainder`/Patch 01 e `oldDayTag`/Patch 02 resta intact e testabil. Li nov defect historic es `oldDistance(calculationDay, targetDay)`, quel prende li diferentie absolut inter li du tags reparat in vice de mesurar li distance cronologic inclusiv inter li dies.
 
-Li path real passa per `LegacyDayTagAdapter`, `Discovery02DayTagHandler` e `Patch02DayTagWrapper`. Li context conserva input, output legacy, decisiones local del patch, output reparat, handlers, trace e metrics non-semantic. Li regression de Discovery 02 es nu verd, e li repository es **GREEN**.
+Li path real passa per `LegacyDistanceAdapter` e `Discovery03DistanceHandler`. Li context conserva ambi dies, ambi tags, li output legacy, handlers, trace e metrics non-semantic. Li regression nov es intentionalmen **EXPECTED_RED**: quelc cases coincide accidentalmen, ma pares identic, traversadas del Foundation e separationes de du dies demonstra li divergentie.
 
-Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de Patch 03 o stage posterior posse aparir ante su stage historic.
+Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null correction de Patch 03 o defect de stage posterior posse aparir ante su stage historic.
 
 ## Lingue-fonte canonic
 
@@ -26,25 +26,25 @@ Omni calcul normativ usa `BigInt`. Null floating-point es usat por SAVE, rangs, 
 
 ## Tests
 
-Li commande principal deve esser verd in ti patch:
+Li suite precedent deve restar verd:
+
+```text
+npm run test:previous
+```
+
+Li commande principal es intentionalmen rubi in ti discovery, pro que it executa li nov regression quam ultim passu:
 
 ```text
 npm test
 ```
 
-Por executar li regression historic de Discovery 02, nu reparat per Patch 02:
+Por executar solmen li regression nov de Discovery 03:
 
 ```text
-npm run test:discovery-02
+npm run test:discovery-03
 ```
 
-Por executar solmen li prova supplementari de Patch 02:
-
-```text
-npm run test:patch-02
-```
-
-Li tests confirma simultanmen que `oldDayTag` resta defectiv, que `dayTagWithFoundationScar` es equivalent a `dayCount` sur un gril larg circum li Foundation, e que li guard redundant del Foundation resta fisicmen present.
+Li tests confirma que Patch 01 e Patch 02 resta verd e que `oldDistance` es realmen defectiv: it usa li diferentie inter tags, ne li distance cronologic inclusiv. Li correction es reservat por Stage 7.
 
 ## Independentie
 
