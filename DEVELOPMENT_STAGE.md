@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=20
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=21
+CURRENT_KIND=PATCH
 CURRENT_PATCH=10
-LAST_COMPLETED_STAGE=20
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=21
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus legacyStirOneDropInPlace, LegacyInPlaceBowlAdapter e Discovery10InPlaceBowlHandler quel muta li six bowls sequentialmen e expone contamination intra li sam round.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, li helper in-place de Discovery 10, plus stirOneDropViaShadow e Patch10ShadowBowlWrapper quel conserva un legacy garbage real, crea vaultOld, scri omni six outputs in pending e committe solmen pos li round complet.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 20 es finit quam **DISCOVERY 10**. `legacyStirOneDropInPlace(drop,index,bowls,stoneRow)` usa li pours ja reparat per bowlAlias, ma scri chascun bowl directmen in li sam vector quel li positions posterior continua leer. Li prim bowl del round posse esser exact, durant que li bowls posterior es contaminat per valores ja mutat.
+Stage 21 es finit quam **PATCH 10**. `legacyStirOneDropInPlace` resta sin modification e continua contaminar su vector quand it es vocat directmen. Li nov `stirOneDropViaShadow` executa realmen ti legacy sur un clone separat, poy crea `vaultOld` ex li statu original, deriva li pours ja reparat per bowlAlias, calcula omni six outputs con reads exclusivmen ex `vaultOld` e scri solmen in `pending`. Li commit semantic es creat solmen pos li six positions.
 
-Li defect es conectet a un path real de production tra `LegacyInPlaceBowlAdapter` e `Discovery10InPlaceBowlHandler`. Li handler possede un copie de labor por ne mutar input extern, ma li helper legacy self conserva mutation in-place e retorna li sam vector. Null `vaultOld`, null `pending`, null `stirOneDropViaShadow`, null correction de Patch 10 e null code posterior es present.
+Li route historic passa per `Discovery10InPlaceBowlHandler` e poy `Patch10ShadowBowlWrapper`. Li context conserva li garbage legacy contaminat, `vaultOld`, `pending`, un flag de commit tardiv e li output final. Li regression de Stage 20 es verd. Null `orderAt46Latch` o code de Patch 11 o posterior es present.

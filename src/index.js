@@ -111,6 +111,12 @@ class BaseMonsterContext {
     this.legacyBowlRoundWorkingState = null;
     this.legacyBowlRoundOutput = null;
     this.legacyBowlRoundReturnedSameObject = false;
+    this.patch10LegacyGarbage = null;
+    this.patch10LegacyCallPreserved = false;
+    this.patch10VaultOld = null;
+    this.patch10Pending = null;
+    this.patch10CommitAfterAllSix = false;
+    this.patch10Output = null;
   }
 }
 
@@ -227,6 +233,12 @@ class BaseValidationManager {
   requireDiscovery09Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_09_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 09.');
+    }
+  }
+
+  requireDiscovery10Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_10_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un bowl-round legacy valid por Patch 10.');
     }
   }
 
@@ -690,6 +702,72 @@ function legacyStirOneDropInPlace(drop, index, bowls, stoneRow) {
     );
   }
   return { order, pours, bowls };
+}
+
+function stirOneDropViaShadow(drop, index, bowls, stoneRow) {
+  if (typeof drop !== 'bigint' || typeof index !== 'bigint') {
+    throw new TypeError('Li drop e su index por li bowl-round reparat deve esser BigInt exact.');
+  }
+  if (index < 1n || index > 46n) {
+    throw new RangeError('Li index reparat del bowl-round deve esser inter 1 e 46.');
+  }
+  if (!Array.isArray(bowls) || bowls.length < 7) {
+    throw new TypeError('Li bowls del round reparat deve conservar indices 1..6.');
+  }
+  for (let id = 1; id <= 6; id += 1) {
+    if (typeof bowls[id] !== 'bigint') {
+      throw new TypeError('Chascun bowl del round reparat deve esser un BigInt exact.');
+    }
+  }
+  if (!stoneRow || typeof stoneRow !== 'object') {
+    throw new TypeError('Li row de stones por li bowl-round reparat deve esser un object.');
+  }
+  for (const key of ['w', 'b', 's', 'm', 'r']) {
+    if (typeof stoneRow[key] !== 'bigint') {
+      throw new TypeError('Li row de stones por li bowl-round reparat deve contener quin BigInt.');
+    }
+  }
+
+  // Li helper legacy resta intact e es realmen executet sur un clone separat; su contamination resta observabil quam garbage historic.
+  const legacyGarbage = legacyStirOneDropInPlace(drop, index, bowls.slice(), stoneRow);
+  // Patch 10 exige un snapshot fisic. Omni read semantic posterior veni exclusivmen ex vaultOld.
+  const vaultOld = bowls.slice();
+  const poured = poursThroughBowlAlias(drop, index, vaultOld, stoneRow);
+  const order = poured.order.slice();
+  const pours = poured.pours.slice();
+  // Null output es commitet durante li loop: omni six writes va solmen in pending.
+  const pending = new Array(7).fill(null);
+  for (let position = 1; position <= 6; position += 1) {
+    const bowlId = order[position - 1];
+    const prevId = order[(position + 4) % 6];
+    const nextId = order[position % 6];
+    const stoneKind = BOWL_STIR_STONE_BY_POSITION_LEGACY[position];
+    const s = vaultOld[bowlId]
+      + 2n * vaultOld[prevId]
+      + 3n * vaultOld[nextId]
+      + pours[position]
+      + drop
+      + stoneRow[stoneKind];
+    pending[bowlId] = savePatch(
+      s * s
+      + 5n * vaultOld[prevId] * vaultOld[nextId]
+      + index * BigInt(position)
+    );
+  }
+  // Li commit semantic evene solmen pos que omni six positions ha plenat pending.
+  const committed = pending.slice();
+  return {
+    order,
+    pours,
+    vaultOld,
+    pending,
+    bowls: committed,
+    legacyGarbage: {
+      order: legacyGarbage.order.slice(),
+      pours: legacyGarbage.pours.slice(),
+      bowls: legacyGarbage.bowls.slice()
+    }
+  };
 }
 
 class LegacyRemainderAdapter {
@@ -1257,6 +1335,43 @@ class Discovery10InPlaceBowlHandler {
   }
 }
 
+class Patch10ShadowBowlWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, drop, index, sourceBowls, stoneRow) {
+    this.validationManager.requireDiscovery10Result(context);
+    this.validationManager.requireExactInteger(drop);
+    this.validationManager.requireVisibleDropIndex(index);
+    this.validationManager.requireBowlVector(sourceBowls);
+    this.validationManager.requireStoneState(stoneRow);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Patch10ShadowBowlWrapper';
+    context.phase = 'PATCH_10_VAULT_PENDING_COMMIT';
+    context.branchTrace.push('PATCH_10_VAULT_PENDING_COMMIT');
+    const patched = stirOneDropViaShadow(drop, index, sourceBowls, stoneRow);
+    context.patch10LegacyCallPreserved = true;
+    context.patch10LegacyGarbage = {
+      order: patched.legacyGarbage.order.slice(),
+      pours: patched.legacyGarbage.pours.slice(),
+      bowls: patched.legacyGarbage.bowls.slice()
+    };
+    context.patch10VaultOld = patched.vaultOld.slice();
+    context.patch10Pending = patched.pending.slice();
+    context.patch10CommitAfterAllSix = true;
+    context.patch10Output = {
+      order: patched.order.slice(),
+      pours: patched.pours.slice(),
+      bowls: patched.bowls.slice()
+    };
+    context.status = 'PATCH_10_RESULT';
+    this.metricsManager.bump(context, 'patch10.shadowBowl.calls');
+    return context.patch10Output;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -1346,6 +1461,10 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager,
       this.legacyInPlaceBowlAdapter
+    );
+    this.patch10ShadowBowlWrapper = new Patch10ShadowBowlWrapper(
+      this.validationManager,
+      this.metricsManager
     );
   }
 
@@ -1596,6 +1715,19 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch10InPlaceBowls(calculationDay, targetDay, drop, index, bowls, stoneRow) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery10InPlaceBowlHandler.handle(context, drop, index, bowls, stoneRow);
+      const result = this.patch10ShadowBowlWrapper.repair(context, drop, index, bowls, stoneRow);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -1684,8 +1816,14 @@ function discovery10LegacyInPlaceBowlsThroughMonsterPath(calculationDay, targetD
   );
 }
 
+function historicBowlRoundThroughMonsterPath(calculationDay, targetDay, drop, index, bowls, stoneRow) {
+  return new BaseMonsterManager().executePatch10InPlaceBowls(
+    calculationDay, targetDay, drop, index, bowls, stoneRow
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 10; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 10; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -1728,6 +1866,7 @@ module.exports = Object.freeze({
   Patch09BowlAliasWrapper,
   LegacyInPlaceBowlAdapter,
   Discovery10InPlaceBowlHandler,
+  Patch10ShadowBowlWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -1761,6 +1900,7 @@ module.exports = Object.freeze({
   poursThroughBowlAlias,
   BOWL_STIR_STONE_BY_POSITION_LEGACY,
   legacyStirOneDropInPlace,
+  stirOneDropViaShadow,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -1781,5 +1921,6 @@ module.exports = Object.freeze({
   discovery09LegacyFixedPoursThroughMonsterPath,
   historicPoursThroughMonsterPath,
   discovery10LegacyInPlaceBowlsThroughMonsterPath,
+  historicBowlRoundThroughMonsterPath,
   calendarDateSpaghetti
 });

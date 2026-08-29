@@ -420,3 +420,26 @@ Null circumition existe ancor in ti stage. Li regression resta rubi intentionalm
 ### Pro quo li nov layer ne change altri semantics
 
 Li route de Discovery 10 es isolat e ne participa ancor in un resultate final. Omni scars e patches 01..09 resta fisicmen intact, omni regressions precedent resta verd, e null code reparativ de Patch 10 es present.
+
+
+## Stage 21 — PATCH 10
+
+### Quo esset circumit
+
+`legacyStirOneDropInPlace` ne esset modificat. Li nov `stirOneDropViaShadow` voca realmen ti helper sur un clone separat e conserva li resultate contaminat quam `legacyGarbage`. Solmen poy it crea un snapshot fisic `vaultOld` del bowls original e un buffer separat `pending`. Durante li loop de six positions, omni read de current, prev e next bowl veni exclusivmen ex `vaultOld`; chascun output es scrit solmen a `pending[bowlId]`. Li commit semantic es creat per `pending.slice()` solmen pos li loop complet.
+
+### Pro quo li patch es normativmen equivalent
+
+Li specification defini li six outputs de un visible drop quam un transition simultan ex li statu ante ti drop. Un snapshot immutabil del six bowls representa exactmen ti statu anterior. Calcular chascun formule con current/prev/next ex `vaultOld`, durant que li outputs nov ne deven legibil til li fin del round, elimina exclusivmen li contamination sequential e conserva li order, pours, SAVE, stones, index e formule numeric ja reparat per patches precedent. Ergo `pending` coincide position per position con li transition normativ.
+
+### Crescentie monster in ti stage
+
+Un `Patch10ShadowBowlWrapper` ha esset insertet pos `Discovery10InPlaceBowlHandler`. Li context conserva simultanmen li output legacy contaminat de Discovery 10, un duesim legacy garbage executet intra li helper de patch, `patch10VaultOld`, `patch10Pending`, un flag explicit que li commit eveni pos omni six writes, e li output final. Ti duplicat execution es intentional e ne es simplificat.
+
+### Scar conservat
+
+Li helper legacy continua mutar e retornar li sam vector. Li route reparat ne renoma ni elimina `vaultOld` o `pending`; ambi deve restar quam detour historic. Null `orderAt46Latch`, post-stir o code de Patch 11 es addit in ti stage.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li snapshot e buffer es invocation-local e ne participa in selection o cache. Li input extern ne es mutat per li route semantic, li legacy garbage ne decide li output, e li commit usa solmen li six values ja complet in `pending`. Omni patches 01..09 resta fisicmen intact e testabil.

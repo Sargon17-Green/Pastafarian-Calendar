@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 19 de 55: PATCH 09**. Omni scars e patches 01..08 resta intact e testabil. `legacyPoursToFixedBowlIds` conserva li assumption historic de bowl IDs fix 1,2,3, ma li nov `bowlAlias[position]=order[position]` traducte chascun position semantic al bowl ID current.
+Li linea es in **Stage 21 de 55: PATCH 10**. Omni scars e patches 01..09 resta intact e testabil. `legacyStirOneDropInPlace` conserva li contamination sequential in-place de Discovery 10, ma `stirOneDropViaShadow` executa ti legacy quam garbage historic e isola li transition semantic per un snapshot `vaultOld` e un buffer `pending`.
 
-`poursThroughBowlAlias` voca realmen li legacy e passa omni read semantic de bowl por li tri pours tra `bowlAtLegacyPosition`. `Patch09BowlAliasWrapper` conserva li garbage legacy, li alias e li output reparat in li sam context. Null `vaultOld`, null `pending` e null code de Patch 10 existe in ti stage.
+Omni reads semantic del six bowl updates veni exclusivmen ex `vaultOld`; omni six writes intra li round va exclusivmen a `pending`; li commit evene solmen pos li six positions. `Patch10ShadowBowlWrapper` conserva li garbage legacy, li snapshot, li buffer e li output reparat in li context. Null `orderAt46Latch` e null code de Patch 11 existe in ti stage.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,16 +26,16 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions precedent, includente Discovery 09 reparat per li route Patch 09, deve restar verd:
+Omni regressions precedent, includente Discovery 10 nu reparat per li route Patch 10, deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test specific de Patch 09 deve esser verd:
+Li test specific de Patch 10 deve esser verd:
 
 ```text
-npm run test:patch-09
+npm run test:patch-10
 ```
 
 Li suite complet deve esser verd:
@@ -44,7 +44,7 @@ Li suite complet deve esser verd:
 npm test
 ```
 
-Li verifier confirma que li helper legacy continua leer bowls fix 1,2,3, que li route semantic instala `bowlAlias` ex li order e que omni tri reads de pour passa tra ti alias. It confirma anc que null `vaultOld`, `pending` o code posterior contamina production.
+Li verifier confirma que li helper legacy continua mutar in-place, durante que li helper reparat executa un legacy call real sur un clone, conserva `vaultOld`, scri omni six resultates in `pending` e crea li commit solmen pos li loop complet. It confirma anc que null `orderAt46Latch` o code posterior contamina production.
 
 ## Independentie
 
@@ -97,3 +97,8 @@ Li order de bowls ja es reparat per Patch 08, ma li routine historic de pours ne
 Li route historic nu expone un defect separat in li stir del six bowls. `legacyStirOneDropInPlace` prende li pours ja reparat per `bowlAlias`, ma actualisa li vector de bowls directmen position pos position. Ti significa que un position posterior posse leer un prev o next bowl ja actualisat in li sam round, in vice de leer exclusivmen li statu ante li drop.
 
 Li regression de Discovery 10 usa intentionalmen un order identic por isolar li contamination del problema de alias: li prim output concorda, ma li quin bowls posterior diverge del transition simultan normativ. `npm run test:previous` resta verd; `npm run test:discovery-10` e `npm test` es intentionalmen rubi. Null snapshot reparativ, null `vaultOld` e null `pending` es includet in ti stage.
+
+
+## Stage 21 — Patch 10
+
+`legacyStirOneDropInPlace` resta intact quam scar historic e continua contaminar bowls posterior quand it es vocat directmen. `stirOneDropViaShadow` voca realmen ti helper sur un clone separat, conserva su garbage, poy crea li snapshot fisic `vaultOld`. Li six calculs semantic lee solmen ex ti snapshot e scri exclusivmen in `pending`; solmen pos li six positions li buffer complet deven li commit final. `Patch10ShadowBowlWrapper` conserva li snapshot, pending, garbage legacy e output reparat in li sam context. Li regression de Discovery 10 es nu verd. Null latch de order al drop 46 o code de Patch 11 es present.

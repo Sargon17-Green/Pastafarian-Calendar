@@ -40,8 +40,6 @@ assert.deepEqual(expected.bowls.slice(1), [23205n, 23443n, 49647n, 18871n, 28375
 const mutable = oldBowls.slice();
 const direct = production.legacyStirOneDropInPlace(drop, index, mutable, stoneRow);
 assert.equal(direct.bowls, mutable, 'Li helper legacy deve mutar e retornar li sam vector de bowls.');
-assert.deepEqual(direct.order, expected.order);
-assert.deepEqual(direct.pours, expected.pours);
 assert.deepEqual(direct.bowls.slice(1), [
   23205n,
   2167757877n,
@@ -50,27 +48,30 @@ assert.deepEqual(direct.bowls.slice(1), [
   49276137518158613509478075707571518903n,
   122328037836810514334452521434516846956n
 ]);
-assert.equal(direct.bowls[1], expected.bowls[1]);
-for (let id = 2; id <= 6; id += 1) assert.notEqual(direct.bowls[id], expected.bowls[id]);
+assert.notDeepEqual(direct.bowls, expected.bowls);
 
-const routed = production.discovery10LegacyInPlaceBowlsThroughMonsterPath(
+const routed = production.historicBowlRoundThroughMonsterPath(
   normative.FOUNDATION_DAY, normative.FOUNDATION_DAY, drop, index, oldBowls, stoneRow
 );
-assert.equal(routed.context.currentHandler, 'Discovery10InPlaceBowlHandler');
-assert.equal(routed.context.phase, 'DISCOVERY_10_IN_PLACE_BOWL_CONTAMINATION');
-assert.equal(routed.context.status, 'DISCOVERY_10_LEGACY_RESULT');
-assert.equal(routed.context.legacyBowlRoundDrop, drop);
-assert.equal(routed.context.legacyBowlRoundIndex, index);
-assert.deepEqual(routed.context.legacyBowlRoundInputBefore, oldBowls);
+assert.equal(routed.context.currentHandler, 'Patch10ShadowBowlWrapper');
+assert.equal(routed.context.previousHandler, 'Discovery10InPlaceBowlHandler');
+assert.equal(routed.context.phase, 'PATCH_10_VAULT_PENDING_COMMIT');
+assert.equal(routed.context.status, 'PATCH_10_RESULT');
 assert.equal(routed.context.legacyBowlRoundReturnedSameObject, true);
-assert.deepEqual(routed.context.legacyBowlRoundOrder, expected.order);
-assert.deepEqual(routed.context.legacyBowlRoundPours, expected.pours);
-assert.deepEqual(routed.result.bowls, routed.context.legacyBowlRoundOutput);
-assert.deepEqual(routed.context.branchTrace, ['BOOTSTRAP_VALIDATED', 'DISCOVERY_10_BOWLS_IN_PLACE']);
+assert.deepEqual(routed.context.legacyBowlRoundOutput, direct.bowls);
+assert.equal(routed.context.patch10LegacyCallPreserved, true);
+assert.deepEqual(routed.context.patch10LegacyGarbage.bowls, direct.bowls);
+assert.deepEqual(routed.context.patch10VaultOld, oldBowls);
+assert.deepEqual(routed.context.patch10Pending, expected.bowls);
+assert.equal(routed.context.patch10CommitAfterAllSix, true);
+assert.deepEqual(routed.result.bowls, expected.bowls);
+assert.deepEqual(routed.context.branchTrace, [
+  'BOOTSTRAP_VALIDATED',
+  'DISCOVERY_10_BOWLS_IN_PLACE',
+  'PATCH_10_VAULT_PENDING_COMMIT'
+]);
 assert.equal(routed.context.metrics['discovery10.inPlaceBowl.calls'], 1n);
-assert.deepEqual(oldBowls, [null, 11n, 13n, 17n, 19n, 23n, 29n], 'Li monster path deve posseder su copie de labor e ne mutar li input extern.');
+assert.equal(routed.context.metrics['patch10.shadowBowl.calls'], 1n);
+assert.deepEqual(oldBowls, [null, 11n, 13n, 17n, 19n, 23n, 29n]);
 
-console.log('DISCOVERY 10 EXPECTED RED: li bowl-round legacy scri in-place e li positions posterior lee valores ja mutat.');
-console.log('legacy:   ' + direct.bowls.slice(1).join(', '));
-console.log('normativ: ' + expected.bowls.slice(1).join(', '));
-assert.deepEqual(direct.bowls, expected.bowls, 'EXPECTED RED Discovery 10: li update sequential in-place contamina li quin bowls posterior del sam round.');
+console.log('DISCOVERY 10 REGRESSION: PASS pos Patch 10; li legacy resta contaminat in-place e li route semantic usa vaultOld/pending con commit pos six writes.');

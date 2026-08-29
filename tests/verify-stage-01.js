@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 10 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 10 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Discovery 10 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'stirOneDropViaShadow', 'vaultOld', 'pending', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
+    'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
@@ -1147,7 +1147,39 @@ group('Discovery 10 conserva li contamination sequential in-place del six bowls'
   eq(routed.context.metrics['discovery10.inPlaceBowl.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 10', () => {
+group('Patch 10 conserva li scar in-place ma usa vaultOld, pending e commit tardiv', () => {
+  const oldBowls = [null, 11n, 13n, 17n, 19n, 23n, 29n];
+  const stoneRow = { w: 2n, b: 3n, s: 5n, m: 7n, r: 11n };
+  const legacyMutable = oldBowls.slice();
+  const legacy = production.legacyStirOneDropInPlace(1n, 4n, legacyMutable, stoneRow);
+  const patched = production.stirOneDropViaShadow(1n, 4n, oldBowls, stoneRow);
+  deepEq(legacy.bowls.slice(1), [23205n, 2167757877n, 18796698741299337031n, 52134066600902479800271676581807921729n, 49276137518158613509478075707571518903n, 122328037836810514334452521434516846956n]);
+  deepEq(patched.vaultOld, oldBowls);
+  deepEq(patched.pending.slice(1), [23205n, 23443n, 49647n, 18871n, 28375n, 13610n]);
+  deepEq(patched.bowls, patched.pending);
+  deepEq(patched.legacyGarbage.bowls, legacy.bowls);
+  const source = production.stirOneDropViaShadow.toString();
+  ok(source.includes('legacyStirOneDropInPlace(drop, index, bowls.slice(), stoneRow)'));
+  ok(source.includes('const vaultOld = bowls.slice()'));
+  ok(source.includes('const pending = new Array(7).fill(null)'));
+  ok(source.includes('vaultOld[bowlId]'));
+  ok(source.includes('2n * vaultOld[prevId]'));
+  ok(source.includes('3n * vaultOld[nextId]'));
+  ok(source.includes('pending[bowlId] = savePatch('));
+  ok(source.indexOf('const committed = pending.slice()') > source.indexOf('pending[bowlId] = savePatch('));
+  const routed = production.historicBowlRoundThroughMonsterPath(1n, 1n, 1n, 4n, oldBowls, stoneRow);
+  eq(routed.context.currentHandler, 'Patch10ShadowBowlWrapper');
+  eq(routed.context.previousHandler, 'Discovery10InPlaceBowlHandler');
+  eq(routed.context.status, 'PATCH_10_RESULT');
+  eq(routed.context.patch10LegacyCallPreserved, true);
+  deepEq(routed.context.patch10VaultOld, oldBowls);
+  deepEq(routed.context.patch10Pending, patched.pending);
+  eq(routed.context.patch10CommitAfterAllSix, true);
+  deepEq(routed.result.bowls, patched.bowls);
+  eq(routed.context.metrics['patch10.shadowBowl.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 10', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1159,4 +1191,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression intentional de Discovery 10.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa pos Patch 10.');
