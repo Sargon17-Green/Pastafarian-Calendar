@@ -1,15 +1,16 @@
 {
   "name": "pastafari-calendar-javascript-interlingue-occidental",
-  "version": "0.0.4-stage-04",
+  "version": "0.0.5-stage-05",
   "private": true,
   "description": "Linea independent de implementation por JavaScript con Interlingue / Occidental quam lingue-fonte.",
   "main": "src/index.js",
   "scripts": {
-    "test": "node tests/run-tests.js && node tests/verify-stage-01.js && node tests/discovery-01.js && node tests/patch-01.js && node tests/discovery-02.js",
-    "test:previous": "node tests/run-tests.js && node tests/verify-stage-01.js && node tests/discovery-01.js && node tests/patch-01.js",
+    "test": "node tests/run-tests.js && node tests/verify-stage-01.js && node tests/discovery-01.js && node tests/patch-01.js && node tests/discovery-02.js && node tests/patch-02.js",
+    "test:previous": "node tests/run-tests.js && node tests/verify-stage-01.js && node tests/discovery-01.js && node tests/patch-01.js && node tests/discovery-02.js",
     "test:discovery-01": "node tests/discovery-01.js",
     "generate-fixtures": "node tests/generate-fixtures.js",
     "test:patch-01": "node tests/patch-01.js",
-    "test:discovery-02": "node tests/discovery-02.js"
+    "test:discovery-02": "node tests/discovery-02.js",
+    "test:patch-02": "node tests/patch-02.js"
   }
 }

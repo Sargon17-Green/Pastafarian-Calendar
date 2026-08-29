@@ -90,3 +90,21 @@ Un `LegacyDayTagAdapter` e un `Discovery02DayTagHandler` ha esset addit. `BaseMo
 ### Pro quo li strat nov ne adjunte un defect extra
 
 Li adapter apella exactmen `oldDayTag` e li handler ne normalisa su resultate, ne consulta li oracle e ne usa metrics por decisiones. Ergo li unic divergentie nov es precis li defect historic mandat por Discovery 02, durant que Patch 01 e omni state anterior resta isolat e testabil.
+
+## Stage 5 — PATCH 02
+
+### Quo esset circumit
+
+Li function `oldDayTag` ne esset modificat. Un nove `dayTagWithFoundationScar(day)` apella it e conserva su resultate quam base. Si `day >= FOUNDATION_DAY_OLD`, li wrapper adjunte un unit. Pos to, un duesim guard separat resta explicit: si li die es exactmen li Foundation e li valore ne es `1`, it es fortiat a `1`. Ti duesim guard es redundant pos li prim correction, ma it resta quam scar historic mandat.
+
+### Pro quo li patch es normativmen equivalent
+
+Ante li Foundation, `oldDayTag` ja rende `2 * (FOUNDATION - day)`, exactmen quam `dayCount`. Al Foundation, li legacy rende `0`; adjunter un unit rende `1`. Pos li Foundation, li legacy rende `2 * (day - FOUNDATION)`; adjunter un unit rende li serie impar `2d + 1` mandat del reference. Li guard final ne cambia li resultate normal, ma preserva li scar ex li correction historic.
+
+### Crescentie monster in ti stage
+
+Un `Patch02DayTagWrapper` ha esset insertet pos `Discovery02DayTagHandler`. Li context conserva simultanmen li input del patch, li output legacy, un flag indicant si li unit de paritá esset addit, un flag indicant que li guard del Foundation esset attinget, li output final, li handlers current/precedent e un trace de ambi passes. `BaseMonsterManager` expone un route separat quel executa li discovery e poy li patch in li sam invocation.
+
+### Pro quo li strat nov ne altera semantics ultra li patch
+
+Li wrapper consulta solmen li die exact e li resultate legacy del sam invocation. Metrics, flags observatori e trace ne participa in li calculation. Null oracle es consultat in production, null fallback existe, e li unic correction semantic es li unit posterior con li guard redundant mandat de Patch 02.

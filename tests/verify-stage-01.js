@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 02 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 02 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,6 @@ group('null textu hebreic o code posterior a Discovery 02 contamina production',
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'dayTagWithFoundationScar', 'Patch02DayTagWrapper', 'PATCH_02',
     'oldDistance', 'mutateStonesWrong',
     'hiddenByNearness', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
@@ -725,7 +724,34 @@ group('Discovery 02 conserva li oldDayTag defectiv in un path real e isolat', ()
   eq(execution.context.metrics['discovery02.legacyDayTag.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 02', () => {
+group('Patch 02 conserva li scar oldDayTag e rende li dayCount normativ exact', () => {
+  const f = production.FOUNDATION_DAY_OLD;
+  for (let delta = -100n; delta <= 100n; delta += 1n) {
+    const day = f + delta;
+    eq(production.dayTagWithFoundationScar(day), o.dayCount(day));
+  }
+  eq(production.oldDayTag(f), 0n);
+  eq(production.dayTagWithFoundationScar(f), 1n);
+  eq(production.dayTagWithFoundationScar(f + 1n), 3n);
+
+  const execution = production.historicDayTagThroughMonsterPath(f, f, f);
+  eq(execution.context.legacyDayTagOutput, 0n);
+  eq(execution.context.patch02Output, 1n);
+  eq(execution.context.patch02AddedParityUnit, true);
+  eq(execution.context.patch02FoundationGuardChecked, true);
+  eq(execution.context.currentHandler, 'Patch02DayTagWrapper');
+  eq(execution.context.phase, 'PATCH_02_DAY_TAG_FOUNDATION_SCAR');
+  eq(execution.context.status, 'PATCH_02_RESULT');
+  deepEq(execution.context.branchTrace, [
+    'BOOTSTRAP_VALIDATED',
+    'DISCOVERY_02_OLD_DAY_TAG',
+    'PATCH_02_DAY_TAG_FOUNDATION_SCAR'
+  ]);
+  eq(execution.context.metrics['discovery02.legacyDayTag.calls'], 1n);
+  eq(execution.context.metrics['patch02.dayTag.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 02', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -737,4 +763,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions precedent passat ante li regression intentional de Discovery 02.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passat in li repository verd de Patch 02.');

@@ -32,6 +32,10 @@ class BaseMonsterContext {
     this.patch01LegacyWasZero = false;
     this.legacyDayTagInput = null;
     this.legacyDayTagOutput = null;
+    this.patch02Input = null;
+    this.patch02Output = null;
+    this.patch02AddedParityUnit = false;
+    this.patch02FoundationGuardChecked = false;
   }
 }
 
@@ -61,6 +65,12 @@ class BaseValidationManager {
   requireDiscovery01Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_01_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 01.');
+    }
+  }
+
+  requireDiscovery02Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_02_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 02.');
     }
   }
 }
@@ -125,6 +135,20 @@ function oldDayTag(day) {
     ? day - FOUNDATION_DAY_OLD
     : FOUNDATION_DAY_OLD - day;
   return 2n * distance;
+}
+
+function dayTagWithFoundationScar(day) {
+  let n = oldDayTag(day);
+  // Li defect legacy resta intact quam scar historic; it ne es correctet in su fonte.
+  // Ante li Foundation it es ja exact; al o pos li Foundation li diferentie normativ es precis +1.
+  if (day >= FOUNDATION_DAY_OLD) {
+    n += 1n;
+  }
+  // Ti guard redundant resta quam scar del prim correction del Foundation.
+  if (day === FOUNDATION_DAY_OLD && n !== 1n) {
+    n = 1n;
+  }
+  return n;
 }
 
 class LegacyRemainderAdapter {
@@ -205,6 +229,29 @@ class Discovery02DayTagHandler {
   }
 }
 
+class Patch02DayTagWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, day) {
+    this.validationManager.requireDiscovery02Result(context);
+    this.validationManager.requireExactInteger(day);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Patch02DayTagWrapper';
+    context.phase = 'PATCH_02_DAY_TAG_FOUNDATION_SCAR';
+    context.branchTrace.push('PATCH_02_DAY_TAG_FOUNDATION_SCAR');
+    context.patch02Input = day;
+    context.patch02AddedParityUnit = day >= FOUNDATION_DAY_OLD;
+    context.patch02FoundationGuardChecked = day === FOUNDATION_DAY_OLD;
+    context.patch02Output = dayTagWithFoundationScar(day);
+    context.status = 'PATCH_02_RESULT';
+    this.metricsManager.bump(context, 'patch02.dayTag.calls');
+    return context.patch02Output;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -224,6 +271,7 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyDayTagAdapter
     );
+    this.patch02DayTagWrapper = new Patch02DayTagWrapper(this.validationManager, this.metricsManager);
   }
 
   prepare(calculationDay, targetDay) {
@@ -273,6 +321,19 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch02DayTag(calculationDay, targetDay, day) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery02DayTagHandler.handle(context, day);
+      const result = this.patch02DayTagWrapper.repair(context, day);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -291,8 +352,12 @@ function discovery02LegacyDayTagThroughMonsterPath(calculationDay, targetDay, da
   return new BaseMonsterManager().executeDiscovery02DayTag(calculationDay, targetDay, day);
 }
 
+function historicDayTagThroughMonsterPath(calculationDay, targetDay, day) {
+  return new BaseMonsterManager().executePatch02DayTag(calculationDay, targetDay, day);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 02; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 02; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -311,14 +376,17 @@ module.exports = Object.freeze({
   Patch01SaveWrapper,
   LegacyDayTagAdapter,
   Discovery02DayTagHandler,
+  Patch02DayTagWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
   savePatch,
   oldDayTag,
+  dayTagWithFoundationScar,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
   discovery02LegacyDayTagThroughMonsterPath,
+  historicDayTagThroughMonsterPath,
   calendarDateSpaghetti
 });
