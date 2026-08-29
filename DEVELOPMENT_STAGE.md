@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=31
-CURRENT_KIND=PATCH
-CURRENT_PATCH=15
-LAST_COMPLETED_STAGE=31
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=32
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=16
+LAST_COMPLETED_STAGE=32
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n fiziksel positive-side scar olarak korunur ve NegativeGatePatchWrapper içinde bütün signed step değerleri için diagnostic olarak gerçekten çağrılır; signed_step<0 olduğunda semantic question day yalnız FOUNDATION_DAY_OLD-abs(step) detour'undan gelir, zero/positive path legacy helper sonucunu aynen korur
+MONSTER_ARCHITECTURE_GROWTH=LEGACY_YEAR_MAX=5781 zorunlu legacy sabiti olarak oluşturulur ve legacyYearCandidateAllowed tarafından gerçekten kullanılır; LegacyYearCandidateAdapter 252..5781 ve en az 6 gate-gap adaylarını stable length-only sort girişine geçirir ve ayrıca mevcut selection katmanını çağırabilen gerçek adapter yolunu taşır; real calendar state-machine 5778,5779,5780,5781 boundary probe ailesini acceptance/sort girişinde gerçekten çalıştırır fakat önceki selection scar call-count sözleşmelerini korumak için ekstra selection çağrısı yapmaz; REAL_YEAR_MAX_PATCH=5778 filtresi henüz yoktur
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

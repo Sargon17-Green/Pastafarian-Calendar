@@ -1,5 +1,7 @@
 from .legacy_arithmetic import M_OLD
 from .legacy_selection import buildAnswerRingFromSauceState
+from .legacy_day_counts import FOUNDATION_DAY_OLD
+from .legacy_year_candidates import LegacyYearCandidate
 from .monster_bootstrap import (
     MonsterContext,
     MonsterManager,
@@ -352,7 +354,49 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.gateQuestion.probes",
         )
         local_ctx.status = "ESKİ_GATE_SORU_GÜNÜ_HAZIR"
-        local_ctx.phase = "AŞAMA_31_BEKLEME"
+        local_ctx.phase = "ESKİ_5781_YIL_ADAYLARI"
+
+    def legacy_year_candidate_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Keşif 16 boundary probe ailesi candidate ceiling ve sort girişini
+        # gerçek production state-machine üzerinde çalıştırır.
+        # Selection çağrısı burada tekrarlanmaz; önceki selection scar call-count
+        # sözleşmeleri aynen korunur.
+        close_day = FOUNDATION_DAY_OLD
+        candidates = tuple(
+            LegacyYearCandidate(
+                label=f"sınır-{length}",
+                length=length,
+                open_day=close_day - length,
+                close_day=close_day,
+                gate_gap_count=6,
+            )
+            for length in (
+                5778,
+                5779,
+                5780,
+                5781,
+            )
+        )
+
+        manager.legacy_year_candidates.prepare_for_selection(
+            local_ctx,
+            candidates,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.yearCandidates.probes",
+        )
+        local_ctx.status = "ESKİ_5781_YIL_ADAYLARI_HAZIR"
+        local_ctx.phase = "AŞAMA_32_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -370,6 +414,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_YANLI_MODULO_SEÇİM", legacy_biased_selection_handler)
     manager.dispatcher.register("ESKİ_YALNIZ_KISA_GENEL_SEÇİM", legacy_short_only_general_selection_handler)
     manager.dispatcher.register("ESKİ_GATE_SORU_GÜNÜ", legacy_gate_question_handler)
+    manager.dispatcher.register("ESKİ_5781_YIL_ADAYLARI", legacy_year_candidate_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -388,5 +434,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Otuz birinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Otuz ikinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

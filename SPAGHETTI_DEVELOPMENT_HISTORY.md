@@ -1512,3 +1512,25 @@ Ek testler `-101`, zero/positive uyumluluğu, invocation-local patch state ve g�
 Patch 16 `LEGACY_YEAR_MAX=5781` ve 5778 late-filter kodu henüz yoktur.
 
 Stage 29 wide patch ve tüm önceki scar'lar aynen korunur.
+
+
+## Aşama 32 — Keşif 16: legacy yıl tavanını 5781 olarak sort/selection girişine taşımak
+
+Production içine zorunlu `LEGACY_YEAR_MAX=5781` sabiti eklenir ve `legacyYearCandidateAllowed` bu sabiti gerçek candidate ceiling olarak kullanır.
+
+Legacy candidate koşulu:
+
+```text
+gate_gap_count>=6
+252<=candidate.length<=LEGACY_YEAR_MAX
+```
+
+olduğundan 5779, 5780 ve 5781 günlük adaylar kabul edilir.
+
+`LegacyYearCandidateAdapter.prepare_for_selection` accepted family'yi mevcut historical stable length-only sort girişine taşır. Adapter ayrıca selection metodunu da taşır; ancak real calendar boundary probe önceki selection call-count scar sözleşmelerini bozmamak için bu aşamada yalnız acceptance/sort girişini çalıştırır.
+
+Real `calendar_date_spaghetti` state-machine Stage 31 gate-question katmanından sonra `5778,5779,5780,5781` boundary candidate ailesini actual adapter üzerinden çalıştırır. Dördü de legacy ceiling'den geçer.
+
+Test-only normatif sınır `YEAR_MAX_DAYS=5778` olduğundan 5779, 5780 ve 5781 alt örnekleri bilinçli kırmızıdır.
+
+Production içinde `REAL_YEAR_MAX_PATCH=5778` veya 5778 üstünü sort/selection öncesi atan filtre henüz yoktur. Legacy sabit değiştirilmez. Patch 17 tie düzeltmesi de henüz yoktur.

@@ -1,0 +1,28 @@
+Aşama 32/55 — DISCOVERY 16
+
+Bu paket yalnızca Aşama 32 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_year_candidates.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_32_discovery_16.py
+artifacts/stage-32/BASELINE_STAGE_31_GREEN.txt
+artifacts/stage-32/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-32/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_32.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 31 baseline: GREEN
+Değişiklik sonrası Aşama 1–31 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+LEGACY_YEAR_MAX=5781: EKLENDİ VE KULLANILIYOR
+5779..5781 sort/selection giriş ailesine geçiyor: EVET
+REAL_YEAR_MAX_PATCH=5778: YOK
+PATCH 16 early overlong reject: YOK
+PATCH 17 tie düzeltmesi: YOK

@@ -1,31 +1,28 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz ikinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 31/55, `PATCH 15` durumundadır.
+Aşama 32/55, `DISCOVERY 16` durumundadır.
 
-Discovery 15 helper scar'ı fiziksel olarak korunur:
-
-```text
-oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n
-```
-
-`NegativeGatePatchWrapper` bu helper'ı diagnostic olarak gerçekten çağırır.
-
-Semantic sonuç:
+Zorunlu legacy sabit:
 
 ```text
-signed_step<0 -> FOUNDATION_DAY_OLD-abs(step)
-signed_step>=0 -> oldGateQuestionDay(abs(step))
+LEGACY_YEAR_MAX=5781
 ```
 
-şeklindedir.
+oluşturulmuş ve candidate acceptance içinde gerçekten kullanılmaktadır.
 
-Aşama 30 normatif negative-gate regresyonu değiştirilmeden yeşile dönmüştür.
+Legacy candidate family `gate_gap_count>=6` ve `252<=length<=5781` koşuluyla sort/selection girişine gider.
 
-Patch 16 year-limit kodu henüz yoktur.
+Real calendar state-machine `5778,5779,5780,5781` boundary probe ailesini actual adapter üzerinden acceptance/sort girişinde çalıştırır. Önceki real-path selection call-count scar'ları korunur; bu probe ekstra selection çağrısı yapmaz.
+
+Yeni normatif regresyon 5779, 5780 ve 5781 günlük adayların normatif 5778 tavanına rağmen sort/selection öncesi family'ye sızdığını gösterir ve üç alt örneği bilinçli kırmızı bırakır.
+
+Henüz `PATCH 16` yoktur: `REAL_YEAR_MAX_PATCH=5778` ve `candidateLength>5778` early reject filtresi eklenmemiştir.
+
+Patch 17 tie düzeltmesi de henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -41,10 +38,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuz birinci aşama paketi:
+Tam otuz ikinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 30'da kırmızı olan `-1`, `-2` ve `-10` negative-gate alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–31 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni 5781-ceiling normatif regresyonunun 5779, 5780 ve 5781 alt örnekleri başarısız olur.

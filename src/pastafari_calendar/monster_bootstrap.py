@@ -18,6 +18,7 @@ from .legacy_selection import (
     LegacyShortOnlySelectionDispatcher,
 )
 from .legacy_gate_question import LegacyGateQuestionAdapter
+from .legacy_year_candidates import LegacyYearCandidateAdapter
 
 
 class MonsterError(RuntimeError):
@@ -190,6 +191,13 @@ class MonsterContext:
     patch15_corrected_day: int | None = None
     patch15_used_negative_detour: bool = False
     patch15_applied: bool = False
+    legacy_year_candidate_input_lengths: tuple[int, ...] | None = None
+    legacy_year_candidate_lengths_before_sort: tuple[int, ...] | None = None
+    legacy_year_candidate_lengths_after_sort: tuple[int, ...] | None = None
+    legacy_year_candidate_count_for_selection: int | None = None
+    legacy_year_candidate_selected_rank: int | None = None
+    legacy_year_candidate_selected_label: str | None = None
+    legacy_year_candidate_selected_length: int | None = None
 
 
 class BaseMetrics:
@@ -257,3 +265,4 @@ class MonsterManager:
         self.legacy_selection = LegacyBiasedSelectionAdapter()
         self.legacy_general_selection = LegacyShortOnlySelectionDispatcher()
         self.legacy_gate_question = LegacyGateQuestionAdapter()
+        self.legacy_year_candidates = LegacyYearCandidateAdapter()
