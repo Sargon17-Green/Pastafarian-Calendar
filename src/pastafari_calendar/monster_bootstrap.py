@@ -379,6 +379,15 @@ class MonsterContext:
     legacy_opening_interval_closed_open_assumption: bool = False
     legacy_opening_interval_semantic_year_number: int | None = None
     legacy_opening_interval_calls: int = 0
+    patch26_legacy_result_number: int | None = None
+    patch26_correct_result_number: int | None = None
+    patch26_correct_result_open_day: int | None = None
+    patch26_correct_result_close_day: int | None = None
+    patch26_backward_steps: int = 0
+    patch26_open_boundary_hit: bool = False
+    patch26_same_as_legacy: bool = False
+    patch26_semantic_year_number: int | None = None
+    patch26_applied: bool = False
 
 
 class BaseMetrics:

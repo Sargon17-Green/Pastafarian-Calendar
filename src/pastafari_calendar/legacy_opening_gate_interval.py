@@ -111,6 +111,130 @@ def legacyFindYearClosedOpeningInterval(
     return current
 
 
+def correctOpeningGateInterval(
+    year: LegacyOpeningGateYear,
+    target_day: int,
+    previous_year,
+) -> tuple[LegacyOpeningGateYear, int]:
+    _validateLegacyYear(
+        year
+    )
+
+    if type(
+        target_day
+    ) is not int:
+        raise TypeError(
+            "Opening-gate düzeltme target day tam sayı olmalıdır"
+        )
+
+    current = year
+    backward_steps = 0
+
+    while target_day <= current.open_day:
+        prior = current
+        current = previous_year(
+            prior
+        )
+        _validateLegacyYear(
+            current
+        )
+
+        if current.number != prior.number - 1:
+            raise ValueError(
+                "Opening-gate düzeltme previousYear tam olarak bir yıl geri gitmelidir"
+            )
+
+        if current.close_day != prior.open_day:
+            raise ValueError(
+                "Opening-gate düzeltme previousYear close gate değeri prior open gate olmalıdır"
+            )
+
+        backward_steps += 1
+
+    if not (
+        current.open_day
+        < target_day
+        <= current.close_day
+    ):
+        raise RuntimeError(
+            "Opening-gate düzeltme target day değerini (open,close] içine yerleştiremedi"
+        )
+
+    return (
+        current,
+        backward_steps,
+    )
+
+
+class OpeningGateIntervalPatchWrapper:
+    def repair(
+        self,
+        ctx,
+        year: LegacyOpeningGateYear,
+        target_day: int,
+        previous_year,
+        legacy_result: LegacyOpeningGateYear,
+    ) -> LegacyOpeningGateYear:
+        (
+            correct_result,
+            backward_steps,
+        ) = correctOpeningGateInterval(
+            year,
+            target_day,
+            previous_year,
+        )
+
+        same_as_legacy = (
+            correct_result
+            == legacy_result
+        )
+        semantic = (
+            legacy_result
+            if same_as_legacy
+            else correct_result
+        )
+
+        ctx.branch_trace.append(
+            (
+                "YAMA_26_OPENING_GATE_AÇIK_SOL_ARALIK",
+                year.number,
+                target_day,
+                legacy_result.number,
+                correct_result.number,
+                backward_steps,
+                same_as_legacy,
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-26-opening-gate-açık-sol-aralık",
+                year.number,
+                target_day,
+                legacy_result.number,
+                correct_result.number,
+                backward_steps,
+                same_as_legacy,
+            )
+        )
+
+        ctx.patch26_legacy_result_number = legacy_result.number
+        ctx.patch26_correct_result_number = correct_result.number
+        ctx.patch26_correct_result_open_day = correct_result.open_day
+        ctx.patch26_correct_result_close_day = correct_result.close_day
+        ctx.patch26_backward_steps = backward_steps
+        ctx.patch26_open_boundary_hit = (
+            target_day
+            == year.open_day
+        )
+        ctx.patch26_same_as_legacy = same_as_legacy
+        ctx.patch26_semantic_year_number = semantic.number
+        ctx.patch26_applied = True
+
+        ctx.legacy_opening_interval_semantic_year_number = semantic.number
+
+        return semantic
+
+
 class LegacyOpeningGateIntervalAdapter:
     def call(
         self,
@@ -172,4 +296,10 @@ class LegacyOpeningGateIntervalAdapter:
         ctx.legacy_opening_interval_semantic_year_number = result.number
         ctx.legacy_opening_interval_calls += 1
 
-        return result
+        return OpeningGateIntervalPatchWrapper().repair(
+            ctx,
+            year,
+            target_day,
+            previous_year,
+            result,
+        )

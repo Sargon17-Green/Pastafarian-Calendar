@@ -786,7 +786,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.openingGateClosedInterval.probes",
         )
         local_ctx.status = "ESKİ_KAPALI_OPENING_GATE_YIL_ARALIĞI_HAZIR"
-        local_ctx.phase = "AŞAMA_52_BEKLEME"
+        local_ctx.phase = "AŞAMA_53_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)

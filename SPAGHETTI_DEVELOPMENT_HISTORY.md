@@ -2256,3 +2256,34 @@ Legacy `<` condition nedeniyle provider real witness'ta çağrılmaz ve backward
 `OpeningGateIntervalPatchWrapper`, `correctOpeningGateInterval`, `patch26_applied` veya bu yeni layer içinde `while target_day <= current.open_day` correction path'i yoktur.
 
 Aşama 18'in daha önceki authoritative sequential-year walk implementation'ı değiştirilmemiştir; Keşif 26 kendi historical interval layer'ını gerçek dispatcher path sonunda açıkça taşır.
+
+
+## Aşama 53 — Yama 26: [open,close] scar üstüne (open,close] detour
+
+Aşama 52 `legacyFindYearClosedOpeningInterval` raw historical function gövdesi byte-for-byte korunur.
+
+`LegacyOpeningGateIntervalAdapter.call` önce bu old path'i gerçekten çalıştırır. Bu path `target_day == open_day` boundary'sinde backward step 0 bırakır ve current year'ı raw result olarak kaydeder.
+
+`correctOpeningGateInterval` aynı original anchor ve aynı `previousYear` zinciri üzerinde:
+
+```text
+while target_day <= current.open_day
+```
+
+koşuluyla geri yürür.
+
+Final invariant:
+
+```text
+current.open_day < target_day <= current.close_day
+```
+
+olmalıdır.
+
+`OpeningGateIntervalPatchWrapper` old raw result'u diagnostic scar olarak tutar ve semantic year assignment'ı correct `(open,close]` result ile değiştirir.
+
+Old ve correct result aynıysa old result nesnesi yeniden kullanılabilir. Opening-boundary case'te old current year state'te kalırken semantic result previous year olur.
+
+Aşama 52 normatif regression gövdesi değiştirilmeden yeşile dönmüştür. Yalnız Patch 26 absence testleri current presence durumuna ilerletilmiştir.
+
+Aşama 54 integration layer henüz eklenmemiştir.

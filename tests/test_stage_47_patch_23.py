@@ -445,7 +445,7 @@ class Stage47Patch23Tests(unittest.TestCase):
                 ),
             )
 
-    def test_patch25_legacy_and_occurrence_correction_are_present_but_patch26_is_absent(self):
+    def test_patch26_opening_gate_correction_is_present_after_patch25(self):
         production = (
             ROOT
             / "src"
@@ -470,21 +470,14 @@ class Stage47Patch23Tests(unittest.TestCase):
             "def countMonthOccurrencesThroughTarget(",
             "class MonthDayOccurrencePatchWrapper:",
             "patch25_applied",
+            "def legacyFindYearClosedOpeningInterval(",
+            "def correctOpeningGateInterval(",
+            "class OpeningGateIntervalPatchWrapper:",
+            "patch26_applied",
         )
 
         for token in required:
             self.assertIn(
-                token,
-                text,
-            )
-
-        forbidden = (
-            "OpeningGateIntervalPatchWrapper",
-            "patch26_applied",
-        )
-
-        for token in forbidden:
-            self.assertNotIn(
                 token,
                 text,
             )

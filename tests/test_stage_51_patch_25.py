@@ -408,7 +408,7 @@ class Stage51Patch25Tests(unittest.TestCase):
             noisy.patch25_correct_day_in_month,
         )
 
-    def test_patch26_opening_gate_logic_is_not_present(self):
+    def test_patch26_opening_gate_logic_is_present_and_legacy_layer_remains(self):
         production = (
             ROOT
             / "src"
@@ -424,14 +424,17 @@ class Stage51Patch25Tests(unittest.TestCase):
             )
         )
 
-        forbidden = (
-            "OpeningGateIntervalPatchWrapper",
+        required = (
+            "def legacyFindYearClosedOpeningInterval(",
+            "while target_day < current.open_day:",
+            "def correctOpeningGateInterval(",
+            "while target_day <= current.open_day:",
+            "class OpeningGateIntervalPatchWrapper:",
             "patch26_applied",
-            "correctOpeningGateInterval",
         )
 
-        for token in forbidden:
-            self.assertNotIn(
+        for token in required:
+            self.assertIn(
                 token,
                 text,
             )

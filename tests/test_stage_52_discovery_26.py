@@ -193,7 +193,7 @@ class Stage52Discovery26Tests(unittest.TestCase):
             second.legacy_opening_interval_result_number,
         )
 
-    def test_patch26_backward_boundary_correction_is_not_present_in_production(self):
+    def test_patch26_backward_boundary_correction_is_present_but_legacy_path_remains(self):
         production = (
             ROOT
             / "src"
@@ -203,29 +203,17 @@ class Stage52Discovery26Tests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        required_legacy = (
+        required = (
             "def legacyFindYearClosedOpeningInterval(",
             "while target_day < current.open_day:",
-            "year.open_day",
-            "<= target_day",
-            "<= year.close_day",
-        )
-
-        for token in required_legacy:
-            self.assertIn(
-                token,
-                production,
-            )
-
-        forbidden = (
-            "OpeningGateIntervalPatchWrapper",
-            "correctOpeningGateInterval",
-            "patch26_applied",
+            "def correctOpeningGateInterval(",
             "while target_day <= current.open_day:",
+            "class OpeningGateIntervalPatchWrapper:",
+            "patch26_applied",
         )
 
-        for token in forbidden:
-            self.assertNotIn(
+        for token in required:
+            self.assertIn(
                 token,
                 production,
             )

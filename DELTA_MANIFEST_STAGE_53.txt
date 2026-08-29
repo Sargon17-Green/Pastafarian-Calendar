@@ -1,0 +1,32 @@
+Aşama 53/55 — PATCH 26
+
+Bu paket yalnızca Aşama 53 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_opening_gate_interval.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_47_patch_23.py
+tests/test_stage_51_patch_25.py
+tests/test_stage_52_discovery_26.py
+tests/test_stage_53_patch_26.py
+artifacts/stage-53/BASELINE_STAGE_52_EXPECTED_RED.txt
+artifacts/stage-53/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-53/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_53.txt
+
+Silinen dosya yoktur.
+Başlangıç yüklenen Aşama 52 baseline: EXPECTED_RED, 356 test / 3 expected failure
+Patch sonrası Aşama 1–52 regressions: 356/356 PASS
+Aşama 53 full suite: GREEN, 365/365
+legacyFindYearClosedOpeningInterval: BYTE-FOR-BYTE KORUNDU VE ÖNCE ÇALIŞIR
+Legacy interval: [open,close]
+Correct backward condition: target_day<=current.open_day
+Correct semantic interval: (open,close]
+Stage52 normative regression: GÖVDE DEĞİŞMEDEN PASS
+Patch25/Patch24/Patch23/Patch22/Stage18 source: DEĞİŞMEDİ
+Aşama54 integration code: YOK
