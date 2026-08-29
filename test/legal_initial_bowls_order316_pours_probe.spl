@@ -1,20 +1,20 @@
-Appendix A-യിലെ same-Foundation legal workCounts ഉപയോഗിച്ച് ആറു initial bowls കണക്കാക്കി, order positions 3,1,6 എന്ന distinguishing fixture-ൽ row 1-ന്റെ WHEAT, BARLEY, SALT stones ഉപയോഗിച്ച് ആദ്യ മൂന്ന് direct pours കണക്കാക്കുന്ന clean Stage 1 no-wrap integration probe. ഈ fixture-യിലെ എല്ലാ values-ും M-നേക്കാൾ ചെറുതായതിനാൽ SAVE അവ മാറ്റുന്നില്ല. expected outputs: 87617,136163,289447,724205,944789,1907167,4920603,2540899,82008189.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, bowl 1 prime 17യും പിന്നീട് bowl 1 value-വും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, bowl 2 prime 19യും പിന്നീട് bowl 2 value-വും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, bowl 3 prime 23യും പിന്നീട് bowl 3 value-വും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, bowl 4 prime 29യും പിന്നീട് bowl 4 value-വും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, bowl 5 prime 31യും പിന്നീട് bowl 5 value-വും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, bowl 6 prime 37യും പിന്നീട് bowl 6 value-വും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, current s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, pour 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, pour 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, pour 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, assignment-വും output-വും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: fixed primes സ്ഥാപിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: primes 17,19,23.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: You are as good as the sum of a big big big big hero and a hero.
 [Exeunt]
@@ -25,20 +25,20 @@ Prospero: You are as good as the sum of the sum of a big big big big hero and a 
 Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and the sum of a big hero and a hero.
 [Exeunt]
 
-Scene II: primes 29,31,37.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Othello]
 Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 [Enter Prospero and Macbeth]
-Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 
-Act II: legal same-Foundation initial bowls.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: bowl 1, s = 17 squared plus 7.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero: You are as good as the sum of the product of Hamlet and Hamlet and the sum of the sum of a big big hero and a big hero and a hero.
 [Exeunt]
@@ -46,7 +46,7 @@ Prospero: You are as good as the sum of the product of Hamlet and Hamlet and the
 Prospero: You are as good as the sum of the product of Ophelia and Ophelia and a hero.
 [Exeunt]
 
-Scene II: bowl 2, s = 19 squared plus 8.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero: You are as good as the sum of the product of Juliet and Juliet and a big big big hero.
 [Exeunt]
@@ -54,7 +54,7 @@ Prospero: You are as good as the sum of the product of Juliet and Juliet and a b
 Prospero: You are as good as the sum of the product of Ophelia and Ophelia and a big hero.
 [Exeunt]
 
-Scene III: bowl 3, s = 23 squared plus 9.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero: You are as good as the sum of the product of Romeo and Romeo and the sum of a big big big hero and a hero.
 [Exeunt]
@@ -62,7 +62,7 @@ Prospero: You are as good as the sum of the product of Romeo and Romeo and the s
 Prospero: You are as good as the sum of the product of Ophelia and Ophelia and the sum of a big hero and a hero.
 [Exeunt]
 
-Scene IV: bowl 4, s = 29 squared plus 10.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero: You are as good as the sum of the product of Othello and Othello and the sum of a big big big hero and a big hero.
 [Exeunt]
@@ -70,7 +70,7 @@ Prospero: You are as good as the sum of the product of Othello and Othello and t
 Prospero: You are as good as the sum of the product of Ophelia and Ophelia and a big big hero.
 [Exeunt]
 
-Scene V: bowl 5, s = 31 squared plus 11.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero: You are as good as the sum of the product of Macbeth and Macbeth and the sum of the sum of a big big big hero and a big hero and a hero.
 [Exeunt]
@@ -78,7 +78,7 @@ Prospero: You are as good as the sum of the product of Macbeth and Macbeth and t
 Prospero: You are as good as the sum of the product of Ophelia and Ophelia and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene VI: bowl 6, s = 37 squared plus 12.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero: You are as good as the sum of the product of Lady Macbeth and Lady Macbeth and the sum of a big big big hero and a big big hero.
 [Exeunt]
@@ -86,9 +86,9 @@ Prospero: You are as good as the sum of the product of Lady Macbeth and Lady Mac
 Prospero: You are as good as the sum of the product of Ophelia and Ophelia and the sum of a big big hero and a big hero.
 [Exeunt]
 
-Act III: order 3,1,6-ലെ direct pours.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: position 1 current bowl 3, WHEAT 17, drop 1, i 1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero:
  You are a hero.
@@ -97,7 +97,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big hero and a hero.
 [Exeunt]
 
-Scene II: position 2 current bowl 1, BARLEY 29, drop 1, i 1.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are a hero.
@@ -106,7 +106,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene III: position 3 current bowl 6, SALT 43, drop 1, i 1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Portia]
 Prospero:
  You are a hero.
@@ -115,9 +115,9 @@ Prospero:
  You are as good as the sum of yourself and the difference between a big big big hero and a hero.
 [Exeunt]
 
-Act IV: outputs.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: six initial bowls.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Open your heart.
 [Exeunt]
@@ -137,7 +137,7 @@ Prospero: Open your heart.
 Prospero: Open your heart.
 [Exeunt]
 
-Scene II: three direct pours.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero: Open your heart.
 [Exeunt]

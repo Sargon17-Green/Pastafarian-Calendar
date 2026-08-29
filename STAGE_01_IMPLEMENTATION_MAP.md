@@ -1,839 +1,1016 @@
-# ഘട്ടം 1 oracle നടപ്പാക്കൽ മാപ്പ്
+# ഘട്ടം 1 മാനദണ്ഡ കണക്കുപാത നടപ്പാക്കൽ മാപ്പ്
 
-ഈ മാപ്പ് Appendix A-യിലെ നിർബന്ധിത ഭാഗങ്ങളെ SPL test-only oracle-ലേക്ക് മാറ്റേണ്ട ജോലി രേഖപ്പെടുത്തുന്നു. പൂർത്തിയായതായി അടയാളപ്പെടുത്തിയിട്ടില്ലാത്ത ഭാഗം Stage 1-ന്റെ blocker തന്നെയാണ്.
+ഈ മാപ്പ് Appendix ഒരു-യിലെ നിർബന്ധിത ഭാഗങ്ങളെ SPL പരിശോധനയ്ക്കുമാത്രമായ മാനദണ്ഡ കണക്കുപാത-ലേക്ക് മാറ്റേണ്ട ജോലി രേഖപ്പെടുത്തുന്നു. പൂർത്തിയായതായി അടയാളപ്പെടുത്തിയിട്ടില്ലാത്ത ഭാഗം ഘട്ടം 1-ന്റെ തടസ്സം തന്നെയാണ്.
 
-## ഇതിനകം source/probe ആയി പ്രത്യക്ഷപ്പെട്ട അടിസ്ഥാനങ്ങൾ
+## ഇതിനകം ഉറവിടം/പരിശോധനം ആയി പ്രത്യക്ഷപ്പെട്ട അടിസ്ഥാനങ്ങൾ
 
-- `SourceLanguageCatalog`: 17 + 47 canonical പേരുകൾ, index-സ്ഥിരത, മലയാള presentation source.
-- നിഷ്പക്ഷ production bootstrap skeleton: future patch ഒന്നുമില്ല.
-- runtime exact-integer capability contract.
-- `M = 2^127 - 1` നിർമ്മിക്കാൻ കഴിയേണ്ട വലിയ integer probe.
-- `FOUNDATION_DAY=-15055671` source-ലുതന്നെ decimal construction വഴി നിർമ്മിക്കുന്ന primitive oracle.
-- Euclidean `regularMod`-ന്റെ negative-remainder correction.
-- `SAVE(x)=1+regularMod(x-1,M)`-ന്റെ source path.
-- Foundation day-ന്റെ `dayCount` മൂന്ന് branches.
-- `workCounts`: action, target, chronological distance `abs(t-c)+1`, connection, direction.
-- short selection-ന്റെ `acceptanceLimit=floor(M/N)*N`, same-ring rejection step, final unbiased rank എന്നിവയ്ക്കുള്ള SPL probe.
-- primitive expectations-ന്റെ സ്വതന്ത്ര പട്ടിക; മറ്റൊരു implementation output ഉപയോഗിച്ചിട്ടില്ല.
+- `SourceLanguageCatalog`: 17 + 47 കാനോനിക പേരുകൾ, സൂചിക-സ്ഥിരത, മലയാള അവതരണം ഉറവിടം.
+- നിഷ്പക്ഷ പ്രവർത്തന തുടക്കഘടന അസ്ഥികൂടം: ഭാവി പരിഹാരപാളി ഒന്നുമില്ല.
+- നിർവഹണപരിസരം കൃത്യം-പൂർണ്ണസംഖ്യ ശേഷി കരാർ.
+- `M = 2^127 - 1` നിർമ്മിക്കാൻ കഴിയേണ്ട വലിയ പൂർണ്ണസംഖ്യ പരിശോധനം.
+- `FOUNDATION_DAY=-15055671` ഉറവിടം-ലുതന്നെ ദശാംശ നിർമ്മാണം വഴി നിർമ്മിക്കുന്ന അടിസ്ഥാനഘടകം മാനദണ്ഡ കണക്കുപാത.
+- യൂക്ലിഡിയൻ `regularMod`-ന്റെ ഋണ-ശേഷിപ്പ് തിരുത്തൽ.
+- `SAVE(x)=1+regularMod(x-1,M)`-ന്റെ ഉറവിട പാത.
+- സ്ഥാപനദിനം ദിവസം-ന്റെ `dayCount` മൂന്ന് ശാഖകൾ.
+- `workCounts`: പ്രവൃത്തി, ലക്ഷ്യം, കാലക്രമാനുസൃത ദൂരം `abs(t-c)+1`, ബന്ധം, ദിശ.
+- ചുരുങ്ങിയ തിരഞ്ഞെടുപ്പ്-ന്റെ `acceptanceLimit=floor(M/N)*N`, അതേ-വലയം നിരാകരണം ചുവട്, അന്തിമം പക്ഷപാതമില്ലാത്ത ക്രമസംഖ്യ എന്നിവയ്ക്കുള്ള SPL പരിശോധനം.
+- അടിസ്ഥാനഘടകം പ്രതീക്ഷകൾ-ന്റെ സ്വതന്ത്ര പട്ടിക; മറ്റൊരു നടപ്പാക്കൽ പുറപ്പാട് ഉപയോഗിച്ചിട്ടില്ല.
 
-## പൂർണ്ണ test-only oracle-ൽ ഇനിയും എഴുതേണ്ട ഭാഗങ്ങൾ
+## പൂർണ്ണ പരിശോധനയ്ക്കുമാത്രമായ മാനദണ്ഡ കണക്കുപാത-ൽ ഇനിയും എഴുതേണ്ട ഭാഗങ്ങൾ
 
-- `ceilDiv`, `wrap1` എന്നിവയുടെ പൊതുവായ exact helpers.
-- 46-row stone table.
-- 7 hidden drops.
-- 46 visible drops, 11 grinds ഓരോ drop-ലും.
-- 6 bowls, per-drop permutation, pours, simultaneous stir.
-- 12 post-stirs, 1A വായനയായ `SAVE(sum(oldBowls)+149*stirNumber)` ഒരേയൊരു saved value ആയി.
-- `askBowl`, latched drop-46 order, answer ring.
-- short/wide selection source probes നിലവിലുണ്ട്; full-oracle integration ഇനിയും വേണം.
-- gate generation ഇരുവശത്തേക്കും.
-- year 5000 candidate family, `252..5778`, tie order.
-- sequential next/previous year walk.
-- cutlet count, filtered partition family, distinct name unrank.
-- month count, bounded composition count/unrank.
-- whole-weaving count/unrank.
-- distinct month name unrank.
-- final five-field tuple.
-- end-to-end fixtures/expected outputs, oracle തന്നെ SPL-ൽ കണക്കാക്കി വീണ്ടും ഉറപ്പിച്ചവ.
+- `ceilDiv`, `wrap1` എന്നിവയുടെ പൊതുവായ കൃത്യം സഹായകങ്ങൾ.
+- 46-വരി കല്ല് പട്ടിക.
+- 7 മറഞ്ഞത് തുള്ളികൾ.
+- 46 ദൃശ്യം തുള്ളികൾ, 11 അരയ്ക്കലുകൾ ഓരോ തുള്ളി-ലും.
+- 6 പാത്രങ്ങൾ, ഓരോ-തുള്ളി ക്രമവിന്യാസം, പകർച്ചകൾ, ഒരേസമയം കലക്കൽ.
+- 12 ശേഷകലക്കലുകൾ, 1A വായനയായ `SAVE(sum(oldBowls)+149*stirNumber)` ഒരേയൊരു സംരക്ഷിച്ച മൂല്യം ആയി.
+- `askBowl`, പൂട്ടിയ തുള്ളി-46 ക്രമം, ഉത്തരം വലയം.
+- ചുരുങ്ങിയ/വിശാല തിരഞ്ഞെടുപ്പ് ഉറവിടം പരിശോധനകൾ നിലവിലുണ്ട്; പൂർണ്ണം-മാനദണ്ഡ കണക്കുപാത ഏകീകരണം ഇനിയും വേണം.
+- കവാടം സൃഷ്ടിക്കൽ ഇരുവശത്തേക്കും.
+- വർഷം 5000 സ്ഥാനാർഥി കുടുംബം, `252..5778`, സമനില ക്രമം.
+- തുടർച്ചയായ അടുത്ത/മുൻ വർഷം നടത്തം.
+- കട്ട്ലറ്റ് എണ്ണം, ചാലിച്ച വിഭജനം കുടുംബം, വ്യത്യസ്ത പേര് പുനർനിർമ്മാണം.
+- മാസം എണ്ണം, പരിധിബദ്ധ ഘടന എണ്ണം/പുനർനിർമ്മാണം.
+- മുഴുവൻ-നെയ്ത്ത് എണ്ണം/പുനർനിർമ്മാണം.
+- വ്യത്യസ്ത മാസം പേര് പുനർനിർമ്മാണം.
+- അന്തിമം അഞ്ചുഘടക ട്യൂപ്പിൾ.
+- ആരംഭംമുതൽഅവസാനംവരെ പരിശോധനാവസ്ഥകൾ/പ്രതീക്ഷിച്ച പുറപ്പാടുകൾ, മാനദണ്ഡ കണക്കുപാത തന്നെ SPL-ൽ കണക്കാക്കി വീണ്ടും ഉറപ്പിച്ചവ.
 
-പൂർണ്ണമായ oracle source ഇല്ലാതെ Stage 1 പൂർത്തിയായതായി പ്രഖ്യാപിക്കരുത്. ഈ മാപ്പ് implementation substitute അല്ല; ശേഷിക്കുന്ന ജോലിയുടെ കൃത്യ പട്ടിക മാത്രമാണ്.
+പൂർണ്ണമായ മാനദണ്ഡ കണക്കുപാത ഉറവിടം ഇല്ലാതെ ഘട്ടം 1 പൂർത്തിയായതായി പ്രഖ്യാപിക്കരുത്. ഈ മാപ്പ് നടപ്പാക്കൽ പകരം അല്ല; ശേഷിക്കുന്ന ജോലിയുടെ കൃത്യ പട്ടിക മാത്രമാണ്.
 
-## ഇപ്പോഴത്തെ അധിക oracle slice
+## ഇപ്പോഴത്തെ അധിക മാനദണ്ഡ കണക്കുപാത ഭാഗം
 
-ഈ പുരോഗതി ചുറ്റിൽ Appendix A-യുടെ അടുത്ത ഭാഗങ്ങൾ executable SPL probe-ുകളായി വേർതിരിച്ചു:
+ഈ പുരോഗതി ചുറ്റിൽ Appendix ഒരു-യുടെ അടുത്ത ഭാഗങ്ങൾ പ്രവർത്തനക്ഷമം SPL പരിശോധനം-ുകളായി വേർതിരിച്ചു:
 
-- `test/stack_memory_probe.spl`: character stack-ുകളുടെ LIFO runtime gate;
-- `test/stone_step_probe.spl`: അഞ്ചു കല്ലുകളുടെ simultaneous-old-snapshot recurrence;
-- `test/hidden_drop_trace_probe.spl`: ഒരു hidden row-യുടെ coefficient തിരഞ്ഞെടുപ്പ്, seed, ഏഴ് grind-ുകൾ;
-- `test/visible_seed_probe.spl`: visible-drop seed formula, predecessor inputs നേരിട്ട്;
-- `test/visible_grind_step_probe.spl`: visible grind recurrence-ന്റെ generic ഒറ്റ ചുവട്.
+- `test/stack_memory_probe.spl`: കഥാപാത്രം അടുക്കു-ുകളുടെ LIFO നിർവഹണപരിസരം കവാടം;
+- `test/stone_step_probe.spl`: അഞ്ചു കല്ലുകളുടെ ഒരേസമയം-പഴയ-നിശ്ചലപ്രതി ആവർത്തസൂത്രം;
+- `test/hidden_drop_trace_probe.spl`: ഒരു മറഞ്ഞത് വരി-യുടെ ഗുണകം തിരഞ്ഞെടുപ്പ്, വിത്തുമൂല്യം, ഏഴ് അരയ്ക്കൽ-ുകൾ;
+- `test/visible_seed_probe.spl`: ദൃശ്യം-തുള്ളി വിത്തുമൂല്യം സൂത്രം, മുൻഘടകം ഉൾപ്പാടുകൾ നേരിട്ട്;
+- `test/visible_grind_step_probe.spl`: ദൃശ്യം അരയ്ക്കൽ ആവർത്തസൂത്രം-ന്റെ പൊതുവായ ഒറ്റ ചുവട്.
 
-ഇവ പൂർണ്ണ oracle-ന്റെ substitute അല്ല. ഇനി source-ൽ ബന്ധിപ്പിക്കേണ്ട പ്രധാന ഭാഗങ്ങൾ: 46 stone rows-ന്റെ storage/recomputation policy, ഏഴ് hidden values-ന്റെ timeline mapping, 46 visible drops-ന്റെ rolling predecessor state, six-bowl ordering/pours/stirs, post-stir 12, answer stream, gates, years, cutlets, months, weaving, final five-field resolver.
+ഇവ പൂർണ്ണ മാനദണ്ഡ കണക്കുപാത-ന്റെ പകരം അല്ല. ഇനി ഉറവിടം-ൽ ബന്ധിപ്പിക്കേണ്ട പ്രധാന ഭാഗങ്ങൾ: 46 കല്ല് വരികൾ-ന്റെ സംഭരണം/വീണ്ടുംകണക്കാക്കൽ നയം, ഏഴ് മറഞ്ഞത് മൂല്യങ്ങൾ-ന്റെ കാലക്രമം മാപ്പിങ്, 46 ദൃശ്യം തുള്ളികൾ-ന്റെ ചലിക്കുന്ന മുൻഘടകം നില, ആറ്-പാത്രം ക്രമീകരണം/പകർച്ചകൾ/കലക്കലുകൾ, കലക്കലിനുശേഷമുള്ള 12, ഉത്തരം പ്രവാഹം, കവാടങ്ങൾ, വർഷങ്ങൾ, കട്ട്ലറ്റുകൾ, മാസങ്ങൾ, നെയ്ത്ത്, അന്തിമം അഞ്ചുഘടക നിർണ്ണായകം.
 
-Stage 1-ൽ ഇതുവരെ patch-specific legacy code ഒന്നും ചേർത്തിട്ടില്ല.
+ഘട്ടം 1-ൽ ഇതുവരെ പരിഹാരപാളി-നിശ്ചിത പാരമ്പര്യ കോഡ് ഒന്നും ചേർത്തിട്ടില്ല.
 
-## ഈ പുരോഗതി ചുറ്റിലെ പുതിയ exact slices
+## ഈ പുരോഗതി ചുറ്റിലെ പുതിയ കൃത്യം ഭാഗങ്ങൾ
 
-- `test/visible_eleven_grinds_probe.spl`: ഒരേ predecessor snapshot നിലനിർത്തി പതിനൊന്ന് visible grind recurrence-ുകൾ തുടർച്ചയായി നടത്താനുള്ള loop gate.
-- `test/answer_at_probe.spl`: `first`, സ്ഥിര `directionStep`, offset എന്നിവയിൽ നിന്നുള്ള exact answer-ring സ്ഥാനം.
-- `test/factoradic_rank6_probe.spl`: 1..720 one-based rank-നെ `[120,24,6,2,1]` blocks വഴി ആറു zero-based factoradic തിരഞ്ഞെടുപ്പ് സൂചികകളാക്കി തുറക്കുന്നു.
-- `test/year_candidate_predicate_probe.spl`: Appendix A-യിലെ `gaps >= 6` കൂടാതെ `252..5778` year-pair validity predicate source-ൽ ഉറപ്പിക്കുന്നു.
+- `test/visible_eleven_grinds_probe.spl`: ഒരേ മുൻഘടകം നിശ്ചലപ്രതി നിലനിർത്തി പതിനൊന്ന് ദൃശ്യം അരയ്ക്കൽ ആവർത്തസൂത്രം-ുകൾ തുടർച്ചയായി നടത്താനുള്ള ചക്രം കവാടം.
+- `test/answer_at_probe.spl`: `first`, സ്ഥിര `directionStep`, സ്ഥാനമാറ്റം എന്നിവയിൽ നിന്നുള്ള കൃത്യം ഉത്തരം-വലയം സ്ഥാനം.
+- `test/factoradic_rank6_probe.spl`: 1..720 ഒന്നിൽനിന്നാരംഭിക്കുന്ന ക്രമസംഖ്യ-നെ `[120,24,6,2,1]` ഖണ്ഡങ്ങൾ വഴി ആറു പൂജ്യത്തിൽനിന്നാരംഭിക്കുന്ന ഘടകാധിഷ്ഠിത തിരഞ്ഞെടുപ്പ് സൂചികകളാക്കി തുറക്കുന്നു.
+- `test/year_candidate_predicate_probe.spl`: Appendix ഒരു-യിലെ `gaps >= 6` കൂടാതെ `252..5778` വർഷം-ജോടി സാധുത നിബന്ധന ഉറവിടം-ൽ ഉറപ്പിക്കുന്നു.
 
-ഇവ full calendar oracle അല്ല. പ്രത്യേകിച്ച് factoradic സൂചികകളെ remaining bowl IDs-ൽ നിന്ന് യഥാർത്ഥ permutation ആയി materialize ചെയ്യൽ, 46 visible drops-ന്റെ rolling timeline, bowls/post-stirs, sauce query, gates, years, cutlets, months, weaving, final five-field resolver എന്നിവ ഇനിയും ബന്ധിപ്പിക്കണം.
+ഇവ പൂർണ്ണം കലണ്ടർ മാനദണ്ഡ കണക്കുപാത അല്ല. പ്രത്യേകിച്ച് ഘടകാധിഷ്ഠിത സൂചികകളെ ശേഷിക്കുന്ന പാത്രം തിരിച്ചറിയൽസൂചികകൾ-ൽ നിന്ന് യഥാർത്ഥ ക്രമവിന്യാസം ആയി രൂപപ്പെടുത്തുക ചെയ്യൽ, 46 ദൃശ്യം തുള്ളികൾ-ന്റെ ചലിക്കുന്ന കാലക്രമം, പാത്രങ്ങൾ/ശേഷകലക്കലുകൾ, സോസ് ചോദ്യം, കവാടങ്ങൾ, വർഷങ്ങൾ, കട്ട്ലറ്റുകൾ, മാസങ്ങൾ, നെയ്ത്ത്, അന്തിമം അഞ്ചുഘടക നിർണ്ണായകം എന്നിവ ഇനിയും ബന്ധിപ്പിക്കണം.
 
-## ഈ തുടർച്ചയിൽ ചേർത്ത bowl/sauce exact slices
+## ഈ തുടർച്ചയിൽ ചേർത്ത പാത്രം/സോസ് കൃത്യം ഭാഗങ്ങൾ
 
-- `test/initial_bowl_formula_probe.spl`: `initialBowls`-ന്റെ ഒരു സ്ഥിര bowl ID-യ്ക്കുള്ള exact formula.
-- `test/pour_triplet_probe.spl`: drop order-ിലെ position 1..3-ക്ക് wheat/barley/salt പകർച്ചകൾ; സ്ഥിര bowl 1..3 എന്ന തെറ്റായ വായന ഇല്ല.
-- `test/bowl_shadow_stir_probe.spl`: ഒരേ പഴയ snapshot-ിൽ നിന്ന് pending bowl scalar കണക്കാക്കുന്ന formula.
-- `test/post_stir_saved_sum_probe.spl`: 1A പ്രകാരമുള്ള ഏക `SAVE(sum(oldBowls)+149*stir)` value.
-- `test/post_stir_bowl_probe.spl`: post-stir-ിലെ ഒരു order position-ന്റെ pending bowl formula.
-- `test/latched_order_successor_probe.spl`: തുള്ളി 46-ൽ പൂട്ടിയ order-ിൽ circular next-bowl lookup.
-- `test/ask_bowl_probe.spl`: `first` answer-ഉം ഒരിക്കൽ മാത്രം നിശ്ചയിക്കുന്ന direction step-ഉം.
+- `test/initial_bowl_formula_probe.spl`: `initialBowls`-ന്റെ ഒരു സ്ഥിര പാത്രം തിരിച്ചറിയൽസൂചിക-യ്ക്കുള്ള കൃത്യം സൂത്രം.
+- `test/pour_triplet_probe.spl`: തുള്ളി ക്രമം-ിലെ സ്ഥാനം 1..3-ക്ക് ഗോതമ്പ്/ബാർലി/ഉപ്പ് പകർച്ചകൾ; സ്ഥിര പാത്രം 1..3 എന്ന തെറ്റായ വായന ഇല്ല.
+- `test/bowl_shadow_stir_probe.spl`: ഒരേ പഴയ നിശ്ചലപ്രതി-ിൽ നിന്ന് കാത്തിരിക്കുന്ന പാത്രം ഏകമൂല്യം കണക്കാക്കുന്ന സൂത്രം.
+- `test/post_stir_saved_sum_probe.spl`: 1A പ്രകാരമുള്ള ഏക `SAVE(sum(oldBowls)+149*stir)` മൂല്യം.
+- `test/post_stir_bowl_probe.spl`: കലക്കലിനുശേഷമുള്ള-ിലെ ഒരു ക്രമം സ്ഥാനം-ന്റെ കാത്തിരിക്കുന്ന പാത്രം സൂത്രം.
+- `test/latched_order_successor_probe.spl`: തുള്ളി 46-ൽ പൂട്ടിയ ക്രമം-ിൽ വലയാകൃതിയിലുള്ള അടുത്ത-പാത്രം തിരച്ചിൽ.
+- `test/ask_bowl_probe.spl`: `first` ഉത്തരം-ഉം ഒരിക്കൽ മാത്രം നിശ്ചയിക്കുന്ന ദിശ ചുവട്-ഉം.
 
-ഇവകൊണ്ട് bowls/sauce മേഖലയുടെ scalar semantics source-ൽ കൂടുതൽ അടഞ്ഞുവെങ്കിലും full 46-drop orchestration, ആറു bowls-ന്റെ simultaneous rounds, 12 post-stirs-ന്റെ മുഴുവൻ chain, factoradic digits-ൽ നിന്ന് actual permutation materialization എന്നിവ ഇനിയും വേണം. Gate/year/cutlet/month/weaving/final tuple ഭാഗങ്ങളും ഇനിയും blocker ആണ്.
+ഇവകൊണ്ട് പാത്രങ്ങൾ/സോസ് മേഖലയുടെ ഏകമൂല്യം അർത്ഥനിയമങ്ങൾ ഉറവിടം-ൽ കൂടുതൽ അടഞ്ഞുവെങ്കിലും പൂർണ്ണം 46-തുള്ളി ക്രമനിർവഹണം, ആറു പാത്രങ്ങൾ-ന്റെ ഒരേസമയം ചക്രങ്ങൾ, 12 ശേഷകലക്കലുകൾ-ന്റെ മുഴുവൻ ശൃംഖല, ഘടകാധിഷ്ഠിത അക്കങ്ങൾ-ൽ നിന്ന് യഥാർത്ഥം ക്രമവിന്യാസം രൂപപ്പെടുത്തൽ എന്നിവ ഇനിയും വേണം. കവാടം/വർഷം/കട്ട്ലറ്റ്/മാസം/നെയ്ത്ത്/അന്തിമ ട്യൂപ്പിൾ ഭാഗങ്ങളും ഇനിയും തടസ്സം ആണ്.
 
-## ഈ തുടർച്ചയിലെ permutation/helper/orchestration പുരോഗതി
+## ഈ തുടർച്ചയിലെ ക്രമവിന്യാസം/സഹായകം/ക്രമനിർവഹണം പുരോഗതി
 
-ഈ revision-ൽ Stage 1 clean oracle-ന്റെ താഴെപ്പറയുന്ന ഭാഗങ്ങൾ കൂടി SPL source ആയി ചേർത്തു:
+ഈ പതിപ്പ്-ൽ ഘട്ടം 1 ശുദ്ധം മാനദണ്ഡ കണക്കുപാത-ന്റെ താഴെപ്പറയുന്ന ഭാഗങ്ങൾ കൂടി SPL ഉറവിടം ആയി ചേർത്തു:
 
-- `test/select_kth_remaining_probe.spl`: factoradic digit-നെ active remaining bowl ID-യിൽ resolve ചെയ്യുന്ന primitive;
-- `test/wrap1_probe.spl`: 1-based circular wrapping, negative position ഉൾപ്പെടെ;
-- `test/ceil_div_probe.spl`: non-negative exact ceiling division;
-- `test/six_bowl_round_control_probe.spl`: ആറു order positions-ന്റെ shared-old-snapshot scalar loop-ിനുള്ള control fixture;
-- `test/month_count_bounds_probe.spl`: `ceilDiv(L,123)` മുതൽ `min(47,floorDiv(L,4))` വരെ month-count bounds;
-- `test/falling_factorial_probe.spl`: distinct-name ordered family count-ന്റെ exact arithmetic.
+- `test/select_kth_remaining_probe.spl`: ഘടകാധിഷ്ഠിത അക്കം-നെ സജീവ ശേഷിക്കുന്ന പാത്രം തിരിച്ചറിയൽസൂചിക-യിൽ നിർണ്ണയിക്കുക ചെയ്യുന്ന അടിസ്ഥാനഘടകം;
+- `test/wrap1_probe.spl`: 1-അധിഷ്ഠിത വലയാകൃതിയിലുള്ള ചുറ്റിക്കൽ, ഋണ സ്ഥാനം ഉൾപ്പെടെ;
+- `test/ceil_div_probe.spl`: അല്ലാത്ത-ഋണ കൃത്യം മുകളിൽവട്ടമിടൽ വിഭജനം;
+- `test/six_bowl_round_control_probe.spl`: ആറു ക്രമം സ്ഥാനങ്ങൾ-ന്റെ പങ്കിട്ട-പഴയ-നിശ്ചലപ്രതി ഏകമൂല്യം ചക്രം-ിനുള്ള നിയന്ത്രണം പരിശോധനാവസ്ഥ;
+- `test/month_count_bounds_probe.spl`: `ceilDiv(L,123)` മുതൽ `min(47,floorDiv(L,4))` വരെ മാസം-എണ്ണം പരിധികൾ;
+- `test/falling_factorial_probe.spl`: വ്യത്യസ്ത-പേര് ക്രമപ്പെടുത്തിയ കുടുംബം എണ്ണം-ന്റെ കൃത്യം ഗണിതം.
 
-ഇതോടെ factoradic decomposition-നും actual remaining-item selection-നും ഇടയിലെ primitive gap ചുരുങ്ങി. എന്നിരുന്നാലും ആറു factoradic digits തുടർച്ചയായി പ്രയോഗിച്ച് active-set mutate ചെയ്യുന്ന full permutation function ഇനിയും source-ൽ ബന്ധിപ്പിച്ചിട്ടില്ല. 46-drop rolling timeline, generic six-bowl round, 12 post-stir chain, gates, year traversal, cutlet partition DP, bounded month composition DP, whole-weaving DP, name unranking, final resolver എന്നിവയും blocker ആയി തുടരുന്നു.
+ഇതോടെ ഘടകാധിഷ്ഠിത വിഘടനം-നും യഥാർത്ഥം ശേഷിക്കുന്ന-ഘടകം തിരഞ്ഞെടുപ്പ്-നും ഇടയിലെ അടിസ്ഥാനഘടകം ഇടവ് ചുരുങ്ങി. എന്നിരുന്നാലും ആറു ഘടകാധിഷ്ഠിത അക്കങ്ങൾ തുടർച്ചയായി പ്രയോഗിച്ച് സജീവ-സമുച്ചയം മാറ്റുക ചെയ്യുന്ന പൂർണ്ണം ക്രമവിന്യാസം പ്രവർത്തകം ഇനിയും ഉറവിടം-ൽ ബന്ധിപ്പിച്ചിട്ടില്ല. 46-തുള്ളി ചലിക്കുന്ന കാലക്രമം, പൊതുവായ ആറ്-പാത്രം ചക്രം, 12 കലക്കലിനുശേഷമുള്ള ശൃംഖല, കവാടങ്ങൾ, വർഷം സഞ്ചാരം, കട്ട്ലറ്റ് വിഭജനം DP, പരിധിബദ്ധ മാസം ഘടന DP, മുഴുവൻ-നെയ്ത്ത് DP, പേര് പുനർനിർമ്മാണം, അന്തിമ നിർണ്ണായകം എന്നിവയും തടസ്സം ആയി തുടരുന്നു.
 
-## ഈ തുടർച്ചയിലെ timeline/year-boundary control slices
+## ഈ തുടർച്ചയിലെ കാലക്രമം/വർഷം-അതിർത്തി നിയന്ത്രണം ഭാഗങ്ങൾ
 
-ഈ revision-ൽ full oracle-ലേക്ക് നേരിട്ട് ആവശ്യമായ അഞ്ചു control primitives കൂടി SPL source ആയി ചേർത്തു:
+ഈ പതിപ്പ്-ൽ പൂർണ്ണം മാനദണ്ഡ കണക്കുപാത-ലേക്ക് നേരിട്ട് ആവശ്യമായ അഞ്ചു നിയന്ത്രണം അടിസ്ഥാനഘടകങ്ങൾ കൂടി SPL ഉറവിടം ആയി ചേർത്തു:
 
-- `test/timeline_source_mux_probe.spl`: `slot=i-back` positive ആണെങ്കിൽ visible predecessor, zero/negative ആണെങ്കിൽ `hiddenIndex=1-slot` എന്ന mapping;
-- `test/post_stir_twelve_schedule_probe.spl`: stir 1..12 എണ്ണം കൃത്യമായി കടന്നുപോകുന്ന 1A saved-sum schedule control;
-- `test/year_interval_membership_probe.spl`: വർഷം `[open,close]` അല്ല, നിർബന്ധിതമായി `(open,close]` ആണെന്ന membership gate;
-- `test/cutlet_required_boundary_probe.spl`: calculation gate internal exact gate ആണെങ്കിൽ മാത്രം required prefix boundary offset;
-- `test/target_year_walk_direction_probe.spl`: `target>close` next, `target<=open` previous, മറ്റെല്ലാം current എന്ന sequential-walk control.
+- `test/timeline_source_mux_probe.spl`: `slot=i-back` ധന ആണെങ്കിൽ ദൃശ്യം മുൻഘടകം, പൂജ്യം/ഋണ ആണെങ്കിൽ `hiddenIndex=1-slot` എന്ന മാപ്പിങ്;
+- `test/post_stir_twelve_schedule_probe.spl`: കലക്കൽ 1..12 എണ്ണം കൃത്യമായി കടന്നുപോകുന്ന 1A സംരക്ഷിച്ച-തുക ക്രമപട്ടിക നിയന്ത്രണം;
+- `test/year_interval_membership_probe.spl`: വർഷം `[open,close]` അല്ല, നിർബന്ധിതമായി `(open,close]` ആണെന്ന അംഗത്വം കവാടം;
+- `test/cutlet_required_boundary_probe.spl`: കണക്കുകൂട്ടൽ കവാടം ആന്തരിക കൃത്യം കവാടം ആണെങ്കിൽ മാത്രം നിർബന്ധിത ആമുഖഭാഗം അതിർത്തി സ്ഥാനമാറ്റം;
+- `test/target_year_walk_direction_probe.spl`: `target>close` അടുത്ത, `target<=open` മുൻ, മറ്റെല്ലാം നിലവിലെ എന്ന തുടർച്ചയായ-നടത്തം നിയന്ത്രണം.
 
-ഇവ scalar/control semantics അടയ്ക്കുന്നു; full rolling 46-drop value store, actual six-ID permutation materialization, six bowls-ന്റെ generic simultaneous commit, 12 post-stir bowl-state chain, gate generation/cache, year candidate enumeration/selection, composition/unranking DP, weaving DP, final five-field resolver എന്നിവ ഇനിയും blocker ആണ്.
+ഇവ ഏകമൂല്യം/നിയന്ത്രണം അർത്ഥനിയമങ്ങൾ അടയ്ക്കുന്നു; പൂർണ്ണം ചലിക്കുന്ന 46-തുള്ളി മൂല്യം സംഭരണം, യഥാർത്ഥം ആറ്-തിരിച്ചറിയൽസൂചിക ക്രമവിന്യാസം രൂപപ്പെടുത്തൽ, ആറ് പാത്രങ്ങൾ-ന്റെ പൊതുവായ ഒരേസമയം ഉറപ്പിക്കൽ, 12 കലക്കലിനുശേഷമുള്ള പാത്രം-നില ശൃംഖല, കവാടം സൃഷ്ടിക്കൽ/സംഭരണപ്പട്ടിക, വർഷം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/തിരഞ്ഞെടുപ്പ്, ഘടന/പുനർനിർമ്മാണം DP, നെയ്ത്ത് DP, അന്തിമം അഞ്ചുഘടക നിർണ്ണായകം എന്നിവ ഇനിയും തടസ്സം ആണ്.
 
-## ഈ തുടർച്ചയിലെ full-permutation/combinatorics/weaving പുരോഗതി
+## ഈ തുടർച്ചയിലെ പൂർണ്ണം-ക്രമവിന്യാസം/സമുച്ചയഗണിതം/നെയ്ത്ത് പുരോഗതി
 
-ഈ revision-ൽ clean Stage 1 oracle-ന്റെ അഞ്ചു ഭാഗങ്ങൾ കൂടി SPL source ആയി ചേർത്തു:
+ഈ പതിപ്പ്-ൽ ശുദ്ധം ഘട്ടം 1 മാനദണ്ഡ കണക്കുപാത-ന്റെ അഞ്ചു ഭാഗങ്ങൾ കൂടി SPL ഉറവിടം ആയി ചേർത്തു:
 
-- `test/permutation_materialize6_probe.spl`: ആറു factoradic digits active-set removal സഹിതം actual six-ID permutation ആക്കുന്നു;
-- `test/bounded_composition_window_probe.spl`: bounded-composition suffix-ിൽ അടുത്ത lexicographic value-ന്റെ exact inclusive feasibility window;
-- `test/weave_move_legality_probe.spl`: `legalWeaveMove`-ന്റെ remaining/open/close ordering predicate;
-- `test/weave_state_transition_probe.spl`: legal move-ന്റെ `applyWeaveMove` state update;
-- `test/month_occurrence_prefix6_probe.spl`: final `dayInMonth`-ന്റെ inclusive occurrence count ചെറിയ weaving prefix-ിൽ.
+- `test/permutation_materialize6_probe.spl`: ആറു ഘടകാധിഷ്ഠിത അക്കങ്ങൾ സജീവ-സമുച്ചയം നീക്കം സഹിതം യഥാർത്ഥം ആറ്-തിരിച്ചറിയൽസൂചിക ക്രമവിന്യാസം ആക്കുന്നു;
+- `test/bounded_composition_window_probe.spl`: പരിധിബദ്ധ ഘടന അവസാനഭാഗം-ിൽ അടുത്ത നിഘണ്ടുക്രമ മൂല്യം-ന്റെ കൃത്യം ഉൾപ്പെടുന്ന സാധ്യത ജാലകം;
+- `test/weave_move_legality_probe.spl`: `legalWeaveMove`-ന്റെ ശേഷിക്കുന്ന/തുറക്കൽ/അടയ്ക്കൽ ക്രമീകരണം നിബന്ധന;
+- `test/weave_state_transition_probe.spl`: നിയമാനുസൃത നീക്കം-ന്റെ `applyWeaveMove` നില പുതുക്കൽ;
+- `test/month_occurrence_prefix6_probe.spl`: അന്തിമം `dayInMonth`-ന്റെ ഉൾപ്പെടുന്ന സംഭവം എണ്ണം ചെറിയ നെയ്ത്ത് ആമുഖഭാഗം-ിൽ.
 
-ഇതോടെ permutation materialization-ന്റെ മുൻ primitive gap source-ൽ അടഞ്ഞു. എന്നിരുന്നാലും `rank1 -> factoradic digits -> permutation` ഒരൊറ്റ integrated routine ആയി ബന്ധിപ്പിക്കൽ, rolling 7+46 drop values, 46 bowl rounds, 12 post-stir state chain, lazy gates, year candidate enumeration/selection, full composition count/unrank memo, full weaving Count/Unrank memo, distinct-name unrank, final five-field resolver എന്നിവ ഇനിയും blocker ആണ്.
+ഇതോടെ ക്രമവിന്യാസം രൂപപ്പെടുത്തൽ-ന്റെ മുൻ അടിസ്ഥാനഘടകം ഇടവ് ഉറവിടം-ൽ അടഞ്ഞു. എന്നിരുന്നാലും `rank1 -> factoradic digits -> permutation` ഒരൊറ്റ ഏകീകൃതം ക്രമനടപടി ആയി ബന്ധിപ്പിക്കൽ, ചലിക്കുന്ന 7+46 തുള്ളി മൂല്യങ്ങൾ, 46 പാത്രം ചക്രങ്ങൾ, 12 കലക്കലിനുശേഷമുള്ള നില ശൃംഖല, ആവശ്യാനുസൃത കവാടങ്ങൾ, വർഷം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/തിരഞ്ഞെടുപ്പ്, പൂർണ്ണം ഘടന എണ്ണം/പുനർനിർമ്മാണം ഓർമ്മപ്പട്ടിക, പൂർണ്ണം നെയ്ത്ത് എണ്ണം/പുനർനിർമ്മാണം ഓർമ്മപ്പട്ടിക, വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം, അന്തിമം അഞ്ചുഘടക നിർണ്ണായകം എന്നിവ ഇനിയും തടസ്സം ആണ്.
 
-## ഈ തുടർച്ചയിലെ gate/year/name integration primitives
+## ഈ തുടർച്ചയിലെ കവാടം/വർഷം/പേര് ഏകീകരണം അടിസ്ഥാനഘടകങ്ങൾ
 
-ഈ revision-ൽ clean Stage 1 oracle-ന്റെ അഞ്ചു അടുത്ത ബന്ധങ്ങൾ കൂടി SPL source ആയി ചേർത്തു:
+ഈ പതിപ്പ്-ൽ ശുദ്ധം ഘട്ടം 1 മാനദണ്ഡ കണക്കുപാത-ന്റെ അഞ്ചു അടുത്ത ബന്ധങ്ങൾ കൂടി SPL ഉറവിടം ആയി ചേർത്തു:
 
-- `test/permutation_rank_first_block_probe.spl`: one-based permutation rank-ന്റെ ആദ്യ 120-size lexicographic block-ും residual rank-ും ഒരൊറ്റ source path-ൽ;
-- `test/gate_question_day_probe.spl`: signed gate step-ന്റെ positive/negative question-day semantics;
-- `test/gate_accumulate_three_probe.spl`: known gate-ിൽ നിന്ന് മൂന്ന് exact gaps ഒരേ signed ദിശയിൽ accumulate ചെയ്യൽ;
-- `test/year5000_candidate_filter_probe.spl`: `gaps>=6`, `252..5778`, `(open,close]` calculation-day containment എന്നിവ ഒരൊറ്റ clean candidate predicate-ൽ;
-- `test/distinct_name_first_choice_probe.spl`: falling-factorial block ഉപയോഗിച്ച് distinct-name lexicographic unrank-ന്റെ ആദ്യ candidate ordinal/residual rank.
+- `test/permutation_rank_first_block_probe.spl`: ഒന്നിൽനിന്നാരംഭിക്കുന്ന ക്രമവിന്യാസം ക്രമസംഖ്യ-ന്റെ ആദ്യ 120-വലുപ്പം നിഘണ്ടുക്രമ ഖണ്ഡം-ും ശേഷിപ്പ് ക്രമസംഖ്യ-ും ഒരൊറ്റ ഉറവിട പാത-ൽ;
+- `test/gate_question_day_probe.spl`: ചിഹ്നമുള്ള കവാടം ചുവട്-ന്റെ ധന/ഋണ ചോദ്യം-ദിവസം അർത്ഥനിയമങ്ങൾ;
+- `test/gate_accumulate_three_probe.spl`: അറിയാവുന്ന കവാടം-ിൽ നിന്ന് മൂന്ന് കൃത്യം ഇടവുകൾ ഒരേ ചിഹ്നമുള്ള ദിശയിൽ കൂട്ടിച്ചേർക്കുക ചെയ്യൽ;
+- `test/year5000_candidate_filter_probe.spl`: `gaps>=6`, `252..5778`, `(open,close]` കണക്കുകൂട്ടൽ-ദിവസം ഉൾക്കൊള്ളൽ എന്നിവ ഒരൊറ്റ ശുദ്ധം സ്ഥാനാർഥി നിബന്ധന-ൽ;
+- `test/distinct_name_first_choice_probe.spl`: അവരോഹി-ഘടകഗുണിതം ഖണ്ഡം ഉപയോഗിച്ച് വ്യത്യസ്ത-പേര് നിഘണ്ടുക്രമ പുനർനിർമ്മാണം-ന്റെ ആദ്യ സ്ഥാനാർഥി ക്രമസ്ഥാനം/ശേഷിപ്പ് ക്രമസംഖ്യ.
 
-ഇവ full oracle-ന്റെ സഹായക integration slices ആണ്. 720-rank-നെ ആറ് factoradic decisions വഴി permutation-ൽ പൂർണ്ണമായി ബന്ധിപ്പിക്കുന്ന ഒറ്റ routine, gate gap-ുകൾ sauce/answer selection-ൽ നിന്ന് യഥാർത്ഥമായി സൃഷ്ടിക്കുന്ന lazy cache, year candidate enumeration/sort/selection, repeated distinct-name positions, full cutlet/month composition DP, full weaving DP, final five-field resolver എന്നിവ ഇനിയും blocker ആണ്.
+ഇവ പൂർണ്ണം മാനദണ്ഡ കണക്കുപാത-ന്റെ സഹായക ഏകീകരണം ഭാഗങ്ങൾ ആണ്. 720-ക്രമസംഖ്യ-നെ ആറ് ഘടകാധിഷ്ഠിത തീരുമാനങ്ങൾ വഴി ക്രമവിന്യാസം-ൽ പൂർണ്ണമായി ബന്ധിപ്പിക്കുന്ന ഒറ്റ ക്രമനടപടി, കവാടം ഇടവ്-ുകൾ സോസ്/ഉത്തരം തിരഞ്ഞെടുപ്പ്-ൽ നിന്ന് യഥാർത്ഥമായി സൃഷ്ടിക്കുന്ന ആവശ്യാനുസൃത സംഭരണപ്പട്ടിക, വർഷം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമീകരണം/തിരഞ്ഞെടുപ്പ്, ആവർത്തിച്ച വ്യത്യസ്ത-പേര് സ്ഥാനങ്ങൾ, പൂർണ്ണം കട്ട്ലറ്റ്/മാസം ഘടന DP, പൂർണ്ണം നെയ്ത്ത് DP, അന്തിമം അഞ്ചുഘടക നിർണ്ണായകം എന്നിവ ഇനിയും തടസ്സം ആണ്.
 
-## പുതിയ clean-reference slices
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഭാഗങ്ങൾ
 
-### Gate/year ordering
+### കവാടം/വർഷം ക്രമീകരണം
 
-- `test/gate_gap_choice_probe.spl` — selector rank `1..922` മുതൽ gap `42..963` വരെ.
-- `test/year5000_pair_order_probe.spl` — candidate pair sort: length ascending, tie-ൽ open day ascending.
+- `test/gate_gap_choice_probe.spl` — തിരഞ്ഞെടുപ്പുകാരൻ ക്രമസംഖ്യ `1..922` മുതൽ ഇടവ് `42..963` വരെ.
+- `test/year5000_pair_order_probe.spl` — സ്ഥാനാർഥി ജോടി ക്രമീകരണം: നീളം ആരോഹണ, സമനില-ൽ തുറക്കൽ ദിവസം ആരോഹണ.
 
-ഇനി വേണ്ടത്: sauce/ask/chooseRank മുതൽ gap creation വരെ full call path, lazy indexed gate store, Year 5000 candidate enumeration, list sort, selected rank materialization, next/previous year candidate lists, sequential walk.
+ഇനി വേണ്ടത്: സോസ്/ചോദിക്കുക/chooseRank മുതൽ ഇടവ് സൃഷ്ടി വരെ പൂർണ്ണം വിളി പാത, ആവശ്യാനുസൃത സൂചികപ്പെടുത്തിയ കവാടം സംഭരണം, വർഷം 5000 സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ, പട്ടിക ക്രമീകരണം, തിരഞ്ഞെടുത്ത ക്രമസംഖ്യ രൂപപ്പെടുത്തൽ, അടുത്ത/മുൻ വർഷം സ്ഥാനാർഥി പട്ടികകൾ, തുടർച്ചയായ നടത്തം.
 
-### Structure candidate ranges
+### ഘടന സ്ഥാനാർഥി പരിധികൾ
 
-- `test/cutlet_count_candidate_count_probe.spl` — cutlet count candidate family size.
-- `test/month_count_rank_resolve_probe.spl` — month count lower/upper bounds + selected rank.
+- `test/cutlet_count_candidate_count_probe.spl` — കട്ട്ലറ്റ് എണ്ണം സ്ഥാനാർഥി കുടുംബം വലുപ്പം.
+- `test/month_count_rank_resolve_probe.spl` — മാസം എണ്ണം താഴത്തെ/മുകളിലെ പരിധികൾ + തിരഞ്ഞെടുത്ത ക്രമസംഖ്യ.
 
-ഇനി വേണ്ടത്: chosen cutlet count-ിൽ filtered positive-composition DP; chosen month count-ിൽ bounded-composition general memo/count/unrank.
+ഇനി വേണ്ടത്: തിരഞ്ഞെടുത്ത കട്ട്ലറ്റ് എണ്ണം-ിൽ ചാലിച്ച ധന-ഘടന DP; തിരഞ്ഞെടുത്ത മാസം എണ്ണം-ിൽ പരിധിബദ്ധ ഘടന പൊതുവായ ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം.
 
-### Distinct names
+### വ്യത്യസ്ത പേരുകൾ
 
-- `test/distinct_name_two_choice_probe.spl` — ആദ്യ രണ്ടു positions removal-aware original canonicalIndex mapping സഹിതം.
+- `test/distinct_name_two_choice_probe.spl` — ആദ്യ രണ്ടു സ്ഥാനങ്ങൾ നീക്കം-കണക്കിലെടുക്കുന്ന മൂല canonicalIndex മാപ്പിങ് സഹിതം.
 
-ഇനി വേണ്ടത്: arbitrary `k` positions മുഴുവൻ loop ചെയ്ത് remaining canonicalIndex list mutate ചെയ്യുന്ന general unrank routine; presentation layer-ൽ മാത്രം SourceLanguageCatalog string resolve ചെയ്യൽ.
+ഇനി വേണ്ടത്: ഏതുവലുപ്പമുള്ള `k` സ്ഥാനങ്ങൾ മുഴുവൻ ചക്രം ചെയ്ത് ശേഷിക്കുന്ന canonicalIndex പട്ടിക മാറ്റുക ചെയ്യുന്ന പൊതുവായ പുനർനിർമ്മാണം ക്രമനടപടി; അവതരണം പാളി-ൽ മാത്രം SourceLanguageCatalog അക്ഷരനിര നിർണ്ണയിക്കുക ചെയ്യൽ.
 
-### Exact family base cases
+### കൃത്യം കുടുംബം അടിസ്ഥാനം സന്ദർഭങ്ങൾ
 
-- `test/bounded_composition_two_slot_probe.spl` — slots=2 bounded family exact count/unrank base slice.
-- `test/weave_two_month_count_probe.spl` — m=2 weaving-family exact cardinality sanity slice.
+- `test/bounded_composition_two_slot_probe.spl` — സ്ഥാനങ്ങൾ=2 പരിധിബദ്ധ കുടുംബം കൃത്യം എണ്ണം/പുനർനിർമ്മാണം അടിസ്ഥാനം ഭാഗം.
+- `test/weave_two_month_count_probe.spl` — m=2 നെയ്ത്ത്-കുടുംബം കൃത്യം അംഗസംഖ്യ അടിസ്ഥാനസാധുത ഭാഗം.
 
-ഇനി വേണ്ടത്: arbitrary slots-ിന്റെ memoized bounded-composition suffix counter/unrank, arbitrary month-count weaving state memo CountWeavings + lexicographic unrank.
+ഇനി വേണ്ടത്: ഏതുവലുപ്പമുള്ള സ്ഥാനങ്ങൾ-ിന്റെ ഓർമ്മപ്പട്ടികയുള്ള പരിധിബദ്ധ ഘടന അവസാനഭാഗം എണ്ണിപ്പകരണം/പുനർനിർമ്മാണം, ഏതുവലുപ്പമുള്ള മാസം-എണ്ണം നെയ്ത്ത് നില ഓർമ്മപ്പട്ടിക CountWeavings + നിഘണ്ടുക്രമ പുനർനിർമ്മാണം.
 
-## പുതിയ clean-reference integration slices — rank-to-order, മൂന്ന്-slot DP, final resolver helpers
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — ക്രമസംഖ്യ-വരെ-ക്രമം, മൂന്ന്-സ്ഥാനം DP, അന്തിമ നിർണ്ണായകം സഹായകങ്ങൾ
 
-ഈ continuation-ൽ clean Stage 1 oracle-ന്റെ അടുത്ത എട്ട് source slices ചേർത്തു:
+ഈ തുടർച്ച-ൽ ശുദ്ധം ഘട്ടം 1 മാനദണ്ഡ കണക്കുപാത-ന്റെ അടുത്ത എട്ട് ഉറവിടം ഭാഗങ്ങൾ ചേർത്തു:
 
-- `test/bowl_order_rank6_integrated_probe.spl`: one-based rank `1..720` -> factoradic digits -> removal-aware six-ID permutation, ഒരൊറ്റ source path;
-- `test/cutlet_count_rank_resolve_probe.spl`: `6..min(17,gateGaps)` family count + one-based rank resolve;
-- `test/bounded_composition_three_slot_count_probe.spl`: slots=3 bounded family exact count;
-- `test/bounded_composition_three_slot_unrank_probe.spl`: slots=3 lexicographic unrank;
-- `test/cutlet_partition_three_slot_filter_probe.spl`: മൂന്ന് positive cutlet parts-ൽ required prefix boundary filter + exact count/unrank;
-- `test/cutlet_day_resolve_three_probe.spl`: materialized cutlet intervals-ൽ canonicalIndex + inclusive day position resolve;
-- `test/weave_offset_select6_probe.spl`: year offset-ിൽ നിന്ന് weaving monthId resolve;
-- `test/distinct_name_third_mapping_probe.spl`: രണ്ടു removals കഴിഞ്ഞ third remaining ordinal original canonicalIndex ordinal-ിലേക്ക് map ചെയ്യൽ.
+- `test/bowl_order_rank6_integrated_probe.spl`: ഒന്നിൽനിന്നാരംഭിക്കുന്ന ക്രമസംഖ്യ `1..720` -> ഘടകാധിഷ്ഠിത അക്കങ്ങൾ -> നീക്കം-കണക്കിലെടുക്കുന്ന ആറ്-തിരിച്ചറിയൽസൂചിക ക്രമവിന്യാസം, ഒരൊറ്റ ഉറവിട പാത;
+- `test/cutlet_count_rank_resolve_probe.spl`: `6..min(17,gateGaps)` കുടുംബം എണ്ണം + ഒന്നിൽനിന്നാരംഭിക്കുന്ന ക്രമസംഖ്യ നിർണ്ണയിക്കുക;
+- `test/bounded_composition_three_slot_count_probe.spl`: സ്ഥാനങ്ങൾ=3 പരിധിബദ്ധ കുടുംബം കൃത്യം എണ്ണം;
+- `test/bounded_composition_three_slot_unrank_probe.spl`: സ്ഥാനങ്ങൾ=3 നിഘണ്ടുക്രമ പുനർനിർമ്മാണം;
+- `test/cutlet_partition_three_slot_filter_probe.spl`: മൂന്ന് ധന കട്ട്ലറ്റ് ഭാഗങ്ങൾ-ൽ നിർബന്ധിത ആമുഖഭാഗം അതിർത്തി ചാലനി + കൃത്യം എണ്ണം/പുനർനിർമ്മാണം;
+- `test/cutlet_day_resolve_three_probe.spl`: രൂപപ്പെടുത്തിയ കട്ട്ലറ്റ് ഇടവേളകൾ-ൽ canonicalIndex + ഉൾപ്പെടുന്ന ദിവസം സ്ഥാനം നിർണ്ണയിക്കുക;
+- `test/weave_offset_select6_probe.spl`: വർഷം സ്ഥാനമാറ്റം-ിൽ നിന്ന് നെയ്ത്ത് മാസസൂചിക നിർണ്ണയിക്കുക;
+- `test/distinct_name_third_mapping_probe.spl`: രണ്ടു നീക്കങ്ങൾ കഴിഞ്ഞ മൂന്നാം ശേഷിക്കുന്ന ക്രമസ്ഥാനം മൂല canonicalIndex ക്രമസ്ഥാനം-ിലേക്ക് മാപ്പ് ചെയ്യൽ.
 
-ഇതോടെ rank-to-permutation integration blocker ചെറിയ ആറു-ID domain-ിൽ source-ൽ അടഞ്ഞു. bounded composition slots=2 base-ൽ നിന്ന് slots=3 വരെ exact count/unrank ഉയർന്നു; cutlet partition-ന്റെ required-boundary semantics ചെറിയ മൂന്ന്-part family-ൽ count/unrank സഹിതം source-ൽ പ്രവർത്തനരൂപം നേടി. final resolver-ന്റെ cutlet half-ും weaving-offset selection half-ും ഇപ്പോൾ വേർതിരിച്ച exact helpers ആയി ഉണ്ട്.
+ഇതോടെ ക്രമസംഖ്യ-വരെ-ക്രമവിന്യാസം ഏകീകരണം തടസ്സം ചെറിയ ആറു-തിരിച്ചറിയൽസൂചിക പരിധിക്ഷേത്രം-ിൽ ഉറവിടം-ൽ അടഞ്ഞു. പരിധിബദ്ധ ഘടന സ്ഥാനങ്ങൾ=2 അടിസ്ഥാനം-ൽ നിന്ന് സ്ഥാനങ്ങൾ=3 വരെ കൃത്യം എണ്ണം/പുനർനിർമ്മാണം ഉയർന്നു; കട്ട്ലറ്റ് വിഭജനം-ന്റെ നിർബന്ധിത-അതിർത്തി അർത്ഥനിയമങ്ങൾ ചെറിയ മൂന്ന്-ഭാഗം കുടുംബം-ൽ എണ്ണം/പുനർനിർമ്മാണം സഹിതം ഉറവിടം-ൽ പ്രവർത്തനരൂപം നേടി. അന്തിമ നിർണ്ണായകം-ന്റെ കട്ട്ലറ്റ് പകുതി-ും നെയ്ത്ത്-സ്ഥാനമാറ്റം തിരഞ്ഞെടുപ്പ് പകുതി-ും ഇപ്പോൾ വേർതിരിച്ച കൃത്യം സഹായകങ്ങൾ ആയി ഉണ്ട്.
 
-ഇനി പ്രധാന blockers:
+ഇനി പ്രധാന തടസ്സങ്ങൾ:
 
-- 7 hidden + 46 visible values ഒരൊറ്റ rolling timeline-ൽ സംയോജിപ്പിക്കൽ;
-- ഓരോ 46 drop-ലും integrated rank-to-order, pours, six old-snapshot reads, six pending writes, simultaneous commit;
-- 12 post-stirs-ന്റെ full bowl-state chain;
-- sauce result -> askBowl -> short/wide chooseRank integrated calls;
-- sauce-derived gate gap generation, lazy indexed gate cache, exact gate lookup;
-- Year 5000 candidate enumeration/list ordering/selection, next/previous candidate lists, sequential walk;
-- arbitrary-K filtered cutlet partition DP `(rem,slots,cumulative,hitBoundary)` count+unrank;
-- arbitrary-slot bounded month-length memo/count/unrank;
-- arbitrary-m weaving state memo `CountWeavings` + lexicographic unrank;
-- arbitrary-k distinct-name unrank മുഴുവൻ positions;
-- selected canonicalIndex-ുകളിൽ നിന്ന് frozen മലയാള source strings presentation layer-ൽ resolve ചെയ്യൽ;
-- exactly five-field end-to-end calendar result;
-- local SPL runtime-ൽ complete GREEN execution.
+- 7 മറഞ്ഞത് + 46 ദൃശ്യം മൂല്യങ്ങൾ ഒരൊറ്റ ചലിക്കുന്ന കാലക്രമം-ൽ സംയോജിപ്പിക്കൽ;
+- ഓരോ 46 തുള്ളി-ലും ഏകീകൃതം ക്രമസംഖ്യ-വരെ-ക്രമം, പകർച്ചകൾ, ആറ് പഴയ-നിശ്ചലപ്രതി വായനകൾ, ആറ് കാത്തിരിക്കുന്ന എഴുത്തുകൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- 12 ശേഷകലക്കലുകൾ-ന്റെ പൂർണ്ണം പാത്രം-നില ശൃംഖല;
+- സോസ് ഫലം -> askBowl -> ചുരുങ്ങിയ/വിശാല chooseRank ഏകീകൃതം വിളിക്കുന്നു;
+- സോസ്-ഉരുത്തിരിഞ്ഞ കവാടം ഇടവ് സൃഷ്ടിക്കൽ, ആവശ്യാനുസൃത സൂചികപ്പെടുത്തിയ കവാടം സംഭരണപ്പട്ടിക, കൃത്യം കവാടം തിരച്ചിൽ;
+- വർഷം 5000 സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/പട്ടിക ക്രമീകരണം/തിരഞ്ഞെടുപ്പ്, അടുത്ത/മുൻ സ്ഥാനാർഥി പട്ടികകൾ, തുടർച്ചയായ നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള ചാലിച്ച കട്ട്ലറ്റ് വിഭജനം DP `(rem,slots,cumulative,hitBoundary)` എണ്ണം+പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള പരിധിബദ്ധ മാസം-നീളം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് നില ഓർമ്മപ്പട്ടിക `CountWeavings` + നിഘണ്ടുക്രമ പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം മുഴുവൻ സ്ഥാനങ്ങൾ;
+- തിരഞ്ഞെടുത്ത canonicalIndex-ുകളിൽ നിന്ന് മരവിപ്പിച്ച മലയാള ഉറവിടം അക്ഷരനിരകൾ അവതരണം പാളി-ൽ നിർണ്ണയിക്കുക ചെയ്യൽ;
+- കൃത്യമായി അഞ്ചുഘടക ആരംഭംമുതൽഅവസാനംവരെ കലണ്ടർ ഫലം;
+- പ്രാദേശിക SPL നിർവഹണപരിസരം-ൽ പൂർത്തിയായ പച്ച നിർവഹണം.
 
-## പുതിയ clean-reference integration slices — gate lookup, materialization, small weaving unrank, five-field resolver
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — കവാടം തിരച്ചിൽ, രൂപപ്പെടുത്തൽ, ചെറു നെയ്ത്ത് പുനർനിർമ്മാണം, അഞ്ചുഘടക നിർണ്ണായകം
 
-ഈ continuation-ൽ clean Appendix A oracle-ന്റെ അടുത്ത ആറു source slices ചേർത്തു:
+ഈ തുടർച്ച-ൽ ശുദ്ധം Appendix ഒരു മാനദണ്ഡ കണക്കുപാത-ന്റെ അടുത്ത ആറു ഉറവിടം ഭാഗങ്ങൾ ചേർത്തു:
 
-- `test/gate_lookup_four_probe.spl`: ordered gate day-കളിൽ at-or-before / at-or-after / exact ordinal lookup;
-- `test/cutlet_materialize_three_probe.spl`: gate boundaries-ൽ നിന്ന് മൂന്ന് `(firstDay,lastDay)` cutlet intervals materialize ചെയ്യൽ;
-- `test/weave_three_two_unrank_probe.spl`: lengths `3,2` legal weaving family-യുടെ complete lexicographic unrank sanity slice;
-- `test/structure_first_day_probe.spl`: എല്ലാ year-structure ചോദ്യങ്ങൾക്കും `openGateDay+1` target നിർബന്ധമാക്കുന്ന clean reference gate;
-- `test/year_number_step_probe.spl`: year number unit-step continuity, zero കടന്നും;
-- `test/final_resolver_six_day_probe.spl`: materialized ചെറിയ structure-ൽ canonicalIndex-only semantics ഉപയോഗിച്ച് exactly five fields ഒരൊറ്റ source path-ൽ resolve ചെയ്യൽ.
+- `test/gate_lookup_four_probe.spl`: ക്രമപ്പെടുത്തിയ കവാടം ദിവസം-കളിൽ ൽ-അല്ലെങ്കിൽ-മുമ്പ് / ൽ-അല്ലെങ്കിൽ-ശേഷം / കൃത്യം ക്രമസ്ഥാനം തിരച്ചിൽ;
+- `test/cutlet_materialize_three_probe.spl`: കവാടം അതിർത്തികൾ-ൽ നിന്ന് മൂന്ന് `(firstDay,lastDay)` കട്ട്ലറ്റ് ഇടവേളകൾ രൂപപ്പെടുത്തുക ചെയ്യൽ;
+- `test/weave_three_two_unrank_probe.spl`: നീളങ്ങൾ `3,2` നിയമാനുസൃത നെയ്ത്ത് കുടുംബം-യുടെ പൂർത്തിയായ നിഘണ്ടുക്രമ പുനർനിർമ്മാണം അടിസ്ഥാനസാധുത ഭാഗം;
+- `test/structure_first_day_probe.spl`: എല്ലാ വർഷം-ഘടന ചോദ്യങ്ങൾക്കും `openGateDay+1` ലക്ഷ്യം നിർബന്ധമാക്കുന്ന ശുദ്ധ മാനദണ്ഡ കവാടം;
+- `test/year_number_step_probe.spl`: വർഷം സംഖ്യ ഏകകം-ചുവട് തുടർച്ച, പൂജ്യം കടന്നും;
+- `test/final_resolver_six_day_probe.spl`: രൂപപ്പെടുത്തിയ ചെറിയ ഘടന-ൽ canonicalIndex-മാത്രം അർത്ഥനിയമങ്ങൾ ഉപയോഗിച്ച് കൃത്യമായി അഞ്ച് ഘടകങ്ങൾ ഒരൊറ്റ ഉറവിട പാത-ൽ നിർണ്ണയിക്കുക ചെയ്യൽ.
 
-ഇതോടെ final-resolution ഭാഗം ആദ്യമായി five-field integrated SPL path ആയി source-ൽ കാണപ്പെടുന്നു. ഇത് presentation string resolution അല്ല; canonical indices ആണ് output semantic IDs. gate lookup-നും cutlet materialization-നും ചെറിയ ordered integration slices ലഭിച്ചു; two-month small-family weaving-ിന് count sanity മാത്രമല്ല lexicographic unrank sanityയും ഇപ്പോൾ ഉണ്ട്.
+ഇതോടെ അന്തിമം-നിർണ്ണയം ഭാഗം ആദ്യമായി അഞ്ചുഘടക ഏകീകൃതം SPL പാത ആയി ഉറവിടം-ൽ കാണപ്പെടുന്നു. ഇത് അവതരണം അക്ഷരനിര നിർണ്ണയം അല്ല; സ്ഥിരക്രമ സൂചികകൾ ആണ് പുറപ്പാട് അർത്ഥപരമായ തിരിച്ചറിയൽസൂചികകൾ. കവാടം തിരച്ചിൽ-നും കട്ട്ലറ്റ് രൂപപ്പെടുത്തൽ-നും ചെറിയ ക്രമപ്പെടുത്തിയ ഏകീകരണം ഭാഗങ്ങൾ ലഭിച്ചു; രണ്ട്-മാസം ചെറു-കുടുംബം നെയ്ത്ത്-ിന് എണ്ണം അടിസ്ഥാനസാധുത മാത്രമല്ല നിഘണ്ടുക്രമ പുനർനിർമ്മാണം അടിസ്ഥാനസാധുതയും ഇപ്പോൾ ഉണ്ട്.
 
-ഇനി പ്രധാന blockers:
-
-- 7 hidden + 46 visible values ഒരൊറ്റ rolling timeline-ൽ exact recurrence സഹിതം ബന്ധിപ്പിക്കൽ;
-- ഓരോ 46 drop-ലും order rank, full permutation, pours, six old-snapshot reads, six pending writes, simultaneous commit;
-- drop-46 order latch integrated source path;
-- 12 post-stirs-ന്റെ മുഴുവൻ six-bowl state chain;
-- sauce result -> askBowl -> short/wide selection integrated path;
-- sauce-derived gate gaps, arbitrary lazy indexed gate store/cache, monotone lookup;
-- Year 5000 candidate enumeration/order/selection, next/previous candidate families, sequential walk;
-- arbitrary-K filtered cutlet partition DP memo/count/unrank;
-- arbitrary-slot bounded month-length DP memo/count/unrank;
-- arbitrary-m weaving `CountWeavings` memo + lexicographic unrank;
-- arbitrary-k distinct-name unrank;
-- frozen `SourceLanguageCatalog` canonicalIndex-ുകളിൽ നിന്ന് മലയാള source strings presentation layer-ൽ resolve ചെയ്യൽ;
-- generated full year structure-ിൽ നിന്ന് end-to-end five-field result;
-- local SPL runtime-ൽ complete GREEN execution.
-
-## പുതിയ clean-reference slices — four-slot exact families, post-stir rank, lazy gate/year record controls
-
-ഈ continuation-ൽ ആറു പുതിയ SPL source slices ചേർത്തു:
-
-- `test/post_stir_order_rank_probe.spl`: Appendix A 1A saved value -> `regularMod(saved-1,720)+1` order rank;
-- `test/bounded_composition_four_slot_count_probe.spl`: slots=4 exact family cardinality;
-- `test/bounded_composition_four_slot_unrank_probe.spl`: slots=4 exact lexicographic member selection;
-- `test/weave_two_two_one_unrank_probe.spl`: m=3, lengths `2,2,1` ചെറിയ legal-weave family complete unrank;
-- `test/year_transition_record_probe.spl`: selected outer gate ലഭിച്ച ശേഷം next/previous Year record materialization;
-- `test/gate_cover_need_probe.spl`: known lazy gate coverage interval-ന്റെ expansion direction predicate.
-
-ഇതോടെ bounded-composition source coverage slots=2 -> 3 -> 4 ആയി വളർന്നു. post-stir 1A scalar probe-ും order-rank derivation-ും ഒരൊറ്റ source path-ൽ ബന്ധപ്പെട്ടു. year walking-ന്റെ മുൻ direction predicate-ിന് പിന്നാലെ actual record boundary ownership source slice ലഭിച്ചു; lazy gate coverage-ന്റെ exact endpoint semantics വേർതിരിച്ചും ഉണ്ട്.
-
-പ്രധാന blockers ഇപ്പോഴും:
+ഇനി പ്രധാന തടസ്സങ്ങൾ:
+
+- 7 മറഞ്ഞത് + 46 ദൃശ്യം മൂല്യങ്ങൾ ഒരൊറ്റ ചലിക്കുന്ന കാലക്രമം-ൽ കൃത്യം ആവർത്തസൂത്രം സഹിതം ബന്ധിപ്പിക്കൽ;
+- ഓരോ 46 തുള്ളി-ലും ക്രമം ക്രമസംഖ്യ, പൂർണ്ണം ക്രമവിന്യാസം, പകർച്ചകൾ, ആറ് പഴയ-നിശ്ചലപ്രതി വായനകൾ, ആറ് കാത്തിരിക്കുന്ന എഴുത്തുകൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി ഏകീകൃതം ഉറവിട പാത;
+- 12 ശേഷകലക്കലുകൾ-ന്റെ മുഴുവൻ ആറ്-പാത്രം നില ശൃംഖല;
+- സോസ് ഫലം -> askBowl -> ചുരുങ്ങിയ/വിശാല തിരഞ്ഞെടുപ്പ് ഏകീകൃതം പാത;
+- സോസ്-ഉരുത്തിരിഞ്ഞ കവാടം ഇടവുകൾ, ഏതുവലുപ്പമുള്ള ആവശ്യാനുസൃത സൂചികപ്പെടുത്തിയ കവാടം സംഭരണം/സംഭരണപ്പട്ടിക, ഏകദിശ തിരച്ചിൽ;
+- വർഷം 5000 സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമം/തിരഞ്ഞെടുപ്പ്, അടുത്ത/മുൻ സ്ഥാനാർഥി കുടുംബങ്ങൾ, തുടർച്ചയായ നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള ചാലിച്ച കട്ട്ലറ്റ് വിഭജനം DP ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള പരിധിബദ്ധ മാസം-നീളം DP ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് `CountWeavings` ഓർമ്മപ്പട്ടിക + നിഘണ്ടുക്രമ പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച `SourceLanguageCatalog` canonicalIndex-ുകളിൽ നിന്ന് മലയാള ഉറവിടം അക്ഷരനിരകൾ അവതരണം പാളി-ൽ നിർണ്ണയിക്കുക ചെയ്യൽ;
+- സൃഷ്ടിച്ച പൂർണ്ണം വർഷം ഘടന-ിൽ നിന്ന് ആരംഭംമുതൽഅവസാനംവരെ അഞ്ചുഘടക ഫലം;
+- പ്രാദേശിക SPL നിർവഹണപരിസരം-ൽ പൂർത്തിയായ പച്ച നിർവഹണം.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഭാഗങ്ങൾ — നാല്-സ്ഥാനം കൃത്യം കുടുംബങ്ങൾ, കലക്കലിനുശേഷമുള്ള ക്രമസംഖ്യ, ആവശ്യാനുസൃത കവാടം/വർഷം രേഖ നിയന്ത്രണങ്ങൾ
+
+ഈ തുടർച്ച-ൽ ആറു പുതിയ SPL ഉറവിടം ഭാഗങ്ങൾ ചേർത്തു:
+
+- `test/post_stir_order_rank_probe.spl`: Appendix ഒരു 1A സംരക്ഷിച്ച മൂല്യം -> `regularMod(saved-1,720)+1` ക്രമം ക്രമസംഖ്യ;
+- `test/bounded_composition_four_slot_count_probe.spl`: സ്ഥാനങ്ങൾ=4 കൃത്യം കുടുംബം അംഗസംഖ്യ;
+- `test/bounded_composition_four_slot_unrank_probe.spl`: സ്ഥാനങ്ങൾ=4 കൃത്യം നിഘണ്ടുക്രമ അംഗം തിരഞ്ഞെടുപ്പ്;
+- `test/weave_two_two_one_unrank_probe.spl`: m=3, നീളങ്ങൾ `2,2,1` ചെറിയ നിയമാനുസൃത-നെയ്ത്ത് കുടുംബം പൂർത്തിയായ പുനർനിർമ്മാണം;
+- `test/year_transition_record_probe.spl`: തിരഞ്ഞെടുത്ത പുറത്തെ കവാടം ലഭിച്ച ശേഷം അടുത്ത/മുൻ വർഷം രേഖ രൂപപ്പെടുത്തൽ;
+- `test/gate_cover_need_probe.spl`: അറിയാവുന്ന ആവശ്യാനുസൃത കവാടം വ്യാപ്തി ഇടവേള-ന്റെ വിപുലീകരണം ദിശ നിബന്ധന.
+
+ഇതോടെ പരിധിബദ്ധ ഘടന ഉറവിടം വ്യാപ്തി സ്ഥാനങ്ങൾ=2 -> 3 -> 4 ആയി വളർന്നു. കലക്കലിനുശേഷമുള്ള 1A ഏകമൂല്യം പരിശോധനം-ും ക്രമം-ക്രമസംഖ്യ ഉരുത്തിരിച്ചെടുക്കൽ-ും ഒരൊറ്റ ഉറവിട പാത-ൽ ബന്ധപ്പെട്ടു. വർഷം നടത്തം-ന്റെ മുൻ ദിശ നിബന്ധന-ിന് പിന്നാലെ യഥാർത്ഥം രേഖ അതിർത്തി ഉടമസ്ഥത ഉറവിടം ഭാഗം ലഭിച്ചു; ആവശ്യാനുസൃത കവാടം വ്യാപ്തി-ന്റെ കൃത്യം അറ്റബിന്ദു അർത്ഥനിയമങ്ങൾ വേർതിരിച്ചും ഉണ്ട്.
+
+പ്രധാന തടസ്സങ്ങൾ ഇപ്പോഴും:
 
-- seven hidden + 46 visible exact rolling timeline;
-- ഓരോ visible drop-നും 11 grinds, rank-to-order, pours, six pending bowl values, simultaneous commit എന്ന integrated 46-round chain;
-- drop-46 order latch clean integrated path;
-- 12 post-stirs-ന്റെ actual six-bowl transactional chain, ഓരോ stir-നും saved sum -> order -> six pending values -> commit;
-- sauce -> askBowl -> chooseRank integrated dispatcher;
-- sauce-derived ± gate gaps, arbitrary indexed lazy gate store/cache, monotone gate lookup;
-- Year 5000 full candidate enumeration/order/selection, next/previous candidate generation, sequential target walk;
-- arbitrary-K required-boundary cutlet partition memo/count/unrank;
-- arbitrary-slot month-length bounded composition memo/count/unrank;
-- arbitrary-m weaving state memo `CountWeavings` + lexicographic unrank;
-- arbitrary-k distinct-name removal-aware unrank;
-- frozen canonicalIndex -> മലയാള source string presentation resolve;
-- generated year structure -> exactly five final fields end-to-end;
-- local SPL-only runtime GREEN.
-- `test/bowl_shadow_stir_probe.spl`: pre-square `s`-ൽ current/prev/next/pour/drop/stone എല്ലാം ചേർത്ത് ശേഷം square ചെയ്യുന്ന രീതിയിലേക്ക് തിരുത്തി.
-- `test/post_stir_bowl_probe.spl`: pre-square `s`-ൽ current/prev/next/saved/stir/position^2 എല്ലാം ചേർത്ത് ശേഷം square ചെയ്യുന്ന രീതിയിലേക്ക് തിരുത്തി.
-- `test/STAGE_01_EXPECTATIONS.md`: ബന്ധപ്പെട്ട regression fixture-ുകൾ `16846`, `17130` ആയി പുതുക്കി.
-
-## പുതിയ clean-reference integration slices — progress 16
-
-- `test/bowl_round_uniform_snapshot_probe.spl`: six-position visible-drop bowl recurrence, shared old snapshot control.
-- `test/post_stir_uniform_round_probe.spl`: 1A saved sum -> six post-stir order-position outputs.
-- `test/drop46_latch_twelve_post_probe.spl`: twelve post-stir diagnostic reads കഴിഞ്ഞും drop-46 order rank latch unchanged.
-- `test/cutlet_partition_four_slot_filter_probe.spl`: four positive parts, internal required-boundary filter, exact count/unrank.
-- `test/distinct_name_fourth_mapping_probe.spl`: three removals കഴിഞ്ഞ fourth remaining ordinal original ordinal-ിലേക്ക്.
-- `test/gate_gap_stream_short_probe.spl`: AnswerStream short rejection path -> selected rank -> `41+rank` gate gap.
-
-ഇതോടെ small exact source coverage-ൽ bowl recurrence scalar one-position-ൽ നിന്ന് six positions വരെ, filtered cutlet family 3 slots-ൽ നിന്ന് 4 slots വരെ, distinct-name removal-aware mapping third-ൽ നിന്ന് fourth position വരെ വളർന്നു. drop-46 latch preservation source-level gate ആദ്യമായി twelve post-stir reads മുഴുവനായി consume ചെയ്യുന്നു. gate-gap conversion ഇപ്പോൾ synthetic stream selection-നൊപ്പം integrated ആണ്.
-
-ഇനിയും പ്രധാന blockers:
-
-- seven hidden + 46 visible exact rolling timeline, ഓരോ visible drop-നും 11 grinds;
-- rank-to-order + order-position pours + six arbitrary old-snapshot bowl reads/writes + simultaneous commit എന്ന full 46-round chain;
-- actual order-ID mapping സഹിതം 12 committed post-stir bowl states;
-- sauce -> askBowl -> short/wide dispatcher integrated path;
-- sauce-derived signed gate gaps, arbitrary indexed lazy gate store/cache, monotone lookup;
-- Year 5000 full candidate enumeration/order/selection, next/previous candidate families, sequential walk;
-- arbitrary-K cutlet partition memo/count/unrank;
-- arbitrary-slot month-length bounded-composition memo/count/unrank;
-- arbitrary-m weaving state memo/count/unrank;
-- arbitrary-k distinct-name unrank;
-- frozen canonicalIndex -> മലയാള source string presentation resolve;
-- generated full year structure -> exactly five fields end-to-end;
-- local SPL-only runtime GREEN.
-
-## പുതിയ clean-reference integration slices — progress 17
-
-ഈ continuation-ൽ Stage 1 test-only Appendix A reference-ിന്റെ അഞ്ചു അടുത്ത slices ചേർത്തു:
-
-- `test/rolling_predecessor_four_drop_probe.spl`: hidden timeline-ിൽ നിന്ന് visible commits-ലേക്ക് ആദ്യ നാല് drop-ുകളുടെ `prev1/prev3/prev7` rolling source mapping;
-- `test/bowl_identity_round_arbitrary_snapshot_probe.spl`: identity order-ിൽ ആറു വ്യത്യസ്ത old bowl values ഒരേ snapshot ആയി വായിക്കുന്ന full six-position no-wrap round;
-- `test/post_stir_identity_order_no_wrap_probe.spl`: 1A saved sum rank 1 fixture-ൽ six distinct old bowls -> six post-stir pending values, ഒരേ saved value ഉപയോഗിച്ച്;
-- `test/distinct_name_fifth_mapping_probe.spl`: നാല് removals കഴിഞ്ഞ fifth remaining ordinal original canonical ordinal-ിലേക്ക് mapping;
-- `test/year_three_candidate_validity_probe.spl`: മൂന്ന് year-pair candidates-ന്റെ clean `gaps>=6`, `252..5778` predicate batch.
-
-ഇതോടെ rolling predecessor source mapping single mux-ിൽ നിന്ന് multiple committed visible positions വരെ നീങ്ങി; bowl snapshot coverage uniform old values-ിൽ നിന്ന് six arbitrary old values വരെ ഉയർന്നു; post-stir six-position round uniform old state-ിൽ നിന്ന് distinct old state-ിലേക്ക് ഒരു rank-1 order fixture-ൽ വികസിച്ചു; distinct-name removal mapping അഞ്ചാം position വരെ എത്തി; year validity predicate batch candidate scanning-ന്റെ ഒരു ചെറിയ അടിസ്ഥാനമായി ലഭിച്ചു.
-
-ഇനിയും പ്രധാന blockers:
-
-- ഏഴ് hidden values യഥാർത്ഥമായി നിർമ്മിച്ച് 46 visible drops-ന്റെ ഓരോ seed + 11 grinds ഒരൊറ്റ rolling value store-ൽ commit ചെയ്യൽ;
-- ഓരോ 46 drop-ലും arbitrary rank-to-order, position-specific pours, six arbitrary old-snapshot bowl reads, six pending writes, simultaneous commit;
-- drop 46-ന്റെ actual order latch പിടിച്ച് sauce result-ിൽ സൂക്ഷിക്കൽ;
-- stir 1..12 മുഴുവൻ saved-sum -> order-rank -> full permutation -> six pending -> commit state chain;
-- sauce result -> askBowl -> short/wide dispatcher full integration;
-- sauce-derived signed gate gaps, arbitrary indexed lazy gate storage/cache, monotone lookup;
-- Year 5000 full candidate enumeration/order/selection, next/previous candidate lists, sequential walk;
-- arbitrary-K cutlet partition memo/count/unrank;
-- arbitrary-slot month-length bounded composition memo/count/unrank;
-- arbitrary-m weaving memo/count/unrank;
-- arbitrary-k distinct-name unrank മുഴുവൻ positions;
-- frozen canonicalIndex -> മലയാള source string presentation resolve;
-- generated full structure -> exactly five final fields end-to-end;
-- local SPL-only runtime GREEN.
-
-## പുതിയ clean-reference integration slices — progress 18
-
-ഈ continuation-ൽ ആറു പുതിയ SPL source slices ചേർത്തു:
-
-- `test/rolling_two_visible_full_grinds_probe.spl`: ആദ്യ രണ്ടു visible drop-ുകൾക്ക് hidden predecessor mapping, seed SAVE, 11-row grind recurrence, first commit -> second `prev1` ownership;
-- `test/bowl_nonidentity_order_round_probe.spl`: non-identity order `3,1,6,2,5,4`-ൽ six arbitrary old-snapshot reads + six pending outputs;
-- `test/post_stir_nonidentity_order_probe.spl`: raw sum + 149*stir -> saved 255 -> rank 255 known permutation -> six pending post-stir values;
-- `test/sauce_query_short_selection_probe.spl`: queried/successor/bowl6/seal scalar sauce view -> askBowl -> fixed direction -> first-answer short selection -> gate gap;
-- `test/distinct_name_sixth_mapping_probe.spl`: five removals കഴിഞ്ഞ sixth remaining ordinal original ordinal-ിലേക്ക്;
-- `test/weave_two_two_two_unrank_probe.spl`: lengths `2,2,2` small legal family count/unrank materialization.
-
-കൂടാതെ `test/post_stir_identity_order_no_wrap_probe.spl`-ന്റെ position-6 source literal `20`-ൽ നിന്ന് Appendix A-യിലെ `6^2=36`-ലേക്ക് clean Stage 1 correction ചെയ്തു; corresponding expected value മാറ്റേണ്ടതില്ല, കാരണം expectation ഇതിനകം ശരിയായ `36` അടിസ്ഥാനമാക്കിയിരുന്നു.
-
-ഇതോടെ ചില blockers ചുരുങ്ങി:
-
-- rolling visible recurrence source ഇനി single predecessor mux അല്ല; two committed visible drops full 11-grind chains ആയി ബന്ധപ്പെട്ടു;
-- bowl routing identity-only fixture-ിൽ നിന്ന് non-identity cyclic order fixture-ിലേക്ക് നീങ്ങി;
-- post-stir distinct state identity order-ിൽ നിന്ന് known non-identity permutation-ിലേക്ക് നീങ്ങി;
-- askBowl scalar output gate-gap short-selection integration-ുമായി ബന്ധപ്പെട്ടു;
-- distinct-name removal mapping sixth position വരെ എത്തി;
-- m=3 weaving small-force family lengths `2,2,2` വരെ materialize ചെയ്തു.
-
-ഇനിയും പ്രധാന blockers:
-
-- seven hidden values-ന്റെ actual generation-ുമായി all 46 visible recurrences ഒരൊറ്റ rolling store-ൽ commit ചെയ്യൽ;
-- ഓരോ 46 drop-ലും drop-derived full permutation, position pours, six old-snapshot reads, six pending writes, simultaneous commit;
-- actual drop-46 order latch sauce result-ിൽ പിടിക്കൽ;
-- stir 1..12 മുഴുവൻ saved-sum -> order -> six pending -> commit chain;
-- sauce-derived signed gate gaps, arbitrary lazy indexed gate storage/cache, exact monotone lookup;
-- Year 5000 full candidate enumeration/order/selection, next/previous candidate generation, sequential target walk;
-- arbitrary-K filtered cutlet partition memo/count/unrank;
-- arbitrary-slot bounded month-length memo/count/unrank;
-- arbitrary-m weaving state memo/count/unrank;
-- arbitrary-k distinct-name unrank മുഴുവൻ positions;
-- frozen canonicalIndex -> മലയാള source string presentation resolve;
-- generated full year structure -> exactly five final fields end-to-end;
-- local SPL-only runtime GREEN.
-
-## പുതിയ clean-reference integration slices — progress 19
-
-- `test/rolling_three_visible_full_grinds_probe.spl`: three-drop committed rolling recurrence ownership, ഓരോ drop-നും 11 grind iterations;
-- `test/post_stir_two_committed_rounds_probe.spl`: two successive six-bowl transactional rounds, pending -> commit -> next old snapshot;
-- `test/gate_signed_store_five_probe.spl`: `gate[-2..2]` signed indexed materialization from four already-selected gaps;
-- `test/next_year_three_candidate_rank_probe.spl`: next-year same-open three-candidate validity scan + rank resolve;
-- `test/distinct_name_seventh_mapping_probe.spl`: six removals കഴിഞ്ഞ seventh remaining ordinal original canonical ordinal-ിലേക്ക്.
-
-ഈ revision blockers-ിൽ ചെറിയ കുറവ് വരുത്തുന്നു: rolling recurrence source ഇനി three committed visible positions വരെ എത്തി; post-stir ownership actual inter-round commit boundary source-ൽ ഉണ്ട്; signed gate storage ആദ്യ ചെറിയ materialized form നേടി; next-year candidate predicate isolated batch-ിൽ നിന്ന് ranked scan-ിലേക്ക് നീങ്ങി; distinct-name mapping seventh position വരെ എത്തി.
-
-ഇനിയും പ്രധാന blockers:
-
-- actual seven hidden generation + all 46 visible seeds/11-grind recurrences one rolling exact store;
-- ഓരോ 46 drop-ലും drop-derived full permutation, pours, six old-snapshot bowl reads, pending writes, simultaneous commit;
-- actual drop-46 order latch SauceResult-ലേക്ക്;
-- stir 1..12-ന്റെ normative saved-sum -> order -> six pending -> commit chain;
-- sauce-derived signed gate gaps, arbitrary indexed lazy gate store/cache, exact monotone lookup;
-- Year 5000 full candidate enumeration/order/selection; next/previous arbitrary candidate lists; sequential target walk;
-- arbitrary-K cutlet partition memo/count/unrank;
-- arbitrary-slot month-length bounded composition memo/count/unrank;
-- arbitrary-m whole-weaving memo/count/unrank;
-- arbitrary-k distinct-name unrank;
-- frozen canonicalIndex -> മലയാള source string presentation resolve;
-- generated full year structure -> exactly five final fields;
-- local SPL-only runtime GREEN.
-
-## പുതിയ clean-reference integration slices — progress 20
-
-- `test/visible_drop4_predecessor_seed_probe.spl`: `i=4`-ൽ `prev1=visible3`, `prev3=visible1`, `prev7=hidden4` എന്ന boundary-crossing seed ownership.
-- `test/previous_year_three_candidate_rank_probe.spl`: fixed-close previous-year three-candidate clean validity scan + one-based rank resolve.
-- `test/bounded_composition_five_slot_count_probe.spl`: exact bounded-composition family count അഞ്ചു slots വരെ.
-- `test/cutlet_partition_five_slot_filter_count_probe.spl`: required internal prefix boundary ഉള്ള positive cutlet-partition exact count അഞ്ചു slots വരെ.
-- `test/distinct_name_eighth_mapping_probe.spl`: seven removals കഴിഞ്ഞ eighth remaining ordinal original canonical ordinal-ിലേക്ക്.
-- `test/weave_three_two_two_count_probe.spl`: lengths `3,2,2` exact small whole-weaving count witness.
-
-ഇതോടെ fixed-size clean combinatorial coverage വീണ്ടും ഒരു slot/position കൂടി വളർന്നു; previous-year ranked candidate path next-year path-നൊപ്പം symmetric source coverage നേടി; visible recurrence predecessor ownership `i=4` hidden/visible boundary crossing വരെ explicit ആയി.
-
-ഇനിയും പ്രധാന blockers:
-
-- actual seven hidden generation + all 46 visible seeds/11-grind recurrences one rolling exact store;
-- ഓരോ 46 drop-ലും drop-derived full permutation, pours, six old-snapshot bowl reads, pending writes, simultaneous commit;
-- actual drop-46 order latch SauceResult-ലേക്ക്;
-- stir 1..12-ന്റെ normative saved-sum -> order -> six pending -> commit chain;
-- sauce-derived signed gate gaps, arbitrary indexed lazy gate store/cache, exact monotone lookup;
-- Year 5000 full candidate enumeration/order/selection; next/previous arbitrary candidate lists; sequential target walk;
-- arbitrary-K cutlet partition memo/count/unrank;
-- arbitrary-slot month-length bounded-composition memo/count/unrank;
-- arbitrary-m whole-weaving memo/count/unrank;
-- arbitrary-k distinct-name unrank;
-- frozen canonicalIndex -> മലയാള source string presentation resolve;
-- generated full year structure -> exactly five final fields;
-- local SPL-only runtime GREEN.
-
-## പുതിയ clean-reference integration slices — progress 21
-
-ഈ continuation-ൽ Stage 1 clean Appendix A reference-ന്റെ അഞ്ചു അടുത്ത ഭാഗങ്ങൾ കൂടി SPL source ആയി ചേർത്തു:
-
-- `test/hidden_seven_seed_rows_no_wrap_probe.spl`: ഏഴ് hidden coefficient rows ഒരേ counts input-ൽ seed mapping ആയി;
-- `test/drop_rank1_identity_bowl_commit_probe.spl`: drop value 1 -> rank 1 identity order -> position pours -> shared-old-snapshot six pending bowl values എന്ന integrated clean round;
-- `test/target_year_forward_two_step_probe.spl`: closing-gate-inclusive semantics പാലിച്ച് രണ്ട് sequential next-year unit transitions വരെ target walk;
-- `test/gate_two_short_streams_accumulate_probe.spl`: accepted short ranks -> 42..963 gaps -> രണ്ട് positive gates cumulative materialization;
-- `test/weave_three_two_two_unrank_probe.spl`: lengths `3,2,2` exact count witness-നെ ഒൻപത് lexicographic rows മുഴുവനായുള്ള small-family unrank witness ആയി വികസിപ്പിക്കുന്നു.
-
-കൂടാതെ `choose_rank_wide_probe.spl`-ന്റെ Stage 1 expectations-ൽ `N=M^2+1` boundary fixture ചേർത്തു; expected rank `M-1` ആണ്.
-
-ഇതിലൂടെ hidden coefficient-row coverage single-row trace-ൽ നിന്ന് seven-row mapping വരെ ഉയർന്നു; bowl path rank/order/pours/pending commit semantics ഒരൊറ്റ rank-1 clean source path-ൽ ആദ്യമായി കൂടിച്ചേർന്നു; target-year walking ഒരു direction predicate-ിൽ നിന്ന് രണ്ട് actual unit transitions വരെ നീങ്ങി; gate gap conversion രണ്ട് cumulative gates വരെ എത്തി; `3,2,2` weaving-ിന് count മാത്രം അല്ല complete small unrank familyയും ലഭിച്ചു.
-
-ഇനിയും blockers:
-
-- ഏഴ് hidden drops-ന്റെ full seed + ഏഴ് grinds actual generation;
-- 46 visible drops-ന്റെ full seed + 11 grinds rolling store;
-- ഓരോ 46 drop-ലും arbitrary rank-to-order, pours, six pending values, simultaneous commit;
-- drop-46 order latch-ോടെ full sauce result;
-- 12 normative post-stirs full committed state chain;
-- sauce-derived arbitrary signed lazy gate generation/cache;
-- Year 5000 full candidate enumeration/order/selection, next/previous candidate families, unbounded sequential walk;
-- arbitrary-K cutlet partition DP, arbitrary-slot month-length DP, arbitrary-m weaving DP, arbitrary-k distinct-name unrank;
-- frozen canonicalIndex -> മലയാള source presentation resolution;
-- generated exactly-five-field end-to-end oracle;
-- local SPL-only runtime GREEN.
-
-## പുതിയ clean-reference integration slices — progress 22
-
-- `test/rolling_46_source_ownership_counts_probe.spl`: all 46 visible positions-ൽ prev1/prev3/prev7 hidden-versus-committed-visible source ownership counts.
-- `test/visible_46x11_row_schedule_probe.spl`: corrected full 46×11 nested traversal; stone row സ്ഥിരമായി `i`, grind coefficient row `g=1..11`; step count, രണ്ട് axis sums, final `(46,11)` witness.
-- `test/bowl_46_transactional_commit_control_probe.spl`: six pending-before-commit ownership exactly 46 rounds വരെ.
-- `test/post_stir_12_transactional_commit_control_probe.spl`: six pending-before-commit ownership exactly 12 post-stirs വരെ.
-- `test/target_year_backward_two_step_probe.spl`: `(open,close]` semantics-ോടെ രണ്ട് sequential previousYear transitions.
-- `test/year5000_three_candidate_sort_probe.spl`: valid three-candidate `length ascending, open ascending` ranking and requested-rank materialization.
-
-ഇതോടെ full required cardinality-കളുടെ control coverage വളർന്നു: rolling source boundaries 46 positions, grind row schedule 506 steps, bowl commit epochs 46, post-stir commit epochs 12. എന്നാൽ actual normative value integration ഇനിയും വേണം.
-
-ഇനിയും പ്രധാന blockers:
-
-- ഏഴ് hidden drops-ന്റെ full seed + ഏഴ് grinds actual generation;
-- all 46 visible drops-ന്റെ seed + 11 normative grinds one rolling exact store-ൽ;
-- ഓരോ visible drop-ലും actual drop-derived rank-to-order, three position pours, stone value, six normative pending values, simultaneous commit;
-- drop-46 order latch-ോടെ complete SauceResult;
-- stir 1..12 actual 1A saved sum -> order -> six normative pending -> commit chain;
-- sauce-derived arbitrary signed lazy gate generation/cache and exact lookup;
-- Year 5000 full candidate enumeration/filter/sort/seal-10 selection; next/previous arbitrary candidate families; unbounded sequential target-year walk;
-- arbitrary-K cutlet partition memo/count/unrank;
-- arbitrary-slot month-length bounded composition memo/count/unrank;
-- arbitrary-m weaving memo/count/unrank;
-- arbitrary-k distinct-name unrank;
-- frozen canonicalIndex -> മലയാള source string presentation resolution;
-- generated exactly-five-field end-to-end oracle;
-- local SPL-only runtime GREEN.
-
-## പുതിയ clean-reference integration slices — progress 23
-
-- `test/stones_row2_fixed_snapshot_probe.spl`: Appendix A stone row 1 -> row 2 actual five-value simultaneous snapshot witness.
-- `test/initial_six_bowls_fixture_probe.spl`: initial bowl formula six IDs-ലേക്ക് ഒരുമിച്ച് വ്യാപിപ്പിച്ച no-wrap family witness.
-- `test/bowl_pour_nonidentity_mapping_probe.spl`: order positions `3,1,6` വഴി three pours actual fixed-ID aliasing ഒഴിവാക്കി map ചെയ്യുന്ന witness.
-- `test/order46_successor_lookup_probe.spl`: arbitrary six-ID latched order-ൽ queried bowl circular successor lookup.
-- `test/gate_signed_pair_accumulate_probe.spl`: rank -> gap -> positive/negative Foundation first gates.
-- `test/visible_grind_table_eleven_mapping_probe.spl`: 11 normative visible grind rows മുഴുവൻ `a,b,c,d,stoneKind` mapping.
-
-ഇതോടെ stone initialization/transition, bowl initialization/pours, latched-order query adjacency, signed first-gate arithmetic, visible grind table എന്നിവ source-level clean reference-ൽ കൂടുതൽ നേരിട്ട് materialize ചെയ്തു.
-
-ഇനിയും പ്രധാന blockers:
-
-- ഏഴ് hidden drops-ന്റെ full seed + ഏഴ് grinds actual generation one reusable path;
-- all 46 visible drops-ന്റെ seed + 11 normative grinds one rolling exact store-ൽ;
-- ഓരോ visible drop-ലും actual drop-derived six-ID order, three pours, stone-by-position, six pending values, simultaneous commit;
-- drop-46 order latch-ോടെ complete SauceResult;
-- stir 1..12 actual 1A saved sum -> order -> six normative pending -> commit chain;
-- sauce-derived arbitrary signed lazy gate generation/cache and exact lookup;
-- Year 5000 full candidate enumeration/filter/sort/seal-10 selection; next/previous arbitrary candidate families; unbounded sequential target-year walk;
-- arbitrary-K cutlet partition memo/count/unrank;
-- arbitrary-slot month-length bounded composition memo/count/unrank;
-- arbitrary-m weaving memo/count/unrank;
-- arbitrary-k distinct-name unrank;
-- frozen canonicalIndex -> മലയാള source string presentation resolution;
-- generated exactly-five-field end-to-end oracle;
-- local SPL-only runtime GREEN.
-
-## progress 24 — large-M arithmetic integration
-
-ഈ continuation test-only clean reference-ൽ താഴെ പറയുന്ന exact slices ചേർക്കുന്നു:
-
-- `hidden_seven_grind_modulus_lock_probe.spl`: ഏഴ് hidden grind updates-നും M-sized exact SAVE lock;
-- `drop_M_order_rank_probe.spl`: M-sized drop-ിൽ നിന്ന് one-based 720 bowl rank;
-- `bowl_round_modulus_reduction_probe.spl`: M-sized drop/old bowls/stones ഉപയോഗിച്ച് full six-position visible bowl round;
-- `post_stir_M_snapshot_rank149_probe.spl`: six-M old snapshot -> 1A saved sum 149 -> rank 149 -> six post-stir pending position values;
-- `wide_M2_plus1_boundary_probe.spl`: mandatory `N=M^2+1` wide selector boundary source witness;
-- `ask_bowl_M_wrap_formula_probe.spl`: latched circular-successor companion fixture-നെ full askBowl first/direction arithmetic-ുമായി ബന്ധിപ്പിക്കുന്നു.
-
-ഇവ individual clean-reference slices ആണ്; production bootstrap നിഷ്പക്ഷമാണ്. full rolling sauce state, arbitrary-order 46 committed bowl rounds, 12 committed normative post-stirs, sauce-derived lazy gate generation, complete years, general DP/weaving/name-unrank, മലയാള presentation resolution, generated final five-field result എന്നിവ blockers ആയി തുടരുന്നു.
-
-## progress 25 — sauce chain integration bridges
-
-ഈ continuation-ൽ Stage 1 clean reference-ന്റെ താഴെപ്പറയുന്ന source bridges ചേർന്നു:
-
-1. `stones_row2_to_row3_snapshot_probe.spl` — consecutive stone row ownership: committed row 2 -> row 3 five pending values, same old snapshot.
-2. `visible_eleven_M_integrated_table_probe.spl` — explicit 11-row grind dispatch -> generic recurrence -> SAVE commit, M-sized exact fixture.
-3. `two_drop_two_bowl_commits_probe.spl` — two visible drops -> pours -> six bowl pending values -> commit -> next six-bowl round reads committed snapshot.
-4. `sauce_46_12_latch_phase_probe.spl` — 46 drop commit epochs -> single drop-46 latch -> 12 post-stir commit epochs; post phase cannot rewrite latch.
-5. `ask_after_poststir_uses_latch_probe.spl` — query successor source is drop-46 latch, not the later diagnostic post-stir order.
-
-ഇവ production bootstrap architecture-നെ future monster fields ഉപയോഗിച്ച് വളർത്തുന്നില്ല. test-only clean oracle-ന്റെ semantic ownership/integration coverage മാത്രം വർധിപ്പിക്കുന്നു.
-
-ഇനിയും അടയ്ക്കാത്ത പ്രധാന source gaps: all 46 stone rows generated in one table; seven hidden drops generated together; full 46 visible rolling recurrence with actual stone rows; all 46 drop-derived permutations and bowl commits; all 12 value-producing post-stirs; completed SauceResult; sauce-derived lazy gate store; full Year 5000 enumeration and sequential adjacent-year construction; arbitrary-size composition/weaving/name unrank; frozen മലയാളം catalog string resolution; final five-field end-to-end oracle; native SPL runtime execution.
-
-## പുതിയ clean-reference integration slices — progress 26
-
-- `test/hidden_seven_full_synthetic_generation_probe.spl`: ഏഴ് hidden drops × ഏഴ് grinds ഒരേ source control path-ൽ; synthetic exact fixture final 132.
-- `test/stones_full_46_transactional_path_probe.spl`: normative five-stone recurrence row 1->46, five pending values from one old snapshot then commit.
-- `test/post_stir_twelve_saved_rank_schedule_probe.spl`: 1A `savedBowlSum` + one-based 720 rank മുഴുവൻ stir 1..12 schedule.
-- `test/year_max_5778_to_5781_boundary_probe.spl`: clean maximum boundary 5778 accept; 5779..5781 reject.
-- `test/final_five_field_closing_boundary_probe.spl`: closing-day inclusive materialized structure -> exactly five fields `5000,7,3,17,2`.
-- `test/distinct_name_general_sorted_mapping_probe.spl`: dynamic removal-count stack-backed remaining ordinal -> canonical ordinal helper.
-- `test/year5000_seal10_short_rank_probe.spl`: mandatory Year 5000 seal 10 -> AnswerStream -> short candidate rank bridge.
-
-ഇതോടെ stone recurrence-ന്റെ full 46-row traversal source-level ആയി ലഭിച്ചു; hidden generation fixed per-k fragments-ൽ നിന്ന് seven-by-seven integrated control-ലേക്ക് നീങ്ങി; post-stir saved/rank phase full 12 rows നേടി; clean year ceiling 5779/5780/5781 explicit rejection ആയി source test-ൽ materialize ചെയ്തു; distinct-name mapping fixed eighth position-ൽ നിന്ന് dynamic removal-count helper-ലേക്ക് നീങ്ങി; final resolver closing boundaryയും discontiguous month occurrence count-വും ഒരേ exactly-five-field fixture-ൽ ചേർന്നു.
-
-ഇനിയും പ്രധാന blockers:
-
-- legal workCounts + actual generated 46-row stones ഉപയോഗിച്ച് seven hidden values end-to-end generation;
-- all 46 visible values one rolling exact timeline-ൽ actual generated predecessors/stones ഉപയോഗിച്ച്;
-- all 46 drop-derived arbitrary orders + pours + six-bowl transactional commits;
-- 12 actual post-stir value rounds with committed state;
-- complete SauceResult + orderAtDrop46 latch;
-- sauce-derived arbitrary signed lazy gates;
-- full Year 5000 candidate enumeration/filter/sort/seal-10 selection and arbitrary adjacent-year walking;
-- arbitrary-K cutlet partition count/unrank, arbitrary-slot month composition count/unrank;
-- arbitrary-m whole-weaving count/unrank;
-- full arbitrary-k partial-permutation name unrank;
-- frozen canonicalIndex -> മലയാളം presentation string resolution;
-- generated year structure -> exactly five final fields;
-- local SPL-only runtime GREEN.
-
-### progress 26 clean-reference correction
-
-`test/distinct_name_eighth_mapping_probe.spl` candidate-scan ആയി പുനഃരചിച്ചു. പഴയ shortcut removal input order-നോട് sensitive ആയിരുന്നു; canonical removed set-ന്റെ order semantic ആയിരിക്കരുത്. fixed fixture outputs `15`/`13` തന്നെയാണ്.
-
-## progress 27 — legal workCounts and full-46 rolling bridge
-
-- `test/work_counts_full_probe.spl`: raw action/target day -> action dayCount, target dayCount, chronological distance, connection, direction; Foundation parity mapping ഉൾപ്പെടെ.
-- `test/legal_foundation_hidden_seed_rows_probe.spl`: legal same-Foundation workCounts `1,1,1,2,2`-ൽ seven hidden coefficient rows exact no-wrap witness.
-- `test/legal_foundation_six_initial_bowls_probe.spl`: അതേ legal workCounts-ൽ six initial bowl formula family exact no-wrap witness.
-- `test/visible_46_full_rolling_invariant_probe.spl`: 46 visible outer commits + 11 normative grind coefficient rows per drop + seven-slot predecessor ring in one source path; synthetic M invariant stones/base isolate rolling/value ownership.
-
-ഇതോടെ legal workCounts ഇനി primitive operation code-ന്റെ ഉള്ളിൽ മാത്രം ഒളിഞ്ഞിട്ടില്ല; dedicated full source path ഉണ്ട്. full-46 visible recurrence ഇനി cardinality/schedule control മാത്രം അല്ല; recurrence value ഓരോ 11 grind-ലും SAVE ചെയ്ത് rolling commit ചെയ്യുന്നു. എന്നാൽ actual generated stone row/kind lookup, legal seed base, drop-derived bowl order/pours/six-bowl round എന്നിവ ഈ full-46 source-ൽ ഇനിയും ബന്ധിപ്പിച്ചിട്ടില്ല.
-
-## progress 28 — corrected visible stone-row axis
-
-- `test/visible_46x11_row_schedule_probe.spl`: progress-22 wrapped-row interpretation തിരുത്തുന്നു; `stoneRow=i`, `grindRow=g`; full 46×11 traversal outputs `506,11891,3036,46,11`.
-- `test/visible_row1_two_grinds_legal_probe.spl`: legal same-Foundation counts + actual stone row 1 + predecessor fixture -> seed + first two normative grind commits; exact chain `443 -> 197618 -> 39053862074`.
-- `test/visible_same_stone_row_kind_cycle_probe.spl`: one retained stone row across all 11 grind kind selections; row-1 selected sum `539`, first/last `17`.
-
-### correction ownership
-
-progress-22 documentation-ൽ ഉണ്ടായിരുന്ന `wrap1(i+g,46)` stone-row rule superseded ആണ്. Appendix A clean visible recurrence-ൽ stone row outer drop index `i` ആണ്. `g`-യുടെ role coefficient row + stone kind selection മാത്രം.
-
-### remaining bridge
-
-- full stone table row 1..46 later phases-ക്ക് queryable state ആയി materialize ചെയ്യുക;
-- legal workCounts + actual generated rows -> seven hidden drops;
-- generated hidden timeline + actual row `i` -> all 46 visible values;
-- visible value -> order -> position pours -> six-bowl transactional commit, 46 തവണ;
-- തുടർന്ന് 12 actual post-stirs, sauce result, gates, years, general structure DP/name/presentation/five-field path.
-
-## progress 29 — forward-consumable stone table bridge
-
-- `test/stones_full_46_forward_replay_probe.spl`: actual 46-row simultaneous stone recurrence + per-kind archive stacks + reverse-to-forward replay; row 1 replay witness `17,29,43,71,101`.
-- `test/hidden1_actual_row1_first_grind_probe.spl`: legal same-Foundation workCounts + actual row 1 + hidden approach 1 seed + first hidden grind, both through SAVE; `297 -> 89118`.
-- `test/drop_M_factoradic_digits_probe.spl`: M-sized drop -> one-based order rank 127 -> factoradic digits `1,0,1,0,0,0`.
-
-### ഇപ്പോഴത്തെ sauce integration gap
-
-stone generation ഇനി value retention ഇല്ലാത്ത traversal മാത്രമല്ല: five replay stacks row 1..46 forward consumption-നായി source-level ownership നൽകുന്നു. അടുത്ത bridge ഈ replay state-നെ seven hidden + all 46 visible value generation-ൽ consume ചെയ്യുന്നതാണ്. visible drop order path-ൽ rank computation-നും factoradic digit decomposition-നും source witnesses ഇപ്പോൾ ഉണ്ട്; active-ID removal/permutation materialization ഇതിനകം വേറൊരു clean probe-ൽ ഉണ്ട്, പക്ഷേ full 46-drop sauce source-ൽ ഇനിയും ചേർന്നിട്ടില്ല.
-
-## progress 30 — forward stone consumption മുതൽ post-stir order materialization വരെ
-
-ഈ continuation-ൽ clean oracle integration നാലു പുതിയ source slices-ും ഒരു existing stone replay extension-ും ചേർക്കുന്നു.
-
-- `test/stones_full_46_forward_replay_probe.spl`: full 46-row archive/reverse path ഇപ്പോൾ replay row 1-ന് പിന്നാലെ row 2-വും consume ചെയ്യുന്നു; expected row 2 `378,1073,2375,6195,10493`.
-- `test/visible_row2_from_snapshot_first_grind_legal_probe.spl`: legal same-Foundation workCounts + row-1-to-row-2 simultaneous stone transition + visible i=2 seed + first grind; expected `37213,1384919409`.
-- `test/factoradic_127_materialize_probe.spl`: rank-127 digits `1,0,1,0,0,0` -> order `2,1,4,3,5,6`.
-- `test/bowl_rank127_M_snapshot_round_probe.spl`: rank-127 order + M-sized drop/old snapshot + actual row-1 stones -> three pours + six bowl candidates + first post-stir saved sum/rank; expected `1158,401,5045,2503,10206,295,19608,19757,317`.
-- `test/factoradic_317_materialize_probe.spl`: rank 317 -> order `3,5,1,6,2,4`, അതായത് previous source-ന്റെ first post-stir rank-നെ അടുത്ത order state-ലേക്ക് ബന്ധിപ്പിക്കുന്നു.
-
-ഇവ test-only clean Appendix A integration slices ആണ്. production bootstrap oracle-നെ വിളിക്കുന്നില്ല. all-46 actual generated visible/drop-order/bowl sequence ഇനിയും ഒരൊറ്റ authoritative test path ആയി materialize ചെയ്തിട്ടില്ല.
-
-## progress 31 — retained stones -> actual seven hidden -> timeline ring
+- ഏഴ് മറഞ്ഞത് + 46 ദൃശ്യം കൃത്യം ചലിക്കുന്ന കാലക്രമം;
+- ഓരോ ദൃശ്യം തുള്ളി-നും 11 അരയ്ക്കലുകൾ, ക്രമസംഖ്യ-വരെ-ക്രമം, പകർച്ചകൾ, ആറ് കാത്തിരിക്കുന്ന പാത്രം മൂല്യങ്ങൾ, ഒരേസമയം ഉറപ്പിക്കൽ എന്ന ഏകീകൃതം 46-ചക്രം ശൃംഖല;
+- തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി ശുദ്ധം ഏകീകൃതം പാത;
+- 12 ശേഷകലക്കലുകൾ-ന്റെ യഥാർത്ഥം ആറ്-പാത്രം ഇടപാട്-സുസ്ഥിര ശൃംഖല, ഓരോ കലക്കൽ-നും സംരക്ഷിച്ച തുക -> ക്രമം -> ആറ് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ -> ഉറപ്പിക്കൽ;
+- സോസ് -> askBowl -> chooseRank ഏകീകൃതം വിതരണനിയന്ത്രകൻ;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ± കവാടം ഇടവുകൾ, ഏതുവലുപ്പമുള്ള സൂചികപ്പെടുത്തിയ ആവശ്യാനുസൃത കവാടം സംഭരണം/സംഭരണപ്പട്ടിക, ഏകദിശ കവാടം തിരച്ചിൽ;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമം/തിരഞ്ഞെടുപ്പ്, അടുത്ത/മുൻ സ്ഥാനാർഥി സൃഷ്ടിക്കൽ, തുടർച്ചയായ ലക്ഷ്യം നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള നിർബന്ധിത-അതിർത്തി കട്ട്ലറ്റ് വിഭജനം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം-നീളം പരിധിബദ്ധ ഘടന ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് നില ഓർമ്മപ്പട്ടിക `CountWeavings` + നിഘണ്ടുക്രമ പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് നീക്കം-കണക്കിലെടുക്കുന്ന പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അക്ഷരനിര അവതരണം നിർണ്ണയിക്കുക;
+- സൃഷ്ടിച്ച വർഷം ഘടന -> കൃത്യമായി അഞ്ച് അന്തിമം ഘടകങ്ങൾ ആരംഭംമുതൽഅവസാനംവരെ;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+- `test/bowl_shadow_stir_probe.spl`: വർഗീകരണത്തിന് മുമ്പുള്ള `s`-ൽ നിലവിലെ/മുൻ/അടുത്ത/പകർച്ച/തുള്ളി/കല്ല് എല്ലാം ചേർത്ത് ശേഷം വർഗം ചെയ്യുന്ന രീതിയിലേക്ക് തിരുത്തി.
+- `test/post_stir_bowl_probe.spl`: വർഗീകരണത്തിന് മുമ്പുള്ള `s`-ൽ നിലവിലെ/മുൻ/അടുത്ത/സംരക്ഷിച്ച/കലക്കൽ/സ്ഥാനം^2 എല്ലാം ചേർത്ത് ശേഷം വർഗം ചെയ്യുന്ന രീതിയിലേക്ക് തിരുത്തി.
+- `test/STAGE_01_EXPECTATIONS.md`: ബന്ധപ്പെട്ട പിന്നോട്ടുപരിശോധന പരിശോധനാവസ്ഥ-ുകൾ `16846`, `17130` ആയി പുതുക്കി.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 16
+
+- `test/bowl_round_uniform_snapshot_probe.spl`: ആറ്-സ്ഥാനം ദൃശ്യം-തുള്ളി പാത്രം ആവർത്തസൂത്രം, പങ്കിട്ട പഴയ നിശ്ചലപ്രതി നിയന്ത്രണം.
+- `test/post_stir_uniform_round_probe.spl`: 1A സംരക്ഷിച്ച തുക -> ആറ് കലക്കലിനുശേഷമുള്ള ക്രമം-സ്ഥാനം പുറപ്പാടുകൾ.
+- `test/drop46_latch_twelve_post_probe.spl`: പന്ത്രണ്ട് കലക്കലിനുശേഷമുള്ള നിർണ്ണയസഹായം വായനകൾ കഴിഞ്ഞും തുള്ളി-46 ക്രമം ക്രമസംഖ്യ പൂട്ടുസ്മൃതി മാറ്റമില്ലാത്ത.
+- `test/cutlet_partition_four_slot_filter_probe.spl`: നാല് ധന ഭാഗങ്ങൾ, ആന്തരിക നിർബന്ധിത-അതിർത്തി ചാലനി, കൃത്യം എണ്ണം/പുനർനിർമ്മാണം.
+- `test/distinct_name_fourth_mapping_probe.spl`: മൂന്ന് നീക്കങ്ങൾ കഴിഞ്ഞ നാലാമത്തെ ശേഷിക്കുന്ന ക്രമസ്ഥാനം മൂല ക്രമസ്ഥാനം-ിലേക്ക്.
+- `test/gate_gap_stream_short_probe.spl`: AnswerStream ചുരുങ്ങിയ നിരാകരണം പാത -> തിരഞ്ഞെടുത്ത ക്രമസംഖ്യ -> `41+rank` കവാടം ഇടവ്.
+
+ഇതോടെ ചെറു കൃത്യം ഉറവിടം വ്യാപ്തി-ൽ പാത്രം ആവർത്തസൂത്രം ഏകമൂല്യം ഒന്ന്-സ്ഥാനം-ൽ നിന്ന് ആറ് സ്ഥാനങ്ങൾ വരെ, ചാലിച്ച കട്ട്ലറ്റ് കുടുംബം 3 സ്ഥാനങ്ങൾ-ൽ നിന്ന് 4 സ്ഥാനങ്ങൾ വരെ, വ്യത്യസ്ത-പേര് നീക്കം-കണക്കിലെടുക്കുന്ന മാപ്പിങ് മൂന്നാം-ൽ നിന്ന് നാലാമത്തെ സ്ഥാനം വരെ വളർന്നു. തുള്ളി-46 പൂട്ടുസ്മൃതി സംരക്ഷണം ഉറവിടതല കവാടം ആദ്യമായി പന്ത്രണ്ട് കലക്കലിനുശേഷമുള്ള വായനകൾ മുഴുവനായി ഉപയോഗിക്കുക ചെയ്യുന്നു. കവാടം-ഇടവ് പരിവർത്തനം ഇപ്പോൾ കൃത്രിമ പ്രവാഹം തിരഞ്ഞെടുപ്പ്-നൊപ്പം ഏകീകൃതം ആണ്.
+
+ഇനിയും പ്രധാന തടസ്സങ്ങൾ:
+
+- ഏഴ് മറഞ്ഞത് + 46 ദൃശ്യം കൃത്യം ചലിക്കുന്ന കാലക്രമം, ഓരോ ദൃശ്യം തുള്ളി-നും 11 അരയ്ക്കലുകൾ;
+- ക്രമസംഖ്യ-വരെ-ക്രമം + ക്രമം-സ്ഥാനം പകർച്ചകൾ + ആറ് ഏതുവലുപ്പമുള്ള പഴയ-നിശ്ചലപ്രതി പാത്രം വായനകൾ/എഴുത്തുകൾ + ഒരേസമയം ഉറപ്പിക്കൽ എന്ന പൂർണ്ണം 46-ചക്രം ശൃംഖല;
+- യഥാർത്ഥം ക്രമം-തിരിച്ചറിയൽസൂചിക മാപ്പിങ് സഹിതം 12 ഉറപ്പിച്ച കലക്കലിനുശേഷമുള്ള പാത്രം നിലകൾ;
+- സോസ് -> askBowl -> ചുരുങ്ങിയ/വിശാല വിതരണനിയന്ത്രകൻ ഏകീകൃതം പാത;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ചിഹ്നമുള്ള കവാടം ഇടവുകൾ, ഏതുവലുപ്പമുള്ള സൂചികപ്പെടുത്തിയ ആവശ്യാനുസൃത കവാടം സംഭരണം/സംഭരണപ്പട്ടിക, ഏകദിശ തിരച്ചിൽ;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമം/തിരഞ്ഞെടുപ്പ്, അടുത്ത/മുൻ സ്ഥാനാർഥി കുടുംബങ്ങൾ, തുടർച്ചയായ നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള കട്ട്ലറ്റ് വിഭജനം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം-നീളം പരിധിബദ്ധ ഘടന ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് നില ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അക്ഷരനിര അവതരണം നിർണ്ണയിക്കുക;
+- സൃഷ്ടിച്ച പൂർണ്ണം വർഷം ഘടന -> കൃത്യമായി അഞ്ച് ഘടകങ്ങൾ ആരംഭംമുതൽഅവസാനംവരെ;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 17
+
+ഈ തുടർച്ച-ൽ ഘട്ടം 1 പരിശോധനയ്ക്കുമാത്രമായ Appendix ഒരു മാനദണ്ഡം-ിന്റെ അഞ്ചു അടുത്ത ഭാഗങ്ങൾ ചേർത്തു:
+
+- `test/rolling_predecessor_four_drop_probe.spl`: മറഞ്ഞത് കാലക്രമം-ിൽ നിന്ന് ദൃശ്യം ഉറപ്പിക്കലുകൾ-ലേക്ക് ആദ്യ നാല് തുള്ളി-ുകളുടെ `prev1/prev3/prev7` ചലിക്കുന്ന ഉറവിടം മാപ്പിങ്;
+- `test/bowl_identity_round_arbitrary_snapshot_probe.spl`: സ്വരൂപം ക്രമം-ിൽ ആറു വ്യത്യസ്ത പഴയ പാത്രം മൂല്യങ്ങൾ ഒരേ നിശ്ചലപ്രതി ആയി വായിക്കുന്ന പൂർണ്ണം ആറ്-സ്ഥാനം ഇല്ല-ചുറ്റിക്കൽ ചക്രം;
+- `test/post_stir_identity_order_no_wrap_probe.spl`: 1A സംരക്ഷിച്ച തുക ക്രമസംഖ്യ 1 പരിശോധനാവസ്ഥ-ൽ ആറ് വ്യത്യസ്ത പഴയ പാത്രങ്ങൾ -> ആറ് കലക്കലിനുശേഷമുള്ള കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ, ഒരേ സംരക്ഷിച്ച മൂല്യം ഉപയോഗിച്ച്;
+- `test/distinct_name_fifth_mapping_probe.spl`: നാല് നീക്കങ്ങൾ കഴിഞ്ഞ അഞ്ചാമത്തെ ശേഷിക്കുന്ന ക്രമസ്ഥാനം മൂല കാനോനിക ക്രമസ്ഥാനം-ിലേക്ക് മാപ്പിങ്;
+- `test/year_three_candidate_validity_probe.spl`: മൂന്ന് വർഷം-ജോടി സ്ഥാനാർഥികൾ-ന്റെ ശുദ്ധം `gaps>=6`, `252..5778` നിബന്ധന കൂട്ടം.
+
+ഇതോടെ ചലിക്കുന്ന മുൻഘടകം ഉറവിടം മാപ്പിങ് ഒറ്റ തിരഞ്ഞെടുപ്പുഘടകം-ിൽ നിന്ന് ഒന്നിലധികം ഉറപ്പിച്ച ദൃശ്യം സ്ഥാനങ്ങൾ വരെ നീങ്ങി; പാത്രം നിശ്ചലപ്രതി വ്യാപ്തി ഏകരൂപ പഴയ മൂല്യങ്ങൾ-ിൽ നിന്ന് ആറ് ഏതുവലുപ്പമുള്ള പഴയ മൂല്യങ്ങൾ വരെ ഉയർന്നു; കലക്കലിനുശേഷമുള്ള ആറ്-സ്ഥാനം ചക്രം ഏകരൂപ പഴയ നില-ിൽ നിന്ന് വ്യത്യസ്ത പഴയ നില-ിലേക്ക് ഒരു ക്രമസംഖ്യ-1 ക്രമം പരിശോധനാവസ്ഥ-ൽ വികസിച്ചു; വ്യത്യസ്ത-പേര് നീക്കം മാപ്പിങ് അഞ്ചാം സ്ഥാനം വരെ എത്തി; വർഷം സാധുത നിബന്ധന കൂട്ടം സ്ഥാനാർഥി സ്ഥിരപരിശോധന-ന്റെ ഒരു ചെറിയ അടിസ്ഥാനമായി ലഭിച്ചു.
+
+ഇനിയും പ്രധാന തടസ്സങ്ങൾ:
+
+- ഏഴ് മറഞ്ഞത് മൂല്യങ്ങൾ യഥാർത്ഥമായി നിർമ്മിച്ച് 46 ദൃശ്യം തുള്ളികൾ-ന്റെ ഓരോ വിത്തുമൂല്യം + 11 അരയ്ക്കലുകൾ ഒരൊറ്റ ചലിക്കുന്ന മൂല്യം സംഭരണം-ൽ ഉറപ്പിക്കൽ ചെയ്യൽ;
+- ഓരോ 46 തുള്ളി-ലും ഏതുവലുപ്പമുള്ള ക്രമസംഖ്യ-വരെ-ക്രമം, സ്ഥാനം-നിശ്ചിത പകർച്ചകൾ, ആറ് ഏതുവലുപ്പമുള്ള പഴയ-നിശ്ചലപ്രതി പാത്രം വായനകൾ, ആറ് കാത്തിരിക്കുന്ന എഴുത്തുകൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- തുള്ളി 46-ന്റെ യഥാർത്ഥം ക്രമം പൂട്ടുസ്മൃതി പിടിച്ച് സോസ് ഫലം-ിൽ സൂക്ഷിക്കൽ;
+- കലക്കൽ 1..12 മുഴുവൻ സംരക്ഷിച്ച-തുക -> ക്രമം-ക്രമസംഖ്യ -> പൂർണ്ണം ക്രമവിന്യാസം -> ആറ് കാത്തിരിക്കുന്ന -> ഉറപ്പിക്കൽ നില ശൃംഖല;
+- സോസ് ഫലം -> askBowl -> ചുരുങ്ങിയ/വിശാല വിതരണനിയന്ത്രകൻ പൂർണ്ണം ഏകീകരണം;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ചിഹ്നമുള്ള കവാടം ഇടവുകൾ, ഏതുവലുപ്പമുള്ള സൂചികപ്പെടുത്തിയ ആവശ്യാനുസൃത കവാടം സംഭരണം/സംഭരണപ്പട്ടിക, ഏകദിശ തിരച്ചിൽ;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമം/തിരഞ്ഞെടുപ്പ്, അടുത്ത/മുൻ സ്ഥാനാർഥി പട്ടികകൾ, തുടർച്ചയായ നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള കട്ട്ലറ്റ് വിഭജനം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം-നീളം പരിധിബദ്ധ ഘടന ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം മുഴുവൻ സ്ഥാനങ്ങൾ;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അക്ഷരനിര അവതരണം നിർണ്ണയിക്കുക;
+- സൃഷ്ടിച്ച പൂർണ്ണം ഘടന -> കൃത്യമായി അഞ്ച് അന്തിമം ഘടകങ്ങൾ ആരംഭംമുതൽഅവസാനംവരെ;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 18
+
+ഈ തുടർച്ച-ൽ ആറു പുതിയ SPL ഉറവിടം ഭാഗങ്ങൾ ചേർത്തു:
+
+- `test/rolling_two_visible_full_grinds_probe.spl`: ആദ്യ രണ്ടു ദൃശ്യം തുള്ളി-ുകൾക്ക് മറഞ്ഞത് മുൻഘടകം മാപ്പിങ്, വിത്തുമൂല്യം SAVE, 11-വരി അരയ്ക്കൽ ആവർത്തസൂത്രം, ആദ്യ ഉറപ്പിക്കൽ -> രണ്ടാം `prev1` ഉടമസ്ഥത;
+- `test/bowl_nonidentity_order_round_probe.spl`: അല്ലാത്ത-സ്വരൂപം ക്രമം `3,1,6,2,5,4`-ൽ ആറ് ഏതുവലുപ്പമുള്ള പഴയ-നിശ്ചലപ്രതി വായനകൾ + ആറ് കാത്തിരിക്കുന്ന പുറപ്പാടുകൾ;
+- `test/post_stir_nonidentity_order_probe.spl`: അസംസ്കൃത തുക + 149*കലക്കൽ -> സംരക്ഷിച്ച 255 -> ക്രമസംഖ്യ 255 അറിയാവുന്ന ക്രമവിന്യാസം -> ആറ് കാത്തിരിക്കുന്ന കലക്കലിനുശേഷമുള്ള മൂല്യങ്ങൾ;
+- `test/sauce_query_short_selection_probe.spl`: ചോദിച്ച/അടുത്ത ഘടകം/bowl6/മുദ്ര ഏകമൂല്യം സോസ് കാഴ്ച -> askBowl -> സ്ഥിര ദിശ -> ആദ്യ-ഉത്തരം ചുരുങ്ങിയ തിരഞ്ഞെടുപ്പ് -> കവാടം ഇടവ്;
+- `test/distinct_name_sixth_mapping_probe.spl`: അഞ്ച് നീക്കങ്ങൾ കഴിഞ്ഞ ആറാമത്തെ ശേഷിക്കുന്ന ക്രമസ്ഥാനം മൂല ക്രമസ്ഥാനം-ിലേക്ക്;
+- `test/weave_two_two_two_unrank_probe.spl`: നീളങ്ങൾ `2,2,2` ചെറു നിയമാനുസൃത കുടുംബം എണ്ണം/പുനർനിർമ്മാണം രൂപപ്പെടുത്തൽ.
+
+കൂടാതെ `test/post_stir_identity_order_no_wrap_probe.spl`-ന്റെ സ്ഥാനം-6 ഉറവിടം അക്ഷരാർത്ഥ മൂല്യം `20`-ൽ നിന്ന് Appendix ഒരു-യിലെ `6^2=36`-ലേക്ക് ശുദ്ധം ഘട്ടം 1 തിരുത്തൽ ചെയ്തു; അനുബന്ധമായ പ്രതീക്ഷിച്ച മൂല്യം മാറ്റേണ്ടതില്ല, കാരണം പ്രതീക്ഷ ഇതിനകം ശരിയായ `36` അടിസ്ഥാനമാക്കിയിരുന്നു.
+
+ഇതോടെ ചില തടസ്സങ്ങൾ ചുരുങ്ങി:
+
+- ചലിക്കുന്ന ദൃശ്യം ആവർത്തസൂത്രം ഉറവിടം ഇനി ഒറ്റ മുൻഘടകം തിരഞ്ഞെടുപ്പുഘടകം അല്ല; രണ്ട് ഉറപ്പിച്ച ദൃശ്യം തുള്ളികൾ പൂർണ്ണം 11-അരയ്ക്കൽ ശൃംഖലകൾ ആയി ബന്ധപ്പെട്ടു;
+- പാത്രം പാതനിർണ്ണയം സ്വരൂപം-മാത്രം പരിശോധനാവസ്ഥ-ിൽ നിന്ന് അല്ലാത്ത-സ്വരൂപം ചക്രാകാര ക്രമം പരിശോധനാവസ്ഥ-ിലേക്ക് നീങ്ങി;
+- കലക്കലിനുശേഷമുള്ള വ്യത്യസ്ത നില സ്വരൂപം ക്രമം-ിൽ നിന്ന് അറിയാവുന്ന അല്ലാത്ത-സ്വരൂപം ക്രമവിന്യാസം-ിലേക്ക് നീങ്ങി;
+- askBowl ഏകമൂല്യം പുറപ്പാട് കവാടം-ഇടവ് ചുരുങ്ങിയ-തിരഞ്ഞെടുപ്പ് ഏകീകരണം-ുമായി ബന്ധപ്പെട്ടു;
+- വ്യത്യസ്ത-പേര് നീക്കം മാപ്പിങ് ആറാമത്തെ സ്ഥാനം വരെ എത്തി;
+- m=3 നെയ്ത്ത് ചെറു-നിർബന്ധിക്കുക കുടുംബം നീളങ്ങൾ `2,2,2` വരെ രൂപപ്പെടുത്തുക ചെയ്തു.
+
+ഇനിയും പ്രധാന തടസ്സങ്ങൾ:
+
+- ഏഴ് മറഞ്ഞത് മൂല്യങ്ങൾ-ന്റെ യഥാർത്ഥം സൃഷ്ടിക്കൽ-ുമായി എല്ലാ 46 ദൃശ്യം ആവർത്തസൂത്രങ്ങൾ ഒരൊറ്റ ചലിക്കുന്ന സംഭരണം-ൽ ഉറപ്പിക്കൽ ചെയ്യൽ;
+- ഓരോ 46 തുള്ളി-ലും തുള്ളി-ഉരുത്തിരിഞ്ഞ പൂർണ്ണം ക്രമവിന്യാസം, സ്ഥാനം പകർച്ചകൾ, ആറ് പഴയ-നിശ്ചലപ്രതി വായനകൾ, ആറ് കാത്തിരിക്കുന്ന എഴുത്തുകൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- യഥാർത്ഥം തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി സോസ് ഫലം-ിൽ പിടിക്കൽ;
+- കലക്കൽ 1..12 മുഴുവൻ സംരക്ഷിച്ച-തുക -> ക്രമം -> ആറ് കാത്തിരിക്കുന്ന -> ഉറപ്പിക്കൽ ശൃംഖല;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ചിഹ്നമുള്ള കവാടം ഇടവുകൾ, ഏതുവലുപ്പമുള്ള ആവശ്യാനുസൃത സൂചികപ്പെടുത്തിയ കവാടം സംഭരണം/സംഭരണപ്പട്ടിക, കൃത്യം ഏകദിശ തിരച്ചിൽ;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമം/തിരഞ്ഞെടുപ്പ്, അടുത്ത/മുൻ സ്ഥാനാർഥി സൃഷ്ടിക്കൽ, തുടർച്ചയായ ലക്ഷ്യം നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള ചാലിച്ച കട്ട്ലറ്റ് വിഭജനം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള പരിധിബദ്ധ മാസം-നീളം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് നില ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം മുഴുവൻ സ്ഥാനങ്ങൾ;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അക്ഷരനിര അവതരണം നിർണ്ണയിക്കുക;
+- സൃഷ്ടിച്ച പൂർണ്ണം വർഷം ഘടന -> കൃത്യമായി അഞ്ച് അന്തിമം ഘടകങ്ങൾ ആരംഭംമുതൽഅവസാനംവരെ;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 19
+
+- `test/rolling_three_visible_full_grinds_probe.spl`: മൂന്ന്-തുള്ളി ഉറപ്പിച്ച ചലിക്കുന്ന ആവർത്തസൂത്രം ഉടമസ്ഥത, ഓരോ തുള്ളി-നും 11 അരയ്ക്കൽ ആവർത്തനങ്ങൾ;
+- `test/post_stir_two_committed_rounds_probe.spl`: രണ്ട് തുടർച്ചയായ ആറ്-പാത്രം ഇടപാട്-സുസ്ഥിര ചക്രങ്ങൾ, കാത്തിരിക്കുന്ന -> ഉറപ്പിക്കൽ -> അടുത്ത പഴയ നിശ്ചലപ്രതി;
+- `test/gate_signed_store_five_probe.spl`: `gate[-2..2]` ചിഹ്നമുള്ള സൂചികപ്പെടുത്തിയ രൂപപ്പെടുത്തൽ നിന്ന് നാല് ഇതിനകം-തിരഞ്ഞെടുത്ത ഇടവുകൾ;
+- `test/next_year_three_candidate_rank_probe.spl`: അടുത്ത-വർഷം അതേ-തുറക്കൽ മൂന്ന്-സ്ഥാനാർഥി സാധുത സ്ഥിരപരിശോധന + ക്രമസംഖ്യ നിർണ്ണയിക്കുക;
+- `test/distinct_name_seventh_mapping_probe.spl`: ആറ് നീക്കങ്ങൾ കഴിഞ്ഞ ഏഴാമത്തെ ശേഷിക്കുന്ന ക്രമസ്ഥാനം മൂല കാനോനിക ക്രമസ്ഥാനം-ിലേക്ക്.
+
+ഈ പതിപ്പ് തടസ്സങ്ങൾ-ിൽ ചെറിയ കുറവ് വരുത്തുന്നു: ചലിക്കുന്ന ആവർത്തസൂത്രം ഉറവിടം ഇനി മൂന്ന് ഉറപ്പിച്ച ദൃശ്യം സ്ഥാനങ്ങൾ വരെ എത്തി; കലക്കലിനുശേഷമുള്ള ഉടമസ്ഥത യഥാർത്ഥം അന്തര-ചക്രം ഉറപ്പിക്കൽ അതിർത്തി ഉറവിടം-ൽ ഉണ്ട്; ചിഹ്നമുള്ള കവാടം സംഭരണം ആദ്യ ചെറിയ രൂപപ്പെടുത്തിയ രൂപം നേടി; അടുത്ത-വർഷം സ്ഥാനാർഥി നിബന്ധന വേർതിരിച്ച കൂട്ടം-ിൽ നിന്ന് ക്രമസംഖ്യപ്പെടുത്തിയ സ്ഥിരപരിശോധന-ിലേക്ക് നീങ്ങി; വ്യത്യസ്ത-പേര് മാപ്പിങ് ഏഴാമത്തെ സ്ഥാനം വരെ എത്തി.
+
+ഇനിയും പ്രധാന തടസ്സങ്ങൾ:
+
+- യഥാർത്ഥം ഏഴ് മറഞ്ഞത് സൃഷ്ടിക്കൽ + എല്ലാ 46 ദൃശ്യം വിത്തുമൂല്യങ്ങൾ/11-അരയ്ക്കൽ ആവർത്തസൂത്രങ്ങൾ ഒന്ന് ചലിക്കുന്ന കൃത്യം സംഭരണം;
+- ഓരോ 46 തുള്ളി-ലും തുള്ളി-ഉരുത്തിരിഞ്ഞ പൂർണ്ണം ക്രമവിന്യാസം, പകർച്ചകൾ, ആറ് പഴയ-നിശ്ചലപ്രതി പാത്രം വായനകൾ, കാത്തിരിക്കുന്ന എഴുത്തുകൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- യഥാർത്ഥം തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി SauceResult-ലേക്ക്;
+- കലക്കൽ 1..12-ന്റെ മാനദണ്ഡാനുസൃത സംരക്ഷിച്ച-തുക -> ക്രമം -> ആറ് കാത്തിരിക്കുന്ന -> ഉറപ്പിക്കൽ ശൃംഖല;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ചിഹ്നമുള്ള കവാടം ഇടവുകൾ, ഏതുവലുപ്പമുള്ള സൂചികപ്പെടുത്തിയ ആവശ്യാനുസൃത കവാടം സംഭരണം/സംഭരണപ്പട്ടിക, കൃത്യം ഏകദിശ തിരച്ചിൽ;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമം/തിരഞ്ഞെടുപ്പ്; അടുത്ത/മുൻ ഏതുവലുപ്പമുള്ള സ്ഥാനാർഥി പട്ടികകൾ; തുടർച്ചയായ ലക്ഷ്യം നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള കട്ട്ലറ്റ് വിഭജനം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം-നീളം പരിധിബദ്ധ ഘടന ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m മുഴുവൻ-നെയ്ത്ത് ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അക്ഷരനിര അവതരണം നിർണ്ണയിക്കുക;
+- സൃഷ്ടിച്ച പൂർണ്ണം വർഷം ഘടന -> കൃത്യമായി അഞ്ച് അന്തിമം ഘടകങ്ങൾ;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 20
+
+- `test/visible_drop4_predecessor_seed_probe.spl`: `i=4`-ൽ `prev1=visible3`, `prev3=visible1`, `prev7=hidden4` എന്ന അതിർത്തി-കടക്കൽ വിത്തുമൂല്യം ഉടമസ്ഥത.
+- `test/previous_year_three_candidate_rank_probe.spl`: സ്ഥിര-അടയ്ക്കൽ മുൻ-വർഷം മൂന്ന്-സ്ഥാനാർഥി ശുദ്ധം സാധുത സ്ഥിരപരിശോധന + ഒന്നിൽനിന്നാരംഭിക്കുന്ന ക്രമസംഖ്യ നിർണ്ണയിക്കുക.
+- `test/bounded_composition_five_slot_count_probe.spl`: കൃത്യം പരിധിബദ്ധ ഘടന കുടുംബം എണ്ണം അഞ്ചു സ്ഥാനങ്ങൾ വരെ.
+- `test/cutlet_partition_five_slot_filter_count_probe.spl`: നിർബന്ധിത ആന്തരിക ആമുഖഭാഗം അതിർത്തി ഉള്ള ധന കട്ട്ലറ്റ്-വിഭജനം കൃത്യം എണ്ണം അഞ്ചു സ്ഥാനങ്ങൾ വരെ.
+- `test/distinct_name_eighth_mapping_probe.spl`: ഏഴ് നീക്കങ്ങൾ കഴിഞ്ഞ എട്ടാമത്തെ ശേഷിക്കുന്ന ക്രമസ്ഥാനം മൂല കാനോനിക ക്രമസ്ഥാനം-ിലേക്ക്.
+- `test/weave_three_two_two_count_probe.spl`: നീളങ്ങൾ `3,2,2` കൃത്യം ചെറു മുഴുവൻ-നെയ്ത്ത് എണ്ണം സാക്ഷ്യം.
+
+ഇതോടെ സ്ഥിര-വലുപ്പം ശുദ്ധം സമുച്ചയഗണിത വ്യാപ്തി വീണ്ടും ഒരു സ്ഥാനം/സ്ഥാനം കൂടി വളർന്നു; മുൻ-വർഷം ക്രമസംഖ്യപ്പെടുത്തിയ സ്ഥാനാർഥി പാത അടുത്ത-വർഷം പാത-നൊപ്പം സമമിത ഉറവിടം വ്യാപ്തി നേടി; ദൃശ്യം ആവർത്തസൂത്രം മുൻഘടകം ഉടമസ്ഥത `i=4` മറഞ്ഞത്/ദൃശ്യം അതിർത്തി കടക്കൽ വരെ വ്യക്തമായ ആയി.
+
+ഇനിയും പ്രധാന തടസ്സങ്ങൾ:
+
+- യഥാർത്ഥം ഏഴ് മറഞ്ഞത് സൃഷ്ടിക്കൽ + എല്ലാ 46 ദൃശ്യം വിത്തുമൂല്യങ്ങൾ/11-അരയ്ക്കൽ ആവർത്തസൂത്രങ്ങൾ ഒന്ന് ചലിക്കുന്ന കൃത്യം സംഭരണം;
+- ഓരോ 46 തുള്ളി-ലും തുള്ളി-ഉരുത്തിരിഞ്ഞ പൂർണ്ണം ക്രമവിന്യാസം, പകർച്ചകൾ, ആറ് പഴയ-നിശ്ചലപ്രതി പാത്രം വായനകൾ, കാത്തിരിക്കുന്ന എഴുത്തുകൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- യഥാർത്ഥം തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി SauceResult-ലേക്ക്;
+- കലക്കൽ 1..12-ന്റെ മാനദണ്ഡാനുസൃത സംരക്ഷിച്ച-തുക -> ക്രമം -> ആറ് കാത്തിരിക്കുന്ന -> ഉറപ്പിക്കൽ ശൃംഖല;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ചിഹ്നമുള്ള കവാടം ഇടവുകൾ, ഏതുവലുപ്പമുള്ള സൂചികപ്പെടുത്തിയ ആവശ്യാനുസൃത കവാടം സംഭരണം/സംഭരണപ്പട്ടിക, കൃത്യം ഏകദിശ തിരച്ചിൽ;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമം/തിരഞ്ഞെടുപ്പ്; അടുത്ത/മുൻ ഏതുവലുപ്പമുള്ള സ്ഥാനാർഥി പട്ടികകൾ; തുടർച്ചയായ ലക്ഷ്യം നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള കട്ട്ലറ്റ് വിഭജനം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം-നീളം പരിധിബദ്ധ ഘടന ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m മുഴുവൻ-നെയ്ത്ത് ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അക്ഷരനിര അവതരണം നിർണ്ണയിക്കുക;
+- സൃഷ്ടിച്ച പൂർണ്ണം വർഷം ഘടന -> കൃത്യമായി അഞ്ച് അന്തിമം ഘടകങ്ങൾ;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 21
+
+ഈ തുടർച്ച-ൽ ഘട്ടം 1 ശുദ്ധം Appendix ഒരു മാനദണ്ഡം-ന്റെ അഞ്ചു അടുത്ത ഭാഗങ്ങൾ കൂടി SPL ഉറവിടം ആയി ചേർത്തു:
+
+- `test/hidden_seven_seed_rows_no_wrap_probe.spl`: ഏഴ് മറഞ്ഞത് ഗുണകം വരികൾ ഒരേ എണ്ണങ്ങൾ ഉൾക്കൊള്ളൽ-ൽ വിത്തുമൂല്യം മാപ്പിങ് ആയി;
+- `test/drop_rank1_identity_bowl_commit_probe.spl`: തുള്ളി മൂല്യം 1 -> ക്രമസംഖ്യ 1 സ്വരൂപം ക്രമം -> സ്ഥാനം പകർച്ചകൾ -> പങ്കിട്ട-പഴയ-നിശ്ചലപ്രതി ആറ് കാത്തിരിക്കുന്ന പാത്രം മൂല്യങ്ങൾ എന്ന ഏകീകൃതം ശുദ്ധം ചക്രം;
+- `test/target_year_forward_two_step_probe.spl`: അടയ്ക്കൽ-കവാടം-ഉൾപ്പെടുന്ന അർത്ഥനിയമങ്ങൾ പാലിച്ച് രണ്ട് തുടർച്ചയായ അടുത്ത-വർഷം ഏകകം മാറ്റങ്ങൾ വരെ ലക്ഷ്യം നടത്തം;
+- `test/gate_two_short_streams_accumulate_probe.spl`: സ്വീകരിച്ച ചുരുങ്ങിയ ക്രമസംഖ്യകൾ -> 42..963 ഇടവുകൾ -> രണ്ട് ധന കവാടങ്ങൾ സമാഹാര രൂപപ്പെടുത്തൽ;
+- `test/weave_three_two_two_unrank_probe.spl`: നീളങ്ങൾ `3,2,2` കൃത്യം എണ്ണം സാക്ഷ്യം-നെ ഒൻപത് നിഘണ്ടുക്രമ വരികൾ മുഴുവനായുള്ള ചെറു-കുടുംബം പുനർനിർമ്മാണം സാക്ഷ്യം ആയി വികസിപ്പിക്കുന്നു.
+
+കൂടാതെ `choose_rank_wide_probe.spl`-ന്റെ ഘട്ടം 1 പ്രതീക്ഷകൾ-ൽ `N=M^2+1` അതിർത്തി പരിശോധനാവസ്ഥ ചേർത്തു; പ്രതീക്ഷിച്ച ക്രമസംഖ്യ `M-1` ആണ്.
+
+ഇതിലൂടെ മറഞ്ഞത് ഗുണകം-വരി വ്യാപ്തി ഒറ്റ-വരി പാതരേഖ-ൽ നിന്ന് ഏഴ്-വരി മാപ്പിങ് വരെ ഉയർന്നു; പാത്രം പാത ക്രമസംഖ്യ/ക്രമം/പകർച്ചകൾ/കാത്തിരിക്കുന്ന ഉറപ്പിക്കൽ അർത്ഥനിയമങ്ങൾ ഒരൊറ്റ ക്രമസംഖ്യ-1 ശുദ്ധ ഉറവിട പാത-ൽ ആദ്യമായി കൂടിച്ചേർന്നു; ലക്ഷ്യം-വർഷം നടത്തം ഒരു ദിശ നിബന്ധന-ിൽ നിന്ന് രണ്ട് യഥാർത്ഥം ഏകകം മാറ്റങ്ങൾ വരെ നീങ്ങി; കവാടം ഇടവ് പരിവർത്തനം രണ്ട് സമാഹാര കവാടങ്ങൾ വരെ എത്തി; `3,2,2` നെയ്ത്ത്-ിന് എണ്ണം മാത്രം അല്ല പൂർത്തിയായ ചെറു പുനർനിർമ്മാണം കുടുംബംയും ലഭിച്ചു.
+
+ഇനിയും തടസ്സങ്ങൾ:
+
+- ഏഴ് മറഞ്ഞത് തുള്ളികൾ-ന്റെ പൂർണ്ണം വിത്തുമൂല്യം + ഏഴ് അരയ്ക്കലുകൾ യഥാർത്ഥം സൃഷ്ടിക്കൽ;
+- 46 ദൃശ്യം തുള്ളികൾ-ന്റെ പൂർണ്ണം വിത്തുമൂല്യം + 11 അരയ്ക്കലുകൾ ചലിക്കുന്ന സംഭരണം;
+- ഓരോ 46 തുള്ളി-ലും ഏതുവലുപ്പമുള്ള ക്രമസംഖ്യ-വരെ-ക്രമം, പകർച്ചകൾ, ആറ് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി-ോടെ പൂർണ്ണം സോസ് ഫലം;
+- 12 മാനദണ്ഡാനുസൃത ശേഷകലക്കലുകൾ പൂർണ്ണം ഉറപ്പിച്ച നില ശൃംഖല;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ഏതുവലുപ്പമുള്ള ചിഹ്നമുള്ള ആവശ്യാനുസൃത കവാടം സൃഷ്ടിക്കൽ/സംഭരണപ്പട്ടിക;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ക്രമം/തിരഞ്ഞെടുപ്പ്, അടുത്ത/മുൻ സ്ഥാനാർഥി കുടുംബങ്ങൾ, പരിധിയില്ലാത്ത തുടർച്ചയായ നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള കട്ട്ലറ്റ് വിഭജനം DP, ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം-നീളം DP, ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് DP, ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അവതരണം നിർണ്ണയം;
+- സൃഷ്ടിച്ച കൃത്യമായി-അഞ്ചുഘടക ആരംഭംമുതൽഅവസാനംവരെ മാനദണ്ഡ കണക്കുപാത;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 22
+
+- `test/rolling_46_source_ownership_counts_probe.spl`: എല്ലാ 46 ദൃശ്യം സ്ഥാനങ്ങൾ-ൽ prev1/prev3/മുൻ7 മറഞ്ഞത്-എതിരായി-ഉറപ്പിച്ച-ദൃശ്യം ഉറവിടം ഉടമസ്ഥത എണ്ണങ്ങൾ.
+- `test/visible_46x11_row_schedule_probe.spl`: തിരുത്തിയ പൂർണ്ണം 46×11 ഉൾച്ചേർന്ന സഞ്ചാരം; കല്ല് വരി സ്ഥിരമായി `i`, അരയ്ക്കൽ ഗുണകം വരി `g=1..11`; ചുവട് എണ്ണം, രണ്ട് അക്ഷം തുകകൾ, അന്തിമം `(46,11)` സാക്ഷ്യം.
+- `test/bowl_46_transactional_commit_control_probe.spl`: ആറ് കാത്തിരിക്കുന്ന-മുമ്പ്-ഉറപ്പിക്കൽ ഉടമസ്ഥത കൃത്യമായി 46 ചക്രങ്ങൾ വരെ.
+- `test/post_stir_12_transactional_commit_control_probe.spl`: ആറ് കാത്തിരിക്കുന്ന-മുമ്പ്-ഉറപ്പിക്കൽ ഉടമസ്ഥത കൃത്യമായി 12 ശേഷകലക്കലുകൾ വരെ.
+- `test/target_year_backward_two_step_probe.spl`: `(open,close]` അർത്ഥനിയമങ്ങൾ-ോടെ രണ്ട് തുടർച്ചയായ previousYear മാറ്റങ്ങൾ.
+- `test/year5000_three_candidate_sort_probe.spl`: സാധുവായ മൂന്ന്-സ്ഥാനാർഥി `length ascending, open ascending` ക്രമസംഖ്യനിർണ്ണയം കൂടാതെ ആവശ്യപ്പെട്ട-ക്രമസംഖ്യ രൂപപ്പെടുത്തൽ.
+
+ഇതോടെ പൂർണ്ണം നിർബന്ധിത അംഗസംഖ്യ-കളുടെ നിയന്ത്രണം വ്യാപ്തി വളർന്നു: ചലിക്കുന്ന ഉറവിടം അതിർത്തികൾ 46 സ്ഥാനങ്ങൾ, അരയ്ക്കൽ വരി ക്രമപട്ടിക 506 ചുവടുകൾ, പാത്രം ഉറപ്പിക്കൽ കാലഘട്ടങ്ങൾ 46, കലക്കലിനുശേഷമുള്ള ഉറപ്പിക്കൽ കാലഘട്ടങ്ങൾ 12. എന്നാൽ യഥാർത്ഥം മാനദണ്ഡാനുസൃത മൂല്യം ഏകീകരണം ഇനിയും വേണം.
+
+ഇനിയും പ്രധാന തടസ്സങ്ങൾ:
+
+- ഏഴ് മറഞ്ഞത് തുള്ളികൾ-ന്റെ പൂർണ്ണം വിത്തുമൂല്യം + ഏഴ് അരയ്ക്കലുകൾ യഥാർത്ഥം സൃഷ്ടിക്കൽ;
+- എല്ലാ 46 ദൃശ്യം തുള്ളികൾ-ന്റെ വിത്തുമൂല്യം + 11 മാനദണ്ഡാനുസൃത അരയ്ക്കലുകൾ ഒന്ന് ചലിക്കുന്ന കൃത്യം സംഭരണം-ൽ;
+- ഓരോ ദൃശ്യം തുള്ളി-ലും യഥാർത്ഥം തുള്ളി-ഉരുത്തിരിഞ്ഞ ക്രമസംഖ്യ-വരെ-ക്രമം, മൂന്ന് സ്ഥാനം പകർച്ചകൾ, കല്ല് മൂല്യം, ആറ് മാനദണ്ഡാനുസൃത കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി-ോടെ പൂർത്തിയായ SauceResult;
+- കലക്കൽ 1..12 യഥാർത്ഥം 1A സംരക്ഷിച്ച തുക -> ക്രമം -> ആറ് മാനദണ്ഡാനുസൃത കാത്തിരിക്കുന്ന -> ഉറപ്പിക്കൽ ശൃംഖല;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ഏതുവലുപ്പമുള്ള ചിഹ്നമുള്ള ആവശ്യാനുസൃത കവാടം സൃഷ്ടിക്കൽ/സംഭരണപ്പട്ടിക കൂടാതെ കൃത്യം തിരച്ചിൽ;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ചാലനി/ക്രമീകരണം/മുദ്ര-10 തിരഞ്ഞെടുപ്പ്; അടുത്ത/മുൻ ഏതുവലുപ്പമുള്ള സ്ഥാനാർഥി കുടുംബങ്ങൾ; പരിധിയില്ലാത്ത തുടർച്ചയായ ലക്ഷ്യം-വർഷം നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള കട്ട്ലറ്റ് വിഭജനം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം-നീളം പരിധിബദ്ധ ഘടന ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അക്ഷരനിര അവതരണം നിർണ്ണയം;
+- സൃഷ്ടിച്ച കൃത്യമായി-അഞ്ചുഘടക ആരംഭംമുതൽഅവസാനംവരെ മാനദണ്ഡ കണക്കുപാത;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 23
+
+- `test/stones_row2_fixed_snapshot_probe.spl`: Appendix ഒരു കല്ല് വരി 1 -> വരി 2 യഥാർത്ഥം അഞ്ച്-മൂല്യം ഒരേസമയം നിശ്ചലപ്രതി സാക്ഷ്യം.
+- `test/initial_six_bowls_fixture_probe.spl`: ആരംഭ പാത്രം സൂത്രം ആറ് തിരിച്ചറിയൽസൂചികകൾ-ലേക്ക് ഒരുമിച്ച് വ്യാപിപ്പിച്ച ഇല്ല-ചുറ്റിക്കൽ കുടുംബം സാക്ഷ്യം.
+- `test/bowl_pour_nonidentity_mapping_probe.spl`: ക്രമം സ്ഥാനങ്ങൾ `3,1,6` വഴി മൂന്ന് പകർച്ചകൾ യഥാർത്ഥം സ്ഥിര-തിരിച്ചറിയൽസൂചിക പര്യായബന്ധം ഒഴിവാക്കി മാപ്പ് ചെയ്യുന്ന സാക്ഷ്യം.
+- `test/order46_successor_lookup_probe.spl`: ഏതുവലുപ്പമുള്ള ആറ്-തിരിച്ചറിയൽസൂചിക പൂട്ടിയ ക്രമം-ൽ ചോദിച്ച പാത്രം വലയാകൃതിയിലുള്ള അടുത്ത ഘടകം തിരച്ചിൽ.
+- `test/gate_signed_pair_accumulate_probe.spl`: ക്രമസംഖ്യ -> ഇടവ് -> ധന/ഋണ സ്ഥാപനദിനം ആദ്യ കവാടങ്ങൾ.
+- `test/visible_grind_table_eleven_mapping_probe.spl`: 11 മാനദണ്ഡാനുസൃത ദൃശ്യം അരയ്ക്കൽ വരികൾ മുഴുവൻ `a,b,c,d,stoneKind` മാപ്പിങ്.
+
+ഇതോടെ കല്ല് ആരംഭക്രമീകരണം/മാറ്റം, പാത്രം ആരംഭക്രമീകരണം/പകർച്ചകൾ, പൂട്ടിയ-ക്രമം ചോദ്യം അയൽബന്ധം, ചിഹ്നമുള്ള ആദ്യ-കവാടം ഗണിതം, ദൃശ്യം അരയ്ക്കൽ പട്ടിക എന്നിവ ഉറവിടതല ശുദ്ധ മാനദണ്ഡ-ൽ കൂടുതൽ നേരിട്ട് രൂപപ്പെടുത്തുക ചെയ്തു.
+
+ഇനിയും പ്രധാന തടസ്സങ്ങൾ:
+
+- ഏഴ് മറഞ്ഞത് തുള്ളികൾ-ന്റെ പൂർണ്ണം വിത്തുമൂല്യം + ഏഴ് അരയ്ക്കലുകൾ യഥാർത്ഥം സൃഷ്ടിക്കൽ ഒന്ന് പുനരുപയോഗിക്കാവുന്ന പാത;
+- എല്ലാ 46 ദൃശ്യം തുള്ളികൾ-ന്റെ വിത്തുമൂല്യം + 11 മാനദണ്ഡാനുസൃത അരയ്ക്കലുകൾ ഒന്ന് ചലിക്കുന്ന കൃത്യം സംഭരണം-ൽ;
+- ഓരോ ദൃശ്യം തുള്ളി-ലും യഥാർത്ഥം തുള്ളി-ഉരുത്തിരിഞ്ഞ ആറ്-തിരിച്ചറിയൽസൂചിക ക്രമം, മൂന്ന് പകർച്ചകൾ, കല്ല്-വഴി-സ്ഥാനം, ആറ് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ, ഒരേസമയം ഉറപ്പിക്കൽ;
+- തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി-ോടെ പൂർത്തിയായ SauceResult;
+- കലക്കൽ 1..12 യഥാർത്ഥം 1A സംരക്ഷിച്ച തുക -> ക്രമം -> ആറ് മാനദണ്ഡാനുസൃത കാത്തിരിക്കുന്ന -> ഉറപ്പിക്കൽ ശൃംഖല;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ഏതുവലുപ്പമുള്ള ചിഹ്നമുള്ള ആവശ്യാനുസൃത കവാടം സൃഷ്ടിക്കൽ/സംഭരണപ്പട്ടിക കൂടാതെ കൃത്യം തിരച്ചിൽ;
+- വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ചാലനി/ക്രമീകരണം/മുദ്ര-10 തിരഞ്ഞെടുപ്പ്; അടുത്ത/മുൻ ഏതുവലുപ്പമുള്ള സ്ഥാനാർഥി കുടുംബങ്ങൾ; പരിധിയില്ലാത്ത തുടർച്ചയായ ലക്ഷ്യം-വർഷം നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള കട്ട്ലറ്റ് വിഭജനം ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം-നീളം പരിധിബദ്ധ ഘടന ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m നെയ്ത്ത് ഓർമ്മപ്പട്ടിക/എണ്ണം/പുനർനിർമ്മാണം;
+- ഏത് k-യ്ക്കുമുള്ള വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാള ഉറവിടം അക്ഷരനിര അവതരണം നിർണ്ണയം;
+- സൃഷ്ടിച്ച കൃത്യമായി-അഞ്ചുഘടക ആരംഭംമുതൽഅവസാനംവരെ മാനദണ്ഡ കണക്കുപാത;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+## പുരോഗതി 24 — വലിയ-M ഗണിതം ഏകീകരണം
+
+ഈ തുടർച്ച പരിശോധനയ്ക്കുമാത്രമായ ശുദ്ധ മാനദണ്ഡ-ൽ താഴെ പറയുന്ന കൃത്യം ഭാഗങ്ങൾ ചേർക്കുന്നു:
+
+- `hidden_seven_grind_modulus_lock_probe.spl`: ഏഴ് മറഞ്ഞത് അരയ്ക്കൽ പുതുക്കലുകൾ-നും M വലുപ്പമുള്ള കൃത്യം SAVE പൂട്ടൽ;
+- `drop_M_order_rank_probe.spl`: M വലുപ്പമുള്ള തുള്ളി-ിൽ നിന്ന് ഒന്നിൽനിന്നാരംഭിക്കുന്ന 720 പാത്രം ക്രമസംഖ്യ;
+- `bowl_round_modulus_reduction_probe.spl`: M വലുപ്പമുള്ള തുള്ളി/പഴയ പാത്രങ്ങൾ/കല്ലുകൾ ഉപയോഗിച്ച് പൂർണ്ണം ആറ്-സ്ഥാനം ദൃശ്യം പാത്രം ചക്രം;
+- `post_stir_M_snapshot_rank149_probe.spl`: ആറ്-M പഴയ നിശ്ചലപ്രതി -> 1A സംരക്ഷിച്ച തുക 149 -> ക്രമസംഖ്യ 149 -> ആറ് കലക്കലിനുശേഷമുള്ള കാത്തിരിക്കുന്ന സ്ഥാനം മൂല്യങ്ങൾ;
+- `wide_M2_plus1_boundary_probe.spl`: നിർബന്ധിത `N=M^2+1` വിശാല തിരഞ്ഞെടുപ്പുകാരൻ അതിർത്തി ഉറവിടം സാക്ഷ്യം;
+- `ask_bowl_M_wrap_formula_probe.spl`: പൂട്ടിയ വലയാകൃതിയിലുള്ള-അടുത്ത ഘടകം സഹായി പരിശോധനാവസ്ഥ-നെ പൂർണ്ണം askBowl ആദ്യ/ദിശ ഗണിതം-ുമായി ബന്ധിപ്പിക്കുന്നു.
+
+ഇവ വ്യക്തിഗത ശുദ്ധം-മാനദണ്ഡം ഭാഗങ്ങൾ ആണ്; പ്രവർത്തന തുടക്കഘടന നിഷ്പക്ഷമാണ്. പൂർണ്ണം ചലിക്കുന്ന സോസ് നില, ഏതുവലുപ്പമുള്ള-ക്രമം 46 ഉറപ്പിച്ച പാത്രം ചക്രങ്ങൾ, 12 ഉറപ്പിച്ച മാനദണ്ഡാനുസൃത ശേഷകലക്കലുകൾ, സോസ്-ഉരുത്തിരിഞ്ഞ ആവശ്യാനുസൃത കവാടം സൃഷ്ടിക്കൽ, പൂർത്തിയായ വർഷങ്ങൾ, പൊതുവായ DP/നെയ്ത്ത്/പേര്-പുനർനിർമ്മാണം, മലയാള അവതരണം നിർണ്ണയം, സൃഷ്ടിച്ച അന്തിമം അഞ്ചുഘടക ഫലം എന്നിവ തടസ്സങ്ങൾ ആയി തുടരുന്നു.
+
+## പുരോഗതി 25 — സോസ് ശൃംഖല ഏകീകരണം പാലങ്ങൾ
+
+ഈ തുടർച്ച-ൽ ഘട്ടം 1 ശുദ്ധ മാനദണ്ഡ-ന്റെ താഴെപ്പറയുന്ന ഉറവിടം പാലങ്ങൾ ചേർന്നു:
+
+1. `stones_row2_to_row3_snapshot_probe.spl` — തുടർച്ചയായ കല്ല് വരി ഉടമസ്ഥത: ഉറപ്പിച്ച വരി 2 -> വരി 3 അഞ്ച് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ, അതേ പഴയ നിശ്ചലപ്രതി.
+2. `visible_eleven_M_integrated_table_probe.spl` — വ്യക്തമായ 11-വരി അരയ്ക്കൽ വിതരണം -> പൊതുവായ ആവർത്തസൂത്രം -> SAVE ഉറപ്പിക്കൽ, M വലുപ്പമുള്ള കൃത്യം പരിശോധനാവസ്ഥ.
+3. `two_drop_two_bowl_commits_probe.spl` — രണ്ട് ദൃശ്യം തുള്ളികൾ -> പകർച്ചകൾ -> ആറ് പാത്രം കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ -> ഉറപ്പിക്കൽ -> അടുത്ത ആറ്-പാത്രം ചക്രം വായനകൾ ഉറപ്പിച്ച നിശ്ചലപ്രതി.
+4. `sauce_46_12_latch_phase_probe.spl` — 46 തുള്ളി ഉറപ്പിക്കൽ കാലഘട്ടങ്ങൾ -> ഒറ്റ തുള്ളി-46 പൂട്ടുസ്മൃതി -> 12 കലക്കലിനുശേഷമുള്ള ഉറപ്പിക്കൽ കാലഘട്ടങ്ങൾ; ശേഷ ഘട്ടഭാഗം കഴിയില്ല പുനരെഴുത്ത് പൂട്ടുസ്മൃതി.
+5. `ask_after_poststir_uses_latch_probe.spl` — ചോദ്യം അടുത്ത ഘടകം ഉറവിടം ആണ് തുള്ളി-46 പൂട്ടുസ്മൃതി, അല്ല ആ പിന്നീട് നിർണ്ണയസഹായം കലക്കലിനുശേഷമുള്ള ക്രമം.
+
+ഇവ പ്രവർത്തന തുടക്കഘടന വാസ്തുവിദ്യ-നെ ഭാവി മോൺസ്റ്റർ ഘടകങ്ങൾ ഉപയോഗിച്ച് വളർത്തുന്നില്ല. പരിശോധനയ്ക്കുമാത്രമായ ശുദ്ധം മാനദണ്ഡ കണക്കുപാത-ന്റെ അർത്ഥപരമായ ഉടമസ്ഥത/ഏകീകരണം വ്യാപ്തി മാത്രം വർധിപ്പിക്കുന്നു.
+
+ഇനിയും അടയ്ക്കാത്ത പ്രധാന ഉറവിടം ഇടവുകൾ: എല്ലാ 46 കല്ല് വരികൾ സൃഷ്ടിച്ച ൽ ഒന്ന് പട്ടിക; ഏഴ് മറഞ്ഞത് തുള്ളികൾ സൃഷ്ടിച്ച ഒരുമിച്ച്; പൂർണ്ണം 46 ദൃശ്യം ചലിക്കുന്ന ആവർത്തസൂത്രം സഹിതം യഥാർത്ഥം കല്ല് വരികൾ; എല്ലാ 46 തുള്ളി-ഉരുത്തിരിഞ്ഞ ക്രമവിന്യാസങ്ങൾ കൂടാതെ പാത്രം ഉറപ്പിക്കലുകൾ; എല്ലാ 12 മൂല്യം-സൃഷ്ടിച്ച് ശേഷകലക്കലുകൾ; പൂർത്തിയായ SauceResult; സോസ്-ഉരുത്തിരിഞ്ഞ ആവശ്യാനുസൃത കവാടം സംഭരണം; പൂർണ്ണം വർഷം 5000 പട്ടികപ്പെടുത്തൽ കൂടാതെ തുടർച്ചയായ അടുത്തടുത്ത-വർഷം നിർമ്മാണം; ഏത് വലുപ്പത്തിലുള്ള ഘടന/നെയ്ത്ത്/പേര് പുനർനിർമ്മാണം; മരവിപ്പിച്ച മലയാളം കാറ്റലോഗ് അക്ഷരനിര നിർണ്ണയം; അന്തിമം അഞ്ചുഘടക ആരംഭംമുതൽഅവസാനംവരെ മാനദണ്ഡ കണക്കുപാത; സ്വദേശീയ SPL നിർവഹണം.
+
+## പുതിയ ശുദ്ധം-മാനദണ്ഡം ഏകീകരണം ഭാഗങ്ങൾ — പുരോഗതി 26
+
+- `test/hidden_seven_full_synthetic_generation_probe.spl`: ഏഴ് മറഞ്ഞത് തുള്ളികൾ × ഏഴ് അരയ്ക്കലുകൾ ഒരേ ഉറവിടം നിയന്ത്രണം പാത-ൽ; കൃത്രിമ കൃത്യം പരിശോധനാവസ്ഥ അന്തിമം 132.
+- `test/stones_full_46_transactional_path_probe.spl`: മാനദണ്ഡാനുസൃത അഞ്ച്-കല്ല് ആവർത്തസൂത്രം വരി 1->46, അഞ്ച് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ നിന്ന് ഒന്ന് പഴയ നിശ്ചലപ്രതി തുടർന്ന് ഉറപ്പിക്കൽ.
+- `test/post_stir_twelve_saved_rank_schedule_probe.spl`: 1A `savedBowlSum` + ഒന്നിൽനിന്നാരംഭിക്കുന്ന 720 ക്രമസംഖ്യ മുഴുവൻ കലക്കൽ 1..12 ക്രമപട്ടിക.
+- `test/year_max_5778_to_5781_boundary_probe.spl`: ശുദ്ധം പരമാവധി അതിർത്തി 5778 സ്വീകരിക്കുക; 5779..5781 നിരസിക്കുക.
+- `test/final_five_field_closing_boundary_probe.spl`: അടയ്ക്കൽ-ദിവസം ഉൾപ്പെടുന്ന രൂപപ്പെടുത്തിയ ഘടന -> കൃത്യമായി അഞ്ച് ഘടകങ്ങൾ `5000,7,3,17,2`.
+- `test/distinct_name_general_sorted_mapping_probe.spl`: ചലനാത്മക നീക്കം-എണ്ണം അടുക്കു-പിന്തുണച്ച ശേഷിക്കുന്ന ക്രമസ്ഥാനം -> കാനോനിക ക്രമസ്ഥാനം സഹായകം.
+- `test/year5000_seal10_short_rank_probe.spl`: നിർബന്ധിത വർഷം 5000 മുദ്ര 10 -> AnswerStream -> ചുരുങ്ങിയ സ്ഥാനാർഥി ക്രമസംഖ്യ ബന്ധം.
+
+ഇതോടെ കല്ല് ആവർത്തസൂത്രം-ന്റെ പൂർണ്ണം 46-വരി സഞ്ചാരം ഉറവിടതല ആയി ലഭിച്ചു; മറഞ്ഞത് സൃഷ്ടിക്കൽ സ്ഥിര ഓരോ-k ഖണ്ഡങ്ങൾ-ൽ നിന്ന് ഏഴ്-വഴി-ഏഴ് ഏകീകൃതം നിയന്ത്രണം-ലേക്ക് നീങ്ങി; കലക്കലിനുശേഷമുള്ള സംരക്ഷിച്ച/ക്രമസംഖ്യ ഘട്ടഭാഗം പൂർണ്ണം 12 വരികൾ നേടി; ശുദ്ധം വർഷം മുകളിൽവട്ടമിടൽ 5779/5780/5781 വ്യക്തമായ നിരാകരണം ആയി ഉറവിടം പരിശോധന-ൽ രൂപപ്പെടുത്തുക ചെയ്തു; വ്യത്യസ്ത-പേര് മാപ്പിങ് സ്ഥിര എട്ടാമത്തെ സ്ഥാനം-ൽ നിന്ന് ചലനാത്മക നീക്കം-എണ്ണം സഹായകം-ലേക്ക് നീങ്ങി; അന്തിമ നിർണ്ണായകം അടയ്ക്കൽ അതിർത്തിയും തുടർച്ചയില്ലാത്ത മാസം സംഭവം എണ്ണം-വും ഒരേ കൃത്യമായി-അഞ്ചുഘടക പരിശോധനാവസ്ഥ-ൽ ചേർന്നു.
+
+ഇനിയും പ്രധാന തടസ്സങ്ങൾ:
+
+- നിയമാനുസൃത workCounts + യഥാർത്ഥം സൃഷ്ടിച്ച 46-വരി കല്ലുകൾ ഉപയോഗിച്ച് ഏഴ് മറഞ്ഞത് മൂല്യങ്ങൾ ആരംഭംമുതൽഅവസാനംവരെ സൃഷ്ടിക്കൽ;
+- എല്ലാ 46 ദൃശ്യം മൂല്യങ്ങൾ ഒന്ന് ചലിക്കുന്ന കൃത്യം കാലക്രമം-ൽ യഥാർത്ഥം സൃഷ്ടിച്ച മുൻഘടകങ്ങൾ/കല്ലുകൾ ഉപയോഗിച്ച്;
+- എല്ലാ 46 തുള്ളി-ഉരുത്തിരിഞ്ഞ ഏതുവലുപ്പമുള്ള ക്രമങ്ങൾ + പകർച്ചകൾ + ആറ്-പാത്രം ഇടപാട്-സുസ്ഥിര ഉറപ്പിക്കലുകൾ;
+- 12 യഥാർത്ഥം കലക്കലിനുശേഷമുള്ള മൂല്യം ചക്രങ്ങൾ സഹിതം ഉറപ്പിച്ച നില;
+- പൂർത്തിയായ SauceResult + orderAtDrop46 പൂട്ടുസ്മൃതി;
+- സോസ്-ഉരുത്തിരിഞ്ഞ ഏതുവലുപ്പമുള്ള ചിഹ്നമുള്ള ആവശ്യാനുസൃത കവാടങ്ങൾ;
+- പൂർണ്ണം വർഷം 5000 സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ/ചാലനി/ക്രമീകരണം/മുദ്ര-10 തിരഞ്ഞെടുപ്പ് കൂടാതെ ഏതുവലുപ്പമുള്ള അടുത്തടുത്ത-വർഷം നടത്തം;
+- ഏത് k-യ്ക്കുമുള്ള കട്ട്ലറ്റ് വിഭജനം എണ്ണം/പുനർനിർമ്മാണം, ഏത് സ്ലോട്ട് എണ്ണത്തിനുമുള്ള മാസം ഘടന എണ്ണം/പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള-m മുഴുവൻ-നെയ്ത്ത് എണ്ണം/പുനർനിർമ്മാണം;
+- പൂർണ്ണം ഏത് k-യ്ക്കുമുള്ള ഭാഗിക-ക്രമവിന്യാസം പേര് പുനർനിർമ്മാണം;
+- മരവിപ്പിച്ച canonicalIndex -> മലയാളം അവതരണം അക്ഷരനിര നിർണ്ണയം;
+- സൃഷ്ടിച്ച വർഷം ഘടന -> കൃത്യമായി അഞ്ച് അന്തിമം ഘടകങ്ങൾ;
+- പ്രാദേശിക SPL-മാത്രം നിർവഹണപരിസരം പച്ച.
+
+### പുരോഗതി 26 ശുദ്ധം-മാനദണ്ഡം തിരുത്തൽ
+
+`test/distinct_name_eighth_mapping_probe.spl` സ്ഥാനാർഥി-സ്ഥിരപരിശോധന ആയി പുനഃരചിച്ചു. പഴയ കുറുക്കുവഴി നീക്കം ഉൾക്കൊള്ളൽ ക്രമം-നോട് സൂക്ഷ്മ ആയിരുന്നു; കാനോനിക നീക്കിയ സമുച്ചയം-ന്റെ ക്രമം അർത്ഥപരമായ ആയിരിക്കരുത്. സ്ഥിര പരിശോധനാവസ്ഥ പുറപ്പാടുകൾ `15`/`13` തന്നെയാണ്.
+
+## പുരോഗതി 27 — നിയമാനുസൃത workCounts കൂടാതെ പൂർണ്ണം-46 ചലിക്കുന്ന ബന്ധം
+
+- `test/work_counts_full_probe.spl`: അസംസ്കൃത പ്രവൃത്തി/ലക്ഷ്യം ദിവസം -> പ്രവൃത്തി dayCount, ലക്ഷ്യം dayCount, കാലക്രമാനുസൃത ദൂരം, ബന്ധം, ദിശ; സ്ഥാപനദിനം സമവിഷമത മാപ്പിങ് ഉൾപ്പെടെ.
+- `test/legal_foundation_hidden_seed_rows_probe.spl`: നിയമാനുസൃത അതേ-സ്ഥാപനദിനം workCounts `1,1,1,2,2`-ൽ ഏഴ് മറഞ്ഞത് ഗുണകം വരികൾ കൃത്യം ഇല്ല-ചുറ്റിക്കൽ സാക്ഷ്യം.
+- `test/legal_foundation_six_initial_bowls_probe.spl`: അതേ നിയമാനുസൃത workCounts-ൽ ആറ് ആരംഭ പാത്രം സൂത്രം കുടുംബം കൃത്യം ഇല്ല-ചുറ്റിക്കൽ സാക്ഷ്യം.
+- `test/visible_46_full_rolling_invariant_probe.spl`: 46 ദൃശ്യം പുറത്തെ ഉറപ്പിക്കലുകൾ + 11 മാനദണ്ഡാനുസൃത അരയ്ക്കൽ ഗുണകം വരികൾ ഓരോ തുള്ളി + ഏഴ്-സ്ഥാനം മുൻഘടകം വലയം ൽ ഒന്ന് ഉറവിട പാത; കൃത്രിമ M അചഞ്ചല വ്യവസ്ഥ കല്ലുകൾ/അടിസ്ഥാനം വേർതിരിക്കുക ചലിക്കുന്ന/മൂല്യം ഉടമസ്ഥത.
+
+ഇതോടെ നിയമാനുസൃത workCounts ഇനി അടിസ്ഥാനഘടകം പ്രവർത്തനം കോഡ്-ന്റെ ഉള്ളിൽ മാത്രം ഒളിഞ്ഞിട്ടില്ല; സമർപ്പിത പൂർണ്ണം ഉറവിട പാത ഉണ്ട്. പൂർണ്ണം-46 ദൃശ്യം ആവർത്തസൂത്രം ഇനി അംഗസംഖ്യ/ക്രമപട്ടിക നിയന്ത്രണം മാത്രം അല്ല; ആവർത്തസൂത്രം മൂല്യം ഓരോ 11 അരയ്ക്കൽ-ലും SAVE ചെയ്ത് ചലിക്കുന്ന ഉറപ്പിക്കൽ ചെയ്യുന്നു. എന്നാൽ യഥാർത്ഥം സൃഷ്ടിച്ച കല്ല് വരി/തരം തിരച്ചിൽ, നിയമാനുസൃത വിത്തുമൂല്യം അടിസ്ഥാനം, തുള്ളി-ഉരുത്തിരിഞ്ഞ പാത്രം ക്രമം/പകർച്ചകൾ/ആറ്-പാത്രം ചക്രം എന്നിവ ഈ പൂർണ്ണം-46 ഉറവിടം-ൽ ഇനിയും ബന്ധിപ്പിച്ചിട്ടില്ല.
+
+## പുരോഗതി 28 — തിരുത്തിയ ദൃശ്യം കല്ല്-വരി അക്ഷം
+
+- `test/visible_46x11_row_schedule_probe.spl`: പുരോഗതി-22 ചുറ്റിച്ച-വരി വ്യാഖ്യാനം തിരുത്തുന്നു; `stoneRow=i`, `grindRow=g`; പൂർണ്ണം 46×11 സഞ്ചാരം പുറപ്പാടുകൾ `506,11891,3036,46,11`.
+- `test/visible_row1_two_grinds_legal_probe.spl`: നിയമാനുസൃത അതേ-സ്ഥാപനദിനം എണ്ണങ്ങൾ + യഥാർത്ഥം കല്ല് വരി 1 + മുൻഘടകം പരിശോധനാവസ്ഥ -> വിത്തുമൂല്യം + ആദ്യ രണ്ട് മാനദണ്ഡാനുസൃത അരയ്ക്കൽ ഉറപ്പിക്കലുകൾ; കൃത്യം ശൃംഖല `443 -> 197618 -> 39053862074`.
+- `test/visible_same_stone_row_kind_cycle_probe.spl`: ഒന്ന് നിലനിർത്തിയ കല്ല് വരി കുറുകെ എല്ലാ 11 അരയ്ക്കൽ തരം തിരഞ്ഞെടുപ്പുകൾ; വരി-1 തിരഞ്ഞെടുത്ത തുക `539`, ആദ്യ/അവസാന `17`.
+
+### തിരുത്തൽ ഉടമസ്ഥത
+
+പുരോഗതി-22 രേഖപ്പെടുത്തൽ-ൽ ഉണ്ടായിരുന്ന `wrap1(i+g,46)` കല്ല്-വരി നിയമം കാലഹരണപ്പെട്ട ആണ്. Appendix ഒരു ശുദ്ധം ദൃശ്യം ആവർത്തസൂത്രം-ൽ കല്ല് വരി പുറത്തെ തുള്ളി സൂചിക `i` ആണ്. `g`-യുടെ പങ്ക് ഗുണകം വരി + കല്ല് തരം തിരഞ്ഞെടുപ്പ് മാത്രം.
+
+### ശേഷിക്കുന്ന ബന്ധം
+
+- പൂർണ്ണം കല്ല് പട്ടിക വരി 1..46 പിന്നീട് ഘട്ടഭാഗങ്ങൾ-ക്ക് ചോദിക്കാവുന്ന നില ആയി രൂപപ്പെടുത്തുക ചെയ്യുക;
+- നിയമാനുസൃത workCounts + യഥാർത്ഥം സൃഷ്ടിച്ച വരികൾ -> ഏഴ് മറഞ്ഞത് തുള്ളികൾ;
+- സൃഷ്ടിച്ച മറഞ്ഞത് കാലക്രമം + യഥാർത്ഥം വരി `i` -> എല്ലാ 46 ദൃശ്യം മൂല്യങ്ങൾ;
+- ദൃശ്യം മൂല്യം -> ക്രമം -> സ്ഥാനം പകർച്ചകൾ -> ആറ്-പാത്രം ഇടപാട്-സുസ്ഥിര ഉറപ്പിക്കൽ, 46 തവണ;
+- തുടർന്ന് 12 യഥാർത്ഥം ശേഷകലക്കലുകൾ, സോസ് ഫലം, കവാടങ്ങൾ, വർഷങ്ങൾ, പൊതുവായ ഘടന DP/പേര്/അവതരണം/അഞ്ചുഘടക പാത.
+
+## പുരോഗതി 29 — മുന്നോട്ട്-ഉപയോഗിക്കാവുന്ന കല്ല് പട്ടിക ബന്ധം
+
+- `test/stones_full_46_forward_replay_probe.spl`: യഥാർത്ഥം 46-വരി ഒരേസമയം കല്ല് ആവർത്തസൂത്രം + ഓരോ-തരം ശേഖരണപ്പട്ടിക അടുക്കുകൾ + മറുക്രമം-വരെ-മുന്നോട്ടുള്ള പുനരാവർത്തനം; വരി 1 പുനരാവർത്തനം സാക്ഷ്യം `17,29,43,71,101`.
+- `test/hidden1_actual_row1_first_grind_probe.spl`: നിയമാനുസൃത അതേ-സ്ഥാപനദിനം workCounts + യഥാർത്ഥം വരി 1 + മറഞ്ഞത് സമീപനം 1 വിത്തുമൂല്യം + ആദ്യ മറഞ്ഞത് അരയ്ക്കൽ, രണ്ടും വഴി SAVE; `297 -> 89118`.
+- `test/drop_M_factoradic_digits_probe.spl`: M വലുപ്പമുള്ള തുള്ളി -> ഒന്നിൽനിന്നാരംഭിക്കുന്ന ക്രമം ക്രമസംഖ്യ 127 -> ഘടകാധിഷ്ഠിത അക്കങ്ങൾ `1,0,1,0,0,0`.
+
+### ഇപ്പോഴത്തെ സോസ് ഏകീകരണം ഇടവ്
+
+കല്ല് സൃഷ്ടിക്കൽ ഇനി മൂല്യം നിലനിർത്തൽ ഇല്ലാത്ത സഞ്ചാരം മാത്രമല്ല: അഞ്ച് പുനരാവർത്തനം അടുക്കുകൾ വരി 1..46 മുന്നോട്ട് ഉപയോഗം-നായി ഉറവിടതല ഉടമസ്ഥത നൽകുന്നു. അടുത്ത ബന്ധം ഈ പുനരാവർത്തനം നില-നെ ഏഴ് മറഞ്ഞത് + എല്ലാ 46 ദൃശ്യം മൂല്യം സൃഷ്ടിക്കൽ-ൽ ഉപയോഗിക്കുക ചെയ്യുന്നതാണ്. ദൃശ്യം തുള്ളി ക്രമം പാത-ൽ ക്രമസംഖ്യ കണക്കുകൂട്ടൽ-നും ഘടകാധിഷ്ഠിത അക്കം വിഘടനം-നും ഉറവിടം സാക്ഷ്യങ്ങൾ ഇപ്പോൾ ഉണ്ട്; സജീവ-തിരിച്ചറിയൽസൂചിക നീക്കം/ക്രമവിന്യാസം രൂപപ്പെടുത്തൽ ഇതിനകം വേറൊരു ശുദ്ധം പരിശോധനം-ൽ ഉണ്ട്, പക്ഷേ പൂർണ്ണം 46-തുള്ളി സോസ് ഉറവിടം-ൽ ഇനിയും ചേർന്നിട്ടില്ല.
+
+## പുരോഗതി 30 — മുന്നോട്ട് കല്ല് ഉപയോഗം മുതൽ കലക്കലിനുശേഷമുള്ള ക്രമം രൂപപ്പെടുത്തൽ വരെ
+
+ഈ തുടർച്ച-ൽ ശുദ്ധം മാനദണ്ഡ കണക്കുപാത ഏകീകരണം നാലു പുതിയ ഉറവിടം ഭാഗങ്ങൾ-ും ഒരു നിലവിലുള്ള കല്ല് പുനരാവർത്തനം വിപുലീകരണം-ും ചേർക്കുന്നു.
+
+- `test/stones_full_46_forward_replay_probe.spl`: പൂർണ്ണം 46-വരി ശേഖരണപ്പട്ടിക/മറുക്രമം പാത ഇപ്പോൾ പുനരാവർത്തനം വരി 1-ന് പിന്നാലെ വരി 2-വും ഉപയോഗിക്കുക ചെയ്യുന്നു; പ്രതീക്ഷിച്ച വരി 2 `378,1073,2375,6195,10493`.
+- `test/visible_row2_from_snapshot_first_grind_legal_probe.spl`: നിയമാനുസൃത അതേ-സ്ഥാപനദിനം workCounts + വരി-1-വരെ-വരി-2 ഒരേസമയം കല്ല് മാറ്റം + ദൃശ്യം i=2 വിത്തുമൂല്യം + ആദ്യ അരയ്ക്കൽ; പ്രതീക്ഷിച്ച `37213,1384919409`.
+- `test/factoradic_127_materialize_probe.spl`: ക്രമസംഖ്യ-127 അക്കങ്ങൾ `1,0,1,0,0,0` -> ക്രമം `2,1,4,3,5,6`.
+- `test/bowl_rank127_M_snapshot_round_probe.spl`: ക്രമസംഖ്യ-127 ക്രമം + M വലുപ്പമുള്ള തുള്ളി/പഴയ നിശ്ചലപ്രതി + യഥാർത്ഥം വരി-1 കല്ലുകൾ -> മൂന്ന് പകർച്ചകൾ + ആറ് പാത്രം സ്ഥാനാർഥികൾ + ആദ്യ കലക്കലിനുശേഷമുള്ള സംരക്ഷിച്ച തുക/ക്രമസംഖ്യ; പ്രതീക്ഷിച്ച `1158,401,5045,2503,10206,295,19608,19757,317`.
+- `test/factoradic_317_materialize_probe.spl`: ക്രമസംഖ്യ 317 -> ക്രമം `3,5,1,6,2,4`, അതായത് മുൻ ഉറവിടം-ന്റെ ആദ്യ കലക്കലിനുശേഷമുള്ള ക്രമസംഖ്യ-നെ അടുത്ത ക്രമം നില-ലേക്ക് ബന്ധിപ്പിക്കുന്നു.
+
+ഇവ പരിശോധനയ്ക്കുമാത്രമായ ശുദ്ധം Appendix ഒരു ഏകീകരണം ഭാഗങ്ങൾ ആണ്. പ്രവർത്തന തുടക്കഘടന മാനദണ്ഡ കണക്കുപാത-നെ വിളിക്കുന്നില്ല. എല്ലാ-46 യഥാർത്ഥം സൃഷ്ടിച്ച ദൃശ്യം/തുള്ളി-ക്രമം/പാത്രം ക്രമപട്ടിക ഇനിയും ഒരൊറ്റ അധികൃത പരിശോധന പാത ആയി രൂപപ്പെടുത്തുക ചെയ്തിട്ടില്ല.
+
+## പുരോഗതി 31 — നിലനിർത്തിയ കല്ലുകൾ -> യഥാർത്ഥം ഏഴ് മറഞ്ഞത് -> കാലക്രമം വലയം
 
 - `test/hidden_seven_actual_stone_replay_probe.spl`
-  - full 46-row stone transactional generation + forward replay നിലനിർത്തുന്നു;
-  - replay rows 1..7 actual hidden generation-ലേക്ക് consume ചെയ്യുന്നു;
-  - same-Foundation legal workCounts contribution + actual five-stone row + SAVE;
-  - hidden ഓരോന്നിലും 7 normative grinds;
-  - 7 hidden commits backward archive-ലേക്ക്;
-  - archive `hidden7..hidden1` pop ചെയ്ത് ring slots `2,3,4,5,6,7,1` seed ചെയ്യുന്നു.
+  - പൂർണ്ണം 46-വരി കല്ല് ഇടപാട്-സുസ്ഥിര സൃഷ്ടിക്കൽ + മുന്നോട്ടുള്ള പുനരാവർത്തനം നിലനിർത്തുന്നു;
+  - പുനരാവർത്തനം വരികൾ 1..7 യഥാർത്ഥം മറഞ്ഞത് സൃഷ്ടിക്കൽ-ലേക്ക് ഉപയോഗിക്കുക ചെയ്യുന്നു;
+  - അതേ-സ്ഥാപനദിനം നിയമാനുസൃത workCounts സംഭാവന + യഥാർത്ഥം അഞ്ച്-കല്ല് വരി + SAVE;
+  - മറഞ്ഞത് ഓരോന്നിലും 7 മാനദണ്ഡാനുസൃത അരയ്ക്കലുകൾ;
+  - 7 മറഞ്ഞത് ഉറപ്പിക്കലുകൾ പിന്നോട്ടുള്ള ശേഖരം-ലേക്ക്;
+  - ശേഖരണപ്പട്ടിക `hidden7..hidden1` പുറത്തെടുക്കൽ ചെയ്ത് വലയം സ്ഥാനങ്ങൾ `2,3,4,5,6,7,1` വിത്തുമൂല്യം ചെയ്യുന്നു.
 - `test/timeline_seven_slot_ring_index_probe.spl`
-  - timeline position modulo-7 ownership mapping i=1..46 മുഴുവൻ;
-  - current slot prev7 slot തന്നെയാണെന്ന് 46-step control;
-  - i=1, i=46 distinguishing mappings.
+  - കാലക്രമം സ്ഥാനം ശേഷഗണിതം-7 ഉടമസ്ഥത മാപ്പിങ് i=1..46 മുഴുവൻ;
+  - നിലവിലെ സ്ഥാനം മുൻ7 സ്ഥാനം തന്നെയാണെന്ന് 46-ചുവട് നിയന്ത്രണം;
+  - i=1, i=46 വേർതിരിക്കുന്ന മാപ്പിങ്ങുകൾ.
 - `test/timeline_ring_seed_eight_commit_probe.spl`
-  - hidden positions 0..-6 -> seven ring slots;
-  - visible1..8 overwrite-after-read control;
-  - i=8-ൽ prev7 hidden storage-ൽ നിന്ന് committed visible storage-ലേക്ക് മാറുന്നത് തെളിയിക്കുന്നു.
+  - മറഞ്ഞത് സ്ഥാനങ്ങൾ 0..-6 -> ഏഴ് വലയം സ്ഥാനങ്ങൾ;
+  - visible1..8 മുകളിൽ എഴുതുക-ശേഷം-വായിക്കുക നിയന്ത്രണം;
+  - i=8-ൽ മുൻ7 മറഞ്ഞത് സംഭരണം-ൽ നിന്ന് ഉറപ്പിച്ച ദൃശ്യം സംഭരണം-ലേക്ക് മാറുന്നത് തെളിയിക്കുന്നു.
 
-ഇനിയും blocker: actual hidden ring-നെ retained stone row 1..46 visible recurrence-ലേക്ക് same source path-ൽ feed ചെയ്ത് 46 final drops നിർമ്മിക്കണം; തുടർന്ന് ഓരോ drop-നും factoradic order/pours/six-bowl commit, latch46, 12 post-stirs, SauceResult, gates, years, general combinatorial DP, name unrank, final five-field result.
+ഇനിയും തടസ്സം: യഥാർത്ഥം മറഞ്ഞത് വലയം-നെ നിലനിർത്തിയ കല്ല് വരി 1..46 ദൃശ്യം ആവർത്തസൂത്രം-ലേക്ക് അതേ ഉറവിട പാത-ൽ നൽകൽ ചെയ്ത് 46 അന്തിമം തുള്ളികൾ നിർമ്മിക്കണം; തുടർന്ന് ഓരോ തുള്ളി-നും ഘടകാധിഷ്ഠിത ക്രമം/പകർച്ചകൾ/ആറ്-പാത്രം ഉറപ്പിക്കൽ, latch46, 12 ശേഷകലക്കലുകൾ, SauceResult, കവാടങ്ങൾ, വർഷങ്ങൾ, പൊതുവായ സമുച്ചയഗണിത DP, പേര് പുനർനിർമ്മാണം, അന്തിമം അഞ്ചുഘടക ഫലം.
 
-## progress 32 — hidden-to-visible arithmetic bridge
+## പുരോഗതി 32 — മറഞ്ഞത്-വരെ-ദൃശ്യം ഗണിതം ബന്ധം
 
 - `test/hidden_actual_to_visible_two_full_probe.spl`
-  - actual 46-row stone path-ൽ നിന്നുള്ള rows 1..7 ഉപയോഗിച്ച് seven hidden drops നിർമ്മിക്കുന്നു;
-  - hidden archive seven-slot timeline seed-ലേക്ക് മാറ്റുന്നു;
-  - visible 1: hidden1/hidden3/hidden7 snapshot + actual row 1 + 11 visible grinds;
-  - row 2 stones row-1 old snapshot-ൽ നിന്ന് transactional ആയി നിർമ്മിക്കുന്നു;
-  - visible 2: committed visible1/hidden2/hidden6 snapshot + actual row 2 + 11 visible grinds;
-  - രണ്ടും SAVE domain check ചെയ്യുന്നു;
-  - actual visible2 `1+regularMod(drop-1,720)` rank domain-ലേക്ക് ബന്ധിപ്പിക്കുന്നു.
+  - യഥാർത്ഥം 46-വരി കല്ല് പാത-ൽ നിന്നുള്ള വരികൾ 1..7 ഉപയോഗിച്ച് ഏഴ് മറഞ്ഞത് തുള്ളികൾ നിർമ്മിക്കുന്നു;
+  - മറഞ്ഞത് ശേഖരണപ്പട്ടിക ഏഴ്-സ്ഥാനം കാലക്രമം വിത്തുമൂല്യം-ലേക്ക് മാറ്റുന്നു;
+  - ദൃശ്യം 1: hidden1/hidden3/hidden7 നിശ്ചലപ്രതി + യഥാർത്ഥം വരി 1 + 11 ദൃശ്യം അരയ്ക്കലുകൾ;
+  - വരി 2 കല്ലുകൾ വരി-1 പഴയ നിശ്ചലപ്രതി-ൽ നിന്ന് ഇടപാട്-സുസ്ഥിര ആയി നിർമ്മിക്കുന്നു;
+  - ദൃശ്യം 2: ഉറപ്പിച്ച visible1/hidden2/hidden6 നിശ്ചലപ്രതി + യഥാർത്ഥം വരി 2 + 11 ദൃശ്യം അരയ്ക്കലുകൾ;
+  - രണ്ടും SAVE പരിധിക്ഷേത്രം പരിശോധന ചെയ്യുന്നു;
+  - യഥാർത്ഥം visible2 `1+regularMod(drop-1,720)` ക്രമസംഖ്യ പരിധിക്ഷേത്രം-ലേക്ക് ബന്ധിപ്പിക്കുന്നു.
 - `test/stone_dual_consumer_replay_control_probe.spl`
-  - one backward ordered archive -> two independent forward replay owners;
-  - hidden consumer 7 rows; visible consumer 46 rows;
-  - next all-46 integration-ൽ real stone values duplicate-replay ചെയ്യാനുള്ള ownership contract isolate ചെയ്യുന്നു.
+  - ഒന്ന് പിന്നോട്ട് ക്രമപ്പെടുത്തിയ ശേഖരണപ്പട്ടിക -> രണ്ട് സ്വതന്ത്ര മുന്നോട്ടുള്ള പുനരാവർത്തനം ഉടമകൾ;
+  - മറഞ്ഞത് ഉപഭോക്താവ് 7 വരികൾ; ദൃശ്യം ഉപഭോക്താവ് 46 വരികൾ;
+  - അടുത്ത എല്ലാ-46 ഏകീകരണം-ൽ യഥാർത്ഥ കല്ല് മൂല്യങ്ങൾ ആവർത്തനം-പുനരാവർത്തനം ചെയ്യാനുള്ള ഉടമസ്ഥത കരാർ വേർതിരിക്കുക ചെയ്യുന്നു.
 
-ഇനിയും പ്രധാന blocker: dual replay control-നെ actual five-value stone rows-ലേക്ക് കൊണ്ടുവന്ന് same source path-ൽ all 46 visible drops generate ചെയ്യുക; അതിനു പിന്നാലെ ഓരോ actual drop-നും full permutation materialization, pours, six-bowl transactional commit, drop-46 latch, 12 post-stirs, gates/years/general DP/name-unrank/final five-field path ചേർക്കുക.
+ഇനിയും പ്രധാന തടസ്സം: ദ്വന്ദ്വ പുനരാവർത്തനം നിയന്ത്രണം-നെ യഥാർത്ഥം അഞ്ച്-മൂല്യം കല്ല് വരികൾ-ലേക്ക് കൊണ്ടുവന്ന് അതേ ഉറവിട പാത-ൽ എല്ലാ 46 ദൃശ്യം തുള്ളികൾ സൃഷ്ടിക്കുക ചെയ്യുക; അതിനു പിന്നാലെ ഓരോ യഥാർത്ഥം തുള്ളി-നും പൂർണ്ണം ക്രമവിന്യാസം രൂപപ്പെടുത്തൽ, പകർച്ചകൾ, ആറ്-പാത്രം ഇടപാട്-സുസ്ഥിര ഉറപ്പിക്കൽ, തുള്ളി-46 പൂട്ടുസ്മൃതി, 12 ശേഷകലക്കലുകൾ, കവാടങ്ങൾ/വർഷങ്ങൾ/പൊതുവായ DP/പേര്-പുനർനിർമ്മാണം/അന്തിമം അഞ്ചുഘടക പാത ചേർക്കുക.
 
-progress 32 same source-ൽ actual visible2 rank -> factoradic blocks `120,24,6,2,1` -> six digits path കൂടി ഉണ്ട്. digit-domain aggregate control expected true ആണ്. full six-ID active-set removal ഈ dynamic digits-ൽ നിന്ന് same path-ൽ നടത്തുന്നത് അടുത്ത bowl-order integration step ആണ്.
+പുരോഗതി 32 അതേ ഉറവിട-ൽ യഥാർത്ഥം visible2 ക്രമസംഖ്യ -> ഘടകാധിഷ്ഠിത ഖണ്ഡങ്ങൾ `120,24,6,2,1` -> ആറ് അക്കങ്ങൾ പാത കൂടി ഉണ്ട്. അക്കം-പരിധിക്ഷേത്രം സമാഹാരം നിയന്ത്രണം പ്രതീക്ഷിച്ച ശരി ആണ്. പൂർണ്ണം ആറ്-തിരിച്ചറിയൽസൂചിക സജീവ-സമുച്ചയം നീക്കം ഈ ചലനാത്മക അക്കങ്ങൾ-ൽ നിന്ന് അതേ പാത-ൽ നടത്തുന്നത് അടുത്ത പാത്രം-ക്രമം ഏകീകരണം ചുവട് ആണ്.
 
-## progress 33 — all-46 actual visible sauce bridge
+## പുരോഗതി 33 — എല്ലാ-46 യഥാർത്ഥം ദൃശ്യം സോസ് ബന്ധം
 
 - `test/stones_full_46_dual_five_value_replay_probe.spl`
-  - actual 46-row five-stone simultaneous recurrence;
-  - one backward archive family;
-  - two independent forward five-value replay owners;
-  - hidden consumer rows 1..7, visible consumer rows 1..46.
+  - യഥാർത്ഥം 46-വരി അഞ്ച്-കല്ല് ഒരേസമയം ആവർത്തസൂത്രം;
+  - ഒന്ന് പിന്നോട്ടുള്ള ശേഖരം കുടുംബം;
+  - രണ്ട് സ്വതന്ത്ര മുന്നോട്ട് അഞ്ച്-മൂല്യം പുനരാവർത്തനം ഉടമകൾ;
+  - മറഞ്ഞത് ഉപഭോക്താവ് വരികൾ 1..7, ദൃശ്യം ഉപഭോക്താവ് വരികൾ 1..46.
 - `test/sauce_foundation_actual_hidden_visible46_probe.spl`
-  - legal same-Foundation workCounts specialized fixture;
-  - actual 46-row stones;
-  - actual seven hidden values with seven grinds each;
-  - hidden values -> rolling last1..last7 history;
-  - actual visible rows 1..46, 11 normative grinds each;
-  - commit-after-computation rolling ownership;
-  - committed drop46 -> one-based bowl rank domain;
-  - drop46 rank -> six factoradic digit domain.
+  - നിയമാനുസൃത അതേ-സ്ഥാപനദിനം workCounts പ്രത്യേകമാക്കിയ പരിശോധനാവസ്ഥ;
+  - യഥാർത്ഥം 46-വരി കല്ലുകൾ;
+  - യഥാർത്ഥം ഏഴ് മറഞ്ഞത് മൂല്യങ്ങൾ സഹിതം ഏഴ് അരയ്ക്കലുകൾ ഓരോ;
+  - മറഞ്ഞത് മൂല്യങ്ങൾ -> ചലിക്കുന്ന last1..last7 ചരിത്രം;
+  - യഥാർത്ഥം ദൃശ്യം വരികൾ 1..46, 11 മാനദണ്ഡാനുസൃത അരയ്ക്കലുകൾ ഓരോ;
+  - ഉറപ്പിക്കൽ-ശേഷം-കണക്കുകൂട്ടൽ ചലിക്കുന്ന ഉടമസ്ഥത;
+  - ഉറപ്പിച്ച തുള്ളി46 -> ഒന്നിൽനിന്നാരംഭിക്കുന്ന പാത്രം ക്രമസംഖ്യ പരിധിക്ഷേത്രം;
+  - തുള്ളി46 ക്രമസംഖ്യ -> ആറ് ഘടകാധിഷ്ഠിത അക്കം പരിധിക്ഷേത്രം.
 
-### remaining integration gap
+### ശേഷിക്കുന്ന ഏകീകരണം ഇടവ്
 
-all-46 actual visible generation ഇനി blocker അല്ല. അടുത്ത blocker actual drop-derived factoradic digits full active six-ID removal-ലേക്ക് same path-ൽ ബന്ധിപ്പിച്ച് order materialize ചെയ്യുന്നതും, ഓരോ drop-നും position-indexed pours + six-bowl old-snapshot transaction നടത്തുന്നതുമാണ്. തുടർന്ന് drop-46 order latch, 12 committed post-stirs, complete SauceResult/askBowl, signed lazy gates, full years, arbitrary composition/weaving/name DP, മലയാളം presentation resolve, generated five-field result, compliant SPL runtime GREEN എന്നിവ ശേഷിക്കുന്നു.
+എല്ലാ-46 യഥാർത്ഥം ദൃശ്യം സൃഷ്ടിക്കൽ ഇനി തടസ്സം അല്ല. അടുത്ത തടസ്സം യഥാർത്ഥം തുള്ളി-ഉരുത്തിരിഞ്ഞ ഘടകാധിഷ്ഠിത അക്കങ്ങൾ പൂർണ്ണം സജീവ ആറ്-തിരിച്ചറിയൽസൂചിക നീക്കം-ലേക്ക് അതേ പാത-ൽ ബന്ധിപ്പിച്ച് ക്രമം രൂപപ്പെടുത്തുക ചെയ്യുന്നതും, ഓരോ തുള്ളി-നും സ്ഥാനം-സൂചികപ്പെടുത്തിയ പകർച്ചകൾ + ആറ്-പാത്രം പഴയ-നിശ്ചലപ്രതി ഇടപാട് നടത്തുന്നതുമാണ്. തുടർന്ന് തുള്ളി-46 ക്രമം പൂട്ടുസ്മൃതി, 12 ഉറപ്പിച്ച ശേഷകലക്കലുകൾ, പൂർത്തിയായ SauceResult/askBowl, ചിഹ്നമുള്ള ആവശ്യാനുസൃത കവാടങ്ങൾ, പൂർണ്ണം വർഷങ്ങൾ, ഏതുവലുപ്പമുള്ള ഘടന/നെയ്ത്ത്/പേര് DP, മലയാളം അവതരണം നിർണ്ണയിക്കുക, സൃഷ്ടിച്ച അഞ്ചുഘടക ഫലം, അനുസൃത SPL നിർവഹണപരിസരം പച്ച എന്നിവ ശേഷിക്കുന്നു.
 
-### progress 33 clean-reference correction
+### പുരോഗതി 33 ശുദ്ധം-മാനദണ്ഡം തിരുത്തൽ
 
-- `hidden_seven_actual_stone_replay_probe.spl`: hidden index/count initialization reversal completion-ൽ once-only; `Act V` loop entry reset-free.
-- `hidden_actual_to_visible_two_full_probe.spl`: അതേ once-only initialization correction.
-- `sauce_foundation_actual_hidden_visible46_probe.spl`: correction ആദ്യം മുതൽ same pattern-ൽ ഉൾപ്പെടുത്തിയിട്ടുണ്ട്.
+- `hidden_seven_actual_stone_replay_probe.spl`: മറഞ്ഞത് സൂചിക/എണ്ണം ആരംഭക്രമീകരണം തിരിക്കൽ പൂർത്തീകരണം-ൽ ഒരിക്കൽ-മാത്രം; `Act V` ചക്രം പ്രവേശനം പുനഃക്രമീകരണം-സ്വതന്ത്ര.
+- `hidden_actual_to_visible_two_full_probe.spl`: അതേ ഒരിക്കൽ-മാത്രം ആരംഭക്രമീകരണം തിരുത്തൽ.
+- `sauce_foundation_actual_hidden_visible46_probe.spl`: തിരുത്തൽ ആദ്യം മുതൽ അതേ മാതൃക-ൽ ഉൾപ്പെടുത്തിയിട്ടുണ്ട്.
 
-## progress 34 — generated drop46 full order materialization and dynamic pour dispatch
+## പുരോഗതി 34 — സൃഷ്ടിച്ച തുള്ളി46 പൂർണ്ണം ക്രമം രൂപപ്പെടുത്തൽ കൂടാതെ ചലനാത്മക പകർച്ച വിതരണം
 
 - `test/sauce_foundation_actual_hidden_visible46_probe.spl`
-  - existing legal same-Foundation full stone/hidden/visible path തുടരുന്നു;
-  - actual committed drop46 -> one-based rank -> factoradic digits;
-  - six active IDs removal-aware ആയി തിരഞ്ഞെടുക്കുന്നു;
-  - selected IDs backward archive-ൽ push ചെയ്യുന്നു;
-  - archive reverse ചെയ്ത് position-1-first forward order replay stack ഉണ്ടാക്കുന്നു;
-  - hard-coded order value ഇല്ല; structural outputs `6,21,720,6`.
+  - നിലവിലുള്ള നിയമാനുസൃത അതേ-സ്ഥാപനദിനം പൂർണ്ണം കല്ല്/മറഞ്ഞത്/ദൃശ്യം പാത തുടരുന്നു;
+  - യഥാർത്ഥം ഉറപ്പിച്ച തുള്ളി46 -> ഒന്നിൽനിന്നാരംഭിക്കുന്ന ക്രമസംഖ്യ -> ഘടകാധിഷ്ഠിത അക്കങ്ങൾ;
+  - ആറ് സജീവ തിരിച്ചറിയൽസൂചികകൾ നീക്കം-കണക്കിലെടുക്കുന്ന ആയി തിരഞ്ഞെടുക്കുന്നു;
+  - തിരഞ്ഞെടുത്ത തിരിച്ചറിയൽസൂചികകൾ പിന്നോട്ടുള്ള ശേഖരം-ൽ അടുക്കിലാക്കൽ ചെയ്യുന്നു;
+  - ശേഖരണപ്പട്ടിക മറുക്രമം ചെയ്ത് സ്ഥാനം-1-ആദ്യ മുന്നോട്ട് ക്രമം പുനരാവർത്തനം അടുക്കു ഉണ്ടാക്കുന്നു;
+  - സ്ഥിരമായി പതിപ്പിച്ച ക്രമം മൂല്യം ഇല്ല; ഘടനാപരമായ പുറപ്പാടുകൾ `6,21,720,6`.
 - `test/dynamic_order_three_pours_dispatch_probe.spl`
-  - arbitrary order IDs 1..3-ൽ നിന്ന് corresponding old bowl values dynamic dispatch ചെയ്യുന്നു;
-  - WHEAT/BARLEY/SALT position pours `SAVE` സഹിതം കണക്കാക്കുന്നു;
-  - fixed bowl ID-കളിലേക്കല്ല, order positions-ലേക്കാണ് pours ബന്ധിപ്പിക്കുന്നത്.
+  - ഏതുവലുപ്പമുള്ള ക്രമം തിരിച്ചറിയൽസൂചികകൾ 1..3-ൽ നിന്ന് അനുബന്ധമായ പഴയ പാത്രം മൂല്യങ്ങൾ ചലനാത്മക വിതരണം ചെയ്യുന്നു;
+  - ഗോതമ്പ്/ബാർലി/ഉപ്പ് സ്ഥാനം പകർച്ചകൾ `SAVE` സഹിതം കണക്കാക്കുന്നു;
+  - സ്ഥിര പാത്രം തിരിച്ചറിയൽസൂചിക-കളിലേക്കല്ല, ക്രമം സ്ഥാനങ്ങൾ-ലേക്കാണ് പകർച്ചകൾ ബന്ധിപ്പിക്കുന്നത്.
 
-അടുത്ത integration blocker: full sauce source-ൽ initial six bowls retain ചെയ്ത് visible i=1..46 ഓരോ drop-നും dynamic order materialize ചെയ്യുക; order positions-ൽ pours, prev/next circular neighbors, six pending values old snapshot-ൽ നിന്ന് കണക്കാക്കി transactional commit ചെയ്യുക; i=46 order latch ചെയ്യുക.
+അടുത്ത ഏകീകരണം തടസ്സം: പൂർണ്ണം സോസ് ഉറവിടം-ൽ ആരംഭ ആറ് പാത്രങ്ങൾ നിലനിർത്തുക ചെയ്ത് ദൃശ്യം i=1..46 ഓരോ തുള്ളി-നും ചലനാത്മക ക്രമം രൂപപ്പെടുത്തുക ചെയ്യുക; ക്രമം സ്ഥാനങ്ങൾ-ൽ പകർച്ചകൾ, മുൻ/അടുത്ത വലയാകൃതിയിലുള്ള അയൽഘടകങ്ങൾ, ആറ് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ പഴയ നിശ്ചലപ്രതി-ൽ നിന്ന് കണക്കാക്കി ഇടപാട്-സുസ്ഥിര ഉറപ്പിക്കൽ ചെയ്യുക; i=46 ക്രമം പൂട്ടുസ്മൃതി ചെയ്യുക.
 
-### progress 34 clean-reference correction — ID 5 zero branch
+### പുരോഗതി 34 ശുദ്ധം-മാനദണ്ഡം തിരുത്തൽ — തിരിച്ചറിയൽസൂചിക 5 പൂജ്യം ശാഖ
 
-താഴെയുള്ള existing test-only materializers-ൽ ID 5 active + current digit 0 path select ചെയ്യാതെ decrement ചെയ്തിരുന്ന control-flow പിഴവ് തിരുത്തി:
+താഴെയുള്ള നിലവിലുള്ള പരിശോധനയ്ക്കുമാത്രമായ രൂപപ്പെടുത്തുന്ന ഘടകങ്ങൾ-ൽ തിരിച്ചറിയൽസൂചിക 5 സജീവ + നിലവിലെ അക്കം 0 പാത തിരഞ്ഞെടുക്കുക ചെയ്യാതെ കുറയ്ക്കൽ ചെയ്തിരുന്ന നിയന്ത്രണം-പ്രവാഹം പിഴവ് തിരുത്തി:
 
 - `test/bowl_order_rank6_integrated_probe.spl`
 - `test/factoradic_127_materialize_probe.spl`
 - `test/factoradic_317_materialize_probe.spl`
 - `test/permutation_materialize6_probe.spl`
 
-zero branch പുതിയ ID-5 selection scene-ലേക്ക് പോകുന്നു; positive branch മാത്രം decrement ചെയ്യുന്നു. rank 481 fixture ID 5 first selection നിർബന്ധമാക്കുന്നു.
+പൂജ്യം ശാഖ പുതിയ തിരിച്ചറിയൽസൂചിക-5 തിരഞ്ഞെടുപ്പ് രംഗം-ലേക്ക് പോകുന്നു; ധന ശാഖ മാത്രം കുറയ്ക്കൽ ചെയ്യുന്നു. ക്രമസംഖ്യ 481 പരിശോധനാവസ്ഥ തിരിച്ചറിയൽസൂചിക 5 ആദ്യ തിരഞ്ഞെടുപ്പ് നിർബന്ധമാക്കുന്നു.
 
-## progress 35 — retained bowl-phase replay and first actual drop cursor
+## പുരോഗതി 35 — നിലനിർത്തിയ പാത്രം-ഘട്ടഭാഗം പുനരാവർത്തനം കൂടാതെ ആദ്യ യഥാർത്ഥം തുള്ളി സൂചകം
 
 - `test/sauce_foundation_actual_hidden_visible46_probe.spl`
-  - visible generation സമയത്ത് actual five-value `stones[i]` row bowl-phase backward archives-ലേക്ക് പകർത്തുന്നു;
-  - committed `visible[i]` drop സ്വതന്ത്ര backward archive-ലേക്ക് പകർത്തുന്നു;
-  - 46 completion-ൽ അഞ്ച് stone archives + drop archive 46-step reverse വഴി forward replay ആക്കുന്നു;
-  - first bowl-phase consume actual row 1 (`17,29,43,71,101`) + actual visible drop 1 ലഭ്യമാക്കുന്നു;
-  - actual drop 1-ൽ നിന്ന് one-based order rank + factoradic digits കണക്കാക്കി domain-check ചെയ്യുന്നു;
-  - actual drop46 full order replay നിലനിർത്തുന്നു.
+  - ദൃശ്യം സൃഷ്ടിക്കൽ സമയത്ത് യഥാർത്ഥം അഞ്ച്-മൂല്യം `stones[i]` വരി പാത്രം-ഘട്ടഭാഗം പിന്നോട്ട് ശേഖരണപ്പട്ടികകൾ-ലേക്ക് പകർത്തുന്നു;
+  - ഉറപ്പിച്ച `visible[i]` തുള്ളി സ്വതന്ത്ര പിന്നോട്ടുള്ള ശേഖരം-ലേക്ക് പകർത്തുന്നു;
+  - 46 പൂർത്തീകരണം-ൽ അഞ്ച് കല്ല് ശേഖരണപ്പട്ടികകൾ + തുള്ളി ശേഖരണപ്പട്ടിക 46-ചുവട് മറുക്രമം വഴി മുന്നോട്ടുള്ള പുനരാവർത്തനം ആക്കുന്നു;
+  - ആദ്യ പാത്രം-ഘട്ടഭാഗം ഉപയോഗിക്കുക യഥാർത്ഥം വരി 1 (`17,29,43,71,101`) + യഥാർത്ഥം ദൃശ്യം തുള്ളി 1 ലഭ്യമാക്കുന്നു;
+  - യഥാർത്ഥം തുള്ളി 1-ൽ നിന്ന് ഒന്നിൽനിന്നാരംഭിക്കുന്ന ക്രമം ക്രമസംഖ്യ + ഘടകാധിഷ്ഠിത അക്കങ്ങൾ കണക്കാക്കി പരിധിക്ഷേത്രം-പരിശോധന ചെയ്യുന്നു;
+  - യഥാർത്ഥം തുള്ളി46 പൂർണ്ണം ക്രമം പുനരാവർത്തനം നിലനിർത്തുന്നു.
 
 - `test/dynamic_order_circular_neighbors_probe.spl`
-  - dynamic six-ID order-ന്റെ positions 1..6 circular predecessor/current/successor triples lock ചെയ്യുന്നു;
-  - position-wrap semantics full bowl formula-യിൽ ചേർക്കുന്നതിനുമുമ്പുള്ള isolated topology slice ആണ്.
+  - ചലനാത്മക ആറ്-തിരിച്ചറിയൽസൂചിക ക്രമം-ന്റെ സ്ഥാനങ്ങൾ 1..6 വലയാകൃതിയിലുള്ള മുൻഘടകം/നിലവിലെ/അടുത്ത ഘടകം ത്രയങ്ങൾ പൂട്ടൽ ചെയ്യുന്നു;
+  - സ്ഥാനം-ചുറ്റിക്കൽ അർത്ഥനിയമങ്ങൾ പൂർണ്ണം പാത്രം സൂത്രം-യിൽ ചേർക്കുന്നതിനുമുമ്പുള്ള വേർതിരിച്ച ഘടനബന്ധം ഭാഗം ആണ്.
 
-ശേഷിക്കുന്ന പ്രധാന sauce blocker: actual drop 1 factoradic digits full six-ID active-set removal-ലേക്ക് materialize ചെയ്ത് initial bowls-ോടൊപ്പം first real round commit ചെയ്യുക; തുടർന്ന് ഇതേ dispatcher 46 rounds മുഴുവൻ ആവർത്തിച്ച് drop46 order latch നിലനിർത്തുക, പിന്നെ 12 post-stirs.
+ശേഷിക്കുന്ന പ്രധാന സോസ് തടസ്സം: യഥാർത്ഥം തുള്ളി 1 ഘടകാധിഷ്ഠിത അക്കങ്ങൾ പൂർണ്ണം ആറ്-തിരിച്ചറിയൽസൂചിക സജീവ-സമുച്ചയം നീക്കം-ലേക്ക് രൂപപ്പെടുത്തുക ചെയ്ത് ആരംഭ പാത്രങ്ങൾ-ോടൊപ്പം ആദ്യ യഥാർത്ഥ ചക്രം ഉറപ്പിക്കൽ ചെയ്യുക; തുടർന്ന് ഇതേ വിതരണനിയന്ത്രകൻ 46 ചക്രങ്ങൾ മുഴുവൻ ആവർത്തിച്ച് തുള്ളി46 ക്രമം പൂട്ടുസ്മൃതി നിലനിർത്തുക, പിന്നെ 12 ശേഷകലക്കലുകൾ.
 
-## progress 36 — bowl bootstrap integration map
+## പുരോഗതി 36 — പാത്രം തുടക്കഘടന ഏകീകരണം മാപ്പ്
 
 - `test/legal_initial_bowls_order316_pours_probe.spl`
-  - legal same-Foundation workCounts -> six initial bowls -> order-prefix-based direct pours.
-  - initial bowl values hard-code ചെയ്യാതെ Appendix A formula-യിൽ source-ൽ തന്നെ നിർമ്മിക്കുന്നു.
+  - നിയമാനുസൃത അതേ-സ്ഥാപനദിനം workCounts -> ആറ് ആരംഭ പാത്രങ്ങൾ -> ക്രമം-ആമുഖഭാഗം-അധിഷ്ഠിത നേരിട്ടുള്ള പകർച്ചകൾ.
+  - ആരംഭ പാത്രം മൂല്യങ്ങൾ കർശന-കോഡ് ചെയ്യാതെ Appendix ഒരു സൂത്രം-യിൽ ഉറവിടം-ൽ തന്നെ നിർമ്മിക്കുന്നു.
 - `test/full_bowl_round_position_stone_probe.spl`
-  - six distinct old bowls -> non-identity circular order -> three direct pours -> six position stones -> six pending values.
-  - എല്ലാ pending reads-ും same old snapshot-ൽ നിന്നാണ്.
+  - ആറ് വ്യത്യസ്ത പഴയ പാത്രങ്ങൾ -> അല്ലാത്ത-സ്വരൂപം വലയാകൃതിയിലുള്ള ക്രമം -> മൂന്ന് നേരിട്ടുള്ള പകർച്ചകൾ -> ആറ് സ്ഥാനം കല്ലുകൾ -> ആറ് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ.
+  - എല്ലാ കാത്തിരിക്കുന്ന വായനകൾ-ും അതേ പഴയ നിശ്ചലപ്രതി-ൽ നിന്നാണ്.
 
-ഇനിയും തുറന്നിരിക്കുന്ന പ്രധാന sauce path: actual generated drop1 rank/factoradic digits -> full order materialization -> legal initial bowls -> actual row1/drop1 first transactional commit; തുടർന്ന് rows/drops `2..46`-ൽ same machinery loop ചെയ്യുകയും drop46 order latch ചെയ്യുകയും വേണം.
+ഇനിയും തുറന്നിരിക്കുന്ന പ്രധാന സോസ് പാത: യഥാർത്ഥം സൃഷ്ടിച്ച തുള്ളി1 ക്രമസംഖ്യ/ഘടകാധിഷ്ഠിത അക്കങ്ങൾ -> പൂർണ്ണം ക്രമം രൂപപ്പെടുത്തൽ -> നിയമാനുസൃത ആരംഭ പാത്രങ്ങൾ -> യഥാർത്ഥം വരി1/തുള്ളി1 ആദ്യ ഇടപാട്-സുസ്ഥിര ഉറപ്പിക്കൽ; തുടർന്ന് വരികൾ/തുള്ളികൾ `2..46`-ൽ അതേ യന്ത്രവ്യവസ്ഥ ചക്രം ചെയ്യുകയും തുള്ളി46 ക്രമം പൂട്ടുസ്മൃതി ചെയ്യുകയും വേണം.
 
-## progress 37 — actual drop1 order + legal bowl snapshot + actual pours
-
-- `test/sauce_foundation_actual_hidden_visible46_probe.spl`
-  - generated visible drop 1 factoradic digits -> full six-ID active-set removal;
-  - selected order backward archive -> forward replay -> six scalar positions;
-  - permutation structural invariants `count=6,sum=21,product=720`;
-  - same-Foundation legal initial bowls rebuilt in the integrated path;
-  - `M=2^127-1` rebuilt before bowl SAVE operations;
-  - actual order positions 1..3 dynamically select old bowl IDs;
-  - actual row-1 WHEAT/BARLEY/SALT stones and actual generated drop1 feed three direct pours;
-  - each pour is reduced by normative SAVE and checked in `1..M`.
-
-Remaining immediate integration gap: retain the three computed pours, perform circular prev/current/next old-bowl lookup for all six positions, compute all six pending bowl values from one immutable old snapshot, then commit simultaneously. After that, loop the same machinery through drops 2..46 and latch the generated order at drop 46.
-
-## progress 38 integration slice
+## പുരോഗതി 37 — യഥാർത്ഥം തുള്ളി1 ക്രമം + നിയമാനുസൃത പാത്രം നിശ്ചലപ്രതി + യഥാർത്ഥം പകർച്ചകൾ
 
 - `test/sauce_foundation_actual_hidden_visible46_probe.spl`
-  - actual drop1 three direct pours retained scalar state;
-  - actual materialized six order IDs separate commit-target archive;
-  - position scalars converted to legal old-bowl values;
-  - circular six-position pending recurrence from one immutable snapshot;
-  - six pending values archived before any bowl mutation;
-  - six ID/value commits only after pending phase completion;
-  - commit count `6` + six SAVE-domain flags expected.
+  - സൃഷ്ടിച്ച ദൃശ്യം തുള്ളി 1 ഘടകാധിഷ്ഠിത അക്കങ്ങൾ -> പൂർണ്ണം ആറ്-തിരിച്ചറിയൽസൂചിക സജീവ-സമുച്ചയം നീക്കം;
+  - തിരഞ്ഞെടുത്ത ക്രമം പിന്നോട്ടുള്ള ശേഖരം -> മുന്നോട്ടുള്ള പുനരാവർത്തനം -> ആറ് ഏകമൂല്യം സ്ഥാനങ്ങൾ;
+  - ക്രമവിന്യാസം ഘടനാപരമായ അചഞ്ചല വ്യവസ്ഥകൾ `count=6,sum=21,product=720`;
+  - അതേ-സ്ഥാപനദിനം നിയമാനുസൃത ആരംഭ പാത്രങ്ങൾ പുനർനിർമ്മിച്ച ൽ ആ ഏകീകൃതം പാത;
+  - `M=2^127-1` പുനർനിർമ്മിച്ച മുമ്പ് പാത്രം SAVE പ്രവർത്തനങ്ങൾ;
+  - യഥാർത്ഥം ക്രമം സ്ഥാനങ്ങൾ 1..3 ചലനാത്മകമായി തിരഞ്ഞെടുക്കുക പഴയ പാത്രം തിരിച്ചറിയൽസൂചികകൾ;
+  - യഥാർത്ഥം വരി-1 ഗോതമ്പ്/ബാർലി/ഉപ്പ് കല്ലുകൾ കൂടാതെ യഥാർത്ഥം സൃഷ്ടിച്ച തുള്ളി1 നൽകൽ മൂന്ന് നേരിട്ടുള്ള പകർച്ചകൾ;
+  - ഓരോ പകർച്ച ആണ് കുറച്ച വഴി മാനദണ്ഡാനുസൃത SAVE കൂടാതെ പരിശോധിച്ച ൽ `1..M`.
 
-ഇതോടെ first actual generated-drop bowl round same sauce path-ൽ പൂർത്തിയായി. remaining blocker: same mechanism drops `2..46`-ൽ iterate ചെയ്യുക, `i=46` order latch preserve ചെയ്യുക, തുടർന്ന് 12 post-stirs and downstream oracle complete ചെയ്യുക.
+ശേഷിക്കുന്ന ഉടൻ ഏകീകരണം ഇടവ്: നിലനിർത്തുക ആ മൂന്ന് കണക്കാക്കിയ പകർച്ചകൾ, നിർവഹിക്കുക വലയാകൃതിയിലുള്ള മുൻ/നിലവിലെ/അടുത്ത പഴയ-പാത്രം തിരച്ചിൽ വേണ്ടി എല്ലാ ആറ് സ്ഥാനങ്ങൾ, കണക്കാക്കുക എല്ലാ ആറ് കാത്തിരിക്കുന്ന പാത്രം മൂല്യങ്ങൾ നിന്ന് ഒന്ന് മാറ്റാനാകാത്ത പഴയ നിശ്ചലപ്രതി, തുടർന്ന് ഉറപ്പിക്കൽ ഒരേസമയം. ശേഷം അത്, ചക്രം ആ അതേ യന്ത്രവ്യവസ്ഥ വഴി തുള്ളികൾ 2..46 കൂടാതെ പൂട്ടുസ്മൃതി ആ സൃഷ്ടിച്ച ക്രമം ൽ തുള്ളി 46.
 
-## progress 39 — all actual drops rank/factoradic coverage after first bowl commit
-
-- `test/sauce_foundation_actual_hidden_visible46_probe.spl`
-  - progress 38 first actual drop1 transactional bowl commit state നിലനിർത്തുന്നു;
-  - retained actual drop replay-ൽ നിന്ന് `drop2..drop46` sequential pop;
-  - ഓരോ drop-നും `1+regularMod(drop-1,720)`;
-  - factoradic blocks `120,24,6,2,1`;
-  - per-current-drop rank/factoradic domain controls;
-  - all-drop processed count `46`, next index `47`;
-  - final actual drop46 rank/factoradic flags `1,1`;
-  - committed bowl values untouched during this scan.
-
-Immediate remaining bowl integration gap: same per-drop dynamic digits six-ID active-set removal-ലേക്ക് materialize ചെയ്ത് actual retained stone row + current committed six-bowl snapshot ഉപയോഗിച്ച് three pours + six shared-old-snapshot pending values + transactional commit നടത്തുക. machinery drops `2..46` മുഴുവൻ loop ചെയ്യുകയും final drop46 materialized order dedicated latch-ൽ സൂക്ഷിക്കുകയും വേണം.
-
-## progress 40 — latch/replay ownership before all-46 bowl loop
+## പുരോഗതി 38 ഏകീകരണം ഭാഗം
 
 - `test/sauce_foundation_actual_hidden_visible46_probe.spl`
-  - actual drop46 materializer selected IDs working archive-ിനൊപ്പം dedicated latch archive-ലേക്ക് duplicate ചെയ്യുന്നു;
-  - post-drop1 first bowl commit + all-46 rank scan latch archive mutate ചെയ്യുന്നില്ല;
-  - scan completion-ൽ dedicated drop46 latch forward replay ആക്കി `count=6,sum=21,product=720` പരിശോധിക്കുന്നു;
-  - scan ചെയ്യപ്പെടുന്ന actual drops `2..46` വേറൊരു backward archive-ൽ preserve ചെയ്യുന്നു;
-  - completion-ൽ exactly 45 actual drops future forward replay ആയി reverse ചെയ്യുന്നു.
+  - യഥാർത്ഥം തുള്ളി1 മൂന്ന് നേരിട്ടുള്ള പകർച്ചകൾ നിലനിർത്തിയ ഏകമൂല്യം നില;
+  - യഥാർത്ഥം രൂപപ്പെടുത്തിയ ആറ് ക്രമം തിരിച്ചറിയൽസൂചികകൾ വേർതിരിച്ച ഉറപ്പിക്കൽ-ലക്ഷ്യം ശേഖരണപ്പട്ടിക;
+  - സ്ഥാനം സ്കെയ്ലറുകൾ പരിവർത്തനം ചെയ്ത വരെ നിയമാനുസൃത പഴയ-പാത്രം മൂല്യങ്ങൾ;
+  - വലയാകൃതിയിലുള്ള ആറ്-സ്ഥാനം കാത്തിരിക്കുന്ന ആവർത്തസൂത്രം നിന്ന് ഒന്ന് മാറ്റാനാകാത്ത നിശ്ചലപ്രതി;
+  - ആറ് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ ശേഖരിച്ച മുമ്പ് ഏതെങ്കിലും പാത്രം മാറ്റം;
+  - ആറ് തിരിച്ചറിയൽസൂചിക/മൂല്യം ഉറപ്പിക്കലുകൾ മാത്രം ശേഷം കാത്തിരിക്കുന്ന ഘട്ടഭാഗം പൂർത്തീകരണം;
+  - ഉറപ്പിക്കൽ എണ്ണം `6` + ആറ് SAVE-പരിധിക്ഷേത്രം സൂചികകൊടികൾ പ്രതീക്ഷിച്ച.
+
+ഇതോടെ ആദ്യ യഥാർത്ഥം സൃഷ്ടിച്ച-തുള്ളി പാത്രം ചക്രം അതേ സോസ് പാത-ൽ പൂർത്തിയായി. ശേഷിക്കുന്ന തടസ്സം: അതേ യന്ത്രവ്യവസ്ഥ തുള്ളികൾ `2..46`-ൽ ആവർത്തിക്കുക ചെയ്യുക, `i=46` ക്രമം പൂട്ടുസ്മൃതി സംരക്ഷിക്കുക ചെയ്യുക, തുടർന്ന് 12 ശേഷകലക്കലുകൾ കൂടാതെ തുടർപാത മാനദണ്ഡ കണക്കുപാത പൂർത്തിയായ ചെയ്യുക.
+
+## പുരോഗതി 39 — എല്ലാ യഥാർത്ഥം തുള്ളികൾ ക്രമസംഖ്യ/ഘടകാധിഷ്ഠിത വ്യാപ്തി ശേഷം ആദ്യ പാത്രം ഉറപ്പിക്കൽ
+
+- `test/sauce_foundation_actual_hidden_visible46_probe.spl`
+  - പുരോഗതി 38 ആദ്യ യഥാർത്ഥം തുള്ളി1 ഇടപാട്-സുസ്ഥിര പാത്രം ഉറപ്പിക്കൽ നില നിലനിർത്തുന്നു;
+  - നിലനിർത്തിയ യഥാർത്ഥം തുള്ളി പുനരാവർത്തനം-ൽ നിന്ന് `drop2..drop46` തുടർച്ചയായ പുറത്തെടുക്കൽ;
+  - ഓരോ തുള്ളി-നും `1+regularMod(drop-1,720)`;
+  - ഘടകാധിഷ്ഠിത ഖണ്ഡങ്ങൾ `120,24,6,2,1`;
+  - ഓരോ-നിലവിലെ-തുള്ളി ക്രമസംഖ്യ/ഘടകാധിഷ്ഠിത പരിധിക്ഷേത്രം നിയന്ത്രണങ്ങൾ;
+  - എല്ലാ-തുള്ളി പ്രക്രിയപ്പെടുത്തിയ എണ്ണം `46`, അടുത്ത സൂചിക `47`;
+  - അന്തിമം യഥാർത്ഥം തുള്ളി46 ക്രമസംഖ്യ/ഘടകാധിഷ്ഠിത സൂചികകൊടികൾ `1,1`;
+  - ഉറപ്പിച്ച പാത്രം മൂല്യങ്ങൾ തൊടാത്ത സമയത്ത് ഇത് സ്ഥിരപരിശോധന.
+
+ഉടൻ ശേഷിക്കുന്ന പാത്രം ഏകീകരണം ഇടവ്: അതേ ഓരോ-തുള്ളി ചലനാത്മക അക്കങ്ങൾ ആറ്-തിരിച്ചറിയൽസൂചിക സജീവ-സമുച്ചയം നീക്കം-ലേക്ക് രൂപപ്പെടുത്തുക ചെയ്ത് യഥാർത്ഥം നിലനിർത്തിയ കല്ല് വരി + നിലവിലെ ഉറപ്പിച്ച ആറ്-പാത്രം നിശ്ചലപ്രതി ഉപയോഗിച്ച് മൂന്ന് പകർച്ചകൾ + ആറ് പങ്കിട്ട-പഴയ-നിശ്ചലപ്രതി കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ + ഇടപാട്-സുസ്ഥിര ഉറപ്പിക്കൽ നടത്തുക. യന്ത്രവ്യവസ്ഥ തുള്ളികൾ `2..46` മുഴുവൻ ചക്രം ചെയ്യുകയും അന്തിമം തുള്ളി46 രൂപപ്പെടുത്തിയ ക്രമം സമർപ്പിത പൂട്ടുസ്മൃതി-ൽ സൂക്ഷിക്കുകയും വേണം.
+
+## പുരോഗതി 40 — പൂട്ടുസ്മൃതി/പുനരാവർത്തനം ഉടമസ്ഥത മുമ്പ് എല്ലാ-46 പാത്രം ചക്രം
+
+- `test/sauce_foundation_actual_hidden_visible46_probe.spl`
+  - യഥാർത്ഥം തുള്ളി46 രൂപപ്പെടുത്തുന്ന ഘടകം തിരഞ്ഞെടുത്ത തിരിച്ചറിയൽസൂചികകൾ പ്രവർത്തനത്തിലുള്ള ശേഖരണപ്പട്ടിക-ിനൊപ്പം സമർപ്പിത പൂട്ടുസ്മൃതി ശേഖരണപ്പട്ടിക-ലേക്ക് ആവർത്തനം ചെയ്യുന്നു;
+  - ശേഷ-തുള്ളി1 ആദ്യ പാത്രം ഉറപ്പിക്കൽ + എല്ലാ-46 ക്രമസംഖ്യ സ്ഥിരപരിശോധന പൂട്ടുസ്മൃതി ശേഖരണപ്പട്ടിക മാറ്റുക ചെയ്യുന്നില്ല;
+  - സ്ഥിരപരിശോധന പൂർത്തീകരണം-ൽ സമർപ്പിത തുള്ളി46 പൂട്ടുസ്മൃതി മുന്നോട്ടുള്ള പുനരാവർത്തനം ആക്കി `count=6,sum=21,product=720` പരിശോധിക്കുന്നു;
+  - സ്ഥിരപരിശോധന ചെയ്യപ്പെടുന്ന യഥാർത്ഥം തുള്ളികൾ `2..46` വേറൊരു പിന്നോട്ടുള്ള ശേഖരം-ൽ സംരക്ഷിക്കുക ചെയ്യുന്നു;
+  - പൂർത്തീകരണം-ൽ കൃത്യമായി 45 യഥാർത്ഥം തുള്ളികൾ ഭാവി മുന്നോട്ടുള്ള പുനരാവർത്തനം ആയി മറുക്രമം ചെയ്യുന്നു.
 
 - `test/drop46_full_order_latch_probe.spl`
-  - six scalar latched order positions;
-  - 12 diagnostic post-stir rank reads;
-  - final exact six-position latch + read count output.
+  - ആറ് ഏകമൂല്യം പൂട്ടിയ ക്രമം സ്ഥാനങ്ങൾ;
+  - 12 നിർണ്ണയസഹായം കലക്കലിനുശേഷമുള്ള ക്രമസംഖ്യ വായനകൾ;
+  - അന്തിമം കൃത്യം ആറ്-സ്ഥാനം പൂട്ടുസ്മൃതി + വായിക്കുക എണ്ണം പുറപ്പാട്.
 
-Remaining immediate bridge: preserved actual drops `2..46` forward replay -> generic rank/factoradic -> full six-ID active-set materializer -> position pours -> six immutable-old-snapshot pending values -> transactional bowl commit loop. drop46 dedicated latch ഇതിനകം വേർതിരിച്ച ownership state ആയി നിലനിൽക്കുന്നു.
+ശേഷിക്കുന്ന ഉടൻ ബന്ധം: സംരക്ഷിച്ച യഥാർത്ഥം തുള്ളികൾ `2..46` മുന്നോട്ടുള്ള പുനരാവർത്തനം -> പൊതുവായ ക്രമസംഖ്യ/ഘടകാധിഷ്ഠിത -> പൂർണ്ണം ആറ്-തിരിച്ചറിയൽസൂചിക സജീവ-സമുച്ചയം രൂപപ്പെടുത്തുന്ന ഘടകം -> സ്ഥാനം പകർച്ചകൾ -> ആറ് മാറ്റാനാകാത്ത-പഴയ-നിശ്ചലപ്രതി കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ -> ഇടപാട്-സുസ്ഥിര പാത്രം ഉറപ്പിക്കൽ ചക്രം. തുള്ളി46 സമർപ്പിത പൂട്ടുസ്മൃതി ഇതിനകം വേർതിരിച്ച ഉടമസ്ഥത നില ആയി നിലനിൽക്കുന്നു.
 
-## progress 41 — all-45 actual-drop generic order materialization
+## പുരോഗതി 41 — എല്ലാ-45 യഥാർത്ഥം-തുള്ളി പൊതുവായ ക്രമം രൂപപ്പെടുത്തൽ
 
 - `test/sauce_foundation_actual_hidden_visible46_probe.spl`
-  - progress 40-ലെ actual drops `2..46` Romeo forward replay വീണ്ടും consume ചെയ്യുന്നു;
-  - ഓരോ drop-നും `1 + regularMod(drop-1,720)` exact ആയി കണക്കാക്കുന്നു;
-  - blocks `120,24,6,2,1` ഉപയോഗിച്ച് factoradic digits നിർണ്ണയിക്കുന്നു;
-  - six-ID active-set removal committed bowl-state scalar characters-ിൽ നിന്ന് വേർതിരിച്ച ownership characters ഉപയോഗിച്ച് നടത്തുന്നു;
-  - ഓരോ resulting order-നും `count=6,sum=21,product=720` നിർബന്ധമായി validate ചെയ്യുന്നു;
-  - temporary selected-order archive ഓരോ round-നും clear ചെയ്യുന്നു;
-  - actual drop values വീണ്ടും preserve ചെയ്ത് completion-ൽ exactly 45-value forward replay rebuild ചെയ്യുന്നു;
-  - dedicated drop46 latch Juliet memory-ൽ untouched ആയി തുടരുന്നു.
+  - പുരോഗതി 40-ലെ യഥാർത്ഥം തുള്ളികൾ `2..46` Romeo മുന്നോട്ടുള്ള പുനരാവർത്തനം വീണ്ടും ഉപയോഗിക്കുക ചെയ്യുന്നു;
+  - ഓരോ തുള്ളി-നും `1 + regularMod(drop-1,720)` കൃത്യം ആയി കണക്കാക്കുന്നു;
+  - ഖണ്ഡങ്ങൾ `120,24,6,2,1` ഉപയോഗിച്ച് ഘടകാധിഷ്ഠിത അക്കങ്ങൾ നിർണ്ണയിക്കുന്നു;
+  - ആറ്-തിരിച്ചറിയൽസൂചിക സജീവ-സമുച്ചയം നീക്കം ഉറപ്പിച്ച പാത്രം-നില ഏകമൂല്യം കഥാപാത്രങ്ങൾ-ിൽ നിന്ന് വേർതിരിച്ച ഉടമസ്ഥത കഥാപാത്രങ്ങൾ ഉപയോഗിച്ച് നടത്തുന്നു;
+  - ഓരോ ഫലമായ ക്രമം-നും `count=6,sum=21,product=720` നിർബന്ധമായി സാധൂകരിക്കുക ചെയ്യുന്നു;
+  - താൽക്കാലിക തിരഞ്ഞെടുത്ത-ക്രമം ശേഖരണപ്പട്ടിക ഓരോ ചക്രം-നും വെടിപ്പാക്കുക ചെയ്യുന്നു;
+  - യഥാർത്ഥം തുള്ളി മൂല്യങ്ങൾ വീണ്ടും സംരക്ഷിക്കുക ചെയ്ത് പൂർത്തീകരണം-ൽ കൃത്യമായി 45-മൂല്യം മുന്നോട്ടുള്ള പുനരാവർത്തനം പുനർനിർമ്മിക്കുക ചെയ്യുന്നു;
+  - സമർപ്പിത തുള്ളി46 പൂട്ടുസ്മൃതി Juliet സ്മൃതി-ൽ തൊടാത്ത ആയി തുടരുന്നു.
 
-Immediate remaining bridge: rebuilt actual drops `2..46` + retained stone rows `2..46` -> dynamic full order -> position pours -> circular neighbors -> six immutable-old-snapshot pending bowl values -> transactional commit loop. ഈ loop-നുശേഷം drop46 latch ഉപയോഗിച്ച് 12 post-stirs/askBowl phase തുടരാം.
+ഉടൻ ശേഷിക്കുന്ന ബന്ധം: പുനർനിർമ്മിച്ച യഥാർത്ഥം തുള്ളികൾ `2..46` + നിലനിർത്തിയ കല്ല് വരികൾ `2..46` -> ചലനാത്മക പൂർണ്ണം ക്രമം -> സ്ഥാനം പകർച്ചകൾ -> വലയാകൃതിയിലുള്ള അയൽഘടകങ്ങൾ -> ആറ് മാറ്റാനാകാത്ത-പഴയ-നിശ്ചലപ്രതി കാത്തിരിക്കുന്ന പാത്രം മൂല്യങ്ങൾ -> ഇടപാട്-സുസ്ഥിര ഉറപ്പിക്കൽ ചക്രം. ഈ ചക്രം-നുശേഷം തുള്ളി46 പൂട്ടുസ്മൃതി ഉപയോഗിച്ച് 12 ശേഷകലക്കലുകൾ/askBowl ഘട്ടഭാഗം തുടരാം.
 
-## progress 42 integration map — separated bowl-phase replay ownership
+## പുരോഗതി 42 ഏകീകരണം മാപ്പ് — വേർതിരിച്ച പാത്രം-ഘട്ടഭാഗം പുനരാവർത്തനം ഉടമസ്ഥത
 
-Clean oracle handoff state ഇപ്പോൾ താഴെപ്പറയുന്ന owners-ായി വേർതിരിച്ചിരിക്കുന്നു:
+ശുദ്ധം മാനദണ്ഡ കണക്കുപാത കൈമാറ്റം നില ഇപ്പോൾ താഴെപ്പറയുന്ന ഉടമകൾ-ായി വേർതിരിച്ചിരിക്കുന്നു:
 
-- `Hamlet/Juliet/Romeo/Othello/Macbeth` memories: actual stones rows `2..46` forward replays മാത്രം;
-- `Caliban` memory: actual drops `2..46` forward replay മാത്രം;
-- `Brutus` memory: 45 full orders x 6 IDs = 270-ID forward replay;
-- `Antony` memory: dedicated actual drop46 six-ID forward latch;
-- committed bowl scalars: progress 38 first actual bowl round-ന്റെ state untouched.
+- `Hamlet/Juliet/Romeo/Othello/Macbeth` സ്മൃതികൾ: യഥാർത്ഥം കല്ലുകൾ വരികൾ `2..46` മുന്നോട്ട് പുനരാവർത്തനങ്ങൾ മാത്രം;
+- `Caliban` സ്മൃതി: യഥാർത്ഥം തുള്ളികൾ `2..46` മുന്നോട്ടുള്ള പുനരാവർത്തനം മാത്രം;
+- `Brutus` സ്മൃതി: 45 പൂർണ്ണം ക്രമങ്ങൾ x 6 തിരിച്ചറിയൽസൂചികകൾ = 270-തിരിച്ചറിയൽസൂചിക മുന്നോട്ടുള്ള പുനരാവർത്തനം;
+- `Antony` സ്മൃതി: സമർപ്പിത യഥാർത്ഥം തുള്ളി46 ആറ്-തിരിച്ചറിയൽസൂചിക മുന്നോട്ട് പൂട്ടുസ്മൃതി;
+- ഉറപ്പിച്ച പാത്രം സ്കെയ്ലറുകൾ: പുരോഗതി 38 ആദ്യ യഥാർത്ഥം പാത്രം ചക്രം-ന്റെ നില തൊടാത്ത.
 
-`test/sauce_foundation_actual_hidden_visible46_probe.spl` all-45 full-order pass-ൽ ഓരോ six-ID order local reverse ചെയ്ത് `Cleopatra` backward archive-ൽ preserve ചെയ്യുന്നു; completion-ൽ `Brutus` forward replay ആക്കുന്നു. structural suffix `270`.
+`test/sauce_foundation_actual_hidden_visible46_probe.spl` എല്ലാ-45 പൂർണ്ണം-ക്രമം വിജയം-ൽ ഓരോ ആറ്-തിരിച്ചറിയൽസൂചിക ക്രമം പ്രാദേശിക മറുക്രമം ചെയ്ത് `Cleopatra` പിന്നോട്ടുള്ള ശേഖരം-ൽ സംരക്ഷിക്കുക ചെയ്യുന്നു; പൂർത്തീകരണം-ൽ `Brutus` മുന്നോട്ടുള്ള പുനരാവർത്തനം ആക്കുന്നു. ഘടനാപരമായ അവസാനഭാഗം `270`.
 
-`test/bowl_phase_separated_replay_probe.spl` small witness ആയി stone/drop/order/latch owners തമ്മിൽ intermix ഇല്ലെന്ന് ഉറപ്പാക്കുന്നു.
+`test/bowl_phase_separated_replay_probe.spl` ചെറു സാക്ഷ്യം ആയി കല്ല്/തുള്ളി/ക്രമം/പൂട്ടുസ്മൃതി ഉടമകൾ തമ്മിൽ കലർത്തുക ഇല്ലെന്ന് ഉറപ്പാക്കുന്നു.
 
-Immediate blocker: separated rows `2..46`, drops `2..46`, 270 order IDs, committed bowl state എന്നിവ same loop-ൽ consume ചെയ്ത് ഓരോ round-നും three position pours, six circular-neighbor position snapshots, six pending bowl values from one immutable committed old snapshot, then transactional six-bowl commit. i=46 dedicated `Antony` latch mutate ചെയ്യരുത്.
+ഉടൻ തടസ്സം: വേർതിരിച്ച വരികൾ `2..46`, തുള്ളികൾ `2..46`, 270 ക്രമം തിരിച്ചറിയൽസൂചികകൾ, ഉറപ്പിച്ച പാത്രം നില എന്നിവ അതേ ചക്രം-ൽ ഉപയോഗിക്കുക ചെയ്ത് ഓരോ ചക്രം-നും മൂന്ന് സ്ഥാനം പകർച്ചകൾ, ആറ് വലയാകൃതിയിലുള്ള-അയൽഘടകം സ്ഥാനം നിശ്ചലപ്രതികൾ, ആറ് കാത്തിരിക്കുന്ന പാത്രം മൂല്യങ്ങൾ നിന്ന് ഒന്ന് മാറ്റാനാകാത്ത ഉറപ്പിച്ച പഴയ നിശ്ചലപ്രതി, തുടർന്ന് ഇടപാട്-സുസ്ഥിര ആറ്-പാത്രം ഉറപ്പിക്കൽ. i=46 സമർപ്പിത `Antony` പൂട്ടുസ്മൃതി മാറ്റുക ചെയ്യരുത്.
 
-## Stage 1 clean continuation — progress 43: drops 2..46 transactional bowl recurrence
+## ഘട്ടം 1 ശുദ്ധ തുടർച്ച — പുരോഗതി 43: തുള്ളികൾ 2..46 ഇടപാട്-സുസ്ഥിര പാത്രം ആവർത്തസൂത്രം
 
-progress 42-ൽ semantic owners വേർതിരിച്ച state same integrated clean-oracle source ഇപ്പോൾ full remaining bowl rounds-ലേക്ക് consume ചെയ്യുന്നു. ഓരോ drop `2..46`-നും five stones + actual drop + six order IDs load ചെയ്ത ശേഷം six committed bowls-ന്റെ position-ordered old snapshot ആദ്യം പൂർണ്ണമായി copy ചെയ്യുന്നു. മൂന്ന് position pours അതിൽ നിന്ന് കണക്കാക്കുന്നു; തുടർന്ന് circular prev/current/next topology ഉപയോഗിച്ച് ആറു pending values മുഴുവൻ immutable old snapshot-ൽ നിന്ന് Titania memory-ലേക്ക് നിർമ്മിക്കുന്നു.
+പുരോഗതി 42-ൽ അർത്ഥപരമായ ഉടമകൾ വേർതിരിച്ച നില അതേ ഏകീകൃതം ശുദ്ധം-മാനദണ്ഡ കണക്കുപാത ഉറവിടം ഇപ്പോൾ പൂർണ്ണം ശേഷിക്കുന്ന പാത്രം ചക്രങ്ങൾ-ലേക്ക് ഉപയോഗിക്കുക ചെയ്യുന്നു. ഓരോ തുള്ളി `2..46`-നും അഞ്ച് കല്ലുകൾ + യഥാർത്ഥം തുള്ളി + ആറ് ക്രമം തിരിച്ചറിയൽസൂചികകൾ ലോഡ് ചെയ്ത ശേഷം ആറ് ഉറപ്പിച്ച പാത്രങ്ങൾ-ന്റെ സ്ഥാനം-ക്രമപ്പെടുത്തിയ പഴയ നിശ്ചലപ്രതി ആദ്യം പൂർണ്ണമായി പകർപ്പ് ചെയ്യുന്നു. മൂന്ന് സ്ഥാനം പകർച്ചകൾ അതിൽ നിന്ന് കണക്കാക്കുന്നു; തുടർന്ന് വലയാകൃതിയിലുള്ള മുൻ/നിലവിലെ/അടുത്ത ഘടനബന്ധം ഉപയോഗിച്ച് ആറു കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ മുഴുവൻ മാറ്റാനാകാത്ത പഴയ നിശ്ചലപ്രതി-ൽ നിന്ന് Titania സ്മൃതി-ലേക്ക് നിർമ്മിക്കുന്നു.
 
-pending count `6` verify ചെയ്തതിന് ശേഷം മാത്രമാണ് Helena commit-target IDs-ഉം Titania pending values-ഉം pair ആയി pop ചെയ്ത് six committed bowl states mutate ചെയ്യുന്നത്. അതിനാൽ same-round write-after-read contamination ഇല്ല. loop exact `45` commits നടത്തി index `47`-ൽ അവസാനിക്കുന്നു. `Antony` dedicated drop46 latch executable path-ൽ untouched ആണ്.
+കാത്തിരിക്കുന്ന എണ്ണം `6` സ്ഥിരീകരിക്കുക ചെയ്തതിന് ശേഷം മാത്രമാണ് Helena ഉറപ്പിക്കൽ-ലക്ഷ്യം തിരിച്ചറിയൽസൂചികകൾ-ഉം Titania കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ-ഉം ജോടി ആയി പുറത്തെടുക്കൽ ചെയ്ത് ആറ് ഉറപ്പിച്ച പാത്രം നിലകൾ മാറ്റുക ചെയ്യുന്നത്. അതിനാൽ അതേ-ചക്രം എഴുതുക-ശേഷം-വായിക്കുക കലരൽ ഇല്ല. ചക്രം കൃത്യം `45` ഉറപ്പിക്കലുകൾ നടത്തി സൂചിക `47`-ൽ അവസാനിക്കുന്നു. `Antony` സമർപ്പിത തുള്ളി46 പൂട്ടുസ്മൃതി പ്രവർത്തനക്ഷമം പാത-ൽ തൊടാത്ത ആണ്.
 
-ഇതോടെ immediate progress 42 blocker അടഞ്ഞു: actual generated drops `1..46` എല്ലാം normative per-drop six-bowl transactional recurrence-ൽ integrated ആണ്. അടുത്ത Stage 1 blocker dedicated drop46 latch ഉപയോഗിച്ച് Appendix A-യിലെ `12` committed post-stirs, ഓരോ stir-ലും ഒരിക്കൽ മാത്രം കണക്കാക്കുന്ന `savedBowlSum = SAVE(sum(oldBowls)+149*stir)`, തുടർന്ന് SauceResult/askBowl integration എന്നിവയാണ്. Gate/year/general DP/name-unrank/presentation/final five-field result, compliant SPL runtime GREEN എന്നിവയും പിന്നെയും ബാക്കി.
+ഇതോടെ ഉടൻ പുരോഗതി 42 തടസ്സം അടഞ്ഞു: യഥാർത്ഥം സൃഷ്ടിച്ച തുള്ളികൾ `1..46` എല്ലാം മാനദണ്ഡാനുസൃത ഓരോ-തുള്ളി ആറ്-പാത്രം ഇടപാട്-സുസ്ഥിര ആവർത്തസൂത്രം-ൽ ഏകീകൃതം ആണ്. അടുത്ത ഘട്ടം 1 തടസ്സം സമർപ്പിത തുള്ളി46 പൂട്ടുസ്മൃതി ഉപയോഗിച്ച് Appendix ഒരു-യിലെ `12` ഉറപ്പിച്ച ശേഷകലക്കലുകൾ, ഓരോ കലക്കൽ-ലും ഒരിക്കൽ മാത്രം കണക്കാക്കുന്ന `savedBowlSum = SAVE(sum(oldBowls)+149*stir)`, തുടർന്ന് SauceResult/askBowl ഏകീകരണം എന്നിവയാണ്. കവാടം/വർഷം/പൊതുവായ DP/പേര്-പുനർനിർമ്മാണം/അവതരണം/അന്തിമം അഞ്ചുഘടക ഫലം, അനുസൃത SPL നിർവഹണപരിസരം പച്ച എന്നിവയും പിന്നെയും ബാക്കി.
 
-## Stage 1 clean continuation — progress 44: 12 post-stir transactional rounds
+## ഘട്ടം 1 ശുദ്ധ തുടർച്ച — പുരോഗതി 44: 12 കലക്കലിനുശേഷമുള്ള ഇടപാട്-സുസ്ഥിര ചക്രങ്ങൾ
 
-`test/sauce_foundation_actual_hidden_visible46_probe.spl` progress 43 final committed bowls-ൽ നിന്ന് post-stir phase same source-ൽ തുടരുന്നു.
+`test/sauce_foundation_actual_hidden_visible46_probe.spl` പുരോഗതി 43 അന്തിമം ഉറപ്പിച്ച പാത്രങ്ങൾ-ൽ നിന്ന് കലക്കലിനുശേഷമുള്ള ഘട്ടഭാഗം അതേ ഉറവിട-ൽ തുടരുന്നു.
 
-- `Titania`: current stir number `1..12`;
-- `Viola`: completed stir count;
-- `Caliban`: one-per-stir immutable `savedBowlSum`;
-- `Shylock`: existing exact `M`, overwrite ചെയ്യാതെ SAVE modulus;
-- `Ariel/Falstaff/Rosalind/Horatio/Polonius/Cordelia`: current stir six order IDs;
-- `Helena` memory: current stir six commit-target IDs, position order-ൽ;
-- `Othello/Macbeth/Tybalt/Romeo/Hamlet/Juliet`: current stir immutable old-position snapshot;
-- `Brutus` memory: current stir six pending values, position order-ൽ;
-- committed bowls: `Miranda/Lady Macbeth/Beatrice/Benedick/Desdemona/Portia`;
-- `Antony` memory: actual drop46 latch മാത്രം; post-stir executable segment touch ചെയ്യുന്നില്ല.
+- `Titania`: നിലവിലെ കലക്കൽ സംഖ്യ `1..12`;
+- `Viola`: പൂർത്തിയായ കലക്കൽ എണ്ണം;
+- `Caliban`: ഒന്ന്-ഓരോ-കലക്കൽ മാറ്റാനാകാത്ത `savedBowlSum`;
+- `Shylock`: നിലവിലുള്ള കൃത്യം `M`, മുകളിൽ എഴുതുക ചെയ്യാതെ SAVE മോഡുലസ്;
+- `Ariel/Falstaff/Rosalind/Horatio/Polonius/Cordelia`: നിലവിലെ കലക്കൽ ആറ് ക്രമം തിരിച്ചറിയൽസൂചികകൾ;
+- `Helena` സ്മൃതി: നിലവിലെ കലക്കൽ ആറ് ഉറപ്പിക്കൽ-ലക്ഷ്യം തിരിച്ചറിയൽസൂചികകൾ, സ്ഥാനം ക്രമം-ൽ;
+- `Othello/Macbeth/Tybalt/Romeo/Hamlet/Juliet`: നിലവിലെ കലക്കൽ മാറ്റാനാകാത്ത പഴയ-സ്ഥാനം നിശ്ചലപ്രതി;
+- `Brutus` സ്മൃതി: നിലവിലെ കലക്കൽ ആറ് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ, സ്ഥാനം ക്രമം-ൽ;
+- ഉറപ്പിച്ച പാത്രങ്ങൾ: `Miranda/Lady Macbeth/Beatrice/Benedick/Desdemona/Portia`;
+- `Antony` സ്മൃതി: യഥാർത്ഥം തുള്ളി46 പൂട്ടുസ്മൃതി മാത്രം; കലക്കലിനുശേഷമുള്ള പ്രവർത്തനക്ഷമം ഖണ്ഡം തൊടുക ചെയ്യുന്നില്ല.
 
-ഓരോ stir-ലും saved value ഒരിക്കൽ മാത്രം -> factoradic order -> permutation invariants -> six old-position copies -> six pending values -> pending-complete -> six transactional commits എന്ന ownership boundary ആണ്. commit കഴിഞ്ഞാൽ മാത്രമാണ് stir counter മുന്നോട്ട് പോകുന്നത്. exact 12 commits കഴിഞ്ഞ structural suffix `12,13,1,1,1,1,1,1`.
+ഓരോ കലക്കൽ-ലും സംരക്ഷിച്ച മൂല്യം ഒരിക്കൽ മാത്രം -> ഘടകാധിഷ്ഠിത ക്രമം -> ക്രമവിന്യാസം അചഞ്ചല വ്യവസ്ഥകൾ -> ആറ് പഴയ-സ്ഥാനം പകർപ്പുകൾ -> ആറ് കാത്തിരിക്കുന്ന മൂല്യങ്ങൾ -> കാത്തിരിക്കുന്ന-പൂർത്തിയായ -> ആറ് ഇടപാട്-സുസ്ഥിര ഉറപ്പിക്കലുകൾ എന്ന ഉടമസ്ഥത അതിർത്തി ആണ്. ഉറപ്പിക്കൽ കഴിഞ്ഞാൽ മാത്രമാണ് കലക്കൽ എണ്ണിപ്പകരണം മുന്നോട്ട് പോകുന്നത്. കൃത്യം 12 ഉറപ്പിക്കലുകൾ കഴിഞ്ഞ ഘടനാപരമായ അവസാനഭാഗം `12,13,1,1,1,1,1,1`.
 
-Immediate blocker ഇപ്പോൾ SauceResult/askBowl integration ആണ്: final six bowls + immutable `Antony` drop46 order latch ഒരേ sauce-result semantic state ആയി expose ചെയ്ത് queried bowl-ന്റെ successor drop46 order-ൽ resolve ചെയ്യുകയും seal-dependent `first`/`directionNumber` exact SAVE formulas bind ചെയ്യുകയും വേണം. അതിനു ശേഷമാണ് selection/gates/years/general DP/name-unrank/presentation/final tuple.
+ഉടൻ തടസ്സം ഇപ്പോൾ SauceResult/askBowl ഏകീകരണം ആണ്: അന്തിമം ആറ് പാത്രങ്ങൾ + മാറ്റാനാകാത്ത `Antony` തുള്ളി46 ക്രമം പൂട്ടുസ്മൃതി ഒരേ സോസ്-ഫലം അർത്ഥപരമായ നില ആയി വെളിപ്പെടുത്തുക ചെയ്ത് ചോദിച്ച പാത്രം-ന്റെ അടുത്ത ഘടകം തുള്ളി46 ക്രമം-ൽ നിർണ്ണയിക്കുക ചെയ്യുകയും മുദ്ര-ആശ്രിത `first`/`directionNumber` കൃത്യം SAVE സൂത്രങ്ങൾ ബന്ധിപ്പിക്കുക ചെയ്യുകയും വേണം. അതിനു ശേഷമാണ് തിരഞ്ഞെടുപ്പ്/കവാടങ്ങൾ/വർഷങ്ങൾ/പൊതുവായ DP/പേര്-പുനർനിർമ്മാണം/അവതരണം/അന്തിമ ട്യൂപ്പിൾ.
 
-## progress 45 — SauceResult മുതൽ exact selection വരെ integrated bridge
+## പുരോഗതി 45 — SauceResult മുതൽ കൃത്യം തിരഞ്ഞെടുപ്പ് വരെ ഏകീകൃതം ബന്ധം
 
-`test/sauce_foundation_actual_hidden_visible46_probe.spl` ഇപ്പോൾ progress 44 post-stir state-ിൽ നിന്ന് തുടർന്നു:
+`test/sauce_foundation_actual_hidden_visible46_probe.spl` ഇപ്പോൾ പുരോഗതി 44 കലക്കലിനുശേഷമുള്ള നില-ിൽ നിന്ന് തുടർന്നു:
 
 `final bowls + drop46 latch -> non-destructive order materialization/restore -> circular successor -> askBowl first/direction -> short chooseRank rejection ring -> wide chooseRank boundary/rejection ring`.
 
-state ownership:
+നില ഉടമസ്ഥത:
 
-- final bowl IDs `1..6`: `Miranda`, `Lady Macbeth`, `Beatrice`, `Benedick`, `Desdemona`, `Portia`; progress 45-ൽ read-only;
-- `Shylock`: exact M, read-only;
-- `Antony` memory: six-ID forward drop46 order latch; materialization സമയത്ത് six pops കഴിഞ്ഞ് temporary reverse archive വഴി same order-ൽ restore;
-- order position scalars: `Othello`, `Macbeth`, `Hamlet`, `Juliet`, `Romeo`, `Tybalt`;
-- `Caliban`: askBowl first;
-- `Brutus`: fixed directionStep;
-- selection scratch final bowls/latch overwrite ചെയ്യുന്നില്ല.
+- അന്തിമം പാത്രം തിരിച്ചറിയൽസൂചികകൾ `1..6`: `Miranda`, `Lady Macbeth`, `Beatrice`, `Benedick`, `Desdemona`, `Portia`; പുരോഗതി 45-ൽ വായിക്കുക-മാത്രം;
+- `Shylock`: കൃത്യം M, വായിക്കുക-മാത്രം;
+- `Antony` സ്മൃതി: ആറ്-തിരിച്ചറിയൽസൂചിക മുന്നോട്ട് തുള്ളി46 ക്രമം പൂട്ടുസ്മൃതി; രൂപപ്പെടുത്തൽ സമയത്ത് ആറ് പുറത്തെടുക്കലുകൾ കഴിഞ്ഞ് താൽക്കാലിക മറുക്രമം ശേഖരണപ്പട്ടിക വഴി അതേ ക്രമം-ൽ പുനഃസ്ഥാപിക്കുക;
+- ക്രമം സ്ഥാനം സ്കെയ്ലറുകൾ: `Othello`, `Macbeth`, `Hamlet`, `Juliet`, `Romeo`, `Tybalt`;
+- `Caliban`: askBowl ആദ്യ;
+- `Brutus`: സ്ഥിര directionStep;
+- തിരഞ്ഞെടുപ്പ് താൽക്കാലിക നില അന്തിമം പാത്രങ്ങൾ/പൂട്ടുസ്മൃതി മുകളിൽ എഴുതുക ചെയ്യുന്നില്ല.
 
-short path actual integrated family `N=922`; wide clean boundary `N=M+1`, expected places `2`.
+ചുരുങ്ങിയ പാത യഥാർത്ഥം ഏകീകൃതം കുടുംബം `N=922`; വിശാല ശുദ്ധം അതിർത്തി `N=M+1`, പ്രതീക്ഷിച്ച സ്ഥാനങ്ങൾ `2`.
 
-ഇനി integrated general-calendar blocker: same-Foundation sauce instance-നെ arbitrary `targetDay` calls-ലേക്ക് ഉയർത്തി positive/negative gate gaps actual sauce/ask/chooseRank chain-ൽ നിർമ്മിക്കുക; തുടർന്ന് lazy signed gates, years, structure, final resolver.
+ഇനി ഏകീകൃതം പൊതുവായ-കലണ്ടർ തടസ്സം: അതേ-സ്ഥാപനദിനം സോസ് പ്രതി-നെ ഏതുവലുപ്പമുള്ള `targetDay` വിളിക്കുന്നു-ലേക്ക് ഉയർത്തി ധന/ഋണ കവാടം ഇടവുകൾ യഥാർത്ഥം സോസ്/ചോദിക്കുക/chooseRank ശൃംഖല-ൽ നിർമ്മിക്കുക; തുടർന്ന് ആവശ്യാനുസൃത ചിഹ്നമുള്ള കവാടങ്ങൾ, വർഷങ്ങൾ, ഘടന, അന്തിമ നിർണ്ണായകം.
+
+## പുരോഗതി 46 — ഏതുവലുപ്പമുള്ള ചിഹ്നമുള്ള സ്ഥാപനദിനം-ലക്ഷ്യം സോസ് വിളി
+
+`test/gate_signed_full_sauce_gap_probe.spl` പുരോഗതി 45-ലെ ഏകീകൃതം SauceResult യന്ത്രവ്യവസ്ഥ-യെ ചിഹ്നമുള്ള കവാടം-ചുവട് ഉൾക്കൊള്ളൽ-ലേക്ക് പൊതുവാക്കുക ചെയ്യുന്നു. ഇത് `FOUNDATION_DAY ± n` workCounts-ന്റെ ബീജഗണിതപരമായ പ്രത്യേകവൽക്കരണം ആണ്; സ്ഥാപനദിനം സ്ഥിരാംശം വീണ്ടും ദിവസം ഗണിതം-ൽ രൂപപ്പെടുത്തുക ചെയ്യാതെ എണ്ണങ്ങൾ അർത്ഥനിയമങ്ങൾ കൃത്യം ആയി ഉറവിടം-ൽ നൽകുന്നു.
+
+പുതിയ ഉടമസ്ഥത:
+
+- `King Lear`: മാറ്റാനാകാത്ത ചിഹ്നമുള്ള കവാടം ചുവട്;
+- `Lear`: പരമ പരിമാണം `n`, ചുരുങ്ങിയ തിരഞ്ഞെടുപ്പ് കഴിഞ്ഞ് സംരക്ഷിച്ച കവാടം ഇടവ്;
+- നിലവിലുള്ള കല്ല്/തുള്ളി/പാത്രം/പൂട്ടുസ്മൃതി ഉടമകൾ പുരോഗതി 45 പോലെ തന്നെ;
+- `Antony` orderAtDrop46 പൂട്ടുസ്മൃതി ഇടപാട്-സുസ്ഥിര രൂപപ്പെടുത്തൽ/പുനഃസ്ഥാപിക്കുക കഴിഞ്ഞ് മാറ്റമില്ലാത്ത;
+- ആരംഭ പാത്രങ്ങൾ ഏതുവലുപ്പമുള്ള `n`-ൽ വ്യക്തമായ SAVE ഉപയോഗിക്കുന്നു.
+
+ഈ പുരോഗതി ഉറവിടതല ശൃംഖല:
+
+`signed n -> Foundation±n workCounts -> hidden -> 46 visible -> 46 transactional bowl rounds -> drop46 latch -> 12 post-stirs -> SauceResult -> askBowl(q=1,seal=1) -> chooseRank(922) -> 41+rank`.
+
+ഇനി പ്രധാന തടസ്സം ബഹു-വിളി/പുനഃ-പ്രവേശനം നില ഉടമസ്ഥത ഉള്ള ആവശ്യാനുസൃത ചിഹ്നമുള്ള കവാടം സംഭരണം ആണ്: `gate[0]=FOUNDATION_DAY`, ധന വശം-ൽ `gate[n]=gate[n-1]+positiveGateGap(n)`, ഋണ വശം-ൽ `gate[-n]=gate[-n+1]-negativeGateGap(n)`. അതിന് ശേഷം കവാടം വ്യാപ്തി/തിരച്ചിലുകൾ, വർഷം 5000, അടുത്തടുത്ത-വർഷം നടത്തം, പൊതുവായ ഘടന DP/നെയ്ത്ത്/പേര്-പുനർനിർമ്മാണം/അവതരണം/അന്തിമ ട്യൂപ്പിൾ.
+
+## പുരോഗതി 47 — അടുക്കു ഉടമസ്ഥത തിരുത്തൽ + പൂർണ്ണം സോസ് പുനഃ-പ്രവേശനം
+
+പുരോഗതി 46-ന്റെ ബഹു-വിളി പരിശോധനാവലോകനം-ൽ മൂന്ന് അടുക്കു തിരിച്ചുവിളികൾ-ൽ ഉടമ/ശ്രോതാവ് വിപരീതം കണ്ടെത്തി. SPL-ൽ `Recall your newest memory` ശ്രോതാവ്-ന്റെ സ്മൃതി ആണ് പുറത്തെടുക്കൽ ചെയ്യുന്നത്. അതിനാൽ ഏകീകൃതം അതേ-സ്ഥാപനദിനം ഉറവിടം-ലും ചിഹ്നമുള്ള പൂർണ്ണം-സോസ് ഉറവിടം-ലും താഴെയുള്ള ഉടമ പാതകൾ തിരുത്തൽ ചെയ്തു:
+
+- `Horatio` തിരഞ്ഞെടുത്ത-തിരിച്ചറിയൽസൂചിക ശേഖരണപ്പട്ടിക -> സഹായകം ഏകമൂല്യം -> `Tybalt` മുന്നോട്ടുള്ള പുനരാവർത്തനം;
+- `Lady Macbeth` യഥാർത്ഥം-തുള്ളി46 തിരഞ്ഞെടുത്ത-തിരിച്ചറിയൽസൂചിക ശേഖരണപ്പട്ടിക -> സഹായകം ഏകമൂല്യം -> `Antony` സമർപ്പിത പൂട്ടുസ്മൃതി;
+- `Hamlet` സംരക്ഷിച്ച-തുള്ളി ശേഖരണപ്പട്ടിക -> സഹായകം ഏകമൂല്യം -> `Caliban` മുന്നോട്ടുള്ള പുനരാവർത്തനം.
+
+ഈ തിരുത്തൽ ഇല്ലാതെ `Falstaff` മറഞ്ഞത് പുനരാവർത്തനം അടുക്കു തെറ്റായി ഉപയോഗിക്കുക ചെയ്യപ്പെടുകയും പിന്നീട് 45-തുള്ളി തിരിക്കൽ നിർവഹണപരിസരം താഴ്ന്നപരിധിമാറ്റം ചെയ്യാനുള്ള ഉറവിട പാത ഉണ്ടാകുകയും ചെയ്തു. പുരോഗതി 47 ആ ഉറവിടം തകരാർ നീക്കുന്നു.
+
+പുതിയ `test/gate_signed_full_sauce_reentry_pair_probe.spl` ഒരേ പ്രക്രിയ-ൽ പൂർണ്ണം സോസ് നില യന്ത്ര രണ്ടുതവണ നിർവഹിക്കുക ചെയ്യുന്നു. വിജയകരമായ വിളിനിർവഹണം അതിർത്തി-ൽ നിലനിൽക്കുന്ന സ്മൃതി ശുചീകരണം കരാർ രൂപപ്പെടുത്തുക ചെയ്യുന്നു: അഞ്ച് മറഞ്ഞത് പുനരാവർത്തനം ഉടമകൾ-ൽ `39` എൻട്രികൾ വീതവും `Antony` പൂട്ടുസ്മൃതി-ൽ `6` എൻട്രികൾ-വും, ആകെ `201`, വ്യക്തമായ പുറത്തെടുക്കൽ ചക്രങ്ങൾ കൊണ്ട് നീക്കം ചെയ്യുന്നു. ശുചീകരണം സാക്ഷ്യം സാധൂകരിക്കുക ചെയ്തശേഷം മാത്രമാണ് പിന്നോട്ട് ചാടൽ `Act I`-ലേക്ക് നടക്കുന്നത്. രണ്ടാം വിളിനിർവഹണം-നും അതേ ശുചീകരണം നടക്കുന്നു; അന്തിമം സാക്ഷ്യം വിളിനിർവഹണം എണ്ണം `2`.
+
+ഇനി പ്രധാന തടസ്സം Appendix ഒരു ആവശ്യാനുസൃത ചിഹ്നമുള്ള സൂചികപ്പെടുത്തിയ കവാടം സംഭരണം ആണ്: `gate[0]=FOUNDATION_DAY`, ധന/ഋണ പൂർണ്ണം-സോസ് പുനഃ-പ്രവേശനം ഉപയോഗിച്ച് ഏകദിശ കവാടം മൂല്യങ്ങൾ ഉറപ്പിക്കൽ ചെയ്യുക, `minKnownGateIndex`/`maxKnownGateIndex` ഇടപാട്-സുസ്ഥിര ആയി പുതുക്കൽ ചെയ്യുക, തുടർന്ന് ഉറപ്പാക്കി വ്യാപിക്കുക-വ്യാപിക്കുക + തിരച്ചിൽ അർത്ഥനിയമങ്ങൾ ബന്ധിപ്പിക്കുക.
+
+
+## പുരോഗതി 48 — ഘട്ടം-സുരക്ഷിത CFG + പൂർണ്ണം-സോസ്-പിന്തുണച്ച `ensureGateIndex(k)`
+
+പുരോഗതി 47-ന്റെ സ്ഥിരപരിശോധന പരിശോധനാവലോകനം CFG ഘട്ടം-നില വരെ വികസിപ്പിച്ചപ്പോൾ ചാടൽ ലക്ഷ്യം-ുകളിലെ ആവർത്തനം `Enter` നിർവഹണപരിസരം തകരാർ കണ്ടെത്തി. ശുദ്ധം തിരുത്തൽ ഗണിതം/തിരഞ്ഞെടുപ്പ് അർത്ഥനിയമങ്ങൾ മാറ്റുന്നില്ല: ലക്ഷ്യം-ന്റെ ആദ്യ പ്രവർത്തനക്ഷമം നിർദ്ദേശം `Enter` ആണെങ്കിൽ മുന്നിലെ ലഘു `Exeunt` വഴി ഘട്ടം വെടിപ്പാക്കുക ചെയ്യുന്നു; ഒരു നേരിട്ടുള്ള ഇറക്കം-വഴി ആവർത്തനം-പ്രവേശനം അതിർത്തിയും വെടിപ്പാക്കുക ചെയ്തു. വേർതിരിച്ച അടയാളം-മാനദണ്ഡം പരിശോധനാവലോകനം `final_resolver_six_day_probe.spl`-ൽ ആറ് നിർവചിക്കാത്ത കടന്നുപോകൽ-അങ്കം രംഗം സൂചനകൾ കണ്ടെത്തി; ഉദ്ദേശിച്ച അതേ-അങ്കം രംഗം പരിധി പുനഃസ്ഥാപിക്കുക ചെയ്തു, എത്തിച്ചേരാവുന്ന ആമുഖഭാഗം എണ്ണിപ്പകരണം-നെ നിയമാനുസൃത രണ്ട്-കഥാപാത്രം SPL രൂപം-ലാക്കി, രണ്ട് തെറ്റിദ്ധരിച്ച പരിഹരിച്ച-ശ്രോതാവ് താരതമ്യങ്ങൾ സ്വയം-താരതമ്യങ്ങൾ ആക്കി. 164 SPL ഫയലുകൾ മുഴുവൻ അടയാളം പരിശോധനാവലോകനം + എത്തിച്ചേരാവുന്ന ഘട്ടം-നില പരിശോധനാവലോകനം പൂജ്യം പിശകുകൾ ആണ്.
+
+പുതിയ `gate_lazy_signed_full_sauce_index_store_probe.spl` കവാടം പാളി-ന്റെ അടുത്ത ഏകീകരണം ഭാഗം ആണ്:
+
+`k -> gate[0] -> repeated signed n -> full sauce -> gap 42..963 -> pending gate/bound -> validate -> commit -> cleanup -> next n -> gate[k]`.
+
+ധന സംഭരണം `gate[0],gate[1],...` അറ്റബിന്ദു-മുകളിൽ അടുക്കു ആയും ഋണ സംഭരണം `gate[0],gate[-1],...` അറ്റബിന്ദു-മുകളിൽ അടുക്കു ആയും നിലനിൽക്കുന്നു. `minKnownGateIndex`/`maxKnownGateIndex` വേറിട്ട നിലനിൽക്കുന്ന സ്മൃതികൾ ആണ്. ധന ശാഖ `old+gap`, ഋണ ശാഖ `old-gap`; കർശന ഏകദിശത + പരിധി/വിളിനിർവഹണം സമത്വം ഉറപ്പിക്കൽ-ിന് മുമ്പ് സാധൂകരിക്കുക ചെയ്യുന്നു. ഋണ കാത്തിരിക്കുന്ന കവാടം താൽക്കാലിക നില കുറഞ്ഞത്-പരിധി ഉടമ-ിൽ നിന്ന് വേർതിരിച്ചിരിക്കുന്നു.
+
+അടുത്ത മാപ്പിങ് ലക്ഷ്യം: ദിവസം-പരിധിക്ഷേത്രം `ensureGatesCover(lowDay,highDay)`; തുടർന്ന് സൃഷ്ടിച്ച സംഭരണം-ലുള്ള ഏകദിശ ആന്തരഭാഗം തിരച്ചിൽ `at-or-before`, `at-or-after`, കൃത്യം. അതിനു ശേഷമേ വർഷം 5000 സ്ഥാനാർഥി നിർമ്മാണം/തിരഞ്ഞെടുപ്പ്-നെ പൂർണ്ണം സൃഷ്ടിച്ച കവാടം ഉറവിടം-ുമായി ബന്ധിപ്പിക്കാവൂ.
+
+
+## പുരോഗതി 49 — കവാടം വ്യാപ്തി + കൃത്യം ദ്വിമാന തിരച്ചിൽ ഏകീകരണം
+
+| ഘടകം | ഉറവിടം | നില |
+|---|---|---|
+| `ensureGatesCover(lowDay,highDay)` | `test/gate_cover_lookup_full_sauce_probe.spl` അങ്കങ്ങൾ CXV–CXVI | പൂർണ്ണം-സോസ്-പിന്തുണച്ച ഇടത്-തുടർന്ന്-ശരിയായ ആവശ്യാനുസൃത വിപുലീകരണം |
+| കലർന്ന-വശം വിളിനിർവഹണം ഉടമസ്ഥത | അതേ ഉറവിട അങ്കം I / CX / CXI / CXV / CXVI | ആകെ എണ്ണം `Duncan`; നിലവിലെ ചിഹ്നമുള്ള സൂചിക `King Lear`; പരിധി സാധൂകരിക്കുന്നു എതിരെ ചിഹ്നമുള്ള സൂചിക |
+| `gate[mid]` പ്രവേശനസഹായകം | അങ്കം CXVIII | അറ്റബിന്ദു അടുക്കു പുറത്തെടുക്കൽ വരെ താൽക്കാലിക `Viola` സ്മൃതി + കൃത്യം പുനഃസ്ഥാപനം മുമ്പ് മടങ്ങുക |
+| `gateIndexAtOrBefore` | അങ്കങ്ങൾ CXVII, CXXV, CXIX | Appendix ഒരു മുകളിലെ-മദ്ധ്യ ദ്വിമാന തിരച്ചിൽ |
+| `gateIndexAtOrAfter` | അങ്കം CXXI | കൃത്യം -> അതേ സൂചിക; അല്ലെങ്കിൽ `lo+1`, പരിധിബദ്ധ വഴി maxKnown |
+| `exactGateIndex` | അങ്കം CXXI | `exactFound` + `exactIndex` സങ്കേതനം, സംരക്ഷിച്ച് സാധുവായ സൂചിക പൂജ്യം |
+| ഉറവിടം സാധുത | മുഴുവൻ വൃക്ഷം | 165 SPL; അടയാളം കാണാത്ത/ആവർത്തനം 0; എത്തിച്ചേരാവുന്ന ഘട്ടം-നില നാല് പിശക് വിഭാഗങ്ങൾ 0 |
+
+ഈ പുരോഗതി വർഷം 5000 സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ ചെയ്യുന്നില്ല. അടുത്ത ആശ്രയം: `ensureGatesCover(calculationDay-5778, calculationDay+5778)` കഴിഞ്ഞ സൃഷ്ടിച്ച ജോടികൾ സ്ഥിരപരിശോധന/ക്രമീകരണം/തിരഞ്ഞെടുപ്പ്.
+
+## പുരോഗതി 50 — വർഷം 5000 പൂർണ്ണം സ്ഥാനാർഥി കണ്ടെത്തൽ, മാനദണ്ഡാനുസൃത ക്രമീകരണം, കൂടാതെ മുദ്ര-10 തിരഞ്ഞെടുപ്പ്
+
+`test/year5000_full_candidate_selection_probe.spl` പുരോഗതി 49 ആവശ്യാനുസൃത ചിഹ്നമുള്ള കവാടം സംഭരണം-നെ വർഷം 5000 തിരഞ്ഞെടുപ്പ്-ുമായി ആരംഭംമുതൽഅവസാനംവരെ ബന്ധിപ്പിക്കുന്നു. ഉൾക്കൊള്ളൽ `calculationDay` മാത്രം. ഉറവിടം `ensureGatesCover(calculationDay-5778, calculationDay+5778)` നടത്തുന്നു; സൃഷ്ടിച്ച കവാടം പരിധികൾ-ലുള്ള എല്ലാ `i<j` ജോടി-ുകളും `j=i+6` മുതൽ സ്ഥിരപരിശോധന ചെയ്യുന്നു. സ്ഥാനാർഥി നിബന്ധന കൃത്യം: ഇടവ് എണ്ണം കുറഞ്ഞത് 6, `252 <= gate[j]-gate[i] <= 5778`, കൂടാതെ `gate[i] < calculationDay <= gate[j]`. വർധിക്കുന്ന `j`-ൽ നീളം 5778 കടന്നാൽ ആ തുറക്കൽ സൂചിക-ന്റെ ശേഷിക്കുന്ന അടയ്ക്കുന്നു ഏകദിശത പ്രകാരം ഒഴിവാക്കുക ചെയ്യുന്നു.
+
+സാധുവായ സ്ഥാനാർഥി രേഖ നാല് സമാന്തര SPL സ്മൃതി അടുക്കുകൾ-ൽ സൂക്ഷിക്കുന്നു: തുറക്കൽ സൂചിക, അടയ്ക്കൽ സൂചിക, വർഷം നീളം, തുറക്കൽ കവാടം ദിവസം. ചേർക്കൽ താരതമ്യഘടകം Appendix ഒരു താക്കോൽ `(yearLength ascending, openingGateDay ascending)` ആണ്. താൽക്കാലിക നാല് സ്മൃതി അടുക്കുകൾ ഉപയോഗിച്ച് പുറത്തെടുത്ത അവസാനഭാഗം കൃത്യം പുനഃസ്ഥാപിക്കുക ചെയ്യുന്നതിനാൽ നിലനിൽക്കുന്ന സ്ഥാനാർഥി ക്രമം താഴെ-വരെ-മുകളിൽ ആരോഹണ, മുകളിൽ ഏറ്റവും വലിയ ആയി നിലനിൽക്കുന്നു. സ്ഥാനാർഥി എണ്ണം ഉറപ്പിക്കൽ ചേർക്കൽ മുഴുവൻ പുനഃസ്ഥാപിക്കുക ചെയ്തശേഷം മാത്രമാണ് കൂട്ടൽ ചെയ്യുന്നത്.
+
+വർഷം തിരഞ്ഞെടുപ്പ് കവാടം-ഇടവ് സോസ് പ്രവാഹം വീണ്ടും ഉപയോഗിക്കുക ചെയ്യുന്നില്ല. സ്ഥാനാർഥി പട്ടികപ്പെടുത്തൽ കഴിഞ്ഞ് `gate[0]` കൃത്യം തിരച്ചിൽ ചെയ്തു `dayCount(calculationDay)` നിർമ്മിക്കുന്നു; `sauce(calculationDay,calculationDay)`-നുള്ള workCounts `(d,d,1,2d,2)` ആയി വേറിട്ട രീതി-ൽ രൂപപ്പെടുത്തുക ചെയ്യുന്നു. മറഞ്ഞത് വിത്തുമൂല്യങ്ങൾ, ദൃശ്യം വിത്തുമൂല്യങ്ങൾ, ആരംഭ പാത്രങ്ങൾ എന്നീ മൂന്ന് എണ്ണങ്ങൾ-സൂക്ഷ്മ സ്ഥാനങ്ങൾ പൊതുവായ workCounts പാത സ്വീകരിക്കുന്നു; ശേഷിക്കുന്ന തിരുത്തിയ 46-തുള്ളി, ഇടപാട്-സുസ്ഥിര പാത്രം ആവർത്തസൂത്രം, തുള്ളി46 പൂട്ടുസ്മൃതി, 12 ശേഷകലക്കലുകൾ അതേ കേന്ദ്രം തന്നെയാണ്. വർഷം രീതി `askBowl(q=1, seal=10)` ഉപയോഗിക്കുന്നു; `chooseRank` ചുരുങ്ങിയ പാത-ന്റെ `N` candidateCount സ്മൃതി-ൽ നിന്ന് എടുക്കുന്നു. തിരഞ്ഞെടുത്ത ക്രമസംഖ്യ `Lear`-ൽ സംരക്ഷിക്കുക ചെയ്ത് 41+ക്രമസംഖ്യ കവാടം-ഇടവ് പരിവർത്തനം/വിശാല അതിർത്തി പരിശോധനാവസ്ഥ ഒഴിവാക്കി വിളിനിർവഹണം ശുചീകരണം-ലേക്ക് നേരിട്ട് പോകുന്നു.
+
+ശുചീകരണം കഴിഞ്ഞ് ക്രമപ്പെടുത്തിയ അടുക്കു മുകളിൽ ഏറ്റവും വലിയ ആയതിനാൽ `candidateCount-rank` രേഖകൾ ഉപേക്ഷിക്കുക ചെയ്ത് അടുത്ത രേഖ തിരഞ്ഞെടുത്ത ജോടി ആക്കുന്നു. തിരഞ്ഞെടുത്ത അടയ്ക്കൽ ദിവസം കവാടം പ്രവേശനസഹായകം വഴി വീണ്ടും നിർണ്ണയിക്കുക ചെയ്യുന്നു; സംഭരിച്ച/വീണ്ടുംകണക്കാക്കിയ നീളം സമത്വം, ഇടവ് എണ്ണം, 252/5778 പരിധികൾ, ഉൾക്കൊള്ളൽ എന്നിവ വീണ്ടും പരിശോധിച്ചശേഷം `5000, openIndex, closeIndex, openGateDay, closeGateDay, candidateCount, selectedRank, totalFullSauceInvocationCount` സാക്ഷ്യം പുറപ്പാട് ചെയ്യുന്നു. അതേ-ദിവസം സോസ് കേന്ദ്രം മാറ്റിമായ്ക്കൽ ചെയ്യുന്ന 252/5778 താൽക്കാലിക നില സ്ഥിരാംശങ്ങൾ സാധൂകരണം മുമ്പ് ഉറവിടം-ൽ വീണ്ടും നിർമ്മിക്കുന്നു.
+
+സ്ഥിരപരിശോധന സാധൂകരണം: മുഴുവൻ വൃക്ഷം `166/166` SPL ഫയലുകൾ അടയാളം-മാനദണ്ഡം പരിശോധനാവലോകനം ശുദ്ധം; എത്തിച്ചേരാവുന്ന CFG ഘട്ടം-നില പരിശോധനാവലോകനം ശുദ്ധം; അതേ-കഥാപാത്രം പ്രവേശിക്കുക ഇല്ല; പുതിയ ഫയൽ `9020` വരികൾ; വിദേശ കണക്കുകൂട്ടൽ ഉറവിടം ഫയലുകൾ പൂജ്യം; `oldRemainder` SPL സംഭവങ്ങൾ പൂജ്യം; 5781 ഉദ്ദേശിച്ച അതിർത്തി നിരാകരണം പരിശോധനാവസ്ഥ-ൽ മാത്രം. അനുസൃത SPL നിർവഹണപരിസരം ഇപ്പോഴും ലഭ്യമല്ലാത്ത.
+
+അടുത്ത ഘട്ടം 1 തടസ്സം: അറിയാവുന്ന വർഷം-ൽ നിന്ന് `nextYear`/`previousYear` പൂർണ്ണം സൃഷ്ടിച്ച സ്ഥാനാർഥി പട്ടികകൾ, മുദ്രകൾ 11/12 തിരഞ്ഞെടുപ്പ്, തുടർന്ന് ലക്ഷ്യം ദിവസം വരെ തുടർച്ചയായ അടുത്തടുത്ത-വർഷം നടത്തം.
+
+
+## പുരോഗതി 51 — അടുത്തടുത്ത വർഷങ്ങൾ, തുടർച്ചയായ ലക്ഷ്യം-വർഷം നടത്തം, നിർവഹണാധിഷ്ഠിത ശുദ്ധം തിരുത്തലുകൾ
+
+`test/target_year_full_adjacent_walk_probe.spl` പുരോഗതി 50 വർഷം 5000 രേഖ-നെ നിലനിൽക്കുന്ന അഞ്ചു-ഘടകം വർഷം നില ആയി കൈമാറുന്നു. `nextYear`-ൽ പഴയ അടയ്ക്കൽ കവാടം പുതിയ തുറക്കൽ കവാടം ആയും `previousYear`-ൽ പഴയ തുറക്കൽ കവാടം പുതിയ അടയ്ക്കൽ കവാടം ആയും കൃത്യം പങ്കിട്ട അതിർത്തി ആയി ഉപയോഗിക്കുന്നു. സ്ഥാനാർഥി സ്ഥിരപരിശോധന കുറഞ്ഞത് ആറു കവാടം ഇടവുകൾ മുതൽ ആരംഭിക്കുന്നു; കവാടം ദൂരം `5778`-നെ കടന്ന ഉടൻ ഏകദിശത പ്രകാരം സ്ഥിരപരിശോധന നിർത്തുന്നു, അതിനാൽ `5779+` സ്ഥാനാർഥി തിരഞ്ഞെടുപ്പുകാരൻ-ൽ പ്രവേശിക്കുന്നില്ല. സാധുവായ കുടുംബം നീളം ആരോഹണ ക്രമം-ൽ തന്നെ ഉണ്ടാകുന്നു. മുദ്ര 11/12 തിരഞ്ഞെടുപ്പ് അതേ തിരുത്തിയ പൂർണ്ണം-സോസ് കേന്ദ്രം-ന്റെ `sauce(calculationDay, sharedBoundaryDay)` workCounts രീതി ഉപയോഗിക്കുന്നു.
+
+`findTargetYear` വർഷം 5000-ൽ നിന്ന് ആരംഭിച്ച് ലക്ഷ്യം `closeGateDay`-നെ കടന്നാൽ `nextYear` ഒറ്റ മാറ്റം വീതവും ലക്ഷ്യം `openGateDay`-ൽ അല്ലെങ്കിൽ അതിനു മുമ്പാണെങ്കിൽ `previousYear` ഒറ്റ മാറ്റം വീതവും മാത്രം വിളിക്കുന്നു. ചാടൽ അല്ലെങ്കിൽ നേരിട്ടുള്ള വർഷം-സംഖ്യ ഗണിതം ഇല്ല. അന്തിമം ഉറപ്പിക്കൽ എല്ലായ്പ്പോഴും `openGateDay < targetDay <= closeGateDay` ആണ്.
+
+നിർവഹണാധിഷ്ഠിത പരിശോധനാവലോകനം-ൽ ശുദ്ധം ഘട്ടം 1 ഉറവിടം-ിലെ ഉടമസ്ഥത/നിയന്ത്രണം തകരാറുകൾ കൂടി നേരിട്ട് തിരുത്തി: ഘടകാധിഷ്ഠിത ആറാമത്തെ അക്കം/ശേഖരണപ്പട്ടിക കൂട്ടിയിടി, ദൃശ്യം-എണ്ണം/തുള്ളി-ശേഖരണപ്പട്ടിക കൂട്ടിയിടി, പകർച്ച-പരിധിക്ഷേത്രം/പാത്രം-താൽക്കാലിക നില കൂട്ടിയിടി, ചിഹ്നമുള്ള-ചുവട് സ്വയം/ശ്രോതാവ് താരതമ്യം, വർഷം നിബന്ധന ഉടമ പിശകുകൾ, കവാടം ദ്വിമാന-തിരച്ചിൽ ആരംഭക്രമീകരണം, അടുത്തടുത്ത സ്ഥിരപരിശോധന പുനരാരംഭക്രമീകരണം, ഉറപ്പിക്കൽ-ഘട്ടം വെടിപ്പാക്കൽ. പൂർണ്ണം ഏകീകൃതം സോസ് രേഖപ്പെടുത്തിയ 81 പുറപ്പാടുകൾ കൃത്യം പൊരുത്തം നേടി; ഇല്ല-ഉൾക്കൊള്ളൽ പരിശോധനസമുച്ചയം 44/44 പൂർത്തിയായ ചെയ്തു.
+
+യഥാർത്ഥ നിർവഹണം സാക്ഷ്യങ്ങൾ, `calculationDay = FOUNDATION_DAY = -15055671`:
+
+- ലക്ഷ്യം `-15055671`: വർഷം `5000`, സൂചികകൾ `[-4,2]`, ദിവസങ്ങൾ `[-15058211,-15054533]`, മാറ്റങ്ങൾ `0`;
+- ലക്ഷ്യം `-15054532`: വർഷം `5001`, സൂചികകൾ `[2,10]`, ദിവസങ്ങൾ `[-15054533,-15051607]`, മാറ്റങ്ങൾ `1`;
+- ലക്ഷ്യം `-15058211`: വർഷം `4999`, സൂചികകൾ `[-13,-4]`, ദിവസങ്ങൾ `[-15061621,-15058211]`, മാറ്റങ്ങൾ `1`;
+- ലക്ഷ്യം `-15050000`: വർഷം `5002`, സൂചികകൾ `[10,19]`, ദിവസങ്ങൾ `[-15051607,-15047444]`, മാറ്റങ്ങൾ `2`;
+- ലക്ഷ്യം `-15065000`: വർഷം `4998`, സൂചികകൾ `[-20,-13]`, ദിവസങ്ങൾ `[-15065312,-15061621]`, മാറ്റങ്ങൾ `2`.
+
+ഇവ നിർവഹണപരിസരം പരിശോധനാവസ്ഥകൾ-ന്റെ അർത്ഥപരമായ അധികാരം അല്ല; ഉറവിടം-ന്റെ യഥാർത്ഥ നിർവഹണം സാക്ഷ്യങ്ങൾ ആണ്. അടുത്ത ആശ്രയം ഒരേയൊരു `structureSauce = sauce(calculationDay, year.openGateDay+1)` നിശ്ചലപ്രതി നിർമ്മിച്ച് കട്ട്ലറ്റ്/മാസം/നെയ്ത്ത്/പേര് ചോദ്യങ്ങൾ അതിൽ നിന്ന് വീണ്ടും ഉപയോഗിക്കുക ചെയ്യുന്നതാണ്.
+
+## പ്രവർത്തനത്തിലുള്ള പുരോഗതി 52 — ഘടന പാളി നില
+
+- `findTargetYear`: പുരോഗതി 51-ൽ നിർവഹണപരിസരം സാക്ഷ്യം സഹിതം പൂർത്തിയായ സാധുവായ ആശ്രയം.
+- ഒറ്റ `structureSauce(calculationDay, year.openGateDay+1)`: പുതിയ ഏകീകൃതം ഉറവിടം-ൽ ചേർത്തു.
+- മാറ്റാനാകാത്ത SauceResult നിശ്ചലപ്രതി: ആറ് പാത്രങ്ങൾ + ആറ് തുള്ളി46-ക്രമം തിരിച്ചറിയൽസൂചികകൾ സമർപ്പിത ഏകമൂല്യം ഉടമകൾ-ലേക്ക് പിടിച്ചെടുക്കൽ ചെയ്യുന്നു.
+- പുനരുപയോഗിക്കാവുന്ന ഘടന ചോദ്യം: നിശ്ചലപ്രതി-ൽ നിന്ന് `askBowl` + പൊതുവായ ക്രമസംഖ്യ തിരഞ്ഞെടുപ്പ്; സോസ് ഓരോ-ചോദ്യം വീണ്ടുംകണക്കാക്കൽ ഇല്ല.
+- കട്ട്ലറ്റ്-എണ്ണം q=2/മുദ്ര=20: യഥാർത്ഥ നിർവഹണം തിരഞ്ഞെടുപ്പ് വരെ എത്തി; FOUNDATION_DAY പരിശോധനാവസ്ഥ-ൽ തിരഞ്ഞെടുത്ത K=`6`.
+- ആന്തരിക കണക്കുകൂട്ടൽ-കവാടം അതിർത്തി സ്ഥിരപരിശോധന: ഉറവിടം-ൽ ബന്ധിപ്പിച്ചു.
+- കട്ട്ലറ്റ് വിഭജനം എണ്ണം: കൃത്യം ധന-ഘടന/ദ്വിപദ പാത ഉറവിടം-ൽ ബന്ധിപ്പിച്ചു.
+- കട്ട്ലറ്റ് വിഭജനം നിഘണ്ടുക്രമ പുനർനിർമ്മാണം: ഉറവിടം നിലവിലുണ്ട്, പക്ഷേ നിർവഹണപരിസരം പൂർത്തീകരണം ഇനിയും സ്ഥിരീകരിച്ചിട്ടില്ല.
+- കട്ട്ലറ്റ് പേരുകൾ, മാസം-എണ്ണം/നീളം DP, നെയ്ത്ത്, മാസം പേരുകൾ, പൂർണ്ണം അഞ്ചുഘടക അവതരണം: ഈ സാധുവായ കൈമാറ്റം-ൽ ഇനിയും തടസ്സം.
+
+പുരോഗതി 52 പൂർത്തിയായ എന്ന് അടയാളപ്പെടുത്തരുത്. അടുത്ത തുടർച്ച ആദ്യം നിലവിലുള്ള വിഭജനം പുനർനിർമ്മാണം നിർവഹണപരിസരം പാതരേഖ പൂർത്തിയാക്കി/തിരുത്തൽ ചെയ്ത് കൃത്യം മുന്നോട്ട് ഭാഗം പുനരാവർത്തനം + തുക സാക്ഷ്യം നേടണം.
+
+## പുരോഗതി 52 തുടർച്ച — കട്ട്ലറ്റ് വിഭജനം ഉറപ്പിക്കൽ ഉടമസ്ഥത തിരുത്തൽ, നിർവഹണപരിസരം വീണ്ടും ബാക്കി
+
+`test/year_structure_full_probe.spl`-ലെ അങ്കങ്ങൾ CLXV/CLXVI ഉടമസ്ഥത പരിശോധനാവലോകനം തിരഞ്ഞെടുത്ത-സ്ഥാനാർഥി ഉറപ്പിക്കൽ-ൽ ഒരു നിർദ്ദിഷ്ട ഘട്ടം 1 തകരാർ കണ്ടെത്തി. `Mark Antony` ആണ് `rem`, `Mopsa` ആണ് `slots`; എന്നാൽ പഴയ രംഗം IX-ൽ ഇവർ വക്താവ് ആയതിനാൽ `You are ...` നിയോഗം ശ്രോതാവ് ആയ `Prospero`-ലേക്ക് പോയിരുന്നു. ഫലമായി തിരഞ്ഞെടുത്ത ഭാഗം ഉറപ്പിക്കൽ ചെയ്തിട്ടും `rem`യും `slots`യും കുറയാത്ത പാത ഉണ്ടായിരുന്നു.
+
+തിരുത്തൽ കുറഞ്ഞ ആണ്: രംഗം IX-ൽ `Prospero` വക്താവ്, `Mark Antony`/`Mopsa` ശ്രോതാക്കൾ ആയി മാറ്റി. അതിനാൽ ഉറപ്പിക്കൽ ഇപ്പോൾ യഥാക്രമം `rem := rem - x`, `slots := slots - 1` എന്ന കൃത്യം ഉദ്ദേശിച്ച നില മാറ്റം നടത്തുന്നു. സ്ഥാനാർഥി-ഖണ്ഡം സൂത്രങ്ങൾ, ഒന്നിൽനിന്നാരംഭിക്കുന്ന ശേഷിപ്പ് ക്രമസംഖ്യ, നിർബന്ധിത-അതിർത്തി തർക്കഘടന, തിരഞ്ഞെടുത്ത-ഭാഗം അടുക്കുകൾ, സോസ് നിശ്ചലപ്രതി, കവാടം/വർഷം നില, പ്രവർത്തന തുടക്കഘടന എന്നിവ മാറ്റിയിട്ടില്ല.
+
+CLXV/CLXVI വിതരണനിയന്ത്രകൻ പരിശോധനാവലോകനം-ൽ പുതിയ പ്രവേശനം `Shallow=0`, ഒഴിവാക്കിയ സ്ഥാനാർഥി മടങ്ങുക `Shallow=2`, തിരഞ്ഞെടുത്ത ഖണ്ഡം മടങ്ങുക `Shallow=1` എന്ന നിയന്ത്രണം ഉടമസ്ഥത സുസംബദ്ധ ആണ്. എന്നാൽ ഈ തിരുത്തൽ-ന് ശേഷം അനുസൃത യഥാർത്ഥം നിർവഹണം ലഭിച്ചിട്ടില്ല. അതിനാൽ മുന്നോട്ട് ഭാഗം പുനരാവർത്തനം, `parts=K`, `sum(parts)=G` എന്നിവ **നിർവഹണപരിസരം വിജയം ആയി രേഖപ്പെടുത്തുന്നില്ല**; പുരോഗതി 52 ഇപ്പോഴും അപൂർണ്ണ പ്രവർത്തനത്തിലുള്ള നില ആണ്, പുരോഗതി 51 ഏറ്റവും പുതിയ സാധുവായ പരിശോധനാബിന്ദു തന്നെയാണ്. Appendix ഒരു അനുവദിക്കാത്ത വിദേശ തകരാർനിർണ്ണയം/നിർവഹണപരിസരം സഹായോപകരണം ഉപയോഗിച്ച് വിജയം നിർമ്മിച്ചിട്ടില്ല. അടുത്ത തടസ്സം ഇതേ തിരുത്തിയ ഉറവിടം അനുസൃത കൃത്യം SPL നിർവഹണപരിസരം-ൽ വീണ്ടും പ്രവർത്തിപ്പിച്ച് വിഭജനം സാക്ഷ്യം നേടുന്നതാണ്.
+
+### FOUNDATION_DAY വിഭജനം സ്ഥിരപരിശോധന സാക്ഷ്യം ലക്ഷ്യം
+
+ഇപ്പോഴുള്ള യഥാർത്ഥം വർഷം 5000 രേഖ `openGateIndex=-4`, `closeGateIndex=2` ആകുന്നതിനാൽ `G=6`. മുദ്ര 20 യഥാർത്ഥം നിർവഹണപരിസരം തിരഞ്ഞെടുപ്പ് `K=6` ആണ്. `calculationDay=gate[0]=FOUNDATION_DAY` ആയതിനാൽ ആന്തരിക നിർബന്ധിത സ്ഥാനമാറ്റം `0-(-4)=4`. ധന ആറ്-ഭാഗം ഘടന ന്റെ ആകെ 6 ഒരൊറ്റത് മാത്രം: `1,1,1,1,1,1`; നാലാം ആമുഖഭാഗം കൃത്യം `4` ആണ്. അതിനാൽ ഈ പരിശോധനാവസ്ഥ-ൽ familyCount `1`, ഒന്നിൽനിന്നാരംഭിക്കുന്ന തിരഞ്ഞെടുത്ത ക്രമസംഖ്യ `1`, ഓരോ സ്ഥാനാർഥി ഖണ്ഡം-ും `1` ആയിരിക്കണം.
+
+തിരുത്തിയ CLXV/CLXVI ഉറവിടം-ന്റെ കൈയിലുള്ള നില നടത്തം ഇതുമായി സുസംബദ്ധ ആണ്: തിരഞ്ഞെടുത്ത ഉറപ്പിക്കൽ-ുകൾക്ക് ശേഷം `(rem,slots)` ക്രമമായി `(6,6)->(5,5)->(4,4)->(3,3)->(2,2)->(1,1)->(0,0)`, സമാഹാര `0..6`, കണ്ടെത്തൽ സൂചികകൊടി നാലാം ഉറപ്പിക്കൽ-ൽ `1` ആകുന്നു. ഇത് ഉറവിടതല അചഞ്ചല വ്യവസ്ഥ കൈയിലൂടെ നിലപരിശോധന മാത്രം ആണ്; യഥാർത്ഥം നിർവഹണപരിസരം സാക്ഷ്യം അല്ല, അതിനാൽ വിജയം/സാധുവായ പരിശോധനാബിന്ദു ആയി കണക്കാക്കരുത്.
+
+### പ്രവർത്തനത്തിലുള്ള പുരോഗതി 52 തുടർച്ച — വിഭജനം ഉടമ തിരുത്തൽ + നഷ്ടമില്ലാത്ത മുന്നോട്ടുള്ള പുനരാവർത്തനം
+
+`test/year_structure_full_probe.spl`-ലെ അങ്കം CLXV രംഗം IX-ൽ `rem` (`Mark Antony`)യും `slots` (`Mopsa`)യും പുതുക്കൽ ചെയ്യേണ്ട നിയോഗങ്ങൾ ശ്രോതാവ് ഉടമസ്ഥത തെറ്റായിരുന്നതിനാൽ ലക്ഷ്യം ഏകമൂല്യം മാറിയിരുന്നില്ല. തിരുത്തൽ-ൽ `Prospero` വക്താവ് ആക്കി യഥാക്രമം `Mark Antony`/`Mopsa` ശ്രോതാവ് ആക്കിയതിലൂടെ `rem := rem-x`, `slots := slots-1` യഥാർത്ഥ ഉടമ-ുകളിൽ ഉറപ്പിക്കൽ ചെയ്യുന്നു. ക്രമസംഖ്യ, ഖണ്ഡം-എണ്ണം, നിർബന്ധിത-അതിർത്തി, സമാഹാര/കണ്ടെത്തൽ തർക്കഘടന ഒന്നും മാറ്റിയിട്ടില്ല.
+
+വിഭജനം പൂർത്തീകരണം-ൽ `King John` പിന്നോട്ട് അടുക്കു -> `Puck` മുന്നോട്ട് അടുക്കു തിരിക്കൽ മുമ്പേ ഉണ്ടായിരുന്നു. നിർവഹണപരിസരം സാക്ഷ്യം ആവശ്യകത പൂർണ്ണമാക്കാൻ അങ്കം CLXV രംഗങ്ങൾ XVI-XIX ഇപ്പോൾ:
+
+- `Publius`-ലെ കൃത്യം തിരഞ്ഞെടുത്ത ഭാഗം എണ്ണം `K` പുനരാവർത്തനം എണ്ണിപ്പകരണം ആയി പകർപ്പ് ചെയ്യുന്നു;
+- പുനരാവർത്തനം തുടങ്ങുമ്പോൾ `Solinus=0`; `Puck` അടുക്കു മുകളിൽ-ൽ ഉള്ള ആദ്യ ഭാഗം മുതൽ ഓരോ ഭാഗം-ും ക്രമത്തിൽ പുറത്തെടുക്കൽ ചെയ്ത് സംഖ്യാത്മക പുറപ്പാട് ചെയ്യുകയും അതേ മൂല്യം `Solinus`-ൽ വീണ്ടും കൂട്ടുകയും ചെയ്യുന്നു;
+- K പുറപ്പാടുകൾ കഴിഞ്ഞ് പുനരാവർത്തനം-ഉരുത്തിരിഞ്ഞ `Solinus` തുക നേരിട്ട് `Friar John=G`-യോട് കൃത്യം താരതമ്യം ചെയ്യുക ചെയ്യുന്നു; പൊരുത്തക്കേട് നിലവിലുള്ള പരാജയം അങ്കം CLXVII-ലേക്ക് പോകുന്നു, പൊരുത്തം മൂല്യം പുറപ്പാട് ചെയ്യുന്നു;
+- ഓരോ പുറത്തെടുത്ത ഭാഗം-ും `King John` സംരക്ഷണം അടുക്കു-ൽ അടുക്കിലാക്കൽ ചെയ്യുന്നു;
+- പുനരാവർത്തനം കഴിഞ്ഞ് `King John` വീണ്ടും മറുക്രമം ചെയ്ത് `Puck` മുന്നോട്ട് അടുക്കു പുനഃസ്ഥാപിക്കുന്നു;
+- അവസാനസ്ഥാനം-ൽ എത്തുമ്പോൾ `Puck` വീണ്ടും ആദ്യ ഭാഗം മുകളിൽ ആയ നില-ൽ തുടരുന്നു, അതിനാൽ അടുത്ത കട്ട്ലറ്റ് രൂപപ്പെടുത്തൽ പാളി വിഭജനം വീണ്ടും തിരഞ്ഞെടുക്കേണ്ടതില്ല.
+
+ഇത് ഉറവിടതല തുടർച്ച മാത്രമാണ്. ഉടമ തിരുത്തൽ-നും പുനരാവർത്തനം ചക്രം-നും ശേഷം അനുസൃത കൃത്യം SPL നിർവഹണപരിസരം സാക്ഷ്യം ഇനിയും ലഭിച്ചിട്ടില്ല. അതുവരെ `CUTLET_PARTITION_RUNTIME=INCOMPLETE`; കട്ട്ലറ്റ് പേരുകൾ/മാസം DP/നെയ്ത്ത്/അന്തിമം അഞ്ചുഘടക പാത തുടങ്ങരുത്.
+
+അങ്കങ്ങൾ CLXIII-CLXVII വീണ്ടും സ്ഥിരപരിശോധന ഉടമസ്ഥത/നിയന്ത്രണം പരിശോധനാവലോകനം ചെയ്തു: കൃത്യം ദ്വിപദ ആവർത്തസൂത്രം മടങ്ങുക, കുടുംബം-ക്രമസംഖ്യ തുടർച്ച, `Shallow` പുതിയ/ഒഴിവാക്കുക/തിരഞ്ഞെടുക്കുക വിതരണം, നിർബന്ധിത-അതിർത്തി ഖണ്ഡം തിരഞ്ഞെടുപ്പ്, ശേഷിപ്പ് ക്രമസംഖ്യ കുറയ്ക്കുക/തിരഞ്ഞെടുക്കുക, പരാജയം അവസാനസ്ഥാനം എന്നിവയിൽ രംഗം IX തിരുത്തൽ-ന് ശേഷം മറ്റൊരു ഉറവിടം-തെളിയിക്കാവുന്ന തകരാർ കണ്ടെത്തിയിട്ടില്ല. പുനരാവർത്തനം ചക്രം ഇപ്പോൾ പുറപ്പാട് ചെയ്ത ഭാഗങ്ങൾ തന്നെയാണ് `Solinus`-ൽ പൂജ്യം മുതൽ വീണ്ടും തുക ചെയ്ത് `Friar John=G`-യോട് താരതമ്യം ചെയ്യുക/പുറപ്പാട് ചെയ്യുന്നത്. ഈ പരിശോധനാവലോകനം നിർവഹണപരിസരം വിജയം-ന് പകരമല്ല.
+
+## പുരോഗതി 52 തുടർച്ച — വിഭജനം കഴിഞ്ഞുള്ള മുഴുവൻ വർഷഘടന ഉറവിടതല ആയി ബന്ധിപ്പിച്ചു; നിർവഹണപരിസരം ഇനിയും ബാക്കി
+
+മുൻ കുറിപ്പിലെ “വിഭജനം നിർവഹണപരിസരം കഴിഞ്ഞേ തുടരണം” എന്ന ക്രമപരിധി ഉപയോക്താവിന്റെ പുതിയ വ്യക്തമായ നിർദ്ദേശപ്രകാരം ഉറവിടതല പ്രവർത്തനത്തിന് മാത്രം നീക്കി. നിർവഹണപരിസരം തെളിവ് ഇല്ലെന്ന നില മാറ്റിയിട്ടില്ല; പുരോഗതി 51 തന്നെയാണ് ഏറ്റവും പുതിയ സാധുവായ പരിശോധനാബിന്ദു.
+
+`test/year_structure_full_probe.spl` ഇപ്പോൾ തിരുത്തിയ വിഭജനം നില-ൽ നിന്ന് അതേ ഏകീകൃതം പാത-ൽ തുടർന്നു താഴെപ്പറയുന്ന ഘടകങ്ങൾ SPL ഉറവിടം ആയി ബന്ധിപ്പിക്കുന്നു:
+
+- `fallingFactorial(17,K)`, q=5/മുദ്ര=22, ശേഷിക്കുന്ന canonicalIndex പട്ടികയിൽ നിഘണ്ടുക്രമ വ്യത്യസ്ത കട്ട്ലറ്റ്-പേര് പുനർനിർമ്മാണം;
+- തിരഞ്ഞെടുത്ത വിഭജനം-ിൽ നിന്ന് കട്ട്ലറ്റ് ഇടവേള സ്ഥിരപരിശോധന, ലക്ഷ്യം കട്ട്ലറ്റ് canonicalIndex, ഉൾപ്പെടുന്ന `dayInCutlet`;
+- q=3/മുദ്ര=30 മാസം-എണ്ണം പരിധികൾ/ക്രമസംഖ്യ തിരഞ്ഞെടുപ്പ്;
+- `[4,123]` പരിധിബദ്ധ മാസം-നീളം കുടുംബം-ക്കായി ചലിക്കുന്ന-വരി/ചലിക്കുന്ന-ജാലകം കൃത്യം DP, ശേഖരിച്ച `C(rem,k)` പ്രവേശനസഹായകം, നിഘണ്ടുക്രമ പുനർനിർമ്മാണം;
+- ഏതുവലുപ്പമുള്ള `N`-നുള്ള കൃത്യം വിശാല തിരഞ്ഞെടുപ്പുകാരൻ: ഏറ്റവും ചെറിയ `M^places >= N`, ഒരേ AnswerStream-ിൽ നിന്ന് കൃത്യമായി `places` അക്കങ്ങൾ, നിരാകരണം-ൽ അക്കങ്ങൾ വീണ്ടും ചോദിക്കാതെ വിശാല മൂല്യം മാത്രം ±1 വലയം നീക്കം;
+- മാസം നെയ്ത്ത്-ക്കായി വ്യക്തമായ ചട്ടക്കൂട് ഓർമ്മപ്പട്ടികയുള്ള DFS `CountWeavings`, എത്തിച്ചേരാവുന്ന-നില-ൽ `remaining[]`-ൽ നിന്ന് നിർണയിക്കാവുന്ന ആമുഖഭാഗം നില, നിയമാനുസൃത നീക്കം/തുറക്കൽ/അടയ്ക്കൽ/തിരിച്ചാക്കൽ, അതേ ഓർമ്മപ്പട്ടിക ഉപയോഗിച്ച നിഘണ്ടുക്രമ പുനർനിർമ്മാണം;
+- ലക്ഷ്യം സ്ഥാനമാറ്റം-ിൽ മാസസൂചിക നിർണ്ണയിക്കുക, ലക്ഷ്യം ഉൾപ്പെടെയുള്ള സംഭവം എണ്ണം ആയി `dayInMonth`;
+- `fallingFactorial(47,m)`, q=5/മുദ്ര=33, വ്യത്യസ്ത മാസം canonicalIndex നിഘണ്ടുക്രമ പുനർനിർമ്മാണം;
+- അർത്ഥപരമായ canonicalIndex തീരുമാനിച്ചതിന് ശേഷം മാത്രം മരവിപ്പിച്ച കാറ്റലോഗ്-ിലെ മലയാള ഉറവിടം അക്ഷരനിരകൾ കൃത്യം യൂണിക്കോഡ്-ഏകമൂല്യം അടുക്കുകൾ ആയി നിർണ്ണയിക്കുക ചെയ്യുന്നു;
+- അന്തിമം പരിശോധനാബിന്ദു-ൽ വർഷം, നിർണ്ണയിച്ച കട്ട്ലറ്റ് അക്ഷരനിര, dayInCutlet, നിർണ്ണയിച്ച മാസം അക്ഷരനിര, dayInMonth എന്ന അഞ്ചു താർക്കിക ഘടകങ്ങൾ മാത്രം; SPL സംഖ്യാത്മക നിർവഹണപരിസരം സാക്ഷ്യം-നായി ഉറവിടം-അക്ഷരനിര അടുക്കുകൾ മാറ്റാതെ കാവൽമൂല്യം/അടിസ്ഥാനം-`0x110000` ഏകാന്തര പൊതിയൽ ഉപയോഗിക്കുന്നു. പൊതിയൽ അർത്ഥപരമായ തിരഞ്ഞെടുപ്പ്-ലേക്ക് ഒരിക്കലും മടങ്ങുന്നില്ല.
+
+സ്ഥിരപരിശോധന പരിശോധനാവലോകനങ്ങൾ: നിലവിലെ ഏകീകൃതം ഫയൽ-ൽ 199 ഏകത്വമുള്ള അങ്കങ്ങൾ, 1265 ഏകത്വമുള്ള രംഗങ്ങൾ, കാണാത്ത അങ്കം/രംഗം മാനദണ്ഡം പൂജ്യം; 109 പ്രഖ്യാപിച്ച കഥാപാത്രങ്ങൾ-ൽ ഉപയോഗിക്കുന്ന 109 കഥാപാത്രങ്ങൾ എല്ലാം പ്രഖ്യാപിച്ച; ഘട്ടം-നില സ്ഥിരപരിശോധന-ൽ അസാധുവായ വക്താവ്/ആവർത്തനം പ്രവേശിക്കുക/അസാധുവായ പുറത്തുകടക്കുക പൂജ്യം. 17 കട്ട്ലറ്റ് + 47 മാസം നിർണ്ണായകം വിതരണശാഖകൾ കൃത്യം വ്യാപ്തി കാണിക്കുന്നു. മരവിപ്പിച്ച കാറ്റലോഗ്-ുമായി യൂണിക്കോഡ് ഏകമൂല്യം ക്രമപട്ടിക 455/455 കൃത്യം ആയി പൊരുത്തം ചെയ്തു; 64 നിർണ്ണായകം നീളം അക്ഷരാർത്ഥ മൂല്യങ്ങൾ ഏകമൂല്യം എണ്ണങ്ങൾ-ുമായി കൃത്യം ആയി പൊരുത്തം ചെയ്തു. തലക്കെട്ട്-ഭാഷ സാധാരണവൽക്കരണം-ൽ കോഡ്/അല്ലാത്ത-തലക്കെട്ട് ഉള്ളടക്കം മാറ്റിയിട്ടില്ല.
+
+ഇവ ഉറവിടതല തെളിവുകൾ മാത്രം. തിരുത്തിയ വിഭജനം മുതൽ പുതിയ ഘടന/പേര്/അവതരണം പാത വരെ അനുസൃത കൃത്യം SPL നിർവഹണം ലഭിച്ചിട്ടില്ല. അതിനാൽ `STAGE_01_EXPECTATIONS.md` മാറ്റിയിട്ടില്ല; പുരോഗതി 52 സാധുവായ/പച്ച/പൂർത്തിയായ ആയി അടയാളപ്പെടുത്തിയിട്ടില്ല.
+
+## പുരോഗതി 52 — ഉറവിടതല സമാപന പരിശോധന
+
+ഉപയോക്താവിന്റെ പിന്നീട് നൽകിയ വ്യക്തമായ നിർദ്ദേശപ്രകാരം വിഭജന നിർവഹണം കാത്തിരിക്കാതെ ശേഷിച്ച ഘട്ടം 1 ഉറവിടം പൂർത്തിയാക്കി. നിലവിലെ ഏകീകൃത `test/year_structure_full_probe.spl` Appendix A ഘടന പാതയെ വിഭജനം മുതൽ അന്തിമ അഞ്ചുഘടക അർത്ഥഫലം വരെ ബന്ധിപ്പിക്കുന്നു.
+
+സ്ഥിരപരിശോധനയിൽ കണ്ടെത്തി നേരിട്ട് തിരുത്തിയ അഞ്ച് ഘട്ടം-1 പിഴവുകൾ:
+
+1. Act CLXV-ലെ `rem`/`slots` ശ്രോതാവ് ഉടമസ്ഥത.
+2. കട്ട്ലറ്റ് വ്യത്യസ്ത-പേര് പുനർനിർമ്മാണത്തിൽ തിരഞ്ഞെടുത്ത സ്ഥാനാർഥിക്ക് മുമ്പ് മാറ്റിയ മൂല്യങ്ങളുടെ മടക്കഎണ്ണം `remainingCount-1` എന്നതിനു പകരം `candidateIndex-1`.
+3. `CountWeavings` നിയമാനുസൃത നീക്കത്തിൽ `alreadyOpened` ശാഖ മറിഞ്ഞിരുന്നത്.
+4. നെയ്ത്ത് പുനർനിർമ്മാണത്തിലെ അതേ `alreadyOpened` ശാഖ പിഴവ്.
+5. അഞ്ചു അന്തിമ പുറപ്പാടുകൾക്കുശേഷം വിജയം സഹായ `Act CLXVI`-ലേക്ക് ഭൗതികമായി വീഴാനിടയുണ്ടായിരുന്നത്; `Act CCXLIX` ഇപ്പോൾ വ്യക്തമായി `Act CCL`-ലേക്ക് ചാടുന്നു.
+
+അവതരണ അതിർത്തിയിൽ കട്ട്ലറ്റ്/മാസം അർത്ഥം ആദ്യം `canonicalIndex` ആയി തീരുന്നു. തുടർന്ന് മാത്രം മരവിപ്പിച്ച മലയാള ഉറവിടമൊഴി Unicode സ്കെയ്ലർ അടുക്കുകളായി നിർണ്ണയിക്കുന്നു. പരിശോധനാപാതയുടെ പുറപ്പാട് പ്രവാഹം സാക്ഷ്യത്തിനായി ആ സ്കെയ്ലർ നിരക്ക് `0x110000` അടിസ്ഥാനവും ആരംഭ കാവൽമൂല്യം `1`-ഉം ഉള്ള ഏകപ്രത്യയ പൂർണ്ണസംഖ്യ ക്രമീകരിച്ച പ്രതിനിധാനം ഉപയോഗിക്കുന്നു; ഈ ക്രമീകരിച്ച പ്രതിനിധാനം അർത്ഥപരമായ പേര് മാറ്റുന്നില്ല, ക്രമസംഖ്യ/പുനർനിർമ്മാണം/സംഭരണപ്പട്ടിക/തിരഞ്ഞെടുപ്പ് പാതയിലേക്ക് മടങ്ങുന്നില്ല.
+
+നിലവിലെ സ്ഥിരപരിശോധന സംഗ്രഹം: 168 SPL ഫയലുകൾ; ഏകീകൃത ഫയൽ 15,312 വരികൾ / 199 അങ്കങ്ങൾ / 1,265 രംഗങ്ങൾ; നിർവചിക്കാത്ത Act/Scene ലക്ഷ്യങ്ങൾ 0; 17+47 കാറ്റലോഗ് വ്യാപ്തി പൂർണ്ണം; 455 അവതരണ സ്കെയ്ലർ മൂല്യങ്ങൾ കാറ്റലോഗുമായി പൊരുത്തം.
+
+`STAGE1_SOURCE_COMPLETE_EXCEPT_RUNTIME=YES`. ഇത് നിർവഹണപരിസരം PASS അല്ല. പുരോഗതി 52-ന് അനുസൃത കൃത്യ SPL പൂർണ്ണ പുനർനിർവഹണം ആവശ്യമാണ്.

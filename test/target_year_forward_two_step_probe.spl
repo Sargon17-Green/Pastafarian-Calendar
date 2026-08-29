@@ -1,16 +1,16 @@
-ഒരു known year-ൽ നിന്ന് target day വലത്തേക്ക് പോയാൽ year records ഒന്നൊന്നായി മാത്രം കടക്കുന്നതും closing gate നിലവിലെ വർഷത്തിൽ ഉൾപ്പെടുന്നതിനാൽ `target > close` ആയപ്പോൾ മാത്രമേ അടുത്ത വർഷത്തിലേക്ക് നീങ്ങൂ എന്നതും രണ്ട് forward transitions വരെ പരിശോധിക്കുന്ന clean Stage 1 പരീക്ഷണം.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, target day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, current year number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, current open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, current close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, first next close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, second next close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: inputs.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: target, base year, മൂന്ന് close boundaries വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -30,9 +30,9 @@ Prospero: Listen to your heart.
 Prospero: Listen to your heart.
 [Exeunt]
 
-Act II: ആദ്യ unit-step transition.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: target close-നെ കടന്നാൽ മാത്രം next.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Othello]
 Hamlet: Are you better than Othello?
 Othello: If not, let us proceed to act IV.
@@ -47,9 +47,9 @@ Prospero: You are as good as Othello.
 Prospero: You are as good as Macbeth.
 [Exeunt]
 
-Act III: രണ്ടാം unit-step transition.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: target പുതിയ close-നെ വീണ്ടും കടന്നാൽ മാത്രം next.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Othello]
 Hamlet: Are you better than Othello?
 Othello: If not, let us proceed to act IV.
@@ -64,9 +64,10 @@ Prospero: You are as good as Othello.
 Prospero: You are as good as Lady Macbeth.
 [Exeunt]
 
-Act IV: selected year record.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: year number, open, close output.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: Open your heart.
 [Exeunt]

@@ -1,14 +1,14 @@
-Appendix A bowl-order rank formula `1+regularMod(drop-1,720)` കൃത്യമായ M-sized drop-ിൽ പരിശോധിക്കുന്ന clean Stage 1 probe. ഈ fixture-ൽ drop=M=2^127-1; expected one-based rank 127 ആണ്.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, Mയും drop-ും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, 720 divisor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, flow-വും assignment-വും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: M നിർമ്മിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: one, count 127.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  You are a hero.
@@ -19,7 +19,7 @@ Prospero:
 [Exeunt]
 [Enter Hamlet and Juliet]
 
-Scene II: doubling loop.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Hamlet:
  Are you better than nothing?
 Juliet:
@@ -30,15 +30,15 @@ Juliet:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: M=2 power 127 minus 1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Hamlet]
 Prospero:
  You are as good as the difference between yourself and a hero.
 
-Act II: 720 divisor-ും rank-ും.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: 720 നിർമ്മിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Romeo]
 Prospero:
@@ -47,7 +47,7 @@ Prospero:
  You are as good as the sum of yourself and a big big big big big big hero.
  You are as good as the sum of yourself and a big big big big hero.
 
-Scene II: one-based rank.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:

@@ -1,24 +1,24 @@
-മൂന്ന് cutlet slot ഉള്ള positive-composition family-ൽ നിർബന്ധിത internal gate prefix filter, exact count, one-based lexicographic unrank എന്നിവ ഒരുമിച്ച് പരിശോധിക്കുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ആകെ gate-gap എണ്ണം G സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, required boundary offset സൂക്ഷിക്കുന്ന കഥാപാത്രം; ശൂന്യം എന്നത് boundary filter ഇല്ല എന്ന diagnostic test convention ആണ്.
-Romeo, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, ആദ്യ part x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, രണ്ടാം part y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, മൂന്നാം part z സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, x+y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, accepted member count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, തിരഞ്ഞെടുത്ത member ഇതിനകം capture ചെയ്തോ എന്ന flag സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, തിരഞ്ഞെടുത്ത x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, തിരഞ്ഞെടുത്ത y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, തിരഞ്ഞെടുത്ത z സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Caliban, outer maximum G-2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Horatio, inner maximum G-x-1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: lexicographic positive compositions scan ചെയ്യുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: G, required, rank വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -32,7 +32,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: count=0, capture flag=0, x=1, maxX=G-2.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero:
  You are nothing.
@@ -49,14 +49,14 @@ Prospero:
 Prospero:
  You are as good as the difference between Hamlet and a big hero.
 
-Scene III: x>maxX ആണെങ്കിൽ scan തീരുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
  Are you better than Caliban?
  If so, let us proceed to scene XV.
 
-Scene IV: y=1, maxY=G-x-1.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
@@ -67,14 +67,14 @@ Prospero:
  You are as good as the difference between Hamlet and Othello.
  You are as good as the difference between yourself and a hero.
 
-Scene V: y>maxY ആണെങ്കിൽ അടുത്ത x.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  Are you better than Horatio?
  If so, let us proceed to scene XIV.
 
-Scene VI: z=G-x-y, sumxy=x+y.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:
@@ -85,7 +85,7 @@ Prospero:
 Prospero:
  You are as good as the sum of Othello and Macbeth.
 
-Scene VII: required ശൂന്യമെങ്കിൽ member സ്വീകരിക്കുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Prospero]
 Juliet:
@@ -94,7 +94,7 @@ Prospero:
  If so, let us proceed to scene X.
 [Exeunt]
 
-Scene VIII: x required boundary ആണോ.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Othello and Juliet]
 Othello:
  Am I as good as you?
@@ -102,7 +102,7 @@ Juliet:
  If so, let us proceed to scene X.
 [Exeunt]
 
-Scene IX: x+y required boundary ആണോ; അല്ലെങ്കിൽ reject.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ophelia and Juliet]
 Ophelia:
  Am I as good as you?
@@ -110,13 +110,13 @@ Juliet:
  If so, let us proceed to scene X.
  Let us proceed to scene XIII.
 
-Scene X: accepted count കൂട്ടുന്നു.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
  You are as good as the sum of yourself and a hero.
 
-Scene XI: ഇതിനകം capture ചെയ്തിട്ടുണ്ടെങ്കിൽ അടുത്ത y; അല്ലെങ്കിൽ count==rank പരിശോധിക്കുന്നു.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Portia and Prospero]
 Portia:
@@ -131,7 +131,7 @@ Romeo:
  If so, let us proceed to scene XII.
  Let us proceed to scene XIII.
 
-Scene XII: ഈ member capture ചെയ്യുന്നു.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Portia]
 Prospero:
@@ -149,21 +149,21 @@ Macbeth:
 Lady Macbeth:
  You are as good as myself.
 
-Scene XIII: y കൂട്ടി inner loop തുടരുന്നു.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  You are as good as the sum of yourself and a hero.
  Let us return to scene V.
 
-Scene XIV: x കൂട്ടി outer loop തുടരുന്നു.
+Scene XIV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
  You are as good as the sum of yourself and a hero.
  Let us return to scene III.
 
-Scene XV: countയും തിരഞ്ഞെടുത്ത triple-ഉം പുറത്തിടുന്നു.
+Scene XV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:

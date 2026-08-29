@@ -1,23 +1,23 @@
-Appendix A-യിലെ legal same-Foundation workCounts, actual stone row 1, hidden approach 1 coefficient row, ആദ്യ hidden grind എന്നിവ ഒരൊറ്റ clean Stage 1 path-ൽ ബന്ധിപ്പിക്കുന്ന probe. seed-നും grind-നും SAVE കൃത്യമായി പ്രയോഗിക്കുന്നു. expected outputs: seed 297, first grind 89118.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, action count 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, target count 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, distance count 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, connection count 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, direction count 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, wheat 17 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, barley 29 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, salt 43 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, bitter 71 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, red 101 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, current hidden value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Falstaff, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Rosalind, M doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, assignment, SAVE, output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: legal counts-ും actual stone row 1-ഉം.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: workCounts = 1,1,1,2,2.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: You are a hero.
 [Exeunt]
@@ -34,7 +34,7 @@ Prospero: You are a big hero.
 Prospero: You are a big hero.
 [Exeunt]
 
-Scene II: stone row 1 = 17,29,43,71,101.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero: You are as good as the sum of a big big big big hero and a hero.
 [Exeunt]
@@ -51,9 +51,9 @@ Prospero: You are as good as the sum of a big big big big big big hero and the s
 Prospero: You are as good as the sum of a big big big big big big hero and the sum of a big big big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 
-Act II: M = 2^127 - 1.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: seed one, count 127.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Falstaff]
 Prospero: You are a hero.
 [Exeunt]
@@ -62,7 +62,7 @@ Prospero: You are as good as the difference between a big big big big big big bi
 [Exeunt]
 [Enter Falstaff and Rosalind]
 
-Scene II: exact doubling.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Falstaff: Are you better than nothing?
 Rosalind:
  If not, let us proceed to scene III.
@@ -71,15 +71,15 @@ Rosalind:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: subtract one.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Falstaff]
 Prospero: You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Act III: hidden approach 1 seed.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: action + 3*target + 4*distance + 6*connection + 8*direction + five stones, തുടർന്ന് SAVE.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Miranda]
 Prospero:
  You are as good as Hamlet.
@@ -98,9 +98,9 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Act IV: hidden grind 1.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: x' = SAVE(x^2 + 3*x + WHEAT + 1).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Miranda]
 Prospero:
  You are as good as the sum of the product of Miranda and Miranda and the product of the sum of a big hero and a hero and Miranda.

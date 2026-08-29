@@ -1,17 +1,17 @@
-lengths 2,2,2 എന്ന ചെറിയ weaving family-യിലെ അഞ്ചു നിയമാനുസൃത rows-ന്റെ മുഴുവൻ lexicographic unrank പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ഒന്നാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, രണ്ടാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, മൂന്നാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, നാലാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, അഞ്ചാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, ആറാം സ്ഥാനം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: family 112233, 112323, 121233, 121323, 123123 എന്ന കൃത്യമായ ക്രമത്തിൽ rank resolve ചെയ്യുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: rank വായിച്ച് branch തിരഞ്ഞെടുക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -38,7 +38,7 @@ Hamlet:
  If so, let us proceed to scene III.
  Let us proceed to scene II.
 
-Scene II: rank 1 -> 112233.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:
@@ -65,7 +65,7 @@ Miranda:
  You are as good as the sum of a big hero and a hero.
  Let us proceed to scene VII.
 
-Scene III: rank 2 -> 112323.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:
@@ -92,7 +92,7 @@ Miranda:
  You are as good as the sum of a big hero and a hero.
  Let us proceed to scene VII.
 
-Scene IV: rank 3 -> 121233.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:
@@ -119,7 +119,7 @@ Miranda:
  You are as good as the sum of a big hero and a hero.
  Let us proceed to scene VII.
 
-Scene V: rank 4 -> 121323.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:
@@ -146,7 +146,7 @@ Miranda:
  You are as good as the sum of a big hero and a hero.
  Let us proceed to scene VII.
 
-Scene VI: rank 5 -> 123123.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:
@@ -172,7 +172,7 @@ Miranda:
 Miranda:
  You are as good as the sum of a big hero and a hero.
 
-Scene VII: ആറു monthId-കൾ പുറത്തിടുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:

@@ -1,22 +1,22 @@
-Distinct-name lexicographic unrank-ന്റെ ആദ്യ രണ്ടു canonicalIndex തിരഞ്ഞെടുപ്പുകളും residual rank-ഉം പരിശോധിക്കുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, remaining master-name count n സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, തിരഞ്ഞെടുക്കേണ്ട മൊത്തം പേരുകളുടെ എണ്ണം k സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, ആദ്യ block size സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, രണ്ടാം block size സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, loop factor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, loop count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, ആദ്യ original candidate ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, ആദ്യ residual rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, രണ്ടാം remaining-list ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, രണ്ടാം original candidate ordinal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, രണ്ടാം residual rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: രണ്ട് falling-factorial block-ുകൾ നിർമ്മിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: n, k, rank വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -30,7 +30,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: ആദ്യ block P(n-1,k-1) ആരംഭിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Othello]
 Prospero:
  You are a hero.
@@ -43,7 +43,7 @@ Prospero:
 Prospero:
  You are as good as the difference between Juliet and a hero.
 
-Scene III: ആദ്യ falling factorial loop.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Prospero:
  Are you better than nothing?
  If not, let us proceed to scene IV.
@@ -61,7 +61,7 @@ Prospero:
  You are as good as the difference between yourself and a hero.
  Let us return to scene III.
 
-Scene IV: ആദ്യ candidate, residual rank.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Portia]
 Prospero:
@@ -76,7 +76,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene V: രണ്ടാം block P(n-2,k-2) ആരംഭിക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Macbeth]
 Prospero:
  You are a hero.
@@ -89,7 +89,7 @@ Prospero:
 Prospero:
  You are as good as the difference between Juliet and a big hero.
 
-Scene VI: രണ്ടാം falling factorial loop.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 Prospero:
  Are you better than nothing?
  If not, let us proceed to scene VII.
@@ -107,7 +107,7 @@ Prospero:
  You are as good as the difference between yourself and a hero.
  Let us return to scene VI.
 
-Scene VII: രണ്ടാം remaining ordinal, residual rank.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ariel]
 Prospero:
@@ -121,7 +121,7 @@ Prospero:
  You are as good as the quotient between yourself and Macbeth.
  You are as good as the sum of yourself and a hero.
 
-Scene VIII: ആദ്യ തിരഞ്ഞെടുപ്പ് നീക്കിയ original list-ിലേക്ക് രണ്ടാം ordinal മാപ്പ് ചെയ്യുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Viola]
 Prospero:
@@ -129,20 +129,20 @@ Prospero:
  If so, let us proceed to scene IX.
  Let us proceed to scene X.
 
-Scene IX: രണ്ടാം original ordinal unchanged.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Viola and Miranda]
 Viola:
  You are as good as myself.
  Let us proceed to scene XI.
 
-Scene X: ആദ്യ ordinal കടന്നാൽ original ordinal ഒന്നുകൂടി.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Viola and Miranda]
 Viola:
  You are as good as the sum of myself and a hero.
 
-Scene XI: മൂന്ന് outputs പുറത്തിടുന്നു.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:

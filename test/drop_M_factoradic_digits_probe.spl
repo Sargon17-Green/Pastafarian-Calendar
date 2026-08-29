@@ -1,16 +1,16 @@
-Appendix A-യിലെ drop-derived bowl order path-ൽ M-sized drop-ിനെ one-based rank ആക്കി, തുടർന്ന് rank 127-ന്റെ factoradic digit sequence വരെ ഒരൊറ്റ clean Stage 1 source-ൽ തുറക്കുന്ന probe. expected outputs: rank 127; zero-based selection digits 1,0,1,0,0,0.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, M-sized drop സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, 720 divisor അല്ലെങ്കിൽ block divisor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, zero-based remainder സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, current digit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, assignment-വും output-വും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: M = 2^127 - 1.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: seed one, count 127.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: You are a hero.
 [Exeunt]
@@ -19,7 +19,7 @@ Prospero: You are as good as the difference between a big big big big big big bi
 [Exeunt]
 [Enter Hamlet and Juliet]
 
-Scene II: exact doubling.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Hamlet: Are you better than nothing?
 Juliet:
  If not, let us proceed to scene III.
@@ -28,15 +28,15 @@ Juliet:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: subtract one.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Hamlet]
 Prospero: You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Act II: drop -> one-based rank.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: 720.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero:
  You are a big big big big big big big big big hero.
@@ -45,7 +45,7 @@ Prospero:
  You are as good as the sum of yourself and a big big big big hero.
 [Exeunt]
 
-Scene II: rank = 1 + regularMod(drop-1,720).
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Othello]
 Prospero:
  You are as good as the difference between Hamlet and a hero.
@@ -54,14 +54,14 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene III: zero-based remainder = rank-1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Macbeth]
 Prospero: You are as good as the difference between Othello and a hero.
 [Exeunt]
 
-Act III: factoradic blocks 120,24,6,2,1.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: block 120 -> digit 1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero: You are as good as the product of the difference between a big big big big hero and a hero and a big big big hero.
 [Exeunt]
@@ -75,7 +75,7 @@ Prospero: Open your heart.
 Romeo: You are as good as the remainder of the quotient between Macbeth and Romeo.
 [Exeunt]
 
-Scene II: block 24 -> digit 0.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero: You are as good as the product of the sum of a big hero and a hero and a big big big hero.
 [Exeunt]
@@ -89,7 +89,7 @@ Prospero: Open your heart.
 Romeo: You are as good as the remainder of the quotient between Macbeth and Romeo.
 [Exeunt]
 
-Scene III: block 6 -> digit 1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero: You are as good as the product of the sum of a big hero and a hero and a big hero.
 [Exeunt]
@@ -103,7 +103,7 @@ Prospero: Open your heart.
 Romeo: You are as good as the remainder of the quotient between Macbeth and Romeo.
 [Exeunt]
 
-Scene IV: block 2 -> digit 0.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero: You are a big hero.
 [Exeunt]
@@ -117,7 +117,7 @@ Prospero: Open your heart.
 Romeo: You are as good as the remainder of the quotient between Macbeth and Romeo.
 [Exeunt]
 
-Scene V: block 1 -> digit 0.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero: You are a hero.
 [Exeunt]
@@ -131,7 +131,7 @@ Prospero: Open your heart.
 Romeo: You are as good as the remainder of the quotient between Macbeth and Romeo.
 [Exeunt]
 
-Scene VI: final slot digit 0.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Macbeth]
 Prospero: Open your heart.
 [Exeunt]

@@ -1,18 +1,18 @@
-ആറ്-position weaving-ൽ one-based year position-നുള്ള monthId നേരിട്ട് തിരഞ്ഞെടുക്കുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, one-based position സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, position ഒന്നിലെ monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, position രണ്ടിലെ monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, position മൂന്നിലെ monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, position നാലിലെ monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, position അഞ്ചിലെ monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, position ആറിലെ monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, തിരഞ്ഞെടുത്ത monthId സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: year offset-ിൽ നിന്ന് weaving item resolve ചെയ്യുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: positionയും ആറു monthId-കളും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -42,7 +42,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: position അനുസരിച്ച് branch ചെയ്യുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Prospero]
 Hamlet:
  Am I as good as a hero?
@@ -80,55 +80,55 @@ Prospero:
  If so, let us proceed to scene VIII.
  Let us proceed to scene IX.
 
-Scene III: position ഒന്ന്.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Cordelia]
 Juliet:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene IV: position രണ്ട്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Cordelia]
 Romeo:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene V: position മൂന്ന്.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Othello and Cordelia]
 Othello:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene VI: position നാല്.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Macbeth and Cordelia]
 Macbeth:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene VII: position അഞ്ച്.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lady Macbeth and Cordelia]
 Lady Macbeth:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene VIII: position ആറു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Ophelia and Cordelia]
 Ophelia:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene IX: പരിധിക്ക് പുറത്തുള്ള position-യ്ക്ക് diagnostic zero.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
  You are nothing.
 
-Scene X: selected monthId പുറത്തിടുന്നു.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:

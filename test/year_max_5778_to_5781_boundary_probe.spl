@@ -1,14 +1,14 @@
-Appendix A Stage 1 clean year-length ceiling 5778-ന്റെ നാല് അടുത്ത boundary values explicit ആയി പരിശോധിക്കുന്ന probe. historical 5781 legacy constant ഇവിടെ ഉണ്ടാകരുത്; 5778 മാത്രം accepted, 5779, 5780, 5781 rejected. outputs ക്രമത്തിൽ `1,0,0,0`.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, clean maximum 5778 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, current candidate length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, acceptance boolean സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, നാല് boundary rows-ന്റെ counter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, assignment, comparison, output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: clean maximum.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: 5778 exact binary sum ആയി നിർമ്മിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  You are a big big big big big big big big big big big big hero.
@@ -25,15 +25,16 @@ Hamlet: You are as good as Hamlet.
 Prospero: You are a hero.
 [Exeunt]
 
-Act II: four adjacent candidate lengths.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: stop after four rows.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Othello and Prospero]
 Othello: Am I better than a big big hero?
 Prospero: If so, let us proceed to act III.
 [Exeunt]
 
-Scene II: default reject; accept only current <= 5778.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero: You are nothing.
 [Exeunt]
@@ -44,7 +45,7 @@ Hamlet: If so, let us proceed to scene IV.
 [Enter Prospero and Romeo]
 Prospero: You are a hero.
 
-Scene IV: output boolean and advance current length.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Romeo]
 Prospero: Open your heart.
@@ -56,6 +57,6 @@ Prospero: You are as good as the sum of yourself and a hero.
 Prospero: You are as good as the sum of yourself and a hero. Let us return to scene I.
 [Exeunt]
 
-Act III: done.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: no extra output.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.

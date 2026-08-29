@@ -1,29 +1,29 @@
-ആദ്യ രണ്ടു visible drop-ുകൾ hidden predecessor timeline-ുമായി ബന്ധിപ്പിച്ച്, ഓരോ drop-നും seed നിർമ്മിച്ച ശേഷം പതിനൊന്ന് grind rows മുഴുവനായി നടത്തുകയും ആദ്യ visible commit രണ്ടാമത്തേതിന്റെ prev1 ആയി ഉപയോഗിക്കുകയും ചെയ്യുന്ന clean Stage 1 rolling integration പരീക്ഷണം.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, hidden 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, hidden 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, hidden 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, hidden 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, hidden 7 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, drop 1 base contribution സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, drop 2 base contribution സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, ഇപ്പോഴത്തെ x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, prev1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, prev3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, prev7 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, grind coefficient a സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Rosalind, grind coefficient b സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Beatrice, grind coefficient c സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Titania, grind coefficient d സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Helena, grind stone value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, ശേഷിക്കുന്ന grind എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Horatio, M നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lear, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Titania, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Helena, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lear, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: hidden values, രണ്ടു base contributions, M.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ആവശ്യമായ hidden values-ും base contributions-ും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lear and Hamlet]
 Lear:
  Listen to your heart.
@@ -53,14 +53,14 @@ Lear:
  Listen to your heart.
 [Exeunt]
 
-Scene II: M = 2^127 - 1 നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Horatio]
 Horatio:
  You are a hero.
 Ariel:
  You are as good as the difference between a big big big big big big big hero and a hero.
 
-Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Ariel:
  Are you better than nothing?
 Horatio:
@@ -70,14 +70,14 @@ Ariel:
  You are as good as the difference between yourself and a hero.
  Let us return to scene III.
 
-Scene IV: അവസാന കുറവ്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Horatio:
  You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Act II: visible drop 1.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: seed1 = SAVE(base1 + hidden1 + 3*hidden3 + 5*hidden7 + 1).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Cordelia]
 Ariel:
  You are as good as Lady Macbeth.
@@ -94,12 +94,12 @@ Ariel:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene III.
 
-Scene II: negative Euclidean remainder repair.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Ariel:
  You are as good as the sum of yourself and Ariel.
  You are as good as the sum of yourself and a hero.
 
-Scene III: predecessor snapshot-ും grind counter-ും സ്ഥാപിക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Desdemona]
 Lear:
@@ -117,7 +117,7 @@ Lear:
 Lear:
  You are as good as the sum of a big big big hero and the sum of a big hero and a hero.
 
-Scene IV: അടുത്ത grind row വായിക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Miranda]
 Lear:
@@ -140,7 +140,7 @@ Lear:
  Listen to your heart.
 [Exeunt]
 
-Scene V: grind recurrence + SAVE.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Cordelia]
 Ariel:
  You are as good as the product of Cordelia and Cordelia.
@@ -158,12 +158,12 @@ Ariel:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene VII.
 
-Scene VI: negative Euclidean remainder repair.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 Ariel:
  You are as good as the sum of yourself and Ariel.
  You are as good as the sum of yourself and a hero.
 
-Scene VII: grind counter കുറയ്ക്കുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Prospero]
 Lear:
@@ -173,7 +173,7 @@ Prospero:
  If so, let us return to scene IV.
 [Exeunt]
 
-Scene VIII: visible 1 output; value Cordelia-യിൽ committed ആയി തുടരുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lear and Desdemona]
 Lear:
  You are as good as Cordelia.
@@ -183,9 +183,9 @@ Lear:
  Open your heart.
 [Exeunt]
 
-Act III: visible drop 2.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: seed2 = SAVE(base2 + visible1 + 3*hidden2 + 5*hidden6 + 2).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Cordelia]
 Ariel:
  You are as good as Ophelia.
@@ -202,12 +202,12 @@ Ariel:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene III.
 
-Scene II: negative Euclidean remainder repair.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Ariel:
  You are as good as the sum of yourself and Ariel.
  You are as good as the sum of yourself and a hero.
 
-Scene III: drop 2 predecessor snapshot-ും grind counter-ും സ്ഥാപിക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Portia]
 Lear:
@@ -221,7 +221,7 @@ Lear:
 Lear:
  You are as good as the sum of a big big big hero and the sum of a big hero and a hero.
 
-Scene IV: അടുത്ത grind row വായിക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Miranda]
 Lear:
@@ -244,7 +244,7 @@ Lear:
  Listen to your heart.
 [Exeunt]
 
-Scene V: grind recurrence + SAVE.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Cordelia]
 Ariel:
  You are as good as the product of Cordelia and Cordelia.
@@ -262,12 +262,12 @@ Ariel:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene VII.
 
-Scene VI: negative Euclidean remainder repair.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 Ariel:
  You are as good as the sum of yourself and Ariel.
  You are as good as the sum of yourself and a hero.
 
-Scene VII: grind counter കുറയ്ക്കുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Prospero]
 Lear:
@@ -277,7 +277,7 @@ Prospero:
  If so, let us return to scene IV.
 [Exeunt]
 
-Scene VIII: visible 2 output.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lear and Cordelia]
 Lear:
  Open your heart.

@@ -1,26 +1,26 @@
-ഒരു വർഷത്തിലെ gate-gap എണ്ണം ലഭിക്കുമ്പോൾ 6..17 ഇടയിലെ നിയമാനുസൃത cutlet-count candidate-ുകളുടെ എണ്ണം കണ്ടെത്തുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, gate-gap എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, പതിനേഴു സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, capped gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, candidate count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: 6 മുതൽ min(17,gaps) വരെ candidate-ുകൾ എണ്ണുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: gap count വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: പതിനേഴു നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Juliet]
 Prospero:
  You are as good as the sum of a big big big big hero and a hero.
 [Exeunt]
 
-Scene III: ആറിന് താഴെയാണെങ്കിൽ candidate ഇല്ല.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Are you worse than the sum of a big big hero and a big hero?
@@ -29,21 +29,21 @@ Prospero:
  If so, let us proceed to scene IV.
  Let us proceed to scene V.
 
-Scene IV: പതിനേഴിന് മുകളിലുള്ള gap count cap ചെയ്യുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Romeo]
 Juliet:
  You are as good as myself.
  Let us proceed to scene VII.
 
-Scene V: gap count തന്നെയാണ് cap.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Hamlet and Romeo]
 Hamlet:
  You are as good as myself.
  Let us proceed to scene VII.
 
-Scene VI: zero candidate പുറത്തിടുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
@@ -51,7 +51,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene VII: count = capped minus five.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:

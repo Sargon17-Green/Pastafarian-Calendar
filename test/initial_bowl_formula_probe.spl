@@ -1,20 +1,20 @@
-ഒരു കിണ്ണത്തിന്റെ ആദ്യ മൂല്യം നോർമറ്റീവ് സൂത്രത്തിൽ നിന്ന് കണക്കാക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, കർമ്മമനുഷ്യന്റെ എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ചോദിക്കപ്പെട്ട മനുഷ്യന്റെ എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, ദൂരം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, ബന്ധം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, ദിശ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, കിണ്ണത്തിന്റെ സ്ഥിര ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, അതേ കിണ്ണത്തിന്റെ അഭാജ്യസംഖ്യ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, കണക്കിന്റെ ഇടക്കാലവും അന്തിമവും സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, മഹാമനുഷ്യൻ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, മഹാമനുഷ്യൻ നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: initialBowls-ന്റെ ഒരു ID-യ്ക്കുള്ള exact formula.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ഏഴ് scalar input-ുകൾ വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -44,14 +44,14 @@ Miranda:
  Listen to your heart.
 [Exeunt]
 
-Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Viola]
 Viola:
  You are a hero.
 Portia:
  You are as good as the difference between a big big big big big big big hero and a hero.
 
-Scene III: നൂറ്റിയിരുപത്തേഴു കൃത്യമായ ഇരട്ടിക്കലുകൾ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Portia:
  Are you better than nothing?
 Viola:
@@ -61,12 +61,12 @@ Portia:
  You are as good as the difference between yourself and a hero.
  Let us return to scene III.
 
-Scene IV: മഹാമനുഷ്യന്റെ അവസാന കുറവ്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Viola:
  You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Scene V: s പിന്നെ SAVE(s squared plus bowlId).
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Prospero]
 Portia:
  You are as good as Hamlet.
@@ -81,7 +81,7 @@ Portia:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VI: അന്തിമ കിണ്ണമൂല്യം പുറത്തിടുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Prospero]
 Miranda:
  Open your heart.

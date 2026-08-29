@@ -1,17 +1,17 @@
-തുള്ളി 46-ൽ പൂട്ടിയ ആറു-ID order-ൽ ചോദിച്ച കിണ്ണത്തിന്റെ വൃത്തീയമായ അടുത്ത കിണ്ണം കണ്ടെത്തുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ചോദിച്ച കിണ്ണ ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, order-ിലെ ഒന്നാം ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, order-ിലെ രണ്ടാം ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, order-ിലെ മൂന്നാം ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, order-ിലെ നാലാം ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, order-ിലെ അഞ്ചാം ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, order-ിലെ ആറാം ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: പൂട്ടിയ order മാത്രം authoritative ആണ്.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: queryയും ആറു order ID-കളും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -41,7 +41,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: ഒന്നാം സ്ഥാനം പരിശോധിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Juliet]
 Hamlet:
  Am I as good as you?
@@ -49,7 +49,7 @@ Juliet:
  If so, let us proceed to scene VIII.
 [Exeunt]
 
-Scene III: രണ്ടാം സ്ഥാനം പരിശോധിക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Romeo]
 Hamlet:
  Am I as good as you?
@@ -57,7 +57,7 @@ Romeo:
  If so, let us proceed to scene IX.
 [Exeunt]
 
-Scene IV: മൂന്നാം സ്ഥാനം പരിശോധിക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Othello]
 Hamlet:
  Am I as good as you?
@@ -65,7 +65,7 @@ Othello:
  If so, let us proceed to scene X.
 [Exeunt]
 
-Scene V: നാലാം സ്ഥാനം പരിശോധിക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Macbeth]
 Hamlet:
  Am I as good as you?
@@ -73,7 +73,7 @@ Macbeth:
  If so, let us proceed to scene XI.
 [Exeunt]
 
-Scene VI: അഞ്ചാം സ്ഥാനം പരിശോധിക്കുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Lady Macbeth]
 Hamlet:
  Am I as good as you?
@@ -81,7 +81,7 @@ Lady Macbeth:
  If so, let us proceed to scene XII.
 [Exeunt]
 
-Scene VII: ആറാം സ്ഥാനത്തിന് ശേഷം ഒന്നാം സ്ഥാനം വൃത്തീയമായി വരുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Ophelia]
 Hamlet:
  Am I as good as you?
@@ -90,45 +90,51 @@ Ophelia:
  Let us proceed to scene XIV.
 [Exeunt]
 
-Scene VIII: ഒന്നിന് ശേഷം രണ്ടാമത്തെ ID.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Romeo]
 Prospero:
  Open your heart.
  Let us proceed to scene XIV.
 [Exeunt]
 
-Scene IX: രണ്ടിന് ശേഷം മൂന്നാമത്തെ ID.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Othello]
 Prospero:
  Open your heart.
  Let us proceed to scene XIV.
 [Exeunt]
 
-Scene X: മൂന്നിന് ശേഷം നാലാമത്തെ ID.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  Open your heart.
  Let us proceed to scene XIV.
 [Exeunt]
 
-Scene XI: നാലിന് ശേഷം അഞ്ചാമത്തെ ID.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:
  Open your heart.
  Let us proceed to scene XIV.
 [Exeunt]
 
-Scene XII: അഞ്ചിന് ശേഷം ആറാമത്തെ ID.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
  Open your heart.
  Let us proceed to scene XIV.
 [Exeunt]
 
-Scene XIII: ആറിന് ശേഷം ഒന്നാമത്തെ ID.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero:
  Open your heart.
 [Exeunt]
 
-Scene XIV: പരിശോധന അവസാനിക്കുന്നു.
+Scene XIV: കണക്കിന്റെ ഉപഘട്ടം.

@@ -1,20 +1,20 @@
-1A saved value 255 ആകുകയും അതിലൂടെ rank 255-ന്റെ bowl order `3,1,5,4,2,6` ലഭിക്കുകയും ചെയ്യുന്ന fixture-ൽ, ആറു വ്യത്യസ്ത പഴയ bowl values ഉപയോഗിച്ച് ഒരു മുഴുവൻ post-stir pending round കണക്കാക്കുന്ന clean Stage 1 പരീക്ഷണം.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, പഴയ bowl 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, പഴയ bowl 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, പഴയ bowl 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, പഴയ bowl 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, പഴയ bowl 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, പഴയ bowl 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, stir number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, 1A saved bowl sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, pre-square s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, pending bowl മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: പഴയ state വായിച്ച് 1A saved value നിർമ്മിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ആറു പഴയ bowl values-ും stir number-ും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -44,7 +44,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: saved = raw sum + 149*stir; fixture-ൽ M wrap ആവശ്യമില്ല.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero:
  You are as good as Hamlet.
@@ -60,9 +60,9 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Act II: rank 255 order 3,1,5,4,2,6 പ്രകാരം ആറു pending values.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: position 1, current=3 prev=6 next=1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as Romeo.
@@ -79,7 +79,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene II: position 2, current=1 prev=3 next=5.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as Hamlet.
@@ -96,7 +96,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene III: position 3, current=5 prev=1 next=4.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as Macbeth.
@@ -113,7 +113,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene IV: position 4, current=4 prev=5 next=2.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as Othello.
@@ -130,7 +130,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene V: position 5, current=2 prev=4 next=6.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as Juliet.
@@ -147,7 +147,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene VI: position 6, current=6 prev=2 next=3.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as Lady Macbeth.

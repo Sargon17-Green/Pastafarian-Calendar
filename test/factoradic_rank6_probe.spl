@@ -1,14 +1,14 @@
-ആറ് കിണ്ണങ്ങളുടെ permutation rank-നെ factoradic തിരഞ്ഞെടുപ്പ് സൂചികകളാക്കി തുറക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ഇപ്പോഴത്തെ zero-based ശേഷിപ്പുള്ള rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, ഇപ്പോഴത്തെ block വലിപ്പം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, ഇപ്പോഴത്തെ തിരഞ്ഞെടുപ്പ് സൂചിക സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: 1 മുതൽ 720 വരെയുള്ള rank-ന്റെ അഞ്ചു division ചുവടുകളും അവസാന ശൂന്യ സൂചികയും.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: one-based rank വായിച്ച് zero-based ആക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Hamlet]
 Macbeth:
  Listen to your heart.
@@ -18,7 +18,7 @@ Macbeth:
  You are as good as the difference between Hamlet and a hero.
 [Exeunt]
 
-Scene II: 120-ന്റെ block.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Romeo]
 Macbeth:
  You are as good as the product of the difference between a big big big big hero and a hero and a big big big hero.
@@ -36,7 +36,7 @@ Romeo:
  You are as good as the remainder of the quotient between yourself and Romeo.
 [Exeunt]
 
-Scene III: 24-ന്റെ block.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Romeo]
 Macbeth:
  You are as good as the product of the sum of a big hero and a hero and a big big big hero.
@@ -54,7 +54,7 @@ Romeo:
  You are as good as the remainder of the quotient between yourself and Romeo.
 [Exeunt]
 
-Scene IV: 6-ന്റെ block.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Romeo]
 Macbeth:
  You are as good as the product of the sum of a big hero and a hero and a big hero.
@@ -72,7 +72,7 @@ Romeo:
  You are as good as the remainder of the quotient between yourself and Romeo.
 [Exeunt]
 
-Scene V: 2-ന്റെ block.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Romeo]
 Macbeth:
  You are a big hero.
@@ -90,7 +90,7 @@ Romeo:
  You are as good as the remainder of the quotient between yourself and Romeo.
 [Exeunt]
 
-Scene VI: 1-ന്റെ block.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Romeo]
 Macbeth:
  You are a hero.
@@ -108,7 +108,7 @@ Romeo:
  You are as good as the remainder of the quotient between yourself and Romeo.
 [Exeunt]
 
-Scene VII: അവസാന slot-ന്റെ സൂചിക എപ്പോഴും ശൂന്യം.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Juliet]
 Macbeth:
  Open your heart.

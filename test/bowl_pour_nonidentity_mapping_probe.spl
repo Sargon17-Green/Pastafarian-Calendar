@@ -1,21 +1,21 @@
-ക്രമരഹിതമായ bowl order-ന്റെ ആദ്യ മൂന്ന് സ്ഥാനങ്ങളിലേക്ക് pours fixed bowl ID-കളിലേക്കല്ല, order position-ലുള്ള പഴയ bowl values-ലേക്കാണ് ബന്ധപ്പെടുന്നതെന്ന് പരിശോധിക്കുന്ന Stage 1 no-wrap fixture. order-ന്റെ ആദ്യ മൂന്ന് IDs `3,1,6` ആണ്.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, drop value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, drop index i സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, wheat stone value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, barley stone value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, salt stone value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, പഴയ bowl 1 value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, പഴയ bowl 3 value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, പഴയ bowl 6 value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, pour 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, pour 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, pour 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: inputs.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: drop, i, stones, relevant old bowl IDs വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -41,9 +41,9 @@ Prospero: Listen to your heart.
 Prospero: Listen to your heart.
 [Exeunt]
 
-Act II: position-based pours.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: position 1 order ID 3 ഉപയോഗിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as the product of Hamlet and Hamlet.
@@ -51,7 +51,7 @@ Prospero:
  You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Juliet.
 [Exeunt]
 
-Scene II: position 2 order ID 1 ഉപയോഗിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Portia]
 Prospero:
  You are as good as the product of Hamlet and Hamlet.
@@ -59,7 +59,7 @@ Prospero:
  You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Juliet.
 [Exeunt]
 
-Scene III: position 3 order ID 6 ഉപയോഗിക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Viola]
 Prospero:
  You are as good as the product of Hamlet and Hamlet.
@@ -67,9 +67,9 @@ Prospero:
  You are as good as the sum of yourself and the product of the difference between a big big big hero and a hero and Juliet.
 [Exeunt]
 
-Act III: outputs.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: pours 1..3 പുറത്തിടുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero: Open your heart.
 [Exeunt]

@@ -1,27 +1,27 @@
-രണ്ട് visible drops തുടർച്ചയായി രണ്ട് യഥാർത്ഥ six-bowl rounds നടത്തുകയും രണ്ടാം round ആദ്യ round-ന്റെ മുഴുവൻ committed snapshot മാത്രം വായിക്കുകയും ചെയ്യുന്ന clean Stage 1 integration fixture. രണ്ട് drops-ും 1, രണ്ട് orders-ും identity, stone contributions എല്ലാം 0, ആരംഭ bowls എല്ലാം 0. എല്ലാ raw values-ും M-നേക്കാൾ ചെറുതായതിനാൽ SAVE identity ആണ്.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, committed bowl 1 അല്ലെങ്കിൽ round 2 pending bowl 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, committed bowl 2 അല്ലെങ്കിൽ round 2 pending bowl 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, committed bowl 3 അല്ലെങ്കിൽ round 2 pending bowl 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, committed bowl 4 അല്ലെങ്കിൽ round 2 pending bowl 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, committed bowl 5 അല്ലെങ്കിൽ round 2 pending bowl 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, committed bowl 6 അല്ലെങ്കിൽ round 2 pending bowl 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, round 1 pending bowl 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, round 1 pending bowl 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, round 1 pending bowl 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, round 1 pending bowl 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, round 1 pending bowl 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, round 1 pending bowl 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Shylock, position 1 pour സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Falstaff, position 2 pour സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Polonius, position 3 pour സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Caliban, drop value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Horatio, visible drop index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, assignment-വും output-വും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Shylock, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ആരംഭ state.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: drop=1, i=1; six old bowls default zero.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Caliban]
 Ariel: You are a hero.
 [Exeunt]
@@ -29,32 +29,32 @@ Ariel: You are a hero.
 Ariel: You are a hero.
 [Exeunt]
 
-Act II: drop 1 pours.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: p1 = drop^2 + 3*i.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Shylock]
 Ariel:
  You are as good as the product of Caliban and Caliban.
  You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Horatio.
 [Exeunt]
 
-Scene II: p2 = drop^2 + 5*i.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Falstaff]
 Ariel:
  You are as good as the product of Caliban and Caliban.
  You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Horatio.
 [Exeunt]
 
-Scene III: p3 = drop^2 + 7*i.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Polonius]
 Ariel:
  You are as good as the product of Caliban and Caliban.
  You are as good as the sum of yourself and the product of the sum of the sum of a big big hero and a big hero and a hero and Horatio.
 [Exeunt]
 
-Act III: drop 1 ആറു pending values, എല്ലാം same zero old snapshot-ൽ നിന്ന്.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: bowl 1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Ophelia]
 Ariel:
  You are as good as the sum of Shylock and Caliban.
@@ -62,7 +62,7 @@ Ariel:
  You are as good as the sum of yourself and Horatio.
 [Exeunt]
 
-Scene II: bowl 2.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Cordelia]
 Ariel:
  You are as good as the sum of Falstaff and Caliban.
@@ -70,7 +70,7 @@ Ariel:
  You are as good as the sum of yourself and the product of a big hero and Horatio.
 [Exeunt]
 
-Scene III: bowl 3.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Desdemona]
 Ariel:
  You are as good as the sum of Polonius and Caliban.
@@ -78,7 +78,7 @@ Ariel:
  You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Horatio.
 [Exeunt]
 
-Scene IV: bowl 4.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Portia]
 Ariel:
  You are as good as Caliban.
@@ -86,7 +86,7 @@ Ariel:
  You are as good as the sum of yourself and the product of a big big hero and Horatio.
 [Exeunt]
 
-Scene V: bowl 5.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Viola]
 Ariel:
  You are as good as Caliban.
@@ -94,7 +94,7 @@ Ariel:
  You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Horatio.
 [Exeunt]
 
-Scene VI: bowl 6.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Miranda]
 Ariel:
  You are as good as Caliban.
@@ -102,7 +102,7 @@ Ariel:
  You are as good as the sum of yourself and the product of the sum of a big big hero and a big hero and Horatio.
 [Exeunt]
 
-Scene VII: round 1 committed snapshot output.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Ophelia]
 Ariel: Open your heart.
 [Exeunt]
@@ -122,37 +122,37 @@ Ariel: Open your heart.
 Ariel: Open your heart.
 [Exeunt]
 
-Act IV: drop 2 pours; i=2.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: i കൂട്ടുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Horatio]
 Ariel: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: p1 = 1 + 3*2 = 7.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Shylock]
 Ariel:
  You are as good as the product of Caliban and Caliban.
  You are as good as the sum of yourself and the product of the sum of a big hero and a hero and Horatio.
 [Exeunt]
 
-Scene III: p2 = 1 + 5*2 = 11.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Falstaff]
 Ariel:
  You are as good as the product of Caliban and Caliban.
  You are as good as the sum of yourself and the product of the sum of a big big hero and a hero and Horatio.
 [Exeunt]
 
-Scene IV: p3 = 1 + 7*2 = 15.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Polonius]
 Ariel:
  You are as good as the product of Caliban and Caliban.
  You are as good as the sum of yourself and the product of the sum of the sum of a big big hero and a big hero and a hero and Horatio.
 [Exeunt]
 
-Act V: drop 2 pending values, round 1 committed snapshot-ൽ നിന്ന് മാത്രം.
+Act V: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: bowl 1, prev=6, next=2.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Hamlet]
 Ariel:
  You are as good as Ophelia.
@@ -165,7 +165,7 @@ Ariel:
  You are as good as the sum of yourself and the product of Horatio and a hero.
 [Exeunt]
 
-Scene II: bowl 2, prev=1, next=3.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Juliet]
 Ariel:
  You are as good as Cordelia.
@@ -178,7 +178,7 @@ Ariel:
  You are as good as the sum of yourself and the product of Horatio and a big hero.
 [Exeunt]
 
-Scene III: bowl 3, prev=2, next=4.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Romeo]
 Ariel:
  You are as good as Desdemona.
@@ -191,7 +191,7 @@ Ariel:
  You are as good as the sum of yourself and the product of Horatio and the sum of a big hero and a hero.
 [Exeunt]
 
-Scene IV: bowl 4, prev=3, next=5.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Othello]
 Ariel:
  You are as good as Portia.
@@ -203,7 +203,7 @@ Ariel:
  You are as good as the sum of yourself and the product of Horatio and a big big hero.
 [Exeunt]
 
-Scene V: bowl 5, prev=4, next=6.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Macbeth]
 Ariel:
  You are as good as Viola.
@@ -215,7 +215,7 @@ Ariel:
  You are as good as the sum of yourself and the product of Horatio and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene VI: bowl 6, prev=5, next=1.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Lady Macbeth]
 Ariel:
  You are as good as Miranda.
@@ -227,9 +227,9 @@ Ariel:
  You are as good as the sum of yourself and the product of Horatio and the sum of a big big hero and a big hero.
 [Exeunt]
 
-Act VI: round 2 commit output.
+Act VI: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: six values.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ariel and Hamlet]
 Ariel: Open your heart.
 [Exeunt]

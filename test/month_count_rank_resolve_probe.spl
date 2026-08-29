@@ -1,18 +1,18 @@
-Year length-ിൽ നിന്ന് നിയമാനുസൃത month-count range കണ്ടെത്തി one-based rank resolve ചെയ്യുന്ന clean Appendix A പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, year length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, 123 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, 47 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, lower month count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, upper month count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, remainder സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, selected month count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: minMonths=ceilDiv(L,123), maxMonths=min(47,floorDiv(L,4)), result=minMonths+rank-1.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: lengthയും rankഉം വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -22,7 +22,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: 123യും 47യും നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero:
  You are a big big big big big big hero.
@@ -41,7 +41,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: ceilDiv(L,123) നിർമ്മിക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Macbeth]
 Prospero:
  You are as good as the quotient between Hamlet and Romeo.
@@ -53,13 +53,13 @@ Prospero:
  If so, let us proceed to scene IV.
  Let us proceed to scene V.
 
-Scene IV: remainder ഉണ്ടെങ്കിൽ lower കൂട്ടുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  You are as good as the sum of yourself and a hero.
 
-Scene V: floorDiv(L,4) കണക്കാക്കി 47-ൽ cap ചെയ്യുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:
@@ -68,13 +68,13 @@ Prospero:
  If so, let us proceed to scene VI.
  Let us proceed to scene VII.
 
-Scene VI: upper 47 ആക്കുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Othello and Lady Macbeth]
 Othello:
  You are as good as myself.
 
-Scene VII: selected = lower + rank - 1.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:

@@ -1,18 +1,18 @@
-ശേഷിക്കുന്ന ആറ് കിണ്ണങ്ങളിൽ zero-based സൂചികയിലുള്ള കിണ്ണം തിരഞ്ഞെടുക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, തിരഞ്ഞെടുക്കേണ്ട zero-based സൂചിക സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, കിണ്ണം ഒന്നിന്റെ സജീവത സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, കിണ്ണം രണ്ടിന്റെ സജീവത സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, കിണ്ണം മൂന്നിന്റെ സജീവത സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, കിണ്ണം നാലിന്റെ സജീവത സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, കിണ്ണം അഞ്ചിന്റെ സജീവത സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, കിണ്ണം ആറിന്റെ സജീവത സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, തിരഞ്ഞെടുത്ത കിണ്ണത്തിന്റെ ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: സജീവമായ ID-കളെ 1 മുതൽ 6 വരെ സ്കാൻ ചെയ്യുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: സൂചികയും ആറു സജീവത പതാകകളും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -42,14 +42,14 @@ Miranda:
  Listen to your heart.
 [Exeunt]
 
-Scene II: കിണ്ണം ഒന്ന് സജീവമാണോ എന്ന് നോക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Juliet]
 Miranda:
  Are you better than nothing?
  If so, let us proceed to scene III.
  Let us proceed to scene VI.
 
-Scene III: ഇപ്പോഴത്തെ സൂചിക ശൂന്യമാണോ എന്ന് നോക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
@@ -57,21 +57,21 @@ Miranda:
  If so, let us proceed to scene V.
  Let us proceed to scene IV.
 
-Scene IV: കിണ്ണം ഒന്ന് തിരഞ്ഞെടുക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:
  You are a hero.
  Let us proceed to scene XX.
 
-Scene V: സജീവമായ കിണ്ണം ഒന്ന് കടന്നതിനാൽ സൂചിക കുറയ്ക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene VI.
 
-Scene VI: കിണ്ണം രണ്ട് സജീവമാണോ എന്ന് നോക്കുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Romeo]
 Miranda:
@@ -79,7 +79,7 @@ Miranda:
  If so, let us proceed to scene VII.
  Let us proceed to scene X.
 
-Scene VII: ഇപ്പോഴത്തെ സൂചിക ശൂന്യമാണോ എന്ന് നോക്കുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
@@ -87,21 +87,21 @@ Miranda:
  If so, let us proceed to scene IX.
  Let us proceed to scene VIII.
 
-Scene VIII: കിണ്ണം രണ്ട് തിരഞ്ഞെടുക്കുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:
  You are a big hero.
  Let us proceed to scene XX.
 
-Scene IX: സജീവമായ കിണ്ണം രണ്ട് കടന്നതിനാൽ സൂചിക കുറയ്ക്കുന്നു.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene X.
 
-Scene X: കിണ്ണം മൂന്ന് സജീവമാണോ എന്ന് നോക്കുന്നു.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Othello]
 Miranda:
@@ -109,7 +109,7 @@ Miranda:
  If so, let us proceed to scene XI.
  Let us proceed to scene XIV.
 
-Scene XI: ഇപ്പോഴത്തെ സൂചിക ശൂന്യമാണോ എന്ന് നോക്കുന്നു.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
@@ -117,21 +117,21 @@ Miranda:
  If so, let us proceed to scene XIII.
  Let us proceed to scene XII.
 
-Scene XII: കിണ്ണം മൂന്ന് തിരഞ്ഞെടുക്കുന്നു.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:
  You are as good as the sum of a big hero and a hero.
  Let us proceed to scene XX.
 
-Scene XIII: സജീവമായ കിണ്ണം മൂന്ന് കടന്നതിനാൽ സൂചിക കുറയ്ക്കുന്നു.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene XIV.
 
-Scene XIV: കിണ്ണം നാല് സജീവമാണോ എന്ന് നോക്കുന്നു.
+Scene XIV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Macbeth]
 Miranda:
@@ -139,7 +139,7 @@ Miranda:
  If so, let us proceed to scene XV.
  Let us proceed to scene XVIII.
 
-Scene XV: ഇപ്പോഴത്തെ സൂചിക ശൂന്യമാണോ എന്ന് നോക്കുന്നു.
+Scene XV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
@@ -147,21 +147,21 @@ Miranda:
  If so, let us proceed to scene XVII.
  Let us proceed to scene XVI.
 
-Scene XVI: കിണ്ണം നാല് തിരഞ്ഞെടുക്കുന്നു.
+Scene XVI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:
  You are a big big hero.
  Let us proceed to scene XX.
 
-Scene XVII: സജീവമായ കിണ്ണം നാല് കടന്നതിനാൽ സൂചിക കുറയ്ക്കുന്നു.
+Scene XVII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene XVIII.
 
-Scene XVIII: കിണ്ണം അഞ്ച് സജീവമാണോ എന്ന് നോക്കുന്നു.
+Scene XVIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Lady Macbeth]
 Miranda:
@@ -169,7 +169,7 @@ Miranda:
  If so, let us proceed to scene XIX.
  Let us proceed to scene XXII.
 
-Scene XIX: ഇപ്പോഴത്തെ സൂചിക ശൂന്യമാണെങ്കിൽ അഞ്ച് തിരഞ്ഞെടുക്കുന്നു, അല്ലെങ്കിൽ ആറിലേക്കു നീങ്ങുന്നു.
+Scene XIX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
@@ -181,21 +181,21 @@ Miranda:
  You are as good as the sum of a big big hero and a hero.
  Let us proceed to scene XX.
 
-Scene XX: തിരഞ്ഞെടുത്ത ID പുറത്തിടുന്നു.
+Scene XX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:
  Open your heart.
 [Exeunt]
 
-Scene XXI: സജീവമായ കിണ്ണം അഞ്ച് കടന്നതിനാൽ സൂചിക കുറയ്ക്കുന്നു.
+Scene XXI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Hamlet]
 Miranda:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene XXII.
 
-Scene XXII: കിണ്ണം ആറിന്റെ സാധുവായ അവസാന തിരഞ്ഞെടുപ്പ്.
+Scene XXII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Ophelia]
 Miranda:
@@ -212,13 +212,13 @@ Miranda:
  You are as good as the sum of a big big hero and a big hero.
  Let us proceed to scene XX.
 
-Scene XXIII: സാധുവായ input-ിൽ ഈ രംഗം എത്തില്ല.
+Scene XXIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Prospero]
 Miranda:
  You are nothing.
  Let us proceed to scene XX.
 
-Scene XXIV: പരിധിക്കു പുറത്തുള്ള input-ിന് diagnostic ശൂന്യം നൽകുന്നു.
+Scene XXIV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:

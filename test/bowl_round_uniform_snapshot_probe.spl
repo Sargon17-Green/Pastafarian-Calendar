@@ -1,19 +1,19 @@
-ഒരേ പഴയ snapshot മൂല്യം ഉപയോഗിച്ച് ഒരു visible drop-ന്റെ ആറു bowl positions-ും clean Appendix A formula പ്രകാരം ഒരുമിച്ച് പരിശോധിക്കുന്ന Stage 1 പരീക്ഷണം.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, എല്ലാ ആറു പഴയ കിണ്ണങ്ങൾക്കും ഒരേ test മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, തുള്ളിമൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, ഓരോ position-നും ഒരേ test കല്ലുമൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, visible drop index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, order position സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, square-നു മുൻപുള്ള s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, പുതിയ pending കിണ്ണമൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, മഹാമനുഷ്യൻ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, മഹാമനുഷ്യൻ നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ആറു positions-ും ഒരേ old snapshot-ിൽ നിന്നാണ് വായിക്കുന്നത്.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: uniform old value, drop, stone value, drop index വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -31,14 +31,14 @@ Miranda:
  Listen to your heart.
 [Exeunt]
 
-Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Viola]
 Viola:
  You are a hero.
 Portia:
  You are as good as the difference between a big big big big big big big hero and a hero.
 
-Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Portia:
  Are you better than nothing?
 Viola:
@@ -48,7 +48,7 @@ Portia:
  You are as good as the difference between yourself and a hero.
  Let us return to scene III.
 
-Scene IV: മഹാമനുഷ്യന്റെ അവസാന കുറവും position ആരംഭവും.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Viola:
  You are as good as the difference between yourself and a hero.
 [Exeunt]
@@ -56,14 +56,14 @@ Viola:
 Miranda:
  You are a hero.
 
-Scene V: ആറു positions പൂർത്തിയായോ എന്ന് നോക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 Miranda:
  Are you better than the sum of a big big hero and a big hero?
 Macbeth:
  If so, let us proceed to scene IX.
 [Exeunt]
 
-Scene VI: s = current + 2 prev + 3 next + pour + drop + stone; uniform fixture-ൽ pour ശൂന്യമാണ്.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Lady Macbeth]
 Miranda:
  You are as good as Hamlet.
@@ -73,7 +73,7 @@ Miranda:
  You are as good as the sum of yourself and Romeo.
 [Exeunt]
 
-Scene VII: pending = SAVE(s squared + 5 prev next + i position), പിന്നെ output.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Prospero]
 Portia:
  You are as good as the product of Lady Macbeth and Lady Macbeth.
@@ -88,11 +88,11 @@ Miranda:
  Open your heart.
 [Exeunt]
 
-Scene VIII: അടുത്ത position.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Macbeth]
 Miranda:
  You are as good as the sum of yourself and a hero.
  Let us return to scene V.
 
-Scene IX: ആറു pending values പൂർത്തിയായി.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]

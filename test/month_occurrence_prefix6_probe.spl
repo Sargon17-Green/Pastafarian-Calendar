@@ -1,19 +1,19 @@
-വർഷാരംഭം മുതൽ target ഉൾപ്പെടെ തിരഞ്ഞെടുത്ത month ID എത്ര തവണ വന്നുവെന്ന് ചെറിയ prefix-ിൽ എണ്ണുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, എണ്ണേണ്ട month ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ഉൾപ്പെടുത്തേണ്ട അവസാന position സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, position ഒന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, position രണ്ട് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, position മൂന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, position നാല് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, position അഞ്ച് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, position ആറു സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, occurrence count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Falstaff, input-output control സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ആറു സ്ഥാനമുള്ള ചെറിയ weaving prefix-ിൽ inclusive occurrence count കണക്കാക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: month ID, അവസാന position, ആറു month IDs വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Falstaff and Hamlet]
 Falstaff:
  Listen to your heart.
@@ -50,7 +50,7 @@ Falstaff:
 Falstaff:
  You are nothing.
 
-Scene II: position ഒന്ന് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Falstaff and Juliet]
 Falstaff:
@@ -68,7 +68,7 @@ Falstaff:
 Falstaff:
  You are as good as the sum of yourself and a hero.
 
-Scene III: position രണ്ട് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Falstaff and Juliet]
 Falstaff:
@@ -86,7 +86,7 @@ Falstaff:
 Falstaff:
  You are as good as the sum of yourself and a hero.
 
-Scene IV: position മൂന്ന് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Falstaff and Juliet]
 Falstaff:
@@ -104,7 +104,7 @@ Falstaff:
 Falstaff:
  You are as good as the sum of yourself and a hero.
 
-Scene V: position നാല് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Falstaff and Juliet]
 Falstaff:
@@ -122,7 +122,7 @@ Falstaff:
 Falstaff:
  You are as good as the sum of yourself and a hero.
 
-Scene VI: position അഞ്ച് പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Falstaff and Juliet]
 Falstaff:
@@ -140,7 +140,7 @@ Falstaff:
 Falstaff:
  You are as good as the sum of yourself and a hero.
 
-Scene VII: position ആറു പരിധിയിൽ ആണെങ്കിൽ match പരിശോധിക്കുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Falstaff and Juliet]
 Falstaff:
@@ -159,20 +159,20 @@ Falstaff:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene XIV.
 
-Scene VIII: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 
-Scene IX: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 
-Scene X: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 
-Scene XI: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 
-Scene XII: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
 
-Scene XIII: ഉപയോഗിക്കാത്ത diagnostic രംഗം.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
 
-Scene XIV: inclusive occurrence count പുറത്തിടുന്നു.
+Scene XIV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Falstaff and Miranda]
 Falstaff:

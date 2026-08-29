@@ -1,19 +1,19 @@
-Appendix A askBowl arithmetic വലിയ exact bowl values-ോടെ പരിശോധിക്കുന്ന clean Stage 1 fixture. latched-order companion fixture `3,1,6,2,5,4`-ൽ queried bowl 4-ന്റെ circular successor bowl 3 ആണ്; ഇവിടെ bowl4=M, bowl3=M-1, fixed bowl6=M, seal=1. expected first=32946, directionStep=+1.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, queried bowl value M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, latched successor bowl value M-1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, fixed bowl 6 value M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, seal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, first answer സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, direction number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, direction step സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, flow-വും assignment-വും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: Mയും fixture values-ും.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: M നിർമ്മിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  You are a hero.
@@ -24,7 +24,7 @@ Prospero:
 [Exeunt]
 [Enter Hamlet and Desdemona]
 
-Scene II: doubling loop.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Hamlet:
  Are you better than nothing?
 Desdemona:
@@ -35,13 +35,13 @@ Desdemona:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: M=2 power 127 minus 1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Hamlet]
 Prospero:
  You are as good as the difference between yourself and a hero.
 
-Scene IV: queried=M, successor=M-1, bowl6=M, seal=1.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Hamlet and Juliet]
 Hamlet: You are as good as Hamlet.
@@ -56,9 +56,9 @@ Hamlet: You are as good as Hamlet.
 Prospero: You are a hero.
 [Exeunt]
 
-Act II: first answer.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: SAVE((queried+seal+181)^2 + 179*successor + seal).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero:
  You are as good as the sum of Juliet and Macbeth.
@@ -80,9 +80,9 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Act III: direction.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: SAVE((first+seal+1+193)^2 + 193*first + 197*bowl6).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as the sum of Lady Macbeth and Macbeth.
@@ -103,7 +103,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: parity odd -> plus one, even -> minus one.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ophelia and Cordelia]
 Ophelia:
  You are as good as the remainder of the quotient between Ophelia and a big hero.
@@ -114,7 +114,8 @@ Ophelia:
  Let us proceed to scene IV.
 [Exeunt]
 
-Scene III: plus one.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
  You are a hero.
@@ -122,12 +123,13 @@ Prospero:
  Let us proceed to scene V.
 [Exeunt]
 
-Scene IV: minus one.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
  You are as good as the difference between nothing and a hero.
  Open your heart.
 [Exeunt]
 
-Scene V: askBowl fixture പൂർത്തിയായി.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]

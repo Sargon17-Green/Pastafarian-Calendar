@@ -1,60 +1,60 @@
-Appendix A-യിലെ hidden positions 0..-6-നെ ഏഴ്-slot rolling ring-ൽ seed ചെയ്ത് visible 1..8 synthetic commits നടത്തുന്നതിനുള്ള clean Stage 1 ownership probe. hidden1..7 = 101..107. slot mapping കാരണം തുടക്കത്തിൽ slots 1..7 = 101,107,106,105,104,103,102. commit ഓരോന്നും prev1,prev3,prev7 വായിച്ചതിന് ശേഷമേ അതേ current/prev7 slot overwrite ചെയ്യൂ. expected output triples: i=1 -> 101,103,107; i=7 -> 206,204,101; i=8 -> 207,205,201.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ring slot 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ring slot 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, ring slot 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, ring slot 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, ring slot 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, ring slot 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, ring slot 7 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, അടുത്ത synthetic visible value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, assignment, output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: hidden timeline ring seed.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: slot 1 = hidden1 = 101.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: You are as good as the sum of the sum of a big big big big big big hero and a big big big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene II: slot 7 = hidden2 = 102.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Ophelia]
 Hamlet: You are as good as the sum of Hamlet and a hero.
 [Exeunt]
 
-Scene III: slot 6 = hidden3 = 103.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Lady Macbeth]
 Hamlet: You are as good as the sum of Hamlet and a big hero.
 [Exeunt]
 
-Scene IV: slot 5 = hidden4 = 104.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Macbeth]
 Hamlet: You are as good as the sum of Hamlet and the sum of a big hero and a hero.
 [Exeunt]
 
-Scene V: slot 4 = hidden5 = 105.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Othello]
 Hamlet: You are as good as the sum of Hamlet and a big big hero.
 [Exeunt]
 
-Scene VI: slot 3 = hidden6 = 106.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Romeo]
 Hamlet: You are as good as the sum of Hamlet and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene VII: slot 2 = hidden7 = 107.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Juliet]
 Hamlet: You are as good as the sum of Hamlet and the sum of a big big hero and a big hero.
 [Exeunt]
 
-Scene VIII: next visible = 201.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Portia]
 Prospero: You are as good as the sum of the sum of a big big big big big big big hero and a big big big big big big hero and the sum of a big big big hero and a hero.
 [Exeunt]
 
-Act II: visible 1; prev1=slot1, prev3=slot6, prev7=current slot2.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: predecessor triple output before overwrite.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Open your heart.
 [Exeunt]
@@ -65,7 +65,7 @@ Prospero: Open your heart.
 Prospero: Open your heart.
 [Exeunt]
 
-Scene II: commit visible1=201 into slot2, then next=202.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Juliet]
 Portia: You are as good as Portia.
 [Exeunt]
@@ -73,9 +73,9 @@ Portia: You are as good as Portia.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Act III: visible 2..6 commits.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: i=2 commit slot3=202 after ring predecessor ownership point.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Romeo]
 Portia: You are as good as Portia.
 [Exeunt]
@@ -83,7 +83,7 @@ Portia: You are as good as Portia.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: i=3 commit slot4=203.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Othello]
 Portia: You are as good as Portia.
 [Exeunt]
@@ -91,7 +91,7 @@ Portia: You are as good as Portia.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: i=4 commit slot5=204.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Macbeth]
 Portia: You are as good as Portia.
 [Exeunt]
@@ -99,7 +99,7 @@ Portia: You are as good as Portia.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: i=5 commit slot6=205.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Lady Macbeth]
 Portia: You are as good as Portia.
 [Exeunt]
@@ -107,7 +107,7 @@ Portia: You are as good as Portia.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene V: i=6 commit slot7=206.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Ophelia]
 Portia: You are as good as Portia.
 [Exeunt]
@@ -115,9 +115,9 @@ Portia: You are as good as Portia.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Act IV: visible 7; prev1=slot7=206, prev3=slot5=204, prev7=current slot1=hidden1=101.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: predecessor triple output before overwrite.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero: Open your heart.
 [Exeunt]
@@ -128,7 +128,7 @@ Prospero: Open your heart.
 Prospero: Open your heart.
 [Exeunt]
 
-Scene II: commit visible7=207 into slot1, then next=208.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Hamlet]
 Portia: You are as good as Portia.
 [Exeunt]
@@ -136,9 +136,9 @@ Portia: You are as good as Portia.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Act V: visible 8; prev7 now points to committed visible1 rather than hidden7.
+Act V: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: predecessor triple output: prev1=slot1=207, prev3=slot6=205, prev7=current slot2=visible1=201.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Open your heart.
 [Exeunt]
@@ -149,7 +149,7 @@ Prospero: Open your heart.
 Prospero: Open your heart.
 [Exeunt]
 
-Scene II: commit visible8=208 into slot2.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Juliet]
 Portia: You are as good as Portia.
 [Exeunt]

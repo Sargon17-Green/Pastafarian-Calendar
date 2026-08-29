@@ -1,21 +1,21 @@
-Appendix A-യിലെ ഏഴ് hidden drops-ും ഓരോന്നിലെ ഏഴ് grind commits-ും ഒരേ control source-ൽ നടത്തുന്നതായ clean Stage 1 arithmetic-integration probe. ഇത് legal workCounts fixture അല്ല; coefficient mapping വേറെയുള്ള probe-ൽ പരിശോധിക്കുന്നു. ഇവിടെ counts contribution 26 മാത്രം, synthetic stone row `M, M-5, M-6, M-7, M-8` ആണ്. അതിനാൽ ഓരോ hidden seed-ും SAVE കഴിഞ്ഞ് M ആകുന്നു; ഏഴ് grinds കഴിഞ്ഞ് ഓരോ hidden value-വും 132 ആകണം. ഏഴ് outputs കഴിഞ്ഞ് generated hidden count 7 കൂടി പുറത്തിടുന്നു.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, wheat synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, barley synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, salt synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, bitter synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, red synthetic stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, ഇപ്പോഴത്തെ hidden x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, hidden index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, grind index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, generated hidden count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, assignment, SAVE, output സഹായിക്കുന്ന കഥാപാത്രം.
-Miranda, M doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: Mയും synthetic stone row-വും.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: M നിർമ്മാണത്തിന്റെ തുടക്കം.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: You are a hero.
 [Exeunt]
@@ -24,7 +24,7 @@ Prospero: You are as good as the difference between a big big big big big big bi
 [Exeunt]
 [Enter Hamlet and Miranda]
 
-Scene II: exact doubling loop.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Hamlet: Are you better than nothing?
 Miranda:
  If not, let us proceed to scene III.
@@ -33,13 +33,13 @@ Miranda:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: M = 2^127 - 1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Hamlet]
 Prospero: You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Scene IV: synthetic stones.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Juliet]
 Hamlet: You are as good as Hamlet.
 [Exeunt]
@@ -56,7 +56,7 @@ Prospero: You are as good as the difference between Hamlet and the sum of the su
 Prospero: You are as good as the difference between Hamlet and a big big big hero.
 [Exeunt]
 
-Scene V: hidden index 1, generated count 0.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero: You are a hero.
 [Exeunt]
@@ -64,15 +64,15 @@ Prospero: You are a hero.
 Prospero: You are nothing.
 [Exeunt]
 
-Act II: hidden seed and seven grinds.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ആദ്യ hidden generation ആരംഭിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Cordelia and Prospero]
 Cordelia: Am I better than the sum of the sum of a big big hero and a big hero and a hero?
 Prospero: If so, let us proceed to act III.
 [Exeunt]
 
-Scene II: seed = SAVE(26 + five synthetic stones) = M; grind=1.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as the sum of Juliet and Romeo.
@@ -87,7 +87,7 @@ Prospero:
 [Enter Prospero and Desdemona]
 Prospero: You are a hero. Let us proceed to scene III.
 
-Scene III: grind dispatch 1..7; ഓരോ പ്രവേശനത്തിലും stage പുതുക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Desdemona and Prospero]
 Desdemona: Am I as good as a hero?
@@ -106,7 +106,7 @@ Desdemona: Am I as good as the sum of the sum of a big big hero and a big hero a
 Prospero: If so, let us proceed to scene X.
 Prospero: Let us proceed to scene XI.
 
-Scene IV: grind 1 uses wheat.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -115,7 +115,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene XII.
 
-Scene V: grind 2 uses barley.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -124,7 +124,7 @@ Prospero:
  You are as good as the sum of yourself and a big hero.
  Let us proceed to scene XII.
 
-Scene VI: grind 3 uses salt.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -133,7 +133,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big hero and a hero.
  Let us proceed to scene XII.
 
-Scene VII: grind 4 uses bitter.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -142,7 +142,7 @@ Prospero:
  You are as good as the sum of yourself and a big big hero.
  Let us proceed to scene XII.
 
-Scene VIII: grind 5 uses red.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -151,7 +151,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big big hero and a hero.
  Let us proceed to scene XII.
 
-Scene IX: grind 6 uses wheat again.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -160,7 +160,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big big hero and a big hero.
  Let us proceed to scene XII.
 
-Scene X: grind 7 uses barley again.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -169,7 +169,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of the sum of a big big hero and a big hero and a hero.
  Let us proceed to scene XII.
 
-Scene XI: hidden complete; output, count, next hidden index.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: Open your heart.
@@ -182,7 +182,7 @@ Prospero: You are as good as the sum of yourself and a hero.
 Cordelia: Am I better than the sum of the sum of a big big hero and a big hero and a hero?
 Prospero: If so, let us proceed to act III. Let us proceed to scene XIII.
 
-Scene XII: SAVE current grind result; increment grind; return to dispatch.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -193,7 +193,7 @@ Prospero:
 [Enter Prospero and Desdemona]
 Prospero: You are as good as the sum of yourself and a hero. Let us return to scene III.
 
-Scene XIII: അടുത്ത hidden seed വീണ്ടും അതേ synthetic fixture-ൽ നിർമ്മിക്കുന്നു.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -209,9 +209,9 @@ Prospero:
 [Enter Prospero and Desdemona]
 Prospero: You are a hero. Let us return to scene III.
 
-Act III: cardinality output.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: exactly seven hidden outputs were generated.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Portia]
 Prospero: Open your heart.

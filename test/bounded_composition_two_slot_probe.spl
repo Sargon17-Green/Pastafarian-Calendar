@@ -1,20 +1,20 @@
-രണ്ട് slot ഉള്ള bounded composition family-യുടെ exact countയും one-based unrank-ഉം പരിശോധിക്കുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, total സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, lower bound സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, upper bound സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, feasible first-value lower സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, feasible first-value upper സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, family count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, തിരഞ്ഞെടുക്കപ്പെട്ട ആദ്യ ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, തിരഞ്ഞെടുക്കപ്പെട്ട രണ്ടാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, താൽക്കാലിക bound സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: രണ്ട് slot-ിൽ lexicographic family interval കണക്കാക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: total, lo, hi, rank വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -32,7 +32,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: lower=max(lo,total-hi).
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Viola]
 Prospero:
  You are as good as the difference between Hamlet and Romeo.
@@ -40,20 +40,20 @@ Prospero:
  If so, let us proceed to scene III.
  Let us proceed to scene IV.
 
-Scene III: lower=total-hi.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Viola and Macbeth]
 Viola:
  You are as good as myself.
  Let us proceed to scene V.
 
-Scene IV: lower=lo.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Macbeth]
 Juliet:
  You are as good as myself.
 
-Scene V: upper=min(hi,total-lo).
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Viola]
 Prospero:
@@ -62,34 +62,34 @@ Prospero:
  If so, let us proceed to scene VI.
  Let us proceed to scene VII.
 
-Scene VI: upper=total-lo.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Viola and Lady Macbeth]
 Viola:
  You are as good as myself.
  Let us proceed to scene VIII.
 
-Scene VII: upper=hi.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Lady Macbeth]
 Romeo:
  You are as good as myself.
 
-Scene VIII: interval ശൂന്യമാണോ എന്ന് നോക്കുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  Are you better than Lady Macbeth?
  If so, let us proceed to scene XII.
 
-Scene IX: count=upper-lower+1.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as the difference between Lady Macbeth and Macbeth.
  You are as good as the sum of yourself and a hero.
 
-Scene X: first=lower+rank-1, second=total-first.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
@@ -100,7 +100,7 @@ Prospero:
 Prospero:
  You are as good as the difference between Hamlet and Cordelia.
 
-Scene XI: count, first, second പുറത്തിടുന്നു.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
@@ -115,7 +115,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene XII: ശൂന്യ family: 0,0,0.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:

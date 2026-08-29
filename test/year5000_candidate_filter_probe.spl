@@ -1,17 +1,17 @@
-Year 5000 candidate-ന്റെ clean Appendix A predicate ഒരൊറ്റ നിയന്ത്രണത്തിൽ പരിശോധിക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, open gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, calculation day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, close gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, gate-gap എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, year length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, output boolean സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, പരമാവധി year length 5778 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input/output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: gaps, length, interval membership എല്ലാം ചേർന്ന candidate predicate.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: നാല് inputs വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -29,7 +29,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: length കണക്കാക്കി output zero ആക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Macbeth]
 Hamlet:
  You are as good as the difference between Romeo and myself.
@@ -39,7 +39,7 @@ Prospero:
  You are nothing.
 [Exeunt]
 
-Scene III: 5778 exact binary sum ആയി നിർമ്മിക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero:
  You are a big big big big big big big big big big big big hero.
@@ -50,28 +50,28 @@ Prospero:
  You are as good as the sum of yourself and a big hero.
 [Exeunt]
 
-Scene IV: കുറഞ്ഞത് ആറു gap വേണം.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Othello]
 Prospero:
  Are you worse than the sum of a big big hero and a big hero?
  If so, let us proceed to scene IX.
 [Exeunt]
 
-Scene V: length കുറഞ്ഞത് 252 വേണം.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Macbeth]
 Prospero:
  Are you worse than the difference between a big big big big big big big big hero and a big big hero?
  If so, let us proceed to scene IX.
 [Exeunt]
 
-Scene VI: length 5778-നെ കവിയരുത്.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Cordelia and Macbeth]
 Cordelia:
  Are you better than myself?
  If so, let us proceed to scene IX.
 [Exeunt]
 
-Scene VII: calculation day open-നേക്കാൾ വലുതായിരിക്കണം, close-നേക്കാൾ കൂടുതലാകരുത്.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Juliet]
 Prospero:
  Are you better than Hamlet?
@@ -80,12 +80,12 @@ Prospero:
  If so, let us proceed to scene IX.
 [Exeunt]
 
-Scene VIII: എല്ലാ നിബന്ധനകളും വിജയിച്ചു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero:
  You are a hero.
 
-Scene IX: ഫലം പുറത്തിടുന്നു.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:

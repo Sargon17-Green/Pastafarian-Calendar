@@ -1,24 +1,24 @@
-ആറ് order-position കിണ്ണങ്ങളും ഒരേ പഴയ snapshot വായിക്കുന്ന simultaneous round control പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ഇപ്പോഴത്തെ position സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, ഇപ്പോഴത്തെ pending scalar ഫലം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, control fixture പ്രവർത്തിപ്പിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: എല്ലാ പഴയ കിണ്ണങ്ങളും ഒന്ന്, പകർച്ചകൾ ശൂന്യം, drop ഒന്ന്, stone ഒന്ന്, i ഒന്ന് എന്ന control fixture.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: position ഒന്നിൽ നിന്ന് തുടങ്ങുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  You are a hero.
  Let us proceed to scene II.
 
-Scene II: position ആറിനു മുകളിൽ എത്തിയോ എന്ന് നോക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Miranda:
  Are you worse than the sum of a big big hero and the sum of a big hero and a hero?
  If not, let us proceed to scene IV.
  Let us proceed to scene III.
 
-Scene III: shared old snapshot formula-യുടെ control രൂപമായ പതിമൂന്ന് plus position കണക്കാക്കി ഉടൻ പുറത്തിടുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:
@@ -30,5 +30,5 @@ Miranda:
  You are as good as the sum of yourself and a hero.
  Let us return to scene II.
 
-Scene IV: ആറു സ്ഥാനങ്ങളും പൂർത്തിയായി.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]

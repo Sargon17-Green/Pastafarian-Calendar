@@ -1,21 +1,21 @@
-പന്ത്രണ്ട് ശേഷവിചലനങ്ങളിൽ ഓരോന്നിന്റെ തുടക്കത്തിൽ സംരക്ഷിക്കുന്ന തുകയിൽ നിന്ന് 1..720 പരിധിയിലുള്ള bowl-order rank നേരിട്ട് കണ്ടെത്തുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ആദ്യ കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, രണ്ടാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, മൂന്നാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, നാലാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, അഞ്ചാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, ആറാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, stir നമ്പർ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, സംരക്ഷിച്ച തുക സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, bowl-order rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-King Lear, മഹാമനുഷ്യൻ M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, M നിർമ്മിക്കാനുള്ള ആവർത്തന എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+King Lear, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: 1A saved value-യും order rank-ഉം.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ആറു കിണ്ണങ്ങളും stir നമ്പറും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -44,7 +44,7 @@ Miranda:
 Miranda:
  Listen to your heart.
 
-Scene II: M=2^127-1 നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter King Lear and Viola]
 Viola:
@@ -52,7 +52,7 @@ Viola:
 King Lear:
  You are as good as the difference between a big big big big big big big hero and a hero.
 
-Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 King Lear:
  Are you better than nothing?
 Viola:
@@ -62,11 +62,11 @@ King Lear:
  You are as good as the difference between yourself and a hero.
  Let us return to scene III.
 
-Scene IV: M-ന്റെ അവസാന കുറവ്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Viola:
  You are as good as the difference between yourself and a hero.
 
-Scene V: raw sum + 149*stir സംരക്ഷിക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter King Lear and Prospero]
 King Lear:
@@ -84,7 +84,7 @@ King Lear:
  You are as good as the remainder of the quotient between yourself and King Lear.
  You are as good as the sum of yourself and a hero.
 
-Scene VI: saved value-ൽ നിന്ന് one-based rank 1..720 കണ്ടെത്തുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Portia]
 Prospero:
@@ -92,7 +92,7 @@ Prospero:
  You are as good as the remainder of the quotient between yourself and the product of a big big big hero and the product of the sum of a big big big hero and a hero and the sum of a big big big hero and a big hero.
  You are as good as the sum of yourself and a hero.
 
-Scene VII: saved value-യും rank-ഉം പുറത്തിടുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:

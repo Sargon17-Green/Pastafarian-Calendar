@@ -1,20 +1,20 @@
-ഒരു post-stir ആരംഭത്തിൽ സംരക്ഷിക്കപ്പെടുന്ന ഏക തുകയുടെ 1A വായന പരിശോധിക്കുന്നു.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ആദ്യ കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, രണ്ടാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, മൂന്നാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, നാലാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, അഞ്ചാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, ആറാം കിണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, stir നമ്പർ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, സംരക്ഷിക്കപ്പെടുന്ന തുക സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, മഹാമനുഷ്യൻ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, മഹാമനുഷ്യൻ നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: SAVE(sum(oldBowls) plus 149 times stirNumber).
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ആറു കിണ്ണങ്ങളും stir നമ്പറും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -44,14 +44,14 @@ Miranda:
  Listen to your heart.
 [Exeunt]
 
-Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Viola]
 Viola:
  You are a hero.
 Portia:
  You are as good as the difference between a big big big big big big big hero and a hero.
 
-Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Portia:
  Are you better than nothing?
 Viola:
@@ -61,12 +61,12 @@ Portia:
  You are as good as the difference between yourself and a hero.
  Let us return to scene III.
 
-Scene IV: മഹാമനുഷ്യന്റെ അവസാന കുറവ്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Viola:
  You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Scene V: raw sum-ലേക്ക് 149 stir ചേർത്ത് അതേ മൂല്യം SAVE ചെയ്യുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Prospero]
 Portia:
  You are as good as Hamlet.
@@ -84,7 +84,7 @@ Portia:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VI: സംരക്ഷിച്ച മൂല്യം പുറത്തിടുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Prospero]
 Miranda:
  Open your heart.

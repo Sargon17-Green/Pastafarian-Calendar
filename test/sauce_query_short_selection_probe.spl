@@ -1,22 +1,22 @@
-latched order-ിൽ കണ്ടെത്തിയ queried bowl value, അതിന്റെ successor bowl value, സ്ഥിര-ID bowl 6, seal എന്നിവയിൽ നിന്ന് askBowl first/step കണക്കാക്കി, ആദ്യ answer acceptance limit-ൽ തന്നെയാണെന്ന fixture-ിൽ short rank-ും gate gap-ും ഒരൊറ്റ clean Stage 1 source path-ൽ കണക്കാക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, queried bowl-ന്റെ final value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, latched order successor bowl-ന്റെ final value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, സ്ഥിര-ID bowl 6-ന്റെ final value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, seal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, selection family size N സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, first answer സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, direction number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, direction step സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, selected short rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, gate gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, M നിർമ്മിക്കുന്ന കഥാപാത്രം.
-Horatio, M നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: askBowl input വായിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: queried, successor, bowl 6, seal, N വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -38,14 +38,14 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: M = 2^127 - 1 നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Horatio]
 Horatio:
  You are a hero.
 Viola:
  You are as good as the difference between a big big big big big big big hero and a hero.
 
-Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Viola:
  Are you better than nothing?
 Horatio:
@@ -55,14 +55,14 @@ Viola:
  You are as good as the difference between yourself and a hero.
  Let us return to scene III.
 
-Scene IV: അവസാന കുറവ്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Horatio:
  You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Act II: askBowl scalar path.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: first = SAVE((queried+seal+181)^2 + 179*successor + seal).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Lady Macbeth]
 Viola:
  You are as good as the sum of Hamlet and Othello.
@@ -83,7 +83,7 @@ Viola:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: direction number = SAVE((first+seal+1+193)^2 + 193*first + 197*bowl6).
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Ophelia]
 Viola:
  You are as good as the sum of Lady Macbeth and Othello.
@@ -104,7 +104,7 @@ Viola:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: parity-യിൽ നിന്ന് direction step.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Ophelia and Cordelia]
 Ophelia:
  You are as good as the remainder of the quotient between Ophelia and a big hero.
@@ -115,20 +115,23 @@ Ophelia:
  Let us proceed to scene V.
 [Exeunt]
 
-Scene IV: odd -> plus one.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
  You are a hero.
  Let us proceed to scene VI.
 [Exeunt]
 
-Scene V: even -> minus one.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
  You are as good as the difference between nothing and a hero.
 [Exeunt]
 
-Scene VI: ആദ്യ answer സ്വീകരിക്കപ്പെടുന്ന fixture-ൽ rank = regularMod(first-1,N)+1.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as the difference between Lady Macbeth and a hero.
@@ -136,7 +139,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VII: gate gap = 41 + rank.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Portia]
 Prospero:
  You are as good as Desdemona.
@@ -145,7 +148,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VIII: first, step, rank, gap പുറത്തിടുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero:
  Open your heart.

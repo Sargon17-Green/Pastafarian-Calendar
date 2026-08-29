@@ -1,15 +1,15 @@
-ഇപ്പോൾ അറിയുന്ന ഏറ്റവും ഇടത്തേയും വലത്തേയും gate day-കളോട് ഒരു day താരതമ്യം ചെയ്ത് backward അല്ലെങ്കിൽ forward വിപുലീകരണം വേണമോ എന്ന് പറയുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, അറിയുന്ന ഇടത്തേയറ്റം gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, അറിയുന്ന വലത്തേയറ്റം gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, ചോദിക്കുന്ന day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, backward expansion flag സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, forward expansion flag സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: lazy gate coverage direction.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: known minimum, known maximum, day വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -22,7 +22,7 @@ Prospero:
 Prospero:
  Listen to your heart.
 
-Scene II: flags ശൂന്യമാക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
@@ -32,7 +32,7 @@ Prospero:
 Prospero:
  You are nothing.
 
-Scene III: day ഇടത്തേയറ്റത്തേക്കാൾ ചെറുതാണെങ്കിൽ backward flag.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Hamlet]
 Romeo:
@@ -41,14 +41,14 @@ Hamlet:
  If so, let us proceed to scene IV.
  Let us proceed to scene V.
 
-Scene IV: backward മാത്രം.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
  You are a hero.
  Let us proceed to scene VII.
 
-Scene V: day വലത്തേയറ്റത്തേക്കാൾ വലുതാണെങ്കിൽ forward flag.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Juliet]
 Romeo:
@@ -57,13 +57,13 @@ Juliet:
  If so, let us proceed to scene VI.
  Let us proceed to scene VII.
 
-Scene VI: forward മാത്രം.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  You are a hero.
 
-Scene VII: flags പുറത്തിടുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:

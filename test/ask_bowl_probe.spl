@@ -1,20 +1,20 @@
-ഒരു കിണ്ണശ്രോതസ്സിന്റെ ആദ്യ answer സംഖ്യയും സ്ഥിര ദിശയും കണക്കാക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ചോദിച്ച കിണ്ണത്തിന്റെ അന്തിമ മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, പൂട്ടിയ order-ിലുള്ള അടുത്ത കിണ്ണത്തിന്റെ അന്തിമ മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, ആറാം സ്ഥിര-ID കിണ്ണത്തിന്റെ അന്തിമ മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, seal സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, ആദ്യ answer സംഖ്യ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, direction number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, parity സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, direction step സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, മഹാമനുഷ്യൻ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, മഹാമനുഷ്യൻ നിർമ്മിക്കാനുള്ള എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: askBowl-ന്റെ scalar core.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: നാലു input-ുകൾ വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -32,14 +32,14 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Viola]
 Viola:
  You are a hero.
 Portia:
  You are as good as the difference between a big big big big big big big hero and a hero.
 
-Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Portia:
  Are you better than nothing?
 Viola:
@@ -49,12 +49,12 @@ Portia:
  You are as good as the difference between yourself and a hero.
  Let us return to scene III.
 
-Scene IV: മഹാമനുഷ്യന്റെ അവസാന കുറവ്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Viola:
  You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Scene V: first answer കണക്കാക്കി SAVE ചെയ്യുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Macbeth]
 Portia:
  You are as good as the sum of Hamlet and Othello.
@@ -75,7 +75,7 @@ Portia:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VI: direction number കണക്കാക്കി SAVE ചെയ്യുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Portia and Lady Macbeth]
 Portia:
  You are as good as the sum of Macbeth and Othello.
@@ -95,7 +95,7 @@ Portia:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VII: direction number-ന്റെ parity കണ്ടെത്തുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lady Macbeth and Ophelia]
 Lady Macbeth:
  You are as good as the remainder of the quotient between Lady Macbeth and a big hero.
@@ -106,20 +106,23 @@ Lady Macbeth:
  Let us proceed to scene IX.
 [Exeunt]
 
-Scene VIII: odd ആണെങ്കിൽ step plus one.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
  You are a hero.
  Let us proceed to scene X.
 [Exeunt]
 
-Scene IX: even ആണെങ്കിൽ step minus one.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
  You are as good as the difference between nothing and a hero.
 [Exeunt]
 
-Scene X: first, step എന്നിവ പുറത്തിടുന്നു.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  Open your heart.

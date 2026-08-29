@@ -1,18 +1,18 @@
-അറിയുന്ന വർഷരേഖയിൽ നിന്ന് അടുത്തതോ മുമ്പത്തേതോ ആയ വർഷത്തിന്റെ number-ും shared gate boundary-യും കൃത്യമായി നിർമ്മിക്കുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, അറിയുന്ന year number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, അറിയുന്ന open gate index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, അറിയുന്ന close gate index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, തിരഞ്ഞെടുത്ത പുതിയ outer gate index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, direction സൂക്ഷിക്കുന്ന കഥാപാത്രം; 1 അടുത്ത വർഷം, -1 മുമ്പത്തെ വർഷം.
-Lady Macbeth, പുതിയ year number സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, പുതിയ open index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, പുതിയ close index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: shared boundary സംരക്ഷിച്ചുള്ള year transition.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: year, open, close, selected outer index, direction വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -33,7 +33,7 @@ Prospero:
 Prospero:
  Listen to your heart.
 
-Scene II: direction positive ആണെങ്കിൽ next year.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Macbeth and Prospero]
 Macbeth:
@@ -42,7 +42,7 @@ Prospero:
  If so, let us proceed to scene III.
  Let us proceed to scene IV.
 
-Scene III: next year number+1; open=old close; close=selected outer.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:
@@ -57,7 +57,7 @@ Othello:
  You are as good as myself.
  Let us proceed to scene V.
 
-Scene IV: previous year number-1; close=old open; open=selected outer.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:
@@ -71,7 +71,7 @@ Othello:
 Juliet:
  You are as good as myself.
 
-Scene V: പുതിയ year record പുറത്തിടുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:

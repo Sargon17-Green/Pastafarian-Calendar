@@ -1,18 +1,18 @@
-പരിമിത composition suffix-ിൽ അടുത്ത ഘടകത്തിന് സാധുവായ lexicographic candidate പരിധി കണക്കാക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ശേഷിക്കുന്ന total സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ശേഷിക്കുന്ന slots എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, താഴത്തെ bound സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, മേലത്തെ bound സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, slots minus one സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, ഏറ്റവും ചെറിയ സാധുവായ candidate സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, ഏറ്റവും വലിയ സാധുവായ candidate സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, ഇടക്കാല arithmetic മൂല്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ശേഷിക്കുന്ന suffix bounds ഉപയോഗിച്ച് candidate window ചുരുക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: rem, slots, lo, hi വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -30,13 +30,13 @@ Miranda:
  Listen to your heart.
 [Exeunt]
 
-Scene II: slots minus one നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Macbeth]
 Miranda:
  You are as good as the difference between Juliet and a hero.
 [Exeunt]
 
-Scene III: lower candidate = rem minus remainingSlots times hi.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Prospero]
 Miranda:
  You are as good as the difference between Hamlet and the product of Macbeth and Othello.
@@ -48,12 +48,12 @@ Miranda:
  If so, let us proceed to scene IV.
  Let us proceed to scene V.
 
-Scene IV: lower candidate lo-നേക്കാൾ താഴെയെങ്കിൽ lo ഉപയോഗിക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Lady Macbeth:
  You are as good as Romeo.
  Let us proceed to scene V.
 
-Scene V: upper candidate = rem minus remainingSlots times lo.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:
@@ -66,12 +66,12 @@ Miranda:
  If so, let us proceed to scene VI.
  Let us proceed to scene VII.
 
-Scene VI: upper candidate hi-നേക്കാൾ കൂടുതലെങ്കിൽ hi ഉപയോഗിക്കുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 Ophelia:
  You are as good as Othello.
  Let us proceed to scene VII.
 
-Scene VII: inclusive candidate window പുറത്തിടുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Lady Macbeth]
 Miranda:

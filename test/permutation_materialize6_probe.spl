@@ -1,25 +1,25 @@
-ആറ് factoradic സൂചികകളിൽ നിന്ന് ശേഷിക്കുന്ന ID-കളെ ഓരോ തവണയും നീക്കി പൂർണ്ണ permutation നിർമ്മിക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ഇപ്പോഴത്തെ തിരഞ്ഞെടുപ്പ് നമ്പർ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ഒന്നാം factoradic digit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, രണ്ടാം factoradic digit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, മൂന്നാം factoradic digit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, നാലാം factoradic digit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, അഞ്ചാം factoradic digit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, ആറാം factoradic digit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, ഇപ്പോഴത്തെ zero-based digit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, ID ഒന്ന് സജീവമാണോ എന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, ID രണ്ട് സജീവമാണോ എന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Caliban, ID മൂന്ന് സജീവമാണോ എന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, ID നാല് സജീവമാണോ എന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Shylock, ID അഞ്ച് സജീവമാണോ എന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Horatio, ID ആറു സജീവമാണോ എന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Falstaff, തിരഞ്ഞെടുക്കപ്പെട്ട ID പുറത്തിടുന്ന കഥാപാത്രം.
-Polonius, control-flow സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Shylock, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: digits വായിച്ച് active-set ആരംഭിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ആറു digits വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Polonius and Juliet]
 Polonius:
  Listen to your heart.
@@ -45,7 +45,7 @@ Polonius:
  Listen to your heart.
 [Exeunt]
 
-Scene II: ആറു ID-കളും active ആക്കി തിരഞ്ഞെടുപ്പ് നമ്പർ ഒന്നാക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Polonius and Miranda]
 Polonius:
  You are a hero.
@@ -75,7 +75,7 @@ Polonius:
  You are a hero.
  Let us proceed to scene III.
 
-Scene III: തിരഞ്ഞെടുപ്പ് നമ്പർ അനുസരിച്ച് അടുത്ത digit load ചെയ്യുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Polonius:
  Are you better than the sum of a big big hero and a big hero?
  If so, let us proceed to scene XXIX.
@@ -91,49 +91,49 @@ Polonius:
  If so, let us proceed to scene V.
  Let us proceed to scene IV.
 
-Scene IV: ഒന്നാം digit load ചെയ്യുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Prospero]
 Juliet:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene V: രണ്ടാം digit load ചെയ്യുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Prospero]
 Romeo:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene VI: മൂന്നാം digit load ചെയ്യുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Othello and Prospero]
 Othello:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene VII: നാലാം digit load ചെയ്യുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Macbeth and Prospero]
 Macbeth:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene VIII: അഞ്ചാം digit load ചെയ്യുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lady Macbeth and Prospero]
 Lady Macbeth:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene IX: ആറാം digit load ചെയ്യുന്നു.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Ophelia and Prospero]
 Ophelia:
  You are as good as myself.
  Let us proceed to scene X.
 
-Scene X: ID ഒന്ന് active ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Miranda]
 Polonius:
@@ -141,7 +141,7 @@ Polonius:
  If so, let us proceed to scene XI.
  Let us proceed to scene XIII.
 
-Scene XI: current digit ശൂന്യമാണെങ്കിൽ ID ഒന്ന് തിരഞ്ഞെടുക്കുന്നു.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Prospero]
 Polonius:
@@ -149,12 +149,12 @@ Polonius:
  If so, let us proceed to scene XII.
  Let us proceed to scene XXI.
 
-Scene XII: active ID ഒന്ന് കടന്നതിനാൽ digit കുറയ്ക്കുന്നു.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
 Polonius:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene XIII.
 
-Scene XIII: ID രണ്ട് active ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Ariel]
 Polonius:
@@ -162,7 +162,7 @@ Polonius:
  If so, let us proceed to scene XIV.
  Let us proceed to scene XVI.
 
-Scene XIV: current digit ശൂന്യമാണെങ്കിൽ ID രണ്ട് തിരഞ്ഞെടുക്കുന്നു.
+Scene XIV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Prospero]
 Polonius:
@@ -170,12 +170,12 @@ Polonius:
  If so, let us proceed to scene XV.
  Let us proceed to scene XXII.
 
-Scene XV: active ID രണ്ട് കടന്നതിനാൽ digit കുറയ്ക്കുന്നു.
+Scene XV: കണക്കിന്റെ ഉപഘട്ടം.
 Polonius:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene XVI.
 
-Scene XVI: ID മൂന്ന് active ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene XVI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Caliban]
 Polonius:
@@ -183,7 +183,7 @@ Polonius:
  If so, let us proceed to scene XVII.
  Let us proceed to scene XIX.
 
-Scene XVII: current digit ശൂന്യമാണെങ്കിൽ ID മൂന്ന് തിരഞ്ഞെടുക്കുന്നു.
+Scene XVII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Prospero]
 Polonius:
@@ -191,12 +191,12 @@ Polonius:
  If so, let us proceed to scene XVIII.
  Let us proceed to scene XXIII.
 
-Scene XVIII: active ID മൂന്ന് കടന്നതിനാൽ digit കുറയ്ക്കുന്നു.
+Scene XVIII: കണക്കിന്റെ ഉപഘട്ടം.
 Polonius:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene XIX.
 
-Scene XIX: ID നാല് active ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene XIX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Portia]
 Polonius:
@@ -204,7 +204,7 @@ Polonius:
  If so, let us proceed to scene XX.
  Let us proceed to scene XXV.
 
-Scene XX: current digit ശൂന്യമാണെങ്കിൽ ID നാല് തിരഞ്ഞെടുക്കുന്നു; അല്ലെങ്കിൽ scan തുടരുന്നു.
+Scene XX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Prospero]
 Polonius:
@@ -212,7 +212,7 @@ Polonius:
  If so, let us proceed to scene XXIV.
  Let us proceed to scene XXIV.
 
-Scene XXI: ID ഒന്ന് തിരഞ്ഞെടുക്കുകയും active-set-ൽ നിന്ന് നീക്കുകയും ചെയ്യുന്നു.
+Scene XXI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Miranda]
 Polonius:
@@ -228,7 +228,7 @@ Polonius:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene III.
 
-Scene XXII: ID രണ്ട് തിരഞ്ഞെടുക്കുകയും active-set-ൽ നിന്ന് നീക്കുകയും ചെയ്യുന്നു.
+Scene XXII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Ariel]
 Polonius:
@@ -244,7 +244,7 @@ Polonius:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene III.
 
-Scene XXIII: ID മൂന്ന് തിരഞ്ഞെടുക്കുകയും active-set-ൽ നിന്ന് നീക്കുകയും ചെയ്യുന്നു.
+Scene XXIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Caliban]
 Polonius:
@@ -260,7 +260,7 @@ Polonius:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene III.
 
-Scene XXIV: ID നാല് active ആണെങ്കിൽ digit പരിശോധിച്ച് തിരഞ്ഞെടുക്കുന്നു; അല്ലെങ്കിൽ ID അഞ്ചിലേക്കു നീങ്ങുന്നു.
+Scene XXIV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Portia]
 Polonius:
@@ -268,7 +268,7 @@ Polonius:
  If so, let us proceed to scene XXX.
  Let us proceed to scene XXV.
 
-Scene XXV: ID അഞ്ച് active ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene XXV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Shylock]
 Polonius:
@@ -276,7 +276,7 @@ Polonius:
  If so, let us proceed to scene XXVI.
  Let us proceed to scene XXVIII.
 
-Scene XXVI: current digit ശൂന്യമാണെങ്കിൽ ID അഞ്ച് തിരഞ്ഞെടുക്കുന്നു.
+Scene XXVI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Prospero]
 Polonius:
@@ -284,12 +284,12 @@ Polonius:
  If so, let us proceed to scene XXVII.
  Let us proceed to scene XXXVI.
 
-Scene XXVII: active ID അഞ്ച് കടന്നതിനാൽ digit കുറയ്ക്കുന്നു.
+Scene XXVII: കണക്കിന്റെ ഉപഘട്ടം.
 Polonius:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene XXVIII.
 
-Scene XXVIII: അവസാന active ID ആറു സാധുവായ digit ശൂന്യത്തിൽ തിരഞ്ഞെടുക്കുന്നു.
+Scene XXVIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Horatio]
 Polonius:
@@ -302,10 +302,10 @@ Polonius:
  If so, let us proceed to scene XXXIII.
  Let us proceed to scene XXXII.
 
-Scene XXIX: ആറു തിരഞ്ഞെടുപ്പുകളും പൂർത്തിയായി.
+Scene XXIX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 
-Scene XXX: ID നാല് active ആയതിനാൽ current digit പരിശോധിക്കുന്നു.
+Scene XXX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Prospero]
 Polonius:
@@ -313,14 +313,14 @@ Polonius:
  If so, let us proceed to scene XXXIV.
  Let us proceed to scene XXXV.
 
-Scene XXXI: ഉപയോഗിക്കാത്ത reserved bridge.
+Scene XXXI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Falstaff]
 Polonius:
  You are as good as Falstaff.
  Let us proceed to scene XXVIII.
 
-Scene XXXII: ID ആറു തിരഞ്ഞെടുക്കുകയും active-set-ൽ നിന്ന് നീക്കുകയും ചെയ്യുന്നു.
+Scene XXXII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Horatio]
 Polonius:
@@ -336,7 +336,7 @@ Polonius:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene III.
 
-Scene XXXIII: സാധുവായ factoradic digit പരിധി ലംഘിച്ച diagnostic path.
+Scene XXXIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Falstaff]
 Polonius:
@@ -344,14 +344,14 @@ Polonius:
  Open your heart.
 [Exeunt]
 
-Scene XXXIV: active ID നാല് കടന്നതിനാൽ digit കുറയ്ക്കുന്നു.
+Scene XXXIV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Prospero]
 Polonius:
  You are as good as the difference between yourself and a hero.
  Let us proceed to scene XXV.
 
-Scene XXXV: ID നാല് തിരഞ്ഞെടുക്കുകയും active-set-ൽ നിന്ന് നീക്കുകയും ചെയ്യുന്നു.
+Scene XXXV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Portia]
 Polonius:
@@ -367,7 +367,7 @@ Polonius:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene III.
 
-Scene XXXVI: ID അഞ്ച് തിരഞ്ഞെടുക്കുകയും active-set-ൽ നിന്ന് നീക്കുകയും ചെയ്യുന്നു.
+Scene XXXVI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Polonius and Shylock]
 Polonius:

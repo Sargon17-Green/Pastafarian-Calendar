@@ -1,15 +1,15 @@
-ഒരു വർഷജോടി നോർമറ്റീവ് പരിധിയിൽ പെടുന്നുവോ എന്ന scalar പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, gate gap എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, വർഷദൈർഘ്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, വിധി സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, input വായിക്കാൻ സഹായിക്കുന്ന കഥാപാത്രം.
-Macbeth, കുറഞ്ഞ വർഷദൈർഘ്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, കൂടിയ വർഷദൈർഘ്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ആറും 252 മുതൽ 5778 വരെയും എന്ന നിർബന്ധിത predicate.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: gap എണ്ണവും ദൈർഘ്യവും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Othello and Hamlet]
 Othello:
  Listen to your heart.
@@ -19,7 +19,7 @@ Othello:
  Listen to your heart.
 [Exeunt]
 
-Scene II: 252യും 5778യും source-ൽ exact integer ആയി നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Romeo and Macbeth]
 Romeo:
  You are as good as the difference between a big big big big big big big big hero and a big big hero.
@@ -34,16 +34,16 @@ Romeo:
  You are as good as the sum of yourself and a big hero.
 [Exeunt]
 
-Scene III: ആദ്യം false ആയി തുടങ്ങുന്നു; gate gap കുറഞ്ഞത് ആറ് വേണം.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Romeo and Hamlet]
-Romeo:
- You are nothing.
- Am I worse than the sum of a big big hero and a big hero?
 Hamlet:
+ You are nothing.
+Romeo:
+ Are you worse than the sum of a big big hero and a big hero?
  If so, let us proceed to scene VII.
 [Exeunt]
 
-Scene IV: താഴത്തെ ദൈർഘ്യപരിധി പരിശോധിക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Romeo and Juliet]
 Juliet:
  Am I worse than Macbeth?
@@ -51,7 +51,7 @@ Romeo:
  If so, let us proceed to scene VII.
 [Exeunt]
 
-Scene V: മുകളിലെ ദൈർഘ്യപരിധി പരിശോധിക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Romeo and Juliet]
 Juliet:
  Am I better than Lady Macbeth?
@@ -59,12 +59,12 @@ Romeo:
  If so, let us proceed to scene VII.
 [Exeunt]
 
-Scene VI: എല്ലാ പരിധികളും പാലിച്ചാൽ true.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Romeo and Hamlet]
-Romeo:
+Hamlet:
  You are a hero.
 
-Scene VII: വിധി പുറത്തിടുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Othello and Romeo]
 Othello:

@@ -1,23 +1,23 @@
-Appendix A-യിലെ 11 visible-grind rows-നെ grind index-ിൽ നിന്ന് `a,b,c,d,stoneKind` ആയി map ചെയ്യുന്ന Stage 1 control. stoneKind machine code: wheat=1, barley=2, salt=3, bitter=4, red=5.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, grind index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, coefficient a സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, coefficient b സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, coefficient c സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, coefficient d സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, stone kind code സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output-ും branching-ും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: grind index വായിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: input.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
 
-Act II: row തിരഞ്ഞെടുക്കുന്നു.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: grind 1..11 dispatch.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Hamlet: Am I as good as a hero?
 Prospero: If so, let us proceed to scene II.
@@ -43,7 +43,7 @@ Hamlet: Am I as good as the sum of the sum of a big big big hero and a big hero 
 Prospero: If so, let us proceed to scene XII.
 Prospero: Let us proceed to act IV.
 
-Scene II: row 1 = 3,5,7,11,wheat.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of a big hero and a hero.
@@ -61,7 +61,8 @@ Prospero: You are as good as the sum of the sum of a big big big hero and a big 
 Prospero: You are a hero. Let us proceed to act III.
 [Exeunt]
 
-Scene III: row 2 = 5,7,11,13,barley.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of a big big hero and a hero.
 [Exeunt]
@@ -78,7 +79,8 @@ Prospero: You are as good as the sum of the sum of a big big big hero and a big 
 Prospero: You are a big hero. Let us proceed to act III.
 [Exeunt]
 
-Scene IV: row 3 = 7,11,13,17,salt.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of the sum of a big big hero and a big hero and a hero.
 [Exeunt]
@@ -95,7 +97,8 @@ Prospero: You are as good as the sum of a big big big big hero and a hero.
 Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act III.
 [Exeunt]
 
-Scene V: row 4 = 11,13,17,19,bitter.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of the sum of a big big big hero and a big hero and a hero.
 [Exeunt]
@@ -112,7 +115,8 @@ Prospero: You are as good as the sum of the sum of a big big big big hero and a 
 Prospero: You are a big big hero. Let us proceed to act III.
 [Exeunt]
 
-Scene VI: row 5 = 13,17,19,23,red.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of the sum of a big big big hero and a big big hero and a hero.
 [Exeunt]
@@ -129,7 +133,8 @@ Prospero: You are as good as the sum of the sum of a big big big big hero and a 
 Prospero: You are as good as the sum of a big big hero and a hero. Let us proceed to act III.
 [Exeunt]
 
-Scene VII: row 6 = 17,19,23,29,wheat.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of a big big big big hero and a hero.
 [Exeunt]
@@ -146,7 +151,8 @@ Prospero: You are as good as the sum of the sum of a big big big big hero and a 
 Prospero: You are a hero. Let us proceed to act III.
 [Exeunt]
 
-Scene VIII: row 7 = 19,23,29,31,barley.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of the sum of a big big big big hero and a big hero and a hero.
 [Exeunt]
@@ -157,13 +163,14 @@ Prospero: You are as good as the sum of the sum of a big big big big hero and a 
 Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 [Enter Prospero and Macbeth]
-Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero: You are a big hero. Let us proceed to act III.
 [Exeunt]
 
-Scene IX: row 8 = 23,29,31,37,salt.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of the sum of a big big big big hero and a big big hero and a hero.
 [Exeunt]
@@ -171,7 +178,7 @@ Prospero: You are as good as the sum of the sum of a big big big big hero and a 
 Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 [Enter Prospero and Othello]
-Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
@@ -180,12 +187,13 @@ Prospero: You are as good as the sum of a big big big big big hero and the sum o
 Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act III.
 [Exeunt]
 
-Scene X: row 9 = 29,31,37,41,bitter.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 [Enter Prospero and Romeo]
-Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
@@ -197,9 +205,10 @@ Prospero: You are as good as the sum of a big big big big big hero and the sum o
 Prospero: You are a big big hero. Let us proceed to act III.
 [Exeunt]
 
-Scene XI: row 10 = 31,37,41,43,red.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
-Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero.
+Prospero: You are as good as the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero.
 [Exeunt]
 [Enter Prospero and Romeo]
 Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
@@ -214,7 +223,8 @@ Prospero: You are as good as the sum of a big big big big big hero and the sum o
 Prospero: You are as good as the sum of a big big hero and a hero. Let us proceed to act III.
 [Exeunt]
 
-Scene XII: row 11 = 37,41,43,47,wheat.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of a big big big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
@@ -231,9 +241,10 @@ Prospero: You are as good as the sum of the sum of a big big big big big hero an
 Prospero: You are a hero. Let us proceed to act III.
 [Exeunt]
 
-Act III: valid row output.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: a,b,c,d,kind പുറത്തിടുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: Open your heart.
 [Exeunt]
@@ -250,11 +261,10 @@ Prospero: Open your heart.
 Prospero: Open your heart.
 [Exeunt]
 
-Act IV: invalid row.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-[Exeunt]
 
-Scene I: അഞ്ചു zero sentinel values.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Juliet]
 Prospero: You are nothing. Open your heart.
 [Exeunt]

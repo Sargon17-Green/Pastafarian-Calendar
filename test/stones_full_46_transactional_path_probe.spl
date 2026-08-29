@@ -1,24 +1,24 @@
-Appendix A stone table-ന്റെ row 1 മുതൽ row 46 വരെ മുഴുവൻ transactional recurrence ഒരൊറ്റ clean Stage 1 source-ൽ സഞ്ചരിക്കുന്ന ownership/integration probe. ഓരോ പുതിയ row-ലെയും അഞ്ച് pending values ഒരേ old five-stone snapshot മാത്രം വായിക്കുന്നു; അഞ്ച് pending values തയ്യാറായ ശേഷമേ commit ഉണ്ടാകൂ. row 2, row 3 exact value probes വേറെയുണ്ട്; ഇവിടെ full path cardinalityയും commit boundaryയും പരിശോധിക്കുന്നു. expected outputs: 45 committed transitions, final committed row index 46.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, old wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, old barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, old salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, old bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, old red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, pending wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, pending barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, pending salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, pending bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, pending red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, current row index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, committed transition count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, M doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Caliban, assignment, SAVE, output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: Mയും row 1-ഉം.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: M നിർമ്മിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Prospero]
 Caliban: You are a hero.
 [Exeunt]
@@ -27,7 +27,7 @@ Caliban: You are as good as the difference between a big big big big big big big
 [Exeunt]
 [Enter Prospero and Ariel]
 
-Scene II: exact doubling.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Prospero: Are you better than nothing?
 Ariel:
  If not, let us proceed to scene III.
@@ -36,13 +36,13 @@ Ariel:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: M minus one.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Caliban and Prospero]
 Caliban: You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Scene IV: normative row 1.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Hamlet]
 Caliban: You are as good as the sum of a big big big big hero and a hero.
 [Exeunt]
@@ -59,7 +59,7 @@ Caliban: You are as good as the sum of a big big big big big big hero and the su
 Caliban: You are as good as the sum of a big big big big big big hero and the sum of a big big big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene V: row index 2, commit count 0.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Viola]
 Caliban: You are a big hero.
 [Exeunt]
@@ -67,15 +67,16 @@ Caliban: You are a big hero.
 Caliban: You are nothing.
 [Exeunt]
 
-Act II: one full simultaneous stone transition.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: stop after row 46 is committed.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Viola and Caliban]
 Viola: Am I better than the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
 Caliban: If so, let us proceed to act IV.
 [Exeunt]
 
-Scene II: pending wheat = SAVE(wheat^2 + 3*barley + i).
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Lady Macbeth]
 Caliban:
  You are as good as the sum of the product of Hamlet and Hamlet and the product of the sum of a big hero and a hero and Juliet.
@@ -85,7 +86,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: pending barley = SAVE(barley^2 + 5*salt + wheat).
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Ophelia]
 Caliban:
  You are as good as the sum of the product of Juliet and Juliet and the product of the sum of a big big hero and a hero and Romeo.
@@ -95,7 +96,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: pending salt = SAVE(salt^2 + 7*bitter + barley).
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Cordelia]
 Caliban:
  You are as good as the sum of the product of Romeo and Romeo and the product of the sum of the sum of a big big hero and a big hero and a hero and Othello.
@@ -105,7 +106,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene V: pending bitter = SAVE(bitter^2 + 11*red + salt).
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Desdemona]
 Caliban:
  You are as good as the sum of the product of Othello and Othello and the product of the sum of the sum of a big big big hero and a big hero and a hero and Macbeth.
@@ -115,7 +116,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VI: pending red = SAVE(red^2 + 13*wheat + bitter).
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Portia]
 Caliban:
  You are as good as the sum of the product of Macbeth and Macbeth and the product of the sum of the sum of a big big big hero and a big big hero and a hero and Hamlet.
@@ -125,9 +126,9 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Act III: commit five pending values only after all reads are complete.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: commit wheat and barley.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lady Macbeth and Hamlet]
 Lady Macbeth: You are as good as Lady Macbeth.
 [Exeunt]
@@ -135,7 +136,7 @@ Lady Macbeth: You are as good as Lady Macbeth.
 Ophelia: You are as good as Ophelia.
 [Exeunt]
 
-Scene II: commit salt, bitter, red.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Cordelia and Romeo]
 Cordelia: You are as good as Cordelia.
 [Exeunt]
@@ -146,7 +147,7 @@ Desdemona: You are as good as Desdemona.
 Portia: You are as good as Portia.
 [Exeunt]
 
-Scene III: count commit; if row 46 just committed, finish; otherwise increment row.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Miranda]
 Caliban: You are as good as the sum of yourself and a hero.
 [Exeunt]
@@ -158,9 +159,10 @@ Caliban: If so, let us proceed to act IV.
 Caliban: You are as good as the sum of yourself and a hero. Let us return to act II.
 [Exeunt]
 
-Act IV: full-table control outputs.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: transition count and final row index.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Caliban and Miranda]
 Caliban: Open your heart.
 [Exeunt]

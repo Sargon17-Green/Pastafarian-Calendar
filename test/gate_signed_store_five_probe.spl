@@ -1,19 +1,19 @@
-Foundation gate-നെ ചുറ്റിയുള്ള രണ്ടു positive gap-ുകളും രണ്ടു negative gap-ുകളും ഉപയോഗിച്ച് gate[-2], gate[-1], gate[0], gate[1], gate[2] ഒരേ ചെറിയ signed store ആയി materialize ചെയ്യുന്ന clean Stage 1 പരീക്ഷണം. gap values ഇതിനകം normative sauce/selection-ൽ നിന്നുള്ളവയെന്ന isolation കരാർ ഇവിടെ സ്വീകരിക്കുന്നു.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, foundation gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, positive gap 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, positive gap 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, negative gap 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, negative gap 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, gate minus 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, gate minus 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, gate plus 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, gate plus 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: inputs.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: foundation-ും നാല് gaps-ും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -30,9 +30,9 @@ Prospero: Listen to your heart.
 Prospero: Listen to your heart.
 [Exeunt]
 
-Act II: signed gate store.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: negative side.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero: You are as good as the difference between Hamlet and Othello.
 [Exeunt]
@@ -40,7 +40,7 @@ Prospero: You are as good as the difference between Hamlet and Othello.
 Prospero: You are as good as the difference between Lady Macbeth and Macbeth.
 [Exeunt]
 
-Scene II: positive side.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero: You are as good as the sum of Hamlet and Juliet.
 [Exeunt]
@@ -48,9 +48,9 @@ Prospero: You are as good as the sum of Hamlet and Juliet.
 Prospero: You are as good as the sum of Cordelia and Romeo.
 [Exeunt]
 
-Act III: -2,-1,0,+1,+2 output.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: outputs.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero: Open your heart.
 [Exeunt]

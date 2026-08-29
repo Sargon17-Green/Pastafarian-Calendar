@@ -1,21 +1,21 @@
-വർഷദൈർഘ്യത്തിൽ നിന്ന് നിർബന്ധിത മാസം-എണ്ണ പരിധി കണക്കാക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, വർഷദൈർഘ്യം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, കുറഞ്ഞ മാസം-എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, കൂടിയ മാസം-എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, നൂറ്റിയിരുപത്തിമൂന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, നാൽപ്പത്തിയേഴ് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ceilDiv length 123 മുതൽ min 47 floorDiv length 4 വരെ.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: വർഷദൈർഘ്യം വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
 [Exeunt]
 
-Scene II: നൂറ്റിയിരുപത്തിമൂന്നും നാൽപ്പത്തിയേഴും നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Othello]
 Miranda:
  You are as good as the difference between a big big big big big big big hero and the sum of a big big hero and a hero.
@@ -25,7 +25,7 @@ Miranda:
  You are as good as the difference between the sum of a big big big big big hero and a big big big big hero and a hero.
 [Exeunt]
 
-Scene III: കുറഞ്ഞ എണ്ണം ceiling division ഉപയോഗിച്ച് കണക്കാക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Juliet]
 Miranda:
  You are as good as the sum of Hamlet and Othello.
@@ -33,7 +33,7 @@ Miranda:
  You are as good as the quotient between yourself and Othello.
 [Exeunt]
 
-Scene IV: കൂടിയ എണ്ണം floor division വഴി കണക്കാക്കി നാൽപ്പത്തിയേഴിൽ cap ചെയ്യുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Romeo]
 Miranda:
  You are as good as the quotient between Hamlet and a big big hero.
@@ -41,12 +41,12 @@ Miranda:
  If so, let us proceed to scene V.
  Let us proceed to scene VI.
 
-Scene V: പരമാവധി നാൽപ്പത്തിയേഴ് ആക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 Miranda:
  You are as good as Macbeth.
  Let us proceed to scene VI.
 
-Scene VI: കുറഞ്ഞതും കൂടിയതും പുറത്തിടുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:

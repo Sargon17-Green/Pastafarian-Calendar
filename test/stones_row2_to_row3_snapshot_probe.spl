@@ -1,20 +1,20 @@
-രണ്ടാം stone row commit ചെയ്തതിന് ശേഷം അതിന്റെ മുഴുവൻ old snapshot മാത്രം ഉപയോഗിച്ച് മൂന്നാം row നിർമ്മിക്കുന്ന clean Stage 1 പരീക്ഷണം. ഈ fixture-ിലെ എല്ലാ raw values-ും M-നേക്കാൾ വളരെ ചെറുതായതിനാൽ SAVE identity ആണ്; ലക്ഷ്യം sequential contamination ഇല്ലെന്ന് ഉറപ്പാക്കലാണ്.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, row 2 wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, row 2 barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, row 2 salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, row 2 bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, row 2 red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, row 3 wheat pending സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, row 3 barley pending സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, row 3 salt pending സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, row 3 bitter pending സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, row 3 red pending സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: committed row 2 snapshot വായിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: അഞ്ചു old values.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -31,9 +31,9 @@ Prospero: Listen to your heart.
 Prospero: Listen to your heart.
 [Exeunt]
 
-Act II: row 3 pending values എല്ലാം അതേ old snapshot-ൽ നിന്ന്.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: wheat3 = wheat2^2 + 3*barley2 + 3.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero:
  You are as good as the product of Hamlet and Hamlet.
@@ -41,7 +41,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big hero and a hero.
 [Exeunt]
 
-Scene II: barley3 = barley2^2 + 5*salt2 + wheat2.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as the product of Juliet and Juliet.
@@ -49,7 +49,7 @@ Prospero:
  You are as good as the sum of yourself and Hamlet.
 [Exeunt]
 
-Scene III: salt3 = salt2^2 + 7*bitter2 + barley2.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero:
  You are as good as the product of Romeo and Romeo.
@@ -57,7 +57,7 @@ Prospero:
  You are as good as the sum of yourself and Juliet.
 [Exeunt]
 
-Scene IV: bitter3 = bitter2^2 + 11*red2 + salt2.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Desdemona]
 Prospero:
  You are as good as the product of Othello and Othello.
@@ -65,7 +65,7 @@ Prospero:
  You are as good as the sum of yourself and Romeo.
 [Exeunt]
 
-Scene V: red3 = red2^2 + 13*wheat2 + bitter2.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Portia]
 Prospero:
  You are as good as the product of Macbeth and Macbeth.
@@ -73,9 +73,9 @@ Prospero:
  You are as good as the sum of yourself and Othello.
 [Exeunt]
 
-Act III: ഒരുമിച്ച് output.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: അഞ്ച് pending values.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero: Open your heart.
 [Exeunt]

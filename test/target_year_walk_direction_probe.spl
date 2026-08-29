@@ -1,14 +1,14 @@
-ലക്ഷ്യദിവസം നിലവിലെ വർഷത്തിൽ ആണോ മുൻവർഷത്തിലേക്കോ അടുത്തവർഷത്തിലേക്കോ നീങ്ങണമോ എന്ന് പരിശോധിക്കുന്ന പരീക്ഷണം.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, year open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, target day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, year close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, direction code സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: Appendix A-യിലെ sequential walk conditions.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: open, target, close വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -22,7 +22,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: target close-നേക്കാൾ വലുതെങ്കിൽ അടുത്ത വർഷം.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Juliet]
 Prospero:
  Are you better than Romeo?
@@ -31,7 +31,7 @@ Prospero:
  If so, let us proceed to scene V.
  Let us proceed to scene IV.
 
-Scene III: direction +1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
@@ -39,7 +39,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene IV: target <= open ആയതിനാൽ direction -1.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
@@ -47,7 +47,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene V: open < target <= close; direction 0.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:

@@ -1,18 +1,18 @@
-നിയമപരമായ month-weaving move പ്രയോഗിച്ച ശേഷം remaining, openedUpTo, closedUpTo പുതുക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, തിരഞ്ഞെടുത്ത മാസത്തിന്റെ remaining എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, തിരഞ്ഞെടുത്ത മാസത്തിന്റെ original length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, തിരഞ്ഞെടുത്ത month ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, openedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, closedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, പുതിയ remaining സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, പുതിയ openedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, പുതിയ closedUpTo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: Appendix A-യിലെ applyWeaveMove state transition isolate ചെയ്യുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: remaining, original, j, openedUpTo, closedUpTo വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -34,7 +34,7 @@ Miranda:
  Listen to your heart.
 [Exeunt]
 
-Scene II: output state-ന്റെ opened/closed ഭാഗങ്ങൾ പഴയ state-ൽ നിന്ന് പകർത്തുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Ophelia]
 Miranda:
  You are as good as Othello.
@@ -44,7 +44,7 @@ Miranda:
  You are as good as Macbeth.
 [Exeunt]
 
-Scene III: remaining original-നോട് തുല്യമെങ്കിൽ ഈ move ആദ്യ തുറക്കലാണ്.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Are you better than Juliet?
@@ -53,14 +53,14 @@ Miranda:
  If so, let us proceed to scene V.
  Let us proceed to scene IV.
 
-Scene IV: openedUpTo month ID ആക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Ophelia]
 Miranda:
  You are as good as Romeo.
  Let us proceed to scene V.
 
-Scene V: remaining ഒന്ന് കുറയ്ക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Lady Macbeth]
 Miranda:
@@ -69,14 +69,14 @@ Miranda:
  If so, let us proceed to scene VII.
  Let us proceed to scene VI.
 
-Scene VI: പുതിയ remaining ശൂന്യമായതിനാൽ closedUpTo month ID ആക്കുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Prospero]
 Miranda:
  You are as good as Romeo.
  Let us proceed to scene VII.
 
-Scene VII: പുതിയ remaining, openedUpTo, closedUpTo പുറത്തിടുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Lady Macbeth]
 Miranda:

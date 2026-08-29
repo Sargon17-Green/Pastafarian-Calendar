@@ -1,16 +1,16 @@
-AnswerStream first/step മുതൽ short rejection selection നടത്തി gate gap = 41 + selectedRank വരെ ഒരൊറ്റ clean Stage 1 source path-ൽ ബന്ധിപ്പിക്കുന്ന പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ഇപ്പോഴത്തെ ring answer സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, direction step സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, വഴികളുടെ എണ്ണം N സൂക്ഷിക്കുന്ന കഥാപാത്രം; gate fixture-ൽ ഇത് 922 ആണ്.
-Othello, മഹാമനുഷ്യൻ M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, acceptance limit സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, selected rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, gate gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: short rejection path gate gap-ലേക്ക് ബന്ധിപ്പിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: first, step, N വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Juliet]
 Juliet:
  Listen to your heart.
@@ -24,14 +24,14 @@ Romeo:
  You are nothing.
 [Exeunt]
 
-Scene II: മഹാമനുഷ്യൻ നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Othello and Lady Macbeth]
 Lady Macbeth:
  You are a hero.
 Othello:
  You are as good as the difference between a big big big big big big big hero and a hero.
 
-Scene III: നൂറ്റിയിരുപത്തേഴു ഇരട്ടിക്കലുകൾ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 Othello:
  Are you better than nothing?
 Lady Macbeth:
@@ -42,7 +42,7 @@ Lady Macbeth:
  You are as good as the product of yourself and a big hero.
  Let us return to scene III.
 
-Scene IV: M-ന്റെ അവസാന കുറവും acceptance limit-ും.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 Lady Macbeth:
  You are as good as the difference between yourself and a hero.
 [Exeunt]
@@ -50,7 +50,7 @@ Lady Macbeth:
 Romeo:
  You are as good as the product of the quotient between Othello and Romeo and Romeo.
 
-Scene V: answer limit-നുള്ളിലാണെങ്കിൽ rank കണ്ടെത്തുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Hamlet and Ophelia]
 Hamlet:
@@ -63,7 +63,7 @@ Hamlet:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene X.
 
-Scene VI: rejection ആയതിനാൽ അതേ ring-ൽ step ഒന്ന് മാത്രം നീങ്ങുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Hamlet]
 Juliet:
@@ -77,22 +77,22 @@ Hamlet:
  If so, let us proceed to scene VIII.
  Let us proceed to scene IX.
 
-Scene VII: M-ന് മുകളിൽ പോയാൽ ഒന്നിലേക്ക് wrap.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 Juliet:
  You are a hero.
  Let us proceed to scene IX.
 
-Scene VIII: ഒന്നിനു താഴെ പോയാൽ M-ലേക്ക് wrap.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 Juliet:
  You are as good as Othello.
 
-Scene IX: rejection പരിശോധനയിലേക്ക് മടങ്ങുന്നു.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Hamlet and Ophelia]
 Hamlet:
  Let us return to scene V.
 
-Scene X: selected rank-ലേക്ക് 41 ചേർത്ത് gap output ചെയ്യുന്നു.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Ophelia and Cordelia]
 Ophelia:

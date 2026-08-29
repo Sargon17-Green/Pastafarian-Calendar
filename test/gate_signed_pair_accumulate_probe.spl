@@ -1,17 +1,17 @@
-Foundation-ന്റെ ഇരുവശത്തും rank-ിൽ നിന്ന് gate gap നിർമ്മിച്ച് signed direction അനുസരിച്ച് കൂട്ടുകയോ കുറയ്ക്കുകയോ ചെയ്യുന്ന Stage 1 no-wrap fixture. rank `1..922` ആണെങ്കിൽ gap `41+rank`, അതായത് `42..963`.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, Foundation day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, positive side rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, negative side rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, positive gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, negative gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, gate plus one സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, gate minus one സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: inputs.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: Foundation, positive rank, negative rank വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -22,9 +22,9 @@ Prospero: Listen to your heart.
 Prospero: Listen to your heart.
 [Exeunt]
 
-Act II: gaps and signed gates.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: positive gap = 41 + rank.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Othello]
 Prospero:
  You are as good as Juliet.
@@ -33,7 +33,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: negative gap = 41 + rank.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Macbeth]
 Prospero:
  You are as good as Romeo.
@@ -42,7 +42,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: gate +1 and gate -1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero: You are as good as the sum of Hamlet and Othello.
 [Exeunt]
@@ -50,9 +50,9 @@ Prospero: You are as good as the sum of Hamlet and Othello.
 Prospero: You are as good as the difference between Hamlet and Macbeth.
 [Exeunt]
 
-Act III: outputs.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: positive പിന്നെ negative gate.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero: Open your heart.
 [Exeunt]

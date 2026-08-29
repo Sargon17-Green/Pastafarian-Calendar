@@ -1,23 +1,23 @@
-ഒരു known year-ന്റെ open gate പുതിയ close gate ആകുന്ന previous-year isolation-ൽ, മൂന്ന് descending open-gate candidates `gaps >= 6` കൂടാതെ `252 <= length <= 5778` പ്രകാരം scan ചെയ്ത് valid candidates-ന്റെ one-based rank resolve ചെയ്യുന്ന clean Stage 1 പരിശോധന. ഒരേ close gate ഉള്ളതിനാൽ open day descending scan length ascending order തന്നെയാണ്.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, close gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, candidate 1 open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, candidate 2 open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, candidate 3 open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, candidate 1 gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, candidate 2 gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, candidate 3 gap count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, requested one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, valid count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, selected open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, current candidate length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Rosalind, കുറഞ്ഞ വർഷദൈർഘ്യം 252 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Beatrice, കൂടിയ വർഷദൈർഘ്യം 5778 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: inputs, bounds, counters.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: values വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -61,9 +61,9 @@ Prospero:
  You are as good as the sum of yourself and a big hero.
 [Exeunt]
 
-Act II: candidate 1.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: length = close-open, bounds പരിശോധിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Viola]
 Prospero: You are as good as the difference between Hamlet and Juliet.
 [Exeunt]
@@ -83,7 +83,7 @@ Beatrice: If so, let us proceed to scene IV.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: requested rank എത്തിയെങ്കിൽ open 1 തിരഞ്ഞെടുക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Desdemona and Cordelia]
 Desdemona: Am I as good as you?
 Cordelia: If not, let us proceed to scene IV.
@@ -91,14 +91,15 @@ Cordelia: If not, let us proceed to scene IV.
 [Enter Prospero and Portia]
 Prospero: You are as good as Juliet.
 
-Scene III: candidate 1 selection പൂർത്തിയായി.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 
-Scene IV: candidate 2-ലേക്ക്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 
-Act III: candidate 2.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: length പരിശോധിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Viola]
 Prospero: You are as good as the difference between Hamlet and Romeo.
 [Exeunt]
@@ -118,7 +119,7 @@ Beatrice: If so, let us proceed to scene IV.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: requested rank എത്തിയെങ്കിൽ open 2 തിരഞ്ഞെടുക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Desdemona and Cordelia]
 Desdemona: Am I as good as you?
 Cordelia: If not, let us proceed to scene IV.
@@ -126,14 +127,15 @@ Cordelia: If not, let us proceed to scene IV.
 [Enter Prospero and Portia]
 Prospero: You are as good as Romeo.
 
-Scene III: candidate 2 selection പൂർത്തിയായി.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 
-Scene IV: candidate 3-ലേക്ക്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 
-Act IV: candidate 3.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: length പരിശോധിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Viola]
 Prospero: You are as good as the difference between Hamlet and Othello.
 [Exeunt]
@@ -153,7 +155,7 @@ Beatrice: If so, let us proceed to scene IV.
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: requested rank എത്തിയെങ്കിൽ open 3 തിരഞ്ഞെടുക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Desdemona and Cordelia]
 Desdemona: Am I as good as you?
 Cordelia: If not, let us proceed to scene IV.
@@ -161,14 +163,15 @@ Cordelia: If not, let us proceed to scene IV.
 [Enter Prospero and Portia]
 Prospero: You are as good as Othello.
 
-Scene III: candidate 3 selection പൂർത്തിയായി.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 
-Scene IV: scan പൂർത്തിയായി.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 
-Act V: result.
+Act V: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: valid countയും selected open dayയും output.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Desdemona]
 Prospero: Open your heart.
 [Exeunt]

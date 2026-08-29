@@ -1,16 +1,16 @@
-ഒരു known gate day-യിൽ നിന്ന് മൂന്ന് gap-ുകൾ ഒരേ signed ദിശയിൽ കൂട്ടിച്ചേർക്കുന്ന ചെറിയ gate-chain arithmetic പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, ദിശ സൂക്ഷിക്കുന്ന കഥാപാത്രം: positive മുന്നോട്ട്, negative പിന്നോട്ട്.
-Juliet, ആരംഭ gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, ഒന്നാം gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, രണ്ടാം gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, മൂന്നാം gap സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, ഇപ്പോഴത്തെ gate day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input/output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: മൂന്ന് കൃത്യമായ gap-ുകളുടെ signed accumulation.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ദിശ, ആരംഭ ദിവസം, മൂന്ന് gap-ുകൾ വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -32,19 +32,19 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: current gate day ആരംഭ gate day ആക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Juliet and Lady Macbeth]
 Juliet:
  You are as good as myself.
 [Exeunt]
 
-Scene III: ദിശ നോക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Are you worse than nothing?
  If so, let us proceed to scene V.
 
-Scene IV: മുന്നോട്ട് മൂന്ന് gap കൂട്ടുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Lady Macbeth]
 Romeo:
@@ -59,7 +59,7 @@ Macbeth:
  You are as good as the sum of yourself and Macbeth.
  Let us proceed to scene VI.
 
-Scene V: പിന്നോട്ട് മൂന്ന് gap കുറയ്ക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Lady Macbeth]
 Romeo:
@@ -73,7 +73,7 @@ Othello:
 Macbeth:
  You are as good as the difference between yourself and Macbeth.
 
-Scene VI: അന്തിമ gate day പുറത്തിടുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:

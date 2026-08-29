@@ -1,19 +1,19 @@
-മൂന്ന് slot ഉള്ള bounded composition family-യുടെ exact cardinality lexicographic scan-നു മുമ്പായി കണക്കാക്കുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, total സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, lower bound സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, upper bound സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, ആദ്യ part x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, ശേഷിക്കുന്ന total സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, രണ്ടാം part-ന്റെ താഴത്തെ സാധുവായ പരിധി സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, രണ്ടാം part-ന്റെ മുകളിലെ സാധുവായ പരിധി സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, താൽക്കാലിക പരിധി സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, ആകെ count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ആദ്യ part ഉയരുന്ന ക്രമത്തിൽ scan ചെയ്ത് ഓരോ suffix pair block-ും എണ്ണുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: total, lo, hi വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -27,7 +27,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: x=lo, count=0.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Juliet and Othello]
 Juliet:
  You are as good as myself.
@@ -36,20 +36,20 @@ Juliet:
 Prospero:
  You are nothing.
 
-Scene III: x>hi ആണെങ്കിൽ തീരുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
  Are you better than Romeo?
  If so, let us proceed to scene XII.
 
-Scene IV: rem=total-x.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  You are as good as the difference between Hamlet and Othello.
 
-Scene V: lower=max(lo,rem-hi).
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
@@ -58,20 +58,20 @@ Prospero:
  If so, let us proceed to scene VI.
  Let us proceed to scene VII.
 
-Scene VI: lower=rem-hi.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Cordelia and Lady Macbeth]
 Cordelia:
  You are as good as myself.
  Let us proceed to scene VIII.
 
-Scene VII: lower=lo.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Lady Macbeth]
 Juliet:
  You are as good as myself.
 
-Scene VIII: upper=min(hi,rem-lo).
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
@@ -80,20 +80,20 @@ Prospero:
  If so, let us proceed to scene IX.
  Let us proceed to scene X.
 
-Scene IX: upper=rem-lo.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Cordelia and Ophelia]
 Cordelia:
  You are as good as myself.
  Let us proceed to scene XI.
 
-Scene X: upper=hi.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Ophelia]
 Romeo:
  You are as good as myself.
 
-Scene XI: interval ശൂന്യമല്ലെങ്കിൽ upper-lower+1 count-ലേക്ക് കൂട്ടി x കൂട്ടുന്നു.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:
@@ -110,14 +110,14 @@ Prospero:
  You are as good as the sum of yourself and a hero.
  Let us return to scene III.
 
-Scene XII: exact count പുറത്തിടുന്നു.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Portia]
 Prospero:
  Open your heart.
 [Exeunt]
 
-Scene XIII: ശൂന്യ suffix block ഒഴിവാക്കി x കൂട്ടുന്നു.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:

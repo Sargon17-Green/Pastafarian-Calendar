@@ -1,22 +1,22 @@
-മൂന്ന് materialized cutlet interval-ുകളിൽ target day ഏതിനുള്ളതാണെന്നും അതിലെ one-based day position-ഉം canonicalIndex-ഉം കണ്ടെത്തുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, target day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, cutlet ഒന്നിന്റെ first day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, cutlet ഒന്നിന്റെ last day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, cutlet രണ്ടിന്റെ first day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, cutlet രണ്ടിന്റെ last day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, cutlet മൂന്നിന്റെ first day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, cutlet മൂന്നിന്റെ last day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, cutlet ഒന്നിന്റെ canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, cutlet രണ്ടിന്റെ canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, cutlet മൂന്നിന്റെ canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, തിരഞ്ഞെടുത്ത canonicalIndex സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, dayInCutlet സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ordered closed day intervals scan ചെയ്യുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: target, മൂന്ന് interval-ുകൾ, മൂന്ന് canonicalIndex-ുകൾ വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -58,7 +58,7 @@ Prospero:
  Listen to your heart.
 [Exeunt]
 
-Scene II: target ആദ്യ interval-ൽ ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Prospero]
 Hamlet:
  Am I worse than Juliet?
@@ -71,7 +71,7 @@ Hamlet:
 Prospero:
  If not, let us proceed to scene VI.
 
-Scene III: target രണ്ടാം interval-ൽ ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Hamlet and Prospero]
 Hamlet:
@@ -85,7 +85,7 @@ Hamlet:
 Prospero:
  If not, let us proceed to scene VII.
 
-Scene IV: target മൂന്നാം interval-ൽ ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Hamlet and Prospero]
 Hamlet:
@@ -99,7 +99,7 @@ Hamlet:
 Prospero:
  If not, let us proceed to scene VIII.
 
-Scene V: interval ഒന്നും match ചെയ്യാത്ത diagnostic path.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Miranda]
 Prospero:
@@ -112,7 +112,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene VI: ഒന്നാം cutlet canonicalIndexയും day position-ഉം.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Cordelia and Miranda]
 Cordelia:
@@ -124,7 +124,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene IX.
 
-Scene VII: രണ്ടാം cutlet canonicalIndexയും day position-ഉം.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Portia and Miranda]
 Portia:
@@ -136,7 +136,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
  Let us proceed to scene IX.
 
-Scene VIII: മൂന്നാം cutlet canonicalIndexയും day position-ഉം.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Viola and Miranda]
 Viola:
@@ -147,7 +147,7 @@ Prospero:
  You are as good as the difference between Hamlet and Lady Macbeth.
  You are as good as the sum of yourself and a hero.
 
-Scene IX: canonicalIndex, dayInCutlet പുറത്തിടുന്നു.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Miranda]
 Prospero:

@@ -1,15 +1,15 @@
-നാലാമത്തെ visible drop-ന്റെ seed recurrence-ൽ `prev1` മൂന്നാമത്തെ committed visible drop-ിൽ നിന്നും, `prev3` ഒന്നാമത്തെ committed visible drop-ിൽ നിന്നും, `prev7` നാലാമത്തെ hidden drop-ിൽ നിന്നും വരുന്നു എന്ന clean Stage 1 പരിശോധന. ഈ probe seed-ന്റെ SAVE-യ്ക്ക് മുമ്പുള്ള കൃത്യമായ integer sum മാത്രം isolate ചെയ്യുന്നു.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, നാലാമത്തെ hidden drop സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ഒന്നാമത്തെ committed visible drop സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, മൂന്നാമത്തെ committed visible drop സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, നാലാമത്തെ drop-ന്റെ മറ്റു base terms-ന്റെ ആകെ സംഭാവന സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, raw seed sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: നാലാമത്തെ drop seed.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: inputs വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -22,7 +22,7 @@ Prospero: Listen to your heart.
 [Enter Prospero and Othello]
 Prospero: Listen to your heart.
 
-Scene II: base + prev1 + 3*prev3 + 5*prev7 + i.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:

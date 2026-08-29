@@ -1,20 +1,20 @@
-Appendix A-യിലെ 11 visible grind-ുകൾ ഒരേ stone row `i`-ൽ നിന്നാണ് kind തിരഞ്ഞെടുക്കുന്നതെന്ന് isolate ചെയ്യുന്ന clean Stage 1 probe. input stone row values WHEAT,BARLEY,SALT,BITTER,RED എന്ന ക്രമത്തിൽ വായിക്കുന്നു; 11 grind kind sequence W,B,S,BITTER,RED,W,B,S,BITTER,RED,W ആണ്. row 1 fixture 17,29,43,71,101 നൽകിയാൽ selected-stone sum 539, ആദ്യ selected stone 17, അവസാന selected stone 17 ആയിരിക്കണം.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, WHEAT stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, BARLEY stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, SALT stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, BITTER stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, RED stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, grind index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, selected stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, selected sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, first selected stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, last selected stone സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output-ും branching-ും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: ഒരൊറ്റ stone row വായിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: WHEAT,BARLEY,SALT,BITTER,RED.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -43,15 +43,16 @@ Prospero: You are nothing.
 Prospero: You are nothing.
 [Exeunt]
 
-Act II: 11 kind selections.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: grind index 12 ആയാൽ അവസാനിപ്പിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Lady Macbeth and Prospero]
 Lady Macbeth: Am I as good as the sum of a big big big hero and a big big hero?
 Prospero: If so, let us proceed to act IV.
 [Exeunt]
 
-Scene II: kind dispatch.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lady Macbeth and Prospero]
 Lady Macbeth: Am I as good as a hero?
 Prospero: If so, let us proceed to scene III.
@@ -76,39 +77,39 @@ Prospero: If so, let us proceed to scene VII.
 Prospero: Let us proceed to scene III.
 [Exeunt]
 
-Scene III: WHEAT.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: You are as good as Hamlet. Let us proceed to act III.
 [Exeunt]
 
-Scene IV: BARLEY.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: You are as good as Juliet. Let us proceed to act III.
 [Exeunt]
 
-Scene V: SALT.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: You are as good as Romeo. Let us proceed to act III.
 [Exeunt]
 
-Scene VI: BITTER.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: You are as good as Othello. Let us proceed to act III.
 [Exeunt]
 
-Scene VII: RED.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: You are as good as Macbeth. Let us proceed to act III.
 [Exeunt]
 
-Act III: selected stone commit.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: sum, first, last, next grind.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are as good as the sum of yourself and Ophelia.
@@ -121,7 +122,8 @@ Prospero: If not, let us proceed to scene II.
 Prospero: You are as good as Ophelia.
 [Exeunt]
 
-Scene II: last value ഓരോ grind-ലും refresh ചെയ്യുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Portia]
 Prospero: You are as good as Ophelia.
 [Exeunt]
@@ -129,9 +131,9 @@ Prospero: You are as good as Ophelia.
 Prospero: You are as good as the sum of yourself and a hero. Let us return to act II.
 [Exeunt]
 
-Act IV: result.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: sum, first, last.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: Open your heart.

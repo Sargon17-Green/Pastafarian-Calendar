@@ -1,33 +1,33 @@
-Appendix A stone table-ന്റെ 46 actual rows transactional ആയി നിർമ്മിച്ച് അഞ്ച് backward archive stack-ുകളിൽ സൂക്ഷിക്കുകയും, reversal സമയത്ത് ഓരോ അഞ്ച്-value row-യും hidden consumer-നും visible consumer-നും വേണ്ടി രണ്ട് സ്വതന്ത്ര forward replay families-ലേക്ക് duplicate ചെയ്യുകയും ചെയ്യുന്ന clean Stage 1 ownership probe. hidden consumer ആദ്യം rows 1..7 consume ചെയ്യുന്നു; visible consumer അതിൽ നിന്ന് സ്വതന്ത്രമായി rows 1..46 consume ചെയ്യുന്നു. expected outputs: reverse count 46; hidden consume count 7; visible first row 17,29,43,71,101; visible consume count 46.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, current wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, current barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, current salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, current bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, current red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, pending wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, pending barleyയും പിന്നീട് reverse count-ഉം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, pending salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, pending bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, pending red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, current row index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, committed transition count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Caliban, archived row count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, Mയും പിന്നീട് stack helper-ഉം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Beatrice, wheat archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Benedick, barley archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Mercutio, salt archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Tybalt, bitter archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Iago, red archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, wheat replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Falstaff, barley replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Rosalind, salt replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Horatio, bitter replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Polonius, red replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Benedick, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Mercutio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Tybalt, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Iago, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: M, row 1, ആദ്യ archive.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: M = 2^127 - 1 നിർമ്മിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Prospero]
 Caliban: You are a hero.
 [Exeunt]
@@ -36,7 +36,7 @@ Caliban: You are as good as the difference between a big big big big big big big
 [Exeunt]
 [Enter Prospero and Ophelia]
 
-Scene II: exact doubling.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Prospero: Are you better than nothing?
 Ophelia:
  If not, let us proceed to scene III.
@@ -45,13 +45,13 @@ Ophelia:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: subtract one.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Caliban and Prospero]
 Caliban: You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Scene IV: normative row 1.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Hamlet]
 Caliban: You are as good as the sum of a big big big big hero and a hero.
 [Exeunt]
@@ -68,7 +68,7 @@ Caliban: You are as good as the sum of a big big big big big big hero and the su
 Caliban: You are as good as the sum of a big big big big big big hero and the sum of a big big big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene V: row 1 അഞ്ച് archive stack-ുകളിലേക്ക് push ചെയ്യുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Beatrice]
 Hamlet: You are as good as Hamlet. Remember yourself.
 [Exeunt]
@@ -85,7 +85,7 @@ Othello: You are as good as Othello. Remember yourself.
 Macbeth: You are as good as Macbeth. Remember yourself.
 [Exeunt]
 
-Scene VI: i=2, transitions=0, archived=1.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Viola]
 Caliban: You are a big hero.
 [Exeunt]
@@ -96,9 +96,10 @@ Caliban: You are nothing.
 Viola: You are a hero.
 [Exeunt]
 
-Act II: row 2 മുതൽ row 46 വരെ transactional generation.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: pending wheat = SAVE(wheat^2 + 3*barley + i).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Caliban and Lady Macbeth]
 Caliban:
  You are as good as the sum of the product of Hamlet and Hamlet and the product of the sum of a big hero and a hero and Juliet.
@@ -108,7 +109,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: pending barley = SAVE(barley^2 + 5*salt + wheat).
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Ophelia]
 Caliban:
  You are as good as the sum of the product of Juliet and Juliet and the product of the sum of a big big hero and a hero and Romeo.
@@ -118,7 +119,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: pending salt = SAVE(salt^2 + 7*bitter + barley).
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Cordelia]
 Caliban:
  You are as good as the sum of the product of Romeo and Romeo and the product of the sum of the sum of a big big hero and a big hero and a hero and Othello.
@@ -128,7 +129,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: pending bitter = SAVE(bitter^2 + 11*red + salt).
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Desdemona]
 Caliban:
  You are as good as the sum of the product of Othello and Othello and the product of the sum of the sum of a big big big hero and a big hero and a hero and Macbeth.
@@ -138,7 +139,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene V: pending red = SAVE(red^2 + 13*wheat + bitter).
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Portia]
 Caliban:
  You are as good as the sum of the product of Macbeth and Macbeth and the product of the sum of the sum of a big big big hero and a big big hero and a hero and Hamlet.
@@ -148,9 +149,9 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Act III: commit, archive, loop.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: അഞ്ച് pending values commit ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lady Macbeth and Hamlet]
 Lady Macbeth: You are as good as Lady Macbeth.
 [Exeunt]
@@ -167,7 +168,7 @@ Desdemona: You are as good as Desdemona.
 Portia: You are as good as Portia.
 [Exeunt]
 
-Scene II: committed row archive stack-ുകളിൽ push ചെയ്യുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Beatrice]
 Hamlet: You are as good as Hamlet. Remember yourself.
 [Exeunt]
@@ -184,7 +185,7 @@ Othello: You are as good as Othello. Remember yourself.
 Macbeth: You are as good as Macbeth. Remember yourself.
 [Exeunt]
 
-Scene III: counters പുതുക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Miranda]
 Caliban: You are as good as the sum of yourself and a hero.
 [Exeunt]
@@ -192,7 +193,7 @@ Caliban: You are as good as the sum of yourself and a hero.
 Viola: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: row 46 archive ചെയ്തോ എന്ന് നോക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Caliban]
 Viola: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
 Caliban: If so, let us proceed to act IV.
@@ -202,14 +203,16 @@ Caliban: You are as good as the sum of yourself and a hero. Let us return to act
 [Exeunt]
 
 
-Act IV: archive reversal രണ്ട് സ്വതന്ത്ര five-value replay families-ലേക്ക്.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: reverse count = 0.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Viola and Ophelia]
 Viola: You are nothing.
 [Exeunt]
 
-Scene II: wheat archive pop; hidden replay Ariel-ലേക്കും visible replay Hamlet-ലേക്കും duplicate ചെയ്യുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Beatrice]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -220,7 +223,7 @@ Beatrice: You are as good as Beatrice. Remember yourself.
 Beatrice: You are as good as Beatrice. Remember yourself.
 [Exeunt]
 
-Scene III: barley archive -> Falstaff + Juliet.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Benedick]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -231,7 +234,7 @@ Benedick: You are as good as Benedick. Remember yourself.
 Benedick: You are as good as Benedick. Remember yourself.
 [Exeunt]
 
-Scene IV: salt archive -> Rosalind + Romeo.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Mercutio]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -242,7 +245,7 @@ Mercutio: You are as good as Mercutio. Remember yourself.
 Mercutio: You are as good as Mercutio. Remember yourself.
 [Exeunt]
 
-Scene V: bitter archive -> Horatio + Othello.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Tybalt]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -253,7 +256,7 @@ Tybalt: You are as good as Tybalt. Remember yourself.
 Tybalt: You are as good as Tybalt. Remember yourself.
 [Exeunt]
 
-Scene VI: red archive -> Polonius + Macbeth.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Iago]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -264,7 +267,7 @@ Iago: You are as good as Iago. Remember yourself.
 Iago: You are as good as Iago. Remember yourself.
 [Exeunt]
 
-Scene VII: reverse count increment; 46 ആയാൽ hidden consumer-ലേക്ക്.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Ophelia]
 Viola: You are as good as the sum of yourself and a hero.
 [Exeunt]
@@ -273,9 +276,10 @@ Ophelia: Am I as good as the sum of the sum of a big big big big big hero and a 
 Viola: If so, let us proceed to act V. Let us return to scene II.
 [Exeunt]
 
-Act V: hidden consumer rows 1..7 മാത്രം consume ചെയ്യുന്നു.
+Act V: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: hidden count = 0; reverse count output.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Miranda]
 Prospero: You are nothing.
 [Exeunt]
@@ -283,7 +287,8 @@ Prospero: You are nothing.
 Prospero: Open your heart.
 [Exeunt]
 
-Scene II: next hidden five-value row pop.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Ariel]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -300,32 +305,34 @@ Prospero: Recall your newest memory.
 Prospero: Recall your newest memory.
 [Exeunt]
 
-Scene III: hidden count++.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Miranda]
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: hidden count 7 ആയാൽ visible consumer setup; അല്ലെങ്കിൽ അടുത്ത hidden row.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Prospero]
 Miranda: Am I as good as the sum of the sum of a big big hero and a big hero and a hero?
 Prospero: If so, let us proceed to act VI. Let us return to scene II.
 [Exeunt]
 
-Act VI: hidden count output, visible consumer count reset.
+Act VI: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: hidden count.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Miranda]
 Prospero: Open your heart.
 [Exeunt]
 
-Scene II: visible count = 0.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Caliban]
 Prospero: You are nothing.
 [Exeunt]
 
-Act VII: visible consumer rows 1..46 consume ചെയ്യുന്നു.
+Act VII: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: next visible five-value row pop.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Hamlet]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -342,13 +349,14 @@ Prospero: Recall your newest memory.
 Prospero: Recall your newest memory.
 [Exeunt]
 
-Scene II: ആദ്യ visible row ആണെങ്കിൽ row 1 അഞ്ച് values output ചെയ്യുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Prospero]
 Caliban: Am I as good as nothing?
 Prospero: If so, let us proceed to scene III. Let us proceed to scene IV.
 [Exeunt]
 
-Scene III: visible first row = normative row 1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Hamlet]
 Prospero: Open your heart.
 [Exeunt]
@@ -365,20 +373,22 @@ Prospero: Open your heart.
 Prospero: Open your heart.
 [Exeunt]
 
-Scene IV: visible count++.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Caliban]
 Prospero: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene V: 46 rows consume ചെയ്താൽ completion; അല്ലെങ്കിൽ loop.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Prospero]
 Caliban: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
 Prospero: If so, let us proceed to act VIII. Let us return to scene I.
 [Exeunt]
 
-Act VIII: visible consumer completion.
+Act VIII: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: visible consume count 46.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Caliban]
 Prospero: Open your heart.
 [Exeunt]

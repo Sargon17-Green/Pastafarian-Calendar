@@ -1,15 +1,15 @@
-വ്യത്യസ്ത പേരുകളുടെ ordered family വലിപ്പത്തിനുള്ള falling factorial പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, master പട്ടികയുടെ വലിപ്പം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, തിരഞ്ഞെടുക്കേണ്ട പേരുകളുടെ എണ്ണം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, കൃത്യമായ ഗുണിതഫലം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, ഇപ്പോഴത്തെ zero-based ചുവട് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, ഇപ്പോഴത്തെ factor സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input വായിക്കാനും output എഴുതാനും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: n ഗുണിച്ച് n minus one എന്ന ക്രമത്തിൽ k factors ഉപയോഗിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: n-ഉം k-ഉം വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -19,7 +19,7 @@ Miranda:
  Listen to your heart.
 [Exeunt]
 
-Scene II: result ഒന്നും step ശൂന്യവും ആക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Romeo]
 Miranda:
  You are a hero.
@@ -29,14 +29,15 @@ Miranda:
  You are nothing.
 [Exeunt]
 
-Scene III: ഇനിയും factor ബാക്കിയുണ്ടോ എന്ന് നോക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Miranda and Othello]
 Miranda:
  Are you worse than Juliet?
  If not, let us proceed to scene VI.
  Let us proceed to scene IV.
 
-Scene IV: ഇപ്പോഴത്തെ factor n minus step ആണ്.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Macbeth]
 Miranda:
@@ -47,13 +48,13 @@ Miranda:
  You are as good as the product of yourself and Macbeth.
 [Exeunt]
 
-Scene V: step കൂട്ടി വീണ്ടും പരിശോധിക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Othello]
 Miranda:
  You are as good as the sum of yourself and a hero.
  Let us return to scene III.
 
-Scene VI: exact family count പുറത്തിടുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Romeo]
 Miranda:

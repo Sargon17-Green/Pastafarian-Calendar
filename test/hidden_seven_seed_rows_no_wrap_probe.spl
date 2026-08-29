@@ -1,23 +1,23 @@
-ഏഴ് hidden coefficient row-കളുടെ seed linear form ഒരേ counts input-ൽ നിന്ന് കണക്കാക്കി row mapping മുഴുവൻ പരിശോധിക്കുന്ന clean Stage 1 no-wrap പരീക്ഷണം. ഈ probe-ൽ ഓരോ stone row-യുടെ അഞ്ചു കല്ലുകളുടെ sum ഇതിനകം ഒരു scalar input ആയി നൽകുന്നു; output values M-നെക്കാൾ വളരെ ചെറുതായ fixture-ിനായതിനാൽ SAVE wrap ഇവിടെ isolate ചെയ്തിട്ടില്ല.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, action സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, target സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, distance സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, connection സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, direction സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, stone row 1 sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, stone row 2 sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, stone row 3 sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, stone row 4 sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, stone row 5 sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, stone row 6 sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, stone row 7 sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, ഇപ്പോഴത്തെ seed സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: inputs.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: counts-ും ഏഴ് stone sums-ും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -55,9 +55,9 @@ Prospero: Listen to your heart.
 Prospero: Listen to your heart.
 [Exeunt]
 
-Act II: ഏഴ് coefficient rows.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: row 1 = 3,4,6,8.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ariel]
 Prospero:
  You are as good as Hamlet.
@@ -69,7 +69,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene II: row 2 = 5,7,10,12.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ariel]
 Prospero:
  You are as good as Hamlet.
@@ -81,7 +81,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene III: row 3 = 7,10,14,16.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ariel]
 Prospero:
  You are as good as Hamlet.
@@ -93,7 +93,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene IV: row 4 = 9,13,18,20.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ariel]
 Prospero:
  You are as good as Hamlet.
@@ -105,7 +105,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene V: row 5 = 11,16,22,24.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ariel]
 Prospero:
  You are as good as Hamlet.
@@ -117,7 +117,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene VI: row 6 = 13,19,26,28.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ariel]
 Prospero:
  You are as good as Hamlet.
@@ -129,7 +129,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene VII: row 7 = 15,22,30,32.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ariel]
 Prospero:
  You are as good as Hamlet.

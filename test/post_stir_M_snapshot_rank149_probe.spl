@@ -1,17 +1,17 @@
-Appendix A 1A post-stir formula വലിയ exact old snapshot-ിൽ പരിശോധിക്കുന്ന clean Stage 1 fixture. six old bowls എല്ലാം M, stir=1. `savedStirSum=SAVE(6M+149)=149`, അതിനാൽ order rank 149. position-order pending values full formula വഴി കണക്കാക്കുന്നു; order materialization വേറെയുള്ള rank-to-order probe-ന്റെ ഉത്തരവാദിത്തമാണ്.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, M സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, savedStirSum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, order rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, pre-square s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, pending value സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, position സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, doubling count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, flow-വും assignment-വും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: M നിർമ്മിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: one, count 127.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  You are a hero.
@@ -22,7 +22,7 @@ Prospero:
 [Exeunt]
 [Enter Hamlet and Ophelia]
 
-Scene II: doubling loop.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Hamlet:
  Are you better than nothing?
 Ophelia:
@@ -33,15 +33,15 @@ Ophelia:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: M=2 power 127 minus 1.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Hamlet]
 Prospero:
  You are as good as the difference between yourself and a hero.
 
-Act II: 1A saved sum-വും order rank-ും.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: savedStirSum = SAVE(6M+149).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Juliet]
 Prospero:
@@ -53,7 +53,7 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Scene II: rank = 1 + regularMod(saved-1,720).
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Romeo]
 Prospero:
  You are as good as the difference between Juliet and a hero.
@@ -62,38 +62,43 @@ Prospero:
  Open your heart.
 [Exeunt]
 
-Act III: six positions-ന്റെ full post-stir arithmetic.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: position 1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Lady Macbeth]
 Prospero: You are a hero.
  Let us proceed to scene VII.
 
-Scene II: position 2.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero: You are a big hero.
  Let us proceed to scene VII.
 
-Scene III: position 3.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero: You are as good as the sum of a big hero and a hero.
  Let us proceed to scene VII.
 
-Scene IV: position 4.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero: You are a big big hero.
  Let us proceed to scene VII.
 
-Scene V: position 5.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero: You are as good as the sum of a big big hero and a hero.
  Let us proceed to scene VII.
 
-Scene VI: position 6.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero: You are as good as the sum of a big big hero and a big hero.
 
-Scene VII: s = M + 3M + 5M + saved + stir + position squared.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero:
@@ -113,7 +118,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
  Open your heart.
 
-Scene VIII: അടുത്ത position തിരഞ്ഞെടുക്കുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Lady Macbeth:

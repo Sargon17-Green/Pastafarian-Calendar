@@ -1,19 +1,19 @@
-Appendix A-യിലെ day axis-ിൽ നിന്ന് അഞ്ച് workCounts ഒരുമിച്ച് കണക്കാക്കുന്ന clean Stage 1 പരീക്ഷണം. input raw action day, target day. output ക്രമം action dayCount, target dayCount, chronological distance, connection, direction. direction mapping: target പഴയതെങ്കിൽ 1, same day 2, target മുന്നിലുള്ളത് 3.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, raw action day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, raw target day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, Foundation day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, action dayCount സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, target dayCount സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, chronological distance സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, connection സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, direction സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, assignment, input, output, branching സഹായിക്കുന്ന കഥാപാത്രം.
-Miranda, Foundation constant നിർമ്മിക്കാൻ സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: input-ും Foundation constant-ും.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: raw days വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -21,7 +21,7 @@ Prospero: Listen to your heart.
 Prospero: Listen to your heart.
 [Exeunt]
 
-Scene II: Foundation day -15055671 നിർമ്മിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Miranda]
 Miranda:
  You are a hero.
@@ -36,9 +36,9 @@ Miranda:
 Macbeth: You are as good as Miranda.
 [Exeunt]
 
-Act II: action dayCount.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: Foundation-നോട് action day താരതമ്യം ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Prospero]
 Hamlet: Am I as good as Macbeth?
 Prospero: If so, let us proceed to scene II.
@@ -46,25 +46,28 @@ Hamlet: Am I better than Macbeth?
 Prospero: If so, let us proceed to scene III.
 Prospero: Let us proceed to scene IV.
 
-Scene II: Foundation dayCount = 1.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: You are a hero. Let us proceed to act III.
 [Exeunt]
 
-Scene III: Foundation-ന് ശേഷം odd dayCount.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: You are as good as the sum of the product of the difference between Hamlet and Macbeth and a big hero and a hero. Let us proceed to act III.
 [Exeunt]
 
-Scene IV: Foundation-ന് മുമ്പ് even dayCount.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: You are as good as the product of the difference between Macbeth and Hamlet and a big hero.
 [Exeunt]
 
-Act III: target dayCount.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: Foundation-നോട് target day താരതമ്യം ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Romeo and Prospero]
 Romeo: Am I as good as Macbeth?
 Prospero: If so, let us proceed to scene II.
@@ -72,25 +75,28 @@ Romeo: Am I better than Macbeth?
 Prospero: If so, let us proceed to scene III.
 Prospero: Let us proceed to scene IV.
 
-Scene II: Foundation target dayCount = 1.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero: You are a hero. Let us proceed to act IV.
 [Exeunt]
 
-Scene III: Foundation-ന് ശേഷം odd target dayCount.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Othello]
 Prospero: You are as good as the sum of the product of the difference between Romeo and Macbeth and a big hero and a hero. Let us proceed to act IV.
 [Exeunt]
 
-Scene IV: Foundation-ന് മുമ്പ് even target dayCount.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Othello]
 Prospero: You are as good as the product of the difference between Macbeth and Romeo and a big hero.
 [Exeunt]
 
-Act IV: distance, connection, direction.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: chronological distance = absolute raw-day difference + 1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Hamlet and Prospero]
 Hamlet: Is Romeo better than Hamlet?
 Prospero: If so, let us proceed to scene II.
@@ -99,17 +105,19 @@ Prospero: If so, let us proceed to scene II.
 Prospero: You are as good as the sum of the difference between Hamlet and Romeo and a hero. Let us proceed to scene III.
 [Exeunt]
 
-Scene II: target മുന്നിലുള്ളപ്പോൾ distance.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero: You are as good as the sum of the difference between Romeo and Hamlet and a hero.
 [Exeunt]
 
-Scene III: connection = action + target dayCounts.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Portia]
 Prospero: You are as good as the sum of Ophelia and Othello.
 [Exeunt]
 
-Scene IV: direction തിരഞ്ഞെടുക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Prospero]
 Hamlet: Is Romeo worse than Hamlet?
 Prospero: If so, let us proceed to scene V.
@@ -120,19 +128,22 @@ Prospero: If so, let us proceed to scene VI.
 Prospero: You are as good as the sum of a big hero and a hero. Let us proceed to act V.
 [Exeunt]
 
-Scene V: target പഴയത്.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are a hero. Let us proceed to act V.
 [Exeunt]
 
-Scene VI: same day.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are a big hero.
 [Exeunt]
 
-Act V: outputs.
+Act V: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: അഞ്ച് workCounts.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: Open your heart.
 [Exeunt]

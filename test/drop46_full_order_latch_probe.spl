@@ -1,18 +1,18 @@
-visible drop 46-ന്റെ full six-ID bowl order scalar latch ആയി പിടിച്ച് പന്ത്രണ്ട് post-stir diagnostic rank reads കഴിഞ്ഞിട്ടും latch values മാറാത്തതെന്ന് പരിശോധിക്കുന്ന clean Stage 1 probe.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, latched order position 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, latched order position 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, latched order position 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, latched order position 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, latched order position 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, latched order position 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, current post-stir diagnostic rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, diagnostic read count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: full drop46 order latch once.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: order positions 1..6 input-ിൽ നിന്ന് latch ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -35,13 +35,15 @@ Prospero: Listen to your heart.
 Prospero: You are nothing. Let us proceed to scene II.
 [Exeunt]
 
-Scene II: പന്ത്രണ്ട് diagnostic rank reads പൂർത്തിയായോ.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Cordelia and Prospero]
 Cordelia: Am I as good as the sum of a big big big hero and the sum of a big hero and a hero?
 Prospero: If so, let us proceed to scene IV. Let us proceed to scene III.
 [Exeunt]
 
-Scene III: next post-stir diagnostic rank വായിക്കുന്നു; six latch characters-ലേക്ക് എഴുത്തില്ല.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Ophelia]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -49,7 +51,8 @@ Prospero: Listen to your heart.
 Prospero: You are as good as the sum of Cordelia and a hero. Let us return to scene II.
 [Exeunt]
 
-Scene IV: full latched order + read count output ചെയ്യുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Hamlet]
 Prospero: Open your heart.
 [Exeunt]

@@ -1,16 +1,16 @@
-lengths 3,2 എന്ന ചെറിയ exact weaving family-യുടെ lexicographic rank തുറക്കുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, one-based rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, position ഒന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, position രണ്ട് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, position മൂന്ന് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, position നാല് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, position അഞ്ച് സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, input output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: നിയമാനുസൃത family 11122, 11212, 12112 എന്ന ക്രമത്തിൽ rank resolve ചെയ്യുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: rank വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Miranda and Hamlet]
 Miranda:
  Listen to your heart.
@@ -25,7 +25,7 @@ Hamlet:
  If so, let us proceed to scene II.
  Let us proceed to scene IV.
 
-Scene II: rank രണ്ട് -> 11212.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:
@@ -48,7 +48,7 @@ Miranda:
  You are a big hero.
  Let us proceed to scene V.
 
-Scene III: rank മൂന്ന് -> 12112.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:
@@ -71,7 +71,7 @@ Miranda:
  You are a big hero.
  Let us proceed to scene V.
 
-Scene IV: rank ഒന്ന് -> 11122.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:
@@ -93,7 +93,7 @@ Miranda:
 Miranda:
  You are a big hero.
 
-Scene V: അഞ്ചു monthId-കൾ പുറത്തിടുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Miranda and Juliet]
 Miranda:

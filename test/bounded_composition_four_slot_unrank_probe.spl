@@ -1,24 +1,24 @@
-നാല് slot bounded composition family-യിൽ one-based lexicographic rank തുറക്കുന്ന clean Stage 1 പരിശോധന.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, total സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, lo സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, hi സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, z സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, w സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, accepted count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, capture flag സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, selected x സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Caliban, selected y സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Shylock, selected z സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Horatio, selected w സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Shylock, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: lexicographic scan-ൽ rank-ാം member capture ചെയ്യുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: total, lo, hi, rank വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero:
  Listen to your heart.
@@ -35,7 +35,7 @@ Prospero:
 Prospero:
  Listen to your heart.
 
-Scene II: count=0, capture=0, x=lo.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Portia]
 Prospero:
@@ -49,40 +49,40 @@ Prospero:
 Juliet:
  You are as good as myself.
 
-Scene III: x>hi ആണെങ്കിൽ output.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Macbeth and Romeo]
 Macbeth:
  Are you better than Romeo?
  If so, let us proceed to scene XVII.
 
-Scene IV: y=lo.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Lady Macbeth]
 Juliet:
  You are as good as myself.
 
-Scene V: y>hi ആണെങ്കിൽ x കൂട്ടുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lady Macbeth and Romeo]
 Lady Macbeth:
  Are you better than Romeo?
  If so, let us proceed to scene XVI.
 
-Scene VI: z=lo.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Juliet and Ophelia]
 Juliet:
  You are as good as myself.
 
-Scene VII: z>hi ആണെങ്കിൽ y കൂട്ടുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Ophelia and Romeo]
 Ophelia:
  Are you better than Romeo?
  If so, let us proceed to scene XV.
 
-Scene VIII: w=total-x-y-z.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero:
@@ -90,7 +90,7 @@ Prospero:
  You are as good as the difference between yourself and Lady Macbeth.
  You are as good as the difference between yourself and Ophelia.
 
-Scene IX: w പരിധിക്കു പുറത്താണെങ്കിൽ അടുത്ത z.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Cordelia and Juliet]
 Cordelia:
@@ -102,13 +102,13 @@ Cordelia:
  Are you better than Romeo?
  If so, let us proceed to scene XIV.
 
-Scene X: accepted count കൂട്ടുന്നു.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Portia]
 Prospero:
  You are as good as the sum of yourself and a hero.
 
-Scene XI: capture ചെയ്തിട്ടുണ്ടെങ്കിൽ അടുത്ത z.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Viola and Prospero]
 Viola:
@@ -116,7 +116,7 @@ Viola:
 Prospero:
  If so, let us proceed to scene XIV.
 
-Scene XII: count==rank ആണെങ്കിൽ നാലു ഭാഗങ്ങളും capture ചെയ്യുന്നു.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Portia and Othello]
 Portia:
@@ -125,7 +125,7 @@ Othello:
  If so, let us proceed to scene XIII.
  Let us proceed to scene XIV.
 
-Scene XIII: capture flag.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Viola]
 Prospero:
@@ -147,28 +147,28 @@ Ophelia:
 Cordelia:
  You are as good as myself.
 
-Scene XIV: z കൂട്ടുന്നു.
+Scene XIV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as the sum of yourself and a hero.
  Let us return to scene VII.
 
-Scene XV: y കൂട്ടുന്നു.
+Scene XV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:
  You are as good as the sum of yourself and a hero.
  Let us return to scene V.
 
-Scene XVI: x കൂട്ടുന്നു.
+Scene XVI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero:
  You are as good as the sum of yourself and a hero.
  Let us return to scene III.
 
-Scene XVII: exact count-ും selected member-ും പുറത്തിടുന്നു.
+Scene XVII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Portia]
 Prospero:

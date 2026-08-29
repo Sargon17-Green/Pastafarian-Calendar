@@ -1,18 +1,18 @@
-post-stir diagnostic order-നെ ആശ്രയിക്കാതെ, latched drop-46 order-ിൽ queried bowl-ന്റെ circular successor കണ്ടെത്തുന്ന Stage 1 lookup. input ആദ്യം ആറു latched IDs, പിന്നെ queried ID; output successor ID.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, position 1 ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, position 2 ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, position 3 ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, position 4 ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, position 5 ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, position 6 ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, queried bowl ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, successor ID സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, input-output-ും branch-ും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: latched order വായിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: order-ും query-യും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: Listen to your heart.
 [Exeunt]
@@ -35,9 +35,9 @@ Prospero: Listen to your heart.
 Prospero: Listen to your heart.
 [Exeunt]
 
-Act II: circular successor search.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: position 1 പരിശോധിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Ophelia: Am I as good as Hamlet?
 Prospero: If so, let us proceed to scene VII.
@@ -53,51 +53,54 @@ Ophelia: Am I as good as Lady Macbeth?
 Prospero: If so, let us proceed to scene XII.
 Prospero: Let us proceed to act IV.
 
-Scene VII: position 1-ന്റെ successor position 2.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are as good as Juliet. Let us proceed to act III.
 [Exeunt]
 
-Scene VIII: position 2-ന്റെ successor position 3.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are as good as Romeo. Let us proceed to act III.
 [Exeunt]
 
-Scene IX: position 3-ന്റെ successor position 4.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are as good as Othello. Let us proceed to act III.
 [Exeunt]
 
-Scene X: position 4-ന്റെ successor position 5.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are as good as Macbeth. Let us proceed to act III.
 [Exeunt]
 
-Scene XI: position 5-ന്റെ successor position 6.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are as good as Lady Macbeth. Let us proceed to act III.
 [Exeunt]
 
-Scene XII: position 6-ന്റെ successor wrap ചെയ്ത് position 1.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are as good as Hamlet.
 [Exeunt]
 
-Act III: valid result.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-[Exeunt]
 
-Scene I: successor output.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero: Open your heart.
 [Exeunt]
 
-Act IV: invalid query.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-[Exeunt]
 
-Scene I: order-ിൽ query ഇല്ലെങ്കിൽ zero sentinel output.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero: You are nothing. Open your heart.
 [Exeunt]

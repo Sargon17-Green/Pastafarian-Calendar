@@ -1,23 +1,23 @@
-Appendix A-യിലെ ഒരു full visible-drop bowl round-ന്റെ position semantics വേർതിരിച്ച് lock ചെയ്യുന്ന clean Stage 1 no-wrap probe. order 3,1,6,2,5,4; old bowl snapshot 1,2,3,4,5,6; direct pours positions 1..3 = 7,11,13; drop=1; i=1; position stone cycle WHEAT,BARLEY,SALT,BITTER,RED,WHEAT = 17,29,43,71,101,17. എല്ലാ ആറു pending values-ും ഒരേ old snapshot മാത്രം വായിക്കുന്നു. expected outputs bowl ID order 1..6: 4448,10355,1542,1762,15174,5054.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, old bowl 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, old bowl 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, old bowl 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, old bowl 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, old bowl 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, old bowl 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, pre-square s സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, pending bowl 1 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, pending bowl 2 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, pending bowl 3 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, pending bowl 4 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, pending bowl 5 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, pending bowl 6 സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, arithmetic-വും output-വും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: old snapshot 1..6 സ്ഥാപിക്കുന്നു.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: bowls 1..3.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: You are a hero.
 [Exeunt]
@@ -28,7 +28,7 @@ Prospero: You are a big hero.
 Prospero: You are as good as the sum of a big hero and a hero.
 [Exeunt]
 
-Scene II: bowls 4..6.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Othello]
 Prospero: You are a big big hero.
 [Exeunt]
@@ -39,9 +39,9 @@ Prospero: You are as good as the sum of a big big hero and a hero.
 Prospero: You are as good as the sum of a big big hero and a big hero.
 [Exeunt]
 
-Act II: order 3,1,6,2,5,4-ന്റെ ആറു positions ഒരേ snapshot-ൽ നിന്ന് pending values കണക്കാക്കുന്നു.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: position 1; current 3, prev 4, next 1, pour 7, drop 1, WHEAT 17.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as Romeo.
@@ -58,7 +58,7 @@ Prospero:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: position 2; current 1, prev 3, next 6, pour 11, drop 1, BARLEY 29.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as Hamlet.
@@ -75,7 +75,7 @@ Prospero:
  You are as good as the sum of yourself and a big hero.
 [Exeunt]
 
-Scene III: position 3; current 6, prev 1, next 2, pour 13, drop 1, SALT 43.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as Lady Macbeth.
@@ -92,7 +92,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big hero and a hero.
 [Exeunt]
 
-Scene IV: position 4; current 2, prev 6, next 5, no pour, drop 1, BITTER 71.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as Juliet.
@@ -108,7 +108,7 @@ Prospero:
  You are as good as the sum of yourself and a big big hero.
 [Exeunt]
 
-Scene V: position 5; current 5, prev 2, next 4, no pour, drop 1, RED 101.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as Macbeth.
@@ -124,7 +124,7 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene VI: position 6; current 4, prev 5, next 3, no pour, drop 1, WHEAT 17.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Ophelia]
 Prospero:
  You are as good as Othello.
@@ -140,9 +140,9 @@ Prospero:
  You are as good as the sum of yourself and the sum of a big big hero and a big hero.
 [Exeunt]
 
-Act III: pending commit vector bowl ID order-ൽ output ചെയ്യുന്നു.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: bowls 1..3.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Cordelia]
 Prospero: Open your heart.
 [Exeunt]
@@ -153,7 +153,7 @@ Prospero: Open your heart.
 Prospero: Open your heart.
 [Exeunt]
 
-Scene II: bowls 4..6.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Viola]
 Prospero: Open your heart.
 [Exeunt]

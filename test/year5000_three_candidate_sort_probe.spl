@@ -1,25 +1,25 @@
-മൂന്ന് സാധുവായ Year 5000 candidate pair-ുകളെ Appendix A key ആയ year length ascending, tie വന്നാൽ opening gate day ascending എന്ന ക്രമത്തിൽ rank ചെയ്യുന്നതു പരിശോധിക്കുന്ന clean Stage 1 source. validity filtering വേറെയുള്ള probe-ൽ പരിശോധിക്കുന്നു; ഇവിടെ മൂന്ന് input pair-ുകളും valid ആണെന്ന precondition ആണ്.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, candidate A open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, candidate A close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, candidate B open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, candidate B close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, candidate C open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, candidate C close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, A length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, B length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, C length സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, A rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, B rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, C rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, requested rank സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, selected open day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Horatio, selected close day സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lear, input-output-ും comparisons-ും സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lear, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: inputsയും lengths-ഉം.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: മൂന്ന് pair-ുകളും requested rank-ും വായിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lear and Hamlet]
 Lear: Listen to your heart.
 [Exeunt]
@@ -59,9 +59,9 @@ Lear: You are a hero.
 [Enter Lear and Miranda]
 Lear: You are a hero.
 
-Act II: A-B pairwise order rank contribution.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: lengths താരതമ്യം ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Ophelia]
 Lear:
@@ -71,7 +71,7 @@ Lear:
  If so, let us proceed to scene IV.
  Let us proceed to scene II.
 
-Scene II: equal length; opening day tie-break.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Hamlet]
 Lear:
@@ -81,19 +81,19 @@ Lear:
  If so, let us proceed to scene IV.
  Let us proceed to act III.
 
-Scene III: A precedes B, അതിനാൽ B rank കൂട്ടുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Viola]
 Lear: You are as good as the sum of yourself and a hero. Let us proceed to act III.
 
-Scene IV: B precedes A, അതിനാൽ A rank കൂട്ടുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Portia]
 Lear: You are as good as the sum of yourself and a hero.
 
-Act III: A-C pairwise order rank contribution.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: lengths താരതമ്യം ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Ophelia]
 Lear:
@@ -103,7 +103,7 @@ Lear:
  If so, let us proceed to scene IV.
  Let us proceed to scene II.
 
-Scene II: equal length; opening day tie-break.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Hamlet]
 Lear:
@@ -113,19 +113,19 @@ Lear:
  If so, let us proceed to scene IV.
  Let us proceed to act IV.
 
-Scene III: A precedes C, അതിനാൽ C rank കൂട്ടുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Miranda]
 Lear: You are as good as the sum of yourself and a hero. Let us proceed to act IV.
 
-Scene IV: C precedes A, അതിനാൽ A rank കൂട്ടുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Portia]
 Lear: You are as good as the sum of yourself and a hero.
 
-Act IV: B-C pairwise order rank contribution.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: lengths താരതമ്യം ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Cordelia]
 Lear:
@@ -135,7 +135,7 @@ Lear:
  If so, let us proceed to scene IV.
  Let us proceed to scene II.
 
-Scene II: equal length; opening day tie-break.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Romeo]
 Lear:
@@ -145,31 +145,31 @@ Lear:
  If so, let us proceed to scene IV.
  Let us proceed to act V.
 
-Scene III: B precedes C, അതിനാൽ C rank കൂട്ടുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Miranda]
 Lear: You are as good as the sum of yourself and a hero. Let us proceed to act V.
 
-Scene IV: C precedes B, അതിനാൽ B rank കൂട്ടുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Viola]
 Lear: You are as good as the sum of yourself and a hero.
 
-Act V: requested rank-ന്റെ candidate materialize ചെയ്യുന്നു.
+Act V: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: A ആണോ പരിശോധിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Ariel]
 Lear: Are you as good as Portia?
 Ariel: If so, let us proceed to scene IV.
 
-Scene II: B ആണോ പരിശോധിക്കുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Ariel]
 Lear: Are you as good as Viola?
 Ariel: If so, let us proceed to scene V.
 
-Scene III: C തിരഞ്ഞെടുക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Macbeth and Prospero]
 Macbeth: You are as good as myself.
@@ -177,7 +177,7 @@ Macbeth: You are as good as myself.
 [Enter Lady Macbeth and Horatio]
 Lady Macbeth: You are as good as myself. Let us proceed to act VI.
 
-Scene IV: A തിരഞ്ഞെടുക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Hamlet and Prospero]
 Hamlet: You are as good as myself.
@@ -185,7 +185,7 @@ Hamlet: You are as good as myself.
 [Enter Juliet and Horatio]
 Juliet: You are as good as myself. Let us proceed to act VI.
 
-Scene V: B തിരഞ്ഞെടുക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Romeo and Prospero]
 Romeo: You are as good as myself.
@@ -193,9 +193,9 @@ Romeo: You are as good as myself.
 [Enter Othello and Horatio]
 Othello: You are as good as myself.
 
-Act VI: result.
+Act VI: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: selected open, close പുറത്തിടുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Lear and Prospero]
 Lear: Open your heart.

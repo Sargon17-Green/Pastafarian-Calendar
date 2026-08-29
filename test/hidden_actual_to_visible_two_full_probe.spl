@@ -1,33 +1,33 @@
-Appendix A-യിലെ 46 actual stone rows transactional ആയി നിർമ്മിച്ച് forward replay ആക്കുകയും, അതിൽ row 1..7 consume ചെയ്ത് same-Foundation legal workCounts contribution ഉപയോഗിച്ച് ഏഴ് actual hidden drops-ും ഓരോന്നിലെ ഏഴ് normative grinds-ും കണക്കാക്കി backward archive-ലേക്ക് commit ചെയ്യുകയും, അവസാനം hidden7..hidden1 pop ചെയ്ത് ഏഴ്-slot timeline ring-ന്റെ slots 2,3,4,5,6,7,1 seed ചെയ്യുകയും ചെയ്യുന്ന clean Stage 1 integration probe. expected control outputs: 45 stone transitions, 46 reversed rows, 7 hidden commits, 7 ring seeds.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, current wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, current barley സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, current salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, current bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, current red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, pending wheat സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, pending barleyയും പിന്നീട് reverse count-ഉം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, pending salt സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Desdemona, pending bitter സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Portia, pending red സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Viola, current row index സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Miranda, committed transition count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Caliban, archived row count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, Mയും പിന്നീട് stack helper-ഉം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Beatrice, wheat archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Benedick, barley archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Mercutio, salt archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Tybalt, bitter archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Iago, red archive stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ariel, wheat replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Falstaff, barley replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Rosalind, salt replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Horatio, bitter replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Polonius, red replay stack സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Desdemona, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Portia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Viola, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Miranda, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Caliban, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Beatrice, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Benedick, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Mercutio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Tybalt, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Iago, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ariel, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Falstaff, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Rosalind, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Horatio, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Polonius, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: M, row 1, ആദ്യ archive.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: M = 2^127 - 1 നിർമ്മിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Prospero]
 Caliban: You are a hero.
 [Exeunt]
@@ -36,7 +36,7 @@ Caliban: You are as good as the difference between a big big big big big big big
 [Exeunt]
 [Enter Prospero and Ophelia]
 
-Scene II: exact doubling.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 Prospero: Are you better than nothing?
 Ophelia:
  If not, let us proceed to scene III.
@@ -45,13 +45,13 @@ Ophelia:
  You are as good as the product of yourself and a big hero.
  Let us return to scene II.
 
-Scene III: subtract one.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Caliban and Prospero]
 Caliban: You are as good as the difference between yourself and a hero.
 [Exeunt]
 
-Scene IV: normative row 1.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Hamlet]
 Caliban: You are as good as the sum of a big big big big hero and a hero.
 [Exeunt]
@@ -68,7 +68,7 @@ Caliban: You are as good as the sum of a big big big big big big hero and the su
 Caliban: You are as good as the sum of a big big big big big big hero and the sum of a big big big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene V: row 1 അഞ്ച് archive stack-ുകളിലേക്ക് push ചെയ്യുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Beatrice]
 Hamlet: You are as good as Hamlet. Remember yourself.
 [Exeunt]
@@ -85,7 +85,7 @@ Othello: You are as good as Othello. Remember yourself.
 Macbeth: You are as good as Macbeth. Remember yourself.
 [Exeunt]
 
-Scene VI: i=2, transitions=0, archived=1.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Viola]
 Caliban: You are a big hero.
 [Exeunt]
@@ -96,9 +96,10 @@ Caliban: You are nothing.
 Viola: You are a hero.
 [Exeunt]
 
-Act II: row 2 മുതൽ row 46 വരെ transactional generation.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: pending wheat = SAVE(wheat^2 + 3*barley + i).
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Caliban and Lady Macbeth]
 Caliban:
  You are as good as the sum of the product of Hamlet and Hamlet and the product of the sum of a big hero and a hero and Juliet.
@@ -108,7 +109,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene II: pending barley = SAVE(barley^2 + 5*salt + wheat).
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Ophelia]
 Caliban:
  You are as good as the sum of the product of Juliet and Juliet and the product of the sum of a big big hero and a hero and Romeo.
@@ -118,7 +119,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: pending salt = SAVE(salt^2 + 7*bitter + barley).
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Cordelia]
 Caliban:
  You are as good as the sum of the product of Romeo and Romeo and the product of the sum of the sum of a big big hero and a big hero and a hero and Othello.
@@ -128,7 +129,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: pending bitter = SAVE(bitter^2 + 11*red + salt).
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Desdemona]
 Caliban:
  You are as good as the sum of the product of Othello and Othello and the product of the sum of the sum of a big big big hero and a big hero and a hero and Macbeth.
@@ -138,7 +139,7 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene V: pending red = SAVE(red^2 + 13*wheat + bitter).
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Portia]
 Caliban:
  You are as good as the sum of the product of Macbeth and Macbeth and the product of the sum of the sum of a big big big hero and a big big hero and a hero and Hamlet.
@@ -148,9 +149,9 @@ Caliban:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Act III: commit, archive, loop.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: അഞ്ച് pending values commit ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lady Macbeth and Hamlet]
 Lady Macbeth: You are as good as Lady Macbeth.
 [Exeunt]
@@ -167,7 +168,7 @@ Desdemona: You are as good as Desdemona.
 Portia: You are as good as Portia.
 [Exeunt]
 
-Scene II: committed row archive stack-ുകളിൽ push ചെയ്യുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Beatrice]
 Hamlet: You are as good as Hamlet. Remember yourself.
 [Exeunt]
@@ -184,7 +185,7 @@ Othello: You are as good as Othello. Remember yourself.
 Macbeth: You are as good as Macbeth. Remember yourself.
 [Exeunt]
 
-Scene III: counters പുതുക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Caliban and Miranda]
 Caliban: You are as good as the sum of yourself and a hero.
 [Exeunt]
@@ -192,7 +193,7 @@ Caliban: You are as good as the sum of yourself and a hero.
 Viola: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: row 46 archive ചെയ്തോ എന്ന് നോക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Caliban]
 Viola: Am I as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big big hero and a big hero?
 Caliban: If so, let us proceed to act IV.
@@ -201,9 +202,10 @@ Caliban: If so, let us proceed to act IV.
 Caliban: You are as good as the sum of yourself and a hero. Let us return to act II.
 [Exeunt]
 
-Act IV: full-table counters, തുടർന്ന് archive reversal.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: 45 transitions, 46 archived rows output ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Caliban and Miranda]
 Caliban: Open your heart.
 [Exeunt]
@@ -211,12 +213,13 @@ Caliban: Open your heart.
 Viola: Open your heart.
 [Exeunt]
 
-Scene II: reverse count = 0.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Ophelia]
 Viola: You are nothing.
 [Exeunt]
 
-Scene III: wheat archive pop ചെയ്ത് wheat replay push ചെയ്യുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Beatrice]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -224,7 +227,7 @@ Prospero: Recall your newest memory.
 Beatrice: You are as good as Beatrice. Remember yourself.
 [Exeunt]
 
-Scene IV: barley archive -> replay.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Benedick]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -232,7 +235,7 @@ Prospero: Recall your newest memory.
 Benedick: You are as good as Benedick. Remember yourself.
 [Exeunt]
 
-Scene V: salt archive -> replay.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Mercutio]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -240,7 +243,7 @@ Prospero: Recall your newest memory.
 Mercutio: You are as good as Mercutio. Remember yourself.
 [Exeunt]
 
-Scene VI: bitter archive -> replay.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Tybalt]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -248,7 +251,7 @@ Prospero: Recall your newest memory.
 Tybalt: You are as good as Tybalt. Remember yourself.
 [Exeunt]
 
-Scene VII: red archive -> replay.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Iago]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -256,7 +259,7 @@ Prospero: Recall your newest memory.
 Iago: You are as good as Iago. Remember yourself.
 [Exeunt]
 
-Scene VIII: reverse count increment; 46 ആയാൽ replay-ലേക്ക് പോകുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Ophelia]
 Viola: You are as good as the sum of yourself and a hero.
 [Exeunt]
@@ -265,7 +268,8 @@ Ophelia: Am I as good as the sum of the sum of a big big big big big hero and a 
 Viola: If so, let us proceed to scene IX. Let us return to scene III.
 [Exeunt]
 
-Scene IX: hidden loop initialization ഒരിക്കൽ മാത്രം.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Viola and Beatrice]
 Viola: You are a hero.
 [Exeunt]
@@ -273,14 +277,16 @@ Viola: You are a hero.
 Viola: You are nothing. Let us proceed to act V.
 [Exeunt]
 
-Act V: actual row 1 മുതൽ row 7 വരെ hidden generation-ലേക്ക് consume ചെയ്യുന്നു.
+Act V: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: initialized hidden loop entry.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Viola and Beatrice]
 Viola: Let us proceed to scene II.
 [Exeunt]
 
-Scene II: അടുത്ത actual stone row forward replay-ൽ നിന്ന് pop ചെയ്യുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Ariel]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -297,11 +303,11 @@ Prospero: Recall your newest memory.
 Prospero: Recall your newest memory.
 [Exeunt]
 
-Scene III: same-Foundation legal workCounts-ൽ hidden coefficient contribution 21*k+15; actual row-യിലെ അഞ്ച് stones കൂടി ചേർത്ത് SAVE ചെയ്യുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Beatrice and Mercutio]
 Beatrice:
  You are as good as the product of the sum of the sum of a big big big big hero and a big big hero and a hero and Beatrice.
- You are as good as the sum of yourself and the sum of the sum of a big big big hero and a big big hero and a big hero and a hero.
+ You are as good as the sum of yourself and the sum of the sum of the sum of a big big big hero and a big big hero and a big hero and a hero.
  You are as good as the sum of yourself and Ariel.
  You are as good as the sum of yourself and Falstaff.
  You are as good as the sum of yourself and Rosalind.
@@ -312,14 +318,15 @@ Beatrice:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: grind index 1.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Beatrice and Benedick]
 Beatrice: You are a hero.
 [Exeunt]
 
-Act VI: ഓരോ hidden value-നും ഏഴ് normative grind commits.
+Act VI: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: grind stone തിരഞ്ഞെടുക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Benedick and Viola]
 Benedick: Am I as good as a hero?
 Viola: If so, let us proceed to scene II.
@@ -338,42 +345,50 @@ Viola: If so, let us proceed to scene VIII.
 Viola: Let us proceed to act VII.
 [Exeunt]
 
-Scene II: grind 1 uses WHEAT.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Ariel and Desdemona]
 Ariel: You are as good as Ariel. Let us proceed to scene IX.
 [Exeunt]
 
-Scene III: grind 2 uses BARLEY.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Falstaff and Desdemona]
 Falstaff: You are as good as Falstaff. Let us proceed to scene IX.
 [Exeunt]
 
-Scene IV: grind 3 uses SALT.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Rosalind and Desdemona]
 Rosalind: You are as good as Rosalind. Let us proceed to scene IX.
 [Exeunt]
 
-Scene V: grind 4 uses BITTER.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Horatio and Desdemona]
 Horatio: You are as good as Horatio. Let us proceed to scene IX.
 [Exeunt]
 
-Scene VI: grind 5 uses RED.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Polonius and Desdemona]
 Polonius: You are as good as Polonius. Let us proceed to scene IX.
 [Exeunt]
 
-Scene VII: grind 6 വീണ്ടും WHEAT ഉപയോഗിക്കുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Ariel and Desdemona]
 Ariel: You are as good as Ariel. Let us proceed to scene IX.
 [Exeunt]
 
-Scene VIII: grind 7 വീണ്ടും BARLEY ഉപയോഗിക്കുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Falstaff and Desdemona]
 Falstaff: You are as good as Falstaff. Let us proceed to scene IX.
 [Exeunt]
 
-Scene IX: x = SAVE(x^2 + 3*x + selectedStone + grind).
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Benedick and Mercutio]
 Benedick:
  You are as good as the sum of the product of Mercutio and Mercutio and the product of the sum of a big hero and a hero and Mercutio.
@@ -384,7 +399,7 @@ Benedick:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene X: grind 7 പൂർത്തിയായാൽ hidden commit; അല്ലെങ്കിൽ അടുത്ത grind.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Benedick and Viola]
 Benedick: Am I as good as the sum of the sum of a big big hero and a big hero and a hero?
 Viola: If so, let us proceed to act VII.
@@ -393,54 +408,56 @@ Viola: If so, let us proceed to act VII.
 Viola: You are as good as the sum of yourself and a hero. Let us return to scene I.
 [Exeunt]
 
-Act VII: hidden commit, ഏഴ് rows പൂർത്തിയാകുന്നത് വരെ loop.
+Act VII: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: final hidden value dedicated backward archive stack-ിലേക്ക് push ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio: You are as good as Mercutio. Remember yourself.
 [Exeunt]
 
-Scene II: hidden count കൂട്ടുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Beatrice and Tybalt]
 Beatrice: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: hidden index 7 ആണോ എന്ന് നോക്കുന്നു.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Beatrice and Viola]
 Beatrice: Am I as good as the sum of the sum of a big big hero and a big hero and a hero?
 Viola: If so, let us proceed to act VIII.
 [Exeunt]
 
-Scene IV: അടുത്ത hidden index.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Beatrice]
 Viola: You are as good as the sum of yourself and a hero. Let us return to act V.
 [Exeunt]
 
-Act VIII: full stone traversal + actual seven-hidden completion controls.
+Act VIII: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: stone transitions 45.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Caliban and Miranda]
 Caliban: Open your heart.
 [Exeunt]
 
-Scene II: reverse count 46.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Viola and Ophelia]
 Viola: Open your heart.
 [Exeunt]
 
-Scene III: actual hidden commits 7.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Beatrice and Tybalt]
 Beatrice: Open your heart.
 [Exeunt]
 
-Act IX: actual hidden archive-നെ timeline ring seed order-ലേക്ക് മാറ്റുന്നു.
+Act IX: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: ring seed count 0.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Tybalt and Iago]
 Tybalt: You are nothing.
 [Exeunt]
 
-Scene II: hidden7 -> slot2.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Caliban]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -451,7 +468,7 @@ Caliban: You are as good as Caliban.
 Tybalt: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: hidden6 -> slot3.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Caliban]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -462,7 +479,7 @@ Caliban: You are as good as Caliban.
 Tybalt: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: hidden5 -> slot4.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Caliban]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -473,7 +490,7 @@ Caliban: You are as good as Caliban.
 Tybalt: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene V: hidden4 -> slot5.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Caliban]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -484,7 +501,7 @@ Caliban: You are as good as Caliban.
 Tybalt: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VI: hidden3 -> slot6.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Caliban]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -495,7 +512,7 @@ Caliban: You are as good as Caliban.
 Tybalt: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VII: hidden2 -> slot7.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Caliban]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -506,7 +523,7 @@ Caliban: You are as good as Caliban.
 Tybalt: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene VIII: hidden1 -> slot1.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Caliban]
 Prospero: Recall your newest memory.
 [Exeunt]
@@ -517,16 +534,15 @@ Caliban: You are as good as Caliban.
 Tybalt: You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IX: ring seed count 7 output.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Tybalt and Iago]
 Tybalt: Open your heart.
 [Exeunt]
 
-Appendix A-യിലെ actual seven-hidden path-ന് പിന്നാലെ same-Foundation legal counts ഉപയോഗിച്ച് visible drop 1, പിന്നെ transactional row-2 stone update ഉപയോഗിച്ച് visible drop 2 എന്നിവ ഓരോന്നും പതിനൊന്ന് normative grinds മുഴുവനായി നടത്തുന്നു. രണ്ട് committed visible മൂല്യങ്ങളും SAVE range 1..M-ൽ തന്നെയാണെന്ന് വേർതിരിച്ച control flags ഉപയോഗിച്ച് പരിശോധിക്കുന്നു.
 
-Act X: visible drop 1-ന് actual row 1, predecessor snapshot, seed.
+Act X: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: row 1 stones വീണ്ടും exact constants ആയി materialize ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Ariel]
 Mercutio: You are as good as the sum of a big big big big hero and a hero.
 [Exeunt]
@@ -537,13 +553,13 @@ Mercutio: You are as good as the sum of the sum of a big big big big hero and a 
 Mercutio: You are as good as the sum of the sum of a big big big big big hero and a big big big hero and the sum of a big hero and a hero.
 [Exeunt]
 [Enter Mercutio and Horatio]
-Mercutio: You are as good as the sum of the sum of a big big big big big big hero and a big big hero and a big hero and a hero.
+Mercutio: You are as good as the sum of the sum of the sum of a big big big big big big hero and a big big hero and a big hero and a hero.
 [Exeunt]
 [Enter Mercutio and Polonius]
 Mercutio: You are as good as the sum of the sum of a big big big big big big hero and a big big big big hero and the sum of a big big hero and a hero.
 [Exeunt]
 
-Scene II: i=1, grind=1; visible-1 predecessor snapshot = hidden1, hidden3, hidden7.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Beatrice]
 Mercutio: You are a hero.
 [Exeunt]
@@ -560,7 +576,7 @@ Lady Macbeth: You are as good as Lady Macbeth.
 Juliet: You are as good as Juliet.
 [Exeunt]
 
-Scene III: same-Foundation counts 1,1,1,2,2 ഉപയോഗിച്ച visible seed.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as Ariel.
@@ -577,9 +593,10 @@ Mercutio:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Act XI: current visible drop-ന്റെ പതിനൊന്ന് normative grinds.
+Act XI: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: oldX snapshot എടുത്ത് grind row dispatch ചെയ്യുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Caliban and Cordelia]
 Caliban: You are as good as Caliban.
 [Exeunt]
@@ -609,7 +626,8 @@ Miranda: If so, let us proceed to scene XII.
 Miranda: Let us proceed to act XIII.
 [Exeunt]
 
-Scene II: grind 1 = 3,5,7,11,WHEAT.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
@@ -624,7 +642,8 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene III: grind 2 = 5,7,11,13,BARLEY.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
@@ -639,7 +658,8 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene IV: grind 3 = 7,11,13,17,SALT.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
@@ -654,7 +674,8 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene V: grind 4 = 11,13,17,19,BITTER.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
@@ -669,7 +690,8 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene VI: grind 5 = 13,17,19,23,RED.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
@@ -684,7 +706,8 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene VII: grind 6 = 17,19,23,29,WHEAT.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
@@ -699,14 +722,15 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene VIII: grind 7 = 19,23,29,31,BARLEY.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
  You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big hero and a hero and Cordelia.
  You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big hero and a hero and Desdemona.
  You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero and Portia.
- You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero and Viola.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero and Viola.
  You are as good as the sum of yourself and Falstaff.
  You are as good as the difference between yourself and a hero.
  You are as good as the remainder of the quotient between yourself and Prospero.
@@ -714,13 +738,14 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene IX: grind 8 = 23,29,31,37,SALT.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
  You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big hero and a hero and Cordelia.
  You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero and Desdemona.
- You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero and Portia.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero and Portia.
  You are as good as the sum of yourself and the product of the sum of a big big big big big hero and the sum of a big big hero and a hero and Viola.
  You are as good as the sum of yourself and Rosalind.
  You are as good as the difference between yourself and a hero.
@@ -729,12 +754,13 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene X: grind 9 = 29,31,37,41,BITTER.
+Scene X: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
  You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a hero and Cordelia.
- You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero and Desdemona.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero and Desdemona.
  You are as good as the sum of yourself and the product of the sum of a big big big big big hero and the sum of a big big hero and a hero and Portia.
  You are as good as the sum of yourself and the product of the sum of a big big big big big hero and the sum of a big big big hero and a hero and Viola.
  You are as good as the sum of yourself and Horatio.
@@ -744,11 +770,12 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene XI: grind 10 = 31,37,41,43,RED.
+Scene XI: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
- You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of a big big hero and a big hero and a hero and Cordelia.
+ You are as good as the sum of yourself and the product of the sum of the sum of a big big big big hero and a big big big hero and the sum of the sum of a big big hero and a big hero and a hero and Cordelia.
  You are as good as the sum of yourself and the product of the sum of a big big big big big hero and the sum of a big big hero and a hero and Desdemona.
  You are as good as the sum of yourself and the product of the sum of a big big big big big hero and the sum of a big big big hero and a hero and Portia.
  You are as good as the sum of yourself and the product of the sum of a big big big big big hero and the sum of a big big big hero and the sum of a big hero and a hero and Viola.
@@ -759,7 +786,8 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene XII: grind 11 = 37,41,43,47,WHEAT.
+Scene XII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Caliban]
 Mercutio:
  You are as good as the product of Cordelia and Cordelia.
@@ -774,7 +802,8 @@ Mercutio:
  Let us proceed to scene XIII.
 [Exeunt]
 
-Scene XIII: grind 11 കഴിഞ്ഞോ എന്ന് നോക്കുന്നു; ഇല്ലെങ്കിൽ increment.
+Scene XIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Benedick and Miranda]
 Benedick: Am I as good as the sum of the sum of a big big big hero and a big hero and a hero?
 Miranda: If so, let us proceed to scene XIV.
@@ -783,14 +812,16 @@ Miranda: If so, let us proceed to scene XIV.
 Mercutio: You are as good as the sum of yourself and a hero. Let us return to scene I.
 [Exeunt]
 
-Scene XIV: completed drop 1 ആണെങ്കിൽ row-2 bridge; completed drop 2 ആണെങ്കിൽ final controls.
+Scene XIV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Beatrice and Miranda]
 Beatrice: Am I as good as a big hero?
 Miranda: If so, let us proceed to act XIII. Let us proceed to act XII.
 [Exeunt]
-Act XII: visible 1 commit range, row 2 transactional stones, visible 2 seed.
+Act XII: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: visible 1 SAVE range flag Tybalt-ൽ നിർമ്മിക്കുന്നു; എല്ലാ paths-ും row 2 flow-ലേക്ക് ചേരുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Tybalt]
 Mercutio: You are nothing.
 [Exeunt]
@@ -805,13 +836,13 @@ Prospero: If so, let us proceed to scene II.
 [Enter Mercutio and Tybalt]
 Mercutio: You are a hero.
 
-Scene II: visible 1 value Mercutio-യിൽ snapshot ചെയ്യുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Caliban and Mercutio]
 Caliban: You are as good as Caliban.
 [Exeunt]
 
-Scene III: row 2 pending stones same row-1 snapshot-ൽ നിന്ന്.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Cordelia]
 Mercutio:
  You are as good as the sum of the product of Ariel and Ariel and the product of the sum of a big hero and a hero and Falstaff.
@@ -853,7 +884,7 @@ Mercutio:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene IV: row 2 pending snapshot ഒരുമിച്ച് commit ചെയ്യുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Ariel]
 Mercutio: You are as good as Cordelia.
 [Exeunt]
@@ -870,7 +901,7 @@ Mercutio: You are as good as Viola.
 Mercutio: You are as good as Miranda.
 [Exeunt]
 
-Scene V: i=2, grind=1, predecessor snapshot = visible1, hidden2, hidden6.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Beatrice]
 Mercutio: You are a big hero.
 [Exeunt]
@@ -887,7 +918,7 @@ Ophelia: You are as good as Ophelia.
 Romeo: You are as good as Romeo.
 [Exeunt]
 
-Scene VI: visible 2 seed.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Cordelia and Caliban]
 Cordelia:
  You are as good as Ariel.
@@ -905,9 +936,10 @@ Cordelia:
  Let us return to act XI.
 [Exeunt]
 
-Act XIII: visible 2 completion controls.
+Act XIII: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: visible 2 range flag Iago-യിൽ; എല്ലാ paths-ും shared output scene-ലേക്ക് ചേരുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Iago]
 Mercutio: You are nothing.
 [Exeunt]
@@ -922,7 +954,7 @@ Prospero: If so, let us proceed to scene II.
 [Enter Mercutio and Iago]
 Mercutio: You are a hero.
 
-Scene II: visible 1 range flag, visible 2 range flag, final i, final grind.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Mercutio and Tybalt]
 Mercutio: Open your heart.
@@ -937,9 +969,9 @@ Mercutio: Open your heart.
 Mercutio: Open your heart.
 [Exeunt]
 
-Act XIV: actual committed visible 2-നെ bowl-order one-based rank domain-ലേക്ക് ബന്ധിപ്പിക്കുന്നു.
+Act XIV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: divisor 720 നിർമ്മിക്കുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Cordelia]
 Mercutio:
  You are a big big big big big big big big big hero.
@@ -948,7 +980,7 @@ Mercutio:
  You are as good as the sum of yourself and a big big big big hero.
 [Exeunt]
 
-Scene II: rank = 1 + regularMod(visible2-1,720).
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Desdemona]
 Mercutio:
  You are as good as the difference between Caliban and a hero.
@@ -956,7 +988,7 @@ Mercutio:
  You are as good as the sum of yourself and a hero.
 [Exeunt]
 
-Scene III: rank-domain flag Portia-യിൽ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Portia]
 Mercutio: You are nothing.
 [Exeunt]
@@ -971,20 +1003,20 @@ Cordelia: If so, let us proceed to scene IV.
 [Enter Mercutio and Portia]
 Mercutio: You are a hero.
 
-Scene IV: actual drop-derived rank domain flag output.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Mercutio and Portia]
 Mercutio: Open your heart.
 [Exeunt]
 
-Act XV: actual visible 2 rank-നെ six factoradic digits-ആക്കി തുറക്കുന്നു.
+Act XV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: zero-based residual = rank-1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Caliban]
 Mercutio: You are as good as the difference between Desdemona and a hero.
 [Exeunt]
 
-Scene II: block 120 -> digit 1 Hamlet-ൽ.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Cordelia]
 Mercutio: You are as good as the product of the difference between a big big big big hero and a hero and a big big big hero.
 [Exeunt]
@@ -995,7 +1027,7 @@ Caliban: You are as good as the quotient between myself and Cordelia.
 Cordelia: You are as good as the remainder of the quotient between Caliban and myself.
 [Exeunt]
 
-Scene III: block 24 -> digit 2 Juliet-ൽ.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Cordelia]
 Mercutio: You are as good as the product of the sum of a big hero and a hero and a big big big hero.
 [Exeunt]
@@ -1006,7 +1038,7 @@ Caliban: You are as good as the quotient between myself and Cordelia.
 Cordelia: You are as good as the remainder of the quotient between Caliban and myself.
 [Exeunt]
 
-Scene IV: block 6 -> digit 3 Romeo-യിൽ.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Cordelia]
 Mercutio: You are as good as the product of the sum of a big hero and a hero and a big hero.
 [Exeunt]
@@ -1017,7 +1049,7 @@ Caliban: You are as good as the quotient between myself and Cordelia.
 Cordelia: You are as good as the remainder of the quotient between Caliban and myself.
 [Exeunt]
 
-Scene V: block 2 -> digit 4 Othello-യിൽ.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Cordelia]
 Mercutio: You are a big hero.
 [Exeunt]
@@ -1028,7 +1060,7 @@ Caliban: You are as good as the quotient between myself and Cordelia.
 Cordelia: You are as good as the remainder of the quotient between Caliban and myself.
 [Exeunt]
 
-Scene VI: block 1 -> digit 5 Macbeth-ൽ; final residual digit 6 Lady Macbeth-ൽ.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Cordelia]
 Mercutio: You are a hero.
 [Exeunt]
@@ -1042,44 +1074,44 @@ Cordelia: You are as good as the remainder of the quotient between Caliban and m
 Caliban: You are as good as Caliban.
 [Exeunt]
 
-Act XVI: factoradic digit-domain control.
+Act XVI: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: valid flag Portia=1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Mercutio and Portia]
 Mercutio: You are a hero.
 [Exeunt]
 
-Scene II: digit1 <=5.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Hamlet and Miranda]
 Hamlet: Am I better than the sum of a big big hero and a hero?
 Miranda: If so, let us proceed to scene VIII.
 [Exeunt]
 
-Scene III: digit2 <=4.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Juliet and Miranda]
 Juliet: Am I better than a big big hero?
 Miranda: If so, let us proceed to scene VIII.
 [Exeunt]
 
-Scene IV: digit3 <=3.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Romeo and Miranda]
 Romeo: Am I better than the sum of a big hero and a hero?
 Miranda: If so, let us proceed to scene VIII.
 [Exeunt]
 
-Scene V: digit4 <=2.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Othello and Miranda]
 Othello: Am I better than a big hero?
 Miranda: If so, let us proceed to scene VIII.
 [Exeunt]
 
-Scene VI: digit5 <=1.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Macbeth and Miranda]
 Macbeth: Am I better than a hero?
 Miranda: If so, let us proceed to scene VIII.
 [Exeunt]
 
-Scene VII: digit6 ==0 ആയിരിക്കണം; valid flag output.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Lady Macbeth and Miranda]
 Lady Macbeth: Am I as good as nothing?
 Miranda: If not, let us proceed to scene VIII.
@@ -1088,14 +1120,16 @@ Miranda: If not, let us proceed to scene VIII.
 Mercutio: Open your heart. Let us proceed to act XVII.
 [Exeunt]
 
-Scene VIII: invalid digit domain.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Portia]
 Mercutio: You are nothing. Open your heart.
 [Exeunt]
 
-Act XVII: source അവസാനിക്കുന്നു.
+Act XVII: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: terminal no-output scene.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Mercutio and Miranda]
 Mercutio: You are as good as Miranda.
 [Exeunt]

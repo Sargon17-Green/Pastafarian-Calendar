@@ -1,27 +1,28 @@
-അഞ്ച് positive parts-ുള്ള cutlet partition family-യിൽ internal calculation-day gate boundary ആവശ്യമായപ്പോൾ exact filtered count brute-force ആയി പരിശോധിക്കുന്ന clean Stage 1 regression. fixture total gate gaps 7, parts 5, required prefix boundary 3 ആണ്.
+ഒന്നാം ഘട്ടത്തിലെ പരിശോധന.
 
-Hamlet, valid count സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Juliet, ആദ്യ ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Romeo, രണ്ടാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Othello, മൂന്നാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Macbeth, നാലാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Lady Macbeth, അഞ്ചാം ഭാഗം സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Ophelia, prefix sum സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Cordelia, boundary-hit flag സൂക്ഷിക്കുന്ന കഥാപാത്രം.
-Prospero, output സഹായിക്കുന്ന കഥാപാത്രം.
+Hamlet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Juliet, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Romeo, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Othello, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Lady Macbeth, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Ophelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Cordelia, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
+Prospero, കണക്കിന്റെ അവസ്ഥ സൂക്ഷിക്കുന്ന കഥാപാത്രം.
 
-Act I: counters.
+Act I: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: count=0, first=1.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
 [Enter Prospero and Hamlet]
 Prospero: You are nothing.
 [Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are a hero.
 
-Act II: first loop.
+Act II: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: first 3 കടന്നാൽ result; total 7, five positive parts ആയതിനാൽ first max 3.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Juliet and Prospero]
 Juliet: Am I better than the sum of a big hero and a hero?
 Prospero: If so, let us proceed to act VII.
@@ -29,9 +30,10 @@ Prospero: If so, let us proceed to act VII.
 [Enter Prospero and Romeo]
 Prospero: You are a hero.
 
-Act III: second loop.
+Act III: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: second 3 കടന്നാൽ first കൂട്ടുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Romeo and Prospero]
 Romeo: Am I better than the sum of a big hero and a hero?
 Prospero: If so, let us proceed to act VI.
@@ -39,9 +41,10 @@ Prospero: If so, let us proceed to act VI.
 [Enter Prospero and Othello]
 Prospero: You are a hero.
 
-Act IV: third loop.
+Act IV: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: third 3 കടന്നാൽ second കൂട്ടുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Othello and Prospero]
 Othello: Am I better than the sum of a big hero and a hero?
 Prospero: If so, let us proceed to scene VIII.
@@ -49,12 +52,13 @@ Prospero: If so, let us proceed to scene VIII.
 [Enter Prospero and Macbeth]
 Prospero: You are a hero.
 
-Scene II: fourth 3 കടന്നാൽ third കൂട്ടുന്നു.
+Scene II: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Macbeth and Prospero]
 Macbeth: Am I better than the sum of a big hero and a hero?
 Prospero: If so, let us proceed to scene VII.
 
-Scene III: fifth = 7-first-second-third-fourth.
+Scene III: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Lady Macbeth]
 Prospero:
@@ -63,12 +67,13 @@ Prospero:
  You are as good as the difference between yourself and Othello.
  You are as good as the difference between yourself and Macbeth.
 
-Scene IV: fifth positive ആണോ എന്ന് പരിശോധിക്കുന്നു.
+Scene IV: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Lady Macbeth and Prospero]
 Lady Macbeth: Am I worse than a hero?
 Prospero: If so, let us proceed to scene IX.
 
-Scene V: prefix boundary 3 hit പരിശോധിക്കുന്നു.
+Scene V: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Cordelia]
 Prospero: You are nothing.
@@ -101,35 +106,37 @@ Prospero: You are as good as the sum of Juliet and Romeo. You are as good as the
 Ophelia: Am I as good as the sum of a big hero and a hero?
 Prospero: If not, let us proceed to scene IX.
 
-Scene VI: valid count കൂട്ടുന്നു.
+Scene VI: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Hamlet]
 Prospero: You are as good as the sum of yourself and a hero.
 
-Scene IX: fourth കൂട്ടുന്നു.
+Scene IX: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Macbeth]
 Prospero: You are as good as the sum of yourself and a hero. Let us return to scene II.
 
-Scene VII: third കൂട്ടുന്നു.
+Scene VII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Othello]
 Prospero: You are as good as the sum of yourself and a hero. Let us return to scene I.
 
-Scene VIII: second കൂട്ടുന്നു.
+Scene VIII: കണക്കിന്റെ ഉപഘട്ടം.
 [Exeunt]
 [Enter Prospero and Romeo]
 Prospero: You are as good as the sum of yourself and a hero. Let us return to act III.
 
-Act VI: first കൂട്ടുന്നു.
+Act VI: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: first കൂട്ടുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Juliet]
 Prospero: You are as good as the sum of yourself and a hero. Let us return to act II.
 
-Act VII: result.
+Act VII: കണക്കിന്റെ പ്രധാന ഘട്ടം.
 
-Scene I: exact filtered count പുറത്തിടുന്നു.
+Scene I: കണക്കിന്റെ ഉപഘട്ടം.
+[Exeunt]
 [Enter Prospero and Hamlet]
 Prospero: Open your heart.
 [Exeunt]
