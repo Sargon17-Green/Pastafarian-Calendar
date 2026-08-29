@@ -1,0 +1,51 @@
+Gradus 14 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Aedificatio communis:
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
+
+Regressiones priores Graduum 1–13 denuo compilatae et exsecutae sunt.
+Exitus actualis:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+REGRESSIO_DISCOVERY_01_TRANSIIT
+REGRESSIO_PATCH_01_TRANSIIT
+REGRESSIO_DISCOVERY_02_TRANSIIT
+REGRESSIO_PATCH_02_TRANSIIT
+REGRESSIO_DISCOVERY_03_TRANSIIT
+REGRESSIO_PATCH_03_TRANSIIT
+REGRESSIO_DISCOVERY_04_TRANSIIT
+REGRESSIO_PATCH_04_TRANSIIT
+REGRESSIO_DISCOVERY_05_TRANSIIT
+REGRESSIO_PATCH_05_TRANSIIT
+REGRESSIO_DISCOVERY_06_TRANSIIT
+REGRESSIO_PATCH_06_TRANSIIT
+PREVIOUS_STATUS=0
+
+Regressio DISCOVERY 07:
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/stage_14_discovery_07_tests.cpp -o build/stage_14_discovery_07_tests.o
+g++ build/stage_14_discovery_07_tests.o build/monster.o -o build/stage_14_discovery_07_tests
+./build/stage_14_discovery_07_tests
+
+Exitus actualis:
+DISCREPANTIA MOLITIONIS grind=1 expectatus=WHEAT,3,5,7,11 actualis=BARLEY,5,7,11,13 index_physicus=1
+DISCREPANTIA MOLITIONIS grind=2 expectatus=BARLEY,5,7,11,13 actualis=SALT,7,11,13,17 index_physicus=2
+DISCREPANTIA MOLITIONIS grind=3 expectatus=SALT,7,11,13,17 actualis=BITTER,11,13,17,19 index_physicus=3
+DISCREPANTIA MOLITIONIS grind=4 expectatus=BITTER,11,13,17,19 actualis=RED,13,17,19,23 index_physicus=4
+DISCREPANTIA MOLITIONIS grind=5 expectatus=RED,13,17,19,23 actualis=WHEAT,17,19,23,29 index_physicus=5
+DISCREPANTIA MOLITIONIS grind=6 expectatus=WHEAT,17,19,23,29 actualis=BARLEY,19,23,29,31 index_physicus=6
+DISCREPANTIA MOLITIONIS grind=7 expectatus=BARLEY,19,23,29,31 actualis=SALT,23,29,31,37 index_physicus=7
+DISCREPANTIA MOLITIONIS grind=8 expectatus=SALT,23,29,31,37 actualis=BITTER,29,31,37,41 index_physicus=8
+DISCREPANTIA MOLITIONIS grind=9 expectatus=BITTER,29,31,37,41 actualis=RED,31,37,41,43 index_physicus=9
+DISCREPANTIA MOLITIONIS grind=10 expectatus=RED,31,37,41,43 actualis=WHEAT,37,41,43,47 index_physicus=10
+DISCREPANTIA MOLITIONIS grind=11 expectatus=WHEAT,37,41,43,47 actualis=ABSENS index_physicus=11
+REGRESSIO_DISCOVERY_07_DEFECIT: 11 discrepantiae normativae ex indice one-based directo inventae sunt
+EXIT_CODE=1
+
+Exitus exspectatus huius gradus: 1.
+Status finalis: EXPECTED_RED
+Regressiones anteriores: PASS
+Emendatio indicum molitionis: ABSENS
+Codex sequentis vitii permutationis: ABSENS

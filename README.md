@@ -1,86 +1,59 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 13 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
+Hoc directorium Gradum 14 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 13 est `PATCH 06` et status repository exspectatus est `GREEN`. Sex detectio prioris gradus ostendit `legacyPrior(dropStore,i,back)` tantum historiam visibilem `dropStore[i-back]` intellegere. Helper legacy ipse non mutatus est et pro indicibus conceptu occultis adhuc errorem mittit.
+Gradus 14 est `DISCOVERY 07`; status repository exspectatus est `EXPECTED_RED`.
 
-Emendatio nova contractum normativum sequitur:
+Vitium historicum nunc in via productionis activa expositum est. Tabula molitionum visibilium undecim ordines reales in ordine recto continet, sed memoria physica a nullo numeratur, locis `0..10`. Vocator legacy autem numerum semanticum molitionis `1..11` directe ut indicem physicum adhibet.
+
+Ita fit:
 
 ```text
-slot = i - back
-if slot >= 1:
-    return legacyPrior(dropStore, i, back)
-hiddenK = 1 - slot
-return hiddenByNearness(legacyHidden, hiddenK)
+molitionis 1  -> ordo realis 2
+molitionis 2  -> ordo realis 3
+...
+molitionis 10 -> ordo realis 11
+molitionis 11 -> ordo absens
 ```
 
-Hoc schema in `priorPatch` servatur. Nulla inversio array occultarum fit; `hiddenByNearness` ex PATCH 05 mapping `8-k` retinet.
+Primus ordo realis igitur omnino praeteritur.
 
 ## Via activa
 
-`BaseMonsterManager::executePrior` nunc transit per:
+`BaseMonsterManager::executeGrindRow` transit per:
 
 ```text
-BaseMonsterManager::executePrior
--> BaseDispatcher::dispatchPatchedPrior
--> Patch06PriorHandler
--> Patch06PriorWrapper
--> priorPatch
+BaseMonsterManager::executeGrindRow
+-> BaseDispatcher::dispatchLegacyGrindIndex
+-> Discovery07GrindIndexHandler
+-> LegacyGrindTableAdapter
+-> legacyGrindRow
 ```
 
-Handler tabulam lapidum per viam productionis iam emendatam construit, deinde septem guttas occultas in repositione retrograda legacy fabricat. `priorPatch` eligens slot positivum ad `legacyPrior` redit; slot non positivum ad `hiddenByNearness` transit.
+`legacyGrindRow(grind)` indicem physicum exacte aequat numero `grind`; nullam translationem facit. Si index 11 petitur, relatio `found=false` reddit et defectum non corrigit.
 
-`executeUnpatchedPriorDiagnostic` viam `Discovery06PriorHandler -> LegacyPriorAdapter -> legacyPrior` integram servat. Sic cicatrix prioris gradus adhuc directe exerceri potest.
+Contextus invocationis ordinalem petitum, indicem physicum adhibitum, ordinem lectum et signum praesentiae servat. Metrics et branch trace observationes sunt tantum; exitum semanticum non corrigunt.
 
-## Regressio Gradus 12
+## Regressio DISCOVERY 07
 
-Probatio `tests/stage_12_discovery_06_tests.cpp` una mutatione harness indiguit: nomen handler et status Gradus 12 erant nimis stricte fixi ad viam DISCOVERY. Expected values, casus `back=1..7`, verificatio quod `legacyPrior` directus occultas reicit, et numerus discrepantiarum ante patch non mutati sunt.
+`tests/stage_14_discovery_07_tests.cpp` undecim ordines normativos ex eodem specimine huius lineae definit et eos cum via activa comparat. Praeterea cicatricem ipsam separat: tabula legacy undecim ordines habet; `legacyGrindRow(1)` secundum ordinem legit; `legacyGrindRow(10)` undecimum; `legacyGrindRow(11)` nihil invenit.
 
-Forma correcta contra productionem Gradus 12 pristinam adhuc exactas septem petitiones `NON_RESOLUTUS` et exitum `1` producit. Contra Gradum 13 eadem probatio nullas discrepantias producit et transit.
+Exitus actualis est undecim discrepantiae ex undecim molitionibus. Hic rubor consultus est.
 
-## Probatio PATCH 06
+## Regressiones anteriores
 
-`tests/stage_13_patch_06_tests.cpp` separat cicatricem et exitum auctoritative:
-
-- `legacyPrior` directus pro `i=1, back=1..7` adhuc reicitur;
-- `priorPatch` pro iisdem septem casibus hidden1..hidden7 recte reddit;
-- pro slot positivo `priorPatch` viam legacy servat;
-- relatio productionis indicat utrum via legacy an via occulta adhibita sit;
-- diagnosticum sine patch pro historia occulta adhuc deficit;
-- petitio ultra septem occultas reicitur.
-
-Omnes regressiones Graduum 1–13 transeunt.
+Omnes probationes Graduum 1–13 denuo compilatae et exsecutae sunt; omnes transeunt. Nullum vitium antea correctum regressum est.
 
 ## Quod consulto nondum adest
 
-Nullum codicem DISCOVERY 07 aut PATCH 07 introductum est. Absunt sentinel tabulae molendi, `Patch07`, `patch07Applied` et omnis emendatio indexing molitionis futurae.
+Nulla linea custodiae in loco physico 0 addita est. Vocator legacy non mutatus est nec ad `grind-1` conversus. Nulla emendatio huius numerationis indicum in productione adest, et nullus codex sequentis vitii permutationis introductus est.
 
 ## Lingua computationis
 
-Omnis codex exsecutus huius lineae est C++. Integra arbitraria per `boost::multiprecision::cpp_int` tractantur. Nullus interpres externus, FFI, runtime alienus aut generator in alia lingua adhibetur.
+Omnis codex exsecutus huius lineae est C++. Integra arbitraria per `boost::multiprecision::cpp_int` tractantur. Nullus interpres externus, FFI, ambitus exsecutionis alienus aut generator in alia lingua adhibetur.
 
 ## Catalogus linguae fontis
 
 Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congelatus manet. Semantica ordinis per `canonicalIndex` tantum definitur; textus presentationis computationem non mutat.
-
-## Exitus probationum
-
-```text
-OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
-REGRESSIO_DISCOVERY_01_TRANSIIT
-REGRESSIO_PATCH_01_TRANSIIT
-REGRESSIO_DISCOVERY_02_TRANSIIT
-REGRESSIO_PATCH_02_TRANSIIT
-REGRESSIO_DISCOVERY_03_TRANSIIT
-REGRESSIO_PATCH_03_TRANSIIT
-REGRESSIO_DISCOVERY_04_TRANSIIT
-REGRESSIO_PATCH_04_TRANSIIT
-REGRESSIO_DISCOVERY_05_TRANSIIT
-REGRESSIO_PATCH_05_TRANSIIT
-REGRESSIO_DISCOVERY_06_TRANSIIT
-REGRESSIO_PATCH_06_TRANSIIT
-```
-
-Gradus proximus est `DISCOVERY 07`; nullum eius codicem hic gradus continet.

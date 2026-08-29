@@ -228,6 +228,40 @@ Integer priorPatch(const VisibleDropStore& dropStore,
     return hiddenByNearness(backwardStorage, hiddenK);
 }
 
+const std::array<VisibleGrindRow, 11>& legacyVisibleGrindTableZeroBased() {
+    static const std::array<VisibleGrindRow, 11> table{{
+        {GrindStoneKind::WHEAT, 3, 5, 7, 11},
+        {GrindStoneKind::BARLEY, 5, 7, 11, 13},
+        {GrindStoneKind::SALT, 7, 11, 13, 17},
+        {GrindStoneKind::BITTER, 11, 13, 17, 19},
+        {GrindStoneKind::RED, 13, 17, 19, 23},
+        {GrindStoneKind::WHEAT, 17, 19, 23, 29},
+        {GrindStoneKind::BARLEY, 19, 23, 29, 31},
+        {GrindStoneKind::SALT, 23, 29, 31, 37},
+        {GrindStoneKind::BITTER, 29, 31, 37, 41},
+        {GrindStoneKind::RED, 31, 37, 41, 43},
+        {GrindStoneKind::WHEAT, 37, 41, 43, 47},
+    }};
+    return table;
+}
+
+LegacyGrindLookup legacyGrindRow(int grind) {
+    if (grind < 1 || grind > 11) {
+        throw BaseValidationError("numerus molitionis inter unum et undecim requiritur");
+    }
+
+    const auto& table = legacyVisibleGrindTableZeroBased();
+    const int physicalIndex = grind;
+    if (physicalIndex < 0 || physicalIndex >= static_cast<int>(table.size())) {
+        return LegacyGrindLookup{VisibleGrindRow{}, physicalIndex, false};
+    }
+    return LegacyGrindLookup{
+        table[static_cast<std::size_t>(physicalIndex)],
+        physicalIndex,
+        true,
+    };
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -391,6 +425,18 @@ void BaseValidationManager::requirePatch06Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyGrindReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyGrindReady) {
+        throw BaseValidationError("lectio tabulae molitionis legacy nondum perfecta est");
+    }
+    if (ctx.legacyGrindOrdinal < 1 || ctx.legacyGrindOrdinal > 11) {
+        throw BaseValidationError("numerus molitionis legacy extra fines est");
+    }
+    if (ctx.legacyGrindPhysicalIndex != ctx.legacyGrindOrdinal) {
+        throw BaseValidationError("caller legacy numerum molitionis ut indicem directum non servavit");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -431,6 +477,10 @@ Integer Patch06PriorWrapper::read(const VisibleDropStore& dropStore,
                                   int i,
                                   int back) const {
     return priorPatch(dropStore, backwardStorage, i, back);
+}
+
+LegacyGrindLookup LegacyGrindTableAdapter::read(int grind) const {
+    return legacyGrindRow(grind);
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -804,6 +854,32 @@ void Patch06PriorHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch06.prior.ready");
 }
 
+void Discovery07GrindIndexHandler::handle(BaseMonsterContext& ctx,
+                                           const LegacyGrindTableAdapter& adapter,
+                                           const BaseValidationManager& validator,
+                                           const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery07GrindIndexHandler";
+    ctx.phase = "DISCOVERY_07_GRIND_INDEX_READ";
+    ctx.status = "LEGACY_GRIND_ZERO_BASED_TABLE_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_07_GRIND_INDEX_READ");
+    metrics.bump(ctx, "discovery07.grind.calls");
+
+    const LegacyGrindLookup lookup = adapter.read(ctx.legacyGrindOrdinal);
+    ctx.legacyGrindPhysicalIndex = lookup.physicalIndex;
+    ctx.legacyGrindOutput = lookup.row;
+    ctx.legacyGrindFound = lookup.found;
+    ctx.legacyGrindReady = true;
+
+    ctx.phase = "DISCOVERY_07_GRIND_INDEX_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_07_GRIND_INDEX_VALIDATE");
+    validator.requireLegacyGrindReady(ctx);
+
+    ctx.phase = "DISCOVERY_07_GRIND_INDEX_EXPOSED";
+    ctx.status = lookup.found ? "LEGACY_GRIND_SHIFTED_ROW_EXPOSED" : "LEGACY_GRIND_ROW_ABSENT";
+    ctx.branchTrace.push_back("DISCOVERY_07_GRIND_INDEX_EXPOSED");
+    metrics.bump(ctx, lookup.found ? "discovery07.grind.shifted" : "discovery07.grind.absent");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -995,6 +1071,20 @@ void BaseDispatcher::dispatchPatchedPrior(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch06.dispatch.calls");
 
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void BaseDispatcher::dispatchLegacyGrindIndex(BaseMonsterContext& ctx,
+                                                 const Discovery07GrindIndexHandler& handler,
+                                                 const LegacyGrindTableAdapter& adapter,
+                                                 const BaseValidationManager& validator,
+                                                 const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_07_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_07_DISPATCH");
+    metrics.bump(ctx, "discovery07.dispatch.calls");
+
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -1377,6 +1467,34 @@ LegacyPriorReport BaseMonsterManager::executeUnpatchedPriorDiagnostic(
         true,
         false,
         false,
+    };
+}
+
+GrindLookupReport BaseMonsterManager::executeGrindRow(int grind) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_07_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyGrindOrdinal = grind;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyGrindTableAdapter adapter;
+    const Discovery07GrindIndexHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyGrindIndex(ctx, handler, adapter, validator, metrics);
+
+    return GrindLookupReport{
+        ctx.legacyGrindOrdinal,
+        ctx.legacyGrindOutput,
+        ctx.legacyGrindFound,
+        ctx.legacyGrindPhysicalIndex,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
     };
 }
 

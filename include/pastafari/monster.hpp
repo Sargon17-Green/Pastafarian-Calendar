@@ -29,6 +29,31 @@ using StoneTable = std::array<Stone, 47>;
 using HiddenDrops = std::array<Integer, 7>;
 using VisibleDropStore = std::vector<Integer>;
 
+enum class GrindStoneKind {
+    WHEAT = 0,
+    BARLEY = 1,
+    SALT = 2,
+    BITTER = 3,
+    RED = 4
+};
+
+struct VisibleGrindRow {
+    GrindStoneKind kind = GrindStoneKind::WHEAT;
+    int a = 0;
+    int b = 0;
+    int c = 0;
+    int d = 0;
+};
+
+struct LegacyGrindLookup {
+    VisibleGrindRow row{};
+    int physicalIndex = -1;
+    bool found = false;
+};
+
+const std::array<VisibleGrindRow, 11>& legacyVisibleGrindTableZeroBased();
+LegacyGrindLookup legacyGrindRow(int grind);
+
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
 Stone stonePatch(int i, Stone state);
@@ -91,6 +116,11 @@ struct BaseMonsterContext {
     bool patch06LegacyPathUsed = false;
     bool patch06HiddenPathUsed = false;
     bool patch06Applied = false;
+    int legacyGrindOrdinal = 0;
+    int legacyGrindPhysicalIndex = -1;
+    VisibleGrindRow legacyGrindOutput{};
+    bool legacyGrindFound = false;
+    bool legacyGrindReady = false;
 };
 
 struct BaseRunReport {
@@ -171,6 +201,17 @@ struct LegacyPriorReport {
     bool patch06Applied = false;
 };
 
+struct GrindLookupReport {
+    int grind = 0;
+    VisibleGrindRow output{};
+    bool found = false;
+    int physicalIndex = -1;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 class BaseValidationError final : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
@@ -191,6 +232,7 @@ public:
     void requirePatch05Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyPriorReady(const BaseMonsterContext& ctx) const;
     void requirePatch06Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyGrindReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -228,6 +270,11 @@ public:
 class LegacyPriorAdapter {
 public:
     Integer read(const VisibleDropStore& dropStore, int i, int back) const;
+};
+
+class LegacyGrindTableAdapter {
+public:
+    LegacyGrindLookup read(int grind) const;
 };
 
 class Discovery01RemainderHandler {
@@ -367,6 +414,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery07GrindIndexHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyGrindTableAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -450,6 +505,12 @@ public:
                               const Patch06PriorWrapper& wrapper,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyGrindIndex(BaseMonsterContext& ctx,
+                                  const Discovery07GrindIndexHandler& handler,
+                                  const LegacyGrindTableAdapter& adapter,
+                                  const BaseValidationManager& validator,
+                                  const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -478,6 +539,7 @@ public:
                                                       const VisibleDropStore& dropStore,
                                                       int i,
                                                       int back) const;
+    GrindLookupReport executeGrindRow(int grind) const;
 };
 
 } // namespace pastafari

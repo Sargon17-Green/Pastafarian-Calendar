@@ -333,3 +333,27 @@ Contra codicem Gradus 12 pristinum forma correcta adhuc septem `NON_RESOLUTUS`, 
 Additi sunt `priorPatch`, `patch06HiddenBackward`, `patchedPriorOutput`, duae notae viae, `patch06Applied`, `Patch06PriorWrapper`, `Patch06PriorHandler`, `dispatchPatchedPrior`, `requirePatch06Ready` et `executeUnpatchedPriorDiagnostic`. Relatio prioris nunc exitum legacy ante patch et viam electam retinet. `legacyPrior` ipse immutatus manet.
 
 Nulla structura Gradus 14 vel PATCH 07 addita est.
+
+## Gradus 14 — Detectio 07: numeratio molitionis ab uno contra tabulam a nullo
+
+### Quid putabatur
+
+Subsystema guttarum visibilium iam habebat tres predecessores recte resolvendos post PATCH 06. Tabula undecim molitionum etiam ordines reales rectos continebat. Caller vetus tamen ex conventionibus anterioribus numerum molitionis ut indicem directum tractabat, quasi numeratio semantica et numeratio physica eundem initium haberent.
+
+### Quid repertum est
+
+Tabula legacy undecim ordines reales continet in locis physicis `0..10`, sed `legacyGrindRow(grind)` numero semantico `1..11` directe utitur. Regresso localis ostendit omnes undecim petitiones a norma discrepare. Molitio 1 ordinem 2 legit, molitio 10 ordinem 11 legit, et molitio 11 extra tabulam cadit. Primus ordo realis numquam legitur.
+
+Discrimen igitur non est in coefficientibus nec in ordine ipsorum undecim ordinum. Ipsi ordines in tabula recti sunt; vitium est sola conventio indicis inter vocatorem et repositionem.
+
+### Quid circumventum est
+
+Nihil hoc gradu circumventum est. `LegacyGrindTableAdapter` et `Discovery07GrindIndexHandler` exactam conventionem veterem exercent et eventum pravum exponunt. Ordo absens pro molitione 11 ut `found=false` servatur; nullus valor substitutus est et nulla correctio per recovery facta est.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Norma undecim molitiones reales ordine 1..11 requirit. Via activa autem ordines 2..11, deinde absentiam, producit. Quia omnis petitio ab ordine normativo suo differt, aequivalentia hoc gradu nondum obtinetur.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `GrindStoneKind`, `VisibleGrindRow`, `LegacyGrindLookup`, tabula legacy a nullo numerata, `legacyGrindRow`, campi contextus molitionis, `GrindLookupReport`, `LegacyGrindTableAdapter`, `Discovery07GrindIndexHandler`, dispatchatio propria et validatio readiness. Validatio confirmat vocator legacy ordinalem semanticum directe ut indicem physicum adhibuisse; vitium non corrigit. Omne state adhuc uni invocationi proprium est.
