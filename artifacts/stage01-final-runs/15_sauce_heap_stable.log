@@ -1,0 +1,3 @@
+$ wasmkit run oracle/normative_sauce_wide.wat test_wide_sauce_heap_stable
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=2.16

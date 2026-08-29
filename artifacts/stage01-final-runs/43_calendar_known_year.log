@@ -1,0 +1,3 @@
+$ wasmkit run oracle/normative_calendar_wide.wat test_general_structure_known_foundation_year
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=49.25

@@ -1,0 +1,3 @@
+$ wasmkit run tests/normative_gate_year.wat fixture_year5000_foundation_close_index
+[WasmTypes.Value.i32(6)]
+TIEMPO_REAL=31.32

@@ -1,0 +1,3 @@
+$ wasmkit run tests/normative_foundation_structure_integrated.wat fixture_weaving_count_bitlen_fast
+[WasmTypes.Value.i32(26403)]
+TIEMPO_REAL=22.69

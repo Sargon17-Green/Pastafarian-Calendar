@@ -1,0 +1,3 @@
+$ wasmkit run tests/normative_month_lengths.wat fixture_month_lengths_sum
+[WasmTypes.Value.i32(4922)]
+TIEMPO_REAL=5.52

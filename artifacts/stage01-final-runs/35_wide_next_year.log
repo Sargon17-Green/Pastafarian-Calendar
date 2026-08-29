@@ -1,0 +1,3 @@
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_next_year_with_wide_number
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=24.83

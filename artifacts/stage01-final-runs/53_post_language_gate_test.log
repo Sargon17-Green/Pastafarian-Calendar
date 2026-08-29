@@ -1,0 +1,3 @@
+$ wasmkit run tests/normative_gate_year.wat fixture_gate_plus_1
+[WasmTypes.Value.i32(216)]
+TIEMPO_REAL=1.13

@@ -1,0 +1,3 @@
+$ wasmkit run tests/normative_gate_year.wat fixture_year5000_foundation_length
+[WasmTypes.Value.i32(4922)]
+TIEMPO_REAL=30.90

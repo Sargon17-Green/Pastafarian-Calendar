@@ -1,0 +1,174 @@
+VERIFICACIÓN FINAL — ETAPA 1 — WAT + español
+EJECUTOR=/usr/local/swift/usr/bin/wasmkit
+VERSION=0.1.6
+MÉTODO=Cada entrada corresponde a una orden WasmKit independiente; no se usó un bucle de shell como arnés.
+RESULTADO_GLOBAL=PASS
+
+$ wasmkit run src/monster_bootstrap.wat test_contexts_are_invocation_owned
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run src/monster_bootstrap.wat test_bootstrap_dispatch
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run src/source_language_catalog.wat test_catalog_complete
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run src/source_language_catalog.wat test_catalog_reconciled_toponyms
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run src/wide_integer.wat test_wide_beyond_i64
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run src/wide_integer.wat test_signed_cross_zero
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run oracle/normative_wide_counts.wat test_wide_counts_foundation
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run oracle/normative_wide_counts.wat test_wide_counts_beyond_i64
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run oracle/normative_sauce_wide.wat test_save_m
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run oracle/normative_sauce_wide.wat test_order_rank_1
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run oracle/normative_sauce_wide.wat test_order_rank_720
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.03
+$ wasmkit run oracle/normative_sauce_wide.wat test_wide_sauce_foundation_matches_fixture
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=1.05
+$ wasmkit run oracle/normative_sauce_wide.wat test_wide_gate_unit_steps
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=2.12
+$ wasmkit run oracle/normative_sauce_wide.wat test_wide_gate_gap_beyond_i64
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=1.99
+$ wasmkit run oracle/normative_sauce_wide.wat test_wide_sauce_heap_stable
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=2.16
+$ wasmkit run tests/normative_selector.wat test_short_n1
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run tests/normative_selector.wat test_short_rejection_from_m_backward
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run tests/normative_selector.wat test_wide_m_plus_1
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run tests/normative_selector.wat test_wide_m_squared
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run tests/normative_month_lengths.wat test_bounded_small
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run tests/normative_month_lengths.wat fixture_month_lengths_sum
+[WasmTypes.Value.i32(4922)]
+TIEMPO_REAL=5.52
+$ wasmkit run tests/normative_weaving_fast_count.wat fixture_weaving_count_bitlen_fast
+[WasmTypes.Value.i32(26403)]
+TIEMPO_REAL=22.32
+$ wasmkit run oracle/normative_calendar_wide.wat test_general_weaving_exhaustive_3x2
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.08
+$ wasmkit run tests/normative_foundation_structure_integrated.wat fixture_foundation_structure_tuple
+[WasmTypes.Value.i64(5000), WasmTypes.Value.i32(10), WasmTypes.Value.i32(949), WasmTypes.Value.i32(3), WasmTypes.Value.i32(54), WasmTypes.Value.i32(1)]
+TIEMPO_REAL=28.74
+$ wasmkit run tests/normative_final_resolver.wat test_final_resolver_interleaved
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run tests/normative_gate_year.wat fixture_gate_plus_1
+[WasmTypes.Value.i32(216)]
+TIEMPO_REAL=1.14
+$ wasmkit run tests/normative_gate_year.wat fixture_gate_minus_1
+[WasmTypes.Value.i32(949)]
+TIEMPO_REAL=1.22
+$ wasmkit run tests/normative_gate_year.wat fixture_year5000_foundation_length
+[WasmTypes.Value.i32(4922)]
+TIEMPO_REAL=30.90
+$ wasmkit run tests/normative_gate_year.wat fixture_year5000_foundation_open_index
+[WasmTypes.Value.i32(4294967291)]
+TIEMPO_REAL=30.16
+$ wasmkit run tests/normative_gate_year.wat fixture_year5000_foundation_close_index
+[WasmTypes.Value.i32(6)]
+TIEMPO_REAL=31.32
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_gate_at_unit_indices
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=2.02
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_gate_gap_beyond_i64
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=2.37
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_year_interval_beyond_i64
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.05
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_year_number_step_beyond_i64
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.05
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_next_year_with_wide_number
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=24.83
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_previous_year_with_wide_number
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=26.72
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_next_boundary_continuity
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=23.75
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_previous_boundary_continuity
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=26.63
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_year5000_foundation
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=30.51
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_find_target_boundaries
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=104.29
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_find_opening_boundary
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=45.20
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_find_closing_boundary
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=30.33
+$ wasmkit run oracle/normative_calendar_wide.wat test_general_structure_known_foundation_year
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=49.25
+$ wasmkit run oracle/normative_calendar_wide.wat test_general_structure_preserves_wide_year_number
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=57.09
+$ wasmkit run oracle/normative_calendar_wide.wat test_general_calendar_foundation
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=77.22
+$ wasmkit run src/monster_bootstrap.wat test_bootstrap_dispatch
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run src/wide_integer.wat test_signed_cross_zero
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run oracle/normative_wide_counts.wat test_wide_counts_foundation
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run oracle/normative_sauce_wide.wat test_save_m
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.02
+$ wasmkit run oracle/normative_wide_gate_year.wat test_save_m
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.03
+$ wasmkit run oracle/normative_calendar_wide.wat test_save_m
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.12
+$ wasmkit run tests/normative_sauce.wat test_save_m
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.03
+$ wasmkit run tests/normative_gate_year.wat fixture_gate_plus_1
+[WasmTypes.Value.i32(216)]
+TIEMPO_REAL=1.13
+$ wasmkit run tests/normative_final_resolver.wat test_final_resolver_interleaved
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
+$ wasmkit run tests/normative_foundation_structure_integrated.wat fixture_weaving_count_bitlen_fast
+[WasmTypes.Value.i32(26403)]
+TIEMPO_REAL=22.69
+$ wasmkit run tests/normative_foundation_structure_integrated.wat fixture_foundation_structure_tuple
+[WasmTypes.Value.i64(5000), WasmTypes.Value.i32(10), WasmTypes.Value.i32(949), WasmTypes.Value.i32(3), WasmTypes.Value.i32(54), WasmTypes.Value.i32(1)]
+TIEMPO_REAL=27.89

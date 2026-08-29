@@ -1,0 +1,3 @@
+$ wasmkit run tests/normative_foundation_structure_integrated.wat fixture_foundation_structure_tuple
+[WasmTypes.Value.i64(5000), WasmTypes.Value.i32(10), WasmTypes.Value.i32(949), WasmTypes.Value.i32(3), WasmTypes.Value.i32(54), WasmTypes.Value.i32(1)]
+TIEMPO_REAL=28.74

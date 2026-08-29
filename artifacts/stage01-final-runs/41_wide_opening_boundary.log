@@ -1,0 +1,3 @@
+$ wasmkit run oracle/normative_wide_gate_year.wat test_wide_find_opening_boundary
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=45.20

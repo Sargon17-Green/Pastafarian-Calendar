@@ -1,0 +1,3 @@
+$ wasmkit run tests/normative_selector.wat test_wide_m_squared
+[WasmTypes.Value.i32(1)]
+TIEMPO_REAL=0.01
