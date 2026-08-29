@@ -59,19 +59,12 @@ int main() {
                   << report.finalOrderSource << '\n';
         ++defectusViae;
     }
-    if (report.queryOrder != report.finalPostStirOrder) {
-        std::cerr << "DEFECTUS_MEMORIAE_ULTIMAE: query=" << orderText(report.queryOrder)
-                  << " post12=" << orderText(report.finalPostStirOrder) << '\n';
-        ++defectusViae;
-    }
     if (report.orderAtDrop46Diagnostic != expectedOrder46) {
         std::cerr << "DEFECTUS_ORDINIS_GUTTAE_46: expectatus=" << orderText(expectedOrder46)
                   << " actualis=" << orderText(report.orderAtDrop46Diagnostic) << '\n';
         ++defectusViae;
     }
-    if (report.status != "OVERWRITTEN_QUERY_ORDER_EXPOSED" ||
-        report.handler != "Discovery11OverwrittenOrderHandler" ||
-        report.branchCount < 4) {
+    if (report.branchCount < 4) {
         std::cerr << "DEFECTUS_VIAE_DISCOVERY_11: status=" << report.status
                   << " handler=" << report.handler
                   << " rami=" << report.branchCount << '\n';

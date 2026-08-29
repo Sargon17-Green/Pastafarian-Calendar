@@ -1,0 +1,76 @@
+Gradus 23 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Aedificatio facta est per obiecta C++ communia, quia series compilationum longa limitem temporis unius invocationis ambitus exsecutionis attingere potest. Nulla probatio nec semantica propter partitionem aedificationis mutata est.
+
+Mandata fundamentalia:
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
+
+Deinde singula tests C++ ut obiecta separata compilata et cum duobus obiectis communibus ligata sunt.
+
+1. Regressiones Graduum 1–23
+
+Exitus actualis omnium processuum: 0.
+
+Gradus 1: OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+Gradus 2: REGRESSIO_DISCOVERY_01_TRANSIIT
+Gradus 3: REGRESSIO_PATCH_01_TRANSIIT
+Gradus 4: REGRESSIO_DISCOVERY_02_TRANSIIT
+Gradus 5: REGRESSIO_PATCH_02_TRANSIIT
+Gradus 6: REGRESSIO_DISCOVERY_03_TRANSIIT
+Gradus 7: REGRESSIO_PATCH_03_TRANSIIT
+Gradus 8: REGRESSIO_DISCOVERY_04_TRANSIIT
+Gradus 9: REGRESSIO_PATCH_04_TRANSIIT
+Gradus 10: REGRESSIO_DISCOVERY_05_TRANSIIT
+Gradus 11: REGRESSIO_PATCH_05_TRANSIIT
+Gradus 12: REGRESSIO_DISCOVERY_06_TRANSIIT
+Gradus 13: REGRESSIO_PATCH_06_TRANSIIT
+Gradus 14: REGRESSIO_DISCOVERY_07_TRANSIIT
+Gradus 15: REGRESSIO_PATCH_07_TRANSIIT
+Gradus 16: REGRESSIO_DISCOVERY_08_TRANSIIT
+Gradus 17: REGRESSIO_PATCH_08_TRANSIIT
+Gradus 18: REGRESSIO_DISCOVERY_09_TRANSIIT
+Gradus 19: REGRESSIO_PATCH_09_TRANSIIT; CASUS_PERMUTATIONUM_PROBATI=720; CICATRICES_LEGACY_DIVERGENTES=714
+Gradus 20: REGRESSIO_DISCOVERY_10_TRANSIIT
+Gradus 21: REGRESSIO_PATCH_10_TRANSIIT; ORDINES_PROBATI=720; CICATRICES_LEGACY_DIVERGENTES=720
+Gradus 22: REGRESSIO_DISCOVERY_11_TRANSIIT
+Gradus 23: REGRESSIO_PATCH_11_TRANSIIT; CASUS_PROBATI=3; CICATRICES_LEGACY_DIVERGENTES=3
+
+2. Witness Gradus 22 post PATCH 11
+
+ORDO_GUTTAE_46=[4,5,2,3,6,1]
+ORDO_QUERY_LEGACY=[4,5,2,3,6,1]
+ORDO_POST_COMMOTIONIS_12=[1,6,5,2,4,3]
+SCRIPTURAE_MEMORIAE=58
+FONS_FINALIS=post-commotio 12
+REGRESSIO_DISCOVERY_11_TRANSIIT
+
+Nomen ORDO_QUERY_LEGACY in output probationis historicum est; post PATCH 11 valor a via activa iam ex latch provenit. Cicatrix vera separatim per campum legacyQueryOrderBeforePatch et viam diagnosticam servatur.
+
+3. Confirmatio pre-patch
+
+Eadem versio tests/stage_22_discovery_11_tests.cpp contra codicem Gradus 22 pristinum compilata est. Exitus actualis:
+
+ORDO_GUTTAE_46=[4,5,2,3,6,1]
+ORDO_QUERY_LEGACY=[1,6,5,2,4,3]
+ORDO_POST_COMMOTIONIS_12=[1,6,5,2,4,3]
+SCRIPTURAE_MEMORIAE=58
+FONS_FINALIS=post-commotio 12
+REGRESSIO_DISCOVERY_11_DEFECIT: 6 positiones query ordinis post superscriptionem a gutta 46 discrepant
+PREPATCH_EXIT_CODE=1
+
+Ita mutatio harness regressionem historicam non debilitat.
+
+4. Auditum staticum
+
+LEGACY_ORDER_MEMORY_BYTE_PRESERVED=YES
+LATCH_WRITE_SITES=1
+FUTURE_MARKERS_PRODUCTION=0
+ORACLE_IMPORTS_PRODUCTION=0
+HEBREW_CHANGED=0
+
+Status finalis: GREEN

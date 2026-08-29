@@ -640,6 +640,116 @@ LegacyOrderMemorySauceResult legacySauceWithOverwritableOrderMemory(
         finalSource
     };
 }
+
+Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
+    const Integer& calculationDay,
+    const Integer& targetDay) {
+    const LegacySauceCounts counts = sauceCountsThroughScars(calculationDay, targetDay);
+    const StoneTable stones = buildStonesThroughLegacyBuilder();
+    const HiddenDrops hiddenBackward = buildHiddenWithBackwardStorage(
+        calculationDay, targetDay, stones);
+    const VisibleDropStore visible = buildVisibleDropsThroughPatchedHistory(
+        counts, stones, hiddenBackward);
+
+    BowlState bowls = initialBowlsThroughCounts(counts);
+    PermutationOrder legacyOrderMemory{};
+    PermutationOrder orderAt46Latch{};
+    PermutationOrder finalPostStirOrder{};
+    std::size_t legacyWrites = 0;
+    std::size_t latchWrites = 0;
+    std::string finalLegacySource;
+
+    for (int i = 1; i <= 46; ++i) {
+        const Integer& drop = visible[static_cast<std::size_t>(i - 1)];
+        const int oneBased = (regularMod(drop - 1, Integer{720}) + 1).convert_to<int>();
+
+        // Cicatrix rank0 manet activa ante pontem semanticum.
+        try {
+            (void)oldPermutationUnrank0(oneBased);
+        } catch (const BaseValidationError&) {
+        }
+        const PermutationOrder order = oldPermutationUnrank0(oneBased - 1);
+
+        // Cicatrix fusionum ad crateres fixos vocatur, deinde bowlAlias viam semanticam reparat.
+        (void)legacyPoursToFixedBowlIds(
+            drop, i, bowls, stones[static_cast<std::size_t>(i)]);
+        const BowlAliasPourComputation pours = poursThroughBowlAlias(
+            drop, i, bowls, stones[static_cast<std::size_t>(i)], order);
+
+        // Cicatrix mutationis in-place currit in clone; vaultOld/pending custodiunt exitum semanticum.
+        BowlState garbage = bowls;
+        legacyStirBowlsInPlace(
+            garbage, i, drop, stones[static_cast<std::size_t>(i)], order, pours.pours);
+        const Patch10DeferredBowlComputation repaired = stirBowlsThroughVaultOld(
+            bowls, i, drop, stones[static_cast<std::size_t>(i)], order, pours.pours);
+        bowls = repaired.output;
+
+        legacyOrderMemory = order;
+        ++legacyWrites;
+        finalLegacySource = "gutta visibilis " + std::to_string(i);
+
+        if (i == 46) {
+            if (latchWrites != 0) {
+                throw BaseValidationError("orderAt46Latch iterum scribi non licet");
+            }
+            orderAt46Latch = order;
+            ++latchWrites;
+        }
+    }
+
+    if (latchWrites != 1) {
+        throw BaseValidationError("orderAt46Latch semel ante post-commotiones scribendus est");
+    }
+
+    for (int stir = 1; stir <= 12; ++stir) {
+        const BowlState old = bowls;
+        Integer savedBowlSum = 0;
+        for (const Integer& bowl : old) {
+            savedBowlSum += bowl;
+        }
+        savedBowlSum = savePatch(savedBowlSum + 149 * stir);
+        const int oneBased = (regularMod(savedBowlSum - 1, Integer{720}) + 1).convert_to<int>();
+        const PermutationOrder order = oldPermutationUnrank0(oneBased - 1);
+
+        BowlState pending = old;
+        for (int position = 1; position <= 6; ++position) {
+            const std::size_t pos = static_cast<std::size_t>(position - 1);
+            const std::size_t prevPos = static_cast<std::size_t>((position + 4) % 6);
+            const std::size_t nextPos = static_cast<std::size_t>(position % 6);
+            const int id = order[pos];
+            const int prev = order[prevPos];
+            const int next = order[nextPos];
+            const Integer s = old[static_cast<std::size_t>(id - 1)]
+                            + 3 * old[static_cast<std::size_t>(prev - 1)]
+                            + 5 * old[static_cast<std::size_t>(next - 1)]
+                            + savedBowlSum
+                            + stir
+                            + position * position;
+            pending[static_cast<std::size_t>(id - 1)] = savePatch(
+                s * s
+                + 7 * old[static_cast<std::size_t>(prev - 1)]
+                    * old[static_cast<std::size_t>(next - 1)]);
+        }
+        bowls = pending;
+
+        // Post-commotiones adhuc memoriam legacy superscribunt, sed latch separatum numquam tangunt.
+        legacyOrderMemory = order;
+        finalPostStirOrder = order;
+        ++legacyWrites;
+        finalLegacySource = "post-commotio " + std::to_string(stir);
+    }
+
+    return Patch11LatchedOrderSauceResult{
+        bowls,
+        orderAt46Latch,
+        orderAt46Latch,
+        legacyOrderMemory,
+        finalPostStirOrder,
+        legacyWrites,
+        latchWrites,
+        finalLegacySource
+    };
+}
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -2764,10 +2874,46 @@ void BaseValidationManager::requireLegacyOrderMemorySauceReady(const BaseMonster
     requirePermutation(result.queryOrder);
 }
 
+void BaseValidationManager::requirePatch11Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyOrderMemorySauceReady(ctx);
+    if (!ctx.patch11Applied) {
+        throw BaseValidationError("emendatio undecima nondum applicata est");
+    }
+
+    const Patch11LatchedOrderSauceResult& patched = ctx.patch11LatchedOrderSauce;
+    if (patched.legacyOrderWriteCount != 58) {
+        throw BaseValidationError("memoria legacy etiam post patch undecimum quinquaginta octo scripturas requirit");
+    }
+    if (patched.latchWriteCount != 1) {
+        throw BaseValidationError("orderAt46Latch exactissime semel scribendus est");
+    }
+    if (patched.finalLegacyOrderSource != "post-commotio 12") {
+        throw BaseValidationError("memoria legacy post patch undecimum fonte post-commotionis duodecimae terminare debet");
+    }
+    if (patched.legacyQueryOrderBeforePatch != patched.finalPostStirOrder) {
+        throw BaseValidationError("cicatrix memoriae legacy post patch undecimum non servata est");
+    }
+    if (patched.queryOrder != patched.orderAt46Latch) {
+        throw BaseValidationError("query ordinis per latch guttae 46 tantum legere debet");
+    }
+    if (patched.orderAt46Latch != ctx.legacyOrderMemorySauce.orderAtDrop46Diagnostic) {
+        throw BaseValidationError("latch guttae 46 ordinem diagnosticum exactum non clonat");
+    }
+    if (patched.finalBowls != ctx.legacyOrderMemorySauce.finalBowls) {
+        throw BaseValidationError("patch undecimum crateres finales mutare non debet");
+    }
+}
+
 LegacyOrderMemorySauceResult LegacyOrderMemorySauceAdapter::run(
     const Integer& calculationDay,
     const Integer& targetDay) const {
     return legacySauceWithOverwritableOrderMemory(calculationDay, targetDay);
+}
+
+Patch11LatchedOrderSauceResult Patch11OrderAt46LatchWrapper::repair(
+    const Integer& calculationDay,
+    const Integer& targetDay) const {
+    return sauceWithOrderAt46Latch(calculationDay, targetDay);
 }
 
 void Discovery11OverwrittenOrderHandler::handle(
@@ -2794,6 +2940,37 @@ void Discovery11OverwrittenOrderHandler::handle(
     metrics.bump(ctx, "discovery11.orderMemory.exposed");
 }
 
+void Patch11OrderAt46LatchHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyOrderMemorySauceAdapter& adapter,
+    const Patch11OrderAt46LatchWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch11OrderAt46LatchHandler";
+    ctx.phase = "PATCH_11_LEGACY_ORDER_MEMORY_RUN";
+    ctx.status = "LEGACY_ORDER_MEMORY_CALLED_BEFORE_LATCH";
+    ctx.branchTrace.push_back("PATCH_11_LEGACY_ORDER_MEMORY_RUN");
+    metrics.bump(ctx, "patch11.legacyOrderMemory.calls");
+
+    ctx.legacyOrderMemorySauce = adapter.run(ctx.calculationDay, ctx.targetDay);
+    ctx.legacyOrderMemorySauceReady = true;
+
+    ctx.phase = "PATCH_11_ORDER_AT_46_LATCH";
+    ctx.branchTrace.push_back("PATCH_11_ORDER_AT_46_LATCH");
+    ctx.patch11LatchedOrderSauce = wrapper.repair(ctx.calculationDay, ctx.targetDay);
+    ctx.patch11Applied = true;
+    metrics.bump(ctx, "patch11.latch.calls");
+
+    ctx.phase = "PATCH_11_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_11_VALIDATE");
+    validator.requirePatch11Ready(ctx);
+
+    ctx.phase = "PATCH_11_LATCHED_QUERY_READY";
+    ctx.status = "LATCHED_ORDER_AT_46_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_11_LATCHED_QUERY_READY");
+    metrics.bump(ctx, "patch11.latchedQuery.ready");
+}
+
 void BaseDispatcher::dispatchLegacyOverwrittenOrder(
     BaseMonsterContext& ctx,
     const Discovery11OverwrittenOrderHandler& handler,
@@ -2808,13 +2985,68 @@ void BaseDispatcher::dispatchLegacyOverwrittenOrder(
     handler.handle(ctx, adapter, validator, metrics);
 }
 
+void BaseDispatcher::dispatchPatchedOrderAt46Latch(
+    BaseMonsterContext& ctx,
+    const Patch11OrderAt46LatchHandler& handler,
+    const LegacyOrderMemorySauceAdapter& adapter,
+    const Patch11OrderAt46LatchWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_11_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_11_DISPATCH");
+    metrics.bump(ctx, "patch11.dispatch.calls");
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
 LegacyOrderMemoryReport BaseMonsterManager::executeOverwritableOrderMemorySauce(
     const Integer& calculationDay,
     const Integer& targetDay) const {
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
     ctx.targetDay = targetDay;
-    ctx.phase = "DISCOVERY_11_NEW";
+    ctx.phase = "PATCH_11_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyOrderMemorySauceAdapter adapter;
+    const Patch11OrderAt46LatchWrapper wrapper;
+    const Patch11OrderAt46LatchHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedOrderAt46Latch(ctx, handler, adapter, wrapper, validator, metrics);
+
+    const LegacyOrderMemorySauceResult& legacy = ctx.legacyOrderMemorySauce;
+    const Patch11LatchedOrderSauceResult& result = ctx.patch11LatchedOrderSauce;
+    return LegacyOrderMemoryReport{
+        calculationDay,
+        targetDay,
+        result.finalBowls,
+        result.queryOrder,
+        result.orderAt46Latch,
+        result.finalPostStirOrder,
+        result.legacyOrderWriteCount,
+        result.finalLegacyOrderSource,
+        legacy.queryOrder,
+        result.orderAt46Latch,
+        result.latchWriteCount,
+        ctx.patch11Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+LegacyOrderMemoryReport BaseMonsterManager::executeUnpatchedOverwritableOrderMemoryDiagnostic(
+    const Integer& calculationDay,
+    const Integer& targetDay) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_11_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
 
@@ -2835,6 +3067,10 @@ LegacyOrderMemoryReport BaseMonsterManager::executeOverwritableOrderMemorySauce(
         result.finalPostStirOrder,
         result.orderWriteCount,
         result.finalOrderSource,
+        result.queryOrder,
+        PermutationOrder{},
+        0,
+        false,
         ctx.phase,
         ctx.status,
         ctx.currentHandler,

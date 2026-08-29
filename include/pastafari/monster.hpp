@@ -110,6 +110,17 @@ struct LegacyOrderMemorySauceResult {
     std::string finalOrderSource;
 };
 
+struct Patch11LatchedOrderSauceResult {
+    BowlState finalBowls{};
+    PermutationOrder queryOrder{};
+    PermutationOrder orderAt46Latch{};
+    PermutationOrder legacyQueryOrderBeforePatch{};
+    PermutationOrder finalPostStirOrder{};
+    std::size_t legacyOrderWriteCount = 0;
+    std::size_t latchWriteCount = 0;
+    std::string finalLegacyOrderSource;
+};
+
 Patch10DeferredBowlComputation stirBowlsThroughVaultOld(const BowlState& bowls,
                                                         int index,
                                                         const Integer& drop,
@@ -131,6 +142,9 @@ VisibleDropStore buildVisibleDropsThroughPatchedHistory(const LegacySauceCounts&
                                                         const HiddenDrops& backwardStorage);
 BowlState initialBowlsThroughCounts(const LegacySauceCounts& counts);
 LegacyOrderMemorySauceResult legacySauceWithOverwritableOrderMemory(
+    const Integer& calculationDay,
+    const Integer& targetDay);
+Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     const Integer& calculationDay,
     const Integer& targetDay);
 
@@ -241,6 +255,8 @@ struct BaseMonsterContext {
     bool patch10Applied = false;
     LegacyOrderMemorySauceResult legacyOrderMemorySauce{};
     bool legacyOrderMemorySauceReady = false;
+    Patch11LatchedOrderSauceResult patch11LatchedOrderSauce{};
+    bool patch11Applied = false;
 };
 
 struct BaseRunReport {
@@ -398,6 +414,10 @@ struct LegacyOrderMemoryReport {
     PermutationOrder finalPostStirOrder{};
     std::size_t orderWriteCount = 0;
     std::string finalOrderSource;
+    PermutationOrder legacyQueryOrderBeforePatch{};
+    PermutationOrder orderAt46Latch{};
+    std::size_t latchWriteCount = 0;
+    bool patch11Applied = false;
     std::string phase;
     std::string status;
     std::string handler;
@@ -433,6 +453,7 @@ public:
     void requireLegacyInPlaceBowlReady(const BaseMonsterContext& ctx) const;
     void requirePatch10Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyOrderMemorySauceReady(const BaseMonsterContext& ctx) const;
+    void requirePatch11Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -504,6 +525,12 @@ class LegacyOrderMemorySauceAdapter {
 public:
     LegacyOrderMemorySauceResult run(const Integer& calculationDay,
                                      const Integer& targetDay) const;
+};
+
+class Patch11OrderAt46LatchWrapper {
+public:
+    Patch11LatchedOrderSauceResult repair(const Integer& calculationDay,
+                                          const Integer& targetDay) const;
 };
 
 class Patch10DeferredBowlWrapper {
@@ -755,6 +782,15 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch11OrderAt46LatchHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyOrderMemorySauceAdapter& adapter,
+                const Patch11OrderAt46LatchWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -896,6 +932,13 @@ public:
                                         const LegacyOrderMemorySauceAdapter& adapter,
                                         const BaseValidationManager& validator,
                                         const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedOrderAt46Latch(BaseMonsterContext& ctx,
+                                       const Patch11OrderAt46LatchHandler& handler,
+                                       const LegacyOrderMemorySauceAdapter& adapter,
+                                       const Patch11OrderAt46LatchWrapper& wrapper,
+                                       const BaseValidationManager& validator,
+                                       const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -951,6 +994,9 @@ public:
                                                                         const PourTriplet& firstThreePours) const;
     LegacyOrderMemoryReport executeOverwritableOrderMemorySauce(const Integer& calculationDay,
                                                                 const Integer& targetDay) const;
+    LegacyOrderMemoryReport executeUnpatchedOverwritableOrderMemoryDiagnostic(
+        const Integer& calculationDay,
+        const Integer& targetDay) const;
 };
 
 } // namespace pastafari
