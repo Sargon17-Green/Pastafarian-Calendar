@@ -1687,3 +1687,71 @@ Contextus invocation-local separat longitudines, sauce structuralem semanticam, 
 Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap transit. Regressiones 1–20 et 21–35 transeunt. Regressiones 36–46 transeunt; Gradus 47 separatim transit postquam series longa limitem temporis instrumenti attingit. Ergo omnes regressiones 1–47 sunt virides in eodem tree. Regressio Gradus 48 sola EXPECTED_RED est cum tribus discrepantiis et `EXIT_CODE=1`.
 
 `SourceLanguageCatalog`, header catalogi et ambo fasciculi reference C++ manent byte pro byte intacti. Nullus runtime externus adhibetur. Nullus rank texturae integrae, nullus DP-unrank legalis, nullus wrapper PATCH 24 et nullus codex PATCH 25 praemature adest. Gradus proximus est 49/55 — PATCH 24 tantum.
+
+## Gradus 49 — PATCH 24: ghost diem singillatim servatur, textura integra DP restituitur
+
+### Cicatrix servata
+
+Corpus productionis `legacyChooseEachDaySeparately(lengths, answerStream)` ex Gradu 48 byte pro byte servatum est. Corpus `Discovery24MonthWeavingHandler::handle` quoque byte pro byte servatum manet. Handler legacy igitur ante correctionem adhuc vere currit, eundem answer ring bowl 4 / seal 32 legit, multiplicities servat et ghost diem-per-diem in contextu ponit. In tribus witness historicis ghost ordinem primae et ultimae apparitionis adhuc infringit.
+
+PATCH 24 hanc cicatricem non mutat. `Patch24MonthWeavingHandler` handler legacy primum vocat. Tantum postquam ghost paratus est, wrapper correctionis excitatur. Via `executeUnpatchedDiscovery24MonthWeavingDiagnostic` adhuc eundem defectum sine patch exponit.
+
+### Familia texturae integrae legalis
+
+Additus est counter DP exactus internus. Status est:
+
+```text
+remaining
+openedUpTo
+closedUpTo
+```
+
+Initio `remaining=lengths`, `openedUpTo=0`, `closedUpTo=0`. Candidatus mensis `j` recusatur si exhausted est; mensis nondum apertus aperiri potest tantum si `j=openedUpTo+1`; mensis cui unum occurrence restat claudi potest tantum si `j=closedUpTo+1`. Applicatio motus decrementat remaining atque, ubi opus est, limites aperturae et clausurae promovet.
+
+`countState` exactos completionum numeros memorat. Key est structura ordinata state; iteratio candidatorum semper monthId crescente fit, ergo unordered iteration numquam ordinem semanticum afficit. Arithmeticum `Integer` exactum est.
+
+Ex hac machina productio exponit:
+
+```text
+exactLegalMonthWeavingCount(lengths)
+DPUnrankLegalWeaving(lengths,rank1)
+```
+
+Unrank one-based per block counts lexicographicos procedit et errorem iacit si rank extra familiam est.
+
+### Eadem series responsorum et selectiones priores
+
+`compatibleMonthWeavingRank` non novum randomness neque novum stream facit. Accipit ipsum `LegacyAnswerRing` ex adapter Gradus 48. Pro familia non latiore quam M, `Patch13RejectionWrapper` semantica rejectionis brevis adhibetur. Pro familia latiore quam M, `Patch14WideDetourWrapper` eundem stream consumit. Sic wantedRank cum historia selectionum iam reparata congruit, sine duplicatione source semanticorum.
+
+### Detour PATCH 24
+
+`MonthWeavingPatchWrapper` computat:
+
+```text
+legalFamilyCount
+wantedRank
+correctWeaving
+```
+
+Deinde ghost iam exsecutum comparat. Si ghost et correct elementatim idem sunt, output est ghost et `legacyReturned=true`. Si differunt, output est correct et `legacyReturned=false`. Non est majority vote, fallback ad oracle aut correctio in corpore legacy.
+
+`Patch24MonthWeavingHandler` raw et semantic state separat. `BaseValidationManager::requirePatch24MonthWeavingReady` eundem legal family count, eundem rank ex annulo et eundem DP-unrank repetit ut validation-copy; si quicquam differt, invariantia deficit ante semantic commit.
+
+### Probationes
+
+Regressio Gradus 48 post correctionem tres ghost discrepantes historicos adhuc enumerat, sed `patch24CorrectWeaving` et `semanticWeaving` nunc cum expected normativo C++ congruunt; ergo regressio DISCOVERY 24 GREEN facta est.
+
+Regressio Gradus 49 habet enumerationem C++ independentem familiae legalis parvae. Septem vectoribus longitudinum omnes 47 texturas ordinatas comparat cum `exactLegalMonthWeavingCount` et `DPUnrankLegalWeaving`. Praeterea:
+
+- via brevis rank contra semanticas PATCH 13 comprobatur;
+- via lata rank contra semanticas PATCH 14 comprobatur;
+- casus `ghost==correct` idem ghost retinere comprobatur;
+- tres witness reales `ghost!=correct` correct DP reddere comprobantur;
+- via diagnostica unpatched ghost veterem adhuc exponit;
+- output semanticus in omnibus tribus casibus ordines globales legales habet.
+
+Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap, regressiones Graduum 2–36 in serie, Gradus 5 et 6 separatim ubi argumentum viae fontis requiritur, Gradus 37 separatim, Gradus 38–45 in serie, atque Gradus 46, 47, 48 et 49 separatim omnes transeunt. Divisio executionis sola propter limitem temporis instrumenti facta est; nullus failure semanticus inventus est. Ex his executionibus omnes regressiones 1–49 sunt GREEN in eodem tree.
+
+### Audit et limes proximus
+
+`SOURCE_LANGUAGE_CATALOG.md`, `include/pastafari/source_language_catalog.hpp` et ambo fasciculi `tests/reference/normative_reference.*` manent byte pro byte intacti. `legacyChooseEachDaySeparately` et `Discovery24MonthWeavingHandler::handle` manent byte pro byte intacti. Nullus runtime externus adhibetur. Nullus `oldContiguousMonthDayGuess`, nullus `ContiguousMonthDayPatchWrapper`, nullus DISCOVERY 25 et nullus PATCH 25 praemature additus est. Gradus 50 nondum incipit.

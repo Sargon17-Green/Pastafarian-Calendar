@@ -977,3 +977,48 @@ Annuli responsorum productionis congruunt exacte cum `askBowl(...,4,32)` oracle 
 ### Quod consulto nondum adest
 
 Nullus rank texturae integrae computatur, nullus DP unrank texturae legalis adest, nullus wrapper correctionis texturationis et nullus PATCH 24 praemature additus est. Gradus 49 debet cicatricem `legacyChooseEachDaySeparately` vere currere sinere sed potestatem semanticam eius restringere. Nullus codex PATCH 25 adest.
+
+## PATCH 24 — textura mensium integra per DP legalem reparatur
+
+Gradus 49 cicatricem DISCOVERY 24 non delet neque corpus `legacyChooseEachDaySeparately(lengths, answerStream)` corrigit. Via PATCH primum ipsum `Discovery24MonthWeavingHandler` exsequitur, unde ghost historicus diem singillatim electus, answer ring, multiplicities atque violationes ordinis globalis invocation-local servantur. `executeUnpatchedDiscovery24MonthWeavingDiagnostic` viam veterem separatam adhuc exponit.
+
+Post ghost, correctio familiam texturarum integrarum legalium separatam computat. Status DP continet `remaining`, `openedUpTo` et `closedUpTo`. Motus ad mensem `j` legalis est tantum si mensis nondum exhaustus est, mensis nondum apertus est exacte proximus post omnes iam apertos, et mensis qui hoc motu clauditur est exacte proximus post omnes iam clausos. Sic primae apparitiones et ultimae apparitiones ordine canonico `1..m` fiunt.
+
+`exactLegalMonthWeavingCount(lengths)` numerum familiae per DP memoratum et integers exactos computat. `DPUnrankLegalWeaving(lengths, rank1)` candidatos monthId ordine crescente explorat, count suffixi ut magnitudinem blocci lexicographici adhibet et exactum rank one-based aperit. Nullus oracle productionis vocatur.
+
+### Rank ex eodem annulo
+
+`compatibleMonthWeavingRank(answerRing, familySize)` answer ring iam ab `LegacyMonthWeavingAdapter` constructum reutilizat. Id est idem annulus bowl 4 / seal 32 quem ghost historicus tangit. Si `familySize <= M`, via rejectionis PATCH 13 adhibetur; si familia M superat, via lata PATCH 14 adhibetur. Nullus answer stream alter neque seed novum introducitur.
+
+`MonthWeavingPatchWrapper` regulam historicam servat:
+
+```text
+ghost = output legacyChooseEachDaySeparately
+wantedRank = rank familiae texturae integrae legalis
+correct = DPUnrankLegalWeaving(lengths,wantedRank)
+
+si ghost == correct:
+    redde ghost
+aliter:
+    redde correct
+```
+
+Ita ghost numquam output semanticum gubernat nisi iam absolute idem est ac correct. `Patch24MonthWeavingHandler` raw ghost, wantedRank, correct et output semanticum in campis distinctis conservat, deinde validator eundem rank et eundem DP-unrank ut validation-copy repetit antequam status PATCH paratus habetur.
+
+### Regressio DISCOVERY 24 post patch
+
+Tres witness `[4,4,4]` Gradus 48 raw omnino servantur. Ghostes veteres adhuc ordines globales infringunt:
+
+```text
+porta 0: ghost=[3,2,1,3,2,1,3,2,1,3,2,1]
+porta 2: ghost=[1,3,2,1,3,2,1,3,2,1,3,2]
+porta 3: ghost=[2,3,1,2,3,1,2,3,1,2,3,1]
+```
+
+Sed in via patched `patch24CorrectWeaving` et `semanticWeaving` cum textura normativa C++ eiusdem lineae exacte congruunt. Regressio Gradus 48 igitur nunc GREEN est, dum tres discrepantiae historicae in `legacyGhost` visibiles manent.
+
+### Probatio exacta PATCH 24
+
+Regressio Gradus 49 enumerat directe familias parvas legales pro septem vectoribus longitudinum et comparat totum ordinem cum DP. Omnes 47 texturas parvas probatae sunt. Probantur etiam parity viae brevis cum PATCH 13, parity viae latae cum PATCH 14, ramus `ghost==correct` ubi idem ghost retinetur, atque tres casus reales `ghost!=correct` ubi correct DP solum ad output semanticum pervenit.
+
+Bootstrap et omnes regressiones Graduum 1–49 transeunt. `SourceLanguageCatalog` et reference C++ manent byte pro byte intacti. Nullus `oldContiguousMonthDayGuess`, nullus `ContiguousMonthDayPatchWrapper`, nullus DISCOVERY 25 et nullus PATCH 25 praemature adest.

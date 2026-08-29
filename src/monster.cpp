@@ -1418,6 +1418,207 @@ std::vector<int> legacyChooseEachDaySeparately(
     return ghost;
 }
 
+namespace {
+
+struct LegalMonthWeavingStateInternal {
+    std::vector<int> remaining{};
+    int openedUpTo = 0;
+    int closedUpTo = 0;
+
+    bool operator<(const LegalMonthWeavingStateInternal& other) const {
+        if (openedUpTo != other.openedUpTo) {
+            return openedUpTo < other.openedUpTo;
+        }
+        if (closedUpTo != other.closedUpTo) {
+            return closedUpTo < other.closedUpTo;
+        }
+        return remaining < other.remaining;
+    }
+};
+
+class LegalMonthWeavingCounterInternal {
+public:
+    explicit LegalMonthWeavingCounterInternal(const std::vector<int>& lengths)
+        : lengths_(lengths) {
+        if (lengths_.empty()) {
+            throw BaseValidationError("DP texturae mensium saltem unum mensem requirit");
+        }
+        for (const int length : lengths_) {
+            if (length < 1) {
+                throw BaseValidationError("DP texturae mensium longitudines positivas requirit");
+            }
+        }
+    }
+
+    Integer countAll() {
+        return countState(LegalMonthWeavingStateInternal{lengths_, 0, 0});
+    }
+
+    std::vector<int> unrank1(const Integer& rank1) {
+        LegalMonthWeavingStateInternal state{lengths_, 0, 0};
+        const Integer total = countState(state);
+        if (rank1 < 1 || rank1 > total) {
+            throw BaseValidationError("rank texturae mensium extra familiam legalem est");
+        }
+
+        Integer rank = rank1;
+        const int totalLength = std::accumulate(lengths_.begin(), lengths_.end(), 0);
+        std::vector<int> out;
+        out.reserve(static_cast<std::size_t>(totalLength));
+        while (static_cast<int>(out.size()) < totalLength) {
+            bool chosen = false;
+            for (int monthId = 1;
+                 monthId <= static_cast<int>(lengths_.size());
+                 ++monthId) {
+                if (!legalMove(state, monthId)) {
+                    continue;
+                }
+                const LegalMonthWeavingStateInternal next = applyMove(state, monthId);
+                const Integer block = countState(next);
+                if (rank > block) {
+                    rank -= block;
+                    continue;
+                }
+                out.push_back(monthId);
+                state = next;
+                chosen = true;
+                break;
+            }
+            if (!chosen) {
+                throw BaseValidationError("DP texturae mensium rank aperire non potuit");
+            }
+        }
+        return out;
+    }
+
+private:
+    std::vector<int> lengths_{};
+    std::map<LegalMonthWeavingStateInternal, Integer> memo_{};
+
+    bool legalMove(const LegalMonthWeavingStateInternal& state,
+                   int monthId) const {
+        const std::size_t index = static_cast<std::size_t>(monthId - 1);
+        if (state.remaining[index] == 0) {
+            return false;
+        }
+        const bool alreadyOpened = state.remaining[index] < lengths_[index];
+        if (!alreadyOpened && monthId != state.openedUpTo + 1) {
+            return false;
+        }
+        const bool willClose = state.remaining[index] == 1;
+        if (willClose && monthId != state.closedUpTo + 1) {
+            return false;
+        }
+        return true;
+    }
+
+    LegalMonthWeavingStateInternal applyMove(
+        const LegalMonthWeavingStateInternal& state,
+        int monthId) const {
+        LegalMonthWeavingStateInternal next = state;
+        const std::size_t index = static_cast<std::size_t>(monthId - 1);
+        if (next.remaining[index] == lengths_[index]) {
+            next.openedUpTo = monthId;
+        }
+        --next.remaining[index];
+        if (next.remaining[index] == 0) {
+            next.closedUpTo = monthId;
+        }
+        return next;
+    }
+
+    Integer countState(const LegalMonthWeavingStateInternal& state) {
+        bool empty = true;
+        for (const int remaining : state.remaining) {
+            if (remaining != 0) {
+                empty = false;
+                break;
+            }
+        }
+        if (empty) {
+            return Integer{1};
+        }
+
+        const auto hit = memo_.find(state);
+        if (hit != memo_.end()) {
+            return hit->second;
+        }
+
+        Integer total = 0;
+        for (int monthId = 1;
+             monthId <= static_cast<int>(lengths_.size());
+             ++monthId) {
+            if (legalMove(state, monthId)) {
+                total += countState(applyMove(state, monthId));
+            }
+        }
+        memo_.emplace(state, total);
+        return total;
+    }
+};
+
+bool legalMonthWeavingRowInternal(const std::vector<int>& lengths,
+                                  const std::vector<int>& row) {
+    const int totalLength = std::accumulate(lengths.begin(), lengths.end(), 0);
+    if (row.size() != static_cast<std::size_t>(totalLength)) {
+        return false;
+    }
+    LegalMonthWeavingStateInternal state{lengths, 0, 0};
+    for (const int monthId : row) {
+        if (monthId < 1 || monthId > static_cast<int>(lengths.size())) {
+            return false;
+        }
+        const std::size_t index = static_cast<std::size_t>(monthId - 1);
+        if (state.remaining[index] == 0) {
+            return false;
+        }
+        const bool alreadyOpened = state.remaining[index] < lengths[index];
+        if (!alreadyOpened && monthId != state.openedUpTo + 1) {
+            return false;
+        }
+        const bool willClose = state.remaining[index] == 1;
+        if (willClose && monthId != state.closedUpTo + 1) {
+            return false;
+        }
+        if (state.remaining[index] == lengths[index]) {
+            state.openedUpTo = monthId;
+        }
+        --state.remaining[index];
+        if (state.remaining[index] == 0) {
+            state.closedUpTo = monthId;
+        }
+    }
+    return state.openedUpTo == static_cast<int>(lengths.size()) &&
+           state.closedUpTo == static_cast<int>(lengths.size());
+}
+
+} // spatium nominum
+
+Integer exactLegalMonthWeavingCount(const std::vector<int>& lengths) {
+    LegalMonthWeavingCounterInternal family(lengths);
+    return family.countAll();
+}
+
+std::vector<int> DPUnrankLegalWeaving(const std::vector<int>& lengths,
+                                      const Integer& rank1) {
+    LegalMonthWeavingCounterInternal family(lengths);
+    return family.unrank1(rank1);
+}
+
+Integer compatibleMonthWeavingRank(const LegacyAnswerRing& stream,
+                                   const Integer& familySize) {
+    if (familySize < 1) {
+        throw BaseValidationError("familia texturae mensium vacua est");
+    }
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    if (familySize <= M_OLD) {
+        return rejectionWrapper.repair(stream, familySize, selectionAdapter).outputRank;
+    }
+    const Patch14WideDetourWrapper wideWrapper;
+    return wideWrapper.repair(stream, familySize, selectionAdapter).outputRank;
+}
+
 VirtualLegacyList::VirtualLegacyList(int yearLength, int monthCount)
     : yearLength_(yearLength), monthCount_(monthCount) {
     if (yearLength_ < 1) {
@@ -4525,6 +4726,60 @@ void BaseValidationManager::requireDiscovery24MonthWeavingReady(
     }
 }
 
+void BaseValidationManager::requirePatch24MonthWeavingReady(
+    const BaseMonsterContext& ctx) const {
+    if (!ctx.patch24MonthWeavingReady || !ctx.patch24Applied) {
+        throw BaseValidationError("PATCH 24 nondum applicatus est");
+    }
+    if (!ctx.discovery24MonthWeavingReady || !ctx.discovery24LegacyUsedAsSemanticOutput) {
+        throw BaseValidationError("PATCH 24 cicatricem DISCOVERY 24 prius exsequi debet");
+    }
+    if (!ctx.patch24LegacyExecuted || !ctx.patch24CorrectComputed) {
+        throw BaseValidationError("PATCH 24 ghost et correct ambos computare debet");
+    }
+    if (ctx.patch24LegalFamilyCount < 1) {
+        throw BaseValidationError("PATCH 24 familiam legalem non vacuam requirit");
+    }
+    if (ctx.patch24WantedRank < 1 ||
+        ctx.patch24WantedRank > ctx.patch24LegalFamilyCount) {
+        throw BaseValidationError("PATCH 24 wantedRank extra familiam legalem est");
+    }
+    const Integer replayRank = compatibleMonthWeavingRank(
+        ctx.discovery24AnswerRing,
+        ctx.patch24LegalFamilyCount);
+    if (replayRank != ctx.patch24WantedRank) {
+        throw BaseValidationError("PATCH 24 wantedRank eodem annulo non reproduci potest");
+    }
+    const std::vector<int> replayCorrect = DPUnrankLegalWeaving(
+        ctx.discovery24MonthLengths,
+        ctx.patch24WantedRank);
+    if (replayCorrect != ctx.patch24CorrectWeaving) {
+        throw BaseValidationError("PATCH 24 correct textura DP discrepat");
+    }
+    const bool equal = ctx.discovery24LegacyGhost == ctx.patch24CorrectWeaving;
+    if (ctx.patch24GhostEqualsCorrect != equal) {
+        throw BaseValidationError("PATCH 24 comparatio ghost==correct discrepat");
+    }
+    if (equal) {
+        if (!ctx.patch24LegacyReturned ||
+            ctx.discovery24SemanticWeaving != ctx.discovery24LegacyGhost) {
+            throw BaseValidationError("PATCH 24 ghost solum cum ghost==correct reddere debet");
+        }
+    } else {
+        if (ctx.patch24LegacyReturned ||
+            ctx.discovery24SemanticWeaving != ctx.patch24CorrectWeaving) {
+            throw BaseValidationError("PATCH 24 correct cum ghost!=correct reddere debet");
+        }
+    }
+    const bool semanticLegal = legalMonthWeavingRowInternal(
+        ctx.discovery24MonthLengths,
+        ctx.discovery24SemanticWeaving);
+    if (!semanticLegal ||
+        !ctx.patch24SemanticWholeWeavingOrderLegal) {
+        throw BaseValidationError("PATCH 24 output semanticus textura integra legalis esse debet");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -4996,6 +5251,30 @@ LegacyMonthWeavingInspection LegacyMonthWeavingAdapter::call(
         firstOrderPreserved,
         lastOrderPreserved,
         firstOrderPreserved && lastOrderPreserved
+    };
+}
+
+MonthWeavingPatchDecision MonthWeavingPatchWrapper::repair(
+    const std::vector<int>& lengths,
+    const LegacyAnswerRing& answerRing,
+    const std::vector<int>& ghost) const {
+    const Integer legalFamilyCount = exactLegalMonthWeavingCount(lengths);
+    const Integer wantedRank = compatibleMonthWeavingRank(
+        answerRing,
+        legalFamilyCount);
+    const std::vector<int> correct = DPUnrankLegalWeaving(lengths, wantedRank);
+    const bool equal = ghost == correct;
+    return MonthWeavingPatchDecision{
+        legalFamilyCount,
+        wantedRank,
+        correct,
+        equal ? ghost : correct,
+        true,
+        true,
+        equal,
+        equal,
+        legalMonthWeavingRowInternal(lengths, equal ? ghost : correct),
+        true
     };
 }
 
@@ -6425,6 +6704,43 @@ void Discovery24MonthWeavingHandler::handle(
     validator.requireDiscovery24MonthWeavingReady(ctx);
 }
 
+void Patch24MonthWeavingHandler::handle(
+    BaseMonsterContext& ctx,
+    const Discovery24MonthWeavingHandler& legacyHandler,
+    const LegacyMonthWeavingAdapter& adapter,
+    const MonthWeavingPatchWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    legacyHandler.handle(ctx, adapter, validator, metrics);
+
+    const MonthWeavingPatchDecision decision = wrapper.repair(
+        ctx.discovery24MonthLengths,
+        ctx.discovery24AnswerRing,
+        ctx.discovery24LegacyGhost);
+    ctx.patch24LegalFamilyCount = decision.legalFamilyCount;
+    ctx.patch24WantedRank = decision.wantedRank;
+    ctx.patch24CorrectWeaving = decision.correctWeaving;
+    ctx.discovery24SemanticWeaving = decision.outputWeaving;
+    ctx.patch24LegacyExecuted = decision.legacyExecuted;
+    ctx.patch24CorrectComputed = decision.correctComputed;
+    ctx.patch24GhostEqualsCorrect = decision.ghostEqualsCorrect;
+    ctx.patch24LegacyReturned = decision.legacyReturned;
+    ctx.patch24SemanticWholeWeavingOrderLegal =
+        decision.semanticWholeWeavingOrderLegal;
+    ctx.patch24Applied = decision.patchApplied;
+    ctx.patch24MonthWeavingReady = true;
+    ctx.currentHandler = "Patch24MonthWeavingHandler";
+    ctx.phase = "PATCH_24_WHOLE_MONTH_WEAVING_DP";
+    ctx.status = ctx.patch24GhostEqualsCorrect
+        ? "GHOST_EQUALS_CORRECT_LEGACY_RETURNED"
+        : "GHOST_DIFFERS_CORRECT_DP_WEAVING_RETURNED";
+    ctx.branchTrace.push_back(ctx.patch24GhostEqualsCorrect
+        ? "PATCH24:GHOST_EQUALS_CORRECT"
+        : "PATCH24:CORRECT_REPLACES_GHOST");
+    metrics.bump(ctx, "patch24.month.weaving.calls");
+    validator.requirePatch24MonthWeavingReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -7224,6 +7540,24 @@ void BaseDispatcher::dispatchDiscovery24MonthWeaving(
     const BaseMetricsShell& metrics) const {
     ctx.branchTrace.push_back("DISPATCH:DISCOVERY24_MONTH_WEAVING");
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedMonthWeaving(
+    BaseMonsterContext& ctx,
+    const Patch24MonthWeavingHandler& handler,
+    const Discovery24MonthWeavingHandler& legacyHandler,
+    const LegacyMonthWeavingAdapter& adapter,
+    const MonthWeavingPatchWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:PATCH24_MONTH_WEAVING");
+    handler.handle(
+        ctx,
+        legacyHandler,
+        adapter,
+        wrapper,
+        validator,
+        metrics);
 }
 
 void BaseDispatcher::dispatchPatchedYear5000Tie(
@@ -8312,6 +8646,110 @@ LegacyMonthWeavingReport BaseMonsterManager::executeDiscovery24MonthWeaving(
     const BaseValidationManager validator;
     const BaseMetricsShell metrics;
     const LegacyMonthWeavingAdapter adapter;
+    const Discovery24MonthWeavingHandler legacyHandler;
+    const MonthWeavingPatchWrapper wrapper;
+    const Patch24MonthWeavingHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedMonthWeaving(
+        ctx,
+        handler,
+        legacyHandler,
+        adapter,
+        wrapper,
+        validator,
+        metrics);
+
+    return LegacyMonthWeavingReport{
+        calculationDay,
+        originalTargetDay,
+        structure.resolvedYear,
+        ctx.discovery24MonthLengths,
+        ctx.discovery24AnswerRing,
+        ctx.discovery24LegacyGhost,
+        ctx.discovery24SemanticWeaving,
+        ctx.discovery24Patch20Prepared,
+        ctx.discovery24Patch23Prepared,
+        ctx.discovery24MultiplicitiesPreserved,
+        ctx.discovery24FirstOccurrenceOrderPreserved,
+        ctx.discovery24LastOccurrenceOrderPreserved,
+        ctx.discovery24WholeWeavingOrderLegal,
+        ctx.discovery24LegacyUsedAsSemanticOutput,
+        ctx.patch24LegalFamilyCount,
+        ctx.patch24WantedRank,
+        ctx.patch24CorrectWeaving,
+        ctx.patch24LegacyExecuted,
+        ctx.patch24CorrectComputed,
+        ctx.patch24GhostEqualsCorrect,
+        ctx.patch24LegacyReturned,
+        ctx.patch24SemanticWholeWeavingOrderLegal,
+        ctx.patch24Applied,
+        ctx.patch24MonthWeavingReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+LegacyMonthWeavingReport BaseMonsterManager::executeUnpatchedDiscovery24MonthWeavingDiagnostic(
+    const LegacyYearAnchor& anchor,
+    const Integer& originalTargetDay,
+    const Integer& calculationDay,
+    const std::vector<int>& monthLengths) const {
+    if (monthLengths.size() < 3 || monthLengths.size() > 47) {
+        throw BaseValidationError("diagnosticum DISCOVERY 24 inter tres et quadraginta septem menses requirit");
+    }
+    int localYearLength = 0;
+    for (const int length : monthLengths) {
+        if (length < LEGACY_MONTH_LENGTH_MIN || length > LEGACY_MONTH_LENGTH_MAX) {
+            throw BaseValidationError("diagnosticum DISCOVERY 24 longitudines mensium extra fines historicos habet");
+        }
+        if (localYearLength > REAL_YEAR_MAX_PATCH - length) {
+            throw BaseValidationError("diagnosticum DISCOVERY 24 summam anni nimis magnam habet");
+        }
+        localYearLength += length;
+    }
+
+    const LegacyStructureSauceReport structure = executeDiscovery20StructureSauce(
+        anchor,
+        originalTargetDay,
+        calculationDay);
+    if (!structure.ready || !structure.patch20Applied ||
+        structure.patch20GhostReachedSelector) {
+        throw BaseValidationError("diagnosticum DISCOVERY 24 PATCH 20 sauce semanticam requirit");
+    }
+
+    const LegacyMonthLengthMaterializationAdapter materializationAdapter;
+    const MonthLengthMaterializationPatchWrapper materializationWrapper;
+    const LegacyMonthLengthMaterializationInspection legacyInspection =
+        materializationAdapter.inspect(
+            localYearLength,
+            static_cast<int>(monthLengths.size()));
+    const MonthLengthMaterializationPatchDecision materializationDecision =
+        materializationWrapper.repair(
+            localYearLength,
+            static_cast<int>(monthLengths.size()),
+            legacyInspection);
+    if (!materializationDecision.patchApplied ||
+        !materializationDecision.legacyExecuted ||
+        !materializationDecision.virtualBackendUsed ||
+        !materializationDecision.countMatchesLegacyProof) {
+        throw BaseValidationError("diagnosticum DISCOVERY 24 PATCH 23 backend virtualem requirit");
+    }
+
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery24MonthLengths = monthLengths;
+    ctx.discovery24SemanticStructureSauce = structure.semanticStructureSauce;
+    ctx.discovery24Patch20Prepared = structure.patch20Applied;
+    ctx.discovery24Patch23Prepared = materializationDecision.patchApplied;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyMonthWeavingAdapter adapter;
     const Discovery24MonthWeavingHandler handler;
     const BaseDispatcher dispatcher;
     dispatcher.dispatchDiscovery24MonthWeaving(
@@ -8336,6 +8774,15 @@ LegacyMonthWeavingReport BaseMonsterManager::executeDiscovery24MonthWeaving(
         ctx.discovery24LastOccurrenceOrderPreserved,
         ctx.discovery24WholeWeavingOrderLegal,
         ctx.discovery24LegacyUsedAsSemanticOutput,
+        {},
+        {},
+        {},
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         ctx.discovery24MonthWeavingReady,
         ctx.phase,
         ctx.status,

@@ -442,6 +442,25 @@ struct LegacyMonthWeavingInspection {
     bool wholeWeavingOrderLegal = false;
 };
 
+Integer exactLegalMonthWeavingCount(const std::vector<int>& lengths);
+std::vector<int> DPUnrankLegalWeaving(const std::vector<int>& lengths,
+                                      const Integer& rank1);
+Integer compatibleMonthWeavingRank(const LegacyAnswerRing& stream,
+                                   const Integer& familySize);
+
+struct MonthWeavingPatchDecision {
+    Integer legalFamilyCount{};
+    Integer wantedRank{};
+    std::vector<int> correctWeaving{};
+    std::vector<int> outputWeaving{};
+    bool legacyExecuted = false;
+    bool correctComputed = false;
+    bool ghostEqualsCorrect = false;
+    bool legacyReturned = false;
+    bool semanticWholeWeavingOrderLegal = false;
+    bool patchApplied = false;
+};
+
 struct LegacyMonthWeavingReport {
     Integer calculationDay{};
     Integer originalTargetDay{};
@@ -457,6 +476,15 @@ struct LegacyMonthWeavingReport {
     bool lastOccurrenceOrderPreserved = false;
     bool wholeWeavingOrderLegal = false;
     bool legacyUsedAsSemanticOutput = false;
+    Integer patch24LegalFamilyCount{};
+    Integer patch24WantedRank{};
+    std::vector<int> patch24CorrectWeaving{};
+    bool patch24LegacyExecuted = false;
+    bool patch24CorrectComputed = false;
+    bool patch24GhostEqualsCorrect = false;
+    bool patch24LegacyReturned = false;
+    bool patch24SemanticWholeWeavingOrderLegal = false;
+    bool patch24Applied = false;
     bool ready = false;
     std::string phase;
     std::string status;
@@ -846,6 +874,16 @@ struct BaseMonsterContext {
     bool discovery24WholeWeavingOrderLegal=false;
     bool discovery24LegacyUsedAsSemanticOutput=false;
     bool discovery24MonthWeavingReady=false;
+    Integer patch24LegalFamilyCount{};
+    Integer patch24WantedRank{};
+    std::vector<int> patch24CorrectWeaving{};
+    bool patch24LegacyExecuted=false;
+    bool patch24CorrectComputed=false;
+    bool patch24GhostEqualsCorrect=false;
+    bool patch24LegacyReturned=false;
+    bool patch24SemanticWholeWeavingOrderLegal=false;
+    bool patch24Applied=false;
+    bool patch24MonthWeavingReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1225,6 +1263,8 @@ public:
         const BaseMonsterContext& ctx) const;
     void requireDiscovery24MonthWeavingReady(
         const BaseMonsterContext& ctx) const;
+    void requirePatch24MonthWeavingReady(
+        const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1376,6 +1416,14 @@ public:
     LegacyMonthWeavingInspection call(
         const std::vector<int>& lengths,
         const Patch11LatchedOrderSauceResult& semanticStructureSauce) const;
+};
+
+class MonthWeavingPatchWrapper {
+public:
+    MonthWeavingPatchDecision repair(
+        const std::vector<int>& lengths,
+        const LegacyAnswerRing& answerRing,
+        const std::vector<int>& ghost) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1957,6 +2005,15 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Patch24MonthWeavingHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const Discovery24MonthWeavingHandler& legacyHandler,
+                const LegacyMonthWeavingAdapter& adapter,
+                const MonthWeavingPatchWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -2276,6 +2333,14 @@ public:
         const LegacyMonthWeavingAdapter& adapter,
         const BaseValidationManager& validator,
         const BaseMetricsShell& metrics) const;
+    void dispatchPatchedMonthWeaving(
+        BaseMonsterContext& ctx,
+        const Patch24MonthWeavingHandler& handler,
+        const Discovery24MonthWeavingHandler& legacyHandler,
+        const LegacyMonthWeavingAdapter& adapter,
+        const MonthWeavingPatchWrapper& wrapper,
+        const BaseValidationManager& validator,
+        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -2444,6 +2509,11 @@ public:
         int cutletCount,
         int monthCount) const;
     LegacyMonthWeavingReport executeDiscovery24MonthWeaving(
+        const LegacyYearAnchor& anchor,
+        const Integer& originalTargetDay,
+        const Integer& calculationDay,
+        const std::vector<int>& monthLengths) const;
+    LegacyMonthWeavingReport executeUnpatchedDiscovery24MonthWeavingDiagnostic(
         const LegacyYearAnchor& anchor,
         const Integer& originalTargetDay,
         const Integer& calculationDay,

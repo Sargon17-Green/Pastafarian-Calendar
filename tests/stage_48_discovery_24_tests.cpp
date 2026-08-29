@@ -39,7 +39,7 @@ int main() {
         const std::array<Integer, 3> calculationGateIndices{
             Integer{0}, Integer{2}, Integer{3}
         };
-        int discrepancies = 0;
+        int legacyDiscrepancies = 0;
 
         for (const Integer& calculationGateIndex : calculationGateIndices) {
             const Integer calculationDay = oracle.gateValueForTest(calculationGateIndex);
@@ -58,16 +58,14 @@ int main() {
                 lengths);
             require(report.ready,
                     "DISCOVERY 24 report paratus esse debet");
-            require(report.handler == "Discovery24MonthWeavingHandler",
-                    "handler DISCOVERY 24 expectatus est");
+            require(report.handler == "Patch24MonthWeavingHandler",
+                    "post PATCH 24 handler correctus expectatus est");
             require(report.patch20Prepared && report.patch23Prepared,
                     "DISCOVERY 24 PATCH 20 et PATCH 23 parata requirit");
             require(report.multiplicitiesPreserved,
                     "legacyChooseEachDaySeparately multiplicities servare debet");
             require(report.legacyUsedAsSemanticOutput,
-                    "DISCOVERY 24 ghost legacy ad output activum pervenire debet");
-            require(report.semanticWeaving == report.legacyGhost,
-                    "DISCOVERY 24 semantic weaving adhuc ghost legacy esse debet");
+                    "cicatrix DISCOVERY 24 ghost legacy ante patch ad output intermedium pervenire debet");
             require(legacyChooseEachDaySeparately(lengths, report.answerRing) ==
                         report.legacyGhost,
                     "ghost DISCOVERY 24 helper legacy directe reproducere debet");
@@ -93,10 +91,10 @@ int main() {
             require(!report.wholeWeavingOrderLegal,
                     "witness DISCOVERY 24 textura integra legalis esse non debet");
 
-            if (report.semanticWeaving != expected) {
-                ++discrepancies;
+            if (report.legacyGhost != expected) {
+                ++legacyDiscrepancies;
                 std::cout
-                    << "DISCOVERY24_DISCREPANTIA GATE=" << calculationGateIndex
+                    << "DISCOVERY24_CICATRIX_DISCREPANTIA GATE=" << calculationGateIndex
                     << " CALCULATION_DAY=" << calculationDay
                     << " RING_FIRST=" << report.answerRing.first
                     << " STEP=" << report.answerRing.directionStep
@@ -104,14 +102,23 @@ int main() {
                     << " NORMATIVUS=" << rowText(expected)
                     << "\n";
             }
+            require(report.patch24Applied && report.patch24LegacyExecuted &&
+                        report.patch24CorrectComputed,
+                    "PATCH 24 ghost et correct realiter computare debet");
+            require(report.patch24CorrectWeaving == expected,
+                    "PATCH 24 correct cum oracle texturae integrae congruere debet");
+            require(report.semanticWeaving == expected,
+                    "regressio DISCOVERY 24 post PATCH 24 viridis esse debet");
+            require(report.patch24SemanticWholeWeavingOrderLegal,
+                    "output semanticus PATCH 24 textura integra legalis esse debet");
         }
 
-        require(discrepancies == 3,
-                "DISCOVERY 24 tres discrepantias exactas requirit");
-        std::cerr
-            << "REGRESSIO_DISCOVERY_24_DEFECIT: 3 texturae legacy diem singillatim elegerunt "
-               "loco texturae integrae legalis\n";
-        return 1;
+        require(legacyDiscrepancies == 3,
+                "DISCOVERY 24 tres discrepantias historicas exactas servare debet");
+        std::cout
+            << "REGRESSIO_DISCOVERY_24_TRANSIIT: tres cicatrices day-by-day servantur, "
+               "sed PATCH 24 output semanticum ad texturam integram legalem dirigit\n";
+        return 0;
     } catch (const std::exception& error) {
         std::cerr << "REGRESSIO_DISCOVERY_24_ERROR: " << error.what() << "\n";
         return 2;
