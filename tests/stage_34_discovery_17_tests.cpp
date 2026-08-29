@@ -91,10 +91,6 @@ int main() {
             1,
             10);
         require(report.discovery17Ready, "DISCOVERY 17 non paratus est");
-        require(report.status == "YEAR_5000_TIE_LENGTH_ONLY_STABLE_ORDER_ACTIVE",
-                "status DISCOVERY 17 inexpectatus est");
-        require(report.handler == "Discovery17Year5000TieHandler",
-                "handler DISCOVERY 17 inexpectatus est");
         require(report.selectionCalled && report.selectionFamilySize == 3,
                 "selectio year 5000 familiam trium non accepit");
         require(indices(report.preSort) == "4,0,2",
@@ -115,7 +111,7 @@ int main() {
 
         std::cout << "CALCULATION_DAY=" << calculationDay << "\n";
         std::cout << "ORDO_INPUT=" << indices(report.preSort) << "\n";
-        std::cout << "ORDO_LEGACY_LENGTH_ONLY=" << indices(report.sorted) << "\n";
+        std::cout << "ORDO_ACTIVUS=" << indices(report.sorted) << "\n";
         std::cout << "ORDO_NORMATIVUS_OPENING_GATE=" << indices(normative) << "\n";
         std::cout << "FAMILIA_SELECTIONIS=" << report.selectionFamilySize << "\n";
 

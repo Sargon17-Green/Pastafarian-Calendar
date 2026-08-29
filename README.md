@@ -404,3 +404,56 @@ Omnes regressiones Graduum 1–33 denuo compilatae et exsecutae sunt; omnes tran
 ### Quod consulto nondum adest
 
 Nulla functio `sortEqualLengthRunsByOpeningGate`, nullus comparator secundarius, nullus PATCH 17 et nullus `patch17Applied` adsunt. Stable sort length-only manet cicatrix productionis. Gradus 35 solus debet post hunc primum sort invenire runs aequalis longitudinis et solum singulos runs per opening gate maturiorem ordinare; non licet in sort duarum clavium mundum reficere.
+
+
+## PATCH 17 — runs aequalis longitudinis tantum per opening gate reparantur
+
+Gradus 35 stable sort historicum per longitudinem solam non substituit. `legacyYear5000TiePreparation` et `Discovery17Year5000TieHandler` prius currunt sicut in DISCOVERY 17; familia legacy iam length-sortata, answer stream, ordinalis et candidatus legacy electus in contextu servantur.
+
+Post hanc cicatricem, helper novus:
+
+```text
+sortEqualLengthRunsByOpeningGate(gates, lengthSorted)
+```
+
+listam iam length-sortatam a sinistra ad dextram percurrit. Pro quolibet run contiguo cui eadem `length` est, tantum slice illius run per `GATE[openIndex]` ascendentem stable-sortat. Elementa extra run non moventur. Itaque hoc non est global sort mundus per `(length, openingGate)`.
+
+Via activa est:
+
+```text
+BaseMonsterManager::executeLegacyYear5000TieDiscovery
+-> Patch 15
+-> Patch 11
+-> Patch 12
+-> BaseDispatcher::dispatchPatchedYear5000Tie
+-> Patch17Year5000TieHandler
+-> Discovery17Year5000TieHandler
+-> familia et selectio legacy servantur
+-> Year5000TiePatchWrapper
+-> sortEqualLengthRunsByOpeningGate
+-> selectio denuo cum eodem answer stream
+```
+
+Via `executeUnpatchedYear5000TieDiagnostic` DISCOVERY 17 sine PATCH 17 adhuc exercet.
+
+### Witness anni 5000
+
+Familia legacy trium candidatorum longitudinis 300 manet:
+
+```text
+4,0,2
+```
+
+Post secondum passum localem PATCH 17 fit:
+
+```text
+0,2,4
+```
+
+Unus run aequalis longitudinis agnoscitur. Ordinalis selectionis ante et post patch est idem `2`, quia answer stream et magnitudo familiae non mutantur; candidatus tamen ex ordine reparato sumitur.
+
+Probe additivum helperi listam non length-sortatam `300(open 4), 200(open 0), 300(open 2)` tradit. Quia duo 300 non sunt contigui, output manet `4,0,2`; hoc demonstrat helperem non candidatos aequalis longitudinis per totam familiam regruppare nec globalem two-key sort simulare.
+
+Regressio DISCOVERY 17 eadem expectatione opening gate nunc transit. Eadem versio probationis contra fontem Stage 34 pristinum adhuc tres discrepantias et exitum 1 reddit. Omnes regressiones Graduum 1–35 transeunt.
+
+Nullus `oldJumpGuess`, nullus PATCH 18 et nullus codex saltus annorum praemature additur.

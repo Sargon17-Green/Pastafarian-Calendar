@@ -211,6 +211,12 @@ struct LegacyYear5000TiePreparation {
     LegacyYearCandidateList sorted{};
 };
 
+struct Patch17Year5000TiePreparation {
+    LegacyYearCandidateList legacySorted{};
+    LegacyYearCandidateList patchedSorted{};
+    std::size_t equalLengthRunCount = 0;
+};
+
 Patch16YearCandidateDecision yearCandidateAfterFootnotePatch(
     const std::vector<Integer>& gates,
     std::size_t openIndex,
@@ -219,6 +225,9 @@ LegacyYear5000TiePreparation legacyYear5000TiePreparation(
     const std::vector<Integer>& gates,
     const std::vector<LegacyYearCandidatePair>& pairs,
     const Integer& calculationDay);
+LegacyYearCandidateList sortEqualLengthRunsByOpeningGate(
+    const std::vector<Integer>& gates,
+    const LegacyYearCandidateList& lengthSorted);
 
 struct Patch13RejectionSelection {
     Integer acceptanceLimit{};
@@ -433,6 +442,14 @@ struct BaseMonsterContext {
     Integer discovery17Year5000SelectedOrdinal{};
     LegacyYearCandidate discovery17Year5000SelectedCandidate{};
     bool discovery17Year5000Ready = false;
+    LegacyYearCandidateList patch17LegacyYear5000Sorted{};
+    Integer patch17LegacyYear5000SelectedOrdinal{};
+    LegacyYearCandidate patch17LegacyYear5000SelectedCandidate{};
+    LegacyYearCandidateList patch17Year5000Sorted{};
+    std::size_t patch17EqualLengthRunCount = 0;
+    Integer patch17Year5000SelectedOrdinal{};
+    LegacyYearCandidate patch17Year5000SelectedCandidate{};
+    bool patch17Applied = false;
 };
 
 struct LegacyYearCandidateReport {
@@ -471,6 +488,11 @@ struct LegacyYear5000TieReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    LegacyYearCandidateList legacySortedBeforePatch{};
+    Integer legacySelectedOrdinalBeforePatch{};
+    LegacyYearCandidate legacySelectedCandidateBeforePatch{};
+    std::size_t equalLengthRunCount = 0;
+    bool patch17Applied = false;
 };
 
 struct LegacyWideSelectionReport {
@@ -770,6 +792,7 @@ public:
     void requireDiscovery16LegacyYearCandidatesReady(const BaseMonsterContext& ctx) const;
     void requirePatch16YearCandidateCeilingReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery17Year5000TieReady(const BaseMonsterContext& ctx) const;
+    void requirePatch17Year5000TieReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -823,6 +846,13 @@ public:
                    const LegacyBiasedSelectionAdapter& selectionAdapter,
                    const Patch13RejectionWrapper& rejectionWrapper,
                    const Patch14WideDetourWrapper& wideWrapper) const;
+};
+
+class Year5000TiePatchWrapper {
+public:
+    Patch17Year5000TiePreparation repair(
+        const std::vector<Integer>& gates,
+        const LegacyYearCandidateList& legacySorted) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1303,6 +1333,19 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch17Year5000TieHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const Discovery17Year5000TieHandler& legacyHandler,
+                const LegacyYear5000TieAdapter& adapter,
+                const Year5000TiePatchWrapper& wrapper,
+                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                const Patch13RejectionWrapper& rejectionWrapper,
+                const Patch14WideDetourWrapper& wideWrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1536,6 +1579,17 @@ public:
                                    const Patch14WideDetourWrapper& wideWrapper,
                                    const BaseValidationManager& validator,
                                    const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedYear5000Tie(BaseMonsterContext& ctx,
+                                    const Patch17Year5000TieHandler& handler,
+                                    const Discovery17Year5000TieHandler& legacyHandler,
+                                    const LegacyYear5000TieAdapter& adapter,
+                                    const Year5000TiePatchWrapper& wrapper,
+                                    const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                    const Patch13RejectionWrapper& rejectionWrapper,
+                                    const Patch14WideDetourWrapper& wideWrapper,
+                                    const BaseValidationManager& validator,
+                                    const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1642,6 +1696,13 @@ public:
         int queriedBowlId,
         int seal) const;
     LegacyYear5000TieReport executeLegacyYear5000TieDiscovery(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        const std::vector<Integer>& gates,
+        const std::vector<LegacyYearCandidatePair>& pairs,
+        int queriedBowlId,
+        int seal) const;
+    LegacyYear5000TieReport executeUnpatchedYear5000TieDiagnostic(
         const Integer& calculationDay,
         const Integer& targetDay,
         const std::vector<Integer>& gates,

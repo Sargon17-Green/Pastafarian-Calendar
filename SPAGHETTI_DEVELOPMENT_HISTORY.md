@@ -1065,3 +1065,39 @@ Additi sunt `LegacyYear5000TiePreparation`, `legacyYear5000TiePreparation`, camp
 ### Quod consulto nondum adest
 
 Nullus `sortEqualLengthRunsByOpeningGate`, nullus PATCH 17, nullus `patch17Applied`, nullus `oldJumpGuess` et nullus codex PATCH 18 adsunt. Gradus 35 debet stable sort primum servare et postea solum runs aequalis longitudinis ordinare secundum opening gate maturiorem.
+
+
+## Gradus 35 — PATCH 17: secondus passus localis intra runs aequalis longitudinis
+
+### Cicatrices servatae
+
+`legacyStableLengthOnlyYearCandidates` manet primus et historicus sort. `legacyYear5000TiePreparation` eum adhuc vocat, et `Discovery17Year5000TieHandler` adhuc familiam length-only sortatam atque selectionem legacy producit. PATCH 17 hos exitus ante correctionem in contextu invocationis servat. Via diagnostica separata DISCOVERY 17 eandem cicatricem sine correctione exercet.
+
+### Correctio
+
+`sortEqualLengthRunsByOpeningGate` familiam iam length-sortatam per runs contiguos percurrit. Limites cuiusque run sola aequalitate `length` definiuntur. Si run plus quam unum elementum habet, tantum illud intervallum stable-sortatur per `gates[candidate.openIndex]` ascendentem. Nulla ordinatio totius familiae per duas claves adhibetur.
+
+`Year5000TiePatchWrapper` familiam legacy accipit et numerum run aequalium observat. `Patch17Year5000TieHandler` primum `Discovery17Year5000TieHandler` vere exsequitur, deinde familiam et candidatum legacy servat, secondum passum localem applicat et cum eodem `LegacyAnswerRing` selectionem denuo facit. Validator confirmat longitudines in singulis positionibus invariatas esse, ordinem reparatum helperi congruere, eundem ordinalem selectionis manere et candidatum semanticum ex familia reparata venire.
+
+### Regressiones
+
+Witness Gradus 34 `4,0,2` in run longitudinis 300 post PATCH 17 fit `0,2,4`; regressio DISCOVERY 17 nunc transit. Eadem versio testis contra fontem Stage 34 pristinum adhuc `4,0,2` reddit, tres discrepantias exactas habet et exitum 1 reddit.
+
+Probatio PATCH 17 etiam confirmat:
+
+- via diagnostica ordinem legacy `4,0,2` servare;
+- run semanticum `0,2,4` fieri;
+- unum tantum run aequalis longitudinis agnosci;
+- ordinalem selectionis ante/post patch eundem esse;
+- candidatum legacy et semanticum separatim observabiles manere;
+- listam non length-sortatam cum duobus 300 non contiguis non regruppari.
+
+Omnes regressiones Graduum 1–35 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `Patch17Year5000TiePreparation`, `sortEqualLengthRunsByOpeningGate`, campi contextus legacy/patched, `Year5000TiePatchWrapper`, `Patch17Year5000TieHandler`, `requirePatch17Year5000TieReady`, `dispatchPatchedYear5000Tie`, via diagnostica DISCOVERY 17 et campi report PATCH 17.
+
+### Quod nondum fit
+
+Nullus `oldJumpGuess`, nullus PATCH 18, nullus saltus per annum medium et nulla substitutio iterationis sequentialis addita est. Gradus 36 debet DISCOVERY 18 tantum introducere.
