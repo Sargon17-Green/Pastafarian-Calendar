@@ -151,6 +151,18 @@ int oldNextBowlFixedName(int id);
 int nextBowlThroughOrderAt46Latch(const PermutationOrder& orderAt46Latch,
                                   int queriedBowlId);
 
+struct LegacyAnswerRing {
+    Integer first{};
+    int directionStep = 0;
+};
+
+LegacyAnswerRing answerRingThroughPatchedNextBowl(const BowlState& finalBowls,
+                                                   int queriedBowlId,
+                                                   int nextBowlId,
+                                                   int seal);
+Integer ringAnswer(const LegacyAnswerRing& stream, const Integer& offset);
+Integer biasedLegacyPick(const Integer& x, const Integer& N);
+
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
 Stone stonePatch(int i, Stone state);
@@ -267,6 +279,13 @@ struct BaseMonsterContext {
     int patchedNextBowlOutput = 0;
     std::size_t patch12QueriedPosition = 0;
     bool patch12Applied = false;
+    int legacyBiasedSelectionQueriedBowlId = 0;
+    int legacyBiasedSelectionSeal = 0;
+    Integer legacyBiasedSelectionFamilySize{};
+    LegacyAnswerRing legacyBiasedSelectionRing{};
+    Integer legacyBiasedSelectionFirstAnswer{};
+    Integer legacyBiasedSelectionOutput{};
+    bool legacyBiasedSelectionReady = false;
 };
 
 struct BaseRunReport {
@@ -451,6 +470,26 @@ struct LegacyNextBowlReport {
     bool patch12Applied = false;
 };
 
+struct LegacyBiasedSelectionReport {
+    Integer calculationDay{};
+    Integer targetDay{};
+    int queriedBowlId = 0;
+    int seal = 0;
+    Integer familySize{};
+    LegacyAnswerRing answerRing{};
+    Integer firstAnswer{};
+    Integer outputRank{};
+    BowlState finalBowls{};
+    PermutationOrder orderAt46Latch{};
+    int nextBowlId = 0;
+    bool patch11Prepared = false;
+    bool patch12Prepared = false;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 class BaseValidationError final : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
@@ -483,6 +522,7 @@ public:
     void requirePatch11Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyNextBowlReady(const BaseMonsterContext& ctx) const;
     void requirePatch12Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyBiasedSelectionReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -571,6 +611,12 @@ class Patch12NextBowlWrapper {
 public:
     int repair(const PermutationOrder& orderAt46Latch,
                int queriedBowlId) const;
+};
+
+class LegacyBiasedSelectionAdapter {
+public:
+    Integer selectBeforeRejection(const LegacyAnswerRing& stream,
+                                  const Integer& N) const;
 };
 
 class Patch10DeferredBowlWrapper {
@@ -848,6 +894,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery13BiasedSelectionHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyBiasedSelectionAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1009,6 +1063,12 @@ public:
                                  const Patch12NextBowlWrapper& wrapper,
                                  const BaseValidationManager& validator,
                                  const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyBiasedSelection(BaseMonsterContext& ctx,
+                                       const Discovery13BiasedSelectionHandler& handler,
+                                       const LegacyBiasedSelectionAdapter& adapter,
+                                       const BaseValidationManager& validator,
+                                       const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1074,6 +1134,12 @@ public:
         const Integer& calculationDay,
         const Integer& targetDay,
         int queriedBowlId) const;
+    LegacyBiasedSelectionReport executeLegacyBiasedSelection(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        int queriedBowlId,
+        int seal,
+        const Integer& familySize) const;
 };
 
 } // namespace pastafari

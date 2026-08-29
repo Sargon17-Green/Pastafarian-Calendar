@@ -771,6 +771,42 @@ int nextBowlThroughOrderAt46Latch(const PermutationOrder& orderAt46Latch,
     throw BaseValidationError("ID crateris in orderAt46Latch non inventus est");
 }
 
+LegacyAnswerRing answerRingThroughPatchedNextBowl(const BowlState& finalBowls,
+                                                   int queriedBowlId,
+                                                   int nextBowlId,
+                                                   int seal) {
+    if (queriedBowlId < 1 || queriedBowlId > 6 || nextBowlId < 1 || nextBowlId > 6) {
+        throw BaseValidationError("ID crateris pro annulo responsorum invalidus est");
+    }
+    const Integer queried = finalBowls[static_cast<std::size_t>(queriedBowlId - 1)];
+    const Integer next = finalBowls[static_cast<std::size_t>(nextBowlId - 1)];
+    const Integer firstBase = queried + seal + 181;
+    const Integer first = savePatch(firstBase * firstBase + 179 * next + seal);
+    const Integer directionBase = first + seal + 1 + 193;
+    const Integer directionNumber = savePatch(
+        directionBase * directionBase
+        + 193 * first
+        + 197 * finalBowls[5]);
+    const int directionStep = regularMod(directionNumber, Integer{2}) == 1 ? 1 : -1;
+    return LegacyAnswerRing{first, directionStep};
+}
+
+Integer ringAnswer(const LegacyAnswerRing& stream, const Integer& offset) {
+    if (stream.directionStep != -1 && stream.directionStep != 1) {
+        throw BaseValidationError("gradus annuli responsorum debet esse -1 aut +1");
+    }
+    return 1 + regularMod(
+        stream.first - 1 + Integer{stream.directionStep} * offset,
+        M_OLD);
+}
+
+Integer biasedLegacyPick(const Integer& x, const Integer& N) {
+    if (N < 1) {
+        throw BaseValidationError("magnitudo familiae positiva requiritur");
+    }
+    return regularMod(x - 1, N) + 1;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -2969,6 +3005,32 @@ void BaseValidationManager::requirePatch12Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyBiasedSelectionReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.patch11Applied || !ctx.patch12Applied) {
+        throw BaseValidationError("patches undecimus et duodecimus ante discovery tertium decimum parati esse debent");
+    }
+    if (!ctx.legacyBiasedSelectionReady) {
+        throw BaseValidationError("electio legacy modulo directa nondum parata est");
+    }
+    if (ctx.legacyBiasedSelectionFamilySize < 1) {
+        throw BaseValidationError("magnitudo familiae selectionis invalida est");
+    }
+    if (ctx.legacyBiasedSelectionRing.directionStep != -1 &&
+        ctx.legacyBiasedSelectionRing.directionStep != 1) {
+        throw BaseValidationError("directio annuli selectionis invalida est");
+    }
+    const Integer expectatusPrimus = ringAnswer(ctx.legacyBiasedSelectionRing, Integer{0});
+    if (ctx.legacyBiasedSelectionFirstAnswer != expectatusPrimus) {
+        throw BaseValidationError("primus responsus annuli non servatus est");
+    }
+    const Integer expectataElectio = biasedLegacyPick(
+        expectatusPrimus,
+        ctx.legacyBiasedSelectionFamilySize);
+    if (ctx.legacyBiasedSelectionOutput != expectataElectio) {
+        throw BaseValidationError("selector legacy non est modulo directus");
+    }
+}
+
 LegacyOrderMemorySauceResult LegacyOrderMemorySauceAdapter::run(
     const Integer& calculationDay,
     const Integer& targetDay) const {
@@ -2988,6 +3050,13 @@ int LegacyNextBowlAdapter::nextFixedName(int queriedBowlId) const {
 int Patch12NextBowlWrapper::repair(const PermutationOrder& orderAt46Latch,
                                    int queriedBowlId) const {
     return nextBowlThroughOrderAt46Latch(orderAt46Latch, queriedBowlId);
+}
+
+Integer LegacyBiasedSelectionAdapter::selectBeforeRejection(
+    const LegacyAnswerRing& stream,
+    const Integer& N) const {
+    const Integer x = ringAnswer(stream, Integer{0});
+    return biasedLegacyPick(x, N);
 }
 
 void Discovery11OverwrittenOrderHandler::handle(
@@ -3169,6 +3238,58 @@ void BaseDispatcher::dispatchPatchedNextBowl(
     ctx.branchTrace.push_back("PATCH_12_DISPATCH");
     metrics.bump(ctx, "patch12.dispatch.calls");
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void Discovery13BiasedSelectionHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyBiasedSelectionAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery13BiasedSelectionHandler";
+    ctx.phase = "DISCOVERY_13_BUILD_ANSWER_RING";
+    ctx.status = "LEGACY_BIASED_MODULO_BEFORE_REJECTION";
+    ctx.branchTrace.push_back("DISCOVERY_13_BUILD_ANSWER_RING");
+    metrics.bump(ctx, "discovery13.answerRing.calls");
+
+    ctx.legacyBiasedSelectionRing = answerRingThroughPatchedNextBowl(
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.legacyBiasedSelectionQueriedBowlId,
+        ctx.patchedNextBowlOutput,
+        ctx.legacyBiasedSelectionSeal);
+    ctx.legacyBiasedSelectionFirstAnswer = ringAnswer(
+        ctx.legacyBiasedSelectionRing,
+        Integer{0});
+
+    ctx.phase = "DISCOVERY_13_DIRECT_MODULO_SELECTION";
+    ctx.branchTrace.push_back("DISCOVERY_13_DIRECT_MODULO_SELECTION");
+    ctx.legacyBiasedSelectionOutput = adapter.selectBeforeRejection(
+        ctx.legacyBiasedSelectionRing,
+        ctx.legacyBiasedSelectionFamilySize);
+    ctx.legacyBiasedSelectionReady = true;
+    metrics.bump(ctx, "discovery13.biasedModulo.calls");
+
+    ctx.phase = "DISCOVERY_13_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_13_VALIDATE");
+    validator.requireLegacyBiasedSelectionReady(ctx);
+
+    ctx.phase = "DISCOVERY_13_BIASED_SELECTION_EXPOSED";
+    ctx.status = "DIRECT_MODULO_CALLED_WITHOUT_REJECTION";
+    ctx.branchTrace.push_back("DISCOVERY_13_BIASED_SELECTION_EXPOSED");
+    metrics.bump(ctx, "discovery13.biasedSelection.exposed");
+}
+
+void BaseDispatcher::dispatchLegacyBiasedSelection(
+    BaseMonsterContext& ctx,
+    const Discovery13BiasedSelectionHandler& handler,
+    const LegacyBiasedSelectionAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_13_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_13_DISPATCH");
+    metrics.bump(ctx, "discovery13.dispatch.calls");
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 LegacyOrderMemoryReport BaseMonsterManager::executeOverwritableOrderMemorySauce(
@@ -3356,4 +3477,76 @@ LegacyNextBowlReport BaseMonsterManager::executeUnpatchedNextBowlDiagnostic(
         false
     };
 }
+
+LegacyBiasedSelectionReport BaseMonsterManager::executeLegacyBiasedSelection(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    int queriedBowlId,
+    int seal,
+    const Integer& familySize) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_13_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyNextBowlQueriedId = queriedBowlId;
+    ctx.legacyBiasedSelectionQueriedBowlId = queriedBowlId;
+    ctx.legacyBiasedSelectionSeal = seal;
+    ctx.legacyBiasedSelectionFamilySize = familySize;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyOrderMemorySauceAdapter orderMemoryAdapter;
+    const Patch11OrderAt46LatchWrapper latchWrapper;
+    const Patch11OrderAt46LatchHandler latchHandler;
+    const LegacyNextBowlAdapter nextBowlAdapter;
+    const Patch12NextBowlWrapper nextBowlWrapper;
+    const Patch12NextBowlHandler nextBowlHandler;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Discovery13BiasedSelectionHandler selectionHandler;
+    const BaseDispatcher dispatcher;
+
+    dispatcher.dispatchPatchedOrderAt46Latch(
+        ctx,
+        latchHandler,
+        orderMemoryAdapter,
+        latchWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchPatchedNextBowl(
+        ctx,
+        nextBowlHandler,
+        nextBowlAdapter,
+        nextBowlWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchLegacyBiasedSelection(
+        ctx,
+        selectionHandler,
+        selectionAdapter,
+        validator,
+        metrics);
+
+    return LegacyBiasedSelectionReport{
+        calculationDay,
+        targetDay,
+        queriedBowlId,
+        seal,
+        familySize,
+        ctx.legacyBiasedSelectionRing,
+        ctx.legacyBiasedSelectionFirstAnswer,
+        ctx.legacyBiasedSelectionOutput,
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.patch11LatchedOrderSauce.orderAt46Latch,
+        ctx.patchedNextBowlOutput,
+        ctx.patch11Applied,
+        ctx.patch12Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
 } // namespace pastafari

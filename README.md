@@ -1,79 +1,84 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 25 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 26 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 25 est `PATCH 12`; status repositorii exspectatus est `GREEN`.
+Gradus 26 est `DISCOVERY 13`; status repositorii exspectatus est `EXPECTED_RED`.
 
-Gradus 24 cicatricem `oldNextBowlFixedName(id)` exposuit: helper vetus IDs craterum per annulum numericum fixum sequitur et `orderAt46Latch` ignorat. Gradus 25 hunc helper non delet nec mutat. Via reparativa eum prius realiter vocat et output eius legacy servat; deinde queried ID intra latch Gradus 23 invenit et successorem circularem eius positionis reddit.
+Gradus 25 next-bowl semanticum iam e successore circulari `orderAt46Latch` derivat. Gradus 26 addit cicatricem historicam selectoris modulo directi: `biasedLegacyPick(x,N)` facit tantum `regularMod(x-1,N)+1`. Via Discovery 13 hunc helper in primo responso annuli statim vocat, ante quam ulla acceptatio vel rejectio fiat.
 
-## PATCH 12 — successor circularis intra orderAt46Latch
+## Correctio oracle testium reperta hoc gradu
 
-Cicatrix historica intacta manet:
+Dum answer ring contra Appendix A verificabatur, inventum est `tests/reference/normative_reference.cpp` duas formulas craterum a textu Appendix A discrepare. In circuitu guttae visibilis et in post-commotione, Appendix A primum totum mixtum `s` format et deinde `square(s)` servat. Oracle vetus solum craterem ipsum quadraverat et additamenta extra quadratum reliquerat.
 
-```text
-oldNextBowlFixedName(id)
-1 -> 2
-2 -> 3
-3 -> 4
-4 -> 5
-5 -> 6
-6 -> 1
-```
+Productionis `stirBowlsThroughVaultOld` et post-commotiones iam lecturam Appendix A rectam habebant. Ergo sola copia test-only correcta est. Generator C++ bootstrap fixture denuo exsecutus est; mutati sunt sex valores craterum Fundationis et duo valores interrogationis Fundationis. Omnes probationes priores post hanc correctionem denuo compilatae et exsecutae sunt.
 
-Helper novus semanticus est:
+## DISCOVERY 13 — biased modulo ante rejectionem
+
+Cicatrix nova est:
 
 ```text
-nextBowlThroughOrderAt46Latch(orderAt46Latch, queriedBowlId)
+biasedLegacyPick(x,N) = regularMod(x-1,N)+1
 ```
 
-Primum queried ID intra sex positiones latch quaerit. Deinde elementum proximum reddit; si ID in ultima positione est, index circulariter ad primam positionem redit. IDs extra 1..6 reiciuntur, et absentia ID intra latch invariantiam violat.
+Helper nullum acceptance limit computat et nullum offset annuli quaerit.
+
+Answer ring productionis ex statu reali iam reparato construitur:
+
+```text
+Patch 11 -> finalBowls + orderAt46Latch
+Patch 12 -> nextBowlId circularis
+answerRingThroughPatchedNextBowl -> first + directionStep
+ringAnswer(stream,0) -> primus responsus
+biasedLegacyPick(first,N) -> electio legacy immediata
+```
+
+Formulae answer ring sunt exactae Appendix A:
+
+```text
+first = SAVE(square(bowls[queried]+seal+181) + 179*bowls[next] + seal)
+directionNumber = SAVE(square(first+seal+1+193) + 193*first + 197*bowls[6])
+directionStep = +1 si directionNumber mod 2 = 1, aliter -1
+answerAt(k) = 1 + regularMod(first-1 + directionStep*k, M_OLD)
+```
 
 ## Via activa
 
 ```text
-BaseMonsterManager::executeLegacyNextBowl
+BaseMonsterManager::executeLegacyBiasedSelection
 -> BaseDispatcher::dispatchPatchedOrderAt46Latch
 -> Patch11OrderAt46LatchHandler
--> orderAt46Latch semel scriptum
 -> BaseDispatcher::dispatchPatchedNextBowl
 -> Patch12NextBowlHandler
--> LegacyNextBowlAdapter::nextFixedName
--> oldNextBowlFixedName
--> Patch12NextBowlWrapper::repair
--> nextBowlThroughOrderAt46Latch
+-> Discovery13BiasedSelectionHandler
+-> answerRingThroughPatchedNextBowl
+-> LegacyBiasedSelectionAdapter::selectBeforeRejection
+-> ringAnswer(stream,0)
+-> biasedLegacyPick
 ```
 
-`Patch12NextBowlHandler` servat `legacyNextBowlOutput` ante correctionem, memorat positionem queried crateris intra latch, deinde `patchedNextBowlOutput` e successore circulari format. `requirePatch12Ready` iterum sine oracle productionis comprobat helper legacy intactum, latch a Patch 11 servatum, positionem repertam et output circularem rectum.
+`requireLegacyBiasedSelectionReady` comprobat Patch 11 et Patch 12 iam parata esse, directionem esse ±1, primum responsum esse `ringAnswer(stream,0)`, et output legacy exactissime directum modulo esse. Validator nullam rejectionem efficit.
 
-Via separata `executeUnpatchedNextBowlDiagnostic` Patch 11 parat sed deinde solum `Discovery12NextBowlHandler` et `oldNextBowlFixedName` exsequitur. Sic cicatrix Gradus 24 physice et exsecutabiliter manet.
+## Regressio
 
-## Regressiones
+`tests/stage_26_discovery_13_tests.cpp` tres annulos reales Fundationis exercet:
 
-`tests/stage_24_discovery_12_tests.cpp` non mutatus est. Contra codicem Gradus 24 pristinum adhuc tres discrepantias exactas et exitum `1` reddit. Contra Gradum 25 eadem probatio transit pro omnibus sex IDs.
+- crater 1, sigillum 1;
+- crater 2, sigillum 21;
+- crater 3, sigillum 31.
 
-`tests/stage_25_patch_12_tests.cpp` separatissime comprobat:
+In omnibus tribus `directionStep=-1`, `N=first-1`, et `N>M_OLD/2`. Ergo `limit=floor(M_OLD/N)*N` in norma test-only esset `N`: primus responsus `N+1` reiciendus est, proximus responsus in eodem annulo est `N`, et electio normativa est `N`. Cicatrix tamen `biasedLegacyPick(N+1,N)=1` statim reddit.
 
-- annulum numericum legacy exactum 1→2→3→4→5→6→1;
-- viam diagnosticam unpatched quae eundem output legacy servat;
-- viam activam PATCH 12 pro omnibus sex IDs;
-- positionem queried ID intra latch;
-- wrap ab ultima positione ad primam;
-- rejectionem IDs 0 et 7;
-- tres cicatrices legacy divergentes in witness Fundationis.
-
-Pro Fundatione latch est `[4,5,2,3,6,1]`. ID 1 in positione sexta est; output correctus est 4, id est prima positio latch.
-
-Omnes regressiones Graduum 1–25 transeunt.
+Tres discrepantiae exactae inveniuntur; regressio consulto exitum `1` reddit. Omnes regressiones Graduum 1–25 transeunt.
 
 ## Quod consulto nondum adest
 
-Nullus `biasedLegacyPick`, nullus rejection ante electionem, nullus `Patch13`, nullus `patch13Applied`, nullus `wideDetour` et nullus codex posterior additus est. Gradus 26 debet esse `DISCOVERY 13` tantum.
+In productione nulla formula `limit=floor(M_OLD/N)*N`, nullus progressus ad responsum acceptabilem, nullus `patchedSmallPick`, nullus `SelectionRejectionPatchWrapper`, nullus `Patch13`, nullus `patch13Applied`, nullus `wideDetour` et nullus codex posterior adest. Gradus 27 debet esse `PATCH 13` tantum.
 
 ## Lingua computationis
 
-Omnis codex exsecutus huius lineae est C++. Integra arbitraria per `boost::multiprecision::cpp_int` tractantur. Nullus interpres externus, FFI, ambitus exsecutionis alienus aut generator in alia lingua adhibetur.
+Omnis codex computationalis huius lineae C++ est. Integra arbitraria per `boost::multiprecision::cpp_int` tractantur. Oracle, generator fixture, probationes et utilities computationales huius lineae C++ sunt.
 
 ## Catalogus linguae fontis
 

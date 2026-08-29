@@ -724,3 +724,38 @@ Omnes regressiones Graduum 1–25 transeunt.
 Additi sunt `nextBowlThroughOrderAt46Latch`, campi contextus `patchedNextBowlOutput`, `patch12QueriedPosition`, `patch12Applied`, campi report cicatricis, `Patch12NextBowlWrapper`, `Patch12NextBowlHandler`, `requirePatch12Ready`, `dispatchPatchedNextBowl` et `executeUnpatchedNextBowlDiagnostic`.
 
 `oldNextBowlFixedName` intactus et callable manet. Nullus `biasedLegacyPick`, nullus PATCH 13, nulla rejectio selectionis et nullus codex posterior praemature additus est.
+
+
+## Gradus 26 — DISCOVERY 13: selector modulo directus ante rejectionem
+
+### Quid putabatur
+
+Post PATCH 12, annulus responsorum iam ex crateribus finalibus et successore next-bowl correcto constitui poterat. Selector vetus videbatur posse primum responsum statim ad familiam `1..N` per modulum redigere, quia omnis responsus annuli ipse in `1..M_OLD` iacet.
+
+### Quid repertum est
+
+Modulo directus aequalitatem distributionis frangit quando `N` non dividit `M_OLD`. Norma brevis prius caudam super `floor(M_OLD/N)*N` reicit et in eodem answer ring procedit. `biasedLegacyPick(x,N)` hanc rejectionem omnino ignorat.
+
+Via realis Discovery 13 primum PATCH 11 et PATCH 12 exsequitur, deinde `LegacyAnswerRing` ex crateribus finalibus, queried crater, next crater et sigillo construit. `LegacyBiasedSelectionAdapter` solum `ringAnswer(stream,0)` accipit et statim `biasedLegacyPick` vocat.
+
+Tres witnesses Fundationis electi sunt quibus `directionStep=-1`, `N=first-1` et `N>M_OLD/2`. In quolibet primus responsus est `N+1` et debet reici; proximus in eodem annulo est `N`. Selector legacy tamen 1 reddit. Ergo tres discrepantiae exactae sunt.
+
+### Correctio test-only oracle reperta
+
+Initio huius gradus comparatio answer ring ostendit productionem et oracle testium ante selectionem discrepare. Appendix A inspecta demonstravit productionem iam rectam esse: tam in circuitu guttae quam in post-commotione omnia additamenta primum in `s` colliguntur et deinde `square(s)` fit. `normative_reference.cpp` vetus additamenta extra quadratum posuerat.
+
+Haec fuit culpa copiae test-only, non nova cicatrix productionis. Oracle C++ correctus est ad textum Appendix A et fixture bootstrap per generator C++ denuo producta est. Omnes regressiones anteriores post correctionem denuo compilatae et transierunt. Hoc corrigendum erat antequam divergence DISCOVERY 13 valida declarari posset.
+
+### Quid hoc gradu consulto non circumventum est
+
+Nulla rejectio productionis additur. Nullus acceptance limit computatur. Nullus offset crescit donec responsus acceptabilis invenitur. `biasedLegacyPick` vocatur ante omnem rejectionem et output eius est output semanticum viae Discovery 13.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Pro tribus witness casibus `biasedLegacyPick(N+1,N)=1`, dum norma primum `N+1` reicit, deinde `N` accipit et rank `N` reddit. Divergentia est ipsa culpa Patch 13 destinata, non error upstream annuli.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `LegacyAnswerRing`, `answerRingThroughPatchedNextBowl`, `ringAnswer`, `biasedLegacyPick`, campi contextus selectionis, `LegacyBiasedSelectionReport`, `LegacyBiasedSelectionAdapter`, `Discovery13BiasedSelectionHandler`, `requireLegacyBiasedSelectionReady`, `dispatchLegacyBiasedSelection` et `executeLegacyBiasedSelection`.
+
+`oldNextBowlFixedName` et omnia strata priora manent. Nullus `patchedSmallPick`, nullus PATCH 13, nulla wide selection et nullus codex posterior praemature additus est.

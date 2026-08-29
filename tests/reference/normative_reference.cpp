@@ -299,14 +299,14 @@ std::pair<std::array<Big, 6>, std::array<int, 6>> applyVisibleDropsToBowls(
             const int prevId = order[wrap1(position - 1, 6) - 1];
             const int nextId = order[wrap1(position + 1, 6) - 1];
             const int stoneKind = BOWL_STIR_STONE_BY_POSITION[position - 1];
-            const Big& s = old[bowlId - 1];
+            const Big s = old[bowlId - 1]
+                        + 2 * old[prevId - 1]
+                        + 3 * old[nextId - 1]
+                        + pour[position - 1]
+                        + drop
+                        + stones[i][stoneKind];
             nextBowls[bowlId - 1] = SAVE(
                 square(s)
-                + 2 * old[prevId - 1]
-                + 3 * old[nextId - 1]
-                + pour[position - 1]
-                + drop
-                + stones[i][stoneKind]
                 + 5 * old[prevId - 1] * old[nextId - 1]
                 + i * position);
         }
@@ -333,14 +333,14 @@ std::array<Big, 6> postStir12(std::array<Big, 6> bowls) {
             const int bowlId = order[position - 1];
             const int prevId = order[wrap1(position - 1, 6) - 1];
             const int nextId = order[wrap1(position + 1, 6) - 1];
-            const Big& s = old[bowlId - 1];
+            const Big s = old[bowlId - 1]
+                        + 3 * old[prevId - 1]
+                        + 5 * old[nextId - 1]
+                        + savedBowlSum
+                        + stir
+                        + position * position;
             nextBowls[bowlId - 1] = SAVE(
                 square(s)
-                + 3 * old[prevId - 1]
-                + 5 * old[nextId - 1]
-                + savedBowlSum
-                + stir
-                + position * position
                 + 7 * old[prevId - 1] * old[nextId - 1]);
         }
         bowls = std::move(nextBowls);
