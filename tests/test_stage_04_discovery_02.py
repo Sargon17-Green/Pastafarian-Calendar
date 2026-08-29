@@ -44,13 +44,13 @@ class Stage04Discovery02Tests(unittest.TestCase):
         self.assertEqual(oldDayTag(FOUNDATION_DAY - 1), 2)
         self.assertEqual(oldDayTag(FOUNDATION_DAY - 3), 6)
 
-    def test_day_tag_adapter_state_is_owned_by_one_invocation(self):
+    def test_day_tag_adapter_keeps_legacy_state_owned_by_one_invocation(self):
         first = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY + 1)
         second = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY + 1)
 
         adapter = LegacyDayTagAdapter()
-        self.assertEqual(adapter.call(first, FOUNDATION_DAY, "action"), 0)
-        self.assertEqual(adapter.call(first, FOUNDATION_DAY + 1, "target"), 2)
+        self.assertEqual(adapter.call(first, FOUNDATION_DAY, "action"), 1)
+        self.assertEqual(adapter.call(first, FOUNDATION_DAY + 1, "target"), 3)
 
         self.assertEqual(first.legacy_action_day_tag_input, FOUNDATION_DAY)
         self.assertEqual(first.legacy_action_day_tag_value, 0)

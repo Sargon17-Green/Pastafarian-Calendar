@@ -83,3 +83,44 @@ Yeni normatif regresyon bu ayrışmayı gerçek adapter yolunda gösterir. Kurul
 `LegacyDayTagAdapter`, `MonsterManager` içine ayrı bir eski-hesap bileşeni olarak eklendi. Eylem ve hedef günlerine ait eski etiket girdileri ve sonuçları ayrı alanlarda, yalnızca tek çağrının `MonsterContext` nesnesinde tutulur. Günlük ve ölçüm güncellemeleri sonuç hesabına geri okunmaz.
 
 Bu aşamada kuruluş günü yarası için hiçbir `+1` düzeltmesi, özel kuruluş koruması veya başka bir gelecek yama eklenmemiştir.
+
+
+## Aşama 5 — Yama 02: kuruluş sonrası tek gün etiketini geri getirme
+
+### Ne aşıldı
+
+`oldDayTag` değiştirilmedi. Kuruluş gününü `0`, kuruluş gününden sonraki ilk günü `2` ve üçüncü günü `6` olarak üretmeye devam eder.
+
+Düzeltme eski yardımcının üstüne eklendi:
+
+```text
+n = oldDayTag(day)
+if day >= FOUNDATION_DAY_OLD:
+    n += 1
+if day == FOUNDATION_DAY_OLD and n != 1:
+    n = 1
+```
+
+İkinci kuruluş-günü koruması normal eski formülle gereksiz görünse de tarihsel yara olarak fiziksel biçimde korunur.
+
+### Neden normatif olarak eşdeğer
+
+Kuruluş gününden önce `oldDayTag`, normatif çift sayımla zaten aynıdır ve yama değeri değiştirmez.
+
+Kuruluş gününde eski değer `0` olur; ilk dal bunu `1` yapar. İkinci koruma da sonuç `1` değilse zorla `1` yapar.
+
+Kuruluş gününden sonra eski değer `2*d` biçimindedir; `+1` onu normatif `2*d+1` değerine dönüştürür.
+
+Bu nedenle yama bütün tam sayı günlerde temiz normatif `day_count` ile aynıdır.
+
+### Ne korundu
+
+Aşama 4'teki normatif kırmızı regresyonun gövdesi değiştirilmedi ve yalnızca yama sayesinde yeşile döndü. Eski `oldDayTag` formülünü doğrudan doğrulayan test de aynı yanlış sonuçları beklemeye devam eder.
+
+Keşif anında adapter'ın doğrudan yanlış sonucunu sabitleyen geçici sahiplik testi, yama sonrasında hem ham eski değerin bağlamda korunduğunu hem adapter çıkışının düzeltilmiş olduğunu doğrulayacak biçime geçirildi; normatif regresyona dokunulmadı.
+
+### Bu aşamada eklenen canavar katmanı
+
+`DayTagPatchWrapper`, `LegacyDayTagAdapter` ile eski hesap arasına eklendi. Her çağrıda ham eski değer ile yama sonrası değer ayrı alanlarda tutulur. Eylem ve hedef yolu için ayrı yama durumları vardır.
+
+Günlük, ölçüm ve tanı durumu normatif hesaba geri okunmaz. İki farklı `MonsterContext` arasında ham veya yamalı gün etiketi durumu paylaşılmaz.

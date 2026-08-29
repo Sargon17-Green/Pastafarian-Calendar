@@ -45,6 +45,13 @@ class MonsterContext:
     legacy_action_day_tag_value: int | None = None
     legacy_target_day_tag_input: int | None = None
     legacy_target_day_tag_value: int | None = None
+    patch02_action_day_tag_input: int | None = None
+    patch02_action_day_tag_value: int | None = None
+    patch02_action_applied: bool = False
+    patch02_target_day_tag_input: int | None = None
+    patch02_target_day_tag_value: int | None = None
+    patch02_target_applied: bool = False
+    patch02_foundation_guard_seen: bool = False
 
 
 class BaseMetrics:
