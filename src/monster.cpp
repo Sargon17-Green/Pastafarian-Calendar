@@ -113,6 +113,67 @@ StoneTable buildStonesThroughLegacyBuilder() {
     return table;
 }
 
+Integer makeHiddenLegacyValue(int k,
+                              const Integer& calculationDay,
+                              const Integer& targetDay,
+                              const StoneTable& stones) {
+    static constexpr std::array<std::array<int, 4>, 7> coeff{{
+        {{3, 4, 6, 8}},
+        {{5, 7, 10, 12}},
+        {{7, 10, 14, 16}},
+        {{9, 13, 18, 20}},
+        {{11, 16, 22, 24}},
+        {{13, 19, 26, 28}},
+        {{15, 22, 30, 32}},
+    }};
+    static constexpr std::array<int, 7> grindStone{{0, 1, 2, 3, 4, 0, 1}};
+
+    if (k < 1 || k > 7) {
+        throw BaseValidationError("index guttae occultae inter unum et septem requiritur");
+    }
+
+    const Integer action = dayTagWithFoundationScar(calculationDay);
+    const Integer target = dayTagWithFoundationScar(targetDay);
+    const Integer distance = distanceWithChronologicalPatch(
+        calculationDay, targetDay, oldDistance(calculationDay, targetDay));
+    const Integer connection = action + target;
+    const Integer direction = targetDay < calculationDay ? Integer{1}
+                            : targetDay == calculationDay ? Integer{2}
+                                                          : Integer{3};
+
+    const auto c = coeff[static_cast<std::size_t>(k - 1)];
+    Integer x = action
+              + c[0] * target
+              + c[1] * distance
+              + c[2] * connection
+              + c[3] * direction;
+    for (int part = 0; part < 5; ++part) {
+        x += stones[static_cast<std::size_t>(k)][static_cast<std::size_t>(part)];
+    }
+    x = savePatch(x);
+
+    for (int grind = 1; grind <= 7; ++grind) {
+        const Integer oldX = x;
+        x = savePatch(oldX * oldX
+                    + 3 * oldX
+                    + stones[static_cast<std::size_t>(k)]
+                            [static_cast<std::size_t>(grindStone[static_cast<std::size_t>(grind - 1)])]
+                    + grind);
+    }
+    return x;
+}
+
+HiddenDrops buildHiddenWithBackwardStorage(const Integer& calculationDay,
+                                           const Integer& targetDay,
+                                           const StoneTable& stones) {
+    HiddenDrops legacyHidden{};
+    for (int k = 1; k <= 7; ++k) {
+        const Integer value = makeHiddenLegacyValue(k, calculationDay, targetDay, stones);
+        legacyHidden[static_cast<std::size_t>(7 - k)] = value;
+    }
+    return legacyHidden;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -223,6 +284,12 @@ void BaseValidationManager::requirePatch04Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyHiddenBackwardReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyHiddenBackwardReady) {
+        throw BaseValidationError("guttae occultae ordine retrogrado nondum paratae sunt");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -246,6 +313,12 @@ Integer LegacyDistanceAdapter::callOldDistance(const Integer& calculationDay, co
 
 StoneTable LegacyStoneMutationAdapter::buildWrongStoneTable() const {
     return buildStonesThroughWrongLegacyMutation();
+}
+
+HiddenDrops LegacyHiddenStorageAdapter::buildBackward(const Integer& calculationDay,
+                                                      const Integer& targetDay,
+                                                      const StoneTable& stones) const {
+    return buildHiddenWithBackwardStorage(calculationDay, targetDay, stones);
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -485,6 +558,31 @@ void Patch04StoneMutationHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch04.stoneTable.ready");
 }
 
+void Discovery05HiddenStorageHandler::handle(BaseMonsterContext& ctx,
+                                             const LegacyHiddenStorageAdapter& adapter,
+                                             const BaseValidationManager& validator,
+                                             const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery05HiddenStorageHandler";
+    ctx.phase = "DISCOVERY_05_HIDDEN_BACKWARD_BUILD";
+    ctx.status = "LEGACY_HIDDEN_BACKWARD_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_05_HIDDEN_BACKWARD_BUILD");
+    metrics.bump(ctx, "discovery05.hiddenBackward.calls");
+
+    const StoneTable stones = buildStonesThroughLegacyBuilder();
+    ctx.legacyHiddenBackward = adapter.buildBackward(
+        ctx.calculationDay, ctx.targetDay, stones);
+    ctx.legacyHiddenBackwardReady = true;
+
+    ctx.phase = "DISCOVERY_05_HIDDEN_BACKWARD_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_05_HIDDEN_BACKWARD_VALIDATE");
+    validator.requireLegacyHiddenBackwardReady(ctx);
+
+    ctx.phase = "DISCOVERY_05_HIDDEN_BACKWARD_EXPOSED";
+    ctx.status = "LEGACY_HIDDEN_BACKWARD_EXPOSED_AS_NEARNESS";
+    ctx.branchTrace.push_back("DISCOVERY_05_HIDDEN_BACKWARD_EXPOSED");
+    metrics.bump(ctx, "discovery05.hiddenBackward.exposed");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -618,6 +716,20 @@ void BaseDispatcher::dispatchPatchedStoneMutation(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch04.dispatch.calls");
 
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void BaseDispatcher::dispatchLegacyHiddenStorage(BaseMonsterContext& ctx,
+                                                 const Discovery05HiddenStorageHandler& handler,
+                                                 const LegacyHiddenStorageAdapter& adapter,
+                                                 const BaseValidationManager& validator,
+                                                 const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_05_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_05_DISPATCH");
+    metrics.bump(ctx, "discovery05.dispatch.calls");
+
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -861,6 +973,34 @@ LegacyStoneTableReport BaseMonsterManager::executeUnpatchedStoneTableDiagnostic(
         ctx.branchTrace.size(),
         ctx.legacyStoneTable,
         false,
+    };
+}
+
+LegacyHiddenReport BaseMonsterManager::executeHiddenDrops(const Integer& calculationDay,
+                                                          const Integer& targetDay) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_05_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyHiddenStorageAdapter adapter;
+    const Discovery05HiddenStorageHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyHiddenStorage(ctx, handler, adapter, validator, metrics);
+
+    return LegacyHiddenReport{
+        ctx.calculationDay,
+        ctx.targetDay,
+        ctx.legacyHiddenBackward,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyHiddenBackward,
     };
 }
 

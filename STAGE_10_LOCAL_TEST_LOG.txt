@@ -1,0 +1,51 @@
+Gradus 10 — probationes locales
+
+Compilator: g++ (C++20)
+
+Fontes communes:
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
+
+Regressiones anteriores:
+
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+REGRESSIO_DISCOVERY_01_TRANSIIT
+REGRESSIO_PATCH_01_TRANSIIT
+REGRESSIO_DISCOVERY_02_TRANSIIT
+REGRESSIO_PATCH_02_TRANSIIT
+REGRESSIO_DISCOVERY_03_TRANSIIT
+REGRESSIO_PATCH_03_TRANSIIT
+REGRESSIO_DISCOVERY_04_TRANSIIT
+REGRESSIO_PATCH_04_TRANSIIT
+
+Regressio DISCOVERY 05:
+
+Mandatum aedificationis:
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/stage_10_discovery_05_tests.cpp -o build/stage_10_discovery_05_tests.o
+g++ build/stage_10_discovery_05_tests.o build/normative_reference.o build/monster.o -o build/stage_10_discovery_05_tests
+
+Exitus actualis:
+DISCREPANTIA GUTTA_OCCULTA k=1: expectatus=36871601121046986009869730559023154066 actualis=28533777856184013846489652028799526221
+DISCREPANTIA GUTTA_OCCULTA k=2: expectatus=131593028985777940099017112814911231894 actualis=121424107640709512196568039528956924403
+DISCREPANTIA GUTTA_OCCULTA k=3: expectatus=42269764445139723723814212963666774061 actualis=51180570161656867345057078882276520086
+CONCORDANTIA GUTTA_OCCULTA k=4: valor=9416990026442622107570147564618187212
+DISCREPANTIA GUTTA_OCCULTA k=5: expectatus=51180570161656867345057078882276520086 actualis=42269764445139723723814212963666774061
+DISCREPANTIA GUTTA_OCCULTA k=6: expectatus=121424107640709512196568039528956924403 actualis=131593028985777940099017112814911231894
+DISCREPANTIA GUTTA_OCCULTA k=7: expectatus=28533777856184013846489652028799526221 actualis=36871601121046986009869730559023154066
+REGRESSIO_DISCOVERY_05_DEFECIT: 6 discrepantiae normativae ex ordine retrogrado inventae sunt
+EXIT_CODE=1
+
+Probatio structuralis intra eandem regressionem confirmat pro omnibus k=1..7:
+legacyOutput[8-k] == expectedHidden[k]
+Ita formulae guttarum occultarum rectae sunt et sola repositio retrograda discrepantiam creat.
+
+Auditum contaminationis futurae in codice C++:
+hiddenByNearness=ABSENS
+Patch05=ABSENS
+patch05Applied=ABSENS
+priorPatch=ABSENS
+legacyPrior=ABSENS
+
+Status finalis: EXPECTED_RED
+Regressiones anteriores: PASS

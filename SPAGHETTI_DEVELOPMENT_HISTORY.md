@@ -217,3 +217,27 @@ Vocatio `mutateStonesWrong` semanticam finalem non mutat, quia quinque eius exit
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `patchedStoneTable`, `patch04Applied`, `Patch04StoneSnapshotWrapper`, `Patch04StoneMutationHandler`, dispatchatio patch separata, via diagnostica legacy et `requirePatch04Ready`. Validator computationem quinque partium ex snapshot iterat ut COPY_VALIDATION; discrepantia invariant error est, non electio inter responsiones. Report utramque tabulam servat, sed solum `patchedStoneTable` est exitus auctoritative.
+
+## Gradus 10 — Detectio 05: repositio retrograda guttarum occultarum
+
+### Quid putabatur
+
+Postquam tabula lapidum per snapshot emendata est, subsystema guttarum occultarum septem valores recte computare coepit. Structura repositionis tamen ex versione antiqua orta erat, in qua elementa physice ordine `hidden7, hidden6, ..., hidden1` servabantur. Codex consumptor putabat autem locum primum esse `hidden1`, secundum `hidden2` et sic porro.
+
+### Quid repertum est
+
+`makeHiddenLegacyValue(k, ...)` eadem semantica ac Appendix normativa utitur: maneries actionis, target, distantiae, connectionis et directionis iam per cicatrices Graduum 1–3 correctae sunt; lapides ex fabricatore Gradus 9 proveniunt; septem grindes eodem ordine lapidum fiunt. Deinde `buildHiddenWithBackwardStorage` valorem k in locum `8-k` scribit.
+
+Regressio `stage_10_discovery_05_tests.cpp` primum probat omnes septem valores in repositione retrograda exacte ibi inveniri ubi ex inverso ordine exspectantur. Haec probatio transit, ergo formulae guttarum ipsae rectae sunt. Deinde eandem seriem sine translatione quasi ordinem proximitatis comparat cum oraculo. Sex positiones discrepant; sola gutta quarta propter centrum inversionis concordat.
+
+### Quid circumventum est
+
+Nihil hoc gradu circumventum est. `Discovery05HiddenStorageHandler` repositionem retrogradam directe in `report.output` exponit. Nulla functio `hiddenByNearness`, nulla translatio `8-k`, nulla inversio seriei et nullus PATCH 05 introductus est. Regressio nova consulto rubra manet.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Norma consumptoribus ordinem semanticum `hidden1..hidden7` praebet. Via activa autem ordinem physicum retrogradum reddit. Quamquam singuli valores recti sunt, identitas positionis est pars semantica quia guttae visibiles postea predecessores 1/3/7 per proximitatem petent. Sex positiones iam in test locali discrepant, ergo aequivalentia nondum obtinetur.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `HiddenDrops`, duo campi repositionis retrogradae in `BaseMonsterContext`, `LegacyHiddenStorageAdapter`, `Discovery05HiddenStorageHandler`, `LegacyHiddenReport`, validator promptitudinis et dispatchatio propria. Formula guttarum occultarum etiam per cicatrices anteriores transit, ita dependentia indirecta crescit. Omne state semanticum contextui invocationis proprium manet; observationes non regunt exitum.
