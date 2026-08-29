@@ -1161,3 +1161,30 @@ Al witness real, li opening-year Year 5001 have `openDay=-15054661`, exactmen li
 Li tests direct verifica li boundary equality sur annus 5001, -12 e 9000, e verifica anc que targets interior e closing gates ne es movet. Li route real conserva legacy 5001 e rende semantic 5000. Omni regressions precedent, li verifier, li test focal e li suite complet passa; li verifier reporta 74 gruppes e 66832 assertions.
 
 Stage 54 resta separat e reservat por integration de omni scars e patches. Null integration final es addit in Stage 53.
+
+
+## Stage 54/55 — INTEGRATION — Final spaghetti-monster route
+
+### Quo esset integrat
+
+Pos li 26 PATCHes, li unic route authoritative es nu real. `calendarDateSpaghetti` passa per `Stage54MonsterIntegrationManager` e un state-machine principal explicit; `sauceWithScars` passa per un state-machine separat del sauce. Null cleanup ha esset fat. Li helper scars precedent resta fisicmen intact e continua esser invocat in li path u lor defect es diagnosticmen relevanti.
+
+Li sauce final executa counts patched, stones travers li builder legacy, hidden storage retrograd, prior detour, 46 drops, per-drop permutation, alias-based pours, shadow bowl updates, li order legacy superscribil, `orderAt46Latch`, 12 post-stirs e queries per li latch. Li selector final usa li sam short/wide detours.
+
+Li calendar path usa un registry de gates deterministic, li 5781 legacy year family ante li 5778 filter, tie repair, Year 5000, `oldJumpGuess` diagnostic, sequential year walk, li bad year-number cache key con guards, ghost structure sauce e li sauce de year.firstDay. It poy passa per cutlet filtered family, repeated cutlet-name candidate + distinct detour, concrete month-length probe + `VirtualLegacyList`, die-per-die weaving ghost + DP unrank, repeated month-name candidate + distinct detour, contiguous-month ghost + occurrence-count overwrite, e li interval final `(open,close]` de Patch 26.
+
+### State e ownership
+
+Chascun public call crea un `BaseMonsterContext` nov e adjunte li fields integration-specific. Semantic structure passa per pending snapshot, validation e commit ante cache write. Li cache persistent usa ancora `year.number` quam bad historic key, ma su read es gardat per calculation-day fingerprint e du gates. Li gate registry es deterministic e indexat per gate index; logs/metrics/diagnostics ne es lectet retro in decisiones semantic.
+
+Un recovery manager explicit conserva snapshot/restore e un finite retry budget por errores marcats recoverabil; it ne have null alternate algorithm ni approximation. Li compatibility flags del authoritative mode es fix e deterministic.
+
+### Verification de Stage 54
+
+Li Foundation witness retorna quin fields: `[5000, scorpion, 503, pute, 56]`. Li integration test verifica que `sauceWithScars` rende li sam bowls e latch quam li path Patch-26 anterior por probes local, que li main contene li state-machine explicit, que null production oracle es importat, que names es distinct e que un call warm retorna li sam tuple per guarded cache.
+
+Li porta final de ti stage es GREEN: omni regressions precedent passa; li verifier passa 75 gruppes / 66842 assertions; `test:integration-54` passa; `npm test` passa.
+
+### Quo ne esset fat
+
+Stage 55 ne es iniciat. Null audit differential final, reliability matrix final ni declaration COMPLETE es includet ci. Secun li specification, ti labor resta exclusivmen por `55/55 — AUDIT`.

@@ -139,8 +139,8 @@ test('li infrastructura monster neutral crea un context isolat e validat', () =>
   assert.throws(() => production.createBootstrapContext(1, 2n));
 });
 
-test('li function final resta intentionalmen absent in Stage 1', () => {
-  assert.throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
+test('li contract bootstrap reconosse que li function final es integrat solmen pos li historie complet', () => {
+  assert.equal(typeof production.calendarDateSpaghetti, 'function');
 });
 
 console.log('\n' + passed + ' tests passat; Stage 1 es GREEN.');

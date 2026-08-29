@@ -2201,7 +2201,18 @@ group('Patch 26 usa <= retro e membership authoritative (open,close]', () => {
   ok(typeof production.historicOpeningGateIntervalThroughMonsterPath === 'function');
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 26', () => {
+group('Stage 54 conecta li route final e sauceWithScars sin production oracle', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'index.js'), 'utf8');
+  eq(typeof production.sauceWithScars, 'function');
+  eq(typeof production.calendarDateSpaghettiWithContext, 'function');
+  eq(typeof production.calendarDateSpaghetti, 'function');
+  ok(source.includes('class Stage54MonsterIntegrationManager extends BaseMonsterManager'));
+  ok(source.includes('programCounter'));
+  ok(source.includes('switch (programCounter)'));
+  ok(!source.includes("require('../tests/normative-reference')"));
+});
+
+group('errores de base es explicit e li final function es integrat in Stage 54', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2210,7 +2221,7 @@ group('errores de base es explicit e li final function resta absent durant Patch
   }
   ok(captured instanceof production.BootstrapStageError);
   ok(captured.cause instanceof TypeError);
-  throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
+  eq(typeof production.calendarDateSpaghetti, 'function');
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 26.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Stage 54.');

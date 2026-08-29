@@ -6863,8 +6863,799 @@ function historicOpeningGateIntervalThroughMonsterPath(
   );
 }
 
-function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor integrat in Patch 26; Stage 54 resta reservat por integration.');
+
+const STAGE54_YEAR_MIN_DAYS = 252n;
+const STAGE54_YEAR_MAX_DAYS = 5778n;
+const STAGE54_LEGACY_YEAR_MAX_DAYS = 5781n;
+const STAGE54_MIN_GATE_GAPS = 6n;
+
+function stage54RequireDay(value, label) {
+  if (typeof value !== 'bigint') {
+    throw new TypeError(label + ' deve esser un BigInt exact.');
+  }
+  return value;
+}
+
+function stage54CloneYear(year) {
+  if (!year || typeof year !== 'object') throw new TypeError('Li year integrat deve esser un object.');
+  const clone = {
+    number: year.number,
+    openDay: year.openDay,
+    firstDay: year.firstDay,
+    closeDay: year.closeDay
+  };
+  if (typeof year.openGateIndex === 'bigint') clone.openGateIndex = year.openGateIndex;
+  if (typeof year.closeGateIndex === 'bigint') clone.closeGateIndex = year.closeGateIndex;
+  return clone;
+}
+
+function stage54ArraysEqual(left, right) {
+  return Array.isArray(left) && Array.isArray(right) && left.length === right.length &&
+    left.every((value, index) => value === right[index]);
+}
+
+function sauceWithScars(calculationDay, targetDay) {
+  stage54RequireDay(calculationDay, 'Li calculation-day del sauce final');
+  stage54RequireDay(targetDay, 'Li target-day del sauce final');
+  let programCounter = 0;
+  let counts = null;
+  let stones = null;
+  let duplicateHidden = null;
+  let result = null;
+  const trace = [];
+  const compatibility = Object.freeze({
+    useLegacyRemainder: true,
+    useLegacyDayTag: true,
+    useLegacyDistance: true,
+    useBackwardHiddenStorage: true,
+    useAliasPours: true,
+    useShadowBowls: true,
+    useLatchedQueryOrder: true
+  });
+  while (true) {
+    switch (programCounter) {
+      case 0:
+        trace.push('SAUCE_ENTRY');
+        programCounter = 10;
+        break;
+      case 10:
+        counts = structureSauceCountsFromDays(calculationDay, targetDay);
+        trace.push('PATCHED_COUNTS');
+        programCounter = 20;
+        break;
+      case 20:
+        stones = getStoneTableThroughLegacyBuilder();
+        trace.push('STONES_THROUGH_LEGACY_BUILDER');
+        programCounter = 30;
+        break;
+      case 30:
+        // Li copia duplicat es validation/diagnostic; li path authoritative infra executa denov li sam storage retrograd.
+        duplicateHidden = buildHiddenWithBackwardStorage(counts, stones);
+        hiddenByNearness(duplicateHidden, 1);
+        hiddenByNearness(duplicateHidden, 7);
+        trace.push('BACKWARD_HIDDEN_STORAGE_AND_PATCHED_PRIOR_READY');
+        programCounter = 40;
+        break;
+      case 40:
+        // Ti unic call conserva li path legacy overwritable e executa 46 drops, permutations, aliases, shadow commits e 12 post-stirs.
+        result = sauceWithOrderAt46Latch(counts, stones);
+        trace.push('VISIBLE_46_ALIAS_SHADOW_LATCH_POST12');
+        programCounter = 50;
+        break;
+      case 50: {
+        if (!stage54ArraysEqual(result.hiddenBackward, duplicateHidden)) {
+          throw new BootstrapStageError('Li validation duplicat del hidden storage final diverge del path authoritative.');
+        }
+        const nextDiagnostics = [];
+        for (let bowlId = 1; bowlId <= 6; bowlId += 1) {
+          const legacyNext = oldNextBowlFixedName(bowlId);
+          const semanticNext = nextBowlFromOrderAt46Latch(result.orderAt46Latch, bowlId);
+          nextDiagnostics.push(Object.freeze({ bowlId, legacyNext, semanticNext }));
+        }
+        trace.push('QUERY_THROUGH_LATCHED_ORDER');
+        return Object.freeze({
+          counts,
+          stones: Object.freeze(stones.map((row) => Object.freeze({ ...row }))),
+          hiddenBackward: Object.freeze(result.hiddenBackward.slice()),
+          drops: Object.freeze(result.drops.slice()),
+          bowlsAfterDrops: Object.freeze(result.bowlsAfterDrops.slice()),
+          bowls: Object.freeze(result.bowls.slice()),
+          orderAt46Latch: Object.freeze(result.orderAt46Latch.slice()),
+          orderAt46LatchWriteCount: result.orderAt46LatchWriteCount,
+          postStirOrderDiagnostic: Object.freeze(result.lastPostStirOrder.slice()),
+          legacyQueryOrderDiagnostic: Object.freeze(result.legacyGarbage.queryOrder.slice()),
+          queryOrder: Object.freeze(result.queryOrder.slice()),
+          nextDiagnostics: Object.freeze(nextDiagnostics),
+          compatibility,
+          stateMachineTrace: Object.freeze(trace.slice())
+        });
+      }
+      default:
+        throw new BootstrapStageError('Li state-machine del sauce final atinge un program counter ínconosset.');
+    }
+  }
+}
+
+function stage54AnswerRingWithScar(sauceResult, bowlId, seal, context, label) {
+  if (!sauceResult || !Array.isArray(sauceResult.bowls) || !Array.isArray(sauceResult.orderAt46Latch)) {
+    throw new TypeError('Li question final exige un sauce complet.');
+  }
+  const legacyNext = oldNextBowlFixedName(bowlId);
+  const semanticNext = nextBowlFromOrderAt46Latch(sauceResult.orderAt46Latch, bowlId);
+  const stream = answerRingFromCurrentState(sauceResult.bowls, bowlId, semanticNext, seal);
+  if (context) {
+    if (!context.answerStreamsBySeal) context.answerStreamsBySeal = Object.create(null);
+    context.answerStreamsBySeal[String(seal)] = { ...stream };
+    context.diagnostics.push(Object.freeze({ label, bowlId, seal, legacyNext, semanticNext }));
+  }
+  return stream;
+}
+
+class Stage54GateRegistry {
+  constructor() {
+    this.gates = new Map([[0n, FOUNDATION_DAY_OLD]]);
+    this.minKnownGateIndex = 0n;
+    this.maxKnownGateIndex = 0n;
+    this.gapCalls = 0n;
+  }
+
+  gateGap(signedIndex) {
+    if (typeof signedIndex !== 'bigint' || signedIndex === 0n) {
+      throw new RangeError('Li index signat del gate gap final deve esser non-zero.');
+    }
+    const questionDay = gateQuestionWithSignedStep(signedIndex);
+    const sauceResult = sauceWithScars(FOUNDATION_DAY_OLD, questionDay);
+    const stream = stage54AnswerRingWithScar(sauceResult, 1, 1n, null, 'gate-gap');
+    const selected = selectionDispatcherWithWideDetour(stream, 922n);
+    this.gapCalls += 1n;
+    return 41n + selected.output;
+  }
+
+  ensureIndex(index) {
+    if (typeof index !== 'bigint') throw new TypeError('Li gate index final deve esser BigInt exact.');
+    if (index > this.maxKnownGateIndex) {
+      let n = this.maxKnownGateIndex + 1n;
+      while (n <= index) {
+        const next = this.gates.get(n - 1n) + this.gateGap(n);
+        this.gates.set(n, next);
+        this.maxKnownGateIndex = n;
+        n += 1n;
+      }
+    }
+    if (index < this.minKnownGateIndex) {
+      let n = this.minKnownGateIndex - 1n;
+      while (n >= index) {
+        const next = this.gates.get(n + 1n) - this.gateGap(n);
+        this.gates.set(n, next);
+        this.minKnownGateIndex = n;
+        n -= 1n;
+      }
+    }
+    return this.gates.get(index);
+  }
+
+  ensureCover(lowDay, highDay) {
+    stage54RequireDay(lowDay, 'Li limite bass del registry de gates');
+    stage54RequireDay(highDay, 'Li limite alt del registry de gates');
+    if (lowDay > highDay) throw new RangeError('Li interval del registry de gates es invers.');
+    while (this.ensureIndex(this.minKnownGateIndex) > lowDay) this.ensureIndex(this.minKnownGateIndex - 1n);
+    while (this.ensureIndex(this.maxKnownGateIndex) < highDay) this.ensureIndex(this.maxKnownGateIndex + 1n);
+  }
+
+  indexAtOrBefore(day) {
+    stage54RequireDay(day, 'Li die questionat al registry de gates');
+    this.ensureCover(day, day);
+    let lo = this.minKnownGateIndex;
+    let hi = this.maxKnownGateIndex;
+    while (lo < hi) {
+      const mid = lo + floorDiv(hi - lo + 1n, 2n);
+      if (this.ensureIndex(mid) <= day) lo = mid;
+      else hi = mid - 1n;
+    }
+    return lo;
+  }
+
+  indexAtOrAfter(day) {
+    const before = this.indexAtOrBefore(day);
+    if (this.ensureIndex(before) === day) return before;
+    this.ensureIndex(before + 1n);
+    return before + 1n;
+  }
+
+  exactIndex(day) {
+    const index = this.indexAtOrBefore(day);
+    return this.ensureIndex(index) === day ? index : null;
+  }
+
+  bounds() {
+    return Object.freeze({ minKnownGateIndex: this.minKnownGateIndex, maxKnownGateIndex: this.maxKnownGateIndex });
+  }
+}
+
+function stage54LocalGateView(registry, lowIndex, highIndex) {
+  if (!(registry instanceof Stage54GateRegistry) || typeof lowIndex !== 'bigint' || typeof highIndex !== 'bigint' || lowIndex > highIndex) {
+    throw new TypeError('Li vista local de gates final have limites invalid.');
+  }
+  const span = highIndex - lowIndex;
+  if (span > 10000n) throw new RangeError('Li vista local de gates final es irrationalmen larg.');
+  const gates = Object.create(null);
+  let local = 0;
+  for (let index = lowIndex; index <= highIndex; index += 1n) {
+    gates[local] = registry.ensureIndex(index);
+    local += 1;
+  }
+  return Object.freeze({
+    gates,
+    lowIndex,
+    highIndex,
+    localIndex(actualIndex) { return Number(actualIndex - lowIndex); },
+    actualIndex(localIndex) { return lowIndex + BigInt(localIndex); }
+  });
+}
+
+function stage54YearRecord(registry, number, openGateIndex, closeGateIndex) {
+  const openDay = registry.ensureIndex(openGateIndex);
+  const closeDay = registry.ensureIndex(closeGateIndex);
+  if (closeDay <= openDay) throw new BootstrapStageError('Li year final have un interval non-positiv.');
+  return Object.freeze({ number, openGateIndex, closeGateIndex, openDay, firstDay: openDay + 1n, closeDay });
+}
+
+function stage54EnrichYear(registry, year) {
+  const base = requireWalkYearRecord(year, 'Li year a enriquir por Stage 54');
+  const openGateIndex = registry.exactIndex(base.openDay);
+  const closeGateIndex = registry.exactIndex(base.closeDay);
+  if (openGateIndex === null || closeGateIndex === null) {
+    throw new BootstrapStageError('Li year resoluet ne posse esser reancorat a su gates exact.');
+  }
+  return stage54YearRecord(registry, base.number, openGateIndex, closeGateIndex);
+}
+
+function stage54SelectCandidateFamily(view, candidatePairs, stream, context, label) {
+  if (candidatePairs.length < 1) throw new BootstrapStageError('Null year candidate existe por ' + label + '.');
+  const legacyPrepared = legacyStableLengthOnlyYearCandidates(view.gates, candidatePairs);
+  if (legacyPrepared.length < 1) throw new BootstrapStageError('Li familie legacy de year candidates es vacui por ' + label + '.');
+  const legacyPick = selectionDispatcherWithWideDetour(stream, BigInt(legacyPrepared.length));
+  const legacySelected = legacyPrepared[Number(legacyPick.output - 1n)];
+  const filteredStable = stableLengthOnlyPatchedYearCandidates(view.gates, candidatePairs);
+  const semanticPrepared = sortEqualLengthRunsByOpeningGate(filteredStable);
+  if (semanticPrepared.length < 1) throw new BootstrapStageError('Li familie reparat de year candidates es vacui por ' + label + '.');
+  const semanticPick = selectionDispatcherWithWideDetour(stream, BigInt(semanticPrepared.length));
+  const semanticSelected = semanticPrepared[Number(semanticPick.output - 1n)];
+  if (context) {
+    context.diagnostics.push(Object.freeze({
+      label,
+      legacyFamilyCount: BigInt(legacyPrepared.length),
+      legacySelectedLength: legacySelected.candidateLength,
+      semanticFamilyCount: BigInt(semanticPrepared.length),
+      semanticSelectedLength: semanticSelected.candidateLength,
+      rejectedOverlong: legacyPrepared.filter((candidate) => candidate.candidateLength > STAGE54_YEAR_MAX_DAYS).length
+    }));
+  }
+  return { legacyPrepared, legacySelected, semanticPrepared, semanticSelected, semanticPick };
+}
+
+function stage54BuildYear5000(calculationDay, registry, context) {
+  registry.ensureCover(calculationDay - STAGE54_LEGACY_YEAR_MAX_DAYS, calculationDay + STAGE54_LEGACY_YEAR_MAX_DAYS);
+  const lowIndex = registry.indexAtOrBefore(calculationDay - STAGE54_LEGACY_YEAR_MAX_DAYS);
+  const highIndex = registry.indexAtOrAfter(calculationDay + STAGE54_LEGACY_YEAR_MAX_DAYS);
+  const view = stage54LocalGateView(registry, lowIndex, highIndex);
+  const candidatePairs = [];
+  for (let i = 0; i < Number(highIndex - lowIndex); i += 1) {
+    const openDay = view.gates[i];
+    if (openDay >= calculationDay) continue;
+    for (let j = i + Number(STAGE54_MIN_GATE_GAPS); j <= Number(highIndex - lowIndex); j += 1) {
+      const closeDay = view.gates[j];
+      const length = closeDay - openDay;
+      if (length > STAGE54_LEGACY_YEAR_MAX_DAYS) break;
+      if (calculationDay <= closeDay) candidatePairs.push({ openIndex: i, closeIndex: j });
+    }
+  }
+  const sauceResult = sauceWithScars(calculationDay, calculationDay);
+  const stream = stage54AnswerRingWithScar(sauceResult, 1, 10n, context, 'year-5000');
+  const selected = stage54SelectCandidateFamily(view, candidatePairs, stream, context, 'YEAR_5000');
+  const year = stage54YearRecord(
+    registry,
+    5000n,
+    view.actualIndex(selected.semanticSelected.openIndex),
+    view.actualIndex(selected.semanticSelected.closeIndex)
+  );
+  if (!(year.openDay < calculationDay && calculationDay <= year.closeDay)) {
+    throw new BootstrapStageError('Year 5000 final ne contene li calculation-day secun (open,close].');
+  }
+  context.year5000 = stage54CloneYear(year);
+  return year;
+}
+
+function stage54BuildAdjacentYear(calculationDay, knownYear, direction, registry, context) {
+  const known = stage54EnrichYear(registry, knownYear);
+  const forward = direction === 'next';
+  if (!forward && direction !== 'previous') throw new RangeError('Li direction annual final deve esser next o previous.');
+  const sharedIndex = forward ? known.closeGateIndex : known.openGateIndex;
+  const sharedDay = registry.ensureIndex(sharedIndex);
+  if (forward) registry.ensureCover(sharedDay, sharedDay + STAGE54_LEGACY_YEAR_MAX_DAYS);
+  else registry.ensureCover(sharedDay - STAGE54_LEGACY_YEAR_MAX_DAYS, sharedDay);
+  const lowIndex = forward ? sharedIndex : registry.indexAtOrBefore(sharedDay - STAGE54_LEGACY_YEAR_MAX_DAYS);
+  const highIndex = forward ? registry.indexAtOrAfter(sharedDay + STAGE54_LEGACY_YEAR_MAX_DAYS) : sharedIndex;
+  const view = stage54LocalGateView(registry, lowIndex, highIndex);
+  const sharedLocal = view.localIndex(sharedIndex);
+  const candidatePairs = [];
+  if (forward) {
+    for (let close = sharedLocal + Number(STAGE54_MIN_GATE_GAPS); close <= Number(highIndex - lowIndex); close += 1) {
+      const length = view.gates[close] - view.gates[sharedLocal];
+      if (length > STAGE54_LEGACY_YEAR_MAX_DAYS) break;
+      candidatePairs.push({ openIndex: sharedLocal, closeIndex: close });
+    }
+  } else {
+    for (let open = sharedLocal - Number(STAGE54_MIN_GATE_GAPS); open >= 0; open -= 1) {
+      const length = view.gates[sharedLocal] - view.gates[open];
+      if (length > STAGE54_LEGACY_YEAR_MAX_DAYS) break;
+      candidatePairs.push({ openIndex: open, closeIndex: sharedLocal });
+    }
+  }
+  const sauceTarget = sharedDay;
+  const sauceResult = sauceWithScars(calculationDay, sauceTarget);
+  const seal = forward ? 11n : 12n;
+  const stream = stage54AnswerRingWithScar(sauceResult, 1, seal, context, forward ? 'next-year' : 'previous-year');
+  const selected = stage54SelectCandidateFamily(view, candidatePairs, stream, context, forward ? 'NEXT_YEAR' : 'PREVIOUS_YEAR');
+  return stage54YearRecord(
+    registry,
+    known.number + (forward ? 1n : -1n),
+    view.actualIndex(selected.semanticSelected.openIndex),
+    view.actualIndex(selected.semanticSelected.closeIndex)
+  );
+}
+
+function stage54ResolveTargetYear(calculationDay, targetDay, registry, context) {
+  const year5000 = stage54BuildYear5000(calculationDay, registry, context);
+  context.diagnostics.push(Object.freeze({ label: 'oldJumpGuess', value: oldJumpGuess(year5000, targetDay) }));
+  const source = Object.freeze({
+    nextYear: (year) => stage54BuildAdjacentYear(calculationDay, year, 'next', registry, context),
+    previousYear: (year) => stage54BuildAdjacentYear(calculationDay, year, 'previous', registry, context)
+  });
+  const walked = findYearByWalkPatch(
+    year5000,
+    targetDay,
+    (year) => source.nextYear(year),
+    (year) => source.previousYear(year)
+  );
+  const authoritativeBeforePatch26 = stage54EnrichYear(registry, walked.year);
+  let ownershipAnchor = authoritativeBeforePatch26;
+  if (targetDay === authoritativeBeforePatch26.closeDay) {
+    ownershipAnchor = stage54BuildAdjacentYear(calculationDay, authoritativeBeforePatch26, 'next', registry, context);
+  }
+  const legacyInterval = legacyFindYearClosedOpeningInterval(
+    ownershipAnchor,
+    targetDay,
+    (year) => source.nextYear(year),
+    (year) => source.previousYear(year)
+  );
+  const corrected = correctOpeningGateInterval(
+    ownershipAnchor,
+    targetDay,
+    (year) => source.nextYear(year),
+    (year) => source.previousYear(year)
+  );
+  const finalYear = stage54EnrichYear(registry, corrected.year);
+  if (finalYear.number !== authoritativeBeforePatch26.number ||
+      finalYear.openDay !== authoritativeBeforePatch26.openDay ||
+      finalYear.closeDay !== authoritativeBeforePatch26.closeDay) {
+    throw new BootstrapStageError('Patch 26 final diverge del year resoluet per li sequential walk.');
+  }
+  context.currentYear = stage54CloneYear(finalYear);
+  context.patch18ResolvedYear = stage54CloneYear(authoritativeBeforePatch26);
+  context.patch18SemanticYearNumber = authoritativeBeforePatch26.number;
+  context.patch26LegacyYear = stage54CloneYear(legacyInterval.year);
+  context.patch26ResolvedYear = stage54CloneYear(finalYear);
+  context.patch26SemanticYearNumber = finalYear.number;
+  context.diagnostics.push(Object.freeze({
+    label: 'opening-gate-interval',
+    legacyYear: legacyInterval.year.number,
+    correctYear: finalYear.number,
+    legacySteps: legacyInterval.stepCount,
+    correctSteps: corrected.stepCount
+  }));
+  return { year: finalYear, source, walk: walked, legacyInterval, corrected };
+}
+
+function stage54DistinctNamesWithScar(sauceResult, masterCount, itemCount, seal, context, label, legacyOwnRank) {
+  const stream = stage54AnswerRingWithScar(sauceResult, 5, seal, context, label);
+  const legacyFamily = legacyNameRowWithRepeats(masterCount, itemCount);
+  const distinctCount = fallingFactorialDistinct(masterCount, itemCount);
+  let legacyRank;
+  let correctRank;
+  if (legacyOwnRank) {
+    legacyRank = selectionDispatcherWithWideDetour(stream, legacyFamily.count()).output;
+    correctRank = selectionDispatcherWithWideDetour(stream, distinctCount).output;
+  } else {
+    correctRank = selectionDispatcherWithWideDetour(stream, distinctCount).output;
+    legacyRank = correctRank;
+  }
+  const bad = legacyFamily.unrank1(legacyRank);
+  const correct = partialPermutationUnrank(masterCount, itemCount, correctRank);
+  const identical = stage54ArraysEqual(bad, correct);
+  const semantic = identical ? bad : correct;
+  context.diagnostics.push(Object.freeze({
+    label,
+    legacyFamilyCount: legacyFamily.count(),
+    distinctFamilyCount: distinctCount,
+    legacyRank,
+    correctRank,
+    bad: Object.freeze(bad.slice()),
+    correct: Object.freeze(correct.slice()),
+    identical
+  }));
+  return semantic.slice();
+}
+
+function stage54MaterializeCutlets(year, partition, nameIndices, registry) {
+  let cursor = year.openGateIndex;
+  const cutlets = [];
+  for (let index = 0; index < partition.length; index += 1) {
+    const openGateIndex = cursor;
+    const closeGateIndex = cursor + BigInt(partition[index]);
+    cutlets.push(Object.freeze({
+      nameIndex: nameIndices[index],
+      openGateIndex,
+      closeGateIndex,
+      firstDay: registry.ensureIndex(openGateIndex) + 1n,
+      lastDay: registry.ensureIndex(closeGateIndex)
+    }));
+    cursor = closeGateIndex;
+  }
+  if (cursor !== year.closeGateIndex) throw new BootstrapStageError('Li cutlet partition final ne fini al closing gate del year.');
+  return Object.freeze(cutlets);
+}
+
+function stage54BuildStructure(manager, context, calculationDay, targetDay, year, registry) {
+  const guarded = cacheGetWithActionGuard(manager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER, year, calculationDay);
+  context.cacheEvents.push(Object.freeze({ type: guarded.hit ? 'HIT' : 'MISS', reason: guarded.reason, year: year.number }));
+  if (guarded.hit) {
+    context.status = 'STAGE_54_STRUCTURE_FROM_GUARDED_BAD_KEY_CACHE';
+    return guarded.value;
+  }
+
+  const yearFirstDay = year.firstDay;
+  const patch20Diagnostic = structureSaucePatch(calculationDay, targetDay, yearFirstDay);
+  const structureSauce = sauceWithScars(calculationDay, yearFirstDay);
+  if (!stage54ArraysEqual(patch20Diagnostic.semanticSauce.bowls, structureSauce.bowls) ||
+      !stage54ArraysEqual(patch20Diagnostic.semanticSauce.orderAt46Latch, structureSauce.orderAt46Latch)) {
+    throw new BootstrapStageError('Li sauceWithScars final diverge del sauce semantic de Patch 20.');
+  }
+  context.diagnostics.push(Object.freeze({ label: 'structure-sauce-ghost', executed: true, targetDiffers: targetDay !== yearFirstDay }));
+
+  const gapCountBig = year.closeGateIndex - year.openGateIndex;
+  if (gapCountBig < 6n || gapCountBig > 10000n) throw new BootstrapStageError('Li gap count final es extra li limite operativ del year.');
+  const gapCount = Number(gapCountBig);
+  const cutletCountCandidates = [];
+  for (let k = 6; k <= 17 && k <= gapCount; k += 1) cutletCountCandidates.push(k);
+  const cutletCountStream = stage54AnswerRingWithScar(structureSauce, 2, 20n, context, 'cutlet-count');
+  const cutletCountPick = selectionDispatcherWithWideDetour(cutletCountStream, BigInt(cutletCountCandidates.length));
+  const cutletCount = cutletCountCandidates[Number(cutletCountPick.output - 1n)];
+
+  const rawPartitionFamily = legacyPositiveCompositions(gapCount, cutletCount);
+  const partitionStream = stage54AnswerRingWithScar(structureSauce, 2, 21n, context, 'cutlet-partition');
+  const rawPartitionRank = selectionDispatcherWithWideDetour(partitionStream, rawPartitionFamily.count()).output;
+  const rawPartition = rawPartitionFamily.unrank1(rawPartitionRank);
+  const calculationGateIndex = registry.exactIndex(calculationDay);
+  const internalOffset = calculationGateIndex !== null && year.openGateIndex < calculationGateIndex && calculationGateIndex < year.closeGateIndex
+    ? Number(calculationGateIndex - year.openGateIndex)
+    : null;
+  let partition = rawPartition;
+  let semanticPartitionRank = rawPartitionRank;
+  let semanticPartitionCount = rawPartitionFamily.count();
+  if (internalOffset !== null) {
+    const filtered = filteredCutletCompositions(gapCount, cutletCount, internalOffset);
+    semanticPartitionCount = filtered.count();
+    semanticPartitionRank = selectionDispatcherWithWideDetour(partitionStream, filtered.count()).output;
+    partition = filtered.unrank1(semanticPartitionRank);
+    let sum = 0;
+    let hit = false;
+    for (const part of partition) {
+      sum += part;
+      if (sum === internalOffset) hit = true;
+    }
+    if (!hit) throw new BootstrapStageError('Li partition filtrat final manca li calculation gate intern.');
+  }
+  context.diagnostics.push(Object.freeze({
+    label: 'cutlet-partition-scar',
+    rawCount: rawPartitionFamily.count(), rawRank: rawPartitionRank, raw: Object.freeze(rawPartition.slice()),
+    internalOffset, semanticCount: semanticPartitionCount, semanticRank: semanticPartitionRank, semantic: Object.freeze(partition.slice())
+  }));
+
+  const cutletNameIndices = stage54DistinctNamesWithScar(
+    structureSauce, SourceLanguageCatalog.cutlets.length, cutletCount, 22n, context, 'cutlet-names', true
+  );
+  if (new Set(cutletNameIndices).size !== cutletNameIndices.length) {
+    throw new BootstrapStageError('Li cutlet names final ne es distinct.');
+  }
+  const cutlets = stage54MaterializeCutlets(year, partition, cutletNameIndices, registry);
+
+  const yearLengthBig = year.closeDay - year.openDay;
+  let minMonths = Number((yearLengthBig + 122n) / 123n);
+  if (minMonths < 3) minMonths = 3;
+  let maxMonths = Number(yearLengthBig / 4n);
+  if (maxMonths > 47) maxMonths = 47;
+  if (minMonths > maxMonths) throw new BootstrapStageError('Li limites final del month count es inconsistent.');
+  const monthCountStream = stage54AnswerRingWithScar(structureSauce, 3, 30n, context, 'month-count');
+  const monthCountRank = selectionDispatcherWithWideDetour(monthCountStream, BigInt(maxMonths - minMonths + 1)).output;
+  const monthCount = minMonths + Number(monthCountRank - 1n);
+
+  const legacyMonthApi = new LegacyMonthLengthAllWaysAPI();
+  const probe = legacyMonthApi.probeAllWays(Number(yearLengthBig), monthCount, 128);
+  const virtualLengths = new VirtualLegacyList(Number(yearLengthBig), monthCount);
+  const monthLengthStream = stage54AnswerRingWithScar(structureSauce, 3, 31n, context, 'month-lengths');
+  const monthLengthRank = selectionDispatcherWithWideDetour(monthLengthStream, virtualLengths.count()).output;
+  const monthLengths = virtualLengths.itemAt1(monthLengthRank);
+  const monthLengthsAgain = virtualLengths.itemAt1(monthLengthRank);
+  if (!stage54ArraysEqual(monthLengths, monthLengthsAgain)) {
+    throw new BootstrapStageError('Li validation duplicat de VirtualLegacyList final diverge.');
+  }
+  context.diagnostics.push(Object.freeze({
+    label: 'month-length-concrete-scar',
+    concreteProbeCount: probe.ways.length,
+    concreteProbeExceeded: probe.exceededLimit,
+    virtualCount: virtualLengths.count(),
+    selectedRank: monthLengthRank
+  }));
+
+  const monthWeavingStream = stage54AnswerRingWithScar(structureSauce, 4, 32n, context, 'month-weaving');
+  const ghostWeaving = legacyChooseEachDaySeparately(monthLengths, monthWeavingStream);
+  const weavingFamily = new LegalMonthWeavingDP(monthLengths);
+  const wantedRank = selectionDispatcherWithWideDetour(monthWeavingStream, weavingFamily.count()).output;
+  const correctWeaving = DPUnrankLegalWeaving(monthLengths, wantedRank);
+  const weaving = stage54ArraysEqual(ghostWeaving, correctWeaving) ? ghostWeaving : correctWeaving;
+  context.diagnostics.push(Object.freeze({
+    label: 'month-weaving-ghost',
+    familyCount: weavingFamily.count(), wantedRank,
+    ghostEqualsCorrect: stage54ArraysEqual(ghostWeaving, correctWeaving)
+  }));
+
+  const monthNameIndices = stage54DistinctNamesWithScar(
+    structureSauce, SourceLanguageCatalog.months.length, monthCount, 33n, context, 'month-names', false
+  );
+  if (new Set(monthNameIndices).size !== monthNameIndices.length) {
+    throw new BootstrapStageError('Li month names final ne es distinct.');
+  }
+
+  const candidateStructure = Object.freeze({
+    yearNumber: year.number,
+    yearOpenDay: year.openDay,
+    yearCloseDay: year.closeDay,
+    cutletCount,
+    cutletPartition: Object.freeze(partition.slice()),
+    cutletNameIndices: Object.freeze(cutletNameIndices.slice()),
+    cutlets,
+    monthCount,
+    monthLengths: Object.freeze(monthLengths.slice()),
+    monthWeaving: Object.freeze(weaving.slice()),
+    monthNameIndices: Object.freeze(monthNameIndices.slice()),
+    structureSauceBowls: Object.freeze(structureSauce.bowls.slice()),
+    structureSauceOrderAt46Latch: Object.freeze(structureSauce.orderAt46Latch.slice())
+  });
+  if (candidateStructure.monthWeaving.length !== Number(yearLengthBig)) {
+    throw new BootstrapStageError('Li intertexe final ne have li longore exact del year.');
+  }
+  context.oldSnapshot = context.structure;
+  context.pendingSnapshot = candidateStructure;
+  context.commitToken = 'STAGE54_STRUCTURE_VALIDATED';
+  context.structure = context.pendingSnapshot;
+  context.pendingSnapshot = null;
+  cachePutWithGuard(manager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER, year, calculationDay, context.structure);
+  context.cacheEvents.push(Object.freeze({ type: 'COMMIT', year: year.number }));
+  return context.structure;
+}
+
+function stage54ResolveFive(context, year, structure, targetDay) {
+  let chosenCutlet = null;
+  for (const cutlet of structure.cutlets) {
+    if (cutlet.firstDay <= targetDay && targetDay <= cutlet.lastDay) {
+      chosenCutlet = cutlet;
+      break;
+    }
+  }
+  if (chosenCutlet === null) throw new BootstrapStageError('Null cutlet final contene li target-day.');
+  const dayInCutlet = targetDay - chosenCutlet.firstDay + 1n;
+  const offsetBig = targetDay - year.firstDay;
+  if (offsetBig < 0n || offsetBig >= BigInt(structure.monthWeaving.length)) {
+    throw new BootstrapStageError('Li offset final del target-day es extra li intertexe.');
+  }
+  const offset = Number(offsetBig);
+  const monthId = structure.monthWeaving[offset];
+  const legacyMonthGuess = oldContiguousMonthDayGuess(structure.monthWeaving, offset + 1);
+  const dayInMonthNumber = countMonthOccurrencesThroughTarget(structure.monthWeaving, offset + 1);
+  const dayInMonth = BigInt(dayInMonthNumber);
+  const monthNameIndex = structure.monthNameIndices[monthId - 1];
+  context.diagnostics.push(Object.freeze({
+    label: 'contiguous-month-ghost', legacyMonthGuess, occurrenceCount: dayInMonthNumber, monthId, targetPosition: offset + 1
+  }));
+  const resultFive = Object.freeze([
+    year.number,
+    textByCanonicalIndex('cutlet', chosenCutlet.nameIndex),
+    dayInCutlet,
+    textByCanonicalIndex('month', monthNameIndex),
+    dayInMonth
+  ]);
+  if (resultFive.length !== 5 || dayInCutlet < 1n || dayInMonth < 1n) {
+    throw new BootstrapStageError('Li final resultate deve contener exactmen quin fields valid.');
+  }
+  return resultFive;
+}
+
+class Stage54CompatibilityManager {
+  installAuthoritativeFlags(context) {
+    const flags = Object.freeze({
+      useLegacyRemainder: true,
+      useLegacyDayTag: true,
+      useLegacyDistance: true,
+      useBackwardHiddenStorage: true,
+      useAliasPours: true,
+      useShadowBowls: true,
+      useLatchedQueryOrder: true,
+      useLateYearFilter: true,
+      useGuardedBadCacheKey: true,
+      useGhostStructureSauce: true,
+      useVirtualFamilies: true,
+      useGhostWeaveCandidate: true
+    });
+    context.compatibilityFlags = flags;
+    return flags;
+  }
+}
+
+class Stage54RecoveryManager {
+  snapshot(context, stage) {
+    return Object.freeze({
+      stage,
+      status: context.status,
+      currentYear: context.currentYear ? stage54CloneYear(context.currentYear) : null,
+      structure: context.structure || null,
+      resultFive: context.resultFive ? Object.freeze(context.resultFive.slice()) : null
+    });
+  }
+
+  restore(context, snapshot) {
+    if (!snapshot || typeof snapshot.stage !== 'number') throw new TypeError('Li snapshot de recovery final es invalid.');
+    context.status = snapshot.status;
+    context.currentYear = snapshot.currentYear ? stage54CloneYear(snapshot.currentYear) : null;
+    context.structure = snapshot.structure;
+    context.resultFive = snapshot.resultFive ? Object.freeze(snapshot.resultFive.slice()) : null;
+    context.recoveryEvents.push(Object.freeze({ type: 'RESTORE', stage: snapshot.stage }));
+  }
+}
+
+class Stage54MonsterIntegrationManager extends BaseMonsterManager {
+  constructor(gateRegistry) {
+    super();
+    this.gateRegistry = gateRegistry;
+    this.compatibilityManager = new Stage54CompatibilityManager();
+    this.recoveryManager = new Stage54RecoveryManager();
+    this.integrationHooks = Object.freeze({
+      beforeStage: null,
+      afterStage: null
+    });
+  }
+
+  prepareFinal(calculationDay, targetDay) {
+    const context = this.prepare(calculationDay, targetDay);
+    context.mode = 'AUTHORITATIVE_SPAGHETTI';
+    context.subPhase = 'ENTRY';
+    context.retryBudget = 3;
+    context.recoveryDepth = 0;
+    context.warnings = [];
+    context.recoveryEvents = [];
+    context.cacheEvents = [];
+    context.answerStreamsBySeal = Object.create(null);
+    context.gatesTouched = [];
+    context.year5000 = null;
+    context.currentYear = null;
+    context.structure = null;
+    context.resultFive = null;
+    context.oldSnapshot = null;
+    context.pendingSnapshot = null;
+    context.rollbackSnapshot = null;
+    context.commitToken = null;
+    this.compatibilityManager.installAuthoritativeFlags(context);
+    context.phase = 'STAGE_54_ENTRY';
+    context.status = 'STAGE_54_NEW';
+    context.branchTrace.push('STAGE_54_ENTRY');
+    return context;
+  }
+
+  executeCalendarDate(calculationDay, targetDay) {
+    stage54RequireDay(calculationDay, 'Li calculation-day final');
+    stage54RequireDay(targetDay, 'Li target-day final');
+    const context = this.prepareFinal(calculationDay, targetDay);
+    let programCounter = 0;
+    let yearResolution = null;
+    let year = null;
+    let structure = null;
+    let committedSnapshot = this.recoveryManager.snapshot(context, programCounter);
+    while (true) {
+      context.phase = 'STAGE_54_MAIN_' + programCounter;
+      context.branchTrace.push('STAGE_54_MAIN_' + programCounter);
+      try {
+        switch (programCounter) {
+          case 0:
+            this.validationManager.requireDiscreteDay(calculationDay);
+            this.validationManager.requireDiscreteDay(targetDay);
+            this.metricsManager.bump(context, 'stage54.calendar.calls');
+            context.status = 'STAGE_54_VALIDATED';
+            committedSnapshot = this.recoveryManager.snapshot(context, 0);
+            programCounter = 10;
+            break;
+          case 10:
+            context.subPhase = 'YEAR_RESOLUTION';
+            yearResolution = stage54ResolveTargetYear(calculationDay, targetDay, this.gateRegistry, context);
+            year = yearResolution.year;
+            context.gatesTouched = [year.openDay, year.closeDay];
+            context.status = 'STAGE_54_YEAR_READY';
+            committedSnapshot = this.recoveryManager.snapshot(context, 10);
+            programCounter = 20;
+            break;
+          case 20: {
+            context.subPhase = 'GUARDED_CACHE';
+            const guarded = cacheGetWithActionGuard(this.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER, year, calculationDay);
+            context.diagnostics.push(Object.freeze({ label: 'pre-structure-cache-probe', hit: guarded.hit, reason: guarded.reason }));
+            programCounter = guarded.hit ? 70 : 30;
+            if (guarded.hit) structure = guarded.value;
+            break;
+          }
+          case 30:
+            context.subPhase = 'STRUCTURE_BUILD';
+            structure = stage54BuildStructure(this, context, calculationDay, targetDay, year, this.gateRegistry);
+            context.status = 'STAGE_54_STRUCTURE_READY';
+            committedSnapshot = this.recoveryManager.snapshot(context, 30);
+            programCounter = 70;
+            break;
+          case 70:
+            if (structure === null) structure = stage54BuildStructure(this, context, calculationDay, targetDay, year, this.gateRegistry);
+            context.structure = structure;
+            context.commitToken = 'STAGE54_STRUCTURE_COMMITTED';
+            programCounter = 80;
+            break;
+          case 80:
+            context.subPhase = 'FINAL_RESOLVER';
+            context.resultFive = stage54ResolveFive(context, year, structure, targetDay);
+            context.commitToken = 'STAGE54_RESULT_VALIDATED';
+            committedSnapshot = this.recoveryManager.snapshot(context, 80);
+            programCounter = 90;
+            break;
+          case 90:
+            context.status = 'SUCCESS';
+            this.metricsManager.bump(context, 'stage54.calendar.success');
+            context.branchTrace.push('STAGE_54_SUCCESS');
+            return { result: Object.freeze(context.resultFive.slice()), context };
+          default:
+            throw new BootstrapStageError('Li state-machine principal de Stage 54 have un stage ínconosset.');
+        }
+      } catch (error) {
+        context.lastError = error;
+        context.wrappedErrors = Array.isArray(context.wrappedErrors) ? context.wrappedErrors : [];
+        context.wrappedErrors.push(Object.freeze({ stage: programCounter, name: error.name }));
+        if (error && error.recoverableStage54 === true && context.retryBudget > 0) {
+          context.retryBudget -= 1;
+          context.recoveryDepth += 1;
+          context.rollbackSnapshot = committedSnapshot;
+          this.recoveryManager.restore(context, committedSnapshot);
+          programCounter = committedSnapshot.stage;
+          continue;
+        }
+        context.status = 'FAILED';
+        throw error;
+      }
+    }
+  }
+}
+
+const STAGE54_GLOBAL_GATE_REGISTRY = new Stage54GateRegistry();
+const STAGE54_GLOBAL_MANAGER = new Stage54MonsterIntegrationManager(STAGE54_GLOBAL_GATE_REGISTRY);
+
+function calendarDateSpaghettiWithContext(calculationDay, targetDay) {
+  return STAGE54_GLOBAL_MANAGER.executeCalendarDate(calculationDay, targetDay);
+}
+
+function calendarDateSpaghetti(calculationDay, targetDay) {
+  return calendarDateSpaghettiWithContext(calculationDay, targetDay).result;
 }
 
 module.exports = Object.freeze({
@@ -7108,5 +7899,13 @@ module.exports = Object.freeze({
   historicMonthDayOccurrenceThroughMonsterPath,
   discovery26LegacyOpeningGateIntervalThroughMonsterPath,
   historicOpeningGateIntervalThroughMonsterPath,
+  sauceWithScars,
+  Stage54GateRegistry,
+  Stage54CompatibilityManager,
+  Stage54RecoveryManager,
+  Stage54MonsterIntegrationManager,
+  STAGE54_GLOBAL_GATE_REGISTRY,
+  STAGE54_GLOBAL_MANAGER,
+  calendarDateSpaghettiWithContext,
   calendarDateSpaghetti
 });

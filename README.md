@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 53 de 55: PATCH 26** e li repository local es `GREEN`. Omni regressions til Discovery 26, li verifier, li test focal de Patch 26 e li suite complet passa.
+Li linea es in **Stage 54 de 55: INTEGRATION** e li repository local es `GREEN`. Omni 26 patches resta activ e li route final `calendarDateSpaghetti(calculationDay,targetDay)` es nu integrat. `sauceWithScars` conserva li cresciment historic del sauce; li main state-machine conecta gates, years, cache, structure, cutlets, mensus e li exact five-field return sin production oracle.
 
-Li finder historic `legacyFindYearClosedOpeningInterval` resta activ e tracta diagnosticmen li year quam `[open,close]`. `OpeningGateIntervalPatchWrapper` passa separatmen per `correctOpeningGateInterval`, quel usa `targetDay<=openDay` durant li caminada retro e valida li membership `openDay<targetDay<=closeDay`. Li function final `calendarDateSpaghetti` resta intentionalmen ne integrat til Stage 54.
+Stage 55 resta separat quam audit independent. Null conclusion de completitá final es fat in Stage 54.
 
 ## Lingue-fonte canonic
 
@@ -24,22 +24,22 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 26 deve restar verd:
+Omni regressions til Patch 26 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li verifier deve esser verd:
+Li verifier actual deve esser verd:
 
 ```text
 node tests/verify-stage-01.js
 ```
 
-Li test focal de Patch 26 deve esser verd:
+Li test focal del integration final deve esser verd:
 
 ```text
-npm run test:patch-26
+npm run test:integration-54
 ```
 
 Li suite complet deve esser verd:
@@ -512,3 +512,32 @@ Patch 26 ne modifica `legacyFindYearClosedOpeningInterval`, ne `LegacyOpeningGat
 Al shared gate `-15054661`, Discovery 26 conserva Year 5001 e zero backward steps. Patch 26 fa exactmen un passu retro e rende Year 5000. Witnesses local adicional con annus positiv e negativ confirma que equality al opening gate sempre move retro, durante que dies strictmen intra li interval e li closing gate resta in li year current.
 
 `test:previous`, li verifier, `test:patch-26` e li suite complet es verd. Li verifier passa 74 gruppes / 66832 assertions. Null integration de Stage 54 es anticipat; `calendarDateSpaghetti` resta explicitmen ne integrat.
+
+
+## Stage 54 — INTEGRATION
+
+### Un unic route authoritative
+
+Pos Patch 26, `calendarDateSpaghetti(calculationDay,targetDay)` ne es plu un stub. `Stage54MonsterIntegrationManager` extende li manager historic e orchestra li invocation per un state-machine explicit `programCounter/switch/loop`. Li context conserva mode, subfase, retry budget, recovery depth, flags compatibility, answer streams, gates tocat, Year 5000, current year, structure, snapshots transactional, cache events, diagnostics e li resultate de quin fields.
+
+### Sauce con omni scars
+
+`sauceWithScars` usa un duesim state-machine explicit. It deriva li counts con li patches de remainder/day-tag/distance, passa li stones travers li builder legacy e su overwrite reparat, conserva hidden storage retrograd e prior translation, e invoca li sauce historic quel executa 46 drops. In chascun drop li permutation 0/1-based, aliases de pours e shadow bowl commits resta activ; li memorie order legacy continua esser superscrit, ma `orderAt46Latch` es scrit un sol vez al drop 46 e resta authority durant 12 post-stirs. Li queries usa li successor positional del latch, durante que `oldNextBowlFixedName` resta diagnostic.
+
+### Gates, years e cache
+
+`Stage54GateRegistry` conserva gates in un registry deterministic indexat per BigInt. Chascun gap usa li question signat de Patch 15, bowl 1 / seal 1 e li dispatcher curt/wide. Year 5000 construi li familie legacy con 5781, filtra 5779..5781 ante li selection, reordena ties egal per opening gate e selecte per bowl 1 / seal 10. Years adjacent usa seals 11/12. `oldJumpGuess` es calculat ma ignorat; `findYearByWalkPatch` camina secuentialmen. Li ultim scar `[open,close]` es anc executet, poy `correctOpeningGateInterval` valida `(open,close]`.
+
+Li structure-cache conserva li bad key `year.number`: `cacheGetWithActionGuard` voca li lookup legacy real, ma un HIT deven semantic solmen si calculation-day fingerprint, opening gate e closing gate concorda.
+
+### Structure e final five
+
+Li build de structure executa `structureSaucePatch` por conservar `oldStructureSauce(cDay,targetOriginal)` quam ghost e compara su sauce semantic con `sauceWithScars(cDay,year.firstDay)`. Li cutlet partition executa li familie positive legacy e usa exactmen li subsequence filtrat si calculationDay es un gate intern. Nomes de cutlettes conserva li candidate repeated legacy e passa al partial permutation distinct.
+
+Por mensus, li API concrete legacy es executet quam probe limitat, durante que `VirtualLegacyList` furni count/itemAt1 exact. `legacyChooseEachDaySeparately` produce anc li ghost weaving real ante `LegalMonthWeavingDP` e `DPUnrankLegalWeaving`. Nomes de mensus usa bowl 5 / seal 33 con li sam pattern repeated-candidate versus partial permutation distinct. Al resolver final `oldContiguousMonthDayGuess` es calculat diagnosticmen e li day-in-month semantic es li occurrence count del monthId in li prefix inclusiv til target.
+
+Li return es exactmen `[year, cutletName, dayInCutlet, monthName, dayInMonth]`. Li Foundation witness del integration rende `[5000, scorpion, 503, pute, 56]`; un duesim call warm rende li sam resultate per li guarded cache. Null oracle test-only es importat o vocat per production.
+
+### Porta ante Stage 55
+
+`npm run test:previous`, `node tests/verify-stage-01.js`, `npm run test:integration-54` e `npm test` es GREEN. Li verifier reporta 75 gruppes / 66842 assertions. Stage 55 resta reservat por un audit independent; production ne es declarat final-auditat in ti stage.
