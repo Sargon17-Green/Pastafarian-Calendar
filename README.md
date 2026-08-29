@@ -1,51 +1,61 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 10 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
+Hoc directorium Gradum 11 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 10 est `DISCOVERY 05`. Correctio lapidum Gradus 9 manet integra et viridis. Novum vitium historicum nunc in septem guttis occultis introductum est: valores ipsi recte computantur, sed repositio legacy eos ordine retrogrado servat, id est `hidden7, hidden6, ..., hidden1`.
+Gradus 11 est `PATCH 05`. Repositio retrograda septem guttarum occultarum ex Gradu 10 consulto integra manet. `buildHiddenWithBackwardStorage(calculationDay, targetDay, stones)` adhuc valores physice ordine `hidden7, hidden6, ..., hidden1` servat.
 
-`buildHiddenWithBackwardStorage(calculationDay, targetDay, stones)` septem valores per formulas normativas huius gradus computat. Sed valor pro proximitate `k` in loco physico `8-k` ponitur. Nulla mappa accessus adhuc hanc ordinationem corrigit.
+Correctio non vertit seriem et non mutat storage. Addita est functio:
+
+```text
+hiddenByNearness(backwardStorage, k)
+```
+
+Ea `k` inter 1 et 7 requirit, deinde locum unum-basatum `8-k` computat et ex repositione retrograda legit. Ita omnis lectio semantica guttae occultae per proximitatem transit per mapping historicum, dum layout vetus physice idem manet.
 
 Via auctoritative huius gradus transit per:
 
 ```text
 BaseMonsterManager::executeHiddenDrops
--> BaseDispatcher::dispatchLegacyHiddenStorage
--> Discovery05HiddenStorageHandler
--> buildStonesThroughLegacyBuilder             [PATCH 04 iam viridis]
+-> BaseDispatcher::dispatchPatchedHiddenStorage
+-> Patch05HiddenStorageHandler
 -> LegacyHiddenStorageAdapter
--> buildHiddenWithBackwardStorage
--> makeHiddenLegacyValue                       [valor rectus]
--> legacyHidden[8-k]                           [repositio retrograda vitiosa]
+-> buildHiddenWithBackwardStorage              [storage retrogradum manet]
+-> Patch05HiddenNearnessWrapper
+-> hiddenByNearness                            [slot = 8-k]
+-> patchedHiddenNearness                       [visio semantica 1..7]
 ```
 
-Via activa Gradus 10 ipsam repositionem retrogradam quasi ordinem proximitatis exponit. Hoc consulto facit regressionem novam rubram.
+Via diagnostica `executeUnpatchedHiddenStorageDiagnostic` adhuc `Discovery05HiddenStorageHandler` exercet et eandem seriem retrogradam sine mapping exponit.
 
 ## Quid regressiones demonstrant
 
-Probatio nova `tests/stage_10_discovery_05_tests.cpp` computationem localem C++ cum `buildHiddenDrops` oraculi eiusdem lineae comparat. Eadem probatio separatim demonstrat relationem structuralem:
+`tests/stage_10_discovery_05_tests.cpp` eadem septem inputs et eadem expected values normativi servat. Gradus 10 eam initio ita scripserat ut sex discrepantias expresse requireret; talis clausula regressionem post patch viridem fieri vetabat. Condicio exitus igitur ad formam historicam correctam mutata est:
 
-```text
-legacyOutput[8-k] == expectedHidden[k]
-```
+- sex discrepantiae significant vitium Gradus 10 et exitum `1`;
+- nullae discrepantiae significant correctionem PATCH 05 et transitum;
+- alius numerus discrepantiarum est defectus inopinatus.
 
-pro omnibus septem guttis. Ergo valores non corrumpuntur; solum loci eorum invertuntur.
+Forma correcta contra codicem Gradus 10 pristinum iterum currens exactas sex discrepantias et exitum `1` produxit. Ergo expected values, storage audit et vis defectus non debilitata sunt.
 
-Cum repositio retrograda directe quasi `hidden1..hidden7` exponitur, sex positiones discrepant. Gutta media `k=4` fortuito eundem locum retinet sub inversione septem elementorum. Exitus novae regressionis est:
+Post PATCH 05 eadem regressio transit omnibus septem guttis. Probatio nova `tests/stage_11_patch_05_tests.cpp` praeterea demonstrat:
 
-```text
-REGRESSIO_DISCOVERY_05_DEFECIT: 6 discrepantiae normativae ex ordine retrogrado inventae sunt
-```
+- `legacyOutput[8-k]` adhuc exactum valorem hidden `k` continet;
+- `hiddenByNearness` omnibus `k=1..7` cum norma congruit;
+- indices extra 1..7 reiciuntur;
+- via auctoritative signum `patch05Applied` servat;
+- via diagnostica sine patch sex discrepantias veteres adhuc exhibet.
 
 ## Cicatrix legacy et stratum monstri
 
-Gradus 10 addit `HiddenDrops`, `legacyHiddenBackward`, `legacyHiddenBackwardReady`, `LegacyHiddenStorageAdapter`, `Discovery05HiddenStorageHandler`, `LegacyHiddenReport`, validationem promptitudinis et dispatchationem separatam. Omne hoc state ad invocationem unam pertinet. Metrics et branch trace exitu semantico non participant.
+Gradus 11 addit `patchedHiddenNearness`, `patch05Applied`, `Patch05HiddenNearnessWrapper`, `Patch05HiddenStorageHandler`, validationem `requirePatch05Ready`, dispatchationem patch separatam et viam diagnosticam legacy. `legacyHiddenBackward` non convertitur, non reordinatur et non superimponitur.
+
+Validator mapping `8-k` iterum computat ut invariantiam confirmet; non vocat oracle et non eligit inter responsiones diversas. Omne state semanticum contextui invocationis proprium manet.
 
 ## Quod consulto nondum adest
 
-Nulla correctio PATCH 05 introducta est. In particulari absunt `hiddenByNearness`, mappa accessus `8-k`, `Patch05` et omnis status emendationis quintae. Series ipsa non convertitur nec reordinatur post constructionem.
+Nullum codicem DISCOVERY/PATCH 06 introduximus. Absunt `legacyPrior`, `priorPatch`, `dropStore` et status emendationis sextae. Historia guttarum visibilium nondum constructa est.
 
 ## Lingua computationis
 
@@ -57,7 +67,7 @@ Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congela
 
 ## Probationes
 
-Regressiones usque ad Gradum 9 virides sunt; regressio Gradus 10 consulto rubra est:
+Omnes regressiones usque ad Gradum 11 virides sunt:
 
 ```text
 OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
@@ -69,7 +79,8 @@ REGRESSIO_DISCOVERY_03_TRANSIIT
 REGRESSIO_PATCH_03_TRANSIIT
 REGRESSIO_DISCOVERY_04_TRANSIIT
 REGRESSIO_PATCH_04_TRANSIIT
-REGRESSIO_DISCOVERY_05_DEFECIT  [EXPECTED_RED]
+REGRESSIO_DISCOVERY_05_TRANSIIT
+REGRESSIO_PATCH_05_TRANSIIT
 ```
 
-Gradus proximus est `PATCH 05`; nullum eius codicem hic gradus continet.
+Gradus proximus est `DISCOVERY 06`; nullum eius codicem hic gradus continet.

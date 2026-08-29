@@ -39,6 +39,8 @@ Integer makeHiddenLegacyValue(int k,
 HiddenDrops buildHiddenWithBackwardStorage(const Integer& calculationDay,
                                            const Integer& targetDay,
                                            const StoneTable& stones);
+Integer hiddenByNearness(const HiddenDrops& backwardStorage, int k);
+HiddenDrops buildHiddenNearnessView(const HiddenDrops& backwardStorage);
 
 struct BaseMonsterContext {
     Integer calculationDay;
@@ -71,6 +73,8 @@ struct BaseMonsterContext {
     bool patch04Applied = false;
     HiddenDrops legacyHiddenBackward{};
     bool legacyHiddenBackwardReady = false;
+    HiddenDrops patchedHiddenNearness{};
+    bool patch05Applied = false;
 };
 
 struct BaseRunReport {
@@ -132,6 +136,7 @@ struct LegacyHiddenReport {
     std::string handler;
     std::size_t branchCount;
     HiddenDrops legacyOutput{};
+    bool patch05Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -151,6 +156,7 @@ public:
     void requireLegacyStoneTableReady(const BaseMonsterContext& ctx) const;
     void requirePatch04Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyHiddenBackwardReady(const BaseMonsterContext& ctx) const;
+    void requirePatch05Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -283,6 +289,20 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch05HiddenNearnessWrapper {
+public:
+    Integer read(const HiddenDrops& backwardStorage, int k) const;
+};
+
+class Patch05HiddenStorageHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyHiddenStorageAdapter& adapter,
+                const Patch05HiddenNearnessWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -346,6 +366,13 @@ public:
                                      const LegacyHiddenStorageAdapter& adapter,
                                      const BaseValidationManager& validator,
                                      const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedHiddenStorage(BaseMonsterContext& ctx,
+                                      const Patch05HiddenStorageHandler& handler,
+                                      const LegacyHiddenStorageAdapter& adapter,
+                                      const Patch05HiddenNearnessWrapper& wrapper,
+                                      const BaseValidationManager& validator,
+                                      const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -362,6 +389,8 @@ public:
     LegacyStoneTableReport executeUnpatchedStoneTableDiagnostic() const;
     LegacyHiddenReport executeHiddenDrops(const Integer& calculationDay,
                                           const Integer& targetDay) const;
+    LegacyHiddenReport executeUnpatchedHiddenStorageDiagnostic(const Integer& calculationDay,
+                                                               const Integer& targetDay) const;
 };
 
 } // namespace pastafari

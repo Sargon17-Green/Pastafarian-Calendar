@@ -174,6 +174,22 @@ HiddenDrops buildHiddenWithBackwardStorage(const Integer& calculationDay,
     return legacyHidden;
 }
 
+Integer hiddenByNearness(const HiddenDrops& backwardStorage, int k) {
+    if (k < 1 || k > 7) {
+        throw BaseValidationError("index guttae occultae inter unum et septem requiritur");
+    }
+    const int oneBasedSlot = 8 - k;
+    return backwardStorage[static_cast<std::size_t>(oneBasedSlot - 1)];
+}
+
+HiddenDrops buildHiddenNearnessView(const HiddenDrops& backwardStorage) {
+    HiddenDrops view{};
+    for (int k = 1; k <= 7; ++k) {
+        view[static_cast<std::size_t>(k - 1)] = hiddenByNearness(backwardStorage, k);
+    }
+    return view;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -287,6 +303,19 @@ void BaseValidationManager::requirePatch04Ready(const BaseMonsterContext& ctx) c
 void BaseValidationManager::requireLegacyHiddenBackwardReady(const BaseMonsterContext& ctx) const {
     if (!ctx.legacyHiddenBackwardReady) {
         throw BaseValidationError("guttae occultae ordine retrogrado nondum paratae sunt");
+    }
+}
+
+void BaseValidationManager::requirePatch05Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyHiddenBackwardReady(ctx);
+    if (!ctx.patch05Applied) {
+        throw BaseValidationError("emendatio quinta nondum applicata est");
+    }
+    for (int k = 1; k <= 7; ++k) {
+        const Integer expectatus = hiddenByNearness(ctx.legacyHiddenBackward, k);
+        if (ctx.patchedHiddenNearness[static_cast<std::size_t>(k - 1)] != expectatus) {
+            throw BaseValidationError("emendatio quinta mapping octo-minus-k non servavit");
+        }
     }
 }
 
@@ -583,6 +612,45 @@ void Discovery05HiddenStorageHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery05.hiddenBackward.exposed");
 }
 
+Integer Patch05HiddenNearnessWrapper::read(const HiddenDrops& backwardStorage, int k) const {
+    return hiddenByNearness(backwardStorage, k);
+}
+
+void Patch05HiddenStorageHandler::handle(BaseMonsterContext& ctx,
+                                         const LegacyHiddenStorageAdapter& adapter,
+                                         const Patch05HiddenNearnessWrapper& wrapper,
+                                         const BaseValidationManager& validator,
+                                         const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch05HiddenStorageHandler";
+    ctx.phase = "PATCH_05_LEGACY_HIDDEN_BACKWARD_BUILD";
+    ctx.status = "LEGACY_HIDDEN_BACKWARD_CALLED_BEFORE_PATCH";
+    ctx.branchTrace.push_back("PATCH_05_LEGACY_HIDDEN_BACKWARD_BUILD");
+    metrics.bump(ctx, "patch05.legacyHiddenBackward.calls");
+
+    const StoneTable stones = buildStonesThroughLegacyBuilder();
+    ctx.legacyHiddenBackward = adapter.buildBackward(
+        ctx.calculationDay, ctx.targetDay, stones);
+    ctx.legacyHiddenBackwardReady = true;
+
+    ctx.phase = "PATCH_05_NEARNESS_ACCESS";
+    ctx.branchTrace.push_back("PATCH_05_NEARNESS_ACCESS");
+    for (int k = 1; k <= 7; ++k) {
+        ctx.patchedHiddenNearness[static_cast<std::size_t>(k - 1)] =
+            wrapper.read(ctx.legacyHiddenBackward, k);
+    }
+    ctx.patch05Applied = true;
+    metrics.bump(ctx, "patch05.nearnessAccess.calls");
+
+    ctx.phase = "PATCH_05_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_05_VALIDATE");
+    validator.requirePatch05Ready(ctx);
+
+    ctx.phase = "PATCH_05_HIDDEN_READY";
+    ctx.status = "PATCHED_HIDDEN_NEARNESS_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_05_HIDDEN_READY");
+    metrics.bump(ctx, "patch05.hidden.ready");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -730,6 +798,21 @@ void BaseDispatcher::dispatchLegacyHiddenStorage(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery05.dispatch.calls");
 
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedHiddenStorage(BaseMonsterContext& ctx,
+                                                  const Patch05HiddenStorageHandler& handler,
+                                                  const LegacyHiddenStorageAdapter& adapter,
+                                                  const Patch05HiddenNearnessWrapper& wrapper,
+                                                  const BaseValidationManager& validator,
+                                                  const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_05_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_05_DISPATCH");
+    metrics.bump(ctx, "patch05.dispatch.calls");
+
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -981,7 +1064,37 @@ LegacyHiddenReport BaseMonsterManager::executeHiddenDrops(const Integer& calcula
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
     ctx.targetDay = targetDay;
-    ctx.phase = "DISCOVERY_05_NEW";
+    ctx.phase = "PATCH_05_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyHiddenStorageAdapter adapter;
+    const Patch05HiddenNearnessWrapper wrapper;
+    const Patch05HiddenStorageHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedHiddenStorage(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return LegacyHiddenReport{
+        ctx.calculationDay,
+        ctx.targetDay,
+        ctx.patchedHiddenNearness,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyHiddenBackward,
+        ctx.patch05Applied,
+    };
+}
+
+LegacyHiddenReport BaseMonsterManager::executeUnpatchedHiddenStorageDiagnostic(
+    const Integer& calculationDay, const Integer& targetDay) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_05_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
 
@@ -1001,6 +1114,7 @@ LegacyHiddenReport BaseMonsterManager::executeHiddenDrops(const Integer& calcula
         ctx.currentHandler,
         ctx.branchTrace.size(),
         ctx.legacyHiddenBackward,
+        false,
     };
 }
 

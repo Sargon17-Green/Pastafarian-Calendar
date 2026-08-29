@@ -241,3 +241,33 @@ Norma consumptoribus ordinem semanticum `hidden1..hidden7` praebet. Via activa a
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `HiddenDrops`, duo campi repositionis retrogradae in `BaseMonsterContext`, `LegacyHiddenStorageAdapter`, `Discovery05HiddenStorageHandler`, `LegacyHiddenReport`, validator promptitudinis et dispatchatio propria. Formula guttarum occultarum etiam per cicatrices anteriores transit, ita dependentia indirecta crescit. Omne state semanticum contextui invocationis proprium manet; observationes non regunt exitum.
+
+## Gradus 11 — Emendatio 05: accessus proximitatis super repositionem retrogradam
+
+### Quid putabatur
+
+Vitium Gradus 10 non in valoribus guttarum occultarum sed in interpretatione locorum erat. Repositio legacy physice `hidden7, hidden6, ..., hidden1` continet. Delere hanc ordinationem aut seriem in-place invertere historiam architecturalem destrueret et sequentem vitium historiae guttarum minus fidelem redderet.
+
+### Quid repertum est
+
+Regressio Gradus 10 iam demonstraverat relationem exactam `legacyOutput[8-k] == hidden[k]` omnibus septem guttis. Ergo nulla recomputatio guttarum, nulla mutatio formulorum et nulla repositio nova requiritur. Correctio potest esse pure accessus: pro proximitate semantica `k`, locus physicus est `8-k` in numeratione unum-basata.
+
+Inspectio harness etiam ostendit regressionem Gradus 10 clausulam temporalem habuisse quae sex discrepantias expresse requirebat. Haec clausula DISCOVERY rubrum recte certificabat, sed PATCH viridem impossibilem faciebat. Eadem inputs, eadem expected values et eadem probatio ordinis retrogradi servata sunt; solum exitus mutatus est ut sex discrepantiae ante patch exitum `1`, nullae post patch transitum, alius numerus defectum inopinatum significet. Contra codicem Gradus 10 pristinum forma correcta adhuc exactas sex discrepantias et exitum `1` produxit.
+
+### Quid circumventum est
+
+Addita est `hiddenByNearness(backwardStorage, k)`. Ea range 1..7 validat, `oneBasedSlot = 8-k` computat, deinde `backwardStorage[oneBasedSlot-1]` legit. `buildHiddenWithBackwardStorage` ne uno quidem passu mutatum est et nulla `reverse` operatio addita est.
+
+`Patch05HiddenStorageHandler` primum per `LegacyHiddenStorageAdapter` repositionem retrogradam re vera fabricat et in `legacyHiddenBackward` servat. Deinde `Patch05HiddenNearnessWrapper` septies vocatur, semel pro unoquoque k, ut `patchedHiddenNearness` construatur. Hic array secundus est visio semantica output, non mutatio neque inversio storage legacy.
+
+`executeUnpatchedHiddenStorageDiagnostic` viam Gradus 10 adhuc exercet et sex discrepantias observabiles servat.
+
+### Cur hoc aequivalet normae
+
+Ex invariantia Gradus 10, valor normativus hidden `k` iacet in loco physico unum-basato `8-k`. `hiddenByNearness` exacte illum locum legit. Itaque pro omni `k` inter 1 et 7 exitus accessorii est valor normativus hidden `k`.
+
+Quia patch storage non mutat, cicatrix `hidden7..hidden1` integra manet. Quia omnis lectio auctoritative huius gradus per wrapper ad accessor transit, ordo semanticus externus est tamen `hidden1..hidden7`. Test novus utramque proprietatem simul confirmat.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `patchedHiddenNearness`, `patch05Applied`, `Patch05HiddenNearnessWrapper`, `Patch05HiddenStorageHandler`, dispatchatio patch separata, via diagnostica legacy et `requirePatch05Ready`. Validator mapping octo-minus-k iterat ut COPY_VALIDATION, sed oracle in productione non vocat. Nullum state PATCH 06, nulla historia visibilium et nullus `legacyPrior` introductus est.

@@ -78,11 +78,16 @@ int main() {
         }
     }
 
+    if (discrepantiae == 0) {
+        std::cout << "REGRESSIO_DISCOVERY_05_TRANSIIT\n";
+        return 0;
+    }
+
     if (discrepantiae != 6) {
         std::cerr
             << "REGRESSIO_DISCOVERY_05_INOPINATE_DEFECIT: "
             << discrepantiae
-            << " discrepantiae inventae sunt, sed sex exspectabantur\n";
+            << " discrepantiae inventae sunt, sed aut sex ante patch aut nullae post patch exspectabantur\n";
         return 2;
     }
 

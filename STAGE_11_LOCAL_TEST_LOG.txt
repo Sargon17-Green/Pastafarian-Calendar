@@ -1,0 +1,77 @@
+Gradus 11 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Codex communis:
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
+
+Probationes singulae eodem modo compilatae et cum obiectis communibus ligatae sunt.
+
+1. Bootstrap
+Exitus actualis:
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+
+2. DISCOVERY 01 post PATCH 01
+Exitus actualis:
+REGRESSIO_DISCOVERY_01_TRANSIIT
+
+3. PATCH 01
+Exitus actualis:
+REGRESSIO_PATCH_01_TRANSIIT
+
+4. DISCOVERY 02 post PATCH 02
+Exitus actualis:
+REGRESSIO_DISCOVERY_02_TRANSIIT
+
+5. PATCH 02
+Exitus actualis:
+REGRESSIO_PATCH_02_TRANSIIT
+
+6. DISCOVERY 03 post PATCH 03
+Exitus actualis:
+REGRESSIO_DISCOVERY_03_TRANSIIT
+
+7. PATCH 03
+Exitus actualis:
+REGRESSIO_PATCH_03_TRANSIIT
+
+8. DISCOVERY 04 post PATCH 04
+Exitus actualis:
+REGRESSIO_DISCOVERY_04_TRANSIIT
+
+9. PATCH 04
+Exitus actualis:
+REGRESSIO_PATCH_04_TRANSIIT
+
+10. Regressio DISCOVERY 05 post PATCH 05
+Exitus actualis:
+CONCORDANTIA GUTTA_OCCULTA k=1: valor=36871601121046986009869730559023154066
+CONCORDANTIA GUTTA_OCCULTA k=2: valor=131593028985777940099017112814911231894
+CONCORDANTIA GUTTA_OCCULTA k=3: valor=42269764445139723723814212963666774061
+CONCORDANTIA GUTTA_OCCULTA k=4: valor=9416990026442622107570147564618187212
+CONCORDANTIA GUTTA_OCCULTA k=5: valor=51180570161656867345057078882276520086
+CONCORDANTIA GUTTA_OCCULTA k=6: valor=121424107640709512196568039528956924403
+CONCORDANTIA GUTTA_OCCULTA k=7: valor=28533777856184013846489652028799526221
+REGRESSIO_DISCOVERY_05_TRANSIIT
+
+11. Regressio PATCH 05
+Exitus actualis:
+REGRESSIO_PATCH_05_TRANSIIT
+
+12. Revalidatio regressionis Gradus 10 contra productionem pristinam Gradus 10
+Eadem inputs et eadem expected values servata sunt. Forma regressionis correcta contra codicem pristinum reddidit:
+PREPATCH_EXIT=1
+REGRESSIO_DISCOVERY_05_DEFECIT: 6 discrepantiae normativae ex ordine retrogrado inventae sunt
+
+13. Auditum cicatricis et contaminationis futurae
+storage legacy retrogradum=SERVATUM
+mapping accessus=8-k
+reverse in-place=ABSENS
+legacyPrior=ABSENS
+Patch06=ABSENS
+dropStore=ABSENS
+
+Status finalis: GREEN
+Regressiones anteriores: PASS
