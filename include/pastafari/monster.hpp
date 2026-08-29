@@ -161,6 +161,21 @@ struct LegacyYearAnchor {
 
 Integer oldJumpGuess(const LegacyYearAnchor& anchor, const Integer& targetDay);
 
+struct Patch18YearRecord {
+    Integer number{};
+    Integer openGateIndex{};
+    Integer closeGateIndex{};
+    Integer openGateDay{};
+    Integer closeGateDay{};
+};
+
+struct Patch18YearWalkResult {
+    Patch18YearRecord anchorYear{};
+    Patch18YearRecord outputYear{};
+    std::size_t forwardSteps = 0;
+    std::size_t backwardSteps = 0;
+};
+
 struct LegacyAnswerRing {
     Integer first{};
     int directionStep = 0;
@@ -464,6 +479,13 @@ struct BaseMonsterContext {
     Integer discovery18JumpOutputYearNumber{};
     bool discovery18GuessUsedAsOutput = false;
     bool discovery18JumpReady = false;
+    Integer patch18CalculationDay{};
+    Patch18YearRecord patch18AnchorYear{};
+    Patch18YearRecord patch18OutputYear{};
+    std::size_t patch18ForwardSteps = 0;
+    std::size_t patch18BackwardSteps = 0;
+    bool patch18GuessTelemetryOnly = false;
+    bool patch18Applied = false;
 };
 
 struct LegacyYearJumpReport {
@@ -477,6 +499,13 @@ struct LegacyYearJumpReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    Integer calculationDay{};
+    Patch18YearRecord anchorYear{};
+    Patch18YearRecord outputYear{};
+    std::size_t forwardSteps = 0;
+    std::size_t backwardSteps = 0;
+    bool guessTelemetryOnly = false;
+    bool patch18Applied = false;
 };
 
 struct LegacyYearCandidateReport {
@@ -821,6 +850,7 @@ public:
     void requireDiscovery17Year5000TieReady(const BaseMonsterContext& ctx) const;
     void requirePatch17Year5000TieReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery18LegacyYearJumpReady(const BaseMonsterContext& ctx) const;
+    void requirePatch18YearWalkReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -886,6 +916,31 @@ public:
 class LegacyYearJumpAdapter {
 public:
     Integer guess(const LegacyYearAnchor& anchor, const Integer& targetDay) const;
+};
+
+class Patch18YearWalkWorkspace {
+public:
+    explicit Patch18YearWalkWorkspace(const Integer& calculationDay);
+    Patch18YearRecord resolveAnchor(const LegacyYearAnchor& anchor);
+    Patch18YearRecord patchedNextYear(const Patch18YearRecord& knownYear);
+    Patch18YearRecord patchedPreviousYear(const Patch18YearRecord& knownYear);
+private:
+    Integer calculationDay_{};
+    std::map<Integer, Integer> gates_{{Integer{0}, FOUNDATION_DAY_OLD}};
+    Integer minGateIndex_{0};
+    Integer maxGateIndex_{0};
+    Integer chooseRank(const LegacyAnswerRing& stream, const Integer& familySize) const;
+    Integer positiveGateGap(const Integer& n) const;
+    Integer negativeGateGap(const Integer& n) const;
+    Integer ensureGateIndex(const Integer& index);
+    Integer exactGateIndex(const Integer& day);
+};
+
+class Patch18SequentialYearWalkWrapper {
+public:
+    Patch18YearWalkResult repair(const Integer& calculationDay,
+                                 const LegacyYearAnchor& anchor,
+                                 const Integer& targetDay) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1387,6 +1442,16 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch18SequentialYearWalkHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const Discovery18LegacyYearJumpHandler& legacyHandler,
+                const LegacyYearJumpAdapter& adapter,
+                const Patch18SequentialYearWalkWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1637,6 +1702,14 @@ public:
                                 const LegacyYearJumpAdapter& adapter,
                                 const BaseValidationManager& validator,
                                 const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedYearWalk(BaseMonsterContext& ctx,
+                                 const Patch18SequentialYearWalkHandler& handler,
+                                 const Discovery18LegacyYearJumpHandler& legacyHandler,
+                                 const LegacyYearJumpAdapter& adapter,
+                                 const Patch18SequentialYearWalkWrapper& wrapper,
+                                 const BaseValidationManager& validator,
+                                 const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1757,7 +1830,11 @@ public:
         int queriedBowlId,
         int seal) const;
     LegacyYearJumpReport executeLegacyYearJump(const LegacyYearAnchor& anchor,
-                                               const Integer& targetDay) const;
+                                               const Integer& targetDay,
+                                               const Integer& calculationDay = FOUNDATION_DAY_OLD) const;
+    LegacyYearJumpReport executeUnpatchedYearJumpDiagnostic(
+        const LegacyYearAnchor& anchor,
+        const Integer& targetDay) const;
 };
 
 } // namespace pastafari

@@ -508,3 +508,37 @@ Omnes regressiones Graduum 1–35 denuo compilatae et exsecutae sunt; omnes tran
 ### Quod consulto nondum adest
 
 Nullus `findYearByWalkPatch`, nullus `patchedNextYear`, nullus `patchedPreviousYear`, nullus `ignoredGuess`, nullus PATCH 18 et nullus cache Patch 19 adest. Gradus 37 solus debet `oldJumpGuess` servare sed ad telemetry relegare atque annum target anno post annum determinare.
+
+
+## PATCH 18 — oldJumpGuess ad telemetry relegatus, annus sequentialiter inventus
+
+Gradus 37 cicatricem saltus `/365` servat sed potestatem semanticam ei aufert. `oldJumpGuess` manet intactus et `Discovery18LegacyYearJumpHandler` adhuc vere currit ante correctionem; eius output in `oldGuess` servatur, sed `guessUsedAsOutput=false` post patch fit.
+
+`Patch18YearWalkWorkspace` est state semanticum invocationi proprium, non cache persistens. A porta Fundationis indice 0 incipit et portas necessarias tantum producit. Intervalla portarum per sauce productionis iam emendatum, bowl 1, next-bowl circularis et seal 1 eliguntur. Nullum oracle productionis adhibetur.
+
+Anchor `LegacyYearAnchor` ad recordum `Patch18YearRecord` resolvitur: `firstDay-1` debet esse opening gate exacta et `lastDay` closing gate exacta. `patchedNextYear` a closing gate anni noti incipit, candidatos cum saltem sex gap et longitudine 252..5778 colligit, eos stable-sort per longitudinem servat, deinde sauce in opening gate cum seal 11 atque selectione Patch 13/14 utitur. `patchedPreviousYear` eandem structuram retro cum seal 12 facit.
+
+`Patch18SequentialYearWalkWrapper` ab anchor anno 5000 incipit. Dum target post closing gate est, unum `patchedNextYear` facit; dum target non post opening gate est, unum `patchedPreviousYear` facit. Terminatio requirit `openGateDay < targetDay <= closeGateDay`.
+
+Via activa est:
+
+```text
+BaseMonsterManager::executeLegacyYearJump
+-> BaseDispatcher::dispatchPatchedYearWalk
+-> Patch18SequentialYearWalkHandler
+-> Discovery18LegacyYearJumpHandler
+-> oldJumpGuess                 [telemetry]
+-> Patch18SequentialYearWalkWrapper
+-> Patch18YearWalkWorkspace
+-> patchedNextYear / patchedPreviousYear
+```
+
+Via `executeUnpatchedYearJumpDiagnostic` cicatricem Gradus 36 separatam servat et oldJumpGuess adhuc ut output reddit.
+
+Regressio Gradus 36 byte-for-byte non mutata est. Contra Stage 36 pristinum adhuc tres discrepantias et exitum 1 reddit; contra PATCH 18 transit. Probatio Gradus 37 quinque casus exercet: nullum transitum, unum et duo `nextYear`, unum et duo `previousYear`. In omnibus quinque oldJumpGuess a numero normativo differt sed in telemetry servatur; summa graduum forward est 3 et backward 3.
+
+Omnes regressiones Graduum 1–37 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus cache annorum persistens, nulla map keyed tantum per year number, nullus `calculationDayFingerprint`, nullus guard cache et nullus PATCH 19 adest. Workspace portarum tantum invocationi proprium est et post manager invocationem perit.

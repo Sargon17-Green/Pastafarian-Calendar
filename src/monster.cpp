@@ -3511,6 +3511,43 @@ void BaseValidationManager::requireDiscovery18LegacyYearJumpReady(
     }
 }
 
+void BaseValidationManager::requirePatch18YearWalkReady(
+    const BaseMonsterContext& ctx) const {
+    if (!ctx.patch18Applied || !ctx.patch18GuessTelemetryOnly) {
+        throw BaseValidationError("PATCH 18 nondum applicatus est");
+    }
+    if (!ctx.discovery18JumpReady) {
+        throw BaseValidationError("cicatrix oldJumpGuess ante PATCH 18 non cucurrit");
+    }
+    const Integer expectatusGuess = oldJumpGuess(
+        ctx.discovery18JumpAnchor,
+        ctx.discovery18JumpTargetDay);
+    if (ctx.discovery18OldJumpGuess != expectatusGuess) {
+        throw BaseValidationError("telemetria oldJumpGuess mutata est");
+    }
+    if (ctx.discovery18GuessUsedAsOutput) {
+        throw BaseValidationError("oldJumpGuess adhuc output semanticum gubernat");
+    }
+    if (ctx.patch18OutputYear.number != ctx.discovery18JumpOutputYearNumber) {
+        throw BaseValidationError("numerus anni semanticus cum recordo PATCH 18 non congruit");
+    }
+    if (!(ctx.patch18OutputYear.openGateDay < ctx.discovery18JumpTargetDay &&
+          ctx.discovery18JumpTargetDay <= ctx.patch18OutputYear.closeGateDay)) {
+        throw BaseValidationError("target dies intra annum PATCH 18 non continetur");
+    }
+    if (ctx.patch18AnchorYear.number != ctx.discovery18JumpAnchor.number ||
+        ctx.patch18AnchorYear.openGateDay + 1 != ctx.discovery18JumpAnchor.firstDay ||
+        ctx.patch18AnchorYear.closeGateDay != ctx.discovery18JumpAnchor.lastDay) {
+        throw BaseValidationError("anchor PATCH 18 a LegacyYearAnchor differt");
+    }
+    const Integer expectedNumber = ctx.patch18AnchorYear.number
+        + Integer{ctx.patch18ForwardSteps}
+        - Integer{ctx.patch18BackwardSteps};
+    if (ctx.patch18OutputYear.number != expectedNumber) {
+        throw BaseValidationError("numerus anni non congruit cum gradibus sequentialibus");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -3740,6 +3777,224 @@ Integer LegacyYear5000TieAdapter::select(
 Integer LegacyYearJumpAdapter::guess(const LegacyYearAnchor& anchor,
                                      const Integer& targetDay) const {
     return oldJumpGuess(anchor, targetDay);
+}
+
+Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
+    : calculationDay_(calculationDay) {}
+
+Integer Patch18YearWalkWorkspace::chooseRank(
+    const LegacyAnswerRing& stream,
+    const Integer& familySize) const {
+    if (familySize < 1) {
+        throw BaseValidationError("familia anni vacua est");
+    }
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    if (familySize <= M_OLD) {
+        return rejectionWrapper.repair(stream, familySize, selectionAdapter).outputRank;
+    }
+    const Patch14WideDetourWrapper wideWrapper;
+    return wideWrapper.repair(stream, familySize, selectionAdapter).outputRank;
+}
+
+Integer Patch18YearWalkWorkspace::positiveGateGap(const Integer& n) const {
+    if (n < 1) {
+        throw BaseValidationError("index portae positivus requiritur");
+    }
+    const Patch11LatchedOrderSauceResult sauce = sauceWithOrderAt46Latch(
+        FOUNDATION_DAY_OLD,
+        FOUNDATION_DAY_OLD + n);
+    const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
+    const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
+        sauce.finalBowls,
+        1,
+        nextBowl,
+        1);
+    return 41 + chooseRank(stream, Integer{922});
+}
+
+Integer Patch18YearWalkWorkspace::negativeGateGap(const Integer& n) const {
+    if (n < 1) {
+        throw BaseValidationError("magnitudo portae negativae positiva requiritur");
+    }
+    const Patch11LatchedOrderSauceResult sauce = sauceWithOrderAt46Latch(
+        FOUNDATION_DAY_OLD,
+        FOUNDATION_DAY_OLD - n);
+    const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
+    const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
+        sauce.finalBowls,
+        1,
+        nextBowl,
+        1);
+    return 41 + chooseRank(stream, Integer{922});
+}
+
+Integer Patch18YearWalkWorkspace::ensureGateIndex(const Integer& index) {
+    if (index > maxGateIndex_) {
+        Integer n = maxGateIndex_ + 1;
+        while (n <= index) {
+            gates_[n] = gates_.at(n - 1) + positiveGateGap(n);
+            ++n;
+        }
+        maxGateIndex_ = index;
+    }
+    if (index < minGateIndex_) {
+        Integer n = minGateIndex_ - 1;
+        while (n >= index) {
+            gates_[n] = gates_.at(n + 1) - negativeGateGap(-n);
+            --n;
+        }
+        minGateIndex_ = index;
+    }
+    return gates_.at(index);
+}
+
+Integer Patch18YearWalkWorkspace::exactGateIndex(const Integer& day) {
+    if (day >= FOUNDATION_DAY_OLD) {
+        while (gates_.at(maxGateIndex_) < day) {
+            ensureGateIndex(maxGateIndex_ + 1);
+        }
+        for (Integer i = Integer{0}; i <= maxGateIndex_; ++i) {
+            if (gates_.at(i) == day) {
+                return i;
+            }
+        }
+    } else {
+        while (gates_.at(minGateIndex_) > day) {
+            ensureGateIndex(minGateIndex_ - 1);
+        }
+        for (Integer i = Integer{-1}; i >= minGateIndex_; --i) {
+            if (gates_.at(i) == day) {
+                return i;
+            }
+        }
+    }
+    throw BaseValidationError("dies portae exactus in workspace PATCH 18 non inventus est");
+}
+
+Patch18YearRecord Patch18YearWalkWorkspace::resolveAnchor(
+    const LegacyYearAnchor& anchor) {
+    if (anchor.firstDay > anchor.lastDay) {
+        throw BaseValidationError("fines anchoris inversi sunt");
+    }
+    const Integer openGateDay = anchor.firstDay - 1;
+    const Integer openGateIndex = exactGateIndex(openGateDay);
+    const Integer closeGateIndex = exactGateIndex(anchor.lastDay);
+    if (closeGateIndex - openGateIndex < 6) {
+        throw BaseValidationError("anchor anni minus sex intervalla portarum habet");
+    }
+    return Patch18YearRecord{
+        anchor.number,
+        openGateIndex,
+        closeGateIndex,
+        openGateDay,
+        anchor.lastDay
+    };
+}
+
+Patch18YearRecord Patch18YearWalkWorkspace::patchedNextYear(
+    const Patch18YearRecord& knownYear) {
+    const Integer openIndex = knownYear.closeGateIndex;
+    struct Candidate { Integer closeIndex{}; Integer length{}; };
+    std::vector<Candidate> candidates;
+    Integer closeIndex = openIndex + 1;
+    for (;;) {
+        const Integer closeDay = ensureGateIndex(closeIndex);
+        const Integer openDay = ensureGateIndex(openIndex);
+        const Integer length = closeDay - openDay;
+        if (length > REAL_YEAR_MAX_PATCH) {
+            break;
+        }
+        if (closeIndex - openIndex >= 6 && length >= 252) {
+            candidates.push_back(Candidate{closeIndex, length});
+        }
+        ++closeIndex;
+    }
+    std::stable_sort(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b) {
+        return a.length < b.length;
+    });
+    if (candidates.empty()) {
+        throw BaseValidationError("annus sequens PATCH 18 inveniri non potuit");
+    }
+    const Integer openDay = ensureGateIndex(openIndex);
+    const Patch11LatchedOrderSauceResult sauce = sauceWithOrderAt46Latch(calculationDay_, openDay);
+    const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
+    const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
+        sauce.finalBowls, 1, nextBowl, 11);
+    const Integer rank = chooseRank(stream, Integer{candidates.size()});
+    const std::size_t chosen = (rank - 1).convert_to<std::size_t>();
+    const Integer chosenClose = candidates.at(chosen).closeIndex;
+    return Patch18YearRecord{
+        knownYear.number + 1,
+        openIndex,
+        chosenClose,
+        openDay,
+        ensureGateIndex(chosenClose)
+    };
+}
+
+Patch18YearRecord Patch18YearWalkWorkspace::patchedPreviousYear(
+    const Patch18YearRecord& knownYear) {
+    const Integer closeIndex = knownYear.openGateIndex;
+    struct Candidate { Integer openIndex{}; Integer length{}; };
+    std::vector<Candidate> candidates;
+    Integer openIndex = closeIndex - 1;
+    for (;;) {
+        const Integer openDay = ensureGateIndex(openIndex);
+        const Integer closeDay = ensureGateIndex(closeIndex);
+        const Integer length = closeDay - openDay;
+        if (length > REAL_YEAR_MAX_PATCH) {
+            break;
+        }
+        if (closeIndex - openIndex >= 6 && length >= 252) {
+            candidates.push_back(Candidate{openIndex, length});
+        }
+        --openIndex;
+    }
+    std::stable_sort(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b) {
+        return a.length < b.length;
+    });
+    if (candidates.empty()) {
+        throw BaseValidationError("annus prior PATCH 18 inveniri non potuit");
+    }
+    const Integer closeDay = ensureGateIndex(closeIndex);
+    const Patch11LatchedOrderSauceResult sauce = sauceWithOrderAt46Latch(calculationDay_, closeDay);
+    const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
+    const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
+        sauce.finalBowls, 1, nextBowl, 12);
+    const Integer rank = chooseRank(stream, Integer{candidates.size()});
+    const std::size_t chosen = (rank - 1).convert_to<std::size_t>();
+    const Integer chosenOpen = candidates.at(chosen).openIndex;
+    return Patch18YearRecord{
+        knownYear.number - 1,
+        chosenOpen,
+        closeIndex,
+        ensureGateIndex(chosenOpen),
+        closeDay
+    };
+}
+
+Patch18YearWalkResult Patch18SequentialYearWalkWrapper::repair(
+    const Integer& calculationDay,
+    const LegacyYearAnchor& anchor,
+    const Integer& targetDay) const {
+    Patch18YearWalkWorkspace workspace(calculationDay);
+    const Patch18YearRecord anchorYear = workspace.resolveAnchor(anchor);
+    Patch18YearRecord current = anchorYear;
+    std::size_t forwardSteps = 0;
+    std::size_t backwardSteps = 0;
+    while (targetDay > current.closeGateDay) {
+        current = workspace.patchedNextYear(current);
+        ++forwardSteps;
+    }
+    while (targetDay <= current.openGateDay) {
+        current = workspace.patchedPreviousYear(current);
+        ++backwardSteps;
+    }
+    if (!(current.openGateDay < targetDay && targetDay <= current.closeGateDay)) {
+        throw BaseValidationError("target dies extra annum inventum PATCH 18 est");
+    }
+    return Patch18YearWalkResult{anchorYear, current, forwardSteps, backwardSteps};
 }
 
 Patch17Year5000TiePreparation Year5000TiePatchWrapper::repair(
@@ -4510,6 +4765,39 @@ void Discovery18LegacyYearJumpHandler::handle(
     validator.requireDiscovery18LegacyYearJumpReady(ctx);
 }
 
+void Patch18SequentialYearWalkHandler::handle(
+    BaseMonsterContext& ctx,
+    const Discovery18LegacyYearJumpHandler& legacyHandler,
+    const LegacyYearJumpAdapter& adapter,
+    const Patch18SequentialYearWalkWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    legacyHandler.handle(ctx, adapter, validator, metrics);
+    const Integer telemetryGuess = ctx.discovery18OldJumpGuess;
+    ctx.branchTrace.push_back("PATCH18:OLD_JUMP_GUESS_TELEMETRY_ONLY");
+    metrics.bump(ctx, "patch18.oldJumpGuess.telemetry");
+
+    const Patch18YearWalkResult walked = wrapper.repair(
+        ctx.patch18CalculationDay,
+        ctx.discovery18JumpAnchor,
+        ctx.discovery18JumpTargetDay);
+    ctx.patch18AnchorYear = walked.anchorYear;
+    ctx.patch18OutputYear = walked.outputYear;
+    ctx.patch18ForwardSteps = walked.forwardSteps;
+    ctx.patch18BackwardSteps = walked.backwardSteps;
+    ctx.discovery18OldJumpGuess = telemetryGuess;
+    ctx.discovery18JumpOutputYearNumber = walked.outputYear.number;
+    ctx.discovery18GuessUsedAsOutput = false;
+    ctx.patch18GuessTelemetryOnly = true;
+    ctx.patch18Applied = true;
+    ctx.currentHandler = "Patch18SequentialYearWalkHandler";
+    ctx.phase = "PATCH_18_SEQUENTIAL_YEAR_WALK";
+    ctx.status = "OLD_JUMP_GUESS_TELEMETRY_WALK_SEMANTIC_ACTIVE";
+    ctx.branchTrace.push_back("PATCH18:SEQUENTIAL_YEAR_WALK_APPLIED");
+    metrics.bump(ctx, "patch18.sequential.year.walk");
+    validator.requirePatch18YearWalkReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -5164,6 +5452,18 @@ void BaseDispatcher::dispatchLegacyYearJump(
     handler.handle(ctx, adapter, validator, metrics);
 }
 
+void BaseDispatcher::dispatchPatchedYearWalk(
+    BaseMonsterContext& ctx,
+    const Patch18SequentialYearWalkHandler& handler,
+    const Discovery18LegacyYearJumpHandler& legacyHandler,
+    const LegacyYearJumpAdapter& adapter,
+    const Patch18SequentialYearWalkWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:PATCH18_SEQUENTIAL_YEAR_WALK");
+    handler.handle(ctx, legacyHandler, adapter, wrapper, validator, metrics);
+}
+
 void BaseDispatcher::dispatchPatchedYear5000Tie(
     BaseMonsterContext& ctx,
     const Patch17Year5000TieHandler& handler,
@@ -5558,6 +5858,54 @@ LegacyYear5000TieReport BaseMonsterManager::executeUnpatchedYear5000TieDiagnosti
 }
 
 LegacyYearJumpReport BaseMonsterManager::executeLegacyYearJump(
+    const LegacyYearAnchor& anchor,
+    const Integer& targetDay,
+    const Integer& calculationDay) const {
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.discovery18JumpAnchor = anchor;
+    ctx.discovery18JumpTargetDay = targetDay;
+    ctx.patch18CalculationDay = calculationDay;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyYearJumpAdapter adapter;
+    const Discovery18LegacyYearJumpHandler legacyHandler;
+    const Patch18SequentialYearWalkWrapper wrapper;
+    const Patch18SequentialYearWalkHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedYearWalk(
+        ctx,
+        handler,
+        legacyHandler,
+        adapter,
+        wrapper,
+        validator,
+        metrics);
+
+    return LegacyYearJumpReport{
+        ctx.discovery18JumpAnchor,
+        ctx.discovery18JumpTargetDay,
+        ctx.discovery18OldJumpGuess,
+        ctx.discovery18JumpOutputYearNumber,
+        ctx.discovery18GuessUsedAsOutput,
+        ctx.discovery18JumpReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.patch18CalculationDay,
+        ctx.patch18AnchorYear,
+        ctx.patch18OutputYear,
+        ctx.patch18ForwardSteps,
+        ctx.patch18BackwardSteps,
+        ctx.patch18GuessTelemetryOnly,
+        ctx.patch18Applied
+    };
+}
+
+LegacyYearJumpReport BaseMonsterManager::executeUnpatchedYearJumpDiagnostic(
     const LegacyYearAnchor& anchor,
     const Integer& targetDay) const {
     BaseMonsterContext ctx;

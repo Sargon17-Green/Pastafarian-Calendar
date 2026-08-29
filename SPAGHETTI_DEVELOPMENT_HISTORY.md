@@ -1128,3 +1128,46 @@ Additi sunt `LegacyYearAnchor`, `oldJumpGuess`, campi contextus Discovery 18, `L
 ### Quod nondum fit
 
 `oldJumpGuess` nondum telemetry tantum est. Nulla ambulatio productionis per `patchedNextYear`/`patchedPreviousYear`, nullus `findYearByWalkPatch`, nullus PATCH 18 et nullus bad-cache-key Patch 19 praemature adest. Gradus 37 debet cicatricem servare, guess ignorare ad decisionem, et annum target sequentialiter determinare.
+
+
+## Gradus 37 — PATCH 18: ambulatio anni sequentialis, guess legacy telemetry tantum
+
+### Cicatrix servata
+
+`oldJumpGuess(anchor,targetDay)=anchor.number+floorDiv(targetDay-anchor.firstDay,365)` manet intactus. `Discovery18LegacyYearJumpHandler` quoque manet via legacy quae guess directe output facere potest. PATCH 18 eam viam ante correctionem vere exsequitur, `oldGuess` servat et metricam telemetry auget. Via diagnostica separata eundem defectum Gradus 36 sine correctione exercet.
+
+### Workspace portarum invocationi proprium
+
+`Patch18YearWalkWorkspace` nullum cache inter invocationes servat. Initium est porta Fundationis indice 0. Portae positivae et negativae lazily construuntur per sauce productionis, bowl 1, next-bowl secundum `orderAt46Latch`, seal portae 1 et selectionem iam emendatam. Anchor anni 5000 per dies portarum exactos ad indices resolvitur.
+
+### patchedNextYear et patchedPreviousYear
+
+`patchedNextYear` opening gate anni sequentis ex closing gate anni noti accipit. Close gates successivae explorantur donec longitudo 5778 superetur. Tantum candidati cum saltem sex gap et longitudine 252..5778 servantur; stable sort per longitudinem historicam manet. Sauce in opening gate cum calculationDay originali et seal 11 answer stream facit; rank per Patch 13/14 eligitur.
+
+`patchedPreviousYear` symmetricum est: closing gate ex opening gate anni noti venit, opening gates retro explorantur, eadem fines candidatorum servantur, sauce in closing gate cum seal 12 rank eligit.
+
+### Ambulatio
+
+`Patch18SequentialYearWalkWrapper` ab anchor 5000 incipit et target diem sine saltibus quaerit. Si target post close est, unum annum procedit; si target `<= open` est, unum annum retrocedit. Guess `/365` numquam determinat directionem, numerum iterationum aut output semanticum.
+
+`Patch18SequentialYearWalkHandler` legacy handler primum currere cogit. Postea `discovery18GuessUsedAsOutput=false`, `patch18GuessTelemetryOnly=true` et output anni ex recordo ambulato ponuntur. Validator confirmat target intra intervalum repertum, anchor congruere, numerum anni cum numero graduum forward/backward congruere et telemetriam guess veterem non mutatam esse.
+
+### Regressiones
+
+Probatio Gradus 36 byte-for-byte servata contra Stage 36 pristinum adhuc tres discrepantias habet; contra PATCH 18 nunc transit.
+
+Probatio Gradus 37 casus hos probat:
+
+```text
+anchor +365 dies -> annus 5000, gradus 0
+primus dies 5001 -> annus 5001, gradus +1
+primus dies 5002 -> annus 5002, gradus +2
+primus dies 4999 -> annus 4999, gradus -1
+primus dies 4998 -> annus 4998, gradus -2
+```
+
+In omnibus quinque casibus oldJumpGuess differt a numero normativo et tamen ut telemetry exacte servatur. Via diagnostica in omnibus eundem old guess ut output reddit. Omnes regressiones Graduum 1–37 transeunt.
+
+### Quod nondum fit
+
+Nullus cache persistens annorum, nullus key ex solo `year.number`, nullus `calculationDayFingerprint`, nulli guards `openGate`/`closeGate`/fingerprint pro cache et nullus PATCH 19 adest. Gradus 38 debet DISCOVERY 19 tantum introducere.
