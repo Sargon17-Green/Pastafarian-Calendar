@@ -1,0 +1,188 @@
+name: Verificacion complet — JavaScript + Interlingue
+
+on:
+  push:
+    branches:
+      - 'JavaScript+Interlingue'
+  pull_request:
+    branches:
+      - 'JavaScript+Interlingue'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: javascript-interlingue-full-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22.16.0'
+
+jobs:
+  historical-stages:
+    name: Historic — ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Stage 01–08
+            artifact: stages-01-08
+            command: |
+              node tests/run-tests.js
+              node tests/verify-stage-01.js
+              for n in $(seq -f '%02g' 1 8); do
+                node "tests/discovery-${n}.js"
+                node "tests/patch-${n}.js"
+              done
+          - label: Stage 09–16
+            artifact: stages-09-16
+            command: |
+              for n in $(seq -f '%02g' 9 16); do
+                node "tests/discovery-${n}.js"
+                node "tests/patch-${n}.js"
+              done
+          - label: Stage 17–26
+            artifact: stages-17-26
+            command: |
+              for n in $(seq -f '%02g' 17 26); do
+                node "tests/discovery-${n}.js"
+                node "tests/patch-${n}.js"
+              done
+          - label: Integration 54
+            artifact: integration-54
+            command: |
+              node tests/integration-54.js
+          - label: Audit 55 core
+            artifact: audit-55-core
+            command: |
+              node tests/final-audit-55.js
+          - label: Audit 55 E2E
+            artifact: audit-55-e2e
+            command: |
+              node tests/final-audit-55-e2e.js
+          - label: Audit 55 crossing
+            artifact: audit-55-cross
+            command: |
+              node tests/final-audit-55-cross.js
+    steps:
+      - name: Extraer li repository
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Registrar versiones
+        run: |
+          node --version
+          npm --version
+
+      - name: Verificar que null HANDOFF es trackat
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)HANDOFF_' ; then
+            echo 'ERRORE: un file HANDOFF_* es trackat in li repository.' >&2
+            exit 1
+          fi
+          echo 'HANDOFF_TRACKED=NO'
+
+      - name: Executer ${{ matrix.label }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          {
+            echo "SHARD=${{ matrix.artifact }}"
+            echo "NODE=$(node --version)"
+            echo "NPM=$(npm --version)"
+            ${{ matrix.command }}
+            echo "RESULT=PASS"
+          } 2>&1 | tee "logs/${{ matrix.artifact }}.log"
+
+      - name: Conservar li log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-interlingue-${{ matrix.artifact }}
+          path: logs/${{ matrix.artifact }}.log
+          if-no-files-found: error
+          retention-days: 30
+
+  corrective-56:
+    name: Corrective 56 — ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Core e 12 post-stirs
+            artifact: stage-56-core
+            command: node tests/stage-56-corrective.js
+          - label: Foundation
+            artifact: stage-56-foundation
+            command: node tests/stage-56-e2e-foundation.js
+          - label: Near-Foundation crossing
+            artifact: stage-56-near-foundation
+            command: node tests/stage-56-e2e-near-foundation.js
+          - label: Witnesses canonical extern
+            artifact: stage-56-reference
+            command: node tests/stage-56-e2e-reference.js
+    steps:
+      - name: Extraer li repository
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Registrar versiones
+        run: |
+          node --version
+          npm --version
+
+      - name: Executer ${{ matrix.label }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          {
+            echo "SHARD=${{ matrix.artifact }}"
+            echo "NODE=$(node --version)"
+            echo "NPM=$(npm --version)"
+            ${{ matrix.command }}
+            echo "RESULT=PASS"
+          } 2>&1 | tee "logs/${{ matrix.artifact }}.log"
+
+      - name: Conservar li log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-interlingue-${{ matrix.artifact }}
+          path: logs/${{ matrix.artifact }}.log
+          if-no-files-found: error
+          retention-days: 30
+
+  complete-branch:
+    name: Branche complet GREEN
+    if: always()
+    needs:
+      - historical-stages
+      - corrective-56
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exiger omni shards GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "historical-stages=${{ needs.historical-stages.result }}"
+          echo "corrective-56=${{ needs.corrective-56.result }}"
+          test "${{ needs.historical-stages.result }}" = "success"
+          test "${{ needs.corrective-56.result }}" = "success"
+          echo 'JAVASCRIPT_INTERLINGUE_BRANCH=GREEN'
