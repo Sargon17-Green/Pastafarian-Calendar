@@ -667,3 +667,34 @@ Regressio Gradus 40 nunc transit sub via activa reparata. Regressio Gradus 41 co
 ### Quod consulto nondum adest
 
 Nulla `legacyPositiveCompositions`, nullus `CutletPartitionPatchWrapper`, nullus filter prefix-sum portae internae et nullus PATCH 21 adest. Gradus 42 debet DISCOVERY 21 tantum introducere.
+
+## DISCOVERY 21 — partitio segmentorum portam internam calculationis ignorat
+
+Gradus 42 cicatricem proximam introducit sine correctione futura. Familia legacy nunc explicite repraesentatur per:
+
+```text
+legacyPositiveCompositions(gapCount, cutletCount)
+```
+
+Familia continet omnes compositiones positivas `gapCount` in exacte `cutletCount` partes et ordinem lexicographicum servat. `legacyPositiveCompositionUnrank` rank unius-based ex eadem familia aperit; nulla conditio portae internae ibi adhibetur.
+
+Via activa primum structuram anni per PATCH 20 iam correctam accipit. `Discovery21CutletPartitionHandler` ex recordo anni `gapCount` derivat, `calculationGateIndex` observat et, si porta strictissime interna est, `internalGateOffset` servat. Tamen signum hoc diagnosticum tantum manet: familia legacy non filtratur. Rank eligitur per answer ring crateris 2 cum sigillo 21 et per semanticas selectionis PATCH 13/14 iam reparatas; deinde unrank fit in tota familia positiva.
+
+Witness C++ localis utitur calculation-day qui est porta index 1. Annus 5000 illius invocationis habet `gapCount=9`; cutletCount normativus est 6 et porta interna offset 6. Familia legacy habet 56 compositiones, rank activus est 7, et output legacy est:
+
+```text
+[1,1,1,2,3,1]
+prefixa=[1,2,3,5,8,9]
+```
+
+Nullum prefixum est 6. Oracle C++ eiusdem lineae, qui regulam normativam ex APPENDIX A implementat, reddit:
+
+```text
+[4,1,1,1,1,1]
+```
+
+Haec partitio prefixum 6 habet. Regressio Gradus 42 igitur consulto exitum 1 reddit. Bootstrap et omnes regressiones Graduum 1–41 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus filter familiae per prefixum, nullus DP condicionatus, nullus `CutletPartitionPatchWrapper`, nullus `Patch21` et nulla correctio selectionis partitionis adest. Gradus 43 debet cicatricem legacy servare et familiam semanticam exacte ut subsequenciam filtratam eiusdem ordinis lexicographici introducere.

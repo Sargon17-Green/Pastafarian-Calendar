@@ -197,6 +197,40 @@ Patch20StructureSauceResult structureSaucePatch(
     const Integer& originalTargetDay,
     const Patch18YearRecord& year);
 
+struct LegacyPositiveCompositionFamily {
+    int gapCount = 0;
+    int cutletCount = 0;
+    Integer count{};
+};
+
+LegacyPositiveCompositionFamily legacyPositiveCompositions(int gapCount,
+                                                            int cutletCount);
+std::vector<int> legacyPositiveCompositionUnrank(
+    const LegacyPositiveCompositionFamily& family,
+    const Integer& rank1);
+
+struct LegacyCutletPartitionReport {
+    Integer calculationDay{};
+    Integer originalTargetDay{};
+    Integer calculationGateIndex{};
+    Patch18YearRecord resolvedYear{};
+    int gapCount = 0;
+    int cutletCount = 0;
+    int internalGateOffset = 0;
+    bool calculationDayIsInternalGate = false;
+    LegacyPositiveCompositionFamily legacyFamily{};
+    Integer selectionRank{};
+    std::vector<int> legacyPartition{};
+    std::vector<int> legacyPrefixSums{};
+    bool legacyHitInternalGateBoundary = false;
+    bool legacyIgnoredInternalGate = false;
+    bool ready = false;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 struct LegacyStructureSelectorToken {
     Integer bowl2{};
     PermutationOrder orderAt46Latch{};
@@ -546,6 +580,18 @@ struct BaseMonsterContext {
     bool patch20GhostReachedSelector=false;
     bool patch20Applied=false;
     bool discovery20StructureSauceReady=false;
+    Integer discovery21CalculationGateIndex{};
+    int discovery21GapCount=0;
+    int discovery21CutletCount=0;
+    int discovery21InternalGateOffset=0;
+    bool discovery21CalculationDayIsInternalGate=false;
+    LegacyPositiveCompositionFamily discovery21LegacyFamily{};
+    Integer discovery21SelectionRank{};
+    std::vector<int> discovery21LegacyPartition{};
+    std::vector<int> discovery21LegacyPrefixSums{};
+    bool discovery21LegacyHitInternalGateBoundary=false;
+    bool discovery21LegacyIgnoredInternalGate=false;
+    bool discovery21CutletPartitionReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -915,6 +961,7 @@ public:
     void requirePatch19YearCacheReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery20StructureSauceReady(const BaseMonsterContext& ctx) const;
     void requirePatch20StructureSauceReady(const BaseMonsterContext& ctx) const;
+    void requireDiscovery21CutletPartitionReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1011,6 +1058,12 @@ class Patch19YearCacheGuardWrapper { public: Patch19GuardedYearCacheResolution r
 class LegacyStructureSauceAdapter { public: Patch11LatchedOrderSauceResult call(const Integer& calculationDay, const Integer& originalTargetDay) const; };
 class LegacyStructureSelectorAdapter { public: LegacyStructureSelectorToken consume(const Patch11LatchedOrderSauceResult& sauce) const; };
 class StructureSaucePatchWrapper { public: Patch20StructureSauceResult repair(const Integer& calculationDay, const Integer& originalTargetDay, const Patch18YearRecord& year) const; };
+class LegacyPositiveCompositionAdapter {
+public:
+    LegacyPositiveCompositionFamily family(int gapCount, int cutletCount) const;
+    std::vector<int> unrank(const LegacyPositiveCompositionFamily& family,
+                            const Integer& rank1) const;
+};
 
 class LegacyArithmeticAdapter {
 public:
@@ -1524,6 +1577,16 @@ class Discovery19YearNumberCacheHandler { public: void handle(BaseMonsterContext
 class Patch19YearCacheGuardHandler { public: void handle(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Discovery19YearNumberCacheHandler& legacyHandler, const LegacyYearNumberOnlyCacheAdapter& adapter, const Patch19YearCacheGuardWrapper& wrapper, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
 class Discovery20StructureSauceHandler { public: void handle(BaseMonsterContext& ctx, const LegacyStructureSauceAdapter& sauceAdapter, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
 class Patch20StructureSauceHandler { public: void handle(BaseMonsterContext& ctx, const StructureSaucePatchWrapper& wrapper, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
+class Discovery21CutletPartitionHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyPositiveCompositionAdapter& adapter,
+                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                const Patch13RejectionWrapper& rejectionWrapper,
+                const Patch14WideDetourWrapper& wideWrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -1787,6 +1850,14 @@ public:
     void dispatchPatchedYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Patch19YearCacheGuardHandler& handler, const Discovery19YearNumberCacheHandler& legacyHandler, const LegacyYearNumberOnlyCacheAdapter& adapter, const Patch19YearCacheGuardWrapper& wrapper, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
     void dispatchDiscovery20StructureSauce(BaseMonsterContext& ctx, const Discovery20StructureSauceHandler& handler, const LegacyStructureSauceAdapter& sauceAdapter, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
     void dispatchPatchedStructureSauce(BaseMonsterContext& ctx, const Patch20StructureSauceHandler& handler, const StructureSaucePatchWrapper& wrapper, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
+    void dispatchDiscovery21CutletPartition(BaseMonsterContext& ctx,
+                                            const Discovery21CutletPartitionHandler& handler,
+                                            const LegacyPositiveCompositionAdapter& adapter,
+                                            const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                            const Patch13RejectionWrapper& rejectionWrapper,
+                                            const Patch14WideDetourWrapper& wideWrapper,
+                                            const BaseValidationManager& validator,
+                                            const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1916,6 +1987,12 @@ public:
     LegacyYearCacheReport executeUnpatchedYearNumberCacheDiagnostic(const LegacyYearAnchor& anchor, const Integer& targetDay, const Integer& calculationDay) const;
     LegacyStructureSauceReport executeDiscovery20StructureSauce(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const;
     LegacyStructureSauceReport executeUnpatchedDiscovery20StructureSauceDiagnostic(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const;
+    LegacyCutletPartitionReport executeDiscovery21CutletPartition(
+        const LegacyYearAnchor& anchor,
+        const Integer& originalTargetDay,
+        const Integer& calculationDay,
+        const Integer& calculationGateIndex,
+        int cutletCount) const;
     void clearLegacyYearNumberCacheDiagnostic() const;
 private:
     mutable std::map<Integer, LegacyYearCacheEntry> legacyYearNumberCache_{};

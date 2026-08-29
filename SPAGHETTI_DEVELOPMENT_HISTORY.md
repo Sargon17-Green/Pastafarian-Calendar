@@ -1316,3 +1316,44 @@ Compilator est `g++ (Debian 14.2.0-19) 14.2.0` cum C++20. Bootstrap transit. Reg
 ### Audit
 
 `SourceLanguageCatalog` et reference C++ manent byte pro byte intacti. `oldStructureSauce` et `Discovery20StructureSauceHandler` manent byte pro byte intacti. Nullus runtime externus adhibetur. Nullus codex PATCH 21, nulla `legacyPositiveCompositions` et nullus `CutletPartitionPatchWrapper` praemature additur.
+
+## Gradus 42 — DISCOVERY 21: familia positiva portam internam ignorat
+
+### Assumptio historica nova
+
+Postquam structure sauce in Gradus 41 ad `year.firstDay` correcta est, implementatio nunc partitionem segmentorum anni construit. Assumptio legacy est omnes compositiones positivas inter `gapCount` et `cutletCount` aeque legales esse, sine relatione ad calculation-day.
+
+Addita est familia virtualis `legacyPositiveCompositions(gapCount,cutletCount)`. Numerus membrorum exactus per combinatoriam integram computatur, et `legacyPositiveCompositionUnrank` eandem familiam lexicographice aperit. Nulla materializatio omnium membrorum requiritur, sed semantica familiae est exacte omnis compositio positiva.
+
+### Stratum monstri additum
+
+Additi sunt `LegacyPositiveCompositionFamily`, `LegacyCutletPartitionReport`, campi contextus DISCOVERY 21, `LegacyPositiveCompositionAdapter`, `Discovery21CutletPartitionHandler`, validator `requireDiscovery21CutletPartitionReady`, dispatcher proprius et manager route `executeDiscovery21CutletPartition`.
+
+Via manager prius PATCH 20 exsequitur et sauce semanticam anni accipit. Handler deinde `gapCount` ex indicibus portarum anni derivat. `calculationGateIndex` separatim transit; si index inter opening et closing gate stricte iacet, `internalGateOffset` computatur et in contextu servatur. Hoc tamen non mutat familiam neque rank. Flag `legacyIgnoredInternalGate` cicatricem expresse testabilem facit.
+
+Rank partitionis per craterem 2, successor circularis ex `orderAt46Latch`, sigillum 21 et electiones PATCH 13/14 iam existentes determinatur. Sic DISCOVERY 21 non reintroducit bias aut assumptionem wide veterem; defectus novus solum est amplitudo familiae non filtrata.
+
+### Witness
+
+Oracle C++ localis elegit calculation-day ad portam index 1. Annus 5000 habet opening index -5 et closing index 4, ergo `gapCount=9` et porta calculationis offset 6 est. CutletCount normativus ex structure sauce est 6.
+
+Familia legacy integra habet 56 membra. Rank activus 7 aperit:
+
+```text
+legacy=[1,1,1,2,3,1]
+prefixa=[1,2,3,5,8,9]
+```
+
+Porta interna offset 6 non attingitur. Oracle normativus eiusdem C++ implementationis test-only reddit:
+
+```text
+normativa=[4,1,1,1,1,1]
+```
+
+cuius prefixa 4,5,6 continent. Regressio igitur intentionaliter `REGRESSIO_DISCOVERY_21_DEFECIT` cum exitu 1 reddit.
+
+### Regressionum status et fines
+
+Bootstrap transit et regressiones Graduum 1–41 omnes transeunt. `SourceLanguageCatalog` et duo fasciculi reference manent byte pro byte intacti. Nullus runtime externus adhibetur.
+
+Nullus codex PATCH 21 adest: nulla familia filtrata, nullus DP qui prefixum internum imponit, nullus `CutletPartitionPatchWrapper`. Etiam nullus generator nominum repetitorum vel codex PATCH 22 praemature additur.
