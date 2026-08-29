@@ -1234,3 +1234,30 @@ Additi sunt `Patch19GuardedYearCacheResolution`, campi contextus/report cicatric
 ### Quod nondum fit
 
 Nulla `oldStructureSauce`, nulla sauce structurae cum `originalTargetDay`, nullus ghost sauce et nullus PATCH 20 adest. Gradus 40 debet DISCOVERY 20 solum introducere et oldStructureSauce realiter ad selectoris inputum mittere.
+
+## Gradus 40 — DISCOVERY 20: oldStructureSauce cum target originali ad selector
+
+### Cicatrix nova
+
+`oldStructureSauce(calculationDay, originalTargetDay)` directe `sauceWithOrderAt46Latch(calculationDay, originalTargetDay)` reddit. Nulla abstractione falsa, nulla constantia et nullus oracle productionis adhibetur.
+
+`BaseMonsterManager::executeDiscovery20StructureSauce` annum target primum per viam PATCH 19 iam reparatam resolvit. `yearFirstDay` ex `resolvedYear.openGateDay + 1` derivatur, sed in hoc gradu solum observatur. `Discovery20StructureSauceHandler` target originalem ad `LegacyStructureSauceAdapter` mittit, deinde `LegacyStructureSelectorAdapter` bowl2 et orderAt46Latch ex sauce veteri directe consumit.
+
+### Witness et regressio
+
+Anchor est annus 5000 Fundationis. Control cum `originalTargetDay == yearFirstDay` congruit. Tres target originales distincti intra eundem annum sauce legacy diversas generant. Test localis C++ confirmat simul:
+
+- `oldStructureSauce(cDay, originalTargetDay)` cum oracle sauce eiusdem target exacta congruere;
+- annum resolutum et `yearFirstDay` immutatos manere;
+- selectoris token directe ex sauce legacy venire;
+- token selectoris pro tribus witness a sauce normativa `(cDay, yearFirstDay)` discrepare.
+
+Regressio consulto exitum 1 cum tribus discrepantiis exactis reddit. Omnes regressiones 1–39 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `LegacyStructureSelectorToken`, `LegacyStructureSauceReport`, campi contextus Discovery 20, `LegacyStructureSauceAdapter`, `LegacyStructureSelectorAdapter`, `Discovery20StructureSauceHandler`, validator, dispatchatio et manager route propria.
+
+### Quod nondum fit
+
+Nulla separatio ghost/semantic adest. `oldStructureSauce` adhuc ipsum inputum selectoris gubernat. Nulla sauce structurae cum `yearFirstDay` in production recomputatur et nullus PATCH 20 praemature additur.

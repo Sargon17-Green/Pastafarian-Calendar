@@ -873,6 +873,12 @@ Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     };
 }
 
+Patch11LatchedOrderSauceResult oldStructureSauce(
+    const Integer& calculationDay,
+    const Integer& originalTargetDay) {
+    return sauceWithOrderAt46Latch(calculationDay, originalTargetDay);
+}
+
 int oldNextBowlFixedName(int id) {
     if (id < 1 || id > 6) {
         throw BaseValidationError("ID crateris inter unum et sex requiritur");
@@ -3570,6 +3576,14 @@ void BaseValidationManager::requirePatch19YearCacheReady(const BaseMonsterContex
     }
     if (ctx.discovery19CacheOutput.number != ctx.discovery19CachedEntry.value.number) throw BaseValidationError("output PATCH 19 a value semantico differt");
 }
+void BaseValidationManager::requireDiscovery20StructureSauceReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.discovery20StructureSauceReady) throw BaseValidationError("structure sauce legacy nondum paratus est");
+    if (!ctx.discovery20SelectorConsumedLegacySauce) throw BaseValidationError("selector structure sauce legacy non consumpsit");
+    if (ctx.discovery20YearFirstDay != ctx.discovery20ResolvedYear.openGateDay + 1) throw BaseValidationError("primus dies anni ex open gate male derivatus est");
+    if (!(ctx.discovery20ResolvedYear.openGateDay < ctx.discovery20OriginalTargetDay && ctx.discovery20OriginalTargetDay <= ctx.discovery20ResolvedYear.closeGateDay)) throw BaseValidationError("target originalis extra annum resolutum est");
+    if (ctx.discovery20SelectorToken.bowl2 != ctx.discovery20LegacyStructureSauce.finalBowls.at(1)) throw BaseValidationError("selector bowl2 non ex oldStructureSauce venit");
+    if (ctx.discovery20SelectorToken.orderAt46Latch != ctx.discovery20LegacyStructureSauce.orderAt46Latch) throw BaseValidationError("selector order non ex oldStructureSauce venit");
+}
 
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
@@ -3812,6 +3826,15 @@ Patch19GuardedYearCacheResolution Patch19YearCacheGuardWrapper::repair(std::map<
     out.closeGateMatched = legacyEntry.closeGate == current.closeGate;
     if (out.fingerprintMatched && out.openGateMatched && out.closeGateMatched) { out.semanticHit=true; out.semanticEntry=legacyEntry; out.outputValue=legacyEntry.value; return out; }
     cache[yearNumber]=current; out.semanticEntry=current; out.outputValue=current.value; out.entryOverwritten=true; return out;
+}
+Patch11LatchedOrderSauceResult LegacyStructureSauceAdapter::call(
+    const Integer& calculationDay,
+    const Integer& originalTargetDay) const {
+    return oldStructureSauce(calculationDay, originalTargetDay);
+}
+LegacyStructureSelectorToken LegacyStructureSelectorAdapter::consume(
+    const Patch11LatchedOrderSauceResult& sauce) const {
+    return LegacyStructureSelectorToken{sauce.finalBowls.at(1), sauce.orderAt46Latch};
 }
 
 Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
@@ -4842,6 +4865,18 @@ void Patch19YearCacheGuardHandler::handle(BaseMonsterContext& ctx, std::map<Inte
     const auto resolved=wrapper.repair(cache,ctx.discovery19CacheKeyYearNumber,ctx.discovery19CacheRequest,ctx.patch19LegacyCachedEntryBeforePatch,ctx.patch19LegacyCacheHitBeforePatch);
     ctx.discovery19CachedEntry=resolved.semanticEntry; ctx.discovery19CacheOutput=resolved.outputValue; ctx.discovery19CacheHit=resolved.semanticHit; ctx.patch19FingerprintMatched=resolved.fingerprintMatched; ctx.patch19OpenGateMatched=resolved.openGateMatched; ctx.patch19CloseGateMatched=resolved.closeGateMatched; ctx.patch19EntryOverwritten=resolved.entryOverwritten; ctx.patch19Applied=true; ctx.currentHandler="Patch19YearCacheGuardHandler"; ctx.phase="PATCH_19_YEAR_CACHE_GUARDS"; ctx.status=ctx.discovery19CacheHit?"YEAR_NUMBER_KEY_GUARDED_HIT":"YEAR_NUMBER_KEY_GUARDED_MISS"; ctx.branchTrace.push_back(ctx.discovery19CacheHit?"PATCH19:GUARDED_HIT":"PATCH19:GUARDED_MISS_OVERWRITE"); metrics.bump(ctx,ctx.discovery19CacheHit?"patch19.year.cache.hit":"patch19.year.cache.miss"); validator.requirePatch19YearCacheReady(ctx);
 }
+void Discovery20StructureSauceHandler::handle(BaseMonsterContext& ctx, const LegacyStructureSauceAdapter& sauceAdapter, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const {
+    ctx.discovery20LegacyStructureSauce = sauceAdapter.call(ctx.calculationDay, ctx.discovery20OriginalTargetDay);
+    ctx.discovery20SelectorToken = selectorAdapter.consume(ctx.discovery20LegacyStructureSauce);
+    ctx.discovery20SelectorConsumedLegacySauce = true;
+    ctx.discovery20StructureSauceReady = true;
+    ctx.currentHandler = "Discovery20StructureSauceHandler";
+    ctx.phase = "DISCOVERY_20_STRUCTURE_SAUCE_ORIGINAL_TARGET";
+    ctx.status = "OLD_STRUCTURE_SAUCE_ORIGINAL_TARGET_FEEDS_SELECTOR";
+    ctx.branchTrace.push_back("DISCOVERY20:OLD_STRUCTURE_SAUCE_TO_SELECTOR");
+    metrics.bump(ctx, "discovery20.structure.sauce.calls");
+    validator.requireDiscovery20StructureSauceReady(ctx);
+}
 
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
@@ -5510,6 +5545,10 @@ void BaseDispatcher::dispatchPatchedYearWalk(
 }
 void BaseDispatcher::dispatchLegacyYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Discovery19YearNumberCacheHandler& handler, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const { handler.handle(ctx,cache,adapter,validator,metrics); }
 void BaseDispatcher::dispatchPatchedYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Patch19YearCacheGuardHandler& handler, const Discovery19YearNumberCacheHandler& legacyHandler, const LegacyYearNumberOnlyCacheAdapter& adapter, const Patch19YearCacheGuardWrapper& wrapper, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const { handler.handle(ctx,cache,legacyHandler,adapter,wrapper,validator,metrics); }
+void BaseDispatcher::dispatchDiscovery20StructureSauce(BaseMonsterContext& ctx, const Discovery20StructureSauceHandler& handler, const LegacyStructureSauceAdapter& sauceAdapter, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:DISCOVERY20_STRUCTURE_SAUCE");
+    handler.handle(ctx, sauceAdapter, selectorAdapter, validator, metrics);
+}
 
 void BaseDispatcher::dispatchPatchedYear5000Tie(
     BaseMonsterContext& ctx,
@@ -5990,6 +6029,38 @@ LegacyYearCacheReport BaseMonsterManager::executeUnpatchedYearNumberCacheDiagnos
     const LegacyYearJumpReport fresh=executeLegacyYearJump(anchor,targetDay,calculationDay); BaseMonsterContext ctx; ctx.phase="ENTRY"; ctx.status="NEW"; ctx.calculationDay=calculationDay; ctx.targetDay=targetDay; ctx.discovery19CacheKeyYearNumber=fresh.outputYear.number; ctx.discovery19CacheRequest=LegacyYearCacheEntry{calculationDay,fresh.outputYear.openGateDay,fresh.outputYear.closeGateDay,fresh.outputYear};
     const BaseValidationManager validator; const BaseMetricsShell metrics; const LegacyYearNumberOnlyCacheAdapter adapter; const Discovery19YearNumberCacheHandler handler; const BaseDispatcher dispatcher; dispatcher.dispatchLegacyYearNumberCache(ctx,legacyYearNumberCache_,handler,adapter,validator,metrics);
     return LegacyYearCacheReport{ctx.discovery19CacheKeyYearNumber,ctx.discovery19CacheRequest,ctx.discovery19CachedEntry,ctx.discovery19CacheOutput,ctx.discovery19CacheHit,ctx.discovery19CacheReady,ctx.phase,ctx.status,ctx.currentHandler,ctx.branchTrace.size()};
+}
+LegacyStructureSauceReport BaseMonsterManager::executeDiscovery20StructureSauce(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const {
+    const LegacyYearCacheReport cacheReport = executeLegacyYearNumberCache(anchor, originalTargetDay, calculationDay);
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery20OriginalTargetDay = originalTargetDay;
+    ctx.discovery20ResolvedYear = cacheReport.outputValue;
+    ctx.discovery20YearFirstDay = cacheReport.outputValue.openGateDay + 1;
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyStructureSauceAdapter sauceAdapter;
+    const LegacyStructureSelectorAdapter selectorAdapter;
+    const Discovery20StructureSauceHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchDiscovery20StructureSauce(ctx, handler, sauceAdapter, selectorAdapter, validator, metrics);
+    return LegacyStructureSauceReport{
+        calculationDay,
+        originalTargetDay,
+        ctx.discovery20YearFirstDay,
+        ctx.discovery20ResolvedYear,
+        ctx.discovery20LegacyStructureSauce,
+        ctx.discovery20SelectorToken,
+        ctx.discovery20SelectorConsumedLegacySauce,
+        ctx.discovery20StructureSauceReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
 }
 void BaseMonsterManager::clearLegacyYearNumberCacheDiagnostic() const { legacyYearNumberCache_.clear(); }
 

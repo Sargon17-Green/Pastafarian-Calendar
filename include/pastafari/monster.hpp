@@ -180,6 +180,30 @@ struct LegacyYearCacheEntry { Integer calculationDayFingerprint{}; Integer openG
 struct LegacyYearCacheReport { Integer cacheKeyYearNumber{}; LegacyYearCacheEntry requestEntry{}; LegacyYearCacheEntry cachedEntry{}; Patch18YearRecord outputValue{}; bool cacheHit=false; bool ready=false; std::string phase; std::string status; std::string handler; std::size_t branchCount=0; LegacyYearCacheEntry legacyCachedEntryBeforePatch{}; Patch18YearRecord legacyOutputBeforePatch{}; bool legacyCacheHitBeforePatch=false; bool fingerprintMatched=false; bool openGateMatched=false; bool closeGateMatched=false; bool entryOverwritten=false; bool patch19Applied=false; };
 struct Patch19GuardedYearCacheResolution { LegacyYearCacheEntry semanticEntry{}; Patch18YearRecord outputValue{}; bool semanticHit=false; bool fingerprintMatched=false; bool openGateMatched=false; bool closeGateMatched=false; bool entryOverwritten=false; };
 
+Patch11LatchedOrderSauceResult oldStructureSauce(
+    const Integer& calculationDay,
+    const Integer& originalTargetDay);
+
+struct LegacyStructureSelectorToken {
+    Integer bowl2{};
+    PermutationOrder orderAt46Latch{};
+};
+
+struct LegacyStructureSauceReport {
+    Integer calculationDay{};
+    Integer originalTargetDay{};
+    Integer yearFirstDay{};
+    Patch18YearRecord resolvedYear{};
+    Patch11LatchedOrderSauceResult legacyStructureSauce{};
+    LegacyStructureSelectorToken selectorToken{};
+    bool selectorConsumedLegacySauce = false;
+    bool ready = false;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 struct LegacyAnswerRing {
     Integer first{};
     int directionStep = 0;
@@ -492,6 +516,13 @@ struct BaseMonsterContext {
     bool patch18Applied = false;
     Integer discovery19CacheKeyYearNumber{}; LegacyYearCacheEntry discovery19CacheRequest{}; LegacyYearCacheEntry discovery19CachedEntry{}; Patch18YearRecord discovery19CacheOutput{}; bool discovery19CacheHit=false; bool discovery19CacheReady=false;
     LegacyYearCacheEntry patch19LegacyCachedEntryBeforePatch{}; Patch18YearRecord patch19LegacyOutputBeforePatch{}; bool patch19LegacyCacheHitBeforePatch=false; bool patch19FingerprintMatched=false; bool patch19OpenGateMatched=false; bool patch19CloseGateMatched=false; bool patch19EntryOverwritten=false; bool patch19Applied=false;
+    Integer discovery20OriginalTargetDay{};
+    Integer discovery20YearFirstDay{};
+    Patch18YearRecord discovery20ResolvedYear{};
+    Patch11LatchedOrderSauceResult discovery20LegacyStructureSauce{};
+    LegacyStructureSelectorToken discovery20SelectorToken{};
+    bool discovery20SelectorConsumedLegacySauce=false;
+    bool discovery20StructureSauceReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -859,6 +890,7 @@ public:
     void requirePatch18YearWalkReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery19YearCacheReady(const BaseMonsterContext& ctx) const;
     void requirePatch19YearCacheReady(const BaseMonsterContext& ctx) const;
+    void requireDiscovery20StructureSauceReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -952,6 +984,8 @@ public:
 };
 class LegacyYearNumberOnlyCacheAdapter { public: LegacyYearCacheEntry getOrPut(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, bool& hit) const; };
 class Patch19YearCacheGuardWrapper { public: Patch19GuardedYearCacheResolution repair(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, const LegacyYearCacheEntry& legacyEntry, bool legacyHit) const; };
+class LegacyStructureSauceAdapter { public: Patch11LatchedOrderSauceResult call(const Integer& calculationDay, const Integer& originalTargetDay) const; };
+class LegacyStructureSelectorAdapter { public: LegacyStructureSelectorToken consume(const Patch11LatchedOrderSauceResult& sauce) const; };
 
 class LegacyArithmeticAdapter {
 public:
@@ -1463,6 +1497,7 @@ public:
 };
 class Discovery19YearNumberCacheHandler { public: void handle(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
 class Patch19YearCacheGuardHandler { public: void handle(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Discovery19YearNumberCacheHandler& legacyHandler, const LegacyYearNumberOnlyCacheAdapter& adapter, const Patch19YearCacheGuardWrapper& wrapper, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
+class Discovery20StructureSauceHandler { public: void handle(BaseMonsterContext& ctx, const LegacyStructureSauceAdapter& sauceAdapter, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
 
 class BaseDispatcher {
 public:
@@ -1724,6 +1759,7 @@ public:
                                  const BaseMetricsShell& metrics) const;
     void dispatchLegacyYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Discovery19YearNumberCacheHandler& handler, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
     void dispatchPatchedYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Patch19YearCacheGuardHandler& handler, const Discovery19YearNumberCacheHandler& legacyHandler, const LegacyYearNumberOnlyCacheAdapter& adapter, const Patch19YearCacheGuardWrapper& wrapper, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
+    void dispatchDiscovery20StructureSauce(BaseMonsterContext& ctx, const Discovery20StructureSauceHandler& handler, const LegacyStructureSauceAdapter& sauceAdapter, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1851,6 +1887,7 @@ public:
         const Integer& targetDay) const;
     LegacyYearCacheReport executeLegacyYearNumberCache(const LegacyYearAnchor& anchor, const Integer& targetDay, const Integer& calculationDay) const;
     LegacyYearCacheReport executeUnpatchedYearNumberCacheDiagnostic(const LegacyYearAnchor& anchor, const Integer& targetDay, const Integer& calculationDay) const;
+    LegacyStructureSauceReport executeDiscovery20StructureSauce(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const;
     void clearLegacyYearNumberCacheDiagnostic() const;
 private:
     mutable std::map<Integer, LegacyYearCacheEntry> legacyYearNumberCache_{};
