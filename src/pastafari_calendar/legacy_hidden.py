@@ -142,7 +142,50 @@ def legacyHiddenDirectByAssumedNearness(
     return legacy_hidden[k]
 
 
+def hiddenByNearness(
+    legacy_hidden: tuple[int, ...],
+    k: int,
+) -> int:
+    if k < 1 or k > 7:
+        raise ValueError("Gizli damla yakınlık indeksi 1 ile 7 arasında olmalıdır")
+
+    return legacy_hidden[8 - k]
+
+
+class HiddenNearnessPatchWrapper:
+    def repair(
+        self,
+        ctx,
+        legacy_hidden: tuple[int, ...],
+        k: int,
+    ) -> int:
+        ctx.branch_trace.append(("YAMA_05_GİZLİ_YAKINLIK", k))
+        ctx.logs.append(("yama-05-gizli-yakınlık", k))
+
+        # Tarihsel yanlış erişim kaldırılmaz; scar olarak gerçekten çalışır.
+        legacy_direct = legacyHiddenDirectByAssumedNearness(
+            legacy_hidden,
+            k,
+        )
+
+        corrected = hiddenByNearness(
+            legacy_hidden,
+            k,
+        )
+
+        ctx.patch05_requested_k = k
+        ctx.patch05_translated_slot = 8 - k
+        ctx.patch05_legacy_direct_value = legacy_direct
+        ctx.patch05_corrected_value = corrected
+        ctx.patch05_applied = True
+
+        return corrected
+
+
 class LegacyHiddenDropAdapter:
+    def __init__(self) -> None:
+        self.patch_wrapper = HiddenNearnessPatchWrapper()
+
     def call(self, ctx) -> tuple[int, ...]:
         if ctx.legacy_stone_table is None:
             raise RuntimeError("Taş tablosu gizli damlalardan önce hazır olmalıdır")
@@ -166,7 +209,9 @@ class LegacyHiddenDropAdapter:
             raise RuntimeError("Gizli damla deposu erişimden önce kurulmalıdır")
 
         ctx.branch_trace.append(("ESKİ_GİZLİ_OKUMA", k))
-        value = legacyHiddenDirectByAssumedNearness(
+
+        value = self.patch_wrapper.repair(
+            ctx,
             ctx.legacy_hidden_storage,
             k,
         )

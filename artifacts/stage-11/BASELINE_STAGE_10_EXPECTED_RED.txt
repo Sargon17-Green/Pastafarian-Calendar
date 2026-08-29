@@ -1,0 +1,141 @@
+Aşama 11 başlamadan önce Aşama 10 yerel baseline doğrulaması
+Komut: python -m unittest discover -s tests -v
+Beklenen durum: EXPECTED_RED
+Çalıştırılan test: 61
+Beklenen failure sayısı: 4
+Beklenmeyen failure/error: YOK
+
+test_bounded_composition_lexicographic_order (test_stage_01.Stage01Tests.test_bounded_composition_lexicographic_order) ... ok
+test_context_is_per_invocation (test_stage_01.Stage01Tests.test_context_is_per_invocation) ... ok
+test_cutlet_partition_filter (test_stage_01.Stage01Tests.test_cutlet_partition_filter) ... ok
+test_day_axis_and_save (test_stage_01.Stage01Tests.test_day_axis_and_save) ... ok
+test_distinct_name_unrank (test_stage_01.Stage01Tests.test_distinct_name_unrank) ... ok
+test_month_weaving_all_small_domains (test_stage_01.Stage01Tests.test_month_weaving_all_small_domains) ... ok
+test_month_weaving_matches_bruteforce (test_stage_01.Stage01Tests.test_month_weaving_matches_bruteforce) ... ok
+test_no_future_patch_names_in_production (test_stage_01.Stage01Tests.test_no_future_patch_names_in_production) ... ok
+test_normative_year5000_and_structure_smoke (test_stage_01.Stage01Tests.test_normative_year5000_and_structure_smoke) ... ok
+test_permutation_edges (test_stage_01.Stage01Tests.test_permutation_edges) ... ok
+test_production_does_not_call_oracle (test_stage_01.Stage01Tests.test_production_does_not_call_oracle) ... ok
+test_sauce_determinism_and_query_wrap (test_stage_01.Stage01Tests.test_sauce_determinism_and_query_wrap) ... ok
+test_short_and_wide_selection_ranges (test_stage_01.Stage01Tests.test_short_and_wide_selection_ranges) ... ok
+test_source_language_catalog_is_frozen_and_index_stable (test_stage_01.Stage01Tests.test_source_language_catalog_is_frozen_and_index_stable) ... ok
+test_work_counts (test_stage_01.Stage01Tests.test_work_counts) ... ok
+test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) ... ok
+test_legacy_helper_keeps_the_historical_zero_bug (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_helper_keeps_the_historical_zero_bug) ... ok
+test_legacy_remainder_is_on_the_real_calendar_path (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_is_on_the_real_calendar_path) ... ok
+test_stage02_legacy_scar_still_exists_after_patch (test_stage_02_discovery_01.Stage02Discovery01Tests.test_stage02_legacy_scar_still_exists_after_patch) ... ok
+test_adapter_routes_through_patch_wrapper_and_keeps_state_local (test_stage_03_patch_01.Stage03Patch01Tests.test_adapter_routes_through_patch_wrapper_and_keeps_state_local) ... ok
+test_observability_state_does_not_change_the_patch_result (test_stage_03_patch_01.Stage03Patch01Tests.test_observability_state_does_not_change_the_patch_result) ... ok
+test_old_remainder_is_still_physically_wrong (test_stage_03_patch_01.Stage03Patch01Tests.test_old_remainder_is_still_physically_wrong) ... ok
+test_save_patch_matches_normative_save_on_required_edges (test_stage_03_patch_01.Stage03Patch01Tests.test_save_patch_matches_normative_save_on_required_edges) ... ok
+test_save_patch_really_calls_the_legacy_helper (test_stage_03_patch_01.Stage03Patch01Tests.test_save_patch_really_calls_the_legacy_helper) ... ok
+test_current_day_tag_path_diverges_from_normative_day_count (test_stage_04_discovery_02.Stage04Discovery02Tests.test_current_day_tag_path_diverges_from_normative_day_count) ... ok
+test_day_tag_adapter_keeps_legacy_state_owned_by_one_invocation (test_stage_04_discovery_02.Stage04Discovery02Tests.test_day_tag_adapter_keeps_legacy_state_owned_by_one_invocation) ... ok
+test_legacy_helper_keeps_the_historical_day_tag_formula (test_stage_04_discovery_02.Stage04Discovery02Tests.test_legacy_helper_keeps_the_historical_day_tag_formula) ... ok
+test_old_day_tag_is_on_the_real_calendar_path (test_stage_04_discovery_02.Stage04Discovery02Tests.test_old_day_tag_is_on_the_real_calendar_path) ... ok
+test_day_tag_patch_matches_normative_day_count_on_required_edges (test_stage_05_patch_02.Stage05Patch02Tests.test_day_tag_patch_matches_normative_day_count_on_required_edges) ... ok
+test_day_tag_patch_really_calls_old_day_tag (test_stage_05_patch_02.Stage05Patch02Tests.test_day_tag_patch_really_calls_old_day_tag) ... ok
+test_observability_state_cannot_change_the_day_tag_patch (test_stage_05_patch_02.Stage05Patch02Tests.test_observability_state_cannot_change_the_day_tag_patch) ... ok
+test_old_day_tag_remains_physically_wrong (test_stage_05_patch_02.Stage05Patch02Tests.test_old_day_tag_remains_physically_wrong) ... ok
+test_patch_state_and_legacy_state_are_both_invocation_local (test_stage_05_patch_02.Stage05Patch02Tests.test_patch_state_and_legacy_state_are_both_invocation_local) ... ok
+test_second_foundation_guard_is_a_real_preserved_scar (test_stage_05_patch_02.Stage05Patch02Tests.test_second_foundation_guard_is_a_real_preserved_scar) ... ok
+test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) ... ok
+test_legacy_distance_state_is_owned_by_one_invocation (test_stage_06_discovery_03.Stage06Discovery03Tests.test_legacy_distance_state_is_owned_by_one_invocation) ... ok
+test_legacy_helper_keeps_tag_difference_formula (test_stage_06_discovery_03.Stage06Discovery03Tests.test_legacy_helper_keeps_tag_difference_formula) ... ok
+test_old_distance_is_on_the_real_calendar_path (test_stage_06_discovery_03.Stage06Discovery03Tests.test_old_distance_is_on_the_real_calendar_path) ... ok
+test_adapter_keeps_raw_legacy_and_patched_distance_separate (test_stage_07_patch_03.Stage07Patch03Tests.test_adapter_keeps_raw_legacy_and_patched_distance_separate) ... ok
+test_adapter_marks_equal_legacy_branch_without_replacement (test_stage_07_patch_03.Stage07Patch03Tests.test_adapter_marks_equal_legacy_branch_without_replacement) ... ok
+test_nonreplacement_branch_still_gets_final_plus_one (test_stage_07_patch_03.Stage07Patch03Tests.test_nonreplacement_branch_still_gets_final_plus_one) ... ok
+test_observability_state_cannot_change_distance_patch (test_stage_07_patch_03.Stage07Patch03Tests.test_observability_state_cannot_change_distance_patch) ... ok
+test_old_distance_remains_physically_wrong (test_stage_07_patch_03.Stage07Patch03Tests.test_old_distance_remains_physically_wrong) ... ok
+test_patch_really_calls_old_distance (test_stage_07_patch_03.Stage07Patch03Tests.test_patch_really_calls_old_distance) ... ok
+test_patched_counts_match_normative_distance_on_required_edges (test_stage_07_patch_03.Stage07Patch03Tests.test_patched_counts_match_normative_distance_on_required_edges) ... ok
+test_current_stone_builder_path_diverges_from_normative_table (test_stage_08_discovery_04.Stage08Discovery04Tests.test_current_stone_builder_path_diverges_from_normative_table) ... ok
+test_legacy_stone_state_is_owned_by_one_invocation (test_stage_08_discovery_04.Stage08Discovery04Tests.test_legacy_stone_state_is_owned_by_one_invocation) ... ok
+test_mutate_stones_wrong_reuses_new_values_in_place (test_stage_08_discovery_04.Stage08Discovery04Tests.test_mutate_stones_wrong_reuses_new_values_in_place) ... ok
+test_wrong_stone_mutation_is_on_the_real_calendar_path (test_stage_08_discovery_04.Stage08Discovery04Tests.test_wrong_stone_mutation_is_on_the_real_calendar_path) ... ok
+test_adapter_keeps_patch_scar_state_invocation_local (test_stage_09_patch_04.Stage09Patch04Tests.test_adapter_keeps_patch_scar_state_invocation_local) ... ok
+test_full_builder_matches_normative_table (test_stage_09_patch_04.Stage09Patch04Tests.test_full_builder_matches_normative_table) ... ok
+test_garbage_is_observed_then_all_five_fields_are_overwritten (test_stage_09_patch_04.Stage09Patch04Tests.test_garbage_is_observed_then_all_five_fields_are_overwritten) ... ok
+test_observability_state_cannot_change_stone_patch_result (test_stage_09_patch_04.Stage09Patch04Tests.test_observability_state_cannot_change_stone_patch_result) ... ok
+test_overwrite_reads_only_old_snapshot_not_garbage (test_stage_09_patch_04.Stage09Patch04Tests.test_overwrite_reads_only_old_snapshot_not_garbage) ... ok
+test_stone_patch_matches_normative_rows (test_stage_09_patch_04.Stage09Patch04Tests.test_stone_patch_matches_normative_rows) ... ok
+test_stone_patch_really_calls_legacy_on_a_clone (test_stage_09_patch_04.Stage09Patch04Tests.test_stone_patch_really_calls_legacy_on_a_clone) ... ok
+test_wrong_mutator_remains_physically_wrong_and_in_place (test_stage_09_patch_04.Stage09Patch04Tests.test_wrong_mutator_remains_physically_wrong_and_in_place) ... ok
+test_backward_hidden_storage_is_on_the_real_calendar_path (test_stage_10_discovery_05.Stage10Discovery05Tests.test_backward_hidden_storage_is_on_the_real_calendar_path) ... ok
+test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) ... 
+  test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) (k=1) ... FAIL
+  test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) (k=2) ... FAIL
+  test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) (k=6) ... FAIL
+  test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) (k=7) ... FAIL
+test_hidden_storage_state_is_owned_by_one_invocation (test_stage_10_discovery_05.Stage10Discovery05Tests.test_hidden_storage_state_is_owned_by_one_invocation) ... ok
+test_physical_storage_really_is_hidden7_through_hidden1 (test_stage_10_discovery_05.Stage10Discovery05Tests.test_physical_storage_really_is_hidden7_through_hidden1) ... ok
+
+======================================================================
+FAIL: test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) (k=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage10-work/pastafari-calendar-python-turkish-stage-10-discovery-05/tests/test_stage_10_discovery_05.py", line 177, in test_current_hidden_nearness_access_diverges_from_normative_hidden
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        adapter.read_by_nearness(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        msg="Geçerli gizli damla near-ness erişimi normatif gizli damlayla uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 80092834224766678420000812159680108442 != 8927008562020429511512547231689661113 : Geçerli gizli damla near-ness erişimi normatif gizli damlayla uyuşmadı
+
+======================================================================
+FAIL: test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) (k=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage10-work/pastafari-calendar-python-turkish-stage-10-discovery-05/tests/test_stage_10_discovery_05.py", line 177, in test_current_hidden_nearness_access_diverges_from_normative_hidden
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        adapter.read_by_nearness(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        msg="Geçerli gizli damla near-ness erişimi normatif gizli damlayla uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 136833399039269448047805104506993093417 != 24834532212454940423022790948632427900 : Geçerli gizli damla near-ness erişimi normatif gizli damlayla uyuşmadı
+
+======================================================================
+FAIL: test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) (k=6)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage10-work/pastafari-calendar-python-turkish-stage-10-discovery-05/tests/test_stage_10_discovery_05.py", line 177, in test_current_hidden_nearness_access_diverges_from_normative_hidden
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        adapter.read_by_nearness(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        msg="Geçerli gizli damla near-ness erişimi normatif gizli damlayla uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 24834532212454940423022790948632427900 != 136833399039269448047805104506993093417 : Geçerli gizli damla near-ness erişimi normatif gizli damlayla uyuşmadı
+
+======================================================================
+FAIL: test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) (k=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage10-work/pastafari-calendar-python-turkish-stage-10-discovery-05/tests/test_stage_10_discovery_05.py", line 177, in test_current_hidden_nearness_access_diverges_from_normative_hidden
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        adapter.read_by_nearness(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        msg="Geçerli gizli damla near-ness erişimi normatif gizli damlayla uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 8927008562020429511512547231689661113 != 80092834224766678420000812159680108442 : Geçerli gizli damla near-ness erişimi normatif gizli damlayla uyuşmadı
+
+----------------------------------------------------------------------
+Ran 61 tests in 11.478s
+
+FAILED (failures=4)

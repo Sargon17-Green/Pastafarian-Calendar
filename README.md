@@ -1,29 +1,29 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin onuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 10/55, `DISCOVERY 05` durumundadır. Beşinci tarihsel kusur gerçek çağrı zincirine eklenmiştir.
-
-Gizli damlalar fiziksel olarak ters sırada saklanır:
+Aşama 11/55, `PATCH 05` durumundadır. Beşinci tarihsel kusurun fiziksel storage'ı aynen korunur:
 
 ```text
 legacyHidden[1] = hidden7
-legacyHidden[2] = hidden6
 ...
 legacyHidden[7] = hidden1
 ```
 
-`buildHiddenWithBackwardStorage` bu backward storage'ı üretir. `LegacyHiddenDropAdapter` onu gerçek `calendar_date_spaghetti` yoluna bağlar.
+Aşama 10'un yanlış direct accessor'ı da kodda kalır. Düzeltme yalnızca üst erişim katmanındadır:
 
-Discovery kusuru near-ness erişimindedir: `k` doğrudan `legacyHidden[k]` olarak okunur. Böylece `hidden1` isteği `hidden7` döndürür. `hidden4` ise ters düzenin orta noktası olduğu için tesadüfen doğru kalır.
+```text
+hiddenByNearness(legacyHidden, k)
+    -> legacyHidden[8-k]
+```
 
-Yeni normatif regresyon `k=1,2,4,6,7` için gerçek adapter erişimini test-only normatif gizli damlalarla karşılaştırır. Dört alt örnek bilinçli olarak kırmızıdır; `k=4` geçer.
+`LegacyHiddenDropAdapter.read_by_nearness`, `HiddenNearnessPatchWrapper` üzerinden önce yanlış direct accessor'ı gerçekten çalıştırır, ham legacy değerini scar olarak tutar ve authoritative sonuç olarak 8-k çevirmeninin değerini döndürür.
 
-Henüz `PATCH 05` yoktur: `hiddenByNearness(legacyHidden,k) -> legacyHidden[8-k]` erişim çevirmeni eklenmemiştir ve backward storage fiziksel olarak ters çevrilmemiştir.
+Aşama 10'un normatif hidden near-ness regresyonu değiştirilmeden artık yeşildir. Backward storage fiziksel olarak ters çevrilmemiştir.
 
-Önceki Aşama 1–9 regresyonlarının tamamı yeşildir. Gelecekteki 06–26 kusur ve yamaları üretime eklenmemiştir.
+Önceki bütün regresyonlar yeşildir. Gelecekteki 06–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -39,10 +39,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam onuncu aşama paketi:
+Tam on birinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–9 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni gizli-damla near-ness regresyonunun `k=1`, `k=2`, `k=6` ve `k=7` alt örnekleri başarısız olur. `k=4` ters storage'ın sabit orta noktası olarak geçer.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 10'da kırmızı olan `k=1,2,6,7` hidden near-ness alt örnekleri aynı regresyon gövdesiyle yeşile dönmelidir; backward physical storage ve yanlış direct accessor ayrı testlerde korunmaya devam eder.

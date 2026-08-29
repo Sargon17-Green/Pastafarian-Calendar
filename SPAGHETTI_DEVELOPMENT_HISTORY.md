@@ -353,3 +353,64 @@ Gerçek main yolu storage'ı kurduktan sonra Discovery kusurunu çalıştırmak 
 Backward storage, son istenen `k` ve dönen legacy değer yalnızca invocation'a ait `MonsterContext` içinde tutulur.
 
 Bu aşamada `hiddenByNearness(legacyHidden,k) -> legacyHidden[8-k]` çevirmeni yoktur. Fiziksel dizi ters çevrilmez ve doğru erişim katmanı henüz eklenmez.
+
+
+## Aşama 11 — Yama 05: backward hidden storage için near-ness çevirmeni
+
+### Ne aşıldı
+
+Backward storage fiziksel olarak değiştirilmedi:
+
+```text
+slot 1 = hidden7
+slot 2 = hidden6
+slot 3 = hidden5
+slot 4 = hidden4
+slot 5 = hidden3
+slot 6 = hidden2
+slot 7 = hidden1
+```
+
+Aşama 10'un yanlış direct accessor'ı da fiziksel olarak korunur:
+
+```text
+legacyHiddenDirectByAssumedNearness(legacyHidden, k)
+    -> legacyHidden[k]
+```
+
+Düzeltme onun üstünde ayrı bir erişim çevirmeni olarak eklenmiştir:
+
+```text
+hiddenByNearness(legacyHidden, k)
+    -> legacyHidden[8-k]
+```
+
+### Neden normatif olarak eşdeğer
+
+Backward storage kurulurken normatif `hiddenK` değeri fiziksel olarak `legacyHidden[8-k]` slotuna yazılır.
+
+Dolayısıyla aynı `8-k` dönüşümünün okunurken tekrar uygulanması, near-ness `k` isteğini tam olarak yazıldığı fiziksel slota götürür.
+
+Fiziksel diziyi ters çevirmeye gerek yoktur; hatta bu tarihsel storage scar'ını yok ederdi.
+
+### Ne korundu
+
+`HiddenNearnessPatchWrapper`, yanlış direct accessor'ı önce gerçekten çağırır ve ham yanlış legacy değeri scar olarak saklar. Ardından `hiddenByNearness` üzerinden doğru değeri döndürür.
+
+Aşama 10'un normatif kırmızı regresyonunun gövdesi byte-for-byte değiştirilmedi ve yalnızca bu erişim çevirmeni sayesinde yeşile döndü.
+
+Backward storage'ın hidden7..hidden1 fiziksel sırası ve yanlış direct accessor'ın davranışı ayrı testlerle korunur.
+
+### Bu aşamada eklenen canavar katmanı
+
+Invocation bağlamında şu erişim scar alanları ayrı tutulur:
+
+```text
+istenen near-ness k
+çevirilmiş fiziksel slot
+yanlış direct legacy değeri
+doğru çevrilmiş değer
+patch uygulanma durumu
+```
+
+Logs, metrics ve diagnostics hidden erişim sonucuna girdi değildir. Bu aşamada visible-drop history veya negative-index düzeltmesi başlatılmamıştır.

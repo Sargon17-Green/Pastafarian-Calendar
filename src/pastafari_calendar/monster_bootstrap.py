@@ -72,6 +72,11 @@ class MonsterContext:
     legacy_hidden_count: int = 0
     legacy_hidden_last_requested_k: int | None = None
     legacy_hidden_last_returned_value: int | None = None
+    patch05_requested_k: int | None = None
+    patch05_translated_slot: int | None = None
+    patch05_legacy_direct_value: int | None = None
+    patch05_corrected_value: int | None = None
+    patch05_applied: bool = False
 
 
 class BaseMetrics:
