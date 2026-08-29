@@ -157,6 +157,14 @@ class MonsterContext:
     legacy_bowls_after_46_drops: tuple[int, ...] | None = None
     legacy_post_stir_last_saved_sum: int | None = None
     legacy_post_stir_final_bowls: tuple[int, ...] | None = None
+    corrective56_raw_bowlsum_enabled: bool = False
+    corrective56_post_stir_last_stir: int | None = None
+    corrective56_post_stir_last_raw_bowl_sum: int | None = None
+    corrective56_post_stir_last_order_number: int | None = None
+    corrective56_post_stir_last_legacy_wrong_result: tuple[int, ...] | None = None
+    corrective56_post_stir_last_corrected_result: tuple[int, ...] | None = None
+    corrective56_post_stir_applied_count: int = 0
+    corrective56_post_stir_applied: bool = False
     orderAt46Latch: tuple[int, ...] | None = None
     patch11_latch_write_count: int = 0
     patch11_latch_source: tuple[str, int] | None = None

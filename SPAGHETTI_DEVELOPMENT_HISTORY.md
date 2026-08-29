@@ -2394,3 +2394,62 @@ Böylece 55 aşamalı geliştirme çizgisi tamamlanmıştır.
 `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES`.
 
 Aşama 56 yoktur.
+
+
+## Düzeltici Aşama 56 — raw bowlSum / saved orderNumber ayrımı
+
+Bu aşama özgün 55 aşamalı tarihsel geliştirme çizgisinin sonradan eklenmiş düzeltici
+uzantısıdır. Aşama 55 completion certificate geriye dönük olarak yeniden yazılmaz.
+
+Milyonluk differential testbench'in calibration koşusu ilk case'te ayrışma buldu.
+Ardından dört ayrı forensic probe, JDN/Foundation offsetinin doğru olduğunu,
+reference public ve reference fast motorlarının kendi aralarında eşit olduğunu ve
+ayrışmanın final tarih katmanından önce sauce içinde başladığını gösterdi.
+
+Derin forensic izleme ilk farklı işlemi 46. damladan sonraki birinci post-stir'e
+indirdi. 46 damla sonundaki bowls ve drop-46 permutation eşittir. Fark yalnız şu
+operanddadır:
+
+```text
+historical A1:
+u += SAVE(rawBowlSum + 149 * stir)
+
+corrective:
+orderNumber = SAVE(rawBowlSum + 149 * stir)
+permutation <- orderNumber
+u += rawBowlSum
+```
+
+Spaghetti şartı gereği `postStirRoundExact` temizlenmemiş ve değiştirilmemiş A1
+anlamıyla korunmuştur. Authoritative düzeltme, eski fonksiyonu önce gerçekten
+çalıştırır; eski bowls sonucu ghost olarak context'e yazar; sonra
+`rawBowlSumPostStirDetour` aynı orderNumber ve permutationı doğrulayıp corrected
+bowls üretir.
+
+Detour global değildir. `MonsterContext.corrective56_raw_bowlsum_enabled` varsayılan
+olarak `False` kalır. Historical 1–55 yürüyüşü eski scar semantics ile çalışır.
+`final_integration.sauceWithScars` yalnız authoritative final recomputation için
+flag'i açar. Final structure katmanı, historical context sauce hazır olsa ve target
+year-first-day olsa bile corrected sauce'u yeniden üretir. Böylece historical kaynak
+ghost olarak korunurken final sonucu kirletemez.
+
+Test-only `normative_reference` içinde eski `sauce` korunmuştur. Düzeltici semantics
+ayrı `sauce_corrective56` ve `post_stir12_corrective56` yollarında bulunur. Historical
+testlerin witness davranışı bu nedenle geriye dönük olarak yeniden tanımlanmamıştır.
+
+Final doğrulama:
+
+```text
+365/365 historical regressions PASS
+10/10 Aşama 54 integration PASS
+21/21 Aşama 55 audit PASS
+6/6 Düzeltici Aşama 56 PASS
+Toplam 402 PASS
+```
+
+Dış forensic witness'lar canonicalIndex tuple olarak 4/4 eşleşmiştir. Ayrıca
+Foundation ve `c=t=-15048173` için final sauce bowls, sabitlenmiş reference commit
+`d5cfe77ef7950a9a67ff0e6814833a3eedacae8a` üzerindeki forensic sonuçla bire bir
+eşleşmiştir.
+
+Production test-only oracle import etmez. Frozen SourceLanguageCatalog değiştirilmez.

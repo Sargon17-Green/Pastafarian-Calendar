@@ -1,0 +1,36 @@
+DÜZELTİCİ_AŞAMA=56
+KIND=SPAGHETTI_DETOUR
+BASE_BRANCH=Python+Türkçe
+BASE_COMMIT=d1ab163f12f95934d9fc260d496bdd3cdeaf952e
+REFERENCE_COMMIT=d5cfe77ef7950a9a67ff0e6814833a3eedacae8a
+ROOT_CAUSE=POST_STIR_RAW_BOWLSUM_VS_SAVED_ORDER_NUMBER
+LEGACY_A1_SCAR_REMOVED=NO
+LEGACY_A1_SCAR_EXECUTES=YES
+AUTHORITATIVE_DETOUR_ACTIVE=YES
+SOURCE_LANGUAGE_CATALOG_CHANGED=NO
+DELETED_FILES=NONE
+HISTORICAL_REGRESSIONS=365/365_PASS
+STAGE54_INTEGRATION=10/10_PASS
+STAGE55_AUDIT=21/21_PASS
+CORRECTIVE56_TESTS=6/6_PASS
+TOTAL_VALIDATED_TESTS=402
+
+DOSYALAR:
+- .github/workflows/python-turkish-final-verification.yml
+- DEVELOPMENT_STAGE.md
+- README.md
+- SPAGHETTI_DEVELOPMENT_HISTORY.md
+- CORRECTIVE_STAGE_56_REPORT.md
+- DELTA_MANIFEST_CORRECTIVE_STAGE_56.txt
+- src/pastafari_calendar/post_stir_bowlsum_detour.py
+- src/pastafari_calendar/legacy_order_memory.py
+- src/pastafari_calendar/legacy_structure_sauce.py
+- src/pastafari_calendar/final_integration.py
+- src/pastafari_calendar/monster_bootstrap.py
+- tests/normative_reference.py
+- tests/integration_stage_54.py
+- tests/audit_stage_55.py
+- tests/corrective_stage_56_bowlsum_detour.py
+- artifacts/corrective-stage-56/FINAL_VERIFICATION_GREEN.txt
+- artifacts/corrective-stage-56/EXTERNAL_ALIGNMENT_WITNESSES.txt
+- artifacts/corrective-stage-56/ROOT_CAUSE.txt

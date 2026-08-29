@@ -324,6 +324,34 @@ def post_stir12(bowls: tuple[int, ...]) -> tuple[int, ...]:
     return working
 
 
+def post_stir12_corrective56(bowls: tuple[int, ...]) -> tuple[int, ...]:
+    working = bowls
+    for stir in range(1, 13):
+        old = working
+        raw_bowl_sum = sum(old[1:7])
+        saved_order_number = save(raw_bowl_sum + 149 * stir)
+        order_number = regular_mod(saved_order_number - 1, 720) + 1
+        order = bowl_order_from_number(order_number)
+        next_bowls = [0] * 7
+        for position in range(1, 7):
+            bowl_id = order[position - 1]
+            prev_id = order[(position - 2) % 6]
+            next_id = order[position % 6]
+            s = (
+                old[bowl_id]
+                + 3 * old[prev_id]
+                + 5 * old[next_id]
+                + raw_bowl_sum
+                + stir
+                + position**2
+            )
+            next_bowls[bowl_id] = save(
+                s**2 + 7 * old[prev_id] * old[next_id]
+            )
+        working = tuple(next_bowls)
+    return working
+
+
 def sauce(calculation_day: int, target_day: int) -> SauceResult:
     counts = work_counts(calculation_day, target_day)
     hidden = build_hidden_drops(counts)
@@ -331,6 +359,16 @@ def sauce(calculation_day: int, target_day: int) -> SauceResult:
     bowls = initial_bowls(counts)
     bowls_after, order_at_46 = apply_visible_drops_to_bowls(bowls, visible)
     final_bowls = post_stir12(bowls_after)
+    return SauceResult(final_bowls, order_at_46)
+
+
+def sauce_corrective56(calculation_day: int, target_day: int) -> SauceResult:
+    counts = work_counts(calculation_day, target_day)
+    hidden = build_hidden_drops(counts)
+    visible = build_visible_drops(counts, hidden)
+    bowls = initial_bowls(counts)
+    bowls_after, order_at_46 = apply_visible_drops_to_bowls(bowls, visible)
+    final_bowls = post_stir12_corrective56(bowls_after)
     return SauceResult(final_bowls, order_at_46)
 
 
@@ -734,18 +772,19 @@ class Year:
 
 
 class GateTable:
-    def __init__(self) -> None:
+    def __init__(self, sauce_function=sauce) -> None:
+        self._sauce = sauce_function
         self.gates: dict[int, int] = {0: FOUNDATION_DAY}
         self.min_known = 0
         self.max_known = 0
 
     def _positive_gap(self, n: int) -> int:
-        result = sauce(FOUNDATION_DAY, FOUNDATION_DAY + n)
+        result = self._sauce(FOUNDATION_DAY, FOUNDATION_DAY + n)
         stream = ask_bowl(result, 1, SEAL_GATE_GAP)
         return 41 + choose_rank(stream, 922)
 
     def _negative_gap(self, n: int) -> int:
-        result = sauce(FOUNDATION_DAY, FOUNDATION_DAY - n)
+        result = self._sauce(FOUNDATION_DAY, FOUNDATION_DAY - n)
         stream = ask_bowl(result, 1, SEAL_GATE_GAP)
         return 41 + choose_rank(stream, 922)
 
@@ -827,8 +866,9 @@ class DateResult:
 
 
 class NormativeCalendar:
-    def __init__(self) -> None:
-        self.gates = GateTable()
+    def __init__(self, sauce_function=sauce) -> None:
+        self._sauce = sauce_function
+        self.gates = GateTable(sauce_function=sauce_function)
 
     def _valid_year_pair(self, open_index: int, close_index: int) -> bool:
         if close_index - open_index < MIN_GATE_GAPS_PER_YEAR:
@@ -859,7 +899,7 @@ class NormativeCalendar:
         )
         if not candidates:
             raise AssertionError("Beş bininci yıl için aday bulunamadı")
-        result = sauce(calculation_day, calculation_day)
+        result = self._sauce(calculation_day, calculation_day)
         rank = choose_rank(ask_bowl(result, 1, SEAL_YEAR_5000), len(candidates))
         i, j = candidates[rank - 1]
         return Year(5000, i, j, self.gates.gates[i], self.gates.gates[j])
@@ -881,7 +921,7 @@ class NormativeCalendar:
                 candidates.append(close_index)
             close_index += 1
         candidates.sort(key=lambda j: self.gates.gates[j] - self.gates.gates[open_index])
-        result = sauce(calculation_day, self.gates.gates[open_index])
+        result = self._sauce(calculation_day, self.gates.gates[open_index])
         rank = choose_rank(ask_bowl(result, 1, SEAL_NEXT_YEAR), len(candidates))
         close_index = candidates[rank - 1]
         return Year(
@@ -909,7 +949,7 @@ class NormativeCalendar:
                 candidates.append(open_index)
             open_index -= 1
         candidates.sort(key=lambda i: self.gates.gates[close_index] - self.gates.gates[i])
-        result = sauce(calculation_day, self.gates.gates[close_index])
+        result = self._sauce(calculation_day, self.gates.gates[close_index])
         rank = choose_rank(ask_bowl(result, 1, SEAL_PREVIOUS_YEAR), len(candidates))
         open_index = candidates[rank - 1]
         return Year(
@@ -1026,7 +1066,7 @@ class NormativeCalendar:
 
     def build_year_structure(self, calculation_day: int, year: Year) -> YearStructure:
         first_day = year.open_gate_day + 1
-        result = sauce(calculation_day, first_day)
+        result = self._sauce(calculation_day, first_day)
         cutlet_count = self.choose_cutlet_count(result, year)
         partition = self.choose_cutlet_partition(
             calculation_day,

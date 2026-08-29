@@ -78,7 +78,7 @@ from normative_reference import (
     falling_factorial,
     permutation_unrank1,
     save,
-    sauce,
+    sauce_corrective56,
     unrank_distinct_indices,
 )
 
@@ -89,7 +89,7 @@ class Stage55FinalAuditTests(unittest.TestCase):
         calculation_day: int,
         target_day: int,
     ) -> None:
-        oracle = NormativeCalendar()
+        oracle = NormativeCalendar(sauce_function=sauce_corrective56)
         expected = astuple(
             oracle.calendar_date(
                 calculation_day,
@@ -345,7 +345,7 @@ class Stage55FinalAuditTests(unittest.TestCase):
                 )
 
     def test_04_gate_plus_minus_one_two_and_no_forced_symmetry_match_oracle(self):
-        oracle = GateTable()
+        oracle = GateTable(sauce_function=sauce_corrective56)
         ctx = MonsterContext(
             FOUNDATION_DAY,
             FOUNDATION_DAY,
@@ -802,7 +802,7 @@ class Stage55FinalAuditTests(unittest.TestCase):
 
     def test_11_year_5000_5001_4999_and_number_transitions_1_0_minus1_match_oracle(self):
         calculation_day = FOUNDATION_DAY
-        oracle = NormativeCalendar()
+        oracle = NormativeCalendar(sauce_function=sauce_corrective56)
         ctx = MonsterContext(
             calculation_day,
             calculation_day,

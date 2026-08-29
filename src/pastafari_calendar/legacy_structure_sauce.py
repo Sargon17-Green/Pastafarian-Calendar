@@ -53,6 +53,8 @@ _BOUND_OLD_STRUCTURE_SOURCE: ContextVar[
 def sauceWithCurrentScars(
     calculation_day: int,
     target_day: int,
+    *,
+    corrective56_raw_bowlsum: bool = False,
 ) -> LegacyStructureSauceResult:
     # Patch 20 semantic recomputation current Python implementation'ın
     # Stage 2–19 production method gövdelerini doğrudan kullanır. Bu direct
@@ -65,6 +67,7 @@ def sauceWithCurrentScars(
         calculation_day=calculation_day,
         target_day=target_day,
     )
+    local_ctx.corrective56_raw_bowlsum_enabled = corrective56_raw_bowlsum
 
     day_tags = _CurrentDayTagAdapter()
     distance = _CurrentDistanceAdapter()

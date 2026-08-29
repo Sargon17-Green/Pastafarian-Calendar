@@ -141,6 +141,7 @@ def sauceWithScars(
     return sauceWithCurrentScars(
         calculation_day,
         target_day,
+        corrective56_raw_bowlsum=True,
     )
 
 
@@ -1607,15 +1608,23 @@ class FinalSpaghettiIntegrationManager:
                 order_at_drop_46=self.ctx.orderAt46Latch,
             )
 
-        semantic_sauce = (
-            original_sauce
-            if original_target_day
-            == first_day
-            else sauceWithScars(
-                calculation_day,
-                first_day,
-            )
+        # Düzeltici Aşama 56: historical context sauce yalnız ghost olarak kalır.
+        # Hedef zaten yılın ilk günü olsa bile authoritative structure, raw-bowlSum
+        # post-stir detour'u açık yeni sauce üzerinden yeniden üretilir.
+        semantic_sauce = sauceWithScars(
+            calculation_day,
+            first_day,
         )
+        self.ctx.branch_trace.append((
+            "DÜZELTİCİ_56_STRUCTURE_SAUCE_RECOMPUTE",
+            original_target_day,
+            first_day,
+        ))
+        self.ctx.logs.append((
+            "düzeltici-56-structure-sauce-recompute",
+            original_target_day,
+            first_day,
+        ))
 
         self.ctx.integration_structure_ghost_target_day = (
             original_sauce.target_day

@@ -31,7 +31,7 @@ Final public semantic sonuç tam beş alan taşır.
 SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES
 ```
 
-Bu geliştirme çizgisinde Aşama 56 yoktur.
+Özgün 55 aşamalı tarihsel çizgide Aşama 56 yoktur. Tamamlanma sonrasında doğrulanmış bir semantic drift için ayrı bir Düzeltici Aşama 56 uygulanmıştır.
 
 ## Korunan birinci aşama temeli
 
@@ -72,4 +72,64 @@ HISTORICAL_REGRESSIONS: PASS
 STAGE54_INTEGRATION: PASS
 STAGE55_FINAL_AUDIT: PASS
 SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES
+```
+
+
+## Düzeltici Aşama 56 — raw bowlSum / saved orderNumber spaghetti detour
+
+55 aşamalı çizgi tamamlandıktan sonra yapılan cross-engine forensic karşılaştırma,
+ilk semantic ayrışmanın 46. damladan sonraki ilk post-stir içinde olduğunu gösterdi.
+
+Tarihsel A1 scar şu davranışı taşır ve kaldırılmamıştır:
+
+```text
+savedOrderNumber = SAVE(sum(oldBowls) + 149 * stir)
+permutation = permutation(savedOrderNumber)
+u += savedOrderNumber
+```
+
+Düzeltici detour ise authoritative final sauce için şu ayrımı uygular:
+
+```text
+rawBowlSum = sum(oldBowls)
+orderNumber = SAVE(rawBowlSum + 149 * stir)
+permutation = permutation(orderNumber)
+u += rawBowlSum
+```
+
+Eski A1 fonksiyonu her 12 post-stir turunda önce gerçekten çalışır. Sonucu ghost
+olarak kaydedilir. Authoritative final bağlamında ayrı detour aynı permutation
+numarasını doğrular ve yalnız `u` içindeki operandı ham `rawBowlSum` olarak yeniden
+kurar. Altı kâse yine aynı eski snapshot üzerinden birlikte güncellenir.
+
+Historical 1–55 scar yürüyüşünde corrective flag kapalıdır; bu sayede 365 historical
+regression değişmeden korunur. `sauceWithScars` ve final integration bağlamında flag
+açıktır. Final year structure, target zaten year-first-day olsa bile corrective sauce
+ile yeniden hesaplanır; historical context sauce yalnız ghost kalır.
+
+Düzeltici doğrulama:
+
+```text
+Historical regressions: 365/365 PASS
+Aşama 54 integration: 10/10 PASS
+Aşama 55 final audit: 21/21 PASS
+Düzeltici Aşama 56: 6/6 PASS
+Toplam: 402 PASS
+```
+
+Forensic external witness kontrolü:
+
+```text
+Foundation:                (5000, 4, 762, 12, 105)
+c=t=-15048173:             (5000, 12, 21, 47, 57)
+c=-15048173,t=-15048172:   (5000, 12, 22, 18, 58)
+c=-15048173,t=-15048174:   (5000, 12, 20, 7, 58)
+```
+
+Bu tuple'larda ad metni değil canonicalIndex karşılaştırılmıştır.
+
+Düzeltici test:
+
+```text
+python -m unittest discover -s tests -p "corrective_stage_56_bowlsum_detour.py" -q
 ```

@@ -17,7 +17,7 @@ jobs:
   final-dogrulama:
     name: Python 3.13 üzerinde final doğrulama
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
 
     steps:
       - name: Depoyu al
@@ -40,6 +40,9 @@ jobs:
       - name: Aşama 55 final audit runner'ını çalıştır
         run: python tests/run_stage_55_audit.py
 
+      - name: Düzeltici Aşama 56 bowlSum detour testlerini çalıştır
+        run: python -m unittest discover -s tests -p "corrective_stage_56_bowlsum_detour.py" -q
+
       - name: Final doğrulama özetini yaz
         if: success()
         run: |
@@ -47,4 +50,5 @@ jobs:
           echo "Beklenen historical regressions: 365/365 PASS"
           echo "Beklenen Aşama 54 integration: 10/10 PASS"
           echo "Beklenen Aşama 55 audit: 21/21 PASS"
-          echo "Beklenen toplam doğrulama: 396 PASS"
+          echo "Beklenen Düzeltici Aşama 56: 6/6 PASS"
+          echo "Beklenen toplam doğrulama: 402 PASS"

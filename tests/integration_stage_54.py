@@ -21,7 +21,7 @@ from pastafari_calendar.source_language_catalog import SOURCE_LANGUAGE_CATALOG
 from normative_reference import (
     FOUNDATION_DAY,
     NormativeCalendar,
-    sauce,
+    sauce_corrective56,
 )
 
 
@@ -38,7 +38,7 @@ class Stage54IntegrationTests(unittest.TestCase):
                 FOUNDATION_DAY + 3,
             ),
         )
-        oracle = NormativeCalendar()
+        oracle = NormativeCalendar(sauce_function=sauce_corrective56)
         cls.expected = {
             str(
                 pair
@@ -188,7 +188,7 @@ class Stage54IntegrationTests(unittest.TestCase):
                     calculation_day,
                     target_day,
                 )
-                expected = sauce(
+                expected = sauce_corrective56(
                     calculation_day,
                     target_day,
                 )
