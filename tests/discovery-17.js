@@ -85,17 +85,35 @@ assert.notEqual(routed.result.selected.openGate, normativeOpeningOrder[0]);
 
 const handlerSource = production.Discovery17Year5000TieHandler.prototype.handle.toString();
 assert.doesNotMatch(handlerSource, /\.sort\(|sortEqualLengthRunsByOpeningGate|openGate.*candidateLength|candidateLength.*openGate/);
-assert.equal('sortEqualLengthRunsByOpeningGate' in production, false);
+assert.equal('sortEqualLengthRunsByOpeningGate' in production, true);
 assert.equal('oldJumpGuess' in production, false);
 
-console.log('DISCOVERY 17 DIAGNOSTIC: li stable sort per longore conserva li ordre de input intra li tie de Year 5000.');
-console.log('legacy opening order:    ' + actualOpeningOrder.map(String).join(', '));
-console.log('normativ opening order:  ' + normativeOpeningOrder.map(String).join(', '));
-console.log('legacy selected opening: ' + String(routed.result.selected.openGate));
-console.log('normativ selected open:   ' + String(normativeOpeningOrder[0]));
-
-assert.deepEqual(
-  actualOpeningOrder,
-  normativeOpeningOrder,
-  'DISCOVERY 17 EXPECTED RED: pos li stable sort per longore, un run egal deve esser ordinat per opening gate tempran ante selection.'
+const patched = production.historicYear5000TieThroughMonsterPath(
+  calculationDay,
+  targetDay,
+  -1n,
+  gates,
+  candidatePairs,
+  selectionStream
 );
+assert.equal(patched.context.currentHandler, 'Year5000TiePatchWrapper');
+assert.equal(patched.context.previousHandler, 'Discovery17Year5000TieHandler');
+assert.equal(patched.context.status, 'PATCH_17_RESULT');
+assert.deepEqual(
+  patched.result.legacyPreparedForSelection.map((candidate) => candidate.openGate),
+  actualOpeningOrder
+);
+assert.deepEqual(
+  patched.result.preparedForSelection.map((candidate) => candidate.openGate),
+  normativeOpeningOrder
+);
+assert.equal(patched.result.selected.openGate, normativeOpeningOrder[0]);
+assert.equal(patched.context.patch17LegacySelectedDiagnostic.openGate, actualOpeningOrder[0]);
+assert.equal(patched.context.patch17LegacyDiagnosticPreserved, true);
+assert.equal(patched.context.patch17EqualLengthRunCount, 1);
+
+console.log('DISCOVERY 17 REGRESSION: li scar stable per longore resta observabil e Patch 17 reordena li run egal pos it.');
+console.log('legacy opening order:    ' + actualOpeningOrder.map(String).join(', '));
+console.log('reparat opening order:   ' + patched.result.preparedForSelection.map((candidate) => String(candidate.openGate)).join(', '));
+console.log('legacy selected opening: ' + String(routed.result.selected.openGate));
+console.log('reparat selected open:    ' + String(patched.result.selected.openGate));

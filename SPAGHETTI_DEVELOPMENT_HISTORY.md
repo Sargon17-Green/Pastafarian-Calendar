@@ -755,3 +755,26 @@ Li context adjunte calculation-day de Year 5000, familie preparat, longore egal 
 ### Pro quo Patch 17 ne es anticipat
 
 Production ne contene null sort secundari, null comparator per `openGate`, null reorder de runs e null `sortEqualLengthRunsByOpeningGate`. Li expected order tempran-medial-tardiv existe solmen in li test normativ, e li suite complet resta rubi intentionalmen til Stage 35 / Patch 17. `oldJumpGuess` de Patch 18 anc resta absent.
+
+
+## Stage 35 — PATCH 17
+
+### Scar historic conservat
+
+Li stable sort per longore de Patch 16 ne es modificat. `stableLengthOnlyPatchedYearCandidates` continua esser li prim sort real e retorna zero por ties. `Discovery17Year5000TieHandler` anc resta intact e conserva li familie tardiv-tempran-medial e li selection legacy in su route diagnostic.
+
+### Circumition local, ne un sort clean
+
+Li specification manda un second passu pos li sort historic. `sortEqualLengthRunsByOpeningGate` camina li familie ja sortat, delimita runs contigui de longore egal e ordina solmen li interior de chascun run per opening gate ascendent. Un probe deliberatmen non-length-sorted demonstra que candidates de sam longore ma separat per un altri longore ne es regroupat; ergo li helper ne posse esser un clean global sort du-clave dissimulat.
+
+### Route monster e ownership
+
+`Year5000TiePatchWrapper` exige li statu real de Discovery 17. It clona e conserva li familie stable-length quam `patch17LegacyLengthSortedFamily`, conserva li candidate legacy selectet quam `patch17LegacySelectedDiagnostic`, e marca ti diagnostics quam preservat. Solmen un copie separat es passet a `sortEqualLengthRunsByOpeningGate`. Pos li reorder, li wrapper conserva li familie reparat, stream, grandore e selection final in state invocation-local.
+
+### Equivalence semantic
+
+Por li witness 490/490/490, li ordre legacy resta `opening=Foundation+30, +10, +20`, ma li familie reparat deven `+10, +20, +30`. Con rank 1 li output semantic cambia del opening tardiv al opening plu tempran, exactmen quam li rule normativ. Con rank 2 li duesim opening deven li medial, demonstrante que selection usa li familie reparat e ne un diagnostic legacy.
+
+### Limites de ti stage
+
+Null `oldJumpGuess` es creat, null jump per 365 es executet, e null next-year/previous-year patch es anticipat. Li function final resta absent. Omni regressions precedent e li regression de Discovery 17 es verd.

@@ -216,6 +216,15 @@ class BaseMonsterContext {
     this.discovery17SelectedOrdinal = null;
     this.discovery17Selected = null;
     this.discovery17StableLengthOnlyScarPreserved = false;
+    this.patch17LegacyLengthSortedFamily = null;
+    this.patch17LegacySelectedDiagnostic = null;
+    this.patch17LegacyDiagnosticPreserved = false;
+    this.patch17EqualLengthRunCount = null;
+    this.patch17RepairedFamily = null;
+    this.patch17SelectionFamilySize = null;
+    this.patch17SelectionStream = null;
+    this.patch17SelectedOrdinal = null;
+    this.patch17Selected = null;
   }
 }
 
@@ -425,6 +434,12 @@ class BaseValidationManager {
   requirePatch16Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_16_RESULT') {
       throw new BootstrapStageError('Li context ne contene un familie de year candidates reparat valid por Discovery 17.');
+    }
+  }
+
+  requireDiscovery17Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_17_LEGACY_TIE_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un tie legacy valid de Year 5000 por Patch 17.');
     }
   }
 
@@ -1581,6 +1596,34 @@ function stableLengthOnlyPatchedYearCandidates(gates, candidatePairs) {
   return accepted;
 }
 
+function sortEqualLengthRunsByOpeningGate(list) {
+  if (!Array.isArray(list)) {
+    throw new TypeError('Li liste de year candidates por li tie patch deve esser un array ja sortat per longore.');
+  }
+  let start = 0;
+  while (start < list.length) {
+    const length = list[start].candidateLength;
+    let end = start + 1;
+    while (end < list.length && list[end].candidateLength === length) {
+      end += 1;
+    }
+    if (end - start > 1) {
+      // Li scar de longore ja ha fixat li position del run; Patch 17 toca solmen su interior.
+      const run = list.slice(start, end);
+      run.sort((left, right) => {
+        if (left.openGate < right.openGate) return -1;
+        if (left.openGate > right.openGate) return 1;
+        return 0;
+      });
+      for (let offset = 0; offset < run.length; offset += 1) {
+        list[start + offset] = run[offset];
+      }
+    }
+    start = end;
+  }
+  return list;
+}
+
 
 class LegacyOverwritableOrderMemoryAdapter {
   call(counts, stones) {
@@ -2131,6 +2174,62 @@ class Discovery17Year5000TieHandler {
       preparedForSelection: prepared.map((candidate) => ({ ...candidate })),
       selectedOrdinal: context.discovery17SelectedOrdinal,
       selected: { ...context.discovery17Selected }
+    };
+  }
+}
+
+class Year5000TiePatchWrapper {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  repair(context, selectionStream) {
+    this.validationManager.requireDiscovery17Result(context);
+    this.validationManager.requireAnswerRing(selectionStream);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Year5000TiePatchWrapper';
+    context.phase = 'PATCH_17_EQUAL_LENGTH_RUN_OPENING_GATE';
+    context.branchTrace.push('PATCH_17_EQUAL_LENGTH_RUN_OPENING_GATE');
+
+    // Li stable sort historic de Patch 16 resta li prim passu real e es conservat quam diagnostic.
+    const legacySorted = context.discovery17PreparedForSelection.map((candidate) => ({ ...candidate }));
+    context.patch17LegacyLengthSortedFamily = legacySorted.map((candidate) => ({ ...candidate }));
+    context.patch17LegacySelectedDiagnostic = { ...context.discovery17Selected };
+    context.patch17LegacyDiagnosticPreserved = true;
+
+    let equalRunCount = 0;
+    for (let start = 0; start < legacySorted.length;) {
+      let end = start + 1;
+      while (end < legacySorted.length && legacySorted[end].candidateLength === legacySorted[start].candidateLength) {
+        end += 1;
+      }
+      if (end - start > 1) equalRunCount += 1;
+      start = end;
+    }
+
+    // Patch 17 ne usa null comparator global du-clave: solmen li runs contigui egal es reordinat.
+    const repaired = sortEqualLengthRunsByOpeningGate(legacySorted.map((candidate) => ({ ...candidate })));
+    context.patch17EqualLengthRunCount = equalRunCount;
+    context.patch17RepairedFamily = repaired.map((candidate) => ({ ...candidate }));
+    context.patch17SelectionFamilySize = repaired.length;
+    context.patch17SelectionStream = {
+      first: selectionStream.first, directionStep: selectionStream.directionStep
+    };
+    const selected = this.legacyAdapter.select(repaired, selectionStream);
+    context.patch17SelectedOrdinal = selected.pickedOrdinal;
+    context.patch17Selected = { ...selected.candidate };
+    context.status = 'PATCH_17_RESULT';
+    this.metricsManager.bump(context, 'patch17.equalLengthRunRepair.calls');
+    for (let index = 0; index < equalRunCount; index += 1) {
+      this.metricsManager.bump(context, 'patch17.equalLengthRuns.reordered');
+    }
+    return {
+      legacyPreparedForSelection: context.patch17LegacyLengthSortedFamily.map((candidate) => ({ ...candidate })),
+      preparedForSelection: repaired.map((candidate) => ({ ...candidate })),
+      selectedOrdinal: selected.pickedOrdinal,
+      selected: { ...selected.candidate }
     };
   }
 }
@@ -2897,6 +2996,11 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    this.year5000TiePatchWrapper = new Year5000TiePatchWrapper(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyYearCandidateAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -3363,6 +3467,22 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch17Year5000Tie(calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      const result = this.year5000TiePatchWrapper.repair(context, selectionStream);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -3541,8 +3661,16 @@ function discovery17LegacyYear5000TieThroughMonsterPath(
   );
 }
 
+function historicYear5000TieThroughMonsterPath(
+  calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+) {
+  return new BaseMonsterManager().executePatch17Year5000Tie(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 17; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 17; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -3605,6 +3733,7 @@ module.exports = Object.freeze({
   Discovery16LegacyYearCandidateHandler,
   YearCandidateCeilingPatchWrapper,
   Discovery17Year5000TieHandler,
+  Year5000TiePatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -3667,6 +3796,7 @@ module.exports = Object.freeze({
   legacyStableLengthOnlyYearCandidates,
   yearCandidatesAfterFootnotePatchBeforeSort,
   stableLengthOnlyPatchedYearCandidates,
+  sortEqualLengthRunsByOpeningGate,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -3701,5 +3831,6 @@ module.exports = Object.freeze({
   discovery16LegacyYearCandidatesThroughMonsterPath,
   historicYearCandidatesThroughMonsterPath,
   discovery17LegacyYear5000TieThroughMonsterPath,
+  historicYear5000TieThroughMonsterPath,
   calendarDateSpaghetti
 });

@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 34 de 55: DISCOVERY 17** e li repository local es EXPECTED_RED. Patch 16 resta verd e continua filtrar omni year candidate supra 5778 ante sort e selection.
+Li linea es in **Stage 35 de 55: PATCH 17** e li repository local es GREEN. Patch 16 continua filtrar omni year candidate supra 5778 ante sort e selection, e Discovery 17 resta observabil quam scar del tie de Year 5000.
 
-Li defect current es li tie de Year 5000. `stableLengthOnlyPatchedYearCandidates` es ancora un stable sort per longore solmen; si du o plu candidates have li sam `candidateLength`, lor ordre de input resta intact mem si un opening gate plu tempran deve preceder un plu tardiv. `Discovery17Year5000TieHandler` observa ti familie real pos Patch 16 e conserva li selection ja executet con li ordre legacy.
+`stableLengthOnlyPatchedYearCandidates` resta intact e executa prim li stable sort historic per longore solmen. Pos ti passu, `sortEqualLengthRunsByOpeningGate` camina li liste ja sortat, trova chascun run contigui de `candidateLength` egal e reordena exclusivmen ti run per opening gate plu tempran. Ti forma preserva li scar historic e evita intentionalmen un clean global sort per `(length, openGate)`.
 
-Null reorder per opening gate es implementat in production. Li correction `sortEqualLengthRunsByOpeningGate` apartene exclusivmen a Stage 35 / Patch 17. `oldJumpGuess` de Patch 18 anc ne es present, e li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+`Year5000TiePatchWrapper` conserva li familie e li candidate selectet legacy quam diagnostics, aplica li reorder local e selecte denov sur li familie reparat. `oldJumpGuess` de Patch 18 ne es present, e li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 16 deve restar verd:
+Omni regressions til Discovery 17 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal del discovery deve esser rubi intentionalmen:
+Li test focal de Patch 17 deve esser verd:
 
 ```text
-npm run test:discovery-17
+npm run test:patch-17
 ```
 
-Li suite complet deve esser EXPECTED_RED exclusivmen in Discovery 17:
+Li suite complet deve esser GREEN:
 
 ```text
 npm test
@@ -190,3 +190,22 @@ Ti stage introduce li constant legacy obligatori `LEGACY_YEAR_MAX=5781` e usa it
 Li familie de Year 5000 usa li candidate set ja filtrat per Patch 16 e li stable sort historic per longore solmen. `Discovery17Year5000TieHandler` es insertet pos li wrapper 5778 e observa un witness de candidates con longore egal quel omnes contene li calculation-day. Li handler ne muta lor ordre e conserva li candidate ja selectet per li dispatcher existent.
 
 Li witness usa tri candidates de longore 490 con opening gates in ordre tardiv, tempran, medial. Pro que li sort es stabil e ne have null secondary key, li ordre resta talmen e rank 1 selecte li opening tardiv. Li ordre normativ del tie deve esser tempran, medial, tardiv; ti comparison es li unic EXPECTED_RED nov. Null correction de Patch 17 es includet.
+
+
+## Stage 35 — PATCH 17
+
+### Scar historic conservat
+
+`stableLengthOnlyPatchedYearCandidates` resta byte-per-byte intact quam li sort historic posterior al filter 5778. `Discovery17Year5000TieHandler` resta anc intact e continua exposir li ordre legacy tardiv-tempran-medial e li selection legacy quand li route de Discovery 17 es vocat directmen. Li patch ne retroedita null de ti strates.
+
+### Circumition exact per runs
+
+`sortEqualLengthRunsByOpeningGate(list)` prende un liste ja ordinar per longore. It trova un `start` e `end` por chascun run contigui de `candidateLength` egal. Solmen si li run contene plu quam un candidate, it copia ti slice, ordina li slice per `openGate` ascendent e scri li slice retro in li sam positions. Li helper ne executa `list.sort` sur li familie complet e ne combina `candidateLength` con `openGate` in un comparator global.
+
+### Route monster e diagnostics
+
+`Year5000TiePatchWrapper` es conectet pos `Discovery17Year5000TieHandler`. It conserva li familie stable-length legacy e li candidate legacy selectet quam diagnostics invocation-local, calcula li quantitá de equal-length runs, aplica li reorder local e usa li sam `LegacyYearCandidateAdapter.select` con li sam answer stream por selection semantic final. Li witness 490/490/490 deven tempran-medial-tardiv e rank 1 selecte li opening gate plu tempran.
+
+### Pro quo li patch ne anticipa Stage 36
+
+Null `oldJumpGuess`, null division per 365 e null transition de year successiv/precedent es addit. Ti scar apartene exclusivmen a Discovery 18. SourceLanguageCatalog, li ceiling 5778, li route de gate-sign e omni scars anterior resta intact.
