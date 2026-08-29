@@ -167,6 +167,20 @@ class BaseMonsterContext {
     this.legacyWideSelectionErrorName = null;
     this.legacyWideSelectionErrorMessage = null;
     this.legacyWideSelectionOutput = null;
+    this.patch14Mode = null;
+    this.patch14LegacyDiagnosticPreserved = false;
+    this.patch14LegacyDiagnosticFailed = false;
+    this.patch14LegacyDiagnosticErrorName = null;
+    this.patch14LegacyDiagnosticOutput = null;
+    this.patch14Places = null;
+    this.patch14Space = null;
+    this.patch14Digits = null;
+    this.patch14DigitReadCount = null;
+    this.patch14InitialWide = null;
+    this.patch14AcceptanceLimit = null;
+    this.patch14AcceptedWide = null;
+    this.patch14RejectionSteps = null;
+    this.patch14Output = null;
   }
 }
 
@@ -341,6 +355,12 @@ class BaseValidationManager {
     this.requireExactInteger(value);
     if (value < 1n) {
       throw new RangeError('Li familie legacy deve haver un grandore positiv.');
+    }
+  }
+
+  requireDiscovery14Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_14_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un diagnostic legacy valid por Patch 14.');
     }
   }
 
@@ -1265,6 +1285,81 @@ function patchedSmallPick(stream, N) {
   return biasedLegacyPick(x, N);
 }
 
+function wideDetour(stream, N) {
+  if (!stream || typeof stream.first !== 'bigint' || typeof stream.directionStep !== 'bigint') {
+    throw new TypeError('Li detour wide exige un answer ring exact.');
+  }
+  if (stream.first < 1n || stream.first > M_OLD ||
+      (stream.directionStep !== 1n && stream.directionStep !== -1n)) {
+    throw new RangeError('Li answer ring del detour wide es extra su contract.');
+  }
+  if (typeof N !== 'bigint') {
+    throw new TypeError('Li grandore del familie wide deve esser un BigInt exact.');
+  }
+  if (N <= M_OLD) {
+    throw new RangeError('Li detour wide exige un familie plu grand quam M.');
+  }
+  let places = 1;
+  let space = M_OLD;
+  while (space < N) {
+    places += 1;
+    space *= M_OLD;
+  }
+  const digits = [];
+  let wide = 1n;
+  let weight = 1n;
+  for (let j = 0; j < places; j += 1) {
+    const digit = ringAnswerAt(stream, BigInt(j)) - 1n;
+    digits.push(digit);
+    wide += digit * weight;
+    weight *= M_OLD;
+  }
+  const initialWide = wide;
+  const acceptanceLimit = (space / N) * N;
+  let rejectionSteps = 0n;
+  // Pos li construction unic del digits, rejection avansa solmen li numero wide combinat; null answer nov es demandat.
+  while (wide > acceptanceLimit) {
+    wide = 1n + regularMod(wide - 1n + stream.directionStep, space);
+    rejectionSteps += 1n;
+  }
+  return {
+    mode: 'wide',
+    output: regularMod(wide - 1n, N) + 1n,
+    places,
+    space,
+    digits,
+    digitReadCount: places,
+    initialWide,
+    acceptanceLimit,
+    acceptedWide: wide,
+    rejectionSteps
+  };
+}
+
+function selectionDispatcherWithWideDetour(stream, N) {
+  if (typeof N !== 'bigint') {
+    throw new TypeError('Li dispatcher de selection exige un familie quam BigInt exact.');
+  }
+  if (N < 1n) {
+    throw new RangeError('Li dispatcher de selection exige un familie positiv.');
+  }
+  if (N <= M_OLD) {
+    return {
+      mode: 'short',
+      output: patchedSmallPick(stream, N),
+      places: null,
+      space: null,
+      digits: null,
+      digitReadCount: 0,
+      initialWide: null,
+      acceptanceLimit: null,
+      acceptedWide: null,
+      rejectionSteps: 0n
+    };
+  }
+  return wideDetour(stream, N);
+}
+
 
 class LegacyOverwritableOrderMemoryAdapter {
   call(counts, stones) {
@@ -1537,6 +1632,48 @@ class Discovery14WideSelectionHandler {
       errorName: context.legacyWideSelectionErrorName,
       errorMessage: context.legacyWideSelectionErrorMessage
     };
+  }
+}
+
+class WideSelectionPatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, stream, seal, N) {
+    this.validationManager.requireDiscovery14Result(context);
+    this.validationManager.requireAnswerRing(stream);
+    this.validationManager.requireExactInteger(seal);
+    this.validationManager.requirePositiveFamilySize(N);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'WideSelectionPatchWrapper';
+    context.phase = 'PATCH_14_SHORT_WIDE_DISPATCH';
+    context.branchTrace.push('PATCH_14_SHORT_WIDE_DISPATCH');
+    context.patch14LegacyDiagnosticPreserved = true;
+    context.patch14LegacyDiagnosticFailed = context.legacyWideSelectionFailed;
+    context.patch14LegacyDiagnosticErrorName = context.legacyWideSelectionErrorName;
+    context.patch14LegacyDiagnosticOutput = context.legacyWideSelectionOutput;
+    // Li assumption historic resta in su adapter; solmen ti wrapper decide si li familie usa li path curt o li detour wide.
+    const dispatched = selectionDispatcherWithWideDetour(stream, N);
+    context.patch14Mode = dispatched.mode;
+    context.patch14Places = dispatched.places;
+    context.patch14Space = dispatched.space;
+    context.patch14Digits = dispatched.digits === null ? null : dispatched.digits.slice();
+    context.patch14DigitReadCount = dispatched.digitReadCount;
+    context.patch14InitialWide = dispatched.initialWide;
+    context.patch14AcceptanceLimit = dispatched.acceptanceLimit;
+    context.patch14AcceptedWide = dispatched.acceptedWide;
+    context.patch14RejectionSteps = dispatched.rejectionSteps;
+    context.patch14Output = dispatched.output;
+    context.status = 'PATCH_14_RESULT';
+    this.metricsManager.bump(context, 'patch14.wideDispatcher.calls');
+    if (dispatched.mode === 'wide') {
+      this.metricsManager.bump(context, 'patch14.wideDetour.calls');
+    } else {
+      this.metricsManager.bump(context, 'patch14.shortCompatibility.calls');
+    }
+    return context.patch14Output;
   }
 }
 
@@ -2273,6 +2410,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyShortFamilyAssumptionAdapter
     );
+    this.wideSelectionPatchWrapper = new WideSelectionPatchWrapper(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -2646,6 +2787,26 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch14Selection(calculationDay, targetDay, counts, stones, queriedBowlId, seal, N) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery11OverwrittenOrderHandler.handle(context, counts, stones);
+      const latched = this.patch11OrderAt46LatchWrapper.repair(context, counts, stones);
+      this.discovery12NextBowlHandler.handle(context, latched.orderAt46Latch, queriedBowlId);
+      const nextBowlId = this.nextBowlPatchWrapper.repair(context, latched.orderAt46Latch, queriedBowlId);
+      const stream = answerRingFromCurrentState(
+        context.patch11FinalBowls, queriedBowlId, nextBowlId, seal
+      );
+      this.discovery14WideSelectionHandler.handle(context, stream, seal, N);
+      const result = this.wideSelectionPatchWrapper.repair(context, stream, seal, N);
+      return { result, context, stream: { first: stream.first, directionStep: stream.directionStep } };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -2784,8 +2945,16 @@ function discovery14LegacyWideSelectionThroughMonsterPath(
   );
 }
 
+function historicSelectionThroughMonsterPath(
+  calculationDay, targetDay, counts, stones, queriedBowlId, seal, N
+) {
+  return new BaseMonsterManager().executePatch14Selection(
+    calculationDay, targetDay, counts, stones, queriedBowlId, seal, N
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 14; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 14; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -2840,6 +3009,7 @@ module.exports = Object.freeze({
   SelectionRejectionPatchWrapper,
   LegacyShortFamilyAssumptionAdapter,
   Discovery14WideSelectionHandler,
+  WideSelectionPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -2890,6 +3060,8 @@ module.exports = Object.freeze({
   biasedLegacyPick,
   legacySelectionAssumingNLeM,
   patchedSmallPick,
+  wideDetour,
+  selectionDispatcherWithWideDetour,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -2918,5 +3090,6 @@ module.exports = Object.freeze({
   discovery13LegacyBiasedSelectionThroughMonsterPath,
   historicSmallSelectionThroughMonsterPath,
   discovery14LegacyWideSelectionThroughMonsterPath,
+  historicSelectionThroughMonsterPath,
   calendarDateSpaghetti
 });

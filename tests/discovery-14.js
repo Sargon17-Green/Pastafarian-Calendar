@@ -64,8 +64,34 @@ assert.doesNotMatch(handlerSource, /wideDetour/);
 
 const expectedWide = normative.chooseRankWide(routed.stream, N);
 assert.equal(expectedWide, 2n);
-assert.equal(
+assert.notEqual(
   routed.result.output,
   expectedWide,
-  'DISCOVERY 14 EXPECTED RED: li route legacy presume N<=M e falla in vice de seleccionar un rank wide exact.'
+  'Li scar de Discovery 14 deve restar demonstrabil pos Patch 14.'
 );
+
+const patched = production.historicSelectionThroughMonsterPath(
+  calculationDay,
+  targetDay,
+  counts,
+  stones,
+  queriedBowlId,
+  seal,
+  N
+);
+assert.equal(patched.result, expectedWide);
+assert.equal(patched.context.currentHandler, 'WideSelectionPatchWrapper');
+assert.equal(patched.context.previousHandler, 'Discovery14WideSelectionHandler');
+assert.equal(patched.context.phase, 'PATCH_14_SHORT_WIDE_DISPATCH');
+assert.equal(patched.context.status, 'PATCH_14_RESULT');
+assert.equal(patched.context.patch14Mode, 'wide');
+assert.equal(patched.context.patch14LegacyDiagnosticPreserved, true);
+assert.equal(patched.context.patch14LegacyDiagnosticFailed, true);
+assert.equal(patched.context.patch14LegacyDiagnosticErrorName, 'RangeError');
+assert.equal(patched.context.patch14LegacyDiagnosticOutput, null);
+assert.equal(patched.context.patch14Output, expectedWide);
+assert.equal(patched.context.metrics['discovery14.shortOnlyAssumption.calls'], 1n);
+assert.equal(patched.context.metrics['patch14.wideDispatcher.calls'], 1n);
+assert.equal(patched.context.metrics['patch14.wideDetour.calls'], 1n);
+
+console.log('DISCOVERY 14 REGRESSION: PASS pos Patch 14 — li assumption curt resta visibil, ma li route semantic usa wideDetour por N>M.');

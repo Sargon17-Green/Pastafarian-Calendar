@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 14 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 14 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Discovery 14 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
+    'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
@@ -1411,7 +1411,66 @@ group('Discovery 14 expone li assumption N<=M ante li detour wide', () => {
   ok(!production.Discovery14WideSelectionHandler.prototype.handle.toString().includes('wideDetour'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 14', () => {
+group('Patch 14 conserva li failure curt legacy ma dispatcha familie wide al detour exact', () => {
+  const M = production.M_OLD;
+  const legacySource = production.legacySelectionAssumingNLeM.toString();
+  ok(legacySource.includes('return patchedSmallPick(stream, N);'));
+  ok(!legacySource.includes('wideDetour'));
+  const wideSource = production.wideDetour.toString();
+  ok(wideSource.includes('while (space < N)'));
+  ok(wideSource.includes('const digit = ringAnswerAt(stream, BigInt(j)) - 1n;'));
+  ok(wideSource.includes('wide += digit * weight;'));
+  ok(wideSource.includes('weight *= M_OLD;'));
+  ok(wideSource.includes('const acceptanceLimit = (space / N) * N;'));
+  ok(wideSource.includes('while (wide > acceptanceLimit)'));
+  const tail = wideSource.slice(wideSource.indexOf('const acceptanceLimit'));
+  ok(!tail.includes('ringAnswerAt'));
+
+  const synthetic = { first: M / 2n + 10n, directionStep: -1n };
+  const d0 = production.ringAnswerAt(synthetic, 0n) - 1n;
+  const d1 = production.ringAnswerAt(synthetic, 1n) - 1n;
+  const initialWide = 1n + d0 + d1 * M;
+  const rejectionN = initialWide - 1n;
+  const detail = production.wideDetour(synthetic, rejectionN);
+  eq(detail.places, 2);
+  deepEq(detail.digits, [d0, d1]);
+  eq(detail.digitReadCount, 2);
+  eq(detail.rejectionSteps, 1n);
+  eq(detail.acceptedWide, rejectionN);
+  eq(detail.output, o.chooseRankWide(synthetic, rejectionN));
+
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const N = M + 1n;
+  const legacy = production.discovery14LegacyWideSelectionThroughMonsterPath(f, f, counts, stones, 1, 1n, N);
+  const patched = production.historicSelectionThroughMonsterPath(f, f, counts, stones, 1, 1n, N);
+  eq(legacy.result.output, null);
+  eq(legacy.result.failed, true);
+  eq(patched.result, o.chooseRankWide(patched.stream, N));
+  eq(patched.result, 2n);
+  eq(patched.context.currentHandler, 'WideSelectionPatchWrapper');
+  eq(patched.context.previousHandler, 'Discovery14WideSelectionHandler');
+  eq(patched.context.phase, 'PATCH_14_SHORT_WIDE_DISPATCH');
+  eq(patched.context.status, 'PATCH_14_RESULT');
+  eq(patched.context.patch14Mode, 'wide');
+  eq(patched.context.patch14LegacyDiagnosticPreserved, true);
+  eq(patched.context.patch14LegacyDiagnosticFailed, true);
+  eq(patched.context.patch14Places, 2);
+  eq(patched.context.patch14DigitReadCount, 2);
+  eq(patched.context.patch14Output, 2n);
+  eq(patched.context.metrics['patch14.wideDispatcher.calls'], 1n);
+  eq(patched.context.metrics['patch14.wideDetour.calls'], 1n);
+
+  const short = production.historicSelectionThroughMonsterPath(f, f, counts, stones, 1, 1n, 10n);
+  eq(short.context.patch14Mode, 'short');
+  eq(short.result, o.chooseRankShort(short.stream, 10n));
+  eq(short.context.patch14DigitReadCount, 0);
+  eq(short.context.metrics['patch14.shortCompatibility.calls'], 1n);
+  eq(short.context.metrics['patch14.wideDetour.calls'], undefined);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 14', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1423,4 +1482,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression EXPECTED_RED de Discovery 14.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa posterior a Patch 14.');

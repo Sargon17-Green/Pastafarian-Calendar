@@ -623,3 +623,25 @@ Li monster adjunte `LegacyShortFamilyAssumptionAdapter` e `Discovery14WideSelect
 ### Pro quo li nov layer ne change altri semantics
 
 Li selector `biasedLegacyPick` e `patchedSmallPick` resta textualmen e semanticmen intact. Families `N<=M_OLD` continua usar li route GREEN de Patch 13. Li nov handler es apellet solmen per li route de Discovery 14 e ne adjunte null `wideDetour`, null digits, null `M^places` e null rejection wide. Omni regressions precedent resta verd; li unic failure intentional es li comparison final del nov discovery.
+
+## Stage 29 — PATCH 14
+
+### Scar historic conservat
+
+`legacySelectionAssumingNLeM(stream,N)` resta textualmen intact. It continua delegar omni familie a `patchedSmallPick` e dunque falla con `RangeError` por `N>M_OLD`. `Discovery14WideSelectionHandler` resta un route real e conserva ti failure quam diagnostic; li patch ne re-scrive ni masca li assumption historic.
+
+### Dispatcher e detour wide
+
+`selectionDispatcherWithWideDetour` introduce li branch exact mandat. Por `N<=M_OLD`, it usa `patchedSmallPick` e conserva li rejection curt de Patch 13. Por `N>M_OLD`, it usa `wideDetour`. Ti detour trova li minimal `places` tal que `space=M_OLD^places>=N`, poy lee `ringAnswerAt(stream,j)-1` por `j=0..places-1` un unic vez e construi `wide=1+Σ digits[j]*M_OLD^j` con pesos little-endian.
+
+### Rejection sin nov digits
+
+Li acceptance-limit wide es `floor(space/N)*N`. Pos li construction unic del vector `digits`, li rejection move solmen li numero `wide` self per `directionStep` sur li ring `1..space`. Null call a `ringAnswerAt` existe in ti fase. Quande li numero entra in li region acceptabil, li rank final es `regularMod(wide-1,N)+1`.
+
+### Crescentie monster e ownership
+
+`WideSelectionPatchWrapper` es insertet pos `Discovery14WideSelectionHandler`. It conserva separatmen li failure legacy, li mode del dispatcher, places, space, digits, quantité de reads, numero wide inicial, acceptance-limit, numero acceptat, passus de rejection e output final. Ti state es invocation-local e diagnostics legacy ne es re-leet por decision semantic.
+
+### Verification
+
+Li witness real del Foundation con `N=M_OLD+1` conserva `legacy output=null` e `RangeError`, durante que li route reparat retorna rank `2`. Un witness synthetic força exactmen un passu de rejection wide e verifica que li quantité de digit reads resta egal a `places`. Cases de du e tri places concorda con li reference normativ local, e li dispatcher curt concorda con Patch 13. Null `oldGateQuestionDay` o logic de Patch 15 es addit.

@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 28 de 55: DISCOVERY 14**. Omni scars e patches til Patch 13 resta intact e testabil. `legacySelectionAssumingNLeM(stream,N)` representa li assumption historic que omni familie have `N<=M_OLD`; it envia mem un `N>M_OLD` al selector curt reparat de Patch 13 e registra li consequent failure de contract.
+Li linea es in **Stage 29 de 55: PATCH 14** e li repository local es GREEN. Li scar `legacySelectionAssumingNLeM(stream,N)` resta intact e continua demonstrar li failure historic por `N>M_OLD`. Li nov dispatcher semantic conserva `patchedSmallPick` por families curt e usa `wideDetour` solmen por families wide.
 
-Li route real passa per li latch de Patch 11 e li next-bowl circular de Patch 12, deriva li answer ring exact e poy intra in `Discovery14WideSelectionHandler`. Por `N=M_OLD+1`, li legacy ne produce null rank, durante que li reference test-only produce un rank wide exact. Null `wideDetour` o correction de Patch 14 es present.
+In `wideDetour`, li minimal `places` satisfá `M_OLD^places>=N`. Li `digits[j]=ringAnswerAt(stream,j)-1` es leet un unic vez e combinat little-endian quam `wide=1+Σ digits[j]*M_OLD^j`. Rejection posterior avansa solmen ti numero wide combinat per ±1 sur `1..space`; null digit nov es generat pos que rejection ha comensat. Li regression de Discovery 14 es nu verd.
 
-Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
+Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de Stage 30 o posterior es anticipat.
 
 ## Lingue-fonte canonic
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 13 deve restar verd:
+Omni regressions til Discovery 14 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal del discovery deve esser rubi exactmen pro li assumption `N<=M_OLD` in un familie wide:
+Li test focal del patch deve esser verd:
 
 ```text
-npm run test:discovery-14
+npm run test:patch-14
 ```
 
-Li suite complet deve esser `EXPECTED_RED` exclusivmen in Discovery 14:
+Li suite complet deve esser GREEN:
 
 ```text
 npm test
@@ -152,3 +152,9 @@ Li witness real del Foundation continua monstrar `legacy=1` por li prim answer r
 Li selector de Patch 13 es exact solmen por families curt `1<=N<=M_OLD`. Li scar nov `legacySelectionAssumingNLeM(stream,N)` ne have null dispatcher de largore: it presume que omni familie es curt e delega directmen a `patchedSmallPick`. Ti helper resta exact in su domini precedent, ma por `N>M_OLD` it rejecte li familie con un `RangeError`.
 
 `LegacyShortFamilyAssumptionAdapter` e `Discovery14WideSelectionHandler` conserva ti failure quam state invocation-local pos li route real de Patch 12. Li handler ne inventa null representation wide, ne combina digits e ne calcula null space `M^places`; it registra solmen que li path curt esset assumet e que ti assumption fallit. Li witness real del Foundation con `N=M_OLD+1` falla in legacy durant que li reference test-only retorna rank `2`. `wideDetour` resta reservat exclusivmen por Stage 29 / Patch 14.
+
+## Stage 29 — Patch 14
+
+`legacySelectionAssumingNLeM` resta intact quam scar historic e su route de Discovery 14 continua fallir diagnosticmen por families plu grand quam `M_OLD`. `selectionDispatcherWithWideDetour` branchia explicitmen: `N<=M_OLD` usa li path curt ja reparat de Patch 13, e `N>M_OLD` entra in `wideDetour`.
+
+Li detour wide deriva `space=M_OLD^places` con li minimal places suficient, lee chascun digit exactmen un vez ex li sam answer ring, e combina li numero wide con pesos little-endian. Pos li construction del digits, li loop de rejection ne voca plu `ringAnswerAt`; it move solmen li numero combinat per li direction del stream sur li ring `1..space`. `WideSelectionPatchWrapper` conserva li diagnostic legacy e li places, space, digits, limite, numero inicial, numero acceptat e passus de rejection in li context. Li regression de Discovery 14 es verd e null logic de Patch 15 es present.
