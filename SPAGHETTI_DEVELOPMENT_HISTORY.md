@@ -941,3 +941,52 @@ Nullus `LEGACY_YEAR_MAX=5781`, nullus `REAL_YEAR_MAX_PATCH=5778`, nullus filter 
 ### Stratum monstri hoc gradu additum
 
 Additi sunt campi contextus `patch15LegacyOutputBeforePatch`, `patch15GateQuestionOutput`, `patch15Applied`; campi report observabilitatis; `Patch15NegativeGateQuestionWrapper`; `Patch15GateQuestionHandler`; `requirePatch15GateQuestionReady`; `dispatchPatchedGateQuestion`; et `executeUnpatchedGateQuestionDayDiagnostic`.
+
+
+## Gradus 32 — DISCOVERY 16: LEGACY_YEAR_MAX 5781 candidatos supra normam ad selectionem transmittit
+
+### Quid putabatur
+
+Post correctionem directionis portae, via candidatorum anni adhuc ceiling historicum maius quam limitem normativum possidebat. Haec cicatrix non debet emendari hoc gradu; debet primum realiter in productione manifestari.
+
+### Quid repertum est
+
+Constans obligatoria nunc est:
+
+```text
+LEGACY_YEAR_MAX=5781
+```
+
+`legacyYearCandidateAllowed` eam directe in limite superiore adhibet. Candidatus admittitur si saltem sex intervalla portarum continet et longitudo inter 252 et 5781 inclusive est. Ergo longitudines 5779, 5780 et 5781 adhuc validae legacy sunt.
+
+`legacyYearCandidatesBeforeSort` ordinem inputuum servat. `legacyStableLengthOnlyYearCandidates` solum longitudinem ut clavem stable sort adhibet. Nullus tie repair posterior anticipatur.
+
+`LegacyYearCandidateAdapter` familiam sortatam ad selectionem iam existentem mittit. `Discovery16LegacyYearCandidateHandler` campos familiae ante sortem, familiae sortatae, answer ring, magnitudinis selectionis, ordinalis et candidati electi in contextu invocationis servat. Validator sine oracle eandem familiam legacy et eundem stable sort independenti vocatione helperum repetit.
+
+### Via monstri
+
+Manager ante handlerem novum PATCH 15 vere exsequitur. Deinde Patch 11 et Patch 12 answer ring selectionis praeparant. Handler Discovery 16 candidatas materialisat, sortat et selectionem vere vocat. Sic 5779..5781 non sunt solum valores testis artificiosi; ad familiam selectionis productionis perveniunt.
+
+### Regressio
+
+Witness communem portam apertam et clausuras cum longitudinibus 5778, 5779, 5780, 5781, 5782 habet. Input acceptabilis ante sortem est:
+
+```text
+5781,5779,5778,5780
+```
+
+Stable sort legacy dat:
+
+```text
+5778,5779,5780,5781
+```
+
+5782 repudiatur. Tres longitudines supra 5778 ad selectionem perveniunt; regressio exactas tres discrepantias agnoscit et exitum 1 reddit. Omnes regressiones Graduum 1–31 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `LEGACY_YEAR_MAX`, `LegacyYearCandidatePair`, `LegacyYearCandidate`, `LegacyYearCandidatePreparation`, helperes acceptance/materializationis/sortis, campi contextus candidatorum et selectionis, `LegacyYearCandidateReport`, `LegacyYearCandidateAdapter`, `Discovery16LegacyYearCandidateHandler`, validator, dispatchatio et manager route.
+
+### Quod nondum fit
+
+Ceiling historicum 5781 non mutatur. Nullus filter separatus 5778, nullus reject ante sortem, nullus PATCH 16, nullus tie repair Patch 17 et nullus codex ulterior praemature additur.

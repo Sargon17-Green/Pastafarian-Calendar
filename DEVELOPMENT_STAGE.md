@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=31
-CURRENT_KIND=PATCH
-CURRENT_PATCH=15
-LAST_COMPLETED_STAGE=31
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=32
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=16
+LAST_COMPLETED_STAGE=32
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=C++
 NATURAL_LANGUAGE=Neo-Latin
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Patch15NegativeGateQuestionWrapper, Patch15GateQuestionHandler, dispatchatio patched, campi output legacy ante patch et output semanticus, via diagnostica Discovery 15 et validatio duplicata addita sunt. oldGateQuestionDay et caller legacy cum abs(signedStep) manent intacti et vere exsequuntur; tantum signedStep negativus ad FOUNDATION_DAY_OLD-abs(step) semanticum detour ducitur.
+MONSTER_ARCHITECTURE_GROWTH=LEGACY_YEAR_MAX=5781, LegacyYearCandidatePair, LegacyYearCandidate, legacyYearCandidateAllowed, familia ante sortem, stable sort per longitudinem solam, LegacyYearCandidateAdapter, Discovery16LegacyYearCandidateHandler, contextus selectionis et dispatchatio propria addita sunt. Via Patch 15 ante handlerem novum vere exsequitur; familia 5778..5781 ad selectionem pervenit, dum 5782 a ceiling legacy repudiatur.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

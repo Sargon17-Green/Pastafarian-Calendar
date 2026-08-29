@@ -220,3 +220,56 @@ BaseMonsterManager::executeLegacyGateQuestionDay
 `tests/stage_31_patch_15_tests.cpp` quattuor gradus negativos, tres non-negativos, output legacy ante patch, viam diagnosticam, statum invocationi proprium et conservationem viae non-negativae probat. Omnes regressiones Graduum 1–31 transeunt.
 
 Nullus `LEGACY_YEAR_MAX`, nullus `REAL_YEAR_MAX_PATCH`, nullus PATCH 16 et nullus codex Gradus 32 praemature additus est.
+
+
+## DISCOVERY 16 — ceiling legacy anni 5781 candidatos nimis longos admittit
+
+Gradus 32 cicatricem historicam obligatoriam expresse creat et in via productionis vere adhibet:
+
+```text
+LEGACY_YEAR_MAX=5781
+```
+
+`legacyYearCandidateAllowed(gates,openIndex,closeIndex)` computat numerum intervallorum portarum et longitudinem candidatam. Via legacy admittit candidatum tantum si:
+
+```text
+gapCount >= 6
+252 <= candidateLength <= LEGACY_YEAR_MAX
+```
+
+`legacyYearCandidatesBeforeSort` candidatas admissas ordine inputuum materialisat. `legacyStableLengthOnlyYearCandidates` deinde copiam facit et stable sort tantum per longitudinem applicat. Nullum criterium secundarium pro porta aperiente hoc gradu adest.
+
+`LegacyYearCandidateAdapter::select` familiam sortatam ad mechanismum selectionis iam emendatum mittit: via brevis Patch 13 pro magnitudine intra M, wideDetour Patch 14 si familia maior esset. Ergo candidata supra 5778 non tantum in memoria diagnostica manent; ad familiam selectionis vere perveniunt.
+
+Via monstri est:
+
+```text
+BaseMonsterManager::executeLegacyYearCandidateDiscovery
+-> Patch 15 gate path
+-> Patch 11 orderAt46Latch
+-> Patch 12 next-bowl
+-> BaseDispatcher::dispatchLegacyYearCandidates
+-> Discovery16LegacyYearCandidateHandler
+-> LegacyYearCandidateAdapter::prepareForSelection
+-> stable sort per longitudinem solam
+-> LegacyYearCandidateAdapter::select
+```
+
+### Witness limitis
+
+Familia probationis communem portam apertam et quinque clausuras habet cum longitudinibus 5778, 5779, 5780, 5781 et 5782. Ordo inputuum acceptabilium consulto non est sortatus:
+
+```text
+ante sortem: 5781, 5779, 5778, 5780
+post sortem: 5778, 5779, 5780, 5781
+```
+
+5782 ceiling legacy excedit et repudiatur. 5779, 5780 et 5781 tamen familiam sortatam et selectionem attingunt, quamvis norma finalis longitudines supra 5778 non admittat. Haec tres discrepantiae unicum rubrum intentionale huius gradus constituunt.
+
+`tests/stage_32_discovery_16_tests.cpp` etiam verificat `LEGACY_YEAR_MAX==5781`, minimum sex gate gaps, conservationem ordinis raw ante sortem, stable sort length-only, vocationem realem selectionis et candidatum electum ex ipsa familia sortata.
+
+Omnes regressiones Graduum 1–31 denuo compilatae et exsecutae sunt; omnes transeunt.
+
+### Quod consulto nondum adest
+
+Nulla constans separata 5778 in productione, nullus early reject pro longitudine supra 5778, nullus PATCH 16 et nullus tie repair secundarius huius gradus adsunt. Gradus 33 / PATCH 16 solus filter separatum ante sortem et selectionem introducere debet, `LEGACY_YEAR_MAX=5781` intacto relicto.

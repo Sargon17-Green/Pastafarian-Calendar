@@ -1,5 +1,7 @@
 #include "pastafari/monster.hpp"
 
+#include <algorithm>
+
 namespace pastafari {
 
 Integer regularMod(const Integer& x, const Integer& d) {
@@ -15,6 +17,46 @@ Integer regularMod(const Integer& x, const Integer& d) {
 
 Integer oldGateQuestionDay(const Integer& n) {
     return FOUNDATION_DAY_OLD + n;
+}
+
+bool legacyYearCandidateAllowed(const std::vector<Integer>& gates,
+                                std::size_t openIndex,
+                                std::size_t closeIndex) {
+    if (openIndex >= gates.size() || closeIndex >= gates.size() || closeIndex <= openIndex) {
+        return false;
+    }
+    const std::size_t gapCount = closeIndex - openIndex;
+    const Integer candidateLength = gates[closeIndex] - gates[openIndex];
+    return gapCount >= 6 &&
+           candidateLength >= 252 &&
+           candidateLength <= LEGACY_YEAR_MAX;
+}
+
+LegacyYearCandidateList legacyYearCandidatesBeforeSort(
+    const std::vector<Integer>& gates,
+    const std::vector<LegacyYearCandidatePair>& pairs) {
+    LegacyYearCandidateList out;
+    for (const LegacyYearCandidatePair& pair : pairs) {
+        if (!legacyYearCandidateAllowed(gates, pair.openIndex, pair.closeIndex)) {
+            continue;
+        }
+        out.push_back(LegacyYearCandidate{
+            pair.openIndex,
+            pair.closeIndex,
+            gates[pair.closeIndex] - gates[pair.openIndex]
+        });
+    }
+    return out;
+}
+
+LegacyYearCandidateList legacyStableLengthOnlyYearCandidates(
+    const LegacyYearCandidateList& candidates) {
+    LegacyYearCandidateList out = candidates;
+    std::stable_sort(out.begin(), out.end(), [](const LegacyYearCandidate& a,
+                                                const LegacyYearCandidate& b) {
+        return a.length < b.length;
+    });
+    return out;
 }
 
 Integer oldRemainder(const Integer& x) {
@@ -3170,6 +3212,60 @@ void BaseValidationManager::requirePatch15GateQuestionReady(const BaseMonsterCon
     }
 }
 
+void BaseValidationManager::requireDiscovery16LegacyYearCandidatesReady(
+    const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyYearCandidateReady) {
+        throw BaseValidationError("familia candidatorum annorum legacy nondum parata est");
+    }
+    if (LEGACY_YEAR_MAX != 5781) {
+        throw BaseValidationError("LEGACY_YEAR_MAX cicatricem 5781 non servat");
+    }
+    const LegacyYearCandidateList expectataPre = legacyYearCandidatesBeforeSort(
+        ctx.legacyYearGates,
+        ctx.legacyYearCandidatePairs);
+    if (expectataPre.size() != ctx.legacyYearCandidatesPreSort.size()) {
+        throw BaseValidationError("familia candidatorum ante sortem legacy discrepat");
+    }
+    for (std::size_t i = 0; i < expectataPre.size(); ++i) {
+        const auto& a = expectataPre[i];
+        const auto& b = ctx.legacyYearCandidatesPreSort[i];
+        if (a.openIndex != b.openIndex || a.closeIndex != b.closeIndex || a.length != b.length) {
+            throw BaseValidationError("candidatus legacy ante sortem mutatus est");
+        }
+    }
+    const LegacyYearCandidateList expectataSort = legacyStableLengthOnlyYearCandidates(expectataPre);
+    if (expectataSort.size() != ctx.legacyYearCandidatesSorted.size()) {
+        throw BaseValidationError("familia candidatorum post sortem legacy discrepat");
+    }
+    for (std::size_t i = 0; i < expectataSort.size(); ++i) {
+        const auto& a = expectataSort[i];
+        const auto& b = ctx.legacyYearCandidatesSorted[i];
+        if (a.openIndex != b.openIndex || a.closeIndex != b.closeIndex || a.length != b.length) {
+            throw BaseValidationError("stable sort per longitudinem solam non servata est");
+        }
+    }
+    if (!ctx.legacyYearSelectionCalled) {
+        throw BaseValidationError("familia legacy ad selectionem non pervenit");
+    }
+    if (ctx.legacyYearSelectionFamilySize != Integer{ctx.legacyYearCandidatesSorted.size()}) {
+        throw BaseValidationError("magnitudo familiae selectionis legacy falsa est");
+    }
+    if (ctx.legacyYearCandidatesSorted.empty()) {
+        throw BaseValidationError("familia selectionis legacy vacua est");
+    }
+    if (ctx.legacyYearSelectedOrdinal < 1 ||
+        ctx.legacyYearSelectedOrdinal > ctx.legacyYearSelectionFamilySize) {
+        throw BaseValidationError("ordinalis selectionis legacy extra fines est");
+    }
+    const std::size_t index = (ctx.legacyYearSelectedOrdinal - 1).convert_to<std::size_t>();
+    const auto& expectatus = ctx.legacyYearCandidatesSorted[index];
+    if (ctx.legacyYearSelectedCandidate.openIndex != expectatus.openIndex ||
+        ctx.legacyYearSelectedCandidate.closeIndex != expectatus.closeIndex ||
+        ctx.legacyYearSelectedCandidate.length != expectatus.length) {
+        throw BaseValidationError("candidatus electus non ex familia sortata venit");
+    }
+}
+
 void BaseValidationManager::requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const {
     requireLegacyBiasedSelectionReady(ctx);
     if (!ctx.patch13Applied) {
@@ -3263,6 +3359,32 @@ Patch13RejectionSelection Patch13RejectionWrapper::repair(
         }
         ++offset;
     }
+}
+
+LegacyYearCandidatePreparation LegacyYearCandidateAdapter::prepareForSelection(
+    const std::vector<Integer>& gates,
+    const std::vector<LegacyYearCandidatePair>& pairs) const {
+    const LegacyYearCandidateList preSort = legacyYearCandidatesBeforeSort(gates, pairs);
+    return LegacyYearCandidatePreparation{
+        preSort,
+        legacyStableLengthOnlyYearCandidates(preSort)
+    };
+}
+
+Integer LegacyYearCandidateAdapter::select(
+    const LegacyAnswerRing& stream,
+    const LegacyYearCandidateList& sorted,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper) const {
+    if (sorted.empty()) {
+        throw BaseValidationError("familia candidatorum annorum ad selectionem vacua est");
+    }
+    const Integer N = Integer{sorted.size()};
+    if (N <= M_OLD) {
+        return rejectionWrapper.repair(stream, N, selectionAdapter).outputRank;
+    }
+    return wideWrapper.repair(stream, N, selectionAdapter).outputRank;
 }
 
 Integer LegacyGateQuestionAdapter::ask(const Integer& magnitude) const {
@@ -3866,6 +3988,44 @@ void Patch15GateQuestionHandler::handle(
     metrics.bump(ctx, "patch15.gateQuestion.ready");
 }
 
+void Discovery16LegacyYearCandidateHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyYearCandidateAdapter& adapter,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_16_LEGACY_YEAR_CANDIDATES";
+    ctx.currentHandler = "Discovery16LegacyYearCandidateHandler";
+    ctx.branchTrace.push_back("handler:discovery16:legacy-year-max-5781");
+
+    const LegacyYearCandidatePreparation prepared = adapter.prepareForSelection(
+        ctx.legacyYearGates,
+        ctx.legacyYearCandidatePairs);
+    ctx.legacyYearCandidatesPreSort = prepared.preSort;
+    ctx.legacyYearCandidatesSorted = prepared.sorted;
+    ctx.legacyYearSelectionFamilySize = Integer{prepared.sorted.size()};
+    ctx.legacyYearSelectionRing = answerRingThroughPatchedNextBowl(
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.legacyYearQueriedBowlId,
+        ctx.patchedNextBowlOutput,
+        ctx.legacyYearSeal);
+    ctx.legacyYearSelectionCalled = true;
+    ctx.legacyYearSelectedOrdinal = adapter.select(
+        ctx.legacyYearSelectionRing,
+        ctx.legacyYearCandidatesSorted,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper);
+    const std::size_t index = (ctx.legacyYearSelectedOrdinal - 1).convert_to<std::size_t>();
+    ctx.legacyYearSelectedCandidate = ctx.legacyYearCandidatesSorted[index];
+    ctx.legacyYearCandidateReady = true;
+    ctx.status = "LEGACY_YEAR_MAX_5781_REACHES_SELECTION";
+    metrics.bump(ctx, "discovery16.legacy-year-candidates");
+    validator.requireDiscovery16LegacyYearCandidatesReady(ctx);
+}
+
 void BaseDispatcher::dispatchPatchedGateQuestion(
     BaseMonsterContext& ctx,
     const Patch15GateQuestionHandler& handler,
@@ -4417,6 +4577,19 @@ LegacyWideSelectionReport BaseMonsterManager::executeUnpatchedWideSelectionDiagn
     };
 }
 
+void BaseDispatcher::dispatchLegacyYearCandidates(
+    BaseMonsterContext& ctx,
+    const Discovery16LegacyYearCandidateHandler& handler,
+    const LegacyYearCandidateAdapter& adapter,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("dispatcher:discovery16:legacy-year-candidates");
+    handler.handle(ctx, adapter, selectionAdapter, rejectionWrapper, wideWrapper, validator, metrics);
+}
+
 LegacyGateQuestionReport BaseMonsterManager::executeLegacyGateQuestionDay(
     const Integer& signedStep) const {
     BaseMonsterContext ctx;
@@ -4477,6 +4650,72 @@ LegacyGateQuestionReport BaseMonsterManager::executeUnpatchedGateQuestionDayDiag
         ctx.branchTrace.size(),
         Integer{0},
         false
+    };
+}
+
+LegacyYearCandidateReport BaseMonsterManager::executeLegacyYearCandidateDiscovery(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    const std::vector<Integer>& gates,
+    const std::vector<LegacyYearCandidatePair>& pairs,
+    int queriedBowlId,
+    int seal) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_16_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyGateQuestionSignedStep = 0;
+    ctx.legacyNextBowlQueriedId = queriedBowlId;
+    ctx.legacyYearQueriedBowlId = queriedBowlId;
+    ctx.legacyYearSeal = seal;
+    ctx.legacyYearGates = gates;
+    ctx.legacyYearCandidatePairs = pairs;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyGateQuestionAdapter gateAdapter;
+    const Discovery15GateQuestionHandler gateLegacyHandler;
+    const Patch15NegativeGateQuestionWrapper gateWrapper;
+    const Patch15GateQuestionHandler gateHandler;
+    const LegacyOrderMemorySauceAdapter orderMemoryAdapter;
+    const Patch11OrderAt46LatchWrapper latchWrapper;
+    const Patch11OrderAt46LatchHandler latchHandler;
+    const LegacyNextBowlAdapter nextBowlAdapter;
+    const Patch12NextBowlWrapper nextBowlWrapper;
+    const Patch12NextBowlHandler nextBowlHandler;
+    const LegacyYearCandidateAdapter yearAdapter;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const Patch14WideDetourWrapper wideWrapper;
+    const Discovery16LegacyYearCandidateHandler yearHandler;
+    const BaseDispatcher dispatcher;
+
+    dispatcher.dispatchPatchedGateQuestion(
+        ctx, gateHandler, gateLegacyHandler, gateAdapter, gateWrapper, validator, metrics);
+    dispatcher.dispatchPatchedOrderAt46Latch(
+        ctx, latchHandler, orderMemoryAdapter, latchWrapper, validator, metrics);
+    dispatcher.dispatchPatchedNextBowl(
+        ctx, nextBowlHandler, nextBowlAdapter, nextBowlWrapper, validator, metrics);
+    dispatcher.dispatchLegacyYearCandidates(
+        ctx, yearHandler, yearAdapter, selectionAdapter, rejectionWrapper, wideWrapper, validator, metrics);
+
+    return LegacyYearCandidateReport{
+        ctx.legacyYearGates,
+        ctx.legacyYearCandidatePairs,
+        ctx.legacyYearCandidatesPreSort,
+        ctx.legacyYearCandidatesSorted,
+        ctx.legacyYearSelectionRing,
+        ctx.legacyYearSelectionFamilySize,
+        ctx.legacyYearSelectionCalled,
+        ctx.legacyYearSelectedOrdinal,
+        ctx.legacyYearSelectedCandidate,
+        ctx.patch15Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
     };
 }
 
