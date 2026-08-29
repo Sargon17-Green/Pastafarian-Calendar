@@ -1,9 +1,2090 @@
-{ هذا الملف مخصص للمرجع المعياري النظيف للملحق A. }
-{ لا يجوز للإنتاج أن يستدعيه. }
-{ لم يكتمل بعد لأن المرحلة تتطلب حساباً صحيحاً بدقة غير محدودة ومفسر FALSE فعلياً للتحقق من النحو والدلالة. }
+{ مرجع معياري اختباري للمرحلة 1، مكتوب بلغة FALSE وحدها. }
+{ يجب تحميل src/bigint.false قبله. }
+{ كل وسيطة استدعاء هي tuple فيزيائي قصير يُبنى كاملاً قبل الاستدعاء. }
+{ كل بنية دلالية متغيرة الطول هي sequence غير قابلة للتغيير: descriptor=[length,head] وعقدة=[value,next]. }
+{ تُضاف العناصر بالترتيب المنطقي؛ لأن الإضافة تتم في الرأس، يعكس seqAt المسافة من الرأس. }
+{ المتغيرات a وg وh وk وo وz محجوزة للبنية التحتية، وc محجوز لكتالوج الثوابت. }
 
-{ ثابت اليومين لا يفعّل أي منطق إنتاجي. }
-[-278522]t:
-[-15055671]f:
+{ استدعاء محمي: stack = argHandle,functionIndex. }
+[
+ z;2+z:k;a;!z;2-k:
+ b;a;!c;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!
+ k;g;!g;!r:k;1-g;!r;!a;!
+ k;2+g;!b:k;3+g;!c:k;4+g;!d:k;5+g;!e:k;6+g;!f:k;7+g;!i:k;8+g;!j:k;9+g;!l:k;10+g;!m:k;11+g;!n:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:
+ k;1+g;!k:z;1-g;!
+]o:
 
-{ لا توجد هنا دالة calendarDate بعد؛ إبقاؤها ناقصة يمنع ادعاء اكتمال المرحلة دون دليل. }
+{ 21: إنشاء الثوابت والجداول الخام؛ الناتج sequence من 22 قيمة بحسب الفهرس 0..21. }
+[
+ x:
+ z;d:
+ 3a;!4a;!6a;!8a;! 5a;!7a;!10a;!12a;! 7a;!10a;!14a;!16a;!
+ 9a;!13a;!18a;!20a;! 11a;!16a;!22a;!24a;! 13a;!19a;!26a;!28a;! 15a;!22a;!30a;!32a;!
+ z;e:1a;!2a;!3a;!4a;!5a;!1a;!2a;!
+ z;f:
+ 3a;!5a;!7a;!11a;!1a;! 5a;!7a;!11a;!13a;!2a;! 7a;!11a;!13a;!17a;!3a;!
+ 11a;!13a;!17a;!19a;!4a;! 13a;!17a;!19a;!23a;!5a;! 17a;!19a;!23a;!29a;!1a;!
+ 19a;!23a;!29a;!31a;!2a;! 23a;!29a;!31a;!37a;!3a;! 29a;!31a;!37a;!41a;!4a;!
+ 31a;!37a;!41a;!43a;!5a;! 37a;!41a;!43a;!47a;!1a;!
+ z;i:17a;!19a;!23a;!29a;!31a;!37a;!
+ z;j:1a;!2a;!3a;!4a;!5a;!1a;!
+ 1_x:
+ z;b:0a;!b;19h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:1a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:0a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:15055671_a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:278522_a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:720a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:922a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:41a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:42a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:963a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:252a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:5778a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ d;w:z;b:w;a;!x;a;!b;x:
+ e;w:z;b:w;a;!x;a;!b;x:
+ f;w:z;b:w;a;!x;a;!b;x:
+ i;w:z;b:w;a;!x;a;!b;x:
+ j;w:z;b:w;a;!x;a;!b;x:
+ z;b:149a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:181a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:179a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:193a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:197a;!b;0h;!!w:z;b:w;a;!x;a;!b;x:
+ z;b:22a;!x;a;!b;
+]a;!
+
+{ 22: قراءة ثابت بحسب index صغير مباشر. }
+[
+ x:z;b:c;a;!x;1+a;!b;23o;!
+]a;!
+
+{ 23: seqAt؛ tuple الوسيطة [sequence,position1]. }
+[
+ x:x;g;!y:x;1+g;!w:y;g;!v:y;1+g;!u:
+ 1w;>["E_SEQ_POS"0 0/]?w;v;>["E_SEQ_POS"0 0/]?
+ v;w;-t:
+ [t;0>][u;1+g;!u:t;1-t:]#
+ u;g;!
+]a;!
+
+{ 24..34: أغلفة الحساب الصحيح. }
+[x:x;0h;!!]a;!
+[x:x;9h;!!]a;!
+[x:x;10h;!!]a;!
+[x:x;14h;!!]a;!
+[x:x;5h;!!]a;!
+[x:x;15h;!!]a;!
+[x:x;16h;!!]a;!
+[x:x;17h;!!]a;!
+[x:x;20h;!!]a;!
+[x:x;13h;!!]a;!
+[x:x;12h;!!]a;!
+
+{ 35: square؛ tuple [a]. }
+[x:x;g;!y:z;b:y;a;!y;a;!b;27o;!]a;!
+
+{ 36: SAVE باختزال مرسيني دقيق؛ tuple [x]. }
+{ بما أن M=2^127-1 فإن 2^127 يساوي 1 بترديد M؛ لذلك نطوي العالي على المنخفض حتى يبقى 127 بتاً. }
+[
+ x:x;g;!y:y;g;!s:
+ z;b:y;a;!b;33o;!w:
+ [
+  w;1+g;!v:0q:
+  v;15>[1q:]?
+  v;15=[w;16+g;!1>[1q:]?]?
+  q;
+ ][
+  w;16+g;!e:e;2/f:e;f;2*-e:
+  0d:
+  e;0=~[15d:]?
+  e;0=[
+   13i:0d:
+   [i;0>i;0=|d;0=&][
+    w;2+i;+g;!f:f;0=~[i;1+d:]?
+    i;1-i:
+   ]#
+  ]?
+  z;u:
+  d;0=[0a;!1a;!0a;!]?
+  d;0=~[
+   1a;!d;a;!0i:
+   [d;i;>][
+    i;14=[e;a;!]?
+    i;14=~[w;2+i;+g;!a;!]?
+    i;1+i:
+   ]#
+  ]?
+  v;14-m:
+  w;v;+1+g;!f:f;2/e:
+  e;0>[m;n:]?
+  e;0=[m;1>[m;1-n:]?m;1=[0n:]?]?
+  z;t:
+  n;0=[0a;!1a;!0a;!]?
+  n;0=~[
+   1a;!n;a;!0l:
+   [n;l;>][
+    w;16+l;+g;!f:f;2/e:
+    v;15l;+>[
+     w;17+l;+g;!i:i;2/j:i;j;2*-j:e;j;256*+e:
+    ]?
+    e;a;!
+    l;1+l:
+   ]#
+  ]?
+  z;b:u;a;!t;a;!b;25o;!w:
+ ]#
+ 0 22o;!v:
+ z;b:w;a;!v;a;!b;28o;!q:
+ w;r:w;g;!0=t:
+ t;q;0=|[v;r:]?
+ t;q;0=|~[
+  s;0>~s;0=~&[z;b:v;a;!w;a;!b;26o;!r:]?
+ ]?
+ r;
+]a;!
+
+{ 37: dayCount؛ tuple [dayBig]. }
+[
+ x:x;g;!y:3 22o;!w:1 22o;!v:
+ z;b:y;a;!w;a;!b;28o;!u:
+ u;0=[v;s:]?
+ u;0>[
+  z;b:y;a;!w;a;!b;26o;!s:z;b:s;a;!s;a;!b;25o;!s:z;b:s;a;!v;a;!b;25o;!s:
+ ]?
+ u;0>~u;0=~&[
+  z;b:w;a;!y;a;!b;26o;!s:z;b:s;a;!s;a;!b;25o;!s:
+ ]?
+ s;
+]a;!
+
+{ 38: workCounts؛ tuple [calculationDay,targetDay]. الناتج sequence بخمسة حقول. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:y;a;!b;37o;!v:z;b:w;a;!b;37o;!u:
+ 1 22o;!d:
+ z;b:w;a;!y;a;!b;26o;!t:z;b:t;a;!b;33o;!t:z;b:t;a;!d;a;!b;25o;!t:
+ z;b:v;a;!u;a;!b;25o;!s:
+ z;b:w;a;!y;a;!b;28o;!r:2q:r;0>[3q:]?r;0>~r;0=~&[1q:]?
+ 1_p:
+ v;w:z;b:w;a;!p;a;!b;p:
+ u;w:z;b:w;a;!p;a;!b;p:
+ t;w:z;b:w;a;!p;a;!b;p:
+ s;w:z;b:w;a;!p;a;!b;p:
+ q;w:z;b:w;a;!p;a;!b;p:
+ z;b:5a;!p;a;!b;
+]a;!
+
+{ 39: قراءة نوع حجر من جدول الحجارة؛ tuple [stones,i,kind]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!w;a;!b;23o;!u:
+ z;b:u;a;!v;a;!b;23o;!
+]a;!
+
+{ 40: إضافة خلية صغيرة إلى BigInt؛ tuple [big,small]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:w;a;!b;24o;!v:
+ z;b:y;a;!v;a;!b;25o;!
+]a;!
+
+{ 41: ضرب BigInt في خلية صغيرة غير سالبة؛ tuple [big,small]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:w;a;!b;24o;!v:
+ z;b:y;a;!v;a;!b;27o;!
+]a;!
+
+{ 42: بناء الحجارة الست والأربعين من لقطة واحدة في كل جولة. }
+[
+ x:
+ z;b:17a;!b;24o;!w:z;b:29a;!b;24o;!v:z;b:43a;!b;24o;!u:z;b:71a;!b;24o;!t:z;b:101a;!b;24o;!s:
+ 1_p:
+ w;r:z;b:r;a;!p;a;!b;p:
+ v;r:z;b:r;a;!p;a;!b;p:
+ u;r:z;b:r;a;!p;a;!b;p:
+ t;r:z;b:r;a;!p;a;!b;p:
+ s;r:z;b:r;a;!p;a;!b;p:
+ z;b:5a;!p;a;!b;y:
+ 1_q:y;r:z;b:r;a;!q;a;!b;q:
+ 2r:
+ [47r;>][
+  z;b:y;a;!1a;!b;23o;!w:z;b:y;a;!2a;!b;23o;!v:z;b:y;a;!3a;!b;23o;!u:z;b:y;a;!4a;!b;23o;!t:z;b:y;a;!5a;!b;23o;!s:
+
+  z;b:w;a;!b;35o;!d:z;b:v;a;!3a;!b;41o;!e:z;b:d;a;!e;a;!b;25o;!d:z;b:d;a;!r;a;!b;40o;!d:z;b:d;a;!b;36o;!d:
+  z;b:v;a;!b;35o;!e:z;b:u;a;!5a;!b;41o;!f:z;b:e;a;!f;a;!b;25o;!e:z;b:e;a;!w;a;!b;25o;!e:z;b:e;a;!b;36o;!e:
+  z;b:u;a;!b;35o;!f:z;b:t;a;!7a;!b;41o;!i:z;b:f;a;!i;a;!b;25o;!f:z;b:f;a;!v;a;!b;25o;!f:z;b:f;a;!b;36o;!f:
+  z;b:t;a;!b;35o;!i:z;b:s;a;!11a;!b;41o;!j:z;b:i;a;!j;a;!b;25o;!i:z;b:i;a;!u;a;!b;25o;!i:z;b:i;a;!b;36o;!i:
+  z;b:s;a;!b;35o;!j:z;b:w;a;!13a;!b;41o;!l:z;b:j;a;!l;a;!b;25o;!j:z;b:j;a;!t;a;!b;25o;!j:z;b:j;a;!b;36o;!j:
+
+  1_p:
+  d;n:z;b:n;a;!p;a;!b;p:e;n:z;b:n;a;!p;a;!b;p:f;n:z;b:n;a;!p;a;!b;p:i;n:z;b:n;a;!p;a;!b;p:j;n:z;b:n;a;!p;a;!b;p:
+  z;b:5a;!p;a;!b;y:
+  y;n:z;b:n;a;!q;a;!b;q:
+  r;1+r:
+ ]#
+ z;b:46a;!q;a;!b;
+]a;!
+
+{ 43: معامل قطرة خفية؛ tuple [k,column]، والقيمة خلية صغيرة. }
+[
+ x:x;g;!y:x;1+g;!w:12 22o;!v:
+ y;1-4*w;1-+v;+g;!
+]a;!
+
+{ 44: نوع الحجر لطحن خفي؛ tuple [grind]. }
+[
+ x:x;g;!y:13 22o;!w:w;y;1-+g;!
+]a;!
+
+{ 45: خلية من جدول الطحن المرئي؛ tuple [grind,column]. }
+[
+ x:x;g;!y:x;1+g;!w:14 22o;!v:
+ y;1-5*w;1-+v;+g;!
+]a;!
+
+{ 46: بناء القطرات الخفية السبع، والنتيجة sequence بترتيب القرب 1..7. }
+[
+ x:x;g;!y:x;1+g;!w:
+ 1_p:1v:
+ [8v;>][
+  z;b:y;a;!1a;!b;23o;!u:
+  1t:
+  [5t;>][
+   z;b:v;a;!t;a;!b;43o;!s:z;b:s;a;!b;24o;!s:
+   z;b:y;a;!t;1+a;!b;23o;!r:t;4=[z;b:r;a;!b;24o;!r:]?
+   z;b:s;a;!r;a;!b;27o;!s:z;b:u;a;!s;a;!b;25o;!u:
+   t;1+t:
+  ]#
+  1t:
+  [6t;>][z;b:w;a;!v;a;!t;a;!b;39o;!s:z;b:u;a;!s;a;!b;25o;!u:t;1+t:]#
+  z;b:u;a;!b;36o;!u:
+  1t:
+  [8t;>][
+   u;s:z;b:s;a;!b;35o;!r:z;b:s;a;!3a;!b;41o;!d:z;b:r;a;!d;a;!b;25o;!r:
+   z;b:t;a;!b;44o;!d:z;b:w;a;!v;a;!d;a;!b;39o;!d:z;b:r;a;!d;a;!b;25o;!r:
+   z;b:r;a;!t;a;!b;40o;!r:z;b:r;a;!b;36o;!u:
+   t;1+t:
+  ]#
+  u;s:z;b:s;a;!p;a;!b;p:
+  v;1+v:
+ ]#
+ z;b:7a;!p;a;!b;
+]a;!
+
+{ 47: سلف قطرة مرئية؛ tuple [visiblePartial,hidden,i,back]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:
+ v;u;-t:
+ t;0>[
+  z;b:y;a;!t;a;!b;23o;!
+ ]?
+ t;0>~[
+  1t;-s:z;b:w;a;!s;a;!b;23o;!
+ ]?
+]a;!
+
+{ 48: بناء القطرات المرئية الست والأربعين. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ 1_p:0q:1u:
+ [47u;>][
+  z;b:q;a;!p;a;!b;d:
+  z;b:d;a;!v;a;!u;a;!1a;!b;47o;!e:
+  z;b:d;a;!v;a;!u;a;!3a;!b;47o;!f:
+  z;b:d;a;!v;a;!u;a;!7a;!b;47o;!i:
+
+  z;b:w;a;!u;a;!1a;!b;39o;!j:z;b:y;a;!1a;!b;23o;!l:z;b:j;a;!l;a;!b;27o;!t:
+  z;b:w;a;!u;a;!2a;!b;39o;!j:z;b:y;a;!2a;!b;23o;!l:z;b:j;a;!l;a;!b;27o;!j:z;b:t;a;!j;a;!b;25o;!t:
+  z;b:w;a;!u;a;!3a;!b;39o;!j:z;b:y;a;!3a;!b;23o;!l:z;b:j;a;!l;a;!b;27o;!j:z;b:t;a;!j;a;!b;25o;!t:
+  z;b:w;a;!u;a;!4a;!b;39o;!j:z;b:y;a;!4a;!b;23o;!l:z;b:j;a;!l;a;!b;27o;!j:z;b:t;a;!j;a;!b;25o;!t:
+  z;b:w;a;!u;a;!5a;!b;39o;!j:z;b:y;a;!5a;!b;23o;!l:z;b:l;a;!b;24o;!l:z;b:j;a;!l;a;!b;27o;!j:z;b:t;a;!j;a;!b;25o;!t:
+  z;b:t;a;!e;a;!b;25o;!t:z;b:f;a;!3a;!b;41o;!j:z;b:t;a;!j;a;!b;25o;!t:
+  z;b:i;a;!5a;!b;41o;!j:z;b:t;a;!j;a;!b;25o;!t:z;b:t;a;!u;a;!b;40o;!t:z;b:t;a;!b;36o;!t:
+
+  1s:
+  [12s;>][
+   t;r:z;b:r;a;!b;35o;!t:
+   z;b:s;a;!1a;!b;45o;!j:z;b:r;a;!j;a;!b;41o;!j:z;b:t;a;!j;a;!b;25o;!t:
+   z;b:s;a;!2a;!b;45o;!j:z;b:e;a;!j;a;!b;41o;!j:z;b:t;a;!j;a;!b;25o;!t:
+   z;b:s;a;!3a;!b;45o;!j:z;b:f;a;!j;a;!b;41o;!j:z;b:t;a;!j;a;!b;25o;!t:
+   z;b:s;a;!4a;!b;45o;!j:z;b:i;a;!j;a;!b;41o;!j:z;b:t;a;!j;a;!b;25o;!t:
+   z;b:s;a;!5a;!b;45o;!j:z;b:w;a;!u;a;!j;a;!b;39o;!j:z;b:t;a;!j;a;!b;25o;!t:
+   z;b:t;a;!b;36o;!t:
+   s;1+s:
+  ]#
+  t;r:z;b:r;a;!p;a;!b;p:q;1+q:u;1+u:
+ ]#
+ z;b:46a;!p;a;!b;
+]a;!
+
+{ 49: factorial صغير، tuple [n] حيث 0<=n<=6. }
+[
+ x:x;g;!y:1w:1v:[y;1+v;>][w;v;*w:v;1+v:]#w;
+]a;!
+
+{ 50: إزالة عنصر حسب موضعه من sequence صغير؛ tuple [seq,pos]. تعيد sequence [chosen,newSeq]. }
+[
+ x:x;g;!y:x;1+g;!w:y;g;!v:
+ 1_p:0q:1u:0t:
+ [v;1+u;>][
+  z;b:y;a;!u;a;!b;23o;!s:
+  u;w;=[s;t:]?
+  u;w;=~[s;r:z;b:r;a;!p;a;!b;p:q;1+q:]?
+  u;1+u:
+ ]#
+ z;b:q;a;!p;a;!b;s:
+ 1_p:t;r:z;b:r;a;!p;a;!b;p:s;r:z;b:r;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 51: فتح ترتيب كرات من rank خام 1..720. }
+[
+ x:x;g;!y:1_p:1u:[7u;>][u;t:z;b:t;a;!p;a;!b;p:u;1+u:]#z;b:6a;!p;a;!b;w:
+ y;1-v:6u:1_q:
+ [u;0>][
+  z;b:u;1-a;!b;49o;!t:v;t;/s:v;s;t;*-v:
+  z;b:w;a;!s;1+a;!b;50o;!r:
+  z;b:r;a;!1a;!b;23o;!s:z;b:r;a;!2a;!b;23o;!w:
+  s;t:z;b:t;a;!q;a;!b;q:
+  u;1-u:
+ ]#
+ z;b:6a;!q;a;!b;
+]a;!
+
+{ 52: ترتيب الكرات من قيمة قطرة BigInt. }
+[
+ x:x;g;!y:1 22o;!w:5 22o;!v:
+ z;b:y;a;!w;a;!b;26o;!u:z;b:u;a;!v;a;!b;30o;!u:z;b:u;a;!w;a;!b;25o;!u:z;b:u;a;!b;32o;!u:
+ z;b:u;a;!b;51o;!
+]a;!
+
+{ 53: موضع bowlId في ترتيب من ستة؛ tuple [order,bowlId]. }
+[
+ x:x;g;!y:x;1+g;!w:1v:0u:
+ [7v;>u;0=&][z;b:y;a;!v;a;!b;23o;!t:t;w;=[v;u:]?v;1+v:]#u;
+]a;!
+
+{ 54: الكرات الابتدائية؛ tuple [counts]. }
+[
+ x:x;g;!y:
+ z;b:y;a;!1a;!b;23o;!w:z;b:y;a;!2a;!b;23o;!v:z;b:y;a;!3a;!b;23o;!u:z;b:y;a;!4a;!b;23o;!t:z;b:y;a;!5a;!b;23o;!s:z;b:s;a;!b;24o;!s:
+ 1_p:1r:
+ [7r;>][
+  z;b:v;a;!r;a;!b;41o;!d:z;b:w;a;!d;a;!b;25o;!d:z;b:d;a;!u;a;!b;25o;!d:z;b:d;a;!t;a;!b;25o;!d:z;b:d;a;!s;a;!b;25o;!d:
+  15 22o;!e:e;r;1-+g;!e:e;e;*e:
+  z;b:d;a;!e;a;!b;40o;!d:z;b:d;a;!b;35o;!d:z;b:d;a;!r;a;!b;40o;!d:z;b:d;a;!b;36o;!d:
+  d;e:z;b:e;a;!p;a;!b;p:r;1+r:
+ ]#
+ z;b:6a;!p;a;!b;
+]a;!
+
+{ 55: تطبيق القطرات المرئية على الكرات؛ tuple [bowls,visible,stones]. الناتج [bowls,order46]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:0d:1u:
+ [47u;>][
+  z;b:w;a;!u;a;!b;23o;!t:z;b:t;a;!b;52o;!s:
+  1_p:1r:
+  [7r;>][
+   z;b:s;a;!r;a;!b;23o;!e:
+   0f:
+   4r;>[
+    z;b:y;a;!e;a;!b;23o;!i:
+    z;b:t;a;!b;35o;!j:
+    r;1=[z;b:v;a;!u;a;!1a;!b;39o;!l:z;b:l;a;!i;a;!b;27o;!l:z;b:j;a;!l;a;!b;25o;!j:z;b:j;a;!u;3*a;!b;40o;!j:z;b:j;a;!b;36o;!f:]?
+    r;2=[z;b:v;a;!u;a;!2a;!b;39o;!l:z;b:l;a;!i;a;!b;27o;!l:z;b:j;a;!l;a;!b;25o;!j:z;b:j;a;!u;5*a;!b;40o;!j:z;b:j;a;!b;36o;!f:]?
+    r;3=[z;b:v;a;!u;a;!3a;!b;39o;!l:z;b:l;a;!i;a;!b;27o;!l:z;b:j;a;!l;a;!b;25o;!j:z;b:j;a;!u;7*a;!b;40o;!j:z;b:j;a;!b;36o;!f:]?
+   ]?
+   4r;>~[2 22o;!f:]?
+   f;i:z;b:i;a;!p;a;!b;p:r;1+r:
+  ]#
+  z;b:6a;!p;a;!b;e:
+
+  1_p:1r:
+  [7r;>][
+   z;b:s;a;!r;a;!b;53o;!f:
+   f;1-j:j;0=[6j:]?f;1+l:l;7=[1l:]?
+   z;b:s;a;!j;a;!b;23o;!j:z;b:s;a;!l;a;!b;23o;!l:
+   z;b:y;a;!r;a;!b;23o;!i:z;b:y;a;!j;a;!b;23o;!n:z;b:y;a;!l;a;!b;23o;!m:
+   z;b:e;a;!f;a;!b;23o;!q:
+   z;b:s;a;!r;a;!b;53o;!f:16 22o;!d:d;f;1-+g;!d:
+   z;b:i;a;!b;35o;!i:z;b:n;a;!2a;!b;41o;!n:z;b:i;a;!n;a;!b;25o;!i:z;b:m;a;!3a;!b;41o;!m:z;b:i;a;!m;a;!b;25o;!i:
+   z;b:i;a;!q;a;!b;25o;!i:z;b:i;a;!t;a;!b;25o;!i:z;b:v;a;!u;a;!d;a;!b;39o;!d:z;b:i;a;!d;a;!b;25o;!i:
+   z;b:y;a;!j;a;!b;23o;!n:z;b:y;a;!l;a;!b;23o;!m:z;b:n;a;!m;a;!b;27o;!d:z;b:d;a;!5a;!b;41o;!d:z;b:i;a;!d;a;!b;25o;!i:
+   u;f;*f:z;b:i;a;!f;a;!b;40o;!i:z;b:i;a;!b;36o;!i:
+   i;d:z;b:d;a;!p;a;!b;p:r;1+r:
+  ]#
+  z;b:6a;!p;a;!b;y:
+  u;46=[s;d:]?
+  u;1+u:
+ ]#
+ 1_p:y;r:z;b:r;a;!p;a;!b;p:d;r:z;b:r;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 56: اثنتا عشرة بحشة بعد القطرة 46؛ tuple [bowls]. }
+[
+ x:x;g;!y:1u:
+ [13u;>][
+  2 22o;!t:1r:[7r;>][z;b:y;a;!r;a;!b;23o;!s:z;b:t;a;!s;a;!b;25o;!t:r;1+r:]#
+  z;b:t;a;!u;149*a;!b;40o;!t:z;b:t;a;!b;36o;!t:
+  5 22o;!s:1 22o;!e:z;b:t;a;!e;a;!b;26o;!r:z;b:r;a;!s;a;!b;30o;!r:z;b:r;a;!e;a;!b;25o;!r:z;b:r;a;!b;32o;!r:z;b:r;a;!b;51o;!w:
+  1_p:1r:
+  [7r;>][
+   z;b:w;a;!r;a;!b;53o;!s:s;1-i:i;0=[6i:]?s;1+j:j;7=[1j:]?
+   z;b:w;a;!i;a;!b;23o;!i:z;b:w;a;!j;a;!b;23o;!j:
+   z;b:y;a;!r;a;!b;23o;!v:z;b:y;a;!i;a;!b;23o;!n:z;b:y;a;!j;a;!b;23o;!m:
+   z;b:v;a;!b;35o;!v:z;b:n;a;!3a;!b;41o;!n:z;b:v;a;!n;a;!b;25o;!v:z;b:m;a;!5a;!b;41o;!m:z;b:v;a;!m;a;!b;25o;!v:
+   z;b:v;a;!t;a;!b;25o;!v:z;b:v;a;!u;a;!b;40o;!v:s;s;*s:z;b:v;a;!s;a;!b;40o;!v:
+   z;b:y;a;!i;a;!b;23o;!n:z;b:y;a;!j;a;!b;23o;!m:z;b:n;a;!m;a;!b;27o;!s:z;b:s;a;!7a;!b;41o;!s:z;b:v;a;!s;a;!b;25o;!v:z;b:v;a;!b;36o;!v:
+   v;s:z;b:s;a;!p;a;!b;p:r;1+r:
+  ]#
+  z;b:6a;!p;a;!b;y:u;1+u:
+ ]#
+ y;
+]a;!
+
+{ 57: الرُّبّ الكامل؛ tuple [calculationDay,targetDay]. الناتج [finalBowls,orderAt46]. }
+[
+ x:x;g;!y:x;1+g;!w:z;b:y;a;!w;a;!b;38o;!v:z;b:0a;!b;42o;!u:z;b:v;a;!u;a;!b;46o;!t:z;b:v;a;!u;a;!t;a;!b;48o;!s:z;b:v;a;!b;54o;!r:z;b:r;a;!s;a;!u;a;!b;55o;!q:z;b:q;a;!1a;!b;23o;!r:z;b:q;a;!2a;!b;23o;!s:z;b:r;a;!b;56o;!r:
+ 1_p:r;q:z;b:q;a;!p;a;!b;p:s;q:z;b:q;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 58: الكَرّة التالية في ترتيب القطرة 46؛ tuple [sauce,bowlId]. }
+[
+ x:x;g;!y:x;1+g;!w:z;b:y;a;!2a;!b;23o;!v:z;b:v;a;!w;a;!b;53o;!u:u;1+t:t;7=[1t:]?z;b:v;a;!t;a;!b;23o;!
+]a;!
+
+{ 59: سؤال كَرّة؛ tuple [sauce,bowlId,sealSmall]. الناتج [firstBig,stepRaw]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:u;a;!w;a;!b;23o;!t:z;b:y;a;!w;a;!b;58o;!s:z;b:u;a;!s;a;!b;23o;!s:
+ v;181+d:z;b:t;a;!d;a;!b;40o;!t:z;b:t;a;!b;35o;!t:z;b:s;a;!179a;!b;41o;!s:z;b:t;a;!s;a;!b;25o;!t:z;b:t;a;!v;a;!b;40o;!t:z;b:t;a;!b;36o;!t:
+ v;194+d:z;b:t;a;!d;a;!b;40o;!d:z;b:d;a;!b;35o;!d:z;b:t;a;!193a;!b;41o;!e:z;b:d;a;!e;a;!b;25o;!d:z;b:u;a;!6a;!b;23o;!e:z;b:e;a;!197a;!b;41o;!e:z;b:d;a;!e;a;!b;25o;!d:z;b:d;a;!b;36o;!d:
+ z;b:d;a;!b;34o;!e:1_s:e;[1s:]?
+ 1_p:t;q:z;b:q;a;!p;a;!b;p:s;q:z;b:q;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 60: answerAt؛ tuple [stream,kBig]. }
+[
+ x:x;g;!y:x;1+g;!w:z;b:y;a;!1a;!b;23o;!v:z;b:y;a;!2a;!b;23o;!u:
+ z;b:w;a;!u;a;!b;41o;!t:z;b:v;a;!t;a;!b;25o;!t:z;b:t;a;!b;36o;!
+]a;!
+
+{ 61: اختيار قصير بلا انحياز؛ tuple [stream,NBig]. الناتج rank BigInt. }
+{ عندما يكون N صغيراً بما يكفي لخلية FALSE، فإن floor(M/N)*N = M-(M mod N)؛ هذا مسار دقيق يقلل التخصيص فقط. }
+[
+ x:x;g;!y:x;1+g;!w:0 22o;!u:1 22o;!d:
+ w;1+g;!n:3n;>[z;b:w;a;!b;32o;!n:z;b:u;a;!n;a;!b;109o;!r:z;b:r;a;!b;24o;!r:z;b:u;a;!r;a;!b;26o;!t:]?3n;>~[z;b:u;a;!w;a;!b;31o;!t:z;b:t;a;!w;a;!b;27o;!t:]?
+ 2 22o;!p:0q:2 22o;!v:
+ [q;0=][
+  z;b:y;a;!p;a;!b;60o;!s:z;b:s;a;!t;a;!b;28o;!r:
+  r;0>~[
+   z;b:s;a;!d;a;!b;26o;!s:z;b:s;a;!w;a;!b;30o;!s:z;b:s;a;!d;a;!b;25o;!v:1q:
+  ]?
+  q;0=[z;b:p;a;!d;a;!b;25o;!p:]?
+ ]#
+ v;
+]a;!
+
+{ 62: اختيار واسع حسب العدد الواسع نفسه بعد الرفض؛ tuple [stream,NBig]. }
+[
+ x:x;g;!y:x;1+g;!w:0 22o;!v:v;e:1 22o;!u:1p:
+ z;b:v;a;!w;a;!b;28o;!t:
+ [t;0>~t;0=~&][z;b:v;a;!e;a;!b;27o;!v:p;1+p:z;b:v;a;!w;a;!b;28o;!t:]#
+ u;t:u;s:0q:
+ [p;q;>][
+  z;b:q;a;!b;24o;!r:z;b:y;a;!r;a;!b;60o;!r:z;b:r;a;!u;a;!b;26o;!r:z;b:r;a;!s;a;!b;27o;!r:z;b:t;a;!r;a;!b;25o;!t:
+  z;b:s;a;!e;a;!b;27o;!s:q;1+q:
+ ]#
+ z;b:v;a;!w;a;!b;31o;!r:z;b:r;a;!w;a;!b;27o;!r:
+ z;b:y;a;!2a;!b;23o;!q:
+ 0d:
+ [d;0=][
+  z;b:t;a;!r;a;!b;28o;!f:f;0>~[z;b:t;a;!u;a;!b;26o;!t:z;b:t;a;!w;a;!b;30o;!t:z;b:t;a;!u;a;!b;25o;!t:1d:]?
+  d;0=[z;b:t;a;!u;a;!b;26o;!t:z;b:t;a;!q;a;!b;40o;!t:z;b:t;a;!v;a;!b;30o;!t:z;b:t;a;!u;a;!b;25o;!t:]?
+ ]#
+ t;
+]a;!
+
+{ 63: مفصل الاختيار؛ tuple [stream,NBig]. }
+[
+ x:x;g;!y:x;1+g;!w:0 22o;!v:z;b:w;a;!v;a;!b;28o;!u:
+ u;0>~[z;b:y;a;!w;a;!b;61o;!]?
+ u;0>[z;b:y;a;!w;a;!b;62o;!]?
+]a;!
+
+{ 64: فجوة بوابة بحسب index موقّع غير صفري؛ tuple [signedGateIndexBig]. الناتج خلية 42..963. }
+{ تحفظ هذه الدالة حد الكومة بعد إطارها الحالي، ثم تمحو كل تخصيصات الرُّبّ المؤقتة بعد استخراج الفجوة الصغيرة. }
+[
+ z;d:
+ x:x;g;!y:2 22o;!w:3 22o;!v:z;b:y;a;!w;a;!b;28o;!u:u;0=["E_GATE_ZERO"0 0/]?
+ z;b:y;a;!b;33o;!t:
+ u;0>[z;b:v;a;!t;a;!b;25o;!s:]?
+ u;0>~u;0=~&[z;b:v;a;!t;a;!b;26o;!s:]?
+ z;b:v;a;!s;a;!b;57o;!r:z;b:r;a;!1a;!1a;!b;59o;!q:6 22o;!p:z;b:q;a;!p;a;!b;63o;!q:z;b:q;a;!b;32o;!q:q;41+q:
+ [z;d;>][%z;1-z:]#
+ q;
+]a;!
+
+{ 65: خطوة بوابة إلى الأمام؛ tuple [cursor]، حيث cursor=[indexBig,dayBig]. }
+{ إذا كان الفهرس القديم سالباً فالفجوة تحمل ذلك الفهرس؛ وإلا تحمل الفهرس الجديد الموجب. }
+[
+ x:x;g;!y:z;b:y;a;!1a;!b;23o;!w:z;b:y;a;!2a;!b;23o;!v:1 22o;!u:2 22o;!s:
+ z;b:w;a;!s;a;!b;28o;!r:w;q:
+ z;b:w;a;!u;a;!b;25o;!w:q;t:r;0>r;0=|[w;t:]?
+ z;b:t;a;!b;64o;!t:z;b:v;a;!t;a;!b;40o;!v:
+ 1_p:w;s:z;b:s;a;!p;a;!b;p:v;s:z;b:s;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 66: خطوة بوابة إلى الخلف؛ tuple [cursor]. }
+{ إذا كان الفهرس القديم موجباً فالفجوة تحمل ذلك الفهرس؛ وإلا تحمل الفهرس الجديد السالب. }
+[
+ x:x;g;!y:z;b:y;a;!1a;!b;23o;!w:z;b:y;a;!2a;!b;23o;!v:1 22o;!u:2 22o;!s:
+ z;b:w;a;!s;a;!b;28o;!r:w;q:
+ z;b:w;a;!u;a;!b;26o;!w:w;t:r;0>[q;t:]?
+ z;b:t;a;!b;64o;!t:z;b:v;a;!t;_a;!b;40o;!v:
+ 1_p:w;s:z;b:s;a;!p;a;!b;p:v;s:z;b:s;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 67: cursor للبوابة الأخيرة التي لا تتجاوز اليوم؛ tuple [dayBig]. }
+[
+ x:x;g;!y:2 22o;!w:3 22o;!v:
+ 1_p:w;t:z;b:t;a;!p;a;!b;p:v;t:z;b:t;a;!p;a;!b;p:z;b:2a;!p;a;!b;u:
+ z;b:y;a;!v;a;!b;28o;!t:
+ t;0>t;0=|[
+  0q:
+  [q;0=][
+   z;b:u;a;!b;65o;!s:z;b:s;a;!2a;!b;23o;!r:z;b:r;a;!y;a;!b;28o;!r:
+   r;0>~[s;u:]?r;0>[1q:]?
+  ]#
+ ]?
+ t;0>~t;0=~&[
+  0q:
+  [q;0=][
+   z;b:u;a;!2a;!b;23o;!s:z;b:s;a;!y;a;!b;28o;!r:
+   r;0>[z;b:u;a;!b;66o;!u:]?r;0>~[1q:]?
+  ]#
+ ]?
+ u;
+]a;!
+
+{ 68: cursor لأول بوابة لا تسبق اليوم؛ tuple [dayBig]. }
+[
+ x:x;g;!y:z;b:y;a;!b;67o;!w:z;b:w;a;!2a;!b;23o;!v:z;b:v;a;!y;a;!b;28o;!u:
+ u;0=[w;]?
+ u;0=~[z;b:w;a;!b;65o;!]?
+]a;!
+
+{ 69: فحص بوابة مطابقة؛ tuple [dayBig]. الناتج [foundFlag,cursor]. }
+[
+ x:x;g;!y:z;b:y;a;!b;67o;!w:z;b:w;a;!2a;!b;23o;!v:z;b:v;a;!y;a;!b;28o;!u:0t:u;0=[1_t:]?
+ 1_p:t;s:z;b:s;a;!p;a;!b;p:w;s:z;b:s;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 70: صلاحية زوج سنة؛ tuple [openCursor,closeCursor]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:y;a;!1a;!b;23o;!v:z;b:w;a;!1a;!b;23o;!u:z;b:u;a;!v;a;!b;26o;!t:
+ z;b:y;a;!2a;!b;23o;!v:z;b:w;a;!2a;!b;23o;!u:z;b:u;a;!v;a;!b;26o;!s:
+ z;b:6a;!b;24o;!r:z;b:t;a;!r;a;!b;28o;!q:
+ 10 22o;!r:z;b:s;a;!r;a;!b;28o;!p:
+ 11 22o;!r:z;b:s;a;!r;a;!b;28o;!n:
+ 1_m:q;0>q;0=|~[0m:]?p;0>p;0=|~[0m:]?n;0>[0m:]?m;
+]a;!
+
+{ 71: سجل سنة؛ tuple [numberBig,openCursor,closeCursor]. الناتج خمسة حقول. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:w;a;!1a;!b;23o;!u:z;b:v;a;!1a;!b;23o;!t:z;b:w;a;!2a;!b;23o;!s:z;b:v;a;!2a;!b;23o;!r:
+ 1_p:y;q:z;b:q;a;!p;a;!b;p:u;q:z;b:q;a;!p;a;!b;p:t;q:z;b:q;a;!p;a;!b;p:s;q:z;b:q;a;!p;a;!b;p:r;q:z;b:q;a;!p;a;!b;p:z;b:5a;!p;a;!b;
+]a;!
+
+{ 72: مقارنة مرشحي سنة 5000؛ tuple [candidateA,candidateB]. true إذا A قبل B. كل candidate=[openCursor,closeCursor]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:y;a;!1a;!b;23o;!v:z;b:y;a;!2a;!b;23o;!u:z;b:w;a;!1a;!b;23o;!t:z;b:w;a;!2a;!b;23o;!s:
+ z;b:v;a;!2a;!b;23o;!r:z;b:u;a;!2a;!b;23o;!q:z;b:q;a;!r;a;!b;26o;!q:
+ z;b:t;a;!2a;!b;23o;!r:z;b:s;a;!2a;!b;23o;!p:z;b:p;a;!r;a;!b;26o;!p:
+ z;b:q;a;!p;a;!b;28o;!n:0m:
+ n;0>~n;0=~&[1_m:]?
+ n;0=[z;b:v;a;!2a;!b;23o;!q:z;b:t;a;!2a;!b;23o;!p:z;b:q;a;!p;a;!b;28o;!n:n;0>~n;0=~&[1_m:]?]?
+ m;
+]a;!
+
+{ 73: إدخال candidate في sequence مرتبة؛ tuple [sequence,candidate]. }
+[
+ x:x;g;!y:x;1+g;!w:y;g;!v:1_p:0q:0u:1t:
+ [v;1+t;>][
+  z;b:y;a;!t;a;!b;23o;!s:
+  u;0=[z;b:w;a;!s;a;!b;72o;!r:r;[w;r:z;b:r;a;!p;a;!b;p:q;1+q:1u:]?]?
+  s;r:z;b:r;a;!p;a;!b;p:q;1+q:t;1+t:
+ ]#
+ u;0=[w;r:z;b:r;a;!p;a;!b;p:q;1+q:]?
+ z;b:q;a;!p;a;!b;
+]a;!
+
+{ 74: سنة 5000؛ tuple [calculationDay]. }
+[
+ x:x;g;!y:11 22o;!w:
+ z;b:y;a;!w;a;!b;26o;!v:z;b:y;a;!w;a;!b;25o;!u:
+ z;b:v;a;!b;67o;!t:1_p:0q:0d:
+ [d;0=][
+  z;b:t;a;!2a;!b;23o;!s:z;b:s;a;!u;a;!b;28o;!r:
+  r;0>[1d:]?
+  r;0>~[t;s:z;b:s;a;!p;a;!b;p:q;1+q:z;b:t;a;!b;65o;!t:]?
+ ]#
+ z;b:q;a;!p;a;!b;i:
+ 1_p:0q:1d:i;g;!e:
+ [e;d;>][
+  z;b:i;a;!d;a;!b;23o;!f:d;1+j:
+  [e;1+j;>][
+   z;b:i;a;!j;a;!b;23o;!l:
+   z;b:f;a;!l;a;!b;70o;!m:
+   m;[
+    z;b:f;a;!2a;!b;23o;!n:z;b:l;a;!2a;!b;23o;!m:
+    z;b:n;a;!y;a;!b;28o;!n:z;b:y;a;!m;a;!b;28o;!m:
+    n;0>~n;0=~&m;0>~&[
+     1_s:f;r:z;b:r;a;!s;a;!b;s:l;r:z;b:r;a;!s;a;!b;s:z;b:2a;!s;a;!b;r:
+     z;b:q;a;!p;a;!b;s:z;b:s;a;!r;a;!b;73o;!s:s;1+g;!p:s;g;!q:
+    ]?
+   ]?
+   j;1+j:
+  ]#
+  d;1+d:
+ ]#
+ z;b:q;a;!p;a;!b;i:
+ z;b:y;a;!y;a;!b;57o;!t:z;b:t;a;!1a;!10a;!b;59o;!t:z;b:q;a;!b;24o;!s:z;b:t;a;!s;a;!b;63o;!t:z;b:t;a;!b;32o;!t:z;b:i;a;!t;a;!b;23o;!t:
+ z;b:5000a;!b;24o;!s:z;b:t;a;!1a;!b;23o;!v:z;b:t;a;!2a;!b;23o;!u:z;b:s;a;!v;a;!u;a;!b;71o;!
+]a;!
+
+{ 75: السنة التالية؛ tuple [calculationDay,knownYear]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:w;a;!3a;!b;23o;!v:z;b:w;a;!5a;!b;23o;!u:
+ 1_p:v;r:z;b:r;a;!p;a;!b;p:u;r:z;b:r;a;!p;a;!b;p:z;b:2a;!p;a;!b;e:e;t:
+ 0q:0d:
+ [d;0=][
+  z;b:t;a;!b;65o;!s:z;b:s;a;!2a;!b;23o;!r:z;b:r;a;!u;a;!b;26o;!r:11 22o;!n:z;b:r;a;!n;a;!b;28o;!m:
+  m;0>[1d:]?
+  m;0>~[
+   z;b:e;a;!s;a;!b;70o;!m:m;[s;r:z;b:r;a;!p;a;!b;p:q;1+q:]?
+   s;t:
+  ]?
+ ]#
+ z;b:q;a;!p;a;!b;s:
+ z;b:y;a;!u;a;!b;57o;!r:z;b:r;a;!1a;!11a;!b;59o;!r:z;b:q;a;!b;24o;!n:z;b:r;a;!n;a;!b;63o;!r:z;b:r;a;!b;32o;!r:z;b:s;a;!r;a;!b;23o;!s:
+ z;b:w;a;!1a;!b;23o;!r:1 22o;!n:z;b:r;a;!n;a;!b;25o;!r:
+ z;b:r;a;!e;a;!s;a;!b;71o;!
+]a;!
+
+{ 76: السنة السابقة؛ tuple [calculationDay,knownYear]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:w;a;!2a;!b;23o;!v:z;b:w;a;!4a;!b;23o;!u:
+ 1_p:v;r:z;b:r;a;!p;a;!b;p:u;r:z;b:r;a;!p;a;!b;p:z;b:2a;!p;a;!b;e:e;t:
+ 0q:0d:
+ [d;0=][
+  z;b:t;a;!b;66o;!s:z;b:s;a;!2a;!b;23o;!r:z;b:u;a;!r;a;!b;26o;!r:11 22o;!n:z;b:r;a;!n;a;!b;28o;!m:
+  m;0>[1d:]?
+  m;0>~[
+   z;b:s;a;!e;a;!b;70o;!m:m;[s;r:z;b:r;a;!p;a;!b;p:q;1+q:]?
+   s;t:
+  ]?
+ ]#
+ z;b:q;a;!p;a;!b;s:
+ z;b:y;a;!u;a;!b;57o;!r:z;b:r;a;!1a;!12a;!b;59o;!r:z;b:q;a;!b;24o;!n:z;b:r;a;!n;a;!b;63o;!r:z;b:r;a;!b;32o;!r:z;b:s;a;!r;a;!b;23o;!s:
+ z;b:w;a;!1a;!b;23o;!r:1 22o;!n:z;b:r;a;!n;a;!b;26o;!r:
+ z;b:r;a;!s;a;!e;a;!b;71o;!
+]a;!
+
+{ 77: إيجاد سنة اليوم المطلوب بالمشي سنة بعد سنة؛ tuple [calculationDay,targetDay]. }
+[
+ x:x;g;!y:x;1+g;!w:z;b:y;a;!b;74o;!v:
+ 0u:[u;0=][z;b:v;a;!5a;!b;23o;!t:z;b:w;a;!t;a;!b;28o;!s:s;0>[z;b:y;a;!v;a;!b;75o;!v:]?s;0>~[1u:]?]#
+ 0u:[u;0=][z;b:v;a;!4a;!b;23o;!t:z;b:w;a;!t;a;!b;28o;!s:s;0>~[z;b:y;a;!v;a;!b;76o;!v:]?s;0>[1u:]?]#
+ v;
+]a;!
+
+{ 78: وصف مضغوط لمسألة bounded composition؛ tuple [total,slots,lo,hi]. }
+{ العدّ وفك الرتبة يحسبان القيم الدقيقة عند الطلب، فلا يلزم الاحتفاظ بجدول BigInt كامل. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:
+ 1_p:y;r:z;b:r;a;!p;a;!b;p:w;r:z;b:r;a;!p;a;!b;p:v;r:z;b:r;a;!p;a;!b;p:u;r:z;b:r;a;!p;a;!b;p:
+ z;b:4a;!p;a;!b;
+]a;!
+
+{ 79: قراءة C_k(rem) عند الطلب؛ tuple [descriptor,k,rem]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!3a;!b;23o;!u:z;b:y;a;!4a;!b;23o;!t:
+ z;b:v;a;!w;a;!u;a;!t;a;!b;118o;!
+]a;!
+
+{ 80: فك رتبة bounded composition بترتيب معجمي؛ tuple [descriptor,total,slots,lo,hi,rankBig]. }
+{ لكل موضع يُختار أصغر جزء يجعل العدد التراكمي يبلغ الرتبة؛ العدّ التراكمي دقيق عبر inclusion-exclusion. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:x;4+g;!t:x;5+g;!s:
+ w;r:1_p:1d:
+ [v;1+d;>][
+  v;d;-1+q:
+  u;i:r;q;1-t;*-m:m;i;>[m;i:]?
+  t;j:r;q;1-u;*-m:j;m;>[m;j:]?
+  i;l:j;n:
+  [n;l;>][
+   l;n;+2/m:
+   z;b:s;a;!r;a;!q;a;!u;a;!t;a;!m;a;!b;120o;!f:
+   f;0>[m;1+l:]?
+   f;0>~f;0=|[m;n:]?
+  ]#
+  l;i:
+  z;b:r;a;!q;a;!u;a;!t;a;!i;1-a;!b;119o;!e:
+  z;b:s;a;!e;a;!b;26o;!s:
+  i;e:z;b:e;a;!p;a;!b;p:
+  r;i;-r:d;1+d:
+ ]#
+ z;b:v;a;!p;a;!b;
+]a;!
+
+{ 81: عدد bounded compositions؛ tuple [descriptor,total,slots]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!3a;!b;23o;!u:z;b:y;a;!4a;!b;23o;!t:
+ z;b:w;a;!v;a;!u;a;!t;a;!b;118o;!
+]a;!
+
+{ 82: binomial صغير المعلمات ودقيق النتيجة؛ tuple [n,k]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ 0w;>["E_BINOM"0 0/]?
+ w;y;>["E_BINOM"0 0/]?
+ y;w;-v:w;v;>[v;w:]?
+ 1 22o;!u:1t:
+ [w;1+t;>][
+  y;w;-t;+s:z;b:u;a;!s;a;!b;41o;!u:z;b:t;a;!b;24o;!s:z;b:u;a;!s;a;!b;31o;!u:t;1+t:
+ ]#
+ u;
+]a;!
+
+{ 83: عدد الكومبوزيشن الموجب؛ tuple [total,slots] خلايا صغيرة. }
+[
+ x:x;g;!y:x;1+g;!w:
+ w;0=[y;0=[1 22o;!]?y;0=~[2 22o;!]?]?
+ w;0>[
+  w;y;>[2 22o;!]?
+  w;y;>~[z;b:y;1-a;!w;1-a;!b;82o;!]?
+ ]?
+]a;!
+
+{ 84: عدد إكمال partition؛ tuple [G,boundary,cumulative,slotsRemaining,hitFlag]. boundary=0 يعني لا شرط. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:x;4+g;!t:
+ y;v;-s:
+ w;0=[z;b:s;a;!u;a;!b;83o;!]?
+ w;0>[
+  t;[z;b:s;a;!u;a;!b;83o;!]?
+  t;~[
+   v;w;>[2 22o;!]?
+   v;w;=[z;b:s;a;!u;a;!b;83o;!]?
+   w;v;>[
+    w;v;-r:y;w;-q:2 22o;!p:1d:
+    [u;d;>][
+     z;b:r;a;!d;a;!b;83o;!e:z;b:q;a;!u;d;-a;!b;83o;!f:z;b:e;a;!f;a;!b;27o;!e:z;b:p;a;!e;a;!b;25o;!p:d;1+d:
+    ]#
+    p;
+   ]?
+  ]?
+ ]?
+]a;!
+
+{ 85: فك رتبة partition للكستلات؛ tuple [G,K,boundary,rankBig]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:
+ 0t:0s:w;r:1_p:1d:
+ [w;1+d;>][
+  w;d;-r:y;t;-r;-q:1e:0f:
+  [q;1+e;>f;0=&][
+   t;e;+i:s;j:
+   v;0>[s;0=[i;v;=[1_j:]?i;v;>[1f:]?]?]?
+   f;0=[
+    z;b:y;a;!v;a;!i;a;!w;d;-a;!j;a;!b;84o;!l:z;b:u;a;!l;a;!b;28o;!m:
+    m;0>[
+     z;b:u;a;!l;a;!b;26o;!u:
+    ]?
+    m;0>~[
+     e;l:z;b:l;a;!p;a;!b;p:t;e;+t:j;s:1f:
+    ]?
+   ]?
+   f;0=[e;1+e:]?
+  ]#
+  f;0=["E_UNRANK_PARTITION"0 0/]?
+  d;1+d:
+ ]#
+ z;b:w;a;!p;a;!b;
+]a;!
+
+{ 86: falling factorial؛ tuple [n,k] خلايا صغيرة. }
+[
+ x:x;g;!y:x;1+g;!w:1 22o;!v:0u:
+ [w;u;>][y;u;-t:z;b:v;a;!t;a;!b;41o;!v:u;1+u:]#v;
+]a;!
+
+{ 87: فك رتبة أسماء مختلفة بحسب canonicalIndex؛ tuple [n,k,rankBig]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ 1_p:1u:[y;1+u;>][u;t:z;b:t;a;!p;a;!b;p:u;1+u:]#z;b:y;a;!p;a;!b;t:
+ 1_p:0q:1u:
+ [w;1+u;>][
+  t;g;!s:w;u;-r:z;b:s;1-a;!r;a;!b;86o;!d:1e:0f:
+  [s;1+e;>f;0=&][
+   z;b:v;a;!d;a;!b;28o;!i:
+   i;0>[
+    z;b:v;a;!d;a;!b;26o;!v:e;1+e:
+   ]?
+   i;0>~[
+    z;b:t;a;!e;a;!b;50o;!i:z;b:i;a;!1a;!b;23o;!j:z;b:i;a;!2a;!b;23o;!t:
+    j;i:z;b:i;a;!p;a;!b;p:q;1+q:1f:
+   ]?
+  ]#
+  f;0=["E_UNRANK_NAMES"0 0/]?
+  u;1+u:
+ ]#
+ z;b:q;a;!p;a;!b;
+]a;!
+
+{ 88: استبدال عنصر خام داخل sequence؛ tuple [sequence,pos,newValue]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:y;g;!u:1_p:1t:
+ [u;1+t;>][t;w;=[v;s:]?t;w;=~[z;b:y;a;!t;a;!b;23o;!s:]?s;r:z;b:r;a;!p;a;!b;p:t;1+t:]#
+ z;b:u;a;!p;a;!b;
+]a;!
+
+{ 89: مساواة sequence من خلايا خام؛ tuple [a,b]. }
+[
+ x:x;g;!y:x;1+g;!w:y;g;!v:w;g;!u:0t:
+ v;u;=~[0]?
+ v;u;=[1_s:1r:[v;1+r;>s;&][z;b:y;a;!r;a;!b;23o;!t:z;b:w;a;!r;a;!b;23o;!q:t;q;=~[0s:]?r;1+r:]#s;]?
+]a;!
+
+{ 90: مساواة حالتي weaving؛ tuple [stateA,stateB]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:y;a;!2a;!b;23o;!v:z;b:w;a;!2a;!b;23o;!u:z;b:y;a;!3a;!b;23o;!t:z;b:w;a;!3a;!b;23o;!s:
+ v;u;=t;s;=&r:
+ r;[z;b:y;a;!1a;!b;23o;!v:z;b:w;a;!1a;!b;23o;!u:z;b:v;a;!u;a;!b;89o;!]?
+ r;~[0]?
+]a;!
+
+{ 91: بحث خطي في memo؛ tuple [memo,state]. الناتج [foundFlag,countBig]. كل entry=[state,count]. }
+[
+ x:x;g;!y:x;1+g;!w:y;g;!v:0u:2 22o;!t:1s:
+ [v;1+s;>u;0=&][
+  z;b:y;a;!s;a;!b;23o;!r:z;b:r;a;!1a;!b;23o;!q:z;b:q;a;!w;a;!b;90o;!q:
+  q;[z;b:r;a;!2a;!b;23o;!t:1_u:]?s;1+s:
+ ]#
+ 1_p:u;r:z;b:r;a;!p;a;!b;p:t;r:z;b:r;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 92: إضافة قيمة إلى memo؛ tuple [memo,state,countBig]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ 1_p:w;t:z;b:t;a;!p;a;!b;p:v;t:z;b:t;a;!p;a;!b;p:z;b:2a;!p;a;!b;u:
+ y;g;!t:y;1+g;!s:z;b:u;a;!s;a;!b;s:z;b:t;1+a;!s;a;!b;
+]a;!
+
+{ 93: قانون حركة weaving؛ tuple [state,j,lengths]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:u;a;!w;a;!b;23o;!t:t;0=[0s:]?
+ t;0>[
+  z;b:v;a;!w;a;!b;23o;!r:z;b:y;a;!2a;!b;23o;!q:z;b:y;a;!3a;!b;23o;!p:
+  t;r;=~n:1s:
+  n;~[w;q;1+=~[0s:]?]?
+  t;1=m:
+  m;[w;p;1+=~[0s:]?]?
+ ]?
+ s;
+]a;!
+
+{ 94: تطبيق حركة weaving؛ tuple [state,j,lengths]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!3a;!b;23o;!s:
+ z;b:u;a;!w;a;!b;23o;!r:z;b:v;a;!w;a;!b;23o;!q:
+ r;q;=[w;t:]?
+ r;1-r:z;b:u;a;!w;a;!r;a;!b;143o;!u:r;0=[w;s:]?
+ 1_p:u;r:z;b:r;a;!p;a;!b;p:t;r:z;b:r;a;!p;a;!b;p:s;r:z;b:r;a;!p;a;!b;p:z;b:3a;!p;a;!b;
+]a;!
+
+{ 95: CountWeavings دقيق؛ tuple [state,lengths,memo]. الناتج [countBig,memo]، مع عدّ متعدد الحدود مكافئ لقواعد weaving. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!w;a;!b;110o;!u:
+ 1_p:u;r:z;b:r;a;!p;a;!b;p:v;r:z;b:r;a;!p;a;!b;p:z;b:2a;!p;a;!b;
+]a;!
+
+{ 96: فك رتبة weaving كامل؛ tuple [lengths,rankBig]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:y;a;!w;a;!b;123o;!
+]a;!
+
+{ 97: عدد weaving؛ tuple [lengths]. }
+[
+ x:x;g;!y:y;g;!w:
+ 1_p:y;t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:z;b:3a;!p;a;!b;u:
+ z;b:y;a;!b;113o;!v:
+ z;b:u;a;!y;a;!v;a;!b;114o;!
+]a;!
+
+{ 98: اختيار عدد الكستلات؛ tuple [structureSauce,year]. الناتج خلية 6..17. }
+{ لأن الناتج خلية صغيرة، تُستعاد ساحة التخصيص المؤقتة بعد استخراج الاختيار دون تغيير أي قيمة معيارية. }
+[
+ z;d:x:x;g;!y:x;1+g;!w:
+ z;b:w;a;!2a;!b;23o;!v:z;b:w;a;!3a;!b;23o;!u:z;b:u;a;!v;a;!b;26o;!t:z;b:t;a;!b;32o;!t:
+ 17s:t;17>~[t;s:]?
+ 6s;>["E_CUTLET_COUNT"0 0/]?
+ s;5-r:z;b:r;a;!b;24o;!r:
+ z;b:y;a;!2a;!20a;!b;59o;!q:z;b:q;a;!r;a;!b;63o;!q:z;b:q;a;!b;32o;!q:
+ q;5+q:[z;d;>][%z;1-z:]#q;
+]a;!
+
+{ 99: اختيار تقسيم الكستلات؛ tuple [calculationDay,structureSauce,year,K]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:
+ z;b:v;a;!2a;!b;23o;!t:z;b:v;a;!3a;!b;23o;!s:z;b:s;a;!t;a;!b;26o;!r:z;b:r;a;!b;32o;!r:
+ 0q:
+ z;b:y;a;!b;69o;!p:z;b:p;a;!1a;!b;23o;!n:
+ n;[
+  z;b:p;a;!2a;!b;23o;!p:z;b:p;a;!1a;!b;23o;!n:
+  z;b:n;a;!t;a;!b;28o;!m:z;b:n;a;!s;a;!b;28o;!l:
+  m;0>l;0>~l;0=~&&[
+   z;b:n;a;!t;a;!b;26o;!m:z;b:m;a;!b;32o;!q:
+  ]?
+ ]?
+ z;b:r;a;!q;a;!0a;!u;a;!0a;!b;84o;!n:
+ z;b:w;a;!2a;!21a;!b;59o;!m:z;b:m;a;!n;a;!b;63o;!m:
+ z;b:r;a;!u;a;!q;a;!m;a;!b;85o;!
+]a;!
+
+{ 100: اختيار أسماء الكستلات بحسب canonicalIndex؛ tuple [structureSauce,K]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:17a;!w;a;!b;86o;!v:
+ z;b:y;a;!5a;!22a;!b;59o;!u:z;b:u;a;!v;a;!b;63o;!u:
+ z;b:17a;!w;a;!u;a;!b;87o;!
+]a;!
+
+{ 101: تجسيد الكستلات؛ tuple [year,partition,names]. كل كستلة=[nameIndex,openIndex,closeIndex,firstDay,lastDay]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ w;g;!u:
+ z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!4a;!b;23o;!s:
+ 1_p:t;r:z;b:r;a;!p;a;!b;p:s;r:z;b:r;a;!p;a;!b;p:z;b:2a;!p;a;!b;q:
+ 1_p:1d:
+ [d;u;>~][
+  z;b:w;a;!d;a;!b;23o;!e:z;b:v;a;!d;a;!b;23o;!f:
+  q;i:0j:
+  [e;j;>][z;b:i;a;!b;65o;!i:j;1+j:]#
+  z;b:q;a;!1a;!b;23o;!l:z;b:i;a;!1a;!b;23o;!m:
+  z;b:q;a;!2a;!b;23o;!n:1 22o;!t:z;b:n;a;!t;a;!b;25o;!n:
+  z;b:i;a;!2a;!b;23o;!t:
+  1_r:f;e:z;b:e;a;!r;a;!b;r:l;e:z;b:e;a;!r;a;!b;r:m;e:z;b:e;a;!r;a;!b;r:n;e:z;b:e;a;!r;a;!b;r:t;e:z;b:e;a;!r;a;!b;r:
+  z;b:5a;!r;a;!b;e:e;r:z;b:r;a;!p;a;!b;p:
+  i;q:d;1+d:
+ ]#
+ z;b:u;a;!p;a;!b;
+]a;!
+
+{ 102: اختيار عدد الأشهر؛ tuple [structureSauce,year]. الناتج خلية 3..47. }
+{ لأن الناتج خلية صغيرة، تُستعاد ساحة التخصيص المؤقتة بعد استخراج الاختيار دون تغيير ترتيب المرشحين أو الرتبة. }
+[
+ z;d:x:x;g;!y:x;1+g;!w:
+ z;b:w;a;!5a;!b;23o;!v:z;b:w;a;!4a;!b;23o;!u:z;b:v;a;!u;a;!b;26o;!t:z;b:t;a;!b;32o;!t:
+ t;122+s:s;123/s:
+ t;4/u:u;47>[47u:]?
+ u;s;-1+r:z;b:r;a;!b;24o;!r:
+ z;b:y;a;!3a;!30a;!b;59o;!q:z;b:q;a;!r;a;!b;63o;!q:z;b:q;a;!b;32o;!q:
+ s;q;+1-q:[z;d;>][%z;1-z:]#q;
+]a;!
+
+{ 103: اختيار أطوال الأشهر؛ tuple [structureSauce,year,monthCount]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:w;a;!5a;!b;23o;!u:z;b:w;a;!4a;!b;23o;!t:z;b:u;a;!t;a;!b;26o;!s:z;b:s;a;!b;32o;!s:
+ z;b:s;a;!v;a;!4a;!123a;!b;78o;!r:
+ z;b:r;a;!s;a;!v;a;!b;81o;!q:
+ z;b:y;a;!3a;!31a;!b;59o;!p:z;b:p;a;!q;a;!b;63o;!p:
+ z;b:r;a;!s;a;!v;a;!4a;!123a;!p;a;!b;80o;!
+]a;!
+
+{ 104: اختيار نسيج الأشهر كاملاً؛ tuple [structureSauce,monthLengths]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:y;a;!w;a;!b;127o;!
+]a;!
+
+{ 105: اختيار أسماء الأشهر بحسب canonicalIndex؛ tuple [structureSauce,monthCount]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:47a;!w;a;!b;86o;!v:
+ z;b:y;a;!5a;!33a;!b;59o;!u:z;b:u;a;!v;a;!b;63o;!u:
+ z;b:47a;!w;a;!u;a;!b;87o;!
+]a;!
+
+{ 106: بناء بنية السنة؛ tuple [calculationDay,year]. الناتج ثمانية حقول Appendix A. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:w;a;!4a;!b;23o;!v:1 22o;!u:z;b:v;a;!u;a;!b;25o;!v:
+ z;b:y;a;!v;a;!b;57o;!u:
+ z;b:u;a;!w;a;!b;98o;!t:
+ z;b:y;a;!u;a;!w;a;!t;a;!b;99o;!s:
+ z;b:u;a;!t;a;!b;100o;!r:
+ z;b:w;a;!s;a;!r;a;!b;101o;!q:
+ z;b:u;a;!w;a;!b;102o;!p:
+ z;b:u;a;!w;a;!p;a;!b;103o;!n:
+ z;b:u;a;!n;a;!b;104o;!m:
+ z;b:u;a;!p;a;!b;105o;!l:
+ 1_f:t;e:z;b:e;a;!f;a;!b;f:s;e:z;b:e;a;!f;a;!b;f:r;e:z;b:e;a;!f;a;!b;f:q;e:z;b:e;a;!f;a;!b;f:p;e:z;b:e;a;!f;a;!b;f:n;e:z;b:e;a;!f;a;!b;f:m;e:z;b:e;a;!f;a;!b;f:l;e:z;b:e;a;!f;a;!b;f:
+ z;b:8a;!f;a;!b;
+]a;!
+
+{ 107: حل الحقول الخمسة؛ tuple [year,structure,targetDay]. يعيد canonicalIndex للأسماء وBigInt لأيام الموضع. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:w;a;!1a;!b;23o;!u:z;b:w;a;!4a;!b;23o;!t:
+ 0s:1d:0q:
+ [d;u;>~s;0=&][
+  z;b:t;a;!d;a;!b;23o;!r:z;b:r;a;!4a;!b;23o;!p:z;b:r;a;!5a;!b;23o;!n:
+  z;b:v;a;!p;a;!b;28o;!m:z;b:v;a;!n;a;!b;28o;!l:
+  m;0>m;0=|l;0>~&[
+   r;q:1s:
+  ]?
+  s;0=[d;1+d:]?
+ ]#
+ s;0=["E_CUTLET_RESOLVE"0 0/]?
+ z;b:q;a;!1a;!b;23o;!r:z;b:q;a;!4a;!b;23o;!p:
+ z;b:v;a;!p;a;!b;26o;!n:1 22o;!m:z;b:n;a;!m;a;!b;25o;!n:
+ z;b:w;a;!7a;!b;23o;!t:z;b:w;a;!8a;!b;23o;!s:
+ z;b:y;a;!4a;!b;23o;!p:1 22o;!m:z;b:p;a;!m;a;!b;25o;!p:z;b:v;a;!p;a;!b;26o;!p:z;b:p;a;!b;32o;!p:p;1+p:
+ z;b:t;a;!p;a;!b;23o;!m:z;b:s;a;!m;a;!b;23o;!l:
+ 0i:1d:
+ [d;p;>~][z;b:t;a;!d;a;!b;23o;!e:e;m;=[i;1+i:]?d;1+d:]#
+ z;b:i;a;!b;24o;!i:
+ z;b:y;a;!1a;!b;23o;!e:
+ 1_f:e;d:z;b:d;a;!f;a;!b;f:r;d:z;b:d;a;!f;a;!b;f:n;d:z;b:d;a;!f;a;!b;f:l;d:z;b:d;a;!f;a;!b;f:i;d:z;b:d;a;!f;a;!b;f:
+ z;b:5a;!f;a;!b;
+]a;!
+
+{ 108: المرجع المعياري النهائي؛ tuple [calculationDay,targetDay]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:y;a;!w;a;!b;77o;!v:
+ z;b:y;a;!v;a;!b;106o;!u:
+ z;b:v;a;!u;a;!w;a;!b;107o;!
+]a;!
+
+{ 109: باقي BigInt غير سالب على مقسوم صغير موجب، باستخدام خانات الأساس 512 من الأعلى إلى الأدنى. }
+{ هذه دالة مساعدة تنفيذية مكافئة للباقي الإقليدي، ولا تضيف قاعدة معيارية جديدة. }
+[
+ x:x;g;!y:x;1+g;!w:w;0=["E_SMALL_MOD_ZERO"0 0/]?
+ y;1+g;!v:0u:v;1-q:
+ [q;0>q;0=|][
+  y;2+q;+g;!t:u;512*t;+s:s;w;/r:s;r;w;*-u:q;1-q:
+ ]#
+ u;
+]a;!
+
+{ 110: عدّ دقيق لإكمالات weaving من حالة قابلة للوصول؛ tuple [state,lengths]. }
+{ يبني جدول suffix القابل لإعادة الاستخدام ثم يقيّم الحالة؛ هذا مكافئ لـ CountWeavings المعياري. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;b:w;a;!b;113o;!v:
+ z;b:y;a;!w;a;!v;a;!b;114o;!
+]a;!
+
+{ 111: معامل ثنائي دقيق C(n,k) كـ BigInt؛ n وk خلايا صغيرة غير سالبة. }
+[
+ x:x;g;!y:x;1+g;!w:
+ 2 22o;!u:
+ 0w;>w;y;>|~[
+  y;w;-v:w;v;>[v;w:]?
+  1 22o;!u:1t:
+  [w;1+t;>][
+   y;w;-t;+s:z;b:u;a;!s;a;!b;41o;!u:
+   z;b:u;a;!t;a;!b;112o;!u:
+   t;1+t:
+  ]#
+ ]?
+ u;
+]a;!
+
+{ 112: قسمة BigInt غير سالب قسمة تامة على مقسوم صغير موجب؛ الناتج BigInt. }
+{ التنفيذ قسمة طويلة بخانات الأساس 512؛ وهو مسار تنفيذي فقط ولا يضيف قاعدة معيارية. }
+[
+ x:x;g;!y:x;1+g;!w:
+ w;0>~["E_SMALL_DIVISOR"0 0/]?y;g;!e:0e;>["E_SMALL_DIV_SIGN"0 0/]?
+ y;1+g;!v:z;s:0u:v;1-q:
+ [q;0>q;0=|][
+  y;2+q;+g;!t:u;512*t;+e:e;w;/d:e;d;w;*-u:d;a;!q;1-q:
+ ]#
+ u;0=~["E_SMALL_DIV_INEXACT"0 0/]?
+ 0q:0d:[v;q;>d;0=&][s;q;+g;!e:e;0=[q;1+q:]?e;0=~[1d:]?]#
+ q;v;=[2 22o;!r:]?
+ q;v;=~[
+  v;q;-n:z;r:1a;!n;a;!v;1-p:
+  [p;q;1->][s;p;+g;!a;!p;1-p:]#
+ ]?
+ r;
+]a;!
+
+{ 113: بناء جدول suffix لنسيج الأشهر مرة واحدة؛ tuple [lengths]. الصف الأول للحالة opened=m ثم الصفوف تنازلياً حتى opened=0. }
+{ كل صف يحفظ عامل الإكمال الذي يعتمد فقط على مجموع البواقي النشطة، ولذلك يمكن إعادة استعماله أثناء فك الرتبة. }
+[
+ x:x;g;!y:y;g;!w:
+ 0n:1d:[w;1+d;>][z;b:y;a;!d;a;!b;23o;!e:n;e;1-+n:d;1+d:]#
+ z;q:1a;!1a;!1_j:0d:[n;1+d;>][q;e:z;b:e;a;!j;a;!b;j:d;1+d:]#
+ z;b:n;1+a;!j;a;!b;u:
+ 1_f:u;e:z;b:e;a;!f;a;!b;f:1s:
+ w;1-d:
+ [d;0>d;0=|][
+  z;b:y;a;!d;1+a;!b;23o;!i:n;i;1--n:
+  { نسخة مؤقتة من مؤشرات الصف السابق بترتيب منطقي تصاعدي؛ القيم BigInt نفسها لا تُنسخ. }
+  u;g;!r:u;1+g;!t:1_p:0q:
+  [r;q;>][
+   t;g;!v:z;b:v;a;!p;a;!b;p:t;1+g;!t:q;1+q:
+  ]#
+  p;t:1q:[i;q;>][t;1+g;!t:q;1+q:]#
+  t;g;!e:1_j:z;b:e;a;!j;a;!b;j:
+  1m:z;l:1a;!1a;!
+  [n;1+m;>][
+   z;b:l;a;!m;i;+2-a;!m;a;!b;130o;!l:
+   t;1+g;!t:t;g;!v:z;b:l;a;!v;a;!e;a;!b;129o;!e:
+   z;b:e;a;!j;a;!b;j:m;1+m:
+  ]#
+  z;b:n;1+a;!j;a;!b;u:
+  u;e:z;b:e;a;!f;a;!b;f:s;1+s:d;1-d:
+ ]#
+ z;b:s;a;!f;a;!b;
+]a;!
+
+{ 114: عدّ الإكمالات باستخدام جدول suffix المحسوب مسبقاً؛ tuple [state,lengths,table]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!3a;!b;23o;!s:w;g;!r:
+ 1 22o;!q:0p:
+ t;s;>[
+  s;1+d:
+  [t;1+d;>][
+   z;b:u;a;!d;a;!b;23o;!e:z;b:p;e;+1-a;!e;1-a;!b;111o;!f:
+   z;b:q;a;!f;a;!b;27o;!q:p;e;+p:d;1+d:
+  ]#
+ ]?
+ t;r;=~[
+  r;t;-1+i:z;b:v;a;!i;a;!b;23o;!i:z;b:i;a;!p;1+a;!b;23o;!i:z;b:i;a;!b;131o;!i:
+  z;b:q;a;!i;a;!b;27o;!q:
+ ]?
+ q;
+]a;!
+
+{ تحسين تنفيذي مكافئ: ضرب العامل غير السالب في خلية صغيرة يستعمل 125 مباشرة بدلاً من إنشاء BigInt صغير ثم الضرب العام؛ العائلة والترتيب والرتبة لا تتغير. }
+{ 115: اشتقاق عامل التداخل للحالة الابنة من عامل الحالة الأب؛ tuple [state,j,parentFactor]. }
+{ يستعمل نسباً صحيحة مكافئة تماماً لحاصل معاملات الاختيار، ولا يعيد حساب السلسلة كاملة لكل مرشح. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!3a;!b;23o;!s:
+ z;b:u;a;!w;a;!b;23o;!r:v;q:0f:
+ w;t;1+=[
+  0p:s;1+d:[t;1+d;>][z;b:u;a;!d;a;!b;23o;!e:p;e;+p:d;1+d:]#
+  r;1-e:z;b:p;e;+1-a;!e;1-a;!b;111o;!i:z;b:q;a;!i;a;!b;27o;!q:1f:
+ ]?
+ f;0=[
+  r;1>[
+   z;b:q;a;!r;1-a;!b;125o;!q:
+   0p:s;1+d:
+   [t;d;>][
+    z;b:u;a;!d;a;!b;23o;!e:p;e;+p:
+    d;w;>d;w;=|[z;b:q;a;!p;a;!b;125o;!q:]?
+    d;1+d:
+   ]#
+   t;d;=[z;b:u;a;!d;a;!b;23o;!e:p;e;+p:]?
+   z;b:q;a;!p;1-a;!b;112o;!q:
+   0p:s;1+d:
+   [t;d;>][
+    z;b:u;a;!d;a;!b;23o;!e:p;e;+p:
+    d;w;>d;w;=|[z;b:q;a;!p;1-a;!b;112o;!q:]?
+    d;1+d:
+   ]#
+   1f:
+  ]?
+  f;0=[
+   0p:s;2+d:
+   [t;1+d;>][z;b:q;a;!p;1+a;!b;125o;!q:z;b:u;a;!d;a;!b;23o;!e:p;e;+p:d;1+d:]#
+   0p:s;2+d:
+   [t;1+d;>][z;b:u;a;!d;a;!b;23o;!e:p;e;+p:z;b:q;a;!p;a;!b;112o;!q:d;1+d:]#
+   1f:
+  ]?
+ ]?
+ q;
+]a;!
+
+{ 116: عدّ الإكمالات من عامل التداخل المعروف وجدول suffix؛ tuple [state,table,activeFactor]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!3a;!b;23o;!s:u;g;!r:
+ 0p:s;1+d:[t;1+d;>][z;b:u;a;!d;a;!b;23o;!e:p;e;+p:d;1+d:]#
+ v;q:t;r;=~[r;t;-1+i:z;b:w;a;!i;a;!b;23o;!i:z;b:i;a;!p;1+a;!b;23o;!i:z;b:i;a;!b;131o;!i:z;b:q;a;!i;a;!b;27o;!q:]?
+ q;
+]a;!
+
+{ 117: قراءة count من صف DP مضغوط؛ tuple [row,rem]. خارج المجال يعيد BigInt صفر. }
+[
+ x:x;g;!y:x;1+g;!w:
+ y;g;!v:z;b:y;a;!1a;!b;23o;!u:w;u;-t:
+ 2 22o;!r:
+ t;0>t;0=|[v;1-t;>[z;b:y;a;!t;2+a;!b;23o;!r:]?]?
+ r;
+]a;!
+
+
+{ 118: عدد bounded compositions الدقيق بالـ inclusion-exclusion؛ tuple [total,slots,lo,hi]. }
+{ إذا xi في [lo,hi] وsum xi=total، نضع yi=xi-lo ونطبق المبدأ القياسي للاحتواء والاستبعاد. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:
+ 2 22o;!q:
+ w;0=[
+  y;0=[1 22o;!q:]?
+ ]?
+ w;0>[
+  y;w;v;*-s:u;v;-t:
+  s;0>s;0=|s;w;t;*>~&[
+   t;1+r:s;r;/n:n;w;>[w;n:]?
+   2 22o;!q:0j:
+   [n;1+j;>][
+    z;b:w;a;!j;a;!b;111o;!e:
+    s;j;r;*-w;+1-f:
+    z;b:f;a;!w;1-a;!b;111o;!i:
+    z;b:e;a;!i;a;!b;27o;!l:
+    j;j;2/2*-d:
+    d;0=[z;b:q;a;!l;a;!b;25o;!q:]?
+    d;0=~[z;b:q;a;!l;a;!b;26o;!q:]?
+    j;1+j:
+   ]#
+  ]?
+ ]?
+ q;
+]a;!
+
+{ 119: عدد الحلول التي يكون فيها الجزء الأول <= limit؛ tuple [total,slots,lo,hi,limit]. }
+{ هذه دالة cumulative لــ unranking المعجمي، مشتقة من inclusion-exclusion مع حد علوي خاص للمتغير الأول. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:x;4+g;!t:
+ 2 22o;!q:
+ w;0>[
+  t;v;>~t;v;=~&[
+   2 22o;!q:
+  ]?
+  t;u;>t;u;=|[
+   z;b:y;a;!w;a;!v;a;!u;a;!b;118o;!q:
+  ]?
+  t;v;>t;v;=|u;t;>&[
+   y;w;v;*-s:u;v;-r:t;v;-m:
+   s;0>s;0=|s;w;r;*>~&[
+    r;1+n:s;n;/l:w;1-i:l;i;>[i;l:]?
+    2 22o;!q:0j:
+    [l;1+j;>][
+     z;b:w;1-a;!j;a;!b;111o;!e:
+     s;j;n;*-f:
+     z;b:f;w;1-+a;!w;1-a;!b;111o;!d:
+     f;m;1+-p:
+     2 22o;!x:
+     p;0>p;0=|[z;b:p;w;1-+a;!w;1-a;!b;111o;!x:]?
+     z;b:d;a;!x;a;!b;26o;!d:
+     z;b:e;a;!d;a;!b;27o;!d:
+     j;j;2/2*-p:
+     p;0=[z;b:q;a;!d;a;!b;25o;!q:]?
+     p;0=~[z;b:q;a;!d;a;!b;26o;!q:]?
+     j;1+j:
+    ]#
+   ]?
+  ]?
+ ]?
+ q;
+]a;!
+
+
+{ 120: مقارنة rank بعدد cumulative مع استعادة كل التخصيصات المؤقتة؛ tuple [rank,total,slots,lo,hi,limit]. }
+{ الناتج خلية compare فقط، لذلك يمكن إعادة arena بأمان بعد اكتمال المقارنة. }
+[
+ z;d:x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:x;4+g;!t:x;5+g;!s:
+ z;b:w;a;!v;a;!u;a;!t;a;!s;a;!b;119o;!r:
+ z;b:y;a;!r;a;!b;28o;!q:
+ [z;d;>][%z;1-z:]#q;
+]a;!
+
+{ 121: عدد إكمالات weaving التي يكون رمزها التالي <= limit؛ tuple [state,table,activeFactor,limit]. }
+{ الصيغة تجمع كتل الرتبة مباشرة من عامل التداخل: لكل شهر نشط أعلى من limit نستبدل C(S-1,r-1) بـ C(S-2,r-1)، أي نضرب في S_prev/(S-1). }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:
+ z;b:y;a;!1a;!b;23o;!t:z;b:y;a;!2a;!b;23o;!s:z;b:y;a;!3a;!b;23o;!r:t;g;!q:
+ 0n:r;1+d:[s;1+d;>][z;b:t;a;!d;a;!b;23o;!e:n;e;+n:d;1+d:]#
+ 2 22o;!p:0f:
+ r;1+u;>[1f:]?
+ f;0=[
+  q;s;>[
+   u;s;1+>u;s;1+=|[
+    z;b:y;a;!w;a;!v;a;!b;116o;!p:1f:
+   ]?
+  ]?
+ ]?
+ f;0=[
+  s;r;>[
+   u;l:u;s;>[s;l:]?
+   v;p:n;i:s;d:
+   [d;l;>][
+    z;b:t;a;!d;a;!b;23o;!e:i;e;-j:
+    z;b:p;a;!j;a;!b;125o;!p:z;b:p;a;!i;1-a;!b;112o;!p:
+    j;i:d;1-d:
+   ]#
+   s;q;=~[
+    q;s;-1+e:z;b:w;a;!e;a;!b;23o;!e:z;b:e;a;!n;a;!b;23o;!e:z;b:e;a;!b;131o;!e:
+    z;b:p;a;!e;a;!b;27o;!p:
+   ]?
+   1f:
+  ]?
+ ]?
+ p;
+]a;!
+
+{ 122: مقارنة rank بالعدد التراكمي حتى limit مع استعادة arena؛ tuple [state,table,activeFactor,limit,rank]. }
+[
+ z;d:x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:x;4+g;!t:
+ z;b:y;a;!w;a;!v;a;!u;a;!b;121o;!s:z;b:t;a;!s;a;!b;28o;!s:
+ [z;d;>][%z;1-z:]#s;
+]a;!
+
+{ 123: فك رتبة weaving بالحساب التراكمي المباشر؛ tuple [lengths,rankBig]. }
+[
+ x:x;g;!y:x;1+g;!w:y;g;!v:
+ 1_p:y;t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:z;b:3a;!p;a;!b;u:
+ z;b:y;a;!b;113o;!n:1 22o;!f:
+ 0s:1q:[v;1+q;>][z;b:y;a;!q;a;!b;23o;!r:s;r;+s:q;1+q:]#
+ 1_p:0q:
+ [s;q;>][
+  z;b:u;a;!2a;!b;23o;!r:z;b:u;a;!3a;!b;23o;!d:
+  d;1+e:r;1+i:i;v;>[v;i:]?
+  [i;e;>][
+   e;i;+2/j:
+   z;b:u;a;!n;a;!f;a;!j;a;!w;a;!b;122o;!l:
+   l;0>[j;1+e:]?
+   l;0>~l;0=|[j;i:]?
+  ]#
+  e;d;1+>[
+   z;b:u;a;!n;a;!f;a;!e;1-a;!b;121o;!j:
+   z;b:w;a;!j;a;!b;26o;!w:
+  ]?
+  z;b:u;a;!e;a;!f;a;!b;115o;!m:z;b:u;a;!e;a;!y;a;!b;94o;!r:
+  e;i:z;b:i;a;!p;a;!b;p:q;1+q:r;u:m;f:
+ ]#
+ z;b:q;a;!p;a;!b;
+]a;!
+
+
+{ 124: ضرب-جمع غير سالب مدمج لجدول weaving؛ tuple [a,b,c] ويعيد a*b+c. }
+{ مسار تنفيذي مكافئ تماماً؛ تمريرة أولى تحدد الطول ثم تُكتب النتيجة المطبّعة مرة واحدة بلا BigInt وسيط للضرب. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ y;g;!u:w;g;!t:v;g;!s:
+ u;0>~u;0=~&["E_WEAVE_FMA_SIGN"0 0/]?t;0>~t;0=~&["E_WEAVE_FMA_SIGN"0 0/]?s;0>~s;0=~&["E_WEAVE_FMA_SIGN"0 0/]?
+ v;s:
+ u;0=[v;s:]?
+ u;0=~t;0=&[v;s:]?
+ u;0=~t;0=~&[
+  y;1+g;!n:w;1+g;!m:v;1+g;!l:
+  n;m;+q:l;q;>[l;q:]?q;1+q:
+  0e:0p:0d:
+  [q;p;>][
+   e;i:
+   l;p;>[v;2+p;+g;!i;+i:]?
+   0f:
+   [n;f;>][
+    p;f;-j:
+    j;0>j;0=|m;j;>&[
+     y;2+f;+g;!r:w;2+j;+g;!x:r;x;*i;+i:
+    ]?
+    f;1+f:
+   ]#
+   i;512/e:i;e;512*-r:r;0=~[p;1+d:]?
+   p;1+p:
+  ]#
+  d;0=[2 22o;!s:]?
+  d;0=~[
+   z;s:1a;!d;a;!
+   0e:0p:
+   [d;p;>][
+    e;i:
+    l;p;>[v;2+p;+g;!i;+i:]?
+    0f:
+    [n;f;>][
+     p;f;-j:
+     j;0>j;0=|m;j;>&[
+      y;2+f;+g;!r:w;2+j;+g;!x:r;x;*i;+i:
+     ]?
+     f;1+f:
+    ]#
+    i;512/e:i;e;512*-a;!
+    p;1+p:
+   ]#
+  ]?
+ ]?
+ s;
+]a;!
+
+
+{ 125: ضرب BigInt غير سالب في خلية صغيرة غير سالبة لمسار weaving؛ tuple [big,small]. }
+{ تمريرتان بلا BigInt وسيط للخلية الصغيرة وبكتابة النتيجة المطبّعة مرة واحدة. }
+[
+ x:x;g;!y:x;1+g;!w:
+ y;g;!u:u;0>~u;0=~&["E_WEAVE_SMALL_MUL_SIGN"0 0/]?
+ y;s:
+ w;0=[2 22o;!s:]?
+ w;0>u;0=&[y;s:]?
+ w;0>u;0>&[
+  y;1+g;!n:0e:0p:0d:
+  [n;p;>][
+   y;2+p;+g;!t:t;w;*e;+q:q;512/e:q;e;512*-r:r;0=~[p;1+d:]?p;1+p:
+  ]#
+  [e;0>][e;q:q;512/e:q;e;512*-r:r;0=~[p;1+d:]?p;1+p:]#
+  d;0=[2 22o;!s:]?
+  d;0=~[
+   z;s:1a;!d;a;!0e:0p:
+   [d;p;>][
+    0t:n;p;>[y;2+p;+g;!t:]?t;w;*e;+q:q;512/e:q;e;512*-a;!p;1+p:
+   ]#
+  ]?
+ ]?
+ s;
+]a;!
+
+
+{ 126: فك رتبة weaving باستعمال جدول suffix جاهز؛ tuple [lengths,rankBig,table]. }
+{ مطابق للدالة 123 بعد حذف إعادة بناء الجدول؛ لا يغيّر ترتيب unranking أو قواعد الحركة. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!n:y;g;!v:
+ 1_p:y;t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:z;b:3a;!p;a;!b;u:
+ 1 22o;!f:
+ 0s:1q:[v;1+q;>][z;b:y;a;!q;a;!b;23o;!r:s;r;+s:q;1+q:]#
+ 1_p:0q:
+ [s;q;>][
+  z;b:u;a;!2a;!b;23o;!r:z;b:u;a;!3a;!b;23o;!d:
+  d;1+e:r;1+i:i;v;>[v;i:]?
+  [i;e;>][
+   e;i;+2/j:
+   z;b:u;a;!n;a;!f;a;!j;a;!w;a;!b;122o;!l:
+   l;0>[j;1+e:]?
+   l;0>~l;0=|[j;i:]?
+  ]#
+  e;d;1+>[
+   z;b:u;a;!n;a;!f;a;!e;1-a;!b;121o;!j:
+   z;b:w;a;!j;a;!b;26o;!w:
+  ]?
+  z;b:u;a;!e;a;!f;a;!b;115o;!m:z;b:u;a;!e;a;!y;a;!b;94o;!r:
+  e;i:z;b:i;a;!p;a;!b;p:q;1+q:r;u:m;f:
+ ]#
+ z;b:q;a;!p;a;!b;
+]a;!
+
+{ 127: اختيار weaving بجدول suffix واحد؛ tuple [structureSauce,lengths]. }
+{ يحسب familyCount ويختار rank ويفك الرتبة من الجدول نفسه، بدلاً من بناء 113 مرتين في 104. }
+[
+ x:x;g;!y:x;1+g;!w:
+ 1_p:w;t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:z;b:3a;!p;a;!b;u:
+ z;b:w;a;!b;113o;!n:
+ z;b:u;a;!w;a;!n;a;!b;114o;!v:
+ z;b:y;a;!4a;!32a;!b;59o;!t:z;b:t;a;!v;a;!b;63o;!t:
+ z;b:w;a;!t;a;!n;a;!b;140o;!
+]a;!
+
+{ 128: ضرب-جمع داخلي أحادي التمرير لصفوف suffix؛ tuple [a,b,c]. }
+{ يساوي عددياً a*b+c، لكنه قد يحتفظ بصفر أو صفرين بادئين لتجنب حساب الالتفاف مرتين. }
+{ لا يُستعمل خارج جدول 113؛ القيم الخارجة من الجدول تمر عبر ضرب BigInt العام قبل المقارنة أو الطرح. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ y;g;!u:w;g;!t:v;g;!s:
+ u;0>~u;0=~&["E_WEAVE_FMA_SIGN"0 0/]?t;0>~t;0=~&["E_WEAVE_FMA_SIGN"0 0/]?s;0>~s;0=~&["E_WEAVE_FMA_SIGN"0 0/]?
+ v;r:
+ u;0=[v;r:]?
+ u;0=~t;0=&[v;r:]?
+ u;0=~t;0=~&[
+  y;1+g;!n:w;1+g;!m:v;1+g;!l:
+  1d:[n;1>d;&][y;n;+1+g;!0=e:e;[n;1-n:]?e;~[0d:]?]#
+  1d:[m;1>d;&][w;m;+1+g;!0=e:e;[m;1-m:]?e;~[0d:]?]#
+  s;0=[0l:]?
+  s;0=~[1d:[l;1>d;&][v;l;+1+g;!0=e:e;[l;1-l:]?e;~[0d:]?]#]?
+  n;m;+q:l;q;>[l;q:]?q;1+q:
+  z;r:1a;!q;a;!
+  0e:0p:
+  [q;p;>][
+   e;i:
+   l;p;>[v;2+p;+g;!i;+i:]?
+   0f:
+   [n;f;>][
+    p;f;-j:
+    j;0>j;0=|m;j;>&[y;2+f;+g;!d:w;2+j;+g;!x:d;x;*i;+i:]?
+    f;1+f:
+   ]#
+   i;512/e:i;e;512*-a;!p;1+p:
+  ]#
+  e;0=~["E_WEAVE_FMA_BOUND"0 0/]?
+ ]?
+ r;
+]a;!
+
+{ 129: ضرب-جمع داخلي مضغوط بالكامل لصفوف weaving؛ tuple [packedA,packedB,packedC]. }
+{ التخزين هو ثلاث خانات أساس 512 في خلية واحدة، أي أساس داخلي 134217728. }
+{ الالتفاف يعمل مباشرة على الخلايا المضغوطة؛ يُختزل low بعد كل حاصل ضرب كي تبقى كل الوسائط ضمن 64 بت. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ y;g;!2+3/n:w;g;!2+3/m:v;g;!2+3/l:
+
+ { قص خلايا padding العليا فقط؛ الصفر العددي يبقى خلية واحدة. }
+ 1d:[n;1>d;&][y;n;+g;!0=[n;1-n:]?y;n;+g;!0=~[0d:]?]#
+ 1d:[m;1>d;&][w;m;+g;!0=[m;1-m:]?w;m;+g;!0=~[0d:]?]#
+ 1d:[l;1>d;&][v;l;+g;!0=[l;1-l:]?v;l;+g;!0=~[0d:]?]#
+
+ n;m;+q:l;q;>[l;q:]?q;1+q:
+ z;r:q;3*a;!
+ 0e:0p:
+ [q;p;>][
+  { فك carry السابق إلى low=i و high=t. }
+  e;134217728/t:e;t;134217728*-i:
+
+  { أضف خلية c في الموضع نفسه ثم طبّع low. }
+  l;p;>[v;1+p;+g;!i;+i:]?
+  i;134217728/x:t;x;+t:i;x;134217728*-i:
+
+  { مجال الالتفاف الفعلي على الخلايا المضغوطة. }
+  p;m;-1+f:0f;>[0f:]?
+  [n;f;>p;f;>p;f;=|&][
+   p;f;-j:
+   y;1+f;+g;!d:w;1+j;+g;!x:d;x;*d:
+   { product = quotient*B + remainder؛ accumulated high/low normalized immediately. }
+   d;134217728/x:t;x;+t:d;x;134217728*-i;+i:
+   i;134217728/x:t;x;+t:i;x;134217728*-i:
+   f;1+f:
+  ]#
+  i;a;!t;e:p;1+p:
+ ]#
+ e;0=~["E_WEAVE_PACK_CARRY"0 0/]?
+ r;
+]a;!
+
+{ 130: تحديث معامل weaving المضغوط في تمريرة خانات واحدة؛ tuple [packedCoefficient,numerator,denominator]. }
+{ يحسب coefficient*numerator/denominator بقسمة تامة، ويبقي الناتج في packed base-512. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ w;0>~["E_WEAVE_PACK_NUM"0 0/]?v;0>~v;0=|["E_WEAVE_PACK_DEN"0 0/]?
+ z;r:1a;!0a;! { packed zero الافتراضي. }
+ w;0>[
+  { gcd واختزال. }
+  w;l:v;n:[n;0>][l;n;/d:l;d;n;*-e:n;l:e;n:]#
+  w;l;/p:v;l;/s:
+
+  { denominator = s * 2^e؛ s فردي. }
+  0e:[s;1>s;2/d:d;2*s;=&][s;2/s:e;1+e:]#
+  e;9/q:e;q;9*-t:
+  1d:0i:[t;i;>][d;2*d:i;1+i:]#
+  512d;/f:
+
+  { inverse(s) modulo 512. }
+  s;l:512n:1j:0w:
+  [n;0>][l;n;/d:l;d;n;*-e:n;l:e;n:j;d;w;*-e:w;j:e;w:]#
+  l;1=~["E_WEAVE_PACK_INVERSE"0 0/]?
+  j;512/d:j;d;512*-j:j;0>~j;0=~&[j;512+j:]?
+
+  { effective input digit length. }
+  y;g;!n:1i:
+  [n;1>i;&][
+   n;1-x:x;3/w:x;w;3*-x:y;1+w;+g;!w:
+   x;1=[w;512/w:]?x;2=[w;262144/w:]?w;512/x:w;x;512*-w:
+   w;0=[n;1-n:]?w;0=~[0i:]?
+  ]#
+  n;q;>~["E_WEAVE_PACK_SHIFT"0 0/]?
+  0i:
+  [q;i;>][
+   i;x:x;3/w:x;w;3*-x:y;1+w;+g;!w:
+   x;1=[w;512/w:]?x;2=[w;262144/w:]?w;512/x:w;x;512*-w:
+   w;0=~["E_WEAVE_PACK_SHIFT"0 0/]?i;1+i:
+  ]#
+  n;q;-m:
+
+  { عدد خانات p في الأساس 512؛ حدّ لطول ناتج الضرب. }
+  p;w:0v:[w;0>][v;1+v:w;512/w:]#
+  z;r:m;v;+a;!
+
+  { carry لقسمة 2^t. }
+  0e:
+  t;0>[
+   q;x:x;3/w:x;w;3*-x:y;1+w;+g;!w:
+   x;1=[w;512/w:]?x;2=[w;262144/w:]?w;512/x:w;x;512*-w:
+   512f;/x:w;x;/l:w;l;x;*-0=~["E_WEAVE_PACK_POW2"0 0/]?l;e:
+  ]?
+
+  { i=carry القسمة الفردية، n=carry الضرب، u=index، d/l=حزمة الخرج. }
+  0i:0n:0u:0d:0l:
+  [m;u;>][
+   t;0=[
+    { A = input digit q+u. }
+    q;u;+x:x;3/w:x;w;3*-x:y;1+w;+g;!w:
+    x;1=[w;512/w:]?x;2=[w;262144/w:]?w;512/x:w;x;512*-w:
+   ]?
+   t;0>[
+    { A = carryPow + nextDigit*(512/2^t), modulo 512. }
+    e;v:
+    m;u;1+>[
+     q;u;+1+x:x;3/w:x;w;3*-x:y;1+w;+g;!w:
+     x;1=[w;512/w:]?x;2=[w;262144/w:]?w;512/x:w;x;512*-w:
+     w;f;*v;+v:
+    ]?
+    v;512/w:v;w;512*-x:w;e:x;w:
+   ]?
+
+   { حل خانة القسمة على الجزء الفردي s. w=A، x=quotientDigit. }
+   w;i;-x:x;$512/512*-x:x;0>~x;0=~&[x;512+x:]?
+   x;j;*$512/512*-x:
+   s;x;*i;+w;-512/i:
+
+   { اضرب quotientDigit في p. }
+   x;p;*n;+$512/n:n;512*-w:
+
+   { احزم خانة الخرج w، ثلاث خانات في كل خلية. }
+   l;x:
+   x;0=[w;d:1l:]?
+   x;1=[w;512*d;+d:2l:]?
+   x;2=[w;262144*d;+a;!0d:0l:]?
+   u;1+u:
+  ]#
+  e;0=~["E_WEAVE_PACK_POW2_CARRY"0 0/]?
+  i;0=~["E_WEAVE_PACK_DIV_CARRY"0 0/]?
+
+  { أفرغ carry الضرب إلى الخانات المحجوزة المتبقية. }
+  [r;g;!u;>][
+   n;512/x:n;x;512*-w:x;n:
+   l;x:x;0=[w;d:1l:]?x;1=[w;512*d;+d:2l:]?x;2=[w;262144*d;+a;!0d:0l:]?
+   u;1+u:
+  ]#
+  l;0>[d;a;!]?
+  n;0=~["E_WEAVE_PACK_MUL_CARRY"0 0/]?
+ ]?
+ r;
+]a;!
+
+{ 131: فك packed weaving count إلى BigInt قياسي عند حدود التوافق مع مسارات BigInt العامة؛ tuple [packed]. }
+[
+ x:x;g;!y:y;g;!n:
+ 1d:
+ [n;1>d;&][
+  n;1-j:j;3/f:j;f;3*-j:y;1+f;+g;!x:
+  j;1=[x;512/x:]?j;2=[x;262144/x:]?x;512/f:x;f;512*-x:
+  x;0=[n;1-n:]?x;0=~[0d:]?
+ ]#
+ z;r:1a;!n;a;!0p:
+ [n;p;>][
+  p;3/d:p;d;3*-j:y;1+d;+g;!x:
+  j;1=[x;512/x:]?j;2=[x;262144/x:]?x;512/d:x;d;512*-a;!p;1+p:
+ ]#
+ r;
+]a;!
+
+
+
+{ 132: تحويل BigInt معياري غير سالب إلى تمثيل weaving المضغوط؛ tuple [big]. }
+{ التمثيل يحفظ ثلاث خانات أساس 512 في خلية واحدة، من دون تغيير القيمة العددية. }
+[
+ x:x;g;!y:y;g;!u:y;1+g;!n:
+ u;0>~u;0=~&["E_WEAVE_PACK_CANONICAL_SIGN"0 0/]?
+ z;r:n;a;!0p:0d:
+ [n;p;>][
+  y;2+p;+g;!w:p;3/i:p;i;3*-l:
+  l;0=[w;d:]?
+  l;1=[w;512*d;+d:]?
+  l;2=[w;262144*d;+a;!0d:]?
+  p;1+p:
+ ]#
+ n;3/i:n;i;3*-l:l;0>[d;a;!]?
+ r;
+]a;!
+
+{ 133: مقارنة عددين مضغوطين غير سالبين؛ tuple [a,b]. الناتج -1 أو 0 أو 1. }
+[
+ x:x;g;!y:x;1+g;!w:
+ y;g;!2+3/n:w;g;!2+3/m:
+ 1d:[n;1>d;&][y;n;+g;!0=[n;1-n:]?y;n;+g;!0=~[0d:]?]#
+ 1d:[m;1>d;&][w;m;+g;!0=[m;1-m:]?w;m;+g;!0=~[0d:]?]#
+ 0r:
+ n;m;>[1r:]?
+ m;n;>[1_r:]?
+ n;m;=[
+  n;1-i:0f:
+  [i;0>i;0=|f;0=&][
+   y;1+i;+g;!e:w;1+i;+g;!d:
+   e;d;>[1r:1f:]?
+   d;e;>[1_r:1f:]?
+   i;1-i:
+  ]#
+ ]?
+ r;
+]a;!
+
+{ 134: طرح عددين weaving مضغوطين غير سالبين مع شرط a>=b؛ tuple [a,b]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ y;g;!2+3/n:w;g;!2+3/m:
+ 1d:[n;1>d;&][y;n;+g;!0=[n;1-n:]?y;n;+g;!0=~[0d:]?]#
+ 1d:[m;1>d;&][w;m;+g;!0=[m;1-m:]?w;m;+g;!0=~[0d:]?]#
+ z;r:n;3*a;!0e:0p:
+ [n;p;>][
+  y;1+p;+g;!i:0j:m;p;>[w;1+p;+g;!j:]?
+  i;j;-e;-d:d;0>~d;0=~&f:
+  f;[d;134217728+d:1e:]?
+  f;~[0e:]?
+  d;a;!p;1+p:
+ ]#
+ e;0=~["E_WEAVE_PACK_SUB_BORROW"0 0/]?
+ r;
+]a;!
+
+{ 135: ضرب عددين weaving مضغوطين غير سالبين؛ tuple [a,b]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ z;v:1a;!0a;!
+ z;b:y;a;!w;a;!v;a;!b;129o;!
+]a;!
+
+{ 136: عدّ الإكمالات من عامل مضغوط وجدول suffix مضغوط؛ tuple [state,table,activeFactor]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!3a;!b;23o;!s:u;g;!r:
+ 0p:s;1+d:[t;1+d;>][z;b:u;a;!d;a;!b;23o;!e:p;e;+p:d;1+d:]#
+ v;q:t;r;=~[
+  r;t;-1+i:z;b:w;a;!i;a;!b;23o;!i:z;b:i;a;!p;1+a;!b;23o;!i:
+  z;b:q;a;!i;a;!b;135o;!q:
+ ]?
+ q;
+]a;!
+
+{ 137: اشتقاق عامل التداخل المضغوط للحالة الابنة؛ tuple [state,j,parentFactorPacked]. }
+{ مطابق حسابياً للدالة 115، لكن جميع العوامل الوسيطة تبقى في تمثيل weaving المضغوط. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!3a;!b;23o;!s:
+ z;b:u;a;!w;a;!b;23o;!r:v;q:0f:
+ w;t;1+=[
+  0p:s;1+d:[t;1+d;>][z;b:u;a;!d;a;!b;23o;!e:p;e;+p:d;1+d:]#
+  r;1-e:z;b:p;e;+1-a;!e;1-a;!b;111o;!i:
+  z;b:i;a;!b;132o;!i:z;b:q;a;!i;a;!b;135o;!q:1f:
+ ]?
+ f;0=[
+  r;1>[
+   z;b:q;a;!r;1-a;!b;141o;!q:
+   0p:s;1+d:
+   [t;d;>][
+    z;b:u;a;!d;a;!b;23o;!e:p;e;+p:
+    d;w;>d;w;=|[z;b:q;a;!p;a;!b;141o;!q:]?
+    d;1+d:
+   ]#
+   t;d;=[z;b:u;a;!d;a;!b;23o;!e:p;e;+p:]?
+   z;b:q;a;!p;1-a;!b;142o;!q:
+   0p:s;1+d:
+   [t;d;>][
+    z;b:u;a;!d;a;!b;23o;!e:p;e;+p:
+    d;w;>d;w;=|[z;b:q;a;!p;1-a;!b;142o;!q:]?
+    d;1+d:
+   ]#
+   1f:
+  ]?
+  f;0=[
+   0p:s;2+d:
+   [t;1+d;>][z;b:q;a;!p;1+a;!b;141o;!q:z;b:u;a;!d;a;!b;23o;!e:p;e;+p:d;1+d:]#
+   0p:s;2+d:
+   [t;1+d;>][z;b:u;a;!d;a;!b;23o;!e:p;e;+p:z;b:q;a;!p;a;!b;142o;!q:d;1+d:]#
+   1f:
+  ]?
+ ]?
+ q;
+]a;!
+
+{ 138: عدد إكمالات weaving المضغوط التي يكون رمزها التالي <= limit؛ tuple [state,table,activeFactorPacked,limit]. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:
+ z;b:y;a;!1a;!b;23o;!t:z;b:y;a;!2a;!b;23o;!s:z;b:y;a;!3a;!b;23o;!r:t;g;!q:
+ 0n:r;1+d:[s;1+d;>][z;b:t;a;!d;a;!b;23o;!e:n;e;+n:d;1+d:]#
+ z;p:1a;!0a;!0f:
+ r;1+u;>[1f:]?
+ f;0=[
+  q;s;>[
+   u;s;1+>u;s;1+=|[
+    z;b:y;a;!w;a;!v;a;!b;136o;!p:1f:
+   ]?
+  ]?
+ ]?
+ f;0=[
+  s;r;>[
+   u;l:u;s;>[s;l:]?
+   v;p:n;i:s;d:
+   [d;l;>][
+    z;b:t;a;!d;a;!b;23o;!e:i;e;-j:
+    z;b:p;a;!j;a;!b;141o;!p:z;b:p;a;!i;1-a;!b;142o;!p:
+    j;i:d;1-d:
+   ]#
+   s;q;=~[
+    q;s;-1+e:z;b:w;a;!e;a;!b;23o;!e:z;b:e;a;!n;a;!b;23o;!e:
+    z;b:p;a;!e;a;!b;135o;!p:
+   ]?
+   1f:
+  ]?
+ ]?
+ p;
+]a;!
+
+{ 139: مقارنة rank مضغوط بالعدد التراكمي المضغوط مع استعادة arena؛ tuple [state,table,activeFactor,limit,rank]. }
+[
+ z;d:x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:x;4+g;!t:
+ z;b:y;a;!w;a;!v;a;!u;a;!b;138o;!s:z;b:t;a;!s;a;!b;133o;!s:
+ [z;d;>][%z;1-z:]#s;
+]a;!
+
+{ 140: فك رتبة weaving باستعمال rank مضغوط وعامل تداخل معياري يُضغط مرة واحدة لكل رمز؛ tuple [lengths,rankBig,table]. }
+{ ترتيب الاختيار وحالات الحركة مطابقان للدالة 126؛ الضغط لا يغيّر إلا تمثيل الحساب المؤقت. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!n:y;g;!v:
+ z;b:w;a;!b;132o;!w:
+ 1_p:y;t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:0t:z;b:t;a;!p;a;!b;p:z;b:3a;!p;a;!b;u:
+ 1 22o;!f:z;b:f;a;!b;132o;!f:
+ 0s:1q:[v;1+q;>][z;b:y;a;!q;a;!b;23o;!r:s;r;+s:q;1+q:]#
+ 1_p:0q:
+ [s;q;>][
+  { ضغط العامل الحالي مرة واحدة فقط لهذه الخطوة؛ جميع استعلامات البحث الثنائي تعيد استعماله. }
+  f;m:
+  z;b:u;a;!2a;!b;23o;!r:z;b:u;a;!3a;!b;23o;!d:
+  d;1+e:r;1+i:i;v;>[v;i:]?
+  [i;e;>][
+   e;i;+2/j:
+   z;b:u;a;!n;a;!m;a;!j;a;!w;a;!b;139o;!l:
+   l;0>[j;1+e:]?
+   l;0>~l;0=|[j;i:]?
+  ]#
+  e;d;1+>[
+   z;b:u;a;!n;a;!m;a;!e;1-a;!b;138o;!j:
+   z;b:w;a;!j;a;!b;134o;!w:
+  ]?
+  z;b:u;a;!e;a;!f;a;!b;145o;!m:z;b:u;a;!e;a;!y;a;!b;94o;!r:
+  e;i:z;b:i;a;!p;a;!b;p:q;1+q:r;u:m;f:
+ ]#
+ z;b:q;a;!p;a;!b;
+]a;!
+
+
+{ 141: ضرب عدد weaving مضغوط في خلية صغيرة غير سالبة؛ tuple [packed,small]. }
+[
+ x:x;g;!y:x;1+g;!w:
+ w;0>~["E_WEAVE_PACK_SMALL_MUL_SIGN"0 0/]?
+ y;g;!2+3/n:
+ 1d:[n;1>d;&][y;n;+g;!0=[n;1-n:]?y;n;+g;!0=~[0d:]?]#
+ z;r:n;1+3*a;!0e:0p:
+ [n;p;>][
+  y;1+p;+g;!i:i;w;*e;+d:d;134217728/e:d;e;134217728*-a;!p;1+p:
+ ]#
+ e;a;!
+ r;
+]a;!
+
+{ 142: قسمة تامة لعدد weaving مضغوط على خلية صغيرة موجبة؛ tuple [packed,small]. }
+{ القسمة الطويلة تُجرى مباشرة في الأساس 134217728؛ خارج القسمة المؤقت يُعكس مرة واحدة إلى ترتيب الخلايا الداخلي. }
+[
+ x:x;g;!y:x;1+g;!w:
+ w;0>~w;0=|["E_WEAVE_PACK_SMALL_DIVISOR"0 0/]?
+ y;g;!2+3/n:
+ 1d:[n;1>d;&][y;n;+g;!0=[n;1-n:]?y;n;+g;!0=~[0d:]?]#
+ z;t:0e:n;1-p:
+ [p;0>p;0=|][
+  y;1+p;+g;!i:e;134217728*i;+d:d;w;/j:d;j;w;*-e:j;a;!p;1-p:
+ ]#
+ e;0=~["E_WEAVE_PACK_SMALL_DIV_INEXACT"0 0/]?
+ z;r:n;3*a;!n;1-p:
+ [p;0>p;0=|][t;p;+g;!a;!p;1-p:]#
+ r;
+]a;!
+
+{ 143: استبدال عنصر في sequence لمسار weaving فقط، بمسحين خطيين على العقد بدلاً من seqAt لكل موضع؛ tuple [sequence,pos,newValue]. }
+{ النتيجة مساوية تماماً للدالة 88؛ الاختلاف تنفيذي فقط ويمنع إنشاء tuple استدعاء لكل عنصر. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ y;g;!u:y;1+g;!t:
+ 1_p:u;i:
+ [i;0>][
+  t;g;!s:i;w;=[v;s:]?
+  s;r:z;b:r;a;!p;a;!b;p:
+  t;1+g;!t:i;1-i:
+ ]#
+ p;t:1_q:u;i:
+ [i;0>][
+  t;g;!s:s;r:z;b:r;a;!q;a;!b;q:
+  t;1+g;!t:i;1-i:
+ ]#
+ z;b:u;a;!q;a;!b;
+]a;!
+
+{ 144: اشتقاق عامل التداخل المضغوط بمسح خطي مباشر لعقد remaining؛ tuple [state,j,parentFactorPacked]. }
+{ مطابق عددياً للدالة 137، لكنه يتجنب seqAt داخل حلقات الأشهر ويستعمل المجاميع التراكمية نفسها بترتيب ضرب/قسمة مكافئ. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!3a;!b;23o;!s:
+ z;b:u;a;!w;a;!b;23o;!r:v;q:0f:
+ w;t;1+=[
+  { p=sum remaining[s+1..t], e=remaining[t]. }
+  0p:0e:
+  t;s;>[
+   u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+   t;d:[d;s;>][l;g;!e:p;e;+p:l;1+g;!l:d;1-d:]#
+  ]?
+  r;1-e:z;b:p;e;+1-a;!e;1-a;!b;111o;!i:
+  z;b:i;a;!b;132o;!i:z;b:q;a;!i;a;!b;135o;!q:1f:
+ ]?
+ f;0=[
+  r;1>[
+   z;b:q;a;!r;1-a;!b;141o;!q:
+   { P_t=sum remaining[s+1..t]. }
+   0p:
+   t;s;>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    t;d:[d;s;>][l;g;!e:p;e;+p:l;1+g;!l:d;1-d:]#
+   ]?
+   { اضرب في P_d لكل d من max(w,s+1) إلى t-1؛ نسير تنازلياً انطلاقاً من P_t. }
+   t;s;>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    p;i:t;d:
+    [d;s;1+>][
+     l;g;!e:i;e;-i:d;1-d:l;1+g;!l:
+     d;w;>d;w;=|[z;b:q;a;!i;a;!b;141o;!q:]?
+    ]#
+   ]?
+   z;b:q;a;!p;1-a;!b;142o;!q:
+   { اقسم على (P_d-1) لنفس d؛ ترتيب القواسم لا يغيّر تمامية حاصل القسمة. }
+   t;s;>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    p;i:t;d:
+    [d;s;1+>][
+     l;g;!e:i;e;-i:d;1-d:l;1+g;!l:
+     d;w;>d;w;=|[z;b:q;a;!i;1-a;!b;142o;!q:]?
+    ]#
+   ]?
+   1f:
+  ]?
+  f;0=[
+   { الحالة r<=1: P_d=sum remaining[s+2..d]. }
+   0p:
+   t;s;1+>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    t;d:[d;s;1+>][l;g;!e:p;e;+p:l;1+g;!l:d;1-d:]#
+   ]?
+   { عوامل البسط 1+P_{d-1}. }
+   t;s;1+>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    p;i:t;d:
+    [d;s;1+>][
+     l;g;!e:i;e;-i:
+     z;b:q;a;!i;1+a;!b;141o;!q:
+     d;1-d:l;1+g;!l:
+    ]#
+   ]?
+   { قواسم المقام P_d. }
+   t;s;1+>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    p;i:t;d:
+    [d;s;1+>][
+     z;b:q;a;!i;a;!b;142o;!q:
+     l;g;!e:i;e;-i:d;1-d:l;1+g;!l:
+    ]#
+   ]?
+   1f:
+  ]?
+ ]?
+ q;
+]a;!
+
+{ 145: اشتقاق عامل التداخل المضغوط مع دمج الضرب/القسمة في حالة remaining[j]>1؛ tuple [state,j,parentFactorPacked]. }
+{ في هذه الحالة الهوية الدقيقة هي: factor' = factor*(r_j-1)/(P_j-1) ثم لكل d=j+1..t نضرب في P_{d-1}/(P_d-1). }
+{ كل نسبة جزئية عدد صحيح عند تطبيقها إلى العامل السابق مباشرةً، ولذلك تستعمل 130 لتجنب BigInt packed وسيط بين الضرب والقسمة. }
+[
+ x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ z;b:y;a;!1a;!b;23o;!u:z;b:y;a;!2a;!b;23o;!t:z;b:y;a;!3a;!b;23o;!s:
+ z;b:u;a;!w;a;!b;23o;!r:v;q:0f:
+ w;t;1+=[
+  0p:0e:
+  t;s;>[
+   u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+   t;d:[d;s;>][l;g;!e:p;e;+p:l;1+g;!l:d;1-d:]#
+  ]?
+  r;1-e:z;b:p;e;+1-a;!e;1-a;!b;111o;!i:
+  z;b:i;a;!b;132o;!i:z;b:q;a;!i;a;!b;135o;!q:1f:
+ ]?
+ f;0=[
+  r;1>[
+   { احسب P_t=sum remaining[s+1..t]. }
+   0p:
+   t;s;>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    t;d:[d;s;>][l;g;!e:p;e;+p:l;1+g;!l:d;1-d:]#
+   ]?
+   { ابنِ قائمة خام من P_w,P_{w+1},...,P_t. المرور بالمصدر تنازلياً ثم prepend يعيد الترتيب التصاعدي. }
+   1_j:
+   t;s;>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    p;i:t;d:
+    [d;w;>d;w;=|][
+     i;e:z;b:e;a;!j;a;!b;j:
+     l;g;!e:i;e;-i:l;1+g;!l:d;1-d:
+    ]#
+   ]?
+   { النسبة الأولى: (r-1)/(P_w-1). }
+   j;g;!i:
+   z;b:q;a;!r;1-a;!i;1-a;!b;130o;!q:
+   i;e:j;1+g;!j:
+   { ثم P_{d-1}/(P_d-1) لكل d=w+1..t. }
+   w;1+d:
+   [t;1+d;>][
+    j;g;!i:
+    z;b:q;a;!e;a;!i;1-a;!b;130o;!q:
+    i;e:j;1+g;!j:d;1+d:
+   ]#
+   1f:
+  ]?
+  f;0=[
+   { حالة r<=1 تبقى مطابقة لمسار 144 لأن نسبها لا تُدمج هنا. }
+   0p:
+   t;s;1+>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    t;d:[d;s;1+>][l;g;!e:p;e;+p:l;1+g;!l:d;1-d:]#
+   ]?
+   t;s;1+>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    p;i:t;d:
+    [d;s;1+>][
+     l;g;!e:i;e;-i:
+     z;b:q;a;!i;1+a;!b;141o;!q:
+     d;1-d:l;1+g;!l:
+    ]#
+   ]?
+   t;s;1+>[
+    u;g;!m:u;1+g;!l:m;t;-n:[n;0>][l;1+g;!l:n;1-n:]#
+    p;i:t;d:
+    [d;s;1+>][
+     z;b:q;a;!i;a;!b;142o;!q:
+     l;g;!e:i;e;-i:d;1-d:l;1+g;!l:
+    ]#
+   ]?
+   1f:
+  ]?
+ ]?
+ q;
+]a;!
