@@ -213,3 +213,17 @@ Un `LegacyHiddenStorageAdapter` e un `Discovery05HiddenStorageHandler` ha esset 
 ### Pro quo li strat nov ne adjunte un defect extra
 
 `makeHiddenPatched` usa li coefficients, checksum de stone, sett grinds e `savePatch` secun li pseudocode historic, e li table de stones veni del builder ja reparat de Patch 04. Null oracle es consultat in production. Li handler ne reordina, ne traducte e ne corrige li storage. Ergo li unic divergentie nov es precis li orientation retrograd mandat de Discovery 05.
+
+## Stage 11 — PATCH 05
+
+### Quo esset pensat
+
+Pos Discovery 05 on acceptat que li array legacy self ne deve esser restructurat: altri parts historic posse depender de su orientation retrograd. Li correction deve esser local al punctu de access semantic, ne un migration del storage.
+
+### Quo esset circumit
+
+`hiddenByNearness(legacyHidden, k)` traducte proximity `k` al slot fisic `8-k`. `Patch05HiddenNearnessWrapper` executa solmen pos `Discovery05HiddenStorageHandler`, conserva li array backward intact in li context e rende li valore semantic correct. Li test de Discovery 05 conserva li mem values expected e deven verd solmen per ti translator.
+
+### Scar conservat
+
+`buildHiddenWithBackwardStorage` continua scrir hidden7 in slot 1 e hidden1 in slot 7. Null `reverse()` es usat quam correction. Li divergence fisic resta observabil e testabil.

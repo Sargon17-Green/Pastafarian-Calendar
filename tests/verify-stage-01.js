@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 05 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 05 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,7 @@ group('null textu hebreic o code posterior a Discovery 05 contamina production',
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'patchedCounts', 'hiddenByNearness', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
+    'patchedCounts', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
@@ -902,7 +902,26 @@ group('Discovery 05 conserva li hidden values exact ma li stores in ordine retro
   eq(execution.context.metrics['discovery05.hiddenBackward.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 05', () => {
+group('Patch 05 traducte access per proximity sin reversar li storage retrograd', () => {
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const expected = o.buildHiddenDrops(counts, o.STONES);
+  const legacy = production.buildHiddenWithBackwardStorage(counts, stones);
+  const snapshot = legacy.slice();
+  for (let k = 1; k <= 7; k += 1) {
+    eq(production.hiddenByNearness(legacy, k), expected[k - 1]);
+  }
+  deepEq(legacy, snapshot);
+  const routed = production.historicHiddenByNearnessThroughMonsterPath(f, f, counts, stones, 7);
+  eq(routed.result, expected[6]);
+  eq(routed.context.patch05PhysicalSlot, 1);
+  eq(routed.context.patch05StoragePreserved, true);
+  eq(routed.context.currentHandler, 'Patch05HiddenNearnessWrapper');
+  eq(routed.context.metrics['patch05.hiddenNearness.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 05', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -914,4 +933,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression rubi de Discovery 05.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa pos Patch 05.');
