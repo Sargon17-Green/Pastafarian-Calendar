@@ -1,0 +1,63 @@
+Gradus 5 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+1. Confirmatio regressionis Gradus 4 post correctionem structurae, contra productionem Gradus 4 pristinam
+
+Eadem probatio correcta `tests/stage_04_discovery_02_tests.cpp` coniuncta est cum `src/monster.cpp` et `normative_reference.cpp` Gradus 4 pristinis.
+
+Exitus actualis ante PATCH 02:
+DISCREPANTIA VIAE_DIEI FOUNDATION: expectatus=1 actualis=0
+DISCREPANTIA VIAE_DIEI FOUNDATION+1: expectatus=3 actualis=2
+DISCREPANTIA VIAE_DIEI FOUNDATION+2: expectatus=5 actualis=4
+CONCORDANTIA VIAE_DIEI FOUNDATION-1: valor=2
+CONCORDANTIA VIAE_DIEI FOUNDATION-2: valor=4
+REGRESSIO_DISCOVERY_02_DEFECIT: 3 discrepantiae normativae inventae sunt
+PREPATCH_EXIT_CODE=1
+
+Haec confirmatio demonstrat correctionem structurae probationis vitium Gradus 4 non abscondere.
+
+2. Aedificatio Gradus 5
+
+Propter limitem temporis ambitus, obiecta C++ communia separatim compilata sunt:
+
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c src/monster.cpp -o build/monster.o
+g++ -std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I. -c tests/reference/normative_reference.cpp -o build/normative_reference.o
+
+Singulae probationes C++ deinde separatim compilatae et cum eisdem obiectis coniunctae sunt.
+
+3. Exitus omnium regressionum post PATCH 02
+
+OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
+
+CONCORDANTIA oldRemainder M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder 2M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder 3M: valor=170141183460469231731687303715884105727
+CONCORDANTIA oldRemainder M+1: valor=1
+REGRESSIO_DISCOVERY_01_TRANSIIT
+
+REGRESSIO_PATCH_01_TRANSIIT
+
+CONCORDANTIA VIAE_DIEI FOUNDATION: valor=1
+CONCORDANTIA VIAE_DIEI FOUNDATION+1: valor=3
+CONCORDANTIA VIAE_DIEI FOUNDATION+2: valor=5
+CONCORDANTIA VIAE_DIEI FOUNDATION-1: valor=2
+CONCORDANTIA VIAE_DIEI FOUNDATION-2: valor=4
+REGRESSIO_DISCOVERY_02_TRANSIIT
+
+REGRESSIO_PATCH_02_TRANSIIT
+
+4. Auditum cicatricis et contaminationis futurae
+
+Probatio Gradus 5 confirmat:
+- `oldDayTag(FOUNDATION_DAY_OLD) == 0` adhuc valet;
+- `oldDayTag(FOUNDATION_DAY_OLD + 1) == 2` adhuc valet;
+- `oldDayTag(FOUNDATION_DAY_OLD + 2) == 4` adhuc valet;
+- via diagnostica legacy patch non applicat;
+- duo custodes PATCH 02 physice in `src/monster.cpp` adsunt;
+- `oldDistance`, `Patch03` et `patch03` in productione absunt.
+
+Status finalis: GREEN
+Regressiones anteriores: PASS
+Emendatio futura PATCH 03: ABSENS

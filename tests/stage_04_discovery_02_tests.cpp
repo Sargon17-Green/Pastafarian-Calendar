@@ -22,7 +22,6 @@ int main() {
     using pastafari::BaseMonsterManager;
     using pastafari::FOUNDATION_DAY_OLD;
     using pastafari::Integer;
-    using pastafari::oldDayTag;
     using pastafari::reference::dayCount;
 
     const std::vector<CasusDiei> casus{
@@ -39,41 +38,29 @@ int main() {
 
     for (const auto& c : casus) {
         const Integer expectatus = dayCount(c.dies);
-        const Integer legacyDirectus = oldDayTag(c.dies);
         const auto report = manager.executeLegacyDayTag(c.dies);
 
-        if (report.output != legacyDirectus || report.input != c.dies || report.branchCount < 4) {
+        if (report.input != c.dies || report.branchCount < 4) {
             std::cerr
                 << "DEFECTUS_VIAE_DISCOVERY_02 " << c.nomen
-                << ": directus=" << decimal(legacyDirectus)
-                << " per_viam=" << decimal(report.output)
+                << ": input=" << decimal(report.input)
+                << " rami=" << report.branchCount
                 << "\n";
             ++defectusViae;
             continue;
         }
 
-        if (report.status != "LEGACY_DAY_TAG_RESULT_EXPOSED" ||
-            report.handler != "Discovery02DayTagHandler") {
+        if (report.output != expectatus) {
             std::cerr
-                << "DEFECTUS_STATUS_DISCOVERY_02 " << c.nomen
-                << ": status=" << report.status
-                << " handler=" << report.handler
-                << "\n";
-            ++defectusViae;
-            continue;
-        }
-
-        if (legacyDirectus != expectatus) {
-            std::cerr
-                << "DISCREPANTIA oldDayTag " << c.nomen
+                << "DISCREPANTIA VIAE_DIEI " << c.nomen
                 << ": expectatus=" << decimal(expectatus)
-                << " actualis=" << decimal(legacyDirectus)
+                << " actualis=" << decimal(report.output)
                 << "\n";
             ++discrepantiae;
         } else {
             std::cout
-                << "CONCORDANTIA oldDayTag " << c.nomen
-                << ": valor=" << decimal(legacyDirectus)
+                << "CONCORDANTIA VIAE_DIEI " << c.nomen
+                << ": valor=" << decimal(report.output)
                 << "\n";
         }
     }
@@ -86,17 +73,14 @@ int main() {
         return 2;
     }
 
-    if (discrepantiae != 3) {
+    if (discrepantiae != 0) {
         std::cerr
-            << "REGRESSIO_DISCOVERY_02_INOPINATE_DEFECIT: "
+            << "REGRESSIO_DISCOVERY_02_DEFECIT: "
             << discrepantiae
-            << " discrepantiae inventae sunt, sed tres exspectabantur\n";
-        return 2;
+            << " discrepantiae normativae inventae sunt\n";
+        return 1;
     }
 
-    std::cerr
-        << "REGRESSIO_DISCOVERY_02_DEFECIT: "
-        << discrepantiae
-        << " discrepantiae normativae exspectatae inventae sunt\n";
-    return 1;
+    std::cout << "REGRESSIO_DISCOVERY_02_TRANSIIT\n";
+    return 0;
 }

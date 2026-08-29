@@ -33,6 +33,17 @@ Integer oldDayTag(const Integer& day) {
     return 2 * distantia;
 }
 
+Integer dayTagWithFoundationScar(const Integer& day) {
+    Integer n = oldDayTag(day);
+    if (day >= FOUNDATION_DAY_OLD) {
+        n += 1;
+    }
+    if (day == FOUNDATION_DAY_OLD && n != 1) {
+        n = 1;
+    }
+    return n;
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -62,6 +73,25 @@ void BaseValidationManager::requirePatch01Ready(const BaseMonsterContext& ctx) c
 void BaseValidationManager::requireLegacyDayTagReady(const BaseMonsterContext& ctx) const {
     if (!ctx.legacyDayTagReady) {
         throw BaseValidationError("nota diei legacy nondum parata est");
+    }
+}
+
+void BaseValidationManager::requirePatch02Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyDayTagReady(ctx);
+    if (!ctx.patch02Applied) {
+        throw BaseValidationError("emendatio secunda nondum applicata est");
+    }
+
+    Integer expectatus = ctx.legacyDayTagOutput;
+    if (ctx.legacyDayTagInput >= FOUNDATION_DAY_OLD) {
+        expectatus += 1;
+    }
+    if (ctx.legacyDayTagInput == FOUNDATION_DAY_OLD && expectatus != 1) {
+        expectatus = 1;
+    }
+
+    if (ctx.patchedDayTagOutput != expectatus) {
+        throw BaseValidationError("emendatio secunda cicatricem diei non servavit");
     }
 }
 
@@ -162,6 +192,40 @@ void Discovery02DayTagHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery02.dayTag.exposed");
 }
 
+Integer Patch02DayTagWrapper::repair(const Integer& day) const {
+    return dayTagWithFoundationScar(day);
+}
+
+void Patch02DayTagHandler::handle(BaseMonsterContext& ctx,
+                                  const LegacyDayTagAdapter& adapter,
+                                  const Patch02DayTagWrapper& wrapper,
+                                  const BaseValidationManager& validator,
+                                  const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch02DayTagHandler";
+    ctx.phase = "PATCH_02_LEGACY_DAY_TAG_CALL";
+    ctx.status = "LEGACY_DAY_TAG_CALLED_BEFORE_PATCH";
+    ctx.branchTrace.push_back("PATCH_02_LEGACY_DAY_TAG_CALL");
+    metrics.bump(ctx, "patch02.legacyDayTag.calls");
+
+    ctx.legacyDayTagOutput = adapter.callOldDayTag(ctx.legacyDayTagInput);
+    ctx.legacyDayTagReady = true;
+
+    ctx.phase = "PATCH_02_FOUNDATION_SCAR";
+    ctx.branchTrace.push_back("PATCH_02_FOUNDATION_SCAR");
+    ctx.patchedDayTagOutput = wrapper.repair(ctx.legacyDayTagInput);
+    ctx.patch02Applied = true;
+    metrics.bump(ctx, "patch02.wrapper.calls");
+
+    ctx.phase = "PATCH_02_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_02_VALIDATE");
+    validator.requirePatch02Ready(ctx);
+
+    ctx.phase = "PATCH_02_DAY_TAG_READY";
+    ctx.status = "PATCHED_DAY_TAG_RESULT_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_02_DAY_TAG_READY");
+    metrics.bump(ctx, "patch02.dayTag.ready");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -222,6 +286,21 @@ void BaseDispatcher::dispatchLegacyDayTag(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery02.dispatch.calls");
 
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedDayTag(BaseMonsterContext& ctx,
+                                           const Patch02DayTagHandler& handler,
+                                           const LegacyDayTagAdapter& adapter,
+                                           const Patch02DayTagWrapper& wrapper,
+                                           const BaseValidationManager& validator,
+                                           const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_02_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_02_DISPATCH");
+    metrics.bump(ctx, "patch02.dispatch.calls");
+
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -300,7 +379,36 @@ LegacyDayTagReport BaseMonsterManager::executeLegacyDayTag(const Integer& day) c
     BaseMonsterContext ctx;
     ctx.calculationDay = day;
     ctx.targetDay = day;
-    ctx.phase = "DISCOVERY_02_NEW";
+    ctx.phase = "PATCH_02_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyDayTagInput = day;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyDayTagAdapter adapter;
+    const Patch02DayTagWrapper wrapper;
+    const Patch02DayTagHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedDayTag(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return LegacyDayTagReport{
+        ctx.legacyDayTagInput,
+        ctx.patchedDayTagOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyDayTagOutput,
+        ctx.patch02Applied
+    };
+}
+
+LegacyDayTagReport BaseMonsterManager::executeUnpatchedDayTagDiagnostic(const Integer& day) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = day;
+    ctx.targetDay = day;
+    ctx.phase = "DISCOVERY_02_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyDayTagInput = day;
@@ -318,7 +426,9 @@ LegacyDayTagReport BaseMonsterManager::executeLegacyDayTag(const Integer& day) c
         ctx.phase,
         ctx.status,
         ctx.currentHandler,
-        ctx.branchTrace.size()
+        ctx.branchTrace.size(),
+        ctx.legacyDayTagOutput,
+        false
     };
 }
 

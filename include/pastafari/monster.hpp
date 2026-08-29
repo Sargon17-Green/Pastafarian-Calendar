@@ -17,6 +17,7 @@ Integer regularMod(const Integer& x, const Integer& d);
 Integer oldRemainder(const Integer& x);
 Integer savePatch(const Integer& x);
 Integer oldDayTag(const Integer& day);
+Integer dayTagWithFoundationScar(const Integer& day);
 
 struct BaseMonsterContext {
     Integer calculationDay;
@@ -34,7 +35,9 @@ struct BaseMonsterContext {
     bool patch01Applied = false;
     Integer legacyDayTagInput;
     Integer legacyDayTagOutput;
+    Integer patchedDayTagOutput;
     bool legacyDayTagReady = false;
+    bool patch02Applied = false;
 };
 
 struct BaseRunReport {
@@ -61,6 +64,8 @@ struct LegacyDayTagReport {
     std::string status;
     std::string handler;
     std::size_t branchCount;
+    Integer legacyOutputBeforePatch{};
+    bool patch02Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -74,6 +79,7 @@ public:
     void requireLegacyArithmeticReady(const BaseMonsterContext& ctx) const;
     void requirePatch01Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyDayTagReady(const BaseMonsterContext& ctx) const;
+    void requirePatch02Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -121,6 +127,20 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch02DayTagWrapper {
+public:
+    Integer repair(const Integer& day) const;
+};
+
+class Patch02DayTagHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyDayTagAdapter& adapter,
+                const Patch02DayTagWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -145,6 +165,13 @@ public:
                               const LegacyDayTagAdapter& adapter,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedDayTag(BaseMonsterContext& ctx,
+                               const Patch02DayTagHandler& handler,
+                               const LegacyDayTagAdapter& adapter,
+                               const Patch02DayTagWrapper& wrapper,
+                               const BaseValidationManager& validator,
+                               const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -153,6 +180,7 @@ public:
     LegacyRemainderReport executeLegacyRemainder(const Integer& x) const;
     LegacyRemainderReport executeUnpatchedRemainderDiagnostic(const Integer& x) const;
     LegacyDayTagReport executeLegacyDayTag(const Integer& day) const;
+    LegacyDayTagReport executeUnpatchedDayTagDiagnostic(const Integer& day) const;
 };
 
 } // namespace pastafari
