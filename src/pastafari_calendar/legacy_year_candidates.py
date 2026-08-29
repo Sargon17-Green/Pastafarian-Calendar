@@ -33,6 +33,23 @@ def legacyYearCandidateAllowed(
     )
 
 
+def legacyStableSortByLength(
+    candidates: tuple[LegacyYearCandidate, ...],
+) -> tuple[LegacyYearCandidate, ...]:
+    working = list(
+        candidates
+    )
+
+    # Tarihsel Year-5000 kusuru: equal-length run input stability ile korunur.
+    working.sort(
+        key=lambda candidate: candidate.length,
+    )
+
+    return tuple(
+        working
+    )
+
+
 class YearMaxPatchWrapper:
     def accept_after_legacy(
         self,
@@ -163,6 +180,70 @@ class LegacyYearCandidateAdapter:
         )
         ctx.legacy_year_candidate_count_for_selection = len(
             result
+        )
+
+        return result
+
+    def sort_year5000_candidates_after_filter(
+        self,
+        ctx,
+        calculation_day: int,
+        candidates: tuple[LegacyYearCandidate, ...],
+    ) -> tuple[LegacyYearCandidate, ...]:
+        for candidate in candidates:
+            if not (
+                candidate.open_day
+                < calculation_day
+                <= candidate.close_day
+            ):
+                raise ValueError(
+                    "Beş bininci yıl adayı hesaplama gününü içermelidir"
+                )
+            if candidate.length > REAL_YEAR_MAX_PATCH:
+                raise ValueError(
+                    "Beş bininci yıl tie yolu yalnız patched candidate family almalıdır"
+                )
+
+        result = legacyStableSortByLength(
+            candidates
+        )
+
+        ctx.branch_trace.append(
+            (
+                "ESKİ_5000_STABLE_LENGTH_TIE",
+                len(candidates),
+            )
+        )
+        ctx.logs.append(
+            (
+                "eski-5000-stable-length-tie",
+                len(candidates),
+            )
+        )
+
+        ctx.legacy_year5000_tie_input_labels = tuple(
+            candidate.label
+            for candidate in candidates
+        )
+        ctx.legacy_year5000_tie_input_lengths = tuple(
+            candidate.length
+            for candidate in candidates
+        )
+        ctx.legacy_year5000_tie_input_open_days = tuple(
+            candidate.open_day
+            for candidate in candidates
+        )
+        ctx.legacy_year5000_tie_sorted_labels = tuple(
+            candidate.label
+            for candidate in result
+        )
+        ctx.legacy_year5000_tie_sorted_lengths = tuple(
+            candidate.length
+            for candidate in result
+        )
+        ctx.legacy_year5000_tie_sorted_open_days = tuple(
+            candidate.open_day
+            for candidate in result
         )
 
         return result

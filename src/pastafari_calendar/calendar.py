@@ -396,7 +396,60 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.yearCandidates.probes",
         )
         local_ctx.status = "ESKİ_5781_YIL_ADAYLARI_HAZIR"
-        local_ctx.phase = "AŞAMA_33_BEKLEME"
+        local_ctx.phase = "ESKİ_5000_STABLE_LENGTH_TIE"
+
+    def legacy_year5000_tie_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Keşif 17 witness family yalnız equal-length opening-order kusurunu yoklar.
+        # Bütün adaylar calculation_day değerini içerir ve Stage 33 ceiling altında kalır.
+        tie_length = 5000
+        late_open = calculation_day - 100
+        middle_open = calculation_day - 200
+        early_open = calculation_day - 300
+
+        candidates = (
+            LegacyYearCandidate(
+                label="5000-geç-açılış",
+                length=tie_length,
+                open_day=late_open,
+                close_day=late_open + tie_length,
+                gate_gap_count=6,
+            ),
+            LegacyYearCandidate(
+                label="5000-erken-açılış",
+                length=tie_length,
+                open_day=early_open,
+                close_day=early_open + tie_length,
+                gate_gap_count=6,
+            ),
+            LegacyYearCandidate(
+                label="5000-orta-açılış",
+                length=tie_length,
+                open_day=middle_open,
+                close_day=middle_open + tie_length,
+                gate_gap_count=6,
+            ),
+        )
+
+        manager.legacy_year_candidates.sort_year5000_candidates_after_filter(
+            local_ctx,
+            calculation_day,
+            candidates,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.year5000.tieProbes",
+        )
+        local_ctx.status = "ESKİ_5000_STABLE_LENGTH_TIE_HAZIR"
+        local_ctx.phase = "AŞAMA_34_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -415,6 +468,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_YALNIZ_KISA_GENEL_SEÇİM", legacy_short_only_general_selection_handler)
     manager.dispatcher.register("ESKİ_GATE_SORU_GÜNÜ", legacy_gate_question_handler)
     manager.dispatcher.register("ESKİ_5781_YIL_ADAYLARI", legacy_year_candidate_handler)
+    manager.dispatcher.register("ESKİ_5000_STABLE_LENGTH_TIE", legacy_year5000_tie_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -434,5 +489,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Otuz üçüncü aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Otuz dördüncü aşamada üretim takvim yolu henüz birleştirilmedi"
     )

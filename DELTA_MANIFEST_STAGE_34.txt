@@ -1,0 +1,29 @@
+Aşama 34/55 — DISCOVERY 17
+
+Bu paket yalnızca Aşama 34 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_year_candidates.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_34_discovery_17.py
+artifacts/stage-34/BASELINE_STAGE_33_GREEN.txt
+artifacts/stage-34/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-34/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_34.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 33 baseline: GREEN
+Değişiklik sonrası Aşama 1–33 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+Stage 33 inline accepted.sort scar: KORUNDU
+Year-5000 stable length-only helper: EKLENDİ
+Year-5000 actual adapter tie path: EKLENDİ
+real calendar equal-length witness probe: EKLENDİ
+equal-length run repair: YOK
+clean two-key sort: YOK
+PATCH 18 oldJumpGuess: YOK

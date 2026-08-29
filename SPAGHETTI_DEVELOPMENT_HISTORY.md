@@ -1599,3 +1599,18 @@ Ek testler legacy helper'ın gerçekten çağrılmasını, exact 5778/5779 sın�
 Patch 17 year-5000 tie düzeltmesi henüz yoktur.
 
 Legacy stable sort by length only aynen kalır; eşit uzunluk runs için gate-opening düzeltmesi eklenmemiştir.
+
+
+## Aşama 34 — Keşif 17: Year 5000 tie içinde stable length-only sırasını korumak
+
+Stage 33 `prepare_for_selection` içindeki fiziksel `accepted.sort(key=length)` scar aynen bırakılır.
+
+Buna paralel olarak Year-5000 historical yolu için `legacyStableSortByLength(candidates)` eklenir. Bu helper da yalnız `candidate.length` anahtarıyla stable sort yapar; equal-length run giriş sırası değişmez.
+
+`LegacyYearCandidateAdapter.sort_year5000_candidates_after_filter`, candidate family'nin `open_day < calculation_day <= close_day` containment şartını ve `length<=5778` post-filter contract'ını doğrulayıp aynı historical length-only helper'a gider.
+
+Real `calendar_date_spaghetti` state-machine üç equal-length candidate içeren opening-order witness family'yi actual adapter üzerinden çalıştırır. Giriş sırası `geç, erken, orta` olduğu için legacy stable sort aynı sırayı korur.
+
+Test-only expected yol önce length sort yapar, sonra yalnız equal-length run içinde `open_day` ascending uygular. Üç farklı tie permütasyonunda expected `erken, orta, geç` iken actual input-stable run farklı kalır; üç alt örnek bilinçli kırmızıdır.
+
+Production içinde equal-length run taraması, run içi opening-day sort veya temiz `(length,open_day)` sort yoktur. Patch 18 `oldJumpGuess` da henüz yoktur.

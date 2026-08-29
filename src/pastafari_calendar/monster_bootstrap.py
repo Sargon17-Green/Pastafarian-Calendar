@@ -203,6 +203,12 @@ class MonsterContext:
     patch16_semantic_accepted_lengths: tuple[int, ...] | None = None
     patch16_filter_evaluations: int = 0
     patch16_applied: bool = False
+    legacy_year5000_tie_input_labels: tuple[str, ...] | None = None
+    legacy_year5000_tie_input_lengths: tuple[int, ...] | None = None
+    legacy_year5000_tie_input_open_days: tuple[int, ...] | None = None
+    legacy_year5000_tie_sorted_labels: tuple[str, ...] | None = None
+    legacy_year5000_tie_sorted_lengths: tuple[int, ...] | None = None
+    legacy_year5000_tie_sorted_open_days: tuple[int, ...] | None = None
 
 
 class BaseMetrics:
