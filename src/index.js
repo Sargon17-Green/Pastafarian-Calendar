@@ -84,6 +84,10 @@ class BaseMonsterContext {
     this.patch07PhysicalIndex = null;
     this.patch07SentinelPreserved = false;
     this.patch07Output = null;
+    this.legacyPermutationDrop = null;
+    this.legacyPermutationOneBased = null;
+    this.legacyPermutationRankPassedToUnrank0 = null;
+    this.legacyPermutationOutput = null;
   }
 }
 
@@ -467,6 +471,33 @@ function grindRowWithSentinel(grind) {
   }
   // Li caller conserva su index one-based; li sentinel ocupa fisicmen index 0 e ne es removet.
   return GRIND_TABLE_WITH_SENTINEL[grind];
+}
+
+const LEGACY_BOWL_FACTORIALS = Object.freeze([1n, 1n, 2n, 6n, 24n, 120n, 720n]);
+
+function oldPermutationUnrank0(rank0) {
+  if (typeof rank0 !== 'bigint' || rank0 < 0n || rank0 >= 720n) {
+    throw new RangeError('Li rank0 legacy de permutation deve esser inter 0 e 719.');
+  }
+  let residual = rank0;
+  const remaining = [1, 2, 3, 4, 5, 6];
+  const order = [];
+  for (let slotsLeft = 6; slotsLeft >= 1; slotsLeft -= 1) {
+    const block = LEGACY_BOWL_FACTORIALS[slotsLeft - 1];
+    const q = residual / block;
+    residual %= block;
+    order.push(remaining.splice(Number(q), 1)[0]);
+  }
+  return order;
+}
+
+function legacyBowlOrderFromDrop(drop) {
+  if (typeof drop !== 'bigint') {
+    throw new TypeError('Un drop por li permutation legacy deve esser un BigInt exact.');
+  }
+  const oneBased = regularMod(drop - 1n, 720n) + 1n;
+  // Li caller historic confunde li ordinal 1..720 con li contract rank0 0..719.
+  return oldPermutationUnrank0(oneBased);
 }
 
 class LegacyRemainderAdapter {
@@ -875,6 +906,36 @@ class Patch07GrindSentinelWrapper {
   }
 }
 
+class LegacyPermutationOrderAdapter {
+  call(drop) {
+    return legacyBowlOrderFromDrop(drop);
+  }
+}
+
+class Discovery08PermutationRankHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, drop) {
+    this.validationManager.requireHistoricReadyContext(context);
+    this.validationManager.requireExactInteger(drop);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery08PermutationRankHandler';
+    context.phase = 'DISCOVERY_08_LEGACY_PERMUTATION_RANK';
+    context.branchTrace.push('DISCOVERY_08_ONE_BASED_AS_RANK0');
+    context.legacyPermutationDrop = drop;
+    context.legacyPermutationOneBased = regularMod(drop - 1n, 720n) + 1n;
+    context.legacyPermutationRankPassedToUnrank0 = context.legacyPermutationOneBased;
+    context.legacyPermutationOutput = this.legacyAdapter.call(drop);
+    context.status = 'DISCOVERY_08_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery08.legacyPermutationRank.calls');
+    return context.legacyPermutationOutput;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -938,6 +999,12 @@ class BaseMonsterManager {
     this.patch07GrindSentinelWrapper = new Patch07GrindSentinelWrapper(
       this.validationManager,
       this.metricsManager
+    );
+    this.legacyPermutationOrderAdapter = new LegacyPermutationOrderAdapter();
+    this.discovery08PermutationRankHandler = new Discovery08PermutationRankHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyPermutationOrderAdapter
     );
   }
 
@@ -1126,6 +1193,18 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery08PermutationRank(calculationDay, targetDay, drop) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      const result = this.discovery08PermutationRankHandler.handle(context, drop);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -1188,8 +1267,12 @@ function historicGrindRowThroughMonsterPath(calculationDay, targetDay, grind) {
   return new BaseMonsterManager().executePatch07GrindIndex(calculationDay, targetDay, grind);
 }
 
+function discovery08LegacyBowlOrderThroughMonsterPath(calculationDay, targetDay, drop) {
+  return new BaseMonsterManager().executeDiscovery08PermutationRank(calculationDay, targetDay, drop);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 07; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 08; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -1224,6 +1307,8 @@ module.exports = Object.freeze({
   LegacyGrindTableAdapter,
   Discovery07GrindIndexHandler,
   Patch07GrindSentinelWrapper,
+  LegacyPermutationOrderAdapter,
+  Discovery08PermutationRankHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -1248,6 +1333,8 @@ module.exports = Object.freeze({
   legacyGrindRow,
   GRIND_TABLE_WITH_SENTINEL,
   grindRowWithSentinel,
+  oldPermutationUnrank0,
+  legacyBowlOrderFromDrop,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -1263,5 +1350,6 @@ module.exports = Object.freeze({
   historicPriorThroughMonsterPath,
   discovery07LegacyGrindRowThroughMonsterPath,
   historicGrindRowThroughMonsterPath,
+  discovery08LegacyBowlOrderThroughMonsterPath,
   calendarDateSpaghetti
 });

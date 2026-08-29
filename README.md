@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 15 de 55: PATCH 07**. Omni scars e patches 01..06 resta intact e testabil. `legacyGrindRow(grind)` conserva li defect de Discovery 07 e usa ancora li ordinal historic 1..11 directmen quam index contra li table zero-based.
+Li linea es in **Stage 16 de 55: DISCOVERY 08**. Omni scars e patches 01..07 resta intact e testabil. `oldPermutationUnrank0(rank0)` conserva un contract zero-based exact de 0..719, ma li nov caller legacy calcula un ordinal one-based de 1..720 ex li drop e passa it directmen quam rank0. Ti displacement es li unic defect nov de Discovery 08.
 
-Li correction adjunte `GRIND_TABLE_WITH_SENTINEL`: index 0 resta un sentinel permanent, e li undec rows real ocupa indices 1..11. `grindRowWithSentinel(grind)` posse dunc conservar exactmen li caller one-based sin desplazzar li data. `Patch07GrindSentinelWrapper` passa pos li handler legacy e conserva separatmen li output defectiv e li output reparat.
+`LegacyPermutationOrderAdapter` e `Discovery08PermutationRankHandler` conecta ti confusion de rank a un route production real. Null subtraction `oneBased-1`, null Patch 08 e null bowl alias existe in ti stage.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -32,20 +32,19 @@ Omni regressions precedent deve restar verd:
 npm run test:previous
 ```
 
-Li regression de Discovery 07 resta executabil e deve esser verd pos li patch, durante que li output legacy desplazat resta observabil:
+Li regression nov de Discovery 08 deve esser intentionalmen rubi:
 
 ```text
-npm run test:discovery-07
+npm run test:discovery-08
 ```
 
-Li prova focal del patch e li suite complet deve esser verd:
+Li suite complet deve finir rubi exclusivmen in ti regression:
 
 ```text
-npm run test:patch-07
 npm test
 ```
 
-Li verifier confirma que li table legacy zero-based resta intact, que li sentinel resta fisicmen in index 0, que indices 1..11 rende li undec rows exact e que `oldPermutationUnrank0` o code de Patch 08 o posterior ne contamina production.
+Li verifier confirma que `oldPermutationUnrank0` resta zero-based, que li caller current passa directmen li ordinal one-based, e que null `legacyRank0`, wrapper de Patch 08, `bowlAlias` o code posterior contamina production.
 
 ## Independentie
 
@@ -72,3 +71,8 @@ Li table historic de visible grinds es almacenat quam un array zero-based de und
 ## Stage 15 — Patch 07
 
 `LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED` e `legacyGrindRow` resta intact quam scar historic. `GRIND_TABLE_WITH_SENTINEL` adjunte un slot permanent a index 0 e conserva li undec rows real in indices 1..11. `grindRowWithSentinel` usa ancora li ordinal one-based directmen quam index, e `Patch07GrindSentinelWrapper` conserva li output legacy e li reparat in li sam context. Li regression de Discovery 07 es nu verd sin deleter li sentinel.
+
+
+## Stage 16 — Discovery 08
+
+`oldPermutationUnrank0(rank0)` es congelat quam li helper historic de unranking por rank0 0..719. Li caller de Discovery 08 deriva `oneBased = regularMod(drop-1,720)+1` e passa ti ordinal directmen al helper, ergo rank 1 deven li duesim permutation in vice del prim, e talmen por omni valore acceptat. Li conversion `legacyRank0 = oneBased-1` apartene exclusivmen a Patch 08 in Stage 17.

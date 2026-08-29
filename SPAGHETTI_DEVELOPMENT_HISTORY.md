@@ -310,3 +310,26 @@ Un `Patch07GrindSentinelWrapper` ha esset insertet pos `Discovery07GrindIndexHan
 ### Scar conservat
 
 `legacyGrindRow(1)` continua rendre li duesim row e `legacyGrindRow(11)` continua rendre `undefined`. Li sentinel ne es removet pos lookup e ne es tratat quam un grind real. Null `oldPermutationUnrank0` o code de Patch 08 o posterior es present.
+
+
+## Stage 16 — DISCOVERY 08
+
+### Quo on pensat
+
+Li ottesim design historic ja possede un helper de permutation quel parla in ranks zero-based. Li caller de bowls, tamen, parla in un ordinal one-based derivat ex li drop per `regularMod(drop-1,720)+1`. On assumet que li du numerationes esset intercambiabil e passat li ordinal directmen al helper.
+
+### Quo esset decovrit
+
+`oldPermutationUnrank0(0)` rende li prim permutation e `oldPermutationUnrank0(719)` li ultim. Passar `oneBased=1` quam rank0 rende dunc li duesim permutation, ne li prim; li displacement continua til `oneBased=719`, e `oneBased=720` es extra li contract 0..719. Li defect es in li caller, ne in li unranking zero-based self.
+
+### Quo esset circumit
+
+Null circumventione existe in ti stage. Li caller continua passar `oneBased` directmen a `oldPermutationUnrank0`. Li bridge mandat `legacyRank0 = oneBased-1` ne existe e apartene exclusivmen a PATCH 08 in Stage 17.
+
+### Crescentie monster in ti stage
+
+Un `LegacyPermutationOrderAdapter` e un `Discovery08PermutationRankHandler` ha esset addit. Li context conserva li drop, li ordinal one-based, li valore exact passat quam rank0 e li order legacy. `BaseMonsterManager` expone un route separat con context fresc e metric non-semantic.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+`oldPermutationUnrank0` implementa exactmen su contract 0..719; li adapter ne reordina ni muta li resultate. Li unic assumption fals nov es li confusion mandat inter ordinal 1..720 e rank0 0..719. Li sentinel permanent de Patch 07 resta intact. Null pours, aliases de bowls o code de Patch 09 es present.

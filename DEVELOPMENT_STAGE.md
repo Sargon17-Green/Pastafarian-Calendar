@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=15
-CURRENT_KIND=PATCH
-CURRENT_PATCH=07
-LAST_COMPLETED_STAGE=15
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=16
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=08
+LAST_COMPLETED_STAGE=16
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, li table zero-based de Discovery 07, e Patch07GrindSentinelWrapper quel conserva li caller one-based per un sentinel permanent a index 0 e li undec rows real a indices 1..11.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus oldPermutationUnrank0, LegacyPermutationOrderAdapter e Discovery08PermutationRankHandler quel passa li ordinal one-based 1..720 directmen quam rank0 zero-based.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 15 es finit quam **PATCH 07**. `legacyGrindRow(grind)` resta sin modification e continua usar li ordinal 1..11 directmen contra li table zero-based, incluente `undefined` por grind 11. Li nov `GRIND_TABLE_WITH_SENTINEL` conserva un sentinel in index 0 e li undec rows real exactmen in indices 1..11.
+Stage 16 es finit quam **DISCOVERY 08**. `oldPermutationUnrank0(rank0)` es un helper legacy correct solmen por su contract zero-based `0..719`. Li caller historic calcula `oneBased = regularMod(drop-1,720)+1` e passa ti valore `1..720` directmen al helper quam si it esset rank0.
 
-`grindRowWithSentinel(grind)` conserva li convention one-based del caller e lee directmen ti table reparat. Li route historic passa per `Discovery07GrindIndexHandler` e poy `Patch07GrindSentinelWrapper`; li context conserva li output legacy, li index semantic/fisic, li sentinel e li output reparat. Li regression de Stage 14 es verd. Null `oldPermutationUnrank0` o code de Patch 08 o posterior es present.
+Li defect es conectet a un path real de production tra `LegacyPermutationOrderAdapter` e `Discovery08PermutationRankHandler`. Por drops con `oneBased` de 1 til 719, li resultate es desplazzat un permutation avan; `oneBased=720` es extra li contract fisic del helper. Li regression nov es intentionalmen rubi. Null `legacyRank0=oneBased-1`, null wrapper de Patch 08 e null `bowlAlias` o code posterior es present.

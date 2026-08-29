@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 07 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 08 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,7 @@ group('null textu hebreic o code posterior a Patch 07 contamina production', () 
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'patchedCounts', 'oldPermutationUnrank0',
+    'patchedCounts', 'legacyRank0', 'Patch08PermutationWrapper', 'bowlOrderWithRankBridge',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
@@ -1031,7 +1031,25 @@ group('Patch 07 conserva li legacy indexing e adjunte un sentinel permanent por 
   eq(routed.context.metrics['patch07.grindSentinel.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 07', () => {
+group('Discovery 08 conserva oldPermutationUnrank0 zero-based e passa li ordinal one-based directmen quam rank0', () => {
+  deepEq(production.oldPermutationUnrank0(0n), [1, 2, 3, 4, 5, 6]);
+  deepEq(production.oldPermutationUnrank0(1n), [1, 2, 3, 4, 6, 5]);
+  deepEq(production.oldPermutationUnrank0(719n), [6, 5, 4, 3, 2, 1]);
+  throws(() => production.oldPermutationUnrank0(-1n), RangeError);
+  throws(() => production.oldPermutationUnrank0(720n), RangeError);
+  deepEq(production.legacyBowlOrderFromDrop(1n), [1, 2, 3, 4, 6, 5]);
+  const routed = production.discovery08LegacyBowlOrderThroughMonsterPath(1n, 1n, 1n);
+  eq(routed.context.currentHandler, 'Discovery08PermutationRankHandler');
+  eq(routed.context.phase, 'DISCOVERY_08_LEGACY_PERMUTATION_RANK');
+  eq(routed.context.status, 'DISCOVERY_08_LEGACY_RESULT');
+  eq(routed.context.legacyPermutationDrop, 1n);
+  eq(routed.context.legacyPermutationOneBased, 1n);
+  eq(routed.context.legacyPermutationRankPassedToUnrank0, 1n);
+  deepEq(routed.result, [1, 2, 3, 4, 6, 5]);
+  eq(routed.context.metrics['discovery08.legacyPermutationRank.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 08', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1043,4 +1061,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in li statu GREEN de Patch 07.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression intentional de Discovery 08.');
