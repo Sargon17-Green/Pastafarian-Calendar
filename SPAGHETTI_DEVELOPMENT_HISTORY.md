@@ -2175,3 +2175,20 @@ Production içinde `countMonthOccurrencesThroughTarget`, `MonthDayOccurrencePatc
 Patch 26 opening-gate interval correction kodu da henüz yoktur.
 
 Stage 1 future-token guard current oldContiguousMonthDayGuess tokenını artık yasaklamaz.
+
+
+## Aşama 51 — Yama 25: contiguous guess üstüne occurrence-count overwrite
+
+Aşama 50 `oldContiguousMonthDayGuess` raw helper gövdesi byte-for-byte korunur.
+
+`LegacyContiguousMonthDayAdapter.call`, Patch 24 corrected semantic weaving üzerinde önce bu old helper'ı gerçekten çalıştırır ve `legacy_month_day_guessed_day` state'ini bırakır.
+
+`countMonthOccurrencesThroughTarget(weaving,target_position)` target position'daki monthId'yi alır ve weaving başlangıcından target dahil prefix sonuna kadar aynı monthId occurrence sayısını exact hesaplar.
+
+`MonthDayOccurrencePatchWrapper` old wrong guess'i diagnostic state'te tutar ve semantic day-in-month değerini occurrence count ile unconditional overwrite eder.
+
+Bu nedenle contiguous month occurrence durumunda old ve correct sayılar eşit kalabilir; interleaved durumda old mesafe tahmini correct occurrence count ile değiştirilir.
+
+Aşama 50 expected occurrence-count hesabı ve final `actual == expected` assertion'ı korunmuştur. Historical `old > expected` witness assertion'ı final semantic result yerine raw `legacy_month_day_guessed_day` scar'ına yönlendirilmiştir.
+
+Patch 26 opening-gate interval correction kodu henüz yoktur.

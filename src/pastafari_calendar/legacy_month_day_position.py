@@ -65,6 +65,78 @@ def oldContiguousMonthDayGuess(
     )
 
 
+def countMonthOccurrencesThroughTarget(
+    weaving: tuple[int, ...],
+    target_position: int,
+) -> int:
+    _validateWeavingAndTarget(
+        weaving,
+        target_position,
+    )
+
+    month_id = weaving[
+        target_position - 1
+    ]
+
+    return sum(
+        1
+        for seen_month_id in weaving[
+            :target_position
+        ]
+        if seen_month_id == month_id
+    )
+
+
+class MonthDayOccurrencePatchWrapper:
+    def repair(
+        self,
+        ctx,
+        weaving: tuple[int, ...],
+        target_position: int,
+        wrong_guess: int,
+    ) -> int:
+        correct_day_in_month = countMonthOccurrencesThroughTarget(
+            weaving,
+            target_position,
+        )
+
+        ctx.branch_trace.append(
+            (
+                "YAMA_25_AY_OCCURRENCE_SAYIMI",
+                target_position,
+                weaving[
+                    target_position - 1
+                ],
+                wrong_guess,
+                correct_day_in_month,
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-25-ay-occurrence-sayımı",
+                target_position,
+                weaving[
+                    target_position - 1
+                ],
+                wrong_guess,
+                correct_day_in_month,
+            )
+        )
+
+        ctx.patch25_wrong_guess = wrong_guess
+        ctx.patch25_correct_day_in_month = correct_day_in_month
+        ctx.patch25_overwrite_needed = (
+            wrong_guess
+            != correct_day_in_month
+        )
+        ctx.patch25_semantic_day_in_month = correct_day_in_month
+        ctx.patch25_applied = True
+
+        ctx.legacy_month_day_semantic_day = correct_day_in_month
+
+        return correct_day_in_month
+
+
 class LegacyContiguousMonthDayAdapter:
     def call(
         self,
@@ -122,4 +194,9 @@ class LegacyContiguousMonthDayAdapter:
         ctx.legacy_month_day_semantic_day = guessed_day
         ctx.legacy_month_day_calls += 1
 
-        return guessed_day
+        return MonthDayOccurrencePatchWrapper().repair(
+            ctx,
+            normalized,
+            target_position,
+            guessed_day,
+        )

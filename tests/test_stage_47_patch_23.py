@@ -445,7 +445,7 @@ class Stage47Patch23Tests(unittest.TestCase):
                 ),
             )
 
-    def test_patch25_discovery_legacy_contiguous_guess_is_present_but_correction_is_absent(self):
+    def test_patch25_legacy_and_occurrence_correction_are_present_but_patch26_is_absent(self):
         production = (
             ROOT
             / "src"
@@ -467,6 +467,9 @@ class Stage47Patch23Tests(unittest.TestCase):
             "class MonthWeavingPatchWrapper:",
             "patch24_applied",
             "def oldContiguousMonthDayGuess(",
+            "def countMonthOccurrencesThroughTarget(",
+            "class MonthDayOccurrencePatchWrapper:",
+            "patch25_applied",
         )
 
         for token in required:
@@ -476,9 +479,8 @@ class Stage47Patch23Tests(unittest.TestCase):
             )
 
         forbidden = (
-            "countMonthOccurrencesThroughTarget",
-            "MonthDayOccurrencePatchWrapper",
-            "patch25_applied",
+            "OpeningGateIntervalPatchWrapper",
+            "patch26_applied",
         )
 
         for token in forbidden:

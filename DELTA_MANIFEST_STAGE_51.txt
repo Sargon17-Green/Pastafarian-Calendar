@@ -1,0 +1,31 @@
+Aşama 51/55 — PATCH 25
+
+Bu paket yalnızca Aşama 51 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_month_day_position.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_47_patch_23.py
+tests/test_stage_50_discovery_25.py
+tests/test_stage_51_patch_25.py
+artifacts/stage-51/BASELINE_STAGE_50_EXPECTED_RED.txt
+artifacts/stage-51/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-51/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_51.txt
+
+Silinen dosya yoktur.
+Başlangıç yüklenen Aşama 50 baseline: EXPECTED_RED, 339 test / 3 expected failure
+Patch sonrası Aşama 1–50 regressions: 339/339 PASS
+Aşama 51 full suite: GREEN, 348/348
+oldContiguousMonthDayGuess: BYTE-FOR-BYTE KORUNDU VE ÖNCE ÇALIŞIR
+Correct day-in-month: TARGET DAHİL OCCURRENCE COUNT
+Semantic overwrite: UNCONDITIONAL CORRECT COUNT
+Stage50 expected calculation: KORUNDU
+Stage50 final equality assertion: KORUNDU
+Patch24/Patch23/Patch22 source: DEĞİŞMEDİ
+Patch26 code: YOK

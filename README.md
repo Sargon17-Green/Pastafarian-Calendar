@@ -1,22 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin ellinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin elli birinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 50/55, `DISCOVERY 25` durumundadır.
+Aşama 51/55, `PATCH 25` durumundadır.
 
-Yeni `oldContiguousMonthDayGuess`, target month'un ilk occurrence position'ı ile target position arasındaki mesafeyi day-in-month sanır.
+Aşama 50 `oldContiguousMonthDayGuess` helper'ı aynen kalır ve önce gerçekten çalışır.
 
-Bu historical hesap month occurrence'larının contiguous olduğunu varsayar.
+Yeni `countMonthOccurrencesThroughTarget`, target dahil year-prefix içinde target monthId occurrence sayısını exact hesaplar.
 
-Patch 24 legal semantic weaving interleaved olabildiği için aradaki başka monthId positions yanlışlıkla aynı ayın günleri sayılır.
+`MonthDayOccurrencePatchWrapper` old guessed value'yu diagnostic scar olarak bırakır ve current semantic day-in-month değerini occurrence count ile overwrite eder.
 
-`LegacyContiguousMonthDayAdapter` bu old helper'ı real calendar path üzerinde corrected weaving'den sonra gerçekten çalıştırır ve guessed value'yu current semantic day-in-month state yapar.
+Contiguous month occurrence durumunda old ve correct değer aynı olabilir; interleaved durumda old mesafe tahmini düzeltilir.
 
-Üç normatif witness occurrence count ile karşılaştırıldığında tam üç expected divergence üretir.
+Aşama 50 expected hesabı ve final semantic equality assertion'ı korunarak üç normatif witness yeşile dönmüştür.
 
-Henüz occurrence-count correction veya Patch 26 kodu yoktur.
+Patch 26 opening-gate interval kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -32,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam ellinci aşama paketi:
+Tam elli birinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki 331 test geçer. Yeni Discovery 25 non-normative kontrolleri geçer; yalnız `test_current_contiguous_month_day_guess_diverges_from_occurrence_count` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.
+Beklenen sonuç: 348 testin tamamı geçer ve depo durumu `GREEN` olur. Aşama 50'de kırmızı olan üç contiguous-month-day witness occurrence-count overwrite ile yeşile dönmelidir.

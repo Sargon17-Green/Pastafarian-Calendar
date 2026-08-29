@@ -119,7 +119,15 @@ class Stage50Discovery25Tests(unittest.TestCase):
             4,
         )
         self.assertEqual(
+            ctx.patch25_wrong_guess,
+            ctx.legacy_month_day_guessed_day,
+        )
+        self.assertEqual(
             ctx.legacy_month_day_semantic_day,
+            actual,
+        )
+        self.assertEqual(
+            ctx.patch25_semantic_day_in_month,
             actual,
         )
 
@@ -158,8 +166,12 @@ class Stage50Discovery25Tests(unittest.TestCase):
             4,
         )
         self.assertEqual(
-            ctx.legacy_month_day_semantic_day,
+            ctx.patch25_wrong_guess,
             ctx.legacy_month_day_guessed_day,
+        )
+        self.assertEqual(
+            ctx.legacy_month_day_semantic_day,
+            ctx.patch25_correct_day_in_month,
         )
 
     def test_month_day_state_is_invocation_local(self):
@@ -199,7 +211,7 @@ class Stage50Discovery25Tests(unittest.TestCase):
             second.legacy_month_day_guessed_day,
         )
 
-    def test_patch25_occurrence_count_correction_is_not_present_in_production(self):
+    def test_patch25_occurrence_count_correction_is_present_and_old_guess_remains(self):
         production = (
             ROOT
             / "src"
@@ -209,15 +221,16 @@ class Stage50Discovery25Tests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        forbidden = (
-            "countMonthOccurrencesThroughTarget",
-            "MonthDayOccurrencePatchWrapper",
+        required = (
+            "def oldContiguousMonthDayGuess(",
+            "def countMonthOccurrencesThroughTarget(",
+            "class MonthDayOccurrencePatchWrapper:",
             "correct_day_in_month",
             "patch25_applied",
         )
 
-        for token in forbidden:
-            self.assertNotIn(
+        for token in required:
+            self.assertIn(
                 token,
                 production,
             )
@@ -338,9 +351,9 @@ class Stage50Discovery25Tests(unittest.TestCase):
                 )
 
                 self.assertGreater(
-                    actual,
+                    ctx.legacy_month_day_guessed_day,
                     expected,
-                    msg="Discovery 25 witness old contiguous guess'ın interleaved month occurrence aralarını day-in-month sanmasını göstermelidir",
+                    msg="Discovery 25 witness old contiguous guess scar'ının interleaved month occurrence aralarını day-in-month sanmasını göstermelidir",
                 )
                 self.assertEqual(
                     actual,

@@ -362,6 +362,11 @@ class MonsterContext:
     legacy_month_day_guessed_day: int | None = None
     legacy_month_day_semantic_day: int | None = None
     legacy_month_day_calls: int = 0
+    patch25_wrong_guess: int | None = None
+    patch25_correct_day_in_month: int | None = None
+    patch25_overwrite_needed: bool = False
+    patch25_semantic_day_in_month: int | None = None
+    patch25_applied: bool = False
 
 
 class BaseMetrics:
