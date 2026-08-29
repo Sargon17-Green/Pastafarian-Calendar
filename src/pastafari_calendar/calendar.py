@@ -677,7 +677,36 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.monthLengthMaterialization.probes",
         )
         local_ctx.status = "ESKİ_AY_UZUNLUĞU_TÜM_YOLLAR_LISTESİ_HAZIR"
-        local_ctx.phase = "AŞAMA_47_BEKLEME"
+        local_ctx.phase = "ESKİ_GÜN_GÜN_AY_SEÇİMİ"
+
+    def legacy_month_weaving_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Keşif 24 witness'i bilinçli olarak küçüktür:
+        # üç ayın her biri dört gün sürer.
+        # Bu, old day-by-day chooser'ın first/last weaving sırasını bozmasını
+        # OOM veya dev state olmadan doğrudan görünür kılar.
+        manager.legacy_month_weaving.call(
+            local_ctx,
+            (
+                4,
+                4,
+                4,
+            ),
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.monthWeavingDayByDay.probes",
+        )
+        local_ctx.status = "ESKİ_GÜN_GÜN_AY_SEÇİMİ_HAZIR"
+        local_ctx.phase = "AŞAMA_48_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -703,6 +732,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_GATE_FİLTRESİZ_KÖFTE_BÖLÜMÜ", legacy_cutlet_partition_handler)
     manager.dispatcher.register("ESKİ_TEKRARLI_KÖFTE_ADLARI", legacy_repeated_cutlet_names_handler)
     manager.dispatcher.register("ESKİ_AY_UZUNLUĞU_TÜM_YOLLAR_LISTESİ", legacy_month_length_materialization_handler)
+    manager.dispatcher.register("ESKİ_GÜN_GÜN_AY_SEÇİMİ", legacy_month_weaving_handler)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -723,6 +753,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
+    manager.dispatcher.dispatch(ctx)
+
     manager.dispatcher.dispatch(ctx)
 
     manager.dispatcher.dispatch(ctx)

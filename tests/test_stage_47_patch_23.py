@@ -445,7 +445,7 @@ class Stage47Patch23Tests(unittest.TestCase):
                 ),
             )
 
-    def test_patch24_month_weaving_logic_is_not_present(self):
+    def test_patch24_discovery_legacy_weaving_is_present_but_correction_is_absent(self):
         production = (
             ROOT
             / "src"
@@ -461,8 +461,12 @@ class Stage47Patch23Tests(unittest.TestCase):
             )
         )
 
+        self.assertIn(
+            "def legacyChooseEachDaySeparately(",
+            text,
+        )
+
         forbidden = (
-            "legacyChooseEachDaySeparately",
             "DPUnrankLegalWeaving",
             "patch24_applied",
             "MonthWeavingPatchWrapper",

@@ -2030,3 +2030,57 @@ Aşama 46 normatif huge-family regression gövdesi değiştirilmeden yeşile dö
 Aşama 1 future-token guard yalnız artık current Patch 23 olan `VirtualLegacyList` tokenını yasak listesinden çıkarmak üzere minimal güncellenmiştir; Patch 24 ve Patch 25 tokenları hâlâ yasaktır.
 
 Patch 24 month weaving ghost/DP detour kodu henüz yoktur.
+
+
+## Aşama 48 — Keşif 24: ayı her gün ayrı seçen legacy weaving
+
+### Historical helper
+
+`legacyChooseEachDaySeparately(lengths, answer_stream)` her day position için answer ring'in o konumundaki cevabını month count moduna indirger.
+
+Seçilen ayın remaining kapasitesi sıfırsa `wrapMonth` ile circular olarak sıradaki dolmamış aya geçer.
+
+Bu nedenle helper her zaman:
+
+```text
+toplam gün sayısını korur
+her monthId için exact multiplicity'yi korur
+```
+
+fakat bir bütün legal weaving family'den rank seçmez.
+
+Özellikle ayların first occurrence sırasını ve last occurrence sırasını enforce etmez.
+
+### Real production yolu
+
+Aşama 20 semantic structure sauce bowls/drop-46 state'inden bowl 4 / seal 32 answer ring kurulur.
+
+Aşama 47 month-length materialization aşamasından sonra real calendar state-machine `(4,4,4)` witness'ını `LegacyMonthWeavingAdapter` üzerinden gerçekten çalıştırır.
+
+Adapter old ghost'u hem diagnostic hem current semantic weaving olarak kaydeder.
+
+### Normatif divergence
+
+Üç independent structure-sauce witness aynı `(4,4,4)` lengths ile kullanılır.
+
+Her üç old ghost ilk pozisyonda month 1 yerine başka bir monthId ile başlar; dolayısıyla legal first-occurrence order'ı gerçekten bozar.
+
+Test-only expected aynı bowl 4 / seal 32 stream üzerinde:
+
+```text
+family = MonthWeavingFamily(lengths)
+rank = choose_rank(stream, family.count())
+expected = family.unrank1(rank)
+```
+
+olarak hesaplanır.
+
+Üç witness yalnız day-by-day local chooser bir whole-weaving rank seçmediği için kırmızıdır.
+
+### Bilinçli sınır
+
+Production içinde `wantedRank`, `DPUnrankLegalWeaving`, `MonthWeavingPatchWrapper` veya `patch24_applied` yoktur.
+
+Patch 25 `oldContiguousMonthDayGuess` da henüz yoktur.
+
+Stage 1 future-token guard'dan yalnız current Discovery 24 helper adı çıkarılmıştır; Patch 25 tokenı yasak kalır.

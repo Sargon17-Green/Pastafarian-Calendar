@@ -1,33 +1,24 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 47/55, `PATCH 23` durumundadır.
+Aşama 48/55, `DISCOVERY 24` durumundadır.
 
-Aşama 46 concrete `LegacyAllMonthLengthWaysAPI.list_all_ways` scar'ı aynen kalır ve semantic adapter içinde önce gerçekten çalışır.
+Yeni `legacyChooseEachDaySeparately`, bowl 4 / seal 32 answer ring'i kullanarak her günü ayrı ayrı bir monthId'ye yollar.
 
-Huge family'de old backend safe cap nedeniyle blocked diagnostic state bırakır.
+Dolu ay seçilirse `wrapMonth` ile circular olarak kalan kapasitesi olan sonraki aya geçer.
 
-Yeni `VirtualLegacyList`, aynı “bütün yollar” family için:
+Böylece exact month multiplicities korunur; fakat whole legal weaving family'nin first/last occurrence sırası uygulanmaz.
 
-```text
-count() = exact DP count
-itemAt1(rank1) = exact lexicographic unrank
-```
+`LegacyMonthWeavingAdapter` old ghost'u doğrudan current semantic weaving olarak kullanır.
 
-sağlar.
+Real calendar path Aşama 47'den sonra `(4,4,4)` witness'ını gerçekten çalıştırır.
 
-Bütün family hiçbir zaman materialize edilmez.
+Üç normatif witness'ın üçünde ghost legal first-occurrence sırasını bozar ve test-only `MonthWeavingFamily` rank sonucundan ayrışır.
 
-Semantic `LegacyMaterializationAttempt` huge family'yi `blocked=False` olarak expose eder; `exposed_count` exact virtual count, `itemAt1` virtual unrank sonucudur.
-
-Small family'de old concrete scar da oluşur, fakat semantic backend yine virtual'dır ve sıra birebir aynıdır.
-
-Aşama 46 normatif huge-family regression gövdesi değiştirilmeden yeşile dönmüştür.
-
-Patch 24 month weaving kodu henüz yoktur.
+Henüz wanted rank, legal-weaving DP unrank veya Patch 25 kodu yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -43,10 +34,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırk yedinci aşama paketi:
+Tam kırk sekizinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: 313 testin tamamı geçer ve depo durumu `GREEN` olur. Aşama 46'da kırmızı olan üç huge-family witness aynı normatif regression gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki 313 test geçer. Yeni Discovery 24 non-normative kontrolleri geçer; yalnız `test_current_day_by_day_month_choice_diverges_from_legal_weaving_rank` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.

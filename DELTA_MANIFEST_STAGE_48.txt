@@ -1,0 +1,32 @@
+Aşama 48/55 — DISCOVERY 24
+
+Bu paket yalnızca Aşama 48 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_month_weaving.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_47_patch_23.py
+tests/test_stage_48_discovery_24.py
+artifacts/stage-48/BASELINE_STAGE_47_GREEN.txt
+artifacts/stage-48/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-48/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_48.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 47 baseline: GREEN, 313/313
+Aşama 1–47 patch sonrası regressions: 313/313 PASS
+Aşama 48 full suite: 321 test, tam 3 expected subTest failure
+Beklenen depo durumu: EXPECTED_RED
+Legacy helper: legacyChooseEachDaySeparately
+Answer source: Aşama 20 semantic sauce, bowl 4, seal 32
+Multiplicity: EXACT KORUNUR
+First/last weaving order: LEGACY TARAFINDAN ENFORCE EDİLMEZ
+Ghost: CURRENT SEMANTIC RESULT
+Patch 24 wantedRank/DP unrank: YOK
+Patch 25 oldContiguousMonthDayGuess: YOK

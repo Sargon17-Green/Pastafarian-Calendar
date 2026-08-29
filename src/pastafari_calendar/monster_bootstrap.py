@@ -25,6 +25,7 @@ from .legacy_structure_sauce import LegacyStructureSauceAdapter
 from .legacy_cutlet_partition import LegacyCutletPartitionAdapter
 from .legacy_repeated_names import LegacyRepeatedNameGenerator
 from .legacy_month_length_materialization import LegacyMonthLengthMaterializationAdapter
+from .legacy_month_weaving import LegacyMonthWeavingAdapter
 
 
 class MonsterError(RuntimeError):
@@ -340,6 +341,12 @@ class MonsterContext:
     patch23_exact_count: int | None = None
     patch23_semantic_blocked: bool = False
     patch23_applied: bool = False
+    legacy_month_weaving_lengths: tuple[int, ...] | None = None
+    legacy_month_weaving_answer_first: int | None = None
+    legacy_month_weaving_answer_direction_step: int | None = None
+    legacy_month_weaving_ghost: tuple[int, ...] | None = None
+    legacy_month_weaving_semantic: tuple[int, ...] | None = None
+    legacy_month_weaving_calls: int = 0
 
 
 class BaseMetrics:
@@ -414,3 +421,4 @@ class MonsterManager:
         self.legacy_cutlet_partition = LegacyCutletPartitionAdapter()
         self.legacy_repeated_names = LegacyRepeatedNameGenerator()
         self.legacy_month_length_materialization = LegacyMonthLengthMaterializationAdapter()
+        self.legacy_month_weaving = LegacyMonthWeavingAdapter()
