@@ -12,7 +12,9 @@ from pastafari_calendar.calendar import calendar_date_spaghetti
 from pastafari_calendar.legacy_hidden import LegacyHiddenDropAdapter
 from pastafari_calendar.legacy_stones import LegacyStoneBuilderAdapter
 from pastafari_calendar.legacy_visible_grinds import (
+    GRIND_TABLE_WITH_SENTINEL,
     LEGACY_VISIBLE_GRIND_TABLE,
+    SENTINEL_GRIND_ROW,
     LegacyVisibleDropBuilderAdapter,
     legacyGrindRow,
 )
@@ -74,7 +76,7 @@ class Stage14Discovery07Tests(unittest.TestCase):
                 1,
             )
 
-    def test_legacy_table_has_no_sentinel_and_indexing_skips_first_real_row(self):
+    def test_legacy_zero_based_table_remains_and_patch_table_adds_permanent_sentinel(self):
         self.assertEqual(
             len(LEGACY_VISIBLE_GRIND_TABLE),
             11,
@@ -83,19 +85,25 @@ class Stage14Discovery07Tests(unittest.TestCase):
             LEGACY_VISIBLE_GRIND_TABLE[0],
             VISIBLE_GRINDS[0],
         )
+
         self.assertEqual(
-            legacyGrindRow(
-                LEGACY_VISIBLE_GRIND_TABLE,
-                1,
-            ),
-            VISIBLE_GRINDS[1],
+            len(GRIND_TABLE_WITH_SENTINEL),
+            12,
+        )
+        self.assertEqual(
+            GRIND_TABLE_WITH_SENTINEL[0],
+            SENTINEL_GRIND_ROW,
         )
 
-        with self.assertRaises(IndexError):
-            legacyGrindRow(
-                LEGACY_VISIBLE_GRIND_TABLE,
-                11,
-            )
+        for grind in range(1, 12):
+            with self.subTest(grind=grind):
+                self.assertEqual(
+                    legacyGrindRow(
+                        GRIND_TABLE_WITH_SENTINEL,
+                        grind,
+                    ),
+                    VISIBLE_GRINDS[grind - 1],
+                )
 
     def test_legacy_visible_drop_state_is_owned_by_one_invocation(self):
         first = _ready_context(
@@ -117,13 +125,22 @@ class Stage14Discovery07Tests(unittest.TestCase):
             first.legacy_visible_drop_count,
             46,
         )
-        self.assertEqual(
+        self.assertIsNone(
             first.legacy_grind_missing_index,
-            11,
         )
         self.assertEqual(
             first.legacy_grind_rows_applied,
-            10,
+            11,
+        )
+        self.assertTrue(
+            first.patch07_sentinel_present,
+        )
+        self.assertEqual(
+            first.patch07_table_length,
+            12,
+        )
+        self.assertTrue(
+            first.patch07_applied,
         )
 
         self.assertIsNone(
@@ -139,6 +156,16 @@ class Stage14Discovery07Tests(unittest.TestCase):
         self.assertEqual(
             second.legacy_grind_rows_applied,
             0,
+        )
+        self.assertFalse(
+            second.patch07_sentinel_present,
+        )
+        self.assertEqual(
+            second.patch07_table_length,
+            0,
+        )
+        self.assertFalse(
+            second.patch07_applied,
         )
 
     def test_current_grind_table_path_diverges_from_normative_visible_drops(self):

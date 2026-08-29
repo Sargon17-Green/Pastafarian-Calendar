@@ -580,3 +580,74 @@ Aşama 12'nin normatif history regresyonuna dokunulmadı.
 Invocation bağlamında görünür damla tablosu, damla sayısı, son eksik legacy grind indeksi ve uygulanmış grind satırı sayısı tutulur.
 
 Bu aşamada sentinel row yoktur. Gerçek 11 grind satırı 1..11 slotlarına taşınmamıştır ve Patch 07 henüz eklenmemiştir.
+
+
+## Aşama 15 — Yama 07: 1-based grind indexing için kalıcı sentinel row
+
+### Ne aşıldı
+
+Legacy indexing değiştirilmedi:
+
+```text
+legacyGrindRow(table, grind)
+    -> table[grind]
+```
+
+Bunun yerine tablo fiziksel olarak yeniden katmanlandı.
+
+Tarihsel zero-based tablo da scar olarak kodda kalır:
+
+```text
+LEGACY_VISIBLE_GRIND_TABLE
+    -> 11 gerçek row, index 0..10
+```
+
+Patch tablosu:
+
+```text
+index 0    -> SENTINEL_GRIND_ROW
+index 1..11 -> 11 gerçek grind row
+```
+
+olarak kurulur.
+
+### Sentinel neden var
+
+Legacy loop grind numaralarını `1..11` üretir.
+
+`table[grind]` davranışını değiştirmeden doğru row'a ulaşmanın tarihsel detour'u, index 0'a kullanılmayan bir sentinel yerleştirmektir.
+
+Böylece:
+
+```text
+grind 1  -> gerçek row 1
+grind 2  -> gerçek row 2
+...
+grind 11 -> gerçek row 11
+```
+
+olur.
+
+Sentinel normal grind loop'unda okunmaz; yalnızca fiziksel hizalama scar'ıdır.
+
+### Ne korundu
+
+Aşama 14'ün normatif visible-drop regresyonunun gövdesi byte-for-byte değiştirilmedi ve yalnızca sentinel hizalaması sayesinde yeşile döndü.
+
+`legacyGrindRow` fonksiyonunun `table[grind]` davranışı değiştirilmedi.
+
+Eski 11-row zero-based `LEGACY_VISIBLE_GRIND_TABLE` fiziksel olarak kodda tutulur.
+
+IndexError recovery scar da kaldırılmadı; sentinel table ile normal `1..11` yolunda artık tetiklenmez.
+
+Müfredat gereği sentinel ileride de silinmemelidir.
+
+### Bu aşamada eklenen canavar katmanı
+
+`SENTINEL_GRIND_ROW` ve `GRIND_TABLE_WITH_SENTINEL`, eski tablonun üstünde yeni fiziksel katmandır.
+
+Invocation bağlamı sentinel tablosunun kullanıldığını, tablo uzunluğunu ve patch uygulanma durumunu tutar.
+
+Görünür drop builder'ın 46 satırının tamamı test-only normatif visible-drop builder ile aynı sonucu verir.
+
+Permutation rank kusuru veya Patch 08 henüz eklenmemiştir.

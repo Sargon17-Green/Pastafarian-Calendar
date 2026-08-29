@@ -1,27 +1,32 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on dördüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 14/55, `DISCOVERY 07` durumundadır. Yedinci tarihsel kusur gerçek visible-drop zincirine eklenmiştir.
+Aşama 15/55, `PATCH 07` durumundadır.
 
-11 gerçek grind satırı sentinel olmadan `index 0..10` tabloda tutulur. Legacy indexing ise 1-based grind numarasını doğrudan tablo indeksi olarak kullanır:
+Legacy grind indexing aynen korunur:
 
 ```text
 legacyGrindRow(table, grind)
     -> table[grind]
 ```
 
-Bu nedenle `grind=1` gerçek satır 2'yi okur, gerçek satır 1 atlanır ve `grind=11` index dışına çıkar. Recovery scar son hatayı kaydeder ve o ana kadar oluşmuş yanlış `x` değerini bırakır; bu bir düzeltme değildir.
+Düzeltme tablo hizasındadır. `LEGACY_VISIBLE_GRIND_TABLE` 11 gerçek satırı eski zero-based 0..10 biçimiyle fiziksel scar olarak tutmaya devam eder.
 
-`LegacyVisibleDropBuilderAdapter`, 46 görünür damlayı önceki exact count/stone/hidden/history katmanlarının üstünde gerçek production state-machine yoluna bağlar.
+Üstünde kalıcı patch tablosu vardır:
 
-Yeni normatif regresyon görünür damla 1, 2 ve 46 değerlerini test-only normatif visible-drop builder ile karşılaştırır ve bilinçli olarak kırmızıdır.
+```text
+GRIND_TABLE_WITH_SENTINEL[0] = SENTINEL_GRIND_ROW
+GRIND_TABLE_WITH_SENTINEL[1..11] = gerçek grind row 1..11
+```
 
-Henüz `PATCH 07` yoktur: index 0 sentinel row eklenmemiştir ve gerçek 11 grind satırı 1..11 slotlarına kaydırılmamıştır.
+Görünür drop builder bu sentinel tablosunu kullanır. Normal `grind=1..11` loop sentinel row'u okumaz; sentinel yalnızca 1-based legacy indexing'i fiziksel olarak hizalar.
 
-Önceki Aşama 1–13 regresyonlarının tamamı yeşildir. Gelecekteki 08–26 kusur ve yamaları üretime eklenmemiştir.
+Aşama 14'ün normatif visible-drop regresyonu değiştirilmeden yeşile dönmüştür. 46 görünür damlanın tamamı test-only normatif builder ile eşleşir.
+
+Sentinel gelecekte silinmemelidir. Gelecekteki 08–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -37,10 +42,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam on dördüncü aşama paketi:
+Tam on beşinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–13 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni grind-table normatif regresyonunun görünür damla `i=1`, `i=2` ve `i=46` alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 14'te kırmızı olan görünür damla `i=1`, `i=2` ve `i=46` alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir; legacy `table[grind]` indexing ve index 0 sentinel fiziksel olarak korunur.

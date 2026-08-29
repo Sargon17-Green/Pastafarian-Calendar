@@ -93,6 +93,9 @@ class MonsterContext:
     legacy_visible_drop_count: int = 0
     legacy_grind_rows_applied: int = 0
     legacy_grind_missing_index: int | None = None
+    patch07_sentinel_present: bool = False
+    patch07_table_length: int = 0
+    patch07_applied: bool = False
 
 
 class BaseMetrics:

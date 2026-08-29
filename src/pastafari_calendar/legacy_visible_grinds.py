@@ -23,6 +23,13 @@ LEGACY_VISIBLE_GRIND_TABLE = (
     (37, 41, 43, 47, WHEAT),
 )
 
+SENTINEL_GRIND_ROW = (0, 0, 0, 0, WHEAT)
+
+GRIND_TABLE_WITH_SENTINEL = (
+    SENTINEL_GRIND_ROW,
+    *LEGACY_VISIBLE_GRIND_TABLE,
+)
+
 
 def legacyGrindRow(
     table: tuple[tuple[int, int, int, int, int], ...],
@@ -49,7 +56,7 @@ def applyLegacyVisibleGrinds(
     while grind <= 11:
         try:
             a, b, c, d, kind = legacyGrindRow(
-                LEGACY_VISIBLE_GRIND_TABLE,
+                GRIND_TABLE_WITH_SENTINEL,
                 grind,
             )
         except IndexError:
@@ -73,6 +80,9 @@ def applyLegacyVisibleGrinds(
 
     ctx.legacy_grind_missing_index = None
     ctx.legacy_grind_rows_applied = 11
+    ctx.patch07_sentinel_present = True
+    ctx.patch07_table_length = len(GRIND_TABLE_WITH_SENTINEL)
+    ctx.patch07_applied = True
     return x
 
 

@@ -1,0 +1,26 @@
+Aşama 15/55 — PATCH 07
+
+Bu paket yalnızca Aşama 15 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_visible_grinds.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_14_discovery_07.py
+tests/test_stage_15_patch_07.py
+artifacts/stage-15/BASELINE_STAGE_14_EXPECTED_RED.txt
+artifacts/stage-15/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_15.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 14 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 14 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+legacyGrindRow table[grind] indexing: KORUNDU
+LEGACY_VISIBLE_GRIND_TABLE zero-based scar: KORUNDU
+index 0 kalıcı sentinel + gerçek row 1..11: EKLENDİ
+PATCH 08 ve 08–26 gelecek kodu: YOK
