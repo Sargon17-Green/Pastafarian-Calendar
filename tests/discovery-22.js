@@ -7,12 +7,14 @@ const normative = require('./normative-reference');
 assert.equal(typeof production.legacyNameRowWithRepeats, 'function');
 assert.equal(typeof production.LegacyRepeatedNameGenerator, 'function');
 assert.equal(typeof production.Discovery22RepeatedNameHandler, 'function');
-assert.equal('RepeatedNamePatchWrapper' in production, false);
-assert.equal('partialPermutationUnrank' in production, false);
+assert.equal(typeof production.RepeatedNamePatchWrapper, 'function');
+assert.equal(typeof production.partialPermutationUnrank, 'function');
 assert.equal('VirtualLegacyList' in production, false);
 
 const legacySource = production.legacyNameRowWithRepeats.toString();
 assert.doesNotMatch(legacySource, /partialPermutation|fallingFactorial|distinct/i);
+const legacyGeneratorSource = production.LegacyRepeatedNameGenerator.prototype.select.toString();
+assert.doesNotMatch(legacyGeneratorSource, /partialPermutation|fallingFactorial|RepeatedNamePatchWrapper/);
 
 const small = production.legacyNameRowWithRepeats(3, 2);
 assert.equal(small.count(), 9n);
@@ -51,7 +53,7 @@ const noWalkExpected = {
   previousYear() { throw new Error('Discovery 22 ne deve caminar retro ex Year 5000 in ti witness.'); }
 };
 
-const routed = production.discovery22LegacyRepeatedNamesThroughMonsterPath(
+const legacyRouted = production.discovery22LegacyRepeatedNamesThroughMonsterPath(
   new production.BaseMonsterManager(),
   calculationDay,
   calculationDay,
@@ -62,23 +64,23 @@ const routed = production.discovery22LegacyRepeatedNamesThroughMonsterPath(
   noWalkExpected
 );
 
-assert.equal(routed.context.status, 'DISCOVERY_22_LEGACY_RESULT');
-assert.equal(routed.context.currentHandler, 'Discovery22RepeatedNameHandler');
-assert.equal(routed.context.previousHandler, 'CutletPartitionPatchWrapper');
-assert.equal(routed.context.phase, 'DISCOVERY_22_LEGACY_REPEATED_CUTLET_NAMES');
-assert.equal(routed.context.patch21SemanticPartition.length, 6);
-assert.equal(routed.result.cutletCount, 6);
-assert.deepEqual(routed.result.masterIndices, [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);
-assert.equal(routed.result.familyCount, 24137569n);
-assert.equal(routed.result.selectedRank, 7563989n);
-assert.deepEqual(routed.result.nameIndices, [6,6,10,10,17,9]);
-assert.equal(routed.result.hasRepeatedCanonicalIndex, true);
-assert.equal(routed.context.legacyRepeatedNameGeneratorExecuted, true);
-assert.equal(routed.context.legacyCutletNameUsedSemanticStructureSauce, true);
-assert.equal(routed.context.metrics['discovery22.repeatedNameGenerator.calls'], 1n);
-assert.equal(routed.context.metrics['discovery22.nameSelection.calls'], 1n);
-assert.equal(routed.context.metrics['discovery22.repeatedCanonicalIndex.calls'], 1n);
-assert.deepEqual(routed.context.branchTrace.slice(-3), [
+assert.equal(legacyRouted.context.status, 'DISCOVERY_22_LEGACY_RESULT');
+assert.equal(legacyRouted.context.currentHandler, 'Discovery22RepeatedNameHandler');
+assert.equal(legacyRouted.context.previousHandler, 'CutletPartitionPatchWrapper');
+assert.equal(legacyRouted.context.phase, 'DISCOVERY_22_LEGACY_REPEATED_CUTLET_NAMES');
+assert.equal(legacyRouted.context.patch21SemanticPartition.length, 6);
+assert.equal(legacyRouted.result.cutletCount, 6);
+assert.deepEqual(legacyRouted.result.masterIndices, [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);
+assert.equal(legacyRouted.result.familyCount, 24137569n);
+assert.equal(legacyRouted.result.selectedRank, 7563989n);
+assert.deepEqual(legacyRouted.result.nameIndices, [6,6,10,10,17,9]);
+assert.equal(legacyRouted.result.hasRepeatedCanonicalIndex, true);
+assert.equal(legacyRouted.context.legacyRepeatedNameGeneratorExecuted, true);
+assert.equal(legacyRouted.context.legacyCutletNameUsedSemanticStructureSauce, true);
+assert.equal(legacyRouted.context.metrics['discovery22.repeatedNameGenerator.calls'], 1n);
+assert.equal(legacyRouted.context.metrics['discovery22.nameSelection.calls'], 1n);
+assert.equal(legacyRouted.context.metrics['discovery22.repeatedCanonicalIndex.calls'], 1n);
+assert.deepEqual(legacyRouted.context.branchTrace.slice(-3), [
   'DISCOVERY_21_ALL_POSITIVE_CUTLET_PARTITION',
   'PATCH_21_FILTERED_INTERNAL_GATE_CUTLET_PARTITION',
   'DISCOVERY_22_LEGACY_REPEATED_CUTLET_NAMES'
@@ -86,13 +88,31 @@ assert.deepEqual(routed.context.branchTrace.slice(-3), [
 
 const yearFirstDay = f + 11n;
 const authoritativeSauce = normative.sauce(calculationDay, yearFirstDay);
-const expected = normative.chooseCutletNames(authoritativeSauce, routed.result.cutletCount);
+const expected = normative.chooseCutletNames(authoritativeSauce, legacyRouted.result.cutletCount);
 assert.deepEqual(expected, [3,11,4,9,12,5]);
 assert.equal(new Set(expected).size, expected.length);
-assert.notDeepEqual(routed.result.nameIndices, expected);
+assert.notDeepEqual(legacyRouted.result.nameIndices, expected);
 
+const routed = production.historicRepeatedNamesThroughMonsterPath(
+  new production.BaseMonsterManager(),
+  calculationDay,
+  calculationDay,
+  -1n,
+  gates,
+  candidatePairs,
+  selectionStream,
+  noWalkExpected
+);
+assert.equal(routed.context.status, 'PATCH_22_RESULT');
+assert.equal(routed.context.previousHandler, 'Discovery22RepeatedNameHandler');
+assert.deepEqual(routed.context.patch22BadNameIndices, legacyRouted.result.nameIndices);
+assert.equal(routed.context.legacyCutletNameHasRepeatedCanonicalIndex, true);
+assert.deepEqual(routed.result.nameIndices, expected);
+assert.equal(new Set(routed.result.nameIndices).size, routed.result.nameIndices.length);
+assert.deepEqual(routed.result.legacyDiagnostic.nameIndices, [6,6,10,10,17,9]);
+assert.equal(routed.result.legacyDiagnostic.hasRepeatedCanonicalIndex, true);
 assert.deepEqual(
   routed.result.nameIndices,
   expected,
-  'DISCOVERY 22 EXPECTED RED: li generator legacy permisse canonicalIndex repetit e ne selecte ex li familie de partial permutations distinct.'
+  'Patch 22 deve retornar li partial permutation distinct durant que li candidate legacy repetit resta diagnostic.'
 );

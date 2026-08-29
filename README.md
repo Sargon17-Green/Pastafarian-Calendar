@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 44 de 55: DISCOVERY 22** e li repository local es intentionalmen `EXPECTED_RED`. Omni regressions til Patch 21 resta verd; li unic divergence nov es li generator legacy de nomes de cutlet, quel permisse repetition de `canonicalIndex`.
+Li linea es in **Stage 45 de 55: PATCH 22** e li repository local es `GREEN`. Li generator repeated de Discovery 22 resta activ quam scar diagnostic, ma li resultate semantic de nomes usa nu un partial permutation distinct.
 
-`legacyNameRowWithRepeats(masterCount,itemCount)` materialisa li familie historic de `masterCount^itemCount` rows lexicografic. `LegacyRepeatedNameGenerator` usa bowl 5 / seal 22 del structure sauce semantic de Patch 20, e `Discovery22RepeatedNameHandler` executa ti generator realmen pos li partition semantic de Patch 21. Null correction de Patch 22 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+`legacyNameRowWithRepeats(masterCount,itemCount)`, `LegacyRepeatedNameGenerator` e `Discovery22RepeatedNameHandler` resta intact. `RepeatedNamePatchWrapper` veni pos ti route legacy, conta li familie distinct per falling factorial, unranka lexicograficmen li partial permutation selectet ex li sam bowl 5 / seal 22 ring, e retorna li candidate legacy solmen si it es ja identic al candidate correct. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -24,19 +24,20 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 21 deve restar verd:
+Omni regressions til Discovery 22 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal de Discovery 22 deve esser intentionalmen red:
+Li verifier e li test focal de Patch 22 deve esser verd:
 
 ```text
-npm run test:discovery-22
+node tests/verify-stage-01.js
+npm run test:patch-22
 ```
 
-Li suite complet deve esser `EXPECTED_RED` exclusivmen in Discovery 22:
+Li suite complet deve esser `GREEN`:
 
 ```text
 npm test
@@ -330,3 +331,26 @@ Con li witness selectet, li cutlet count es 6. Li familie legacy have `17^6 = 24
 ### Limite del stage
 
 Null `RepeatedNamePatchWrapper`, null `partialPermutationUnrank`, null falling-factorial helper production e null `VirtualLegacyList` es includet. Patch 22 deve esser implementat solmen in Stage 45, conservante ti generator legacy quam scar activ.
+
+
+## Stage 45 — PATCH 22
+
+### Scar repeated conservat
+
+`legacyNameRowWithRepeats`, `LegacyRepeatedNameGenerator.select` e `Discovery22RepeatedNameHandler.handle` resta fisicmen e semanticmen li route historic de Discovery 22. Li route reparat executa ti generator ante li detour e conserva su candidate, count `17^K`, rank e repetition flag quam state invocation-local. Li defect old dunque ne es netta ni transformat in un helper mort.
+
+### Familie distinct e unrank lexicografic
+
+`fallingFactorialDistinct(n,k)` calcula exactmen `n*(n-1)*...*(n-k+1)` con `BigInt`. `partialPermutationUnrank(n,k,rank1)` tene un liste ascendent de indices restants; por chascun position it calcula li block-size del suffix per falling factorial e consume blocks in ordre. Talmen su ordre es exactmen li ordre lexicografic del partial permutations de `1..n` sin repetition.
+
+### Detour semantic de Patch 22
+
+`RepeatedNamePatchWrapper` exige un resultate complet de Discovery 22. It ne reexecuta li generator old: `bad` es li array ja materialisat per ti scar. Li wrapper reconstrui li sam answer ring del structure sauce semantic de Patch 20, bowl 5 / seal 22, selecte un rank contra li familie distinct e calcula `correct` per `partialPermutationUnrank`.
+
+Li decision final conserva exactmen li regul mandat: si `bad` e `correct` es identic, li sam object `bad` passa; si ili difere, solmen `correct` deven semantic. Li raw candidate resta sempre diagnostic.
+
+### Witness e limite historic
+
+Li witness de Stage 44 resta observabil: familie old `24137569`, rank `7563989`, `bad=[6,6,10,10,17,9]`. Li detour distinct usa familie `8910720`, rank `1348551` e rende `[3,11,4,9,12,5]`, identic al reference test-only. Un audit exhaustiv de 28 pares `(n,k)` micri e 16064 membres confirma li ordre lexicografic exact del unrank distinct.
+
+Omni regressions, li verifier, li test focal e li suite complet es verd. Null `VirtualLegacyList` de Patch 23, null `legacyChooseEachDaySeparately` de Patch 24 e null `oldContiguousMonthDayGuess` de Patch 25 es present.

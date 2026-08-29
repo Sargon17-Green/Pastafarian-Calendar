@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 22 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 22 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,8 +319,7 @@ group('null textu hebreic o code posterior a Discovery 22 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'RepeatedNamePatchWrapper', 'partialPermutationUnrank', 'VirtualLegacyList',
-    'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
+    'VirtualLegacyList', 'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
@@ -2063,8 +2062,8 @@ group('Discovery 21 resta un scar real e Patch 21 filtra exactmen li familie sem
   ok(typeof production.filteredCutletCompositions === 'function');
   ok(typeof production.legacyNameRowWithRepeats === 'function');
   ok(typeof production.LegacyRepeatedNameGenerator === 'function');
-  ok(!('RepeatedNamePatchWrapper' in production));
-  ok(!('partialPermutationUnrank' in production));
+  ok(typeof production.RepeatedNamePatchWrapper === 'function');
+  ok(typeof production.partialPermutationUnrank === 'function');
 });
 
 group('li generator legacy de Discovery 22 materialisa repetition sin anticipar Patch 22', () => {
@@ -2074,10 +2073,21 @@ group('li generator legacy de Discovery 22 materialisa repetition sin anticipar 
   deepEq(family.unrank1(5n), [2,2]);
   deepEq(family.unrank1(9n), [3,3]);
   ok(typeof production.Discovery22RepeatedNameHandler === 'function');
-  ok(!('RepeatedNamePatchWrapper' in production));
+  ok(typeof production.RepeatedNamePatchWrapper === 'function');
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 22', () => {
+group('Patch 22 conserva li candidate legacy e selecte un partial permutation distinct', () => {
+  eq(production.fallingFactorialDistinct(17, 6), 8910720n);
+  deepEq([1n,2n,3n,4n,5n,6n].map((rank) => production.partialPermutationUnrank(3, 2, rank)), [
+    [1,2],[1,3],[2,1],[2,3],[3,1],[3,2]
+  ]);
+  ok(typeof production.RepeatedNamePatchWrapper === 'function');
+  ok(typeof production.historicRepeatedNamesThroughMonsterPath === 'function');
+  ok(!('VirtualLegacyList' in production));
+  ok(!('legacyChooseEachDaySeparately' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 22', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2089,4 +2099,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 22.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 22.');

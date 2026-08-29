@@ -597,6 +597,12 @@ class BaseValidationManager {
     }
   }
 
+  requireDiscovery22Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_22_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un candidate legacy de nomes valid por Patch 22.');
+    }
+  }
+
   requireStructureSauceResult(result) {
     if (!result || typeof result !== 'object' || !Array.isArray(result.bowls) || result.bowls.length < 7 ||
         !Array.isArray(result.orderAt46Latch) || result.orderAt46Latch.length !== 6) {
@@ -3539,6 +3545,112 @@ class Discovery22RepeatedNameHandler {
   }
 }
 
+function fallingFactorialDistinct(masterCount, itemCount) {
+  if (!Number.isInteger(masterCount) || masterCount < 0) {
+    throw new RangeError('Li master count por nomes distinct deve esser un integer non-negativ.');
+  }
+  if (!Number.isInteger(itemCount) || itemCount < 0 || itemCount > masterCount) {
+    throw new RangeError('Li item count por nomes distinct deve esser inter zero e li master count.');
+  }
+  let total = 1n;
+  for (let position = 0; position < itemCount; position += 1) {
+    total *= BigInt(masterCount - position);
+  }
+  return total;
+}
+
+function partialPermutationUnrank(masterCount, itemCount, rank1) {
+  const total = fallingFactorialDistinct(masterCount, itemCount);
+  if (typeof rank1 !== 'bigint' || rank1 < 1n || rank1 > total) {
+    throw new RangeError('Li rank de partial permutation es extra li familie distinct.');
+  }
+  const remaining = Array.from({ length: masterCount }, (_, index) => index + 1);
+  const out = [];
+  let rank = rank1;
+  for (let position = 0; position < itemCount; position += 1) {
+    const suffixLength = itemCount - position - 1;
+    const block = fallingFactorialDistinct(remaining.length - 1, suffixLength);
+    let selected = false;
+    for (let candidate = 0; candidate < remaining.length; candidate += 1) {
+      if (rank > block) {
+        rank -= block;
+      } else {
+        out.push(remaining.splice(candidate, 1)[0]);
+        selected = true;
+        break;
+      }
+    }
+    if (!selected) {
+      throw new BootstrapStageError('Li unrank distinct ne posset selecter un bloc lexicografic valid.');
+    }
+  }
+  return out;
+}
+
+class RepeatedNamePatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context) {
+    this.validationManager.requireDiscovery22Result(context);
+    const bad = context.legacyCutletNameIndices;
+    const masterIndices = context.legacyCutletNameMasterIndices;
+    const itemCount = context.legacyCutletNameCount;
+    if (!Array.isArray(bad) || bad.length !== itemCount || !Array.isArray(masterIndices) || masterIndices.length < itemCount) {
+      throw new BootstrapStageError('Patch 22 exige li candidate legacy e li master list complet de Discovery 22.');
+    }
+    const semanticSauce = {
+      bowls: context.patch20SemanticSauceBowls.slice(),
+      orderAt46Latch: context.patch20SemanticOrderAt46Latch.slice()
+    };
+    const stream = cutletNameAnswerRingFromSauce(semanticSauce);
+    const distinctFamilyCount = fallingFactorialDistinct(masterIndices.length, itemCount);
+    const picked = selectionDispatcherWithWideDetour(stream, distinctFamilyCount);
+    const ordinalRow = partialPermutationUnrank(masterIndices.length, itemCount, picked.output);
+    const correct = ordinalRow.map((ordinal) => masterIndices[ordinal - 1]);
+    const identical = bad.length === correct.length && bad.every((value, index) => value === correct[index]);
+    const semanticNameIndices = identical ? bad : correct;
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'RepeatedNamePatchWrapper';
+    context.phase = 'PATCH_22_DISTINCT_PARTIAL_PERMUTATION_NAMES';
+    context.branchTrace.push('PATCH_22_DISTINCT_PARTIAL_PERMUTATION_NAMES');
+    context.patch22BadNameIndices = bad.slice();
+    context.patch22CorrectNameIndices = correct.slice();
+    context.patch22DistinctFamilyCount = distinctFamilyCount;
+    context.patch22DistinctSelectedRank = picked.output;
+    context.patch22DistinctOrdinalRow = ordinalRow.slice();
+    context.patch22NameStream = { ...stream };
+    context.patch22BadEqualsCorrect = identical;
+    context.patch22ReturnedLegacyObject = identical;
+    context.patch22SemanticNameIndices = semanticNameIndices;
+    context.status = 'PATCH_22_RESULT';
+    this.metricsManager.bump(context, 'patch22.legacyDiagnosticPreserved.calls');
+    this.metricsManager.bump(context, 'patch22.distinctPartialPermutation.calls');
+    if (identical) this.metricsManager.bump(context, 'patch22.legacyIdentityReturn.calls');
+    else this.metricsManager.bump(context, 'patch22.correctedNameSelection.calls');
+
+    return {
+      masterIndices: masterIndices.slice(),
+      cutletCount: itemCount,
+      familyCount: distinctFamilyCount,
+      selectedRank: picked.output,
+      nameIndices: semanticNameIndices,
+      badEqualsCorrect: identical,
+      returnedLegacyObject: identical,
+      legacyDiagnostic: {
+        familyCount: context.legacyCutletNameFamilyCount,
+        selectedRank: context.legacyCutletNameSelectedRank,
+        nameIndices: bad.slice(),
+        hasRepeatedCanonicalIndex: context.legacyCutletNameHasRepeatedCanonicalIndex
+      },
+      stream: { ...stream }
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -4360,6 +4472,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyRepeatedNameGenerator
     );
+    this.repeatedNamePatchWrapper = new RepeatedNamePatchWrapper(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -5053,6 +5169,34 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch22RepeatedCutletNames(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      this.cutletPartitionPatchWrapper.repair(context);
+      // Li route PATCH 22 executa prim li generator old real e conserva su candidate quam bad diagnostic.
+      this.discovery22RepeatedNameHandler.handle(context);
+      const result = this.repeatedNamePatchWrapper.repair(context);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -5332,8 +5476,19 @@ function discovery22LegacyRepeatedNamesThroughMonsterPath(
   );
 }
 
+function historicRepeatedNamesThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Patch 22 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executePatch22RepeatedCutletNames(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 22; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 22; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -5412,6 +5567,7 @@ module.exports = Object.freeze({
   CutletPartitionPatchWrapper,
   LegacyRepeatedNameGenerator,
   Discovery22RepeatedNameHandler,
+  RepeatedNamePatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -5494,6 +5650,8 @@ module.exports = Object.freeze({
   legacyPositiveCompositions,
   filteredCutletCompositions,
   legacyNameRowWithRepeats,
+  fallingFactorialDistinct,
+  partialPermutationUnrank,
   cutletNameAnswerRingFromSauce,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
@@ -5539,5 +5697,6 @@ module.exports = Object.freeze({
   discovery21LegacyCutletPartitionThroughMonsterPath,
   historicCutletPartitionThroughMonsterPath,
   discovery22LegacyRepeatedNamesThroughMonsterPath,
+  historicRepeatedNamesThroughMonsterPath,
   calendarDateSpaghetti
 });

@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=44
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=45
+CURRENT_KIND=PATCH
 CURRENT_PATCH=22
-LAST_COMPLETED_STAGE=44
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=45
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,19 +15,19 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus legacyNameRowWithRepeats, LegacyRepeatedNameGenerator e Discovery22RepeatedNameHandler quel tracta chascun position de nome independentmen e talmen permisse canonicalIndex repetit.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus fallingFactorialDistinct, partialPermutationUnrank e RepeatedNamePatchWrapper quel executa pos li generator repeated legacy e selecte li candidate semantic distinct ex li sam ring bowl 5 / seal 22.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 44 es finit quam **DISCOVERY 22** e li repository local es intentionalmen `EXPECTED_RED`. Omni regressions til Patch 21 resta verd.
+Stage 45 es finit quam **PATCH 22** e li repository local es `GREEN`.
 
-`legacyNameRowWithRepeats(masterCount,itemCount)` es li scar nov. Su familie have exactmen `masterCount^itemCount` rows e es ordinat lexicograficmen. Chascun position es tractat independentmen, ergo li sam `canonicalIndex` posse aparir plu vezes in un row. Null filtre de distinctitá, null falling-factorial e null partial-permutation unrank existe in production.
+Li scar historic de Stage 44 resta activ: `legacyNameRowWithRepeats(masterCount,itemCount)`, `LegacyRepeatedNameGenerator.select` e `Discovery22RepeatedNameHandler.handle` ne es reparat. Li route Patch 22 executa prim ti generator real e conserva su candidate repeated, family count, rank e repetition flag quam diagnostic invocation-local.
 
-`LegacyRepeatedNameGenerator` questiona li bowl 5 con seal 22 usando li structure sauce semantic de Patch 20, e `Discovery22RepeatedNameHandler` es conectet pos `CutletPartitionPatchWrapper`. Li quantitá de nomes es exactmen li cutlet count semantic de Patch 21; li master list veni directmen del 17 `canonicalIndex` congelat in `SourceLanguageCatalog`.
+`fallingFactorialDistinct(masterCount,itemCount)` conta exactmen li familie de partial permutations sin repetition. `partialPermutationUnrank(masterCount,itemCount,rank1)` unranka ti familie 1-based in li sam ordre lexicografic del indices canonic ascendent. `RepeatedNamePatchWrapper` reconstrui li sam answer ring de bowl 5 / seal 22, selecte contra li count distinct e rende li candidate correct.
 
-Li witness usa six cutlets. Li familie legacy have `17^6 = 24137569` membres; rank `7563989` produce `[6,6,10,10,17,9]`, quel repeti indices 6 e 10. Li familie normativ distinct, calculat solmen in li reference test-only, selecte `[3,11,4,9,12,5]`. Ti divergence es li unic nov `EXPECTED_RED`.
+Li regul de return es strict: si `bad` e `correct` es element-per-element identic, li wrapper retorna li sam array-object `bad`; altrimen it retorna `correct`. Li witness de Discovery 22 conserva `bad=[6,6,10,10,17,9]`, ma li resultate semantic es `[3,11,4,9,12,5]` con familie distinct `8910720` e rank `1348551`.
 
-`RepeatedNamePatchWrapper`, `partialPermutationUnrank` e `VirtualLegacyList` es absent. Patch 22 resta reservat por Stage 45.
+Omni regressions til Discovery 22, li verifier e li suite complet passa. `VirtualLegacyList`, `legacyChooseEachDaySeparately` e `oldContiguousMonthDayGuess` es absent; null code de Patch 23 es present.

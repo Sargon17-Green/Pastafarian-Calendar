@@ -975,3 +975,24 @@ Li witness con calculation-day offset 102 desde Foundation fini con six cutlets.
 ### Limite historic
 
 Stage 44 ne contene null correction. `RepeatedNamePatchWrapper`, `partialPermutationUnrank` e `VirtualLegacyList` es absent. Li proxim stage mandat es Stage 45 — PATCH 22, quel deve conservar li generator old e calcular li candidate distinct in un detour separat.
+
+
+## Stage 45 — PATCH 22
+
+### Li generator old resta un scar activ
+
+Stage 45 ne altera li familie `masterCount^itemCount` de Discovery 22 e ne altera su generator. `executePatch22RepeatedCutletNames` traversa li sam chain til Patch 21, executa `Discovery22RepeatedNameHandler` realmen e conserva ti output quam `bad` ante qualcunc correction. Li metrics del Discovery resta visibil e li raw repeated indices resta in li context.
+
+### Count e unrank distinct
+
+Li correction vive in un detour separat. `fallingFactorialDistinct` usa arithmetic `BigInt` e conta li partial permutations exact. `partialPermutationUnrank` usa rank 1-based e blocks falling-factorial por selecter chascun indice ex li liste ascendent de indices ancor disponibil. Li familie semantic ne contene repetition e su ordre es lexicografic per `canonicalIndex`.
+
+### Wrapper e regul bad/correct
+
+`RepeatedNamePatchWrapper` usa li sam structure sauce semantic e li sam bowl 5 / seal 22 ring quam li generator old, ma questiona li dispatcher contra li count distinct. It conserva `patch22BadNameIndices` e `patch22CorrectNameIndices` separatim. Si ili es identic element-per-element, li wrapper passa li sam object legacy; altrimen it rende li array correct. Ti regul impedi que un candidate wrong sia conservat solmen pro tradition.
+
+### Regression e future boundary
+
+Li witness repeated old `[6,6,10,10,17,9]` resta demonstrabil, ma li route semantic retorna `[3,11,4,9,12,5]`. Li suite complet deven verd. Tests adicional confirma falling factorial exact, unrank exhaustiv por spaces micri, raw-before-patch, same-ring selection, identity-return quand bad==correct, state invocation-local e absence de code futur.
+
+Patch 23 ne es anticipat: `VirtualLegacyList` e li month-length materialization defect resta por Stage 46/47 secun li progression historic.
