@@ -201,10 +201,14 @@ class Stage44Discovery22Tests(unittest.TestCase):
         )
         self.assertEqual(
             ctx.legacy_cutlet_name_indices,
-            ctx.legacy_name_candidate_indices,
+            ctx.patch22_semantic_indices,
         )
         self.assertEqual(
             ctx.legacy_name_semantic_indices,
+            ctx.patch22_semantic_indices,
+        )
+        self.assertEqual(
+            ctx.patch22_bad_indices,
             ctx.legacy_name_candidate_indices,
         )
         self.assertEqual(
@@ -252,7 +256,7 @@ class Stage44Discovery22Tests(unittest.TestCase):
             second.legacy_name_candidate_indices,
         )
 
-    def test_patch22_partial_permutation_correction_is_not_present_in_production(self):
+    def test_patch22_partial_permutation_correction_is_present_but_legacy_generator_remains(self):
         production = (
             ROOT
             / "src"
@@ -262,17 +266,17 @@ class Stage44Discovery22Tests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        forbidden = (
-            "RepeatedNamePatchWrapper",
-            "partialPermutationUnrank",
-            "unrankDistinctIndices",
-            "fallingFactorialDistinct",
-            "correct_name_indices",
+        required = (
+            "def legacyRepeatedNameUnrank1(",
+            "class LegacyRepeatedNameGenerator:",
+            "class RepeatedNamePatchWrapper:",
+            "def partialPermutationUnrank(",
+            "def fallingFactorialDistinct(",
             "patch22_applied",
         )
 
-        for token in forbidden:
-            self.assertNotIn(
+        for token in required:
+            self.assertIn(
                 token,
                 production,
             )
@@ -346,13 +350,13 @@ class Stage44Discovery22Tests(unittest.TestCase):
                 self.assertLess(
                     len(
                         set(
-                            actual
+                            ctx.legacy_name_candidate_indices
                         )
                     ),
                     len(
-                        actual
+                        ctx.legacy_name_candidate_indices
                     ),
-                    msg="Discovery 22 witness eski generator'ın gerçekten tekrarlı canonicalIndex üretmesini göstermelidir",
+                    msg="Discovery 22 witness eski generator scar'ının gerçekten tekrarlı canonicalIndex üretmesini göstermelidir",
                 )
                 self.assertEqual(
                     actual,

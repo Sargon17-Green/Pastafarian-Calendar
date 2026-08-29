@@ -316,6 +316,14 @@ class MonsterContext:
     legacy_name_answer_direction_step: int | None = None
     legacy_name_generation_calls: int = 0
     legacy_cutlet_name_indices: tuple[int, ...] | None = None
+    patch22_bad_indices: tuple[int, ...] | None = None
+    patch22_distinct_family_count: int | None = None
+    patch22_correct_rank: int | None = None
+    patch22_correct_indices: tuple[int, ...] | None = None
+    patch22_bad_equals_correct: bool = False
+    patch22_returned_bad: bool = False
+    patch22_semantic_indices: tuple[int, ...] | None = None
+    patch22_applied: bool = False
 
 
 class BaseMetrics:

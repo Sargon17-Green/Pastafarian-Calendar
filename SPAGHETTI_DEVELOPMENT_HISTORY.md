@@ -1929,3 +1929,31 @@ Aşama 43 semantic cutlet partition sonrasında real calendar handler frozen `So
 Üç bağımsız witness'ın her birinde old `17^6` candidate gerçekten repeated canonicalIndex içerir. Expected test-only normative path `falling_factorial(17,6)`, bowl 5 / seal 22 rank seçimi ve `unrank_distinct_indices` ile hesaplanır. Üç witness yalnız repeated-name family yanlışlığı nedeniyle kırmızıdır.
 
 Production içinde partial-permutation correction, `RepeatedNamePatchWrapper` veya `patch22_applied` yoktur. Patch 23 `VirtualLegacyList` kodu da eklenmemiştir.
+
+
+## Aşama 45 — Yama 22: repeated legacy candidate üstüne distinct partial-permutation detour
+
+Aşama 44 `LegacyRepeatedNameGenerator.call_with_ring` gövdesi byte-for-byte korunur ve `call_cutlet_names` içinde önce gerçekten çalışarak `bad` candidate üretir.
+
+`fallingFactorialDistinct(master_count,item_count)` distinct family boyutunu exact düşen faktöriyel ile hesaplar.
+
+`partialPermutationUnrank` 1-based rank değerini lexicographic distinct canonicalIndex sırasına exact açar.
+
+`RepeatedNamePatchWrapper` aynı bowl 5 / seal 22 answer ring üzerinde distinct family count için `compatibleRepeatedNameRank` kullanarak `correct` candidate üretir.
+
+Historical davranış gereği:
+
+```text
+if bad == correct:
+    return bad
+else:
+    return correct
+```
+
+uygulanır.
+
+Raw repeated candidate `legacy_name_candidate_indices` ve `patch22_bad_indices` içinde kalır. Semantic name indices patch sonucuna güncellenir.
+
+Aşama 44 normatif equality regression korunur. Discovery testinin aynı method içindeki historical-repeat witness assert'i, final semantic result yerine raw `legacy_name_candidate_indices` scar'ını kontrol edecek şekilde zorunlu minimal uyarlanır; aksi halde patch sonrası distinct semantic output ile historical bad scar aynı nesneymiş gibi davranmak gerekirdi.
+
+Patch 23 `VirtualLegacyList` month-length kodu henüz yoktur.

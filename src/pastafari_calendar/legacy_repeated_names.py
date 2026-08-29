@@ -191,6 +191,176 @@ def buildCutletNameAnswerRing(
     )
 
 
+def fallingFactorialDistinct(
+    master_count: int,
+    item_count: int,
+) -> int:
+    if type(master_count) is not int:
+        raise TypeError(
+            "Ayrık ad havuzu boyutu tam sayı olmalıdır"
+        )
+
+    if type(item_count) is not int:
+        raise TypeError(
+            "Ayrık ad sayısı tam sayı olmalıdır"
+        )
+
+    if master_count < 0:
+        raise ValueError(
+            "Ayrık ad havuzu boyutu negatif olamaz"
+        )
+
+    if not 0 <= item_count <= master_count:
+        raise ValueError(
+            "Ayrık ad sayısı havuz boyutunu aşamaz"
+        )
+
+    result = 1
+
+    for offset in range(
+        item_count
+    ):
+        result *= (
+            master_count
+            - offset
+        )
+
+    return result
+
+
+def partialPermutationUnrank(
+    master_count: int,
+    item_count: int,
+    rank1: int,
+) -> tuple[int, ...]:
+    total = fallingFactorialDistinct(
+        master_count,
+        item_count,
+    )
+
+    if not 1 <= rank1 <= total:
+        raise ValueError(
+            "Ayrık ad derecesi aralık dışında"
+        )
+
+    remaining = list(
+        range(
+            1,
+            master_count + 1,
+        )
+    )
+    output: list[int] = []
+    rank = rank1
+
+    for position in range(
+        item_count
+    ):
+        suffix_length = (
+            item_count
+            - position
+            - 1
+        )
+        block = fallingFactorialDistinct(
+            len(
+                remaining
+            )
+            - 1,
+            suffix_length,
+        )
+        candidate_position = (
+            rank - 1
+        ) // block
+        rank = (
+            (
+                rank - 1
+            )
+            % block
+        ) + 1
+
+        output.append(
+            remaining.pop(
+                candidate_position
+            )
+        )
+
+    return tuple(
+        output
+    )
+
+
+class RepeatedNamePatchWrapper:
+    def repair(
+        self,
+        ctx,
+        ring: LegacyAnswerRing,
+        master_count: int,
+        item_count: int,
+        source_kind: str,
+        bad: tuple[int, ...],
+    ) -> tuple[int, ...]:
+        distinct_count = fallingFactorialDistinct(
+            master_count,
+            item_count,
+        )
+        correct_rank = compatibleRepeatedNameRank(
+            ring,
+            distinct_count,
+        )
+        correct = partialPermutationUnrank(
+            master_count,
+            item_count,
+            correct_rank,
+        )
+
+        bad_matches_correct = (
+            bad == correct
+        )
+
+        semantic = (
+            bad
+            if bad_matches_correct
+            else correct
+        )
+
+        ctx.branch_trace.append(
+            (
+                "YAMA_22_AYRIK_AD_DETOURU",
+                source_kind,
+                master_count,
+                item_count,
+                distinct_count,
+                correct_rank,
+                bad_matches_correct,
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-22-ayrık-ad-detouru",
+                source_kind,
+                master_count,
+                item_count,
+                distinct_count,
+                correct_rank,
+                bad_matches_correct,
+            )
+        )
+
+        ctx.patch22_bad_indices = bad
+        ctx.patch22_distinct_family_count = distinct_count
+        ctx.patch22_correct_rank = correct_rank
+        ctx.patch22_correct_indices = correct
+        ctx.patch22_bad_equals_correct = bad_matches_correct
+        ctx.patch22_returned_bad = bad_matches_correct
+        ctx.patch22_semantic_indices = semantic
+        ctx.patch22_applied = True
+
+        ctx.legacy_name_semantic_indices = semantic
+
+        return semantic
+
+
+
+
 class LegacyRepeatedNameGenerator:
     def call_with_ring(
         self,
@@ -271,10 +441,19 @@ class LegacyRepeatedNameGenerator:
             ring.direction_step
         )
 
-        return self.call_with_ring(
+        bad = self.call_with_ring(
             ctx,
             ring,
             master_count,
             item_count,
             "köfte",
+        )
+
+        return RepeatedNamePatchWrapper().repair(
+            ctx,
+            ring,
+            master_count,
+            item_count,
+            "köfte",
+            bad,
         )

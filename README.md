@@ -1,20 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk dördüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 44/55, `DISCOVERY 22` durumundadır.
+Aşama 45/55, `PATCH 22` durumundadır.
 
-Yeni `LegacyRepeatedNameGenerator`, `master_count^item_count` büyüklüğündeki bütün canonicalIndex dizilerini legacy family kabul eder ve repeated canonicalIndex değerlerine izin verir.
+Aşama 44 raw `LegacyRepeatedNameGenerator.call_with_ring` scar'ı aynen kalır ve önce gerçekten `bad` candidate üretir.
 
-Köfte adları için real path Aşama 20 semantic structure sauce üzerinden bowl 5 / seal 22 answer ring kurar ve frozen `SourceLanguageCatalog` içindeki 17 canonicalIndex ile actual cutlet count kullanır.
+Yeni `fallingFactorialDistinct` ve `partialPermutationUnrank` distinct canonicalIndex partial-permutation family'yi exact lexicographic olarak temsil eder.
 
-Rank compatibility copy current short/wide selection semantiğine eşittir fakat eski real-path selection instrumentation call-count scars'ını ikinci kez tetiklemez.
+`RepeatedNamePatchWrapper` aynı bowl 5 / seal 22 answer ring ile correct rank ve correct candidate hesaplar.
 
-Üç normatif witness'ın üçünde old candidate gerçekten tekrar içerir ve correct partial-permutation unrank sonucundan ayrışır.
+`bad==correct` ise bad aynen döner; farklıysa correct semantic result döner.
 
-Henüz `PATCH 22` correction yoktur. Patch 23 `VirtualLegacyList` kodu da yoktur.
+Raw repeated candidate diagnostic state'te kalır, semantic ad indices corrected result olur.
+
+Patch 23 `VirtualLegacyList` kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -30,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırk dördüncü aşama paketi:
+Tam kırk beşinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki 278 test geçer. Yeni Discovery 22 non-normative kontrolleri geçer; yalnız `test_current_repeated_name_generator_diverges_from_partial_permutation_unrank` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 44'te kırmızı olan üç repeated-name witness corrected partial-permutation semantic result ile yeşile dönmelidir.

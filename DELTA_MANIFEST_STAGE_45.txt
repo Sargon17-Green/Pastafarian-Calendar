@@ -1,0 +1,35 @@
+Aşama 45/55 — PATCH 22
+
+Bu paket yalnızca Aşama 45 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_repeated_names.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_44_discovery_22.py
+tests/test_stage_45_patch_22.py
+artifacts/stage-45/BASELINE_STAGE_44_EXPECTED_RED.txt
+artifacts/stage-45/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-45/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_45.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 44 baseline: EXPECTED_RED, 286 test / 3 expected failure
+Patch sonrası Aşama 1–44 regressions: 286/286 PASS
+Aşama 45 full suite: GREEN, 295/295
+Legacy call_with_ring: BYTE-FOR-BYTE KORUNDU VE AKTİF
+Legacy repeated family helpers: KORUNDU
+Correct family count: fallingFactorialDistinct
+Correct unrank: partialPermutationUnrank
+Same ring: bowl 5 / seal 22
+bad==correct: BAD AYNI NESNE OLARAK DÖNER
+bad!=correct: CORRECT DÖNER
+Stage 44 expected calculation: KORUNDU
+Stage 44 final semantic equality assertion: KORUNDU
+Historical repeat witness: RAW BAD STATE'E YÖNLENDİRİLDİ
+Frozen SourceLanguageCatalog: DEĞİŞMEDİ
+Patch 23 VirtualLegacyList: YOK

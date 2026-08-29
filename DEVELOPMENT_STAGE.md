@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=44
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=45
+CURRENT_KIND=PATCH
 CURRENT_PATCH=22
-LAST_COMPLETED_STAGE=44
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=45
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=LegacyRepeatedNameGenerator canonicalIndex havuzunu item_count kez bağımsız seçilmiş gibi yorumlayıp master_count^item_count büyüklüğündeki bütün lexicographic index dizilerini legacy family kabul eder; tekrarlar yasaklanmaz; Stage 20 semantic structure sauce state'inden bowl 5 seal 22 answer ring kurulur ve ayrı compatibility selection copy ile bu yanlış family'den rank seçilir; bu copy current short/wide selection semantiğine eşittir fakat eski real-path selection instrumentation call-count scars'ını ikinci kez tetiklemez; real calendar path Patch 21 cutlet partition sonrasında frozen SourceLanguageCatalog içindeki 17 köfte canonicalIndex'i ve actual cutlet count ile generator'ı gerçekten çağırır; partial-permutation correction production'da henüz yoktur
+MONSTER_ARCHITECTURE_GROWTH=LegacyRepeatedNameGenerator.call_with_ring Aşama 44 raw legacy scar gövdesi byte-for-byte korunur ve call_cutlet_names içinde önce gerçekten çalışıp bad candidate üretir; fallingFactorialDistinct ve partialPermutationUnrank distinct canonicalIndex family'yi exact lexicographic partial-permutation olarak temsil eder; RepeatedNamePatchWrapper aynı bowl 5 seal 22 answer ring üzerinde distinct family count ile current short/wide selection semantiğinden correct rank hesaplar ve correct candidate üretir; bad==correct ise aynı bad tuple nesnesi döner, aksi halde correct döner; semantic state correct result'a güncellenirken raw repeated candidate diagnostic scar olarak kalır
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
