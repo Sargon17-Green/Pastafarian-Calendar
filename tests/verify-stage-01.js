@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 19 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 19 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Discovery 19 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'calculationDayFingerprint', 'cacheGetWithActionGuard', 'cachePutWithGuard', 'oldStructureSauce',
+    'oldStructureSauce', 'structureSaucePatch',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
   ];
@@ -1802,7 +1802,81 @@ group('Discovery 19 conserva li bad cache key year.number e expone stale hit sin
   ok(!production.Discovery19YearNumberCacheHandler.prototype.handle.toString().includes('oldStructureSauce'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 19', () => {
+group('Patch 19 conserva li bad key ma accepta HIT solmen con tri guards exact', () => {
+  const legacyLookupSource = production.legacyYearNumberOnlyLookup.toString();
+  ok(legacyLookupSource.includes('cacheMap.has(yearNumber)'));
+  ok(legacyLookupSource.includes('cacheMap.get(yearNumber)'));
+  ok(!legacyLookupSource.includes('calculationDayFingerprint'));
+  const getSource = production.cacheGetWithActionGuard.toString();
+  ok(getSource.indexOf('legacyYearNumberOnlyLookup(cacheMap, year.number)') < getSource.indexOf('entry.calculationDayFingerprint'));
+  ok(getSource.includes('entry.openGate !== year.openDay'));
+  ok(getSource.includes('entry.closeGate !== year.closeDay'));
+  const putSource = production.cachePutWithGuard.toString();
+  ok(putSource.includes('legacyYearNumberOnlyPut(cacheMap, year.number, entry)'));
+  ok(putSource.includes('calculationDayFingerprint: calculationDayFingerprint(calculationDay)'));
+  ok(putSource.includes('openGate: year.openDay'));
+  ok(putSource.includes('closeGate: year.closeDay'));
+  eq(production.calculationDayFingerprint(123n), 123n);
+
+  const f = o.FOUNDATION_DAY;
+  const year = { number: 5000n, openDay: f + 10n, closeDay: f + 1010n };
+  const cache = new Map();
+  const value = { yearNumber: 5000n, actionDay: f + 100n, openingDay: f + 10n, closingDay: f + 1010n };
+  const entry = production.cachePutWithGuard(cache, year, f + 100n, value);
+  eq(cache.size, 1);
+  ok(cache.has(5000n));
+  eq(entry.calculationDayFingerprint, f + 100n);
+  eq(entry.openGate, year.openDay);
+  eq(entry.closeGate, year.closeDay);
+  let got = production.cacheGetWithActionGuard(cache, year, f + 100n);
+  ok(got.hit);
+  eq(got.reason, null);
+  got = production.cacheGetWithActionGuard(cache, year, f + 101n);
+  ok(!got.hit);
+  eq(got.reason, 'calculation-day');
+  got = production.cacheGetWithActionGuard(cache, { ...year, openDay: f + 11n }, f + 100n);
+  ok(!got.hit);
+  eq(got.reason, 'open-gate');
+  got = production.cacheGetWithActionGuard(cache, { ...year, closeDay: f + 1011n }, f + 100n);
+  ok(!got.hit);
+  eq(got.reason, 'close-gate');
+
+  const manager = new production.BaseMonsterManager();
+  const gates = {
+    10: f + 10n, 16: f + 1010n,
+    20: f + 20n, 26: f + 1020n,
+    30: f + 30n, 36: f + 1030n
+  };
+  const pairs = [
+    { openIndex: 30, closeIndex: 36 },
+    { openIndex: 10, closeIndex: 16 },
+    { openIndex: 20, closeIndex: 26 }
+  ];
+  const stream = { first: 1n, directionStep: 1n };
+  const noWalk = {
+    nextYear() { throw new Error('Null next-year expectat in Patch 19.'); },
+    previousYear() { throw new Error('Null previous-year expectat in Patch 19.'); }
+  };
+  const first = manager.executePatch19YearCache(f + 100n, f + 100n, -1n, gates, pairs, stream, noWalk);
+  const second = manager.executePatch19YearCache(f + 101n, f + 101n, -1n, gates, pairs, stream, noWalk);
+  const third = manager.executePatch19YearCache(f + 101n, f + 101n, -1n, gates, pairs, stream, noWalk);
+  ok(!first.result.hit);
+  ok(!second.result.hit);
+  eq(second.result.reason, 'calculation-day');
+  eq(second.result.value.actionDay, f + 101n);
+  ok(third.result.hit);
+  eq(third.result.value.actionDay, f + 101n);
+  eq(manager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER.size, 1);
+  ok(manager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER.has(5000n));
+  eq(second.context.currentHandler, 'YearCacheActionGuardPatchWrapper');
+  eq(second.context.previousHandler, 'SequentialYearWalkPatchWrapper');
+  eq(second.context.status, 'PATCH_19_RESULT');
+  ok(second.context.patch19LegacyDiagnosticPreserved);
+  ok(second.context.patch19OnlyNumberKeyPreserved);
+  ok(!production.YearCacheActionGuardPatchWrapper.prototype.repair.toString().includes('oldStructureSauce'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 19', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1814,4 +1888,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 19.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 19.');

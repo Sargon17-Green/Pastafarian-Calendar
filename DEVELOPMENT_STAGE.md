@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=38
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=39
+CURRENT_KIND=PATCH
 CURRENT_PATCH=19
-LAST_COMPLETED_STAGE=38
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=39
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus un LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER manager-owned, legacyYearNumberOnlyLookup/Put, LegacyYearNumberCacheAdapter e Discovery19YearNumberCacheHandler quel usa exclusivmen year.number quam clave e reutilisa un value stale si li calculation-day o limites del year cambia.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, li manager-owned cache keyed solmen per year.number de Discovery 19, plus calculationDayFingerprint, cacheGetWithActionGuard, cachePutWithGuard e YearCacheActionGuardPatchWrapper quel conserva li bad key ma accepta un HIT solmen quand calculation-day, open gate e close gate concorda exactmen.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 38 es finit quam **DISCOVERY 19**. Li cache legacy es persistent solmen intra un `BaseMonsterManager`, ma su `Map` es keyed exclusivmen per `year.number`. `legacyYearNumberOnlyLookup` ne riceve ni inspectiona calculation-day, opening day o closing day. Li value guardat de Patch 19 ne existe ancor.
+Stage 39 es finit quam **PATCH 19**. `legacyYearNumberOnlyLookup` e `legacyYearNumberOnlyPut` resta sin modification e continua usar exclusivmen `year.number` quam clave. Li defect historic resta dunque directmen observabil per li route de Discovery 19.
 
-`Discovery19YearNumberCacheHandler` es conectet pos li route complet de Patch 18. Li year current veni del caminada sequential ja reparat; un value current es derivat ex li year resoluet e li calculation-day, poy li cache legacy retorna un HIT si li sam year number ja existe. In un HIT, li value old es usat directmen sin comparar li request current. Li regression prova separatmen changement de calculation-day, opening gate e closing gate con year number 5000 constant; chascun duesim request recive li value stale del prim request. Null `calculationDayFingerprint`, null action-guard de Patch 19 e null `oldStructureSauce` de Patch 20 es present.
+Li route semantic de Patch 19 parte del resultate de Patch 18 e voca realmen li lookup legacy ante verificar li guards. Li value del cache es nu un entry con `calculationDayFingerprint`, `openGate`, `closeGate` e `value`. Un entry absent, un value legacy sin ti forma o qualcunc mismatch de guard es tractat quam MISS; li value current es recalculat e reemplazza li entry sub li sam bad key. Solmen tri guards exact concede HIT. Null `oldStructureSauce` o code de Patch 20 es present.

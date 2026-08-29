@@ -66,6 +66,19 @@ function call(manager, calculationDay, gates) {
   );
 }
 
+function callPatched(manager, calculationDay, gates) {
+  return production.historicYearNumberCacheThroughMonsterPath(
+    manager,
+    calculationDay,
+    calculationDay,
+    -1n,
+    gates,
+    candidatePairs,
+    selectionStream,
+    noWalkExpected
+  );
+}
+
 const lookupSource = production.legacyYearNumberOnlyLookup.toString();
 assert.match(lookupSource, /cacheMap\.has\(yearNumber\)/);
 assert.match(lookupSource, /cacheMap\.get\(yearNumber\)/);
@@ -102,6 +115,7 @@ const cases = [
   }
 ];
 
+const legacySecondValues = [];
 const actualSecondValues = [];
 const expectedSecondValues = [];
 for (const scenario of cases) {
@@ -143,13 +157,28 @@ for (const scenario of cases) {
     'DISCOVERY_19_YEAR_NUMBER_ONLY_CACHE'
   ]);
 
-  actualSecondValues.push(second.result.value);
+  legacySecondValues.push(second.result.value);
+  // Li scar direct resta observabil e wrong; li route Patch 19 deve reparar li sam scenario.
+  const patchedManager = new production.BaseMonsterManager();
+  const patchedFirst = callPatched(patchedManager, scenario.firstDay, scenario.firstGates);
+  assert.equal(patchedFirst.result.hit, false, scenario.label);
+  assert.deepEqual(patchedFirst.result.value, scenario.firstExpected, scenario.label);
+  const patchedSecond = callPatched(patchedManager, scenario.secondDay, scenario.secondGates);
+  assert.equal(patchedSecond.result.hit, false, scenario.label);
+  assert.equal(patchedSecond.result.recomputed, true, scenario.label);
+  assert.deepEqual(patchedSecond.result.value, scenario.secondExpected, scenario.label);
+  assert.equal(patchedSecond.context.status, 'PATCH_19_RESULT', scenario.label);
+  assert.equal(patchedSecond.context.currentHandler, 'YearCacheActionGuardPatchWrapper', scenario.label);
+  assert.equal(patchedSecond.context.patch19OnlyNumberKeyPreserved, true, scenario.label);
+  assert.equal(patchedManager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER.size, 1, scenario.label);
+  actualSecondValues.push(patchedSecond.result.value);
   expectedSecondValues.push(scenario.secondExpected);
 }
 
-console.log('DISCOVERY 19 DIAGNOSTIC: li cache legacy keyed solmen per year.number reutilisa un value stale quand li request cambia.');
+console.log('DISCOVERY 19 DIAGNOSTIC: li cache legacy direct resta stale, durante que Patch 19 refusa li HIT si un guard cambia.');
 for (let index = 0; index < cases.length; index += 1) {
-  console.log(cases[index].label + ' legacy:   ' + JSON.stringify(actualSecondValues[index], (_, value) => typeof value === 'bigint' ? value.toString() : value));
+  console.log(cases[index].label + ' legacy:   ' + JSON.stringify(legacySecondValues[index], (_, value) => typeof value === 'bigint' ? value.toString() : value));
+  console.log(cases[index].label + ' patched:  ' + JSON.stringify(actualSecondValues[index], (_, value) => typeof value === 'bigint' ? value.toString() : value));
   console.log(cases[index].label + ' current:  ' + JSON.stringify(expectedSecondValues[index], (_, value) => typeof value === 'bigint' ? value.toString() : value));
 }
 

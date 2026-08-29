@@ -842,3 +842,28 @@ Li sam numer annual posse esser evaluat sub un altri calculation-day o con limit
 ### Witness e limite del stage
 
 Tri scenarios conserva `year.number=5000`: un muta solmen li calculation-day, un muta solmen li opening gate e un muta solmen li closing gate. In chascun scenario li duesim request es un HIT e retorna li value del prim request, ergo li regression nov es intentionalmen rubi. Li correction de Patch 19 — guardar calculation-day fingerprint e du limites in li value e acceptar HIT solmen quand omni tri guards coincide — ne es present. `oldStructureSauce` de Patch 20 anc resta absent.
+
+
+## Stage 39 — PATCH 19
+
+### Scar historic conservat
+
+Li Map legacy resta `LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER` e su key resta solmen `year.number`. `legacyYearNumberOnlyLookup(cacheMap,yearNumber)` e `legacyYearNumberOnlyPut(cacheMap,yearNumber,value)` resta byte-per-byte intact desde Discovery 19. Li route diagnostic de Discovery 19 continua retornar stale values quand it es vocat directmen.
+
+### Guard in li value, ne in li key
+
+Patch 19 ne crea un composite key. `cachePutWithGuard` usa li sam put legacy e guarda un entry con quar campos: `calculationDayFingerprint`, `openGate`, `closeGate` e `value`. Li fingerprint es directmen li calculation-day current, sin hash o normalisation addit.
+
+`cacheGetWithActionGuard` voca prim `legacyYearNumberOnlyLookup`. Solmen pos ti bad-key lookup it inspecte li entry. Null entry, un value historic non-guardat, un calculation-day diferent, un opening gate diferent o un closing gate diferent es un MISS semantic. Un HIT es acceptat solmen si omni tri guards concorda exactmen.
+
+### Recompute e replacement sub li sam bad key
+
+`YearCacheActionGuardPatchWrapper` prende li year ja resoluet per li caminada sequential de Patch 18. Sur MISS it reconstrui li value current per `buildLegacyYearStructureValue` e voca `cachePutWithGuard`, quel reemplazza li entry existent sub exactmen li sam `year.number`. Un request repetit con li nov guards poy deven un HIT valid. Talmen li history del cache ne posse plu cambiar li output semantic.
+
+### Ownership e observabilitá
+
+Li Map resta manager-owned e persistent inter invocations del sam manager. Li state del request — legacy lookup diagnostic, key, tri guards, entry anterior, reason de MISS, decision HIT, recomputation e entry final — resta invocation-local in `BaseMonsterContext`. Un manager fresh e un manager con history stale retorna li sam value current por li sam request.
+
+### Limites de ti stage
+
+Null `oldStructureSauce`, null `structureSaucePatch` e null code de Patch 20 es addit. Li target original ne es ancor reemplazzat per `year.firstDay` por li sauce structural. Omni regressions til Discovery 19 es verd.

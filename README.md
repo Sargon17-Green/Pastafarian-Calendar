@@ -239,3 +239,14 @@ Patch 18 resta li proprietario semantic del year resoluet. Discovery 19 adjunte 
 Li regression crea tri managers separat por isolar tri defectes: changement solmen del calculation-day, changement solmen del opening gate e changement solmen del closing gate. Chascun duesim request conserva `year.number=5000` e recive un HIT, ma su output egala li value del prim request e diverge del value current. Ti tri divergenties es resumit in un unic assertion EXPECTED_RED final.
 
 Null entry guardat con `calculationDayFingerprint/openGate/closeGate/value` es creat. Null helper de action-guard es present, e null `oldStructureSauce` o code de Patch 20 es anticipat. Li bad cache key resta intentionalmen activ til Stage 39 / Patch 19.
+
+
+## Stage 39 — PATCH 19
+
+Li cache manager-owned continua esser keyed exclusivmen per `year.number`; Patch 19 ne netta ti scar. `legacyYearNumberOnlyLookup` e `legacyYearNumberOnlyPut` resta fisicmen intact e li path reparat real-voca li lookup legacy ante omni decision de guard.
+
+`calculationDayFingerprint(calculationDay)` retorna directmen li calculation-day exact. `cachePutWithGuard` conserva sub li sam year-number key un entry con exactmen `calculationDayFingerprint`, `openGate`, `closeGate` e `value`. `cacheGetWithActionGuard` accepta HIT solmen si omni tri guards concorda con li request current. Un entry absent, un value legacy sin forma guardat o qualcunc mismatch deven MISS.
+
+`YearCacheActionGuardPatchWrapper` es conectet directmen pos `SequentialYearWalkPatchWrapper`. It ne consume li stale output del handler defectiv de Discovery 19; in vice, su call a `cacheGetWithActionGuard` conserva li bad lookup quam diagnostic e usa solmen un entry guardat valid. Sur MISS, li structura current es recalculat e `cachePutWithGuard` reemplazza li entry sub li sam key. Sur HIT valid, li cached semantic value es reutilisat.
+
+Li regression conserva li route direct de Discovery 19 quam prova que li scar resta wrong, ma li route Patch 19 deven verd por tri changements independent: calculation-day, opening gate e closing gate. Un duesim request con guard mutat es MISS/recompute, e un triesim request identic deven HIT. Null `oldStructureSauce` o recomputation del structure sauce de Patch 20 es present.
