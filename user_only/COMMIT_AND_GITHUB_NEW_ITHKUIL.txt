@@ -1,0 +1,3 @@
+COMMIT_TITLE=ümprala
+COMMIT_BODY=aňţtala. ämţtala. ümprala.
+GITHUB_NOTE=aňţtala. ämţtala. ümprala.

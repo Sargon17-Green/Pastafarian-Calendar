@@ -1,0 +1,12 @@
+name = "PastafariCalendarNewIthkuil"
+uuid = "8b2186f0-7f45-4f97-9b99-2cfe55ba9a01"
+version = "0.1.0"
+
+[compat]
+julia = "1.10, 1.11, 1.12, 1.13"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

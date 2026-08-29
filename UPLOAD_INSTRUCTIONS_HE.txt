@@ -1,0 +1,22 @@
+חבילת סגירת Stage 1 — Julia + New Ithkuil
+
+1. חלץ את ה-ZIP.
+2. ודא ש-Julia 1.10–1.13 זמינה ב-PATH.
+3. מתוך שורש החבילה הרץ פקודה אחת בלבד:
+
+   julia RUN_STAGE_01_VERIFICATION.jl
+
+4. אם מתקבל STAGE_01=PASS:
+   - Stage 1 סגור.
+   - LAST_COMPLETED_STAGE יעודכן אוטומטית ל-1.
+   - הקטלוג יעודכן אוטומטית ל-FROZEN=YES.
+   - TEST_RESULT_STAGE_01.txt וה-audit יעודכנו אוטומטית ל-PASS/GREEN.
+   - STAGE_01_EXECUTION_LOG.txt יכיל את Julia version ואת פלט ההרצה.
+   - להעלאה למאגר השתמש אך ורק בתוכן התיקייה repo_delta/.
+   - אין להעלות קבצים מתוך user_only/ ואין להעלות את RUN_STAGE_01_VERIFICATION.jl.
+
+5. אם מתקבל STAGE_01=FAIL:
+   - אל תעלה את Stage 1 כשלב מושלם.
+   - שלח את repo_delta/STAGE_01_EXECUTION_LOG.txt לבדיקה.
+
+אין להתחיל Stage 2 או Patch 01 במסגרת חבילה זו.
