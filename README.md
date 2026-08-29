@@ -157,3 +157,31 @@ Omnes regressiones Graduum 1–29 transeunt.
 ### Quod consulto nondum adest
 
 Nullus `oldGateQuestionDay`, nullus signed-step gate detour, nullus PATCH 15 et nullus `LEGACY_YEAR_MAX` in productione adsunt. Gradus 30 debet esse `DISCOVERY 15`: helper legacy `oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n` latus positivum semper rogabit quando caller signum gradus negativi amittit; nulla correctio negativa eo gradu addetur.
+
+
+## DISCOVERY 15 — gradus negativus signum ante quaestionem portae amittit
+
+Gradus 30 helper historicum expresse introducit:
+
+```text
+oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n
+```
+
+Helper ipse formulam suam directe servat et etiam argumentum negativum, si directe datum sit, ad latus antecedens Fundationis traducere potest. Cicatrix huius gradus in caller est. `Discovery15GateQuestionHandler` `signedStep` in magnitudinem absolutam convertit ante `LegacyGateQuestionAdapter::ask`; adapter deinde `oldGateQuestionDay(magnitude)` vere vocat.
+
+Ita `signedStep>=0` accidentaliter cum die normativo concordat, sed `signedStep<0` signum amittit et quaestionem ad latus positivum mittit. Via activa est:
+
+```text
+BaseMonsterManager::executeLegacyGateQuestionDay
+-> BaseDispatcher::dispatchLegacyGateQuestion
+-> Discovery15GateQuestionHandler
+-> abs(signedStep)
+-> LegacyGateQuestionAdapter::ask
+-> oldGateQuestionDay
+```
+
+`tests/stage_30_discovery_15_tests.cpp` casus `0,+1,+17,-1,-17,-123456` probat. Tres casus non-negativi concordant. Tres negativi exactas discrepantias reddunt; exitus testis consulto est 1.
+
+Omnes regressiones Graduum 1–29 transeunt.
+
+Nullus PATCH 15, nullus wrapper qui diem negativum restituit, nullus `LEGACY_YEAR_MAX` et nullus codex Gradus 31 vel 32 praemature adest.

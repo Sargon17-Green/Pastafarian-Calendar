@@ -162,6 +162,7 @@ LegacyAnswerRing answerRingThroughPatchedNextBowl(const BowlState& finalBowls,
                                                    int seal);
 Integer ringAnswer(const LegacyAnswerRing& stream, const Integer& offset);
 Integer biasedLegacyPick(const Integer& x, const Integer& N);
+Integer oldGateQuestionDay(const Integer& n);
 
 struct Patch13RejectionSelection {
     Integer acceptanceLimit{};
@@ -339,6 +340,10 @@ struct BaseMonsterContext {
     Integer patch14WideAcceptedValue{};
     Integer patch14WideRejectionSteps{};
     bool patch14Applied = false;
+    Integer legacyGateQuestionSignedStep{};
+    Integer legacyGateQuestionMagnitude{};
+    Integer legacyGateQuestionOutput{};
+    bool legacyGateQuestionReady = false;
 };
 
 struct LegacyWideSelectionReport {
@@ -376,6 +381,16 @@ struct LegacyWideSelectionReport {
     Integer wideAcceptanceLimit{};
     Integer wideAcceptedValue{};
     Integer wideRejectionSteps{};
+};
+
+struct LegacyGateQuestionReport {
+    Integer signedStep{};
+    Integer magnitudePassedToLegacy{};
+    Integer outputQuestionDay{};
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
 };
 
 struct BaseRunReport {
@@ -621,11 +636,17 @@ public:
     void requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery14WideAssumptionReady(const BaseMonsterContext& ctx) const;
     void requirePatch14WideSelectionReady(const BaseMonsterContext& ctx) const;
+    void requireDiscovery15GateQuestionReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
 public:
     void bump(BaseMonsterContext& ctx, const std::string& key) const;
+};
+
+class LegacyGateQuestionAdapter {
+public:
+    Integer ask(const Integer& magnitude) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1054,6 +1075,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery15GateQuestionHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyGateQuestionAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1245,6 +1274,12 @@ public:
                                       const Patch14WideDetourWrapper& wideWrapper,
                                       const BaseValidationManager& validator,
                                       const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyGateQuestion(BaseMonsterContext& ctx,
+                                    const Discovery15GateQuestionHandler& handler,
+                                    const LegacyGateQuestionAdapter& adapter,
+                                    const BaseValidationManager& validator,
+                                    const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1334,6 +1369,7 @@ public:
         int queriedBowlId,
         int seal,
         const Integer& familySize) const;
+    LegacyGateQuestionReport executeLegacyGateQuestionDay(const Integer& signedStep) const;
 };
 
 } // namespace pastafari

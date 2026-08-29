@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=29
-CURRENT_KIND=PATCH
-CURRENT_PATCH=14
-LAST_COMPLETED_STAGE=29
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=30
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=15
+LAST_COMPLETED_STAGE=30
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=C++
 NATURAL_LANGUAGE=Neo-Latin
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Patch14WideDetourSelection, Patch14WideDetourWrapper, Patch14WideSelectionHandler, dispatcher short/wide, validatio duplicata, via diagnostica Stage 28 et observabilitas digits semel lectorum addita sunt. Legacy short-only prius vere vocatur et defectus eius servatur; N<=M_OLD viam brevem Patch 13 servat, N>M_OLD minimum space=M_OLD^places construit, digits annuli semel legit et rejectionem tantum super numero wide composito movet.
+MONSTER_ARCHITECTURE_GROWTH=oldGateQuestionDay, LegacyGateQuestionReport, LegacyGateQuestionAdapter, Discovery15GateQuestionHandler, campi contextus signedStep/magnitudo/output, validatio et dispatchatio propria addita sunt. Caller legacy signum gradus amittit per magnitudinem absolutam ante helper; gradus negativi ideo latus positivum Fundationis rogant. Nulla correctio PATCH 15 addita est.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

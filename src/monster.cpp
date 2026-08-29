@@ -13,6 +13,10 @@ Integer regularMod(const Integer& x, const Integer& d) {
     return r;
 }
 
+Integer oldGateQuestionDay(const Integer& n) {
+    return FOUNDATION_DAY_OLD + n;
+}
+
 Integer oldRemainder(const Integer& x) {
     return regularMod(x, M_OLD);
 }
@@ -3133,6 +3137,22 @@ void BaseValidationManager::requirePatch14WideSelectionReady(const BaseMonsterCo
     }
 }
 
+void BaseValidationManager::requireDiscovery15GateQuestionReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyGateQuestionReady) {
+        throw BaseValidationError("quaestio portae legacy nondum parata est");
+    }
+    Integer magnitudo = ctx.legacyGateQuestionSignedStep;
+    if (magnitudo < 0) {
+        magnitudo = -magnitudo;
+    }
+    if (ctx.legacyGateQuestionMagnitude != magnitudo) {
+        throw BaseValidationError("caller legacy signum gradus non per abs delevit");
+    }
+    if (ctx.legacyGateQuestionOutput != oldGateQuestionDay(magnitudo)) {
+        throw BaseValidationError("oldGateQuestionDay magnitudinem calleris non accepit");
+    }
+}
+
 void BaseValidationManager::requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const {
     requireLegacyBiasedSelectionReady(ctx);
     if (!ctx.patch13Applied) {
@@ -3226,6 +3246,10 @@ Patch13RejectionSelection Patch13RejectionWrapper::repair(
         }
         ++offset;
     }
+}
+
+Integer LegacyGateQuestionAdapter::ask(const Integer& magnitude) const {
+    return oldGateQuestionDay(magnitude);
 }
 
 LegacyWideSelectionAttempt LegacyShortOnlyWideSelectionAdapter::attempt(
@@ -3744,6 +3768,41 @@ void Patch14WideSelectionHandler::handle(
         : "SHORT_PATH_REMAINS_LEGACY_COMPATIBLE";
     ctx.branchTrace.push_back("PATCH_14_WIDE_SELECTION_READY");
     metrics.bump(ctx, "patch14.wideSelection.ready");
+}
+
+void Discovery15GateQuestionHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyGateQuestionAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery15GateQuestionHandler";
+    ctx.phase = "DISCOVERY_15_GATE_QUESTION";
+    ctx.branchTrace.push_back("DISCOVERY_15_GATE_QUESTION");
+    ctx.legacyGateQuestionMagnitude = ctx.legacyGateQuestionSignedStep;
+    if (ctx.legacyGateQuestionMagnitude < 0) {
+        ctx.legacyGateQuestionMagnitude = -ctx.legacyGateQuestionMagnitude;
+    }
+    ctx.legacyGateQuestionOutput = adapter.ask(ctx.legacyGateQuestionMagnitude);
+    ctx.legacyGateQuestionReady = true;
+    ctx.status = ctx.legacyGateQuestionSignedStep < 0
+        ? "SIGNUM_NEGATIVUM_AB_CALLER_DELETUM"
+        : "VIA_POSITIVA_LEGACY_CONCORDAT";
+    metrics.bump(ctx, "discovery15.gateQuestion.calls");
+    validator.requireDiscovery15GateQuestionReady(ctx);
+}
+
+void BaseDispatcher::dispatchLegacyGateQuestion(
+    BaseMonsterContext& ctx,
+    const Discovery15GateQuestionHandler& handler,
+    const LegacyGateQuestionAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_15_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_15_DISPATCH");
+    metrics.bump(ctx, "discovery15.dispatch.calls");
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 void BaseDispatcher::dispatchPatchedWideSelection(
@@ -4274,6 +4333,34 @@ LegacyWideSelectionReport BaseMonsterManager::executeUnpatchedWideSelectionDiagn
         ctx.patchedNextBowlOutput,
         ctx.patch11Applied,
         ctx.patch12Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+LegacyGateQuestionReport BaseMonsterManager::executeLegacyGateQuestionDay(
+    const Integer& signedStep) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = FOUNDATION_DAY_OLD;
+    ctx.targetDay = FOUNDATION_DAY_OLD;
+    ctx.phase = "DISCOVERY_15_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyGateQuestionSignedStep = signedStep;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyGateQuestionAdapter adapter;
+    const Discovery15GateQuestionHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyGateQuestion(ctx, handler, adapter, validator, metrics);
+
+    return LegacyGateQuestionReport{
+        signedStep,
+        ctx.legacyGateQuestionMagnitude,
+        ctx.legacyGateQuestionOutput,
         ctx.phase,
         ctx.status,
         ctx.currentHandler,

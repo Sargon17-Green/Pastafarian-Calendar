@@ -877,3 +877,36 @@ Omnes regressiones Graduum 1–29 transeunt.
 Additi sunt `Patch14WideDetourSelection`, campi contextus ante-patch et wide, campi report observabilitatis, `Patch14WideDetourWrapper`, `Patch14WideSelectionHandler`, `requirePatch14WideSelectionReady`, `dispatchPatchedWideSelection` et `executeUnpatchedWideSelectionDiagnostic`. `biasedLegacyPick` et `LegacyShortOnlyWideSelectionAdapter::attempt` intacta manent.
 
 Nullus `oldGateQuestionDay`, nullus PATCH 15, nullus `LEGACY_YEAR_MAX` et nullus codex posterior praemature additus est.
+
+
+## Gradus 30 — DISCOVERY 15: quaestio portae negativa ad latus positivum conversa
+
+### Quid putabatur
+
+Post wide selectionem correctam, interrogatio portae per gradum signatum ad utramque partem Fundationis moveri debebat. Stratum historicum tamen helper vetus simplicem numerum non significationem directionis possidebat.
+
+### Quid repertum est
+
+Helper legacy nunc expresse manet:
+
+```text
+oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n
+```
+
+Caller historicus ante vocationem `signedStep` in magnitudinem absolutam convertit. Ergo gradus negativus non per helper negativum transit; idem numerus positivus traditur et dies quaestionis fit `FOUNDATION_DAY_OLD+abs(signedStep)`.
+
+`LegacyGateQuestionAdapter` helper vere vocat. `Discovery15GateQuestionHandler` magnitudinem calleris, output, statum et trace in `BaseMonsterContext` servat. `requireDiscovery15GateQuestionReady` verificat exactam cicatricem calleris, non normam futuram.
+
+### Regressio
+
+Probatio tres controles non-negativos et tres gradus negativos exercet. `0,+1,+17` concordant. `-1,-17,-123456` debent ad dies `FOUNDATION_DAY_OLD+signedStep` pertinere, sed via activa eos ad `FOUNDATION_DAY_OLD+abs(signedStep)` mittit. Tres discrepantiae exactae fiunt et exitus est 1.
+
+Omnes regressiones Graduum 1–29 denuo transeunt.
+
+### Quod consulto nondum adest
+
+Nulla via specialis pro `signedStep<0`, nullus PATCH 15, nullum `patch15Applied`, nullus `LEGACY_YEAR_MAX=5781` et nullus codex ulterior additur. Gradus 31 solus correctionem directionis negativae introducere debet, helper veteri intacto relicto.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `oldGateQuestionDay`, campi contextus gradus/magnitudinis/output, `LegacyGateQuestionReport`, `LegacyGateQuestionAdapter`, `Discovery15GateQuestionHandler`, `requireDiscovery15GateQuestionReady`, `dispatchLegacyGateQuestion` et `executeLegacyGateQuestionDay`.
