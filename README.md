@@ -1,37 +1,30 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırkıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 39/55, `PATCH 19` durumundadır.
+Aşama 40/55, `DISCOVERY 20` durumundadır.
 
-Legacy cache map key olarak yalnız `year.number` kullanmaya devam eder.
-
-Raw `legacyYearNumberOnlyLookup` yalnız bu kötü key ile entry arar ve guard kontrollerinden önce gerçekten çağrılır.
-
-Map value artık:
+Exact historical helper:
 
 ```text
-calculationDayFingerprint
-openGate
-closeGate
-value
+oldStructureSauce(cDay,originalTargetDay)
 ```
 
-alanlarını taşır.
+production'a eklenmiştir.
 
-`calculationDayFingerprint` doğrudan current `calculation_day` değeridir.
+Real calendar path user original target için sauce'u daha önce zaten hesapladığından helper mevcut final bowls ve drop-46 latch sonucunu invocation-local binding üzerinden kullanır; eski sauce phases ikinci kez çalıştırılmaz.
 
-Hit yalnız calculation day fingerprint, open gate ve close gate guard'larının üçü de eşleşirse kabul edilir.
+Standalone `sauceWithCurrentScars` current Python implementation'ın kendi production adapter zinciriyle aynı sauce sonucunu yeniden üretebilir.
 
-Herhangi bir guard mismatch `MISS` olur ve aynı `year.number` key altında yeni guarded entry yazılır.
+Real state-machine resolved year first day değerini bilir, fakat old helper hâlâ user original target ile çağrılır ve old sauce doğrudan `LegacyStructureSelectorAdapter` inputuna gider.
 
-Composite key kullanılmaz.
+Yeni normatif regression üç witness üzerinde actual selector token değerini test-only `sauce(cDay,yearFirstDay)` sonucu ile karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
 
-Aşama 38 normatif stale-cache regression gövdesi değiştirilmeden yeşile dönmüştür.
+Henüz `PATCH 20` yoktur: old sauce ghost değildir, `(cDay,year.firstDay)` authoritative recomputation semantic yola girmez ve old result selector'dan ayrılmaz.
 
-Patch 20 `oldStructureSauce` ghost kodu henüz yoktur.
+Patch 21 cutlet partition prefix-gate filter kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -47,10 +40,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuz dokuzuncu aşama paketi:
+Tam kırkıncı aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 38'de kırmızı olan calculation day, open gate ve close gate cache alt örnekleri aynı normatif regression gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–39 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni original-target structure sauce versus year-first-day selector regressionunun üç alt örneği başarısız olur.

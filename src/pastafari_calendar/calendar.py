@@ -559,7 +559,40 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.yearCache.probes",
         )
         local_ctx.status = "ESKİ_YALNIZ_YIL_NUMARASI_CACHE_HAZIR"
-        local_ctx.phase = "AŞAMA_39_BEKLEME"
+        local_ctx.phase = "ESKİ_ORİJİNAL_TARGET_STRUCTURE_SAUCE"
+
+    def legacy_structure_sauce_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        if local_ctx.patch18_result_open_day is None:
+            raise RuntimeError(
+                "Structure sauce başlamadan önce resolved year open gate hazır olmalıdır"
+            )
+
+        year_first_day = (
+            local_ctx.patch18_result_open_day
+            + 1
+        )
+
+        manager.legacy_structure_sauce.call(
+            local_ctx,
+            calculation_day,
+            target_day,
+            year_first_day,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.structureSauce.probes",
+        )
+        local_ctx.status = "ESKİ_ORİJİNAL_TARGET_STRUCTURE_SAUCE_HAZIR"
+        local_ctx.phase = "AŞAMA_40_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -581,6 +614,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_5000_STABLE_LENGTH_TIE", legacy_year5000_tie_handler)
     manager.dispatcher.register("ESKİ_365_YIL_SIÇRAMA_TAHMİNİ", legacy_year_jump_handler)
     manager.dispatcher.register("ESKİ_YALNIZ_YIL_NUMARASI_CACHE", legacy_year_cache_handler)
+    manager.dispatcher.register("ESKİ_ORİJİNAL_TARGET_STRUCTURE_SAUCE", legacy_structure_sauce_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -602,6 +637,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
 
+    # Aşama 39 terminal mesajı önceki regression scar'ı olarak bilerek korunur.
     raise StageNotIntegratedError(
         "Otuz dokuzuncu aşamada üretim takvim yolu henüz birleştirilmedi"
     )

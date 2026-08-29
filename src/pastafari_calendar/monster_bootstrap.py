@@ -21,6 +21,7 @@ from .legacy_gate_question import LegacyGateQuestionAdapter
 from .legacy_year_candidates import LegacyYearCandidateAdapter
 from .legacy_year_jump import LegacyYearJumpAdapter
 from .legacy_year_cache import LegacyYearNumberOnlyCacheMap
+from .legacy_structure_sauce import LegacyStructureSauceAdapter
 
 
 class MonsterError(RuntimeError):
@@ -259,6 +260,18 @@ class MonsterContext:
     patch19_last_written_close_gate: int | None = None
     patch19_last_written_token: str | None = None
     patch19_applied: bool = False
+    legacy_structure_calculation_day: int | None = None
+    legacy_structure_original_target_day: int | None = None
+    legacy_structure_year_first_day: int | None = None
+    legacy_structure_old_bowls: tuple[int, ...] | None = None
+    legacy_structure_old_order_at_drop_46: tuple[int, ...] | None = None
+    legacy_structure_old_used_by_selector: bool = False
+    legacy_structure_semantic_source: str | None = None
+    legacy_structure_reused_existing_calendar_sauce: bool = False
+    legacy_structure_selector_input_target_day: int | None = None
+    legacy_structure_selector_token: int | None = None
+    legacy_structure_selector_order_at_drop_46: tuple[int, ...] | None = None
+    legacy_structure_calls: int = 0
 
 
 class BaseMetrics:
@@ -329,3 +342,4 @@ class MonsterManager:
         self.legacy_year_candidates = LegacyYearCandidateAdapter()
         self.legacy_year_jump = LegacyYearJumpAdapter()
         self.legacy_year_cache = LegacyYearNumberOnlyCacheMap()
+        self.legacy_structure_sauce = LegacyStructureSauceAdapter()

@@ -1,0 +1,29 @@
+Aşama 40/55 — DISCOVERY 20
+
+Bu paket yalnızca Aşama 40 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_structure_sauce.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_40_discovery_20.py
+artifacts/stage-40/BASELINE_STAGE_39_GREEN.txt
+artifacts/stage-40/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-40/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_40.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 39 baseline: GREEN
+Değişiklik sonrası Aşama 1–39 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+oldStructureSauce(cDay,originalTargetDay): EKLENDİ VE AKTİF
+real path mevcut original-target sauce reuse: EVET
+standalone current-line sauce core: EKLENDİ
+old original-target sauce selector'a gidiyor: EVET
+year first-day semantic recomputation: YOK
+old sauce ghost: HAYIR
+Patch 21 cutlet prefix filter: YOK

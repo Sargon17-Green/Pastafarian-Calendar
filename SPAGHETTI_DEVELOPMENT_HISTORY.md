@@ -1792,3 +1792,54 @@ Aşama 38'in yalnız historical bug state'ini donduran iki non-normative testi y
 Patch 20 `oldStructureSauce` ghost kodu henüz yoktur.
 
 Structure target replacement veya year.firstDay sauce recomputation production'a eklenmemiştir.
+
+
+## Aşama 40 — Keşif 20: structure sauce için original target kullanmak
+
+### Historical helper
+
+Production içine exact iki-argüman helper eklenir:
+
+```text
+oldStructureSauce(cDay,originalTargetDay)
+```
+
+Real calendar path original-target sauce'u daha önce zaten hesapladığı için helper bu mevcut final bowls ve drop-46 latch sonucunu invocation-local binding üzerinden kullanır. Böylece önceki aşamaların real-path call-count scar'ları ikinci kez çalıştırılmaz.
+
+Standalone çağrıda `sauceWithCurrentScars` current Python implementation'ın kendi adapter zinciriyle aynı sauce sonucunu yeniden üretebilir.
+
+### Real semantic kusur
+
+`LegacyStructureSauceAdapter` resolved year first day değerini diagnostic state'te tutar.
+
+Fakat semantic structure sauce hâlâ `oldStructureSauce(cDay,originalTargetDay)` sonucudur.
+
+Old result doğrudan `LegacyStructureSelectorAdapter` inputuna gider.
+
+### Production witness
+
+Real `calendar_date_spaghetti` Stage 39 cache katmanından sonra Stage 37 resolved year open gate üzerinden `year_first_day=open_gate+1` hesaplar.
+
+User original target bu first day'den farklıdır.
+
+Buna rağmen old helper exact user original target ile çağrılır ve selector input target day aynı original target olarak kalır.
+
+Aşama 39 terminal error string'i önceki regression scar'ı olduğu için fiziksel olarak aynen korunur.
+
+### Normatif ayrışma
+
+Yeni regression üç bağımsız `(cDay,originalTargetDay,yearFirstDay)` witness üzerinde actual adapter selector token değerini test-only authoritative `sauce(cDay,yearFirstDay).bowls[2]` ile karşılaştırır.
+
+Üç witness'ta actual original-target sauce token ile authoritative year-first-day token ayrışır.
+
+Üç alt örnek bilinçli kırmızıdır.
+
+### Sınır
+
+Production içinde old sauce ghost değildir.
+
+Authoritative `(cDay,year.firstDay)` recomputation semantic yola eklenmemiştir.
+
+Old result selector'dan ayrılmamıştır.
+
+Patch 21 cutlet partition prefix-gate filter kodu henüz yoktur.
