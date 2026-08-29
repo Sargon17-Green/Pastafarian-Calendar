@@ -10,8 +10,8 @@ assert.equal(typeof production.monthWeavingAnswerRingFromSauce, 'function');
 assert.equal(typeof production.LegacyMonthWeavingAdapter, 'function');
 assert.equal(typeof production.Discovery24MonthWeavingHandler, 'function');
 assert.equal(typeof production.discovery24LegacyMonthWeavingThroughMonsterPath, 'function');
-assert.equal('DPUnrankLegalWeaving' in production, false);
-assert.equal('MonthWeavingPatchWrapper' in production, false);
+assert.equal(typeof production.DPUnrankLegalWeaving, 'function');
+assert.equal(typeof production.MonthWeavingPatchWrapper, 'function');
 assert.equal('oldContiguousMonthDayGuess' in production, false);
 
 const legacySource = production.legacyChooseEachDaySeparately.toString();
@@ -92,12 +92,12 @@ assert.deepEqual(routed.context.branchTrace.slice(-3), [
 ]);
 assert.equal(routed.context.metrics['discovery24.legacyChooseEachDaySeparately.calls'], 1n);
 
-console.log('DISCOVERY 24 EXPECTED_RED witness: family=' + firstDivergence.familyCount +
+console.log('DISCOVERY 24 LEGACY witness: family=' + firstDivergence.familyCount +
   ' rank=' + firstDivergence.wantedRank +
   ' ghost=[' + firstDivergence.ghost.join(',') + '] expected=[' + firstDivergence.expected.join(',') + ']');
 
-assert.deepEqual(
+assert.notDeepEqual(
   firstDivergence.ghost,
   firstDivergence.expected,
-  'EXPECTED_RED Discovery 24: li chooser die-per-die legacy ne selecte li intertexe legal complet per bowl 4 / seal 32.'
+  'Li scar de Discovery 24 deve continuar demostrar li divergence historic pos Patch 24.'
 );

@@ -8,7 +8,7 @@ assert.equal(typeof production.VirtualLegacyList, 'function');
 assert.equal(typeof production.MonthLengthVirtualPatchWrapper, 'function');
 assert.equal(typeof production.historicMonthLengthVirtualListThroughMonsterPath, 'function');
 assert.equal(typeof production.legacyChooseEachDaySeparately, 'function');
-assert.equal('DPUnrankLegalWeaving' in production, false);
+assert.equal(typeof production.DPUnrankLegalWeaving, 'function');
 assert.equal('oldContiguousMonthDayGuess' in production, false);
 
 const legacyMaterializerSource = production.legacyMaterializeMonthLengthWays.toString();

@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 48 de 55: DISCOVERY 24** e li repository local es intentionalmen `EXPECTED_RED`. Omni regressions til Patch 23 e li verifier passa; solmen li regression nov de Discovery 24 falla.
+Li linea es in **Stage 49 de 55: PATCH 24** e li repository local es `GREEN`. Omni regressions til Discovery 24, li verifier e li test focal de Patch 24 passa.
 
-Li backend virtual de Patch 23 resta intact. Pos it, `legacyChooseEachDaySeparately` es executet realmen quam scar: it questiona bowl 4 / seal 32 e electe un monthId localmen por chascun die, circumrotante solmen quand li monthId selectet ja es plen. It conserva exactmen li longores/multiplicities, ma ne selecte un intertexe complet e ne enforce li ordre del unesim/ultim occurrences. `Discovery24MonthWeavingHandler` conserva ti resultate quam ghost e anc quam current semantic weaving, pro que Patch 24 ne existe ancor. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Li chooser `legacyChooseEachDaySeparately` resta intact e es executet realmen ante li correction, talmen que su word die-per-die resta un ghost historic observabil. `LegalMonthWeavingDP` conta e unranka li familie legal complet sin materialisation complet; `compatibleMonthWeavingRank` usa li sam bowl 4 / seal 32 ring e li dispatcher curt/wide existent. `MonthWeavingPatchWrapper` retorna li ghost solmen si it ja es identic al word legal; altrimen solmen li correct deven semantic. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -24,7 +24,7 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 23 deve restar verd:
+Omni regressions til Discovery 24 deve restar verd:
 
 ```text
 npm run test:previous
@@ -36,13 +36,13 @@ Li verifier deve esser verd:
 node tests/verify-stage-01.js
 ```
 
-Li test focal de Discovery 24 deve esser intentionalmen red:
+Li test focal de Patch 24 deve esser verd:
 
 ```text
-npm run test:discovery-24
+npm run test:patch-24
 ```
 
-Li suite complet deve esser intentionalmen red solmen in Discovery 24:
+Li suite complet deve esser verd:
 
 ```text
 npm test
@@ -420,3 +420,25 @@ Por `[4,4,4]`, li familie legal test-only have 1301 membres. Un witness del stru
 ### Limite historic
 
 Null `wantedRank`, null `DPUnrankLegalWeaving` e null `MonthWeavingPatchWrapper` es present. `oldContiguousMonthDayGuess` de Patch 25 es anc absent. Stage 48 resta EXPECTED_RED exclusivmen pro ti scar; li proxim stage mandat es Stage 49 — PATCH 24.
+
+## Stage 49 — PATCH 24
+
+### Li chooser old resta activ
+
+Patch 24 ne altera `legacyChooseEachDaySeparately`, `LegacyMonthWeavingAdapter.selectEachDay` ni `Discovery24MonthWeavingHandler.handle`. Li route reparat traversa prim Discovery 24, ergo li word die-per-die old es calculat realmen con bowl 4 / seal 32 e resta in state quam ghost. Li patch ne usa ti ghost por determinar un rank ni por modificar li familie legal.
+
+### Familie legal complet sin vector-state explosion
+
+`LegalMonthWeavingDP` representa exactmen li familie normativ de words con multiplicities fix e du constraints: unesim occurrences de monthIds in órdine ascendent, e ultim occurrences anc in órdine ascendent. Por evitar un memo gigant de omni vectores de remaining counts, li backend decomposi li count exact in du partes: intertexes del labels ja apert con ultim-occurrence order, e un table DP del labels futur quel depende del quantitá de simbols pos li unesim occurrence del maxim label apert. Omni combinatorica es exact in `BigInt`.
+
+Durant `unrank1`, li moves legal es provat in monthId ascendent. Por chascun move, li backend calcula exactmen li count del suffix e subtrae solmen blocs complet. Talmen li rank 1-based conserva exactmen li ordre lexicografic del familie normativ.
+
+### wantedRank e detour semantic
+
+`compatibleMonthWeavingRank` manda li sam answer ring de bowl 4 / seal 32 al dispatcher curt/wide ja reparat. Li resultate es `patch24WantedRank`. `DPUnrankLegalWeaving` usa ti rank por calcular `correct`. `MonthWeavingPatchWrapper` conserva separatim ghost, count, wanted rank e correct; si ghost e correct es identic element-per-element, it retorna li sam object ghost, altrimen it retorna li correct.
+
+Li witness `[4,4,4]` conserva li old ghost `[3,1,2,3,1,2,3,1,2,3,1,2]`, ma li familie legal have 1301 membres, rank 216 e correct `[1,1,2,1,3,3,1,2,2,2,3,3]`. Li suite torna verd. Un audit test-only del sam linea JavaScript compara 10 families micri e 1332 membres contra li reference normativ local. Li route real con li 16 longores de Patch 23 have un count legal de 1064 cifras e usa li wide path sin materialisar li familie.
+
+### Limite historic
+
+Patch 25 ne es anticipat. `oldContiguousMonthDayGuess` e `ContiguousMonthDayPatchWrapper` resta absent, e null logic de month-in-day contigui es introductet.

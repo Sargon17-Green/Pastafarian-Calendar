@@ -621,6 +621,12 @@ class BaseValidationManager {
     }
   }
 
+  requireDiscovery24Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_24_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un ghost legacy de intertexe valid por Patch 24.');
+    }
+  }
+
   requireStructureSauceResult(result) {
     if (!result || typeof result !== 'object' || !Array.isArray(result.bowls) || result.bowls.length < 7 ||
         !Array.isArray(result.orderAt46Latch) || result.orderAt46Latch.length !== 6) {
@@ -4060,6 +4066,237 @@ class Discovery24MonthWeavingHandler {
   }
 }
 
+class LegalMonthWeavingDP {
+  constructor(lengths) {
+    if (!Array.isArray(lengths) || lengths.length < 1 ||
+        lengths.some((length) => !Number.isInteger(length) || length < 1)) {
+      throw new RangeError('LegalMonthWeavingDP exige longores positiv de mensus.');
+    }
+    this.lengths = lengths.slice();
+    this.monthCount = lengths.length;
+    this.totalDays = lengths.reduce((sum, length) => sum + length, 0);
+    this._binomialMemo = new Map();
+    this._futureWays = this._buildFutureWays();
+    this._exactCount = null;
+  }
+
+  _binomial(n, k) {
+    if (!Number.isInteger(n) || !Number.isInteger(k) || n < 0 || k < 0 || k > n) return 0n;
+    const symmetric = k <= n - k ? k : n - k;
+    const key = n + ':' + symmetric;
+    if (this._binomialMemo.has(key)) return this._binomialMemo.get(key);
+    let value = 1n;
+    for (let i = 1; i <= symmetric; i += 1) {
+      value = (value * BigInt(n - symmetric + i)) / BigInt(i);
+    }
+    this._binomialMemo.set(key, value);
+    return value;
+  }
+
+  _buildFutureWays() {
+    // Ti DP conta exactmen li insertion del mensus futur; li state x es li quantitá de simbols pos li unesim occurrence del maxim monthId ja apert.
+    const table = Array.from(
+      { length: this.monthCount + 1 },
+      () => new Array(this.totalDays + 1).fill(0n)
+    );
+    for (let x = 0; x <= this.totalDays; x += 1) table[this.monthCount][x] = 1n;
+
+    for (let openedUpTo = this.monthCount - 1; openedUpTo >= 1; openedUpTo -= 1) {
+      const nextMultiplicity = this.lengths[openedUpTo];
+      const current = table[openedUpTo];
+      const next = table[openedUpTo + 1];
+      if (nextMultiplicity === 1) {
+        const constant = next[0];
+        for (let x = 0; x <= this.totalDays; x += 1) current[x] = constant;
+        continue;
+      }
+
+      let prefix = 0n;
+      let combination = 1n;
+      for (let x = 0; x <= this.totalDays; x += 1) {
+        const y = x + nextMultiplicity - 1;
+        if (y > this.totalDays) {
+          current[x] = prefix;
+          continue;
+        }
+        if (x > 0) {
+          combination = (combination * BigInt(y - 1)) / BigInt(y - nextMultiplicity + 1);
+        }
+        prefix += combination * next[y];
+        current[x] = prefix;
+      }
+    }
+    return table;
+  }
+
+  _legalMove(remaining, openedUpTo, closedUpTo, monthId) {
+    if (remaining[monthId - 1] === 0) return false;
+    const alreadyOpened = remaining[monthId - 1] < this.lengths[monthId - 1];
+    if (!alreadyOpened && monthId !== openedUpTo + 1) return false;
+    const willClose = remaining[monthId - 1] === 1;
+    if (willClose && monthId !== closedUpTo + 1) return false;
+    return true;
+  }
+
+  _applyMove(remaining, openedUpTo, closedUpTo, monthId) {
+    const next = remaining.slice();
+    let nextOpened = openedUpTo;
+    let nextClosed = closedUpTo;
+    if (next[monthId - 1] === this.lengths[monthId - 1]) nextOpened = monthId;
+    next[monthId - 1] -= 1;
+    if (next[monthId - 1] === 0) nextClosed = monthId;
+    return { remaining: next, openedUpTo: nextOpened, closedUpTo: nextClosed };
+  }
+
+  _activeLastOrderCount(remaining, openedUpTo, closedUpTo) {
+    let firstActive = -1;
+    for (let monthId = closedUpTo + 1; monthId <= openedUpTo; monthId += 1) {
+      if (remaining[monthId - 1] > 0) {
+        firstActive = monthId;
+        break;
+      }
+    }
+    if (firstActive < 0) return 1n;
+
+    let prefixLength = remaining[firstActive - 1];
+    let ways = 1n;
+    for (let monthId = firstActive + 1; monthId <= openedUpTo; monthId += 1) {
+      const multiplicity = remaining[monthId - 1];
+      if (multiplicity < 1) {
+        throw new BootstrapStageError('Li state activ de LegalMonthWeavingDP viola li ordre del ultim occurrences.');
+      }
+      ways *= this._binomial(prefixLength + multiplicity - 1, multiplicity - 1);
+      prefixLength += multiplicity;
+    }
+    return ways;
+  }
+
+  _countCompletions(remaining, openedUpTo, closedUpTo) {
+    let activeLength = 0;
+    for (let monthId = closedUpTo + 1; monthId <= openedUpTo; monthId += 1) {
+      activeLength += remaining[monthId - 1];
+    }
+    const activeWays = this._activeLastOrderCount(remaining, openedUpTo, closedUpTo);
+    const futureWays = this._futureWays[openedUpTo][activeLength];
+    return activeWays * futureWays;
+  }
+
+  count() {
+    if (this._exactCount !== null) return this._exactCount;
+    const initial = this.lengths.slice();
+    const first = this._applyMove(initial, 0, 0, 1);
+    this._exactCount = this._countCompletions(first.remaining, first.openedUpTo, first.closedUpTo);
+    return this._exactCount;
+  }
+
+  unrank1(rank1) {
+    const familyCount = this.count();
+    if (typeof rank1 !== 'bigint' || rank1 < 1n || rank1 > familyCount) {
+      throw new RangeError('Li rank de intertexe legal es extra li familie.');
+    }
+    let rank = rank1;
+    let remaining = this.lengths.slice();
+    let openedUpTo = 0;
+    let closedUpTo = 0;
+    const out = [];
+
+    while (out.length < this.totalDays) {
+      let selected = false;
+      for (let monthId = 1; monthId <= this.monthCount; monthId += 1) {
+        if (!this._legalMove(remaining, openedUpTo, closedUpTo, monthId)) continue;
+        const next = this._applyMove(remaining, openedUpTo, closedUpTo, monthId);
+        const block = this._countCompletions(next.remaining, next.openedUpTo, next.closedUpTo);
+        if (rank > block) {
+          rank -= block;
+        } else {
+          out.push(monthId);
+          remaining = next.remaining;
+          openedUpTo = next.openedUpTo;
+          closedUpTo = next.closedUpTo;
+          selected = true;
+          break;
+        }
+      }
+      if (!selected) {
+        throw new BootstrapStageError('LegalMonthWeavingDP ne trova un move lexicografic legal por li rank restant.');
+      }
+    }
+    return out;
+  }
+}
+
+function compatibleMonthWeavingRank(answerStream, familyCount) {
+  if (typeof familyCount !== 'bigint' || familyCount < 1n) {
+    throw new RangeError('Li familie de intertexes legal deve haver un count positiv exact.');
+  }
+  return selectionDispatcherWithWideDetour(answerStream, familyCount).output;
+}
+
+function DPUnrankLegalWeaving(lengths, wantedRank, preparedFamily = null) {
+  const family = preparedFamily === null ? new LegalMonthWeavingDP(lengths) : preparedFamily;
+  if (!(family instanceof LegalMonthWeavingDP)) {
+    throw new TypeError('DPUnrankLegalWeaving exige un backend LegalMonthWeavingDP valid.');
+  }
+  return family.unrank1(wantedRank);
+}
+
+class MonthWeavingPatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context) {
+    this.validationManager.requireDiscovery24Result(context);
+    const monthLengths = context.legacyMonthWeavingLengths;
+    const ghost = context.legacyMonthWeavingGhost;
+    const answerStream = context.legacyMonthWeavingAnswerStream;
+    if (!Array.isArray(monthLengths) || !Array.isArray(ghost) ||
+        !answerStream || typeof answerStream.first !== 'bigint' || typeof answerStream.directionStep !== 'bigint') {
+      throw new BootstrapStageError('Patch 24 exige li longores, ghost e answer ring preservat per Discovery 24.');
+    }
+
+    const family = new LegalMonthWeavingDP(monthLengths);
+    const familyCount = family.count();
+    const wantedRank = compatibleMonthWeavingRank(answerStream, familyCount);
+    const correct = DPUnrankLegalWeaving(monthLengths, wantedRank, family);
+    const ghostEqualsCorrect = ghost.length === correct.length && ghost.every((value, index) => value === correct[index]);
+    const semantic = ghostEqualsCorrect ? ghost : correct;
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'MonthWeavingPatchWrapper';
+    context.phase = 'PATCH_24_LEGAL_WHOLE_MONTH_WEAVING';
+    context.branchTrace.push('PATCH_24_LEGAL_WHOLE_MONTH_WEAVING');
+    context.patch24Ghost = ghost;
+    context.patch24LegalFamily = family;
+    context.patch24LegalFamilyCount = familyCount;
+    context.patch24WantedRank = wantedRank;
+    context.patch24CorrectMonthWeaving = correct.slice();
+    context.patch24GhostEqualsCorrect = ghostEqualsCorrect;
+    context.patch24ReturnedLegacyGhost = ghostEqualsCorrect;
+    context.patch24SemanticMonthWeaving = semantic;
+    context.legacyMonthWeavingSemantic = semantic;
+    context.status = 'PATCH_24_RESULT';
+    this.metricsManager.bump(context, 'patch24.legacyGhostPreserved.calls');
+    this.metricsManager.bump(context, 'patch24.legalFamilyCount.calls');
+    this.metricsManager.bump(context, 'patch24.wantedRank.calls');
+    this.metricsManager.bump(context, 'patch24.DPUnrankLegalWeaving.calls');
+    if (ghostEqualsCorrect) this.metricsManager.bump(context, 'patch24.legacyGhostIdentityReturn.calls');
+    else this.metricsManager.bump(context, 'patch24.correctDetourReturn.calls');
+
+    return {
+      monthLengths: monthLengths.slice(),
+      answerStream: { ...answerStream },
+      ghost,
+      familyCount,
+      wantedRank,
+      correct: correct.slice(),
+      ghostEqualsCorrect,
+      monthWeaving: semantic
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -4901,6 +5138,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyMonthWeavingAdapter
     );
+    this.monthWeavingPatchWrapper = new MonthWeavingPatchWrapper(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -5710,6 +5951,38 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch24MonthWeaving(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      this.cutletPartitionPatchWrapper.repair(context);
+      this.discovery22RepeatedNameHandler.handle(context);
+      this.repeatedNamePatchWrapper.repair(context);
+      this.discovery23MonthLengthMaterializationHandler.handle(context);
+      this.monthLengthVirtualPatchWrapper.repair(context);
+      // Li chooser legacy de Discovery 24 resta un scar activ e es executet realmen ante li detour legal.
+      this.discovery24MonthWeavingHandler.handle(context);
+      const result = this.monthWeavingPatchWrapper.repair(context);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -6033,8 +6306,19 @@ function discovery24LegacyMonthWeavingThroughMonsterPath(
   );
 }
 
+function historicMonthWeavingThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Patch 24 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executePatch24MonthWeaving(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 24; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 24; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -6120,6 +6404,8 @@ module.exports = Object.freeze({
   MonthLengthVirtualPatchWrapper,
   LegacyMonthWeavingAdapter,
   Discovery24MonthWeavingHandler,
+  LegalMonthWeavingDP,
+  MonthWeavingPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -6211,6 +6497,8 @@ module.exports = Object.freeze({
   monthWeavingAnswerRingFromSauce,
   wrapMonth,
   legacyChooseEachDaySeparately,
+  compatibleMonthWeavingRank,
+  DPUnrankLegalWeaving,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -6259,5 +6547,6 @@ module.exports = Object.freeze({
   discovery23LegacyMonthLengthMaterializationThroughMonsterPath,
   historicMonthLengthVirtualListThroughMonsterPath,
   discovery24LegacyMonthWeavingThroughMonsterPath,
+  historicMonthWeavingThroughMonsterPath,
   calendarDateSpaghetti
 });

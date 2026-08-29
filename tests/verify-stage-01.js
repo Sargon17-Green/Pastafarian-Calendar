@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Patch 23 contamina production', () 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'DPUnrankLegalWeaving', 'oldContiguousMonthDayGuess'
+    'oldContiguousMonthDayGuess'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
@@ -2117,7 +2117,7 @@ group('Patch 23 furni count exact e itemAt1 lexicografic sin materialisation com
   ok(!Array.isArray(huge));
   ok(!('ways' in huge));
   ok(typeof production.legacyChooseEachDaySeparately === 'function');
-  ok(!('DPUnrankLegalWeaving' in production));
+  ok(typeof production.DPUnrankLegalWeaving === 'function');
 });
 
 group('Discovery 24 conserva li chooser die-per-die legacy quam ghost real', () => {
@@ -2128,12 +2128,22 @@ group('Discovery 24 conserva li chooser die-per-die legacy quam ghost real', () 
   ok(typeof production.Discovery24MonthWeavingHandler === 'function');
   ok(typeof production.discovery24LegacyMonthWeavingThroughMonsterPath === 'function');
   deepEq(production.legacyChooseEachDaySeparately([2,1], { first: 1n, directionStep: 1n }), [1,2,1]);
-  ok(!('DPUnrankLegalWeaving' in production));
-  ok(!('MonthWeavingPatchWrapper' in production));
+  ok(typeof production.DPUnrankLegalWeaving === 'function');
+  ok(typeof production.MonthWeavingPatchWrapper === 'function');
   ok(!('oldContiguousMonthDayGuess' in production));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 24', () => {
+group('Patch 24 conserva li ghost e selecte li intertexe legal complet per DP', () => {
+  const family = new production.LegalMonthWeavingDP([4,4,4]);
+  eq(family.count(), 1301n);
+  deepEq(production.DPUnrankLegalWeaving([4,4,4], 216n, family), [1,1,2,1,3,3,1,2,2,2,3,3]);
+  eq(production.compatibleMonthWeavingRank({ first: 216n, directionStep: 1n }, 1301n), 216n);
+  ok(typeof production.MonthWeavingPatchWrapper === 'function');
+  ok(typeof production.historicMonthWeavingThroughMonsterPath === 'function');
+  ok(!('oldContiguousMonthDayGuess' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 24', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2145,4 +2155,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 24.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 24.');
