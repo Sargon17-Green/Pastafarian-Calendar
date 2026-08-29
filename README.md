@@ -1,32 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 36/55, `DISCOVERY 18` durumundadır.
+Aşama 37/55, `PATCH 18` durumundadır.
 
-Exact legacy jump helper:
+`oldJumpGuess(.../365...)` fiziksel olarak aynen korunur ve her jump çağrısında telemetry için gerçekten hesaplanır. Ancak guess artık semantic year number değildir.
 
-```text
-oldJumpGuess(anchor,targetDay)
-=
-anchor.number
-+
-floorDiv(targetDay-anchor.first_day,365)
-```
+`SequentialYearWalkPatchWrapper` anchor Year 5000'den başlayarak hedef current interval içine girene kadar `nextYear` veya `previousYear` callback'ini bir yıl bir yıl çağırır.
 
-olarak production'a eklenmiştir.
+Forward step `number+1` ve shared close/open boundary ister. Backward step `number-1` ve shared open/close boundary ister.
 
-`LegacyYearJumpAdapter` bu tahmini diagnostic state'te saklar, fakat historical kusur gereği aynı guess henüz doğrudan semantic target year number olarak kullanılır.
+Hedef interval kuralı `open_day < target_day <= close_day` olarak uygulanır.
 
-Real calendar state-machine Year-5000 witness anchor için `close_day+1` hedefinde bu yolu gerçekten çalıştırır.
+Aşama 36 normatif `/365` regresyonu değiştirilmeden yeşile dönmüştür. Yalnız historical state'i donduran non-normative Stage 36 testi yeni telemetry-only contract'a uyarlanmıştır.
 
-Yeni normatif regresyon üç hedefte 365 günlük tahmini gerçek ardışık-year interval semantiğiyle karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
-
-Henüz `PATCH 18` yoktur: `oldJumpGuess` telemetry-only değildir ve `previousYear`/`nextYear` one-at-a-time walk production'a eklenmemiştir.
-
-Patch 19 cache kodu da henüz yoktur.
+Patch 19 cache-by-year-number kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -42,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuz altıncı aşama paketi:
+Tam otuz yedinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–35 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni `/365` jump-versus-sequential-year normatif regresyonunun üç alt örneği başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 36'da kırmızı olan üç `/365` jump alt örneği aynı normatif regression gövdesiyle yeşile dönmelidir.

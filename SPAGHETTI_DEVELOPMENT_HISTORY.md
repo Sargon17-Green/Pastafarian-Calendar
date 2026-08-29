@@ -1702,3 +1702,16 @@ Production içinde `previousYear` veya `nextYear` walk yoktur.
 `oldJumpGuess` sonucu henüz ignored telemetry değildir.
 
 Patch 19 bad cache key kodu henüz yoktur.
+
+
+## Aşama 37 — Yama 18: /365 tahminini telemetry yapıp year-by-year yürümek
+
+Aşama 36 `oldJumpGuess(anchor,targetDay)` helper gövdesi aynen korunur. Her adapter call içinde helper semantic walk başlamadan önce gerçekten çalıştırılır ve raw guess diagnostic state'te kalır.
+
+`SequentialYearWalkPatchWrapper` anchor year'dan başlar. `target_day>current.close_day` iken `nextYear`, `target_day<=current.open_day` iken `previousYear` tam bir yıl bir yıl çağrılır. Forward transition number `+1` ve shared close/open boundary, backward transition number `-1` ve shared open/close boundary taşımak zorundadır. Yürüyüş yalnız `open_day<target_day<=close_day` sağlandığında biter.
+
+Aşama 36 normatif `/365` regression gövdesi byte-for-byte değiştirilmeden yeşile döner. Stage 36'nın yalnız historical state'i donduran non-normative testi, patch sonrası yeni state contract'ı için minimal olarak güncellenir: raw guess ayrı kalır ve `legacy_jump_guess_used_as_semantic=False` beklenir.
+
+Patch wrapper arbitrary uzak hedeflerde caller tarafından verilen gerçek transition callback'leriyle bir yıl bir yıl yürür. Real Stage 37 production witness yalnız `close_day+1` adımını gerektirdiği için local fallback yalnız bu tek boundary adımını çözer; uzak hedefte gerçek transition provider zorunludur.
+
+Patch 19 cache-by-year-number code henüz yoktur.

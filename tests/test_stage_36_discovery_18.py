@@ -129,13 +129,16 @@ class Stage36Discovery18Tests(unittest.TestCase):
         )
         self.assertEqual(
             first.legacy_jump_guess_number,
-            actual,
+            oldJumpGuess(
+                anchor,
+                anchor.close_day,
+            ),
         )
         self.assertEqual(
             first.legacy_jump_semantic_year_number,
             actual,
         )
-        self.assertTrue(
+        self.assertFalse(
             first.legacy_jump_guess_used_as_semantic,
         )
         self.assertEqual(

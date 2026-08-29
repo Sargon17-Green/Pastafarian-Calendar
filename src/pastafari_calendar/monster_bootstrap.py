@@ -227,6 +227,17 @@ class MonsterContext:
     legacy_jump_semantic_year_number: int | None = None
     legacy_jump_guess_used_as_semantic: bool = False
     legacy_jump_calls: int = 0
+    patch18_legacy_guess_telemetry: int | None = None
+    patch18_guess_ignored_for_semantics: bool = False
+    patch18_walk_start_number: int | None = None
+    patch18_walk_target_day: int | None = None
+    patch18_walk_visited_numbers: tuple[int, ...] | None = None
+    patch18_forward_steps: int = 0
+    patch18_backward_steps: int = 0
+    patch18_result_number: int | None = None
+    patch18_result_open_day: int | None = None
+    patch18_result_close_day: int | None = None
+    patch18_applied: bool = False
 
 
 class BaseMetrics:
