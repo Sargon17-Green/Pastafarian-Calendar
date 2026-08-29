@@ -850,3 +850,48 @@ Bootstrap et omnes regressiones Graduum 1–45 transeunt.
 ### Quod consulto nondum adest
 
 Nullus `VirtualLegacyList`, nulla materializatio mensium enormis, nullus PATCH 23 et nullus codex posterior praemature adest. Gradus 46 debet DISCOVERY 23 tantum introducere: API legacy quod omnes vias mensium materializare fingit, sine correctione virtualis listae.
+
+## DISCOVERY 23 — materializatio concreta familiae longitudinum mensium explodit
+
+Gradus 46 post PATCH 22 solam assumptionem historicam de familia longitudinum mensium introducit. API legacy familiam bounded compositionum non ut structuram virtualem, sed ut listam concretam omnium viarum describit. Fines sunt `4..123` dies pro singulo mense, ordo est lexicographicus crescens, et numerus mensium manet inter 3 et 47.
+
+`legacyMaterializeAllMonthLengthWays(yearLength, monthCount)` hanc assumptionem realiter implet. In familia parva `yearLength=12`, `monthCount=2`, lista concreta nascitur:
+
+```text
+[4,8]
+[5,7]
+[6,6]
+[7,5]
+[8,4]
+```
+
+Ita cicatrix non est token fictus: enumeratio legacy concreta vere exsistit et ordinem familiae servat.
+
+Pro DISCOVERY 23 tamen periculosum esset eandem functionem in input enormi usque ad OOM exsequi. Propterea stratum diagnosticum ante allocationem tantum cardinalitatem exactam probat per formulam combinatoriam inclusionis-exclusionis. Haec probatio non est backend PATCH 23, non praebet `itemAt1`, neque ullam compositionem semanticam eligit. Contractus legacy listae concretae tamen attingitur, et si numerus membrorum capacitatem `std::size_t` superat, defectus materializationis ante allocationem observabiliter sistitur.
+
+Tres witness reales anni 5000 ex eadem linea C++ sunt:
+
+```text
+porta calculationis 0:
+yearLength=4244
+monthCount=45
+familyCount=28267369127220710176329716843724118975520840014877906533654334421021017631241800900
+
+porta calculationis 1:
+yearLength=4677
+monthCount=40
+familyCount=1130199237207385122412737191720843978989936770400
+
+porta calculationis 2:
+yearLength=4677
+monthCount=41
+familyCount=36861642729255180261458221372975022866131399690235443380
+```
+
+In omnibus tribus cardinalitas maior est quam capacitas indexabilis listae concretae huius platformae. Nulla enumeratio enormis incipit, nulla memoria gigantea allocatur et nullus OOM provocatur. Regressio Gradus 46 igitur consulto `EXIT_CODE=1` reddit quia API legacy materializationis concretae hanc familiam repraesentare non potest, non quia processum memoria exhausit.
+
+Bootstrap et omnes regressiones Graduum 1–45 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus `VirtualLegacyList`, nullus `monthLengthFamilyPatch`, nullus backend DP cum `count` et `itemAt1`, nullus `DPUnrankBoundedCompositionLex` et nullus PATCH 23 adest. Gradus 47 debet eundem contractum legacy servare sed backend virtualem exactum sub eo addere. Nullus codex PATCH 24 praemature adest.

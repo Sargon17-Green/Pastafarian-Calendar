@@ -1483,3 +1483,57 @@ Compilator `g++ (Debian 14.2.0-19) 14.2.0`, C++20. Bootstrap et regressiones Gra
 ### Audit et limes proximus
 
 `SourceLanguageCatalog` et reference C++ non mutantur. Nullus runtime externus adhibetur. Nullus `VirtualLegacyList`, nullus PATCH 23 et nullus codex PATCH 24 praemature additur. Gradus proximus est 46/55 — DISCOVERY 23 tantum.
+
+## Gradus 46 — DISCOVERY 23: lista concreta omnium longitudinum mensium nimis magna fieri potest
+
+### Assumptio historica nova
+
+Post correctionem nominum segmentorum, implementatio ad longitudines mensium pervenit. Cogitatio vetus erat simplicissima: familia omnium compositionum bounded inter 4 et 123 dies materializetur in una lista concreta, deinde selector membrum per ordinalem eligat. Nulla distinctio inter "API listae" et backend representationis adhuc exsistit.
+
+Haec assumptio tolerabilis videtur in exemplis parvis, sed falsa est in annis realibus huius algorithmi. Familia combinatoria potest cardinalitatem enormem habere multo antequam ullam semanticam selectionem faciamus.
+
+### Cicatrix addita
+
+Addita sunt:
+
+```text
+legacyMaterializeAllMonthLengthWays(yearLength,monthCount)
+legacyMonthLengthConcreteFamilyCountProof(yearLength,monthCount)
+LegacyMonthLengthMaterializationAdapter
+Discovery23MonthLengthMaterializationHandler
+```
+
+Prima functio est ipsa API legacy concreta: omnes ordines lexicographicos materializat in `vector<vector<int>>`. Probatio parva cum total 12 et duobus mensibus quinque ordines concretos exacte producit.
+
+Secunda functio ad solam detectionem huius gradus numerum familiae exactum computat per inclusionem-exclusionem super compositiones bounded. Non est DP backend, non habet unrank, non habet `itemAt1`, non potest output semanticum eligere et in PATCH 23 non reutilizatur ut virtualis familia. Eius solum officium est demonstratio sine OOM.
+
+`LegacyMonthLengthMaterializationAdapter` contractum listae concretae realiter attingit. Si cardinalitas intra capacitatem `std::size_t` est, legacy enumeratio concreta ingredi potest. Si cardinalitas ipsam capacitatem indexabilem superat, handler statum defectus ante allocationem servat. Haec clausura est bariera salutis DISCOVERY, non correctio semantica: nulla familia virtualis substituitur et nullum membrum eligi potest.
+
+### Connexio ad historiam priorem
+
+`BaseMonsterManager::executeDiscovery23MonthLengthMaterialization` primum viam activam PATCH 22 exsequitur. Ergo recordus anni, PATCH 20 sauce semantica, PATCH 21 partitio et PATCH 22 nomina distincta omnes iam parata sunt antequam stratum materializationis mensium intratur. Defectus novus non bypass-at cicatrices priores.
+
+Month count in regressionibus ex oracle C++ test-only normativo derivatur tantum ut witness legalis eiusdem anni constituatur; productionis DISCOVERY 23 eum ut input contextus recipit et nullum oracle vocat.
+
+### Witness exacti
+
+Tres calculation-gates 0, 1 et 2 adhibentur. Cardinalitates exactae sunt:
+
+```text
+0 -> L=4244, K=45,
+28267369127220710176329716843724118975520840014877906533654334421021017631241800900
+
+1 -> L=4677, K=40,
+1130199237207385122412737191720843978989936770400
+
+2 -> L=4677, K=41,
+36861642729255180261458221372975022866131399690235443380
+```
+
+Omnes tres `std::size_t` maximam cardinalitatem huius platformae superant. Ideo listae concretae ne cardinalitate quidem indexari possunt. Enumeratio enormis numquam incipit, materializatio non completur, `materializedItemCount=0` manet et OOM actualis non fit.
+
+Regressio Gradus 46 hoc ipsum defectum observat et intentionaliter `REGRESSIO_DISCOVERY_23_DEFECIT` cum exitu 1 reddit. Bootstrap atque regressiones Graduum 1–45 omnes transeunt.
+
+### Audit et limes proximus
+
+`SourceLanguageCatalog` et reference C++ manent byte pro byte intacti; probationes Graduum 42–45 non mutantur. Nullus runtime externus adhibetur. Nullus `VirtualLegacyList`, nullus backend DP `count/itemAt1`, nullus `monthLengthFamilyPatch` et nullus PATCH 23 praemature adest. Nullus PATCH 24 adest. Gradus proximus est 47/55 — PATCH 23 tantum.

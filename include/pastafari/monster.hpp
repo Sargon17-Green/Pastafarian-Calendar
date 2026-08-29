@@ -15,6 +15,8 @@ inline const Integer M_OLD = (Integer{1} << 127) - 1;
 inline const Integer FOUNDATION_DAY_OLD = Integer{-15055671};
 inline constexpr int LEGACY_YEAR_MAX = 5781;
 inline constexpr int REAL_YEAR_MAX_PATCH = 5778;
+inline constexpr int LEGACY_MONTH_LENGTH_MIN = 4;
+inline constexpr int LEGACY_MONTH_LENGTH_MAX = 123;
 
 Integer regularMod(const Integer& x, const Integer& d);
 Integer oldRemainder(const Integer& x);
@@ -345,6 +347,49 @@ struct LegacyRepeatedNameReport {
     bool patch22BadEqualsCorrect = false;
     bool patch22LegacyReturned = false;
     bool patch22Applied = false;
+    bool ready = false;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
+using LegacyMonthLengthWays = std::vector<std::vector<int>>;
+
+Integer legacyMonthLengthConcreteFamilyCountProof(int yearLength,
+                                                  int monthCount);
+LegacyMonthLengthWays legacyMaterializeAllMonthLengthWays(int yearLength,
+                                                          int monthCount);
+
+struct LegacyMonthLengthMaterializationInspection {
+    int yearLength = 0;
+    int monthCount = 0;
+    Integer exactFamilyCount{};
+    Integer concreteListIndexCapacity{};
+    bool concreteListContractReached = false;
+    bool concreteEnumerationEntered = false;
+    bool concreteMaterializationCompleted = false;
+    bool blockedBeforeAllocation = false;
+    std::size_t materializedItemCount = 0;
+};
+
+struct LegacyMonthLengthMaterializationReport {
+    Integer calculationDay{};
+    Integer originalTargetDay{};
+    Integer calculationGateIndex{};
+    Patch18YearRecord resolvedYear{};
+    int cutletCount = 0;
+    int yearLength = 0;
+    int monthCount = 0;
+    Integer exactFamilyCount{};
+    Integer concreteListIndexCapacity{};
+    bool patch22Prepared = false;
+    bool legacyConcreteListContractReached = false;
+    bool legacyConcreteEnumerationEntered = false;
+    bool legacyConcreteMaterializationCompleted = false;
+    bool blockedBeforeAllocation = false;
+    std::size_t materializedItemCount = 0;
+    bool patch23Applied = false;
     bool ready = false;
     std::string phase;
     std::string status;
@@ -702,6 +747,17 @@ struct BaseMonsterContext {
     bool patch22LegacyReturned=false;
     bool patch22Applied=false;
     bool patch22RepeatedNamesReady=false;
+    int discovery23YearLength=0;
+    int discovery23MonthCount=0;
+    Integer discovery23ExactFamilyCount{};
+    Integer discovery23ConcreteListIndexCapacity{};
+    bool discovery23Patch22Prepared=false;
+    bool discovery23LegacyConcreteListContractReached=false;
+    bool discovery23LegacyConcreteEnumerationEntered=false;
+    bool discovery23LegacyConcreteMaterializationCompleted=false;
+    bool discovery23BlockedBeforeAllocation=false;
+    std::size_t discovery23MaterializedItemCount=0;
+    bool discovery23MonthLengthMaterializationReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1075,6 +1131,8 @@ public:
     void requirePatch21CutletPartitionReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery22RepeatedNamesReady(const BaseMonsterContext& ctx) const;
     void requirePatch22RepeatedNamesReady(const BaseMonsterContext& ctx) const;
+    void requireDiscovery23MonthLengthMaterializationReady(
+        const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1205,6 +1263,12 @@ public:
                                      const Integer& rank1,
                                      int itemCount,
                                      const std::vector<int>& badNameIndices) const;
+};
+
+class LegacyMonthLengthMaterializationAdapter {
+public:
+    LegacyMonthLengthMaterializationInspection inspect(int yearLength,
+                                                       int monthCount) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1763,6 +1827,13 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Discovery23MonthLengthMaterializationHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyMonthLengthMaterializationAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -2062,6 +2133,12 @@ public:
                                             const Patch14WideDetourWrapper& wideWrapper,
                                             const BaseValidationManager& validator,
                                             const BaseMetricsShell& metrics) const;
+    void dispatchDiscovery23MonthLengthMaterialization(
+        BaseMonsterContext& ctx,
+        const Discovery23MonthLengthMaterializationHandler& handler,
+        const LegacyMonthLengthMaterializationAdapter& adapter,
+        const BaseValidationManager& validator,
+        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -2215,6 +2292,13 @@ public:
         const Integer& calculationDay,
         const Integer& calculationGateIndex,
         int cutletCount) const;
+    LegacyMonthLengthMaterializationReport executeDiscovery23MonthLengthMaterialization(
+        const LegacyYearAnchor& anchor,
+        const Integer& originalTargetDay,
+        const Integer& calculationDay,
+        const Integer& calculationGateIndex,
+        int cutletCount,
+        int monthCount) const;
     void clearLegacyYearNumberCacheDiagnostic() const;
 private:
     mutable std::map<Integer, LegacyYearCacheEntry> legacyYearNumberCache_{};
