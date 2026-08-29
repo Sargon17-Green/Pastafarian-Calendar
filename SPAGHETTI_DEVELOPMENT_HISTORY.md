@@ -645,3 +645,25 @@ Li acceptance-limit wide es `floor(space/N)*N`. Pos li construction unic del vec
 ### Verification
 
 Li witness real del Foundation con `N=M_OLD+1` conserva `legacy output=null` e `RangeError`, durante que li route reparat retorna rank `2`. Un witness synthetic força exactmen un passu de rejection wide e verifica que li quantité de digit reads resta egal a `places`. Cases de du e tri places concorda con li reference normativ local, e li dispatcher curt concorda con Patch 13. Null `oldGateQuestionDay` o logic de Patch 15 es addit.
+
+## Stage 30 — DISCOVERY 15
+
+### Quo on pensat
+
+Li code historic de gate-gap tractat li ordinal del question quam un magnitude simplic. Un helper unic, `oldGateQuestionDay(n)`, deven li fonte del die demandat e calcula sempre `FOUNDATION_DAY_OLD+n`. Quande li caller vole caminar retrovers, it normalisa li passu a su magnitude ante li call, credente que li direction esset ja representat altriloc.
+
+### Quo esset decovrit
+
+Li signe es semantic. Por un `signedStep<0`, li question del gate negativ deve esser fat al latere negativ del Foundation. Perder li signe e passar `abs(step)` al helper historic transforma `FOUNDATION-abs(step)` in `FOUNDATION+abs(step)`. Li regression current prova li divergence por magnitudes 1, 2 e 10: chascun legacy question es exactmen simetric al latere fals.
+
+### Quo esset circumit
+
+Null circumition existe in Discovery 15. `oldGateQuestionDay(n)` resta li unic helper nov e retorna solmen `FOUNDATION_DAY_OLD+n`. `LegacyGateQuestionAdapter` conserva intentionalmen li defect per transformar `signedStep` al magnitude ante li call. Null branch negativ, null subtraction del Foundation e null wrapper reparativ es addit.
+
+### Crescentie monster in ti stage
+
+`BaseMonsterContext` adjunte state invocation-local por li signed step, magnitude, question-day e un flag diagnostic de latere positiv. `BaseValidationManager` adjunte validation exact del passu signat e del magnitude. `LegacyGateQuestionAdapter` e `Discovery15NegativeGateQuestionHandler` forma un nov route per `BaseMonsterManager`, con phase, branch trace e metric propri.
+
+### Pro quo li nov layer ne change altri semantics
+
+Li route de Discovery 15 es separat del selector de Stage 29 e ne muta bowls, stones, latch, answer rings o catalog. Omni scars e patches precedent resta intact. Li unic failure intentional es li comparison final del nov regression contra li question-day negativ normativ. Li correction `FOUNDATION_DAY_OLD-abs(step)` apartene exclusivmen a Patch 15.

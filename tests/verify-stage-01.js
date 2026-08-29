@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 14 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 15 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,8 @@ group('null textu hebreic o code posterior a Patch 14 contamina production', () 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
+    'gateQuestionWithSignedStep', 'NegativeGateQuestionPatchWrapper',
+    'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
@@ -1470,7 +1471,42 @@ group('Patch 14 conserva li failure curt legacy ma dispatcha familie wide al det
   eq(short.context.metrics['patch14.wideDetour.calls'], undefined);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 14', () => {
+group('Discovery 15 conserva li question historic del latere positiv por passus negativ', () => {
+  const legacySource = production.oldGateQuestionDay.toString();
+  ok(legacySource.includes('return FOUNDATION_DAY_OLD + n;'));
+  ok(!legacySource.includes('FOUNDATION_DAY_OLD -'));
+  ok(!legacySource.includes('signedStep'));
+  eq(production.oldGateQuestionDay(0n), production.FOUNDATION_DAY_OLD);
+  eq(production.oldGateQuestionDay(1n), production.FOUNDATION_DAY_OLD + 1n);
+  eq(production.oldGateQuestionDay(10n), production.FOUNDATION_DAY_OLD + 10n);
+  throws(() => production.oldGateQuestionDay(-1n), RangeError);
+  throws(() => production.oldGateQuestionDay(1), TypeError);
+
+  const routed = production.discovery15LegacyGateQuestionThroughMonsterPath(
+    o.FOUNDATION_DAY, o.FOUNDATION_DAY, -10n
+  );
+  eq(routed.result, o.FOUNDATION_DAY + 10n);
+  eq(routed.context.currentHandler, 'Discovery15NegativeGateQuestionHandler');
+  eq(routed.context.previousHandler, null);
+  eq(routed.context.phase, 'DISCOVERY_15_NEGATIVE_GATE_ASKS_POSITIVE_SIDE');
+  eq(routed.context.status, 'DISCOVERY_15_LEGACY_RESULT');
+  eq(routed.context.legacyGateSignedStep, -10n);
+  eq(routed.context.legacyGateMagnitude, 10n);
+  eq(routed.context.legacyGateQuestionDay, o.FOUNDATION_DAY + 10n);
+  eq(routed.context.legacyGateQuestionAskedPositiveSide, true);
+  deepEq(routed.context.branchTrace, [
+    'BOOTSTRAP_VALIDATED',
+    'DISCOVERY_15_NEGATIVE_GATE_ASKS_POSITIVE_SIDE'
+  ]);
+  eq(routed.context.metrics['discovery15.negativeGatePositiveSide.calls'], 1n);
+
+  const handlerSource = production.Discovery15NegativeGateQuestionHandler.prototype.handle.toString();
+  ok(!handlerSource.includes('FOUNDATION_DAY_OLD -'));
+  ok(!handlerSource.includes('gateQuestionWithSignedStep'));
+  ok(!handlerSource.includes('NegativeGateQuestionPatchWrapper'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 15', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1482,4 +1518,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa posterior a Patch 14.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression intentional de Discovery 15.');
