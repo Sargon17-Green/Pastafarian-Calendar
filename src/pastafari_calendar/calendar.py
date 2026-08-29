@@ -2,6 +2,7 @@ from .legacy_arithmetic import M_OLD
 from .legacy_selection import buildAnswerRingFromSauceState
 from .legacy_day_counts import FOUNDATION_DAY_OLD
 from .legacy_year_candidates import LegacyYearCandidate
+from .legacy_year_jump import LegacyYearJumpAnchor
 from .monster_bootstrap import (
     MonsterContext,
     MonsterManager,
@@ -449,7 +450,50 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.year5000.tieProbes",
         )
         local_ctx.status = "ESKİ_5000_STABLE_LENGTH_TIE_HAZIR"
-        local_ctx.phase = "AŞAMA_35_BEKLEME"
+        local_ctx.phase = "ESKİ_365_YIL_SIÇRAMA_TAHMİNİ"
+
+    def legacy_year_jump_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Keşif 18 Year-5000 witness anchor: 5000 günlük yıl Stage 33 ceiling
+        # altında kalır. Hedef, close_day sonrasındaki ilk gündür; authoritative
+        # ardışık yıl mantığında bu yalnız year 5001 olabilir, fakat legacy /365
+        # tahmini doğrudan semantic sayı olarak kullanıldığı için çok ileri sıçrar.
+        anchor_open_day = (
+            calculation_day
+            - 100
+        )
+
+        anchor = LegacyYearJumpAnchor(
+            number=5000,
+            first_day=anchor_open_day + 1,
+            open_day=anchor_open_day,
+            close_day=anchor_open_day + 5000,
+        )
+
+        jump_target_day = (
+            anchor.close_day
+            + 1
+        )
+
+        manager.legacy_year_jump.call(
+            local_ctx,
+            anchor,
+            jump_target_day,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.yearJump.probes",
+        )
+        local_ctx.status = "ESKİ_365_YIL_SIÇRAMA_TAHMİNİ_HAZIR"
+        local_ctx.phase = "AŞAMA_36_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -469,6 +513,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_GATE_SORU_GÜNÜ", legacy_gate_question_handler)
     manager.dispatcher.register("ESKİ_5781_YIL_ADAYLARI", legacy_year_candidate_handler)
     manager.dispatcher.register("ESKİ_5000_STABLE_LENGTH_TIE", legacy_year5000_tie_handler)
+    manager.dispatcher.register("ESKİ_365_YIL_SIÇRAMA_TAHMİNİ", legacy_year_jump_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -489,5 +535,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Otuz beşinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Otuz altıncı aşamada üretim takvim yolu henüz birleştirilmedi"
     )

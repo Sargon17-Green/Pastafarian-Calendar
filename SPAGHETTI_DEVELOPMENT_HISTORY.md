@@ -1627,3 +1627,78 @@ Yalnız bundan sonra `Year5000TiePatchWrapper` çağrılır. Wrapper legacy-sort
 Aşama 34 normatif Year-5000 tie regresyonunun gövdesi byte-for-byte değiştirilmeden yeşile döner. Raw legacy state yanlış input-stable sırayı göstermeye devam ederken semantic dönüş corrected earlier-opening sırasını verir.
 
 Patch 18 `oldJumpGuess` ve year-by-year traversal henüz yoktur.
+
+
+## Aşama 36 — Keşif 18: Year 5000'den 365 günlük ortalamayla sıçramak
+
+### Tarihsel tahmin
+
+Production içine exact legacy helper eklenir:
+
+```text
+oldJumpGuess(anchor,targetDay)
+=
+anchor.number
++
+floorDiv(targetDay-anchor.first_day,365)
+```
+
+Python `//` işlemi integer floor division olarak kullanılır; negative delta davranışı da legacy formülle aynıdır.
+
+### Historical semantic kusur
+
+`LegacyYearJumpAdapter`, guess sonucunu diagnostic state'e yazar.
+
+Fakat Keşif 18 aşamasında tahmin henüz telemetry-only değildir.
+
+Aynı guess doğrudan:
+
+```text
+legacy_jump_semantic_year_number
+```
+
+olarak kullanılır.
+
+Bu nedenle 365 günlük ortalama gerçek year transition zincirinin yerine geçer.
+
+### Gerçek production yolu
+
+Real `calendar_date_spaghetti` state-machine, Stage 35 Year-5000 tie katmanından sonra number 5000 olan, 5000 günlük valid ceiling-altı witness anchor oluşturur.
+
+Hedef:
+
+```text
+anchor.close_day+1
+```
+
+olur.
+
+Ardışık yıl semantiğinde bu gün yalnız year 5001 olabilir.
+
+Legacy `/365` tahmini ise 5000 günlük anchor üzerinde çok ileri bir year number üretir ve actual semantic path bu yanlış değeri kullanır.
+
+### Normatif ayrışma
+
+Yeni normatif regresyon actual adapter yolunda üç hedefi yoklar:
+
+```text
+anchor.first_day+365
+anchor.close_day
+anchor.close_day+1
+```
+
+İlk iki hedef hâlâ year 5000 aralığındadır.
+
+Üçüncü hedef close gate sonrasındaki ilk gün olduğu için year 5001'dir.
+
+Legacy jump guess üçünde de farklı semantic year number üretir.
+
+Üç alt örnek bilinçli kırmızıdır.
+
+### Sınır
+
+Production içinde `previousYear` veya `nextYear` walk yoktur.
+
+`oldJumpGuess` sonucu henüz ignored telemetry değildir.
+
+Patch 19 bad cache key kodu henüz yoktur.

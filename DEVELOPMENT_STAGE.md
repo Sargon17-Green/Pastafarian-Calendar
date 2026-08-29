@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=35
-CURRENT_KIND=PATCH
-CURRENT_PATCH=17
-LAST_COMPLETED_STAGE=35
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=36
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=18
+LAST_COMPLETED_STAGE=36
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage 33 inline accepted.sort(key=length) ve Stage 34 legacyStableSortByLength helper'ı fiziksel stable length-only scar olarak aynen korunur; Year5000TiePatchWrapper yalnız legacy sort tamamlandıktan sonra contiguous equal-length runs tarar, yalnız run length>1 parçalarını candidate.open_day ascending ile yerinde yeniden sıralar ve singleton/non-tied bölümleri değiştirmez; LegacyYearCandidateAdapter raw legacy sorted state'i koruyup semantic dönüşte yalnız bu wrapper'ın sonucunu kullanır
+MONSTER_ARCHITECTURE_GROWTH=oldJumpGuess(anchor,targetDay)=anchor.number+floorDiv(targetDay-anchor.first_day,365) exact legacy helper olarak eklenir; LegacyYearJumpAdapter tahmini invocation-local telemetry state'e yazar fakat Keşif 18 historical kusuru gereği aynı tahmin hâlâ doğrudan semantic target year number olarak kullanılır; real calendar state-machine Year-5000 anchor için close_day+1 witness hedefiyle bu yanlış jump yolunu gerçekten çalıştırır; previousYear/nextYear one-at-a-time authoritative walk henüz yoktur
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

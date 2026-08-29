@@ -1,0 +1,29 @@
+Aşama 36/55 — DISCOVERY 18
+
+Bu paket yalnızca Aşama 36 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_year_jump.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_36_discovery_18.py
+artifacts/stage-36/BASELINE_STAGE_35_GREEN.txt
+artifacts/stage-36/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-36/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_36.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 35 baseline: GREEN
+Değişiklik sonrası Aşama 1–35 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+oldJumpGuess exact /365 helper: EKLENDİ
+real calendar jump adapter path: EKLENDİ
+guess semantic year olarak kullanılıyor: EVET
+telemetry-only detour: YOK
+previousYear/nextYear walk: YOK
+PATCH 19 cache: YOK

@@ -19,6 +19,7 @@ from .legacy_selection import (
 )
 from .legacy_gate_question import LegacyGateQuestionAdapter
 from .legacy_year_candidates import LegacyYearCandidateAdapter
+from .legacy_year_jump import LegacyYearJumpAdapter
 
 
 class MonsterError(RuntimeError):
@@ -217,6 +218,15 @@ class MonsterContext:
     patch17_corrected_labels: tuple[str, ...] | None = None
     patch17_corrected_open_days: tuple[int, ...] | None = None
     patch17_applied: bool = False
+    legacy_jump_anchor_number: int | None = None
+    legacy_jump_anchor_first_day: int | None = None
+    legacy_jump_anchor_open_day: int | None = None
+    legacy_jump_anchor_close_day: int | None = None
+    legacy_jump_target_day: int | None = None
+    legacy_jump_guess_number: int | None = None
+    legacy_jump_semantic_year_number: int | None = None
+    legacy_jump_guess_used_as_semantic: bool = False
+    legacy_jump_calls: int = 0
 
 
 class BaseMetrics:
@@ -285,3 +295,4 @@ class MonsterManager:
         self.legacy_general_selection = LegacyShortOnlySelectionDispatcher()
         self.legacy_gate_question = LegacyGateQuestionAdapter()
         self.legacy_year_candidates = LegacyYearCandidateAdapter()
+        self.legacy_year_jump = LegacyYearJumpAdapter()

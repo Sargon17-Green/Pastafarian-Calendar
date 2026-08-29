@@ -1,22 +1,32 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin otuz altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 35/55, `PATCH 17` durumundadır.
+Aşama 36/55, `DISCOVERY 18` durumundadır.
 
-Historical stable length-only scar'lar aynen korunur.
+Exact legacy jump helper:
 
-Year-5000 semantic yolu önce legacy sort'u çalıştırır ve raw input-stable sonucu diagnostic state'te saklar.
+```text
+oldJumpGuess(anchor,targetDay)
+=
+anchor.number
++
+floorDiv(targetDay-anchor.first_day,365)
+```
 
-Ardından `Year5000TiePatchWrapper` yalnız contiguous equal-length runs bulur. Yalnız run uzunluğu birden büyük olan parçalar `candidate.open_day` ascending ile earlier gate opening sırasına alınır.
+olarak production'a eklenmiştir.
 
-Singleton ve farklı-length bölümler değiştirilmez. Global `(length,open_day)` sort kullanılmaz.
+`LegacyYearJumpAdapter` bu tahmini diagnostic state'te saklar, fakat historical kusur gereği aynı guess henüz doğrudan semantic target year number olarak kullanılır.
 
-Aşama 34 normatif tie regresyonu değiştirilmeden yeşile dönmüştür.
+Real calendar state-machine Year-5000 witness anchor için `close_day+1` hedefinde bu yolu gerçekten çalıştırır.
 
-Patch 18 `oldJumpGuess` ve year-by-year traversal kodu henüz yoktur.
+Yeni normatif regresyon üç hedefte 365 günlük tahmini gerçek ardışık-year interval semantiğiyle karşılaştırır ve üç alt örneği bilinçli kırmızı bırakır.
+
+Henüz `PATCH 18` yoktur: `oldJumpGuess` telemetry-only değildir ve `previousYear`/`nextYear` one-at-a-time walk production'a eklenmemiştir.
+
+Patch 19 cache kodu da henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -32,10 +42,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam otuz beşinci aşama paketi:
+Tam otuz altıncı aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 34'te kırmızı olan üç Year-5000 tie permütasyonu aynı normatif regresyon gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–35 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni `/365` jump-versus-sequential-year normatif regresyonunun üç alt örneği başarısız olur.
