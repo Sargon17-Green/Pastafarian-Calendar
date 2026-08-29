@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 03 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 03 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -781,7 +781,34 @@ group('Discovery 03 conserva li oldDistance defectiv in un path real e isolat', 
   eq(execution.context.metrics['discovery03.legacyDistance.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 03', () => {
+group('Patch 03 conserva oldDistance ma rende li distance inclusiv exact per un detour cronologic', () => {
+  const f = production.FOUNDATION_DAY_OLD;
+  for (let dc = -16n; dc <= 16n; dc += 1n) {
+    for (let dt = -16n; dt <= 16n; dt += 1n) {
+      const c = f + dc;
+      const t = f + dt;
+      eq(production.distanceWithChronologyDetour(c, t), o.workCounts(c, t).distance);
+    }
+  }
+  const execution = production.historicDistanceThroughMonsterPath(f - 2n, f + 2n);
+  eq(execution.context.legacyDistanceOutput, 1n);
+  eq(execution.context.patch03ChronologicalDistance, 4n);
+  eq(execution.context.patch03LegacyReplaced, true);
+  eq(execution.context.patch03DistanceBeforeInclusive, 4n);
+  eq(execution.result, 5n);
+  eq(execution.context.currentHandler, 'Patch03DistanceWrapper');
+  eq(execution.context.phase, 'PATCH_03_CHRONOLOGY_DETOUR');
+  eq(execution.context.status, 'PATCH_03_RESULT');
+  deepEq(execution.context.branchTrace, [
+    'BOOTSTRAP_VALIDATED',
+    'DISCOVERY_03_OLD_DISTANCE',
+    'PATCH_03_CHRONOLOGY_DETOUR'
+  ]);
+  eq(execution.context.metrics['discovery03.legacyDistance.calls'], 1n);
+  eq(execution.context.metrics['patch03.distance.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 03', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -793,4 +820,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions precedent passa ante li regression rubi de Discovery 03.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in Patch 03.');

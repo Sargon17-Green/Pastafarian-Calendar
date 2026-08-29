@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 6 de 55: DISCOVERY 03**. Li scars de `oldRemainder`/Patch 01 e `oldDayTag`/Patch 02 resta intact e testabil. Li nov defect historic es `oldDistance(calculationDay, targetDay)`, quel prende li diferentie absolut inter li du tags reparat in vice de mesurar li distance cronologic inclusiv inter li dies.
+Li linea es in **Stage 7 de 55: PATCH 03**. Li scars de `oldRemainder`/Patch 01 e `oldDayTag`/Patch 02 resta intact e testabil. `oldDistance(calculationDay, targetDay)` resta anc intentionalmen defectiv: it mesura li diferentie inter tags. Li nov detour cronologic ne modifica ti function.
 
-Li path real passa per `LegacyDistanceAdapter` e `Discovery03DistanceHandler`. Li context conserva ambi dies, ambi tags, li output legacy, handlers, trace e metrics non-semantic. Li regression nov es intentionalmen **EXPECTED_RED**: quelc cases coincide accidentalmen, ma pares identic, traversadas del Foundation e separationes de du dies demonstra li divergentie.
+Li path real passa per `LegacyDistanceAdapter`, `Discovery03DistanceHandler` e `Patch03DistanceWrapper`. Li wrapper calcula li distance cronologic absolut, substitue li valore legacy si necessi e adjunte poy li unit inclusiv. Li context conserva ambi versiones e li decision de substitution. Li repository es **GREEN**.
 
-Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null correction de Patch 03 o defect de stage posterior posse aparir ante su stage historic.
+Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; `patchedCounts` e null defect de stage posterior posse aparir ante su stage historic.
 
 ## Lingue-fonte canonic
 
@@ -26,25 +26,25 @@ Omni calcul normativ usa `BigInt`. Null floating-point es usat por SAVE, rangs, 
 
 ## Tests
 
-Li suite precedent deve restar verd:
+Li suite precedent, includente li regression original de Discovery 03 tra li patch actual, deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li commande principal es intentionalmen rubi in ti discovery, pro que it executa li nov regression quam ultim passu:
+Li commande principal es nu verd:
 
 ```text
 npm test
 ```
 
-Por executar solmen li regression nov de Discovery 03:
+Por executar solmen li prova nov de Patch 03:
 
 ```text
-npm run test:discovery-03
+npm run test:patch-03
 ```
 
-Li tests confirma que Patch 01 e Patch 02 resta verd e que `oldDistance` es realmen defectiv: it usa li diferentie inter tags, ne li distance cronologic inclusiv. Li correction es reservat por Stage 7.
+Li tests confirma que `oldDistance` resta defectiv e que `distanceWithChronologyDetour` es equivalent al `distance` de `workCounts` sur un gril exhaustiv circum li Foundation e sur cases lontan. Li correction usa exactmen li ordine historic: legacy, comparation con li distance cronologic, substitution si necessi, poy `+1`.
 
 ## Independentie
 

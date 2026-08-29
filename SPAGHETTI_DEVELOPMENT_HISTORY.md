@@ -130,3 +130,22 @@ Un `LegacyDistanceAdapter` e un `Discovery03DistanceHandler` ha esset addit. Li 
 ### Pro quo li strat nov ne adjunte un defect extra
 
 Li adapter apella exactmen `oldDistance`; li handler ne normalisa li resultate, ne consulta li oracle e ne usa metrics por decisiones. Li scars de Patch 01 e Patch 02 resta separatmen testabil. Ergo li unic divergentie nov es li assumption historic mandat de Discovery 03.
+
+
+## Stage 7 — PATCH 03
+
+### Quo esset circumit
+
+Li function `oldDistance` ne esset modificat. Un nov `distanceWithChronologyDetour(calculationDay, targetDay)` comensa per apellar li legacy. It calcula separatmen li distance cronologic absolut `abs(targetDay-calculationDay)`. Si li valore legacy diverge, li variable legacy local es substituet per ti distance cronologic; si ili coincide, li valore legacy resta. Solmen pos ti comparation li detour adjunte `1` por render li distance inclusiv.
+
+### Pro quo li patch es normativmen equivalent
+
+Li reference defini `distance = abs(targetDay-calculationDay) + 1`. Li patch calcula exactmen ti magnitude cronologic con integers `BigInt`. Li branch de substitution ne posse cambiar li resultate correct: si legacy diverge, it es remplacat per li magnitude normativ; si it ja coincide, conservar it rende li sam magnitude. Li addition final de un unit transforma li distance de separation in li distance inclusiv mandat.
+
+### Crescentie monster in ti stage
+
+Un `Patch03DistanceWrapper` ha esset insertet pos `Discovery03DistanceHandler`. Li context conserva li du dies del patch, li output legacy, li distance cronologic calculat separatmen, un flag `patch03LegacyReplaced`, li valore selectet ante li unit inclusiv e li output final. `BaseMonsterManager` expone un route historic separat quel executa li discovery e poy li patch in li sam invocation. Un invariant local confirma ante return que li output es exactmen li valore selectet plus un.
+
+### Pro quo li strat nov ne altera semantics ultra li patch
+
+Li wrapper usa solmen li du dies exact e li output legacy del sam invocation. Li trace, flags e metrics resta observatori e ne alimenta null decision semantic. Null oracle es consultat in production, null fallback existe, e `oldDistance` resta fisicmen e comportamentalmen intact. `patchedCounts` ne es creat in ti stage; ergo null parte de Patch 04 o posterior es anticipat.

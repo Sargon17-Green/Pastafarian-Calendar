@@ -41,6 +41,12 @@ class BaseMonsterContext {
     this.legacyDistanceCalculationTag = null;
     this.legacyDistanceTargetTag = null;
     this.legacyDistanceOutput = null;
+    this.patch03CalculationDay = null;
+    this.patch03TargetDay = null;
+    this.patch03ChronologicalDistance = null;
+    this.patch03LegacyReplaced = false;
+    this.patch03DistanceBeforeInclusive = null;
+    this.patch03Output = null;
   }
 }
 
@@ -76,6 +82,12 @@ class BaseValidationManager {
   requireDiscovery02Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_02_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 02.');
+    }
+  }
+
+  requireDiscovery03Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_03_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 03.');
     }
   }
 }
@@ -162,6 +174,19 @@ function oldDistance(calculationDay, targetDay) {
   return calculationTag >= targetTag
     ? calculationTag - targetTag
     : targetTag - calculationTag;
+}
+
+function distanceWithChronologyDetour(calculationDay, targetDay) {
+  let legacy = oldDistance(calculationDay, targetDay);
+  const chronological = targetDay >= calculationDay
+    ? targetDay - calculationDay
+    : calculationDay - targetDay;
+  // Li valore legacy ne es reparat in su fonte: li wrapper substitue solmen si li mesure de tags diverge del distance cronologic.
+  if (legacy !== chronological) {
+    legacy = chronological;
+  }
+  const distance = legacy + 1n;
+  return distance;
 }
 
 class LegacyRemainderAdapter {
@@ -297,6 +322,39 @@ class Discovery03DistanceHandler {
   }
 }
 
+class Patch03DistanceWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, calculationDay, targetDay) {
+    this.validationManager.requireDiscovery03Result(context);
+    this.validationManager.requireExactInteger(calculationDay);
+    this.validationManager.requireExactInteger(targetDay);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Patch03DistanceWrapper';
+    context.phase = 'PATCH_03_CHRONOLOGY_DETOUR';
+    context.branchTrace.push('PATCH_03_CHRONOLOGY_DETOUR');
+    context.patch03CalculationDay = calculationDay;
+    context.patch03TargetDay = targetDay;
+    context.patch03ChronologicalDistance = targetDay >= calculationDay
+      ? targetDay - calculationDay
+      : calculationDay - targetDay;
+    context.patch03LegacyReplaced = context.legacyDistanceOutput !== context.patch03ChronologicalDistance;
+    context.patch03DistanceBeforeInclusive = context.patch03LegacyReplaced
+      ? context.patch03ChronologicalDistance
+      : context.legacyDistanceOutput;
+    context.patch03Output = distanceWithChronologyDetour(calculationDay, targetDay);
+    if (context.patch03Output !== context.patch03DistanceBeforeInclusive + 1n) {
+      throw new BootstrapStageError('Li detour de Patch 03 ne conserva li regul inclusiv local.');
+    }
+    context.status = 'PATCH_03_RESULT';
+    this.metricsManager.bump(context, 'patch03.distance.calls');
+    return context.patch03Output;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -323,6 +381,7 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyDistanceAdapter
     );
+    this.patch03DistanceWrapper = new Patch03DistanceWrapper(this.validationManager, this.metricsManager);
   }
 
   prepare(calculationDay, targetDay) {
@@ -397,6 +456,19 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch03Distance(calculationDay, targetDay) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery03DistanceHandler.handle(context, calculationDay, targetDay);
+      const result = this.patch03DistanceWrapper.repair(context, calculationDay, targetDay);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -423,8 +495,12 @@ function discovery03LegacyDistanceThroughMonsterPath(calculationDay, targetDay) 
   return new BaseMonsterManager().executeDiscovery03Distance(calculationDay, targetDay);
 }
 
+function historicDistanceThroughMonsterPath(calculationDay, targetDay) {
+  return new BaseMonsterManager().executePatch03Distance(calculationDay, targetDay);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 03; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 03; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -446,6 +522,7 @@ module.exports = Object.freeze({
   Patch02DayTagWrapper,
   LegacyDistanceAdapter,
   Discovery03DistanceHandler,
+  Patch03DistanceWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -453,11 +530,13 @@ module.exports = Object.freeze({
   oldDayTag,
   dayTagWithFoundationScar,
   oldDistance,
+  distanceWithChronologyDetour,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
   discovery02LegacyDayTagThroughMonsterPath,
   historicDayTagThroughMonsterPath,
   discovery03LegacyDistanceThroughMonsterPath,
+  historicDistanceThroughMonsterPath,
   calendarDateSpaghetti
 });
