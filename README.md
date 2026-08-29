@@ -1,27 +1,32 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi dördüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yirmi beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 24/55, `DISCOVERY 12` durumundadır.
+Aşama 25/55, `PATCH 12` durumundadır.
 
-Yeni tarihsel kusur:
+Discovery 12 fixed-ID scar'ı fiziksel olarak korunur:
 
 ```text
 oldNextBowlFixedName(id)
 1->2->3->4->5->6->1
 ```
 
-Legacy next-bowl sorgusu queried ID'nin `orderAt46Latch` içindeki gerçek position'ını dikkate almaz.
+`NextBowlPatchWrapper` bu helper'ı diagnostic olarak gerçekten çağırır, fakat semantic sonucu ondan almaz.
 
-`LegacyNextBowlAdapter` bu wrong fixed-ID helper'ını Stage 23 latch tamamlandıktan sonra gerçek production state-machine yoluna bağlar.
+Corrected yol:
 
-Fixture latch `(1,2,3,4,6,5)` için queried ID 4, 5 ve 6 sonuçları latch-based circular successor değerlerinden bilinçli olarak ayrışır.
+```text
+position = queriedId'nin orderAt46Latch içindeki konumu
+next = orderAt46Latch[(position+1) mod 6]
+```
 
-Henüz `PATCH 12` yoktur: queried ID latch içinde aranmaz ve circular successor detour'u production'a eklenmemiştir.
+şeklindedir.
 
-Aşama 1 future-name guard zaten Patch 13+ isimleriyle sınırlıdır ve bu aşamada değiştirilmemiştir.
+Aşama 24'ün normatif next-bowl regresyonu değiştirilmeden yeşile dönmüştür. Latch içindeki altı ID'nin tamamı circular successor semantiğiyle doğrulanır.
+
+Patch 13 biased modulo selection kodu henüz yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -37,10 +42,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yirmi dördüncü aşama paketi:
+Tam yirmi beşinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–23 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni fixed-ID next-bowl normatif regresyonunun queried ID 4, 5 ve 6 alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 24'te kırmızı olan queried ID 4, 5 ve 6 alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.

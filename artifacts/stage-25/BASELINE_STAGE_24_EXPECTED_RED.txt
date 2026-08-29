@@ -1,0 +1,210 @@
+Aşama 25 başlamadan önce Aşama 24 yerel baseline doğrulaması
+Komut: python -m unittest discover -s tests -v
+Beklenen durum: EXPECTED_RED
+Çalıştırılan test: 144
+Beklenen failure sayısı: 3
+Beklenmeyen failure/error: YOK
+
+test_bounded_composition_lexicographic_order (test_stage_01.Stage01Tests.test_bounded_composition_lexicographic_order) ... ok
+test_context_is_per_invocation (test_stage_01.Stage01Tests.test_context_is_per_invocation) ... ok
+test_cutlet_partition_filter (test_stage_01.Stage01Tests.test_cutlet_partition_filter) ... ok
+test_day_axis_and_save (test_stage_01.Stage01Tests.test_day_axis_and_save) ... ok
+test_distinct_name_unrank (test_stage_01.Stage01Tests.test_distinct_name_unrank) ... ok
+test_month_weaving_all_small_domains (test_stage_01.Stage01Tests.test_month_weaving_all_small_domains) ... ok
+test_month_weaving_matches_bruteforce (test_stage_01.Stage01Tests.test_month_weaving_matches_bruteforce) ... ok
+test_no_future_patch_names_in_production (test_stage_01.Stage01Tests.test_no_future_patch_names_in_production) ... ok
+test_normative_year5000_and_structure_smoke (test_stage_01.Stage01Tests.test_normative_year5000_and_structure_smoke) ... ok
+test_permutation_edges (test_stage_01.Stage01Tests.test_permutation_edges) ... ok
+test_production_does_not_call_oracle (test_stage_01.Stage01Tests.test_production_does_not_call_oracle) ... ok
+test_sauce_determinism_and_query_wrap (test_stage_01.Stage01Tests.test_sauce_determinism_and_query_wrap) ... ok
+test_short_and_wide_selection_ranges (test_stage_01.Stage01Tests.test_short_and_wide_selection_ranges) ... ok
+test_source_language_catalog_is_frozen_and_index_stable (test_stage_01.Stage01Tests.test_source_language_catalog_is_frozen_and_index_stable) ... ok
+test_work_counts (test_stage_01.Stage01Tests.test_work_counts) ... ok
+test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) ... ok
+test_legacy_helper_keeps_the_historical_zero_bug (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_helper_keeps_the_historical_zero_bug) ... ok
+test_legacy_remainder_is_on_the_real_calendar_path (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_is_on_the_real_calendar_path) ... ok
+test_stage02_legacy_scar_still_exists_after_patch (test_stage_02_discovery_01.Stage02Discovery01Tests.test_stage02_legacy_scar_still_exists_after_patch) ... ok
+test_adapter_routes_through_patch_wrapper_and_keeps_state_local (test_stage_03_patch_01.Stage03Patch01Tests.test_adapter_routes_through_patch_wrapper_and_keeps_state_local) ... ok
+test_observability_state_does_not_change_the_patch_result (test_stage_03_patch_01.Stage03Patch01Tests.test_observability_state_does_not_change_the_patch_result) ... ok
+test_old_remainder_is_still_physically_wrong (test_stage_03_patch_01.Stage03Patch01Tests.test_old_remainder_is_still_physically_wrong) ... ok
+test_save_patch_matches_normative_save_on_required_edges (test_stage_03_patch_01.Stage03Patch01Tests.test_save_patch_matches_normative_save_on_required_edges) ... ok
+test_save_patch_really_calls_the_legacy_helper (test_stage_03_patch_01.Stage03Patch01Tests.test_save_patch_really_calls_the_legacy_helper) ... ok
+test_current_day_tag_path_diverges_from_normative_day_count (test_stage_04_discovery_02.Stage04Discovery02Tests.test_current_day_tag_path_diverges_from_normative_day_count) ... ok
+test_day_tag_adapter_keeps_legacy_state_owned_by_one_invocation (test_stage_04_discovery_02.Stage04Discovery02Tests.test_day_tag_adapter_keeps_legacy_state_owned_by_one_invocation) ... ok
+test_legacy_helper_keeps_the_historical_day_tag_formula (test_stage_04_discovery_02.Stage04Discovery02Tests.test_legacy_helper_keeps_the_historical_day_tag_formula) ... ok
+test_old_day_tag_is_on_the_real_calendar_path (test_stage_04_discovery_02.Stage04Discovery02Tests.test_old_day_tag_is_on_the_real_calendar_path) ... ok
+test_day_tag_patch_matches_normative_day_count_on_required_edges (test_stage_05_patch_02.Stage05Patch02Tests.test_day_tag_patch_matches_normative_day_count_on_required_edges) ... ok
+test_day_tag_patch_really_calls_old_day_tag (test_stage_05_patch_02.Stage05Patch02Tests.test_day_tag_patch_really_calls_old_day_tag) ... ok
+test_observability_state_cannot_change_the_day_tag_patch (test_stage_05_patch_02.Stage05Patch02Tests.test_observability_state_cannot_change_the_day_tag_patch) ... ok
+test_old_day_tag_remains_physically_wrong (test_stage_05_patch_02.Stage05Patch02Tests.test_old_day_tag_remains_physically_wrong) ... ok
+test_patch_state_and_legacy_state_are_both_invocation_local (test_stage_05_patch_02.Stage05Patch02Tests.test_patch_state_and_legacy_state_are_both_invocation_local) ... ok
+test_second_foundation_guard_is_a_real_preserved_scar (test_stage_05_patch_02.Stage05Patch02Tests.test_second_foundation_guard_is_a_real_preserved_scar) ... ok
+test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) ... ok
+test_legacy_distance_state_is_owned_by_one_invocation (test_stage_06_discovery_03.Stage06Discovery03Tests.test_legacy_distance_state_is_owned_by_one_invocation) ... ok
+test_legacy_helper_keeps_tag_difference_formula (test_stage_06_discovery_03.Stage06Discovery03Tests.test_legacy_helper_keeps_tag_difference_formula) ... ok
+test_old_distance_is_on_the_real_calendar_path (test_stage_06_discovery_03.Stage06Discovery03Tests.test_old_distance_is_on_the_real_calendar_path) ... ok
+test_adapter_keeps_raw_legacy_and_patched_distance_separate (test_stage_07_patch_03.Stage07Patch03Tests.test_adapter_keeps_raw_legacy_and_patched_distance_separate) ... ok
+test_adapter_marks_equal_legacy_branch_without_replacement (test_stage_07_patch_03.Stage07Patch03Tests.test_adapter_marks_equal_legacy_branch_without_replacement) ... ok
+test_nonreplacement_branch_still_gets_final_plus_one (test_stage_07_patch_03.Stage07Patch03Tests.test_nonreplacement_branch_still_gets_final_plus_one) ... ok
+test_observability_state_cannot_change_distance_patch (test_stage_07_patch_03.Stage07Patch03Tests.test_observability_state_cannot_change_distance_patch) ... ok
+test_old_distance_remains_physically_wrong (test_stage_07_patch_03.Stage07Patch03Tests.test_old_distance_remains_physically_wrong) ... ok
+test_patch_really_calls_old_distance (test_stage_07_patch_03.Stage07Patch03Tests.test_patch_really_calls_old_distance) ... ok
+test_patched_counts_match_normative_distance_on_required_edges (test_stage_07_patch_03.Stage07Patch03Tests.test_patched_counts_match_normative_distance_on_required_edges) ... ok
+test_current_stone_builder_path_diverges_from_normative_table (test_stage_08_discovery_04.Stage08Discovery04Tests.test_current_stone_builder_path_diverges_from_normative_table) ... ok
+test_legacy_stone_state_is_owned_by_one_invocation (test_stage_08_discovery_04.Stage08Discovery04Tests.test_legacy_stone_state_is_owned_by_one_invocation) ... ok
+test_mutate_stones_wrong_reuses_new_values_in_place (test_stage_08_discovery_04.Stage08Discovery04Tests.test_mutate_stones_wrong_reuses_new_values_in_place) ... ok
+test_wrong_stone_mutation_is_on_the_real_calendar_path (test_stage_08_discovery_04.Stage08Discovery04Tests.test_wrong_stone_mutation_is_on_the_real_calendar_path) ... ok
+test_adapter_keeps_patch_scar_state_invocation_local (test_stage_09_patch_04.Stage09Patch04Tests.test_adapter_keeps_patch_scar_state_invocation_local) ... ok
+test_full_builder_matches_normative_table (test_stage_09_patch_04.Stage09Patch04Tests.test_full_builder_matches_normative_table) ... ok
+test_garbage_is_observed_then_all_five_fields_are_overwritten (test_stage_09_patch_04.Stage09Patch04Tests.test_garbage_is_observed_then_all_five_fields_are_overwritten) ... ok
+test_observability_state_cannot_change_stone_patch_result (test_stage_09_patch_04.Stage09Patch04Tests.test_observability_state_cannot_change_stone_patch_result) ... ok
+test_overwrite_reads_only_old_snapshot_not_garbage (test_stage_09_patch_04.Stage09Patch04Tests.test_overwrite_reads_only_old_snapshot_not_garbage) ... ok
+test_stone_patch_matches_normative_rows (test_stage_09_patch_04.Stage09Patch04Tests.test_stone_patch_matches_normative_rows) ... ok
+test_stone_patch_really_calls_legacy_on_a_clone (test_stage_09_patch_04.Stage09Patch04Tests.test_stone_patch_really_calls_legacy_on_a_clone) ... ok
+test_wrong_mutator_remains_physically_wrong_and_in_place (test_stage_09_patch_04.Stage09Patch04Tests.test_wrong_mutator_remains_physically_wrong_and_in_place) ... ok
+test_backward_hidden_storage_is_on_the_real_calendar_path (test_stage_10_discovery_05.Stage10Discovery05Tests.test_backward_hidden_storage_is_on_the_real_calendar_path) ... ok
+test_current_hidden_nearness_access_diverges_from_normative_hidden (test_stage_10_discovery_05.Stage10Discovery05Tests.test_current_hidden_nearness_access_diverges_from_normative_hidden) ... ok
+test_hidden_storage_state_is_owned_by_one_invocation (test_stage_10_discovery_05.Stage10Discovery05Tests.test_hidden_storage_state_is_owned_by_one_invocation) ... ok
+test_physical_storage_really_is_hidden7_through_hidden1 (test_stage_10_discovery_05.Stage10Discovery05Tests.test_physical_storage_really_is_hidden7_through_hidden1) ... ok
+test_backward_storage_remains_physically_reversed (test_stage_11_patch_05.Stage11Patch05Tests.test_backward_storage_remains_physically_reversed) ... ok
+test_hidden_by_nearness_matches_normative_hidden_for_all_seven_slots (test_stage_11_patch_05.Stage11Patch05Tests.test_hidden_by_nearness_matches_normative_hidden_for_all_seven_slots) ... ok
+test_observability_state_cannot_change_hidden_translation (test_stage_11_patch_05.Stage11Patch05Tests.test_observability_state_cannot_change_hidden_translation) ... ok
+test_patch_state_is_invocation_local (test_stage_11_patch_05.Stage11Patch05Tests.test_patch_state_is_invocation_local) ... ok
+test_patch_wrapper_really_calls_wrong_direct_accessor_before_translation (test_stage_11_patch_05.Stage11Patch05Tests.test_patch_wrapper_really_calls_wrong_direct_accessor_before_translation) ... ok
+test_wrong_direct_accessor_remains_physically_wrong (test_stage_11_patch_05.Stage11Patch05Tests.test_wrong_direct_accessor_remains_physically_wrong) ... ok
+test_current_prior_path_diverges_when_history_should_come_from_hidden (test_stage_12_discovery_06.Stage12Discovery06Tests.test_current_prior_path_diverges_when_history_should_come_from_hidden) ... ok
+test_legacy_prior_is_on_the_real_calendar_path (test_stage_12_discovery_06.Stage12Discovery06Tests.test_legacy_prior_is_on_the_real_calendar_path) ... ok
+test_legacy_prior_still_reads_valid_visible_slots (test_stage_12_discovery_06.Stage12Discovery06Tests.test_legacy_prior_still_reads_valid_visible_slots) ... ok
+test_nonpositive_slot_keeps_legacy_coordinates_and_uses_hidden_history (test_stage_12_discovery_06.Stage12Discovery06Tests.test_nonpositive_slot_keeps_legacy_coordinates_and_uses_hidden_history) ... ok
+test_adapter_records_hidden_branch_state_invocation_locally (test_stage_13_patch_06.Stage13Patch06Tests.test_adapter_records_hidden_branch_state_invocation_locally) ... ok
+test_adapter_visible_branch_does_not_require_hidden_storage (test_stage_13_patch_06.Stage13Patch06Tests.test_adapter_visible_branch_does_not_require_hidden_storage) ... ok
+test_hidden_branch_really_calls_hidden_by_nearness_and_not_legacy_prior (test_stage_13_patch_06.Stage13Patch06Tests.test_hidden_branch_really_calls_hidden_by_nearness_and_not_legacy_prior) ... ok
+test_hidden_branch_requires_hidden_storage (test_stage_13_patch_06.Stage13Patch06Tests.test_hidden_branch_requires_hidden_storage) ... ok
+test_observability_state_cannot_change_prior_patch (test_stage_13_patch_06.Stage13Patch06Tests.test_observability_state_cannot_change_prior_patch) ... ok
+test_prior_patch_preserves_visible_branch_through_legacy_prior (test_stage_13_patch_06.Stage13Patch06Tests.test_prior_patch_preserves_visible_branch_through_legacy_prior) ... ok
+test_prior_patch_uses_hidden_k_equal_one_minus_slot (test_stage_13_patch_06.Stage13Patch06Tests.test_prior_patch_uses_hidden_k_equal_one_minus_slot) ... ok
+test_current_grind_table_path_diverges_from_normative_visible_drops (test_stage_14_discovery_07.Stage14Discovery07Tests.test_current_grind_table_path_diverges_from_normative_visible_drops) ... ok
+test_legacy_grind_indexing_is_on_the_real_calendar_path (test_stage_14_discovery_07.Stage14Discovery07Tests.test_legacy_grind_indexing_is_on_the_real_calendar_path) ... ok
+test_legacy_visible_drop_state_is_owned_by_one_invocation (test_stage_14_discovery_07.Stage14Discovery07Tests.test_legacy_visible_drop_state_is_owned_by_one_invocation) ... ok
+test_legacy_zero_based_table_remains_and_patch_table_adds_permanent_sentinel (test_stage_14_discovery_07.Stage14Discovery07Tests.test_legacy_zero_based_table_remains_and_patch_table_adds_permanent_sentinel) ... ok
+test_full_visible_drop_builder_matches_normative_visible_drops (test_stage_15_patch_07.Stage15Patch07Tests.test_full_visible_drop_builder_matches_normative_visible_drops) ... ok
+test_legacy_indexing_function_remains_unchanged (test_stage_15_patch_07.Stage15Patch07Tests.test_legacy_indexing_function_remains_unchanged) ... ok
+test_observability_state_cannot_change_visible_grind_patch (test_stage_15_patch_07.Stage15Patch07Tests.test_observability_state_cannot_change_visible_grind_patch) ... ok
+test_patch_state_is_invocation_local (test_stage_15_patch_07.Stage15Patch07Tests.test_patch_state_is_invocation_local) ... ok
+test_patch_table_keeps_sentinel_at_zero_and_real_rows_at_one_through_eleven (test_stage_15_patch_07.Stage15Patch07Tests.test_patch_table_keeps_sentinel_at_zero_and_real_rows_at_one_through_eleven) ... ok
+test_sentinel_is_never_read_by_normal_one_through_eleven_grinds (test_stage_15_patch_07.Stage15Patch07Tests.test_sentinel_is_never_read_by_normal_one_through_eleven_grinds) ... ok
+test_current_permutation_rank_path_diverges_from_normative_order (test_stage_16_discovery_08.Stage16Discovery08Tests.test_current_permutation_rank_path_diverges_from_normative_order) ... ok
+test_old_zero_based_unrank_helper_keeps_its_historical_contract (test_stage_16_discovery_08.Stage16Discovery08Tests.test_old_zero_based_unrank_helper_keeps_its_historical_contract) ... ok
+test_order_table_state_is_owned_by_one_invocation (test_stage_16_discovery_08.Stage16Discovery08Tests.test_order_table_state_is_owned_by_one_invocation) ... ok
+test_wrong_path_passes_one_based_number_directly_as_rank0 (test_stage_16_discovery_08.Stage16Discovery08Tests.test_wrong_path_passes_one_based_number_directly_as_rank0) ... ok
+test_zero_based_unrank_helper_remains_on_the_real_calendar_path (test_stage_16_discovery_08.Stage16Discovery08Tests.test_zero_based_unrank_helper_remains_on_the_real_calendar_path) ... ok
+test_full_order_table_matches_normative_orders (test_stage_17_patch_08.Stage17Patch08Tests.test_full_order_table_matches_normative_orders) ... ok
+test_observability_state_cannot_change_permutation_patch (test_stage_17_patch_08.Stage17Patch08Tests.test_observability_state_cannot_change_permutation_patch) ... ok
+test_one_based_720_keeps_wrong_path_error_as_scar_but_corrects_successfully (test_stage_17_patch_08.Stage17Patch08Tests.test_one_based_720_keeps_wrong_path_error_as_scar_but_corrects_successfully) ... ok
+test_patch_chain_really_passes_one_based_minus_one_to_old_unrank (test_stage_17_patch_08.Stage17Patch08Tests.test_patch_chain_really_passes_one_based_minus_one_to_old_unrank) ... ok
+test_patch_state_is_invocation_local (test_stage_17_patch_08.Stage17Patch08Tests.test_patch_state_is_invocation_local) ... ok
+test_patch_wrapper_really_calls_wrong_caller_then_correct_chain (test_stage_17_patch_08.Stage17Patch08Tests.test_patch_wrapper_really_calls_wrong_caller_then_correct_chain) ... ok
+test_required_chain_matches_normative_for_all_order_numbers (test_stage_17_patch_08.Stage17Patch08Tests.test_required_chain_matches_normative_for_all_order_numbers) ... ok
+test_stage15_sentinel_is_still_present (test_stage_17_patch_08.Stage17Patch08Tests.test_stage15_sentinel_is_still_present) ... ok
+test_wrong_caller_remains_physically_wrong (test_stage_17_patch_08.Stage17Patch08Tests.test_wrong_caller_remains_physically_wrong) ... ok
+test_current_fixed_bowl_pours_diverge_from_normative_position_reads (test_stage_18_discovery_09.Stage18Discovery09Tests.test_current_fixed_bowl_pours_diverge_from_normative_position_reads) ... ok
+test_fixed_bowl_pour_is_on_the_real_calendar_path (test_stage_18_discovery_09.Stage18Discovery09Tests.test_fixed_bowl_pour_is_on_the_real_calendar_path) ... ok
+test_initial_bowl_factory_matches_normative_initial_bowls (test_stage_18_discovery_09.Stage18Discovery09Tests.test_initial_bowl_factory_matches_normative_initial_bowls) ... ok
+test_legacy_helper_really_reads_fixed_bowls_one_two_three (test_stage_18_discovery_09.Stage18Discovery09Tests.test_legacy_helper_really_reads_fixed_bowls_one_two_three) ... ok
+test_legacy_pour_state_is_owned_by_one_invocation (test_stage_18_discovery_09.Stage18Discovery09Tests.test_legacy_pour_state_is_owned_by_one_invocation) ... ok
+test_alias_table_maps_every_position_to_current_order_bowl (test_stage_19_patch_09.Stage19Patch09Tests.test_alias_table_maps_every_position_to_current_order_bowl) ... ok
+test_all_46_isolated_pour_sets_match_normative_position_reads (test_stage_19_patch_09.Stage19Patch09Tests.test_all_46_isolated_pour_sets_match_normative_position_reads) ... ok
+test_all_corrected_bowl_reads_go_through_alias_helper (test_stage_19_patch_09.Stage19Patch09Tests.test_all_corrected_bowl_reads_go_through_alias_helper) ... ok
+test_fixed_bowl_helper_remains_physically_wrong (test_stage_19_patch_09.Stage19Patch09Tests.test_fixed_bowl_helper_remains_physically_wrong) ... ok
+test_observability_state_cannot_change_bowl_alias_patch (test_stage_19_patch_09.Stage19Patch09Tests.test_observability_state_cannot_change_bowl_alias_patch) ... ok
+test_patch_state_is_invocation_local (test_stage_19_patch_09.Stage19Patch09Tests.test_patch_state_is_invocation_local) ... ok
+test_stage15_sentinel_is_still_present (test_stage_19_patch_09.Stage19Patch09Tests.test_stage15_sentinel_is_still_present) ... ok
+test_wrapper_really_calls_legacy_fixed_scar_then_alias_correction (test_stage_19_patch_09.Stage19Patch09Tests.test_wrapper_really_calls_legacy_fixed_scar_then_alias_correction) ... ok
+test_current_in_place_bowl_update_diverges_from_normative_snapshot_update (test_stage_20_discovery_10.Stage20Discovery10Tests.test_current_in_place_bowl_update_diverges_from_normative_snapshot_update) ... ok
+test_in_place_bowl_update_is_on_the_real_calendar_path (test_stage_20_discovery_10.Stage20Discovery10Tests.test_in_place_bowl_update_is_on_the_real_calendar_path) ... ok
+test_legacy_helper_really_uses_updated_working_values_in_later_positions (test_stage_20_discovery_10.Stage20Discovery10Tests.test_legacy_helper_really_uses_updated_working_values_in_later_positions) ... ok
+test_legacy_update_state_is_owned_by_one_invocation (test_stage_20_discovery_10.Stage20Discovery10Tests.test_legacy_update_state_is_owned_by_one_invocation) ... ok
+test_observability_state_cannot_change_snapshot_patch (test_stage_21_patch_10.Stage21Patch10Tests.test_observability_state_cannot_change_snapshot_patch) ... ok
+test_patch_state_is_invocation_local (test_stage_21_patch_10.Stage21Patch10Tests.test_patch_state_is_invocation_local) ... ok
+test_snapshot_patch_commits_all_six_positions_as_one_batch (test_stage_21_patch_10.Stage21Patch10Tests.test_snapshot_patch_commits_all_six_positions_as_one_batch) ... ok
+test_snapshot_patch_matches_normative_one_drop_result (test_stage_21_patch_10.Stage21Patch10Tests.test_snapshot_patch_matches_normative_one_drop_result) ... ok
+test_stage15_sentinel_is_still_present (test_stage_21_patch_10.Stage21Patch10Tests.test_stage15_sentinel_is_still_present) ... ok
+test_vault_old_is_physical_clone_and_pending_is_committed_result (test_stage_21_patch_10.Stage21Patch10Tests.test_vault_old_is_physical_clone_and_pending_is_committed_result) ... ok
+test_wrapper_really_calls_wrong_scar_then_snapshot_patch (test_stage_21_patch_10.Stage21Patch10Tests.test_wrapper_really_calls_wrong_scar_then_snapshot_patch) ... ok
+test_wrong_in_place_helper_remains_physically_wrong (test_stage_21_patch_10.Stage21Patch10Tests.test_wrong_in_place_helper_remains_physically_wrong) ... ok
+test_current_query_order_is_overwritten_instead_of_preserving_drop_46_order (test_stage_22_discovery_11.Stage22Discovery11Tests.test_current_query_order_is_overwritten_instead_of_preserving_drop_46_order) ... ok
+test_full_46_drop_and_12_stir_bowls_are_normative (test_stage_22_discovery_11.Stage22Discovery11Tests.test_full_46_drop_and_12_stir_bowls_are_normative) ... ok
+test_full_drop_and_post_stir_path_is_on_the_real_calendar_path (test_stage_22_discovery_11.Stage22Discovery11Tests.test_full_drop_and_post_stir_path_is_on_the_real_calendar_path) ... ok
+test_general_order_memory_is_still_overwritten_by_all_post_stirs (test_stage_22_discovery_11.Stage22Discovery11Tests.test_general_order_memory_is_still_overwritten_by_all_post_stirs) ... ok
+test_order_memory_state_is_owned_by_one_invocation (test_stage_22_discovery_11.Stage22Discovery11Tests.test_order_memory_state_is_owned_by_one_invocation) ... ok
+test_latch_equals_drop_46_order_and_is_a_physical_clone (test_stage_23_patch_11.Stage23Patch11Tests.test_latch_equals_drop_46_order_and_is_a_physical_clone) ... ok
+test_latch_is_written_exactly_once_before_post_stirs (test_stage_23_patch_11.Stage23Patch11Tests.test_latch_is_written_exactly_once_before_post_stirs) ... ok
+test_observability_state_cannot_change_latched_order (test_stage_23_patch_11.Stage23Patch11Tests.test_observability_state_cannot_change_latched_order) ... ok
+test_patch_state_is_invocation_local (test_stage_23_patch_11.Stage23Patch11Tests.test_patch_state_is_invocation_local) ... ok
+test_post_stirs_keep_overwriting_legacy_memory_but_never_latch (test_stage_23_patch_11.Stage23Patch11Tests.test_post_stirs_keep_overwriting_legacy_memory_but_never_latch) ... ok
+test_query_order_reads_latch_not_overwritable_memory (test_stage_23_patch_11.Stage23Patch11Tests.test_query_order_reads_latch_not_overwritable_memory) ... ok
+test_second_run_on_same_context_rejects_latch_rewrite (test_stage_23_patch_11.Stage23Patch11Tests.test_second_run_on_same_context_rejects_latch_rewrite) ... ok
+test_stage15_sentinel_is_still_present (test_stage_23_patch_11.Stage23Patch11Tests.test_stage15_sentinel_is_still_present) ... ok
+test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor (test_stage_24_discovery_12.Stage24Discovery12Tests.test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor) ... 
+  test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor (test_stage_24_discovery_12.Stage24Discovery12Tests.test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor) (queried_id=4) ... FAIL
+  test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor (test_stage_24_discovery_12.Stage24Discovery12Tests.test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor) (queried_id=5) ... FAIL
+  test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor (test_stage_24_discovery_12.Stage24Discovery12Tests.test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor) (queried_id=6) ... FAIL
+test_fixed_id_next_bowl_is_on_the_real_calendar_path (test_stage_24_discovery_12.Stage24Discovery12Tests.test_fixed_id_next_bowl_is_on_the_real_calendar_path) ... ok
+test_legacy_next_bowl_state_is_owned_by_one_invocation (test_stage_24_discovery_12.Stage24Discovery12Tests.test_legacy_next_bowl_state_is_owned_by_one_invocation) ... ok
+test_old_helper_really_uses_numeric_fixed_id_ring (test_stage_24_discovery_12.Stage24Discovery12Tests.test_old_helper_really_uses_numeric_fixed_id_ring) ... ok
+
+======================================================================
+FAIL: test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor (test_stage_24_discovery_12.Stage24Discovery12Tests.test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor) (queried_id=4)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage24-work/pastafari-calendar-python-turkish-stage-24-discovery-12/tests/test_stage_24_discovery_12.py", line 166, in test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        actual,
+        ^^^^^^^
+        expected,
+        ^^^^^^^^^
+        msg="Legacy sabit ID halkası drop 46 latch içindeki circular successor ile uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 5 != 6 : Legacy sabit ID halkası drop 46 latch içindeki circular successor ile uyuşmadı
+
+======================================================================
+FAIL: test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor (test_stage_24_discovery_12.Stage24Discovery12Tests.test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor) (queried_id=5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage24-work/pastafari-calendar-python-turkish-stage-24-discovery-12/tests/test_stage_24_discovery_12.py", line 166, in test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        actual,
+        ^^^^^^^
+        expected,
+        ^^^^^^^^^
+        msg="Legacy sabit ID halkası drop 46 latch içindeki circular successor ile uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 6 != 1 : Legacy sabit ID halkası drop 46 latch içindeki circular successor ile uyuşmadı
+
+======================================================================
+FAIL: test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor (test_stage_24_discovery_12.Stage24Discovery12Tests.test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor) (queried_id=6)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage24-work/pastafari-calendar-python-turkish-stage-24-discovery-12/tests/test_stage_24_discovery_12.py", line 166, in test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        actual,
+        ^^^^^^^
+        expected,
+        ^^^^^^^^^
+        msg="Legacy sabit ID halkası drop 46 latch içindeki circular successor ile uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 1 != 5 : Legacy sabit ID halkası drop 46 latch içindeki circular successor ile uyuşmadı
+
+----------------------------------------------------------------------
+Ran 144 tests in 10.899s
+
+FAILED (failures=3)

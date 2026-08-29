@@ -1,0 +1,28 @@
+Aşama 25/55 — PATCH 12
+
+Bu paket yalnızca Aşama 25 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_next_bowl.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_24_discovery_12.py
+tests/test_stage_25_patch_12.py
+artifacts/stage-25/BASELINE_STAGE_24_EXPECTED_RED.txt
+artifacts/stage-25/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_25.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 24 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 24 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+oldNextBowlFixedName fixed-ID scar: KORUNDU
+old helper diagnostic call: AKTİF
+queried ID latch position lookup: EKLENDİ
+circular successor semantic result: EKLENDİ
+orderAt46Latch: KORUNDU
+PATCH 13 biasedLegacyPick code: YOK

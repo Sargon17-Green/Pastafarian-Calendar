@@ -1097,3 +1097,49 @@ Stage 23 exact drop 46 order değerini `orderAt46Latch` içinde korur. Bu fixtur
 Yeni normatif regresyon actual adapter yolunu queried ID 4, 5 ve 6 için test eder ve expected değeri test-only olarak latch içindeki circular successor'dan hesaplar. Üç alt örnek bilinçli kırmızıdır.
 
 Bu aşamada production içinde latch-position arama veya corrected circular-successor detour'u yoktur. Aşama 1 future-name guard zaten Patch 13+ isimleriyle sınırlı olduğundan değiştirilmemiştir. Patch 13 ve sonrası kod eklenmemiştir.
+
+
+## Aşama 25 — Yama 12: queried ID için latch-position circular successor
+
+### Ne korundu
+
+Discovery 12'nin tarihsel helper'ı fiziksel olarak kalır:
+
+```text
+oldNextBowlFixedName(id)
+1->2->3->4->5->6->1
+```
+
+Bu helper hâlâ yanlış fixed numeric ID successor üretir.
+
+`NextBowlPatchWrapper` helper'ı diagnostic scar olarak gerçekten çağırır ve sonucunu invocation-local bağlamda saklar.
+
+### Authoritative semantic yol
+
+Corrected yol queried ID'yi `orderAt46Latch` içinde arar.
+
+Bulunan position için semantic next bowl:
+
+```text
+orderAt46Latch[(position+1) mod 6]
+```
+
+değeridir.
+
+Bu yol numeric ID sırasına hiçbir anlam yüklemez.
+
+Latch son position için wraparound ilk position'a gider.
+
+### Regresyon
+
+Aşama 24'ün normatif next-bowl regresyonunun gövdesi byte-for-byte değiştirilmedi.
+
+Queried ID 4, 5 ve 6 alt örnekleri yalnızca latch-position circular successor detour'u sayesinde yeşile döndü.
+
+Ayrıca latch içindeki altı ID'nin tamamı corrected adapter üzerinden test edilir.
+
+### Sınır
+
+Patch 13 biased modulo selection kodu henüz yoktur.
+
+Stage 15 sentinel, Stage 17 permutation patch, Stage 19 bowlAlias patch, Stage 21 snapshot/pending patch ve Stage 23 orderAt46Latch aynen korunur.

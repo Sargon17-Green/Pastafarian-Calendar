@@ -148,6 +148,10 @@ class MonsterContext:
     patch11_applied: bool = False
     legacy_next_bowl_queried_id: int | None = None
     legacy_next_bowl_fixed_result: int | None = None
+    patch12_queried_id: int | None = None
+    patch12_legacy_diagnostic: int | None = None
+    patch12_corrected_result: int | None = None
+    patch12_applied: bool = False
 
 
 class BaseMetrics:

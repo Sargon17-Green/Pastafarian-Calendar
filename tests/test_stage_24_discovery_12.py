@@ -119,6 +119,10 @@ class Stage24Discovery12Tests(unittest.TestCase):
         )
         self.assertEqual(
             first.legacy_next_bowl_fixed_result,
+            oldNextBowlFixedName(4),
+        )
+        self.assertEqual(
+            first.patch12_corrected_result,
             result,
         )
 
@@ -127,6 +131,9 @@ class Stage24Discovery12Tests(unittest.TestCase):
         )
         self.assertIsNone(
             second.legacy_next_bowl_fixed_result,
+        )
+        self.assertIsNone(
+            second.patch12_corrected_result,
         )
 
     def test_current_fixed_id_next_bowl_diverges_from_latched_circular_successor(self):
