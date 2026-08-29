@@ -759,3 +759,45 @@ Pro tribus witness casibus `biasedLegacyPick(N+1,N)=1`, dum norma primum `N+1` r
 Additi sunt `LegacyAnswerRing`, `answerRingThroughPatchedNextBowl`, `ringAnswer`, `biasedLegacyPick`, campi contextus selectionis, `LegacyBiasedSelectionReport`, `LegacyBiasedSelectionAdapter`, `Discovery13BiasedSelectionHandler`, `requireLegacyBiasedSelectionReady`, `dispatchLegacyBiasedSelection` et `executeLegacyBiasedSelection`.
 
 `oldNextBowlFixedName` et omnia strata priora manent. Nullus `patchedSmallPick`, nullus PATCH 13, nulla wide selection et nullus codex posterior praemature additus est.
+
+## Gradus 27 — PATCH 13: rejectio brevis in eodem answer ring
+
+### Quid repertum erat
+
+Gradus 26 demonstravit `biasedLegacyPick(x,N)` directum modulum facere et distributionem inclinare quando `N` non dividit `M_OLD`. Tres witnesses Fundationis habebant `directionStep=-1`, `N=first-1` et `N>M_OLD/2`; primus responsus `N+1` reiciendus erat, sed helper legacy statim rank 1 reddebat.
+
+### Quid circumventum est
+
+`biasedLegacyPick` non mutatur. `Patch13BiasedSelectionHandler` annulum e Patch 11 et Patch 12 construit, deinde `LegacyBiasedSelectionAdapter::selectBeforeRejection` vere vocat et output historicum in contextu servat. Validator legacy hanc cicatricem directi modulo ante patch confirmat.
+
+Postea `Patch13RejectionWrapper` magnitudinem familiae brevem ad `1..M_OLD` restringit et computat:
+
+```text
+acceptanceLimit = (M_OLD/N)*N
+```
+
+Offset ab zero incipit. Dum `ringAnswer(stream,offset)>acceptanceLimit`, solum offset eiusdem annuli crescit. Nullus annulus novus, nullum first novum et nulla directio nova gignitur. Cum primum responsum acceptabile invenitur, `LegacyBiasedSelectionAdapter::selectAcceptedAnswer` eundem `biasedLegacyPick` in illo responso vocat.
+
+### Cur hoc aequivalet normae brevi
+
+Massa `1..M_OLD` in `floor(M_OLD/N)` blocos integros magnitudinis `N` secatur; cauda residua supra `acceptanceLimit` reicitur. Ideo modulo post acceptance tantum classes aequales accipit. Progressus in eodem answer ring ordinem candidatorum normativum servat.
+
+Validator productionis formula acceptance limit, accepted offset non negativum, accepted answer ex eodem annulo, conditionem `x<=limit`, absentiam candidati prioris acceptabilis et vocationem finalem `biasedLegacyPick(acceptedAnswer,N)` separat verificat.
+
+### Regressio Gradus 26
+
+`tests/stage_26_discovery_13_tests.cpp` non mutatur. Contra Gradum 26 pristinum tres discrepantias exactas et exitum `1` adhuc reddit. Contra Patch 13 novum eadem probatio transit.
+
+### Regressio PATCH 13
+
+Nova probatio tres witnesses Fundationis repetit. In omnibus output legacy ante patch est 1; acceptance limit est `N`; primus responsus reicitur; offset 1 responsum `N` dat; output patched cum norma congruit. Via diagnostica unpatched directum modulo servat.
+
+Boundary `N=M_OLD` statim offset 0 accipit. `N=0` et `N>M_OLD` in selector brevi reiciuntur. Tres cicatrices legacy divergentes manent.
+
+Omnes regressiones Graduum 1–27 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `Patch13RejectionSelection`, campi contextus acceptance limit, accepted answer, accepted offset et output patched, campi report cicatricis, `LegacyBiasedSelectionAdapter::selectAcceptedAnswer`, `Patch13RejectionWrapper`, `Patch13BiasedSelectionHandler`, `requirePatch13BiasedSelectionReady`, `dispatchPatchedBiasedSelection` et `executeUnpatchedBiasedSelectionDiagnostic`.
+
+`biasedLegacyPick` intactus et callable manet. Nullus `wideDetour`, nullus dispatcher wide, nullae digits base-M et nullus PATCH 14 praemature additus est.

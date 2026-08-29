@@ -1,80 +1,84 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 26 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 27 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 26 est `DISCOVERY 13`; status repositorii exspectatus est `EXPECTED_RED`.
+Gradus 27 est `PATCH 13`; status repositorii est `GREEN`.
 
-Gradus 25 next-bowl semanticum iam e successore circulari `orderAt46Latch` derivat. Gradus 26 addit cicatricem historicam selectoris modulo directi: `biasedLegacyPick(x,N)` facit tantum `regularMod(x-1,N)+1`. Via Discovery 13 hunc helper in primo responso annuli statim vocat, ante quam ulla acceptatio vel rejectio fiat.
+Gradus 26 cicatricem `biasedLegacyPick(x,N)=regularMod(x-1,N)+1` exposuit et eam ante rejectionem statim vocavit. Gradus 27 helper ipsum non mutat. Handler novus primum eandem vocationem legacy vere exsequitur et exitum eius servat, deinde rejectionem brevem in eodem `LegacyAnswerRing` applicat.
 
-## Correctio oracle testium reperta hoc gradu
+## PATCH 13 — rejectio ante selector legacy
 
-Dum answer ring contra Appendix A verificabatur, inventum est `tests/reference/normative_reference.cpp` duas formulas craterum a textu Appendix A discrepare. In circuitu guttae visibilis et in post-commotione, Appendix A primum totum mixtum `s` format et deinde `square(s)` servat. Oracle vetus solum craterem ipsum quadraverat et additamenta extra quadratum reliquerat.
-
-Productionis `stirBowlsThroughVaultOld` et post-commotiones iam lecturam Appendix A rectam habebant. Ergo sola copia test-only correcta est. Generator C++ bootstrap fixture denuo exsecutus est; mutati sunt sex valores craterum Fundationis et duo valores interrogationis Fundationis. Omnes probationes priores post hanc correctionem denuo compilatae et exsecutae sunt.
-
-## DISCOVERY 13 — biased modulo ante rejectionem
-
-Cicatrix nova est:
+Pro familia brevi `1<=N<=M_OLD`:
 
 ```text
-biasedLegacyPick(x,N) = regularMod(x-1,N)+1
+acceptanceLimit = floor(M_OLD/N)*N
+offset = 0
+x = ringAnswer(stream,offset)
+while x > acceptanceLimit:
+    offset = offset + 1
+    x = ringAnswer(stream,offset)
+output = biasedLegacyPick(x,N)
 ```
 
-Helper nullum acceptance limit computat et nullum offset annuli quaerit.
+Quia `M_OLD` et `N` positiva sunt, in C++ expressio `(M_OLD/N)*N` eundem `floor(M_OLD/N)*N` reddit.
 
-Answer ring productionis ex statu reali iam reparato construitur:
+Rejectio non mutat originem annuli. Omnia responsa candidata per eandem functionem `ringAnswer` eodem `first` et eodem `directionStep` derivantur. `biasedLegacyPick` non vocatur pro responsis reiectis; postquam primum `x<=acceptanceLimit` inventum est, idem helper historicus in illo `x` accepto vocatur.
+
+## Cicatrix servata
+
+Via activa Patch 13 prius vocat:
 
 ```text
-Patch 11 -> finalBowls + orderAt46Latch
-Patch 12 -> nextBowlId circularis
-answerRingThroughPatchedNextBowl -> first + directionStep
-ringAnswer(stream,0) -> primus responsus
-biasedLegacyPick(first,N) -> electio legacy immediata
+LegacyBiasedSelectionAdapter::selectBeforeRejection
+-> ringAnswer(stream,0)
+-> biasedLegacyPick
 ```
 
-Formulae answer ring sunt exactae Appendix A:
+Exitus hic in `legacyOutputBeforePatch` servatur. Postea `Patch13RejectionWrapper` rejectionem facit et per `LegacyBiasedSelectionAdapter::selectAcceptedAnswer` eundem `biasedLegacyPick` vocat.
 
-```text
-first = SAVE(square(bowls[queried]+seal+181) + 179*bowls[next] + seal)
-directionNumber = SAVE(square(first+seal+1+193) + 193*first + 197*bowls[6])
-directionStep = +1 si directionNumber mod 2 = 1, aliter -1
-answerAt(k) = 1 + regularMod(first-1 + directionStep*k, M_OLD)
-```
+Via diagnostica `executeUnpatchedBiasedSelectionDiagnostic` Gradum 26 intactum exercet et output directi modulo reddit.
 
 ## Via activa
 
 ```text
 BaseMonsterManager::executeLegacyBiasedSelection
--> BaseDispatcher::dispatchPatchedOrderAt46Latch
--> Patch11OrderAt46LatchHandler
--> BaseDispatcher::dispatchPatchedNextBowl
--> Patch12NextBowlHandler
--> Discovery13BiasedSelectionHandler
--> answerRingThroughPatchedNextBowl
+-> Patch 11: orderAt46Latch
+-> Patch 12: successor circularis next-bowl
+-> BaseDispatcher::dispatchPatchedBiasedSelection
+-> Patch13BiasedSelectionHandler
 -> LegacyBiasedSelectionAdapter::selectBeforeRejection
--> ringAnswer(stream,0)
+-> Patch13RejectionWrapper::repair
+-> ringAnswer in eodem annulo donec x<=acceptanceLimit
+-> LegacyBiasedSelectionAdapter::selectAcceptedAnswer
 -> biasedLegacyPick
 ```
 
-`requireLegacyBiasedSelectionReady` comprobat Patch 11 et Patch 12 iam parata esse, directionem esse ±1, primum responsum esse `ringAnswer(stream,0)`, et output legacy exactissime directum modulo esse. Validator nullam rejectionem efficit.
+`requirePatch13BiasedSelectionReady` sine oracle productionis verificat limites `1..M_OLD`, formulam acceptance limit, originem accepted answer ex eodem annulo, absentiam responsi prioris acceptabilis et output finalem per helper legacy.
 
-## Regressio
+## Regressiones
 
-`tests/stage_26_discovery_13_tests.cpp` tres annulos reales Fundationis exercet:
+`tests/stage_26_discovery_13_tests.cpp` byte pro byte non mutatur. Contra codicem Gradus 26 pristinum adhuc tres discrepantias et exitum `1` reddit. Contra Gradum 27 eadem regressio transit.
 
-- crater 1, sigillum 1;
-- crater 2, sigillum 21;
-- crater 3, sigillum 31.
+`tests/stage_27_patch_13_tests.cpp` tres witnesses Fundationis exercet. In omnibus:
 
-In omnibus tribus `directionStep=-1`, `N=first-1`, et `N>M_OLD/2`. Ergo `limit=floor(M_OLD/N)*N` in norma test-only esset `N`: primus responsus `N+1` reiciendus est, proximus responsus in eodem annulo est `N`, et electio normativa est `N`. Cicatrix tamen `biasedLegacyPick(N+1,N)=1` statim reddit.
+```text
+N = first-1
+acceptanceLimit = N
+offset acceptus = 1
+acceptedAnswer = N
+legacyOutputBeforePatch = 1
+output patched = N
+```
 
-Tres discrepantiae exactae inveniuntur; regressio consulto exitum `1` reddit. Omnes regressiones Graduum 1–25 transeunt.
+Probatio etiam `N=M_OLD` sine rejectione, `N=0` reiectum et `N>M_OLD` reiectum in via brevi comprobat. Via diagnostica legacy manet directa modulo.
+
+Omnes regressiones Graduum 1–27 transeunt.
 
 ## Quod consulto nondum adest
 
-In productione nulla formula `limit=floor(M_OLD/N)*N`, nullus progressus ad responsum acceptabilem, nullus `patchedSmallPick`, nullus `SelectionRejectionPatchWrapper`, nullus `Patch13`, nullus `patch13Applied`, nullus `wideDetour` et nullus codex posterior adest. Gradus 27 debet esse `PATCH 13` tantum.
+Nullus dispatcher wide, nullus `wideDetour`, nullum `space=M^places`, nullae digits wide et nullus PATCH 14 in productione adest. Gradus 28 debet esse `DISCOVERY 14`: legacy path brevis assumptionem `N<=M_OLD` servabit et casum `N>M_OLD` consulto exponet sine correctione wide.
 
 ## Lingua computationis
 

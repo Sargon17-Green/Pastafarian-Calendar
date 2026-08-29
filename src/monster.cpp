@@ -3031,6 +3031,44 @@ void BaseValidationManager::requireLegacyBiasedSelectionReady(const BaseMonsterC
     }
 }
 
+void BaseValidationManager::requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const {
+    requireLegacyBiasedSelectionReady(ctx);
+    if (!ctx.patch13Applied) {
+        throw BaseValidationError("emendatio tertia decima nondum applicata est");
+    }
+    const Integer N = ctx.legacyBiasedSelectionFamilySize;
+    if (N < 1 || N > M_OLD) {
+        throw BaseValidationError("magnitudo familiae brevis extra fines 1..M est");
+    }
+    const Integer expectatusLimes = (M_OLD / N) * N;
+    if (ctx.patch13AcceptanceLimit != expectatusLimes) {
+        throw BaseValidationError("limes rejectionis brevis non est floor(M/N)*N");
+    }
+    if (ctx.patch13AcceptedOffset < 0) {
+        throw BaseValidationError("offset responsi accepti negativus est");
+    }
+    const Integer expectatusResponsus = ringAnswer(
+        ctx.legacyBiasedSelectionRing,
+        ctx.patch13AcceptedOffset);
+    if (ctx.patch13AcceptedAnswer != expectatusResponsus) {
+        throw BaseValidationError("responsus acceptus non ex eodem annulo venit");
+    }
+    if (ctx.patch13AcceptedAnswer > ctx.patch13AcceptanceLimit) {
+        throw BaseValidationError("responsus supra limitem rejectionis acceptus est");
+    }
+    for (Integer k = 0; k < ctx.patch13AcceptedOffset; ++k) {
+        if (ringAnswer(ctx.legacyBiasedSelectionRing, k) <= ctx.patch13AcceptanceLimit) {
+            throw BaseValidationError("responsus prior acceptabilis praetermissus est");
+        }
+    }
+    const Integer expectataElectio = biasedLegacyPick(
+        ctx.patch13AcceptedAnswer,
+        N);
+    if (ctx.patchedBiasedSelectionOutput != expectataElectio) {
+        throw BaseValidationError("selector legacy post rejectionem non vocatus est");
+    }
+}
+
 LegacyOrderMemorySauceResult LegacyOrderMemorySauceAdapter::run(
     const Integer& calculationDay,
     const Integer& targetDay) const {
@@ -3057,6 +3095,35 @@ Integer LegacyBiasedSelectionAdapter::selectBeforeRejection(
     const Integer& N) const {
     const Integer x = ringAnswer(stream, Integer{0});
     return biasedLegacyPick(x, N);
+}
+
+Integer LegacyBiasedSelectionAdapter::selectAcceptedAnswer(
+    const Integer& x,
+    const Integer& N) const {
+    return biasedLegacyPick(x, N);
+}
+
+Patch13RejectionSelection Patch13RejectionWrapper::repair(
+    const LegacyAnswerRing& stream,
+    const Integer& N,
+    const LegacyBiasedSelectionAdapter& adapter) const {
+    if (N < 1 || N > M_OLD) {
+        throw BaseValidationError("magnitudo familiae brevis inter 1 et M requiritur");
+    }
+    const Integer acceptanceLimit = (M_OLD / N) * N;
+    Integer offset = 0;
+    for (;;) {
+        const Integer x = ringAnswer(stream, offset);
+        if (x <= acceptanceLimit) {
+            return Patch13RejectionSelection{
+                acceptanceLimit,
+                x,
+                offset,
+                adapter.selectAcceptedAnswer(x, N)
+            };
+        }
+        ++offset;
+    }
 }
 
 void Discovery11OverwrittenOrderHandler::handle(
@@ -3292,6 +3359,74 @@ void BaseDispatcher::dispatchLegacyBiasedSelection(
     handler.handle(ctx, adapter, validator, metrics);
 }
 
+void Patch13BiasedSelectionHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyBiasedSelectionAdapter& adapter,
+    const Patch13RejectionWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch13BiasedSelectionHandler";
+    ctx.phase = "PATCH_13_BUILD_ANSWER_RING";
+    ctx.status = "LEGACY_BIASED_MODULO_CALLED_BEFORE_REJECTION_PATCH";
+    ctx.branchTrace.push_back("PATCH_13_BUILD_ANSWER_RING");
+    metrics.bump(ctx, "patch13.answerRing.calls");
+
+    ctx.legacyBiasedSelectionRing = answerRingThroughPatchedNextBowl(
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.legacyBiasedSelectionQueriedBowlId,
+        ctx.patchedNextBowlOutput,
+        ctx.legacyBiasedSelectionSeal);
+    ctx.legacyBiasedSelectionFirstAnswer = ringAnswer(
+        ctx.legacyBiasedSelectionRing,
+        Integer{0});
+
+    ctx.phase = "PATCH_13_LEGACY_DIRECT_MODULO_CALL";
+    ctx.branchTrace.push_back("PATCH_13_LEGACY_DIRECT_MODULO_CALL");
+    ctx.legacyBiasedSelectionOutput = adapter.selectBeforeRejection(
+        ctx.legacyBiasedSelectionRing,
+        ctx.legacyBiasedSelectionFamilySize);
+    ctx.legacyBiasedSelectionReady = true;
+    metrics.bump(ctx, "patch13.legacyBiasedModulo.calls");
+    validator.requireLegacyBiasedSelectionReady(ctx);
+
+    ctx.phase = "PATCH_13_REJECTION_RING";
+    ctx.branchTrace.push_back("PATCH_13_REJECTION_RING");
+    const Patch13RejectionSelection repaired = wrapper.repair(
+        ctx.legacyBiasedSelectionRing,
+        ctx.legacyBiasedSelectionFamilySize,
+        adapter);
+    ctx.patch13AcceptanceLimit = repaired.acceptanceLimit;
+    ctx.patch13AcceptedAnswer = repaired.acceptedAnswer;
+    ctx.patch13AcceptedOffset = repaired.acceptedOffset;
+    ctx.patchedBiasedSelectionOutput = repaired.outputRank;
+    ctx.patch13Applied = true;
+    metrics.bump(ctx, "patch13.rejection.calls");
+
+    ctx.phase = "PATCH_13_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_13_VALIDATE");
+    validator.requirePatch13BiasedSelectionReady(ctx);
+
+    ctx.phase = "PATCH_13_BIASED_SELECTION_READY";
+    ctx.status = "REJECTION_COMPLETED_ON_SAME_ANSWER_RING";
+    ctx.branchTrace.push_back("PATCH_13_BIASED_SELECTION_READY");
+    metrics.bump(ctx, "patch13.biasedSelection.ready");
+}
+
+void BaseDispatcher::dispatchPatchedBiasedSelection(
+    BaseMonsterContext& ctx,
+    const Patch13BiasedSelectionHandler& handler,
+    const LegacyBiasedSelectionAdapter& adapter,
+    const Patch13RejectionWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_13_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_13_DISPATCH");
+    metrics.bump(ctx, "patch13.dispatch.calls");
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
 LegacyOrderMemoryReport BaseMonsterManager::executeOverwritableOrderMemorySauce(
     const Integer& calculationDay,
     const Integer& targetDay) const {
@@ -3487,7 +3622,85 @@ LegacyBiasedSelectionReport BaseMonsterManager::executeLegacyBiasedSelection(
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
     ctx.targetDay = targetDay;
-    ctx.phase = "DISCOVERY_13_NEW";
+    ctx.phase = "PATCH_13_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyNextBowlQueriedId = queriedBowlId;
+    ctx.legacyBiasedSelectionQueriedBowlId = queriedBowlId;
+    ctx.legacyBiasedSelectionSeal = seal;
+    ctx.legacyBiasedSelectionFamilySize = familySize;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyOrderMemorySauceAdapter orderMemoryAdapter;
+    const Patch11OrderAt46LatchWrapper latchWrapper;
+    const Patch11OrderAt46LatchHandler latchHandler;
+    const LegacyNextBowlAdapter nextBowlAdapter;
+    const Patch12NextBowlWrapper nextBowlWrapper;
+    const Patch12NextBowlHandler nextBowlHandler;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const Patch13BiasedSelectionHandler selectionHandler;
+    const BaseDispatcher dispatcher;
+
+    dispatcher.dispatchPatchedOrderAt46Latch(
+        ctx,
+        latchHandler,
+        orderMemoryAdapter,
+        latchWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchPatchedNextBowl(
+        ctx,
+        nextBowlHandler,
+        nextBowlAdapter,
+        nextBowlWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchPatchedBiasedSelection(
+        ctx,
+        selectionHandler,
+        selectionAdapter,
+        rejectionWrapper,
+        validator,
+        metrics);
+
+    return LegacyBiasedSelectionReport{
+        calculationDay,
+        targetDay,
+        queriedBowlId,
+        seal,
+        familySize,
+        ctx.legacyBiasedSelectionRing,
+        ctx.legacyBiasedSelectionFirstAnswer,
+        ctx.patchedBiasedSelectionOutput,
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.patch11LatchedOrderSauce.orderAt46Latch,
+        ctx.patchedNextBowlOutput,
+        ctx.patch11Applied,
+        ctx.patch12Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyBiasedSelectionOutput,
+        ctx.patch13AcceptanceLimit,
+        ctx.patch13AcceptedAnswer,
+        ctx.patch13AcceptedOffset,
+        ctx.patch13Applied
+    };
+}
+
+LegacyBiasedSelectionReport BaseMonsterManager::executeUnpatchedBiasedSelectionDiagnostic(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    int queriedBowlId,
+    int seal,
+    const Integer& familySize) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_13_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyNextBowlQueriedId = queriedBowlId;
@@ -3545,7 +3758,12 @@ LegacyBiasedSelectionReport BaseMonsterManager::executeLegacyBiasedSelection(
         ctx.phase,
         ctx.status,
         ctx.currentHandler,
-        ctx.branchTrace.size()
+        ctx.branchTrace.size(),
+        ctx.legacyBiasedSelectionOutput,
+        Integer{0},
+        Integer{0},
+        Integer{0},
+        false
     };
 }
 

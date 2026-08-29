@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=26
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=27
+CURRENT_KIND=PATCH
 CURRENT_PATCH=13
-LAST_COMPLETED_STAGE=26
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=27
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=C++
 NATURAL_LANGUAGE=Neo-Latin
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=LegacyAnswerRing, answerRingThroughPatchedNextBowl, ringAnswer, biasedLegacyPick, LegacyBiasedSelectionAdapter, Discovery13BiasedSelectionHandler, campi contextus selectionis et dispatchatio propria addita sunt. Via realis Patch 11 et Patch 12 prius parat, deinde biasedLegacyPick statim in primo responso sine rejectione vocat. Oracle testium lectura Appendix A pro circuitibus craterum correcta est; productionis formula iam recta erat.
+MONSTER_ARCHITECTURE_GROWTH=Patch13RejectionSelection, Patch13RejectionWrapper, Patch13BiasedSelectionHandler, validatio rejectionis, dispatchatio patched et via diagnostica unpatched addita sunt. biasedLegacyPick manet intactus et ante patch vere vocatur; deinde limit=(M_OLD/N)*N computatur, annulus idem progreditur usque ad primum x<=limit, et biasedLegacyPick iterum tantum in x accepto vocatur.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

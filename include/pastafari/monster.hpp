@@ -163,6 +163,13 @@ LegacyAnswerRing answerRingThroughPatchedNextBowl(const BowlState& finalBowls,
 Integer ringAnswer(const LegacyAnswerRing& stream, const Integer& offset);
 Integer biasedLegacyPick(const Integer& x, const Integer& N);
 
+struct Patch13RejectionSelection {
+    Integer acceptanceLimit{};
+    Integer acceptedAnswer{};
+    Integer acceptedOffset{};
+    Integer outputRank{};
+};
+
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
 Stone stonePatch(int i, Stone state);
@@ -286,6 +293,11 @@ struct BaseMonsterContext {
     Integer legacyBiasedSelectionFirstAnswer{};
     Integer legacyBiasedSelectionOutput{};
     bool legacyBiasedSelectionReady = false;
+    Integer patch13AcceptanceLimit{};
+    Integer patch13AcceptedAnswer{};
+    Integer patch13AcceptedOffset{};
+    Integer patchedBiasedSelectionOutput{};
+    bool patch13Applied = false;
 };
 
 struct BaseRunReport {
@@ -488,6 +500,11 @@ struct LegacyBiasedSelectionReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    Integer legacyOutputBeforePatch{};
+    Integer acceptanceLimit{};
+    Integer acceptedAnswer{};
+    Integer acceptedOffset{};
+    bool patch13Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -523,6 +540,7 @@ public:
     void requireLegacyNextBowlReady(const BaseMonsterContext& ctx) const;
     void requirePatch12Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyBiasedSelectionReady(const BaseMonsterContext& ctx) const;
+    void requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -617,6 +635,15 @@ class LegacyBiasedSelectionAdapter {
 public:
     Integer selectBeforeRejection(const LegacyAnswerRing& stream,
                                   const Integer& N) const;
+    Integer selectAcceptedAnswer(const Integer& x,
+                                 const Integer& N) const;
+};
+
+class Patch13RejectionWrapper {
+public:
+    Patch13RejectionSelection repair(const LegacyAnswerRing& stream,
+                                     const Integer& N,
+                                     const LegacyBiasedSelectionAdapter& adapter) const;
 };
 
 class Patch10DeferredBowlWrapper {
@@ -902,6 +929,15 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch13BiasedSelectionHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyBiasedSelectionAdapter& adapter,
+                const Patch13RejectionWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1069,6 +1105,13 @@ public:
                                        const LegacyBiasedSelectionAdapter& adapter,
                                        const BaseValidationManager& validator,
                                        const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedBiasedSelection(BaseMonsterContext& ctx,
+                                        const Patch13BiasedSelectionHandler& handler,
+                                        const LegacyBiasedSelectionAdapter& adapter,
+                                        const Patch13RejectionWrapper& wrapper,
+                                        const BaseValidationManager& validator,
+                                        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1135,6 +1178,12 @@ public:
         const Integer& targetDay,
         int queriedBowlId) const;
     LegacyBiasedSelectionReport executeLegacyBiasedSelection(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        int queriedBowlId,
+        int seal,
+        const Integer& familySize) const;
+    LegacyBiasedSelectionReport executeUnpatchedBiasedSelectionDiagnostic(
         const Integer& calculationDay,
         const Integer& targetDay,
         int queriedBowlId,
