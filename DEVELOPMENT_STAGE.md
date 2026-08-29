@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=17
-CURRENT_KIND=PATCH
-CURRENT_PATCH=08
-LAST_COMPLETED_STAGE=17
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=18
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=09
+LAST_COMPLETED_STAGE=18
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=oldPermutationUnrank0 ve legacyOrderFromDropWrong fiziksel scar olarak korundu; PermutationRankPatchWrapper yanlış caller'ı gerçekten çalıştırıp ham order/error scar'ını tuttu ve authoritative oneBased -> legacyRank0=oneBased-1 -> oldPermutationUnrank0 zincirini uyguladı; 46-drop order tablosu patched yol üzerinden exact hâle geldi
+MONSTER_ARCHITECTURE_GROWTH=initialBowlsThroughOldFactory exact başlangıç kâselerini üretir; legacyFixedBowlPours pour position 1,2,3 için current order'daki bowl ID'leri yerine sabit bowl ID 1,2,3 okuyan tarihsel kusuru taşır; LegacyPourAdapter bu yanlış pour yolunu gerçek calendar state-machine zincirine drop 1 probe olarak bağladı, bowl stir/update henüz başlatılmadı
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

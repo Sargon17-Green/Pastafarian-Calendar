@@ -1,0 +1,28 @@
+Aşama 18/55 — DISCOVERY 09
+
+Bu paket yalnızca Aşama 18 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_pours.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_18_discovery_09.py
+artifacts/stage-18/BASELINE_STAGE_17_GREEN.txt
+artifacts/stage-18/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-18/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_18.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 17 baseline: GREEN
+Değişiklik sonrası Aşama 1–17 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+Yeni kusur: pour position 1,2,3 için sabit bowl ID 1,2,3 okunuyor
+PATCH 09 bowlAlias: YOK
+PATCH 10 vaultOld/pending: YOK
+Aşama 15 sentinel: KORUNDU
+Aşama 17 permutation patch: KORUNDU
+10–26 gelecek kusur/yama kodu: YOK

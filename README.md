@@ -1,34 +1,30 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 17/55, `PATCH 08` durumundadır.
+Aşama 18/55, `DISCOVERY 09` durumundadır.
 
-Tarihsel 0-based helper fiziksel olarak değişmez:
-
-```text
-oldPermutationUnrank0(rank0)
-```
-
-Discovery 08'in yanlış caller'ı da scar olarak kodda kalır.
-
-Authoritative patch chain tam olarak:
+Exact initial bowl factory eklenmiştir. Yeni tarihsel kusur pour read katmanındadır:
 
 ```text
-oneBased = regularMod(drop-1,720)+1
-legacyRank0 = oneBased-1
-order = oldPermutationUnrank0(legacyRank0)
+pour position 1 -> sabit bowl 1
+pour position 2 -> sabit bowl 2
+pour position 3 -> sabit bowl 3
 ```
 
-biçimindedir.
+Legacy kod current permutation order'ını hangi gerçek bowl ID'nin position 1,2,3'te olduğunu belirlemek için kullanmaz.
 
-`PermutationRankPatchWrapper` önce yanlış caller'ı gerçekten çalıştırır ve yanlış order veya `oneBased=720` hata scar'ını invocation-local bağlamda tutar. Sonra patched chain sonucunu semantic order olarak döndürür.
+`LegacyPourAdapter`, bu fixed-bowl yolu exact visible drops ve exact permutation order tablosunun üstünde gerçek `calendar_date_spaghetti` state-machine zincirine bağlar.
 
-Aşama 16'nın normatif permutation-rank regresyonu değiştirilmeden yeşile dönmüştür. 46 görünür drop order'ının tamamı test-only normatif bowl order ile eşleşir.
+Yeni normatif regresyon `i=1`, `i=2` ve `i=3` için legacy pour tuple'ını test-only normatif position-based bowl reads ile karşılaştırır ve bilinçli olarak kırmızıdır.
 
-Stage 15'in kalıcı sentinel row'u korunur. Pours ve `bowlAlias` henüz eklenmemiştir. Gelecekteki 09–26 kusur ve yamaları üretime eklenmemiştir.
+Henüz `PATCH 09` yoktur: `bowlAlias[position]=order[position]` ve alias üzerinden bowl read eklenmemiştir.
+
+Bowl stir/update da henüz başlatılmaz; dolayısıyla `vaultOld`/`pending` Patch 10 kodu yoktur.
+
+Stage 15 kalıcı sentinel row ve Stage 17 permutation patch korunur. Önceki Aşama 1–17 regresyonlarının tamamı yeşildir.
 
 ## Korunan birinci aşama temeli
 
@@ -44,10 +40,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam on yedinci aşama paketi:
+Tam on sekizinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 16'da kırmızı olan `i=1`, `i=2` ve `i=46` permutation-order alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.
+Beklenen sonuç: önceki Aşama 1–17 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni fixed-bowl pour normatif regresyonunun `i=1`, `i=2` ve `i=3` alt örnekleri başarısız olur.

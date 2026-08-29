@@ -164,7 +164,26 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.permutation.orderTables",
         )
         local_ctx.status = "ESKİ_PERMÜTASYON_SIRALARI_HAZIR"
-        local_ctx.phase = "AŞAMA_16_BEKLEME"
+        local_ctx.phase = "ESKİ_SABİT_KÂSE_POURS"
+
+    def legacy_pour_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        manager.legacy_pours.call(
+            local_ctx,
+            1,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.pour.probes",
+        )
+        local_ctx.status = "ESKİ_SABİT_KÂSE_POURS_HAZIR"
+        local_ctx.phase = "AŞAMA_18_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -175,6 +194,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_GÖRÜNÜR_GEÇMİŞ", legacy_prior_handler)
     manager.dispatcher.register("ESKİ_GÖRÜNÜR_DAMLALAR", legacy_visible_drop_handler)
     manager.dispatcher.register("ESKİ_PERMÜTASYON_SIRALARI", legacy_permutation_handler)
+    manager.dispatcher.register("ESKİ_SABİT_KÂSE_POURS", legacy_pour_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -186,5 +207,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "On yedinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "On sekizinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

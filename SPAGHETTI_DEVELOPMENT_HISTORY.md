@@ -775,3 +775,72 @@ Bütün 46 visible-drop order'ı test-only normatif bowl order ile eşleşir.
 Stage 15'in kalıcı grind sentinel row'u aynen korunur.
 
 Pours, bowlAlias ve Patch 09 henüz başlatılmamıştır.
+
+
+## Aşama 18 — Keşif 09: pour positions yerine sabit bowl ID 1,2,3 okumak
+
+### Ne sanıldı
+
+İlk bowl factory doğru başlangıç kâselerini üretir.
+
+Legacy pour kodu ise eski position düşüncesini sabit bowl ID sanmıştır:
+
+```text
+pour position 1 -> B[1]
+pour position 2 -> B[2]
+pour position 3 -> B[3]
+```
+
+Bu nedenle helper:
+
+```text
+legacyFixedBowlPours(...)
+```
+
+ilk üç pour değerini current permutation order'ını bowl seçimi için kullanmadan hesaplar.
+
+### Ne keşfedildi
+
+Normatif anlamda `pour[1]`, `pour[2]`, `pour[3]` birer position değeridir.
+
+Current order:
+
+```text
+order[position]
+```
+
+hangi gerçek bowl ID'nin o position'da olduğunu belirler.
+
+Dolayısıyla doğru bowl read:
+
+```text
+B[order[1]]
+B[order[2]]
+B[order[3]]
+```
+
+olmalıdır.
+
+Discovery 09'da bu alias henüz yoktur.
+
+Örneğin order position 1 bowl 5 ise legacy hâlâ bowl 1'i okur.
+
+### Gerçek production yolu
+
+`LegacyPourAdapter`, exact initial bowls, Stage 15 exact visible drops ve Stage 17 exact permutation orders üstünde çalışır.
+
+Gerçek `calendar_date_spaghetti` state-machine yolu drop 1 için legacy fixed-bowl pour probe çalıştırır.
+
+Bowl stir/update henüz başlatılmaz. Böylece Stage 18 yalnızca Patch 09 kusurunu ekler; in-place bowl contamination olan Patch 10 erkenden ortaya çıkmaz.
+
+Yeni normatif regresyon aynı gerçek adapter yolunu `i=1`, `i=2` ve `i=3` için test-only normatif position-based pour formülüyle karşılaştırır. Üç alt örnek bilinçli olarak kırmızıdır.
+
+`i=46` bu regresyon için kullanılmaz çünkü o fixture'da ilk üç order position'ı tesadüfen bowl 1,2,3'tür ve legacy kusuru görünmez.
+
+### Bu aşamada eklenen canavar katmanı
+
+Invocation bağlamında exact initial bowl tuple'ı, son pour drop indeksi, son exact order ve son legacy pour tuple'ı tutulur.
+
+Bu aşamada `bowlAlias` yoktur. Alias install/read helper'ı, vaultOld, pending writes veya Patch 10 kodu eklenmemiştir.
+
+Stage 15 sentinel ve Stage 17 permutation rank patch aynen korunur.
