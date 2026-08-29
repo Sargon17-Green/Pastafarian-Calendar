@@ -148,6 +148,8 @@ Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     const Integer& calculationDay,
     const Integer& targetDay);
 int oldNextBowlFixedName(int id);
+int nextBowlThroughOrderAt46Latch(const PermutationOrder& orderAt46Latch,
+                                  int queriedBowlId);
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -262,6 +264,9 @@ struct BaseMonsterContext {
     int legacyNextBowlOutput = 0;
     PermutationOrder legacyNextBowlOrderAt46Latch{};
     bool legacyNextBowlReady = false;
+    int patchedNextBowlOutput = 0;
+    std::size_t patch12QueriedPosition = 0;
+    bool patch12Applied = false;
 };
 
 struct BaseRunReport {
@@ -441,6 +446,9 @@ struct LegacyNextBowlReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    int legacyOutputBeforePatch = 0;
+    std::size_t queriedPosition = 0;
+    bool patch12Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -474,6 +482,7 @@ public:
     void requireLegacyOrderMemorySauceReady(const BaseMonsterContext& ctx) const;
     void requirePatch11Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyNextBowlReady(const BaseMonsterContext& ctx) const;
+    void requirePatch12Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -556,6 +565,12 @@ public:
 class LegacyNextBowlAdapter {
 public:
     int nextFixedName(int queriedBowlId) const;
+};
+
+class Patch12NextBowlWrapper {
+public:
+    int repair(const PermutationOrder& orderAt46Latch,
+               int queriedBowlId) const;
 };
 
 class Patch10DeferredBowlWrapper {
@@ -824,6 +839,15 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch12NextBowlHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyNextBowlAdapter& adapter,
+                const Patch12NextBowlWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -978,6 +1002,13 @@ public:
                                 const LegacyNextBowlAdapter& adapter,
                                 const BaseValidationManager& validator,
                                 const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedNextBowl(BaseMonsterContext& ctx,
+                                 const Patch12NextBowlHandler& handler,
+                                 const LegacyNextBowlAdapter& adapter,
+                                 const Patch12NextBowlWrapper& wrapper,
+                                 const BaseValidationManager& validator,
+                                 const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1039,6 +1070,10 @@ public:
     LegacyNextBowlReport executeLegacyNextBowl(const Integer& calculationDay,
                                                const Integer& targetDay,
                                                int queriedBowlId) const;
+    LegacyNextBowlReport executeUnpatchedNextBowlDiagnostic(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        int queriedBowlId) const;
 };
 
 } // namespace pastafari

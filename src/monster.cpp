@@ -758,6 +758,19 @@ int oldNextBowlFixedName(int id) {
     return id == 6 ? 1 : id + 1;
 }
 
+int nextBowlThroughOrderAt46Latch(const PermutationOrder& orderAt46Latch,
+                                  int queriedBowlId) {
+    if (queriedBowlId < 1 || queriedBowlId > 6) {
+        throw BaseValidationError("ID crateris inter unum et sex requiritur");
+    }
+    for (std::size_t i = 0; i < orderAt46Latch.size(); ++i) {
+        if (orderAt46Latch[i] == queriedBowlId) {
+            return orderAt46Latch[(i + 1) % orderAt46Latch.size()];
+        }
+    }
+    throw BaseValidationError("ID crateris in orderAt46Latch non inventus est");
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -2930,6 +2943,32 @@ void BaseValidationManager::requireLegacyNextBowlReady(const BaseMonsterContext&
     }
 }
 
+void BaseValidationManager::requirePatch12Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyNextBowlReady(ctx);
+    if (!ctx.patch12Applied) {
+        throw BaseValidationError("patch duodecimum next-bowl nondum applicatum est");
+    }
+    std::size_t inventa = 0;
+    for (std::size_t i = 0; i < ctx.legacyNextBowlOrderAt46Latch.size(); ++i) {
+        if (ctx.legacyNextBowlOrderAt46Latch[i] == ctx.legacyNextBowlQueriedId) {
+            inventa = i + 1;
+            break;
+        }
+    }
+    if (inventa == 0) {
+        throw BaseValidationError("queried ID crateris in latch non inventus est");
+    }
+    if (ctx.patch12QueriedPosition != inventa) {
+        throw BaseValidationError("positio queried crateris a latch non recte servata est");
+    }
+    const int expectatus = nextBowlThroughOrderAt46Latch(
+        ctx.legacyNextBowlOrderAt46Latch,
+        ctx.legacyNextBowlQueriedId);
+    if (ctx.patchedNextBowlOutput != expectatus) {
+        throw BaseValidationError("successor circularis orderAt46Latch non servatus est");
+    }
+}
+
 LegacyOrderMemorySauceResult LegacyOrderMemorySauceAdapter::run(
     const Integer& calculationDay,
     const Integer& targetDay) const {
@@ -2944,6 +2983,11 @@ Patch11LatchedOrderSauceResult Patch11OrderAt46LatchWrapper::repair(
 
 int LegacyNextBowlAdapter::nextFixedName(int queriedBowlId) const {
     return oldNextBowlFixedName(queriedBowlId);
+}
+
+int Patch12NextBowlWrapper::repair(const PermutationOrder& orderAt46Latch,
+                                   int queriedBowlId) const {
+    return nextBowlThroughOrderAt46Latch(orderAt46Latch, queriedBowlId);
 }
 
 void Discovery11OverwrittenOrderHandler::handle(
@@ -3026,6 +3070,49 @@ void Discovery12NextBowlHandler::handle(
     metrics.bump(ctx, "discovery12.nextBowl.exposed");
 }
 
+void Patch12NextBowlHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyNextBowlAdapter& adapter,
+    const Patch12NextBowlWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch12NextBowlHandler";
+    ctx.phase = "PATCH_12_LEGACY_NEXT_BOWL_CALL";
+    ctx.status = "LEGACY_FIXED_NAME_CALLED_BEFORE_POSITIONAL_PATCH";
+    ctx.branchTrace.push_back("PATCH_12_LEGACY_NEXT_BOWL_CALL");
+    metrics.bump(ctx, "patch12.legacyNextBowl.calls");
+
+    ctx.legacyNextBowlOrderAt46Latch = ctx.patch11LatchedOrderSauce.orderAt46Latch;
+    ctx.legacyNextBowlOutput = adapter.nextFixedName(ctx.legacyNextBowlQueriedId);
+    ctx.legacyNextBowlReady = true;
+
+    ctx.phase = "PATCH_12_LOCATE_IN_ORDER_AT_46";
+    ctx.branchTrace.push_back("PATCH_12_LOCATE_IN_ORDER_AT_46");
+    for (std::size_t i = 0; i < ctx.legacyNextBowlOrderAt46Latch.size(); ++i) {
+        if (ctx.legacyNextBowlOrderAt46Latch[i] == ctx.legacyNextBowlQueriedId) {
+            ctx.patch12QueriedPosition = i + 1;
+            break;
+        }
+    }
+
+    ctx.phase = "PATCH_12_CIRCULAR_SUCCESSOR";
+    ctx.branchTrace.push_back("PATCH_12_CIRCULAR_SUCCESSOR");
+    ctx.patchedNextBowlOutput = wrapper.repair(
+        ctx.legacyNextBowlOrderAt46Latch,
+        ctx.legacyNextBowlQueriedId);
+    ctx.patch12Applied = true;
+    metrics.bump(ctx, "patch12.circularSuccessor.calls");
+
+    ctx.phase = "PATCH_12_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_12_VALIDATE");
+    validator.requirePatch12Ready(ctx);
+
+    ctx.phase = "PATCH_12_NEXT_BOWL_READY";
+    ctx.status = "LATCH_POSITIONAL_SUCCESSOR_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_12_NEXT_BOWL_READY");
+    metrics.bump(ctx, "patch12.nextBowl.ready");
+}
+
 void BaseDispatcher::dispatchLegacyOverwrittenOrder(
     BaseMonsterContext& ctx,
     const Discovery11OverwrittenOrderHandler& handler,
@@ -3067,6 +3154,21 @@ void BaseDispatcher::dispatchLegacyNextBowl(
     ctx.branchTrace.push_back("DISCOVERY_12_DISPATCH");
     metrics.bump(ctx, "discovery12.dispatch.calls");
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedNextBowl(
+    BaseMonsterContext& ctx,
+    const Patch12NextBowlHandler& handler,
+    const LegacyNextBowlAdapter& adapter,
+    const Patch12NextBowlWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_12_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_12_DISPATCH");
+    metrics.bump(ctx, "patch12.dispatch.calls");
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
 }
 
 LegacyOrderMemoryReport BaseMonsterManager::executeOverwritableOrderMemorySauce(
@@ -3154,7 +3256,62 @@ LegacyNextBowlReport BaseMonsterManager::executeLegacyNextBowl(
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
     ctx.targetDay = targetDay;
-    ctx.phase = "DISCOVERY_12_NEW";
+    ctx.phase = "PATCH_12_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyNextBowlQueriedId = queriedBowlId;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyOrderMemorySauceAdapter orderMemoryAdapter;
+    const Patch11OrderAt46LatchWrapper latchWrapper;
+    const Patch11OrderAt46LatchHandler latchHandler;
+    const LegacyNextBowlAdapter nextBowlAdapter;
+    const Patch12NextBowlWrapper nextBowlWrapper;
+    const Patch12NextBowlHandler nextBowlHandler;
+    const BaseDispatcher dispatcher;
+
+    dispatcher.dispatchPatchedOrderAt46Latch(
+        ctx,
+        latchHandler,
+        orderMemoryAdapter,
+        latchWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchPatchedNextBowl(
+        ctx,
+        nextBowlHandler,
+        nextBowlAdapter,
+        nextBowlWrapper,
+        validator,
+        metrics);
+
+    return LegacyNextBowlReport{
+        calculationDay,
+        targetDay,
+        queriedBowlId,
+        ctx.patchedNextBowlOutput,
+        ctx.legacyNextBowlOrderAt46Latch,
+        ctx.patch11LatchedOrderSauce.latchWriteCount,
+        ctx.patch11Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyNextBowlOutput,
+        ctx.patch12QueriedPosition,
+        ctx.patch12Applied
+    };
+}
+
+LegacyNextBowlReport BaseMonsterManager::executeUnpatchedNextBowlDiagnostic(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    int queriedBowlId) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_12_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyNextBowlQueriedId = queriedBowlId;
@@ -3193,7 +3350,10 @@ LegacyNextBowlReport BaseMonsterManager::executeLegacyNextBowl(
         ctx.phase,
         ctx.status,
         ctx.currentHandler,
-        ctx.branchTrace.size()
+        ctx.branchTrace.size(),
+        ctx.legacyNextBowlOutput,
+        0,
+        false
     };
 }
 } // namespace pastafari
