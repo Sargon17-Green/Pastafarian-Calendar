@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 21 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 21 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Discovery 21 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'CutletPartitionPatchWrapper', 'filteredCutletCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
+    'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
@@ -1990,7 +1990,7 @@ group('Patch 20 executa oldStructureSauce quam ghost ma alimenta li selector sol
   ok(!wrapperSource.includes('legacyPositiveCompositions'));
 });
 
-group('Discovery 21 selecte ex omni positive compositions e ignora li gate intern del calculation-day', () => {
+group('Discovery 21 resta un scar real e Patch 21 filtra exactmen li familie semantic', () => {
   const familySource = production.legacyPositiveCompositions.toString();
   ok(familySource.includes('positiveCompositionCountExact'));
   ok(!/internalGate|internal_gate|prefix|boundary|required/.test(familySource));
@@ -2013,26 +2013,26 @@ group('Discovery 21 selecte ex omni positive compositions e ignora li gate inter
   ];
   const stream = { first: 1n, directionStep: 1n };
   const noWalk = {
-    nextYear() { throw new Error('Null next-year expectat in Discovery 21.'); },
-    previousYear() { throw new Error('Null previous-year expectat in Discovery 21.'); }
+    nextYear() { throw new Error('Null next-year expectat in Patch 21.'); },
+    previousYear() { throw new Error('Null previous-year expectat in Patch 21.'); }
   };
-  const routed = new production.BaseMonsterManager().executeDiscovery21CutletPartition(
+  const legacy = new production.BaseMonsterManager().executeDiscovery21CutletPartition(
     calculationDay, calculationDay, -1n, gates, pairs, stream, noWalk
   );
-  eq(routed.context.status, 'DISCOVERY_21_LEGACY_RESULT');
-  eq(routed.context.previousHandler, 'StructureSaucePatchWrapper');
-  eq(routed.context.legacyCutletGapCount, 10);
-  deepEq(routed.context.legacyCutletCountCandidates, [6,7,8,9,10]);
-  eq(routed.context.legacyCutletCount, 8);
-  eq(routed.context.legacyCutletInternalGateIndex, 14);
-  eq(routed.context.legacyCutletInternalGateOffset, 4);
-  eq(routed.context.legacyCutletFamilyCount, 36n);
-  eq(routed.context.legacyCutletSelectedRank, 15n);
-  deepEq(routed.result.partition, [1,1,1,3,1,1,1,1]);
-  deepEq(routed.result.prefixSums, [1,2,3,6,7,8,9,10]);
-  ok(!routed.result.internalBoundaryHit);
-  ok(routed.context.legacyCutletIgnoredInternalGate);
-  eq(routed.context.metrics['discovery21.internalGateIgnored.calls'], 1n);
+  eq(legacy.context.status, 'DISCOVERY_21_LEGACY_RESULT');
+  eq(legacy.context.previousHandler, 'StructureSaucePatchWrapper');
+  eq(legacy.context.legacyCutletGapCount, 10);
+  deepEq(legacy.context.legacyCutletCountCandidates, [6,7,8,9,10]);
+  eq(legacy.context.legacyCutletCount, 8);
+  eq(legacy.context.legacyCutletInternalGateIndex, 14);
+  eq(legacy.context.legacyCutletInternalGateOffset, 4);
+  eq(legacy.context.legacyCutletFamilyCount, 36n);
+  eq(legacy.context.legacyCutletSelectedRank, 15n);
+  deepEq(legacy.result.partition, [1,1,1,3,1,1,1,1]);
+  deepEq(legacy.result.prefixSums, [1,2,3,6,7,8,9,10]);
+  ok(!legacy.result.internalBoundaryHit);
+  ok(legacy.context.legacyCutletIgnoredInternalGate);
+  eq(legacy.context.metrics['discovery21.internalGateIgnored.calls'], 1n);
 
   const authoritativeSauce = o.sauce(calculationDay, f + 11n);
   const filtered = o.makeCutletPartitionFamily(10, 8, 4);
@@ -2041,12 +2041,30 @@ group('Discovery 21 selecte ex omni positive compositions e ignora li gate inter
   eq(filtered.count(), 28n);
   eq(expectedRank, 3n);
   deepEq(expected, [1,1,1,1,1,1,3,1]);
-  ok(JSON.stringify(expected) !== JSON.stringify(routed.result.partition));
-  ok(!('CutletPartitionPatchWrapper' in production));
+  ok(JSON.stringify(expected) !== JSON.stringify(legacy.result.partition));
+
+  const patched = new production.BaseMonsterManager().executePatch21CutletPartition(
+    calculationDay, calculationDay, -1n, gates, pairs, stream, noWalk
+  );
+  eq(patched.context.status, 'PATCH_21_RESULT');
+  eq(patched.context.previousHandler, 'Discovery21CutletPartitionHandler');
+  ok(patched.context.patch21LegacyDiagnosticPreserved);
+  ok(patched.context.patch21FilteredFamilyUsed);
+  ok(!patched.context.patch21RawLegacyPassedThrough);
+  eq(patched.context.patch21LegacyFamilyCountDiagnostic, 36n);
+  eq(patched.context.patch21LegacySelectedRankDiagnostic, 15n);
+  deepEq(patched.context.patch21LegacyPartitionDiagnostic, legacy.result.partition);
+  eq(patched.result.familyCount, 28n);
+  eq(patched.result.selectedRank, 3n);
+  deepEq(patched.result.partition, expected);
+  ok(patched.result.internalBoundaryHit);
+  ok(patched.context.patch21SelectionChangedFromLegacy);
+  ok(typeof production.CutletPartitionPatchWrapper === 'function');
+  ok(typeof production.filteredCutletCompositions === 'function');
   ok(!('legacyNameRowWithRepeats' in production));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 21', () => {
+group('errores de base es explicit e li final function resta absent durant Patch 21', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2058,4 +2076,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 21.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 21.');

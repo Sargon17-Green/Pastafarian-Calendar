@@ -934,3 +934,25 @@ Li expectation normativ test-only filtra exactmen li sam familie legacy per li b
 
 Null `CutletPartitionPatchWrapper`, null familie filtrat production e null DP con state de boundary es includet. Patch 21 resta reservat por Stage 43 e deve conservar `legacyPositiveCompositions` quam scar fisic. Null generator de nomes repetit de Patch 22 es present.
 
+
+## Stage 43 — PATCH 21
+
+### Scar historic conservat
+
+`legacyPositiveCompositions(gapCount,cutletCount)`, `LegacyCutletPartitionAdapter.selectAllPositive` e `Discovery21CutletPartitionHandler.handle` resta sin modification desde Discovery 21. Li manager executa ti route legacy real ante li correction, talmen li raw family count, rank, partition e prefixes continua esser observabil quam li defect historic exact.
+
+### DP filtrat quam detour separat
+
+`filteredCutletCompositions` ne muta li helper legacy. It crea un familie separat solmen por un `internalGateOffset` strictmen intern. Su DP state conserva remaining total, slots, cumulative sum e si li boundary ja esset atinget. Li unrank examina parts in li sam ordine ascendent del legacy family e subtrae solmen counts de branches acceptat. Dunc li ordre final ne es un ordre nov: it es exactmen li legacy sequence con membres illegal omisset.
+
+### Wrapper de Patch 21
+
+`CutletPartitionPatchWrapper` exige un `DISCOVERY_21_LEGACY_RESULT` ja complet. It conserva li diagnostic legacy in campos invocation-local, sin recalcule del raw family. Con un gate intern, it reconstrui li stream de bowl 2 / seal 21 ex li sauce semantic de Patch 20, selecte contra li count filtrat e unranka li composition legal. Sin gate intern, it ne crea null familie filtrat e passa exactmen li partition raw.
+
+### Witness e state semantic
+
+Li witness 10/8/4 conserva li raw selection de Stage 42: familie 36, rank 15, partition `[1,1,1,3,1,1,1,1]`, prefixes `[1,2,3,6,7,8,9,10]`. Li detour semantic conta 28 membres, usa rank 3 e retorna `[1,1,1,1,1,1,3,1]`, prefixes `[1,2,3,4,5,6,9,10]`. Li boundary intern es talmen un cutlet boundary exact.
+
+### Limite del stage
+
+Omni regressions, li verifier e li suite complet es verd. Li code de names con repeats, partial-permutation repair e `VirtualLegacyList` ne es present. Patch 22 ne es anticipat.

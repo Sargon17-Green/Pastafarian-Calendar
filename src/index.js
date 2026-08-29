@@ -298,6 +298,21 @@ class BaseMonsterContext {
     this.legacyCutletPrefixSums = null;
     this.legacyCutletInternalBoundaryHit = null;
     this.legacyCutletIgnoredInternalGate = false;
+    this.patch21LegacyDiagnosticPreserved = false;
+    this.patch21LegacyFamilyCountDiagnostic = null;
+    this.patch21LegacySelectedRankDiagnostic = null;
+    this.patch21LegacyPartitionDiagnostic = null;
+    this.patch21LegacyPrefixSumsDiagnostic = null;
+    this.patch21LegacyBoundaryHitDiagnostic = null;
+    this.patch21FilteredFamilyUsed = false;
+    this.patch21RawLegacyPassedThrough = false;
+    this.patch21SemanticPartitionStream = null;
+    this.patch21SemanticFamilyCount = null;
+    this.patch21SemanticSelectedRank = null;
+    this.patch21SemanticPartition = null;
+    this.patch21SemanticPrefixSums = null;
+    this.patch21SemanticBoundaryHit = null;
+    this.patch21SelectionChangedFromLegacy = false;
   }
 }
 
@@ -558,6 +573,12 @@ class BaseValidationManager {
   requirePatch20Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_20_RESULT') {
       throw new BootstrapStageError('Li context ne contene un structure sauce reparat valid por Discovery 21.');
+    }
+  }
+
+  requireDiscovery21Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_21_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un cutlet partition legacy valid por Patch 21.');
     }
   }
 
@@ -3078,6 +3099,83 @@ function legacyPositiveCompositions(gapCount, cutletCount) {
   });
 }
 
+function filteredCutletCompositions(gapCount, cutletCount, internalGateOffset) {
+  if (!Number.isInteger(gapCount) || !Number.isInteger(cutletCount) || gapCount < 1 || cutletCount < 1) {
+    throw new RangeError('Li familie filtrat de Patch 21 exige gapCount e cutletCount integers positiv.');
+  }
+  if (cutletCount > gapCount) {
+    throw new RangeError('Li familie filtrat ne posse haver plu cutlets quam gate gaps.');
+  }
+  if (!Number.isInteger(internalGateOffset) || internalGateOffset <= 0 || internalGateOffset >= gapCount) {
+    throw new RangeError('Li offset de gate por Patch 21 deve esser strictmen intern al year.');
+  }
+
+  // Ti DP conta solmen branches quel atinge exactmen li boundary; li ordre de parts resta li ordre lexicografic del familie legacy.
+  const memo = new Map();
+  function countAccepted(remaining, slots, cumulative, boundaryHit) {
+    if (slots === 0) {
+      return remaining === 0 && boundaryHit ? 1n : 0n;
+    }
+    if (remaining < slots) return 0n;
+    if (!boundaryHit && cumulative >= internalGateOffset) return 0n;
+    const key = remaining + ':' + slots + ':' + cumulative + ':' + (boundaryHit ? 1 : 0);
+    if (memo.has(key)) return memo.get(key);
+    let total = 0n;
+    const maxPart = remaining - (slots - 1);
+    for (let part = 1; part <= maxPart; part += 1) {
+      const nextCumulative = cumulative + part;
+      if (!boundaryHit && nextCumulative > internalGateOffset) break;
+      const nextBoundaryHit = boundaryHit || nextCumulative === internalGateOffset;
+      total += countAccepted(remaining - part, slots - 1, nextCumulative, nextBoundaryHit);
+    }
+    memo.set(key, total);
+    return total;
+  }
+
+  const totalCount = countAccepted(gapCount, cutletCount, 0, false);
+  return Object.freeze({
+    count() {
+      return totalCount;
+    },
+    unrank1(rank1) {
+      if (typeof rank1 !== 'bigint' || rank1 < 1n || rank1 > totalCount) {
+        throw new RangeError('Li rank filtrat de cutlet partition es extra li familie legal.');
+      }
+      let rank = rank1;
+      let remaining = gapCount;
+      let slots = cutletCount;
+      let cumulative = 0;
+      let boundaryHit = false;
+      const out = [];
+      while (slots > 0) {
+        const maxPart = remaining - (slots - 1);
+        let chosen = false;
+        for (let part = 1; part <= maxPart; part += 1) {
+          const nextCumulative = cumulative + part;
+          if (!boundaryHit && nextCumulative > internalGateOffset) break;
+          const nextBoundaryHit = boundaryHit || nextCumulative === internalGateOffset;
+          const block = countAccepted(remaining - part, slots - 1, nextCumulative, nextBoundaryHit);
+          if (rank > block) {
+            rank -= block;
+            continue;
+          }
+          out.push(part);
+          remaining -= part;
+          slots -= 1;
+          cumulative = nextCumulative;
+          boundaryHit = nextBoundaryHit;
+          chosen = true;
+          break;
+        }
+        if (!chosen) {
+          throw new BootstrapStageError('Li DP de Patch 21 ne posset resolver un rank ja validat.');
+        }
+      }
+      return out;
+    }
+  });
+}
+
 function cutletAnswerRingFromSauce(sauceResult, seal) {
   if (!sauceResult || !Array.isArray(sauceResult.bowls) || !Array.isArray(sauceResult.orderAt46Latch)) {
     throw new TypeError('Li cutlet selection exige un structure sauce complet.');
@@ -3193,6 +3291,116 @@ class Discovery21CutletPartitionHandler {
       internalGateOffset,
       prefixSums: context.legacyCutletPrefixSums.slice(),
       internalBoundaryHit: context.legacyCutletInternalBoundaryHit
+    };
+  }
+}
+
+class CutletPartitionPatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context) {
+    this.validationManager.requireDiscovery21Result(context);
+    const gapCount = context.legacyCutletGapCount;
+    const cutletCount = context.legacyCutletCount;
+    const internalGateIndex = context.legacyCutletInternalGateIndex;
+    const internalGateOffset = context.legacyCutletInternalGateOffset;
+    if (!Number.isInteger(gapCount) || !Number.isInteger(cutletCount) || cutletCount < 1 || cutletCount > gapCount) {
+      throw new BootstrapStageError('Patch 21 exige li gap count e cutlet count ja selectet per Discovery 21.');
+    }
+    if (internalGateOffset !== null &&
+        (!Number.isInteger(internalGateOffset) || internalGateOffset <= 0 || internalGateOffset >= gapCount)) {
+      throw new BootstrapStageError('Patch 21 recivet un offset de gate quel ne es strictmen intern.');
+    }
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'CutletPartitionPatchWrapper';
+    context.phase = 'PATCH_21_FILTERED_INTERNAL_GATE_CUTLET_PARTITION';
+    context.branchTrace.push('PATCH_21_FILTERED_INTERNAL_GATE_CUTLET_PARTITION');
+
+    // Li selection raw de Discovery 21 resta un diagnostic real e complet; ne reparar ni re-unrankar li familie legacy.
+    context.patch21LegacyDiagnosticPreserved = true;
+    context.patch21LegacyFamilyCountDiagnostic = context.legacyCutletFamilyCount;
+    context.patch21LegacySelectedRankDiagnostic = context.legacyCutletSelectedRank;
+    context.patch21LegacyPartitionDiagnostic = context.legacyCutletSelectedPartition.slice();
+    context.patch21LegacyPrefixSumsDiagnostic = context.legacyCutletPrefixSums.slice();
+    context.patch21LegacyBoundaryHitDiagnostic = context.legacyCutletInternalBoundaryHit;
+
+    let semanticFamilyCount;
+    let semanticSelectedRank;
+    let semanticPartition;
+    let semanticPartitionStream;
+    if (internalGateOffset === null) {
+      // Sin gate intern li contract mandat un pass-through exact del partition raw, sin familie reparativ artificial.
+      context.patch21FilteredFamilyUsed = false;
+      context.patch21RawLegacyPassedThrough = true;
+      semanticFamilyCount = context.legacyCutletFamilyCount;
+      semanticSelectedRank = context.legacyCutletSelectedRank;
+      semanticPartition = context.legacyCutletSelectedPartition.slice();
+      semanticPartitionStream = { ...context.legacyCutletPartitionStream };
+      this.metricsManager.bump(context, 'patch21.rawLegacyPassThrough.calls');
+    } else {
+      context.patch21FilteredFamilyUsed = true;
+      context.patch21RawLegacyPassedThrough = false;
+      const family = filteredCutletCompositions(gapCount, cutletCount, internalGateOffset);
+      semanticFamilyCount = family.count();
+      if (semanticFamilyCount < 1n) {
+        throw new BootstrapStageError('Li familie legal de Patch 21 ne posse esser vacui por un gate intern valid.');
+      }
+      const semanticSauce = {
+        bowls: context.patch20SemanticSauceBowls.slice(),
+        orderAt46Latch: context.patch20SemanticOrderAt46Latch.slice()
+      };
+      semanticPartitionStream = cutletAnswerRingFromSauce(semanticSauce, 21n);
+      const semanticPick = selectionDispatcherWithWideDetour(semanticPartitionStream, semanticFamilyCount);
+      semanticSelectedRank = semanticPick.output;
+      semanticPartition = family.unrank1(semanticSelectedRank);
+      this.metricsManager.bump(context, 'patch21.filteredFamily.calls');
+    }
+
+    let cumulative = 0;
+    const semanticPrefixSums = semanticPartition.map((part) => {
+      cumulative += part;
+      return cumulative;
+    });
+    const semanticBoundaryHit = internalGateOffset === null ? null : semanticPrefixSums.includes(internalGateOffset);
+    if (internalGateOffset !== null && !semanticBoundaryHit) {
+      throw new BootstrapStageError('Li partition semantic de Patch 21 manca li boundary intern obligatori.');
+    }
+
+    context.patch21SemanticPartitionStream = { ...semanticPartitionStream };
+    context.patch21SemanticFamilyCount = semanticFamilyCount;
+    context.patch21SemanticSelectedRank = semanticSelectedRank;
+    context.patch21SemanticPartition = semanticPartition.slice();
+    context.patch21SemanticPrefixSums = semanticPrefixSums.slice();
+    context.patch21SemanticBoundaryHit = semanticBoundaryHit;
+    context.patch21SelectionChangedFromLegacy = semanticPartition.length !== context.legacyCutletSelectedPartition.length ||
+      semanticPartition.some((part, index) => part !== context.legacyCutletSelectedPartition[index]);
+    context.status = 'PATCH_21_RESULT';
+    this.metricsManager.bump(context, 'patch21.legacyDiagnosticPreserved.calls');
+    this.metricsManager.bump(context, 'patch21.semanticPartitionSelection.calls');
+
+    return {
+      gapCount,
+      cutletCount,
+      internalGateIndex,
+      internalGateOffset,
+      familyCount: semanticFamilyCount,
+      selectedRank: semanticSelectedRank,
+      partition: semanticPartition.slice(),
+      prefixSums: semanticPrefixSums.slice(),
+      internalBoundaryHit: semanticBoundaryHit,
+      filteredFamilyUsed: context.patch21FilteredFamilyUsed,
+      rawLegacyPassedThrough: context.patch21RawLegacyPassedThrough,
+      legacyDiagnostic: {
+        familyCount: context.patch21LegacyFamilyCountDiagnostic,
+        selectedRank: context.patch21LegacySelectedRankDiagnostic,
+        partition: context.patch21LegacyPartitionDiagnostic.slice(),
+        prefixSums: context.patch21LegacyPrefixSumsDiagnostic.slice(),
+        internalBoundaryHit: context.patch21LegacyBoundaryHitDiagnostic
+      }
     };
   }
 }
@@ -4008,6 +4216,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyCutletPartitionAdapter
     );
+    this.cutletPartitionPatchWrapper = new CutletPartitionPatchWrapper(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -4649,6 +4861,32 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch21CutletPartition(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      // Li route PATCH 21 executa prim li scar Discovery 21 complet; solmen poy li wrapper cambia li selection semantic.
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      const result = this.cutletPartitionPatchWrapper.repair(context);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -4906,8 +5144,19 @@ function discovery21LegacyCutletPartitionThroughMonsterPath(
   );
 }
 
+function historicCutletPartitionThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Patch 21 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executePatch21CutletPartition(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 21; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 21; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -4983,6 +5232,7 @@ module.exports = Object.freeze({
   StructureSaucePatchWrapper,
   LegacyCutletPartitionAdapter,
   Discovery21CutletPartitionHandler,
+  CutletPartitionPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -5063,6 +5313,7 @@ module.exports = Object.freeze({
   legacyStructureSelectorToken,
   structureSaucePatch,
   legacyPositiveCompositions,
+  filteredCutletCompositions,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -5105,5 +5356,6 @@ module.exports = Object.freeze({
   discovery20LegacyStructureSauceThroughMonsterPath,
   historicStructureSauceThroughMonsterPath,
   discovery21LegacyCutletPartitionThroughMonsterPath,
+  historicCutletPartitionThroughMonsterPath,
   calendarDateSpaghetti
 });

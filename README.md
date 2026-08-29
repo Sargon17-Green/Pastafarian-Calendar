@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 41 de 55: PATCH 20** e li repository local es GREEN. Omni regressions til Discovery 20 e li test focal de Patch 20 passa.
+Li linea es in **Stage 43 de 55: PATCH 21** e li repository local es GREEN. Omni regressions til Discovery 21 e li test focal de Patch 21 passa.
 
-Li scar historic `oldStructureSauce(cDay,originalTargetDay)` resta intact e es executet realmen quam ghost. `structureSaucePatch` materialisa separatim li sauce semantic con `(cDay,year.firstDay)`, e `StructureSaucePatchWrapper` manda exclusivmen ti sauce al selector. Li resultate ghost resta diagnostic e ne posse influir li selector semantic. Null cutlet-partition code de Patch 21 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Li scar historic `legacyPositiveCompositions(gapCount,cutletCount)` e li raw selection de Discovery 21 resta fisicmen intact e es executet realmen quam diagnostic. `CutletPartitionPatchWrapper` usa un familie semantic separat: si li calculation-day es un gate strictmen intern, `filteredCutletCompositions` representa exactmen li subsequence lexicografic del familie legacy con un prefix sum egal a `internalGateOffset`; si null gate intern existe, li raw legacy partition passa sin alteration. Null code de Patch 22 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -24,16 +24,16 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 20 deve restar verd:
+Omni regressions til Discovery 21 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal de Patch 20 deve esser verd:
+Li test focal de Patch 21 deve esser verd:
 
 ```text
-npm run test:patch-20
+npm run test:patch-21
 ```
 
 Li suite complet deve esser GREEN:
@@ -289,3 +289,23 @@ Li expectation normativ test-only filtra exactmen li sam familie legacy per li b
 
 Null `CutletPartitionPatchWrapper`, null familie filtrat production e null DP con state de boundary es includet. Patch 21 resta reservat por Stage 43 e deve conservar `legacyPositiveCompositions` quam scar fisic. Null generator de nomes repetit de Patch 22 es present.
 
+
+## Stage 43 — PATCH 21
+
+### Scar legacy conservat e executet
+
+`legacyPositiveCompositions(gapCount,cutletCount)` resta sin modification e continua representar omni positive compositions in ordine lexicografic. `LegacyCutletPartitionAdapter.selectAllPositive` continua selecter un raw rank ex ti familie e `Discovery21CutletPartitionHandler.handle` continua calcular li internal gate diagnostic sin passar it al helper legacy. Li route de Patch 21 executa ti chain complet ante li wrapper reparativ.
+
+### Familie semantic filtrat
+
+`filteredCutletCompositions(gapCount,cutletCount,internalGateOffset)` usa un DP exact con `BigInt` por contar branches legal e por unrankar un rank one-based. Li iteration de parts resta ascendent exactmen quam in li legacy helper; branches es eliminat solmen si ili ne posse atinger exactmen li boundary intern. Ergo su serie es exactmen li subsequence filtrat del serie legacy, sin reordination.
+
+### Wrapper e ownership
+
+`CutletPartitionPatchWrapper` copia li family count, raw selected rank, raw partition, raw prefix sums e raw boundary result in diagnostics invocation-local. Ti values ne retorna al decision semantic. Si `internalGateOffset` es null, li wrapper passa exactmen li raw partition e su raw rank/family count. Si un gate intern existe, it questiona denov li sam bowl 2 / seal 21 stream contra li count del familie filtrat e unranka solmen in ti familie legal.
+
+### Witness e regressions
+
+Li witness 10 gaps / 8 cutlets / offset 4 continua producer raw diagnostic `36 / rank 15 / [1,1,1,3,1,1,1,1]`, con prefixes quel manca 4. Li familie semantic have 28 membres; li sam answer stream selecte rank 3 e produce `[1,1,1,1,1,1,3,1]`, con prefix 4. Un witness separat sin gate intern confirma li pass-through exact del raw legacy partition.
+
+Omni regressions es verd. Null `legacyNameRowWithRepeats`, null partial-permutation correction e null `VirtualLegacyList` es addit; Patch 22 resta completmen absent.
