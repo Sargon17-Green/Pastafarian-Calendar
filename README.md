@@ -563,3 +563,37 @@ Omnes regressiones Graduum 1–37 transeunt.
 ### Quod consulto nondum adest
 
 Nullus guard HIT super `calculationDayFingerprint`, `openGate` aut `closeGate` adest; nullus mismatch ad MISS convertitur; nullus overwrite guarded PATCH 19 adest. Nulla `oldStructureSauce` nec logica PATCH 20 praemature addita est.
+
+## PATCH 19 — guardi actionis supra clavem malam `year.number`
+
+Gradus 39 clavem historicam cache non purgat. `BaseMonsterManager` map persistentem adhuc per `year.number` tantum tenet, et `LegacyYearNumberOnlyCacheAdapter::getOrPut` atque `Discovery19YearNumberCacheHandler` ante correctionem vere currunt. Ita HIT legacy secundum solam clavem adhuc observabilis est.
+
+`Patch19YearCacheGuardWrapper` post lookup legacy tres guardos value comparat:
+
+```text
+calculationDayFingerprint
+openGate
+closeGate
+```
+
+Si tres omnes congruunt, HIT legacy etiam HIT semanticus fit et value servatus reutilizatur. Si unus saltem guard differt, HIT legacy reicitur: actio semantica MISS est, request entry current sub eadem clave `year.number` overwrite fit, et value current redditur. Prima MISS sine entry praevia simpliciter value current ponit nec overwrite superfluum notat.
+
+Via activa est:
+
+```text
+BaseMonsterManager::executeLegacyYearNumberCache
+-> PATCH 18 sequential year walk
+-> Patch19YearCacheGuardHandler
+-> Discovery19YearNumberCacheHandler
+-> LegacyYearNumberOnlyCacheAdapter::getOrPut   [cicatrix]
+-> Patch19YearCacheGuardWrapper
+-> guard HIT vel MISS + overwrite sub eadem clave
+```
+
+`executeUnpatchedYearNumberCacheDiagnostic` viam Stage 38 separatam servat. Ea eandem map key malam adhibet et stale HIT sine guardis adhuc producere potest.
+
+Regressio Gradus 38 post adaptationem metadata tantum contra Stage 38 pristinum adhuc tres stale outputs et exitum 1 reddit; contra PATCH 19 transit. Probatio Gradus 39 primam MISS, HIT exactum trium guardorum, duo mismatch/overwrite consecutiva, HIT post overwrite et diagnosticum stale HIT exercet. Omnes regressiones Graduum 1–39 transeunt.
+
+### Quod consulto nondum adest
+
+Nulla clavis composita cache adest; map non mutatur a `year.number`. Nulla `oldStructureSauce`, nulla structure sauce cum target originali, nullus ghost sauce et nullus PATCH 20 praemature additus est. Gradus 40 debet DISCOVERY 20 tantum introducere.

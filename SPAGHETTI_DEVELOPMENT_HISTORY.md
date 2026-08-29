@@ -1191,3 +1191,46 @@ Additi sunt `LegacyYearCacheEntry`, `LegacyYearCacheReport`, cache persistens ma
 ### Quod nondum fit
 
 Tres guardi value nondum potestatem habent. Nulla comparatio `calculationDayFingerprint`, `openGate` vel `closeGate` fit ante HIT; mismatch nondum MISS est et entry nondum currentibus guardis overwrititur. Nullus PATCH 19 nec `oldStructureSauce` PATCH 20 praemature adest.
+
+## Gradus 39 — PATCH 19: tres guardi supra clavem malam anni
+
+### Cicatrix servata
+
+Clavis map persistens manet `year.number` tantum. `LegacyYearNumberOnlyCacheAdapter::getOrPut` et `Discovery19YearNumberCacheHandler` non mutantur: lookup legacy adhuc ex sola praesentia eiusdem numeri anni HIT decernit. PATCH 19 hanc viam ante correctionem vere exsequitur et `legacyCachedEntryBeforePatch`, `legacyOutputBeforePatch` atque `legacyCacheHitBeforePatch` servat.
+
+### Guardi semantici
+
+`Patch19YearCacheGuardWrapper` entry legacy cum request currenti comparat. Tres condiciones sunt exactae:
+
+```text
+cached.calculationDayFingerprint == current.calculationDayFingerprint
+cached.openGate == current.openGate
+cached.closeGate == current.closeGate
+```
+
+HIT semanticus conceditur tantum si omnes tres verae sunt. Alioquin actio semantica MISS est et `cache[year.number]=current` sub eadem clave mala overwrite fit. Non fit mutatio ad composite key.
+
+`Patch19YearCacheGuardHandler` legacy handler primum vocat, cicatricem servat, wrapper guarded postea applicat, output semanticum ponit et validator confirmat relationem inter HIT legacy, tres guardos, HIT semanticum et overwrite.
+
+### Regressiones
+
+Probatio Gradus 38 non utitur campis PATCH 19. Ea stale definire per output semanticum contra request didicit. Eadem versio contra fontem Stage 38 pristinum adhuc tres stale outputs et exitum 1 reddit; contra Gradum 39 transit.
+
+Probatio Gradus 39 demonstrat:
+
+- prima invocatio: MISS legacy et semanticus;
+- eadem request iterata: HIT legacy et semanticus cum tribus guardis veris;
+- calculationDay mutatus: HIT legacy ante patch, sed MISS semanticus et overwrite;
+- eadem request post overwrite: HIT semanticus exactus;
+- calculationDay iterum mutatus: alter MISS semanticus et alter overwrite;
+- via diagnostica Stage 38: stale HIT ex sola clave `year.number` manet.
+
+Omnes regressiones Graduum 1–39 transeunt.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `Patch19GuardedYearCacheResolution`, campi contextus/report cicatricis et guardorum, `Patch19YearCacheGuardWrapper`, `Patch19YearCacheGuardHandler`, `requirePatch19YearCacheReady`, `dispatchPatchedYearNumberCache` et `executeUnpatchedYearNumberCacheDiagnostic`.
+
+### Quod nondum fit
+
+Nulla `oldStructureSauce`, nulla sauce structurae cum `originalTargetDay`, nullus ghost sauce et nullus PATCH 20 adest. Gradus 40 debet DISCOVERY 20 solum introducere et oldStructureSauce realiter ad selectoris inputum mittere.
