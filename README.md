@@ -1,34 +1,20 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin yedinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 7/55, `PATCH 03` durumundadır. Üçüncü tarihsel kusur kodda aynen korunur:
+Aşama 8/55, `DISCOVERY 04` durumundadır. Dördüncü tarihsel kusur gerçek çağrı zincirine eklenmiştir.
 
-```text
-oldDistance(calculationDay, targetDay) =
-    abs(
-        dayTagWithFoundationScar(calculationDay)
-        - dayTagWithFoundationScar(targetDay)
-    )
-```
+`mutateStonesWrong`, beş taş değerini aynı mutable state üzerinde sırayla değiştirir. İlk `w` hesabı eski satırı görürken sonraki hesaplar daha önce aynı çağrıda yazılmış yeni değerleri okur.
 
-Düzeltme onun üstündeki `patchedCounts` ve `DistancePatchWrapper` katmanındadır:
+`getStoneTableThroughLegacyBuilder`, 1 numaralı başlangıç satırından sonra 2–46 satırlarını bu yanlış in-place mutasyonla üretir. `LegacyStoneBuilderAdapter` tabloyu gerçek `calendar_date_spaghetti` yoluna bağlar.
 
-```text
-legacy = oldDistance(calculationDay, targetDay)
-chronological = abs(targetDay - calculationDay)
+Yeni normatif regresyon gerçek builder yolunun 2, 3 ve 46 numaralı satırlarını test-only normatif taş tablosuyla karşılaştırır ve bilinçli olarak kırmızıdır.
 
-if legacy != chronological:
-    legacy = chronological
+Henüz `PATCH 04` yoktur: eski snapshot, clone üzerinde korunmuş legacy çağrısı, `garbage` sonucu veya beş alanı snapshot'tan yeniden yazan `stonePatch` eklenmemiştir.
 
-distance = legacy + 1
-```
-
-Gerçek `LegacyDistanceAdapter` yolu bu yamadan geçer. Ham legacy mesafe, kronolojik ara fark, son mesafe ve legacy değerin değiştirildiğini gösteren durum çağrıya ait `MonsterContext` içinde ayrı tutulur.
-
-Aşama 6'nın normatif regresyonu değiştirilmeden artık yeşildir. Önceki bütün regresyonlar geçer. Gelecekteki 04–26 kusur ve yamaları üretime eklenmemiştir.
+Önceki Aşama 1–7 regresyonlarının tamamı yeşildir. Gelecekteki 05–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -44,10 +30,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam yedinci aşama paketi:
+Tam sekizinci aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 6'da kırmızı olan mesafe normatif regresyonu aynı gövdeyle yeşile dönmelidir; `oldDistance` kusurunu doğrudan doğrulayan testler eski yanlış sonuçları korur.
+Beklenen sonuç: önceki Aşama 1–7 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni taş-tablosu normatif regresyonunun 2, 3 ve 46 numaralı satır alt örnekleri başarısız olur.

@@ -4,6 +4,7 @@ from typing import Any, Callable
 from .legacy_arithmetic import LegacyRemainderAdapter
 from .legacy_day_counts import LegacyDayTagAdapter
 from .legacy_distance import LegacyDistanceAdapter
+from .legacy_stones import LegacyStoneBuilderAdapter
 
 
 class MonsterError(RuntimeError):
@@ -60,6 +61,8 @@ class MonsterContext:
     patch03_distance_value: int | None = None
     patch03_legacy_replaced: bool = False
     patch03_applied: bool = False
+    legacy_stone_table: tuple[tuple[int, ...], ...] | None = None
+    legacy_stone_rows_built: int = 0
 
 
 class BaseMetrics:
@@ -115,3 +118,4 @@ class MonsterManager:
         self.legacy_arithmetic = LegacyRemainderAdapter()
         self.legacy_day_tags = LegacyDayTagAdapter()
         self.legacy_distance = LegacyDistanceAdapter()
+        self.legacy_stones = LegacyStoneBuilderAdapter()

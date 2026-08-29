@@ -1,0 +1,27 @@
+Aşama 8/55 — DISCOVERY 04
+
+Bu paket yalnızca Aşama 8 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_stones.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_01.py
+tests/test_stage_02_discovery_01.py
+tests/test_stage_08_discovery_04.py
+artifacts/stage-08/BASELINE_STAGE_07_GREEN.txt
+artifacts/stage-08/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-08/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_08.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 7 baseline: GREEN
+Değişiklik sonrası Aşama 1–7 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+Yeni kusur: mutateStonesWrong aynı mutable state'i sırayla günceller
+PATCH 04: YOK
+05–26 gelecek kusur/yama kodu: YOK

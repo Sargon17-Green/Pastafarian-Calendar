@@ -216,3 +216,42 @@ Aşama 6'daki adapter-state testi PATCH sonrası adapter çıkışının normati
 Doğal değiştirmeme dalı `FOUNDATION_DAY-1 -> FOUNDATION_DAY` örneğiyle ayrıca doğrulanır: legacy `1`, kronolojik fark `1`, değiştirme yok, son mesafe `2`.
 
 Günlük, ölçüm ve tanı verileri normatif hesaba geri okunmaz.
+
+
+## Aşama 8 — Keşif 04: taşları aynı nesnede sırayla güncellemek
+
+### Ne sanıldı
+
+Dördüncü tarihsel katman, beş taşın bir sonraki satırını tek bir mutable state üzerinde satır satır hesapladı:
+
+```text
+S.w = savePatch(S.w*S.w + 3*S.b + i)
+S.b = savePatch(S.b*S.b + 5*S.s + S.w)
+S.s = savePatch(S.s*S.s + 7*S.m + S.b)
+S.m = savePatch(S.m*S.m + 11*S.r + S.s)
+S.r = savePatch(S.r*S.r + 13*S.w + S.m)
+```
+
+`mutateStonesWrong` aynı state nesnesini in-place değiştirir. Bu yüzden `b` hesabı yeni `w` değerini, `s` hesabı yeni `b` değerini, `m` hesabı yeni `s` değerini ve `r` hesabı yeni `w` ile yeni `m` değerlerini okur.
+
+### Ne keşfedildi
+
+Normatif taş satırı aynı eski snapshot'tan beş bağımsız sonuç üretmelidir.
+
+İkinci satırda `w` hesabı ilk çalışan satır olduğu için tesadüfen normatif değerle aynıdır. Ancak aynı satırdaki `b`, `s`, `m` ve `r` yeni ara değerlerden kirlenir. Bu ayrışma sonraki satırlara da taşınır.
+
+Yeni regresyon gerçek `LegacyStoneBuilderAdapter` yolunun 2, 3 ve 46 numaralı satırlarını aynı Python hattının test-only normatif taş tablosuyla karşılaştırır. Üç alt örnek de bilinçli olarak kırmızıdır.
+
+### Önceki instrumentation ile etkileşim
+
+Aşama 2'deki gerçek-yol instrumentation testi başlangıçta `oldRemainder` için tam bir çağrı bekliyordu. Taş legacy hesabı her `savePatch` üzerinden aynı tarihsel `oldRemainder` yolunu meşru biçimde yeniden kullandığı için Aşama 8'de toplam çağrı sayısı doğal olarak artar.
+
+Bu nedenle yalnızca instrumentation koşulu geleceğe dayanıklı hâle getirildi: ilk `oldRemainder` çağrısının hâlâ Aşama 2'nin `M_OLD` çağrısı olduğu doğrulanır. Aşama 2'nin normatif kırmızı/yeşil regresyonuna dokunulmadı.
+
+### Bu aşamada eklenen canavar katmanı
+
+`getStoneTableThroughLegacyBuilder`, ilk satırı sabit başlangıç state'inden kurar ve 2–46 satırlarını `mutateStonesWrong` çağrılarıyla üretir.
+
+`LegacyStoneBuilderAdapter`, bu yanlış tabloyu gerçek `calendar_date_spaghetti` state machine'ine bağlar. Tablo ve üretilen satır sayısı yalnızca invocation'a ait `MonsterContext` içinde tutulur.
+
+Bu aşamada snapshot alınmaz, legacy clone üzerinde ayrıca çalıştırılmaz, `garbage` sonucu yoktur ve beş alanı eski snapshot formülleriyle yeniden yazan `stonePatch` henüz eklenmemiştir.

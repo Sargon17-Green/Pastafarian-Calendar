@@ -73,17 +73,30 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
         )
         manager.metrics.bump(local_ctx, "legacy.distance.calls")
         local_ctx.status = "ESKİ_MESAFE_HAZIR"
-        local_ctx.phase = "AŞAMA_06_BEKLEME"
+        local_ctx.phase = "ESKİ_TAŞ_TABLOSU"
+
+    def legacy_stone_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+        manager.legacy_stones.call(local_ctx)
+        manager.metrics.bump(local_ctx, "legacy.stones.builds")
+        local_ctx.status = "ESKİ_TAŞ_TABLOSU_HAZIR"
+        local_ctx.phase = "AŞAMA_08_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
     manager.dispatcher.register("ESKİ_GÜN_ETİKETLERİ", legacy_day_tag_handler)
     manager.dispatcher.register("ESKİ_MESAFE", legacy_distance_handler)
+    manager.dispatcher.register("ESKİ_TAŞ_TABLOSU", legacy_stone_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "Yedinci aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Sekizinci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

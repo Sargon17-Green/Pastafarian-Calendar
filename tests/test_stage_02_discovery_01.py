@@ -22,8 +22,11 @@ class Stage02Discovery01Tests(unittest.TestCase):
         ) as legacy_call:
             with self.assertRaises(StageNotIntegratedError):
                 calendar_date_spaghetti(FOUNDATION_DAY, FOUNDATION_DAY)
-            self.assertEqual(legacy_call.call_count, 1)
-            self.assertEqual(legacy_call.call_args.args, (M_OLD,))
+            self.assertGreaterEqual(legacy_call.call_count, 1)
+            self.assertEqual(
+                legacy_call.call_args_list[0].args,
+                (M_OLD,),
+            )
 
     def test_stage02_legacy_scar_still_exists_after_patch(self):
         production_text = "\n".join(
