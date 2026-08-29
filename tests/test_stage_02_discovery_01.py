@@ -20,7 +20,10 @@ class Stage02Discovery01Tests(unittest.TestCase):
             "pastafari_calendar.legacy_arithmetic.oldRemainder",
             wraps=oldRemainder,
         ) as legacy_call:
-            with self.assertRaises(StageNotIntegratedError):
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(FOUNDATION_DAY, FOUNDATION_DAY)
             self.assertGreaterEqual(legacy_call.call_count, 1)
             self.assertEqual(

@@ -71,7 +71,10 @@ class Stage24Discovery12Tests(unittest.TestCase):
             "pastafari_calendar.legacy_next_bowl.oldNextBowlFixedName",
             wraps=oldNextBowlFixedName,
         ) as old_call:
-            with self.assertRaises(StageNotIntegratedError):
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(
                     FOUNDATION_DAY,
                     FOUNDATION_DAY + 3,

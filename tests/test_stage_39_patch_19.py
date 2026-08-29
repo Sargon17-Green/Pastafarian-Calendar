@@ -319,22 +319,32 @@ class Stage39Patch19Tests(unittest.TestCase):
             autospec=True,
             wraps=YearCacheActionGuardPatchWrapper.cachePutWithGuard,
         ) as put_call:
-            with self.assertRaises(StageNotIntegratedError) as raised:
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(
                     FOUNDATION_DAY,
                     FOUNDATION_DAY + 3,
                 )
 
-            self.assertIn(
-                "Otuz dokuzuncu aşamada",
-                str(
-                    raised.exception
-                ),
-            )
             self.assertEqual(
                 put_call.call_count,
                 2,
             )
+
+        production = (
+            ROOT
+            / "src"
+            / "pastafari_calendar"
+            / "calendar.py"
+        ).read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "Otuz dokuzuncu aşamada üretim takvim yolu henüz birleştirilmedi",
+            production,
+        )
 
     def test_patch_state_is_invocation_local_even_when_cache_object_is_reused(self):
         first = MonsterContext(

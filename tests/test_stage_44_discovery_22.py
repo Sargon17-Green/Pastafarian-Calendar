@@ -176,7 +176,10 @@ class Stage44Discovery22Tests(unittest.TestCase):
             autospec=True,
             wraps=LegacyRepeatedNameGenerator.call_cutlet_names,
         ) as name_call:
-            with self.assertRaises(StageNotIntegratedError):
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(
                     FOUNDATION_DAY,
                     FOUNDATION_DAY + 3,

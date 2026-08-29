@@ -1,0 +1,15 @@
+test_all_26_legacy_scars_and_patch_layers_remain_physical (integration_stage_54.Stage54IntegrationTests.test_all_26_legacy_scars_and_patch_layers_remain_physical) ... ok
+test_end_to_end_results_match_local_normative_oracle (integration_stage_54.Stage54IntegrationTests.test_end_to_end_results_match_local_normative_oracle) ... ok
+test_fast_integration_dp_unrank_is_exact_on_small_families (integration_stage_54.Stage54IntegrationTests.test_fast_integration_dp_unrank_is_exact_on_small_families) ... ok
+test_production_does_not_import_test_only_oracle (integration_stage_54.Stage54IntegrationTests.test_production_does_not_import_test_only_oracle) ... ok
+test_public_result_has_exactly_five_fields_and_source_language_names (integration_stage_54.Stage54IntegrationTests.test_public_result_has_exactly_five_fields_and_source_language_names) ... ok
+test_real_main_path_runs_gate_year_walk_bad_key_guard_and_structure_ghost (integration_stage_54.Stage54IntegrationTests.test_real_main_path_runs_gate_year_walk_bad_key_guard_and_structure_ghost) ... ok
+test_real_main_path_runs_integration_state_machine_and_transaction_commits (integration_stage_54.Stage54IntegrationTests.test_real_main_path_runs_integration_state_machine_and_transaction_commits) ... ok
+test_real_main_path_runs_partition_name_virtual_weaving_and_month_day_detours (integration_stage_54.Stage54IntegrationTests.test_real_main_path_runs_partition_name_virtual_weaving_and_month_day_detours) ... ok
+test_sauce_with_scars_matches_local_normative_sauce (integration_stage_54.Stage54IntegrationTests.test_sauce_with_scars_matches_local_normative_sauce) ... ok
+test_stage54_required_authoritative_components_are_wired_and_stage55_is_absent (integration_stage_54.Stage54IntegrationTests.test_stage54_required_authoritative_components_are_wired_and_stage55_is_absent) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 26.582s
+
+OK

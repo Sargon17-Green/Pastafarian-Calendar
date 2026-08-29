@@ -105,7 +105,10 @@ class Stage20Discovery10Tests(unittest.TestCase):
             "pastafari_calendar.legacy_bowl_updates.legacyInPlaceBowlUpdateWrong",
             wraps=legacyInPlaceBowlUpdateWrong,
         ) as wrong_update:
-            with self.assertRaises(StageNotIntegratedError):
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(
                     FOUNDATION_DAY,
                     FOUNDATION_DAY,

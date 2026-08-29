@@ -27,7 +27,10 @@ class Stage04Discovery02Tests(unittest.TestCase):
             "pastafari_calendar.legacy_day_counts.oldDayTag",
             wraps=oldDayTag,
         ) as legacy_call:
-            with self.assertRaises(StageNotIntegratedError):
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(calculation_day, target_day)
 
             self.assertGreaterEqual(legacy_call.call_count, 2)

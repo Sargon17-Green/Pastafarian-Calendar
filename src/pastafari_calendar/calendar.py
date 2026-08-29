@@ -849,7 +849,26 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
 
     manager.dispatcher.dispatch(ctx)
 
-    # Aşama 39 terminal mesajı önceki regression scar'ı olarak bilerek korunur.
-    raise StageNotIntegratedError(
+    # Aşama 39 terminal mesajı fiziksel scar olarak kalır; Aşama 54 artık
+    # bu historical durma noktasını semantic sonuç yerine yalnız diagnostic
+    # state'e taşır.
+    local_stage39_terminal_scar = (
         "Otuz dokuzuncu aşamada üretim takvim yolu henüz birleştirilmedi"
+    )
+    ctx.integration_stage39_terminal_scar = local_stage39_terminal_scar
+    ctx.diagnostics.append(
+        (
+            "aşama-39-terminal-scar",
+            local_stage39_terminal_scar,
+        )
+    )
+
+    from .final_integration import FinalSpaghettiIntegrationManager
+
+    integration_manager = FinalSpaghettiIntegrationManager(
+        ctx
+    )
+    return integration_manager.execute(
+        calculation_day,
+        target_day,
     )

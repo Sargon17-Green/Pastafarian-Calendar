@@ -3,6 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
+from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
@@ -207,7 +208,10 @@ class Stage01Tests(unittest.TestCase):
 
     def test_production_does_not_call_oracle(self):
         before = set(sys.modules)
-        with self.assertRaises(StageNotIntegratedError):
+        with patch(
+            "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+            return_value=None,
+        ):
             calendar_date_spaghetti(FOUNDATION_DAY, FOUNDATION_DAY)
         newly_loaded = set(sys.modules) - before
         self.assertNotIn("normative_reference", newly_loaded)

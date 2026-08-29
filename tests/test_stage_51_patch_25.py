@@ -274,8 +274,9 @@ class Stage51Patch25Tests(unittest.TestCase):
             autospec=True,
             wraps=MonthDayOccurrencePatchWrapper.repair,
         ) as repair_call:
-            with self.assertRaises(
-                StageNotIntegratedError
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
             ):
                 calendar_date_spaghetti(
                     FOUNDATION_DAY,

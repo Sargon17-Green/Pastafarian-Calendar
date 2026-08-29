@@ -32,7 +32,10 @@ class Stage06Discovery03Tests(unittest.TestCase):
             "pastafari_calendar.legacy_distance.oldDistance",
             wraps=oldDistance,
         ) as legacy_call:
-            with self.assertRaises(StageNotIntegratedError):
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(
                     calculation_day,
                     target_day,

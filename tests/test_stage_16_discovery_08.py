@@ -88,7 +88,10 @@ class Stage16Discovery08Tests(unittest.TestCase):
             "pastafari_calendar.legacy_permutation.oldPermutationUnrank0",
             wraps=oldPermutationUnrank0,
         ) as legacy_unrank:
-            with self.assertRaises(StageNotIntegratedError):
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(
                     FOUNDATION_DAY,
                     FOUNDATION_DAY,

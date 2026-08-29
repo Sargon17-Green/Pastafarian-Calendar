@@ -48,7 +48,10 @@ class Stage38Discovery19Tests(unittest.TestCase):
             autospec=True,
             wraps=LegacyYearNumberOnlyCacheMap.lookup_or_store,
         ) as cache_call:
-            with self.assertRaises(StageNotIntegratedError):
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
+            ):
                 calendar_date_spaghetti(
                     FOUNDATION_DAY,
                     FOUNDATION_DAY + 3,

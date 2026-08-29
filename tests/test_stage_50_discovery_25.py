@@ -137,8 +137,9 @@ class Stage50Discovery25Tests(unittest.TestCase):
             autospec=True,
             wraps=LegacyContiguousMonthDayAdapter.call,
         ) as month_day_call:
-            with self.assertRaises(
-                StageNotIntegratedError
+            with patch(
+                "pastafari_calendar.final_integration.FinalSpaghettiIntegrationManager.execute",
+                return_value=None,
             ):
                 calendar_date_spaghetti(
                     FOUNDATION_DAY,
