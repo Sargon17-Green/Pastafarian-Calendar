@@ -1,61 +1,57 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 11 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
+Hoc directorium Gradum 12 evolutionis continet. Linea implementationis ab initio condita est ex solo specimine normativo in mandato incluso. Nulla implementatio aliena, nullum output alienum, nullus hash alienus et nulla probatio differentialis trans implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 11 est `PATCH 05`. Repositio retrograda septem guttarum occultarum ex Gradu 10 consulto integra manet. `buildHiddenWithBackwardStorage(calculationDay, targetDay, stones)` adhuc valores physice ordine `hidden7, hidden6, ..., hidden1` servat.
-
-Correctio non vertit seriem et non mutat storage. Addita est functio:
+Gradus 12 est `DISCOVERY 06` et consulto `EXPECTED_RED`. Quinque emendationes anteriores integrae et virides manent. Hoc gradu introducitur helper legacy ad historiam guttarum visibilium:
 
 ```text
-hiddenByNearness(backwardStorage, k)
+legacyPrior(dropStore, i, back) = dropStore[i-back]
 ```
 
-Ea `k` inter 1 et 7 requirit, deinde locum unum-basatum `8-k` computat et ex repositione retrograda legit. Ita omnis lectio semantica guttae occultae per proximitatem transit per mapping historicum, dum layout vetus physice idem manet.
+Semantica eius veteris contractus stricte limitatur ad indices iam visibiles `1..i-1`. Si `i-back < 1`, helper errorem mittit. Quare in prima gutta visibili, ubi `i=1`, petitiones `back=1..7` nullum indicem visibilem habent et omnes septem reiciuntur.
 
-Via auctoritative huius gradus transit per:
+Via activa huius gradus transit per:
 
 ```text
-BaseMonsterManager::executeHiddenDrops
--> BaseDispatcher::dispatchPatchedHiddenStorage
--> Patch05HiddenStorageHandler
--> LegacyHiddenStorageAdapter
--> buildHiddenWithBackwardStorage              [storage retrogradum manet]
--> Patch05HiddenNearnessWrapper
--> hiddenByNearness                            [slot = 8-k]
--> patchedHiddenNearness                       [visio semantica 1..7]
+BaseMonsterManager::executePrior
+-> BaseDispatcher::dispatchLegacyPrior
+-> Discovery06PriorHandler
+-> LegacyPriorAdapter
+-> legacyPrior
 ```
 
-Via diagnostica `executeUnpatchedHiddenStorageDiagnostic` adhuc `Discovery05HiddenStorageHandler` exercet et eandem seriem retrogradam sine mapping exponit.
+`calculationDay` et `targetDay` iam per contextum huius viae transeunt, sed handler DISCOVERY 06 eis ad guttas occultas resolvendas consulto non utitur. Hoc spatium necessarium est ut PATCH 06 postea supplementum ad historiam occultam supra eundem helper legacy addere possit sine helper veteri delendo.
 
-## Quid regressiones demonstrant
+## Quid regressio demonstrat
 
-`tests/stage_10_discovery_05_tests.cpp` eadem septem inputs et eadem expected values normativi servat. Gradus 10 eam initio ita scripserat ut sex discrepantias expresse requireret; talis clausula regressionem post patch viridem fieri vetabat. Condicio exitus igitur ad formam historicam correctam mutata est:
+`tests/stage_12_discovery_06_tests.cpp` duas proprietates distinguit.
 
-- sex discrepantiae significant vitium Gradus 10 et exitum `1`;
-- nullae discrepantiae significant correctionem PATCH 05 et transitum;
-- alius numerus discrepantiarum est defectus inopinatus.
+Primum, helper legacy in historia visibili recte operatur. Cum `dropStore = [101,202,303]` et `i=4`, petitiones `back=1,2,3` valores `303,202,101` reddunt. Petitio `back=4` recte reicitur quia index prior iam non est inter `1..i-1`.
 
-Forma correcta contra codicem Gradus 10 pristinum iterum currens exactas sex discrepantias et exitum `1` produxit. Ergo expected values, storage audit et vis defectus non debilitata sunt.
+Deinde probatio eadem computatione diei utitur qua Gradus 10–11 septem guttas occultas normativas iam habent. Pro `i=1`, omnis petitio `back=1..7` semantice correspondet `hidden1..hidden7`. `legacyPrior` autem septies errorem mittit:
 
-Post PATCH 05 eadem regressio transit omnibus septem guttis. Probatio nova `tests/stage_11_patch_05_tests.cpp` praeterea demonstrat:
+```text
+DISCREPANTIA PRIOR_OCCULTUS back=1 ... actualis=NON_RESOLUTUS
+...
+DISCREPANTIA PRIOR_OCCULTUS back=7 ... actualis=NON_RESOLUTUS
+REGRESSIO_DISCOVERY_06_DEFECIT: 7 petitiones historiae occultae a helper legacy non resolutae sunt
+```
 
-- `legacyOutput[8-k]` adhuc exactum valorem hidden `k` continet;
-- `hiddenByNearness` omnibus `k=1..7` cum norma congruit;
-- indices extra 1..7 reiciuntur;
-- via auctoritative signum `patch05Applied` servat;
-- via diagnostica sine patch sex discrepantias veteres adhuc exhibet.
+Exitus est `1`, sicut gradus DISCOVERY postulat. Forma probationis iam PATCH-compatibilis est: si via activa postea omnes septem valores occultos recte resolvet, eadem probatio sine mutatione ad nullas discrepantias et transitum perveniet; helper `legacyPrior` directus tamen adhuc debet indices non visibiles reicere.
 
 ## Cicatrix legacy et stratum monstri
 
-Gradus 11 addit `patchedHiddenNearness`, `patch05Applied`, `Patch05HiddenNearnessWrapper`, `Patch05HiddenStorageHandler`, validationem `requirePatch05Ready`, dispatchationem patch separatam et viam diagnosticam legacy. `legacyHiddenBackward` non convertitur, non reordinatur et non superimponitur.
+Additi sunt `VisibleDropStore`, `legacyPrior`, campi prioris in `BaseMonsterContext`, `LegacyPriorReport`, `LegacyPriorAdapter`, `Discovery06PriorHandler`, validatio `requireLegacyPriorReady` et dispatchatio separata.
 
-Validator mapping `8-k` iterum computat ut invariantiam confirmet; non vocat oracle et non eligit inter responsiones diversas. Omne state semanticum contextui invocationis proprium manet.
+Helper legacy non cognoscit `HiddenDrops`, non vocat `hiddenByNearness`, non aedificat guttas occultas et non habet ramum pro indicibus `0..-6`. Error eius est pars defectus historici observabilis.
+
+Omne state semantically activum huic invocationi proprium manet. Metricae et trace tantum observant; exitum semanticum non eligunt.
 
 ## Quod consulto nondum adest
 
-Nullum codicem DISCOVERY/PATCH 06 introduximus. Absunt `legacyPrior`, `priorPatch`, `dropStore` et status emendationis sextae. Historia guttarum visibilium nondum constructa est.
+Nullum codicem PATCH 06 introduximus. Absunt `priorPatch`, `Patch06`, `patch06Applied` et omnis resolver qui, post defectum `legacyPrior`, guttam occultam eligat. Nulla mutatio formulae guttarum visibilium hoc gradu facta est.
 
 ## Lingua computationis
 
@@ -67,7 +63,7 @@ Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congela
 
 ## Probationes
 
-Omnes regressiones usque ad Gradum 11 virides sunt:
+Omnes regressiones usque ad Gradum 11 virides sunt. Regressio nova Gradus 12 est consulto rubra:
 
 ```text
 OMNES_PROBATIONES_BOOTSTRAP_TRANSEUNT
@@ -81,6 +77,7 @@ REGRESSIO_DISCOVERY_04_TRANSIIT
 REGRESSIO_PATCH_04_TRANSIIT
 REGRESSIO_DISCOVERY_05_TRANSIIT
 REGRESSIO_PATCH_05_TRANSIIT
+REGRESSIO_DISCOVERY_06_DEFECIT: 7 petitiones historiae occultae a helper legacy non resolutae sunt
 ```
 
-Gradus proximus est `DISCOVERY 06`; nullum eius codicem hic gradus continet.
+Gradus proximus est `PATCH 06`; nullum eius codicem hic gradus continet.

@@ -27,6 +27,7 @@ Integer distanceWithChronologicalPatch(const Integer& calculationDay,
 using Stone = std::array<Integer, 5>;
 using StoneTable = std::array<Stone, 47>;
 using HiddenDrops = std::array<Integer, 7>;
+using VisibleDropStore = std::vector<Integer>;
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -41,6 +42,7 @@ HiddenDrops buildHiddenWithBackwardStorage(const Integer& calculationDay,
                                            const StoneTable& stones);
 Integer hiddenByNearness(const HiddenDrops& backwardStorage, int k);
 HiddenDrops buildHiddenNearnessView(const HiddenDrops& backwardStorage);
+Integer legacyPrior(const VisibleDropStore& dropStore, int i, int back);
 
 struct BaseMonsterContext {
     Integer calculationDay;
@@ -75,6 +77,11 @@ struct BaseMonsterContext {
     bool legacyHiddenBackwardReady = false;
     HiddenDrops patchedHiddenNearness{};
     bool patch05Applied = false;
+    VisibleDropStore legacyPriorDropStore{};
+    int legacyPriorI = 0;
+    int legacyPriorBack = 0;
+    Integer legacyPriorOutput{};
+    bool legacyPriorReady = false;
 };
 
 struct BaseRunReport {
@@ -139,6 +146,18 @@ struct LegacyHiddenReport {
     bool patch05Applied = false;
 };
 
+struct LegacyPriorReport {
+    Integer calculationDay{};
+    Integer targetDay{};
+    int i = 0;
+    int back = 0;
+    Integer output{};
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
+};
+
 class BaseValidationError final : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
@@ -157,6 +176,7 @@ public:
     void requirePatch04Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyHiddenBackwardReady(const BaseMonsterContext& ctx) const;
     void requirePatch05Ready(const BaseMonsterContext& ctx) const;
+    void requireLegacyPriorReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -189,6 +209,11 @@ public:
     HiddenDrops buildBackward(const Integer& calculationDay,
                               const Integer& targetDay,
                               const StoneTable& stones) const;
+};
+
+class LegacyPriorAdapter {
+public:
+    Integer read(const VisibleDropStore& dropStore, int i, int back) const;
 };
 
 class Discovery01RemainderHandler {
@@ -303,6 +328,14 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery06PriorHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyPriorAdapter& adapter,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -373,6 +406,12 @@ public:
                                       const Patch05HiddenNearnessWrapper& wrapper,
                                       const BaseValidationManager& validator,
                                       const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyPrior(BaseMonsterContext& ctx,
+                             const Discovery06PriorHandler& handler,
+                             const LegacyPriorAdapter& adapter,
+                             const BaseValidationManager& validator,
+                             const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -391,6 +430,11 @@ public:
                                           const Integer& targetDay) const;
     LegacyHiddenReport executeUnpatchedHiddenStorageDiagnostic(const Integer& calculationDay,
                                                                const Integer& targetDay) const;
+    LegacyPriorReport executePrior(const Integer& calculationDay,
+                                   const Integer& targetDay,
+                                   const VisibleDropStore& dropStore,
+                                   int i,
+                                   int back) const;
 };
 
 } // namespace pastafari

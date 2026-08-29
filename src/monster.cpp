@@ -190,6 +190,24 @@ HiddenDrops buildHiddenNearnessView(const HiddenDrops& backwardStorage) {
     return view;
 }
 
+Integer legacyPrior(const VisibleDropStore& dropStore, int i, int back) {
+    if (i < 1) {
+        throw BaseValidationError("index guttae visibilis positivus requiritur");
+    }
+    if (back < 1) {
+        throw BaseValidationError("distantia retro positiva requiritur");
+    }
+    const int indexPrior = i - back;
+    if (indexPrior < 1 || indexPrior >= i) {
+        throw BaseValidationError("helper legacy tantum historiam visibilem iam scriptam legit");
+    }
+    const auto slot = static_cast<std::size_t>(indexPrior - 1);
+    if (slot >= dropStore.size()) {
+        throw BaseValidationError("historia visibilis ad indicem petitum nondum adest");
+    }
+    return dropStore[slot];
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -319,6 +337,12 @@ void BaseValidationManager::requirePatch05Ready(const BaseMonsterContext& ctx) c
     }
 }
 
+void BaseValidationManager::requireLegacyPriorReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.legacyPriorReady) {
+        throw BaseValidationError("valor prior legacy nondum paratus est");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -348,6 +372,10 @@ HiddenDrops LegacyHiddenStorageAdapter::buildBackward(const Integer& calculation
                                                       const Integer& targetDay,
                                                       const StoneTable& stones) const {
     return buildHiddenWithBackwardStorage(calculationDay, targetDay, stones);
+}
+
+Integer LegacyPriorAdapter::read(const VisibleDropStore& dropStore, int i, int back) const {
+    return legacyPrior(dropStore, i, back);
 }
 
 void Discovery01RemainderHandler::handle(BaseMonsterContext& ctx,
@@ -651,6 +679,30 @@ void Patch05HiddenStorageHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch05.hidden.ready");
 }
 
+void Discovery06PriorHandler::handle(BaseMonsterContext& ctx,
+                                     const LegacyPriorAdapter& adapter,
+                                     const BaseValidationManager& validator,
+                                     const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery06PriorHandler";
+    ctx.phase = "DISCOVERY_06_PRIOR_READ";
+    ctx.status = "LEGACY_PRIOR_VISIBLE_ONLY_ACTIVE";
+    ctx.branchTrace.push_back("DISCOVERY_06_PRIOR_READ");
+    metrics.bump(ctx, "discovery06.prior.calls");
+
+    ctx.legacyPriorOutput = adapter.read(
+        ctx.legacyPriorDropStore, ctx.legacyPriorI, ctx.legacyPriorBack);
+    ctx.legacyPriorReady = true;
+
+    ctx.phase = "DISCOVERY_06_PRIOR_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_06_PRIOR_VALIDATE");
+    validator.requireLegacyPriorReady(ctx);
+
+    ctx.phase = "DISCOVERY_06_PRIOR_EXPOSED";
+    ctx.status = "LEGACY_PRIOR_VISIBLE_RESULT_EXPOSED";
+    ctx.branchTrace.push_back("DISCOVERY_06_PRIOR_EXPOSED");
+    metrics.bump(ctx, "discovery06.prior.exposed");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -813,6 +865,20 @@ void BaseDispatcher::dispatchPatchedHiddenStorage(BaseMonsterContext& ctx,
     metrics.bump(ctx, "patch05.dispatch.calls");
 
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void BaseDispatcher::dispatchLegacyPrior(BaseMonsterContext& ctx,
+                                         const Discovery06PriorHandler& handler,
+                                         const LegacyPriorAdapter& adapter,
+                                         const BaseValidationManager& validator,
+                                         const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_06_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_06_DISPATCH");
+    metrics.bump(ctx, "discovery06.dispatch.calls");
+
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -1115,6 +1181,41 @@ LegacyHiddenReport BaseMonsterManager::executeUnpatchedHiddenStorageDiagnostic(
         ctx.branchTrace.size(),
         ctx.legacyHiddenBackward,
         false,
+    };
+}
+
+LegacyPriorReport BaseMonsterManager::executePrior(const Integer& calculationDay,
+                                                   const Integer& targetDay,
+                                                   const VisibleDropStore& dropStore,
+                                                   int i,
+                                                   int back) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_06_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyPriorDropStore = dropStore;
+    ctx.legacyPriorI = i;
+    ctx.legacyPriorBack = back;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyPriorAdapter adapter;
+    const Discovery06PriorHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchLegacyPrior(ctx, handler, adapter, validator, metrics);
+
+    return LegacyPriorReport{
+        ctx.calculationDay,
+        ctx.targetDay,
+        ctx.legacyPriorI,
+        ctx.legacyPriorBack,
+        ctx.legacyPriorOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
     };
 }
 

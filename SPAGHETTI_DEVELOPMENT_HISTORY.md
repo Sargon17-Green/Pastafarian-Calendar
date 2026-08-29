@@ -271,3 +271,35 @@ Quia patch storage non mutat, cicatrix `hidden7..hidden1` integra manet. Quia om
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `patchedHiddenNearness`, `patch05Applied`, `Patch05HiddenNearnessWrapper`, `Patch05HiddenStorageHandler`, dispatchatio patch separata, via diagnostica legacy et `requirePatch05Ready`. Validator mapping octo-minus-k iterat ut COPY_VALIDATION, sed oracle in productione non vocat. Nullum state PATCH 06, nulla historia visibilium et nullus `legacyPrior` introductus est.
+
+## Gradus 12 — Detectio 06: helper prioris solum historiam visibilem novit
+
+### Quid putabatur
+
+Postquam repositio guttarum occultarum per mapping `8-k` correcta est, subsystema vetus ad guttas visibiles venire poterat. Helper ad valores antecedentes legendos simplicissimus erat: `legacyPrior(dropStore, i, back)` indicem `i-back` calculabat et ex historia visibili iam scripta legebat. Auctor huius helper putabat omnem predecessorem necessarium iam in eodem store visibili exsistere.
+
+Haec opinio valet tantum postquam satis multae guttae visibiles scriptae sunt. In initio seriei autem norma predecessors negativos conceptuales per septem guttas occultas supplet.
+
+### Quid repertum est
+
+`legacyPrior` consulto tantum indices `1..i-1` accipit. Historia `[101,202,303]` cum `i=4` demonstrat helper ipsum in suo dominio rectum esse: `back=1,2,3` reddit `303,202,101`. Petitio `back=4` iam extra historiam visibilem cadit et reicitur.
+
+Vitium apparet perfecte in `i=1`. Norma semantica habet septem predecessors validos: `back=1` significat `hidden1`, usque ad `back=7` quod `hidden7` significat. Sed `i-back` tunc est `0,-1,-2,-3,-4,-5,-6`. Helper legacy nullum horum indicum intellegit et septem errores emittit.
+
+Regressio Gradus 12 valores occultos ex oraculo C++ locali computat, sed via productionis eos non legit. Omnes septem petitiones ergo `NON_RESOLUTUS` sunt; regressiones Graduum 1–11 manent virides.
+
+### Quid circumventum est
+
+Nihil hoc gradu circumventum est. `BaseMonsterManager::executePrior` transit directe per `Discovery06PriorHandler`, `LegacyPriorAdapter` et `legacyPrior`. Quamquam dies calculationis et target in contextu praesto sunt, handler eos ad guttas occultas fabricandas vel quaerendas non adhibet.
+
+Nullus `priorPatch`, nullus catch cum supplemento occulto, nullus mapping ad `hiddenByNearness` et nullus state PATCH 06 introductus est. Error legacy igitur usque ad superficiem regressionis ascendit.
+
+### Cur hoc adhuc aequivalentia normativa non est
+
+Appendix normativa guttae visibili `i` tres predecessors ex intervallis 1, 3 et 7 tribuit; in primis positionibus hi predecessors ex septem guttis occultis venire possunt. Accessor qui solum store visibilem legit non potest seriem a `i=1` construere.
+
+Septem petitiones fundamenti testis iam demonstrant domain gap exactum. Quia via activa valores semantice existentes ut inexsistentes tractat, aequivalentia normativa hoc gradu nondum obtinetur.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `VisibleDropStore`, campi `legacyPriorDropStore`, `legacyPriorI`, `legacyPriorBack`, `legacyPriorOutput`, `legacyPriorReady`, relatio `LegacyPriorReport`, `LegacyPriorAdapter`, `Discovery06PriorHandler`, dispatchatio propria et validatio readiness. Haec structura errorem historicum per viam realem exponit et locum organicum futuro PATCH 06 parat, sed ipsum patch nondum continet.
