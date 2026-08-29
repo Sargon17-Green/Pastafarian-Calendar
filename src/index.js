@@ -147,6 +147,12 @@ class BaseMonsterContext {
     this.patch12LegacyDiagnostic = null;
     this.patch12LegacyDiagnosticPreserved = false;
     this.patch12Output = null;
+    this.legacySelectionSeal = null;
+    this.legacySelectionStreamFirst = null;
+    this.legacySelectionDirectionStep = null;
+    this.legacySelectionN = null;
+    this.legacySelectionInitialAnswer = null;
+    this.legacySelectionOutput = null;
   }
 }
 
@@ -287,6 +293,33 @@ class BaseValidationManager {
   requireDiscovery12Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_12_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un next-bowl legacy valid por Patch 12.');
+    }
+  }
+
+  requirePatch12Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_12_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un next-bowl reparat valid por Discovery 13.');
+    }
+  }
+
+  requireAnswerRing(stream) {
+    if (!stream || typeof stream !== 'object') {
+      throw new TypeError('Un answer ring deve esser un object con first e directionStep.');
+    }
+    this.requireExactInteger(stream.first);
+    this.requireExactInteger(stream.directionStep);
+    if (stream.first < 1n || stream.first > M_OLD) {
+      throw new RangeError('Li prim answer deve esser inter 1 e M.');
+    }
+    if (stream.directionStep !== 1n && stream.directionStep !== -1n) {
+      throw new RangeError('Li directionStep del answer ring deve esser +1 o -1.');
+    }
+  }
+
+  requireShortFamilySize(value) {
+    this.requireExactInteger(value);
+    if (value < 1n || value > M_OLD) {
+      throw new RangeError('Li familie legacy curt deve haver un grandore inter 1 e M.');
     }
   }
 
@@ -1130,6 +1163,57 @@ function nextBowlFromOrderAt46Latch(orderAt46Latch, queriedBowlId) {
   return orderAt46Latch[(position + 1) % orderAt46Latch.length];
 }
 
+function answerRingFromCurrentState(bowls, queriedBowlId, nextBowlId, seal) {
+  if (!Array.isArray(bowls) || bowls.length < 7) {
+    throw new TypeError('Li statu de bowls por answer ring deve conservar indices 1..6.');
+  }
+  for (let id = 1; id <= 6; id += 1) {
+    if (typeof bowls[id] !== 'bigint') {
+      throw new TypeError('Chascun bowl por answer ring deve esser un BigInt exact.');
+    }
+  }
+  if (!Number.isInteger(queriedBowlId) || queriedBowlId < 1 || queriedBowlId > 6 ||
+      !Number.isInteger(nextBowlId) || nextBowlId < 1 || nextBowlId > 6) {
+    throw new RangeError('Li bowl questionat e su successor deve esser IDs inter 1 e 6.');
+  }
+  if (typeof seal !== 'bigint') {
+    throw new TypeError('Li seal del answer ring deve esser un BigInt exact.');
+  }
+  const firstBase = bowls[queriedBowlId] + seal + 181n;
+  const first = savePatch(firstBase * firstBase + 179n * bowls[nextBowlId] + seal);
+  const directionBase = first + seal + 1n + 193n;
+  const directionNumber = savePatch(
+    directionBase * directionBase + 193n * first + 197n * bowls[6]
+  );
+  const directionStep = regularMod(directionNumber, 2n) === 1n ? 1n : -1n;
+  return { first, directionStep };
+}
+
+function ringAnswerAt(stream, offset) {
+  if (!stream || typeof stream.first !== 'bigint' || typeof stream.directionStep !== 'bigint') {
+    throw new TypeError('Li answer ring legacy deve contener first e directionStep exact.');
+  }
+  if (stream.first < 1n || stream.first > M_OLD ||
+      (stream.directionStep !== 1n && stream.directionStep !== -1n)) {
+    throw new RangeError('Li answer ring legacy es extra su contract.');
+  }
+  if (typeof offset !== 'bigint' || offset < 0n) {
+    throw new RangeError('Li offset del answer ring legacy deve esser un BigInt non-negativ.');
+  }
+  return 1n + regularMod(stream.first - 1n + stream.directionStep * offset, M_OLD);
+}
+
+function biasedLegacyPick(x, N) {
+  if (typeof x !== 'bigint' || typeof N !== 'bigint') {
+    throw new TypeError('Li selector legacy exige x e N quam BigInt exact.');
+  }
+  if (x < 1n || N < 1n) {
+    throw new RangeError('Li selector legacy exige x e N positiv.');
+  }
+  // Li scar historic fa directmen modulo e ne executa null rejection ante li mapping al familie.
+  return regularMod(x - 1n, N) + 1n;
+}
+
 
 class LegacyOverwritableOrderMemoryAdapter {
   call(counts, stones) {
@@ -1284,6 +1368,42 @@ class NextBowlPatchWrapper {
     context.status = 'PATCH_12_RESULT';
     this.metricsManager.bump(context, 'patch12.nextBowl.calls');
     return context.patch12Output;
+  }
+}
+
+class LegacyBiasedSelectionAdapter {
+  call(stream, N) {
+    const x = ringAnswerAt(stream, 0n);
+    return { x, output: biasedLegacyPick(x, N) };
+  }
+}
+
+class Discovery13BiasedSelectionHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, stream, seal, N) {
+    this.validationManager.requirePatch12Result(context);
+    this.validationManager.requireAnswerRing(stream);
+    this.validationManager.requireExactInteger(seal);
+    this.validationManager.requireShortFamilySize(N);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery13BiasedSelectionHandler';
+    context.phase = 'DISCOVERY_13_BIASED_MODULO_SELECTION';
+    context.branchTrace.push('DISCOVERY_13_BIASED_MODULO_SELECTION');
+    context.legacySelectionSeal = seal;
+    context.legacySelectionStreamFirst = stream.first;
+    context.legacySelectionDirectionStep = stream.directionStep;
+    context.legacySelectionN = N;
+    const legacy = this.legacyAdapter.call(stream, N);
+    context.legacySelectionInitialAnswer = legacy.x;
+    context.legacySelectionOutput = legacy.output;
+    context.status = 'DISCOVERY_13_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery13.biasedModulo.calls');
+    return context.legacySelectionOutput;
   }
 }
 
@@ -2004,6 +2124,12 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyNextBowlAdapter
     );
+    this.legacyBiasedSelectionAdapter = new LegacyBiasedSelectionAdapter();
+    this.discovery13BiasedSelectionHandler = new Discovery13BiasedSelectionHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyBiasedSelectionAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -2320,6 +2446,25 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery13BiasedSelection(calculationDay, targetDay, counts, stones, queriedBowlId, seal, N) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery11OverwrittenOrderHandler.handle(context, counts, stones);
+      const latched = this.patch11OrderAt46LatchWrapper.repair(context, counts, stones);
+      this.discovery12NextBowlHandler.handle(context, latched.orderAt46Latch, queriedBowlId);
+      const nextBowlId = this.nextBowlPatchWrapper.repair(context, latched.orderAt46Latch, queriedBowlId);
+      const stream = answerRingFromCurrentState(
+        context.patch11FinalBowls, queriedBowlId, nextBowlId, seal
+      );
+      const result = this.discovery13BiasedSelectionHandler.handle(context, stream, seal, N);
+      return { result, context, stream: { first: stream.first, directionStep: stream.directionStep } };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -2434,8 +2579,16 @@ function historicNextBowlThroughMonsterPath(calculationDay, targetDay, counts, s
   );
 }
 
+function discovery13LegacyBiasedSelectionThroughMonsterPath(
+  calculationDay, targetDay, counts, stones, queriedBowlId, seal, N
+) {
+  return new BaseMonsterManager().executeDiscovery13BiasedSelection(
+    calculationDay, targetDay, counts, stones, queriedBowlId, seal, N
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 12; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 13; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -2485,6 +2638,8 @@ module.exports = Object.freeze({
   LegacyNextBowlAdapter,
   Discovery12NextBowlHandler,
   NextBowlPatchWrapper,
+  LegacyBiasedSelectionAdapter,
+  Discovery13BiasedSelectionHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -2530,6 +2685,9 @@ module.exports = Object.freeze({
   sauceWithOrderAt46Latch,
   oldNextBowlFixedName,
   nextBowlFromOrderAt46Latch,
+  answerRingFromCurrentState,
+  ringAnswerAt,
+  biasedLegacyPick,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -2555,5 +2713,6 @@ module.exports = Object.freeze({
   historicOrderAt46ThroughMonsterPath,
   discovery12LegacyNextBowlThroughMonsterPath,
   historicNextBowlThroughMonsterPath,
+  discovery13LegacyBiasedSelectionThroughMonsterPath,
   calendarDateSpaghetti
 });

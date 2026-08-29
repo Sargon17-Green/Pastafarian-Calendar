@@ -535,3 +535,50 @@ Li helper `oldNextBowlFixedName(id)` continua retornar li ring numeric fix `1→
 ### Pro quo li strat nov ne adjunte un defect extra
 
 `nextBowlFromOrderAt46Latch` valida que li latch es un permutation complet de 1..6 e que li queried ID es valid. It ne muta li latch e ne usa state global. Un sweep de omni 720 permutations e omni six queried IDs concorda con li reference normativ local. Null `biasedLegacyPick` o code de Patch 13 es addit.
+
+
+## Stage 26 — DISCOVERY 13
+
+### Quo on pensat
+
+Li selector historic tractat li answer de un bowl quam si un simplic modulo esset suficient por projecter it in un familie ordonat de grandore `N`. Pos que li answer self es uniformmen situat sur li ring `1..M`, on passat li prim valore directmen a `biasedLegacyPick(x,N)` e retornat `regularMod(x-1,N)+1`.
+
+### Quo esset decovrit
+
+Si `N` ne divide `M`, li ultim `M mod N` valores del answer ring forma un caude quel ne posse esser projectet directmen sin bias. Li specification exige que ti valores es rejectet e que on avansa sur li sam answer ring til trovar un `x` acceptabil. In li witness real del Foundation, bowl 1 con seal 1 produce un prim answer `90411690289794975082828500805689671121` e direction `-1`. Con `N=first-1`, li prim answer deve esser rejectet e li sequent answer es exactmen `N`; li legacy direct rende tamen 1.
+
+### Quo esset circumit
+
+Null circumition existe in Discovery 13. `biasedLegacyPick` es li unic selector nov e resta direct modulo. `LegacyBiasedSelectionAdapter` usa exactmen `ringAnswerAt(stream,0)` e voca li helper immediatmen; it ne calcula null limite, ne avansa null offset e ne executa null rejection. Li correction apartene exclusivmen a PATCH 13.
+
+### Crescentie monster in ti stage
+
+Li monster adjunte `answerRingFromCurrentState`, quel deriva `first` e `directionStep` ex li bowls final e li next-bowl ja reparat, poy `ringAnswerAt` quam ring exact. `LegacyBiasedSelectionAdapter` e `Discovery13BiasedSelectionHandler` conserva in li context li seal, first, direction, `N`, li prim answer e li output modulo legacy. Li manager conecta ti layer pos Discovery 11, Patch 11, Discovery 12 e Patch 12, ergo li defect es visibil sur un route real e ne sur un helper isolat solmen.
+
+### Pro quo li nov layer ne change altri semantics
+
+Li answer ring usa solmen state invocation-local ja derivat per patches precedent e ne muta bowls, latch, stones o catalog. `biasedLegacyPick` ne es usat retroactivmen in alcun selector anterior, e null acceptance-limit o wide selection existe in production. Omni regressions til Patch 12 resta verd; li unic failure intentional es li comparison normativ de Discovery 13.
+
+
+
+## Stage 26 — DISCOVERY 13
+
+### Quo on pensat
+
+Li selector historic tractat li answer de un bowl quam si un simplic modulo esset suficient por projecter it in un familie ordonat de grandore `N`. Pos que li answer self es situat sur li ring `1..M`, on passat li prim valore directmen a `biasedLegacyPick(x,N)` e retornat `regularMod(x-1,N)+1`.
+
+### Quo esset decovrit
+
+Si `N` ne divide `M`, li ultim `M mod N` valores del answer ring forma un caude quel ne posse esser projectet directmen sin bias. Li specification exige que ti valores es rejectet e que on avansa sur li sam answer ring til trovar un `x` acceptabil. In li witness real del Foundation, bowl 1 con seal 1 produce un prim answer `90411690289794975082828500805689671121` e direction `-1`. Con `N=first-1`, li prim answer deve esser rejectet e li sequent answer es exactmen `N`; li legacy direct rende tamen 1.
+
+### Quo esset circumit
+
+Null circumition existe in Discovery 13. `biasedLegacyPick` es li unic selector nov e resta direct modulo. `LegacyBiasedSelectionAdapter` usa exactmen `ringAnswerAt(stream,0)` e voca li helper immediatmen; it ne calcula null limite, ne avansa null offset e ne executa null rejection. Li correction apartene exclusivmen a PATCH 13.
+
+### Crescentie monster in ti stage
+
+Li monster adjunte `answerRingFromCurrentState`, quel deriva `first` e `directionStep` ex li bowls final e li next-bowl ja reparat, poy `ringAnswerAt` quam ring exact. `LegacyBiasedSelectionAdapter` e `Discovery13BiasedSelectionHandler` conserva in li context li seal, first, direction, `N`, li prim answer e li output modulo legacy. Li manager conecta ti layer pos Discovery 11, Patch 11, Discovery 12 e Patch 12, ergo li defect es visibil sur un route real e ne sur un helper isolat solmen.
+
+### Pro quo li nov layer ne change altri semantics
+
+Li answer ring usa solmen state invocation-local ja derivat per patches precedent e ne muta bowls, latch, stones o catalog. `biasedLegacyPick` ne es usat retroactivmen in alcun selector anterior, e null acceptance-limit o wide selection existe in production. Omni regressions til Patch 12 resta verd; li unic failure intentional es li comparison normativ de Discovery 13.

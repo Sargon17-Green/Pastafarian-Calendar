@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 25 de 55: PATCH 12**. Omni scars e patches til Patch 11 resta intact e testabil. `oldNextBowlFixedName(id)` continua esser li scar fixed-ID de Discovery 12, ma li route semantic nov trova li queried ID in `orderAt46Latch` e usa su successor circular.
+Li linea es in **Stage 26 de 55: DISCOVERY 13**. Omni scars e patches til Patch 12 resta intact e testabil. `biasedLegacyPick(x,N)` conserva li selector historic quel applica directmen `regularMod(x-1,N)+1` al prim answer del ring, sin un rejection precedent.
 
-`NextBowlPatchWrapper` es conectet pos `Discovery12NextBowlHandler`. It conserva un call diagnostic real a `oldNextBowlFixedName`, ma ti valore ne decide li output. `nextBowlFromOrderAt46Latch` es li unic fonte semantic del next-bowl reparat. Li regression de Discovery 12 es nu verd; Patch 13 ne es present.
+Li route real de Discovery 13 passa per li latch de Patch 11 e li next-bowl circular de Patch 12, deriva un answer ring exact ex li six bowls final, e poy `LegacyBiasedSelectionAdapter` voca `biasedLegacyPick` immediatmen sur `ringAnswerAt(stream,0)`. Li regression nov es intentionalmen rubi. Null acceptance-limit, null progression de rejection e null Patch 13 es present.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 12 deve restar verd:
+Omni regressions til Patch 12 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal del patch deve esser verd:
+Li test focal del discovery deve esser rubi exactmen per li modulo bias ante rejection:
 
 ```text
-npm run test:patch-12
+npm run test:discovery-13
 ```
 
-Li suite complet deve esser verd:
+Li suite complet deve esser `EXPECTED_RED` exclusivmen in Discovery 13:
 
 ```text
 npm test
@@ -122,3 +122,10 @@ Li latch de drop 46 ja es exact e stabil, ma li layer historic de next-bowl cons
 ## Stage 25 — Patch 12
 
 `oldNextBowlFixedName` resta intact e continua representar li successor numeric fix historic. `nextBowlFromOrderAt46Latch` valida un permutation latchet de six IDs, trova li queried ID per position e retorna `orderAt46Latch[(position+1) mod 6]`; li ultim position wrap al prim. `NextBowlPatchWrapper` voca li legacy diagnosticmen e conserva su output in li context, ma li successor semantic veni solmen del latch. Li regression de Discovery 12 deven verd por li fixture `[1,2,3,4,6,5]` e li test de Patch 12 verifica omni six IDs super omni 720 permutations. Null `biasedLegacyPick` o code de Patch 13 es present.
+
+
+## Stage 26 — Discovery 13
+
+Li state precedent ja posse derivar un next-bowl exact ex `orderAt46Latch`. Ti stage adjunte `answerRingFromCurrentState` e `ringAnswerAt` por representar li answer ring exact, ma conserva un selector historic separat: `biasedLegacyPick(x,N)` fa directmen `regularMod(x-1,N)+1`. `LegacyBiasedSelectionAdapter` prende solmen `ringAnswerAt(stream,0)` e passa ti prim answer al selector, sin examinar si it cade in li parte rejectend del ring.
+
+`Discovery13BiasedSelectionHandler` es conectet pos `NextBowlPatchWrapper`, talmen li witness real usa li six bowls final e li successor circular ja reparat. Por li Foundation, bowl 1 e seal 1, li prim answer es `90411690289794975082828500805689671121` con direction `-1`. Si `N` es un minus quam ti first, li prim answer es rejectend e li sequent answer es exactmen `N`; li legacy tamen mappa li prim answer directmen e rende 1. Li correction de rejection apartene exclusivmen a Stage 27 / Patch 13. Null `wideDetour` o logic de Patch 14 es present.
