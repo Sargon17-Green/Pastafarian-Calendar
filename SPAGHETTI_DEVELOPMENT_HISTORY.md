@@ -778,3 +778,25 @@ Por li witness 490/490/490, li ordre legacy resta `opening=Foundation+30, +10, +
 ### Limites de ti stage
 
 Null `oldJumpGuess` es creat, null jump per 365 es executet, e null next-year/previous-year patch es anticipat. Li function final resta absent. Omni regressions precedent e li regression de Discovery 17 es verd.
+
+## Stage 36 — DISCOVERY 18
+
+### Quo on pensat
+
+Pos trovar Year 5000, li code historic tentat evitar un caminada annual repetit per estimar directmen li numer del year demandat. Li estimation usa 365 dies quam longore medie: `oldJumpGuess` divide per 365 li distance desde li prim die del anchor e adjunte ti quotient al numer 5000.
+
+### Quo esset decovrit
+
+Li annus normativ ne have longore fix 365. Lor limites veni de gates e li longore legal posse variar largmen. Ergo un target quel es plu quam 364 dies pos `firstDay` posse ancor esser in Year 5000, e un target immediatmen pos `closeDay` deve esser solmen Year 5001 independentmen de quant gruppes de 365 cabe in li anchor.
+
+### Quo resta intentionalmen defectiv
+
+Null circumition existe in Discovery 18. `oldJumpGuess(anchor,targetDay)` calcula li quotient con floor division exact, includente deltas negativ, e `LegacyYearJumpAdapter` lo voca realmen. `Discovery18YearJumpHandler` copia li candidate selectet de Patch 17 in un anchor de Year 5000 e usa li valore estimat directmen quam `legacyJumpSemanticYearNumber`. Li guess ne es ancor telemetry-only.
+
+### Crescentie monster in ti stage
+
+`BaseMonsterContext` adjunte number, open day, first day, close day, target day, delta, guess e un flag quel confirma que li guess controla li semantics. `BaseValidationManager` adjunte guards por un resultate valid de Patch 17 e por li anchor de Year 5000. `LegacyYearJumpAdapter`, `Discovery18YearJumpHandler`, un route manager separat e un public route rende li scar observabil sin mutar li strates anterior.
+
+### Witness e limite del stage
+
+Li witness usa un anchor selectet de longore 1000. `firstDay+365` e `closeDay` resta intra Year 5000 ma li estimation retorna 5001 e 5002; `closeDay+1` es li prim die pos li anchor e deve esser in Year 5001, ma li estimation retorna 5002. Ti divergence es intentionalmen rubi. Li correction de Patch 18 — conservar li guess solmen quam telemetry e caminar un year a un vez per `nextYear`/`previousYear` — ne es present. Null cache de Patch 19 es addit.

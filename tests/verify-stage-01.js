@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 17 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 18 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,8 @@ group('null textu hebreic o code posterior a Patch 17 contamina production', () 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
+    'findYearByWalkPatch', 'patchedNextYear', 'patchedPreviousYear',
+    'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
   ];
@@ -1690,7 +1691,49 @@ group('Patch 17 reordena solmen runs contigui egal per opening gate tempran', ()
   ok(!production.Year5000TiePatchWrapper.prototype.repair.toString().includes('oldJumpGuess'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 17', () => {
+group('Discovery 18 usa oldJumpGuess /365 directmen quam numer semantic', () => {
+  const helperSource = production.oldJumpGuess.toString();
+  ok(helperSource.includes('targetDay - anchor.firstDay'));
+  ok(helperSource.includes('floorDiv(targetDay - anchor.firstDay, 365n)'));
+  ok(!helperSource.includes('nextYear'));
+  ok(!helperSource.includes('previousYear'));
+
+  const f = o.FOUNDATION_DAY;
+  const calculationDay = f + 100n;
+  const gates = {
+    10: f + 10n, 16: f + 1010n,
+    20: f + 20n, 26: f + 1020n,
+    30: f + 30n, 36: f + 1030n
+  };
+  const pairs = [
+    { openIndex: 30, closeIndex: 36 },
+    { openIndex: 10, closeIndex: 16 },
+    { openIndex: 20, closeIndex: 26 }
+  ];
+  const targetDay = f + 376n;
+  const routed = production.discovery18LegacyYearJumpThroughMonsterPath(
+    calculationDay, targetDay, -1n, gates, pairs, { first: 1n, directionStep: 1n }
+  );
+  eq(routed.context.currentHandler, 'Discovery18YearJumpHandler');
+  eq(routed.context.previousHandler, 'Year5000TiePatchWrapper');
+  eq(routed.context.status, 'DISCOVERY_18_LEGACY_RESULT');
+  eq(routed.context.legacyJumpAnchorNumber, 5000n);
+  eq(routed.context.legacyJumpAnchorFirstDay, f + 11n);
+  eq(routed.context.legacyJumpAnchorCloseDay, f + 1010n);
+  eq(routed.context.legacyJumpTargetDay, targetDay);
+  eq(routed.context.legacyJumpDeltaFromFirstDay, 365n);
+  eq(routed.context.legacyJumpGuess, 5001n);
+  eq(routed.context.legacyJumpSemanticYearNumber, 5001n);
+  eq(routed.context.legacyJumpGuessUsedAsSemantic, true);
+  ok(routed.context.legacyJumpAnchorOpenDay < targetDay && targetDay <= routed.context.legacyJumpAnchorCloseDay);
+  eq(routed.context.metrics['discovery18.oldJumpGuess.calls'], 1n);
+  eq(routed.context.metrics['discovery18.guessUsedAsSemantic.calls'], 1n);
+  ok(!production.Discovery18YearJumpHandler.prototype.handle.toString().includes('findYearByWalkPatch'));
+  ok(!production.Discovery18YearJumpHandler.prototype.handle.toString().includes('patchedNextYear'));
+  ok(!production.Discovery18YearJumpHandler.prototype.handle.toString().includes('patchedPreviousYear'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 18', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1702,4 +1745,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 17.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 18.');

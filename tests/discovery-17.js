@@ -86,7 +86,7 @@ assert.notEqual(routed.result.selected.openGate, normativeOpeningOrder[0]);
 const handlerSource = production.Discovery17Year5000TieHandler.prototype.handle.toString();
 assert.doesNotMatch(handlerSource, /\.sort\(|sortEqualLengthRunsByOpeningGate|openGate.*candidateLength|candidateLength.*openGate/);
 assert.equal('sortEqualLengthRunsByOpeningGate' in production, true);
-assert.equal('oldJumpGuess' in production, false);
+assert.doesNotMatch(handlerSource, /oldJumpGuess/);
 
 const patched = production.historicYear5000TieThroughMonsterPath(
   calculationDay,

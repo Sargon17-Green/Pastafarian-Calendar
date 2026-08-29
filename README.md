@@ -209,3 +209,11 @@ Li witness usa tri candidates de longore 490 con opening gates in ordre tardiv, 
 ### Pro quo li patch ne anticipa Stage 36
 
 Null `oldJumpGuess`, null division per 365 e null transition de year successiv/precedent es addit. Ti scar apartene exclusivmen a Discovery 18. SourceLanguageCatalog, li ceiling 5778, li route de gate-sign e omni scars anterior resta intact.
+
+## Stage 36 — Discovery 18
+
+Li route de Year 5000 ja passa per li ceiling 5778 e li duesim tie passu de Patch 17. Ti stage adjunte li scar historic `oldJumpGuess(anchor,targetDay)`: it usa li difference `targetDay-anchor.firstDay`, fa floor division exact per `365` e adjunte li quotient al numer del anchor. Li helper resta intentionalmen un estimation de longore medie e ne conosse li intervalles real del annus.
+
+`LegacyYearJumpAdapter` voca ti helper realmen. `Discovery18YearJumpHandler` prende li candidate selectet per Patch 17, forma un anchor de Year 5000 e conserva number, open day, first day, close day, target, delta e guess quam state invocation-local. In ti Discovery li defect es activ: li guess es usat directmen quam numer semantic del year, ne solmen quam telemetry.
+
+Li witness usa tri candidates egal de longore 1000. Pos li tie repair, li anchor selectet have li opening plu tempran. Por `firstDay+365`, `closeDay` e `closeDay+1`, li guess legacy retorna respectivmen 5001, 5002 e 5002; li semantics per intervalles/year-walk exige 5000, 5000 e 5001. Ti comparison es li unic EXPECTED_RED del stage. Null `findYearByWalkPatch`, null `patchedNextYear`, null `patchedPreviousYear` e null code de Patch 19 es includet.

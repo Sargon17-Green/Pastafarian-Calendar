@@ -225,6 +225,15 @@ class BaseMonsterContext {
     this.patch17SelectionStream = null;
     this.patch17SelectedOrdinal = null;
     this.patch17Selected = null;
+    this.legacyJumpAnchorNumber = null;
+    this.legacyJumpAnchorOpenDay = null;
+    this.legacyJumpAnchorFirstDay = null;
+    this.legacyJumpAnchorCloseDay = null;
+    this.legacyJumpTargetDay = null;
+    this.legacyJumpDeltaFromFirstDay = null;
+    this.legacyJumpGuess = null;
+    this.legacyJumpSemanticYearNumber = null;
+    this.legacyJumpGuessUsedAsSemantic = false;
   }
 }
 
@@ -440,6 +449,27 @@ class BaseValidationManager {
   requireDiscovery17Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_17_LEGACY_TIE_RESULT') {
       throw new BootstrapStageError('Li context ne contene un tie legacy valid de Year 5000 por Patch 17.');
+    }
+  }
+
+  requirePatch17Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_17_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un Year 5000 reparat valid por Discovery 18.');
+    }
+  }
+
+  requireYearJumpAnchor(anchor) {
+    if (!anchor || typeof anchor !== 'object') {
+      throw new TypeError('Li anchor de Year 5000 por li jump legacy deve esser un object.');
+    }
+    for (const key of ['number', 'openDay', 'firstDay', 'closeDay']) {
+      this.requireExactInteger(anchor[key]);
+    }
+    if (anchor.number !== 5000n) {
+      throw new RangeError('Discovery 18 exige exactmen li anchor de Year 5000.');
+    }
+    if (anchor.firstDay !== anchor.openDay + 1n || anchor.closeDay < anchor.firstDay) {
+      throw new RangeError('Li interval del anchor de Year 5000 es invalid.');
     }
   }
 
@@ -1596,6 +1626,30 @@ function stableLengthOnlyPatchedYearCandidates(gates, candidatePairs) {
   return accepted;
 }
 
+function floorDiv(a, b) {
+  if (typeof a !== 'bigint' || typeof b !== 'bigint') {
+    throw new TypeError('floorDiv exige du integers BigInt exact.');
+  }
+  if (b < 1n) {
+    throw new RangeError('Li divisor de floorDiv deve esser positiv.');
+  }
+  let q = a / b;
+  const r = a % b;
+  if (r < 0n) q -= 1n;
+  return q;
+}
+
+function oldJumpGuess(anchor, targetDay) {
+  if (!anchor || typeof anchor !== 'object') {
+    throw new TypeError('Li anchor legacy de year-jump deve esser un object.');
+  }
+  if (typeof anchor.number !== 'bigint' || typeof anchor.firstDay !== 'bigint' || typeof targetDay !== 'bigint') {
+    throw new TypeError('Li jump legacy exige number, firstDay e targetDay quam BigInt exact.');
+  }
+  // Li scar historic usa 365 quam longore medie e salta directmen al numer de year estimat.
+  return anchor.number + floorDiv(targetDay - anchor.firstDay, 365n);
+}
+
 function sortEqualLengthRunsByOpeningGate(list) {
   if (!Array.isArray(list)) {
     throw new TypeError('Li liste de year candidates por li tie patch deve esser un array ja sortat per longore.');
@@ -2231,6 +2285,55 @@ class Year5000TiePatchWrapper {
       selectedOrdinal: selected.pickedOrdinal,
       selected: { ...selected.candidate }
     };
+  }
+}
+
+class LegacyYearJumpAdapter {
+  call(anchor, targetDay) {
+    return oldJumpGuess(anchor, targetDay);
+  }
+}
+
+class Discovery18YearJumpHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context, targetDay) {
+    this.validationManager.requirePatch17Result(context);
+    this.validationManager.requireDiscreteDay(targetDay);
+    const selected = context.patch17Selected;
+    if (!selected || typeof selected !== 'object') {
+      throw new BootstrapStageError('Discovery 18 ne trova li candidate selectet de Year 5000 ex Patch 17.');
+    }
+    const anchor = {
+      number: 5000n,
+      openDay: selected.openGate,
+      firstDay: selected.openGate + 1n,
+      closeDay: selected.closeGate
+    };
+    this.validationManager.requireYearJumpAnchor(anchor);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery18YearJumpHandler';
+    context.phase = 'DISCOVERY_18_OLD_JUMP_GUESS_365';
+    context.branchTrace.push('DISCOVERY_18_OLD_JUMP_GUESS_365');
+    context.legacyJumpAnchorNumber = anchor.number;
+    context.legacyJumpAnchorOpenDay = anchor.openDay;
+    context.legacyJumpAnchorFirstDay = anchor.firstDay;
+    context.legacyJumpAnchorCloseDay = anchor.closeDay;
+    context.legacyJumpTargetDay = targetDay;
+    context.legacyJumpDeltaFromFirstDay = targetDay - anchor.firstDay;
+    const guess = this.legacyAdapter.call(anchor, targetDay);
+    context.legacyJumpGuess = guess;
+    // Discovery 18 conserva li defect: li estimation /365 es usat directmen quam resultate semantic.
+    context.legacyJumpSemanticYearNumber = guess;
+    context.legacyJumpGuessUsedAsSemantic = true;
+    context.status = 'DISCOVERY_18_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery18.oldJumpGuess.calls');
+    this.metricsManager.bump(context, 'discovery18.guessUsedAsSemantic.calls');
+    return { anchor: { ...anchor }, guessedYearNumber: guess, semanticYearNumber: guess };
   }
 }
 
@@ -3001,6 +3104,12 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyYearCandidateAdapter
     );
+    this.legacyYearJumpAdapter = new LegacyYearJumpAdapter();
+    this.discovery18YearJumpHandler = new Discovery18YearJumpHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyYearJumpAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -3483,6 +3592,23 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery18YearJump(calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      const result = this.discovery18YearJumpHandler.handle(context, targetDay);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -3669,8 +3795,16 @@ function historicYear5000TieThroughMonsterPath(
   );
 }
 
+function discovery18LegacyYearJumpThroughMonsterPath(
+  calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+) {
+  return new BaseMonsterManager().executeDiscovery18YearJump(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 17; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 18; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -3734,6 +3868,8 @@ module.exports = Object.freeze({
   YearCandidateCeilingPatchWrapper,
   Discovery17Year5000TieHandler,
   Year5000TiePatchWrapper,
+  LegacyYearJumpAdapter,
+  Discovery18YearJumpHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -3797,6 +3933,8 @@ module.exports = Object.freeze({
   yearCandidatesAfterFootnotePatchBeforeSort,
   stableLengthOnlyPatchedYearCandidates,
   sortEqualLengthRunsByOpeningGate,
+  floorDiv,
+  oldJumpGuess,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -3832,5 +3970,6 @@ module.exports = Object.freeze({
   historicYearCandidatesThroughMonsterPath,
   discovery17LegacyYear5000TieThroughMonsterPath,
   historicYear5000TieThroughMonsterPath,
+  discovery18LegacyYearJumpThroughMonsterPath,
   calendarDateSpaghetti
 });

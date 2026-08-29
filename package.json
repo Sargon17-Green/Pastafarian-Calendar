@@ -1,12 +1,12 @@
 {
   "name": "pastafari-calendar-javascript-interlingue-occidental",
-  "version": "0.0.35-stage-35",
+  "version": "0.0.36-stage-36",
   "private": true,
   "description": "Linea independent de implementation por JavaScript con Interlingue / Occidental quam lingue-fonte.",
   "main": "src/index.js",
   "scripts": {
-    "test": "node tests/run-tests.js && node tests/verify-stage-01.js && node tests/discovery-01.js && node tests/patch-01.js && node tests/discovery-02.js && node tests/patch-02.js && node tests/discovery-03.js && node tests/patch-03.js && node tests/discovery-04.js && node tests/patch-04.js && node tests/discovery-05.js && node tests/patch-05.js && node tests/discovery-06.js && node tests/patch-06.js && node tests/discovery-07.js && node tests/patch-07.js && node tests/discovery-08.js && node tests/patch-08.js && node tests/discovery-09.js && node tests/patch-09.js && node tests/discovery-10.js && node tests/patch-10.js && node tests/discovery-11.js && node tests/patch-11.js && node tests/discovery-12.js && node tests/patch-12.js && node tests/discovery-13.js && node tests/patch-13.js && node tests/discovery-14.js && node tests/patch-14.js && node tests/discovery-15.js && node tests/patch-15.js && node tests/discovery-16.js && node tests/patch-16.js && node tests/discovery-17.js && node tests/patch-17.js",
-    "test:previous": "node tests/run-tests.js && node tests/verify-stage-01.js && node tests/discovery-01.js && node tests/patch-01.js && node tests/discovery-02.js && node tests/patch-02.js && node tests/discovery-03.js && node tests/patch-03.js && node tests/discovery-04.js && node tests/patch-04.js && node tests/discovery-05.js && node tests/patch-05.js && node tests/discovery-06.js && node tests/patch-06.js && node tests/discovery-07.js && node tests/patch-07.js && node tests/discovery-08.js && node tests/patch-08.js && node tests/discovery-09.js && node tests/patch-09.js && node tests/discovery-10.js && node tests/patch-10.js && node tests/discovery-11.js && node tests/patch-11.js && node tests/discovery-12.js && node tests/patch-12.js && node tests/discovery-13.js && node tests/patch-13.js && node tests/discovery-14.js && node tests/patch-14.js && node tests/discovery-15.js && node tests/patch-15.js && node tests/discovery-16.js && node tests/patch-16.js && node tests/discovery-17.js",
+    "test": "node tests/run-tests.js && node tests/verify-stage-01.js && node tests/discovery-01.js && node tests/patch-01.js && node tests/discovery-02.js && node tests/patch-02.js && node tests/discovery-03.js && node tests/patch-03.js && node tests/discovery-04.js && node tests/patch-04.js && node tests/discovery-05.js && node tests/patch-05.js && node tests/discovery-06.js && node tests/patch-06.js && node tests/discovery-07.js && node tests/patch-07.js && node tests/discovery-08.js && node tests/patch-08.js && node tests/discovery-09.js && node tests/patch-09.js && node tests/discovery-10.js && node tests/patch-10.js && node tests/discovery-11.js && node tests/patch-11.js && node tests/discovery-12.js && node tests/patch-12.js && node tests/discovery-13.js && node tests/patch-13.js && node tests/discovery-14.js && node tests/patch-14.js && node tests/discovery-15.js && node tests/patch-15.js && node tests/discovery-16.js && node tests/patch-16.js && node tests/discovery-17.js && node tests/patch-17.js && node tests/discovery-18.js",
+    "test:previous": "node tests/run-tests.js && node tests/verify-stage-01.js && node tests/discovery-01.js && node tests/patch-01.js && node tests/discovery-02.js && node tests/patch-02.js && node tests/discovery-03.js && node tests/patch-03.js && node tests/discovery-04.js && node tests/patch-04.js && node tests/discovery-05.js && node tests/patch-05.js && node tests/discovery-06.js && node tests/patch-06.js && node tests/discovery-07.js && node tests/patch-07.js && node tests/discovery-08.js && node tests/patch-08.js && node tests/discovery-09.js && node tests/patch-09.js && node tests/discovery-10.js && node tests/patch-10.js && node tests/discovery-11.js && node tests/patch-11.js && node tests/discovery-12.js && node tests/patch-12.js && node tests/discovery-13.js && node tests/patch-13.js && node tests/discovery-14.js && node tests/patch-14.js && node tests/discovery-15.js && node tests/patch-15.js && node tests/discovery-16.js && node tests/patch-16.js && node tests/discovery-17.js && node tests/patch-17.js",
     "test:discovery-01": "node tests/discovery-01.js",
     "generate-fixtures": "node tests/generate-fixtures.js",
     "test:patch-01": "node tests/patch-01.js",
@@ -41,6 +41,7 @@
     "test:discovery-16": "node tests/discovery-16.js",
     "test:patch-16": "node tests/patch-16.js",
     "test:discovery-17": "node tests/discovery-17.js",
-    "test:patch-17": "node tests/patch-17.js"
+    "test:patch-17": "node tests/patch-17.js",
+    "test:discovery-18": "node tests/discovery-18.js"
   }
 }

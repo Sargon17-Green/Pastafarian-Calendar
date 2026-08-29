@@ -134,6 +134,6 @@ assert.ok(
   wrapperSource.indexOf('discovery17PreparedForSelection') < wrapperSource.indexOf('sortEqualLengthRunsByOpeningGate'),
   'Li stable family legacy deve esser materialisat e conservat ante li tie repair.'
 );
-assert.equal('oldJumpGuess' in production, false);
+assert.doesNotMatch(production.Year5000TiePatchWrapper.prototype.repair.toString(), /oldJumpGuess/);
 
 console.log('PATCH 17: PASS — li stable sort per longore resta intact; solmen runs contigui egal es reordinat per opening gate tempran ante selection.');
