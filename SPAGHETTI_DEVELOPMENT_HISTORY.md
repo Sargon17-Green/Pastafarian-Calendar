@@ -333,3 +333,22 @@ Un `LegacyPermutationOrderAdapter` e un `Discovery08PermutationRankHandler` ha e
 ### Pro quo li strat nov ne adjunte un defect extra
 
 `oldPermutationUnrank0` implementa exactmen su contract 0..719; li adapter ne reordina ni muta li resultate. Li unic assumption fals nov es li confusion mandat inter ordinal 1..720 e rank0 0..719. Li sentinel permanent de Patch 07 resta intact. Null pours, aliases de bowls o code de Patch 09 es present.
+
+
+## Stage 17 — PATCH 08
+
+### Quo esset circumit
+
+`oldPermutationUnrank0` e `legacyBowlOrderFromDrop` ne esset modificat. Li nov `orderPatchFromValue(value)` recalcula intentionalmen `oneBased = regularMod(value-1,720)+1`, deriva `legacyRank0 = oneBased-1`, e voca poy `oldPermutationUnrank0(legacyRank0)`. Li chain -1 ... +1 ... -1 resta fisicmen visibil quam scar mandat e ne es algebricmen simplificat.
+
+### Pro quo li patch es normativmen equivalent
+
+Li helper legacy enumera exactmen li 720 permutations lexicographic per ranks 0..719. Li ordinal semantic derivat del drop es 1..720; subtracter un unit produce bijectivmen li rank 0..719 correspondent. Ergo li call final rende exactmen li permutation normativ por chascun residue del drop modulo 720, includente li boundary oneBased=720 quel deven rank0=719.
+
+### Crescentie monster in ti stage
+
+Un `Patch08PermutationWrapper` ha esset insertet pos `Discovery08PermutationRankHandler`. Li context conserva li drop, li ordinal one-based, li `legacyRank0` e li output reparat. `BaseMonsterManager` expone un route historic separat quel executa discovery e patch in li sam context e metrics resta non-semantic.
+
+### Scar conservat
+
+`legacyBowlOrderFromDrop(1)` continua rendre li duesim permutation, e li caller legacy continua passar su ordinal directmen quam rank0. Li patch ne muta ni reordina li helper legacy. Null `bowlAlias`, pours de Patch 09 o code posterior es present.

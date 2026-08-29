@@ -12,6 +12,7 @@ assert.throws(() => production.oldPermutationUnrank0(720n), RangeError);
 const drops = [1n, 2n, 3n, 719n];
 const legacyActual = [];
 const legacyExpectedFromScar = [];
+const patchedActual = [];
 const normativeExpected = [];
 
 for (const drop of drops) {
@@ -30,12 +31,15 @@ for (const drop of drops) {
   ]);
   legacyActual.push(routed.result);
   legacyExpectedFromScar.push(normative.bowlOrderFromNumber(oneBased + 1n));
+  const patched = production.historicBowlOrderThroughMonsterPath(1n, 1n, drop);
+  assert.equal(patched.context.currentHandler, 'Patch08PermutationWrapper');
+  assert.equal(patched.context.patch08OneBased, oneBased);
+  assert.equal(patched.context.patch08LegacyRank0, oneBased - 1n);
+  patchedActual.push(patched.result);
   normativeExpected.push(normative.bowlOrderFromDrop(drop));
 }
 
 assert.deepEqual(legacyActual, legacyExpectedFromScar, 'Li legacy route deve expor exactmen li shift rank0 mandat.');
-assert.deepEqual(
-  legacyActual,
-  normativeExpected,
-  'EXPECTED RED: li ordinal one-based es passat directmen a oldPermutationUnrank0; Patch 08 ne deve esser present in ti stage.'
-);
+assert.notDeepEqual(legacyActual, normativeExpected, 'Li scar legacy deve restar observabil pos Patch 08.');
+assert.deepEqual(patchedActual, normativeExpected, 'Patch 08 deve traducter oneBased a rank0 per oneBased-1.');
+console.log('DISCOVERY 08 REGRESSION: PASS pos Patch 08; li caller legacy resta desplazzat e li bridge zero-based rende li órdine normativ.');
