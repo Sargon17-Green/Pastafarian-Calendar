@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 15 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 15 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,6 @@ group('null textu hebreic o code posterior a Discovery 15 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'gateQuestionWithSignedStep', 'NegativeGateQuestionPatchWrapper',
     'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
@@ -1506,7 +1505,56 @@ group('Discovery 15 conserva li question historic del latere positiv por passus 
   ok(!handlerSource.includes('NegativeGateQuestionPatchWrapper'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 15', () => {
+group('Patch 15 conserva li scar positiv e devia exclusivmen signedStep negativ', () => {
+  const legacySource = production.oldGateQuestionDay.toString();
+  ok(legacySource.includes('return FOUNDATION_DAY_OLD + n;'));
+  ok(!legacySource.includes('FOUNDATION_DAY_OLD -'));
+  ok(!legacySource.includes('signedStep'));
+  const patchSource = production.gateQuestionWithSignedStep.toString();
+  ok(patchSource.includes('let q = oldGateQuestionDay(magnitude);'));
+  ok(patchSource.includes('if (signedStep < 0n)'));
+  ok(patchSource.includes('q = FOUNDATION_DAY_OLD - magnitude;'));
+  ok(patchSource.indexOf('oldGateQuestionDay(magnitude)') < patchSource.indexOf('if (signedStep < 0n)'));
+
+  for (const signedStep of [-1n, -2n, -10n, -101n]) {
+    const magnitude = -signedStep;
+    eq(production.oldGateQuestionDay(magnitude), o.FOUNDATION_DAY + magnitude);
+    eq(production.gateQuestionWithSignedStep(signedStep), o.FOUNDATION_DAY - magnitude);
+  }
+  for (const signedStep of [0n, 1n, 10n, 101n]) {
+    eq(production.gateQuestionWithSignedStep(signedStep), production.oldGateQuestionDay(signedStep));
+  }
+
+  const routed = production.historicGateQuestionThroughMonsterPath(
+    o.FOUNDATION_DAY, o.FOUNDATION_DAY, -10n
+  );
+  eq(routed.result, o.FOUNDATION_DAY - 10n);
+  eq(routed.context.currentHandler, 'NegativeGateQuestionPatchWrapper');
+  eq(routed.context.previousHandler, 'Discovery15NegativeGateQuestionHandler');
+  eq(routed.context.phase, 'PATCH_15_NEGATIVE_GATE_SIGN_DETOUR');
+  eq(routed.context.status, 'PATCH_15_RESULT');
+  eq(routed.context.patch15SignedStep, -10n);
+  eq(routed.context.patch15Magnitude, 10n);
+  eq(routed.context.patch15LegacyDiagnostic, o.FOUNDATION_DAY + 10n);
+  eq(routed.context.patch15LegacyDiagnosticPreserved, true);
+  eq(routed.context.patch15NegativeDetourUsed, true);
+  eq(routed.context.patch15Output, o.FOUNDATION_DAY - 10n);
+  deepEq(routed.context.branchTrace, [
+    'BOOTSTRAP_VALIDATED',
+    'DISCOVERY_15_NEGATIVE_GATE_ASKS_POSITIVE_SIDE',
+    'PATCH_15_NEGATIVE_GATE_SIGN_DETOUR'
+  ]);
+  eq(routed.context.metrics['patch15.negativeGateDetour.calls'], 1n);
+  eq(routed.context.metrics['patch15.negativeGateDetour.used'], 1n);
+
+  const zero = production.historicGateQuestionThroughMonsterPath(o.FOUNDATION_DAY, o.FOUNDATION_DAY, 0n);
+  eq(zero.result, o.FOUNDATION_DAY);
+  eq(zero.context.patch15NegativeDetourUsed, false);
+  eq(zero.context.metrics['patch15.legacySidePreserved.calls'], 1n);
+  ok(!production.NegativeGateQuestionPatchWrapper.prototype.repair.toString().includes('LEGACY_YEAR_MAX'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 15', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1518,4 +1566,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression intentional de Discovery 15.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa posterior a Patch 15.');

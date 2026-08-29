@@ -185,6 +185,12 @@ class BaseMonsterContext {
     this.legacyGateMagnitude = null;
     this.legacyGateQuestionDay = null;
     this.legacyGateQuestionAskedPositiveSide = false;
+    this.patch15SignedStep = null;
+    this.patch15Magnitude = null;
+    this.patch15LegacyDiagnostic = null;
+    this.patch15LegacyDiagnosticPreserved = false;
+    this.patch15NegativeDetourUsed = false;
+    this.patch15Output = null;
   }
 }
 
@@ -376,6 +382,12 @@ class BaseValidationManager {
     this.requireExactInteger(value);
     if (value < 0n) {
       throw new RangeError('Li magnitude legacy del passu de gate ne posse esser negativ.');
+    }
+  }
+
+  requireDiscovery15Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_15_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un question legacy valid por Patch 15.');
     }
   }
 
@@ -1386,6 +1398,20 @@ function oldGateQuestionDay(n) {
   return FOUNDATION_DAY_OLD + n;
 }
 
+function gateQuestionWithSignedStep(signedStep) {
+  if (typeof signedStep !== 'bigint') {
+    throw new TypeError('Li passu signat reparat de gate deve esser un BigInt exact.');
+  }
+  const magnitude = signedStep < 0n ? -signedStep : signedStep;
+  // Li helper legacy resta intact e es vocat realmen; su question positiv es li scar initial del wrapper.
+  let q = oldGateQuestionDay(magnitude);
+  // Patch 15 devia exclusivmen li passus negativ al latere negativ del Foundation.
+  if (signedStep < 0n) {
+    q = FOUNDATION_DAY_OLD - magnitude;
+  }
+  return q;
+}
+
 
 class LegacyOverwritableOrderMemoryAdapter {
   call(counts, stones) {
@@ -1739,6 +1765,40 @@ class Discovery15NegativeGateQuestionHandler {
     context.status = 'DISCOVERY_15_LEGACY_RESULT';
     this.metricsManager.bump(context, 'discovery15.negativeGatePositiveSide.calls');
     return context.legacyGateQuestionDay;
+  }
+}
+
+class NegativeGateQuestionPatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, signedStep) {
+    this.validationManager.requireDiscovery15Result(context);
+    this.validationManager.requireSignedGateStep(signedStep);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'NegativeGateQuestionPatchWrapper';
+    context.phase = 'PATCH_15_NEGATIVE_GATE_SIGN_DETOUR';
+    context.branchTrace.push('PATCH_15_NEGATIVE_GATE_SIGN_DETOUR');
+    context.patch15SignedStep = signedStep;
+    context.patch15Magnitude = signedStep < 0n ? -signedStep : signedStep;
+    // Li output legacy ja calculat resta visibil quam diagnostic e ne es removet ni mutat.
+    context.patch15LegacyDiagnostic = context.legacyGateQuestionDay;
+    context.patch15LegacyDiagnosticPreserved = true;
+    context.patch15NegativeDetourUsed = signedStep < 0n;
+    context.patch15Output = gateQuestionWithSignedStep(signedStep);
+    if (signedStep >= 0n && context.patch15Output !== context.patch15LegacyDiagnostic) {
+      throw new BootstrapStageError('Patch 15 ne posse mutar li path legacy por zero o passus positiv.');
+    }
+    context.status = 'PATCH_15_RESULT';
+    this.metricsManager.bump(context, 'patch15.negativeGateDetour.calls');
+    if (context.patch15NegativeDetourUsed) {
+      this.metricsManager.bump(context, 'patch15.negativeGateDetour.used');
+    } else {
+      this.metricsManager.bump(context, 'patch15.legacySidePreserved.calls');
+    }
+    return context.patch15Output;
   }
 }
 
@@ -2485,6 +2545,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyGateQuestionAdapter
     );
+    this.negativeGateQuestionPatchWrapper = new NegativeGateQuestionPatchWrapper(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -2890,6 +2954,19 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch15GateQuestion(calculationDay, targetDay, signedStep) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      const result = this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -3040,8 +3117,12 @@ function discovery15LegacyGateQuestionThroughMonsterPath(calculationDay, targetD
   return new BaseMonsterManager().executeDiscovery15GateQuestion(calculationDay, targetDay, signedStep);
 }
 
+function historicGateQuestionThroughMonsterPath(calculationDay, targetDay, signedStep) {
+  return new BaseMonsterManager().executePatch15GateQuestion(calculationDay, targetDay, signedStep);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 15; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 15; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -3099,6 +3180,7 @@ module.exports = Object.freeze({
   WideSelectionPatchWrapper,
   LegacyGateQuestionAdapter,
   Discovery15NegativeGateQuestionHandler,
+  NegativeGateQuestionPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -3152,6 +3234,7 @@ module.exports = Object.freeze({
   wideDetour,
   selectionDispatcherWithWideDetour,
   oldGateQuestionDay,
+  gateQuestionWithSignedStep,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -3182,5 +3265,6 @@ module.exports = Object.freeze({
   discovery14LegacyWideSelectionThroughMonsterPath,
   historicSelectionThroughMonsterPath,
   discovery15LegacyGateQuestionThroughMonsterPath,
+  historicGateQuestionThroughMonsterPath,
   calendarDateSpaghetti
 });

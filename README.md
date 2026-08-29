@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 29 de 55: PATCH 14** e li repository local es GREEN. Li scar `legacySelectionAssumingNLeM(stream,N)` resta intact e continua demonstrar li failure historic por `N>M_OLD`. Li nov dispatcher semantic conserva `patchedSmallPick` por families curt e usa `wideDetour` solmen por families wide.
+Li linea es in **Stage 31 de 55: PATCH 15** e li repository local es GREEN. Li scar `oldGateQuestionDay(n)` resta intact e continua questionar `FOUNDATION_DAY_OLD+n`. Li route semantic nov conserva ti output quam diagnostic, ma por `signedStep<0` usa exclusivmen `FOUNDATION_DAY_OLD-abs(step)`; zero e passus positiv resta sur li path legacy.
 
-In `wideDetour`, li minimal `places` satisfá `M_OLD^places>=N`. Li `digits[j]=ringAnswerAt(stream,j)-1` es leet un unic vez e combinat little-endian quam `wide=1+Σ digits[j]*M_OLD^j`. Rejection posterior avansa solmen ti numero wide combinat per ±1 sur `1..space`; null digit nov es generat pos que rejection ha comensat. Li regression de Discovery 14 es nu verd.
+`gateQuestionWithSignedStep` representa li circumition local e `NegativeGateQuestionPatchWrapper` conserva li scar, li magnitude, li flag de detour e li output final in `BaseMonsterContext`. Li regression de Discovery 15 es nu verd. Null `LEGACY_YEAR_MAX` o code de Patch 16 es anticipat.
 
-Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de Stage 30 o posterior es anticipat.
+Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de Stage 32 o posterior es anticipat.
 
 ## Lingue-fonte canonic
 
@@ -26,7 +26,7 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 14 deve restar verd:
+Omni regressions til Discovery 15 deve restar verd pos Patch 15:
 
 ```text
 npm run test:previous
@@ -35,7 +35,7 @@ npm run test:previous
 Li test focal del patch deve esser verd:
 
 ```text
-npm run test:patch-14
+npm run test:patch-15
 ```
 
 Li suite complet deve esser GREEN:
@@ -164,3 +164,10 @@ Li detour wide deriva `space=M_OLD^places` con li minimal places suficient, lee 
 Li selection curt e wide de Stage 29 resta intact. Ti stage comensa li subsystem de gates con un scar historic mult plu simplic: `oldGateQuestionDay(n)` conosse solmen un magnitude non-negativ e calcula sempre `FOUNDATION_DAY_OLD+n`.
 
 `LegacyGateQuestionAdapter` prende un `signedStep`, perde intentionalmen su signe per convertir it al magnitude e invia ti magnitude al helper legacy. `Discovery15NegativeGateQuestionHandler` registra li signed step original, li magnitude, li die questionat e li fact que un passu negativ finit al latere positiv. Li regression usa `-1`, `-2` e `-10`: li legacy demanda dies pos li Foundation, durante que li semantics normativ exige li dies ante li Foundation. Null correction de Patch 15 es present; li detour negativ resta reservat exclusivmen por Stage 31.
+
+
+## Stage 31 — Patch 15
+
+`oldGateQuestionDay(n)` resta intact quam scar historic e continua adjunter li magnitude al Foundation. `gateQuestionWithSignedStep(signedStep)` voca ti helper ante alcun correction, poy devia exclusivmen passus negativ a `FOUNDATION_DAY_OLD-abs(step)`. Por zero e passus positiv, li valore legacy es retornat sin alteration.
+
+`NegativeGateQuestionPatchWrapper` succede al handler de Discovery 15, conserva li question legacy quam diagnostic, registra li magnitude e li decision de detour, e retorna li question-day semantic reparat. Li test confirma passus `-1`, `-2`, `-10`, `-101`, zero e positives, con contexts invocation-local separat. Null `LEGACY_YEAR_MAX=5781` o filtre de 5778 es addit in ti stage.

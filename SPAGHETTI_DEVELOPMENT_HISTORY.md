@@ -667,3 +667,22 @@ Null circumition existe in Discovery 15. `oldGateQuestionDay(n)` resta li unic h
 ### Pro quo li nov layer ne change altri semantics
 
 Li route de Discovery 15 es separat del selector de Stage 29 e ne muta bowls, stones, latch, answer rings o catalog. Omni scars e patches precedent resta intact. Li unic failure intentional es li comparison final del nov regression contra li question-day negativ normativ. Li correction `FOUNDATION_DAY_OLD-abs(step)` apartene exclusivmen a Patch 15.
+
+
+## Stage 31 — PATCH 15
+
+### Scar historic conservat
+
+`oldGateQuestionDay(n)` resta textualmen e semanticmen intact. It continua acceptar solmen un magnitude non-negativ e retorna sempre `FOUNDATION_DAY_OLD+n`. Li route separat de Discovery 15 continua perder li signe e demonstra li latere positiv fals por passus negativ.
+
+### Circumition exact
+
+`gateQuestionWithSignedStep(signedStep)` deriva li magnitude, voca realmen `oldGateQuestionDay(magnitude)` e usa ti question quam valore inicial. Solmen si `signedStep<0`, it substitue `q` per `FOUNDATION_DAY_OLD-magnitude`. Ti forma conserva exactmen li instruction historic: li helper old ne es reparat, ma li wrapper local compensa li signe perdut.
+
+### Route monster e ownership
+
+`NegativeGateQuestionPatchWrapper` es insertet pos `Discovery15NegativeGateQuestionHandler`. Li context conserva separatmen signed step, magnitude, question legacy diagnostic, flag de preservation, flag de detour negativ e output final. Diagnostics ne es re-leet por un decision futur; li helper reparat deriva li resultat deterministicmen del input del invocation. Contexts de invocations separat ne parti state.
+
+### Pro quo li patch es equivalent
+
+Por `signedStep<0`, li magnitude es `abs(step)` e li die normativ es exactmen `FOUNDATION_DAY_OLD-abs(step)`. Por zero e passus positiv, li specification ne manda null circumition; dunque li wrapper conserva exactmen `oldGateQuestionDay(magnitude)`. Li regression de Discovery 15 deven verd durant que li helper legacy resta divergent directmen. Null `LEGACY_YEAR_MAX`, null limite 5778 e null logic de Patch 16 es present.
