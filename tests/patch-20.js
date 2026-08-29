@@ -132,7 +132,7 @@ assert.deepEqual(sameRouted.result.selectorToken.orderAt46Latch, normativeFirstD
 assert.equal(sameRouted.context.metrics['patch20.targetDetour.calls'], undefined);
 assert.equal(sameRouted.context.patch20GhostIgnoredForSelector, true);
 
-assert.ok(!production.StructureSaucePatchWrapper.prototype.repair.toString().includes('legacyPositiveCompositions'));
+assert.equal('legacyPositiveCompositions' in production, false);
 assert.equal('CutletPartitionPatchWrapper' in production, false);
 assert.equal('legacyNameRowWithRepeats' in production, false);
 
