@@ -1,0 +1,33 @@
+Aşama 46/55 — DISCOVERY 23
+
+Bu paket yalnızca Aşama 46 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_month_length_materialization.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_46_discovery_23.py
+artifacts/stage-46/BASELINE_STAGE_45_GREEN.txt
+artifacts/stage-46/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-46/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_46.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 45 baseline: GREEN, 295/295
+Aşama 46 full suite: 303 test, tam 3 expected subTest failure
+Beklenen depo durumu: EXPECTED_RED
+Legacy API görünümü: BÜTÜN YOLLARIN CONCRETE LİSTESİ
+Small-space force brute: PASS
+Huge-family proof: EXACT OLMAYAN KANITLANMIŞ LOWER BOUND
+300/10 lower bound: 10604499373
+400/10 lower bound: 20661046784
+1000/20 lower bound: 609359740010496
+Safe cap: 100000
+OOM: OLUŞTURULMADI
+VirtualLegacyList: YOK
+Exact DP count/itemAt1 production: YOK
+Patch 24 ve sonrası: YOK

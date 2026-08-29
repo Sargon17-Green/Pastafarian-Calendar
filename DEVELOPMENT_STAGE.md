@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=45
-CURRENT_KIND=PATCH
-CURRENT_PATCH=22
-LAST_COMPLETED_STAGE=45
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=46
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=23
+LAST_COMPLETED_STAGE=46
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=LegacyRepeatedNameGenerator.call_with_ring Aşama 44 raw legacy scar gövdesi byte-for-byte korunur ve call_cutlet_names içinde önce gerçekten çalışıp bad candidate üretir; fallingFactorialDistinct ve partialPermutationUnrank distinct canonicalIndex family'yi exact lexicographic partial-permutation olarak temsil eder; RepeatedNamePatchWrapper aynı bowl 5 seal 22 answer ring üzerinde distinct family count ile current short/wide selection semantiğinden correct rank hesaplar ve correct candidate üretir; bad==correct ise aynı bad tuple nesnesi döner, aksi halde correct döner; semantic state correct result'a güncellenirken raw repeated candidate diagnostic scar olarak kalır
+MONSTER_ARCHITECTURE_GROWTH=LegacyAllMonthLengthWaysAPI bounded month-length composition family'yi historical olarak bütün yolların concrete tuple listesi şeklinde materialize eder; proveLegacyMonthLengthFamilyLowerBound exact DP sayımı yapmadan ilk month_count-1 pozisyon için tamamen legal Cartesian alt-aralık bularak family için kanıtlanmış bir lower bound üretir; LegacyMonthLengthMaterializationAdapter bu proof safe cap'i aştığında OOM oluşturmadan historical materialization kusurunu blocked state olarak kaydeder; real calendar state-machine 300 gün ve 10 ay witness'ını gerçekten çağırır; VirtualLegacyList backend, exact DP count ve itemAt1 henüz production'da yoktur
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

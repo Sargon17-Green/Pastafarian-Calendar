@@ -1957,3 +1957,46 @@ Raw repeated candidate `legacy_name_candidate_indices` ve `patch22_bad_indices` 
 Aşama 44 normatif equality regression korunur. Discovery testinin aynı method içindeki historical-repeat witness assert'i, final semantic result yerine raw `legacy_name_candidate_indices` scar'ını kontrol edecek şekilde zorunlu minimal uyarlanır; aksi halde patch sonrası distinct semantic output ile historical bad scar aynı nesneymiş gibi davranmak gerekirdi.
 
 Patch 23 `VirtualLegacyList` month-length kodu henüz yoktur.
+
+
+## Aşama 46 — Keşif 23: ay-uzunluğu bütün yollarını concrete materialize etmek
+
+### Ne sanıldı
+
+Legacy API'nin “bütün yolların listesi” ifadesi literal Python tuple listesi olarak yorumlandı.
+
+`LegacyAllMonthLengthWaysAPI.list_all_ways` year-day toplamını `month_count` adet 4..123 aralığındaki ay uzunluğuna bölen bütün bounded compositions'ı lexicographic sırada concrete olarak üretir.
+
+Küçük uzaylarda Python force brute ile exact sıra ve içerik doğrulanır.
+
+### Ne keşfedildi
+
+Bu family gerçek calendar sınırları içinde bile astronomik olabilir.
+
+OOM üretmeden bunu kanıtlamak için `proveLegacyMonthLengthFamilyLowerBound` exact family count hesaplamaz. İlk `month_count-1` pozisyon için öyle bir `[prefix_low,prefix_high]` aralığı bulur ki bu aralıktaki bütün Cartesian seçimlerde son ay otomatik olarak 4..123 içinde kalır.
+
+Dolayısıyla:
+
+```text
+(prefix_high-prefix_low+1)^(month_count-1)
+```
+
+gerçek family için matematiksel lower bound'dur.
+
+300 gün / 10 ay, 400 gün / 10 ay ve 1000 gün / 20 ay witness'larında bu lower bound safe concrete-list sınırını aşar. Test-only `BoundedCompositionFamily.count()` yalnız proof kontrolü için exact count'un lower bound'dan küçük olmadığını doğrular; production oracle kullanmaz.
+
+### Safe recovery
+
+Historical materializer production'da aynen concrete-list backend'dir.
+
+Ancak güvenli recovery, kanıtlanmış lower bound 100000'i aştığında allocation başlamadan `LegacyMaterializationTooLargeError` üretir; recursion içinde de aynı cap tekrar kontrol edilir. Böylece Discovery OOM yaratmaz.
+
+`LegacyMonthLengthMaterializationAdapter` bu historical failure'ı invocation-local blocked state olarak kaydeder.
+
+Real calendar path 300 gün / 10 ay witness'ını gerçekten adapter'a geçirir.
+
+### Bilinçli sınır
+
+`VirtualLegacyList`, exact DP count, exact lexicographic `itemAt1` ve `patch23_applied` henüz production'da yoktur.
+
+Patch 24 `legacyChooseEachDaySeparately` kodu da eklenmemiştir.

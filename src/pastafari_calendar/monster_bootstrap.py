@@ -24,6 +24,7 @@ from .legacy_year_cache import LegacyYearNumberOnlyCacheMap
 from .legacy_structure_sauce import LegacyStructureSauceAdapter
 from .legacy_cutlet_partition import LegacyCutletPartitionAdapter
 from .legacy_repeated_names import LegacyRepeatedNameGenerator
+from .legacy_month_length_materialization import LegacyMonthLengthMaterializationAdapter
 
 
 class MonsterError(RuntimeError):
@@ -324,6 +325,15 @@ class MonsterContext:
     patch22_returned_bad: bool = False
     patch22_semantic_indices: tuple[int, ...] | None = None
     patch22_applied: bool = False
+    legacy_month_length_total_days: int | None = None
+    legacy_month_length_month_count: int | None = None
+    legacy_month_length_lower_bound: int | None = None
+    legacy_month_length_prefix_low: int | None = None
+    legacy_month_length_prefix_high: int | None = None
+    legacy_month_length_materialization_blocked: bool = False
+    legacy_month_length_materialized_count: int | None = None
+    legacy_month_length_concrete_ways: tuple[tuple[int, ...], ...] | None = None
+    legacy_month_length_materialization_calls: int = 0
 
 
 class BaseMetrics:
@@ -397,3 +407,4 @@ class MonsterManager:
         self.legacy_structure_sauce = LegacyStructureSauceAdapter()
         self.legacy_cutlet_partition = LegacyCutletPartitionAdapter()
         self.legacy_repeated_names = LegacyRepeatedNameGenerator()
+        self.legacy_month_length_materialization = LegacyMonthLengthMaterializationAdapter()

@@ -1,22 +1,22 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk beşinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin kırk altıncı aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 45/55, `PATCH 22` durumundadır.
+Aşama 46/55, `DISCOVERY 23` durumundadır.
 
-Aşama 44 raw `LegacyRepeatedNameGenerator.call_with_ring` scar'ı aynen kalır ve önce gerçekten `bad` candidate üretir.
+`LegacyAllMonthLengthWaysAPI`, bounded month-length composition family'yi literal concrete “bütün yollar listesi” olarak materialize eder.
 
-Yeni `fallingFactorialDistinct` ve `partialPermutationUnrank` distinct canonicalIndex partial-permutation family'yi exact lexicographic olarak temsil eder.
+Küçük uzaylar Python force brute ile exact doğrulanır.
 
-`RepeatedNamePatchWrapper` aynı bowl 5 / seal 22 answer ring ile correct rank ve correct candidate hesaplar.
+`proveLegacyMonthLengthFamilyLowerBound`, exact DP count kullanmadan tamamen legal bir Cartesian alt-family kurar ve family'nin milyarlarca veya daha fazla eleman içerebildiğini OOM oluşturmadan kanıtlar.
 
-`bad==correct` ise bad aynen döner; farklıysa correct semantic result döner.
+Legacy concrete backend safe recovery sınırını aşan proof gördüğünde allocation başlamadan block olur.
 
-Raw repeated candidate diagnostic state'te kalır, semantic ad indices corrected result olur.
+Real calendar state-machine 300 gün / 10 ay witness'ı ile bu kusurlu API'yi gerçekten çağırır.
 
-Patch 23 `VirtualLegacyList` kodu henüz yoktur.
+Henüz `VirtualLegacyList`, exact DP `count`, exact lexicographic `itemAt1` veya Patch 24 kodu yoktur.
 
 ## Korunan birinci aşama temeli
 
@@ -32,10 +32,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam kırk beşinci aşama paketi:
+Tam kırk altıncı aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 44'te kırmızı olan üç repeated-name witness corrected partial-permutation semantic result ile yeşile dönmelidir.
+Beklenen sonuç: önceki 295 test geçer. Yeni Discovery 23 non-normative kontrolleri geçer; yalnız `test_current_legacy_all_ways_api_cannot_expose_huge_family` testinin üç subTest witness'ı beklenen nedenle kırmızı olur. Depo durumu `EXPECTED_RED` olur.

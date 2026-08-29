@@ -650,7 +650,34 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.repeatedCutletNames.probes",
         )
         local_ctx.status = "ESKİ_TEKRARLI_KÖFTE_ADLARI_HAZIR"
-        local_ctx.phase = "AŞAMA_45_BEKLEME"
+        local_ctx.phase = "ESKİ_AY_UZUNLUĞU_TÜM_YOLLAR_LISTESİ"
+
+    def legacy_month_length_materialization_handler(
+        local_ctx: MonsterContext,
+    ) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        # Keşif 23 için güvenli fakat gerçekçi witness:
+        # 300 günlük bir yılın 10 ay uzunluğuna ayrılması.
+        # Legacy API "bütün yolların concrete listesi" görünümünü korur.
+        # Alt-aile kanıtı materialization başlamadan milyarlarca legal yol
+        # bulunduğunu gösterir; safe recovery OOM oluşmadan eski kusuru kaydeder.
+        manager.legacy_month_length_materialization.call(
+            local_ctx,
+            300,
+            10,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.monthLengthMaterialization.probes",
+        )
+        local_ctx.status = "ESKİ_AY_UZUNLUĞU_TÜM_YOLLAR_LISTESİ_HAZIR"
+        local_ctx.phase = "AŞAMA_46_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -675,6 +702,7 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_ORİJİNAL_TARGET_STRUCTURE_SAUCE", legacy_structure_sauce_handler)
     manager.dispatcher.register("ESKİ_GATE_FİLTRESİZ_KÖFTE_BÖLÜMÜ", legacy_cutlet_partition_handler)
     manager.dispatcher.register("ESKİ_TEKRARLI_KÖFTE_ADLARI", legacy_repeated_cutlet_names_handler)
+    manager.dispatcher.register("ESKİ_AY_UZUNLUĞU_TÜM_YOLLAR_LISTESİ", legacy_month_length_materialization_handler)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -695,6 +723,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
+    manager.dispatcher.dispatch(ctx)
+
     manager.dispatcher.dispatch(ctx)
 
     manager.dispatcher.dispatch(ctx)
