@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <numeric>
 
 namespace pastafari {
 
@@ -1362,6 +1363,59 @@ LegacyMonthLengthWays legacyMaterializeAllMonthLengthWays(int yearLength,
     prefix.reserve(static_cast<std::size_t>(monthCount));
     legacyMaterializeAllMonthLengthWaysRec(yearLength, monthCount, prefix, out);
     return out;
+}
+
+int wrapMonth(int j, int monthCount) {
+    if (monthCount < 1) {
+        throw BaseValidationError("numerus mensium ad circulationem positivus requiritur");
+    }
+    int reduced = (j - 1) % monthCount;
+    if (reduced < 0) {
+        reduced += monthCount;
+    }
+    return reduced + 1;
+}
+
+std::vector<int> legacyChooseEachDaySeparately(
+    const std::vector<int>& lengths,
+    const LegacyAnswerRing& answerStream) {
+    if (lengths.empty()) {
+        throw BaseValidationError("textura legacy saltem unum mensem requirit");
+    }
+    if (answerStream.directionStep != -1 && answerStream.directionStep != 1) {
+        throw BaseValidationError("annulus responsorum texturae legacy gradum invalidum habet");
+    }
+
+    int totalLength = 0;
+    for (const int length : lengths) {
+        if (length < 1) {
+            throw BaseValidationError("longitudo mensis texturae legacy positiva requiritur");
+        }
+        if (totalLength > std::numeric_limits<int>::max() - length) {
+            throw BaseValidationError("summa longitudinum texturae legacy nimis magna est");
+        }
+        totalLength += length;
+    }
+
+    const int monthCount = static_cast<int>(lengths.size());
+    std::vector<int> remaining = lengths;
+    std::vector<int> ghost;
+    ghost.reserve(static_cast<std::size_t>(totalLength));
+    for (int dayPosition = 1; dayPosition <= totalLength; ++dayPosition) {
+        const Integer answer = ringAnswer(answerStream, Integer{dayPosition - 1});
+        int j = regularMod(answer - 1, Integer{monthCount}).convert_to<int>() + 1;
+        int rotations = 0;
+        while (remaining[static_cast<std::size_t>(j - 1)] == 0) {
+            j = wrapMonth(j + 1, monthCount);
+            ++rotations;
+            if (rotations > monthCount) {
+                throw BaseValidationError("textura legacy mensem cum capacitate residua invenire non potuit");
+            }
+        }
+        ghost.push_back(j);
+        --remaining[static_cast<std::size_t>(j - 1)];
+    }
+    return ghost;
 }
 
 VirtualLegacyList::VirtualLegacyList(int yearLength, int monthCount)
@@ -4427,6 +4481,50 @@ void BaseValidationManager::requirePatch23MonthLengthMaterializationReady(
     }
 }
 
+void BaseValidationManager::requireDiscovery24MonthWeavingReady(
+    const BaseMonsterContext& ctx) const {
+    if (!ctx.discovery24MonthWeavingReady) {
+        throw BaseValidationError("DISCOVERY 24 nondum paratus est");
+    }
+    if (!ctx.discovery24Patch20Prepared) {
+        throw BaseValidationError("DISCOVERY 24 sauce structuralem PATCH 20 paratam requirit");
+    }
+    if (!ctx.discovery24Patch23Prepared) {
+        throw BaseValidationError("DISCOVERY 24 backend mensium PATCH 23 paratum requirit");
+    }
+    if (ctx.discovery24MonthLengths.empty()) {
+        throw BaseValidationError("DISCOVERY 24 longitudines mensium vacuas recusat");
+    }
+    if (ctx.discovery24AnswerRing.directionStep != -1 &&
+        ctx.discovery24AnswerRing.directionStep != 1) {
+        throw BaseValidationError("DISCOVERY 24 annulum responsorum invalidum habet");
+    }
+    if (!ctx.discovery24MultiplicitiesPreserved) {
+        throw BaseValidationError("legacyChooseEachDaySeparately multiplicities mensium servare debet");
+    }
+    if (!ctx.discovery24LegacyUsedAsSemanticOutput) {
+        throw BaseValidationError("DISCOVERY 24 ghost legacy ad output activum pervenire debet");
+    }
+    if (ctx.discovery24SemanticWeaving != ctx.discovery24LegacyGhost) {
+        throw BaseValidationError("DISCOVERY 24 output activus a ghost legacy separari nondum debet");
+    }
+    int totalLength = 0;
+    for (const int length : ctx.discovery24MonthLengths) {
+        if (length < LEGACY_MONTH_LENGTH_MIN || length > LEGACY_MONTH_LENGTH_MAX) {
+            throw BaseValidationError("DISCOVERY 24 longitudo mensis extra fines historicos est");
+        }
+        totalLength += length;
+    }
+    if (ctx.discovery24LegacyGhost.size() != static_cast<std::size_t>(totalLength)) {
+        throw BaseValidationError("DISCOVERY 24 ghost longitudinem anni localis non servat");
+    }
+    if (ctx.discovery24WholeWeavingOrderLegal !=
+        (ctx.discovery24FirstOccurrenceOrderPreserved &&
+         ctx.discovery24LastOccurrenceOrderPreserved)) {
+        throw BaseValidationError("DISCOVERY 24 status ordinis texturae internus discrepat");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -4826,6 +4924,78 @@ MonthLengthMaterializationPatchWrapper::repair(
         true,
         virtualCount == legacyInspection.exactFamilyCount,
         true
+    };
+}
+
+LegacyMonthWeavingInspection LegacyMonthWeavingAdapter::call(
+    const std::vector<int>& lengths,
+    const Patch11LatchedOrderSauceResult& semanticStructureSauce) const {
+    if (lengths.empty()) {
+        throw BaseValidationError("adapter texturae mensium longitudines vacuas recusat");
+    }
+    const int nextBowl = nextBowlThroughOrderAt46Latch(
+        semanticStructureSauce.orderAt46Latch,
+        4);
+    const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
+        semanticStructureSauce.finalBowls,
+        4,
+        nextBowl,
+        32);
+    const std::vector<int> ghost = legacyChooseEachDaySeparately(lengths, stream);
+
+    const std::size_t monthCount = lengths.size();
+    std::vector<int> observedCounts(monthCount, 0);
+    std::vector<int> remaining = lengths;
+    std::vector<bool> opened(monthCount, false);
+    std::vector<int> firstOrder;
+    std::vector<int> lastOrder;
+    firstOrder.reserve(monthCount);
+    lastOrder.reserve(monthCount);
+    bool idsValid = true;
+    for (const int monthId : ghost) {
+        if (monthId < 1 || monthId > static_cast<int>(monthCount)) {
+            idsValid = false;
+            continue;
+        }
+        const std::size_t index = static_cast<std::size_t>(monthId - 1);
+        ++observedCounts[index];
+        if (!opened[index]) {
+            opened[index] = true;
+            firstOrder.push_back(monthId);
+        }
+        --remaining[index];
+        if (remaining[index] == 0) {
+            lastOrder.push_back(monthId);
+        }
+    }
+
+    bool multiplicitiesPreserved = idsValid && ghost.size() == static_cast<std::size_t>(
+        std::accumulate(lengths.begin(), lengths.end(), 0));
+    for (std::size_t i = 0; i < monthCount; ++i) {
+        if (observedCounts[i] != lengths[i] || remaining[i] != 0) {
+            multiplicitiesPreserved = false;
+        }
+    }
+
+    bool firstOrderPreserved = firstOrder.size() == monthCount;
+    bool lastOrderPreserved = lastOrder.size() == monthCount;
+    for (std::size_t i = 0; i < monthCount; ++i) {
+        const int expected = static_cast<int>(i + 1);
+        if (!firstOrderPreserved || firstOrder[i] != expected) {
+            firstOrderPreserved = false;
+        }
+        if (!lastOrderPreserved || lastOrder[i] != expected) {
+            lastOrderPreserved = false;
+        }
+    }
+
+    return LegacyMonthWeavingInspection{
+        stream,
+        ghost,
+        multiplicitiesPreserved,
+        firstOrderPreserved,
+        lastOrderPreserved,
+        firstOrderPreserved && lastOrderPreserved
     };
 }
 
@@ -6226,6 +6396,35 @@ void Patch23MonthLengthMaterializationHandler::handle(
     validator.requirePatch23MonthLengthMaterializationReady(ctx);
 }
 
+void Discovery24MonthWeavingHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyMonthWeavingAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    const LegacyMonthWeavingInspection inspection = adapter.call(
+        ctx.discovery24MonthLengths,
+        ctx.discovery24SemanticStructureSauce);
+    ctx.discovery24AnswerRing = inspection.answerRing;
+    ctx.discovery24LegacyGhost = inspection.ghost;
+    ctx.discovery24SemanticWeaving = inspection.ghost;
+    ctx.discovery24MultiplicitiesPreserved = inspection.multiplicitiesPreserved;
+    ctx.discovery24FirstOccurrenceOrderPreserved =
+        inspection.firstOccurrenceOrderPreserved;
+    ctx.discovery24LastOccurrenceOrderPreserved =
+        inspection.lastOccurrenceOrderPreserved;
+    ctx.discovery24WholeWeavingOrderLegal = inspection.wholeWeavingOrderLegal;
+    ctx.discovery24LegacyUsedAsSemanticOutput = true;
+    ctx.discovery24MonthWeavingReady = true;
+    ctx.currentHandler = "Discovery24MonthWeavingHandler";
+    ctx.phase = "DISCOVERY_24_MONTH_WEAVING_DAY_BY_DAY";
+    ctx.status = ctx.discovery24WholeWeavingOrderLegal
+        ? "LEGACY_DAY_BY_DAY_WEAVING_ACCIDENTALLY_ORDERED"
+        : "LEGACY_DAY_BY_DAY_WEAVING_IGNORES_WHOLE_ORDER";
+    ctx.branchTrace.push_back("DISCOVERY24:LEGACY_CHOOSE_EACH_DAY_SEPARATELY_ACTIVE");
+    metrics.bump(ctx, "discovery24.month.weaving.legacy.calls");
+    validator.requireDiscovery24MonthWeavingReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -7015,6 +7214,16 @@ void BaseDispatcher::dispatchPatchedMonthLengthMaterialization(
         wrapper,
         validator,
         metrics);
+}
+
+void BaseDispatcher::dispatchDiscovery24MonthWeaving(
+    BaseMonsterContext& ctx,
+    const Discovery24MonthWeavingHandler& handler,
+    const LegacyMonthWeavingAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:DISCOVERY24_MONTH_WEAVING");
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 void BaseDispatcher::dispatchPatchedYear5000Tie(
@@ -8037,6 +8246,97 @@ BaseMonsterManager::executeUnpatchedDiscovery23MonthLengthMaterializationDiagnos
         false,
         false,
         ctx.discovery23MonthLengthMaterializationReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+LegacyMonthWeavingReport BaseMonsterManager::executeDiscovery24MonthWeaving(
+    const LegacyYearAnchor& anchor,
+    const Integer& originalTargetDay,
+    const Integer& calculationDay,
+    const std::vector<int>& monthLengths) const {
+    if (monthLengths.size() < 3 || monthLengths.size() > 47) {
+        throw BaseValidationError("DISCOVERY 24 inter tres et quadraginta septem menses requirit");
+    }
+    int localYearLength = 0;
+    for (const int length : monthLengths) {
+        if (length < LEGACY_MONTH_LENGTH_MIN || length > LEGACY_MONTH_LENGTH_MAX) {
+            throw BaseValidationError("DISCOVERY 24 longitudines mensium inter quattuor et centum viginti tres requirit");
+        }
+        if (localYearLength > REAL_YEAR_MAX_PATCH - length) {
+            throw BaseValidationError("DISCOVERY 24 summa longitudinum mensium limitem anni excedit");
+        }
+        localYearLength += length;
+    }
+
+    const LegacyStructureSauceReport structure = executeDiscovery20StructureSauce(
+        anchor,
+        originalTargetDay,
+        calculationDay);
+    if (!structure.ready || !structure.patch20Applied ||
+        structure.patch20GhostReachedSelector) {
+        throw BaseValidationError("DISCOVERY 24 PATCH 20 sauce semanticam paratam requirit");
+    }
+
+    const LegacyMonthLengthMaterializationAdapter materializationAdapter;
+    const MonthLengthMaterializationPatchWrapper materializationWrapper;
+    const LegacyMonthLengthMaterializationInspection legacyInspection =
+        materializationAdapter.inspect(
+            localYearLength,
+            static_cast<int>(monthLengths.size()));
+    const MonthLengthMaterializationPatchDecision materializationDecision =
+        materializationWrapper.repair(
+            localYearLength,
+            static_cast<int>(monthLengths.size()),
+            legacyInspection);
+    if (!materializationDecision.patchApplied ||
+        !materializationDecision.legacyExecuted ||
+        !materializationDecision.virtualBackendUsed ||
+        !materializationDecision.countMatchesLegacyProof) {
+        throw BaseValidationError("DISCOVERY 24 PATCH 23 backend virtualem paratum requirit");
+    }
+
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery24MonthLengths = monthLengths;
+    ctx.discovery24SemanticStructureSauce = structure.semanticStructureSauce;
+    ctx.discovery24Patch20Prepared = structure.patch20Applied;
+    ctx.discovery24Patch23Prepared = materializationDecision.patchApplied;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyMonthWeavingAdapter adapter;
+    const Discovery24MonthWeavingHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchDiscovery24MonthWeaving(
+        ctx,
+        handler,
+        adapter,
+        validator,
+        metrics);
+
+    return LegacyMonthWeavingReport{
+        calculationDay,
+        originalTargetDay,
+        structure.resolvedYear,
+        ctx.discovery24MonthLengths,
+        ctx.discovery24AnswerRing,
+        ctx.discovery24LegacyGhost,
+        ctx.discovery24SemanticWeaving,
+        ctx.discovery24Patch20Prepared,
+        ctx.discovery24Patch23Prepared,
+        ctx.discovery24MultiplicitiesPreserved,
+        ctx.discovery24FirstOccurrenceOrderPreserved,
+        ctx.discovery24LastOccurrenceOrderPreserved,
+        ctx.discovery24WholeWeavingOrderLegal,
+        ctx.discovery24LegacyUsedAsSemanticOutput,
+        ctx.discovery24MonthWeavingReady,
         ctx.phase,
         ctx.status,
         ctx.currentHandler,

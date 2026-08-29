@@ -943,3 +943,37 @@ Ranks 0 et `count+1` recusantur. Tres witness enormes deinde count et `itemAt1` 
 ### Quod consulto nondum adest
 
 Nullus `legacyChooseEachDaySeparately`, nullus ghost electionis mensis die-per-diem, nullus `DPUnrankLegalWeaving`, nullus DISCOVERY 24 et nullus PATCH 24 praemature adest. Gradus 48 debet DISCOVERY 24 tantum introducere.
+
+## DISCOVERY 24 — mensis singulis diebus separatim eligitur
+
+Gradus 48 assumptionem historicam sequentem introducit sine correctione futura. `legacyChooseEachDaySeparately(lengths, answerStream)` longitudines iam paratas accipit et pro omni die unum answer ex eodem annulo legit. Answer in numerum mensium modulo regulari redigitur; si mensis electus capacitatem iam exhausit, `wrapMonth` circulariter ad mensem proximum cum loco residuo transit.
+
+Helper semper terminat et multiplicities exacte servat. Tamen electionem die-per-diem facit. Nullam familiam texturarum integrarum numerat, nullum rank texturae integrae eligit et duas leges ordinis historice ignorat: prima apparitio mensium debet ordine `1,2,...,m` fieri, et ultima apparitio eodem ordine claudi debet.
+
+`LegacyMonthWeavingAdapter` sauce structuralem semanticam PATCH 20 accipit. Successor crateris 4 ex `orderAt46Latch` sumitur, deinde annulus responsorum cum cratere 4 et sigillo 32 construitur. `Discovery24MonthWeavingHandler` ghost legacy servat et eundem ghost intentionaliter ut `semanticWeaving` huius gradus promovet. Ita vitium non est diagnosticum mortuum: output activus DISCOVERY 24 vere ab electione locali legacy regitur.
+
+Ante hanc viam, manager stratum PATCH 23 super summam longitudinum localium et numerum mensium realiter attingit: contractus materializationis legacy currit et `VirtualLegacyList` backend paratus confirmatur. Correctio texturationis tamen nondum adest.
+
+### Witness C++
+
+Tres calculation-gates cum longitudinibus `[4,4,4]` adhibentur. Sauce structurale venit ex primo die anni 5000 eiusdem calculation day. In omnibus tribus multiplicities servantur, sed ordines primae et ultimae apparitionis infringuntur et output activus ab oracle C++ test-only normativo differt:
+
+```text
+porta 0:
+legacy=[3,2,1,3,2,1,3,2,1,3,2,1]
+normativus=[1,2,3,1,3,2,1,2,1,3,2,3]
+
+porta 2:
+legacy=[1,3,2,1,3,2,1,3,2,1,3,2]
+normativus=[1,2,1,1,1,2,3,3,3,2,2,3]
+
+porta 3:
+legacy=[2,3,1,2,3,1,2,3,1,2,3,1]
+normativus=[1,2,1,2,2,1,3,3,1,3,2,3]
+```
+
+Annuli responsorum productionis congruunt exacte cum `askBowl(...,4,32)` oracle C++ test-only. Regresso Gradus 48 consulto `EXIT_CODE=1` cum tribus discrepantiis exactis reddit. Bootstrap et omnes regressiones Graduum 1–47 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus rank texturae integrae computatur, nullus DP unrank texturae legalis adest, nullus wrapper correctionis texturationis et nullus PATCH 24 praemature additus est. Gradus 49 debet cicatricem `legacyChooseEachDaySeparately` vere currere sinere sed potestatem semanticam eius restringere. Nullus codex PATCH 25 adest.

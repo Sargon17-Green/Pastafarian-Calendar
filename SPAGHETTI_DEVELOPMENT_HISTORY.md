@@ -1615,3 +1615,75 @@ Compilator `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap et regress
 ### Audit et limes proximus
 
 `SourceLanguageCatalog` et reference C++ manent byte pro byte intacti. Probationes Graduum 42–45 non mutantur. Test Gradus 46 mutatur solum ut post PATCH 23 simul cicatricem raw et backend semanticum virtualem comprobet. Nullus runtime externus adhibetur. Nullus `legacyChooseEachDaySeparately`, nullus `DPUnrankLegalWeaving`, nullus DISCOVERY 24 et nullus PATCH 24 praemature adest. Gradus proximus est 48/55 — DISCOVERY 24 tantum.
+
+## Gradus 48 — DISCOVERY 24: textura mensium per electiones locales diem singillatim
+
+### Quid putabatur
+
+Postquam PATCH 23 familiam longitudinum mensium sine materializatione enormi exponere potuit, assumptio vetus erat non opus esse totam texturam anni ut unum obiectum combinatorium eligere. Putabatur satis esse unum mensem pro singulo die ex answer ring eligere et tantum cavere ne mensis plus vicibus quam longitudo sua adhiberetur.
+
+### Cicatrix introducta
+
+Addita est functio historica:
+
+```text
+legacyChooseEachDaySeparately(lengths, answerStream)
+```
+
+Pro die positione quaque functio `ringAnswer` legit, answer modulo numero mensium ad ID `1..m` redigit, et si mensis iam plenus est per `wrapMonth` circulariter ad proximum mensem capacitatem residuam habentem movetur. Deinde ID mensis in ghost scribitur et remaining illius mensis uno minuitur.
+
+Hoc corpus productionis vere currit. `LegacyMonthWeavingAdapter` annulum ex sauce structurali PATCH 20 construit: crater 4, successor ex `orderAt46Latch`, sigillum 32. `Discovery24MonthWeavingHandler` ghost non relegat ad telemetry; eundem ghost ut output semanticum huius gradus servat.
+
+### Connexio ad cicatrices priores
+
+Manager ante texturam:
+
+1. `executeDiscovery20StructureSauce` vocat et sauce semanticam PATCH 20 requirit;
+2. super summam longitudinum localium et numerum mensium `LegacyMonthLengthMaterializationAdapter` realiter attingit;
+3. `MonthLengthMaterializationPatchWrapper` backend `VirtualLegacyList` PATCH 23 paratum confirmat;
+4. demum `Discovery24MonthWeavingHandler` ad electionem diem-per-diem transit.
+
+Ita Gradus 48 neque sauce veterem PATCH 20 neque backend concretum Gradus 46 neque virtualem PATCH 23 bypass-at.
+
+### Quid repertum est
+
+Helper localis multiplicities exacte servat, sed familia normativa texturae duas condiciones globales imponit. Prima apparitio mensium debet ordine canonico crescere; ultima apparitio quoque eodem ordine claudi debet. Electio localis has condiciones non novit.
+
+Tres witness C++ cum longitudinibus `[4,4,4]` et calculation-gates `0,2,3` defectum exponunt:
+
+```text
+0 -> legacy [3,2,1,3,2,1,3,2,1,3,2,1]
+     normative [1,2,3,1,3,2,1,2,1,3,2,3]
+
+2 -> legacy [1,3,2,1,3,2,1,3,2,1,3,2]
+     normative [1,2,1,1,1,2,3,3,3,2,2,3]
+
+3 -> legacy [2,3,1,2,3,1,2,3,1,2,3,1]
+     normative [1,2,1,2,2,1,3,3,1,3,2,3]
+```
+
+In tribus casibus ordines primae apparitionis atque ultimae apparitionis legacy falsi sunt. Annulus productionis exacta paritate cum `askBowl(structureSauce,4,32)` oracle C++ test-only comprobatur. Regressio nova tres discrepantias exactas invenit et consulto exitum 1 reddit.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt:
+
+```text
+wrapMonth
+legacyChooseEachDaySeparately
+LegacyMonthWeavingInspection
+LegacyMonthWeavingReport
+LegacyMonthWeavingAdapter
+Discovery24MonthWeavingHandler
+BaseValidationManager::requireDiscovery24MonthWeavingReady
+BaseDispatcher::dispatchDiscovery24MonthWeaving
+BaseMonsterManager::executeDiscovery24MonthWeaving
+```
+
+Contextus invocation-local separat longitudines, sauce structuralem semanticam, answer ring, ghost, output semanticum et status ordinum. Validator non corrigit ordinem: tantum confirmat PATCH 20 et PATCH 23 parata esse, multiplicities servari et ghost ipsum adhuc output activum esse.
+
+### Probationes et limes proximus
+
+Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap transit. Regressiones 1–20 et 21–35 transeunt. Regressiones 36–46 transeunt; Gradus 47 separatim transit postquam series longa limitem temporis instrumenti attingit. Ergo omnes regressiones 1–47 sunt virides in eodem tree. Regressio Gradus 48 sola EXPECTED_RED est cum tribus discrepantiis et `EXIT_CODE=1`.
+
+`SourceLanguageCatalog`, header catalogi et ambo fasciculi reference C++ manent byte pro byte intacti. Nullus runtime externus adhibetur. Nullus rank texturae integrae, nullus DP-unrank legalis, nullus wrapper PATCH 24 et nullus codex PATCH 25 praemature adest. Gradus proximus est 49/55 — PATCH 24 tantum.
