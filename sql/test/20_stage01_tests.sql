@@ -8,9 +8,9 @@ CREATE TEMP TABLE stage01_assertions (
 INSERT INTO stage01_assertions VALUES
 ('கறி-துண்டுப் பெயர்களின் எண்ணிக்கை', (SELECT count(*)=17 FROM pastafari_sql_tamil.source_language_catalog WHERE category='CUTLET')),
 ('மாதப் பெயர்களின் எண்ணிக்கை', (SELECT count(*)=47 FROM pastafari_sql_tamil.source_language_catalog WHERE category='MONTH')),
-('கறி-துண்டு canonicalIndex வரம்பு', (SELECT min(canonical_index)=1 AND max(canonical_index)=17 AND count(DISTINCT canonical_index)=17 FROM pastafari_sql_tamil.source_language_catalog WHERE category='CUTLET')),
+('கறித்துண்டு canonicalIndex வரம்பு', (SELECT min(canonical_index)=1 AND max(canonical_index)=17 AND count(DISTINCT canonical_index)=17 FROM pastafari_sql_tamil.source_language_catalog WHERE category='CUTLET')),
 ('மாத canonicalIndex வரம்பு', (SELECT min(canonical_index)=1 AND max(canonical_index)=47 AND count(DISTINCT canonical_index)=47 FROM pastafari_sql_tamil.source_language_catalog WHERE category='MONTH')),
-('மூல மொழி அட்டவணை மாற்றமுடியாத view', pg_relation_is_updatable('pastafari_sql_tamil.source_language_catalog'::regclass,true)=0),
+('மூல மொழி அட்டவணை மாற்றமுடியாத பார்வை', pg_relation_is_updatable('pastafari_sql_tamil.source_language_catalog'::regclass,true)=0),
 ('கோதுமை பெயர் நிலை', pastafari_sql_tamil.source_name('CUTLET',12)='கோதுமை'),
 ('உப்பு பெயர் நிலை', pastafari_sql_tamil.source_name('MONTH',44)='உப்பு');
 
@@ -27,21 +27,30 @@ INSERT INTO stage01_assertions VALUES
 ('ஒரே நாளின் தூரம் ஒன்று', (pastafari_sql_tamil_test.work_counts(pastafari_sql_tamil_test.foundation_day(),pastafari_sql_tamil_test.foundation_day())).distance=1),
 ('ஒரே நாளின் திசை இரண்டு', (pastafari_sql_tamil_test.work_counts(pastafari_sql_tamil_test.foundation_day(),pastafari_sql_tamil_test.foundation_day())).direction=2);
 
+
+INSERT INTO stage01_assertions VALUES
+('M இன் துல்லிய எண் வகை', pg_typeof(pastafari_sql_tamil_test.m())='numeric'::regtype),
+('பெரும் நேர்மறை முழு வகுத்தல் துல்லியம்', pastafari_sql_tamil_test.floor_div(pastafari_sql_tamil_test.m()*pastafari_sql_tamil_test.m()+pastafari_sql_tamil_test.m()-1,pastafari_sql_tamil_test.m())=pastafari_sql_tamil_test.m()),
+('பெரும் எதிர்மறை முழு வகுத்தல் துல்லியம்', pastafari_sql_tamil_test.floor_div(-(pastafari_sql_tamil_test.m()*pastafari_sql_tamil_test.m()+1),pastafari_sql_tamil_test.m())=-(pastafari_sql_tamil_test.m()+1)),
+('எதிர்மறை மீதி யூக்ளிடியன்', pastafari_sql_tamil_test.regular_mod(-1,pastafari_sql_tamil_test.m())=pastafari_sql_tamil_test.m()-1),
+('மிகப் பெரிய SAVE துல்லியம்', pastafari_sql_tamil_test.save_value(pastafari_sql_tamil_test.m()*pastafari_sql_tamil_test.m()+1)=1),
+('பெரும் இருபடைக் குணகத் துல்லியம்', pastafari_sql_tamil_test.binomial_exact(100,50)=100891344545564193334812497256::numeric);
+
 INSERT INTO stage01_assertions VALUES
 ('கல் அட்டவணை நாற்பத்தாறு வரிகள்', (SELECT count(*)=46 FROM pastafari_sql_tamil_test.stone_table)),
 ('முதல் கல் நிலை', (pastafari_sql_tamil_test.stone_row(1)).wheat=17 AND (pastafari_sql_tamil_test.stone_row(1)).barley=29 AND (pastafari_sql_tamil_test.stone_row(1)).salt=43 AND (pastafari_sql_tamil_test.stone_row(1)).bitter=71 AND (pastafari_sql_tamil_test.stone_row(1)).red=101),
-('முதல் permutation', pastafari_sql_tamil_test.bowl_order_from_number(1)=ARRAY[1,2,3,4,5,6]),
-('எழுநூற்று இருபதாவது permutation', pastafari_sql_tamil_test.bowl_order_from_number(720)=ARRAY[6,5,4,3,2,1]),
-('falling factorial துல்லியம்', pastafari_sql_tamil_test.falling_factorial(5,3)=60),
-('binomial துல்லியம்', pastafari_sql_tamil_test.binomial_exact(5,2)=10),
-('bounded composition எண்ணிக்கை', pastafari_sql_tamil_test.bounded_count(6,2,1,5)=5),
-('bounded composition முதல் unrank', pastafari_sql_tamil_test.unrank_bounded_composition(6,2,1,5,1)=ARRAY[1,5]),
-('bounded composition கடைசி unrank', pastafari_sql_tamil_test.unrank_bounded_composition(6,2,1,5,5)=ARRAY[5,1]),
-('கட்டாய உள் எல்லையுள்ள partition எண்ணிக்கை', pastafari_sql_tamil_test.cutlet_partition_count(6,3,0,3,false)=4),
-('கட்டாய உள் எல்லையுள்ள முதல் partition', pastafari_sql_tamil_test.unrank_cutlet_partition(6,3,3,1)=ARRAY[1,2,3]),
-('கட்டாய உள் எல்லையுள்ள கடைசி partition', pastafari_sql_tamil_test.unrank_cutlet_partition(6,3,3,4)=ARRAY[3,2,1]);
+('முதல் வரிசைமாற்றம்', pastafari_sql_tamil_test.bowl_order_from_number(1)=ARRAY[1,2,3,4,5,6]),
+('எழுநூற்று இருபதாவது வரிசைமாற்றம்', pastafari_sql_tamil_test.bowl_order_from_number(720)=ARRAY[6,5,4,3,2,1]),
+('இறங்கும் காரணித் தொடரின் துல்லியம்', pastafari_sql_tamil_test.falling_factorial(5,3)=60),
+('இருபடைக் குணகத் துல்லியம்', pastafari_sql_tamil_test.binomial_exact(5,2)=10),
+('வரம்புள்ள பகுப்பின் எண்ணிக்கை', pastafari_sql_tamil_test.bounded_count(6,2,1,5)=5),
+('வரம்புள்ள பகுப்பின் முதல் தரவரிசைத் திறப்பு', pastafari_sql_tamil_test.unrank_bounded_composition(6,2,1,5,1)=ARRAY[1,5]),
+('வரம்புள்ள பகுப்பின் கடைசி தரவரிசைத் திறப்பு', pastafari_sql_tamil_test.unrank_bounded_composition(6,2,1,5,5)=ARRAY[5,1]),
+('கட்டாய உள் எல்லையுள்ள பிரிப்பின் எண்ணிக்கை', pastafari_sql_tamil_test.cutlet_partition_count(6,3,0,3,false)=4),
+('கட்டாய உள் எல்லையுள்ள முதல் பிரிப்பு', pastafari_sql_tamil_test.unrank_cutlet_partition(6,3,3,1)=ARRAY[1,2,3]),
+('கட்டாய உள் எல்லையுள்ள கடைசி பிரிப்பு', pastafari_sql_tamil_test.unrank_cutlet_partition(6,3,3,4)=ARRAY[3,2,1]);
 
-TRUNCATE TABLE pastafari_sql_tamil_test.weave_memo;
+TRUNCATE TABLE pastafari_sql_tamil_test.weave_future_memo, pastafari_sql_tamil_test.weave_family_registry RESTART IDENTITY;
 
 INSERT INTO stage01_assertions VALUES
 ('2,2 நெய்தல்களின் எண்ணிக்கை', pastafari_sql_tamil_test.weave_count(ARRAY[2,2],ARRAY[2,2],0,0)=2),
@@ -49,9 +58,9 @@ INSERT INTO stage01_assertions VALUES
 ('2,2 இரண்டாம் நெய்தல்', pastafari_sql_tamil_test.unrank_weaving(ARRAY[2,2],2)=ARRAY[1,2,1,2]);
 
 INSERT INTO stage01_assertions VALUES
-('குறுகிய தேர்வு முன்னோக்கி rejection', pastafari_sql_tamil_test.choose_rank_short(ROW(pastafari_sql_tamil_test.m(),1)::pastafari_sql_tamil_test.answer_stream,10)=1),
-('குறுகிய தேர்வு பின்னோக்கி rejection', pastafari_sql_tamil_test.choose_rank_short(ROW(pastafari_sql_tamil_test.m(),-1)::pastafari_sql_tamil_test.answer_stream,10)=10),
-('wide தேர்வு வரம்பு', pastafari_sql_tamil_test.choose_rank_wide(ROW(pastafari_sql_tamil_test.m(),1)::pastafari_sql_tamil_test.answer_stream,pastafari_sql_tamil_test.m()+1) BETWEEN 1 AND pastafari_sql_tamil_test.m()+1);
+('குறுகிய தேர்வின் முன்னோக்கி நிராகரிப்பு', pastafari_sql_tamil_test.choose_rank_short(ROW(pastafari_sql_tamil_test.m(),1)::pastafari_sql_tamil_test.answer_stream,10)=1),
+('குறுகிய தேர்வின் பின்னோக்கி நிராகரிப்பு', pastafari_sql_tamil_test.choose_rank_short(ROW(pastafari_sql_tamil_test.m(),-1)::pastafari_sql_tamil_test.answer_stream,10)=10),
+('விரிவான தேர்வு வரம்பு', pastafari_sql_tamil_test.choose_rank_wide(ROW(pastafari_sql_tamil_test.m(),1)::pastafari_sql_tamil_test.answer_stream,pastafari_sql_tamil_test.m()+1) BETWEEN 1 AND pastafari_sql_tamil_test.m()+1);
 
 WITH s AS (
     SELECT pastafari_sql_tamil_test.sauce(pastafari_sql_tamil_test.foundation_day(),pastafari_sql_tamil_test.foundation_day()) AS a,
@@ -71,12 +80,12 @@ SELECT '46வது துளியின் கடைசி கிண்ணத�
 FROM q;
 
 INSERT INTO stage01_assertions VALUES
-('production தொடக்க நுழைவு முடிவு வழங்காது', (SELECT count(*)=0 FROM pastafari_sql_tamil.calendar_date_spaghetti(0,0))),
-('தனி context உள்ளீடு தக்கவைக்கிறது', (pastafari_sql_tamil.new_monster_context(11,22)).calculation_day=11 AND (pastafari_sql_tamil.new_monster_context(11,22)).target_day=22),
-('அடிப்படை dispatcher validation செய்கிறது', (pastafari_sql_tamil.base_dispatch(pastafari_sql_tamil.new_monster_context(11,22))).status='READY');
+('முதன்மை தொடக்க நுழைவு முடிவு வழங்காது', (SELECT count(*)=0 FROM pastafari_sql_tamil.calendar_date_spaghetti(0,0))),
+('தனி அழைப்புச் சூழல் உள்ளீட்டைத் தக்கவைக்கிறது', (pastafari_sql_tamil.new_monster_context(11,22)).calculation_day=11 AND (pastafari_sql_tamil.new_monster_context(11,22)).target_day=22),
+('அடிப்படை வழிமாற்றி சரிபார்க்கிறது', (pastafari_sql_tamil.base_dispatch(pastafari_sql_tamil.new_monster_context(11,22))).status='READY');
 
 INSERT INTO stage01_assertions
-SELECT 'இந்த வரியின் எல்லா function-களும் SQL மொழியிலேயே உள்ளன', count(*)=0
+SELECT 'இந்த வரியின் எல்லாச் செயற்கூறுகளும் SQL மொழியிலேயே உள்ளன', count(*)=0
 FROM pg_proc p
 JOIN pg_namespace n ON n.oid=p.pronamespace
 JOIN pg_language l ON l.oid=p.prolang
@@ -84,15 +93,38 @@ WHERE n.nspname IN ('pastafari_sql_tamil','pastafari_sql_tamil_test')
   AND l.lanname<>'sql';
 
 INSERT INTO stage01_assertions
-SELECT 'production நுழைவு test oracle-ஐ அழைக்காது',
+SELECT 'முதன்மை நுழைவு சோதனை ஒப்புநிலையை அழைக்காது',
        position('pastafari_sql_tamil_test' in pg_get_functiondef('pastafari_sql_tamil.calendar_date_spaghetti(numeric,numeric)'::regprocedure))=0;
 
 INSERT INTO stage01_assertions
-SELECT 'எதிர்கால legacy மற்றும் patch பெயர்கள் production-இல் இல்லை', count(*)=0
+SELECT 'எதிர்கால பழைய வழி மற்றும் திருத்தப் பெயர்கள் முதன்மைச் செயலாக்கத்தில் இல்லை', count(*)=0
 FROM pg_proc p
 JOIN pg_namespace n ON n.oid=p.pronamespace
 WHERE n.nspname='pastafari_sql_tamil'
-  AND p.proname ~ '(old|legacy|patch|detour|ghost|latch)';
+  AND p.proname ~ '(^|_)(old|legacy|patch|detour|ghost|latch)($|_)';
+
+
+INSERT INTO stage01_assertions
+WITH funcs AS MATERIALIZED (
+  SELECT p.oid
+  FROM pg_proc p
+  JOIN pg_namespace n ON n.oid=p.pronamespace
+  WHERE n.nspname='pastafari_sql_tamil_test' AND p.prokind='f'
+)
+SELECT 'நெறிமுறை SQL-இல் மிதவை கணக்குப் பாதை இல்லை', count(*)=0
+FROM funcs
+WHERE lower(pg_get_functiondef(oid)) ~ '(float4|float8|double precision|(^|[^a-z_])real([^a-z_]|$)|power[[:space:]]*\(|ln[[:space:]]*\(|log[[:space:]]*\(|exp[[:space:]]*\(|floor[[:space:]]*\()';
+
+INSERT INTO stage01_assertions
+WITH funcs AS MATERIALIZED (
+  SELECT p.oid
+  FROM pg_proc p
+  JOIN pg_namespace n ON n.oid=p.pronamespace
+  WHERE n.nspname='pastafari_sql_tamil' AND p.prokind='f'
+)
+SELECT 'முதன்மைச் செயலாக்கத்தின் எந்தச் செயற்கூறும் சோதனை ஒப்புநிலையை அழைக்காது', count(*)=0
+FROM funcs
+WHERE position('pastafari_sql_tamil_test' in pg_get_functiondef(oid))>0;
 
 SELECT 'முதல் கட்ட SQL சோதனைகள் அனைத்தும் வெற்றியடைந்தன' AS status,
        count(*) AS assertion_count

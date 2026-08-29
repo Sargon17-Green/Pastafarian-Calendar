@@ -1,3 +1,6 @@
+DROP SCHEMA IF EXISTS pastafari_sql_tamil_test CASCADE;
+CREATE SCHEMA pastafari_sql_tamil_test;
+
 CREATE TYPE pastafari_sql_tamil_test.work_counts AS (
     action numeric,
     target numeric,
@@ -51,14 +54,27 @@ CREATE TYPE pastafari_sql_tamil_test.calendar_result_text AS (
     day_in_month numeric
 );
 
-CREATE TABLE IF NOT EXISTS pastafari_sql_tamil_test.weave_memo (
-    original_lengths integer[] NOT NULL,
-    remaining integer[] NOT NULL,
-    opened_up_to integer NOT NULL,
-    closed_up_to integer NOT NULL,
-    way_count numeric NOT NULL,
-    PRIMARY KEY (original_lengths, remaining, opened_up_to, closed_up_to)
+
+CREATE TABLE pastafari_sql_tamil_test.weave_family_registry (
+    family_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    original_lengths integer[] NOT NULL UNIQUE
 );
+
+CREATE TABLE pastafari_sql_tamil_test.weave_future_memo (
+    family_id bigint NOT NULL REFERENCES pastafari_sql_tamil_test.weave_family_registry(family_id) ON DELETE CASCADE,
+    opened_up_to integer NOT NULL,
+    tail_length integer NOT NULL,
+    factor numeric NOT NULL,
+    PRIMARY KEY (family_id, opened_up_to, tail_length)
+);
+CREATE TABLE IF NOT EXISTS pastafari_sql_tamil_test.gate_cache (
+    gate_index numeric PRIMARY KEY,
+    gate_day numeric NOT NULL UNIQUE
+);
+
+INSERT INTO pastafari_sql_tamil_test.gate_cache(gate_index,gate_day)
+VALUES (0::numeric,(-15055671)::numeric)
+ON CONFLICT (gate_index) DO NOTHING;
 
 CREATE TABLE pastafari_sql_tamil_test.stone_table (
     stone_index integer PRIMARY KEY,
@@ -81,13 +97,25 @@ LANGUAGE SQL
 IMMUTABLE
 AS $$ SELECT (-15055671)::numeric $$;
 
+CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.floor_div(p_x numeric, p_d numeric)
+RETURNS numeric
+LANGUAGE SQL
+IMMUTABLE
+STRICT
+AS $$
+    SELECT CASE
+      WHEN p_d < 1 THEN NULL::numeric
+      WHEN p_x >= 0 THEN div(p_x,p_d)
+      ELSE -div(-p_x+p_d-1,p_d)
+    END
+$$;
+
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.regular_mod(p_x numeric, p_d numeric)
 RETURNS numeric
 LANGUAGE SQL
 IMMUTABLE
 STRICT
-AS $$ SELECT p_x - floor(p_x / p_d) * p_d $$;
-
+AS $$ SELECT p_x - pastafari_sql_tamil_test.floor_div(p_x,p_d) * p_d $$;
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.save_value(p_x numeric)
 RETURNS numeric
 LANGUAGE SQL
@@ -117,7 +145,7 @@ RETURNS numeric
 LANGUAGE SQL
 IMMUTABLE
 STRICT
-AS $$ SELECT floor((p_a + p_b - 1) / p_b) $$;
+AS $$ SELECT div(p_a+p_b-1,p_b) $$;
 
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.wrap1(p_position integer, p_size integer)
 RETURNS integer
@@ -329,8 +357,8 @@ AS $$
         UNION ALL
         SELECT pos+1,
                rank0 % pastafari_sql_tamil_test.factorial_small(6-pos),
-               array_remove(remaining,remaining[(rank0 / pastafari_sql_tamil_test.factorial_small(6-pos))+1]),
-               array_append(out_arr,remaining[(rank0 / pastafari_sql_tamil_test.factorial_small(6-pos))+1])
+               array_remove(remaining,remaining[(div(rank0::numeric,pastafari_sql_tamil_test.factorial_small(6-pos)::numeric)::integer)+1]),
+               array_append(out_arr,remaining[(div(rank0::numeric,pastafari_sql_tamil_test.factorial_small(6-pos)::numeric)::integer)+1])
         FROM u
         WHERE pos <= 6
     )
@@ -519,7 +547,7 @@ IMMUTABLE
 STRICT
 AS $$
     WITH a AS (
-        SELECT floor(pastafari_sql_tamil_test.m()/p_n)*p_n AS lim,
+        SELECT div(pastafari_sql_tamil_test.m(),p_n)*p_n AS lim,
                pastafari_sql_tamil_test.answer_at(p_stream,0) AS x
     ), accepted AS (
         SELECT CASE WHEN x<=lim THEN x WHEN (p_stream).direction_step=1 THEN 1::numeric ELSE lim END AS y
@@ -550,7 +578,7 @@ AS $$
         FROM digits
         WHERE j<k
     ), built AS (
-        SELECT space,wide,floor(space/p_n)*p_n AS lim
+        SELECT space,wide,div(space,p_n)*p_n AS lim
         FROM digits
         WHERE j=k
     ), accepted AS (
@@ -610,25 +638,43 @@ LANGUAGE SQL
 VOLATILE
 STRICT
 AS $$
-    SELECT CASE
-      WHEN p_index = 0 THEN pastafari_sql_tamil_test.foundation_day()
-      WHEN p_index > 0 THEN (
-        WITH RECURSIVE g(n,d) AS (
-          SELECT 0::numeric,pastafari_sql_tamil_test.foundation_day()
-          UNION ALL
-          SELECT n+1,d+pastafari_sql_tamil_test.positive_gate_gap(n+1)
-          FROM g WHERE n<p_index
-        ) SELECT d FROM g WHERE n=p_index
-      )
-      ELSE (
-        WITH RECURSIVE g(n,d) AS (
-          SELECT 0::numeric,pastafari_sql_tamil_test.foundation_day()
-          UNION ALL
-          SELECT n-1,d-pastafari_sql_tamil_test.negative_gate_gap(abs(n-1))
-          FROM g WHERE n>p_index
-        ) SELECT d FROM g WHERE n=p_index
-      )
-    END
+    WITH RECURSIVE cached AS (
+      SELECT gate_day
+      FROM pastafari_sql_tamil_test.gate_cache
+      WHERE gate_index=p_index
+    ), base AS (
+      SELECT c.gate_index,c.gate_day,
+             CASE WHEN p_index>c.gate_index THEN 1 WHEN p_index<c.gate_index THEN -1 ELSE 0 END AS step
+      FROM pastafari_sql_tamil_test.gate_cache AS c
+      WHERE (p_index>=0 AND c.gate_index<=p_index)
+         OR (p_index<0 AND c.gate_index>=p_index)
+      ORDER BY CASE WHEN p_index>=0 THEN c.gate_index END DESC,
+               CASE WHEN p_index<0 THEN c.gate_index END ASC
+      LIMIT 1
+    ), walk(gate_index,gate_day,step) AS (
+      SELECT gate_index,gate_day,step FROM base
+      WHERE NOT EXISTS (SELECT 1 FROM cached)
+      UNION ALL
+      SELECT w.gate_index+w.step,
+             w.gate_day + CASE
+               WHEN w.step=1 THEN pastafari_sql_tamil_test.positive_gate_gap(w.gate_index+1)
+               ELSE -pastafari_sql_tamil_test.negative_gate_gap(abs(w.gate_index-1))
+             END,
+             w.step
+      FROM walk AS w
+      WHERE w.gate_index<>p_index
+    ), ins AS (
+      INSERT INTO pastafari_sql_tamil_test.gate_cache(gate_index,gate_day)
+      SELECT gate_index,gate_day FROM walk
+      ON CONFLICT (gate_index) DO NOTHING
+      RETURNING 1
+    ), forced AS (
+      SELECT count(*) AS inserted FROM ins
+    )
+    SELECT gate_day FROM cached
+    UNION ALL
+    SELECT w.gate_day FROM walk AS w,forced WHERE w.gate_index=p_index
+    LIMIT 1
 $$;
 
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.gate_index_at_or_before(p_day numeric)
@@ -637,30 +683,53 @@ LANGUAGE SQL
 VOLATILE
 STRICT
 AS $$
-    SELECT CASE
-      WHEN p_day >= pastafari_sql_tamil_test.foundation_day() THEN (
-        WITH RECURSIVE g(n,d,done) AS (
-          SELECT 0::numeric,pastafari_sql_tamil_test.foundation_day(),false
-          UNION ALL
-          SELECT n+1,
-                 d+pastafari_sql_tamil_test.positive_gate_gap(n+1),
-                 d+pastafari_sql_tamil_test.positive_gate_gap(n+1)>p_day
-          FROM g WHERE NOT done
-        ) SELECT max(n) FILTER (WHERE d<=p_day) FROM g
-      )
-      ELSE (
-        WITH RECURSIVE g(n,d,done) AS (
-          SELECT 0::numeric,pastafari_sql_tamil_test.foundation_day(),false
-          UNION ALL
-          SELECT n-1,
-                 d-pastafari_sql_tamil_test.negative_gate_gap(abs(n-1)),
-                 d-pastafari_sql_tamil_test.negative_gate_gap(abs(n-1))<=p_day
-          FROM g WHERE NOT done
-        ) SELECT max(n) FILTER (WHERE d<=p_day) FROM g
-      )
-    END
+    WITH RECURSIVE bounds AS (
+      SELECT min(gate_index) AS min_i,max(gate_index) AS max_i,
+             min(gate_day) AS min_d,max(gate_day) AS max_d
+      FROM pastafari_sql_tamil_test.gate_cache
+    ), start AS (
+      SELECT CASE
+               WHEN p_day>max_d THEN max_i
+               WHEN p_day<min_d THEN min_i
+               ELSE NULL::numeric
+             END AS gate_index,
+             CASE
+               WHEN p_day>max_d THEN max_d
+               WHEN p_day<min_d THEN min_d
+               ELSE NULL::numeric
+             END AS gate_day,
+             CASE WHEN p_day>max_d THEN 1 WHEN p_day<min_d THEN -1 ELSE 0 END AS step
+      FROM bounds
+    ), walk(gate_index,gate_day,step) AS (
+      SELECT gate_index,gate_day,step
+      FROM start
+      WHERE step<>0
+      UNION ALL
+      SELECT w.gate_index+w.step,
+             w.gate_day + CASE
+               WHEN w.step=1 THEN pastafari_sql_tamil_test.positive_gate_gap(w.gate_index+1)
+               ELSE -pastafari_sql_tamil_test.negative_gate_gap(abs(w.gate_index-1))
+             END,
+             w.step
+      FROM walk AS w
+      WHERE (w.step=1 AND w.gate_day<=p_day)
+         OR (w.step=-1 AND w.gate_day>p_day)
+    ), ins AS (
+      INSERT INTO pastafari_sql_tamil_test.gate_cache(gate_index,gate_day)
+      SELECT gate_index,gate_day FROM walk
+      ON CONFLICT (gate_index) DO NOTHING
+      RETURNING 1
+    ), forced AS (
+      SELECT count(*) AS inserted FROM ins
+    ), all_rows AS (
+      SELECT gate_index,gate_day FROM pastafari_sql_tamil_test.gate_cache
+      UNION ALL
+      SELECT gate_index,gate_day FROM walk
+    )
+    SELECT max(c.gate_index)
+    FROM forced,all_rows AS c
+    WHERE c.gate_day<=p_day
 $$;
-
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.gate_index_at_or_after(p_day numeric)
 RETURNS numeric
 LANGUAGE SQL
@@ -683,27 +752,6 @@ AS $$
     SELECT CASE WHEN pastafari_sql_tamil_test.gate_day(i)=p_day THEN i ELSE NULL END FROM b
 $$;
 
-CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.find_target_year(p_calculation_day numeric, p_target_day numeric)
-RETURNS pastafari_sql_tamil_test.year_rec
-LANGUAGE SQL
-VOLATILE
-STRICT
-AS $$
-    WITH RECURSIVE walk(step,y) AS (
-      SELECT 0,pastafari_sql_tamil_test.year5000(p_calculation_day)
-      UNION ALL
-      SELECT step+1,
-             CASE
-               WHEN p_target_day>(y).close_gate_day THEN pastafari_sql_tamil_test.next_year(p_calculation_day,y)
-               ELSE pastafari_sql_tamil_test.previous_year(p_calculation_day,y)
-             END
-      FROM walk
-      WHERE NOT ((y).open_gate_day<p_target_day AND p_target_day<=(y).close_gate_day)
-    )
-    SELECT y FROM walk
-    WHERE (y).open_gate_day<p_target_day AND p_target_day<=(y).close_gate_day
-    ORDER BY step LIMIT 1
-$$;
 
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.falling_factorial(p_n integer,p_k integer)
 RETURNS numeric
@@ -730,9 +778,9 @@ AS $$
       SELECT 1,p_rank1,ARRAY(SELECT x FROM generate_series(1,p_n) AS g(x)),ARRAY[]::integer[]
       UNION ALL
       SELECT pos+1,
-             r-floor((r-1)/block)*block,
-             array_remove(remaining,remaining[(floor((r-1)/block)+1)::integer]),
-             array_append(out_arr,remaining[(floor((r-1)/block)+1)::integer])
+             r-div(r-1,block)*block,
+             array_remove(remaining,remaining[(div(r-1,block)+1)::integer]),
+             array_append(out_arr,remaining[(div(r-1,block)+1)::integer])
       FROM u
       CROSS JOIN LATERAL (
         SELECT pastafari_sql_tamil_test.falling_factorial(array_length(remaining,1)-1,p_k-pos) AS block
@@ -752,7 +800,7 @@ AS $$
       SELECT 0,least(p_k,p_n-p_k),1::numeric
       WHERE p_n>=0 AND p_k>=0 AND p_k<=p_n
       UNION ALL
-      SELECT i+1,k_eff,(r*(p_n-k_eff+i+1))/(i+1)
+      SELECT i+1,k_eff,div(r*(p_n-k_eff+i+1),(i+1)::numeric)
       FROM b
       WHERE i<k_eff
     )
@@ -777,7 +825,7 @@ AS $$
           * pastafari_sql_tamil_test.binomial_exact(p_slots,j)
           * pastafari_sql_tamil_test.binomial_exact(rem-j*(upper+1)+p_slots-1,p_slots-1)
         )
-        FROM generate_series(0,least(p_slots,floor(rem::numeric/(upper+1))::integer)) AS g(j)
+        FROM generate_series(0,least(p_slots,div(rem::numeric,(upper+1)::numeric)::integer)) AS g(j)
       ),0::numeric)
     END
     FROM q
@@ -891,16 +939,97 @@ AS $$
     FROM unnest(p_arr) WITH ORDINALITY AS u(val,ord)
 $$;
 
-CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.weave_move_legal(
-    p_original integer[],p_remaining integer[],p_opened integer,p_closed integer,p_j integer)
-RETURNS boolean
+CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.weave_last_order_count(
+    p_remaining integer[],p_opened integer,p_closed integer)
+RETURNS numeric
 LANGUAGE SQL
 IMMUTABLE
 STRICT
 AS $$
-    SELECT p_remaining[p_j]>0
-       AND (p_remaining[p_j]<p_original[p_j] OR p_j=p_opened+1)
-       AND (p_remaining[p_j]<>1 OR p_j=p_closed+1)
+    WITH RECURSIVE a(j,total_len,ways) AS (
+      SELECT p_closed,0,1::numeric
+      UNION ALL
+      SELECT j+1,
+             total_len+p_remaining[j+1],
+             ways * CASE
+               WHEN total_len=0 THEN 1::numeric
+               ELSE pastafari_sql_tamil_test.binomial_exact(total_len+p_remaining[j+1]-1,p_remaining[j+1]-1)
+             END
+      FROM a
+      WHERE j<p_opened
+    )
+    SELECT ways FROM a WHERE j=p_opened
+$$;
+
+CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.weave_future_factors(p_lengths integer[])
+RETURNS TABLE(opened_up_to integer,tail_length integer,factor numeric)
+LANGUAGE SQL
+IMMUTABLE
+STRICT
+AS $$
+    WITH RECURSIVE meta AS (
+      SELECT array_length(p_lengths,1) AS month_count,
+             (SELECT sum(v)::integer FROM unnest(p_lengths) AS u(v)) AS total_length
+      WHERE NOT EXISTS (SELECT 1 FROM unnest(p_lengths) AS u(v) WHERE v<2)
+    ), f(opened_up_to,tail_length,factor) AS (
+      SELECT month_count,g.r,1::numeric
+      FROM meta
+      CROSS JOIN LATERAL generate_series(0,total_length-month_count) AS g(r)
+      UNION ALL
+      SELECT d.opened_up_to-1,
+             d.tail_length-p_lengths[d.opened_up_to]+1,
+             sum(
+               d.factor * pastafari_sql_tamil_test.binomial_exact(
+                 d.tail_length-1,
+                 p_lengths[d.opened_up_to]-2
+               )
+             ) OVER (ORDER BY d.tail_length ROWS UNBOUNDED PRECEDING)
+      FROM f AS d
+      WHERE d.opened_up_to>0
+        AND d.tail_length>=p_lengths[d.opened_up_to]-1
+    )
+    SELECT opened_up_to,tail_length,factor FROM f
+$$;
+
+CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.weave_prepare(p_lengths integer[])
+RETURNS bigint
+LANGUAGE SQL
+VOLATILE
+STRICT
+AS $$
+    INSERT INTO pastafari_sql_tamil_test.weave_family_registry(original_lengths)
+    VALUES (p_lengths)
+    ON CONFLICT (original_lengths) DO NOTHING;
+
+    INSERT INTO pastafari_sql_tamil_test.weave_future_memo(family_id,opened_up_to,tail_length,factor)
+    SELECT f.family_id,x.opened_up_to,x.tail_length,x.factor
+    FROM pastafari_sql_tamil_test.weave_family_registry AS f
+    CROSS JOIN LATERAL pastafari_sql_tamil_test.weave_future_factors(p_lengths) AS x
+    WHERE f.original_lengths=p_lengths
+      AND NOT EXISTS (
+        SELECT 1 FROM pastafari_sql_tamil_test.weave_future_memo AS m
+        WHERE m.family_id=f.family_id
+      )
+    ON CONFLICT (family_id,opened_up_to,tail_length) DO NOTHING;
+
+    SELECT family_id
+    FROM pastafari_sql_tamil_test.weave_family_registry
+    WHERE original_lengths=p_lengths
+    LIMIT 1;
+$$;
+
+CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.weave_factor(
+    p_family_id bigint,p_opened integer,p_tail integer)
+RETURNS numeric
+LANGUAGE SQL
+VOLATILE
+STRICT
+AS $$
+    SELECT factor
+    FROM pastafari_sql_tamil_test.weave_future_memo
+    WHERE family_id=p_family_id
+      AND opened_up_to=p_opened
+      AND tail_length=p_tail
 $$;
 
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.weave_count(
@@ -910,39 +1039,17 @@ LANGUAGE SQL
 VOLATILE
 STRICT
 AS $$
-    WITH cached AS (
-      SELECT way_count FROM pastafari_sql_tamil_test.weave_memo
-      WHERE original_lengths=p_original AND remaining=p_remaining
-        AND opened_up_to=p_opened AND closed_up_to=p_closed
-    ), computed AS (
-      SELECT CASE
-        WHEN NOT EXISTS (SELECT 1 FROM unnest(p_remaining) AS x(v) WHERE v<>0) THEN 1::numeric
-        ELSE COALESCE((
-          SELECT sum(pastafari_sql_tamil_test.weave_count(
-            p_original,
-            pastafari_sql_tamil_test.array_decrement_at(p_remaining,j),
-            CASE WHEN p_remaining[j]=p_original[j] THEN j ELSE p_opened END,
-            CASE WHEN p_remaining[j]=1 THEN j ELSE p_closed END
-          ))
-          FROM generate_series(1,array_length(p_remaining,1)) AS g(j)
-          WHERE pastafari_sql_tamil_test.weave_move_legal(p_original,p_remaining,p_opened,p_closed,j)
-        ),0::numeric)
-      END AS way_count
-      WHERE NOT EXISTS (SELECT 1 FROM cached)
-    ), ins AS (
-      INSERT INTO pastafari_sql_tamil_test.weave_memo(original_lengths,remaining,opened_up_to,closed_up_to,way_count)
-      SELECT p_original,p_remaining,p_opened,p_closed,way_count FROM computed
-      ON CONFLICT (original_lengths,remaining,opened_up_to,closed_up_to) DO NOTHING
-      RETURNING way_count
+    WITH fam AS MATERIALIZED (
+      SELECT pastafari_sql_tamil_test.weave_prepare(p_original) AS family_id
+    ), b AS (
+      SELECT pastafari_sql_tamil_test.weave_last_order_count(p_remaining,p_opened,p_closed) AS active_factor,
+             COALESCE((
+               SELECT sum(p_remaining[j])::integer
+               FROM generate_series(p_closed+1,p_opened) AS g(j)
+             ),0) AS active_tail
     )
-    SELECT way_count FROM cached
-    UNION ALL
-    SELECT way_count FROM ins
-    UNION ALL
-    SELECT way_count FROM pastafari_sql_tamil_test.weave_memo
-      WHERE original_lengths=p_original AND remaining=p_remaining
-        AND opened_up_to=p_opened AND closed_up_to=p_closed
-    LIMIT 1
+    SELECT b.active_factor*pastafari_sql_tamil_test.weave_factor(fam.family_id,p_opened,b.active_tail)
+    FROM fam,b
 $$;
 
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.unrank_weaving(p_lengths integer[],p_rank1 numeric)
@@ -951,45 +1058,121 @@ LANGUAGE SQL
 VOLATILE
 STRICT
 AS $$
-    WITH RECURSIVE u(step,remaining,opened,closed,r,out_arr) AS (
-      SELECT 0,p_lengths,0,0,p_rank1,ARRAY[]::integer[]
+    WITH RECURSIVE fam AS MATERIALIZED (
+      SELECT pastafari_sql_tamil_test.weave_prepare(p_lengths) AS family_id
+    ), initial_count AS MATERIALIZED (
+      SELECT pastafari_sql_tamil_test.weave_factor(fam.family_id,0,0) AS n,fam.family_id
+      FROM fam
+    ), valid AS (
+      SELECT p_rank1 AS initial_rank,family_id
+      FROM initial_count
+      WHERE p_rank1>=1 AND p_rank1<=n
+    ), u(step,remaining,opened,closed,active_tail,active_factor,r,chosen,family_id) AS (
+      SELECT 0,p_lengths,0,0,0,1::numeric,initial_rank,NULL::integer,family_id
+      FROM valid
       UNION ALL
-      SELECT step+1,
-             pastafari_sql_tamil_test.array_decrement_at(remaining,chosen),
-             CASE WHEN remaining[chosen]=p_lengths[chosen] THEN chosen ELSE opened END,
-             CASE WHEN remaining[chosen]=1 THEN chosen ELSE closed END,
-             r-prev_sum,
-             array_append(out_arr,chosen)
+      SELECT u.step+1,
+             pastafari_sql_tamil_test.array_decrement_at(u.remaining,pick.j),
+             CASE WHEN pick.j=u.opened+1 THEN u.opened+1 ELSE u.opened END,
+             CASE
+               WHEN pick.j<=u.opened AND u.remaining[pick.j]=1 THEN u.closed+1
+               ELSE u.closed
+             END,
+             CASE
+               WHEN pick.j=u.opened+1 THEN u.active_tail+u.remaining[pick.j]-1
+               ELSE u.active_tail-1
+             END,
+             pick.next_active_factor,
+             u.r-pick.previous_blocks,
+             pick.j,
+             u.family_id
       FROM u
       CROSS JOIN LATERAL (
-        WITH legal AS (
-          SELECT j,
-            pastafari_sql_tamil_test.weave_count(
-              p_lengths,
-              pastafari_sql_tamil_test.array_decrement_at(remaining,j),
-              CASE WHEN remaining[j]=p_lengths[j] THEN j ELSE opened END,
-              CASE WHEN remaining[j]=1 THEN j ELSE closed END
-            ) AS block
-          FROM generate_series(1,array_length(remaining,1)) AS g(j)
-          WHERE pastafari_sql_tamil_test.weave_move_legal(p_lengths,remaining,opened,closed,j)
-        ), sums AS (
-          SELECT j,block,
-                 COALESCE(sum(block) OVER (ORDER BY j ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING),0::numeric) AS prev_sum,
-                 sum(block) OVER (ORDER BY j) AS upto
-          FROM legal
+        WITH RECURSIVE active AS (
+          SELECT g.j,
+                 u.remaining[g.j] AS rem,
+                 sum(u.remaining[g.j]) OVER (ORDER BY g.j ROWS UNBOUNDED PRECEDING)::numeric AS prefix_total
+          FROM generate_series(u.closed+1,u.opened) AS g(j)
+        ), suffix(j,product_total,product_minus_one) AS (
+          SELECT a.j,a.prefix_total,a.prefix_total-1
+          FROM active AS a
+          WHERE a.j=u.opened
+          UNION ALL
+          SELECT a.j,
+                 a.prefix_total*s.product_total,
+                 (a.prefix_total-1)*s.product_minus_one
+          FROM suffix AS s
+          JOIN active AS a ON a.j=s.j-1
+        ), shared AS MATERIALIZED (
+          SELECT
+            CASE
+              WHEN u.active_tail>0
+              THEN pastafari_sql_tamil_test.weave_factor(u.family_id,u.opened,u.active_tail-1)
+            END AS active_future,
+            CASE
+              WHEN u.opened<array_length(p_lengths,1)
+              THEN pastafari_sql_tamil_test.weave_factor(
+                     u.family_id,
+                     u.opened+1,
+                     u.active_tail+u.remaining[u.opened+1]-1
+                   )
+            END AS opening_future
+        ), active_candidates AS (
+          SELECT a.j,
+                 div(
+                   u.active_factor
+                   * CASE WHEN a.j=u.closed+1 THEN a.rem::numeric ELSE (a.rem-1)::numeric END
+                   * COALESCE(s.product_total,1::numeric),
+                   u.active_tail::numeric * COALESCE(s.product_minus_one,1::numeric)
+                 ) AS next_active_factor
+          FROM active AS a
+          LEFT JOIN suffix AS s
+            ON s.j=CASE WHEN a.j=u.closed+1 THEN a.j+1 ELSE a.j END
+          WHERE a.rem>1 OR a.j=u.closed+1
+        ), active_blocks AS (
+          SELECT a.j,a.next_active_factor,
+                 a.next_active_factor*sh.active_future AS block
+          FROM active_candidates AS a
+          CROSS JOIN shared AS sh
+        ), opening_candidate AS (
+          SELECT u.opened+1 AS j,
+                 u.active_factor
+                 * pastafari_sql_tamil_test.binomial_exact(
+                     u.active_tail+u.remaining[u.opened+1]-2,
+                     u.remaining[u.opened+1]-2
+                   ) AS next_active_factor
+          WHERE u.opened<array_length(p_lengths,1)
+            AND u.remaining[u.opened+1]>=2
+        ), opening_block AS (
+          SELECT o.j,o.next_active_factor,
+                 o.next_active_factor*sh.opening_future AS block
+          FROM opening_candidate AS o
+          CROSS JOIN shared AS sh
+        ), candidates AS (
+          SELECT * FROM active_blocks
+          UNION ALL
+          SELECT * FROM opening_block
+        ), ranges AS (
+          SELECT j,next_active_factor,block,
+                 COALESCE(
+                   sum(block) OVER (
+                     ORDER BY j ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+                   ),0::numeric
+                 ) AS previous_blocks,
+                 sum(block) OVER (ORDER BY j ROWS UNBOUNDED PRECEDING) AS through_block
+          FROM candidates
         )
-        SELECT j AS chosen,prev_sum
-        FROM sums
-        WHERE r>prev_sum AND r<=upto
-        ORDER BY j LIMIT 1
-      ) q
-      WHERE EXISTS (SELECT 1 FROM unnest(remaining) AS x(v) WHERE v<>0)
+        SELECT j,next_active_factor,previous_blocks
+        FROM ranges
+        WHERE u.r>previous_blocks AND u.r<=through_block
+        ORDER BY j
+        LIMIT 1
+      ) AS pick
+      WHERE EXISTS (SELECT 1 FROM unnest(u.remaining) AS x(v) WHERE v<>0)
     )
-    SELECT out_arr FROM u
-    WHERE NOT EXISTS (SELECT 1 FROM unnest(remaining) AS x(v) WHERE v<>0)
-    ORDER BY step LIMIT 1
+    SELECT array_agg(chosen ORDER BY step) FILTER (WHERE step>0)
+    FROM u
 $$;
-
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.numeric_series(p_start numeric,p_stop numeric,p_step numeric DEFAULT 1)
 RETURNS SETOF numeric
 LANGUAGE SQL
@@ -1095,6 +1278,27 @@ AS $$
     FROM n,p WHERE rn=wanted
 $$;
 
+CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.find_target_year(p_calculation_day numeric, p_target_day numeric)
+RETURNS pastafari_sql_tamil_test.year_rec
+LANGUAGE SQL
+VOLATILE
+STRICT
+AS $$
+    WITH RECURSIVE walk(step,y) AS (
+      SELECT 0,pastafari_sql_tamil_test.year5000(p_calculation_day)
+      UNION ALL
+      SELECT step+1,
+             CASE
+               WHEN p_target_day>(y).close_gate_day THEN pastafari_sql_tamil_test.next_year(p_calculation_day,y)
+               ELSE pastafari_sql_tamil_test.previous_year(p_calculation_day,y)
+             END
+      FROM walk
+      WHERE NOT ((y).open_gate_day<p_target_day AND p_target_day<=(y).close_gate_day)
+    )
+    SELECT y FROM walk
+    WHERE (y).open_gate_day<p_target_day AND p_target_day<=(y).close_gate_day
+    ORDER BY step LIMIT 1
+$$;
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.choose_cutlet_count(p_sauce pastafari_sql_tamil_test.sauce_result,p_year pastafari_sql_tamil_test.year_rec)
 RETURNS integer
 LANGUAGE SQL
@@ -1156,7 +1360,7 @@ STRICT
 AS $$
     WITH b AS (
       SELECT pastafari_sql_tamil_test.ceil_div((p_year).close_gate_day-(p_year).open_gate_day,123)::integer AS lo,
-             least(47,floor(((p_year).close_gate_day-(p_year).open_gate_day)/4)::integer) AS hi
+             least(47,div((p_year).close_gate_day-(p_year).open_gate_day,4)::integer) AS hi
     ), r AS (
       SELECT lo,pastafari_sql_tamil_test.choose_rank(pastafari_sql_tamil_test.ask_bowl(p_sauce,3,30),(hi-lo+1)::numeric)::integer AS rank1
       FROM b
@@ -1180,20 +1384,104 @@ AS $$
     SELECT pastafari_sql_tamil_test.unrank_bounded_composition(total,p_k,4,123,rank1) FROM r
 $$;
 
-CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.choose_month_weaving(p_sauce pastafari_sql_tamil_test.sauce_result,p_lengths integer[])
+CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.choose_month_weaving(
+    p_sauce pastafari_sql_tamil_test.sauce_result,p_lengths integer[])
 RETURNS integer[]
 LANGUAGE SQL
 VOLATILE
 STRICT
 AS $$
-    WITH c AS (
-      SELECT pastafari_sql_tamil_test.weave_count(p_lengths,p_lengths,0,0) AS cnt
-    ), r AS (
-      SELECT pastafari_sql_tamil_test.choose_rank(pastafari_sql_tamil_test.ask_bowl(p_sauce,4,32),cnt) AS rank1 FROM c
-    )
-    SELECT pastafari_sql_tamil_test.unrank_weaving(p_lengths,rank1) FROM r
-$$;
+    SELECT pastafari_sql_tamil_test.weave_prepare(p_lengths);
 
+    WITH RECURSIVE fam AS MATERIALIZED (
+      SELECT family_id
+      FROM pastafari_sql_tamil_test.weave_family_registry
+      WHERE original_lengths=p_lengths
+      LIMIT 1
+    ), root AS MATERIALIZED (
+      SELECT m.factor AS cnt,fam.family_id
+      FROM fam
+      JOIN pastafari_sql_tamil_test.weave_future_memo AS m
+        ON m.family_id=fam.family_id AND m.opened_up_to=0 AND m.tail_length=0
+    ), ranked AS MATERIALIZED (
+      SELECT pastafari_sql_tamil_test.choose_rank(
+               pastafari_sql_tamil_test.ask_bowl(p_sauce,4,32),cnt
+             ) AS rank1,
+             family_id
+      FROM root
+    ), u(step,remaining,opened,closed,active_tail,active_factor,r,chosen,family_id) AS (
+      SELECT 0,p_lengths,0,0,0,1::numeric,rank1,NULL::integer,family_id
+      FROM ranked
+      UNION ALL
+      SELECT u.step+1,
+             pastafari_sql_tamil_test.array_decrement_at(u.remaining,pick.j),
+             CASE WHEN pick.j=u.opened+1 THEN u.opened+1 ELSE u.opened END,
+             CASE WHEN pick.j<=u.opened AND u.remaining[pick.j]=1 THEN u.closed+1 ELSE u.closed END,
+             CASE WHEN pick.j=u.opened+1 THEN u.active_tail+u.remaining[pick.j]-1 ELSE u.active_tail-1 END,
+             pick.next_active_factor,
+             u.r-pick.previous_blocks,
+             pick.j,
+             u.family_id
+      FROM u
+      CROSS JOIN LATERAL (
+        WITH RECURSIVE active AS (
+          SELECT g.j,u.remaining[g.j] AS rem,
+                 sum(u.remaining[g.j]) OVER (ORDER BY g.j ROWS UNBOUNDED PRECEDING)::numeric AS prefix_total
+          FROM generate_series(u.closed+1,u.opened) AS g(j)
+        ), suffix(j,product_total,product_minus_one) AS (
+          SELECT a.j,a.prefix_total,a.prefix_total-1 FROM active a WHERE a.j=u.opened
+          UNION ALL
+          SELECT a.j,a.prefix_total*s.product_total,(a.prefix_total-1)*s.product_minus_one
+          FROM suffix s JOIN active a ON a.j=s.j-1
+        ), shared AS MATERIALIZED (
+          SELECT
+            CASE WHEN u.active_tail>0 THEN (
+              SELECT m.factor FROM pastafari_sql_tamil_test.weave_future_memo AS m
+              WHERE m.family_id=u.family_id AND m.opened_up_to=u.opened AND m.tail_length=u.active_tail-1
+            ) END AS active_future,
+            CASE WHEN u.opened<array_length(p_lengths,1) THEN (
+              SELECT m.factor FROM pastafari_sql_tamil_test.weave_future_memo AS m
+              WHERE m.family_id=u.family_id AND m.opened_up_to=u.opened+1
+                AND m.tail_length=u.active_tail+u.remaining[u.opened+1]-1
+            ) END AS opening_future
+        ), active_candidates AS (
+          SELECT a.j,
+                 div(u.active_factor
+                   * CASE WHEN a.j=u.closed+1 THEN a.rem::numeric ELSE (a.rem-1)::numeric END
+                   * COALESCE(s.product_total,1::numeric),
+                   u.active_tail::numeric*COALESCE(s.product_minus_one,1::numeric)) AS next_active_factor
+          FROM active a
+          LEFT JOIN suffix s ON s.j=CASE WHEN a.j=u.closed+1 THEN a.j+1 ELSE a.j END
+          WHERE a.rem>1 OR a.j=u.closed+1
+        ), active_blocks AS (
+          SELECT a.j,a.next_active_factor,a.next_active_factor*sh.active_future AS block
+          FROM active_candidates a CROSS JOIN shared sh
+        ), opening_candidate AS (
+          SELECT u.opened+1 AS j,
+                 u.active_factor*pastafari_sql_tamil_test.binomial_exact(
+                   u.active_tail+u.remaining[u.opened+1]-2,u.remaining[u.opened+1]-2) AS next_active_factor
+          WHERE u.opened<array_length(p_lengths,1) AND u.remaining[u.opened+1]>=2
+        ), opening_block AS (
+          SELECT o.j,o.next_active_factor,o.next_active_factor*sh.opening_future AS block
+          FROM opening_candidate o CROSS JOIN shared sh
+        ), candidates AS (
+          SELECT * FROM active_blocks UNION ALL SELECT * FROM opening_block
+        ), ranges AS (
+          SELECT j,next_active_factor,block,
+                 COALESCE(sum(block) OVER (ORDER BY j ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING),0::numeric) AS previous_blocks,
+                 sum(block) OVER (ORDER BY j ROWS UNBOUNDED PRECEDING) AS through_block
+          FROM candidates
+        )
+        SELECT j,next_active_factor,previous_blocks
+        FROM ranges
+        WHERE u.r>previous_blocks AND u.r<=through_block
+        ORDER BY j LIMIT 1
+      ) pick
+      WHERE EXISTS (SELECT 1 FROM unnest(u.remaining) x(v) WHERE v<>0)
+    )
+    SELECT array_agg(chosen ORDER BY step) FILTER (WHERE step>0)
+    FROM u;
+$$;
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.choose_month_names(p_sauce pastafari_sql_tamil_test.sauce_result,p_k integer)
 RETURNS integer[]
 LANGUAGE SQL
@@ -1211,22 +1499,22 @@ LANGUAGE SQL
 VOLATILE
 STRICT
 AS $$
-    WITH r AS (
+    WITH r AS MATERIALIZED (
       SELECT pastafari_sql_tamil_test.sauce(p_calculation_day,(p_year).open_gate_day+1) AS sauce_data
-    ), k AS (
+    ), k AS MATERIALIZED (
       SELECT sauce_data,pastafari_sql_tamil_test.choose_cutlet_count(sauce_data,p_year) AS cutlet_count FROM r
-    ), cp AS (
+    ), cp AS MATERIALIZED (
       SELECT sauce_data,cutlet_count,
              pastafari_sql_tamil_test.choose_cutlet_partition(p_calculation_day,sauce_data,p_year,cutlet_count) AS cutlet_partition,
              pastafari_sql_tamil_test.choose_cutlet_names(sauce_data,cutlet_count) AS cutlet_names
       FROM k
-    ), mc AS (
+    ), mc AS MATERIALIZED (
       SELECT *,pastafari_sql_tamil_test.choose_month_count(sauce_data,p_year) AS month_count FROM cp
-    ), ml AS (
+    ), ml AS MATERIALIZED (
       SELECT *,pastafari_sql_tamil_test.choose_month_lengths(sauce_data,p_year,month_count) AS month_lengths FROM mc
-    ), mw AS (
+    ), mw AS MATERIALIZED (
       SELECT *,pastafari_sql_tamil_test.choose_month_weaving(sauce_data,month_lengths) AS month_weaving FROM ml
-    ), mn AS (
+    ), mn AS MATERIALIZED (
       SELECT *,pastafari_sql_tamil_test.choose_month_names(sauce_data,month_count) AS month_names FROM mw
     )
     SELECT ROW(p_year,cutlet_count,cutlet_partition,cutlet_names,month_count,month_lengths,month_weaving,month_names)::pastafari_sql_tamil_test.year_structure
@@ -1239,17 +1527,17 @@ LANGUAGE SQL
 VOLATILE
 STRICT
 AS $$
-    WITH y AS (
+    WITH y AS MATERIALIZED (
       SELECT pastafari_sql_tamil_test.find_target_year(p_calculation_day,p_target_day) AS yr
-    ), s AS (
+    ), s AS MATERIALIZED (
       SELECT yr,pastafari_sql_tamil_test.build_year_structure(p_calculation_day,yr) AS st FROM y
-    ), cutlets AS (
+    ), cutlets AS MATERIALIZED (
       SELECT ord::integer AS cutlet_id,
              COALESCE(sum(part) OVER (ORDER BY ord ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING),0)::numeric AS prev_gaps,
              sum(part) OVER (ORDER BY ord)::numeric AS upto_gaps,
              part,yr,st
       FROM s,unnest((st).cutlet_partition) WITH ORDINALITY AS u(part,ord)
-    ), chosen AS (
+    ), chosen AS MATERIALIZED (
       SELECT cutlet_id,
              pastafari_sql_tamil_test.gate_day((yr).open_gate_index+prev_gaps)+1 AS first_day,
              yr,st
@@ -1257,11 +1545,11 @@ AS $$
       WHERE pastafari_sql_tamil_test.gate_day((yr).open_gate_index+prev_gaps)+1<=p_target_day
         AND p_target_day<=pastafari_sql_tamil_test.gate_day((yr).open_gate_index+upto_gaps)
       ORDER BY cutlet_id LIMIT 1
-    ), month_data AS (
+    ), month_data AS MATERIALIZED (
       SELECT cutlet_id,first_day,yr,st,
              (p_target_day-((yr).open_gate_day+1))::integer AS offset0
       FROM chosen
-    ), final_data AS (
+    ), final_data AS MATERIALIZED (
       SELECT cutlet_id,first_day,yr,st,offset0,
              (st).month_weaving[offset0+1] AS month_id
       FROM month_data

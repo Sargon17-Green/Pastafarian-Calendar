@@ -1,8 +1,6 @@
-DROP SCHEMA IF EXISTS pastafari_sql_tamil_test CASCADE;
 DROP SCHEMA IF EXISTS pastafari_sql_tamil CASCADE;
 
 CREATE SCHEMA pastafari_sql_tamil;
-CREATE SCHEMA pastafari_sql_tamil_test;
 
 CREATE TYPE pastafari_sql_tamil.calendar_result AS (
     year_number numeric,

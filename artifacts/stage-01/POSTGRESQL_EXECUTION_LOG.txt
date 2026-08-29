@@ -1,0 +1,241 @@
+POSTGRESQL_VERSION=postgres (PostgreSQL) 17.6
+PSQL_VERSION=psql (PostgreSQL) 17.6
+MAIN_DATABASE=stage01final2
+PRODUCTION_ISOLATION_DATABASE=stage01prodfinal2
+VERIFICATION_BEGIN
+NOTICE:  database "stage01final2" does not exist, skipping
+LOAD_ORDER_MAIN=sql/00_schema.sql|sql/01_source_language_catalog.sql|sql/02_monster_bootstrap.sql|sql/test/10_normative_reference.sql|sql/test/20_stage01_tests.sql|sql/test/30_stage01_heavy_reference.sql
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01final2 -X -v ON_ERROR_STOP=1 -f sql/00_schema.sql
+.psql-wrapped:sql/00_schema.sql:1: NOTICE:  schema "pastafari_sql_tamil" does not exist, skipping
+DROP SCHEMA
+CREATE SCHEMA
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+ELAPSED_SECONDS=0.01 FILE=sql/00_schema.sql
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01final2 -X -v ON_ERROR_STOP=1 -f sql/01_source_language_catalog.sql
+CREATE VIEW
+CREATE FUNCTION
+ELAPSED_SECONDS=0.01 FILE=sql/01_source_language_catalog.sql
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01final2 -X -v ON_ERROR_STOP=1 -f sql/02_monster_bootstrap.sql
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ELAPSED_SECONDS=0.01 FILE=sql/02_monster_bootstrap.sql
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01final2 -X -v ON_ERROR_STOP=1 -f sql/test/10_normative_reference.sql
+.psql-wrapped:sql/test/10_normative_reference.sql:1: NOTICE:  schema "pastafari_sql_tamil_test" does not exist, skipping
+DROP SCHEMA
+CREATE SCHEMA
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 1
+CREATE TABLE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+INSERT 0 46
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ELAPSED_SECONDS=0.03 FILE=sql/test/10_normative_reference.sql
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01final2 -X -v ON_ERROR_STOP=1 -f sql/test/20_stage01_tests.sql
+BEGIN
+CREATE TABLE
+INSERT 0 7
+INSERT 0 11
+INSERT 0 6
+INSERT 0 12
+TRUNCATE TABLE
+INSERT 0 3
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+                  status                  | assertion_count 
+------------------------------------------+-----------------
+ முதல் கட்ட SQL சோதனைகள் அனைத்தும் வெற்றியடைந்தன |              52
+(1 row)
+
+COMMIT
+ELAPSED_SECONDS=3.91 FILE=sql/test/20_stage01_tests.sql
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01final2 -X -v ON_ERROR_STOP=1 -f sql/test/30_stage01_heavy_reference.sql
+BEGIN
+SELECT 1
+ year_structure_assertion 
+--------------------------
+                        1
+(1 row)
+
+ month_weaving_assertion 
+-------------------------
+                       1
+(1 row)
+
+ full_calendar_assertion 
+-------------------------
+                       1
+(1 row)
+
+                   status                   | assertion_count 
+--------------------------------------------+-----------------
+ கனரக நெறிமுறைச் சோதனைகள் அனைத்தும் வெற்றியடைந்தன |               3
+(1 row)
+
+COMMIT
+ELAPSED_SECONDS=87.32 FILE=sql/test/30_stage01_heavy_reference.sql
+REGULAR_ASSERTIONS=52
+HEAVY_ASSERTIONS=3
+PRODUCTION_ISOLATION_BEGIN
+NOTICE:  database "stage01prodfinal2" does not exist, skipping
+LOAD_ORDER_PRODUCTION_ISOLATION=sql/00_schema.sql|sql/01_source_language_catalog.sql|sql/02_monster_bootstrap.sql|sql/test/40_production_isolation.sql
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01prodfinal2 -X -v ON_ERROR_STOP=1 -f sql/00_schema.sql
+.psql-wrapped:sql/00_schema.sql:1: NOTICE:  schema "pastafari_sql_tamil" does not exist, skipping
+DROP SCHEMA
+CREATE SCHEMA
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01prodfinal2 -X -v ON_ERROR_STOP=1 -f sql/01_source_language_catalog.sql
+CREATE VIEW
+CREATE FUNCTION
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01prodfinal2 -X -v ON_ERROR_STOP=1 -f sql/02_monster_bootstrap.sql
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01prodfinal2 -X -v ON_ERROR_STOP=1 -f sql/test/40_production_isolation.sql
+BEGIN
+CREATE TABLE
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+                      status                      | assertion_count 
+--------------------------------------------------+-----------------
+ முதன்மைத் தனிமைப்படுத்தல் சோதனைகள் அனைத்தும் வெற்றியடைந்தன |               4
+(1 row)
+
+COMMIT
+PRODUCTION_ISOLATION_ASSERTIONS=4
+ASSERTION_COUNT_TOTAL=59
+FAILURES=0
+RESULT=PASS
+VERIFICATION_END
+FINAL_TAMIL_TEXT_RERUN_BEGIN
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01final2 -X -v ON_ERROR_STOP=1 -f sql/test/20_stage01_tests.sql
+BEGIN
+CREATE TABLE
+INSERT 0 7
+INSERT 0 11
+INSERT 0 6
+INSERT 0 12
+TRUNCATE TABLE
+INSERT 0 3
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+                  status                  | assertion_count 
+------------------------------------------+-----------------
+ முதல் கட்ட SQL சோதனைகள் அனைத்தும் வெற்றியடைந்தன |              52
+(1 row)
+
+COMMIT
+COMMAND=/mnt/data/pgdist/bin/psql -h /mnt/data/pgsocket -p 55432 -U oai -d stage01prodfinal2 -X -v ON_ERROR_STOP=1 -f sql/test/40_production_isolation.sql
+BEGIN
+CREATE TABLE
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+                      status                      | assertion_count 
+--------------------------------------------------+-----------------
+ முதன்மைத் தனிமைப்படுத்தல் சோதனைகள் அனைத்தும் வெற்றியடைந்தன |               4
+(1 row)
+
+COMMIT
+FINAL_TAMIL_TEXT_RERUN_REGULAR_ASSERTIONS=52
+FINAL_TAMIL_TEXT_RERUN_PRODUCTION_ISOLATION_ASSERTIONS=4
+FINAL_TAMIL_TEXT_RERUN_FAILURES=0
+FINAL_TAMIL_TEXT_RERUN_RESULT=PASS
+FINAL_TAMIL_TEXT_RERUN_END
