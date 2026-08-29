@@ -1418,6 +1418,24 @@ std::vector<int> legacyChooseEachDaySeparately(
     return ghost;
 }
 
+int oldContiguousMonthDayGuess(const std::vector<int>& weaving,
+                               std::size_t targetPosition1) {
+    if (weaving.empty()) {
+        throw BaseValidationError("oldContiguousMonthDayGuess texturam vacuam recusat");
+    }
+    if (targetPosition1 < 1 || targetPosition1 > weaving.size()) {
+        throw BaseValidationError("oldContiguousMonthDayGuess positionem target extra fines recusat");
+    }
+    const int targetMonthId = weaving[targetPosition1 - 1];
+    const auto found = std::find(weaving.begin(), weaving.end(), targetMonthId);
+    if (found == weaving.end()) {
+        throw BaseValidationError("oldContiguousMonthDayGuess mensem target invenire non potuit");
+    }
+    const std::size_t firstPosition1 =
+        static_cast<std::size_t>(std::distance(weaving.begin(), found)) + 1;
+    return static_cast<int>(targetPosition1 - firstPosition1 + 1);
+}
+
 namespace {
 
 struct LegalMonthWeavingStateInternal {
@@ -4780,6 +4798,47 @@ void BaseValidationManager::requirePatch24MonthWeavingReady(
     }
 }
 
+void BaseValidationManager::requireDiscovery25ContiguousMonthDayReady(
+    const BaseMonsterContext& ctx) const {
+    requirePatch24MonthWeavingReady(ctx);
+    if (!ctx.discovery25ContiguousMonthDayReady) {
+        throw BaseValidationError("DISCOVERY 25 nondum paratus est");
+    }
+    if (!ctx.discovery25Patch24Prepared) {
+        throw BaseValidationError("DISCOVERY 25 texturam semanticam PATCH 24 paratam requirit");
+    }
+    if (ctx.discovery25TargetPosition1 < 1 ||
+        ctx.discovery25TargetPosition1 > ctx.discovery24SemanticWeaving.size()) {
+        throw BaseValidationError("DISCOVERY 25 positio target extra texturam semanticam est");
+    }
+    const int targetMonthId =
+        ctx.discovery24SemanticWeaving[ctx.discovery25TargetPosition1 - 1];
+    if (ctx.discovery25TargetMonthId != targetMonthId) {
+        throw BaseValidationError("DISCOVERY 25 monthId target a textura semantica discrepat");
+    }
+    const auto found = std::find(
+        ctx.discovery24SemanticWeaving.begin(),
+        ctx.discovery24SemanticWeaving.end(),
+        targetMonthId);
+    const std::size_t firstPosition1 =
+        static_cast<std::size_t>(
+            std::distance(ctx.discovery24SemanticWeaving.begin(), found)) + 1;
+    if (ctx.discovery25FirstOccurrencePosition1 != firstPosition1) {
+        throw BaseValidationError("DISCOVERY 25 prima positio mensis target discrepat");
+    }
+    const int replayGuess = oldContiguousMonthDayGuess(
+        ctx.discovery24SemanticWeaving,
+        ctx.discovery25TargetPosition1);
+    if (!ctx.discovery25LegacyExecuted ||
+        ctx.discovery25LegacyGuessedDayInMonth != replayGuess) {
+        throw BaseValidationError("DISCOVERY 25 oldContiguousMonthDayGuess realiter exsequi debet");
+    }
+    if (!ctx.discovery25LegacyUsedAsSemanticOutput ||
+        ctx.discovery25SemanticDayInMonth != ctx.discovery25LegacyGuessedDayInMonth) {
+        throw BaseValidationError("DISCOVERY 25 guess legacy ad statum semanticum nondum correctum pervenire debet");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -5274,6 +5333,32 @@ MonthWeavingPatchDecision MonthWeavingPatchWrapper::repair(
         equal,
         equal,
         legalMonthWeavingRowInternal(lengths, equal ? ghost : correct),
+        true
+    };
+}
+
+LegacyContiguousMonthDayInspection LegacyContiguousMonthDayAdapter::call(
+    const std::vector<int>& semanticWeaving,
+    std::size_t targetPosition1) const {
+    if (semanticWeaving.empty()) {
+        throw BaseValidationError("adapter diei mensis texturam semanticam vacuam recusat");
+    }
+    if (targetPosition1 < 1 || targetPosition1 > semanticWeaving.size()) {
+        throw BaseValidationError("adapter diei mensis positionem target extra fines recusat");
+    }
+    const int targetMonthId = semanticWeaving[targetPosition1 - 1];
+    const auto found = std::find(semanticWeaving.begin(), semanticWeaving.end(), targetMonthId);
+    if (found == semanticWeaving.end()) {
+        throw BaseValidationError("adapter diei mensis mensem target invenire non potuit");
+    }
+    const std::size_t firstPosition1 =
+        static_cast<std::size_t>(std::distance(semanticWeaving.begin(), found)) + 1;
+    const int guess = oldContiguousMonthDayGuess(semanticWeaving, targetPosition1);
+    return LegacyContiguousMonthDayInspection{
+        targetPosition1,
+        targetMonthId,
+        firstPosition1,
+        guess,
         true
     };
 }
@@ -6741,6 +6826,31 @@ void Patch24MonthWeavingHandler::handle(
     validator.requirePatch24MonthWeavingReady(ctx);
 }
 
+void Discovery25ContiguousMonthDayHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyContiguousMonthDayAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    validator.requirePatch24MonthWeavingReady(ctx);
+    const LegacyContiguousMonthDayInspection inspection = adapter.call(
+        ctx.discovery24SemanticWeaving,
+        ctx.discovery25TargetPosition1);
+    ctx.discovery25TargetMonthId = inspection.targetMonthId;
+    ctx.discovery25FirstOccurrencePosition1 = inspection.firstOccurrencePosition1;
+    ctx.discovery25LegacyGuessedDayInMonth = inspection.guessedDayInMonth;
+    ctx.discovery25SemanticDayInMonth = inspection.guessedDayInMonth;
+    ctx.discovery25Patch24Prepared = ctx.patch24Applied;
+    ctx.discovery25LegacyExecuted = inspection.legacyExecuted;
+    ctx.discovery25LegacyUsedAsSemanticOutput = true;
+    ctx.discovery25ContiguousMonthDayReady = true;
+    ctx.currentHandler = "Discovery25ContiguousMonthDayHandler";
+    ctx.phase = "DISCOVERY_25_LEGACY_CONTIGUOUS_MONTH_DAY";
+    ctx.status = "EXPECTED_RED";
+    ctx.branchTrace.push_back("HANDLER:DISCOVERY25_CONTIGUOUS_MONTH_DAY");
+    metrics.bump(ctx, "discovery25.contiguous.month.day.ready");
+    validator.requireDiscovery25ContiguousMonthDayReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -7558,6 +7668,16 @@ void BaseDispatcher::dispatchPatchedMonthWeaving(
         wrapper,
         validator,
         metrics);
+}
+
+void BaseDispatcher::dispatchDiscovery25ContiguousMonthDay(
+    BaseMonsterContext& ctx,
+    const Discovery25ContiguousMonthDayHandler& handler,
+    const LegacyContiguousMonthDayAdapter& adapter,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:DISCOVERY25_CONTIGUOUS_MONTH_DAY");
+    handler.handle(ctx, adapter, validator, metrics);
 }
 
 void BaseDispatcher::dispatchPatchedYear5000Tie(
@@ -8790,6 +8910,114 @@ LegacyMonthWeavingReport BaseMonsterManager::executeUnpatchedDiscovery24MonthWea
         ctx.branchTrace.size()
     };
 }
+LegacyContiguousMonthDayReport BaseMonsterManager::executeDiscovery25ContiguousMonthDay(
+    const LegacyYearAnchor& anchor,
+    const Integer& originalTargetDay,
+    const Integer& calculationDay,
+    const std::vector<int>& monthLengths,
+    std::size_t targetPosition1) const {
+    if (monthLengths.size() < 3 || monthLengths.size() > 47) {
+        throw BaseValidationError("DISCOVERY 25 inter tres et quadraginta septem menses requirit");
+    }
+    int localYearLength = 0;
+    for (const int length : monthLengths) {
+        if (length < LEGACY_MONTH_LENGTH_MIN || length > LEGACY_MONTH_LENGTH_MAX) {
+            throw BaseValidationError("DISCOVERY 25 longitudines mensium extra fines historicos habet");
+        }
+        if (localYearLength > REAL_YEAR_MAX_PATCH - length) {
+            throw BaseValidationError("DISCOVERY 25 summam longitudinum mensium limitem anni excedere non sinit");
+        }
+        localYearLength += length;
+    }
+    if (targetPosition1 < 1 ||
+        targetPosition1 > static_cast<std::size_t>(localYearLength)) {
+        throw BaseValidationError("DISCOVERY 25 positionem target intra texturam anni localis requirit");
+    }
+
+    const LegacyStructureSauceReport structure = executeDiscovery20StructureSauce(
+        anchor,
+        originalTargetDay,
+        calculationDay);
+    if (!structure.ready || !structure.patch20Applied ||
+        structure.patch20GhostReachedSelector) {
+        throw BaseValidationError("DISCOVERY 25 PATCH 20 sauce semanticam paratam requirit");
+    }
+
+    const LegacyMonthLengthMaterializationAdapter materializationAdapter;
+    const MonthLengthMaterializationPatchWrapper materializationWrapper;
+    const LegacyMonthLengthMaterializationInspection legacyInspection =
+        materializationAdapter.inspect(
+            localYearLength,
+            static_cast<int>(monthLengths.size()));
+    const MonthLengthMaterializationPatchDecision materializationDecision =
+        materializationWrapper.repair(
+            localYearLength,
+            static_cast<int>(monthLengths.size()),
+            legacyInspection);
+    if (!materializationDecision.patchApplied ||
+        !materializationDecision.legacyExecuted ||
+        !materializationDecision.virtualBackendUsed ||
+        !materializationDecision.countMatchesLegacyProof) {
+        throw BaseValidationError("DISCOVERY 25 PATCH 23 backend virtualem paratum requirit");
+    }
+
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery24MonthLengths = monthLengths;
+    ctx.discovery24SemanticStructureSauce = structure.semanticStructureSauce;
+    ctx.discovery24Patch20Prepared = structure.patch20Applied;
+    ctx.discovery24Patch23Prepared = materializationDecision.patchApplied;
+    ctx.discovery25TargetPosition1 = targetPosition1;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyMonthWeavingAdapter weavingAdapter;
+    const Discovery24MonthWeavingHandler legacyWeavingHandler;
+    const MonthWeavingPatchWrapper weavingWrapper;
+    const Patch24MonthWeavingHandler weavingHandler;
+    const Discovery25ContiguousMonthDayHandler monthDayHandler;
+    const LegacyContiguousMonthDayAdapter monthDayAdapter;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedMonthWeaving(
+        ctx,
+        weavingHandler,
+        legacyWeavingHandler,
+        weavingAdapter,
+        weavingWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchDiscovery25ContiguousMonthDay(
+        ctx,
+        monthDayHandler,
+        monthDayAdapter,
+        validator,
+        metrics);
+
+    return LegacyContiguousMonthDayReport{
+        calculationDay,
+        originalTargetDay,
+        structure.resolvedYear,
+        ctx.discovery24MonthLengths,
+        ctx.discovery24SemanticWeaving,
+        ctx.discovery25TargetPosition1,
+        ctx.discovery25TargetMonthId,
+        ctx.discovery25FirstOccurrencePosition1,
+        ctx.discovery25LegacyGuessedDayInMonth,
+        ctx.discovery25SemanticDayInMonth,
+        ctx.discovery25Patch24Prepared,
+        ctx.discovery25LegacyExecuted,
+        ctx.discovery25LegacyUsedAsSemanticOutput,
+        ctx.discovery25ContiguousMonthDayReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
 void BaseMonsterManager::clearLegacyYearNumberCacheDiagnostic() const { legacyYearNumberCache_.clear(); }
 
 } // namespace pastafari

@@ -1022,3 +1022,60 @@ Sed in via patched `patch24CorrectWeaving` et `semanticWeaving` cum textura norm
 Regressio Gradus 49 enumerat directe familias parvas legales pro septem vectoribus longitudinum et comparat totum ordinem cum DP. Omnes 47 texturas parvas probatae sunt. Probantur etiam parity viae brevis cum PATCH 13, parity viae latae cum PATCH 14, ramus `ghost==correct` ubi idem ghost retinetur, atque tres casus reales `ghost!=correct` ubi correct DP solum ad output semanticum pervenit.
 
 Bootstrap et omnes regressiones Graduum 1–49 transeunt. `SourceLanguageCatalog` et reference C++ manent byte pro byte intacti. Nullus `oldContiguousMonthDayGuess`, nullus `ContiguousMonthDayPatchWrapper`, nullus DISCOVERY 25 et nullus PATCH 25 praemature adest.
+
+## DISCOVERY 25 — dies mensis tamquam occurrence contiguum
+
+Gradus 50 cicatricem historicam diei-in-mense introducit sine correctione PATCH 25. Textura mensium a PATCH 24 iam integra, legalis et semantica est; defectus huius gradus post eam deliberate exercetur.
+
+Helper legacy est:
+
+```text
+oldContiguousMonthDayGuess(weaving,targetPosition1)
+```
+
+Is `monthId` in positione target legit, primam apparitionem eiusdem `monthId` in textura quaerit, deinde:
+
+```text
+targetPosition1 - firstOccurrencePosition1 + 1
+```
+
+pro die mensis sumit. Formula recta est tantum si omnes apparitiones illius mensis contiguae sunt. In textura legali intertexta positiones aliorum mensium inter primam apparitionem et target falso quasi dies eiusdem mensis numerantur.
+
+Via activa hoc ordine crescit:
+
+```text
+PATCH 20 structure sauce semanticum
+-> PATCH 23 backend mensium virtualis
+-> PATCH 24 whole-weaving DP semanticum
+-> LegacyContiguousMonthDayAdapter
+-> oldContiguousMonthDayGuess
+-> Discovery25ContiguousMonthDayHandler
+```
+
+`Discovery25ContiguousMonthDayHandler` guess legacy ipsum in `semanticDayInMonth` ponit. Ita cicatrix non est token diagnosticus tantum: output huius gradus intentionaliter assumptionem veterem sequitur.
+
+### Witness C++
+
+Longitudines locales sunt `[4,4,4]`. Tres calculation-gates independentes texturas PATCH 24 legales producunt:
+
+```text
+gate 0, target position 4:
+weaving=[1,2,3,1,3,2,1,2,1,3,2,3]
+monthId=1, first=1, legacy=4, occurrence-count=2
+
+gate 7, target position 5:
+weaving=[1,2,3,2,1,1,2,1,2,3,3,3]
+monthId=1, first=1, legacy=5, occurrence-count=2
+
+gate -11, target position 4:
+weaving=[1,2,3,2,1,1,3,2,3,1,2,3]
+monthId=2, first=2, legacy=3, occurrence-count=2
+```
+
+Occurrence-count normativus in regression test-only directe a principio texturae usque ad target inclusive numeratur. Productio nullum helper occurrence-count nec oracle vocat.
+
+Regressiones Graduum 1–49 et bootstrap transeunt. Regressio Gradus 50 consulto `EXIT_CODE=1` cum tribus discrepantiis exactis reddit.
+
+### Quod nondum adest
+
+Nullus `countMonthOccurrencesThroughTarget`, nullus `MonthDayOccurrencePatchWrapper`, nullus overwrite semanticus diei-in-mense et nullus PATCH 25 adest. Correctio occurrence-count pertinet tantum ad Gradum 51. Nulla pars PATCH 26 praemature addita est.

@@ -1755,3 +1755,39 @@ Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap, regre
 ### Audit et limes proximus
 
 `SOURCE_LANGUAGE_CATALOG.md`, `include/pastafari/source_language_catalog.hpp` et ambo fasciculi `tests/reference/normative_reference.*` manent byte pro byte intacti. `legacyChooseEachDaySeparately` et `Discovery24MonthWeavingHandler::handle` manent byte pro byte intacti. Nullus runtime externus adhibetur. Nullus `oldContiguousMonthDayGuess`, nullus `ContiguousMonthDayPatchWrapper`, nullus DISCOVERY 25 et nullus PATCH 25 praemature additus est. Gradus 50 nondum incipit.
+
+## Gradus 50 — DISCOVERY 25: dies mensis falso contiguus putatur
+
+### Quid putabatur
+
+Postquam PATCH 24 texturam mensium integram legalem restituit, calculatio vetus diei-in-mense adhuc tacite supponebat apparitiones unius `monthId` in textura continuas esse. Sub hac assumptione satis videbatur primam apparitionem mensis invenire et distantiam usque ad target numerare.
+
+### Cicatrix introducta
+
+Additus et ad viam activam conexus est:
+
+```text
+oldContiguousMonthDayGuess(weaving,targetPosition1)
+```
+
+Helper target monthId ex ipsa textura semantica PATCH 24 legit, primam eius apparitionem quaerit et `targetPosition1-firstOccurrencePosition1+1` reddit. `LegacyContiguousMonthDayAdapter` helper ipsum vere vocat. `Discovery25ContiguousMonthDayHandler` guess in contextu invocation-local servat et eum ipsum ut `semanticDayInMonth` huius discovery exponit.
+
+Stratum monstri huius gradus addit `LegacyContiguousMonthDayInspection`, `LegacyContiguousMonthDayReport`, campos contextus DISCOVERY 25, adapter, handler, validationem, dispatchationem et `BaseMonsterManager::executeDiscovery25ContiguousMonthDay`.
+
+### Quid repertum est
+
+Textura legalis potest menses intertexere. Ergo distantia positionalis a prima apparitione non est numerus apparitionum eiusdem monthId.
+
+Tres witness C++ cum longitudinibus `[4,4,4]` hoc directe ostendunt:
+
+```text
+gate 0:   target=4, monthId=1, first=1, old=4, occurrence=2
+gate 7:   target=5, monthId=1, first=1, old=5, occurrence=2
+gate -11: target=4, monthId=2, first=2, old=3, occurrence=2
+```
+
+In omnibus tribus texturam semantica PATCH 24 cum oracle C++ test-only congruit; sola computatio day-in-month legacy discrepat. Regressio Gradus 50 igitur intentionaliter rubra est et tres discrepantias exactas cum exitu 1 reddit. Bootstrap et regressiones 1–49 manent virides.
+
+### Quod nondum corrigitur
+
+Occurrence-count productio nondum computat. Nullus `countMonthOccurrencesThroughTarget`, nullus `MonthDayOccurrencePatchWrapper` et nullus overwrite semanticus adest. PATCH 25 ad Gradum 51 reservatur. Codex PATCH 26 nondum adest.
