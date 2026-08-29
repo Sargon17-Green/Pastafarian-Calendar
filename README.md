@@ -698,3 +698,48 @@ Haec partitio prefixum 6 habet. Regressio Gradus 42 igitur consulto exitum 1 red
 ### Quod consulto nondum adest
 
 Nullus filter familiae per prefixum, nullus DP condicionatus, nullus `CutletPartitionPatchWrapper`, nullus `Patch21` et nulla correctio selectionis partitionis adest. Gradus 43 debet cicatricem legacy servare et familiam semanticam exacte ut subsequenciam filtratam eiusdem ordinis lexicographici introducere.
+
+## PATCH 21 — familia legacy per portam calculation-day filtratur
+
+Gradus 43 cicatricem DISCOVERY 21 non delet. `legacyPositiveCompositions(gapCount, cutletCount)` et `Discovery21CutletPartitionHandler` manent physice atque semantice veteres: familia eorum adhuc omnes compositiones positivas continet et portam internam non filtrat.
+
+Via PATCH 21 consulto primum viam legacy vere exsequitur. `Patch21CutletPartitionHandler` vocat `Discovery21CutletPartitionHandler`, unde familia raw, rank raw, partitio raw et diagnostica prefixorum in contextu servantur. Tantum post hanc executionem `CutletPartitionPatchWrapper` correctionem separatam applicat.
+
+Si calculation-day porta stricte interna anni est, familia semantica definitur ut exacta subsequencia familiae legacy in eodem ordine lexicographico:
+
+```text
+legalis(compositio) <=> aliquod prefixum == internalGateOffset
+```
+
+`filteredLegacyPositiveCompositions` numerum exactum huius subsequenciae computat sine materializatione totius familiae, et `filteredLegacyPositiveCompositionUnrank` rank unius-based eadem lege lexicographica aperit. Count et unrank solis integris exactis utuntur. Rank semantica de eodem answer ring crateris 2, sigillo 21, per PATCH 13 vel PATCH 14 eligitur, sed `N` nunc est magnitudo familiae filtratae.
+
+Si calculation-day porta interna non est, nulla familia nova ad output mutandum adhibetur: rank legacy et partitio legacy ipsae transeunt. Flag `patch21LegacyPartitionReused` hunc casum observabilem facit.
+
+### Witness Gradus 42 post correctionem
+
+Witness idem manet:
+
+```text
+gapCount=9
+cutletCount=6
+internalGateOffset=6
+legacyFamilyCount=56
+legacyRank=7
+legacyPartition=[1,1,1,2,3,1]
+```
+
+Cicatrix legacy adhuc nullum prefixum 6 habet. Familia filtrata autem 35 membra habet; rank semanticus ex eodem stream est 35 et aperit:
+
+```text
+semanticPartition=[4,1,1,1,1,1]
+```
+
+Haec partitio cum oracle C++ normativo congruit et prefixum 6 continet. Regressio Gradus 42 nunc sub via activa transit, dum `executeUnpatchedDiscovery21CutletPartitionDiagnostic` defectum veterem separatam servat.
+
+Probatio Gradus 43 praeterea familias parvas exhaustive materialisat in test C++ et confirmat omnem `filteredLegacyPositiveCompositionUnrank` esse exacte subsequenciam lexicographicam familiae legacy, sine permutatione ordinis. Casus sine porta interna confirmat pass-through raw sine mutatione, et diagnosticum inter duas invocationes activas nullum semantic state in invocationem sequentem transfert.
+
+Bootstrap et omnes regressiones Graduum 1–43 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus generator legacy nominum repetitorum, nulla correctio partial-permutation nominum et nullus PATCH 22 adest. Gradus 44 debet DISCOVERY 22 tantum introducere.

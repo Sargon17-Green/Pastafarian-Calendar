@@ -209,6 +209,33 @@ std::vector<int> legacyPositiveCompositionUnrank(
     const LegacyPositiveCompositionFamily& family,
     const Integer& rank1);
 
+struct FilteredPositiveCompositionFamily {
+    int gapCount = 0;
+    int cutletCount = 0;
+    int internalGateOffset = 0;
+    bool internalGateRequired = false;
+    Integer count{};
+};
+
+FilteredPositiveCompositionFamily filteredLegacyPositiveCompositions(
+    int gapCount,
+    int cutletCount,
+    int internalGateOffset,
+    bool internalGateRequired);
+std::vector<int> filteredLegacyPositiveCompositionUnrank(
+    const FilteredPositiveCompositionFamily& family,
+    const Integer& rank1);
+
+struct Patch21CutletPartitionResult {
+    FilteredPositiveCompositionFamily semanticFamily{};
+    Integer semanticSelectionRank{};
+    std::vector<int> semanticPartition{};
+    std::vector<int> semanticPrefixSums{};
+    bool semanticHitInternalGateBoundary = false;
+    bool filterApplied = false;
+    bool legacyPartitionReused = false;
+};
+
 struct LegacyCutletPartitionReport {
     Integer calculationDay{};
     Integer originalTargetDay{};
@@ -224,6 +251,15 @@ struct LegacyCutletPartitionReport {
     std::vector<int> legacyPrefixSums{};
     bool legacyHitInternalGateBoundary = false;
     bool legacyIgnoredInternalGate = false;
+    FilteredPositiveCompositionFamily semanticFamily{};
+    Integer semanticSelectionRank{};
+    std::vector<int> semanticPartition{};
+    std::vector<int> semanticPrefixSums{};
+    bool semanticHitInternalGateBoundary = false;
+    bool patch21FilterApplied = false;
+    bool patch21LegacyExecuted = false;
+    bool patch21LegacyPartitionReused = false;
+    bool patch21Applied = false;
     bool ready = false;
     std::string phase;
     std::string status;
@@ -591,6 +627,15 @@ struct BaseMonsterContext {
     std::vector<int> discovery21LegacyPrefixSums{};
     bool discovery21LegacyHitInternalGateBoundary=false;
     bool discovery21LegacyIgnoredInternalGate=false;
+    FilteredPositiveCompositionFamily patch21SemanticFamily{};
+    Integer patch21SemanticSelectionRank{};
+    std::vector<int> patch21SemanticPartition{};
+    std::vector<int> patch21SemanticPrefixSums{};
+    bool patch21SemanticHitInternalGateBoundary=false;
+    bool patch21FilterApplied=false;
+    bool patch21LegacyExecuted=false;
+    bool patch21LegacyPartitionReused=false;
+    bool patch21Applied=false;
     bool discovery21CutletPartitionReady=false;
 };
 
@@ -962,6 +1007,7 @@ public:
     void requireDiscovery20StructureSauceReady(const BaseMonsterContext& ctx) const;
     void requirePatch20StructureSauceReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery21CutletPartitionReady(const BaseMonsterContext& ctx) const;
+    void requirePatch21CutletPartitionReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1063,6 +1109,20 @@ public:
     LegacyPositiveCompositionFamily family(int gapCount, int cutletCount) const;
     std::vector<int> unrank(const LegacyPositiveCompositionFamily& family,
                             const Integer& rank1) const;
+};
+
+class LegacyBiasedSelectionAdapter;
+class Patch13RejectionWrapper;
+class Patch14WideDetourWrapper;
+
+class CutletPartitionPatchWrapper {
+public:
+    Patch21CutletPartitionResult repair(
+        const BaseMonsterContext& ctx,
+        const LegacyAnswerRing& stream,
+        const LegacyBiasedSelectionAdapter& selectionAdapter,
+        const Patch13RejectionWrapper& rejectionWrapper,
+        const Patch14WideDetourWrapper& wideWrapper) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -1587,6 +1647,18 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Patch21CutletPartitionHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const Discovery21CutletPartitionHandler& legacyHandler,
+                const LegacyPositiveCompositionAdapter& adapter,
+                const CutletPartitionPatchWrapper& wrapper,
+                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                const Patch13RejectionWrapper& rejectionWrapper,
+                const Patch14WideDetourWrapper& wideWrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -1858,6 +1930,16 @@ public:
                                             const Patch14WideDetourWrapper& wideWrapper,
                                             const BaseValidationManager& validator,
                                             const BaseMetricsShell& metrics) const;
+    void dispatchPatchedCutletPartition(BaseMonsterContext& ctx,
+                                        const Patch21CutletPartitionHandler& handler,
+                                        const Discovery21CutletPartitionHandler& legacyHandler,
+                                        const LegacyPositiveCompositionAdapter& adapter,
+                                        const CutletPartitionPatchWrapper& wrapper,
+                                        const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                        const Patch13RejectionWrapper& rejectionWrapper,
+                                        const Patch14WideDetourWrapper& wideWrapper,
+                                        const BaseValidationManager& validator,
+                                        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1988,6 +2070,12 @@ public:
     LegacyStructureSauceReport executeDiscovery20StructureSauce(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const;
     LegacyStructureSauceReport executeUnpatchedDiscovery20StructureSauceDiagnostic(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const;
     LegacyCutletPartitionReport executeDiscovery21CutletPartition(
+        const LegacyYearAnchor& anchor,
+        const Integer& originalTargetDay,
+        const Integer& calculationDay,
+        const Integer& calculationGateIndex,
+        int cutletCount) const;
+    LegacyCutletPartitionReport executeUnpatchedDiscovery21CutletPartitionDiagnostic(
         const LegacyYearAnchor& anchor,
         const Integer& originalTargetDay,
         const Integer& calculationDay,

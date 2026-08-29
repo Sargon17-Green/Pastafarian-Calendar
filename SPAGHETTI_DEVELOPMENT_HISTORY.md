@@ -1357,3 +1357,38 @@ cuius prefixa 4,5,6 continent. Regressio igitur intentionaliter `REGRESSIO_DISCO
 Bootstrap transit et regressiones Graduum 1–41 omnes transeunt. `SourceLanguageCatalog` et duo fasciculi reference manent byte pro byte intacti. Nullus runtime externus adhibetur.
 
 Nullus codex PATCH 21 adest: nulla familia filtrata, nullus DP qui prefixum internum imponit, nullus `CutletPartitionPatchWrapper`. Etiam nullus generator nominum repetitorum vel codex PATCH 22 praemature additur.
+
+## Gradus 43 — PATCH 21: familia partitionis portam internam cogitur attingere
+
+### Cicatrix servata
+
+`legacyPositiveCompositions(gapCount,cutletCount)` et `legacyPositiveCompositionUnrank` non reparantur. `Discovery21CutletPartitionHandler` quoque non mutatur: adhuc `internalGateOffset` observat sed familiam omnium compositionum positivarum eligit. Via diagnostica `executeUnpatchedDiscovery21CutletPartitionDiagnostic` hanc historiam directe exsequitur.
+
+Via activa PATCH 21 cicatricem non praetermittit. `Patch21CutletPartitionHandler` ipsum handler DISCOVERY 21 primum vocat; raw `legacyFamily`, `selectionRank`, `legacyPartition`, prefixa et flag `legacyIgnoredInternalGate` igitur realiter nascuntur ante correctionem et invocation-local servantur.
+
+### Correctio addita
+
+Addita est structura `FilteredPositiveCompositionFamily` et duo auxilia semantica:
+
+```text
+filteredLegacyPositiveCompositions(...)
+filteredLegacyPositiveCompositionUnrank(...)
+```
+
+Si porta calculation-day stricte interna est, legalitas compositionis est tantum existentia prefixi cui summa exacte `internalGateOffset` aequat. Numerus exactus computatur combinatorice per partitionem partium ante et post limitem; unrank deinde candidatos primo elemento crescente tractat et numeros completionum legalium ad rank lexicographicum servandum adhibet. Ita familia nova non est ordo novus: est exacta subsequencia familiae legacy.
+
+`CutletPartitionPatchWrapper` eundem answer ring crateris 2 cum sigillo 21 recipit. Si familia filtrata intra `M` est, PATCH 13 rejectionem adhibet; si maior est, PATCH 14 wide detour adhibet. Deinde unrank fit intra familiam filtratam. Nullum diagnosticum, metricum aut raw output in decisionem semanticam post selectionem reingreditur.
+
+Si porta interna nulla est, wrapper nullam re-selectionem facit: raw rank et raw partitio legacy directe reutilizantur. Haec bifurcatio est pars PATCH 21 et non refactor clean.
+
+### Witness et regressiones
+
+Witness Gradus 42 manet `gapCount=9`, `cutletCount=6`, `internalGateOffset=6`. Raw familia 56 membra habet, raw rank 7 et cicatrix `[1,1,1,2,3,1]` manet sine prefixo 6. Familia filtrata 35 membra habet; rank semanticus 35 aperit `[4,1,1,1,1,1]`, exacte output oracle C++ normativi.
+
+Regressio Gradus 42 adaptata nunc simul confirmat cicatricem raw, viam PATCH 21 et diagnosticum historicum. Regressio Gradus 43 exhaustive, pro familiis parvis, comparat familiam filtratam cum materializatione directa subsequenciae legacy et ordinem lexicographicum exacte servatum demonstrat. Etiam casum sine porta interna, conservationem diagnostici et independentiam invocationum probat.
+
+Compilator `g++ (Debian 14.2.0-19) 14.2.0`, C++20. Bootstrap et regressiones Graduum 1–43 omnes transeunt.
+
+### Audit et limes proximus
+
+`SourceLanguageCatalog` et reference C++ manent byte pro byte intacti. Nullus runtime externus adhibetur. Nullus codex PATCH 22 in productione additus est: generator nominum repetitorum, partial-permutation repair et strata posteriora nondum introducuntur. Gradus proximus est 44/55 — DISCOVERY 22 tantum.

@@ -967,6 +967,165 @@ std::vector<int> legacyPositiveCompositionUnrank(
     return out;
 }
 
+static Integer exactPositiveCompositionCount(int total, int parts) {
+    if (total < 1 || parts < 1 || parts > total) {
+        return Integer{0};
+    }
+    return exactCombinationForLegacyPositiveCompositions(total - 1, parts - 1);
+}
+
+static Integer filteredPositiveCompletionCount(
+    int remaining,
+    int slots,
+    int cumulative,
+    int internalGateOffset,
+    bool internalGateRequired,
+    bool hitBoundary) {
+    if (slots == 0) {
+        if (remaining != 0) {
+            return Integer{0};
+        }
+        return (!internalGateRequired || hitBoundary) ? Integer{1} : Integer{0};
+    }
+    if (remaining < slots) {
+        return Integer{0};
+    }
+    if (!internalGateRequired || hitBoundary) {
+        return exactPositiveCompositionCount(remaining, slots);
+    }
+    if (cumulative >= internalGateOffset) {
+        return cumulative == internalGateOffset
+            ? exactPositiveCompositionCount(remaining, slots)
+            : Integer{0};
+    }
+
+    const int distanceToBoundary = internalGateOffset - cumulative;
+    if (distanceToBoundary < 1 || distanceToBoundary >= remaining) {
+        return Integer{0};
+    }
+    const int tailTotal = remaining - distanceToBoundary;
+    Integer total = 0;
+    for (int prefixParts = 1; prefixParts < slots; ++prefixParts) {
+        const int tailParts = slots - prefixParts;
+        const Integer prefixWays = exactPositiveCompositionCount(
+            distanceToBoundary,
+            prefixParts);
+        if (prefixWays == 0) {
+            continue;
+        }
+        const Integer tailWays = exactPositiveCompositionCount(
+            tailTotal,
+            tailParts);
+        if (tailWays == 0) {
+            continue;
+        }
+        total += prefixWays * tailWays;
+    }
+    return total;
+}
+
+FilteredPositiveCompositionFamily filteredLegacyPositiveCompositions(
+    int gapCount,
+    int cutletCount,
+    int internalGateOffset,
+    bool internalGateRequired) {
+    const LegacyPositiveCompositionFamily legacy = legacyPositiveCompositions(
+        gapCount,
+        cutletCount);
+    if (internalGateRequired &&
+        (internalGateOffset < 1 || internalGateOffset >= gapCount)) {
+        throw BaseValidationError("offset portae internae intra intervalla requiritur");
+    }
+    const Integer count = internalGateRequired
+        ? filteredPositiveCompletionCount(
+              gapCount,
+              cutletCount,
+              0,
+              internalGateOffset,
+              true,
+              false)
+        : legacy.count;
+    if (count < 1) {
+        throw BaseValidationError("familia partitionis filtratae vacua est");
+    }
+    return FilteredPositiveCompositionFamily{
+        gapCount,
+        cutletCount,
+        internalGateOffset,
+        internalGateRequired,
+        count
+    };
+}
+
+std::vector<int> filteredLegacyPositiveCompositionUnrank(
+    const FilteredPositiveCompositionFamily& family,
+    const Integer& rank1) {
+    if (rank1 < 1 || rank1 > family.count) {
+        throw BaseValidationError("gradus compositionis filtratae extra familiam est");
+    }
+    if (!family.internalGateRequired) {
+        const LegacyPositiveCompositionFamily legacy{
+            family.gapCount,
+            family.cutletCount,
+            family.count
+        };
+        return legacyPositiveCompositionUnrank(legacy, rank1);
+    }
+
+    Integer rank = rank1;
+    int remaining = family.gapCount;
+    int slots = family.cutletCount;
+    int cumulative = 0;
+    bool hitBoundary = false;
+    std::vector<int> out;
+    out.reserve(static_cast<std::size_t>(family.cutletCount));
+
+    while (slots > 0) {
+        const int maxFirst = remaining - (slots - 1);
+        bool chosen = false;
+        for (int first = 1; first <= maxFirst; ++first) {
+            const int nextCumulative = cumulative + first;
+            bool nextHit = hitBoundary;
+            if (!hitBoundary) {
+                if (nextCumulative > family.internalGateOffset) {
+                    continue;
+                }
+                if (nextCumulative == family.internalGateOffset) {
+                    nextHit = true;
+                }
+            }
+            const Integer block = filteredPositiveCompletionCount(
+                remaining - first,
+                slots - 1,
+                nextCumulative,
+                family.internalGateOffset,
+                true,
+                nextHit);
+            if (block == 0) {
+                continue;
+            }
+            if (rank > block) {
+                rank -= block;
+                continue;
+            }
+            out.push_back(first);
+            remaining -= first;
+            --slots;
+            cumulative = nextCumulative;
+            hitBoundary = nextHit;
+            chosen = true;
+            break;
+        }
+        if (!chosen) {
+            throw BaseValidationError("compositionis filtratae apertio defecit");
+        }
+    }
+    if (!hitBoundary) {
+        throw BaseValidationError("compositio filtrata portam internam non attingit");
+    }
+    return out;
+}
+
 int oldNextBowlFixedName(int id) {
     if (id < 1 || id > 6) {
         throw BaseValidationError("ID crateris inter unum et sex requiritur");
@@ -3740,6 +3899,73 @@ void BaseValidationManager::requireDiscovery21CutletPartitionReady(const BaseMon
     }
 }
 
+void BaseValidationManager::requirePatch21CutletPartitionReady(const BaseMonsterContext& ctx) const {
+    requireDiscovery21CutletPartitionReady(ctx);
+    if (!ctx.patch21Applied) {
+        throw BaseValidationError("PATCH 21 nondum applicatus est");
+    }
+    if (!ctx.patch21LegacyExecuted) {
+        throw BaseValidationError("familia legacy ante PATCH 21 non exsecuta est");
+    }
+    if (ctx.patch21SemanticFamily.gapCount != ctx.discovery21GapCount ||
+        ctx.patch21SemanticFamily.cutletCount != ctx.discovery21CutletCount ||
+        ctx.patch21SemanticFamily.count < 1) {
+        throw BaseValidationError("familia semantica PATCH 21 cum contextu non congruit");
+    }
+    if (ctx.patch21SemanticSelectionRank < 1 ||
+        ctx.patch21SemanticSelectionRank > ctx.patch21SemanticFamily.count) {
+        throw BaseValidationError("gradus selectionis PATCH 21 extra fines est");
+    }
+    if (ctx.patch21SemanticPartition.size() !=
+        static_cast<std::size_t>(ctx.discovery21CutletCount) ||
+        ctx.patch21SemanticPrefixSums.size() != ctx.patch21SemanticPartition.size()) {
+        throw BaseValidationError("partitio semantica PATCH 21 magnitudine falsa est");
+    }
+
+    int summa = 0;
+    int cumulata = 0;
+    bool boundaryHit = false;
+    for (std::size_t i = 0; i < ctx.patch21SemanticPartition.size(); ++i) {
+        const int part = ctx.patch21SemanticPartition[i];
+        if (part < 1) {
+            throw BaseValidationError("pars semantica PATCH 21 non positiva est");
+        }
+        summa += part;
+        cumulata += part;
+        if (ctx.patch21SemanticPrefixSums[i] != cumulata) {
+            throw BaseValidationError("prefixum semanticum PATCH 21 male servatum est");
+        }
+        if (ctx.discovery21CalculationDayIsInternalGate &&
+            cumulata == ctx.discovery21InternalGateOffset) {
+            boundaryHit = true;
+        }
+    }
+    if (summa != ctx.discovery21GapCount) {
+        throw BaseValidationError("summa partitionis PATCH 21 a gapCount differt");
+    }
+    if (boundaryHit != ctx.patch21SemanticHitInternalGateBoundary) {
+        throw BaseValidationError("diagnosticum limes semanticae PATCH 21 discrepat");
+    }
+
+    if (ctx.discovery21CalculationDayIsInternalGate) {
+        if (!ctx.patch21FilterApplied ||
+            !ctx.patch21SemanticFamily.internalGateRequired ||
+            ctx.patch21SemanticFamily.internalGateOffset != ctx.discovery21InternalGateOffset ||
+            !ctx.patch21SemanticHitInternalGateBoundary ||
+            ctx.patch21LegacyPartitionReused) {
+            throw BaseValidationError("filter portae internae PATCH 21 non completus est");
+        }
+    } else {
+        if (ctx.patch21FilterApplied ||
+            ctx.patch21SemanticFamily.internalGateRequired ||
+            !ctx.patch21LegacyPartitionReused ||
+            ctx.patch21SemanticSelectionRank != ctx.discovery21SelectionRank ||
+            ctx.patch21SemanticPartition != ctx.discovery21LegacyPartition) {
+            throw BaseValidationError("casus sine porta interna legacy transire debet");
+        }
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -4006,6 +4232,53 @@ std::vector<int> LegacyPositiveCompositionAdapter::unrank(
     const LegacyPositiveCompositionFamily& familyValue,
     const Integer& rank1) const {
     return legacyPositiveCompositionUnrank(familyValue, rank1);
+}
+Patch21CutletPartitionResult CutletPartitionPatchWrapper::repair(
+    const BaseMonsterContext& ctx,
+    const LegacyAnswerRing& stream,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper) const {
+    Patch21CutletPartitionResult out;
+    out.filterApplied = ctx.discovery21CalculationDayIsInternalGate;
+    out.legacyPartitionReused = !out.filterApplied;
+    out.semanticFamily = filteredLegacyPositiveCompositions(
+        ctx.discovery21GapCount,
+        ctx.discovery21CutletCount,
+        ctx.discovery21InternalGateOffset,
+        out.filterApplied);
+
+    if (!out.filterApplied) {
+        out.semanticSelectionRank = ctx.discovery21SelectionRank;
+        out.semanticPartition = ctx.discovery21LegacyPartition;
+    } else {
+        if (out.semanticFamily.count <= M_OLD) {
+            out.semanticSelectionRank = rejectionWrapper.repair(
+                stream,
+                out.semanticFamily.count,
+                selectionAdapter).outputRank;
+        } else {
+            out.semanticSelectionRank = wideWrapper.repair(
+                stream,
+                out.semanticFamily.count,
+                selectionAdapter).outputRank;
+        }
+        out.semanticPartition = filteredLegacyPositiveCompositionUnrank(
+            out.semanticFamily,
+            out.semanticSelectionRank);
+    }
+
+    out.semanticPrefixSums.clear();
+    out.semanticPrefixSums.reserve(out.semanticPartition.size());
+    int cumulative = 0;
+    for (const int part : out.semanticPartition) {
+        cumulative += part;
+        out.semanticPrefixSums.push_back(cumulative);
+        if (out.filterApplied && cumulative == ctx.discovery21InternalGateOffset) {
+            out.semanticHitInternalGateBoundary = true;
+        }
+    }
+    return out;
 }
 
 Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
@@ -5157,6 +5430,62 @@ void Discovery21CutletPartitionHandler::handle(
     validator.requireDiscovery21CutletPartitionReady(ctx);
 }
 
+void Patch21CutletPartitionHandler::handle(
+    BaseMonsterContext& ctx,
+    const Discovery21CutletPartitionHandler& legacyHandler,
+    const LegacyPositiveCompositionAdapter& adapter,
+    const CutletPartitionPatchWrapper& wrapper,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    legacyHandler.handle(
+        ctx,
+        adapter,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+    ctx.patch21LegacyExecuted = true;
+
+    const int queriedBowlId = 2;
+    const int nextBowlId = nextBowlThroughOrderAt46Latch(
+        ctx.patch20SemanticStructureSauce.orderAt46Latch,
+        queriedBowlId);
+    const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
+        ctx.patch20SemanticStructureSauce.finalBowls,
+        queriedBowlId,
+        nextBowlId,
+        21);
+    const Patch21CutletPartitionResult repaired = wrapper.repair(
+        ctx,
+        stream,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper);
+
+    ctx.patch21SemanticFamily = repaired.semanticFamily;
+    ctx.patch21SemanticSelectionRank = repaired.semanticSelectionRank;
+    ctx.patch21SemanticPartition = repaired.semanticPartition;
+    ctx.patch21SemanticPrefixSums = repaired.semanticPrefixSums;
+    ctx.patch21SemanticHitInternalGateBoundary = repaired.semanticHitInternalGateBoundary;
+    ctx.patch21FilterApplied = repaired.filterApplied;
+    ctx.patch21LegacyPartitionReused = repaired.legacyPartitionReused;
+    ctx.patch21Applied = true;
+    ctx.currentHandler = "Patch21CutletPartitionHandler";
+    ctx.phase = "PATCH_21_CUTLET_PARTITION_INTERNAL_GATE_FILTER";
+    ctx.status = ctx.patch21FilterApplied
+        ? "FILTERED_LEGACY_FAMILY_HITS_INTERNAL_GATE"
+        : "NO_INTERNAL_GATE_LEGACY_PARTITION_REUSED";
+    ctx.branchTrace.push_back(ctx.patch21FilterApplied
+        ? "PATCH21:FILTERED_LEGACY_SUBSEQUENCE"
+        : "PATCH21:NO_INTERNAL_GATE_PASS_THROUGH");
+    metrics.bump(ctx, "patch21.cutlet.partition.calls");
+    validator.requirePatch21CutletPartitionReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -5852,6 +6181,30 @@ void BaseDispatcher::dispatchDiscovery21CutletPartition(
         metrics);
 }
 
+void BaseDispatcher::dispatchPatchedCutletPartition(
+    BaseMonsterContext& ctx,
+    const Patch21CutletPartitionHandler& handler,
+    const Discovery21CutletPartitionHandler& legacyHandler,
+    const LegacyPositiveCompositionAdapter& adapter,
+    const CutletPartitionPatchWrapper& wrapper,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const Patch14WideDetourWrapper& wideWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:PATCH21_CUTLET_PARTITION");
+    handler.handle(
+        ctx,
+        legacyHandler,
+        adapter,
+        wrapper,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+}
+
 void BaseDispatcher::dispatchPatchedYear5000Tie(
     BaseMonsterContext& ctx,
     const Patch17Year5000TieHandler& handler,
@@ -6435,6 +6788,82 @@ LegacyCutletPartitionReport BaseMonsterManager::executeDiscovery21CutletPartitio
     const LegacyBiasedSelectionAdapter selectionAdapter;
     const Patch13RejectionWrapper rejectionWrapper;
     const Patch14WideDetourWrapper wideWrapper;
+    const Discovery21CutletPartitionHandler legacyHandler;
+    const CutletPartitionPatchWrapper wrapper;
+    const Patch21CutletPartitionHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedCutletPartition(
+        ctx,
+        handler,
+        legacyHandler,
+        adapter,
+        wrapper,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper,
+        validator,
+        metrics);
+
+    return LegacyCutletPartitionReport{
+        calculationDay,
+        originalTargetDay,
+        calculationGateIndex,
+        ctx.discovery20ResolvedYear,
+        ctx.discovery21GapCount,
+        ctx.discovery21CutletCount,
+        ctx.discovery21InternalGateOffset,
+        ctx.discovery21CalculationDayIsInternalGate,
+        ctx.discovery21LegacyFamily,
+        ctx.discovery21SelectionRank,
+        ctx.discovery21LegacyPartition,
+        ctx.discovery21LegacyPrefixSums,
+        ctx.discovery21LegacyHitInternalGateBoundary,
+        ctx.discovery21LegacyIgnoredInternalGate,
+        ctx.patch21SemanticFamily,
+        ctx.patch21SemanticSelectionRank,
+        ctx.patch21SemanticPartition,
+        ctx.patch21SemanticPrefixSums,
+        ctx.patch21SemanticHitInternalGateBoundary,
+        ctx.patch21FilterApplied,
+        ctx.patch21LegacyExecuted,
+        ctx.patch21LegacyPartitionReused,
+        ctx.patch21Applied,
+        ctx.discovery21CutletPartitionReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+LegacyCutletPartitionReport BaseMonsterManager::executeUnpatchedDiscovery21CutletPartitionDiagnostic(
+    const LegacyYearAnchor& anchor,
+    const Integer& originalTargetDay,
+    const Integer& calculationDay,
+    const Integer& calculationGateIndex,
+    int cutletCount) const {
+    const LegacyStructureSauceReport structure = executeDiscovery20StructureSauce(
+        anchor,
+        originalTargetDay,
+        calculationDay);
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery20OriginalTargetDay = originalTargetDay;
+    ctx.discovery20YearFirstDay = structure.yearFirstDay;
+    ctx.discovery20ResolvedYear = structure.resolvedYear;
+    ctx.patch20SemanticStructureSauce = structure.semanticStructureSauce;
+    ctx.patch20Applied = structure.patch20Applied;
+    ctx.discovery21CalculationGateIndex = calculationGateIndex;
+    ctx.discovery21CutletCount = cutletCount;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyPositiveCompositionAdapter adapter;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const Patch14WideDetourWrapper wideWrapper;
     const Discovery21CutletPartitionHandler handler;
     const BaseDispatcher dispatcher;
     dispatcher.dispatchDiscovery21CutletPartition(
@@ -6462,6 +6891,15 @@ LegacyCutletPartitionReport BaseMonsterManager::executeDiscovery21CutletPartitio
         ctx.discovery21LegacyPrefixSums,
         ctx.discovery21LegacyHitInternalGateBoundary,
         ctx.discovery21LegacyIgnoredInternalGate,
+        FilteredPositiveCompositionFamily{},
+        Integer{},
+        {},
+        {},
+        false,
+        false,
+        false,
+        false,
+        false,
         ctx.discovery21CutletPartitionReady,
         ctx.phase,
         ctx.status,

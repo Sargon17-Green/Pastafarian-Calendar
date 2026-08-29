@@ -80,13 +80,21 @@ int main() {
             cutletCount);
 
         require(report.ready,
-                "DISCOVERY 21 partitionem legacy paratam reddere debet");
-        require(report.handler == "Discovery21CutletPartitionHandler",
-                "handler DISCOVERY 21 expectatus est");
+                "PATCH 21 partitionem paratam reddere debet");
+        require(report.handler == "Patch21CutletPartitionHandler",
+                "handler PATCH 21 expectatus est");
+        require(report.patch21Applied,
+                "PATCH 21 via activa applicari debet");
+        require(report.patch21LegacyExecuted,
+                "familia legacy ante PATCH 21 vere exsequi debet");
         require(report.calculationDayIsInternalGate,
-                "porta interna in contextu DISCOVERY 21 observari debet");
+                "porta interna in contextu PATCH 21 observari debet");
         require(report.legacyIgnoredInternalGate,
-                "familia legacy portam internam consulto ignorare debet");
+                "cicatrix legacy portam internam adhuc ignorare debet");
+        require(report.patch21FilterApplied,
+                "familia semantica PATCH 21 portam internam filtrare debet");
+        require(report.semanticHitInternalGateBoundary,
+                "partitio semantica PATCH 21 portam internam attingere debet");
         require(report.gapCount == gapCount,
                 "gapCount legacy ab anno resoluto differt");
         require(report.cutletCount == cutletCount,
@@ -108,6 +116,27 @@ int main() {
         const bool legacyHits = hitsBoundary(report.legacyPartition, internalOffset);
         require(legacyHits == report.legacyHitInternalGateBoundary,
                 "diagnosticum prefixum portae internae discrepat");
+        require(!legacyHits,
+                "witness legacy post PATCH 21 cicatricem servare debet");
+        require(report.semanticPartition == normativePartition,
+                "partitio semantica PATCH 21 ab oracle normativo differt");
+
+        const auto diagnostic = manager.executeUnpatchedDiscovery21CutletPartitionDiagnostic(
+            anchor,
+            yearFirstDay,
+            calculationDay,
+            calculationGateIndex,
+            cutletCount);
+        require(diagnostic.ready,
+                "diagnosticum DISCOVERY 21 paratum esse debet");
+        require(diagnostic.handler == "Discovery21CutletPartitionHandler",
+                "diagnosticum handler DISCOVERY 21 servare debet");
+        require(!diagnostic.patch21Applied,
+                "diagnosticum PATCH 21 applicare non debet");
+        require(diagnostic.legacyPartition == report.legacyPartition,
+                "diagnosticum eandem partitionem legacy servare debet");
+        require(!diagnostic.legacyHitInternalGateBoundary,
+                "diagnosticum defectum prefixi portae internae servare debet");
 
         std::cout << "DISCOVERY_21_WITNESS"
                   << " gapCount=" << gapCount
@@ -120,16 +149,8 @@ int main() {
                   << " normative=" << integerList(normativePartition)
                   << "\n";
 
-        if (report.legacyPartition != normativePartition && !legacyHits) {
-            std::cerr << "REGRESSIO_DISCOVERY_21_DEFECIT: familia legacy omnes compositiones positivas admittit et partitionem sine prefixo ad portam internam elegit\n";
-            return 1;
-        }
-        if (report.legacyPartition == normativePartition) {
-            std::cerr << "REGRESSIO_DISCOVERY_21_INEXPECTATA: witness divergence non exposuit\n";
-            return 2;
-        }
-        std::cerr << "REGRESSIO_DISCOVERY_21_INEXPECTATA: legacy differt sed portam internam fortuito attingit\n";
-        return 3;
+        std::cout << "REGRESSIO_DISCOVERY_21_POST_PATCH_TRANSIIT\n";
+        return 0;
     } catch (const std::exception& error) {
         std::cerr << "REGRESSIO_DISCOVERY_21_ERROR: " << error.what() << "\n";
         return 4;
