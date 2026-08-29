@@ -1,0 +1,122 @@
+Aşama 7 başlamadan önce Aşama 6 yerel baseline doğrulaması
+Komut: python -m unittest discover -s tests -v
+Beklenen durum: EXPECTED_RED
+Çalıştırılan test: 38
+Beklenen failure sayısı: 4
+Beklenmeyen failure/error: YOK
+
+test_bounded_composition_lexicographic_order (test_stage_01.Stage01Tests.test_bounded_composition_lexicographic_order) ... ok
+test_context_is_per_invocation (test_stage_01.Stage01Tests.test_context_is_per_invocation) ... ok
+test_cutlet_partition_filter (test_stage_01.Stage01Tests.test_cutlet_partition_filter) ... ok
+test_day_axis_and_save (test_stage_01.Stage01Tests.test_day_axis_and_save) ... ok
+test_distinct_name_unrank (test_stage_01.Stage01Tests.test_distinct_name_unrank) ... ok
+test_month_weaving_all_small_domains (test_stage_01.Stage01Tests.test_month_weaving_all_small_domains) ... ok
+test_month_weaving_matches_bruteforce (test_stage_01.Stage01Tests.test_month_weaving_matches_bruteforce) ... ok
+test_no_future_patch_names_in_production (test_stage_01.Stage01Tests.test_no_future_patch_names_in_production) ... ok
+test_normative_year5000_and_structure_smoke (test_stage_01.Stage01Tests.test_normative_year5000_and_structure_smoke) ... ok
+test_permutation_edges (test_stage_01.Stage01Tests.test_permutation_edges) ... ok
+test_production_does_not_call_oracle (test_stage_01.Stage01Tests.test_production_does_not_call_oracle) ... ok
+test_sauce_determinism_and_query_wrap (test_stage_01.Stage01Tests.test_sauce_determinism_and_query_wrap) ... ok
+test_short_and_wide_selection_ranges (test_stage_01.Stage01Tests.test_short_and_wide_selection_ranges) ... ok
+test_source_language_catalog_is_frozen_and_index_stable (test_stage_01.Stage01Tests.test_source_language_catalog_is_frozen_and_index_stable) ... ok
+test_work_counts (test_stage_01.Stage01Tests.test_work_counts) ... ok
+test_current_remainder_path_diverges_from_normative_save (test_stage_02_discovery_01.Stage02Discovery01Tests.test_current_remainder_path_diverges_from_normative_save) ... ok
+test_legacy_helper_keeps_the_historical_zero_bug (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_helper_keeps_the_historical_zero_bug) ... ok
+test_legacy_remainder_is_on_the_real_calendar_path (test_stage_02_discovery_01.Stage02Discovery01Tests.test_legacy_remainder_is_on_the_real_calendar_path) ... ok
+test_stage02_legacy_scar_still_exists_after_patch (test_stage_02_discovery_01.Stage02Discovery01Tests.test_stage02_legacy_scar_still_exists_after_patch) ... ok
+test_adapter_routes_through_patch_wrapper_and_keeps_state_local (test_stage_03_patch_01.Stage03Patch01Tests.test_adapter_routes_through_patch_wrapper_and_keeps_state_local) ... ok
+test_observability_state_does_not_change_the_patch_result (test_stage_03_patch_01.Stage03Patch01Tests.test_observability_state_does_not_change_the_patch_result) ... ok
+test_old_remainder_is_still_physically_wrong (test_stage_03_patch_01.Stage03Patch01Tests.test_old_remainder_is_still_physically_wrong) ... ok
+test_save_patch_matches_normative_save_on_required_edges (test_stage_03_patch_01.Stage03Patch01Tests.test_save_patch_matches_normative_save_on_required_edges) ... ok
+test_save_patch_really_calls_the_legacy_helper (test_stage_03_patch_01.Stage03Patch01Tests.test_save_patch_really_calls_the_legacy_helper) ... ok
+test_current_day_tag_path_diverges_from_normative_day_count (test_stage_04_discovery_02.Stage04Discovery02Tests.test_current_day_tag_path_diverges_from_normative_day_count) ... ok
+test_day_tag_adapter_keeps_legacy_state_owned_by_one_invocation (test_stage_04_discovery_02.Stage04Discovery02Tests.test_day_tag_adapter_keeps_legacy_state_owned_by_one_invocation) ... ok
+test_legacy_helper_keeps_the_historical_day_tag_formula (test_stage_04_discovery_02.Stage04Discovery02Tests.test_legacy_helper_keeps_the_historical_day_tag_formula) ... ok
+test_old_day_tag_is_on_the_real_calendar_path (test_stage_04_discovery_02.Stage04Discovery02Tests.test_old_day_tag_is_on_the_real_calendar_path) ... ok
+test_day_tag_patch_matches_normative_day_count_on_required_edges (test_stage_05_patch_02.Stage05Patch02Tests.test_day_tag_patch_matches_normative_day_count_on_required_edges) ... ok
+test_day_tag_patch_really_calls_old_day_tag (test_stage_05_patch_02.Stage05Patch02Tests.test_day_tag_patch_really_calls_old_day_tag) ... ok
+test_observability_state_cannot_change_the_day_tag_patch (test_stage_05_patch_02.Stage05Patch02Tests.test_observability_state_cannot_change_the_day_tag_patch) ... ok
+test_old_day_tag_remains_physically_wrong (test_stage_05_patch_02.Stage05Patch02Tests.test_old_day_tag_remains_physically_wrong) ... ok
+test_patch_state_and_legacy_state_are_both_invocation_local (test_stage_05_patch_02.Stage05Patch02Tests.test_patch_state_and_legacy_state_are_both_invocation_local) ... ok
+test_second_foundation_guard_is_a_real_preserved_scar (test_stage_05_patch_02.Stage05Patch02Tests.test_second_foundation_guard_is_a_real_preserved_scar) ... ok
+test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) ... 
+  test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) (calculation_day=-15055671, target_day=-15055671) ... FAIL
+  test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) (calculation_day=-15055671, target_day=-15055668) ... FAIL
+  test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) (calculation_day=-15055672, target_day=-15055671) ... FAIL
+  test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) (calculation_day=-15055674, target_day=-15055668) ... FAIL
+test_legacy_distance_state_is_owned_by_one_invocation (test_stage_06_discovery_03.Stage06Discovery03Tests.test_legacy_distance_state_is_owned_by_one_invocation) ... ok
+test_legacy_helper_keeps_tag_difference_formula (test_stage_06_discovery_03.Stage06Discovery03Tests.test_legacy_helper_keeps_tag_difference_formula) ... ok
+test_old_distance_is_on_the_real_calendar_path (test_stage_06_discovery_03.Stage06Discovery03Tests.test_old_distance_is_on_the_real_calendar_path) ... ok
+
+======================================================================
+FAIL: test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) (calculation_day=-15055671, target_day=-15055671)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage06-work/pastafari-calendar-python-turkish-stage-06-discovery-03/tests/test_stage_06_discovery_03.py", line 143, in test_current_distance_path_diverges_from_normative_distance
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        actual,
+        ^^^^^^^
+        expected,
+        ^^^^^^^^^
+        msg="Geçerli eski mesafe yolu normatif mesafeyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 0 != 1 : Geçerli eski mesafe yolu normatif mesafeyle uyuşmadı
+
+======================================================================
+FAIL: test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) (calculation_day=-15055671, target_day=-15055668)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage06-work/pastafari-calendar-python-turkish-stage-06-discovery-03/tests/test_stage_06_discovery_03.py", line 143, in test_current_distance_path_diverges_from_normative_distance
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        actual,
+        ^^^^^^^
+        expected,
+        ^^^^^^^^^
+        msg="Geçerli eski mesafe yolu normatif mesafeyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 6 != 4 : Geçerli eski mesafe yolu normatif mesafeyle uyuşmadı
+
+======================================================================
+FAIL: test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) (calculation_day=-15055672, target_day=-15055671)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage06-work/pastafari-calendar-python-turkish-stage-06-discovery-03/tests/test_stage_06_discovery_03.py", line 143, in test_current_distance_path_diverges_from_normative_distance
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        actual,
+        ^^^^^^^
+        expected,
+        ^^^^^^^^^
+        msg="Geçerli eski mesafe yolu normatif mesafeyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 1 != 2 : Geçerli eski mesafe yolu normatif mesafeyle uyuşmadı
+
+======================================================================
+FAIL: test_current_distance_path_diverges_from_normative_distance (test_stage_06_discovery_03.Stage06Discovery03Tests.test_current_distance_path_diverges_from_normative_distance) (calculation_day=-15055674, target_day=-15055668)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/python-turkish-stage06-work/pastafari-calendar-python-turkish-stage-06-discovery-03/tests/test_stage_06_discovery_03.py", line 143, in test_current_distance_path_diverges_from_normative_distance
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        actual,
+        ^^^^^^^
+        expected,
+        ^^^^^^^^^
+        msg="Geçerli eski mesafe yolu normatif mesafeyle uyuşmadı",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 1 != 7 : Geçerli eski mesafe yolu normatif mesafeyle uyuşmadı
+
+----------------------------------------------------------------------
+Ran 38 tests in 11.719s
+
+FAILED (failures=4)

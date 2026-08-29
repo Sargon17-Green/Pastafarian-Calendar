@@ -56,6 +56,10 @@ class MonsterContext:
     legacy_distance_calculation_day: int | None = None
     legacy_distance_target_day: int | None = None
     legacy_distance_value: int | None = None
+    patch03_chronological_distance: int | None = None
+    patch03_distance_value: int | None = None
+    patch03_legacy_replaced: bool = False
+    patch03_applied: bool = False
 
 
 class BaseMetrics:

@@ -1,0 +1,25 @@
+Aşama 7/55 — PATCH 03
+
+Bu paket yalnızca Aşama 7 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_distance.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_06_discovery_03.py
+tests/test_stage_07_patch_03.py
+artifacts/stage-07/BASELINE_STAGE_06_EXPECTED_RED.txt
+artifacts/stage-07/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_07.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 6 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 6 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+oldDistance tarihsel kusuru: KORUNDU
+patchedCounts ve DistancePatchWrapper: EKLENDİ
+04–26 gelecek kusur/yama kodu: YOK

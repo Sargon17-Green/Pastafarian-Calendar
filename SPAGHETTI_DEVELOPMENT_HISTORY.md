@@ -163,3 +163,56 @@ Bir günlük `FOUNDATION_DAY -> FOUNDATION_DAY + 1` örneği eski yolun tesadüf
 `oldDistance`, önceki yamanın `dayTagWithFoundationScar` yolunu gerçekten yeniden çağırır; bu nedenle gün etiketi katmanı artık bir çağrı içinde hem kendi aşamasında hem mesafe legacy hesabının içinde görülebilir.
 
 Bu aşamada kronolojik karşılaştırma, legacy değeri kronolojik değerle değiştiren guard veya son `+1` henüz yoktur. Bunların hiçbiri erken eklenmemiştir.
+
+
+## Aşama 7 — Yama 03: etiket farkını kronolojik mesafeyle karşılaştırma
+
+### Ne aşıldı
+
+`oldDistance` değiştirilmedi. Hâlâ iki yamalı gün etiketinin mutlak farkını döndürür.
+
+Düzeltme eski fonksiyonun üstünde uygulanır:
+
+```text
+legacy = oldDistance(calculationDay, targetDay)
+chronological = abs(targetDay - calculationDay)
+
+if legacy != chronological:
+    legacy = chronological
+
+distance = legacy + 1
+```
+
+Bu yol önce tarihsel hesabı gerçekten çalıştırır. Yalnızca legacy değer kronolojik farktan ayrışıyorsa legacy ara değeri kronolojik değerle değiştirir. Ardından her durumda iki uç günü de kapsamak için `+1` uygular.
+
+### Neden normatif olarak eşdeğer
+
+Legacy değer kronolojik farktan farklıysa açıkça kronolojik farkla değiştirilir.
+
+Legacy değer kronolojik farkla aynıysa değiştirme dalı çalışmaz; legacy zaten kronolojik değerdir.
+
+Her iki durumda da son `+1` uygulanır. Böylece son değer her zaman:
+
+```text
+abs(targetDay - calculationDay) + 1
+```
+
+olur.
+
+### Ne korundu
+
+Aşama 6'nın normatif kırmızı regresyonunun gövdesi byte-for-byte değiştirilmedi ve yalnızca yeni yama sayesinde yeşile döndü.
+
+`oldDistance` yardımcısının yanlış sonuçlarını doğrulayan doğrudan testler korunur.
+
+Aşama 6'daki adapter-state testi PATCH sonrası adapter çıkışının normatif olmasını bekleyecek biçimde güncellendi; ham legacy değer bağlamda yine `oldDistance` sonucu olarak saklanır.
+
+### Bu aşamada eklenen canavar katmanı
+
+`DistancePatchWrapper`, `LegacyDistanceAdapter` üstünden çalışan ayrı yama katmanıdır.
+
+Çağrı bağlamında ham legacy mesafe, kronolojik ara fark, son mesafe, legacy değerin değiştirilip değiştirilmediği ve yamanın uygulanma durumu ayrı saklanır.
+
+Doğal değiştirmeme dalı `FOUNDATION_DAY-1 -> FOUNDATION_DAY` örneğiyle ayrıca doğrulanır: legacy `1`, kronolojik fark `1`, değiştirme yok, son mesafe `2`.
+
+Günlük, ölçüm ve tanı verileri normatif hesaba geri okunmaz.

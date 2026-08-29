@@ -85,10 +85,10 @@ class Stage06Discovery03Tests(unittest.TestCase):
 
         self.assertEqual(
             actual,
-            oldDistance(
+            work_counts(
                 FOUNDATION_DAY - 1,
                 FOUNDATION_DAY + 3,
-            ),
+            ).distance,
         )
         self.assertEqual(
             first.legacy_distance_calculation_day,
@@ -100,7 +100,10 @@ class Stage06Discovery03Tests(unittest.TestCase):
         )
         self.assertEqual(
             first.legacy_distance_value,
-            actual,
+            oldDistance(
+                FOUNDATION_DAY - 1,
+                FOUNDATION_DAY + 3,
+            ),
         )
 
         self.assertIsNone(
