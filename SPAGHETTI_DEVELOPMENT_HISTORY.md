@@ -844,3 +844,72 @@ Invocation bağlamında exact initial bowl tuple'ı, son pour drop indeksi, son 
 Bu aşamada `bowlAlias` yoktur. Alias install/read helper'ı, vaultOld, pending writes veya Patch 10 kodu eklenmemiştir.
 
 Stage 15 sentinel ve Stage 17 permutation rank patch aynen korunur.
+
+
+## Aşama 19 — Yama 09: order positions için bowlAlias katmanı
+
+### Ne aşıldı
+
+Discovery 09'un fiziksel yanlış helper'ı değiştirilmedi:
+
+```text
+legacyFixedBowlPours(...)
+    position 1 -> B[1]
+    position 2 -> B[2]
+    position 3 -> B[3]
+```
+
+Bu helper hâlâ sabit bowl ID okur.
+
+Patch ayrı alias katmanındadır.
+
+Current exact order için:
+
+```text
+bowlAlias[position] = order[position]
+```
+
+ilişkisi kurulur.
+
+Python tuple fiziksel düzeninde bunun karşılığı:
+
+```text
+bowlAlias[1] = order[0]
+...
+bowlAlias[6] = order[5]
+```
+
+şeklindedir.
+
+### Corrected bowl read
+
+Bütün corrected pour bowl read'leri tek helper üzerinden geçer:
+
+```text
+bowlByLegacyPosition(oldBowls, bowlAlias, position)
+    -> oldBowls[bowlAlias[position]]
+```
+
+`aliasedPositionPours` position 1,2,3 için doğrudan order veya sabit bowl ID okumaz.
+
+Üç read de bu helper'ı kullanır.
+
+### Ne korundu
+
+`BowlAliasPatchWrapper`, yanlış `legacyFixedBowlPours` helper'ını önce gerçekten çalıştırır ve ham fixed-bowl pour tuple'ını scar olarak tutar.
+
+Ardından alias table'ı kurar ve corrected pours üretir.
+
+Yalnızca corrected tuple semantic sonuç olarak döner.
+
+Aşama 18'in normatif pour regresyonunun gövdesi byte-for-byte değiştirilmedi ve yalnızca alias katmanı sayesinde yeşile döndü.
+
+Exact initial bowls, Stage 15 sentinel ve Stage 17 permutation rank patch aynen korunur.
+
+### Bu aşamada eklenen canavar katmanı
+
+Invocation bağlamında son drop indeksi, bowlAlias tuple'ı, wrong fixed-bowl pour scar'ı, corrected pour tuple'ı ve patch uygulanma durumu tutulur.
+
+46 visible drop için isolated pour tuple'ları test-only normatif position-based formülle eşleşir.
+
+Bowl stir/update henüz uygulanmaz. `vaultOld`, `pending` ve in-place contamination olan Patch 10 kodu eklenmemiştir.

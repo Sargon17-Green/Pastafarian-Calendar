@@ -73,7 +73,136 @@ def legacyFixedBowlPours(
     return tuple(pour)
 
 
+def installOrderAliases(
+    order: tuple[int, ...],
+) -> tuple[int, ...]:
+    if len(order) != 6:
+        raise ValueError("Kâse sırası tam olarak altı konum içermelidir")
+
+    bowl_alias = [0] * 7
+
+    position = 1
+    while position <= 6:
+        bowl_alias[position] = order[position - 1]
+        position += 1
+
+    return tuple(bowl_alias)
+
+
+def bowlByLegacyPosition(
+    old_bowls: tuple[int, ...],
+    bowl_alias: tuple[int, ...],
+    position: int,
+) -> int:
+    if position < 1 or position > 6:
+        raise ValueError("Legacy kâse konumu 1 ile 6 arasında olmalıdır")
+
+    return old_bowls[
+        bowl_alias[position]
+    ]
+
+
+def aliasedPositionPours(
+    i: int,
+    drop: int,
+    stones: tuple[tuple[int, ...], ...],
+    old_bowls: tuple[int, ...],
+    bowl_alias: tuple[int, ...],
+) -> tuple[int, ...]:
+    pour = [0] * 7
+
+    pour[1] = savePatch(
+        drop * drop
+        + stones[i][WHEAT]
+        * bowlByLegacyPosition(
+            old_bowls,
+            bowl_alias,
+            1,
+        )
+        + 3 * i
+    )
+    pour[2] = savePatch(
+        drop * drop
+        + stones[i][BARLEY]
+        * bowlByLegacyPosition(
+            old_bowls,
+            bowl_alias,
+            2,
+        )
+        + 5 * i
+    )
+    pour[3] = savePatch(
+        drop * drop
+        + stones[i][SALT]
+        * bowlByLegacyPosition(
+            old_bowls,
+            bowl_alias,
+            3,
+        )
+        + 7 * i
+    )
+
+    return tuple(pour)
+
+
+class BowlAliasPatchWrapper:
+    def repair(
+        self,
+        ctx,
+        i: int,
+        drop: int,
+        order: tuple[int, ...],
+        stones: tuple[tuple[int, ...], ...],
+        old_bowls: tuple[int, ...],
+    ) -> tuple[int, ...]:
+        ctx.branch_trace.append(
+            (
+                "YAMA_09_KÂSE_ALIAS",
+                i,
+                order,
+            )
+        )
+        ctx.logs.append(
+            (
+                "yama-09-kâse-alias",
+                i,
+                order,
+            )
+        )
+
+        # Discovery 09 fixed-bowl scar'ı kaldırılmaz; gerçekten çalıştırılır.
+        legacy_fixed = legacyFixedBowlPours(
+            i,
+            drop,
+            stones,
+            old_bowls,
+        )
+
+        bowl_alias = installOrderAliases(
+            order,
+        )
+
+        corrected = aliasedPositionPours(
+            i,
+            drop,
+            stones,
+            old_bowls,
+            bowl_alias,
+        )
+
+        ctx.patch09_drop_index = i
+        ctx.patch09_bowl_alias = bowl_alias
+        ctx.patch09_legacy_fixed_pours = legacy_fixed
+        ctx.patch09_corrected_pours = corrected
+        ctx.patch09_applied = True
+
+        return corrected
+
+
 class LegacyPourAdapter:
+    def __init__(self) -> None:
+        self.patch_wrapper = BowlAliasPatchWrapper()
+
     def ensure_initial_bowls(
         self,
         ctx,
@@ -119,9 +248,11 @@ class LegacyPourAdapter:
             )
         )
 
-        pours = legacyFixedBowlPours(
+        pours = self.patch_wrapper.repair(
+            ctx,
             i,
             drop,
+            order,
             ctx.legacy_stone_table,
             old_bowls,
         )

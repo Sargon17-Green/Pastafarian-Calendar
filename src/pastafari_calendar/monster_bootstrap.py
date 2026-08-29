@@ -117,6 +117,11 @@ class MonsterContext:
     legacy_pour_last_drop_index: int | None = None
     legacy_pour_last_order: tuple[int, ...] | None = None
     legacy_pour_last_values: tuple[int, ...] | None = None
+    patch09_drop_index: int | None = None
+    patch09_bowl_alias: tuple[int, ...] | None = None
+    patch09_legacy_fixed_pours: tuple[int, ...] | None = None
+    patch09_corrected_pours: tuple[int, ...] | None = None
+    patch09_applied: bool = False
 
 
 class BaseMetrics:

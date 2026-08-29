@@ -1,30 +1,40 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on sekizinci aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on dokuzuncu aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 18/55, `DISCOVERY 09` durumundadır.
+Aşama 19/55, `PATCH 09` durumundadır.
 
-Exact initial bowl factory eklenmiştir. Yeni tarihsel kusur pour read katmanındadır:
+Discovery 09'un yanlış fixed-bowl helper'ı fiziksel olarak korunur:
 
 ```text
-pour position 1 -> sabit bowl 1
-pour position 2 -> sabit bowl 2
-pour position 3 -> sabit bowl 3
+position 1 -> fixed bowl 1
+position 2 -> fixed bowl 2
+position 3 -> fixed bowl 3
 ```
 
-Legacy kod current permutation order'ını hangi gerçek bowl ID'nin position 1,2,3'te olduğunu belirlemek için kullanmaz.
+Düzeltme ayrı alias katmanındadır:
 
-`LegacyPourAdapter`, bu fixed-bowl yolu exact visible drops ve exact permutation order tablosunun üstünde gerçek `calendar_date_spaghetti` state-machine zincirine bağlar.
+```text
+bowlAlias[position] = order[position]
+```
 
-Yeni normatif regresyon `i=1`, `i=2` ve `i=3` için legacy pour tuple'ını test-only normatif position-based bowl reads ile karşılaştırır ve bilinçli olarak kırmızıdır.
+ve bütün corrected pour bowl read'leri:
 
-Henüz `PATCH 09` yoktur: `bowlAlias[position]=order[position]` ve alias üzerinden bowl read eklenmemiştir.
+```text
+bowlByLegacyPosition(oldBowls, bowlAlias, position)
+```
 
-Bowl stir/update da henüz başlatılmaz; dolayısıyla `vaultOld`/`pending` Patch 10 kodu yoktur.
+üzerinden geçer.
 
-Stage 15 kalıcı sentinel row ve Stage 17 permutation patch korunur. Önceki Aşama 1–17 regresyonlarının tamamı yeşildir.
+`BowlAliasPatchWrapper`, yanlış helper'ı gerçekten çalıştırıp raw fixed-bowl pour scar'ını invocation bağlamında tutar; semantic sonuç olarak yalnızca alias üzerinden hesaplanan corrected pour tuple'ını döndürür.
+
+Aşama 18'in normatif pour regresyonu değiştirilmeden yeşile dönmüştür. Ayrıca 46 visible drop için isolated pour tuple'larının tamamı test-only normatif position-based formülle eşleşir.
+
+Bowl stir/update henüz başlatılmaz. `vaultOld`, `pending` ve Patch 10 kodu yoktur.
+
+Stage 15 kalıcı sentinel row ve Stage 17 permutation patch korunur.
 
 ## Korunan birinci aşama temeli
 
@@ -40,10 +50,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam on sekizinci aşama paketi:
+Tam on dokuzuncu aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: önceki Aşama 1–17 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni fixed-bowl pour normatif regresyonunun `i=1`, `i=2` ve `i=3` alt örnekleri başarısız olur.
+Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 18'de kırmızı olan `i=1`, `i=2` ve `i=3` pour alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir.

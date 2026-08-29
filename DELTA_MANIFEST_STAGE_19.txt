@@ -1,0 +1,28 @@
+Aşama 19/55 — PATCH 09
+
+Bu paket yalnızca Aşama 19 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_pours.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_19_patch_09.py
+artifacts/stage-19/BASELINE_STAGE_18_EXPECTED_RED.txt
+artifacts/stage-19/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_19.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 18 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 18 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+legacyFixedBowlPours fixed-bowl scar: KORUNDU VE WRAPPER İÇİNDE ÇALIŞTIRILIYOR
+bowlAlias[position]=order[position]: EKLENDİ
+Corrected pour bowl reads: TAMAMI ALIAS HELPER ÜZERİNDEN
+Aşama 15 sentinel: KORUNDU
+Aşama 17 permutation patch: KORUNDU
+PATCH 10 vaultOld/pending: YOK
+10–26 gelecek kusur/yama kodu: YOK
