@@ -19,6 +19,9 @@ Integer savePatch(const Integer& x);
 Integer oldDayTag(const Integer& day);
 Integer dayTagWithFoundationScar(const Integer& day);
 Integer oldDistance(const Integer& calculationDay, const Integer& targetDay);
+Integer distanceWithChronologicalPatch(const Integer& calculationDay,
+                                       const Integer& targetDay,
+                                       const Integer& legacyDistance);
 
 struct BaseMonsterContext {
     Integer calculationDay;
@@ -42,7 +45,9 @@ struct BaseMonsterContext {
     Integer legacyDistanceCalculationDay;
     Integer legacyDistanceTargetDay;
     Integer legacyDistanceOutput;
+    Integer patchedDistanceOutput;
     bool legacyDistanceReady = false;
+    bool patch03Applied = false;
 };
 
 struct BaseRunReport {
@@ -82,6 +87,7 @@ struct LegacyDistanceReport {
     std::string handler;
     std::size_t branchCount;
     Integer legacyOutput{};
+    bool patch03Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -97,6 +103,7 @@ public:
     void requireLegacyDayTagReady(const BaseMonsterContext& ctx) const;
     void requirePatch02Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyDistanceReady(const BaseMonsterContext& ctx) const;
+    void requirePatch03Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -171,6 +178,22 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch03DistanceWrapper {
+public:
+    Integer repair(const Integer& calculationDay,
+                   const Integer& targetDay,
+                   const Integer& legacyDistance) const;
+};
+
+class Patch03DistanceHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyDistanceAdapter& adapter,
+                const Patch03DistanceWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -208,6 +231,13 @@ public:
                                 const LegacyDistanceAdapter& adapter,
                                 const BaseValidationManager& validator,
                                 const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedDistance(BaseMonsterContext& ctx,
+                                 const Patch03DistanceHandler& handler,
+                                 const LegacyDistanceAdapter& adapter,
+                                 const Patch03DistanceWrapper& wrapper,
+                                 const BaseValidationManager& validator,
+                                 const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -218,6 +248,8 @@ public:
     LegacyDayTagReport executeLegacyDayTag(const Integer& day) const;
     LegacyDayTagReport executeUnpatchedDayTagDiagnostic(const Integer& day) const;
     LegacyDistanceReport executeDistance(const Integer& calculationDay, const Integer& targetDay) const;
+    LegacyDistanceReport executeUnpatchedDistanceDiagnostic(const Integer& calculationDay,
+                                                            const Integer& targetDay) const;
 };
 
 } // namespace pastafari

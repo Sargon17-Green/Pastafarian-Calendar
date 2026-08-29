@@ -133,3 +133,31 @@ Norma distantiam definit ut `abs(targetDay - calculationDay) + 1`. Via legacy au
 ### Stratum monstri hoc gradu additum
 
 Additi sunt status distantiae legacy in `BaseMonsterContext`, `LegacyDistanceAdapter`, `Discovery03DistanceHandler`, dispatchatio separata et `LegacyDistanceReport`. Relatio exitum legacy separatim servat ut cicatrix post patch futurum probari possit. Haec omnia contextui invocationis propria sunt; nullum state semanticum globaliter communicatur et observationes non regunt exitum.
+
+## Gradus 7 — Emendatio 03: distantia chronologica super differentiam notarum
+
+### Quid putabatur
+
+Vitium Gradus 6 non deletum est. `oldDistance(cDay, tDay)` adhuc differentiam absolutam notarum dierum correctarum computat. Formula illa in nonnullis casibus fortuito congruit, sed neque eandem scalam chronologicam neque inclusionem utriusque finis generaliter repraesentat.
+
+### Quid repertum est
+
+Regressio Gradus 6 iam ostenderat quinque classes discrepantes: eadem dies, separatio duorum dierum eodem latere et transitus per Fundationem. Ex hoc sequitur correctionem non posse fieri sola additione unius ad exitum legacy, quia exempli gratia `DUO_POST` legacy quattuor reddit ubi distantia inclusiva normativa tres est.
+
+Praeterea auditum probationum priorum recognitum est. Gradus 5 et 6 recte vetabant PATCH 03 dum futurum erat, sed prohibitiones nominum patch non sunt invariantae perpetuae postquam gradus patch ipse venit. Illae tantum partes temporales remotae vel in assertionem perpetuam cicatricis conversae sunt; expected values et probationes semanticae non mutatae sunt. Forma correcta regressionis Gradus 6 contra productionem Gradus 6 pristinam adhuc quinque discrepantias et exitum rubrum produxit.
+
+### Quid circumventum est
+
+Addita est `distanceWithChronologicalPatch(calculationDay, targetDay, legacyDistance)`. Ea exitum `oldDistance` accipit, deinde `chronological = abs(targetDay - calculationDay)` computat. Si exitus legacy ab hoc valore differt, variabile locale legacy valore chronologico superatur. Deinde unum additur.
+
+`Patch03DistanceHandler` primum per `LegacyDistanceAdapter` `oldDistance` re vera vocat, exitum veterem in contextu retinet, et tantum postea `Patch03DistanceWrapper` applicat. `executeUnpatchedDistanceDiagnostic` viam veterem adhuc exercet sine patch.
+
+### Cur hoc aequivalet normae
+
+Post conditionalem, valor localis `d` necessario aequalis est `abs(targetDay - calculationDay)`: si legacy iam concordabat, nihil mutatur; si discrepabat, expresse substituitur. Exitus est deinde `d + 1`, id est exacte definitio normativa distantiae operis.
+
+Validatio separata eandem quantitatem iterum computat et solum invariantiam confirmat. Non eligit inter duas responsiones et non vocat oracle productionis.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `patchedDistanceOutput`, `patch03Applied`, `Patch03DistanceWrapper`, `Patch03DistanceHandler`, dispatchatio patch separata, via diagnostica legacy et `requirePatch03Ready`. Relatio distantiae simul exitum auctoritative correctum et exitum legacy ante patch servat. Haec duplicatio audibilitatem cicatricis auget, sed semanticam unicam non bifurcat.

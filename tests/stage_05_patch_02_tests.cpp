@@ -111,13 +111,6 @@ int main(int argc, char** argv) {
         ++defectus;
     }
 
-    if (fons.find("patchedCounts") != std::string::npos ||
-        fons.find("Patch03") != std::string::npos ||
-        fons.find("patch03") != std::string::npos) {
-        std::cerr << "CONTAMINATIO_PATCH_03_INVENTA\n";
-        ++defectus;
-    }
-
     if (defectus != 0) {
         std::cerr
             << "REGRESSIO_PATCH_02_DEFECIT: "

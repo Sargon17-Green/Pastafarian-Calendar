@@ -85,11 +85,8 @@ int main(int argc, char** argv) {
 
     const std::string viaFontis = argc >= 2 ? argv[1] : "src/monster.cpp";
     const std::string fons = legeTotum(viaFontis);
-    if (fons.find("patchedCounts") != std::string::npos ||
-        fons.find("Patch03") != std::string::npos ||
-        fons.find("patch03") != std::string::npos ||
-        fons.find("chronological") != std::string::npos) {
-        std::cerr << "CONTAMINATIO_PATCH_03_INVENTA\n";
+    if (fons.find("Integer oldDistance(") == std::string::npos) {
+        std::cerr << "CICATRIX_OLD_DISTANCE_DELETA\n";
         ++defectusViae;
     }
 
