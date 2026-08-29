@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=46
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=47
+CURRENT_KIND=PATCH
 CURRENT_PATCH=23
-LAST_COMPLETED_STAGE=46
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=47
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,19 +15,19 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus legacyMaterializeMonthLengthWays, LegacyMonthLengthAllWaysAPI e Discovery23MonthLengthMaterializationHandler quel expone li old contract de un Array concret con omni vias e executa un sondage capat sur li request semantic por demonstrar li risc de materialisation sin provocar OOM.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus VirtualLegacyList e MonthLengthVirtualPatchWrapper: li concrete all-ways scar de Discovery 23 es executet prim quam diagnostic, poy un backend virtual conta exactmen per DP e furni itemAt1 per unrank lexicografic sin materialisar li familie complet.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 46 es finit quam **DISCOVERY 23**. Li repository local es intentionalmen `EXPECTED_RED` solmen por li nov regression de month-length materialization.
+Stage 47 es finit quam **PATCH 23** e li repository local es `GREEN`.
 
-Li scar nov `legacyMaterializeMonthLengthWays(totalDays,monthCount)` expone li assumption historic: li API retorna un `Array` concret contenente omni compositions legal de longores de mensus, con chascun longore inter 4 e 123 e li summa egal al longore del year. `LegacyMonthLengthAllWaysAPI.allWays` conserva exactmen ti contract e ne contene null backend virtual.
+`legacyMaterializeMonthLengthWays(totalDays,monthCount)`, `LegacyMonthLengthAllWaysAPI.allWays`, `LegacyMonthLengthAllWaysAPI.probeAllWays` e `Discovery23MonthLengthMaterializationHandler.handle` resta fisicmen sin modification. Li route Patch 23 traversa Discovery 23 realmen ante li correction, ergo li old concrete enumerator/probe resta un scar activ e su contract `ALL_WAYS_CONCRETE_ARRAY` resta observabil quam diagnostic invocation-local.
 
-`Discovery23MonthLengthMaterializationHandler` veni pos `RepeatedNamePatchWrapper`. It deriva li longore semantic del year, selecte li month count ex bowl 3 / seal 30 per li dispatcher ja reparat, conserva anc li answer ring de bowl 3 / seal 31, e executa li sam enumerator concret quam un sondage diagnostic capat a 2048 rows. Li cap existe solmen por impedir un OOM durant Discovery; it ne es un representation semantic nov e ne calcula li count complet.
+`VirtualLegacyList(totalDays,monthCount)` ne materialisa null row por construir li familie. It construi un table DP exact con arithmetic `BigInt`; `count()` retorna li count complet, e `itemAt1(rank1)` prova longores 4..123 in órdine ascendent e subtrae counts de suffixes, talmen que su órdine es exactmen li órdine lexicografic del materializer legacy.
 
-Li witness have year length `1000`, limites 9..47 mensus e month count selectet `16`. Li sondage materialisa 2048 rows e prova que plu rows existe. Li reference test-only conta exactmen `5239332298078798668173613753510` compositions legal. Ti count demonstra que li contract old "omni vias quam Array concret" ne es materialisabil securmen.
+`MonthLengthVirtualPatchWrapper` usa li sam answer ring de bowl 3 / seal 31 conservat per Discovery 23, selecte li rank contra li count virtual e rende li row semantic de longores. Por li witness de 1000 dies e 16 mensus, li count exact es `5239332298078798668173613753510`, li rank selectet es `1892970349028658514214546085756`, e li row semantic es `[46,62,31,19,31,123,10,47,108,96,7,97,113,29,74,107]`.
 
-`VirtualLegacyList`, exact DP count production e exact lexicographic `itemAt1` ne es present. Null code de Patch 23, `legacyChooseEachDaySeparately` o Patch 24 es includet.
+Li audit micri compara 43 families e 1999 membres contra li concrete materializer e confirma paritá exact del órdine. `legacyChooseEachDaySeparately`, `DPUnrankLegalWeaving`, `oldContiguousMonthDayGuess` e omni code de Patch 24/25 resta absent.

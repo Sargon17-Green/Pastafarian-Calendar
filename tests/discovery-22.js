@@ -9,7 +9,7 @@ assert.equal(typeof production.LegacyRepeatedNameGenerator, 'function');
 assert.equal(typeof production.Discovery22RepeatedNameHandler, 'function');
 assert.equal(typeof production.RepeatedNamePatchWrapper, 'function');
 assert.equal(typeof production.partialPermutationUnrank, 'function');
-assert.equal('VirtualLegacyList' in production, false);
+assert.equal(typeof production.VirtualLegacyList, 'function');
 
 const legacySource = production.legacyNameRowWithRepeats.toString();
 assert.doesNotMatch(legacySource, /partialPermutation|fallingFactorial|distinct/i);

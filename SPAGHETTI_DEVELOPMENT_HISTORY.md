@@ -1015,3 +1015,28 @@ Por ne transformar li discovery in un crash de memoria, li handler executa li sa
 ### Limite historic
 
 Stage 46 resta intentionalmen red. `VirtualLegacyList` ne existe ancor; ne existe anc un DP count production o un `itemAt1` lexicografic. Patch 23 deve venir solmen in Stage 47 e deve conservar li API legacy quam scar, durant que un backend virtual furni count exact e unrank exact sin materialisation complet. Li defect de month weaving de Patch 24 resta absent.
+
+
+## Stage 47 — PATCH 23
+
+### Li liste concrete ne esset delet
+
+Li discovery precedent exposi un API quel voleva materialisar omni bounded compositions de longores. Patch 23 ne rectifica ti API in loco. `legacyMaterializeMonthLengthWays`, `LegacyMonthLengthAllWaysAPI.allWays`, `probeAllWays` e `Discovery23MonthLengthMaterializationHandler.handle` resta sin modification. In li route nov, Discovery 23 executa ante li patch e su sample concrete resta diagnostic.
+
+### Un backend virtual supra li scar
+
+`VirtualLegacyList` es adjunt quam un strate separat. Su table DP conta sequences de un cert quantitá de slots por chascun subtotal. Li recurrence es implementat per un fenestre glissant sur li range 4..123, usante exclusivmen integers JavaScript exact e `BigInt` por counts. Li classe conserva li table por reutilisar li sam state durant `itemAt1`.
+
+`itemAt1` conserva li ordre old: candidat lengths es examinat ascendent de 4 a 123. Por chascun candidat, li cell DP del suffix es li count del bloc lexicografic. Li rank 1-based es subtrat solmen quand it jace pos li bloc. Ergo li virtualisation cambia li representation e coste, ne li familie ni su ordre.
+
+### Wrapper posterior e selection real
+
+`MonthLengthVirtualPatchWrapper` exige li state de Discovery 23. It conserva explicitmen li old API contract e li facts del probe, crea li backend virtual, calcula li count complet e usa li answer ring de bowl 3 / seal 31 ja derivat ex li structure sauce semantic de Patch 20. Li dispatcher curt/wide selecte li rank contra li count exact; li row semantic veni solmen de `itemAt1`.
+
+Por li witness de 1000 dies e 16 mensus, li old sample resta 2048 arrays con un row ulterior detectet. Li backend virtual conta `5239332298078798668173613753510` membres, selecte rank `1892970349028658514214546085756` e rende `[46,62,31,19,31,123,10,47,108,96,7,97,113,29,74,107]`. Li count e li row concorda con li oracle JavaScript test-only del sam implementation.
+
+### Regression e scars
+
+Li regression de Discovery 23 es verd nu: it demonstra separatim que li route legacy ancor expone `ALL_WAYS_CONCRETE_ARRAY` e que li route semantic posterior expone `VIRTUAL_EXACT_COUNT_LEXICOGRAPHIC_UNRANK`. Li audit micri compara 43 families / 1999 rows con li enumerator old. Omni regressions precedent passa.
+
+Null code de Patch 24 es present. In particular, `legacyChooseEachDaySeparately` e `DPUnrankLegalWeaving` resta absent; anc `oldContiguousMonthDayGuess` de Patch 25 ne existe. Li proxim stage mandat es Stage 48 — DISCOVERY 24.

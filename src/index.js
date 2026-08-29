@@ -609,6 +609,12 @@ class BaseValidationManager {
     }
   }
 
+  requireDiscovery23Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_23_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un attempt legacy de materialisation valid por Patch 23.');
+    }
+  }
+
   requireStructureSauceResult(result) {
     if (!result || typeof result !== 'object' || !Array.isArray(result.bowls) || result.bowls.length < 7 ||
         !Array.isArray(result.orderAt46Latch) || result.orderAt46Latch.length !== 6) {
@@ -3819,6 +3825,148 @@ class Discovery23MonthLengthMaterializationHandler {
   }
 }
 
+
+
+class VirtualLegacyList {
+  constructor(totalDays, monthCount) {
+    if (!Number.isInteger(totalDays) || totalDays < 1) {
+      throw new RangeError('VirtualLegacyList exige un total de dies positiv.');
+    }
+    if (!Number.isInteger(monthCount) || monthCount < 1) {
+      throw new RangeError('VirtualLegacyList exige un quantitá de mensus positiv.');
+    }
+    this.totalDays = totalDays;
+    this.monthCount = monthCount;
+    this.minimumLength = 4;
+    this.maximumLength = 123;
+    this._countsBySlots = this._buildExactCountTable();
+    this._exactCount = this._countsBySlots[monthCount][totalDays];
+  }
+
+  _buildExactCountTable() {
+    // Li table usa un fenestre glissant exact: null floating-point e null materialisation del familie.
+    const table = Array.from({ length: this.monthCount + 1 }, () => new Array(this.totalDays + 1).fill(0n));
+    table[0][0] = 1n;
+    for (let slots = 1; slots <= this.monthCount; slots += 1) {
+      const previous = table[slots - 1];
+      const current = table[slots];
+      let window = 0n;
+      for (let subtotal = 0; subtotal <= this.totalDays; subtotal += 1) {
+        const entering = subtotal - this.minimumLength;
+        if (entering >= 0) window += previous[entering];
+        const leaving = subtotal - this.maximumLength - 1;
+        if (leaving >= 0) window -= previous[leaving];
+        current[subtotal] = window;
+      }
+    }
+    return table;
+  }
+
+  count() {
+    return this._exactCount;
+  }
+
+  itemAt1(rank1) {
+    const familyCount = this.count();
+    if (typeof rank1 !== 'bigint' || rank1 < 1n || rank1 > familyCount) {
+      throw new RangeError('Li rank virtual de longores de mensus es extra li familie.');
+    }
+    let rank = rank1;
+    let remaining = this.totalDays;
+    const out = [];
+    for (let position = 0; position < this.monthCount; position += 1) {
+      const slotsAfter = this.monthCount - position - 1;
+      let selected = false;
+      for (let length = this.minimumLength; length <= this.maximumLength; length += 1) {
+        const suffixTotal = remaining - length;
+        let block = 0n;
+        if (suffixTotal >= 0 && suffixTotal <= this.totalDays) {
+          block = this._countsBySlots[slotsAfter][suffixTotal];
+        }
+        if (rank > block) {
+          rank -= block;
+        } else {
+          out.push(length);
+          remaining = suffixTotal;
+          selected = true;
+          break;
+        }
+      }
+      if (!selected) {
+        throw new BootstrapStageError('VirtualLegacyList ne posset selecter un bloc lexicografic valid.');
+      }
+    }
+    if (remaining !== 0) {
+      throw new BootstrapStageError('VirtualLegacyList finit con un subtotal non-zero.');
+    }
+    return out;
+  }
+}
+
+class MonthLengthVirtualPatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context) {
+    this.validationManager.requireDiscovery23Result(context);
+    const yearLengthBig = context.legacyMonthLengthYearLength;
+    const monthCount = context.legacyMonthLengthMonthCount;
+    if (typeof yearLengthBig !== 'bigint' || yearLengthBig < 1n || yearLengthBig > 5778n ||
+        !Number.isInteger(monthCount) || monthCount < 1) {
+      throw new BootstrapStageError('Patch 23 exige li request exact de longores preservat per Discovery 23.');
+    }
+    const virtualList = new VirtualLegacyList(Number(yearLengthBig), monthCount);
+    const familyCount = virtualList.count();
+    if (familyCount < 1n) {
+      throw new BootstrapStageError('Patch 23 trova un familie virtual vacui por un month-count ja selectet.');
+    }
+    const stream = { ...context.legacyMonthLengthSelectionStream };
+    const picked = selectionDispatcherWithWideDetour(stream, familyCount);
+    const monthLengths = virtualList.itemAt1(picked.output);
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'MonthLengthVirtualPatchWrapper';
+    context.phase = 'PATCH_23_VIRTUAL_MONTH_LENGTH_ALL_WAYS';
+    context.branchTrace.push('PATCH_23_VIRTUAL_MONTH_LENGTH_ALL_WAYS');
+    context.patch23LegacyApiContractDiagnostic = context.legacyMonthLengthApiContract;
+    context.patch23LegacyMaterializerExecuted = context.legacyMonthLengthMaterializerExecuted === true;
+    context.patch23LegacyProbeLimitDiagnostic = context.legacyMonthLengthProbeLimit;
+    context.patch23LegacyProbeSampleCountDiagnostic = context.legacyMonthLengthProbeSample.length;
+    context.patch23LegacyProbeExceededDiagnostic = context.legacyMonthLengthProbeExceededLimit;
+    context.patch23VirtualList = virtualList;
+    context.patch23VirtualFamilyCount = familyCount;
+    context.patch23VirtualSelectedRank = picked.output;
+    context.patch23SemanticMonthLengths = monthLengths.slice();
+    context.patch23MonthLengthSelectionStream = { ...stream };
+    context.patch23ApiContract = 'VIRTUAL_EXACT_COUNT_LEXICOGRAPHIC_UNRANK';
+    context.status = 'PATCH_23_RESULT';
+    this.metricsManager.bump(context, 'patch23.legacyConcreteDiagnosticPreserved.calls');
+    this.metricsManager.bump(context, 'patch23.virtualExactCount.calls');
+    this.metricsManager.bump(context, 'patch23.virtualLexicographicItemAt1.calls');
+
+    return {
+      yearLength: yearLengthBig,
+      monthCount,
+      apiContract: context.patch23ApiContract,
+      allWays: virtualList,
+      familyCount,
+      selectedRank: picked.output,
+      monthLengths: monthLengths.slice(),
+      monthLengthStream: { ...stream },
+      legacyDiagnostic: {
+        apiContract: context.legacyMonthLengthApiContract,
+        materializerExecuted: context.legacyMonthLengthMaterializerExecuted === true,
+        probeLimit: context.legacyMonthLengthProbeLimit,
+        probeSampleCount: context.legacyMonthLengthProbeSample.length,
+        probeExceededLimit: context.legacyMonthLengthProbeExceededLimit,
+        concreteArrayContract: context.legacyMonthLengthConcreteArrayContract
+      }
+    };
+  }
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -4650,6 +4798,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyMonthLengthAllWaysAPI
     );
+    this.monthLengthVirtualPatchWrapper = new MonthLengthVirtualPatchWrapper(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -5399,6 +5551,36 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch23MonthLengthVirtualList(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      this.cutletPartitionPatchWrapper.repair(context);
+      this.discovery22RepeatedNameHandler.handle(context);
+      this.repeatedNamePatchWrapper.repair(context);
+      // Patch 23 conserva li scar concret: Discovery 23 executa su enumerator-probe real ante li backend virtual.
+      this.discovery23MonthLengthMaterializationHandler.handle(context);
+      const result = this.monthLengthVirtualPatchWrapper.repair(context);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -5700,8 +5882,19 @@ function discovery23LegacyMonthLengthMaterializationThroughMonsterPath(
   );
 }
 
+function historicMonthLengthVirtualListThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Patch 23 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executePatch23MonthLengthVirtualList(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 23; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 23; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -5783,6 +5976,8 @@ module.exports = Object.freeze({
   RepeatedNamePatchWrapper,
   LegacyMonthLengthAllWaysAPI,
   Discovery23MonthLengthMaterializationHandler,
+  VirtualLegacyList,
+  MonthLengthVirtualPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -5917,5 +6112,6 @@ module.exports = Object.freeze({
   discovery22LegacyRepeatedNamesThroughMonsterPath,
   historicRepeatedNamesThroughMonsterPath,
   discovery23LegacyMonthLengthMaterializationThroughMonsterPath,
+  historicMonthLengthVirtualListThroughMonsterPath,
   calendarDateSpaghetti
 });

@@ -8,15 +8,18 @@ assert.equal(typeof production.legacyMaterializeMonthLengthWays, 'function');
 assert.equal(typeof production.LegacyMonthLengthAllWaysAPI, 'function');
 assert.equal(typeof production.Discovery23MonthLengthMaterializationHandler, 'function');
 assert.equal(typeof production.discovery23LegacyMonthLengthMaterializationThroughMonsterPath, 'function');
-assert.equal('VirtualLegacyList' in production, false);
+assert.equal(typeof production.VirtualLegacyList, 'function');
+assert.equal(typeof production.MonthLengthVirtualPatchWrapper, 'function');
+assert.equal(typeof production.historicMonthLengthVirtualListThroughMonsterPath, 'function');
 assert.equal('legacyChooseEachDaySeparately' in production, false);
+assert.equal('DPUnrankLegalWeaving' in production, false);
 assert.equal('oldContiguousMonthDayGuess' in production, false);
 
 const legacySource = production.legacyMaterializeMonthLengthWays.toString();
 const legacyApiSource = production.LegacyMonthLengthAllWaysAPI.prototype.allWays.toString();
 const discoverySource = production.Discovery23MonthLengthMaterializationHandler.prototype.handle.toString();
-assert.doesNotMatch(legacySource, /VirtualLegacyList|unrank|countAll|memo/i);
-assert.doesNotMatch(legacyApiSource, /VirtualLegacyList|unrank|countAll|memo/i);
+assert.doesNotMatch(legacySource, /VirtualLegacyList|itemAt1|_buildExactCountTable/i);
+assert.doesNotMatch(legacyApiSource, /VirtualLegacyList|itemAt1|_buildExactCountTable/i);
 assert.doesNotMatch(discoverySource, /VirtualLegacyList|itemAt1|DPUnrank|legacyChooseEachDaySeparately/);
 
 assert.deepEqual(production.legacyMaterializeMonthLengthWays(12, 3), [[4,4,4]]);
@@ -49,11 +52,11 @@ const candidatePairs = [
 ];
 const selectionStream = { first: 1n, directionStep: 1n };
 const noWalkExpected = {
-  nextYear() { throw new Error('Discovery 23 ne deve caminar avante ex Year 5000 in ti witness.'); },
-  previousYear() { throw new Error('Discovery 23 ne deve caminar retro ex Year 5000 in ti witness.'); }
+  nextYear() { throw new Error('Patch 23 ne deve caminar avante ex Year 5000 in ti witness.'); },
+  previousYear() { throw new Error('Patch 23 ne deve caminar retro ex Year 5000 in ti witness.'); }
 };
 
-const routed = production.discovery23LegacyMonthLengthMaterializationThroughMonsterPath(
+const legacyRouted = production.discovery23LegacyMonthLengthMaterializationThroughMonsterPath(
   new production.BaseMonsterManager(),
   calculationDay,
   calculationDay,
@@ -64,27 +67,27 @@ const routed = production.discovery23LegacyMonthLengthMaterializationThroughMons
   noWalkExpected
 );
 
-assert.equal(routed.context.status, 'DISCOVERY_23_LEGACY_RESULT');
-assert.equal(routed.context.currentHandler, 'Discovery23MonthLengthMaterializationHandler');
-assert.equal(routed.context.previousHandler, 'RepeatedNamePatchWrapper');
-assert.equal(routed.context.phase, 'DISCOVERY_23_LEGACY_CONCRETE_MONTH_LENGTH_ALL_WAYS');
-assert.equal(routed.context.patch22BadEqualsCorrect, false);
-assert.deepEqual(routed.context.patch22SemanticNameIndices, [3,11,4,9,12,5]);
-assert.equal(routed.result.yearLength, 1000n);
-assert.equal(routed.result.minMonths, 9);
-assert.equal(routed.result.maxMonths, 47);
-assert.equal(routed.result.monthCount, 16);
-assert.equal(routed.result.countSelectedRank, 8n);
-assert.equal(routed.result.apiContract, 'ALL_WAYS_CONCRETE_ARRAY');
-assert.equal(routed.result.concreteArrayContract, true);
-assert.equal(routed.result.probeLimit, 2048);
-assert.equal(routed.result.probeSampleCount, 2048);
-assert.equal(routed.result.probeExceededLimit, true);
-assert.equal(routed.context.legacyMonthLengthMaterializerExecuted, true);
-assert.equal(routed.context.metrics['discovery23.monthLengthConcreteApi.calls'], 1n);
-assert.equal(routed.context.metrics['discovery23.monthLengthProbe.calls'], 1n);
-assert.equal(routed.context.metrics['discovery23.monthLengthProbe.exceeded.calls'], 1n);
-assert.deepEqual(routed.context.branchTrace.slice(-5), [
+assert.equal(legacyRouted.context.status, 'DISCOVERY_23_LEGACY_RESULT');
+assert.equal(legacyRouted.context.currentHandler, 'Discovery23MonthLengthMaterializationHandler');
+assert.equal(legacyRouted.context.previousHandler, 'RepeatedNamePatchWrapper');
+assert.equal(legacyRouted.context.phase, 'DISCOVERY_23_LEGACY_CONCRETE_MONTH_LENGTH_ALL_WAYS');
+assert.equal(legacyRouted.context.patch22BadEqualsCorrect, false);
+assert.deepEqual(legacyRouted.context.patch22SemanticNameIndices, [3,11,4,9,12,5]);
+assert.equal(legacyRouted.result.yearLength, 1000n);
+assert.equal(legacyRouted.result.minMonths, 9);
+assert.equal(legacyRouted.result.maxMonths, 47);
+assert.equal(legacyRouted.result.monthCount, 16);
+assert.equal(legacyRouted.result.countSelectedRank, 8n);
+assert.equal(legacyRouted.result.apiContract, 'ALL_WAYS_CONCRETE_ARRAY');
+assert.equal(legacyRouted.result.concreteArrayContract, true);
+assert.equal(legacyRouted.result.probeLimit, 2048);
+assert.equal(legacyRouted.result.probeSampleCount, 2048);
+assert.equal(legacyRouted.result.probeExceededLimit, true);
+assert.equal(legacyRouted.context.legacyMonthLengthMaterializerExecuted, true);
+assert.equal(legacyRouted.context.metrics['discovery23.monthLengthConcreteApi.calls'], 1n);
+assert.equal(legacyRouted.context.metrics['discovery23.monthLengthProbe.calls'], 1n);
+assert.equal(legacyRouted.context.metrics['discovery23.monthLengthProbe.exceeded.calls'], 1n);
+assert.deepEqual(legacyRouted.context.branchTrace.slice(-5), [
   'DISCOVERY_21_ALL_POSITIVE_CUTLET_PARTITION',
   'PATCH_21_FILTERED_INTERNAL_GATE_CUTLET_PARTITION',
   'DISCOVERY_22_LEGACY_REPEATED_CUTLET_NAMES',
@@ -92,22 +95,64 @@ assert.deepEqual(routed.context.branchTrace.slice(-5), [
   'DISCOVERY_23_LEGACY_CONCRETE_MONTH_LENGTH_ALL_WAYS'
 ]);
 
-for (const row of routed.context.legacyMonthLengthProbeSample) {
-  assert.equal(row.length, routed.result.monthCount);
-  assert.equal(row.reduce((sum, length) => sum + length, 0), Number(routed.result.yearLength));
+for (const row of legacyRouted.context.legacyMonthLengthProbeSample) {
+  assert.equal(row.length, legacyRouted.result.monthCount);
+  assert.equal(row.reduce((sum, length) => sum + length, 0), Number(legacyRouted.result.yearLength));
   for (const length of row) assert.ok(4 <= length && length <= 123);
 }
 
 const exactFamily = normative.makeBoundedCompositionCounter(
-  Number(routed.result.yearLength), routed.result.monthCount, 4, 123
+  Number(legacyRouted.result.yearLength), legacyRouted.result.monthCount, 4, 123
 );
 const exactFamilyCount = exactFamily.countAll();
 assert.equal(exactFamilyCount, 5239332298078798668173613753510n);
 assert.ok(exactFamilyCount > 1000000000000000000n);
-assert.equal(BigInt(routed.result.probeSampleCount) < exactFamilyCount, true);
+assert.equal(BigInt(legacyRouted.result.probeSampleCount) < exactFamilyCount, true);
+
+const routed = production.historicMonthLengthVirtualListThroughMonsterPath(
+  new production.BaseMonsterManager(),
+  calculationDay,
+  calculationDay,
+  -1n,
+  gates,
+  candidatePairs,
+  selectionStream,
+  noWalkExpected
+);
+const authoritativeSauce = normative.sauce(calculationDay, f + 11n);
+const expectedMonthLengths = normative.chooseMonthLengths(
+  authoritativeSauce,
+  { openGateDay: f + 10n, closeGateDay: f + 1010n },
+  16
+);
+
+assert.equal(routed.context.status, 'PATCH_23_RESULT');
+assert.equal(routed.context.currentHandler, 'MonthLengthVirtualPatchWrapper');
+assert.equal(routed.context.previousHandler, 'Discovery23MonthLengthMaterializationHandler');
+assert.equal(routed.context.phase, 'PATCH_23_VIRTUAL_MONTH_LENGTH_ALL_WAYS');
+assert.equal(routed.result.apiContract, 'VIRTUAL_EXACT_COUNT_LEXICOGRAPHIC_UNRANK');
+assert.ok(routed.result.allWays instanceof production.VirtualLegacyList);
+assert.equal(Array.isArray(routed.result.allWays), false);
+assert.equal(routed.result.familyCount, exactFamilyCount);
+assert.equal(routed.result.allWays.count(), exactFamilyCount);
+assert.equal(routed.result.selectedRank, 1892970349028658514214546085756n);
+assert.deepEqual(routed.result.monthLengths, expectedMonthLengths);
+assert.deepEqual(routed.result.allWays.itemAt1(routed.result.selectedRank), expectedMonthLengths);
+assert.equal(routed.result.legacyDiagnostic.apiContract, 'ALL_WAYS_CONCRETE_ARRAY');
+assert.equal(routed.result.legacyDiagnostic.materializerExecuted, true);
+assert.equal(routed.result.legacyDiagnostic.probeSampleCount, 2048);
+assert.equal(routed.result.legacyDiagnostic.probeExceededLimit, true);
+assert.equal(routed.context.metrics['discovery23.monthLengthConcreteApi.calls'], 1n);
+assert.equal(routed.context.metrics['patch23.legacyConcreteDiagnosticPreserved.calls'], 1n);
+assert.equal(routed.context.metrics['patch23.virtualExactCount.calls'], 1n);
+assert.equal(routed.context.metrics['patch23.virtualLexicographicItemAt1.calls'], 1n);
+assert.deepEqual(routed.context.branchTrace.slice(-2), [
+  'DISCOVERY_23_LEGACY_CONCRETE_MONTH_LENGTH_ALL_WAYS',
+  'PATCH_23_VIRTUAL_MONTH_LENGTH_ALL_WAYS'
+]);
 
 assert.equal(
   routed.result.apiContract,
   'VIRTUAL_EXACT_COUNT_LEXICOGRAPHIC_UNRANK',
-  'Discovery 23 EXPECTED_RED: li Legacy API ancor expone un Array concret de omni vias, durante que li familie real have 5239332298078798668173613753510 membres e ne posse esser materialisat securmen.'
+  'Patch 23 deve conservar li façade historic de omni vias ma exposir semanticmen un VirtualLegacyList con count exact e itemAt1 lexicografic.'
 );

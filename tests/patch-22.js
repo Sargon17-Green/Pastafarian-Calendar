@@ -8,7 +8,7 @@ assert.equal(typeof production.fallingFactorialDistinct, 'function');
 assert.equal(typeof production.partialPermutationUnrank, 'function');
 assert.equal(typeof production.RepeatedNamePatchWrapper, 'function');
 assert.equal(typeof production.historicRepeatedNamesThroughMonsterPath, 'function');
-assert.equal('VirtualLegacyList' in production, false);
+assert.equal(typeof production.VirtualLegacyList, 'function');
 assert.equal('legacyChooseEachDaySeparately' in production, false);
 assert.equal('oldContiguousMonthDayGuess' in production, false);
 

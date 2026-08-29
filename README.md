@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 46 de 55: DISCOVERY 23** e li repository local es intentionalmen `EXPECTED_RED`. Omni regressions til Patch 22 resta verd; li unic divergence nov es que li API historic de month-lengths ancor expone un liste concret de "omni vias".
+Li linea es in **Stage 47 de 55: PATCH 23** e li repository local es `GREEN`. Omni regressions til Discovery 23, li verifier e li test focal de Patch 23 passa.
 
-`legacyMaterializeMonthLengthWays` e `LegacyMonthLengthAllWaysAPI` conserva ti contract concret. `Discovery23MonthLengthMaterializationHandler` veni pos li route complet de Patch 22, selecte li month count per bowl 3 / seal 30 e executa li enumerator old sur li request semantic quam un sondage capat. Por li witness de year length 1000 e 16 mensus, li sondage atinge 2048 rows e ancor have plu; li reference test-only demonstra un familie exact de `5239332298078798668173613753510` membres. Null `VirtualLegacyList` o code de Patch 23 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Li façade concrete historic resta intact: `legacyMaterializeMonthLengthWays`, `LegacyMonthLengthAllWaysAPI` e `Discovery23MonthLengthMaterializationHandler` continua esser executet realmen ante li correction quam scar diagnostic. `VirtualLegacyList` es un backend separat con `count()` exact per DP e `itemAt1(rank1)` exact per unrank lexicografic. `MonthLengthVirtualPatchWrapper` usa li sam bowl 3 / seal 31 ring e selecte semanticmen sin materialisar li familie complet. Por li witness 1000/16, li count es `5239332298078798668173613753510`, rank `1892970349028658514214546085756` rende `[46,62,31,19,31,123,10,47,108,96,7,97,113,29,74,107]`. Null code de Patch 24 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -24,7 +24,7 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Patch 22 deve restar verd:
+Omni regressions til Discovery 23 deve restar verd:
 
 ```text
 npm run test:previous
@@ -36,13 +36,13 @@ Li verifier deve esser verd:
 node tests/verify-stage-01.js
 ```
 
-Li regression focal de Discovery 23 deve esser intentionalmen red:
+Li test focal de Patch 23 deve esser verd:
 
 ```text
-npm run test:discovery-23
+npm run test:patch-23
 ```
 
-Li suite complet deve esser `EXPECTED_RED` exclusivmen in Discovery 23:
+Li suite complet deve esser verd:
 
 ```text
 npm test
@@ -378,3 +378,26 @@ Executar `allWays` complet por li witness real vell esser destructiv. Por demons
 Li witness selecte un year de 1000 dies. Li limits de month count es 9..47 e bowl 3 / seal 30 selecte li octesim option, ergo 16 mensus. Li sondage old materialisa 2048 rows e signala que li enumeration continua. Li reference test-only usa su bounded-composition counter normativ e trova exactmen `5239332298078798668173613753510` membres legal.
 
 Li regression nov exige un representation virtual scalabil e dunque falla contra li actual contract `ALL_WAYS_CONCRETE_ARRAY`. Omni tests precedent resta verd. Null `VirtualLegacyList`, null DP count production e null `itemAt1` lexicografic es includet; ili apartene solmen a Stage 47 — PATCH 23. Null code de Patch 24 es anticipat.
+
+
+## Stage 47 — PATCH 23
+
+### Scar concrete conservat
+
+Stage 47 ne toca li corp de `legacyMaterializeMonthLengthWays`, ne li methods `allWays`/`probeAllWays` de `LegacyMonthLengthAllWaysAPI`, e ne li handler de Discovery 23. Li route patch traversa ti handler prim, materialisa li sample concrete capat e conserva contract, limite, sample-count e flag `exceededLimit` quam diagnostics invocation-local. Talmen li errore historic ne es retroeditat ni simulat post factum.
+
+### VirtualLegacyList
+
+`VirtualLegacyList(totalDays,monthCount)` representa exactmen li sam bounded compositions: chascun component es 4..123, li summa es `totalDays`, e li órdine es lexicografic ascendent. Li constructor construi un table de counts per quantitá de slots e subtotal. Un fenestre glissant adjunte li contribution entrant a distanza 4 e subtrae li contribution quittant pos 123, sempre con `BigInt` exact.
+
+`count()` lee li cell final del DP. `itemAt1(rank1)` es 1-based: por chascun position it prova 4,5,...,123; li count DP del suffix define li grandore del bloc current. Si li rank passa li bloc, it es decrementat; altrimen li candidat current es fixat. Ti mechanism ne genera li membres precedent e ne materialisa li familie.
+
+### Detour semantic
+
+`MonthLengthVirtualPatchWrapper` veni solmen pos `Discovery23MonthLengthMaterializationHandler`. It prende li year length, month count e bowl 3 / seal 31 answer ring ja conservat, crea un `VirtualLegacyList`, questiona li dispatcher selection contra `count()` e usa `itemAt1` por li row selectet. Li façade semantic expone `VIRTUAL_EXACT_COUNT_LEXICOGRAPHIC_UNRANK`; li façade old `ALL_WAYS_CONCRETE_ARRAY` resta in li diagnostic legacy.
+
+Li witness 1000/16 have `5239332298078798668173613753510` membres. Rank `1892970349028658514214546085756` rende `[46,62,31,19,31,123,10,47,108,96,7,97,113,29,74,107]`, egal al reference normativ JavaScript del sam linea. Un audit separat compara 43 families micri e 1999 rows exactmen contra li materializer old e confirma identitá del órdine.
+
+### Limite historic
+
+Patch 24 ne es anticipat. `legacyChooseEachDaySeparately`, `DPUnrankLegalWeaving` e un wrapper de month weaving ne existe. `oldContiguousMonthDayGuess` de Patch 25 resta anc absent. `SourceLanguageCatalog` resta congelat e production ne importa li reference test-only.

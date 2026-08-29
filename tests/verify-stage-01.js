@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 23 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 23 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Discovery 23 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'VirtualLegacyList', 'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
+    'legacyChooseEachDaySeparately', 'DPUnrankLegalWeaving', 'oldContiguousMonthDayGuess'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
@@ -2083,11 +2083,11 @@ group('Patch 22 conserva li candidate legacy e selecte un partial permutation di
   ]);
   ok(typeof production.RepeatedNamePatchWrapper === 'function');
   ok(typeof production.historicRepeatedNamesThroughMonsterPath === 'function');
-  ok(!('VirtualLegacyList' in production));
+  ok(typeof production.VirtualLegacyList === 'function');
   ok(!('legacyChooseEachDaySeparately' in production));
 });
 
-group('Discovery 23 expone li materialisation concret legacy sin materialisar li familie gigant', () => {
+group('Discovery 23 conserva li materialisation concret legacy quam scar activ', () => {
   ok(typeof production.legacyMaterializeMonthLengthWays === 'function');
   ok(typeof production.LegacyMonthLengthAllWaysAPI === 'function');
   ok(typeof production.Discovery23MonthLengthMaterializationHandler === 'function');
@@ -2098,11 +2098,29 @@ group('Discovery 23 expone li materialisation concret legacy sin materialisar li
   eq(probe.ways.length, 16);
   ok(probe.exceededLimit);
   ok(probe.concreteArrayContract);
-  ok(!('VirtualLegacyList' in production));
+  ok(typeof production.VirtualLegacyList === 'function');
   ok(!('legacyChooseEachDaySeparately' in production));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 23', () => {
+group('Patch 23 furni count exact e itemAt1 lexicografic sin materialisation complet', () => {
+  ok(typeof production.VirtualLegacyList === 'function');
+  ok(typeof production.MonthLengthVirtualPatchWrapper === 'function');
+  ok(typeof production.historicMonthLengthVirtualListThroughMonsterPath === 'function');
+  const tiny = new production.VirtualLegacyList(13, 3);
+  eq(tiny.count(), 3n);
+  deepEq(tiny.itemAt1(1n), [4,4,5]);
+  deepEq(tiny.itemAt1(2n), [4,5,4]);
+  deepEq(tiny.itemAt1(3n), [5,4,4]);
+  const huge = new production.VirtualLegacyList(1000, 16);
+  eq(huge.count(), 5239332298078798668173613753510n);
+  deepEq(huge.itemAt1(1892970349028658514214546085756n), [46,62,31,19,31,123,10,47,108,96,7,97,113,29,74,107]);
+  ok(!Array.isArray(huge));
+  ok(!('ways' in huge));
+  ok(!('legacyChooseEachDaySeparately' in production));
+  ok(!('DPUnrankLegalWeaving' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 23', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2114,4 +2132,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 23.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 23.');

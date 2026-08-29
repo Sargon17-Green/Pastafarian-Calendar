@@ -8,7 +8,7 @@ assert.equal(typeof production.filteredCutletCompositions, 'function');
 assert.equal(typeof production.CutletPartitionPatchWrapper, 'function');
 assert.equal(typeof production.RepeatedNamePatchWrapper, 'function');
 assert.equal(typeof production.partialPermutationUnrank, 'function');
-assert.equal('VirtualLegacyList' in production, false);
+assert.equal(typeof production.VirtualLegacyList, 'function');
 
 const legacySource = production.legacyPositiveCompositions.toString();
 assert.doesNotMatch(legacySource, /internalGate|internal_gate|prefix|boundary|required/);
