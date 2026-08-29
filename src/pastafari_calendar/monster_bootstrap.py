@@ -7,6 +7,7 @@ from .legacy_distance import LegacyDistanceAdapter
 from .legacy_stones import LegacyStoneBuilderAdapter
 from .legacy_hidden import LegacyHiddenDropAdapter
 from .legacy_prior import LegacyPriorAdapter
+from .legacy_visible_grinds import LegacyVisibleDropBuilderAdapter
 
 
 class MonsterError(RuntimeError):
@@ -88,6 +89,10 @@ class MonsterContext:
     patch06_hidden_k: int | None = None
     patch06_value: int | None = None
     patch06_applied: bool = False
+    legacy_visible_drop_table: tuple[int, ...] | None = None
+    legacy_visible_drop_count: int = 0
+    legacy_grind_rows_applied: int = 0
+    legacy_grind_missing_index: int | None = None
 
 
 class BaseMetrics:
@@ -146,3 +151,4 @@ class MonsterManager:
         self.legacy_stones = LegacyStoneBuilderAdapter()
         self.legacy_hidden = LegacyHiddenDropAdapter()
         self.legacy_prior = LegacyPriorAdapter()
+        self.legacy_visible_drops = LegacyVisibleDropBuilderAdapter()

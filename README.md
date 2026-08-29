@@ -1,33 +1,27 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on üçüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştirecek bağımsız uygulama çizgisinin on dördüncü aşama durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
 
 ## Güncel aşama
 
-Aşama 13/55, `PATCH 06` durumundadır. Altıncı tarihsel kusur kodda aynen korunur:
+Aşama 14/55, `DISCOVERY 07` durumundadır. Yedinci tarihsel kusur gerçek visible-drop zincirine eklenmiştir.
+
+11 gerçek grind satırı sentinel olmadan `index 0..10` tabloda tutulur. Legacy indexing ise 1-based grind numarasını doğrudan tablo indeksi olarak kullanır:
 
 ```text
-legacyPrior(dropStore, i, back)
-    -> dropStore[i-back]
+legacyGrindRow(table, grind)
+    -> table[grind]
 ```
 
-Düzeltme onun üstündeki `priorPatch` ve `PriorPatchWrapper` katmanındadır:
+Bu nedenle `grind=1` gerçek satır 2'yi okur, gerçek satır 1 atlanır ve `grind=11` index dışına çıkar. Recovery scar son hatayı kaydeder ve o ana kadar oluşmuş yanlış `x` değerini bırakır; bu bir düzeltme değildir.
 
-```text
-slot = i - back
+`LegacyVisibleDropBuilderAdapter`, 46 görünür damlayı önceki exact count/stone/hidden/history katmanlarının üstünde gerçek production state-machine yoluna bağlar.
 
-if slot >= 1:
-    return legacyPrior(dropStore, i, back)
+Yeni normatif regresyon görünür damla 1, 2 ve 46 değerlerini test-only normatif visible-drop builder ile karşılaştırır ve bilinçli olarak kırmızıdır.
 
-hiddenK = 1 - slot
-return hiddenByNearness(legacyHidden, hiddenK)
-```
+Henüz `PATCH 07` yoktur: index 0 sentinel row eklenmemiştir ve gerçek 11 grind satırı 1..11 slotlarına kaydırılmamıştır.
 
-Pozitif visible-history branch'i eski helper'ı gerçekten çağırır ve hidden storage gerektirmez. Nonpositive branch ise `hiddenK=1-slot` üzerinden önceki hidden near-ness translator'ına gider.
-
-Aşama 12'nin normatif history regresyonu değiştirilmeden artık yeşildir. `legacyPrior` hidden history bilmeyen fiziksel biçimiyle kodda kalır.
-
-Önceki bütün regresyonlar yeşildir. Gelecekteki 07–26 kusur ve yamaları üretime eklenmemiştir.
+Önceki Aşama 1–13 regresyonlarının tamamı yeşildir. Gelecekteki 08–26 kusur ve yamaları üretime eklenmemiştir.
 
 ## Korunan birinci aşama temeli
 
@@ -43,10 +37,10 @@ Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adlar�
 
 ## Çalıştırma
 
-Tam on üçüncü aşama paketi:
+Tam on dördüncü aşama paketi:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-Beklenen sonuç: bütün testler geçer ve depo durumu `GREEN` olur. Aşama 12'de kırmızı olan slot 0, -2 ve -6 hidden-history alt örnekleri aynı normatif regresyon gövdesiyle yeşile dönmelidir; pozitif visible slot branch'i `legacyPrior` üzerinden hidden storage gerektirmeden çalışmaya devam eder.
+Beklenen sonuç: önceki Aşama 1–13 regresyonları geçer. Tam paket `EXPECTED_RED` durumundadır; yalnızca yeni grind-table normatif regresyonunun görünür damla `i=1`, `i=2` ve `i=46` alt örnekleri başarısız olur.

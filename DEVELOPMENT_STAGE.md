@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=13
-CURRENT_KIND=PATCH
-CURRENT_PATCH=06
-LAST_COMPLETED_STAGE=13
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=14
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=07
+LAST_COMPLETED_STAGE=14
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Python
 NATURAL_LANGUAGE=Türkçe
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=legacyPrior fiziksel olarak yalnızca dropStore[i-back] visible-slot erişimiyle bırakıldı; priorPatch slot>=1 için legacyPrior çağrısını hidden storage gerektirmeden korudu, slot<=0 için hiddenK=1-slot hesaplayıp hiddenByNearness kullandı; PriorPatchWrapper branch scar durumunu çağrıya ait MonsterContext içinde tuttu
+MONSTER_ARCHITECTURE_GROWTH=11 gerçek visible grind satırı sentinel olmadan index 0..10 legacy tabloda tutuldu; legacyGrindRow 1-based grind değerini doğrudan table[grind] olarak kullanıyor, ilk gerçek satırı atlıyor ve grind 11'de son indeksi bulamıyor; LegacyVisibleDropBuilderAdapter bu yolu 46 görünür damlanın gerçek çağrı zincirine bağladı
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO

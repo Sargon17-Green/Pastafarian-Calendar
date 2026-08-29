@@ -1,0 +1,26 @@
+Aşama 14/55 — DISCOVERY 07
+
+Bu paket yalnızca Aşama 14 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_visible_grinds.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_12_discovery_06.py
+tests/test_stage_14_discovery_07.py
+artifacts/stage-14/BASELINE_STAGE_13_GREEN.txt
+artifacts/stage-14/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-14/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_14.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 13 baseline: GREEN
+Değişiklik sonrası Aşama 1–13 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+Yeni kusur: 11 gerçek grind row index 0..10; legacy 1-based table[grind] indexing
+PATCH 07 sentinel row: YOK
+08–26 gelecek kusur/yama kodu: YOK

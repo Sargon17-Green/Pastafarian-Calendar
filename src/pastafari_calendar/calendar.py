@@ -127,7 +127,20 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
 
         manager.metrics.bump(local_ctx, "legacy.prior.probes")
         local_ctx.status = "ESKİ_GÖRÜNÜR_GEÇMİŞ_HAZIR"
-        local_ctx.phase = "AŞAMA_12_BEKLEME"
+        local_ctx.phase = "ESKİ_GÖRÜNÜR_DAMLALAR"
+
+    def legacy_visible_drop_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        manager.legacy_visible_drops.call(local_ctx)
+
+        manager.metrics.bump(local_ctx, "legacy.visibleDrop.builds")
+        local_ctx.status = "ESKİ_GÖRÜNÜR_DAMLALAR_HAZIR"
+        local_ctx.phase = "AŞAMA_14_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -136,6 +149,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_TAŞ_TABLOSU", legacy_stone_handler)
     manager.dispatcher.register("ESKİ_GİZLİ_DAMLALAR", legacy_hidden_handler)
     manager.dispatcher.register("ESKİ_GÖRÜNÜR_GEÇMİŞ", legacy_prior_handler)
+    manager.dispatcher.register("ESKİ_GÖRÜNÜR_DAMLALAR", legacy_visible_drop_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -145,5 +160,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "On üçüncü aşamada üretim takvim yolu henüz birleştirilmedi"
+        "On dördüncü aşamada üretim takvim yolu henüz birleştirilmedi"
     )

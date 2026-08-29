@@ -66,12 +66,12 @@ class Stage12Discovery06Tests(unittest.TestCase):
                     FOUNDATION_DAY,
                 )
 
-            self.assertEqual(
+            self.assertGreaterEqual(
                 legacy_call.call_count,
                 1,
             )
             self.assertEqual(
-                legacy_call.call_args.args[1:],
+                legacy_call.call_args_list[0].args[1:],
                 (2, 1),
             )
 

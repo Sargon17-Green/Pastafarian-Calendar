@@ -516,3 +516,67 @@ Discovery aşamasındaki temporary `KeyError` state testi PATCH sonrası gerçek
 Visible branch'in hidden storage istememesi ayrıca regression ile dondurulmuştur.
 
 Logs, metrics ve diagnostics history sonucuna girdi değildir. Grind-table sentinel veya visible-drop grind hesapları hâlâ başlatılmamıştır.
+
+
+## Aşama 14 — Keşif 07: 1-based grind indeksini 0-based tabloya doğrudan vermek
+
+### Ne sanıldı
+
+Görünür damla için 11 gerçek öğütme satırı normal Python tablosunda `index 0..10` olarak tutuldu.
+
+Legacy kod ise öğütmeleri tarihsel olarak `1..11` numaralarıyla yürüttü ve bu numarayı doğrudan tablo indeksi sandı:
+
+```text
+legacyGrindRow(table, grind)
+    -> table[grind]
+```
+
+Tabloda sentinel yoktur.
+
+### Ne keşfedildi
+
+`grind=1` ilk gerçek satırı değil, ikinci gerçek satırı okur.
+
+Böylece görünür damla ilk normatif öğütmeyi tamamen atlar ve gerçek satır 2 ile başlar.
+
+`grind=10` gerçek satır 11'i okur.
+
+`grind=11` için tablo index 11 mevcut değildir.
+
+Discovery yolu bu son `IndexError` durumunu recovery scar olarak kaydeder ve o noktaya kadar oluşmuş yanlış `x` değerini döndürür. Bu recovery bir düzeltme değildir: ilk gerçek satır hâlâ atlanmıştır ve yalnızca 10 yanlış hizalanmış grind uygulanmıştır.
+
+### Gerçek görünür damla yolu
+
+Bu aşamada visible-drop builder ilk kez tam 1..46 zinciriyle üretime bağlandı.
+
+Her görünür damla:
+
+```text
+prev1 = priorPatch(...)
+prev3 = priorPatch(...)
+prev7 = priorPatch(...)
+base x = SAVE(...)
+x = legacy grind-table yolu
+```
+
+ile hesaplanır.
+
+History erişimi Patch 06 üzerinden doğru hidden/visible timeline'ı görür. Taşlar ve count değerleri de önceki yamalardan gelir. Bu aşamadaki yeni divergence yalnızca grind tablosunun indeks hizasındadır.
+
+Yeni normatif regresyon gerçek builder yolunun görünür damla 1, 2 ve 46 değerlerini test-only normatif visible-drop builder ile karşılaştırır. Üç alt örnek bilinçli olarak kırmızıdır.
+
+### Önceki instrumentation ile etkileşim
+
+Aşama 12'nin gerçek-yol `legacyPrior` instrumentation testi başlangıçta tek probe çağrısı bekliyordu.
+
+Visible-drop builder artık aynı prior yolunu doğal olarak çok kez çağırdığı için exact-count koşulu tarihsel olarak geçersiz oldu. Yalnızca instrumentation genişletildi: ilk çağrının hâlâ Stage 12'nin `(i=2, back=1)` probe'u olduğu doğrulanır.
+
+Aşama 12'nin normatif history regresyonuna dokunulmadı.
+
+### Bu aşamada eklenen canavar katmanı
+
+`LegacyVisibleDropBuilderAdapter`, 46 görünür damlayı yeni bir production katmanı olarak üretir.
+
+Invocation bağlamında görünür damla tablosu, damla sayısı, son eksik legacy grind indeksi ve uygulanmış grind satırı sayısı tutulur.
+
+Bu aşamada sentinel row yoktur. Gerçek 11 grind satırı 1..11 slotlarına taşınmamıştır ve Patch 07 henüz eklenmemiştir.
