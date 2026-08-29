@@ -87,3 +87,25 @@ Omnis codex computationalis huius lineae C++ est. Integra arbitraria per `boost:
 ## Catalogus linguae fontis
 
 Catalogus Neo-Latinus in `include/pastafari/source_language_catalog.hpp` congelatus manet. Semantica ordinis per `canonicalIndex` tantum definitur; textus presentationis computationem non mutat.
+
+
+## DISCOVERY 14 — assumptio legacy N<=M in selectione lata
+
+Via brevis Patch 13 manet recta pro familiis `1<=N<=M_OLD`, sed nondum habet modum familiae latae. Gradus 28 hanc limitationem non corrigit. `LegacyShortOnlyWideSelectionAdapter` eundem `Patch13RejectionWrapper` ad familiam `N>M_OLD` vere mittit; guard brevis defectum Neo-Latinum reddit et output semanticum non gignitur.
+
+Via activa huius gradus est:
+
+```text
+BaseMonsterManager::executeLegacyWideSelectionAssumption
+-> Patch 11: orderAt46Latch
+-> Patch 12: successor circularis next-bowl
+-> BaseDispatcher::dispatchLegacyWideSelectionAssumption
+-> Discovery14WideAssumptionHandler
+-> LegacyShortOnlyWideSelectionAdapter::attempt
+-> Patch13RejectionWrapper::repair
+-> defectus, quia N>M_OLD
+```
+
+`tests/stage_28_discovery_14_tests.cpp` tres familias latas probat: `M_OLD+1`, `M_OLD^2`, `M_OLD^3`. Answer ring productionis cum oracle C++ locali concordat, sed via activa in omnibus tribus output non habet, dum `reference::chooseRankWide` rank normativum definit. Ergo status huius gradus consulto `EXPECTED_RED` est.
+
+Nullus dispatcher `N<=M / N>M`, nullus `wideDetour`, nullum `space=M^places`, nullae digits base-M, nullus numerus wide et nulla rejectio super numero wide in productione huius gradus adsunt. Haec omnia reservantur Gradui 29 / PATCH 14.

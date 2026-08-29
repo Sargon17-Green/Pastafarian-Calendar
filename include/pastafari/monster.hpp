@@ -170,6 +170,13 @@ struct Patch13RejectionSelection {
     Integer outputRank{};
 };
 
+struct LegacyWideSelectionAttempt {
+    bool outputAvailable = false;
+    Integer outputRank{};
+    bool legacyShortFailure = false;
+    std::string legacyFailure;
+};
+
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
 Stone stonePatch(int i, Stone state);
@@ -298,6 +305,35 @@ struct BaseMonsterContext {
     Integer patch13AcceptedOffset{};
     Integer patchedBiasedSelectionOutput{};
     bool patch13Applied = false;
+    Integer legacyWideSelectionFamilySize{};
+    LegacyAnswerRing legacyWideSelectionRing{};
+    bool legacyWideSelectionOutputAvailable = false;
+    Integer legacyWideSelectionOutput{};
+    bool legacyWideSelectionShortFailure = false;
+    std::string legacyWideSelectionFailure;
+    bool legacyWideSelectionReady = false;
+};
+
+struct LegacyWideSelectionReport {
+    Integer calculationDay{};
+    Integer targetDay{};
+    int queriedBowlId = 0;
+    int seal = 0;
+    Integer familySize{};
+    LegacyAnswerRing answerRing{};
+    bool outputAvailable = false;
+    Integer outputRank{};
+    bool legacyShortFailure = false;
+    std::string legacyFailure;
+    BowlState finalBowls{};
+    PermutationOrder orderAt46Latch{};
+    int nextBowlId = 0;
+    bool patch11Prepared = false;
+    bool patch12Prepared = false;
+    std::string phase;
+    std::string status;
+    std::string handler;
+    std::size_t branchCount = 0;
 };
 
 struct BaseRunReport {
@@ -541,6 +577,7 @@ public:
     void requirePatch12Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyBiasedSelectionReady(const BaseMonsterContext& ctx) const;
     void requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const;
+    void requireDiscovery14WideAssumptionReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -644,6 +681,14 @@ public:
     Patch13RejectionSelection repair(const LegacyAnswerRing& stream,
                                      const Integer& N,
                                      const LegacyBiasedSelectionAdapter& adapter) const;
+};
+
+class LegacyShortOnlyWideSelectionAdapter {
+public:
+    LegacyWideSelectionAttempt attempt(const LegacyAnswerRing& stream,
+                                       const Integer& N,
+                                       const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                       const Patch13RejectionWrapper& rejectionWrapper) const;
 };
 
 class Patch10DeferredBowlWrapper {
@@ -938,6 +983,16 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Discovery14WideAssumptionHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyShortOnlyWideSelectionAdapter& adapter,
+                const LegacyBiasedSelectionAdapter& selectionAdapter,
+                const Patch13RejectionWrapper& rejectionWrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -1112,6 +1167,14 @@ public:
                                         const Patch13RejectionWrapper& wrapper,
                                         const BaseValidationManager& validator,
                                         const BaseMetricsShell& metrics) const;
+
+    void dispatchLegacyWideSelectionAssumption(BaseMonsterContext& ctx,
+                                               const Discovery14WideAssumptionHandler& handler,
+                                               const LegacyShortOnlyWideSelectionAdapter& adapter,
+                                               const LegacyBiasedSelectionAdapter& selectionAdapter,
+                                               const Patch13RejectionWrapper& rejectionWrapper,
+                                               const BaseValidationManager& validator,
+                                               const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1184,6 +1247,12 @@ public:
         int seal,
         const Integer& familySize) const;
     LegacyBiasedSelectionReport executeUnpatchedBiasedSelectionDiagnostic(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        int queriedBowlId,
+        int seal,
+        const Integer& familySize) const;
+    LegacyWideSelectionReport executeLegacyWideSelectionAssumption(
         const Integer& calculationDay,
         const Integer& targetDay,
         int queriedBowlId,

@@ -801,3 +801,38 @@ Omnes regressiones Graduum 1–27 transeunt.
 Additi sunt `Patch13RejectionSelection`, campi contextus acceptance limit, accepted answer, accepted offset et output patched, campi report cicatricis, `LegacyBiasedSelectionAdapter::selectAcceptedAnswer`, `Patch13RejectionWrapper`, `Patch13BiasedSelectionHandler`, `requirePatch13BiasedSelectionReady`, `dispatchPatchedBiasedSelection` et `executeUnpatchedBiasedSelectionDiagnostic`.
 
 `biasedLegacyPick` intactus et callable manet. Nullus `wideDetour`, nullus dispatcher wide, nullae digits base-M et nullus PATCH 14 praemature additus est.
+
+
+## Gradus 28 — DISCOVERY 14: via short-only familias supra M repudiat
+
+### Quid putabatur
+
+Post PATCH 13 selector brevis iam rejectionem aequam in eodem answer ring faciebat. Stratum legacy tamen tacite supponebat familiam semper intra `1..M_OLD` cadere et eundem `Patch13RejectionWrapper` pro omni magnitudine familiae adhiberi posse.
+
+### Quid repertum est
+
+Familiae combinatoriae possunt multo maiores quam `M_OLD` esse. Pro `N>M_OLD` norma selectionem latam requirit. In hoc gradu nulla talis via adicitur: `LegacyShortOnlyWideSelectionAdapter` eundem wrapper brevem vere vocat. Guard Patch 13, qui pro via brevi rectus est, familiam supra M repudiat et sic nullum rank reddit.
+
+`Discovery14WideAssumptionHandler` primum Patch 11 et Patch 12 per eundem contextum invocationis parat, answer ring ex crateribus finalibus et successore circulari constituit, deinde conatum short-only facit. Defectus captus tantum ut status cicatricis et diagnosticum servatur; nullus fallback semanticus, nullus oracle et nulla selectio lata productionis fit.
+
+### Regressio
+
+Probatio nova tres valores legitimos sed latos exercet:
+
+```text
+N = M_OLD + 1
+N = M_OLD^2
+N = M_OLD^3
+```
+
+Pro singulis answer ring productionis cum `reference::askBowl` concordat. Oracle test-only `reference::chooseRankWide` rank definit, sed via activa `outputAvailable=false` et defectum short-only reddit. Tres discrepantiae exactae fiunt et exitus probationis est 1.
+
+Omnes regressiones Graduum 1–27 denuo compilatae et exsecutae sunt; omnes transeunt.
+
+### Quid consulto nondum adest
+
+Nullus dispatcher inter viam brevem et latam, nullus `wideDetour`, nullum minimum `places`, nullum `space=M_OLD^places`, nullae digits `answerAt(j)-1`, nullus numerus wide et nulla rejectio per `directionStep` super spatio lato addita sunt. Gradus 29 / PATCH 14 solus ea introducere debet.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `LegacyWideSelectionAttempt`, campi contextus selectionis latae, `LegacyWideSelectionReport`, `LegacyShortOnlyWideSelectionAdapter`, `Discovery14WideAssumptionHandler`, `requireDiscovery14WideAssumptionReady`, `dispatchLegacyWideSelectionAssumption` et `executeLegacyWideSelectionAssumption`. Strata Patch 11–13 manent intacta.

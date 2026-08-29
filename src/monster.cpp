@@ -3031,6 +3031,27 @@ void BaseValidationManager::requireLegacyBiasedSelectionReady(const BaseMonsterC
     }
 }
 
+void BaseValidationManager::requireDiscovery14WideAssumptionReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.patch11Applied || !ctx.patch12Applied) {
+        throw BaseValidationError("patches undecimus et duodecimus ante discovery quartum decimum parati esse debent");
+    }
+    if (!ctx.legacyWideSelectionReady) {
+        throw BaseValidationError("conatus selectionis latae legacy nondum paratus est");
+    }
+    if (ctx.legacyWideSelectionFamilySize <= M_OLD) {
+        throw BaseValidationError("discovery quartum decimum familiam supra M requirit");
+    }
+    if (ctx.legacyWideSelectionOutputAvailable) {
+        throw BaseValidationError("legacy short-only familiam supra M perperam accepit");
+    }
+    if (!ctx.legacyWideSelectionShortFailure) {
+        throw BaseValidationError("assumptio legacy N<=M defectum short-only non exposuit");
+    }
+    if (ctx.legacyWideSelectionFailure.empty()) {
+        throw BaseValidationError("causa defectus short-only vacua est");
+    }
+}
+
 void BaseValidationManager::requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const {
     requireLegacyBiasedSelectionReady(ctx);
     if (!ctx.patch13Applied) {
@@ -3123,6 +3144,32 @@ Patch13RejectionSelection Patch13RejectionWrapper::repair(
             };
         }
         ++offset;
+    }
+}
+
+LegacyWideSelectionAttempt LegacyShortOnlyWideSelectionAdapter::attempt(
+    const LegacyAnswerRing& stream,
+    const Integer& N,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper) const {
+    try {
+        const Patch13RejectionSelection shortResult = rejectionWrapper.repair(
+            stream,
+            N,
+            selectionAdapter);
+        return LegacyWideSelectionAttempt{
+            true,
+            shortResult.outputRank,
+            false,
+            std::string{}
+        };
+    } catch (const BaseValidationError& error) {
+        return LegacyWideSelectionAttempt{
+            false,
+            Integer{0},
+            true,
+            error.what()
+        };
     }
 }
 
@@ -3425,6 +3472,63 @@ void BaseDispatcher::dispatchPatchedBiasedSelection(
     ctx.branchTrace.push_back("PATCH_13_DISPATCH");
     metrics.bump(ctx, "patch13.dispatch.calls");
     handler.handle(ctx, adapter, wrapper, validator, metrics);
+}
+
+void Discovery14WideAssumptionHandler::handle(
+    BaseMonsterContext& ctx,
+    const LegacyShortOnlyWideSelectionAdapter& adapter,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Discovery14WideAssumptionHandler";
+    ctx.phase = "DISCOVERY_14_SHORT_ONLY_ATTEMPT";
+    ctx.status = "LEGACY_ASSUMES_N_NOT_ABOVE_M";
+    ctx.branchTrace.push_back("DISCOVERY_14_SHORT_ONLY_ATTEMPT");
+    metrics.bump(ctx, "discovery14.shortOnly.calls");
+
+    ctx.legacyWideSelectionRing = answerRingThroughPatchedNextBowl(
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.legacyBiasedSelectionQueriedBowlId,
+        ctx.patchedNextBowlOutput,
+        ctx.legacyBiasedSelectionSeal);
+    ctx.legacyWideSelectionFamilySize = ctx.legacyBiasedSelectionFamilySize;
+
+    const LegacyWideSelectionAttempt attempt = adapter.attempt(
+        ctx.legacyWideSelectionRing,
+        ctx.legacyWideSelectionFamilySize,
+        selectionAdapter,
+        rejectionWrapper);
+    ctx.legacyWideSelectionOutputAvailable = attempt.outputAvailable;
+    ctx.legacyWideSelectionOutput = attempt.outputRank;
+    ctx.legacyWideSelectionShortFailure = attempt.legacyShortFailure;
+    ctx.legacyWideSelectionFailure = attempt.legacyFailure;
+    ctx.legacyWideSelectionReady = true;
+
+    ctx.phase = "DISCOVERY_14_VALIDATE";
+    ctx.branchTrace.push_back("DISCOVERY_14_VALIDATE");
+    validator.requireDiscovery14WideAssumptionReady(ctx);
+
+    ctx.phase = "DISCOVERY_14_WIDE_ASSUMPTION_EXPOSED";
+    ctx.status = "SHORT_ONLY_PATH_CANNOT_SELECT_N_ABOVE_M";
+    ctx.branchTrace.push_back("DISCOVERY_14_WIDE_ASSUMPTION_EXPOSED");
+    metrics.bump(ctx, "discovery14.wideAssumption.exposed");
+}
+
+void BaseDispatcher::dispatchLegacyWideSelectionAssumption(
+    BaseMonsterContext& ctx,
+    const Discovery14WideAssumptionHandler& handler,
+    const LegacyShortOnlyWideSelectionAdapter& adapter,
+    const LegacyBiasedSelectionAdapter& selectionAdapter,
+    const Patch13RejectionWrapper& rejectionWrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "DISCOVERY_14_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("DISCOVERY_14_DISPATCH");
+    metrics.bump(ctx, "discovery14.dispatch.calls");
+    handler.handle(ctx, adapter, selectionAdapter, rejectionWrapper, validator, metrics);
 }
 
 LegacyOrderMemoryReport BaseMonsterManager::executeOverwritableOrderMemorySauce(
@@ -3764,6 +3868,83 @@ LegacyBiasedSelectionReport BaseMonsterManager::executeUnpatchedBiasedSelectionD
         Integer{0},
         Integer{0},
         false
+    };
+}
+
+LegacyWideSelectionReport BaseMonsterManager::executeLegacyWideSelectionAssumption(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    int queriedBowlId,
+    int seal,
+    const Integer& familySize) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "DISCOVERY_14_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyNextBowlQueriedId = queriedBowlId;
+    ctx.legacyBiasedSelectionQueriedBowlId = queriedBowlId;
+    ctx.legacyBiasedSelectionSeal = seal;
+    ctx.legacyBiasedSelectionFamilySize = familySize;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyOrderMemorySauceAdapter orderMemoryAdapter;
+    const Patch11OrderAt46LatchWrapper latchWrapper;
+    const Patch11OrderAt46LatchHandler latchHandler;
+    const LegacyNextBowlAdapter nextBowlAdapter;
+    const Patch12NextBowlWrapper nextBowlWrapper;
+    const Patch12NextBowlHandler nextBowlHandler;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const LegacyShortOnlyWideSelectionAdapter wideLegacyAdapter;
+    const Discovery14WideAssumptionHandler wideHandler;
+    const BaseDispatcher dispatcher;
+
+    dispatcher.dispatchPatchedOrderAt46Latch(
+        ctx,
+        latchHandler,
+        orderMemoryAdapter,
+        latchWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchPatchedNextBowl(
+        ctx,
+        nextBowlHandler,
+        nextBowlAdapter,
+        nextBowlWrapper,
+        validator,
+        metrics);
+    dispatcher.dispatchLegacyWideSelectionAssumption(
+        ctx,
+        wideHandler,
+        wideLegacyAdapter,
+        selectionAdapter,
+        rejectionWrapper,
+        validator,
+        metrics);
+
+    return LegacyWideSelectionReport{
+        calculationDay,
+        targetDay,
+        queriedBowlId,
+        seal,
+        familySize,
+        ctx.legacyWideSelectionRing,
+        ctx.legacyWideSelectionOutputAvailable,
+        ctx.legacyWideSelectionOutput,
+        ctx.legacyWideSelectionShortFailure,
+        ctx.legacyWideSelectionFailure,
+        ctx.patch11LatchedOrderSauce.finalBowls,
+        ctx.patch11LatchedOrderSauce.orderAt46Latch,
+        ctx.patchedNextBowlOutput,
+        ctx.patch11Applied,
+        ctx.patch12Applied,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
     };
 }
 
