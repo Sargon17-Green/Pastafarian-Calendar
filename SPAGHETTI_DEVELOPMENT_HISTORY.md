@@ -800,3 +800,22 @@ Null circumition existe in Discovery 18. `oldJumpGuess(anchor,targetDay)` calcul
 ### Witness e limite del stage
 
 Li witness usa un anchor selectet de longore 1000. `firstDay+365` e `closeDay` resta intra Year 5000 ma li estimation retorna 5001 e 5002; `closeDay+1` es li prim die pos li anchor e deve esser in Year 5001, ma li estimation retorna 5002. Ti divergence es intentionalmen rubi. Li correction de Patch 18 — conservar li guess solmen quam telemetry e caminar un year a un vez per `nextYear`/`previousYear` — ne es present. Null cache de Patch 19 es addit.
+
+
+## Stage 37 — PATCH 18
+
+### Scar historic conservat
+
+`oldJumpGuess(anchor,targetDay)` resta exactmen li helper de Discovery 18. It continua usar `floorDiv(targetDay-anchor.firstDay,365)` e ne conosse null limite annual real. `Discovery18YearJumpHandler` anc resta un route separat quel usa li guess directmen quam numer semantic, por que li defect historic resta observabil e testabil.
+
+### Caminada annual autoritativ
+
+Patch 18 adjunte `patchedNextYear`, `patchedPreviousYear` e `findYearByWalkPatch`. Li du prim helpers accepta un resolver de un sol year e valida du invariantes ante retornar: li numero cambia exactmen per un, e li gate compartit coincide exactmen. Li walk ne deriva null numer del distance in dies. It avansa solmen durant que li target es pos li close gate current, o recula solmen durant que li target es al opening gate o plu tempran. Li condition final es sempre `openDay < targetDay <= closeDay`.
+
+### Telemetry legacy ante semantics
+
+`SequentialYearWalkPatchWrapper` exige un resultate real de Discovery 18. Pro to, `oldJumpGuess` ja esset vocat e su valore es conservat quam `patch18LegacyGuessDiagnostic` ante que `findYearByWalkPatch` comensa. Li flag `patch18GuessIgnoredForSemantics` rende explicit que ti estimation ne controla plu li resultate final. Li trace conserva chascun transition individual con direction, numer anterior, numer posterior e gate compartit.
+
+### Regression e limites
+
+Li witness de longore 1000 conserva li legacy outputs 5001, 5002 e 5002 por `firstDay+365`, `closeDay` e `closeDay+1`. Li route reparat retorna 5000, 5000 e 5001. Un suite separat exercita walks de pluri annus in ambi directiones, limites exact de interval, transitiones con numer o gate invalid e isolation invocation-local. Null cache de Patch 19, null `calculationDayFingerprint`, null `oldStructureSauce` e null code posterior es present.

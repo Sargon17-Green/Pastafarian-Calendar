@@ -234,6 +234,14 @@ class BaseMonsterContext {
     this.legacyJumpGuess = null;
     this.legacyJumpSemanticYearNumber = null;
     this.legacyJumpGuessUsedAsSemantic = false;
+    this.patch18LegacyGuessDiagnostic = null;
+    this.patch18LegacyDiagnosticPreserved = false;
+    this.patch18GuessIgnoredForSemantics = false;
+    this.patch18WalkDirection = null;
+    this.patch18WalkStepCount = null;
+    this.patch18WalkTrace = null;
+    this.patch18ResolvedYear = null;
+    this.patch18SemanticYearNumber = null;
   }
 }
 
@@ -470,6 +478,21 @@ class BaseValidationManager {
     }
     if (anchor.firstDay !== anchor.openDay + 1n || anchor.closeDay < anchor.firstDay) {
       throw new RangeError('Li interval del anchor de Year 5000 es invalid.');
+    }
+  }
+
+  requireDiscovery18Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_18_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un jump legacy valid por Patch 18.');
+    }
+  }
+
+  requireYearWalkSource(yearWalkSource) {
+    if (!yearWalkSource || typeof yearWalkSource !== 'object') {
+      throw new TypeError('Li fonte de caminada annual deve esser un object con nextYear e previousYear.');
+    }
+    if (typeof yearWalkSource.nextYear !== 'function' || typeof yearWalkSource.previousYear !== 'function') {
+      throw new TypeError('Li fonte de caminada annual deve exposer nextYear e previousYear quam functiones.');
     }
   }
 
@@ -1650,6 +1673,84 @@ function oldJumpGuess(anchor, targetDay) {
   return anchor.number + floorDiv(targetDay - anchor.firstDay, 365n);
 }
 
+function requireWalkYearRecord(year, label) {
+  if (!year || typeof year !== 'object') {
+    throw new TypeError(label + ' deve esser un object de year.');
+  }
+  for (const key of ['number', 'openDay', 'firstDay', 'closeDay']) {
+    if (typeof year[key] !== 'bigint') {
+      throw new TypeError(label + ' deve contener ' + key + ' quam BigInt exact.');
+    }
+  }
+  if (year.firstDay !== year.openDay + 1n || year.closeDay < year.firstDay) {
+    throw new RangeError(label + ' have un interval invalid.');
+  }
+  return { number: year.number, openDay: year.openDay, firstDay: year.firstDay, closeDay: year.closeDay };
+}
+
+function patchedNextYear(knownYear, nextYear) {
+  const current = requireWalkYearRecord(knownYear, 'Li year current por nextYear');
+  if (typeof nextYear !== 'function') {
+    throw new TypeError('Patch 18 exige un callback nextYear por caminar un year exact.');
+  }
+  const candidate = requireWalkYearRecord(nextYear({ ...current }), 'Li year retornat per nextYear');
+  if (candidate.number !== current.number + 1n) {
+    throw new BootstrapStageError('nextYear deve avansar li numero exactmen per un.');
+  }
+  if (candidate.openDay !== current.closeDay) {
+    throw new BootstrapStageError('nextYear deve compartir exactmen li gate de limite con li year current.');
+  }
+  return candidate;
+}
+
+function patchedPreviousYear(knownYear, previousYear) {
+  const current = requireWalkYearRecord(knownYear, 'Li year current por previousYear');
+  if (typeof previousYear !== 'function') {
+    throw new TypeError('Patch 18 exige un callback previousYear por caminar un year exact.');
+  }
+  const candidate = requireWalkYearRecord(previousYear({ ...current }), 'Li year retornat per previousYear');
+  if (candidate.number !== current.number - 1n) {
+    throw new BootstrapStageError('previousYear deve recular li numero exactmen per un.');
+  }
+  if (candidate.closeDay !== current.openDay) {
+    throw new BootstrapStageError('previousYear deve compartir exactmen li gate de limite con li year current.');
+  }
+  return candidate;
+}
+
+function findYearByWalkPatch(anchor, targetDay, nextYear, previousYear) {
+  let current = requireWalkYearRecord(anchor, 'Li anchor por li caminada annual');
+  if (typeof targetDay !== 'bigint') {
+    throw new TypeError('Li target-day de Patch 18 deve esser un BigInt exact.');
+  }
+  const trace = [];
+  while (targetDay > current.closeDay) {
+    const before = current;
+    current = patchedNextYear(current, nextYear);
+    trace.push({
+      direction: 'next',
+      fromNumber: before.number,
+      toNumber: current.number,
+      sharedGate: before.closeDay
+    });
+  }
+  while (targetDay <= current.openDay) {
+    const before = current;
+    current = patchedPreviousYear(current, previousYear);
+    trace.push({
+      direction: 'previous',
+      fromNumber: before.number,
+      toNumber: current.number,
+      sharedGate: before.openDay
+    });
+  }
+  if (!(current.openDay < targetDay && targetDay <= current.closeDay)) {
+    throw new BootstrapStageError('Li caminada annual ne fini in un interval quel contene li target-day.');
+  }
+  const direction = trace.length === 0 ? 'anchor' : trace[0].direction;
+  return { year: { ...current }, direction, stepCount: BigInt(trace.length), trace: trace.map((step) => ({ ...step })) };
+}
+
 function sortEqualLengthRunsByOpeningGate(list) {
   if (!Array.isArray(list)) {
     throw new TypeError('Li liste de year candidates por li tie patch deve esser un array ja sortat per longore.');
@@ -2334,6 +2435,63 @@ class Discovery18YearJumpHandler {
     this.metricsManager.bump(context, 'discovery18.oldJumpGuess.calls');
     this.metricsManager.bump(context, 'discovery18.guessUsedAsSemantic.calls');
     return { anchor: { ...anchor }, guessedYearNumber: guess, semanticYearNumber: guess };
+  }
+}
+
+class SequentialYearWalkPatchWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, targetDay, yearWalkSource) {
+    this.validationManager.requireDiscovery18Result(context);
+    this.validationManager.requireDiscreteDay(targetDay);
+    this.validationManager.requireYearWalkSource(yearWalkSource);
+    const anchor = {
+      number: context.legacyJumpAnchorNumber,
+      openDay: context.legacyJumpAnchorOpenDay,
+      firstDay: context.legacyJumpAnchorFirstDay,
+      closeDay: context.legacyJumpAnchorCloseDay
+    };
+    this.validationManager.requireYearJumpAnchor(anchor);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'SequentialYearWalkPatchWrapper';
+    context.phase = 'PATCH_18_SEQUENTIAL_YEAR_WALK';
+    context.branchTrace.push('PATCH_18_SEQUENTIAL_YEAR_WALK');
+
+    // Li scar /365 ja esset vocat realmen in Discovery 18; Patch 18 conserva it exclusivmen quam telemetry.
+    context.patch18LegacyGuessDiagnostic = context.legacyJumpGuess;
+    context.patch18LegacyDiagnosticPreserved = true;
+    context.patch18GuessIgnoredForSemantics = true;
+    const walked = findYearByWalkPatch(
+      anchor,
+      targetDay,
+      (year) => yearWalkSource.nextYear({ ...year }),
+      (year) => yearWalkSource.previousYear({ ...year })
+    );
+    context.patch18WalkDirection = walked.direction;
+    context.patch18WalkStepCount = walked.stepCount;
+    context.patch18WalkTrace = walked.trace.map((step) => ({ ...step }));
+    context.patch18ResolvedYear = { ...walked.year };
+    context.patch18SemanticYearNumber = walked.year.number;
+    context.status = 'PATCH_18_RESULT';
+    this.metricsManager.bump(context, 'patch18.sequentialYearWalk.calls');
+    for (let index = 0n; index < walked.stepCount; index += 1n) {
+      this.metricsManager.bump(context, 'patch18.singleYearTransitions.calls');
+    }
+    if (walked.direction === 'next') this.metricsManager.bump(context, 'patch18.nextYearWalk.calls');
+    if (walked.direction === 'previous') this.metricsManager.bump(context, 'patch18.previousYearWalk.calls');
+    if (walked.direction === 'anchor') this.metricsManager.bump(context, 'patch18.anchorAlreadyContainsTarget.calls');
+    return {
+      anchor: { ...anchor },
+      telemetryGuess: context.patch18LegacyGuessDiagnostic,
+      semanticYearNumber: context.patch18SemanticYearNumber,
+      resolvedYear: { ...context.patch18ResolvedYear },
+      direction: context.patch18WalkDirection,
+      stepCount: context.patch18WalkStepCount,
+      trace: context.patch18WalkTrace.map((step) => ({ ...step }))
+    };
   }
 }
 
@@ -3110,6 +3268,10 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyYearJumpAdapter
     );
+    this.sequentialYearWalkPatchWrapper = new SequentialYearWalkPatchWrapper(
+      this.validationManager,
+      this.metricsManager
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -3609,6 +3771,26 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch18YearJump(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, targetDay);
+      const result = this.sequentialYearWalkPatchWrapper.repair(context, targetDay, yearWalkSource);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -3803,8 +3985,16 @@ function discovery18LegacyYearJumpThroughMonsterPath(
   );
 }
 
+function historicYearJumpThroughMonsterPath(
+  calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  return new BaseMonsterManager().executePatch18YearJump(
+    calculationDay, targetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 18; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 18; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -3870,6 +4060,7 @@ module.exports = Object.freeze({
   Year5000TiePatchWrapper,
   LegacyYearJumpAdapter,
   Discovery18YearJumpHandler,
+  SequentialYearWalkPatchWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -3935,6 +4126,9 @@ module.exports = Object.freeze({
   sortEqualLengthRunsByOpeningGate,
   floorDiv,
   oldJumpGuess,
+  patchedNextYear,
+  patchedPreviousYear,
+  findYearByWalkPatch,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -3971,5 +4165,6 @@ module.exports = Object.freeze({
   discovery17LegacyYear5000TieThroughMonsterPath,
   historicYear5000TieThroughMonsterPath,
   discovery18LegacyYearJumpThroughMonsterPath,
+  historicYearJumpThroughMonsterPath,
   calendarDateSpaghetti
 });

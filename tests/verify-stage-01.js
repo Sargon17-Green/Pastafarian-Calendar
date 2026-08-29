@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 18 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 18 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,8 +319,7 @@ group('null textu hebreic o code posterior a Discovery 18 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'findYearByWalkPatch', 'patchedNextYear', 'patchedPreviousYear',
-    'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
+    'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'calculationDayFingerprint', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
     'legacyChooseEachDaySeparately', 'oldContiguousMonthDayGuess'
   ];
@@ -1691,7 +1690,7 @@ group('Patch 17 reordena solmen runs contigui egal per opening gate tempran', ()
   ok(!production.Year5000TiePatchWrapper.prototype.repair.toString().includes('oldJumpGuess'));
 });
 
-group('Discovery 18 usa oldJumpGuess /365 directmen quam numer semantic', () => {
+group('Discovery 18 conserva oldJumpGuess /365 quam scar semantic direct', () => {
   const helperSource = production.oldJumpGuess.toString();
   ok(helperSource.includes('targetDay - anchor.firstDay'));
   ok(helperSource.includes('floorDiv(targetDay - anchor.firstDay, 365n)'));
@@ -1733,7 +1732,35 @@ group('Discovery 18 usa oldJumpGuess /365 directmen quam numer semantic', () => 
   ok(!production.Discovery18YearJumpHandler.prototype.handle.toString().includes('patchedPreviousYear'));
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 18', () => {
+group('Patch 18 conserva li guess quam telemetry e camina un year a un vez', () => {
+  const anchor = { number: 5000n, openDay: 0n, firstDay: 1n, closeDay: 1000n };
+  const years = new Map([
+    [4999n, { number: 4999n, openDay: -700n, firstDay: -699n, closeDay: 0n }],
+    [5000n, anchor],
+    [5001n, { number: 5001n, openDay: 1000n, firstDay: 1001n, closeDay: 1700n }],
+    [5002n, { number: 5002n, openDay: 1700n, firstDay: 1701n, closeDay: 2500n }]
+  ]);
+  const nextYear = (year) => ({ ...years.get(year.number + 1n) });
+  const previousYear = (year) => ({ ...years.get(year.number - 1n) });
+  let walked = production.findYearByWalkPatch(anchor, 365n, nextYear, previousYear);
+  eq(walked.year.number, 5000n);
+  eq(walked.stepCount, 0n);
+  eq(walked.direction, 'anchor');
+  walked = production.findYearByWalkPatch(anchor, 1701n, nextYear, previousYear);
+  eq(walked.year.number, 5002n);
+  eq(walked.stepCount, 2n);
+  eq(walked.trace[0].toNumber, 5001n);
+  eq(walked.trace[1].toNumber, 5002n);
+  walked = production.findYearByWalkPatch(anchor, 0n, nextYear, previousYear);
+  eq(walked.year.number, 4999n);
+  eq(walked.stepCount, 1n);
+  eq(walked.direction, 'previous');
+  ok(production.SequentialYearWalkPatchWrapper.prototype.repair.toString().includes('context.patch18LegacyGuessDiagnostic = context.legacyJumpGuess'));
+  ok(production.SequentialYearWalkPatchWrapper.prototype.repair.toString().includes('findYearByWalkPatch'));
+  ok(!production.SequentialYearWalkPatchWrapper.prototype.repair.toString().includes('LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 18', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1745,4 +1772,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 18.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 18.');

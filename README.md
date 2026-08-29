@@ -4,11 +4,11 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 35 de 55: PATCH 17** e li repository local es GREEN. Patch 16 continua filtrar omni year candidate supra 5778 ante sort e selection, e Discovery 17 resta observabil quam scar del tie de Year 5000.
+Li linea es in **Stage 37 de 55: PATCH 18** e li repository local es GREEN. Li scars de year-candidate 5778 e tie de Year 5000 resta intact, e Discovery 18 continua exposir li estimation historic `oldJumpGuess(.../365...)` quam route defectiv separat.
 
-`stableLengthOnlyPatchedYearCandidates` resta intact e executa prim li stable sort historic per longore solmen. Pos ti passu, `sortEqualLengthRunsByOpeningGate` camina li liste ja sortat, trova chascun run contigui de `candidateLength` egal e reordena exclusivmen ti run per opening gate plu tempran. Ti forma preserva li scar historic e evita intentionalmen un clean global sort per `(length, openGate)`.
+`oldJumpGuess` ne es modificat e es ancor vocat realmen ante li circumition semantic. `SequentialYearWalkPatchWrapper` conserva su valore quam telemetry, ma `findYearByWalkPatch` determina li year semantic exclusivmen per caminada desde li anchor Year 5000. `patchedNextYear` e `patchedPreviousYear` permitte solmen transitiones de un unic numer annual e exige continuitá exact del gate compartit.
 
-`Year5000TiePatchWrapper` conserva li familie e li candidate selectet legacy quam diagnostics, aplica li reorder local e selecte denov sur li familie reparat. `oldJumpGuess` de Patch 18 ne es present, e li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Li interval semantic resta `openDay < targetDay <= closeDay`: un target ja intra Year 5000 usa zero transitions, un target pos su close gate camina avante un year a un vez, e un target al opening gate o plu tempran camina retro un year a un vez. Null cache de Patch 19 es present, e li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -26,16 +26,16 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 17 deve restar verd:
+Omni regressions til Discovery 18 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal de Patch 17 deve esser verd:
+Li test focal de Patch 18 deve esser verd:
 
 ```text
-npm run test:patch-17
+npm run test:patch-18
 ```
 
 Li suite complet deve esser GREEN:
@@ -217,3 +217,14 @@ Li route de Year 5000 ja passa per li ceiling 5778 e li duesim tie passu de Patc
 `LegacyYearJumpAdapter` voca ti helper realmen. `Discovery18YearJumpHandler` prende li candidate selectet per Patch 17, forma un anchor de Year 5000 e conserva number, open day, first day, close day, target, delta e guess quam state invocation-local. In ti Discovery li defect es activ: li guess es usat directmen quam numer semantic del year, ne solmen quam telemetry.
 
 Li witness usa tri candidates egal de longore 1000. Pos li tie repair, li anchor selectet have li opening plu tempran. Por `firstDay+365`, `closeDay` e `closeDay+1`, li guess legacy retorna respectivmen 5001, 5002 e 5002; li semantics per intervalles/year-walk exige 5000, 5000 e 5001. Ti comparison es li unic EXPECTED_RED del stage. Null `findYearByWalkPatch`, null `patchedNextYear`, null `patchedPreviousYear` e null code de Patch 19 es includet.
+
+
+## Stage 37 — Patch 18
+
+`oldJumpGuess(anchor,targetDay)` resta intact quam scar historic. Li route separat de Discovery 18 continua demonstrar que li quotient per 365 posse etiquettar un target intern de Year 5000 quam 5001 o 5002. Patch 18 ne netta, ne inlinea e ne substitue ti helper.
+
+`patchedNextYear` e `patchedPreviousYear` es strates de un unic transition. Chascun valida li record de year, exige un cambio de numero exactmen +1 o -1 e confirma que li gate de limite es compartit exactmen inter li du annus. `findYearByWalkPatch` comensa sempre al anchor Year 5000, repeti next-year durant que `targetDay>closeDay`, repeti previous-year durant que `targetDay<=openDay`, e fini solmen quand `openDay<targetDay<=closeDay`.
+
+`SequentialYearWalkPatchWrapper` es conectet pos `Discovery18YearJumpHandler`. Ergo `oldJumpGuess` es vocat realmen ante li walk, su output es conservat quam `patch18LegacyGuessDiagnostic`, e li wrapper marca explicitmen que ti guess es ignorat por semantics. Li resultate final veni solmen del year atinget per li caminada annual.
+
+Li witness del stage conserva li divergence legacy 5001/5002/5002, ma li path reparat retorna 5000/5000/5001. Tests separat confirma zero-step intra li anchor, multi-step avante e retro, limites de gate, rejection de transitiones malformed e isolation de contexts. Null cache keyed per year number, null guards de Patch 19 e null `oldStructureSauce` es addit.

@@ -56,7 +56,7 @@ const anchor = {
 };
 const targets = [anchor.firstDay + 365n, anchor.closeDay, anchor.closeDay + 1n];
 const expectedYearNumbers = [5000n, 5000n, 5001n];
-const actualYearNumbers = [];
+const legacyYearNumbers = [];
 
 for (let index = 0; index < targets.length; index += 1) {
   const targetDay = targets[index];
@@ -69,7 +69,7 @@ for (let index = 0; index < targets.length; index += 1) {
     selectionStream
   );
   const expected = expectedYearNumbers[index];
-  actualYearNumbers.push(routed.result.semanticYearNumber);
+  legacyYearNumbers.push(routed.result.semanticYearNumber);
   assert.equal(routed.context.currentHandler, 'Discovery18YearJumpHandler');
   assert.equal(routed.context.previousHandler, 'Year5000TiePatchWrapper');
   assert.equal(routed.context.phase, 'DISCOVERY_18_OLD_JUMP_GUESS_365');
@@ -101,20 +101,54 @@ for (let index = 0; index < targets.length; index += 1) {
   }
 }
 
-assert.deepEqual(actualYearNumbers, [5001n, 5002n, 5002n]);
-assert.equal('findYearByWalkPatch' in production, false);
-assert.equal('patchedNextYear' in production, false);
-assert.equal('patchedPreviousYear' in production, false);
-assert.equal('LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER' in production, false);
+assert.deepEqual(legacyYearNumbers, [5001n, 5002n, 5002n]);
+assert.notDeepEqual(legacyYearNumbers, expectedYearNumbers);
+assert.doesNotMatch(
+  production.Discovery18YearJumpHandler.prototype.handle.toString(),
+  /findYearByWalkPatch|patchedNextYear|patchedPreviousYear/
+);
 
-console.log('DISCOVERY 18 DIAGNOSTIC: oldJumpGuess usa 365 quam longore medie e su guess deven directmen li numer semantic.');
+const nextYear5001 = {
+  number: 5001n,
+  openDay: anchor.closeDay,
+  firstDay: anchor.closeDay + 1n,
+  closeDay: anchor.closeDay + 700n
+};
+const previousYear4999 = {
+  number: 4999n,
+  openDay: anchor.openDay - 700n,
+  firstDay: anchor.openDay - 699n,
+  closeDay: anchor.openDay
+};
+const walkSource = {
+  nextYear(year) {
+    if (year.number === 5000n) return { ...nextYear5001 };
+    throw new RangeError('Null altri nextYear es necessi por li witness de Discovery 18.');
+  },
+  previousYear(year) {
+    if (year.number === 5000n) return { ...previousYear4999 };
+    throw new RangeError('Null altri previousYear es necessi por li witness de Discovery 18.');
+  }
+};
+const patchedYearNumbers = targets.map((targetDay) => production.historicYearJumpThroughMonsterPath(
+  calculationDay,
+  targetDay,
+  -1n,
+  gates,
+  candidatePairs,
+  selectionStream,
+  walkSource
+).result.semanticYearNumber);
+
+console.log('DISCOVERY 18 DIAGNOSTIC: oldJumpGuess resta incorrect quam scar, ma Patch 18 ignora su guess por li semantics.');
 console.log('anchor:   ' + [anchor.number, anchor.openDay, anchor.firstDay, anchor.closeDay].map(String).join(', '));
 console.log('targets:  ' + targets.map(String).join(', '));
-console.log('legacy:   ' + actualYearNumbers.map(String).join(', '));
+console.log('legacy:   ' + legacyYearNumbers.map(String).join(', '));
+console.log('patched:  ' + patchedYearNumbers.map(String).join(', '));
 console.log('normativ: ' + expectedYearNumbers.map(String).join(', '));
 
 assert.deepEqual(
-  actualYearNumbers,
+  patchedYearNumbers,
   expectedYearNumbers,
-  'DISCOVERY 18 EXPECTED RED: li guess /365 ex Year 5000 ne posse determinar li year semantic; li path authoritative deve caminar un year a un vez.'
+  'Discovery 18 resta observabil quam scar, durante que Patch 18 deve caminar un year a un vez por li resultate semantic.'
 );

@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=36
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=37
+CURRENT_KIND=PATCH
 CURRENT_PATCH=18
-LAST_COMPLETED_STAGE=36
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=37
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus oldJumpGuess, LegacyYearJumpAdapter e Discovery18YearJumpHandler quel deriva un estimation ex Year 5000 per floor division del distance desde firstDay per 365 e usa li sam guess directmen quam numer semantic del year.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, oldJumpGuess e Discovery18YearJumpHandler, plus patchedNextYear, patchedPreviousYear, findYearByWalkPatch e SequentialYearWalkPatchWrapper quel conserva li guess /365 quam telemetry e camina semanticmen exactmen un year per transition desde li anchor Year 5000.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 36 es finit quam **DISCOVERY 18**. `oldJumpGuess(anchor,targetDay)` es li nov scar historic. It calcula li distance desde `anchor.firstDay`, aplica floor division exact per 365 e adjunte li quotient al `anchor.number`. Ti estimation es deterministic ma ne representa li longores real variabil del annus.
+Stage 37 es finit quam **PATCH 18**. `oldJumpGuess(anchor,targetDay)` resta fisicmen sin modification e li route de Discovery 18 continua usar su estimation /365 directmen quam scar historic quand it es vocat separatmen.
 
-`Discovery18YearJumpHandler` es conectet pos li route complet de Patch 17. Ex li candidate selectet de Year 5000 it forma un anchor con `number=5000`, `openDay`, `firstDay=openDay+1` e `closeDay`, voca realmen `oldJumpGuess`, conserva li guess in state invocation-local e — intentionalmen por li discovery — usa ti guess directmen quam resultate semantic. Un witness con un Year 5000 de longore 1000 demonstra que targets ancor intra li sam year es etiquettat 5001/5002 e que `closeDay+1` es etiquettat 5002 in vice de 5001. Null caminada per `nextYear`/`previousYear`, null `findYearByWalkPatch` e null cache de Patch 19 es present.
+Li route semantic de Patch 18 passa ancor per Discovery 18, ergo li helper legacy es vocat realmen ante li circumition. `SequentialYearWalkPatchWrapper` conserva ti guess exclusivmen quam diagnostic/telemetry e delega li resultate semantic a `findYearByWalkPatch`. Ti helper resta al anchor si `openDay < targetDay <= closeDay`, usa `patchedNextYear` un year per vez si li target es plu tardiv e `patchedPreviousYear` un year per vez si li target es al opening gate o plu tempran. Chascun transition valida numero ±1 e un gate compartit exact. Null cache de Patch 19 e null code posterior es present.
