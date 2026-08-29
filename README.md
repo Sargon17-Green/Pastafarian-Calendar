@@ -645,3 +645,25 @@ In omnibus tribus casibus selector sauce legacy target originalis videt et a sau
 ### Quod consulto nondum adest
 
 Nullus `Patch20`, nullus `structureSaucePatch`, nulla separatio ghost, nulla recomputatio semantica sauce cum `yearFirstDay` et nullus selector qui old sauce praetermittit adest. Correctio huius cicatricis ad gradum sequentem pertinet; Gradus 40 manet DISCOVERY 20 tantum.
+
+## PATCH 20 — structure sauce ex primo die anni, cicatrice target originalis servata
+
+Gradus 41 defectum a DISCOVERY 20 reparat sine deletione cicatricis. `oldStructureSauce(calculationDay, originalTargetDay)` byte pro byte manet et in via PATCH 20 semper vere currit. Eius exitus nunc ghost est atque in report servatur.
+
+Correctio nova habitat in `structureSaucePatch(calculationDay, originalTargetDay, year)`. Ea primo ghost veterem materialisat, deinde definit:
+
+```text
+mustUse = year.openGateDay + 1
+```
+
+Si `originalTargetDay != mustUse`, sauce semantica nova per `sauceWithOrderAt46Latch(calculationDay, mustUse)` computatur. Si duo dies aequales sunt, recomputatio superflua non fit et valor ghost, iam semantice rectus, in copiam semanticam transfertur.
+
+`Patch20StructureSauceHandler` solam `semanticStructureSauce` ad `LegacyStructureSelectorAdapter` tradit. `bowl2` et `orderAt46Latch` selectoris igitur semper ex sauce `(calculationDay, yearFirstDay)` oriuntur. Ghost non est input selectoris semantici.
+
+Via diagnostica separata `executeUnpatchedDiscovery20StructureSauceDiagnostic` adhuc `Discovery20StructureSauceHandler` exercet. Ita defectus historicus manet observabilis: tres target dies anni 5000 adhuc tres sauces legacy distinctas producunt et diagnosticum eas ad selector veterem mittit, dum via PATCH 20 in omnibus tribus casibus token normativum year-first-day reddit.
+
+Regressio Gradus 40 nunc transit sub via activa reparata. Regressio Gradus 41 confirmat simul ghost executionem, tres ghost divergence, tres selectores normativos, conservationem diagnostici legacy et absentiam recomputationis in casu `originalTargetDay == yearFirstDay`. Omnes regressiones Graduum 1–41 transeunt.
+
+### Quod consulto nondum adest
+
+Nulla `legacyPositiveCompositions`, nullus `CutletPartitionPatchWrapper`, nullus filter prefix-sum portae internae et nullus PATCH 21 adest. Gradus 42 debet DISCOVERY 21 tantum introducere.

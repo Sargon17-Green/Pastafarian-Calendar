@@ -1277,3 +1277,42 @@ Validator confirmat annum resolutum continere target originalem, `yearFirstDay` 
 ### Quod nondum circumvenitur
 
 Nulla correctio fit. `oldStructureSauce` nondum ghost est; nullum sauce novum cum `yearFirstDay` ad selector mittitur; nullus `Patch20` aut wrapper correctionis adest. Gradus hic historiam tantum usque ad detectionem defectus complet.
+
+## Gradus 41 — PATCH 20: old structure sauce ghost fit, selector year-first-day sauce videt
+
+### Cicatrix servata
+
+`oldStructureSauce(calculationDay, originalTargetDay)` non reparatur nec redirectitur. Corpus eius byte pro byte manet et `sauceWithOrderAt46Latch(calculationDay, originalTargetDay)` vocat. `Discovery20StructureSauceHandler` quoque byte pro byte servatur; via diagnostica nova eum directe exercere potest et defectum Gradus 40 adhuc demonstrat.
+
+### Correctio addita
+
+Additum est `structureSaucePatch(calculationDay, originalTargetDay, year)`. Ordo eius intentionalis est:
+
+```text
+1. ghost = oldStructureSauce(calculationDay, originalTargetDay)
+2. mustUse = year.openGateDay + 1
+3. si originalTargetDay != mustUse:
+       semanticSauce = sauceWithOrderAt46Latch(calculationDay, mustUse)
+   aliter:
+       semanticSauce = copia ghost
+```
+
+Ghost semper exsequitur. Recomputatio semantica fit tantum ubi target originalis a primo die anni differt.
+
+`StructureSaucePatchWrapper` hanc correctionem claudit. `Patch20StructureSauceHandler` ghost et sauce semanticam in contextu separatim servat, deinde `LegacyStructureSelectorAdapter` solam sauce semanticam consumere iubet. Flags invocationis demonstrant `patch20GhostExecuted=YES`, `patch20GhostReachedSelector=NO` et `patch20Applied=YES`.
+
+### Via activa et via diagnostica
+
+Via activa post resolutionem anni per PATCH 18 et cache guardatum PATCH 19 ad dispatcher PATCH 20 transit. Via historica DISCOVERY 20 separatim per `executeUnpatchedDiscovery20StructureSauceDiagnostic` manet. Nulla electio semantica ex diagnostics, metrics vel ghost legitur.
+
+### Witness anni 5000
+
+Tres target originales iam in Gradus 40 detecti ghostes veteres distinctos servant. Hi ghostes a sauce `(calculationDay, yearFirstDay)` discrepant, sed selector PATCH 20 in omnibus tribus casibus bowl2 atque `orderAt46Latch` ex sauce year-first-day accipit. Casus controlis `originalTargetDay == yearFirstDay` ghost vere exsequitur sed recomputationem duplicem omittit.
+
+### Probationes
+
+Compilator est `g++ (Debian 14.2.0-19) 14.2.0` cum C++20. Bootstrap transit. Regressio Gradus 40 nunc `REGRESSIO_DISCOVERY_20_TRANSIIT` reddit. Regressio Gradus 41 `REGRESSIO_PATCH_20_TRANSIIT` reddit cum tribus ghost divergence, tribus selectoribus normativis et tribus diagnosticis legacy. Omnes regressiones Graduum 1–41 transeunt.
+
+### Audit
+
+`SourceLanguageCatalog` et reference C++ manent byte pro byte intacti. `oldStructureSauce` et `Discovery20StructureSauceHandler` manent byte pro byte intacti. Nullus runtime externus adhibetur. Nullus codex PATCH 21, nulla `legacyPositiveCompositions` et nullus `CutletPartitionPatchWrapper` praemature additur.

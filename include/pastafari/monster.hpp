@@ -184,6 +184,19 @@ Patch11LatchedOrderSauceResult oldStructureSauce(
     const Integer& calculationDay,
     const Integer& originalTargetDay);
 
+struct Patch20StructureSauceResult {
+    Patch11LatchedOrderSauceResult ghost{};
+    Patch11LatchedOrderSauceResult semanticSauce{};
+    Integer mustUse{};
+    bool ghostExecuted = false;
+    bool semanticRecomputed = false;
+};
+
+Patch20StructureSauceResult structureSaucePatch(
+    const Integer& calculationDay,
+    const Integer& originalTargetDay,
+    const Patch18YearRecord& year);
+
 struct LegacyStructureSelectorToken {
     Integer bowl2{};
     PermutationOrder orderAt46Latch{};
@@ -195,8 +208,13 @@ struct LegacyStructureSauceReport {
     Integer yearFirstDay{};
     Patch18YearRecord resolvedYear{};
     Patch11LatchedOrderSauceResult legacyStructureSauce{};
+    Patch11LatchedOrderSauceResult semanticStructureSauce{};
     LegacyStructureSelectorToken selectorToken{};
     bool selectorConsumedLegacySauce = false;
+    bool patch20GhostExecuted = false;
+    bool patch20SemanticRecomputed = false;
+    bool patch20GhostReachedSelector = false;
+    bool patch20Applied = false;
     bool ready = false;
     std::string phase;
     std::string status;
@@ -520,8 +538,13 @@ struct BaseMonsterContext {
     Integer discovery20YearFirstDay{};
     Patch18YearRecord discovery20ResolvedYear{};
     Patch11LatchedOrderSauceResult discovery20LegacyStructureSauce{};
+    Patch11LatchedOrderSauceResult patch20SemanticStructureSauce{};
     LegacyStructureSelectorToken discovery20SelectorToken{};
     bool discovery20SelectorConsumedLegacySauce=false;
+    bool patch20GhostExecuted=false;
+    bool patch20SemanticRecomputed=false;
+    bool patch20GhostReachedSelector=false;
+    bool patch20Applied=false;
     bool discovery20StructureSauceReady=false;
 };
 
@@ -891,6 +914,7 @@ public:
     void requireDiscovery19YearCacheReady(const BaseMonsterContext& ctx) const;
     void requirePatch19YearCacheReady(const BaseMonsterContext& ctx) const;
     void requireDiscovery20StructureSauceReady(const BaseMonsterContext& ctx) const;
+    void requirePatch20StructureSauceReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -986,6 +1010,7 @@ class LegacyYearNumberOnlyCacheAdapter { public: LegacyYearCacheEntry getOrPut(s
 class Patch19YearCacheGuardWrapper { public: Patch19GuardedYearCacheResolution repair(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, const LegacyYearCacheEntry& legacyEntry, bool legacyHit) const; };
 class LegacyStructureSauceAdapter { public: Patch11LatchedOrderSauceResult call(const Integer& calculationDay, const Integer& originalTargetDay) const; };
 class LegacyStructureSelectorAdapter { public: LegacyStructureSelectorToken consume(const Patch11LatchedOrderSauceResult& sauce) const; };
+class StructureSaucePatchWrapper { public: Patch20StructureSauceResult repair(const Integer& calculationDay, const Integer& originalTargetDay, const Patch18YearRecord& year) const; };
 
 class LegacyArithmeticAdapter {
 public:
@@ -1498,6 +1523,7 @@ public:
 class Discovery19YearNumberCacheHandler { public: void handle(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
 class Patch19YearCacheGuardHandler { public: void handle(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Discovery19YearNumberCacheHandler& legacyHandler, const LegacyYearNumberOnlyCacheAdapter& adapter, const Patch19YearCacheGuardWrapper& wrapper, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
 class Discovery20StructureSauceHandler { public: void handle(BaseMonsterContext& ctx, const LegacyStructureSauceAdapter& sauceAdapter, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
+class Patch20StructureSauceHandler { public: void handle(BaseMonsterContext& ctx, const StructureSaucePatchWrapper& wrapper, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const; };
 
 class BaseDispatcher {
 public:
@@ -1760,6 +1786,7 @@ public:
     void dispatchLegacyYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Discovery19YearNumberCacheHandler& handler, const LegacyYearNumberOnlyCacheAdapter& adapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
     void dispatchPatchedYearNumberCache(BaseMonsterContext& ctx, std::map<Integer, LegacyYearCacheEntry>& cache, const Patch19YearCacheGuardHandler& handler, const Discovery19YearNumberCacheHandler& legacyHandler, const LegacyYearNumberOnlyCacheAdapter& adapter, const Patch19YearCacheGuardWrapper& wrapper, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
     void dispatchDiscovery20StructureSauce(BaseMonsterContext& ctx, const Discovery20StructureSauceHandler& handler, const LegacyStructureSauceAdapter& sauceAdapter, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
+    void dispatchPatchedStructureSauce(BaseMonsterContext& ctx, const Patch20StructureSauceHandler& handler, const StructureSaucePatchWrapper& wrapper, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -1888,6 +1915,7 @@ public:
     LegacyYearCacheReport executeLegacyYearNumberCache(const LegacyYearAnchor& anchor, const Integer& targetDay, const Integer& calculationDay) const;
     LegacyYearCacheReport executeUnpatchedYearNumberCacheDiagnostic(const LegacyYearAnchor& anchor, const Integer& targetDay, const Integer& calculationDay) const;
     LegacyStructureSauceReport executeDiscovery20StructureSauce(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const;
+    LegacyStructureSauceReport executeUnpatchedDiscovery20StructureSauceDiagnostic(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const;
     void clearLegacyYearNumberCacheDiagnostic() const;
 private:
     mutable std::map<Integer, LegacyYearCacheEntry> legacyYearNumberCache_{};

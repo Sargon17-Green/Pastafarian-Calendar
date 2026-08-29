@@ -72,9 +72,14 @@ int main() {
             yearFirstDay,
             calculationDay);
         require(control.ready, "casus control structure sauce paratus esse debet");
-        require(control.selectorConsumedLegacySauce, "selector in DISCOVERY 20 sauce legacy consumere debet");
+        require(control.patch20Applied, "PATCH 20 casui control applicatus esse debet");
+        require(control.patch20GhostExecuted, "oldStructureSauce control ut ghost currere debet");
+        require(!control.selectorConsumedLegacySauce, "selector post PATCH 20 ghost consumere non debet");
+        require(!control.patch20SemanticRecomputed, "target==year.firstDay recomputationem superfluam facere non debet");
+        require(!control.patch20GhostReachedSelector, "ghost control ad selector pervenire non debet");
         require(control.yearFirstDay == yearFirstDay, "primus dies anni controlis differt");
         require(sameLegacySauce(control.legacyStructureSauce, normativeStructure), "oldStructureSauce control cum year.firstDay congruere debet");
+        require(sameLegacySauce(control.semanticStructureSauce, normativeStructure), "sauce semantica control normativam sequi debet");
         require(sameToken(control.selectorToken, normativeStructure), "selector control sauce normativam videre debet");
 
         const std::array<Integer, 3> targets{
@@ -93,8 +98,12 @@ int main() {
                 originalTargetDay,
                 calculationDay);
             require(report.ready, "structure sauce report paratus esse debet");
-            require(report.handler == "Discovery20StructureSauceHandler", "handler DISCOVERY 20 expectatus est");
-            require(report.selectorConsumedLegacySauce, "selector oldStructureSauce consumere debet");
+            require(report.handler == "Patch20StructureSauceHandler", "handler PATCH 20 expectatus est");
+            require(report.patch20Applied, "PATCH 20 applicatus esse debet");
+            require(report.patch20GhostExecuted, "oldStructureSauce ut ghost currere debet");
+            require(report.patch20SemanticRecomputed, "target diversus sauce year.firstDay recomputare debet");
+            require(!report.selectorConsumedLegacySauce, "selector post PATCH 20 oldStructureSauce consumere non debet");
+            require(!report.patch20GhostReachedSelector, "ghost oldStructureSauce ad selector pervenire non debet");
             require(report.yearFirstDay == yearFirstDay, "primus dies anni resoluti mutatus est");
             require(report.resolvedYear.number == year5000.number, "annus resolutus 5000 manere debet");
 
@@ -102,8 +111,19 @@ int main() {
                 calculationDay,
                 originalTargetDay);
             require(sameLegacySauce(report.legacyStructureSauce, legacyExpected), "oldStructureSauce target originalem exacte sequi debet");
-            require(report.selectorToken.bowl2 == report.legacyStructureSauce.finalBowls[1], "selector bowl2 ex sauce legacy venire debet");
-            require(report.selectorToken.orderAt46Latch == report.legacyStructureSauce.orderAt46Latch, "selector order ex sauce legacy venire debet");
+            require(sameLegacySauce(report.semanticStructureSauce, normativeStructure), "sauce semantica year.firstDay exacte sequi debet");
+            require(report.selectorToken.bowl2 == report.semanticStructureSauce.finalBowls[1], "selector bowl2 ex sauce semantica venire debet");
+            require(report.selectorToken.orderAt46Latch == report.semanticStructureSauce.orderAt46Latch, "selector order ex sauce semantica venire debet");
+
+            const auto diagnostic = manager.executeUnpatchedDiscovery20StructureSauceDiagnostic(
+                anchor,
+                originalTargetDay,
+                calculationDay);
+            require(diagnostic.ready, "diagnosticum DISCOVERY 20 paratum esse debet");
+            require(diagnostic.handler == "Discovery20StructureSauceHandler", "diagnosticum handler DISCOVERY 20 servare debet");
+            require(diagnostic.selectorConsumedLegacySauce, "diagnosticum selector sauce legacy consumere debet");
+            require(!diagnostic.patch20Applied, "diagnosticum PATCH 20 applicare non debet");
+            require(!sameToken(diagnostic.selectorToken, normativeStructure), "diagnosticum cicatricem target originalis servare debet");
 
             const bool divergent = !sameToken(report.selectorToken, normativeStructure);
             if (divergent) {

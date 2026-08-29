@@ -879,6 +879,24 @@ Patch11LatchedOrderSauceResult oldStructureSauce(
     return sauceWithOrderAt46Latch(calculationDay, originalTargetDay);
 }
 
+Patch20StructureSauceResult structureSaucePatch(
+    const Integer& calculationDay,
+    const Integer& originalTargetDay,
+    const Patch18YearRecord& year) {
+    Patch20StructureSauceResult result;
+    result.ghost = oldStructureSauce(calculationDay, originalTargetDay);
+    result.ghostExecuted = true;
+    result.mustUse = year.openGateDay + 1;
+    if (originalTargetDay != result.mustUse) {
+        result.semanticSauce = sauceWithOrderAt46Latch(calculationDay, result.mustUse);
+        result.semanticRecomputed = true;
+    } else {
+        result.semanticSauce = result.ghost;
+        result.semanticRecomputed = false;
+    }
+    return result;
+}
+
 int oldNextBowlFixedName(int id) {
     if (id < 1 || id > 6) {
         throw BaseValidationError("ID crateris inter unum et sex requiritur");
@@ -3584,6 +3602,19 @@ void BaseValidationManager::requireDiscovery20StructureSauceReady(const BaseMons
     if (ctx.discovery20SelectorToken.bowl2 != ctx.discovery20LegacyStructureSauce.finalBowls.at(1)) throw BaseValidationError("selector bowl2 non ex oldStructureSauce venit");
     if (ctx.discovery20SelectorToken.orderAt46Latch != ctx.discovery20LegacyStructureSauce.orderAt46Latch) throw BaseValidationError("selector order non ex oldStructureSauce venit");
 }
+void BaseValidationManager::requirePatch20StructureSauceReady(const BaseMonsterContext& ctx) const {
+    if (!ctx.discovery20StructureSauceReady) throw BaseValidationError("structure sauce PATCH 20 nondum paratus est");
+    if (!ctx.patch20Applied) throw BaseValidationError("PATCH 20 nondum applicatus est");
+    if (!ctx.patch20GhostExecuted) throw BaseValidationError("oldStructureSauce ut ghost non cucurrit");
+    if (ctx.patch20GhostReachedSelector) throw BaseValidationError("ghost oldStructureSauce ad selector pervenit");
+    if (ctx.discovery20SelectorConsumedLegacySauce) throw BaseValidationError("selector semanticus legacy sauce consumpsit");
+    if (ctx.discovery20YearFirstDay != ctx.discovery20ResolvedYear.openGateDay + 1) throw BaseValidationError("primus dies anni PATCH 20 male derivatus est");
+    if (!(ctx.discovery20ResolvedYear.openGateDay < ctx.discovery20OriginalTargetDay && ctx.discovery20OriginalTargetDay <= ctx.discovery20ResolvedYear.closeGateDay)) throw BaseValidationError("target originalis PATCH 20 extra annum resolutum est");
+    if (ctx.discovery20SelectorToken.bowl2 != ctx.patch20SemanticStructureSauce.finalBowls.at(1)) throw BaseValidationError("selector bowl2 non ex sauce semantica PATCH 20 venit");
+    if (ctx.discovery20SelectorToken.orderAt46Latch != ctx.patch20SemanticStructureSauce.orderAt46Latch) throw BaseValidationError("selector order non ex sauce semantica PATCH 20 venit");
+    const bool differunt = ctx.discovery20OriginalTargetDay != ctx.discovery20YearFirstDay;
+    if (differunt != ctx.patch20SemanticRecomputed) throw BaseValidationError("recomputatio PATCH 20 a differentia target/firstDay differt");
+}
 
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
@@ -3835,6 +3866,12 @@ Patch11LatchedOrderSauceResult LegacyStructureSauceAdapter::call(
 LegacyStructureSelectorToken LegacyStructureSelectorAdapter::consume(
     const Patch11LatchedOrderSauceResult& sauce) const {
     return LegacyStructureSelectorToken{sauce.finalBowls.at(1), sauce.orderAt46Latch};
+}
+Patch20StructureSauceResult StructureSaucePatchWrapper::repair(
+    const Integer& calculationDay,
+    const Integer& originalTargetDay,
+    const Patch18YearRecord& year) const {
+    return structureSaucePatch(calculationDay, originalTargetDay, year);
 }
 
 Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
@@ -4877,6 +4914,31 @@ void Discovery20StructureSauceHandler::handle(BaseMonsterContext& ctx, const Leg
     metrics.bump(ctx, "discovery20.structure.sauce.calls");
     validator.requireDiscovery20StructureSauceReady(ctx);
 }
+void Patch20StructureSauceHandler::handle(BaseMonsterContext& ctx, const StructureSaucePatchWrapper& wrapper, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const {
+    const Patch20StructureSauceResult repaired = wrapper.repair(
+        ctx.calculationDay,
+        ctx.discovery20OriginalTargetDay,
+        ctx.discovery20ResolvedYear);
+    ctx.discovery20LegacyStructureSauce = repaired.ghost;
+    ctx.patch20SemanticStructureSauce = repaired.semanticSauce;
+    ctx.patch20GhostExecuted = repaired.ghostExecuted;
+    ctx.patch20SemanticRecomputed = repaired.semanticRecomputed;
+    ctx.discovery20SelectorToken = selectorAdapter.consume(ctx.patch20SemanticStructureSauce);
+    ctx.discovery20SelectorConsumedLegacySauce = false;
+    ctx.patch20GhostReachedSelector = false;
+    ctx.patch20Applied = true;
+    ctx.discovery20StructureSauceReady = true;
+    ctx.currentHandler = "Patch20StructureSauceHandler";
+    ctx.phase = "PATCH_20_STRUCTURE_SAUCE_YEAR_FIRST_DAY";
+    ctx.status = repaired.semanticRecomputed
+        ? "OLD_STRUCTURE_SAUCE_GHOST_SEMANTIC_RECOMPUTED"
+        : "OLD_STRUCTURE_SAUCE_GHOST_EQUALS_SEMANTIC_INPUT";
+    ctx.branchTrace.push_back(repaired.semanticRecomputed
+        ? "PATCH20:GHOST_OLD_RECOMPUTE_YEAR_FIRST_DAY"
+        : "PATCH20:GHOST_OLD_REUSE_EQUAL_FIRST_DAY");
+    metrics.bump(ctx, "patch20.structure.sauce.calls");
+    validator.requirePatch20StructureSauceReady(ctx);
+}
 
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
@@ -5549,6 +5611,10 @@ void BaseDispatcher::dispatchDiscovery20StructureSauce(BaseMonsterContext& ctx, 
     ctx.branchTrace.push_back("DISPATCH:DISCOVERY20_STRUCTURE_SAUCE");
     handler.handle(ctx, sauceAdapter, selectorAdapter, validator, metrics);
 }
+void BaseDispatcher::dispatchPatchedStructureSauce(BaseMonsterContext& ctx, const Patch20StructureSauceHandler& handler, const StructureSaucePatchWrapper& wrapper, const LegacyStructureSelectorAdapter& selectorAdapter, const BaseValidationManager& validator, const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:PATCH20_STRUCTURE_SAUCE");
+    handler.handle(ctx, wrapper, selectorAdapter, validator, metrics);
+}
 
 void BaseDispatcher::dispatchPatchedYear5000Tie(
     BaseMonsterContext& ctx,
@@ -6042,6 +6108,43 @@ LegacyStructureSauceReport BaseMonsterManager::executeDiscovery20StructureSauce(
     ctx.discovery20YearFirstDay = cacheReport.outputValue.openGateDay + 1;
     const BaseValidationManager validator;
     const BaseMetricsShell metrics;
+    const LegacyStructureSelectorAdapter selectorAdapter;
+    const StructureSaucePatchWrapper wrapper;
+    const Patch20StructureSauceHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedStructureSauce(ctx, handler, wrapper, selectorAdapter, validator, metrics);
+    return LegacyStructureSauceReport{
+        calculationDay,
+        originalTargetDay,
+        ctx.discovery20YearFirstDay,
+        ctx.discovery20ResolvedYear,
+        ctx.discovery20LegacyStructureSauce,
+        ctx.patch20SemanticStructureSauce,
+        ctx.discovery20SelectorToken,
+        ctx.discovery20SelectorConsumedLegacySauce,
+        ctx.patch20GhostExecuted,
+        ctx.patch20SemanticRecomputed,
+        ctx.patch20GhostReachedSelector,
+        ctx.patch20Applied,
+        ctx.discovery20StructureSauceReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+LegacyStructureSauceReport BaseMonsterManager::executeUnpatchedDiscovery20StructureSauceDiagnostic(const LegacyYearAnchor& anchor, const Integer& originalTargetDay, const Integer& calculationDay) const {
+    const LegacyYearCacheReport cacheReport = executeLegacyYearNumberCache(anchor, originalTargetDay, calculationDay);
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = originalTargetDay;
+    ctx.discovery20OriginalTargetDay = originalTargetDay;
+    ctx.discovery20ResolvedYear = cacheReport.outputValue;
+    ctx.discovery20YearFirstDay = cacheReport.outputValue.openGateDay + 1;
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
     const LegacyStructureSauceAdapter sauceAdapter;
     const LegacyStructureSelectorAdapter selectorAdapter;
     const Discovery20StructureSauceHandler handler;
@@ -6053,8 +6156,13 @@ LegacyStructureSauceReport BaseMonsterManager::executeDiscovery20StructureSauce(
         ctx.discovery20YearFirstDay,
         ctx.discovery20ResolvedYear,
         ctx.discovery20LegacyStructureSauce,
+        ctx.patch20SemanticStructureSauce,
         ctx.discovery20SelectorToken,
         ctx.discovery20SelectorConsumedLegacySauce,
+        ctx.patch20GhostExecuted,
+        ctx.patch20SemanticRecomputed,
+        ctx.patch20GhostReachedSelector,
+        ctx.patch20Applied,
         ctx.discovery20StructureSauceReady,
         ctx.phase,
         ctx.status,
