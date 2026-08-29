@@ -435,6 +435,8 @@ std::vector<int> legacyChooseEachDaySeparately(
 
 int oldContiguousMonthDayGuess(const std::vector<int>& weaving,
                                std::size_t targetPosition1);
+int countMonthOccurrencesThroughTarget(const std::vector<int>& weaving,
+                                       std::size_t targetPosition1);
 
 struct LegacyContiguousMonthDayInspection {
     std::size_t targetPosition1 = 0;
@@ -442,6 +444,17 @@ struct LegacyContiguousMonthDayInspection {
     std::size_t firstOccurrencePosition1 = 0;
     int guessedDayInMonth = 0;
     bool legacyExecuted = false;
+};
+
+struct MonthDayOccurrencePatchDecision {
+    int legacyGuessedDayInMonth = 0;
+    int correctDayInMonth = 0;
+    int outputDayInMonth = 0;
+    bool legacyExecuted = false;
+    bool correctComputed = false;
+    bool legacyEqualsCorrect = false;
+    bool legacyReturned = false;
+    bool patchApplied = false;
 };
 
 struct LegacyMonthWeavingInspection {
@@ -517,6 +530,12 @@ struct LegacyContiguousMonthDayReport {
     bool patch24Prepared = false;
     bool legacyExecuted = false;
     bool legacyUsedAsSemanticOutput = false;
+    int patch25CorrectDayInMonth = 0;
+    bool patch25LegacyExecuted = false;
+    bool patch25CorrectComputed = false;
+    bool patch25LegacyEqualsCorrect = false;
+    bool patch25LegacyReturned = false;
+    bool patch25Applied = false;
     bool ready = false;
     std::string phase;
     std::string status;
@@ -925,6 +944,13 @@ struct BaseMonsterContext {
     bool discovery25LegacyExecuted=false;
     bool discovery25LegacyUsedAsSemanticOutput=false;
     bool discovery25ContiguousMonthDayReady=false;
+    int patch25CorrectDayInMonth=0;
+    bool patch25LegacyExecuted=false;
+    bool patch25CorrectComputed=false;
+    bool patch25LegacyEqualsCorrect=false;
+    bool patch25LegacyReturned=false;
+    bool patch25Applied=false;
+    bool patch25ContiguousMonthDayReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1308,6 +1334,8 @@ public:
         const BaseMonsterContext& ctx) const;
     void requireDiscovery25ContiguousMonthDayReady(
         const BaseMonsterContext& ctx) const;
+    void requirePatch25ContiguousMonthDayReady(
+        const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1474,6 +1502,14 @@ public:
     LegacyContiguousMonthDayInspection call(
         const std::vector<int>& semanticWeaving,
         std::size_t targetPosition1) const;
+};
+
+class MonthDayOccurrencePatchWrapper {
+public:
+    MonthDayOccurrencePatchDecision repair(
+        const std::vector<int>& semanticWeaving,
+        std::size_t targetPosition1,
+        int legacyGuessedDayInMonth) const;
 };
 
 class LegacyArithmeticAdapter {
@@ -2071,6 +2107,15 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Patch25ContiguousMonthDayHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const Discovery25ContiguousMonthDayHandler& legacyHandler,
+                const LegacyContiguousMonthDayAdapter& adapter,
+                const MonthDayOccurrencePatchWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -2404,6 +2449,14 @@ public:
         const LegacyContiguousMonthDayAdapter& adapter,
         const BaseValidationManager& validator,
         const BaseMetricsShell& metrics) const;
+    void dispatchPatchedContiguousMonthDay(
+        BaseMonsterContext& ctx,
+        const Patch25ContiguousMonthDayHandler& handler,
+        const Discovery25ContiguousMonthDayHandler& legacyHandler,
+        const LegacyContiguousMonthDayAdapter& adapter,
+        const MonthDayOccurrencePatchWrapper& wrapper,
+        const BaseValidationManager& validator,
+        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -2582,6 +2635,12 @@ public:
         const Integer& calculationDay,
         const std::vector<int>& monthLengths) const;
     LegacyContiguousMonthDayReport executeDiscovery25ContiguousMonthDay(
+        const LegacyYearAnchor& anchor,
+        const Integer& originalTargetDay,
+        const Integer& calculationDay,
+        const std::vector<int>& monthLengths,
+        std::size_t targetPosition1) const;
+    LegacyContiguousMonthDayReport executeUnpatchedDiscovery25ContiguousMonthDayDiagnostic(
         const LegacyYearAnchor& anchor,
         const Integer& originalTargetDay,
         const Integer& calculationDay,

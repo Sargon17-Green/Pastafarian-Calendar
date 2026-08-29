@@ -1791,3 +1791,45 @@ In omnibus tribus texturam semantica PATCH 24 cum oracle C++ test-only congruit;
 ### Quod nondum corrigitur
 
 Occurrence-count productio nondum computat. Nullus `countMonthOccurrencesThroughTarget`, nullus `MonthDayOccurrencePatchWrapper` et nullus overwrite semanticus adest. PATCH 25 ad Gradum 51 reservatur. Codex PATCH 26 nondum adest.
+
+## Gradus 51 — PATCH 25: occurrence-count diei mensis distantiam contiguam vincit
+
+### Cicatrix servata
+
+Corpus `oldContiguousMonthDayGuess(weaving,targetPosition1)` ex Gradu 50 byte pro byte servatum est. Corpus `Discovery25ContiguousMonthDayHandler::handle` quoque byte pro byte servatum manet. Via PATCH 25 handler legacy primum vere currit; ergo guess historicus adhuc statum semanticum intermedium gubernat ante detour.
+
+Addita est via diagnostica `executeUnpatchedDiscovery25ContiguousMonthDayDiagnostic`, quae PATCH 24 weaving semanticum parat, deinde DISCOVERY 25 sine correctione exsequitur. Sic tres discrepantiae 4/5/3 contra 2/2/2 independenter observari possunt etiam post correctionem.
+
+### Correctio separata
+
+Productio nunc exponit:
+
+```text
+countMonthOccurrencesThroughTarget(weaving,targetPosition1)
+```
+
+Helper positionem target validat, `monthId` target legit et eius apparitiones in prefixo `[1,targetPosition1]` numerat. Inclusio target explicita est: iteratio usque ad positionem target inclusive procedit. Haec est definitio semantica diei-in-mense in textura intertexta.
+
+`MonthDayOccurrencePatchWrapper` bad et correct separat. `bad` est valor iam a cicatrice legacy computatus; `correct` est occurrence-count. Si duo valori idem sunt, wrapper ipsum bad retinet. Si differunt, correct tantum redditur. Nullus oracle, fallback aut mutatio corporis legacy adest.
+
+`Patch25ContiguousMonthDayHandler` primum `Discovery25ContiguousMonthDayHandler` vocat, deinde decisionem wrapperis in campos distinctos servat: correct, legacy-executed, correct-computed, equality, legacy-returned et applied. Tantum post hoc `semanticDayInMonth` overwrite fit.
+
+### Witness et regressiones
+
+Tres witness historici Gradus 50:
+
+```text
+gate 0:   old=4, correct=2
+gate 7:   old=5, correct=2
+gate -11: old=3, correct=2
+```
+
+In omnibus tribus via raw DISCOVERY 25 eundem defectum servat. Via PATCH 25 eandem texturam PATCH 24 servat et diem mensis `2` reddit. Regressio Gradus 50 post patch tres cicatrices raw confirmat et GREEN fit.
+
+Regressio Gradus 51 addit casum `ghost==correct` in textura contigua et casum `ghost!=correct` in textura intertexta, atque production helper cum brute occurrence-count C++ comparat. Tres witness reales omnes per ramum correct-replaces-ghost transeunt.
+
+Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap transit. Regressiones 2–20, 21–35 et 36–46 in greges transeunt; Gradus 47–51 quoque transeunt. Ergo omnes regressiones 1–51 sunt GREEN in eadem arbore.
+
+### Audit et limes proximus
+
+`SOURCE_LANGUAGE_CATALOG.md`, `include/pastafari/source_language_catalog.hpp` et `tests/reference/normative_reference.hpp/.cpp` manent byte pro byte intacti. Probationes Graduum 42–49 manent byte pro byte intactae. Corpus helperis legacy et corpus handleris DISCOVERY 25 manent byte pro byte intacta. Nullus runtime externus ad computationem vel oracle adhibitus est. Nulla pars PATCH 26 praemature addita est. Gradus 52 nondum incipit.

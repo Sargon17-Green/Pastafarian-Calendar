@@ -1079,3 +1079,51 @@ Regressiones Graduum 1–49 et bootstrap transeunt. Regressio Gradus 50 consulto
 ### Quod nondum adest
 
 Nullus `countMonthOccurrencesThroughTarget`, nullus `MonthDayOccurrencePatchWrapper`, nullus overwrite semanticus diei-in-mense et nullus PATCH 25 adest. Correctio occurrence-count pertinet tantum ad Gradum 51. Nulla pars PATCH 26 praemature addita est.
+
+## PATCH 25 — dies mensis per occurrence-count target inclusum restituitur
+
+Gradus 51 cicatricem DISCOVERY 25 non delet neque corpus `oldContiguousMonthDayGuess(weaving,targetPosition1)` corrigit. Via PATCH primum `Discovery25ContiguousMonthDayHandler` vere exsequitur; ita guess historicus, `monthId` target, prima apparitio et status intermedius invocation-local servantur. `executeUnpatchedDiscovery25ContiguousMonthDayDiagnostic` viam veterem separatam adhuc exponit.
+
+Post ghost additur helper semanticus:
+
+```text
+countMonthOccurrencesThroughTarget(weaving,targetPosition1)
+```
+
+Is `monthId` in positione target legit et apparitiones eiusdem `monthId` ab initio texturae usque ad `targetPosition1` inclusive numerat. Target ipsum semper in count includitur. Nullus oracle productionis vocatur.
+
+`MonthDayOccurrencePatchWrapper` regulam detour servat:
+
+```text
+bad = oldContiguousMonthDayGuess(...)
+correct = countMonthOccurrencesThroughTarget(...)
+
+si bad == correct:
+    redde bad
+aliter:
+    redde correct
+```
+
+`Patch25ContiguousMonthDayHandler` handler legacy primum currit, deinde correctum computat. Ghost ad output semanticum pervenire potest tantum si absolute idem est ac correct; aliter `semanticDayInMonth` occurrence-count correctum accipit.
+
+### Tres cicatrices servatae
+
+Witness Gradus 50 manent observabiles:
+
+```text
+gate 0:   target=4, monthId=1, legacy=4, correct=2
+gate 7:   target=5, monthId=1, legacy=5, correct=2
+gate -11: target=4, monthId=2, legacy=3, correct=2
+```
+
+In via diagnostica tres discrepantiae historicae manent. In via PATCH 25 omnes tres outputs semantici sunt `2`. Textura PATCH 24 non mutatur.
+
+### Probationes
+
+Regressio Gradus 50 nunc GREEN est: tres cicatrices raw numerat sed post PATCH 25 `semanticDayInMonth` cum occurrence-count test-only C++ congruit. Regressio Gradus 51 probat target inclusum, casum contiguum, casum intertextum, ramum `ghost==correct`, ramum `ghost!=correct` atque tres witness reales.
+
+Bootstrap et omnes regressiones Graduum 1–51 transeunt in eadem arbore. Executiones longae in greges C++ separatae sunt tantum propter limitem temporis instrumenti. `SourceLanguageCatalog` et reference C++ manent byte pro byte intacti.
+
+### Limes proximus
+
+Nulla pars PATCH 26 praemature addita est. Gradus 52 nondum incipit.
