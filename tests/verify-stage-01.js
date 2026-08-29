@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 01 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 01 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,7 +318,7 @@ group('null textu hebreic o code posterior a Discovery 01 contamina production',
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'savePatch', 'oldDayTag', 'oldDistance', 'mutateStonesWrong',
+    'oldDayTag', 'oldDistance', 'mutateStonesWrong',
     'hiddenByNearness', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
@@ -705,7 +705,7 @@ group('li infrastructura neutral conserva isolation, ownership e non-semantic me
   deepEq(invalid.branchTrace, []);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 01', () => {
+group('errores de base es explicit e li final function resta absent durant Patch 01', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -717,4 +717,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passat ante li regression expectat de Discovery 01.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passat in li statu GREEN de Patch 01.');

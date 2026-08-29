@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 2 de 55: DISCOVERY 01**. Li prim defect historic es nu present e activ: `oldRemainder(value)` usa regular modulo con `M_OLD = 2^127 - 1`. Un `LegacyRemainderAdapter` e un `Discovery01RemainderHandler` porta ti operation tra li manager e li context de invocation.
+Li linea es in **Stage 3 de 55: PATCH 01**. Li defect historic de Stage 2 resta present: `oldRemainder(value)` usa regular modulo con `M_OLD = 2^127 - 1` e rende `0` por multiplicas de `M`.
 
-Ti stage es intentionalmen **EXPECTED_RED**. Li regression demonstra que multiplicas de `M` deven `0` in li legacy, ma li reference normativ `SAVE` exige `M`. Li correction `savePatch` apartene solmen a Stage 3 e ne es present.
+Li correction ne modifica ti function legacy. `savePatch(value)` apella `oldRemainder`, e si li residu es `0` it remappa it a `M_OLD`. Un `Patch01SaveWrapper` aplica ti correction pos `Discovery01RemainderHandler`, conservante li scar, li trace e li output legacy in li context de invocation. Li repository retorna a **GREEN**.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null patch posterior posse aparir ante su stage historic.
 
@@ -26,25 +26,25 @@ Omni calcul normativ usa `BigInt`. Null floating-point es usat por SAVE, rangs, 
 
 ## Tests
 
-Li suites precedent resta verdes. Li commande principal fini intentionalmen con un regression red de Discovery 01:
+Li commande principal es nu verd:
 
 ```text
 npm test
 ```
 
-Por provar solmen omni regressions precedent:
+Por executar li suites anterior includente li regression de Discovery 01 in su form nu reparat:
 
 ```text
 npm run test:previous
 ```
 
-Por reproducer solmen li divergentie nov:
+Por verificar directmen li equivalence local de Patch 01:
 
 ```text
-npm run test:discovery-01
+npm run test:patch-01
 ```
 
-Li resultat expectat de Stage 2 es: regressions precedent PASS, regression de Discovery 01 FAIL exactmen pro `0` contra `M` por multiplicas de `M`.
+Li tests confirma simultanmen que `oldRemainder(M) == 0` resta ver e que `savePatch(M) == M` concorda con li reference normativ.
 
 ## Independentie
 

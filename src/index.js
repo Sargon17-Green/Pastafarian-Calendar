@@ -26,6 +26,9 @@ class BaseMonsterContext {
     this.lastError = null;
     this.legacyRemainderInput = null;
     this.legacyRemainderOutput = null;
+    this.patch01Input = null;
+    this.patch01Output = null;
+    this.patch01LegacyWasZero = false;
   }
 }
 
@@ -49,6 +52,12 @@ class BaseValidationManager {
   requireHistoricReadyContext(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'READY_FOR_HISTORIC_DEVELOPMENT') {
       throw new BootstrapStageError('Li context ne es pret por li passu historic de Discovery 01.');
+    }
+  }
+
+  requireDiscovery01Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_01_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 01.');
     }
   }
 }
@@ -99,6 +108,15 @@ function oldRemainder(value) {
   return regularMod(value, M_OLD);
 }
 
+function savePatch(value) {
+  let remainder = oldRemainder(value);
+  // Li defect legacy resta intact: li patch remappa solmen li residu zero al valore reservat M.
+  if (remainder === 0n) {
+    remainder = M_OLD;
+  }
+  return remainder;
+}
+
 class LegacyRemainderAdapter {
   call(value) {
     return oldRemainder(value);
@@ -127,6 +145,28 @@ class Discovery01RemainderHandler {
   }
 }
 
+class Patch01SaveWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, value) {
+    this.validationManager.requireDiscovery01Result(context);
+    this.validationManager.requireExactInteger(value);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Patch01SaveWrapper';
+    context.phase = 'PATCH_01_SAVE_ZERO_REMAP';
+    context.branchTrace.push('PATCH_01_SAVE_ZERO_REMAP');
+    context.patch01Input = value;
+    context.patch01LegacyWasZero = context.legacyRemainderOutput === 0n;
+    context.patch01Output = savePatch(value);
+    context.status = 'PATCH_01_RESULT';
+    this.metricsManager.bump(context, 'patch01.save.calls');
+    return context.patch01Output;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -139,6 +179,7 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyRemainderAdapter
     );
+    this.patch01SaveWrapper = new Patch01SaveWrapper(this.validationManager, this.metricsManager);
   }
 
   prepare(calculationDay, targetDay) {
@@ -163,18 +204,35 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch01Save(calculationDay, targetDay, value) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery01RemainderHandler.handle(context, value);
+      const result = this.patch01SaveWrapper.repair(context, value);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
   return new BaseMonsterManager().prepare(calculationDay, targetDay);
 }
 
-function historicRemainderThroughMonsterPath(calculationDay, targetDay, value) {
+function discovery01LegacyRemainderThroughMonsterPath(calculationDay, targetDay, value) {
   return new BaseMonsterManager().executeDiscovery01Remainder(calculationDay, targetDay, value);
 }
 
+function historicRemainderThroughMonsterPath(calculationDay, targetDay, value) {
+  return new BaseMonsterManager().executePatch01Save(calculationDay, targetDay, value);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 01; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 01; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -189,10 +247,13 @@ module.exports = Object.freeze({
   BaseDispatcher,
   LegacyRemainderAdapter,
   Discovery01RemainderHandler,
+  Patch01SaveWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
+  savePatch,
   createBootstrapContext,
+  discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
   calendarDateSpaghetti
 });

@@ -50,3 +50,21 @@ Un `LegacyRemainderAdapter` e un `Discovery01RemainderHandler` ha esset addit. `
 
 Li adapter e li handler copia exactmen li operation legacy definat por ti discovery; ili ne normalisa, ne corrige e ne consulta li oracle. Li unic divergentie es li defect historic intentional de `oldRemainder`. Li state del context resta proprietá de un unic invocation.
 
+
+## Stage 3 — PATCH 01
+
+### Quo esset circumit
+
+Li function `oldRemainder` ne esset modificat. Un nove `savePatch(value)` apella it e examina su resultate. Si li legacy rende `0`, li wrapper rende `M_OLD`; altrimen it rende exactmen li residu legacy. Li defect original resta dunc fisicmen present e directmen testabil.
+
+### Pro quo li patch es normativmen equivalent
+
+`oldRemainder` rende li residu Euclidean in `0..M-1`. Por omni residu non-zero, `SAVE` rende li sam valore. Por un multiplica de `M`, incluid 0 e multiplicas negativ, li unic diferentie es que `SAVE` representa li classe zero quam `M`. Remappar exclusivmen `0` a `M` es dunc exactmen li definition normativ, sin altri transformation.
+
+### Crescentie monster in ti stage
+
+Un `Patch01SaveWrapper` ha esset insertet pos `Discovery01RemainderHandler`. Li context conserva simultanmen li input, li output legacy, un flag indicant si li legacy esset zero, li output reparat, li handlers precedent/current e un trace de ambi stages. Ti strat adjunte un dependentie e un passu historic real sin compartir state inter invocations.
+
+### Pro quo li strat nov ne altera semantics ultra li patch
+
+Li wrapper usa solmen li input exact e li output del operation legacy del sam invocation. Metrics e trace resta non-semantic. Null oracle es consultat in production, null fallback existe, e li correction aplica solmen li remappage `0 -> M` mandat per Patch 01.
