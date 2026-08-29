@@ -185,3 +185,38 @@ BaseMonsterManager::executeLegacyGateQuestionDay
 Omnes regressiones Graduum 1–29 transeunt.
 
 Nullus PATCH 15, nullus wrapper qui diem negativum restituit, nullus `LEGACY_YEAR_MAX` et nullus codex Gradus 31 vel 32 praemature adest.
+
+
+## PATCH 15 — latus negativum quaestionis portae restitutum
+
+Gradus 31 cicatricem Discovery 15 non delet. `oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n` manet intactus, et `Discovery15GateQuestionHandler` adhuc `signedStep` in `abs(signedStep)` convertit ante vocationem helperis. Via patched primum totam hanc viam legacy exsequitur et output positivum in `legacyOutputBeforePatch` servat.
+
+Deinde `Patch15NegativeGateQuestionWrapper` tantum signum semanticum restituit:
+
+```text
+si signedStep < 0:
+    output = FOUNDATION_DAY_OLD - abs(signedStep)
+aliter:
+    output = legacyOutputBeforePatch
+```
+
+Ita zero et gradus positivi byte-semantice viam legacy servant; gradus negativus solus ad latus antecedens Fundationis divertitur. Via activa est:
+
+```text
+BaseMonsterManager::executeLegacyGateQuestionDay
+-> BaseDispatcher::dispatchPatchedGateQuestion
+-> Patch15GateQuestionHandler
+-> Discovery15GateQuestionHandler
+-> abs(signedStep)
+-> LegacyGateQuestionAdapter::ask
+-> oldGateQuestionDay
+-> legacyOutputBeforePatch
+-> Patch15NegativeGateQuestionWrapper
+-> output semanticus
+```
+
+`executeUnpatchedGateQuestionDayDiagnostic` viam Discovery 15 solam retinet. `tests/stage_30_discovery_15_tests.cpp` expected values non mutat; solum output semanticum activum aestimat, dum magnitudinem legacy adhuc exigit. Eadem versio testis contra Gradum 30 pristinum tres discrepantias negativas et exitum 1 reddit; contra Gradum 31 transit.
+
+`tests/stage_31_patch_15_tests.cpp` quattuor gradus negativos, tres non-negativos, output legacy ante patch, viam diagnosticam, statum invocationi proprium et conservationem viae non-negativae probat. Omnes regressiones Graduum 1–31 transeunt.
+
+Nullus `LEGACY_YEAR_MAX`, nullus `REAL_YEAR_MAX_PATCH`, nullus PATCH 16 et nullus codex Gradus 32 praemature additus est.

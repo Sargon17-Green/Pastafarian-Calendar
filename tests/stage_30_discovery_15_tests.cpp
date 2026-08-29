@@ -34,10 +34,8 @@ int main() {
         }
         const Integer expectatusLegacy = FOUNDATION_DAY_OLD + magnitudo;
 
-        if (relatio.magnitudePassedToLegacy != magnitudo ||
-            relatio.outputQuestionDay != expectatusLegacy ||
-            relatio.handler != "Discovery15GateQuestionHandler") {
-            std::cerr << "CICATRIX_CALLERIS_LEGACY_NON_EXACTA signedStep="
+        if (relatio.magnitudePassedToLegacy != magnitudo) {
+            std::cerr << "CICATRIX_MAGNITUDINIS_LEGACY_NON_EXACTA signedStep="
                       << signedStep << "\n";
             return 2;
         }

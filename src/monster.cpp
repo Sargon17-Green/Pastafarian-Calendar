@@ -3153,6 +3153,23 @@ void BaseValidationManager::requireDiscovery15GateQuestionReady(const BaseMonste
     }
 }
 
+void BaseValidationManager::requirePatch15GateQuestionReady(const BaseMonsterContext& ctx) const {
+    requireDiscovery15GateQuestionReady(ctx);
+    if (!ctx.patch15Applied) {
+        throw BaseValidationError("emendatio quinta decima nondum applicata est");
+    }
+    if (ctx.patch15LegacyOutputBeforePatch != ctx.legacyGateQuestionOutput) {
+        throw BaseValidationError("output legacy ante PATCH 15 non servatus est");
+    }
+    Integer expectatus = ctx.patch15LegacyOutputBeforePatch;
+    if (ctx.legacyGateQuestionSignedStep < 0) {
+        expectatus = FOUNDATION_DAY_OLD - ctx.legacyGateQuestionMagnitude;
+    }
+    if (ctx.patch15GateQuestionOutput != expectatus) {
+        throw BaseValidationError("quaestio portae PATCH 15 latus signatum non servat");
+    }
+}
+
 void BaseValidationManager::requirePatch13BiasedSelectionReady(const BaseMonsterContext& ctx) const {
     requireLegacyBiasedSelectionReady(ctx);
     if (!ctx.patch13Applied) {
@@ -3250,6 +3267,16 @@ Patch13RejectionSelection Patch13RejectionWrapper::repair(
 
 Integer LegacyGateQuestionAdapter::ask(const Integer& magnitude) const {
     return oldGateQuestionDay(magnitude);
+}
+
+Integer Patch15NegativeGateQuestionWrapper::repair(
+    const Integer& signedStep,
+    const Integer& magnitude,
+    const Integer& legacyOutput) const {
+    if (signedStep < 0) {
+        return FOUNDATION_DAY_OLD - magnitude;
+    }
+    return legacyOutput;
 }
 
 LegacyWideSelectionAttempt LegacyShortOnlyWideSelectionAdapter::attempt(
@@ -3805,6 +3832,56 @@ void BaseDispatcher::dispatchLegacyGateQuestion(
     handler.handle(ctx, adapter, validator, metrics);
 }
 
+void Patch15GateQuestionHandler::handle(
+    BaseMonsterContext& ctx,
+    const Discovery15GateQuestionHandler& legacyHandler,
+    const LegacyGateQuestionAdapter& adapter,
+    const Patch15NegativeGateQuestionWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_15_LEGACY_GATE_QUESTION";
+    ctx.branchTrace.push_back("PATCH_15_LEGACY_GATE_QUESTION");
+    legacyHandler.handle(ctx, adapter, validator, metrics);
+    ctx.patch15LegacyOutputBeforePatch = ctx.legacyGateQuestionOutput;
+
+    ctx.currentHandler = "Patch15GateQuestionHandler";
+    ctx.phase = "PATCH_15_SIGNED_GATE_DETOUR";
+    ctx.branchTrace.push_back("PATCH_15_SIGNED_GATE_DETOUR");
+    ctx.patch15GateQuestionOutput = wrapper.repair(
+        ctx.legacyGateQuestionSignedStep,
+        ctx.legacyGateQuestionMagnitude,
+        ctx.patch15LegacyOutputBeforePatch);
+    ctx.patch15Applied = true;
+    metrics.bump(ctx, "patch15.gateQuestion.wrapper.calls");
+
+    ctx.phase = "PATCH_15_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_15_VALIDATE");
+    validator.requirePatch15GateQuestionReady(ctx);
+
+    ctx.phase = "PATCH_15_GATE_QUESTION_READY";
+    ctx.status = ctx.legacyGateQuestionSignedStep < 0
+        ? "GRADUS_NEGATIVUS_AD_LATUS_ANTERIUS_DIRECTUS"
+        : "VIA_LEGACY_NON_NEGATIVA_SERVATA";
+    ctx.branchTrace.push_back("PATCH_15_GATE_QUESTION_READY");
+    metrics.bump(ctx, "patch15.gateQuestion.ready");
+}
+
+void BaseDispatcher::dispatchPatchedGateQuestion(
+    BaseMonsterContext& ctx,
+    const Patch15GateQuestionHandler& handler,
+    const Discovery15GateQuestionHandler& legacyHandler,
+    const LegacyGateQuestionAdapter& adapter,
+    const Patch15NegativeGateQuestionWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_15_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_15_DISPATCH");
+    metrics.bump(ctx, "patch15.dispatch.calls");
+    handler.handle(ctx, legacyHandler, adapter, wrapper, validator, metrics);
+}
+
 void BaseDispatcher::dispatchPatchedWideSelection(
     BaseMonsterContext& ctx,
     const Patch14WideSelectionHandler& handler,
@@ -4345,7 +4422,40 @@ LegacyGateQuestionReport BaseMonsterManager::executeLegacyGateQuestionDay(
     BaseMonsterContext ctx;
     ctx.calculationDay = FOUNDATION_DAY_OLD;
     ctx.targetDay = FOUNDATION_DAY_OLD;
-    ctx.phase = "DISCOVERY_15_NEW";
+    ctx.phase = "PATCH_15_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyGateQuestionSignedStep = signedStep;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyGateQuestionAdapter adapter;
+    const Discovery15GateQuestionHandler legacyHandler;
+    const Patch15NegativeGateQuestionWrapper wrapper;
+    const Patch15GateQuestionHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedGateQuestion(
+        ctx, handler, legacyHandler, adapter, wrapper, validator, metrics);
+
+    return LegacyGateQuestionReport{
+        signedStep,
+        ctx.legacyGateQuestionMagnitude,
+        ctx.patch15GateQuestionOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.patch15LegacyOutputBeforePatch,
+        ctx.patch15Applied
+    };
+}
+
+LegacyGateQuestionReport BaseMonsterManager::executeUnpatchedGateQuestionDayDiagnostic(
+    const Integer& signedStep) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = FOUNDATION_DAY_OLD;
+    ctx.targetDay = FOUNDATION_DAY_OLD;
+    ctx.phase = "DISCOVERY_15_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyGateQuestionSignedStep = signedStep;
@@ -4364,7 +4474,9 @@ LegacyGateQuestionReport BaseMonsterManager::executeLegacyGateQuestionDay(
         ctx.phase,
         ctx.status,
         ctx.currentHandler,
-        ctx.branchTrace.size()
+        ctx.branchTrace.size(),
+        Integer{0},
+        false
     };
 }
 

@@ -910,3 +910,34 @@ Nulla via specialis pro `signedStep<0`, nullus PATCH 15, nullum `patch15Applied`
 ### Stratum monstri hoc gradu additum
 
 Additi sunt `oldGateQuestionDay`, campi contextus gradus/magnitudinis/output, `LegacyGateQuestionReport`, `LegacyGateQuestionAdapter`, `Discovery15GateQuestionHandler`, `requireDiscovery15GateQuestionReady`, `dispatchLegacyGateQuestion` et `executeLegacyGateQuestionDay`.
+
+
+## Gradus 31 — PATCH 15: signum negativum quaestionis portae restitutum
+
+### Cicatrix servata
+
+`oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n` non mutatur. `Discovery15GateQuestionHandler` quoque adhuc signum negativum per magnitudinem absolutam delet et helperem cum illa magnitudine vere vocat. Ergo cicatrix positiva observabilis manet et per `executeUnpatchedGateQuestionDayDiagnostic` directe exerceri potest.
+
+### Circumventio
+
+`Patch15GateQuestionHandler` primum handlerem Discovery 15 exsequitur et output eius in `patch15LegacyOutputBeforePatch` servat. `Patch15NegativeGateQuestionWrapper` deinde output semanticum construit. Si `signedStep<0`, dies fit `FOUNDATION_DAY_OLD-abs(step)`; aliter output legacy non mutatur. Nullum statum inter invocationes communicat.
+
+`requirePatch15GateQuestionReady` primum invariantia Discovery 15 repetit, deinde verificat output legacy servatum, flag patch et detour negativum exactum. Oracle test-only in productionem non intrat.
+
+### Regressio Discovery 15
+
+Testis Gradus 30 ad separationem cicatricis et output activi accommodatus est, sine mutatione inputuum vel expected dierum. Contra fontem Gradus 30 pristinum eadem versio testis adhuc `-1,-17,-123456` in latus positivum mittit et exitum 1 reddit. Contra Gradum 31 transit.
+
+### Regressio PATCH 15
+
+Nova probatio casus `0,+1,+17,-1,-17,-101,-123456` exercet. Via diagnostica semper `FOUNDATION_DAY_OLD+abs(step)` reddit. Via activa idem output pro non-negativis servat, sed pro quattuor negativis `FOUNDATION_DAY_OLD-abs(step)` reddit. Quattuor cicatrices positivae ante patch observantur. Invocatio negativa deinde positiva statum non contaminat.
+
+Omnes regressiones Graduum 1–31 transeunt.
+
+### Quod consulto nondum adest
+
+Nullus `LEGACY_YEAR_MAX=5781`, nullus `REAL_YEAR_MAX_PATCH=5778`, nullus filter longitudinis anni et nullus PATCH 16 praemature additus est. Gradus 32 debet esse DISCOVERY 16.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt campi contextus `patch15LegacyOutputBeforePatch`, `patch15GateQuestionOutput`, `patch15Applied`; campi report observabilitatis; `Patch15NegativeGateQuestionWrapper`; `Patch15GateQuestionHandler`; `requirePatch15GateQuestionReady`; `dispatchPatchedGateQuestion`; et `executeUnpatchedGateQuestionDayDiagnostic`.
