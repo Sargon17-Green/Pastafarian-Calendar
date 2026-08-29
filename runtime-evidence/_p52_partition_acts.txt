@@ -1,0 +1,383 @@
+Act CLXII: internal calculation-gate scan return and partition-family count preparation.
+
+Scene I: exact internal calculation gate stores required offset; later gate means NONE and ends scan; earlier gate advances.
+[Exeunt]
+[Enter Lady Macbeth and Montague]
+Lady Macbeth: Am I as good as Montague?
+Montague: If so, let us proceed to scene II.
+[Exeunt]
+[Enter Lady Macbeth and Montague]
+Lady Macbeth: Am I better than Montague?
+Montague: If so, let us proceed to scene IV. Let us proceed to scene III.
+[Exeunt]
+
+Scene II: requiredBoundary = scanIndex - year.openGateIndex.
+[Exeunt]
+[Enter Julius Caesar and King Henry]
+Julius Caesar: You are as good as the difference between Julius Caesar and Adonis. Let us proceed to scene IV.
+[Exeunt]
+
+Scene III: advance internal gate scan.
+[Exeunt]
+[Enter Prospero and Julius Caesar]
+Prospero: You are as good as the sum of Julius Caesar and a hero. Let us proceed to act CLX.
+[Exeunt]
+
+Scene IV: family count uses C(G-1,K-1) without required boundary, C(G-2,K-2) with required boundary.
+[Exeunt]
+[Enter Friar John and King Richard]
+Friar John: You are as good as the difference between Friar John and a hero.
+[Exeunt]
+[Enter Francisca and Leonato]
+Francisca: You are as good as the difference between Francisca and a hero.
+[Exeunt]
+[Enter King Henry and Prospero]
+King Henry: Am I as good as nothing?
+Prospero: If so, let us proceed to scene V. Let us proceed to scene VI.
+[Exeunt]
+
+Scene V: no required boundary; binomial inputs already G-1,K-1.
+[Exeunt]
+[Enter Prospero and Mariana]
+Prospero: You are a hero. Let us proceed to act CLXIII.
+[Exeunt]
+
+Scene VI: required boundary fixed separator removes one position and one choice.
+[Exeunt]
+[Enter Prospero and King Richard]
+Prospero: You are as good as the difference between King Richard and a hero.
+[Exeunt]
+[Enter Prospero and Leonato]
+Prospero: You are as good as the difference between Leonato and a hero.
+[Exeunt]
+[Enter Prospero and Mariana]
+Prospero: You are a hero. Let us proceed to act CLXIII.
+[Exeunt]
+
+Act CLXIII: reusable exact positive binomial recurrence C(n,r).
+
+Scene I: validate 0<=r<=n; result=1, i=0.
+[Exeunt]
+[Enter Leonato and Prospero]
+Leonato: Am I worse than nothing?
+Prospero: If so, let us proceed to act CLXVII.
+[Exeunt]
+[Enter Leonato and King Richard]
+Leonato: Am I better than King Richard?
+King Richard: If so, let us proceed to act CLXVII.
+[Exeunt]
+[Enter Prospero and Lucio]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Luciana]
+Prospero: You are nothing. Let us proceed to scene II.
+[Exeunt]
+
+Scene II: result *= (n-r+i)/i for i=1..r; each division is exact.
+[Exeunt]
+[Enter Luciana and Leonato]
+Luciana: Am I as good as Leonato?
+Leonato: If so, let us proceed to act CLXIV.
+[Exeunt]
+[Enter Prospero and Luciana]
+Prospero: You are as good as the sum of Luciana and a hero.
+[Exeunt]
+[Enter King Richard and Solinus]
+King Richard: You are as good as the difference between King Richard and Leonato.
+[Exeunt]
+[Enter Luciana and Solinus]
+Luciana: You are as good as the sum of Solinus and Luciana.
+[Exeunt]
+[Enter Solinus and Lucio]
+Solinus: You are as good as the product of Lucio and Solinus.
+[Exeunt]
+[Enter Luciana and Lucio]
+Luciana: You are as good as the quotient between Lucio and Luciana. Let us return to scene II.
+[Exeunt]
+
+Act CLXIV: binomial return dispatcher.
+
+Scene I: continuation 1 selects partition family rank; continuation 2 returns block to unrank comparator.
+[Exeunt]
+[Enter Mariana and Prospero]
+Mariana: Am I as good as a hero?
+Prospero: If so, let us proceed to scene II.
+Mariana: Am I as good as a big hero?
+Prospero: If so, let us proceed to act CLXVI. Let us proceed to act CLXVII.
+[Exeunt]
+
+Scene II: q=2 seal=21 phase=2 over exact familyCount.
+[Exeunt]
+[Enter Lucio and Hermia]
+Lucio: You are as good as Lucio.
+[Exeunt]
+[Enter Hermia and Prospero]
+Hermia: Am I better than nothing?
+Prospero: If not, let us proceed to act CLXVII.
+[Exeunt]
+[Enter Prospero and Hecate]
+Prospero: You are a big hero.
+[Exeunt]
+[Enter Prospero and Hector]
+Prospero: You are as good as the sum of a big big big big hero and the sum of a big big hero and a hero.
+[Exeunt]
+[Enter Prospero and Doctor Caius]
+Prospero: You are a big hero. Let us proceed to act CLXI.
+[Exeunt]
+
+Act CLXV: lexicographic positive cutlet-partition unrank initialization and candidate block preparation.
+
+Scene I: rem=G, slots=K, cumulative=0, hit=true only for NONE, residual rank=selected rank, candidate x=1.
+[Exeunt]
+[Enter Friar John and Mark Antony]
+Friar John: You are as good as Friar John.
+[Exeunt]
+[Enter Francisca and Mopsa]
+Francisca: You are as good as Francisca.
+[Exeunt]
+[Enter Prospero and Oberon]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Prospero and Octavius Caesar]
+Prospero: You are nothing.
+[Exeunt]
+[Enter King Henry and Prospero]
+King Henry: Am I as good as nothing?
+Prospero: If not, let us proceed to scene II.
+[Exeunt]
+[Enter Prospero and Octavius Caesar]
+Prospero: You are a hero.
+[Exeunt]
+
+Scene II: remaining state initialization.
+[Enter Imogen and Pinch]
+Imogen: You are as good as Imogen.
+[Exeunt]
+[Enter Prospero and Pericles]
+Prospero: You are a hero.
+[Exeunt]
+[Enter Prospero and Publius]
+Prospero: You are nothing. Let us proceed to scene III.
+[Exeunt]
+
+Scene III: if slots zero finish; maxX=rem-slots+1 and candidate must not exceed it.
+[Exeunt]
+[Enter Mopsa and Prospero]
+Mopsa: Am I as good as nothing?
+Prospero: If so, let us proceed to scene XI.
+[Exeunt]
+[Enter Mark Antony and Solinus]
+Mark Antony: You are as good as the sum of the difference between Mark Antony and Mopsa and a hero.
+[Exeunt]
+[Enter Pericles and Solinus]
+Pericles: Am I better than Solinus?
+Solinus: If so, let us proceed to act CLXVII.
+[Exeunt]
+[Enter Oberon and Queen Elinor]
+Oberon: You are as good as the sum of Oberon and Pericles.
+[Exeunt]
+[Enter Octavius Caesar and Robin]
+Octavius Caesar: You are as good as Octavius Caesar. Let us proceed to scene IV.
+[Exeunt]
+
+Scene IV: required-boundary legality when not already hit.
+[Exeunt]
+[Enter King Henry and Prospero]
+King Henry: Am I as good as nothing?
+Prospero: If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Octavius Caesar and Prospero]
+Octavius Caesar: Am I as good as a hero?
+Prospero: If so, let us proceed to scene VII.
+[Exeunt]
+[Enter Queen Elinor and King Henry]
+Queen Elinor: Am I better than King Henry?
+King Henry: If so, let us proceed to scene V.
+Queen Elinor: Am I as good as King Henry?
+King Henry: If so, let us proceed to scene VI. Let us proceed to scene VIII.
+[Exeunt]
+
+Scene V: candidate skipped required boundary; block=0.
+[Exeunt]
+[Enter Prospero and Lucio]
+Prospero: You are nothing. Let us proceed to act CLXVI.
+[Exeunt]
+
+Scene VI: candidate hits required boundary now.
+[Exeunt]
+[Enter Prospero and Robin]
+Prospero: You are a hero. Let us proceed to scene VII.
+[Exeunt]
+
+Scene VII: unconstrained remaining suffix count; handle final slot then C(rem-x-1,slots-2).
+[Exeunt]
+[Enter Mopsa and Prospero]
+Mopsa: Am I as good as a hero?
+Prospero: If so, let us proceed to scene X.
+[Exeunt]
+[Enter Mark Antony and King Richard]
+Mark Antony: You are as good as the difference between the difference between Mark Antony and Pericles and a hero.
+[Exeunt]
+[Enter Mopsa and Leonato]
+Mopsa: You are as good as the difference between Mopsa and a big hero.
+[Exeunt]
+[Enter Prospero and Mariana]
+Prospero: You are a big hero. Let us proceed to act CLXIII.
+[Exeunt]
+
+Scene VIII: required boundary still ahead; at least two suffix slots needed; block=C(rem-x-2,slots-3).
+[Exeunt]
+[Enter Mopsa and Prospero]
+Mopsa: Am I worse than the sum of a big hero and a hero?
+Prospero: If so, let us proceed to scene V.
+[Exeunt]
+[Enter Mark Antony and King Richard]
+Mark Antony: You are as good as the difference between the difference between Mark Antony and Pericles and a big hero.
+[Exeunt]
+[Enter Mopsa and Leonato]
+Mopsa: You are as good as the difference between Mopsa and the sum of a big hero and a hero.
+[Exeunt]
+[Enter Prospero and Mariana]
+Prospero: You are a big hero. Let us proceed to act CLXIII.
+[Exeunt]
+
+Scene IX: selected candidate commit; push part, update state, reset x=1.
+[Exeunt]
+[Enter Pericles and King John]
+Pericles: You are as good as Pericles. Remember yourself.
+[Exeunt]
+[Enter Mark Antony and Prospero]
+Mark Antony: You are as good as the difference between Mark Antony and Pericles.
+[Exeunt]
+[Enter Mopsa and Prospero]
+Mopsa: You are as good as the difference between Mopsa and a hero.
+[Exeunt]
+[Enter Queen Elinor and Oberon]
+Queen Elinor: You are as good as Queen Elinor.
+[Exeunt]
+[Enter Robin and Octavius Caesar]
+Robin: You are as good as Robin.
+[Exeunt]
+[Enter Prospero and Publius]
+Prospero: You are as good as the sum of Publius and a hero.
+[Exeunt]
+[Enter Prospero and Pericles]
+Prospero: You are a hero. Let us return to scene III.
+[Exeunt]
+
+Scene X: final suffix base block is one only when candidate consumes all remaining total and boundary is satisfied.
+[Exeunt]
+[Enter Mark Antony and Solinus]
+Mark Antony: You are as good as the difference between Mark Antony and Pericles.
+[Exeunt]
+[Enter Solinus and Prospero]
+Solinus: Am I as good as nothing?
+Prospero: If not, let us proceed to scene V.
+[Exeunt]
+[Enter King Henry and Prospero]
+King Henry: Am I as good as nothing?
+Prospero: If so, let us proceed to scene XII.
+[Exeunt]
+[Enter Robin and Prospero]
+Robin: Am I as good as a hero?
+Prospero: If not, let us proceed to scene V.
+[Exeunt]
+
+Scene XII: valid final base block one.
+[Exeunt]
+[Enter Prospero and Lucio]
+Prospero: You are a hero. Let us proceed to act CLXVI.
+[Exeunt]
+
+Scene XI: completed partition validation and reverse to forward replay.
+[Exeunt]
+[Enter Mark Antony and Prospero]
+Mark Antony: Am I as good as nothing?
+Prospero: If not, let us proceed to act CLXVII.
+[Exeunt]
+[Enter Publius and Francisca]
+Publius: Am I as good as Francisca?
+Francisca: If not, let us proceed to act CLXVII.
+[Exeunt]
+[Enter King Henry and Prospero]
+King Henry: Am I as good as nothing?
+Prospero: If so, let us proceed to scene XIII.
+[Exeunt]
+[Enter Octavius Caesar and Prospero]
+Octavius Caesar: Am I as good as a hero?
+Prospero: If not, let us proceed to act CLXVII.
+[Exeunt]
+
+Scene XIII: reverse selected parts; accumulate exact gap sum while preserving forward stack Puck top=first part.
+[Exeunt]
+[Enter Prospero and Solinus]
+Prospero: You are nothing.
+[Exeunt]
+[Enter Publius and Pericles]
+Publius: You are as good as Publius. Let us proceed to scene XIV.
+[Exeunt]
+
+Scene XIV: pop backward stack and push forward; count down.
+[Exeunt]
+[Enter Pericles and Prospero]
+Pericles: Am I better than nothing?
+Prospero: If not, let us proceed to scene XV.
+[Exeunt]
+[Enter Prospero and King John]
+Prospero: Recall your newest memory.
+[Exeunt]
+[Enter King John and Solinus]
+King John: You are as good as the sum of Solinus and King John.
+[Exeunt]
+[Enter King John and Puck]
+King John: You are as good as King John. Remember yourself.
+[Exeunt]
+[Enter Prospero and Pericles]
+Prospero: You are as good as the difference between Pericles and a hero. Let us return to scene XIV.
+[Exeunt]
+
+Scene XV: partition sum must equal G; runtime witness output then terminal for this integration checkpoint.
+[Exeunt]
+[Enter Solinus and Friar John]
+Solinus: Am I as good as Friar John?
+Friar John: If not, let us proceed to act CLXVII.
+[Exeunt]
+[Enter Prospero and Achilles]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Friar John]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Francisca]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and King Henry]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Hermia]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Imogen]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Solinus]
+Prospero: Open your heart.
+[Exeunt]
+[Enter Prospero and Duncan]
+Prospero: Open your heart. Let us proceed to act CCL.
+[Exeunt]
+
+Act CLXVI: cutlet unrank candidate block comparator.
+
+Scene I: if residual rank > block subtract and x++; otherwise select current candidate.
+[Exeunt]
+[Enter Pinch and Lucio]
+Pinch: Am I better than Lucio?
+Lucio: If not, let us proceed to act CLXV.
+[Exeunt]
+[Enter Lucio and Pinch]
+Lucio: You are as good as the difference between Pinch and Lucio.
+[Exeunt]
+[Enter Prospero and Pericles]
+Prospero: You are as good as the sum of Pericles and a hero. Let us proceed to act CLXV.
+[Exeunt]
