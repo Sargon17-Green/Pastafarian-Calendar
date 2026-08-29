@@ -334,6 +334,50 @@ LegacyFixedPourComputation legacyPoursToFixedBowlIds(const Integer& drop,
     return LegacyFixedPourComputation{order, {{1, 2, 3}}, pours};
 }
 
+BowlAlias installBowlAlias(const PermutationOrder& order) {
+    BowlAlias alias{};
+    for (std::size_t position = 0; position < alias.size(); ++position) {
+        alias[position] = order[position];
+    }
+    return alias;
+}
+
+Integer bowlAtAliasedPosition(const BowlState& oldBowls,
+                              const BowlAlias& bowlAlias,
+                              int position) {
+    if (position < 1 || position > 6) {
+        throw BaseValidationError("positio crateris inter unum et sex requiritur");
+    }
+    const int bowlId = bowlAlias[static_cast<std::size_t>(position - 1)];
+    if (bowlId < 1 || bowlId > 6) {
+        throw BaseValidationError("bowlAlias ID crateris validum non continet");
+    }
+    return oldBowls[static_cast<std::size_t>(bowlId - 1)];
+}
+
+// Vitium legacy consulto manet: helper vetus crateres 1,2,3 directe legit.
+// Patch 09 non callerem simplicificat; translationem permanentem positionis ad bowl ID addit.
+// Quia order ipsa permutatio normativae craterarum est, bowlAlias[position]=order[position]
+// eandem craterem eligit quam definitio fusionis pro illa positione.
+BowlAliasPourComputation poursThroughBowlAlias(const Integer& drop,
+                                               int index,
+                                               const BowlState& oldBowls,
+                                               const Stone& stoneRow,
+                                               const PermutationOrder& order) {
+    if (index < 1 || index > 46) {
+        throw BaseValidationError("index guttae visibilis inter unum et quadraginta sex requiritur");
+    }
+
+    const BowlAlias alias = installBowlAlias(order);
+    const std::array<int, 3> aliasedIds{{alias[0], alias[1], alias[2]}};
+    const Integer dropSquare = drop * drop;
+    PourTriplet pours{};
+    pours[0] = savePatch(dropSquare + stoneRow[0] * bowlAtAliasedPosition(oldBowls, alias, 1) + 3 * index);
+    pours[1] = savePatch(dropSquare + stoneRow[1] * bowlAtAliasedPosition(oldBowls, alias, 2) + 5 * index);
+    pours[2] = savePatch(dropSquare + stoneRow[2] * bowlAtAliasedPosition(oldBowls, alias, 3) + 7 * index);
+    return BowlAliasPourComputation{alias, aliasedIds, pours};
+}
+
 void BaseValidationManager::requireNeutralBootstrapState(const BaseMonsterContext& ctx) const {
     if (ctx.phase.empty() || ctx.status.empty()) {
         throw BaseValidationError("status initialis invalidus");
@@ -586,6 +630,47 @@ void BaseValidationManager::requireLegacyFixedPourReady(const BaseMonsterContext
     }
 }
 
+void BaseValidationManager::requirePatch09Ready(const BaseMonsterContext& ctx) const {
+    requireLegacyFixedPourReady(ctx);
+    if (!ctx.patch09Applied) {
+        throw BaseValidationError("emendatio nona bowlAlias nondum applicata est");
+    }
+    if (ctx.bowlAlias != ctx.legacyFixedPourOrder) {
+        throw BaseValidationError("bowlAlias ordinem permutationis non servat");
+    }
+
+    std::array<bool, 7> seen{};
+    for (const int bowlId : ctx.bowlAlias) {
+        if (bowlId < 1 || bowlId > 6 || seen[static_cast<std::size_t>(bowlId)]) {
+            throw BaseValidationError("bowlAlias permutatio valida craterarum non est");
+        }
+        seen[static_cast<std::size_t>(bowlId)] = true;
+    }
+
+    const std::array<int, 3> expectatiIds{{ctx.bowlAlias[0], ctx.bowlAlias[1], ctx.bowlAlias[2]}};
+    if (ctx.aliasedFixedPourBowlIds != expectatiIds) {
+        throw BaseValidationError("IDs craterarum per bowlAlias non respondent primis tribus positionibus");
+    }
+
+    const Integer quadratum = ctx.legacyFixedPourDrop * ctx.legacyFixedPourDrop;
+    PourTriplet expectatae{};
+    expectatae[0] = savePatch(
+        quadratum + ctx.legacyFixedPourStoneRow[0] *
+            ctx.legacyFixedPourOldBowls[static_cast<std::size_t>(ctx.bowlAlias[0] - 1)] +
+        3 * ctx.legacyFixedPourIndex);
+    expectatae[1] = savePatch(
+        quadratum + ctx.legacyFixedPourStoneRow[1] *
+            ctx.legacyFixedPourOldBowls[static_cast<std::size_t>(ctx.bowlAlias[1] - 1)] +
+        5 * ctx.legacyFixedPourIndex);
+    expectatae[2] = savePatch(
+        quadratum + ctx.legacyFixedPourStoneRow[2] *
+            ctx.legacyFixedPourOldBowls[static_cast<std::size_t>(ctx.bowlAlias[2] - 1)] +
+        7 * ctx.legacyFixedPourIndex);
+    if (ctx.patchedFixedPourOutput != expectatae) {
+        throw BaseValidationError("fusiones post bowlAlias normam positionum non servant");
+    }
+}
+
 void BaseMetricsShell::bump(BaseMonsterContext& ctx, const std::string& key) const {
     auto it = ctx.metrics.find(key);
     if (it == ctx.metrics.end()) {
@@ -637,6 +722,14 @@ LegacyFixedPourComputation LegacyFixedPourAdapter::compute(const Integer& drop,
                                                            const BowlState& oldBowls,
                                                            const Stone& stoneRow) const {
     return legacyPoursToFixedBowlIds(drop, index, oldBowls, stoneRow);
+}
+
+BowlAliasPourComputation Patch09BowlAliasWrapper::repair(const Integer& drop,
+                                                         int index,
+                                                         const BowlState& oldBowls,
+                                                         const Stone& stoneRow,
+                                                         const PermutationOrder& order) const {
+    return poursThroughBowlAlias(drop, index, oldBowls, stoneRow, order);
 }
 
 LegacyGrindLookup Patch07SentinelGrindWrapper::read(int grind) const {
@@ -1195,6 +1288,51 @@ void Discovery09FixedPourHandler::handle(BaseMonsterContext& ctx,
     metrics.bump(ctx, "discovery09.pours.exposed");
 }
 
+void Patch09BowlAliasHandler::handle(BaseMonsterContext& ctx,
+                                     const LegacyFixedPourAdapter& adapter,
+                                     const Patch09BowlAliasWrapper& wrapper,
+                                     const BaseValidationManager& validator,
+                                     const BaseMetricsShell& metrics) const {
+    ctx.currentHandler = "Patch09BowlAliasHandler";
+    ctx.phase = "PATCH_09_LEGACY_FIXED_BOWL_POURS_CALL";
+    ctx.status = "LEGACY_FIXED_BOWL_POURS_CALLED_BEFORE_ALIAS";
+    ctx.branchTrace.push_back("PATCH_09_LEGACY_FIXED_BOWL_POURS_CALL");
+    metrics.bump(ctx, "patch09.legacy.pours.calls");
+
+    const LegacyFixedPourComputation legacy = adapter.compute(
+        ctx.legacyFixedPourDrop,
+        ctx.legacyFixedPourIndex,
+        ctx.legacyFixedPourOldBowls,
+        ctx.legacyFixedPourStoneRow);
+    ctx.legacyFixedPourOrder = legacy.order;
+    ctx.legacyFixedPourBowlIds = legacy.fixedBowlIds;
+    ctx.legacyFixedPourOutput = legacy.pours;
+    ctx.legacyFixedPourReady = true;
+
+    ctx.phase = "PATCH_09_BOWL_ALIAS_INSTALL";
+    ctx.branchTrace.push_back("PATCH_09_BOWL_ALIAS_INSTALL");
+    const BowlAliasPourComputation repaired = wrapper.repair(
+        ctx.legacyFixedPourDrop,
+        ctx.legacyFixedPourIndex,
+        ctx.legacyFixedPourOldBowls,
+        ctx.legacyFixedPourStoneRow,
+        ctx.legacyFixedPourOrder);
+    ctx.bowlAlias = repaired.bowlAlias;
+    ctx.aliasedFixedPourBowlIds = repaired.aliasedBowlIds;
+    ctx.patchedFixedPourOutput = repaired.pours;
+    ctx.patch09Applied = true;
+    metrics.bump(ctx, "patch09.bowlAlias.calls");
+
+    ctx.phase = "PATCH_09_VALIDATE";
+    ctx.branchTrace.push_back("PATCH_09_VALIDATE");
+    validator.requirePatch09Ready(ctx);
+
+    ctx.phase = "PATCH_09_ALIAS_POURS_READY";
+    ctx.status = "PATCHED_ALIAS_POURS_EXPOSED";
+    ctx.branchTrace.push_back("PATCH_09_ALIAS_POURS_READY");
+    metrics.bump(ctx, "patch09.pours.ready");
+}
+
 void BaseDispatcher::dispatch(BaseMonsterContext& ctx,
                               const BaseValidationManager& validator,
                               const BaseMetricsShell& metrics) const {
@@ -1454,6 +1592,20 @@ void BaseDispatcher::dispatchLegacyFixedPours(BaseMonsterContext& ctx,
     ctx.branchTrace.push_back("DISCOVERY_09_DISPATCH");
     metrics.bump(ctx, "discovery09.dispatch.calls");
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedFixedPours(BaseMonsterContext& ctx,
+                                               const Patch09BowlAliasHandler& handler,
+                                               const LegacyFixedPourAdapter& adapter,
+                                               const Patch09BowlAliasWrapper& wrapper,
+                                               const BaseValidationManager& validator,
+                                               const BaseMetricsShell& metrics) const {
+    ctx.phase = "PATCH_09_DISPATCH";
+    ctx.status = "ENTERED";
+    ctx.currentHandler = "BaseDispatcher";
+    ctx.branchTrace.push_back("PATCH_09_DISPATCH");
+    metrics.bump(ctx, "patch09.dispatch.calls");
+    handler.handle(ctx, adapter, wrapper, validator, metrics);
 }
 
 BaseRunReport BaseMonsterManager::execute(const Integer& calculationDay, const Integer& targetDay) const {
@@ -1960,7 +2112,51 @@ LegacyFixedPourReport BaseMonsterManager::executeFixedPours(const Integer& drop,
     BaseMonsterContext ctx;
     ctx.calculationDay = 0;
     ctx.targetDay = 0;
-    ctx.phase = "DISCOVERY_09_NEW";
+    ctx.phase = "PATCH_09_NEW";
+    ctx.status = "NEW";
+    ctx.currentHandler = "BaseMonsterManager";
+    ctx.legacyFixedPourDrop = drop;
+    ctx.legacyFixedPourIndex = index;
+    ctx.legacyFixedPourOldBowls = oldBowls;
+    ctx.legacyFixedPourStoneRow = stoneRow;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyFixedPourAdapter adapter;
+    const Patch09BowlAliasWrapper wrapper;
+    const Patch09BowlAliasHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedFixedPours(ctx, handler, adapter, wrapper, validator, metrics);
+
+    return LegacyFixedPourReport{
+        ctx.legacyFixedPourDrop,
+        ctx.legacyFixedPourIndex,
+        ctx.legacyFixedPourOldBowls,
+        ctx.legacyFixedPourStoneRow,
+        ctx.legacyFixedPourOrder,
+        ctx.legacyFixedPourBowlIds,
+        ctx.patchedFixedPourOutput,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.legacyFixedPourOutput,
+        ctx.legacyFixedPourBowlIds,
+        ctx.bowlAlias,
+        ctx.aliasedFixedPourBowlIds,
+        ctx.patch09Applied,
+    };
+}
+
+LegacyFixedPourReport BaseMonsterManager::executeUnpatchedFixedPoursDiagnostic(
+    const Integer& drop,
+    int index,
+    const BowlState& oldBowls,
+    const Stone& stoneRow) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = 0;
+    ctx.targetDay = 0;
+    ctx.phase = "DISCOVERY_09_DIAGNOSTIC_NEW";
     ctx.status = "NEW";
     ctx.currentHandler = "BaseMonsterManager";
     ctx.legacyFixedPourDrop = drop;
@@ -1987,6 +2183,11 @@ LegacyFixedPourReport BaseMonsterManager::executeFixedPours(const Integer& drop,
         ctx.status,
         ctx.currentHandler,
         ctx.branchTrace.size(),
+        ctx.legacyFixedPourOutput,
+        ctx.legacyFixedPourBowlIds,
+        BowlAlias{},
+        std::array<int, 3>{{1, 2, 3}},
+        false,
     };
 }
 

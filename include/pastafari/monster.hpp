@@ -31,6 +31,7 @@ using VisibleDropStore = std::vector<Integer>;
 using PermutationOrder = std::array<int, 6>;
 using BowlState = std::array<Integer, 6>;
 using PourTriplet = std::array<Integer, 3>;
+using BowlAlias = std::array<int, 6>;
 
 enum class GrindStoneKind {
     NONE = -1,
@@ -67,10 +68,25 @@ struct LegacyFixedPourComputation {
     PourTriplet pours{};
 };
 
+struct BowlAliasPourComputation {
+    BowlAlias bowlAlias{};
+    std::array<int, 3> aliasedBowlIds{{1, 2, 3}};
+    PourTriplet pours{};
+};
+
 LegacyFixedPourComputation legacyPoursToFixedBowlIds(const Integer& drop,
                                                      int index,
                                                      const BowlState& oldBowls,
                                                      const Stone& stoneRow);
+BowlAlias installBowlAlias(const PermutationOrder& order);
+Integer bowlAtAliasedPosition(const BowlState& oldBowls,
+                              const BowlAlias& bowlAlias,
+                              int position);
+BowlAliasPourComputation poursThroughBowlAlias(const Integer& drop,
+                                               int index,
+                                               const BowlState& oldBowls,
+                                               const Stone& stoneRow,
+                                               const PermutationOrder& order);
 
 Stone mutateStonesWrong(int i, Stone state);
 StoneTable buildStonesThroughWrongLegacyMutation();
@@ -161,6 +177,10 @@ struct BaseMonsterContext {
     std::array<int, 3> legacyFixedPourBowlIds{{1, 2, 3}};
     PourTriplet legacyFixedPourOutput{};
     bool legacyFixedPourReady = false;
+    BowlAlias bowlAlias{};
+    std::array<int, 3> aliasedFixedPourBowlIds{{1, 2, 3}};
+    PourTriplet patchedFixedPourOutput{};
+    bool patch09Applied = false;
 };
 
 struct BaseRunReport {
@@ -284,6 +304,11 @@ struct LegacyFixedPourReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    PourTriplet legacyOutputBeforePatch{};
+    std::array<int, 3> legacyFixedBowlIdsBeforePatch{{1, 2, 3}};
+    BowlAlias bowlAlias{};
+    std::array<int, 3> aliasedBowlIds{{1, 2, 3}};
+    bool patch09Applied = false;
 };
 
 class BaseValidationError final : public std::runtime_error {
@@ -311,6 +336,7 @@ public:
     void requireLegacyPermutationReady(const BaseMonsterContext& ctx) const;
     void requirePatch08Ready(const BaseMonsterContext& ctx) const;
     void requireLegacyFixedPourReady(const BaseMonsterContext& ctx) const;
+    void requirePatch09Ready(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -366,6 +392,15 @@ public:
                                        int index,
                                        const BowlState& oldBowls,
                                        const Stone& stoneRow) const;
+};
+
+class Patch09BowlAliasWrapper {
+public:
+    BowlAliasPourComputation repair(const Integer& drop,
+                                    int index,
+                                    const BowlState& oldBowls,
+                                    const Stone& stoneRow,
+                                    const PermutationOrder& order) const;
 };
 
 class Discovery01RemainderHandler {
@@ -564,6 +599,15 @@ public:
                 const BaseMetricsShell& metrics) const;
 };
 
+class Patch09BowlAliasHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const LegacyFixedPourAdapter& adapter,
+                const Patch09BowlAliasWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
+
 class BaseDispatcher {
 public:
     void dispatch(BaseMonsterContext& ctx,
@@ -679,6 +723,13 @@ public:
                                   const LegacyFixedPourAdapter& adapter,
                                   const BaseValidationManager& validator,
                                   const BaseMetricsShell& metrics) const;
+
+    void dispatchPatchedFixedPours(BaseMonsterContext& ctx,
+                                   const Patch09BowlAliasHandler& handler,
+                                   const LegacyFixedPourAdapter& adapter,
+                                   const Patch09BowlAliasWrapper& wrapper,
+                                   const BaseValidationManager& validator,
+                                   const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -716,6 +767,10 @@ public:
                                             int index,
                                             const BowlState& oldBowls,
                                             const Stone& stoneRow) const;
+    LegacyFixedPourReport executeUnpatchedFixedPoursDiagnostic(const Integer& drop,
+                                                               int index,
+                                                               const BowlState& oldBowls,
+                                                               const Stone& stoneRow) const;
 };
 
 } // namespace pastafari

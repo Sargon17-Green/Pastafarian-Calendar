@@ -1,0 +1,53 @@
+Gradus 19 — probationes locales
+
+Compilator: g++ (Debian 14.2.0-19) 14.2.0
+Norma: C++20
+
+Aedificatio in segmenta brevia divisa est propter limitem temporis ambitus; codex, flags et probationes non mutati sunt.
+
+Flags principales:
+-std=c++20 -O2 -Wall -Wextra -pedantic -Iinclude -I.
+
+1. Regressiones Graduum 1–17
+Exitus actualis: PASS omnibus.
+
+2. Regressio DISCOVERY 09 immutata
+Mandatum:
+./build/stage_18_discovery_09_tests
+
+Exitus actualis:
+CASUS_FUSIONIS drop=1 ordo=[1,2,3,4,5,6] discrepantiae_legacy=0 discrepantiae_activae=0
+CASUS_FUSIONIS drop=241 ordo=[3,1,2,4,5,6] discrepantiae_legacy=3 discrepantiae_activae=0
+REGRESSIO_DISCOVERY_09_TRANSIIT
+
+3. Regressio PATCH 09
+Mandatum:
+./build/stage_19_patch_09_tests
+
+Exitus actualis:
+REGRESSIO_PATCH_09_TRANSIIT
+CASUS_PERMUTATIONUM_PROBATI=720
+CICATRICES_LEGACY_DIVERGENTES=714
+
+4. Probatio pre-patch contra arborem Gradus 18 pristinam
+Mandatum:
+./build/stage_18_discovery_09_tests
+
+Exitus actualis:
+CASUS_FUSIONIS drop=1 ordo=[1,2,3,4,5,6] discrepantiae_legacy=0 discrepantiae_activae=0
+CASUS_FUSIONIS drop=241 ordo=[3,1,2,4,5,6] discrepantiae_legacy=3 discrepantiae_activae=3
+DISCREPANTIA FUSIONIS drop=241 positio=1 crater_normativus=3 crater_legacy=1 expectatus=58127 actualis=58115
+DISCREPANTIA FUSIONIS drop=241 positio=2 crater_normativus=1 crater_legacy=2 expectatus=58134 actualis=58140
+DISCREPANTIA FUSIONIS drop=241 positio=3 crater_normativus=2 crater_legacy=3 expectatus=58174 actualis=58194
+REGRESSIO_DISCOVERY_09_DEFECIT: 3 discrepantiae normativae ex crateris fixis inventae sunt
+PREPATCH_EXIT_CODE=1
+
+5. Auditum contaminationis futurae
+Nullum vaultOld in codice productionis/testium huius gradus.
+Nullum pending in codice productionis/testium huius gradus.
+Nullum Patch10 vel patch10Applied.
+Nulla logica PATCH 10 praemature adest.
+
+Status finalis: GREEN
+Regressiones anteriores: PASS
+Emendatio PATCH 09: PASS

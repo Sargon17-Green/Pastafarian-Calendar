@@ -481,3 +481,39 @@ Norma fusionis definit lecturam crateris per positionem ordinis permutationis. V
 Additi sunt `BowlState`, `PourTriplet`, `LegacyFixedPourComputation`, `legacyPoursToFixedBowlIds`, campi contextus fusionum, `LegacyFixedPourReport`, `LegacyFixedPourAdapter`, `Discovery09FixedPourHandler`, `requireLegacyFixedPourReady`, `dispatchLegacyFixedPours` et `executeFixedPours`. Contextus servat simul ordinem rectum et IDs fixos erratos, ut cicatrix semantica ante correctionem sequentem clare observetur.
 
 Nullus `bowlAlias`, nullus PATCH 09, nullus `vaultOld` et nulla logica PATCH 10 addita est.
+
+## Gradus 19 — PATCH 09: bowlAlias inter positiones et craterum IDs
+
+### Quid repertum erat
+
+Gradus 18 demonstravit ordinem permutationis iam recte computari, sed tres formulas fusionis ipsum ordinem ignorare et crateres fixos `1,2,3` legere. Defectus igitur non erat in permutatione neque in SAVE, sed in confusione inter positionem semanticae ordinis et ID crateris physicum.
+
+### Quid circumventum est
+
+`legacyPoursToFixedBowlIds` intactum manet et in via PATCH vere vocatur ante correctionem. `Patch09BowlAliasHandler` exitum illius vocationis in contextu servat ut cicatrix observabilis maneat.
+
+Postea `Patch09BowlAliasWrapper` `poursThroughBowlAlias` vocat. Haec via `installBowlAlias(order)` constituit relationem permanentem:
+
+```text
+bowlAlias[position] = order[position]
+```
+
+Tres formulae fusionis nullum `oldBowls` directe per positionem legunt. Quaelibet lectio per `bowlAtAliasedPosition` transit, qui positionem ad ID crateris per alias resolvit et tum craterem legit.
+
+### Cur hoc aequivalet normae
+
+`order[position]` est ex definitione ID crateris qui in illa positione permutationis sedet. Ergo `bowlAlias[position]` eundem ID exactum servat. Legere `oldBowls[bowlAlias[position]]` est igitur eadem lectio ac formula normativa quae craterem per ordinem permutationis eligit. Formulae `SAVE`, coefficients lapidum et termini `3*i`, `5*i`, `7*i` immutati manent.
+
+Comprobator productionis relationem `bowlAlias == order`, validitatem permutationis et tres formulas emendatas independenter recomputat; oracle testium productione non vocatur.
+
+### Regressio Gradus 18 immutata
+
+`tests/stage_18_discovery_09_tests.cpp` non mutatus est. Contra Gradum 18 pristinum `drop=241` adhuc tres discrepantias exactas et exitum `1` reddit. Contra Gradum 19 helper legacy directus adhuc easdem tres discrepantias habet, sed `executeFixedPours` output emendatum reddit et regressio transit.
+
+Regressio PATCH 09 omnes 720 permutationis residua probat. `bowlAlias` semper ordini respondet; tres IDs aliased prima tria loca ordinis servant; via activa semper formulae normativae test-only concordat. Cicatrix legacy adhuc in 714 ex 720 casibus divergit. Via diagnostica unpatched separatim servatur.
+
+### Stratum monstri hoc gradu additum
+
+Additi sunt `BowlAlias`, `BowlAliasPourComputation`, `installBowlAlias`, `bowlAtAliasedPosition`, `poursThroughBowlAlias`, campi contextus alias et output emendati, `Patch09BowlAliasWrapper`, `Patch09BowlAliasHandler`, `dispatchPatchedFixedPours`, `requirePatch09Ready`, `executeUnpatchedFixedPoursDiagnostic` et campi report cicatricis ante patch.
+
+Nullum `vaultOld`, nullum `pending`, nullus PATCH 10 et nulla logica contaminationis craterum sequentis gradus addita est.

@@ -1,54 +1,66 @@
 # Calendarium Pastafarianum — linea C++ et Neo-Latina
 
-Hoc directorium Gradum 18 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
+Hoc directorium Gradum 19 evolutionis continet. Linea implementationis ab initio ex solo specimine normativo huius mandati aedificata est. Nulla implementatio aliena, nullus exitus alienus, nulla summa cryptographica aliena et nulla probatio differentialis inter implementationes adhibita est.
 
 ## Status praesentis gradus
 
-Gradus 18 est `DISCOVERY 09`; status repositorii exspectatus est `EXPECTED_RED`.
+Gradus 19 est `PATCH 09`; status repositorii exspectatus est `GREEN`.
 
-Post PATCH 08 ordo sex craterum iam recte e `drop` derivatur. Novum vitium historicum tamen apparet in tribus fusionibus: codex veteris viae ordinem rectum computat, sed lecturas craterum adhuc quasi positiones 1, 2, 3 essent identicae crateribus cum ID 1, 2, 3 facit.
-
-Routine legacy est:
+Gradus 18 ostendit tres fusiones crateres fixos `1,2,3` legere, quamquam ordo permutationis iam aliud craterum ordinem definire potest. Helper legacy consulto non mutatus est:
 
 ```text
 legacyPoursToFixedBowlIds(drop,index,oldBowls,stoneRow)
 ```
 
-Ea ordinem per eandem conventionem PATCH 08 obtinet, sed tres formulas fusionis legunt semper:
+Is adhuc crateres fixos `1,2,3` legit et exitum pravum observabilem reddit ubi tres primae positiones non sunt identitas.
+
+## PATCH 09 — bowlAlias permanens
+
+Emendatio novum interpretem positionum retinet:
 
 ```text
-oldBowls[1]
-oldBowls[2]
-oldBowls[3]
+bowlAlias[position] = order[position]
 ```
 
-sensu ID crateris, id est indices C++ `0`, `1`, `2`. Ordo computatus nondum ad has lecturas applicatur.
+In C++ sex elementa in array zero-based servantur, sed valor cuiusque cellae est ID crateris one-based `1..6`.
+
+Omnis lectio crateris ad tres fusiones emendatas per `bowlAtAliasedPosition` transit. Itaque positiones `1`, `2`, `3` primum per `bowlAlias` ad crateris ID convertuntur et deinde solum crater ille ex `oldBowls` legitur.
+
+`poursThroughBowlAlias` formulas servat:
+
+```text
+pour1 = SAVE(drop^2 + wheat  * bowlAtAliasedPosition(...,1) + 3*i)
+pour2 = SAVE(drop^2 + barley * bowlAtAliasedPosition(...,2) + 5*i)
+pour3 = SAVE(drop^2 + salt   * bowlAtAliasedPosition(...,3) + 7*i)
+```
 
 ## Via activa
 
 ```text
 BaseMonsterManager::executeFixedPours
--> BaseDispatcher::dispatchLegacyFixedPours
--> Discovery09FixedPourHandler
+-> BaseDispatcher::dispatchPatchedFixedPours
+-> Patch09BowlAliasHandler
 -> LegacyFixedPourAdapter::compute
--> legacyPoursToFixedBowlIds
+-> legacyPoursToFixedBowlIds              [cicatrix vere vocata]
+-> Patch09BowlAliasWrapper::repair
+-> poursThroughBowlAlias
+-> installBowlAlias
+-> bowlAtAliasedPosition
 ```
 
-Contextus huius viae servat `drop`, indicem guttae, sex crateres veteres, ordinem sex craterum, tres IDs fixos `1,2,3`, ordinem lapidis et tres exitus fusionis. Validator confirmat tantum structuram defectus legacy; nullam correctionem semanticae facit.
+`executeUnpatchedFixedPoursDiagnostic` viam Gradus 18 separatam retinet et sine PATCH 09 tres fusiones veteres exponit.
 
-## Regressio DISCOVERY 09
+## Regressiones
 
-`tests/stage_18_discovery_09_tests.cpp` duos casus separat.
+`tests/stage_18_discovery_09_tests.cpp` immutatus manet. Contra codicem Gradus 18 pristinum adhuc tres discrepantias et exitum `1` reddit. Contra Gradum 19 idem executable transit: `drop=241` tres discrepantias in helper legacy adhuc demonstrat, sed nullam discrepantiam in output viae activae.
 
-Pro `drop=1`, ordo est identitas `[1,2,3,4,5,6]`. Hic vitium latent: crateres fixi `1,2,3` forte iidem sunt ac tres crateres positi in primis tribus positionibus, ergo nulla discrepantia apparet.
+`tests/stage_19_patch_09_tests.cpp` omnes 720 residua permutationis probat. In omnibus casibus `bowlAlias == order`; tres IDs ad fusiones sunt prima tria elementa ordinis; omnis lectio crateris per alias eundem valorem ac lectio per ID normativum accipit; omnes tres fusiones viae activae cum formula test-only normativa concordant. Helper legacy in 714 ex 720 casibus adhuc saltem unam fusionem divergentem habet.
 
-Pro `drop=241`, ordo est `[3,1,2,4,5,6]`. Norma tres fusiones e crateribus `3,1,2` legere iubet, dum legacy adhuc `1,2,3` legit. Cum crateribus veteribus distinctis et lapide distincto, tres discrepantiae exactae apparent. Regressio consulto exitum `1` reddit.
-
-Omnes regressiones Graduum 1–17 transeunt.
+Omnes regressiones Graduum 1–19 transeunt.
 
 ## Quod consulto nondum adest
 
-Nullus `bowlAlias`, nullus `Patch09`, nullus status `patch09Applied` et nulla translatio `position -> order[position]` ad lecturas fusionum introducta est. Item nullus `vaultOld`, nullum `pending` et nulla logica PATCH 10 praemature adest.
+Nullum `vaultOld`, nullum `pending`, nullus `Patch10`, nullus status `patch10Applied` et nulla emendatio contaminationis in-place craterum praemature addita est.
 
 ## Lingua computationis
 
