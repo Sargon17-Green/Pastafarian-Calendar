@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 23 de 55: PATCH 11**. Omni scars e patches 01..10 resta intact e testabil. `legacySauceWithOverwritableOrderMemory` continua superscrir li sam `legacyOrderMemory` durant 46 drops e 12 post-stirs, ma li nov path `sauceWithOrderAt46Latch` conserva separatmen li order exact de drop 46.
+Li linea es in **Stage 24 de 55: DISCOVERY 12**. Omni scars e patches til Patch 11 resta intact e testabil. `orderAt46Latch` continua esser single-write e li fonte semantic del order de drop 46, ma li nov `oldNextBowlFixedName(id)` interpreta next-bowl quam successor numeric fix del ID.
 
-Pos li round de drop 46 e ante post-stir 1, `orderAt46Latch` recive un clone fisic del order exact e ne posse esser scrit un duesim vez. Li post-stirs continua mutar solmen li memorie legacy. `queryOrder` lee exclusivmen li latch; li bowls final resta identic al path normativ. Null code de Patch 12 es present.
+`LegacyNextBowlAdapter` e `Discovery12NextBowlHandler` es conectet pos li route de Patch 11. Li handler conserva li latch valid in li context, ma li call legacy self usa solmen li queried ID e ignora su position in ti latch. Li correction circular de Patch 12 ne es present; li nov regression es intentionalmen rubi.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,19 +26,19 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 11 deve restar verd sub Patch 11:
+Omni regressions til Patch 11 deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li test focal del patch deve esser verd:
+Li test focal del discovery deve esser rubi intentionalmen:
 
 ```text
-npm run test:patch-11
+npm run test:discovery-12
 ```
 
-Li suite complet deve esser verd:
+Li suite complet deve finir in li sam regression expectat:
 
 ```text
 npm test
@@ -110,3 +110,10 @@ Li defect current es exclusivmen li memorie de order: un unic `legacyOrderMemory
 `legacySauceWithOverwritableOrderMemory` resta intact e continua esser un witness direct del defect: 58 writes al sam memorie e un `queryOrder` final egal al order del post-stir 12. `sauceWithOrderAt46Latch` apella realmen ti legacy quam garbage historic, poy executa li route semantic con un separat state single-write.
 
 Exactmen pos drop 46, `writeOrderAt46LatchOnce` clona li order in `orderAt46Latch`; ti write-site precede li loop del 12 post-stirs. Li latch rejecte un duesim write, e li post-stirs ne toca it. Durante que li `legacyOrderMemory` continua til 58 writes, `queryOrder` es derivat exclusivmen per `readOrderAt46Latch`. `Patch11OrderAt46LatchWrapper` conserva simultanmen li garbage legacy, li latch, li ultim memorie superscrit e li resultate semantic. Null next-bowl logic de Patch 12 es anticipat.
+
+
+## Stage 24 — Discovery 12
+
+Li latch de drop 46 ja es exact e stabil, ma li layer historic de next-bowl conserva un vocabularium anterior: `oldNextBowlFixedName(id)` avansa per li IDs numeric `1→2→3→4→5→6→1`. Ti helper ne cerca li queried ID in `orderAt46Latch` e ne conosse null position circular.
+
+`LegacyNextBowlAdapter` es insertet pos Patch 11 e `Discovery12NextBowlHandler` registra li latch, li queried ID e li successor legacy in li context invocation-local. Li regression nov usa un latch nontrivial por monstrar que li successor numeric fix diverge del successor circular definit per li order latchet. Null correction de Patch 12 es anticipat.

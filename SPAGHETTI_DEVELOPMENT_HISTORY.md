@@ -489,3 +489,26 @@ Li memorie legacy continua esser superscrit 46 + 12 vezes e termina con fonte `p
 ### Pro quo li strat nov ne adjunte un defect extra
 
 Li latch es invocation-local, contene un clone fisic de six IDs e posse esser scrit exactmen un vez. Reads retorna anc clones, ergo un consumer ne posse mutar li fonte semantic. Post-stirs conserva lor memorie legacy separat, e li garbage legacy ne decide li output reparat. Li six bowls final e omni regressions precedent resta invariat.
+
+
+## Stage 24 — DISCOVERY 12
+
+### Quo on pensat
+
+Pos que Patch 11 ha conservat li order exact del drop 46, li layer historic de query continuat usar li notion anterior que bowls have nomes numeric fix e que "li sequent bowl" es simplicmen li ID numeric sequent, con wrap de 6 a 1. Ti assumption sembla innocu si li order latchet coincide con li ring numeric.
+
+### Quo esset decovrit
+
+Li semantics de query depende del position del queried bowl in `orderAt46Latch`, ne de su ID numeric. In un latch `[1,2,3,4,6,5]`, por exemple, li successor de 4 es 6, li successor de 5 es 1 e li successor de 6 es 5. `oldNextBowlFixedName` rende respectivmen 5, 6 e 1, ergo li defect resta visibil mem si li latch self es correct.
+
+### Quo esset circumit
+
+Null circumition existe in Discovery 12. `oldNextBowlFixedName(id)` es li unic helper nov de next-bowl e continua usar exclusivmen li ring numeric fix. Null code de production cerca li queried ID in li latch o calcula su successor circular. Ti detour apartene exclusivmen a PATCH 12.
+
+### Crescentie monster in ti stage
+
+Li monster adjunte `LegacyNextBowlAdapter` e `Discovery12NextBowlHandler`. Li manager prepara realmen Discovery 11 e Patch 11 ante intrar in Discovery 12, talmen li handler recive un `orderAt46Latch` valid e single-write. Li context conserva separatmen li latch, li queried ID e li output fixed-ID legacy, durant que metrics registra li nov call.
+
+### Pro quo li nov layer ne change altri semantics
+
+Li helper ne muta li latch, bowls, drops o stones. Li route usa li output de Patch 11 solmen quam state precedent valid e li regression nov es isolat al next-bowl. Omni regressions precedent resta verd e null logic de Patch 12 o Patch 13 es present.

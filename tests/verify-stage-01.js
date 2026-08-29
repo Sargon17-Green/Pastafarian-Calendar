@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Patch 11 contamina production', () => {
+group('null textu hebreic o code posterior a Discovery 12 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Patch 11 contamina production', () 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'oldNextBowlFixedName', 'biasedLegacyPick',
+    'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
@@ -1245,7 +1245,33 @@ group('Patch 11 conserva li memorie superscribil ma query usa un latch single-wr
   eq(routed.context.metrics['patch11.orderAt46Latch.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 11', () => {
+group('Discovery 12 conserva li successor numeric fix de bowl ID pos li latch de Patch 11', () => {
+  const fixtureLatch = [1, 2, 3, 4, 6, 5];
+  deepEq([4, 5, 6].map((id) => production.oldNextBowlFixedName(id)), [5, 6, 1]);
+  const normativeFixture = [4, 5, 6].map((id) => o.nextBowlInDrop46Order({ orderAtDrop46: fixtureLatch }, id));
+  deepEq(normativeFixture, [6, 1, 5]);
+  ok([4, 5, 6].some((id, index) => production.oldNextBowlFixedName(id) !== normativeFixture[index]));
+  const f = o.FOUNDATION_DAY;
+  const counts = o.workCounts(f, f);
+  const stones = production.getStoneTableThroughLegacyBuilder();
+  const expected = o.sauce(f, f);
+  const queriedId = expected.orderAtDrop46[3];
+  const routed = production.discovery12LegacyNextBowlThroughMonsterPath(f, f, counts, stones, queriedId);
+  eq(routed.context.currentHandler, 'Discovery12NextBowlHandler');
+  eq(routed.context.previousHandler, 'Patch11OrderAt46LatchWrapper');
+  eq(routed.context.phase, 'DISCOVERY_12_FIXED_ID_NEXT_BOWL');
+  eq(routed.context.status, 'DISCOVERY_12_LEGACY_RESULT');
+  deepEq(routed.context.legacyNextBowlOrderAt46Latch, expected.orderAtDrop46);
+  eq(routed.context.legacyNextBowlQueriedId, queriedId);
+  eq(routed.result, production.oldNextBowlFixedName(queriedId));
+  ok(routed.result !== o.nextBowlInDrop46Order(expected, queriedId));
+  eq(routed.context.metrics['discovery12.fixedIdNextBowl.calls'], 1n);
+  const source = production.oldNextBowlFixedName.toString();
+  ok(source.includes('return id === 6 ? 1 : id + 1;'));
+  ok(!source.includes('indexOf'));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 12', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1257,4 +1283,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 11.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 12.');
