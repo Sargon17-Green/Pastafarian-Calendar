@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=18
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=19
+CURRENT_KIND=PATCH
 CURRENT_PATCH=09
-LAST_COMPLETED_STAGE=18
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+LAST_COMPLETED_STAGE=19
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,13 +15,13 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus legacyPoursToFixedBowlIds, LegacyFixedPourAdapter e Discovery09FixedPourHandler quel calcula li order reparat ma usa ancora bowl IDs fix 1,2,3 por li tri pours.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, li fixed-bowl pours de Discovery 09, plus installBowlAlias, bowlAtLegacyPosition, poursThroughBowlAlias e Patch09BowlAliasWrapper quel traducte chascun position al bowl ID de order.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 18 es finit quam **DISCOVERY 09**. `legacyPoursToFixedBowlIds(drop,index,oldBowls,stoneRow)` calcula li order exact per `orderPatchFromValue`, ma li tri pours continua leer `oldBowls[1]`, `oldBowls[2]` e `oldBowls[3]` quam si positions 1,2,3 esset bowl IDs fix.
+Stage 19 es finit quam **PATCH 09**. `legacyPoursToFixedBowlIds` resta sin modification e continua leer bowls fix 1,2,3 quand it es vocat directmen. Li nov `bowlAlias[position]=order[position]` es conservat quam un translator explicit; omni read semantic de bowl por li tri pours passa tra `bowlAtLegacyPosition`.
 
-Li defect es conectet a un path real de production tra `LegacyFixedPourAdapter` e `Discovery09FixedPourHandler`. Por un order identic li scar posse coincider accidentalmen; por drop 127 li order es `[2,1,4,3,5,6]` e li pours legacy `16163,16188,16242` diverge de `16167,16182,16252`. Li regression nov es intentionalmen rubi. Null `bowlAlias`, null correction de Patch 09 e null code posterior es present.
+`poursThroughBowlAlias` voca realmen li routine legacy, conserva su resultate quam scar, instala li alias e superscri solmen li tri pours semantic per li IDs selectet de positions 1,2,3. Li route historic passa per `Discovery09FixedPourHandler` e poy `Patch09BowlAliasWrapper`. Li regression de Stage 18 es verd. Null `vaultOld`, null `pending`, null correction de Patch 10 e null code posterior es present.

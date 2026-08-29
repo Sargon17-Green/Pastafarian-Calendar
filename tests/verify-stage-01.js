@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 09 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 09 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Discovery 09 contamina production',
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
+    'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
     'legacyPositiveCompositions', 'legacyNameRowWithRepeats', 'VirtualLegacyList',
@@ -1089,7 +1089,36 @@ group('Discovery 09 conserva pours ligat a bowl IDs fix 1,2,3 in vice de positio
   eq(routed.context.metrics['discovery09.fixedPour.calls'], 1n);
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 09', () => {
+group('Patch 09 conserva li scar fixed-bowl ma passa omni read semantic per bowlAlias', () => {
+  const oldBowls = [null, 11n, 13n, 17n, 19n, 23n, 29n];
+  const stoneRow = { w: 2n, b: 3n, s: 5n };
+  const legacy = production.legacyPoursToFixedBowlIds(127n, 4n, oldBowls, stoneRow);
+  deepEq(legacy.pours.slice(1, 4), [16163n, 16188n, 16242n]);
+  const alias = production.installBowlAlias([2, 1, 4, 3, 5, 6]);
+  deepEq(alias, [null, 2, 1, 4, 3, 5, 6]);
+  eq(production.bowlAtLegacyPosition(oldBowls, alias, 1), 13n);
+  eq(production.bowlAtLegacyPosition(oldBowls, alias, 2), 11n);
+  eq(production.bowlAtLegacyPosition(oldBowls, alias, 3), 19n);
+  const patched = production.poursThroughBowlAlias(127n, 4n, oldBowls, stoneRow);
+  deepEq(patched.bowlAlias, [null, 2, 1, 4, 3, 5, 6]);
+  deepEq(patched.pours.slice(1, 4), [16167n, 16182n, 16252n]);
+  const source = production.poursThroughBowlAlias.toString();
+  ok(source.includes('legacyPoursToFixedBowlIds(drop, index, oldBowls, stoneRow)'));
+  ok(source.includes('installBowlAlias(order)'));
+  ok(source.includes('bowlAtLegacyPosition(oldBowls, bowlAlias, 1)'));
+  ok(source.includes('bowlAtLegacyPosition(oldBowls, bowlAlias, 2)'));
+  ok(source.includes('bowlAtLegacyPosition(oldBowls, bowlAlias, 3)'));
+  const routed = production.historicPoursThroughMonsterPath(1n, 1n, 127n, 4n, oldBowls, stoneRow);
+  eq(routed.context.currentHandler, 'Patch09BowlAliasWrapper');
+  eq(routed.context.previousHandler, 'Discovery09FixedPourHandler');
+  deepEq(routed.context.patch09BowlAlias, [null, 2, 1, 4, 3, 5, 6]);
+  deepEq(routed.context.patch09AliasedBowlIds, [2, 1, 4]);
+  eq(routed.context.patch09LegacyCallPreserved, true);
+  deepEq(routed.result.pours.slice(1, 4), [16167n, 16182n, 16252n]);
+  eq(routed.context.metrics['patch09.bowlAlias.calls'], 1n);
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 09', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -1101,4 +1130,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa ante li regression intentional de Discovery 09.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa tra Patch 09.');

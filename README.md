@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 18 de 55: DISCOVERY 09**. Omni scars e patches 01..08 resta intact e testabil. Li nov `legacyPoursToFixedBowlIds` calcula un order valid, ma conserva li assumption historic que positions 1,2,3 del pour es bowl IDs fix 1,2,3.
+Li linea es in **Stage 19 de 55: PATCH 09**. Omni scars e patches 01..08 resta intact e testabil. `legacyPoursToFixedBowlIds` conserva li assumption historic de bowl IDs fix 1,2,3, ma li nov `bowlAlias[position]=order[position]` traducte chascun position semantic al bowl ID current.
 
-`Discovery09FixedPourHandler` expone ti defect in un route real de production e conserva separatmen li order, li IDs fix, li bowls anterior e li tri pours legacy. Null `bowlAlias`, null correction de Patch 09 e null code de Patch 10 existe in ti stage.
+`poursThroughBowlAlias` voca realmen li legacy e passa omni read semantic de bowl por li tri pours tra `bowlAtLegacyPosition`. `Patch09BowlAliasWrapper` conserva li garbage legacy, li alias e li output reparat in li sam context. Null `vaultOld`, null `pending` e null code de Patch 10 existe in ti stage.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,25 +26,25 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions precedent deve restar verd:
+Omni regressions precedent, includente Discovery 09 reparat per li route Patch 09, deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li regression specific de Discovery 09 deve esser intentionalmen rubi:
+Li test specific de Patch 09 deve esser verd:
 
 ```text
-npm run test:discovery-09
+npm run test:patch-09
 ```
 
-Li suite complet deve finir rubi exclusivmen in Discovery 09:
+Li suite complet deve esser verd:
 
 ```text
 npm test
 ```
 
-Li verifier confirma que li pours legacy usa fisicmen bowls 1,2,3 quam IDs fix, que li order reparat es calculat ma ne traducte ancor ti reads, e que null `bowlAlias` o code posterior contamina production.
+Li verifier confirma que li helper legacy continua leer bowls fix 1,2,3, que li route semantic instala `bowlAlias` ex li order e que omni tri reads de pour passa tra ti alias. It confirma anc que null `vaultOld`, `pending` o code posterior contamina production.
 
 ## Independentie
 
@@ -86,3 +86,8 @@ Li table historic de visible grinds es almacenat quam un array zero-based de und
 ## Stage 18 — Discovery 09
 
 Li order de bowls ja es reparat per Patch 08, ma li routine historic de pours ne usa ti IDs selectet. It tracta positions semantic 1,2,3 quam bowl IDs fisic 1,2,3 e lee directmen `oldBowls[1]`, `oldBowls[2]`, `oldBowls[3]`. `LegacyFixedPourAdapter` e `Discovery09FixedPourHandler` conserva ti mismatch. Li translator de Patch 09 resta reservat por Stage 19.
+
+
+## Stage 19 — Patch 09
+
+`legacyPoursToFixedBowlIds` resta intact quam scar historic. `installBowlAlias` fixa li relation `bowlAlias[position]=order[position]` por positions 1..6, e `bowlAtLegacyPosition` es li unic read semantic usat por li bowls del tri pours. `poursThroughBowlAlias` executa realmen li helper legacy ante li overwrite aliased; `Patch09BowlAliasWrapper` conserva li output legacy e li reparat. Li regression de Discovery 09 es nu verd sin introducter li snapshot/commit de Patch 10.

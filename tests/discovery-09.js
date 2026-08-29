@@ -23,14 +23,14 @@ const identityExpected = normativePours(1n);
 assert.deepEqual(identityLegacy.order, [1, 2, 3, 4, 5, 6]);
 assert.deepEqual(identityLegacy.pours.slice(1, 4), identityExpected.pours.slice(1, 4));
 
-const primary = production.legacyPoursToFixedBowlIds(127n, index, oldBowls, stoneRow);
+const primaryLegacy = production.legacyPoursToFixedBowlIds(127n, index, oldBowls, stoneRow);
 const primaryExpected = normativePours(127n);
-assert.deepEqual(primary.order, [2, 1, 4, 3, 5, 6]);
-assert.deepEqual(primary.pours.slice(1, 4), [16163n, 16188n, 16242n]);
+assert.deepEqual(primaryLegacy.order, [2, 1, 4, 3, 5, 6]);
+assert.deepEqual(primaryLegacy.pours.slice(1, 4), [16163n, 16188n, 16242n]);
 assert.deepEqual(primaryExpected.pours.slice(1, 4), [16167n, 16182n, 16252n]);
-assert.notDeepEqual(primary.pours.slice(1, 4), primaryExpected.pours.slice(1, 4));
+assert.notDeepEqual(primaryLegacy.pours.slice(1, 4), primaryExpected.pours.slice(1, 4));
 
-const routed = production.discovery09LegacyFixedPoursThroughMonsterPath(
+const routed = production.historicPoursThroughMonsterPath(
   normative.FOUNDATION_DAY,
   normative.FOUNDATION_DAY,
   127n,
@@ -38,34 +38,30 @@ const routed = production.discovery09LegacyFixedPoursThroughMonsterPath(
   oldBowls,
   stoneRow
 );
-assert.equal(routed.context.currentHandler, 'Discovery09FixedPourHandler');
-assert.equal(routed.context.phase, 'DISCOVERY_09_FIXED_BOWL_POURS');
-assert.equal(routed.context.status, 'DISCOVERY_09_LEGACY_RESULT');
-assert.equal(routed.context.legacyPourDrop, 127n);
-assert.equal(routed.context.legacyPourIndex, index);
-assert.deepEqual(routed.context.legacyPourOrder, [2, 1, 4, 3, 5, 6]);
-assert.deepEqual(routed.context.legacyPourFixedBowlIds, [1, 2, 3]);
-assert.deepEqual(routed.context.legacyPourOldBowls, oldBowls);
-assert.deepEqual(routed.context.legacyPourStoneRow, stoneRow);
-assert.deepEqual(routed.result.pours.slice(1, 4), [16163n, 16188n, 16242n]);
+assert.equal(routed.context.currentHandler, 'Patch09BowlAliasWrapper');
+assert.equal(routed.context.previousHandler, 'Discovery09FixedPourHandler');
+assert.equal(routed.context.phase, 'PATCH_09_BOWL_ALIAS');
+assert.equal(routed.context.status, 'PATCH_09_RESULT');
+assert.deepEqual(routed.context.legacyPourOutput.pours.slice(1, 4), [16163n, 16188n, 16242n]);
+assert.deepEqual(routed.context.patch09BowlAlias, [null, 2, 1, 4, 3, 5, 6]);
+assert.deepEqual(routed.context.patch09AliasedBowlIds, [2, 1, 4]);
+assert.equal(routed.context.patch09LegacyCallPreserved, true);
+assert.deepEqual(routed.result.pours.slice(1, 4), primaryExpected.pours.slice(1, 4));
 assert.deepEqual(routed.context.branchTrace, [
   'BOOTSTRAP_VALIDATED',
-  'DISCOVERY_09_POURS_TO_FIXED_BOWL_IDS'
+  'DISCOVERY_09_POURS_TO_FIXED_BOWL_IDS',
+  'PATCH_09_BOWL_ALIAS'
 ]);
 assert.equal(routed.context.metrics['discovery09.fixedPour.calls'], 1n);
+assert.equal(routed.context.metrics['patch09.bowlAlias.calls'], 1n);
 
-const legacyActual = [];
-const normativeExpected = [];
 for (const drop of drops) {
   const legacy = production.legacyPoursToFixedBowlIds(drop, index, oldBowls, stoneRow);
   const expected = normativePours(drop);
+  const patched = production.poursThroughBowlAlias(drop, index, oldBowls, stoneRow);
   assert.deepEqual(legacy.order, expected.order);
-  legacyActual.push(legacy.pours.slice(1, 4));
-  normativeExpected.push(expected.pours.slice(1, 4));
+  assert.deepEqual(patched.order, expected.order);
+  assert.deepEqual(patched.pours.slice(1, 4), expected.pours.slice(1, 4));
 }
 
-assert.deepEqual(
-  legacyActual,
-  normativeExpected,
-  'Li regression de Discovery 09 deve restar rubi: li pours legacy usa bowl IDs fix 1,2,3 in vice de IDs selectet per position in order.'
-);
+console.log('DISCOVERY 09 REGRESSION: PASS pos Patch 09; li legacy resta ligat a IDs fix e li route semantic lee per bowlAlias.');

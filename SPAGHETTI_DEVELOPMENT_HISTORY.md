@@ -375,3 +375,26 @@ Un `LegacyFixedPourAdapter` e un `Discovery09FixedPourHandler` ha esset addit. L
 ### Pro quo li strat nov ne adjunte un defect extra
 
 Li order veni exclusivmen de `orderPatchFromValue`, ergo Patch 08 resta activ e exact. Li routine de Discovery 09 ne muta bowls, ne implementa li update de six bowls e ne introduce contamination in-place de Patch 10. Li unic divergence nov es precis li confusion mandat inter position e bowl ID durant li tri pours. Null `bowlAlias`, null `vaultOld` e null code posterior es present.
+
+
+## Stage 19 — PATCH 09
+
+### Quo esset circumit
+
+`legacyPoursToFixedBowlIds` ne esset modificat. Li nov `installBowlAlias(order)` crea un array one-based u `bowlAlias[position]` es li bowl ID in ti position del order. `bowlAtLegacyPosition(oldBowls, bowlAlias, position)` es insertet quam translator explicit, e `poursThroughBowlAlias` voca realmen li routine legacy ante superscrir li tri pours con reads exclusivmen tra ti alias.
+
+### Pro quo li patch es normativmen equivalent
+
+Patch 08 ja rende li order exact. Li specification liga chascun pour al bowl in un position del order; ergo li map `position -> order[position]` rende exactmen li ID semantic sin mutar ni reordinar li bowls. Li formules numeric, li SAVE, li stone factors e li index del visible drop resta identic; solmen li fonte del bowl multiplicat es traductet al ID correct.
+
+### Crescentie monster in ti stage
+
+Un `Patch09BowlAliasWrapper` ha esset insertet pos `Discovery09FixedPourHandler`. Li context conserva li output fixed-bowl legacy, li `bowlAlias`, li tri IDs aliased, un flag quel confirma li call legacy e li output final. Li helper de patch apella anc directmen li routine legacy, talmen li scar ne posse esser optimisat for del route historic.
+
+### Scar conservat
+
+`legacyPoursToFixedBowlIds(127,...)` continua rendre `16163,16188,16242` e resta directmen testabil. `bowlAlias` ne es eliminat ni remplaciat per indexing simplificat. Null bowl update in-place existe ancor; `vaultOld`, `pending` e li commit simultan de Patch 10 resta absent.
+
+### Pro quo li strat nov ne adjunte un defect extra
+
+Li alias es un permutation direct del order exact e ne participa in selection, SAVE o mutation de state. Li wrapper ne muta `oldBowls` ni `stoneRow`, e metrics/diagnostics ne decide null valore semantic. Ergo li unic change semantic es li correction local mandat de positions a bowl IDs.

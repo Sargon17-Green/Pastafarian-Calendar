@@ -99,6 +99,10 @@ class BaseMonsterContext {
     this.legacyPourOldBowls = null;
     this.legacyPourStoneRow = null;
     this.legacyPourOutput = null;
+    this.patch09BowlAlias = null;
+    this.patch09AliasedBowlIds = null;
+    this.patch09LegacyCallPreserved = false;
+    this.patch09Output = null;
   }
 }
 
@@ -209,6 +213,12 @@ class BaseValidationManager {
   requireDiscovery08Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_08_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 08.');
+    }
+  }
+
+  requireDiscovery09Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_09_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 09.');
     }
   }
 
@@ -578,6 +588,51 @@ function legacyPoursToFixedBowlIds(drop, index, oldBowls, stoneRow) {
   pours[2] = savePatch(drop * drop + stoneRow.b * oldBowls[2] + 5n * index);
   pours[3] = savePatch(drop * drop + stoneRow.s * oldBowls[3] + 7n * index);
   return { order, pours };
+}
+
+function installBowlAlias(order) {
+  if (!Array.isArray(order) || order.length !== 6) {
+    throw new TypeError('Li order de bowls por alias deve contener exactmen six IDs.');
+  }
+  const seen = new Set();
+  const bowlAlias = new Array(7).fill(null);
+  for (let position = 1; position <= 6; position += 1) {
+    const bowlId = order[position - 1];
+    if (!Number.isInteger(bowlId) || bowlId < 1 || bowlId > 6 || seen.has(bowlId)) {
+      throw new RangeError('Li order de bowls deve esser un permutation exact de IDs 1..6.');
+    }
+    seen.add(bowlId);
+    // Ti scar deve restar explicit: li position historic es traductet al bowl ID current per bowlAlias[position].
+    bowlAlias[position] = bowlId;
+  }
+  return bowlAlias;
+}
+
+function bowlAtLegacyPosition(oldBowls, bowlAlias, position) {
+  if (!Number.isInteger(position) || position < 1 || position > 6) {
+    throw new RangeError('Li position legacy de bowl deve esser inter 1 e 6.');
+  }
+  if (!Array.isArray(oldBowls) || oldBowls.length < 7 || !Array.isArray(bowlAlias) || bowlAlias.length < 7) {
+    throw new TypeError('Li bowls e bowlAlias deve conservar indices 1..6.');
+  }
+  const bowlId = bowlAlias[position];
+  if (!Number.isInteger(bowlId) || bowlId < 1 || bowlId > 6 || typeof oldBowls[bowlId] !== 'bigint') {
+    throw new TypeError('Li alias de bowl deve resolver a un bowl BigInt valid.');
+  }
+  return oldBowls[bowlId];
+}
+
+function poursThroughBowlAlias(drop, index, oldBowls, stoneRow) {
+  // Li routine legacy resta intact e es realmen vocat; su pours fix es conservabil quam scar ma ne decide li output semantic.
+  const garbage = legacyPoursToFixedBowlIds(drop, index, oldBowls, stoneRow);
+  const order = garbage.order.slice();
+  const bowlAlias = installBowlAlias(order);
+  const pours = garbage.pours.slice();
+  // Li defect legacy ne es correctet in-place: chascun read semantic de bowl passa explicitmen per bowlAlias[position].
+  pours[1] = savePatch(drop * drop + stoneRow.w * bowlAtLegacyPosition(oldBowls, bowlAlias, 1) + 3n * index);
+  pours[2] = savePatch(drop * drop + stoneRow.b * bowlAtLegacyPosition(oldBowls, bowlAlias, 2) + 5n * index);
+  pours[3] = savePatch(drop * drop + stoneRow.s * bowlAtLegacyPosition(oldBowls, bowlAlias, 3) + 7n * index);
+  return { order, bowlAlias, pours };
 }
 
 class LegacyRemainderAdapter {
@@ -1075,6 +1130,37 @@ class Discovery09FixedPourHandler {
   }
 }
 
+class Patch09BowlAliasWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, drop, index, oldBowls, stoneRow) {
+    this.validationManager.requireDiscovery09Result(context);
+    this.validationManager.requireExactInteger(drop);
+    this.validationManager.requireVisibleDropIndex(index);
+    this.validationManager.requireBowlVector(oldBowls);
+    this.validationManager.requirePourStoneRow(stoneRow);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Patch09BowlAliasWrapper';
+    context.phase = 'PATCH_09_BOWL_ALIAS';
+    context.branchTrace.push('PATCH_09_BOWL_ALIAS');
+    context.patch09LegacyCallPreserved = true;
+    const patched = poursThroughBowlAlias(drop, index, oldBowls, stoneRow);
+    context.patch09BowlAlias = patched.bowlAlias.slice();
+    context.patch09AliasedBowlIds = [patched.bowlAlias[1], patched.bowlAlias[2], patched.bowlAlias[3]];
+    context.patch09Output = {
+      order: patched.order.slice(),
+      bowlAlias: patched.bowlAlias.slice(),
+      pours: patched.pours.slice()
+    };
+    context.status = 'PATCH_09_RESULT';
+    this.metricsManager.bump(context, 'patch09.bowlAlias.calls');
+    return context.patch09Output;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -1154,6 +1240,10 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager,
       this.legacyFixedPourAdapter
+    );
+    this.patch09BowlAliasWrapper = new Patch09BowlAliasWrapper(
+      this.validationManager,
+      this.metricsManager
     );
   }
 
@@ -1379,6 +1469,19 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch09FixedPours(calculationDay, targetDay, drop, index, oldBowls, stoneRow) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery09FixedPourHandler.handle(context, drop, index, oldBowls, stoneRow);
+      const result = this.patch09BowlAliasWrapper.repair(context, drop, index, oldBowls, stoneRow);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -1455,8 +1558,14 @@ function discovery09LegacyFixedPoursThroughMonsterPath(calculationDay, targetDay
   );
 }
 
+function historicPoursThroughMonsterPath(calculationDay, targetDay, drop, index, oldBowls, stoneRow) {
+  return new BaseMonsterManager().executePatch09FixedPours(
+    calculationDay, targetDay, drop, index, oldBowls, stoneRow
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 09; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 09; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -1496,6 +1605,7 @@ module.exports = Object.freeze({
   Patch08PermutationWrapper,
   LegacyFixedPourAdapter,
   Discovery09FixedPourHandler,
+  Patch09BowlAliasWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -1524,6 +1634,9 @@ module.exports = Object.freeze({
   legacyBowlOrderFromDrop,
   orderPatchFromValue,
   legacyPoursToFixedBowlIds,
+  installBowlAlias,
+  bowlAtLegacyPosition,
+  poursThroughBowlAlias,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -1542,5 +1655,6 @@ module.exports = Object.freeze({
   discovery08LegacyBowlOrderThroughMonsterPath,
   historicBowlOrderThroughMonsterPath,
   discovery09LegacyFixedPoursThroughMonsterPath,
+  historicPoursThroughMonsterPath,
   calendarDateSpaghetti
 });
