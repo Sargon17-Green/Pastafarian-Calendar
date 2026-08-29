@@ -258,7 +258,7 @@ class Stage42Discovery21Tests(unittest.TestCase):
             second.legacy_cutlet_internal_gate_was_ignored,
         )
 
-    def test_patch21_filter_code_is_not_present_in_production(self):
+    def test_patch21_filter_code_is_present_but_legacy_family_remains(self):
         production = (
             ROOT
             / "src"
@@ -268,16 +268,15 @@ class Stage42Discovery21Tests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        forbidden = (
-            "CutletPartitionGatePatchWrapper",
-            "filteredLegacyFamily",
-            "required_boundary",
-            "prefix_sum",
+        required = (
+            "class LegacyAllPositiveCutletPartitionFamily:",
+            "class FilteredLegacyCutletPartitionFamily:",
+            "class CutletPartitionGatePatchWrapper:",
             "patch21_applied",
         )
 
-        for token in forbidden:
-            self.assertNotIn(
+        for token in required:
+            self.assertIn(
                 token,
                 production,
             )

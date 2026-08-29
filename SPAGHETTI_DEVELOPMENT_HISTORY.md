@@ -1897,3 +1897,20 @@ Bu üç alt örnek Aşama 42'nin beklenen tek kırmızılığıdır.
 `CutletPartitionGatePatchWrapper`, filtered legacy family, prefix-boundary semantic filter veya `patch21_applied` henüz production'da yoktur.
 
 Patch 22 repeated-name generator kodu da eklenmemiştir.
+
+
+## Aşama 43 — Yama 21: internal calculation-day gate için filtered legacy family
+
+Aşama 42 `LegacyAllPositiveCutletPartitionFamily` gövdesi ve `LegacyCutletPartitionAdapter.call_with_ring` raw legacy metodu byte-for-byte korunur.
+
+Her `LegacyCutletPartitionAdapter.call` içinde aynı bowl 2 / seal 21 answer ring kurulduktan sonra raw legacy selection önce gerçekten çalışır ve historical all-positive family sonucu diagnostic state'te kalır.
+
+`FilteredLegacyCutletPartitionFamily` DP count/unrank kullanır. `required_boundary` internal gate offsetidir. Legal composition yalnız partial prefix sum'lardan biri exact bu boundary değerine eşitse ailede kalır.
+
+DP unrank, all-positive legacy family'nin aynı lexicographic sırasını korur; yani filtered aile yalnız legacy sıradan eleme yapar, yeni bir sıralama tanımlamaz.
+
+`CutletPartitionGatePatchWrapper` internal gate varsa filtered family count üzerinden current selection semantiğini uygular. Short count için Stage 13 rejection semantiğiyle uyumlu rank, wide count için Stage 14 wide-number semantiği kullanılır. Seçilen semantic composition gerekli internal boundary'yi vurmak zorundadır.
+
+Internal gate yoksa filtered detour uygulanmaz ve raw legacy partition aynen semantic sonuç olur.
+
+Aşama 42 normatif regression gövdesi byte-for-byte değiştirilmeden yeşile dönmüştür. Patch 22 repeated-name generator kodu henüz yoktur.

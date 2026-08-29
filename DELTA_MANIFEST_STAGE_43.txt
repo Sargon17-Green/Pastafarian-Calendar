@@ -1,0 +1,30 @@
+Aşama 43/55 — PATCH 21
+
+Bu paket yalnızca Aşama 43 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_cutlet_partition.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_42_discovery_21.py
+tests/test_stage_43_patch_21.py
+artifacts/stage-43/BASELINE_STAGE_42_EXPECTED_RED.txt
+artifacts/stage-43/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_43.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 42 baseline: EXPECTED_RED, 270 test / 3 expected failure
+Aşama 43 full suite: GREEN, 278/278
+Aşama 42 normatif regression: GÖVDE DEĞİŞMEDEN PASS
+Legacy all-positive family: BYTE-FOR-BYTE KORUNDU
+Legacy raw call_with_ring: BYTE-FOR-BYTE KORUNDU VE AKTİF
+Filtered legacy family: EXACT DP COUNT/UNRANK
+Lexicographic sıra: LEGACY SUBSEQUENCE OLARAK KORUNDU
+Internal gate semantic filter: EKLENDİ
+No-internal-gate pass-through: KORUNDU
+Short/wide selection compatibility: DOĞRULANDI
+Patch 22 repeated-name code: YOK

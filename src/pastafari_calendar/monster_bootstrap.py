@@ -295,6 +295,14 @@ class MonsterContext:
     legacy_cutlet_answer_first: int | None = None
     legacy_cutlet_answer_direction_step: int | None = None
     legacy_cutlet_partition_calls: int = 0
+    patch21_legacy_selected_partition: tuple[int, ...] | None = None
+    patch21_required_boundary: int | None = None
+    patch21_filter_applied: bool = False
+    patch21_filtered_family_count: int | None = None
+    patch21_semantic_selected_rank: int | None = None
+    patch21_semantic_partition: tuple[int, ...] | None = None
+    patch21_boundary_hit: bool = False
+    patch21_applied: bool = False
 
 
 class BaseMetrics:
