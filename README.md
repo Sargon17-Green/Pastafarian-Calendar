@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 47 de 55: PATCH 23** e li repository local es `GREEN`. Omni regressions til Discovery 23, li verifier e li test focal de Patch 23 passa.
+Li linea es in **Stage 48 de 55: DISCOVERY 24** e li repository local es intentionalmen `EXPECTED_RED`. Omni regressions til Patch 23 e li verifier passa; solmen li regression nov de Discovery 24 falla.
 
-Li façade concrete historic resta intact: `legacyMaterializeMonthLengthWays`, `LegacyMonthLengthAllWaysAPI` e `Discovery23MonthLengthMaterializationHandler` continua esser executet realmen ante li correction quam scar diagnostic. `VirtualLegacyList` es un backend separat con `count()` exact per DP e `itemAt1(rank1)` exact per unrank lexicografic. `MonthLengthVirtualPatchWrapper` usa li sam bowl 3 / seal 31 ring e selecte semanticmen sin materialisar li familie complet. Por li witness 1000/16, li count es `5239332298078798668173613753510`, rank `1892970349028658514214546085756` rende `[46,62,31,19,31,123,10,47,108,96,7,97,113,29,74,107]`. Null code de Patch 24 es present. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
+Li backend virtual de Patch 23 resta intact. Pos it, `legacyChooseEachDaySeparately` es executet realmen quam scar: it questiona bowl 4 / seal 32 e electe un monthId localmen por chascun die, circumrotante solmen quand li monthId selectet ja es plen. It conserva exactmen li longores/multiplicities, ma ne selecte un intertexe complet e ne enforce li ordre del unesim/ultim occurrences. `Discovery24MonthWeavingHandler` conserva ti resultate quam ghost e anc quam current semantic weaving, pro que Patch 24 ne existe ancor. Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat.
 
 ## Lingue-fonte canonic
 
@@ -24,7 +24,7 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions til Discovery 23 deve restar verd:
+Omni regressions til Patch 23 deve restar verd:
 
 ```text
 npm run test:previous
@@ -36,13 +36,13 @@ Li verifier deve esser verd:
 node tests/verify-stage-01.js
 ```
 
-Li test focal de Patch 23 deve esser verd:
+Li test focal de Discovery 24 deve esser intentionalmen red:
 
 ```text
-npm run test:patch-23
+npm run test:discovery-24
 ```
 
-Li suite complet deve esser verd:
+Li suite complet deve esser intentionalmen red solmen in Discovery 24:
 
 ```text
 npm test
@@ -401,3 +401,22 @@ Li witness 1000/16 have `5239332298078798668173613753510` membres. Rank `1892970
 ### Limite historic
 
 Patch 24 ne es anticipat. `legacyChooseEachDaySeparately`, `DPUnrankLegalWeaving` e un wrapper de month weaving ne existe. `oldContiguousMonthDayGuess` de Patch 25 resta anc absent. `SourceLanguageCatalog` resta congelat e production ne importa li reference test-only.
+
+
+## Stage 48 — DISCOVERY 24
+
+### Chooser historic die-per-die
+
+`legacyChooseEachDaySeparately(lengths,answerStream)` conserva li algorithm old exact: chascun die prende un answer del ring, reduce it modulo li quantitá de mensus e prova ti monthId. Si li monthId ja ne have occurrence restant, `wrapMonth` avansa circularmen til un monthId ancor disponibil. Li helper ne conosse null count de intertexes, rank global, first-occurrence constraint o last-occurrence constraint.
+
+### Sauce e route real
+
+`monthWeavingAnswerRingFromSauce` construi li ring ex bowl 4 / seal 32 del structure sauce semantic reparat de Patch 20. `LegacyMonthWeavingAdapter` executa li helper old, e `Discovery24MonthWeavingHandler` veni pos li chain complet til `MonthLengthVirtualPatchWrapper`. Li longores de Patch 23 es usat quam multiplicities exact, e li ghost old deven li resultate current del Discovery. Ti es intentional: un Discovery deve revelar li defect ante que li patch posterior existe.
+
+### Witness EXPECTED_RED
+
+Por `[4,4,4]`, li familie legal test-only have 1301 membres. Un witness del structure sauce selecte rank 216; li intertexe legal esperat es `[1,1,2,1,3,3,1,2,2,2,3,3]`. Li old chooser produce `[3,1,2,3,1,2,3,1,2,3,1,2]`. Chascun monthId appare exactmen quatre vezes, ma month 3 appare ante month 1, ergo li ordre del unesim occurrences es illegal. Du witnesses sauce adicional confirma li sam classe de divergence.
+
+### Limite historic
+
+Null `wantedRank`, null `DPUnrankLegalWeaving` e null `MonthWeavingPatchWrapper` es present. `oldContiguousMonthDayGuess` de Patch 25 es anc absent. Stage 48 resta EXPECTED_RED exclusivmen pro ti scar; li proxim stage mandat es Stage 49 — PATCH 24.

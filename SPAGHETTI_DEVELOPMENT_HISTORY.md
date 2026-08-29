@@ -1040,3 +1040,22 @@ Por li witness de 1000 dies e 16 mensus, li old sample resta 2048 arrays con un 
 Li regression de Discovery 23 es verd nu: it demonstra separatim que li route legacy ancor expone `ALL_WAYS_CONCRETE_ARRAY` e que li route semantic posterior expone `VIRTUAL_EXACT_COUNT_LEXICOGRAPHIC_UNRANK`. Li audit micri compara 43 families / 1999 rows con li enumerator old. Omni regressions precedent passa.
 
 Null code de Patch 24 es present. In particular, `legacyChooseEachDaySeparately` e `DPUnrankLegalWeaving` resta absent; anc `oldContiguousMonthDayGuess` de Patch 25 ne existe. Li proxim stage mandat es Stage 48 — DISCOVERY 24.
+
+
+## Stage 48 — DISCOVERY 24
+
+### Li mensu esset electet un die a un vez
+
+Pos li virtualisation de longores, li proxim scar historic ne tracta li month weaving quam un familie de words complet. `legacyChooseEachDaySeparately` questiona li answer ring separatmen por chascun position del year. Li answer indica un monthId modulo `m`; si su quota ja es consumat, li helper circumrota al proxim monthId con quota restant. Ti procedure conserva li multiset de monthIds, ma it ne imposi li ordre del unesim ni del ultim occurrences.
+
+### Integrare sin correction
+
+`LegacyMonthWeavingAdapter` deriva bowl 4 / seal 32 ex li sam structure sauce semantic quel ja governa li structure. `Discovery24MonthWeavingHandler` exige un `PATCH_23_RESULT`, prende exactmen `patch23SemanticMonthLengths`, executa li helper old e registra ring, longores, ghost e metrics in state invocation-local. In Stage 48, li ghost es intentionalmen anc li current semantic weaving: null detour reparativ es ancor autorisat.
+
+### Divergence observat
+
+Li witness micri `[4,4,4]` have un familie legal de 1301 intertexes. Bowl 4 / seal 32 selecte rank 216 secun li reference JavaScript test-only. Li word legal es `[1,1,2,1,3,3,1,2,2,2,3,3]`; li chooser old produce `[3,1,2,3,1,2,3,1,2,3,1,2]`. Li counts per month resta `[4,4,4]`, ma li unesim occurrence de month 3 veni ante li unesim occurrence de month 1. Li regression nov es ergo intentionalmen red, durante que omni regressions til Patch 23 resta verd.
+
+### Boundary vers Patch 24
+
+Stage 48 ne contene null `wantedRank`, `DPUnrankLegalWeaving` o `MonthWeavingPatchWrapper`. Li correction mandat deve esser un strate posterior in Stage 49, conservante ti chooser die-per-die quam ghost real. Null `oldContiguousMonthDayGuess` de Patch 25 es present.

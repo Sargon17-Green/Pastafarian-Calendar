@@ -319,7 +319,7 @@ group('null textu hebreic o code posterior a Patch 23 contamina production', () 
   }
   const futureTokens = [
     'patchedCounts', 'bowlOrderWithRankBridge',
-    'legacyChooseEachDaySeparately', 'DPUnrankLegalWeaving', 'oldContiguousMonthDayGuess'
+    'DPUnrankLegalWeaving', 'oldContiguousMonthDayGuess'
   ];
   const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
@@ -2084,7 +2084,7 @@ group('Patch 22 conserva li candidate legacy e selecte un partial permutation di
   ok(typeof production.RepeatedNamePatchWrapper === 'function');
   ok(typeof production.historicRepeatedNamesThroughMonsterPath === 'function');
   ok(typeof production.VirtualLegacyList === 'function');
-  ok(!('legacyChooseEachDaySeparately' in production));
+  ok(typeof production.legacyChooseEachDaySeparately === 'function');
 });
 
 group('Discovery 23 conserva li materialisation concret legacy quam scar activ', () => {
@@ -2099,7 +2099,7 @@ group('Discovery 23 conserva li materialisation concret legacy quam scar activ',
   ok(probe.exceededLimit);
   ok(probe.concreteArrayContract);
   ok(typeof production.VirtualLegacyList === 'function');
-  ok(!('legacyChooseEachDaySeparately' in production));
+  ok(typeof production.legacyChooseEachDaySeparately === 'function');
 });
 
 group('Patch 23 furni count exact e itemAt1 lexicografic sin materialisation complet', () => {
@@ -2116,11 +2116,24 @@ group('Patch 23 furni count exact e itemAt1 lexicografic sin materialisation com
   deepEq(huge.itemAt1(1892970349028658514214546085756n), [46,62,31,19,31,123,10,47,108,96,7,97,113,29,74,107]);
   ok(!Array.isArray(huge));
   ok(!('ways' in huge));
-  ok(!('legacyChooseEachDaySeparately' in production));
+  ok(typeof production.legacyChooseEachDaySeparately === 'function');
   ok(!('DPUnrankLegalWeaving' in production));
 });
 
-group('errores de base es explicit e li final function resta absent durant Patch 23', () => {
+group('Discovery 24 conserva li chooser die-per-die legacy quam ghost real', () => {
+  ok(typeof production.wrapMonth === 'function');
+  ok(typeof production.legacyChooseEachDaySeparately === 'function');
+  ok(typeof production.monthWeavingAnswerRingFromSauce === 'function');
+  ok(typeof production.LegacyMonthWeavingAdapter === 'function');
+  ok(typeof production.Discovery24MonthWeavingHandler === 'function');
+  ok(typeof production.discovery24LegacyMonthWeavingThroughMonsterPath === 'function');
+  deepEq(production.legacyChooseEachDaySeparately([2,1], { first: 1n, directionStep: 1n }), [1,2,1]);
+  ok(!('DPUnrankLegalWeaving' in production));
+  ok(!('MonthWeavingPatchWrapper' in production));
+  ok(!('oldContiguousMonthDayGuess' in production));
+});
+
+group('errores de base es explicit e li final function resta absent durant Discovery 24', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -2132,4 +2145,4 @@ group('errores de base es explicit e li final function resta absent durant Patch
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Patch 23.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Discovery 24.');

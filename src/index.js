@@ -615,6 +615,12 @@ class BaseValidationManager {
     }
   }
 
+  requirePatch23Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'PATCH_23_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un liste virtual de longores valid por Discovery 24.');
+    }
+  }
+
   requireStructureSauceResult(result) {
     if (!result || typeof result !== 'object' || !Array.isArray(result.bowls) || result.bowls.length < 7 ||
         !Array.isArray(result.orderAt46Latch) || result.orderAt46Latch.length !== 6) {
@@ -3730,6 +3736,43 @@ function monthLengthAnswerRingFromSauce(sauceResult) {
   return answerRingFromCurrentState(sauceResult.bowls, 3, nextBowl, 31n);
 }
 
+function monthWeavingAnswerRingFromSauce(sauceResult) {
+  if (!sauceResult || !Array.isArray(sauceResult.bowls) || !Array.isArray(sauceResult.orderAt46Latch)) {
+    throw new TypeError('Li intertexe legacy de mensus exige un structure sauce complet.');
+  }
+  const nextBowl = nextBowlFromOrderAt46Latch(sauceResult.orderAt46Latch, 4);
+  return answerRingFromCurrentState(sauceResult.bowls, 4, nextBowl, 32n);
+}
+
+function wrapMonth(j, monthCount) {
+  if (!Number.isInteger(j) || !Number.isInteger(monthCount) || monthCount < 1) {
+    throw new RangeError('wrapMonth exige indices integer e un quantitá positiv de mensus.');
+  }
+  return 1 + Number(regularMod(BigInt(j - 1), BigInt(monthCount)));
+}
+
+function legacyChooseEachDaySeparately(lengths, answerStream) {
+  // Li scar historic fa un election local por chascun die e ne selecte un intertexe complet.
+  if (!Array.isArray(lengths) || lengths.length < 1 ||
+      lengths.some((length) => !Number.isInteger(length) || length < 1)) {
+    throw new RangeError('Li chooser legacy exige longores positiv de mensus.');
+  }
+  const monthCount = lengths.length;
+  const remaining = lengths.slice();
+  const totalDays = lengths.reduce((sum, length) => sum + length, 0);
+  const ghost = [];
+  for (let dayPosition = 0; dayPosition < totalDays; dayPosition += 1) {
+    const answer = ringAnswerAt(answerStream, BigInt(dayPosition));
+    let monthId = 1 + Number(regularMod(answer - 1n, BigInt(monthCount)));
+    while (remaining[monthId - 1] === 0) {
+      monthId = wrapMonth(monthId + 1, monthCount);
+    }
+    ghost.push(monthId);
+    remaining[monthId - 1] -= 1;
+  }
+  return ghost;
+}
+
 class LegacyMonthLengthAllWaysAPI {
   allWays(totalDays, monthCount) {
     return legacyMaterializeMonthLengthWays(totalDays, monthCount);
@@ -3963,6 +4006,56 @@ class MonthLengthVirtualPatchWrapper {
         probeExceededLimit: context.legacyMonthLengthProbeExceededLimit,
         concreteArrayContract: context.legacyMonthLengthConcreteArrayContract
       }
+    };
+  }
+}
+
+class LegacyMonthWeavingAdapter {
+  selectEachDay(sauceResult, monthLengths) {
+    const stream = monthWeavingAnswerRingFromSauce(sauceResult);
+    const ghost = legacyChooseEachDaySeparately(monthLengths, stream);
+    return { stream, ghost };
+  }
+}
+
+class Discovery24MonthWeavingHandler {
+  constructor(validationManager, metricsManager, legacyAdapter) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+    this.legacyAdapter = legacyAdapter;
+  }
+
+  handle(context) {
+    this.validationManager.requirePatch23Result(context);
+    const monthLengths = context.patch23SemanticMonthLengths;
+    if (!Array.isArray(monthLengths) || monthLengths.length < 1 ||
+        monthLengths.some((length) => !Number.isInteger(length) || length < 1)) {
+      throw new BootstrapStageError('Discovery 24 exige li longores semantic de Patch 23.');
+    }
+    const semanticSauce = {
+      bowls: context.patch20SemanticSauceBowls.slice(),
+      orderAt46Latch: context.patch20SemanticOrderAt46Latch.slice()
+    };
+    const selected = this.legacyAdapter.selectEachDay(semanticSauce, monthLengths);
+
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Discovery24MonthWeavingHandler';
+    context.phase = 'DISCOVERY_24_LEGACY_MONTH_CHOSEN_EACH_DAY';
+    context.branchTrace.push('DISCOVERY_24_LEGACY_MONTH_CHOSEN_EACH_DAY');
+    context.legacyMonthWeavingLengths = monthLengths.slice();
+    context.legacyMonthWeavingAnswerStream = { ...selected.stream };
+    context.legacyMonthWeavingGhost = selected.ghost.slice();
+    context.legacyMonthWeavingSemantic = selected.ghost.slice();
+    context.legacyMonthWeavingHelperExecuted = true;
+    context.status = 'DISCOVERY_24_LEGACY_RESULT';
+    this.metricsManager.bump(context, 'discovery24.legacyChooseEachDaySeparately.calls');
+
+    return {
+      monthLengths: monthLengths.slice(),
+      answerStream: { ...selected.stream },
+      ghost: selected.ghost.slice(),
+      monthWeaving: selected.ghost.slice(),
+      helperExecuted: true
     };
   }
 }
@@ -4802,6 +4895,12 @@ class BaseMonsterManager {
       this.validationManager,
       this.metricsManager
     );
+    this.legacyMonthWeavingAdapter = new LegacyMonthWeavingAdapter();
+    this.discovery24MonthWeavingHandler = new Discovery24MonthWeavingHandler(
+      this.validationManager,
+      this.metricsManager,
+      this.legacyMonthWeavingAdapter
+    );
   }
 
   prepare(calculationDay, targetDay) {
@@ -5581,6 +5680,36 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executeDiscovery24MonthWeaving(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  ) {
+    const context = this.prepare(calculationDay, originalTargetDay);
+    try {
+      this.discovery15NegativeGateQuestionHandler.handle(context, signedStep);
+      this.negativeGateQuestionPatchWrapper.repair(context, signedStep);
+      this.yearCandidateCeilingPatchWrapper.repair(context, gates, candidatePairs, selectionStream);
+      this.discovery17Year5000TieHandler.handle(context, calculationDay);
+      this.year5000TiePatchWrapper.repair(context, selectionStream);
+      this.discovery18YearJumpHandler.handle(context, originalTargetDay);
+      this.sequentialYearWalkPatchWrapper.repair(context, originalTargetDay, yearWalkSource);
+      this.yearCacheActionGuardPatchWrapper.repair(context, context.patch18ResolvedYear, calculationDay);
+      const yearFirstDay = context.patch18ResolvedYear.openDay + 1n;
+      this.structureSaucePatchWrapper.repair(context, calculationDay, originalTargetDay, yearFirstDay);
+      this.discovery21CutletPartitionHandler.handle(context, calculationDay, gates);
+      this.cutletPartitionPatchWrapper.repair(context);
+      this.discovery22RepeatedNameHandler.handle(context);
+      this.repeatedNamePatchWrapper.repair(context);
+      this.discovery23MonthLengthMaterializationHandler.handle(context);
+      this.monthLengthVirtualPatchWrapper.repair(context);
+      const result = this.discovery24MonthWeavingHandler.handle(context);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -5893,8 +6022,19 @@ function historicMonthLengthVirtualListThroughMonsterPath(
   );
 }
 
+function discovery24LegacyMonthWeavingThroughMonsterPath(
+  manager, calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+) {
+  if (!(manager instanceof BaseMonsterManager)) {
+    throw new TypeError('Discovery 24 exige un BaseMonsterManager persistent por li chain historic precedent.');
+  }
+  return manager.executeDiscovery24MonthWeaving(
+    calculationDay, originalTargetDay, signedStep, gates, candidatePairs, selectionStream, yearWalkSource
+  );
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 23; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 24; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -5978,6 +6118,8 @@ module.exports = Object.freeze({
   Discovery23MonthLengthMaterializationHandler,
   VirtualLegacyList,
   MonthLengthVirtualPatchWrapper,
+  LegacyMonthWeavingAdapter,
+  Discovery24MonthWeavingHandler,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -6066,6 +6208,9 @@ module.exports = Object.freeze({
   legacyMaterializeMonthLengthWays,
   monthCountAnswerRingFromSauce,
   monthLengthAnswerRingFromSauce,
+  monthWeavingAnswerRingFromSauce,
+  wrapMonth,
+  legacyChooseEachDaySeparately,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -6113,5 +6258,6 @@ module.exports = Object.freeze({
   historicRepeatedNamesThroughMonsterPath,
   discovery23LegacyMonthLengthMaterializationThroughMonsterPath,
   historicMonthLengthVirtualListThroughMonsterPath,
+  discovery24LegacyMonthWeavingThroughMonsterPath,
   calendarDateSpaghetti
 });

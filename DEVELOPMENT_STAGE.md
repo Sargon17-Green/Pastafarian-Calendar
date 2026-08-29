@@ -2,11 +2,11 @@
 
 ```text
 TOTAL_STAGES=55
-CURRENT_STAGE=47
-CURRENT_KIND=PATCH
-CURRENT_PATCH=23
-LAST_COMPLETED_STAGE=47
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=48
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=24
+LAST_COMPLETED_STAGE=48
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -15,19 +15,19 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=JavaScript
 NATURAL_LANGUAGE=Interlingue / Occidental
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus VirtualLegacyList e MonthLengthVirtualPatchWrapper: li concrete all-ways scar de Discovery 23 es executet prim quam diagnostic, poy un backend virtual conta exactmen per DP e furni itemAt1 per unrank lexicografic sin materialisar li familie complet.
+MONSTER_ARCHITECTURE_GROWTH=Li infrastructura e scars precedent, plus monthWeavingAnswerRingFromSauce, wrapMonth, legacyChooseEachDaySeparately, LegacyMonthWeavingAdapter e Discovery24MonthWeavingHandler: li old chooser usa bowl 4 / seal 32 por electer un monthId separatmen por chascun die, conserva multiplicities ma ne selecte un intertexe legal complet.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 ```
 
-Stage 47 es finit quam **PATCH 23** e li repository local es `GREEN`.
+Stage 48 es finit quam **DISCOVERY 24** e li repository local es intentionalmen `EXPECTED_RED`.
 
-`legacyMaterializeMonthLengthWays(totalDays,monthCount)`, `LegacyMonthLengthAllWaysAPI.allWays`, `LegacyMonthLengthAllWaysAPI.probeAllWays` e `Discovery23MonthLengthMaterializationHandler.handle` resta fisicmen sin modification. Li route Patch 23 traversa Discovery 23 realmen ante li correction, ergo li old concrete enumerator/probe resta un scar activ e su contract `ALL_WAYS_CONCRETE_ARRAY` resta observabil quam diagnostic invocation-local.
+`legacyChooseEachDaySeparately(lengths,answerStream)` es li scar historic nov. Por chascun position del year it lee `ringAnswerAt`, reduce li answer modulo li quantitá de mensus, e si ti monthId ja ne have capacitate it avansa circularmen per `wrapMonth` til un monthId con occurrence restant. Talmen li helper termina e conserva exactmen li multiplicities, ma it ne enforce li ordre del unesim ni del ultim occurrences.
 
-`VirtualLegacyList(totalDays,monthCount)` ne materialisa null row por construir li familie. It construi un table DP exact con arithmetic `BigInt`; `count()` retorna li count complet, e `itemAt1(rank1)` prova longores 4..123 in órdine ascendent e subtrae counts de suffixes, talmen que su órdine es exactmen li órdine lexicografic del materializer legacy.
+`LegacyMonthWeavingAdapter` construi li answer ring ex li structure sauce semantic de Patch 20 con bowl 4 / seal 32. `Discovery24MonthWeavingHandler` es conectet pos `MonthLengthVirtualPatchWrapper`, usa li longores semantic de Patch 23 e executa li chooser old realmen. Li ghost deven anc li current semantic month weaving de ti Discovery; null correction es present.
 
-`MonthLengthVirtualPatchWrapper` usa li sam answer ring de bowl 3 / seal 31 conservat per Discovery 23, selecte li rank contra li count virtual e rende li row semantic de longores. Por li witness de 1000 dies e 16 mensus, li count exact es `5239332298078798668173613753510`, li rank selectet es `1892970349028658514214546085756`, e li row semantic es `[46,62,31,19,31,123,10,47,108,96,7,97,113,29,74,107]`.
+Li witness micri usa longores `[4,4,4]`. Li familie legal have 1301 membres; li ring selecte rank 216 e li expectation legal es `[1,1,2,1,3,3,1,2,2,2,3,3]`, durante que li ghost die-per-die es `[3,1,2,3,1,2,3,1,2,3,1,2]`. Li ghost conserva quatre occurrences de chascun monthId ma viola ja li ordre del unesim occurrences. Ti divergence es li unic EXPECTED_RED nov.
 
-Li audit micri compara 43 families e 1999 membres contra li concrete materializer e confirma paritá exact del órdine. `legacyChooseEachDaySeparately`, `DPUnrankLegalWeaving`, `oldContiguousMonthDayGuess` e omni code de Patch 24/25 resta absent.
+`wantedRank`, `DPUnrankLegalWeaving`, `MonthWeavingPatchWrapper` e `oldContiguousMonthDayGuess` resta absent. Null code de Patch 24 o Patch 25 es anticipat.

@@ -9,7 +9,7 @@ assert.equal(typeof production.partialPermutationUnrank, 'function');
 assert.equal(typeof production.RepeatedNamePatchWrapper, 'function');
 assert.equal(typeof production.historicRepeatedNamesThroughMonsterPath, 'function');
 assert.equal(typeof production.VirtualLegacyList, 'function');
-assert.equal('legacyChooseEachDaySeparately' in production, false);
+assert.equal(typeof production.legacyChooseEachDaySeparately, 'function');
 assert.equal('oldContiguousMonthDayGuess' in production, false);
 
 const legacyFamilySource = production.legacyNameRowWithRepeats.toString();

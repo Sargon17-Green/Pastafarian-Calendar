@@ -11,7 +11,7 @@ assert.equal(typeof production.discovery23LegacyMonthLengthMaterializationThroug
 assert.equal(typeof production.VirtualLegacyList, 'function');
 assert.equal(typeof production.MonthLengthVirtualPatchWrapper, 'function');
 assert.equal(typeof production.historicMonthLengthVirtualListThroughMonsterPath, 'function');
-assert.equal('legacyChooseEachDaySeparately' in production, false);
+assert.equal(typeof production.legacyChooseEachDaySeparately, 'function');
 assert.equal('DPUnrankLegalWeaving' in production, false);
 assert.equal('oldContiguousMonthDayGuess' in production, false);
 
