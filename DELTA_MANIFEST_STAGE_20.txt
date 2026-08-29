@@ -1,0 +1,28 @@
+Aşama 20/55 — DISCOVERY 10
+
+Bu paket yalnızca Aşama 20 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_bowl_updates.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_20_discovery_10.py
+artifacts/stage-20/BASELINE_STAGE_19_GREEN.txt
+artifacts/stage-20/PREVIOUS_REGRESSIONS.txt
+artifacts/stage-20/FULL_SUITE_EXPECTED_RED.txt
+DELTA_MANIFEST_STAGE_20.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 19 baseline: GREEN
+Değişiklik sonrası Aşama 1–19 regresyonları: PASS
+Beklenen depo durumu: EXPECTED_RED
+Yeni kusur: bowl update loop aynı working storage'dan okuyup anında aynı storage'a yazıyor
+PATCH 10 snapshot/ayrı write-buffer/toplu commit: YOK
+Aşama 15 sentinel: KORUNDU
+Aşama 17 permutation patch: KORUNDU
+Aşama 19 bowlAlias patch: KORUNDU
+11–26 gelecek kusur/yama kodu: YOK

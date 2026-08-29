@@ -183,7 +183,37 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
             "legacy.pour.probes",
         )
         local_ctx.status = "ESKİ_SABİT_KÂSE_POURS_HAZIR"
-        local_ctx.phase = "AŞAMA_18_BEKLEME"
+        local_ctx.phase = "ESKİ_YERİNDE_KÂSE_GÜNCELLEME"
+
+    def legacy_bowl_update_handler(local_ctx: MonsterContext) -> None:
+        manager.validator.require_context_owned(
+            local_ctx,
+            calculation_day,
+            target_day,
+        )
+
+        if local_ctx.legacy_initial_bowls is None:
+            raise RuntimeError(
+                "Başlangıç kâseleri yerinde güncellemeden önce hazır olmalıdır"
+            )
+        if local_ctx.legacy_pour_last_values is None:
+            raise RuntimeError(
+                "Pour değerleri yerinde güncellemeden önce hazır olmalıdır"
+            )
+
+        manager.legacy_bowl_updates.call(
+            local_ctx,
+            1,
+            local_ctx.legacy_initial_bowls,
+            local_ctx.legacy_pour_last_values,
+        )
+
+        manager.metrics.bump(
+            local_ctx,
+            "legacy.bowlUpdate.probes",
+        )
+        local_ctx.status = "ESKİ_YERİNDE_KÂSE_GÜNCELLEME_HAZIR"
+        local_ctx.phase = "AŞAMA_20_BEKLEME"
 
     manager.dispatcher.register("GİRİŞ", entry_handler)
     manager.dispatcher.register("ESKİ_KALAN", legacy_remainder_handler)
@@ -195,6 +225,8 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.register("ESKİ_GÖRÜNÜR_DAMLALAR", legacy_visible_drop_handler)
     manager.dispatcher.register("ESKİ_PERMÜTASYON_SIRALARI", legacy_permutation_handler)
     manager.dispatcher.register("ESKİ_SABİT_KÂSE_POURS", legacy_pour_handler)
+    manager.dispatcher.register("ESKİ_YERİNDE_KÂSE_GÜNCELLEME", legacy_bowl_update_handler)
+    manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
     manager.dispatcher.dispatch(ctx)
@@ -207,5 +239,5 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     manager.dispatcher.dispatch(ctx)
 
     raise StageNotIntegratedError(
-        "On dokuzuncu aşamada üretim takvim yolu henüz birleştirilmedi"
+        "Yirminci aşamada üretim takvim yolu henüz birleştirilmedi"
     )

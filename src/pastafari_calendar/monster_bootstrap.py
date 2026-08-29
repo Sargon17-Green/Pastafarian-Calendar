@@ -10,6 +10,7 @@ from .legacy_prior import LegacyPriorAdapter
 from .legacy_visible_grinds import LegacyVisibleDropBuilderAdapter
 from .legacy_permutation import LegacyPermutationOrderAdapter
 from .legacy_pours import LegacyPourAdapter
+from .legacy_bowl_updates import LegacyBowlUpdateAdapter
 
 
 class MonsterError(RuntimeError):
@@ -122,6 +123,10 @@ class MonsterContext:
     patch09_legacy_fixed_pours: tuple[int, ...] | None = None
     patch09_corrected_pours: tuple[int, ...] | None = None
     patch09_applied: bool = False
+    legacy_bowl_update_last_drop_index: int | None = None
+    legacy_bowl_update_last_input: tuple[int, ...] | None = None
+    legacy_bowl_update_last_pours: tuple[int, ...] | None = None
+    legacy_bowl_update_last_result: tuple[int, ...] | None = None
 
 
 class BaseMetrics:
@@ -183,3 +188,4 @@ class MonsterManager:
         self.legacy_visible_drops = LegacyVisibleDropBuilderAdapter()
         self.legacy_permutation = LegacyPermutationOrderAdapter()
         self.legacy_pours = LegacyPourAdapter()
+        self.legacy_bowl_updates = LegacyBowlUpdateAdapter()

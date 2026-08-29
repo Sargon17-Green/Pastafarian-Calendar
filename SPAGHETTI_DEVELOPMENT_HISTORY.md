@@ -913,3 +913,58 @@ Invocation bağlamında son drop indeksi, bowlAlias tuple'ı, wrong fixed-bowl p
 46 visible drop için isolated pour tuple'ları test-only normatif position-based formülle eşleşir.
 
 Bowl stir/update henüz uygulanmaz. `vaultOld`, `pending` ve in-place contamination olan Patch 10 kodu eklenmemiştir.
+
+
+## Aşama 20 — Keşif 10: kâse güncellemelerini yerinde yaparak sonraki okumaları kirletmek
+
+### Ne sanıldı
+
+Legacy bowl update loop altı position'ı sırayla yürütür.
+
+Her position için current bowl, previous bowl ve next bowl okunur; yeni değer hesaplanır ve aynı bowl storage'a hemen yazılır.
+
+Legacy helper:
+
+```text
+legacyInPlaceBowlUpdateWrong(...)
+```
+
+tek bir `working` bowl listesi kullanır.
+
+### Ne keşfedildi
+
+Birinci position kendi yazısından önce yalnızca eski değerleri görür.
+
+Fakat birinci position'ın bowl'u yazıldıktan sonra ikinci ve sonraki position'lar komşuluk ilişkisine bağlı olarak bu yeni değeri okuyabilir.
+
+Bu nedenle altı bowl aynı logical step'e ait olmasına rağmen read set'i tek bir eski snapshot'tan gelmez.
+
+Sonuç order-dependent contamination taşır.
+
+### Normatif karşılaştırma
+
+Test-only normatif one-drop formülü her read'i aynı `old` bowl tuple'ından yapar ve altı sonucu ayrı `next_bowls` içine yazar.
+
+Discovery path ise aynı bowl listesine anında yazar.
+
+Drop 1 fixture'ında position 1 henüz contamination görmediği için normatif değerle eşleşir; sonraki positions arasında ayrışma oluşur.
+
+Normatif regresyon position 2, 3 ve 6 bowl sonuçlarını karşılaştırır ve üç alt örnek bilinçli olarak kırmızıdır.
+
+### Gerçek production yolu
+
+Stage 19 corrected pour probe'dan sonra gerçek `calendar_date_spaghetti` state-machine yolu drop 1 için `LegacyBowlUpdateAdapter` çağırır.
+
+Böylece wrong in-place helper gerçekten production path üzerindedir.
+
+Stage 20 yalnızca tek-drop bowl update scar'ını kurar.
+
+46-drop full bowl pass, order-at-46 latch ve post-stir henüz başlatılmaz; böylece Patch 11 erkenden eklenmez.
+
+### Bu aşamada eklenen canavar katmanı
+
+Invocation bağlamında son drop index, input bowl tuple, pour tuple ve yanlış in-place result tutulur.
+
+Bu aşamada snapshot bowl clone, ayrı write buffer veya altı position sonrası toplu commit yoktur.
+
+Stage 15 sentinel, Stage 17 permutation patch ve Stage 19 bowlAlias patch aynen korunur.
