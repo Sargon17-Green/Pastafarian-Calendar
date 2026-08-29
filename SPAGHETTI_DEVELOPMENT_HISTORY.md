@@ -172,3 +172,22 @@ Un `LegacyStoneMutationAdapter` e un `Discovery04StoneMutationHandler` ha esset 
 
 Li adapter apella exactmen `mutateStonesWrong`; li handler ne recomputa null valore, ne consulta li oracle e ne corrige li mutation. Li copie de intrada al statu de labor servi solmen por ownership del invocation e ne es usat quam snapshot semantic por recalcular li transition. Ergo li divergentie nov es precis li defect sequential mandat de Discovery 04.
 
+
+
+## Stage 9 — PATCH 04
+
+### Quo esset circumit
+
+`mutateStonesWrong` ne esset modificat. Li nov `stonePatch(index, state)` crea un snapshot `old` del statu ante li transition. It poy executa realmen `mutateStonesWrong(index, clone(state))`; ti call legacy ne es deletet ni convertet a diagnostic mort. Pos li call, li patch superscri `w`, `b`, `s`, `m` e `r` del object garbage con li quin formules original, ma chascun lecture veni exclusivmen del snapshot `old`.
+
+### Pro quo li patch es normativmen equivalent
+
+Li transition normativ defini omni quin componentes ex li sam row precedent. Li snapshot old congela exactmen ti row. Chascun overwrite usa `savePatch`, quel ja es equivalent a `SAVE`, e usa li coefficient e dependenties normativ por su componente. Ergo li valor mutat sequentialmen per li call legacy es completmen neutralisat ante return, durant que li call historic resta real. `getStoneTableThroughLegacyBuilder()` aplica ti transition desde li row inicial e rende 46 rows exactmen in li órdine normativ.
+
+### Crescentie monster in ti stage
+
+Un `Patch04StoneWrapper` ha esset insertet pos `Discovery04StoneMutationHandler`. Li context conserva li index, li snapshot old, un copie del garbage legacy ante overwrite, un flag quel registra li conservation del call legacy e li output reparat. In addition, un builder separat `getStoneTableThroughLegacyBuilder` usa `stonePatch` iterativmen, creante un via production quel preserva li scar a chascun transition.
+
+### Pro quo li strat nov ne altera semantics ultra li patch
+
+Li wrapper ne consulta li oracle e ne usa metrics o diagnostics por decisiones. Li source state es validat ma ne mutat; li call legacy opera sur clones. Solmen li quin overwrites mandad de Patch 04 decide li output. `mutateStonesWrong` resta directmen invocabil e demonstra ancora su divergentie. Null storage retrograd de hidden drops, `hiddenByNearness` o altri code de Patch 05 es present.

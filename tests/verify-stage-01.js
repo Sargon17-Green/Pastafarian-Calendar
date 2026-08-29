@@ -310,7 +310,7 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('null textu hebreic o code posterior a Discovery 04 contamina production', () => {
+group('null textu hebreic o code posterior a Patch 04 contamina production', () => {
   const root = path.join(__dirname, '..');
   const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
   for (const file of textFiles) {
@@ -318,8 +318,7 @@ group('null textu hebreic o code posterior a Discovery 04 contamina production',
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
   const futureTokens = [
-    'patchedCounts', 'stonePatch', 'Patch04StoneWrapper', 'getStoneTableThroughLegacyBuilder',
-    'hiddenByNearness', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
+    'patchedCounts', 'hiddenByNearness', 'legacyPrior', 'GRIND_TABLE_WITH_SENTINEL', 'oldPermutationUnrank0',
     'bowlAlias', 'vaultOld', 'orderAt46Latch', 'oldNextBowlFixedName', 'biasedLegacyPick',
     'wideDetour', 'oldGateQuestionDay', 'LEGACY_YEAR_MAX', 'REAL_YEAR_MAX_PATCH',
     'oldJumpGuess', 'LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER', 'oldStructureSauce',
@@ -843,7 +842,33 @@ group('Discovery 04 conserva li mutation sequential in-place e su divergentie pr
   );
 });
 
-group('errores de base es explicit e li final function resta absent durant Discovery 04', () => {
+group('Patch 04 conserva li call legacy ma li builder usa snapshot simultan por omni 46 rows', () => {
+  const f = o.FOUNDATION_DAY;
+  const start = { w: 17n, b: 29n, s: 43n, m: 71n, r: 101n };
+  const legacy = production.discovery04LegacyStoneMutationThroughMonsterPath(f, f, 2n, start);
+  deepEq(
+    [legacy.result.w, legacy.result.b, legacy.result.s, legacy.result.m, legacy.result.r],
+    [378n, 1434n, 3780n, 9932n, 25047n]
+  );
+  const patched = production.historicStoneMutationThroughMonsterPath(f, f, 2n, start);
+  deepEq(
+    [patched.result.w, patched.result.b, patched.result.s, patched.result.m, patched.result.r],
+    o.STONES[1]
+  );
+  deepEq(patched.context.patch04LegacyGarbageBeforeOverwrite, {
+    w: 378n, b: 1434n, s: 3780n, m: 9932n, r: 25047n
+  });
+  eq(patched.context.patch04LegacyCallPreserved, true);
+  eq(patched.context.currentHandler, 'Patch04StoneWrapper');
+  eq(patched.context.status, 'PATCH_04_RESULT');
+  const table = production.getStoneTableThroughLegacyBuilder();
+  eq(table.length, 46);
+  for (let i = 0; i < table.length; i += 1) {
+    deepEq([table[i].w, table[i].b, table[i].s, table[i].m, table[i].r], o.STONES[i]);
+  }
+});
+
+group('errores de base es explicit e li final function resta absent durant Patch 04', () => {
   let captured = null;
   try {
     production.createBootstrapContext(1, 2n);
@@ -855,4 +880,4 @@ group('errores de base es explicit e li final function resta absent durant Disco
   throws(() => production.calendarDateSpaghetti(1n, 1n), production.BootstrapStageError);
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in Discovery 04 ante li regression rubi.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa in Patch 04.');

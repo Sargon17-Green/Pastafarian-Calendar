@@ -52,6 +52,11 @@ class BaseMonsterContext {
     this.legacyStoneWorkingState = null;
     this.legacyStoneOutput = null;
     this.legacyStoneReturnedSameObject = false;
+    this.patch04Index = null;
+    this.patch04OldSnapshot = null;
+    this.patch04LegacyGarbageBeforeOverwrite = null;
+    this.patch04Output = null;
+    this.patch04LegacyCallPreserved = false;
   }
 }
 
@@ -102,6 +107,12 @@ class BaseValidationManager {
   requireDiscovery03Result(context) {
     if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_03_LEGACY_RESULT') {
       throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 03.');
+    }
+  }
+
+  requireDiscovery04Result(context) {
+    if (!(context instanceof BaseMonsterContext) || context.status !== 'DISCOVERY_04_LEGACY_RESULT') {
+      throw new BootstrapStageError('Li context ne contene un resultate legacy valid por Patch 04.');
     }
   }
 }
@@ -211,6 +222,34 @@ function mutateStonesWrong(index, state) {
   state.m = savePatch(state.m * state.m + 11n * state.r + state.s);
   state.r = savePatch(state.r * state.r + 13n * state.w + state.m);
   return state;
+}
+
+function cloneStoneState(state) {
+  return { w: state.w, b: state.b, s: state.s, m: state.m, r: state.r };
+}
+
+function stonePatch(index, state) {
+  const old = cloneStoneState(state);
+  // Li call legacy resta real e intentional; su resultate es poy totalmen superscrit ex li snapshot old.
+  const garbage = mutateStonesWrong(index, cloneStoneState(state));
+  garbage.w = savePatch(old.w * old.w + 3n * old.b + index);
+  garbage.b = savePatch(old.b * old.b + 5n * old.s + old.w);
+  garbage.s = savePatch(old.s * old.s + 7n * old.m + old.b);
+  garbage.m = savePatch(old.m * old.m + 11n * old.r + old.s);
+  garbage.r = savePatch(old.r * old.r + 13n * old.w + old.m);
+  return garbage;
+}
+
+function getStoneTableThroughLegacyBuilder() {
+  let state = { w: 17n, b: 29n, s: 43n, m: 71n, r: 101n };
+  const table = [cloneStoneState(state)];
+  let index = 2n;
+  while (index <= 46n) {
+    state = stonePatch(index, state);
+    table.push(cloneStoneState(state));
+    index += 1n;
+  }
+  return table;
 }
 
 class LegacyRemainderAdapter {
@@ -417,6 +456,31 @@ class Discovery04StoneMutationHandler {
   }
 }
 
+class Patch04StoneWrapper {
+  constructor(validationManager, metricsManager) {
+    this.validationManager = validationManager;
+    this.metricsManager = metricsManager;
+  }
+
+  repair(context, index, sourceState) {
+    this.validationManager.requireDiscovery04Result(context);
+    this.validationManager.requireExactInteger(index);
+    this.validationManager.requireStoneState(sourceState);
+    context.previousHandler = context.currentHandler;
+    context.currentHandler = 'Patch04StoneWrapper';
+    context.phase = 'PATCH_04_SNAPSHOT_OVERWRITE';
+    context.branchTrace.push('PATCH_04_STONE_SNAPSHOT_OVERWRITE');
+    context.patch04Index = index;
+    context.patch04OldSnapshot = cloneStoneState(sourceState);
+    context.patch04LegacyGarbageBeforeOverwrite = cloneStoneState(context.legacyStoneOutput);
+    context.patch04LegacyCallPreserved = true;
+    context.patch04Output = stonePatch(index, sourceState);
+    context.status = 'PATCH_04_RESULT';
+    this.metricsManager.bump(context, 'patch04.stoneSnapshot.calls');
+    return context.patch04Output;
+  }
+}
+
 class BaseMonsterManager {
   constructor() {
     this.validationManager = new BaseValidationManager();
@@ -450,6 +514,7 @@ class BaseMonsterManager {
       this.metricsManager,
       this.legacyStoneMutationAdapter
     );
+    this.patch04StoneWrapper = new Patch04StoneWrapper(this.validationManager, this.metricsManager);
   }
 
   prepare(calculationDay, targetDay) {
@@ -549,6 +614,19 @@ class BaseMonsterManager {
       throw context.lastError;
     }
   }
+
+  executePatch04StoneMutation(calculationDay, targetDay, index, stoneState) {
+    const context = this.prepare(calculationDay, targetDay);
+    try {
+      this.discovery04StoneMutationHandler.handle(context, index, stoneState);
+      const result = this.patch04StoneWrapper.repair(context, index, stoneState);
+      return { result, context };
+    } catch (error) {
+      context.status = 'FAILED';
+      context.lastError = this.errorWrapper.wrap(error, context.phase);
+      throw context.lastError;
+    }
+  }
 }
 
 function createBootstrapContext(calculationDay, targetDay) {
@@ -583,8 +661,12 @@ function discovery04LegacyStoneMutationThroughMonsterPath(calculationDay, target
   return new BaseMonsterManager().executeDiscovery04StoneMutation(calculationDay, targetDay, index, stoneState);
 }
 
+function historicStoneMutationThroughMonsterPath(calculationDay, targetDay, index, stoneState) {
+  return new BaseMonsterManager().executePatch04StoneMutation(calculationDay, targetDay, index, stoneState);
+}
+
 function calendarDateSpaghetti() {
-  throw new BootstrapStageError('Li function final ne es ancor implementat in Discovery 04; li progression historic deve restar intact.');
+  throw new BootstrapStageError('Li function final ne es ancor implementat in Patch 04; li progression historic deve restar intact.');
 }
 
 module.exports = Object.freeze({
@@ -609,6 +691,7 @@ module.exports = Object.freeze({
   Patch03DistanceWrapper,
   LegacyStoneMutationAdapter,
   Discovery04StoneMutationHandler,
+  Patch04StoneWrapper,
   BaseMonsterManager,
   regularMod,
   oldRemainder,
@@ -618,6 +701,9 @@ module.exports = Object.freeze({
   oldDistance,
   distanceWithChronologyDetour,
   mutateStonesWrong,
+  cloneStoneState,
+  stonePatch,
+  getStoneTableThroughLegacyBuilder,
   createBootstrapContext,
   discovery01LegacyRemainderThroughMonsterPath,
   historicRemainderThroughMonsterPath,
@@ -626,5 +712,6 @@ module.exports = Object.freeze({
   discovery03LegacyDistanceThroughMonsterPath,
   historicDistanceThroughMonsterPath,
   discovery04LegacyStoneMutationThroughMonsterPath,
+  historicStoneMutationThroughMonsterPath,
   calendarDateSpaghetti
 });

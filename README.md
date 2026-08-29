@@ -4,9 +4,9 @@ Ti directoria es un linea de implementation completmen independent. It ha esset 
 
 ## Statu actual
 
-Li linea es in **Stage 8 de 55: DISCOVERY 04**. Li scars de Patch 01, Patch 02 e Patch 03 resta intact e testabil. Li nov defect historic es `mutateStonesWrong(index, state)`: it muta li quin stones sequentialmen in-place e li passus posterior usa immediatmen valores ja mutat.
+Li linea es in **Stage 9 de 55: PATCH 04**. Li scars de Patch 01, Patch 02 e Patch 03 resta intact e testabil. `mutateStonesWrong(index, state)` anc resta intact quam li mutation sequential in-place decovrit in Stage 8.
 
-Li path real passa per `LegacyStoneMutationAdapter` e `Discovery04StoneMutationHandler`. Li handler conserva li valores de intrada por diagnostics, crea un statu de labor proprietari al invocation e passa ti object al legacy. Li legacy rende li sam object quel it mutat. Null `stonePatch`, null snapshot normativ e null code de Patch 04 es present. Li repository es intentionalmen **EXPECTED_RED** solmen por li nov regression de Discovery 04.
+Li correction historic nov es `stonePatch(index, state)`: it prende un snapshot `old`, voca realmen `mutateStonesWrong` sur un clone e conserva ti call legacy, ma poy superscri omni quin outputs con formules quel lege exclusivmen `old`. `getStoneTableThroughLegacyBuilder()` usa ti route por construir li 46 stones. Un `Patch04StoneWrapper` es insertet pos `Discovery04StoneMutationHandler`, e li context conserva li garbage legacy ante overwrite e li resultate reparat separatmen. Li repository es **GREEN**.
 
 Li function final `calendarDateSpaghetti` resta intentionalmen ne implementat; null defect de stage posterior posse aparir ante su stage historic.
 
@@ -26,25 +26,25 @@ Omni calcul normativ e historic numeric usa `BigInt`. Null floating-point es usa
 
 ## Tests
 
-Omni regressions precedent, includente Patch 03, deve restar verd:
+Omni regressions precedent, includente li scar de Discovery 04, deve restar verd:
 
 ```text
 npm run test:previous
 ```
 
-Li commande principal es intentionalmen rubi in Discovery 04:
+Li commande principal deve esser verd in Patch 04:
 
 ```text
 npm test
 ```
 
-Por executar solmen li regression nov:
+Por executar solmen li patch nov:
 
 ```text
-npm run test:discovery-04
+npm run test:patch-04
 ```
 
-Por li prim transition de stones, li legacy rende `[378,1434,3780,9932,25047]`, durante que li transition simultan normativ rende `[378,1073,2375,6195,10493]`. Li prim stone coincide pro que it es calculat ante quelcunc contamination; li altri quar demonstra li dependentie sequential intra li sam passu.
+Por li prim transition, li legacy continua rendre `[378,1434,3780,9932,25047]`, ma `stonePatch` rende `[378,1073,2375,6195,10493]`. Li builder reparat concorda row-per-row con omni 46 stones del reference local test-only.
 
 ## Independentie
 
