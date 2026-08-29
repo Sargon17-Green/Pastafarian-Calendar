@@ -1,0 +1,11 @@
+Aşama 55 production kimlik denetimi
+
+Aşama 54 `src/` ile Aşama 55 `src/` dosya listesi:
+AYNI
+
+Her production dosyasının SHA-256 içeriği:
+AYNI
+
+Sonuç:
+PRODUCTION_BYTE_IDENTICAL_TO_STAGE_54=YES
+PRODUCTION_CHANGED_IN_STAGE_55=NO
