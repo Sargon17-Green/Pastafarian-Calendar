@@ -106,20 +106,27 @@ class Stage12Discovery06Tests(unittest.TestCase):
             101,
         )
 
-    def test_missing_hidden_history_leaves_legacy_state_on_nonpositive_slot(self):
-        ctx = MonsterContext(
-            FOUNDATION_DAY,
-            FOUNDATION_DAY,
+    def test_nonpositive_slot_keeps_legacy_coordinates_and_uses_hidden_history(self):
+        calculation_day = FOUNDATION_DAY
+        target_day = FOUNDATION_DAY + 3
+        ctx = _ready_context(
+            calculation_day,
+            target_day,
         )
         adapter = LegacyPriorAdapter()
-
-        with self.assertRaises(KeyError):
-            adapter.call(
-                ctx,
-                {},
-                1,
-                1,
+        normative_hidden = build_hidden_drops(
+            work_counts(
+                calculation_day,
+                target_day,
             )
+        )
+
+        value = adapter.call(
+            ctx,
+            {},
+            1,
+            1,
+        )
 
         self.assertEqual(
             ctx.legacy_prior_i,
@@ -133,8 +140,13 @@ class Stage12Discovery06Tests(unittest.TestCase):
             ctx.legacy_prior_slot,
             0,
         )
-        self.assertIsNone(
+        self.assertEqual(
             ctx.legacy_prior_value,
+            normative_hidden[1],
+        )
+        self.assertEqual(
+            value,
+            normative_hidden[1],
         )
 
     def test_current_prior_path_diverges_when_history_should_come_from_hidden(self):

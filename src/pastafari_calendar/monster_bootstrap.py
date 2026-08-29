@@ -83,6 +83,11 @@ class MonsterContext:
     legacy_prior_slot: int | None = None
     legacy_prior_value: int | None = None
     legacy_prior_probe_value: int | None = None
+    patch06_slot: int | None = None
+    patch06_used_hidden: bool = False
+    patch06_hidden_k: int | None = None
+    patch06_value: int | None = None
+    patch06_applied: bool = False
 
 
 class BaseMetrics:

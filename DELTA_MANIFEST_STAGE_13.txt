@@ -1,0 +1,26 @@
+Aşama 13/55 — PATCH 06
+
+Bu paket yalnızca Aşama 13 farkını içerir.
+HANDOFF dosyası pakete dahil değildir.
+
+Değiştirilen veya eklenen dosyalar:
+DEVELOPMENT_STAGE.md
+README.md
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+src/pastafari_calendar/calendar.py
+src/pastafari_calendar/legacy_prior.py
+src/pastafari_calendar/monster_bootstrap.py
+tests/test_stage_12_discovery_06.py
+tests/test_stage_13_patch_06.py
+artifacts/stage-13/BASELINE_STAGE_12_EXPECTED_RED.txt
+artifacts/stage-13/FULL_SUITE_GREEN.txt
+DELTA_MANIFEST_STAGE_13.txt
+
+Silinen dosya yoktur.
+Başlangıç Aşama 12 baseline: EXPECTED_RED
+Beklenen depo durumu: GREEN
+Aşama 12 normatif regresyonu: GÖVDE DEĞİŞMEDEN PASS
+legacyPrior visible-only tarihsel kusuru: KORUNDU
+priorPatch slot>=1 legacy / slot<=0 hidden fallback: EKLENDİ
+visible branch hidden storage gerektirmez
+07–26 gelecek kusur/yama kodu: YOK

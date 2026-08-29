@@ -456,3 +456,63 @@ Yeni normatif regresyon adapter yolunu `slot=0`, `slot=-2` ve `slot=-6` için te
 Gerçek state-machine probe yalnızca valid görünür slotu kullanarak eski fonksiyonun gerçek üretim zincirinde çağrıldığını kanıtlar; hidden geçmişinin yanlışlığı yeni regresyonda gerçek adapter üzerinden ölçülür.
 
 Bu aşamada `priorPatch` yoktur. `slot<=0` için `hiddenK=1-slot` hesabı yapılmaz ve `hiddenByNearness` çağrılmaz. Grind-table sentinel veya visible-drop grind hesapları da başlatılmamıştır.
+
+
+## Aşama 13 — Yama 06: nonpositive history slotlarını hidden geçmişe bağlamak
+
+### Ne aşıldı
+
+`legacyPrior` değiştirilmedi:
+
+```text
+legacyPrior(dropStore, i, back)
+    -> dropStore[i-back]
+```
+
+Pozitif görünür history slotlarında bu eski yol hâlâ gerçek çağrı zincirinin parçasıdır ve hidden storage gerektirmez.
+
+Düzeltme ayrı `priorPatch` katmanındadır:
+
+```text
+slot = i - back
+
+if slot >= 1:
+    return legacyPrior(dropStore, i, back)
+
+hiddenK = 1 - slot
+return hiddenByNearness(legacyHidden, hiddenK)
+```
+
+### Neden normatif olarak eşdeğer
+
+Visible timeline'ın ilk elemanından geriye doğru sayıldığında:
+
+```text
+slot 0  -> hidden1
+slot -1 -> hidden2
+slot -2 -> hidden3
+...
+slot -6 -> hidden7
+```
+
+Bu ilişki doğrudan `hiddenK = 1 - slot` eşitliğidir.
+
+`hiddenByNearness`, backward physical hidden storage'ı normatif near-ness değerine çevirdiği için nonpositive branch doğru hidden geçmişi bulur.
+
+Pozitif branch ise hidden storage'a hiç ihtiyaç duymadan eski `legacyPrior` çağrısını gerçekten korur.
+
+### Ne korundu
+
+Aşama 12'nin normatif kırmızı regresyonunun gövdesi byte-for-byte değiştirilmedi ve yalnızca `priorPatch` sayesinde yeşile döndü.
+
+`legacyPrior` fiziksel olarak hidden storage bilmeden kalır.
+
+Discovery aşamasındaki temporary `KeyError` state testi PATCH sonrası gerçekliği yansıtacak biçimde güncellendi; normatif regresyona dokunulmadı.
+
+### Bu aşamada eklenen canavar katmanı
+
+`PriorPatchWrapper`, invocation bağlamında hesaplanan slotu, hidden branch kullanımını, varsa hiddenK değerini ve patched sonucu tutar.
+
+Visible branch'in hidden storage istememesi ayrıca regression ile dondurulmuştur.
+
+Logs, metrics ve diagnostics history sonucuna girdi değildir. Grind-table sentinel veya visible-drop grind hesapları hâlâ başlatılmamıştır.
