@@ -2212,6 +2212,22 @@ group('Stage 54 conecta li route final e sauceWithScars sin production oracle', 
   ok(!source.includes("require('../tests/normative-reference')"));
 });
 
+group('Stage 55 confirma completation sin mutation de production e con du shards audit', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  const stage = fs.readFileSync(path.join(__dirname, '..', 'DEVELOPMENT_STAGE.md'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'index.js'), 'utf8');
+  eq(pkg.version, '0.0.55-stage-55');
+  eq(pkg.scripts['test:audit-55-core'], 'node tests/final-audit-55.js');
+  eq(pkg.scripts['test:audit-55-e2e'], 'node tests/final-audit-55-e2e.js');
+  ok(fs.existsSync(path.join(__dirname, 'final-audit-55.js')));
+  ok(fs.existsSync(path.join(__dirname, 'final-audit-55-e2e.js')));
+  ok(fs.existsSync(path.join(__dirname, 'final-audit-55-cross.js')));
+  ok(stage.includes('LAST_COMPLETED_STAGE=55'));
+  ok(stage.includes('SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES'));
+  ok(!source.includes('Stage55'));
+  ok(!source.includes('AUDIT55'));
+});
+
 group('errores de base es explicit e li final function es integrat in Stage 54', () => {
   let captured = null;
   try {
@@ -2224,4 +2240,4 @@ group('errores de base es explicit e li final function es integrat in Stage 54',
   eq(typeof production.calendarDateSpaghetti, 'function');
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Stage 54.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Stage 55.');
