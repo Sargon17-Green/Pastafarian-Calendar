@@ -259,3 +259,18 @@
 ### WHY SAFE
 
 Ⲡalias ⲙⲛ ⲡpatched pour buffers ⲥⲉϣⲟⲟⲡ ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ. Ⲙⲛ global mutable semantic state, cache, environment ⲏ observability value ⲉϥϫⲓ ⲛⲟⲩⲧⲟϣ ⲙⲡpour.
+
+
+## Ⲡⲣⲱⲧⲉ ⲛin-place bowl ⲙⲡⲃⲁⲑⲙⲟⲥ 20
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage20_legacy_inplace_bowl_handler -> monster_bowl_stir_route -> legacyStirOneDropInPlace`
+
+Ⲡ`legacyStirOneDropInPlace` ϫⲓ ⲙⲡorder ⲙⲛ ⲛpour ⲙⲡPatch 09, ⲁⲗⲗⲁ ⲛϥⲥϩⲁⲓ ⲙⲡbowl output ⲙⲡposition ⲛⲓⲙ ⲉϩⲟⲩⲛ ⲉⲡB ⲛⲧⲉⲩⲛⲟⲩ. Ⲛread ⲙⲡ`id`, `prev`, `next` ⲉⲧⲛⲏⲩ ⲙⲙⲛⲛⲥⲱⲟⲩ ⲥⲉϫⲓ ⲙⲡB ⲡⲁⲓ ⲉⲧⲟⲩⲥϩⲁⲓ ⲉⲣⲟϥ.
+
+Ⲡ`monster_stage20_legacy_inplace_bowl_handler` ⲕⲱ ⲙⲡinput bowls ⲛⲧⲉⲡlayer ⲛϣⲟⲣⲡ ⲉⲃⲟⲗ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲛϥⲧⲁⲙⲓⲟ ⲛⲟⲩpointer-vector ⲛworking ⲛⲧⲉⲡinvocation. Ⲡlegacy ⲙⲟⲩⲧⲉ ⲉⲡworking ⲛⲧⲟϥ ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡresult ϩⲙⲡ`MonsterContext`.
+
+Ⲡcontext ⲟⲩⲱϩ ⲛ`CTX_LEGACY_BOWL_STIR_DROP`, `CTX_LEGACY_BOWL_STIR_I`, `CTX_LEGACY_BOWL_STIR_INPUT`, `CTX_LEGACY_BOWL_STIR_STONE_ROW`, `CTX_LEGACY_BOWL_STIR_ORDER`, `CTX_LEGACY_BOWL_STIR_POURS`, `CTX_LEGACY_BOWL_STIR_OUTPUT`, `CTX_LEGACY_BOWL_STIR_SEEN`, `CTX_BOWL_STIR_ROUTE_RESULT` ⲙⲛ `CTX_BOWL_STIR_ROUTE_SEEN`.
+
+Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ. Ⲡfailure ⲙⲡStage 20 ⲟ ⲛⲟⲩfailure ⲉϥⲧⲟϣ ⲙⲡDISCOVERY; ⲛregression ⲛStage 1–19 ⲟⲩⲏϩ ⲉⲩⲟ ⲛ`GREEN`.

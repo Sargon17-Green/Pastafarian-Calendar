@@ -367,3 +367,26 @@
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `installOrderAliases`, `bowlByLegacyPosition`, `patchedPours`, `monster_stage19_bowl_alias_patch_wrapper`, `CTX_PATCHED_POUR_ORDER`, `CTX_BOWL_ALIAS`, `CTX_PATCHED_POUR_RESULT` ⲙⲛ `CTX_BOWL_ALIAS_PATCH_SEEN`.
 
 Ⲡlegacy result ⲙⲛ ⲡpatched result ⲥⲉϣⲟⲟⲡ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ϩⲙⲡ`MonsterContext`. Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ ϩⲙⲡⲉⲓⲡⲁⲧϣ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 20 — DISCOVERY 10
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲟⲩⲛ ϣϭⲟⲙ ⲉⲥϩⲁⲓ ⲙⲡbowl ⲛⲧⲉ position ⲛⲓⲙ ⲉϩⲟⲩⲛ ⲉⲡB ⲛⲟⲩⲱⲧ ⲛⲧⲉⲩⲛⲟⲩ, ϫⲉ ⲡorder ⲛⲧⲟϥ ⲧⲁϫⲣⲏⲩ. Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`legacyStirOneDropInPlace` ⲉϥⲟⲩⲱϩ ⲛⲥⲁ ⲛposition 1..6 ⲁⲩⲱ ⲉϥⲥϩⲁⲓ ⲙⲡresult ⲉⲡB ⲛⲧⲉⲩⲛⲟⲩ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡorder ⲉϥⲧⲁϫⲣⲏⲩ ⲛϥⲧⲁϫⲣⲟ ⲁⲛ ⲙⲡsource ⲙⲡread. Ⲙⲛⲛⲥⲁ ⲧⲣⲉⲡposition ⲛϣⲟⲣⲡ ⲥϩⲁⲓ ⲙⲡB[id], ⲟⲩposition ⲉⲧⲛⲏⲩ ϣϭⲙϭⲟⲙ ⲉϫⲓ ⲙⲡⲉⲓvalue ⲛⲃⲣⲣⲉ ϩⲱⲥ `prev` ⲏ `next`.
+
+Ⲡwitness ⲙⲡ`drop=1`, `i=4` ⲕⲱ ⲙⲡorder ⲉidentity ⲉⲧⲣⲉⲡⲡⲗⲁⲛⲏ ⲙⲡbowlAlias ⲧⲙⲧⲱⲙⲛⲧ ⲙⲛ ⲡⲡⲗⲁⲛⲏ ⲛⲧⲉⲡⲉⲓStage. Ⲡϣⲟⲣⲡ bowl ⲧⲱⲛ; ⲛ5 ⲉⲧⲛⲏⲩ ⲥⲉϣⲟⲃⲉ ⲙⲛ ⲟⲩVALIDATION_COPY ⲉϥϫⲓ ⲛread ⲧⲏⲣⲟⲩ ⲉⲃⲟⲗ ϩⲙⲡoldB ⲛⲟⲩⲱⲧ.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage20_legacy_inplace_bowl_handler -> monster_bowl_stir_route -> legacyStirOneDropInPlace`
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyStirOneDropInPlace`, `monster_bowl_stir_route`, `monster_stage20_legacy_inplace_bowl_handler`, ⲙⲛ state ⲛⲧⲉⲡdrop/index/input bowls/stone row/order/pours/output.
+
+Ⲡhandler ⲧⲁⲙⲓⲟ ⲛⲟⲩworking pointer-vector ⲛⲧⲉⲡinvocation ⲉⲧⲣⲉⲡlegacy ⲧⲙϣⲓⲃⲉ ⲙⲡinput ⲙⲡlayer ⲛϣⲟⲣⲡ. Ⲡworking state ⲛⲧⲟϥ ⲇⲉ ⲟ ⲛsemantic state ⲙⲡDISCOVERY, ⲁⲩⲱ ⲡroute ⲙⲟⲟϣⲉ ⲉⲡlegacy ⲛⲧⲟϥ.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩrepair ϩⲙⲡⲉⲓDISCOVERY.

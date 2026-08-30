@@ -89,7 +89,17 @@
 .equ CTX_BOWL_ALIAS,696
 .equ CTX_PATCHED_POUR_RESULT,704
 .equ CTX_BOWL_ALIAS_PATCH_SEEN,712
-.equ CTX_SIZE,720
+.equ CTX_LEGACY_BOWL_STIR_DROP,720
+.equ CTX_LEGACY_BOWL_STIR_I,728
+.equ CTX_LEGACY_BOWL_STIR_INPUT,736
+.equ CTX_LEGACY_BOWL_STIR_STONE_ROW,744
+.equ CTX_LEGACY_BOWL_STIR_ORDER,752
+.equ CTX_LEGACY_BOWL_STIR_POURS,760
+.equ CTX_LEGACY_BOWL_STIR_OUTPUT,768
+.equ CTX_LEGACY_BOWL_STIR_SEEN,776
+.equ CTX_BOWL_STIR_ROUTE_RESULT,784
+.equ CTX_BOWL_STIR_ROUTE_SEEN,792
+.equ CTX_SIZE,800
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -154,6 +164,9 @@ legacy_fixed_pour_ids:
     .quad 1,2,3
 legacy_pour_factor:
     .quad 3,5,7
+# Ⲡlegacy ⲙⲡⲃⲁⲑⲙⲟⲥ 20 ϫⲓ ⲙⲡⲱⲛⲉ ⲕⲁⲧⲁ ⲡposition.
+legacy_bowl_stir_stone_by_position:
+    .quad 0,1,2,3,4,0
 
 .section .text
 .extern arena_alloc
@@ -230,6 +243,9 @@ legacy_pour_factor:
 .global bowlByLegacyPosition
 .global patchedPours
 .global monster_stage19_bowl_alias_patch_wrapper
+.global legacyStirOneDropInPlace
+.global monster_bowl_stir_route
+.global monster_stage20_legacy_inplace_bowl_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -2696,6 +2712,315 @@ monster_stage18_legacy_fixed_pour_handler:
     ret
 .size monster_stage18_legacy_fixed_pour_handler,.-monster_stage18_legacy_fixed_pour_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 20 — DISCOVERY 10
+# Ⲡlegacy ⲥϩⲁⲓ ⲛⲧⲉⲩⲛⲟⲩ ⲉϩⲟⲩⲛ ⲉⲡB ⲛⲟⲩⲱⲧ.
+# Ⲡposition ⲉⲧⲛⲏⲩ ⲙⲙⲛⲛⲥⲱϥ ϣϭⲙϭⲟⲙ ⲉϫⲓ ⲙⲡⲉⲧϩⲁⲧⲏϥ ⲉⲁⲩϣⲓⲃⲉ ⲙⲙⲟϥ.
+# Ⲙⲛ ⲟⲩⲥⲟⲧⲡ ⲛϣⲟⲣⲡ ⲉϥⲧⲟϣ ⲛⲛread ⲧⲏⲣⲟⲩ ϩⲙⲡⲃⲁⲑⲙⲟⲥ ⲡⲁⲓ.
+.type legacyStirOneDropInPlace,@function
+legacyStirOneDropInPlace:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,88
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov qword ptr [rbp-48],r8
+    mov qword ptr [rbp-56],r9
+    test r12,r12
+    je .Llso_fail
+    test r14,r14
+    je .Llso_fail
+    test r15,r15
+    je .Llso_fail
+    test r8,r8
+    je .Llso_fail
+    test r9,r9
+    je .Llso_fail
+    xor ebx,ebx
+
+.Llso_loop:
+    cmp rbx,6
+    jae .Llso_ok
+    mov rax,qword ptr [rbp-48]
+    mov rax,qword ptr [rax+rbx*8]
+    test rax,rax
+    je .Llso_fail
+    cmp rax,6
+    ja .Llso_fail
+    mov qword ptr [rbp-64],rax
+
+    mov rcx,rbx
+    add rcx,5
+    cmp rcx,6
+    jb .Llso_prev_ready
+    sub rcx,6
+.Llso_prev_ready:
+    mov rax,qword ptr [rbp-48]
+    mov rax,qword ptr [rax+rcx*8]
+    test rax,rax
+    je .Llso_fail
+    cmp rax,6
+    ja .Llso_fail
+    mov qword ptr [rbp-72],rax
+
+    mov rcx,rbx
+    inc rcx
+    cmp rcx,6
+    jb .Llso_next_ready
+    xor ecx,ecx
+.Llso_next_ready:
+    mov rax,qword ptr [rbp-48]
+    mov rax,qword ptr [rax+rcx*8]
+    test rax,rax
+    je .Llso_fail
+    cmp rax,6
+    ja .Llso_fail
+    mov qword ptr [rbp-80],rax
+
+    mov rax,qword ptr [rbp-64]
+    dec rax
+    mov rdi,qword ptr [r12+rax*8]
+    test rdi,rdi
+    je .Llso_fail
+    call bi_clone
+    test rax,rax
+    je .Llso_fail
+    mov qword ptr [rbp-88],rax
+
+    mov rax,qword ptr [rbp-72]
+    dec rax
+    mov rdi,qword ptr [r12+rax*8]
+    mov esi,2
+    call bi_mul_u64
+    test rax,rax
+    je .Llso_fail
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,rax
+    call bi_add_abs
+    test rax,rax
+    je .Llso_fail
+    mov qword ptr [rbp-88],rax
+
+    mov rax,qword ptr [rbp-80]
+    dec rax
+    mov rdi,qword ptr [r12+rax*8]
+    mov esi,3
+    call bi_mul_u64
+    test rax,rax
+    je .Llso_fail
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,rax
+    call bi_add_abs
+    test rax,rax
+    je .Llso_fail
+    mov qword ptr [rbp-88],rax
+
+    cmp rbx,3
+    jae .Llso_no_pour
+    mov rax,qword ptr [rbp-56]
+    mov rsi,qword ptr [rax+rbx*8]
+    test rsi,rsi
+    je .Llso_fail
+    mov rdi,qword ptr [rbp-88]
+    call bi_add_abs
+    test rax,rax
+    je .Llso_fail
+    mov qword ptr [rbp-88],rax
+.Llso_no_pour:
+
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,r14
+    call bi_add_abs
+    test rax,rax
+    je .Llso_fail
+    mov qword ptr [rbp-88],rax
+
+    lea rax,[rip+legacy_bowl_stir_stone_by_position]
+    mov rcx,qword ptr [rax+rbx*8]
+    mov rsi,qword ptr [r15+rcx*8]
+    test rsi,rsi
+    je .Llso_fail
+    mov rdi,qword ptr [rbp-88]
+    call bi_add_abs
+    test rax,rax
+    je .Llso_fail
+    mov qword ptr [rbp-88],rax
+
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,rdi
+    call bi_mul_abs
+    test rax,rax
+    je .Llso_fail
+    mov qword ptr [rbp-96],rax
+
+    mov rax,qword ptr [rbp-72]
+    dec rax
+    mov rdi,qword ptr [r12+rax*8]
+    mov rax,qword ptr [rbp-80]
+    dec rax
+    mov rsi,qword ptr [r12+rax*8]
+    call bi_mul_abs
+    test rax,rax
+    je .Llso_fail
+    mov rdi,rax
+    mov esi,5
+    call bi_mul_u64
+    test rax,rax
+    je .Llso_fail
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rax
+    call bi_add_abs
+    test rax,rax
+    je .Llso_fail
+
+    mov rcx,rbx
+    inc rcx
+    imul rcx,r13
+    mov rdi,rax
+    mov rsi,rcx
+    call bi_add_u64
+    test rax,rax
+    je .Llso_fail
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Llso_fail
+
+    mov rcx,qword ptr [rbp-64]
+    dec rcx
+    mov qword ptr [r12+rcx*8],rax     # Ⲁⲩⲥϩⲁⲓ ⲉⲡB ⲛⲟⲩⲱⲧ.
+    inc rbx
+    jmp .Llso_loop
+
+.Llso_ok:
+    mov rax,r12
+    jmp .Llso_done
+.Llso_fail:
+    xor eax,eax
+.Llso_done:
+    add rsp,88
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size legacyStirOneDropInPlace,.-legacyStirOneDropInPlace
+
+.type monster_bowl_stir_route,@function
+monster_bowl_stir_route:
+    jmp legacyStirOneDropInPlace
+.size monster_bowl_stir_route,.-monster_bowl_stir_route
+
+.type monster_stage20_legacy_inplace_bowl_handler,@function
+monster_stage20_legacy_inplace_bowl_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    test r12,r12
+    je .Lms20_fail
+
+    mov r13,qword ptr [r12+CTX_LEGACY_POUR_DROP]
+    mov r14,qword ptr [r12+CTX_LEGACY_POUR_OLD_BOWLS]
+    mov r15,qword ptr [r12+CTX_LEGACY_POUR_STONE_ROW]
+    test r13,r13
+    je .Lms20_fail
+    test r14,r14
+    je .Lms20_fail
+    test r15,r15
+    je .Lms20_fail
+    mov qword ptr [r12+CTX_LEGACY_BOWL_STIR_DROP],r13
+    mov rax,qword ptr [r12+CTX_LEGACY_POUR_I]
+    mov qword ptr [r12+CTX_LEGACY_BOWL_STIR_I],rax
+    mov qword ptr [r12+CTX_LEGACY_BOWL_STIR_INPUT],r14
+    mov qword ptr [r12+CTX_LEGACY_BOWL_STIR_STONE_ROW],r15
+    mov rax,qword ptr [r12+CTX_PATCHED_POUR_ORDER]
+    mov qword ptr [r12+CTX_LEGACY_BOWL_STIR_ORDER],rax
+    mov rcx,qword ptr [r12+CTX_PATCHED_POUR_RESULT]
+    mov qword ptr [r12+CTX_LEGACY_BOWL_STIR_POURS],rcx
+    test rax,rax
+    je .Lms20_fail
+    test rcx,rcx
+    je .Lms20_fail
+
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lms20_fail
+    mov qword ptr [rbp-48],rax
+    xor ecx,ecx
+.Lms20_clone_loop:
+    cmp rcx,6
+    jae .Lms20_clone_done
+    mov rdx,qword ptr [r14+rcx*8]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lms20_clone_loop
+.Lms20_clone_done:
+    mov rdi,rax
+    mov rsi,qword ptr [r12+CTX_LEGACY_BOWL_STIR_I]
+    mov rdx,r13
+    mov rcx,r15
+    mov r8,qword ptr [r12+CTX_LEGACY_BOWL_STIR_ORDER]
+    mov r9,qword ptr [r12+CTX_LEGACY_BOWL_STIR_POURS]
+    call legacyStirOneDropInPlace
+    test rax,rax
+    je .Lms20_fail
+    mov qword ptr [r12+CTX_LEGACY_BOWL_STIR_OUTPUT],rax
+    inc qword ptr [r12+CTX_LEGACY_BOWL_STIR_SEEN]
+
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lms20_fail
+    mov qword ptr [rbp-48],rax
+    xor ecx,ecx
+.Lms20_route_clone_loop:
+    cmp rcx,6
+    jae .Lms20_route_clone_done
+    mov rdx,qword ptr [r14+rcx*8]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lms20_route_clone_loop
+.Lms20_route_clone_done:
+    mov rdi,rax
+    mov rsi,qword ptr [r12+CTX_LEGACY_BOWL_STIR_I]
+    mov rdx,r13
+    mov rcx,r15
+    mov r8,qword ptr [r12+CTX_LEGACY_BOWL_STIR_ORDER]
+    mov r9,qword ptr [r12+CTX_LEGACY_BOWL_STIR_POURS]
+    call monster_bowl_stir_route
+    test rax,rax
+    je .Lms20_fail
+    mov qword ptr [r12+CTX_BOWL_STIR_ROUTE_RESULT],rax
+    inc qword ptr [r12+CTX_BOWL_STIR_ROUTE_SEEN]
+    mov eax,1
+    jmp .Lms20_done
+.Lms20_fail:
+    xor eax,eax
+.Lms20_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage20_legacy_inplace_bowl_handler,.-monster_stage20_legacy_inplace_bowl_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -2749,6 +3074,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage18_legacy_fixed_pour_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage20_legacy_inplace_bowl_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

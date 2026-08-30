@@ -205,3 +205,18 @@
 ⲠStage 18 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. ⲠStage 19 ⲧⲁϫⲣⲟ ⲛⲟⲩwitness `drop=145`, order `[2,3,1,4,5,6]`, ⲉⲣⲉ ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ⲧⲏⲣⲟⲩ ϫⲓ ⲛbowl ⲉⲩϣⲟⲃⲉ ⲙⲛ ⲛfixed IDs. Ⲁⲩⲱ ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲛ720 ⲛpermutation residue ⲧⲏⲣⲟⲩ ⲙⲛ ⲡsame-line oracle; ⲙⲛ mismatch.
 
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_PATCHED_POUR_ORDER`, `CTX_BOWL_ALIAS`, `CTX_PATCHED_POUR_RESULT` ⲙⲛ `CTX_BOWL_ALIAS_PATCH_SEEN` ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲙⲛ ⲛlegacy trace.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 20 — DISCOVERY 10
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyStirOneDropInPlace`. Ⲡhelper ⲡⲁⲓ ϫⲓ ⲙⲡorder ⲙⲛ ⲛpour ⲉⲧⲁⲩⲧⲁϫⲣⲟ ⲙⲙⲟⲟⲩ ϩⲛ ⲛⲃⲁⲑⲙⲟⲥ ⲛϣⲟⲣⲡ, ⲁⲗⲗⲁ ⲛϥⲥϩⲁⲓ ⲛⲧⲉⲩⲛⲟⲩ ⲙⲡresult ⲙⲡposition ⲛⲓⲙ ⲉϩⲟⲩⲛ ⲉⲡB ⲛⲟⲩⲱⲧ.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage20_legacy_inplace_bowl_handler -> monster_bowl_stir_route -> legacyStirOneDropInPlace`
+
+Ⲉⲧⲃⲉ ⲧⲉⲓⲅⲣⲁⲫⲏ ⲛⲧⲉⲩⲛⲟⲩ, ⲡposition ⲉⲧⲛⲏⲩ ϣϭⲙϭⲟⲙ ⲉϫⲓ ⲙⲡB ⲉⲁⲩϣⲓⲃⲉ ⲙⲙⲟϥ ϩⲙⲡround ⲛⲟⲩⲱⲧ. Ⲡformula ⲙⲡbowl ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ`id`, `prev`, `next`, ⲡpour ⲙⲡposition, ⲡdrop ⲙⲛ ⲡstone ⲙⲡposition, ⲁⲩⲱ ⲛϥⲥϩⲁⲓ ⲙⲡ`SAVE` ⲉⲡB ⲛⲧⲉⲩⲛⲟⲩ.
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ`drop=1`, `i=4`, bowls `11,13,17,19,23,29`, stones `2,3,5,7,11` ⲙⲛ order `[1,2,3,4,5,6]` ⲧⲁϫⲣⲟ ϫⲉ ⲡϣⲟⲣⲡ bowl ⲧⲱⲛ ⲙⲛ ⲡreference ⲛⲧⲉⲡold-state, ⲁⲗⲗⲁ ⲛbowl 2..6 ⲥⲉϣⲟⲃⲉ: ⲟⲩⲛ 5 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡdrop, ⲡi, ⲡinput bowls, ⲡstone row, ⲡorder, ⲛpour, ⲡlegacy output ⲙⲛ ⲡroute output. Ⲡ`monster_bowl_stir_route` ⲙⲟⲟϣⲉ ⲉⲡlegacy ⲛⲧⲟϥ ϩⲙⲡⲉⲓDISCOVERY.
+
+ⲚStage 1–19 ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 20 ⲟ ⲛ`EXPECTED_RED`.
