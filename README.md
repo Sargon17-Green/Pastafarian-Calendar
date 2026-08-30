@@ -124,3 +124,11 @@
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_PATCHED_PRIOR_RESULT` ⲙⲛ `CTX_PRIOR_PATCH_SEEN`, ϩⲟⲡⲟⲩ ⲡ`CTX_LEGACY_PRIOR_RESULT` ⲟⲩⲏϩ ⲉϥⲥⲏϩ ⲛⲟⲩCOPY_DIAGNOSTIC. ⲠStage 12 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.
 
 ⲠStage 13 ⲥⲙⲓⲛⲉ ⲛ7 ⲛpredecessor: ⲛ2 ⲛvisible ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡlegacy, ⲁⲩⲱ ⲛ5 ⲛhidden ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡhidden-nearness patch. Ⲟⲩⲛ 0 ⲛmismatch ⲙⲡ`priorPatch` ⲙⲛ ⲡroute.
+
+## Ⲃⲁⲑⲙⲟⲥ 14 — DISCOVERY 07
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩgrind table ⲛⲗⲉⲅⲁⲥⲓ ⲉⲣⲉ ⲛ11 ⲛrow ⲛⲙⲉ ϣⲟⲟⲡ ϩⲓ index `0..10`, ϩⲟⲡⲟⲩ ⲡloop ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡindex `1..11` ⲛⲧⲟϥ. Ⲡ`legacyGrindRowAtIndex(1)` ϫⲓ ⲙⲡgrind 2, ⲁⲩⲱ `legacyGrindRowAtIndex(10)` ϫⲓ ⲙⲡgrind 11. Ⲡindex 11 ϫⲓ ⲛⲟⲩfence ⲉϥϣⲟⲩⲓⲧ ⲉⲧⲣⲉⲡlegacy ⲧⲙⲃⲱⲕ ⲉⲟⲩmemory ⲛⲁⲧⲧⲟϣ.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage14_legacy_grind_handler -> monster_visible_drop_route -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲙⲓⲛⲉ ⲛ11 ⲛrow ⲙⲛ ⲡtable ⲛⲕⲁⲛⲱⲛ: ⲛ11 ⲧⲏⲣⲟⲩ ⲥⲉϣⲟⲃⲉ. Ⲁⲩⲱ ⲡϣⲟⲣⲡ visible drop ⲉϥⲛⲏⲩ ϩⲓⲧⲛ ⲡlegacy grind indexing ⲛϥⲧⲱⲛ ⲁⲛ ⲙⲛ `oracle_build_visible`. Ⲙⲛ row 0 ⲛsentinel ⲉϥϣⲟⲟⲡ ϩⲙⲡtable ⲙⲡⲉⲓStage. ⲠStage 14 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–13 ⲥⲉⲟ ⲛ`GREEN`.

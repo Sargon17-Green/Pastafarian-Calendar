@@ -218,3 +218,21 @@
 ### WHY SAFE
 
 Ⲡⲡⲁⲧϣ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡdropStore ⲏ ⲡhidden storage. Ⲛϥⲧⲟϣ ⲙⲙⲁⲧⲉ ⲙⲡsource ⲙⲡpredecessor ⲕⲁⲧⲁ ⲡslot, ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲛlegacy/patch ⲉⲧϣⲟⲟⲡ ⲏⲇⲏ. Ⲙⲛ log, metric, cache ⲏ environment ⲉϥⲧⲟϣ ⲙⲡⲟⲩⲱϣⲃ.
+
+## Ⲃⲁⲑⲙⲟⲥ 14 — DISCOVERY 07
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲛ11 ⲛgrind row ⲛⲁϣⲁⲣⲭⲉⲓ ϩⲓ index 1, ⲁⲩⲱ ⲡloop ⲁϥⲙⲟⲟϣⲉ ⲕⲁⲧⲁ `g=1..11`. Ⲡdata table ⲇⲉ ⲁϥⲥϩⲁⲓ ⲛⲛrow ⲛⲙⲉ ϩⲓ `0..10`.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡ`legacyGrindRowAtIndex` ϫⲓ ⲙⲡ`g` ⲛⲧⲟϥ ⲛⲟⲩindex ⲙⲡtable. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲛgrind 1..10 ⲥⲉϫⲓ ⲙⲡrow ⲉⲧⲛⲏⲩ ⲙⲛⲛⲥⲱⲟⲩ, ⲁⲩⲱ ⲡgrind 11 ϫⲓ ⲛⲟⲩfence ⲉϥϣⲟⲩⲓⲧ. Ⲡfence ⲡⲁⲓ ⲛϥⲟ ⲁⲛ ⲛⲟⲩgrind ⲛⲕⲁⲛⲱⲛ; ⲟⲩⲧⲱϣ ⲛⲇⲉⲧⲉⲣⲙⲓⲛⲓⲥⲧⲓⲕⲟⲛ ⲙⲙⲁⲧⲉ ⲡⲉ ⲛⲧⲉⲡlegacy ⲉⲧⲃⲉ ⲧⲙⲣ ⲟⲩundefined memory read.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`oneVisibleDropLegacyGrindIndexWrong`, ⲉϥϫⲓ ⲛpredecessor ϩⲓⲧⲛ `priorPatch` ⲁⲩⲱ ⲉϥⲣ ⲛ11 ⲛgrind ϩⲓⲧⲛ ⲡindex ⲛⲗⲉⲅⲁⲥⲓ. Ⲡ`monster_stage14_legacy_grind_handler` ⲁϥⲕⲱ ⲙⲡⲉⲓⲣⲱⲧⲉ ϩⲙ `calendarDateSpaghetti`.
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲧⲁϫⲣⲟ ϫⲉ ⲛ11 ⲛrow ⲧⲏⲣⲟⲩ ⲥⲉϣⲟⲃⲉ ⲙⲛ ⲡrow ⲛⲕⲁⲛⲱⲛ, ⲁⲩⲱ ⲡvisible drop ⲛϣⲟⲣⲡ ⲛϥⲧⲱⲛ ⲁⲛ ⲙⲛ ⲡoracle. Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩⲡⲁⲧϣ ϩⲙⲡⲉⲓStage.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyGrindRowAtIndex`, `oneVisibleDropLegacyGrindIndexWrong`, `monster_visible_drop_route`, `monster_stage14_legacy_grind_handler`, ⲙⲛ state ⲛⲧⲉⲡvisible-drop/grind ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ. Ⲡⲉⲓlayer ⲟ ⲛCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲁⲩⲱ ⲛϥϫⲓ ⲁⲛ ⲙⲡoracle ϩⲙ runtime.

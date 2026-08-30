@@ -58,7 +58,13 @@
 .equ CTX_PRIOR_ROUTE_SEEN,448
 .equ CTX_PATCHED_PRIOR_RESULT,456
 .equ CTX_PRIOR_PATCH_SEEN,464
-.equ CTX_SIZE,472
+.equ CTX_LEGACY_VISIBLE_DROP_RESULT,472
+.equ CTX_VISIBLE_DROP_ROUTE_RESULT,480
+.equ CTX_LEGACY_GRIND_ROW1,488
+.equ CTX_LEGACY_GRIND_TABLE_SEEN,496
+.equ CTX_LEGACY_VISIBLE_DROP_SEEN,504
+.equ CTX_VISIBLE_DROP_I,512
+.equ CTX_SIZE,520
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -95,6 +101,23 @@ legacy_hidden_coeff:
 legacy_hidden_stone_kind:
     .quad 1,2,3,4,5,1,2
 
+# Ⲡtable ⲛⲗⲉⲅⲁⲥⲓ ⲟⲩⲏϩ ⲁϫⲛ sentinel ϩⲓ index 0. Ⲛ11 ⲛrow ⲛⲙⲉ ⲥⲉϣⲟⲟⲡ ϩⲓ 0..10.
+# Ⲡrow ⲉⲧⲟⲩⲟϩ ⲙⲛⲛⲥⲱⲟⲩ ⲟⲩfence ⲛⲗⲉⲅⲁⲥⲓ ⲡⲉ ⲉⲧⲣⲉ index 11 ⲙⲡⲣϫⲡⲓⲟ ⲛⲟⲩmemory ⲛⲁⲧⲧⲟϣ.
+legacy_visible_grinds_indexed:
+    .quad 3,5,7,11,1
+    .quad 5,7,11,13,2
+    .quad 7,11,13,17,3
+    .quad 11,13,17,19,4
+    .quad 13,17,19,23,5
+    .quad 17,19,23,29,1
+    .quad 19,23,29,31,2
+    .quad 23,29,31,37,3
+    .quad 29,31,37,41,4
+    .quad 31,37,41,43,5
+    .quad 37,41,43,47,1
+legacy_visible_grind_missing_fence:
+    .quad 0,0,0,0,0
+
 .section .text
 .extern arena_alloc
 .extern bi_abs
@@ -108,6 +131,7 @@ legacy_hidden_stone_kind:
 .extern bi_from_i64
 .extern bi_from_u64
 .extern bi_clone
+.extern bi_add_u64
 .global monster_context_new
 .global monster_validate_base
 .global monster_metrics_bump
@@ -147,6 +171,10 @@ legacy_hidden_stone_kind:
 .global monster_stage13_prior_patch_wrapper
 .global monster_prior_route
 .global monster_stage12_legacy_prior_handler
+.global legacyGrindRowAtIndex
+.global oneVisibleDropLegacyGrindIndexWrong
+.global monster_visible_drop_route
+.global monster_stage14_legacy_grind_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -1576,6 +1604,351 @@ monster_stage12_legacy_prior_handler:
     ret
 .size monster_stage12_legacy_prior_handler,.-monster_stage12_legacy_prior_handler
 
+
+
+# Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡgrind table ⲁⲣⲭⲉⲓ ϩⲓ index 1. Ⲡtable ⲇⲉ ⲁⲣⲭⲉⲓ ϩⲓ 0, ⲁⲩⲱ ⲡlegacy index ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ g ⲛⲧⲟϥ.
+# Ⲉⲧⲃⲉ ⲡⲁⲓ g=1 ϫⲓ ⲙⲡgrind 2, ... g=10 ϫⲓ ⲙⲡgrind 11, ⲁⲩⲱ g=11 ϫⲓ ⲙⲡfence ⲉⲧϣⲟⲩⲓⲧ.
+.type legacyGrindRowAtIndex,@function
+legacyGrindRowAtIndex:
+    cmp rdi,1
+    jb .Llgrai_fail
+    cmp rdi,11
+    ja .Llgrai_fail
+    lea rax,[rip+legacy_visible_grinds_indexed]
+    imul rdi,40
+    add rax,rdi
+    ret
+.Llgrai_fail:
+    xor eax,eax
+    ret
+.size legacyGrindRowAtIndex,.-legacyGrindRowAtIndex
+
+.type oneVisibleDropLegacyGrindIndexWrong,@function
+oneVisibleDropLegacyGrindIndexWrong:
+    # rdi=counts, rsi=stones, rdx=dropStore, rcx=hiddenBackward, r8=i.
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,56
+    mov r12,rdi
+    mov r13,rsi
+    mov qword ptr [rbp-48],rdx
+    mov qword ptr [rbp-56],rcx
+    mov qword ptr [rbp-64],r8
+    test r12,r12
+    je .Lovdli_fail
+    test r13,r13
+    je .Lovdli_fail
+    test rdx,rdx
+    je .Lovdli_fail
+    test rcx,rcx
+    je .Lovdli_fail
+    cmp r8,1
+    jb .Lovdli_fail
+    cmp r8,46
+    ja .Lovdli_fail
+
+    # Ⲛpredecessor 1/3/7 ⲛⲏⲩ ϩⲓⲧⲛ priorPatch, ⲉⲧⲣⲉ ⲛhidden scars ⲛϣⲟⲣⲡ ⲟⲩⲱϩ ϩⲙⲡroute.
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,qword ptr [rbp-56]
+    mov rdx,qword ptr [rbp-64]
+    mov ecx,1
+    call priorPatch
+    test rax,rax
+    je .Lovdli_fail
+    mov qword ptr [rbp-72],rax
+
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,qword ptr [rbp-56]
+    mov rdx,qword ptr [rbp-64]
+    mov ecx,3
+    call priorPatch
+    test rax,rax
+    je .Lovdli_fail
+    mov qword ptr [rbp-80],rax
+
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,qword ptr [rbp-56]
+    mov rdx,qword ptr [rbp-64]
+    mov ecx,7
+    call priorPatch
+    test rax,rax
+    je .Lovdli_fail
+    mov qword ptr [rbp-88],rax
+
+    # Ⲡrow ⲙⲡstone i.
+    mov rax,qword ptr [rbp-64]
+    dec rax
+    imul rax,40
+    add r13,rax
+
+    # x = SAVE(w*action + b*target + s*distance + m*connection + r*direction + p1 + 3*p3 + 5*p7 + i)
+    mov rdi,qword ptr [r13]
+    mov rsi,qword ptr [r12+HCOUNTS_ACTION]
+    call bi_mul_abs
+    mov rbx,rax
+
+    mov rdi,qword ptr [r13+8]
+    mov rsi,qword ptr [r12+HCOUNTS_TARGET]
+    call bi_mul_abs
+    mov rdi,rbx
+    mov rsi,rax
+    call bi_add_abs
+    mov rbx,rax
+
+    mov rdi,qword ptr [r13+16]
+    mov rsi,qword ptr [r12+HCOUNTS_DISTANCE]
+    call bi_mul_abs
+    mov rdi,rbx
+    mov rsi,rax
+    call bi_add_abs
+    mov rbx,rax
+
+    mov rdi,qword ptr [r13+24]
+    mov rsi,qword ptr [r12+HCOUNTS_CONNECTION]
+    call bi_mul_abs
+    mov rdi,rbx
+    mov rsi,rax
+    call bi_add_abs
+    mov rbx,rax
+
+    mov rdi,qword ptr [r13+32]
+    mov rsi,qword ptr [r12+HCOUNTS_DIRECTION]
+    call bi_mul_abs
+    mov rdi,rbx
+    mov rsi,rax
+    call bi_add_abs
+    mov rbx,rax
+
+    mov rdi,rbx
+    mov rsi,qword ptr [rbp-72]
+    call bi_add_abs
+    mov rbx,rax
+
+    mov rdi,qword ptr [rbp-80]
+    mov esi,3
+    call bi_mul_u64
+    mov rdi,rbx
+    mov rsi,rax
+    call bi_add_abs
+    mov rbx,rax
+
+    mov rdi,qword ptr [rbp-88]
+    mov esi,5
+    call bi_mul_u64
+    mov rdi,rbx
+    mov rsi,rax
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [rbp-64]
+    call bi_add_u64
+    mov rdi,rax
+    call savePatch
+    mov rbx,rax
+
+    mov r14,1
+.Lovdli_grind:
+    cmp r14,11
+    ja .Lovdli_ok
+    mov rdi,r14
+    call legacyGrindRowAtIndex
+    test rax,rax
+    je .Lovdli_fail
+    mov r15,rax
+
+    # x' = SAVE(x^2 + a*x + b*p1 + c*p3 + d*p7 + stone[kind]).
+    mov rdi,rbx
+    mov rsi,rbx
+    call bi_mul_abs
+    mov qword ptr [rbp-96],rax
+
+    mov rdi,rbx
+    mov rsi,qword ptr [r15]
+    call bi_mul_u64
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rax
+    call bi_add_abs
+    mov qword ptr [rbp-96],rax
+
+    mov rdi,qword ptr [rbp-72]
+    mov rsi,qword ptr [r15+8]
+    call bi_mul_u64
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rax
+    call bi_add_abs
+    mov qword ptr [rbp-96],rax
+
+    mov rdi,qword ptr [rbp-80]
+    mov rsi,qword ptr [r15+16]
+    call bi_mul_u64
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rax
+    call bi_add_abs
+    mov qword ptr [rbp-96],rax
+
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,qword ptr [r15+24]
+    call bi_mul_u64
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rax
+    call bi_add_abs
+    mov qword ptr [rbp-96],rax
+
+    mov rax,qword ptr [r15+32]
+    test rax,rax
+    je .Lovdli_no_stone
+    dec rax
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,qword ptr [r13+rax*8]
+    call bi_add_abs
+    mov qword ptr [rbp-96],rax
+.Lovdli_no_stone:
+    mov rdi,qword ptr [rbp-96]
+    call savePatch
+    mov rbx,rax
+    inc r14
+    jmp .Lovdli_grind
+
+.Lovdli_ok:
+    mov rax,rbx
+    jmp .Lovdli_done
+.Lovdli_fail:
+    xor eax,eax
+.Lovdli_done:
+    add rsp,56
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size oneVisibleDropLegacyGrindIndexWrong,.-oneVisibleDropLegacyGrindIndexWrong
+
+.type monster_visible_drop_route,@function
+monster_visible_drop_route:
+    jmp oneVisibleDropLegacyGrindIndexWrong
+.size monster_visible_drop_route,.-monster_visible_drop_route
+
+.type monster_stage14_legacy_grind_handler,@function
+monster_stage14_legacy_grind_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    test r12,r12
+    je .Lms14_fail
+    mov r15,qword ptr [r12+CTX_HIDDEN_BACKWARD]
+    test r15,r15
+    je .Lms14_fail
+
+    # Ⲧⲁⲙⲓⲟ ⲛⲕⲉⲥⲟⲡ ⲙⲡcounts ⲛⲧⲉⲡinvocation; ⲡobservability ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡⲗⲟⲅⲓⲥⲙⲟⲥ.
+    mov edi,HCOUNTS_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Lms14_fail
+    mov r13,rax
+    mov rax,qword ptr [r12+CTX_PATCHED_DAYTAG_CALC_RESULT]
+    test rax,rax
+    je .Lms14_fail
+    mov qword ptr [r13+HCOUNTS_ACTION],rax
+    mov rax,qword ptr [r12+CTX_PATCHED_DAYTAG_TARGET_RESULT]
+    test rax,rax
+    je .Lms14_fail
+    mov qword ptr [r13+HCOUNTS_TARGET],rax
+    mov rax,qword ptr [r12+CTX_PATCHED_DISTANCE_RESULT]
+    test rax,rax
+    je .Lms14_fail
+    mov qword ptr [r13+HCOUNTS_DISTANCE],rax
+    mov rdi,qword ptr [r13+HCOUNTS_ACTION]
+    mov rsi,qword ptr [r13+HCOUNTS_TARGET]
+    call bi_add_abs
+    mov qword ptr [r13+HCOUNTS_CONNECTION],rax
+    mov rax,qword ptr [r12+CTX_TARGET_DAY]
+    cmp rax,qword ptr [r12+CTX_CALCULATION_DAY]
+    jl .Lms14_dir1
+    je .Lms14_dir2
+    mov edi,3
+    jmp .Lms14_make_dir
+.Lms14_dir1:
+    mov edi,1
+    jmp .Lms14_make_dir
+.Lms14_dir2:
+    mov edi,2
+.Lms14_make_dir:
+    call bi_from_u64
+    mov qword ptr [r13+HCOUNTS_DIRECTION],rax
+
+    call getHiddenStonePrefixThroughLegacyBuilder
+    test rax,rax
+    je .Lms14_fail
+    mov r14,rax
+
+    # ⲠdropStore ⲛⲧⲉ i=1 ⲙⲛ ⲛslot -6..8; ⲡpriorPatch ϫⲓ ⲙⲡhidden ϩⲛ ⲛslot ⲛⲥⲁϩⲟⲩ.
+    mov edi,120
+    call arena_alloc
+    test rax,rax
+    je .Lms14_fail
+    mov qword ptr [rbp-48],rax
+    mov rdi,rax
+    xor eax,eax
+    mov ecx,15
+    rep stosq
+    mov rax,qword ptr [rbp-48]
+    add rax,48
+    mov qword ptr [rbp-56],rax
+
+    mov qword ptr [r12+CTX_VISIBLE_DROP_I],1
+    mov edi,1
+    call legacyGrindRowAtIndex
+    test rax,rax
+    je .Lms14_fail
+    mov qword ptr [r12+CTX_LEGACY_GRIND_ROW1],rax
+    inc qword ptr [r12+CTX_LEGACY_GRIND_TABLE_SEEN]
+
+    # COPY_DIAGNOSTIC ⲙⲛ route: ⲙⲡⲉⲓStage ⲛⲉⲥⲛⲁⲩ ϫⲓ ⲙⲡlegacy indexing ⲛⲟⲩⲱⲧ.
+    mov rdi,r13
+    mov rsi,r14
+    mov rdx,qword ptr [rbp-56]
+    mov rcx,r15
+    mov r8d,1
+    call oneVisibleDropLegacyGrindIndexWrong
+    test rax,rax
+    je .Lms14_fail
+    mov qword ptr [r12+CTX_LEGACY_VISIBLE_DROP_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_VISIBLE_DROP_SEEN]
+
+    mov rdi,r13
+    mov rsi,r14
+    mov rdx,qword ptr [rbp-56]
+    mov rcx,r15
+    mov r8d,1
+    call monster_visible_drop_route
+    test rax,rax
+    je .Lms14_fail
+    mov qword ptr [r12+CTX_VISIBLE_DROP_ROUTE_RESULT],rax
+    mov eax,1
+    jmp .Lms14_done
+.Lms14_fail:
+    xor eax,eax
+.Lms14_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage14_legacy_grind_handler,.-monster_stage14_legacy_grind_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -1614,6 +1987,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage12_legacy_prior_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage14_legacy_grind_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

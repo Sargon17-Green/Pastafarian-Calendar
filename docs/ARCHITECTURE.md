@@ -180,3 +180,13 @@
 `monster_prior_route -> monster_stage13_prior_patch_wrapper -> priorPatch -> {legacyPrior | hiddenByNearness}`
 
 Ⲡ`CTX_LEGACY_PRIOR_RESULT` ⲙⲛ ⲡ`CTX_PATCHED_PRIOR_RESULT` ⲥⲉϣⲟⲟⲡ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. Ⲡroute ⲙⲡpatch ⲡⲉ ⲡCOPY_AUTHORITATIVE; ⲡlegacy call ⲙⲡslot 0 ⲡⲉ ⲡCOPY_DIAGNOSTIC.
+
+## Ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲃⲁⲑⲙⲟⲥ 14
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage14_legacy_grind_handler -> monster_visible_drop_route -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
+
+Ⲡgrind table ⲙⲡDISCOVERY ϩⲁⲣⲉϩ ⲛ11 ⲛrow ⲛⲙⲉ ϩⲓ index `0..10`. Ⲡlegacy loop ⲙⲟⲟϣⲉ ⲙⲛ `g=1..11`, ⲁⲩⲱ `legacyGrindRowAtIndex` ϫⲓ ⲙⲡ`g` ⲛⲧⲟϥ ⲉϥⲟ ⲛindex. Ⲡrow ⲛⲥⲁ ⲛ11 ⲛrow ⲛⲙⲉ ⲟⲩfence ⲉϥϣⲟⲩⲓⲧ ⲡⲉ; ⲛϥⲟ ⲁⲛ ⲛsentinel ⲙⲡindex 0.
+
+Ⲡ`oneVisibleDropLegacyGrindIndexWrong` ⲟⲩⲏϩ ⲉϥϫⲓ ⲛ1/3/7 predecessor ϩⲓⲧⲛ `priorPatch`, ⲁⲩⲱ ⲛϥϫⲓ ⲛstone ϩⲓⲧⲛ ⲡbuilder ⲙⲡPatch 04. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡⲡⲗⲁⲛⲏ ⲙⲡⲉⲓStage ⲟ ⲙⲙⲁⲧⲉ ⲛⲟⲩgrind-indexing divergence, ⲛϥⲧⲱⲙⲛⲧ ⲁⲛ ⲙⲛ ⲛscar ⲛϣⲟⲣⲡ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_VISIBLE_DROP_RESULT`, `CTX_VISIBLE_DROP_ROUTE_RESULT`, `CTX_LEGACY_GRIND_ROW1`, `CTX_LEGACY_GRIND_TABLE_SEEN`, `CTX_LEGACY_VISIBLE_DROP_SEEN` ⲙⲛ `CTX_VISIBLE_DROP_I`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ; ⲙⲛ logs, metrics ⲏ global mutable semantic state ⲉⲩⲧⲟϣ ⲙⲡvisible drop.
