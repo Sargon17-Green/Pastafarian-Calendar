@@ -55,3 +55,11 @@
 Ⲡ`savePatch` ⲡⲉ ⲡ COPY_AUTHORITATIVE ⲙⲡⲉⲓⲙⲉⲣⲟⲥ. Ⲡϫⲓⲛϣⲓⲃⲉ ⲙⲙⲁⲧⲉ ⲡⲉ `0 -> M`. Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_REMAINDER_RESULT` ⲁⲩⲱ ⲉ`CTX_PATCHED_REMAINDER_RESULT` ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ, ⲉⲧⲣⲉⲡⲟⲩⲱϣⲃ ⲛⲗⲉⲅⲁⲥⲓ ⲧⲙⲧⲱⲙⲛⲧ ⲙⲛ ⲡⲟⲩⲱϣⲃ ⲙⲡⲁⲧϣ.
 
 Ⲡ`oldRemainder` ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛϣⲟⲣⲡ ⲛⲟⲩCOPY_DIAGNOSTIC ϩⲙⲡhandler; ⲡⲉϥⲟⲩⲱϣⲃ ⲛϥⲃⲱⲕ ⲁⲛ ⲉϩⲟⲩⲛ ⲉⲡⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ ⲛⲕⲁⲛⲱⲛ. Ⲙⲛ retry ⲏ fallback ⲛⲃⲣⲣⲉ ⲉⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲡⲉⲓⲃⲁⲑⲙⲟⲥ.
+
+## Ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲃⲁⲑⲙⲟⲥ 4
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage04_legacy_daytag_handler -> monster_daytag_route -> oldDayTag`
+
+Ⲡ`oldDayTag` ⲡⲉ ⲡCOPY_AUTHORITATIVE ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ; ⲡⲁⲓ ⲡⲉ ⲡⲡⲗⲁⲛⲏ ⲉⲧⲉⲣⲉⲡⲇⲟⲕⲓⲙⲏ ⲟⲩⲱⲛϩ ⲙⲙⲟϥ. Ⲡ`monster_daytag_route` ⲙⲛ ⲡhandler ⲛⲉ ⲟⲩⲧⲁⲡ ⲉϥⲧⲱⲛ ⲙⲛ ⲡⲗⲉⲅⲁⲥⲓ; ⲙⲛ normalization ⲏ fallback ⲉⲩⲟⲩⲱϩ ⲉϫⲱⲟⲩ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_DAYTAG_CALC_INPUT`, `CTX_LEGACY_DAYTAG_CALC_RESULT`, `CTX_DAYTAG_TARGET_INPUT`, `CTX_LEGACY_DAYTAG_TARGET_RESULT` ⲙⲛ `CTX_LEGACY_DAYTAG_SEEN`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲙⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ; ⲙⲛ ⲡstate ⲙⲡⲁⲧϣ 02 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.

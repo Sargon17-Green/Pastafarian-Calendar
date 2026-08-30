@@ -19,7 +19,12 @@
 .equ CTX_LEGACY_REMAINDER_SEEN,136
 .equ CTX_PATCHED_REMAINDER_RESULT,144
 .equ CTX_SAVE_PATCH_SEEN,152
-.equ CTX_SIZE,160
+.equ CTX_DAYTAG_CALC_INPUT,160
+.equ CTX_LEGACY_DAYTAG_CALC_RESULT,168
+.equ CTX_DAYTAG_TARGET_INPUT,176
+.equ CTX_LEGACY_DAYTAG_TARGET_RESULT,184
+.equ CTX_LEGACY_DAYTAG_SEEN,192
+.equ CTX_SIZE,200
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -43,6 +48,8 @@ legacy_remainder_M_limbs:
 .extern bi_mod_abs
 .extern bi_is_zero
 .extern bi_sub_abs
+.extern bi_sub
+.extern bi_mul_u64
 .extern bi_from_i64
 .extern bi_clone
 .global monster_context_new
@@ -55,6 +62,9 @@ legacy_remainder_M_limbs:
 .global monster_stage03_save_patch_wrapper
 .global monster_stage02_legacy_remainder_handler
 .global monster_remainder_route
+.global oldDayTag
+.global monster_daytag_route
+.global monster_stage04_legacy_daytag_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -238,6 +248,73 @@ monster_stage02_legacy_remainder_handler:
     ret
 .size monster_stage02_legacy_remainder_handler,.-monster_stage02_legacy_remainder_handler
 
+
+# Ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲉⲧⲉⲓ ⲙⲡⲉϥⲡⲱⲣϫ ⲙⲙⲟⲥ ϫⲉ ⲛⲉϩⲟⲟⲩ ⲙⲛⲛⲥⲁ ⲡϩⲟⲟⲩ ⲛⲧⲉⲥⲛⲧⲉ ⲥⲉϣⲟⲟⲡ ⲛⲕⲟⲧ ⲛⲟⲩⲱⲧ. Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩⲡⲁⲧϣ ϩⲙ ⲡⲃⲁⲑⲙⲟⲥ ⲡⲁⲓ.
+.type oldDayTag,@function
+oldDayTag:
+    push rbp
+    mov rbp,rsp
+    push r12
+    mov r12,rdi
+    mov rdi,-15055671
+    call bi_from_i64
+    mov rsi,rax
+    mov rdi,r12
+    call bi_sub
+    mov rdi,rax
+    call bi_abs
+    mov rdi,rax
+    mov rsi,2
+    call bi_mul_u64
+    pop r12
+    leave
+    ret
+.size oldDayTag,.-oldDayTag
+
+.type monster_daytag_route,@function
+monster_daytag_route:
+    jmp oldDayTag
+.size monster_daytag_route,.-monster_daytag_route
+
+.type monster_stage04_legacy_daytag_handler,@function
+monster_stage04_legacy_daytag_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    test r12,r12
+    je .Lms04_fail
+
+    mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
+    call bi_from_i64
+    mov r13,rax
+    mov qword ptr [r12+CTX_DAYTAG_CALC_INPUT],r13
+    mov rdi,r13
+    call monster_daytag_route
+    mov qword ptr [r12+CTX_LEGACY_DAYTAG_CALC_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_DAYTAG_SEEN]
+
+    mov rdi,qword ptr [r12+CTX_TARGET_DAY]
+    call bi_from_i64
+    mov r13,rax
+    mov qword ptr [r12+CTX_DAYTAG_TARGET_INPUT],r13
+    mov rdi,r13
+    call monster_daytag_route
+    mov qword ptr [r12+CTX_LEGACY_DAYTAG_TARGET_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_DAYTAG_SEEN]
+
+    mov eax,1
+    jmp .Lms04_done
+.Lms04_fail:
+    xor eax,eax
+.Lms04_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage04_legacy_daytag_handler,.-monster_stage04_legacy_daytag_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -251,6 +328,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage02_legacy_remainder_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage04_legacy_daytag_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
