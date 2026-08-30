@@ -616,3 +616,28 @@
 Ⲡhandler ⲧⲁⲙⲓⲟ ⲙⲡ`signedStep=targetDay-FOUNDATION`, ϩⲁⲣⲉϩ ⲉⲡsigned step ⲙⲛ ⲡabsolute magnitude, ⲁⲩⲱ ⲕⲱ ⲙⲡlegacy result ⲙⲛ ⲡroute result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩnegative detour. Ⲙⲛ `LEGACY_YEAR_MAX`, ⲙⲛ code ⲙⲡPATCH 16, ⲁⲩⲱ ⲙⲛ future gate-selection code.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 31 — PATCH 15
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`oldGateQuestionDay` ⲏ ⲡ`legacyGateQuestionDayFromSignedStepWrong`. Ⲡnegative scar ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`gateQuestionDayPatch15` ⲙⲛ `monster_stage31_gate_question_patch_wrapper`. Ⲡpatch ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉⲡlegacy helper. Ⲡsign comparison ⲙⲛ zero ⲧⲱϣ ⲙⲡsemantic branch: `signedStep>=0` ⲕⲁ ⲙⲡlegacy result; `signedStep<0` ϯ ⲙⲡ`FOUNDATION-abs(step)`.
+
+`monster_gate_question_day_route -> monster_stage31_gate_question_patch_wrapper -> gateQuestionDayPatch15`
+
+Ⲁⲩⲟⲩⲱϩ ⲟⲛ ⲉϫⲛ `monster_stage31_gate_question_patch_handler` ⲉϥϩⲁⲣⲉϩ ⲉⲡpatched result ⲙⲛ ⲡseen counter ϩⲙⲡ`MonsterContext`.
+
+### Ⲡⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+ⲠStage 30 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE30_REGRESSION_GREEN`. ⲠStage 31 test ⲧⲁϫⲣⲟ ⲙⲡdirect legacy scar ⲙⲛ ⲛsigned cases `-1,-2,-10,0,+1`, ⲁⲩⲱ ⲛϥⲥⲙⲓⲛⲉ ⲙⲡcontext legacy result ⲉⲡpatched route result.
+
+### Ⲡharness ⲉⲧⲁⲩⲧⲁϫⲣⲟϥ
+
+Ⲡtest ⲛStage 31 ⲛⲁϥⲕⲱ ⲙⲡ`-10` ϩⲓⲧⲛ `edi`, ⲉⲧⲉ ⲛϥϩⲁⲣⲉϩ ⲁⲛ ⲙⲡ64-bit negative sign. Ⲁⲩϣⲓⲃⲉ ⲙⲙⲟϥ ⲉ`rdi` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡproduction. Ⲁⲩⲧⲁϫⲣⲟ ⲟⲛ ⲙⲡstack alignment ⲛⲧⲉ ⲛtest helpers.
+
+Ⲙⲛ code ⲙⲡPATCH 16 ⲏ future gate-selection code ⲉⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ.

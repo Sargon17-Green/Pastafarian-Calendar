@@ -456,3 +456,24 @@
 Ⲡstate ⲛⲧⲉⲡinvocation ϩⲁⲣⲉϩ ⲉ signed step, absolute step, direct legacy result, route result ⲙⲛ counters. Ⲙⲛ global mutable semantic state ⲁⲩⲱ ⲙⲛ oracle call ϩⲙⲡproduction.
 
 Ⲡtest-only normative side ⲗⲟⲅⲓⲍⲉ ⲙⲡ`FOUNDATION+signedStep` ϩⲓ ⲛsmall signed witnesses. Ⲙⲛ repair ⲙⲡnegative side ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 30.
+
+
+## Ⲡnegative gate-question detour ⲙⲡⲃⲁⲑⲙⲟⲥ 31
+
+ⲠCOPY_DIAGNOSTIC ⲟ ⲛ:
+
+`legacyGateQuestionDayFromSignedStepWrong -> oldGateQuestionDay`
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_gate_question_day_route -> monster_stage31_gate_question_patch_wrapper -> gateQuestionDayPatch15`
+
+Ⲡ`gateQuestionDayPatch15` ⲙⲟⲩⲧⲉ ⲉⲡlegacy path ⲛϣⲟⲣⲡ. Ⲉϣϫⲉ ⲡsigned step ⲟ ⲛzero ⲏ positive, ⲡlegacy result ⲟ ⲛexact ⲁⲩⲱ ⲛϥⲕⲧⲟ ⲙⲙⲟϥ. Ⲉϣϫⲉ ⲡstep ⲟ ⲛnegative, ⲡpatch ⲧⲁⲙⲓⲟ ⲙⲡabsolute magnitude ⲁⲩⲱ ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡ`FOUNDATION-abs(step)`.
+
+### EQUIVALENCE
+
+Ϩⲓ `signedStep>=0`, `abs(step)=step`, ⲉⲧⲃⲉ ⲡⲁⲓ `oldGateQuestionDay(abs(step))=FOUNDATION+signedStep`. Ϩⲓ `signedStep<0`, `FOUNDATION-abs(step)=FOUNDATION+signedStep`. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡdetour ⲧⲱⲛ ⲙⲛ ⲡsigned normative question day ϩⲓ ⲡdomain ⲧⲏⲣϥ.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
+
+Ⲡlegacy scar ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ. Ⲡpatched result ⲙⲛ ⲡseen counter ⲟ ⲛinvocation-local. Ⲙⲛ global mutable semantic state, ⲙⲛ oracle call ϩⲙⲡproduction, ⲁⲩⲱ ⲙⲛ future patch code.

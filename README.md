@@ -376,3 +376,18 @@
 Ⲡsame-line regression ⲧⲁϫⲣⲟ ϩⲓ signed steps `-1,-2,-10,0,+1`. Ⲛnegative ⲛϣⲟⲙⲛⲧ ⲥⲉϣⲟⲃⲉ, ⲁⲗⲗⲁ `0,+1` ⲧⲱⲛ ⲛⲟⲩcoincidence.
 
 Ⲙⲛ negative-side detour ⲏ code ⲙⲡPATCH 15 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. ⲠStage 30 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–29 ⲥⲉⲟ ⲛ`GREEN`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 31 — PATCH 15
+
+Ⲡ`oldGateQuestionDay` ⲙⲛ ⲡ`legacyGateQuestionDayFromSignedStepWrong` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡlegacy call ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ`abs(signedStep)` ⲁⲩⲱ ⲉϥϯ ⲙⲡpositive-side day.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `gateQuestionDayPatch15`. Ⲛϣⲟⲣⲡ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡlegacy path ⲛⲟⲩCOPY_DIAGNOSTIC. Ⲉϣϫⲉ `signedStep>=0`, ⲡlegacy result ⲡⲉ ⲡsemantic result. Ⲉϣϫⲉ `signedStep<0`, ⲡlegacy result ⲕⲁ ⲙⲙⲟϥ ϩⲓ ⲡⲥⲁ ⲁⲩⲱ ⲡpatch ϯ ⲙⲡ`FOUNDATION-abs(step)`.
+
+`monster_gate_question_day_route -> monster_stage31_gate_question_patch_wrapper -> gateQuestionDayPatch15`
+
+ⲠStage 30 handler ⲟⲩⲏϩ ⲉϥϩⲁⲣⲉϩ ⲉⲡdirect legacy result ⲙⲛ ⲡroute result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. ⲠStage 31 handler ϩⲁⲣⲉϩ ⲉⲡpatched result ⲙⲛ ⲡpatch counter ⲉⲧⲟ ⲛinvocation-local.
+
+Ⲡsame-line regression ⲧⲁϫⲣⲟ ϩⲓ `-1,-2,-10,0,+1`. Ⲛ5 ⲛcase ⲧⲏⲣⲟⲩ ⲧⲱⲛ ⲙⲛ ⲡsigned normative day. Ⲡdirect legacy scar ϩⲓ `-10` ⲟⲩⲏϩ ⲉϥϯ `FOUNDATION+10`.
+
+ⲠStage 30 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲙⲛ code ⲙⲡPATCH 16 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.

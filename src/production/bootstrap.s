@@ -158,7 +158,9 @@
 .equ CTX_STAGE30_ROUTE_RESULT,1248
 .equ CTX_STAGE30_LEGACY_SEEN,1256
 .equ CTX_STAGE30_ROUTE_SEEN,1264
-.equ CTX_SIZE,1272
+.equ CTX_STAGE31_PATCHED_RESULT,1272
+.equ CTX_STAGE31_PATCH_SEEN,1280
+.equ CTX_SIZE,1288
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -378,6 +380,9 @@ legacy_bowl_stir_stone_by_position:
 .global legacyGateQuestionDayFromSignedStepWrong
 .global monster_gate_question_day_route
 .global monster_stage30_legacy_gate_question_handler
+.global gateQuestionDayPatch15
+.global monster_stage31_gate_question_patch_wrapper
+.global monster_stage31_gate_question_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -5567,9 +5572,76 @@ legacyGateQuestionDayFromSignedStepWrong:
     ret
 .size legacyGateQuestionDayFromSignedStepWrong,.-legacyGateQuestionDayFromSignedStepWrong
 
+# Ⲃⲁⲑⲙⲟⲥ 31 — PATCH 15
+# Ⲡlegacy path ⲟⲩⲏϩ ⲉϥⲙⲟⲩⲧⲉ ⲛⲟⲩⲙⲉ. Ⲉϣϫⲉ ⲡsignedStep ⲟ ⲛnegative, ⲡresult ⲛⲗⲉⲅⲁⲥⲓ ⲥⲏϩ ⲉⲃⲟⲗ ⲁⲩⲱ ⲁⲩⲕⲱ ⲉϫⲱϥ ⲙⲡFOUNDATION-abs(step).
+.type gateQuestionDayPatch15,@function
+gateQuestionDayPatch15:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lgqdp15_fail
+
+    # COPY_DIAGNOSTIC: ⲡlegacy ⲙⲟⲩⲧⲉ ⲛⲟⲩⲙⲉ ϩⲓ signedStep ⲛⲓⲙ.
+    mov rdi,r12
+    call legacyGateQuestionDayFromSignedStepWrong
+    test rax,rax
+    je .Lgqdp15_fail
+    mov r13,rax
+
+    # Ⲛϥⲧⲱϣ ⲙⲡsign ⲙⲛ 0 ⲁϫⲛ ⲟⲩruntime ⲛϣⲙⲙⲟ.
+    xor edi,edi
+    call bi_from_i64
+    test rax,rax
+    je .Lgqdp15_fail
+    mov rdi,r12
+    mov rsi,rax
+    call bi_cmp
+    test eax,eax
+    jge .Lgqdp15_legacy
+
+    mov rdi,r12
+    call bi_abs
+    test rax,rax
+    je .Lgqdp15_fail
+    mov r14,rax
+    mov rdi,-15055671
+    call bi_from_i64
+    test rax,rax
+    je .Lgqdp15_fail
+    mov rdi,rax
+    mov rsi,r14
+    call bi_sub
+    test rax,rax
+    je .Lgqdp15_fail
+    jmp .Lgqdp15_done
+
+.Lgqdp15_legacy:
+    mov rax,r13
+    jmp .Lgqdp15_done
+.Lgqdp15_fail:
+    xor eax,eax
+.Lgqdp15_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size gateQuestionDayPatch15,.-gateQuestionDayPatch15
+
+.type monster_stage31_gate_question_patch_wrapper,@function
+monster_stage31_gate_question_patch_wrapper:
+    jmp gateQuestionDayPatch15
+.size monster_stage31_gate_question_patch_wrapper,.-monster_stage31_gate_question_patch_wrapper
+
 .type monster_gate_question_day_route,@function
 monster_gate_question_day_route:
-    jmp legacyGateQuestionDayFromSignedStepWrong
+    jmp monster_stage31_gate_question_patch_wrapper
 .size monster_gate_question_day_route,.-monster_gate_question_day_route
 
 .type monster_stage30_legacy_gate_question_handler,@function
@@ -5634,6 +5706,33 @@ monster_stage30_legacy_gate_question_handler:
     leave
     ret
 .size monster_stage30_legacy_gate_question_handler,.-monster_stage30_legacy_gate_question_handler
+
+
+.type monster_stage31_gate_question_patch_handler,@function
+monster_stage31_gate_question_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    mov r12,rdi
+    test r12,r12
+    je .Lms31_fail
+    mov rdi,qword ptr [r12+CTX_STAGE30_SIGNED_STEP]
+    test rdi,rdi
+    je .Lms31_fail
+    call monster_gate_question_day_route
+    test rax,rax
+    je .Lms31_fail
+    mov qword ptr [r12+CTX_STAGE31_PATCHED_RESULT],rax
+    inc qword ptr [r12+CTX_STAGE31_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms31_done
+.Lms31_fail:
+    xor eax,eax
+.Lms31_done:
+    pop r12
+    leave
+    ret
+.size monster_stage31_gate_question_patch_handler,.-monster_stage31_gate_question_patch_handler
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -5738,6 +5837,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage30_legacy_gate_question_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage31_gate_question_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
