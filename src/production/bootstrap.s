@@ -56,7 +56,9 @@
 .equ CTX_PRIOR_ROUTE_RESULT,432
 .equ CTX_LEGACY_PRIOR_SEEN,440
 .equ CTX_PRIOR_ROUTE_SEEN,448
-.equ CTX_SIZE,456
+.equ CTX_PATCHED_PRIOR_RESULT,456
+.equ CTX_PRIOR_PATCH_SEEN,464
+.equ CTX_SIZE,472
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -141,6 +143,8 @@ legacy_hidden_stone_kind:
 .global monster_hidden_route
 .global monster_stage10_legacy_hidden_handler
 .global legacyPrior
+.global priorPatch
+.global monster_stage13_prior_patch_wrapper
 .global monster_prior_route
 .global monster_stage12_legacy_prior_handler
 
@@ -1449,13 +1453,59 @@ legacyPrior:
     ret
 .size legacyPrior,.-legacyPrior
 
+.type priorPatch,@function
+priorPatch:
+    # rdi=dropStore(logical slot 0), rsi=hiddenBackward, rdx=i, rcx=back.
+    # Ⲡslot ⲉϥⲟ ⲛ1 ⲏ ⲉϥⲛⲁⲁⲁϥ ϫⲓ ⲙⲡlegacy; ⲡslot ⲛ0 ϣⲁ -6 ϫⲓ ⲙⲡhidden ⲕⲁⲧⲁ k=1-slot.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov rax,r14
+    sub rax,r15
+    cmp rax,1
+    jl .Lpp_hidden
+    mov rdi,r12
+    mov rsi,r14
+    mov rdx,r15
+    call legacyPrior
+    jmp .Lpp_done
+.Lpp_hidden:
+    mov rcx,1
+    sub rcx,rax
+    cmp rcx,1
+    jb .Lpp_fail
+    cmp rcx,7
+    ja .Lpp_fail
+    mov rdi,r13
+    mov rsi,rcx
+    call hiddenByNearness
+    jmp .Lpp_done
+.Lpp_fail:
+    xor eax,eax
+.Lpp_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size priorPatch,.-priorPatch
+
+.type monster_stage13_prior_patch_wrapper,@function
+monster_stage13_prior_patch_wrapper:
+    jmp priorPatch
+.size monster_stage13_prior_patch_wrapper,.-monster_stage13_prior_patch_wrapper
+
 .type monster_prior_route,@function
 monster_prior_route:
-    # rdi=dropStore(logical slot 0), rsi=hiddenBackward, rdx=i, rcx=back.
-    # Ⲡhidden argument ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ϩⲙⲡcontract, ⲁⲗⲗⲁ ⲡlegacy ⲛϥϫⲓ ⲙⲙⲟϥ ⲁⲛ.
-    mov rsi,rdx
-    mov rdx,rcx
-    jmp legacyPrior
+    jmp monster_stage13_prior_patch_wrapper
 .size monster_prior_route,.-monster_prior_route
 
 .type monster_stage12_legacy_prior_handler,@function
@@ -1510,7 +1560,9 @@ monster_stage12_legacy_prior_handler:
     mov ecx,1
     call monster_prior_route
     mov qword ptr [r12+CTX_PRIOR_ROUTE_RESULT],rax
+    mov qword ptr [r12+CTX_PATCHED_PRIOR_RESULT],rax
     inc qword ptr [r12+CTX_PRIOR_ROUTE_SEEN]
+    inc qword ptr [r12+CTX_PRIOR_PATCH_SEEN]
     mov eax,1
     jmp .Lms12_done
 .Lms12_fail:

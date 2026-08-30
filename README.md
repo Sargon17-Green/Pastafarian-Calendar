@@ -113,3 +113,14 @@
 Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲙⲓⲛⲉ ⲛ7 ⲛquery: ⲙⲛ 2 ⲉⲣⲉ `i-back >= 1` ⲁⲩⲱ ⲥⲉⲧⲱⲛ, ⲙⲛ 5 ⲉⲣⲉ `i-back <= 0` ⲁⲩⲱ ⲡlegacy ⲛϥϫⲓ ⲁⲛ ⲙⲡhidden ⲉⲧϣⲟⲟⲡ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡStage 12 ⲟ ⲛ`EXPECTED_RED`.
 
 Ⲙⲛ detour ⲛⲧⲉⲡhistory ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. ⲚStage 1–11 ⲥⲉⲟ ⲛ`GREEN`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 13 — PATCH 06
+
+Ⲡ`legacyPrior` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲁⲩⲕⲱ ⲉϫⲱϥ ⲙⲡ`priorPatch`: ⲉϣϫⲉ `slot=i-back` ⲟ ⲛ1 ⲏ ⲉϥⲛⲁⲁⲁϥ, ⲡⲣⲱⲧⲉ ⲙⲟⲟϣⲉ ϩⲓⲧⲛ `legacyPrior`; ⲉϣϫⲉ ⲡslot ⲟ ⲛ0 ϣⲁ -6, ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡ`k=1-slot` ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡhidden ϩⲓⲧⲛ `hiddenByNearness`.
+
+`monster_prior_route -> monster_stage13_prior_patch_wrapper -> priorPatch`
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_PATCHED_PRIOR_RESULT` ⲙⲛ `CTX_PRIOR_PATCH_SEEN`, ϩⲟⲡⲟⲩ ⲡ`CTX_LEGACY_PRIOR_RESULT` ⲟⲩⲏϩ ⲉϥⲥⲏϩ ⲛⲟⲩCOPY_DIAGNOSTIC. ⲠStage 12 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.
+
+ⲠStage 13 ⲥⲙⲓⲛⲉ ⲛ7 ⲛpredecessor: ⲛ2 ⲛvisible ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡlegacy, ⲁⲩⲱ ⲛ5 ⲛhidden ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡhidden-nearness patch. Ⲟⲩⲛ 0 ⲛmismatch ⲙⲡ`priorPatch` ⲙⲛ ⲡroute.

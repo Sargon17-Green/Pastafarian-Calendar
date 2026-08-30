@@ -195,3 +195,26 @@
 Ⲉϣϫⲉ `i-back >= 1`, ⲡlegacy ϣⲁϥϫⲓ ⲙⲡvisible drop ⲉⲧⲥⲏϩ ϩⲙⲡstore. Ⲉϣϫⲉ `i-back <= 0`, ⲛhidden predecessor ⲥⲉϣⲟⲟⲡ ϩⲙⲡbackward hidden storage ⲉϥϣⲟⲃⲉ, ⲁⲗⲗⲁ ⲡ`legacyPrior` ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡslot ⲙⲡdropStore. Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲱⲡ ⲛ5 ⲛⲇⲓⲁⲫⲟⲣⲁ ⲉⲩⲧⲟϣ ⲙⲛ 2 ⲛvisible query ⲉⲩⲧⲱⲛ.
 
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `monster_stage12_legacy_prior_handler`, `monster_prior_route`, ⲙⲛ state ⲛⲧⲉⲡdropStore ⲙⲛ ⲡquery ⲙⲛ ⲛresult. Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩdetour ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 13 — PATCH 06
+
+Ⲡ`legacyPrior` ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲙⲟϥ. Ⲛϥⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡ`dropStore[i-back]`, ⲁⲩⲱ ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩCOPY_DIAGNOSTIC ⲉϫⲛ ⲡslot 0.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲡ`priorPatch`. Ⲉϣϫⲉ `slot>=1`, ⲛϥⲙⲟⲩⲧⲉ ⲉ`legacyPrior` ⲙⲙⲁⲧⲉ. Ⲉϣϫⲉ `slot<=0`, ⲛϥⲧⲁⲙⲓⲟ ⲙⲡ`k=1-slot` ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉ`hiddenByNearness`; ⲡbackward storage ⲛϥⲕⲧⲟ ⲁⲛ.
+
+`monster_prior_route -> monster_stage13_prior_patch_wrapper -> priorPatch`
+
+Ⲡ`MonsterContext` ⲟⲩⲱϩ ⲉϫⲛ `CTX_PATCHED_PRIOR_RESULT` ⲙⲛ `CTX_PRIOR_PATCH_SEEN`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ; ⲡlegacy result ⲙⲛ ⲡpatched result ⲛⲥⲉⲧⲱⲛ ⲁⲛ ϩⲛ ⲟⲩfield ⲛⲟⲩⲱⲧ.
+
+### EQUIVALENCE
+
+Ⲉϣϫⲉ `slot>=1`, ⲡnormative predecessor ⲡⲉ ⲡvisible `dropStore[slot]`, ⲁⲩⲱ ⲡ`legacyPrior` ϯ ⲙⲡpointer ⲛⲧⲟϥ. Ⲉϣϫⲉ `slot<=0`, ⲡformula `k=1-slot` ⲕⲱ ⲙⲡslot 0,-1,...,-6 ⲉ hidden1,hidden2,...,hidden7, ⲁⲩⲱ ⲡ`hiddenByNearness` ϩⲁⲣⲉϩ ⲉⲡstorage ⲛⲥⲁϩⲟⲩ ϩⲓⲧⲛ ⲡtranslation `8-k`.
+
+### EDGE CASES
+
+Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲛslot 1,2,0,-1,-2,-5,-6. Ⲡlegacy scar ⲟⲩⲏϩ ⲉϥϯ 0 ⲉslot 0 ϩⲙⲡdropStore; ⲡpatched route ⲟ ⲛ0 ⲛmismatch ⲉϫⲛ ⲛ7 ⲛcase.
+
+### WHY SAFE
+
+Ⲡⲡⲁⲧϣ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡdropStore ⲏ ⲡhidden storage. Ⲛϥⲧⲟϣ ⲙⲙⲁⲧⲉ ⲙⲡsource ⲙⲡpredecessor ⲕⲁⲧⲁ ⲡslot, ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲛlegacy/patch ⲉⲧϣⲟⲟⲡ ⲏⲇⲏ. Ⲙⲛ log, metric, cache ⲏ environment ⲉϥⲧⲟϣ ⲙⲡⲟⲩⲱϣⲃ.

@@ -171,3 +171,12 @@
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_DROP_STORE`, `CTX_PRIOR_I`, `CTX_PRIOR_BACK`, `CTX_LEGACY_PRIOR_RESULT`, `CTX_PRIOR_ROUTE_RESULT`, `CTX_LEGACY_PRIOR_SEEN` ⲙⲛ `CTX_PRIOR_ROUTE_SEEN`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.
 
 Ⲡhandler ⲧⲁⲙⲓⲟ ⲛⲟⲩdropStore ⲉϥⲕⲱ ⲛlogical slot -6..8. Ⲛslot 0..-6 ⲥⲉⲟ ⲛ0 ϩⲙⲡlegacy store, ϩⲟⲡⲟⲩ ⲡhidden storage ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ϩⲛ ⲟⲩstate ⲉϥϣⲟⲃⲉ. Ⲙⲛ normalization ⲏ fallback ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ.
+
+
+## Ⲡprior detour ⲙⲡⲃⲁⲑⲙⲟⲥ 13
+
+Ⲡ`legacyPrior` ⲟⲩⲏϩ ⲉϥⲟ ⲛCOPY_DIAGNOSTIC ⲁⲩⲱ ⲟⲛ ⲡⲣⲱⲧⲉ ⲛvisible predecessor ϩⲙⲡCOPY_AUTHORITATIVE. Ⲡ`priorPatch` ⲡⲉ ⲡresolver ⲙⲡslot: `slot>=1` ⲕⲧⲟ ⲉ`legacyPrior`; `slot<=0` ⲕⲧⲟ ⲉ`hiddenByNearness` ϩⲓⲧⲛ `k=1-slot`.
+
+`monster_prior_route -> monster_stage13_prior_patch_wrapper -> priorPatch -> {legacyPrior | hiddenByNearness}`
+
+Ⲡ`CTX_LEGACY_PRIOR_RESULT` ⲙⲛ ⲡ`CTX_PATCHED_PRIOR_RESULT` ⲥⲉϣⲟⲟⲡ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. Ⲡroute ⲙⲡpatch ⲡⲉ ⲡCOPY_AUTHORITATIVE; ⲡlegacy call ⲙⲡslot 0 ⲡⲉ ⲡCOPY_DIAGNOSTIC.

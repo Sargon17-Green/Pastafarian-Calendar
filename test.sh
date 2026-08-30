@@ -14,3 +14,4 @@ set -euo pipefail
 ./build/stage10_discovery05
 ./build/stage11_patch05
 ./build/stage12_discovery06
+./build/stage13_patch06
