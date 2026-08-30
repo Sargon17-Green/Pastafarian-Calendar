@@ -54,8 +54,19 @@ jobs:
             -Icandidate/include -Icandidate/tests -Icandidate \
             candidate/tools/branch_vector_runner.cpp candidate/src/monster.cpp \
             -o bin/candidate-vector
+          clang++ $CXXSTD -O2 $COMMON_WARNINGS \
+            -Icandidate/include -Icandidate/tests -Icandidate \
+            candidate/tools/patch40_wide_funeral_probe.cpp candidate/src/monster.cpp \
+            -o bin/candidate-patch40-probe
           clang++ --version | head -1
-          sha256sum bin/baseline-vector bin/candidate-vector
+          sha256sum bin/baseline-vector bin/candidate-vector bin/candidate-patch40-probe
+
+      - name: Probare exsequias rejectionis latae PATCH 40
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 2m bin/candidate-patch40-probe | tee patch40-wide-funeral.log
+          grep -q '^PATCH40_EXSEQUIAE_REIECTIONIS_LATAE=PASS' patch40-wide-funeral.log
 
       - name: Servare executabilia
         uses: actions/upload-artifact@v6
