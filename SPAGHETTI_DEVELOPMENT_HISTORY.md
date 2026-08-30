@@ -1258,3 +1258,14 @@ Li public Stage 57 rende `[5000, rise, 547, tri partes de quin, 72]`, egal a can
 Li corrective es revalidat sur li baseline remote `1f2ff72cce768eb9b295bef891aea683ed3ade97`. Li verifier passa 78 gruppes / 66942 assertions; li tri tests focal Stage 57 passa, Patch 26 historic passa, Integration 54 passa, Audit 55 core passa 29/29, Audit 55 crossing passa, e li Stage 56 core/near/reference/Foundation shards passa. Li testbench witness `c=-15048553, t=-15044872` rende exactmen canonical `(5000,14,547,7,72)`. Li Stage 56 historic alias continua jettar li old guard error sur li sam witness.
 
 Li delta Stage 57 ne include null HANDOFF. Li workflow complet es extendet per exigir Stage 57 ante declarar li branche GREEN.
+
+
+## Stage 58 — remembered acceleration scars
+
+Stage 58 ne netta li monster. Li public package-version ne es incrementat: it resta `0.0.57-stage-57-corrective`, quam un compatibility scar intentional. It adjunte un nov strata de memoria supra li archaeology existent: bounded gate/gap checkpoints, direction-tagged year anchors, weak sauce memories separat por Stage 54/56, exact selection/rejection memo, weak reuse de `VirtualLegacyList` e `LegalMonthWeavingDP` backends, un fast weaving traversal sibling, e un semantic structure cache keyed per full fingerprint supra li intentionally bad `year.number` cache.
+
+Li old routes resta fisicmen activ. `sauceWithOrderAt46Latch`, `selectionDispatcherWithWideDetour`, `LegalMonthWeavingDP.unrank1`, li sequential gate registry, `findYearByWalkPatch`, Patch 19, Stage 56 historic e li Patch 26 round-trip ghost de Stage 57 ne es eliminat. Quand Stage 58 evita heavyweight work, diagnostics marca li route quam remembered/cache-backed invez de pretender que li calcul esset refat.
+
+Li memories pesant es weak e bounded per key slots; gate/year/selection/structure memories have caps explicit. Sur Node v22.16.0 li cold Stage 57 witness cade de 20371.367 ms a 15732.753 ms, neighbor-year retro de 7994.777 ms a 5664.486 ms, far-retro fresh de 28517.259 ms a 22675.463 ms, e identical repeat de 4.205 ms a 0.705 ms. Stage 54/56 historic cold anc deven plu rapid sin cambiar lor canonical outputs. Omni 10 benchmark comparisons es canonical-identic.
+
+Li detailed evidence, cache counters, memory tradeoffs e intentional bottlenecks resta in `STAGE_58_ACCELERATION_REPORT.md` e `artifacts/STAGE_58_*`. `tests/stage-58-acceleration.js` verifica historical/replay sauce equivalence, generation separation, rejection reuse, DP backend reuse, 1301 exhaustive weaving ranks, shared gate checkpoints e direction-safe year anchors.

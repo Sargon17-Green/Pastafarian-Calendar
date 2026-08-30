@@ -1,0 +1,35 @@
+{
+  "first": {
+    "ms": 115.370782,
+    "day": "-15041828",
+    "gapCalls": "26",
+    "checkpointHits": "0",
+    "materialized": "27"
+  },
+  "second": {
+    "ms": 0.1512570000000153,
+    "day": "-15041828",
+    "gapCalls": "0",
+    "checkpointHits": "26",
+    "materialized": "27"
+  },
+  "sameDay": true,
+  "metrics": {
+    "stage58.gates.gapMisses": "26",
+    "stage58.sauce56.misses": "26",
+    "stage58.sauce56.recomputations": "26",
+    "stage58.stones.misses": "1",
+    "stage58.orderLatch.legacyTraversalsExecuted": "26",
+    "stage58.orderLatch.semanticTraversalsRemembered": "26",
+    "stage58.orderLatch.rememberedDropSteps": "1196",
+    "stage58.orderLatch.rememberedPostStirSteps": "312",
+    "stage58.stage56.historicalSauceRememberedReplays": "26",
+    "stage58.selection.misses": "26",
+    "stage58.selection.rejectionIterations": "0",
+    "stage58.gates.gapComputations": "26",
+    "stage58.gates.checkpointMisses": "26",
+    "stage58.gates.registryCellsMaterialized": "52",
+    "stage58.stones.hits": "25",
+    "stage58.gates.checkpointHits": "26"
+  }
+}

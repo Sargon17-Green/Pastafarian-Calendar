@@ -574,3 +574,14 @@ Li membership ne es errat in Patch 18: `findYearByWalkPatch` ja usa `targetDay<=
 Stage 57 ne modifica null helper historic. `legacyStage54Patch26RoundTripGuard` conserva e executa li old guard; `legacyFindYearClosedOpeningInterval` e `correctOpeningGateInterval` resta intact. `stage57PreserveSequentialYearAfterPatch26Ghost` conserva li round-trip quam ghost e, solmen in `Stage57MonsterIntegrationManager`, reten li year Patch 18 quam semantic. Li old Stage 56 route resta accessibil per `calendarDateSpaghettiStage56Historical*` e continua faller sur li witness exact.
 
 Li public Stage 57 rende `[5000, rise, 547, tri partes de quin, 72]`, egal a canonical `(5000,14,547,7,72)`. Li Stage 55 certificate e li Stage 56 corrective ne es rescrit.
+
+
+## Stage 58 — remembered acceleration scars
+
+Stage 58 ne netta li monster. Li public package-version ne es incrementat: it resta `0.0.57-stage-57-corrective`, quam un compatibility scar intentional. It adjunte un nov strata de memoria supra li archaeology existent: bounded gate/gap checkpoints, direction-tagged year anchors, weak sauce memories separat por Stage 54/56, exact selection/rejection memo, weak reuse de `VirtualLegacyList` e `LegalMonthWeavingDP` backends, un fast weaving traversal sibling, e un semantic structure cache keyed per full fingerprint supra li intentionally bad `year.number` cache.
+
+Li old routes resta fisicmen activ. `sauceWithOrderAt46Latch`, `selectionDispatcherWithWideDetour`, `LegalMonthWeavingDP.unrank1`, li sequential gate registry, `findYearByWalkPatch`, Patch 19, Stage 56 historic e li Patch 26 round-trip ghost de Stage 57 ne es eliminat. Quand Stage 58 evita heavyweight work, diagnostics marca li route quam remembered/cache-backed invez de pretender que li calcul esset refat.
+
+Li memories pesant es weak e bounded per key slots; gate/year/selection/structure memories have caps explicit. Sur Node v22.16.0 li cold Stage 57 witness cade de 20371.367 ms a 15732.753 ms, neighbor-year retro de 7994.777 ms a 5664.486 ms, far-retro fresh de 28517.259 ms a 22675.463 ms, e identical repeat de 4.205 ms a 0.705 ms. Stage 54/56 historic cold anc deven plu rapid sin cambiar lor canonical outputs. Omni 10 benchmark comparisons es canonical-identic.
+
+Li detailed evidence, cache counters, memory tradeoffs e intentional bottlenecks resta in `STAGE_58_ACCELERATION_REPORT.md` e `artifacts/STAGE_58_*`. `tests/stage-58-acceleration.js` verifica historical/replay sauce equivalence, generation separation, rejection reuse, DP backend reuse, 1301 exhaustive weaving ranks, shared gate checkpoints e direction-safe year anchors.

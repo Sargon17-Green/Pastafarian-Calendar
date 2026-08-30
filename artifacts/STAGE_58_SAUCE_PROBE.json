@@ -1,0 +1,17 @@
+{
+  "firstMs": 20.373160999999996,
+  "secondMs": 0.22219100000000935,
+  "sameBowls": true,
+  "secondReplay": true,
+  "metrics": {
+    "stage58.sauce56.misses": "1",
+    "stage58.sauce56.recomputations": "1",
+    "stage58.stones.misses": "1",
+    "stage58.orderLatch.legacyTraversalsExecuted": "1",
+    "stage58.orderLatch.semanticTraversalsRemembered": "1",
+    "stage58.orderLatch.rememberedDropSteps": "46",
+    "stage58.orderLatch.rememberedPostStirSteps": "12",
+    "stage58.stage56.historicalSauceRememberedReplays": "1",
+    "stage58.sauce56.hits": "1"
+  }
+}

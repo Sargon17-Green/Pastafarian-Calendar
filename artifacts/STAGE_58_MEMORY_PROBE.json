@@ -1,0 +1,47 @@
+{
+  "before": {
+    "rss": 44994560,
+    "heapTotal": 7278592,
+    "heapUsed": 4291704,
+    "external": 1178184,
+    "arrayBuffers": 10475,
+    "maxRSSKB": 43940
+  },
+  "afterCall": {
+    "rss": 477822976,
+    "heapTotal": 426782720,
+    "heapUsed": 398016520,
+    "external": 1178224,
+    "arrayBuffers": 10475,
+    "maxRSSKB": 466624
+  },
+  "afterGC": {
+    "rss": 470781952,
+    "heapTotal": 39522304,
+    "heapUsed": 4999432,
+    "external": 1178224,
+    "arrayBuffers": 10475,
+    "maxRSSKB": 466624
+  },
+  "result": [
+    "5000",
+    "frument",
+    "21",
+    "sand",
+    "57"
+  ],
+  "cacheSizes": {
+    "sauce54WeakKeySlots": 0,
+    "sauce54WeakLive": 0,
+    "sauce56WeakKeySlots": 28,
+    "sauce56WeakLive": 0,
+    "virtualBackendWeakKeySlots": 1,
+    "virtualBackendWeakLive": 0,
+    "weavingBackendWeakKeySlots": 1,
+    "weavingBackendWeakLive": 0,
+    "selections": 35,
+    "stoneTableSnapshots": 1,
+    "weakRefSupported": true,
+    "weakFallbackSkippedWrites": "0"
+  }
+}

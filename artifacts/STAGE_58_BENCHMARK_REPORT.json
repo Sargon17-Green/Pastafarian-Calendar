@@ -1,0 +1,427 @@
+{
+  "node": "v22.16.0",
+  "witnessCalculationDay": "-15048173",
+  "allCanonicalResultsEqual": true,
+  "scenarios": [
+    {
+      "scenario": "cold-single-stage57",
+      "baselineMs": 20371.367,
+      "stage58Ms": 15732.753,
+      "speedup": 1.2948380362928216,
+      "wallClockReductionPercent": 22.77026377267661,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "5000",
+        "frument",
+        "21",
+        "sand",
+        "57"
+      ],
+      "stage58Result": [
+        "5000",
+        "frument",
+        "21",
+        "sand",
+        "57"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 28,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 26,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 0,
+        "adjacentYearBuilds": 0,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 0,
+        "semanticStructureMisses": 2,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 1,
+        "weavingDpBackendHits": 1,
+        "weavingDpBackendMisses": 1,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 1,
+        "selectionCacheMisses": 35,
+        "gatesMaterializedInRegistry": 27
+      }
+    },
+    {
+      "scenario": "identical-repeat-stage57",
+      "baselineMs": 4.205,
+      "stage58Ms": 0.705,
+      "speedup": 5.964539007092199,
+      "wallClockReductionPercent": 83.23424494649228,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "5000",
+        "frument",
+        "21",
+        "sand",
+        "57"
+      ],
+      "stage58Result": [
+        "5000",
+        "frument",
+        "21",
+        "sand",
+        "57"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 0,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 0,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 1,
+        "adjacentYearBuilds": 0,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 1,
+        "semanticStructureMisses": 0,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 0,
+        "weavingDpBackendHits": 0,
+        "weavingDpBackendMisses": 0,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 0,
+        "selectionCacheMisses": 0,
+        "gatesMaterializedInRegistry": 27
+      }
+    },
+    {
+      "scenario": "same-year-target+1",
+      "baselineMs": 3.837,
+      "stage58Ms": 0.321,
+      "speedup": 11.953271028037383,
+      "wallClockReductionPercent": 91.63408913213448,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "5000",
+        "frument",
+        "22",
+        "camel",
+        "58"
+      ],
+      "stage58Result": [
+        "5000",
+        "frument",
+        "22",
+        "camel",
+        "58"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 0,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 0,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 1,
+        "adjacentYearBuilds": 0,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 1,
+        "semanticStructureMisses": 0,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 0,
+        "weavingDpBackendHits": 0,
+        "weavingDpBackendMisses": 0,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 0,
+        "selectionCacheMisses": 0,
+        "gatesMaterializedInRegistry": 27
+      }
+    },
+    {
+      "scenario": "same-year-target-1",
+      "baselineMs": 3.776,
+      "stage58Ms": 0.221,
+      "speedup": 17.085972850678733,
+      "wallClockReductionPercent": 94.14724576271186,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "5000",
+        "frument",
+        "20",
+        "tri partes de quin",
+        "58"
+      ],
+      "stage58Result": [
+        "5000",
+        "frument",
+        "20",
+        "tri partes de quin",
+        "58"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 0,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 0,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 1,
+        "adjacentYearBuilds": 0,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 1,
+        "semanticStructureMisses": 0,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 0,
+        "weavingDpBackendHits": 0,
+        "weavingDpBackendMisses": 0,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 0,
+        "selectionCacheMisses": 0,
+        "gatesMaterializedInRegistry": 27
+      }
+    },
+    {
+      "scenario": "same-calculation-day-forward-2500",
+      "baselineMs": 3.961,
+      "stage58Ms": 0.413,
+      "speedup": 9.590799031476998,
+      "wallClockReductionPercent": 89.57334006564,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "5000",
+        "Akkad",
+        "479",
+        "gudron",
+        "115"
+      ],
+      "stage58Result": [
+        "5000",
+        "Akkad",
+        "479",
+        "gudron",
+        "115"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 0,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 0,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 1,
+        "adjacentYearBuilds": 0,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 1,
+        "semanticStructureMisses": 0,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 0,
+        "weavingDpBackendHits": 0,
+        "weavingDpBackendMisses": 0,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 0,
+        "selectionCacheMisses": 0,
+        "gatesMaterializedInRegistry": 27
+      }
+    },
+    {
+      "scenario": "neighboring-year-backward-2500",
+      "baselineMs": 7994.777,
+      "stage58Ms": 5664.486,
+      "speedup": 1.4113861345936771,
+      "wallClockReductionPercent": 29.147667283277574,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "4999",
+        "pense",
+        "237",
+        "granat",
+        "42"
+      ],
+      "stage58Result": [
+        "4999",
+        "pense",
+        "237",
+        "granat",
+        "42"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 3,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 1,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 1,
+        "adjacentYearBuilds": 1,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 0,
+        "semanticStructureMisses": 2,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 1,
+        "weavingDpBackendHits": 1,
+        "weavingDpBackendMisses": 1,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 1,
+        "selectionCacheMisses": 10,
+        "gatesMaterializedInRegistry": 28
+      }
+    },
+    {
+      "scenario": "far-forward-12000",
+      "baselineMs": 4695.496,
+      "stage58Ms": 3571.076,
+      "speedup": 1.3148686838364683,
+      "wallClockReductionPercent": 23.9467779335772,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "5004",
+        "rise",
+        "284",
+        "asin",
+        "66"
+      ],
+      "stage58Result": [
+        "5004",
+        "rise",
+        "284",
+        "asin",
+        "66"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 28,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 23,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 1,
+        "adjacentYearBuilds": 4,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 0,
+        "semanticStructureMisses": 2,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 1,
+        "weavingDpBackendHits": 1,
+        "weavingDpBackendMisses": 1,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 4,
+        "selectionCacheMisses": 35,
+        "gatesMaterializedInRegistry": 51
+      }
+    },
+    {
+      "scenario": "stage-57-offset--12000",
+      "baselineMs": 28517.259,
+      "stage58Ms": 22675.463,
+      "speedup": 1.2576263161638639,
+      "wallClockReductionPercent": 20.485124464451506,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "4997",
+        "scorpion",
+        "372",
+        "fus",
+        "88"
+      ],
+      "stage58Result": [
+        "4997",
+        "scorpion",
+        "372",
+        "fus",
+        "88"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 49,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 44,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 0,
+        "adjacentYearBuilds": 3,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 0,
+        "semanticStructureMisses": 2,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 1,
+        "weavingDpBackendHits": 1,
+        "weavingDpBackendMisses": 1,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 4,
+        "selectionCacheMisses": 56,
+        "gatesMaterializedInRegistry": 45
+      }
+    },
+    {
+      "scenario": "stage-54-offset-0",
+      "baselineMs": 27575.809589,
+      "stage58Ms": 22555.254,
+      "speedup": 1.2225891842760892,
+      "wallClockReductionPercent": 18.20637603692586,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "5000",
+        "li vacui vase",
+        "456",
+        "sesam",
+        "87"
+      ],
+      "stage58Result": [
+        "5000",
+        "li vacui vase",
+        "456",
+        "sesam",
+        "87"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 28,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 26,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 0,
+        "adjacentYearBuilds": 0,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 0,
+        "semanticStructureMisses": 2,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 1,
+        "weavingDpBackendHits": 1,
+        "weavingDpBackendMisses": 1,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 1,
+        "selectionCacheMisses": 35,
+        "gatesMaterializedInRegistry": 27
+      }
+    },
+    {
+      "scenario": "stage-56-offset-0",
+      "baselineMs": 19090.659179,
+      "stage58Ms": 16363.735,
+      "speedup": 1.1666443619992624,
+      "wallClockReductionPercent": 14.28407554412607,
+      "canonicalResultEqual": true,
+      "baselineResult": [
+        "5000",
+        "frument",
+        "21",
+        "sand",
+        "57"
+      ],
+      "stage58Result": [
+        "5000",
+        "frument",
+        "21",
+        "sand",
+        "57"
+      ],
+      "stage58Counters": {
+        "sauceComputations": 28,
+        "sauceCacheHits": 0,
+        "gateGapComputations": 26,
+        "gateCheckpointHits": 0,
+        "year5000Hits": 0,
+        "adjacentYearBuilds": 0,
+        "adjacentYearTransitionHits": 0,
+        "semanticStructureHits": 0,
+        "semanticStructureMisses": 2,
+        "virtualDpBackendHits": 0,
+        "virtualDpBackendMisses": 1,
+        "weavingDpBackendHits": 1,
+        "weavingDpBackendMisses": 1,
+        "rejectionIterations": 0,
+        "rejectionIterationsAvoided": 0,
+        "selectionCacheHits": 1,
+        "selectionCacheMisses": 35,
+        "gatesMaterializedInRegistry": 27
+      }
+    }
+  ]
+}
