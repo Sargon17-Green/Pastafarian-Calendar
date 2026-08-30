@@ -1,0 +1,557 @@
+name: Vigilia diuturna — C++ + Latina Nova
+
+on:
+  push:
+    branches:
+      - 'C\+\+&Latina'
+  pull_request:
+    branches:
+      - 'C\+\+&Latina'
+permissions:
+  contents: read
+
+concurrency:
+  group: cpp-latina-nova-soak-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CXXSTD: '-std=c++20'
+  COMMON_WARNINGS: '-Wall -Wextra -Wpedantic'
+  COMMON_INCLUDES: '-Iinclude -Itests -I.'
+  SOAK_ROUNDS: '8'
+
+jobs:
+  custodia-arboris:
+    name: Custodia arboris et provenance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v4
+
+      - name: Notare provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-logs
+          {
+            echo "REPOSITORY=${GITHUB_REPOSITORY}"
+            echo "REF=${GITHUB_REF}"
+            echo "SHA=${GITHUB_SHA}"
+            echo "EVENT=${GITHUB_EVENT_NAME}"
+            git status --short
+            git rev-parse HEAD
+          } | tee soak-logs/provenance.log
+
+      - name: Vetare HANDOFF, build et Gradum 57
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            if git ls-files | grep -E '(^|/)HANDOFF_' ; then
+              echo 'DEFECTUS: HANDOFF_* in arbore trackata repertum est.' >&2
+              exit 1
+            fi
+            if git ls-files | grep -E '(^|/)(build|build_[^/]*|build-stage[^/]*)/' ; then
+              echo 'DEFECTUS: artifactum build trackatum repertum est.' >&2
+              exit 1
+            fi
+            if git ls-files | grep -Ei '(^|/)STAGE_57|(^|/)stage_57' ; then
+              echo 'DEFECTUS: Gradus 57 in ramo soak nondum admittitur.' >&2
+              exit 1
+            fi
+            echo 'HANDOFF_TRACKED=NO'
+            echo 'BUILD_ARTIFACT_TRACKED=NO'
+            echo 'STAGE_57_TRACKED=NO'
+          } | tee soak-logs/tree-guard.log
+
+      - name: Requirere testimonia Gradus 56
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in \
+            DEVELOPMENT_STAGE.md \
+            STAGE_56_LOCAL_TEST_LOG.txt \
+            STAGE_56_CORRECTIVE_EVIDENCE.md \
+            STAGE_56_FINAL_BYTE_AUDIT.txt \
+            tests/stage_56_raw_bowl_sum_corrective_tests.cpp \
+            tests/stage_56_final_static_audit_tests.cpp \
+            tests/stage_56_e2e_worker.cpp \
+            src/monster.cpp \
+            include/pastafari/monster.hpp; do
+            test -f "$f" || { echo "DEFECTUS: deest $f" >&2; exit 1; }
+          done
+          grep -q 'GRADUS=56_CORRECTIVUS_POST_COMPLETIONEM' STAGE_56_LOCAL_TEST_LOG.txt
+          grep -q 'STATUS=PASS' STAGE_56_LOCAL_TEST_LOG.txt
+          grep -q 'CORE_XII_COMMOTIONES=12/12_PASS' STAGE_56_LOCAL_TEST_LOG.txt
+          grep -q 'E2E_EXTERNI_CANONICI=4/4_PASS' STAGE_56_LOCAL_TEST_LOG.txt
+          echo 'TESTIMONIA_STAGE56=PASS' | tee soak-logs/stage56-evidence-guard.log
+
+      - name: Servare logs custodiae
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-latina-soak-custodia
+          path: soak-logs/
+          if-no-files-found: error
+          retention-days: 30
+
+  regressiones-historicae:
+    name: Regressiones historicae — ${{ matrix.label }}
+    needs: custodia-arboris
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Gradus 01–14
+            primus: 2
+            ultimus: 14
+            bootstrap: 'yes'
+          - label: Gradus 15–27
+            primus: 15
+            ultimus: 27
+            bootstrap: 'no'
+          - label: Gradus 28–40
+            primus: 28
+            ultimus: 40
+            bootstrap: 'no'
+          - label: Gradus 41–54
+            primus: 41
+            ultimus: 54
+            bootstrap: 'no'
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v4
+
+      - name: Compilare nucleum commune
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build_soak/history soak-logs
+          g++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES -c src/monster.cpp -o build_soak/history/monster.o
+          g++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES -c tests/reference/normative_reference.cpp -o build_soak/history/reference.o
+          g++ --version | head -1 | tee soak-logs/compiler.log
+
+      - name: Currere shard historicum
+        shell: bash
+        run: |
+          set -euo pipefail
+          LOG="soak-logs/history-${{ matrix.primus }}-${{ matrix.ultimus }}.log"
+          exec > >(tee "$LOG") 2>&1
+
+          curre_unum() {
+            src="$1"
+            nomen="$(basename "$src" .cpp)"
+            exe="build_soak/history/$nomen"
+            echo "=== COMPILO $src ==="
+            g++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES "$src" \
+              build_soak/history/monster.o build_soak/history/reference.o -o "$exe"
+            echo "=== CURRO $nomen ==="
+            timeout 30m "$exe"
+          }
+
+          if [[ '${{ matrix.bootstrap }}' == 'yes' ]]; then
+            curre_unum tests/bootstrap_tests.cpp
+          fi
+
+          for n in $(seq ${{ matrix.primus }} ${{ matrix.ultimus }}); do
+            nn=$(printf '%02d' "$n")
+            mapfile -t fontes < <(find tests -maxdepth 1 -type f -name "stage_${nn}_*_tests.cpp" | sort)
+            if [[ ${#fontes[@]} -ne 1 ]]; then
+              echo "DEFECTUS: pro Stage ${nn} inventa sunt ${#fontes[@]} test files" >&2
+              printf '%s\n' "${fontes[@]}" >&2
+              exit 1
+            fi
+            curre_unum "${fontes[0]}"
+          done
+          echo "SHARD_HISTORICUS=PASS"
+
+      - name: Servare logs regressionum
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-latina-history-${{ matrix.primus }}-${{ matrix.ultimus }}
+          path: soak-logs/
+          if-no-files-found: error
+          retention-days: 30
+
+  audit-gradus-55:
+    name: Audit Gradus 55 et processus isolati
+    needs: custodia-arboris
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v4
+
+      - name: Compilare audit Gradus 55
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build_stage55_clang soak-logs
+          clang++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES -c src/monster.cpp -o build_stage55_clang/monster.o
+          clang++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES -c tests/reference/normative_reference.cpp -o build_stage55_clang/reference.o
+
+          compila_cum_nucleo() {
+            src="$1"; exe="$2"
+            clang++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES "$src" \
+              build_stage55_clang/monster.o build_stage55_clang/reference.o -o "$exe"
+          }
+
+          for src in \
+            tests/stage_55_recovery_audit_tests.cpp \
+            tests/stage_55_static_audit_tests.cpp \
+            tests/stage_55_helper_differential_audit_tests.cpp \
+            tests/stage_55_catalog_presentation_audit_tests.cpp \
+            tests/stage_55_safe_monster_audit_tests.cpp; do
+            nomen="$(basename "$src" .cpp)"
+            compila_cum_nucleo "$src" "build_stage55_clang/$nomen"
+          done
+
+          compila_cum_nucleo tests/stage_55_final_e2e_worker.cpp build_stage55_clang/stage_55_final_e2e_worker
+          compila_cum_nucleo tests/stage_55_far_year_worker.cpp build_stage55_clang/stage_55_far_year_worker
+          clang++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_55_process_isolated_e2e_runner.cpp -o build_stage55_clang/stage_55_process_isolated_e2e_runner
+          clang++ --version | head -1 | tee soak-logs/compiler.log
+
+      - name: Currere audits directos Gradus 55
+        shell: bash
+        run: |
+          set -euo pipefail
+          LOG=soak-logs/stage55-direct-audits.log
+          exec > >(tee "$LOG") 2>&1
+          for exe in \
+            stage_55_recovery_audit_tests \
+            stage_55_static_audit_tests \
+            stage_55_helper_differential_audit_tests \
+            stage_55_catalog_presentation_audit_tests \
+            stage_55_safe_monster_audit_tests; do
+            echo "=== $exe ==="
+            timeout 30m "build_stage55_clang/$exe"
+          done
+          echo 'AUDITA_DIRECTA_STAGE55=PASS'
+
+      - name: Currere E2E processibus separatis Gradus 55
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 45m build_stage55_clang/stage_55_process_isolated_e2e_runner \
+            2>&1 | tee soak-logs/stage55-process-isolated.log
+
+      - name: Servare logs Gradus 55
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-latina-stage55-audit
+          path: soak-logs/
+          if-no-files-found: error
+          retention-days: 30
+
+  matrix-gradus-56:
+    name: Gradus 56 — ${{ matrix.label }}
+    needs: custodia-arboris
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: gcc-O1
+            cxx: g++
+            opt: '-O1'
+          - label: gcc-O2
+            cxx: g++
+            opt: '-O2'
+          - label: gcc-O3
+            cxx: g++
+            opt: '-O3'
+          - label: clang-O1
+            cxx: clang++
+            opt: '-O1'
+          - label: clang-O2
+            cxx: clang++
+            opt: '-O2'
+          - label: clang-O3
+            cxx: clang++
+            opt: '-O3'
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v4
+
+      - name: Compilare Gradum 56
+        shell: bash
+        env:
+          CXX: ${{ matrix.cxx }}
+          OPT: ${{ matrix.opt }}
+        run: |
+          set -euo pipefail
+          mkdir -p build_soak/stage56 soak-logs
+          "$CXX" --version | head -1 | tee soak-logs/compiler.log
+          "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES -c src/monster.cpp -o build_soak/stage56/monster.o
+          "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES -c tests/reference/normative_reference.cpp -o build_soak/stage56/reference.o
+          "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_raw_bowl_sum_corrective_tests.cpp \
+            build_soak/stage56/monster.o build_soak/stage56/reference.o \
+            -o build_soak/stage56/core
+          "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_final_static_audit_tests.cpp \
+            -o build_soak/stage56/static
+          "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_e2e_worker.cpp build_soak/stage56/monster.o \
+            -o build_soak/stage56/e2e
+
+      - name: Currere core et audit staticum
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 30m build_soak/stage56/core 2>&1 | tee soak-logs/core.log
+          timeout 5m build_soak/stage56/static 2>&1 | tee soak-logs/static.log
+
+      - name: Currere witnesses canonicos et prope Foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          exec > >(tee soak-logs/e2e-canonical.log) 2>&1
+          e=build_soak/stage56/e2e
+          timeout 15m "$e" -15055671 -15055671 5000 4 762 12 105
+          timeout 15m "$e" -15048173 -15048173 5000 12 21 47 57
+          timeout 15m "$e" -15048173 -15048172 5000 12 22 18 58
+          timeout 15m "$e" -15048173 -15048174 5000 12 20 7 58
+          timeout 15m "$e" -15055672 -15055670 5000 3 1 3 96
+          echo 'E2E_CANONICA_STAGE56=5/5_PASS'
+
+      - name: Servare logs matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-latina-stage56-${{ matrix.label }}
+          path: soak-logs/
+          if-no-files-found: error
+          retention-days: 30
+
+  differential-decemplum:
+    name: Decem paria contra reference canonica — ${{ matrix.label }}
+    needs: custodia-arboris
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: gcc
+            cxx: g++
+          - label: clang
+            cxx: clang++
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v4
+
+      - name: Compilare worker differentialem
+        shell: bash
+        env:
+          CXX: ${{ matrix.cxx }}
+        run: |
+          set -euo pipefail
+          mkdir -p build_soak/differential soak-logs
+          "$CXX" $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES -c src/monster.cpp -o build_soak/differential/monster.o
+          "$CXX" $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_e2e_worker.cpp build_soak/differential/monster.o \
+            -o build_soak/differential/e2e
+          "$CXX" --version | head -1 | tee soak-logs/compiler.log
+
+      - name: Currere eadem X paria differentialia
+        shell: bash
+        run: |
+          set -euo pipefail
+          exec > >(tee soak-logs/differential-10.log) 2>&1
+          e=build_soak/differential/e2e
+          cat > soak-logs/pairs.tsv <<'EOF'
+          -15055671 -15055671 5000 4 762 12 105
+          -15048173 -15048173 5000 12 21 47 57
+          -15048173 -15048172 5000 12 22 18 58
+          -15048173 -15048174 5000 12 20 7 58
+          -15048173 -15048171 5000 12 23 5 61
+          -15048173 -15048170 5000 12 24 2 57
+          -15048173 -15048169 5000 12 25 28 58
+          -15048173 -15048168 5000 12 26 15 61
+          -15048173 -15048167 5000 12 27 13 51
+          -15048173 -15048166 5000 12 28 23 52
+          EOF
+          numerus=0
+          while read -r c t y k dk m dm; do
+            numerus=$((numerus+1))
+            echo "=== PAR $numerus: c=$c t=$t ==="
+            timeout 15m "$e" "$c" "$t" "$y" "$k" "$dk" "$m" "$dm"
+          done < soak-logs/pairs.tsv
+          test "$numerus" -eq 10
+          echo 'DIFFERENTIA_DECEM_PARIA=10/10_PASS'
+
+      - name: Servare logs differentialia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-latina-differential-10-${{ matrix.label }}
+          path: soak-logs/
+          if-no-files-found: error
+          retention-days: 30
+
+  sanitatores:
+    name: ASan + UBSan Gradus 56
+    needs: custodia-arboris
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      ASAN_OPTIONS: detect_leaks=1:halt_on_error=1:abort_on_error=1
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v4
+
+      - name: Compilare cum sanitatoribus
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build_soak/san soak-logs
+          flags='-O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined'
+          clang++ $CXXSTD $flags $COMMON_WARNINGS $COMMON_INCLUDES -c src/monster.cpp -o build_soak/san/monster.o
+          clang++ $CXXSTD $flags $COMMON_WARNINGS $COMMON_INCLUDES -c tests/reference/normative_reference.cpp -o build_soak/san/reference.o
+          clang++ $CXXSTD $flags $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_raw_bowl_sum_corrective_tests.cpp \
+            build_soak/san/monster.o build_soak/san/reference.o \
+            -o build_soak/san/core
+          clang++ $CXXSTD $flags $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_e2e_worker.cpp build_soak/san/monster.o \
+            -o build_soak/san/e2e
+          clang++ --version | head -1 | tee soak-logs/compiler.log
+
+      - name: Currere sanitatores
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 40m build_soak/san/core 2>&1 | tee soak-logs/sanitizer-core.log
+          {
+            timeout 20m build_soak/san/e2e -15055671 -15055671 5000 4 762 12 105
+            timeout 20m build_soak/san/e2e -15048173 -15048173 5000 12 21 47 57
+            timeout 20m build_soak/san/e2e -15048173 -15048172 5000 12 22 18 58
+            timeout 20m build_soak/san/e2e -15048173 -15048174 5000 12 20 7 58
+            timeout 20m build_soak/san/e2e -15055672 -15055670 5000 3 1 3 96
+          } 2>&1 | tee soak-logs/sanitizer-e2e.log
+
+      - name: Servare logs sanitatorum
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-latina-sanitizers
+          path: soak-logs/
+          if-no-files-found: error
+          retention-days: 30
+
+  soak-repetitionis:
+    name: Soak repetitum processibus recentibus
+    needs: [matrix-gradus-56, differential-decemplum]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v4
+
+      - name: Compilare imagines soak
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build_soak/repeat soak-logs
+          g++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES -c src/monster.cpp -o build_soak/repeat/monster.o
+          g++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES -c tests/reference/normative_reference.cpp -o build_soak/repeat/reference.o
+          g++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_raw_bowl_sum_corrective_tests.cpp \
+            build_soak/repeat/monster.o build_soak/repeat/reference.o \
+            -o build_soak/repeat/core
+          g++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_e2e_worker.cpp build_soak/repeat/monster.o \
+            -o build_soak/repeat/e2e
+          g++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_55_state_history_worker.cpp build_soak/repeat/monster.o \
+            -o build_soak/repeat/state-history
+
+      - name: Currere circuitus soak
+        shell: bash
+        run: |
+          set -euo pipefail
+          rounds="$SOAK_ROUNDS"
+          case "$rounds" in 4|8|16|32) ;; *) echo "rounds invalidi: $rounds" >&2; exit 1;; esac
+          exec > >(tee soak-logs/repetition.log) 2>&1
+          echo "CIRCUITUS=$rounds"
+          e=build_soak/repeat/e2e
+
+          for r in $(seq 1 "$rounds"); do
+            echo "===== CIRCUITUS $r/$rounds ====="
+            timeout 30m build_soak/repeat/core
+            timeout 20m "$e" -15055671 -15055671 5000 4 762 12 105
+            timeout 20m "$e" -15048173 -15048173 5000 12 21 47 57
+            timeout 20m "$e" -15048173 -15048172 5000 12 22 18 58
+            timeout 20m "$e" -15048173 -15048174 5000 12 20 7 58
+            timeout 20m "$e" -15048173 -15048171 5000 12 23 5 61
+            timeout 20m "$e" -15048173 -15048170 5000 12 24 2 57
+            timeout 20m "$e" -15048173 -15048169 5000 12 25 28 58
+            timeout 20m "$e" -15048173 -15048168 5000 12 26 15 61
+            timeout 20m "$e" -15048173 -15048167 5000 12 27 13 51
+            timeout 20m "$e" -15048173 -15048166 5000 12 28 23 52
+            timeout 30m build_soak/repeat/state-history
+          done
+          echo "SOAK_REPETITUM=${rounds}/${rounds}_PASS"
+
+      - name: Servare logs soak
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-latina-soak-repetitionis
+          path: soak-logs/
+          if-no-files-found: error
+          retention-days: 30
+
+  sententia-finalis:
+    name: Sententia finalis vigiliae
+    if: always()
+    needs:
+      - custodia-arboris
+      - regressiones-historicae
+      - audit-gradus-55
+      - matrix-gradus-56
+      - differential-decemplum
+      - sanitatores
+      - soak-repetitionis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Colligere status
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat <<EOF
+          custodia-arboris=${{ needs.custodia-arboris.result }}
+          regressiones-historicae=${{ needs.regressiones-historicae.result }}
+          audit-gradus-55=${{ needs.audit-gradus-55.result }}
+          matrix-gradus-56=${{ needs.matrix-gradus-56.result }}
+          differential-decemplum=${{ needs.differential-decemplum.result }}
+          sanitatores=${{ needs.sanitatores.result }}
+          soak-repetitionis=${{ needs.soak-repetitionis.result }}
+          EOF
+
+          for status in \
+            '${{ needs.custodia-arboris.result }}' \
+            '${{ needs.regressiones-historicae.result }}' \
+            '${{ needs.audit-gradus-55.result }}' \
+            '${{ needs.matrix-gradus-56.result }}' \
+            '${{ needs.differential-decemplum.result }}' \
+            '${{ needs.sanitatores.result }}' \
+            '${{ needs.soak-repetitionis.result }}'; do
+            [[ "$status" == 'success' ]] || {
+              echo 'VIGILIA_SOAK=DEFECIT'
+              exit 1
+            }
+          done
+
+          echo 'VIGILIA_SOAK=PASS'
+          echo 'STATUS_POST_RUN=SOAK_GREEN'
