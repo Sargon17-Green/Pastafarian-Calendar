@@ -27,7 +27,11 @@
 .equ CTX_PATCHED_DAYTAG_CALC_RESULT,200
 .equ CTX_PATCHED_DAYTAG_TARGET_RESULT,208
 .equ CTX_DAYTAG_PATCH_SEEN,216
-.equ CTX_SIZE,224
+.equ CTX_LEGACY_DISTANCE_RESULT,224
+.equ CTX_DISTANCE_ROUTE_RESULT,232
+.equ CTX_LEGACY_DISTANCE_SEEN,240
+.equ CTX_DISTANCE_ROUTE_SEEN,248
+.equ CTX_SIZE,256
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -71,6 +75,9 @@ legacy_remainder_M_limbs:
 .global monster_stage05_daytag_patch_wrapper
 .global monster_daytag_route
 .global monster_stage04_legacy_daytag_handler
+.global oldDistance
+.global monster_distance_route
+.global monster_stage06_legacy_distance_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -383,6 +390,80 @@ monster_stage04_legacy_daytag_handler:
     ret
 .size monster_stage04_legacy_daytag_handler,.-monster_stage04_legacy_daytag_handler
 
+# Ⲡ oldDistance ⲥⲱⲟⲩϩ ⲙⲡⲟⲩⲱϣⲃ ⲛⲛⲧⲁⲅ ⲛⲛϩⲟⲟⲩ, ⲛⲧⲟϥ ⲇⲉ ⲛϥϣⲓⲛⲉ ⲁⲛ ⲛⲥⲁ ⲡⲟⲩⲁϩⲥⲁϩⲛⲉ ⲛⲛϩⲟⲟⲩ ϩⲛ ⲡⲉⲩⲧⲁⲝⲓⲥ.
+# Ⲡⲣⲱⲧⲉ ⲡⲁⲓ ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲛⲗⲉⲅⲁⲥⲓ; ⲙⲛ ⲡⲁⲧϣ ⲉϥϣⲟⲟⲡ ϩⲙ ⲡⲃⲁⲑⲙⲟⲥ ⲡⲁⲓ.
+.type oldDistance,@function
+oldDistance:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    mov r13,rsi
+    mov rdi,r12
+    call dayTagWithFoundationScar
+    mov r14,rax
+    mov rdi,r13
+    call dayTagWithFoundationScar
+    mov rsi,rax
+    mov rdi,r14
+    call bi_sub
+    mov rdi,rax
+    call bi_abs
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size oldDistance,.-oldDistance
+
+.type monster_distance_route,@function
+monster_distance_route:
+    jmp oldDistance
+.size monster_distance_route,.-monster_distance_route
+
+.type monster_stage06_legacy_distance_handler,@function
+monster_stage06_legacy_distance_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    test r12,r12
+    je .Lms06_fail
+    mov r13,qword ptr [r12+CTX_DAYTAG_CALC_INPUT]
+    mov r14,qword ptr [r12+CTX_DAYTAG_TARGET_INPUT]
+    test r13,r13
+    je .Lms06_fail
+    test r14,r14
+    je .Lms06_fail
+
+    mov rdi,r13
+    mov rsi,r14
+    call oldDistance
+    mov qword ptr [r12+CTX_LEGACY_DISTANCE_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_DISTANCE_SEEN]
+
+    mov rdi,r13
+    mov rsi,r14
+    call monster_distance_route
+    mov qword ptr [r12+CTX_DISTANCE_ROUTE_RESULT],rax
+    inc qword ptr [r12+CTX_DISTANCE_ROUTE_SEEN]
+
+    mov eax,1
+    jmp .Lms06_done
+.Lms06_fail:
+    xor eax,eax
+.Lms06_done:
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage06_legacy_distance_handler,.-monster_stage06_legacy_distance_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -401,6 +482,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage04_legacy_daytag_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage06_legacy_distance_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

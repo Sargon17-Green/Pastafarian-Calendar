@@ -43,3 +43,11 @@
 `monster_daytag_route -> monster_stage05_daytag_patch_wrapper -> dayTagWithFoundationScar -> oldDayTag`
 
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲉⲛresult ⲛⲗⲉⲅⲁⲥⲓ ⲙⲛ ⲛresult ⲙⲡⲁⲧϣ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 4 ⲟ ⲛ`GREEN`, ⲁⲩⲱ ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 5 ⲧⲱⲛ ⲙⲛ `oracle_day_count`.
+
+## Ⲃⲁⲑⲙⲟⲥ 6 — DISCOVERY 03
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`oldDistance(c,t)=abs(dayTag(c)-dayTag(t))` ⲛⲗⲉⲅⲁⲥⲓ. Ⲡ`oldDistance` ⲙⲟⲩⲧⲉ ⲉ`dayTagWithFoundationScar` ⲙⲡϩⲟⲟⲩ ⲛϩⲱⲃ ⲙⲛ ⲡϩⲟⲟⲩ ⲛϣⲓⲛⲉ, ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡⲇⲓⲁⲫⲟⲣⲁ ⲛⲁⲡⲟⲗⲩⲧⲟⲛ ⲛⲛⲉⲩⲧⲁⲅ.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage06_legacy_distance_handler -> monster_distance_route -> oldDistance`
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ϫⲉ ⲡⲇⲓⲁⲫⲟⲣⲁ ⲛⲧⲉⲛⲧⲁⲅ ⲛϥⲧⲱⲛ ⲁⲛ ⲛⲥⲏⲩ ⲛⲓⲙ ⲙⲛ ⲡⲙⲁⲕⲣⲟⲛ ⲛⲧⲉⲛϩⲟⲟⲩ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 6 ⲟ ⲛ`EXPECTED_RED`; ⲛⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 1–5 ⲥⲉⲟ ⲛ`GREEN`.
