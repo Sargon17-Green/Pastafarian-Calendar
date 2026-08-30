@@ -64,7 +64,8 @@
 .equ CTX_LEGACY_GRIND_TABLE_SEEN,496
 .equ CTX_LEGACY_VISIBLE_DROP_SEEN,504
 .equ CTX_VISIBLE_DROP_I,512
-.equ CTX_SIZE,520
+.equ CTX_GRIND_SENTINEL_PATCH_SEEN,520
+.equ CTX_SIZE,528
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -101,9 +102,11 @@ legacy_hidden_coeff:
 legacy_hidden_stone_kind:
     .quad 1,2,3,4,5,1,2
 
-# Ⲡtable ⲛⲗⲉⲅⲁⲥⲓ ⲟⲩⲏϩ ⲁϫⲛ sentinel ϩⲓ index 0. Ⲛ11 ⲛrow ⲛⲙⲉ ⲥⲉϣⲟⲟⲡ ϩⲓ 0..10.
-# Ⲡrow ⲉⲧⲟⲩⲟϩ ⲙⲛⲛⲥⲱⲟⲩ ⲟⲩfence ⲛⲗⲉⲅⲁⲥⲓ ⲡⲉ ⲉⲧⲣⲉ index 11 ⲙⲡⲣϫⲡⲓⲟ ⲛⲟⲩmemory ⲛⲁⲧⲧⲟϣ.
+# ⲠStage 14 ⲁϥⲕⲱ ⲛ11 ⲛrow ⲛⲙⲉ ϩⲓ 0..10 ϩⲟⲡⲟⲩ ⲡlegacy loop ⲟⲩⲏϩ ⲉϥϫⲓ 1..11.
+# ⲠStage 15 ⲙⲡⲉϥϣⲓⲃⲉ ⲙⲡlegacy indexing: ⲁϥⲟⲩⲱϩ ⲛⲟⲩsentinel ⲉϥϣⲟⲩⲓⲧ ϩⲓ index 0, ⲁⲩⲱ ⲛ11 ⲛrow ⲛⲙⲉ ⲥⲉϣⲟⲟⲡ ϩⲓ 1..11.
+# Ⲡfence ⲛStage 14 ⲟⲩⲏϩ ⲉϥⲟⲩⲟϩ ⲙⲛⲛⲥⲁ ⲡtable ⲛⲟⲩϣⲟⲩⲱⲃⲉ, ⲁⲗⲗⲁ ⲛϥⲙⲟⲟϣⲉ ⲁⲛ ϩⲙⲡCOPY_AUTHORITATIVE.
 legacy_visible_grinds_indexed:
+    .quad 0,0,0,0,0
     .quad 3,5,7,11,1
     .quad 5,7,11,13,2
     .quad 7,11,13,17,3
@@ -175,6 +178,8 @@ legacy_visible_grind_missing_fence:
 .global oneVisibleDropLegacyGrindIndexWrong
 .global monster_visible_drop_route
 .global monster_stage14_legacy_grind_handler
+.global grindSentinelRow0
+.global monster_stage15_grind_sentinel_patch_wrapper
 
 .type monster_context_new,@function
 monster_context_new:
@@ -1606,8 +1611,14 @@ monster_stage12_legacy_prior_handler:
 
 
 
-# Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡgrind table ⲁⲣⲭⲉⲓ ϩⲓ index 1. Ⲡtable ⲇⲉ ⲁⲣⲭⲉⲓ ϩⲓ 0, ⲁⲩⲱ ⲡlegacy index ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ g ⲛⲧⲟϥ.
-# Ⲉⲧⲃⲉ ⲡⲁⲓ g=1 ϫⲓ ⲙⲡgrind 2, ... g=10 ϫⲓ ⲙⲡgrind 11, ⲁⲩⲱ g=11 ϫⲓ ⲙⲡfence ⲉⲧϣⲟⲩⲓⲧ.
+# Ⲡlegacy indexing ⲙⲡStage 14 ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ: g=1..11 ⲡⲉ ⲡindex ⲛⲧⲟϥ.
+# ⲠStage 15 ⲕⲱ ⲙⲡsentinel ⲙⲡindex 0 ⲉϩⲣⲁⲓ ⲙⲙⲁⲧⲉ; ⲉⲧⲃⲉ ⲡⲁⲓ g=1..11 ϫⲓ ⲛ11 ⲛgrind ⲛⲙⲉ ⲁϫⲛ ⲧⲣⲉⲩϥⲱϫⲉ ⲙⲡlegacy loop.
+.type grindSentinelRow0,@function
+grindSentinelRow0:
+    lea rax,[rip+legacy_visible_grinds_indexed]
+    ret
+.size grindSentinelRow0,.-grindSentinelRow0
+
 .type legacyGrindRowAtIndex,@function
 legacyGrindRowAtIndex:
     cmp rdi,1
@@ -1829,9 +1840,15 @@ oneVisibleDropLegacyGrindIndexWrong:
     ret
 .size oneVisibleDropLegacyGrindIndexWrong,.-oneVisibleDropLegacyGrindIndexWrong
 
+.type monster_stage15_grind_sentinel_patch_wrapper,@function
+monster_stage15_grind_sentinel_patch_wrapper:
+    # Ⲡwrapper ⲛStage 15 ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡlegacy loop; ⲡsentinel ϩⲙⲡtable ⲡⲉ ⲡⲡⲁⲧϣ ⲛⲧⲟϥ.
+    jmp oneVisibleDropLegacyGrindIndexWrong
+.size monster_stage15_grind_sentinel_patch_wrapper,.-monster_stage15_grind_sentinel_patch_wrapper
+
 .type monster_visible_drop_route,@function
 monster_visible_drop_route:
-    jmp oneVisibleDropLegacyGrindIndexWrong
+    jmp monster_stage15_grind_sentinel_patch_wrapper
 .size monster_visible_drop_route,.-monster_visible_drop_route
 
 .type monster_stage14_legacy_grind_handler,@function
@@ -1914,7 +1931,7 @@ monster_stage14_legacy_grind_handler:
     mov qword ptr [r12+CTX_LEGACY_GRIND_ROW1],rax
     inc qword ptr [r12+CTX_LEGACY_GRIND_TABLE_SEEN]
 
-    # COPY_DIAGNOSTIC ⲙⲛ route: ⲙⲡⲉⲓStage ⲛⲉⲥⲛⲁⲩ ϫⲓ ⲙⲡlegacy indexing ⲛⲟⲩⲱⲧ.
+    # COPY_DIAGNOSTIC ⲙⲛ route ⲥⲉϫⲓ ⲙⲡlegacy indexing ⲛⲟⲩⲱⲧ; ⲡsentinel ⲛStage 15 ⲕⲱ ⲙⲡindex 0 ⲉϩⲣⲁⲓ ⲉⲧⲣⲉⲡⲉⲓindexing ⲟ ⲛⲧⲟϣ.
     mov rdi,r13
     mov rsi,r14
     mov rdx,qword ptr [rbp-56]
@@ -1935,6 +1952,7 @@ monster_stage14_legacy_grind_handler:
     test rax,rax
     je .Lms14_fail
     mov qword ptr [r12+CTX_VISIBLE_DROP_ROUTE_RESULT],rax
+    inc qword ptr [r12+CTX_GRIND_SENTINEL_PATCH_SEEN]
     mov eax,1
     jmp .Lms14_done
 .Lms14_fail:

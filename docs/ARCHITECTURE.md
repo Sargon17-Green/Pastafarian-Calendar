@@ -190,3 +190,13 @@
 Ⲡ`oneVisibleDropLegacyGrindIndexWrong` ⲟⲩⲏϩ ⲉϥϫⲓ ⲛ1/3/7 predecessor ϩⲓⲧⲛ `priorPatch`, ⲁⲩⲱ ⲛϥϫⲓ ⲛstone ϩⲓⲧⲛ ⲡbuilder ⲙⲡPatch 04. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡⲡⲗⲁⲛⲏ ⲙⲡⲉⲓStage ⲟ ⲙⲙⲁⲧⲉ ⲛⲟⲩgrind-indexing divergence, ⲛϥⲧⲱⲙⲛⲧ ⲁⲛ ⲙⲛ ⲛscar ⲛϣⲟⲣⲡ.
 
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_VISIBLE_DROP_RESULT`, `CTX_VISIBLE_DROP_ROUTE_RESULT`, `CTX_LEGACY_GRIND_ROW1`, `CTX_LEGACY_GRIND_TABLE_SEEN`, `CTX_LEGACY_VISIBLE_DROP_SEEN` ⲙⲛ `CTX_VISIBLE_DROP_I`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ; ⲙⲛ logs, metrics ⲏ global mutable semantic state ⲉⲩⲧⲟϣ ⲙⲡvisible drop.
+
+## Ⲡgrind sentinel detour ⲙⲡⲃⲁⲑⲙⲟⲥ 15
+
+Ⲡtable ⲙⲡproduction ϩⲁⲣⲉϩ ⲧⲉⲛⲟⲩ ⲛⲟⲩsentinel row ⲉϥϣⲟⲩⲓⲧ ϩⲓ index 0, ⲙⲛ 11 ⲛgrind row ⲛⲙⲉ ϩⲓ 1..11. Ⲡ`legacyGrindRowAtIndex` ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲙⲟϥ: ⲛϥϫⲓ ⲙⲡindex 1..11 ⲛⲧⲟϥ, ⲁⲩⲱ ⲛϥⲁⲣⲛⲁ ⲙⲡ0.
+
+`monster_visible_drop_route -> monster_stage15_grind_sentinel_patch_wrapper -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
+
+Ⲡ`grindSentinelRow0` ⲟ ⲛVALIDATION_COPY ⲙⲙⲁⲧⲉ ⲉⲧⲣⲉⲡtest ⲧⲁϫⲣⲟ ⲙⲡsentinel; ⲛϥϫⲓ ⲁⲛ ⲛⲟⲩsemantic decision. Ⲡfence ⲛStage 14 ⲟⲩⲏϩ ⲉϥⲟⲩⲟϩ ⲙⲛⲛⲥⲁ ⲡtable ⲛⲟⲩscar ⲛⲟⲩⲱⲧ.
+
+Ⲡ`CTX_GRIND_SENTINEL_PATCH_SEEN` ⲡⲉ ⲟⲩobservability state ⲙⲡinvocation. Ⲙⲛ ⲟⲩbranch ⲛⲕⲁⲛⲱⲛ ⲉϥⲱϣ ⲙⲙⲟϥ; ⲙⲛ logs, metrics ⲏ environment ⲉⲩϫⲓ ⲛⲟⲩⲧⲟϣ ⲙⲡvisible drop.

@@ -236,3 +236,25 @@
 ### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
 
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyGrindRowAtIndex`, `oneVisibleDropLegacyGrindIndexWrong`, `monster_visible_drop_route`, `monster_stage14_legacy_grind_handler`, ⲙⲛ state ⲛⲧⲉⲡvisible-drop/grind ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ. Ⲡⲉⲓlayer ⲟ ⲛCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲁⲩⲱ ⲛϥϫⲓ ⲁⲛ ⲙⲡoracle ϩⲙ runtime.
+
+## Ⲃⲁⲑⲙⲟⲥ 15 — PATCH 07
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡlegacy indexing `g=1..11`. Ⲡ`legacyGrindRowAtIndex` ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ`g` ⲛⲧⲟϥ ⲛⲟⲩindex, ⲁⲩⲱ ⲡ`oneVisibleDropLegacyGrindIndexWrong` ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ⲙⲛ ⲡloop ⲛ11 ⲛⲧⲁⲡ. Ⲡfence ⲉϥϣⲟⲩⲓⲧ ⲛStage 14 ⲟⲩⲏϩ ⲉϥⲥⲏϩ ⲙⲛⲛⲥⲁ ⲡtable.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲟⲩⲱϩ ⲛⲟⲩsentinel row ⲉϥϣⲟⲩⲓⲧ ϩⲁⲧϩⲏ ⲛⲛ11 ⲛgrind row. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡindex 0 ⲟ ⲛsentinel, ⲁⲩⲱ ⲛgrind ⲛⲙⲉ ⲥⲉⲕⲏ ϩⲓ 1..11. Ⲙⲡⲟⲩⲕⲧⲟ ⲙⲡlegacy loop ⲁⲩⲱ ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡsentinel.
+
+`monster_visible_drop_route -> monster_stage15_grind_sentinel_patch_wrapper -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲁⲓ ⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+Ⲡgrind ⲛⲕⲁⲛⲱⲛ ⲙⲡ`g` ⲡⲉ ⲡrow ⲙⲡ`g` ϩⲛ ⲧⲁⲝⲓⲥ 1..11. Ⲙⲛⲛⲥⲁ ⲡsentinel ⲛindex 0, ⲡlegacy index `g` ϫⲓ ⲙⲡrow ⲙⲡ`g` ⲛⲧⲟϥ. Ⲙⲛ rank, state, input ⲏ side effect ⲛⲃⲣⲣⲉ ⲉϥϫⲓ ⲛⲟⲩⲧⲟϣ.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲟⲩ`monster_stage15_grind_sentinel_patch_wrapper` ⲁⲩⲱ `CTX_GRIND_SENTINEL_PATCH_SEEN`. Ⲡwrapper ⲛϥϣⲓⲃⲉ ⲁⲛ ⲛⲟⲩsemantic value; ⲛϥϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉⲡϩⲓⲥⲧⲟⲣⲓⲁ ⲙⲡroute. Ⲡcounter ⲟ ⲛobservability state ⲙⲡinvocation ⲁⲩⲱ ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡⲗⲟⲅⲓⲥⲙⲟⲥ.
+
+ⲠStage 14 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. ⲠStage 15 ⲧⲁϫⲣⲟ ϫⲉ ⲡlegacy API ⲟⲩⲏϩ ⲉϥⲁⲣⲛⲁ ⲙⲡindex 0, ⲡsentinel ⲟⲩⲏϩ ⲉϥⲥⲏϩ ϩⲙⲡtable, ⲛ11 ⲛrow ⲛⲙⲉ ⲥⲉⲧⲱⲛ, ⲁⲩⲱ ⲡvisible drop ⲧⲱⲛ ⲙⲛ ⲡoracle.

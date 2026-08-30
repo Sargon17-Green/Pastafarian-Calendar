@@ -132,3 +132,13 @@
 `calendarDateSpaghetti -> monster_dispatch_base -> monster_stage14_legacy_grind_handler -> monster_visible_drop_route -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
 
 Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲙⲓⲛⲉ ⲛ11 ⲛrow ⲙⲛ ⲡtable ⲛⲕⲁⲛⲱⲛ: ⲛ11 ⲧⲏⲣⲟⲩ ⲥⲉϣⲟⲃⲉ. Ⲁⲩⲱ ⲡϣⲟⲣⲡ visible drop ⲉϥⲛⲏⲩ ϩⲓⲧⲛ ⲡlegacy grind indexing ⲛϥⲧⲱⲛ ⲁⲛ ⲙⲛ `oracle_build_visible`. Ⲙⲛ row 0 ⲛsentinel ⲉϥϣⲟⲟⲡ ϩⲙⲡtable ⲙⲡⲉⲓStage. ⲠStage 14 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–13 ⲥⲉⲟ ⲛ`GREEN`.
+
+## Ⲃⲁⲑⲙⲟⲥ 15 — PATCH 07
+
+Ⲡlegacy grind indexing `g=1..11` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`legacyGrindRowAtIndex` ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡloop ⲙⲡ`oneVisibleDropLegacyGrindIndexWrong`.
+
+Ⲁⲩⲟⲩⲱϩ ⲛⲟⲩsentinel row ⲉϥϣⲟⲩⲓⲧ ϩⲓ index `0`, ⲁⲩⲱ ⲛ11 ⲛgrind row ⲛⲙⲉ ⲥⲉϣⲟⲟⲡ ⲧⲉⲛⲟⲩ ϩⲓ `1..11`. Ⲡfence ⲛStage 14 ⲟⲩⲏϩ ⲉϥⲟⲩⲟϩ ⲙⲛⲛⲥⲁ ⲡtable ⲛⲟⲩϣⲟⲩⲱⲃⲉ, ⲁⲗⲗⲁ ⲛϥϫⲓ ⲁⲛ ⲛⲟⲩsemantic decision.
+
+`monster_visible_drop_route -> monster_stage15_grind_sentinel_patch_wrapper -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
+
+ⲠStage 14 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. ⲠStage 15 ⲧⲁϫⲣⲟ ⲙⲡsentinel ϩⲓ 0, ⲛ11 ⲛrow ⲛⲙⲉ ϩⲓ 1..11, ⲙⲛ ⲡvisible drop ⲛϣⲟⲣⲡ ⲉϥⲧⲱⲛ ⲙⲛ ⲡoracle.
