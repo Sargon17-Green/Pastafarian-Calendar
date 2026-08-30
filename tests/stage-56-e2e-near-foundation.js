@@ -2,11 +2,11 @@
 const assert = require('node:assert/strict');
 const production = require('../src');
 const F = production.FOUNDATION_DAY_OLD;
-const first = production.calendarDateSpaghetti(F - 1n, F + 1n);
+const first = production.calendarDateSpaghettiStage56Historical(F - 1n, F + 1n);
 assert.equal(first.length, 5);
 assert.equal(typeof first[0], 'bigint');
 assert.equal(typeof first[1], 'string');
 assert.equal(typeof first[3], 'string');
-const second = production.calendarDateSpaghetti(F - 1n, F + 1n);
+const second = production.calendarDateSpaghettiStage56Historical(F - 1n, F + 1n);
 assert.deepEqual(second, first);
 console.log('STAGE 56 E2E NEAR-FOUNDATION PASS — crossing del Foundation es deterministic e valid.');

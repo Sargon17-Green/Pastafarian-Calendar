@@ -7431,6 +7431,53 @@ function stage54BuildAdjacentYear(calculationDay, knownYear, direction, registry
   );
 }
 
+function legacyStage54Patch26RoundTripGuard(authoritativeBeforePatch26, patch26RoundTripYear) {
+  const authoritative = requireWalkYearRecord(authoritativeBeforePatch26, 'Li year sequential ante li guard final de Patch 26');
+  const roundTrip = requireWalkYearRecord(patch26RoundTripYear, 'Li year round-trip de Patch 26');
+  if (roundTrip.number !== authoritative.number ||
+      roundTrip.openDay !== authoritative.openDay ||
+      roundTrip.closeDay !== authoritative.closeDay) {
+    throw new BootstrapStageError('Patch 26 final diverge del year resoluet per li sequential walk.');
+  }
+  return true;
+}
+
+function stage57PreserveSequentialYearAfterPatch26Ghost(context, authoritativeBeforePatch26, patch26RoundTripYear, guardError) {
+  requireWalkYearRecord(authoritativeBeforePatch26, 'Li year semantic de Stage 57');
+  requireWalkYearRecord(patch26RoundTripYear, 'Li ghost round-trip de Stage 57');
+  const authoritative = authoritativeBeforePatch26;
+  const roundTrip = patch26RoundTripYear;
+  const mismatch = roundTrip.number !== authoritative.number ||
+    roundTrip.openDay !== authoritative.openDay ||
+    roundTrip.closeDay !== authoritative.closeDay;
+  if (!context || context.stage57Patch26RoundTripDetourEnabled !== true) {
+    if (guardError) throw guardError;
+    return stage54CloneYear(roundTrip);
+  }
+  context.stage57Patch26RoundTripGhost = stage54CloneYear(roundTrip);
+  context.stage57Patch26RoundTripMismatch = mismatch;
+  context.stage57LegacyGuardExecuted = true;
+  context.stage57LegacyGuardPassed = guardError === null;
+  context.stage57LegacyGuardError = guardError === null ? null : Object.freeze({
+    name: guardError.name || 'Error',
+    message: guardError.message || String(guardError)
+  });
+  context.stage57SemanticYearPreservedFromPatch18 = true;
+  context.stage57SemanticYear = stage54CloneYear(authoritative);
+  context.diagnostics.push(Object.freeze({
+    label: 'stage57-patch26-round-trip-ghost',
+    mismatch,
+    semanticYear: authoritative.number,
+    semanticOpenDay: authoritative.openDay,
+    semanticCloseDay: authoritative.closeDay,
+    ghostYear: roundTrip.number,
+    ghostOpenDay: roundTrip.openDay,
+    ghostCloseDay: roundTrip.closeDay,
+    legacyGuardPassed: guardError === null
+  }));
+  return stage54CloneYear(authoritative);
+}
+
 function stage54ResolveTargetYear(calculationDay, targetDay, registry, context, sauceProvider = sauceWithScars) {
   const year5000 = stage54BuildYear5000(calculationDay, registry, context, sauceProvider);
   context.diagnostics.push(Object.freeze({ label: 'oldJumpGuess', value: oldJumpGuess(year5000, targetDay) }));
@@ -7461,26 +7508,37 @@ function stage54ResolveTargetYear(calculationDay, targetDay, registry, context, 
     (year) => source.nextYear(year),
     (year) => source.previousYear(year)
   );
-  const finalYear = stage54EnrichYear(registry, corrected.year);
-  if (finalYear.number !== authoritativeBeforePatch26.number ||
-      finalYear.openDay !== authoritativeBeforePatch26.openDay ||
-      finalYear.closeDay !== authoritativeBeforePatch26.closeDay) {
-    throw new BootstrapStageError('Patch 26 final diverge del year resoluet per li sequential walk.');
+  const patch26RoundTripYear = stage54EnrichYear(registry, corrected.year);
+  let patch26GuardError = null;
+  try {
+    legacyStage54Patch26RoundTripGuard(authoritativeBeforePatch26, patch26RoundTripYear);
+  } catch (error) {
+    patch26GuardError = error;
   }
+  const finalYear = stage57PreserveSequentialYearAfterPatch26Ghost(
+    context, authoritativeBeforePatch26, patch26RoundTripYear, patch26GuardError
+  );
   context.currentYear = stage54CloneYear(finalYear);
   context.patch18ResolvedYear = stage54CloneYear(authoritativeBeforePatch26);
   context.patch18SemanticYearNumber = authoritativeBeforePatch26.number;
   context.patch26LegacyYear = stage54CloneYear(legacyInterval.year);
-  context.patch26ResolvedYear = stage54CloneYear(finalYear);
+  context.patch26ResolvedYear = stage54CloneYear(patch26RoundTripYear);
   context.patch26SemanticYearNumber = finalYear.number;
   context.diagnostics.push(Object.freeze({
     label: 'opening-gate-interval',
     legacyYear: legacyInterval.year.number,
-    correctYear: finalYear.number,
+    correctYear: patch26RoundTripYear.number,
+    semanticYear: finalYear.number,
     legacySteps: legacyInterval.stepCount,
-    correctSteps: corrected.stepCount
+    correctSteps: corrected.stepCount,
+    roundTripMismatch: context.stage57Patch26RoundTripDetourEnabled === true
+      ? context.stage57Patch26RoundTripMismatch
+      : false
   }));
-  return { year: finalYear, source, walk: walked, legacyInterval, corrected };
+  return {
+    year: finalYear, source, walk: walked, legacyInterval, corrected,
+    patch26RoundTripYear: stage54CloneYear(patch26RoundTripYear)
+  };
 }
 
 function stage54DistinctNamesWithScar(sauceResult, masterCount, itemCount, seal, context, label, legacyOwnRank) {
@@ -7925,8 +7983,38 @@ class Stage56MonsterIntegrationManager extends Stage54MonsterIntegrationManager 
 const STAGE56_GLOBAL_GATE_REGISTRY = new Stage54GateRegistry(sauceWithScarsStage56);
 const STAGE56_GLOBAL_MANAGER = new Stage56MonsterIntegrationManager(STAGE56_GLOBAL_GATE_REGISTRY);
 
-function calendarDateSpaghettiWithContext(calculationDay, targetDay) {
+function calendarDateSpaghettiStage56HistoricalWithContext(calculationDay, targetDay) {
   return STAGE56_GLOBAL_MANAGER.executeCalendarDate(calculationDay, targetDay);
+}
+
+function calendarDateSpaghettiStage56Historical(calculationDay, targetDay) {
+  return calendarDateSpaghettiStage56HistoricalWithContext(calculationDay, targetDay).result;
+}
+
+class Stage57MonsterIntegrationManager extends Stage56MonsterIntegrationManager {
+  prepareFinal(calculationDay, targetDay) {
+    const context = super.prepareFinal(calculationDay, targetDay);
+    context.mode = 'AUTHORITATIVE_SPAGHETTI_STAGE_57';
+    context.stage57Patch26RoundTripDetourEnabled = true;
+    context.stage57Patch26RoundTripGhost = null;
+    context.stage57Patch26RoundTripMismatch = false;
+    context.stage57LegacyGuardExecuted = false;
+    context.stage57LegacyGuardPassed = false;
+    context.stage57LegacyGuardError = null;
+    context.stage57SemanticYearPreservedFromPatch18 = false;
+    context.stage57SemanticYear = null;
+    context.compatibilityFlags = Object.freeze({ ...context.compatibilityFlags, useStage57Patch26RoundTripGhostDetour: true });
+    context.phase = 'STAGE_57_CORRECTIVE_ENTRY';
+    context.branchTrace.push('STAGE_57_CORRECTIVE_ENTRY');
+    return context;
+  }
+}
+
+const STAGE57_GLOBAL_GATE_REGISTRY = new Stage54GateRegistry(sauceWithScarsStage56);
+const STAGE57_GLOBAL_MANAGER = new Stage57MonsterIntegrationManager(STAGE57_GLOBAL_GATE_REGISTRY);
+
+function calendarDateSpaghettiWithContext(calculationDay, targetDay) {
+  return STAGE57_GLOBAL_MANAGER.executeCalendarDate(calculationDay, targetDay);
 }
 
 function calendarDateSpaghetti(calculationDay, targetDay) {
@@ -8095,6 +8183,8 @@ module.exports = Object.freeze({
   patchedNextYear,
   patchedPreviousYear,
   findYearByWalkPatch,
+  legacyStage54Patch26RoundTripGuard,
+  stage57PreserveSequentialYearAfterPatch26Ghost,
   buildLegacyYearStructureValue,
   legacyYearNumberOnlyLookup,
   legacyYearNumberOnlyPut,
@@ -8184,10 +8274,17 @@ module.exports = Object.freeze({
   Stage54RecoveryManager,
   Stage54MonsterIntegrationManager,
   Stage56MonsterIntegrationManager,
+  Stage57MonsterIntegrationManager,
   STAGE54_GLOBAL_GATE_REGISTRY,
   STAGE54_GLOBAL_MANAGER,
+  STAGE56_GLOBAL_GATE_REGISTRY,
+  STAGE56_GLOBAL_MANAGER,
+  STAGE57_GLOBAL_GATE_REGISTRY,
+  STAGE57_GLOBAL_MANAGER,
   calendarDateSpaghettiStage55HistoricalWithContext,
   calendarDateSpaghettiStage55Historical,
+  calendarDateSpaghettiStage56HistoricalWithContext,
+  calendarDateSpaghettiStage56Historical,
   calendarDateSpaghettiWithContext,
   calendarDateSpaghetti
 });

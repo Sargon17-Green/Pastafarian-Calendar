@@ -12,5 +12,5 @@ const cases = [
   [-15048173n, -15048172n, [5000n, 12, 22n, 18, 58n]],
   [-15048173n, -15048174n, [5000n, 12, 20n, 7, 58n]]
 ];
-for (const [c, t, expected] of cases) assert.deepEqual(canonicalFive(production.calendarDateSpaghetti(c, t)), expected);
+for (const [c, t, expected] of cases) assert.deepEqual(canonicalFive(production.calendarDateSpaghettiStage56Historical(c, t)), expected);
 console.log('STAGE 56 E2E REFERENCE PASS — tri witnesses extern pos-Foundation es reproductet per canonical indices.');

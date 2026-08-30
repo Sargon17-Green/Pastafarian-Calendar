@@ -9,7 +9,7 @@ function canonicalFive(result) {
   return [result[0], cutlet.canonicalIndex, result[2], month.canonicalIndex, result[4]];
 }
 const historic = production.calendarDateSpaghettiStage55Historical(F, F);
-const corrected = production.calendarDateSpaghettiWithContext(F, F);
+const corrected = production.calendarDateSpaghettiStage56HistoricalWithContext(F, F);
 assert.deepEqual(historic, [5000n, 'scorpion', 503n, 'pute', 56n]);
 assert.deepEqual(canonicalFive(corrected.result), [5000n, 4, 762n, 12, 105n]);
 assert.notDeepEqual(corrected.result, historic);

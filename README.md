@@ -563,3 +563,14 @@ Li detour nov `stage56RawBowlSumPostStirDetour` es vocat solmen pos que li scar 
 Li state invocation-local del corrective registra old result, corrected result, raw bowl sum, saved order number, stir index, applied count, applied flag, legacy-scar call count e un history de 12 rows. Null oracle test-only es importat in production.
 
 Li evidence local confirma omni 12 stirs contra `tests/stage-56-reference.js`, six bowls final e drop-46 order por Foundation e `c=t=-15048173`, e li quatre tuples canonical extern del corrective specification. Li reference SHA `d5cfe77ef7950a9a67ff0e6814833a3eedacae8a` ne esset disponibil directmen in li repository public durant ti session; ergo li formulas e bowls esset reconstructet independentmen e null code esset copiat ex ti commit.
+
+
+## Stage 57 — corrective post-completion: Patch 26 round-trip ghost
+
+Un testbench differential multi-million trovat un failure nov al global index 6859: `c=-15048553, t=-15044872`. Stage 56 jetta li guard `Patch 26 final diverge del year resoluet per li sequential walk.`, durante que li reference retorna `(5000,14,547,7,72)` per indices canonic.
+
+Li membership ne es errat in Patch 18: `findYearByWalkPatch` ja usa `targetDay<=openDay` por caminar retro e fini in `(open,close]`. Li failure veni del diagnostic de Patch 26 al closing gate. Ti diagnostic reancra al year sequent por far visibil li old `[open,close]` scar, poy prova caminar retro. In production, adjacent-year selection ne es invertibil: li round-trip retorna year-number 5000 con open gate 9, durante que Patch 18 ja have li authoritative Year 5000 con open gate 10.
+
+Stage 57 ne modifica null helper historic. `legacyStage54Patch26RoundTripGuard` conserva e executa li old guard; `legacyFindYearClosedOpeningInterval` e `correctOpeningGateInterval` resta intact. `stage57PreserveSequentialYearAfterPatch26Ghost` conserva li round-trip quam ghost e, solmen in `Stage57MonsterIntegrationManager`, reten li year Patch 18 quam semantic. Li old Stage 56 route resta accessibil per `calendarDateSpaghettiStage56Historical*` e continua faller sur li witness exact.
+
+Li public Stage 57 rende `[5000, rise, 547, tri partes de quin, 72]`, egal a canonical `(5000,14,547,7,72)`. Li Stage 55 certificate e li Stage 56 corrective ne es rescrit.

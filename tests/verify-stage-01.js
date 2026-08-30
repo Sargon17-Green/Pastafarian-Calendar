@@ -2232,7 +2232,7 @@ group('Stage 56 aplica rawBowlSum pos li scar legacy e conserva li route histori
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   const stage = fs.readFileSync(path.join(__dirname, '..', 'DEVELOPMENT_STAGE.md'), 'utf8');
   const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'index.js'), 'utf8');
-  eq(pkg.version, '0.0.56-stage-56-corrective');
+  eq(pkg.version, '0.0.57-stage-57-corrective');
   eq(pkg.scripts['test:stage-56-core'], 'node tests/stage-56-corrective.js');
   eq(pkg.scripts['test:stage-56-foundation'], 'node tests/stage-56-e2e-foundation.js');
   eq(pkg.scripts['test:stage-56-near-foundation'], 'node tests/stage-56-e2e-near-foundation.js');
@@ -2242,9 +2242,6 @@ group('Stage 56 aplica rawBowlSum pos li scar legacy e conserva li route histori
   ok(fs.existsSync(path.join(__dirname, 'stage-56-e2e-foundation.js')));
   ok(fs.existsSync(path.join(__dirname, 'stage-56-e2e-near-foundation.js')));
   ok(fs.existsSync(path.join(__dirname, 'stage-56-e2e-reference.js')));
-  ok(stage.includes('CURRENT_STAGE=56'));
-  ok(stage.includes('LAST_COMPLETED_STAGE=56'));
-  ok(stage.includes('POST_COMPLETION_CORRECTIVE_STAGE=56'));
   ok(stage.includes('STAGE_56_CORRECTIVE=COMPLETE'));
   ok(stage.includes('HISTORIC_COMPLETION_STAGE=55'));
   eq(typeof production.createStage56PostStirContext, 'function');
@@ -2271,6 +2268,34 @@ group('Stage 56 aplica rawBowlSum pos li scar legacy e conserva li route histori
   ok(JSON.stringify(corrected.bowls.map(String)) !== JSON.stringify(legacy.bowls.map(String)));
 });
 
+group('Stage 57 conserva li round-trip Patch 26 quam ghost e li year Patch 18 quam semantic', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  const stage = fs.readFileSync(path.join(__dirname, '..', 'DEVELOPMENT_STAGE.md'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'index.js'), 'utf8');
+  eq(pkg.version, '0.0.57-stage-57-corrective');
+  eq(pkg.scripts['test:stage-57-core'], 'node tests/stage-57-corrective.js');
+  eq(pkg.scripts['test:stage-57-e2e'], 'node tests/stage-57-e2e-reference.js');
+  eq(pkg.scripts['test:stage-57-historical-scar'], 'node tests/stage-57-historical-scar.js');
+  ok(fs.existsSync(path.join(__dirname, 'stage-57-corrective.js')));
+  ok(fs.existsSync(path.join(__dirname, 'stage-57-e2e-reference.js')));
+  ok(fs.existsSync(path.join(__dirname, 'stage-57-historical-scar.js')));
+  ok(stage.includes('CURRENT_STAGE=57'));
+  ok(stage.includes('LAST_COMPLETED_STAGE=57'));
+  ok(stage.includes('POST_COMPLETION_CORRECTIVE_STAGE=57'));
+  ok(stage.includes('STAGE_57_CORRECTIVE=COMPLETE'));
+  ok(stage.includes('STAGE_56_CORRECTIVE=COMPLETE'));
+  ok(stage.includes('HISTORIC_COMPLETION_STAGE=55'));
+  eq(typeof production.legacyStage54Patch26RoundTripGuard, 'function');
+  eq(typeof production.stage57PreserveSequentialYearAfterPatch26Ghost, 'function');
+  eq(typeof production.Stage57MonsterIntegrationManager, 'function');
+  eq(typeof production.calendarDateSpaghettiStage56Historical, 'function');
+  eq(typeof production.calendarDateSpaghettiStage56HistoricalWithContext, 'function');
+  ok(production.legacyStage54Patch26RoundTripGuard.toString().includes('Patch 26 final diverge del year resoluet per li sequential walk.'));
+  ok(source.includes('stage57Patch26RoundTripGhost'));
+  ok(source.includes('stage57SemanticYearPreservedFromPatch18'));
+  ok(!source.includes("require('../tests/stage-57"));
+});
+
 group('errores de base es explicit e li final function es integrat in Stage 54', () => {
   let captured = null;
   try {
@@ -2283,4 +2308,4 @@ group('errores de base es explicit e li final function es integrat in Stage 54',
   eq(typeof production.calendarDateSpaghetti, 'function');
 });
 
-console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Stage 56 corrective.');
+console.log('\n' + groupsPassed + ' gruppes regressiv passat; ' + assertions + ' assertions passa durant Stage 57 corrective.');
