@@ -24,7 +24,10 @@
 .equ CTX_DAYTAG_TARGET_INPUT,176
 .equ CTX_LEGACY_DAYTAG_TARGET_RESULT,184
 .equ CTX_LEGACY_DAYTAG_SEEN,192
-.equ CTX_SIZE,200
+.equ CTX_PATCHED_DAYTAG_CALC_RESULT,200
+.equ CTX_PATCHED_DAYTAG_TARGET_RESULT,208
+.equ CTX_DAYTAG_PATCH_SEEN,216
+.equ CTX_SIZE,224
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -51,6 +54,7 @@ legacy_remainder_M_limbs:
 .extern bi_sub
 .extern bi_mul_u64
 .extern bi_from_i64
+.extern bi_from_u64
 .extern bi_clone
 .global monster_context_new
 .global monster_validate_base
@@ -63,6 +67,8 @@ legacy_remainder_M_limbs:
 .global monster_stage02_legacy_remainder_handler
 .global monster_remainder_route
 .global oldDayTag
+.global dayTagWithFoundationScar
+.global monster_stage05_daytag_patch_wrapper
 .global monster_daytag_route
 .global monster_stage04_legacy_daytag_handler
 
@@ -271,9 +277,63 @@ oldDayTag:
     ret
 .size oldDayTag,.-oldDayTag
 
+# Ⲡ oldDayTag ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥⲡⲗⲁⲛⲏ. Ⲡⲡⲁⲧϣ ⲉⲧⲛⲏⲩ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲙⲟϥ; ⲛϥⲟⲩⲱϩ ⲙⲙⲁⲧⲉ ⲉϫⲱϥ.
+# Ⲡ guard ⲙⲡ FOUNDATION ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲛⲟⲩϣⲟⲩⲱⲃⲉ ⲛⲧⲉⲡϩⲓⲥⲧⲟⲣⲓⲁ, ϩⲟⲡⲟⲩ ⲡ +1 ⲛϣⲟⲣⲡ ⲧⲁⲙⲓⲟ ⲙⲡ 1.
+.type dayTagWithFoundationScar,@function
+dayTagWithFoundationScar:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    call oldDayTag
+    mov r13,rax
+
+    mov rdi,-15055671
+    call bi_from_i64
+    mov r14,rax
+    mov rdi,r12
+    mov rsi,r14
+    call bi_cmp
+    test eax,eax
+    jl .Ldtfs_done
+
+    mov rdi,r13
+    mov rsi,1
+    call bi_add_u64
+    mov r13,rax
+
+    mov rdi,r12
+    mov rsi,r14
+    call bi_cmp
+    test eax,eax
+    jne .Ldtfs_done
+    mov rdi,r13
+    mov rsi,1
+    call bi_eq_u64
+    test eax,eax
+    jne .Ldtfs_done
+    mov rdi,1
+    call bi_from_u64
+    mov r13,rax
+.Ldtfs_done:
+    mov rax,r13
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size dayTagWithFoundationScar,.-dayTagWithFoundationScar
+
+.type monster_stage05_daytag_patch_wrapper,@function
+monster_stage05_daytag_patch_wrapper:
+    jmp dayTagWithFoundationScar
+.size monster_stage05_daytag_patch_wrapper,.-monster_stage05_daytag_patch_wrapper
+
 .type monster_daytag_route,@function
 monster_daytag_route:
-    jmp oldDayTag
+    jmp monster_stage05_daytag_patch_wrapper
 .size monster_daytag_route,.-monster_daytag_route
 
 .type monster_stage04_legacy_daytag_handler,@function
@@ -291,18 +351,26 @@ monster_stage04_legacy_daytag_handler:
     mov r13,rax
     mov qword ptr [r12+CTX_DAYTAG_CALC_INPUT],r13
     mov rdi,r13
-    call monster_daytag_route
+    call oldDayTag
     mov qword ptr [r12+CTX_LEGACY_DAYTAG_CALC_RESULT],rax
     inc qword ptr [r12+CTX_LEGACY_DAYTAG_SEEN]
+    mov rdi,r13
+    call monster_daytag_route
+    mov qword ptr [r12+CTX_PATCHED_DAYTAG_CALC_RESULT],rax
+    inc qword ptr [r12+CTX_DAYTAG_PATCH_SEEN]
 
     mov rdi,qword ptr [r12+CTX_TARGET_DAY]
     call bi_from_i64
     mov r13,rax
     mov qword ptr [r12+CTX_DAYTAG_TARGET_INPUT],r13
     mov rdi,r13
-    call monster_daytag_route
+    call oldDayTag
     mov qword ptr [r12+CTX_LEGACY_DAYTAG_TARGET_RESULT],rax
     inc qword ptr [r12+CTX_LEGACY_DAYTAG_SEEN]
+    mov rdi,r13
+    call monster_daytag_route
+    mov qword ptr [r12+CTX_PATCHED_DAYTAG_TARGET_RESULT],rax
+    inc qword ptr [r12+CTX_DAYTAG_PATCH_SEEN]
 
     mov eax,1
     jmp .Lms04_done

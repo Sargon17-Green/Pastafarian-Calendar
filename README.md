@@ -33,3 +33,13 @@
 Ⲡ`monster_stage04_legacy_daytag_handler` ⲗⲟⲅⲓⲍⲉ ⲙⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡ`calculationDay` ⲙⲛ ⲡ`targetDay`, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲛⲉⲩⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ ϩⲙⲡ`MonsterContext`.
 
 Ϩⲓ `FOUNDATION-1` ⲡⲣⲱⲧⲉ ⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ: `2`. Ϩⲓ `FOUNDATION` ⲛϥϯ `0` ϩⲁ `1`; ϩⲓ `FOUNDATION+1` ⲛϥϯ `2` ϩⲁ `3`; ϩⲓ `FOUNDATION+2` ⲛϥϯ `4` ϩⲁ `5`. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 4 ⲟ ⲛ`EXPECTED_RED`.
+
+## Ⲃⲁⲑⲙⲟⲥ 5 — PATCH 02
+
+Ⲡ`oldDayTag` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥⲡⲗⲁⲛⲏ. Ⲁⲩⲕⲱ ⲉϫⲱϥ ⲙⲡ`dayTagWithFoundationScar`: ⲉϣϫⲉ ⲡϩⲟⲟⲩ ϣⲟⲟⲡ ϩⲓ `FOUNDATION` ⲏ ⲙⲛⲛⲥⲱϥ, ⲛϥⲟⲩⲱϩ `1` ⲉⲡⲟⲩⲱϣⲃ ⲛⲗⲉⲅⲁⲥⲓ.
+
+Ⲡ guard ⲛⲥⲛⲁⲩ ⲉϫⲛ `FOUNDATION` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ: ⲉϣϫⲉ ⲡϩⲟⲟⲩ ⲡⲉ `FOUNDATION` ⲁⲩⲱ ⲡⲟⲩⲱϣⲃ ⲙⲛⲛⲥⲁ ⲡ`+1` ⲛϥⲟ ⲁⲛ ⲛ`1`, ⲛϥⲕⲱ ⲙⲡ`1` ⲉϩⲣⲁⲓ. Ⲡⲉⲓ guard ⲙⲛϩⲏⲧϥ ⲁⲛ ⲛⲟⲩclean-up; ⲟⲩϣⲟⲩⲱⲃⲉ ⲛⲧⲉⲡϩⲓⲥⲧⲟⲣⲓⲁ ⲡⲉ.
+
+`monster_daytag_route -> monster_stage05_daytag_patch_wrapper -> dayTagWithFoundationScar -> oldDayTag`
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲉⲛresult ⲛⲗⲉⲅⲁⲥⲓ ⲙⲛ ⲛresult ⲙⲡⲁⲧϣ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 4 ⲟ ⲛ`GREEN`, ⲁⲩⲱ ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 5 ⲧⲱⲛ ⲙⲛ `oracle_day_count`.

@@ -63,3 +63,13 @@
 Ⲡ`oldDayTag` ⲡⲉ ⲡCOPY_AUTHORITATIVE ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ; ⲡⲁⲓ ⲡⲉ ⲡⲡⲗⲁⲛⲏ ⲉⲧⲉⲣⲉⲡⲇⲟⲕⲓⲙⲏ ⲟⲩⲱⲛϩ ⲙⲙⲟϥ. Ⲡ`monster_daytag_route` ⲙⲛ ⲡhandler ⲛⲉ ⲟⲩⲧⲁⲡ ⲉϥⲧⲱⲛ ⲙⲛ ⲡⲗⲉⲅⲁⲥⲓ; ⲙⲛ normalization ⲏ fallback ⲉⲩⲟⲩⲱϩ ⲉϫⲱⲟⲩ.
 
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_DAYTAG_CALC_INPUT`, `CTX_LEGACY_DAYTAG_CALC_RESULT`, `CTX_DAYTAG_TARGET_INPUT`, `CTX_LEGACY_DAYTAG_TARGET_RESULT` ⲙⲛ `CTX_LEGACY_DAYTAG_SEEN`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲙⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ; ⲙⲛ ⲡstate ⲙⲡⲁⲧϣ 02 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+## Ⲡⲡⲁⲧϣ ⲙⲡ`dayTag` ⲙⲡⲃⲁⲑⲙⲟⲥ 5
+
+Ⲡ`oldDayTag` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲛⲟⲩCOPY_DIAGNOSTIC ⲛⲗⲉⲅⲁⲥⲓ ϩⲙⲡhandler. Ⲡ`dayTagWithFoundationScar` ⲡⲉ ⲡCOPY_AUTHORITATIVE ⲙⲡⲉⲓⲙⲉⲣⲟⲥ.
+
+`monster_daytag_route -> monster_stage05_daytag_patch_wrapper -> dayTagWithFoundationScar -> oldDayTag`
+
+Ⲡ`dayTagWithFoundationScar` ⲕⲁⲁϥ ⲛⲥⲁ ⲡresult ⲛ`oldDayTag` ϩⲁⲧϩⲏ ⲙⲡ`FOUNDATION`. Ϩⲓ `FOUNDATION` ⲙⲛ ⲙⲛⲛⲥⲱϥ ⲛϥⲟⲩⲱϩ `1`. Ⲡ guard `day == FOUNDATION && n != 1 -> n=1` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲛⲟⲩϣⲟⲩⲱⲃⲉ; ⲙⲡⲟⲩⲧⲁⲕⲟϥ ⲉⲧⲃⲉ ϫⲉ ⲡ`+1` ⲧⲁⲙⲓⲟ ⲙⲡ`1` ϩⲙⲡⲣⲱⲧⲉ ⲛⲧⲉⲛⲟⲩ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡlegacy result ⲙⲛ ⲡpatched result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲙⲡ`calculationDay` ⲙⲛ ⲡ`targetDay`. Ⲡpatched result ⲙⲙⲁⲧⲉ ⲡⲉ ⲡⲣⲱⲧⲉ ⲛCOPY_AUTHORITATIVE; ⲡlegacy result ⲛϥⲧⲙϫⲓ ⲛⲟⲩⲧⲟϣ ⲛⲕⲁⲛⲱⲛ.
