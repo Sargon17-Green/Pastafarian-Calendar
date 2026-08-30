@@ -607,6 +607,13 @@ bool NormativeOracle::exactGateIndex(const Big& day, Big& indexOut) {
     return false;
 }
 
+void NormativeOracle::seedGateAnchorForStage55Audit(const Big& index, const Big& day) {
+    gate_.clear();
+    gate_[index] = day;
+    minKnownGateIndex_ = index;
+    maxKnownGateIndex_ = index;
+}
+
 Big NormativeOracle::yearLength(const Big& openIndex, const Big& closeIndex) {
     ensureGateIndex(openIndex);
     ensureGateIndex(closeIndex);

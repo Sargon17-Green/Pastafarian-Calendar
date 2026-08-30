@@ -289,6 +289,16 @@ struct Stage54IntegrationReport {
     std::string status{};
     std::string handler{};
     std::size_t branchCount = 0;
+    int retryBudgetRemaining = 0;
+    int recoveryDepth = 0;
+    int recoverableFailuresObserved = 0;
+    bool recoverySnapshotRestoredExactly = false;
+};
+
+struct FinalIntegrationFaultPlan {
+    int recoverableFailuresToInject = 0;
+    int retryBudget = 3;
+    int injectionStage = 50;
 };
 
 SpaghettiDateFive calendarDateSpaghetti(const Integer& calculationDay,
@@ -1107,6 +1117,8 @@ struct BaseMonsterContext {
     bool finalLegacyContiguousMonthDayExecuted=false;
     bool finalExactFiveFieldReturn=false;
     bool finalIntegrationReady=false;
+    int finalRecoverableFailuresObserved=0;
+    bool finalRecoverySnapshotRestoredExactly=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1433,6 +1445,11 @@ public:
     using std::runtime_error::runtime_error;
 };
 
+class BaseRecoverableError final : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+};
+
 class BaseValidationManager {
 public:
     void requireNeutralBootstrapState(const BaseMonsterContext& ctx) const;
@@ -1612,7 +1629,8 @@ public:
     void handle(BaseMonsterContext& ctx,
                 std::map<Integer, FinalStructureCacheEntry>& structureCache,
                 const BaseValidationManager& validator,
-                const BaseMetricsShell& metrics) const;
+                const BaseMetricsShell& metrics,
+                const FinalIntegrationFaultPlan& faultPlan = {}) const;
 };
 class LegacyYearNumberOnlyCacheAdapter { public: LegacyYearCacheEntry getOrPut(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, bool& hit) const; };
 class Patch19YearCacheGuardWrapper { public: Patch19GuardedYearCacheResolution repair(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, const LegacyYearCacheEntry& legacyEntry, bool legacyHit) const; };
@@ -2680,7 +2698,8 @@ public:
         std::map<Integer, FinalStructureCacheEntry>& structureCache,
         const FinalIntegrationHandler& handler,
         const BaseValidationManager& validator,
-        const BaseMetricsShell& metrics) const;
+        const BaseMetricsShell& metrics,
+        const FinalIntegrationFaultPlan& faultPlan = {}) const;
 };
 
 class BaseMonsterManager {
@@ -2881,6 +2900,11 @@ public:
     Stage54IntegrationReport executeFinalIntegration(
         const Integer& calculationDay,
         const Integer& targetDay) const;
+    Stage54IntegrationReport executeFinalIntegrationRecoveryAudit(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        const FinalIntegrationFaultPlan& faultPlan) const;
+    std::size_t finalStructureCacheSizeDiagnostic() const;
     void clearLegacyYearNumberCacheDiagnostic() const;
 private:
     mutable std::map<Integer, LegacyYearCacheEntry> legacyYearNumberCache_{};

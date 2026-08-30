@@ -159,6 +159,7 @@ public:
     Big gateIndexAtOrBefore(const Big& day);
     Big gateIndexAtOrAfter(const Big& day);
     bool exactGateIndex(const Big& day, Big& indexOut);
+    void seedGateAnchorForStage55Audit(const Big& index, const Big& day);
 
     Year year5000(const Big& calculationDay);
     Year nextYear(const Big& calculationDay, const Year& knownYear);

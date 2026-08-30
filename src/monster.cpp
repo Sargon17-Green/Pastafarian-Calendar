@@ -10297,17 +10297,36 @@ void FinalIntegrationHandler::handle(
     BaseMonsterContext& ctx,
     std::map<Integer, FinalStructureCacheEntry>& structureCache,
     const BaseValidationManager& validator,
-    const BaseMetricsShell& metrics) const {
+    const BaseMetricsShell& metrics,
+    const FinalIntegrationFaultPlan& faultPlan) const {
+    if (faultPlan.recoverableFailuresToInject < 0) {
+        throw BaseValidationError("numerus defectuum recoverabilium negativus esse non potest");
+    }
+    if (faultPlan.retryBudget < 0) {
+        throw BaseValidationError("retryBudget negativus esse non potest");
+    }
+    if (faultPlan.injectionStage != 40 && faultPlan.injectionStage != 50) {
+        throw BaseValidationError("gradus injectionis recovery debet esse 40 aut 50");
+    }
+
     ctx.mode = "AUTHORITATIVE_SPAGHETTI";
     ctx.status = "NEW";
-    ctx.retryBudget = 3;
+    ctx.retryBudget = faultPlan.retryBudget;
     ctx.recoveryDepth = 0;
+    ctx.finalRecoverableFailuresObserved = 0;
+    ctx.finalRecoverySnapshotRestoredExactly = false;
     int stage = 0;
     Patch18YearWalkWorkspace workspace(ctx.calculationDay);
     Patch18YearRecord year5000{};
     Patch18YearRecord targetYear{};
     SpaghettiYearStructure structure{};
     bool cacheReady = false;
+    bool pendingCacheWrite = false;
+    FinalStructureCacheEntry pendingCacheEntry{};
+    int injectedFailuresRemaining = faultPlan.recoverableFailuresToInject;
+    int failuresObserved = 0;
+    int recoveryDepth = 0;
+    bool snapshotRestoredExactly = false;
 
     goto FINAL_MAIN_DISPATCH;
 
@@ -10380,8 +10399,8 @@ FINAL_MAIN_CACHE: {
             ctx.finalGuardedCacheHit = true;
             cacheReady = true;
         } else {
+            // Cicatrix key year-number-only manet; entry vetus ante validationem non mutatur.
             ctx.finalGuardedCacheRejected = true;
-            structureCache.erase(found);
         }
     }
     stage = cacheReady ? 50 : 40;
@@ -10389,18 +10408,89 @@ FINAL_MAIN_CACHE: {
 }
 
 FINAL_MAIN_STRUCTURE:
+    if (faultPlan.injectionStage == 40 && injectedFailuresRemaining > 0) {
+        const BaseMonsterContext ctxSnapshot = ctx;
+        const Patch18YearRecord year5000Snapshot = year5000;
+        const Patch18YearRecord targetYearSnapshot = targetYear;
+        const SpaghettiYearStructure structureSnapshot = structure;
+        const bool cacheReadySnapshot = cacheReady;
+        const bool pendingCacheWriteSnapshot = pendingCacheWrite;
+        const FinalStructureCacheEntry pendingCacheEntrySnapshot = pendingCacheEntry;
+        try {
+            --injectedFailuresRemaining;
+            throw BaseRecoverableError("defectus recoverabilis artificialis in structura finali");
+        } catch (const BaseRecoverableError&) {
+            ctx = ctxSnapshot;
+            year5000 = year5000Snapshot;
+            targetYear = targetYearSnapshot;
+            structure = structureSnapshot;
+            cacheReady = cacheReadySnapshot;
+            pendingCacheWrite = pendingCacheWriteSnapshot;
+            pendingCacheEntry = pendingCacheEntrySnapshot;
+            ++failuresObserved;
+            ++recoveryDepth;
+            snapshotRestoredExactly = true;
+            ctx.finalRecoverableFailuresObserved = failuresObserved;
+            ctx.recoveryDepth = recoveryDepth;
+            ctx.finalRecoverySnapshotRestoredExactly = true;
+            metrics.bump(ctx, "final.recoverableError");
+            if (ctx.retryBudget <= 0) {
+                ctx.status = "FAILED_RETRY_EXHAUSTED";
+                throw BaseRecoverableError("retry finalis exhaustum est post defectum recoverabilem");
+            }
+            --ctx.retryBudget;
+            stage = 40;
+            goto FINAL_MAIN_DISPATCH;
+        }
+    }
     ctx.phase = "FINAL_STRUCTURE_BUILD";
     structure = buildFinalYearStructure(ctx, workspace, targetYear);
-    structureCache[targetYear.number] = FinalStructureCacheEntry{
+    pendingCacheEntry = FinalStructureCacheEntry{
         ctx.calculationDay,
         targetYear.openGateDay,
         targetYear.closeGateDay,
         structure
     };
+    pendingCacheWrite = true;
     stage = 50;
     goto FINAL_MAIN_DISPATCH;
 
 FINAL_MAIN_FINALIZE: {
+    if (faultPlan.injectionStage == 50 && injectedFailuresRemaining > 0) {
+        const BaseMonsterContext ctxSnapshot = ctx;
+        const Patch18YearRecord year5000Snapshot = year5000;
+        const Patch18YearRecord targetYearSnapshot = targetYear;
+        const SpaghettiYearStructure structureSnapshot = structure;
+        const bool cacheReadySnapshot = cacheReady;
+        const bool pendingCacheWriteSnapshot = pendingCacheWrite;
+        const FinalStructureCacheEntry pendingCacheEntrySnapshot = pendingCacheEntry;
+        try {
+            --injectedFailuresRemaining;
+            throw BaseRecoverableError("defectus recoverabilis artificialis ante validationem finalem");
+        } catch (const BaseRecoverableError&) {
+            ctx = ctxSnapshot;
+            year5000 = year5000Snapshot;
+            targetYear = targetYearSnapshot;
+            structure = structureSnapshot;
+            cacheReady = cacheReadySnapshot;
+            pendingCacheWrite = pendingCacheWriteSnapshot;
+            pendingCacheEntry = pendingCacheEntrySnapshot;
+            ++failuresObserved;
+            ++recoveryDepth;
+            snapshotRestoredExactly = true;
+            ctx.finalRecoverableFailuresObserved = failuresObserved;
+            ctx.recoveryDepth = recoveryDepth;
+            ctx.finalRecoverySnapshotRestoredExactly = true;
+            metrics.bump(ctx, "final.recoverableError");
+            if (ctx.retryBudget <= 0) {
+                ctx.status = "FAILED_RETRY_EXHAUSTED";
+                throw BaseRecoverableError("retry finalis exhaustum est post defectum recoverabilem");
+            }
+            --ctx.retryBudget;
+            stage = 50;
+            goto FINAL_MAIN_DISPATCH;
+        }
+    }
     ctx.phase = "FINAL_FIVE_FIELDS";
     ctx.finalStructure = structure;
     const SpaghettiCutletRecord* chosenCutlet = nullptr;
@@ -10456,6 +10546,13 @@ FINAL_MAIN_FINALIZE: {
 FINAL_MAIN_VALIDATE_OUTPUT:
     ctx.phase = "FINAL_VALIDATE";
     validator.requireFinalIntegrationReady(ctx);
+    if (pendingCacheWrite) {
+        structureCache[targetYear.number] = pendingCacheEntry;
+        pendingCacheWrite = false;
+    }
+    ctx.finalRecoverableFailuresObserved = failuresObserved;
+    ctx.recoveryDepth = recoveryDepth;
+    ctx.finalRecoverySnapshotRestoredExactly = snapshotRestoredExactly;
     ctx.status = "GREEN";
     metrics.bump(ctx, "final.success");
     return;
@@ -10466,23 +10563,34 @@ void BaseDispatcher::dispatchFinalIntegration(
     std::map<Integer, FinalStructureCacheEntry>& structureCache,
     const FinalIntegrationHandler& handler,
     const BaseValidationManager& validator,
-    const BaseMetricsShell& metrics) const {
+    const BaseMetricsShell& metrics,
+    const FinalIntegrationFaultPlan& faultPlan) const {
     ctx.previousHandler = ctx.currentHandler;
     ctx.currentHandler = "BaseDispatcher::dispatchFinalIntegration";
     ctx.branchTrace.push_back("DISPATCH_FINAL_INTEGRATION");
-    handler.handle(ctx, structureCache, validator, metrics);
+    handler.handle(ctx, structureCache, validator, metrics, faultPlan);
 }
 
 Stage54IntegrationReport BaseMonsterManager::executeFinalIntegration(
     const Integer& calculationDay,
     const Integer& targetDay) const {
+    return executeFinalIntegrationRecoveryAudit(
+        calculationDay,
+        targetDay,
+        FinalIntegrationFaultPlan{});
+}
+
+Stage54IntegrationReport BaseMonsterManager::executeFinalIntegrationRecoveryAudit(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    const FinalIntegrationFaultPlan& faultPlan) const {
     BaseMonsterContext ctx;
     ctx.calculationDay = calculationDay;
     ctx.targetDay = targetDay;
     ctx.phase = "ENTRY";
     ctx.status = "NEW";
     ctx.mode = "AUTHORITATIVE_SPAGHETTI";
-    ctx.retryBudget = 3;
+    ctx.retryBudget = faultPlan.retryBudget;
     const BaseValidationManager validator;
     const BaseMetricsShell metrics;
     const FinalIntegrationHandler handler;
@@ -10492,7 +10600,8 @@ Stage54IntegrationReport BaseMonsterManager::executeFinalIntegration(
         finalStructureCache_,
         handler,
         validator,
-        metrics);
+        metrics,
+        faultPlan);
     return Stage54IntegrationReport{
         ctx.resultFive,
         ctx.finalYear5000,
@@ -10512,8 +10621,16 @@ Stage54IntegrationReport BaseMonsterManager::executeFinalIntegration(
         ctx.phase,
         ctx.status,
         ctx.currentHandler,
-        ctx.branchTrace.size()
+        ctx.branchTrace.size(),
+        ctx.retryBudget,
+        ctx.recoveryDepth,
+        ctx.finalRecoverableFailuresObserved,
+        ctx.finalRecoverySnapshotRestoredExactly
     };
+}
+
+std::size_t BaseMonsterManager::finalStructureCacheSizeDiagnostic() const {
+    return finalStructureCache_.size();
 }
 
 SpaghettiDateFive calendarDateSpaghetti(

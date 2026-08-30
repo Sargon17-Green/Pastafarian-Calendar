@@ -1,0 +1,44 @@
+GRADUS=55/55
+GENUS=AUDIT_FINALIS_BYTE
+STATUS=PASS
+BASELINE=GRADUS_54_GREEN
+FASCICULI_BASELINE_DELETI=0
+DIFFERENTIAE_INEXPECTATAE_EXTRA_SCOPUM=0
+CATALOGUS_HPP_BYTE_IDENTICUS=PASS
+CATALOGUS_MD_BYTE_IDENTICUS=PASS
+PROBATIONES_PRIORUM_GRADUUM_BYTE_IDENTICAE=PASS
+REFERENCE_CPP_MUTATIO=ADDITIVA_TEST_ONLY
+REFERENCE_LINEAE_REMOTAE=0
+REFERENCE_LINEAE_ADDITAE=8
+REFERENCE_SEED_MENTIONES_ADDITAE=2
+REFERENCE_SEED_CORPUS_ADDITUM=1
+REFERENCE_SEMANTICA_EXISTENS_MUTATA=NO
+PRODUCTIO_MUTATA=YES_BUG_RECOVERY_REALIS_GRADUS_55
+ALII_FONTES_PRODUCTIONIS_MUTATI=NO
+HANDOFF_IN_ARBORE=0
+STAGE_56_IN_ARBORE=0
+FASCICULI_NOVI_GRADUS_55=18
+BUILD_DIRECTORY_EXCLUDENDA=build_stage55_clang
+ORACLE_IN_PRODUCTIONE=NONE
+RUNTIME_EXTERNUS=NONE
+GIT_GITHUB_ACTIONES=NONE
+
+NOVI_FASCICULI:
+- STAGE_55_FINAL_BYTE_AUDIT.txt
+- STAGE_55_FINAL_DIFFERENTIAL_LEDGER.md
+- STAGE_55_INVARIANT_LEDGER.md
+- STAGE_55_LOCAL_TEST_LOG.txt
+- STAGE_55_SAFE_MONSTER_LEDGER.md
+- tests/fixtures/stage_55_far_year_fixtures.txt
+- tests/stage_55_catalog_presentation_audit_tests.cpp
+- tests/stage_55_far_year_fixture_generator.cpp
+- tests/stage_55_far_year_segment_worker.cpp
+- tests/stage_55_far_year_worker.cpp
+- tests/stage_55_fast_reference.hpp
+- tests/stage_55_final_e2e_worker.cpp
+- tests/stage_55_helper_differential_audit_tests.cpp
+- tests/stage_55_process_isolated_e2e_runner.cpp
+- tests/stage_55_recovery_audit_tests.cpp
+- tests/stage_55_safe_monster_audit_tests.cpp
+- tests/stage_55_state_history_worker.cpp
+- tests/stage_55_static_audit_tests.cpp
