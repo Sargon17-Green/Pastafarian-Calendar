@@ -157,3 +157,23 @@
 Ⲡⲇⲟⲕⲓⲙⲏ ⲧⲁϫⲣⲟ ⲛ4 ⲛmismatch ϩⲓ `drop=1,719,720,721`. ⲚStage 1–15 ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 16 ⲟ ⲛ`EXPECTED_RED`.
 
 Ⲙⲛ ⲡⲁⲧϣ ⲛbase ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+## Ⲃⲁⲑⲙⲟⲥ 17 — PATCH 08
+
+Ⲡ`oldPermutationUnrank0(rank0)` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ, ⲁⲩⲱ ⲡ`legacyPermutationRank0FromDropWrong` ⲙⲛ ⲡ`legacyPermutationOrderFromDropWrong` ⲟⲩⲏϩ ⲉⲩϣⲟⲟⲡ ⲛⲟⲩCOPY_DIAGNOSTIC.
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡchain ⲛⲧⲟϣ:
+
+`oneBased = regularMod(drop-1,720)+1`
+
+`legacyRank0 = oneBased-1`
+
+`order = oldPermutationUnrank0(legacyRank0)`
+
+Ⲡ`monster_permutation_route` ⲙⲟⲟϣⲉ ⲧⲉⲛⲟⲩ ϩⲓⲧⲛ:
+
+`monster_stage17_permutation_patch_wrapper -> orderPatchFromValue -> oldPermutationUnrank0`
+
+Ⲡ`monster_stage16_legacy_permutation_handler` ⲙⲟⲩⲧⲉ ⲉⲡlegacy caller ⲛⲟⲩdiagnostic, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡoneBased ⲙⲛ ⲡtranslated rank0 ⲙⲛ ⲡpatched order ϩⲙⲡ`MonsterContext` ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ.
+
+ⲠStage 16 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. ⲠStage 17 ⲥⲙⲓⲛⲉ ⲙⲡpatched route ⲙⲛ `oracle_bowl_order_from_value` ϩⲓ boundary ⲙⲛ negative values, ⲁⲩⲱ ⲛⲥⲉϣⲟⲃⲉ ⲁⲛ.

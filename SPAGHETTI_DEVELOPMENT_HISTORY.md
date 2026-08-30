@@ -279,3 +279,37 @@
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldPermutationUnrank0`, `legacyPermutationRank0FromDropWrong`, `legacyPermutationOrderFromDropWrong`, `monster_permutation_route`, `monster_stage16_legacy_permutation_handler`, ⲙⲛ state ⲛⲧⲉⲡdrop ⲙⲛ ⲡrank0 ⲙⲛ ⲛorder ⲛⲗⲉⲅⲁⲥⲓ.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡdetour ⲙⲡⲃⲁⲑⲙⲟⲥ ⲉⲧⲛⲏⲩ. Ⲙⲛ `drop-1` ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+
+## Ⲃⲁⲑⲙⲟⲥ 17 — PATCH 08
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`oldPermutationUnrank0`. Ⲡcontract ⲛⲧⲟϥ ⲟⲩⲏϩ ⲉϥϫⲓ `rank0=0..719`. Ⲡcaller ⲛStage 16 ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥmapping ⲛⲗⲉⲅⲁⲥⲓ, ⲁⲩⲱ ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩCOPY_DIAGNOSTIC.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`permutationOneBasedFromDropPatch08`: ⲛϥϫⲓ ⲙⲡ`drop-1`, ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡregular modulo ϩⲓ 720 ϩⲙⲡBigInt ⲛⲧⲉⲡⲉⲓline, ⲁⲩⲱ ⲛϥⲟⲩⲱϩ `1`. Ⲡ`orderPatchFromValue` ϫⲓ ⲙⲡoneBased ⲡⲁⲓ, ⲛϥⲥⲉⲕ `1` ⲉⲧⲣⲉϥⲧⲁⲙⲓⲟ ⲙⲡlegacyRank0, ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉ`oldPermutationUnrank0`.
+
+`monster_permutation_route -> monster_stage17_permutation_patch_wrapper -> orderPatchFromValue -> oldPermutationUnrank0`
+
+### EQUIVALENCE
+
+Ⲡchain ⲟⲩⲏϩ ⲉϥⲟⲩⲟⲛϩ ⲁϫⲛ ⲟⲩsimplification: `drop-1 -> regularMod(...,720) -> +1 -> -1 -> oldPermutationUnrank0`. Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲙⲓⲛⲉ ⲙⲛ `oracle_bowl_order_from_value` ϩⲓ `-1440,-721,-720,-719,-1,0,1,2,719,720,721,1440,1441`, ⲁⲩⲱ ⲟⲩⲛ 0 ⲛmismatch.
+
+### EDGE CASES
+
+`drop=1 -> oneBased=1 -> rank0=0`.
+
+`drop=720 -> oneBased=720 -> rank0=719`.
+
+`drop=721 -> oneBased=1 -> rank0=0`.
+
+`drop=0 -> oneBased=720 -> rank0=719`.
+
+`drop=-1 -> oneBased=719 -> rank0=718`.
+
+Ⲡlegacy scar ⲟⲩⲏϩ ⲉϥⲟⲩⲟⲛϩ: `legacyPermutationOrderFromDropWrong(1)` ⲛϥⲧⲱⲛ ⲁⲛ ⲙⲛ ⲡoracle.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `permutationOneBasedFromDropPatch08`, `orderPatchFromValue`, `monster_stage17_permutation_patch_wrapper`, `CTX_PATCHED_PERMUTATION_ONE_BASED`, `CTX_PATCHED_PERMUTATION_RANK0`, `CTX_PATCHED_PERMUTATION_ORDER`, ⲙⲛ `CTX_PERMUTATION_PATCH_SEEN`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.

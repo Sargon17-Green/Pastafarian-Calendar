@@ -71,7 +71,11 @@
 .equ CTX_PERMUTATION_ROUTE_ORDER,552
 .equ CTX_LEGACY_PERMUTATION_SEEN,560
 .equ CTX_PERMUTATION_ROUTE_SEEN,568
-.equ CTX_SIZE,576
+.equ CTX_PATCHED_PERMUTATION_ONE_BASED,576
+.equ CTX_PATCHED_PERMUTATION_RANK0,584
+.equ CTX_PATCHED_PERMUTATION_ORDER,592
+.equ CTX_PERMUTATION_PATCH_SEEN,600
+.equ CTX_SIZE,608
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -196,6 +200,9 @@ legacy_factorial_0_5:
 .global legacyPermutationOrderFromDropWrong
 .global monster_permutation_route
 .global monster_stage16_legacy_permutation_handler
+.global permutationOneBasedFromDropPatch08
+.global orderPatchFromValue
+.global monster_stage17_permutation_patch_wrapper
 
 .type monster_context_new,@function
 monster_context_new:
@@ -2092,9 +2099,98 @@ legacyPermutationOrderFromDropWrong:
     ret
 .size legacyPermutationOrderFromDropWrong,.-legacyPermutationOrderFromDropWrong
 
+# Ⲃⲁⲑⲙⲟⲥ 17 — PATCH 08
+# Ⲡcaller ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡStage 16 ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩCOPY_DIAGNOSTIC.
+# Ⲡⲡⲁⲧϣ ⲡⲁⲓ ⲕⲱ ⲉϩⲣⲁⲓ ⲛⲧⲉⲓchain ⲛⲧⲟϣ: oneBased=regularMod(drop-1,720)+1; legacyRank0=oneBased-1.
+.type permutationOneBasedFromDropPatch08,@function
+permutationOneBasedFromDropPatch08:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lpobfdp08_fail
+
+    mov edi,1
+    call bi_from_u64
+    mov rsi,rax
+    mov rdi,r12
+    call bi_sub
+    mov r13,rax
+    test r13,r13
+    je .Lpobfdp08_fail
+
+    mov r14,qword ptr [r13+BI_SIGN]
+    mov rdi,r13
+    mov rsi,720
+    call bi_divmod_u64_abs
+    mov rax,rdx
+    test r14,r14
+    jge .Lpobfdp08_mod_done
+    test rax,rax
+    je .Lpobfdp08_mod_done
+    mov rcx,720
+    sub rcx,rax
+    mov rax,rcx
+.Lpobfdp08_mod_done:
+    inc rax
+    jmp .Lpobfdp08_done
+.Lpobfdp08_fail:
+    xor eax,eax
+.Lpobfdp08_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size permutationOneBasedFromDropPatch08,.-permutationOneBasedFromDropPatch08
+
+.type orderPatchFromValue,@function
+orderPatchFromValue:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rsi
+    test rdi,rdi
+    je .Lopfv_fail
+    test r12,r12
+    je .Lopfv_fail
+
+    # Ⲡ`+1` ⲙⲡoneBased ⲟⲩⲏϩ ⲉϥⲟⲩⲟⲛϩ; ⲙⲡⲟⲩⲥⲉⲕ ⲙⲡchain ⲉⲟⲩrank0 ⲛⲟⲩcall ⲛⲟⲩⲱⲧ.
+    call permutationOneBasedFromDropPatch08
+    test rax,rax
+    je .Lopfv_fail
+    mov r13,rax
+    dec r13
+    mov rdi,r13
+    mov rsi,r12
+    call oldPermutationUnrank0
+    test eax,eax
+    je .Lopfv_fail
+    mov rax,r12
+    jmp .Lopfv_done
+.Lopfv_fail:
+    xor eax,eax
+.Lopfv_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size orderPatchFromValue,.-orderPatchFromValue
+
+.type monster_stage17_permutation_patch_wrapper,@function
+monster_stage17_permutation_patch_wrapper:
+    jmp orderPatchFromValue
+.size monster_stage17_permutation_patch_wrapper,.-monster_stage17_permutation_patch_wrapper
+
 .type monster_permutation_route,@function
 monster_permutation_route:
-    jmp legacyPermutationOrderFromDropWrong
+    jmp monster_stage17_permutation_patch_wrapper
 .size monster_permutation_route,.-monster_permutation_route
 
 .type monster_stage16_legacy_permutation_handler,@function
@@ -2131,6 +2227,15 @@ monster_stage16_legacy_permutation_handler:
     mov qword ptr [r12+CTX_LEGACY_PERMUTATION_ORDER],r14
     inc qword ptr [r12+CTX_LEGACY_PERMUTATION_SEEN]
 
+    mov rdi,r13
+    call permutationOneBasedFromDropPatch08
+    test rax,rax
+    je .Lms16_fail
+    mov qword ptr [r12+CTX_PATCHED_PERMUTATION_ONE_BASED],rax
+    mov rcx,rax
+    dec rcx
+    mov qword ptr [r12+CTX_PATCHED_PERMUTATION_RANK0],rcx
+
     mov edi,48
     call arena_alloc
     test rax,rax
@@ -2142,7 +2247,9 @@ monster_stage16_legacy_permutation_handler:
     test rax,rax
     je .Lms16_fail
     mov qword ptr [r12+CTX_PERMUTATION_ROUTE_ORDER],r15
+    mov qword ptr [r12+CTX_PATCHED_PERMUTATION_ORDER],r15
     inc qword ptr [r12+CTX_PERMUTATION_ROUTE_SEEN]
+    inc qword ptr [r12+CTX_PERMUTATION_PATCH_SEEN]
 
     mov eax,1
     jmp .Lms16_done

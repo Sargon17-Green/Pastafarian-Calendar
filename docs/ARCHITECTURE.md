@@ -209,3 +209,23 @@
 Ⲡ`oldPermutationUnrank0` ⲡⲉ ⲟⲩCOPY_AUTHORITATIVE ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡDISCOVERY ⲡⲁⲓ, ⲉϥϫⲓ ⲙⲡrank `0..719`. Ⲡ`legacyPermutationRank0FromDropWrong` ⲧⲁⲙⲓⲟ ⲙⲡ`drop mod 720` ⲛⲟⲩrank0; ⲛϥⲟⲩⲱϩ ⲁⲛ ⲙⲡ`-1`.
 
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_PERMUTATION_DROP`, `CTX_LEGACY_PERMUTATION_RANK0`, `CTX_LEGACY_PERMUTATION_ORDER`, `CTX_PERMUTATION_ROUTE_ORDER`, ⲙⲛ ⲛcounter ⲛⲧⲉⲡlegacy/route. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.
+
+## Ⲡpermutation-rank detour ⲙⲡⲃⲁⲑⲙⲟⲥ 17
+
+Ⲡ`oldPermutationUnrank0` ⲟⲩⲏϩ ⲉϥⲟ ⲛCOPY_LEGACY ⲙⲛ ⲡcontract `0..719`. Ⲡ`legacyPermutationOrderFromDropWrong` ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ϩⲙⲡhandler ⲛStage 16 ⲛⲟⲩCOPY_DIAGNOSTIC; ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡsemantic output ⲙⲡroute ⲧⲉⲛⲟⲩ.
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_permutation_route -> monster_stage17_permutation_patch_wrapper -> orderPatchFromValue -> oldPermutationUnrank0`
+
+Ⲡ`permutationOneBasedFromDropPatch08` ⲧⲁⲙⲓⲟ ⲙⲡ`oneBased=regularMod(drop-1,720)+1` ϩⲓⲧⲛ ⲛBigInt helper ⲛⲧⲉⲡline ⲛⲟⲩⲱⲧ. Ⲡ`orderPatchFromValue` ⲧⲁⲙⲓⲟ ⲙⲡ`legacyRank0=oneBased-1` ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡlegacy unranker ⲛⲧⲟϥ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲉⲡlegacy drop/rank/order, ⲡpatched oneBased/rank0/order, ⲙⲛ ⲛcounter ⲛⲧⲉⲡroute/patch. Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ.
+
+### EQUIVALENCE
+
+Ⲡregular modulo ⲙⲡhelper ⲟ ⲛ0..719 ⲟⲛ ϩⲓ ⲛnegative inputs; ⲡ`+1` ⲕⲱ ⲙⲡordinal ⲉ1..720; ⲡ`-1` ⲙⲡ`orderPatchFromValue` ⲕⲧⲟ ⲙⲡordinal ⲉⲡdomain ⲛ0..719 ⲙⲡ`oldPermutationUnrank0`.
+
+### WHY SAFE
+
+Ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡlegacy unranker ⲏ ⲡlegacy caller. Ⲡⲡⲁⲧϣ ⲟ ⲙⲙⲁⲧⲉ ⲛⲟⲩbridge ⲛbase ⲙⲡrank. Ⲙⲛ `bowlAlias` ⲏ pour-position patch ⲙⲡⲃⲁⲑⲙⲟⲥ ⲉⲧⲛⲏⲩ ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓlayer.
