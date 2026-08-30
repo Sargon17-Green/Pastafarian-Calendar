@@ -136,3 +136,28 @@
 ### WHY SAFE
 
 Ⲡⲕⲱⲇⲓⲝ ⲧⲱϣ ⲙⲙⲁⲧⲉ ⲛⲛrow ⲉⲧⲉⲣⲉⲡhidden calculation ⲁⲛⲁⲅⲕⲁⲍⲉ ⲙⲙⲟⲟⲩ. Ⲛrow ⲉⲧⲟⲩⲏⲩ ⲛⲥⲉϫⲓ ⲁⲛ ⲙⲡⲉⲓⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡϫⲓⲛⲧⲙⲧⲁⲙⲓⲟ ⲙⲙⲟⲟⲩ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡsemantic result.
+
+## Ⲡⲡⲁⲧϣ ⲙⲡhidden access ⲙⲡⲃⲁⲑⲙⲟⲥ 11
+
+Ⲡ`buildHiddenWithBackwardStorage` ⲟⲩⲏϩ ⲉϥⲕⲱ ⲛⲛhidden ϩⲛ ⲧⲁⲝⲓⲥ `hidden7..hidden1`. Ⲡ`legacyHiddenAtNearnessWrong` ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲛⲟⲩCOPY_DIAGNOSTIC ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡslot `k` ⲛⲧⲟϥ.
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_hidden_route -> monster_stage11_hidden_nearness_patch_wrapper -> hiddenByNearness`
+
+Ⲡ`hiddenByNearness` ⲣ `slot = 8-k` ϩⲙⲡⲧⲱϣ ⲛⲟⲩⲱⲧ. Ⲙⲛ allocation, mutation, sorting ⲏ copy ⲙⲡarray ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓⲡⲁⲧϣ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_HIDDEN_QUERY_RESULT` ⲙⲛ `CTX_PATCHED_HIDDEN_QUERY_RESULT` ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. Ⲡlegacy result ⲛϥⲧⲙⲃⲱⲕ ⲉϩⲟⲩⲛ ⲉⲡsemantic result; ⲡpatched result ⲡⲉ ⲡⲣⲱⲧⲉ ⲛCOPY_AUTHORITATIVE.
+
+### EQUIVALENCE
+
+Ⲉϣϫⲉ ⲡ`buildHiddenWithBackwardStorage` ⲥϩⲁⲓ ⲙⲡ`hidden k` ϩⲙⲡslot `8-k`, ⲧⲟⲧⲉ ⲡaccess ⲙⲡslot `8-k` ⲕⲧⲟ ⲙⲡ`hidden k` ⲛⲧⲟϥ. Ⲙⲛ ⲟⲩⲧⲓⲙⲏ ⲛⲃⲣⲣⲉ ⲉⲩⲗⲟⲅⲓⲍⲉ ⲙⲙⲟⲥ; ⲡⲁⲧϣ ⲟ ⲙⲙⲁⲧⲉ ⲛⲟⲩtranslation ⲙⲡindex.
+
+### EDGE CASES
+
+Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲙⲡ`k=1`, `k=4`, `k=7` ⲁⲩⲱ ⲛ7 ⲛ`k` ⲧⲏⲣⲟⲩ. Ⲡstorage ⲧⲱⲛ ⲙⲛ `hidden7..hidden1`; ⲡlegacy access ⲟⲩⲏϩ ⲉϥⲟ ⲛ6 ⲛmismatch; ⲡpatched access ⲟ ⲛ0 ⲛmismatch.
+
+### WHY SAFE
+
+Ⲡⲡⲁⲧϣ ⲛϥⲣ ⲁⲛ ⲟⲩmutation ⲙⲡsemantic state. Ⲛϥϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡpointer ⲉⲧⲕⲏ ⲉϩⲣⲁⲓ ϩⲙⲡbackward array ⲕⲁⲧⲁ ⲟⲩformula ⲛⲧⲟϣ. Ⲙⲛ logs, metrics, cache ⲏ environment ⲉⲩⲧⲟϣ ⲙⲡⲟⲩⲱϣⲃ.
+

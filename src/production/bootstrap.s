@@ -47,7 +47,9 @@
 .equ CTX_LEGACY_HIDDEN_QUERY_RESULT,360
 .equ CTX_LEGACY_HIDDEN_STORAGE_SEEN,368
 .equ CTX_LEGACY_HIDDEN_QUERY_SEEN,376
-.equ CTX_SIZE,384
+.equ CTX_PATCHED_HIDDEN_QUERY_RESULT,384
+.equ CTX_HIDDEN_NEARNESS_PATCH_SEEN,392
+.equ CTX_SIZE,400
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -127,6 +129,8 @@ legacy_hidden_stone_kind:
 .global makeHiddenLegacyStoredValue
 .global buildHiddenWithBackwardStorage
 .global legacyHiddenAtNearnessWrong
+.global hiddenByNearness
+.global monster_stage11_hidden_nearness_patch_wrapper
 .global monster_hidden_route
 .global monster_stage10_legacy_hidden_handler
 
@@ -1112,7 +1116,7 @@ getHiddenStonePrefixThroughLegacyBuilder:
 .size getHiddenStonePrefixThroughLegacyBuilder,.-getHiddenStonePrefixThroughLegacyBuilder
 
 # Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡarray ⲛⲛhidden ⲉϥⲥϩⲟⲩⲟⲣⲧ ⲉϥⲟⲩⲱϩ ⲉⲃⲟⲗ ϩⲛ ⲧⲉⲩⲧⲁⲝⲓⲥ ⲛⲟⲩⲱⲧ. Ⲡlegacy ⲇⲉ ⲥϩⲁⲓ ⲙⲡ hidden7 ⲛϣⲟⲣⲡ ⲙⲛ hidden1 ϩⲙⲡϩⲁⲉ.
-# Ⲙⲛ ⲡⲙⲉⲧⲁⲅⲣⲁⲫⲉⲩⲥ 8-k ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ. Ⲡroute ϫⲓ ⲙⲡk ⲛⲧⲟϥ ϩⲙⲡⲉϥⲙⲁ ⲛⲗⲉⲅⲁⲥⲓ.
+# Ⲡⲡⲁⲧϣ ⲛStage 11 ⲙⲡϥⲕⲧⲟ ⲙⲡarray. Ⲛϥⲙⲉⲧⲁⲅⲣⲁⲫⲉ ⲙⲙⲁⲧⲉ ⲙⲡk ⲉⲡposition 8-k, ⲉⲣⲉ ⲡstorage ⲛⲥⲁϩⲟⲩ ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ.
 .type makeHiddenLegacyStoredValue,@function
 makeHiddenLegacyStoredValue:
     push rbp
@@ -1300,9 +1304,31 @@ legacyHiddenAtNearnessWrong:
     ret
 .size legacyHiddenAtNearnessWrong,.-legacyHiddenAtNearnessWrong
 
+.type hiddenByNearness,@function
+hiddenByNearness:
+    test rdi,rdi
+    je .Lhbn_fail
+    cmp rsi,1
+    jb .Lhbn_fail
+    cmp rsi,7
+    ja .Lhbn_fail
+    mov rax,7
+    sub rax,rsi
+    mov rax,qword ptr [rdi+rax*8]
+    ret
+.Lhbn_fail:
+    xor eax,eax
+    ret
+.size hiddenByNearness,.-hiddenByNearness
+
+.type monster_stage11_hidden_nearness_patch_wrapper,@function
+monster_stage11_hidden_nearness_patch_wrapper:
+    jmp hiddenByNearness
+.size monster_stage11_hidden_nearness_patch_wrapper,.-monster_stage11_hidden_nearness_patch_wrapper
+
 .type monster_hidden_route,@function
 monster_hidden_route:
-    jmp legacyHiddenAtNearnessWrong
+    jmp monster_stage11_hidden_nearness_patch_wrapper
 .size monster_hidden_route,.-monster_hidden_route
 
 .type monster_stage10_legacy_hidden_handler,@function
@@ -1366,13 +1392,24 @@ monster_stage10_legacy_hidden_handler:
     mov qword ptr [r12+CTX_HIDDEN_BACKWARD],r15
     inc qword ptr [r12+CTX_LEGACY_HIDDEN_STORAGE_SEEN]
     mov qword ptr [r12+CTX_HIDDEN_QUERY_K],1
+
+    # Ⲡlegacy call ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲛⲟⲩCOPY_DIAGNOSTIC: k=1 ⲙⲟⲩⲧⲉ ⲉhidden7.
+    mov rdi,r15
+    mov esi,1
+    call legacyHiddenAtNearnessWrong
+    test rax,rax
+    je .Lms10_fail
+    mov qword ptr [r12+CTX_LEGACY_HIDDEN_QUERY_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_HIDDEN_QUERY_SEEN]
+
+    # Ⲡroute ⲛⲕⲁⲛⲱⲛ ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡtranslator 8-k, ⲁϫⲛ ⲧⲣⲉϥⲕⲧⲟ ⲙⲡstorage.
     mov rdi,r15
     mov esi,1
     call monster_hidden_route
     test rax,rax
     je .Lms10_fail
-    mov qword ptr [r12+CTX_LEGACY_HIDDEN_QUERY_RESULT],rax
-    inc qword ptr [r12+CTX_LEGACY_HIDDEN_QUERY_SEEN]
+    mov qword ptr [r12+CTX_PATCHED_HIDDEN_QUERY_RESULT],rax
+    inc qword ptr [r12+CTX_HIDDEN_NEARNESS_PATCH_SEEN]
     mov eax,1
     jmp .Lms10_done
 .Lms10_fail:

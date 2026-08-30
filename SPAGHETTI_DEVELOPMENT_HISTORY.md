@@ -162,3 +162,24 @@
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `monster_stage10_legacy_hidden_handler`, `monster_hidden_route`, `CTX_HIDDEN_BACKWARD`, `CTX_HIDDEN_QUERY_K`, `CTX_LEGACY_HIDDEN_QUERY_RESULT`, ⲙⲛ ⲛcounter ⲛⲧⲉⲡstorage ⲙⲛ ⲡquery. Ⲡ`calendarDateSpaghetti` ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡhandler ⲡⲁⲓ ϩⲙⲡⲣⲱⲧⲉ.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡⲙⲉⲧⲁⲅⲣⲁⲫⲉⲩⲥ ⲛⲧⲉⲡⲃⲁⲑⲙⲟⲥ ⲉⲧⲛⲏⲩ. Ⲡⲡⲗⲁⲛⲏ ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲙⲡⲣⲱⲧⲉ.
+
+## Ⲃⲁⲑⲙⲟⲥ 11 — PATCH 05
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩⲕⲧⲟ ⲙⲡ`buildHiddenWithBackwardStorage`. Ⲡarray ⲟⲩⲏϩ ⲉϥⲥϩⲟⲩⲟⲣⲧ `hidden7..hidden1`. Ⲡ`legacyHiddenAtNearnessWrong` ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡslot `k` ⲁϫⲛ ⲟⲩⲙⲉⲧⲁⲅⲣⲁⲫⲏ, ⲁⲩⲱ ⲛϥⲣϩⲱⲃ ⲛⲟⲩCOPY_DIAGNOSTIC.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`hiddenByNearness`. Ⲡⲟⲩⲱϣⲃ ⲙⲡquery `k` ⲛϥⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡslot `8-k`. Ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡstorage; ⲡⲁⲧϣ ⲟ ⲙⲙⲁⲧⲉ ϩⲙⲡaccess.
+
+`monster_hidden_route -> monster_stage11_hidden_nearness_patch_wrapper -> hiddenByNearness`
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲁⲓ ⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+Ϩⲙⲡbackward storage ⲡ`hidden k` ⲥⲏϩ ϩⲙⲡposition `8-k`. Ⲡ`hiddenByNearness` ϫⲓ ⲙⲡposition ⲡⲁⲓ ⲛⲧⲟϥ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡⲟⲩⲱϣⲃ ⲧⲱⲛ ⲙⲛ ⲡoracle ϩⲓ `k=1..7`. ⲠStage 10 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `hiddenByNearness`, `monster_stage11_hidden_nearness_patch_wrapper`, `CTX_PATCHED_HIDDEN_QUERY_RESULT` ⲙⲛ `CTX_HIDDEN_NEARNESS_PATCH_SEEN`. Ⲡhandler ϩⲁⲣⲉϩ ⲉⲡlegacy result ⲙⲛ ⲡpatched result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. Ⲡstate ⲡⲁⲓ ⲡⲉ ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ, ⲁⲩⲱ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡstorage ⲏ ⲙⲡsemantic input.
+
