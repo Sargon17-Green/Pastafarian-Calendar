@@ -89,3 +89,11 @@
 `monster_distance_route -> monster_stage07_distance_patch_wrapper -> distanceWithChronologicalScar -> oldDistance`
 
 ⲠCOPY_AUTHORITATIVE ⲙⲉⲧⲣⲉ ⲙⲡ`abs(targetDay-calculationDay)`, ⲛϥϣⲓⲃⲉ ⲙⲡlegacy ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ⲛϥϣⲟⲃⲉ, ⲁⲩⲱ ⲛϥⲟⲩⲱϩ `1`. Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_CHRONOLOGICAL_DISTANCE`, `CTX_PATCHED_DISTANCE_RESULT` ⲙⲛ `CTX_DISTANCE_PATCH_SEEN`; ⲙⲛ logs ⲏ metrics ⲉⲩⲣϩⲱⲃ ϩⲙⲡⲉⲓⲧⲟϣ.
+
+## Ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲃⲁⲑⲙⲟⲥ 8
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage08_legacy_stone_handler -> monster_stone_mutation_route -> mutateStonesWrong`
+
+Ⲡ`mutateStonesWrong` ⲡⲉ ⲡCOPY_AUTHORITATIVE ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ. Ⲛϥϣⲓⲃⲉ ⲙⲡarray ⲛ5 ⲛⲱⲛⲉ ϩⲛ ⲡⲉϥⲙⲁ, ⲁⲩⲱ ⲛⲗⲟⲅⲓⲥⲙⲟⲥ ⲉⲧⲛⲏⲩ ⲥⲉϫⲓ ⲛⲧⲓⲙⲏ ⲉⲁⲩⲥϩⲁⲓⲟⲩ ⲏⲇⲏ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_STONE_ROW`, `CTX_STONE_ROUTE_RESULT`, `CTX_LEGACY_STONE_SEEN`, `CTX_STONE_ROUTE_SEEN` ⲙⲛ `CTX_STONE_ITERATION`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ. Ⲙⲛ `stonePatch`, `vaultOld`, `garbage overwrite` ⲏ snapshot ⲙⲡ Patch 04 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.

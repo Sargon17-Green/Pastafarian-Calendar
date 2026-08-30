@@ -34,7 +34,12 @@
 .equ CTX_CHRONOLOGICAL_DISTANCE,256
 .equ CTX_PATCHED_DISTANCE_RESULT,264
 .equ CTX_DISTANCE_PATCH_SEEN,272
-.equ CTX_SIZE,280
+.equ CTX_LEGACY_STONE_ROW,280
+.equ CTX_STONE_ROUTE_RESULT,288
+.equ CTX_LEGACY_STONE_SEEN,296
+.equ CTX_STONE_ROUTE_SEEN,304
+.equ CTX_STONE_ITERATION,312
+.equ CTX_SIZE,320
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -60,6 +65,8 @@ legacy_remainder_M_limbs:
 .extern bi_sub_abs
 .extern bi_sub
 .extern bi_mul_u64
+.extern bi_mul_abs
+.extern bi_add_abs
 .extern bi_from_i64
 .extern bi_from_u64
 .extern bi_clone
@@ -83,6 +90,9 @@ legacy_remainder_M_limbs:
 .global monster_stage07_distance_patch_wrapper
 .global monster_distance_route
 .global monster_stage06_legacy_distance_handler
+.global mutateStonesWrong
+.global monster_stone_mutation_route
+.global monster_stage08_legacy_stone_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -527,6 +537,183 @@ monster_stage06_legacy_distance_handler:
     ret
 .size monster_stage06_legacy_distance_handler,.-monster_stage06_legacy_distance_handler
 
+
+
+# Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲛϣⲟⲙⲛⲧ ⲛⲉⲣⲅⲁⲥⲓⲁ ⲙⲡⲉⲓⲙⲁ ⲛⲁϣⲱⲡⲉ ⲛⲟⲩⲱⲧ ϩⲛ ⲟⲩⲥⲱⲙⲁ ⲛ state. Ⲡ mutateStonesWrong ϣⲓⲃⲉ ⲙⲡⲉϥⲥⲱⲙⲁ ϩⲛ ⲟⲩⲧⲁⲝⲓⲥ, ⲁⲩⲱ ⲛϥϫⲓ ⲛⲛⲉⲁⲡⲟⲕⲣⲓⲥⲓⲥ ⲛⲃⲣⲣⲉ ϩⲛ ⲛⲗⲟⲅⲓⲥⲙⲟⲥ ⲉⲧⲛⲏⲩ.
+# Ⲙⲛ snapshot ⲛⲕⲁⲛⲱⲛ ⲉϥϣⲟⲟⲡ ϩⲙ ⲡⲃⲁⲑⲙⲟⲥ ⲡⲁⲓ. Ⲡⲡⲗⲁⲛⲏ ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲙⲡⲣⲱⲧⲉ.
+.type mutateStonesWrong,@function
+mutateStonesWrong:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lmsw_fail
+
+    # w = SAVE(w*w + 3*b + i)
+    mov rdi,qword ptr [r12]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov r14,rax
+    mov rdi,qword ptr [r12+8]
+    mov rsi,3
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,r14
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,r13
+    call bi_add_u64
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r12],rax
+
+    # b = SAVE(b*b + 5*s + w) ; w ⲡⲉ ⲡⲟⲩⲱϣⲃ ⲛⲃⲣⲣⲉ.
+    mov rdi,qword ptr [r12+8]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov r14,rax
+    mov rdi,qword ptr [r12+16]
+    mov rsi,5
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,r14
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [r12]
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r12+8],rax
+
+    # s = SAVE(s*s + 7*m + b) ; b ⲡⲉ ⲡⲟⲩⲱϣⲃ ⲛⲃⲣⲣⲉ.
+    mov rdi,qword ptr [r12+16]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov r14,rax
+    mov rdi,qword ptr [r12+24]
+    mov rsi,7
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,r14
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [r12+8]
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r12+16],rax
+
+    # m = SAVE(m*m + 11*r + s) ; s ⲡⲉ ⲡⲟⲩⲱϣⲃ ⲛⲃⲣⲣⲉ.
+    mov rdi,qword ptr [r12+24]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov r14,rax
+    mov rdi,qword ptr [r12+32]
+    mov rsi,11
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,r14
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [r12+16]
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r12+24],rax
+
+    # r = SAVE(r*r + 13*w + m) ; w ⲙⲛ m ⲛⲉ ⲛⲟⲩⲱϣⲃ ⲛⲃⲣⲣⲉ.
+    mov rdi,qword ptr [r12+32]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov r14,rax
+    mov rdi,qword ptr [r12]
+    mov rsi,13
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,r14
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [r12+24]
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r12+32],rax
+
+    mov rax,r12
+    jmp .Lmsw_done
+.Lmsw_fail:
+    xor eax,eax
+.Lmsw_done:
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size mutateStonesWrong,.-mutateStonesWrong
+
+.type monster_stone_mutation_route,@function
+monster_stone_mutation_route:
+    jmp mutateStonesWrong
+.size monster_stone_mutation_route,.-monster_stone_mutation_route
+
+.type monster_stage08_legacy_stone_handler,@function
+monster_stage08_legacy_stone_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    test r12,r12
+    je .Lms08_fail
+    mov rdi,40
+    call arena_alloc
+    mov r13,rax
+
+    mov rdi,17
+    call bi_from_u64
+    mov qword ptr [r13],rax
+    mov rdi,29
+    call bi_from_u64
+    mov qword ptr [r13+8],rax
+    mov rdi,43
+    call bi_from_u64
+    mov qword ptr [r13+16],rax
+    mov rdi,71
+    call bi_from_u64
+    mov qword ptr [r13+24],rax
+    mov rdi,101
+    call bi_from_u64
+    mov qword ptr [r13+32],rax
+
+    mov qword ptr [r12+CTX_STONE_ITERATION],2
+    mov qword ptr [r12+CTX_LEGACY_STONE_ROW],r13
+    mov rdi,r13
+    mov rsi,2
+    call monster_stone_mutation_route
+    test rax,rax
+    je .Lms08_fail
+    mov qword ptr [r12+CTX_STONE_ROUTE_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_STONE_SEEN]
+    inc qword ptr [r12+CTX_STONE_ROUTE_SEEN]
+    mov eax,1
+    jmp .Lms08_done
+.Lms08_fail:
+    xor eax,eax
+.Lms08_done:
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage08_legacy_stone_handler,.-monster_stage08_legacy_stone_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -550,6 +737,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage06_legacy_distance_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage08_legacy_stone_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

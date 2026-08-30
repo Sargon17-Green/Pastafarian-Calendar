@@ -59,3 +59,11 @@
 `monster_distance_route -> monster_stage07_distance_patch_wrapper -> distanceWithChronologicalScar -> oldDistance`
 
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲉⲡlegacy distance, ⲡchronological distance ⲙⲛ ⲡpatched distance. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 6 ⲟ ⲛ`GREEN`, ⲁⲩⲱ ⲡ Stage 7 ⲧⲱⲛ ⲙⲛ `oracle_work_counts`.
+
+## Ⲃⲁⲑⲙⲟⲥ 8 — DISCOVERY 04
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`mutateStonesWrong` ⲛⲗⲉⲅⲁⲥⲓ. Ⲛⲧⲟϥ ϣⲓⲃⲉ ⲛⲛ5 ⲛⲱⲛⲉ ϩⲛ ⲧⲉⲩⲧⲁⲝⲓⲥ ⲉⲩⲙⲏⲛ ϩⲙⲡstate ⲛⲟⲩⲱⲧ, ⲁⲩⲱ ⲟⲩⲱⲛⲉ ⲉϥⲛⲏⲩ ϫⲓ ⲛⲟⲩⲧⲓⲙⲏ ⲛⲃⲣⲣⲉ ⲉⲁⲩⲥϩⲁⲓⲥ ⲏⲇⲏ ϩⲙⲡⲉⲓⲧⲱϣ.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage08_legacy_stone_handler -> monster_stone_mutation_route -> mutateStonesWrong`
+
+Ϩⲙⲡϣⲟⲣⲡ ⲙⲉⲧⲁⲃⲟⲗⲏ `i=2`, ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ϯ `378,1434,3780,9932,25047`, ⲁⲩⲱ ⲡⲕⲁⲛⲱⲛ ϯ `378,1073,2375,6195,10493`. Ⲡϣⲟⲣⲡ ⲱⲛⲉ ⲧⲱⲛ; ⲡⲕⲉ4 ⲥⲉϣⲟⲃⲉ. Ⲙⲛ ⲡⲁⲧϣ ⲛsnapshot ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 8 ⲟ ⲛ`EXPECTED_RED`; ⲛⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 1–7 ⲥⲉⲟ ⲛ`GREEN`.

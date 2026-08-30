@@ -115,3 +115,15 @@
 ### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
 
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲟⲩ`monster_stage07_distance_patch_wrapper`, ⲙⲛ `CTX_CHRONOLOGICAL_DISTANCE`, `CTX_PATCHED_DISTANCE_RESULT` ⲙⲛ `CTX_DISTANCE_PATCH_SEEN`. Ⲡhandler ϩⲁⲣⲉϩ ⲉⲡlegacy result ⲙⲛ ⲡchronological result ⲙⲛ ⲡpatched result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ, ⲁⲩⲱ ⲛⲥⲉϣⲓⲃⲉ ⲁⲛ ⲙⲡⲕⲁⲛⲱⲛ.
+
+## Ⲃⲁⲑⲙⲟⲥ 8 — DISCOVERY 04
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲉϣϫⲉ ⲧⲁⲝⲓⲥ ⲛⲛ5 ⲛⲱⲛⲉ ⲥⲏϩ ϩⲛⲟⲩⲃⲗⲟⲕ ⲛⲟⲩⲱⲧ, ⲟⲩⲛ ⲉϣϫⲉ ⲟⲩⲱⲛⲉ ⲥϩⲁⲓ ⲙⲡⲉϥⲧⲓⲙⲏ ⲛⲃⲣⲣⲉ ⲛϣⲟⲣⲡ ⲁⲩⲱ ⲡⲉⲧⲛⲏⲩ ϫⲓ ⲙⲙⲟⲥ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`mutateStonesWrong` ⲉϥϣⲓⲃⲉ ⲙⲡstate ϩⲛ ⲟⲩⲧⲁⲝⲓⲥ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ϩⲙ `i=2` ⲡ`w` ⲟⲩⲱϣⲃ ⲛ`378` ⲁⲩⲱ ⲛϥⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ. Ⲁⲗⲗⲁ ⲡ`b` ϫⲓ ⲙⲡ`w` ⲛⲃⲣⲣⲉ, ⲡ`s` ϫⲓ ⲙⲡ`b` ⲛⲃⲣⲣⲉ, ⲡ`m` ϫⲓ ⲙⲡ`s` ⲛⲃⲣⲣⲉ, ⲁⲩⲱ ⲡ`r` ϫⲓ ⲙⲡ`w` ⲙⲛ ⲡ`m` ⲛⲃⲣⲣⲉ. Ⲡⲣⲱⲧⲉ ϯ `378,1434,3780,9932,25047`, ϩⲟⲡⲟⲩ ⲡoracle ϯ `378,1073,2375,6195,10493`. Ⲟⲩⲛ 4 ⲛⲇⲓⲁⲫⲟⲣⲁ ⲉⲩⲧⲟϣ.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲛⲟⲩ`monster_stone_mutation_route` ⲙⲛ ⲟⲩ`monster_stage08_legacy_stone_handler`. Ⲡ`calendarDateSpaghetti` ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡlegacy ⲡⲁⲓ, ⲁⲩⲱ ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡrow ⲙⲛ ⲡiteration ⲙⲛ ⲛcounter. Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩsnapshot ⲏ ⲟⲩoverwrite ⲛⲕⲁⲛⲱⲛ ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ.
