@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
+from .acceleration_scars import AccelerationScarContext
+
 from .legacy_arithmetic import LegacyRemainderAdapter
 from .legacy_day_counts import LegacyDayTagAdapter
 from .legacy_distance import LegacyDistanceAdapter
@@ -449,6 +451,7 @@ class MonsterContext:
     integration_result_five: Any = None
     integration_exact_five_fields: bool = False
     integration_stage39_terminal_scar: str | None = None
+    acceleration_scars: AccelerationScarContext = field(default_factory=AccelerationScarContext)
 
 
 class BaseMetrics:

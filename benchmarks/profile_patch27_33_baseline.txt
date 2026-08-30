@@ -1,0 +1,31 @@
+mode= baseline elapsed= 7.812864595999599 result= {"cutlet_name": "Salkım", "day_in_cutlet": 723, "day_in_month": 21, "month_name": "Dirsek", "year_number": 5001}
+         1369572 function calls (1367786 primitive calls) in 7.812 seconds
+
+   Ordered by: cumulative time
+   List reduced from 410 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    7.813    7.813 calendar.py:26(calendar_date_spaghetti)
+        1    0.007    0.007    7.799    7.799 final_integration.py:2392(execute)
+        1    0.000    0.000    7.669    7.669 final_integration.py:1858(buildStructure)
+        1    5.987    5.987    6.532    6.532 final_integration.py:532(integratedDPUnrankLegalWeaving)
+        2    0.659    0.330    1.095    0.548 legacy_month_weaving.py:143(__init__)
+   512051    0.461    0.000    0.461    0.000 {built-in method math.gcd}
+   137853    0.437    0.000    0.437    0.000 {built-in method math.comb}
+       25    0.001    0.000    0.131    0.005 legacy_structure_sauce.py:53(sauceWithCurrentScars)
+       24    0.001    0.000    0.125    0.005 final_integration.py:157(sauceWithScars)
+        1    0.000    0.000    0.121    0.121 final_integration.py:1645(findTargetYear)
+        3    0.000    0.000    0.111    0.037 final_integration.py:1086(ensure_cover)
+       31    0.000    0.000    0.111    0.004 final_integration.py:1020(ensure_index)
+       21    0.000    0.000    0.111    0.005 final_integration.py:968(_gap)
+        1    0.000    0.000    0.111    0.111 final_integration.py:1373(year5000)
+        1    0.000    0.000    0.106    0.106 final_integration.py:1229(_rawCandidatesContaining)
+       26    0.001    0.000    0.049    0.002 legacy_order_memory.py:61(run)
+24055/23618    0.037    0.000    0.046    0.000 {built-in method builtins.divmod}
+   318960    0.039    0.000    0.039    0.000 {method 'append' of 'list' objects}
+    53481    0.012    0.000    0.035    0.000 legacy_arithmetic.py:14(savePatch)
+       26    0.003    0.000    0.030    0.001 legacy_visible_grinds.py:93(call)
+
+
+
+metrics= {}

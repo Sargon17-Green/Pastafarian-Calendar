@@ -12,9 +12,71 @@ from .monster_bootstrap import (
     StageNotIntegratedError,
 )
 
+from .acceleration_scars import (
+    acceleration_enabled,
+    forced_legacy_full_walk,
+    lookup_final_result,
+    poison_final_result,
+    semantic_fingerprint,
+    should_ghost_validate,
+    store_final_result,
+)
+
 
 def calendar_date_spaghetti(calculation_day: int, target_day: int):
     ctx = MonsterContext(calculation_day=calculation_day, target_day=target_day)
+    ctx.acceleration_scars.enabled = acceleration_enabled()
+    from .final_integration import (
+        FinalSpaghettiIntegrationManager as _Patch27SemanticSentinelManager,
+        SpaghettiDateResult as _Patch27BurialResultType,
+    )
+    final_fingerprint = semantic_fingerprint(
+        calendar_date_spaghetti,
+        buildAnswerRingFromSauceState,
+        _Patch27SemanticSentinelManager.execute,
+    )
+
+    if (
+        ctx.acceleration_scars.enabled
+        and type(calculation_day) is int
+        and type(target_day) is int
+    ):
+        buried = lookup_final_result(
+            ctx,
+            final_fingerprint,
+        )
+        if buried is not None:
+            if should_ghost_validate(calculation_day, target_day):
+                ctx.acceleration_scars.ghost_validations += 1
+                ctx.metrics["acceleration_ghost_validation"] = (
+                    ctx.metrics.get("acceleration_ghost_validation", 0) + 1
+                )
+                ctx.branch_trace.append((
+                    "YAMA_33_GHOST_VALIDATION_BEGIN",
+                    calculation_day,
+                    target_day,
+                ))
+                with forced_legacy_full_walk():
+                    ghost = calendar_date_spaghetti(
+                        calculation_day,
+                        target_day,
+                    )
+                if ghost != buried.result:
+                    ctx.acceleration_scars.ghost_divergences += 1
+                    poison_final_result(
+                        ctx,
+                        "ghost-validation-divergence",
+                    )
+                    raise AssertionError(
+                        "Patch 33 ghost validation cached semantic sonuçtan saptı"
+                    )
+                ctx.branch_trace.append((
+                    "YAMA_33_GHOST_VALIDATION_MATCH",
+                    calculation_day,
+                    target_day,
+                ))
+            return buried.result
+
     manager = MonsterManager()
 
     def entry_handler(local_ctx: MonsterContext) -> None:
@@ -868,7 +930,18 @@ def calendar_date_spaghetti(calculation_day: int, target_day: int):
     integration_manager = FinalSpaghettiIntegrationManager(
         ctx
     )
-    return integration_manager.execute(
+    result = integration_manager.execute(
         calculation_day,
         target_day,
     )
+    if (
+        ctx.acceleration_scars.enabled
+        and isinstance(result, _Patch27BurialResultType)
+    ):
+        store_final_result(
+            ctx,
+            result,
+            final_fingerprint,
+            full_monster_run=True,
+        )
+    return result

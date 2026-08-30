@@ -1,0 +1,105 @@
+{
+  "measurement_policy": {
+    "baseline_and_accelerated_modes_isolated_in_fresh_python_processes": true,
+    "notes": "Scenarios were executed one at a time in this environment because long sustained CPU runs are throttled; values below are direct measurements from the benchmark driver.",
+    "semantic_result_equality_checked_by_benchmark_driver": true,
+    "warm_primes_are_not_included_in_measured_warm_time": true
+  },
+  "profile_comparison": {
+    "baseline_calls": 1369572,
+    "baseline_hotspot": "integratedDPUnrankLegalWeaving: 6.532 s cumulative",
+    "baseline_profile_s": 7.812864595999599,
+    "scenario": "calculation_day=FOUNDATION_DAY, target=FOUNDATION_DAY+1100; warm primed with target=FOUNDATION_DAY+1000",
+    "warm_calls": 395087,
+    "warm_hotspot_removed_from_top20": true,
+    "warm_profile_s": 0.13030533900018781,
+    "warm_year_structure_cache_hit": 1
+  },
+  "python": "3.13.5",
+  "rows": [
+    {
+      "accelerated_cold_s": 4.191052687,
+      "accelerated_warm_s": 9.1644e-05,
+      "baseline_s": 4.129068597,
+      "cache_hits": 1,
+      "cold_speedup": 0.985,
+      "gate_generations_avoided": 0,
+      "scenario": "cold_single_lookup",
+      "selection_iterations_avoided": 0,
+      "warm_speedup": 45055.526,
+      "year_steps_avoided": 0
+    },
+    {
+      "accelerated_cold_s": 7.651703601,
+      "accelerated_warm_s": 3.3075e-05,
+      "baseline_s": 8.224118476,
+      "cache_hits": 20,
+      "cold_speedup": 1.075,
+      "gate_generations_avoided": 0,
+      "scenario": "repeated_identical_lookup",
+      "selection_iterations_avoided": 0,
+      "warm_speedup": 248650.22,
+      "year_steps_avoided": 0
+    },
+    {
+      "accelerated_cold_s": 7.840902677,
+      "accelerated_warm_s": 0.043484935,
+      "baseline_s": 7.705041792,
+      "cache_hits": 24,
+      "cold_speedup": 0.983,
+      "gate_generations_avoided": 0,
+      "scenario": "repeated_calculation_day_different_targets",
+      "selection_iterations_avoided": 0,
+      "warm_speedup": 177.189,
+      "year_steps_avoided": 0
+    },
+    {
+      "accelerated_cold_s": 8.253093764,
+      "accelerated_warm_s": 0.425830599,
+      "baseline_s": 8.495408633,
+      "cache_hits": 288,
+      "cold_speedup": 1.029,
+      "gate_generations_avoided": 512,
+      "scenario": "far_target_years",
+      "selection_iterations_avoided": 0,
+      "warm_speedup": 19.95,
+      "year_steps_avoided": 92
+    },
+    {
+      "accelerated_cold_s": 7.724787112,
+      "accelerated_warm_s": 0.035795745,
+      "baseline_s": 7.786794804,
+      "cache_hits": 23,
+      "cold_speedup": 1.008,
+      "gate_generations_avoided": 0,
+      "scenario": "sequential_target_days",
+      "selection_iterations_avoided": 0,
+      "warm_speedup": 217.534,
+      "year_steps_avoided": 1
+    },
+    {
+      "accelerated_cold_s": 7.709647626,
+      "accelerated_warm_s": 0.039341056,
+      "baseline_s": 7.961154036,
+      "cache_hits": 23,
+      "cold_speedup": 1.033,
+      "gate_generations_avoided": 0,
+      "scenario": "repeated_requests_same_year",
+      "selection_iterations_avoided": 0,
+      "warm_speedup": 202.362,
+      "year_steps_avoided": 1
+    },
+    {
+      "accelerated_cold_s": 0.000714501,
+      "accelerated_warm_s": 2.0488e-05,
+      "baseline_s": 0.000515269,
+      "cache_hits": 200,
+      "cold_speedup": 0.721,
+      "gate_generations_avoided": 0,
+      "scenario": "selection_heavy_remembered_offset",
+      "selection_iterations_avoided": 400000,
+      "warm_speedup": 25.15,
+      "year_steps_avoided": 0
+    }
+  ]
+}

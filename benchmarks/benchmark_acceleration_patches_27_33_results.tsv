@@ -1,0 +1,8 @@
+scenario	baseline_s	accelerated_cold_s	accelerated_warm_s	cold_speedup	warm_speedup	cache_hits	year_steps_avoided	gate_generations_avoided	selection_iterations_avoided
+cold_single_lookup	4.129068597	4.191052687	9.1644e-05	0.985	45055.526	1	0	0	0
+repeated_identical_lookup	8.224118476	7.651703601	3.3075e-05	1.075	248650.22	20	0	0	0
+repeated_calculation_day_different_targets	7.705041792	7.840902677	0.043484935	0.983	177.189	24	0	0	0
+far_target_years	8.495408633	8.253093764	0.425830599	1.029	19.95	288	92	512	0
+sequential_target_days	7.786794804	7.724787112	0.035795745	1.008	217.534	23	1	0	0
+repeated_requests_same_year	7.961154036	7.709647626	0.039341056	1.033	202.362	23	1	0	0
+selection_heavy_remembered_offset	0.000515269	0.000714501	2.0488e-05	0.721	25.15	200	0	0	400000

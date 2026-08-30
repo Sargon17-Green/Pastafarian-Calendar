@@ -1,0 +1,31 @@
+mode= warm elapsed= 0.13030533900018781 result= {"cutlet_name": "Salkım", "day_in_cutlet": 723, "day_in_month": 21, "month_name": "Dirsek", "year_number": 5001}
+         395087 function calls (395063 primitive calls) in 0.130 seconds
+
+   Ordered by: cumulative time
+   List reduced from 325 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.130    0.130 calendar.py:26(calendar_date_spaghetti)
+        1    0.000    0.000    0.119    0.119 final_integration.py:2392(execute)
+       24    0.001    0.000    0.119    0.005 legacy_structure_sauce.py:53(sauceWithCurrentScars)
+        1    0.000    0.000    0.117    0.117 final_integration.py:1645(findTargetYear)
+       23    0.000    0.000    0.115    0.005 final_integration.py:157(sauceWithScars)
+        1    0.000    0.000    0.107    0.107 final_integration.py:1373(year5000)
+        2    0.000    0.000    0.107    0.053 final_integration.py:1086(ensure_cover)
+       31    0.000    0.000    0.107    0.003 final_integration.py:1020(ensure_index)
+       21    0.000    0.000    0.106    0.005 final_integration.py:968(_gap)
+        1    0.000    0.000    0.102    0.102 final_integration.py:1229(_rawCandidatesContaining)
+       25    0.001    0.000    0.047    0.002 legacy_order_memory.py:61(run)
+    51407    0.011    0.000    0.033    0.000 legacy_arithmetic.py:14(savePatch)
+       25    0.002    0.000    0.027    0.001 legacy_visible_grinds.py:93(call)
+       25    0.000    0.000    0.024    0.001 legacy_permutation.py:164(build_order_table)
+     1150    0.001    0.000    0.024    0.000 legacy_permutation.py:121(order_from_drop)
+     2876    0.014    0.000    0.024    0.000 legacy_permutation.py:9(oldPermutationUnrank0)
+       25    0.000    0.000    0.022    0.001 legacy_stones.py:129(call)
+       25    0.001    0.000    0.022    0.001 legacy_stones.py:101(getStoneTableThroughLegacyBuilder)
+     1150    0.001    0.000    0.022    0.000 legacy_permutation.py:62(repair)
+    51407    0.010    0.000    0.021    0.000 legacy_arithmetic.py:10(oldRemainder)
+
+
+
+metrics= {"final_result_cache_miss": 2, "final_result_cache_store": 2, "gate_shard_miss": 4, "selection_oracle_hit": 23, "selection_oracle_miss": 29, "year_checkpoint_created": 1, "year_checkpoint_miss": 2, "year_structure_cache_hit": 1, "year_structure_cache_miss": 1, "year_structure_cache_store": 1}

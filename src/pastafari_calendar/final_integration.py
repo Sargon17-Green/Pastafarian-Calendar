@@ -34,6 +34,26 @@ from .legacy_month_weaving import (
 from .legacy_month_day_position import oldContiguousMonthDayGuess
 from .source_language_catalog import SOURCE_LANGUAGE_CATALOG
 
+from .acceleration_scars import (
+    SelectionOracleKey,
+    YearCheckpoint,
+    YearStructureCacheKey,
+    checkpoint_note_search,
+    lookup_gate_shard,
+    nearest_year_checkpoint,
+    oracle_accept_hit,
+    oracle_false_prophecy,
+    oracle_lookup,
+    oracle_store,
+    poison_year_checkpoint,
+    semantic_fingerprint,
+    store_gate_shard,
+    store_year_checkpoint,
+    year_structure_lookup,
+    year_structure_store,
+    GATE_SHARD_SIZE,
+)
+
 
 FOUNDATION_DAY_INTEGRATED = -15055671
 GATE_GAP_CHOICES = 922
@@ -212,6 +232,8 @@ def _ringFromSauce(
 def _chooseIntegratedRank(
     ring: LegacyAnswerRing,
     family_count: int,
+    ctx=None,
+    oracle_scope=None,
 ) -> int:
     if family_count < 1:
         raise ValueError(
@@ -223,6 +245,53 @@ def _chooseIntegratedRank(
             M_OLD
             // family_count
         ) * family_count
+        fingerprint = semantic_fingerprint(
+            answerAtRing,
+            biasedLegacyPick,
+            _chooseIntegratedRank,
+        )
+        oracle_key = None
+
+        if (
+            ctx is not None
+            and ctx.acceleration_scars.enabled
+            and oracle_scope is not None
+        ):
+            oracle_key = SelectionOracleKey(
+                ring_identity=(ring.first, ring.direction_step),
+                family_count=family_count,
+                limit=limit,
+                question_identity=oracle_scope,
+                semantic_fingerprint=fingerprint,
+            )
+            remembered = oracle_lookup(
+                ctx,
+                oracle_key,
+            )
+            if remembered is not None:
+                prophetic_answer = answerAtRing(
+                    ring,
+                    remembered.offset,
+                )
+                if (
+                    prophetic_answer <= limit
+                    and prophetic_answer == remembered.accepted_answer
+                ):
+                    oracle_accept_hit(
+                        ctx,
+                        oracle_key,
+                        remembered,
+                    )
+                    return biasedLegacyPick(
+                        prophetic_answer,
+                        family_count,
+                    )
+                oracle_false_prophecy(
+                    ctx,
+                    oracle_key,
+                    remembered,
+                )
+
         offset = 0
         answer = answerAtRing(
             ring,
@@ -236,10 +305,40 @@ def _chooseIntegratedRank(
                 offset,
             )
 
+        if oracle_key is not None:
+            oracle_store(
+                ctx,
+                oracle_key,
+                offset,
+                answer,
+            )
+
         return biasedLegacyPick(
             answer,
             family_count,
         )
+
+    # Geniş seçim döngüsü tarihsel biçimiyle bırakılır. Patch 31'in ilk
+    # nesli yalnız daha önce gözlenmiş kısa-selection offset'lerini diriltir.
+    if (
+        ctx is not None
+        and ctx.acceleration_scars.enabled
+        and oracle_scope is not None
+    ):
+        ctx.acceleration_scars.oracle_misses += 1
+        ctx.metrics["selection_oracle_miss"] = (
+            ctx.metrics.get("selection_oracle_miss", 0) + 1
+        )
+        ctx.branch_trace.append((
+            "YAMA_31_ORACLE_WIDE_FALLBACK",
+            oracle_scope,
+            family_count,
+        ))
+        ctx.logs.append((
+            "yama-31-oracle-wide-fallback",
+            oracle_scope,
+            family_count,
+        ))
 
     places = 1
     space = M_OLD
@@ -784,6 +883,87 @@ class IntegratedGateCache:
         }
         self.min_known = 0
         self.max_known = 0
+        self._acceleration_fingerprint = semantic_fingerprint(
+            sauceWithScars,
+            _ringFromSauce,
+            _chooseIntegratedRank,
+        )
+
+    def _resurrect_shard_if_adjacent(
+        self,
+        index: int,
+    ) -> bool:
+        if not self.ctx.acceleration_scars.enabled or index == 0:
+            return False
+        if index > 0 and (index - 1) % GATE_SHARD_SIZE != 0:
+            return False
+        if index < 0 and ((-index) - 1) % GATE_SHARD_SIZE != 0:
+            return False
+
+        shard = lookup_gate_shard(
+            self.ctx,
+            index,
+            self._acceleration_fingerprint,
+        )
+        if shard is None:
+            return False
+
+        if index > 0:
+            if shard.start_index != self.max_known + 1:
+                return False
+        else:
+            if shard.end_index != self.min_known - 1:
+                return False
+
+        for offset, day in enumerate(shard.days):
+            self.gates[shard.start_index + offset] = day
+
+        self.min_known = min(self.min_known, shard.start_index)
+        self.max_known = max(self.max_known, shard.end_index)
+        loaded = len(shard.days)
+        self.ctx.acceleration_scars.gate_shard_loaded_days += loaded
+        self.ctx.metrics["gate_shard_loaded_days"] = (
+            self.ctx.metrics.get("gate_shard_loaded_days", 0) + loaded
+        )
+        self.ctx.branch_trace.append((
+            "YAMA_29_GATE_SHARD_RESURRECTED",
+            shard.start_index,
+            shard.end_index,
+            loaded,
+        ))
+        self.ctx.logs.append((
+            "yama-29-gate-shard-resurrected",
+            shard.start_index,
+            shard.end_index,
+            loaded,
+        ))
+        return True
+
+    def _bury_shard_ending_at(
+        self,
+        current: int,
+    ) -> None:
+        if not self.ctx.acceleration_scars.enabled:
+            return
+        if current > 0 and current % GATE_SHARD_SIZE == 0:
+            start = current - GATE_SHARD_SIZE + 1
+            days = tuple(self.gates[index] for index in range(start, current + 1))
+            store_gate_shard(
+                self.ctx,
+                start,
+                days,
+                self._acceleration_fingerprint,
+            )
+        elif current < 0 and (-current) % GATE_SHARD_SIZE == 0:
+            start = current
+            end = current + GATE_SHARD_SIZE - 1
+            days = tuple(self.gates[index] for index in range(start, end + 1))
+            store_gate_shard(
+                self.ctx,
+                start,
+                days,
+                self._acceleration_fingerprint,
+            )
 
     def _gap(
         self,
@@ -815,6 +995,8 @@ class IntegratedGateCache:
                 rank = _chooseIntegratedRank(
                     ring,
                     GATE_GAP_CHOICES,
+                    self.ctx,
+                    ("gate-gap", signed_index),
                 )
                 gap = (
                     GATE_GAP_BASE
@@ -856,6 +1038,9 @@ class IntegratedGateCache:
             )
 
             while current <= index:
+                if self._resurrect_shard_if_adjacent(current):
+                    current = self.max_known + 1
+                    continue
                 self.gates[
                     current
                 ] = (
@@ -867,6 +1052,7 @@ class IntegratedGateCache:
                     )
                 )
                 self.max_known = current
+                self._bury_shard_ending_at(current)
                 current += 1
 
         elif index < self.min_known:
@@ -876,6 +1062,9 @@ class IntegratedGateCache:
             )
 
             while current >= index:
+                if self._resurrect_shard_if_adjacent(current):
+                    current = self.min_known - 1
+                    continue
                 self.gates[
                     current
                 ] = (
@@ -887,6 +1076,7 @@ class IntegratedGateCache:
                     )
                 )
                 self.min_known = current
+                self._bury_shard_ending_at(current)
                 current -= 1
 
         return self.gates[
@@ -986,6 +1176,12 @@ class FinalSpaghettiIntegrationManager:
             "result"
         ].append(
             self._validateFiveFieldHook
+        )
+        self._acceleration_fingerprint = semantic_fingerprint(
+            sauceWithScars,
+            _chooseIntegratedRank,
+            integratedDPUnrankLegalWeaving,
+            oldContiguousMonthDayGuess,
         )
         self.ctx.integration_compatibility_flags = (
             "LEGACY_SCARS_AKTİF",
@@ -1204,6 +1400,8 @@ class FinalSpaghettiIntegrationManager:
             len(
                 candidates
             ),
+            self.ctx,
+            ("year5000", calculation_day),
         )
         selected = candidates[
             rank - 1
@@ -1319,6 +1517,8 @@ class FinalSpaghettiIntegrationManager:
             len(
                 patched
             ),
+            self.ctx,
+            ("next-year", calculation_day, known.number, known.close_gate_index),
         )
         selected = patched[
             rank - 1
@@ -1427,6 +1627,8 @@ class FinalSpaghettiIntegrationManager:
             len(
                 patched
             ),
+            self.ctx,
+            ("previous-year", calculation_day, known.number, known.open_gate_index),
         )
         selected = patched[
             rank - 1
@@ -1448,6 +1650,7 @@ class FinalSpaghettiIntegrationManager:
         current = self.year5000(
             calculation_day
         )
+        anchor = current
         visited = [
             current.number
         ]
@@ -1464,6 +1667,56 @@ class FinalSpaghettiIntegrationManager:
         )
         self.ctx.integration_legacy_jump_guess = legacy_guess
 
+        def checkpoint_from_year(value: IntegratedYear) -> YearCheckpoint:
+            return YearCheckpoint(
+                calculation_day=calculation_day,
+                year_number=value.number,
+                first_day=value.open_gate_day + 1,
+                last_day=value.close_gate_day,
+                open_gate_index=value.open_gate_index,
+                close_gate_index=value.close_gate_index,
+                relevant_gate_index=value.open_gate_index,
+                semantic_fingerprint=self._acceleration_fingerprint,
+            )
+
+        if self.ctx.acceleration_scars.enabled:
+            store_year_checkpoint(
+                self.ctx,
+                checkpoint_from_year(anchor),
+            )
+            prophecy = nearest_year_checkpoint(
+                self.ctx,
+                calculation_day,
+                target_day,
+                self._acceleration_fingerprint,
+                anchor.open_gate_day + 1,
+                anchor.close_gate_day,
+            )
+            if prophecy is not None:
+                self.gates.ensure_index(prophecy.open_gate_index)
+                self.gates.ensure_index(prophecy.close_gate_index)
+                if (
+                    self.gates.gates[prophecy.open_gate_index]
+                    == prophecy.first_day - 1
+                    and self.gates.gates[prophecy.close_gate_index]
+                    == prophecy.last_day
+                ):
+                    current = IntegratedYear(
+                        number=prophecy.year_number,
+                        open_gate_index=prophecy.open_gate_index,
+                        close_gate_index=prophecy.close_gate_index,
+                        open_gate_day=prophecy.first_day - 1,
+                        close_gate_day=prophecy.last_day,
+                    )
+                    visited.append(current.number)
+                else:
+                    poison_year_checkpoint(
+                        self.ctx,
+                        prophecy,
+                        "gate-boundary-validation-failed",
+                    )
+                    current = anchor
+
         while target_day > current.close_gate_day:
             current = self._nextYear(
                 calculation_day,
@@ -1472,6 +1725,11 @@ class FinalSpaghettiIntegrationManager:
             visited.append(
                 current.number
             )
+            if self.ctx.acceleration_scars.enabled:
+                store_year_checkpoint(
+                    self.ctx,
+                    checkpoint_from_year(current),
+                )
 
         while target_day <= current.open_gate_day:
             current = self._previousYear(
@@ -1481,6 +1739,11 @@ class FinalSpaghettiIntegrationManager:
             visited.append(
                 current.number
             )
+            if self.ctx.acceleration_scars.enabled:
+                store_year_checkpoint(
+                    self.ctx,
+                    checkpoint_from_year(current),
+                )
 
         if not (
             current.open_gate_day
@@ -1489,6 +1752,17 @@ class FinalSpaghettiIntegrationManager:
         ):
             raise AssertionError(
                 "Entegrasyon target day değerini (open,close] year interval içine yerleştiremedi"
+            )
+
+        if self.ctx.acceleration_scars.enabled:
+            seen_count = checkpoint_note_search(
+                calculation_day,
+                current.number,
+            )
+            store_year_checkpoint(
+                self.ctx,
+                checkpoint_from_year(current),
+                forced=seen_count >= 2,
             )
 
         self.ctx.integration_year_walk_visited = tuple(
@@ -1591,6 +1865,52 @@ class FinalSpaghettiIntegrationManager:
             year.open_gate_day
             + 1
         )
+        structure_cache_key = YearStructureCacheKey(
+            calculation_day=calculation_day,
+            year_number=year.number,
+            first_day=first_day,
+            last_day=year.close_gate_day,
+            gate_identity=(year.open_gate_index, year.close_gate_index),
+            semantic_fingerprint=self._acceleration_fingerprint,
+        )
+
+        if self.ctx.acceleration_scars.enabled:
+            remembered_structure = year_structure_lookup(
+                self.ctx,
+                structure_cache_key,
+            )
+            if remembered_structure is not None:
+                self.ctx.integration_structure_ghost_target_day = original_target_day
+                self.ctx.integration_structure_semantic_target_day = first_day
+                self.ctx.integration_structure_recomputed = True
+                self.ctx.integration_cutlet_semantic_partition = (
+                    remembered_structure.cutlet_partition
+                )
+                self.ctx.integration_cutlet_name_indices = (
+                    remembered_structure.cutlet_name_indices
+                )
+                self.ctx.integration_month_weaving_semantic = (
+                    remembered_structure.month_weaving
+                )
+                self.ctx.integration_month_name_indices = (
+                    remembered_structure.month_name_indices
+                )
+                self.ctx.integration_structure = remembered_structure
+                self.ctx.branch_trace.append((
+                    "YAMA_30_STRUCTURE_LEGACY_BYPASS_VISIBLE",
+                    year.number,
+                    original_target_day,
+                ))
+                self.ctx.logs.append((
+                    "yama-30-structure-legacy-bypass-visible",
+                    year.number,
+                    original_target_day,
+                ))
+                self._fireHooks(
+                    "structure",
+                    remembered_structure,
+                )
+                return remembered_structure
 
         if (
             self.ctx.legacy_post_stir_final_bowls is None
@@ -1661,6 +1981,8 @@ class FinalSpaghettiIntegrationManager:
             len(
                 cutlet_candidates
             ),
+            self.ctx,
+            ("structure-cutlet-count", calculation_day, year.number),
         )
         cutlet_count = cutlet_candidates[
             cutlet_count_rank
@@ -1694,6 +2016,8 @@ class FinalSpaghettiIntegrationManager:
         raw_partition_rank = _chooseIntegratedRank(
             partition_ring,
             raw_partition_family.count(),
+            self.ctx,
+            ("structure-cutlet-partition-raw", calculation_day, year.number),
         )
         raw_partition = raw_partition_family.unrank1(
             raw_partition_rank
@@ -1707,6 +2031,8 @@ class FinalSpaghettiIntegrationManager:
         filtered_partition_rank = _chooseIntegratedRank(
             partition_ring,
             filtered_partition_family.count(),
+            self.ctx,
+            ("structure-cutlet-partition-filtered", calculation_day, year.number, required_boundary),
         )
         cutlet_partition = filtered_partition_family.unrank1(
             filtered_partition_rank
@@ -1728,6 +2054,8 @@ class FinalSpaghettiIntegrationManager:
         raw_cutlet_name_rank = _chooseIntegratedRank(
             cutlet_name_ring,
             raw_cutlet_name_count,
+            self.ctx,
+            ("structure-cutlet-names-raw", calculation_day, year.number, cutlet_count),
         )
         raw_cutlet_names = legacyRepeatedNameUnrank1(
             17,
@@ -1741,6 +2069,8 @@ class FinalSpaghettiIntegrationManager:
         distinct_cutlet_rank = _chooseIntegratedRank(
             cutlet_name_ring,
             distinct_cutlet_count,
+            self.ctx,
+            ("structure-cutlet-names-distinct", calculation_day, year.number, cutlet_count),
         )
         correct_cutlet_names = partialPermutationUnrank(
             17,
@@ -1828,6 +2158,8 @@ class FinalSpaghettiIntegrationManager:
             len(
                 month_candidates
             ),
+            self.ctx,
+            ("structure-month-count", calculation_day, year.number),
         )
         month_count = month_candidates[
             month_count_rank
@@ -1848,6 +2180,8 @@ class FinalSpaghettiIntegrationManager:
         month_length_rank = _chooseIntegratedRank(
             month_length_ring,
             virtual_lengths.count(),
+            self.ctx,
+            ("structure-month-lengths", calculation_day, year.number, month_count),
         )
         month_lengths = virtual_lengths.itemAt1(
             month_length_rank
@@ -1868,6 +2202,8 @@ class FinalSpaghettiIntegrationManager:
         weaving_rank = _chooseIntegratedRank(
             weaving_ring,
             legal_weaving.count(),
+            self.ctx,
+            ("structure-month-weaving", calculation_day, year.number, month_lengths),
         )
         correct_weaving = integratedDPUnrankLegalWeaving(
             legal_weaving,
@@ -1895,6 +2231,8 @@ class FinalSpaghettiIntegrationManager:
         raw_month_name_rank = _chooseIntegratedRank(
             month_name_ring,
             raw_month_name_count,
+            self.ctx,
+            ("structure-month-names-raw", calculation_day, year.number, month_count),
         )
         raw_month_names = legacyRepeatedNameUnrank1(
             47,
@@ -1908,6 +2246,8 @@ class FinalSpaghettiIntegrationManager:
         distinct_month_name_rank = _chooseIntegratedRank(
             month_name_ring,
             distinct_month_name_count,
+            self.ctx,
+            ("structure-month-names-distinct", calculation_day, year.number, month_count),
         )
         correct_month_names = partialPermutationUnrank(
             47,
@@ -1942,8 +2282,112 @@ class FinalSpaghettiIntegrationManager:
             "structure",
             structure,
         )
+        if self.ctx.acceleration_scars.enabled:
+            year_structure_store(
+                self.ctx,
+                structure_cache_key,
+                structure,
+            )
 
         return structure
+
+    def _captureAccelerationContainmentShell(
+        self,
+    ) -> dict[str, object]:
+        program_counter = self.ctx.integration_program_counter
+        fields_by_phase = {
+            "YIL_5000": (
+                "integration_year5000_candidate_count",
+                "integration_year5000_selected_rank",
+                "integration_year5000_open_day",
+                "integration_year5000_close_day",
+                "integration_legacy_jump_guess",
+                "integration_year_walk_visited",
+                "integration_target_year_number",
+                "integration_target_year_open_day",
+                "integration_target_year_close_day",
+            ),
+            "CACHE": (
+                "integration_year_cache_guard_valid",
+                "integration_year_cache_guard_rejections",
+            ),
+            "YAPI": (
+                "integration_structure_ghost_target_day",
+                "integration_structure_semantic_target_day",
+                "integration_structure_recomputed",
+                "integration_cutlet_raw_partition",
+                "integration_cutlet_required_boundary",
+                "integration_cutlet_semantic_partition",
+                "integration_cutlet_raw_name_indices",
+                "integration_cutlet_name_indices",
+                "integration_month_weaving_ghost",
+                "integration_month_weaving_semantic",
+                "integration_month_raw_name_indices",
+                "integration_month_name_indices",
+                "integration_structure",
+            ),
+            "SONUÇ": (
+                "integration_month_day_legacy_guess",
+                "integration_month_day_occurrence_count",
+                "integration_result_five",
+                "integration_exact_five_fields",
+            ),
+        }
+        return {
+            field_name: getattr(self.ctx, field_name)
+            for field_name in fields_by_phase.get(program_counter, ())
+        }
+
+    def _applyAccelerationContainmentAfterLegacyRollback(
+        self,
+        snapshot: dict[str, object],
+    ) -> None:
+        changed = [
+            field_name
+            for field_name, old_value in snapshot.items()
+            if getattr(self.ctx, field_name) != old_value
+        ]
+        if not changed:
+            self.ctx.acceleration_scars.rollback_legacy_success += 1
+            self.ctx.metrics["rollback_legacy_success"] = (
+                self.ctx.metrics.get("rollback_legacy_success", 0) + 1
+            )
+            self.ctx.branch_trace.append((
+                "YAMA_32_LEGACY_ROLLBACK_SUCCESS",
+                self.ctx.integration_program_counter,
+            ))
+            self.ctx.logs.append((
+                "yama-32-legacy-rollback-success",
+                self.ctx.integration_program_counter,
+            ))
+            return
+
+        for field_name in changed:
+            setattr(self.ctx, field_name, snapshot[field_name])
+
+        restored = len(changed)
+        self.ctx.acceleration_scars.rollback_containment_applied += 1
+        self.ctx.acceleration_scars.rollback_containment_fields_restored += restored
+        self.ctx.acceleration_scars.bypassed_scars.append(
+            "patch32:external-rollback-containment"
+        )
+        self.ctx.metrics["rollback_containment_applied"] = (
+            self.ctx.metrics.get("rollback_containment_applied", 0) + 1
+        )
+        self.ctx.metrics["rollback_containment_fields_restored"] = (
+            self.ctx.metrics.get("rollback_containment_fields_restored", 0)
+            + restored
+        )
+        self.ctx.branch_trace.append((
+            "YAMA_32_ROLLBACK_CONTAINMENT_APPLIED",
+            self.ctx.integration_program_counter,
+            tuple(changed),
+        ))
+        self.ctx.logs.append((
+            "yama-32-rollback-containment-applied",
+            self.ctx.integration_program_counter,
+            tuple(changed),
+        ))
 
     def execute(
         self,
@@ -1982,6 +2426,11 @@ class FinalSpaghettiIntegrationManager:
         self.ctx.integration_last_committed_phase = committed_phase
 
         while self.ctx.integration_program_counter != "BİTTİ":
+            containment_snapshot = (
+                self._captureAccelerationContainmentShell()
+                if self.ctx.acceleration_scars.enabled
+                else {}
+            )
             try:
                 if self.ctx.integration_program_counter == "YIL_5000":
                     year = self.findTargetYear(
@@ -2154,10 +2603,16 @@ class FinalSpaghettiIntegrationManager:
                 )
 
             except AssertionError:
+                # Historical rollback fiziksel olarak önce çalışır. Patch 32 ancak
+                # onun bıraktığı semantic alanları kontrol ettikten sonra devreye girer.
                 self.ctx.integration_rollback_snapshot = (
                     self.ctx.integration_old_snapshot
                 )
                 self.ctx.integration_pending_snapshot = None
+                if self.ctx.acceleration_scars.enabled:
+                    self._applyAccelerationContainmentAfterLegacyRollback(
+                        containment_snapshot
+                    )
 
                 if retry_budget <= 0:
                     self.ctx.integration_status = "FAILED"
