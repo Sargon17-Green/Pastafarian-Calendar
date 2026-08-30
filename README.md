@@ -1127,3 +1127,50 @@ Bootstrap et omnes regressiones Graduum 1–51 transeunt in eadem arbore. Execut
 ### Limes proximus
 
 Nulla pars PATCH 26 praemature addita est. Gradus 52 nondum incipit.
+
+## DISCOVERY 26 — opening gate per intervalum clausum anno novo tribuitur
+
+Gradus 52 ultimam assumptionem historicam ante PATCH 26 ad viam activam addit. `LegacyYearMembershipAdapter` annos per transitus sequentiales PATCH 18 iam correctos movet, sed membership veterem intentionaliter interpretatur ut:
+
+```text
+[open,close]
+```
+
+Via legacy primum procedit dum `targetDay > current.closeGateDay`, deinde retrocedit tantum dum:
+
+```text
+targetDay < current.openGateDay
+```
+
+Ita target exacte aequalis `current.openGateDay` non retrocedit. `Discovery26OpeningGateYearMembershipHandler` hunc annum legacy invocation-local servat et eum ipsum ut output semanticum huius discovery mittit. Correctio futura `targetDay <= current.openGateDay` nondum adest.
+
+### Quid repertum est
+
+Membership normativum anni est `(open,close]`: opening gate anni novi ad annum priorem pertinet et eius closing gate est. Tres witness C++ hoc exacte demonstrant:
+
+```text
+calculation-gate 0:
+target=-15057703
+legacy year=5000, legacy open=-15057703
+normative year=4999, normative close=-15057703
+
+calculation-gate 7:
+target=-15053677
+legacy year=5000, legacy open=-15053677
+normative year=4999, normative close=-15053677
+
+calculation-gate -11:
+target=-15061829
+legacy year=5000, legacy open=-15061829
+normative year=4999, normative close=-15061829
+```
+
+Pro singulis witness control interior `open+1` cum oracle C++ test-only normativo concordat. Ergo discrepantia non est transitus anni PATCH 18, sed sola regula membership in ipso opening gate.
+
+### Status probationum
+
+Bootstrap et omnes regressiones Graduum 1–51 transeunt in eadem arbore. Regressio Gradus 52 consulto `EXIT_CODE=1` cum tribus discrepantiis opening-gate exactis reddit. Nullus runtime externus, nullus oracle productionis et nulla mutatio `SourceLanguageCatalog` adest.
+
+### Limes proximus
+
+Nullus PATCH 26 praemature adest. Correctio stricti `<` in `<=` pertinet tantum ad Gradum 53. Integratio finalis Gradus 54 nondum incipit.

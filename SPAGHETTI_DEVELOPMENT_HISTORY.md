@@ -1833,3 +1833,67 @@ Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap transi
 ### Audit et limes proximus
 
 `SOURCE_LANGUAGE_CATALOG.md`, `include/pastafari/source_language_catalog.hpp` et `tests/reference/normative_reference.hpp/.cpp` manent byte pro byte intacti. Probationes Graduum 42–49 manent byte pro byte intactae. Corpus helperis legacy et corpus handleris DISCOVERY 25 manent byte pro byte intacta. Nullus runtime externus ad computationem vel oracle adhibitus est. Nulla pars PATCH 26 praemature addita est. Gradus 52 nondum incipit.
+
+## Gradus 52 — DISCOVERY 26: opening gate anno novo falso attribuitur
+
+### Quid putabatur
+
+Post transitus annorum PATCH 18 iam reparatos, stratum membership adhuc annum quasi intervalum clausum utrinque tractabat. Assumptio historica erat annum continere omnes dies a porta aperiente usque ad portam claudentem inclusive:
+
+```text
+[open,close]
+```
+
+Ita backward search videbatur retrocedere debere tantum si target esset stricte ante opening gate.
+
+### Cicatrix introducta
+
+`LegacyYearMembershipAdapter::resolve` annum anchor per `Patch18YearWalkWorkspace` resolvit et transitus `patchedNextYear` / `patchedPreviousYear` iam existentes reutilizat. Dein membership legacy vere exsequitur:
+
+```text
+dum targetDay > current.closeGateDay:
+    current = nextYear(current)
+
+dum targetDay < current.openGateDay:
+    current = previousYear(current)
+```
+
+Conditio secunda intentionaliter stricta est. Si `targetDay == current.openGateDay`, via legacy annum currentem retinet. `Discovery26OpeningGateYearMembershipHandler` output legacy, numerum graduum, notam opening-gate et acceptance intervali clausi in `BaseMonsterContext` invocation-local servat atque ipsum annum legacy directe ut output semanticum huius discovery exponit.
+
+Stratum monstri Gradus 52 addit `LegacyYearMembershipInspection`, `LegacyYearMembershipReport`, campos contextus DISCOVERY 26, adapter, handler, validationem, dispatchationem et `BaseMonsterManager::executeDiscovery26OpeningGateYearMembership`. Validator huius gradus intentionaliter solam regulam legacy `[open,close]` confirmat; regulam futuram `(open,close]` non imponit.
+
+### Quid repertum est
+
+Norma anni est `(open,close]`. Porta aperiens anni currentis eadem dies est porta claudens anni prioris et ad annum priorem pertinet. Tres calculation-gates C++ independentes exactam discrepantiam producunt:
+
+```text
+gate 0:
+calculationDay=-15055671
+target=-15057703
+legacy=year 5000 [-15057703,-15053459]
+normative=year 4999 [-15061829,-15057703]
+
+gate 7:
+calculationDay=-15051795
+target=-15053677
+legacy=year 5000 [-15053677,-15049766]
+normative=year 4999 [-15057703,-15053677]
+
+gate -11:
+calculationDay=-15061083
+target=-15061829
+legacy=year 5000 [-15061829,-15059026]
+normative=year 4999 [-15064629,-15061829]
+```
+
+In singulis casibus target est exacte `legacy.openGateDay` et exacte `normative.closeGateDay`. Control `open+1` ad annum 5000 rite pertinet, unde vitium ad solam inclusionem opening gate restringitur.
+
+### Probationes et status
+
+Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap et regressiones Graduum 1–51 transeunt. Regressio Gradus 52 tres discrepantias exactas enumerat et consulto `EXIT_CODE=1` reddit; status repository huius discovery est `EXPECTED_RED`.
+
+`SOURCE_LANGUAGE_CATALOG.md`, `include/pastafari/source_language_catalog.hpp` et `tests/reference/normative_reference.hpp/.cpp` manent byte pro byte intacti. Probationes Graduum 42–51 non mutantur. Nullus runtime externus ad computationem vel oracle adhibetur.
+
+### Limes proximus
+
+Nullus `OpeningGateMembershipPatchWrapper`, nullus `Patch26`, nullus `patch26Applied` et nulla integratio finalis praemature adest. Gradus 53 tantum strictam conditionem backward per `targetDay <= year.openDay` reparabit, legacy `[open,close]` servato ut cicatrice. Gradus 53 nondum incipit.
