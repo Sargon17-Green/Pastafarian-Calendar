@@ -82,6 +82,8 @@ std::pair<std::array<Big, 6>, std::array<int, 6>> applyVisibleDropsToBowls(
     const StoneTable& stones);
 std::array<Big, 6> postStir12(std::array<Big, 6> bowls);
 SauceResult sauce(const Big& calculationDay, const Big& targetDay);
+std::array<Big, 6> postStir12RawBowlSum(std::array<Big, 6> bowls);
+SauceResult sauceRawBowlSum(const Big& calculationDay, const Big& targetDay);
 
 struct AnswerStream {
     Big first;
@@ -150,7 +152,7 @@ struct CalendarDate {
 
 class NormativeOracle {
 public:
-    NormativeOracle();
+    explicit NormativeOracle(bool rawBowlSumCorrection = false);
 
     Big positiveGateGap(const Big& n);
     Big negativeGateGap(const Big& n);
@@ -189,6 +191,7 @@ public:
     Big gateValueForTest(const Big& index) { return ensureGateIndex(index); }
 
 private:
+    bool rawBowlSumCorrection_ = false;
     std::map<Big, Big> gate_;
     Big minKnownGateIndex_;
     Big maxKnownGateIndex_;
@@ -196,6 +199,7 @@ private:
     Big yearLength(const Big& openIndex, const Big& closeIndex);
     bool validYearPair(const Big& openIndex, const Big& closeIndex);
     int gapCountAsInt(const Year& year) const;
+    SauceResult sauceForOracle(const Big& calculationDay, const Big& targetDay) const;
 
     struct CutletPartitionCounter {
         int G;

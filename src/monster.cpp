@@ -966,6 +966,202 @@ SAUCE_WITH_SCARS_VALIDATE:
     return authoritative;
 }
 
+namespace {
+
+BowlState stage56LegacySavedOrderOperandScar(
+    const BowlState& old,
+    int stir,
+    Integer& rawBowlSumOut,
+    Integer& savedOrderNumberOut,
+    PermutationOrder& orderOut) {
+    if (stir < 1 || stir > 12) {
+        throw BaseValidationError("Gradus 56 post-commotionem inter 1 et 12 requirit");
+    }
+
+    Integer rawBowlSum = 0;
+    for (const Integer& bowl : old) {
+        rawBowlSum += bowl;
+    }
+    const Integer savedOrderNumber = savePatch(rawBowlSum + 149 * stir);
+    const int oneBased =
+        (regularMod(savedOrderNumber - 1, Integer{720}) + 1).convert_to<int>();
+    const PermutationOrder order = oldPermutationUnrank0(oneBased - 1);
+
+    BowlState pending = old;
+    for (int position = 1; position <= 6; ++position) {
+        const std::size_t pos = static_cast<std::size_t>(position - 1);
+        const std::size_t prevPos = static_cast<std::size_t>((position + 4) % 6);
+        const std::size_t nextPos = static_cast<std::size_t>(position % 6);
+        const int id = order[pos];
+        const int prev = order[prevPos];
+        const int next = order[nextPos];
+        const Integer s = old[static_cast<std::size_t>(id - 1)]
+                        + 3 * old[static_cast<std::size_t>(prev - 1)]
+                        + 5 * old[static_cast<std::size_t>(next - 1)]
+                        + savedOrderNumber
+                        + stir
+                        + position * position;
+        pending[static_cast<std::size_t>(id - 1)] = savePatch(
+            s * s
+            + 7 * old[static_cast<std::size_t>(prev - 1)]
+                * old[static_cast<std::size_t>(next - 1)]);
+    }
+
+    rawBowlSumOut = rawBowlSum;
+    savedOrderNumberOut = savedOrderNumber;
+    orderOut = order;
+    return pending;
+}
+
+} // namespace
+
+Stage56PostStirDetourWitness stage56RawBowlSumPostStirDetour(
+    const BowlState& oldBowls,
+    int stirIndex) {
+    Integer legacyRawBowlSum = 0;
+    Integer legacySavedOrderNumber = 0;
+    PermutationOrder legacyOrder{};
+    const BowlState oldResult = stage56LegacySavedOrderOperandScar(
+        oldBowls,
+        stirIndex,
+        legacyRawBowlSum,
+        legacySavedOrderNumber,
+        legacyOrder);
+
+    Integer rawBowlSum = 0;
+    for (const Integer& bowl : oldBowls) {
+        rawBowlSum += bowl;
+    }
+    const Integer savedOrderNumber = savePatch(rawBowlSum + 149 * stirIndex);
+    const int oneBased =
+        (regularMod(savedOrderNumber - 1, Integer{720}) + 1).convert_to<int>();
+    const PermutationOrder correctedOrder = oldPermutationUnrank0(oneBased - 1);
+
+    if (legacyRawBowlSum != rawBowlSum ||
+        legacySavedOrderNumber != savedOrderNumber ||
+        legacyOrder != correctedOrder) {
+        throw BaseValidationError(
+            "Gradus 56 guard: orderNumber vel permutatio a cicatrice legacy discrepat");
+    }
+
+    BowlState corrected = oldBowls;
+    for (int position = 1; position <= 6; ++position) {
+        const std::size_t pos = static_cast<std::size_t>(position - 1);
+        const std::size_t prevPos = static_cast<std::size_t>((position + 4) % 6);
+        const std::size_t nextPos = static_cast<std::size_t>(position % 6);
+        const int id = correctedOrder[pos];
+        const int prev = correctedOrder[prevPos];
+        const int next = correctedOrder[nextPos];
+        const Integer u = oldBowls[static_cast<std::size_t>(id - 1)]
+                        + 3 * oldBowls[static_cast<std::size_t>(prev - 1)]
+                        + 5 * oldBowls[static_cast<std::size_t>(next - 1)]
+                        + rawBowlSum
+                        + stirIndex
+                        + position * position;
+        corrected[static_cast<std::size_t>(id - 1)] = savePatch(
+            u * u
+            + 7 * oldBowls[static_cast<std::size_t>(prev - 1)]
+                * oldBowls[static_cast<std::size_t>(next - 1)]);
+    }
+
+    return Stage56PostStirDetourWitness{
+        oldResult,
+        corrected,
+        rawBowlSum,
+        savedOrderNumber,
+        legacyOrder,
+        correctedOrder,
+        stirIndex,
+        true
+    };
+}
+
+Stage56RawBowlSumSauceResult sauceWithStage56RawBowlSumDetour(
+    const Integer& calculationDay,
+    const Integer& targetDay) {
+    const LegacySauceCounts counts = sauceCountsThroughScars(calculationDay, targetDay);
+    const StoneTable stones = buildStonesThroughLegacyBuilder();
+    const HiddenDrops hiddenBackward = buildHiddenWithBackwardStorage(
+        calculationDay, targetDay, stones);
+    const VisibleDropStore visible = buildVisibleDropsThroughPatchedHistory(
+        counts, stones, hiddenBackward);
+
+    BowlState bowls = initialBowlsThroughCounts(counts);
+    PermutationOrder legacyOrderMemory{};
+    PermutationOrder orderAt46Latch{};
+    PermutationOrder finalPostStirOrder{};
+    std::size_t legacyWrites = 0;
+    std::size_t latchWrites = 0;
+    std::string finalLegacySource;
+
+    for (int i = 1; i <= 46; ++i) {
+        const Integer& drop = visible[static_cast<std::size_t>(i - 1)];
+        const int oneBased =
+            (regularMod(drop - 1, Integer{720}) + 1).convert_to<int>();
+
+        try {
+            (void)oldPermutationUnrank0(oneBased);
+        } catch (const BaseValidationError&) {
+        }
+        const PermutationOrder order = oldPermutationUnrank0(oneBased - 1);
+
+        (void)legacyPoursToFixedBowlIds(
+            drop, i, bowls, stones[static_cast<std::size_t>(i)]);
+        const BowlAliasPourComputation pours = poursThroughBowlAlias(
+            drop, i, bowls, stones[static_cast<std::size_t>(i)], order);
+
+        BowlState garbage = bowls;
+        legacyStirBowlsInPlace(
+            garbage, i, drop, stones[static_cast<std::size_t>(i)], order, pours.pours);
+        const Patch10DeferredBowlComputation repaired = stirBowlsThroughVaultOld(
+            bowls, i, drop, stones[static_cast<std::size_t>(i)], order, pours.pours);
+        bowls = repaired.output;
+
+        legacyOrderMemory = order;
+        ++legacyWrites;
+        finalLegacySource = "gutta visibilis " + std::to_string(i);
+        if (i == 46) {
+            orderAt46Latch = order;
+            ++latchWrites;
+        }
+    }
+
+    if (latchWrites != 1) {
+        throw BaseValidationError("Gradus 56 orderAt46Latch semel scribendus est");
+    }
+
+    Stage56RawBowlSumSauceResult out;
+    for (int stir = 1; stir <= 12; ++stir) {
+        const Stage56PostStirDetourWitness witness =
+            stage56RawBowlSumPostStirDetour(bowls, stir);
+        out.stirWitnesses[static_cast<std::size_t>(stir - 1)] = witness;
+        ++out.legacyScarCallCount;
+        ++out.appliedCount;
+        bowls = witness.correctedResult;
+
+        legacyOrderMemory = witness.legacyOrder;
+        finalPostStirOrder = witness.correctedOrder;
+        ++legacyWrites;
+        finalLegacySource = "post-commotio " + std::to_string(stir);
+    }
+
+    out.semanticSauce = Patch11LatchedOrderSauceResult{
+        bowls,
+        orderAt46Latch,
+        orderAt46Latch,
+        legacyOrderMemory,
+        finalPostStirOrder,
+        legacyWrites,
+        latchWrites,
+        finalLegacySource
+    };
+    out.applied = out.legacyScarCallCount == 12 && out.appliedCount == 12;
+    if (!out.applied) {
+        throw BaseValidationError("Gradus 56 duodecim cicatrices et detours requirit");
+    }
+    return out;
+}
+
 Patch11LatchedOrderSauceResult oldStructureSauce(
     const Integer& calculationDay,
     const Integer& originalTargetDay) {
@@ -5774,8 +5970,11 @@ MonthDayOccurrencePatchDecision MonthDayOccurrencePatchWrapper::repair(
     };
 }
 
-Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
-    : calculationDay_(calculationDay) {}
+Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(
+    const Integer& calculationDay,
+    bool stage56CorrectedSauce)
+    : calculationDay_(calculationDay),
+      stage56CorrectedSauce_(stage56CorrectedSauce) {}
 
 Integer Patch18YearWalkWorkspace::gateDay(const Integer& index) {
     return ensureGateIndex(index);
@@ -5881,8 +6080,10 @@ Patch18YearRecord Patch18YearWalkWorkspace::finalYear5000() {
         runBegin = runEnd;
     }
 
-    const Patch11LatchedOrderSauceResult sauce = sauceWithScars(
-        calculationDay_, calculationDay_);
+    const Patch11LatchedOrderSauceResult sauce = stage56CorrectedSauce_
+        ? sauceWithStage56RawBowlSumDetour(
+              calculationDay_, calculationDay_).semanticSauce
+        : sauceWithScars(calculationDay_, calculationDay_);
     const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
     const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
         sauce.finalBowls, 1, nextBowl, 10);
@@ -5917,9 +6118,13 @@ Integer Patch18YearWalkWorkspace::positiveGateGap(const Integer& n) const {
     if (n < 1) {
         throw BaseValidationError("index portae positivus requiritur");
     }
-    const Patch11LatchedOrderSauceResult sauce = sauceWithOrderAt46Latch(
-        FOUNDATION_DAY_OLD,
-        FOUNDATION_DAY_OLD + n);
+    const Patch11LatchedOrderSauceResult sauce = stage56CorrectedSauce_
+        ? sauceWithStage56RawBowlSumDetour(
+              FOUNDATION_DAY_OLD,
+              FOUNDATION_DAY_OLD + n).semanticSauce
+        : sauceWithOrderAt46Latch(
+              FOUNDATION_DAY_OLD,
+              FOUNDATION_DAY_OLD + n);
     const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
     const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
         sauce.finalBowls,
@@ -5933,9 +6138,13 @@ Integer Patch18YearWalkWorkspace::negativeGateGap(const Integer& n) const {
     if (n < 1) {
         throw BaseValidationError("magnitudo portae negativae positiva requiritur");
     }
-    const Patch11LatchedOrderSauceResult sauce = sauceWithOrderAt46Latch(
-        FOUNDATION_DAY_OLD,
-        FOUNDATION_DAY_OLD - n);
+    const Patch11LatchedOrderSauceResult sauce = stage56CorrectedSauce_
+        ? sauceWithStage56RawBowlSumDetour(
+              FOUNDATION_DAY_OLD,
+              FOUNDATION_DAY_OLD - n).semanticSauce
+        : sauceWithOrderAt46Latch(
+              FOUNDATION_DAY_OLD,
+              FOUNDATION_DAY_OLD - n);
     const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
     const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
         sauce.finalBowls,
@@ -6033,7 +6242,9 @@ Patch18YearRecord Patch18YearWalkWorkspace::patchedNextYear(
         throw BaseValidationError("annus sequens PATCH 18 inveniri non potuit");
     }
     const Integer openDay = ensureGateIndex(openIndex);
-    const Patch11LatchedOrderSauceResult sauce = sauceWithOrderAt46Latch(calculationDay_, openDay);
+    const Patch11LatchedOrderSauceResult sauce = stage56CorrectedSauce_
+        ? sauceWithStage56RawBowlSumDetour(calculationDay_, openDay).semanticSauce
+        : sauceWithOrderAt46Latch(calculationDay_, openDay);
     const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
     const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
         sauce.finalBowls, 1, nextBowl, 11);
@@ -6074,7 +6285,9 @@ Patch18YearRecord Patch18YearWalkWorkspace::patchedPreviousYear(
         throw BaseValidationError("annus prior PATCH 18 inveniri non potuit");
     }
     const Integer closeDay = ensureGateIndex(closeIndex);
-    const Patch11LatchedOrderSauceResult sauce = sauceWithOrderAt46Latch(calculationDay_, closeDay);
+    const Patch11LatchedOrderSauceResult sauce = stage56CorrectedSauce_
+        ? sauceWithStage56RawBowlSumDetour(calculationDay_, closeDay).semanticSauce
+        : sauceWithOrderAt46Latch(calculationDay_, closeDay);
     const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
     const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
         sauce.finalBowls, 1, nextBowl, 12);
@@ -6152,12 +6365,13 @@ Patch26YearMembershipDecision OpeningGateMembershipPatchWrapper::repair(
     const Integer& calculationDay,
     const LegacyYearAnchor& anchor,
     const Integer& targetDay,
-    const LegacyYearMembershipInspection& legacyInspection) const {
+    const LegacyYearMembershipInspection& legacyInspection,
+    bool stage56CorrectedSauce) const {
     if (!legacyInspection.legacyExecuted) {
         throw BaseValidationError("PATCH 26 cicatricem membership legacy ante correctionem requirit");
     }
 
-    Patch18YearWalkWorkspace workspace(calculationDay);
+    Patch18YearWalkWorkspace workspace(calculationDay, stage56CorrectedSauce);
     const Patch18YearRecord anchorYear = workspace.resolveAnchor(anchor);
     Patch18YearRecord current = anchorYear;
     std::size_t forwardSteps = 0;
@@ -10070,9 +10284,23 @@ SpaghettiYearStructure buildFinalYearStructure(
         throw BaseValidationError("integratio finalis ghost structure sauce requirit");
     }
     ctx.finalLegacyStructureSauceGhostExecuted = true;
-    const Patch11LatchedOrderSauceResult semanticSauce = sauceWithScars(
-        ctx.calculationDay,
-        firstDay);
+    Patch11LatchedOrderSauceResult semanticSauce{};
+    if (ctx.stage56CorrectiveRequested) {
+        const Stage56RawBowlSumSauceResult stage56Sauce =
+            sauceWithStage56RawBowlSumDetour(ctx.calculationDay, firstDay);
+        semanticSauce = stage56Sauce.semanticSauce;
+        const Stage56PostStirDetourWitness& last = stage56Sauce.stirWitnesses.back();
+        ctx.stage56PostStirOldResult = last.oldResult;
+        ctx.stage56PostStirCorrectedResult = last.correctedResult;
+        ctx.stage56RawBowlSum = last.rawBowlSum;
+        ctx.stage56SavedOrderNumber = last.savedOrderNumber;
+        ctx.stage56StirIndex = last.stirIndex;
+        ctx.stage56LegacyScarCallCount = stage56Sauce.legacyScarCallCount;
+        ctx.stage56AppliedCount = stage56Sauce.appliedCount;
+        ctx.stage56AppliedFlag = stage56Sauce.applied;
+    } else {
+        semanticSauce = sauceWithScars(ctx.calculationDay, firstDay);
+    }
 
     const int gapCount = (year.closeGateIndex - year.openGateIndex).convert_to<int>();
     std::vector<int> cutletCounts;
@@ -10291,6 +10519,14 @@ void BaseValidationManager::requireFinalIntegrationReady(
         ctx.resultFive.dayInCutlet < 1 || ctx.resultFive.dayInMonth < 1) {
         throw BaseValidationError("integratio finalis quinque campos invalidos habet");
     }
+    if (ctx.stage56CorrectiveRequested &&
+        (!ctx.stage56AppliedFlag ||
+         ctx.stage56LegacyScarCallCount != 12 ||
+         ctx.stage56AppliedCount != 12 ||
+         ctx.stage56StirIndex != 12)) {
+        throw BaseValidationError(
+            "integratio finalis Gradus 56 duodecim cicatrices raw bowl sum requirit");
+    }
 }
 
 void FinalIntegrationHandler::handle(
@@ -10316,7 +10552,9 @@ void FinalIntegrationHandler::handle(
     ctx.finalRecoverableFailuresObserved = 0;
     ctx.finalRecoverySnapshotRestoredExactly = false;
     int stage = 0;
-    Patch18YearWalkWorkspace workspace(ctx.calculationDay);
+    Patch18YearWalkWorkspace workspace(
+        ctx.calculationDay,
+        ctx.stage56CorrectiveRequested);
     Patch18YearRecord year5000{};
     Patch18YearRecord targetYear{};
     SpaghettiYearStructure structure{};
@@ -10366,16 +10604,34 @@ FINAL_MAIN_YEAR_WALK: {
     };
     (void)oldJumpGuess(anchor, ctx.targetDay);
     const LegacyYearMembershipAdapter legacyMembership;
-    const LegacyYearMembershipInspection legacyInspection = legacyMembership.resolve(
-        ctx.calculationDay,
-        anchor,
-        ctx.targetDay);
+    LegacyYearMembershipInspection legacyInspection{};
+    if (ctx.stage56CorrectiveRequested) {
+        // Cicatrix historica membership manet in geometria Gradus 55; non cogitur
+        // anchor correctionis Gradus 56 quasi portam veterem agnoscere.
+        Patch18YearWalkWorkspace historicalWorkspace(ctx.calculationDay, false);
+        const Patch18YearRecord historicalYear5000 = historicalWorkspace.finalYear5000();
+        const LegacyYearAnchor historicalAnchor{
+            historicalYear5000.number,
+            historicalYear5000.openGateDay + 1,
+            historicalYear5000.closeGateDay
+        };
+        legacyInspection = legacyMembership.resolve(
+            ctx.calculationDay,
+            historicalAnchor,
+            ctx.targetDay);
+    } else {
+        legacyInspection = legacyMembership.resolve(
+            ctx.calculationDay,
+            anchor,
+            ctx.targetDay);
+    }
     const OpeningGateMembershipPatchWrapper membershipWrapper;
     const Patch26YearMembershipDecision membershipDecision = membershipWrapper.repair(
         ctx.calculationDay,
         anchor,
         ctx.targetDay,
-        legacyInspection);
+        legacyInspection,
+        ctx.stage56CorrectiveRequested);
     if (!membershipDecision.patchApplied ||
         !membershipDecision.authoritativeIntervalAccepted) {
         throw BaseValidationError("integratio finalis PATCH 26 annum non confirmavit");
@@ -10629,11 +10885,81 @@ Stage54IntegrationReport BaseMonsterManager::executeFinalIntegrationRecoveryAudi
     };
 }
 
+Stage54IntegrationReport BaseMonsterManager::executeFinalIntegrationStage56(
+    const Integer& calculationDay,
+    const Integer& targetDay) const {
+    return executeFinalIntegrationStage56RecoveryAudit(
+        calculationDay,
+        targetDay,
+        FinalIntegrationFaultPlan{});
+}
+
+Stage54IntegrationReport BaseMonsterManager::executeFinalIntegrationStage56RecoveryAudit(
+    const Integer& calculationDay,
+    const Integer& targetDay,
+    const FinalIntegrationFaultPlan& faultPlan) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.mode = "AUTHORITATIVE_SPAGHETTI_GRADUS_56";
+    ctx.retryBudget = faultPlan.retryBudget;
+    ctx.stage56CorrectiveRequested = true;
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const FinalIntegrationHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchFinalIntegration(
+        ctx,
+        stage56FinalStructureCache_,
+        handler,
+        validator,
+        metrics,
+        faultPlan);
+    return Stage54IntegrationReport{
+        ctx.resultFive,
+        ctx.finalYear5000,
+        ctx.finalCurrentYear,
+        ctx.finalStructure,
+        ctx.finalGuardedCacheHit,
+        ctx.finalGuardedCacheRejected,
+        ctx.finalLegacyStructureSauceGhostExecuted,
+        ctx.finalLegacyCutletPartitionExecuted,
+        ctx.finalLegacyCutletNamesExecuted,
+        ctx.finalLegacyMonthLengthListContractExecuted,
+        ctx.finalLegacyMonthWeavingExecuted,
+        ctx.finalLegacyMonthNamesExecuted,
+        ctx.finalLegacyContiguousMonthDayExecuted,
+        ctx.finalExactFiveFieldReturn,
+        ctx.finalIntegrationReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size(),
+        ctx.retryBudget,
+        ctx.recoveryDepth,
+        ctx.finalRecoverableFailuresObserved,
+        ctx.finalRecoverySnapshotRestoredExactly
+    };
+}
+
 std::size_t BaseMonsterManager::finalStructureCacheSizeDiagnostic() const {
     return finalStructureCache_.size();
 }
 
+std::size_t BaseMonsterManager::stage56FinalStructureCacheSizeDiagnostic() const {
+    return stage56FinalStructureCache_.size();
+}
+
 SpaghettiDateFive calendarDateSpaghetti(
+    const Integer& calculationDay,
+    const Integer& targetDay) {
+    BaseMonsterManager manager;
+    return manager.executeFinalIntegrationStage56(calculationDay, targetDay).result;
+}
+
+SpaghettiDateFive calendarDateSpaghettiThroughStage55(
     const Integer& calculationDay,
     const Integer& targetDay) {
     BaseMonsterManager manager;

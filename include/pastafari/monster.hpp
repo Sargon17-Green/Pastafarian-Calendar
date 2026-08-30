@@ -125,6 +125,25 @@ struct Patch11LatchedOrderSauceResult {
     std::string finalLegacyOrderSource;
 };
 
+struct Stage56PostStirDetourWitness {
+    BowlState oldResult{};
+    BowlState correctedResult{};
+    Integer rawBowlSum{};
+    Integer savedOrderNumber{};
+    PermutationOrder legacyOrder{};
+    PermutationOrder correctedOrder{};
+    int stirIndex = 0;
+    bool applied = false;
+};
+
+struct Stage56RawBowlSumSauceResult {
+    Patch11LatchedOrderSauceResult semanticSauce{};
+    std::array<Stage56PostStirDetourWitness, 12> stirWitnesses{};
+    std::size_t legacyScarCallCount = 0;
+    std::size_t appliedCount = 0;
+    bool applied = false;
+};
+
 Patch10DeferredBowlComputation stirBowlsThroughVaultOld(const BowlState& bowls,
                                                         int index,
                                                         const Integer& drop,
@@ -152,6 +171,12 @@ Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     const Integer& calculationDay,
     const Integer& targetDay);
 Patch11LatchedOrderSauceResult sauceWithScars(
+    const Integer& calculationDay,
+    const Integer& targetDay);
+Stage56PostStirDetourWitness stage56RawBowlSumPostStirDetour(
+    const BowlState& oldBowls,
+    int stirIndex);
+Stage56RawBowlSumSauceResult sauceWithStage56RawBowlSumDetour(
     const Integer& calculationDay,
     const Integer& targetDay);
 int oldNextBowlFixedName(int id);
@@ -303,6 +328,8 @@ struct FinalIntegrationFaultPlan {
 
 SpaghettiDateFive calendarDateSpaghetti(const Integer& calculationDay,
                                         const Integer& targetDay);
+SpaghettiDateFive calendarDateSpaghettiThroughStage55(const Integer& calculationDay,
+                                                      const Integer& targetDay);
 struct LegacyYearCacheEntry { Integer calculationDayFingerprint{}; Integer openGate{}; Integer closeGate{}; Patch18YearRecord value{}; };
 struct LegacyYearCacheReport { Integer cacheKeyYearNumber{}; LegacyYearCacheEntry requestEntry{}; LegacyYearCacheEntry cachedEntry{}; Patch18YearRecord outputValue{}; bool cacheHit=false; bool ready=false; std::string phase; std::string status; std::string handler; std::size_t branchCount=0; LegacyYearCacheEntry legacyCachedEntryBeforePatch{}; Patch18YearRecord legacyOutputBeforePatch{}; bool legacyCacheHitBeforePatch=false; bool fingerprintMatched=false; bool openGateMatched=false; bool closeGateMatched=false; bool entryOverwritten=false; bool patch19Applied=false; };
 struct Patch19GuardedYearCacheResolution { LegacyYearCacheEntry semanticEntry{}; Patch18YearRecord outputValue{}; bool semanticHit=false; bool fingerprintMatched=false; bool openGateMatched=false; bool closeGateMatched=false; bool entryOverwritten=false; };
@@ -871,6 +898,15 @@ struct BaseMonsterContext {
     bool legacyOrderMemorySauceReady = false;
     Patch11LatchedOrderSauceResult patch11LatchedOrderSauce{};
     bool patch11Applied = false;
+    bool stage56CorrectiveRequested = false;
+    BowlState stage56PostStirOldResult{};
+    BowlState stage56PostStirCorrectedResult{};
+    Integer stage56RawBowlSum{};
+    Integer stage56SavedOrderNumber{};
+    int stage56StirIndex = 0;
+    std::size_t stage56LegacyScarCallCount = 0;
+    std::size_t stage56AppliedCount = 0;
+    bool stage56AppliedFlag = false;
     int legacyNextBowlQueriedId = 0;
     int legacyNextBowlOutput = 0;
     PermutationOrder legacyNextBowlOrderAt46Latch{};
@@ -1583,7 +1619,8 @@ public:
 
 class Patch18YearWalkWorkspace {
 public:
-    explicit Patch18YearWalkWorkspace(const Integer& calculationDay);
+    explicit Patch18YearWalkWorkspace(const Integer& calculationDay,
+                                      bool stage56CorrectedSauce = false);
     Patch18YearRecord finalYear5000();
     Patch18YearRecord resolveAnchor(const LegacyYearAnchor& anchor);
     Patch18YearRecord patchedNextYear(const Patch18YearRecord& knownYear);
@@ -1592,6 +1629,7 @@ public:
     bool exactGateIndexIfPresent(const Integer& day, Integer& indexOut);
 private:
     Integer calculationDay_{};
+    bool stage56CorrectedSauce_ = false;
     std::map<Integer, Integer> gates_{{Integer{0}, FOUNDATION_DAY_OLD}};
     Integer minGateIndex_{0};
     Integer maxGateIndex_{0};
@@ -1621,7 +1659,8 @@ public:
         const Integer& calculationDay,
         const LegacyYearAnchor& anchor,
         const Integer& targetDay,
-        const LegacyYearMembershipInspection& legacyInspection) const;
+        const LegacyYearMembershipInspection& legacyInspection,
+        bool stage56CorrectedSauce = false) const;
 };
 
 class FinalIntegrationHandler {
@@ -2904,11 +2943,20 @@ public:
         const Integer& calculationDay,
         const Integer& targetDay,
         const FinalIntegrationFaultPlan& faultPlan) const;
+    Stage54IntegrationReport executeFinalIntegrationStage56(
+        const Integer& calculationDay,
+        const Integer& targetDay) const;
+    Stage54IntegrationReport executeFinalIntegrationStage56RecoveryAudit(
+        const Integer& calculationDay,
+        const Integer& targetDay,
+        const FinalIntegrationFaultPlan& faultPlan) const;
     std::size_t finalStructureCacheSizeDiagnostic() const;
+    std::size_t stage56FinalStructureCacheSizeDiagnostic() const;
     void clearLegacyYearNumberCacheDiagnostic() const;
 private:
     mutable std::map<Integer, LegacyYearCacheEntry> legacyYearNumberCache_{};
     mutable std::map<Integer, FinalStructureCacheEntry> finalStructureCache_{};
+    mutable std::map<Integer, FinalStructureCacheEntry> stage56FinalStructureCache_{};
 };
 
 } // namespace pastafari

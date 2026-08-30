@@ -348,6 +348,37 @@ std::array<Big, 6> postStir12(std::array<Big, 6> bowls) {
     return bowls;
 }
 
+std::array<Big, 6> postStir12RawBowlSum(std::array<Big, 6> bowls) {
+    for (int stir = 1; stir <= 12; ++stir) {
+        const auto old = bowls;
+        Big rawBowlSum = 0;
+        for (const auto& b : old) {
+            rawBowlSum += b;
+        }
+        const Big orderNumberSaved = SAVE(rawBowlSum + 149 * stir);
+        const int orderNumber =
+            (regularMod(orderNumberSaved - 1, 720) + 1).convert_to<int>();
+        const auto order = bowlOrderFromNumber(orderNumber);
+        std::array<Big, 6> nextBowls{};
+        for (int position = 1; position <= 6; ++position) {
+            const int bowlId = order[position - 1];
+            const int prevId = order[wrap1(position - 1, 6) - 1];
+            const int nextId = order[wrap1(position + 1, 6) - 1];
+            const Big u = old[bowlId - 1]
+                        + 3 * old[prevId - 1]
+                        + 5 * old[nextId - 1]
+                        + rawBowlSum
+                        + stir
+                        + position * position;
+            nextBowls[bowlId - 1] = SAVE(
+                square(u)
+                + 7 * old[prevId - 1] * old[nextId - 1]);
+        }
+        bowls = std::move(nextBowls);
+    }
+    return bowls;
+}
+
 SauceResult sauce(const Big& calculationDay, const Big& targetDay) {
     const auto counts = workCounts(calculationDay, targetDay);
     const auto stones = buildStones();
@@ -356,6 +387,19 @@ SauceResult sauce(const Big& calculationDay, const Big& targetDay) {
     auto bowls = initialBowls(counts);
     auto afterDrops = applyVisibleDropsToBowls(std::move(bowls), visible, stones);
     return SauceResult{postStir12(std::move(afterDrops.first)), afterDrops.second};
+}
+
+SauceResult sauceRawBowlSum(const Big& calculationDay, const Big& targetDay) {
+    const auto counts = workCounts(calculationDay, targetDay);
+    const auto stones = buildStones();
+    const auto hidden = buildHiddenDrops(counts, stones);
+    const auto visible = buildVisibleDrops(counts, stones, hidden);
+    auto bowls = initialBowls(counts);
+    auto afterDrops = applyVisibleDropsToBowls(std::move(bowls), visible, stones);
+    return SauceResult{
+        postStir12RawBowlSum(std::move(afterDrops.first)),
+        afterDrops.second
+    };
 }
 
 int nextBowlInDrop46Order(const SauceResult& sauceResult, int queriedBowlId) {
@@ -521,14 +565,25 @@ std::vector<int> BoundedCompositionFamily::unrank1(const Big& rank1) {
     return out;
 }
 
-NormativeOracle::NormativeOracle()
-    : gate_{{Big{0}, FOUNDATION_DAY}}, minKnownGateIndex_(0), maxKnownGateIndex_(0) {}
+NormativeOracle::NormativeOracle(bool rawBowlSumCorrection)
+    : rawBowlSumCorrection_(rawBowlSumCorrection),
+      gate_{{Big{0}, FOUNDATION_DAY}},
+      minKnownGateIndex_(0),
+      maxKnownGateIndex_(0) {}
+
+SauceResult NormativeOracle::sauceForOracle(
+    const Big& calculationDay,
+    const Big& targetDay) const {
+    return rawBowlSumCorrection_
+        ? sauceRawBowlSum(calculationDay, targetDay)
+        : sauce(calculationDay, targetDay);
+}
 
 Big NormativeOracle::positiveGateGap(const Big& n) {
     if (n < 1) {
         throw std::invalid_argument("index portae positivus requiritur");
     }
-    const auto r = sauce(FOUNDATION_DAY, FOUNDATION_DAY + n);
+    const auto r = sauceForOracle(FOUNDATION_DAY, FOUNDATION_DAY + n);
     const auto stream = askBowl(r, 1, SEAL_GATE_GAP);
     return 41 + chooseRank(stream, 922);
 }
@@ -537,7 +592,7 @@ Big NormativeOracle::negativeGateGap(const Big& n) {
     if (n < 1) {
         throw std::invalid_argument("magnitudo portae negativa positiva requiritur");
     }
-    const auto r = sauce(FOUNDATION_DAY, FOUNDATION_DAY - n);
+    const auto r = sauceForOracle(FOUNDATION_DAY, FOUNDATION_DAY - n);
     const auto stream = askBowl(r, 1, SEAL_GATE_GAP);
     return 41 + chooseRank(stream, 922);
 }
@@ -659,7 +714,7 @@ Year NormativeOracle::year5000(const Big& calculationDay) {
     if (candidates.empty()) {
         throw std::runtime_error("annus quinque milium inveniri non potuit");
     }
-    const auto r = sauce(calculationDay, calculationDay);
+    const auto r = sauceForOracle(calculationDay, calculationDay);
     const auto stream = askBowl(r, 1, SEAL_YEAR_5000);
     const Big rank = chooseRank(stream, Big{candidates.size()});
     const auto& chosen = candidates.at(static_cast<std::size_t>((rank - 1).convert_to<unsigned long long>()));
@@ -686,7 +741,7 @@ Year NormativeOracle::nextYear(const Big& calculationDay, const Year& knownYear)
     if (candidates.empty()) {
         throw std::runtime_error("annus sequens inveniri non potuit");
     }
-    const auto r = sauce(calculationDay, gate_.at(openIndex));
+    const auto r = sauceForOracle(calculationDay, gate_.at(openIndex));
     const auto stream = askBowl(r, 1, SEAL_NEXT_YEAR);
     const Big rank = chooseRank(stream, Big{candidates.size()});
     const Big chosenClose = candidates.at(static_cast<std::size_t>((rank - 1).convert_to<unsigned long long>()));
@@ -713,7 +768,7 @@ Year NormativeOracle::previousYear(const Big& calculationDay, const Year& knownY
     if (candidates.empty()) {
         throw std::runtime_error("annus prior inveniri non potuit");
     }
-    const auto r = sauce(calculationDay, gate_.at(closeIndex));
+    const auto r = sauceForOracle(calculationDay, gate_.at(closeIndex));
     const auto stream = askBowl(r, 1, SEAL_PREVIOUS_YEAR);
     const Big rank = chooseRank(stream, Big{candidates.size()});
     const Big chosenOpen = candidates.at(static_cast<std::size_t>((rank - 1).convert_to<unsigned long long>()));
@@ -1030,7 +1085,7 @@ std::vector<int> NormativeOracle::chooseMonthNameIndices(const SauceResult& stru
 
 YearStructure NormativeOracle::buildYearStructure(const Big& calculationDay, const Year& year) {
     const Big firstDay = year.openGateDay + 1;
-    const SauceResult r = sauce(calculationDay, firstDay);
+    const SauceResult r = sauceForOracle(calculationDay, firstDay);
     const int cutletCount = chooseCutletCount(r, year);
     const auto cutletPartition = chooseCutletPartition(calculationDay, r, year, cutletCount);
     const auto cutletNames = chooseCutletNameIndices(r, cutletCount);
