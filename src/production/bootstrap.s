@@ -152,7 +152,13 @@
 .equ CTX_STAGE29_REJECTION_STEPS,1200
 .equ CTX_STAGE29_USED_WIDE,1208
 .equ CTX_STAGE29_PATCH_SEEN,1216
-.equ CTX_SIZE,1224
+.equ CTX_STAGE30_SIGNED_STEP,1224
+.equ CTX_STAGE30_ABS_STEP,1232
+.equ CTX_STAGE30_LEGACY_RESULT,1240
+.equ CTX_STAGE30_ROUTE_RESULT,1248
+.equ CTX_STAGE30_LEGACY_SEEN,1256
+.equ CTX_STAGE30_ROUTE_SEEN,1264
+.equ CTX_SIZE,1272
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -368,6 +374,10 @@ legacy_bowl_stir_stone_by_position:
 .global monster_wide_selection_route
 .global monster_stage28_legacy_wide_assumption_handler
 .global monster_stage29_wide_patch_handler
+.global oldGateQuestionDay
+.global legacyGateQuestionDayFromSignedStepWrong
+.global monster_gate_question_day_route
+.global monster_stage30_legacy_gate_question_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -5506,6 +5516,125 @@ monster_stage29_wide_patch_handler:
     ret
 .size monster_stage29_wide_patch_handler,.-monster_stage29_wide_patch_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 30 — DISCOVERY 15
+# Ⲡlegacy helper ϫⲓ ⲛⲟⲩn ⲉϥⲟ ⲛpositive magnitude ⲁⲩⲱ ⲛϥⲟⲩⲱϩ ⲙⲙⲟϥ ⲉⲡFOUNDATION.
+# ⲠsignedStep ⲙⲡcaller ⲛϥϩⲁⲣⲉϩ ⲁⲛ ⲙⲡⲉϥsign: ⲛϥϫⲓ ⲙⲡabs(step) ⲉⲙⲡⲁⲧⲉ ⲡlegacy helper.
+.type oldGateQuestionDay,@function
+oldGateQuestionDay:
+    push rbp
+    mov rbp,rsp
+    push r12
+    mov r12,rdi
+    test r12,r12
+    je .Logqd_fail
+    mov rdi,-15055671
+    call bi_from_i64
+    test rax,rax
+    je .Logqd_fail
+    mov rdi,rax
+    mov rsi,r12
+    call bi_add
+    jmp .Logqd_done
+.Logqd_fail:
+    xor eax,eax
+.Logqd_done:
+    pop r12
+    leave
+    ret
+.size oldGateQuestionDay,.-oldGateQuestionDay
+
+.type legacyGateQuestionDayFromSignedStepWrong,@function
+legacyGateQuestionDayFromSignedStepWrong:
+    push rbp
+    mov rbp,rsp
+    push r12
+    mov r12,rdi
+    test r12,r12
+    je .Llgqdfssw_fail
+    mov rdi,r12
+    call bi_abs
+    test rax,rax
+    je .Llgqdfssw_fail
+    mov rdi,rax
+    call oldGateQuestionDay
+    jmp .Llgqdfssw_done
+.Llgqdfssw_fail:
+    xor eax,eax
+.Llgqdfssw_done:
+    pop r12
+    leave
+    ret
+.size legacyGateQuestionDayFromSignedStepWrong,.-legacyGateQuestionDayFromSignedStepWrong
+
+.type monster_gate_question_day_route,@function
+monster_gate_question_day_route:
+    jmp legacyGateQuestionDayFromSignedStepWrong
+.size monster_gate_question_day_route,.-monster_gate_question_day_route
+
+.type monster_stage30_legacy_gate_question_handler,@function
+monster_stage30_legacy_gate_question_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms30_fail
+
+    mov rdi,qword ptr [r12+CTX_TARGET_DAY]
+    call bi_from_i64
+    test rax,rax
+    je .Lms30_fail
+    mov r13,rax
+    mov rdi,-15055671
+    call bi_from_i64
+    test rax,rax
+    je .Lms30_fail
+    mov rsi,rax
+    mov rdi,r13
+    call bi_sub
+    test rax,rax
+    je .Lms30_fail
+    mov r14,rax
+    mov qword ptr [r12+CTX_STAGE30_SIGNED_STEP],r14
+
+    mov rdi,r14
+    call bi_abs
+    test rax,rax
+    je .Lms30_fail
+    mov r15,rax
+    mov qword ptr [r12+CTX_STAGE30_ABS_STEP],r15
+
+    mov rdi,r15
+    call oldGateQuestionDay
+    test rax,rax
+    je .Lms30_fail
+    mov qword ptr [r12+CTX_STAGE30_LEGACY_RESULT],rax
+    inc qword ptr [r12+CTX_STAGE30_LEGACY_SEEN]
+
+    mov rdi,r14
+    call monster_gate_question_day_route
+    test rax,rax
+    je .Lms30_fail
+    mov qword ptr [r12+CTX_STAGE30_ROUTE_RESULT],rax
+    inc qword ptr [r12+CTX_STAGE30_ROUTE_SEEN]
+
+    mov eax,1
+    jmp .Lms30_done
+.Lms30_fail:
+    xor eax,eax
+.Lms30_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage30_legacy_gate_question_handler,.-monster_stage30_legacy_gate_question_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -5604,6 +5733,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage29_wide_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage30_legacy_gate_question_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

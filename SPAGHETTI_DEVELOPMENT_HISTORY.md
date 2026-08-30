@@ -589,3 +589,30 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡlegacy scar ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ ϩⲙⲡwide detour. Ⲡwide trace ⲟ ⲛinvocation-local ϩⲙⲡ`MonsterContext`. Ⲙⲛ oracle call ϩⲙⲡproduction, ⲙⲛ global mutable semantic state, ⲁⲩⲱ ⲙⲛ future patch code.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 30 — DISCOVERY 15
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡgate question step ϣϭⲙϭⲟⲙ ⲉⲩⲕⲱ ⲙⲙⲟϥ ⲛⲟⲩpositive magnitude ⲁⲩⲱ ⲉⲩⲙⲟⲩⲧⲉ ⲉ `oldGateQuestionDay(n)=FOUNDATION+n`.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡsigned step ⲛnegative ⲥⲱⲣⲙ ⲙⲡⲉϥsign ϩⲓⲧⲛ `abs(step)`. Ⲡlegacy ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡnegative side; ⲛϥⲟⲩⲱϩ ⲙⲡmagnitude ⲉⲡFOUNDATION.
+
+Ⲛwitness:
+
+`step=-1  -> legacy=-15055670 ; normative=-15055672`
+`step=-2  -> legacy=-15055669 ; normative=-15055673`
+`step=-10 -> legacy=-15055661 ; normative=-15055681`
+
+Ⲡ`step=0` ⲙⲛ `step=+1` ⲧⲱⲛ ⲛⲟⲩcoincidence.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldGateQuestionDay`, `legacyGateQuestionDayFromSignedStepWrong`, `monster_gate_question_day_route` ⲙⲛ `monster_stage30_legacy_gate_question_handler`.
+
+Ⲡhandler ⲧⲁⲙⲓⲟ ⲙⲡ`signedStep=targetDay-FOUNDATION`, ϩⲁⲣⲉϩ ⲉⲡsigned step ⲙⲛ ⲡabsolute magnitude, ⲁⲩⲱ ⲕⲱ ⲙⲡlegacy result ⲙⲛ ⲡroute result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩnegative detour. Ⲙⲛ `LEGACY_YEAR_MAX`, ⲙⲛ code ⲙⲡPATCH 16, ⲁⲩⲱ ⲙⲛ future gate-selection code.

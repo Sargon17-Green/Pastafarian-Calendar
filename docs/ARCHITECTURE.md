@@ -443,3 +443,16 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡshort scar ⲟⲩⲏϩ callable. Ⲡwide state ⲧⲏⲣϥ — places, space, initial combined, limit, accepted combined, rejection steps ⲙⲛ rank — ⲟ ⲛinvocation-local. Ⲙⲛ global mutable semantic state ⲁⲩⲱ ⲙⲛ oracle call ϩⲙⲡproduction.
+
+
+## Ⲡnegative gate-question scar ⲙⲡⲃⲁⲑⲙⲟⲥ 30
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`monster_gate_question_day_route -> legacyGateQuestionDayFromSignedStepWrong -> oldGateQuestionDay`
+
+Ⲡ`oldGateQuestionDay` ϫⲓ ⲛⲟⲩpositive magnitude ⲁⲩⲱ ⲛϥⲟⲩⲱϩ ⲙⲙⲟϥ ⲉⲡFOUNDATION. Ⲡadapter ⲛⲗⲉⲅⲁⲥⲓ ⲧⲁⲙⲓⲟ ⲙⲡ`abs(signedStep)` ⲉⲙⲡⲁⲧⲉ ⲡcall, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡsign ⲛnegative ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡhelper.
+
+Ⲡstate ⲛⲧⲉⲡinvocation ϩⲁⲣⲉϩ ⲉ signed step, absolute step, direct legacy result, route result ⲙⲛ counters. Ⲙⲛ global mutable semantic state ⲁⲩⲱ ⲙⲛ oracle call ϩⲙⲡproduction.
+
+Ⲡtest-only normative side ⲗⲟⲅⲓⲍⲉ ⲙⲡ`FOUNDATION+signedStep` ϩⲓ ⲛsmall signed witnesses. Ⲙⲛ repair ⲙⲡnegative side ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 30.

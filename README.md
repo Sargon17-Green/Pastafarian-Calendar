@@ -363,3 +363,16 @@
 ⲠStage 29 test ⲥⲙⲓⲛⲉ ⲙⲡshort boundary `N=M_OLD` ⲙⲛ ⲛwide family `M_OLD+1`, `M_OLD^2`, `M_OLD^3` ⲙⲛ `oracle_choose_rank_wide` ⲙⲡsame-line Assembly. Ⲛⲧⲟⲟⲩ ⲧⲏⲣⲟⲩ ⲥⲉⲧⲱⲛ.
 
 Ⲙⲛ code ⲙⲡPATCH 15 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 30 — DISCOVERY 15
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldGateQuestionDay(n)`, ⲉϥⲧⲁⲙⲓⲟ ⲙⲡquestion day ⲛⲧⲉⲡlegacy ϩⲓⲧⲛ `FOUNDATION+n`.
+
+Ⲡcaller ⲛⲗⲉⲅⲁⲥⲓ `legacyGateQuestionDayFromSignedStepWrong` ϫⲓ ⲙⲡ`abs(signedStep)` ⲉⲙⲡⲁⲧⲉϥⲙⲟⲩⲧⲉ ⲉⲡhelper. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡnegative step ⲥⲱⲣⲙ ⲙⲡⲉϥsign ⲁⲩⲱ ⲡquestion day ⲃⲱⲕ ⲉⲡpositive side.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage30_legacy_gate_question_handler -> monster_gate_question_day_route -> legacyGateQuestionDayFromSignedStepWrong -> oldGateQuestionDay`
+
+Ⲡsame-line regression ⲧⲁϫⲣⲟ ϩⲓ signed steps `-1,-2,-10,0,+1`. Ⲛnegative ⲛϣⲟⲙⲛⲧ ⲥⲉϣⲟⲃⲉ, ⲁⲗⲗⲁ `0,+1` ⲧⲱⲛ ⲛⲟⲩcoincidence.
+
+Ⲙⲛ negative-side detour ⲏ code ⲙⲡPATCH 15 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. ⲠStage 30 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–29 ⲥⲉⲟ ⲛ`GREEN`.
