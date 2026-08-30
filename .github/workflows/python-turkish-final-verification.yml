@@ -18,6 +18,8 @@ jobs:
     name: Python 3.13 üzerinde final doğrulama
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      PYTHONPATH: ${{ github.workspace }}/src
 
     steps:
       - name: Depoyu al
@@ -43,6 +45,9 @@ jobs:
       - name: Düzeltici Aşama 56 bowlSum detour testlerini çalıştır
         run: python -m unittest discover -s tests -p "corrective_stage_56_bowlsum_detour.py" -q
 
+      - name: Patch 27–33 acceleration correctness paketini çalıştır
+        run: python -m unittest discover -s tests -p "test_acceleration_patches_27_33.py" -q
+
       - name: Final doğrulama özetini yaz
         if: success()
         run: |
@@ -51,4 +56,5 @@ jobs:
           echo "Beklenen Aşama 54 integration: 10/10 PASS"
           echo "Beklenen Aşama 55 audit: 21/21 PASS"
           echo "Beklenen Düzeltici Aşama 56: 6/6 PASS"
-          echo "Beklenen toplam doğrulama: 402 PASS"
+          echo "Beklenen Patch 27–33 acceleration correctness: 7/7 PASS"
+          echo "Beklenen toplam doğrulama: 409 PASS"
