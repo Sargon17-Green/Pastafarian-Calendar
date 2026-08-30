@@ -25,6 +25,7 @@ pattern_len = . - pattern_token
 .extern answerRingThroughPatchedNextBowl
 .extern ringAnswer
 .extern biasedLegacyPick
+.extern legacyBiasedSelectionBeforeRejection
 .extern monster_biased_selection_route
 .extern calendarDateSpaghetti
 .extern legacy_remainder_M
@@ -124,18 +125,25 @@ check_one_ring:
     test eax,eax
     jne .Lcor_bad
 
-    # Ⲡlegacy ⲙⲟⲩⲧⲉ ⲉbiasedLegacyPick ϩⲓ answerAt(0) ⲁϫⲛ rejection; ⲛϥϯ 1.
+    # Ⲡlegacy direct call ⲟⲩⲏϩ ⲉϥⲙⲟⲩⲧⲉ ⲉbiasedLegacyPick ϩⲓ answerAt(0) ⲁϫⲛ rejection; ⲛϥϯ 1.
+    mov rdi,qword ptr [rbp-40]
+    mov rsi,qword ptr [rbp-56]
+    call legacyBiasedSelectionBeforeRejection
+    test rax,rax
+    je .Lcor_bad
+    mov rdi,rax
+    mov rsi,1
+    call bi_eq_u64
+    test eax,eax
+    je .Lcor_bad
+
+    # Ⲡroute ⲡⲉ ⲡsemantic path ⲉⲧⲣⲉⲡPATCH ⲛⲁϣ ⲉⲕⲧⲟϥ ⲉGREEN ⲁϫⲛ ⲧⲣⲉⲡlegacy scar ⲟⲩⲱϣϥ.
     mov rdi,qword ptr [rbp-40]
     mov rsi,qword ptr [rbp-56]
     call monster_biased_selection_route
     test rax,rax
     je .Lcor_bad
     mov qword ptr [rbp-64],rax
-    mov rdi,rax
-    mov rsi,1
-    call bi_eq_u64
-    test eax,eax
-    je .Lcor_bad
 
     # Ⲡsame-line oracle ⲣrejection ϩⲙⲡring ⲛⲟⲩⲱⲧ; ⲡanswer ⲙⲙⲁϩ2 ⲡⲉ N.
     mov rdi,qword ptr [rbp-48]

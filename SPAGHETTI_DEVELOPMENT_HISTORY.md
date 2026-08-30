@@ -522,3 +522,30 @@
 Ⲡtest ⲥⲙⲓⲛⲉ ⲛanswer ring ⲛⲓⲙ ⲙⲛ `oracle_ask_bowl` ⲙⲡsame-line Assembly, ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡnormative short choice ϩⲓⲧⲛ `oracle_choose_rank_short`. Ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩacceptance limit, rejection progression, `patchedSmallPick`, `wideDetour` ⲏ code ⲙⲡStage 27/28.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 27 — PATCH 13
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`biasedLegacyPick` ⲏ ⲡ`legacyBiasedSelectionBeforeRejection`. Ⲡdirect legacy call ⲟⲩⲏϩ ⲉϥⲟⲩⲱⲛϩ ⲙⲡbiased modulo ⲁϫⲛ rejection.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`patchedSmallPick`. Ⲛϣⲟⲣⲡ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡlegacy path ⲛⲟⲩCOPY_DIAGNOSTIC. Ⲙⲛⲛⲥⲱⲥ ⲛϥⲧⲁϫⲣⲟ ⲙⲡshort-domain `1<=N<=M_OLD`, ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡacceptance limit `floor(M_OLD/N)*N`, ⲁⲩⲱ ⲛϥⲙⲟⲟϣⲉ ϩⲙⲡring ⲛⲟⲩⲱⲧ ϩⲓⲧⲛ offset ⲉϥⲟⲩⲱϩ ϣⲁⲛⲧⲉ `x<=limit`.
+
+Ⲡ`biasedLegacyPick` ⲛϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛsemantic purpose ⲙⲙⲁⲧⲉ ⲙⲛⲛⲥⲁ acceptance. Ⲡroute ⲟ ⲛ:
+
+`monster_biased_selection_route -> monster_stage27_rejection_patch_wrapper -> patchedSmallPick`
+
+### Ⲡⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+Ⲛ3 ⲛwitness ⲙⲡDISCOVERY 13 ⲥⲉⲟ ⲛdescending ring ⲙⲛ `N=first-1`. ⲠPATCH 13 rejecte ⲙⲡ`first=N+1`, ⲛϥϫⲓ ⲙⲡ`ringAnswer(1)=N`, ⲁⲩⲱ ⲛϥⲕⲧⲟ ⲙⲡrank `N`. Ⲡsame-line `oracle_choose_rank_short` ϯ ⲙⲡvalue ⲛⲟⲩⲱⲧ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡacceptance limit, ⲡaccepted answer, ⲡaccepted offset, ⲡpatched selection ⲙⲛ ⲡpatch seen counter. Ⲛstate ⲧⲏⲣⲟⲩ ⲟ ⲛinvocation-local.
+
+### Ⲡharness scar ⲉⲧⲁⲩⲧⲁϫⲣⲟϥ
+
+ⲠStage 26 test ⲛⲁϥⲁⲛⲁⲅⲕⲁⲍⲉ ⲙⲡsemantic route ⲉⲧⲣⲉϥⲟ ⲛ`1`, ⲉⲧⲉ ⲟⲩcontract ⲉϥⲥⲏϩ ⲙⲡbug ⲡⲉ ⲁⲛⲧⲓ ⲟⲩregression contract. Ⲁⲩⲕⲱ ⲙⲡassert ⲡⲁⲓ ⲉⲡdirect `legacyBiasedSelectionBeforeRejection`; ⲡroute ⲟⲩⲏϩ ⲉϥⲥⲙⲓⲛⲉ ⲙⲛ ⲡoracle. Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲙⲡtest ⲉϥⲧⲟⲩⲛⲟⲥ ⲙⲛ ⲡStage 26 production: ⲛϥϯ `STAGE26_DISCOVERY13_EXPECTED_RED`; ⲙⲛ ⲡStage 27 production ⲛϥϯ `STAGE26_REGRESSION_GREEN`.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩwide selection ⲏ code ⲙⲡPATCH 14.

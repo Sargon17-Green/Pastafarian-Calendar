@@ -314,3 +314,18 @@
 Ϩⲛ ⲛ3 ⲛring ⲧⲏⲣⲟⲩ, ⲡdirection ⲟ ⲛ`-1`, ⲡ`first` ⲟ ⲉϩⲣⲁⲓ ⲉ`M_OLD/2`, ⲁⲩⲱ ⲡ`ringAnswer(1)` ⲧⲱⲛ ⲙⲛ `N`. Ⲡlegacy direct modulo ϯ `1`, ϩⲟⲡⲟⲩ ⲡsame-line rejection oracle ϯ `N`. Ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
 
 ⲠStage 26 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–25 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ rejection patch ⲏ `wideDetour` ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 27 — PATCH 13
+
+Ⲡ`biasedLegacyPick(x,N)` ⲙⲛ ⲡ`legacyBiasedSelectionBeforeRejection` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡ`patchedSmallPick` ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉⲡlegacy path ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲗⲗⲁ ⲡresult ⲙⲡcall ⲡⲁⲓ ⲛϥⲧⲟϣ ⲁⲛ ⲙⲡsemantic selection.
+
+Ⲡshort detour ⲧⲁϫⲣⲟ ⲛ`1<=N<=M_OLD`, ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡ`limit=floor(M_OLD/N)*N`, ⲁⲩⲱ ⲛϥⲟⲩⲱϩ ⲙⲡoffset ϩⲙⲡanswer ring ⲛⲟⲩⲱⲧ ϩⲟⲥⲟⲛ `x>limit`. Ⲙⲛⲛⲥⲁ ⲧⲣⲉϥϭⲓⲛⲉ ⲙⲡϣⲟⲣⲡ `x<=limit`, ⲛⲧⲉⲩⲛⲟⲩ ⲙⲙⲁⲧⲉ ⲛϥⲙⲟⲩⲧⲉ ⲉ`biasedLegacyPick(x,N)`.
+
+`monster_biased_selection_route -> monster_stage27_rejection_patch_wrapper -> patchedSmallPick -> biasedLegacyPick`
+
+Ϩⲛ ⲛ3 ⲛFoundation witness ⲙⲡStage 26, ⲡanswer ⲛoffset 0 ⲟ ⲛ`N+1`, ⲡlimit ⲟ ⲛ`N`, ⲁⲩⲱ ⲡanswer ⲛoffset 1 ⲟ ⲛ`N`. Ⲡdirect legacy ⲟⲩⲏϩ ⲉϥϯ `1`; ⲡroute ⲙⲡPATCH 13 ⲧⲉⲛⲟⲩ ϯ `N` ⲙⲛ ⲡsame-line oracle.
+
+Ⲡtest ⲙⲡStage 27 ⲥⲙⲓⲛⲉ ⲛⲛ3 ⲛwitness, ⲡboundary `N=M_OLD` ⲉⲧⲉ ⲡoffset ⲟ ⲛ0 ⲙⲛ ⲡlimit ⲟ ⲛM, ⲙⲛ ⲛinvalid short boundaries. Ⲡ`N>M_OLD` ⲛϥⲧⲟϣ ⲁⲛ ϩⲙⲡStage ⲡⲁⲓ; ⲙⲛ `wideDetour` ⲉϥϣⲟⲟⲡ.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲛⲟⲩharness correction ⲛⲧⲉ Stage 26: ⲡassert ⲛ`legacy==1` ⲁⲩⲕⲧⲟϥ ⲉⲡdirect legacy call ⲁⲛⲧⲓ ⲡsemantic route. Ⲛwitness ⲙⲛ ⲡoracle comparison ⲙⲡⲟⲩϣⲓⲃⲉ. Ⲡtest ⲡⲁⲓ ⲟⲩⲏϩ ⲉϥϯ `EXPECTED_RED` ⲉϥⲙⲟⲟϣⲉ ⲙⲛ ⲡproduction ⲙⲡStage 26, ⲁⲩⲱ ⲛϥϯ `REGRESSION_GREEN` ⲙⲛ ⲡPATCH 13.

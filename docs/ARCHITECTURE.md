@@ -386,3 +386,22 @@
 Ⲛ3 ⲛFoundation ring ⲛⲧⲉⲡtest ⲥⲉⲧⲱⲛ ⲙⲛ ⲡsame-line oracle ϩⲓ first/direction. Ⲛⲧⲟⲟⲩ ⲧⲏⲣⲟⲩ ⲟ ⲛdescending ring ⲙⲛ `N=first-1`, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡlegacy direct modulo ϯ `1` ⲁⲗⲗⲁ ⲡfirst accepted answer ⲙⲡsame ring ⲟ ⲛ`N`.
 
 Ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local. Ⲙⲛ global mutable semantic state, ⲙⲛ oracle call ϩⲙⲡproduction, ⲁⲩⲱ ⲙⲛ future rejection code.
+
+
+## Ⲡshort rejection detour ⲙⲡⲃⲁⲑⲙⲟⲥ 27
+
+ⲠCOPY_DIAGNOSTIC ⲟ ⲛ`legacyBiasedSelectionBeforeRejection -> biasedLegacyPick`, ⲉϥϫⲓ ⲙⲡanswer ⲛoffset 0 ⲁϫⲛ rejection. ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_biased_selection_route -> monster_stage27_rejection_patch_wrapper -> patchedSmallPick`
+
+Ⲡ`patchedSmallPick` ⲧⲁϫⲣⲟ ⲙⲡshort domain `1<=N<=M_OLD`. Ⲡlimit ⲡⲉ `floor(M_OLD/N)*N`. Ⲡoffset ⲁⲣⲭⲉⲓ ϩⲓ 0; ⲡ`ringAnswer` ⲛⲧⲉⲡoffset ⲡⲁⲓ ⲟⲩⲏϩ ⲉϥⲣrejection ⲉϣϫⲉ `x>limit`. Ⲡoffset ⲟⲩⲱϩ ⲙⲙⲁⲧⲉ ϩⲙⲡring ⲛⲟⲩⲱⲧ. Ⲙⲛⲛⲥⲁ ⲡϣⲟⲣⲡ `x<=limit`, ⲡselector ⲛⲗⲉⲅⲁⲥⲓ ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲧⲉⲩⲛⲟⲩ.
+
+### EQUIVALENCE
+
+Ϩⲙⲡshort domain, ⲡacceptance interval ⲡⲉ `1..limit` ⲉⲣⲉ ⲡlength ⲟ ⲛmultiple ⲙⲡN. Ⲉⲧⲃⲉ ⲡⲁⲓ `biasedLegacyPick` ⲙⲛⲛⲥⲁ rejection ⲕⲱ ⲛⲟⲩuniform rank ϩⲛ `1..N`. Ⲡanswer sequence ⲛϥⲧⲟϣ ⲁⲛ ⲛⲕⲉstream; ⲡdetour ⲟⲩⲏϩ ϩⲙⲡsame ring ⲙⲙⲁⲧⲉ.
+
+Ⲡ`N=M_OLD` ⲣ ⲛⲟⲩboundary: `limit=M_OLD`, ⲡoffset 0 ⲟ ⲛaccepted ⲛⲧⲉⲩⲛⲟⲩ. Ⲡ`N=0` ⲙⲛ null ring ⲟ ⲛdeterministic failures. Ⲡ`N>M_OLD` ⲛϥⲧⲟϣ ⲁⲛ ϩⲙⲡshort detour ⲡⲁⲓ, ⲁⲩⲱ ⲙⲛ wide detour ϩⲙⲡStage 27.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
+
+Ⲡlegacy helper ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ. Ⲡacceptance trace ⲟ ⲛinvocation-local ϩⲙⲡ`MonsterContext`; ⲙⲛ global mutable semantic state. Ⲙⲛ oracle call ϩⲙⲡproduction.

@@ -132,7 +132,12 @@
 .equ CTX_STAGE26_DIRECTION,1040
 .equ CTX_STAGE26_LEGACY_SEEN,1048
 .equ CTX_STAGE26_ROUTE_SEEN,1056
-.equ CTX_SIZE,1064
+.equ CTX_STAGE27_ACCEPTANCE_LIMIT,1064
+.equ CTX_STAGE27_ACCEPTED_ANSWER,1072
+.equ CTX_STAGE27_ACCEPTED_OFFSET,1080
+.equ CTX_STAGE27_PATCHED_SELECTION,1088
+.equ CTX_STAGE27_PATCH_SEEN,1096
+.equ CTX_SIZE,1104
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -239,6 +244,8 @@ legacy_bowl_stir_stone_by_position:
 .extern bi_abs
 .extern bi_divmod_u64_abs
 .extern bi_mod_abs
+.extern bi_divmod_abs
+.extern bi_mul_abs
 .extern bi_is_zero
 .extern bi_sub_abs
 .extern bi_sub
@@ -333,8 +340,11 @@ legacy_bowl_stir_stone_by_position:
 .global ringAnswer
 .global biasedLegacyPick
 .global legacyBiasedSelectionBeforeRejection
+.global patchedSmallPick
+.global monster_stage27_rejection_patch_wrapper
 .global monster_biased_selection_route
 .global monster_stage26_legacy_biased_selection_handler
+.global monster_stage27_rejection_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -4832,9 +4842,112 @@ legacyBiasedSelectionBeforeRejection:
     ret
 .size legacyBiasedSelectionBeforeRejection,.-legacyBiasedSelectionBeforeRejection
 
+
+# Ⲃⲁⲑⲙⲟⲥ 27 — PATCH 13
+# ⲠbiasedLegacyPick ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲛⲟⲩscar. Ⲡdetour ⲙⲟⲩⲧⲉ ⲉⲡlegacy path ⲛⲟⲩCOPY_DIAGNOSTIC,
+# ⲁⲩⲱ ⲙⲛⲛⲥⲱⲥ ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡlimit=floor(M_OLD/N)*N. Ⲛϥⲙⲟⲟϣⲉ ϩⲙⲡanswer ring ⲛⲟⲩⲱⲧ
+# ϣⲁⲛⲧⲉ x<=limit, ⲁⲩⲱ ⲛⲧⲉⲩⲛⲟⲩ ⲙⲙⲁⲧⲉ ⲛϥⲙⲟⲩⲧⲉ ⲉbiasedLegacyPick.
+.type patchedSmallPick,@function
+patchedSmallPick:
+    # rdi=LegacyAnswerRing*, rsi=N BigInt*.
+    # rax=rank BigInt*; rdx=accepted x BigInt*; rcx=accepted offset u64; r8=limit BigInt*.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lpsp_fail
+    test r13,r13
+    je .Lpsp_fail
+    cmp qword ptr [r13+BI_SIGN],1
+    jne .Lpsp_fail
+
+    # Ⲡshort path ⲙⲡPATCH 13 ⲟ ⲛⲧⲟϣ ⲙⲙⲁⲧⲉ ⲉϣϫⲉ N<=M_OLD.
+    mov rdi,r13
+    lea rsi,[rip+legacy_remainder_M]
+    call bi_cmp
+    test eax,eax
+    jg .Lpsp_fail
+
+    # ⲞⲩCOPY_DIAGNOSTIC ⲛⲧⲉⲡDISCOVERY: ⲡlegacy call ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲁⲩⲱ ⲡresult ⲛϥⲧⲟϣ ⲁⲛ.
+    mov rdi,r12
+    mov rsi,r13
+    call legacyBiasedSelectionBeforeRejection
+    test rax,rax
+    je .Lpsp_fail
+
+    # limit=floor(M_OLD/N)*N
+    lea rdi,[rip+legacy_remainder_M]
+    mov rsi,r13
+    call bi_divmod_abs
+    test rax,rax
+    je .Lpsp_fail
+    mov rdi,rax
+    mov rsi,r13
+    call bi_mul_abs
+    test rax,rax
+    je .Lpsp_fail
+    mov r14,rax
+    xor r15d,r15d
+
+.Lpsp_rejection_loop:
+    mov rdi,r12
+    mov rsi,r15
+    call ringAnswer
+    test rax,rax
+    je .Lpsp_fail
+    mov qword ptr [rbp-40],rax
+
+    mov rdi,rax
+    mov rsi,r14
+    call bi_cmp
+    test eax,eax
+    jle .Lpsp_accept
+
+    inc r15
+    jne .Lpsp_rejection_loop
+    # Ⲡoffset u64 ⲛⲧⲉⲡlegacy ring API ⲁϥⲙⲟⲩϩ: deterministic fail, ⲙⲛ wide detour ϩⲙⲡStage ⲡⲁⲓ.
+    jmp .Lpsp_fail
+
+.Lpsp_accept:
+    mov rdi,qword ptr [rbp-40]
+    mov rsi,r13
+    call biasedLegacyPick
+    test rax,rax
+    je .Lpsp_fail
+    mov rdx,qword ptr [rbp-40]
+    mov rcx,r15
+    mov r8,r14
+    jmp .Lpsp_done
+
+.Lpsp_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+.Lpsp_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size patchedSmallPick,.-patchedSmallPick
+
+.type monster_stage27_rejection_patch_wrapper,@function
+monster_stage27_rejection_patch_wrapper:
+    jmp patchedSmallPick
+.size monster_stage27_rejection_patch_wrapper,.-monster_stage27_rejection_patch_wrapper
+
 .type monster_biased_selection_route,@function
 monster_biased_selection_route:
-    jmp legacyBiasedSelectionBeforeRejection
+    jmp monster_stage27_rejection_patch_wrapper
 .size monster_biased_selection_route,.-monster_biased_selection_route
 
 .type monster_stage26_legacy_biased_selection_handler,@function
@@ -4921,6 +5034,40 @@ monster_stage26_legacy_biased_selection_handler:
     ret
 .size monster_stage26_legacy_biased_selection_handler,.-monster_stage26_legacy_biased_selection_handler
 
+.type monster_stage27_rejection_patch_handler,@function
+monster_stage27_rejection_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    test r12,r12
+    je .Lms27_fail
+    mov rdi,qword ptr [r12+CTX_STAGE26_ANSWER_RING]
+    mov rsi,qword ptr [r12+CTX_STAGE26_FAMILY_SIZE]
+    test rdi,rdi
+    je .Lms27_fail
+    test rsi,rsi
+    je .Lms27_fail
+    call patchedSmallPick
+    test rax,rax
+    je .Lms27_fail
+    mov qword ptr [r12+CTX_STAGE27_PATCHED_SELECTION],rax
+    mov qword ptr [r12+CTX_STAGE27_ACCEPTED_ANSWER],rdx
+    mov qword ptr [r12+CTX_STAGE27_ACCEPTED_OFFSET],rcx
+    mov qword ptr [r12+CTX_STAGE27_ACCEPTANCE_LIMIT],r8
+    inc qword ptr [r12+CTX_STAGE27_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms27_done
+.Lms27_fail:
+    xor eax,eax
+.Lms27_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage27_rejection_patch_handler,.-monster_stage27_rejection_patch_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -5004,6 +5151,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage26_legacy_biased_selection_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage27_rejection_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
