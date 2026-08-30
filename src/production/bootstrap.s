@@ -137,7 +137,13 @@
 .equ CTX_STAGE27_ACCEPTED_OFFSET,1080
 .equ CTX_STAGE27_PATCHED_SELECTION,1088
 .equ CTX_STAGE27_PATCH_SEEN,1096
-.equ CTX_SIZE,1104
+.equ CTX_STAGE28_WIDE_RING,1104
+.equ CTX_STAGE28_WIDE_FAMILY_SIZE,1112
+.equ CTX_STAGE28_LEGACY_RESULT,1120
+.equ CTX_STAGE28_LEGACY_ASSUMED_SHORT,1128
+.equ CTX_STAGE28_LEGACY_UNSUPPORTED,1136
+.equ CTX_STAGE28_ROUTE_SEEN,1144
+.equ CTX_SIZE,1152
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -345,6 +351,9 @@ legacy_bowl_stir_stone_by_position:
 .global monster_biased_selection_route
 .global monster_stage26_legacy_biased_selection_handler
 .global monster_stage27_rejection_patch_handler
+.global legacySelectionAssumingNLeM
+.global monster_wide_selection_route
+.global monster_stage28_legacy_wide_assumption_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -5068,6 +5077,71 @@ monster_stage27_rejection_patch_handler:
     ret
 .size monster_stage27_rejection_patch_handler,.-monster_stage27_rejection_patch_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 28 — DISCOVERY 14
+# Ⲡlegacy ⲡⲁⲓ ⲙⲉⲉⲩⲉ ϫⲉ ⲛfamily ⲧⲏⲣⲟⲩ ⲟ ⲛshort. Ⲛϥϫⲟⲟⲩ ⲙⲡN ⲧⲏⲣϥ ⲉpatchedSmallPick
+# ⲁϫⲛ ⲟⲩdispatcher ⲛwide. Ⲉϣϫⲉ N>M_OLD, ⲡguard ⲛPATCH 13 ⲕⲱ ⲙⲡresult ⲉ0.
+.type legacySelectionAssumingNLeM,@function
+legacySelectionAssumingNLeM:
+    jmp patchedSmallPick
+.size legacySelectionAssumingNLeM,.-legacySelectionAssumingNLeM
+
+.type monster_wide_selection_route,@function
+monster_wide_selection_route:
+    jmp legacySelectionAssumingNLeM
+.size monster_wide_selection_route,.-monster_wide_selection_route
+
+.type monster_stage28_legacy_wide_assumption_handler,@function
+monster_stage28_legacy_wide_assumption_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lms28_fail
+
+    mov r13,qword ptr [r12+CTX_STAGE26_ANSWER_RING]
+    test r13,r13
+    je .Lms28_fail
+    mov qword ptr [r12+CTX_STAGE28_WIDE_RING],r13
+
+    lea rdi,[rip+legacy_remainder_M]
+    mov rsi,1
+    call bi_add_u64
+    test rax,rax
+    je .Lms28_fail
+    mov r14,rax
+    mov qword ptr [r12+CTX_STAGE28_WIDE_FAMILY_SIZE],r14
+    mov qword ptr [r12+CTX_STAGE28_LEGACY_ASSUMED_SHORT],1
+
+    mov rdi,r13
+    mov rsi,r14
+    call monster_wide_selection_route
+    mov qword ptr [r12+CTX_STAGE28_LEGACY_RESULT],rax
+    inc qword ptr [r12+CTX_STAGE28_ROUTE_SEEN]
+    test rax,rax
+    jne .Lms28_supported
+    mov qword ptr [r12+CTX_STAGE28_LEGACY_UNSUPPORTED],1
+    jmp .Lms28_ok
+.Lms28_supported:
+    mov qword ptr [r12+CTX_STAGE28_LEGACY_UNSUPPORTED],0
+.Lms28_ok:
+    mov eax,1
+    jmp .Lms28_done
+.Lms28_fail:
+    xor eax,eax
+.Lms28_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage28_legacy_wide_assumption_handler,.-monster_stage28_legacy_wide_assumption_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -5156,6 +5230,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage27_rejection_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage28_legacy_wide_assumption_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

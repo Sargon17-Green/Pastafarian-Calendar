@@ -549,3 +549,20 @@
 ⲠStage 26 test ⲛⲁϥⲁⲛⲁⲅⲕⲁⲍⲉ ⲙⲡsemantic route ⲉⲧⲣⲉϥⲟ ⲛ`1`, ⲉⲧⲉ ⲟⲩcontract ⲉϥⲥⲏϩ ⲙⲡbug ⲡⲉ ⲁⲛⲧⲓ ⲟⲩregression contract. Ⲁⲩⲕⲱ ⲙⲡassert ⲡⲁⲓ ⲉⲡdirect `legacyBiasedSelectionBeforeRejection`; ⲡroute ⲟⲩⲏϩ ⲉϥⲥⲙⲓⲛⲉ ⲙⲛ ⲡoracle. Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲙⲡtest ⲉϥⲧⲟⲩⲛⲟⲥ ⲙⲛ ⲡStage 26 production: ⲛϥϯ `STAGE26_DISCOVERY13_EXPECTED_RED`; ⲙⲛ ⲡStage 27 production ⲛϥϯ `STAGE26_REGRESSION_GREEN`.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩwide selection ⲏ code ⲙⲡPATCH 14.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 28 — DISCOVERY 14
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲛfamily size ⲧⲏⲣⲟⲩ ϣϭⲙϭⲟⲙ ⲉⲩⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡshort rejection ⲙⲡPATCH 13. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡscar `legacySelectionAssumingNLeM` ⲙⲟⲩⲧⲉ ⲉ`patchedSmallPick` ⲁϫⲛ ⲟⲩbranch ⲛfamily width.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡ`patchedSmallPick` ⲧⲁϫⲣⲟ ⲙⲡguard `N<=M_OLD`; ⲉϣϫⲉ `N>M_OLD` ⲛϥϯ ⲁⲛ ⲛⲟⲩsemantic rank. Ⲡsame-line wide oracle ⲇⲉ ϯ ⲛⲟⲩrank ⲛⲧⲟϣ ⲛⲧⲉ family ⲛⲓⲙ. Ⲛ3 ⲛfamily `M_OLD+1`, `M_OLD^2`, `M_OLD^3` ⲧⲁϫⲣⲟ ⲙⲡdivergence ⲙⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacySelectionAssumingNLeM`, `monster_wide_selection_route` ⲙⲛ `monster_stage28_legacy_wide_assumption_handler`. Ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲡroute ⲛⲟⲩⲙⲉ ϩⲓ `N=M_OLD+1`, ⲛϥϩⲁⲣⲉϩ ⲉⲡring, family size, null result, assumed-short flag, unsupported flag ⲙⲛ seen counter ϩⲙⲡinvocation context.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`wideDetour`, ⲟⲩbase-M digit builder, ⲟⲩwide-number rejection ⲏ code ⲙⲡPATCH 14.

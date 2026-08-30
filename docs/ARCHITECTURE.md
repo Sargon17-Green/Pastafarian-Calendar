@@ -405,3 +405,20 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡlegacy helper ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ. Ⲡacceptance trace ⲟ ⲛinvocation-local ϩⲙⲡ`MonsterContext`; ⲙⲛ global mutable semantic state. Ⲙⲛ oracle call ϩⲙⲡproduction.
+
+
+## Ⲡshort-only wide-family scar ⲙⲡⲃⲁⲑⲙⲟⲥ 28
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage28_legacy_wide_assumption_handler -> monster_wide_selection_route -> legacySelectionAssumingNLeM -> patchedSmallPick`
+
+Ⲡ`legacySelectionAssumingNLeM` ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲟⲩnew selection arithmetic; ⲛϥϫⲟⲟⲩ ⲙⲙⲁⲧⲉ ⲙⲡN ⲉⲡshort helper ⲙⲡPATCH 13. Ⲉⲧⲃⲉ ⲡguard `N<=M_OLD`, ⲡroute ⲟ ⲛunsupported ϩⲓ wide families.
+
+ⲠStage 28 handler ϫⲓ ⲙⲡexisting answer-ring pointer ⲙⲡinvocation, ⲕⲱ ⲙⲡ`N=M_OLD+1`, ⲙⲟⲩⲧⲉ ⲉⲡroute, ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡunsupported state ⲁϫⲛ ⲧⲣⲉϥⲕⲧⲟ ⲛⲟⲩfake semantic rank.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡEXPECTED_RED ⲧⲁϫⲣⲏⲩ
+
+Ⲡtest-only validation ϫⲓ ⲙⲡ`oracle_choose_rank_wide` ⲙⲡsame-line Assembly ⲙⲙⲁⲧⲉ. Ⲛfamily `M_OLD+1`, `M_OLD^2`, `M_OLD^3` ⲥⲉⲟ ⲛnormative wide families ⲙⲛ rank ⲉϥϣⲟⲟⲡ, ϩⲟⲡⲟⲩ ⲡshort-only route ϯ null.
+
+Ⲙⲛ wide semantic path ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction. Ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local ⲁⲩⲱ ⲙⲛ global mutable semantic state.

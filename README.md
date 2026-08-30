@@ -329,3 +329,16 @@
 Ⲡtest ⲙⲡStage 27 ⲥⲙⲓⲛⲉ ⲛⲛ3 ⲛwitness, ⲡboundary `N=M_OLD` ⲉⲧⲉ ⲡoffset ⲟ ⲛ0 ⲙⲛ ⲡlimit ⲟ ⲛM, ⲙⲛ ⲛinvalid short boundaries. Ⲡ`N>M_OLD` ⲛϥⲧⲟϣ ⲁⲛ ϩⲙⲡStage ⲡⲁⲓ; ⲙⲛ `wideDetour` ⲉϥϣⲟⲟⲡ.
 
 Ⲁⲩⲧⲁⲙⲓⲟ ⲛⲟⲩharness correction ⲛⲧⲉ Stage 26: ⲡassert ⲛ`legacy==1` ⲁⲩⲕⲧⲟϥ ⲉⲡdirect legacy call ⲁⲛⲧⲓ ⲡsemantic route. Ⲛwitness ⲙⲛ ⲡoracle comparison ⲙⲡⲟⲩϣⲓⲃⲉ. Ⲡtest ⲡⲁⲓ ⲟⲩⲏϩ ⲉϥϯ `EXPECTED_RED` ⲉϥⲙⲟⲟϣⲉ ⲙⲛ ⲡproduction ⲙⲡStage 26, ⲁⲩⲱ ⲛϥϯ `REGRESSION_GREEN` ⲙⲛ ⲡPATCH 13.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 28 — DISCOVERY 14
+
+Ⲡ`patchedSmallPick` ⲙⲡPATCH 13 ⲟⲩⲏϩ ⲉϥⲧⲟϣ ⲙⲡshort domain `1<=N<=M_OLD`. Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacySelectionAssumingNLeM`, ⲉϥⲙⲉⲉⲩⲉ ϫⲉ ⲛfamily ⲧⲏⲣⲟⲩ ⲟ ⲛshort ⲁⲩⲱ ⲉϥϫⲟⲟⲩ ⲙⲡN ⲧⲏⲣϥ ⲉ`patchedSmallPick` ⲁϫⲛ ⲟⲩwide dispatcher.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage28_legacy_wide_assumption_handler -> monster_wide_selection_route -> legacySelectionAssumingNLeM -> patchedSmallPick`
+
+Ⲡreal handler ϫⲓ ⲙⲡanswer ring ⲙⲡStage 26 ⲁⲩⲱ ⲛϥⲧⲁⲙⲓⲟ ⲙⲡ`N=M_OLD+1`. Ⲡshort guard ⲕⲱ ⲙⲡresult ⲉ0; ⲡhandler ϩⲁⲣⲉϩ ⲉ`legacy_assumed_short=1`, `unsupported=1` ⲙⲛ null semantic result, ⲁⲗⲗⲁ ⲛϥⲧⲁⲕⲟ ⲁⲛ ⲛⲛregression ⲛϣⲟⲣⲡ.
+
+Ⲡsame-line regression ⲧⲁϫⲣⲟ ⲛ3 ⲛwide family size: `M_OLD+1`, `M_OLD^2`, `M_OLD^3`. Ⲡdirect legacy call ⲧⲏⲣϥ ⲟ ⲛnull; ⲡ`oracle_choose_rank_wide` ⲙⲡAssembly ⲛⲟⲩⲱⲧ ϯ ⲛⲟⲩrank ⲛⲧⲟϣ. Ⲡroute ⲙⲡStage 28 ⲟ ⲛshort-only, ⲁⲩⲱ ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+Ⲙⲛ `wideDetour`, ⲙⲛ base-M digits, ⲙⲛ combined wide number, ⲁⲩⲱ ⲙⲛ wide rejection ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 28 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–27 ⲥⲉⲟ ⲛ`GREEN`.
