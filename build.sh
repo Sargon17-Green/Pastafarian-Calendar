@@ -20,6 +20,7 @@ as --64 -o build/stage08_discovery04.o tests/stage08_discovery04.s
 as --64 -o build/stage09_patch04.o tests/stage09_patch04.s
 as --64 -o build/stage10_discovery05.o tests/stage10_discovery05.s
 as --64 -o build/stage11_patch05.o tests/stage11_patch05.s
+as --64 -o build/stage12_discovery06.o tests/stage12_discovery06.s
 ld -o build/stage01_tests build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/tests.o
 ld -o build/stage01_smoke build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/smoke.o
 ld -o build/stage02_discovery01 build/arena.o build/bigint.o build/bootstrap.o build/stage02_discovery01.o
@@ -32,3 +33,4 @@ ld -o build/stage08_discovery04 build/arena.o build/bigint.o build/bootstrap.o b
 ld -o build/stage09_patch04 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage09_patch04.o
 ld -o build/stage10_discovery05 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage10_discovery05.o
 ld -o build/stage11_patch05 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage11_patch05.o
+ld -o build/stage12_discovery06 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage12_discovery06.o

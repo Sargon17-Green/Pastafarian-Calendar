@@ -103,3 +103,13 @@
 
 ⲠStage 10 regression ⲟ ⲛ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. ⲠStage 11 ⲥⲙⲓⲛⲉ ⲛ7 ⲛquery ⲙⲛ ⲡoracle, ⲁⲩⲱ ⲛϥⲧⲁϫⲣⲟ ϫⲉ ⲡlegacy access ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ϩⲓ 6 ⲛⲧⲓⲙⲏ.
 
+
+## Ⲃⲁⲑⲙⲟⲥ 12 — DISCOVERY 06
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`legacyPrior(dropStore,i,back)` ⲛⲗⲉⲅⲁⲥⲓ. Ⲛⲧⲟϥ ϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡ`dropStore[i-back]`, ⲁⲩⲱ ⲛϥⲥⲟⲟⲩⲛ ⲁⲛ ⲙⲡbackward hidden storage.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage12_legacy_prior_handler -> monster_prior_route -> legacyPrior`
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲙⲓⲛⲉ ⲛ7 ⲛquery: ⲙⲛ 2 ⲉⲣⲉ `i-back >= 1` ⲁⲩⲱ ⲥⲉⲧⲱⲛ, ⲙⲛ 5 ⲉⲣⲉ `i-back <= 0` ⲁⲩⲱ ⲡlegacy ⲛϥϫⲓ ⲁⲛ ⲙⲡhidden ⲉⲧϣⲟⲟⲡ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡStage 12 ⲟ ⲛ`EXPECTED_RED`.
+
+Ⲙⲛ detour ⲛⲧⲉⲡhistory ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. ⲚStage 1–11 ⲥⲉⲟ ⲛ`GREEN`.

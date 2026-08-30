@@ -161,3 +161,13 @@
 
 Ⲡⲡⲁⲧϣ ⲛϥⲣ ⲁⲛ ⲟⲩmutation ⲙⲡsemantic state. Ⲛϥϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡpointer ⲉⲧⲕⲏ ⲉϩⲣⲁⲓ ϩⲙⲡbackward array ⲕⲁⲧⲁ ⲟⲩformula ⲛⲧⲟϣ. Ⲙⲛ logs, metrics, cache ⲏ environment ⲉⲩⲧⲟϣ ⲙⲡⲟⲩⲱϣⲃ.
 
+
+## Ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲃⲁⲑⲙⲟⲥ 12
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage12_legacy_prior_handler -> monster_prior_route -> legacyPrior`
+
+Ⲡ`legacyPrior` ⲡⲉ ⲡCOPY_AUTHORITATIVE ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡDISCOVERY ⲡⲁⲓ. Ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡ`slot=i-back` ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡpointer ⲙⲡ`dropStore[slot]` ⲙⲙⲁⲧⲉ. Ⲡargument ⲙⲡhidden ⲥⲏϩ ϩⲙⲡcontract ⲙⲡ`monster_prior_route`, ⲁⲗⲗⲁ ⲡlegacy ⲛϥϫⲓ ⲙⲙⲟϥ ⲁⲛ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_DROP_STORE`, `CTX_PRIOR_I`, `CTX_PRIOR_BACK`, `CTX_LEGACY_PRIOR_RESULT`, `CTX_PRIOR_ROUTE_RESULT`, `CTX_LEGACY_PRIOR_SEEN` ⲙⲛ `CTX_PRIOR_ROUTE_SEEN`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.
+
+Ⲡhandler ⲧⲁⲙⲓⲟ ⲛⲟⲩdropStore ⲉϥⲕⲱ ⲛlogical slot -6..8. Ⲛslot 0..-6 ⲥⲉⲟ ⲛ0 ϩⲙⲡlegacy store, ϩⲟⲡⲟⲩ ⲡhidden storage ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ϩⲛ ⲟⲩstate ⲉϥϣⲟⲃⲉ. Ⲙⲛ normalization ⲏ fallback ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ.

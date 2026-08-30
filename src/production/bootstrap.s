@@ -49,7 +49,14 @@
 .equ CTX_LEGACY_HIDDEN_QUERY_SEEN,376
 .equ CTX_PATCHED_HIDDEN_QUERY_RESULT,384
 .equ CTX_HIDDEN_NEARNESS_PATCH_SEEN,392
-.equ CTX_SIZE,400
+.equ CTX_DROP_STORE,400
+.equ CTX_PRIOR_I,408
+.equ CTX_PRIOR_BACK,416
+.equ CTX_LEGACY_PRIOR_RESULT,424
+.equ CTX_PRIOR_ROUTE_RESULT,432
+.equ CTX_LEGACY_PRIOR_SEEN,440
+.equ CTX_PRIOR_ROUTE_SEEN,448
+.equ CTX_SIZE,456
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -133,6 +140,9 @@ legacy_hidden_stone_kind:
 .global monster_stage11_hidden_nearness_patch_wrapper
 .global monster_hidden_route
 .global monster_stage10_legacy_hidden_handler
+.global legacyPrior
+.global monster_prior_route
+.global monster_stage12_legacy_prior_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -1423,6 +1433,97 @@ monster_stage10_legacy_hidden_handler:
     ret
 .size monster_stage10_legacy_hidden_handler,.-monster_stage10_legacy_hidden_handler
 
+
+# Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡdropStore ⲙⲁⲩⲁⲁϥ ⲛⲁϣϩⲁⲣⲉϩ ⲉⲡhistory ⲛⲓⲙ.
+# Ⲡ legacyPrior ⲇⲉ ϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡslot i-back ϩⲙⲡdropStore; ⲛϥⲥⲟⲟⲩⲛ ⲁⲛ ⲙⲡhidden storage.
+.type legacyPrior,@function
+legacyPrior:
+    test rdi,rdi
+    je .Llp_fail
+    mov rax,rsi
+    sub rax,rdx
+    mov rax,qword ptr [rdi+rax*8]
+    ret
+.Llp_fail:
+    xor eax,eax
+    ret
+.size legacyPrior,.-legacyPrior
+
+.type monster_prior_route,@function
+monster_prior_route:
+    # rdi=dropStore(logical slot 0), rsi=hiddenBackward, rdx=i, rcx=back.
+    # Ⲡhidden argument ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ϩⲙⲡcontract, ⲁⲗⲗⲁ ⲡlegacy ⲛϥϫⲓ ⲙⲙⲟϥ ⲁⲛ.
+    mov rsi,rdx
+    mov rdx,rcx
+    jmp legacyPrior
+.size monster_prior_route,.-monster_prior_route
+
+.type monster_stage12_legacy_prior_handler,@function
+monster_stage12_legacy_prior_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms12_fail
+    mov r13,qword ptr [r12+CTX_HIDDEN_BACKWARD]
+    test r13,r13
+    je .Lms12_fail
+
+    # Ⲡbuffer ⲕⲱ ⲛlogical slot -6..8. Ⲛslot ⲙⲡⲥⲁ ⲛⲥⲁϩⲟⲩ ⲥⲉⲟ ⲛ0, ϫⲉ ⲡlegacy ⲛϥⲥⲟⲟⲩⲛ ⲁⲛ ⲙⲡhidden.
+    mov edi,120
+    call arena_alloc
+    test rax,rax
+    je .Lms12_fail
+    mov r14,rax
+    mov rdi,r14
+    xor eax,eax
+    mov ecx,15
+    rep stosq
+    lea r15,[r14+48]
+    mov qword ptr [r12+CTX_DROP_STORE],r15
+
+    mov edi,111
+    call bi_from_u64
+    test rax,rax
+    je .Lms12_fail
+    mov qword ptr [r15+8],rax
+
+    mov qword ptr [r12+CTX_PRIOR_I],1
+    mov qword ptr [r12+CTX_PRIOR_BACK],1
+
+    # COPY_DIAGNOSTIC: slot 0 ⲙⲡdropStore ⲟ ⲛ0, ⲉⲣⲉ hidden1 ϣⲟⲟⲡ ϩⲙⲡstorage ⲉⲧⲕⲟⲟϩ.
+    mov rdi,r15
+    mov esi,1
+    mov edx,1
+    call legacyPrior
+    mov qword ptr [r12+CTX_LEGACY_PRIOR_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_PRIOR_SEEN]
+
+    # Ⲡroute ⲙⲡDISCOVERY ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡlegacy ⲁϫⲛ ⲟⲩdetour.
+    mov rdi,r15
+    mov rsi,r13
+    mov edx,1
+    mov ecx,1
+    call monster_prior_route
+    mov qword ptr [r12+CTX_PRIOR_ROUTE_RESULT],rax
+    inc qword ptr [r12+CTX_PRIOR_ROUTE_SEEN]
+    mov eax,1
+    jmp .Lms12_done
+.Lms12_fail:
+    xor eax,eax
+.Lms12_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage12_legacy_prior_handler,.-monster_stage12_legacy_prior_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -1456,6 +1557,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage10_legacy_hidden_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage12_legacy_prior_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

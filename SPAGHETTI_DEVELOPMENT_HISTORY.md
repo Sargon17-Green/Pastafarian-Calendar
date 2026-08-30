@@ -183,3 +183,15 @@
 
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `hiddenByNearness`, `monster_stage11_hidden_nearness_patch_wrapper`, `CTX_PATCHED_HIDDEN_QUERY_RESULT` ⲙⲛ `CTX_HIDDEN_NEARNESS_PATCH_SEEN`. Ⲡhandler ϩⲁⲣⲉϩ ⲉⲡlegacy result ⲙⲛ ⲡpatched result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. Ⲡstate ⲡⲁⲓ ⲡⲉ ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ, ⲁⲩⲱ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡstorage ⲏ ⲙⲡsemantic input.
 
+
+## Ⲃⲁⲑⲙⲟⲥ 12 — DISCOVERY 06
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡhistory ⲛⲧⲉⲛdrop ⲛⲁϣϣⲱⲡ ⲛⲛpredecessor ⲛⲓⲙ ϩⲙⲡ`dropStore` ⲛⲟⲩⲱⲧ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`legacyPrior(dropStore,i,back)` ⲉϥϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡ`dropStore[i-back]`.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲉϣϫⲉ `i-back >= 1`, ⲡlegacy ϣⲁϥϫⲓ ⲙⲡvisible drop ⲉⲧⲥⲏϩ ϩⲙⲡstore. Ⲉϣϫⲉ `i-back <= 0`, ⲛhidden predecessor ⲥⲉϣⲟⲟⲡ ϩⲙⲡbackward hidden storage ⲉϥϣⲟⲃⲉ, ⲁⲗⲗⲁ ⲡ`legacyPrior` ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡslot ⲙⲡdropStore. Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲱⲡ ⲛ5 ⲛⲇⲓⲁⲫⲟⲣⲁ ⲉⲩⲧⲟϣ ⲙⲛ 2 ⲛvisible query ⲉⲩⲧⲱⲛ.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `monster_stage12_legacy_prior_handler`, `monster_prior_route`, ⲙⲛ state ⲛⲧⲉⲡdropStore ⲙⲛ ⲡquery ⲙⲛ ⲛresult. Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩdetour ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ.
