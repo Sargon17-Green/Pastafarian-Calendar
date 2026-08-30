@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Excerpere repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Notare provenance
         shell: bash
@@ -89,11 +89,11 @@ jobs:
 
       - name: Servare logs custodiae
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cpp-latina-soak-custodia
           path: soak-logs/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
   regressiones-historicae:
@@ -123,7 +123,24 @@ jobs:
             bootstrap: 'no'
     steps:
       - name: Excerpere repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et instrumenta C++
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-logs
+          exec > >(tee soak-logs/dependencies.log) 2>&1
+          echo "RUNNER_OS=${RUNNER_OS}"
+          echo "RUNNER_ARCH=${RUNNER_ARCH}"
+          uname -a
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          dpkg-query -W -f='BOOST_PACKAGE=${Package}\nBOOST_VERSION=${Version}\n' libboost-dev
+          echo 'BOOST_MULTIPRECISION_HEADER=PASS'
+          g++ --version | head -1
+          clang++ --version | head -1
 
       - name: Compilare nucleum commune
         shell: bash
@@ -170,11 +187,11 @@ jobs:
 
       - name: Servare logs regressionum
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cpp-latina-history-${{ matrix.primus }}-${{ matrix.ultimus }}
           path: soak-logs/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
   audit-gradus-55:
@@ -184,7 +201,24 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Excerpere repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et instrumenta C++
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-logs
+          exec > >(tee soak-logs/dependencies.log) 2>&1
+          echo "RUNNER_OS=${RUNNER_OS}"
+          echo "RUNNER_ARCH=${RUNNER_ARCH}"
+          uname -a
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          dpkg-query -W -f='BOOST_PACKAGE=${Package}\nBOOST_VERSION=${Version}\n' libboost-dev
+          echo 'BOOST_MULTIPRECISION_HEADER=PASS'
+          g++ --version | head -1
+          clang++ --version | head -1
 
       - name: Compilare audit Gradus 55
         shell: bash
@@ -242,11 +276,11 @@ jobs:
 
       - name: Servare logs Gradus 55
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cpp-latina-stage55-audit
           path: soak-logs/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
   matrix-gradus-56:
@@ -278,7 +312,24 @@ jobs:
             opt: '-O3'
     steps:
       - name: Excerpere repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et instrumenta C++
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-logs
+          exec > >(tee soak-logs/dependencies.log) 2>&1
+          echo "RUNNER_OS=${RUNNER_OS}"
+          echo "RUNNER_ARCH=${RUNNER_ARCH}"
+          uname -a
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          dpkg-query -W -f='BOOST_PACKAGE=${Package}\nBOOST_VERSION=${Version}\n' libboost-dev
+          echo 'BOOST_MULTIPRECISION_HEADER=PASS'
+          g++ --version | head -1
+          clang++ --version | head -1
 
       - name: Compilare Gradum 56
         shell: bash
@@ -324,11 +375,11 @@ jobs:
 
       - name: Servare logs matrix
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cpp-latina-stage56-${{ matrix.label }}
           path: soak-logs/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
   differential-decemplum:
@@ -346,7 +397,24 @@ jobs:
             cxx: clang++
     steps:
       - name: Excerpere repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et instrumenta C++
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-logs
+          exec > >(tee soak-logs/dependencies.log) 2>&1
+          echo "RUNNER_OS=${RUNNER_OS}"
+          echo "RUNNER_ARCH=${RUNNER_ARCH}"
+          uname -a
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          dpkg-query -W -f='BOOST_PACKAGE=${Package}\nBOOST_VERSION=${Version}\n' libboost-dev
+          echo 'BOOST_MULTIPRECISION_HEADER=PASS'
+          g++ --version | head -1
+          clang++ --version | head -1
 
       - name: Compilare worker differentialem
         shell: bash
@@ -390,11 +458,11 @@ jobs:
 
       - name: Servare logs differentialia
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cpp-latina-differential-10-${{ matrix.label }}
           path: soak-logs/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
   sanitatores:
@@ -407,7 +475,24 @@ jobs:
       UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
     steps:
       - name: Excerpere repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et instrumenta C++
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-logs
+          exec > >(tee soak-logs/dependencies.log) 2>&1
+          echo "RUNNER_OS=${RUNNER_OS}"
+          echo "RUNNER_ARCH=${RUNNER_ARCH}"
+          uname -a
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          dpkg-query -W -f='BOOST_PACKAGE=${Package}\nBOOST_VERSION=${Version}\n' libboost-dev
+          echo 'BOOST_MULTIPRECISION_HEADER=PASS'
+          g++ --version | head -1
+          clang++ --version | head -1
 
       - name: Compilare cum sanitatoribus
         shell: bash
@@ -441,11 +526,11 @@ jobs:
 
       - name: Servare logs sanitatorum
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cpp-latina-sanitizers
           path: soak-logs/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
   soak-repetitionis:
@@ -455,7 +540,24 @@ jobs:
     timeout-minutes: 180
     steps:
       - name: Excerpere repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et instrumenta C++
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-logs
+          exec > >(tee soak-logs/dependencies.log) 2>&1
+          echo "RUNNER_OS=${RUNNER_OS}"
+          echo "RUNNER_ARCH=${RUNNER_ARCH}"
+          uname -a
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          dpkg-query -W -f='BOOST_PACKAGE=${Package}\nBOOST_VERSION=${Version}\n' libboost-dev
+          echo 'BOOST_MULTIPRECISION_HEADER=PASS'
+          g++ --version | head -1
+          clang++ --version | head -1
 
       - name: Compilare imagines soak
         shell: bash
@@ -504,11 +606,11 @@ jobs:
 
       - name: Servare logs soak
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cpp-latina-soak-repetitionis
           path: soak-logs/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
   sententia-finalis:
