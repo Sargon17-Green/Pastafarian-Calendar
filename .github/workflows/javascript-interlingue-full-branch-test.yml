@@ -223,6 +223,53 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  acceleration-58:
+    name: Acceleration 58 — ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Scar memorativ e equivalence
+            artifact: stage-58-acceleration
+            command: node tests/stage-58-acceleration.js
+    steps:
+      - name: Extraer li repository
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Registrar versiones
+        run: |
+          node --version
+          npm --version
+
+      - name: Executer ${{ matrix.label }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          {
+            echo "SHARD=${{ matrix.artifact }}"
+            echo "NODE=$(node --version)"
+            echo "NPM=$(npm --version)"
+            ${{ matrix.command }}
+            echo "RESULT=PASS"
+          } 2>&1 | tee "logs/${{ matrix.artifact }}.log"
+
+      - name: Conservar li log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-interlingue-${{ matrix.artifact }}
+          path: logs/${{ matrix.artifact }}.log
+          if-no-files-found: error
+          retention-days: 30
+
   complete-branch:
     name: Branche complet GREEN
     if: always()
@@ -230,6 +277,7 @@ jobs:
       - historical-stages
       - corrective-56
       - corrective-57
+      - acceleration-58
     runs-on: ubuntu-latest
     steps:
       - name: Exiger omni shards GREEN
@@ -239,7 +287,9 @@ jobs:
           echo "historical-stages=${{ needs.historical-stages.result }}"
           echo "corrective-56=${{ needs.corrective-56.result }}"
           echo "corrective-57=${{ needs.corrective-57.result }}"
+          echo "acceleration-58=${{ needs.acceleration-58.result }}"
           test "${{ needs.historical-stages.result }}" = "success"
           test "${{ needs.corrective-56.result }}" = "success"
           test "${{ needs.corrective-57.result }}" = "success"
+          test "${{ needs.acceleration-58.result }}" = "success"
           echo 'JAVASCRIPT_INTERLINGUE_BRANCH=GREEN'
