@@ -200,3 +200,12 @@
 Ⲡ`grindSentinelRow0` ⲟ ⲛVALIDATION_COPY ⲙⲙⲁⲧⲉ ⲉⲧⲣⲉⲡtest ⲧⲁϫⲣⲟ ⲙⲡsentinel; ⲛϥϫⲓ ⲁⲛ ⲛⲟⲩsemantic decision. Ⲡfence ⲛStage 14 ⲟⲩⲏϩ ⲉϥⲟⲩⲟϩ ⲙⲛⲛⲥⲁ ⲡtable ⲛⲟⲩscar ⲛⲟⲩⲱⲧ.
 
 Ⲡ`CTX_GRIND_SENTINEL_PATCH_SEEN` ⲡⲉ ⲟⲩobservability state ⲙⲡinvocation. Ⲙⲛ ⲟⲩbranch ⲛⲕⲁⲛⲱⲛ ⲉϥⲱϣ ⲙⲙⲟϥ; ⲙⲛ logs, metrics ⲏ environment ⲉⲩϫⲓ ⲛⲟⲩⲧⲟϣ ⲙⲡvisible drop.
+
+
+## Ⲡⲣⲱⲧⲉ ⲛpermutation ⲙⲡⲃⲁⲑⲙⲟⲥ 16
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage16_legacy_permutation_handler -> monster_permutation_route -> legacyPermutationOrderFromDropWrong -> oldPermutationUnrank0`
+
+Ⲡ`oldPermutationUnrank0` ⲡⲉ ⲟⲩCOPY_AUTHORITATIVE ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡDISCOVERY ⲡⲁⲓ, ⲉϥϫⲓ ⲙⲡrank `0..719`. Ⲡ`legacyPermutationRank0FromDropWrong` ⲧⲁⲙⲓⲟ ⲙⲡ`drop mod 720` ⲛⲟⲩrank0; ⲛϥⲟⲩⲱϩ ⲁⲛ ⲙⲡ`-1`.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_PERMUTATION_DROP`, `CTX_LEGACY_PERMUTATION_RANK0`, `CTX_LEGACY_PERMUTATION_ORDER`, `CTX_PERMUTATION_ROUTE_ORDER`, ⲙⲛ ⲛcounter ⲛⲧⲉⲡlegacy/route. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.

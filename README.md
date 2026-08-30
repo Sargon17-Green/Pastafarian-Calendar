@@ -142,3 +142,18 @@
 `monster_visible_drop_route -> monster_stage15_grind_sentinel_patch_wrapper -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
 
 ⲠStage 14 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. ⲠStage 15 ⲧⲁϫⲣⲟ ⲙⲡsentinel ϩⲓ 0, ⲛ11 ⲛrow ⲛⲙⲉ ϩⲓ 1..11, ⲙⲛ ⲡvisible drop ⲛϣⲟⲣⲡ ⲉϥⲧⲱⲛ ⲙⲛ ⲡoracle.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 16 — DISCOVERY 08
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldPermutationUnrank0(rank0)` ⲉϥϫⲓ ⲙⲡrank ⲉϥⲁⲣⲭⲉⲓ ϩⲓ `0`. Ⲡhelper ⲛⲧⲟϥ ⲧⲱⲛ ϩⲛ `0..719`.
+
+Ⲡlegacy caller ⲇⲉ ⲕⲱ ⲙⲡ`drop mod 720` ⲛⲟⲩrank0 ⲁϫⲛ ⲟⲩⲧⲱϣ ⲙⲡbase:
+
+`monster_permutation_route -> legacyPermutationOrderFromDropWrong -> oldPermutationUnrank0`
+
+Ⲡ`monster_stage16_legacy_permutation_handler` ϫⲓ ⲙⲡvisible drop ⲉⲧⲁϥⲛⲏⲩ ϩⲓⲧⲛ ⲛscar ⲛϣⲟⲣⲡ, ⲛϥϩⲁⲣⲉϩ ⲉⲡdrop, ⲡrank0, ⲡlegacy order ⲙⲛ ⲡroute order ϩⲙⲡ`MonsterContext`.
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲧⲁϫⲣⲟ ⲛ4 ⲛmismatch ϩⲓ `drop=1,719,720,721`. ⲚStage 1–15 ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 16 ⲟ ⲛ`EXPECTED_RED`.
+
+Ⲙⲛ ⲡⲁⲧϣ ⲛbase ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.

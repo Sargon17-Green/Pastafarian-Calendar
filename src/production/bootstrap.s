@@ -65,7 +65,13 @@
 .equ CTX_LEGACY_VISIBLE_DROP_SEEN,504
 .equ CTX_VISIBLE_DROP_I,512
 .equ CTX_GRIND_SENTINEL_PATCH_SEEN,520
-.equ CTX_SIZE,528
+.equ CTX_LEGACY_PERMUTATION_DROP,528
+.equ CTX_LEGACY_PERMUTATION_RANK0,536
+.equ CTX_LEGACY_PERMUTATION_ORDER,544
+.equ CTX_PERMUTATION_ROUTE_ORDER,552
+.equ CTX_LEGACY_PERMUTATION_SEEN,560
+.equ CTX_PERMUTATION_ROUTE_SEEN,568
+.equ CTX_SIZE,576
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -121,9 +127,14 @@ legacy_visible_grinds_indexed:
 legacy_visible_grind_missing_fence:
     .quad 0,0,0,0,0
 
+.align 8
+legacy_factorial_0_5:
+    .quad 1,1,2,6,24,120
+
 .section .text
 .extern arena_alloc
 .extern bi_abs
+.extern bi_divmod_u64_abs
 .extern bi_mod_abs
 .extern bi_is_zero
 .extern bi_sub_abs
@@ -180,6 +191,11 @@ legacy_visible_grind_missing_fence:
 .global monster_stage14_legacy_grind_handler
 .global grindSentinelRow0
 .global monster_stage15_grind_sentinel_patch_wrapper
+.global oldPermutationUnrank0
+.global legacyPermutationRank0FromDropWrong
+.global legacyPermutationOrderFromDropWrong
+.global monster_permutation_route
+.global monster_stage16_legacy_permutation_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -1967,6 +1983,180 @@ monster_stage14_legacy_grind_handler:
     ret
 .size monster_stage14_legacy_grind_handler,.-monster_stage14_legacy_grind_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 16 — DISCOVERY 08
+# Ⲡlegacy ⲡⲁⲓ ⲥⲟⲟⲩⲛ ⲙⲙⲁⲧⲉ ⲛⲟⲩrank ⲉϥⲁⲣⲭⲉⲓ ϩⲓ 0. Ⲛϥϫⲓ 0..719 ⲁⲩⲱ ⲛϥⲕⲱ ⲉⲃⲟⲗ ⲙⲡpermutation ⲕⲁⲧⲁ factoradic.
+# Ⲙⲛ ⲡⲁⲧϣ ⲛdrop-1 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. Ⲡcaller ⲛⲗⲉⲅⲁⲥⲓ ⲗⲟⲅⲓⲍⲉ ⲙⲡregular remainder ⲙⲡdrop ϩⲓ 720 ⲁⲩⲱ ⲛϥϫⲟⲟⲩϥ ⲛⲟⲩrank0.
+.type oldPermutationUnrank0,@function
+oldPermutationUnrank0:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,56
+    mov r12,rdi
+    mov r13,rsi
+    test r13,r13
+    je .Lopu0_fail
+    cmp r12,719
+    ja .Lopu0_fail
+
+    lea r8,[rbp-88]
+    mov qword ptr [r8],1
+    mov qword ptr [r8+8],2
+    mov qword ptr [r8+16],3
+    mov qword ptr [r8+24],4
+    mov qword ptr [r8+32],5
+    mov qword ptr [r8+40],6
+    mov r14,6
+    xor r15d,r15d
+.Lopu0_slot:
+    test r14,r14
+    je .Lopu0_ok
+    lea r9,[rip+legacy_factorial_0_5]
+    mov rax,r14
+    dec rax
+    mov rbx,qword ptr [r9+rax*8]
+    mov rax,r12
+    xor edx,edx
+    div rbx
+    mov r12,rdx
+    mov rcx,rax
+    mov rax,qword ptr [r8+rcx*8]
+    mov qword ptr [r13+r15*8],rax
+
+    mov rdx,rcx
+.Lopu0_remove:
+    lea rax,[rdx+1]
+    cmp rax,r14
+    jae .Lopu0_removed
+    mov rbx,qword ptr [r8+rax*8]
+    mov qword ptr [r8+rdx*8],rbx
+    inc rdx
+    jmp .Lopu0_remove
+.Lopu0_removed:
+    dec r14
+    inc r15
+    jmp .Lopu0_slot
+.Lopu0_ok:
+    mov eax,1
+    jmp .Lopu0_done
+.Lopu0_fail:
+    xor eax,eax
+.Lopu0_done:
+    add rsp,56
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size oldPermutationUnrank0,.-oldPermutationUnrank0
+
+.type legacyPermutationRank0FromDropWrong,@function
+legacyPermutationRank0FromDropWrong:
+    # Ⲡⲡⲗⲁⲛⲏ: ⲡdrop ⲛⲧⲟϥ ⲡⲉ ⲡsource ⲙⲡrank0; ⲙⲛ ⲡ`drop-1` ⲉϥⲥⲏϩ ⲙⲡⲉⲓStage.
+    mov rsi,720
+    call bi_divmod_u64_abs
+    mov rax,rdx
+    ret
+.size legacyPermutationRank0FromDropWrong,.-legacyPermutationRank0FromDropWrong
+
+.type legacyPermutationOrderFromDropWrong,@function
+legacyPermutationOrderFromDropWrong:
+    push rbp
+    mov rbp,rsp
+    push r12
+    mov r12,rsi
+    test rdi,rdi
+    je .Llpofdw_fail
+    test r12,r12
+    je .Llpofdw_fail
+    call legacyPermutationRank0FromDropWrong
+    mov rdi,rax
+    mov rsi,r12
+    call oldPermutationUnrank0
+    test eax,eax
+    je .Llpofdw_fail
+    mov rax,r12
+    jmp .Llpofdw_done
+.Llpofdw_fail:
+    xor eax,eax
+.Llpofdw_done:
+    pop r12
+    leave
+    ret
+.size legacyPermutationOrderFromDropWrong,.-legacyPermutationOrderFromDropWrong
+
+.type monster_permutation_route,@function
+monster_permutation_route:
+    jmp legacyPermutationOrderFromDropWrong
+.size monster_permutation_route,.-monster_permutation_route
+
+.type monster_stage16_legacy_permutation_handler,@function
+monster_stage16_legacy_permutation_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms16_fail
+
+    mov r13,qword ptr [r12+CTX_VISIBLE_DROP_ROUTE_RESULT]
+    test r13,r13
+    je .Lms16_fail
+    mov qword ptr [r12+CTX_LEGACY_PERMUTATION_DROP],r13
+
+    mov rdi,r13
+    call legacyPermutationRank0FromDropWrong
+    mov qword ptr [r12+CTX_LEGACY_PERMUTATION_RANK0],rax
+
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lms16_fail
+    mov r14,rax
+    mov rdi,r13
+    mov rsi,r14
+    call legacyPermutationOrderFromDropWrong
+    test rax,rax
+    je .Lms16_fail
+    mov qword ptr [r12+CTX_LEGACY_PERMUTATION_ORDER],r14
+    inc qword ptr [r12+CTX_LEGACY_PERMUTATION_SEEN]
+
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lms16_fail
+    mov r15,rax
+    mov rdi,r13
+    mov rsi,r15
+    call monster_permutation_route
+    test rax,rax
+    je .Lms16_fail
+    mov qword ptr [r12+CTX_PERMUTATION_ROUTE_ORDER],r15
+    inc qword ptr [r12+CTX_PERMUTATION_ROUTE_SEEN]
+
+    mov eax,1
+    jmp .Lms16_done
+.Lms16_fail:
+    xor eax,eax
+.Lms16_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage16_legacy_permutation_handler,.-monster_stage16_legacy_permutation_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -2010,6 +2200,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage14_legacy_grind_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage16_legacy_permutation_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

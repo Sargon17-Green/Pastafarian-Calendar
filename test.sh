@@ -17,3 +17,4 @@ set -euo pipefail
 ./build/stage13_patch06
 ./build/stage14_discovery07
 ./build/stage15_patch07
+./build/stage16_discovery08

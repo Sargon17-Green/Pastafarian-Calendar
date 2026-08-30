@@ -258,3 +258,24 @@
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲟⲩ`monster_stage15_grind_sentinel_patch_wrapper` ⲁⲩⲱ `CTX_GRIND_SENTINEL_PATCH_SEEN`. Ⲡwrapper ⲛϥϣⲓⲃⲉ ⲁⲛ ⲛⲟⲩsemantic value; ⲛϥϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉⲡϩⲓⲥⲧⲟⲣⲓⲁ ⲙⲡroute. Ⲡcounter ⲟ ⲛobservability state ⲙⲡinvocation ⲁⲩⲱ ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡⲗⲟⲅⲓⲥⲙⲟⲥ.
 
 ⲠStage 14 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. ⲠStage 15 ⲧⲁϫⲣⲟ ϫⲉ ⲡlegacy API ⲟⲩⲏϩ ⲉϥⲁⲣⲛⲁ ⲙⲡindex 0, ⲡsentinel ⲟⲩⲏϩ ⲉϥⲥⲏϩ ϩⲙⲡtable, ⲛ11 ⲛrow ⲛⲙⲉ ⲥⲉⲧⲱⲛ, ⲁⲩⲱ ⲡvisible drop ⲧⲱⲛ ⲙⲛ ⲡoracle.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 16 — DISCOVERY 08
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡⲧⲟϣ ⲙⲡpermutation ⲡⲉ ⲟⲩrank ⲉϥⲁⲣⲭⲉⲓ ϩⲓ `0`, ⲁⲩⲱ ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`oldPermutationUnrank0(rank0)` ⲉϥϫⲓ `0..719`. Ⲡcaller ⲛⲗⲉⲅⲁⲥⲓ ⲁϥⲗⲟⲅⲓⲍⲉ ⲙⲡrank ⲛⲧⲟϥ ϩⲓⲧⲛ ⲡremainder ⲙⲡ`drop` ϩⲓ `720`, ⲁⲩⲱ ⲁϥϫⲟⲟⲩϥ ⲉⲡhelper ⲁϫⲛ ⲟⲩⲙⲉⲧⲁⲃⲟⲗⲏ ⲙⲡbase.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡ`oldPermutationUnrank0` ⲛⲧⲟϥ ⲧⲱⲛ ϩⲙⲡⲉϥdomain: `rank0=0` ϯ ⲙⲡϣⲟⲣⲡ permutation, ⲁⲩⲱ `rank0=719` ϯ ⲙⲡϩⲁⲉ. Ⲡⲡⲗⲁⲛⲏ ϣⲟⲟⲡ ϩⲙⲡcaller: `drop=1` ⲕⲱ ⲙⲡ`rank0=1`, `drop=719` ⲕⲱ ⲙⲡ`719`, `drop=720` ⲕⲱ ⲙⲡ`0`, ⲁⲩⲱ `drop=721` ⲕⲱ ⲙⲡ`1`.
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲙⲓⲛⲉ ⲙⲡ`monster_permutation_route` ⲙⲛ `oracle_bowl_order_from_value` ϩⲓ ⲛ4 ⲛdrop ⲛⲁⲓ. Ⲟⲩⲛ 4 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage16_legacy_permutation_handler -> monster_permutation_route -> legacyPermutationOrderFromDropWrong -> oldPermutationUnrank0`
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldPermutationUnrank0`, `legacyPermutationRank0FromDropWrong`, `legacyPermutationOrderFromDropWrong`, `monster_permutation_route`, `monster_stage16_legacy_permutation_handler`, ⲙⲛ state ⲛⲧⲉⲡdrop ⲙⲛ ⲡrank0 ⲙⲛ ⲛorder ⲛⲗⲉⲅⲁⲥⲓ.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡdetour ⲙⲡⲃⲁⲑⲙⲟⲥ ⲉⲧⲛⲏⲩ. Ⲙⲛ `drop-1` ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
