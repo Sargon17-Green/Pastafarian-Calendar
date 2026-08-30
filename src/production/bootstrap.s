@@ -75,7 +75,17 @@
 .equ CTX_PATCHED_PERMUTATION_RANK0,584
 .equ CTX_PATCHED_PERMUTATION_ORDER,592
 .equ CTX_PERMUTATION_PATCH_SEEN,600
-.equ CTX_SIZE,608
+.equ CTX_LEGACY_POUR_DROP,608
+.equ CTX_LEGACY_POUR_I,616
+.equ CTX_LEGACY_POUR_ORDER,624
+.equ CTX_LEGACY_POUR_FIXED_IDS,632
+.equ CTX_LEGACY_POUR_OLD_BOWLS,640
+.equ CTX_LEGACY_POUR_STONE_ROW,648
+.equ CTX_LEGACY_POUR_RESULT,656
+.equ CTX_POUR_ROUTE_RESULT,664
+.equ CTX_LEGACY_POUR_SEEN,672
+.equ CTX_POUR_ROUTE_SEEN,680
+.equ CTX_SIZE,688
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -134,6 +144,12 @@ legacy_visible_grind_missing_fence:
 .align 8
 legacy_factorial_0_5:
     .quad 1,1,2,6,24,120
+
+.align 8
+legacy_fixed_pour_ids:
+    .quad 1,2,3
+legacy_pour_factor:
+    .quad 3,5,7
 
 .section .text
 .extern arena_alloc
@@ -203,6 +219,9 @@ legacy_factorial_0_5:
 .global permutationOneBasedFromDropPatch08
 .global orderPatchFromValue
 .global monster_stage17_permutation_patch_wrapper
+.global legacyPoursToFixedBowlIds
+.global monster_pour_route
+.global monster_stage18_legacy_fixed_pour_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -2264,6 +2283,220 @@ monster_stage16_legacy_permutation_handler:
     ret
 .size monster_stage16_legacy_permutation_handler,.-monster_stage16_legacy_permutation_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 18 — DISCOVERY 09
+# Ⲡlegacy ⲥⲟⲟⲩⲛ ⲙⲡorder ⲛⲧⲟϣ, ⲁⲗⲗⲁ ϩⲛ ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ⲛϥⲟⲩⲏϩ ⲉϥϫⲓ ⲛbowl ID 1,2,3 ⲛⲧⲟⲩⲱⲧ.
+# Ⲡpositions ⲛⲗⲉⲅⲁⲥⲓ ⲁⲩⲕⲁⲁⲩ ⲛbowl IDs ⲛⲥⲁϣϥ. Ⲙⲛ ⲟⲩdetour ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ.
+.type legacyPoursToFixedBowlIds,@function
+legacyPoursToFixedBowlIds:
+    # Ⲛargument ⲛⲉ rdi=drop, rsi=i, rdx=oldBowls[6], rcx=stoneRow[5], r8=orderOut[6], r9=poursOut[3].
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,24
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov qword ptr [rbp-48],r8
+    mov qword ptr [rbp-56],r9
+    test r12,r12
+    je .Llptfbi_fail
+    test r14,r14
+    je .Llptfbi_fail
+    test r15,r15
+    je .Llptfbi_fail
+    test r8,r8
+    je .Llptfbi_fail
+    test r9,r9
+    je .Llptfbi_fail
+
+    mov rdi,r12
+    mov rsi,qword ptr [rbp-48]
+    call orderPatchFromValue
+    test rax,rax
+    je .Llptfbi_fail
+
+    xor ebx,ebx
+.Llptfbi_loop:
+    cmp rbx,3
+    jae .Llptfbi_ok
+
+    # Ⲡdrop².
+    mov rdi,r12
+    mov rsi,r12
+    call bi_mul_abs
+    test rax,rax
+    je .Llptfbi_fail
+    mov qword ptr [rbp-64],rax
+
+    # Ⲡⲡⲗⲁⲛⲏ ⲛⲗⲉⲅⲁⲥⲓ: oldBowls[position] ⲛⲧⲟϥ, ⲙⲡⲉϥϫⲓ oldBowls[order[position]].
+    mov rdi,qword ptr [r15+rbx*8]
+    mov rsi,qword ptr [r14+rbx*8]
+    call bi_mul_abs
+    test rax,rax
+    je .Llptfbi_fail
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-64]
+    call bi_add_abs
+    test rax,rax
+    je .Llptfbi_fail
+
+    lea rcx,[rip+legacy_pour_factor]
+    mov rcx,qword ptr [rcx+rbx*8]
+    imul rcx,r13
+    mov rdi,rax
+    mov rsi,rcx
+    call bi_add_u64
+    test rax,rax
+    je .Llptfbi_fail
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Llptfbi_fail
+    mov rdx,qword ptr [rbp-56]
+    mov qword ptr [rdx+rbx*8],rax
+
+    inc rbx
+    jmp .Llptfbi_loop
+
+.Llptfbi_ok:
+    mov rax,qword ptr [rbp-56]
+    jmp .Llptfbi_done
+.Llptfbi_fail:
+    xor eax,eax
+.Llptfbi_done:
+    add rsp,24
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size legacyPoursToFixedBowlIds,.-legacyPoursToFixedBowlIds
+
+.type monster_pour_route,@function
+monster_pour_route:
+    jmp legacyPoursToFixedBowlIds
+.size monster_pour_route,.-monster_pour_route
+
+.type monster_stage18_legacy_fixed_pour_handler,@function
+monster_stage18_legacy_fixed_pour_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    test r12,r12
+    je .Lms18_fail
+
+    mov r13,qword ptr [r12+CTX_VISIBLE_DROP_ROUTE_RESULT]
+    test r13,r13
+    je .Lms18_fail
+    mov qword ptr [r12+CTX_LEGACY_POUR_DROP],r13
+    mov rax,qword ptr [r12+CTX_VISIBLE_DROP_I]
+    test rax,rax
+    jne .Lms18_have_i
+    mov eax,1
+.Lms18_have_i:
+    mov qword ptr [r12+CTX_LEGACY_POUR_I],rax
+
+    # Ⲛold bowls ⲛⲇⲓⲁⲅⲛⲱⲥⲧⲓⲕⲟⲛ ⲥⲉϣⲟⲃⲉ ⲉⲧⲣⲉⲡID ⲛbowl ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ.
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lms18_fail
+    mov r14,rax
+    mov edi,11
+    call bi_from_u64
+    mov qword ptr [r14],rax
+    mov edi,13
+    call bi_from_u64
+    mov qword ptr [r14+8],rax
+    mov edi,17
+    call bi_from_u64
+    mov qword ptr [r14+16],rax
+    mov edi,19
+    call bi_from_u64
+    mov qword ptr [r14+24],rax
+    mov edi,23
+    call bi_from_u64
+    mov qword ptr [r14+32],rax
+    mov edi,29
+    call bi_from_u64
+    mov qword ptr [r14+40],rax
+    mov qword ptr [r12+CTX_LEGACY_POUR_OLD_BOWLS],r14
+
+    mov r15,qword ptr [r12+CTX_PATCHED_STONE_ROW]
+    test r15,r15
+    je .Lms18_fail
+    mov qword ptr [r12+CTX_LEGACY_POUR_STONE_ROW],r15
+    lea rax,[rip+legacy_fixed_pour_ids]
+    mov qword ptr [r12+CTX_LEGACY_POUR_FIXED_IDS],rax
+
+    mov edi,72
+    call arena_alloc
+    test rax,rax
+    je .Lms18_fail
+    mov qword ptr [rbp-48],rax
+    lea rcx,[rax+48]
+    mov qword ptr [rbp-56],rcx
+
+    mov rdi,r13
+    mov rsi,qword ptr [r12+CTX_LEGACY_POUR_I]
+    mov rdx,r14
+    mov rcx,r15
+    mov r8,qword ptr [rbp-48]
+    mov r9,qword ptr [rbp-56]
+    call legacyPoursToFixedBowlIds
+    test rax,rax
+    je .Lms18_fail
+    mov rax,qword ptr [rbp-48]
+    mov qword ptr [r12+CTX_LEGACY_POUR_ORDER],rax
+    mov qword ptr [r12+CTX_LEGACY_POUR_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_POUR_SEEN]
+
+    mov edi,72
+    call arena_alloc
+    test rax,rax
+    je .Lms18_fail
+    mov qword ptr [rbp-48],rax
+    lea rcx,[rax+48]
+    mov qword ptr [rbp-56],rcx
+    mov rdi,r13
+    mov rsi,qword ptr [r12+CTX_LEGACY_POUR_I]
+    mov rdx,r14
+    mov rcx,r15
+    mov r8,qword ptr [rbp-48]
+    mov r9,qword ptr [rbp-56]
+    call monster_pour_route
+    test rax,rax
+    je .Lms18_fail
+    mov qword ptr [r12+CTX_POUR_ROUTE_RESULT],rax
+    inc qword ptr [r12+CTX_POUR_ROUTE_SEEN]
+
+    mov eax,1
+    jmp .Lms18_done
+.Lms18_fail:
+    xor eax,eax
+.Lms18_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage18_legacy_fixed_pour_handler,.-monster_stage18_legacy_fixed_pour_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -2312,6 +2545,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage16_legacy_permutation_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage18_legacy_fixed_pour_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

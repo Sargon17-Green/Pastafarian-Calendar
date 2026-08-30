@@ -313,3 +313,24 @@
 ### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
 
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `permutationOneBasedFromDropPatch08`, `orderPatchFromValue`, `monster_stage17_permutation_patch_wrapper`, `CTX_PATCHED_PERMUTATION_ONE_BASED`, `CTX_PATCHED_PERMUTATION_RANK0`, `CTX_PATCHED_PERMUTATION_ORDER`, ⲙⲛ `CTX_PERMUTATION_PATCH_SEEN`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 18 — DISCOVERY 09
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲛposition ⲛϣⲟⲣⲡ ⲙⲡorder ⲛⲉ ⲛbowl ID `1,2,3` ⲛⲧⲟⲩⲱⲧ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`legacyPoursToFixedBowlIds`: ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡorder ⲛⲧⲟϣ ϩⲓⲧⲛ `orderPatchFromValue`, ⲁⲗⲗⲁ ⲛϥϫⲓ ⲛbowl ⲛⲧⲉⲡpour ϩⲓⲧⲛ ⲛID ⲉⲧⲟⲩⲏϩ `1,2,3`.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲉϣϫⲉ ⲡorder ⲟ ⲛidentity, ⲡⲡⲗⲁⲛⲏ ⲛϥⲟⲩⲱⲛϩ ⲁⲛ. Ⲉϣϫⲉ ⲡorder ϣⲓⲃⲉ ⲛⲛposition ⲛ1..3, ⲡlegacy ϫⲓ ⲙⲡbowl ⲛⲗⲁⲑⲟⲥ.
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲕⲱ ⲛⲟⲩcase ⲉϥⲧⲟϣ: `drop=121`, `i=4`, order `[2,1,3,4,5,6]`. Ⲡlegacy output ⲡⲉ `14675,14700,14754`; ⲡoutput ⲛposition ⲙⲡorder ⲡⲉ `14679,14694,14754`. Ⲛpour 1 ⲙⲛ 2 ⲥⲉϣⲟⲃⲉ; ⲡpour 3 ⲧⲱⲛ ϫⲉ ⲡID ⲙⲡposition 3 ⲟⲩⲏϩ ⲉϥⲟ ⲛ3.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage18_legacy_fixed_pour_handler -> monster_pour_route -> legacyPoursToFixedBowlIds`
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyPoursToFixedBowlIds`, `monster_pour_route`, `monster_stage18_legacy_fixed_pour_handler`, ⲙⲛ state ⲛⲧⲉⲡdrop/index/order/fixed IDs/old bowls/stone row/pours ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩdetour ϩⲙⲡⲉⲓDISCOVERY. Ⲡ`monster_pour_route` ⲟ ⲛCOPY_AUTHORITATIVE ⲙⲡlegacy ⲡⲁⲓ, ⲁⲩⲱ ⲛϥϫⲓ ⲁⲛ ⲙⲡoracle ϩⲙ runtime.

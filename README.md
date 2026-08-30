@@ -177,3 +177,16 @@
 Ⲡ`monster_stage16_legacy_permutation_handler` ⲙⲟⲩⲧⲉ ⲉⲡlegacy caller ⲛⲟⲩdiagnostic, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡoneBased ⲙⲛ ⲡtranslated rank0 ⲙⲛ ⲡpatched order ϩⲙⲡ`MonsterContext` ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ.
 
 ⲠStage 16 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. ⲠStage 17 ⲥⲙⲓⲛⲉ ⲙⲡpatched route ⲙⲛ `oracle_bowl_order_from_value` ϩⲓ boundary ⲙⲛ negative values, ⲁⲩⲱ ⲛⲥⲉϣⲟⲃⲉ ⲁⲛ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 18 — DISCOVERY 09
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyPoursToFixedBowlIds`. Ⲡlegacy ⲙⲟⲩⲧⲉ ⲉ `orderPatchFromValue` ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡorder ⲛⲧⲟϣ, ⲁⲗⲗⲁ ϩⲛ ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ⲛϥⲟⲩⲏϩ ⲉϥϫⲓ ⲛbowl ID `1,2,3` ⲛⲧⲟⲩⲱⲧ, ⲉϥⲙⲉⲉⲩⲉ ϫⲉ ⲛposition ⲛϣⲟⲣⲡ ⲛⲉ ⲛID ⲛbowl.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage18_legacy_fixed_pour_handler -> monster_pour_route -> legacyPoursToFixedBowlIds`
+
+Ⲡformula ⲙⲡpour ⲛⲧⲟϣ ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ: `SAVE(drop² + stone[position]*bowl + factor*i)` ⲙⲛ factor `3,5,7`. Ⲡⲡⲗⲁⲛⲏ ⲟ ⲙⲙⲁⲧⲉ ϩⲙⲡsource ⲙⲡbowl: ⲡlegacy ϫⲓ `oldBowls[1]`, `oldBowls[2]`, `oldBowls[3]` ⲁϫⲛ ⲟⲩⲧⲱϣ ⲙⲡorder.
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ`drop=121`, `i=4` ⲧⲁϫⲣⲟ ⲙⲡorder `[2,1,3,4,5,6]`. Ⲡlegacy ⲕⲱ ⲉⲃⲟⲗ ⲛ`14675,14700,14754`, ϩⲟⲡⲟⲩ ⲡcalculation ⲕⲁⲧⲁ ⲛposition ϩⲙⲡorder ⲡⲉ `14679,14694,14754`. Ⲟⲩⲛ 2 ⲛmismatch ⲉⲩⲧⲟϣ. Ⲡ`drop=1` ⲟ ⲛcoincidence ⲉϥⲧⲱⲛ ϫⲉ ⲡorder ⲟ ⲛidentity.
+
+Ⲙⲛ `bowlAlias` ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 18 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–17 ⲥⲉⲟ ⲛ`GREEN`.

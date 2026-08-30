@@ -229,3 +229,14 @@
 ### WHY SAFE
 
 Ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡlegacy unranker ⲏ ⲡlegacy caller. Ⲡⲡⲁⲧϣ ⲟ ⲙⲙⲁⲧⲉ ⲛⲟⲩbridge ⲛbase ⲙⲡrank. Ⲙⲛ `bowlAlias` ⲏ pour-position patch ⲙⲡⲃⲁⲑⲙⲟⲥ ⲉⲧⲛⲏⲩ ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓlayer.
+
+
+## Ⲡⲣⲱⲧⲉ ⲛfixed-pour ⲙⲡⲃⲁⲑⲙⲟⲥ 18
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage18_legacy_fixed_pour_handler -> monster_pour_route -> legacyPoursToFixedBowlIds`
+
+Ⲡ`legacyPoursToFixedBowlIds` ⲙⲟⲩⲧⲉ ⲉ`orderPatchFromValue`, ϩⲟⲡⲟⲩ ⲛ3 ⲛbowl read ⲛⲧⲉⲡpour ⲟⲩⲏϩ ⲉⲩⲙⲟⲟϣⲉ ϩⲓ fixed IDs `1,2,3`. Ⲡorder ⲥⲏϩ ⲉⲃⲟⲗ ⲉⲧⲣⲉⲡscar ⲟⲩⲱⲛϩ, ⲁⲗⲗⲁ ⲛϥⲧⲟϣ ⲁⲛ ⲙⲡsource ⲙⲡbowl ϩⲙⲡⲉⲓStage.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_POUR_DROP`, `CTX_LEGACY_POUR_I`, `CTX_LEGACY_POUR_ORDER`, `CTX_LEGACY_POUR_FIXED_IDS`, `CTX_LEGACY_POUR_OLD_BOWLS`, `CTX_LEGACY_POUR_STONE_ROW`, `CTX_LEGACY_POUR_RESULT`, `CTX_POUR_ROUTE_RESULT`, ⲙⲛ ⲛcounter ⲛⲧⲉⲡlegacy/route.
+
+Ⲡfixed bowl array ⲙⲡhandler ⲟ ⲛdiagnostic state ⲉϥⲧⲟϣ ⲛⲟⲩinvocation; ⲛϥⲟ ⲁⲛ ⲛglobal semantic state. Ⲙⲛ `bowlAlias` ⲏ vault/pending ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓlayer.
