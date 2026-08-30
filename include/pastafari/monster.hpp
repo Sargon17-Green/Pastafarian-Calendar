@@ -204,6 +204,32 @@ struct LegacyYearMembershipReport {
     std::string status;
     std::string handler;
     std::size_t branchCount = 0;
+    Patch18YearRecord legacyOutputYearBeforePatch{};
+    Patch18YearRecord correctOutputYear{};
+    std::size_t legacyForwardStepsBeforePatch = 0;
+    std::size_t legacyBackwardStepsBeforePatch = 0;
+    std::size_t correctForwardSteps = 0;
+    std::size_t correctBackwardSteps = 0;
+    bool patch26LegacyExecuted = false;
+    bool patch26CorrectComputed = false;
+    bool patch26LegacyEqualsCorrect = false;
+    bool patch26LegacyReturned = false;
+    bool patch26AuthoritativeIntervalAccepted = false;
+    bool patch26Applied = false;
+};
+
+struct Patch26YearMembershipDecision {
+    Patch18YearRecord legacyOutputYear{};
+    Patch18YearRecord correctOutputYear{};
+    Patch18YearRecord outputYear{};
+    std::size_t correctForwardSteps = 0;
+    std::size_t correctBackwardSteps = 0;
+    bool legacyExecuted = false;
+    bool correctComputed = false;
+    bool legacyEqualsCorrect = false;
+    bool legacyReturned = false;
+    bool authoritativeIntervalAccepted = false;
+    bool patchApplied = false;
 };
 struct LegacyYearCacheEntry { Integer calculationDayFingerprint{}; Integer openGate{}; Integer closeGate{}; Patch18YearRecord value{}; };
 struct LegacyYearCacheReport { Integer cacheKeyYearNumber{}; LegacyYearCacheEntry requestEntry{}; LegacyYearCacheEntry cachedEntry{}; Patch18YearRecord outputValue{}; bool cacheHit=false; bool ready=false; std::string phase; std::string status; std::string handler; std::size_t branchCount=0; LegacyYearCacheEntry legacyCachedEntryBeforePatch{}; Patch18YearRecord legacyOutputBeforePatch{}; bool legacyCacheHitBeforePatch=false; bool fingerprintMatched=false; bool openGateMatched=false; bool closeGateMatched=false; bool entryOverwritten=false; bool patch19Applied=false; };
@@ -989,6 +1015,16 @@ struct BaseMonsterContext {
     bool discovery26LegacyExecuted=false;
     bool discovery26LegacyUsedAsSemanticOutput=false;
     bool discovery26YearMembershipReady=false;
+    Patch18YearRecord patch26CorrectOutputYear{};
+    std::size_t patch26CorrectForwardSteps=0;
+    std::size_t patch26CorrectBackwardSteps=0;
+    bool patch26LegacyExecuted=false;
+    bool patch26CorrectComputed=false;
+    bool patch26LegacyEqualsCorrect=false;
+    bool patch26LegacyReturned=false;
+    bool patch26AuthoritativeIntervalAccepted=false;
+    bool patch26Applied=false;
+    bool patch26YearMembershipReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1376,6 +1412,8 @@ public:
         const BaseMonsterContext& ctx) const;
     void requireDiscovery26YearMembershipReady(
         const BaseMonsterContext& ctx) const;
+    void requirePatch26YearMembershipReady(
+        const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1473,6 +1511,14 @@ public:
         const Integer& calculationDay,
         const LegacyYearAnchor& anchor,
         const Integer& targetDay) const;
+};
+class OpeningGateMembershipPatchWrapper {
+public:
+    Patch26YearMembershipDecision repair(
+        const Integer& calculationDay,
+        const LegacyYearAnchor& anchor,
+        const Integer& targetDay,
+        const LegacyYearMembershipInspection& legacyInspection) const;
 };
 class LegacyYearNumberOnlyCacheAdapter { public: LegacyYearCacheEntry getOrPut(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, bool& hit) const; };
 class Patch19YearCacheGuardWrapper { public: Patch19GuardedYearCacheResolution repair(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, const LegacyYearCacheEntry& legacyEntry, bool legacyHit) const; };
@@ -2171,6 +2217,15 @@ public:
                 const BaseValidationManager& validator,
                 const BaseMetricsShell& metrics) const;
 };
+class Patch26OpeningGateYearMembershipHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                const Discovery26OpeningGateYearMembershipHandler& legacyHandler,
+                const LegacyYearMembershipAdapter& adapter,
+                const OpeningGateMembershipPatchWrapper& wrapper,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
+};
 
 class BaseDispatcher {
 public:
@@ -2518,6 +2573,14 @@ public:
         const LegacyYearMembershipAdapter& adapter,
         const BaseValidationManager& validator,
         const BaseMetricsShell& metrics) const;
+    void dispatchPatchedOpeningGateYearMembership(
+        BaseMonsterContext& ctx,
+        const Patch26OpeningGateYearMembershipHandler& handler,
+        const Discovery26OpeningGateYearMembershipHandler& legacyHandler,
+        const LegacyYearMembershipAdapter& adapter,
+        const OpeningGateMembershipPatchWrapper& wrapper,
+        const BaseValidationManager& validator,
+        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -2708,6 +2771,10 @@ public:
         const std::vector<int>& monthLengths,
         std::size_t targetPosition1) const;
     LegacyYearMembershipReport executeDiscovery26OpeningGateYearMembership(
+        const LegacyYearAnchor& anchor,
+        const Integer& targetDay,
+        const Integer& calculationDay) const;
+    LegacyYearMembershipReport executeUnpatchedDiscovery26OpeningGateYearMembershipDiagnostic(
         const LegacyYearAnchor& anchor,
         const Integer& targetDay,
         const Integer& calculationDay) const;

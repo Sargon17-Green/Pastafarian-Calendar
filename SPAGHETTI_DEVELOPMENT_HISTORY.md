@@ -1897,3 +1897,28 @@ Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap et reg
 ### Limes proximus
 
 Nullus `OpeningGateMembershipPatchWrapper`, nullus `Patch26`, nullus `patch26Applied` et nulla integratio finalis praemature adest. Gradus 53 tantum strictam conditionem backward per `targetDay <= year.openDay` reparabit, legacy `[open,close]` servato ut cicatrice. Gradus 53 nondum incipit.
+
+
+## Gradus 53 — PATCH 26: opening gate ad annum priorem per `(open,close]` restituitur
+
+### Cicatrix servata
+
+Corpus `LegacyYearMembershipAdapter::resolve` ex Gradu 52 servatum est: forward search adhuc `targetDay>closeGateDay` et backward search legacy adhuc stricte `targetDay<openGateDay` utitur. Corpus `Discovery26OpeningGateYearMembershipHandler::handle` quoque servatum est et ante correctionem vere currit. Itaque tres opening-gate witness raw annum 5000 adhuc producunt et via diagnostica `executeUnpatchedDiscovery26OpeningGateYearMembershipDiagnostic` eos sine patch exponit.
+
+### Correctio separata
+
+`OpeningGateMembershipPatchWrapper` eundem anchor per `Patch18YearWalkWorkspace` resolvit et eosdem transitus sequentiales PATCH 18 adhibet. Sola regula membership reparata est: backward loop nunc procedit dum `targetDay<=current.openGateDay`. Post iter wrapper expresse requirit `current.openGateDay<targetDay && targetDay<=current.closeGateDay`.
+
+Decisionem separatam servat: annum legacy, annum correctum, output, gradus correctos, flags legacy-executed/correct-computed, aequalitatem, legacy-returned, acceptance intervali auctoritatis et applied. Si ghost et correct idem sunt, ghost retinetur; aliter correct tantum fit output.
+
+`Patch26OpeningGateYearMembershipHandler` primum handler DISCOVERY 26 vocat, deinde wrapper. Contextus raw DISCOVERY 26 non overwrite fit; correct state in campis PATCH 26 separatis manet. Validator PATCH 26 cicatricem legacy revalidat et iter semanticum contra `Patch18SequentialYearWalkWrapper` independently repetit.
+
+### Regressiones
+
+Regressio Gradus 52 post patch tres discrepantias raw historicas servat, sed output activum cum norma C++ congruit et GREEN fit. Regressio Gradus 53 wrapper directe probat et tres calculation-gates 0, 7 et -11 reparat. In opening gate ghost!=correct est et unum gradum backward additur; in `open+1` et closing gate ghost==correct est et ghost retinetur.
+
+Compilator est `g++ (Debian 14.2.0-19) 14.2.0`, standard C++20. Bootstrap transit. Regressiones 2–20, 21–40 et 41–53 in greges separatos in eadem arbore exsecuti sunt et omnes transeunt. Ergo regressiones 1–53 sunt GREEN.
+
+### Audit et limes proximus
+
+`SOURCE_LANGUAGE_CATALOG.md`, `include/pastafari/source_language_catalog.hpp` et `tests/reference/normative_reference.hpp/.cpp` manent byte pro byte intacti. Probationes Graduum 42–51 manent byte pro byte intactae. Corpora adapteris membership legacy et handleris DISCOVERY 26 servantur. Nullus runtime externus, nullus oracle productionis et nulla pars integrationis finalis Gradus 54 adhibetur. Gradus 54 nondum incipit.

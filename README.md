@@ -1171,6 +1171,52 @@ Pro singulis witness control interior `open+1` cum oracle C++ test-only normativ
 
 Bootstrap et omnes regressiones Graduum 1–51 transeunt in eadem arbore. Regressio Gradus 52 consulto `EXIT_CODE=1` cum tribus discrepantiis opening-gate exactis reddit. Nullus runtime externus, nullus oracle productionis et nulla mutatio `SourceLanguageCatalog` adest.
 
+### Limes post DISCOVERY 26
+
+Sub fine Gradus 52 nullus PATCH 26 aderat; correctio stricti `<` in `<=` ad Gradum 53 reservata erat. Integratio finalis Gradus 54 nondum incipit.
+
+## PATCH 26 — opening gate per intervalum `(open,close]` anno priori restituitur
+
+Gradus 53 cicatricem DISCOVERY 26 non delet. `LegacyYearMembershipAdapter::resolve` et `Discovery26OpeningGateYearMembershipHandler::handle` servantur et via PATCH primum vere currunt; sic membership historicum `[open,close]`, strictum backward `<`, annum legacy, gradus forward/backward et nota opening-gate observabilia manent. `executeUnpatchedDiscovery26OpeningGateYearMembershipDiagnostic` eandem cicatricem separatim exponit.
+
+Post ghost `OpeningGateMembershipPatchWrapper` iter semanticum separatum per `Patch18YearWalkWorkspace` facit. Forward regula manet:
+
+```text
+targetDay > current.closeGateDay
+```
+
+Backward regula PATCH 26 est:
+
+```text
+targetDay <= current.openGateDay
+```
+
+Ita output semanticus semper verificatur contra intervalum auctoritatem:
+
+```text
+(open,close]
+```
+
+Wrapper ghost et correct non miscet. Si annum legacy et annum correctum in omnibus campis idem sunt, ipsum ghost retinetur. Si differunt, correct tantum redditur. `Patch26OpeningGateYearMembershipHandler` raw et correct state invocation-local separat; nullus oracle productionis vocatur.
+
+### Tres opening-gate cicatrices servatae
+
+Witness Gradus 52 manent observabiles in via diagnostica:
+
+```text
+gate 0:   legacy year=5000 -> correct year=4999
+gate 7:   legacy year=5000 -> correct year=4999
+gate -11: legacy year=5000 -> correct year=4999
+```
+
+In omnibus tribus target est opening gate anni 5000 et closing gate anni 4999. Via PATCH 26 unum gradum backward addit et annum 4999 reddit. Control `open+1` exercet ramum `ghost==correct` et annum 5000 retinet; closing gate quoque in anno currenti manet, quia pars dextra intervali inclusa est.
+
+### Probationes
+
+Regressio Gradus 52 nunc GREEN est: tres discrepantias raw `[open,close]` adhuc enumerat, sed output activus PATCH 26 cum oracle C++ test-only normativo congruit. Regressio Gradus 53 probat wrapper directe, ramum `ghost==correct`, ramum `ghost!=correct`, inclusionem closing gate, tres opening-gate witness et paritatem cum itinere sequentiali PATCH 18.
+
+Bootstrap et omnes regressiones Graduum 1–53 transeunt in eadem arbore. Executiones in tres greges divisae sunt tantum propter tempus instrumenti; nullus failure semanticus inventus est. `SourceLanguageCatalog` et reference C++ manent byte pro byte intacti.
+
 ### Limes proximus
 
-Nullus PATCH 26 praemature adest. Correctio stricti `<` in `<=` pertinet tantum ad Gradum 53. Integratio finalis Gradus 54 nondum incipit.
+Gradus 54 est integratio finalis separata. Nulla pars integrationis finalis in Gradum 53 introducta est; omnes 26 cicatrices et omnes 26 strata PATCH manent distincta et callable.

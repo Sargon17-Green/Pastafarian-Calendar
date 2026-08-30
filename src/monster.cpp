@@ -4916,6 +4916,51 @@ void BaseValidationManager::requireDiscovery26YearMembershipReady(
     }
 }
 
+void BaseValidationManager::requirePatch26YearMembershipReady(
+    const BaseMonsterContext& ctx) const {
+    requireDiscovery26YearMembershipReady(ctx);
+    if (!ctx.patch26YearMembershipReady || !ctx.patch26Applied) {
+        throw BaseValidationError("PATCH 26 membership anni nondum applicata est");
+    }
+    if (!ctx.patch26LegacyExecuted || !ctx.patch26CorrectComputed) {
+        throw BaseValidationError("PATCH 26 cicatricem legacy et annum correctum requirit");
+    }
+    const bool authoritativeAccepted =
+        ctx.patch26CorrectOutputYear.openGateDay < ctx.discovery26MembershipTargetDay &&
+        ctx.discovery26MembershipTargetDay <= ctx.patch26CorrectOutputYear.closeGateDay;
+    if (!authoritativeAccepted || !ctx.patch26AuthoritativeIntervalAccepted) {
+        throw BaseValidationError("PATCH 26 intervalum (open,close] non servat");
+    }
+
+    const Patch18SequentialYearWalkWrapper replayWrapper;
+    const Patch18YearWalkResult replay = replayWrapper.repair(
+        ctx.calculationDay,
+        ctx.discovery26MembershipAnchor,
+        ctx.discovery26MembershipTargetDay);
+    const bool replayEqual =
+        replay.outputYear.number == ctx.patch26CorrectOutputYear.number &&
+        replay.outputYear.openGateIndex == ctx.patch26CorrectOutputYear.openGateIndex &&
+        replay.outputYear.closeGateIndex == ctx.patch26CorrectOutputYear.closeGateIndex &&
+        replay.outputYear.openGateDay == ctx.patch26CorrectOutputYear.openGateDay &&
+        replay.outputYear.closeGateDay == ctx.patch26CorrectOutputYear.closeGateDay;
+    if (!replayEqual ||
+        replay.forwardSteps != ctx.patch26CorrectForwardSteps ||
+        replay.backwardSteps != ctx.patch26CorrectBackwardSteps) {
+        throw BaseValidationError("PATCH 26 iter semanticum a replay PATCH 18 discrepat");
+    }
+
+    const bool equal =
+        ctx.discovery26MembershipOutputYear.number == ctx.patch26CorrectOutputYear.number &&
+        ctx.discovery26MembershipOutputYear.openGateIndex == ctx.patch26CorrectOutputYear.openGateIndex &&
+        ctx.discovery26MembershipOutputYear.closeGateIndex == ctx.patch26CorrectOutputYear.closeGateIndex &&
+        ctx.discovery26MembershipOutputYear.openGateDay == ctx.patch26CorrectOutputYear.openGateDay &&
+        ctx.discovery26MembershipOutputYear.closeGateDay == ctx.patch26CorrectOutputYear.closeGateDay;
+    if (ctx.patch26LegacyEqualsCorrect != equal ||
+        ctx.patch26LegacyReturned != equal) {
+        throw BaseValidationError("PATCH 26 regulam ghost==correct non servat");
+    }
+}
+
 void BaseValidationManager::requirePatch17Year5000TieReady(
     const BaseMonsterContext& ctx) const {
     requireDiscovery17Year5000TieReady(ctx);
@@ -5709,6 +5754,57 @@ LegacyYearMembershipInspection LegacyYearMembershipAdapter::resolve(
         backwardSteps,
         targetDay == current.openGateDay,
         closedAccepted,
+        true
+    };
+}
+
+Patch26YearMembershipDecision OpeningGateMembershipPatchWrapper::repair(
+    const Integer& calculationDay,
+    const LegacyYearAnchor& anchor,
+    const Integer& targetDay,
+    const LegacyYearMembershipInspection& legacyInspection) const {
+    if (!legacyInspection.legacyExecuted) {
+        throw BaseValidationError("PATCH 26 cicatricem membership legacy ante correctionem requirit");
+    }
+
+    Patch18YearWalkWorkspace workspace(calculationDay);
+    const Patch18YearRecord anchorYear = workspace.resolveAnchor(anchor);
+    Patch18YearRecord current = anchorYear;
+    std::size_t forwardSteps = 0;
+    std::size_t backwardSteps = 0;
+
+    while (targetDay > current.closeGateDay) {
+        current = workspace.patchedNextYear(current);
+        ++forwardSteps;
+    }
+    while (targetDay <= current.openGateDay) {
+        current = workspace.patchedPreviousYear(current);
+        ++backwardSteps;
+    }
+
+    const bool authoritativeAccepted =
+        current.openGateDay < targetDay && targetDay <= current.closeGateDay;
+    if (!authoritativeAccepted) {
+        throw BaseValidationError("PATCH 26 intervalum auctoritatem (open,close] non obtinuit");
+    }
+    const bool equal =
+        legacyInspection.outputYear.number == current.number &&
+        legacyInspection.outputYear.openGateIndex == current.openGateIndex &&
+        legacyInspection.outputYear.closeGateIndex == current.closeGateIndex &&
+        legacyInspection.outputYear.openGateDay == current.openGateDay &&
+        legacyInspection.outputYear.closeGateDay == current.closeGateDay;
+
+    return Patch26YearMembershipDecision{
+        legacyInspection.outputYear,
+        current,
+        equal ? legacyInspection.outputYear : current,
+        forwardSteps,
+        backwardSteps,
+        true,
+        true,
+        equal,
+        equal,
+        authoritativeAccepted,
         true
     };
 }
@@ -7041,6 +7137,52 @@ void Discovery26OpeningGateYearMembershipHandler::handle(
     validator.requireDiscovery26YearMembershipReady(ctx);
 }
 
+void Patch26OpeningGateYearMembershipHandler::handle(
+    BaseMonsterContext& ctx,
+    const Discovery26OpeningGateYearMembershipHandler& legacyHandler,
+    const LegacyYearMembershipAdapter& adapter,
+    const OpeningGateMembershipPatchWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    legacyHandler.handle(ctx, adapter, validator, metrics);
+
+    LegacyYearMembershipInspection legacyInspection;
+    legacyInspection.anchorYear = ctx.discovery26MembershipAnchorYear;
+    legacyInspection.outputYear = ctx.discovery26MembershipOutputYear;
+    legacyInspection.forwardSteps = ctx.discovery26MembershipForwardSteps;
+    legacyInspection.backwardSteps = ctx.discovery26MembershipBackwardSteps;
+    legacyInspection.targetAtOpeningGate = ctx.discovery26TargetAtOpeningGate;
+    legacyInspection.legacyClosedIntervalAccepted =
+        ctx.discovery26LegacyClosedIntervalAccepted;
+    legacyInspection.legacyExecuted = ctx.discovery26LegacyExecuted;
+
+    const Patch26YearMembershipDecision decision = wrapper.repair(
+        ctx.calculationDay,
+        ctx.discovery26MembershipAnchor,
+        ctx.discovery26MembershipTargetDay,
+        legacyInspection);
+    ctx.patch26CorrectOutputYear = decision.correctOutputYear;
+    ctx.patch26CorrectForwardSteps = decision.correctForwardSteps;
+    ctx.patch26CorrectBackwardSteps = decision.correctBackwardSteps;
+    ctx.patch26LegacyExecuted = decision.legacyExecuted && ctx.discovery26LegacyExecuted;
+    ctx.patch26CorrectComputed = decision.correctComputed;
+    ctx.patch26LegacyEqualsCorrect = decision.legacyEqualsCorrect;
+    ctx.patch26LegacyReturned = decision.legacyReturned;
+    ctx.patch26AuthoritativeIntervalAccepted = decision.authoritativeIntervalAccepted;
+    ctx.patch26Applied = decision.patchApplied;
+    ctx.patch26YearMembershipReady = true;
+    ctx.currentHandler = "Patch26OpeningGateYearMembershipHandler";
+    ctx.phase = "PATCH_26_AUTHORITATIVE_OPENING_GATE_YEAR_MEMBERSHIP";
+    ctx.status = ctx.patch26LegacyEqualsCorrect
+        ? "GHOST_EQUALS_CORRECT_LEGACY_RETURNED"
+        : "GHOST_DIFFERS_CORRECT_YEAR_RETURNED";
+    ctx.branchTrace.push_back(ctx.patch26LegacyEqualsCorrect
+        ? "PATCH26:GHOST_EQUALS_CORRECT"
+        : "PATCH26:CORRECT_REPLACES_GHOST");
+    metrics.bump(ctx, "patch26.year.membership.calls");
+    validator.requirePatch26YearMembershipReady(ctx);
+}
+
 void Patch17Year5000TieHandler::handle(
     BaseMonsterContext& ctx,
     const Discovery17Year5000TieHandler& legacyHandler,
@@ -7890,6 +8032,18 @@ void BaseDispatcher::dispatchDiscovery26OpeningGateYearMembership(
     const BaseMetricsShell& metrics) const {
     ctx.branchTrace.push_back("DISPATCH:DISCOVERY26_OPENING_GATE_YEAR_MEMBERSHIP");
     handler.handle(ctx, adapter, validator, metrics);
+}
+
+void BaseDispatcher::dispatchPatchedOpeningGateYearMembership(
+    BaseMonsterContext& ctx,
+    const Patch26OpeningGateYearMembershipHandler& handler,
+    const Discovery26OpeningGateYearMembershipHandler& legacyHandler,
+    const LegacyYearMembershipAdapter& adapter,
+    const OpeningGateMembershipPatchWrapper& wrapper,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.branchTrace.push_back("DISPATCH:PATCH26_OPENING_GATE_YEAR_MEMBERSHIP");
+    handler.handle(ctx, legacyHandler, adapter, wrapper, validator, metrics);
 }
 
 void BaseDispatcher::dispatchPatchedYear5000Tie(
@@ -9356,6 +9510,74 @@ BaseMonsterManager::executeUnpatchedDiscovery25ContiguousMonthDayDiagnostic(
 }
 
 LegacyYearMembershipReport BaseMonsterManager::executeDiscovery26OpeningGateYearMembership(
+    const LegacyYearAnchor& anchor,
+    const Integer& targetDay,
+    const Integer& calculationDay) const {
+    if (anchor.firstDay > anchor.lastDay) {
+        throw BaseValidationError("PATCH 26 anchor anni fines inversos habet");
+    }
+
+    BaseMonsterContext ctx;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.discovery26MembershipAnchor = anchor;
+    ctx.discovery26MembershipTargetDay = targetDay;
+
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const LegacyYearMembershipAdapter adapter;
+    const Discovery26OpeningGateYearMembershipHandler legacyHandler;
+    const OpeningGateMembershipPatchWrapper wrapper;
+    const Patch26OpeningGateYearMembershipHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchPatchedOpeningGateYearMembership(
+        ctx,
+        handler,
+        legacyHandler,
+        adapter,
+        wrapper,
+        validator,
+        metrics);
+
+    const Patch18YearRecord semanticOutput = ctx.patch26LegacyReturned
+        ? ctx.discovery26MembershipOutputYear
+        : ctx.patch26CorrectOutputYear;
+    LegacyYearMembershipReport report{
+        calculationDay,
+        anchor,
+        targetDay,
+        ctx.discovery26MembershipAnchorYear,
+        semanticOutput,
+        ctx.patch26CorrectForwardSteps,
+        ctx.patch26CorrectBackwardSteps,
+        targetDay == semanticOutput.openGateDay,
+        ctx.discovery26LegacyClosedIntervalAccepted,
+        ctx.discovery26LegacyUsedAsSemanticOutput,
+        ctx.patch26YearMembershipReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+    report.legacyOutputYearBeforePatch = ctx.discovery26MembershipOutputYear;
+    report.correctOutputYear = ctx.patch26CorrectOutputYear;
+    report.legacyForwardStepsBeforePatch = ctx.discovery26MembershipForwardSteps;
+    report.legacyBackwardStepsBeforePatch = ctx.discovery26MembershipBackwardSteps;
+    report.correctForwardSteps = ctx.patch26CorrectForwardSteps;
+    report.correctBackwardSteps = ctx.patch26CorrectBackwardSteps;
+    report.patch26LegacyExecuted = ctx.patch26LegacyExecuted;
+    report.patch26CorrectComputed = ctx.patch26CorrectComputed;
+    report.patch26LegacyEqualsCorrect = ctx.patch26LegacyEqualsCorrect;
+    report.patch26LegacyReturned = ctx.patch26LegacyReturned;
+    report.patch26AuthoritativeIntervalAccepted =
+        ctx.patch26AuthoritativeIntervalAccepted;
+    report.patch26Applied = ctx.patch26Applied;
+    return report;
+}
+
+LegacyYearMembershipReport BaseMonsterManager::executeUnpatchedDiscovery26OpeningGateYearMembershipDiagnostic(
     const LegacyYearAnchor& anchor,
     const Integer& targetDay,
     const Integer& calculationDay) const {
