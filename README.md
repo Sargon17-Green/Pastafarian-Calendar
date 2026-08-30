@@ -51,3 +51,11 @@
 `calendarDateSpaghetti -> monster_dispatch_base -> monster_stage06_legacy_distance_handler -> monster_distance_route -> oldDistance`
 
 Ⲡⲇⲟⲕⲓⲙⲏ ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ϫⲉ ⲡⲇⲓⲁⲫⲟⲣⲁ ⲛⲧⲉⲛⲧⲁⲅ ⲛϥⲧⲱⲛ ⲁⲛ ⲛⲥⲏⲩ ⲛⲓⲙ ⲙⲛ ⲡⲙⲁⲕⲣⲟⲛ ⲛⲧⲉⲛϩⲟⲟⲩ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 6 ⲟ ⲛ`EXPECTED_RED`; ⲛⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 1–5 ⲥⲉⲟ ⲛ`GREEN`.
+
+## Ⲃⲁⲑⲙⲟⲥ 7 — PATCH 03
+
+Ⲡ`oldDistance` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥⲡⲗⲁⲛⲏ. Ⲁⲩⲕⲱ ⲉϫⲱϥ ⲙⲡ`distanceWithChronologicalScar`: ⲛϥϫⲓ ⲙⲡ`oldDistance`, ⲛϥⲙⲉⲧⲣⲉ ⲟⲛ ⲙⲡ`abs(targetDay-calculationDay)`, ⲁⲩⲱ ⲉϣϫⲉ ⲛⲥⲉⲧⲱⲛ ⲁⲛ ⲛϥⲕⲱ ⲙⲡⲙⲁⲕⲣⲟⲛ ⲛⲭⲣⲟⲛⲟⲗⲟⲅⲓⲕⲟⲛ ⲉϩⲣⲁⲓ. Ⲙⲛⲛⲥⲱⲥ ⲛϥⲟⲩⲱϩ `1`.
+
+`monster_distance_route -> monster_stage07_distance_patch_wrapper -> distanceWithChronologicalScar -> oldDistance`
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲉⲡlegacy distance, ⲡchronological distance ⲙⲛ ⲡpatched distance. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 6 ⲟ ⲛ`GREEN`, ⲁⲩⲱ ⲡ Stage 7 ⲧⲱⲛ ⲙⲛ `oracle_work_counts`.

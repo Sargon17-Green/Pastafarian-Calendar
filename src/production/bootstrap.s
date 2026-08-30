@@ -31,7 +31,10 @@
 .equ CTX_DISTANCE_ROUTE_RESULT,232
 .equ CTX_LEGACY_DISTANCE_SEEN,240
 .equ CTX_DISTANCE_ROUTE_SEEN,248
-.equ CTX_SIZE,256
+.equ CTX_CHRONOLOGICAL_DISTANCE,256
+.equ CTX_PATCHED_DISTANCE_RESULT,264
+.equ CTX_DISTANCE_PATCH_SEEN,272
+.equ CTX_SIZE,280
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -76,6 +79,8 @@ legacy_remainder_M_limbs:
 .global monster_daytag_route
 .global monster_stage04_legacy_daytag_handler
 .global oldDistance
+.global distanceWithChronologicalScar
+.global monster_stage07_distance_patch_wrapper
 .global monster_distance_route
 .global monster_stage06_legacy_distance_handler
 
@@ -418,9 +423,58 @@ oldDistance:
     ret
 .size oldDistance,.-oldDistance
 
+# Ⲡ oldDistance ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥⲡⲗⲁⲛⲏ. Ⲡⲡⲁⲧϣ ⲙⲉⲧⲣⲉ ⲙⲡⲙⲁⲕⲣⲟⲛ ⲛⲧⲉⲛϩⲟⲟⲩ, ⲁⲩⲱ ⲛϥϣⲓⲃⲉ ⲙⲡlegacy ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ⲛⲥⲉⲧⲱⲛ ⲁⲛ.
+# Ⲙⲛⲛⲥⲱⲥ ⲛϥⲟⲩⲱϩ 1. Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ oldDistance, ⲁⲩⲱ ⲙⲛ fallback ⲉϥⲥⲟⲡⲥⲡ ⲉϥϣⲟⲟⲡ.
+.type distanceWithChronologicalScar,@function
+distanceWithChronologicalScar:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+
+    mov rdi,r12
+    mov rsi,r13
+    call oldDistance
+    mov r14,rax
+
+    mov rdi,r13
+    mov rsi,r12
+    call bi_sub
+    mov rdi,rax
+    call bi_abs
+    mov r15,rax
+
+    mov rdi,r14
+    mov rsi,r15
+    call bi_cmp
+    test eax,eax
+    je .Ldwcs_keep_legacy
+    mov r14,r15
+.Ldwcs_keep_legacy:
+    mov rdi,r14
+    mov rsi,1
+    call bi_add_u64
+
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size distanceWithChronologicalScar,.-distanceWithChronologicalScar
+
+.type monster_stage07_distance_patch_wrapper,@function
+monster_stage07_distance_patch_wrapper:
+    jmp distanceWithChronologicalScar
+.size monster_stage07_distance_patch_wrapper,.-monster_stage07_distance_patch_wrapper
+
 .type monster_distance_route,@function
 monster_distance_route:
-    jmp oldDistance
+    jmp monster_stage07_distance_patch_wrapper
 .size monster_distance_route,.-monster_distance_route
 
 .type monster_stage06_legacy_distance_handler,@function
@@ -446,11 +500,20 @@ monster_stage06_legacy_distance_handler:
     mov qword ptr [r12+CTX_LEGACY_DISTANCE_RESULT],rax
     inc qword ptr [r12+CTX_LEGACY_DISTANCE_SEEN]
 
+    mov rdi,r14
+    mov rsi,r13
+    call bi_sub
+    mov rdi,rax
+    call bi_abs
+    mov qword ptr [r12+CTX_CHRONOLOGICAL_DISTANCE],rax
+
     mov rdi,r13
     mov rsi,r14
     call monster_distance_route
     mov qword ptr [r12+CTX_DISTANCE_ROUTE_RESULT],rax
+    mov qword ptr [r12+CTX_PATCHED_DISTANCE_RESULT],rax
     inc qword ptr [r12+CTX_DISTANCE_ROUTE_SEEN]
+    inc qword ptr [r12+CTX_DISTANCE_PATCH_SEEN]
 
     mov eax,1
     jmp .Lms06_done
