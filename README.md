@@ -413,6 +413,56 @@ new(B) = SAVE(u² + 7·old(P)·old(N))
 
 Hawn ukoll, is-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
 
+## K½. Il-Mostru Jinduna bil-Mgħarfa Wara li Diġà Ħawwad
+
+L-istruzzjoni ta’ hawn fuq **ma titħassarx**. F’kull wieħed mit-tnax-il pass, il-Mostru l-ewwel iwettaqha kollha kemm hi, inkluż `+ S_r`, u jżomm is-sitt skutelli li joħorġu minnha bħala **riżultat fantasma storiku**. Dak ir-riżultat ma jitħalliex imur għand is-siġilli, ix-xtiebi, is-snin, il-pulpetti, ix-xhur jew ir-riżultat finali.
+
+Imbagħad, mingħajr ma juża l-iskutelli fantasma bħala input, il-Mostru jerġa’ jieħu **l-istess `oldBowls` li daħlu fil-pass** u jagħmel dawra oħra, għax sab li kien ħallat żewġ numri li għandhom xogħol differenti.
+
+L-ewwel jinżamm is-somma ordinarja, mhux miżmuma u mingħajr `149·r`:
+
+```text
+rawBowlSum_r = sum(oldBowls)
+```
+
+Minnha jinħadem numru separat għall-ordni:
+
+```text
+orderNumber_r = SAVE(rawBowlSum_r + 149·r)
+```
+
+Il-permutazzjoni tal-pass korrettiv tiġi minn:
+
+```text
+1 + ((orderNumber_r-1) mod 720)
+```
+
+Qabel ma jkompli, il-Mostru jqabbel dak li għadu kemm għamel ma’ dak li għamel ħażin ftit qabel:
+
+```text
+orderNumber_r = S_r
+correctedPermutation_r = historicalPermutation_r
+```
+
+Jekk waħda minn dawn iż-żewġ ugwaljanzi ma tkunx vera, il-kalkolu jieqaf: id-detour ma jistax jibdel l-ordni u ma jistax jaħbi żball ieħor.
+
+Wara l-guard, u **biss** wara l-guard, kull skutella terġa’ tiġi kkalkulata mill-istess `snapshot` antik. Jekk `B` tinsab fil-pożizzjoni `q` tal-permutazzjoni vverifikata u l-ġirien huma `P,N`:
+
+```text
+u_corrected = old(B)
+            + 3·old(P)
+            + 5·old(N)
+            + rawBowlSum_r
+            + r
+            + q²
+
+correctedNew(B) = SAVE(u_corrected² + 7·old(P)·old(N))
+```
+
+Hawnhekk `rawBowlSum_r` huwa **eżattament** `sum(oldBowls)`: ma jiġix applikat `SAVE` fuqu u ma jiżdiedx `149·r` miegħu. `149·r` jgħix biss ġewwa `orderNumber_r`.
+
+Is-sitt `correctedNew` jiġu kkalkulati kollha mill-istess `oldBowls` u jiġu assenjati flimkien. Dawn is-sitt skutelli korrettivi — u mhux is-sitt skutelli fantasma tal-ewwel dawra — isiru l-`oldBowls` tal-pass `r+1`. Għalhekk kull pass jagħmel, fl-ordni: **scar qadim reali → guard → detour korrettiv → commit korrettiv**.
+
 Meta jsiru l-mistoqsijiet, “l-iskutella ta’ wara” tibqa’ ddeterminata minn `orderAt46`. Dawn it-tnax-il pass ta’ tħawwid jużaw l-ordnijiet tagħhom stess waqt it-tħawwid, filwaqt li l-ordni rreġistrata tal-qatra 46 tibqa’ tintuża meta jsiru l-mistoqsijiet.
 
 ---
@@ -878,11 +928,17 @@ Iż-żewġ komponenti tal-isem fil-vetturi jiġu rreġistrati bħala indiċijiet
 
 Il-valuri kollha f’dan il-kapitlu nkisbu permezz tat-tħaddim tal-`oracle` normattiv bl-`inputs` espliċiti, u nżammu bħala vetturi kanoniċi ta’ konformità.
 
+Dik is-sentenza baqgħet hawn għax kienet miktuba qabel ma l-Mostru nduna bil-mgħarfa żejda ta’ K½. Minn issa għandha tinqara b’żewġ saffi: l-ewwel tabella hija l-karta l-qadima li ma ntremitx; it-tieni tabella hija l-unika waħda li tista’ tgħaddi test ta’ konformità.
+
 Il-valur ta’ `F` huwa:
 
 ```text
 F = -15,055,671
 ```
+
+## AC.1. Il-Vetturi li Baqgħu fuq il-Karta l-Qadima
+
+It-tabella li ġejja hija **scar storiku u ghost biss**. Implimentazzjoni tista’ tikkalkulaha biex turi li l-mogħdija l-qadima għadha teżisti, iżda **ma tistax** tuża dawn il-ħames komponenti bħala `expected output` ta’ konformità.
 
 | # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
 |---:|---:|---:|---:|---:|---:|---:|---:|
@@ -899,7 +955,30 @@ F = -15,055,671
 
 Il-vetturi 6, 7 u 10 jittestjaw b’mod espliċitu l-każijiet li fihom il-proċedura tgħaddi lil hinn mis-sena 5000: il-vettur 6 permezz ta’ `PREVIOUS₁₂`, u l-vetturi 7 u 10 permezz ta’ `NEXT₁₁`.
 
+Dik l-aħħar sentenza wkoll tappartjeni għall-karta l-qadima. Ma għandhiex tintuża biex jiġi dedott li l-vettur 5 korrettiv jibqa’ fis-sena 5000.
+
+## AC.2. Il-Vetturi li Joħorġu mid-Detour Korrettiv
+
+Din hija **l-unika tabella normattiva ta’ konformità**. Għal kull ringiela, il-mogħdija l-qadima ta’ K titħaddem bħala scar, iżda l-ħames komponenti jiġu mill-iskutelli li għaddew minn K½.
+
+| # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | -15,055,671 | -15,055,671 | 5000 | 4 | 762 | 12 | 105 |
+| 2 | -15,055,671 | -15,055,672 | 5000 | 4 | 761 | 32 | 114 |
+| 3 | -15,055,671 | -15,055,670 | 5000 | 3 | 1 | 25 | 91 |
+| 4 | -15,055,671 | -15,056,171 | 5000 | 4 | 262 | 46 | 47 |
+| 5 | -15,055,671 | -15,055,171 | 5001 | 9 | 123 | 7 | 3 |
+| 6 | -15,055,671 | -15,061,671 | 4999 | 14 | 207 | 1 | 81 |
+| 7 | -15,055,671 | -15,049,671 | 5001 | 8 | 787 | 6 | 122 |
+| 8 | -15,056,905 | -15,056,448 | 5000 | 10 | 1082 | 37 | 50 |
+| 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 20 | 14 | 47 |
+| 10 | -15,058,171 | -15,053,171 | 5002 | 9 | 498 | 41 | 10 |
+
+Fil-mogħdija korrettiva, il-vettur 6 jgħaddi lura minn sena 5000 permezz ta’ `PREVIOUS₁₂`; il-vetturi 5, 7 u 10 jgħaddu ’l quddiem permezz ta’ `NEXT₁₁`. Il-vettur 5 għalhekk huwa wkoll discriminator intenzjonat kontra l-karta l-qadima.
+
 ## `checkpoint` dettaljat: `c=t=F`
+
+**Dan il-checkpoint jibqa’ fiżikament bħala checkpoint storiku tal-mogħdija l-qadima.** Il-valuri tiegħu sal-ordni tal-qatra 46 għadhom komuni għaż-żewġ mogħdijiet. Is-sitt skutelli ta’ wara t-12-il pass, il-konfini tas-sena u r-riżultat testwali li jidhru f’dan il-blokk huma ghosts u ma jgħaddux għall-konformità.
 
 Għall-vettur 1, il-ħames għaddijiet użati fil-kalkolu huma:
 
@@ -966,6 +1045,44 @@ Ir-rappreżentazzjoni testwali tal-istess riżultat fil-katalgu Malti hija:
 ```
 
 Il-komponenti kanoniċi ta’ konformità hawnhekk huma l-indiċijiet 10 u 20; fil-katalgu Malti dawn jingħataw il-forom `Skorpjun` u `Bir`.
+
+Dik l-aħħar sentenza hija wkoll parti mill-ghost storiku: l-indiċijiet 10 u 20 m’għadhomx il-komponenti ta’ konformità tal-vettur 1.
+
+## Il-`checkpoint` li l-Mostru Reġa’ Għamel Wara li Ma Fdax l-Ewwel Wieħed
+
+Għall-istess `c=t=F`, il-ħames għaddijiet, is-seba’ qatriet moħbija, l-ewwel qatra viżibbli, il-qatra viżibbli 46 u `orderAt46 = [4,5,2,3,6,1]` jibqgħu eżattament kif jidhru fil-checkpoint storiku. Id-diverġenza tibda fl-ewwel post-stir ta’ K½.
+
+Wara li kull wieħed mit-tnax-il scars antiki jitħaddem u mbagħad jiġi mgħoddi mid-detour korrettiv, is-sitt skutelli awtorevoli, skont l-identitajiet fissi `1..6`, huma:
+
+```text
+1: 67068226522203060890658143482200172502
+2: 156830781782038036265833091137164500083
+3: 27860245395513113590943202859639481773
+4: 154958270957687565769906933601352753179
+5: 83762519477527209919484977230999195024
+6: 154633989471499313687998830839607736513
+```
+
+Dawn, u dawn biss, jitħallew jidħlu fil-mekkaniżmu tal-mistoqsijiet. Il-konfini awtorevoli tas-sena 5000 għal dan il-vettur huma:
+
+```text
+openGate  = -15,059,693
+closeGate = -15,055,294
+```
+
+Ir-rappreżentazzjoni testwali awtorevoli fil-katalgu Malti hija:
+
+```text
+5000, Lagaš, 762, Libien, 105
+```
+
+Il-komponenti kanoniċi normattivi huma għalhekk:
+
+```text
+(5000, 4, 762, 12, 105)
+```
+
+Jekk implimentazzjoni tipproduċi l-checkpoint storiku ta’ fuq bħala riżultat finali, il-fatt li żammet l-istorja mhuwiex skuża: **il-konformità tfalli**. Jekk ma tistax turi li l-permutazzjoni tal-scar u tal-detour hija l-istess f’kull wieħed mit-12-il pass, il-konformità tfalli wkoll.
 
 ---
 
