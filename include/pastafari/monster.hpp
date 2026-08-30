@@ -2,6 +2,7 @@
 
 #include <array>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <cstdint>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -17,6 +18,63 @@ inline constexpr int LEGACY_YEAR_MAX = 5781;
 inline constexpr int REAL_YEAR_MAX_PATCH = 5778;
 inline constexpr int LEGACY_MONTH_LENGTH_MIN = 4;
 inline constexpr int LEGACY_MONTH_LENGTH_MAX = 123;
+
+
+struct PersistentScarMetrics {
+    std::uint64_t patch27AncestralHit = 0;
+    std::uint64_t patch27AncestralMiss = 0;
+    std::uint64_t patch27ResurrectionCount = 0;
+    std::uint64_t patch27RejectedCorpse = 0;
+    std::uint64_t patch27BuriedStructure = 0;
+    std::uint64_t patch28GateGraveyardHit = 0;
+    std::uint64_t patch28GateGraveyardMiss = 0;
+    std::uint64_t patch28GateResurrection = 0;
+    std::uint64_t patch28GateCalculated = 0;
+    std::uint64_t patch28PoisonedGate = 0;
+    std::uint64_t patch29ReverseGateHit = 0;
+    std::uint64_t patch29ReverseGatePoisoned = 0;
+    std::uint64_t patch29HistoricalScanFallback = 0;
+    std::uint64_t patch30CheckpointHit = 0;
+    std::uint64_t patch30CheckpointMiss = 0;
+    std::uint64_t patch30CheckpointBuried = 0;
+    std::uint64_t patch30YearStepsAvoided = 0;
+    std::uint64_t patch31WorkspaceWillWritten = 0;
+    std::uint64_t patch31WorkspaceInherited = 0;
+    std::uint64_t patch32SauceCorpseFound = 0;
+    std::uint64_t patch32SauceResurrected = 0;
+    std::uint64_t patch32SauceGenerationMismatch = 0;
+    std::uint64_t patch32SauceRecomputed = 0;
+    std::uint64_t patch33DiagnosticBodyBuilt = 0;
+    std::uint64_t patch33AuthoritativeBodyResurrected = 0;
+    std::uint64_t patch33LegacyDoubleComputationShapePreserved = 0;
+    std::uint64_t patch34StructureSauceCorpseBuried = 0;
+    std::uint64_t patch34StructureSauceResurrected = 0;
+    std::uint64_t patch34StructureSauceGenerationRejected = 0;
+    std::uint64_t patch35StoneFossilHit = 0;
+    std::uint64_t patch35StoneFossilMiss = 0;
+    std::uint64_t patch35StoneFullRebuild = 0;
+    std::uint64_t patch36RejectionScarHit = 0;
+    std::uint64_t patch36RejectionScarMiss = 0;
+    std::uint64_t patch36RejectionIterationsAvoided = 0;
+    std::uint64_t patch36WideScarHit = 0;
+    std::uint64_t patch36WideScarMiss = 0;
+    std::uint64_t patch37VirtualMemoBoneHit = 0;
+    std::uint64_t patch37VirtualMemoBoneMiss = 0;
+    std::uint64_t patch38CountBackendBorn = 0;
+    std::uint64_t patch38UnrankBackendBorn = 0;
+    std::uint64_t patch38SharedSkeletonUsed = 0;
+    std::uint64_t patch38SkeletonMiss = 0;
+    std::uint64_t patch39FinalResultHit = 0;
+    std::uint64_t patch39FinalResultMiss = 0;
+    std::uint64_t staleOrPoisonedRejected = 0;
+};
+
+void setAccelerationScarsEnabled(bool enabled);
+bool accelerationScarsEnabled();
+void setFullHistoricalAccelerationValidation(bool enabled);
+bool fullHistoricalAccelerationValidation();
+PersistentScarMetrics persistentScarMetricsDiagnostic();
+void resetPersistentScarVaultsDiagnostic();
 
 Integer regularMod(const Integer& x, const Integer& d);
 Integer oldRemainder(const Integer& x);
@@ -907,6 +965,13 @@ struct BaseMonsterContext {
     std::size_t stage56LegacyScarCallCount = 0;
     std::size_t stage56AppliedCount = 0;
     bool stage56AppliedFlag = false;
+    bool patch27AncestralHit = false;
+    bool patch27AncestralMiss = false;
+    bool patch27RejectedCorpse = false;
+    bool patch27BuriedStructure = false;
+    bool patch31WorkspaceInheritanceObserved = false;
+    bool patch34StructureSauceResurrectionObserved = false;
+    bool patch39FinalResultBurialEligible = false;
     int legacyNextBowlQueriedId = 0;
     int legacyNextBowlOutput = 0;
     PermutationOrder legacyNextBowlOrderAt46Latch{};
@@ -1621,16 +1686,23 @@ class Patch18YearWalkWorkspace {
 public:
     explicit Patch18YearWalkWorkspace(const Integer& calculationDay,
                                       bool stage56CorrectedSauce = false);
+    ~Patch18YearWalkWorkspace();
     Patch18YearRecord finalYear5000();
     Patch18YearRecord resolveAnchor(const LegacyYearAnchor& anchor);
     Patch18YearRecord patchedNextYear(const Patch18YearRecord& knownYear);
     Patch18YearRecord patchedPreviousYear(const Patch18YearRecord& knownYear);
+    Patch18YearRecord resurrectNearestYearCheckpoint(
+        const Patch18YearRecord& anchorYear,
+        const Integer& targetDay);
+    void buryYearCheckpoint(const Patch18YearRecord& year);
     Integer gateDay(const Integer& index);
     bool exactGateIndexIfPresent(const Integer& day, Integer& indexOut);
 private:
     Integer calculationDay_{};
     bool stage56CorrectedSauce_ = false;
     std::map<Integer, Integer> gates_{{Integer{0}, FOUNDATION_DAY_OLD}};
+    std::map<Integer, Integer> gateDayToIndex_{{FOUNDATION_DAY_OLD, Integer{0}}};
+    std::map<Integer, bool> poisonedReverseGateDays_{};
     Integer minGateIndex_{0};
     Integer maxGateIndex_{0};
     Integer chooseRank(const LegacyAnswerRing& stream, const Integer& familySize) const;
@@ -1638,6 +1710,7 @@ private:
     Integer negativeGateGap(const Integer& n) const;
     Integer ensureGateIndex(const Integer& index);
     Integer exactGateIndex(const Integer& day);
+    void rememberReverseGate(const Integer& index, const Integer& day);
 };
 
 class Patch18SequentialYearWalkWrapper {

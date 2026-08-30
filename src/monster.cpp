@@ -3,10 +3,435 @@
 
 #include <algorithm>
 #include <limits>
+#include <mutex>
 #include <numeric>
 #include <set>
+#include <tuple>
 
 namespace pastafari {
+
+namespace {
+
+// PATCHES 27-39: memoria externa non managerem immortalem facit.
+// Manager adhuc nascitur et moritur; tantum sepulcra, ossuaria et testamenta
+// semantice probata extra vitam eius manent.
+constexpr std::uint64_t PERSISTENT_SCAR_GENERATION = 39;
+constexpr std::size_t FINAL_RESULT_BURIAL_LIMIT = 4096;
+constexpr std::size_t ANCESTRAL_STRUCTURE_LIMIT = 128;
+constexpr std::size_t YEAR_CHECKPOINT_LIMIT = 8192;
+constexpr std::size_t GATE_GRAVEYARD_LIMIT = 32768;
+constexpr std::size_t SAUCE_TOMB_LIMIT = 512;
+constexpr std::size_t STAGE56_SAUCE_TOMB_LIMIT = 256;
+constexpr std::size_t AUTOPSY_LIMIT = 128;
+constexpr std::size_t REJECTION_SCAR_LIMIT = 16384;
+constexpr std::size_t VIRTUAL_MEMO_GRAVEYARD_LIMIT = 4096;
+constexpr std::size_t LEGAL_WEAVING_SKELETON_LIMIT = 512;
+constexpr std::size_t WORKSPACE_WILL_LIMIT = 512;
+
+bool accelerationScarsEnabledInternal = true;
+bool fullHistoricalAccelerationValidationInternal = false;
+std::mutex accelerationModeMutex;
+
+PersistentScarMetrics persistentScarMetricsState{};
+std::mutex persistentScarMetricsMutex;
+
+void scarBump(std::uint64_t PersistentScarMetrics::*member,
+              std::uint64_t amount = 1) {
+    std::lock_guard<std::mutex> guard(persistentScarMetricsMutex);
+    persistentScarMetricsState.*member += amount;
+}
+
+const std::string& persistentCatalogFossilFingerprint() {
+    // PATCH39 CICATRIX: catalogus non fit hash nitidus nec dependency nova.
+    // Nomina ipsa, cum longitudinibus et indicibus, quasi dentes in sarcophago
+    // concatenantur.  Mutatio unius tituli corpus cache vetus reddit.
+    static const std::string fossil = [] {
+        std::string out = "CATALOG_FOSSIL";
+        for (const CatalogEntry& entry : CUTLET_SOURCE_CATALOG) {
+            out += "|C" + std::to_string(entry.canonicalIndex) + ":" +
+                   std::to_string(entry.text.size()) + ":" + std::string(entry.text);
+        }
+        for (const CatalogEntry& entry : MONTH_SOURCE_CATALOG) {
+            out += "|M" + std::to_string(entry.canonicalIndex) + ":" +
+                   std::to_string(entry.text.size()) + ":" + std::string(entry.text);
+        }
+        return out;
+    }();
+    return fossil;
+}
+
+const std::string& persistentSemanticFingerprint() {
+    static const std::string fingerprint =
+        std::string("PATCH39|") +
+        "M_OLD=" + M_OLD.str() +
+        "|FOUNDATION_DAY_OLD=" + FOUNDATION_DAY_OLD.str() +
+        "|LEGACY_YEAR_MAX=" + std::to_string(LEGACY_YEAR_MAX) +
+        "|REAL_YEAR_MAX_PATCH=" + std::to_string(REAL_YEAR_MAX_PATCH) +
+        "|LEGACY_MONTH_LENGTH_MIN=" + std::to_string(LEGACY_MONTH_LENGTH_MIN) +
+        "|LEGACY_MONTH_LENGTH_MAX=" + std::to_string(LEGACY_MONTH_LENGTH_MAX) +
+        "|PATCH_GENERATION=" + std::to_string(PERSISTENT_SCAR_GENERATION) +
+        "|SAUCE_GENERATION=STAGE56_RAW_BOWL_SUM" +
+        "|" + persistentCatalogFossilFingerprint();
+    return fingerprint;
+}
+
+template <class Map>
+void boundedEraseFirst(Map& map, std::size_t limit) {
+    while (map.size() >= limit && !map.empty()) {
+        map.erase(map.begin());
+    }
+}
+
+struct GateGraveyardKey {
+    bool stage56 = false;
+    Integer index{};
+    bool operator<(const GateGraveyardKey& other) const {
+        return std::tie(stage56, index) < std::tie(other.stage56, other.index);
+    }
+};
+
+struct BuriedGate {
+    Integer index{};
+    Integer day{};
+    std::uint64_t scarGeneration = 28;
+    bool verifiedThroughLegacyGapPath = false;
+    bool poisoned = false;
+    std::string semanticFingerprint{};
+};
+
+std::map<GateGraveyardKey, BuriedGate> gateGraveyard;
+std::mutex gateGraveyardMutex;
+
+struct YearCheckpointKey {
+    bool stage56 = false;
+    Integer calculationDay{};
+    Integer yearNumber{};
+    bool operator<(const YearCheckpointKey& other) const {
+        return std::tie(stage56, calculationDay, yearNumber) <
+               std::tie(other.stage56, other.calculationDay, other.yearNumber);
+    }
+};
+
+struct BuriedYearCheckpoint {
+    Integer calculationDayFingerprint{};
+    Patch18YearRecord year{};
+    std::uint64_t scarGeneration = 30;
+    bool stage56 = false;
+    bool poisoned = false;
+    std::string semanticFingerprint{};
+};
+
+std::map<YearCheckpointKey, BuriedYearCheckpoint> yearCheckpointVault;
+std::mutex yearCheckpointVaultMutex;
+
+struct WorkspaceWillKey {
+    bool stage56 = false;
+    Integer calculationDay{};
+    bool operator<(const WorkspaceWillKey& other) const {
+        return std::tie(stage56, calculationDay) <
+               std::tie(other.stage56, other.calculationDay);
+    }
+};
+
+struct DeadWorkspaceWill {
+    Integer minGateIndex{};
+    Integer maxGateIndex{};
+    std::uint64_t scarGeneration = 31;
+    std::string semanticFingerprint{};
+    bool poisoned = false;
+};
+
+std::map<WorkspaceWillKey, DeadWorkspaceWill> workspaceWillVault;
+std::mutex workspaceWillVaultMutex;
+
+struct SauceKey {
+    Integer calculationDay{};
+    Integer targetDay{};
+    bool operator<(const SauceKey& other) const {
+        return std::tie(calculationDay, targetDay) <
+               std::tie(other.calculationDay, other.targetDay);
+    }
+};
+
+struct BuriedSauce {
+    Patch11LatchedOrderSauceResult value{};
+    std::uint64_t scarGeneration = 32;
+    bool poisoned = false;
+    std::string semanticFingerprint{};
+};
+
+struct BuriedStage56Sauce {
+    Stage56RawBowlSumSauceResult value{};
+    std::uint64_t scarGeneration = 32;
+    bool poisoned = false;
+    std::string semanticFingerprint{};
+};
+
+std::map<SauceKey, BuriedSauce> sauceTomb;
+std::mutex sauceTombMutex;
+std::map<SauceKey, BuriedStage56Sauce> stage56SauceTomb;
+std::mutex stage56SauceTombMutex;
+
+struct SauceAutopsyRecord {
+    LegacySauceCounts counts{};
+    StoneTable stones{};
+    HiddenDrops hidden{};
+    VisibleDropStore visible{};
+    bool diagnosticBodyBuilt = false;
+    bool authoritativeBodyResurrected = false;
+    bool legacyDoubleComputationShapePreserved = false;
+    bool poisoned = false;
+    std::uint64_t scarGeneration = 33;
+    std::string semanticFingerprint{};
+};
+
+std::map<SauceKey, SauceAutopsyRecord> sauceAutopsyVault;
+std::mutex sauceAutopsyVaultMutex;
+
+struct StoneTableFossil {
+    StoneTable value{};
+    bool present = false;
+    bool poisoned = false;
+    std::uint64_t scarGeneration = 35;
+    std::string semanticFingerprint{};
+};
+
+StoneTableFossil stoneTableFossil;
+std::mutex stoneTableFossilMutex;
+
+struct RejectionScarKey {
+    Integer ringFirst{};
+    int directionStep = 0;
+    Integer familySize{};
+    Integer acceptanceLimit{};
+    bool operator<(const RejectionScarKey& other) const {
+        return std::tie(ringFirst, directionStep, familySize, acceptanceLimit) <
+               std::tie(other.ringFirst, other.directionStep,
+                        other.familySize, other.acceptanceLimit);
+    }
+};
+
+struct RejectionCertificate {
+    Integer firstRejectedOffset{};
+    Integer acceptedOffset{};
+    Integer acceptedAnswer{};
+    bool poisoned = false;
+    std::uint64_t scarGeneration = 36;
+    std::string semanticFingerprint{};
+};
+
+std::map<RejectionScarKey, RejectionCertificate> rejectionScarVault;
+std::mutex rejectionScarVaultMutex;
+
+struct WideRejectionScarKey {
+    Integer ringFirst{};
+    int directionStep = 0;
+    Integer familySize{};
+    Integer space{};
+    Integer acceptanceLimit{};
+    Integer initialWide{};
+    bool operator<(const WideRejectionScarKey& other) const {
+        return std::tie(ringFirst, directionStep, familySize, space,
+                        acceptanceLimit, initialWide) <
+               std::tie(other.ringFirst, other.directionStep, other.familySize,
+                        other.space, other.acceptanceLimit, other.initialWide);
+    }
+};
+
+struct WideRejectionCertificate {
+    Integer acceptedWide{};
+    Integer rejectionSteps{};
+    bool poisoned = false;
+    std::uint64_t scarGeneration = 36;
+    std::string semanticFingerprint{};
+};
+
+std::map<WideRejectionScarKey, WideRejectionCertificate> wideRejectionScarVault;
+std::mutex wideRejectionScarVaultMutex;
+
+struct VirtualMemoBoneKey {
+    int yearLength = 0;
+    int monthCount = 0;
+    int remaining = 0;
+    int slots = 0;
+    bool operator<(const VirtualMemoBoneKey& other) const {
+        return std::tie(yearLength, monthCount, remaining, slots) <
+               std::tie(other.yearLength, other.monthCount,
+                        other.remaining, other.slots);
+    }
+};
+
+struct VirtualMemoBone {
+    Integer count{};
+    bool poisoned = false;
+    std::uint64_t scarGeneration = 37;
+    std::string semanticFingerprint{};
+};
+
+std::map<VirtualMemoBoneKey, VirtualMemoBone> virtualMemoGraveyard;
+std::mutex virtualMemoGraveyardMutex;
+
+struct LegalWeavingSkeletonBones {
+    std::vector<int> maxActive{};
+    std::vector<std::vector<Integer>> suffixPerFixedActive{};
+    bool poisoned = false;
+    std::uint64_t scarGeneration = 38;
+    std::string semanticFingerprint{};
+};
+
+std::map<std::vector<int>, LegalWeavingSkeletonBones> legalWeavingSkeletonVault;
+std::mutex legalWeavingSkeletonVaultMutex;
+
+struct StructureVaultKey {
+    bool stage56 = false;
+    Integer calculationDay{};
+    Integer yearNumber{};
+    Integer openGate{};
+    Integer closeGate{};
+    bool operator<(const StructureVaultKey& other) const {
+        return std::tie(stage56, calculationDay, yearNumber, openGate, closeGate) <
+               std::tie(other.stage56, other.calculationDay, other.yearNumber,
+                        other.openGate, other.closeGate);
+    }
+};
+
+struct BuriedFinalStructure {
+    Integer calculationDayFingerprint{};
+    Integer yearNumber{};
+    Integer openGate{};
+    Integer closeGate{};
+    SpaghettiYearStructure value{};
+    std::size_t resurrectionCount = 0;
+    std::size_t burialGeneration = 27;
+    bool stage56 = false;
+    bool poisoned = false;
+    std::string semanticFingerprint{};
+};
+
+std::map<StructureVaultKey, BuriedFinalStructure> ancestralMemoryVault;
+std::mutex ancestralMemoryVaultMutex;
+
+struct FinalResultKey {
+    Integer calculationDay{};
+    Integer targetDay{};
+    std::uint64_t semanticGeneration = PERSISTENT_SCAR_GENERATION;
+    bool operator<(const FinalResultKey& other) const {
+        return std::tie(calculationDay, targetDay, semanticGeneration) <
+               std::tie(other.calculationDay, other.targetDay,
+                        other.semanticGeneration);
+    }
+};
+
+struct BuriedFinalResult {
+    SpaghettiDateFive value{};
+    bool poisoned = false;
+    std::uint64_t scarGeneration = 39;
+    std::string semanticFingerprint{};
+};
+
+std::map<FinalResultKey, BuriedFinalResult> finalResultBurialVault;
+std::mutex finalResultBurialVaultMutex;
+
+bool accelerationsOn() {
+    std::lock_guard<std::mutex> guard(accelerationModeMutex);
+    return accelerationScarsEnabledInternal;
+}
+
+bool fullHistoricalValidationOn() {
+    std::lock_guard<std::mutex> guard(accelerationModeMutex);
+    return fullHistoricalAccelerationValidationInternal;
+}
+
+bool fingerprintAcceptable(const std::string& fingerprint,
+                           std::uint64_t generation,
+                           std::uint64_t minimumGeneration) {
+    return generation >= minimumGeneration &&
+           fingerprint == persistentSemanticFingerprint();
+}
+
+} // namespace
+
+void setAccelerationScarsEnabled(bool enabled) {
+    std::lock_guard<std::mutex> guard(accelerationModeMutex);
+    accelerationScarsEnabledInternal = enabled;
+}
+
+bool accelerationScarsEnabled() {
+    return accelerationsOn();
+}
+
+void setFullHistoricalAccelerationValidation(bool enabled) {
+    std::lock_guard<std::mutex> guard(accelerationModeMutex);
+    fullHistoricalAccelerationValidationInternal = enabled;
+}
+
+bool fullHistoricalAccelerationValidation() {
+    return fullHistoricalValidationOn();
+}
+
+PersistentScarMetrics persistentScarMetricsDiagnostic() {
+    std::lock_guard<std::mutex> guard(persistentScarMetricsMutex);
+    return persistentScarMetricsState;
+}
+
+void resetPersistentScarVaultsDiagnostic() {
+    {
+        std::lock_guard<std::mutex> guard(gateGraveyardMutex);
+        gateGraveyard.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(yearCheckpointVaultMutex);
+        yearCheckpointVault.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(workspaceWillVaultMutex);
+        workspaceWillVault.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(sauceTombMutex);
+        sauceTomb.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(stage56SauceTombMutex);
+        stage56SauceTomb.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(sauceAutopsyVaultMutex);
+        sauceAutopsyVault.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(stoneTableFossilMutex);
+        stoneTableFossil = StoneTableFossil{};
+    }
+    {
+        std::lock_guard<std::mutex> guard(rejectionScarVaultMutex);
+        rejectionScarVault.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(wideRejectionScarVaultMutex);
+        wideRejectionScarVault.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(virtualMemoGraveyardMutex);
+        virtualMemoGraveyard.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(legalWeavingSkeletonVaultMutex);
+        legalWeavingSkeletonVault.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);
+        ancestralMemoryVault.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(finalResultBurialVaultMutex);
+        finalResultBurialVault.clear();
+    }
+    {
+        std::lock_guard<std::mutex> guard(persistentScarMetricsMutex);
+        persistentScarMetricsState = PersistentScarMetrics{};
+    }
+}
 
 Integer regularMod(const Integer& x, const Integer& d) {
     if (d <= 0) {
@@ -228,7 +653,9 @@ Stone stonePatch(int i, Stone state) {
     return garbage;
 }
 
-StoneTable buildStonesThroughLegacyBuilder() {
+namespace {
+
+StoneTable buildStonesThroughLegacyBuilderUnfossilized() {
     StoneTable table{};
     Stone state{Integer{17}, Integer{29}, Integer{43}, Integer{71}, Integer{101}};
     table[1] = state;
@@ -237,6 +664,73 @@ StoneTable buildStonesThroughLegacyBuilder() {
         table[i] = state;
     }
     return table;
+}
+
+bool cheapStoneFossilIntegrity(const StoneTable& table) {
+    return table[1][0] == Integer{17} &&
+           table[1][1] == Integer{29} &&
+           table[1][2] == Integer{43} &&
+           table[1][3] == Integer{71} &&
+           table[1][4] == Integer{101};
+}
+
+} // namespace
+
+StoneTable buildStonesThroughLegacyBuilder() {
+    if (!accelerationsOn()) {
+        scarBump(&PersistentScarMetrics::patch35StoneFullRebuild);
+        return buildStonesThroughLegacyBuilderUnfossilized();
+    }
+
+    StoneTable fossilCopy{};
+    bool fossilFound = false;
+    {
+        std::lock_guard<std::mutex> guard(stoneTableFossilMutex);
+        if (stoneTableFossil.present &&
+            !stoneTableFossil.poisoned &&
+            fingerprintAcceptable(
+                stoneTableFossil.semanticFingerprint,
+                stoneTableFossil.scarGeneration,
+                35)) {
+            fossilCopy = stoneTableFossil.value;
+            fossilFound = true;
+        } else if (stoneTableFossil.present) {
+            stoneTableFossil.poisoned = true;
+            scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+        }
+    }
+
+    if (fossilFound && cheapStoneFossilIntegrity(fossilCopy)) {
+        scarBump(&PersistentScarMetrics::patch35StoneFossilHit);
+        if (fullHistoricalValidationOn()) {
+            scarBump(&PersistentScarMetrics::patch35StoneFullRebuild);
+            const StoneTable rebuilt = buildStonesThroughLegacyBuilderUnfossilized();
+            if (rebuilt != fossilCopy) {
+                std::lock_guard<std::mutex> guard(stoneTableFossilMutex);
+                stoneTableFossil.poisoned = true;
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                return rebuilt;
+            }
+        }
+        return fossilCopy;
+    }
+
+    scarBump(&PersistentScarMetrics::patch35StoneFossilMiss);
+    scarBump(&PersistentScarMetrics::patch35StoneFullRebuild);
+    const StoneTable rebuilt = buildStonesThroughLegacyBuilderUnfossilized();
+
+    {
+        std::lock_guard<std::mutex> guard(stoneTableFossilMutex);
+        if (!stoneTableFossil.present || stoneTableFossil.poisoned ||
+            !fingerprintAcceptable(
+                stoneTableFossil.semanticFingerprint,
+                stoneTableFossil.scarGeneration,
+                35)) {
+            stoneTableFossil = StoneTableFossil{
+                rebuilt, true, false, 35, persistentSemanticFingerprint()};
+        }
+    }
+    return rebuilt;
 }
 
 Integer makeHiddenLegacyValue(int k,
@@ -767,15 +1261,64 @@ LegacyOrderMemorySauceResult legacySauceWithOverwritableOrderMemory(
     };
 }
 
+namespace {
+
+bool sameLatchedSauce(const Patch11LatchedOrderSauceResult& a,
+                      const Patch11LatchedOrderSauceResult& b) {
+    return a.finalBowls == b.finalBowls &&
+           a.orderAt46Latch == b.orderAt46Latch &&
+           a.queryOrder == b.queryOrder &&
+           a.legacyQueryOrderBeforePatch == b.legacyQueryOrderBeforePatch &&
+           a.finalPostStirOrder == b.finalPostStirOrder &&
+           a.legacyOrderWriteCount == b.legacyOrderWriteCount &&
+           a.latchWriteCount == b.latchWriteCount;
+}
+
+namespace patch32_legacy_body {
+
 Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     const Integer& calculationDay,
     const Integer& targetDay) {
-    const LegacySauceCounts counts = sauceCountsThroughScars(calculationDay, targetDay);
-    const StoneTable stones = buildStonesThroughLegacyBuilder();
-    const HiddenDrops hiddenBackward = buildHiddenWithBackwardStorage(
-        calculationDay, targetDay, stones);
-    const VisibleDropStore visible = buildVisibleDropsThroughPatchedHistory(
-        counts, stones, hiddenBackward);
+    LegacySauceCounts counts{};
+    StoneTable stones{};
+    HiddenDrops hiddenBackward{};
+    VisibleDropStore visible{};
+    bool autopsyResurrected = false;
+
+    if (accelerationsOn() && !fullHistoricalValidationOn()) {
+        const SauceKey key{calculationDay, targetDay};
+        std::lock_guard<std::mutex> guard(sauceAutopsyVaultMutex);
+        const auto found = sauceAutopsyVault.find(key);
+        if (found != sauceAutopsyVault.end()) {
+            if (!found->second.poisoned &&
+                found->second.diagnosticBodyBuilt &&
+                fingerprintAcceptable(
+                    found->second.semanticFingerprint,
+                    found->second.scarGeneration,
+                    33)) {
+                counts = found->second.counts;
+                stones = found->second.stones;
+                hiddenBackward = found->second.hidden;
+                visible = found->second.visible;
+                autopsyResurrected = true;
+            } else if (!found->second.poisoned) {
+                found->second.poisoned = true;
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+            }
+        }
+    }
+
+    if (!autopsyResurrected) {
+        counts = sauceCountsThroughScars(calculationDay, targetDay);
+        stones = buildStonesThroughLegacyBuilder();
+        hiddenBackward = buildHiddenWithBackwardStorage(
+            calculationDay, targetDay, stones);
+        visible = buildVisibleDropsThroughPatchedHistory(
+            counts, stones, hiddenBackward);
+    } else {
+        scarBump(&PersistentScarMetrics::patch33AuthoritativeBodyResurrected);
+        scarBump(&PersistentScarMetrics::patch33LegacyDoubleComputationShapePreserved);
+    }
 
     BowlState bowls = initialBowlsThroughCounts(counts);
     PermutationOrder legacyOrderMemory{};
@@ -877,6 +1420,72 @@ Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     };
 }
 
+} // namespace patch32_legacy_body
+} // namespace
+
+Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
+    const Integer& calculationDay,
+    const Integer& targetDay) {
+    if (!accelerationsOn()) {
+        scarBump(&PersistentScarMetrics::patch32SauceRecomputed);
+        return patch32_legacy_body::sauceWithOrderAt46Latch(calculationDay, targetDay);
+    }
+
+    const SauceKey key{calculationDay, targetDay};
+    BuriedSauce corpse{};
+    bool foundCorpse = false;
+    {
+        std::lock_guard<std::mutex> guard(sauceTombMutex);
+        const auto found = sauceTomb.find(key);
+        if (found != sauceTomb.end()) {
+            scarBump(&PersistentScarMetrics::patch32SauceCorpseFound);
+            if (!found->second.poisoned &&
+                fingerprintAcceptable(
+                    found->second.semanticFingerprint,
+                    found->second.scarGeneration,
+                    32)) {
+                corpse = found->second;
+                foundCorpse = true;
+            } else {
+                found->second.poisoned = true;
+                scarBump(&PersistentScarMetrics::patch32SauceGenerationMismatch);
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+            }
+        }
+    }
+
+    if (foundCorpse) {
+        scarBump(&PersistentScarMetrics::patch32SauceResurrected);
+        if (fullHistoricalValidationOn()) {
+            const Patch11LatchedOrderSauceResult rebuilt =
+                patch32_legacy_body::sauceWithOrderAt46Latch(calculationDay, targetDay);
+            scarBump(&PersistentScarMetrics::patch32SauceRecomputed);
+            if (!sameLatchedSauce(rebuilt, corpse.value)) {
+                std::lock_guard<std::mutex> guard(sauceTombMutex);
+                const auto found = sauceTomb.find(key);
+                if (found != sauceTomb.end()) found->second.poisoned = true;
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                return rebuilt;
+            }
+        }
+        return corpse.value;
+    }
+
+    const Patch11LatchedOrderSauceResult rebuilt =
+        patch32_legacy_body::sauceWithOrderAt46Latch(calculationDay, targetDay);
+    scarBump(&PersistentScarMetrics::patch32SauceRecomputed);
+    {
+        std::lock_guard<std::mutex> guard(sauceTombMutex);
+        const auto existing = sauceTomb.find(key);
+        if (existing == sauceTomb.end() || existing->second.poisoned) {
+            boundedEraseFirst(sauceTomb, SAUCE_TOMB_LIMIT);
+            sauceTomb[key] = BuriedSauce{
+                rebuilt, 32, false, persistentSemanticFingerprint()};
+        }
+    }
+    return rebuilt;
+}
+
 Patch11LatchedOrderSauceResult sauceWithScars(
     const Integer& calculationDay,
     const Integer& targetDay) {
@@ -942,6 +1551,28 @@ SAUCE_WITH_SCARS_VISIBLE:
         diagnosticVisible.clear();
         state = 0;
         goto SAUCE_WITH_SCARS_DISPATCH;
+    }
+    if (accelerationsOn()) {
+        const SauceKey key{calculationDay, targetDay};
+        SauceAutopsyRecord autopsy{
+            diagnosticCounts,
+            diagnosticStones,
+            diagnosticHidden,
+            diagnosticVisible,
+            true,
+            false,
+            true,
+            false,
+            33,
+            persistentSemanticFingerprint()
+        };
+        {
+            std::lock_guard<std::mutex> guard(sauceAutopsyVaultMutex);
+            boundedEraseFirst(sauceAutopsyVault, AUTOPSY_LIMIT);
+            sauceAutopsyVault[key] = std::move(autopsy);
+        }
+        scarBump(&PersistentScarMetrics::patch33DiagnosticBodyBuilt);
+        scarBump(&PersistentScarMetrics::patch33LegacyDoubleComputationShapePreserved);
     }
     state = 40;
     goto SAUCE_WITH_SCARS_DISPATCH;
@@ -1076,7 +1707,9 @@ Stage56PostStirDetourWitness stage56RawBowlSumPostStirDetour(
     };
 }
 
-Stage56RawBowlSumSauceResult sauceWithStage56RawBowlSumDetour(
+namespace {
+
+Stage56RawBowlSumSauceResult sauceWithStage56RawBowlSumDetourUnburied(
     const Integer& calculationDay,
     const Integer& targetDay) {
     const LegacySauceCounts counts = sauceCountsThroughScars(calculationDay, targetDay);
@@ -1160,6 +1793,96 @@ Stage56RawBowlSumSauceResult sauceWithStage56RawBowlSumDetour(
         throw BaseValidationError("Gradus 56 duodecim cicatrices et detours requirit");
     }
     return out;
+}
+
+bool sameStage56Sauce(const Stage56RawBowlSumSauceResult& a,
+                      const Stage56RawBowlSumSauceResult& b) {
+    if (!sameLatchedSauce(a.semanticSauce, b.semanticSauce) ||
+        a.legacyScarCallCount != b.legacyScarCallCount ||
+        a.appliedCount != b.appliedCount ||
+        a.applied != b.applied) {
+        return false;
+    }
+    for (std::size_t i = 0; i < a.stirWitnesses.size(); ++i) {
+        const auto& x = a.stirWitnesses[i];
+        const auto& y = b.stirWitnesses[i];
+        if (x.oldResult != y.oldResult ||
+            x.correctedResult != y.correctedResult ||
+            x.rawBowlSum != y.rawBowlSum ||
+            x.savedOrderNumber != y.savedOrderNumber ||
+            x.legacyOrder != y.legacyOrder ||
+            x.correctedOrder != y.correctedOrder ||
+            x.stirIndex != y.stirIndex ||
+            x.applied != y.applied) {
+            return false;
+        }
+    }
+    return true;
+}
+
+} // namespace
+
+Stage56RawBowlSumSauceResult sauceWithStage56RawBowlSumDetour(
+    const Integer& calculationDay,
+    const Integer& targetDay) {
+    if (!accelerationsOn()) {
+        scarBump(&PersistentScarMetrics::patch32SauceRecomputed);
+        return sauceWithStage56RawBowlSumDetourUnburied(calculationDay, targetDay);
+    }
+
+    const SauceKey key{calculationDay, targetDay};
+    BuriedStage56Sauce corpse{};
+    bool foundCorpse = false;
+    {
+        std::lock_guard<std::mutex> guard(stage56SauceTombMutex);
+        const auto found = stage56SauceTomb.find(key);
+        if (found != stage56SauceTomb.end()) {
+            scarBump(&PersistentScarMetrics::patch32SauceCorpseFound);
+            if (!found->second.poisoned &&
+                fingerprintAcceptable(
+                    found->second.semanticFingerprint,
+                    found->second.scarGeneration,
+                    32)) {
+                corpse = found->second;
+                foundCorpse = true;
+            } else {
+                found->second.poisoned = true;
+                scarBump(&PersistentScarMetrics::patch32SauceGenerationMismatch);
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+            }
+        }
+    }
+
+    if (foundCorpse) {
+        scarBump(&PersistentScarMetrics::patch32SauceResurrected);
+        if (fullHistoricalValidationOn()) {
+            const Stage56RawBowlSumSauceResult rebuilt =
+                sauceWithStage56RawBowlSumDetourUnburied(calculationDay, targetDay);
+            scarBump(&PersistentScarMetrics::patch32SauceRecomputed);
+            if (!sameStage56Sauce(rebuilt, corpse.value)) {
+                std::lock_guard<std::mutex> guard(stage56SauceTombMutex);
+                const auto found = stage56SauceTomb.find(key);
+                if (found != stage56SauceTomb.end()) found->second.poisoned = true;
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                return rebuilt;
+            }
+        }
+        return corpse.value;
+    }
+
+    const Stage56RawBowlSumSauceResult rebuilt =
+        sauceWithStage56RawBowlSumDetourUnburied(calculationDay, targetDay);
+    scarBump(&PersistentScarMetrics::patch32SauceRecomputed);
+    {
+        std::lock_guard<std::mutex> guard(stage56SauceTombMutex);
+        const auto existing = stage56SauceTomb.find(key);
+        if (existing == stage56SauceTomb.end() || existing->second.poisoned) {
+            boundedEraseFirst(stage56SauceTomb, STAGE56_SAUCE_TOMB_LIMIT);
+            stage56SauceTomb[key] = BuriedStage56Sauce{
+                rebuilt, 32, false, persistentSemanticFingerprint()};
+        }
+    }
+    return rebuilt;
 }
 
 Patch11LatchedOrderSauceResult oldStructureSauce(
@@ -1887,12 +2610,45 @@ public:
         if (lengths_.empty()) {
             throw BaseValidationError("DP celer texturae mensium saltem unum mensem requirit");
         }
-        maxActive_.assign(static_cast<std::size_t>(monthCount_ + 1), 0);
-        for (int a = 1; a <= monthCount_; ++a) {
-            const int length = lengths_.at(static_cast<std::size_t>(a - 1));
+        for (const int length : lengths_) {
             if (length < 1) {
                 throw BaseValidationError("DP celer texturae mensium longitudines positivas requirit");
             }
+        }
+
+        LegalWeavingSkeletonBones inherited{};
+        bool inheritedSkeleton = false;
+        if (accelerationsOn() && !fullHistoricalValidationOn()) {
+            std::lock_guard<std::mutex> guard(legalWeavingSkeletonVaultMutex);
+            const auto found = legalWeavingSkeletonVault.find(lengths_);
+            if (found != legalWeavingSkeletonVault.end()) {
+                if (!found->second.poisoned &&
+                    fingerprintAcceptable(
+                        found->second.semanticFingerprint,
+                        found->second.scarGeneration,
+                        38)) {
+                    inherited = found->second;
+                    inheritedSkeleton = true;
+                } else if (!found->second.poisoned) {
+                    found->second.poisoned = true;
+                    scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                }
+            }
+        }
+
+        if (inheritedSkeleton) {
+            maxActive_ = inherited.maxActive;
+            suffixPerFixedActive_ = inherited.suffixPerFixedActive;
+            scarBump(&PersistentScarMetrics::patch38SharedSkeletonUsed);
+            return;
+        }
+
+        if (accelerationsOn()) {
+            scarBump(&PersistentScarMetrics::patch38SkeletonMiss);
+        }
+        maxActive_.assign(static_cast<std::size_t>(monthCount_ + 1), 0);
+        for (int a = 1; a <= monthCount_; ++a) {
+            const int length = lengths_.at(static_cast<std::size_t>(a - 1));
             maxActive_[static_cast<std::size_t>(a)] =
                 maxActive_[static_cast<std::size_t>(a - 1)] + length - 1;
         }
@@ -1918,6 +2674,24 @@ public:
                 if (s > 0) {
                     row[static_cast<std::size_t>(s)] += row[static_cast<std::size_t>(s - 1)];
                 }
+            }
+        }
+
+        if (accelerationsOn()) {
+            LegalWeavingSkeletonBones born{
+                maxActive_,
+                suffixPerFixedActive_,
+                false,
+                38,
+                persistentSemanticFingerprint()
+            };
+            std::lock_guard<std::mutex> guard(legalWeavingSkeletonVaultMutex);
+            const auto existing = legalWeavingSkeletonVault.find(lengths_);
+            if (existing == legalWeavingSkeletonVault.end() || existing->second.poisoned) {
+                boundedEraseFirst(
+                    legalWeavingSkeletonVault,
+                    LEGAL_WEAVING_SKELETON_LIMIT);
+                legalWeavingSkeletonVault[lengths_] = std::move(born);
             }
         }
     }
@@ -2086,6 +2860,7 @@ bool legalMonthWeavingRowInternal(const std::vector<int>& lengths,
 } // spatium nominum
 
 Integer exactLegalMonthWeavingCount(const std::vector<int>& lengths) {
+    scarBump(&PersistentScarMetrics::patch38CountBackendBorn);
     const int totalLength = std::accumulate(lengths.begin(), lengths.end(), 0);
     if (totalLength <= 40) {
         LegalMonthWeavingCounterInternal family(lengths);
@@ -2097,6 +2872,7 @@ Integer exactLegalMonthWeavingCount(const std::vector<int>& lengths) {
 
 std::vector<int> DPUnrankLegalWeaving(const std::vector<int>& lengths,
                                       const Integer& rank1) {
+    scarBump(&PersistentScarMetrics::patch38UnrankBackendBorn);
     const int totalLength = std::accumulate(lengths.begin(), lengths.end(), 0);
     if (totalLength <= 40) {
         LegalMonthWeavingCounterInternal family(lengths);
@@ -2144,6 +2920,31 @@ Integer VirtualLegacyList::countSuffix(int remaining, int slots) const {
         return found->second;
     }
 
+    const VirtualMemoBoneKey boneKey{
+        yearLength_, monthCount_, remaining, slots};
+    if (accelerationsOn() && !fullHistoricalValidationOn()) {
+        std::lock_guard<std::mutex> guard(virtualMemoGraveyardMutex);
+        const auto bone = virtualMemoGraveyard.find(boneKey);
+        if (bone != virtualMemoGraveyard.end()) {
+            if (!bone->second.poisoned &&
+                fingerprintAcceptable(
+                    bone->second.semanticFingerprint,
+                    bone->second.scarGeneration,
+                    37)) {
+                memo_[key] = bone->second.count;
+                scarBump(&PersistentScarMetrics::patch37VirtualMemoBoneHit);
+                return bone->second.count;
+            }
+            if (!bone->second.poisoned) {
+                bone->second.poisoned = true;
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+            }
+        }
+    }
+    if (accelerationsOn()) {
+        scarBump(&PersistentScarMetrics::patch37VirtualMemoBoneMiss);
+    }
+
     Integer total = 0;
     for (int length = LEGACY_MONTH_LENGTH_MIN;
          length <= LEGACY_MONTH_LENGTH_MAX;
@@ -2151,6 +2952,15 @@ Integer VirtualLegacyList::countSuffix(int remaining, int slots) const {
         total += countSuffix(remaining - length, slots - 1);
     }
     memo_[key] = total;
+    if (accelerationsOn()) {
+        std::lock_guard<std::mutex> guard(virtualMemoGraveyardMutex);
+        const auto existing = virtualMemoGraveyard.find(boneKey);
+        if (existing == virtualMemoGraveyard.end() || existing->second.poisoned) {
+            boundedEraseFirst(virtualMemoGraveyard, VIRTUAL_MEMO_GRAVEYARD_LIMIT);
+            virtualMemoGraveyard[boneKey] = VirtualMemoBone{
+                total, false, 37, persistentSemanticFingerprint()};
+        }
+    }
     return total;
 }
 
@@ -5566,10 +6376,89 @@ Patch13RejectionSelection Patch13RejectionWrapper::repair(
         throw BaseValidationError("magnitudo familiae brevis inter 1 et M requiritur");
     }
     const Integer acceptanceLimit = (M_OLD / N) * N;
+    const RejectionScarKey key{
+        stream.first, stream.directionStep, N, acceptanceLimit};
+
+    if (accelerationsOn()) {
+        RejectionCertificate certificate{};
+        bool foundCertificate = false;
+        {
+            std::lock_guard<std::mutex> guard(rejectionScarVaultMutex);
+            const auto found = rejectionScarVault.find(key);
+            if (found != rejectionScarVault.end()) {
+                if (!found->second.poisoned &&
+                    fingerprintAcceptable(
+                        found->second.semanticFingerprint,
+                        found->second.scarGeneration,
+                        36)) {
+                    certificate = found->second;
+                    foundCertificate = true;
+                } else if (!found->second.poisoned) {
+                    found->second.poisoned = true;
+                    scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                }
+            }
+        }
+        if (foundCertificate) {
+            const Integer replay = ringAnswer(stream, certificate.acceptedOffset);
+            bool valid = replay == certificate.acceptedAnswer &&
+                         replay <= acceptanceLimit;
+            if (valid && fullHistoricalValidationOn()) {
+                Integer probe = 0;
+                while (probe < certificate.acceptedOffset) {
+                    if (ringAnswer(stream, probe) <= acceptanceLimit) {
+                        valid = false;
+                        break;
+                    }
+                    ++probe;
+                }
+            }
+            if (valid) {
+                scarBump(&PersistentScarMetrics::patch36RejectionScarHit);
+                if (certificate.acceptedOffset > 0 &&
+                    certificate.acceptedOffset <= Integer{std::numeric_limits<std::uint64_t>::max()}) {
+                    scarBump(
+                        &PersistentScarMetrics::patch36RejectionIterationsAvoided,
+                        certificate.acceptedOffset.convert_to<std::uint64_t>());
+                }
+                return Patch13RejectionSelection{
+                    acceptanceLimit,
+                    certificate.acceptedAnswer,
+                    certificate.acceptedOffset,
+                    adapter.selectAcceptedAnswer(certificate.acceptedAnswer, N)
+                };
+            }
+            {
+                std::lock_guard<std::mutex> guard(rejectionScarVaultMutex);
+                const auto found = rejectionScarVault.find(key);
+                if (found != rejectionScarVault.end()) found->second.poisoned = true;
+            }
+            scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+        } else {
+            scarBump(&PersistentScarMetrics::patch36RejectionScarMiss);
+        }
+    }
+
     Integer offset = 0;
     for (;;) {
         const Integer x = ringAnswer(stream, offset);
         if (x <= acceptanceLimit) {
+            if (accelerationsOn()) {
+                const RejectionCertificate certificate{
+                    Integer{0},
+                    offset,
+                    x,
+                    false,
+                    36,
+                    persistentSemanticFingerprint()
+                };
+                std::lock_guard<std::mutex> guard(rejectionScarVaultMutex);
+                const auto existing = rejectionScarVault.find(key);
+                if (existing == rejectionScarVault.end() || existing->second.poisoned) {
+                    boundedEraseFirst(rejectionScarVault, REJECTION_SCAR_LIMIT);
+                    rejectionScarVault[key] = certificate;
+                }
+            }
             return Patch13RejectionSelection{
                 acceptanceLimit,
                 x,
@@ -5974,7 +6863,62 @@ Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(
     const Integer& calculationDay,
     bool stage56CorrectedSauce)
     : calculationDay_(calculationDay),
-      stage56CorrectedSauce_(stage56CorrectedSauce) {}
+      stage56CorrectedSauce_(stage56CorrectedSauce) {
+    // PATCH 31: workspace novum manet; testamentum prioris tantum narratur.
+    if (accelerationsOn()) {
+        const WorkspaceWillKey key{stage56CorrectedSauce_, calculationDay_};
+        std::lock_guard<std::mutex> guard(workspaceWillVaultMutex);
+        const auto found = workspaceWillVault.find(key);
+        if (found != workspaceWillVault.end()) {
+            if (!found->second.poisoned &&
+                fingerprintAcceptable(
+                    found->second.semanticFingerprint,
+                    found->second.scarGeneration,
+                    31)) {
+                scarBump(&PersistentScarMetrics::patch31WorkspaceInherited);
+            } else if (!found->second.poisoned) {
+                found->second.poisoned = true;
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+            }
+        }
+    }
+}
+
+Patch18YearWalkWorkspace::~Patch18YearWalkWorkspace() {
+    if (!accelerationsOn()) {
+        return;
+    }
+    try {
+        const WorkspaceWillKey key{stage56CorrectedSauce_, calculationDay_};
+        const DeadWorkspaceWill will{
+            minGateIndex_,
+            maxGateIndex_,
+            31,
+            persistentSemanticFingerprint(),
+            false
+        };
+        std::lock_guard<std::mutex> guard(workspaceWillVaultMutex);
+        if (workspaceWillVault.find(key) == workspaceWillVault.end()) {
+            boundedEraseFirst(workspaceWillVault, WORKSPACE_WILL_LIMIT);
+        }
+        workspaceWillVault[key] = will;
+        scarBump(&PersistentScarMetrics::patch31WorkspaceWillWritten);
+    } catch (...) {
+        // Testamentum non potest mortem workspace in exceptionem alteram convertere.
+    }
+}
+
+void Patch18YearWalkWorkspace::rememberReverseGate(
+    const Integer& index,
+    const Integer& day) {
+    const auto found = gateDayToIndex_.find(day);
+    if (found != gateDayToIndex_.end() && found->second != index) {
+        poisonedReverseGateDays_[day] = true;
+        scarBump(&PersistentScarMetrics::patch29ReverseGatePoisoned);
+        return;
+    }
+    gateDayToIndex_[day] = index;
+}
 
 Integer Patch18YearWalkWorkspace::gateDay(const Integer& index) {
     return ensureGateIndex(index);
@@ -5987,20 +6931,42 @@ bool Patch18YearWalkWorkspace::exactGateIndexIfPresent(
         while (gates_.at(maxGateIndex_) < day) {
             ensureGateIndex(maxGateIndex_ + 1);
         }
+    } else {
+        while (gates_.at(minGateIndex_) > day) {
+            ensureGateIndex(minGateIndex_ - 1);
+        }
+    }
+
+    // PATCH 29: ossuarium inversum interrogatur, sed scan historicus infra manet.
+    const auto reverse = gateDayToIndex_.find(day);
+    const bool reversePoisoned =
+        poisonedReverseGateDays_.find(day) != poisonedReverseGateDays_.end();
+    if (reverse != gateDayToIndex_.end() && !reversePoisoned) {
+        const auto forward = gates_.find(reverse->second);
+        if (forward != gates_.end() && forward->second == day) {
+            indexOut = reverse->second;
+            scarBump(&PersistentScarMetrics::patch29ReverseGateHit);
+            return true;
+        }
+        poisonedReverseGateDays_[day] = true;
+        scarBump(&PersistentScarMetrics::patch29ReverseGatePoisoned);
+    }
+
+    scarBump(&PersistentScarMetrics::patch29HistoricalScanFallback);
+    if (day >= FOUNDATION_DAY_OLD) {
         for (Integer i = Integer{0}; i <= maxGateIndex_; ++i) {
             if (gates_.at(i) == day) {
                 indexOut = i;
+                rememberReverseGate(i, day);
                 return true;
             }
         }
         return false;
     }
-    while (gates_.at(minGateIndex_) > day) {
-        ensureGateIndex(minGateIndex_ - 1);
-    }
     for (Integer i = Integer{-1}; i >= minGateIndex_; --i) {
         if (gates_.at(i) == day) {
             indexOut = i;
+            rememberReverseGate(i, day);
             return true;
         }
     }
@@ -6090,13 +7056,15 @@ Patch18YearRecord Patch18YearWalkWorkspace::finalYear5000() {
     const Integer rank = chooseRank(stream, Integer{semanticCandidates.size()});
     const std::size_t chosen = (rank - 1).convert_to<std::size_t>();
     const Candidate& candidate = semanticCandidates.at(chosen);
-    return Patch18YearRecord{
+    const Patch18YearRecord selected{
         Integer{5000},
         candidate.openIndex,
         candidate.closeIndex,
         gates_.at(candidate.openIndex),
         gates_.at(candidate.closeIndex)
     };
+    buryYearCheckpoint(selected);
+    return selected;
 }
 
 Integer Patch18YearWalkWorkspace::chooseRank(
@@ -6158,18 +7126,170 @@ Integer Patch18YearWalkWorkspace::ensureGateIndex(const Integer& index) {
     if (index > maxGateIndex_) {
         Integer n = maxGateIndex_ + 1;
         while (n <= index) {
-            gates_[n] = gates_.at(n - 1) + positiveGateGap(n);
+            const Integer previousDay = gates_.at(n - 1);
+            Integer resolvedDay{};
+            bool resurrected = false;
+            const GateGraveyardKey key{stage56CorrectedSauce_, n};
+
+            if (accelerationsOn()) {
+                BuriedGate corpse{};
+                bool foundCorpse = false;
+                {
+                    std::lock_guard<std::mutex> guard(gateGraveyardMutex);
+                    const auto found = gateGraveyard.find(key);
+                    if (found != gateGraveyard.end()) {
+                        scarBump(&PersistentScarMetrics::patch28GateGraveyardHit);
+                        if (!found->second.poisoned &&
+                            found->second.index == n &&
+                            found->second.verifiedThroughLegacyGapPath &&
+                            fingerprintAcceptable(
+                                found->second.semanticFingerprint,
+                                found->second.scarGeneration,
+                                28)) {
+                            corpse = found->second;
+                            foundCorpse = true;
+                        } else {
+                            found->second.poisoned = true;
+                            scarBump(&PersistentScarMetrics::patch28PoisonedGate);
+                            scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                        }
+                    } else {
+                        scarBump(&PersistentScarMetrics::patch28GateGraveyardMiss);
+                    }
+                }
+                if (foundCorpse) {
+                    const Integer rememberedGap = corpse.day - previousDay;
+                    bool corpseValid = rememberedGap >= 42 && rememberedGap <= 963;
+                    if (corpseValid && fullHistoricalValidationOn()) {
+                        const Integer historicalGap = positiveGateGap(n);
+                        scarBump(&PersistentScarMetrics::patch28GateCalculated);
+                        corpseValid = historicalGap == rememberedGap;
+                    }
+                    if (corpseValid) {
+                        resolvedDay = corpse.day;
+                        resurrected = true;
+                        scarBump(&PersistentScarMetrics::patch28GateResurrection);
+                    } else {
+                        std::lock_guard<std::mutex> guard(gateGraveyardMutex);
+                        const auto found = gateGraveyard.find(key);
+                        if (found != gateGraveyard.end()) found->second.poisoned = true;
+                        scarBump(&PersistentScarMetrics::patch28PoisonedGate);
+                        scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                    }
+                }
+            }
+
+            if (!resurrected) {
+                const Integer gap = positiveGateGap(n);
+                scarBump(&PersistentScarMetrics::patch28GateCalculated);
+                resolvedDay = previousDay + gap;
+                if (accelerationsOn()) {
+                    const BuriedGate burial{
+                        n,
+                        resolvedDay,
+                        28,
+                        true,
+                        false,
+                        persistentSemanticFingerprint()
+                    };
+                    std::lock_guard<std::mutex> guard(gateGraveyardMutex);
+                    const auto existing = gateGraveyard.find(key);
+                    if (existing == gateGraveyard.end() || existing->second.poisoned) {
+                        boundedEraseFirst(gateGraveyard, GATE_GRAVEYARD_LIMIT);
+                        gateGraveyard[key] = burial;
+                    }
+                }
+            }
+
+            gates_[n] = resolvedDay;
+            rememberReverseGate(n, resolvedDay);
+            maxGateIndex_ = n;
             ++n;
         }
-        maxGateIndex_ = index;
     }
     if (index < minGateIndex_) {
         Integer n = minGateIndex_ - 1;
         while (n >= index) {
-            gates_[n] = gates_.at(n + 1) - negativeGateGap(-n);
+            const Integer nextDay = gates_.at(n + 1);
+            Integer resolvedDay{};
+            bool resurrected = false;
+            const GateGraveyardKey key{stage56CorrectedSauce_, n};
+
+            if (accelerationsOn()) {
+                BuriedGate corpse{};
+                bool foundCorpse = false;
+                {
+                    std::lock_guard<std::mutex> guard(gateGraveyardMutex);
+                    const auto found = gateGraveyard.find(key);
+                    if (found != gateGraveyard.end()) {
+                        scarBump(&PersistentScarMetrics::patch28GateGraveyardHit);
+                        if (!found->second.poisoned &&
+                            found->second.index == n &&
+                            found->second.verifiedThroughLegacyGapPath &&
+                            fingerprintAcceptable(
+                                found->second.semanticFingerprint,
+                                found->second.scarGeneration,
+                                28)) {
+                            corpse = found->second;
+                            foundCorpse = true;
+                        } else {
+                            found->second.poisoned = true;
+                            scarBump(&PersistentScarMetrics::patch28PoisonedGate);
+                            scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                        }
+                    } else {
+                        scarBump(&PersistentScarMetrics::patch28GateGraveyardMiss);
+                    }
+                }
+                if (foundCorpse) {
+                    const Integer rememberedGap = nextDay - corpse.day;
+                    bool corpseValid = rememberedGap >= 42 && rememberedGap <= 963;
+                    if (corpseValid && fullHistoricalValidationOn()) {
+                        const Integer historicalGap = negativeGateGap(-n);
+                        scarBump(&PersistentScarMetrics::patch28GateCalculated);
+                        corpseValid = historicalGap == rememberedGap;
+                    }
+                    if (corpseValid) {
+                        resolvedDay = corpse.day;
+                        resurrected = true;
+                        scarBump(&PersistentScarMetrics::patch28GateResurrection);
+                    } else {
+                        std::lock_guard<std::mutex> guard(gateGraveyardMutex);
+                        const auto found = gateGraveyard.find(key);
+                        if (found != gateGraveyard.end()) found->second.poisoned = true;
+                        scarBump(&PersistentScarMetrics::patch28PoisonedGate);
+                        scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                    }
+                }
+            }
+
+            if (!resurrected) {
+                const Integer gap = negativeGateGap(-n);
+                scarBump(&PersistentScarMetrics::patch28GateCalculated);
+                resolvedDay = nextDay - gap;
+                if (accelerationsOn()) {
+                    const BuriedGate burial{
+                        n,
+                        resolvedDay,
+                        28,
+                        true,
+                        false,
+                        persistentSemanticFingerprint()
+                    };
+                    std::lock_guard<std::mutex> guard(gateGraveyardMutex);
+                    const auto existing = gateGraveyard.find(key);
+                    if (existing == gateGraveyard.end() || existing->second.poisoned) {
+                        boundedEraseFirst(gateGraveyard, GATE_GRAVEYARD_LIMIT);
+                        gateGraveyard[key] = burial;
+                    }
+                }
+            }
+
+            gates_[n] = resolvedDay;
+            rememberReverseGate(n, resolvedDay);
+            minGateIndex_ = n;
             --n;
         }
-        minGateIndex_ = index;
     }
     return gates_.at(index);
 }
@@ -6179,22 +7299,154 @@ Integer Patch18YearWalkWorkspace::exactGateIndex(const Integer& day) {
         while (gates_.at(maxGateIndex_) < day) {
             ensureGateIndex(maxGateIndex_ + 1);
         }
-        for (Integer i = Integer{0}; i <= maxGateIndex_; ++i) {
-            if (gates_.at(i) == day) {
-                return i;
-            }
-        }
     } else {
         while (gates_.at(minGateIndex_) > day) {
             ensureGateIndex(minGateIndex_ - 1);
         }
+    }
+
+    const auto reverse = gateDayToIndex_.find(day);
+    const bool reversePoisoned =
+        poisonedReverseGateDays_.find(day) != poisonedReverseGateDays_.end();
+    if (reverse != gateDayToIndex_.end() && !reversePoisoned) {
+        const auto forward = gates_.find(reverse->second);
+        if (forward != gates_.end() && forward->second == day) {
+            scarBump(&PersistentScarMetrics::patch29ReverseGateHit);
+            return reverse->second;
+        }
+        poisonedReverseGateDays_[day] = true;
+        scarBump(&PersistentScarMetrics::patch29ReverseGatePoisoned);
+    }
+
+    // Scan historicus consulto non deletur: ossuarium fallibile est.
+    scarBump(&PersistentScarMetrics::patch29HistoricalScanFallback);
+    if (day >= FOUNDATION_DAY_OLD) {
+        for (Integer i = Integer{0}; i <= maxGateIndex_; ++i) {
+            if (gates_.at(i) == day) {
+                rememberReverseGate(i, day);
+                return i;
+            }
+        }
+    } else {
         for (Integer i = Integer{-1}; i >= minGateIndex_; --i) {
             if (gates_.at(i) == day) {
+                rememberReverseGate(i, day);
                 return i;
             }
         }
     }
     throw BaseValidationError("dies portae exactus in workspace PATCH 18 non inventus est");
+}
+
+void Patch18YearWalkWorkspace::buryYearCheckpoint(
+    const Patch18YearRecord& year) {
+    if (!accelerationsOn()) {
+        return;
+    }
+    const YearCheckpointKey key{
+        stage56CorrectedSauce_, calculationDay_, year.number};
+    const BuriedYearCheckpoint burial{
+        calculationDay_,
+        year,
+        30,
+        stage56CorrectedSauce_,
+        false,
+        persistentSemanticFingerprint()
+    };
+    std::lock_guard<std::mutex> guard(yearCheckpointVaultMutex);
+    const auto existing = yearCheckpointVault.find(key);
+    if (existing == yearCheckpointVault.end() || existing->second.poisoned) {
+        boundedEraseFirst(yearCheckpointVault, YEAR_CHECKPOINT_LIMIT);
+        yearCheckpointVault[key] = burial;
+        scarBump(&PersistentScarMetrics::patch30CheckpointBuried);
+    }
+}
+
+Patch18YearRecord Patch18YearWalkWorkspace::resurrectNearestYearCheckpoint(
+    const Patch18YearRecord& anchorYear,
+    const Integer& targetDay) {
+    if (!accelerationsOn()) {
+        return anchorYear;
+    }
+
+    std::vector<std::pair<YearCheckpointKey, BuriedYearCheckpoint>> candidates;
+    {
+        std::lock_guard<std::mutex> guard(yearCheckpointVaultMutex);
+        for (auto& pair : yearCheckpointVault) {
+            const YearCheckpointKey& key = pair.first;
+            BuriedYearCheckpoint& value = pair.second;
+            if (key.stage56 != stage56CorrectedSauce_ ||
+                key.calculationDay != calculationDay_) {
+                continue;
+            }
+            if (value.poisoned) {
+                continue;
+            }
+            if (value.calculationDayFingerprint != calculationDay_ ||
+                value.stage56 != stage56CorrectedSauce_ ||
+                !fingerprintAcceptable(
+                    value.semanticFingerprint,
+                    value.scarGeneration,
+                    30)) {
+                value.poisoned = true;
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                continue;
+            }
+            candidates.push_back(pair);
+        }
+    }
+    if (candidates.empty()) {
+        scarBump(&PersistentScarMetrics::patch30CheckpointMiss);
+        return anchorYear;
+    }
+
+    auto distanceToTarget = [&targetDay](const Patch18YearRecord& year) -> Integer {
+        if (targetDay <= year.openGateDay) return Integer{year.openGateDay - targetDay};
+        if (targetDay > year.closeGateDay) return Integer{targetDay - year.closeGateDay};
+        return Integer{0};
+    };
+    std::stable_sort(
+        candidates.begin(),
+        candidates.end(),
+        [&](const auto& a, const auto& b) {
+            const Integer da = distanceToTarget(a.second.year);
+            const Integer db = distanceToTarget(b.second.year);
+            if (da != db) return da < db;
+            Integer ay = a.second.year.number - anchorYear.number;
+            Integer by = b.second.year.number - anchorYear.number;
+            if (ay < 0) ay = -ay;
+            if (by < 0) by = -by;
+            return ay < by;
+        });
+
+    for (const auto& candidate : candidates) {
+        const Patch18YearRecord& year = candidate.second.year;
+        const Integer verifiedOpen = ensureGateIndex(year.openGateIndex);
+        const Integer verifiedClose = ensureGateIndex(year.closeGateIndex);
+        if (verifiedOpen == year.openGateDay &&
+            verifiedClose == year.closeGateDay &&
+            year.closeGateIndex - year.openGateIndex >= 6) {
+            scarBump(&PersistentScarMetrics::patch30CheckpointHit);
+            Integer avoided = year.number - anchorYear.number;
+            if (avoided < 0) avoided = -avoided;
+            if (avoided > 0 &&
+                avoided <= Integer{std::numeric_limits<std::uint64_t>::max()}) {
+                scarBump(
+                    &PersistentScarMetrics::patch30YearStepsAvoided,
+                    avoided.convert_to<std::uint64_t>());
+            }
+            return year;
+        }
+        {
+            std::lock_guard<std::mutex> guard(yearCheckpointVaultMutex);
+            const auto found = yearCheckpointVault.find(candidate.first);
+            if (found != yearCheckpointVault.end()) found->second.poisoned = true;
+        }
+        scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+    }
+
+    scarBump(&PersistentScarMetrics::patch30CheckpointMiss);
+    return anchorYear;
 }
 
 Patch18YearRecord Patch18YearWalkWorkspace::resolveAnchor(
@@ -6251,13 +7503,17 @@ Patch18YearRecord Patch18YearWalkWorkspace::patchedNextYear(
     const Integer rank = chooseRank(stream, Integer{candidates.size()});
     const std::size_t chosen = (rank - 1).convert_to<std::size_t>();
     const Integer chosenClose = candidates.at(chosen).closeIndex;
-    return Patch18YearRecord{
+    const Patch18YearRecord result{
         knownYear.number + 1,
         openIndex,
         chosenClose,
         openDay,
         ensureGateIndex(chosenClose)
     };
+    if (regularMod(result.number - Integer{5000}, Integer{128}) == 0) {
+        buryYearCheckpoint(result);
+    }
+    return result;
 }
 
 Patch18YearRecord Patch18YearWalkWorkspace::patchedPreviousYear(
@@ -6294,13 +7550,17 @@ Patch18YearRecord Patch18YearWalkWorkspace::patchedPreviousYear(
     const Integer rank = chooseRank(stream, Integer{candidates.size()});
     const std::size_t chosen = (rank - 1).convert_to<std::size_t>();
     const Integer chosenOpen = candidates.at(chosen).openIndex;
-    return Patch18YearRecord{
+    const Patch18YearRecord result{
         knownYear.number - 1,
         chosenOpen,
         closeIndex,
         ensureGateIndex(chosenOpen),
         closeDay
     };
+    if (regularMod(result.number - Integer{5000}, Integer{128}) == 0) {
+        buryYearCheckpoint(result);
+    }
+    return result;
 }
 
 Patch18YearWalkResult Patch18SequentialYearWalkWrapper::repair(
@@ -6309,7 +7569,8 @@ Patch18YearWalkResult Patch18SequentialYearWalkWrapper::repair(
     const Integer& targetDay) const {
     Patch18YearWalkWorkspace workspace(calculationDay);
     const Patch18YearRecord anchorYear = workspace.resolveAnchor(anchor);
-    Patch18YearRecord current = anchorYear;
+    Patch18YearRecord current =
+        workspace.resurrectNearestYearCheckpoint(anchorYear, targetDay);
     std::size_t forwardSteps = 0;
     std::size_t backwardSteps = 0;
     while (targetDay > current.closeGateDay) {
@@ -6323,6 +7584,7 @@ Patch18YearWalkResult Patch18SequentialYearWalkWrapper::repair(
     if (!(current.openGateDay < targetDay && targetDay <= current.closeGateDay)) {
         throw BaseValidationError("target dies extra annum inventum PATCH 18 est");
     }
+    workspace.buryYearCheckpoint(current);
     return Patch18YearWalkResult{anchorYear, current, forwardSteps, backwardSteps};
 }
 
@@ -6373,7 +7635,8 @@ Patch26YearMembershipDecision OpeningGateMembershipPatchWrapper::repair(
 
     Patch18YearWalkWorkspace workspace(calculationDay, stage56CorrectedSauce);
     const Patch18YearRecord anchorYear = workspace.resolveAnchor(anchor);
-    Patch18YearRecord current = anchorYear;
+    Patch18YearRecord current =
+        workspace.resurrectNearestYearCheckpoint(anchorYear, targetDay);
     std::size_t forwardSteps = 0;
     std::size_t backwardSteps = 0;
 
@@ -6391,6 +7654,7 @@ Patch26YearMembershipDecision OpeningGateMembershipPatchWrapper::repair(
     if (!authoritativeAccepted) {
         throw BaseValidationError("PATCH 26 intervalum auctoritatem (open,close] non obtinuit");
     }
+    workspace.buryYearCheckpoint(current);
     const bool equal =
         legacyInspection.outputYear.number == current.number &&
         legacyInspection.outputYear.openGateIndex == current.openGateIndex &&
@@ -6504,12 +7768,93 @@ Patch14WideDetourSelection Patch14WideDetourWrapper::repair(
     }
     const Integer initialWide = wide;
     const Integer acceptanceLimit = (space / N) * N;
+    const WideRejectionScarKey scarKey{
+        stream.first,
+        stream.directionStep,
+        N,
+        space,
+        acceptanceLimit,
+        initialWide
+    };
     Integer rejectionSteps = 0;
-    while (wide > acceptanceLimit) {
-        wide = 1 + regularMod(
-            wide - 1 + Integer{stream.directionStep},
-            space);
-        ++rejectionSteps;
+    bool rememberedWideAccepted = false;
+    if (accelerationsOn()) {
+        WideRejectionCertificate certificate{};
+        bool foundCertificate = false;
+        {
+            std::lock_guard<std::mutex> guard(wideRejectionScarVaultMutex);
+            const auto found = wideRejectionScarVault.find(scarKey);
+            if (found != wideRejectionScarVault.end()) {
+                if (!found->second.poisoned &&
+                    fingerprintAcceptable(
+                        found->second.semanticFingerprint,
+                        found->second.scarGeneration,
+                        36)) {
+                    certificate = found->second;
+                    foundCertificate = true;
+                } else if (!found->second.poisoned) {
+                    found->second.poisoned = true;
+                    scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                }
+            }
+        }
+        if (foundCertificate) {
+            const Integer replay = 1 + regularMod(
+                initialWide - 1 +
+                    Integer{stream.directionStep} * certificate.rejectionSteps,
+                space);
+            bool valid = replay == certificate.acceptedWide &&
+                         replay <= acceptanceLimit;
+            if (valid && fullHistoricalValidationOn()) {
+                Integer historical = initialWide;
+                Integer historicalSteps = 0;
+                while (historical > acceptanceLimit) {
+                    historical = 1 + regularMod(
+                        historical - 1 + Integer{stream.directionStep},
+                        space);
+                    ++historicalSteps;
+                }
+                valid = historical == certificate.acceptedWide &&
+                        historicalSteps == certificate.rejectionSteps;
+            }
+            if (valid) {
+                wide = certificate.acceptedWide;
+                rejectionSteps = certificate.rejectionSteps;
+                rememberedWideAccepted = true;
+                scarBump(&PersistentScarMetrics::patch36WideScarHit);
+            } else {
+                std::lock_guard<std::mutex> guard(wideRejectionScarVaultMutex);
+                const auto found = wideRejectionScarVault.find(scarKey);
+                if (found != wideRejectionScarVault.end()) found->second.poisoned = true;
+                scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+            }
+        } else {
+            scarBump(&PersistentScarMetrics::patch36WideScarMiss);
+        }
+    }
+
+    if (!rememberedWideAccepted) {
+        while (wide > acceptanceLimit) {
+            wide = 1 + regularMod(
+                wide - 1 + Integer{stream.directionStep},
+                space);
+            ++rejectionSteps;
+        }
+        if (accelerationsOn()) {
+            const WideRejectionCertificate certificate{
+                wide,
+                rejectionSteps,
+                false,
+                36,
+                persistentSemanticFingerprint()
+            };
+            std::lock_guard<std::mutex> guard(wideRejectionScarVaultMutex);
+            const auto existing = wideRejectionScarVault.find(scarKey);
+            if (existing == wideRejectionScarVault.end() || existing->second.poisoned) {
+                boundedEraseFirst(wideRejectionScarVault, REJECTION_SCAR_LIMIT);
+                wideRejectionScarVault[scarKey] = certificate;
+            }
+        }
     }
 
     return Patch14WideDetourSelection{
@@ -10285,9 +11630,26 @@ SpaghettiYearStructure buildFinalYearStructure(
     }
     ctx.finalLegacyStructureSauceGhostExecuted = true;
     Patch11LatchedOrderSauceResult semanticSauce{};
+    if (accelerationsOn()) {
+        // PATCH 34: PATCH 20 corpus semanticum sepelitur etiam si Gradus 56
+        // generationem eius postea recusabit. Recusatio ipsa cicatrix est.
+        scarBump(&PersistentScarMetrics::patch34StructureSauceCorpseBuried);
+    }
     if (ctx.stage56CorrectiveRequested) {
-        const Stage56RawBowlSumSauceResult stage56Sauce =
-            sauceWithStage56RawBowlSumDetour(ctx.calculationDay, firstDay);
+        Stage56RawBowlSumSauceResult stage56Sauce{};
+        if (accelerationsOn()) {
+            scarBump(&PersistentScarMetrics::patch34StructureSauceGenerationRejected);
+            // Prima petitio generationis 56 corpus rectum sepelit; secunda petitio
+            // infra ritum historicum "recompute" servat, sed ex tumulo resurgit.
+            (void)sauceWithStage56RawBowlSumDetour(ctx.calculationDay, firstDay);
+            stage56Sauce =
+                sauceWithStage56RawBowlSumDetour(ctx.calculationDay, firstDay);
+            scarBump(&PersistentScarMetrics::patch34StructureSauceResurrected);
+            ctx.patch34StructureSauceResurrectionObserved = true;
+        } else {
+            stage56Sauce =
+                sauceWithStage56RawBowlSumDetour(ctx.calculationDay, firstDay);
+        }
         semanticSauce = stage56Sauce.semanticSauce;
         const Stage56PostStirDetourWitness& last = stage56Sauce.stirWitnesses.back();
         ctx.stage56PostStirOldResult = last.oldResult;
@@ -10300,6 +11662,10 @@ SpaghettiYearStructure buildFinalYearStructure(
         ctx.stage56AppliedFlag = stage56Sauce.applied;
     } else {
         semanticSauce = sauceWithScars(ctx.calculationDay, firstDay);
+        if (accelerationsOn()) {
+            scarBump(&PersistentScarMetrics::patch34StructureSauceResurrected);
+            ctx.patch34StructureSauceResurrectionObserved = true;
+        }
     }
 
     const int gapCount = (year.closeGateIndex - year.openGateIndex).convert_to<int>();
@@ -10502,7 +11868,7 @@ void BaseValidationManager::requireFinalIntegrationReady(
         !ctx.finalLegacyContiguousMonthDayExecuted) {
         throw BaseValidationError("integratio finalis omnes cicatrices et exitum quinque camporum requirit");
     }
-    if (!ctx.finalGuardedCacheHit &&
+    if (!ctx.finalGuardedCacheHit && !ctx.patch27AncestralHit &&
         (!ctx.finalLegacyStructureSauceGhostExecuted ||
          !ctx.finalLegacyCutletPartitionExecuted ||
          !ctx.finalLegacyCutletNamesExecuted ||
@@ -10519,7 +11885,12 @@ void BaseValidationManager::requireFinalIntegrationReady(
         ctx.resultFive.dayInCutlet < 1 || ctx.resultFive.dayInMonth < 1) {
         throw BaseValidationError("integratio finalis quinque campos invalidos habet");
     }
+    // PATCH 27 REMEMBERED-SCAR VALIDATION: structura iam sepulta/cache-validata
+    // non debet duodecim cicatrices CPU iterum fingere. Via non-cached adhuc
+    // plenam ceremoniam Gradus 56 probat; cache/resurrectio corpus iam probatum
+    // tantum recognoscit.
     if (ctx.stage56CorrectiveRequested &&
+        !ctx.finalGuardedCacheHit && !ctx.patch27AncestralHit &&
         (!ctx.stage56AppliedFlag ||
          ctx.stage56LegacyScarCallCount != 12 ||
          ctx.stage56AppliedCount != 12 ||
@@ -10657,6 +12028,64 @@ FINAL_MAIN_CACHE: {
         } else {
             // Cicatrix key year-number-only manet; entry vetus ante validationem non mutatur.
             ctx.finalGuardedCacheRejected = true;
+        }
+    }
+
+    if (!cacheReady && accelerationsOn()) {
+        // PATCH 27: cache localis mortuus non fingitur HIT. Ex sepulcro externo
+        // tantum post miss localem resurrectio temptatur.
+        const StructureVaultKey vaultKey{
+            ctx.stage56CorrectiveRequested,
+            ctx.calculationDay,
+            targetYear.number,
+            targetYear.openGateDay,
+            targetYear.closeGateDay
+        };
+        BuriedFinalStructure corpse{};
+        bool corpseFound = false;
+        {
+            std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);
+            const auto ancestor = ancestralMemoryVault.find(vaultKey);
+            if (ancestor != ancestralMemoryVault.end()) {
+                if (!ancestor->second.poisoned &&
+                    ancestor->second.calculationDayFingerprint == ctx.calculationDay &&
+                    ancestor->second.yearNumber == targetYear.number &&
+                    ancestor->second.openGate == targetYear.openGateDay &&
+                    ancestor->second.closeGate == targetYear.closeGateDay &&
+                    ancestor->second.stage56 == ctx.stage56CorrectiveRequested &&
+                    fingerprintAcceptable(
+                        ancestor->second.semanticFingerprint,
+                        static_cast<std::uint64_t>(ancestor->second.burialGeneration),
+                        27)) {
+                    corpse = ancestor->second;
+                    ++ancestor->second.resurrectionCount;
+                    corpseFound = true;
+                } else {
+                    ancestor->second.poisoned = true;
+                    ctx.patch27RejectedCorpse = true;
+                    scarBump(&PersistentScarMetrics::patch27RejectedCorpse);
+                    scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                }
+            }
+        }
+        if (corpseFound) {
+            structure = corpse.value;
+            cacheReady = true;
+            ctx.patch27AncestralHit = true;
+            ctx.branchTrace.push_back("PATCH27_ANCESTRAL_CORPSE_RESURRECTED");
+            scarBump(&PersistentScarMetrics::patch27AncestralHit);
+            scarBump(&PersistentScarMetrics::patch27ResurrectionCount);
+            pendingCacheEntry = FinalStructureCacheEntry{
+                ctx.calculationDay,
+                targetYear.openGateDay,
+                targetYear.closeGateDay,
+                structure
+            };
+            pendingCacheWrite = true;
+        } else {
+            ctx.patch27AncestralMiss = true;
+            ctx.branchTrace.push_back("PATCH27_ANCESTRAL_TOMB_EMPTY");
+            scarBump(&PersistentScarMetrics::patch27AncestralMiss);
         }
     }
     stage = cacheReady ? 50 : 40;
@@ -10805,6 +12234,35 @@ FINAL_MAIN_VALIDATE_OUTPUT:
     if (pendingCacheWrite) {
         structureCache[targetYear.number] = pendingCacheEntry;
         pendingCacheWrite = false;
+    }
+    if (accelerationsOn()) {
+        const StructureVaultKey vaultKey{
+            ctx.stage56CorrectiveRequested,
+            ctx.calculationDay,
+            targetYear.number,
+            targetYear.openGateDay,
+            targetYear.closeGateDay
+        };
+        const BuriedFinalStructure burial{
+            ctx.calculationDay,
+            targetYear.number,
+            targetYear.openGateDay,
+            targetYear.closeGateDay,
+            structure,
+            0,
+            27,
+            ctx.stage56CorrectiveRequested,
+            false,
+            persistentSemanticFingerprint()
+        };
+        std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);
+        const auto existing = ancestralMemoryVault.find(vaultKey);
+        if (existing == ancestralMemoryVault.end() || existing->second.poisoned) {
+            boundedEraseFirst(ancestralMemoryVault, ANCESTRAL_STRUCTURE_LIMIT);
+            ancestralMemoryVault[vaultKey] = burial;
+            ctx.patch27BuriedStructure = true;
+            scarBump(&PersistentScarMetrics::patch27BuriedStructure);
+        }
     }
     ctx.finalRecoverableFailuresObserved = failuresObserved;
     ctx.recoveryDepth = recoveryDepth;
@@ -10955,9 +12413,125 @@ std::size_t BaseMonsterManager::stage56FinalStructureCacheSizeDiagnostic() const
 SpaghettiDateFive calendarDateSpaghetti(
     const Integer& calculationDay,
     const Integer& targetDay) {
+    // PATCH 39: modo accelerationum exstincto API ipsa cicatrix historica manet
+    // physice et executable: manager nascitur, operatur, moritur.
+    if (!accelerationsOn()) {
+        BaseMonsterManager manager;
+        return manager.executeFinalIntegrationStage56(calculationDay, targetDay).result;
+    }
+
+    const FinalResultKey key{
+        calculationDay, targetDay, PERSISTENT_SCAR_GENERATION};
+    if (accelerationsOn()) {
+        BuriedFinalResult corpse{};
+        bool foundCorpse = false;
+        {
+            std::lock_guard<std::mutex> guard(finalResultBurialVaultMutex);
+            const auto found = finalResultBurialVault.find(key);
+            if (found != finalResultBurialVault.end()) {
+                if (!found->second.poisoned &&
+                    fingerprintAcceptable(
+                        found->second.semanticFingerprint,
+                        found->second.scarGeneration,
+                        39)) {
+                    corpse = found->second;
+                    foundCorpse = true;
+                } else if (!found->second.poisoned) {
+                    found->second.poisoned = true;
+                    scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                }
+            }
+        }
+        if (foundCorpse && !fullHistoricalValidationOn()) {
+            scarBump(&PersistentScarMetrics::patch39FinalResultHit);
+            return corpse.value;
+        }
+        if (foundCorpse && fullHistoricalValidationOn()) {
+            BaseMonsterManager validatingManager;
+            const SpaghettiDateFive rebuilt = validatingManager
+                .executeFinalIntegrationStage56(calculationDay, targetDay).result;
+            const bool equal =
+                rebuilt.yearNumber == corpse.value.yearNumber &&
+                rebuilt.cutletName == corpse.value.cutletName &&
+                rebuilt.dayInCutlet == corpse.value.dayInCutlet &&
+                rebuilt.monthName == corpse.value.monthName &&
+                rebuilt.dayInMonth == corpse.value.dayInMonth;
+            if (equal) {
+                scarBump(&PersistentScarMetrics::patch39FinalResultHit);
+                return corpse.value;
+            }
+            {
+                std::lock_guard<std::mutex> guard(finalResultBurialVaultMutex);
+                const auto found = finalResultBurialVault.find(key);
+                if (found != finalResultBurialVault.end()) found->second.poisoned = true;
+            }
+            scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+            return rebuilt;
+        }
+        scarBump(&PersistentScarMetrics::patch39FinalResultMiss);
+    }
+
+    // Manager temporarius consulto manet. PATCH 39 sepulcrum extra vitam eius est.
     BaseMonsterManager manager;
-    return manager.executeFinalIntegrationStage56(calculationDay, targetDay).result;
+    const SpaghettiDateFive rebuilt =
+        manager.executeFinalIntegrationStage56(calculationDay, targetDay).result;
+
+    if (accelerationsOn()) {
+        const BuriedFinalResult burial{
+            rebuilt,
+            false,
+            39,
+            persistentSemanticFingerprint()
+        };
+        std::lock_guard<std::mutex> guard(finalResultBurialVaultMutex);
+        const auto existing = finalResultBurialVault.find(key);
+        if (existing == finalResultBurialVault.end() || existing->second.poisoned) {
+            boundedEraseFirst(finalResultBurialVault, FINAL_RESULT_BURIAL_LIMIT);
+            finalResultBurialVault[key] = burial;
+        }
+    }
+    return rebuilt;
 }
+
+#ifdef PASTAFARI_INTERNAL_SCAR_POISON_ORACLE
+bool poisonPatch33AutopsyCorpseForCI() {
+    // Tribunal tantum: corpus diagnosticum corrumpitur et Patch32 tumulus
+    // evacuatur, ne sepultura exterior autopsiam venenatam occultet.
+    bool poisoned = false;
+    {
+        std::lock_guard<std::mutex> guard(sauceAutopsyVaultMutex);
+        for (auto& entry : sauceAutopsyVault) {
+            entry.second.semanticFingerprint = "CORPUS_VETUS_PATCH33";
+            poisoned = true;
+        }
+    }
+    {
+        std::lock_guard<std::mutex> guard(sauceTombMutex);
+        sauceTomb.clear();
+    }
+    return poisoned;
+}
+
+bool poisonPatch27AncestralCorpseForCI() {
+    bool poisoned = false;
+    std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);
+    for (auto& entry : ancestralMemoryVault) {
+        entry.second.semanticFingerprint = "CORPUS_VETUS_PATCH27";
+        poisoned = true;
+    }
+    return poisoned;
+}
+
+bool poisonPatch39FinalCorpseForCI() {
+    bool poisoned = false;
+    std::lock_guard<std::mutex> guard(finalResultBurialVaultMutex);
+    for (auto& entry : finalResultBurialVault) {
+        entry.second.semanticFingerprint = "CORPUS_VETUS_PATCH39";
+        poisoned = true;
+    }
+    return poisoned;
+}
+#endif
 
 SpaghettiDateFive calendarDateSpaghettiThroughStage55(
     const Integer& calculationDay,
