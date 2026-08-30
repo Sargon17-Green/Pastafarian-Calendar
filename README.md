@@ -67,3 +67,16 @@
 `calendarDateSpaghetti -> monster_dispatch_base -> monster_stage08_legacy_stone_handler -> monster_stone_mutation_route -> mutateStonesWrong`
 
 Ϩⲙⲡϣⲟⲣⲡ ⲙⲉⲧⲁⲃⲟⲗⲏ `i=2`, ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ϯ `378,1434,3780,9932,25047`, ⲁⲩⲱ ⲡⲕⲁⲛⲱⲛ ϯ `378,1073,2375,6195,10493`. Ⲡϣⲟⲣⲡ ⲱⲛⲉ ⲧⲱⲛ; ⲡⲕⲉ4 ⲥⲉϣⲟⲃⲉ. Ⲙⲛ ⲡⲁⲧϣ ⲛsnapshot ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 8 ⲟ ⲛ`EXPECTED_RED`; ⲛⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 1–7 ⲥⲉⲟ ⲛ`GREEN`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 9 — PATCH 04
+
+Ⲡ`mutateStonesWrong` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥϫⲓⲛϣⲓⲃⲉ ⲛⲗⲉⲅⲁⲥⲓ. Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲙⲟϥ ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲛⲟⲩⲧⲓⲙⲏ ϩⲙⲡⲉϥⲥⲱⲙⲁ.
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`stonePatch`: ⲛϥϫⲓ ⲛⲟⲩsnapshot ⲙⲡrow ⲛϣⲟⲣⲡ, ⲛϥⲕⲱ ⲛⲟⲩclone ⲛⲕⲉⲥⲟⲡ, ⲛϥⲙⲟⲩⲧⲉ ⲉ`mutateStonesWrong` ϩⲓ ⲡclone, ⲁⲩⲱ ⲛϥⲥϩⲁⲓ ⲛⲕⲉⲥⲟⲡ ⲛ5 ⲛⲧⲓⲙⲏ ⲙⲡgarbage ⲉⲃⲟⲗ ϩⲙⲡsnapshot ⲙⲙⲁⲧⲉ.
+
+`monster_stone_mutation_route -> monster_stage09_stone_patch_wrapper -> stonePatch -> mutateStonesWrong`
+
+Ⲡwrapper ϩⲁⲣⲉϩ ⲉⲡcontract ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡrow: ⲡpointer ⲛⲟⲩⲱⲧ ⲃⲱⲕ ⲉϩⲟⲩⲛ ⲁⲩⲱ ⲛϥⲛⲏⲩ ⲉⲃⲟⲗ. Ⲡ`stonePatch` ⲛⲧⲟϥ ⲟⲩⲏϩ ⲉϥⲧⲁⲙⲓⲟ ⲙⲡgarbage clone ⲕⲁⲧⲁ ⲡϩⲓⲥⲧⲟⲣⲓⲁ.
+
+Ⲡ`getStoneTableThroughLegacyBuilder` ⲕⲱ ⲉϩⲣⲁⲓ ⲛ46 ⲛrows ϩⲓⲧⲛ ⲡ`stonePatch`; ⲡⲇⲟⲕⲓⲙⲏ ⲧⲱⲛ ⲙⲛ ⲡoracle ϩⲓ 230 ⲛBigInt. ⲠStage 8 regression ⲟ ⲛ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲙⲟϥ.

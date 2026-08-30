@@ -97,3 +97,18 @@
 Ⲡ`mutateStonesWrong` ⲡⲉ ⲡCOPY_AUTHORITATIVE ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ. Ⲛϥϣⲓⲃⲉ ⲙⲡarray ⲛ5 ⲛⲱⲛⲉ ϩⲛ ⲡⲉϥⲙⲁ, ⲁⲩⲱ ⲛⲗⲟⲅⲓⲥⲙⲟⲥ ⲉⲧⲛⲏⲩ ⲥⲉϫⲓ ⲛⲧⲓⲙⲏ ⲉⲁⲩⲥϩⲁⲓⲟⲩ ⲏⲇⲏ.
 
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_STONE_ROW`, `CTX_STONE_ROUTE_RESULT`, `CTX_LEGACY_STONE_SEEN`, `CTX_STONE_ROUTE_SEEN` ⲙⲛ `CTX_STONE_ITERATION`. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ. Ⲙⲛ `stonePatch`, `vaultOld`, `garbage overwrite` ⲏ snapshot ⲙⲡ Patch 04 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲡⲡⲁⲧϣ ⲛⲛⲱⲛⲉ ⲙⲡⲃⲁⲑⲙⲟⲥ 9
+
+Ⲡ`mutateStonesWrong` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲛⲟⲩCOPY_DIAGNOSTIC ⲛⲗⲉⲅⲁⲥⲓ ϩⲙⲡhandler ⲁⲩⲱ ⲛⲟⲩcall ⲛⲁⲅⲕⲁⲓⲟⲛ ϩⲙⲡ`stonePatch`. Ⲙⲡⲟⲩⲧⲁⲕⲟϥ.
+
+`monster_stone_mutation_route -> monster_stage09_stone_patch_wrapper -> stonePatch -> mutateStonesWrong`
+
+Ⲡ`stonePatch` ⲣ `old = clone(S)` ⲁⲩⲱ `garbage = mutateStonesWrong(i, clone(S))`. Ⲙⲛⲛⲥⲱⲥ ⲛϥⲥϩⲁⲓ ⲛ5 ⲛⲧⲓⲙⲏ ⲙⲡgarbage ϩⲓⲧⲛ ⲛⲗⲟⲅⲓⲥⲙⲟⲥ ⲉⲧϫⲓ ⲙⲙⲁⲧⲉ ϩⲙⲡ`old`. Ⲉⲧⲃⲉ ϫⲉ ⲛBigInt ⲙⲡrow ⲛⲉ immutable, ⲡsnapshot ⲛ40 bytes ⲛpointer ⲧⲁϫⲣⲏⲩ ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲁⲛ ⲉⲟⲩstate ⲛⲃⲣⲣⲉ.
+
+Ⲡ`monster_stage09_stone_patch_wrapper` ⲕⲱ ⲛ5 ⲛpointer ⲙⲡpatched garbage ⲉϩⲟⲩⲛ ⲉⲡrow ⲉⲧⲁϥϫⲓ ⲁⲩⲱ ⲛϥⲕⲧⲟ ⲙⲡpointer ⲛⲟⲩⲱⲧ. Ⲡⲁⲓ ⲡⲉ ⲟⲩCOPY_COMPATIBILITY ⲉϥⲧⲱⲛ ⲙⲛ ⲡCOPY_AUTHORITATIVE ϩⲛ ⲛ5 ⲛⲧⲓⲙⲏ.
+
+Ⲡ`getStoneTableThroughLegacyBuilder` ⲕⲱ ⲉϩⲣⲁⲓ ⲛ46 ⲛrows ⲛⲧⲉⲡtable, ⲁⲩⲱ row ⲛⲓⲙ ⲙⲛⲛⲥⲁ ⲡϣⲟⲣⲡ ⲃⲱⲕ ϩⲓⲧⲛ `stonePatch`. Ⲡvalidation ⲙⲡStage 9 ⲥⲙⲓⲛⲉ ⲛ230 ⲛBigInt ⲙⲛ ⲡoracle ⲛⲧⲉⲡⲉⲓⲕⲱⲇⲓⲝ.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡlegacy garbage row ⲙⲛ ⲡpatch input ⲙⲛ ⲡpatched row ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ; ⲙⲛ logs ⲏ metrics ⲉⲩⲧⲟϣ ⲙⲡⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ.

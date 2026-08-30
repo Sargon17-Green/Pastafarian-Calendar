@@ -39,7 +39,10 @@
 .equ CTX_LEGACY_STONE_SEEN,296
 .equ CTX_STONE_ROUTE_SEEN,304
 .equ CTX_STONE_ITERATION,312
-.equ CTX_SIZE,320
+.equ CTX_STONE_PATCH_INPUT,320
+.equ CTX_PATCHED_STONE_ROW,328
+.equ CTX_STONE_PATCH_SEEN,336
+.equ CTX_SIZE,344
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -93,6 +96,9 @@ legacy_remainder_M_limbs:
 .global mutateStonesWrong
 .global monster_stone_mutation_route
 .global monster_stage08_legacy_stone_handler
+.global stonePatch
+.global monster_stage09_stone_patch_wrapper
+.global getStoneTableThroughLegacyBuilder
 
 .type monster_context_new,@function
 monster_context_new:
@@ -657,10 +663,270 @@ mutateStonesWrong:
     ret
 .size mutateStonesWrong,.-mutateStonesWrong
 
+# Ⲡ mutateStonesWrong ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲁⲩⲱ ⲡ stonePatch ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ϩⲓ ⲟⲩclone. Ⲡgarbage ⲛⲗⲉⲅⲁⲥⲓ ⲛϥⲃⲱⲗ ⲁⲛ ⲉⲃⲟⲗ; ⲁⲗⲗⲁ ⲛ5 ⲛⲧⲓⲙⲏ ⲥⲉⲥϩⲁⲓ ⲛⲕⲉⲥⲟⲡ ⲉⲃⲟⲗ ϩⲙⲡsnapshot ⲛϣⲟⲣⲡ.
+# Ⲡsnapshot ⲙⲛ ⲡgarbage ⲛⲉ 40 bytes ⲙⲡⲟⲓⲛⲧⲉⲣ. ⲚBigInt ⲥⲉⲟ ⲛimmutable ϩⲙⲡⲉⲓⲣⲱⲧⲉ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡclone ⲛⲧⲉⲡrow ⲧⲁϫⲣⲏⲩ.
+.type stonePatch,@function
+stonePatch:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lsp4_fail
+
+    # old = clone(S)
+    mov rdi,40
+    call arena_alloc
+    mov r14,rax
+    mov rax,qword ptr [r12]
+    mov qword ptr [r14],rax
+    mov rax,qword ptr [r12+8]
+    mov qword ptr [r14+8],rax
+    mov rax,qword ptr [r12+16]
+    mov qword ptr [r14+16],rax
+    mov rax,qword ptr [r12+24]
+    mov qword ptr [r14+24],rax
+    mov rax,qword ptr [r12+32]
+    mov qword ptr [r14+32],rax
+
+    # garbage = mutateStonesWrong(i, clone(S))
+    mov rdi,40
+    call arena_alloc
+    mov r15,rax
+    mov rax,qword ptr [r12]
+    mov qword ptr [r15],rax
+    mov rax,qword ptr [r12+8]
+    mov qword ptr [r15+8],rax
+    mov rax,qword ptr [r12+16]
+    mov qword ptr [r15+16],rax
+    mov rax,qword ptr [r12+24]
+    mov qword ptr [r15+24],rax
+    mov rax,qword ptr [r12+32]
+    mov qword ptr [r15+32],rax
+    mov rdi,r15
+    mov rsi,r13
+    call mutateStonesWrong
+    test rax,rax
+    je .Lsp4_fail
+    mov r15,rax
+
+    # w = SAVE(old.w*old.w + 3*old.b + i)
+    mov rdi,qword ptr [r14]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov rbx,rax
+    mov rdi,qword ptr [r14+8]
+    mov rsi,3
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,rbx
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,r13
+    call bi_add_u64
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r15],rax
+
+    # b = SAVE(old.b*old.b + 5*old.s + old.w)
+    mov rdi,qword ptr [r14+8]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov rbx,rax
+    mov rdi,qword ptr [r14+16]
+    mov rsi,5
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,rbx
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [r14]
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r15+8],rax
+
+    # s = SAVE(old.s*old.s + 7*old.m + old.b)
+    mov rdi,qword ptr [r14+16]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov rbx,rax
+    mov rdi,qword ptr [r14+24]
+    mov rsi,7
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,rbx
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [r14+8]
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r15+16],rax
+
+    # m = SAVE(old.m*old.m + 11*old.r + old.s)
+    mov rdi,qword ptr [r14+24]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov rbx,rax
+    mov rdi,qword ptr [r14+32]
+    mov rsi,11
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,rbx
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [r14+16]
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r15+24],rax
+
+    # r = SAVE(old.r*old.r + 13*old.w + old.m)
+    mov rdi,qword ptr [r14+32]
+    mov rsi,rdi
+    call bi_mul_abs
+    mov rbx,rax
+    mov rdi,qword ptr [r14]
+    mov rsi,13
+    call bi_mul_u64
+    mov rsi,rax
+    mov rdi,rbx
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,qword ptr [r14+24]
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    mov qword ptr [r15+32],rax
+
+    mov rax,r15
+    jmp .Lsp4_done
+.Lsp4_fail:
+    xor eax,eax
+.Lsp4_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stonePatch,.-stonePatch
+
+# Ⲡwrapper ϩⲁⲣⲉϩ ⲉⲡcontract ⲙⲡroute ⲛⲗⲉⲅⲁⲥⲓ: ⲡpointer ⲉⲧⲃⲱⲕ ⲉϩⲟⲩⲛ ⲡⲉ ⲡpointer ⲉⲧⲛⲏⲩ ⲉⲃⲟⲗ. Ⲡ stonePatch ⲛⲧⲟϥ ⲟⲩⲏϩ ⲉϥⲕⲱ ⲙⲡgarbage clone ⲉⲃⲟⲗ.
+.type monster_stage09_stone_patch_wrapper,@function
+monster_stage09_stone_patch_wrapper:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    call stonePatch
+    test rax,rax
+    je .Lms09w_fail
+    mov r13,rax
+    mov rax,qword ptr [r13]
+    mov qword ptr [r12],rax
+    mov rax,qword ptr [r13+8]
+    mov qword ptr [r12+8],rax
+    mov rax,qword ptr [r13+16]
+    mov qword ptr [r12+16],rax
+    mov rax,qword ptr [r13+24]
+    mov qword ptr [r12+24],rax
+    mov rax,qword ptr [r13+32]
+    mov qword ptr [r12+32],rax
+    mov rax,r12
+    jmp .Lms09w_done
+.Lms09w_fail:
+    xor eax,eax
+.Lms09w_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage09_stone_patch_wrapper,.-monster_stage09_stone_patch_wrapper
+
 .type monster_stone_mutation_route,@function
 monster_stone_mutation_route:
-    jmp mutateStonesWrong
+    jmp monster_stage09_stone_patch_wrapper
 .size monster_stone_mutation_route,.-monster_stone_mutation_route
+
+# Ⲡbuilder ⲛⲗⲉⲅⲁⲥⲓ ⲕⲱ ⲉϩⲣⲁⲓ ⲛ46 ⲛrows. Ⲛrow 2..46 ⲥⲉⲛⲏⲩ ϩⲓⲧⲛ stonePatch, ⲉⲣⲉ mutateStonesWrong ⲙⲟⲟϣⲉ ⲙⲙⲏⲛⲉ ϩⲙⲡⲁⲧϣ.
+.type getStoneTableThroughLegacyBuilder,@function
+getStoneTableThroughLegacyBuilder:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov rdi,1840
+    call arena_alloc
+    mov r12,rax
+    mov rdi,17
+    call bi_from_u64
+    mov qword ptr [r12],rax
+    mov rdi,29
+    call bi_from_u64
+    mov qword ptr [r12+8],rax
+    mov rdi,43
+    call bi_from_u64
+    mov qword ptr [r12+16],rax
+    mov rdi,71
+    call bi_from_u64
+    mov qword ptr [r12+24],rax
+    mov rdi,101
+    call bi_from_u64
+    mov qword ptr [r12+32],rax
+    mov r13,2
+.Lgst_loop:
+    cmp r13,47
+    jae .Lgst_done_rows
+    mov rax,r13
+    sub rax,2
+    imul rax,40
+    lea r14,[r12+rax]
+    mov rdi,r14
+    mov rsi,r13
+    call stonePatch
+    test rax,rax
+    je .Lgst_fail
+    mov r15,rax
+    mov rax,r13
+    dec rax
+    imul rax,40
+    lea r14,[r12+rax]
+    mov rax,qword ptr [r15]
+    mov qword ptr [r14],rax
+    mov rax,qword ptr [r15+8]
+    mov qword ptr [r14+8],rax
+    mov rax,qword ptr [r15+16]
+    mov qword ptr [r14+16],rax
+    mov rax,qword ptr [r15+24]
+    mov qword ptr [r14+24],rax
+    mov rax,qword ptr [r15+32]
+    mov qword ptr [r14+32],rax
+    inc r13
+    jmp .Lgst_loop
+.Lgst_done_rows:
+    mov rax,r12
+    jmp .Lgst_done
+.Lgst_fail:
+    xor eax,eax
+.Lgst_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size getStoneTableThroughLegacyBuilder,.-getStoneTableThroughLegacyBuilder
 
 .type monster_stage08_legacy_stone_handler,@function
 monster_stage08_legacy_stone_handler:
@@ -672,10 +938,11 @@ monster_stage08_legacy_stone_handler:
     mov r12,rdi
     test r12,r12
     je .Lms08_fail
+
+    # Ⲡrow ⲛϣⲟⲣⲡ ⲃⲱⲕ ⲉ mutateStonesWrong ⲙⲙⲁⲧⲉ, ⲉⲧⲣⲉ ⲡgarbage ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ϩⲙⲡcontext.
     mov rdi,40
     call arena_alloc
     mov r13,rax
-
     mov rdi,17
     call bi_from_u64
     mov qword ptr [r13],rax
@@ -691,17 +958,44 @@ monster_stage08_legacy_stone_handler:
     mov rdi,101
     call bi_from_u64
     mov qword ptr [r13+32],rax
-
-    mov qword ptr [r12+CTX_STONE_ITERATION],2
-    mov qword ptr [r12+CTX_LEGACY_STONE_ROW],r13
     mov rdi,r13
+    mov rsi,2
+    call mutateStonesWrong
+    test rax,rax
+    je .Lms08_fail
+    mov qword ptr [r12+CTX_LEGACY_STONE_ROW],rax
+    inc qword ptr [r12+CTX_LEGACY_STONE_SEEN]
+
+    # Ⲡrow ⲛⲥⲛⲁⲩ ⲃⲱⲕ ϩⲓⲧⲛ ⲡroute ⲙⲡⲁⲧϣ.
+    mov rdi,40
+    call arena_alloc
+    mov r14,rax
+    mov rdi,17
+    call bi_from_u64
+    mov qword ptr [r14],rax
+    mov rdi,29
+    call bi_from_u64
+    mov qword ptr [r14+8],rax
+    mov rdi,43
+    call bi_from_u64
+    mov qword ptr [r14+16],rax
+    mov rdi,71
+    call bi_from_u64
+    mov qword ptr [r14+24],rax
+    mov rdi,101
+    call bi_from_u64
+    mov qword ptr [r14+32],rax
+    mov qword ptr [r12+CTX_STONE_ITERATION],2
+    mov qword ptr [r12+CTX_STONE_PATCH_INPUT],r14
+    mov rdi,r14
     mov rsi,2
     call monster_stone_mutation_route
     test rax,rax
     je .Lms08_fail
     mov qword ptr [r12+CTX_STONE_ROUTE_RESULT],rax
-    inc qword ptr [r12+CTX_LEGACY_STONE_SEEN]
+    mov qword ptr [r12+CTX_PATCHED_STONE_ROW],rax
     inc qword ptr [r12+CTX_STONE_ROUTE_SEEN]
+    inc qword ptr [r12+CTX_STONE_PATCH_SEEN]
     mov eax,1
     jmp .Lms08_done
 .Lms08_fail:
