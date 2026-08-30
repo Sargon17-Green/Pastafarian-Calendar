@@ -160,7 +160,10 @@
 .equ CTX_STAGE30_ROUTE_SEEN,1264
 .equ CTX_STAGE31_PATCHED_RESULT,1272
 .equ CTX_STAGE31_PATCH_SEEN,1280
-.equ CTX_SIZE,1288
+.equ CTX_STAGE32_LEGACY_YEAR_MAX_OBSERVED,1288
+.equ CTX_STAGE32_CANDIDATE_MASK,1296
+.equ CTX_STAGE32_LEGACY_SEEN,1304
+.equ CTX_SIZE,1312
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -202,6 +205,7 @@
 .equ BI_LEN,8
 .equ BI_CAP,16
 .equ BI_DATA,24
+.equ LEGACY_YEAR_MAX,5781
 
 .section .data.rel.ro
 .align 8
@@ -383,6 +387,9 @@ legacy_bowl_stir_stone_by_position:
 .global gateQuestionDayPatch15
 .global monster_stage31_gate_question_patch_wrapper
 .global monster_stage31_gate_question_patch_handler
+.global oldYearCandidate
+.global monster_year_candidate_route
+.global monster_stage32_legacy_year_max_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -5734,6 +5741,82 @@ monster_stage31_gate_question_patch_handler:
     ret
 .size monster_stage31_gate_question_patch_handler,.-monster_stage31_gate_question_patch_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 32 — DISCOVERY 16
+# Ⲡlegacy ⲟⲩⲏϩ ⲉϥϩⲁⲣⲉϩ ⲉⲡyear maximum ⲛ5781. Ⲡcandidate predicate ⲟⲩⲱⲛϩ ⲛⲟⲩⲙⲉ ϩⲙⲡroute ⲁⲩⲱ ⲛϥϫⲓ ⲛ5779,5780,5781 ⲉϩⲟⲩⲛ ⲉⲡfamily.
+.type oldYearCandidate,@function
+oldYearCandidate:
+    cmp rdi,6
+    jb .Loyc_no
+    cmp rsi,252
+    jb .Loyc_no
+    cmp rsi,LEGACY_YEAR_MAX
+    ja .Loyc_no
+    mov eax,1
+    ret
+.Loyc_no:
+    xor eax,eax
+    ret
+.size oldYearCandidate,.-oldYearCandidate
+
+.type monster_year_candidate_route,@function
+monster_year_candidate_route:
+    jmp oldYearCandidate
+.size monster_year_candidate_route,.-monster_year_candidate_route
+
+.type monster_stage32_legacy_year_max_handler,@function
+monster_stage32_legacy_year_max_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    test r12,r12
+    je .Lms32_fail
+    mov qword ptr [r12+CTX_STAGE32_LEGACY_YEAR_MAX_OBSERVED],LEGACY_YEAR_MAX
+    xor r13d,r13d
+
+    mov edi,6
+    mov esi,5778
+    call monster_year_candidate_route
+    test eax,eax
+    je .Lms32_next_5779
+    or r13,1
+.Lms32_next_5779:
+    mov edi,6
+    mov esi,5779
+    call monster_year_candidate_route
+    test eax,eax
+    je .Lms32_next_5780
+    or r13,2
+.Lms32_next_5780:
+    mov edi,6
+    mov esi,5780
+    call monster_year_candidate_route
+    test eax,eax
+    je .Lms32_next_5781
+    or r13,4
+.Lms32_next_5781:
+    mov edi,6
+    mov esi,5781
+    call monster_year_candidate_route
+    test eax,eax
+    je .Lms32_store
+    or r13,8
+.Lms32_store:
+    mov qword ptr [r12+CTX_STAGE32_CANDIDATE_MASK],r13
+    inc qword ptr [r12+CTX_STAGE32_LEGACY_SEEN]
+    mov eax,1
+    jmp .Lms32_done
+.Lms32_fail:
+    xor eax,eax
+.Lms32_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage32_legacy_year_max_handler,.-monster_stage32_legacy_year_max_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -5842,6 +5925,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage31_gate_question_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage32_legacy_year_max_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

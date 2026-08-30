@@ -477,3 +477,18 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡlegacy scar ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ. Ⲡpatched result ⲙⲛ ⲡseen counter ⲟ ⲛinvocation-local. Ⲙⲛ global mutable semantic state, ⲙⲛ oracle call ϩⲙⲡproduction, ⲁⲩⲱ ⲙⲛ future patch code.
+
+
+## Ⲡlegacy year ceiling scar ⲙⲡⲃⲁⲑⲙⲟⲥ 32
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage32_legacy_year_max_handler -> monster_year_candidate_route -> oldYearCandidate`
+
+Ⲡ`oldYearCandidate` ϫⲓ ⲛⲟⲩgap count ⲙⲛ ⲟⲩcandidate length ⲉⲁⲩⲗⲟⲅⲓⲍⲉ ⲙⲙⲟⲟⲩ ϩⲙⲡgate layer. Ⲡpredicate ⲛⲗⲉⲅⲁⲥⲓ ϯ ⲛtrue ⲉϣϫⲉ `gaps>=6` ⲙⲛ `252<=length<=LEGACY_YEAR_MAX`, ⲉⲣⲉ `LEGACY_YEAR_MAX=5781` ⲟ ⲛconstant ⲉϥⲥⲏϩ ϩⲙⲡproduction.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡEXPECTED_RED ⲧⲁϫⲣⲏⲩ
+
+Ⲡsame-line test boundary ⲟ ⲛ`5778`. Ⲉⲧⲃⲉ ⲡlegacy constant, ⲛlength `5779,5780,5781` ⲥⲉⲃⲱⲕ ⲉϩⲟⲩⲛ ⲉⲡfamily ⲉⲧⲟⲩⲱϣ ⲉⲣⲟϥ ⲛⲗⲉⲅⲁⲥⲓ. Ⲡ`5782` ⲙⲛ `251` ⲥⲉⲟ ⲛout-of-family ⲁⲩⲱ `252,5778` ⲥⲉⲟ ⲛin-family. Ⲡdivergence ⲟ ⲛ3 ⲛcase ⲙⲙⲁⲧⲉ.
+
+Ⲡstate ⲛⲧⲉⲡStage 32 ⲟ ⲛinvocation-local ϩⲙⲡ`MonsterContext`. Ⲙⲛ oracle call ϩⲙⲡproduction, ⲙⲛ global mutable semantic state, ⲁⲩⲱ ⲙⲛ future year-filter code.

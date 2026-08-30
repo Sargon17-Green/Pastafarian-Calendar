@@ -391,3 +391,16 @@
 Ⲡsame-line regression ⲧⲁϫⲣⲟ ϩⲓ `-1,-2,-10,0,+1`. Ⲛ5 ⲛcase ⲧⲏⲣⲟⲩ ⲧⲱⲛ ⲙⲛ ⲡsigned normative day. Ⲡdirect legacy scar ϩⲓ `-10` ⲟⲩⲏϩ ⲉϥϯ `FOUNDATION+10`.
 
 ⲠStage 30 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲙⲛ code ⲙⲡPATCH 16 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 32 — DISCOVERY 16
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲡlegacy constant `LEGACY_YEAR_MAX=5781` ⲁⲩⲱ ⲙⲡ`oldYearCandidate(gaps,length)`. Ⲡpredicate ⲟ ⲛⲧⲉⲓϩⲉ:
+
+`gaps>=6` ⲙⲛ `252<=length<=LEGACY_YEAR_MAX`.
+
+`monster_year_candidate_route` ⲙⲟⲟϣⲉ ⲉ`oldYearCandidate` ⲛⲧⲟϥ ϩⲙⲡDISCOVERY ⲡⲁⲓ. Ⲡ`monster_stage32_legacy_year_max_handler` ⲙⲟⲩⲧⲉ ⲉⲡroute ⲛⲟⲩⲙⲉ ⲉϫⲛ `5778,5779,5780,5781` ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲟⲩcandidate mask ϩⲙⲡ`MonsterContext`.
+
+Ⲡsame-line regression ⲧⲁϫⲣⲟ ⲉϫⲛ `251,252,5778,5779,5780,5781,5782`. Ⲡlegacy ϫⲓ ⲉϩⲟⲩⲛ ⲛ`5779..5781`, ϩⲟⲡⲟⲩ ⲡboundary ⲛⲕⲁⲛⲱⲛ ⲟ ⲛ`5778`; ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+ⲠStage 32 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–31 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ late year filter ⲏ code ⲙⲡPATCH 16 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.

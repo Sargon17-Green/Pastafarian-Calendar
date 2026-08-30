@@ -641,3 +641,20 @@
 Ⲡtest ⲛStage 31 ⲛⲁϥⲕⲱ ⲙⲡ`-10` ϩⲓⲧⲛ `edi`, ⲉⲧⲉ ⲛϥϩⲁⲣⲉϩ ⲁⲛ ⲙⲡ64-bit negative sign. Ⲁⲩϣⲓⲃⲉ ⲙⲙⲟϥ ⲉ`rdi` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡproduction. Ⲁⲩⲧⲁϫⲣⲟ ⲟⲛ ⲙⲡstack alignment ⲛⲧⲉ ⲛtest helpers.
 
 Ⲙⲛ code ⲙⲡPATCH 16 ⲏ future gate-selection code ⲉⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 32 — DISCOVERY 16
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡyear-length ceiling ⲟ ⲛ`5781`, ⲁⲩⲱ ⲡcandidate predicate ϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲛⲟⲩyear ⲉϣϫⲉ `gaps>=6` ⲙⲛ `252<=length<=5781`.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡlegacy ceiling ⲕⲱ ⲛ`5779`, `5780`, `5781` ⲉϩⲟⲩⲛ ⲉⲡcandidate family, ϩⲟⲡⲟⲩ ⲡboundary ⲛⲕⲁⲛⲱⲛ ⲟ ⲛ`5778`. Ⲡregression ⲧⲁϫⲣⲟ ⲙⲡ`251,252,5778,5779,5780,5781,5782` ⲁⲩⲱ ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `LEGACY_YEAR_MAX=5781`, `oldYearCandidate`, `monster_year_candidate_route` ⲙⲛ `monster_stage32_legacy_year_max_handler`. Ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲡlegacy route ⲛⲟⲩⲙⲉ ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡobserved legacy maximum, ⲡcandidate mask ⲙⲛ ⲡseen counter ϩⲙⲡinvocation context.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩlate filter ⲙⲡ`5778`, ⲁⲩⲱ ⲙⲛ code ⲙⲡPATCH 16 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
