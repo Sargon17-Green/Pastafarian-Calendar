@@ -342,3 +342,24 @@
 Ⲡsame-line regression ⲧⲁϫⲣⲟ ⲛ3 ⲛwide family size: `M_OLD+1`, `M_OLD^2`, `M_OLD^3`. Ⲡdirect legacy call ⲧⲏⲣϥ ⲟ ⲛnull; ⲡ`oracle_choose_rank_wide` ⲙⲡAssembly ⲛⲟⲩⲱⲧ ϯ ⲛⲟⲩrank ⲛⲧⲟϣ. Ⲡroute ⲙⲡStage 28 ⲟ ⲛshort-only, ⲁⲩⲱ ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
 
 Ⲙⲛ `wideDetour`, ⲙⲛ base-M digits, ⲙⲛ combined wide number, ⲁⲩⲱ ⲙⲛ wide rejection ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 28 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–27 ⲥⲉⲟ ⲛ`GREEN`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 29 — PATCH 14
+
+Ⲡ`legacySelectionAssumingNLeM` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉ`patchedSmallPick` ⲙⲙⲁⲧⲉ. Ϩⲓ `N>M_OLD` ⲡdirect legacy scar ⲟⲩⲏϩ ⲉϥϯ null.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`selectionPatch14`. Ⲉϣϫⲉ `N<=M_OLD`, ⲡdispatcher ⲕⲧⲟ ⲉⲡlegacy short path. Ⲉϣϫⲉ `N>M_OLD`, ⲛϥⲙⲟⲩⲧⲉ ⲉ`wideDetour`.
+
+`monster_wide_selection_route -> monster_stage29_wide_patch_wrapper -> selectionPatch14`
+
+Ⲡ`wideDetour` ⲕⲱ ⲙⲡ`places` ⲙⲙⲁⲧⲉ ϣⲁⲛⲧⲉ `space=M_OLD^places >= N`. Ⲛdigits ⲥⲉϫⲓ ⲛⲟⲩⲥⲟⲡ ⲙⲙⲁⲧⲉ ϩⲙⲡanswer ring, ⲁⲩⲱ ⲡcombined number ⲟ ⲛ:
+
+`1 + Σ((digit_k-1) * M_OLD^k)`
+
+Ⲙⲛⲛⲥⲱⲥ ⲡacceptance limit ⲡⲉ `floor(space/N)*N`. Ⲉϣϫⲉ ⲡcombined number ⲟ ⲉϩⲣⲁⲓ ⲉⲡlimit, ⲡrejection ⲙⲟⲟϣⲉ ϩⲓ ⲡcombined-number ring ⲛⲧⲟϣ ⲙⲛ ⲡdirection ⲛⲧⲉ ⲡanswer ring. Ⲛdigits ⲛⲥⲉϫⲓ ⲁⲛ ⲛⲕⲉⲥⲟⲡ.
+
+ⲠStage 28 handler ⲧⲉⲛⲟⲩ ⲕⲱ ⲙⲡdirect legacy null ⲙⲛ `unsupported=1`, ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡpatched route ϩⲛ ⲟⲩstate ⲉϥϣⲟⲃⲉ. ⲠStage 28 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.
+
+ⲠStage 29 test ⲥⲙⲓⲛⲉ ⲙⲡshort boundary `N=M_OLD` ⲙⲛ ⲛwide family `M_OLD+1`, `M_OLD^2`, `M_OLD^3` ⲙⲛ `oracle_choose_rank_wide` ⲙⲡsame-line Assembly. Ⲛⲧⲟⲟⲩ ⲧⲏⲣⲟⲩ ⲥⲉⲧⲱⲛ.
+
+Ⲙⲛ code ⲙⲡPATCH 15 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.

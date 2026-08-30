@@ -566,3 +566,26 @@
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacySelectionAssumingNLeM`, `monster_wide_selection_route` ⲙⲛ `monster_stage28_legacy_wide_assumption_handler`. Ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲡroute ⲛⲟⲩⲙⲉ ϩⲓ `N=M_OLD+1`, ⲛϥϩⲁⲣⲉϩ ⲉⲡring, family size, null result, assumed-short flag, unsupported flag ⲙⲛ seen counter ϩⲙⲡinvocation context.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`wideDetour`, ⲟⲩbase-M digit builder, ⲟⲩwide-number rejection ⲏ code ⲙⲡPATCH 14.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 29 — PATCH 14
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`legacySelectionAssumingNLeM`. Ⲡscar ⲟⲩⲏϩ ⲉϥⲙⲉⲉⲩⲉ ϫⲉ family ⲛⲓⲙ ⲟ ⲛshort, ⲁⲩⲱ ϩⲓ `N>M_OLD` ⲛϥϯ ⲁⲛ ⲛⲟⲩrank.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲛ`wideRingStepPatch14`, `wideDetour`, `selectionPatch14` ⲙⲛ `monster_stage29_wide_patch_wrapper`.
+
+Ⲡdispatcher ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡshort legacy path ⲉϣϫⲉ `N<=M_OLD`; ⲡwide detour ⲙⲙⲁⲧⲉ ⲡⲉ ⲡⲙⲁ ⲉϥⲙⲟⲟϣⲉ ⲉⲣⲟϥ ⲉϣϫⲉ `N>M_OLD`.
+
+Ⲡwide path ⲧⲁⲙⲓⲟ ⲙⲡ`space=M_OLD^places` ⲉϥⲥⲟⲃⲧⲉ ⲉⲧⲣⲉϥⲟ ⲛ`>=N`. Ⲛdigits ⲛⲧⲉⲡanswer ring ⲥⲉϫⲓ ⲛⲟⲩⲥⲟⲡ ⲙⲙⲁⲧⲉ, ⲁⲩⲱ ⲥⲉⲧⲁⲙⲓⲟ ⲙⲡcombined base-M number. Ⲡrejection ⲙⲟⲟϣⲉ ϩⲓ ⲡcombined-number ring ⲛⲧⲟϣ; ⲛϥⲕⲧⲟ ⲁⲛ ⲉⲡdigit stream.
+
+### Ⲡⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+ⲠStage 28 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE28_REGRESSION_GREEN`. ⲠStage 29 test ⲧⲁϫⲣⲟ ⲙⲡshort boundary ⲙⲛ ⲛwide family `M_OLD+1`, `M_OLD^2`, `M_OLD^3` ⲙⲛ ⲡsame-line oracle. Ⲡrank, `space`, `limit`, accepted combined number ⲙⲛ places ⲥⲉⲧⲱⲛ ⲙⲛ ⲛinvariant ⲛⲧⲟϣ.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
+
+Ⲡlegacy scar ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ ϩⲙⲡwide detour. Ⲡwide trace ⲟ ⲛinvocation-local ϩⲙⲡ`MonsterContext`. Ⲙⲛ oracle call ϩⲙⲡproduction, ⲙⲛ global mutable semantic state, ⲁⲩⲱ ⲙⲛ future patch code.

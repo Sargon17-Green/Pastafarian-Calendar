@@ -143,7 +143,16 @@
 .equ CTX_STAGE28_LEGACY_ASSUMED_SHORT,1128
 .equ CTX_STAGE28_LEGACY_UNSUPPORTED,1136
 .equ CTX_STAGE28_ROUTE_SEEN,1144
-.equ CTX_SIZE,1152
+.equ CTX_STAGE29_ROUTE_RESULT,1152
+.equ CTX_STAGE29_PLACES,1160
+.equ CTX_STAGE29_SPACE,1168
+.equ CTX_STAGE29_COMBINED_INITIAL,1176
+.equ CTX_STAGE29_ACCEPTANCE_LIMIT,1184
+.equ CTX_STAGE29_ACCEPTED_COMBINED,1192
+.equ CTX_STAGE29_REJECTION_STEPS,1200
+.equ CTX_STAGE29_USED_WIDE,1208
+.equ CTX_STAGE29_PATCH_SEEN,1216
+.equ CTX_SIZE,1224
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -352,8 +361,13 @@ legacy_bowl_stir_stone_by_position:
 .global monster_stage26_legacy_biased_selection_handler
 .global monster_stage27_rejection_patch_handler
 .global legacySelectionAssumingNLeM
+.global wideRingStepPatch14
+.global wideDetour
+.global selectionPatch14
+.global monster_stage29_wide_patch_wrapper
 .global monster_wide_selection_route
 .global monster_stage28_legacy_wide_assumption_handler
+.global monster_stage29_wide_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -5086,9 +5100,311 @@ legacySelectionAssumingNLeM:
     jmp patchedSmallPick
 .size legacySelectionAssumingNLeM,.-legacySelectionAssumingNLeM
 
+# Ⲃⲁⲑⲙⲟⲥ 29 — PATCH 14
+# ⲠlegacySelectionAssumingNLeM ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲛⲟⲩscar. Ⲡdispatcher ⲙⲟⲟϣⲉ ⲉⲡshort path ⲉϣϫⲉ N<=M_OLD,
+# ⲁⲩⲱ ⲉⲡwide detour ⲙⲙⲁⲧⲉ ⲉϣϫⲉ N>M_OLD. Ⲛdigits ⲥⲉϫⲓ ⲛⲟⲩⲥⲟⲡ ⲙⲙⲁⲧⲉ ϩⲙⲡanswer ring;
+# ⲡrejection ⲙⲟⲟϣⲉ ϩⲓ ⲡcombined number ϩⲙⲡspace=M_OLD^places, ⲁⲛ ϩⲓ ⲟⲩnew digit read.
+.type wideRingStepPatch14,@function
+wideRingStepPatch14:
+    # rdi=current BigInt*, rsi=step +/-1, rdx=space BigInt*. rax=next BigInt*.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Lwrsp14_fail
+    test r14,r14
+    je .Lwrsp14_fail
+    cmp r13,1
+    je .Lwrsp14_plus
+    cmp r13,-1
+    jne .Lwrsp14_fail
+
+    mov rdi,r12
+    mov rsi,1
+    call bi_eq_u64
+    test eax,eax
+    je .Lwrsp14_minus_plain
+    mov rdi,r14
+    call bi_clone
+    jmp .Lwrsp14_done
+.Lwrsp14_minus_plain:
+    mov rdi,1
+    call bi_from_u64
+    test rax,rax
+    je .Lwrsp14_fail
+    mov rsi,rax
+    mov rdi,r12
+    call bi_sub
+    jmp .Lwrsp14_done
+
+.Lwrsp14_plus:
+    mov rdi,r12
+    mov rsi,r14
+    call bi_cmp
+    test eax,eax
+    jne .Lwrsp14_plus_plain
+    mov rdi,1
+    call bi_from_u64
+    jmp .Lwrsp14_done
+.Lwrsp14_plus_plain:
+    mov rdi,r12
+    mov rsi,1
+    call bi_add_u64
+    jmp .Lwrsp14_done
+
+.Lwrsp14_fail:
+    xor eax,eax
+.Lwrsp14_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size wideRingStepPatch14,.-wideRingStepPatch14
+
+.type wideDetour,@function
+wideDetour:
+    # rdi=LegacyAnswerRing*, rsi=N BigInt*.
+    # rax=rank; rdx=accepted combined; rcx=places; r8=space; r9=limit; r10=initial combined; r11=rejection steps.
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,56
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lwd14_fail
+    test r13,r13
+    je .Lwd14_fail
+    cmp qword ptr [r13+BI_SIGN],1
+    jne .Lwd14_fail
+    mov rdi,r13
+    lea rsi,[rip+legacy_remainder_M]
+    call bi_cmp
+    test eax,eax
+    jle .Lwd14_fail
+
+    # ⲞⲩCOPY_DIAGNOSTIC: ⲡshort-only legacy scar ⲛϥϯ ⲁⲛ ⲛⲟⲩrank ϩⲓ wide N.
+    mov rdi,r12
+    mov rsi,r13
+    call legacySelectionAssumingNLeM
+    test rax,rax
+    jne .Lwd14_fail
+
+    # space=M_OLD^places, ⲙⲛ ⲡplaces ⲉϥⲥⲟⲃⲧⲉ ⲉⲧⲣⲉ space>=N.
+    lea rdi,[rip+legacy_remainder_M]
+    call bi_clone
+    test rax,rax
+    je .Lwd14_fail
+    mov r14,rax
+    mov ebx,1
+.Lwd14_space_loop:
+    mov rdi,r14
+    mov rsi,r13
+    call bi_cmp
+    test eax,eax
+    jge .Lwd14_space_done
+    mov rdi,r14
+    lea rsi,[rip+legacy_remainder_M]
+    call bi_mul_abs
+    test rax,rax
+    je .Lwd14_fail
+    mov r14,rax
+    inc rbx
+    jne .Lwd14_space_loop
+    jmp .Lwd14_fail
+.Lwd14_space_done:
+    mov qword ptr [rbp-48],r14
+
+    # combined=1; factor=1. Ⲡdigit ⲛposition k ⲡⲉ ringAnswer(k), ⲁⲩⲱ ⲡweight ⲡⲉ M_OLD^k.
+    mov rdi,1
+    call bi_from_u64
+    test rax,rax
+    je .Lwd14_fail
+    mov r15,rax
+    mov rdi,1
+    call bi_from_u64
+    test rax,rax
+    je .Lwd14_fail
+    mov qword ptr [rbp-56],rax
+    xor ecx,ecx
+.Lwd14_digit_loop:
+    cmp rcx,rbx
+    jae .Lwd14_digits_done
+    mov qword ptr [rbp-64],rcx
+    mov rdi,r12
+    mov rsi,rcx
+    call ringAnswer
+    test rax,rax
+    je .Lwd14_fail
+    mov qword ptr [rbp-72],rax
+    mov rdi,1
+    call bi_from_u64
+    test rax,rax
+    je .Lwd14_fail
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-72]
+    call bi_sub
+    test rax,rax
+    je .Lwd14_fail
+    mov rdi,rax
+    mov rsi,qword ptr [rbp-56]
+    call bi_mul_abs
+    test rax,rax
+    je .Lwd14_fail
+    mov rsi,rax
+    mov rdi,r15
+    call bi_add_abs
+    test rax,rax
+    je .Lwd14_fail
+    mov r15,rax
+    mov rdi,qword ptr [rbp-56]
+    lea rsi,[rip+legacy_remainder_M]
+    call bi_mul_abs
+    test rax,rax
+    je .Lwd14_fail
+    mov qword ptr [rbp-56],rax
+    mov rcx,qword ptr [rbp-64]
+    inc rcx
+    jmp .Lwd14_digit_loop
+.Lwd14_digits_done:
+    mov qword ptr [rbp-80],r15
+    # Ⲡfactor ⲙⲛ ⲡspace ϣⲉ ⲉⲧⲣⲉⲩⲧⲱⲛ.
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-48]
+    call bi_cmp
+    test eax,eax
+    jne .Lwd14_fail
+
+    # limit=floor(space/N)*N.
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,r13
+    call bi_divmod_abs
+    test rax,rax
+    je .Lwd14_fail
+    mov rdi,rax
+    mov rsi,r13
+    call bi_mul_abs
+    test rax,rax
+    je .Lwd14_fail
+    mov qword ptr [rbp-88],rax
+    mov qword ptr [rbp-96],r15
+    xor r11d,r11d
+
+.Lwd14_reject:
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,qword ptr [rbp-88]
+    call bi_cmp
+    test eax,eax
+    jle .Lwd14_accept
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,qword ptr [r12+S26_RING_STEP]
+    mov rdx,qword ptr [rbp-48]
+    call wideRingStepPatch14
+    test rax,rax
+    je .Lwd14_fail
+    mov qword ptr [rbp-96],rax
+    inc r11
+    jne .Lwd14_reject
+    jmp .Lwd14_fail
+
+.Lwd14_accept:
+    mov qword ptr [rbp-56],r11
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,r13
+    call biasedLegacyPick
+    test rax,rax
+    je .Lwd14_fail
+    mov rdx,qword ptr [rbp-96]
+    mov rcx,rbx
+    mov r8,qword ptr [rbp-48]
+    mov r9,qword ptr [rbp-88]
+    mov r10,qword ptr [rbp-80]
+    mov r11,qword ptr [rbp-56]
+    jmp .Lwd14_done
+
+.Lwd14_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+    xor r9d,r9d
+    xor r10d,r10d
+    xor r11d,r11d
+.Lwd14_done:
+    add rsp,56
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size wideDetour,.-wideDetour
+
+.type selectionPatch14,@function
+selectionPatch14:
+    # rdi=ring, rsi=N. Ⲡshort path ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡlegacy short wrapper.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lsp14_fail
+    test r13,r13
+    je .Lsp14_fail
+    cmp qword ptr [r13+BI_SIGN],1
+    jne .Lsp14_fail
+    mov rdi,r13
+    lea rsi,[rip+legacy_remainder_M]
+    call bi_cmp
+    test eax,eax
+    jg .Lsp14_wide
+    mov rdi,r12
+    mov rsi,r13
+    call legacySelectionAssumingNLeM
+    jmp .Lsp14_done
+.Lsp14_wide:
+    mov rdi,r12
+    mov rsi,r13
+    call wideDetour
+    jmp .Lsp14_done
+.Lsp14_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+    xor r9d,r9d
+    xor r10d,r10d
+    xor r11d,r11d
+.Lsp14_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size selectionPatch14,.-selectionPatch14
+
+.type monster_stage29_wide_patch_wrapper,@function
+monster_stage29_wide_patch_wrapper:
+    jmp selectionPatch14
+.size monster_stage29_wide_patch_wrapper,.-monster_stage29_wide_patch_wrapper
+
 .type monster_wide_selection_route,@function
 monster_wide_selection_route:
-    jmp legacySelectionAssumingNLeM
+    jmp monster_stage29_wide_patch_wrapper
 .size monster_wide_selection_route,.-monster_wide_selection_route
 
 .type monster_stage28_legacy_wide_assumption_handler,@function
@@ -5117,18 +5433,22 @@ monster_stage28_legacy_wide_assumption_handler:
     mov qword ptr [r12+CTX_STAGE28_WIDE_FAMILY_SIZE],r14
     mov qword ptr [r12+CTX_STAGE28_LEGACY_ASSUMED_SHORT],1
 
+    # Ⲡlegacy scar ⲟⲩⲏϩ ⲉϥϯ null ϩⲓ N>M_OLD.
+    mov rdi,r13
+    mov rsi,r14
+    call legacySelectionAssumingNLeM
+    mov qword ptr [r12+CTX_STAGE28_LEGACY_RESULT],rax
+    test rax,rax
+    jne .Lms28_fail
+    mov qword ptr [r12+CTX_STAGE28_LEGACY_UNSUPPORTED],1
+
+    # Ⲡsemantic route ⲧⲉⲛⲟⲩ ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡPATCH 14.
     mov rdi,r13
     mov rsi,r14
     call monster_wide_selection_route
-    mov qword ptr [r12+CTX_STAGE28_LEGACY_RESULT],rax
-    inc qword ptr [r12+CTX_STAGE28_ROUTE_SEEN]
     test rax,rax
-    jne .Lms28_supported
-    mov qword ptr [r12+CTX_STAGE28_LEGACY_UNSUPPORTED],1
-    jmp .Lms28_ok
-.Lms28_supported:
-    mov qword ptr [r12+CTX_STAGE28_LEGACY_UNSUPPORTED],0
-.Lms28_ok:
+    je .Lms28_fail
+    inc qword ptr [r12+CTX_STAGE28_ROUTE_SEEN]
     mov eax,1
     jmp .Lms28_done
 .Lms28_fail:
@@ -5141,6 +5461,50 @@ monster_stage28_legacy_wide_assumption_handler:
     leave
     ret
 .size monster_stage28_legacy_wide_assumption_handler,.-monster_stage28_legacy_wide_assumption_handler
+
+.type monster_stage29_wide_patch_handler,@function
+monster_stage29_wide_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lms29_fail
+    mov r13,qword ptr [r12+CTX_STAGE28_WIDE_RING]
+    mov r14,qword ptr [r12+CTX_STAGE28_WIDE_FAMILY_SIZE]
+    test r13,r13
+    je .Lms29_fail
+    test r14,r14
+    je .Lms29_fail
+    mov rdi,r13
+    mov rsi,r14
+    call monster_wide_selection_route
+    test rax,rax
+    je .Lms29_fail
+    mov qword ptr [r12+CTX_STAGE29_ROUTE_RESULT],rax
+    mov qword ptr [r12+CTX_STAGE29_ACCEPTED_COMBINED],rdx
+    mov qword ptr [r12+CTX_STAGE29_PLACES],rcx
+    mov qword ptr [r12+CTX_STAGE29_SPACE],r8
+    mov qword ptr [r12+CTX_STAGE29_ACCEPTANCE_LIMIT],r9
+    mov qword ptr [r12+CTX_STAGE29_COMBINED_INITIAL],r10
+    mov qword ptr [r12+CTX_STAGE29_REJECTION_STEPS],r11
+    mov qword ptr [r12+CTX_STAGE29_USED_WIDE],1
+    inc qword ptr [r12+CTX_STAGE29_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms29_done
+.Lms29_fail:
+    xor eax,eax
+.Lms29_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage29_wide_patch_handler,.-monster_stage29_wide_patch_handler
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -5235,6 +5599,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage28_legacy_wide_assumption_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage29_wide_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

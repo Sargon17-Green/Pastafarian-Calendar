@@ -422,3 +422,24 @@
 Ⲡtest-only validation ϫⲓ ⲙⲡ`oracle_choose_rank_wide` ⲙⲡsame-line Assembly ⲙⲙⲁⲧⲉ. Ⲛfamily `M_OLD+1`, `M_OLD^2`, `M_OLD^3` ⲥⲉⲟ ⲛnormative wide families ⲙⲛ rank ⲉϥϣⲟⲟⲡ, ϩⲟⲡⲟⲩ ⲡshort-only route ϯ null.
 
 Ⲙⲛ wide semantic path ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction. Ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local ⲁⲩⲱ ⲙⲛ global mutable semantic state.
+
+
+## Ⲡwide-family detour ⲙⲡⲃⲁⲑⲙⲟⲥ 29
+
+ⲠCOPY_DIAGNOSTIC ⲟ ⲛ`legacySelectionAssumingNLeM -> patchedSmallPick`. Ϩⲓ `N>M_OLD` ⲡlegacy scar ⲕⲧⲟ ⲛnull. ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_wide_selection_route -> monster_stage29_wide_patch_wrapper -> selectionPatch14`
+
+Ⲡ`selectionPatch14` ϯ ⲛⲟⲩbranch ⲉⲃⲟⲗ ϩⲙⲡcomparison ⲙⲛ `M_OLD`. Ⲡshort branch ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡlegacy short wrapper; ⲡwide branch ⲙⲟⲩⲧⲉ ⲉ`wideDetour`.
+
+Ⲡ`wideDetour` ϫⲓ ⲙⲡplaces ⲉⲧⲉ ⲡϣⲟⲣⲡ exponent ⲡⲉ ⲉⲧⲣⲉ `M_OLD^places>=N`. Ⲡdigit list ⲛϥϫⲓ ⲙⲙⲟϥ ⲛⲟⲩⲥⲟⲡ ⲙⲙⲁⲧⲉ ϩⲓ offsets `0..places-1`. Ⲡcombined number ⲟ ⲛ`1+Σ((digit_k-1)M_OLD^k)` ⲁⲩⲱ ⲉϥϣⲟⲟⲡ ϩⲛ `1..space`.
+
+Ⲡacceptance limit ⲡⲉ `floor(space/N)*N`. Ⲡ`wideRingStepPatch14` ⲙⲟⲟϣⲉ ⲙⲡcombined number ⲛⲟⲩstep `+1` ⲏ `-1` ϩⲙⲡspace ring. Ⲡrejection ⲙⲟⲟϣⲉ ϩⲙⲡring ⲡⲁⲓ ϣⲁⲛⲧⲉ `combined<=limit`, ⲁⲩⲱ ⲙⲛⲛⲥⲱⲥ `biasedLegacyPick` ϯ ⲙⲡrank.
+
+### EQUIVALENCE
+
+Ⲛdigits ⲥⲉⲟ ⲛbase-`M_OLD` digits ⲛⲧⲉ ⲟⲩnumber ϩⲛ `1..space`. Ⲡacceptance interval ⲟ ⲛmultiple ⲙⲡN, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡlegacy modulo ⲙⲛⲛⲥⲁ rejection ⲟ ⲛuniform ϩⲛ `1..N`. Ⲡrejection ⲛϥϫⲓ ⲁⲛ ⲛⲕⲉdigits; ⲛϥⲙⲟⲟϣⲉ ⲙⲙⲁⲧⲉ ϩⲓ ⲡcombined ring ⲉⲧⲁⲩⲧⲁⲙⲓⲟϥ.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
+
+Ⲡshort scar ⲟⲩⲏϩ callable. Ⲡwide state ⲧⲏⲣϥ — places, space, initial combined, limit, accepted combined, rejection steps ⲙⲛ rank — ⲟ ⲛinvocation-local. Ⲙⲛ global mutable semantic state ⲁⲩⲱ ⲙⲛ oracle call ϩⲙⲡproduction.
