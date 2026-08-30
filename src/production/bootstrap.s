@@ -108,7 +108,12 @@
 .equ CTX_STAGE22_LAST_SOURCE_KIND,848
 .equ CTX_STAGE22_LAST_SOURCE_ORDINAL,856
 .equ CTX_STAGE22_SEEN,864
-.equ CTX_SIZE,872
+.equ CTX_STAGE23_ORDER46_LATCH,872
+.equ CTX_STAGE23_LATCH_WRITE_COUNT,880
+.equ CTX_STAGE23_LATCH_SOURCE_ORDINAL,888
+.equ CTX_STAGE23_LEGACY_DIAGNOSTIC_RESULT,896
+.equ CTX_STAGE23_SEEN,904
+.equ CTX_SIZE,912
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -127,6 +132,22 @@
 .equ S22_LAST_SOURCE_KIND,72
 .equ S22_LAST_SOURCE_ORDINAL,80
 .equ S22_SIZE,88
+.equ S23_BOWLS_AFTER_DROPS,0
+.equ S23_FINAL_BOWLS,8
+.equ S23_DROP46_DIAGNOSTIC,16
+.equ S23_LEGACY_ORDER_MEMORY,24
+.equ S23_LAST_POST_ORDER,32
+.equ S23_QUERY_ORDER,40
+.equ S23_DROPS,48
+.equ S23_HIDDEN,56
+.equ S23_ORDER_WRITE_COUNT,64
+.equ S23_LAST_SOURCE_KIND,72
+.equ S23_LAST_SOURCE_ORDINAL,80
+.equ S23_ORDER46_LATCH,88
+.equ S23_LATCH_WRITE_COUNT,96
+.equ S23_LATCH_SOURCE_ORDINAL,104
+.equ S23_LEGACY_DIAGNOSTIC_RESULT,112
+.equ S23_SIZE,120
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -276,6 +297,9 @@ legacy_bowl_stir_stone_by_position:
 .global legacySauceWithOverwritableOrderMemory
 .global monster_order46_memory_route
 .global monster_stage22_overwritable_order_handler
+.global sauceWithOrderAt46Latch
+.global monster_stage23_order46_latch_patch_wrapper
+.global monster_stage23_order46_latch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -3886,9 +3910,336 @@ legacySauceWithOverwritableOrderMemory:
     ret
 .size legacySauceWithOverwritableOrderMemory,.-legacySauceWithOverwritableOrderMemory
 
+.type sauceWithOrderAt46Latch,@function
+sauceWithOrderAt46Latch:
+    # Ⲃⲁⲑⲙⲟⲥ 23 — PATCH 11. Ⲡlatch ⲡⲁⲓ ⲥⲏϩ ⲛⲟⲩⲥⲟⲡ ⲙⲙⲁⲧⲉ ⲙⲛⲛⲥⲁ ⲡdrop 46, ⲉⲙⲡⲁⲧⲉ ⲡpost-stir ⲛϣⲟⲣⲡ ⲁⲣⲭⲉⲓ.
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,120
+    mov qword ptr [rbp-48],rdi
+    mov qword ptr [rbp-56],rsi
+    mov edi,S23_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Lswo46l23_fail
+    mov r12,rax
+    mov rdi,r12
+    xor eax,eax
+    mov ecx,11
+    rep stosq
+    mov edi,HCOUNTS_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Lswo46l23_fail
+    mov r13,rax
+    mov rdi,qword ptr [rbp-48]
+    call bi_from_i64
+    mov qword ptr [rbp-64],rax
+    mov rdi,rax
+    call dayTagWithFoundationScar
+    mov qword ptr [r13+HCOUNTS_ACTION],rax
+    mov rdi,qword ptr [rbp-56]
+    call bi_from_i64
+    mov qword ptr [rbp-72],rax
+    mov rdi,rax
+    call dayTagWithFoundationScar
+    mov qword ptr [r13+HCOUNTS_TARGET],rax
+    mov rdi,qword ptr [rbp-64]
+    mov rsi,qword ptr [rbp-72]
+    call distanceWithChronologicalScar
+    mov qword ptr [r13+HCOUNTS_DISTANCE],rax
+    mov rdi,qword ptr [r13+HCOUNTS_ACTION]
+    mov rsi,qword ptr [r13+HCOUNTS_TARGET]
+    call bi_add_abs
+    mov qword ptr [r13+HCOUNTS_CONNECTION],rax
+    mov rax,qword ptr [rbp-56]
+    cmp rax,qword ptr [rbp-48]
+    jl .Lswo46l23_dir1
+    je .Lswo46l23_dir2
+    mov edi,3
+    jmp .Lswo46l23_dir_make
+.Lswo46l23_dir1:
+    mov edi,1
+    jmp .Lswo46l23_dir_make
+.Lswo46l23_dir2:
+    mov edi,2
+.Lswo46l23_dir_make:
+    call bi_from_u64
+    mov qword ptr [r13+HCOUNTS_DIRECTION],rax
+    call getStoneTableThroughLegacyBuilder
+    test rax,rax
+    je .Lswo46l23_fail
+    mov r14,rax
+    mov rdi,r13
+    mov rsi,r14
+    call buildHiddenWithBackwardStorage
+    test rax,rax
+    je .Lswo46l23_fail
+    mov r15,rax
+    mov qword ptr [r12+S23_HIDDEN],r15
+    mov edi,424
+    call arena_alloc
+    test rax,rax
+    je .Lswo46l23_fail
+    mov qword ptr [rbp-80],rax
+    mov rdi,rax
+    xor eax,eax
+    mov ecx,53
+    rep stosq
+    mov rax,qword ptr [rbp-80]
+    add rax,48
+    mov qword ptr [rbp-88],rax
+    mov qword ptr [r12+S23_DROPS],rax
+    mov rdi,r13
+    call initialBowlsThroughStage22OldFactory
+    test rax,rax
+    je .Lswo46l23_fail
+    mov qword ptr [rbp-96],rax
+    mov edi,144
+    call arena_alloc
+    test rax,rax
+    je .Lswo46l23_fail
+    mov qword ptr [rbp-104],rax
+    lea rcx,[rax+48]
+    mov qword ptr [rbp-112],rcx
+    lea rcx,[rax+96]
+    mov qword ptr [rbp-120],rcx
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lswo46l23_fail
+    mov qword ptr [rbp-152],rax
+    mov qword ptr [r12+S23_ORDER46_LATCH],rax
+    mov rax,qword ptr [rbp-104]
+    mov qword ptr [r12+S23_LEGACY_ORDER_MEMORY],rax
+    mov rcx,qword ptr [rbp-112]
+    mov qword ptr [r12+S23_DROP46_DIAGNOSTIC],rcx
+    mov rcx,qword ptr [rbp-120]
+    mov qword ptr [r12+S23_LAST_POST_ORDER],rcx
+    mov rbx,1
+.Lswo46l23_drop_loop:
+    cmp rbx,46
+    ja .Lswo46l23_after_drops
+    mov rdi,r13
+    mov rsi,r14
+    mov rdx,qword ptr [rbp-88]
+    mov rcx,r15
+    mov r8,rbx
+    call monster_visible_drop_route
+    test rax,rax
+    je .Lswo46l23_fail
+    mov rdx,qword ptr [rbp-88]
+    mov qword ptr [rdx+rbx*8],rax
+    mov qword ptr [rbp-128],rax
+    mov edi,72
+    call arena_alloc
+    test rax,rax
+    je .Lswo46l23_fail
+    mov qword ptr [rbp-136],rax
+    lea rcx,[rax+48]
+    mov qword ptr [rbp-144],rcx
+    mov rdi,qword ptr [rbp-128]
+    mov rsi,rax
+    call orderPatchFromValue
+    test rax,rax
+    je .Lswo46l23_fail
+    mov rax,rbx
+    dec rax
+    imul rax,40
+    lea rcx,[r14+rax]
+    mov rdi,qword ptr [rbp-128]
+    mov rsi,rbx
+    mov rdx,qword ptr [rbp-96]
+    mov r8,qword ptr [rbp-136]
+    mov r9,qword ptr [rbp-144]
+    call patchedPours
+    test rax,rax
+    je .Lswo46l23_fail
+    mov rax,rbx
+    dec rax
+    imul rax,40
+    lea rcx,[r14+rax]
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rbx
+    mov rdx,qword ptr [rbp-128]
+    mov r8,qword ptr [rbp-136]
+    mov r9,qword ptr [rbp-144]
+    call stirOneDropViaShadow
+    test rax,rax
+    je .Lswo46l23_fail
+    xor ecx,ecx
+.Lswo46l23_write_drop_order:
+    cmp rcx,6
+    jae .Lswo46l23_drop_written
+    mov rax,qword ptr [rbp-136]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov rax,qword ptr [rbp-104]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lswo46l23_write_drop_order
+.Lswo46l23_drop_written:
+    inc qword ptr [r12+S23_ORDER_WRITE_COUNT]
+    mov qword ptr [r12+S23_LAST_SOURCE_KIND],1
+    mov qword ptr [r12+S23_LAST_SOURCE_ORDINAL],rbx
+    cmp rbx,46
+    jne .Lswo46l23_next_drop
+    xor ecx,ecx
+.Lswo46l23_copy46:
+    cmp rcx,6
+    jae .Lswo46l23_latch46_begin
+    mov rax,qword ptr [rbp-136]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov rax,qword ptr [rbp-112]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lswo46l23_copy46
+.Lswo46l23_latch46_begin:
+    cmp qword ptr [r12+S23_LATCH_WRITE_COUNT],0
+    jne .Lswo46l23_fail
+    xor ecx,ecx
+.Lswo46l23_latch46_copy:
+    cmp rcx,6
+    jae .Lswo46l23_latch46_done
+    mov rax,qword ptr [rbp-136]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov rax,qword ptr [rbp-152]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lswo46l23_latch46_copy
+.Lswo46l23_latch46_done:
+    inc qword ptr [r12+S23_LATCH_WRITE_COUNT]
+    mov qword ptr [r12+S23_LATCH_SOURCE_ORDINAL],46
+.Lswo46l23_next_drop:
+    inc rbx
+    jmp .Lswo46l23_drop_loop
+.Lswo46l23_after_drops:
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lswo46l23_fail
+    mov qword ptr [r12+S23_BOWLS_AFTER_DROPS],rax
+    xor ecx,ecx
+.Lswo46l23_copy_after_drops:
+    cmp rcx,6
+    jae .Lswo46l23_post_begin
+    mov rdx,qword ptr [rbp-96]
+    mov rdx,qword ptr [rdx+rcx*8]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lswo46l23_copy_after_drops
+.Lswo46l23_post_begin:
+    mov rbx,1
+.Lswo46l23_post_loop:
+    cmp rbx,12
+    ja .Lswo46l23_finish
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rbx
+    mov rdx,qword ptr [rbp-120]
+    call postStirOneOverwritingOrderMemoryStage22
+    test rax,rax
+    je .Lswo46l23_fail
+    xor ecx,ecx
+.Lswo46l23_write_post_order:
+    cmp rcx,6
+    jae .Lswo46l23_post_written
+    mov rax,qword ptr [rbp-120]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov rax,qword ptr [rbp-104]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lswo46l23_write_post_order
+.Lswo46l23_post_written:
+    inc qword ptr [r12+S23_ORDER_WRITE_COUNT]
+    mov qword ptr [r12+S23_LAST_SOURCE_KIND],2
+    mov qword ptr [r12+S23_LAST_SOURCE_ORDINAL],rbx
+    inc rbx
+    jmp .Lswo46l23_post_loop
+.Lswo46l23_finish:
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lswo46l23_fail
+    mov qword ptr [r12+S23_FINAL_BOWLS],rax
+    xor ecx,ecx
+.Lswo46l23_final_copy:
+    cmp rcx,6
+    jae .Lswo46l23_query
+    mov rdx,qword ptr [rbp-96]
+    mov rdx,qword ptr [rdx+rcx*8]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lswo46l23_final_copy
+.Lswo46l23_query:
+    mov rax,qword ptr [rbp-152]
+    mov qword ptr [r12+S23_QUERY_ORDER],rax
+    cmp qword ptr [r12+S23_LATCH_WRITE_COUNT],1
+    jne .Lswo46l23_fail
+    cmp qword ptr [r12+S23_LATCH_SOURCE_ORDINAL],46
+    jne .Lswo46l23_fail
+    cmp qword ptr [r12+S23_ORDER_WRITE_COUNT],58
+    jne .Lswo46l23_fail
+    cmp qword ptr [r12+S23_LAST_SOURCE_KIND],2
+    jne .Lswo46l23_fail
+    cmp qword ptr [r12+S23_LAST_SOURCE_ORDINAL],12
+    jne .Lswo46l23_fail
+    mov rax,r12
+    jmp .Lswo46l23_done
+.Lswo46l23_fail:
+    xor eax,eax
+.Lswo46l23_done:
+    add rsp,120
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size sauceWithOrderAt46Latch,.-sauceWithOrderAt46Latch
+
+.type monster_stage23_order46_latch_patch_wrapper,@function
+monster_stage23_order46_latch_patch_wrapper:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    # Ⲡlegacy sauce ⲙⲟⲟϣⲉ ⲛⲟⲩⲙⲉ ⲉⲧⲣⲉⲡoverwritable memory ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ.
+    mov rdi,r12
+    mov rsi,r13
+    call legacySauceWithOverwritableOrderMemory
+    test rax,rax
+    je .Lms23wrap_fail
+    mov r14,rax
+    mov rdi,r12
+    mov rsi,r13
+    call sauceWithOrderAt46Latch
+    test rax,rax
+    je .Lms23wrap_fail
+    mov qword ptr [rax+S23_LEGACY_DIAGNOSTIC_RESULT],r14
+    jmp .Lms23wrap_done
+.Lms23wrap_fail:
+    xor eax,eax
+.Lms23wrap_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage23_order46_latch_patch_wrapper,.-monster_stage23_order46_latch_patch_wrapper
+
 .type monster_order46_memory_route,@function
 monster_order46_memory_route:
-    jmp legacySauceWithOverwritableOrderMemory
+    jmp monster_stage23_order46_latch_patch_wrapper
 .size monster_order46_memory_route,.-monster_order46_memory_route
 
 .type monster_stage22_overwritable_order_handler,@function
@@ -3930,6 +4281,40 @@ monster_stage22_overwritable_order_handler:
     leave
     ret
 .size monster_stage22_overwritable_order_handler,.-monster_stage22_overwritable_order_handler
+
+.type monster_stage23_order46_latch_handler,@function
+monster_stage23_order46_latch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    mov r12,rdi
+    test r12,r12
+    je .Lms23h_fail
+    mov rax,qword ptr [r12+CTX_STAGE22_SAUCE_RESULT]
+    test rax,rax
+    je .Lms23h_fail
+    mov rdx,qword ptr [rax+S23_ORDER46_LATCH]
+    test rdx,rdx
+    je .Lms23h_fail
+    mov qword ptr [r12+CTX_STAGE23_ORDER46_LATCH],rdx
+    mov rdx,qword ptr [rax+S23_LATCH_WRITE_COUNT]
+    mov qword ptr [r12+CTX_STAGE23_LATCH_WRITE_COUNT],rdx
+    mov rdx,qword ptr [rax+S23_LATCH_SOURCE_ORDINAL]
+    mov qword ptr [r12+CTX_STAGE23_LATCH_SOURCE_ORDINAL],rdx
+    mov rdx,qword ptr [rax+S23_LEGACY_DIAGNOSTIC_RESULT]
+    test rdx,rdx
+    je .Lms23h_fail
+    mov qword ptr [r12+CTX_STAGE23_LEGACY_DIAGNOSTIC_RESULT],rdx
+    inc qword ptr [r12+CTX_STAGE23_SEEN]
+    mov eax,1
+    jmp .Lms23h_done
+.Lms23h_fail:
+    xor eax,eax
+.Lms23h_done:
+    pop r12
+    leave
+    ret
+.size monster_stage23_order46_latch_handler,.-monster_stage23_order46_latch_handler
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -3994,6 +4379,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage22_overwritable_order_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage23_order46_latch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

@@ -248,3 +248,18 @@
 ϨⲙⲡFoundation witness, ⲡorder ⲙⲡdrop 46 ⲡⲉ `[4,5,2,3,6,1]`, ⲁⲗⲗⲁ ⲡlegacy/query memory ⲙⲛⲛⲥⲁ ⲡpost-stir 12 ⲡⲉ `[1,6,5,2,4,3]`. Ⲛposition 1,2,6 ⲥⲉϣⲟⲃⲉ. Ⲛ6 ⲛfinal bowls ⲧⲱⲛ ⲙⲛ `oracle_sauce` ⲙⲡline ⲛⲟⲩⲱⲧ; ⲡdrop46 diagnostic ⲧⲱⲛ ⲟⲛ ⲙⲛ ⲡoracle.
 
 Ⲙⲛ `orderAt46Latch` ⲏ ⲟⲩsingle-write repair ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 22 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–21 ⲥⲉⲟ ⲛ`GREEN`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 23 — PATCH 11
+
+Ⲡ`legacySauceWithOverwritableOrderMemory` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡ`monster_stage23_order46_latch_patch_wrapper` ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲩⲱ ⲙⲛⲛⲥⲱⲥ ⲛϥⲙⲟⲩⲧⲉ ⲉ`sauceWithOrderAt46Latch` ⲛⲟⲩCOPY_AUTHORITATIVE.
+
+`monster_order46_memory_route -> monster_stage23_order46_latch_patch_wrapper -> sauceWithOrderAt46Latch`
+
+ⲠCOPY_AUTHORITATIVE ⲟⲩⲏϩ ⲉϥⲥϩⲁⲓ ⲙⲡlegacy order memory 58 ⲛⲥⲟⲡ. Ⲙⲛⲛⲥⲁ ⲧⲣⲉⲡround ⲙⲡdrop 46 ⲟⲩⲱ ⲁⲩⲱ ⲉⲙⲡⲁⲧⲉ ⲡpost-stir ⲛϣⲟⲣⲡ ⲁⲣⲭⲉⲓ, ⲛϥⲥϩⲁⲓ ⲛⲟⲩⲥⲟⲡ ⲙⲙⲁⲧⲉ ⲙⲡorder ⲉ`S23_ORDER46_LATCH`.
+
+Ⲡlatch ⲟⲩⲏϩ ⲁϫⲛ write ϩⲛ ⲛ12 ⲛpost-stir. Ⲡlegacy memory ⲇⲉ ⲟⲩⲏϩ ⲉϥⲟⲩⲱϩ ⲛⲛwrite ⲁⲩⲱ ⲛϥϫⲱⲕ ⲉⲃⲟⲗ ϩⲙⲡorder ⲙⲡpost-stir 12. Ⲡ`queryOrder` ⲙⲡPATCH 11 ϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡlatch.
+
+ϨⲙⲡFoundation witness, ⲡlatch/query ⲡⲉ `[4,5,2,3,6,1]`, ⲁⲗⲗⲁ ⲡlegacy memory ⲡⲉ `[1,6,5,2,4,3]`. Ⲡlatch write count ⲟ ⲛ1 ⲁⲩⲱ ⲡsource ordinal ⲟ ⲛ46. Ⲛ6 ⲛfinal bowls ⲙⲛ ⲡquery ⲧⲱⲛ ⲙⲛ `oracle_sauce` ⲙⲡline ⲛⲟⲩⲱⲧ.
+
+ⲠStage 22 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲙⲛ `oldNextBowlFixedName` ⲏ ⲟⲩrepair ⲙⲡPATCH 12 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.

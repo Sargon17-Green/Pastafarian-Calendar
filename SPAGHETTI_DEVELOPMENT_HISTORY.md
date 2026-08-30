@@ -432,3 +432,28 @@
 Ⲡfull path ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲛscar ⲙⲛ ⲛpatch ⲛStage 1–21. Ⲡoracle ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡproduction; ⲡtest ⲙⲙⲁⲧⲉ ⲥⲙⲓⲛⲉ ⲛⲛfinal bowls ⲙⲛ ⲡdrop46 order ⲙⲛ `oracle_sauce` ⲙⲡline ⲛⲟⲩⲱⲧ.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`orderAt46Latch` ⲏ ⲟⲩrepair ϩⲙⲡⲉⲓDISCOVERY.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 23 — PATCH 11
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`legacySauceWithOverwritableOrderMemory`. ⲠCOPY_DIAGNOSTIC ⲛⲧⲟϥ ⲟⲩⲏϩ ⲉϥⲥϩⲁⲓ ⲙⲡorder memory 58 ⲛⲥⲟⲡ ⲁⲩⲱ ⲡlegacy query ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡorder ⲙⲡpost-stir 12.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`sauceWithOrderAt46Latch`. ⲠCOPY_AUTHORITATIVE ⲡⲁⲓ ⲣ ⲛⲟⲩfull sauce path ⲛⲕⲉⲥⲟⲡ, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲙⲡlegacy order memory ⲛⲟⲩⲱⲧ ⲉϥⲥⲏϩ 58 ⲛⲥⲟⲡ.
+
+Ⲙⲛⲛⲥⲁ ⲡdrop 46 bowl round ⲛⲧⲉⲩⲛⲟⲩ, ⲉⲙⲡⲁⲧⲉ ⲡpost-stir 1 ⲁⲣⲭⲉⲓ, ⲡorder ⲥⲏϩ ⲉⲟⲩbuffer ⲉϥϣⲟⲃⲉ: `S23_ORDER46_LATCH`. Ⲡguard ⲁⲛⲁⲅⲕⲁⲍⲉ ϫⲉ ⲡwrite count ⲟ ⲛ0 ⲙⲡⲉⲙⲧⲟ ⲙⲡwrite, ⲁⲩⲱ ⲙⲛⲛⲥⲱϥ ⲛϥⲟ ⲛ1 ⲙⲙⲁⲧⲉ.
+
+Ⲛ12 ⲛpost-stir ⲟⲩⲏϩ ⲉⲩⲥϩⲁⲓ ⲉⲡlegacy memory ⲁⲗⲗⲁ ⲙⲛ ⲟⲩwrite ⲉⲡlatch. Ⲡ`S23_QUERY_ORDER` ϫⲓ ⲙⲡlatch ⲙⲙⲁⲧⲉ.
+
+`monster_order46_memory_route -> monster_stage23_order46_latch_patch_wrapper -> sauceWithOrderAt46Latch`
+
+### Ⲡⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+ⲠStage 22 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE22_REGRESSION_GREEN`. ⲠStage 23 test ⲧⲁϫⲣⲟ ϫⲉ ⲡCOPY_DIAGNOSTIC ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ⲙⲛ ⲡdrop46 order, ⲁⲗⲗⲁ ⲡlatch ⲙⲛ ⲡquery ⲧⲱⲛ ⲙⲛ `oracle_sauce`.
+
+Ⲡ`monster_stage23_order46_latch_handler` ϫⲓ ⲛⲟⲩstate ⲙⲡresult ⲉⲧⲁⲡStage 22 handler ⲧⲁⲙⲓⲟ ⲙⲙⲟϥ; ⲛϥⲙⲟⲩⲧⲉ ⲁⲛ ⲛⲕⲉⲥⲟⲡ ⲉⲡsauce. Ⲡcontext ϩⲁⲣⲉϩ ⲉⲡlatch pointer, ⲡwrite count, ⲡsource ordinal, ⲡlegacy diagnostic result ⲙⲛ ⲡseen counter.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`oldNextBowlFixedName` ⲏ ⲟⲩcode ⲙⲡDISCOVERY 12.

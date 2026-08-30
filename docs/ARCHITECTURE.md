@@ -308,3 +308,26 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲛstate ⲧⲏⲣⲟⲩ ⲟ ⲛinvocation-local ϩⲙⲡarena. Ⲙⲛ global mutable semantic state. Ⲙⲛ latch ⲏ cache ⲉϥϫⲓ ⲙⲡorder ⲙⲡdrop 46.
+
+
+## Ⲡsingle-write order latch ⲙⲡⲃⲁⲑⲙⲟⲥ 23
+
+ⲠCOPY_DIAGNOSTIC ⲡⲉ `legacySauceWithOverwritableOrderMemory`: ⲛϥⲙⲟⲟϣⲉ ⲛⲟⲩⲙⲉ ⲁⲩⲱ ⲛϥϫⲱⲕ ⲙⲡlegacy order memory ϩⲙⲡpost-stir 12.
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_order46_memory_route -> monster_stage23_order46_latch_patch_wrapper -> sauceWithOrderAt46Latch`
+
+Ⲡ`S23_ORDER46_LATCH` ⲟ ⲛⲟⲩarena buffer ⲛ48 byte ⲙⲡinvocation. Ⲡwrite-site ⲛⲟⲩⲱⲧ ⲟⲩⲱⲛϩ ⲙⲛⲛⲥⲁ ⲡdrop 46 round ⲁⲩⲱ ⲙⲡⲉⲙⲧⲟ ⲙⲡbranch ⲉⲧⲁⲣⲭⲉⲓ ⲙⲡpost-stir loop. Ⲡlatch ⲛϥⲛⲁⲥϩⲁⲓ ⲁⲛ ⲛⲕⲉⲥⲟⲡ.
+
+Ⲡlegacy order memory ⲛⲧⲉⲡCOPY_AUTHORITATIVE ⲟⲩⲏϩ ⲉϥϫⲓ 58 ⲛwrite ⲉⲧⲣⲉⲡscar ⲙⲡStage 22 ⲟⲩⲱⲛϩ. Ⲡquery pointer ⲇⲉ ⲟ ⲛalias ⲙⲡlatch ⲙⲙⲁⲧⲉ.
+
+Ⲡ`monster_stage23_order46_latch_handler` ⲛϥⲣ ⲁⲛ ⲛⲟⲩsecond sauce execution. Ⲛϥϫⲓ ⲙⲙⲁⲧⲉ ⲛStage 23 fields ⲉⲃⲟⲗ ϩⲙⲡresult pointer ⲉⲧⲁⲡStage 22 handler ⲕⲁⲁϥ ϩⲙ `CTX_STAGE22_SAUCE_RESULT`.
+
+### EQUIVALENCE
+
+Ⲡlatch ⲟ ⲛphysical clone ⲛⲧⲉ ⲛ6 ⲛbowl IDs ⲙⲡorder ⲙⲡdrop 46. Ⲛpost-stir ⲛϥⲧⲟϣ ⲁⲛ ⲙⲙⲟϥ. Ⲉⲧⲃⲉ ⲡⲁⲓ `queryOrder == order(drop46)` ⲙⲛⲛⲥⲁ ⲡfull sauce, ϩⲟⲡⲟⲩ ⲡlegacy memory ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡpost-stir 12.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
+
+Ⲡlatch, ⲡlegacy memory, ⲛbowls ⲙⲛ ⲛdiagnostic ⲧⲏⲣⲟⲩ ⲟ ⲛinvocation-local ϩⲙⲡarena. Ⲙⲛ global mutable semantic state. ⲠCOPY_DIAGNOSTIC ⲛϥⲧⲟϣ ⲁⲛ ⲙⲡquery; ⲡCOPY_AUTHORITATIVE ⲙⲙⲁⲧⲉ ⲡⲉ ⲡsource ⲙⲡsemantic result.
