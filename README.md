@@ -235,3 +235,16 @@
 ⲠStage 20 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲡdirect legacy call ⲟⲩⲏϩ ⲉϥϯ 5 ⲛmismatch ϩⲙⲡwitness ⲛⲧⲟϣ, ϩⲟⲡⲟⲩ ⲡroute ⲙⲡpatch ϯ 0 ⲛmismatch ⲙⲛ ⲡsame-line old-state reference.
 
 Ⲡ`CTX_BOWL_SHADOW_PATCH_SEEN` ⲙⲉⲧⲣⲉ ϫⲉ ⲡshadow detour ⲁϥⲙⲟⲟϣⲉ ϩⲙⲡinvocation. Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 22 — DISCOVERY 11
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacySauceWithOverwritableOrderMemory`. Ⲡroute ⲡⲁⲓ ⲧⲁⲙⲓⲟ ⲛ46 ⲛvisible drop ϩⲓⲧⲛ ⲛpatch ⲛϣⲟⲣⲡ, ⲛϥⲧⲁⲙⲓⲟ ⲛpatched pours, ⲛϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ `stirOneDropViaShadow`, ⲁⲩⲱ ⲛϥⲉⲣ 12 ⲛpost-stir.
+
+Ⲡlegacy ⲕⲱ ⲙⲡorder ⲛⲧⲉ drop ⲛⲓⲙ ⲙⲛ post-stir ⲛⲓⲙ ⲉⲟⲩmemory ⲛⲟⲩⲱⲧ. Ⲟⲩⲛ 58 ⲛwrite: 46 ⲛⲧⲉ ⲛdrop ⲙⲛ 12 ⲛⲧⲉ ⲛpost-stir. Ⲡorder ⲙⲡdrop 46 ⲥⲏϩ ⲉⲃⲟⲗ ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲗⲗⲁ ⲡ`queryOrder` ϫⲓ ⲙⲡmemory ⲛⲟⲩⲱⲧ ⲙⲛⲛⲥⲁ ⲡpost-stir 12.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage22_overwritable_order_handler -> monster_order46_memory_route -> legacySauceWithOverwritableOrderMemory`
+
+ϨⲙⲡFoundation witness, ⲡorder ⲙⲡdrop 46 ⲡⲉ `[4,5,2,3,6,1]`, ⲁⲗⲗⲁ ⲡlegacy/query memory ⲙⲛⲛⲥⲁ ⲡpost-stir 12 ⲡⲉ `[1,6,5,2,4,3]`. Ⲛposition 1,2,6 ⲥⲉϣⲟⲃⲉ. Ⲛ6 ⲛfinal bowls ⲧⲱⲛ ⲙⲛ `oracle_sauce` ⲙⲡline ⲛⲟⲩⲱⲧ; ⲡdrop46 diagnostic ⲧⲱⲛ ⲟⲛ ⲙⲛ ⲡoracle.
+
+Ⲙⲛ `orderAt46Latch` ⲏ ⲟⲩsingle-write repair ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 22 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–21 ⲥⲉⲟ ⲛ`GREEN`.

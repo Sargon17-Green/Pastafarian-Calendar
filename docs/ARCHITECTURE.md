@@ -18,7 +18,7 @@
 
 Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲛ0, 1, ⲛⲕⲟⲩⲟⲧⲁ ⲉⲩⲟⲩⲟⲛ ϩⲁϩ ⲛ`limb`, ⲙⲛ ⲛⲡⲱϣ ⲉⲧⲉⲧⲡⲉⲣⲓⲥⲥⲉⲓⲁ ⲛ0 ⲧⲉ ϩⲛⲛⲃⲓⲛⲟⲙⲓⲟⲛ.
 
-### WHY SAFE
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡⲕⲱⲇⲓⲝ ⲥⲟⲡⲥⲡ ⲛⲟⲩϩⲱⲃ ⲛⲟⲩⲱⲧ: ⲡⲡⲱϣ ⲛⲁⲡⲟⲗⲩⲧⲟⲛ. Ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡ`rank` ⲏ ⲙⲡⲧⲱϣ.
 
@@ -34,7 +34,7 @@
 
 Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ `[2,2] = 2`, `[2,2,2] = 5`, `[2,3] = 3`, ⲙⲛ ⲡ`unrank` ⲛ1 ⲛ`[2,2]`. Ⲡ`smoke` ⲙⲡⲏⲓ ⲛ5000 ⲟⲩⲱϣⲃ ⲛⲧⲁⲡⲟⲕⲣⲓⲥⲓⲥ ⲛ5 ⲙⲙⲉⲣⲟⲥ.
 
-### WHY SAFE
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲛⲉ`memo` ⲥⲉϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉⲛⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ ⲛⲧⲉⲟⲩ `state` ⲛⲕⲁⲛⲱⲛ. Ⲡ`scratch` ⲥⲉⲕⲟⲧϥ ⲙⲛⲛⲥⲁ ⲡ`copy` ⲛⲟⲩ`BigInt` ⲉϥⲙⲏⲛ. Ⲙⲛ ⲟⲩ`cache hit` ⲉϥⲧⲟϣ ⲕⲁⲧⲁ ⲟⲩⲥϩⲁⲓ ⲛⲣⲁⲛ ⲏ ⲕⲁⲧⲁ ⲟⲩ`locale`.
 
@@ -133,7 +133,7 @@
 
 Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲙⲡStage 9 ⲉϫⲛ 46 ⲛrow ⲧⲏⲣⲟⲩ, ⲁⲩⲱ ⲡStage 10 ⲥⲙⲓⲛⲉ ⲛhidden ⲉⲧⲉⲣⲉⲩϫⲓ ⲙⲙⲁⲩ ⲛrow 1..7 ⲙⲛ ⲡoracle.
 
-### WHY SAFE
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡⲕⲱⲇⲓⲝ ⲧⲱϣ ⲙⲙⲁⲧⲉ ⲛⲛrow ⲉⲧⲉⲣⲉⲡhidden calculation ⲁⲛⲁⲅⲕⲁⲍⲉ ⲙⲙⲟⲟⲩ. Ⲛrow ⲉⲧⲟⲩⲏⲩ ⲛⲥⲉϫⲓ ⲁⲛ ⲙⲡⲉⲓⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡϫⲓⲛⲧⲙⲧⲁⲙⲓⲟ ⲙⲙⲟⲟⲩ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡsemantic result.
 
@@ -157,7 +157,7 @@
 
 Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲙⲡ`k=1`, `k=4`, `k=7` ⲁⲩⲱ ⲛ7 ⲛ`k` ⲧⲏⲣⲟⲩ. Ⲡstorage ⲧⲱⲛ ⲙⲛ `hidden7..hidden1`; ⲡlegacy access ⲟⲩⲏϩ ⲉϥⲟ ⲛ6 ⲛmismatch; ⲡpatched access ⲟ ⲛ0 ⲛmismatch.
 
-### WHY SAFE
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡⲡⲁⲧϣ ⲛϥⲣ ⲁⲛ ⲟⲩmutation ⲙⲡsemantic state. Ⲛϥϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡpointer ⲉⲧⲕⲏ ⲉϩⲣⲁⲓ ϩⲙⲡbackward array ⲕⲁⲧⲁ ⲟⲩformula ⲛⲧⲟϣ. Ⲙⲛ logs, metrics, cache ⲏ environment ⲉⲩⲧⲟϣ ⲙⲡⲟⲩⲱϣⲃ.
 
@@ -226,7 +226,7 @@
 
 Ⲡregular modulo ⲙⲡhelper ⲟ ⲛ0..719 ⲟⲛ ϩⲓ ⲛnegative inputs; ⲡ`+1` ⲕⲱ ⲙⲡordinal ⲉ1..720; ⲡ`-1` ⲙⲡ`orderPatchFromValue` ⲕⲧⲟ ⲙⲡordinal ⲉⲡdomain ⲛ0..719 ⲙⲡ`oldPermutationUnrank0`.
 
-### WHY SAFE
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡlegacy unranker ⲏ ⲡlegacy caller. Ⲡⲡⲁⲧϣ ⲟ ⲙⲙⲁⲧⲉ ⲛⲟⲩbridge ⲛbase ⲙⲡrank. Ⲙⲛ `bowlAlias` ⲏ pour-position patch ⲙⲡⲃⲁⲑⲙⲟⲥ ⲉⲧⲛⲏⲩ ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓlayer.
 
@@ -256,7 +256,7 @@
 
 `alias[position]=order[position]`, ⲁⲩⲱ `bowlByLegacyPosition(B,alias,position)=B[order[position]]`. Ⲡpour formula ⲛϥϣⲓⲃⲉ ⲁⲛ; ⲡsource ⲙⲡbowl ⲙⲙⲁⲧⲉ ⲡⲉ ⲡⲉⲛⲧⲁϥⲕⲧⲟ ⲉⲡⲕⲁⲛⲱⲛ.
 
-### WHY SAFE
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡalias ⲙⲛ ⲡpatched pour buffers ⲥⲉϣⲟⲟⲡ ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ. Ⲙⲛ global mutable semantic state, cache, environment ⲏ observability value ⲉϥϫⲓ ⲛⲟⲩⲧⲟϣ ⲙⲡpour.
 
@@ -287,3 +287,24 @@
 Ⲡ`pending` ⲟ ⲛⲟⲩvector ⲛⲥⲟⲟⲩ ⲉϥϣⲟⲩⲓⲧ ⲛϣⲟⲣⲡ. Ⲛwrite ⲧⲏⲣⲟⲩ ⲙⲟⲟϣⲉ ⲉⲣⲟϥ. ⲠB ⲛⲧⲟϥ ⲛϥϣⲓⲃⲉ ⲁⲛ ϣⲁⲛⲧⲉⲡpending ⲙⲟⲩϩ ⲛ6 ⲛvalue, ⲁⲩⲱ ⲡcommit ⲕⲧⲟ ⲛ6 ⲛpointer ⲉⲡB ⲙⲛⲛⲥⲁ ⲡround.
 
 Ⲡroute ⲟⲩⲏϩ ⲉϥϩⲁⲣⲉϩ ⲙⲡpointer contract ⲙⲡStage 20: ⲡB pointer ⲛⲧⲟϥ ⲡⲉ ⲡreturn pointer. Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ; `CTX_BOWL_SHADOW_PATCH_SEEN` ⲡⲉ ⲟⲩcounter ⲙⲡinvocation ⲙⲙⲁⲧⲉ.
+
+
+## Ⲡoverwritable order-memory route ⲙⲡⲃⲁⲑⲙⲟⲥ 22
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage22_overwritable_order_handler -> monster_order46_memory_route -> legacySauceWithOverwritableOrderMemory`
+
+Ⲡ`legacySauceWithOverwritableOrderMemory` ⲧⲁⲙⲓⲟ ⲛcounts, stones, backward hidden storage, 46 visible drops, alias-based pours, shadow bowl rounds, ⲙⲛ 12 post-stirs. Ⲡsemantic bowl state ⲙⲟⲟϣⲉ ⲕⲁⲧⲁ snapshot/compute/commit; ⲡdefect ⲛStage 22 ⲟ ⲙⲙⲁⲧⲉ ϩⲙⲡorder memory.
+
+Ⲡlegacy order memory ⲥⲏϩ 58 ⲛⲥⲟⲡ. Ⲡdrop46 order ⲥⲏϩ ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲗⲗⲁ ⲡ`S22_QUERY_ORDER` ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ`S22_LEGACY_ORDER_MEMORY` ⲙⲛⲛⲥⲁ ⲡpost-stir 12.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_STAGE22_SAUCE_RESULT`, `CTX_STAGE22_DROP46_DIAGNOSTIC`, `CTX_STAGE22_LEGACY_ORDER_MEMORY`, `CTX_STAGE22_QUERY_ORDER`, `CTX_STAGE22_ORDER_WRITE_COUNT`, `CTX_STAGE22_LAST_SOURCE_KIND`, `CTX_STAGE22_LAST_SOURCE_ORDINAL` ⲙⲛ `CTX_STAGE22_SEEN`.
+
+### Ⲡⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+Ⲛ6 ⲛfinal bowls ⲙⲛ ⲡdrop46 diagnostic ⲥⲉⲧⲱⲛ ⲙⲛ ⲡsame-line oracle. Ⲡquery ⲙⲙⲁⲧⲉ ⲡⲉ ⲡvalue ⲉϥϣⲟⲃⲉ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡ`EXPECTED_RED` ⲛϥⲛⲁϣ ⲉⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲟⲩsuccess ϩⲓⲧⲛ ⲟⲩbowl ⲏ drop ⲉϥϣⲟⲃⲉ.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
+
+Ⲛstate ⲧⲏⲣⲟⲩ ⲟ ⲛinvocation-local ϩⲙⲡarena. Ⲙⲛ global mutable semantic state. Ⲙⲛ latch ⲏ cache ⲉϥϫⲓ ⲙⲡorder ⲙⲡdrop 46.

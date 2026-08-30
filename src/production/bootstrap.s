@@ -100,13 +100,33 @@
 .equ CTX_BOWL_STIR_ROUTE_RESULT,784
 .equ CTX_BOWL_STIR_ROUTE_SEEN,792
 .equ CTX_BOWL_SHADOW_PATCH_SEEN,800
-.equ CTX_SIZE,808
+.equ CTX_STAGE22_SAUCE_RESULT,808
+.equ CTX_STAGE22_DROP46_DIAGNOSTIC,816
+.equ CTX_STAGE22_LEGACY_ORDER_MEMORY,824
+.equ CTX_STAGE22_QUERY_ORDER,832
+.equ CTX_STAGE22_ORDER_WRITE_COUNT,840
+.equ CTX_STAGE22_LAST_SOURCE_KIND,848
+.equ CTX_STAGE22_LAST_SOURCE_ORDINAL,856
+.equ CTX_STAGE22_SEEN,864
+.equ CTX_SIZE,872
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
 .equ HCOUNTS_CONNECTION,24
 .equ HCOUNTS_DIRECTION,32
 .equ HCOUNTS_SIZE,40
+.equ S22_BOWLS_AFTER_DROPS,0
+.equ S22_FINAL_BOWLS,8
+.equ S22_DROP46_DIAGNOSTIC,16
+.equ S22_LEGACY_ORDER_MEMORY,24
+.equ S22_LAST_POST_ORDER,32
+.equ S22_QUERY_ORDER,40
+.equ S22_DROPS,48
+.equ S22_HIDDEN,56
+.equ S22_ORDER_WRITE_COUNT,64
+.equ S22_LAST_SOURCE_KIND,72
+.equ S22_LAST_SOURCE_ORDINAL,80
+.equ S22_SIZE,88
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -165,6 +185,8 @@ legacy_fixed_pour_ids:
     .quad 1,2,3
 legacy_pour_factor:
     .quad 3,5,7
+stage22_bowl_prime:
+    .quad 17,19,23,29,31,37
 # Ⲡlegacy ⲙⲡⲃⲁⲑⲙⲟⲥ 20 ϫⲓ ⲙⲡⲱⲛⲉ ⲕⲁⲧⲁ ⲡposition.
 legacy_bowl_stir_stone_by_position:
     .quad 0,1,2,3,4,0
@@ -249,6 +271,11 @@ legacy_bowl_stir_stone_by_position:
 .global monster_stage20_legacy_inplace_bowl_handler
 .global stirOneDropViaShadow
 .global monster_stage21_bowl_shadow_patch_wrapper
+.global initialBowlsThroughStage22OldFactory
+.global postStirOneOverwritingOrderMemoryStage22
+.global legacySauceWithOverwritableOrderMemory
+.global monster_order46_memory_route
+.global monster_stage22_overwritable_order_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -3313,6 +3340,597 @@ monster_stage20_legacy_inplace_bowl_handler:
     ret
 .size monster_stage20_legacy_inplace_bowl_handler,.-monster_stage20_legacy_inplace_bowl_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 22 — DISCOVERY 11
+# Ⲡⲙⲉⲉⲩⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲟⲩⲏϩ ⲉϥϩⲁⲣⲉϩ ⲉⲟⲩorder ⲛⲟⲩⲱⲧ. Ⲛ46 ⲛdrop ⲙⲛ ⲛ12 ⲛpost-stir ⲥⲉⲥϩⲁⲓ ⲧⲏⲣⲟⲩ ⲉⲡmemory ⲛⲟⲩⲱⲧ.
+# Ⲡorder ⲙⲡdrop 46 ⲥⲉⲁⲁϥ ⲛⲟⲩCOPY_DIAGNOSTIC ⲙⲙⲁⲧⲉ; ⲡquery ⲛStage 22 ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡlegacy memory ⲙⲛⲛⲥⲁ ⲡpost-stir 12.
+# Ⲙⲛ ⲟⲩlatch ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ.
+.type initialBowlsThroughStage22OldFactory,@function
+initialBowlsThroughStage22OldFactory:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Libs22_fail
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Libs22_fail
+    mov r13,rax
+    mov r14,1
+.Libs22_loop:
+    cmp r14,6
+    ja .Libs22_ok
+    mov rdi,qword ptr [r12+HCOUNTS_ACTION]
+    call bi_clone
+    test rax,rax
+    je .Libs22_fail
+    mov r15,rax
+    mov rdi,qword ptr [r12+HCOUNTS_TARGET]
+    mov rsi,r14
+    call bi_mul_u64
+    test rax,rax
+    je .Libs22_fail
+    mov rdi,r15
+    mov rsi,rax
+    call bi_add_abs
+    mov r15,rax
+    mov rdi,r15
+    mov rsi,qword ptr [r12+HCOUNTS_DISTANCE]
+    call bi_add_abs
+    mov r15,rax
+    mov rdi,r15
+    mov rsi,qword ptr [r12+HCOUNTS_CONNECTION]
+    call bi_add_abs
+    mov r15,rax
+    mov rdi,r15
+    mov rsi,qword ptr [r12+HCOUNTS_DIRECTION]
+    call bi_add_abs
+    mov r15,rax
+    lea r8,[rip+stage22_bowl_prime]
+    mov rax,qword ptr [r8+r14*8-8]
+    imul rax,rax
+    mov rdi,r15
+    mov rsi,rax
+    call bi_add_u64
+    mov rdi,rax
+    mov rsi,rax
+    call bi_mul_abs
+    mov rdi,rax
+    mov rsi,r14
+    call bi_add_u64
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Libs22_fail
+    mov qword ptr [r13+r14*8-8],rax
+    inc r14
+    jmp .Libs22_loop
+.Libs22_ok:
+    mov rax,r13
+    jmp .Libs22_done
+.Libs22_fail:
+    xor eax,eax
+.Libs22_done:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size initialBowlsThroughStage22OldFactory,.-initialBowlsThroughStage22OldFactory
+
+.type postStirOneOverwritingOrderMemoryStage22,@function
+postStirOneOverwritingOrderMemoryStage22:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,56
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Lpsoom22_fail
+    test r14,r14
+    je .Lpsoom22_fail
+    cmp r13,1
+    jb .Lpsoom22_fail
+    cmp r13,12
+    ja .Lpsoom22_fail
+    mov edi,96
+    call arena_alloc
+    test rax,rax
+    je .Lpsoom22_fail
+    mov r15,rax
+    lea rax,[rax+48]
+    mov qword ptr [rbp-48],rax
+    xor ecx,ecx
+.Lpsoom22_copy_old:
+    cmp rcx,6
+    jae .Lpsoom22_sum
+    mov rax,qword ptr [r12+rcx*8]
+    test rax,rax
+    je .Lpsoom22_fail
+    mov qword ptr [r15+rcx*8],rax
+    inc rcx
+    jmp .Lpsoom22_copy_old
+.Lpsoom22_sum:
+    xor edi,edi
+    call bi_from_u64
+    test rax,rax
+    je .Lpsoom22_fail
+    mov qword ptr [rbp-56],rax
+    xor ebx,ebx
+.Lpsoom22_sum_loop:
+    cmp rbx,6
+    jae .Lpsoom22_saved_sum
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [r15+rbx*8]
+    call bi_add_abs
+    mov qword ptr [rbp-56],rax
+    inc rbx
+    jmp .Lpsoom22_sum_loop
+.Lpsoom22_saved_sum:
+    mov rax,r13
+    imul rax,149
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,rax
+    call bi_add_u64
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Lpsoom22_fail
+    mov qword ptr [rbp-56],rax
+    mov rdi,rax
+    mov rsi,r14
+    call orderPatchFromValue
+    test rax,rax
+    je .Lpsoom22_fail
+    xor ebx,ebx
+.Lpsoom22_bowl_loop:
+    cmp rbx,6
+    jae .Lpsoom22_validate
+    mov rax,qword ptr [r14+rbx*8]
+    cmp rax,1
+    jb .Lpsoom22_fail
+    cmp rax,6
+    ja .Lpsoom22_fail
+    mov qword ptr [rbp-64],rax
+    mov rcx,rbx
+    add rcx,5
+    cmp rcx,6
+    jb .Lpsoom22_prev_ready
+    sub rcx,6
+.Lpsoom22_prev_ready:
+    mov rax,qword ptr [r14+rcx*8]
+    mov qword ptr [rbp-72],rax
+    mov rcx,rbx
+    inc rcx
+    cmp rcx,6
+    jb .Lpsoom22_next_ready
+    xor ecx,ecx
+.Lpsoom22_next_ready:
+    mov rax,qword ptr [r14+rcx*8]
+    mov qword ptr [rbp-80],rax
+    mov rax,qword ptr [rbp-64]
+    dec rax
+    mov rdi,qword ptr [r15+rax*8]
+    call bi_clone
+    mov qword ptr [rbp-88],rax
+    mov rax,qword ptr [rbp-72]
+    dec rax
+    mov rdi,qword ptr [r15+rax*8]
+    mov esi,3
+    call bi_mul_u64
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,rax
+    call bi_add_abs
+    mov qword ptr [rbp-88],rax
+    mov rax,qword ptr [rbp-80]
+    dec rax
+    mov rdi,qword ptr [r15+rax*8]
+    mov esi,5
+    call bi_mul_u64
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,rax
+    call bi_add_abs
+    mov qword ptr [rbp-88],rax
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,qword ptr [rbp-56]
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,r13
+    call bi_add_u64
+    mov rcx,rbx
+    inc rcx
+    imul rcx,rcx
+    mov rdi,rax
+    mov rsi,rcx
+    call bi_add_u64
+    mov rdi,rax
+    mov rsi,rax
+    call bi_mul_abs
+    mov qword ptr [rbp-88],rax
+    mov rax,qword ptr [rbp-72]
+    dec rax
+    mov rdi,qword ptr [r15+rax*8]
+    mov rax,qword ptr [rbp-80]
+    dec rax
+    mov rsi,qword ptr [r15+rax*8]
+    call bi_mul_abs
+    mov rdi,rax
+    mov esi,7
+    call bi_mul_u64
+    mov rdi,qword ptr [rbp-88]
+    mov rsi,rax
+    call bi_add_abs
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Lpsoom22_fail
+    mov rcx,qword ptr [rbp-64]
+    dec rcx
+    mov rdx,qword ptr [rbp-48]
+    mov qword ptr [rdx+rcx*8],rax
+    inc rbx
+    jmp .Lpsoom22_bowl_loop
+.Lpsoom22_validate:
+    xor ecx,ecx
+.Lpsoom22_validate_loop:
+    cmp rcx,6
+    jae .Lpsoom22_commit
+    mov rax,qword ptr [rbp-48]
+    cmp qword ptr [rax+rcx*8],0
+    je .Lpsoom22_fail
+    inc rcx
+    jmp .Lpsoom22_validate_loop
+.Lpsoom22_commit:
+    xor ecx,ecx
+.Lpsoom22_commit_loop:
+    cmp rcx,6
+    jae .Lpsoom22_ok
+    mov rax,qword ptr [rbp-48]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov qword ptr [r12+rcx*8],rdx
+    inc rcx
+    jmp .Lpsoom22_commit_loop
+.Lpsoom22_ok:
+    mov rax,r12
+    jmp .Lpsoom22_done
+.Lpsoom22_fail:
+    xor eax,eax
+.Lpsoom22_done:
+    add rsp,56
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size postStirOneOverwritingOrderMemoryStage22,.-postStirOneOverwritingOrderMemoryStage22
+
+.type legacySauceWithOverwritableOrderMemory,@function
+legacySauceWithOverwritableOrderMemory:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,120
+    mov qword ptr [rbp-48],rdi
+    mov qword ptr [rbp-56],rsi
+    mov edi,S22_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Llswoom22_fail
+    mov r12,rax
+    mov rdi,r12
+    xor eax,eax
+    mov ecx,11
+    rep stosq
+    mov edi,HCOUNTS_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Llswoom22_fail
+    mov r13,rax
+    mov rdi,qword ptr [rbp-48]
+    call bi_from_i64
+    mov qword ptr [rbp-64],rax
+    mov rdi,rax
+    call dayTagWithFoundationScar
+    mov qword ptr [r13+HCOUNTS_ACTION],rax
+    mov rdi,qword ptr [rbp-56]
+    call bi_from_i64
+    mov qword ptr [rbp-72],rax
+    mov rdi,rax
+    call dayTagWithFoundationScar
+    mov qword ptr [r13+HCOUNTS_TARGET],rax
+    mov rdi,qword ptr [rbp-64]
+    mov rsi,qword ptr [rbp-72]
+    call distanceWithChronologicalScar
+    mov qword ptr [r13+HCOUNTS_DISTANCE],rax
+    mov rdi,qword ptr [r13+HCOUNTS_ACTION]
+    mov rsi,qword ptr [r13+HCOUNTS_TARGET]
+    call bi_add_abs
+    mov qword ptr [r13+HCOUNTS_CONNECTION],rax
+    mov rax,qword ptr [rbp-56]
+    cmp rax,qword ptr [rbp-48]
+    jl .Llswoom22_dir1
+    je .Llswoom22_dir2
+    mov edi,3
+    jmp .Llswoom22_dir_make
+.Llswoom22_dir1:
+    mov edi,1
+    jmp .Llswoom22_dir_make
+.Llswoom22_dir2:
+    mov edi,2
+.Llswoom22_dir_make:
+    call bi_from_u64
+    mov qword ptr [r13+HCOUNTS_DIRECTION],rax
+    call getStoneTableThroughLegacyBuilder
+    test rax,rax
+    je .Llswoom22_fail
+    mov r14,rax
+    mov rdi,r13
+    mov rsi,r14
+    call buildHiddenWithBackwardStorage
+    test rax,rax
+    je .Llswoom22_fail
+    mov r15,rax
+    mov qword ptr [r12+S22_HIDDEN],r15
+    mov edi,424
+    call arena_alloc
+    test rax,rax
+    je .Llswoom22_fail
+    mov qword ptr [rbp-80],rax
+    mov rdi,rax
+    xor eax,eax
+    mov ecx,53
+    rep stosq
+    mov rax,qword ptr [rbp-80]
+    add rax,48
+    mov qword ptr [rbp-88],rax
+    mov qword ptr [r12+S22_DROPS],rax
+    mov rdi,r13
+    call initialBowlsThroughStage22OldFactory
+    test rax,rax
+    je .Llswoom22_fail
+    mov qword ptr [rbp-96],rax
+    mov edi,144
+    call arena_alloc
+    test rax,rax
+    je .Llswoom22_fail
+    mov qword ptr [rbp-104],rax
+    lea rcx,[rax+48]
+    mov qword ptr [rbp-112],rcx
+    lea rcx,[rax+96]
+    mov qword ptr [rbp-120],rcx
+    mov qword ptr [r12+S22_LEGACY_ORDER_MEMORY],rax
+    mov rcx,qword ptr [rbp-112]
+    mov qword ptr [r12+S22_DROP46_DIAGNOSTIC],rcx
+    mov rcx,qword ptr [rbp-120]
+    mov qword ptr [r12+S22_LAST_POST_ORDER],rcx
+    mov rbx,1
+.Llswoom22_drop_loop:
+    cmp rbx,46
+    ja .Llswoom22_after_drops
+    mov rdi,r13
+    mov rsi,r14
+    mov rdx,qword ptr [rbp-88]
+    mov rcx,r15
+    mov r8,rbx
+    call monster_visible_drop_route
+    test rax,rax
+    je .Llswoom22_fail
+    mov rdx,qword ptr [rbp-88]
+    mov qword ptr [rdx+rbx*8],rax
+    mov qword ptr [rbp-128],rax
+    mov edi,72
+    call arena_alloc
+    test rax,rax
+    je .Llswoom22_fail
+    mov qword ptr [rbp-136],rax
+    lea rcx,[rax+48]
+    mov qword ptr [rbp-144],rcx
+    mov rdi,qword ptr [rbp-128]
+    mov rsi,rax
+    call orderPatchFromValue
+    test rax,rax
+    je .Llswoom22_fail
+    mov rax,rbx
+    dec rax
+    imul rax,40
+    lea rcx,[r14+rax]
+    mov rdi,qword ptr [rbp-128]
+    mov rsi,rbx
+    mov rdx,qword ptr [rbp-96]
+    mov r8,qword ptr [rbp-136]
+    mov r9,qword ptr [rbp-144]
+    call patchedPours
+    test rax,rax
+    je .Llswoom22_fail
+    mov rax,rbx
+    dec rax
+    imul rax,40
+    lea rcx,[r14+rax]
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rbx
+    mov rdx,qword ptr [rbp-128]
+    mov r8,qword ptr [rbp-136]
+    mov r9,qword ptr [rbp-144]
+    call stirOneDropViaShadow
+    test rax,rax
+    je .Llswoom22_fail
+    xor ecx,ecx
+.Llswoom22_write_drop_order:
+    cmp rcx,6
+    jae .Llswoom22_drop_written
+    mov rax,qword ptr [rbp-136]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov rax,qword ptr [rbp-104]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Llswoom22_write_drop_order
+.Llswoom22_drop_written:
+    inc qword ptr [r12+S22_ORDER_WRITE_COUNT]
+    mov qword ptr [r12+S22_LAST_SOURCE_KIND],1
+    mov qword ptr [r12+S22_LAST_SOURCE_ORDINAL],rbx
+    cmp rbx,46
+    jne .Llswoom22_next_drop
+    xor ecx,ecx
+.Llswoom22_copy46:
+    cmp rcx,6
+    jae .Llswoom22_next_drop
+    mov rax,qword ptr [rbp-136]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov rax,qword ptr [rbp-112]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Llswoom22_copy46
+.Llswoom22_next_drop:
+    inc rbx
+    jmp .Llswoom22_drop_loop
+.Llswoom22_after_drops:
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Llswoom22_fail
+    mov qword ptr [r12+S22_BOWLS_AFTER_DROPS],rax
+    xor ecx,ecx
+.Llswoom22_copy_after_drops:
+    cmp rcx,6
+    jae .Llswoom22_post_begin
+    mov rdx,qword ptr [rbp-96]
+    mov rdx,qword ptr [rdx+rcx*8]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Llswoom22_copy_after_drops
+.Llswoom22_post_begin:
+    mov rbx,1
+.Llswoom22_post_loop:
+    cmp rbx,12
+    ja .Llswoom22_finish
+    mov rdi,qword ptr [rbp-96]
+    mov rsi,rbx
+    mov rdx,qword ptr [rbp-120]
+    call postStirOneOverwritingOrderMemoryStage22
+    test rax,rax
+    je .Llswoom22_fail
+    xor ecx,ecx
+.Llswoom22_write_post_order:
+    cmp rcx,6
+    jae .Llswoom22_post_written
+    mov rax,qword ptr [rbp-120]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov rax,qword ptr [rbp-104]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Llswoom22_write_post_order
+.Llswoom22_post_written:
+    inc qword ptr [r12+S22_ORDER_WRITE_COUNT]
+    mov qword ptr [r12+S22_LAST_SOURCE_KIND],2
+    mov qword ptr [r12+S22_LAST_SOURCE_ORDINAL],rbx
+    inc rbx
+    jmp .Llswoom22_post_loop
+.Llswoom22_finish:
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Llswoom22_fail
+    mov qword ptr [r12+S22_FINAL_BOWLS],rax
+    xor ecx,ecx
+.Llswoom22_final_copy:
+    cmp rcx,6
+    jae .Llswoom22_query
+    mov rdx,qword ptr [rbp-96]
+    mov rdx,qword ptr [rdx+rcx*8]
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Llswoom22_final_copy
+.Llswoom22_query:
+    mov rax,qword ptr [rbp-104]
+    mov qword ptr [r12+S22_QUERY_ORDER],rax
+    cmp qword ptr [r12+S22_ORDER_WRITE_COUNT],58
+    jne .Llswoom22_fail
+    cmp qword ptr [r12+S22_LAST_SOURCE_KIND],2
+    jne .Llswoom22_fail
+    cmp qword ptr [r12+S22_LAST_SOURCE_ORDINAL],12
+    jne .Llswoom22_fail
+    mov rax,r12
+    jmp .Llswoom22_done
+.Llswoom22_fail:
+    xor eax,eax
+.Llswoom22_done:
+    add rsp,120
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size legacySauceWithOverwritableOrderMemory,.-legacySauceWithOverwritableOrderMemory
+
+.type monster_order46_memory_route,@function
+monster_order46_memory_route:
+    jmp legacySauceWithOverwritableOrderMemory
+.size monster_order46_memory_route,.-monster_order46_memory_route
+
+.type monster_stage22_overwritable_order_handler,@function
+monster_stage22_overwritable_order_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    test r12,r12
+    je .Lms22_fail
+    mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
+    mov rsi,qword ptr [r12+CTX_TARGET_DAY]
+    call monster_order46_memory_route
+    test rax,rax
+    je .Lms22_fail
+    mov r13,rax
+    mov qword ptr [r12+CTX_STAGE22_SAUCE_RESULT],r13
+    mov rax,qword ptr [r13+S22_DROP46_DIAGNOSTIC]
+    mov qword ptr [r12+CTX_STAGE22_DROP46_DIAGNOSTIC],rax
+    mov rax,qword ptr [r13+S22_LEGACY_ORDER_MEMORY]
+    mov qword ptr [r12+CTX_STAGE22_LEGACY_ORDER_MEMORY],rax
+    mov rax,qword ptr [r13+S22_QUERY_ORDER]
+    mov qword ptr [r12+CTX_STAGE22_QUERY_ORDER],rax
+    mov rax,qword ptr [r13+S22_ORDER_WRITE_COUNT]
+    mov qword ptr [r12+CTX_STAGE22_ORDER_WRITE_COUNT],rax
+    mov rax,qword ptr [r13+S22_LAST_SOURCE_KIND]
+    mov qword ptr [r12+CTX_STAGE22_LAST_SOURCE_KIND],rax
+    mov rax,qword ptr [r13+S22_LAST_SOURCE_ORDINAL]
+    mov qword ptr [r12+CTX_STAGE22_LAST_SOURCE_ORDINAL],rax
+    inc qword ptr [r12+CTX_STAGE22_SEEN]
+    mov eax,1
+    jmp .Lms22_done
+.Lms22_fail:
+    xor eax,eax
+.Lms22_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage22_overwritable_order_handler,.-monster_stage22_overwritable_order_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -3371,6 +3989,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage20_legacy_inplace_bowl_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage22_overwritable_order_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

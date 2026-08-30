@@ -411,3 +411,24 @@
 Ⲉⲡⲉⲓⲇⲏ ⲛread ⲧⲏⲣⲟⲩ ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡsnapshot ⲛⲟⲩⲱⲧ, ⲡresult ⲙⲡposition ⲛⲓⲙ ⲛϥⲛⲁϫⲓ ⲁⲛ ⲛⲟⲩneighbor ⲉⲁⲩϣⲓⲃⲉ ⲙⲙⲟϥ ϩⲙⲡround ⲛⲟⲩⲱⲧ. Ⲡ`pending` ⲛϥⲧⲟϣ ⲁⲛ ⲛⲟⲩread source.
 
 ⲠStage 20 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE20_REGRESSION_GREEN`. ⲠStage 21 test ⲟ ⲛ`STAGE21_PATCH10_GREEN`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 22 — DISCOVERY 11
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲟⲩmemory ⲛorder ⲛⲟⲩⲱⲧ ⲣⲱϣⲉ ⲉⲧⲣⲉϥϩⲁⲣⲉϩ ⲉⲡorder ⲉⲧⲉⲣⲉⲡsauce ϫⲓ ⲙⲙⲟϥ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡlegacy ⲥϩⲁⲓ ⲉⲡmemory ⲡⲁⲓ ⲙⲛⲛⲥⲁ drop ⲛⲓⲙ ⲁⲩⲱ ⲙⲛⲛⲥⲁ post-stir ⲛⲓⲙ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡorder ⲙⲡdrop 46 ⲟ ⲛⲧⲟϣ ϩⲛ ⲧⲉϥⲟⲩⲛⲟⲩ, ⲁⲗⲗⲁ ⲛ12 ⲛpost-stir ⲥⲉⲥϩⲁⲓ ⲉⲡmemory ⲛⲟⲩⲱⲧ ⲙⲛⲛⲥⲱϥ. Ⲙⲛⲛⲥⲁ ⲡpost-stir 12, ⲡquery ⲛⲗⲉⲅⲁⲥⲓ ϫⲓ ⲙⲡorder ⲙⲡpost-stir 12 ⲁⲛⲧⲓ ⲡorder ⲙⲡdrop 46.
+
+ⲠFoundation witness ⲧⲁϫⲣⲟ ⲙⲡdrop46 `[4,5,2,3,6,1]` ⲙⲛ ⲡquery `[1,6,5,2,4,3]`. Ⲛposition 1,2,6 ⲥⲉϣⲟⲃⲉ. Ⲡwrite count ⲟ ⲛ58, ⲁⲩⲱ ⲡlast source ⲡⲉ post-stir 12.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `initialBowlsThroughStage22OldFactory`, `postStirOneOverwritingOrderMemoryStage22`, `legacySauceWithOverwritableOrderMemory`, `monster_order46_memory_route`, `monster_stage22_overwritable_order_handler`, ⲙⲛ state ⲛⲧⲉ drop46 diagnostic/legacy order/query/write count/last source.
+
+Ⲡfull path ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲛscar ⲙⲛ ⲛpatch ⲛStage 1–21. Ⲡoracle ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡproduction; ⲡtest ⲙⲙⲁⲧⲉ ⲥⲙⲓⲛⲉ ⲛⲛfinal bowls ⲙⲛ ⲡdrop46 order ⲙⲛ `oracle_sauce` ⲙⲡline ⲛⲟⲩⲱⲧ.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`orderAt46Latch` ⲏ ⲟⲩrepair ϩⲙⲡⲉⲓDISCOVERY.
