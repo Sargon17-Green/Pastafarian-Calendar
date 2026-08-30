@@ -15,7 +15,7 @@ namespace {
 // PATCHES 27-39: memoria externa non managerem immortalem facit.
 // Manager adhuc nascitur et moritur; tantum sepulcra, ossuaria et testamenta
 // semantice probata extra vitam eius manent.
-constexpr std::uint64_t PERSISTENT_SCAR_GENERATION = 39;
+constexpr std::uint64_t PERSISTENT_SCAR_GENERATION = 40;
 constexpr std::size_t FINAL_RESULT_BURIAL_LIMIT = 4096;
 constexpr std::size_t ANCESTRAL_STRUCTURE_LIMIT = 128;
 constexpr std::size_t YEAR_CHECKPOINT_LIMIT = 8192;
@@ -7901,11 +7901,40 @@ Patch14WideDetourSelection Patch14WideDetourWrapper::repair(
     }
 
     if (!rememberedWideAccepted) {
-        while (wide > acceptanceLimit) {
-            wide = 1 + regularMod(
-                wide - 1 + Integer{stream.directionStep},
-                space);
-            ++rejectionSteps;
+        // PATCH 40 — Exsequiae Reiectionis Latae.
+        //
+        // Cicatrix PATCH 14 manet infra integre: dum acceleratio exstinguitur
+        // aut validator historicus plenus requiritur, eadem while singulos
+        // gradus adhuc corpore exsequitur. In via productionis autem gradus
+        // annuli semper +1 aut -1 est, ergo cadaver rejectionum continuorum
+        // sine enumeratione singulorum ossium metiri licet.
+        //
+        // Si gradus est -1 et wide supra limitem iacet, nullus wrap ante
+        // limitem accidit: numerus graduum = wide-limit et corpus in limite
+        // quiescit. Si gradus est +1, omnia reliqua usque ad space adhuc
+        // reiciuntur, deinde annulus ad 1 redit: gradus = space-wide+1.
+        // Haec formula non seligit alium exitum; eandem while sepelit et
+        // rejectionSteps integrum, etiam astronomicum, conservat.
+        const bool patch40FuneralShortcut =
+            accelerationsOn() && !fullHistoricalValidationOn() &&
+            wide > acceptanceLimit;
+        if (patch40FuneralShortcut) {
+            if (stream.directionStep == -1) {
+                rejectionSteps = wide - acceptanceLimit;
+                wide = acceptanceLimit;
+            } else {
+                rejectionSteps = space - wide + 1;
+                wide = 1;
+            }
+            scarBump(&PersistentScarMetrics::patch40WideFuneralShortcut);
+        } else {
+            scarBump(&PersistentScarMetrics::patch40HistoricalLoopForced);
+            while (wide > acceptanceLimit) {
+                wide = 1 + regularMod(
+                    wide - 1 + Integer{stream.directionStep},
+                    space);
+                ++rejectionSteps;
+            }
         }
         if (accelerationsOn()) {
             const WideRejectionCertificate certificate{
