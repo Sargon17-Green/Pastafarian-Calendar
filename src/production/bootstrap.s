@@ -121,7 +121,18 @@
 .equ CTX_STAGE25_QUERIED_POSITION,952
 .equ CTX_STAGE25_PATCHED_NEXT_BOWL_ID,960
 .equ CTX_STAGE25_PATCH_SEEN,968
-.equ CTX_SIZE,976
+.equ CTX_STAGE26_ANSWER_RING,976
+.equ CTX_STAGE26_FAMILY_SIZE,984
+.equ CTX_STAGE26_FIRST_ANSWER,992
+.equ CTX_STAGE26_LEGACY_SELECTION,1000
+.equ CTX_STAGE26_ROUTE_SELECTION,1008
+.equ CTX_STAGE26_QUERIED_BOWL_ID,1016
+.equ CTX_STAGE26_NEXT_BOWL_ID,1024
+.equ CTX_STAGE26_SEAL,1032
+.equ CTX_STAGE26_DIRECTION,1040
+.equ CTX_STAGE26_LEGACY_SEEN,1048
+.equ CTX_STAGE26_ROUTE_SEEN,1056
+.equ CTX_SIZE,1064
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -156,6 +167,9 @@
 .equ S23_LATCH_SOURCE_ORDINAL,104
 .equ S23_LEGACY_DIAGNOSTIC_RESULT,112
 .equ S23_SIZE,120
+.equ S26_RING_FIRST,0
+.equ S26_RING_STEP,8
+.equ S26_RING_SIZE,16
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -315,6 +329,12 @@ legacy_bowl_stir_stone_by_position:
 .global nextBowlQueryPatch
 .global monster_stage25_next_bowl_patch_wrapper
 .global monster_stage25_next_bowl_patch_handler
+.global answerRingThroughPatchedNextBowl
+.global ringAnswer
+.global biasedLegacyPick
+.global legacyBiasedSelectionBeforeRejection
+.global monster_biased_selection_route
+.global monster_stage26_legacy_biased_selection_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -4532,6 +4552,375 @@ monster_stage25_next_bowl_patch_handler:
     ret
 .size monster_stage25_next_bowl_patch_handler,.-monster_stage25_next_bowl_patch_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 26 — DISCOVERY 13
+# Ⲡanswer ring ⲡⲁⲓ ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲛ ⲛfinal bowls ⲙⲛ ⲡnext-bowl ⲙⲡPATCH 12. Ⲡfirst ⲙⲛ ⲡdirection ⲥⲉⲟ ⲛinvocation-local.
+.type answerRingThroughPatchedNextBowl,@function
+answerRingThroughPatchedNextBowl:
+    # rdi=sauceResult, rsi=queried bowl ID, rdx=seal. rax=LegacyAnswerRing*.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,32
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Larpnb_fail
+    cmp r13,1
+    jb .Larpnb_fail
+    cmp r13,6
+    ja .Larpnb_fail
+    mov r15,qword ptr [r12+S23_FINAL_BOWLS]
+    test r15,r15
+    je .Larpnb_fail
+
+    mov rdi,r12
+    mov rsi,r13
+    call nextBowlQueryPatch
+    test rax,rax
+    je .Larpnb_fail
+    mov qword ptr [rbp-40],rax
+
+    lea rcx,[r13-1]
+    mov rdi,qword ptr [r15+rcx*8]
+    test rdi,rdi
+    je .Larpnb_fail
+    lea rsi,[r14+181]
+    call bi_add_u64
+    test rax,rax
+    je .Larpnb_fail
+    mov qword ptr [rbp-48],rax
+    mov rdi,rax
+    mov rsi,rax
+    call bi_mul_abs
+    test rax,rax
+    je .Larpnb_fail
+    mov qword ptr [rbp-56],rax
+
+    mov rcx,qword ptr [rbp-40]
+    dec rcx
+    mov rdi,qword ptr [r15+rcx*8]
+    test rdi,rdi
+    je .Larpnb_fail
+    mov rsi,179
+    call bi_mul_u64
+    test rax,rax
+    je .Larpnb_fail
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-56]
+    call bi_add_abs
+    test rax,rax
+    je .Larpnb_fail
+    mov rdi,rax
+    mov rsi,r14
+    call bi_add_u64
+    test rax,rax
+    je .Larpnb_fail
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Larpnb_fail
+    mov qword ptr [rbp-64],rax
+
+    mov rdi,rax
+    lea rsi,[r14+194]
+    call bi_add_u64
+    test rax,rax
+    je .Larpnb_fail
+    mov rdi,rax
+    mov rsi,rax
+    call bi_mul_abs
+    test rax,rax
+    je .Larpnb_fail
+    mov qword ptr [rbp-48],rax
+
+    mov rdi,qword ptr [rbp-64]
+    mov rsi,193
+    call bi_mul_u64
+    test rax,rax
+    je .Larpnb_fail
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-48]
+    call bi_add_abs
+    test rax,rax
+    je .Larpnb_fail
+    mov qword ptr [rbp-48],rax
+
+    mov rdi,qword ptr [r15+40]
+    mov rsi,197
+    call bi_mul_u64
+    test rax,rax
+    je .Larpnb_fail
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-48]
+    call bi_add_abs
+    test rax,rax
+    je .Larpnb_fail
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Larpnb_fail
+    mov rdi,rax
+    mov rsi,2
+    call bi_divmod_u64_abs
+    cmp rdx,1
+    je .Larpnb_plus
+    mov qword ptr [rbp-48],-1
+    jmp .Larpnb_alloc
+.Larpnb_plus:
+    mov qword ptr [rbp-48],1
+.Larpnb_alloc:
+    mov edi,S26_RING_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Larpnb_fail
+    mov rcx,qword ptr [rbp-64]
+    mov qword ptr [rax+S26_RING_FIRST],rcx
+    mov rcx,qword ptr [rbp-48]
+    mov qword ptr [rax+S26_RING_STEP],rcx
+    jmp .Larpnb_done
+.Larpnb_fail:
+    xor eax,eax
+.Larpnb_done:
+    add rsp,32
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size answerRingThroughPatchedNextBowl,.-answerRingThroughPatchedNextBowl
+
+# Ⲡring answer ⲟⲩⲏϩ ϩⲙⲡM-old ring ⲛⲟⲩⲱⲧ. Ⲡoffset ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡring ⲛⲧⲟϥ.
+.type ringAnswer,@function
+ringAnswer:
+    # rdi=LegacyAnswerRing*, rsi=offset u64. rax=BigInt*.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lra_fail
+    mov rax,qword ptr [r12+S26_RING_STEP]
+    cmp rax,1
+    je .Lra_step_ok
+    cmp rax,-1
+    jne .Lra_fail
+.Lra_step_ok:
+    mov rdi,1
+    call bi_from_u64
+    test rax,rax
+    je .Lra_fail
+    mov rsi,rax
+    mov rdi,qword ptr [r12+S26_RING_FIRST]
+    call bi_sub
+    test rax,rax
+    je .Lra_fail
+    mov r14,rax
+    cmp qword ptr [r12+S26_RING_STEP],1
+    jne .Lra_minus
+    mov rdi,r14
+    mov rsi,r13
+    call bi_add_u64
+    jmp .Lra_mod
+.Lra_minus:
+    mov rdi,r13
+    call bi_from_u64
+    test rax,rax
+    je .Lra_fail
+    mov rsi,rax
+    mov rdi,r14
+    call bi_sub
+.Lra_mod:
+    test rax,rax
+    je .Lra_fail
+    mov rdi,rax
+    call oldRemainder
+    test rax,rax
+    je .Lra_add_one
+.Lra_add_one:
+    mov rdi,rax
+    mov rsi,1
+    call bi_add_u64
+    jmp .Lra_done
+.Lra_fail:
+    xor eax,eax
+.Lra_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size ringAnswer,.-ringAnswer
+
+# Ⲡselector legacy ⲙⲡDISCOVERY 13: regularMod(x-1,N)+1. Ⲙⲛ rejection ⲉϥϣⲟⲟⲡ ϩⲙⲡhelper ⲡⲁⲓ.
+.type biasedLegacyPick,@function
+biasedLegacyPick:
+    # rdi=x BigInt*, rsi=N BigInt*.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lblp_fail
+    test r13,r13
+    je .Lblp_fail
+    cmp qword ptr [r12+BI_SIGN],1
+    jne .Lblp_fail
+    cmp qword ptr [r13+BI_SIGN],1
+    jne .Lblp_fail
+    mov rdi,1
+    call bi_from_u64
+    mov rsi,rax
+    mov rdi,r12
+    call bi_sub
+    test rax,rax
+    je .Lblp_fail
+    mov rdi,rax
+    mov rsi,r13
+    call bi_mod_abs
+    test rax,rax
+    je .Lblp_fail
+    mov rdi,rax
+    mov rsi,1
+    call bi_add_u64
+    jmp .Lblp_done
+.Lblp_fail:
+    xor eax,eax
+.Lblp_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size biasedLegacyPick,.-biasedLegacyPick
+
+.type legacyBiasedSelectionBeforeRejection,@function
+legacyBiasedSelectionBeforeRejection:
+    # rdi=LegacyAnswerRing*, rsi=N BigInt*.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    mov r13,rsi
+    xor esi,esi
+    mov rdi,r12
+    call ringAnswer
+    test rax,rax
+    je .Llbsbr_fail
+    mov rdi,rax
+    mov rsi,r13
+    call biasedLegacyPick
+    jmp .Llbsbr_done
+.Llbsbr_fail:
+    xor eax,eax
+.Llbsbr_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size legacyBiasedSelectionBeforeRejection,.-legacyBiasedSelectionBeforeRejection
+
+.type monster_biased_selection_route,@function
+monster_biased_selection_route:
+    jmp legacyBiasedSelectionBeforeRejection
+.size monster_biased_selection_route,.-monster_biased_selection_route
+
+.type monster_stage26_legacy_biased_selection_handler,@function
+monster_stage26_legacy_biased_selection_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    test r12,r12
+    je .Lms26_fail
+    mov r13,qword ptr [r12+CTX_STAGE22_SAUCE_RESULT]
+    test r13,r13
+    je .Lms26_fail
+
+    mov qword ptr [r12+CTX_STAGE26_QUERIED_BOWL_ID],1
+    mov qword ptr [r12+CTX_STAGE26_SEAL],21
+    mov rdi,r13
+    mov esi,1
+    call nextBowlQueryPatch
+    test rax,rax
+    je .Lms26_fail
+    mov qword ptr [r12+CTX_STAGE26_NEXT_BOWL_ID],rax
+
+    mov rdi,r13
+    mov esi,1
+    mov edx,21
+    call answerRingThroughPatchedNextBowl
+    test rax,rax
+    je .Lms26_fail
+    mov r14,rax
+    mov qword ptr [r12+CTX_STAGE26_ANSWER_RING],r14
+    mov rax,qword ptr [r14+S26_RING_STEP]
+    mov qword ptr [r12+CTX_STAGE26_DIRECTION],rax
+
+    mov rdi,1
+    call bi_from_u64
+    mov rsi,rax
+    mov rdi,qword ptr [r14+S26_RING_FIRST]
+    call bi_sub
+    test rax,rax
+    je .Lms26_fail
+    cmp qword ptr [rax+BI_SIGN],1
+    jne .Lms26_fail
+    mov r15,rax
+    mov qword ptr [r12+CTX_STAGE26_FAMILY_SIZE],r15
+
+    mov rdi,r14
+    xor esi,esi
+    call ringAnswer
+    test rax,rax
+    je .Lms26_fail
+    mov qword ptr [r12+CTX_STAGE26_FIRST_ANSWER],rax
+
+    mov rdi,rax
+    mov rsi,r15
+    call biasedLegacyPick
+    test rax,rax
+    je .Lms26_fail
+    mov qword ptr [r12+CTX_STAGE26_LEGACY_SELECTION],rax
+    inc qword ptr [r12+CTX_STAGE26_LEGACY_SEEN]
+
+    mov rdi,r14
+    mov rsi,r15
+    call monster_biased_selection_route
+    test rax,rax
+    je .Lms26_fail
+    mov qword ptr [r12+CTX_STAGE26_ROUTE_SELECTION],rax
+    inc qword ptr [r12+CTX_STAGE26_ROUTE_SEEN]
+    mov eax,1
+    jmp .Lms26_done
+.Lms26_fail:
+    xor eax,eax
+.Lms26_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage26_legacy_biased_selection_handler,.-monster_stage26_legacy_biased_selection_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -4610,6 +4999,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage25_next_bowl_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage26_legacy_biased_selection_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

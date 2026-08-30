@@ -501,3 +501,24 @@
 ⲠStage 24 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE24_REGRESSION_GREEN`. ⲠStage 25 test ⲧⲁϫⲣⲟ ⲛ6 ⲛID ⲧⲏⲣⲟⲩ, ⲡwrap, ⲙⲛ ⲛinvalid boundaries, ⲁⲩⲱ ⲛϥϯ `STAGE25_PATCH12_GREEN`.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`biasedLegacyPick` ⲏ ⲟⲩcode ⲙⲡPATCH 13.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 26 — DISCOVERY 13
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡanswer ⲛϣⲟⲣⲡ ϣϭⲙϭⲟⲙ ⲉϥⲃⲱⲕ ⲛⲧⲉⲩⲛⲟⲩ ⲉⲡfamily ϩⲓⲧⲛ ⲟⲩmodulo. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡlegacy helper `biasedLegacyPick(x,N)` ⲕⲧⲟ ⲙⲡ`regularMod(x-1,N)+1` ⲁϫⲛ ⲟⲩrejection ⲉⲙⲡⲁⲧϥ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡ`M_OLD` ⲛϥⲛⲁϣ ⲁⲛ ⲉϣⲁϫⲉ ⲙⲛ family size ⲛⲓⲙ ⲛⲟⲩⲙⲉⲧⲧⲱⲛ ⲛⲟⲩⲱⲧ ϩⲓⲧⲛ direct modulo. Ϩⲛ ⲛwitness ⲙⲡFoundation ⲉⲧⲟⲩⲧⲟϣ, ⲡ`first` ⲟ ⲉϩⲣⲁⲓ ⲉ`M_OLD/2`, ⲡdirection ⲟ ⲛ`-1`, ⲁⲩⲱ ⲡ`N` ⲡⲉ `first-1`. Ⲡanswer ⲛϣⲟⲣⲡ ⲟ ⲛ`N+1`; ⲡanswer ⲉⲧⲛⲏⲩ ⲟ ⲛ`N`. Ⲡlegacy ϯ `1` ⲁϫⲛ rejection, ⲁⲗⲗⲁ ⲡsame-line reference ⲙⲛ rejection ϯ `N`.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `answerRingThroughPatchedNextBowl`, `ringAnswer`, `biasedLegacyPick`, `legacyBiasedSelectionBeforeRejection`, `monster_biased_selection_route` ⲙⲛ `monster_stage26_legacy_biased_selection_handler`.
+
+Ⲡhandler ⲕⲱ ⲛⲟⲩreal ring ⲉⲃⲟⲗ ϩⲙⲡStage 23 sauce result ⲙⲛ Stage 25 next-bowl semantics, ⲛϥⲧⲁⲙⲓⲟ ⲙⲡ`N=first-1`, ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡlegacy selector ⲉⲙⲡⲁⲧⲉ ⲟⲩrejection ⲟⲩⲱⲛϩ.
+
+Ⲡtest ⲥⲙⲓⲛⲉ ⲛanswer ring ⲛⲓⲙ ⲙⲛ `oracle_ask_bowl` ⲙⲡsame-line Assembly, ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡnormative short choice ϩⲓⲧⲛ `oracle_choose_rank_short`. Ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩacceptance limit, rejection progression, `patchedSmallPick`, `wideDetour` ⲏ code ⲙⲡStage 27/28.

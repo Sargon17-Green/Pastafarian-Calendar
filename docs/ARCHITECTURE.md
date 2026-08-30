@@ -367,3 +367,22 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡpatch ⲛϥⲥϩⲁⲓ ⲁⲛ ⲉⲡlatch ⲁⲩⲱ ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲟⲩglobal state. Ⲡposition ⲙⲛ ⲡpatched output ⲥⲉϩⲁⲣⲉϩ ϩⲙⲡ`MonsterContext` ⲙⲡinvocation ⲙⲙⲁⲧⲉ. Ⲡlegacy scar ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ.
+
+
+## Ⲡbiased-selection legacy route ⲙⲡⲃⲁⲑⲙⲟⲥ 26
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage26_legacy_biased_selection_handler -> monster_biased_selection_route -> legacyBiasedSelectionBeforeRejection -> biasedLegacyPick`
+
+Ⲡ`answerRingThroughPatchedNextBowl` ϫⲓ ⲙⲡfinal bowl state ⲙⲡsingle-write-latch sauce ⲙⲛ ⲡcircular next-bowl ⲙⲡPATCH 12. Ⲡring state ⲟ ⲛⲟⲩarena struct ⲙⲛ `first` BigInt pointer ⲙⲛ `direction` signed qword.
+
+Ⲡ`ringAnswer` ⲕⲱ ⲉⲃⲟⲗ ⲙⲡ`1 + regularMod(first-1 + direction*offset, M_OLD)` ϩⲓⲧⲛ ⲛBigInt helpers ⲙⲡruntime ⲛAssembly.
+
+Ⲡ`biasedLegacyPick` ϫⲓ ⲙⲡanswer ⲙⲡoffset 0 ⲁⲩⲱ ⲛϥⲕⲧⲟ ⲙⲡ`regularMod(x-1,N)+1` ⲛⲧⲉⲩⲛⲟⲩ. Ⲙⲛ semantic branch ⲉϥϫⲓ ⲛⲟⲩacceptance limit ⲏ ⲟⲩoffset ⲛrejection.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡEXPECTED_RED ⲧⲁϫⲣⲏⲩ
+
+Ⲛ3 ⲛFoundation ring ⲛⲧⲉⲡtest ⲥⲉⲧⲱⲛ ⲙⲛ ⲡsame-line oracle ϩⲓ first/direction. Ⲛⲧⲟⲟⲩ ⲧⲏⲣⲟⲩ ⲟ ⲛdescending ring ⲙⲛ `N=first-1`, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡlegacy direct modulo ϯ `1` ⲁⲗⲗⲁ ⲡfirst accepted answer ⲙⲡsame ring ⲟ ⲛ`N`.
+
+Ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local. Ⲙⲛ global mutable semantic state, ⲙⲛ oracle call ϩⲙⲡproduction, ⲁⲩⲱ ⲙⲛ future rejection code.

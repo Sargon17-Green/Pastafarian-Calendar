@@ -291,3 +291,26 @@
 ϨⲙⲡFoundation latch `[4,5,2,3,6,1]`, ⲡprobe ⲛStage 24 ⲟ ⲛ`queriedId=3`: ⲡlegacy ϯ `4`, ⲁⲗⲗⲁ ⲡpatched route ϯ `6`. Ⲡtest ⲙⲡStage 25 ⲥⲙⲓⲛⲉ ⲛ6 ⲛID ⲧⲏⲣⲟⲩ, ⲙⲛ ⲡwrap ⲙⲡposition 6, ⲙⲛ ⲛID 0/7 ⲉⲧⲃⲏⲕ ⲉⲃⲟⲗ. Ⲡlegacy scar ϣⲟⲃⲉ 3 ⲛⲥⲟⲡ, ⲁⲗⲗⲁ ⲡpatch ⲟ ⲛ0 ⲛmismatch.
 
 ⲠStage 24 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 26 — DISCOVERY 13
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `answerRingThroughPatchedNextBowl`, `ringAnswer` ⲙⲛ `biasedLegacyPick`. Ⲡanswer ring ϫⲓ ⲛⲛfinal bowls ⲙⲡPATCH 11 ⲙⲛ ⲡnext bowl ⲙⲡPATCH 12, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡ`first` ⲙⲛ ⲡ`direction` ϩⲛ state ⲙⲡinvocation.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage26_legacy_biased_selection_handler -> monster_biased_selection_route -> legacyBiasedSelectionBeforeRejection -> biasedLegacyPick`
+
+Ⲡlegacy selector ⲟ ⲛⲧⲉⲓϩⲉ:
+
+`biasedLegacyPick(x,N) = regularMod(x-1,N)+1`
+
+Ⲡ`legacyBiasedSelectionBeforeRejection` ϫⲓ ⲙⲡ`ringAnswer(stream,0)` ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡselector ⲛⲧⲉⲩⲛⲟⲩ. Ⲙⲛ acceptance limit, ⲙⲛ rejection loop, ⲁⲩⲱ ⲙⲛ progression ϩⲙⲡanswer ring ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+
+Ⲡsame-line regression ⲧⲁϫⲣⲟ ⲛ3 ⲛFoundation ring ⲛⲧⲉⲡAssembly ⲡⲁⲓ:
+
+- bowl `1`, seal `21`: `first=149761121754155417675313577282624396876`, `N=first-1`.
+- bowl `2`, seal `21`: `first=150753053569195599631047864881928087266`, `N=first-1`.
+- bowl `3`, seal `3`: `first=127977781070158256028771206368791714084`, `N=first-1`.
+
+Ϩⲛ ⲛ3 ⲛring ⲧⲏⲣⲟⲩ, ⲡdirection ⲟ ⲛ`-1`, ⲡ`first` ⲟ ⲉϩⲣⲁⲓ ⲉ`M_OLD/2`, ⲁⲩⲱ ⲡ`ringAnswer(1)` ⲧⲱⲛ ⲙⲛ `N`. Ⲡlegacy direct modulo ϯ `1`, ϩⲟⲡⲟⲩ ⲡsame-line rejection oracle ϯ `N`. Ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+ⲠStage 26 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–25 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ rejection patch ⲏ `wideDetour` ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
