@@ -276,3 +276,18 @@
 ϨⲙⲡFoundation witness, ⲡlatch ⲡⲉ `[4,5,2,3,6,1]`. Ⲡqueried ID ⲡⲉ `3`. Ⲡlegacy fixed-name successor ⲡⲉ `4`, ⲁⲗⲗⲁ ⲡcircular successor ϩⲙⲡlatch ⲡⲉ `6`. ⲠStage 24 ⲟ ⲛ`EXPECTED_RED`, ⲁⲩⲱ ⲛStage 1–23 ⲥⲉⲟ ⲛ`GREEN`.
 
 Ⲙⲛ lookup ⲙⲡqueried ID ϩⲙⲡlatch ⲏ ⲟⲩrepair ⲙⲡPATCH 12 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 25 — PATCH 12
+
+Ⲡ`oldNextBowlFixedName(id)` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲛ ⲡring ⲛID `1→2→3→4→5→6→1`. Ⲡ`nextBowlQueryPatch` ⲙⲟⲩⲧⲉ ⲉⲡlegacy helper ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲩⲱ ⲛϥⲕⲁ ⲙⲡⲉϥresult ⲛⲥⲁ.
+
+ⲠCOPY_AUTHORITATIVE ϫⲓ ⲙⲡ`sauceResult.queryOrder`, ⲉⲧⲉ ⲡ`orderAt46Latch` ⲙⲡPATCH 11 ⲡⲉ, ⲛϥϣⲓⲛⲉ ⲛⲥⲁ ⲡ`queriedId` ϩⲓ ⲛ6 ⲛposition, ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡID ⲙⲡposition ⲉⲧⲛⲏⲩ. Ⲉϣϫⲉ ⲡqueried ID ⲟ ϩⲙⲡposition ⲙⲙⲁϩ6, ⲡsuccessor ⲡⲉ ⲡposition ⲛϣⲟⲣⲡ.
+
+`monster_next_bowl_route -> monster_stage25_next_bowl_patch_wrapper -> nextBowlQueryPatch`
+
+Ⲡ`monster_stage24_legacy_next_bowl_handler` ⲟⲩⲏϩ ⲉϥϫⲓ ⲛⲟⲩdirect legacy result ϩⲙⲡfield ⲛStage 24, ⲁⲗⲗⲁ ⲡroute result ⲧⲉⲛⲟⲩ ⲟ ⲛⲟⲩcircular successor. Ⲡ`monster_stage25_next_bowl_patch_handler` ϩⲁⲣⲉϩ ⲉⲡposition ⲉⲧⲁⲩϭⲓⲛⲉ, ⲡpatched output ⲙⲛ ⲡseen counter.
+
+ϨⲙⲡFoundation latch `[4,5,2,3,6,1]`, ⲡprobe ⲛStage 24 ⲟ ⲛ`queriedId=3`: ⲡlegacy ϯ `4`, ⲁⲗⲗⲁ ⲡpatched route ϯ `6`. Ⲡtest ⲙⲡStage 25 ⲥⲙⲓⲛⲉ ⲛ6 ⲛID ⲧⲏⲣⲟⲩ, ⲙⲛ ⲡwrap ⲙⲡposition 6, ⲙⲛ ⲛID 0/7 ⲉⲧⲃⲏⲕ ⲉⲃⲟⲗ. Ⲡlegacy scar ϣⲟⲃⲉ 3 ⲛⲥⲟⲡ, ⲁⲗⲗⲁ ⲡpatch ⲟ ⲛ0 ⲛmismatch.
+
+ⲠStage 24 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.

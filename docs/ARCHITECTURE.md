@@ -350,3 +350,20 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local. Ⲙⲛ global mutable semantic state. Ⲙⲛ lookup repair ⲏ future patch code ⲉϥϣⲟⲟⲡ ϩⲙⲡroute ⲙⲡDISCOVERY.
+
+
+## Ⲡcircular next-bowl detour ⲙⲡⲃⲁⲑⲙⲟⲥ 25
+
+ⲠCOPY_DIAGNOSTIC ⲟⲩⲏϩ ⲉϥⲟ ⲛ`oldNextBowlFixedName`, ⲉϥⲙⲟⲟϣⲉ ϩⲓ ⲡfixed numeric ring. ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_next_bowl_route -> monster_stage25_next_bowl_patch_wrapper -> nextBowlQueryPatch`
+
+Ⲡ`nextBowlQueryPatch` ϫⲓ ⲙⲡ`sauceResult.queryOrder` ⲙⲡPATCH 11, ⲉⲧⲉ ⲟⲩalias ⲙⲡsingle-write `orderAt46Latch` ⲡⲉ. Ⲡqueried ID ϫⲓ ⲛⲟⲩposition ⲛⲟⲩⲱⲧ ϩⲙⲡpermutation; ⲡsuccessor ⲡⲉ ⲡelement ⲉⲧⲛⲏⲩ, ⲙⲛ wrap ⲙⲡposition 6 ⲉⲡposition 1.
+
+### EQUIVALENCE
+
+Ⲉⲡⲉⲓⲇⲏ ⲡ`queryOrder` ⲟ ⲛⲟⲩpermutation ⲛⲛID `1..6`, ⲡlookup ⲛqueried ID ⲉϥϣⲟⲟⲡ ⲛⲟⲩⲱⲧ. Ⲡcircular successor ⲡⲁⲓ ⲡⲉ ⲡnext bowl ⲉⲧⲧⲟϣ ϩⲙⲡlatched order. Ⲡfixed-name legacy result ⲟ ⲛdiagnostic ⲙⲙⲁⲧⲉ.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
+
+Ⲡpatch ⲛϥⲥϩⲁⲓ ⲁⲛ ⲉⲡlatch ⲁⲩⲱ ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲟⲩglobal state. Ⲡposition ⲙⲛ ⲡpatched output ⲥⲉϩⲁⲣⲉϩ ϩⲙⲡ`MonsterContext` ⲙⲡinvocation ⲙⲙⲁⲧⲉ. Ⲡlegacy scar ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ.

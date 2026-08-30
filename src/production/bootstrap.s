@@ -118,7 +118,10 @@
 .equ CTX_STAGE24_ROUTE_NEXT_BOWL_ID,928
 .equ CTX_STAGE24_LEGACY_SEEN,936
 .equ CTX_STAGE24_ROUTE_SEEN,944
-.equ CTX_SIZE,952
+.equ CTX_STAGE25_QUERIED_POSITION,952
+.equ CTX_STAGE25_PATCHED_NEXT_BOWL_ID,960
+.equ CTX_STAGE25_PATCH_SEEN,968
+.equ CTX_SIZE,976
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -309,6 +312,9 @@ legacy_bowl_stir_stone_by_position:
 .global legacyNextBowlAdapter
 .global monster_next_bowl_route
 .global monster_stage24_legacy_next_bowl_handler
+.global nextBowlQueryPatch
+.global monster_stage25_next_bowl_patch_wrapper
+.global monster_stage25_next_bowl_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -4353,9 +4359,70 @@ legacyNextBowlAdapter:
     jmp oldNextBowlFixedName
 .size legacyNextBowlAdapter,.-legacyNextBowlAdapter
 
+# Ⲃⲁⲑⲙⲟⲥ 25 — PATCH 12
+# Ⲡscar `oldNextBowlFixedName` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ. Ⲡpatch ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩdiagnostic ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡsuccessor ⲉⲃⲟⲗ ϩⲙⲡqueryOrder ⲉⲧⲉ ⲡorderAt46Latch ⲡⲉ.
+.type nextBowlQueryPatch,@function
+nextBowlQueryPatch:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lnbqp_fail
+    cmp r13,1
+    jb .Lnbqp_fail
+    cmp r13,6
+    ja .Lnbqp_fail
+
+    # Ⲡlegacy call ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲛⲟⲩCOPY_DIAGNOSTIC; ⲡⲉϥresult ⲛϥⲣ ⲁⲛ ⲛⲟⲩsemantic decision.
+    mov rdi,r13
+    call oldNextBowlFixedName
+    test rax,rax
+    je .Lnbqp_fail
+
+    mov rdx,qword ptr [r12+S23_QUERY_ORDER]
+    test rdx,rdx
+    je .Lnbqp_fail
+    xor ecx,ecx
+.Lnbqp_find:
+    cmp rcx,6
+    jae .Lnbqp_fail
+    mov rax,qword ptr [rdx+rcx*8]
+    cmp rax,r13
+    je .Lnbqp_found
+    inc rcx
+    jmp .Lnbqp_find
+.Lnbqp_found:
+    inc rcx
+    cmp rcx,6
+    jb .Lnbqp_load
+    xor ecx,ecx
+.Lnbqp_load:
+    mov rax,qword ptr [rdx+rcx*8]
+    test rax,rax
+    je .Lnbqp_fail
+    cmp rax,6
+    ja .Lnbqp_fail
+    jmp .Lnbqp_done
+.Lnbqp_fail:
+    xor eax,eax
+.Lnbqp_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size nextBowlQueryPatch,.-nextBowlQueryPatch
+
+.type monster_stage25_next_bowl_patch_wrapper,@function
+monster_stage25_next_bowl_patch_wrapper:
+    jmp nextBowlQueryPatch
+.size monster_stage25_next_bowl_patch_wrapper,.-monster_stage25_next_bowl_patch_wrapper
+
 .type monster_next_bowl_route,@function
 monster_next_bowl_route:
-    jmp legacyNextBowlAdapter
+    jmp monster_stage25_next_bowl_patch_wrapper
 .size monster_next_bowl_route,.-monster_next_bowl_route
 
 .type monster_stage24_legacy_next_bowl_handler,@function
@@ -4409,6 +4476,61 @@ monster_stage24_legacy_next_bowl_handler:
     leave
     ret
 .size monster_stage24_legacy_next_bowl_handler,.-monster_stage24_legacy_next_bowl_handler
+
+.type monster_stage25_next_bowl_patch_handler,@function
+monster_stage25_next_bowl_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lms25_fail
+    mov r13,qword ptr [r12+CTX_STAGE22_SAUCE_RESULT]
+    test r13,r13
+    je .Lms25_fail
+    mov r14,qword ptr [r12+CTX_STAGE24_QUERIED_BOWL_ID]
+    cmp r14,1
+    jb .Lms25_fail
+    cmp r14,6
+    ja .Lms25_fail
+
+    mov rdx,qword ptr [r13+S23_QUERY_ORDER]
+    test rdx,rdx
+    je .Lms25_fail
+    xor ecx,ecx
+.Lms25_find:
+    cmp rcx,6
+    jae .Lms25_fail
+    cmp qword ptr [rdx+rcx*8],r14
+    je .Lms25_found
+    inc rcx
+    jmp .Lms25_find
+.Lms25_found:
+    lea rax,[rcx+1]
+    mov qword ptr [r12+CTX_STAGE25_QUERIED_POSITION],rax
+
+    mov rdi,r13
+    mov rsi,r14
+    call monster_next_bowl_route
+    test rax,rax
+    je .Lms25_fail
+    mov qword ptr [r12+CTX_STAGE25_PATCHED_NEXT_BOWL_ID],rax
+    inc qword ptr [r12+CTX_STAGE25_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms25_done
+.Lms25_fail:
+    xor eax,eax
+.Lms25_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage25_next_bowl_patch_handler,.-monster_stage25_next_bowl_patch_handler
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -4483,6 +4605,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage24_legacy_next_bowl_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage25_next_bowl_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

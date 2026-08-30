@@ -478,3 +478,26 @@
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldNextBowlFixedName`, `legacyNextBowlAdapter`, `monster_next_bowl_route`, `monster_stage24_legacy_next_bowl_handler`, ⲙⲛ state ⲛⲧⲉ queried ID/direct legacy result/route result/seen counters.
 
 Ⲡ`legacyNextBowlAdapter` ϫⲓ ⲙⲡsauce result ϩⲙⲡcontract ⲁⲗⲗⲁ ⲛϥϫⲓ ⲙⲙⲟϥ ⲁⲛ ϩⲙⲡdecision; ⲡⲉⲓscar ⲡⲉ ⲡⲡⲗⲁⲛⲏ ⲙⲡDISCOVERY. Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩlookup ⲏ circular-successor repair ϩⲙⲡⲉⲓStage.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 25 — PATCH 12
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`oldNextBowlFixedName`. Ⲡhelper ⲛⲗⲉⲅⲁⲥⲓ ⲟⲩⲏϩ ⲉϥϯ ⲙⲡsuccessor ⲙⲡfixed numeric ring, ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲉⲧⲓ ⲛⲟⲩdiagnostic.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`nextBowlQueryPatch`. Ⲙⲛⲛⲥⲁ ⲡlegacy call, ⲡpatch ϫⲓ ⲙⲡ`S23_QUERY_ORDER`, ⲛϥϣⲓⲛⲉ ⲛⲥⲁ ⲡqueried ID, ⲁⲩⲱ ⲛϥⲕⲧⲟ ⲙⲡcircular successor. Ⲡlegacy output ⲛϥⲧⲟϣ ⲁⲛ ⲙⲡsemantic output.
+
+`monster_next_bowl_route -> monster_stage25_next_bowl_patch_wrapper -> nextBowlQueryPatch`
+
+Ⲡ`monster_stage25_next_bowl_patch_handler` ϩⲁⲣⲉϩ ⲉ`CTX_STAGE25_QUERIED_POSITION`, `CTX_STAGE25_PATCHED_NEXT_BOWL_ID` ⲙⲛ `CTX_STAGE25_PATCH_SEEN`.
+
+### Ⲡⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+ϨⲙⲡFoundation `orderAt46Latch=[4,5,2,3,6,1]`. Ⲛcircular successor ⲛⲉ `4→5`, `5→2`, `2→3`, `3→6`, `6→1`, `1→4`. Ⲡfixed-name scar ϣⲟⲃⲉ ϩⲓ queried IDs `1,3,5`, ⲁⲩⲱ ⲛϥⲧⲱⲛ ϩⲓ `2,4,6`.
+
+ⲠStage 24 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE24_REGRESSION_GREEN`. ⲠStage 25 test ⲧⲁϫⲣⲟ ⲛ6 ⲛID ⲧⲏⲣⲟⲩ, ⲡwrap, ⲙⲛ ⲛinvalid boundaries, ⲁⲩⲱ ⲛϥϯ `STAGE25_PATCH12_GREEN`.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`biasedLegacyPick` ⲏ ⲟⲩcode ⲙⲡPATCH 13.
