@@ -4,3 +4,4 @@ set -euo pipefail
 ./build/stage01_tests
 ./build/stage01_smoke
 ./build/stage02_discovery01
+./build/stage03_patch01

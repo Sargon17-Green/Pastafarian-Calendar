@@ -19,3 +19,9 @@
 ## Ⲃⲁⲑⲙⲟⲥ 2 — DISCOVERY 01
 
 Ⲡ`oldRemainder` ⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ ⲉⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ. Ⲛϥⲕⲱ ⲁⲛ ⲉϩⲣⲁⲓ ⲙⲡⲡⲁⲧϣ ⲛ`SAVE`; ⲡⲇⲟⲕⲓⲙⲏ ⲛStage 2 ⲟⲩ`EXPECTED_RED` ⲡⲉ. Ⲛⲇⲟⲕⲓⲙⲏ ⲛStage 1 ⲥⲉⲟⲩⲏϩ ⲉⲩϣⲟⲟⲡ ⲛ`GREEN`.
+
+## Ⲃⲁⲑⲙⲟⲥ 3 — PATCH 01
+
+Ⲡ`oldRemainder` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥⲡⲗⲁⲛⲏ. Ⲡ`savePatch` ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ, ⲁⲩⲱ ⲉϣϫⲉ ⲡⲟⲩⲱϣⲃ ⲟ ⲛ`0`, ⲛϥⲕⲱ ⲛ`M` ⲉϩⲣⲁⲓ. Ⲡ`monster_remainder_route` ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲟⲩwrapper ⲛⲧⲉⲡⲉⲓⲡⲁⲧϣ.
+
+Ⲡⲇⲟⲕⲓⲙⲏ ⲛStage 2 ⲁϥⲕⲧⲟϥ ⲉ`GREEN`, ⲁⲩⲱ ⲟⲩⲇⲟⲕⲓⲙⲏ ⲛStage 3 ϩⲁⲣⲉϩ ϫⲉ ⲡ`oldRemainder` ⲟⲩⲏϩ ⲉϥϯ `0` ϩⲓ `M`, ϩⲟⲡⲟⲩ ⲡⲣⲱⲧⲉ ⲙⲡⲁⲧϣ ϯ `M`.

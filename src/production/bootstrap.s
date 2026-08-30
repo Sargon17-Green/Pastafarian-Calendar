@@ -17,6 +17,8 @@
 .equ CTX_LEGACY_REMAINDER_INPUT,120
 .equ CTX_LEGACY_REMAINDER_RESULT,128
 .equ CTX_LEGACY_REMAINDER_SEEN,136
+.equ CTX_PATCHED_REMAINDER_RESULT,144
+.equ CTX_SAVE_PATCH_SEEN,152
 .equ CTX_SIZE,160
 .equ BI_SIGN,0
 .equ BI_LEN,8
@@ -42,12 +44,15 @@ legacy_remainder_M_limbs:
 .extern bi_is_zero
 .extern bi_sub_abs
 .extern bi_from_i64
+.extern bi_clone
 .global monster_context_new
 .global monster_validate_base
 .global monster_metrics_bump
 .global monster_dispatch_base
 .global calendarDateSpaghetti
 .global oldRemainder
+.global savePatch
+.global monster_stage03_save_patch_wrapper
 .global monster_stage02_legacy_remainder_handler
 .global monster_remainder_route
 
@@ -167,9 +172,38 @@ oldRemainder:
     ret
 .size oldRemainder,.-oldRemainder
 
+# Ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ϯ 0 ϩⲓ ⲛⲡⲟⲗⲗⲁⲡⲗⲁⲥⲓⲟⲛ ⲙⲡ M. Ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ ϫⲉ ⲟⲩϣⲟⲩⲱⲃⲉ ⲛⲧⲉⲡϩⲓⲥⲧⲟⲣⲓⲁ ⲡⲉ.
+# Ⲡ savePatch ⲕⲱ M ⲉϩⲣⲁⲓ ⲉϣϫⲉ ⲡ oldRemainder ϯ 0. Ⲡⲁⲓ ⲧⲱⲛ ⲙⲛ SAVE ⲁⲩⲱ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲛⲟⲩⲕⲉⲁⲡⲟⲕⲣⲓⲥⲓⲥ.
+.type savePatch,@function
+savePatch:
+    push rbp
+    mov rbp,rsp
+    push r12
+    call oldRemainder
+    mov r12,rax
+    mov rdi,r12
+    call bi_is_zero
+    test eax,eax
+    je .Lsp_old_value
+    lea rdi,[rip+legacy_remainder_M]
+    call bi_clone
+    jmp .Lsp_done
+.Lsp_old_value:
+    mov rax,r12
+.Lsp_done:
+    pop r12
+    leave
+    ret
+.size savePatch,.-savePatch
+
+.type monster_stage03_save_patch_wrapper,@function
+monster_stage03_save_patch_wrapper:
+    jmp savePatch
+.size monster_stage03_save_patch_wrapper,.-monster_stage03_save_patch_wrapper
+
 .type monster_remainder_route,@function
 monster_remainder_route:
-    jmp oldRemainder
+    jmp monster_stage03_save_patch_wrapper
 .size monster_remainder_route,.-monster_remainder_route
 
 .type monster_stage02_legacy_remainder_handler,@function
@@ -186,9 +220,13 @@ monster_stage02_legacy_remainder_handler:
     mov r13,rax
     mov qword ptr [r12+CTX_LEGACY_REMAINDER_INPUT],r13
     mov rdi,r13
-    call monster_remainder_route
+    call oldRemainder
     mov qword ptr [r12+CTX_LEGACY_REMAINDER_RESULT],rax
     inc qword ptr [r12+CTX_LEGACY_REMAINDER_SEEN]
+    mov rdi,r13
+    call monster_remainder_route
+    mov qword ptr [r12+CTX_PATCHED_REMAINDER_RESULT],rax
+    inc qword ptr [r12+CTX_SAVE_PATCH_SEEN]
     mov eax,1
     jmp .Lms02_done
 .Lms02_fail:
