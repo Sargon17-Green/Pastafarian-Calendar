@@ -457,3 +457,24 @@
 Ⲡ`monster_stage23_order46_latch_handler` ϫⲓ ⲛⲟⲩstate ⲙⲡresult ⲉⲧⲁⲡStage 22 handler ⲧⲁⲙⲓⲟ ⲙⲙⲟϥ; ⲛϥⲙⲟⲩⲧⲉ ⲁⲛ ⲛⲕⲉⲥⲟⲡ ⲉⲡsauce. Ⲡcontext ϩⲁⲣⲉϩ ⲉⲡlatch pointer, ⲡwrite count, ⲡsource ordinal, ⲡlegacy diagnostic result ⲙⲛ ⲡseen counter.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`oldNextBowlFixedName` ⲏ ⲟⲩcode ⲙⲡDISCOVERY 12.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 24 — DISCOVERY 12
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡnext bowl ϣϭⲙϭⲟⲙ ⲉϥⲟⲩⲱϩ ⲛⲥⲁ ⲡID ⲙⲙⲓⲛ ⲙⲙⲟϥ ϩⲓ ⲡring `1..6`. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`oldNextBowlFixedName(id)` ⲉϥϯ `id+1`, ⲏ `1` ⲉϣϫⲉ ⲡid ⲟ ⲛ6.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+ⲠPATCH 11 ⲁϥⲧⲁϫⲣⲟ ⲛⲟⲩ`orderAt46Latch` ⲉϥϣⲟⲃⲉ ⲙⲛ ⲡring ⲛⲛID ⲛⲛⲟⲩⲙⲉⲣⲟⲛ. Ⲡsuccessor ⲛⲧⲟϣ ⲛⲧⲉ ⲟⲩqueried bowl ⲡⲉ ⲡID ⲉⲧⲛⲏⲩ ⲙⲛⲛⲥⲱϥ ϩⲙⲡlatch, ⲁⲛ ⲡID ⲉⲧⲛⲏⲩ ϩⲙⲡring ⲛⲛⲟⲩⲙⲉⲣⲟⲛ.
+
+ϨⲙⲡFoundation witness, `orderAt46Latch=[4,5,2,3,6,1]`. Ⲡqueried ID ⲉⲧϩⲙⲡposition ⲙⲙⲁϩ4 ⲡⲉ `3`. Ⲡ`oldNextBowlFixedName(3)` ϯ `4`, ϩⲟⲡⲟⲩ ⲡsuccessor ⲙⲡlatch ⲡⲉ `6`.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage24_legacy_next_bowl_handler -> monster_next_bowl_route -> legacyNextBowlAdapter -> oldNextBowlFixedName`
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldNextBowlFixedName`, `legacyNextBowlAdapter`, `monster_next_bowl_route`, `monster_stage24_legacy_next_bowl_handler`, ⲙⲛ state ⲛⲧⲉ queried ID/direct legacy result/route result/seen counters.
+
+Ⲡ`legacyNextBowlAdapter` ϫⲓ ⲙⲡsauce result ϩⲙⲡcontract ⲁⲗⲗⲁ ⲛϥϫⲓ ⲙⲙⲟϥ ⲁⲛ ϩⲙⲡdecision; ⲡⲉⲓscar ⲡⲉ ⲡⲡⲗⲁⲛⲏ ⲙⲡDISCOVERY. Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩlookup ⲏ circular-successor repair ϩⲙⲡⲉⲓStage.

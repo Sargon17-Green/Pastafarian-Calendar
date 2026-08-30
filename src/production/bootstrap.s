@@ -113,7 +113,12 @@
 .equ CTX_STAGE23_LATCH_SOURCE_ORDINAL,888
 .equ CTX_STAGE23_LEGACY_DIAGNOSTIC_RESULT,896
 .equ CTX_STAGE23_SEEN,904
-.equ CTX_SIZE,912
+.equ CTX_STAGE24_QUERIED_BOWL_ID,912
+.equ CTX_STAGE24_LEGACY_NEXT_BOWL_ID,920
+.equ CTX_STAGE24_ROUTE_NEXT_BOWL_ID,928
+.equ CTX_STAGE24_LEGACY_SEEN,936
+.equ CTX_STAGE24_ROUTE_SEEN,944
+.equ CTX_SIZE,952
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -300,6 +305,10 @@ legacy_bowl_stir_stone_by_position:
 .global sauceWithOrderAt46Latch
 .global monster_stage23_order46_latch_patch_wrapper
 .global monster_stage23_order46_latch_handler
+.global oldNextBowlFixedName
+.global legacyNextBowlAdapter
+.global monster_next_bowl_route
+.global monster_stage24_legacy_next_bowl_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -4316,6 +4325,91 @@ monster_stage23_order46_latch_handler:
     ret
 .size monster_stage23_order46_latch_handler,.-monster_stage23_order46_latch_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 24 — DISCOVERY 12
+# Ⲡlegacy helper ⲡⲁⲓ ⲙⲟⲟϣⲉ ⲕⲁⲧⲁ ⲡⲣⲓⲛⲅⲕ ⲛⲛbowl ID ⲛⲛⲟⲩⲙⲉⲣⲟⲛ 1..6 ⲁⲩⲱ ⲛϥϫⲓ ⲁⲛ ⲙⲡposition ϩⲙⲡorderAt46Latch.
+.type oldNextBowlFixedName,@function
+oldNextBowlFixedName:
+    cmp rdi,1
+    jb .Lonbfn_fail
+    cmp rdi,6
+    ja .Lonbfn_fail
+    cmp rdi,6
+    je .Lonbfn_wrap
+    lea rax,[rdi+1]
+    ret
+.Lonbfn_wrap:
+    mov eax,1
+    ret
+.Lonbfn_fail:
+    xor eax,eax
+    ret
+.size oldNextBowlFixedName,.-oldNextBowlFixedName
+
+.type legacyNextBowlAdapter,@function
+legacyNextBowlAdapter:
+    # Ⲡrdi ϥϫⲓ ⲙⲡsauceResult, ⲁⲩⲱ ⲡrsi ϥϫⲓ ⲙⲡqueriedId. Ⲡlegacy ⲛϥϫⲓ ⲁⲛ ⲙⲡsauceResult.
+    mov rdi,rsi
+    jmp oldNextBowlFixedName
+.size legacyNextBowlAdapter,.-legacyNextBowlAdapter
+
+.type monster_next_bowl_route,@function
+monster_next_bowl_route:
+    jmp legacyNextBowlAdapter
+.size monster_next_bowl_route,.-monster_next_bowl_route
+
+.type monster_stage24_legacy_next_bowl_handler,@function
+monster_stage24_legacy_next_bowl_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lms24_fail
+    mov r13,qword ptr [r12+CTX_STAGE22_SAUCE_RESULT]
+    test r13,r13
+    je .Lms24_fail
+    mov r14,qword ptr [r12+CTX_STAGE23_ORDER46_LATCH]
+    test r14,r14
+    je .Lms24_fail
+    # Ⲡprobe ⲙⲡDISCOVERY ϫⲓ ⲙⲡID ⲉⲧϩⲙⲡposition ⲙⲙⲁϩ4 ⲙⲡlatch ⲛⲧⲟϣ.
+    mov rdx,qword ptr [r14+24]
+    cmp rdx,1
+    jb .Lms24_fail
+    cmp rdx,6
+    ja .Lms24_fail
+    mov qword ptr [r12+CTX_STAGE24_QUERIED_BOWL_ID],rdx
+
+    mov rdi,rdx
+    call oldNextBowlFixedName
+    test rax,rax
+    je .Lms24_fail
+    mov qword ptr [r12+CTX_STAGE24_LEGACY_NEXT_BOWL_ID],rax
+    inc qword ptr [r12+CTX_STAGE24_LEGACY_SEEN]
+
+    mov rdi,r13
+    mov rsi,qword ptr [r12+CTX_STAGE24_QUERIED_BOWL_ID]
+    call monster_next_bowl_route
+    test rax,rax
+    je .Lms24_fail
+    mov qword ptr [r12+CTX_STAGE24_ROUTE_NEXT_BOWL_ID],rax
+    inc qword ptr [r12+CTX_STAGE24_ROUTE_SEEN]
+    mov eax,1
+    jmp .Lms24_done
+.Lms24_fail:
+    xor eax,eax
+.Lms24_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage24_legacy_next_bowl_handler,.-monster_stage24_legacy_next_bowl_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -4384,6 +4478,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage23_order46_latch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage24_legacy_next_bowl_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

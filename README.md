@@ -263,3 +263,16 @@
 ϨⲙⲡFoundation witness, ⲡlatch/query ⲡⲉ `[4,5,2,3,6,1]`, ⲁⲗⲗⲁ ⲡlegacy memory ⲡⲉ `[1,6,5,2,4,3]`. Ⲡlatch write count ⲟ ⲛ1 ⲁⲩⲱ ⲡsource ordinal ⲟ ⲛ46. Ⲛ6 ⲛfinal bowls ⲙⲛ ⲡquery ⲧⲱⲛ ⲙⲛ `oracle_sauce` ⲙⲡline ⲛⲟⲩⲱⲧ.
 
 ⲠStage 22 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲙⲛ `oldNextBowlFixedName` ⲏ ⲟⲩrepair ⲙⲡPATCH 12 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 24 — DISCOVERY 12
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldNextBowlFixedName(id)`. Ⲡhelper ⲛⲗⲉⲅⲁⲥⲓ ⲡⲁⲓ ⲙⲟⲟϣⲉ ϩⲓ ⲡring ⲛⲛbowl ID ⲛⲛⲟⲩⲙⲉⲣⲟⲛ: `1→2→3→4→5→6→1`. Ⲛϥϫⲓ ⲁⲛ ⲙⲡposition ⲙⲡqueried ID ϩⲙ `orderAt46Latch`.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage24_legacy_next_bowl_handler -> monster_next_bowl_route -> legacyNextBowlAdapter -> oldNextBowlFixedName`
+
+Ⲡhandler ϫⲓ ⲙⲡ`S23_ORDER46_LATCH` ⲉⲧⲁⲡPATCH 11 ⲧⲁⲙⲓⲟ ⲙⲙⲟϥ, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡqueried ID, ⲡdirect legacy result ⲙⲛ ⲡroute result ϩⲙⲡ`MonsterContext`. Ⲡprobe ⲙⲡDISCOVERY ϫⲓ ⲙⲡID ⲉⲧϩⲙⲡposition ⲙⲙⲁϩ4 ⲙⲡlatch ⲛⲧⲟϣ.
+
+ϨⲙⲡFoundation witness, ⲡlatch ⲡⲉ `[4,5,2,3,6,1]`. Ⲡqueried ID ⲡⲉ `3`. Ⲡlegacy fixed-name successor ⲡⲉ `4`, ⲁⲗⲗⲁ ⲡcircular successor ϩⲙⲡlatch ⲡⲉ `6`. ⲠStage 24 ⲟ ⲛ`EXPECTED_RED`, ⲁⲩⲱ ⲛStage 1–23 ⲥⲉⲟ ⲛ`GREEN`.
+
+Ⲙⲛ lookup ⲙⲡqueried ID ϩⲙⲡlatch ⲏ ⲟⲩrepair ⲙⲡPATCH 12 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.

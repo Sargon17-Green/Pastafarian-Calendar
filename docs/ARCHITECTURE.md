@@ -331,3 +331,22 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
 
 Ⲡlatch, ⲡlegacy memory, ⲛbowls ⲙⲛ ⲛdiagnostic ⲧⲏⲣⲟⲩ ⲟ ⲛinvocation-local ϩⲙⲡarena. Ⲙⲛ global mutable semantic state. ⲠCOPY_DIAGNOSTIC ⲛϥⲧⲟϣ ⲁⲛ ⲙⲡquery; ⲡCOPY_AUTHORITATIVE ⲙⲙⲁⲧⲉ ⲡⲉ ⲡsource ⲙⲡsemantic result.
+
+
+## Ⲡfixed-name next-bowl route ⲙⲡⲃⲁⲑⲙⲟⲥ 24
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage24_legacy_next_bowl_handler -> monster_next_bowl_route -> legacyNextBowlAdapter -> oldNextBowlFixedName`
+
+Ⲡ`oldNextBowlFixedName` ⲟ ⲛⲟⲩhelper ⲛpure deterministic ⲉϥϩⲁⲣⲉϩ ⲉⲡring ⲛID `1→2→3→4→5→6→1`. Ⲡ`legacyNextBowlAdapter` ϫⲓ ⲙⲡsauceResult pointer ⲉⲧⲣⲉⲡcontract ⲟⲩⲱϩ, ⲁⲗⲗⲁ ⲛϥⲱϣ ⲁⲛ ⲙⲡ`orderAt46Latch`.
+
+Ⲡhandler ϫⲓ ⲙⲡlatch pointer ⲙⲡPATCH 11 ⲉⲃⲟⲗ ϩⲙⲡ`MonsterContext`, ⲛϥϫⲓ ⲙⲡqueried ID ⲙⲡposition ⲙⲙⲁϩ4, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲛⲟⲩdirect legacy result ⲙⲛ ⲟⲩroute result ϩⲛ state ⲉⲩϣⲟⲃⲉ.
+
+### Ⲡⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+Ⲡtest-only VALIDATION_COPY ϭⲓⲛⲉ ⲙⲡqueried ID ϩⲙⲡlatch ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡcircular successor. ϨⲙⲡFoundation latch `[4,5,2,3,6,1]`, ⲡqueried ID `3` ϩⲁ ⲡlegacy successor `4`, ϩⲟⲡⲟⲩ ⲡlatch successor ⲡⲉ `6`. Ⲡⲉⲓdivergence ⲡⲉ ⲡ`EXPECTED_RED` ⲙⲡStage 24.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲉⲓⲣⲱⲧⲉ ⲧⲁϫⲣⲏⲩ
+
+Ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local. Ⲙⲛ global mutable semantic state. Ⲙⲛ lookup repair ⲏ future patch code ⲉϥϣⲟⲟⲡ ϩⲙⲡroute ⲙⲡDISCOVERY.
