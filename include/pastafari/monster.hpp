@@ -151,6 +151,9 @@ LegacyOrderMemorySauceResult legacySauceWithOverwritableOrderMemory(
 Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     const Integer& calculationDay,
     const Integer& targetDay);
+Patch11LatchedOrderSauceResult sauceWithScars(
+    const Integer& calculationDay,
+    const Integer& targetDay);
 int oldNextBowlFixedName(int id);
 int nextBowlThroughOrderAt46Latch(const PermutationOrder& orderAt46Latch,
                                   int queriedBowlId);
@@ -231,6 +234,65 @@ struct Patch26YearMembershipDecision {
     bool authoritativeIntervalAccepted = false;
     bool patchApplied = false;
 };
+
+struct SpaghettiCutletRecord {
+    int canonicalIndex = 0;
+    Integer openGateIndex{};
+    Integer closeGateIndex{};
+    Integer firstDay{};
+    Integer lastDay{};
+};
+
+struct SpaghettiYearStructure {
+    int cutletCount = 0;
+    std::vector<int> cutletPartition{};
+    std::vector<int> cutletNameIndices{};
+    std::vector<SpaghettiCutletRecord> cutlets{};
+    int monthCount = 0;
+    std::vector<int> monthLengths{};
+    std::vector<int> monthWeaving{};
+    std::vector<int> monthNameIndices{};
+};
+
+struct SpaghettiDateFive {
+    Integer yearNumber{};
+    std::string cutletName{};
+    Integer dayInCutlet{};
+    std::string monthName{};
+    Integer dayInMonth{};
+};
+
+struct FinalStructureCacheEntry {
+    Integer calculationDayFingerprint{};
+    Integer openGate{};
+    Integer closeGate{};
+    SpaghettiYearStructure value{};
+};
+
+struct Stage54IntegrationReport {
+    SpaghettiDateFive result{};
+    Patch18YearRecord year5000{};
+    Patch18YearRecord targetYear{};
+    SpaghettiYearStructure structure{};
+    bool guardedCacheHit = false;
+    bool guardedCacheRejected = false;
+    bool legacyStructureSauceGhostExecuted = false;
+    bool legacyCutletPartitionExecuted = false;
+    bool legacyCutletNamesExecuted = false;
+    bool legacyMonthLengthListContractExecuted = false;
+    bool legacyMonthWeavingExecuted = false;
+    bool legacyMonthNamesExecuted = false;
+    bool legacyContiguousMonthDayExecuted = false;
+    bool exactFiveFieldReturn = false;
+    bool ready = false;
+    std::string phase{};
+    std::string status{};
+    std::string handler{};
+    std::size_t branchCount = 0;
+};
+
+SpaghettiDateFive calendarDateSpaghetti(const Integer& calculationDay,
+                                        const Integer& targetDay);
 struct LegacyYearCacheEntry { Integer calculationDayFingerprint{}; Integer openGate{}; Integer closeGate{}; Patch18YearRecord value{}; };
 struct LegacyYearCacheReport { Integer cacheKeyYearNumber{}; LegacyYearCacheEntry requestEntry{}; LegacyYearCacheEntry cachedEntry{}; Patch18YearRecord outputValue{}; bool cacheHit=false; bool ready=false; std::string phase; std::string status; std::string handler; std::size_t branchCount=0; LegacyYearCacheEntry legacyCachedEntryBeforePatch{}; Patch18YearRecord legacyOutputBeforePatch{}; bool legacyCacheHitBeforePatch=false; bool fingerprintMatched=false; bool openGateMatched=false; bool closeGateMatched=false; bool entryOverwritten=false; bool patch19Applied=false; };
 struct Patch19GuardedYearCacheResolution { LegacyYearCacheEntry semanticEntry{}; Patch18YearRecord outputValue{}; bool semanticHit=false; bool fingerprintMatched=false; bool openGateMatched=false; bool closeGateMatched=false; bool entryOverwritten=false; };
@@ -708,8 +770,13 @@ struct BaseMonsterContext {
     Integer calculationDay;
     Integer targetDay;
     std::string phase;
+    std::string mode;
     std::string status;
+    int subPhase = 0;
+    int retryBudget = 0;
+    int recoveryDepth = 0;
     std::string currentHandler;
+    std::string previousHandler;
     std::vector<std::string> branchTrace;
     std::vector<std::string> logs;
     std::map<std::string, Integer> metrics;
@@ -1025,6 +1092,21 @@ struct BaseMonsterContext {
     bool patch26AuthoritativeIntervalAccepted=false;
     bool patch26Applied=false;
     bool patch26YearMembershipReady=false;
+    Patch18YearRecord finalYear5000{};
+    Patch18YearRecord finalCurrentYear{};
+    SpaghettiYearStructure finalStructure{};
+    SpaghettiDateFive resultFive{};
+    bool finalGuardedCacheHit=false;
+    bool finalGuardedCacheRejected=false;
+    bool finalLegacyStructureSauceGhostExecuted=false;
+    bool finalLegacyCutletPartitionExecuted=false;
+    bool finalLegacyCutletNamesExecuted=false;
+    bool finalLegacyMonthLengthListContractExecuted=false;
+    bool finalLegacyMonthWeavingExecuted=false;
+    bool finalLegacyMonthNamesExecuted=false;
+    bool finalLegacyContiguousMonthDayExecuted=false;
+    bool finalExactFiveFieldReturn=false;
+    bool finalIntegrationReady=false;
 };
 
 struct LegacyYearJumpReport {
@@ -1414,6 +1496,7 @@ public:
         const BaseMonsterContext& ctx) const;
     void requirePatch26YearMembershipReady(
         const BaseMonsterContext& ctx) const;
+    void requireFinalIntegrationReady(const BaseMonsterContext& ctx) const;
 };
 
 class BaseMetricsShell {
@@ -1484,9 +1567,12 @@ public:
 class Patch18YearWalkWorkspace {
 public:
     explicit Patch18YearWalkWorkspace(const Integer& calculationDay);
+    Patch18YearRecord finalYear5000();
     Patch18YearRecord resolveAnchor(const LegacyYearAnchor& anchor);
     Patch18YearRecord patchedNextYear(const Patch18YearRecord& knownYear);
     Patch18YearRecord patchedPreviousYear(const Patch18YearRecord& knownYear);
+    Integer gateDay(const Integer& index);
+    bool exactGateIndexIfPresent(const Integer& day, Integer& indexOut);
 private:
     Integer calculationDay_{};
     std::map<Integer, Integer> gates_{{Integer{0}, FOUNDATION_DAY_OLD}};
@@ -1519,6 +1605,14 @@ public:
         const LegacyYearAnchor& anchor,
         const Integer& targetDay,
         const LegacyYearMembershipInspection& legacyInspection) const;
+};
+
+class FinalIntegrationHandler {
+public:
+    void handle(BaseMonsterContext& ctx,
+                std::map<Integer, FinalStructureCacheEntry>& structureCache,
+                const BaseValidationManager& validator,
+                const BaseMetricsShell& metrics) const;
 };
 class LegacyYearNumberOnlyCacheAdapter { public: LegacyYearCacheEntry getOrPut(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, bool& hit) const; };
 class Patch19YearCacheGuardWrapper { public: Patch19GuardedYearCacheResolution repair(std::map<Integer, LegacyYearCacheEntry>& cache, const Integer& yearNumber, const LegacyYearCacheEntry& current, const LegacyYearCacheEntry& legacyEntry, bool legacyHit) const; };
@@ -2581,6 +2675,12 @@ public:
         const OpeningGateMembershipPatchWrapper& wrapper,
         const BaseValidationManager& validator,
         const BaseMetricsShell& metrics) const;
+    void dispatchFinalIntegration(
+        BaseMonsterContext& ctx,
+        std::map<Integer, FinalStructureCacheEntry>& structureCache,
+        const FinalIntegrationHandler& handler,
+        const BaseValidationManager& validator,
+        const BaseMetricsShell& metrics) const;
 };
 
 class BaseMonsterManager {
@@ -2778,9 +2878,13 @@ public:
         const LegacyYearAnchor& anchor,
         const Integer& targetDay,
         const Integer& calculationDay) const;
+    Stage54IntegrationReport executeFinalIntegration(
+        const Integer& calculationDay,
+        const Integer& targetDay) const;
     void clearLegacyYearNumberCacheDiagnostic() const;
 private:
     mutable std::map<Integer, LegacyYearCacheEntry> legacyYearNumberCache_{};
+    mutable std::map<Integer, FinalStructureCacheEntry> finalStructureCache_{};
 };
 
 } // namespace pastafari

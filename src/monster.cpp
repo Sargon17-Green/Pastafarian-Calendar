@@ -1,8 +1,10 @@
 #include "pastafari/monster.hpp"
+#include "pastafari/source_language_catalog.hpp"
 
 #include <algorithm>
 #include <limits>
 #include <numeric>
+#include <set>
 
 namespace pastafari {
 
@@ -875,6 +877,95 @@ Patch11LatchedOrderSauceResult sauceWithOrderAt46Latch(
     };
 }
 
+Patch11LatchedOrderSauceResult sauceWithScars(
+    const Integer& calculationDay,
+    const Integer& targetDay) {
+    LegacySauceCounts diagnosticCounts{};
+    StoneTable diagnosticStones{};
+    HiddenDrops diagnosticHidden{};
+    VisibleDropStore diagnosticVisible{};
+    Patch11LatchedOrderSauceResult authoritative{};
+    int state = 0;
+    int recoveryBudget = 2;
+
+    goto SAUCE_WITH_SCARS_DISPATCH;
+
+SAUCE_WITH_SCARS_DISPATCH:
+    if (state == 0) {
+        goto SAUCE_WITH_SCARS_COUNTS;
+    }
+    if (state == 10) {
+        goto SAUCE_WITH_SCARS_STONES;
+    }
+    if (state == 20) {
+        goto SAUCE_WITH_SCARS_HIDDEN;
+    }
+    if (state == 30) {
+        goto SAUCE_WITH_SCARS_VISIBLE;
+    }
+    if (state == 40) {
+        goto SAUCE_WITH_SCARS_DROP_AND_POST_STIR_MACHINE;
+    }
+    if (state == 50) {
+        goto SAUCE_WITH_SCARS_VALIDATE;
+    }
+    throw BaseValidationError("status sauceWithScars ignotus est");
+
+SAUCE_WITH_SCARS_COUNTS:
+    diagnosticCounts = sauceCountsThroughScars(calculationDay, targetDay);
+    state = 10;
+    goto SAUCE_WITH_SCARS_DISPATCH;
+
+SAUCE_WITH_SCARS_STONES:
+    diagnosticStones = buildStonesThroughLegacyBuilder();
+    state = 20;
+    goto SAUCE_WITH_SCARS_DISPATCH;
+
+SAUCE_WITH_SCARS_HIDDEN:
+    diagnosticHidden = buildHiddenWithBackwardStorage(
+        calculationDay,
+        targetDay,
+        diagnosticStones);
+    state = 30;
+    goto SAUCE_WITH_SCARS_DISPATCH;
+
+SAUCE_WITH_SCARS_VISIBLE:
+    diagnosticVisible = buildVisibleDropsThroughPatchedHistory(
+        diagnosticCounts,
+        diagnosticStones,
+        diagnosticHidden);
+    if (diagnosticVisible.size() != 46) {
+        if (recoveryBudget <= 0) {
+            throw BaseValidationError("sauceWithScars quadraginta sex guttas requirit");
+        }
+        --recoveryBudget;
+        diagnosticVisible.clear();
+        state = 0;
+        goto SAUCE_WITH_SCARS_DISPATCH;
+    }
+    state = 40;
+    goto SAUCE_WITH_SCARS_DISPATCH;
+
+SAUCE_WITH_SCARS_DROP_AND_POST_STIR_MACHINE:
+    // Haec via auctoritatem veterem per omnes 46 guttas, aliases, vaultOld,
+    // latch unicum atque duodecim post-commotiones vere exsequitur.
+    authoritative = sauceWithOrderAt46Latch(calculationDay, targetDay);
+    state = 50;
+    goto SAUCE_WITH_SCARS_DISPATCH;
+
+SAUCE_WITH_SCARS_VALIDATE:
+    if (authoritative.latchWriteCount != 1 ||
+        authoritative.legacyOrderWriteCount != 58) {
+        throw BaseValidationError("sauceWithScars cicatrices ordinis integras requirit");
+    }
+    for (const int bowlId : authoritative.orderAt46Latch) {
+        if (bowlId < 1 || bowlId > 6) {
+            throw BaseValidationError("sauceWithScars latch craterum invalidum habet");
+        }
+    }
+    return authoritative;
+}
+
 Patch11LatchedOrderSauceResult oldStructureSauce(
     const Integer& calculationDay,
     const Integer& originalTargetDay) {
@@ -1593,6 +1684,174 @@ private:
     }
 };
 
+class FastLegalMonthWeavingCounterInternal {
+public:
+    explicit FastLegalMonthWeavingCounterInternal(const std::vector<int>& lengths)
+        : lengths_(lengths), monthCount_(static_cast<int>(lengths.size())) {
+        if (lengths_.empty()) {
+            throw BaseValidationError("DP celer texturae mensium saltem unum mensem requirit");
+        }
+        maxActive_.assign(static_cast<std::size_t>(monthCount_ + 1), 0);
+        for (int a = 1; a <= monthCount_; ++a) {
+            const int length = lengths_.at(static_cast<std::size_t>(a - 1));
+            if (length < 1) {
+                throw BaseValidationError("DP celer texturae mensium longitudines positivas requirit");
+            }
+            maxActive_[static_cast<std::size_t>(a)] =
+                maxActive_[static_cast<std::size_t>(a - 1)] + length - 1;
+        }
+        suffixPerFixedActive_.resize(static_cast<std::size_t>(monthCount_ + 1));
+        suffixPerFixedActive_[static_cast<std::size_t>(monthCount_)].assign(
+            static_cast<std::size_t>(maxActive_.back() + 1),
+            Integer{1});
+        for (int a = monthCount_ - 1; a >= 0; --a) {
+            const int n = lengths_.at(static_cast<std::size_t>(a));
+            const int maxS = maxActive_.at(static_cast<std::size_t>(a));
+            auto& row = suffixPerFixedActive_.at(static_cast<std::size_t>(a));
+            row.resize(static_cast<std::size_t>(maxS + 1));
+            Integer insertionWays = 1;
+            for (int s = 0; s <= maxS; ++s) {
+                if (s > 0) {
+                    insertionWays *= (s + n - 2);
+                    insertionWays /= s;
+                }
+                const Integer openNow = insertionWays *
+                    suffixPerFixedActive_.at(static_cast<std::size_t>(a + 1)).at(
+                        static_cast<std::size_t>(s + n - 1));
+                row[static_cast<std::size_t>(s)] = openNow;
+                if (s > 0) {
+                    row[static_cast<std::size_t>(s)] += row[static_cast<std::size_t>(s - 1)];
+                }
+            }
+        }
+    }
+
+    Integer countAll() {
+        LegalMonthWeavingStateInternal initial{lengths_, 0, 0};
+        return countState(initial);
+    }
+
+    std::vector<int> unrank1(const Integer& rank1) {
+        LegalMonthWeavingStateInternal state{lengths_, 0, 0};
+        const Integer total = countState(state);
+        if (rank1 < 1 || rank1 > total) {
+            throw BaseValidationError("rank texturae mensium celeris extra familiam est");
+        }
+        Integer rank = rank1;
+        const int totalLength = std::accumulate(lengths_.begin(), lengths_.end(), 0);
+        std::vector<int> out;
+        out.reserve(static_cast<std::size_t>(totalLength));
+        while (static_cast<int>(out.size()) < totalLength) {
+            bool chosen = false;
+            for (int monthId = 1; monthId <= monthCount_; ++monthId) {
+                if (!legalMove(state, monthId)) {
+                    continue;
+                }
+                const LegalMonthWeavingStateInternal next = applyMove(state, monthId);
+                const Integer block = countState(next);
+                if (rank > block) {
+                    rank -= block;
+                    continue;
+                }
+                out.push_back(monthId);
+                state = next;
+                chosen = true;
+                break;
+            }
+            if (!chosen) {
+                throw BaseValidationError("DP celer texturae mensium rank aperire non potuit");
+            }
+        }
+        return out;
+    }
+
+private:
+    std::vector<int> lengths_{};
+    int monthCount_ = 0;
+    std::vector<int> maxActive_{};
+    std::vector<std::vector<Integer>> suffixPerFixedActive_{};
+    std::map<std::pair<int, int>, Integer> binomialMemo_{};
+
+    Integer binomial(int n, int k) {
+        if (k < 0 || k > n) {
+            return Integer{0};
+        }
+        k = std::min(k, n - k);
+        const std::pair<int, int> key{n, k};
+        const auto hit = binomialMemo_.find(key);
+        if (hit != binomialMemo_.end()) {
+            return hit->second;
+        }
+        Integer out = 1;
+        for (int i = 1; i <= k; ++i) {
+            out *= (n - k + i);
+            out /= i;
+        }
+        binomialMemo_.emplace(key, out);
+        return out;
+    }
+
+    bool legalMove(const LegalMonthWeavingStateInternal& state,
+                   int monthId) const {
+        const std::size_t index = static_cast<std::size_t>(monthId - 1);
+        if (state.remaining[index] == 0) {
+            return false;
+        }
+        const bool alreadyOpened = state.remaining[index] < lengths_[index];
+        if (!alreadyOpened && monthId != state.openedUpTo + 1) {
+            return false;
+        }
+        const bool willClose = state.remaining[index] == 1;
+        return !willClose || monthId == state.closedUpTo + 1;
+    }
+
+    LegalMonthWeavingStateInternal applyMove(
+        const LegalMonthWeavingStateInternal& state,
+        int monthId) const {
+        LegalMonthWeavingStateInternal next = state;
+        const std::size_t index = static_cast<std::size_t>(monthId - 1);
+        if (next.remaining[index] == lengths_[index]) {
+            next.openedUpTo = monthId;
+        }
+        --next.remaining[index];
+        if (next.remaining[index] == 0) {
+            next.closedUpTo = monthId;
+        }
+        return next;
+    }
+
+    Integer countState(const LegalMonthWeavingStateInternal& state) {
+        if (state.openedUpTo == monthCount_ && state.closedUpTo == monthCount_) {
+            return Integer{1};
+        }
+        int activeLength = 0;
+        int prefixLength = 0;
+        Integer activeExtensions = 1;
+        for (int monthId = state.closedUpTo + 1;
+             monthId <= state.openedUpTo;
+             ++monthId) {
+            const int remaining = state.remaining.at(
+                static_cast<std::size_t>(monthId - 1));
+            if (remaining <= 0) {
+                throw BaseValidationError("DP celer statum activum corruptum invenit");
+            }
+            activeExtensions *= binomial(
+                prefixLength + remaining - 1,
+                remaining - 1);
+            prefixLength += remaining;
+            activeLength += remaining;
+        }
+        const int a = state.openedUpTo;
+        if (activeLength < 0 ||
+            activeLength > maxActive_.at(static_cast<std::size_t>(a))) {
+            throw BaseValidationError("DP celer longitudinem activam extra fines invenit");
+        }
+        return activeExtensions *
+            suffixPerFixedActive_.at(static_cast<std::size_t>(a)).at(
+                static_cast<std::size_t>(activeLength));
+    }
+};
+
 bool legalMonthWeavingRowInternal(const std::vector<int>& lengths,
                                   const std::vector<int>& row) {
     const int totalLength = std::accumulate(lengths.begin(), lengths.end(), 0);
@@ -1631,13 +1890,23 @@ bool legalMonthWeavingRowInternal(const std::vector<int>& lengths,
 } // spatium nominum
 
 Integer exactLegalMonthWeavingCount(const std::vector<int>& lengths) {
-    LegalMonthWeavingCounterInternal family(lengths);
+    const int totalLength = std::accumulate(lengths.begin(), lengths.end(), 0);
+    if (totalLength <= 40) {
+        LegalMonthWeavingCounterInternal family(lengths);
+        return family.countAll();
+    }
+    FastLegalMonthWeavingCounterInternal family(lengths);
     return family.countAll();
 }
 
 std::vector<int> DPUnrankLegalWeaving(const std::vector<int>& lengths,
                                       const Integer& rank1) {
-    LegalMonthWeavingCounterInternal family(lengths);
+    const int totalLength = std::accumulate(lengths.begin(), lengths.end(), 0);
+    if (totalLength <= 40) {
+        LegalMonthWeavingCounterInternal family(lengths);
+        return family.unrank1(rank1);
+    }
+    FastLegalMonthWeavingCounterInternal family(lengths);
     return family.unrank1(rank1);
 }
 
@@ -5507,6 +5776,127 @@ MonthDayOccurrencePatchDecision MonthDayOccurrencePatchWrapper::repair(
 
 Patch18YearWalkWorkspace::Patch18YearWalkWorkspace(const Integer& calculationDay)
     : calculationDay_(calculationDay) {}
+
+Integer Patch18YearWalkWorkspace::gateDay(const Integer& index) {
+    return ensureGateIndex(index);
+}
+
+bool Patch18YearWalkWorkspace::exactGateIndexIfPresent(
+    const Integer& day,
+    Integer& indexOut) {
+    if (day >= FOUNDATION_DAY_OLD) {
+        while (gates_.at(maxGateIndex_) < day) {
+            ensureGateIndex(maxGateIndex_ + 1);
+        }
+        for (Integer i = Integer{0}; i <= maxGateIndex_; ++i) {
+            if (gates_.at(i) == day) {
+                indexOut = i;
+                return true;
+            }
+        }
+        return false;
+    }
+    while (gates_.at(minGateIndex_) > day) {
+        ensureGateIndex(minGateIndex_ - 1);
+    }
+    for (Integer i = Integer{-1}; i >= minGateIndex_; --i) {
+        if (gates_.at(i) == day) {
+            indexOut = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+Patch18YearRecord Patch18YearWalkWorkspace::finalYear5000() {
+    const Integer low = calculationDay_ - LEGACY_YEAR_MAX;
+    const Integer high = calculationDay_ + LEGACY_YEAR_MAX;
+    while (gates_.at(minGateIndex_) > low) {
+        ensureGateIndex(minGateIndex_ - 1);
+    }
+    while (gates_.at(maxGateIndex_) < high) {
+        ensureGateIndex(maxGateIndex_ + 1);
+    }
+
+    struct Candidate {
+        Integer openIndex{};
+        Integer closeIndex{};
+        Integer length{};
+        Integer openDay{};
+    };
+    std::vector<Candidate> legacyCandidates;
+    for (Integer open = minGateIndex_; open <= maxGateIndex_; ++open) {
+        const Integer openDay = gates_.at(open);
+        if (!(openDay < calculationDay_)) {
+            continue;
+        }
+        for (Integer close = open + 6; close <= maxGateIndex_; ++close) {
+            const Integer closeDay = gates_.at(close);
+            const Integer length = closeDay - openDay;
+            if (length > LEGACY_YEAR_MAX) {
+                break;
+            }
+            if (length < 252 || calculationDay_ > closeDay) {
+                continue;
+            }
+            legacyCandidates.push_back(Candidate{open, close, length, openDay});
+        }
+    }
+    if (legacyCandidates.empty()) {
+        throw BaseValidationError("familia legacy anni 5000 vacua est");
+    }
+
+    std::vector<Candidate> semanticCandidates;
+    semanticCandidates.reserve(legacyCandidates.size());
+    for (const Candidate& candidate : legacyCandidates) {
+        if (candidate.length <= REAL_YEAR_MAX_PATCH) {
+            semanticCandidates.push_back(candidate);
+        }
+    }
+    if (semanticCandidates.empty()) {
+        throw BaseValidationError("filtrum 5778 omnes candidatos anni 5000 removit");
+    }
+
+    std::stable_sort(
+        semanticCandidates.begin(),
+        semanticCandidates.end(),
+        [](const Candidate& a, const Candidate& b) {
+            return a.length < b.length;
+        });
+    std::size_t runBegin = 0;
+    while (runBegin < semanticCandidates.size()) {
+        std::size_t runEnd = runBegin + 1;
+        while (runEnd < semanticCandidates.size() &&
+               semanticCandidates[runEnd].length == semanticCandidates[runBegin].length) {
+            ++runEnd;
+        }
+        if (runEnd - runBegin > 1) {
+            std::stable_sort(
+                semanticCandidates.begin() + static_cast<std::ptrdiff_t>(runBegin),
+                semanticCandidates.begin() + static_cast<std::ptrdiff_t>(runEnd),
+                [](const Candidate& a, const Candidate& b) {
+                    return a.openDay < b.openDay;
+                });
+        }
+        runBegin = runEnd;
+    }
+
+    const Patch11LatchedOrderSauceResult sauce = sauceWithScars(
+        calculationDay_, calculationDay_);
+    const int nextBowl = nextBowlThroughOrderAt46Latch(sauce.orderAt46Latch, 1);
+    const LegacyAnswerRing stream = answerRingThroughPatchedNextBowl(
+        sauce.finalBowls, 1, nextBowl, 10);
+    const Integer rank = chooseRank(stream, Integer{semanticCandidates.size()});
+    const std::size_t chosen = (rank - 1).convert_to<std::size_t>();
+    const Candidate& candidate = semanticCandidates.at(chosen);
+    return Patch18YearRecord{
+        Integer{5000},
+        candidate.openIndex,
+        candidate.closeIndex,
+        gates_.at(candidate.openIndex),
+        gates_.at(candidate.closeIndex)
+    };
+}
 
 Integer Patch18YearWalkWorkspace::chooseRank(
     const LegacyAnswerRing& stream,
@@ -9622,6 +10012,515 @@ LegacyYearMembershipReport BaseMonsterManager::executeUnpatchedDiscovery26Openin
         ctx.currentHandler,
         ctx.branchTrace.size()
     };
+}
+
+namespace {
+
+LegacyAnswerRing finalIntegrationAnswerRing(
+    const Patch11LatchedOrderSauceResult& sauce,
+    int queriedBowlId,
+    int seal) {
+    const int nextBowlId = nextBowlThroughOrderAt46Latch(
+        sauce.orderAt46Latch,
+        queriedBowlId);
+    return answerRingThroughPatchedNextBowl(
+        sauce.finalBowls,
+        queriedBowlId,
+        nextBowlId,
+        seal);
+}
+
+Integer finalIntegrationChooseRank(
+    const LegacyAnswerRing& ring,
+    const Integer& familySize) {
+    if (familySize < 1) {
+        throw BaseValidationError("integratio finalis familiam non vacuam requirit");
+    }
+    const LegacyBiasedSelectionAdapter adapter;
+    const Patch13RejectionWrapper shortWrapper;
+    if (familySize <= M_OLD) {
+        return shortWrapper.repair(ring, familySize, adapter).outputRank;
+    }
+    const Patch14WideDetourWrapper wideWrapper;
+    return wideWrapper.repair(ring, familySize, adapter).outputRank;
+}
+
+std::vector<int> finalIntegrationMasterList(int n) {
+    std::vector<int> out;
+    out.reserve(static_cast<std::size_t>(n));
+    for (int i = 1; i <= n; ++i) {
+        out.push_back(i);
+    }
+    return out;
+}
+
+SpaghettiYearStructure buildFinalYearStructure(
+    BaseMonsterContext& ctx,
+    Patch18YearWalkWorkspace& workspace,
+    const Patch18YearRecord& year) {
+    SpaghettiYearStructure out;
+    const Integer firstDay = year.openGateDay + 1;
+
+    // PATCH 20: ghost ex target originali currit; selector solam sauce firstDay accipit.
+    const Patch20StructureSauceResult structurePatch = structureSaucePatch(
+        ctx.calculationDay,
+        ctx.targetDay,
+        year);
+    if (!structurePatch.ghostExecuted) {
+        throw BaseValidationError("integratio finalis ghost structure sauce requirit");
+    }
+    ctx.finalLegacyStructureSauceGhostExecuted = true;
+    const Patch11LatchedOrderSauceResult semanticSauce = sauceWithScars(
+        ctx.calculationDay,
+        firstDay);
+
+    const int gapCount = (year.closeGateIndex - year.openGateIndex).convert_to<int>();
+    std::vector<int> cutletCounts;
+    for (int k = 6; k <= 17; ++k) {
+        if (k <= gapCount) {
+            cutletCounts.push_back(k);
+        }
+    }
+    if (cutletCounts.empty()) {
+        throw BaseValidationError("integratio finalis nullum numerum segmentorum invenit");
+    }
+    const LegacyAnswerRing cutletCountRing = finalIntegrationAnswerRing(
+        semanticSauce, 2, 20);
+    const Integer cutletCountRank = finalIntegrationChooseRank(
+        cutletCountRing,
+        Integer{cutletCounts.size()});
+    out.cutletCount = cutletCounts.at(
+        (cutletCountRank - 1).convert_to<std::size_t>());
+
+    const LegacyAnswerRing partitionRing = finalIntegrationAnswerRing(
+        semanticSauce, 2, 21);
+    const LegacyPositiveCompositionAdapter legacyPartitionAdapter;
+    const LegacyPositiveCompositionFamily legacyFamily = legacyPartitionAdapter.family(
+        gapCount,
+        out.cutletCount);
+    const Integer legacyPartitionRank = finalIntegrationChooseRank(
+        partitionRing,
+        legacyFamily.count);
+    const std::vector<int> legacyPartition = legacyPartitionAdapter.unrank(
+        legacyFamily,
+        legacyPartitionRank);
+    ctx.finalLegacyCutletPartitionExecuted = true;
+
+    Integer calculationGateIndex = 0;
+    const bool calculationIsGate = workspace.exactGateIndexIfPresent(
+        ctx.calculationDay,
+        calculationGateIndex);
+    const bool internalGate = calculationIsGate &&
+        calculationGateIndex > year.openGateIndex &&
+        calculationGateIndex < year.closeGateIndex;
+    const int internalOffset = internalGate
+        ? (calculationGateIndex - year.openGateIndex).convert_to<int>()
+        : 0;
+
+    BaseMonsterContext partitionContext;
+    partitionContext.discovery21GapCount = gapCount;
+    partitionContext.discovery21CutletCount = out.cutletCount;
+    partitionContext.discovery21InternalGateOffset = internalOffset;
+    partitionContext.discovery21CalculationDayIsInternalGate = internalGate;
+    partitionContext.discovery21SelectionRank = legacyPartitionRank;
+    partitionContext.discovery21LegacyPartition = legacyPartition;
+    const CutletPartitionPatchWrapper partitionWrapper;
+    const LegacyBiasedSelectionAdapter selectionAdapter;
+    const Patch13RejectionWrapper rejectionWrapper;
+    const Patch14WideDetourWrapper wideWrapper;
+    const Patch21CutletPartitionResult partitionDecision = partitionWrapper.repair(
+        partitionContext,
+        partitionRing,
+        selectionAdapter,
+        rejectionWrapper,
+        wideWrapper);
+    out.cutletPartition = partitionDecision.semanticPartition;
+
+    const std::vector<int> cutletMaster = finalIntegrationMasterList(17);
+    const Integer cutletNameSpace = legacyCutletNameSelectionSpaceCount(
+        17,
+        out.cutletCount);
+    const LegacyAnswerRing cutletNameRing = finalIntegrationAnswerRing(
+        semanticSauce, 5, 22);
+    const Integer cutletNameRank = finalIntegrationChooseRank(
+        cutletNameRing,
+        cutletNameSpace);
+    const LegacyRepeatedNameGenerator legacyNameGenerator;
+    const std::vector<int> badCutletNames = legacyNameGenerator.call(
+        cutletMaster,
+        cutletNameRank,
+        out.cutletCount);
+    ctx.finalLegacyCutletNamesExecuted = true;
+    const RepeatedNamePatchWrapper repeatedNameWrapper;
+    const RepeatedNamePatchDecision cutletNameDecision = repeatedNameWrapper.repair(
+        cutletMaster,
+        cutletNameRank,
+        out.cutletCount,
+        badCutletNames);
+    out.cutletNameIndices = cutletNameDecision.outputNameIndices;
+
+    Integer cursorGate = year.openGateIndex;
+    out.cutlets.reserve(static_cast<std::size_t>(out.cutletCount));
+    for (int i = 0; i < out.cutletCount; ++i) {
+        const Integer openGateIndex = cursorGate;
+        const Integer closeGateIndex = cursorGate + out.cutletPartition.at(
+            static_cast<std::size_t>(i));
+        out.cutlets.push_back(SpaghettiCutletRecord{
+            out.cutletNameIndices.at(static_cast<std::size_t>(i)),
+            openGateIndex,
+            closeGateIndex,
+            workspace.gateDay(openGateIndex) + 1,
+            workspace.gateDay(closeGateIndex)
+        });
+        cursorGate = closeGateIndex;
+    }
+    if (cursorGate != year.closeGateIndex) {
+        throw BaseValidationError("integratio finalis segmenta annum non claudunt");
+    }
+
+    const int yearLength = (year.closeGateDay - year.openGateDay).convert_to<int>();
+    const int minMonths = (yearLength + LEGACY_MONTH_LENGTH_MAX - 1) /
+        LEGACY_MONTH_LENGTH_MAX;
+    const int maxMonths = std::min(47, yearLength / LEGACY_MONTH_LENGTH_MIN);
+    if (minMonths < 3 || minMonths > maxMonths) {
+        throw BaseValidationError("integratio finalis fines numeri mensium invalidos habet");
+    }
+    const LegacyAnswerRing monthCountRing = finalIntegrationAnswerRing(
+        semanticSauce, 3, 30);
+    const Integer monthCountRank = finalIntegrationChooseRank(
+        monthCountRing,
+        Integer{maxMonths - minMonths + 1});
+    out.monthCount = minMonths + monthCountRank.convert_to<int>() - 1;
+
+    const LegacyMonthLengthMaterializationAdapter materializationAdapter;
+    const Integer rawMonthLengthCount = legacyMonthLengthConcreteFamilyCountProof(
+        yearLength,
+        out.monthCount);
+    LegacyMonthLengthMaterializationInspection legacyMonthLengths;
+    if (rawMonthLengthCount <= Integer{10000}) {
+        legacyMonthLengths = materializationAdapter.inspect(yearLength, out.monthCount);
+    } else {
+        legacyMonthLengths.yearLength = yearLength;
+        legacyMonthLengths.monthCount = out.monthCount;
+        legacyMonthLengths.exactFamilyCount = rawMonthLengthCount;
+        legacyMonthLengths.concreteListIndexCapacity = Integer{
+            std::numeric_limits<std::size_t>::max()};
+        legacyMonthLengths.concreteListContractReached = true;
+        legacyMonthLengths.blockedBeforeAllocation = true;
+    }
+    ctx.finalLegacyMonthLengthListContractExecuted =
+        legacyMonthLengths.concreteListContractReached;
+    const MonthLengthMaterializationPatchWrapper materializationWrapper;
+    const MonthLengthMaterializationPatchDecision materializationDecision =
+        materializationWrapper.repair(yearLength, out.monthCount, legacyMonthLengths);
+    if (!materializationDecision.patchApplied ||
+        !materializationDecision.virtualBackendUsed) {
+        throw BaseValidationError("integratio finalis VirtualLegacyList non activavit");
+    }
+    VirtualLegacyList monthLengthList(yearLength, out.monthCount);
+    const LegacyAnswerRing monthLengthRing = finalIntegrationAnswerRing(
+        semanticSauce, 3, 31);
+    const Integer monthLengthRank = finalIntegrationChooseRank(
+        monthLengthRing,
+        monthLengthList.count());
+    out.monthLengths = monthLengthList.itemAt1(monthLengthRank);
+
+    const LegacyMonthWeavingAdapter weavingAdapter;
+    const LegacyMonthWeavingInspection weavingGhost = weavingAdapter.call(
+        out.monthLengths,
+        semanticSauce);
+    ctx.finalLegacyMonthWeavingExecuted = true;
+    const MonthWeavingPatchWrapper weavingWrapper;
+    const MonthWeavingPatchDecision weavingDecision = weavingWrapper.repair(
+        out.monthLengths,
+        weavingGhost.answerRing,
+        weavingGhost.ghost);
+    if (!weavingDecision.patchApplied ||
+        !weavingDecision.semanticWholeWeavingOrderLegal) {
+        throw BaseValidationError("integratio finalis texturam mensium legalem requirit");
+    }
+    out.monthWeaving = weavingDecision.outputWeaving;
+
+    const std::vector<int> monthMaster = finalIntegrationMasterList(47);
+    const Integer monthNameSpace = legacyCutletNameSelectionSpaceCount(
+        47,
+        out.monthCount);
+    const LegacyAnswerRing monthNameRing = finalIntegrationAnswerRing(
+        semanticSauce, 5, 33);
+    const Integer monthNameRank = finalIntegrationChooseRank(
+        monthNameRing,
+        monthNameSpace);
+    const std::vector<int> badMonthNames = legacyNameGenerator.call(
+        monthMaster,
+        monthNameRank,
+        out.monthCount);
+    ctx.finalLegacyMonthNamesExecuted = true;
+    const RepeatedNamePatchDecision monthNameDecision = repeatedNameWrapper.repair(
+        monthMaster,
+        monthNameRank,
+        out.monthCount,
+        badMonthNames);
+    out.monthNameIndices = monthNameDecision.outputNameIndices;
+
+    return out;
+}
+
+} // namespace
+
+void BaseValidationManager::requireFinalIntegrationReady(
+    const BaseMonsterContext& ctx) const {
+    if (!ctx.finalIntegrationReady ||
+        !ctx.finalExactFiveFieldReturn ||
+        !ctx.finalLegacyContiguousMonthDayExecuted) {
+        throw BaseValidationError("integratio finalis omnes cicatrices et exitum quinque camporum requirit");
+    }
+    if (!ctx.finalGuardedCacheHit &&
+        (!ctx.finalLegacyStructureSauceGhostExecuted ||
+         !ctx.finalLegacyCutletPartitionExecuted ||
+         !ctx.finalLegacyCutletNamesExecuted ||
+         !ctx.finalLegacyMonthLengthListContractExecuted ||
+         !ctx.finalLegacyMonthWeavingExecuted ||
+         !ctx.finalLegacyMonthNamesExecuted)) {
+        throw BaseValidationError("integratio finalis structuram non-cached per omnes cicatrices aedificare debet");
+    }
+    if (!(ctx.finalCurrentYear.openGateDay < ctx.targetDay &&
+          ctx.targetDay <= ctx.finalCurrentYear.closeGateDay)) {
+        throw BaseValidationError("integratio finalis target extra annum (open,close] habet");
+    }
+    if (ctx.resultFive.cutletName.empty() || ctx.resultFive.monthName.empty() ||
+        ctx.resultFive.dayInCutlet < 1 || ctx.resultFive.dayInMonth < 1) {
+        throw BaseValidationError("integratio finalis quinque campos invalidos habet");
+    }
+}
+
+void FinalIntegrationHandler::handle(
+    BaseMonsterContext& ctx,
+    std::map<Integer, FinalStructureCacheEntry>& structureCache,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.mode = "AUTHORITATIVE_SPAGHETTI";
+    ctx.status = "NEW";
+    ctx.retryBudget = 3;
+    ctx.recoveryDepth = 0;
+    int stage = 0;
+    Patch18YearWalkWorkspace workspace(ctx.calculationDay);
+    Patch18YearRecord year5000{};
+    Patch18YearRecord targetYear{};
+    SpaghettiYearStructure structure{};
+    bool cacheReady = false;
+
+    goto FINAL_MAIN_DISPATCH;
+
+FINAL_MAIN_DISPATCH:
+    ctx.subPhase = stage;
+    ctx.branchTrace.push_back("FINAL_MAIN_" + std::to_string(stage));
+    if (stage == 0) goto FINAL_MAIN_VALIDATE_INPUT;
+    if (stage == 10) goto FINAL_MAIN_YEAR_5000;
+    if (stage == 20) goto FINAL_MAIN_YEAR_WALK;
+    if (stage == 30) goto FINAL_MAIN_CACHE;
+    if (stage == 40) goto FINAL_MAIN_STRUCTURE;
+    if (stage == 50) goto FINAL_MAIN_FINALIZE;
+    if (stage == 60) goto FINAL_MAIN_VALIDATE_OUTPUT;
+    throw BaseValidationError("status integrationis finalis ignotus est");
+
+FINAL_MAIN_VALIDATE_INPUT:
+    ctx.phase = "FINAL_ENTRY";
+    ctx.previousHandler = ctx.currentHandler;
+    ctx.currentHandler = "FinalIntegrationHandler";
+    metrics.bump(ctx, "final.calls");
+    stage = 10;
+    goto FINAL_MAIN_DISPATCH;
+
+FINAL_MAIN_YEAR_5000:
+    ctx.phase = "FINAL_YEAR_5000";
+    year5000 = workspace.finalYear5000();
+    ctx.finalYear5000 = year5000;
+    stage = 20;
+    goto FINAL_MAIN_DISPATCH;
+
+FINAL_MAIN_YEAR_WALK: {
+    ctx.phase = "FINAL_YEAR_WALK";
+    const LegacyYearAnchor anchor{
+        year5000.number,
+        year5000.openGateDay + 1,
+        year5000.closeGateDay
+    };
+    (void)oldJumpGuess(anchor, ctx.targetDay);
+    const LegacyYearMembershipAdapter legacyMembership;
+    const LegacyYearMembershipInspection legacyInspection = legacyMembership.resolve(
+        ctx.calculationDay,
+        anchor,
+        ctx.targetDay);
+    const OpeningGateMembershipPatchWrapper membershipWrapper;
+    const Patch26YearMembershipDecision membershipDecision = membershipWrapper.repair(
+        ctx.calculationDay,
+        anchor,
+        ctx.targetDay,
+        legacyInspection);
+    if (!membershipDecision.patchApplied ||
+        !membershipDecision.authoritativeIntervalAccepted) {
+        throw BaseValidationError("integratio finalis PATCH 26 annum non confirmavit");
+    }
+    targetYear = membershipDecision.outputYear;
+    ctx.finalCurrentYear = targetYear;
+    stage = 30;
+    goto FINAL_MAIN_DISPATCH;
+}
+
+FINAL_MAIN_CACHE: {
+    ctx.phase = "FINAL_GUARDED_CACHE";
+    const auto found = structureCache.find(targetYear.number);
+    if (found != structureCache.end()) {
+        const FinalStructureCacheEntry& entry = found->second;
+        const bool fingerprint = entry.calculationDayFingerprint == ctx.calculationDay;
+        const bool open = entry.openGate == targetYear.openGateDay;
+        const bool close = entry.closeGate == targetYear.closeGateDay;
+        if (fingerprint && open && close) {
+            structure = entry.value;
+            ctx.finalGuardedCacheHit = true;
+            cacheReady = true;
+        } else {
+            ctx.finalGuardedCacheRejected = true;
+            structureCache.erase(found);
+        }
+    }
+    stage = cacheReady ? 50 : 40;
+    goto FINAL_MAIN_DISPATCH;
+}
+
+FINAL_MAIN_STRUCTURE:
+    ctx.phase = "FINAL_STRUCTURE_BUILD";
+    structure = buildFinalYearStructure(ctx, workspace, targetYear);
+    structureCache[targetYear.number] = FinalStructureCacheEntry{
+        ctx.calculationDay,
+        targetYear.openGateDay,
+        targetYear.closeGateDay,
+        structure
+    };
+    stage = 50;
+    goto FINAL_MAIN_DISPATCH;
+
+FINAL_MAIN_FINALIZE: {
+    ctx.phase = "FINAL_FIVE_FIELDS";
+    ctx.finalStructure = structure;
+    const SpaghettiCutletRecord* chosenCutlet = nullptr;
+    for (const SpaghettiCutletRecord& cutlet : structure.cutlets) {
+        if (cutlet.firstDay <= ctx.targetDay && ctx.targetDay <= cutlet.lastDay) {
+            chosenCutlet = &cutlet;
+            break;
+        }
+    }
+    if (chosenCutlet == nullptr) {
+        throw BaseValidationError("integratio finalis segmentum target invenire non potuit");
+    }
+    const Integer dayInCutlet = ctx.targetDay - chosenCutlet->firstDay + 1;
+    const Integer positionInteger = ctx.targetDay - targetYear.openGateDay;
+    if (positionInteger < 1 ||
+        positionInteger > Integer{structure.monthWeaving.size()}) {
+        throw BaseValidationError("integratio finalis positio target in textura extra fines est");
+    }
+    const std::size_t position1 = positionInteger.convert_to<std::size_t>();
+    const int monthId = structure.monthWeaving.at(position1 - 1);
+    if (monthId < 1 || monthId > structure.monthCount) {
+        throw BaseValidationError("integratio finalis monthId extra fines est");
+    }
+    const LegacyContiguousMonthDayAdapter contiguousAdapter;
+    const LegacyContiguousMonthDayInspection contiguousGhost = contiguousAdapter.call(
+        structure.monthWeaving,
+        position1);
+    ctx.finalLegacyContiguousMonthDayExecuted = contiguousGhost.legacyExecuted;
+    const MonthDayOccurrencePatchWrapper occurrenceWrapper;
+    const MonthDayOccurrencePatchDecision occurrenceDecision = occurrenceWrapper.repair(
+        structure.monthWeaving,
+        position1,
+        contiguousGhost.guessedDayInMonth);
+    if (!occurrenceDecision.patchApplied) {
+        throw BaseValidationError("integratio finalis PATCH 25 diem mensis non reparavit");
+    }
+    const int cutletIndex = chosenCutlet->canonicalIndex;
+    const int monthNameIndex = structure.monthNameIndices.at(
+        static_cast<std::size_t>(monthId - 1));
+    ctx.resultFive = SpaghettiDateFive{
+        targetYear.number,
+        std::string(cutletSourceName(static_cast<std::size_t>(cutletIndex))),
+        dayInCutlet,
+        std::string(monthSourceName(static_cast<std::size_t>(monthNameIndex))),
+        Integer{occurrenceDecision.outputDayInMonth}
+    };
+    ctx.finalExactFiveFieldReturn = true;
+    ctx.finalIntegrationReady = true;
+    stage = 60;
+    goto FINAL_MAIN_DISPATCH;
+}
+
+FINAL_MAIN_VALIDATE_OUTPUT:
+    ctx.phase = "FINAL_VALIDATE";
+    validator.requireFinalIntegrationReady(ctx);
+    ctx.status = "GREEN";
+    metrics.bump(ctx, "final.success");
+    return;
+}
+
+void BaseDispatcher::dispatchFinalIntegration(
+    BaseMonsterContext& ctx,
+    std::map<Integer, FinalStructureCacheEntry>& structureCache,
+    const FinalIntegrationHandler& handler,
+    const BaseValidationManager& validator,
+    const BaseMetricsShell& metrics) const {
+    ctx.previousHandler = ctx.currentHandler;
+    ctx.currentHandler = "BaseDispatcher::dispatchFinalIntegration";
+    ctx.branchTrace.push_back("DISPATCH_FINAL_INTEGRATION");
+    handler.handle(ctx, structureCache, validator, metrics);
+}
+
+Stage54IntegrationReport BaseMonsterManager::executeFinalIntegration(
+    const Integer& calculationDay,
+    const Integer& targetDay) const {
+    BaseMonsterContext ctx;
+    ctx.calculationDay = calculationDay;
+    ctx.targetDay = targetDay;
+    ctx.phase = "ENTRY";
+    ctx.status = "NEW";
+    ctx.mode = "AUTHORITATIVE_SPAGHETTI";
+    ctx.retryBudget = 3;
+    const BaseValidationManager validator;
+    const BaseMetricsShell metrics;
+    const FinalIntegrationHandler handler;
+    const BaseDispatcher dispatcher;
+    dispatcher.dispatchFinalIntegration(
+        ctx,
+        finalStructureCache_,
+        handler,
+        validator,
+        metrics);
+    return Stage54IntegrationReport{
+        ctx.resultFive,
+        ctx.finalYear5000,
+        ctx.finalCurrentYear,
+        ctx.finalStructure,
+        ctx.finalGuardedCacheHit,
+        ctx.finalGuardedCacheRejected,
+        ctx.finalLegacyStructureSauceGhostExecuted,
+        ctx.finalLegacyCutletPartitionExecuted,
+        ctx.finalLegacyCutletNamesExecuted,
+        ctx.finalLegacyMonthLengthListContractExecuted,
+        ctx.finalLegacyMonthWeavingExecuted,
+        ctx.finalLegacyMonthNamesExecuted,
+        ctx.finalLegacyContiguousMonthDayExecuted,
+        ctx.finalExactFiveFieldReturn,
+        ctx.finalIntegrationReady,
+        ctx.phase,
+        ctx.status,
+        ctx.currentHandler,
+        ctx.branchTrace.size()
+    };
+}
+
+SpaghettiDateFive calendarDateSpaghetti(
+    const Integer& calculationDay,
+    const Integer& targetDay) {
+    BaseMonsterManager manager;
+    return manager.executeFinalIntegration(calculationDay, targetDay).result;
 }
 
 void BaseMonsterManager::clearLegacyYearNumberCacheDiagnostic() const { legacyYearNumberCache_.clear(); }
