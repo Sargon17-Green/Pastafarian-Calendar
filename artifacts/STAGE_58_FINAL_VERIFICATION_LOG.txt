@@ -62,3 +62,11 @@ Compatibility correction discovered during final verification:
 
 No Git history was mutated and no GitHub write was performed.
 No HANDOFF_* file is part of the upload tree.
+
+[CI INTEGRATION CORRECTION]
+YAML_PARSE=PASS
+WORKFLOW_JOB=acceleration-58
+WORKFLOW_COMMAND=node tests/stage-58-acceleration.js
+COMPLETE_BRANCH_REQUIRES_ACCELERATION_58=YES
+STAGE_58_ACCELERATION_RECHECK=PASS
+BENCHMARKS_AS_CI_GATE=NO (intentional; evidence-only)

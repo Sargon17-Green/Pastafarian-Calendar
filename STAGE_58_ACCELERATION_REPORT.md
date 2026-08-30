@@ -2,7 +2,7 @@
 
 ## Intent
 
-Stage 58 es un layer de performance **pos** li archaeology existent. Li public `package.json` version resta intentionalmen `0.0.57-stage-57-corrective`, pro conservar li observable compatibility contract verificat per li suite historic. It ne rescri null Discovery, null Patch e null Stage 54/56/57. Li rule es intentional: quand un calcul historic es custosi, li old route resta executable e Stage 58 memora su intermediates, checkpoints o backends por evitar repetir li sam dolor computational.
+Stage 58 es un layer de performance **pos** li archaeology existent. It ne rescri null Discovery, null Patch e null Stage 54/56/57. Li rule es intentional: quand un calcul historic es custosi, li old route resta executable e Stage 58 memora su intermediates, checkpoints o backends por evitar repetir li sam dolor computational.
 
 Li API public resta identic: `calendarDateSpaghetti(calculationDay,targetDay)` e `calendarDateSpaghettiWithContext(calculationDay,targetDay)` continua retornar li sam quin fields semantic. Li routes historic Stage 55/56 resta exportat separatmen.
 
@@ -120,9 +120,6 @@ Li regression suites de Patch 11/13/14/19/23/24/26, Stage 54 integration, Stage 
 - `artifacts/STAGE_58_SAUCE_PROBE.json`
 - `artifacts/STAGE_58_MEMORY_PROBE.json`
 
+## CI integration correction
 
-## Final compatibility revalidation
-
-Durante li final split-run del historic suite, `verify-stage-01.js` detectet du regressiones metadata creat per li unesim packaging draft: li public package version esset incrementat e `CURRENT_STAGE` esset mutat a 58. Ti changes esset observable compatibility changes, ne performance changes. Ili ne esset "fixat" per mutar li test historic. Invez, li public version esset restituit a `0.0.57-stage-57-corrective` e `CURRENT_STAGE=57` / `LAST_COMPLETED_STAGE=57` resta intact. Li Stage58-named classes e report es explicitmen un post-Stage-57 acceleration scar, ne un replacement del authoritative Stage 57 state.
-
-Pos ti correction, omni constituent del `npm test` chain passat in split runs: base tests, Stage-01 verifier, Discoveries/Patches 01..26, Integration 54, Stage 55 core/E2E/cross, Stage 56 corrective/Foundation/near-Foundation/reference, Stage 57 corrective/reference/historical-scar e Stage 58 acceleration. Li split execution es usat solmen por evitar command timeout; null failed assertion resta.
+Li branch workflow `.github/workflows/javascript-interlingue-full-branch-test.yml` include nu un separat `acceleration-58` shard quel execut `node tests/stage-58-acceleration.js`. Li final `complete-branch` gate depende explicitmen de ti shard e exige su result `success`. Li heavyweight benchmark e memory probes resta manual evidence, ne CI correctness gates.
