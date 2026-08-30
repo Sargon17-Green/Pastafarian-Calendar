@@ -658,3 +658,33 @@
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `LEGACY_YEAR_MAX=5781`, `oldYearCandidate`, `monster_year_candidate_route` ⲙⲛ `monster_stage32_legacy_year_max_handler`. Ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲡlegacy route ⲛⲟⲩⲙⲉ ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡobserved legacy maximum, ⲡcandidate mask ⲙⲛ ⲡseen counter ϩⲙⲡinvocation context.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩlate filter ⲙⲡ`5778`, ⲁⲩⲱ ⲙⲛ code ⲙⲡPATCH 16 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 33 — PATCH 16
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`LEGACY_YEAR_MAX=5781` ⲏ ⲡ`oldYearCandidate`. Ⲡlegacy scar ⲟⲩⲏϩ callable ⲁⲩⲱ ⲡStage 32 handler ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲧⲟϥ ⲉⲧⲣⲉ `5779..5781` ⲟⲩⲏϩ ϩⲙⲡraw diagnostic family.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`REAL_YEAR_MAX_PATCH=5778` ⲙⲛ `yearCandidateAfterFootnotePatch`. Ⲡpatch helper ⲙⲟⲩⲧⲉ ⲉⲡlegacy predicate ⲛϣⲟⲣⲡ, ⲁⲩⲱ ⲙⲛⲛⲥⲁ ⲡlegacy accept ⲛϥrejecte ⲙⲙⲁⲧⲉ ⲉϣϫⲉ `length>5778`.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyYearCandidatesBeforeSortStage33`, `yearCandidatesAfterFootnotePatchBeforeSort`, `stableLengthOnlyPatchedYearCandidates`, `legacyYearSelectFirst`, `monster_stage33_year_ceiling_patch_wrapper` ⲙⲛ `monster_stage33_year_ceiling_patch_handler`.
+
+### Ⲡorder ⲙⲡpipeline
+
+Ⲡhandler ⲧⲁⲙⲓⲟ ⲛϣⲟⲣⲡ ⲙⲡraw legacy family ϩⲙⲡinput order `5781,5779,5778,5780`. Ⲙⲛⲛⲥⲱⲥ ⲡfootnote filter ⲕⲱ ⲙⲡsemantic pre-sort family ⲉ`5778` ⲙⲙⲁⲧⲉ. Ⲡstable sort ⲙⲛ ⲡselection ⲙⲟⲟϣⲉ ⲙⲛⲛⲥⲁ ⲡfilter ⲙⲙⲁⲧⲉ.
+
+Ⲡcontext trace ⲟ ⲛ:
+
+`legacy_raw_count=4`
+`rejected_before_sort=3`
+`filtered_pre_sort=1`
+`sorted_count=1`
+`selection_called=1`
+`selected_length=5778`
+
+### Ⲡfuture scar ⲉⲙⲡⲁⲧⲉϥⲓ
+
+Ⲡsort ⲟⲩⲏϩ stable ⲕⲁⲧⲁ ⲡlength ⲙⲙⲁⲧⲉ. Ⲡtie probe ⲛlength `490` ϩⲁⲣⲉϩ ⲉⲡopening order `9,3`; ⲙⲛ reorder ⲙⲡequal-length run. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡPATCH 17 ⲙⲡⲟⲩanticipate ⲙⲙⲟϥ.

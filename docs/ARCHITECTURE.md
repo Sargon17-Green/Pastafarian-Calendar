@@ -492,3 +492,24 @@
 Ⲡsame-line test boundary ⲟ ⲛ`5778`. Ⲉⲧⲃⲉ ⲡlegacy constant, ⲛlength `5779,5780,5781` ⲥⲉⲃⲱⲕ ⲉϩⲟⲩⲛ ⲉⲡfamily ⲉⲧⲟⲩⲱϣ ⲉⲣⲟϥ ⲛⲗⲉⲅⲁⲥⲓ. Ⲡ`5782` ⲙⲛ `251` ⲥⲉⲟ ⲛout-of-family ⲁⲩⲱ `252,5778` ⲥⲉⲟ ⲛin-family. Ⲡdivergence ⲟ ⲛ3 ⲛcase ⲙⲙⲁⲧⲉ.
 
 Ⲡstate ⲛⲧⲉⲡStage 32 ⲟ ⲛinvocation-local ϩⲙⲡ`MonsterContext`. Ⲙⲛ oracle call ϩⲙⲡproduction, ⲙⲛ global mutable semantic state, ⲁⲩⲱ ⲙⲛ future year-filter code.
+
+
+## Ⲡyear-ceiling footnote detour ⲙⲡⲃⲁⲑⲙⲟⲥ 33
+
+ⲠCOPY_DIAGNOSTIC ⲟ ⲛ`oldYearCandidate` ⲙⲛ `LEGACY_YEAR_MAX=5781`. ⲠStage 32 handler ⲟⲩⲏϩ ⲉϥⲙⲟⲩⲧⲉ ⲉⲡscar ⲛⲧⲟϥ ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡraw mask.
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_year_candidate_route -> monster_stage33_year_ceiling_patch_wrapper -> yearCandidateAfterFootnotePatch`
+
+Ⲡwrapper ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉ`oldYearCandidate`. Ⲡseparate footnote ceiling ⲟ ⲛ`REAL_YEAR_MAX_PATCH=5778`; ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡlegacy constant.
+
+### Ⲡpipeline boundary
+
+`legacy raw family -> 5778 footnote filter -> stable length-only sort -> selection`
+
+Ⲡraw family ⲛⲗⲉⲅⲁⲥⲓ ⲟ ⲛobservable. Ⲛcandidate `5779..5781` ⲥⲉⲃⲱⲕ ⲉⲡraw family ⲁⲗⲗⲁ ⲛⲥⲉϫⲓ ⲁⲛ ⲛⲟⲩslot ϩⲙⲡsemantic sort ⲏ selection.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡPATCH 17 ⲙⲡⲟⲩanticipate ⲙⲙⲟϥ
+
+Ⲡ`stableLengthOnlyPatchedYearCandidates` comparison ⲟ ⲛlength-only ⲙⲛ strict `>` swap. Ⲛequal lengths ⲛⲥⲉswap ⲁⲛ. Ⲡopening gate ⲛϥϫⲓ ⲁⲛ ⲙⲙⲟϥ ⲛⲟⲩsort key ϩⲙⲡStage 33.

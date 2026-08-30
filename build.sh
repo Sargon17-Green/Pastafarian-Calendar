@@ -81,3 +81,6 @@ ld -o build/stage30_discovery15 build/arena.o build/bigint.o build/bootstrap.o b
 ld -o build/stage31_patch15 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage31_patch15.o
 
 ld -o build/stage32_discovery16 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage32_discovery16.o
+
+as --64 -o build/stage33_patch16.o tests/stage33_patch16.s
+ld -o build/stage33_patch16 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage33_patch16.o

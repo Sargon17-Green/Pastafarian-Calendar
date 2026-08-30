@@ -404,3 +404,22 @@
 Ⲡsame-line regression ⲧⲁϫⲣⲟ ⲉϫⲛ `251,252,5778,5779,5780,5781,5782`. Ⲡlegacy ϫⲓ ⲉϩⲟⲩⲛ ⲛ`5779..5781`, ϩⲟⲡⲟⲩ ⲡboundary ⲛⲕⲁⲛⲱⲛ ⲟ ⲛ`5778`; ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
 
 ⲠStage 32 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–31 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ late year filter ⲏ code ⲙⲡPATCH 16 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 33 — PATCH 16
+
+Ⲡ`LEGACY_YEAR_MAX=5781` ⲙⲛ ⲡ`oldYearCandidate` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡ`monster_stage32_legacy_year_max_handler` ⲧⲉⲛⲟⲩ ⲙⲟⲩⲧⲉ ⲉ`oldYearCandidate` ⲛⲧⲟϥ, ⲉⲧⲣⲉ ⲡraw legacy mask `5778..5781` ⲟⲩⲏϩ observable.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲡfootnote constant `REAL_YEAR_MAX_PATCH=5778` ⲙⲛ `yearCandidateAfterFootnotePatch`. Ⲡhelper ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉ`oldYearCandidate`; ⲉϣϫⲉ ⲡlegacy rejecte, ⲛϥrejecte. Ⲉϣϫⲉ ⲡlegacy accept ⲁⲩⲱ `candidateLength>5778`, ⲡfootnote ⲙⲙⲁⲧⲉ ⲡⲉ ⲉϥrejecte.
+
+`monster_year_candidate_route -> monster_stage33_year_ceiling_patch_wrapper -> yearCandidateAfterFootnotePatch`
+
+ⲠStage 33 handler ⲧⲁⲙⲓⲟ ⲙⲡraw family ⲛⲗⲉⲅⲁⲥⲓ ϩⲛ ⲡinput order:
+
+`5781,5779,5778,5780`
+
+Ⲡraw family ⲟⲩⲏϩ 4. Ⲡfootnote rejecte ⲙⲡ`5781,5779,5780` **ⲉⲙⲡⲁⲧⲉ ⲡsort**, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡsemantic pre-sort family ⲟ ⲛ`5778` ⲙⲙⲁⲧⲉ. Ⲡ`stableLengthOnlyPatchedYearCandidates` ⲙⲟⲟϣⲉ ⲙⲛⲛⲥⲁ ⲡfilter ⲁⲩⲱ ⲡ`legacyYearSelectFirst` ϫⲓ ⲙⲡsorted filtered family ⲙⲙⲁⲧⲉ.
+
+Ⲡtie probe ⲙⲛ 2 ⲛcandidate ⲛlength `490` ⲙⲛ opening gate `9` ⲙⲛ `3` ⲟⲩⲏϩ ϩⲙⲡinput order `9,3` ⲙⲛⲛⲥⲁ ⲡstable length-only sort. Ⲙⲛ tie repair ⲙⲡPATCH 17 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+ⲠStage 32 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE32_REGRESSION_GREEN`. ⲠStage 33 ⲟ ⲛ`STAGE33_PATCH16_GREEN`.

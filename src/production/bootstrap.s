@@ -163,7 +163,15 @@
 .equ CTX_STAGE32_LEGACY_YEAR_MAX_OBSERVED,1288
 .equ CTX_STAGE32_CANDIDATE_MASK,1296
 .equ CTX_STAGE32_LEGACY_SEEN,1304
-.equ CTX_SIZE,1312
+.equ CTX_STAGE33_REAL_YEAR_MAX_OBSERVED,1312
+.equ CTX_STAGE33_LEGACY_RAW_COUNT,1320
+.equ CTX_STAGE33_REJECTED_BEFORE_SORT_COUNT,1328
+.equ CTX_STAGE33_FILTERED_PRE_SORT_COUNT,1336
+.equ CTX_STAGE33_SORTED_COUNT,1344
+.equ CTX_STAGE33_SELECTION_CALLED,1352
+.equ CTX_STAGE33_SELECTED_LENGTH,1360
+.equ CTX_STAGE33_PATCH_SEEN,1368
+.equ CTX_SIZE,1376
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -206,6 +214,11 @@
 .equ BI_CAP,16
 .equ BI_DATA,24
 .equ LEGACY_YEAR_MAX,5781
+.equ REAL_YEAR_MAX_PATCH,5778
+.equ YC_OPEN,0
+.equ YC_CLOSE,8
+.equ YC_LENGTH,16
+.equ YC_SIZE,24
 
 .section .data.rel.ro
 .align 8
@@ -388,8 +401,15 @@ legacy_bowl_stir_stone_by_position:
 .global monster_stage31_gate_question_patch_wrapper
 .global monster_stage31_gate_question_patch_handler
 .global oldYearCandidate
+.global yearCandidateAfterFootnotePatch
+.global legacyYearCandidatesBeforeSortStage33
+.global yearCandidatesAfterFootnotePatchBeforeSort
+.global stableLengthOnlyPatchedYearCandidates
+.global legacyYearSelectFirst
+.global monster_stage33_year_ceiling_patch_wrapper
 .global monster_year_candidate_route
 .global monster_stage32_legacy_year_max_handler
+.global monster_stage33_year_ceiling_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -5759,9 +5779,218 @@ oldYearCandidate:
     ret
 .size oldYearCandidate,.-oldYearCandidate
 
+.type yearCandidateAfterFootnotePatch,@function
+yearCandidateAfterFootnotePatch:
+    push rbp
+    mov rbp,rsp
+    sub rsp,16
+    mov qword ptr [rbp-8],rsi
+    call oldYearCandidate
+    test eax,eax
+    je .Lycafp_no
+    mov rsi,qword ptr [rbp-8]
+    cmp rsi,REAL_YEAR_MAX_PATCH
+    ja .Lycafp_no
+    mov eax,1
+    leave
+    ret
+.Lycafp_no:
+    xor eax,eax
+    leave
+    ret
+.size yearCandidateAfterFootnotePatch,.-yearCandidateAfterFootnotePatch
+
+# Ⲡraw family ⲙⲡlegacy ⲟⲩⲏϩ ⲉϥⲙⲟⲩⲧⲉ ⲉ oldYearCandidate ⲛⲟⲩⲙⲉ.
+.type legacyYearCandidatesBeforeSortStage33,@function
+legacyYearCandidatesBeforeSortStage33:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    push rbx
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    xor r15d,r15d
+    xor ebx,ebx
+.Llycbs33_loop:
+    cmp r15,r13
+    jae .Llycbs33_done
+    lea r10,[r15+r15*2]
+    lea r10,[r12+r10*8]
+    mov rdi,qword ptr [r10+YC_CLOSE]
+    sub rdi,qword ptr [r10+YC_OPEN]
+    mov rsi,qword ptr [r10+YC_LENGTH]
+    call oldYearCandidate
+    test eax,eax
+    je .Llycbs33_next
+    lea r10,[r15+r15*2]
+    lea r10,[r12+r10*8]
+    lea r11,[rbx+rbx*2]
+    lea r11,[r14+r11*8]
+    mov rax,qword ptr [r10+YC_OPEN]
+    mov qword ptr [r11+YC_OPEN],rax
+    mov rax,qword ptr [r10+YC_CLOSE]
+    mov qword ptr [r11+YC_CLOSE],rax
+    mov rax,qword ptr [r10+YC_LENGTH]
+    mov qword ptr [r11+YC_LENGTH],rax
+    inc rbx
+.Llycbs33_next:
+    inc r15
+    jmp .Llycbs33_loop
+.Llycbs33_done:
+    mov rax,rbx
+    add rsp,8
+    pop rbx
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size legacyYearCandidatesBeforeSortStage33,.-legacyYearCandidatesBeforeSortStage33
+
+# Ⲡfootnote filter ⲙⲟⲟϣⲉ ⲙⲛⲛⲥⲁ ⲡlegacy acceptance ⲁⲩⲱ ⲉⲙⲡⲁⲧⲉ ⲡsort.
+.type yearCandidatesAfterFootnotePatchBeforeSort,@function
+yearCandidatesAfterFootnotePatchBeforeSort:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    push rbx
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    xor r15d,r15d
+    xor ebx,ebx
+.Lycafpbs_loop:
+    cmp r15,r13
+    jae .Lycafpbs_done
+    lea r10,[r15+r15*2]
+    lea r10,[r12+r10*8]
+    mov rdi,qword ptr [r10+YC_CLOSE]
+    sub rdi,qword ptr [r10+YC_OPEN]
+    mov rsi,qword ptr [r10+YC_LENGTH]
+    call yearCandidateAfterFootnotePatch
+    test eax,eax
+    je .Lycafpbs_next
+    lea r10,[r15+r15*2]
+    lea r10,[r12+r10*8]
+    lea r11,[rbx+rbx*2]
+    lea r11,[r14+r11*8]
+    mov rax,qword ptr [r10+YC_OPEN]
+    mov qword ptr [r11+YC_OPEN],rax
+    mov rax,qword ptr [r10+YC_CLOSE]
+    mov qword ptr [r11+YC_CLOSE],rax
+    mov rax,qword ptr [r10+YC_LENGTH]
+    mov qword ptr [r11+YC_LENGTH],rax
+    inc rbx
+.Lycafpbs_next:
+    inc r15
+    jmp .Lycafpbs_loop
+.Lycafpbs_done:
+    mov rax,rbx
+    add rsp,8
+    pop rbx
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size yearCandidatesAfterFootnotePatchBeforeSort,.-yearCandidatesAfterFootnotePatchBeforeSort
+
+# Ⲡsort ⲟⲩⲏϩ stable ⲕⲁⲧⲁ ⲡlength ⲙⲙⲁⲧⲉ. Ⲙⲛ tie repair.
+.type stableLengthOnlyPatchedYearCandidates,@function
+stableLengthOnlyPatchedYearCandidates:
+    mov r8,rdx
+    mov r9,rsi
+    xor ecx,ecx
+.Lslopyc_copy:
+    cmp rcx,r9
+    jae .Lslopyc_sort_start
+    lea r10,[rcx+rcx*2]
+    lea r11,[rdi+r10*8]
+    lea r10,[r8+r10*8]
+    mov rax,qword ptr [r11+YC_OPEN]
+    mov qword ptr [r10+YC_OPEN],rax
+    mov rax,qword ptr [r11+YC_CLOSE]
+    mov qword ptr [r10+YC_CLOSE],rax
+    mov rax,qword ptr [r11+YC_LENGTH]
+    mov qword ptr [r10+YC_LENGTH],rax
+    inc rcx
+    jmp .Lslopyc_copy
+.Lslopyc_sort_start:
+    cmp r9,2
+    jb .Lslopyc_done
+    mov r10,r9
+    dec r10
+.Lslopyc_outer:
+    xor r11d,r11d
+    xor edx,edx
+.Lslopyc_inner:
+    cmp r11,r10
+    jae .Lslopyc_after_inner
+    lea rax,[r11+r11*2]
+    lea rax,[r8+rax*8]
+    lea rcx,[rax+YC_SIZE]
+    mov rsi,qword ptr [rax+YC_LENGTH]
+    cmp rsi,qword ptr [rcx+YC_LENGTH]
+    jbe .Lslopyc_noswap
+    mov rsi,qword ptr [rax+YC_OPEN]
+    mov rdi,qword ptr [rcx+YC_OPEN]
+    mov qword ptr [rax+YC_OPEN],rdi
+    mov qword ptr [rcx+YC_OPEN],rsi
+    mov rsi,qword ptr [rax+YC_CLOSE]
+    mov rdi,qword ptr [rcx+YC_CLOSE]
+    mov qword ptr [rax+YC_CLOSE],rdi
+    mov qword ptr [rcx+YC_CLOSE],rsi
+    mov rsi,qword ptr [rax+YC_LENGTH]
+    mov rdi,qword ptr [rcx+YC_LENGTH]
+    mov qword ptr [rax+YC_LENGTH],rdi
+    mov qword ptr [rcx+YC_LENGTH],rsi
+    mov edx,1
+.Lslopyc_noswap:
+    inc r11
+    jmp .Lslopyc_inner
+.Lslopyc_after_inner:
+    test edx,edx
+    je .Lslopyc_done
+    dec r10
+    test r10,r10
+    jne .Lslopyc_outer
+.Lslopyc_done:
+    mov rax,r9
+    ret
+.size stableLengthOnlyPatchedYearCandidates,.-stableLengthOnlyPatchedYearCandidates
+
+.type legacyYearSelectFirst,@function
+legacyYearSelectFirst:
+    test rdi,rdi
+    je .Llysf_no
+    test rsi,rsi
+    je .Llysf_no
+    mov rax,rdi
+    ret
+.Llysf_no:
+    xor eax,eax
+    ret
+.size legacyYearSelectFirst,.-legacyYearSelectFirst
+
+.type monster_stage33_year_ceiling_patch_wrapper,@function
+monster_stage33_year_ceiling_patch_wrapper:
+    jmp yearCandidateAfterFootnotePatch
+.size monster_stage33_year_ceiling_patch_wrapper,.-monster_stage33_year_ceiling_patch_wrapper
+
 .type monster_year_candidate_route,@function
 monster_year_candidate_route:
-    jmp oldYearCandidate
+    jmp monster_stage33_year_ceiling_patch_wrapper
 .size monster_year_candidate_route,.-monster_year_candidate_route
 
 .type monster_stage32_legacy_year_max_handler,@function
@@ -5778,28 +6007,28 @@ monster_stage32_legacy_year_max_handler:
 
     mov edi,6
     mov esi,5778
-    call monster_year_candidate_route
+    call oldYearCandidate
     test eax,eax
     je .Lms32_next_5779
     or r13,1
 .Lms32_next_5779:
     mov edi,6
     mov esi,5779
-    call monster_year_candidate_route
+    call oldYearCandidate
     test eax,eax
     je .Lms32_next_5780
     or r13,2
 .Lms32_next_5780:
     mov edi,6
     mov esi,5780
-    call monster_year_candidate_route
+    call oldYearCandidate
     test eax,eax
     je .Lms32_next_5781
     or r13,4
 .Lms32_next_5781:
     mov edi,6
     mov esi,5781
-    call monster_year_candidate_route
+    call oldYearCandidate
     test eax,eax
     je .Lms32_store
     or r13,8
@@ -5816,6 +6045,93 @@ monster_stage32_legacy_year_max_handler:
     leave
     ret
 .size monster_stage32_legacy_year_max_handler,.-monster_stage32_legacy_year_max_handler
+
+# Ⲃⲁⲑⲙⲟⲥ 33 — PATCH 16
+# Ⲡlegacy family ⲟⲩⲏϩ raw. Ⲡ5778 footnote filter ⲙⲟⲟϣⲉ ⲉⲙⲡⲁⲧⲉ ⲡstable sort ⲙⲛ ⲡselection.
+.type monster_stage33_year_ceiling_patch_handler,@function
+monster_stage33_year_ceiling_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    push rbx
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lms33_fail
+    mov qword ptr [r12+CTX_STAGE33_REAL_YEAR_MAX_OBSERVED],REAL_YEAR_MAX_PATCH
+
+    mov edi,96
+    call arena_alloc
+    mov r13,rax
+    mov qword ptr [r13+0],40
+    mov qword ptr [r13+8],46
+    mov qword ptr [r13+16],5781
+    mov qword ptr [r13+24],20
+    mov qword ptr [r13+32],26
+    mov qword ptr [r13+40],5779
+    mov qword ptr [r13+48],10
+    mov qword ptr [r13+56],16
+    mov qword ptr [r13+64],5778
+    mov qword ptr [r13+72],30
+    mov qword ptr [r13+80],36
+    mov qword ptr [r13+88],5780
+
+    mov edi,96
+    call arena_alloc
+    mov r14,rax
+    mov rdi,r13
+    mov esi,4
+    mov rdx,r14
+    call legacyYearCandidatesBeforeSortStage33
+    mov qword ptr [r12+CTX_STAGE33_LEGACY_RAW_COUNT],rax
+
+    mov edi,96
+    call arena_alloc
+    mov r15,rax
+    mov rdi,r13
+    mov esi,4
+    mov rdx,r15
+    call yearCandidatesAfterFootnotePatchBeforeSort
+    mov qword ptr [r12+CTX_STAGE33_FILTERED_PRE_SORT_COUNT],rax
+    mov rcx,qword ptr [r12+CTX_STAGE33_LEGACY_RAW_COUNT]
+    sub rcx,rax
+    mov qword ptr [r12+CTX_STAGE33_REJECTED_BEFORE_SORT_COUNT],rcx
+
+    mov edi,96
+    call arena_alloc
+    mov rbx,rax
+    mov rdi,r15
+    mov rsi,qword ptr [r12+CTX_STAGE33_FILTERED_PRE_SORT_COUNT]
+    mov rdx,rbx
+    call stableLengthOnlyPatchedYearCandidates
+    mov qword ptr [r12+CTX_STAGE33_SORTED_COUNT],rax
+
+    mov rdi,rbx
+    mov rsi,rax
+    call legacyYearSelectFirst
+    test rax,rax
+    je .Lms33_fail
+    mov qword ptr [r12+CTX_STAGE33_SELECTION_CALLED],1
+    mov rcx,qword ptr [rax+YC_LENGTH]
+    mov qword ptr [r12+CTX_STAGE33_SELECTED_LENGTH],rcx
+    inc qword ptr [r12+CTX_STAGE33_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms33_done
+.Lms33_fail:
+    xor eax,eax
+.Lms33_done:
+    add rsp,8
+    pop rbx
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage33_year_ceiling_patch_handler,.-monster_stage33_year_ceiling_patch_handler
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -5930,6 +6246,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage32_legacy_year_max_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage33_year_ceiling_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
