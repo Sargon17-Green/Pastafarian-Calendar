@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - 'C\+\+&Latina'
+      - 'Celeritas-per-Sepulcra'
+  workflow_dispatch:
   pull_request:
     branches:
       - 'C\+\+&Latina'
@@ -486,6 +488,165 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  cicatrices-acceleratae:
+    name: Cicatrices accelerationis — Patches 27–39
+    needs: custodia-arboris
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      # CICATRIX: checkout v4 olim sufficiebat; via recentior v5 memoriam veterem circumit.
+      - name: Excerpere repository
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et Clang
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-logs
+          exec > >(tee soak-logs/acceleration-dependencies.log) 2>&1
+
+          # CICATRIX: vetus runner Boost iam adesse tacite credebat.
+          if false; then
+            test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          fi
+
+          # DETOUR: dependency explicite sepelitur ante compilationem cicatricum novarum.
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          clang++ --version | head -1
+
+      - name: Compilare probam sepulcrorum 27–39
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build_soak/acceleration soak-logs
+
+          # CICATRIX: probatio non fit nova bibliotheca nitida. Corpus temporarium
+          # nascitur intra build-dir, interrogat API diagnostica, deinde moritur.
+          cat > build_soak/acceleration/proba.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+
+          #include <iostream>
+          #include <stdexcept>
+          #include <string>
+
+          namespace {
+          using pastafari::Integer;
+          using pastafari::SpaghettiDateFive;
+
+          void require(bool condition, const char* message) {
+              if (!condition) throw std::runtime_error(message);
+          }
+
+          bool equalFive(const SpaghettiDateFive& a, const SpaghettiDateFive& b) {
+              return a.yearNumber == b.yearNumber &&
+                     a.cutletName == b.cutletName &&
+                     a.dayInCutlet == b.dayInCutlet &&
+                     a.monthName == b.monthName &&
+                     a.dayInMonth == b.dayInMonth;
+          }
+
+          int cutletIndex(const std::string& name) {
+              for (int i = 1; i <= 17; ++i) {
+                  if (pastafari::cutletSourceName(static_cast<std::size_t>(i)) == name) return i;
+              }
+              return -1;
+          }
+
+          int monthIndex(const std::string& name) {
+              for (int i = 1; i <= 47; ++i) {
+                  if (pastafari::monthSourceName(static_cast<std::size_t>(i)) == name) return i;
+              }
+              return -1;
+          }
+          }
+
+          int main() {
+              try {
+                  const Integer c{-15048173};
+                  const Integer t0{-15048173};
+                  const Integer t1{-15048172};
+
+                  pastafari::setFullHistoricalAccelerationValidation(false);
+                  pastafari::setAccelerationScarsEnabled(false);
+                  pastafari::resetPersistentScarVaultsDiagnostic();
+                  const auto vetus0 = pastafari::calendarDateSpaghetti(c, t0);
+
+                  pastafari::resetPersistentScarVaultsDiagnostic();
+                  pastafari::setAccelerationScarsEnabled(true);
+                  const auto novum0 = pastafari::calendarDateSpaghetti(c, t0);
+                  require(equalFive(vetus0, novum0),
+                          "quinque campa acceleratione discrepant");
+
+                  // Detour vicinus probat hereditatem sine secundo baseline pathologico.
+                  const auto novum1 = pastafari::calendarDateSpaghetti(c, t1);
+                  require(novum1.yearNumber == Integer{5000}, "annus nearby discrepat");
+                  require(cutletIndex(novum1.cutletName) == 12, "segmentum nearby discrepat");
+                  require(novum1.dayInCutlet == Integer{22}, "dies segmenti nearby discrepat");
+                  require(monthIndex(novum1.monthName) == 18, "mensis nearby discrepat");
+                  require(novum1.dayInMonth == Integer{58}, "dies mensis nearby discrepat");
+
+                  const auto repetitum = pastafari::calendarDateSpaghetti(c, t1);
+                  require(equalFive(novum1, repetitum), "sepultura finalis exitum mutavit");
+
+                  const auto m = pastafari::persistentScarMetricsDiagnostic();
+                  require(m.patch39FinalResultHit > 0,
+                          "Patch39 sepulcrum finale non repertum est");
+                  require(m.patch28GateGraveyardHit > 0 || m.patch27AncestralHit > 0,
+                          "nec portae nec structurae ancestrales resurrexerunt");
+                  require(m.patch32SauceCorpseFound > 0 ||
+                              m.patch34StructureSauceResurrected > 0,
+                          "condimentum nullam resurrectionem ostendit");
+
+                  std::cout << "CICATRICES_ACCELERATIONIS_27_39=PASS\n";
+                  std::cout << "PATCH28_HITS=" << m.patch28GateGraveyardHit << "\n";
+                  std::cout << "PATCH27_HITS=" << m.patch27AncestralHit << "\n";
+                  std::cout << "PATCH32_HITS=" << m.patch32SauceCorpseFound << "\n";
+                  std::cout << "PATCH34_HITS=" << m.patch34StructureSauceResurrected << "\n";
+                  std::cout << "PATCH39_HITS=" << m.patch39FinalResultHit << "\n";
+
+                  pastafari::setAccelerationScarsEnabled(false);
+                  pastafari::resetPersistentScarVaultsDiagnostic();
+                  return 0;
+              } catch (const std::exception& error) {
+                  std::cerr << "CICATRICES_ACCELERATIONIS_27_39=FAIL: "
+                            << error.what() << "\n";
+                  return 1;
+              }
+          }
+          CPP
+
+          clang++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES \
+            -c src/monster.cpp -o build_soak/acceleration/monster.o
+          clang++ $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES \
+            build_soak/acceleration/proba.cpp build_soak/acceleration/monster.o \
+            -o build_soak/acceleration/proba
+
+      - name: Currere resurrectiones et differentialem
+        shell: bash
+        run: |
+          set -euo pipefail
+          # FULL_HISTORICAL_VALIDATION manet API diagnostica; haec probatio smoke
+          # intentionaliter default remembered-scar path exercet.
+          timeout 15m build_soak/acceleration/proba 2>&1 | tee soak-logs/acceleration-27-39.log
+          grep -q 'CICATRICES_ACCELERATIONIS_27_39=PASS' soak-logs/acceleration-27-39.log
+          grep -Eq 'PATCH(27|28)_HITS=[1-9][0-9]*' soak-logs/acceleration-27-39.log
+          grep -q 'PATCH39_HITS=1' soak-logs/acceleration-27-39.log
+
+      - name: Servare logs cicatricum accelerationis
+        if: always()
+        # CICATRIX: olim `uses: actions/upload-artifact@v4`.
+        # Detour hodiernus v6 adhibet, cicatrice relicta.
+        uses: actions/upload-artifact@v6
+        with:
+          name: cpp-latina-acceleration-patches-27-39
+          path: soak-logs/
+          # CICATRIX: via vetus `error` defectum secundarium creare poterat.
+          if-no-files-found: warn
+          retention-days: 30
+
   differential-decemplum:
     name: Decem paria contra reference canonica — ${{ matrix.label }}
     needs: custodia-arboris
@@ -669,7 +830,7 @@ jobs:
 
   soak-repetitionis:
     name: Soak repetitum processibus recentibus
-    needs: [matrix-gradus-56, differential-decemplum]
+    needs: [matrix-gradus-56, differential-decemplum, cicatrices-acceleratae]
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
@@ -770,6 +931,7 @@ jobs:
       - regressiones-historicae
       - audit-gradus-55
       - matrix-gradus-56
+      - cicatrices-acceleratae
       - differential-decemplum
       - sanitatores
       - soak-repetitionis
@@ -785,6 +947,7 @@ jobs:
           regressiones-historicae=${{ needs.regressiones-historicae.result }}
           audit-gradus-55=${{ needs.audit-gradus-55.result }}
           matrix-gradus-56=${{ needs.matrix-gradus-56.result }}
+          cicatrices-acceleratae=${{ needs.cicatrices-acceleratae.result }}
           differential-decemplum=${{ needs.differential-decemplum.result }}
           sanitatores=${{ needs.sanitatores.result }}
           soak-repetitionis=${{ needs.soak-repetitionis.result }}
@@ -795,6 +958,7 @@ jobs:
             '${{ needs.regressiones-historicae.result }}' \
             '${{ needs.audit-gradus-55.result }}' \
             '${{ needs.matrix-gradus-56.result }}' \
+            '${{ needs.cicatrices-acceleratae.result }}' \
             '${{ needs.differential-decemplum.result }}' \
             '${{ needs.sanitatores.result }}' \
             '${{ needs.soak-repetitionis.result }}'; do
