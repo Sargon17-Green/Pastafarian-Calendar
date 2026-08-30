@@ -64,8 +64,25 @@ struct PersistentScarMetrics {
     std::uint64_t patch38UnrankBackendBorn = 0;
     std::uint64_t patch38SharedSkeletonUsed = 0;
     std::uint64_t patch38SkeletonMiss = 0;
+    // CADAVER HEADER ANTE PATCH XL.  Non tollitur: haec erat cauda viva
+    // PersistentScarMetrics antequam Exsequiae Reiectionis Latae duo metra
+    // nova postulaverunt.  Compiler eam infra tumulo praecessoris non videt.
+#if 0
     std::uint64_t patch39FinalResultHit = 0;
     std::uint64_t patch39FinalResultMiss = 0;
+    std::uint64_t staleOrPoisonedRejected = 0;
+#endif
+
+    // PATCH XL — cicatrix capitis.  Duo metra non in ordinem nitidum
+    // simpliciter inseruntur: macro brevis quasi tabula funebris ea declarat,
+    // deinde statim frangitur.  Nomina ipsa membra vera manent, ut veteris
+    // scarBump pointer-to-member ritus nihil discat de hoc detour.
+    std::uint64_t patch39FinalResultHit = 0;
+    std::uint64_t patch39FinalResultMiss = 0;
+#define PASTAFARI_METRUM_FUNEBRE_XL(nomen) std::uint64_t nomen = 0
+    PASTAFARI_METRUM_FUNEBRE_XL(patch40WideFuneralShortcut);
+    PASTAFARI_METRUM_FUNEBRE_XL(patch40HistoricalLoopForced);
+#undef PASTAFARI_METRUM_FUNEBRE_XL
     std::uint64_t staleOrPoisonedRejected = 0;
 };
 
