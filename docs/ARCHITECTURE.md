@@ -513,3 +513,16 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲡPATCH 17 ⲙⲡⲟⲩanticipate ⲙⲙⲟϥ
 
 Ⲡ`stableLengthOnlyPatchedYearCandidates` comparison ⲟ ⲛlength-only ⲙⲛ strict `>` swap. Ⲛequal lengths ⲛⲥⲉswap ⲁⲛ. Ⲡopening gate ⲛϥϫⲓ ⲁⲛ ⲙⲙⲟϥ ⲛⲟⲩsort key ϩⲙⲡStage 33.
+
+
+## ⲠYear 5000 equal-length tie scar ⲙⲡⲃⲁⲑⲙⲟⲥ 34
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage34_legacy_year5000_tie_handler -> monster_year5000_tie_route -> monster_stage34_legacy_year5000_tie_wrapper -> legacyYear5000TieSelection -> stableLengthOnlyPatchedYearCandidates -> legacyYearSelectFirst`
+
+Ⲡ`legacyYear5000TieSelection` ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡsort ⲙⲡStage 33. Ⲡcomparison ⲟ ⲛlength-only ⲁⲩⲱ ⲡstrict `>` swap ⲕⲱ ⲙⲡequal-length run ϩⲙⲡinput order.
+
+ⲠYear 5000 witness ⲟ ⲛcandidate ⲥⲛⲁⲩ ⲙⲛ `length=490`, ⲉⲣⲉ ⲛopening gates ⲟ ⲛ`9,3`. Ⲡlegacy route ϫⲓ ⲙⲡ`9`. Ⲡtest-only normative reference ϫⲓ ⲙⲡearlier opening `3` ⲙⲙⲁⲧⲉ ϩⲙⲡequal-length run.
+
+Ⲡlegacy selection ⲙⲛ ⲡroute selection ⲥⲉⲣϩⲱⲃ ϩⲓ buffers ⲉⲩϣⲟⲃⲉ ⲁⲩⲱ ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local. Ⲙⲛ oracle call ϩⲙⲡproduction, ⲙⲛ global mutable semantic state, ⲁⲩⲱ ⲙⲛ equal-run reorder code ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.

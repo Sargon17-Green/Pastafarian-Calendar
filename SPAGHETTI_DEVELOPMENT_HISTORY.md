@@ -688,3 +688,22 @@
 ### Ⲡfuture scar ⲉⲙⲡⲁⲧⲉϥⲓ
 
 Ⲡsort ⲟⲩⲏϩ stable ⲕⲁⲧⲁ ⲡlength ⲙⲙⲁⲧⲉ. Ⲡtie probe ⲛlength `490` ϩⲁⲣⲉϩ ⲉⲡopening order `9,3`; ⲙⲛ reorder ⲙⲡequal-length run. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡPATCH 17 ⲙⲡⲟⲩanticipate ⲙⲙⲟϥ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 34 — DISCOVERY 17
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲡstable sort ⲙⲡlegacy ϫⲓ ⲙⲡ`length` ⲙⲙⲁⲧⲉ. Ⲉϣϫⲉ ⲟⲩrun ⲟ ⲛequal-length, ⲡinput order ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲁϫⲛ ⲟⲩⲕⲉcomparison ⲙⲛ ⲡopening gate.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+ϨⲙⲡYear 5000 tie witness, ⲛcandidate ⲥⲛⲁⲩ ⲉⲩⲟ ⲛ`length=490` ⲛⲏⲩ ϩⲙⲡinput order ⲛopening gates `9,3`. Ⲡ`stableLengthOnlyPatchedYearCandidates` ϩⲁⲣⲉϩ ⲉ`9,3`, ⲁⲩⲱ ⲡ`legacyYearSelectFirst` ϫⲓ ⲙⲡopening `9`. Ⲡtest reference, ⲕⲁⲧⲁ ⲡscroll, ϫⲓ ⲙⲡopening ⲉⲧⲟ ⲛϣⲟⲣⲡ ϩⲙⲡequal-length run, ⲉⲧⲉ `3` ⲡⲉ.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyYear5000TieSelection`, `monster_stage34_legacy_year5000_tie_wrapper`, `monster_year5000_tie_route` ⲙⲛ `monster_stage34_legacy_year5000_tie_handler`. Ⲡhandler ⲣ ⲛⲟⲩdirect legacy copy ⲙⲛ ⲟⲩroute copy ϩⲓ buffer ⲉⲩϣⲟⲃⲉ, ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉ`year=5000`, `tieLength=490`, `tieCount=2`, `legacySelectedOpen=9`, `routeSelectedOpen=9`.
+
+Ⲡroute ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ⲙⲛ ⲡlegacy selection. Ⲙⲛ reorder ⲙⲡequal-length run ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 34. Ⲡregression ⲟ ⲛ`EXPECTED_RED` ⲙⲛ 2 ⲛroute/context mismatch ⲉⲩⲧⲟϣ.
+
+Ⲙⲛ code ⲙⲡPATCH 17 ⲉⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ.

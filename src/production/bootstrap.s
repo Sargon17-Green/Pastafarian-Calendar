@@ -171,7 +171,14 @@
 .equ CTX_STAGE33_SELECTION_CALLED,1352
 .equ CTX_STAGE33_SELECTED_LENGTH,1360
 .equ CTX_STAGE33_PATCH_SEEN,1368
-.equ CTX_SIZE,1376
+.equ CTX_STAGE34_YEAR_NUMBER,1376
+.equ CTX_STAGE34_TIE_LENGTH,1384
+.equ CTX_STAGE34_TIE_COUNT,1392
+.equ CTX_STAGE34_LEGACY_SELECTED_OPEN,1400
+.equ CTX_STAGE34_ROUTE_SELECTED_OPEN,1408
+.equ CTX_STAGE34_LEGACY_SEEN,1416
+.equ CTX_STAGE34_ROUTE_SEEN,1424
+.equ CTX_SIZE,1432
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -410,6 +417,10 @@ legacy_bowl_stir_stone_by_position:
 .global monster_year_candidate_route
 .global monster_stage32_legacy_year_max_handler
 .global monster_stage33_year_ceiling_patch_handler
+.global legacyYear5000TieSelection
+.global monster_stage34_legacy_year5000_tie_wrapper
+.global monster_year5000_tie_route
+.global monster_stage34_legacy_year5000_tie_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -6133,6 +6144,97 @@ monster_stage33_year_ceiling_patch_handler:
     ret
 .size monster_stage33_year_ceiling_patch_handler,.-monster_stage33_year_ceiling_patch_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 34 — DISCOVERY 17
+# Ⲡlegacy stable sort ⲕⲁⲧⲁ ⲡlength ⲙⲙⲁⲧⲉ ϩⲁⲣⲉϩ ⲉⲡinput order ϩⲙⲡequal-length run ⲙⲡYear 5000.
+.type legacyYear5000TieSelection,@function
+legacyYear5000TieSelection:
+    push rbp
+    mov rbp,rsp
+    sub rsp,32
+    mov qword ptr [rbp-8],rdx
+    call stableLengthOnlyPatchedYearCandidates
+    mov rdi,qword ptr [rbp-8]
+    mov rsi,rax
+    call legacyYearSelectFirst
+    leave
+    ret
+.size legacyYear5000TieSelection,.-legacyYear5000TieSelection
+
+.type monster_stage34_legacy_year5000_tie_wrapper,@function
+monster_stage34_legacy_year5000_tie_wrapper:
+    jmp legacyYear5000TieSelection
+.size monster_stage34_legacy_year5000_tie_wrapper,.-monster_stage34_legacy_year5000_tie_wrapper
+
+.type monster_year5000_tie_route,@function
+monster_year5000_tie_route:
+    jmp monster_stage34_legacy_year5000_tie_wrapper
+.size monster_year5000_tie_route,.-monster_year5000_tie_route
+
+.type monster_stage34_legacy_year5000_tie_handler,@function
+monster_stage34_legacy_year5000_tie_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms34_fail
+    mov qword ptr [r12+CTX_STAGE34_YEAR_NUMBER],5000
+    mov qword ptr [r12+CTX_STAGE34_TIE_LENGTH],490
+    mov qword ptr [r12+CTX_STAGE34_TIE_COUNT],2
+
+    mov edi,48
+    call arena_alloc
+    mov r13,rax
+    mov qword ptr [r13+0],9
+    mov qword ptr [r13+8],15
+    mov qword ptr [r13+16],490
+    mov qword ptr [r13+24],3
+    mov qword ptr [r13+32],9
+    mov qword ptr [r13+40],490
+
+    mov edi,48
+    call arena_alloc
+    mov r14,rax
+    mov rdi,r13
+    mov esi,2
+    mov rdx,r14
+    call legacyYear5000TieSelection
+    test rax,rax
+    je .Lms34_fail
+    mov rcx,qword ptr [rax+YC_OPEN]
+    mov qword ptr [r12+CTX_STAGE34_LEGACY_SELECTED_OPEN],rcx
+    inc qword ptr [r12+CTX_STAGE34_LEGACY_SEEN]
+
+    mov edi,48
+    call arena_alloc
+    mov r15,rax
+    mov rdi,r13
+    mov esi,2
+    mov rdx,r15
+    call monster_year5000_tie_route
+    test rax,rax
+    je .Lms34_fail
+    mov rcx,qword ptr [rax+YC_OPEN]
+    mov qword ptr [r12+CTX_STAGE34_ROUTE_SELECTED_OPEN],rcx
+    inc qword ptr [r12+CTX_STAGE34_ROUTE_SEEN]
+    mov eax,1
+    jmp .Lms34_done
+.Lms34_fail:
+    xor eax,eax
+.Lms34_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage34_legacy_year5000_tie_handler,.-monster_stage34_legacy_year5000_tie_handler
+
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -6251,6 +6353,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage33_year_ceiling_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage34_legacy_year5000_tie_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
