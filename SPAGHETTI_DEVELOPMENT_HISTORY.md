@@ -146,3 +146,19 @@
 ### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
 
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `stonePatch`, `monster_stage09_stone_patch_wrapper`, `getStoneTableThroughLegacyBuilder`, ⲙⲛ `CTX_STONE_PATCH_INPUT`, `CTX_PATCHED_STONE_ROW`, `CTX_STONE_PATCH_SEEN`. Ⲡhandler ⲣ ⲡlegacy call ⲛⲟⲩCOPY_DIAGNOSTIC ⲁⲩⲱ ⲡroute ⲣ ⲡpatched copy ⲛⲟⲩCOPY_AUTHORITATIVE. Ⲡwrapper ϩⲁⲣⲉϩ ⲉⲡpointer contract ⲛStage 8 ⲁϫⲛ ⲧⲣⲉϥϣⲓⲃⲉ ⲙⲡⲕⲁⲛⲱⲛ.
+
+## Ⲃⲁⲑⲙⲟⲥ 10 — DISCOVERY 05
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲟⲩarray ⲙⲡhidden ⲛⲁϣϩⲁⲣⲉϩ ⲉⲡⲉϥⲙⲁ ⲕⲁⲧⲁ ⲡⲧⲱϣ ⲉⲧⲁⲩⲥϩⲁⲓ: ⲁⲩⲥϩⲁⲓ `hidden7, hidden6, ..., hidden1`, ⲁⲗⲗⲁ ⲡⲣⲱⲧⲉ ⲛⲧⲉⲡaccess ⲙⲟⲩⲧⲉ ⲉⲡⲙⲁ `k` ⲛⲧⲟϥ.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`buildHiddenWithBackwardStorage`: ⲡⲧⲓⲙⲏ ⲛhidden ⲛⲓⲙ ⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ, ⲁⲗⲗⲁ ⲡⲙⲁ ⲙⲡarray ⲟ ⲛⲥⲁϩⲟⲩ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡstorage ⲧⲱⲛ ϩⲓⲱⲱϥ ⲙⲛ `hidden7..hidden1`. Ⲁⲗⲗⲁ ⲡ`legacyHiddenAtNearnessWrong` ϫⲓ ⲙⲡposition `k` ⲁϫⲛ ⲟⲩⲙⲉⲧⲁⲅⲣⲁⲫⲏ. Ⲉⲧⲃⲉ ⲡⲁⲓ `k=1` ⲧⲱⲛ ⲙⲛ `hidden7`, `k=7` ⲧⲱⲛ ⲙⲛ `hidden1`, ⲁⲩⲱ `k=4` ⲧⲱⲛ ⲙⲛ `hidden4`. Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲱⲡ ⲛ6 ⲛⲇⲓⲁⲫⲟⲣⲁ ⲉⲩⲧⲟϣ.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `monster_stage10_legacy_hidden_handler`, `monster_hidden_route`, `CTX_HIDDEN_BACKWARD`, `CTX_HIDDEN_QUERY_K`, `CTX_LEGACY_HIDDEN_QUERY_RESULT`, ⲙⲛ ⲛcounter ⲛⲧⲉⲡstorage ⲙⲛ ⲡquery. Ⲡ`calendarDateSpaghetti` ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡhandler ⲡⲁⲓ ϩⲙⲡⲣⲱⲧⲉ.
+
+Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡⲙⲉⲧⲁⲅⲣⲁⲫⲉⲩⲥ ⲛⲧⲉⲡⲃⲁⲑⲙⲟⲥ ⲉⲧⲛⲏⲩ. Ⲡⲡⲗⲁⲛⲏ ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲙⲡⲣⲱⲧⲉ.

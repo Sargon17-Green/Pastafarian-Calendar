@@ -112,3 +112,27 @@
 Ⲡ`getStoneTableThroughLegacyBuilder` ⲕⲱ ⲉϩⲣⲁⲓ ⲛ46 ⲛrows ⲛⲧⲉⲡtable, ⲁⲩⲱ row ⲛⲓⲙ ⲙⲛⲛⲥⲁ ⲡϣⲟⲣⲡ ⲃⲱⲕ ϩⲓⲧⲛ `stonePatch`. Ⲡvalidation ⲙⲡStage 9 ⲥⲙⲓⲛⲉ ⲛ230 ⲛBigInt ⲙⲛ ⲡoracle ⲛⲧⲉⲡⲉⲓⲕⲱⲇⲓⲝ.
 
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡlegacy garbage row ⲙⲛ ⲡpatch input ⲙⲛ ⲡpatched row ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ; ⲙⲛ logs ⲏ metrics ⲉⲩⲧⲟϣ ⲙⲡⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ.
+
+## Ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲃⲁⲑⲙⲟⲥ 10
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage10_legacy_hidden_handler -> monster_hidden_route -> legacyHiddenAtNearnessWrong`
+
+Ⲡ`buildHiddenWithBackwardStorage` ⲗⲟⲅⲓⲍⲉ ⲛ7 ⲛhidden ⲕⲁⲧⲁ ⲛcoefficient ⲙⲛ ⲛ7 ⲛgrind ⲛⲕⲁⲛⲱⲛ, ⲁⲩⲱ ⲛϥⲕⲱ ⲙⲙⲟⲟⲩ ϩⲛ ⲡarray ⲕⲁⲧⲁ `hidden7..hidden1`. Ⲡ`legacyHiddenAtNearnessWrong` ⲡⲉ ⲡCOPY_AUTHORITATIVE ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ; ⲛϥϫⲓ ⲙⲡslot `k` ⲁϫⲛ ⲟⲩtranslation.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡpointer ⲙⲡbackward storage, ⲡ`k` ⲛⲧⲉⲡquery, ⲡlegacy result, ⲙⲛ ⲛcounter ⲙⲡstorage ⲙⲛ ⲡquery. Ⲛⲁⲓ ⲛⲉ ⲛstate ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.
+
+## OPTIMIZATION — Ⲡprefix ⲛ7 ⲛrow ⲛⲧⲉⲛⲱⲛⲉ
+
+Ⲡ`getHiddenStonePrefixThroughLegacyBuilder` ⲕⲱ ⲉϩⲣⲁⲓ ⲙⲙⲁⲧⲉ ⲛrow 1..7, ϫⲉ ⲛhidden ⲙⲡⲉⲓⲧⲟϣ ⲛⲥⲉⲙⲟⲩⲧⲉ ⲁⲛ ⲉrow 8..46. Ⲛrow 2..7 ⲥⲉⲛⲏⲩ ⲟⲛ ϩⲓⲧⲛ `stonePatch`, ⲉⲣⲉ `mutateStonesWrong` ⲙⲟⲟϣⲉ ϩⲙⲡⲣⲱⲧⲉ.
+
+### EQUIVALENCE
+
+Ⲡprefix ⲡⲉ ⲛ7 ⲛrow ⲛϣⲟⲣⲡ ⲛⲧⲉ `getStoneTableThroughLegacyBuilder`. Ⲙⲛ row ⲛⲃⲣⲣⲉ, ⲙⲛ formula ⲛⲃⲣⲣⲉ, ⲁⲩⲱ ⲙⲛ ⲟⲩⲧⲱϣ ⲉϥϣⲟⲃⲉ.
+
+### EDGE CASES
+
+Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲙⲡStage 9 ⲉϫⲛ 46 ⲛrow ⲧⲏⲣⲟⲩ, ⲁⲩⲱ ⲡStage 10 ⲥⲙⲓⲛⲉ ⲛhidden ⲉⲧⲉⲣⲉⲩϫⲓ ⲙⲙⲁⲩ ⲛrow 1..7 ⲙⲛ ⲡoracle.
+
+### WHY SAFE
+
+Ⲡⲕⲱⲇⲓⲝ ⲧⲱϣ ⲙⲙⲁⲧⲉ ⲛⲛrow ⲉⲧⲉⲣⲉⲡhidden calculation ⲁⲛⲁⲅⲕⲁⲍⲉ ⲙⲙⲟⲟⲩ. Ⲛrow ⲉⲧⲟⲩⲏⲩ ⲛⲥⲉϫⲓ ⲁⲛ ⲙⲡⲉⲓⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡϫⲓⲛⲧⲙⲧⲁⲙⲓⲟ ⲙⲙⲟⲟⲩ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡsemantic result.

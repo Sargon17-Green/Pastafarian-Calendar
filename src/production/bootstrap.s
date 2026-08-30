@@ -42,7 +42,18 @@
 .equ CTX_STONE_PATCH_INPUT,320
 .equ CTX_PATCHED_STONE_ROW,328
 .equ CTX_STONE_PATCH_SEEN,336
-.equ CTX_SIZE,344
+.equ CTX_HIDDEN_BACKWARD,344
+.equ CTX_HIDDEN_QUERY_K,352
+.equ CTX_LEGACY_HIDDEN_QUERY_RESULT,360
+.equ CTX_LEGACY_HIDDEN_STORAGE_SEEN,368
+.equ CTX_LEGACY_HIDDEN_QUERY_SEEN,376
+.equ CTX_SIZE,384
+.equ HCOUNTS_ACTION,0
+.equ HCOUNTS_TARGET,8
+.equ HCOUNTS_DISTANCE,16
+.equ HCOUNTS_CONNECTION,24
+.equ HCOUNTS_DIRECTION,32
+.equ HCOUNTS_SIZE,40
 .equ BI_SIGN,0
 .equ BI_LEN,8
 .equ BI_CAP,16
@@ -59,6 +70,19 @@ legacy_remainder_M:
 legacy_remainder_M_limbs:
     .quad 0xffffffffffffffff
     .quad 0x7fffffffffffffff
+
+.section .rodata
+.align 8
+legacy_hidden_coeff:
+    .quad 3,4,6,8
+    .quad 5,7,10,12
+    .quad 7,10,14,16
+    .quad 9,13,18,20
+    .quad 11,16,22,24
+    .quad 13,19,26,28
+    .quad 15,22,30,32
+legacy_hidden_stone_kind:
+    .quad 1,2,3,4,5,1,2
 
 .section .text
 .extern arena_alloc
@@ -99,6 +123,12 @@ legacy_remainder_M_limbs:
 .global stonePatch
 .global monster_stage09_stone_patch_wrapper
 .global getStoneTableThroughLegacyBuilder
+.global getHiddenStonePrefixThroughLegacyBuilder
+.global makeHiddenLegacyStoredValue
+.global buildHiddenWithBackwardStorage
+.global legacyHiddenAtNearnessWrong
+.global monster_hidden_route
+.global monster_stage10_legacy_hidden_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -1008,6 +1038,354 @@ monster_stage08_legacy_stone_handler:
     ret
 .size monster_stage08_legacy_stone_handler,.-monster_stage08_legacy_stone_handler
 
+
+
+# Ⲛhidden ⲥⲉϫⲓ ⲙⲙⲁⲧⲉ ⲛⲛrow 1..7 ⲛⲧⲉⲛⲱⲛⲉ. Ⲡbuilder ⲡⲁⲓ ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ stonePatch ⲁⲩⲱ ⲛϥⲕⲱ ⲛⲥⲱϥ ⲛrow 8..46 ⲉⲧⲉ ⲛⲥⲉϫⲓ ⲙⲙⲟⲟⲩ ⲁⲛ ϩⲙⲡⲉⲓⲧⲟϣ.
+.type getHiddenStonePrefixThroughLegacyBuilder,@function
+getHiddenStonePrefixThroughLegacyBuilder:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov rdi,280
+    call arena_alloc
+    mov r12,rax
+    mov rdi,17
+    call bi_from_u64
+    mov qword ptr [r12],rax
+    mov rdi,29
+    call bi_from_u64
+    mov qword ptr [r12+8],rax
+    mov rdi,43
+    call bi_from_u64
+    mov qword ptr [r12+16],rax
+    mov rdi,71
+    call bi_from_u64
+    mov qword ptr [r12+24],rax
+    mov rdi,101
+    call bi_from_u64
+    mov qword ptr [r12+32],rax
+    mov r13,2
+.Lghsp_loop:
+    cmp r13,8
+    jae .Lghsp_ok
+    mov rax,r13
+    sub rax,2
+    imul rax,40
+    lea r14,[r12+rax]
+    mov rdi,r14
+    mov rsi,r13
+    call stonePatch
+    test rax,rax
+    je .Lghsp_fail
+    mov r15,rax
+    mov rax,r13
+    dec rax
+    imul rax,40
+    lea r14,[r12+rax]
+    mov rax,qword ptr [r15]
+    mov qword ptr [r14],rax
+    mov rax,qword ptr [r15+8]
+    mov qword ptr [r14+8],rax
+    mov rax,qword ptr [r15+16]
+    mov qword ptr [r14+16],rax
+    mov rax,qword ptr [r15+24]
+    mov qword ptr [r14+24],rax
+    mov rax,qword ptr [r15+32]
+    mov qword ptr [r14+32],rax
+    inc r13
+    jmp .Lghsp_loop
+.Lghsp_ok:
+    mov rax,r12
+    jmp .Lghsp_done
+.Lghsp_fail:
+    xor eax,eax
+.Lghsp_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size getHiddenStonePrefixThroughLegacyBuilder,.-getHiddenStonePrefixThroughLegacyBuilder
+
+# Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡarray ⲛⲛhidden ⲉϥⲥϩⲟⲩⲟⲣⲧ ⲉϥⲟⲩⲱϩ ⲉⲃⲟⲗ ϩⲛ ⲧⲉⲩⲧⲁⲝⲓⲥ ⲛⲟⲩⲱⲧ. Ⲡlegacy ⲇⲉ ⲥϩⲁⲓ ⲙⲡ hidden7 ⲛϣⲟⲣⲡ ⲙⲛ hidden1 ϩⲙⲡϩⲁⲉ.
+# Ⲙⲛ ⲡⲙⲉⲧⲁⲅⲣⲁⲫⲉⲩⲥ 8-k ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ. Ⲡroute ϫⲓ ⲙⲡk ⲛⲧⲟϥ ϩⲙⲡⲉϥⲙⲁ ⲛⲗⲉⲅⲁⲥⲓ.
+.type makeHiddenLegacyStoredValue,@function
+makeHiddenLegacyStoredValue:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Lmhlv_fail
+    test r13,r13
+    je .Lmhlv_fail
+    cmp r14,1
+    jb .Lmhlv_fail
+    cmp r14,7
+    ja .Lmhlv_fail
+
+    mov rdi,qword ptr [r12+HCOUNTS_ACTION]
+    call bi_clone
+    mov r15,rax
+
+    mov rax,r14
+    dec rax
+    imul rax,32
+    lea rbx,[rip+legacy_hidden_coeff]
+    add rbx,rax
+
+    mov rdi,qword ptr [r12+HCOUNTS_TARGET]
+    mov rsi,qword ptr [rbx]
+    call bi_mul_u64
+    mov rdi,r15
+    mov rsi,rax
+    call bi_add_abs
+    mov r15,rax
+
+    mov rdi,qword ptr [r12+HCOUNTS_DISTANCE]
+    mov rsi,qword ptr [rbx+8]
+    call bi_mul_u64
+    mov rdi,r15
+    mov rsi,rax
+    call bi_add_abs
+    mov r15,rax
+
+    mov rdi,qword ptr [r12+HCOUNTS_CONNECTION]
+    mov rsi,qword ptr [rbx+16]
+    call bi_mul_u64
+    mov rdi,r15
+    mov rsi,rax
+    call bi_add_abs
+    mov r15,rax
+
+    mov rdi,qword ptr [r12+HCOUNTS_DIRECTION]
+    mov rsi,qword ptr [rbx+24]
+    call bi_mul_u64
+    mov rdi,r15
+    mov rsi,rax
+    call bi_add_abs
+    mov r15,rax
+
+    mov rax,r14
+    dec rax
+    imul rax,40
+    lea rbx,[r13+rax]
+    xor r14d,r14d
+.Lmhlv_stone_sum:
+    cmp r14,5
+    jae .Lmhlv_first_save
+    mov rdi,r15
+    mov rsi,qword ptr [rbx+r14*8]
+    call bi_add_abs
+    mov r15,rax
+    inc r14
+    jmp .Lmhlv_stone_sum
+
+.Lmhlv_first_save:
+    mov rdi,r15
+    call savePatch
+    mov r15,rax
+    mov r14,1
+.Lmhlv_grind:
+    cmp r14,7
+    ja .Lmhlv_ok
+    mov rdi,r15
+    mov rsi,r15
+    call bi_mul_abs
+    mov r12,rax
+    mov rdi,r15
+    mov rsi,3
+    call bi_mul_u64
+    mov rdi,r12
+    mov rsi,rax
+    call bi_add_abs
+    mov r12,rax
+    lea r10,[rip+legacy_hidden_stone_kind]
+    mov rax,qword ptr [r10+r14*8-8]
+    dec rax
+    mov rdi,r12
+    mov rsi,qword ptr [rbx+rax*8]
+    call bi_add_abs
+    mov rdi,rax
+    mov rsi,r14
+    call bi_add_u64
+    mov rdi,rax
+    call savePatch
+    mov r15,rax
+    inc r14
+    jmp .Lmhlv_grind
+.Lmhlv_ok:
+    mov rax,r15
+    jmp .Lmhlv_done
+.Lmhlv_fail:
+    xor eax,eax
+.Lmhlv_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size makeHiddenLegacyStoredValue,.-makeHiddenLegacyStoredValue
+
+.type buildHiddenWithBackwardStorage,@function
+buildHiddenWithBackwardStorage:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lbhbs_fail
+    test r13,r13
+    je .Lbhbs_fail
+    mov rdi,56
+    call arena_alloc
+    mov r15,rax
+    mov r14,1
+.Lbhbs_loop:
+    cmp r14,7
+    ja .Lbhbs_ok
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    call makeHiddenLegacyStoredValue
+    test rax,rax
+    je .Lbhbs_fail
+    mov rdx,7
+    sub rdx,r14
+    mov qword ptr [r15+rdx*8],rax
+    inc r14
+    jmp .Lbhbs_loop
+.Lbhbs_ok:
+    mov rax,r15
+    jmp .Lbhbs_done
+.Lbhbs_fail:
+    xor eax,eax
+.Lbhbs_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size buildHiddenWithBackwardStorage,.-buildHiddenWithBackwardStorage
+
+.type legacyHiddenAtNearnessWrong,@function
+legacyHiddenAtNearnessWrong:
+    test rdi,rdi
+    je .Llhaw_fail
+    cmp rsi,1
+    jb .Llhaw_fail
+    cmp rsi,7
+    ja .Llhaw_fail
+    mov rax,qword ptr [rdi+rsi*8-8]
+    ret
+.Llhaw_fail:
+    xor eax,eax
+    ret
+.size legacyHiddenAtNearnessWrong,.-legacyHiddenAtNearnessWrong
+
+.type monster_hidden_route,@function
+monster_hidden_route:
+    jmp legacyHiddenAtNearnessWrong
+.size monster_hidden_route,.-monster_hidden_route
+
+.type monster_stage10_legacy_hidden_handler,@function
+monster_stage10_legacy_hidden_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms10_fail
+
+    mov rdi,HCOUNTS_SIZE
+    call arena_alloc
+    mov r13,rax
+    mov rax,qword ptr [r12+CTX_PATCHED_DAYTAG_CALC_RESULT]
+    test rax,rax
+    je .Lms10_fail
+    mov qword ptr [r13+HCOUNTS_ACTION],rax
+    mov rax,qword ptr [r12+CTX_PATCHED_DAYTAG_TARGET_RESULT]
+    test rax,rax
+    je .Lms10_fail
+    mov qword ptr [r13+HCOUNTS_TARGET],rax
+    mov rax,qword ptr [r12+CTX_PATCHED_DISTANCE_RESULT]
+    test rax,rax
+    je .Lms10_fail
+    mov qword ptr [r13+HCOUNTS_DISTANCE],rax
+
+    mov rdi,qword ptr [r13+HCOUNTS_ACTION]
+    mov rsi,qword ptr [r13+HCOUNTS_TARGET]
+    call bi_add_abs
+    mov qword ptr [r13+HCOUNTS_CONNECTION],rax
+
+    mov rax,qword ptr [r12+CTX_TARGET_DAY]
+    cmp rax,qword ptr [r12+CTX_CALCULATION_DAY]
+    jl .Lms10_dir1
+    je .Lms10_dir2
+    mov edi,3
+    jmp .Lms10_make_dir
+.Lms10_dir1:
+    mov edi,1
+    jmp .Lms10_make_dir
+.Lms10_dir2:
+    mov edi,2
+.Lms10_make_dir:
+    call bi_from_u64
+    mov qword ptr [r13+HCOUNTS_DIRECTION],rax
+
+    call getHiddenStonePrefixThroughLegacyBuilder
+    test rax,rax
+    je .Lms10_fail
+    mov r14,rax
+    mov rdi,r13
+    mov rsi,r14
+    call buildHiddenWithBackwardStorage
+    test rax,rax
+    je .Lms10_fail
+    mov r15,rax
+    mov qword ptr [r12+CTX_HIDDEN_BACKWARD],r15
+    inc qword ptr [r12+CTX_LEGACY_HIDDEN_STORAGE_SEEN]
+    mov qword ptr [r12+CTX_HIDDEN_QUERY_K],1
+    mov rdi,r15
+    mov esi,1
+    call monster_hidden_route
+    test rax,rax
+    je .Lms10_fail
+    mov qword ptr [r12+CTX_LEGACY_HIDDEN_QUERY_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_HIDDEN_QUERY_SEEN]
+    mov eax,1
+    jmp .Lms10_done
+.Lms10_fail:
+    xor eax,eax
+.Lms10_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage10_legacy_hidden_handler,.-monster_stage10_legacy_hidden_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -1036,6 +1414,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage08_legacy_stone_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage10_legacy_hidden_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

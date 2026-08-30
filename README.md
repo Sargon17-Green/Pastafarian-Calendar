@@ -80,3 +80,13 @@
 Ⲡwrapper ϩⲁⲣⲉϩ ⲉⲡcontract ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡrow: ⲡpointer ⲛⲟⲩⲱⲧ ⲃⲱⲕ ⲉϩⲟⲩⲛ ⲁⲩⲱ ⲛϥⲛⲏⲩ ⲉⲃⲟⲗ. Ⲡ`stonePatch` ⲛⲧⲟϥ ⲟⲩⲏϩ ⲉϥⲧⲁⲙⲓⲟ ⲙⲡgarbage clone ⲕⲁⲧⲁ ⲡϩⲓⲥⲧⲟⲣⲓⲁ.
 
 Ⲡ`getStoneTableThroughLegacyBuilder` ⲕⲱ ⲉϩⲣⲁⲓ ⲛ46 ⲛrows ϩⲓⲧⲛ ⲡ`stonePatch`; ⲡⲇⲟⲕⲓⲙⲏ ⲧⲱⲛ ⲙⲛ ⲡoracle ϩⲓ 230 ⲛBigInt. ⲠStage 8 regression ⲟ ⲛ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲙⲟϥ.
+
+## Ⲃⲁⲑⲙⲟⲥ 10 — DISCOVERY 05
+
+Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`buildHiddenWithBackwardStorage` ⲛⲗⲉⲅⲁⲥⲓ. Ⲛ7 ⲛhidden ⲥⲉⲗⲟⲅⲓⲍⲉ ⲙⲙⲟⲟⲩ ⲕⲁⲧⲁ ⲡⲕⲁⲛⲱⲛ, ⲁⲗⲗⲁ ⲡarray ⲥϩⲁⲓ ⲙⲙⲟⲟⲩ ϩⲛ ⲧⲁⲝⲓⲥ `hidden7..hidden1`.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage10_legacy_hidden_handler -> monster_hidden_route -> legacyHiddenAtNearnessWrong`
+
+Ⲡ`monster_hidden_route` ϫⲓ ⲙⲡ`k` ⲙⲛ ⲡⲙⲁ `k` ⲛⲧⲉⲡarray ⲛⲗⲉⲅⲁⲥⲓ. Ⲉⲧⲃⲉ ⲡⲁⲓ `k=1` ϯ `hidden7`, `k=7` ϯ `hidden1`, ⲁⲩⲱ `k=4` ⲧⲱⲛ ϫⲉ ⲛⲧⲟϥ ⲡⲉ ⲡⲙⲏⲧⲉ. Ⲟⲩⲛ 6 ⲛⲇⲓⲁⲫⲟⲣⲁ ⲉⲩⲧⲟϣ.
+
+Ⲙⲛ `hiddenByNearness` ⲏ ⲟⲩⲙⲉⲧⲁⲅⲣⲁⲫⲉⲩⲥ `8-k` ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. ⲠStage 10 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–9 ⲥⲉⲟ ⲛ`GREEN`.
