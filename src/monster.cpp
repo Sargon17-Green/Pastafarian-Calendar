@@ -7369,6 +7369,18 @@ Patch18YearRecord Patch18YearWalkWorkspace::resurrectNearestYearCheckpoint(
         return anchorYear;
     }
 
+    // PATCH 30 scar directionalis: annus sepultus non est teleportum bidirectionale.
+    // patchedNextYear(patchedPreviousYear(X)) non promittitur X reddere, praesertim
+    // circa anchor specialem 5000. Ergo checkpoint tantum in eadem directione
+    // qua walk historicus ab anchor moveretur adhibetur. Si target iam in anchor
+    // est, nulla resurrectio licet: zero-gradus historicus sacer manet.
+    const bool targetAfterAnchor = targetDay > anchorYear.closeGateDay;
+    const bool targetBeforeOrAtAnchorOpen = targetDay <= anchorYear.openGateDay;
+    if (!targetAfterAnchor && !targetBeforeOrAtAnchorOpen) {
+        scarBump(&PersistentScarMetrics::patch30CheckpointMiss);
+        return anchorYear;
+    }
+
     std::vector<std::pair<YearCheckpointKey, BuriedYearCheckpoint>> candidates;
     {
         std::lock_guard<std::mutex> guard(yearCheckpointVaultMutex);
@@ -7390,6 +7402,21 @@ Patch18YearRecord Patch18YearWalkWorkspace::resurrectNearestYearCheckpoint(
                     30)) {
                 value.poisoned = true;
                 scarBump(&PersistentScarMetrics::staleOrPoisonedRejected);
+                continue;
+            }
+
+            const Patch18YearRecord& corpseYear = value.year;
+            const bool monotonicForwardCorpse =
+                targetAfterAnchor &&
+                corpseYear.number >= anchorYear.number &&
+                corpseYear.openGateDay < targetDay;
+            const bool monotonicBackwardCorpse =
+                targetBeforeOrAtAnchorOpen &&
+                corpseYear.number <= anchorYear.number &&
+                targetDay <= corpseYear.closeGateDay;
+            if (!monotonicForwardCorpse && !monotonicBackwardCorpse) {
+                // Corpus validum est, sed ex parte falsa anchoris iacet. Non
+                // poisonatur: alio target futuro adhuc legitime resurgere potest.
                 continue;
             }
             candidates.push_back(pair);
@@ -7584,6 +7611,26 @@ Patch18YearWalkResult Patch18SequentialYearWalkWrapper::repair(
     if (!(current.openGateDay < targetDay && targetDay <= current.closeGateDay)) {
         throw BaseValidationError("target dies extra annum inventum PATCH 18 est");
     }
+
+    // PATCH 30, cicatrix telemetrica: checkpoint CPU-gradus devorat, sed reportum
+    // historicum numerum graduum quasi ab anchor 5000 ambulatum servare debet.
+    // Counters executionis abbreviatae non licet cicatricem historicam mutare.
+    const Integer logicalDelta = current.number - anchorYear.number;
+    if (logicalDelta >= 0) {
+        if (logicalDelta > Integer{std::numeric_limits<std::size_t>::max()}) {
+            throw BaseValidationError("telemetria graduum PATCH 18 capacitatem size_t excedit");
+        }
+        forwardSteps = logicalDelta.convert_to<std::size_t>();
+        backwardSteps = 0;
+    } else {
+        const Integer magnitude = -logicalDelta;
+        if (magnitude > Integer{std::numeric_limits<std::size_t>::max()}) {
+            throw BaseValidationError("telemetria graduum PATCH 18 capacitatem size_t excedit");
+        }
+        forwardSteps = 0;
+        backwardSteps = magnitude.convert_to<std::size_t>();
+    }
+
     workspace.buryYearCheckpoint(current);
     return Patch18YearWalkResult{anchorYear, current, forwardSteps, backwardSteps};
 }
@@ -7654,6 +7701,26 @@ Patch26YearMembershipDecision OpeningGateMembershipPatchWrapper::repair(
     if (!authoritativeAccepted) {
         throw BaseValidationError("PATCH 26 intervalum auctoritatem (open,close] non obtinuit");
     }
+
+    // PATCH 30 ad PATCH 26 propagatus: replay historicus et detour correctus
+    // eandem telemetriam logicalem ab anchor exhibent, etiamsi diversa ossa
+    // checkpoint in processu invenerint.
+    const Integer logicalDelta = current.number - anchorYear.number;
+    if (logicalDelta >= 0) {
+        if (logicalDelta > Integer{std::numeric_limits<std::size_t>::max()}) {
+            throw BaseValidationError("telemetria graduum PATCH 26 capacitatem size_t excedit");
+        }
+        forwardSteps = logicalDelta.convert_to<std::size_t>();
+        backwardSteps = 0;
+    } else {
+        const Integer magnitude = -logicalDelta;
+        if (magnitude > Integer{std::numeric_limits<std::size_t>::max()}) {
+            throw BaseValidationError("telemetria graduum PATCH 26 capacitatem size_t excedit");
+        }
+        forwardSteps = 0;
+        backwardSteps = magnitude.convert_to<std::size_t>();
+    }
+
     workspace.buryYearCheckpoint(current);
     const bool equal =
         legacyInspection.outputYear.number == current.number &&
@@ -12031,7 +12098,11 @@ FINAL_MAIN_CACHE: {
         }
     }
 
-    if (!cacheReady && accelerationsOn()) {
+    const bool patch27ResurrectionForbiddenByStage40FaultAudit =
+        faultPlan.injectionStage == 40 &&
+        faultPlan.recoverableFailuresToInject > 0;
+    if (!cacheReady && accelerationsOn() &&
+        !patch27ResurrectionForbiddenByStage40FaultAudit) {
         // PATCH 27: cache localis mortuus non fingitur HIT. Ex sepulcro externo
         // tantum post miss localem resurrectio temptatur.
         const StructureVaultKey vaultKey{
@@ -12087,6 +12158,13 @@ FINAL_MAIN_CACHE: {
             ctx.branchTrace.push_back("PATCH27_ANCESTRAL_TOMB_EMPTY");
             scarBump(&PersistentScarMetrics::patch27AncestralMiss);
         }
+    }
+    if (!cacheReady && accelerationsOn() &&
+        patch27ResurrectionForbiddenByStage40FaultAudit) {
+        // PATCH 27 scar super scar: audit recovery Stage 40 petit ut corpus
+        // quamvis inventum nondum resurgat. Sepulcrum manet; fault historicus
+        // primum exsequitur, deinde via ordinaria structuram recreat.
+        ctx.branchTrace.push_back("PATCH27_ANCESTRAL_CORPSE_DEFERRED_FOR_STAGE40_FAULT_AUDIT");
     }
     stage = cacheReady ? 50 : 40;
     goto FINAL_MAIN_DISPATCH;
