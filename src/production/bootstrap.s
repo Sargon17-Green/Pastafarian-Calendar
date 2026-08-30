@@ -14,15 +14,42 @@
 .equ CTX_LOG_COUNT,96
 .equ CTX_LAST_ERROR,104
 .equ CTX_VALIDATION_FAILURES,112
-.equ CTX_SIZE,128
+.equ CTX_LEGACY_REMAINDER_INPUT,120
+.equ CTX_LEGACY_REMAINDER_RESULT,128
+.equ CTX_LEGACY_REMAINDER_SEEN,136
+.equ CTX_SIZE,160
+.equ BI_SIGN,0
+.equ BI_LEN,8
+.equ BI_CAP,16
+.equ BI_DATA,24
+
+.section .data.rel.ro
+.align 8
+.global legacy_remainder_M
+legacy_remainder_M:
+    .quad 1
+    .quad 2
+    .quad 2
+    .quad legacy_remainder_M_limbs
+legacy_remainder_M_limbs:
+    .quad 0xffffffffffffffff
+    .quad 0x7fffffffffffffff
 
 .section .text
 .extern arena_alloc
+.extern bi_abs
+.extern bi_mod_abs
+.extern bi_is_zero
+.extern bi_sub_abs
+.extern bi_from_i64
 .global monster_context_new
 .global monster_validate_base
 .global monster_metrics_bump
 .global monster_dispatch_base
 .global calendarDateSpaghetti
+.global oldRemainder
+.global monster_stage02_legacy_remainder_handler
+.global monster_remainder_route
 
 .type monster_context_new,@function
 monster_context_new:
@@ -104,20 +131,97 @@ monster_dispatch_base:
     ret
 .size monster_dispatch_base,.-monster_dispatch_base
 
+
+.type oldRemainder,@function
+oldRemainder:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    mov r13,qword ptr [r12+BI_SIGN]
+    mov rdi,r12
+    call bi_abs
+    mov rdi,rax
+    lea rsi,[rip+legacy_remainder_M]
+    call bi_mod_abs
+    mov r14,rax
+    test r13,r13
+    jge .Lor_done_value
+    mov rdi,r14
+    call bi_is_zero
+    test eax,eax
+    jne .Lor_done_value
+    lea rdi,[rip+legacy_remainder_M]
+    mov rsi,r14
+    call bi_sub_abs
+    jmp .Lor_done
+.Lor_done_value:
+    mov rax,r14
+.Lor_done:
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size oldRemainder,.-oldRemainder
+
+.type monster_remainder_route,@function
+monster_remainder_route:
+    jmp oldRemainder
+.size monster_remainder_route,.-monster_remainder_route
+
+.type monster_stage02_legacy_remainder_handler,@function
+monster_stage02_legacy_remainder_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    test r12,r12
+    je .Lms02_fail
+    mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
+    call bi_from_i64
+    mov r13,rax
+    mov qword ptr [r12+CTX_LEGACY_REMAINDER_INPUT],r13
+    mov rdi,r13
+    call monster_remainder_route
+    mov qword ptr [r12+CTX_LEGACY_REMAINDER_RESULT],rax
+    inc qword ptr [r12+CTX_LEGACY_REMAINDER_SEEN]
+    mov eax,1
+    jmp .Lms02_done
+.Lms02_fail:
+    xor eax,eax
+.Lms02_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage02_legacy_remainder_handler,.-monster_stage02_legacy_remainder_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
     mov rbp,rsp
+    push r12
     call monster_context_new
-    mov rdi,rax
+    mov r12,rax
+    mov rdi,r12
     call monster_validate_base
     test eax,eax
     je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage02_legacy_remainder_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
     mov eax,2
-    leave
-    ret
+    jmp .Lcds_done
 .Lcds_fail:
     xor eax,eax
+.Lcds_done:
+    pop r12
     leave
     ret
 .size calendarDateSpaghetti,.-calendarDateSpaghetti

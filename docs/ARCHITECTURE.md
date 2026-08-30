@@ -39,3 +39,9 @@
 Ⲛⲉ`memo` ⲥⲉϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉⲛⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ ⲛⲧⲉⲟⲩ `state` ⲛⲕⲁⲛⲱⲛ. Ⲡ`scratch` ⲥⲉⲕⲟⲧϥ ⲙⲛⲛⲥⲁ ⲡ`copy` ⲛⲟⲩ`BigInt` ⲉϥⲙⲏⲛ. Ⲙⲛ ⲟⲩ`cache hit` ⲉϥⲧⲟϣ ⲕⲁⲧⲁ ⲟⲩⲥϩⲁⲓ ⲛⲣⲁⲛ ⲏ ⲕⲁⲧⲁ ⲟⲩ`locale`.
 
 Ⲡⲧⲱϣ ⲛ560 `limb` ϩⲙⲡ`copy` ⲛ`scratch` ⲟⲩⲧⲱϣ ⲛⲕⲁⲛⲱⲛ ⲉϥⲣⲟⲉⲓⲥ ⲡⲉ: ⲡϩⲁϩ ⲛⲛϣⲁⲓ ⲛϥⲟⲩⲱⲧ ⲁⲛ ⲉ47^5778, ⲁⲩⲱ `47^5778 < 2^(6*5778)`. Ⲡⲁⲓ ⲟⲩⲟⲛϩ ⲉⲃⲟⲗ ϫⲉ 542 `limb` ⲛ64 `bit` ⲣⲱϣⲉ; 560 ⲟⲩⲟⲛ ⲛⲟⲩⲥⲉⲉⲡⲉ ⲁⲩⲱ ⲙⲛ `truncation`.
+
+## Ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡⲃⲁⲑⲙⲟⲥ 2
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage02_legacy_remainder_handler -> monster_remainder_route -> oldRemainder`
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_REMAINDER_INPUT`, `CTX_LEGACY_REMAINDER_RESULT` ⲙⲛ `CTX_LEGACY_REMAINDER_SEEN`. Ⲛⲁⲓ ⲛⲉ ⲛⲧⲉⲡⲉⲓⲣⲱⲧⲉ ⲙⲙⲁⲧⲉ; Ⲙⲛ `savePatch` ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓⲃⲁⲑⲙⲟⲥ.

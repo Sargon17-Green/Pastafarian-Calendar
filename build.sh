@@ -10,5 +10,7 @@ as --64 -o build/oracle_calendar.o src/oracle/oracle_calendar.s
 as --64 -o build/oracle_structure.o src/oracle/oracle_structure.s
 as --64 -o build/tests.o tests/stage01_tests.s
 as --64 -o build/smoke.o tests/stage01_smoke.s
+as --64 -o build/stage02_discovery01.o tests/stage02_discovery01.s
 ld -o build/stage01_tests build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/tests.o
 ld -o build/stage01_smoke build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/smoke.o
+ld -o build/stage02_discovery01 build/arena.o build/bigint.o build/bootstrap.o build/stage02_discovery01.o
