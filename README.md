@@ -190,3 +190,18 @@
 Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ`drop=121`, `i=4` ⲧⲁϫⲣⲟ ⲙⲡorder `[2,1,3,4,5,6]`. Ⲡlegacy ⲕⲱ ⲉⲃⲟⲗ ⲛ`14675,14700,14754`, ϩⲟⲡⲟⲩ ⲡcalculation ⲕⲁⲧⲁ ⲛposition ϩⲙⲡorder ⲡⲉ `14679,14694,14754`. Ⲟⲩⲛ 2 ⲛmismatch ⲉⲩⲧⲟϣ. Ⲡ`drop=1` ⲟ ⲛcoincidence ⲉϥⲧⲱⲛ ϫⲉ ⲡorder ⲟ ⲛidentity.
 
 Ⲙⲛ `bowlAlias` ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 18 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–17 ⲥⲉⲟ ⲛ`GREEN`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 19 — PATCH 09
+
+Ⲡ`legacyPoursToFixedBowlIds` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ: ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ⲟⲩⲏϩ ⲉⲩϫⲓ ⲛbowl ID `1,2,3` ⲉϣϫⲉ ⲟⲩⲱϣ ⲙⲟⲩⲧⲉ ⲉⲡlegacy ⲛⲧⲟϥ.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `installOrderAliases`: ⲡposition `1..6` ⲕⲧⲟ ⲉⲡbowl ID ⲉⲧⲥⲏϩ ϩⲙⲡorder. Ⲡ`bowlByLegacyPosition` ⲛϥϫⲓ ⲁⲛ ⲛⲟⲩbowl ϩⲓⲧⲛ fixed ID; ⲛϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡalias ⲙⲡposition ⲛϣⲟⲣⲡ.
+
+`monster_pour_route -> monster_stage19_bowl_alias_patch_wrapper -> patchedPours -> {installOrderAliases, bowlByLegacyPosition}`
+
+Ⲡ`patchedPours` ⲙⲟⲩⲧⲉ ⲉ`orderPatchFromValue`, ⲛϥⲧⲁⲙⲓⲟ ⲙⲡalias, ⲁⲩⲱ ⲛ3 ⲛread ⲙⲡbowl ⲛⲧⲉⲡpour ⲧⲏⲣⲟⲩ ⲥⲉⲙⲟⲟϣⲉ ϩⲓⲧⲛ `bowlByLegacyPosition`.
+
+ⲠStage 18 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. ⲠStage 19 ⲧⲁϫⲣⲟ ⲛⲟⲩwitness `drop=145`, order `[2,3,1,4,5,6]`, ⲉⲣⲉ ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ⲧⲏⲣⲟⲩ ϫⲓ ⲛbowl ⲉⲩϣⲟⲃⲉ ⲙⲛ ⲛfixed IDs. Ⲁⲩⲱ ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲛ720 ⲛpermutation residue ⲧⲏⲣⲟⲩ ⲙⲛ ⲡsame-line oracle; ⲙⲛ mismatch.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_PATCHED_POUR_ORDER`, `CTX_BOWL_ALIAS`, `CTX_PATCHED_POUR_RESULT` ⲙⲛ `CTX_BOWL_ALIAS_PATCH_SEEN` ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲙⲛ ⲛlegacy trace.

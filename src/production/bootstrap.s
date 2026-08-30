@@ -85,7 +85,11 @@
 .equ CTX_POUR_ROUTE_RESULT,664
 .equ CTX_LEGACY_POUR_SEEN,672
 .equ CTX_POUR_ROUTE_SEEN,680
-.equ CTX_SIZE,688
+.equ CTX_PATCHED_POUR_ORDER,688
+.equ CTX_BOWL_ALIAS,696
+.equ CTX_PATCHED_POUR_RESULT,704
+.equ CTX_BOWL_ALIAS_PATCH_SEEN,712
+.equ CTX_SIZE,720
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -222,6 +226,10 @@ legacy_pour_factor:
 .global legacyPoursToFixedBowlIds
 .global monster_pour_route
 .global monster_stage18_legacy_fixed_pour_handler
+.global installOrderAliases
+.global bowlByLegacyPosition
+.global patchedPours
+.global monster_stage19_bowl_alias_patch_wrapper
 
 .type monster_context_new,@function
 monster_context_new:
@@ -2380,9 +2388,184 @@ legacyPoursToFixedBowlIds:
     ret
 .size legacyPoursToFixedBowlIds,.-legacyPoursToFixedBowlIds
 
+
+# Ⲃⲁⲑⲙⲟⲥ 19 — PATCH 09
+# Ⲡlegacy ⲛfixed bowls ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡⲡⲁⲧϣ ⲧⲁⲙⲓⲟ ⲛⲟⲩalias ⲉϥⲙⲁⲡⲡⲉ ⲙⲡposition ⲉⲡbowl ID ⲕⲁⲧⲁ ⲡorder.
+.type installOrderAliases,@function
+installOrderAliases:
+    # rdi=order[6], rsi=alias[6].
+    test rdi,rdi
+    je .Lioa_fail
+    test rsi,rsi
+    je .Lioa_fail
+    xor ecx,ecx
+    xor r8d,r8d
+.Lioa_loop:
+    cmp rcx,6
+    jae .Lioa_mask
+    mov rax,qword ptr [rdi+rcx*8]
+    cmp rax,1
+    jb .Lioa_fail
+    cmp rax,6
+    ja .Lioa_fail
+    mov rdx,rax
+    dec rdx
+    bt r8,rdx
+    jc .Lioa_fail
+    bts r8,rdx
+    mov qword ptr [rsi+rcx*8],rax
+    inc rcx
+    jmp .Lioa_loop
+.Lioa_mask:
+    cmp r8,0x3f
+    jne .Lioa_fail
+    mov rax,rsi
+    ret
+.Lioa_fail:
+    xor eax,eax
+    ret
+.size installOrderAliases,.-installOrderAliases
+
+.type bowlByLegacyPosition,@function
+bowlByLegacyPosition:
+    # rdi=oldBowls[6], rsi=alias[6], rdx=position 1..6.
+    test rdi,rdi
+    je .Lbblp_fail
+    test rsi,rsi
+    je .Lbblp_fail
+    cmp rdx,1
+    jb .Lbblp_fail
+    cmp rdx,6
+    ja .Lbblp_fail
+    mov rcx,rdx
+    dec rcx
+    mov rax,qword ptr [rsi+rcx*8]
+    cmp rax,1
+    jb .Lbblp_fail
+    cmp rax,6
+    ja .Lbblp_fail
+    dec rax
+    mov rax,qword ptr [rdi+rax*8]
+    test rax,rax
+    je .Lbblp_fail
+    ret
+.Lbblp_fail:
+    xor eax,eax
+    ret
+.size bowlByLegacyPosition,.-bowlByLegacyPosition
+
+.type patchedPours,@function
+patchedPours:
+    # rdi=drop, rsi=i, rdx=oldBowls[6], rcx=stoneRow[5], r8=orderOut[6], r9=poursOut[3].
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,72
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov qword ptr [rbp-48],r8
+    mov qword ptr [rbp-56],r9
+    test r12,r12
+    je .Lpp09_fail
+    test r14,r14
+    je .Lpp09_fail
+    test r15,r15
+    je .Lpp09_fail
+    test r8,r8
+    je .Lpp09_fail
+    test r9,r9
+    je .Lpp09_fail
+
+    mov rdi,r12
+    mov rsi,qword ptr [rbp-48]
+    call orderPatchFromValue
+    test rax,rax
+    je .Lpp09_fail
+
+    mov rdi,qword ptr [rbp-48]
+    lea rsi,[rbp-112]
+    call installOrderAliases
+    test rax,rax
+    je .Lpp09_fail
+
+    xor ebx,ebx
+.Lpp09_loop:
+    cmp rbx,3
+    jae .Lpp09_ok
+
+    mov rdi,r12
+    mov rsi,r12
+    call bi_mul_abs
+    test rax,rax
+    je .Lpp09_fail
+    mov qword ptr [rbp-64],rax
+
+    mov rdi,r14
+    lea rsi,[rbp-112]
+    lea rdx,[rbx+1]
+    call bowlByLegacyPosition
+    test rax,rax
+    je .Lpp09_fail
+    mov rsi,rax
+    mov rdi,qword ptr [r15+rbx*8]
+    call bi_mul_abs
+    test rax,rax
+    je .Lpp09_fail
+
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-64]
+    call bi_add_abs
+    test rax,rax
+    je .Lpp09_fail
+
+    lea rcx,[rip+legacy_pour_factor]
+    mov rcx,qword ptr [rcx+rbx*8]
+    imul rcx,r13
+    mov rdi,rax
+    mov rsi,rcx
+    call bi_add_u64
+    test rax,rax
+    je .Lpp09_fail
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Lpp09_fail
+    mov rdx,qword ptr [rbp-56]
+    mov qword ptr [rdx+rbx*8],rax
+
+    inc rbx
+    jmp .Lpp09_loop
+
+.Lpp09_ok:
+    mov rax,qword ptr [rbp-56]
+    jmp .Lpp09_done
+.Lpp09_fail:
+    xor eax,eax
+.Lpp09_done:
+    add rsp,72
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size patchedPours,.-patchedPours
+
+.type monster_stage19_bowl_alias_patch_wrapper,@function
+monster_stage19_bowl_alias_patch_wrapper:
+    jmp patchedPours
+.size monster_stage19_bowl_alias_patch_wrapper,.-monster_stage19_bowl_alias_patch_wrapper
+
 .type monster_pour_route,@function
 monster_pour_route:
-    jmp legacyPoursToFixedBowlIds
+    jmp monster_stage19_bowl_alias_patch_wrapper
 .size monster_pour_route,.-monster_pour_route
 
 .type monster_stage18_legacy_fixed_pour_handler,@function
@@ -2481,7 +2664,23 @@ monster_stage18_legacy_fixed_pour_handler:
     test rax,rax
     je .Lms18_fail
     mov qword ptr [r12+CTX_POUR_ROUTE_RESULT],rax
+    mov qword ptr [r12+CTX_PATCHED_POUR_RESULT],rax
+    mov rax,qword ptr [rbp-48]
+    mov qword ptr [r12+CTX_PATCHED_POUR_ORDER],rax
     inc qword ptr [r12+CTX_POUR_ROUTE_SEEN]
+
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lms18_fail
+    mov r13,rax
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,r13
+    call installOrderAliases
+    test rax,rax
+    je .Lms18_fail
+    mov qword ptr [r12+CTX_BOWL_ALIAS],r13
+    inc qword ptr [r12+CTX_BOWL_ALIAS_PATCH_SEEN]
 
     mov eax,1
     jmp .Lms18_done

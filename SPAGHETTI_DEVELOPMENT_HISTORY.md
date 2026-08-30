@@ -334,3 +334,36 @@
 Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyPoursToFixedBowlIds`, `monster_pour_route`, `monster_stage18_legacy_fixed_pour_handler`, ⲙⲛ state ⲛⲧⲉⲡdrop/index/order/fixed IDs/old bowls/stone row/pours ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩdetour ϩⲙⲡⲉⲓDISCOVERY. Ⲡ`monster_pour_route` ⲟ ⲛCOPY_AUTHORITATIVE ⲙⲡlegacy ⲡⲁⲓ, ⲁⲩⲱ ⲛϥϫⲓ ⲁⲛ ⲙⲡoracle ϩⲙ runtime.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 19 — PATCH 09
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`legacyPoursToFixedBowlIds`. Ⲡhelper ⲛStage 18 ⲟⲩⲏϩ ⲉϥⲗⲟⲅⲓⲍⲉ ⲙⲡorder ⲛⲧⲟϣ ⲁⲗⲗⲁ ⲛϥϫⲓ ⲛbowl ID `1,2,3` ϩⲛ ⲛ3 ⲛpour ⲛϣⲟⲣⲡ. Ⲡdirect call ⲉⲣⲟϥ ⲟⲩⲏϩ ⲉϥⲟⲩⲱⲛϩ ⲙⲡscar ⲛⲗⲉⲅⲁⲥⲓ.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`installOrderAliases(order,alias)`. Ⲡalias ⲟ ⲛⲟⲩmap ⲛⲧⲟϣ: `alias[position]=order[position]` ⲛposition `1..6`. Ⲡhelper ⲧⲁϫⲣⲟ ⲟⲛ ϫⲉ ⲡorder ⲟ ⲛpermutation ⲛID `1..6`.
+
+Ⲡ`bowlByLegacyPosition(oldBowls,alias,position)` ⲗⲟⲅⲓⲍⲉ ⲙⲡbowl ID ϩⲓⲧⲛ ⲡalias ⲛⲧⲟϥ, ⲁⲩⲱ ⲙⲛⲛⲥⲱⲥ ⲛϥϫⲓ ⲙⲡBigInt pointer ϩⲙⲡoldBowls.
+
+Ⲡ`patchedPours` ⲙⲟⲩⲧⲉ ⲉ`orderPatchFromValue`, ⲛϥⲧⲁⲙⲓⲟ ⲙⲡalias, ⲁⲩⲱ ⲛϥⲗⲟⲅⲓⲍⲉ ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ϩⲓⲧⲛ ⲛformula ⲛⲧⲟϣ ⲙⲛ bowl read ⲉϥⲙⲟⲟϣⲉ ⲙⲙⲁⲧⲉ ϩⲓⲧⲛ `bowlByLegacyPosition`.
+
+`monster_pour_route -> monster_stage19_bowl_alias_patch_wrapper -> patchedPours`
+
+### EQUIVALENCE
+
+Ⲉϣϫⲉ `alias[position]=order[position]`, ⲧⲟⲧⲉ `bowlByLegacyPosition(oldBowls,alias,position)` ⲧⲱⲛ ⲙⲛ `oldBowls[order[position]]`. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲛformula ⲙⲡpour ⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ ⲁϫⲛ ⲧⲣⲉⲩϥⲱϫⲉ ⲙⲡlegacy helper.
+
+### EDGE CASES
+
+Ⲡwitness `drop=145`, `i=4` ϯ order `[2,3,1,4,5,6]`. Ⲡalias ⲛⲧⲟϥ ⲟ ⲙⲡⲉⲓorder. Ⲛ3 ⲛbowl read ⲛϣⲟⲣⲡ ⲕⲧⲟ ⲉ`13,17,11`, ⲁⲩⲱ ⲛpatched pours ⲛⲉ `21063,21096,21108`.
+
+Ⲡtest ⲙⲟⲟϣⲉ ⲟⲛ ϩⲓ `drop=1..720`, ⲛϥⲥⲙⲓⲛⲉ ⲙⲡorder ⲙⲛ `oracle_bowl_order_from_value`, ⲁⲩⲱ ⲛϥⲥⲙⲓⲛⲉ ⲙⲡ3 ⲛpour ⲙⲛ ⲟⲩVALIDATION_COPY ⲉϥϫⲓ ⲙⲡoracle order ⲙⲛ `oracle_SAVE`. Ⲟⲩⲛ 0 ⲛmismatch.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `installOrderAliases`, `bowlByLegacyPosition`, `patchedPours`, `monster_stage19_bowl_alias_patch_wrapper`, `CTX_PATCHED_POUR_ORDER`, `CTX_BOWL_ALIAS`, `CTX_PATCHED_POUR_RESULT` ⲙⲛ `CTX_BOWL_ALIAS_PATCH_SEEN`.
+
+Ⲡlegacy result ⲙⲛ ⲡpatched result ⲥⲉϣⲟⲟⲡ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ϩⲙⲡ`MonsterContext`. Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ ϩⲙⲡⲉⲓⲡⲁⲧϣ.

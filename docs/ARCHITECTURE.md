@@ -240,3 +240,22 @@
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_LEGACY_POUR_DROP`, `CTX_LEGACY_POUR_I`, `CTX_LEGACY_POUR_ORDER`, `CTX_LEGACY_POUR_FIXED_IDS`, `CTX_LEGACY_POUR_OLD_BOWLS`, `CTX_LEGACY_POUR_STONE_ROW`, `CTX_LEGACY_POUR_RESULT`, `CTX_POUR_ROUTE_RESULT`, ⲙⲛ ⲛcounter ⲛⲧⲉⲡlegacy/route.
 
 Ⲡfixed bowl array ⲙⲡhandler ⲟ ⲛdiagnostic state ⲉϥⲧⲟϣ ⲛⲟⲩinvocation; ⲛϥⲟ ⲁⲛ ⲛglobal semantic state. Ⲙⲛ `bowlAlias` ⲏ vault/pending ⲉϥϣⲟⲟⲡ ϩⲙⲡⲉⲓlayer.
+
+
+## Ⲡbowl-alias detour ⲙⲡⲃⲁⲑⲙⲟⲥ 19
+
+Ⲡ`legacyPoursToFixedBowlIds` ⲟⲩⲏϩ ⲉϥⲟ ⲛCOPY_DIAGNOSTIC ⲙⲛ ⲡfixed-ID scar ⲛStage 18. ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_pour_route -> monster_stage19_bowl_alias_patch_wrapper -> patchedPours -> {installOrderAliases, bowlByLegacyPosition}`
+
+Ⲡ`installOrderAliases` ⲧⲁⲙⲓⲟ ⲛ6 ⲛmapping ⲉⲩⲧⲟϣ ϩⲙⲡinvocation: position ⲕⲧⲟ ⲉbowl ID. Ⲡ`bowlByLegacyPosition` ⲡⲉ ⲡⲣⲱⲧⲉ ⲛⲟⲩⲱⲧ ⲙⲡsemantic bowl read ⲙⲡ3 ⲛpour.
+
+Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡpatched order, ⲡalias, ⲡpatched pour pointer ⲙⲛ ⲡcounter ⲙⲡpatch. Ⲛlegacy trace ⲙⲡStage 18 ⲟⲩⲏϩ ⲉϥⲥⲏϩ ϩⲛ ⲛfield ⲛϣⲟⲣⲡ.
+
+### EQUIVALENCE
+
+`alias[position]=order[position]`, ⲁⲩⲱ `bowlByLegacyPosition(B,alias,position)=B[order[position]]`. Ⲡpour formula ⲛϥϣⲓⲃⲉ ⲁⲛ; ⲡsource ⲙⲡbowl ⲙⲙⲁⲧⲉ ⲡⲉ ⲡⲉⲛⲧⲁϥⲕⲧⲟ ⲉⲡⲕⲁⲛⲱⲛ.
+
+### WHY SAFE
+
+Ⲡalias ⲙⲛ ⲡpatched pour buffers ⲥⲉϣⲟⲟⲡ ⲛⲟⲩinvocation ⲛⲟⲩⲱⲧ. Ⲙⲛ global mutable semantic state, cache, environment ⲏ observability value ⲉϥϫⲓ ⲛⲟⲩⲧⲟϣ ⲙⲡpour.
