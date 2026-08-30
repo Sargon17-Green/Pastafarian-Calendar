@@ -220,3 +220,18 @@
 Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡdrop, ⲡi, ⲡinput bowls, ⲡstone row, ⲡorder, ⲛpour, ⲡlegacy output ⲙⲛ ⲡroute output. Ⲡ`monster_bowl_stir_route` ⲙⲟⲟϣⲉ ⲉⲡlegacy ⲛⲧⲟϥ ϩⲙⲡⲉⲓDISCOVERY.
 
 ⲚStage 1–19 ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 20 ⲟ ⲛ`EXPECTED_RED`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 21 — PATCH 10
+
+Ⲡ`legacyStirOneDropInPlace` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ, ⲁⲩⲱ ⲡ`stirOneDropViaShadow` ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ ϩⲓ clone ⲉϥϣⲟⲃⲉ. Ⲡgarbage ⲛⲗⲉⲅⲁⲥⲓ ⲛϥⲧⲟϣ ⲁⲛ ⲙⲡsemantic output.
+
+Ⲡ`vaultOld` ⲟ ⲛⲟⲩsnapshot ⲛⲧⲉ ⲛ6 ⲛBigInt pointer ⲙⲡB ⲙⲡⲉⲙⲧⲟ ⲛⲛ6 ⲛposition. Ⲛread ⲧⲏⲣⲟⲩ ⲙⲡ`id`, `prev`, `next` ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡ`vaultOld` ⲙⲙⲁⲧⲉ.
+
+Ⲡ`pending` ⲁⲣⲭⲉⲓ ⲛ0 ϩⲓ ⲛ6 ⲛslot. Ⲡresult ⲙⲡposition ⲛⲓⲙ ⲥⲏϩ ⲉ`pending[bowlId]`, ⲁⲩⲱ ⲙⲛ write ⲉⲡB ⲉϥϣⲟⲟⲡ ϩⲙⲡloop. Ⲙⲛⲛⲥⲁ ⲧⲣⲉⲛ6 ⲛslot ⲧⲏⲣⲟⲩ ⲙⲟⲩϩ, ⲡcommit ⲕⲱ ⲛ6 ⲛpointer ⲉⲡB ⲛⲟⲩⲥⲟⲡ.
+
+`monster_bowl_stir_route -> monster_stage21_bowl_shadow_patch_wrapper -> stirOneDropViaShadow`
+
+ⲠStage 20 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲡdirect legacy call ⲟⲩⲏϩ ⲉϥϯ 5 ⲛmismatch ϩⲙⲡwitness ⲛⲧⲟϣ, ϩⲟⲡⲟⲩ ⲡroute ⲙⲡpatch ϯ 0 ⲛmismatch ⲙⲛ ⲡsame-line old-state reference.
+
+Ⲡ`CTX_BOWL_SHADOW_PATCH_SEEN` ⲙⲉⲧⲣⲉ ϫⲉ ⲡshadow detour ⲁϥⲙⲟⲟϣⲉ ϩⲙⲡinvocation. Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ.

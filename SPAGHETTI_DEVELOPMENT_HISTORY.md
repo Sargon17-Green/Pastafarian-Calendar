@@ -390,3 +390,24 @@
 Ⲡhandler ⲧⲁⲙⲓⲟ ⲛⲟⲩworking pointer-vector ⲛⲧⲉⲡinvocation ⲉⲧⲣⲉⲡlegacy ⲧⲙϣⲓⲃⲉ ⲙⲡinput ⲙⲡlayer ⲛϣⲟⲣⲡ. Ⲡworking state ⲛⲧⲟϥ ⲇⲉ ⲟ ⲛsemantic state ⲙⲡDISCOVERY, ⲁⲩⲱ ⲡroute ⲙⲟⲟϣⲉ ⲉⲡlegacy ⲛⲧⲟϥ.
 
 Ⲙⲡⲟⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩrepair ϩⲙⲡⲉⲓDISCOVERY.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 21 — PATCH 10
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`legacyStirOneDropInPlace`. Ⲡhelper ⲛStage 20 ⲟⲩⲏϩ ⲉϥⲥϩⲁⲓ ⲉⲡB ⲛⲧⲉⲩⲛⲟⲩ, ⲁⲩⲱ ⲡdirect test ⲟⲩⲏϩ ⲉϥⲟⲩⲱⲛϩ ⲙⲡ5 ⲛmismatch.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`stirOneDropViaShadow`. Ⲛϥⲧⲁⲙⲓⲟ ⲛⲟⲩclone ⲉϥϣⲟⲃⲉ ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡlegacy ϩⲓⲱⲱϥ ⲛⲟⲩⲙⲉ. Ⲙⲛⲛⲥⲱⲥ ⲛϥⲧⲁⲙⲓⲟ ⲙⲡ`vaultOld` ⲉⲃⲟⲗ ϩⲙⲡB ⲛϣⲟⲣⲡ ⲙⲛ ⲟⲩ`pending` ⲉϥϣⲟⲩⲓⲧ.
+
+Ⲛ6 ⲛcalculation ⲧⲏⲣⲟⲩ ⲥⲉϫⲓ ⲛbowl read ⲙⲙⲁⲧⲉ ϩⲙⲡ`vaultOld`. Ⲡresult ⲛⲓⲙ ⲃⲱⲕ ⲉ`pending`; ⲙⲛ ⲟⲩwrite ⲉⲡB ϣⲁⲛⲧⲉⲡround ⲙⲟⲩϩ ⲛⲥⲟⲟⲩ. Ⲡcommit ⲟⲩⲱⲛϩ ⲙⲙⲁⲧⲉ ⲙⲛⲛⲥⲁ ⲡvalidation ⲛⲧⲉ ⲛ6 ⲛpending slot.
+
+`monster_bowl_stir_route -> monster_stage21_bowl_shadow_patch_wrapper -> stirOneDropViaShadow`
+
+### Ⲡⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ
+
+Ⲉⲡⲉⲓⲇⲏ ⲛread ⲧⲏⲣⲟⲩ ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡsnapshot ⲛⲟⲩⲱⲧ, ⲡresult ⲙⲡposition ⲛⲓⲙ ⲛϥⲛⲁϫⲓ ⲁⲛ ⲛⲟⲩneighbor ⲉⲁⲩϣⲓⲃⲉ ⲙⲙⲟϥ ϩⲙⲡround ⲛⲟⲩⲱⲧ. Ⲡ`pending` ⲛϥⲧⲟϣ ⲁⲛ ⲛⲟⲩread source.
+
+ⲠStage 20 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE20_REGRESSION_GREEN`. ⲠStage 21 test ⲟ ⲛ`STAGE21_PATCH10_GREEN`.

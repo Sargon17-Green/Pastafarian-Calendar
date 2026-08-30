@@ -99,7 +99,8 @@
 .equ CTX_LEGACY_BOWL_STIR_SEEN,776
 .equ CTX_BOWL_STIR_ROUTE_RESULT,784
 .equ CTX_BOWL_STIR_ROUTE_SEEN,792
-.equ CTX_SIZE,800
+.equ CTX_BOWL_SHADOW_PATCH_SEEN,800
+.equ CTX_SIZE,808
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -246,6 +247,8 @@ legacy_bowl_stir_stone_by_position:
 .global legacyStirOneDropInPlace
 .global monster_bowl_stir_route
 .global monster_stage20_legacy_inplace_bowl_handler
+.global stirOneDropViaShadow
+.global monster_stage21_bowl_shadow_patch_wrapper
 
 .type monster_context_new,@function
 monster_context_new:
@@ -2915,9 +2918,297 @@ legacyStirOneDropInPlace:
     ret
 .size legacyStirOneDropInPlace,.-legacyStirOneDropInPlace
 
+# Ⲃⲁⲑⲙⲟⲥ 21 — PATCH 10
+# Ⲡlegacy ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ϩⲓ clone ⲉϥϣⲟⲃⲉ.
+# ⲠvaultOld ⲡⲉ ⲡsnapshot ⲛⲟⲩⲱⲧ ⲛⲧⲉ ⲛ6 ⲛbowl. Ⲛread ⲧⲏⲣⲟⲩ ⲛⲁⲩⲛⲏⲩ ⲉⲃⲟⲗ ϩⲓⲱⲱϥ.
+# Ⲛwrite ⲧⲏⲣⲟⲩ ⲃⲱⲕ ⲉpending; ⲡcommit ⲟⲩⲱⲛϩ ⲙⲙⲁⲧⲉ ⲙⲛⲛⲥⲁ ⲛ6 ⲛposition.
+.type stirOneDropViaShadow,@function
+stirOneDropViaShadow:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,120
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov qword ptr [rbp-48],r8
+    mov qword ptr [rbp-56],r9
+    test r12,r12
+    je .Lsodvs_fail
+    test r14,r14
+    je .Lsodvs_fail
+    test r15,r15
+    je .Lsodvs_fail
+    test r8,r8
+    je .Lsodvs_fail
+    test r9,r9
+    je .Lsodvs_fail
+
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-64],rax
+    xor ecx,ecx
+.Lsodvs_legacy_clone:
+    cmp rcx,6
+    jae .Lsodvs_legacy_call
+    mov rdx,qword ptr [r12+rcx*8]
+    test rdx,rdx
+    je .Lsodvs_fail
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lsodvs_legacy_clone
+.Lsodvs_legacy_call:
+    mov rdi,qword ptr [rbp-64]
+    mov rsi,r13
+    mov rdx,r14
+    mov rcx,r15
+    mov r8,qword ptr [rbp-48]
+    mov r9,qword ptr [rbp-56]
+    call legacyStirOneDropInPlace
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-88],rax
+
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-72],rax
+    xor ecx,ecx
+.Lsodvs_vault_clone:
+    cmp rcx,6
+    jae .Lsodvs_pending_make
+    mov rdx,qword ptr [r12+rcx*8]
+    test rdx,rdx
+    je .Lsodvs_fail
+    mov qword ptr [rax+rcx*8],rdx
+    inc rcx
+    jmp .Lsodvs_vault_clone
+
+.Lsodvs_pending_make:
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-80],rax
+    mov rdi,rax
+    xor eax,eax
+    mov ecx,6
+    rep stosq
+    xor ebx,ebx
+
+.Lsodvs_loop:
+    cmp rbx,6
+    jae .Lsodvs_validate_pending
+
+    mov rax,qword ptr [rbp-48]
+    mov rax,qword ptr [rax+rbx*8]
+    test rax,rax
+    je .Lsodvs_fail
+    cmp rax,6
+    ja .Lsodvs_fail
+    mov qword ptr [rbp-96],rax
+
+    mov rcx,rbx
+    add rcx,5
+    cmp rcx,6
+    jb .Lsodvs_prev_ready
+    sub rcx,6
+.Lsodvs_prev_ready:
+    mov rax,qword ptr [rbp-48]
+    mov rax,qword ptr [rax+rcx*8]
+    test rax,rax
+    je .Lsodvs_fail
+    cmp rax,6
+    ja .Lsodvs_fail
+    mov qword ptr [rbp-104],rax
+
+    mov rcx,rbx
+    inc rcx
+    cmp rcx,6
+    jb .Lsodvs_next_ready
+    xor ecx,ecx
+.Lsodvs_next_ready:
+    mov rax,qword ptr [rbp-48]
+    mov rax,qword ptr [rax+rcx*8]
+    test rax,rax
+    je .Lsodvs_fail
+    cmp rax,6
+    ja .Lsodvs_fail
+    mov qword ptr [rbp-112],rax
+
+    mov rax,qword ptr [rbp-96]
+    dec rax
+    mov rdx,qword ptr [rbp-72]
+    mov rdi,qword ptr [rdx+rax*8]
+    call bi_clone
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-120],rax
+
+    mov rax,qword ptr [rbp-104]
+    dec rax
+    mov rdx,qword ptr [rbp-72]
+    mov rdi,qword ptr [rdx+rax*8]
+    mov esi,2
+    call bi_mul_u64
+    test rax,rax
+    je .Lsodvs_fail
+    mov rdi,qword ptr [rbp-120]
+    mov rsi,rax
+    call bi_add_abs
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-120],rax
+
+    mov rax,qword ptr [rbp-112]
+    dec rax
+    mov rdx,qword ptr [rbp-72]
+    mov rdi,qword ptr [rdx+rax*8]
+    mov esi,3
+    call bi_mul_u64
+    test rax,rax
+    je .Lsodvs_fail
+    mov rdi,qword ptr [rbp-120]
+    mov rsi,rax
+    call bi_add_abs
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-120],rax
+
+    cmp rbx,3
+    jae .Lsodvs_no_pour
+    mov rax,qword ptr [rbp-56]
+    mov rsi,qword ptr [rax+rbx*8]
+    test rsi,rsi
+    je .Lsodvs_fail
+    mov rdi,qword ptr [rbp-120]
+    call bi_add_abs
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-120],rax
+.Lsodvs_no_pour:
+
+    mov rdi,qword ptr [rbp-120]
+    mov rsi,r14
+    call bi_add_abs
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-120],rax
+
+    lea rax,[rip+legacy_bowl_stir_stone_by_position]
+    mov rcx,qword ptr [rax+rbx*8]
+    mov rsi,qword ptr [r15+rcx*8]
+    test rsi,rsi
+    je .Lsodvs_fail
+    mov rdi,qword ptr [rbp-120]
+    call bi_add_abs
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-120],rax
+
+    mov rdi,qword ptr [rbp-120]
+    mov rsi,rdi
+    call bi_mul_abs
+    test rax,rax
+    je .Lsodvs_fail
+    mov qword ptr [rbp-128],rax
+
+    mov rax,qword ptr [rbp-104]
+    dec rax
+    mov rdx,qword ptr [rbp-72]
+    mov rdi,qword ptr [rdx+rax*8]
+    mov rax,qword ptr [rbp-112]
+    dec rax
+    mov rdx,qword ptr [rbp-72]
+    mov rsi,qword ptr [rdx+rax*8]
+    call bi_mul_abs
+    test rax,rax
+    je .Lsodvs_fail
+    mov rdi,rax
+    mov esi,5
+    call bi_mul_u64
+    test rax,rax
+    je .Lsodvs_fail
+    mov rdi,qword ptr [rbp-128]
+    mov rsi,rax
+    call bi_add_abs
+    test rax,rax
+    je .Lsodvs_fail
+
+    mov rcx,rbx
+    inc rcx
+    imul rcx,r13
+    mov rdi,rax
+    mov rsi,rcx
+    call bi_add_u64
+    test rax,rax
+    je .Lsodvs_fail
+    mov rdi,rax
+    call savePatch
+    test rax,rax
+    je .Lsodvs_fail
+
+    mov rcx,qword ptr [rbp-96]
+    dec rcx
+    mov rdx,qword ptr [rbp-80]
+    mov qword ptr [rdx+rcx*8],rax
+    inc rbx
+    jmp .Lsodvs_loop
+
+.Lsodvs_validate_pending:
+    xor ecx,ecx
+.Lsodvs_pending_check:
+    cmp rcx,6
+    jae .Lsodvs_commit
+    mov rax,qword ptr [rbp-80]
+    cmp qword ptr [rax+rcx*8],0
+    je .Lsodvs_fail
+    inc rcx
+    jmp .Lsodvs_pending_check
+
+.Lsodvs_commit:
+    xor ecx,ecx
+.Lsodvs_commit_loop:
+    cmp rcx,6
+    jae .Lsodvs_ok
+    mov rax,qword ptr [rbp-80]
+    mov rdx,qword ptr [rax+rcx*8]
+    mov qword ptr [r12+rcx*8],rdx
+    inc rcx
+    jmp .Lsodvs_commit_loop
+
+.Lsodvs_ok:
+    mov rax,r12
+    jmp .Lsodvs_done
+.Lsodvs_fail:
+    xor eax,eax
+.Lsodvs_done:
+    add rsp,120
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stirOneDropViaShadow,.-stirOneDropViaShadow
+
+.type monster_stage21_bowl_shadow_patch_wrapper,@function
+monster_stage21_bowl_shadow_patch_wrapper:
+    jmp stirOneDropViaShadow
+.size monster_stage21_bowl_shadow_patch_wrapper,.-monster_stage21_bowl_shadow_patch_wrapper
+
 .type monster_bowl_stir_route,@function
 monster_bowl_stir_route:
-    jmp legacyStirOneDropInPlace
+    jmp monster_stage21_bowl_shadow_patch_wrapper
 .size monster_bowl_stir_route,.-monster_bowl_stir_route
 
 .type monster_stage20_legacy_inplace_bowl_handler,@function
@@ -3007,6 +3298,7 @@ monster_stage20_legacy_inplace_bowl_handler:
     je .Lms20_fail
     mov qword ptr [r12+CTX_BOWL_STIR_ROUTE_RESULT],rax
     inc qword ptr [r12+CTX_BOWL_STIR_ROUTE_SEEN]
+    inc qword ptr [r12+CTX_BOWL_SHADOW_PATCH_SEEN]
     mov eax,1
     jmp .Lms20_done
 .Lms20_fail:

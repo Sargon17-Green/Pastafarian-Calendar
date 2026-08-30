@@ -274,3 +274,16 @@
 Ⲡcontext ⲟⲩⲱϩ ⲛ`CTX_LEGACY_BOWL_STIR_DROP`, `CTX_LEGACY_BOWL_STIR_I`, `CTX_LEGACY_BOWL_STIR_INPUT`, `CTX_LEGACY_BOWL_STIR_STONE_ROW`, `CTX_LEGACY_BOWL_STIR_ORDER`, `CTX_LEGACY_BOWL_STIR_POURS`, `CTX_LEGACY_BOWL_STIR_OUTPUT`, `CTX_LEGACY_BOWL_STIR_SEEN`, `CTX_BOWL_STIR_ROUTE_RESULT` ⲙⲛ `CTX_BOWL_STIR_ROUTE_SEEN`.
 
 Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ. Ⲡfailure ⲙⲡStage 20 ⲟ ⲛⲟⲩfailure ⲉϥⲧⲟϣ ⲙⲡDISCOVERY; ⲛregression ⲛStage 1–19 ⲟⲩⲏϩ ⲉⲩⲟ ⲛ`GREEN`.
+
+
+## Ⲡshadow bowl detour ⲙⲡⲃⲁⲑⲙⲟⲥ 21
+
+ⲠCOPY_DIAGNOSTIC ⲟⲩⲏϩ ⲉϥⲟ ⲛ`legacyStirOneDropInPlace`, ⲉϥⲙⲟⲟϣⲉ ϩⲓ clone ⲉϥϣⲟⲃⲉ ϩⲛ `stirOneDropViaShadow`. ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_bowl_stir_route -> monster_stage21_bowl_shadow_patch_wrapper -> stirOneDropViaShadow`
+
+Ⲡdetour ϩⲁⲣⲉϩ ⲛⲟⲩsnapshot ⲛpointer-vector ⲛⲥⲟⲟⲩ ϩⲙⲡarena ⲙⲡinvocation. ⲚBigInt ⲙⲙⲓⲛ ⲙⲙⲟⲟⲩ ⲟ ⲛimmutable ϩⲙⲡruntime; ⲉⲧⲃⲉ ⲡⲁⲓ ⲡvector clone ⲡⲉ ⲡphysical snapshot ⲙⲡsemantic B-state.
+
+Ⲡ`pending` ⲟ ⲛⲟⲩvector ⲛⲥⲟⲟⲩ ⲉϥϣⲟⲩⲓⲧ ⲛϣⲟⲣⲡ. Ⲛwrite ⲧⲏⲣⲟⲩ ⲙⲟⲟϣⲉ ⲉⲣⲟϥ. ⲠB ⲛⲧⲟϥ ⲛϥϣⲓⲃⲉ ⲁⲛ ϣⲁⲛⲧⲉⲡpending ⲙⲟⲩϩ ⲛ6 ⲛvalue, ⲁⲩⲱ ⲡcommit ⲕⲧⲟ ⲛ6 ⲛpointer ⲉⲡB ⲙⲛⲛⲥⲁ ⲡround.
+
+Ⲡroute ⲟⲩⲏϩ ⲉϥϩⲁⲣⲉϩ ⲙⲡpointer contract ⲙⲡStage 20: ⲡB pointer ⲛⲧⲟϥ ⲡⲉ ⲡreturn pointer. Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ; `CTX_BOWL_SHADOW_PATCH_SEEN` ⲡⲉ ⲟⲩcounter ⲙⲡinvocation ⲙⲙⲁⲧⲉ.
