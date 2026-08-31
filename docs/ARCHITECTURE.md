@@ -613,3 +613,28 @@
 Ⲡcache ⲡⲟⲩⲁ ⲟ ⲛinvocation-local ⲁⲩⲱ ⲕⲏ ϩⲙⲡarena ⲛⲧⲉⲡsame handler. ⲠMonsterContext ϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉtrace/diagnostic flags. Ⲙⲛ cache pointer ⲉϥⲃⲱⲕ ⲉⲃⲟⲗ ⲙⲡinvocation.
 
 Ⲙⲛ guarded entry ⲙⲛ `calculationDayFingerprint/openGate/closeGate`, ⲙⲛ semantic HIT guard, ⲁⲩⲱ ⲙⲛ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 38.
+
+
+## Ⲡguarded value ⲙⲡyear-number-only cache ⲙⲡⲃⲁⲑⲙⲟⲥ 39
+
+ⲠCOPY_DIAGNOSTIC ⲟ ⲛ`legacyYearNumberOnlyCacheGetOrPut`: ⲡlookup ⲟⲩⲏϩ keyed ⲙⲙⲁⲧⲉ ⲕⲁⲧⲁ exact BigInt `year.number`, ⲁⲩⲱ ⲡlegacy HIT ϣϭⲙϭⲟⲙ ⲉϥϯ ⲛstale value.
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_year_cache_route -> monster_stage39_year_cache_guard_patch_wrapper -> guardedYearNumberOnlyCacheRoute -> guardedYearNumberOnlyCacheGetOrPut`
+
+Ⲡmap slot layout ⲙⲡkey ⲙⲡⲟⲩϣⲓⲃⲉ: `year.number` pointer ⲙⲛ value pointer. Ⲡvalue pointer ⲙⲡpatched path ⲧⲉⲛⲟⲩ ϫⲟⲟⲥ ⲉentry:
+
+`[calculationDayFingerprint, openGate, closeGate, value]`
+
+### HIT / MISS
+
+Ⲡslot ⲛϣⲟⲣⲡ ⲥⲱⲧⲡ ⲙⲙⲁⲧⲉ ⲕⲁⲧⲁ `year.number`. Ⲙⲛⲛⲥⲱϥ ⲛⲥⲉcompare ⲙⲡ3 ⲛguard ⲕⲁⲧⲁ exact BigInt value. ⲠHIT semantic ⲟ ⲛtrue ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ⲡ3 ⲧⲱⲛ.
+
+Ⲉϣϫⲉ ⲡkey ⲧⲱⲛ ⲁⲗⲗⲁ ⲟⲩguard ϣⲟⲃⲉ, ⲡcache ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲟⲩⲕⲉkey. Ⲛϥreplace ⲙⲡentry pointer ϩⲙⲡsame slot ⲁⲩⲱ ⲛϥreturn ⲙⲡfresh value ⲛMISS.
+
+### Ⲡscar ⲙⲛ ⲡownership
+
+Ⲡlegacy number-only function ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲣϩⲱⲃ. Ⲡwrapper ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ϩⲓ diagnostic cache ⲉϥϣⲟⲃⲉ. Ⲡguarded cache ⲟ ⲛinvocation-local ⲕⲁⲧⲁ ⲡStage 38 ownership; ⲙⲛ global mutable semantic state.
+
+Ⲙⲛ structure-sauce ghost ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ.

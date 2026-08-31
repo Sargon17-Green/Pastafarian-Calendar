@@ -536,3 +536,29 @@
 Ⲡdirect regression ⲧⲁϫⲣⲟ ϫⲉ ⲡlegacy map ⲛⲧⲟϥ ⲣ ⲛHIT ⲕⲁⲧⲁ year number ⲙⲙⲁⲧⲉ. Ⲡsemantic regression ⲟ ⲛ`EXPECTED_RED` ⲙⲛ 3 ⲛstale request ⲉⲩⲧⲟϣ.
 
 Ⲙⲛ `calculationDayFingerprint`, guarded hit, guard-entry value, ⲏ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 39 — PATCH 19
+
+Ⲡmap ⲟⲩⲏϩ keyed ⲙⲙⲁⲧⲉ ⲕⲁⲧⲁ `year.number`. Ⲙⲡⲟⲩⲟⲩⲱϩ ⲛⲟⲩⲕⲉfield ⲉⲡkey, ⲁⲩⲱ ⲡphysical slot ⲟⲩⲏϩ `year.number -> pointer`.
+
+Ⲡpointer ⲙⲡpatched route ⲧⲉⲛⲟⲩ ϫⲟⲟⲥ ⲉⲟⲩentry ⲙⲛ 4 ⲛfield:
+
+`calculationDayFingerprint`
+`openGate`
+`closeGate`
+`value`
+
+Ⲡ`calculationDayFingerprintPatch19` ⲟ ⲛexact BigInt clone ⲙⲡcalculation day; ⲙⲛ foreign hash ⲏ foreign runtime. Ⲡ`guardedYearNumberOnlyCacheGetOrPut` ϭⲓⲛⲉ ⲙⲡslot ⲕⲁⲧⲁ `year.number` ⲙⲙⲁⲧⲉ. Ⲉϣϫⲉ ⲡkey ⲧⲱⲛ, ⲡHIT ⲟ ⲛsemantic HIT ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ⲡ3 ⲛguard ⲧⲱⲛ.
+
+Ⲉϣϫⲉ ⲟⲩguard ϣⲟⲃⲉ, ⲡsame bad key ⲟⲩⲏϩ ϩⲙⲡsame slot; ⲡentry ⲙⲙⲁⲧⲉ ⲧⲉ ⲉⲧⲟⲩϣⲓⲃⲉ ⲙⲛ ⲟⲩfresh entry, ⲁⲩⲱ ⲡrequest ⲟ ⲛMISS.
+
+`monster_year_cache_route -> monster_stage39_year_cache_guard_patch_wrapper -> guardedYearNumberOnlyCacheRoute -> guardedYearNumberOnlyCacheGetOrPut`
+
+Ⲡwrapper ⲙⲟⲩⲧⲉ ⲉ`legacyYearNumberOnlyCacheRoute` ⲛⲟⲩⲙⲉ ϩⲓ ⲟⲩdiagnostic cache ⲉϥϣⲟⲃⲉ, ⲙⲛⲛⲥⲱϥ ⲛϥⲙⲟⲟϣⲉ ⲉⲡguarded cache. Ⲡdirect legacy scar ⲟⲩⲏϩ ⲉϥreturn ⲙⲡstale value ⲕⲁⲧⲁ year.number ⲙⲙⲁⲧⲉ.
+
+ⲠStage 39 regression ⲧⲁϫⲣⲟ ⲙⲡcalculation-day, open-gate ⲙⲛ close-gate mismatch. Ⲛ3 ⲛcase ⲧⲏⲣⲟⲩ ⲣ ⲛMISS+replace ϩⲁ ⲡsame key ⲁⲩⲱ ϯ ⲙⲡfresh value. Ⲟⲩsame-state request ⲙⲙⲁϩ2 ⲣ ⲛreal HIT.
+
+ⲠStage 38 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE38_REGRESSION_GREEN`. ⲠStage 39 ⲟ ⲛ`STAGE39_PATCH19_GREEN`.
+
+Ⲙⲛ `oldStructureSauce` ⲏ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.

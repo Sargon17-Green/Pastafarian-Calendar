@@ -99,3 +99,6 @@ ld -o build/stage37_patch18 build/arena.o build/bigint.o build/bootstrap.o build
 
 as --64 -o build/stage38_discovery19.o tests/stage38_discovery19.s
 ld -o build/stage38_discovery19 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage38_discovery19.o
+
+as --64 -o build/stage39_patch19.o tests/stage39_patch19.s
+ld -o build/stage39_patch19 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage39_patch19.o

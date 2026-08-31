@@ -204,7 +204,14 @@
 .equ CTX_STAGE38_ROUTE_CASES,1616
 .equ CTX_STAGE38_NUMBER_ONLY_KEY,1624
 .equ CTX_STAGE38_SEEN,1632
-.equ CTX_SIZE,1640
+.equ CTX_STAGE39_CALCULATION_REFRESH,1640
+.equ CTX_STAGE39_OPEN_REFRESH,1648
+.equ CTX_STAGE39_CLOSE_REFRESH,1656
+.equ CTX_STAGE39_LEGACY_STALE_CASES,1664
+.equ CTX_STAGE39_SAME_STATE_HIT,1672
+.equ CTX_STAGE39_NUMBER_ONLY_KEY_KEPT,1680
+.equ CTX_STAGE39_PATCH_SEEN,1688
+.equ CTX_SIZE,1696
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -262,6 +269,11 @@
 .equ L38_CACHE_SLOT_SIZE,16
 .equ L38_CACHE_CAPACITY,4
 .equ L38_CACHE_SIZE,72
+.equ G39_ENTRY_CALC_FP,0
+.equ G39_ENTRY_OPEN_GATE,8
+.equ G39_ENTRY_CLOSE_GATE,16
+.equ G39_ENTRY_VALUE,24
+.equ G39_ENTRY_SIZE,32
 
 .section .data.rel.ro
 .align 8
@@ -480,6 +492,13 @@ legacy_bowl_stir_stone_by_position:
 .global monster_year_cache_route
 .global stage38LegacyCollisionCase
 .global monster_stage38_legacy_year_number_cache_handler
+.global calculationDayFingerprintPatch19
+.global stage39NewGuardedEntry
+.global guardedYearNumberOnlyCacheGetOrPut
+.global guardedYearNumberOnlyCacheRoute
+.global monster_stage39_year_cache_guard_patch_wrapper
+.global stage39GuardedCollisionCase
+.global monster_stage39_year_cache_guard_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -7182,9 +7201,287 @@ legacyYearNumberOnlyCacheRoute:
     ret
 .size legacyYearNumberOnlyCacheRoute,.-legacyYearNumberOnlyCacheRoute
 
+# Ⲃⲁⲑⲙⲟⲥ 39 — PATCH 19
+# Ⲡfingerprint ⲟ ⲛexact clone ⲙⲡcalculation day; ⲙⲛ foreign hash ⲉϥⲣϩⲱⲃ.
+.type calculationDayFingerprintPatch19,@function
+calculationDayFingerprintPatch19:
+    test rdi,rdi
+    je .Lcdfp39_fail
+    jmp bi_clone
+.Lcdfp39_fail:
+    xor eax,eax
+    ret
+.size calculationDayFingerprintPatch19,.-calculationDayFingerprintPatch19
+
+# Ⲛregister: rdi=calculation-day, rsi=YJ*, rdx=value; rax=guarded entry.
+.type stage39NewGuardedEntry,@function
+stage39NewGuardedEntry:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Ls39nge_fail
+    test r13,r13
+    je .Ls39nge_fail
+    test r14,r14
+    je .Ls39nge_fail
+    mov edi,G39_ENTRY_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Ls39nge_fail
+    mov r15,rax
+    mov rdi,r12
+    call calculationDayFingerprintPatch19
+    test rax,rax
+    je .Ls39nge_fail
+    mov qword ptr [r15+G39_ENTRY_CALC_FP],rax
+    mov rax,qword ptr [r13+YJ_OPEN_DAY]
+    mov qword ptr [r15+G39_ENTRY_OPEN_GATE],rax
+    mov rax,qword ptr [r13+YJ_CLOSE_DAY]
+    mov qword ptr [r15+G39_ENTRY_CLOSE_GATE],rax
+    mov qword ptr [r15+G39_ENTRY_VALUE],r14
+    mov rax,r15
+    jmp .Ls39nge_done
+.Ls39nge_fail:
+    xor eax,eax
+.Ls39nge_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size stage39NewGuardedEntry,.-stage39NewGuardedEntry
+
+# Ⲛregister: rdi=cache, rsi=year.number, rdx=calculation-day, rcx=YJ*, r8=fresh value.
+# Ⲡⲟⲩⲱϣⲃ: rax=semantic value, rdx=1 guarded HIT / 0 MISS, rcx=1 same-number guard replacement / 0.
+.type guardedYearNumberOnlyCacheGetOrPut,@function
+guardedYearNumberOnlyCacheGetOrPut:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,40
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov qword ptr [rbp-48],r8
+    test r12,r12
+    je .Lg39cg_fail
+    test r13,r13
+    je .Lg39cg_fail
+    test r14,r14
+    je .Lg39cg_fail
+    test r15,r15
+    je .Lg39cg_fail
+    cmp qword ptr [rbp-48],0
+    je .Lg39cg_fail
+    mov rax,qword ptr [r12+L38_CACHE_COUNT]
+    mov qword ptr [rbp-56],rax
+    xor ebx,ebx
+.Lg39cg_scan:
+    cmp rbx,qword ptr [rbp-56]
+    jae .Lg39cg_new_key
+    mov rax,rbx
+    shl rax,4
+    lea rax,[r12+L38_CACHE_SLOTS+rax]
+    mov qword ptr [rbp-64],rax
+    mov rdi,qword ptr [rax]
+    mov rsi,r13
+    call bi_cmp
+    test eax,eax
+    jne .Lg39cg_next
+    mov rax,qword ptr [rbp-64]
+    mov rax,qword ptr [rax+8]
+    test rax,rax
+    je .Lg39cg_fail
+    mov qword ptr [rbp-72],rax
+    mov rdi,qword ptr [rax+G39_ENTRY_CALC_FP]
+    mov rsi,r14
+    call bi_cmp
+    test eax,eax
+    jne .Lg39cg_replace
+    mov rax,qword ptr [rbp-72]
+    mov rdi,qword ptr [rax+G39_ENTRY_OPEN_GATE]
+    mov rsi,qword ptr [r15+YJ_OPEN_DAY]
+    call bi_cmp
+    test eax,eax
+    jne .Lg39cg_replace
+    mov rax,qword ptr [rbp-72]
+    mov rdi,qword ptr [rax+G39_ENTRY_CLOSE_GATE]
+    mov rsi,qword ptr [r15+YJ_CLOSE_DAY]
+    call bi_cmp
+    test eax,eax
+    jne .Lg39cg_replace
+    mov rax,qword ptr [rbp-72]
+    mov rax,qword ptr [rax+G39_ENTRY_VALUE]
+    mov edx,1
+    xor ecx,ecx
+    jmp .Lg39cg_done
+.Lg39cg_replace:
+    mov rdi,r14
+    mov rsi,r15
+    mov rdx,qword ptr [rbp-48]
+    call stage39NewGuardedEntry
+    test rax,rax
+    je .Lg39cg_fail
+    mov rdx,qword ptr [rbp-64]
+    mov qword ptr [rdx+8],rax
+    mov rax,qword ptr [rbp-48]
+    xor edx,edx
+    mov ecx,1
+    jmp .Lg39cg_done
+.Lg39cg_next:
+    inc rbx
+    jmp .Lg39cg_scan
+.Lg39cg_new_key:
+    mov rax,qword ptr [rbp-56]
+    cmp rax,L38_CACHE_CAPACITY
+    jae .Lg39cg_fail
+    mov rdi,r14
+    mov rsi,r15
+    mov rdx,qword ptr [rbp-48]
+    call stage39NewGuardedEntry
+    test rax,rax
+    je .Lg39cg_fail
+    mov qword ptr [rbp-72],rax
+    mov rax,qword ptr [rbp-56]
+    shl rax,4
+    lea rax,[r12+L38_CACHE_SLOTS+rax]
+    mov qword ptr [rax],r13
+    mov rdx,qword ptr [rbp-72]
+    mov qword ptr [rax+8],rdx
+    inc qword ptr [rbp-56]
+    mov rdx,qword ptr [rbp-56]
+    mov qword ptr [r12+L38_CACHE_COUNT],rdx
+    mov rax,qword ptr [rbp-48]
+    xor edx,edx
+    xor ecx,ecx
+    jmp .Lg39cg_done
+.Lg39cg_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+.Lg39cg_done:
+    add rsp,40
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size guardedYearNumberOnlyCacheGetOrPut,.-guardedYearNumberOnlyCacheGetOrPut
+
+# Ⲛregister: rdi=guarded cache, rsi=YJ*, rdx=calculation-day.
+# Ⲡⲟⲩⲱϣⲃ: rax=semantic output, rdx=fresh value, rcx=guarded HIT, r8=guard-replacement flag.
+.type guardedYearNumberOnlyCacheRoute,@function
+guardedYearNumberOnlyCacheRoute:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Lg39cr_fail
+    test r13,r13
+    je .Lg39cr_fail
+    test r14,r14
+    je .Lg39cr_fail
+    mov rdi,r13
+    mov rsi,r14
+    call buildLegacyYearCacheValueStage38
+    test rax,rax
+    je .Lg39cr_fail
+    mov r15,rax
+    mov rdi,r12
+    mov rsi,qword ptr [r13+YJ_NUMBER]
+    mov rdx,r14
+    mov rcx,r13
+    mov r8,r15
+    call guardedYearNumberOnlyCacheGetOrPut
+    test rax,rax
+    je .Lg39cr_fail
+    mov r8,rcx
+    mov rcx,rdx
+    mov rdx,r15
+    jmp .Lg39cr_done
+.Lg39cr_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+.Lg39cr_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size guardedYearNumberOnlyCacheRoute,.-guardedYearNumberOnlyCacheRoute
+
+# Ⲡwrapper ⲙⲟⲩⲧⲉ ⲉⲡlegacy route ϩⲓ ⲟⲩcache ⲉϥϣⲟⲃⲉ, ⲙⲛⲛⲥⲱϥ ⲛϥϯ ⲙⲡguarded result.
+.type monster_stage39_year_cache_guard_patch_wrapper,@function
+monster_stage39_year_cache_guard_patch_wrapper:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    call stage38NewLegacyYearCache
+    test rax,rax
+    je .Lms39w_fail
+    mov r15,rax
+    mov rdi,r15
+    mov rsi,r13
+    mov rdx,r14
+    call legacyYearNumberOnlyCacheRoute
+    test rax,rax
+    je .Lms39w_fail
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    call guardedYearNumberOnlyCacheRoute
+    jmp .Lms39w_done
+.Lms39w_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+.Lms39w_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage39_year_cache_guard_patch_wrapper,.-monster_stage39_year_cache_guard_patch_wrapper
+
 .type monster_year_cache_route,@function
 monster_year_cache_route:
-    jmp legacyYearNumberOnlyCacheRoute
+    jmp monster_stage39_year_cache_guard_patch_wrapper
 .size monster_year_cache_route,.-monster_year_cache_route
 
 # rdi=YJ*, rsi=calculation-day BigInt*, edx=1 calc / 2 open / 3 close.
@@ -7362,6 +7659,253 @@ monster_stage38_legacy_year_number_cache_handler:
     ret
 .size monster_stage38_legacy_year_number_cache_handler,.-monster_stage38_legacy_year_number_cache_handler
 
+# Ⲛregister: rdi=YJ*, rsi=calculation-day, edx=1 calc / 2 open / 3 close.
+# Ⲡⲟⲩⲱϣⲃ: rax=semantic mismatch 0/1, rdx=legacy stale flag, rcx=guard replacement flag; -1 ⲉϣϫⲉ invariant ⲁϥⲃⲱⲗ.
+.type stage39GuardedCollisionCase,@function
+stage39GuardedCollisionCase:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,56
+    mov r12,rdi
+    mov r13,rsi
+    mov r14d,edx
+    test r12,r12
+    je .Ls39cc_pattern
+    test r13,r13
+    je .Ls39cc_pattern
+    cmp r14d,1
+    jb .Ls39cc_pattern
+    cmp r14d,3
+    ja .Ls39cc_pattern
+    call stage38NewLegacyYearCache
+    test rax,rax
+    je .Ls39cc_pattern
+    mov r15,rax
+    call stage38NewLegacyYearCache
+    test rax,rax
+    je .Ls39cc_pattern
+    mov qword ptr [rbp-48],rax
+
+    # Ⲡrequest ⲛϣⲟⲣⲡ — legacy cache.
+    mov rdi,r15
+    mov rsi,r12
+    mov rdx,r13
+    call legacyYearNumberOnlyCacheRoute
+    test rax,rax
+    je .Ls39cc_pattern
+    mov qword ptr [rbp-56],rax
+    mov qword ptr [rbp-64],rdx
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-64]
+    call bi_cmp
+    test eax,eax
+    jne .Ls39cc_pattern
+
+    # Ⲡrequest ⲛϣⲟⲣⲡ — guarded route.
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,r12
+    mov rdx,r13
+    call monster_year_cache_route
+    test rax,rax
+    je .Ls39cc_pattern
+    mov qword ptr [rbp-56],rax
+    mov qword ptr [rbp-64],rdx
+    test rcx,rcx
+    jne .Ls39cc_pattern
+    test r8,r8
+    jne .Ls39cc_pattern
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-64]
+    call bi_cmp
+    test eax,eax
+    jne .Ls39cc_pattern
+
+    mov qword ptr [rbp-72],r12
+    mov qword ptr [rbp-80],r13
+    cmp r14d,1
+    jne .Ls39cc_gate_variant
+    mov rdi,r13
+    mov esi,1
+    call bi_add_u64
+    test rax,rax
+    je .Ls39cc_pattern
+    mov qword ptr [rbp-80],rax
+    jmp .Ls39cc_second
+.Ls39cc_gate_variant:
+    mov rdi,r12
+    mov esi,r14d
+    dec esi
+    call stage38YearVariant
+    test rax,rax
+    je .Ls39cc_pattern
+    mov qword ptr [rbp-72],rax
+.Ls39cc_second:
+    # Ⲡrequest ⲙⲙⲁϩ2 — ⲡdirect legacy ⲟⲩⲏϩ stale.
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-72]
+    mov rdx,qword ptr [rbp-80]
+    call legacyYearNumberOnlyCacheRoute
+    test rax,rax
+    je .Ls39cc_pattern
+    mov qword ptr [rbp-56],rax
+    mov qword ptr [rbp-64],rdx
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-64]
+    call bi_cmp
+    sete al
+    xor al,1
+    movzx ebx,al
+    cmp ebx,1
+    jne .Ls39cc_pattern
+
+    # Ⲡrequest ⲙⲙⲁϩ2 — ⲡguarded route refresh ⲙⲡentry ϩⲁ ⲡsame bad key.
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,qword ptr [rbp-72]
+    mov rdx,qword ptr [rbp-80]
+    call monster_year_cache_route
+    test rax,rax
+    je .Ls39cc_pattern
+    mov qword ptr [rbp-56],rax
+    mov qword ptr [rbp-64],rdx
+    test rcx,rcx
+    jne .Ls39cc_pattern
+    cmp r8,1
+    jne .Ls39cc_pattern
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-64]
+    call bi_cmp
+    setne al
+    movzx eax,al
+    mov edx,ebx
+    mov ecx,1
+    jmp .Ls39cc_done
+.Ls39cc_pattern:
+    mov rax,-1
+    xor edx,edx
+    xor ecx,ecx
+.Ls39cc_done:
+    add rsp,56
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage39GuardedCollisionCase,.-stage39GuardedCollisionCase
+
+# Ⲡhandler ⲧⲁϫⲣⲟ ⲙⲡ3 ⲛguard refresh ⲙⲛ ⲟⲩsame-state HIT, ⲉⲣⲉ ⲡkey ⲟⲩⲏϩ year.number ⲙⲙⲁⲧⲉ.
+.type monster_stage39_year_cache_guard_patch_handler,@function
+monster_stage39_year_cache_guard_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,32
+    mov r12,rdi
+    test r12,r12
+    je .Lms39_fail
+    call stage36Year5000JumpAnchorFromPatchedTie
+    test rax,rax
+    je .Lms39_fail
+    mov r13,rax
+    mov rdi,qword ptr [r13+YJ_FIRST_DAY]
+    mov esi,365
+    call bi_add_u64
+    test rax,rax
+    je .Lms39_fail
+    mov r14,rax
+    mov rdi,r13
+    mov rsi,r14
+    call monster_year_jump_route
+    test rax,rax
+    je .Lms39_fail
+    test rdx,rdx
+    je .Lms39_fail
+    mov r15,rdx
+    mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
+    call bi_from_i64
+    test rax,rax
+    je .Lms39_fail
+    mov qword ptr [rbp-40],rax
+
+    mov qword ptr [rbp-56],0
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-40]
+    mov edx,1
+    call stage39GuardedCollisionCase
+    cmp rax,-1
+    je .Lms39_fail
+    mov qword ptr [r12+CTX_STAGE39_CALCULATION_REFRESH],rax
+    add qword ptr [rbp-56],rdx
+
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-40]
+    mov edx,2
+    call stage39GuardedCollisionCase
+    cmp rax,-1
+    je .Lms39_fail
+    mov qword ptr [r12+CTX_STAGE39_OPEN_REFRESH],rax
+    add qword ptr [rbp-56],rdx
+
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-40]
+    mov edx,3
+    call stage39GuardedCollisionCase
+    cmp rax,-1
+    je .Lms39_fail
+    mov qword ptr [r12+CTX_STAGE39_CLOSE_REFRESH],rax
+    add qword ptr [rbp-56],rdx
+    mov rax,qword ptr [rbp-56]
+    mov qword ptr [r12+CTX_STAGE39_LEGACY_STALE_CASES],rax
+
+    # Ⲡsame request ⲛⲥⲟⲡ2 ⲟⲩⲏϩ ⲉϥⲣ ⲛⲟⲩreal cache HIT.
+    call stage38NewLegacyYearCache
+    test rax,rax
+    je .Lms39_fail
+    mov qword ptr [rbp-48],rax
+    mov rdi,rax
+    mov rsi,r15
+    mov rdx,qword ptr [rbp-40]
+    call monster_year_cache_route
+    test rax,rax
+    je .Lms39_fail
+    test rcx,rcx
+    jne .Lms39_fail
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,r15
+    mov rdx,qword ptr [rbp-40]
+    call monster_year_cache_route
+    test rax,rax
+    je .Lms39_fail
+    cmp rcx,1
+    jne .Lms39_fail
+    test r8,r8
+    jne .Lms39_fail
+    mov qword ptr [r12+CTX_STAGE39_SAME_STATE_HIT],1
+    mov qword ptr [r12+CTX_STAGE39_NUMBER_ONLY_KEY_KEPT],1
+    inc qword ptr [r12+CTX_STAGE39_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms39_done
+.Lms39_fail:
+    xor eax,eax
+.Lms39_done:
+    add rsp,32
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage39_year_cache_guard_patch_handler,.-monster_stage39_year_cache_guard_patch_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -7505,6 +8049,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage38_legacy_year_number_cache_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage39_year_cache_guard_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
