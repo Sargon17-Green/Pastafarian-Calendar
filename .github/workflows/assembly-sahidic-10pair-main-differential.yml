@@ -1,0 +1,255 @@
+name: Assembly Sahidic 10-pair main differential
+
+on:
+  push:
+    branches:
+      - 'x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Verify exact tested head
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "HEAD=$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "2455c520d0f937fe7a0216c2487ab34e71428e78" || {
+            echo "NOTE: branch moved since probe was prepared; testing current HEAD instead."
+          }
+
+      - name: Build production objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          as --64 -o build/arena.o src/runtime/arena.s
+          as --64 -o build/bigint.o src/runtime/bigint.s
+          as --64 -o build/bootstrap.o src/production/bootstrap.s
+          as --64 -o build/catalog.o src/catalog/source_language_catalog.s
+          as --64 -o build/stage54_integration.o src/production/stage54_integration.s
+          as --64 -o build/stage56_bowlsum_corrective.o src/production/stage56_bowlsum_corrective.s
+          as --64 -o build/stage56_historical_sauce_bridge.o tests/stage56_historical_sauce_bridge.s
+
+      - name: Materialize differential harness
+        shell: bash
+        run: |
+          cat > build/diff_probe.s <<'ASM'
+          .intel_syntax noprefix
+          .equ RES_YEAR,0
+          .equ RES_CUTLET_NAME,8
+          .equ RES_DAY_IN_CUTLET,16
+          .equ RES_MONTH_NAME,24
+          .equ RES_DAY_IN_MONTH,32
+          .ifndef CASE
+          .set CASE,1
+          .endif
+
+          .if CASE == 1
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15055671
+          .equ E_YEAR,5000
+          .equ E_CUTLET,12
+          .equ E_DCUT,921
+          .equ E_MONTH,43
+          .equ E_DMONTH,108
+          .elseif CASE == 2
+          .equ C_DAY,-15055672
+          .equ T_DAY,-15055672
+          .equ E_YEAR,5000
+          .equ E_CUTLET,17
+          .equ E_DCUT,159
+          .equ E_MONTH,37
+          .equ E_DMONTH,80
+          .elseif CASE == 3
+          .equ C_DAY,-15055670
+          .equ T_DAY,-15055670
+          .equ E_YEAR,5000
+          .equ E_CUTLET,17
+          .equ E_DCUT,161
+          .equ E_MONTH,5
+          .equ E_DMONTH,6
+          .elseif CASE == 4
+          .equ C_DAY,-15055672
+          .equ T_DAY,-15055670
+          .equ E_YEAR,5000
+          .equ E_CUTLET,17
+          .equ E_DCUT,161
+          .equ E_MONTH,2
+          .equ E_DMONTH,87
+          .elseif CASE == 5
+          .equ C_DAY,-15055670
+          .equ T_DAY,-15055672
+          .equ E_YEAR,5000
+          .equ E_CUTLET,17
+          .equ E_DCUT,159
+          .equ E_MONTH,26
+          .equ E_DMONTH,2
+          .elseif CASE == 6
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15057703
+          .equ E_YEAR,5000
+          .equ E_CUTLET,10
+          .equ E_DCUT,1410
+          .equ E_MONTH,16
+          .equ E_DMONTH,58
+          .elseif CASE == 7
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15057702
+          .equ E_YEAR,5000
+          .equ E_CUTLET,10
+          .equ E_DCUT,1411
+          .equ E_MONTH,6
+          .equ E_DMONTH,70
+          .elseif CASE == 8
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15056944
+          .equ E_YEAR,5000
+          .equ E_CUTLET,9
+          .equ E_DCUT,490
+          .equ E_MONTH,32
+          .equ E_DMONTH,72
+          .elseif CASE == 9
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15053459
+          .equ E_YEAR,5001
+          .equ E_CUTLET,14
+          .equ E_DCUT,582
+          .equ E_MONTH,6
+          .equ E_DMONTH,33
+          .elseif CASE == 10
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15053458
+          .equ E_YEAR,5001
+          .equ E_CUTLET,14
+          .equ E_DCUT,583
+          .equ E_MONTH,23
+          .equ E_DMONTH,37
+          .else
+          .error "CASE must be 1..10"
+          .endif
+
+          .section .rodata
+          pass_msg: .ascii "PASS\n"
+          pass_len = . - pass_msg
+          fail_msg: .ascii "MISMATCH\n"
+          fail_len = . - fail_msg
+
+          .section .text
+          .global _start
+          .extern calendarDateSpaghetti
+          .extern bi_eq_u64
+          .extern catalog_get_cutlet
+          .extern catalog_get_month
+
+          _start:
+              mov rdi,C_DAY
+              mov rsi,T_DAY
+              call calendarDateSpaghetti
+              cmp eax,2
+              jne fail
+              test rdx,rdx
+              je fail
+              mov r12,rdx
+
+              mov rdi,qword ptr [r12+RES_YEAR]
+              mov esi,E_YEAR
+              call bi_eq_u64
+              test eax,eax
+              je fail
+
+              mov rdi,E_CUTLET
+              call catalog_get_cutlet
+              cmp rax,qword ptr [r12+RES_CUTLET_NAME]
+              jne fail
+              cmp qword ptr [r12+RES_DAY_IN_CUTLET],E_DCUT
+              jne fail
+
+              mov rdi,E_MONTH
+              call catalog_get_month
+              cmp rax,qword ptr [r12+RES_MONTH_NAME]
+              jne fail
+              cmp qword ptr [r12+RES_DAY_IN_MONTH],E_DMONTH
+              jne fail
+
+              mov eax,1
+              mov edi,1
+              lea rsi,[rip+pass_msg]
+              mov edx,pass_len
+              syscall
+              mov eax,60
+              xor edi,edi
+              syscall
+
+          fail:
+              mov eax,1
+              mov edi,1
+              lea rsi,[rip+fail_msg]
+              mov edx,fail_len
+              syscall
+              mov eax,60
+              mov edi,1
+              syscall
+          ASM
+
+      - name: Run 10 exact pairs
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          : > differential-results.tsv
+          printf 'case\tcalculation_day\ttarget_day\tmain_tuple\tassembly_status\n' >> differential-results.tsv
+          pairs=(
+            '-15055671 -15055671 5000,12,921,43,108'
+            '-15055672 -15055672 5000,17,159,37,80'
+            '-15055670 -15055670 5000,17,161,5,6'
+            '-15055672 -15055670 5000,17,161,2,87'
+            '-15055670 -15055672 5000,17,159,26,2'
+            '-15055671 -15057703 5000,10,1410,16,58'
+            '-15055671 -15057702 5000,10,1411,6,70'
+            '-15055671 -15056944 5000,9,490,32,72'
+            '-15055671 -15053459 5001,14,582,6,33'
+            '-15055671 -15053458 5001,14,583,23,37'
+          )
+          for n in $(seq 1 10); do
+            as --64 --defsym CASE=$n -o build/diff_probe_$n.o build/diff_probe.s || exit 201
+            ld --wrap=stage56SauceRawBowlSumCorrective \
+              -o build/diff_probe_$n \
+              build/arena.o \
+              build/bigint.o \
+              build/bootstrap.o \
+              build/stage54_integration.o \
+              build/stage56_bowlsum_corrective.o \
+              build/stage56_historical_sauce_bridge.o \
+              build/catalog.o \
+              build/diff_probe_$n.o || exit 202
+            read -r c t tuple <<< "${pairs[$((n-1))]}"
+            if out="$(./build/diff_probe_$n 2>&1)"; then
+              status=PASS
+            else
+              status=MISMATCH
+              rc=1
+            fi
+            printf '%s\t%s\t%s\t%s\t%s\n' "$n" "$c" "$t" "$tuple" "$status" | tee -a differential-results.tsv
+          done
+          echo
+          cat differential-results.tsv
+          exit "$rc"
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assembly-sahidic-10pair-main-differential
+          path: differential-results.tsv
+          if-no-files-found: error
+          retention-days: 30
+
