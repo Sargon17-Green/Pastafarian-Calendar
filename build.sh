@@ -133,3 +133,5 @@ as --64 -o build/stage50_discovery25.o tests/stage50_discovery25.s
 ld -o build/stage50_discovery25 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage50_discovery25.o
 as --64 -o build/stage51_patch25.o tests/stage51_patch25.s
 ld -o build/stage51_patch25 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage51_patch25.o
+as --64 -o build/stage52_discovery26.o tests/stage52_discovery26.s
+ld -o build/stage52_discovery26 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage52_discovery26.o

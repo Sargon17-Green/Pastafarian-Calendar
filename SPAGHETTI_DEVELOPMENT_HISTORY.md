@@ -1099,6 +1099,11 @@
 Ⲡcontiguous ghost ⲣϩⲱⲃ ⲛϣⲟⲣⲡ. Ⲡauthoritative dayInMonth ⲧⲉⲛⲟⲩ ⲡⲉ ⲡoccurrence count ⲙⲡtarget month thread ⲉⲃⲟⲗ ϩⲙⲡϣⲟⲣⲡ ⲛⲧⲉⲡyear ϣⲁ ⲡtarget ⲛⲉⲙⲁϥ. Ⲉϣϫⲉ ghost==correct ⲡghost ϣϭⲙϭⲟⲙ ⲉϥⲟ ⲛsemantic value; ⲉⲙⲙⲟⲛ ϥⲟ ⲛdiagnostic ⲙⲙⲁⲧⲉ.
 
 
+## Ⲃⲁⲑⲙⲟⲥ 52 — DISCOVERY 26
+
+Ⲁⲩⲟⲩⲱϩ ⲙⲡlate ownership layer ⲉϥⲭⲣⲁⲱ ⲙⲡ`[open,close]` legacy interval. Ⲡstrict backward comparison ⲕⲱ ⲙⲡopening gate ⲉⲡyear ⲉⲧⲟⲩⲱⲛ, ⲉⲣⲉ ⲡearlier sequential walk scar ⲟⲩⲏϩ ⲉϥcallable ⲛⲕⲉⲥⲟⲡ. ⲠStage 52 ⲟ ⲛEXPECTED_RED ⲙⲙⲁⲧⲉ.
+
+
 ## Ⲡⲥⲱⲧⲙ ⲙⲡPATCH 22 — ⲛⲣⲁⲛ ⲛⲛⲉⲃⲟⲧ
 
 Ⲡauthoritative specification ⲕⲱ ⲙⲡrepeated-name scar ⲉϫⲛ ⲛcutlet names ⲙⲛ ⲛmonth names ⲛⲥⲉⲛⲁϣⲱⲡⲉ distinct ϩⲙⲡsame year. Ⲡmonth-name branch ⲉⲧⲁϥϣⲱϣ ⲙⲡStage 45 ⲁⲩⲕⲧⲟϥ ⲉⲡPATCH 22: `legacyMonthNamesWithRepeats` ⲣϩⲱⲃ ⲛlive ghost, ⲁⲩⲱ `monthNamesPatch22` / `monthNamesPatch22Big` ϯ ⲙⲡexact lexicographic partial-permutation row ⲛ47 canonical names. Ⲡwide path ⲟ ⲛBigInt ⲁⲩⲱ ϥϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲙⲡrank ϣⲁ `47!`.

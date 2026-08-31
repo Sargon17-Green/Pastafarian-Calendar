@@ -54,3 +54,4 @@ set -euo pipefail
 ./build/patch22_month_names_regression
 ./build/stage50_discovery25
 ./build/stage51_patch25
+./build/stage52_discovery26

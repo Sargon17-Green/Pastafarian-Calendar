@@ -936,3 +936,8 @@
 ## Ⲃⲁⲑⲙⲟⲥ 51 — day-in-month occurrence detour
 
 `monster_day_in_month_route -> monster_stage51_day_in_month_patch_wrapper -> dayInMonthPatch25`. Ⲡold contiguous arithmetic ⲣϩⲱⲃ ⲛϣⲟⲣⲡ ⲛghost. Ⲡauthoritative value ⲱϣ ⲙⲡoccurrences ⲙⲡtarget `monthId` ϩⲙ `weave[0..targetOffset]`, ⲉⲣⲉ ⲡtarget ⲛⲉⲙⲁϥ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 52 — closed opening-gate interval scar
+
+`oldYearOwnsClosedInterval` ⲕⲱ ⲙⲡlegacy `[open,close]` ownership. `legacyFindYearByClosedIntervalWalk` ⲭⲣⲁⲱ ⲙⲡstrict `target<open` backward condition, ⲁⲩⲱ `monster_year_ownership_route` ⲟⲩⲏϩ authoritative ⲉⲡscar ϩⲙⲡDISCOVERY 26. Ⲡopening gate ⲙⲡYear 5000 ⲕⲱ ⲙⲡ5000 ⲉⲡⲙⲁ ⲙⲡ4999, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡstage ⲟ ⲛEXPECTED_RED.

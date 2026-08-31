@@ -932,6 +932,17 @@
 Ⲙⲛ Stage 52 ⲏ Patch 26 code ⲉϥϣⲟⲟⲡ.
 
 
+## Ⲃⲁⲑⲙⲟⲥ 52 — DISCOVERY 26
+
+Ⲡlate year-owner scar ⲕⲱ ⲙⲡlegacy interval `[open,close]`. `legacyFindYearByClosedIntervalWalk` ⲙⲟⲟϣⲉ ⲛⲥⲁ ⲛyears, ⲁⲗⲗⲁ ⲡbackward test ⲡⲉ `target<open`; ⲉϣϫⲉ `target==open`, ϥⲕⲱ ⲙⲡopening year ⲛⲧⲟϥ.
+
+Ϩⲙ Year 5000 opening gate, ⲡlegacy route ϯ Year 5000, ⲁⲗⲗⲁ ⲡprevious year 4999 ⲡⲉ ⲡcorrect owner.
+
+`STAGE52_DISCOVERY26_EXPECTED_RED`
+
+Ⲙⲛ Stage 53 / PATCH 26 code ⲉϥϣⲟⲟⲡ.
+
+
 ## Ⲡⲥⲱⲧⲙ ⲙⲡPATCH 22 — ⲛⲣⲁⲛ ⲛⲛⲉⲃⲟⲧ
 
 Ⲡauthoritative specification ⲕⲱ ⲙⲡrepeated-name scar ⲉϫⲛ ⲛcutlet names ⲙⲛ ⲛmonth names ⲛⲥⲉⲛⲁϣⲱⲡⲉ distinct ϩⲙⲡsame year. Ⲡmonth-name branch ⲉⲧⲁϥϣⲱϣ ⲙⲡStage 45 ⲁⲩⲕⲧⲟϥ ⲉⲡPATCH 22: `legacyMonthNamesWithRepeats` ⲣϩⲱⲃ ⲛlive ghost, ⲁⲩⲱ `monthNamesPatch22` / `monthNamesPatch22Big` ϯ ⲙⲡexact lexicographic partial-permutation row ⲛ47 canonical names. Ⲡwide path ⲟ ⲛBigInt ⲁⲩⲱ ϥϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲙⲡrank ϣⲁ `47!`.

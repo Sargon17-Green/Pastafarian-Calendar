@@ -308,7 +308,15 @@
 .equ CTX_STAGE51_EQUAL_GHOST,2448
 .equ CTX_STAGE51_EQUAL_ROUTE,2456
 .equ CTX_STAGE51_SEEN,2464
-.equ CTX_SIZE,2472
+.equ CTX_STAGE52_ANCHOR,2472
+.equ CTX_STAGE52_TARGET_DAY,2480
+.equ CTX_STAGE52_DIRECT_OWNS,2488
+.equ CTX_STAGE52_ROUTE_YEAR,2496
+.equ CTX_STAGE52_CORRECT_PREVIOUS,2504
+.equ CTX_STAGE52_LEGACY_SEEN,2512
+.equ CTX_STAGE52_ROUTE_SEEN,2520
+.equ CTX_STAGE52_SEEN,2528
+.equ CTX_SIZE,2536
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -689,6 +697,10 @@ legacy_bowl_stir_stone_by_position:
 .global dayInMonthPatch25
 .global monster_stage51_day_in_month_patch_wrapper
 .global monster_stage51_day_in_month_patch_handler
+.global oldYearOwnsClosedInterval
+.global legacyFindYearByClosedIntervalWalk
+.global monster_year_ownership_route
+.global monster_stage52_legacy_opening_gate_owner_handler
 .global oldMonthNameRowWithRepeats
 .global legacyMonthNamesWithRepeats
 .global namePatch22FallingBig
@@ -12154,6 +12166,158 @@ monster_stage51_day_in_month_patch_handler:
 .size monster_stage51_day_in_month_patch_handler,.-monster_stage51_day_in_month_patch_handler
 
 
+# Ⲃⲁⲑⲙⲟⲥ 52 — DISCOVERY 26
+# Ⲡlegacy scar ⲕⲱ ⲙⲡinterval [open,close], ⲉⲧⲃⲉ ⲡⲁⲓ ⲡopening gate ⲃⲱⲕ ⲉⲡyear ⲉⲧⲟⲩⲱⲛ.
+# rdi=YJ*, rsi=target BigInt*; eax=1 ⲉϣϫⲉ open<=target<=close.
+.type oldYearOwnsClosedInterval,@function
+oldYearOwnsClosedInterval:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Loyo26_no
+    test r13,r13
+    je .Loyo26_no
+    mov rdi,r13
+    mov rsi,qword ptr [r12+YJ_OPEN_DAY]
+    call bi_cmp
+    test eax,eax
+    jl .Loyo26_no
+    mov rdi,r13
+    mov rsi,qword ptr [r12+YJ_CLOSE_DAY]
+    call bi_cmp
+    test eax,eax
+    jg .Loyo26_no
+    mov eax,1
+    jmp .Loyo26_done
+.Loyo26_no:
+    xor eax,eax
+.Loyo26_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size oldYearOwnsClosedInterval,.-oldYearOwnsClosedInterval
+
+# rdi=anchor YJ*, rsi=target BigInt*; rax=year-number BigInt*, rdx=YJ*.
+# Ⲡbackward loop ⲕⲱ ⲙⲡscar `target<open`; ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡyear ⲉⲧϩⲁⲧⲉϥϩⲏ ⲉϣϫⲉ target==open.
+.type legacyFindYearByClosedIntervalWalk,@function
+legacyFindYearByClosedIntervalWalk:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Llfy26_fail
+    test r13,r13
+    je .Llfy26_fail
+    mov r14,r12
+.Llfy26_forward:
+    mov rdi,r13
+    mov rsi,qword ptr [r14+YJ_CLOSE_DAY]
+    call bi_cmp
+    test eax,eax
+    jle .Llfy26_backward
+    mov rdi,r14
+    call patchedNextYear
+    test rax,rax
+    je .Llfy26_fail
+    mov r14,rax
+    jmp .Llfy26_forward
+.Llfy26_backward:
+    mov rdi,r13
+    mov rsi,qword ptr [r14+YJ_OPEN_DAY]
+    call bi_cmp
+    test eax,eax
+    jge .Llfy26_found
+    mov rdi,r14
+    call patchedPreviousYear
+    test rax,rax
+    je .Llfy26_fail
+    mov r14,rax
+    jmp .Llfy26_backward
+.Llfy26_found:
+    mov rdi,r14
+    mov rsi,r13
+    call oldYearOwnsClosedInterval
+    test eax,eax
+    je .Llfy26_fail
+    mov rax,qword ptr [r14+YJ_NUMBER]
+    mov rdx,r14
+    jmp .Llfy26_done
+.Llfy26_fail:
+    xor eax,eax
+    xor edx,edx
+.Llfy26_done:
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size legacyFindYearByClosedIntervalWalk,.-legacyFindYearByClosedIntervalWalk
+
+.type monster_year_ownership_route,@function
+monster_year_ownership_route:
+    jmp legacyFindYearByClosedIntervalWalk
+.size monster_year_ownership_route,.-monster_year_ownership_route
+
+.type monster_stage52_legacy_opening_gate_owner_handler,@function
+monster_stage52_legacy_opening_gate_owner_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    test r12,r12
+    je .Lms52_fail
+    call stage36Year5000JumpAnchorFromPatchedTie
+    test rax,rax
+    je .Lms52_fail
+    mov r13,rax
+    mov r14,qword ptr [r13+YJ_OPEN_DAY]
+    mov rdi,r13
+    mov rsi,r14
+    call oldYearOwnsClosedInterval
+    cmp eax,1
+    jne .Lms52_fail
+    mov qword ptr [r12+CTX_STAGE52_DIRECT_OWNS],1
+    mov rdi,r13
+    mov rsi,r14
+    call monster_year_ownership_route
+    test rax,rax
+    je .Lms52_fail
+    mov qword ptr [r12+CTX_STAGE52_ROUTE_YEAR],rax
+    mov rdi,r13
+    call patchedPreviousYear
+    test rax,rax
+    je .Lms52_fail
+    mov rdx,qword ptr [rax+YJ_NUMBER]
+    mov qword ptr [r12+CTX_STAGE52_CORRECT_PREVIOUS],rdx
+    mov qword ptr [r12+CTX_STAGE52_ANCHOR],r13
+    mov qword ptr [r12+CTX_STAGE52_TARGET_DAY],r14
+    mov qword ptr [r12+CTX_STAGE52_LEGACY_SEEN],1
+    mov qword ptr [r12+CTX_STAGE52_ROUTE_SEEN],1
+    inc qword ptr [r12+CTX_STAGE52_SEEN]
+    mov eax,1
+    jmp .Lms52_done
+.Lms52_fail:
+    xor eax,eax
+.Lms52_done:
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage52_legacy_opening_gate_owner_handler,.-monster_stage52_legacy_opening_gate_owner_handler
+
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -12352,6 +12516,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage51_day_in_month_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage52_legacy_opening_gate_owner_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
