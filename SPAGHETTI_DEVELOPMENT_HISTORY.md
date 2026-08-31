@@ -728,3 +728,39 @@
 ⲠStage 34 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ ⲁⲩⲱ ⲧⲉⲛⲟⲩ ⲟ ⲛ`GREEN`. ⲠStage 35 test ⲧⲁϫⲣⲟ ⲙⲡdirect legacy scar `9,3 -> 9`, ⲡpatched witness `9,3 -> 3,9 -> 3`, ⲥⲛⲁⲩ ⲛequal-length run ϩⲙⲡsame family, ⲛsingleton run, ⲁⲩⲱ ⲡinvocation-local context trace.
 
 Ⲙⲛ `oldJumpGuess` ⲏ year-by-year traversal ⲙⲡPATCH 18 ⲉⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 36 — DISCOVERY 18
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲙⲛⲛⲥⲁ ⲡYear 5000 tie ⲉⲧⲁⲩⲧⲁϫⲣⲟϥ, ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡnumber ⲙⲡyear ⲉⲧⲉ ⲡtarget ⲛⲁⲃⲱⲕ ⲉⲣⲟϥ ϣϭⲙϭⲟⲙ ⲉⲁⲩestimate ⲙⲙⲟϥ ⲕⲁⲧⲁ 365 ⲛday ⲛyear.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`oldJumpGuess` ⲉϥⲣ ⲛⲟⲩexact BigInt floor division:
+
+`anchor.number + floorDiv(targetDay-anchor.firstDay,365)`
+
+Ⲡnegative remainder ⲛⲧⲉⲡhardware division ⲙⲡⲟⲩⲕⲁⲁϥ ⲛⲟⲩtruncation scar; ⲡhelper ⲕⲧⲟ ⲙⲙⲟϥ ⲉⲡmathematical floor ⲛⲟⲩⲙⲉ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡdefect ⲛϥⲟ ⲁⲛ ϩⲙⲡdivision. Ⲡdefect ⲡⲉ ϫⲉ ⲡ365 guess ⲟ ⲛsemantic authority.
+
+Ⲡ`stage36Year5000JumpAnchorFromPatchedTie` ⲙⲟⲩⲧⲉ ⲉⲡStage 35 `monster_year5000_tie_route`, ϫⲓ ⲙⲡpatched selected candidate ⲙⲛ `length=490`, ⲁⲩⲱ ⲛϥⲧⲁⲙⲓⲟ ⲛⲟⲩinvocation-local Year-5000 probe anchor. Ⲡanchor interval ϩⲁⲣⲉϩ ⲉⲡscroll ownership `(openDay,closeDay]`.
+
+Ⲛtargets ⲛⲧⲉⲡtest:
+
+`openDay -> expected 4999, legacy 4999`
+`firstDay -> expected 5000, legacy 5000`
+`firstDay+364 -> expected 5000, legacy 5000`
+`firstDay+365 -> expected 5000, legacy 5001`
+`closeDay -> expected 5000, legacy 5001`
+`closeDay+1 -> expected 5001, legacy 5001`
+
+Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡdirect scar ⲧⲁϫⲣⲟ, ⲁⲗⲗⲁ ⲡsemantic route ⲟ ⲛ`EXPECTED_RED`.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+`legacyYearJumpAdapter` ⲙⲟⲩⲧⲉ ⲉ`oldJumpGuess` ⲛⲟⲩⲙⲉ. `monster_year_jump_route` ⲙⲟⲟϣⲉ ⲉⲡadapter ⲛⲧⲟϥ ϩⲙⲡDISCOVERY 18. `monster_stage36_legacy_year_jump_handler` ⲣ ⲛⲟⲩdirect copy ⲙⲛ ⲟⲩroute copy ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡtrace ⲧⲏⲣϥ ϩⲙⲡMonsterContext ⲛⲧⲉⲡinvocation.
+
+Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲙⲡ`patchedNextYear`, `patchedPreviousYear`, `findYearByWalkPatch`, sequential transition trace, year cache, ⲏ code ⲙⲡPATCH 19.

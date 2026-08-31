@@ -549,3 +549,29 @@
 ### Ⲉⲧⲃⲉ ⲟⲩ ⲛϥⲟ ⲁⲛ ⲛclean two-key sort
 
 Ⲡold length-only function ⲟⲩⲏϩ byte/code-machine identical. Ⲡpatched layer ⲙⲟⲟϣⲉ **ⲙⲛⲛⲥⲁ** ⲡlegacy sort ⲁⲩⲱ ⲛϥϣⲓⲃⲉ ⲙⲙⲁⲧⲉ ⲙⲡrecords ϩⲛ equal-length run. Ⲙⲛ global two-key comparator ⲉϥϣⲟⲟⲡ.
+
+
+## Ⲡlegacy /365 year-jump scar ⲙⲡⲃⲁⲑⲙⲟⲥ 36
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage36_legacy_year_jump_handler -> monster_year_jump_route -> legacyYearJumpAdapter -> oldJumpGuess`
+
+Ⲡanchor record ⲟ ⲛ4 ⲛBigInt pointer:
+
+`number`
+`openDay`
+`firstDay`
+`closeDay`
+
+Ⲡanchor probe ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡStage 35 patched tie route, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡStage 36 ⲛϥⲕⲱ ⲁⲛ ⲛⲟⲩseparate tie correction ⲏ clean Year-5000 selector.
+
+### Ⲡfloor division
+
+`oldJumpGuess` ⲗⲟⲅⲓⲍⲉ ⲛⲟⲩdelta ⲛBigInt, ⲛϥϫⲓ ⲙⲡabsolute quotient/remainder ϩⲓ 365, ⲁⲩⲱ ⲉϣϫⲉ ⲡdelta ⲟ ⲛnegative ⲙⲛ remainder ⲉϥϣⲟⲟⲡ ⲛϥⲟⲩⲱϩ 1 ⲉⲡabsolute quotient ⲉⲙⲡⲁⲧⲉϥnegate ⲙⲙⲟϥ. Ⲡresult ⲟ ⲛmathematical floor, ⲁⲛ truncation.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡEXPECTED_RED ⲧⲁϫⲣⲏⲩ
+
+ⲠStage 35 selected span ⲟ ⲛ490. Ⲡtarget `firstDay+365` ⲙⲛ `closeDay` ⲟ ⲛinside ⲙⲡYear 5000 interval, ⲁⲗⲗⲁ ⲡ/365 jump ϯ ⲛYear 5001. Ⲡtest-only normative reference ⲙⲟⲩⲧⲉ ⲙⲙⲁⲧⲉ ⲉⲡexplicit interval ownership ⲛⲧⲉⲡprobe; ⲙⲛ oracle call ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
+
+Ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local. Ⲙⲛ sequential year walk, ⲙⲛ year cache, ⲙⲛ global mutable semantic state, ⲁⲩⲱ ⲙⲛ future patch code.

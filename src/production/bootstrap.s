@@ -180,7 +180,16 @@
 .equ CTX_STAGE34_ROUTE_SEEN,1424
 .equ CTX_STAGE35_PATCH_SELECTED_OPEN,1432
 .equ CTX_STAGE35_PATCH_SEEN,1440
-.equ CTX_SIZE,1448
+.equ CTX_STAGE36_ANCHOR,1448
+.equ CTX_STAGE36_TARGET_DAY,1456
+.equ CTX_STAGE36_DELTA_FROM_FIRST,1464
+.equ CTX_STAGE36_LEGACY_GUESS,1472
+.equ CTX_STAGE36_ROUTE_GUESS,1480
+.equ CTX_STAGE36_LEGACY_SEEN,1488
+.equ CTX_STAGE36_ROUTE_SEEN,1496
+.equ CTX_STAGE36_GUESS_USED_AS_SEMANTIC,1504
+.equ CTX_STAGE36_ANCHOR_LENGTH,1512
+.equ CTX_SIZE,1520
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -228,6 +237,11 @@
 .equ YC_CLOSE,8
 .equ YC_LENGTH,16
 .equ YC_SIZE,24
+.equ YJ_NUMBER,0
+.equ YJ_OPEN_DAY,8
+.equ YJ_FIRST_DAY,16
+.equ YJ_CLOSE_DAY,24
+.equ YJ_SIZE,32
 
 .section .data.rel.ro
 .align 8
@@ -427,6 +441,11 @@ legacy_bowl_stir_stone_by_position:
 .global year5000TieSelectionPatch17
 .global monster_stage35_year5000_tie_patch_wrapper
 .global monster_stage35_year5000_tie_patch_handler
+.global oldJumpGuess
+.global stage36Year5000JumpAnchorFromPatchedTie
+.global legacyYearJumpAdapter
+.global monster_year_jump_route
+.global monster_stage36_legacy_year_jump_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -6403,6 +6422,203 @@ monster_stage35_year5000_tie_patch_handler:
 .size monster_stage35_year5000_tie_patch_handler,.-monster_stage35_year5000_tie_patch_handler
 
 
+# Ⲡold jump ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ365 ⲛⲟⲩlongore ⲛyear ⲉϥⲧⲁϫⲣⲏⲩ; ⲡfloor division ⲛⲧⲟϥ ⲟ ⲛexact ⲙⲛ negative delta.
+.type oldJumpGuess,@function
+oldJumpGuess:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lojg_fail
+    test r13,r13
+    je .Lojg_fail
+    mov rdi,r13
+    mov rsi,qword ptr [r12+YJ_FIRST_DAY]
+    call bi_sub
+    mov r14,rax
+    mov rdi,r14
+    call bi_abs
+    mov rdi,rax
+    mov esi,365
+    call bi_divmod_u64_abs
+    mov rbx,rax
+    mov qword ptr [rsp],rdx
+    cmp qword ptr [r14+BI_SIGN],0
+    jge .Lojg_have_floor
+    cmp qword ptr [rsp],0
+    je .Lojg_negate
+    mov rdi,rbx
+    mov esi,1
+    call bi_add_u64
+    mov rbx,rax
+.Lojg_negate:
+    mov rdi,rbx
+    call bi_neg
+    mov rbx,rax
+.Lojg_have_floor:
+    mov rdi,qword ptr [r12+YJ_NUMBER]
+    mov rsi,rbx
+    call bi_add
+    jmp .Lojg_done
+.Lojg_fail:
+    xor eax,eax
+.Lojg_done:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size oldJumpGuess,.-oldJumpGuess
+
+# Ⲡanchor ⲙⲡDISCOVERY 18 ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡpatched Year-5000 tie path; ⲡlength ⲙⲡselected candidate ⲡⲉ ⲡyear span ⲙⲡprobe.
+.type stage36Year5000JumpAnchorFromPatchedTie,@function
+stage36Year5000JumpAnchorFromPatchedTie:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov edi,48
+    call arena_alloc
+    mov r12,rax
+    mov qword ptr [r12+0],9
+    mov qword ptr [r12+8],15
+    mov qword ptr [r12+16],490
+    mov qword ptr [r12+24],3
+    mov qword ptr [r12+32],9
+    mov qword ptr [r12+40],490
+    mov edi,48
+    call arena_alloc
+    mov r13,rax
+    mov rdi,r12
+    mov esi,2
+    mov rdx,r13
+    call monster_year5000_tie_route
+    test rax,rax
+    je .Ls36a_fail
+    mov r14,qword ptr [rax+YC_LENGTH]
+    cmp r14,252
+    jb .Ls36a_fail
+    cmp r14,REAL_YEAR_MAX_PATCH
+    ja .Ls36a_fail
+    mov edi,YJ_SIZE
+    call arena_alloc
+    mov r15,rax
+    mov edi,5000
+    call bi_from_u64
+    mov qword ptr [r15+YJ_NUMBER],rax
+    mov rdi,-15055671
+    call bi_from_i64
+    mov qword ptr [r15+YJ_OPEN_DAY],rax
+    mov rdi,rax
+    mov esi,1
+    call bi_add_u64
+    mov qword ptr [r15+YJ_FIRST_DAY],rax
+    mov rdi,qword ptr [r15+YJ_OPEN_DAY]
+    mov rsi,r14
+    call bi_add_u64
+    mov qword ptr [r15+YJ_CLOSE_DAY],rax
+    mov rax,r15
+    jmp .Ls36a_done
+.Ls36a_fail:
+    xor eax,eax
+.Ls36a_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size stage36Year5000JumpAnchorFromPatchedTie,.-stage36Year5000JumpAnchorFromPatchedTie
+
+# Ⲡadapter ⲙⲟⲩⲧⲉ ⲉⲡlegacy jump ⲛⲟⲩⲙⲉ; ⲙⲛ sequential walk ⲉϥϣⲟⲟⲡ ϩⲙⲡⲃⲁⲑⲙⲟⲥ ⲡⲁⲓ.
+.type legacyYearJumpAdapter,@function
+legacyYearJumpAdapter:
+    jmp oldJumpGuess
+.size legacyYearJumpAdapter,.-legacyYearJumpAdapter
+
+.type monster_year_jump_route,@function
+monster_year_jump_route:
+    jmp legacyYearJumpAdapter
+.size monster_year_jump_route,.-monster_year_jump_route
+
+# ⲠDISCOVERY 18 handler ⲕⲱ ⲙⲡguess /365 ⲛⲧⲟϥ ⲉⲣⲟϥ ⲛsemantic year number, ⲉⲧⲃⲉ ϫⲉ ⲡtarget ⲟⲩⲏϩ ϩⲙⲡanchor interval.
+.type monster_stage36_legacy_year_jump_handler,@function
+monster_stage36_legacy_year_jump_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms36_fail
+    call stage36Year5000JumpAnchorFromPatchedTie
+    test rax,rax
+    je .Lms36_fail
+    mov r13,rax
+    mov qword ptr [r12+CTX_STAGE36_ANCHOR],r13
+    mov rdi,qword ptr [r13+YJ_FIRST_DAY]
+    mov esi,365
+    call bi_add_u64
+    mov r14,rax
+    mov qword ptr [r12+CTX_STAGE36_TARGET_DAY],r14
+    mov rdi,r14
+    mov rsi,qword ptr [r13+YJ_FIRST_DAY]
+    call bi_sub
+    mov qword ptr [r12+CTX_STAGE36_DELTA_FROM_FIRST],rax
+    mov rdi,r13
+    mov rsi,r14
+    call oldJumpGuess
+    test rax,rax
+    je .Lms36_fail
+    mov qword ptr [r12+CTX_STAGE36_LEGACY_GUESS],rax
+    inc qword ptr [r12+CTX_STAGE36_LEGACY_SEEN]
+    mov rdi,r13
+    mov rsi,r14
+    call monster_year_jump_route
+    test rax,rax
+    je .Lms36_fail
+    mov qword ptr [r12+CTX_STAGE36_ROUTE_GUESS],rax
+    inc qword ptr [r12+CTX_STAGE36_ROUTE_SEEN]
+    mov qword ptr [r12+CTX_STAGE36_GUESS_USED_AS_SEMANTIC],1
+    mov rdi,qword ptr [r13+YJ_CLOSE_DAY]
+    mov rsi,qword ptr [r13+YJ_OPEN_DAY]
+    call bi_sub
+    mov r15,rax
+    mov rax,qword ptr [r15+BI_DATA]
+    test rax,rax
+    je .Lms36_fail
+    mov rax,qword ptr [rax]
+    mov qword ptr [r12+CTX_STAGE36_ANCHOR_LENGTH],rax
+    mov eax,1
+    jmp .Lms36_done
+.Lms36_fail:
+    xor eax,eax
+.Lms36_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage36_legacy_year_jump_handler,.-monster_stage36_legacy_year_jump_handler
+
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -6531,6 +6747,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage35_year5000_tie_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage36_legacy_year_jump_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

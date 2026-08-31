@@ -459,3 +459,32 @@
 ⲠStage 34 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE34_REGRESSION_GREEN`. ⲠStage 35 ⲟ ⲛ`STAGE35_PATCH17_GREEN`.
 
 Ⲙⲛ clean two-key global sort, ⲙⲛ `oldJumpGuess`, ⲁⲩⲱ ⲙⲛ code ⲙⲡStage 36 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 36 — DISCOVERY 18
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲟⲩjump ⲉⲃⲟⲗ ϩⲙⲡYear 5000 ϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲙⲡ365 ⲛⲟⲩlongore ⲛyear ⲉϥⲧⲁϫⲣⲏⲩ. Ⲡlegacy helper ⲟ ⲛ:
+
+`oldJumpGuess(anchor,targetDay) = anchor.number + floorDiv(targetDay-anchor.firstDay,365)`
+
+Ⲡfloor division ⲛⲧⲟϥ ⲟ ⲛexact, ⲁⲩⲱ ⲟⲩnegative delta ⲙⲟⲟϣⲉ ⲉⲡfloor ⲁⲛ ⲉⲡtruncation.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡsame-line Year-5000 probe anchor ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡStage 35 patched tie selection. Ⲡselected candidate ⲟ ⲛ`length=490`; ⲡprobe interval ⲟ ⲛ`(openDay,closeDay]` ⲙⲛ 490 ⲛday.
+
+Ⲉⲧⲃⲉ ⲡⲁⲓ `firstDay+365` ⲙⲛ `closeDay` ⲟⲩⲏϩ ϩⲙⲡYear 5000. Ⲡlegacy guess ⲇⲉ ϯ ⲛ`5001` ϩⲓ ⲡⲉⲩⲥⲛⲁⲩ. Ⲡ`openDay` ⲧⲁϫⲣⲟ ⲟⲛ ⲙⲡnegative floor: ⲡguess ⲟ ⲛ`4999` ⲉϥⲧⲱⲛ.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `stage36Year5000JumpAnchorFromPatchedTie`, `oldJumpGuess`, `legacyYearJumpAdapter`, `monster_year_jump_route` ⲙⲛ `monster_stage36_legacy_year_jump_handler`.
+
+`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage36_legacy_year_jump_handler -> monster_year_jump_route -> legacyYearJumpAdapter -> oldJumpGuess`
+
+Ⲡhandler ⲣ ⲛⲟⲩdirect legacy call ⲙⲛ ⲟⲩroute call, ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡanchor, target, delta, legacy guess, route guess, seen counters ⲙⲛ ⲡhistoric flag ϫⲉ ⲡguess ⲟ ⲛsemantic result ϩⲙⲡDISCOVERY.
+
+Ⲡsame-line regression ⲧⲁϫⲣⲟ 6 ⲛboundary/probe target. Ⲡroute ⲛStage 36 ϣⲟⲃⲉ 2 ⲛcase, ⲁⲩⲱ ⲡcontext probe ϣⲟⲃⲉ ⲟⲛ 1 ⲛcase; ⲡtotal ⲟ ⲛ3 ⲛmismatch ⲉⲩⲧⲟϣ.
+
+ⲠStage 36 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–35 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ `patchedNextYear`, `patchedPreviousYear`, year-by-year walk ⲏ cache ⲙⲡPATCH 19 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
