@@ -219,7 +219,11 @@
 .equ CTX_STAGE40_TARGET_DIFFERS_FIRSTDAY,1736
 .equ CTX_STAGE40_GHOST_USED_AS_SEMANTIC,1744
 .equ CTX_STAGE40_SEEN,1752
-.equ CTX_SIZE,1760
+.equ CTX_STAGE41_ROUTE_GHOST,1760
+.equ CTX_STAGE41_ROUTE_GHOST_SEEN,1768
+.equ CTX_STAGE41_PATCH_SEEN,1776
+.equ CTX_STAGE41_GHOST_REUSE_EQUAL,1784
+.equ CTX_SIZE,1792
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -509,6 +513,8 @@ legacy_bowl_stir_stone_by_position:
 .global monster_stage39_year_cache_guard_patch_handler
 .global oldStructureSauce
 .global legacyStructureSauceUsingOriginalTarget
+.global structureSaucePatch
+.global monster_stage41_structure_sauce_patch_wrapper
 .global monster_structure_sauce_route
 .global monster_stage40_legacy_structure_sauce_handler
 
@@ -7932,12 +7938,131 @@ legacyStructureSauceUsingOriginalTarget:
     jmp oldStructureSauce
 .size legacyStructureSauceUsingOriginalTarget,.-legacyStructureSauceUsingOriginalTarget
 
+# Ⲃⲁⲑⲙⲟⲥ 41 — PATCH 20. Ⲡghost ⲙⲟⲩⲧⲉ ⲉⲡold route ⲛⲟⲩⲙⲉ; ⲡauthoritative target ⲡⲉ year.firstDay ⲉϣϫⲉ ⲡoriginal target ϣⲟⲃⲉ.
+# rdi=BigInt*. rax=i64, rdx=1 success / 0 fail.
+.type stage41StructureDayToI64,@function
+stage41StructureDayToI64:
+    test rdi,rdi
+    je .Ls41di_fail
+    mov rcx,qword ptr [rdi+BI_LEN]
+    test rcx,rcx
+    je .Ls41di_zero
+    cmp rcx,1
+    jne .Ls41di_fail
+    mov rdx,qword ptr [rdi+BI_DATA]
+    test rdx,rdx
+    je .Ls41di_fail
+    mov rax,qword ptr [rdx]
+    mov rcx,qword ptr [rdi+BI_SIGN]
+    cmp rcx,1
+    je .Ls41di_positive
+    cmp rcx,-1
+    jne .Ls41di_fail
+    mov rcx,0x8000000000000000
+    cmp rax,rcx
+    ja .Ls41di_fail
+    neg rax
+    mov edx,1
+    ret
+.Ls41di_positive:
+    test rax,rax
+    js .Ls41di_fail
+    mov edx,1
+    ret
+.Ls41di_zero:
+    xor eax,eax
+    mov edx,1
+    ret
+.Ls41di_fail:
+    xor eax,eax
+    xor edx,edx
+    ret
+.size stage41StructureDayToI64,.-stage41StructureDayToI64
+
+# rdi=cDay i64, rsi=originalTargetDay i64, rdx=YJ*.
+# rax=authoritative sauce; rdx=1 only when the returned sauce is the ghost; rcx=ghost sauce from this wrapper.
+.type structureSaucePatch,@function
+structureSaucePatch:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r14,r14
+    je .Ls41ssp_fail
+
+    # ⲠoldStructureSauce ⲣϩⲱⲃ ⲛⲟⲩⲙⲉ ϩⲙ call ⲛⲓⲙ; ⲡresult ⲡⲉ ⲡghost.
+    mov rdi,r12
+    mov rsi,r13
+    call oldStructureSauce
+    test rax,rax
+    je .Ls41ssp_fail
+    mov r15,rax
+
+    mov rdi,r13
+    call bi_from_i64
+    test rax,rax
+    je .Ls41ssp_fail
+    mov rdi,rax
+    mov rsi,qword ptr [r14+YJ_FIRST_DAY]
+    call bi_cmp
+    test eax,eax
+    je .Ls41ssp_equal
+
+    # Ⲡghost ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡselector: ⲡsauce ⲛⲙⲉ ⲗⲟⲅⲓⲍⲉ ⲙⲛ year.firstDay.
+    mov rdi,qword ptr [r14+YJ_FIRST_DAY]
+    call stage41StructureDayToI64
+    test rdx,rdx
+    je .Ls41ssp_fail
+    mov rsi,rax
+    mov rdi,r12
+    call sauceWithOrderAt46Latch
+    test rax,rax
+    je .Ls41ssp_fail
+    mov rbx,rax
+    mov rax,rbx
+    xor edx,edx
+    mov rcx,r15
+    jmp .Ls41ssp_done
+
+.Ls41ssp_equal:
+    mov rax,r15
+    mov edx,1
+    mov rcx,r15
+    jmp .Ls41ssp_done
+
+.Ls41ssp_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+.Ls41ssp_done:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size structureSaucePatch,.-structureSaucePatch
+
+.type monster_stage41_structure_sauce_patch_wrapper,@function
+monster_stage41_structure_sauce_patch_wrapper:
+    jmp structureSaucePatch
+.size monster_stage41_structure_sauce_patch_wrapper,.-monster_stage41_structure_sauce_patch_wrapper
+
 .type monster_structure_sauce_route,@function
 monster_structure_sauce_route:
-    jmp legacyStructureSauceUsingOriginalTarget
+    jmp monster_stage41_structure_sauce_patch_wrapper
 .size monster_structure_sauce_route,.-monster_structure_sauce_route
 
-# Ⲡhandler ϭⲓⲛⲉ ⲙⲡyear ϩⲓⲧⲛ ⲡsequential walk, ⲁⲗⲗⲁ ⲡstructure sauce route ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡoriginal target.
+# Ⲡhandler ϭⲓⲛⲉ ⲙⲡyear ϩⲓⲧⲛ ⲡsequential walk; ⲡStage 41 route ⲙⲟⲩⲧⲉ ⲉghost ⲛϣⲟⲣⲡ ⲁⲩⲱ ⲕⲱ ⲙⲡyear.firstDay ⲛauthoritative ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ.
 .type monster_stage40_legacy_structure_sauce_handler,@function
 monster_stage40_legacy_structure_sauce_handler:
     push rbp
@@ -7984,15 +8109,7 @@ monster_stage40_legacy_structure_sauce_handler:
     movzx eax,al
     mov qword ptr [r12+CTX_STAGE40_TARGET_DIFFERS_FIRSTDAY],rax
 
-    # Ⲡghost direct call ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲛⲟⲩdiagnostic scar.
-    mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
-    mov rsi,qword ptr [r12+CTX_TARGET_DAY]
-    call oldStructureSauce
-    test rax,rax
-    je .Lms40_fail
-    mov qword ptr [r12+CTX_STAGE40_GHOST_SAUCE],rax
-
-    # ⲠDISCOVERY route ⲟⲩⲏϩ ⲉϥⲥⲉⲙⲛⲉ ⲙⲡsame original-target ghost ⲛsemantic sauce.
+    # ⲠStage 41 route ⲛⲧⲟϥ ⲙⲟⲩⲧⲉ ⲉoldStructureSauce ⲛghost; ⲡhandler ⲛϥⲣ ⲁⲛ ⲛⲟⲩthird sauce copy.
     mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
     mov rsi,qword ptr [r12+CTX_TARGET_DAY]
     mov rdx,r15
@@ -8000,7 +8117,15 @@ monster_stage40_legacy_structure_sauce_handler:
     test rax,rax
     je .Lms40_fail
     mov qword ptr [r12+CTX_STAGE40_ROUTE_SAUCE],rax
-    mov qword ptr [r12+CTX_STAGE40_GHOST_USED_AS_SEMANTIC],1
+    mov qword ptr [r12+CTX_STAGE40_GHOST_SAUCE],rcx
+    mov qword ptr [r12+CTX_STAGE41_ROUTE_GHOST],rcx
+    test rcx,rcx
+    setne al
+    movzx eax,al
+    mov qword ptr [r12+CTX_STAGE41_ROUTE_GHOST_SEEN],rax
+    mov qword ptr [r12+CTX_STAGE40_GHOST_USED_AS_SEMANTIC],rdx
+    mov qword ptr [r12+CTX_STAGE41_GHOST_REUSE_EQUAL],rdx
+    inc qword ptr [r12+CTX_STAGE41_PATCH_SEEN]
     inc qword ptr [r12+CTX_STAGE40_SEEN]
     mov eax,1
     jmp .Lms40_done

@@ -663,3 +663,40 @@
 ⲠYear pointer ⲙⲛ ⲛsauce pointers ⲧⲏⲣⲟⲩ ⲟ ⲛinvocation-local. ⲠMonsterContext ϩⲁⲣⲉϩ ⲉdiagnostic ⲙⲛ route trace ⲙⲙⲁⲧⲉ. Ⲙⲛ global mutable structure-sauce state.
 
 Ⲙⲛ `structureSaucePatch` ⲙⲛ year-first-day detour ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 40; ⲙⲛ cutlet-family patch code ⲙⲡStage 42 ⲉϥϣⲟⲟⲡ.
+
+
+## Ⲡyear-first-day structure-sauce detour ⲙⲡⲃⲁⲑⲙⲟⲥ 41
+
+ⲠCOPY_DIAGNOSTIC ⲟⲩⲏϩ:
+
+`legacyStructureSauceUsingOriginalTarget -> oldStructureSauce -> sauceWithOrderAt46Latch(cDay, originalTargetDay)`
+
+ⲠCOPY_AUTHORITATIVE ⲧⲉⲛⲟⲩ ⲡⲉ:
+
+`monster_structure_sauce_route -> monster_stage41_structure_sauce_patch_wrapper -> structureSaucePatch`
+
+Ⲡwrapper ⲙⲟⲩⲧⲉ ⲉ`oldStructureSauce` ⲛⲟⲩⲙⲉ ϩⲙ call ⲛⲓⲙ. Ⲡghost pointer ⲟ ⲛdiagnostic trace ⲁⲩⲱ ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡauthoritative selector ⲉϣϫⲉ ⲡoriginal target ϣⲟⲃⲉ.
+
+### EQUIVALENCE
+
+`mustUse = year.firstDay`
+
+Ⲉϣϫⲉ `originalTargetDay != mustUse`:
+
+`authoritative = sauceWithOrderAt46Latch(cDay, mustUse)`
+
+Ⲉϣϫⲉ `originalTargetDay == mustUse`:
+
+`authoritative = ghost`
+
+Ⲡequal branch ⲟ ⲛexact reuse, ϫⲉ ⲡghost ⲁϥⲗⲟⲅⲓⲍⲉ ⲙⲛ ⲡsame `(cDay,mustUse)` ⲏⲇⲏ. Ⲡdifferent branch ⲕⲱ ⲙⲡghost ⲛtrace ⲙⲙⲁⲧⲉ.
+
+### Ⲡstate ownership
+
+ⲠYear pointer, route sauce ⲙⲛ ghost pointers ⲟ ⲛinvocation-local arena state. `CTX_STAGE41_ROUTE_GHOST`, `CTX_STAGE41_ROUTE_GHOST_SEEN`, `CTX_STAGE41_PATCH_SEEN` ⲙⲛ `CTX_STAGE41_GHOST_REUSE_EQUAL` ⲟ ⲛtrace fields ⲙⲙⲁⲧⲉ. Ⲙⲛ global mutable semantic state.
+
+### ⲠStage 40 byte contract
+
+`tests/stage40_discovery20.s` ⲟⲩⲏϩ byte-for-byte ⲛsame. Ⲡsource ⲛⲧⲟϥ ⲉⲓⲥ ⲟⲩcaller-red-zone stack scar ϩⲙⲡsauce comparator ⲉϥⲟⲩⲱⲛϩ ⲙⲙⲟϥ ⲙⲙⲁⲧⲉ ϩⲟⲧⲁⲛ ⲡroute ⲙⲛ reference ⲧⲱⲛ. `stage41_stage40_abi_bridge.s` ⲟ ⲛpure Assembly test-only link detour; `__real_bi_cmp` ⲟⲩⲏϩ ⲡcomparison ⲛⲙⲉ. Ⲡproduction binaries ⲛⲧⲉⲛStage 1–39 ⲙⲛ ⲡStage 41 test ⲛⲥⲉϫⲓ ⲁⲛ ⲙⲡbridge.
+
+Ⲙⲛ cutlet partition / Patch 21 semantic code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 41.

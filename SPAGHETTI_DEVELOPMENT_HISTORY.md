@@ -857,3 +857,30 @@
 ⲠStage 40 test ϯ `STAGE40_DISCOVERY20_EXPECTED_RED`; ⲛStage 1–39 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`.
 
 Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲙⲡ`structureSaucePatch`, year-first-day authoritative selector route, cutlet filtered family, ⲏ code ⲙⲡPATCH 21.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 41 — PATCH 20
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲡghost ⲙⲡStage 40 ⲙⲡⲟⲩⲃⲟⲗϥ ⲉⲃⲟⲗ. `oldStructureSauce` ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲙⲛ ⲡoriginal target, ⲁⲩⲱ `legacyStructureSauceUsingOriginalTarget` ⲟⲩⲏϩ callable.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`structureSaucePatch` ⲛⲟⲩdetour ⲉϫⲛ ⲡlegacy route. Ⲛϥⲙⲟⲩⲧⲉ ⲉⲡghost ⲛϣⲟⲣⲡ ϩⲙ call ⲛⲓⲙ. Ⲉϣϫⲉ ⲡoriginal target ϣⲟⲃⲉ ⲙⲛ `year.firstDay`, ⲛϥⲗⲟⲅⲓⲍⲉ ⲛⲕⲉsauce ⲙⲛ `year.firstDay` ⲁⲩⲱ ⲛⲧⲟϥ ⲡⲉ ⲡauthoritative result. Ⲉϣϫⲉ ⲥⲉⲧⲱⲛ, ⲛϥreturn ⲙⲡghost.
+
+`monster_structure_sauce_route -> monster_stage41_structure_sauce_patch_wrapper -> structureSaucePatch`
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+Ⲁⲩⲟⲩⲱϩ ⲛ4 ⲛtrace field ⲉⲡMonsterContext ⲛⲧⲉⲡsame invocation: route ghost pointer, ghost-seen flag, patch-seen count ⲙⲛ equal-target reuse flag. Ⲙⲛ global semantic state ⲉϥⲟⲩⲱϩ.
+
+ⲠStage 40 source ⲙⲡⲟⲩϣⲓⲃⲉ. Ⲡequal comparison ⲁϥⲟⲩⲱⲛϩ ⲛⲟⲩlatent stack fault ϩⲙⲡStage 40 comparator: ⲡsecond array pointer ⲛⲉϥⲕⲏ ϩⲁ ⲡrsp ⲉⲧⲁⲩreserve ⲙⲙⲟϥ, ⲁⲩⲱ ⲡ`call bi_cmp` ⲛⲉϥⲥϩⲁⲓ ⲙⲡreturn address ⲉϫⲛ ⲡsame slot. Ⲁⲩϩⲁⲣⲉϩ ⲉⲡbyte contract ϩⲓⲧⲛ ⲟⲩtest-only Assembly ABI bridge ⲉϥⲙⲟⲩⲧⲉ ⲉ`__real_bi_cmp` ⲁⲩⲱ ⲕⲧⲟ ⲙⲡcaller red-zone value. Ⲡbridge ⲛϥⲟ ⲁⲛ ⲙⲙⲉⲣⲟⲥ ⲙⲡproduction route.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+ⲠFOUNDATION witness ⲟⲩⲏϩ ⲉϥϯ ⲛYear 4999 ⲙⲛ `firstDay=-15056160`. Ⲡold ghost ⲙⲛ original target `-15055671` ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ⲙⲛ ⲡfirst-day sauce, ⲁⲗⲗⲁ ⲡpatched route ⲧⲱⲛ ⲙⲛ ⲡfirst-day sauce. Ⲡflag `GHOST_USED_AS_SEMANTIC` ⲟ ⲛ0 ϩⲙⲡdifferent-target case ⲁⲩⲱ 1 ϩⲙⲡequal-target case.
+
+`STAGE40_REGRESSION_GREEN`
+
+`STAGE41_PATCH20_GREEN`
+
+Ⲙⲛ Patch 21 ⲏ cutlet filtered-family code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 41.

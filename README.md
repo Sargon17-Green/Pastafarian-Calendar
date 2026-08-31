@@ -593,3 +593,39 @@
 Ⲡdirect ghost scar ⲧⲁϫⲣⲟ ⲛⲧⲟϥ ϫⲉ ⲡold sauce ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ⲙⲛ ⲡyear-first-day sauce. Ⲡsemantic regression ⲱϣ ⲙⲡroute ⲙⲛ ⲡsame-line year-first-day reference ⲁⲩⲱ ϫⲓ 2 ⲛmismatch ⲉⲩⲧⲟϣ: ⲟⲩroute-sauce mismatch ⲙⲛ ⲟⲩghost-semantic flag.
 
 ⲠStage 40 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–39 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ `structureSaucePatch` ⲏ cutlet-family code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 41 — PATCH 20
+
+### Ⲡⲡⲁⲧϣ ⲙⲡstructure sauce
+
+Ⲡ`oldStructureSauce(cDay, originalTargetDay)` ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ. Ⲡ`legacyStructureSauceUsingOriginalTarget` ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲡold ghost route ⲛⲟⲩⲙⲉ.
+
+Ⲁⲩⲟⲩⲱϩ ⲙⲡdetour ⲙⲡPATCH 20:
+
+`monster_structure_sauce_route -> monster_stage41_structure_sauce_patch_wrapper -> structureSaucePatch`
+
+Ⲡ`structureSaucePatch` ⲙⲟⲩⲧⲉ ⲉ`oldStructureSauce(cDay, originalTargetDay)` ϩⲙ call ⲛⲓⲙ ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡresult ⲛghost. Ⲡ`mustUse` ⲡⲉ `year.firstDay`.
+
+- Ⲉϣϫⲉ `originalTargetDay != year.firstDay`, ⲡauthoritative sauce ⲗⲟⲅⲓⲍⲉ ⲙⲛ `(cDay, year.firstDay)`; ⲡghost ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡsemantic selector.
+- Ⲉϣϫⲉ `originalTargetDay == year.firstDay`, ⲡwrapper ϣϭⲙϭⲟⲙ ⲉreturn ⲙⲡghost ⲛⲧⲟϥ, ϫⲉ ⲡⲉϥtarget ⲟ ⲛsame authoritative target.
+
+ⲠMonsterContext ϩⲁⲣⲉϩ ⲉ`ROUTE_GHOST`, `ROUTE_GHOST_SEEN`, `PATCH_SEEN` ⲙⲛ `GHOST_REUSE_EQUAL`. Ⲛfields ⲛⲁⲓ ⲟ ⲛdiagnostic/trace state ⲙⲙⲁⲧⲉ; ⲛⲥⲉⲃⲱⲕ ⲁⲛ ⲉⲡsauce arithmetic.
+
+### ⲠStage 40 regression ⲙⲛ ⲡABI bridge
+
+`tests/stage40_discovery20.s` ⲙⲡⲟⲩϣⲓⲃⲉ ⲛⲟⲩbyte. Ⲡtest ⲛⲧⲟϥ ⲕⲱ ⲙⲡsecond sauce-array pointer ϩⲓ `[rbp-48]` ϩⲁ ⲡallocated stack ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉ`bi_cmp`; ⲡ`call` return address ϣⲓⲃⲉ ⲙⲡslot ⲡⲁⲓ. Ⲡfault ⲛⲉϥϩⲏⲡ ϩⲟⲧⲁⲛ ⲡroute ⲛⲉϥϣⲟⲃⲉ ϩⲙⲡfirst bowl, ⲁⲗⲗⲁ ⲁϥⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ϩⲟⲧⲁⲛ ⲡPATCH ⲁϥⲧⲣⲉⲡroute ⲧⲱⲛ ⲙⲛ ⲡreference.
+
+Ⲉⲧⲃⲉ ⲡcontract ⲛbyte-for-byte, ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡStage 40 source. Ⲁⲩⲟⲩⲱϩ ⲛⲟⲩtest-only pure-Assembly bridge `tests/stage41_stage40_abi_bridge.s`; `ld --wrap=bi_cmp` ⲟ ⲙⲙⲁⲧⲉ ϩⲙⲡStage 40 regression binary. Ⲡbridge ⲙⲟⲩⲧⲉ ⲉ`__real_bi_cmp` ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡillegal caller red-zone slot; ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡBigInt comparison result.
+
+### Ⲡregression
+
+ⲠStage 41 test ⲧⲁϫⲣⲟ ⲛⲛⲁⲓ:
+
+- ⲡdirect ghost scar ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ⲙⲛ ⲡ`year.firstDay` sauce ϩⲙⲡFOUNDATION witness;
+- ⲡpatched route ⲧⲱⲛ ⲙⲛ ⲡ`year.firstDay` sauce;
+- ⲡghost ⲛⲧⲉⲡwrapper ⲁϥⲣϩⲱⲃ ⲛⲟⲩⲙⲉ ⲁⲩⲱ ⲛϥⲣⲥⲉⲙⲛⲉ ⲁⲛ ϩⲙⲡdifferent-target case;
+- ⲡequal-target case ⲕⲧⲟ ⲉⲡghost ⲛauthoritative result;
+- ⲡlegacy adapter scar ⲟⲩⲏϩ callable.
+
+ⲠStage 40 ⲧⲉⲛⲟⲩ ϯ `STAGE40_REGRESSION_GREEN`; ⲡStage 41 ϯ `STAGE41_PATCH20_GREEN`. Ⲙⲛ cutlet-partition code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 41.

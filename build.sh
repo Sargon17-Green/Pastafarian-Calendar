@@ -104,4 +104,8 @@ as --64 -o build/stage39_patch19.o tests/stage39_patch19.s
 ld -o build/stage39_patch19 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage39_patch19.o
 
 as --64 -o build/stage40_discovery20.o tests/stage40_discovery20.s
-ld -o build/stage40_discovery20 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage40_discovery20.o
+as --64 -o build/stage41_stage40_abi_bridge.o tests/stage41_stage40_abi_bridge.s
+ld --wrap=bi_cmp -o build/stage40_discovery20 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage40_discovery20.o build/stage41_stage40_abi_bridge.o
+
+as --64 -o build/stage41_patch20.o tests/stage41_patch20.s
+ld -o build/stage41_patch20 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage41_patch20.o
