@@ -1,4 +1,4 @@
-name: Assembly Sahidic Stage 56 final audit
+name: Ⲡaudit ⲛϩⲁⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 56 — Assembly x86-64 / Ⲙⲉⲧⲣⲉⲙⲛⲕⲏⲙⲉ
 
 on:
   push:
@@ -21,7 +21,8 @@ jobs:
         with:
           fetch-depth: 1
 
-      - shell: bash
+      - name: Ⲡenvironment ⲙⲛ ⲡHEAD
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p audit_evidence
@@ -31,16 +32,19 @@ jobs:
           ld --version | head -1 | tee -a audit_evidence/ENVIRONMENT.txt
           bash --version | head -1 | tee -a audit_evidence/ENVIRONMENT.txt
 
-      - shell: bash
+      - name: Ⲡsyntax ⲛⲛorchestration scripts
+        shell: bash
         run: |
           set -euo pipefail
           bash -n build.sh
           bash -n test.sh
           bash -n audit_stage55.sh
           bash -n audit_stage55_helpers.sh
+          bash -n audit_stage56.sh
           printf '%s\n' 'SCRIPT_SYNTAX=PASS' | tee audit_evidence/SCRIPT_SYNTAX.txt
 
       - id: build
+        name: Ⲡbuild ⲙⲡmonster
         continue-on-error: true
         shell: bash
         run: |
@@ -51,7 +55,20 @@ jobs:
           printf 'BUILD_RC=%s\n' "$rc" | tee audit_evidence/BUILD_STATUS.txt
           exit "$rc"
 
+      - id: stage56
+        name: Ⲡsemantic/runtime audit ⲙⲡⲃⲁⲑⲙⲟⲥ 56
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          bash audit_stage56.sh >audit_evidence/STAGE56_SEMANTIC_RUNTIME.log 2>&1 || rc=$?
+          cat audit_evidence/STAGE56_SEMANTIC_RUNTIME.log
+          printf 'STAGE56_SEMANTIC_RUNTIME_RC=%s\n' "$rc" | tee audit_evidence/STAGE56_SEMANTIC_RUNTIME_STATUS.txt
+          exit "$rc"
+
       - id: historical
+        name: Ⲛhistorical scars ⲙⲛ smoke suite
         continue-on-error: true
         shell: bash
         run: |
@@ -72,6 +89,7 @@ jobs:
           exit "$rc"
 
       - id: helpers
+        name: Ⲛhelpers ⲙⲡⲃⲁⲑⲙⲟⲥ 55
         continue-on-error: true
         shell: bash
         run: |
@@ -92,6 +110,7 @@ jobs:
           exit "$rc"
 
       - id: stage55
+        name: Ⲡfull matrix ⲙⲡⲃⲁⲑⲙⲟⲥ 55
         continue-on-error: true
         shell: bash
         run: |
@@ -120,30 +139,8 @@ jobs:
           printf 'STAGE55_FULL_RC=%s\n' "$rc" | tee audit_evidence/STAGE55_FULL_STATUS.txt
           exit "$rc"
 
-      - id: stage56
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -uo pipefail
-          rc=0
-          {
-            as --64 -o build/stage56_semantic_runtime_audit.o tests/stage56_semantic_runtime_audit.s || exit 201
-            ld -o build/stage56_semantic_runtime_audit \
-              build/arena.o \
-              build/bigint.o \
-              build/bootstrap.o \
-              build/stage54_integration.o \
-              build/stage56_bowlsum_corrective.o \
-              build/catalog.o \
-              build/stage56_semantic_runtime_audit.o || exit 202
-            file build/stage56_semantic_runtime_audit
-            ./build/stage56_semantic_runtime_audit
-          } >audit_evidence/STAGE56_SEMANTIC.log 2>&1 || rc=$?
-          cat audit_evidence/STAGE56_SEMANTIC.log
-          printf 'STAGE56_SEMANTIC_RC=%s\n' "$rc" | tee audit_evidence/STAGE56_SEMANTIC_STATUS.txt
-          exit "$rc"
-
       - id: static
+        name: Ⲡstatic/scar audit
         continue-on-error: true
         shell: bash
         run: |
@@ -177,14 +174,34 @@ jobs:
               printf '%s\n' 'STAGE56_INTERNAL_SYSCALL=PASS'
             fi
 
-            printf '%s\n' '[runtime-process-abort]'
-            grep -R -n -E 'mov[[:space:]]+(e|r)ax,[[:space:]]*60' src/runtime || true
-            if grep -R -q -E 'mov[[:space:]]+(e|r)ax,[[:space:]]*60' src/runtime; then
-              printf '%s\n' 'RUNTIME_PROCESS_ABORT=FAIL'
-              rc=1
-            else
-              printf '%s\n' 'RUNTIME_PROCESS_ABORT=PASS'
-            fi
+            printf '%s\n' '[runtime-legacy-abort-scars]'
+            abort_count="$(grep -R -E 'mov[[:space:]]+(e|r)ax,[[:space:]]*60' src/runtime | wc -l)"
+            printf 'LEGACY_ABORT_SCAR_COUNT=%s\n' "$abort_count"
+            if [[ "$abort_count" != 5 ]]; then rc=1; fi
+            check_dead_scar() {
+              file="$1"
+              label="$2"
+              count="$(grep -F -c "$label" "$file")"
+              printf '%s_COUNT=%s\n' "$label" "$count"
+              if [[ "$count" != 1 ]]; then rc=1; fi
+            }
+            check_live_detour() {
+              file="$1"
+              label="$2"
+              count="$(grep -F -c "$label" "$file")"
+              printf '%s_COUNT=%s\n' "$label" "$count"
+              if (( count < 2 )); then rc=1; fi
+            }
+            check_dead_scar src/runtime/arena.s '.Larena_fail'
+            check_dead_scar src/runtime/arena.s '.Larena_reset_fail'
+            check_dead_scar src/runtime/bigint.s '.Lbires_fail'
+            check_dead_scar src/runtime/bigint.s '.Lbd64_fail'
+            check_dead_scar src/runtime/bigint.s '.Lbda_fail'
+            check_live_detour src/runtime/arena.s '.Larena_soft_fail'
+            check_live_detour src/runtime/arena.s '.Larena_reset_soft_fail'
+            check_live_detour src/runtime/bigint.s '.Lbires_soft_fail'
+            check_live_detour src/runtime/bigint.s '.Lbd64_soft_fail'
+            check_live_detour src/runtime/bigint.s '.Lbda_soft_fail'
 
             printf '%s\n' '[stage56-scar]'
             grep -n 'stage56_LEGACY_POSTSTIR_CALL_COUNT' src/production/bootstrap.s || rc=1
@@ -192,26 +209,25 @@ jobs:
             grep -n 'postStirOneOverwritingOrderMemoryStage22' src/production/stage56_bowlsum_corrective.s || rc=1
             grep -n 'stage56PostStirRawBowlSumDetour' src/production/stage56_bowlsum_corrective.s || rc=1
             grep -n 'stage56SauceRawBowlSumCorrective' src/production/stage54_integration.s || rc=1
+            grep -n 'jmp .Ls54ss_correct' src/production/stage54_integration.s || rc=1
 
             printf '%s\n' '[elf]'
-            if [[ -f build/stage56_semantic_runtime_audit ]]; then
-              file build/stage56_semantic_runtime_audit
-              if readelf -l build/stage56_semantic_runtime_audit | grep -q 'INTERP'; then
-                printf '%s\n' 'NO_INTERP=FAIL'
+            for elf in build/stage56_semantic_runtime_audit build/stage56_runtime_soft_failure_audit; do
+              file "$elf" || { rc=1; continue; }
+              if readelf -l "$elf" | grep -q 'INTERP'; then
+                printf '%s NO_INTERP=FAIL\n' "$elf"
                 rc=1
               else
-                printf '%s\n' 'NO_INTERP=PASS'
+                printf '%s NO_INTERP=PASS\n' "$elf"
               fi
-            else
-              printf '%s\n' 'NO_INTERP=NOT_BUILT'
-              rc=1
-            fi
+            done
           } >audit_evidence/STATIC_RUNTIME_AUDIT.log 2>&1
           cat audit_evidence/STATIC_RUNTIME_AUDIT.log
           printf 'STATIC_RUNTIME_AUDIT_RC=%s\n' "$rc" | tee audit_evidence/STATIC_RUNTIME_AUDIT_STATUS.txt
           exit "$rc"
 
       - if: always()
+        name: Ⲡfinal status
         shell: bash
         run: |
           set -uo pipefail
@@ -219,10 +235,10 @@ jobs:
           : > audit_evidence/FINAL_STATUS.txt
           for f in \
             audit_evidence/BUILD_STATUS.txt \
+            audit_evidence/STAGE56_SEMANTIC_RUNTIME_STATUS.txt \
             audit_evidence/HISTORICAL_AND_SMOKE_STATUS.txt \
             audit_evidence/STAGE55_HELPERS_STATUS.txt \
             audit_evidence/STAGE55_FULL_STATUS.txt \
-            audit_evidence/STAGE56_SEMANTIC_STATUS.txt \
             audit_evidence/STATIC_RUNTIME_AUDIT_STATUS.txt; do
             cat "$f" >>audit_evidence/FINAL_STATUS.txt 2>/dev/null || rc=1
             if ! grep -q '_RC=0$' "$f" 2>/dev/null; then rc=1; fi
