@@ -1,4 +1,4 @@
-name: One-time rollback accidental main push
+name: One-time guarded rollback of accidental main push
 
 on:
   push:
@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - '.github/workflows/rollback-main-once.yml'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,8 +17,10 @@ concurrency:
 jobs:
   rollback:
     runs-on: ubuntu-latest
+
     env:
-      EXPECTED_BAD_HEAD: f004cce09bc1bb40dca4946b784636a44577923d
+      BAD_HEAD: f004cce09bc1bb40dca4946b784636a44577923d
+      FAILED_WORKFLOW_COMMIT: 7e2d9392058077188576953a6d2f4adba81ce9b8
       TARGET_SHA: db13b46cacdc9e8f0614a14085ad746911f0b7aa
       TARGET_TREE: 627b94f26b4b884071cbab76ccdbadc85c02a109
       SELF_PATH: .github/workflows/rollback-main-once.yml
@@ -30,76 +31,96 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Guard the exact accidental state
+      - name: Guard exact repository history
         shell: bash
         run: |
           set -euo pipefail
 
           current="$(git rev-parse HEAD)"
           parent="$(git rev-parse HEAD^)"
+          failed_parent="$(git rev-parse "${FAILED_WORKFLOW_COMMIT}^")"
 
-          echo "workflow_commit=$current"
-          echo "workflow_parent=$parent"
-          echo "expected_bad_head=$EXPECTED_BAD_HEAD"
+          echo "current=$current"
+          echo "parent=$parent"
+          echo "expected_parent=$FAILED_WORKFLOW_COMMIT"
+          echo "failed_workflow_parent=$failed_parent"
+          echo "expected_bad_head=$BAD_HEAD"
 
-          if [[ "$parent" != "$EXPECTED_BAD_HEAD" ]]; then
-            echo "REFUSING: parent is not the verified accidental main HEAD."
+          if [[ "$parent" != "$FAILED_WORKFLOW_COMMIT" ]]; then
+            echo "REFUSING: corrected workflow commit is not directly on top of the verified failed workflow commit."
             exit 10
           fi
 
-          mapfile -t changed < <(git diff --name-only "$parent" "$current")
-          printf 'workflow_commit_changed_file=%s\n' "${changed[@]}"
-
-          if [[ "${#changed[@]}" -ne 1 || "${changed[0]}" != "$SELF_PATH" ]]; then
-            echo "REFUSING: the trigger commit changed something besides this one-time workflow."
+          if [[ "$failed_parent" != "$BAD_HEAD" ]]; then
+            echo "REFUSING: failed workflow commit is no longer directly on top of the verified accidental main HEAD."
             exit 11
           fi
 
-          git cat-file -e "${TARGET_SHA}^{commit}"
-          actual_target_tree="$(git rev-parse "${TARGET_SHA}^{tree}")"
+          mapfile -t failed_changed < <(
+            git diff --name-only "$BAD_HEAD" "$FAILED_WORKFLOW_COMMIT"
+          )
 
-          if [[ "$actual_target_tree" != "$TARGET_TREE" ]]; then
-            echo "REFUSING: target commit tree does not match the pre-verified tree."
+          if [[ "${#failed_changed[@]}" -ne 1 || "${failed_changed[0]}" != "$SELF_PATH" ]]; then
+            echo "REFUSING: the failed workflow commit changed something besides the workflow file."
             exit 12
+          fi
+
+          mapfile -t correction_changed < <(
+            git diff --name-only "$FAILED_WORKFLOW_COMMIT" "$current"
+          )
+
+          if [[ "${#correction_changed[@]}" -ne 1 || "${correction_changed[0]}" != "$SELF_PATH" ]]; then
+            echo "REFUSING: the correction commit changed something besides the workflow file."
+            exit 13
+          fi
+
+          actual_target_tree="$(git rev-parse "${TARGET_SHA}^{tree}")"
+          if [[ "$actual_target_tree" != "$TARGET_TREE" ]]; then
+            echo "REFUSING: target commit tree does not match the pre-verified target tree."
+            exit 14
           fi
 
           echo "ROLLBACK_GUARD=PASS"
 
-      - name: Restore exact target tree, commit, and push
+      - name: Restore target tree while retaining only this workflow
         shell: bash
         run: |
           set -euo pipefail
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp "$SELF_PATH" /tmp/rollback-main-once.yml
 
-          # Replace the entire tracked tree, including deleting this workflow,
-          # with the exact tree from the last verified good main commit.
           git read-tree --reset -u "$TARGET_SHA"
 
-          staged_tree="$(git write-tree)"
-          if [[ "$staged_tree" != "$TARGET_TREE" ]]; then
-            echo "REFUSING: staged rollback tree is not byte-for-byte the verified target tree."
+          mkdir -p "$(dirname "$SELF_PATH")"
+          cp /tmp/rollback-main-once.yml "$SELF_PATH"
+          git add -A
+
+          mapfile -t target_diff < <(
+            git diff --cached --name-only "$TARGET_SHA"
+          )
+
+          printf 'difference_from_target=%s\n' "${target_diff[@]}"
+
+          if [[ "${#target_diff[@]}" -ne 1 || "${target_diff[0]}" != "$SELF_PATH" ]]; then
+            echo "REFUSING: staged repository is not exactly TARGET_SHA plus this workflow file."
             exit 20
           fi
 
-          git commit \
-            -m "Revert accidental Assembly + Sahidic Coptic push to main" \
-            -m "Revert the four Assembly x86-64 + Sahidic Coptic commits that were accidentally pushed to main, plus remove this one-time rollback workflow.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-Reverted accidental commits:
-- f004cce09bc1bb40dca4946b784636a44577923d
-- f368dbbd3747bb68fa774752ed036ec9d8b982fd
-- 82567e6e4f69aa1d3d4e8cec7d21675516602d4b
-- 40cb7abc30a7ee2231a244a5cf35b0e95e8c7af8
+          git commit             -m "Revert accidental Assembly + Sahidic Coptic push to main"             -m "Revert the four Assembly x86-64 + Sahidic Coptic commits that were accidentally pushed to main."             -m "Reverted commits: f004cce09bc1bb40dca4946b784636a44577923d, f368dbbd3747bb68fa774752ed036ec9d8b982fd, 82567e6e4f69aa1d3d4e8cec7d21675516602d4b, 40cb7abc30a7ee2231a244a5cf35b0e95e8c7af8."             -m "All repository content is restored to db13b46cacdc9e8f0614a14085ad746911f0b7aa except this temporary rollback workflow. Delete .github/workflows/rollback-main-once.yml afterward to make the tree exactly identical to the verified target. Git history is preserved; no force-push is used."
 
-The resulting repository tree is exactly the tree of db13b46cacdc9e8f0614a14085ad746911f0b7aa. Git history is preserved; no force-push is used."
+          mapfile -t final_diff < <(
+            git diff --name-only "$TARGET_SHA" HEAD
+          )
 
-          final_tree="$(git rev-parse 'HEAD^{tree}')"
-          if [[ "$final_tree" != "$TARGET_TREE" ]]; then
-            echo "REFUSING: final rollback commit tree is not the verified target tree."
+          printf 'final_difference_from_target=%s\n' "${final_diff[@]}"
+
+          if [[ "${#final_diff[@]}" -ne 1 || "${final_diff[0]}" != "$SELF_PATH" ]]; then
+            echo "REFUSING: final rollback commit is not exactly TARGET_SHA plus this workflow file."
             exit 21
           fi
 
-          echo "ROLLBACK_TREE_MATCH=PASS"
+          echo "ROLLBACK_CONTENT_MATCH=PASS"
           git push origin HEAD:main
