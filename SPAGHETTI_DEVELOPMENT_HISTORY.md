@@ -1086,46 +1086,21 @@
 
 Ⲡ15-case Assembly sweep ⲧⲁϫⲣⲟ ⲙⲡgeneral count/unrank. Ⲡ12-month test ⲣ ⲙⲡ`rank=count` ⲙⲛ multi-limb BigInt. Ⲡ47-month test ⲣ ⲙⲡmax supported month-count path.
 
-Ⲙⲛ repeated month-name generator ⲏ Patch 25 / Stage 50 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 49.
+Ⲙⲛ contiguous day-in-month guess ⲏ Patch 25 / Stage 50 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 49.
 
 
 ## Ⲃⲁⲑⲙⲟⲥ 50 — DISCOVERY 25
 
-### Ⲛⲉⲩⲙⲉⲉⲩⲉ
-
-Ⲁⲩⲕⲱ ⲙⲡmonth-name rank ϫⲉ ϥϣϭⲙϭⲟⲙ ⲉϥⲣ ⲛbase-47 digits ⲛⲥⲁ ⲧⲣⲉⲟⲩposition ⲛⲓⲙ ⲥⲱⲧⲡ ⲛⲟⲩcanonical index ⲙⲙⲁⲩⲁⲁϥ. `oldMonthNameRowWithRepeats` ⲧⲁⲙⲓⲟ ⲛⲟⲩrow ⲛⲧⲉⲓϩⲉ, ⲁⲩⲱ `legacyMonthNamesWithRepeats` ⲟ ⲛcallable scar ⲉϫⲱϥ.
-
-### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
-
-Ϩⲙ `K=6, rank1=1`, ⲡlegacy base-47 row ⲡⲉ `[1,1,1,1,1,1]`. Ⲡtest-only distinct lexicographic reference ⲡⲉ `[1,2,3,4,5,6]`. `monster_month_names_route` ⲟⲩⲏϩ authoritative ⲉⲡlegacy scar ϩⲙⲡDISCOVERY 25, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡtest ϯ `STAGE50_DISCOVERY25_EXPECTED_RED`.
-
-### Ⲡdiagnostic ownership
-
-ⲠStage 50 handler ⲙⲡϥallocate ⲛrows ϩⲙⲡarena. Ⲛϥⲕⲱ ⲙⲙⲟⲟⲩ ϩⲙ stack scratch, ⲛϥϩⲁⲣⲉϩ ϩⲙ context ⲉscalar trace ⲙⲙⲁⲧⲉ. Ⲡⲁⲓ ϩⲁⲣⲉϩ ⲉⲡallocation history ⲛⲧⲉⲛprevious stages ⲁⲩⲱ ⲛϥⲕⲱ ⲁⲛ ⲛⲟⲩdiagnostic side effect ⲉϥⲣsemantic.
-
-Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲛpartial-permutation month-name unrank ⲏ Patch 25 selector ϩⲙⲡStage 50.
+Ⲁⲩⲕⲱ ⲙⲡ`oldContiguousMonthDayGuess` ⲉϥⲱϣ ⲙⲡtarget offset ⲛⲧⲟϥ ⲛday-in-month. Ⲡwitness ⲙⲛ separated occurrences ⲧⲁϫⲣⲟ ϫⲉ 5 ϣⲟⲃⲉ ⲙⲛ ⲡcorrect occurrence count 3. Ⲡroute ⲟⲩⲏϩ legacy, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡrepository ⲟ ⲛEXPECTED_RED.
 
 
 ## Ⲃⲁⲑⲙⲟⲥ 51 — PATCH 25
 
-### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+Ⲡcontiguous ghost ⲣϩⲱⲃ ⲛϣⲟⲣⲡ. Ⲡauthoritative dayInMonth ⲧⲉⲛⲟⲩ ⲡⲉ ⲡoccurrence count ⲙⲡtarget month thread ⲉⲃⲟⲗ ϩⲙⲡϣⲟⲣⲡ ⲛⲧⲉⲡyear ϣⲁ ⲡtarget ⲛⲉⲙⲁϥ. Ⲉϣϫⲉ ghost==correct ⲡghost ϣϭⲙϭⲟⲙ ⲉϥⲟ ⲛsemantic value; ⲉⲙⲙⲟⲛ ϥⲟ ⲛdiagnostic ⲙⲙⲁⲧⲉ.
 
-Ⲙⲡⲟⲩⲃⲟⲗ ⲉⲃⲟⲗ ⲙⲡbase-47 scar ⲙⲡStage 50. `oldMonthNameRowWithRepeats` ⲙⲛ `legacyMonthNamesWithRepeats` ⲟⲩⲏϩ callable ⲙⲛ ⲡsame repeated-name behavior. Ⲁⲩⲟⲩⲱϩ ⲙⲡ`monthNamesPatch25` ⲛdetour ⲉϫⲛ ⲡscar.
 
-Ⲡdetour ⲣ ⲙⲡlegacy call ⲛϣⲟⲣⲡ ⲁⲩⲱ ⲧⲁⲙⲓⲟ ⲙⲡghost row. Ⲙⲛⲛⲥⲱⲥ ϥⲣ ⲙⲡpartial-permutation unrank ⲛ47 canonical names. Ⲡghost ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡsemantic output ⲉϣϫⲉ ⲛϥⲧⲱⲛ ⲁⲛ ⲙⲛ ⲡcorrect row.
+## Ⲡⲥⲱⲧⲙ ⲙⲡPATCH 22 — ⲛⲣⲁⲛ ⲛⲛⲉⲃⲟⲧ
 
-### Ⲡwide-rank correction
+Ⲡauthoritative specification ⲕⲱ ⲙⲡrepeated-name scar ⲉϫⲛ ⲛcutlet names ⲙⲛ ⲛmonth names ⲛⲥⲉⲛⲁϣⲱⲡⲉ distinct ϩⲙⲡsame year. Ⲡmonth-name branch ⲉⲧⲁϥϣⲱϣ ⲙⲡStage 45 ⲁⲩⲕⲧⲟϥ ⲉⲡPATCH 22: `legacyMonthNamesWithRepeats` ⲣϩⲱⲃ ⲛlive ghost, ⲁⲩⲱ `monthNamesPatch22` / `monthNamesPatch22Big` ϯ ⲙⲡexact lexicographic partial-permutation row ⲛ47 canonical names. Ⲡwide path ⲟ ⲛBigInt ⲁⲩⲱ ϥϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲙⲡrank ϣⲁ `47!`.
 
-Ⲡcutlet-name patch ⲙⲡStage 45 ϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲙⲡfull family ϩⲙ u64 ϫⲉ `17!` ⲟ ⲛsmall. Ⲡmonth-name family ⲛⲧⲟϥ ⲟ ⲛwide: `47!` ⲟ ⲛ198 bits. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲁⲩⲟⲩⲱϩ ⲛⲟⲩBigInt unrank path ⲉϥϫⲓ ⲙⲡfull rank domain, ⲁⲩⲱ ⲡu64 compatibility route ⲟⲩⲏϩ allocation-neutral.
-
-### Ⲡⲉⲛⲧⲁⲩⲧⲁϫⲣⲟ
-
-`K=6,rank1=1` ⲕⲱ ⲙⲡlegacy ghost `[1,1,1,1,1,1]` ⲁⲗⲗⲁ ⲡroute ϯ `[1,2,3,4,5,6]`. `K=2,rank1=2162` ⲧⲁϫⲣⲟ ⲙⲡnontrivial equal reuse `[47,46]`. Ⲡwide witness `K=47,rank=47!` ⲧⲁϫⲣⲟ ⲙⲡ198-bit last row `[47,46,...,1]`.
-
-Ⲡinternal Assembly differential ⲧⲁϫⲣⲟ ⲙⲡu64 route ⲙⲛ ⲡBigInt route ϩⲓ 12 ⲛpoints, ⲉⲣⲉ `K=20,47` ⲙⲛ `rank=UINT64_MAX` ϣⲟⲟⲡ ⲛϩⲏⲧⲟⲩ.
-
-`STAGE50_REGRESSION_GREEN`
-
-`STAGE51_PATCH25_GREEN`
-
-Ⲙⲛ day-in-month Patch 26 / Stage 52 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 51.
+`PATCH22_MONTH_NAMES_CORRECTION_GREEN`

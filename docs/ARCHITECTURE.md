@@ -920,52 +920,19 @@
 
 `tests/stage48_discovery24.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE48_REGRESSION_GREEN`.
 
-Ⲙⲛ Stage 50 / PATCH 25 month-name layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.
+Ⲙⲛ Stage 50 / PATCH 25 day-in-month occurrence layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.
 
 
-## Ⲡrepeated month-name legacy route ⲙⲡⲃⲁⲑⲙⲟⲥ 50
+## ⲠPATCH 22 month-name correction
 
-ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
-
-`monster_month_names_route -> legacyMonthNamesWithRepeats -> oldMonthNameRowWithRepeats`
-
-### Ⲡlegacy representation
-
-Ⲡfunction ϫⲓ `rank1` ⲛu64 ⲙⲛ `K<=47`. Ⲛⲥⲁ ⲧⲣⲉϥⲙⲉⲓⲟⲩ ⲙⲡrank ⲛ1, ϥϫⲓ ⲙⲡremainder ⲕⲁⲧⲁ 47 ⲛposition ⲛⲓⲙ, ϥⲟⲩⲱϩ ⲛ1 ⲁⲩⲱ ϥⲥϩⲁⲓ ⲙⲡcanonical month-name index. Ⲙⲛ used-index mask ⲏ partial-permutation block state ⲉϥϣⲟⲟⲡ.
-
-### Ⲡinvocation trace
-
-`monster_stage50_legacy_repeated_month_names_handler` ⲕⲱ ⲛtwo 6-entry rows ϩⲙ stack scratch, ⲙⲟⲩⲧⲉ ⲉⲡdirect scar ⲙⲛ ⲡroute, ⲁⲩⲱ ϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉscalar sums ⲙⲛ seen flags ϩⲙⲡinvocation-local MonsterContext. Ⲙⲛ extra arena allocation ⲉϥϣⲟⲟⲡ ⲉⲧⲣⲉⲡdiagnostic ⲛϥⲧⲱϩ ⲁⲛ ⲙⲡallocation history.
-
-### Ⲡfuture boundary
-
-Ⲙⲛ `unrankDistinctMonthNames47`, falling-factorial BigInt family, equality-gated ghost selector ⲏ Stage 51 / PATCH 25 code ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 50.
+`monster_month_names_route -> monthNamesPatch22` ⲁⲩⲱ `monster_month_names_route_big -> monthNamesPatch22Big`. Ⲡ`legacyMonthNamesWithRepeats` / `oldMonthNameRowWithRepeats` ⲟⲩⲏϩ callable ⲛghost. Ⲡcorrect branch ⲟ ⲛexact partial-permutation unrank ⲙⲡ47 canonical indices; ⲡghost ⲃⲱⲕ ⲉⲡoutput ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ⲥⲉⲧⲱⲛ.
 
 
-## Ⲡdistinct month-name partial-permutation route ⲙⲡⲃⲁⲑⲙⲟⲥ 51
+## Ⲃⲁⲑⲙⲟⲥ 50 — contiguous day-in-month scar
 
-ⲠCOPY_DIAGNOSTIC scar ⲟⲩⲏϩ:
+`monster_day_in_month_route -> legacyContiguousMonthDayGuess -> oldContiguousMonthDayGuess`. Ⲡroute ABI ϫⲓ `weave*`, `weaveCount`, `yearFirstDay`, `targetDay`, ⲁⲗⲗⲁ ⲡlegacy scar ⲱϣ ⲙⲡ`targetDay-yearFirstDay+1` ⲙⲙⲁⲧⲉ. Ⲡweave ⲙⲛ ⲡmonth thread ⲛⲥⲉⲣϩⲱⲃ ⲁⲛ ϩⲙⲡDISCOVERY 25.
 
-`legacyMonthNamesWithRepeats -> oldMonthNameRowWithRepeats`
 
-ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
+## Ⲃⲁⲑⲙⲟⲥ 51 — day-in-month occurrence detour
 
-`monster_month_names_route -> monster_stage51_month_names_patch_wrapper -> monthNamesPatch25`
-
-### Ⲡrank family
-
-Ⲡcanonical family ⲡⲉ ⲡlexicographic partial permutation ⲛ`1..47` ⲉⲣⲉ `K` positions ϣⲟⲟⲡ ⲁⲩⲱ ⲙⲛ index ⲉϥⲕⲧⲟ ⲛⲕⲉⲥⲟⲡ. Ⲡfamily size ⲡⲉ `P(47,K)`. `unrankDistinctMonthNames47` ⲧⲁϫⲣⲟ ⲙⲡsame order ϩⲙ u64 ranks, ⲁⲩⲱ `unrankDistinctMonthNames47Big` ⲧⲁϫⲣⲟ ⲙⲡfull BigInt rank domain.
-
-Ⲡu64 helper ⲕⲱ ⲛsaturating falling-factorial block. Ⲉϣϫⲉ ⲡexact block ⲟ ⲛwide ⲉⲡu64 domain, ⲡcurrent u64 rank ⲟ ⲛsmaller ⲉⲡblock ⲁⲩⲱ ⲡcandidate quotient ⲟ ⲛ0; ⲡⲁⲓ ⲕⲱ ⲙⲡsame lexicographic choice without arena allocation.
-
-### Ⲡwide path
-
-`stage51FallingBig` ⲗⲟⲅⲓⲍⲉ ⲙⲡfalling factorial ϩⲙ local BigInt runtime. `unrankDistinctMonthNames47Big` ⲃⲱⲗ ⲙⲡzero-based rank ϩⲓ exact BigInt blocks ⲁⲩⲱ ϥⲥⲱⲧⲡ ⲙⲡq-th unused canonical index ⲙⲛ ⲟⲩ47-bit used mask.
-
-### Ⲡghost ownership
-
-Ⲡu64 detour ⲕⲱ ⲙⲡghost ϩⲙ stack scratch, ⲉⲧⲣⲉϥⲛⲁⲩ ⲉⲡlegacy output without changing arena history. Ⲡwide detour ⲙⲟⲩⲧⲉ ⲉ`legacyMonthNamesWithRepeatsBigGhost`, ⲉⲧⲁⲙⲓⲟ ⲙⲡsame base-47 repeated-name row ⲉϫⲛ BigInt rank. Ⲡselector ⲛⲁⲕⲱ ⲙⲡghost ⲉⲡsemantic output ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ghost==correct.
-
-`tests/stage50_discovery25.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE50_REGRESSION_GREEN`.
-
-Ⲙⲛ Stage 52 / PATCH 26 day-in-month layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 51.
+`monster_day_in_month_route -> monster_stage51_day_in_month_patch_wrapper -> dayInMonthPatch25`. Ⲡold contiguous arithmetic ⲣϩⲱⲃ ⲛϣⲟⲣⲡ ⲛghost. Ⲡauthoritative value ⲱϣ ⲙⲡoccurrences ⲙⲡtarget `monthId` ϩⲙ `weave[0..targetOffset]`, ⲉⲣⲉ ⲡtarget ⲛⲉⲙⲁϥ.

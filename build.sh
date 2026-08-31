@@ -127,6 +127,8 @@ as --64 -o build/stage48_discovery24.o tests/stage48_discovery24.s
 ld -o build/stage48_discovery24 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage48_discovery24.o
 as --64 -o build/stage49_patch24.o tests/stage49_patch24.s
 ld -o build/stage49_patch24 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage49_patch24.o
+as --64 -o build/patch22_month_names_regression.o tests/patch22_month_names_regression.s
+ld -o build/patch22_month_names_regression build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/patch22_month_names_regression.o
 as --64 -o build/stage50_discovery25.o tests/stage50_discovery25.s
 ld -o build/stage50_discovery25 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage50_discovery25.o
 as --64 -o build/stage51_patch25.o tests/stage51_patch25.s
