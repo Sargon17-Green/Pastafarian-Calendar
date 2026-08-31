@@ -1,0 +1,289 @@
+name: Assembly Sahidic Stage56 first-day reuse diagnostic
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify production baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "HEAD=$(git rev-parse HEAD)"
+          git diff --exit-code \
+            2455c520d0f937fe7a0216c2487ab34e71428e78 \
+            HEAD -- \
+            src/runtime/arena.s \
+            src/runtime/bigint.s \
+            src/production/bootstrap.s \
+            src/catalog/source_language_catalog.s \
+            src/production/stage54_integration.s \
+            src/production/stage56_bowlsum_corrective.s
+
+      - name: Apply one-line Stage56 semantic detour in checkout only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("src/production/stage54_integration.s")
+          s = p.read_text(encoding="utf-8")
+
+          old = "    mov ecx,1\n    jmp .Ls54ss_done\n.Ls54ss_correct:"
+          new = "    mov ecx,1\n    jmp .Ls54ss_correct\n.Ls54ss_correct:"
+
+          if s.count(old) != 1:
+              raise SystemExit(f"expected exactly one historical equal-reuse jump, found {s.count(old)}")
+
+          p.write_text(s.replace(old, new, 1), encoding="utf-8")
+          print("Applied diagnostic detour: historical equal-reuse executes, then Stage56 corrected sauce wins.")
+          PY
+
+          git diff -- src/production/stage54_integration.s
+
+      - name: Build patched production objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          as --64 -o build/arena.o src/runtime/arena.s
+          as --64 -o build/bigint.o src/runtime/bigint.s
+          as --64 -o build/bootstrap.o src/production/bootstrap.s
+          as --64 -o build/catalog.o src/catalog/source_language_catalog.s
+          as --64 -o build/stage54_integration.o src/production/stage54_integration.s
+          as --64 -o build/stage56_bowlsum_corrective.o src/production/stage56_bowlsum_corrective.s
+
+      - name: Materialize raw-result Assembly harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > build/diff_probe.s <<'ASM'
+          .intel_syntax noprefix
+
+          .equ BI_SIGN,0
+          .equ BI_LEN,8
+          .equ BI_DATA,24
+
+          .equ RES_YEAR,0
+          .equ RES_CUTLET_NAME,8
+          .equ RES_DAY_IN_CUTLET,16
+          .equ RES_MONTH_NAME,24
+          .equ RES_DAY_IN_MONTH,32
+
+          .ifndef CASE
+          .set CASE,1
+          .endif
+
+          .if CASE == 1
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15055671
+          .elseif CASE == 2
+          .equ C_DAY,-15055672
+          .equ T_DAY,-15055672
+          .elseif CASE == 3
+          .equ C_DAY,-15055670
+          .equ T_DAY,-15055670
+          .elseif CASE == 4
+          .equ C_DAY,-15055672
+          .equ T_DAY,-15055670
+          .elseif CASE == 5
+          .equ C_DAY,-15055670
+          .equ T_DAY,-15055672
+          .elseif CASE == 6
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15057703
+          .elseif CASE == 7
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15057702
+          .elseif CASE == 8
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15056944
+          .elseif CASE == 9
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15053459
+          .elseif CASE == 10
+          .equ C_DAY,-15055671
+          .equ T_DAY,-15053458
+          .else
+          .error "CASE must be 1..10"
+          .endif
+
+          .section .bss
+          .align 8
+          raw_result:
+              .skip 40
+
+          .section .text
+          .global _start
+          .extern calendarDateSpaghetti
+          .extern catalog_get_cutlet
+          .extern catalog_get_month
+
+          _start:
+              mov rdi,C_DAY
+              mov rsi,T_DAY
+              call calendarDateSpaghetti
+              cmp eax,2
+              jne calendar_error
+              test rdx,rdx
+              je calendar_error
+              mov r12,rdx
+
+              mov rax,qword ptr [r12+RES_YEAR]
+              test rax,rax
+              je calendar_error
+              cmp qword ptr [rax+BI_SIGN],1
+              jne calendar_error
+              cmp qword ptr [rax+BI_LEN],1
+              jne calendar_error
+              mov rax,qword ptr [rax+BI_DATA]
+              test rax,rax
+              je calendar_error
+              mov rax,qword ptr [rax]
+              mov qword ptr [rip+raw_result+0],rax
+
+              mov r14,qword ptr [r12+RES_CUTLET_NAME]
+              mov r13,1
+          cutlet_loop:
+              mov rdi,r13
+              call catalog_get_cutlet
+              cmp rax,r14
+              je cutlet_found
+              inc r13
+              cmp r13,18
+              jb cutlet_loop
+              xor r13d,r13d
+          cutlet_found:
+              mov qword ptr [rip+raw_result+8],r13
+
+              mov rax,qword ptr [r12+RES_DAY_IN_CUTLET]
+              mov qword ptr [rip+raw_result+16],rax
+
+              mov r14,qword ptr [r12+RES_MONTH_NAME]
+              mov r13,1
+          month_loop:
+              mov rdi,r13
+              call catalog_get_month
+              cmp rax,r14
+              je month_found
+              inc r13
+              cmp r13,48
+              jb month_loop
+              xor r13d,r13d
+          month_found:
+              mov qword ptr [rip+raw_result+24],r13
+
+              mov rax,qword ptr [r12+RES_DAY_IN_MONTH]
+              mov qword ptr [rip+raw_result+32],rax
+
+              mov eax,1
+              mov edi,1
+              lea rsi,[rip+raw_result]
+              mov edx,40
+              syscall
+
+              mov eax,60
+              xor edi,edi
+              syscall
+
+          calendar_error:
+              mov eax,60
+              mov edi,111
+              syscall
+          ASM
+
+      - name: Run patched 10-pair differential against corrected main JDN baseline
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          printf 'case\tcalculation_day\ttarget_day\tmain_correct_tuple\tpatched_assembly_tuple\tstatus\n' > stage56-firstday-diagnostic.tsv
+
+          pairs=(
+            '-15055671 -15055671 5000,4,762,12,105'
+            '-15055672 -15055672 5000,8,761,24,96'
+            '-15055670 -15055670 5000,10,1,3,1'
+            '-15055672 -15055670 5000,3,1,3,96'
+            '-15055670 -15055672 4999,9,761,7,112'
+            '-15055671 -15057703 5000,6,635,5,46'
+            '-15055671 -15057702 5000,6,636,37,62'
+            '-15055671 -15056944 5000,16,2,5,68'
+            '-15055671 -15053459 5001,13,10,27,39'
+            '-15055671 -15053458 5001,13,11,1,37'
+          )
+
+          for n in $(seq 1 10); do
+            as --64 --defsym CASE=$n -o "build/diff_probe_${n}.o" build/diff_probe.s || exit 201
+
+            ld -o "build/diff_probe_${n}" \
+              build/arena.o \
+              build/bigint.o \
+              build/bootstrap.o \
+              build/stage54_integration.o \
+              build/stage56_bowlsum_corrective.o \
+              build/catalog.o \
+              "build/diff_probe_${n}.o" || exit 202
+
+            read -r c t expected <<< "${pairs[$((n-1))]}"
+            raw="build/raw_${n}.bin"
+
+            if "./build/diff_probe_${n}" > "$raw"; then
+              actual="$(python3 - "$raw" <<'PY'
+          import struct, sys
+          data = open(sys.argv[1], "rb").read()
+          if len(data) != 40:
+              raise SystemExit(f"bad raw result length: {len(data)}")
+          print(",".join(map(str, struct.unpack("<QQQQQ", data))))
+          PY
+              )"
+              if [[ "$actual" == "$expected" ]]; then
+                status=PASS
+              else
+                status=MISMATCH
+                rc=1
+              fi
+            else
+              probe_rc=$?
+              actual="ERROR:${probe_rc}"
+              status=ERROR
+              rc=1
+            fi
+
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+              "$n" "$c" "$t" "$expected" "$actual" "$status" \
+              | tee -a stage56-firstday-diagnostic.tsv
+          done
+
+          echo
+          cat stage56-firstday-diagnostic.tsv
+          printf '%s\n' "$rc" > build/diagnostic_rc
+
+      - name: Upload diagnostic result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assembly-sahidic-stage56-firstday-reuse-diagnostic
+          path: stage56-firstday-diagnostic.tsv
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Require patched 10/10 agreement
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f build/diagnostic_rc
+          test "$(cat build/diagnostic_rc)" = "0"
+          test "$(grep -c $'\tPASS$' stage56-firstday-diagnostic.tsv)" = "10"
