@@ -1,0 +1,108 @@
+name: Assembly Sahidic Stage 56 final audit closure
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assembly-sahidic-stage56-final-audit-closure
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Record head and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit_evidence
+          git rev-parse HEAD | tee audit_evidence/HEAD_SHA.txt
+          bash -n build.sh
+          bash -n test.sh
+          bash -n audit_stage55.sh
+          bash -n audit_stage55_helpers.sh
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash build.sh | tee audit_evidence/BUILD.log
+
+      - name: Historical and smoke suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash test.sh | tee audit_evidence/HISTORICAL_AND_SMOKE.log
+
+      - name: Stage55 helper suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash audit_stage55_helpers.sh | tee audit_evidence/STAGE55_HELPERS.log
+
+      - name: Stage55 full suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash audit_stage55.sh | tee audit_evidence/STAGE55_FULL.log
+
+      - name: Stage56 semantic runtime audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          as --64 -o build/stage56_semantic_runtime_audit.o tests/stage56_semantic_runtime_audit.s
+          ld -o build/stage56_semantic_runtime_audit \
+            build/arena.o \
+            build/bigint.o \
+            build/bootstrap.o \
+            build/stage54_integration.o \
+            build/stage56_bowlsum_corrective.o \
+            build/catalog.o \
+            build/stage56_semantic_runtime_audit.o
+          file build/stage56_semantic_runtime_audit
+          ./build/stage56_semantic_runtime_audit | tee audit_evidence/STAGE56_SEMANTIC.log
+
+      - name: Static runtime audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad_kind="$(find src/production src/runtime src/catalog -type f ! -name '*.s' -print)"
+          test -z "$bad_kind"
+
+          ! grep -R -nE 'oracle_|src/oracle|oracle_reference' src/production src/runtime src/catalog
+          ! grep -nE '^[[:space:]]*syscall([[:space:]]|$)' src/production/stage56_bowlsum_corrective.s
+          ! grep -R -q -E 'mov[[:space:]]+(e|r)ax,[[:space:]]*60' src/runtime
+
+          grep -n 'stage56_LEGACY_POSTSTIR_CALL_COUNT' src/production/bootstrap.s
+          grep -n 'stage56_LEGACY_SAVED_ORDER_WITNESS' src/production/bootstrap.s
+          grep -n 'postStirOneOverwritingOrderMemoryStage22' src/production/stage56_bowlsum_corrective.s
+          grep -n 'stage56PostStirRawBowlSumDetour' src/production/stage56_bowlsum_corrective.s
+          grep -n 'stage56SauceRawBowlSumCorrective' src/production/stage54_integration.s
+
+          ! readelf -l build/stage56_semantic_runtime_audit | grep -q 'INTERP'
+          printf '%s\n' 'STATIC_RUNTIME_AUDIT=PASS' | tee audit_evidence/STATIC_RUNTIME_AUDIT.log
+
+      - name: Final status
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' 'FINAL_RC=0' | tee audit_evidence/FINAL_STATUS.txt
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assembly-sahidic-stage56-audit-closure-evidence
+          path: audit_evidence/
+          if-no-files-found: error
+          retention-days: 30
