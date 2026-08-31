@@ -1,13 +1,14 @@
-name: Assembly Sahidic Stage56 first-day permanent fix
+name: Assembly Sahidic Stage56 source-only first-day fix
 
 on:
   push:
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  fix:
+  fix-source-only:
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -17,102 +18,43 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref_name }}
 
-      - name: Guard exact branch and baseline
+      - name: Patch source if still stale
+        id: patch
         shell: bash
         run: |
           set -euo pipefail
+
           expected_branch='x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
           test "$GITHUB_REF_NAME" = "$expected_branch"
-          test "$(git hash-object src/production/stage54_integration.s)" = \
-            "6d648fe4abc0838b4aa94e7de81b6fbb9846ffc2"
-          test -f .github/workflows/assembly-sahidic-10pair-main-differential.yml
 
-      - name: Make the Stage56 scar detour permanent
-        shell: bash
-        run: |
-          set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
 
-          source = Path("src/production/stage54_integration.s")
-          s = source.read_text(encoding="utf-8")
+          p = Path("src/production/stage54_integration.s")
+          s = p.read_text(encoding="utf-8")
 
           old = "    mov ecx,1\n    jmp .Ls54ss_done\n.Ls54ss_correct:"
           new = "    mov ecx,1\n    jmp .Ls54ss_correct\n.Ls54ss_correct:"
 
-          if s.count(old) != 1:
+          n_old = s.count(old)
+          n_new = s.count(new)
+
+          if n_old == 1 and n_new == 0:
+              p.write_text(s.replace(old, new, 1), encoding="utf-8")
+              Path("build_patch_state.txt").write_text("PATCHED\n", encoding="utf-8")
+              print("PATCHED: stale Stage41 first-day ghost reuse now detours through Stage56.")
+          elif n_old == 0 and n_new == 1:
+              Path("build_patch_state.txt").write_text("ALREADY_PATCHED\n", encoding="utf-8")
+              print("ALREADY_PATCHED: permanent Stage56 detour is already present.")
+          else:
               raise SystemExit(
-                  f"expected exactly one stale first-day ghost reuse jump; found {s.count(old)}"
+                  f"unexpected source state: old={n_old}, patched={n_new}"
               )
-          source.write_text(s.replace(old, new, 1), encoding="utf-8")
-
-          wf = Path(".github/workflows/assembly-sahidic-10pair-main-differential.yml")
-          w = wf.read_text(encoding="utf-8")
-
-          start_marker = "      - name: Apply one-line Stage56 semantic detour in checkout only\n"
-          end_marker = "      - name: Build patched production objects\n"
-          if w.count(start_marker) != 1 or w.count(end_marker) != 1:
-              raise SystemExit("diagnostic workflow markers are not exactly as expected")
-
-          start = w.index(start_marker)
-          end = w.index(end_marker)
-          w = w[:start] + w[end:]
-
-          replacements = {
-              "name: Assembly Sahidic Stage56 first-day reuse diagnostic":
-                  "name: Assembly Sahidic 10-pair main differential",
-              "  push:\n\npermissions:":
-                  "  push:\n  workflow_dispatch:\n\npermissions:",
-              "      - name: Build patched production objects":
-                  "      - name: Build current Stage56 production objects",
-              "            src/production/stage54_integration.s \\\n":
-                  "",
-              "      - name: Run patched 10-pair differential against corrected main JDN baseline":
-                  "      - name: Run 10-pair differential against corrected main JDN baseline",
-              "main_correct_tuple\\tpatched_assembly_tuple\\tstatus":
-                  "main_correct_tuple\\tassembly_tuple\\tstatus",
-              "stage56-firstday-diagnostic.tsv":
-                  "differential-results.tsv",
-              "assembly-sahidic-stage56-firstday-reuse-diagnostic":
-                  "assembly-sahidic-10pair-main-differential",
-              "      - name: Upload diagnostic result":
-                  "      - name: Upload differential result",
-              "      - name: Require patched 10/10 agreement":
-                  "      - name: Require 10/10 agreement",
-          }
-          for a, b in replacements.items():
-              if a not in w:
-                  raise SystemExit(f"expected workflow text not found: {a!r}")
-              w = w.replace(a, b)
-
-          forbidden = [
-              "Apply one-line Stage56 semantic detour in checkout only",
-              "p.write_text(s.replace(old, new, 1)",
-              "Build patched production objects",
-              "patched_assembly_tuple",
-          ]
-          for item in forbidden:
-              if item in w:
-                  raise SystemExit(f"temporary diagnostic logic survived: {item}")
-
-          wf.write_text(w, encoding="utf-8")
-
-          self_path = Path(
-              ".github/workflows/assembly-sahidic-stage56-firstday-permanent-fix.yml"
-          )
-          if not self_path.exists():
-              raise SystemExit("one-time fixer is not at the expected repository path")
-          self_path.unlink()
           PY
 
-          echo '--- source semantic diff ---'
           git diff -- src/production/stage54_integration.s
-          echo '--- workflow persistence diff ---'
-          git diff -- .github/workflows/assembly-sahidic-10pair-main-differential.yml
-          echo '--- one-time workflow removal ---'
-          git status --short
 
-      - name: Build patched production route
+      - name: Build current production route
         shell: bash
         run: |
           set -euo pipefail
@@ -124,7 +66,7 @@ jobs:
           as --64 -o build/stage54_integration.o src/production/stage54_integration.s
           as --64 -o build/stage56_bowlsum_corrective.o src/production/stage56_bowlsum_corrective.s
 
-      - name: Prove the two first-day witnesses before commit
+      - name: Prove first-day regression witnesses
         shell: bash
         run: |
           set -euo pipefail
@@ -237,19 +179,29 @@ jobs:
             "./build/firstday_witness_${n}"
           done
 
-      - name: Commit the permanent scar detour
+      - name: Commit only the Assembly source
         shell: bash
         run: |
           set -euo pipefail
+
+          state="$(cat build_patch_state.txt)"
+          if [[ "$state" == "ALREADY_PATCHED" ]]; then
+            echo "Source was already patched; nothing to commit."
+            exit 0
+          fi
+
+          test "$state" = "PATCHED"
+
           git config user.name "Stage56 scar keeper"
           git config user.email "stage56-scar-keeper@users.noreply.github.com"
 
-          git add \
-            src/production/stage54_integration.s \
-            .github/workflows/assembly-sahidic-10pair-main-differential.yml \
-            .github/workflows/assembly-sahidic-stage56-firstday-permanent-fix.yml
+          # Critical: stage ONLY the production Assembly file.
+          # Never stage this workflow or any other .github/workflows file.
+          git add -- src/production/stage54_integration.s
 
+          test "$(git diff --cached --name-only | wc -l)" = "1"
+          test "$(git diff --cached --name-only)" = "src/production/stage54_integration.s"
           test "$(git diff --cached --numstat src/production/stage54_integration.s | awk '{print $1+$2}')" = "2"
 
-          git commit -m "Stage 56: detour stale first-day ghost reuse"
+          git commit -m "Stage 56: detour stale first-day ghost reuse [skip ci]"
           git push origin "HEAD:${GITHUB_REF_NAME}"
