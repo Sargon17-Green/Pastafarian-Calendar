@@ -932,3 +932,48 @@
 ⲠStage 42 source ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ ⲁⲩⲱ ⲁϥⲕⲧⲟϥ ⲉ`STAGE42_REGRESSION_GREEN`. ⲠStage 43 ϯ `STAGE43_PATCH21_GREEN`.
 
 Ⲁⲩⲣ ⲛⲟⲩ32-case vector sweep ϩⲓ filtered ranks ⲉⲩϣⲟⲃⲉ, ⲁⲩⲱ ⲟⲩwide witness `gap=5778, cutlets=17, requiredOffset=1000` ⲧⲁϫⲣⲟ ϫⲉ ⲡcount ⲟ ⲛmulti-limb BigInt ⲁⲩⲱ ⲡrank-1 prefix ⲙⲟⲩϩ ⲙⲡrequired boundary.
+
+## Ⲃⲁⲑⲙⲟⲥ 44 — DISCOVERY 22
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲙⲛⲛⲥⲁ ⲡcutlet-partition route, ⲁⲩⲕⲱ ⲙⲡlegacy name generator ϫⲉ ⲡrank ϣϭⲙϭⲟⲙ ⲉⲩⲱϣ ⲙⲙⲟϥ ⲛdigits ⲛbase 17 ⲙⲙⲁⲧⲉ. Ⲡdigit ⲛposition ⲛⲓⲙ ϫⲓ ⲛⲟⲩcanonical cutlet-name index `1..17`, ⲁⲩⲱ ⲙⲛ state ⲉϥⲙⲉⲩⲉ ⲛⲛⲉⲛⲧⲁⲩϫⲓ ⲛϣⲟⲣⲡ.
+
+`oldCutletNameRowWithRepeats(rank1,K,out)`
+
+Ⲡlegacy rule ⲡⲉ:
+
+`q = rank1 - 1`
+
+`out[p] = (q mod 17) + 1; q = floor(q/17)`
+
+Ⲡ`legacyCutletNamesWithRepeats` ⲕⲱ ⲙⲡscar callable. Ⲡsemantic route ⲙⲡDISCOVERY 22 ⲡⲉ:
+
+`monster_cutlet_names_route -> legacyCutletNamesWithRepeats -> oldCutletNameRowWithRepeats`
+
+Ⲛcanonical indices ⲧⲱⲛ ⲙⲛ ⲡfrozen `SOURCE_LANGUAGE_CATALOG.tsv`; ⲙⲡⲟⲩϣⲓⲃⲉ ⲛⲟⲩname ϩⲙⲡcatalog.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡwitness ⲡⲉ `K=6`, `rank1=1`.
+
+Ⲡlegacy route ϯ:
+
+`[1,1,1,1,1,1]`
+
+Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡsame Sahidic cutlet name ⲣ ⲛ6 ⲛposition. Ⲡtest-only normative reference ⲛⲧⲉⲡsame Assembly test ϯ ⲙⲡrank 1 ⲙⲡordered distinct-name family:
+
+`[1,2,3,4,5,6]`
+
+Ⲡdirect scar ⲟⲩⲏϩ repeated ⲁⲩⲱ ⲡsemantic route ⲟⲩⲏϩ ⲉϥⲧⲱⲛ ⲙⲙⲟϥ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡDISCOVERY ⲟ ⲛ`EXPECTED_RED`.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+`calendarDateSpaghetti -> monster_stage44_legacy_repeated_names_handler -> monster_cutlet_names_route -> legacyCutletNamesWithRepeats -> oldCutletNameRowWithRepeats`
+
+ⲠMonsterContext ϩⲁⲣⲉϩ ⲉ`cutletCount`, `selectedRank`, route-name row pointer, repeat-seen flag, route-seen flag ⲙⲛ seen counter. Ⲛfield ⲛⲁⲓ ⲟ ⲛinvocation-local trace state ⲙⲙⲁⲧⲉ.
+
+Ⲡcorrect distinct-name unrank ⲥⲏϩ ⲙⲙⲁⲧⲉ ϩⲙ `tests/stage44_discovery22.s` ⲛtest reference. Ⲙⲛ selector/detour ⲙⲡPATCH 22 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
+
+ⲚStage 1–43 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 44 ϯ `STAGE44_DISCOVERY22_EXPECTED_RED`.
+

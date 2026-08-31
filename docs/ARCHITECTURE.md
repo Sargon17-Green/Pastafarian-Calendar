@@ -758,3 +758,22 @@
 Ⲡdetour allocates ⲛⲟⲩinvocation-local ghost partition buffer ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉⲡlegacy scar before ⲡauthoritative branch. `requiredOffset=0` reuse ⲙⲡghost; internal offset ⲕⲱ ⲙⲡghost ⲛtrace ⲙⲙⲁⲧⲉ. Ⲙⲛ global mutable cutlet-family state.
 
 ⲠStage 42 regression source ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE42_REGRESSION_GREEN`.
+
+## Ⲡrepeated cutlet-name scar ⲙⲡⲃⲁⲑⲙⲟⲥ 44
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY 22 ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage44_legacy_repeated_names_handler -> monster_cutlet_names_route -> legacyCutletNamesWithRepeats -> oldCutletNameRowWithRepeats`
+
+### Ⲡlegacy row
+
+Ⲡrow ⲕⲱ ⲛcanonical cutlet-name indices `1..17`; ⲡcatalog order ⲟ ⲛfrozen. Ⲡlegacy converter ϫⲓ ⲙⲡ`rank1-1` ⲁⲩⲱ ϥⲱϣ ⲙⲙⲟϥ ⲛlittle-endian base-17 digits. Ⲉⲧⲃⲉ ϫⲉ position ⲛⲓⲙ ⲟ ⲛindependent, ⲟⲩcanonical index ϣϭⲙϭⲟⲙ ⲉϥⲟⲩⲱϩ ⲛⲕⲉⲥⲟⲡ ϩⲙⲡsame row.
+
+### Ⲡwitness ⲙⲛ ownership
+
+`K=6, rank1=1 -> [1,1,1,1,1,1]`
+
+Ⲡtest-only normative row ⲡⲉ `[1,2,3,4,5,6]`. Ⲡreference algorithm ⲟ ⲛtest-only; ⲛϥⲟ ⲁⲛ ⲙⲙⲉⲣⲟⲥ ⲙⲡproduction object.
+
+Ⲡname-row buffer ⲙⲛ trace fields ⲟ ⲛinvocation-local arena state. Ⲙⲛ global mutable name state. Ⲙⲛ PATCH 22 selector/detour ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 44.
+

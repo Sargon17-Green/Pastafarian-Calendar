@@ -238,7 +238,13 @@
 .equ CTX_STAGE43_FILTERED_USED,1888
 .equ CTX_STAGE43_PATCH_SEEN,1896
 .equ CTX_STAGE43_GHOST_REUSED,1904
-.equ CTX_SIZE,1912
+.equ CTX_STAGE44_CUTLET_COUNT,1912
+.equ CTX_STAGE44_SELECTED_RANK,1920
+.equ CTX_STAGE44_ROUTE_NAMES,1928
+.equ CTX_STAGE44_REPEAT_SEEN,1936
+.equ CTX_STAGE44_ROUTE_SEEN,1944
+.equ CTX_STAGE44_SEEN,1952
+.equ CTX_SIZE,1960
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -544,6 +550,10 @@ legacy_bowl_stir_stone_by_position:
 .global filteredCutletPartitionFamily
 .global cutletPartitionPatch21
 .global monster_stage43_cutlet_partition_patch_wrapper
+.global oldCutletNameRowWithRepeats
+.global legacyCutletNamesWithRepeats
+.global monster_cutlet_names_route
+.global monster_stage44_legacy_repeated_names_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -8876,6 +8886,118 @@ monster_stage42_legacy_cutlet_partition_handler:
     ret
 .size monster_stage42_legacy_cutlet_partition_handler,.-monster_stage42_legacy_cutlet_partition_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 44 — DISCOVERY 22
+# Ⲡlegacy ⲛⲉϥⲙⲉⲉⲩⲉ ϫⲉ ⲟⲩrank ϣϭⲙϭⲟⲙ ⲉϥⲣ ⲛbase-17 digits ⲉⲩⲟⲩⲱϩ ⲉⲩⲕⲧⲟ ⲉⲡsame canonical name.
+# rdi=rank1 u64, rsi=K, rdx=out u64[K] canonical indices. rax=out / 0.
+.type oldCutletNameRowWithRepeats,@function
+oldCutletNameRowWithRepeats:
+    test rdi,rdi
+    je .Locnr_fail
+    test rsi,rsi
+    je .Locnr_fail
+    cmp rsi,17
+    ja .Locnr_fail
+    test rdx,rdx
+    je .Locnr_fail
+    mov r8,rdx
+    dec rdi
+    xor ecx,ecx
+    mov r10d,17
+.Locnr_loop:
+    cmp rcx,rsi
+    jae .Locnr_done
+    mov rax,rdi
+    xor edx,edx
+    div r10
+    inc rdx
+    mov qword ptr [r8+rcx*8],rdx
+    mov rdi,rax
+    inc rcx
+    jmp .Locnr_loop
+.Locnr_done:
+    mov rax,r8
+    ret
+.Locnr_fail:
+    xor eax,eax
+    ret
+.size oldCutletNameRowWithRepeats,.-oldCutletNameRowWithRepeats
+
+# Ⲡscar callable ⲟⲩⲏϩ ⲉϥⲧⲁⲙⲓⲟ ⲛⲟⲩrow ⲉⲣⲉ repeats ϣⲟⲟⲡ ⲛϩⲏⲧϥ.
+.type legacyCutletNamesWithRepeats,@function
+legacyCutletNamesWithRepeats:
+    jmp oldCutletNameRowWithRepeats
+.size legacyCutletNamesWithRepeats,.-legacyCutletNamesWithRepeats
+
+.type monster_cutlet_names_route,@function
+monster_cutlet_names_route:
+    jmp legacyCutletNamesWithRepeats
+.size monster_cutlet_names_route,.-monster_cutlet_names_route
+
+# rdi=MonsterContext*. Ⲡhandler ϫⲓ K=6, rank1=1 ⲉⲧⲣⲉⲡbase-17 scar ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ.
+# Ⲡrepeat scan ⲟ ⲛdiagnostic ⲙⲙⲁⲧⲉ; ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡrow ϩⲙⲡproduction ⲡⲁⲓ.
+.type monster_stage44_legacy_repeated_names_handler,@function
+monster_stage44_legacy_repeated_names_handler:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    test r12,r12
+    je .Lms44_fail
+    mov qword ptr [r12+CTX_STAGE44_CUTLET_COUNT],6
+    mov qword ptr [r12+CTX_STAGE44_SELECTED_RANK],1
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lms44_fail
+    mov r13,rax
+    mov qword ptr [r12+CTX_STAGE44_ROUTE_NAMES],rax
+
+    mov edi,1
+    mov esi,6
+    mov rdx,r13
+    call monster_cutlet_names_route
+    test rax,rax
+    je .Lms44_fail
+    mov qword ptr [r12+CTX_STAGE44_ROUTE_SEEN],1
+
+    xor ebx,ebx
+.Lms44_outer:
+    cmp rbx,6
+    jae .Lms44_scanned
+    mov r14,rbx
+    inc r14
+.Lms44_inner:
+    cmp r14,6
+    jae .Lms44_next
+    mov rax,qword ptr [r13+rbx*8]
+    cmp rax,qword ptr [r13+r14*8]
+    je .Lms44_repeat
+    inc r14
+    jmp .Lms44_inner
+.Lms44_next:
+    inc rbx
+    jmp .Lms44_outer
+.Lms44_repeat:
+    mov qword ptr [r12+CTX_STAGE44_REPEAT_SEEN],1
+.Lms44_scanned:
+    inc qword ptr [r12+CTX_STAGE44_SEEN]
+    mov eax,1
+    jmp .Lms44_done
+.Lms44_fail:
+    xor eax,eax
+.Lms44_done:
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size monster_stage44_legacy_repeated_names_handler,.-monster_stage44_legacy_repeated_names_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -9034,6 +9156,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage42_legacy_cutlet_partition_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage44_legacy_repeated_names_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
