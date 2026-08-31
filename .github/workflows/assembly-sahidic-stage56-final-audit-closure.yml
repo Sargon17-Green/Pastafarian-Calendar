@@ -28,6 +28,10 @@ jobs:
           set -euo pipefail
           mkdir -p audit_evidence
           git rev-parse HEAD | tee audit_evidence/HEAD_SHA.txt
+          # The repository intentionally does not require build.sh to carry an
+          # executable bit. Historical audit scripts invoke it as ./build.sh,
+          # so make it executable only inside this ephemeral runner checkout.
+          chmod +x build.sh
           bash -n build.sh
           bash -n test.sh
           bash -n audit_stage55.sh
