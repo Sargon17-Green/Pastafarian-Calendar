@@ -1060,3 +1060,30 @@
 Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲛlegal-weaving DP ⲏ whole-weave unrank ϩⲙⲡproduction. Ⲙⲡⲟⲩⲕⲱ ⲛghost/correct equality selector. Ⲡlegacy chooser ⲙⲙⲁⲧⲉ ⲡⲉ ⲡauthoritative route ⲙⲡStage 48.
 
 `STAGE48_DISCOVERY24_EXPECTED_RED`
+
+
+## Ⲃⲁⲑⲙⲟⲥ 49 — PATCH 24
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲙⲡⲟⲩⲃⲟⲗ ⲉⲃⲟⲗ ⲙⲡdaily chooser scar ⲙⲡStage 48. `oldMonthWeavingEachDaySeparately` ⲙⲛ `legacyChooseEachDaySeparately` ⲟⲩⲏϩ callable ⲙⲛ ⲡsame local-choice semantics. Ⲁⲩⲟⲩⲱϩ ⲙⲡ`monthWeavingPatch24` ⲛdetour ⲉϫⲛ ⲡscar.
+
+Ⲡdetour ⲙⲟⲩⲧⲉ ⲉⲡlegacy ⲛϣⲟⲣⲡ ⲉⲧⲣⲉϥⲧⲁⲙⲓⲟ ⲛⲟⲩlive ghost. Ⲙⲛⲛⲥⲱⲥ `CountWeavingsByDP` ⲙⲛ `DPUnrankLegalWeaving` ⲕⲱ ⲙⲡwhole-weave legality ⲙⲛ exact BigInt rank.
+
+### ⲠDP state ⲙⲛ lexicographic rank
+
+ⲠDP state ϩⲁⲣⲉϩ ⲉ`remaining[]`, `openedUpTo` ⲙⲛ `closedUpTo`. Ⲡmove legality ⲧⲱⲛ ⲙⲛ ⲡAppendix invariant: ⲟⲩnew month ⲙⲟⲛⲟⲛ `openedUpTo+1`, ⲁⲩⲱ ⲟⲩclosing month ⲙⲟⲛⲟⲛ `closedUpTo+1`. Ⲡcount ⲟ ⲛBigInt ⲛⲙⲉ, ⲁⲩⲱ ⲡunrank ⲙⲟⲟϣⲉ ⲛⲥⲁ legal month ids ϩⲙ ascending order ⲉⲧⲣⲉϥⲧⲁϫⲣⲟ ⲙⲡcanonical lexicographic family.
+
+### Ⲡscar selector
+
+`ghost=legacy daily row`
+
+`correct=whole-weave DP unrank`
+
+Ⲉϣϫⲉ `ghost==correct`, ⲡghost ϣϭⲙϭⲟⲙ ⲉϥⲃⲱⲕ ⲉⲡsemantic output. Ⲉϣϫⲉ `ghost!=correct`, ⲡghost ⲟ ⲛinvocation-local diagnostic row ⲙⲙⲁⲧⲉ.
+
+ⲠStage 48 source ⲙⲡⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲁϥⲕⲧⲟϥ ⲉ`STAGE48_REGRESSION_GREEN`. ⲠStage 49 ϯ `STAGE49_PATCH24_GREEN`.
+
+Ⲡ15-case Assembly sweep ⲧⲁϫⲣⲟ ⲙⲡgeneral count/unrank. Ⲡ12-month test ⲣ ⲙⲡ`rank=count` ⲙⲛ multi-limb BigInt. Ⲡ47-month test ⲣ ⲙⲡmax supported month-count path.
+
+Ⲙⲛ contiguous day-in-month guess ⲏ Patch 25 / Stage 50 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 49.

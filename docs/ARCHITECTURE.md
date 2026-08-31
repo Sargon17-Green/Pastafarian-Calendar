@@ -888,3 +888,36 @@
 ### Ⲡfuture boundary
 
 Ⲙⲛ whole-weave DP count, `DPUnrankLegalWeaving`, first/last legality state, ⲏ equality-gated ghost selector ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 48. Ⲛⲁⲓ ⲟ ⲛboundary ⲙⲡPATCH 24 / Stage 49.
+
+
+## Ⲡwhole-month weaving detour ⲙⲡⲃⲁⲑⲙⲟⲥ 49
+
+ⲠCOPY_DIAGNOSTIC scar ⲟⲩⲏϩ:
+
+`legacyChooseEachDaySeparately -> oldMonthWeavingEachDaySeparately`
+
+ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
+
+`monster_month_weaving_route -> monster_stage49_month_weaving_patch_wrapper -> monthWeavingPatch24 -> DPUnrankLegalWeaving`
+
+### Ⲡstate invariant
+
+ⲠDP state ⲕⲱ ⲛ`remaining[1..m]`, `openedUpTo`, `closedUpTo`. Ⲟⲩcandidate `j` ⲟ ⲛlegal ⲉϣϫⲉ `remaining[j]>0`; ⲉϣϫⲉ ⲙⲡⲁⲧⲟⲩⲟⲩⲱⲛ ⲙⲙⲟϥ, `j=openedUpTo+1`; ⲉϣϫⲉ ⲡcandidate ⲛⲁⲕⲱ ⲙⲡ`remaining[j]` ⲉ0, `j=closedUpTo+1`. Ⲡapply step ⲕⲱ ⲙⲡopened/closed frontiers ⲙⲛ ⲡremaining count.
+
+Ⲡⲁⲓ ⲧⲁϫⲣⲟ ⲙⲡtwo whole-weave conditions without day-local guessing: first occurrences ⲛⲏⲩ ϩⲙ month-id order, ⲁⲩⲱ last occurrences ⲛⲏⲩ ϩⲙ ⲡsame order.
+
+### Ⲡcount ⲙⲛ unrank
+
+`CountWeavingsByDP` ϯ ⲙⲡexact BigInt family count. Ⲡproduction implementation ⲟ ⲛAssembly-local DP ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲁⲛ ⲉⲡoracle runtime.
+
+`DPUnrankLegalWeaving` ϫⲓ ⲛⲟⲩone-based BigInt rank. Ϩⲙ output position ⲛⲓⲙ ϥⲙⲟⲟϣⲉ ⲛⲥⲁ `j=1..m`, ϥⲥⲕⲓⲡ ⲙⲡillegal moves, ⲁⲩⲱ ϥⲟⲩⲱϣ ⲙⲡlegal suffix count ⲛblock. Ⲡwhole blocks ⲉⲧⲛⲏⲩ ϩⲁ ⲡrank ⲥⲉⲃⲱⲗ ⲉⲃⲟⲗ; ⲡfirst block ⲉⲧⲉ ⲡrank ⲛϩⲏⲧϥ ⲡⲉ ⲡcandidate ⲉⲧⲁⲩⲥⲟⲧⲡϥ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡorder ⲟ ⲛexact ascending lexicographic.
+
+### Ⲡghost ownership ⲙⲛ selector
+
+`monthWeavingPatch24` ⲧⲁⲙⲓⲟ ⲛⲟⲩseparate arena-owned ghost row ⲁⲩⲱ ⲣ ⲙⲡlegacy call ⲛϣⲟⲣⲡ ϩⲙ invocation ⲛⲓⲙ. Ⲡcorrect row ⲥⲏϩ ⲉⲡcaller output ϩⲓⲧⲛ `DPUnrankLegalWeaving`.
+
+Ⲉϣϫⲉ ⲡrows ⲧⲱⲛ byte-for-byte, ⲡghost copy ⲃⲱⲕ ⲉⲡoutput ⲁⲩⲱ ⲡreuse flag ⲟ ⲛ1. Ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡcorrect row ⲟⲩⲏϩ authoritative ⲁⲩⲱ ⲡghost ⲟⲩⲏϩ diagnostic. Ⲙⲛ global mutable weaving selector state.
+
+`tests/stage48_discovery24.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE48_REGRESSION_GREEN`.
+
+Ⲙⲛ Stage 50 / PATCH 25 day-in-month occurrence layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.
