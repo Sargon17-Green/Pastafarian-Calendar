@@ -911,3 +911,24 @@
 `STAGE42_DISCOVERY21_EXPECTED_RED`
 
 ⲚStage 1–41 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 43 — PATCH 21
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲙⲡⲟⲩⲃⲟⲗ ⲉⲃⲟⲗ ⲙⲡall-positive generator ⲙⲡStage 42. `oldCutletPartitionFamily` ⲙⲛ `legacyCutletPartitionWithoutCalculationGate` ⲟⲩⲏϩ callable ⲁⲩⲱ ⲡdetour ⲙⲟⲩⲧⲉ ⲉⲣⲟⲟⲩ ⲛghost ⲛⲟⲩⲙⲉ.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`filteredCutletPartitionFamilyCount`, `filteredCutletPartitionFamilyUnrank` ⲙⲛ `filteredCutletPartitionFamily`. Ⲉϣϫⲉ ⲟⲩinternal calculation gate ⲥⲏϩ ϩⲙ `requiredOffset`, ⲡfamily ⲡⲉ ⲛpositive compositions ⲉⲧⲉ ⲟⲩproper prefix ⲧⲱⲛ ⲙⲛ ⲡoffset. Ⲡunrank ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡlegacy lexicographic order.
+
+`monster_cutlet_partition_route -> monster_stage43_cutlet_partition_patch_wrapper -> cutletPartitionPatch21`
+
+### Ⲡghost ⲙⲛ ⲡauthoritative route
+
+Ⲡwrapper ⲧⲁⲙⲓⲟ ⲛⲟⲩseparate ghost buffer, ⲙⲟⲩⲧⲉ ⲉⲡlegacy adapter, ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡghost count ⲙⲛ partition. Ⲉϣϫⲉ `requiredOffset=0`, ⲡghost ⲟ ⲛauthoritative ⲁⲩⲱ ⲁⲩreuse ⲙⲙⲟϥ. Ⲉϣϫⲉ `requiredOffset!=0`, ⲡghost ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡsemantic output.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+ⲠStage 42 source ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ ⲁⲩⲱ ⲁϥⲕⲧⲟϥ ⲉ`STAGE42_REGRESSION_GREEN`. ⲠStage 43 ϯ `STAGE43_PATCH21_GREEN`.
+
+Ⲁⲩⲣ ⲛⲟⲩ32-case vector sweep ϩⲓ filtered ranks ⲉⲩϣⲟⲃⲉ, ⲁⲩⲱ ⲟⲩwide witness `gap=5778, cutlets=17, requiredOffset=1000` ⲧⲁϫⲣⲟ ϫⲉ ⲡcount ⲟ ⲛmulti-limb BigInt ⲁⲩⲱ ⲡrank-1 prefix ⲙⲟⲩϩ ⲙⲡrequired boundary.

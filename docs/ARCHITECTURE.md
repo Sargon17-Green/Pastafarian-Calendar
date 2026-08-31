@@ -733,3 +733,28 @@
 Ⲡpartition buffer, rank BigInt, count BigInt ⲙⲛ trace fields ⲟ ⲛinvocation-local arena state. Ⲙⲛ global mutable cutlet state.
 
 Ⲙⲛ filtered family, ⲙⲛ prefix-required selector, ⲙⲛ DP count/unrank ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 42.
+
+
+## Ⲡfiltered cutlet-partition detour ⲙⲡⲃⲁⲑⲙⲟⲥ 43
+
+ⲠCOPY_DIAGNOSTIC ⲟⲩⲏϩ:
+
+`legacyCutletPartitionWithoutCalculationGate -> oldCutletPartitionFamily`
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_cutlet_partition_route -> monster_stage43_cutlet_partition_patch_wrapper -> cutletPartitionPatch21`
+
+### Ⲡfiltered-family invariant
+
+Ⲡlegacy family ⲟ ⲛall positive compositions ⲙⲡ`gap` ⲉ`cutlets` ⲛparts, ϩⲙ lexicographic order. Ⲉϣϫⲉ `requiredOffset` ⲟ ⲛinternal boundary, ⲡauthoritative family ⲡⲉ ⲡsame ordered family ⲙⲉⲧⲁ ⲡpredicate:
+
+`some proper prefix sum == requiredOffset`
+
+Ⲡcount ⲡⲉ `C(gap-2,cutlets-2)`. Ⲡunrank ⲱϣ ⲙⲡlegacy first-part candidates ϩⲙ ascending order; ⲡblock count ⲙⲡcandidate ⲟ ⲛall-positive count ⲙⲛⲛⲥⲁ boundary-hit, ⲏ fixed-boundary count ϩⲁⲧⲉⲛ boundary-hit. Ⲡⲁⲓ ϩⲁⲣⲉϩ ⲉⲡexact legacy lexicographic order without materialization.
+
+### Ⲡghost ownership
+
+Ⲡdetour allocates ⲛⲟⲩinvocation-local ghost partition buffer ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉⲡlegacy scar before ⲡauthoritative branch. `requiredOffset=0` reuse ⲙⲡghost; internal offset ⲕⲱ ⲙⲡghost ⲛtrace ⲙⲙⲁⲧⲉ. Ⲙⲛ global mutable cutlet-family state.
+
+ⲠStage 42 regression source ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE42_REGRESSION_GREEN`.

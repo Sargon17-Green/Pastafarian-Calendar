@@ -668,3 +668,34 @@
 Ⲡprefix check ⲙⲡregression ⲟ ⲛtest-only code. Ⲙⲛ prefix-filter, DP count/unrank, filtered family, ⲏ code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
 
 ⲚStage 1–41 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 42 ϯ `STAGE42_DISCOVERY21_EXPECTED_RED`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 43 — PATCH 21
+
+### Ⲡfiltered legacy family
+
+Ⲡall-positive scar ⲙⲡStage 42 ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲣϩⲱⲃ ⲛghost ϩⲙ call ⲛⲓⲙ:
+
+`legacyCutletPartitionWithoutCalculationGate -> oldCutletPartitionFamily`
+
+Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
+
+`monster_cutlet_partition_route -> monster_stage43_cutlet_partition_patch_wrapper -> cutletPartitionPatch21`
+
+Ⲉϣϫⲉ `requiredOffset=0`, ⲡghost family ⲟ ⲛsame legal family ⲁⲩⲱ ⲡwrapper reuse ⲙⲙⲟϥ. Ⲉϣϫⲉ `0 < requiredOffset < gap`, ⲡghost ⲟⲩⲏϩ ϩⲙⲡtrace ⲙⲙⲁⲧⲉ, ⲁⲩⲱ ⲡauthoritative family ⲕⲱ ⲙⲡrequired offset ⲛⲟⲩproper prefix boundary.
+
+Ⲡcount ⲙⲡfiltered family ⲡⲉ:
+
+`C(gap-2, cutlets-2)`
+
+ϫⲉ ⲟⲩcut position ⲛⲧⲉ ⲛ`cutlets-1` ⲟ ⲛfixed ⲉ`requiredOffset`, ⲁⲩⲱ ⲥⲉⲥⲱⲧⲡ ⲛⲛremaining `cutlets-2` ϩⲛ `gap-2` ⲛpositions. Ⲡ`filteredCutletPartitionFamilyUnrank` ⲙⲟⲟϣⲉ ⲛⲥⲁ ⲛlegacy candidate parts ϩⲙ ascending order ⲁⲩⲱ ⲗⲟⲅⲓⲍⲉ ⲙⲡfiltered descendant block ⲛcandidate ⲛⲓⲙ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡorder ⲟ ⲛsame lexicographic order ⲛⲧⲉⲡfiltered legacy family.
+
+### Ⲡtrace ⲙⲛ regression
+
+ⲠStage 42 witness `gap=10, cutlets=3, offset=4, rank=1` ⲧⲉⲛⲟⲩ ϯ authoritative `count=8`, `[1,3,6]`, ⲁⲗⲗⲁ ⲡlive ghost ⲟⲩⲏϩ `count=36`, `[1,1,8]`. Ⲡrank 8 ⲙⲡfiltered family ϯ `[4,5,1]`.
+
+ⲠMonsterContext ϩⲁⲣⲉϩ ⲉghost count, ghost partition, ghost-seen, filtered-used, patch-seen ⲙⲛ ghost-reused. Ⲛfield ⲛⲁⲓ ⲟ ⲛinvocation-local diagnostic state ⲙⲙⲁⲧⲉ.
+
+`STAGE42_REGRESSION_GREEN`
+
+`STAGE43_PATCH21_GREEN`

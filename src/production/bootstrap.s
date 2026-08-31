@@ -232,7 +232,13 @@
 .equ CTX_STAGE42_ROUTE_SEEN,1840
 .equ CTX_STAGE42_SEEN,1848
 .equ CTX_STAGE42_SELECTED_RANK,1856
-.equ CTX_SIZE,1864
+.equ CTX_STAGE43_GHOST_FAMILY_COUNT,1864
+.equ CTX_STAGE43_GHOST_PARTITION,1872
+.equ CTX_STAGE43_GHOST_SEEN,1880
+.equ CTX_STAGE43_FILTERED_USED,1888
+.equ CTX_STAGE43_PATCH_SEEN,1896
+.equ CTX_STAGE43_GHOST_REUSED,1904
+.equ CTX_SIZE,1912
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -533,6 +539,11 @@ legacy_bowl_stir_stone_by_position:
 .global legacyCutletPartitionWithoutCalculationGate
 .global monster_cutlet_partition_route
 .global monster_stage42_legacy_cutlet_partition_handler
+.global filteredCutletPartitionFamilyCount
+.global filteredCutletPartitionFamilyUnrank
+.global filteredCutletPartitionFamily
+.global cutletPartitionPatch21
+.global monster_stage43_cutlet_partition_patch_wrapper
 
 .type monster_context_new,@function
 monster_context_new:
@@ -8421,9 +8432,358 @@ legacyCutletPartitionWithoutCalculationGate:
     jmp oldCutletPartitionFamily
 .size legacyCutletPartitionWithoutCalculationGate,.-legacyCutletPartitionWithoutCalculationGate
 
+# rdi=gap, rsi=cutlets, rdx=required boundary offset; 0 ⲡⲉ NONE. rax=BigInt*.
+# Ⲡfamily ⲉⲧⲥⲟⲧⲡ ⲧⲁϫⲣⲟ ⲙⲡlegacy lexicographic order: ⲉϣϫⲉ required!=0, ⲡcut position required ⲡⲉ mandatory.
+.type filteredCutletPartitionFamilyCount,@function
+filteredCutletPartitionFamilyCount:
+    test rdx,rdx
+    je .Lfcpfc_old
+    cmp rdx,rdi
+    jae .Lfcpfc_zero
+    cmp rsi,2
+    jb .Lfcpfc_zero
+    cmp rdi,rsi
+    jb .Lfcpfc_zero
+    sub rdi,2
+    sub rsi,2
+    jmp stage42LegacyBinomialU64
+.Lfcpfc_old:
+    jmp oldCutletPartitionFamilyCount
+.Lfcpfc_zero:
+    jmp bi_zero
+.size filteredCutletPartitionFamilyCount,.-filteredCutletPartitionFamilyCount
+
+# rdi=gap, rsi=cutlets, rdx=required, rcx=rank1 BigInt*, r8=out u64[cutlets].
+# Ⲡunrank ⲙⲟⲟϣⲉ ⲕⲁⲧⲁ ⲡlegacy candidates 1..maxX; ⲡblock ⲛⲓⲙ ⲗⲟⲅⲓⲍⲉ ⲛfiltered descendants ⲛⲟⲩⲱⲧ.
+.type filteredCutletPartitionFamilyUnrank,@function
+filteredCutletPartitionFamilyUnrank:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,104
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov rbx,r8
+    test r15,r15
+    je .Lfcpu_fail
+    test rbx,rbx
+    je .Lfcpu_fail
+    cmp qword ptr [r15+BI_SIGN],1
+    jne .Lfcpu_fail
+
+    test r14,r14
+    jne .Lfcpu_filtered
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r15
+    mov rcx,rbx
+    call oldCutletPartitionFamilyUnrank
+    jmp .Lfcpu_done
+
+.Lfcpu_filtered:
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    call filteredCutletPartitionFamilyCount
+    test rax,rax
+    je .Lfcpu_fail
+    mov qword ptr [rbp-48],rax
+    mov rdi,r15
+    mov rsi,rax
+    call bi_cmp
+    cmp eax,0
+    jg .Lfcpu_fail
+    mov rdi,r15
+    call bi_clone
+    test rax,rax
+    je .Lfcpu_fail
+    mov qword ptr [rbp-56],rax
+    mov qword ptr [rbp-64],r12
+    mov qword ptr [rbp-72],r13
+    mov qword ptr [rbp-80],0
+    mov qword ptr [rbp-88],0
+    mov qword ptr [rbp-96],0
+
+.Lfcpu_slot_loop:
+    mov rax,qword ptr [rbp-72]
+    test rax,rax
+    je .Lfcpu_fail
+    cmp rax,1
+    je .Lfcpu_last
+
+    mov qword ptr [rbp-104],1
+    mov rax,qword ptr [rbp-64]
+    mov rcx,qword ptr [rbp-72]
+    dec rcx
+    sub rax,rcx
+    mov qword ptr [rbp-112],rax
+
+.Lfcpu_candidate:
+    mov rax,qword ptr [rbp-104]
+    cmp rax,qword ptr [rbp-112]
+    ja .Lfcpu_fail
+    mov rcx,qword ptr [rbp-80]
+    add rcx,rax
+    mov qword ptr [rbp-120],rcx
+
+    cmp qword ptr [rbp-88],1
+    je .Lfcpu_block_all
+    cmp rcx,r14
+    ja .Lfcpu_fail
+    je .Lfcpu_block_hit
+
+    # Ⲡboundary ⲟⲩⲏϩ ϩⲓⲧϩⲏ: among remaining cuts, one fixed cut is required.
+    mov rdi,qword ptr [rbp-64]
+    sub rdi,qword ptr [rbp-104]
+    mov rsi,qword ptr [rbp-72]
+    dec rsi
+    cmp rsi,2
+    jb .Lfcpu_next_candidate
+    cmp rdi,2
+    jb .Lfcpu_next_candidate
+    sub rdi,2
+    sub rsi,2
+    call stage42LegacyBinomialU64
+    test rax,rax
+    je .Lfcpu_fail
+    mov qword ptr [rbp-128],rax
+    mov qword ptr [rbp-136],0
+    jmp .Lfcpu_compare_block
+
+.Lfcpu_block_hit:
+    mov rdi,qword ptr [rbp-64]
+    sub rdi,qword ptr [rbp-104]
+    mov rsi,qword ptr [rbp-72]
+    dec rsi
+    call oldCutletPartitionFamilyCount
+    test rax,rax
+    je .Lfcpu_fail
+    mov qword ptr [rbp-128],rax
+    mov qword ptr [rbp-136],1
+    jmp .Lfcpu_compare_block
+
+.Lfcpu_block_all:
+    mov rdi,qword ptr [rbp-64]
+    sub rdi,qword ptr [rbp-104]
+    mov rsi,qword ptr [rbp-72]
+    dec rsi
+    call oldCutletPartitionFamilyCount
+    test rax,rax
+    je .Lfcpu_fail
+    mov qword ptr [rbp-128],rax
+    mov qword ptr [rbp-136],1
+
+.Lfcpu_compare_block:
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-128]
+    call bi_cmp
+    cmp eax,0
+    jle .Lfcpu_take
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-128]
+    call bi_sub
+    test rax,rax
+    je .Lfcpu_fail
+    mov qword ptr [rbp-56],rax
+.Lfcpu_next_candidate:
+    inc qword ptr [rbp-104]
+    jmp .Lfcpu_candidate
+
+.Lfcpu_take:
+    mov rcx,qword ptr [rbp-96]
+    mov rax,qword ptr [rbp-104]
+    mov qword ptr [rbx+rcx*8],rax
+    sub qword ptr [rbp-64],rax
+    dec qword ptr [rbp-72]
+    mov rax,qword ptr [rbp-120]
+    mov qword ptr [rbp-80],rax
+    mov rax,qword ptr [rbp-136]
+    mov qword ptr [rbp-88],rax
+    inc qword ptr [rbp-96]
+    jmp .Lfcpu_slot_loop
+
+.Lfcpu_last:
+    cmp qword ptr [rbp-88],1
+    jne .Lfcpu_fail
+    mov rax,qword ptr [rbp-64]
+    test rax,rax
+    je .Lfcpu_fail
+    mov rcx,qword ptr [rbp-96]
+    mov qword ptr [rbx+rcx*8],rax
+    mov rax,rbx
+    jmp .Lfcpu_done
+
+.Lfcpu_fail:
+    xor eax,eax
+.Lfcpu_done:
+    add rsp,104
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size filteredCutletPartitionFamilyUnrank,.-filteredCutletPartitionFamilyUnrank
+
+# rdi=gap, rsi=cutlets, rdx=required, rcx=rank1, r8=out. rax=count, rdx=1/0.
+.type filteredCutletPartitionFamily,@function
+filteredCutletPartitionFamily:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,24
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov qword ptr [rbp-48],r8
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    call filteredCutletPartitionFamilyCount
+    test rax,rax
+    je .Lfcpf_fail
+    mov rbx,rax
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    mov rcx,r15
+    mov r8,qword ptr [rbp-48]
+    call filteredCutletPartitionFamilyUnrank
+    test rax,rax
+    je .Lfcpf_fail
+    mov rax,rbx
+    mov edx,1
+    jmp .Lfcpf_done
+.Lfcpf_fail:
+    xor eax,eax
+    xor edx,edx
+.Lfcpf_done:
+    add rsp,24
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size filteredCutletPartitionFamily,.-filteredCutletPartitionFamily
+
+# ⲠPatch 21 detour: ⲡlegacy all-positive scar ⲣϩⲱⲃ ⲛghost ⲛⲓⲙ; required==0 ⲙⲟⲛ ⲉϥϣⲟⲟⲡ authoritative.
+# returns rax=authoritative count, rdx=success, rcx=ghost count, r8=ghost out, r9=1 iff ghost reused.
+.type cutletPartitionPatch21,@function
+cutletPartitionPatch21:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,40
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov qword ptr [rbp-48],r8
+    test r8,r8
+    je .Lcpp21_fail
+
+    mov rdi,r13
+    test rdi,rdi
+    jne .Lcpp21_bytes
+    mov edi,1
+.Lcpp21_bytes:
+    shl rdi,3
+    call arena_alloc
+    test rax,rax
+    je .Lcpp21_fail
+    mov qword ptr [rbp-56],rax
+
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    mov rcx,r15
+    mov r8,rax
+    call legacyCutletPartitionWithoutCalculationGate
+    test rax,rax
+    je .Lcpp21_fail
+    cmp rdx,1
+    jne .Lcpp21_fail
+    mov qword ptr [rbp-64],rax
+
+    test r14,r14
+    jne .Lcpp21_filtered
+    xor ebx,ebx
+.Lcpp21_copy_ghost:
+    cmp rbx,r13
+    jae .Lcpp21_reused
+    mov rax,qword ptr [rbp-56]
+    mov rax,qword ptr [rax+rbx*8]
+    mov rcx,qword ptr [rbp-48]
+    mov qword ptr [rcx+rbx*8],rax
+    inc rbx
+    jmp .Lcpp21_copy_ghost
+.Lcpp21_reused:
+    mov rax,qword ptr [rbp-64]
+    mov edx,1
+    mov rcx,qword ptr [rbp-64]
+    mov r8,qword ptr [rbp-56]
+    mov r9d,1
+    jmp .Lcpp21_done
+
+.Lcpp21_filtered:
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    mov rcx,r15
+    mov r8,qword ptr [rbp-48]
+    call filteredCutletPartitionFamily
+    test rax,rax
+    je .Lcpp21_fail
+    cmp rdx,1
+    jne .Lcpp21_fail
+    mov rcx,qword ptr [rbp-64]
+    mov r8,qword ptr [rbp-56]
+    xor r9d,r9d
+    jmp .Lcpp21_done
+
+.Lcpp21_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+    xor r9d,r9d
+.Lcpp21_done:
+    add rsp,40
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size cutletPartitionPatch21,.-cutletPartitionPatch21
+
+.type monster_stage43_cutlet_partition_patch_wrapper,@function
+monster_stage43_cutlet_partition_patch_wrapper:
+    jmp cutletPartitionPatch21
+.size monster_stage43_cutlet_partition_patch_wrapper,.-monster_stage43_cutlet_partition_patch_wrapper
+
 .type monster_cutlet_partition_route,@function
 monster_cutlet_partition_route:
-    jmp legacyCutletPartitionWithoutCalculationGate
+    jmp monster_stage43_cutlet_partition_patch_wrapper
 .size monster_cutlet_partition_route,.-monster_cutlet_partition_route
 
 # Ⲡhandler ⲧⲁϫⲣⲟ ⲛⲟⲩinternal-gate witness: gap=10, cutlets=3, offset=4, rank=1.
@@ -8483,6 +8843,21 @@ monster_stage42_legacy_cutlet_partition_handler:
     cmp rdx,1
     jne .Lms42_fail
     mov qword ptr [r12+CTX_STAGE42_ROUTE_FAMILY_COUNT],rax
+    mov qword ptr [r12+CTX_STAGE43_GHOST_FAMILY_COUNT],rcx
+    mov qword ptr [r12+CTX_STAGE43_GHOST_PARTITION],r8
+    test rcx,rcx
+    jz .Lms42_no_ghost
+    test r8,r8
+    jz .Lms42_no_ghost
+    mov qword ptr [r12+CTX_STAGE43_GHOST_SEEN],1
+.Lms42_no_ghost:
+    mov qword ptr [r12+CTX_STAGE43_GHOST_REUSED],r9
+    xor eax,eax
+    test r14,r14
+    setne al
+    movzx eax,al
+    mov qword ptr [r12+CTX_STAGE43_FILTERED_USED],rax
+    inc qword ptr [r12+CTX_STAGE43_PATCH_SEEN]
 
     mov qword ptr [r12+CTX_STAGE42_ROUTE_SEEN],1
     inc qword ptr [r12+CTX_STAGE42_SEEN]
