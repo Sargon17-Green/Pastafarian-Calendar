@@ -920,4 +920,23 @@
 
 `tests/stage48_discovery24.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE48_REGRESSION_GREEN`.
 
-Ⲙⲛ Stage 50 / PATCH 25 day-in-month occurrence layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.
+Ⲙⲛ Stage 50 / PATCH 25 month-name layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.
+
+
+## Ⲡrepeated month-name legacy route ⲙⲡⲃⲁⲑⲙⲟⲥ 50
+
+ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
+
+`monster_month_names_route -> legacyMonthNamesWithRepeats -> oldMonthNameRowWithRepeats`
+
+### Ⲡlegacy representation
+
+Ⲡfunction ϫⲓ `rank1` ⲛu64 ⲙⲛ `K<=47`. Ⲛⲥⲁ ⲧⲣⲉϥⲙⲉⲓⲟⲩ ⲙⲡrank ⲛ1, ϥϫⲓ ⲙⲡremainder ⲕⲁⲧⲁ 47 ⲛposition ⲛⲓⲙ, ϥⲟⲩⲱϩ ⲛ1 ⲁⲩⲱ ϥⲥϩⲁⲓ ⲙⲡcanonical month-name index. Ⲙⲛ used-index mask ⲏ partial-permutation block state ⲉϥϣⲟⲟⲡ.
+
+### Ⲡinvocation trace
+
+`monster_stage50_legacy_repeated_month_names_handler` ⲕⲱ ⲛtwo 6-entry rows ϩⲙ stack scratch, ⲙⲟⲩⲧⲉ ⲉⲡdirect scar ⲙⲛ ⲡroute, ⲁⲩⲱ ϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉscalar sums ⲙⲛ seen flags ϩⲙⲡinvocation-local MonsterContext. Ⲙⲛ extra arena allocation ⲉϥϣⲟⲟⲡ ⲉⲧⲣⲉⲡdiagnostic ⲛϥⲧⲱϩ ⲁⲛ ⲙⲡallocation history.
+
+### Ⲡfuture boundary
+
+Ⲙⲛ `unrankDistinctMonthNames47`, falling-factorial BigInt family, equality-gated ghost selector ⲏ Stage 51 / PATCH 25 code ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 50.

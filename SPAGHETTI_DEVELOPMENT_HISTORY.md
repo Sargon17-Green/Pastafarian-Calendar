@@ -1086,4 +1086,21 @@
 
 Ⲡ15-case Assembly sweep ⲧⲁϫⲣⲟ ⲙⲡgeneral count/unrank. Ⲡ12-month test ⲣ ⲙⲡ`rank=count` ⲙⲛ multi-limb BigInt. Ⲡ47-month test ⲣ ⲙⲡmax supported month-count path.
 
-Ⲙⲛ contiguous day-in-month guess ⲏ Patch 25 / Stage 50 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 49.
+Ⲙⲛ repeated month-name generator ⲏ Patch 25 / Stage 50 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 49.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 50 — DISCOVERY 25
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲁⲩⲕⲱ ⲙⲡmonth-name rank ϫⲉ ϥϣϭⲙϭⲟⲙ ⲉϥⲣ ⲛbase-47 digits ⲛⲥⲁ ⲧⲣⲉⲟⲩposition ⲛⲓⲙ ⲥⲱⲧⲡ ⲛⲟⲩcanonical index ⲙⲙⲁⲩⲁⲁϥ. `oldMonthNameRowWithRepeats` ⲧⲁⲙⲓⲟ ⲛⲟⲩrow ⲛⲧⲉⲓϩⲉ, ⲁⲩⲱ `legacyMonthNamesWithRepeats` ⲟ ⲛcallable scar ⲉϫⲱϥ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ϩⲙ `K=6, rank1=1`, ⲡlegacy base-47 row ⲡⲉ `[1,1,1,1,1,1]`. Ⲡtest-only distinct lexicographic reference ⲡⲉ `[1,2,3,4,5,6]`. `monster_month_names_route` ⲟⲩⲏϩ authoritative ⲉⲡlegacy scar ϩⲙⲡDISCOVERY 25, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡtest ϯ `STAGE50_DISCOVERY25_EXPECTED_RED`.
+
+### Ⲡdiagnostic ownership
+
+ⲠStage 50 handler ⲙⲡϥallocate ⲛrows ϩⲙⲡarena. Ⲛϥⲕⲱ ⲙⲙⲟⲟⲩ ϩⲙ stack scratch, ⲛϥϩⲁⲣⲉϩ ϩⲙ context ⲉscalar trace ⲙⲙⲁⲧⲉ. Ⲡⲁⲓ ϩⲁⲣⲉϩ ⲉⲡallocation history ⲛⲧⲉⲛprevious stages ⲁⲩⲱ ⲛϥⲕⲱ ⲁⲛ ⲛⲟⲩdiagnostic side effect ⲉϥⲣsemantic.
+
+Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲛpartial-permutation month-name unrank ⲏ Patch 25 selector ϩⲙⲡStage 50.

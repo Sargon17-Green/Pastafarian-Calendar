@@ -290,7 +290,14 @@
 .equ CTX_STAGE49_EQUAL_GHOST,2304
 .equ CTX_STAGE49_EQUAL_ROUTE,2312
 .equ CTX_STAGE49_SEEN,2320
-.equ CTX_SIZE,2328
+.equ CTX_STAGE50_MONTH_COUNT,2328
+.equ CTX_STAGE50_RANK,2336
+.equ CTX_STAGE50_DIRECT_SUM,2344
+.equ CTX_STAGE50_ROUTE_SUM,2352
+.equ CTX_STAGE50_LEGACY_SEEN,2360
+.equ CTX_STAGE50_ROUTE_SEEN,2368
+.equ CTX_STAGE50_SEEN,2376
+.equ CTX_SIZE,2384
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -664,6 +671,10 @@ legacy_bowl_stir_stone_by_position:
 .global monthWeavingPatch24
 .global monster_stage49_month_weaving_patch_wrapper
 .global monster_stage49_month_weaving_patch_handler
+.global oldMonthNameRowWithRepeats
+.global legacyMonthNamesWithRepeats
+.global monster_month_names_route
+.global monster_stage50_legacy_repeated_month_names_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -11313,6 +11324,125 @@ monster_stage49_month_weaving_patch_handler:
 .size monster_stage49_month_weaving_patch_handler,.-monster_stage49_month_weaving_patch_handler
 
 
+
+
+# Ⲃⲁⲑⲙⲟⲥ 50 — DISCOVERY 25
+# Ⲡlegacy ⲛmonth names ϫⲓ ⲙⲡrank ⲛbase-47 digits, ⲉⲧⲃⲉ ⲡⲁⲓ ⲟⲩcanonical name ϣϭⲙϭⲟⲙ ⲉϥⲕⲧⲟ ⲛⲕⲉⲥⲟⲡ.
+# rdi=rank1 u64, rsi=K, rdx=out u64[K] canonical indices. rax=out / 0.
+.type oldMonthNameRowWithRepeats,@function
+oldMonthNameRowWithRepeats:
+    test rdi,rdi
+    je .Lomnr_fail
+    test rsi,rsi
+    je .Lomnr_fail
+    cmp rsi,47
+    ja .Lomnr_fail
+    test rdx,rdx
+    je .Lomnr_fail
+    mov r8,rdx
+    dec rdi
+    xor ecx,ecx
+    mov r10d,47
+.Lomnr_loop:
+    cmp rcx,rsi
+    jae .Lomnr_done
+    mov rax,rdi
+    xor edx,edx
+    div r10
+    inc rdx
+    mov qword ptr [r8+rcx*8],rdx
+    mov rdi,rax
+    inc rcx
+    jmp .Lomnr_loop
+.Lomnr_done:
+    mov rax,r8
+    ret
+.Lomnr_fail:
+    xor eax,eax
+    ret
+.size oldMonthNameRowWithRepeats,.-oldMonthNameRowWithRepeats
+
+# Ⲡscar callable ⲟⲩⲏϩ ⲉϥⲧⲁⲙⲓⲟ ⲛⲟⲩmonth-name row ⲉⲣⲉ repeats ϣⲟⲟⲡ ⲛϩⲏⲧϥ.
+.type legacyMonthNamesWithRepeats,@function
+legacyMonthNamesWithRepeats:
+    jmp oldMonthNameRowWithRepeats
+.size legacyMonthNamesWithRepeats,.-legacyMonthNamesWithRepeats
+
+# ⲠDISCOVERY route ⲟⲩⲏϩ authoritative ⲉⲡlegacy scar; ⲡdistinct-name detour ⲙⲡⲁⲧϥϣⲱⲡⲉ.
+.type monster_month_names_route,@function
+monster_month_names_route:
+    jmp legacyMonthNamesWithRepeats
+.size monster_month_names_route,.-monster_month_names_route
+
+# rdi=MonsterContext*. Ⲡhandler ϫⲓ K=6, rank1=1 ⲉⲧⲣⲉⲡrepeat ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ϩⲛ ⲡdirect scar ⲙⲛ ⲡroute.
+.type monster_stage50_legacy_repeated_month_names_handler,@function
+monster_stage50_legacy_repeated_month_names_handler:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    sub rsp,96
+    mov r12,rdi
+    test r12,r12
+    je .Lms50_fail
+    lea r13,[rsp]
+    lea r14,[rsp+48]
+
+    mov edi,1
+    mov esi,6
+    mov rdx,r13
+    call oldMonthNameRowWithRepeats
+    test rax,rax
+    je .Lms50_fail
+
+    mov edi,1
+    mov esi,6
+    mov rdx,r14
+    call monster_month_names_route
+    test rax,rax
+    je .Lms50_fail
+
+    xor ebx,ebx
+    xor ecx,ecx
+.Lms50_sum_direct:
+    cmp ecx,6
+    jae .Lms50_sum_route_start
+    add rbx,qword ptr [r13+rcx*8]
+    inc ecx
+    jmp .Lms50_sum_direct
+.Lms50_sum_route_start:
+    xor r8d,r8d
+    xor ecx,ecx
+.Lms50_sum_route:
+    cmp ecx,6
+    jae .Lms50_store
+    add r8,qword ptr [r14+rcx*8]
+    inc ecx
+    jmp .Lms50_sum_route
+.Lms50_store:
+    mov qword ptr [r12+CTX_STAGE50_MONTH_COUNT],6
+    mov qword ptr [r12+CTX_STAGE50_RANK],1
+    mov qword ptr [r12+CTX_STAGE50_DIRECT_SUM],rbx
+    mov qword ptr [r12+CTX_STAGE50_ROUTE_SUM],r8
+    mov qword ptr [r12+CTX_STAGE50_LEGACY_SEEN],1
+    mov qword ptr [r12+CTX_STAGE50_ROUTE_SEEN],1
+    inc qword ptr [r12+CTX_STAGE50_SEEN]
+    mov eax,1
+    jmp .Lms50_done
+.Lms50_fail:
+    xor eax,eax
+.Lms50_done:
+    add rsp,96
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size monster_stage50_legacy_repeated_month_names_handler,.-monster_stage50_legacy_repeated_month_names_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -11501,6 +11631,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage49_month_weaving_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage50_legacy_repeated_month_names_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

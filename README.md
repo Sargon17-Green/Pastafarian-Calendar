@@ -909,4 +909,31 @@
 
 `STAGE49_PATCH24_GREEN`
 
-Ⲙⲛ Stage 50 ⲏ PATCH 25 day-in-month code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.
+Ⲙⲛ Stage 50 ⲏ PATCH 25 month-name code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 50 — DISCOVERY 25
+
+### Ⲡlegacy repeated month-name route
+
+Ⲁⲩⲟⲩⲱϩ ⲙⲡ`oldMonthNameRowWithRepeats` ⲙⲛ ⲡcallable scar `legacyMonthNamesWithRepeats`. Ⲡlegacy row ⲃⲱⲗ ⲉⲃⲟⲗ ⲙⲡ`rank1-1` ⲉbase-47 digits, ⲁⲩⲱ position ⲛⲓⲙ ϫⲓ ⲛⲟⲩcanonical month-name index ϩⲛ `1..47` ⲁϫⲛ ⲟⲩused-name state. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲟⲩname ϣϭⲙϭⲟⲙ ⲉϥⲕⲧⲟ ⲛⲕⲉⲥⲟⲡ ϩⲙⲡsame year.
+
+ⲠDISCOVERY route ⲡⲉ:
+
+`monster_month_names_route -> legacyMonthNamesWithRepeats -> oldMonthNameRowWithRepeats`
+
+Ⲡ`monster_stage50_legacy_repeated_month_names_handler` ⲣ ⲙⲡdirect scar ⲙⲛ ⲡroute ⲛⲥⲛⲁⲩ. Ⲛrow scratch ⲟ ⲛstack-local ⲉⲧⲣⲉⲡdiagnostic ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡarena history; ⲡMonsterContext ϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉmonth-count, rank, sums ⲙⲛ seen flags.
+
+### Ⲡwitness
+
+Ϩⲙ `K=6, rank1=1`, ⲡdirect scar ⲙⲛ ⲡroute ⲛⲥⲛⲁⲩ ϯ:
+
+`[1,1,1,1,1,1]`
+
+Ⲡtest-only partial-permutation reference ϯ:
+
+`[1,2,3,4,5,6]`
+
+Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡStage 50 ϯ `STAGE50_DISCOVERY25_EXPECTED_RED`. ⲚStage 1–49 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛGREEN.
+
+Ⲙⲛ distinct-month-name detour, `unrankDistinctMonthNames47`, ghost/correct selector ⲏ Stage 51 code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 50.
