@@ -1,912 +1,1120 @@
-# Ⲡⲙⲟⲛⲥⲧⲉⲣ ⲙⲡϩⲙⲉ ⲛⲟⲩⲟⲉⲓϣ
+# Il-Kalendarju taz-Zalza u taż-Żminijiet
+## Dwar iż-żmien, l-iskutelli, ix-xtiebi u l-ħidma tal-Ħolqien
 
-Ⲡⲉⲓⲉⲣⲅⲟⲛ ⲡⲉ ⲡϣⲟⲣⲡ ⲃⲁⲑⲙⲟⲥ ⲙⲡⲙⲟⲛⲥⲧⲉⲣ. Ⲡⲕⲱⲇⲓⲝ ⲉⲧϣⲟⲟⲡ ϩⲙⲡⲉⲓⲙⲁ ⲡⲉ x86-64 Assembly ⲙⲙⲁⲧⲉ. Ⲙⲛ ⲕⲉⲕⲱⲇⲓⲝ ⲛⲕⲉⲙⲉⲧⲁⲥⲡⲉ ⲉϥⲣϩⲱⲃ ϩⲙⲡⲉⲓⲉⲣⲅⲟⲛ.
+Id-dinja nħolqot mill-Mostru tal-Ispagetti li Jtir, u sal-lum għadha turi l-marki ta’ xogħlu. Iż-żmien huwa zalza magħmula minn pali, għaddijiet, ġebliet, qtar, skutelli, passi ta’ tħawwid, xtiebi, pulpetti u ħjut ta’ xhur. Kull dettall f’din is-sistema ġie stabbilit waqt il-Ħolqien, u minn dakinhar ’l hawn kull ma ġie stabbilit iservi ta’ liġi.
 
-Ⲡ`SourceLanguageCatalog` ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ⲛ17 ⲛⲣⲁⲛ ⲛⲕⲟⲧⲗⲉⲧ ⲙⲛ 47 ⲛⲣⲁⲛ ⲙⲙⲏⲛ. Ⲡⲧⲱϣ ⲛⲧⲉⲡⲕⲁⲧⲁⲗⲟⲅⲟⲥ ⲉϥⲧⲁϫⲣⲏⲩ ⲕⲁⲧⲁ `canonicalIndex`; ⲛϥⲟⲩⲱϣ ⲁⲛ ⲛⲥⲁ ⲟⲩⲧⲱϣ ⲛⲅⲣⲁⲙⲙⲁ ⲏ ⲟⲩ `locale`.
+Il-Mostru huwa magħmul minn għaġin, u l-ħidma tiegħu timxi pass pass. Jibda, juża dak li jkun diġà fuq il-mejda, jagħmel xi tiswijiet meta jkun hemm bżonn, u kultant iħalli struzzjoni qadima f’postha anki wara li jkun żied saff ġdid. L-ismijiet jingħataw waqt ix-xogħol u jibqgħu marbuta mal-affarijiet li jsemmu. Hekk kiber il-Ħolqien, saff fuq saff.
 
-Ⲛⲣⲁⲛ ⲉⲧⲉⲟⲩⲛⲧⲁⲩ ⲙⲙⲁⲩ ⲛⲟⲩⲙⲁⲉⲓⲛ ⲥⲉⲟⲩⲁϩⲙⲟⲩ ⲙⲡⲉⲩⲙⲁⲉⲓⲛ ϩⲛⲧⲙⲉⲧⲣⲉⲙⲛⲕⲏⲙⲉ. Ⲛⲣⲁⲛ ⲛⲙⲁ ⲙⲛ ⲛⲣⲁⲛ ⲁϫⲛⲙⲁⲉⲓⲛ ⲥⲉⲥϩⲁⲓ ⲕⲁⲧⲁ ⲡⲕⲁⲛⲱⲛ ⲛⲙⲉⲧⲁⲅⲣⲁⲫⲏ ⲉⲧⲧⲁϫⲣⲏⲩ.
+Dawn is-saffi kollha tal-ħidma jiffurmaw sistema deterministika: kull pass jiġi ddeterminat mill-passi ta’ qablu.
 
-Ⲡϣⲟⲣⲡ ⲃⲁⲑⲙⲟⲥ ⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ `MonsterContext`, ⲟⲩ `MonsterDispatcher`, ⲟⲩ `ValidationManager` ⲙⲛ ⲟⲩ `MetricsShell`. Ⲙⲛ ⲗⲟⲅⲓⲕⲏ ⲛⲗⲉⲅⲁⲥⲓ ⲛⲛⲉⲡⲁⲧϣ ⲉⲧⲛⲏⲩ.
+Hekk sar il-Ħolqien: b’irqajja’, żidiet u tiswijiet li saru fejn kien hemm bżonnhom. Il-Mostru jitfixkel, jerġa’ jgħodd, jinsa xi struzzjoni, iduq mill-iskutella ta’ ħdejh u jżid regola ġdida fejn tkun meħtieġa. Il-Kalendarju taż-Żminijiet jinqara billi wieħed jgħaddi minn dawn is-saffi b’eżattezza, wieħed wara l-ieħor.
 
-## Ⲡϫⲓⲛⲕⲱⲧ
+Għalhekk, il-prinċipju fundamentali tal-Kalendarju taż-Żminijiet huwa:
 
-`./build.sh`
+> **Kull stadju jiġi kkalkulat b’eżattezza.**
 
-## Ⲡϫⲓⲛⲇⲟⲕⲓⲙⲁⲍⲉ
+Żball ta’ unità waħda f’waħda mill-ewwel qatriet jibdel il-qatriet ta’ warajha, l-iskutelli, ix-xtiebi, is-sena, il-pulpetti, ix-xhur u l-isem tal-jum fir-riżultat finali.
 
-`./test.sh`
+---
 
-## Ⲃⲁⲑⲙⲟⲥ 2 — DISCOVERY 01
+# A. Iż-żmien jitwieled meta jum jistaqsi lil ieħor
 
-Ⲡ`oldRemainder` ⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ ⲉⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ. Ⲛϥⲕⲱ ⲁⲛ ⲉϩⲣⲁⲓ ⲙⲡⲡⲁⲧϣ ⲛ`SAVE`; ⲡⲇⲟⲕⲓⲙⲏ ⲛStage 2 ⲟⲩ`EXPECTED_RED` ⲡⲉ. Ⲛⲇⲟⲕⲓⲙⲏ ⲛStage 1 ⲥⲉⲟⲩⲏϩ ⲉⲩϣⲟⲟⲡ ⲛ`GREEN`.
+Kull kalkolu jinvolvi jumejn, u l-ordni tagħhom tagħmel differenza:
 
-## Ⲃⲁⲑⲙⲟⲥ 3 — PATCH 01
+1. **Jum il-Kalkolu** — il-jum li fih isir il-kalkolu.
+2. **Il-Jum Mitlub** — il-jum li għalih irid jinstab l-isem.
 
-Ⲡ`oldRemainder` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥⲡⲗⲁⲛⲏ. Ⲡ`savePatch` ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ, ⲁⲩⲱ ⲉϣϫⲉ ⲡⲟⲩⲱϣⲃ ⲟ ⲛ`0`, ⲛϥⲕⲱ ⲛ`M` ⲉϩⲣⲁⲓ. Ⲡ`monster_remainder_route` ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲟⲩwrapper ⲛⲧⲉⲡⲉⲓⲡⲁⲧϣ.
+Il-Mostru ħoloq il-kalendarju bħala relazzjoni bejn żewġ jiem għax, fil-bidu ta’ xogħlu, kien iżomm żewġ taljarini mmarkati: wieħed għall-jum li fih kien jistaqsi u l-ieħor għall-jum li dwaru kien jistaqsi. Ftit wara ma baqax jiftakar liema wieħed minnhom kellu jintrema. Baqgħu t-tnejn.
 
-Ⲡⲇⲟⲕⲓⲙⲏ ⲛStage 2 ⲁϥⲕⲧⲟϥ ⲉ`GREEN`, ⲁⲩⲱ ⲟⲩⲇⲟⲕⲓⲙⲏ ⲛStage 3 ϩⲁⲣⲉϩ ϫⲉ ⲡ`oldRemainder` ⲟⲩⲏϩ ⲉϥϯ `0` ϩⲓ `M`, ϩⲟⲡⲟⲩ ⲡⲣⲱⲧⲉ ⲙⲡⲁⲧϣ ϯ `M`.
+Ir-riżultat tal-kalendarju huwa funzjoni:
 
-## Ⲃⲁⲑⲙⲟⲥ 4 — DISCOVERY 02
+```text
+F(c,t)
+```
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`oldDayTag(day)=2*abs(day-FOUNDATION)` ⲛⲗⲉⲅⲁⲥⲓ. Ⲡ`monster_daytag_route` ⲟⲩⲏϩ ⲉϥⲙⲟⲩⲧⲉ ⲉⲡ`oldDayTag` ⲙⲙⲁⲧⲉ; ⲙⲛ ⲡⲁⲧϣ ⲛ`+1` ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+fejn `c` huwa Jum il-Kalkolu u `t` huwa l-Jum Mitlub. Ġeneralment:
 
-Ⲡ`monster_stage04_legacy_daytag_handler` ⲗⲟⲅⲓⲍⲉ ⲙⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡ`calculationDay` ⲙⲛ ⲡ`targetDay`, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲛⲉⲩⲁⲡⲟⲧⲉⲗⲉⲥⲙⲁ ϩⲙⲡ`MonsterContext`.
+```text
+F(c,t) ≠ F(t,c)
+```
 
-Ϩⲓ `FOUNDATION-1` ⲡⲣⲱⲧⲉ ⲧⲱⲛ ⲙⲛ ⲡⲕⲁⲛⲱⲛ: `2`. Ϩⲓ `FOUNDATION` ⲛϥϯ `0` ϩⲁ `1`; ϩⲓ `FOUNDATION+1` ⲛϥϯ `2` ϩⲁ `3`; ϩⲓ `FOUNDATION+2` ⲛϥϯ `4` ϩⲁ `5`. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 4 ⲟ ⲛ`EXPECTED_RED`.
+Minn dan il-par jiġu kkalkulati ħames għaddijiet:
 
-## Ⲃⲁⲑⲙⲟⲥ 5 — PATCH 02
+- **l-Għadd tal-Kalkolu** — l-għadd tal-jum `c`.
+- **l-Għadd Mitlub** — l-għadd tal-jum `t`.
+- **l-Għadd tad-Distanza** — `|t-c|+1`.
+- **l-Għadd tas-Somma** — is-somma tal-Għadd tal-Kalkolu u l-Għadd Mitlub.
+- **l-Għadd tad-Direzzjoni** — `1` jekk `t<c`, `2` jekk `t=c`, u `3` jekk `t>c`.
 
-Ⲡ`oldDayTag` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥⲡⲗⲁⲛⲏ. Ⲁⲩⲕⲱ ⲉϫⲱϥ ⲙⲡ`dayTagWithFoundationScar`: ⲉϣϫⲉ ⲡϩⲟⲟⲩ ϣⲟⲟⲡ ϩⲓ `FOUNDATION` ⲏ ⲙⲛⲛⲥⲱϥ, ⲛϥⲟⲩⲱϩ `1` ⲉⲡⲟⲩⲱϣⲃ ⲛⲗⲉⲅⲁⲥⲓ.
+L-Għadd tad-Distanza jibda minn wieħed għax il-Mostru ma kienx iħobb post vojt. L-Għadd tad-Direzzjoni żdied wara li l-Mostru ntebaħ li d-distanza waħedha ma tindikax jekk il-mixja kinitx ’il quddiem jew lura.
 
-Ⲡ guard ⲛⲥⲛⲁⲩ ⲉϫⲛ `FOUNDATION` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ: ⲉϣϫⲉ ⲡϩⲟⲟⲩ ⲡⲉ `FOUNDATION` ⲁⲩⲱ ⲡⲟⲩⲱϣⲃ ⲙⲛⲛⲥⲁ ⲡ`+1` ⲛϥⲟ ⲁⲛ ⲛ`1`, ⲛϥⲕⲱ ⲙⲡ`1` ⲉϩⲣⲁⲓ. Ⲡⲉⲓ guard ⲙⲛϩⲏⲧϥ ⲁⲛ ⲛⲟⲩclean-up; ⲟⲩϣⲟⲩⲱⲃⲉ ⲛⲧⲉⲡϩⲓⲥⲧⲟⲣⲓⲁ ⲡⲉ.
+---
 
-`monster_daytag_route -> monster_stage05_daytag_patch_wrapper -> dayTagWithFoundationScar -> oldDayTag`
+# B. Il-Pal
 
-Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲉⲛresult ⲛⲗⲉⲅⲁⲥⲓ ⲙⲛ ⲛresult ⲙⲡⲁⲧϣ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 4 ⲟ ⲛ`GREEN`, ⲁⲩⲱ ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 5 ⲧⲱⲛ ⲙⲛ `oracle_day_count`.
+Il-Mostru għażel jum wieħed mis-sensiela tal-jiem, waħħal pal fih, u lil dak il-jum semmieh **Jum il-Pedament**.
 
-## Ⲃⲁⲑⲙⲟⲥ 6 — DISCOVERY 03
+F’numerazzjoni kontinwa li fiha, fil-kalendarju Gregorjan, l-1 ta’ Jannar tas-sena 1 W.K. huwa l-jum `1`:
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`oldDistance(c,t)=abs(dayTag(c)-dayTag(t))` ⲛⲗⲉⲅⲁⲥⲓ. Ⲡ`oldDistance` ⲙⲟⲩⲧⲉ ⲉ`dayTagWithFoundationScar` ⲙⲡϩⲟⲟⲩ ⲛϩⲱⲃ ⲙⲛ ⲡϩⲟⲟⲩ ⲛϣⲓⲛⲉ, ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡⲇⲓⲁⲫⲟⲣⲁ ⲛⲁⲡⲟⲗⲩⲧⲟⲛ ⲛⲛⲉⲩⲧⲁⲅ.
+```text
+Jum l-Għoti tat-Twavel = -278,522
+Jum il-Pedament         = -15,055,671
+```
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage06_legacy_distance_handler -> monster_distance_route -> oldDistance`
+Id-differenza hija:
 
-Ⲡⲇⲟⲕⲓⲙⲏ ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ϫⲉ ⲡⲇⲓⲁⲫⲟⲣⲁ ⲛⲧⲉⲛⲧⲁⲅ ⲛϥⲧⲱⲛ ⲁⲛ ⲛⲥⲏⲩ ⲛⲓⲙ ⲙⲛ ⲡⲙⲁⲕⲣⲟⲛ ⲛⲧⲉⲛϩⲟⲟⲩ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 6 ⲟ ⲛ`EXPECTED_RED`; ⲛⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 1–5 ⲥⲉⲟ ⲛ`GREEN`.
+```text
+14,777,149 jum
+```
 
-## Ⲃⲁⲑⲙⲟⲥ 7 — PATCH 03
+Jum l-Għoti tat-Twavel jaqa’ fi żmien Aššur-dān III, fis-sena tal-*limmu* ta’ Būr-Sagallē, gvernatur ta’ Guzana, fix-xahar ta’ Simanu, dakinhar li seħħet eklissi tax-xemx. Għall-kalkolu normattiv, dan huwa l-15 ta’ Ġunju 763 Q.K. fil-kalendarju Ġuljan prolettiku, jew is-7 ta’ Ġunju tal-istess sena fil-kalendarju Gregorjan prolettiku.
 
-Ⲡ`oldDistance` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥⲡⲗⲁⲛⲏ. Ⲁⲩⲕⲱ ⲉϫⲱϥ ⲙⲡ`distanceWithChronologicalScar`: ⲛϥϫⲓ ⲙⲡ`oldDistance`, ⲛϥⲙⲉⲧⲣⲉ ⲟⲛ ⲙⲡ`abs(targetDay-calculationDay)`, ⲁⲩⲱ ⲉϣϫⲉ ⲛⲥⲉⲧⲱⲛ ⲁⲛ ⲛϥⲕⲱ ⲙⲡⲙⲁⲕⲣⲟⲛ ⲛⲭⲣⲟⲛⲟⲗⲟⲅⲓⲕⲟⲛ ⲉϩⲣⲁⲓ. Ⲙⲛⲛⲥⲱⲥ ⲛϥⲟⲩⲱϩ `1`.
+Jum il-Pedament jiġi deskritt kif ġej:
 
-`monster_distance_route -> monster_stage07_distance_patch_wrapper -> distanceWithChronologicalScar -> oldDistance`
+- **Gregorjan:** 22 ta’ Diċembru 41,222 Q.K.
+- **Ebrajk:** 19 ta’ Sivan, is-sena 37,460 qabel il-Ħolqien tad-Dinja.
+- **Kalendarju Iżlamiku aritmetiku:** 27 ta’ Rabiʿ al-Awwal, is-sena `−43,126` tal-Eġira.
+- **Kalendarju solari Persjan aritmetiku taċ-ċiklu ta’ 2,820 sena:** 18 ta’ Azar, is-sena `−41,843`.
+- **Ġuljan:** 28 ta’ Ottubru 41,221 Q.K.
+- **Ċiniż tradizzjonali**, skont l-estensjoni magħmula bl-algoritmu preskritt: iċ-ċiklu `−643`, is-sena 57 taċ-ċiklu, Geng-Shen, l-ewwel xahar, il-jum 22; ix-xahar mhuwiex interkalarju.
+- **Ħindu**, skont l-estensjoni magħmula bl-algoritmu stabbilit: is-sena `−41,162` tal-era Vikrama, Kartika, is-16-il jum lunari, mingħajr xahar interkalarju u mingħajr jum interkalarju.
+- **Saka:** l-1 ta’ Pausha, is-sena `−41,299`.
+- **Buddist Tajlandiż:** 22 ta’ Diċembru, is-sena `−40,678`.
+- **Etjopiku:** l-1 ta’ Hidar, is-sena `−41,227`.
+- **Koptiku:** l-1 ta’ Hathor, is-sena `−41,503`.
+- **Kōki Ġappuniż prolettiku:** 22 ta’ Diċembru, is-sena `−40,561`.
+- **Minguo:** 22 ta’ Diċembru, is-sena `−43,132`.
+- **Bahá’í prolettiku:** is-sena `−43,064`, il-11-il jum ta’ Masá’il; Kull-i-Shay’ `−119`, Váḥid 14, sena 9.
+- **L-Għadd Twil tal-Maja**, skont GMT 584283 u b’diviżjoni Ewklidjana tal-komponenti negattivi: `−97.6.17.7.11`.
 
-Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲉⲡlegacy distance, ⲡchronological distance ⲙⲛ ⲡpatched distance. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 6 ⲟ ⲛ`GREEN`, ⲁⲩⲱ ⲡ Stage 7 ⲧⲱⲛ ⲙⲛ `oracle_work_counts`.
+---
 
-## Ⲃⲁⲑⲙⲟⲥ 8 — DISCOVERY 04
+# C. Żewġ Ħjut ta’ Numri
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`mutateStonesWrong` ⲛⲗⲉⲅⲁⲥⲓ. Ⲛⲧⲟϥ ϣⲓⲃⲉ ⲛⲛ5 ⲛⲱⲛⲉ ϩⲛ ⲧⲉⲩⲧⲁⲝⲓⲥ ⲉⲩⲙⲏⲛ ϩⲙⲡstate ⲛⲟⲩⲱⲧ, ⲁⲩⲱ ⲟⲩⲱⲛⲉ ⲉϥⲛⲏⲩ ϫⲓ ⲛⲟⲩⲧⲓⲙⲏ ⲛⲃⲣⲣⲉ ⲉⲁⲩⲥϩⲁⲓⲥ ⲏⲇⲏ ϩⲙⲡⲉⲓⲧⲱϣ.
+Jum il-Pedament jingħata l-valur `1`.
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage08_legacy_stone_handler -> monster_stone_mutation_route -> mutateStonesWrong`
+Jekk `d>Foundation`:
 
-Ϩⲙⲡϣⲟⲣⲡ ⲙⲉⲧⲁⲃⲟⲗⲏ `i=2`, ⲡⲣⲱⲧⲉ ⲛⲗⲉⲅⲁⲥⲓ ϯ `378,1434,3780,9932,25047`, ⲁⲩⲱ ⲡⲕⲁⲛⲱⲛ ϯ `378,1073,2375,6195,10493`. Ⲡϣⲟⲣⲡ ⲱⲛⲉ ⲧⲱⲛ; ⲡⲕⲉ4 ⲥⲉϣⲟⲃⲉ. Ⲙⲛ ⲡⲁⲧϣ ⲛsnapshot ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 8 ⲟ ⲛ`EXPECTED_RED`; ⲛⲇⲟⲕⲓⲙⲏ ⲙⲡ Stage 1–7 ⲥⲉⲟ ⲛ`GREEN`.
+```text
+N(d) = 2(d-Foundation)+1
+```
 
+Jekk `d<Foundation`:
 
-## Ⲃⲁⲑⲙⲟⲥ 9 — PATCH 04
+```text
+N(d) = 2(Foundation-d)
+```
 
-Ⲡ`mutateStonesWrong` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲙⲛ ⲡⲉϥϫⲓⲛϣⲓⲃⲉ ⲛⲗⲉⲅⲁⲥⲓ. Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲙⲟϥ ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲛⲟⲩⲧⲓⲙⲏ ϩⲙⲡⲉϥⲥⲱⲙⲁ.
+Għalhekk:
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`stonePatch`: ⲛϥϫⲓ ⲛⲟⲩsnapshot ⲙⲡrow ⲛϣⲟⲣⲡ, ⲛϥⲕⲱ ⲛⲟⲩclone ⲛⲕⲉⲥⲟⲡ, ⲛϥⲙⲟⲩⲧⲉ ⲉ`mutateStonesWrong` ϩⲓ ⲡclone, ⲁⲩⲱ ⲛϥⲥϩⲁⲓ ⲛⲕⲉⲥⲟⲡ ⲛ5 ⲛⲧⲓⲙⲏ ⲙⲡgarbage ⲉⲃⲟⲗ ϩⲙⲡsnapshot ⲙⲙⲁⲧⲉ.
+```text
+F-3 → 6
+F-2 → 4
+F-1 → 2
+F   → 1
+F+1 → 3
+F+2 → 5
+F+3 → 7
+```
 
-`monster_stone_mutation_route -> monster_stage09_stone_patch_wrapper -> stonePatch -> mutateStonesWrong`
+Il-Mostru, mela, rabat żewġ ħjut — tal-pari u tal-fard — madwar l-istess pal. L-għadd tal-jum jidentifika jum; il-qabel u l-wara jibqgħu fuq l-istess assi.
 
-Ⲡwrapper ϩⲁⲣⲉϩ ⲉⲡcontract ⲛⲗⲉⲅⲁⲥⲓ ⲙⲡrow: ⲡpointer ⲛⲟⲩⲱⲧ ⲃⲱⲕ ⲉϩⲟⲩⲛ ⲁⲩⲱ ⲛϥⲛⲏⲩ ⲉⲃⲟⲗ. Ⲡ`stonePatch` ⲛⲧⲟϥ ⲟⲩⲏϩ ⲉϥⲧⲁⲙⲓⲟ ⲙⲡgarbage clone ⲕⲁⲧⲁ ⲡϩⲓⲥⲧⲟⲣⲓⲁ.
+---
 
-Ⲡ`getStoneTableThroughLegacyBuilder` ⲕⲱ ⲉϩⲣⲁⲓ ⲛ46 ⲛrows ϩⲓⲧⲛ ⲡ`stonePatch`; ⲡⲇⲟⲕⲓⲙⲏ ⲧⲱⲛ ⲙⲛ ⲡoracle ϩⲓ 230 ⲛBigInt. ⲠStage 8 regression ⲟ ⲛ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲙⲟϥ.
+# D. L-Għadd il-Kbir u l-Bqija Miżmuma
 
-## Ⲃⲁⲑⲙⲟⲥ 10 — DISCOVERY 05
+Il-limitu taz-zalza huwa dan:
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩ`buildHiddenWithBackwardStorage` ⲛⲗⲉⲅⲁⲥⲓ. Ⲛ7 ⲛhidden ⲥⲉⲗⲟⲅⲓⲍⲉ ⲙⲙⲟⲟⲩ ⲕⲁⲧⲁ ⲡⲕⲁⲛⲱⲛ, ⲁⲗⲗⲁ ⲡarray ⲥϩⲁⲓ ⲙⲙⲟⲟⲩ ϩⲛ ⲧⲁⲝⲓⲥ `hidden7..hidden1`.
+```text
+M = 2^127 - 1
+```
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage10_legacy_hidden_handler -> monster_hidden_route -> legacyHiddenAtNearnessWrong`
+Meta l-istruzzjoni tgħid **żomm**:
 
-Ⲡ`monster_hidden_route` ϫⲓ ⲙⲡ`k` ⲙⲛ ⲡⲙⲁ `k` ⲛⲧⲉⲡarray ⲛⲗⲉⲅⲁⲥⲓ. Ⲉⲧⲃⲉ ⲡⲁⲓ `k=1` ϯ `hidden7`, `k=7` ϯ `hidden1`, ⲁⲩⲱ `k=4` ⲧⲱⲛ ϫⲉ ⲛⲧⲟϥ ⲡⲉ ⲡⲙⲏⲧⲉ. Ⲟⲩⲛ 6 ⲛⲇⲓⲁⲫⲟⲣⲁ ⲉⲩⲧⲟϣ.
+```text
+SAVE(x) = 1 + ((x-1) mod M)
+```
 
-Ⲙⲛ `hiddenByNearness` ⲏ ⲟⲩⲙⲉⲧⲁⲅⲣⲁⲫⲉⲩⲥ `8-k` ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. ⲠStage 10 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–9 ⲥⲉⲟ ⲛ`GREEN`.
+għalhekk ir-riżultat ikun dejjem fil-medda `1..M`.
 
-## Ⲃⲁⲑⲙⲟⲥ 11 — PATCH 05
+B’mod partikolari:
 
-Ⲡ`buildHiddenWithBackwardStorage` ⲟⲩⲏϩ ⲉϥⲥϩⲁⲓ ⲛ7 ⲛhidden ϩⲛ ⲧⲁⲝⲓⲥ `hidden7..hidden1`. Ⲙⲡⲟⲩⲕⲧⲟ ⲙⲡarray ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡ`legacyHiddenAtNearnessWrong`.
+```text
+SAVE(M)   = M
+SAVE(2M)  = M
+SAVE(M+1) = 1
+SAVE(0)   = M
+```
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`hiddenByNearness`: ⲉϣϫⲉ ⲡquery ⲡⲉ `k`, ⲛϥϫⲓ ⲙⲡslot `8-k`. Ⲡⲁⲓ ⲕⲱ ⲙⲡ`hidden1` ⲉ `k=1` ⲙⲛ ⲡ`hidden7` ⲉ `k=7`, ⲉⲣⲉ ⲡstorage ⲛⲥⲁϩⲟⲩ ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ.
+Meta l-istruzzjoni titlob **bqija ordinarja** fid-diviżjoni b’`d`, ir-riżultat ikun fil-medda `0..d-1`.
 
-`monster_hidden_route -> monster_stage11_hidden_nearness_patch_wrapper -> hiddenByNearness`
+Fit-tnaqqis ukoll, meta jinqabeż il-limitu, il-valur jerġa’ jibda min-naħa l-oħra tal-medda: fil-kalkolu jista’ jintuża `SAVE(a-b)`.
 
-Ⲡ`monster_stage10_legacy_hidden_handler` ⲙⲟⲩⲧⲉ ⲉ`legacyHiddenAtNearnessWrong` ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲩⲱ ⲛϥⲙⲟⲟϣⲉ ⲟⲛ ϩⲓⲧⲛ ⲡroute ⲙⲡⲁⲧϣ. Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡlegacy result ⲙⲛ ⲡpatched result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ.
+---
 
-ⲠStage 10 regression ⲟ ⲛ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. ⲠStage 11 ⲥⲙⲓⲛⲉ ⲛ7 ⲛquery ⲙⲛ ⲡoracle, ⲁⲩⲱ ⲛϥⲧⲁϫⲣⲟ ϫⲉ ⲡlegacy access ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ϩⲓ 6 ⲛⲧⲓⲙⲏ.
+# E. Il-Ħames Ġebliet
 
+Kull qatra viżibbli għandha ħames ġebliet:
 
-## Ⲃⲁⲑⲙⲟⲥ 12 — DISCOVERY 06
+```text
+qamħ, xgħir, melħ, morra, ħamra
+```
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡ`legacyPrior(dropStore,i,back)` ⲛⲗⲉⲅⲁⲥⲓ. Ⲛⲧⲟϥ ϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡ`dropStore[i-back]`, ⲁⲩⲱ ⲛϥⲥⲟⲟⲩⲛ ⲁⲛ ⲙⲡbackward hidden storage.
+Għall-qatra 1:
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage12_legacy_prior_handler -> monster_prior_route -> legacyPrior`
+```text
+[17, 29, 43, 71, 101]
+```
 
-Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲙⲓⲛⲉ ⲛ7 ⲛquery: ⲙⲛ 2 ⲉⲣⲉ `i-back >= 1` ⲁⲩⲱ ⲥⲉⲧⲱⲛ, ⲙⲛ 5 ⲉⲣⲉ `i-back <= 0` ⲁⲩⲱ ⲡlegacy ⲛϥϫⲓ ⲁⲛ ⲙⲡhidden ⲉⲧϣⲟⲟⲡ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡStage 12 ⲟ ⲛ`EXPECTED_RED`.
+Għall-qatra `i>=2`, il-ħames valuri l-ġodda jiġu kkalkulati kollha minn `snapshot` wieħed tal-istat tal-qatra ta’ qabilha:
 
-Ⲙⲛ detour ⲛⲧⲉⲡhistory ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. ⲚStage 1–11 ⲥⲉⲟ ⲛ`GREEN`.
+```text
+qamħ_i  = SAVE(qamħ² + 3·xgħir + i)
+xgħir_i = SAVE(xgħir² + 5·melħ + qamħ)
+melħ_i  = SAVE(melħ² + 7·morra + xgħir)
+morra_i = SAVE(morra² + 11·ħamra + melħ)
+ħamra_i = SAVE(ħamra² + 13·qamħ + morra)
+```
 
+Il-ħames valuri l-ġodda jiġu assenjati fl-istess ħin.
 
-## Ⲃⲁⲑⲙⲟⲥ 13 — PATCH 06
+---
 
-Ⲡ`legacyPrior` ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲁⲩⲕⲱ ⲉϫⲱϥ ⲙⲡ`priorPatch`: ⲉϣϫⲉ `slot=i-back` ⲟ ⲛ1 ⲏ ⲉϥⲛⲁⲁⲁϥ, ⲡⲣⲱⲧⲉ ⲙⲟⲟϣⲉ ϩⲓⲧⲛ `legacyPrior`; ⲉϣϫⲉ ⲡslot ⲟ ⲛ0 ϣⲁ -6, ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡ`k=1-slot` ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡhidden ϩⲓⲧⲛ `hiddenByNearness`.
+# F. Is-Seba’ Qatriet Moħbija
 
-`monster_prior_route -> monster_stage13_prior_patch_wrapper -> priorPatch`
+Qabel l-ewwel qatra viżibbli hemm dawn:
 
-Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_PATCHED_PRIOR_RESULT` ⲙⲛ `CTX_PRIOR_PATCH_SEEN`, ϩⲟⲡⲟⲩ ⲡ`CTX_LEGACY_PRIOR_RESULT` ⲟⲩⲏϩ ⲉϥⲥⲏϩ ⲛⲟⲩCOPY_DIAGNOSTIC. ⲠStage 12 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.
+```text
+moħbija 7, moħbija 6, moħbija 5, moħbija 4,
+moħbija 3, moħbija 2, moħbija 1, viżibbli 1
+```
 
-ⲠStage 13 ⲥⲙⲓⲛⲉ ⲛ7 ⲛpredecessor: ⲛ2 ⲛvisible ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡlegacy, ⲁⲩⲱ ⲛ5 ⲛhidden ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡhidden-nearness patch. Ⲟⲩⲛ 0 ⲛmismatch ⲙⲡ`priorPatch` ⲙⲛ ⲡroute.
+Kull qatra moħbija `k` għandha erba’ koeffiċjenti:
 
-## Ⲃⲁⲑⲙⲟⲥ 14 — DISCOVERY 07
+| `k` | ×Mitlub | ×Distanza | ×Somma | ×Direzzjoni |
+|---:|---:|---:|---:|---:|
+| 1 | 3 | 4 | 6 | 8 |
+| 2 | 5 | 7 | 10 | 12 |
+| 3 | 7 | 10 | 14 | 16 |
+| 4 | 9 | 13 | 18 | 20 |
+| 5 | 11 | 16 | 22 | 24 |
+| 6 | 13 | 19 | 26 | 28 |
+| 7 | 15 | 22 | 30 | 32 |
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲛⲟⲩgrind table ⲛⲗⲉⲅⲁⲥⲓ ⲉⲣⲉ ⲛ11 ⲛrow ⲛⲙⲉ ϣⲟⲟⲡ ϩⲓ index `0..10`, ϩⲟⲡⲟⲩ ⲡloop ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡindex `1..11` ⲛⲧⲟϥ. Ⲡ`legacyGrindRowAtIndex(1)` ϫⲓ ⲙⲡgrind 2, ⲁⲩⲱ `legacyGrindRowAtIndex(10)` ϫⲓ ⲙⲡgrind 11. Ⲡindex 11 ϫⲓ ⲛⲟⲩfence ⲉϥϣⲟⲩⲓⲧ ⲉⲧⲣⲉⲡlegacy ⲧⲙⲃⲱⲕ ⲉⲟⲩmemory ⲛⲁⲧⲧⲟϣ.
+Hawnhekk tapplika r-regola sħiħa, mingħajr ma jitħalla barra xejn:
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage14_legacy_grind_handler -> monster_visible_drop_route -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
+Nirrappreżentaw l-erba’ koeffiċjenti tal-qatra moħbija `k` b’`a_k,b_k,c_k,d_k`. Il-ħames ġebliet tal-qatra viżibbli `k` nirrappreżentawhom b’`stones[k,*]`. Il-valur tal-bidu huwa:
 
-Ⲡⲇⲟⲕⲓⲙⲏ ⲥⲙⲓⲛⲉ ⲛ11 ⲛrow ⲙⲛ ⲡtable ⲛⲕⲁⲛⲱⲛ: ⲛ11 ⲧⲏⲣⲟⲩ ⲥⲉϣⲟⲃⲉ. Ⲁⲩⲱ ⲡϣⲟⲣⲡ visible drop ⲉϥⲛⲏⲩ ϩⲓⲧⲛ ⲡlegacy grind indexing ⲛϥⲧⲱⲛ ⲁⲛ ⲙⲛ `oracle_build_visible`. Ⲙⲛ row 0 ⲛsentinel ⲉϥϣⲟⲟⲡ ϩⲙⲡtable ⲙⲡⲉⲓStage. ⲠStage 14 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–13 ⲥⲉⲟ ⲛ`GREEN`.
+```text
+x₀(k) = SAVE(
+    Għadd_tal_Kalkolu
+  + a_k·Għadd_Mitlub
+  + b_k·Għadd_tad_Distanza
+  + c_k·Għadd_tas_Somma
+  + d_k·Għadd_tad_Direzzjoni
+  + qamħ_k + xgħir_k + melħ_k + morra_k + ħamra_k
+)
+```
 
-## Ⲃⲁⲑⲙⲟⲥ 15 — PATCH 07
+Wara dan isiru seba’ passi ta’ tħin. L-ordni tal-ġebliet hija:
 
-Ⲡlegacy grind indexing `g=1..11` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`legacyGrindRowAtIndex` ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡloop ⲙⲡ`oneVisibleDropLegacyGrindIndexWrong`.
+```text
+[qamħ, xgħir, melħ, morra, ħamra, qamħ, xgħir]
+```
 
-Ⲁⲩⲟⲩⲱϩ ⲛⲟⲩsentinel row ⲉϥϣⲟⲩⲓⲧ ϩⲓ index `0`, ⲁⲩⲱ ⲛ11 ⲛgrind row ⲛⲙⲉ ⲥⲉϣⲟⲟⲡ ⲧⲉⲛⲟⲩ ϩⲓ `1..11`. Ⲡfence ⲛStage 14 ⲟⲩⲏϩ ⲉϥⲟⲩⲟϩ ⲙⲛⲛⲥⲁ ⲡtable ⲛⲟⲩϣⲟⲩⲱⲃⲉ, ⲁⲗⲗⲁ ⲛϥϫⲓ ⲁⲛ ⲛⲟⲩsemantic decision.
+u għal kull `r=1..7`:
 
-`monster_visible_drop_route -> monster_stage15_grind_sentinel_patch_wrapper -> oneVisibleDropLegacyGrindIndexWrong -> legacyGrindRowAtIndex`
+```text
+x_r(k) = SAVE(
+    x_(r-1)(k)²
+  + 3·x_(r-1)(k)
+  + stone_of_visible_drop_k_for_grind_r
+  + r
+)
+```
 
-ⲠStage 14 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲧⲣⲉⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. ⲠStage 15 ⲧⲁϫⲣⲟ ⲙⲡsentinel ϩⲓ 0, ⲛ11 ⲛrow ⲛⲙⲉ ϩⲓ 1..11, ⲙⲛ ⲡvisible drop ⲛϣⲟⲣⲡ ⲉϥⲧⲱⲛ ⲙⲛ ⲡoracle.
+F’kull pass ta’ tħin, il-ġebla tittieħed **mil-lista fissa tal-ġebliet tal-qatra viżibbli `k`**, skont l-ordni tas-seba’ passi ta’ tħin.
 
+Il-qatra moħbija `k` hija `x₇(k)`.
 
-## Ⲃⲁⲑⲙⲟⲥ 16 — DISCOVERY 08
+---
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldPermutationUnrank0(rank0)` ⲉϥϫⲓ ⲙⲡrank ⲉϥⲁⲣⲭⲉⲓ ϩⲓ `0`. Ⲡhelper ⲛⲧⲟϥ ⲧⲱⲛ ϩⲛ `0..719`.
+# G. Is-Sitta u Erbgħin Qatra Viżibbli
 
-Ⲡlegacy caller ⲇⲉ ⲕⲱ ⲙⲡ`drop mod 720` ⲛⲟⲩrank0 ⲁϫⲛ ⲟⲩⲧⲱϣ ⲙⲡbase:
+Fil-bidu tal-ħidma fuq il-qtar kien hemm 48 qatra. Żewġ qatriet minnhom inxterdu mal-art, u fis-sensiela taz-zalza baqgħu 46 qatra viżibbli.
 
-`monster_permutation_route -> legacyPermutationOrderFromDropWrong -> oldPermutationUnrank0`
+Għall-qatra `i` hemm bżonn tal-qatriet fil-pożizzjonijiet `i-1`, `i-3` u `i-7`. Qabel il-qatra viżibbli 1 hemm il-qatriet moħbija, b’mod li l-qatra moħbija 1 tinsab fil-pożizzjoni `0`, u l-qatra moħbija 7 fil-pożizzjoni `−6`.
 
-Ⲡ`monster_stage16_legacy_permutation_handler` ϫⲓ ⲙⲡvisible drop ⲉⲧⲁϥⲛⲏⲩ ϩⲓⲧⲛ ⲛscar ⲛϣⲟⲣⲡ, ⲛϥϩⲁⲣⲉϩ ⲉⲡdrop, ⲡrank0, ⲡlegacy order ⲙⲛ ⲡroute order ϩⲙⲡ`MonsterContext`.
+L-għaġina tal-qatra hija:
 
-Ⲡⲇⲟⲕⲓⲙⲏ ⲧⲁϫⲣⲟ ⲛ4 ⲛmismatch ϩⲓ `drop=1,719,720,721`. ⲚStage 1–15 ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 16 ⲟ ⲛ`EXPECTED_RED`.
+```text
+dough_i = SAVE(
+    qamħ_i·Għadd_tal_Kalkolu
+  + xgħir_i·Għadd_Mitlub
+  + melħ_i·Għadd_tad_Distanza
+  + morra_i·Għadd_tas_Somma
+  + ħamra_i·Għadd_tad_Direzzjoni
+  + drop[i-1]
+  + 3·drop[i-3]
+  + 5·drop[i-7]
+  + i
+)
+```
 
-Ⲙⲛ ⲡⲁⲧϣ ⲛbase ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+Wara dan isiru 11-il pass ta’ tħin:
 
-## Ⲃⲁⲑⲙⲟⲥ 17 — PATCH 08
+| Pass ta’ tħin | × il-valur preċedenti | ×`i-1` | ×`i-3` | ×`i-7` | Ġebla |
+|---:|---:|---:|---:|---:|---|
+| 1 | 3 | 5 | 7 | 11 | qamħ |
+| 2 | 5 | 7 | 11 | 13 | xgħir |
+| 3 | 7 | 11 | 13 | 17 | melħ |
+| 4 | 11 | 13 | 17 | 19 | morra |
+| 5 | 13 | 17 | 19 | 23 | ħamra |
+| 6 | 17 | 19 | 23 | 29 | qamħ |
+| 7 | 19 | 23 | 29 | 31 | xgħir |
+| 8 | 23 | 29 | 31 | 37 | melħ |
+| 9 | 29 | 31 | 37 | 41 | morra |
+| 10 | 31 | 37 | 41 | 43 | ħamra |
+| 11 | 37 | 41 | 43 | 47 | qamħ |
 
-Ⲡ`oldPermutationUnrank0(rank0)` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ, ⲁⲩⲱ ⲡ`legacyPermutationRank0FromDropWrong` ⲙⲛ ⲡ`legacyPermutationOrderFromDropWrong` ⲟⲩⲏϩ ⲉⲩϣⲟⲟⲡ ⲛⲟⲩCOPY_DIAGNOSTIC.
+Jekk ir-ringiela tkun `[a,b,c,d,stone]`:
 
-Ⲁⲩⲕⲱ ⲉϩⲣⲁⲓ ⲙⲡchain ⲛⲧⲟϣ:
+```text
+x ← SAVE(
+    x²
+  + a·x_old
+  + b·drop[i-1]
+  + c·drop[i-3]
+  + d·drop[i-7]
+  + stone_i
+)
+```
 
-`oneBased = regularMod(drop-1,720)+1`
+Il-qatra tkun lesta biss wara l-ħdax-il pass ta’ tħin.
 
-`legacyRank0 = oneBased-1`
+---
 
-`order = oldPermutationUnrank0(legacyRank0)`
+# H. Is-Sitt Skutelli
 
-Ⲡ`monster_permutation_route` ⲙⲟⲟϣⲉ ⲧⲉⲛⲟⲩ ϩⲓⲧⲛ:
+L-istat taz-zalza jinżamm f’sitt skutelli. L-identitajiet fissi tagħhom huma `1..6`.
 
-`monster_stage17_permutation_patch_wrapper -> orderPatchFromValue -> oldPermutationUnrank0`
+In-numri marbuta magħhom huma:
 
-Ⲡ`monster_stage16_legacy_permutation_handler` ⲙⲟⲩⲧⲉ ⲉⲡlegacy caller ⲛⲟⲩdiagnostic, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡoneBased ⲙⲛ ⲡtranslated rank0 ⲙⲛ ⲡpatched order ϩⲙⲡ`MonsterContext` ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ.
+```text
+[17, 19, 23, 29, 31, 37]
+```
 
-ⲠStage 16 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. ⲠStage 17 ⲥⲙⲓⲛⲉ ⲙⲡpatched route ⲙⲛ `oracle_bowl_order_from_value` ϩⲓ boundary ⲙⲛ negative values, ⲁⲩⲱ ⲛⲥⲉϣⲟⲃⲉ ⲁⲛ.
+Għall-iskutella `b`:
 
+```text
+s_b = Għadd_tal_Kalkolu
+    + b·Għadd_Mitlub
+    + Għadd_tad_Distanza
+    + Għadd_tas_Somma
+    + Għadd_tad_Direzzjoni
+    + p_b²
 
-## Ⲃⲁⲑⲙⲟⲥ 18 — DISCOVERY 09
+B_b = SAVE(s_b² + b)
+```
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyPoursToFixedBowlIds`. Ⲡlegacy ⲙⲟⲩⲧⲉ ⲉ `orderPatchFromValue` ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡorder ⲛⲧⲟϣ, ⲁⲗⲗⲁ ϩⲛ ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ⲛϥⲟⲩⲏϩ ⲉϥϫⲓ ⲛbowl ID `1,2,3` ⲛⲧⲟⲩⲱⲧ, ⲉϥⲙⲉⲉⲩⲉ ϫⲉ ⲛposition ⲛϣⲟⲣⲡ ⲛⲉ ⲛID ⲛbowl.
+---
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage18_legacy_fixed_pour_handler -> monster_pour_route -> legacyPoursToFixedBowlIds`
+# I. Is-720 Permutazzjoni tal-Iskutelli
 
-Ⲡformula ⲙⲡpour ⲛⲧⲟϣ ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ: `SAVE(drop² + stone[position]*bowl + factor*i)` ⲙⲛ factor `3,5,7`. Ⲡⲡⲗⲁⲛⲏ ⲟ ⲙⲙⲁⲧⲉ ϩⲙⲡsource ⲙⲡbowl: ⲡlegacy ϫⲓ `oldBowls[1]`, `oldBowls[2]`, `oldBowls[3]` ⲁϫⲛ ⲟⲩⲧⲱϣ ⲙⲡorder.
+Il-permutazzjonijiet kollha tas-sitt skutelli — b’kollox `6! = 720` — jitqiegħdu f’ordni lessikografika skont l-identitajiet fissi tal-iskutelli.
 
-Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ`drop=121`, `i=4` ⲧⲁϫⲣⲟ ⲙⲡorder `[2,1,3,4,5,6]`. Ⲡlegacy ⲕⲱ ⲉⲃⲟⲗ ⲛ`14675,14700,14754`, ϩⲟⲡⲟⲩ ⲡcalculation ⲕⲁⲧⲁ ⲛposition ϩⲙⲡorder ⲡⲉ `14679,14694,14754`. Ⲟⲩⲛ 2 ⲛmismatch ⲉⲩⲧⲟϣ. Ⲡ`drop=1` ⲟ ⲛcoincidence ⲉϥⲧⲱⲛ ϫⲉ ⲡorder ⲟ ⲛidentity.
+L-ewwel waħda hija:
 
-Ⲙⲛ `bowlAlias` ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 18 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–17 ⲥⲉⲟ ⲛ`GREEN`.
+```text
+[1,2,3,4,5,6]
+```
 
+L-aħħar waħda hija:
 
-## Ⲃⲁⲑⲙⲟⲥ 19 — PATCH 09
+```text
+[6,5,4,3,2,1]
+```
 
-Ⲡ`legacyPoursToFixedBowlIds` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ: ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ⲟⲩⲏϩ ⲉⲩϫⲓ ⲛbowl ID `1,2,3` ⲉϣϫⲉ ⲟⲩⲱϣ ⲙⲟⲩⲧⲉ ⲉⲡlegacy ⲛⲧⲟϥ.
+Għall-qatra `D`:
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `installOrderAliases`: ⲡposition `1..6` ⲕⲧⲟ ⲉⲡbowl ID ⲉⲧⲥⲏϩ ϩⲙⲡorder. Ⲡ`bowlByLegacyPosition` ⲛϥϫⲓ ⲁⲛ ⲛⲟⲩbowl ϩⲓⲧⲛ fixed ID; ⲛϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡalias ⲙⲡposition ⲛϣⲟⲣⲡ.
+```text
+orderNumber = 1 + ((D-1) mod 720)
+```
 
-`monster_pour_route -> monster_stage19_bowl_alias_patch_wrapper -> patchedPours -> {installOrderAliases, bowlByLegacyPosition}`
+L-identità fissa ta’ skutella u l-pożizzjoni temporanja tagħha f’ordni partikolari għandhom jiġu distinti minn xulxin.
 
-Ⲡ`patchedPours` ⲙⲟⲩⲧⲉ ⲉ`orderPatchFromValue`, ⲛϥⲧⲁⲙⲓⲟ ⲙⲡalias, ⲁⲩⲱ ⲛ3 ⲛread ⲙⲡbowl ⲛⲧⲉⲡpour ⲧⲏⲣⲟⲩ ⲥⲉⲙⲟⲟϣⲉ ϩⲓⲧⲛ `bowlByLegacyPosition`.
+---
 
-ⲠStage 18 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. ⲠStage 19 ⲧⲁϫⲣⲟ ⲛⲟⲩwitness `drop=145`, order `[2,3,1,4,5,6]`, ⲉⲣⲉ ⲛ3 ⲛpour ⲛϣⲟⲣⲡ ⲧⲏⲣⲟⲩ ϫⲓ ⲛbowl ⲉⲩϣⲟⲃⲉ ⲙⲛ ⲛfixed IDs. Ⲁⲩⲱ ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲛ720 ⲛpermutation residue ⲧⲏⲣⲟⲩ ⲙⲛ ⲡsame-line oracle; ⲙⲛ mismatch.
+# J. It-Tferrigħ u t-Tħawwid ta’ Kull Qatra
 
-Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉ`CTX_PATCHED_POUR_ORDER`, `CTX_BOWL_ALIAS`, `CTX_PATCHED_POUR_RESULT` ⲙⲛ `CTX_BOWL_ALIAS_PATCH_SEEN` ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ ⲙⲛ ⲛlegacy trace.
+Fit-tliet skutelli li jkunu fil-pożizzjonijiet 1–3 isiru tliet tferrigħat diretti:
 
+```text
+pour₁ = SAVE(D² + qamħ_i · old(position1) + 3i)
+pour₂ = SAVE(D² + xgħir_i· old(position2) + 5i)
+pour₃ = SAVE(D² + melħ_i  · old(position3) + 7i)
+```
 
-## Ⲃⲁⲑⲙⲟⲥ 20 — DISCOVERY 10
+Qabel it-tħawwid jittieħed `snapshot` tal-istat tas-sitt skutelli. L-iskutelli jitqiegħdu f’ċirku skont l-ordni ddeterminata minn dik il-qatra.
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyStirOneDropInPlace`. Ⲡhelper ⲡⲁⲓ ϫⲓ ⲙⲡorder ⲙⲛ ⲛpour ⲉⲧⲁⲩⲧⲁϫⲣⲟ ⲙⲙⲟⲟⲩ ϩⲛ ⲛⲃⲁⲑⲙⲟⲥ ⲛϣⲟⲣⲡ, ⲁⲗⲗⲁ ⲛϥⲥϩⲁⲓ ⲛⲧⲉⲩⲛⲟⲩ ⲙⲡresult ⲙⲡposition ⲛⲓⲙ ⲉϩⲟⲩⲛ ⲉⲡB ⲛⲟⲩⲱⲧ.
+Dawn il-ġebliet jintrabtu mal-pożizzjonijiet 1–6 kif ġej:
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage20_legacy_inplace_bowl_handler -> monster_bowl_stir_route -> legacyStirOneDropInPlace`
+```text
+qamħ, xgħir, melħ, morra, ħamra, qamħ
+```
 
-Ⲉⲧⲃⲉ ⲧⲉⲓⲅⲣⲁⲫⲏ ⲛⲧⲉⲩⲛⲟⲩ, ⲡposition ⲉⲧⲛⲏⲩ ϣϭⲙϭⲟⲙ ⲉϫⲓ ⲙⲡB ⲉⲁⲩϣⲓⲃⲉ ⲙⲙⲟϥ ϩⲙⲡround ⲛⲟⲩⲱⲧ. Ⲡformula ⲙⲡbowl ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ`id`, `prev`, `next`, ⲡpour ⲙⲡposition, ⲡdrop ⲙⲛ ⲡstone ⲙⲡposition, ⲁⲩⲱ ⲛϥⲥϩⲁⲓ ⲙⲡ`SAVE` ⲉⲡB ⲛⲧⲉⲩⲛⲟⲩ.
+Jekk l-iskutella `B` tinsab fil-pożizzjoni `q`, l-iskutella ta’ qabilha hija `P` u dik ta’ warajha hija `N`:
 
-Ⲡⲇⲟⲕⲓⲙⲏ ⲙⲡ`drop=1`, `i=4`, bowls `11,13,17,19,23,29`, stones `2,3,5,7,11` ⲙⲛ order `[1,2,3,4,5,6]` ⲧⲁϫⲣⲟ ϫⲉ ⲡϣⲟⲣⲡ bowl ⲧⲱⲛ ⲙⲛ ⲡreference ⲛⲧⲉⲡold-state, ⲁⲗⲗⲁ ⲛbowl 2..6 ⲥⲉϣⲟⲃⲉ: ⲟⲩⲛ 5 ⲛmismatch ⲉⲩⲧⲟϣ.
+```text
+u = old(B)
+  + 2·old(P)
+  + 3·old(N)
+  + directPour(q)
+  + D
+  + stone(q)
 
-Ⲡ`MonsterContext` ϩⲁⲣⲉϩ ⲉⲡdrop, ⲡi, ⲡinput bowls, ⲡstone row, ⲡorder, ⲛpour, ⲡlegacy output ⲙⲛ ⲡroute output. Ⲡ`monster_bowl_stir_route` ⲙⲟⲟϣⲉ ⲉⲡlegacy ⲛⲧⲟϥ ϩⲙⲡⲉⲓDISCOVERY.
+new(B) = SAVE(u² + 5·old(P)·old(N) + i·q)
+```
 
-ⲚStage 1–19 ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 20 ⲟ ⲛ`EXPECTED_RED`.
+Is-sitt riżultati kollha jiġu kkalkulati mill-istess `snapshot` tal-istat, u s-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
 
+Wara l-qatra 46, l-ordni tinħażen bħala `orderAt46`.
 
-## Ⲃⲁⲑⲙⲟⲥ 21 — PATCH 10
+---
 
-Ⲡ`legacyStirOneDropInPlace` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ, ⲁⲩⲱ ⲡ`stirOneDropViaShadow` ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ ϩⲓ clone ⲉϥϣⲟⲃⲉ. Ⲡgarbage ⲛⲗⲉⲅⲁⲥⲓ ⲛϥⲧⲟϣ ⲁⲛ ⲙⲡsemantic output.
+# K. It-Tnax-il Pass Sussegwenti ta’ Tħawwid
 
-Ⲡ`vaultOld` ⲟ ⲛⲟⲩsnapshot ⲛⲧⲉ ⲛ6 ⲛBigInt pointer ⲙⲡB ⲙⲡⲉⲙⲧⲟ ⲛⲛ6 ⲛposition. Ⲛread ⲧⲏⲣⲟⲩ ⲙⲡ`id`, `prev`, `next` ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡ`vaultOld` ⲙⲙⲁⲧⲉ.
+Wara l-qatra 46 isiru tnax-il pass sussegwenti ta’ tħawwid.
 
-Ⲡ`pending` ⲁⲣⲭⲉⲓ ⲛ0 ϩⲓ ⲛ6 ⲛslot. Ⲡresult ⲙⲡposition ⲛⲓⲙ ⲥⲏϩ ⲉ`pending[bowlId]`, ⲁⲩⲱ ⲙⲛ write ⲉⲡB ⲉϥϣⲟⲟⲡ ϩⲙⲡloop. Ⲙⲛⲛⲥⲁ ⲧⲣⲉⲛ6 ⲛslot ⲧⲏⲣⲟⲩ ⲙⲟⲩϩ, ⲡcommit ⲕⲱ ⲛ6 ⲛpointer ⲉⲡB ⲛⲟⲩⲥⲟⲡ.
+F’kull pass ta’ tħawwid `r`:
 
-`monster_bowl_stir_route -> monster_stage21_bowl_shadow_patch_wrapper -> stirOneDropViaShadow`
+```text
+S_r = SAVE(sum(oldBowls) + 149·r)
+```
 
-ⲠStage 20 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲡdirect legacy call ⲟⲩⲏϩ ⲉϥϯ 5 ⲛmismatch ϩⲙⲡwitness ⲛⲧⲟϣ, ϩⲟⲡⲟⲩ ⲡroute ⲙⲡpatch ϯ 0 ⲛmismatch ⲙⲛ ⲡsame-line old-state reference.
+L-istess valur jiżdied ma’ kull skutella u, fl-istess ħin, jintuża biex jiġi ddeterminat in-numru tal-ordni:
 
-Ⲡ`CTX_BOWL_SHADOW_PATCH_SEEN` ⲙⲉⲧⲣⲉ ϫⲉ ⲡshadow detour ⲁϥⲙⲟⲟϣⲉ ϩⲙⲡinvocation. Ⲙⲛ global mutable semantic state ⲉϥⲟⲩⲱϩ.
+```text
+1 + ((S_r-1) mod 720)
+```
 
+Jekk l-iskutella `B` tinsab fil-pożizzjoni `q` fl-ordni ta’ dak il-pass ta’ tħawwid, u l-iskutelli ġirien tagħha huma `P,N`:
 
-## Ⲃⲁⲑⲙⲟⲥ 22 — DISCOVERY 11
+```text
+u = old(B)
+  + 3·old(P)
+  + 5·old(N)
+  + S_r
+  + r
+  + q²
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacySauceWithOverwritableOrderMemory`. Ⲡroute ⲡⲁⲓ ⲧⲁⲙⲓⲟ ⲛ46 ⲛvisible drop ϩⲓⲧⲛ ⲛpatch ⲛϣⲟⲣⲡ, ⲛϥⲧⲁⲙⲓⲟ ⲛpatched pours, ⲛϥⲙⲟⲟϣⲉ ϩⲓⲧⲛ `stirOneDropViaShadow`, ⲁⲩⲱ ⲛϥⲉⲣ 12 ⲛpost-stir.
+new(B) = SAVE(u² + 7·old(P)·old(N))
+```
 
-Ⲡlegacy ⲕⲱ ⲙⲡorder ⲛⲧⲉ drop ⲛⲓⲙ ⲙⲛ post-stir ⲛⲓⲙ ⲉⲟⲩmemory ⲛⲟⲩⲱⲧ. Ⲟⲩⲛ 58 ⲛwrite: 46 ⲛⲧⲉ ⲛdrop ⲙⲛ 12 ⲛⲧⲉ ⲛpost-stir. Ⲡorder ⲙⲡdrop 46 ⲥⲏϩ ⲉⲃⲟⲗ ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲗⲗⲁ ⲡ`queryOrder` ϫⲓ ⲙⲡmemory ⲛⲟⲩⲱⲧ ⲙⲛⲛⲥⲁ ⲡpost-stir 12.
+Hawn ukoll, is-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage22_overwritable_order_handler -> monster_order46_memory_route -> legacySauceWithOverwritableOrderMemory`
+## K½. Il-Mostru Jinduna bil-Mgħarfa Wara li Diġà Ħawwad
 
-ϨⲙⲡFoundation witness, ⲡorder ⲙⲡdrop 46 ⲡⲉ `[4,5,2,3,6,1]`, ⲁⲗⲗⲁ ⲡlegacy/query memory ⲙⲛⲛⲥⲁ ⲡpost-stir 12 ⲡⲉ `[1,6,5,2,4,3]`. Ⲛposition 1,2,6 ⲥⲉϣⲟⲃⲉ. Ⲛ6 ⲛfinal bowls ⲧⲱⲛ ⲙⲛ `oracle_sauce` ⲙⲡline ⲛⲟⲩⲱⲧ; ⲡdrop46 diagnostic ⲧⲱⲛ ⲟⲛ ⲙⲛ ⲡoracle.
+L-istruzzjoni ta’ hawn fuq **ma titħassarx**. F’kull wieħed mit-tnax-il pass, il-Mostru l-ewwel iwettaqha kollha kemm hi, inkluż `+ S_r`, u jżomm is-sitt skutelli li joħorġu minnha bħala **riżultat fantasma storiku**. Dak ir-riżultat ma jitħalliex imur għand is-siġilli, ix-xtiebi, is-snin, il-pulpetti, ix-xhur jew ir-riżultat finali.
 
-Ⲙⲛ `orderAt46Latch` ⲏ ⲟⲩsingle-write repair ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 22 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–21 ⲥⲉⲟ ⲛ`GREEN`.
+Imbagħad, mingħajr ma juża l-iskutelli fantasma bħala input, il-Mostru jerġa’ jieħu **l-istess `oldBowls` li daħlu fil-pass** u jagħmel dawra oħra, għax sab li kien ħallat żewġ numri li għandhom xogħol differenti.
 
+L-ewwel jinżamm is-somma ordinarja, mhux miżmuma u mingħajr `149·r`:
 
-## Ⲃⲁⲑⲙⲟⲥ 23 — PATCH 11
+```text
+rawBowlSum_r = sum(oldBowls)
+```
 
-Ⲡ`legacySauceWithOverwritableOrderMemory` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡ`monster_stage23_order46_latch_patch_wrapper` ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲩⲱ ⲙⲛⲛⲥⲱⲥ ⲛϥⲙⲟⲩⲧⲉ ⲉ`sauceWithOrderAt46Latch` ⲛⲟⲩCOPY_AUTHORITATIVE.
+Minnha jinħadem numru separat għall-ordni:
 
-`monster_order46_memory_route -> monster_stage23_order46_latch_patch_wrapper -> sauceWithOrderAt46Latch`
+```text
+orderNumber_r = SAVE(rawBowlSum_r + 149·r)
+```
 
-ⲠCOPY_AUTHORITATIVE ⲟⲩⲏϩ ⲉϥⲥϩⲁⲓ ⲙⲡlegacy order memory 58 ⲛⲥⲟⲡ. Ⲙⲛⲛⲥⲁ ⲧⲣⲉⲡround ⲙⲡdrop 46 ⲟⲩⲱ ⲁⲩⲱ ⲉⲙⲡⲁⲧⲉ ⲡpost-stir ⲛϣⲟⲣⲡ ⲁⲣⲭⲉⲓ, ⲛϥⲥϩⲁⲓ ⲛⲟⲩⲥⲟⲡ ⲙⲙⲁⲧⲉ ⲙⲡorder ⲉ`S23_ORDER46_LATCH`.
+Il-permutazzjoni tal-pass korrettiv tiġi minn:
 
-Ⲡlatch ⲟⲩⲏϩ ⲁϫⲛ write ϩⲛ ⲛ12 ⲛpost-stir. Ⲡlegacy memory ⲇⲉ ⲟⲩⲏϩ ⲉϥⲟⲩⲱϩ ⲛⲛwrite ⲁⲩⲱ ⲛϥϫⲱⲕ ⲉⲃⲟⲗ ϩⲙⲡorder ⲙⲡpost-stir 12. Ⲡ`queryOrder` ⲙⲡPATCH 11 ϫⲓ ⲙⲙⲁⲧⲉ ⲙⲡlatch.
+```text
+1 + ((orderNumber_r-1) mod 720)
+```
 
-ϨⲙⲡFoundation witness, ⲡlatch/query ⲡⲉ `[4,5,2,3,6,1]`, ⲁⲗⲗⲁ ⲡlegacy memory ⲡⲉ `[1,6,5,2,4,3]`. Ⲡlatch write count ⲟ ⲛ1 ⲁⲩⲱ ⲡsource ordinal ⲟ ⲛ46. Ⲛ6 ⲛfinal bowls ⲙⲛ ⲡquery ⲧⲱⲛ ⲙⲛ `oracle_sauce` ⲙⲡline ⲛⲟⲩⲱⲧ.
+Qabel ma jkompli, il-Mostru jqabbel dak li għadu kemm għamel ma’ dak li għamel ħażin ftit qabel:
 
-ⲠStage 22 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲙⲛ `oldNextBowlFixedName` ⲏ ⲟⲩrepair ⲙⲡPATCH 12 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+```text
+orderNumber_r = S_r
+correctedPermutation_r = historicalPermutation_r
+```
 
+Jekk waħda minn dawn iż-żewġ ugwaljanzi ma tkunx vera, il-kalkolu jieqaf: id-detour ma jistax jibdel l-ordni u ma jistax jaħbi żball ieħor.
 
-## Ⲃⲁⲑⲙⲟⲥ 24 — DISCOVERY 12
+Wara l-guard, u **biss** wara l-guard, kull skutella terġa’ tiġi kkalkulata mill-istess `snapshot` antik. Jekk `B` tinsab fil-pożizzjoni `q` tal-permutazzjoni vverifikata u l-ġirien huma `P,N`:
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldNextBowlFixedName(id)`. Ⲡhelper ⲛⲗⲉⲅⲁⲥⲓ ⲡⲁⲓ ⲙⲟⲟϣⲉ ϩⲓ ⲡring ⲛⲛbowl ID ⲛⲛⲟⲩⲙⲉⲣⲟⲛ: `1→2→3→4→5→6→1`. Ⲛϥϫⲓ ⲁⲛ ⲙⲡposition ⲙⲡqueried ID ϩⲙ `orderAt46Latch`.
+```text
+u_corrected = old(B)
+            + 3·old(P)
+            + 5·old(N)
+            + rawBowlSum_r
+            + r
+            + q²
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage24_legacy_next_bowl_handler -> monster_next_bowl_route -> legacyNextBowlAdapter -> oldNextBowlFixedName`
+correctedNew(B) = SAVE(u_corrected² + 7·old(P)·old(N))
+```
 
-Ⲡhandler ϫⲓ ⲙⲡ`S23_ORDER46_LATCH` ⲉⲧⲁⲡPATCH 11 ⲧⲁⲙⲓⲟ ⲙⲙⲟϥ, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡqueried ID, ⲡdirect legacy result ⲙⲛ ⲡroute result ϩⲙⲡ`MonsterContext`. Ⲡprobe ⲙⲡDISCOVERY ϫⲓ ⲙⲡID ⲉⲧϩⲙⲡposition ⲙⲙⲁϩ4 ⲙⲡlatch ⲛⲧⲟϣ.
+Hawnhekk `rawBowlSum_r` huwa **eżattament** `sum(oldBowls)`: ma jiġix applikat `SAVE` fuqu u ma jiżdiedx `149·r` miegħu. `149·r` jgħix biss ġewwa `orderNumber_r`.
 
-ϨⲙⲡFoundation witness, ⲡlatch ⲡⲉ `[4,5,2,3,6,1]`. Ⲡqueried ID ⲡⲉ `3`. Ⲡlegacy fixed-name successor ⲡⲉ `4`, ⲁⲗⲗⲁ ⲡcircular successor ϩⲙⲡlatch ⲡⲉ `6`. ⲠStage 24 ⲟ ⲛ`EXPECTED_RED`, ⲁⲩⲱ ⲛStage 1–23 ⲥⲉⲟ ⲛ`GREEN`.
+Is-sitt `correctedNew` jiġu kkalkulati kollha mill-istess `oldBowls` u jiġu assenjati flimkien. Dawn is-sitt skutelli korrettivi — u mhux is-sitt skutelli fantasma tal-ewwel dawra — isiru l-`oldBowls` tal-pass `r+1`. Għalhekk kull pass jagħmel, fl-ordni: **scar qadim reali → guard → detour korrettiv → commit korrettiv**.
 
-Ⲙⲛ lookup ⲙⲡqueried ID ϩⲙⲡlatch ⲏ ⲟⲩrepair ⲙⲡPATCH 12 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+Meta jsiru l-mistoqsijiet, “l-iskutella ta’ wara” tibqa’ ddeterminata minn `orderAt46`. Dawn it-tnax-il pass ta’ tħawwid jużaw l-ordnijiet tagħhom stess waqt it-tħawwid, filwaqt li l-ordni rreġistrata tal-qatra 46 tibqa’ tintuża meta jsiru l-mistoqsijiet.
 
+---
 
-## Ⲃⲁⲑⲙⲟⲥ 25 — PATCH 12
+# L. Is-Siġilli
 
-Ⲡ`oldNextBowlFixedName(id)` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲛ ⲡring ⲛID `1→2→3→4→5→6→1`. Ⲡ`nextBowlQueryPatch` ⲙⲟⲩⲧⲉ ⲉⲡlegacy helper ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲩⲱ ⲛϥⲕⲁ ⲙⲡⲉϥresult ⲛⲥⲁ.
+| Siġill | Mistoqsija |
+|---:|---|
+| 1 | id-distanza bejn ix-xtiebi tal-pulpetti |
+| 10 | is-sena 5000 |
+| 11 | is-sena ta’ wara |
+| 12 | is-sena ta’ qabel |
+| 20 | l-għadd tal-pulpetti |
+| 21 | it-tqassim tal-medda bejn ix-xtiebi |
+| 22 | l-ismijiet tal-pulpetti |
+| 30 | l-għadd tax-xhur |
+| 31 | it-tulijiet tax-xhur |
+| 32 | l-insiġ tax-xhur |
+| 33 | l-ismijiet tax-xhur |
 
-ⲠCOPY_AUTHORITATIVE ϫⲓ ⲙⲡ`sauceResult.queryOrder`, ⲉⲧⲉ ⲡ`orderAt46Latch` ⲙⲡPATCH 11 ⲡⲉ, ⲛϥϣⲓⲛⲉ ⲛⲥⲁ ⲡ`queriedId` ϩⲓ ⲛ6 ⲛposition, ⲁⲩⲱ ⲛϥϫⲓ ⲙⲡID ⲙⲡposition ⲉⲧⲛⲏⲩ. Ⲉϣϫⲉ ⲡqueried ID ⲟ ϩⲙⲡposition ⲙⲙⲁϩ6, ⲡsuccessor ⲡⲉ ⲡposition ⲛϣⲟⲣⲡ.
+Il-post maħsub għas-siġill 40 jibqa’ vojt. Kien maħsub għall-mistoqsija tal-ġobon, u l-abbozz tagħha ttiekel qabel ma ġiet stabbilita l-mistoqsija.
 
-`monster_next_bowl_route -> monster_stage25_next_bowl_patch_wrapper -> nextBowlQueryPatch`
+---
 
-Ⲡ`monster_stage24_legacy_next_bowl_handler` ⲟⲩⲏϩ ⲉϥϫⲓ ⲛⲟⲩdirect legacy result ϩⲙⲡfield ⲛStage 24, ⲁⲗⲗⲁ ⲡroute result ⲧⲉⲛⲟⲩ ⲟ ⲛⲟⲩcircular successor. Ⲡ`monster_stage25_next_bowl_patch_handler` ϩⲁⲣⲉϩ ⲉⲡposition ⲉⲧⲁⲩϭⲓⲛⲉ, ⲡpatched output ⲙⲛ ⲡseen counter.
+# M. Kif Twieġeb Skutella
 
-ϨⲙⲡFoundation latch `[4,5,2,3,6,1]`, ⲡprobe ⲛStage 24 ⲟ ⲛ`queriedId=3`: ⲡlegacy ϯ `4`, ⲁⲗⲗⲁ ⲡpatched route ϯ `6`. Ⲡtest ⲙⲡStage 25 ⲥⲙⲓⲛⲉ ⲛ6 ⲛID ⲧⲏⲣⲟⲩ, ⲙⲛ ⲡwrap ⲙⲡposition 6, ⲙⲛ ⲛID 0/7 ⲉⲧⲃⲏⲕ ⲉⲃⲟⲗ. Ⲡlegacy scar ϣⲟⲃⲉ 3 ⲛⲥⲟⲡ, ⲁⲗⲗⲁ ⲡpatch ⲟ ⲛ0 ⲛmismatch.
+Meta ssir mistoqsija lill-iskutella `B`, “l-iskutella ta’ wara” hija dik li tiġi warajha fiċ-ċirku ddefinit minn `orderAt46`.
 
-ⲠStage 24 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.
+Jekk `z` huwa s-siġill:
 
+```text
+A₀ = SAVE((Q[B] + z + 181)² + 179·Q[next] + z)
+```
 
-## Ⲃⲁⲑⲙⲟⲥ 26 — DISCOVERY 13
+Biex tiġi ddeterminata d-direzzjoni tal-fluss tat-tweġibiet, jiġi kkalkulat il-valur `D` li ġej:
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `answerRingThroughPatchedNextBowl`, `ringAnswer` ⲙⲛ `biasedLegacyPick`. Ⲡanswer ring ϫⲓ ⲛⲛfinal bowls ⲙⲡPATCH 11 ⲙⲛ ⲡnext bowl ⲙⲡPATCH 12, ⲁⲩⲱ ⲛϥϩⲁⲣⲉϩ ⲉⲡ`first` ⲙⲛ ⲡ`direction` ϩⲛ state ⲙⲡinvocation.
+```text
+D = SAVE((A₀ + z + 1 + 193)² + 193·A₀ + 197·Q[6])
+```
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage26_legacy_biased_selection_handler -> monster_biased_selection_route -> legacyBiasedSelectionBeforeRejection -> biasedLegacyPick`
+Jekk `D` ikun numru fard — il-fluss jimxi ’l quddiem; jekk ikun numru pari — jimxi lura.
 
-Ⲡlegacy selector ⲟ ⲛⲧⲉⲓϩⲉ:
+```text
+A_k = 1 + ((A₀ - 1 + s·k) mod M)
+```
 
-`biasedLegacyPick(x,N) = regularMod(x-1,N)+1`
+fejn `s=+1` jew `−1`.
 
-Ⲡ`legacyBiasedSelectionBeforeRejection` ϫⲓ ⲙⲡ`ringAnswer(stream,0)` ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡselector ⲛⲧⲉⲩⲛⲟⲩ. Ⲙⲛ acceptance limit, ⲙⲛ rejection loop, ⲁⲩⲱ ⲙⲛ progression ϩⲙⲡanswer ring ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+---
 
-Ⲡsame-line regression ⲧⲁϫⲣⲟ ⲛ3 ⲛFoundation ring ⲛⲧⲉⲡAssembly ⲡⲁⲓ:
+# N. Għażla Qasira u Għażla Wiesgħa
 
-- bowl `1`, seal `21`: `first=149761121754155417675313577282624396876`, `N=first-1`.
-- bowl `2`, seal `21`: `first=150753053569195599631047864881928087266`, `N=first-1`.
-- bowl `3`, seal `3`: `first=127977781070158256028771206368791714084`, `N=first-1`.
+Jekk `1<=N<=M`:
 
-Ϩⲛ ⲛ3 ⲛring ⲧⲏⲣⲟⲩ, ⲡdirection ⲟ ⲛ`-1`, ⲡ`first` ⲟ ⲉϩⲣⲁⲓ ⲉ`M_OLD/2`, ⲁⲩⲱ ⲡ`ringAnswer(1)` ⲧⲱⲛ ⲙⲛ `N`. Ⲡlegacy direct modulo ϯ `1`, ϩⲟⲡⲟⲩ ⲡsame-line rejection oracle ϯ `N`. Ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+```text
+L = floor(M/N)·N
+```
 
-ⲠStage 26 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–25 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ rejection patch ⲏ `wideDetour` ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+Tweġibiet akbar minn `L` jiġu miċħuda, u l-ewwel tweġiba aċċettata tiddetermina l-għażla:
 
+```text
+1 + ((A-1) mod N)
+```
 
-## Ⲃⲁⲑⲙⲟⲥ 27 — PATCH 13
+Jekk `N>M`, jittieħed l-iżgħar `k` li għalih `M^k>=N`, u jinbena dan in-numru:
 
-Ⲡ`biasedLegacyPick(x,N)` ⲙⲛ ⲡ`legacyBiasedSelectionBeforeRejection` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡ`patchedSmallPick` ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉⲡlegacy path ⲛⲟⲩCOPY_DIAGNOSTIC, ⲁⲗⲗⲁ ⲡresult ⲙⲡcall ⲡⲁⲓ ⲛϥⲧⲟϣ ⲁⲛ ⲙⲡsemantic selection.
+```text
+W = 1 + Σ(A_j-1)·M^j
+```
 
-Ⲡshort detour ⲧⲁϫⲣⲟ ⲛ`1<=N<=M_OLD`, ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡ`limit=floor(M_OLD/N)*N`, ⲁⲩⲱ ⲛϥⲟⲩⲱϩ ⲙⲡoffset ϩⲙⲡanswer ring ⲛⲟⲩⲱⲧ ϩⲟⲥⲟⲛ `x>limit`. Ⲙⲛⲛⲥⲁ ⲧⲣⲉϥϭⲓⲛⲉ ⲙⲡϣⲟⲣⲡ `x<=limit`, ⲛⲧⲉⲩⲛⲟⲩ ⲙⲙⲁⲧⲉ ⲛϥⲙⲟⲩⲧⲉ ⲉ`biasedLegacyPick(x,N)`.
+fejn `A₀` hija ċ-ċifra l-inqas sinifikanti.
 
-`monster_biased_selection_route -> monster_stage27_rejection_patch_wrapper -> patchedSmallPick -> biasedLegacyPick`
+```text
+L_w = floor(M^k/N)·N
+```
 
-Ϩⲛ ⲛ3 ⲛFoundation witness ⲙⲡStage 26, ⲡanswer ⲛoffset 0 ⲟ ⲛ`N+1`, ⲡlimit ⲟ ⲛ`N`, ⲁⲩⲱ ⲡanswer ⲛoffset 1 ⲟ ⲛ`N`. Ⲡdirect legacy ⲟⲩⲏϩ ⲉϥϯ `1`; ⲡroute ⲙⲡPATCH 13 ⲧⲉⲛⲟⲩ ϯ `N` ⲙⲛ ⲡsame-line oracle.
+Jekk `W>L_w`, il-proċedura tibda minn `W` stess u timxi pass wieħed kull darba, fl-istess direzzjoni, fuq iċ-ċirku `1..M^k` sakemm jintlaħaq valur aċċettabbli; imbagħad:
 
-Ⲡtest ⲙⲡStage 27 ⲥⲙⲓⲛⲉ ⲛⲛ3 ⲛwitness, ⲡboundary `N=M_OLD` ⲉⲧⲉ ⲡoffset ⲟ ⲛ0 ⲙⲛ ⲡlimit ⲟ ⲛM, ⲙⲛ ⲛinvalid short boundaries. Ⲡ`N>M_OLD` ⲛϥⲧⲟϣ ⲁⲛ ϩⲙⲡStage ⲡⲁⲓ; ⲙⲛ `wideDetour` ⲉϥϣⲟⲟⲡ.
+```text
+1 + ((W-1) mod N)
+```
 
-Ⲁⲩⲧⲁⲙⲓⲟ ⲛⲟⲩharness correction ⲛⲧⲉ Stage 26: ⲡassert ⲛ`legacy==1` ⲁⲩⲕⲧⲟϥ ⲉⲡdirect legacy call ⲁⲛⲧⲓ ⲡsemantic route. Ⲛwitness ⲙⲛ ⲡoracle comparison ⲙⲡⲟⲩϣⲓⲃⲉ. Ⲡtest ⲡⲁⲓ ⲟⲩⲏϩ ⲉϥϯ `EXPECTED_RED` ⲉϥⲙⲟⲟϣⲉ ⲙⲛ ⲡproduction ⲙⲡStage 26, ⲁⲩⲱ ⲛϥϯ `REGRESSION_GREEN` ⲙⲛ ⲡPATCH 13.
+L-isem kanoniku ta’ dan il-mekkaniżmu huwa **Għażla Ugwali**. Iċ-ċifri tal-ewwel numru wiesa’ jittieħdu minn numri konsekuttivi fis-sekwenza tat-tweġibiet. Minħabba din l-istruttura, il-valuri f’`1..M^k` ma jingħatawx l-istess piż; u meta l-ispazju jkun kbir biżżejjed, xi possibbiltajiet jingħataw piż ta’ żero u għalhekk ma jistgħux jintgħażlu qatt. Din hija d-distribuzzjoni preskritta tal-mekkaniżmu tal-għażla wiesgħa.
 
+---
 
-## Ⲃⲁⲑⲙⲟⲥ 28 — DISCOVERY 14
+# O. Ix-Xtiebi tal-Pulpetti
 
-Ⲡ`patchedSmallPick` ⲙⲡPATCH 13 ⲟⲩⲏϩ ⲉϥⲧⲟϣ ⲙⲡshort domain `1<=N<=M_OLD`. Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacySelectionAssumingNLeM`, ⲉϥⲙⲉⲉⲩⲉ ϫⲉ ⲛfamily ⲧⲏⲣⲟⲩ ⲟ ⲛshort ⲁⲩⲱ ⲉϥϫⲟⲟⲩ ⲙⲡN ⲧⲏⲣϥ ⲉ`patchedSmallPick` ⲁϫⲛ ⲟⲩwide dispatcher.
+`Foundation` hija x-xatba bl-indiċi 0.
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage28_legacy_wide_assumption_handler -> monster_wide_selection_route -> legacySelectionAssumingNLeM -> patchedSmallPick`
+Biex tinstab ix-xatba pożittiva bin-numru `n`, titħejja z-zalza billi jintuża l-par:
 
-Ⲡreal handler ϫⲓ ⲙⲡanswer ring ⲙⲡStage 26 ⲁⲩⲱ ⲛϥⲧⲁⲙⲓⲟ ⲙⲡ`N=M_OLD+1`. Ⲡshort guard ⲕⲱ ⲙⲡresult ⲉ0; ⲡhandler ϩⲁⲣⲉϩ ⲉ`legacy_assumed_short=1`, `unsupported=1` ⲙⲛ null semantic result, ⲁⲗⲗⲁ ⲛϥⲧⲁⲕⲟ ⲁⲛ ⲛⲛregression ⲛϣⲟⲣⲡ.
+```text
+(Foundation, Foundation+n)
+```
 
-Ⲡsame-line regression ⲧⲁϫⲣⲟ ⲛ3 ⲛwide family size: `M_OLD+1`, `M_OLD^2`, `M_OLD^3`. Ⲡdirect legacy call ⲧⲏⲣϥ ⲟ ⲛnull; ⲡ`oracle_choose_rank_wide` ⲙⲡAssembly ⲛⲟⲩⲱⲧ ϯ ⲛⲟⲩrank ⲛⲧⲟϣ. Ⲡroute ⲙⲡStage 28 ⲟ ⲛshort-only, ⲁⲩⲱ ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+Issir mistoqsija lill-iskutella 1 bis-siġill 1, jintgħażel numru minn `1..922`, u mbagħad jiżdied 41 ma’ dak in-numru.
 
-Ⲙⲛ `wideDetour`, ⲙⲛ base-M digits, ⲙⲛ combined wide number, ⲁⲩⲱ ⲙⲛ wide rejection ϩⲙⲡproduction ⲙⲡⲉⲓStage. ⲠStage 28 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–27 ⲥⲉⲟ ⲛ`GREEN`.
+Biex tinstab ix-xatba negattiva bin-numru `n`, jintuża l-par:
 
+```text
+(Foundation, Foundation-n)
+```
 
-## Ⲃⲁⲑⲙⲟⲥ 29 — PATCH 14
+Għalhekk it-tul ta’ kull medda bejn żewġ xtiebi jkun fil-medda:
 
-Ⲡ`legacySelectionAssumingNLeM` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉ`patchedSmallPick` ⲙⲙⲁⲧⲉ. Ϩⲓ `N>M_OLD` ⲡdirect legacy scar ⲟⲩⲏϩ ⲉϥϯ null.
+```text
+42..963
+```
 
-Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`selectionPatch14`. Ⲉϣϫⲉ `N<=M_OLD`, ⲡdispatcher ⲕⲧⲟ ⲉⲡlegacy short path. Ⲉϣϫⲉ `N>M_OLD`, ⲛϥⲙⲟⲩⲧⲉ ⲉ`wideDetour`.
+u japplikaw ir-relazzjonijiet li ġejjin:
 
-`monster_wide_selection_route -> monster_stage29_wide_patch_wrapper -> selectionPatch14`
+```text
+G_0  = Foundation
+G_n  = G_(n-1) + positiveGap(n)
+G_-n = G_-(n-1) - negativeGap(n)
+```
 
-Ⲡ`wideDetour` ⲕⲱ ⲙⲡ`places` ⲙⲙⲁⲧⲉ ϣⲁⲛⲧⲉ `space=M_OLD^places >= N`. Ⲛdigits ⲥⲉϫⲓ ⲛⲟⲩⲥⲟⲡ ⲙⲙⲁⲧⲉ ϩⲙⲡanswer ring, ⲁⲩⲱ ⲡcombined number ⲟ ⲛ:
+---
 
-`1 + Σ((digit_k-1) * M_OLD^k)`
+# P. Is-Sena
 
-Ⲙⲛⲛⲥⲱⲥ ⲡacceptance limit ⲡⲉ `floor(space/N)*N`. Ⲉϣϫⲉ ⲡcombined number ⲟ ⲉϩⲣⲁⲓ ⲉⲡlimit, ⲡrejection ⲙⲟⲟϣⲉ ϩⲓ ⲡcombined-number ring ⲛⲧⲟϣ ⲙⲛ ⲡdirection ⲛⲧⲉ ⲡanswer ring. Ⲛdigits ⲛⲥⲉϫⲓ ⲁⲛ ⲛⲕⲉⲥⲟⲡ.
+Sena hija l-medda:
 
-ⲠStage 28 handler ⲧⲉⲛⲟⲩ ⲕⲱ ⲙⲡdirect legacy null ⲙⲛ `unsupported=1`, ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡpatched route ϩⲛ ⲟⲩstate ⲉϥϣⲟⲃⲉ. ⲠStage 28 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest.
+```text
+(openGate, closeGate]
+```
 
-ⲠStage 29 test ⲥⲙⲓⲛⲉ ⲙⲡshort boundary `N=M_OLD` ⲙⲛ ⲛwide family `M_OLD+1`, `M_OLD^2`, `M_OLD^3` ⲙⲛ `oracle_choose_rank_wide` ⲙⲡsame-line Assembly. Ⲛⲧⲟⲟⲩ ⲧⲏⲣⲟⲩ ⲥⲉⲧⲱⲛ.
+Għandha tinkludi mill-inqas 6 meded bejn ix-xtiebi, u t-tul tagħha għandu jkun:
 
-Ⲙⲛ code ⲙⲡPATCH 15 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+```text
+252..5778
+```
 
+It-tul massimu tas-sena huwa `5778`, u dan jirriżulta mis-sitt meded massimi:
 
-## Ⲃⲁⲑⲙⲟⲥ 30 — DISCOVERY 15
+```text
+6·963 = 5778
+```
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldGateQuestionDay(n)`, ⲉϥⲧⲁⲙⲓⲟ ⲙⲡquestion day ⲛⲧⲉⲡlegacy ϩⲓⲧⲛ `FOUNDATION+n`.
+---
 
-Ⲡcaller ⲛⲗⲉⲅⲁⲥⲓ `legacyGateQuestionDayFromSignedStepWrong` ϫⲓ ⲙⲡ`abs(signedStep)` ⲉⲙⲡⲁⲧⲉϥⲙⲟⲩⲧⲉ ⲉⲡhelper. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡnegative step ⲥⲱⲣⲙ ⲙⲡⲉϥsign ⲁⲩⲱ ⲡquestion day ⲃⲱⲕ ⲉⲡpositive side.
+# Q. Is-Sena 5000
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage30_legacy_gate_question_handler -> monster_gate_question_day_route -> legacyGateQuestionDayFromSignedStepWrong -> oldGateQuestionDay`
+Għall-Jum tal-Kalkolu `c`, jinstabu l-pari kollha eliġibbli ta’ xtiebi li jiddefinixxu sena li fiha jaqa’ dak il-jum:
 
-Ⲡsame-line regression ⲧⲁϫⲣⲟ ϩⲓ signed steps `-1,-2,-10,0,+1`. Ⲛnegative ⲛϣⲟⲙⲛⲧ ⲥⲉϣⲟⲃⲉ, ⲁⲗⲗⲁ `0,+1` ⲧⲱⲛ ⲛⲟⲩcoincidence.
+```text
+open < c <= close
+```
 
-Ⲙⲛ negative-side detour ⲏ code ⲙⲡPATCH 15 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ. ⲠStage 30 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–29 ⲥⲉⲟ ⲛ`GREEN`.
+Dawn jiġu ordnati skont:
 
+1. tul is-sena, mill-iqsar għall-itwal;
+2. jekk it-tul ikun l-istess — ix-xatba tal-ftuħ li tiġi l-ewwel.
 
-## Ⲃⲁⲑⲙⲟⲥ 31 — PATCH 15
+Titħejja z-zalza għal `(c,c)`, issir mistoqsija lill-iskutella 1 bis-siġill 10, u tintgħażel sena waħda.
 
-Ⲡ`oldGateQuestionDay` ⲙⲛ ⲡ`legacyGateQuestionDayFromSignedStepWrong` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡlegacy call ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ`abs(signedStep)` ⲁⲩⲱ ⲉϥϯ ⲙⲡpositive-side day.
+Is-sena magħżula hija **s-sena 5000 mill-Ħolqien tad-Dinja**.
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `gateQuestionDayPatch15`. Ⲛϣⲟⲣⲡ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡlegacy path ⲛⲟⲩCOPY_DIAGNOSTIC. Ⲉϣϫⲉ `signedStep>=0`, ⲡlegacy result ⲡⲉ ⲡsemantic result. Ⲉϣϫⲉ `signedStep<0`, ⲡlegacy result ⲕⲁ ⲙⲙⲟϥ ϩⲓ ⲡⲥⲁ ⲁⲩⲱ ⲡpatch ϯ ⲙⲡ`FOUNDATION-abs(step)`.
+In-numru 5000 huwa kostanta strutturali. Il-Mostru kiteb in-numru fuq l-iskutella tas-sena qabel ma kien spiċċa jagħżel ix-xtiebi tagħha, u minn dak iż-żmien id-dinja baqgħet irranġata hekk.
 
-`monster_gate_question_day_route -> monster_stage31_gate_question_patch_wrapper -> gateQuestionDayPatch15`
+---
 
-ⲠStage 30 handler ⲟⲩⲏϩ ⲉϥϩⲁⲣⲉϩ ⲉⲡdirect legacy result ⲙⲛ ⲡroute result ϩⲛ ⲙⲁ ⲉⲩϣⲟⲃⲉ. ⲠStage 31 handler ϩⲁⲣⲉϩ ⲉⲡpatched result ⲙⲛ ⲡpatch counter ⲉⲧⲟ ⲛinvocation-local.
+# R. Iż-Żewġ Mogħdijiet mis-Sena 5000
 
-Ⲡsame-line regression ⲧⲁϫⲣⲟ ϩⲓ `-1,-2,-10,0,+1`. Ⲛ5 ⲛcase ⲧⲏⲣⲟⲩ ⲧⲱⲛ ⲙⲛ ⲡsigned normative day. Ⲡdirect legacy scar ϩⲓ `-10` ⲟⲩⲏϩ ⲉϥϯ `FOUNDATION+10`.
+Biex tinstab is-sena li fiha jaqa’ l-Jum Mitlub, nibdew mis-sena 5000 determinata minn Jum il-Kalkolu.
 
-ⲠStage 30 regression ⲁϥⲕⲧⲟϥ ⲉ`GREEN` ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲙⲡⲉϥtest. Ⲙⲛ code ⲙⲡPATCH 16 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡⲉⲓStage.
+Meta l-Jum Mitlub ikun wara x-xatba tal-għeluq tas-sena magħrufa, fil-mixja ’l quddiem tintuża l-operazzjoni tas-sena ta’ wara:
 
+```text
+NEXT₁₁(c,Y)
+```
 
-## Ⲃⲁⲑⲙⲟⲥ 32 — DISCOVERY 16
+Ix-xatba tal-għeluq ta’ `Y` issir ix-xatba tal-ftuħ tas-snin kandidati. Dik l-istess xatba tintuża bħala l-Jum Mitlub fit-tħejjija taz-zalza. Is-snin eliġibbli li jibdew minn dik ix-xatba jiġu ordnati mill-iqsar għall-itwal, issir mistoqsija lill-iskutella 1 bis-siġill 11, u tintgħażel sena waħda. In-numru tas-sena jiżdied b’wieħed.
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲡlegacy constant `LEGACY_YEAR_MAX=5781` ⲁⲩⲱ ⲙⲡ`oldYearCandidate(gaps,length)`. Ⲡpredicate ⲟ ⲛⲧⲉⲓϩⲉ:
+Meta l-Jum Mitlub jaħbat max-xatba tal-ftuħ tas-sena magħrufa, jew ikun qabilha, fil-mixja lura tintuża l-operazzjoni tas-sena ta’ qabel:
 
-`gaps>=6` ⲙⲛ `252<=length<=LEGACY_YEAR_MAX`.
+```text
+PREVIOUS₁₂(c,Y)
+```
 
-`monster_year_candidate_route` ⲙⲟⲟϣⲉ ⲉ`oldYearCandidate` ⲛⲧⲟϥ ϩⲙⲡDISCOVERY ⲡⲁⲓ. Ⲡ`monster_stage32_legacy_year_max_handler` ⲙⲟⲩⲧⲉ ⲉⲡroute ⲛⲟⲩⲙⲉ ⲉϫⲛ `5778,5779,5780,5781` ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲟⲩcandidate mask ϩⲙⲡ`MonsterContext`.
+Ix-xatba tal-ftuħ ta’ `Y` issir ix-xatba tal-għeluq tas-snin kandidati. Dik l-istess xatba tintuża bħala l-Jum Mitlub fit-tħejjija taz-zalza. Is-snin eliġibbli li jintemmu f’dik ix-xatba jiġu ordnati mill-iqsar għall-itwal, issir mistoqsija lill-iskutella 1 bis-siġill 12, u tintgħażel sena waħda. In-numru tas-sena jonqos b’wieħed.
 
-Ⲡsame-line regression ⲧⲁϫⲣⲟ ⲉϫⲛ `251,252,5778,5779,5780,5781,5782`. Ⲡlegacy ϫⲓ ⲉϩⲟⲩⲛ ⲛ`5779..5781`, ϩⲟⲡⲟⲩ ⲡboundary ⲛⲕⲁⲛⲱⲛ ⲟ ⲛ`5778`; ⲟⲩⲛ 3 ⲛmismatch ⲉⲩⲧⲟϣ.
+Għalhekk, il-proċedura biex tinstab is-sena hija:
 
-ⲠStage 32 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–31 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ late year filter ⲏ code ⲙⲡPATCH 16 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+```text
+y = year5000(c)
 
+while t > y.closeGate:
+    y = NEXT₁₁(c,y)
 
-## Ⲃⲁⲑⲙⲟⲥ 33 — PATCH 16
+while t <= y.openGate:
+    y = PREVIOUS₁₂(c,y)
 
-Ⲡ`LEGACY_YEAR_MAX=5781` ⲙⲛ ⲡ`oldYearCandidate` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡ`monster_stage32_legacy_year_max_handler` ⲧⲉⲛⲟⲩ ⲙⲟⲩⲧⲉ ⲉ`oldYearCandidate` ⲛⲧⲟϥ, ⲉⲧⲣⲉ ⲡraw legacy mask `5778..5781` ⲟⲩⲏϩ observable.
+return y
+```
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ ⲡfootnote constant `REAL_YEAR_MAX_PATCH=5778` ⲙⲛ `yearCandidateAfterFootnotePatch`. Ⲡhelper ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉ`oldYearCandidate`; ⲉϣϫⲉ ⲡlegacy rejecte, ⲛϥrejecte. Ⲉϣϫⲉ ⲡlegacy accept ⲁⲩⲱ `candidateLength>5778`, ⲡfootnote ⲙⲙⲁⲧⲉ ⲡⲉ ⲉϥrejecte.
+B’hekk iż-żewġ operazzjonijiet jiffurmaw is-sekwenza kanonika miż-żewġ naħat tas-sena 5000: l-operazzjoni `NEXT₁₁` tifforma s-snin ta’ wara, u l-operazzjoni `PREVIOUS₁₂` tifforma dawk ta’ qabel.
 
-`monster_year_candidate_route -> monster_stage33_year_ceiling_patch_wrapper -> yearCandidateAfterFootnotePatch`
+---
 
-ⲠStage 33 handler ⲧⲁⲙⲓⲟ ⲙⲡraw family ⲛⲗⲉⲅⲁⲥⲓ ϩⲛ ⲡinput order:
+# S. Il-Pulpetti
 
-`5781,5779,5778,5780`
+Kull sena tinqasam f’għadd ta’ pulpetti li jvarja bejn 6 u 17. Kull pulpetta tibda fil-jum ta’ wara x-xatba tal-ftuħ tagħha u tintemm fix-xatba tal-għeluq tagħha.
 
-Ⲡraw family ⲟⲩⲏϩ 4. Ⲡfootnote rejecte ⲙⲡ`5781,5779,5780` **ⲉⲙⲡⲁⲧⲉ ⲡsort**, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡsemantic pre-sort family ⲟ ⲛ`5778` ⲙⲙⲁⲧⲉ. Ⲡ`stableLengthOnlyPatchedYearCandidates` ⲙⲟⲟϣⲉ ⲙⲛⲛⲥⲁ ⲡfilter ⲁⲩⲱ ⲡ`legacyYearSelectFirst` ϫⲓ ⲙⲡsorted filtered family ⲙⲙⲁⲧⲉ.
+Il-mistoqsijiet kollha dwar l-istruttura tas-sena jużaw l-istess zalza:
 
-Ⲡtie probe ⲙⲛ 2 ⲛcandidate ⲛlength `490` ⲙⲛ opening gate `9` ⲙⲛ `3` ⲟⲩⲏϩ ϩⲙⲡinput order `9,3` ⲙⲛⲛⲥⲁ ⲡstable length-only sort. Ⲙⲛ tie repair ⲙⲡPATCH 17 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+```text
+(c, firstDayOfYear)
+```
 
-ⲠStage 32 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE32_REGRESSION_GREEN`. ⲠStage 33 ⲟ ⲛ`STAGE33_PATCH16_GREEN`.
+Jekk is-sena fiha `G` meded bejn ix-xtiebi, l-għadd tal-pulpetti jintgħażel minn:
 
+```text
+6..min(17,G)
+```
 
-## Ⲃⲁⲑⲙⲟⲥ 34 — DISCOVERY 17
+permezz ta’ mistoqsija lill-iskutella 2 bis-siġill 20.
 
-### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+Imbagħad tintgħażel kompożizzjoni ta’ numri sħaħ pożittivi:
 
-Ⲡstable sort ⲙⲡlegacy ϫⲓ ⲙⲡ`length` ⲙⲙⲁⲧⲉ. Ⲉϣϫⲉ ⲟⲩrun ⲟ ⲛequal-length, ⲡinput order ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲁϫⲛ ⲟⲩⲕⲉcomparison ⲙⲛ ⲡopening gate.
+```text
+(x₁,...,x_K)
+Σx_i = G
+x_i >= 1
+```
 
-### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+Il-kompożizzjonijiet eliġibbli jiġu ordnati lessikografikament. Jekk Jum il-Kalkolu jaħbat ma’ xatba interna tas-sena, waħda mis-somom parzjali għandha tikkorrispondi eżattament ma’ dik ix-xatba. L-għażla ssir permezz ta’ mistoqsija lill-iskutella 2 bis-siġill 21.
 
-ϨⲙⲡYear 5000 tie witness, ⲛcandidate ⲥⲛⲁⲩ ⲉⲩⲟ ⲛ`length=490` ⲛⲏⲩ ϩⲙⲡinput order ⲛopening gates `9,3`. Ⲡ`stableLengthOnlyPatchedYearCandidates` ϩⲁⲣⲉϩ ⲉ`9,3`, ⲁⲩⲱ ⲡ`legacyYearSelectFirst` ϫⲓ ⲙⲡopening `9`. Ⲡtest reference, ⲕⲁⲧⲁ ⲡscroll, ϫⲓ ⲙⲡopening ⲉⲧⲟ ⲛϣⲟⲣⲡ ϩⲙⲡequal-length run, ⲉⲧⲉ `3` ⲡⲉ.
+---
 
-### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+# T. Is-Sbatax-il Isem tal-Pulpetti
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `legacyYear5000TieSelection`, `monster_stage34_legacy_year5000_tie_wrapper`, `monster_year5000_tie_route` ⲙⲛ `monster_stage34_legacy_year5000_tie_handler`. Ⲡhandler ⲣ ⲛⲟⲩdirect legacy copy ⲙⲛ ⲟⲩroute copy ϩⲓ buffer ⲉⲩϣⲟⲃⲉ, ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉ`year=5000`, `tieLength=490`, `tieCount=2`, `legacySelectedOpen=9`, `routeSelectedOpen=9`.
+```text
+1  Bronż
+2  Volpi
+3  Kilwa
+4  Lagaš
+5  Ħsieb
+6  Erbgħa minn Disgħa
+7  Palgurax
+8  Buda
+9  Għanqud
+10 Skorpjun
+11 Rmied
+12 Qamħ
+13 Xmara
+14 Daħk
+15 Akkad
+16 Qarn
+17 Il-Buqar Vojt
+```
 
-Ⲡroute ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ⲙⲛ ⲡlegacy selection. Ⲙⲛ reorder ⲙⲡequal-length run ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 34. Ⲡregression ⲟ ⲛ`EXPECTED_RED` ⲙⲛ 2 ⲛroute/context mismatch ⲉⲩⲧⲟϣ.
+Għal `K` pulpetti jintgħażlu `K` ismijiet differenti. Is-sekwenzi kollha possibbli tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi tagħhom, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 22.
 
-Ⲙⲛ code ⲙⲡPATCH 17 ⲉⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ.
+---
 
+# U. Ix-Xhur
 
-## Ⲃⲁⲑⲙⲟⲥ 35 — PATCH 17
+Kull sena tinqasam f’għadd ta’ xhur li jvarja bejn 3 u 47. Kull xahar ikollu bejn 4 u 123 jum.
 
-Ⲡ`stableLengthOnlyPatchedYearCandidates` ⲙⲛ ⲡ`legacyYear5000TieSelection` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡlegacy stable sort ⲟⲩⲏϩ ⲉϥsort ⲕⲁⲧⲁ ⲡ`length` ⲙⲙⲁⲧⲉ ⲁⲩⲱ ⲉϥϩⲁⲣⲉϩ ⲉⲡinput order ϩⲛ equal-length tie.
+Jekk it-tul tas-sena huwa `L`:
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `reorderEqualLengthRunsByOpeningAfterLegacySort` ⲙⲛ `year5000TieSelectionPatch17`. Ⲡpatched path ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉ`legacyYear5000TieSelection` ϩⲓ ⲡsemantic output buffer. Ⲙⲛⲛⲥⲁ ⲡlegacy sort ⲙⲙⲁⲧⲉ, ⲡrepair ⲕⲱ ⲙⲡbuffer ⲉⲩrun ⲛⲣⲁⲛ ⲉⲩⲟ ⲛcontiguous ⲁⲩⲱ equal-length. Ⲟⲩrun ⲉϥⲕⲏ ⲙⲡⲥⲁ ⲛ2 ⲏ ⲟⲩsingleton ⲛϥϣⲓⲃⲉ ⲁⲛ. Ⲟⲩrun ⲛⲥⲛⲁⲩ ⲏ ⲉϩⲟⲩⲉ ⲙⲟⲟϣⲉ ⲕⲁⲧⲁ ⲡ`YC_OPEN` ⲉϥϣⲟⲣⲡ.
+```text
+minMonths = ceil(L/123)
+maxMonths = min(47, floor(L/4))
+```
 
-`monster_year5000_tie_route -> monster_stage35_year5000_tie_patch_wrapper -> year5000TieSelectionPatch17 -> legacyYear5000TieSelection -> reorderEqualLengthRunsByOpeningAfterLegacySort -> legacyYearSelectFirst`
+L-għadd tax-xhur jintgħażel permezz ta’ mistoqsija lill-iskutella 3 bis-siġill 30.
 
-ϨⲙⲡYear 5000 witness, ⲡlegacy output ⲟⲩⲏϩ `9,3` ⲁⲩⲱ ⲡlegacy selection ⲟ ⲛ`9`. Ⲡpatched output ⲟ ⲛ`3,9` ⲁⲩⲱ ⲡsemantic selection ⲟ ⲛ`3`.
+Imbagħad tintgħażel sekwenza ta’ tulijiet:
 
-ⲠStage 35 regression ⲧⲁϫⲣⲟ ⲟⲛ ⲙⲡmulti-run input: ⲡstable length-only sort ⲧⲁⲙⲓⲟ ⲛ2 ⲛcontiguous tie runs, ⲁⲩⲱ ⲡrepair ⲥⲟⲣⲧ ⲙⲙⲁⲧⲉ ⲙⲡrun ⲡⲟⲩⲁ ⲕⲁⲧⲁ opening. Ⲛlength group ⲛⲥⲉmix ⲁⲛ. Ⲛsingleton length ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ.
+```text
+(L₁,...,L_m)
+4 <= L_i <= 123
+ΣL_i = L
+```
 
-ⲠStage 34 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE34_REGRESSION_GREEN`. ⲠStage 35 ⲟ ⲛ`STAGE35_PATCH17_GREEN`.
+Is-sekwenzi jiġu ordnati lessikografikament, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 3 bis-siġill 31.
 
-Ⲙⲛ clean two-key global sort, ⲙⲛ `oldJumpGuess`, ⲁⲩⲱ ⲙⲛ code ⲙⲡStage 36 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+---
 
+# V. L-Insiġ tax-Xhur
 
-## Ⲃⲁⲑⲙⲟⲥ 36 — DISCOVERY 18
+Xahar huwa ħajta minsuġa tul is-sena, u l-jiem tiegħu jistgħu jidhru bejn il-jiem ta’ xhur oħra.
 
-### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+Nisġa eliġibbli hija kelma ta’ tul `L` li fiha x-xahar `j` jidher eżattament `L_j` darbiet, u barra minn hekk:
 
-Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲟⲩjump ⲉⲃⲟⲗ ϩⲙⲡYear 5000 ϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲙⲡ365 ⲛⲟⲩlongore ⲛyear ⲉϥⲧⲁϫⲣⲏⲩ. Ⲡlegacy helper ⲟ ⲛ:
+1. kull xahar jidher għall-ewwel darba fl-ordni `1,2,...,m`;
+2. kull xahar jidher għall-aħħar darba wkoll fl-ordni `1,2,...,m`.
 
-`oldJumpGuess(anchor,targetDay) = anchor.number + floorDiv(targetDay-anchor.firstDay,365)`
+In-nisġiet eliġibbli kollha jiġu ordnati lessikografikament skont in-numru tax-xahar assenjat lil kull jum.
 
-Ⲡfloor division ⲛⲧⲟϥ ⲟ ⲛexact, ⲁⲩⲱ ⲟⲩnegative delta ⲙⲟⲟϣⲉ ⲉⲡfloor ⲁⲛ ⲉⲡtruncation.
+Tintgħażel in-**nisġa kollha** permezz ta’ mistoqsija lill-iskutella 4 bis-siġill 32.
 
-### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+Għal kull prefiss, l-implimentazzjoni tikkalkula eżattament id-daqs tal-blokk tat-tkomplijiet u tapplika `unrank` għall-pożizzjoni magħżula. Il-kalkolu permezz ta’ blokki jagħti direttament l-istess ordni lessikografika u l-istess element magħżul.
 
-Ⲡsame-line Year-5000 probe anchor ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡStage 35 patched tie selection. Ⲡselected candidate ⲟ ⲛ`length=490`; ⲡprobe interval ⲟ ⲛ`(openDay,closeDay]` ⲙⲛ 490 ⲛday.
+---
 
-Ⲉⲧⲃⲉ ⲡⲁⲓ `firstDay+365` ⲙⲛ `closeDay` ⲟⲩⲏϩ ϩⲙⲡYear 5000. Ⲡlegacy guess ⲇⲉ ϯ ⲛ`5001` ϩⲓ ⲡⲉⲩⲥⲛⲁⲩ. Ⲡ`openDay` ⲧⲁϫⲣⲟ ⲟⲛ ⲙⲡnegative floor: ⲡguess ⲟ ⲛ`4999` ⲉϥⲧⲱⲛ.
+# W. Is-Sebgħa u Erbgħin Isem tax-Xhur
 
-### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ ⲉⲛⲧⲁϥⲟⲩⲱϩ
+```text
+1  Tajn
+2  Rummiena
+3  Minkeb
+4  Għira
+5  Eridu
+6  Tutpejst
+7  Tlieta minn Ħamsa
+8  Karxumab
+9  Leopard
+10 Landa
+11 Ċpar
+12 Libien
+13 Magħżel
+14 Kustilja
+15 Ħarrub
+16 Uruk
+17 Mistħija
+18 Ġemel
+19 Ram
+20 Bir
+21 Isfar tal-Bajd
+22 Kewkba
+23 Għasel
+24 Milsa
+25 Ġebla tal-Ġir
+26 Ferħ
+27 Tina
+28 Ninwe
+29 Żrinġ
+30 Żift
+31 Xemgħa
+32 Il-Bieb Magħluq
+33 Ġulġlien
+34 Kozz
+35 Fidda
+36 Ġilju
+37 Maltempata
+38 Ħmar
+39 Dqiq
+40 Dispjaċir
+41 Babilonja
+42 Ilsien
+43 Kittien
+44 Melħ
+45 Lanġasa
+46 Qaws
+47 Ramel
+```
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `stage36Year5000JumpAnchorFromPatchedTie`, `oldJumpGuess`, `legacyYearJumpAdapter`, `monster_year_jump_route` ⲙⲛ `monster_stage36_legacy_year_jump_handler`.
+Għal sena b’`m` xhur jintgħażlu `m` ismijiet differenti. Is-sekwenzi tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 33.
 
-`calendarDateSpaghetti -> monster_dispatch_base -> monster_stage36_legacy_year_jump_handler -> monster_year_jump_route -> legacyYearJumpAdapter -> oldJumpGuess`
+---
 
-Ⲡhandler ⲣ ⲛⲟⲩdirect legacy call ⲙⲛ ⲟⲩroute call, ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡanchor, target, delta, legacy guess, route guess, seen counters ⲙⲛ ⲡhistoric flag ϫⲉ ⲡguess ⲟ ⲛsemantic result ϩⲙⲡDISCOVERY.
+# X. Il-Ħames Komponenti tal-Jum
 
-Ⲡsame-line regression ⲧⲁϫⲣⲟ 6 ⲛboundary/probe target. Ⲡroute ⲛStage 36 ϣⲟⲃⲉ 2 ⲛcase, ⲁⲩⲱ ⲡcontext probe ϣⲟⲃⲉ ⲟⲛ 1 ⲛcase; ⲡtotal ⲟ ⲛ3 ⲛmismatch ⲉⲩⲧⲟϣ.
+Biex jiġi kkalkulat ir-riżultat għal `t` fir-rigward ta’ `c`:
 
-ⲠStage 36 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–35 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ `patchedNextYear`, `patchedPreviousYear`, year-by-year walk ⲏ cache ⲙⲡPATCH 19 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+1. tinstab is-sena 5000 determinata minn `c`;
+2. minn dik is-sena tintuża biss `NEXT₁₁` għall-mixja ’l quddiem, jew biss `PREVIOUS₁₂` għall-mixja lura, skont fejn jinsab `t`;
+3. l-istruttura tas-sena tiġi kkalkulata darba biss billi jintuża `(c, firstDayOfYear)`;
+4. jiġi stabbilit fejn jaqa’ `t` fil-pulpetti u fin-nisġa tax-xhur.
 
+Ir-riżultat jikkonsisti eżattament f’ħames komponenti:
 
-## Ⲃⲁⲑⲙⲟⲥ 37 — PATCH 18
+```text
+(
+  yearNumber,
+  cutletName,
+  dayInCutlet,
+  monthName,
+  dayInMonth
+)
+```
 
-Ⲡ`oldJumpGuess(.../365...)` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ ⲛtelemetry. Ⲡresult ⲙⲡguess ⲛϥⲣ ⲁⲛ ⲛⲟⲩsemantic authority.
+`dayInMonth` jindika kemm-il darba dak ix-xahar ikun deher mill-bidu tas-sena sa `t`, inkluż `t` innifsu.
 
-Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `patchedNextYear`, `patchedPreviousYear` ⲙⲛ `findYearByWalkPatch`. Ⲡwalk ⲁⲣⲭⲉⲓ ϩⲙⲡYear 5000 anchor ⲁⲩⲱ ⲛϥⲣ ⲛⲟⲩtransition ⲛⲟⲩⲱⲧ ϩⲓ iteration ⲛⲓⲙ.
+---
 
-`monster_year_jump_route -> monster_stage37_year_walk_patch_wrapper -> findYearByWalkPatch`
+# Y. L-Eżistenza u l-Uniċità
 
-Ⲡownership ⲟ ⲛ`(openDay,closeDay]`. Ⲉϣϫⲉ `target>closeDay`, ⲟⲩ`patchedNextYear` ⲛⲟⲩⲱⲧ ⲙⲟⲟϣⲉ. Ⲉϣϫⲉ `target<=openDay`, ⲟⲩ`patchedPreviousYear` ⲛⲟⲩⲱⲧ ⲙⲟⲟϣⲉ. Ⲛϥⲕⲧⲟ ⲙⲙⲁⲧⲉ ⲙⲛⲛⲥⲁ ⲡtarget ⲟ ϩⲙⲡinterval.
+Għal kull par ordnat `(c,t)` jinkiseb riżultat wieħed biss:
 
-Ⲡsame-line Stage 37 regression ⲧⲁϫⲣⲟ ⲙⲡ0, 1 ⲙⲛ 2 ⲛtransition ϩⲓ ⲡforward ⲙⲛ ⲡbackward side. Ⲡopening gate ⲛⲧⲉⲡYear 5000 ⲧⲁϫⲣⲟ ϫⲉ ⲟ ⲙⲡYear 4999.
+- kull jum għandu għadd uniku;
+- kull sett ġdid ta’ ġebliet jiġi kkalkulat minn `snapshot` wieħed tal-istat;
+- kull qatra tiddependi biss minn dak li jkun diġà ġie stabbilit;
+- waqt kull pass ta’ tħawwid, is-sitt skutelli kollha jaqraw mill-istess passat;
+- kull sett ta’ possibbiltajiet jitqiegħed f’ordni preskritta;
+- kull medda bejn żewġ xtiebi tkun bejn 42 u 963 jum;
+- kull sena tkun twila bejn 252 u 5778 jum;
+- il-proċess biex tinstab is-sena dejjem jibda mis-sena 5000 u jimxi f’direzzjoni waħda skont fejn jinsab il-Jum Mitlub;
+- l-istruttura tas-sena tiġi kkalkulata minn par fiss ta’ jiem.
 
-ⲠStage 36 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE36_REGRESSION_GREEN`. ⲠStage 37 ⲟ ⲛ`STAGE37_PATCH18_GREEN`.
+Il-magna taż-żmien inbniet b’irqajja’: għal kull ħtieġa li nqalgħet matul ix-xogħol ġiet stabbilita regola, u kull regola saret saff ieħor fil-mekkaniżmu.
 
-Ⲙⲛ year cache ⲙⲡPATCH 19 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+---
 
+# Z. Meta l-Jum Idur
 
-## Ⲃⲁⲑⲙⲟⲥ 38 — DISCOVERY 19
+Il-jum lokali jinbidel meta **ċ-ċentru ta’ Venere jilħaq il-kulminazzjoni inferjuri tiegħu fuq il-meridjan lokali**.
 
-### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+Din hija r-regola astronomika tal-jum.
 
-Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡ`year.number` ⲙⲙⲁⲧⲉ ⲣⲁϣⲉ ⲉⲣⲟϥ ⲛⲟⲩcache key ⲛⲧⲉⲡYear result. Ⲡlegacy map ⲧⲉⲛⲟⲩ ⲕⲱ ⲛ4 ⲛslot ⲁⲩⲱ lookup ⲙⲙⲁⲧⲉ ⲕⲁⲧⲁ ⲡexact BigInt `year.number`.
+Il-qalba tal-Kalendarju taz-Zalza tirċievi żewġ jiem diskreti `c,t` u tipproċessahom fuq l-assi tal-jiem b’mod li r-riżultat jista’ jiġi riprodott għalkollox.
 
-`legacyYearNumberOnlyCacheGetOrPut(cache, year.number, freshValue)`
+Il-konverżjoni:
 
-ⲠHIT ⲛϥⲱϣ ⲁⲛ ⲙⲡcalculation day, ⲡopen gate ⲏ ⲡclose gate. Ⲡvalue ⲙⲡDISCOVERY 19 ⲟ ⲛopaque semantic token; ⲙⲛ guard entry ⲙⲡPATCH 19 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+```text
+instant + location -> discrete day
+```
 
-### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+teħtieġ profil astronomiku numeriku: `ephemeris` u l-verżjoni tiegħu, `timescales`, definizzjoni tal-`Earth orientation`, it-trattament ta’ `ΔT`, koordinati u konvenzjonijiet tal-avveniment. Il-vetturi ta’ konformità tal-qalba huma ddefiniti direttament f’termini ta’ `c,t`, li huma numri diskreti li jirrappreżentaw jiem.
 
-ⲠStage 38 handler ϫⲓ ⲙⲡresolved Year 5000 ⲉⲃⲟⲗ ϩⲙⲡStage 37 sequential walk. Ⲙⲛⲛⲥⲱϥ ⲛϥⲣ 3 ⲛfresh-cache collision case ϩⲓ ⲡsame `year.number`:
+---
 
-- calculation day ⲉϥϣⲟⲃⲉ;
-- open gate ⲉϥϣⲟⲃⲉ;
-- close gate ⲉϥϣⲟⲃⲉ.
+# AA. Il-Lingwa li Tagħti Ġisem lill-Ismijiet
 
-Ϩⲙⲡcase ⲛⲓⲙ ⲡrequest ⲛϣⲟⲣⲡ ⲣ ⲛMISS ⲁⲩⲱ ⲕⲱ ⲙⲡvalue ⲛϣⲟⲣⲡ. Ⲡrequest ⲙⲙⲁϩ2 ⲙⲛ ⲡsame `year.number` ϫⲓ ⲙⲡvalue ⲛϣⲟⲣⲡ ⲛHIT, ϩⲟⲡⲟⲩ ⲡfresh value ⲙⲙⲁϩ2 ϣⲟⲃⲉ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲟⲩⲛ 3 ⲛsemantic mismatch ⲉⲩⲧⲟϣ.
+Kull implimentazzjoni għandha lingwa waħda ta’ programmar u lingwa naturali waħda li sservi bħala l-lingwa tas-sors.
 
-### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+F’`Stage 1` ta’ dik l-implimentazzjoni jinħoloq **`SourceLanguageCatalog` kanoniku u immutabbli**, li jkun fih eżattament:
 
-`calendarDateSpaghetti -> monster_stage38_legacy_year_number_cache_handler -> stage38LegacyCollisionCase -> monster_year_cache_route -> legacyYearNumberOnlyCacheRoute -> legacyYearNumberOnlyCacheGetOrPut`
+- 17-il isem ta’ pulpetti bħala sekwenzi ta’ karattri;
+- 47 isem ta’ xhur bħala sekwenzi ta’ karattri;
+- l-indiċi kanoniku ta’ kull wieħed minnhom.
 
-Ⲡ`stage38YearVariant` ϩⲁⲣⲉϩ ⲉⲡsame year number ⲁⲩⲱ ⲛϥϣⲓⲃⲉ ⲙⲙⲁⲧⲉ ⲙⲡopen/first gate ⲏ ⲡclose gate ⲕⲁⲧⲁ ⲡprobe. ⲠMonsterContext ϩⲁⲣⲉϩ ⲉⲡcache-key year, ⲡ3 stale flags, ⲡroute-case count, ⲡnumber-only-key scar ⲙⲛ ⲡseen counter.
+Meta isem iġorr tifsira, tintgħażel il-kelma jew l-espressjoni l-aktar naturali biex twassal dik it-tifsira fil-lingwa tas-sors. L-ismijiet proprji, l-ismijiet ta’ postijiet, l-ismijiet ivvintati u s-sekwenzi ta’ ħsejjes mingħajr tifsira lessikali jiġu translitterati skont regola fissa u dokumentata, speċifika għal dik il-lingwa tas-sors.
 
-Ⲡdirect regression ⲧⲁϫⲣⲟ ϫⲉ ⲡlegacy map ⲛⲧⲟϥ ⲣ ⲛHIT ⲕⲁⲧⲁ year number ⲙⲙⲁⲧⲉ. Ⲡsemantic regression ⲟ ⲛ`EXPECTED_RED` ⲙⲛ 3 ⲛstale request ⲉⲩⲧⲟϣ.
+Wara li l-katalgu jiġi stabbilit fil-forma definittiva tiegħu, ikun hemm korrispondenza unika:
 
-Ⲙⲛ `calculationDayFingerprint`, guarded hit, guard-entry value, ⲏ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+```text
+canonicalIndex -> exactly one source-language string
+```
 
+Il-katalgu fil-forma definittiva tiegħu jistabbilixxi s-sekwenza unika ta’ karattri għal kull indiċi. Fil-livell semantiku jintuża `canonicalIndex`, u l-forma testwali korrispondenti tiġi ddeterminata fis-saff li jipproduċi r-riżultat. Il-`locales` futuri jkunu traduzzjonijiet tal-katalgu tal-lingwa tas-sors maħsuba għall-wiri, filwaqt li `rank`, `unrank`, il-`cache keys` u l-proċessi tal-għażla jibqgħu jużaw l-indiċijiet kanoniċi.
 
-## Ⲃⲁⲑⲙⲟⲥ 39 — PATCH 19
+---
 
-Ⲡmap ⲟⲩⲏϩ keyed ⲙⲙⲁⲧⲉ ⲕⲁⲧⲁ `year.number`. Ⲙⲡⲟⲩⲟⲩⲱϩ ⲛⲟⲩⲕⲉfield ⲉⲡkey, ⲁⲩⲱ ⲡphysical slot ⲟⲩⲏϩ `year.number -> pointer`.
+# AB. L-Istruttura tar-Repożitorju u l-Fergħat
 
-Ⲡpointer ⲙⲡpatched route ⲧⲉⲛⲟⲩ ϫⲟⲟⲥ ⲉⲟⲩentry ⲙⲛ 4 ⲛfield:
+Kull par għandu l-forma:
 
-`calculationDayFingerprint`
-`openGate`
-`closeGate`
-`value`
+```text
+[LANGUAGE] + [NATURAL_LANGUAGE]
+```
 
-Ⲡ`calculationDayFingerprintPatch19` ⲟ ⲛexact BigInt clone ⲙⲡcalculation day; ⲙⲛ foreign hash ⲏ foreign runtime. Ⲡ`guardedYearNumberOnlyCacheGetOrPut` ϭⲓⲛⲉ ⲙⲡslot ⲕⲁⲧⲁ `year.number` ⲙⲙⲁⲧⲉ. Ⲉϣϫⲉ ⲡkey ⲧⲱⲛ, ⲡHIT ⲟ ⲛsemantic HIT ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ⲡ3 ⲛguard ⲧⲱⲛ.
+Għal kull par bħal dan tinħoloq implimentazzjoni indipendenti f’fergħa `orphan`; din tinbena mill-bidu nett. Il-kodiċi, il-`tests`, il-`fixtures`, l-`expected outputs`, l-`oracle`, it-tabelli ġġenerati, il-`caches` u d-dejta ta’ validazzjoni tal-fergħa jinħolqu u jitħejjew kollha fi ħdan il-fergħa ta’ dik l-implimentazzjoni, direttament skont l-ispeċifikazzjoni komuni. Il-konformità ta’ kull implimentazzjoni tiġi vverifikata billi l-implimentazzjoni titqabbel mal-`oracle` lokali tagħha u mal-vetturi kanoniċi ta’ konformità.
 
-Ⲉϣϫⲉ ⲟⲩguard ϣⲟⲃⲉ, ⲡsame bad key ⲟⲩⲏϩ ϩⲙⲡsame slot; ⲡentry ⲙⲙⲁⲧⲉ ⲧⲉ ⲉⲧⲟⲩϣⲓⲃⲉ ⲙⲛ ⲟⲩfresh entry, ⲁⲩⲱ ⲡrequest ⲟ ⲛMISS.
+Il-fergħa `main` tinkludi dan it-trattat u d-dejta komuni ta’ konformità. Il-fergħat tal-implimentazzjonijiet jinħolqu bħala fergħat `orphan` indipendenti.
 
-`monster_year_cache_route -> monster_stage39_year_cache_guard_patch_wrapper -> guardedYearNumberOnlyCacheRoute -> guardedYearNumberOnlyCacheGetOrPut`
+---
 
-Ⲡwrapper ⲙⲟⲩⲧⲉ ⲉ`legacyYearNumberOnlyCacheRoute` ⲛⲟⲩⲙⲉ ϩⲓ ⲟⲩdiagnostic cache ⲉϥϣⲟⲃⲉ, ⲙⲛⲛⲥⲱϥ ⲛϥⲙⲟⲟϣⲉ ⲉⲡguarded cache. Ⲡdirect legacy scar ⲟⲩⲏϩ ⲉϥreturn ⲙⲡstale value ⲕⲁⲧⲁ year.number ⲙⲙⲁⲧⲉ.
+# AC. Il-Vetturi Kanoniċi ta’ Konformità
 
-ⲠStage 39 regression ⲧⲁϫⲣⲟ ⲙⲡcalculation-day, open-gate ⲙⲛ close-gate mismatch. Ⲛ3 ⲛcase ⲧⲏⲣⲟⲩ ⲣ ⲛMISS+replace ϩⲁ ⲡsame key ⲁⲩⲱ ϯ ⲙⲡfresh value. Ⲟⲩsame-state request ⲙⲙⲁϩ2 ⲣ ⲛreal HIT.
+Il-vetturi ta’ konformità huma dejta komuni li tagħmel parti mill-ispeċifikazzjoni għall-implimentazzjonijiet kollha. Kull implimentazzjoni tużahom bħala parti mit-test ta’ konformità tagħha.
 
-ⲠStage 38 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE38_REGRESSION_GREEN`. ⲠStage 39 ⲟ ⲛ`STAGE39_PATCH19_GREEN`.
+Iż-żewġ komponenti tal-isem fil-vetturi jiġu rreġistrati bħala indiċijiet kanoniċi, u għalhekk l-istess sett ta’ vetturi jista’ jintuża mal-lingwi tas-sors kollha:
 
-Ⲙⲛ `oldStructureSauce` ⲏ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+```text
+(yearNumber, cutletCanonicalIndex, dayInCutlet,
+ monthCanonicalIndex, dayInMonth)
+```
 
+Il-valuri kollha f’dan il-kapitlu nkisbu permezz tat-tħaddim tal-`oracle` normattiv bl-`inputs` espliċiti, u nżammu bħala vetturi kanoniċi ta’ konformità.
 
-## Ⲃⲁⲑⲙⲟⲥ 40 — DISCOVERY 20
+Dik is-sentenza baqgħet hawn għax kienet miktuba qabel ma l-Mostru nduna bil-mgħarfa żejda ta’ K½. Minn issa għandha tinqara b’żewġ saffi: l-ewwel tabella hija l-karta l-qadima li ma ntremitx; it-tieni tabella hija l-unika waħda li tista’ tgħaddi test ta’ konformità.
 
-### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+Il-valur ta’ `F` huwa:
 
-Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`oldStructureSauce(cDay, originalTargetDay)` ⲉϥⲙⲟⲩⲧⲉ ⲉⲡsauce path ⲉⲧϣⲟⲟⲡ ⲙⲛ ⲛscar ⲧⲏⲣⲟⲩ. Ⲡhelper ⲡⲁⲓ ϫⲓ ⲙⲡoriginal target day ⲛⲧⲟϥ; ⲛϥϫⲓ ⲁⲛ ⲙⲡ`year.firstDay`.
+```text
+F = -15,055,671
+```
 
-`oldStructureSauce(cDay, originalTargetDay) -> sauceWithOrderAt46Latch(cDay, originalTargetDay)`
+## AC.1. Il-Vetturi li Baqgħu fuq il-Karta l-Qadima
 
-Ⲡ`legacyStructureSauceUsingOriginalTarget` ϫⲓ ⲙⲡYear pointer ϩⲓ ⲡⲉϥABI, ⲁⲗⲗⲁ ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ. `monster_structure_sauce_route` ⲙⲟⲟϣⲉ ⲉⲡlegacy adapter ⲙⲙⲁⲧⲉ ϩⲙⲡDISCOVERY 20.
+It-tabella li ġejja hija **scar storiku u ghost biss**. Implimentazzjoni tista’ tikkalkulaha biex turi li l-mogħdija l-qadima għadha teżisti, iżda **ma tistax** tuża dawn il-ħames komponenti bħala `expected output` ta’ konformità.
 
-### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+| # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | -15,055,671 | -15,055,671 | 5000 | 10 | 503 | 20 | 56 |
+| 2 | -15,055,671 | -15,055,672 | 5000 | 10 | 502 | 32 | 21 |
+| 3 | -15,055,671 | -15,055,670 | 5000 | 14 | 1 | 29 | 38 |
+| 4 | -15,055,671 | -15,056,171 | 5000 | 10 | 3 | 1 | 29 |
+| 5 | -15,055,671 | -15,055,171 | 5000 | 14 | 500 | 18 | 76 |
+| 6 | -15,055,671 | -15,061,671 | 4999 | 5 | 158 | 43 | 3 |
+| 7 | -15,055,671 | -15,049,671 | 5001 | 12 | 95 | 5 | 81 |
+| 8 | -15,056,905 | -15,056,448 | 5000 | 9 | 167 | 10 | 65 |
+| 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 10 | 1 | 45 |
+| 10 | -15,058,171 | -15,053,171 | 5002 | 5 | 288 | 29 | 13 |
 
-Ⲡsame-line witness ϫⲓ ⲙⲡ`cDay=FOUNDATION` ⲙⲛ ⲡ`originalTargetDay=FOUNDATION`. ⲠStage 37 sequential walk ϭⲓⲛⲉ ⲙⲡYear 4999:
+Il-vetturi 6, 7 u 10 jittestjaw b’mod espliċitu l-każijiet li fihom il-proċedura tgħaddi lil hinn mis-sena 5000: il-vettur 6 permezz ta’ `PREVIOUS₁₂`, u l-vetturi 7 u 10 permezz ta’ `NEXT₁₁`.
 
-`openDay  = -15056161`
-`firstDay = -15056160`
-`closeDay = -15055671`
+Dik l-aħħar sentenza wkoll tappartjeni għall-karta l-qadima. Ma għandhiex tintuża biex jiġi dedott li l-vettur 5 korrettiv jibqa’ fis-sena 5000.
 
-Ⲡoriginal target ⲟ ⲛ`closeDay`, ⲁⲩⲱ ϣⲟⲃⲉ ⲙⲛ ⲡ`firstDay` ⲛ489 ⲛday. Ⲡghost sauce ⲉⲧⲁⲩⲗⲟⲅⲓⲍⲉϥ ⲙⲛ ⲡoriginal target ϣⲟⲃⲉ ⲙⲛ ⲡsame-line sauce ⲉⲧⲁⲩⲗⲟⲅⲓⲍⲉϥ ⲙⲛ `year.firstDay`: ⲛ6 ⲛfinal bowl ⲧⲏⲣⲟⲩ ϣⲟⲃⲉ, ⲁⲩⲱ 5 ⲛposition ⲉⲃⲟⲗ ϩⲛ 6 ⲙⲡquery order ϣⲟⲃⲉ.
+## AC.2. Il-Vetturi li Joħorġu mid-Detour Korrettiv
 
-### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+Din hija **l-unika tabella normattiva ta’ konformità**. Għal kull ringiela, il-mogħdija l-qadima ta’ K titħaddem bħala scar, iżda l-ħames komponenti jiġu mill-iskutelli li għaddew minn K½.
 
-`calendarDateSpaghetti -> monster_stage40_legacy_structure_sauce_handler -> monster_structure_sauce_route -> legacyStructureSauceUsingOriginalTarget -> oldStructureSauce`
+| # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | -15,055,671 | -15,055,671 | 5000 | 4 | 762 | 12 | 105 |
+| 2 | -15,055,671 | -15,055,672 | 5000 | 4 | 761 | 32 | 114 |
+| 3 | -15,055,671 | -15,055,670 | 5000 | 3 | 1 | 25 | 91 |
+| 4 | -15,055,671 | -15,056,171 | 5000 | 4 | 262 | 46 | 47 |
+| 5 | -15,055,671 | -15,055,171 | 5001 | 9 | 123 | 7 | 3 |
+| 6 | -15,055,671 | -15,061,671 | 4999 | 14 | 207 | 1 | 81 |
+| 7 | -15,055,671 | -15,049,671 | 5001 | 8 | 787 | 6 | 122 |
+| 8 | -15,056,905 | -15,056,448 | 5000 | 10 | 1082 | 37 | 50 |
+| 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 20 | 14 | 47 |
+| 10 | -15,058,171 | -15,053,171 | 5002 | 9 | 498 | 41 | 10 |
 
-Ⲡhandler ϭⲓⲛⲉ ⲛϣⲟⲣⲡ ⲙⲡYear ⲉⲧⲧⲱⲛ ϩⲓⲧⲛ ⲡStage 37 walk. Ⲛϥϩⲁⲣⲉϩ ⲉⲡYear pointer, `year.firstDay`, original target, direct ghost sauce, route sauce, ⲡflag ϫⲉ target ϣⲟⲃⲉ ⲙⲛ firstDay, ⲙⲛ ⲡhistoric flag `GHOST_USED_AS_SEMANTIC=1`.
+Fil-mogħdija korrettiva, il-vettur 6 jgħaddi lura minn sena 5000 permezz ta’ `PREVIOUS₁₂`; il-vetturi 5, 7 u 10 jgħaddu ’l quddiem permezz ta’ `NEXT₁₁`. Il-vettur 5 għalhekk huwa wkoll discriminator intenzjonat kontra l-karta l-qadima.
 
-Ⲡdirect ghost scar ⲧⲁϫⲣⲟ ⲛⲧⲟϥ ϫⲉ ⲡold sauce ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ⲙⲛ ⲡyear-first-day sauce. Ⲡsemantic regression ⲱϣ ⲙⲡroute ⲙⲛ ⲡsame-line year-first-day reference ⲁⲩⲱ ϫⲓ 2 ⲛmismatch ⲉⲩⲧⲟϣ: ⲟⲩroute-sauce mismatch ⲙⲛ ⲟⲩghost-semantic flag.
+## `checkpoint` dettaljat: `c=t=F`
 
-ⲠStage 40 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–39 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ `structureSaucePatch` ⲏ cutlet-family code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+**Dan il-checkpoint jibqa’ fiżikament bħala checkpoint storiku tal-mogħdija l-qadima.** Il-valuri tiegħu sal-ordni tal-qatra 46 għadhom komuni għaż-żewġ mogħdijiet. Is-sitt skutelli ta’ wara t-12-il pass, il-konfini tas-sena u r-riżultat testwali li jidhru f’dan il-blokk huma ghosts u ma jgħaddux għall-konformità.
 
+Għall-vettur 1, il-ħames għaddijiet użati fil-kalkolu huma:
 
-## Ⲃⲁⲑⲙⲟⲥ 41 — PATCH 20
+```text
+Għadd_tal_Kalkolu   = 1
+Għadd_Mitlub        = 1
+Għadd_tad_Distanza  = 1
+Għadd_tas_Somma     = 2
+Għadd_tad_Direzzjoni = 2
+```
 
-### Ⲡⲡⲁⲧϣ ⲙⲡstructure sauce
+Is-seba’ qatriet moħbija wara seba’ passi ta’ tħin:
 
-Ⲡ`oldStructureSauce(cDay, originalTargetDay)` ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ. Ⲡ`legacyStructureSauceUsingOriginalTarget` ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲡold ghost route ⲛⲟⲩⲙⲉ.
+```text
+1: 119390830530032782664128530203002080344
+2: 11877236279154673426874867061566696749
+3: 24217814924229232987463457533828175476
+4: 166629231917547214614573522551290204247
+5: 81202913407267092008896220686064041568
+6: 73551520026920072430116213847585486272
+7: 6164285870955721082771365327359496898
+```
 
-Ⲁⲩⲟⲩⲱϩ ⲙⲡdetour ⲙⲡPATCH 20:
+L-ewwel qatra viżibbli:
 
-`monster_structure_sauce_route -> monster_stage41_structure_sauce_patch_wrapper -> structureSaucePatch`
+```text
+56644603826892212324764499696091907135
+```
 
-Ⲡ`structureSaucePatch` ⲙⲟⲩⲧⲉ ⲉ`oldStructureSauce(cDay, originalTargetDay)` ϩⲙ call ⲛⲓⲙ ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡresult ⲛghost. Ⲡ`mustUse` ⲡⲉ `year.firstDay`.
+Il-qatra viżibbli numru 46:
 
-- Ⲉϣϫⲉ `originalTargetDay != year.firstDay`, ⲡauthoritative sauce ⲗⲟⲅⲓⲍⲉ ⲙⲛ `(cDay, year.firstDay)`; ⲡghost ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡsemantic selector.
-- Ⲉϣϫⲉ `originalTargetDay == year.firstDay`, ⲡwrapper ϣϭⲙϭⲟⲙ ⲉreturn ⲙⲡghost ⲛⲧⲟϥ, ϫⲉ ⲡⲉϥtarget ⲟ ⲛsame authoritative target.
+```text
+141872771689426650819909896585756512282
+```
 
-ⲠMonsterContext ϩⲁⲣⲉϩ ⲉ`ROUTE_GHOST`, `ROUTE_GHOST_SEEN`, `PATCH_SEEN` ⲙⲛ `GHOST_REUSE_EQUAL`. Ⲛfields ⲛⲁⲓ ⲟ ⲛdiagnostic/trace state ⲙⲙⲁⲧⲉ; ⲛⲥⲉⲃⲱⲕ ⲁⲛ ⲉⲡsauce arithmetic.
+L-ordni tal-iskutelli tal-qatra 46:
 
-### ⲠStage 40 regression ⲙⲛ ⲡABI bridge
+```text
+[4, 5, 2, 3, 6, 1]
+```
 
-`tests/stage40_discovery20.s` ⲙⲡⲟⲩϣⲓⲃⲉ ⲛⲟⲩbyte. Ⲡtest ⲛⲧⲟϥ ⲕⲱ ⲙⲡsecond sauce-array pointer ϩⲓ `[rbp-48]` ϩⲁ ⲡallocated stack ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉ`bi_cmp`; ⲡ`call` return address ϣⲓⲃⲉ ⲙⲡslot ⲡⲁⲓ. Ⲡfault ⲛⲉϥϩⲏⲡ ϩⲟⲧⲁⲛ ⲡroute ⲛⲉϥϣⲟⲃⲉ ϩⲙⲡfirst bowl, ⲁⲗⲗⲁ ⲁϥⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ϩⲟⲧⲁⲛ ⲡPATCH ⲁϥⲧⲣⲉⲡroute ⲧⲱⲛ ⲙⲛ ⲡreference.
+Is-sitt skutelli wara t-12-il pass addizzjonali ta’ tħawwid, skont l-identitajiet fissi `1..6`:
 
-Ⲉⲧⲃⲉ ⲡcontract ⲛbyte-for-byte, ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡStage 40 source. Ⲁⲩⲟⲩⲱϩ ⲛⲟⲩtest-only pure-Assembly bridge `tests/stage41_stage40_abi_bridge.s`; `ld --wrap=bi_cmp` ⲟ ⲙⲙⲁⲧⲉ ϩⲙⲡStage 40 regression binary. Ⲡbridge ⲙⲟⲩⲧⲉ ⲉ`__real_bi_cmp` ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡillegal caller red-zone slot; ⲛϥϣⲓⲃⲉ ⲁⲛ ⲙⲡBigInt comparison result.
+```text
+1: 65286679584284972964194865805379907599
+2: 127720283375330263615328810127751035299
+3: 54364069496183805843611594721403108554
+4: 93072329024469476118876155742008280619
+5: 54867842942953573450868747713087920246
+6: 111207247632761530752404582123499651367
+```
 
-### Ⲡregression
+Il-konfini tas-sena 5000 f’dan l-istess vettur:
 
-ⲠStage 41 test ⲧⲁϫⲣⲟ ⲛⲛⲁⲓ:
+```text
+openGate  = -15,057,703
+closeGate = -15,053,459
+```
 
-- ⲡdirect ghost scar ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ⲙⲛ ⲡ`year.firstDay` sauce ϩⲙⲡFOUNDATION witness;
-- ⲡpatched route ⲧⲱⲛ ⲙⲛ ⲡ`year.firstDay` sauce;
-- ⲡghost ⲛⲧⲉⲡwrapper ⲁϥⲣϩⲱⲃ ⲛⲟⲩⲙⲉ ⲁⲩⲱ ⲛϥⲣⲥⲉⲙⲛⲉ ⲁⲛ ϩⲙⲡdifferent-target case;
-- ⲡequal-target case ⲕⲧⲟ ⲉⲡghost ⲛauthoritative result;
-- ⲡlegacy adapter scar ⲟⲩⲏϩ callable.
+Ir-rappreżentazzjoni testwali tal-istess riżultat fil-katalgu Malti hija:
 
-ⲠStage 40 ⲧⲉⲛⲟⲩ ϯ `STAGE40_REGRESSION_GREEN`; ⲡStage 41 ϯ `STAGE41_PATCH20_GREEN`. Ⲙⲛ cutlet-partition code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 41.
+```text
+5000, Skorpjun, 503, Bir, 56
+```
 
+Il-komponenti kanoniċi ta’ konformità hawnhekk huma l-indiċijiet 10 u 20; fil-katalgu Malti dawn jingħataw il-forom `Skorpjun` u `Bir`.
 
-## Ⲃⲁⲑⲙⲟⲥ 42 — DISCOVERY 21
+Dik l-aħħar sentenza hija wkoll parti mill-ghost storiku: l-indiċijiet 10 u 20 m’għadhomx il-komponenti ta’ konformità tal-vettur 1.
 
-### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+## Il-`checkpoint` li l-Mostru Reġa’ Għamel Wara li Ma Fdax l-Ewwel Wieħed
 
-Ⲁⲩⲕⲱ ⲙⲡlegacy cutlet family ϫⲉ ⲡgap count ⲛⲧⲟϥ ⲙⲛ ⲡcutlet count ⲙⲙⲁⲧⲉ ⲣⲁϣⲉ ⲉⲣⲟⲟⲩ. Ⲡfamily ⲡⲉ ⲛpositive compositions ⲧⲏⲣⲟⲩ ⲙⲡgap count, ⲉⲩordered lexicographically.
+Għall-istess `c=t=F`, il-ħames għaddijiet, is-seba’ qatriet moħbija, l-ewwel qatra viżibbli, il-qatra viżibbli 46 u `orderAt46 = [4,5,2,3,6,1]` jibqgħu eżattament kif jidhru fil-checkpoint storiku. Id-diverġenza tibda fl-ewwel post-stir ta’ K½.
 
-`oldCutletPartitionFamilyCount(gap, cutlets) = C(gap-1, cutlets-1)`
+Wara li kull wieħed mit-tnax-il scars antiki jitħaddem u mbagħad jiġi mgħoddi mid-detour korrettiv, is-sitt skutelli awtorevoli, skont l-identitajiet fissi `1..6`, huma:
 
-`oldCutletPartitionFamily(gap, cutlets, rank1, out)`
+```text
+1: 67068226522203060890658143482200172502
+2: 156830781782038036265833091137164500083
+3: 27860245395513113590943202859639481773
+4: 154958270957687565769906933601352753179
+5: 83762519477527209919484977230999195024
+6: 154633989471499313687998830839607736513
+```
 
-Ⲡ`legacyCutletPartitionWithoutCalculationGate` ϫⲓ ⲛⲟⲩ`requiredOffset` ϩⲙⲡABI, ⲁⲗⲗⲁ ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ. `monster_cutlet_partition_route` ⲙⲟⲟϣⲉ ⲉⲡlegacy adapter ⲙⲙⲁⲧⲉ ϩⲙⲡDISCOVERY 21.
+Dawn, u dawn biss, jitħallew jidħlu fil-mekkaniżmu tal-mistoqsijiet. Il-konfini awtorevoli tas-sena 5000 għal dan il-vettur huma:
 
-### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+```text
+openGate  = -15,059,693
+closeGate = -15,055,294
+```
 
-Ⲡwitness ⲡⲉ:
+Ir-rappreżentazzjoni testwali awtorevoli fil-katalgu Malti hija:
 
-`gap=10`
+```text
+5000, Lagaš, 762, Libien, 105
+```
 
-`cutlets=3`
+Il-komponenti kanoniċi normattivi huma għalhekk:
 
-`calculation-gate offset=4`
+```text
+(5000, 4, 762, 12, 105)
+```
 
-`rank=1`
+Jekk implimentazzjoni tipproduċi l-checkpoint storiku ta’ fuq bħala riżultat finali, il-fatt li żammet l-istorja mhuwiex skuża: **il-konformità tfalli**. Jekk ma tistax turi li l-permutazzjoni tal-scar u tal-detour hija l-istess f’kull wieħed mit-12-il pass, il-konformità tfalli wkoll.
 
-Ⲡlegacy family count ⲡⲉ `36`, ⲁⲩⲱ ⲡrank-1 composition ⲡⲉ `[1,1,8]`. Ⲙⲛ proper prefix ⲉϥⲧⲱⲛ ⲙⲛ `4`.
+---
 
-Ⲡtest-only normative reference ⲛⲧⲉⲡsame Assembly line ϯ `8` ⲛlegal compositions ⲁⲩⲱ rank 1 = `[1,3,6]`, ⲉⲣⲉ ⲡproper prefix `1+3=4`. ⲠDISCOVERY regression ⲱϣ ⲛ3 ⲛdivergence ⲉⲩⲧⲟϣ: family-count, rank-1 composition, ⲙⲛ required-prefix.
+# AD. Il-Ħidma tal-Ħolqien
 
-### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+Il-Kalendarju taż-Żminijiet huwa l-espressjoni preċiża tal-Ħolqien.
 
-`calendarDateSpaghetti -> monster_stage42_legacy_cutlet_partition_handler -> monster_cutlet_partition_route -> legacyCutletPartitionWithoutCalculationGate -> oldCutletPartitionFamily`
+Il-Mostru ħoloq:
 
-ⲠMonsterContext ϩⲁⲣⲉϩ ⲉ`gap`, `cutletCount`, `calculationGateOffset`, route family count, route partition, selected rank, legacy-all-positive flag, route-seen ⲙⲛ seen counter. Ⲛfield ⲛⲁⲓ ⲟ ⲛinvocation-local trace state.
+- pal fis-sensiela tal-jiem;
+- żewġ ħjut tal-għadd tal-jiem;
+- l-Għadd il-Kbir li fih iż-żero taz-zalza jidher bħala `M`;
+- ħames ġebliet li jiġu aġġornati flimkien;
+- seba’ qatriet moħbija;
+- 46 qatra viżibbli;
+- sitt skutelli li jibdlu l-ordni tagħhom;
+- tliet tferrigħat diretti;
+- tħawwid simultanju;
+- 12-il pass sussegwenti ta’ tħawwid;
+- ħażna fissa tal-ordni tal-qatra 46;
+- siġilli separati;
+- fluss ċirkolari ta’ tweġibiet;
+- Għażla Qasira;
+- Għażla Wiesgħa li l-isem kanoniku tagħha huwa **Għażla Ugwali**;
+- xtiebi fuq iż-żewġ naħat tal-pal;
+- is-sena 5000 bħala kostanta strutturali;
+- żewġ mogħdijiet li jibdew minnha u jimxu f’direzzjonijiet opposti;
+- pulpetti li l-konfini tagħhom jaħbtu max-xtiebi;
+- xhur minsuġa bħal ħjut;
+- ismijiet kanoniċi;
+- u eżattament ħames komponenti fir-riżultat tal-jum.
 
-Ⲡprefix check ⲙⲡregression ⲟ ⲛtest-only code. Ⲙⲛ prefix-filter, DP count/unrank, filtered family, ⲏ code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
+Hekk huwa rranġat iż-żmien: kull saff jinsab f’postu, u kull riżultat jitnissel mis-saffi li ġew qablu. Il-kalendarju jinqara billi wieħed jimxi mal-liġi u mal-ordni u jwettaq il-kalkolu sal-aħħar.
 
-ⲚStage 1–41 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 42 ϯ `STAGE42_DISCOVERY21_EXPECTED_RED`.
-
-
-## Ⲃⲁⲑⲙⲟⲥ 43 — PATCH 21
-
-### Ⲡfiltered legacy family
-
-Ⲡall-positive scar ⲙⲡStage 42 ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲣϩⲱⲃ ⲛghost ϩⲙ call ⲛⲓⲙ:
-
-`legacyCutletPartitionWithoutCalculationGate -> oldCutletPartitionFamily`
-
-Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
-
-`monster_cutlet_partition_route -> monster_stage43_cutlet_partition_patch_wrapper -> cutletPartitionPatch21`
-
-Ⲉϣϫⲉ `requiredOffset=0`, ⲡghost family ⲟ ⲛsame legal family ⲁⲩⲱ ⲡwrapper reuse ⲙⲙⲟϥ. Ⲉϣϫⲉ `0 < requiredOffset < gap`, ⲡghost ⲟⲩⲏϩ ϩⲙⲡtrace ⲙⲙⲁⲧⲉ, ⲁⲩⲱ ⲡauthoritative family ⲕⲱ ⲙⲡrequired offset ⲛⲟⲩproper prefix boundary.
-
-Ⲡcount ⲙⲡfiltered family ⲡⲉ:
-
-`C(gap-2, cutlets-2)`
-
-ϫⲉ ⲟⲩcut position ⲛⲧⲉ ⲛ`cutlets-1` ⲟ ⲛfixed ⲉ`requiredOffset`, ⲁⲩⲱ ⲥⲉⲥⲱⲧⲡ ⲛⲛremaining `cutlets-2` ϩⲛ `gap-2` ⲛpositions. Ⲡ`filteredCutletPartitionFamilyUnrank` ⲙⲟⲟϣⲉ ⲛⲥⲁ ⲛlegacy candidate parts ϩⲙ ascending order ⲁⲩⲱ ⲗⲟⲅⲓⲍⲉ ⲙⲡfiltered descendant block ⲛcandidate ⲛⲓⲙ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡorder ⲟ ⲛsame lexicographic order ⲛⲧⲉⲡfiltered legacy family.
-
-### Ⲡtrace ⲙⲛ regression
-
-ⲠStage 42 witness `gap=10, cutlets=3, offset=4, rank=1` ⲧⲉⲛⲟⲩ ϯ authoritative `count=8`, `[1,3,6]`, ⲁⲗⲗⲁ ⲡlive ghost ⲟⲩⲏϩ `count=36`, `[1,1,8]`. Ⲡrank 8 ⲙⲡfiltered family ϯ `[4,5,1]`.
-
-ⲠMonsterContext ϩⲁⲣⲉϩ ⲉghost count, ghost partition, ghost-seen, filtered-used, patch-seen ⲙⲛ ghost-reused. Ⲛfield ⲛⲁⲓ ⲟ ⲛinvocation-local diagnostic state ⲙⲙⲁⲧⲉ.
-
-`STAGE42_REGRESSION_GREEN`
-
-`STAGE43_PATCH21_GREEN`
-
-## Ⲃⲁⲑⲙⲟⲥ 44 — DISCOVERY 22
-
-### Ⲛⲉⲩⲙⲉⲉⲩⲉ
-
-Ⲙⲛⲛⲥⲁ ⲡcutlet-partition route, ⲁⲩⲕⲱ ⲙⲡlegacy name generator ϫⲉ ⲡrank ϣϭⲙϭⲟⲙ ⲉⲩⲱϣ ⲙⲙⲟϥ ⲛdigits ⲛbase 17 ⲙⲙⲁⲧⲉ. Ⲡdigit ⲛposition ⲛⲓⲙ ϫⲓ ⲛⲟⲩcanonical cutlet-name index `1..17`, ⲁⲩⲱ ⲙⲛ state ⲉϥⲙⲉⲩⲉ ⲛⲛⲉⲛⲧⲁⲩϫⲓ ⲛϣⲟⲣⲡ.
-
-`oldCutletNameRowWithRepeats(rank1,K,out)`
-
-Ⲡlegacy rule ⲡⲉ:
-
-`q = rank1 - 1`
-
-`out[p] = (q mod 17) + 1; q = floor(q/17)`
-
-Ⲡ`legacyCutletNamesWithRepeats` ⲕⲱ ⲙⲡscar callable. Ⲡsemantic route ⲙⲡDISCOVERY 22 ⲡⲉ:
-
-`monster_cutlet_names_route -> legacyCutletNamesWithRepeats -> oldCutletNameRowWithRepeats`
-
-Ⲛcanonical indices ⲧⲱⲛ ⲙⲛ ⲡfrozen `SOURCE_LANGUAGE_CATALOG.tsv`; ⲙⲡⲟⲩϣⲓⲃⲉ ⲛⲟⲩname ϩⲙⲡcatalog.
-
-### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
-
-Ⲡwitness ⲡⲉ `K=6`, `rank1=1`.
-
-Ⲡlegacy route ϯ:
-
-`[1,1,1,1,1,1]`
-
-Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡsame Sahidic cutlet name ⲣ ⲛ6 ⲛposition. Ⲡtest-only normative reference ⲛⲧⲉⲡsame Assembly test ϯ ⲙⲡrank 1 ⲙⲡordered distinct-name family:
-
-`[1,2,3,4,5,6]`
-
-Ⲡdirect scar ⲟⲩⲏϩ repeated ⲁⲩⲱ ⲡsemantic route ⲟⲩⲏϩ ⲉϥⲧⲱⲛ ⲙⲙⲟϥ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡDISCOVERY ⲟ ⲛ`EXPECTED_RED`.
-
-### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
-
-`calendarDateSpaghetti -> monster_stage44_legacy_repeated_names_handler -> monster_cutlet_names_route -> legacyCutletNamesWithRepeats -> oldCutletNameRowWithRepeats`
-
-ⲠMonsterContext ϩⲁⲣⲉϩ ⲉ`cutletCount`, `selectedRank`, route-name row pointer, repeat-seen flag, route-seen flag ⲙⲛ seen counter. Ⲛfield ⲛⲁⲓ ⲟ ⲛinvocation-local trace state ⲙⲙⲁⲧⲉ.
-
-Ⲡcorrect distinct-name unrank ⲥⲏϩ ⲙⲙⲁⲧⲉ ϩⲙ `tests/stage44_discovery22.s` ⲛtest reference. Ⲙⲛ selector/detour ⲙⲡPATCH 22 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
-
-ⲚStage 1–43 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 44 ϯ `STAGE44_DISCOVERY22_EXPECTED_RED`.
-
-
-## Ⲃⲁⲑⲙⲟⲥ 45 — PATCH 22
-
-### Ⲡpartial-permutation detour
-
-Ⲡrepeated-name scar ⲙⲡStage 44 ⲙⲡⲟⲩⲃⲟⲗϥ ⲉⲃⲟⲗ. `oldCutletNameRowWithRepeats` ⲙⲛ `legacyCutletNamesWithRepeats` ⲟⲩⲏϩ callable ⲁⲩⲱ byte-for-byte ⲛsame.
-
-Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
-
-`monster_cutlet_names_route -> monster_stage45_cutlet_names_patch_wrapper -> cutletNamesPatch22`
-
-`cutletNamesPatch22` ⲙⲟⲩⲧⲉ ⲉⲡlegacy scar ⲛϣⲟⲣⲡ ϩⲙ call ⲛⲓⲙ ⲉⲟⲩseparate invocation-local ghost buffer. Ⲙⲛⲛⲥⲱϥ `unrankDistinctCutletNames17` ⲗⲟⲅⲓⲍⲉ ⲙⲡsame one-based rank ϩⲙⲡordered family ⲛdistinct canonical indices.
-
-Ⲡblock ⲙⲡposition ⲛⲓⲙ ⲡⲉ:
-
-`P(remaining-1, suffixLength)`
-
-ⲁⲩⲱ ⲡcandidate ⲥⲱⲧⲡ ⲕⲁⲧⲁ ascending unused canonical index. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡorder ⲧⲱⲛ ⲙⲛ ⲡlexicographic partial-permutation family ⲙⲡnormative scroll.
-
-### Ⲡbad/correct selector
-
-Ⲡghost ⲛⲉϥⲃⲱⲕ ⲁⲛ ⲉⲡsemantic output ⲉϣϫⲉ ϥϣⲟⲃⲉ ⲙⲛ ⲡcorrect row. Ⲉϣϫⲉ `bad==correct`, ⲡwrapper ⲕⲱ ⲙⲡbad row ⲉⲡoutput; ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡcorrect row ⲙⲙⲁⲧⲉ ⲟ ⲛauthoritative.
-
-ⲠStage 44 witness `K=6, rank1=1` ⲧⲉⲛⲟⲩ ϯ:
-
-`ghost = [1,1,1,1,1,1]`
-
-`route = [1,2,3,4,5,6]`
-
-Ⲡequal witness `K=2, rank1=272=P(17,2)` ϯ:
-
-`ghost = route = [17,16]`
-
-ⲁⲩⲱ ⲡreuse flag ⲟ ⲛ1.
-
-### Ⲡtrace ⲙⲛ regression
-
-ⲠMonsterContext ϩⲁⲣⲉϩ ⲉlive ghost pointer, ghost-seen, patch-seen, correct-used-different, equal-ghost-reused ⲙⲛ pointers ⲙⲡequal witness. Ⲛfield ⲛⲁⲓ ⲟ ⲛinvocation-local diagnostic state ⲙⲙⲁⲧⲉ.
-
-`STAGE44_REGRESSION_GREEN`
-
-`STAGE45_PATCH22_GREEN`
-
-Ⲁⲩⲣ ⲛⲟⲩ68-case vector sweep ϩⲓ `K=1..17` ⲙⲛ first/second/middle/last ranks. Ⲙⲛ Stage 46 ⲏ PATCH 23 month-length backend code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 45.
-
-
-## Ⲃⲁⲑⲙⲟⲥ 46 — DISCOVERY 23
-
-### Ⲡlegacy month-length list
-
-Ⲡ`oldMonthLengthMaterializedList` ⲧⲁⲙⲓⲟ ⲛⲟⲩmaterialized row ⲛⲓⲙ ⲙⲡbounded family ϩⲙⲡarena. Ⲡ`legacyMonthLengthMaterializedList` ⲕⲱ ⲙⲡscar callable, ⲁⲩⲱ ⲡsemantic route ⲙⲡDISCOVERY 23 ⲡⲉ:
-
-`monster_month_length_family_route -> legacyMonthLengthMaterializedList -> oldMonthLengthMaterializedList`
-
-Ⲡlegacy list object ϩⲁⲣⲉϩ ⲉ`count`, `total`, `slots`, `rows`, `kind=1` ⲙⲛ `rowBytes`. `legacyMonthLengthListItemAt1` ϫⲓ ⲛⲟⲩrow ⲉⲃⲟⲗ ϩⲙⲡmaterialized array. Ⲡsmall witness `L=15,K=3` ⲧⲁⲙⲓⲟ ⲛ10 ⲛrows ⲛⲁⲙⲉ; ⲡfirst ⲡⲉ `[4,4,7]` ⲁⲩⲱ ⲡlast ⲡⲉ `[7,4,4]`.
-
-### Ⲡfamily ⲉⲧⲛⲁⲁⲁ
-
-Ϩⲙ `L=252,K=47`, ⲙⲛⲛⲥⲁ ⲧⲉⲛⲃⲱⲗ ⲛ4 ⲉⲃⲟⲗ ϩⲙ month ⲛⲓⲙ, ⲡremaining total ⲡⲉ 64. Ⲉⲧⲃⲉ ϫⲉ 64 < 120, ⲡupper bound 123 ⲛϥⲕⲱⲗⲩ ⲁⲛ ⲛⲟⲩrow. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡexact family count ⲡⲉ:
-
-`C(110,46) = 22747362824110665179416185383175`
-
-ⲠStage 46 Assembly regression ⲧⲁϫⲣⲟ ⲙⲡBigInt ⲡⲁⲓ ϩⲙ two limbs: `0x11f1cb183ca:d6d1731e3f99a907`. Ⲡcount ⲟ ⲛ105-bit ⲁⲩⲱ ⲛⲁⲁⲁ ϩⲁ 2^64 rows. Ⲟⲩrow ⲛ47 ⲛu64 ϣⲁϫⲉ ⲛ376 bytes, ⲁⲩⲱ ⲡeager materialization ⲛⲁϣⲓⲛⲉ ⲛⲟⲩmemory ⲛⲁⲁⲁ ⲙⲙⲁⲧⲉ. Ⲡtest ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲙⲡhuge list; ϥⲗⲟⲅⲓⲍⲉ ⲙⲙⲁⲧⲉ ⲙⲡexact count, ⲉⲧⲃⲉ ⲡⲁⲓ ⲙⲛ OOM ⲉϥϣⲟⲟⲡ.
-
-### Ⲡtrace ⲙⲛ repository state
-
-`calendarDateSpaghetti` ⲙⲟⲩⲧⲉ ⲉ`monster_stage46_legacy_month_materialization_handler`; ⲡhandler ⲣϩⲱⲃ ϩⲓ ⲡsmall family ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡmaterialized list ϩⲙ invocation-local context. Ⲙⲛ `VirtualLegacyList`, exact bounded-DP backend ⲏ lexicographic DP unrank ⲙⲡPATCH 23 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
-
-ⲚStage 1–45 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 46 ϯ `STAGE46_DISCOVERY23_EXPECTED_RED`.
-
-
-## Ⲃⲁⲑⲙⲟⲥ 47 — PATCH 23
-
-### ⲠVirtualLegacyList detour
-
-Ⲡ`oldMonthLengthMaterializedList` ⲙⲛ `legacyMonthLengthMaterializedList` ⲟⲩⲏϩ callable ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡⲉⲩlegacy enumeration. Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
-
-`monster_month_length_family_route -> monster_stage47_month_length_patch_wrapper -> monthLengthVirtualListPatch23 -> VirtualLegacyList`
-
-Ⲡbase layout ⲙⲡvirtual object ⲧⲱⲛ ⲙⲛ ⲛϣⲟⲣⲡ fields ⲙⲡlegacy list: `count`, `total`, `slots`, `rows`, `kind`, `rowBytes`. Ⲡvirtual backend ⲕⲱ `kind=2` ⲁⲩⲱ `rows=0`; ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲟⲩfull row array.
-
-Ⲛⲥⲁ ⲧⲉⲛⲃⲱⲗ ⲛ4 ⲉⲃⲟⲗ ϩⲙ slot ⲛⲓⲙ, ⲡresidual ⲡⲉ:
-
-`S = yearLength - 4*monthCount`
-
-ⲁⲩⲱ ⲟⲩresidual part ⲛⲓⲙ ⲟ ϩⲛ `0..119`. `VirtualLegacyList` ⲕⲱ ⲛⲟⲩexact DP table `DP[k][s]`, ⲉⲣⲉ ⲡcell ⲛⲓⲙ ⲟ ⲛBigInt count ⲙⲡrows ⲉⲧⲉ ⲟⲩ`k` ⲛslot ⲥⲱϫⲡ ⲙⲛ residual `s`. Ⲡsliding-window recurrence ⲕⲱ ⲙⲡbound 119 without row materialization.
-
-### ⲠitemAt1
-
-`virtualMonthLengthListItemAt1Big` ⲟ ⲛexact one-based lexicographic unrank. Ϩⲙ position ⲛⲓⲙ, ⲛϥⲙⲟⲟϣⲉ ⲛⲥⲁ candidate month lengths `4..123` ϩⲙ ascending order, ⲛϥϫⲓ ⲙⲡDP suffix count ⲛcandidate ⲛⲓⲙ, ⲁⲩⲱ ⲛϥⲥⲱⲧⲡ ⲙⲡblock ⲉⲧⲉ ⲡrank ⲛϩⲏⲧϥ. `virtualMonthLengthListItemAt1` ⲕⲱ ⲛⲟⲩu64 compatibility rank ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉⲡBigInt unrank.
-
-Ⲡlarge witness `L=252,K=47` ⲕⲱ `kind=2`, `rows=0`, ⲙⲛ ⲡsame exact 105-bit count:
-
-`22747362824110665179416185383175`
-
-Ⲡrank 1 ϯ `46*4,68`; ⲡrank ⲉⲧⲧⲱⲛ ⲙⲛ ⲡfull BigInt count ϯ `68,46*4`. Ⲙⲛ eager huge allocation ⲉϥϣⲟⲟⲡ.
-
-### Ⲡlegacy ghost ⲙⲛ trace
-
-`monthLengthVirtualListPatch23` ⲣ ⲙⲡlegacy materializer ⲛghost ⲛⲟⲩⲙⲉ ⲉϣϫⲉ ⲡexact count ⲟ ⲛu64 ⲁⲩⲱ `count<=256`. Ⲡsmall witness `L=15,K=3` ⲕⲱ ⲛⲟⲩlive `kind=1` ghost ⲙⲛ 10 materialized rows, ⲁⲗⲗⲁ ⲡauthoritative object ⲟ ⲛ`kind=2` ⲙⲛ `rows=0`. Ⲉϣϫⲉ ⲡfamily ⲛⲁⲁⲁ, ⲡghost ⲛϥmaterialize ⲁⲛ ⲁⲩⲱ ⲡskip flag ⲟ ⲛ1.
-
-ⲠStage 46 handler ⲟⲩⲏϩ ⲉϥⲙⲟⲩⲧⲉ ⲉⲡdirect legacy scar ⲉⲧⲣⲉⲡStage 46 trace ⲟⲩⲏϩ materialized. ⲠStage 47 handler ⲕⲱ ⲙⲡvirtual route ⲙⲛ first/last rows ⲙⲛ live small ghost ϩⲙ invocation-local context.
-
-`STAGE46_REGRESSION_GREEN`
-
-`STAGE47_PATCH23_GREEN`
-
-Ⲙⲛ Stage 48 ⲏ PATCH 24 weaving code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 47.
-
-
-## Ⲃⲁⲑⲙⲟⲥ 48 — DISCOVERY 24
-
-### Ⲡlegacy daily month chooser
-
-Ⲁⲩⲟⲩⲱϩ ⲙⲡ`oldMonthWeavingEachDaySeparately` ⲙⲛ ⲡcallable scar `legacyChooseEachDaySeparately`. Ⲡlegacy chooser ⲕⲱ ⲛⲟⲩ`remaining` copy ⲙⲡmonth lengths, ⲁⲩⲱ ϩⲙ day-position ⲛⲓⲙ ϥϫⲓ ⲙⲡ`answer mod m` start month. Ⲉϣϫⲉ ⲡmonth ⲉⲧⲁϥⲥⲟⲧⲡϥ ⲙⲟⲩϩ, ϥⲕⲱⲧⲉ ⲉⲡnext month ϣⲁⲛⲧⲉϥϭⲓⲛⲉ ⲛⲟⲩremaining occurrence.
-
-ⲠDISCOVERY route ⲡⲉ:
-
-`monster_month_weaving_route -> legacyChooseEachDaySeparately -> oldMonthWeavingEachDaySeparately`
-
-ⲠABI ϩⲁⲣⲉϩ ⲉⲡ`wantedRank` BigInt ⲉⲧⲣⲉⲡlater patch ϣϭⲙϭⲟⲙ ⲉϥⲕⲱ ⲛⲟⲩwhole-weave selector ⲉϫⲛ ⲡsame route, ⲁⲗⲗⲁ ⲡStage 48 legacy ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ.
-
-### Ⲡwitness
-
-Ϩⲙ `lengths=[4,4]`, `answers=[2]`, `wantedRank=1`, ⲡlegacy daily chooser ϯ:
-
-`[2,2,2,2,1,1,1,1]`
-
-Ⲡrow ⲕⲱ ⲙⲡmultiplicity 4 ⲛⲟⲩmonth ⲛⲓⲙ, ⲁⲗⲗⲁ ⲡfirst occurrence ⲙⲡmonth 2 ⲛⲏⲩ ϩⲁ ⲡfirst occurrence ⲙⲡmonth 1, ⲁⲩⲱ ⲡlast occurrence ⲙⲡmonth 2 ⲛⲏⲩ ϩⲁ ⲡlast occurrence ⲙⲡmonth 1. Ⲡrank-1 legal lexicographic weave ⲙⲡsame lengths ⲡⲉ `[1,1,1,1,2,2,2,2]`.
-
-`calendarDateSpaghetti` ⲙⲟⲩⲧⲉ ⲉ`monster_stage48_legacy_daily_month_weaving_handler`; ⲡhandler ⲣ ⲙⲡdirect scar ⲙⲛ ⲡroute ⲛⲥⲛⲁⲩ ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲛrow pointers ⲙⲛ ⲡwanted rank ϩⲙ invocation-local context.
-
-`STAGE48_DISCOVERY24_EXPECTED_RED`
-
-ⲚStage 1–47 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛGREEN. Ⲙⲛ `DPUnrankLegalWeaving`, legal-weave DP, ghost/correct selector ⲏ Stage 49 code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 48.
-
-
-## Ⲃⲁⲑⲙⲟⲥ 49 — PATCH 24
-
-### Ⲡwhole-weave DP detour
-
-Ⲡ`oldMonthWeavingEachDaySeparately` ⲙⲛ `legacyChooseEachDaySeparately` ⲟⲩⲏϩ callable ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡⲉⲩlegacy daily-choice work. Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
-
-`monster_month_weaving_route -> monster_stage49_month_weaving_patch_wrapper -> monthWeavingPatch24`
-
-Ⲡdetour ⲧⲁⲙⲓⲟ ⲛⲟⲩseparate ghost row ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉ`legacyChooseEachDaySeparately` ⲛϣⲟⲣⲡ ϩⲙ call ⲛⲓⲙ. Ⲙⲛⲛⲥⲱⲥ ϥⲙⲟⲩⲧⲉ ⲉ`DPUnrankLegalWeaving` ⲙⲛ ⲡsame `lengths` ⲙⲛ ⲡ`wantedRank` BigInt, ⲁⲩⲱ ⲡcorrect row ⲡⲉ ⲡauthoritative candidate.
-
-### Ⲡlegal DP invariant
-
-Ⲡstate ⲕⲱ ⲛ`remaining[1..m]`, `openedUpTo` ⲙⲛ `closedUpTo`. Ⲟⲩmonth `j` ϣϭⲙϭⲟⲙ ⲉϥⲃⲱⲕ ⲉⲡnext position ⲉϣϫⲉ `remaining[j]>0`, ⲁⲩⲱ ⲉϣϫⲉ ⲙⲡⲁⲧⲟⲩⲟⲩⲱⲛ ⲙⲙⲟϥ ϥϣⲟⲟⲡ `j=openedUpTo+1`; ⲉϣϫⲉ ⲡmove ⲛⲁⲙⲟⲩϩ ⲙⲡmonth, ϥϣⲟⲟⲡ `j=closedUpTo+1`. Ⲡⲁⲓ ⲧⲁϫⲣⲟ ⲙⲡfirst-occurrence order ⲙⲛ ⲡlast-occurrence order ⲙⲙⲁⲩⲁⲁⲩ.
-
-`CountWeavingsByDP` ϯ ⲙⲡexact BigInt count. `DPUnrankLegalWeaving` ⲟ ⲛone-based exact lexicographic unrank: ϩⲙ position ⲛⲓⲙ ϥϭⲱϣⲧ ⲉmonth ids ϩⲙ ascending order, ϥⲱϣ ⲙⲡlegal suffix count, ⲁⲩⲱ ϥⲃⲱⲗ ⲉⲃⲟⲗ ⲙⲡwhole blocks ϣⲁⲛⲧⲉϥϩⲉ ⲉⲡblock ⲙⲡrank. Ⲡcount ⲙⲛ ⲡrank ⲛⲥⲉⲕⲱ ⲁⲛ ⲛⲟⲩu64 boundary.
-
-### Ⲡghost selector ⲙⲛ witness
-
-Ⲉϣϫⲉ ⲡghost ⲧⲱⲛ exactly ⲙⲛ ⲡcorrect row, ⲡwrapper ⲕⲱ ⲙⲡghost bytes ⲉⲡoutput ⲁⲩⲱ ⲥϩⲁⲓ `ghost-reused=1`. Ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡghost ⲟⲩⲏϩ diagnostic ⲙⲙⲁⲧⲉ ⲁⲩⲱ ⲡcorrect row ⲟⲩⲏϩ authoritative.
-
-Ϩⲙ `lengths=[4,4]`, `answers=[2]`, `wantedRank=1`, ⲡlive ghost ⲡⲉ `[2,2,2,2,1,1,1,1]`, ⲁⲗⲗⲁ ⲡroute ϯ `[1,1,1,1,2,2,2,2]`. Ⲡexact legal-family count ⲡⲉ 20. Ⲛranks 1, 2 ⲙⲛ 20 ⲁⲩⲧⲁϫⲣⲟ ⲛⲥⲉⲟ ⲛlexicographic order. Ϩⲙ `answers=[1]`, `rank=1`, ⲡghost ⲙⲛ ⲡcorrect ⲧⲱⲛ ⲁⲩⲱ ⲡreuse branch ⲣϩⲱⲃ ⲛⲟⲩⲙⲉ.
-
-ⲠAssembly differential sweep ⲧⲁϫⲣⲟ ⲙⲡcount/unrank ⲙⲛ ⲡsame-line Assembly oracle ϩⲓ 15 ⲛcases ⲙⲛ 2..4 ⲛmonths. Ⲟⲩ12-month witness ⲧⲁϫⲣⲟ ⲙⲡmulti-limb `rank=count`; ⲟⲩ47-month witness ⲧⲁϫⲣⲟ ⲙⲡmax month-count path ⲙⲛ rank 1.
-
-`STAGE48_REGRESSION_GREEN`
-
-`STAGE49_PATCH24_GREEN`
-
-Ⲙⲛ Stage 50 ⲏ PATCH 25 day-in-month code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.
+**R’amen.**
