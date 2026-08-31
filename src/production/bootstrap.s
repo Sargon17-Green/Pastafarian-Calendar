@@ -178,7 +178,9 @@
 .equ CTX_STAGE34_ROUTE_SELECTED_OPEN,1408
 .equ CTX_STAGE34_LEGACY_SEEN,1416
 .equ CTX_STAGE34_ROUTE_SEEN,1424
-.equ CTX_SIZE,1432
+.equ CTX_STAGE35_PATCH_SELECTED_OPEN,1432
+.equ CTX_STAGE35_PATCH_SEEN,1440
+.equ CTX_SIZE,1448
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -421,6 +423,10 @@ legacy_bowl_stir_stone_by_position:
 .global monster_stage34_legacy_year5000_tie_wrapper
 .global monster_year5000_tie_route
 .global monster_stage34_legacy_year5000_tie_handler
+.global reorderEqualLengthRunsByOpeningAfterLegacySort
+.global year5000TieSelectionPatch17
+.global monster_stage35_year5000_tie_patch_wrapper
+.global monster_stage35_year5000_tie_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -6168,8 +6174,126 @@ monster_stage34_legacy_year5000_tie_wrapper:
 
 .type monster_year5000_tie_route,@function
 monster_year5000_tie_route:
-    jmp monster_stage34_legacy_year5000_tie_wrapper
+    jmp monster_stage35_year5000_tie_patch_wrapper
 .size monster_year5000_tie_route,.-monster_year5000_tie_route
+
+# Ⲃⲁⲑⲙⲟⲥ 35 — PATCH 17
+# Ⲙⲛⲛⲥⲁ ⲡstable length-only sort, ⲛequal-length run ⲙⲙⲁⲧⲉ ⲥⲉsort ⲕⲁⲧⲁ ⲡopening gate ⲉϥϣⲟⲣⲡ.
+.type reorderEqualLengthRunsByOpeningAfterLegacySort,@function
+reorderEqualLengthRunsByOpeningAfterLegacySort:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    push rbx
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    xor r14d,r14d
+.Lrelr_scan_run:
+    cmp r14,r13
+    jae .Lrelr_done
+    mov r15,r14
+    inc r15
+.Lrelr_find_end:
+    cmp r15,r13
+    jae .Lrelr_have_end
+    lea rax,[r14+r14*2]
+    lea rax,[r12+rax*8]
+    mov rcx,qword ptr [rax+YC_LENGTH]
+    lea rdx,[r15+r15*2]
+    lea rdx,[r12+rdx*8]
+    cmp rcx,qword ptr [rdx+YC_LENGTH]
+    jne .Lrelr_have_end
+    inc r15
+    jmp .Lrelr_find_end
+.Lrelr_have_end:
+    mov rax,r15
+    sub rax,r14
+    cmp rax,2
+    jb .Lrelr_next_run
+    mov rbx,r15
+    dec rbx
+.Lrelr_outer:
+    mov r10,r14
+    xor r11d,r11d
+.Lrelr_inner:
+    cmp r10,rbx
+    jae .Lrelr_after_inner
+    lea rax,[r10+r10*2]
+    lea rax,[r12+rax*8]
+    lea rcx,[rax+YC_SIZE]
+    mov rdx,qword ptr [rax+YC_OPEN]
+    cmp rdx,qword ptr [rcx+YC_OPEN]
+    jle .Lrelr_no_swap
+    mov rdx,qword ptr [rax+YC_OPEN]
+    mov rsi,qword ptr [rcx+YC_OPEN]
+    mov qword ptr [rax+YC_OPEN],rsi
+    mov qword ptr [rcx+YC_OPEN],rdx
+    mov rdx,qword ptr [rax+YC_CLOSE]
+    mov rsi,qword ptr [rcx+YC_CLOSE]
+    mov qword ptr [rax+YC_CLOSE],rsi
+    mov qword ptr [rcx+YC_CLOSE],rdx
+    mov rdx,qword ptr [rax+YC_LENGTH]
+    mov rsi,qword ptr [rcx+YC_LENGTH]
+    mov qword ptr [rax+YC_LENGTH],rsi
+    mov qword ptr [rcx+YC_LENGTH],rdx
+    mov r11d,1
+.Lrelr_no_swap:
+    inc r10
+    jmp .Lrelr_inner
+.Lrelr_after_inner:
+    test r11d,r11d
+    je .Lrelr_next_run
+    dec rbx
+    cmp rbx,r14
+    ja .Lrelr_outer
+.Lrelr_next_run:
+    mov r14,r15
+    jmp .Lrelr_scan_run
+.Lrelr_done:
+    mov rax,r13
+    add rsp,8
+    pop rbx
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size reorderEqualLengthRunsByOpeningAfterLegacySort,.-reorderEqualLengthRunsByOpeningAfterLegacySort
+
+# Ⲡlegacy selector ⲙⲟⲟϣⲉ ⲛϣⲟⲣⲡ ϩⲓ ⲡbuffer ⲛⲧⲟϣ; ⲙⲛⲛⲥⲱϥ ⲙⲙⲁⲧⲉ ⲡequal-run repair ⲙⲟⲟϣⲉ.
+.type year5000TieSelectionPatch17,@function
+year5000TieSelectionPatch17:
+    push rbp
+    mov rbp,rsp
+    sub rsp,32
+    mov qword ptr [rbp-8],rsi
+    mov qword ptr [rbp-16],rdx
+    call legacyYear5000TieSelection
+    test rax,rax
+    je .Ly5tsp17_no
+    mov rdi,qword ptr [rbp-16]
+    mov rsi,qword ptr [rbp-8]
+    call reorderEqualLengthRunsByOpeningAfterLegacySort
+    mov rdi,qword ptr [rbp-16]
+    mov rsi,qword ptr [rbp-8]
+    call legacyYearSelectFirst
+    leave
+    ret
+.Ly5tsp17_no:
+    xor eax,eax
+    leave
+    ret
+.size year5000TieSelectionPatch17,.-year5000TieSelectionPatch17
+
+.type monster_stage35_year5000_tie_patch_wrapper,@function
+monster_stage35_year5000_tie_patch_wrapper:
+    jmp year5000TieSelectionPatch17
+.size monster_stage35_year5000_tie_patch_wrapper,.-monster_stage35_year5000_tie_patch_wrapper
 
 .type monster_stage34_legacy_year5000_tie_handler,@function
 monster_stage34_legacy_year5000_tie_handler:
@@ -6233,6 +6357,50 @@ monster_stage34_legacy_year5000_tie_handler:
     leave
     ret
 .size monster_stage34_legacy_year5000_tie_handler,.-monster_stage34_legacy_year5000_tie_handler
+
+# ⲠPATCH 17 handler ϩⲁⲣⲉϩ ⲉⲡsemantic selected opening ⲛⲧⲉⲡsame Year 5000 tie.
+.type monster_stage35_year5000_tie_patch_handler,@function
+monster_stage35_year5000_tie_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    mov r12,rdi
+    test r12,r12
+    je .Lms35_fail
+    mov edi,48
+    call arena_alloc
+    mov r13,rax
+    mov qword ptr [r13+0],9
+    mov qword ptr [r13+8],15
+    mov qword ptr [r13+16],490
+    mov qword ptr [r13+24],3
+    mov qword ptr [r13+32],9
+    mov qword ptr [r13+40],490
+    mov edi,48
+    call arena_alloc
+    mov r14,rax
+    mov rdi,r13
+    mov esi,2
+    mov rdx,r14
+    call monster_year5000_tie_route
+    test rax,rax
+    je .Lms35_fail
+    mov rcx,qword ptr [rax+YC_OPEN]
+    mov qword ptr [r12+CTX_STAGE35_PATCH_SELECTED_OPEN],rcx
+    inc qword ptr [r12+CTX_STAGE35_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms35_done
+.Lms35_fail:
+    xor eax,eax
+.Lms35_done:
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage35_year5000_tie_patch_handler,.-monster_stage35_year5000_tie_patch_handler
 
 
 .type calendarDateSpaghetti,@function
@@ -6358,6 +6526,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage34_legacy_year5000_tie_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage35_year5000_tie_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

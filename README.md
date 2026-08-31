@@ -442,3 +442,20 @@
 Ⲡroute ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ⲙⲛ ⲡlegacy selection. Ⲙⲛ reorder ⲙⲡequal-length run ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 34. Ⲡregression ⲟ ⲛ`EXPECTED_RED` ⲙⲛ 2 ⲛroute/context mismatch ⲉⲩⲧⲟϣ.
 
 Ⲙⲛ code ⲙⲡPATCH 17 ⲉⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 35 — PATCH 17
+
+Ⲡ`stableLengthOnlyPatchedYearCandidates` ⲙⲛ ⲡ`legacyYear5000TieSelection` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ. Ⲡlegacy stable sort ⲟⲩⲏϩ ⲉϥsort ⲕⲁⲧⲁ ⲡ`length` ⲙⲙⲁⲧⲉ ⲁⲩⲱ ⲉϥϩⲁⲣⲉϩ ⲉⲡinput order ϩⲛ equal-length tie.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `reorderEqualLengthRunsByOpeningAfterLegacySort` ⲙⲛ `year5000TieSelectionPatch17`. Ⲡpatched path ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉ`legacyYear5000TieSelection` ϩⲓ ⲡsemantic output buffer. Ⲙⲛⲛⲥⲁ ⲡlegacy sort ⲙⲙⲁⲧⲉ, ⲡrepair ⲕⲱ ⲙⲡbuffer ⲉⲩrun ⲛⲣⲁⲛ ⲉⲩⲟ ⲛcontiguous ⲁⲩⲱ equal-length. Ⲟⲩrun ⲉϥⲕⲏ ⲙⲡⲥⲁ ⲛ2 ⲏ ⲟⲩsingleton ⲛϥϣⲓⲃⲉ ⲁⲛ. Ⲟⲩrun ⲛⲥⲛⲁⲩ ⲏ ⲉϩⲟⲩⲉ ⲙⲟⲟϣⲉ ⲕⲁⲧⲁ ⲡ`YC_OPEN` ⲉϥϣⲟⲣⲡ.
+
+`monster_year5000_tie_route -> monster_stage35_year5000_tie_patch_wrapper -> year5000TieSelectionPatch17 -> legacyYear5000TieSelection -> reorderEqualLengthRunsByOpeningAfterLegacySort -> legacyYearSelectFirst`
+
+ϨⲙⲡYear 5000 witness, ⲡlegacy output ⲟⲩⲏϩ `9,3` ⲁⲩⲱ ⲡlegacy selection ⲟ ⲛ`9`. Ⲡpatched output ⲟ ⲛ`3,9` ⲁⲩⲱ ⲡsemantic selection ⲟ ⲛ`3`.
+
+ⲠStage 35 regression ⲧⲁϫⲣⲟ ⲟⲛ ⲙⲡmulti-run input: ⲡstable length-only sort ⲧⲁⲙⲓⲟ ⲛ2 ⲛcontiguous tie runs, ⲁⲩⲱ ⲡrepair ⲥⲟⲣⲧ ⲙⲙⲁⲧⲉ ⲙⲡrun ⲡⲟⲩⲁ ⲕⲁⲧⲁ opening. Ⲛlength group ⲛⲥⲉmix ⲁⲛ. Ⲛsingleton length ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ.
+
+ⲠStage 34 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE34_REGRESSION_GREEN`. ⲠStage 35 ⲟ ⲛ`STAGE35_PATCH17_GREEN`.
+
+Ⲙⲛ clean two-key global sort, ⲙⲛ `oldJumpGuess`, ⲁⲩⲱ ⲙⲛ code ⲙⲡStage 36 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.

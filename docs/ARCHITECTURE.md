@@ -526,3 +526,26 @@
 ⲠYear 5000 witness ⲟ ⲛcandidate ⲥⲛⲁⲩ ⲙⲛ `length=490`, ⲉⲣⲉ ⲛopening gates ⲟ ⲛ`9,3`. Ⲡlegacy route ϫⲓ ⲙⲡ`9`. Ⲡtest-only normative reference ϫⲓ ⲙⲡearlier opening `3` ⲙⲙⲁⲧⲉ ϩⲙⲡequal-length run.
 
 Ⲡlegacy selection ⲙⲛ ⲡroute selection ⲥⲉⲣϩⲱⲃ ϩⲓ buffers ⲉⲩϣⲟⲃⲉ ⲁⲩⲱ ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local. Ⲙⲛ oracle call ϩⲙⲡproduction, ⲙⲛ global mutable semantic state, ⲁⲩⲱ ⲙⲛ equal-run reorder code ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲡequal-length run repair ⲙⲡⲃⲁⲑⲙⲟⲥ 35
+
+ⲠCOPY_DIAGNOSTIC ⲟ ⲛ:
+
+`legacyYear5000TieSelection -> stableLengthOnlyPatchedYearCandidates -> legacyYearSelectFirst`
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_year5000_tie_route -> monster_stage35_year5000_tie_patch_wrapper -> year5000TieSelectionPatch17`
+
+Ⲡ`year5000TieSelectionPatch17` ⲙⲟⲩⲧⲉ ⲛϣⲟⲣⲡ ⲉⲡCOPY_DIAGNOSTIC ⲉϫⲛ ⲡsemantic output buffer. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡstable length-only sort ⲟ ⲛphysical step ⲉϥϣⲟⲟⲡ ⲉⲙⲡⲁⲧⲉ ⲟⲩrepair.
+
+Ⲙⲛⲛⲥⲱϥ, `reorderEqualLengthRunsByOpeningAfterLegacySort` scan ⲙⲡalready-sorted buffer. Ⲡrun boundary ⲧⲱϣ ⲙⲙⲁⲧⲉ ⲕⲁⲧⲁ equality ⲙⲡ`YC_LENGTH`. Ⲡopening comparison ⲛϥⲙⲟⲟϣⲉ ⲁⲛ ⲉⲃⲟⲗ ϩⲙⲡrun. Ⲛdifferent-length records ⲛⲥⲉcross ⲁⲛ ⲛⲟⲩrun-repair boundary.
+
+### EQUIVALENCE
+
+Ⲉϣϫⲉ ⲟⲩlength ⲙⲛⲧⲉϥ ⲛⲟⲩtie, ⲡlegacy order ⲙⲛ ⲡpatched order ⲧⲱⲛ. Ⲉϣϫⲉ ⲟⲩcontiguous run ⲟ ⲛequal-length, ⲡpatched order ⲟ ⲛascending ⲕⲁⲧⲁ opening gate. Ⲉⲧⲃⲉ ϫⲉ ⲡstable length-only sort ⲙⲟⲟϣⲉ ⲛϣⲟⲣⲡ, ⲛequal-length records ⲧⲏⲣⲟⲩ ⲛⲧⲉⲡsame length ⲧⲁⲙⲓⲟ ⲛⲟⲩcontiguous run ⲉⲙⲡⲁⲧⲉ ⲡrepair.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲛϥⲟ ⲁⲛ ⲛclean two-key sort
+
+Ⲡold length-only function ⲟⲩⲏϩ byte/code-machine identical. Ⲡpatched layer ⲙⲟⲟϣⲉ **ⲙⲛⲛⲥⲁ** ⲡlegacy sort ⲁⲩⲱ ⲛϥϣⲓⲃⲉ ⲙⲙⲁⲧⲉ ⲙⲡrecords ϩⲛ equal-length run. Ⲙⲛ global two-key comparator ⲉϥϣⲟⲟⲡ.

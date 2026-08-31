@@ -36,3 +36,4 @@ set -euo pipefail
 ./build/stage32_discovery16
 ./build/stage33_patch16
 ./build/stage34_discovery17
+./build/stage35_patch17

@@ -707,3 +707,24 @@
 Ⲡroute ⲟⲩⲏϩ ⲉϥⲙⲟⲟϣⲉ ⲙⲛ ⲡlegacy selection. Ⲙⲛ reorder ⲙⲡequal-length run ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 34. Ⲡregression ⲟ ⲛ`EXPECTED_RED` ⲙⲛ 2 ⲛroute/context mismatch ⲉⲩⲧⲟϣ.
 
 Ⲙⲛ code ⲙⲡPATCH 17 ⲉⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 35 — PATCH 17
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲁⲁϥ ⲛⲥⲱⲟⲩ
+
+Ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲡ`stableLengthOnlyPatchedYearCandidates`, ⲡ`legacyYear5000TieSelection`, ⲏ ⲡ`legacyYearSelectFirst`. Ⲡlength-only stable sort ⲟⲩⲏϩ callable ⲁⲩⲱ ⲡdirect Stage 34 legacy scar ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡopening `9` ϩⲙⲡYear 5000 witness.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`reorderEqualLengthRunsByOpeningAfterLegacySort`. Ⲡhelper ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲟⲩglobal `(length,opening)` sort. Ⲛϣⲟⲣⲡ ⲡlegacy sort ⲙⲟⲟϣⲉ. Ⲙⲛⲛⲥⲱϥ ⲡhelper scan ⲛⲛrun ⲉⲩⲟ ⲛcontiguous ⲁⲩⲱ ⲉⲩⲉⲓⲣⲉ ⲙⲡsame `YC_LENGTH`. Ⲙⲙⲁⲧⲉ ϩⲛ ⲡrun ⲛⲧⲟϣ ⲛϥsort ⲕⲁⲧⲁ `YC_OPEN` ascending.
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲟⲛ ⲙⲡ`year5000TieSelectionPatch17` ⲙⲛ `monster_stage35_year5000_tie_patch_wrapper`. Ⲡpatch ⲙⲟⲩⲧⲉ ⲉ`legacyYear5000TieSelection` ⲛϣⲟⲣⲡ ⲁⲩⲱ ⲙⲛⲛⲥⲱϥ ⲙⲙⲁⲧⲉ ⲛϥⲙⲟⲩⲧⲉ ⲉⲡrun repair.
+
+`monster_year5000_tie_route -> monster_stage35_year5000_tie_patch_wrapper -> year5000TieSelectionPatch17`
+
+### Ⲡregression
+
+ⲠStage 34 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ ⲁⲩⲱ ⲧⲉⲛⲟⲩ ⲟ ⲛ`GREEN`. ⲠStage 35 test ⲧⲁϫⲣⲟ ⲙⲡdirect legacy scar `9,3 -> 9`, ⲡpatched witness `9,3 -> 3,9 -> 3`, ⲥⲛⲁⲩ ⲛequal-length run ϩⲙⲡsame family, ⲛsingleton run, ⲁⲩⲱ ⲡinvocation-local context trace.
+
+Ⲙⲛ `oldJumpGuess` ⲏ year-by-year traversal ⲙⲡPATCH 18 ⲉⲁϥⲃⲱⲕ ⲉϩⲟⲩⲛ.
