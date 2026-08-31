@@ -338,6 +338,15 @@ stage54_gate_gap:
     ret
 .size stage54_gate_gap,.-stage54_gate_gap
 
+# OPTIMIZATION:
+# Ⲡscratch ⲙⲡgate-gap ⲙⲛ ⲡyear-candidate ⲕⲧⲟ ⲉⲡarena mark ⲙⲛⲛⲥⲁ ⲡpersistent gate/year data ⲉⲁⲩⲥⲱⲛⲧ ⲙⲙⲟⲟⲩ.
+# EQUIVALENCE:
+# Ⲡgate index/day ⲙⲛ ⲡchosen year ⲥⲉⲕⲱ ⲛⲟⲩⲱⲧ; ⲡscratch ⲙⲙⲁⲧⲉ ⲡⲉ ⲉⲧⲟⲩⲱⲥϥ.
+# EDGE CASES:
+# Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲙⲡwalk 100 years, opening/closing gates, Year 5001, ⲙⲛ sequential checkpoints ϣⲁ Year -1.
+# WHY SAFE:
+# Ⲡpersistent data ⲥⲏϩ ⲛϣⲟⲣⲡ; ⲡscrub/reset ⲣϩⲱⲃ ⲙⲙⲁⲧⲉ ⲉϫⲛ bytes ⲉⲧⲙⲛ semantic ownership.
+
 .type stage54_gate_extend_positive,@function
 stage54_gate_extend_positive:
     push rbp
@@ -345,12 +354,26 @@ stage54_gate_extend_positive:
     push r12
     push r13
     push r14
+    push r15
+    sub rsp,32
     call stage54_gate_init
     mov r12,qword ptr [rip+stage54_GATE_MAX]
+    mov rdi,G_SIZE
+    call arena_alloc
+    mov r15,rax
+    call arena_mark
+    mov qword ptr [rbp-40],rax
+
     mov rdi,qword ptr [r12+G_INDEX]
     mov rsi,1
     call bi_add_u64
     mov r13,rax
+    mov rdi,r13
+    call stage54BigToI64
+    test rdx,rdx
+    je .Ls54gep_fail
+    mov qword ptr [rbp-48],rax
+
     mov rdi,r13
     mov rsi,1
     call stage54_gate_gap
@@ -358,18 +381,36 @@ stage54_gate_extend_positive:
     mov rdi,qword ptr [r12+G_DAY]
     mov rsi,r14
     call bi_add_u64
-    push rax
-    mov rdi,G_SIZE
-    call arena_alloc
-    mov r14,rax
-    pop rax
-    mov qword ptr [r14+G_INDEX],r13
-    mov qword ptr [r14+G_DAY],rax
-    mov qword ptr [r14+G_PREV],r12
-    mov qword ptr [r14+G_NEXT],0
-    mov qword ptr [r12+G_NEXT],r14
-    mov qword ptr [rip+stage54_GATE_MAX],r14
-    mov rax,r14
+    mov rdi,rax
+    call stage54BigToI64
+    test rdx,rdx
+    je .Ls54gep_fail
+    mov qword ptr [rbp-56],rax
+
+    call arena_mark
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-40]
+    call stage54ScrubGhostArena
+    mov rdi,qword ptr [rbp-40]
+    call arena_reset
+
+    mov rdi,qword ptr [rbp-48]
+    call bi_from_i64
+    mov qword ptr [r15+G_INDEX],rax
+    mov rdi,qword ptr [rbp-56]
+    call bi_from_i64
+    mov qword ptr [r15+G_DAY],rax
+    mov qword ptr [r15+G_PREV],r12
+    mov qword ptr [r15+G_NEXT],0
+    mov qword ptr [r12+G_NEXT],r15
+    mov qword ptr [rip+stage54_GATE_MAX],r15
+    mov rax,r15
+    jmp .Ls54gep_done
+.Ls54gep_fail:
+    xor eax,eax
+.Ls54gep_done:
+    add rsp,32
+    pop r15
     pop r14
     pop r13
     pop r12
@@ -384,14 +425,28 @@ stage54_gate_extend_negative:
     push r12
     push r13
     push r14
+    push r15
+    sub rsp,32
     call stage54_gate_init
     mov r12,qword ptr [rip+stage54_GATE_MIN]
+    mov rdi,G_SIZE
+    call arena_alloc
+    mov r15,rax
+    call arena_mark
+    mov qword ptr [rbp-40],rax
+
     mov rdi,1
     call bi_from_u64
     mov rsi,rax
     mov rdi,qword ptr [r12+G_INDEX]
     call bi_sub
     mov r13,rax
+    mov rdi,r13
+    call stage54BigToI64
+    test rdx,rdx
+    je .Ls54gen_fail
+    mov qword ptr [rbp-48],rax
+
     mov rdi,r13
     call bi_abs
     mov rsi,-1
@@ -403,18 +458,36 @@ stage54_gate_extend_negative:
     mov rsi,rax
     mov rdi,qword ptr [r12+G_DAY]
     call bi_sub
-    push rax
-    mov rdi,G_SIZE
-    call arena_alloc
-    mov r14,rax
-    pop rax
-    mov qword ptr [r14+G_INDEX],r13
-    mov qword ptr [r14+G_DAY],rax
-    mov qword ptr [r14+G_PREV],0
-    mov qword ptr [r14+G_NEXT],r12
-    mov qword ptr [r12+G_PREV],r14
-    mov qword ptr [rip+stage54_GATE_MIN],r14
-    mov rax,r14
+    mov rdi,rax
+    call stage54BigToI64
+    test rdx,rdx
+    je .Ls54gen_fail
+    mov qword ptr [rbp-56],rax
+
+    call arena_mark
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-40]
+    call stage54ScrubGhostArena
+    mov rdi,qword ptr [rbp-40]
+    call arena_reset
+
+    mov rdi,qword ptr [rbp-48]
+    call bi_from_i64
+    mov qword ptr [r15+G_INDEX],rax
+    mov rdi,qword ptr [rbp-56]
+    call bi_from_i64
+    mov qword ptr [r15+G_DAY],rax
+    mov qword ptr [r15+G_PREV],0
+    mov qword ptr [r15+G_NEXT],r12
+    mov qword ptr [r12+G_PREV],r15
+    mov qword ptr [rip+stage54_GATE_MIN],r15
+    mov rax,r15
+    jmp .Ls54gen_done
+.Ls54gen_fail:
+    xor eax,eax
+.Ls54gen_done:
+    add rsp,32
+    pop r15
     pop r14
     pop r13
     pop r12
@@ -656,9 +729,12 @@ stage54_bucket_select:
     leave
     ret
 .Lobs_fail:
-    mov rax,60
-    mov rdi,126
-    syscall
+    xor eax,eax
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
 .size stage54_bucket_select,.-stage54_bucket_select
 
 .type stage54_year5000,@function
@@ -687,6 +763,9 @@ stage54_year5000:
     call stage54_ensure_gates_cover_day
     mov rdi,qword ptr [rbp-64]
     call stage54_ensure_gates_cover_day
+
+    call arena_mark
+    mov qword ptr [rbp-88],rax
     call stage54_bucket_new
     mov r13,rax
     mov qword ptr [rbp-72],0
@@ -768,12 +847,24 @@ stage54_year5000:
     mov rsi,rax
     mov rdi,r13
     call stage54_bucket_select
+    test rax,rax
+    je .Loy5_fail
     mov r14,rax
+    mov rax,qword ptr [r14+C_OPEN]
+    mov qword ptr [rbp-96],rax
+    mov rax,qword ptr [r14+C_CLOSE]
+    mov qword ptr [rbp-104],rax
+    call arena_mark
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-88]
+    call stage54ScrubGhostArena
+    mov rdi,qword ptr [rbp-88]
+    call arena_reset
     mov rdi,5000
     call bi_from_u64
     mov rdi,rax
-    mov rsi,qword ptr [r14+C_OPEN]
-    mov rdx,qword ptr [r14+C_CLOSE]
+    mov rsi,qword ptr [rbp-96]
+    mov rdx,qword ptr [rbp-104]
     call stage54_make_year
     add rsp,64
     pop r15
@@ -784,9 +875,15 @@ stage54_year5000:
     leave
     ret
 .Loy5_fail:
-    mov rax,60
-    mov rdi,127
-    syscall
+    xor eax,eax
+    add rsp,64
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
 .size stage54_year5000,.-stage54_year5000
 
 .type stage54_next_year,@function
@@ -798,21 +895,27 @@ stage54_next_year:
     push r13
     push r14
     push r15
-    sub rsp,32
+    sub rsp,72
     mov r12,rdi
     mov r13,rsi
+    mov r15,qword ptr [r13+Y_CLOSE]
+
+    mov rdi,qword ptr [r15+G_DAY]
+    mov rsi,YEAR_MAX
+    call bi_add_u64
+    mov rdi,rax
+    call stage54_ensure_gates_cover_day
+
+    call arena_mark
+    mov qword ptr [rbp-72],rax
     call stage54_bucket_new
     mov r14,rax
     mov qword ptr [rbp-48],0
-    mov r15,qword ptr [r13+Y_CLOSE]
     mov rbx,qword ptr [r15+G_NEXT]
-    mov rcx,1
+    mov qword ptr [rbp-64],1
 .Lony_scan:
     test rbx,rbx
-    jne .Lony_have
-    call stage54_gate_extend_positive
-    mov rbx,rax
-.Lony_have:
+    je .Lony_choose
     mov rdi,qword ptr [rbx+G_DAY]
     mov rsi,qword ptr [r15+G_DAY]
     call bi_sub
@@ -821,23 +924,23 @@ stage54_next_year:
     mov qword ptr [rbp-56],rax
     cmp rax,YEAR_MAX
     ja .Lony_choose
-    cmp rcx,6
+    cmp qword ptr [rbp-64],6
     jb .Lony_advance
     cmp rax,YEAR_MIN
     jb .Lony_advance
-    push rcx
     mov rdi,r14
     mov rsi,r15
     mov rdx,rbx
     mov rcx,qword ptr [rbp-56]
     call stage54_bucket_append
-    pop rcx
     inc qword ptr [rbp-48]
 .Lony_advance:
     mov rbx,qword ptr [rbx+G_NEXT]
-    inc rcx
+    inc qword ptr [rbp-64]
     jmp .Lony_scan
 .Lony_choose:
+    cmp qword ptr [rbp-48],0
+    je .Ls54ny_fail
     mov rdi,r12
     mov rsi,qword ptr [r15+G_DAY]
     call sauceWithScars
@@ -856,15 +959,38 @@ stage54_next_year:
     mov rsi,rax
     mov rdi,r14
     call stage54_bucket_select
+    test rax,rax
+    je .Ls54ny_fail
     mov r14,rax
+    mov rax,qword ptr [r14+C_OPEN]
+    mov qword ptr [rbp-80],rax
+    mov rax,qword ptr [r14+C_CLOSE]
+    mov qword ptr [rbp-88],rax
+    call arena_mark
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-72]
+    call stage54ScrubGhostArena
+    mov rdi,qword ptr [rbp-72]
+    call arena_reset
+
     mov rdi,qword ptr [r13+Y_NUMBER]
     mov rsi,1
     call bi_add_u64
     mov rdi,rax
-    mov rsi,qword ptr [r14+C_OPEN]
-    mov rdx,qword ptr [r14+C_CLOSE]
+    mov rsi,qword ptr [rbp-80]
+    mov rdx,qword ptr [rbp-88]
     call stage54_make_year
-    add rsp,32
+    add rsp,72
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.Ls54ny_fail:
+    xor eax,eax
+    add rsp,72
     pop r15
     pop r14
     pop r13
@@ -883,21 +1009,29 @@ stage54_previous_year:
     push r13
     push r14
     push r15
-    sub rsp,32
+    sub rsp,72
     mov r12,rdi
     mov r13,rsi
+    mov r15,qword ptr [r13+Y_OPEN]
+
+    mov rdi,YEAR_MAX
+    call bi_from_u64
+    mov rsi,rax
+    mov rdi,qword ptr [r15+G_DAY]
+    call bi_sub
+    mov rdi,rax
+    call stage54_ensure_gates_cover_day
+
+    call arena_mark
+    mov qword ptr [rbp-72],rax
     call stage54_bucket_new
     mov r14,rax
     mov qword ptr [rbp-48],0
-    mov r15,qword ptr [r13+Y_OPEN]
     mov rbx,qword ptr [r15+G_PREV]
-    mov rcx,1
+    mov qword ptr [rbp-64],1
 .Lopy_scan:
     test rbx,rbx
-    jne .Lopy_have
-    call stage54_gate_extend_negative
-    mov rbx,rax
-.Lopy_have:
+    je .Lopy_choose
     mov rdi,qword ptr [r15+G_DAY]
     mov rsi,qword ptr [rbx+G_DAY]
     call bi_sub
@@ -906,23 +1040,23 @@ stage54_previous_year:
     mov qword ptr [rbp-56],rax
     cmp rax,YEAR_MAX
     ja .Lopy_choose
-    cmp rcx,6
+    cmp qword ptr [rbp-64],6
     jb .Lopy_advance
     cmp rax,YEAR_MIN
     jb .Lopy_advance
-    push rcx
     mov rdi,r14
     mov rsi,rbx
     mov rdx,r15
     mov rcx,qword ptr [rbp-56]
     call stage54_bucket_append
-    pop rcx
     inc qword ptr [rbp-48]
 .Lopy_advance:
     mov rbx,qword ptr [rbx+G_PREV]
-    inc rcx
+    inc qword ptr [rbp-64]
     jmp .Lopy_scan
 .Lopy_choose:
+    cmp qword ptr [rbp-48],0
+    je .Ls54py_fail
     mov rdi,r12
     mov rsi,qword ptr [r15+G_DAY]
     call sauceWithScars
@@ -941,17 +1075,40 @@ stage54_previous_year:
     mov rsi,rax
     mov rdi,r14
     call stage54_bucket_select
+    test rax,rax
+    je .Ls54py_fail
     mov r14,rax
+    mov rax,qword ptr [r14+C_OPEN]
+    mov qword ptr [rbp-80],rax
+    mov rax,qword ptr [r14+C_CLOSE]
+    mov qword ptr [rbp-88],rax
+    call arena_mark
+    mov rsi,rax
+    mov rdi,qword ptr [rbp-72]
+    call stage54ScrubGhostArena
+    mov rdi,qword ptr [rbp-72]
+    call arena_reset
+
     mov rdi,1
     call bi_from_u64
     mov rsi,rax
     mov rdi,qword ptr [r13+Y_NUMBER]
     call bi_sub
     mov rdi,rax
-    mov rsi,qword ptr [r14+C_OPEN]
-    mov rdx,qword ptr [r14+C_CLOSE]
+    mov rsi,qword ptr [rbp-80]
+    mov rdx,qword ptr [rbp-88]
     call stage54_make_year
-    add rsp,32
+    add rsp,72
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.Ls54py_fail:
+    xor eax,eax
+    add rsp,72
     pop r15
     pop r14
     pop r13
@@ -1944,15 +2101,44 @@ calendarDateSpaghetti:
     jmp .Ls54cd_done
 
 .Ls54cd_recover:
+    mov rax,qword ptr [r14+CTX_STAGE54_PHASE]
+    mov qword ptr [rbp-96],rax
     mov qword ptr [r14+CTX_STAGE54_PHASE],80
     dec qword ptr [r14+CTX_STAGE54_RETRY]
     js .Ls54cd_fail
     inc qword ptr [r14+CTX_STAGE54_LOGS]
+    mov rax,qword ptr [rbp-96]
+    cmp rax,10
+    je .Ls54cd_recover_legacy
+    cmp rax,20
+    je .Ls54cd_recover_year
+    cmp rax,30
+    je .Ls54cd_recover_structure
+    cmp rax,40
+    je .Ls54cd_validator_manager
+    cmp rax,50
+    je .Ls54cd_recover_result
+    cmp rax,60
+    je .Ls54cd_final_validator
+    jmp .Ls54cd_recover_year
+.Ls54cd_recover_legacy:
     mov qword ptr [r14+CTX_STAGE54_PENDING],0
     mov qword ptr [r14+CTX_STAGE54_COMMITTED],0
-    cmp qword ptr [r14+CTX_STAGE54_RETRY],0
-    je .Ls54cd_year_manager
+    mov qword ptr [r14+CTX_STAGE54_RESULT],0
+    jmp .Ls54cd_legacy_manager
+.Ls54cd_recover_year:
+    mov qword ptr [r14+CTX_STAGE54_PENDING],0
+    mov qword ptr [r14+CTX_STAGE54_COMMITTED],0
+    mov qword ptr [r14+CTX_STAGE54_RESULT],0
     jmp .Ls54cd_year_manager
+.Ls54cd_recover_structure:
+    mov qword ptr [r14+CTX_STAGE54_PENDING],0
+    mov qword ptr [r14+CTX_STAGE54_RESULT],0
+    jmp .Ls54cd_structure_manager
+.Ls54cd_recover_result:
+    mov qword ptr [r14+CTX_STAGE54_RESULT],0
+    mov qword ptr [rbp-72],0
+    jmp .Ls54cd_result_manager
 .Ls54cd_fail:
     xor eax,eax
     xor edx,edx

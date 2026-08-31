@@ -141,3 +141,35 @@ ld --wrap=calendarDateSpaghetti -o build/stage52_discovery26 build/arena.o build
 as --64 -o build/stage53_patch26.o tests/stage53_patch26.s
 ld --wrap=calendarDateSpaghetti -o build/stage53_patch26 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage53_patch26.o build/stage54_previous_main_bridge.o
 ld -o build/stage54_final_integration build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage54_final_integration.o
+
+# Ⲃⲁⲑⲙⲟⲥ 55 — ⲛⲇⲟⲕⲓⲙⲏ ⲙⲡaudit.
+for n in $(seq 1 14); do
+  as --64 --defsym AUDIT_CASE=$n -o build/stage55_end_to_end_$n.o tests/stage55_end_to_end_audit.s
+  ld -o build/stage55_end_to_end_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_end_to_end_$n.o
+done
+for n in 1 2 3; do
+  as --64 --defsym FAR_CASE=$n -o build/stage55_far_end_to_end_$n.o tests/stage55_far_end_to_end_audit.s
+  ld -o build/stage55_far_end_to_end_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_far_end_to_end_$n.o
+done
+as --64 -o build/stage55_observability_audit.o tests/stage55_observability_audit.s
+ld --wrap=monster_context_new -o build/stage55_observability_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_observability_audit.o
+as --64 -o build/stage55_error_cleanup_audit.o tests/stage55_error_cleanup_audit.s
+ld --wrap=catalog_get_cutlet -o build/stage55_error_cleanup_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_error_cleanup_audit.o
+as --64 -o build/stage55_history_audit.o tests/stage55_history_audit.s
+ld -o build/stage55_history_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_history_audit.o
+for n in 0 1 2 3; do
+  as --64 --defsym FAIL_N=$n -o build/stage55_recovery_$n.o tests/stage55_recovery_audit.s
+  ld --wrap=catalog_get_cutlet --wrap=monster_cutlet_partition_route -o build/stage55_recovery_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_recovery_$n.o
+done
+
+# Ⲃⲁⲑⲙⲟⲥ 55 — ⲛshort/wide/SAVE ⲛⲇⲟⲕⲓⲙⲏ.
+as --64 -o build/stage55_save_edges_audit.o tests/stage55_save_edges_audit.s
+ld -o build/stage55_save_edges_audit build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage55_save_edges_audit.o
+as --64 -o build/stage55_wide_edges_audit.o tests/stage55_wide_edges_audit.s
+ld --wrap=calendarDateSpaghetti -o build/stage55_wide_edges_audit build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage55_wide_edges_audit.o build/stage54_previous_main_bridge.o
+as --64 -o build/stage55_short_edges_audit.o tests/stage55_short_edges_audit.s
+ld -o build/stage55_short_edges_audit build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage55_short_edges_audit.o
+
+# Ⲃⲁⲑⲙⲟⲥ 55 — ⲡlocale/catalog ⲛⲇⲟⲕⲓⲙⲏ.
+as --64 -o build/stage55_locale_catalog_audit.o tests/stage55_locale_catalog_audit.s
+ld --wrap=catalog_get_cutlet --wrap=catalog_get_month -o build/stage55_locale_catalog_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_locale_catalog_audit.o

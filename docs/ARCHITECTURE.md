@@ -999,3 +999,14 @@
 `stage54FinalizeFiveFields -> monster_day_in_month_route -> RES[5]`
 
 Ⲙⲛ oracle symbol ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction link ⲙⲡStage 54.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 55 — ⲛreliability detours ⲙⲛ audit surfaces
+
+`patchedSmallPickReliability55` ⲟ ⲛdetour ⲉϫⲛ `patchedSmallPickSlowPatch13`. Ⲡslow scar ⲟⲩⲏϩ callable. Ⲡdetour ⲗⲟⲅⲓⲍⲉ ⲙⲡfirst accepted ring value directly, ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉ`biasedLegacyPick` ⲙⲛ ⲡsame accepted value. Ⲙⲛ sampling, approximation, hash order ⲏ truncated semantic count.
+
+Ⲡ`stage54_next_year` ⲙⲛ `stage54_previous_year` ⲟⲩⲏϩ sequential year-by-year. Ⲡcandidate/gate scratch ⲙⲙⲁⲧⲉ ⲡⲉ ⲉⲧⲟⲩscrub/reset; ⲡgate nodes ⲙⲛ ⲡchosen Year data ⲥⲉⲣpersistent ⲙⲛⲛⲥⲁ commit.
+
+Ⲡmain recovery ⲕⲱ ⲙⲡfailed phase id. Ⲡpending structure ⲛϥⲕⲧⲟ ⲁⲛ ⲉcommitted ϩⲁⲑⲏ ⲙⲡvalidation; ⲡcommitted structure ⲛϥⲃⲟⲗ ⲁⲛ ⲉⲃⲟⲗ ϩⲙ result/final-validation retry. Ⲡexhaustion ⲕⲧⲟ ⲛexplicit error.
+
+ⲠStage 55 package ⲟ ⲛaudit candidate. Ⲛproduction repairs ⲥⲉϣⲟⲟⲡ, ⲁⲗⲗⲁ ⲡstrict audit completion ⲛϥⲥⲏϩ ⲁⲛ ⲛcompleted ϣⲁⲛⲧⲉ ⲛfar-year ⲙⲛ ⲛledger checks ⲧⲏⲣⲟⲩ ⲟⲩⲱ.

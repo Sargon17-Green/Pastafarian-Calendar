@@ -57,3 +57,9 @@ set -euo pipefail
 ./build/stage52_discovery26
 ./build/stage53_patch26
 ./build/stage54_final_integration
+./build/stage55_end_to_end_1
+./build/stage55_observability_audit
+./build/stage55_recovery_0
+./build/stage55_recovery_1
+./build/stage55_recovery_2
+./build/stage55_recovery_3

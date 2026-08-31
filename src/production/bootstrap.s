@@ -5238,8 +5238,188 @@ legacyBiasedSelectionBeforeRejection:
 # ⲠbiasedLegacyPick ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ⲛⲟⲩscar. Ⲡdetour ⲙⲟⲩⲧⲉ ⲉⲡlegacy path ⲛⲟⲩCOPY_DIAGNOSTIC,
 # ⲁⲩⲱ ⲙⲛⲛⲥⲱⲥ ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡlimit=floor(M_OLD/N)*N. Ⲛϥⲙⲟⲟϣⲉ ϩⲙⲡanswer ring ⲛⲟⲩⲱⲧ
 # ϣⲁⲛⲧⲉ x<=limit, ⲁⲩⲱ ⲛⲧⲉⲩⲛⲟⲩ ⲙⲙⲁⲧⲉ ⲛϥⲙⲟⲩⲧⲉ ⲉbiasedLegacyPick.
+
+# Ⲡⲁⲓ ϫⲓ ⲛⲟⲩBigInt ⲉⲟⲩu64 ⲉϣϫⲉ ⲡⲧⲟϣ ϣⲟⲟⲡ.
+.type stage55PositiveBigToU64,@function
+stage55PositiveBigToU64:
+    test rdi,rdi
+    je .Ls55pbu_fail
+    mov rax,qword ptr [rdi+BI_SIGN]
+    test rax,rax
+    je .Ls55pbu_zero
+    cmp rax,1
+    jne .Ls55pbu_fail
+    cmp qword ptr [rdi+BI_LEN],1
+    jne .Ls55pbu_fail
+    mov rcx,qword ptr [rdi+BI_DATA]
+    test rcx,rcx
+    je .Ls55pbu_fail
+    mov rax,qword ptr [rcx]
+    mov edx,1
+    ret
+.Ls55pbu_zero:
+    xor eax,eax
+    mov edx,1
+    ret
+.Ls55pbu_fail:
+    xor eax,eax
+    xor edx,edx
+    ret
+.size stage55PositiveBigToU64,.-stage55PositiveBigToU64
+
+# OPTIMIZATION:
+# Ⲡdetour ⲗⲟⲅⲓⲍⲉ ⲙⲡoffset ⲙⲡrejection ⲁϫⲛ ⲛⲕⲟⲧ ⲛⲟⲩⲱⲧ.
+# EQUIVALENCE:
+# Ⲡaccepted x ⲡⲉ ⲡϣⲟⲣⲡ ⲛvalue ϩⲙⲡring ⲉⲧⲙⲉϩ ⲙⲡx<=limit; ⲡrank ⲟⲩⲏϩ biasedLegacyPick(x,N).
+# EDGE CASES:
+# Ⲁⲩⲇⲟⲕⲓⲙⲁⲍⲉ ⲙⲡoffset 0, ⲡdirection +1/-1, ⲡwrap, ⲙⲛ ⲡoffset ⲉϥⲟⲩⲟⲛϩ ⲉⲃⲟⲗ ϩⲓⲧⲛ 64 bit.
+# WHY SAFE:
+# Ⲙⲛ sampling, approximation ⲏ hash ordering; ⲡaccepted value ⲟ ⲛⲧⲉⲩⲛⲟⲩ ⲙⲙⲁⲧⲉ ⲙⲛ ⲡlegacy walk.
+.type patchedSmallPickReliability55,@function
+patchedSmallPickReliability55:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,24
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Ls55psp_fail
+    test r13,r13
+    je .Ls55psp_fail
+    cmp qword ptr [r13+BI_SIGN],1
+    jne .Ls55psp_fail
+    mov rdi,r13
+    lea rsi,[rip+legacy_remainder_M]
+    call bi_cmp
+    test eax,eax
+    jg .Ls55psp_fail
+
+    mov rdi,r12
+    mov rsi,r13
+    call legacyBiasedSelectionBeforeRejection
+    test rax,rax
+    je .Ls55psp_fail
+
+    lea rdi,[rip+legacy_remainder_M]
+    mov rsi,r13
+    call bi_divmod_abs
+    test rax,rax
+    je .Ls55psp_fail
+    mov rdi,rax
+    mov rsi,r13
+    call bi_mul_abs
+    test rax,rax
+    je .Ls55psp_fail
+    mov r14,rax
+
+    mov rdi,r12
+    xor esi,esi
+    call ringAnswer
+    test rax,rax
+    je .Ls55psp_fail
+    mov rbx,rax
+    mov rdi,rbx
+    mov rsi,r14
+    call bi_cmp
+    test eax,eax
+    jle .Ls55psp_offset_zero
+
+    mov rax,qword ptr [r12+S26_RING_STEP]
+    cmp rax,-1
+    je .Ls55psp_minus
+    cmp rax,1
+    jne .Ls55psp_fail
+    lea rdi,[rip+legacy_remainder_M]
+    mov rsi,rbx
+    call bi_sub_abs
+    test rax,rax
+    je .Ls55psp_fail
+    mov rdi,rax
+    mov rsi,1
+    call bi_add_u64
+    test rax,rax
+    je .Ls55psp_fail
+    mov rdi,rax
+    call stage55PositiveBigToU64
+    test edx,edx
+    je .Ls55psp_plus_wide
+    mov r15,rax
+    jmp .Ls55psp_fetch
+.Ls55psp_plus_wide:
+    mov rdi,1
+    call bi_from_u64
+    test rax,rax
+    je .Ls55psp_fail
+    mov qword ptr [rbp-48],rax
+    mov r15,-1
+    jmp .Ls55psp_accept
+.Ls55psp_minus:
+    mov rdi,rbx
+    mov rsi,r14
+    call bi_sub_abs
+    test rax,rax
+    je .Ls55psp_fail
+    mov rdi,rax
+    call stage55PositiveBigToU64
+    test edx,edx
+    je .Ls55psp_minus_wide
+    mov r15,rax
+    jmp .Ls55psp_fetch
+.Ls55psp_minus_wide:
+    mov qword ptr [rbp-48],r14
+    mov r15,-1
+    jmp .Ls55psp_accept
+.Ls55psp_offset_zero:
+    xor r15d,r15d
+    mov qword ptr [rbp-48],rbx
+    jmp .Ls55psp_accept
+.Ls55psp_fetch:
+    mov rdi,r12
+    mov rsi,r15
+    call ringAnswer
+    test rax,rax
+    je .Ls55psp_fail
+    mov qword ptr [rbp-48],rax
+    mov rdi,rax
+    mov rsi,r14
+    call bi_cmp
+    test eax,eax
+    jg .Ls55psp_fail
+.Ls55psp_accept:
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,r13
+    call biasedLegacyPick
+    test rax,rax
+    je .Ls55psp_fail
+    mov rdx,qword ptr [rbp-48]
+    mov rcx,r15
+    mov r8,r14
+    jmp .Ls55psp_done
+.Ls55psp_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+.Ls55psp_done:
+    add rsp,24
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size patchedSmallPickReliability55,.-patchedSmallPickReliability55
+
 .type patchedSmallPick,@function
 patchedSmallPick:
+    jmp patchedSmallPickReliability55
+patchedSmallPickSlowPatch13:
     # rdi=LegacyAnswerRing*, rsi=N BigInt*.
     # rax=rank BigInt*; rdx=accepted x BigInt*; rcx=accepted offset u64; r8=limit BigInt*.
     push rbp

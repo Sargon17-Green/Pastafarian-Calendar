@@ -1151,3 +1151,18 @@
 Ⲁⲩⲟⲩⲱϩ ⲛ`stage54_integration.s`, `sauceWithScars`, gate/year managers, structure manager, validation manager, result manager, retry states, metrics/log counters, compatibility bridge ⲛⲛtests ⲉⲧϩⲁⲑⲏ, ghost scrub ⲙⲛ exact five-field commit.
 
 `STAGE54_INTEGRATION_GREEN`
+
+
+## Ⲃⲁⲑⲙⲟⲥ 55 — AUDIT candidate / verification pending
+
+Ⲁⲡfinal audit ϭⲓⲛⲉ ⲛϩⲟⲩⲟ ⲛscar ⲛreliability ϩⲙⲡStage 54 integration. Ⲙⲡⲟⲩⲣ cleanup ⲙⲡlegacy architecture; ⲛrepair ⲁⲩⲕⲱ ⲙⲙⲟⲟⲩ ⲉϫⲛ ⲛscar ⲛⲧⲟⲟⲩ.
+
+`patchedSmallPickSlowPatch13` ⲟⲩⲏϩ callable. `patchedSmallPickReliability55` ⲕⲱ ⲛⲟⲩexact direct rejection offset/accepted-value path. Ⲡoptimization ⲕⲱ ⲙⲡsame answer ring, ⲡsame acceptance predicate ⲙⲛ ⲡsame `biasedLegacyPick`; ⲙⲛ probabilistic shortcut.
+
+Ⲡyear walk ⲁϥⲣbounded ⲙⲡscratch lifetime ϩⲓ gate extension ⲙⲛ candidate selection. Ⲡpersistent gate/year data ⲟⲩⲏϩ, ⲁⲩⲱ scratch bytes ⲥⲉscrub ⲙⲛ reset ⲙⲛⲛⲥⲁ commit.
+
+Ⲡrecovery state machine ⲧⲉⲛⲟⲩ ⲕⲧⲟ ⲉⲡsame failed phase ⲙⲛ ⲡlast committed state. Ⲡresult/final-validation retry ⲛϥⲕⲧⲟ ⲁⲛ ⲉyear/structure. Ⲡretry exhaustion ϯ ⲛexplicit error.
+
+Ⲛ`stage54_bucket_select` ⲙⲛ `stage54_year5000` internal failures ⲧⲉⲛⲟⲩ ⲕⲧⲟ `NULL` ⲉⲡstate machine; ⲙⲛ internal process abort ϩⲙⲡproduction.
+
+Ⲛaudit tests ⲥⲉⲕⲱ ⲛend-to-end cold cases, far-year cases, observability, recovery 0/1/2/exhaustion, error-cleanup, history A-B-A, SAVE edges, short/wide selection edges ⲙⲛ locale/catalog invariance. Ⲡstrict verification ⲙⲡⲁⲧϥⲟⲩⲱ, ⲉⲧⲃⲉ ⲡⲁⲓ `LAST_COMPLETED_STAGE=54` ⲙⲛ `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=NO` ⲟⲩⲏϩ.

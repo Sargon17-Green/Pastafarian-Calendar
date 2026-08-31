@@ -986,3 +986,17 @@
 Ⲡsame-line Assembly differential ϩⲙ `calculationDay=FOUNDATION+1,targetDay=FOUNDATION` ⲧⲁϫⲣⲟ ⲙⲡ5 ⲛfields ⲧⲏⲣⲟⲩ ⲙⲛ ⲡlocal oracle, ⲛⲕⲉⲥⲟⲡ ⲉⲣⲉ ⲡoracle allocation history ϩⲁⲑⲏ ⲙⲡmonster call. Ⲟⲩtwo-call witness ⲧⲁϫⲣⲟ `STAGE54_REPEAT_GREEN`.
 
 Ⲛⲃⲁⲑⲙⲟⲥ 1..53 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛGREEN. Ⲙⲛ Stage 55 audit code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 54.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 55 — AUDIT candidate ⲉⲣⲉ ⲡverification ⲙⲡⲁⲧϥⲟⲩⲱ
+
+ⲠStage 55 candidate ⲟⲩⲏϩ ϩⲓ `CURRENT_STAGE=55`, ⲁⲗⲗⲁ `LAST_COMPLETED_STAGE=54`. Ⲡⲁⲓ ⲟ ⲛⲟⲩpackage ⲉϥϣϭⲙϭⲟⲙ ⲉⲩⲧⲁⲗⲟϥ ⲉGitHub ϩⲁⲑⲏ ⲙⲡstrict audit ⲉⲧⲛⲁⲟⲩⲱ. `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=NO` ϣⲁⲛⲧⲉ ⲛⲇⲟⲕⲓⲙⲏ ⲧⲏⲣⲟⲩ ⲟⲩⲱ.
+
+Ⲛbug ⲉⲧⲁⲡaudit ϭⲓⲛⲉ ⲁⲩⲧⲁϫⲣⲟ ⲙⲙⲟⲟⲩ ϩⲙⲡproduction:
+
+- `patchedSmallPickSlowPatch13` ⲟⲩⲏϩ callable ⲛscar; `patchedSmallPickReliability55` ⲕⲱ ⲙⲡexact proved-rejection shortcut ⲁϫⲛ sampling ⲏ approximation.
+- Ⲡsequential year walk ⲟⲩⲏϩ year-by-year, ⲁⲗⲗⲁ ⲡgate/year candidate scratch ⲕⲧⲟ ⲉarena marks ⲙⲛ scrub/reset ⲉⲧⲣⲉⲡmemory ⲧⲙⲁϣⲁⲓ ⲙⲛⲛⲥⲁ year ⲛⲓⲙ.
+- Ⲡrecovery ⲟ ⲛphase-directed: pending/committed/result state ⲛϥⲃⲟⲗ ⲁⲛ ⲉⲃⲟⲗ ⲉϣϫⲉ ⲡfailed phase ⲛϥϩⲟⲩⲉ ⲁⲛ.
+- Ⲛinternal year-selection failures ⲕⲧⲟ ⲛexplicit error ⲉⲡstate machine; ⲙⲛ process-abort syscall ϩⲙ `src/production`.
+
+ⲚStage 55 audit surfaces ⲥⲉϣⲟⲟⲡ ϩⲙ `tests/stage55_*`, `audit_stage55.sh` ⲙⲛ `audit_stage55_helpers.sh`. Ⲡfar-year audit ⲛYears 1/0/-1 ⲟ ⲛsequential year-by-year ⲁⲩⲱ ϣϭⲙϭⲟⲙ ⲉϥⲱⲥⲕ ⲉⲙⲁⲧⲉ. Ⲡpackage ⲡⲁⲓ ⲛϥϣⲁϫⲉ ⲁⲛ ϫⲉ ⲡstrict verification ⲁϥⲟⲩⲱ.
