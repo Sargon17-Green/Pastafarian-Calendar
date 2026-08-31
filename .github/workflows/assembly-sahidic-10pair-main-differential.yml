@@ -2,9 +2,6 @@ name: Assembly Sahidic 10-pair main differential
 
 on:
   push:
-    branches:
-      - 'x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,21 +10,29 @@ jobs:
   compare:
     runs-on: ubuntu-latest
     timeout-minutes: 180
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Verify exact tested head
+      - name: Verify production sources are still the Stage 56 baseline
         shell: bash
         run: |
           set -euo pipefail
           echo "HEAD=$(git rev-parse HEAD)"
-          test "$(git rev-parse HEAD)" = "2455c520d0f937fe7a0216c2487ab34e71428e78" || {
-            echo "NOTE: branch moved since probe was prepared; testing current HEAD instead."
-          }
+          echo "Production baseline=2455c520d0f937fe7a0216c2487ab34e71428e78"
+          git diff --exit-code \
+            2455c520d0f937fe7a0216c2487ab34e71428e78 \
+            HEAD -- \
+            src/runtime/arena.s \
+            src/runtime/bigint.s \
+            src/production/bootstrap.s \
+            src/catalog/source_language_catalog.s \
+            src/production/stage54_integration.s \
+            src/production/stage56_bowlsum_corrective.s
 
-      - name: Build production objects
+      - name: Build current Stage 56 production objects
         shell: bash
         run: |
           set -euo pipefail
@@ -38,18 +43,24 @@ jobs:
           as --64 -o build/catalog.o src/catalog/source_language_catalog.s
           as --64 -o build/stage54_integration.o src/production/stage54_integration.s
           as --64 -o build/stage56_bowlsum_corrective.o src/production/stage56_bowlsum_corrective.s
-          as --64 -o build/stage56_historical_sauce_bridge.o tests/stage56_historical_sauce_bridge.s
 
-      - name: Materialize differential harness
+      - name: Materialize raw-result Assembly harness
         shell: bash
         run: |
+          set -euo pipefail
           cat > build/diff_probe.s <<'ASM'
           .intel_syntax noprefix
+
+          .equ BI_SIGN,0
+          .equ BI_LEN,8
+          .equ BI_DATA,24
+
           .equ RES_YEAR,0
           .equ RES_CUTLET_NAME,8
           .equ RES_DAY_IN_CUTLET,16
           .equ RES_MONTH_NAME,24
           .equ RES_DAY_IN_MONTH,32
+
           .ifndef CASE
           .set CASE,1
           .endif
@@ -57,97 +68,45 @@ jobs:
           .if CASE == 1
           .equ C_DAY,-15055671
           .equ T_DAY,-15055671
-          .equ E_YEAR,5000
-          .equ E_CUTLET,12
-          .equ E_DCUT,921
-          .equ E_MONTH,43
-          .equ E_DMONTH,108
           .elseif CASE == 2
           .equ C_DAY,-15055672
           .equ T_DAY,-15055672
-          .equ E_YEAR,5000
-          .equ E_CUTLET,17
-          .equ E_DCUT,159
-          .equ E_MONTH,37
-          .equ E_DMONTH,80
           .elseif CASE == 3
           .equ C_DAY,-15055670
           .equ T_DAY,-15055670
-          .equ E_YEAR,5000
-          .equ E_CUTLET,17
-          .equ E_DCUT,161
-          .equ E_MONTH,5
-          .equ E_DMONTH,6
           .elseif CASE == 4
           .equ C_DAY,-15055672
           .equ T_DAY,-15055670
-          .equ E_YEAR,5000
-          .equ E_CUTLET,17
-          .equ E_DCUT,161
-          .equ E_MONTH,2
-          .equ E_DMONTH,87
           .elseif CASE == 5
           .equ C_DAY,-15055670
           .equ T_DAY,-15055672
-          .equ E_YEAR,5000
-          .equ E_CUTLET,17
-          .equ E_DCUT,159
-          .equ E_MONTH,26
-          .equ E_DMONTH,2
           .elseif CASE == 6
           .equ C_DAY,-15055671
           .equ T_DAY,-15057703
-          .equ E_YEAR,5000
-          .equ E_CUTLET,10
-          .equ E_DCUT,1410
-          .equ E_MONTH,16
-          .equ E_DMONTH,58
           .elseif CASE == 7
           .equ C_DAY,-15055671
           .equ T_DAY,-15057702
-          .equ E_YEAR,5000
-          .equ E_CUTLET,10
-          .equ E_DCUT,1411
-          .equ E_MONTH,6
-          .equ E_DMONTH,70
           .elseif CASE == 8
           .equ C_DAY,-15055671
           .equ T_DAY,-15056944
-          .equ E_YEAR,5000
-          .equ E_CUTLET,9
-          .equ E_DCUT,490
-          .equ E_MONTH,32
-          .equ E_DMONTH,72
           .elseif CASE == 9
           .equ C_DAY,-15055671
           .equ T_DAY,-15053459
-          .equ E_YEAR,5001
-          .equ E_CUTLET,14
-          .equ E_DCUT,582
-          .equ E_MONTH,6
-          .equ E_DMONTH,33
           .elseif CASE == 10
           .equ C_DAY,-15055671
           .equ T_DAY,-15053458
-          .equ E_YEAR,5001
-          .equ E_CUTLET,14
-          .equ E_DCUT,583
-          .equ E_MONTH,23
-          .equ E_DMONTH,37
           .else
           .error "CASE must be 1..10"
           .endif
 
-          .section .rodata
-          pass_msg: .ascii "PASS\n"
-          pass_len = . - pass_msg
-          fail_msg: .ascii "MISMATCH\n"
-          fail_len = . - fail_msg
+          .section .bss
+          .align 8
+          raw_result:
+              .skip 40
 
           .section .text
           .global _start
           .extern calendarDateSpaghetti
-          .extern bi_eq_u64
           .extern catalog_get_cutlet
           .extern catalog_get_month
 
@@ -156,58 +115,81 @@ jobs:
               mov rsi,T_DAY
               call calendarDateSpaghetti
               cmp eax,2
-              jne fail
+              jne calendar_error
               test rdx,rdx
-              je fail
+              je calendar_error
               mov r12,rdx
 
-              mov rdi,qword ptr [r12+RES_YEAR]
-              mov esi,E_YEAR
-              call bi_eq_u64
-              test eax,eax
-              je fail
+              mov rax,qword ptr [r12+RES_YEAR]
+              test rax,rax
+              je calendar_error
+              cmp qword ptr [rax+BI_SIGN],1
+              jne calendar_error
+              cmp qword ptr [rax+BI_LEN],1
+              jne calendar_error
+              mov rax,qword ptr [rax+BI_DATA]
+              test rax,rax
+              je calendar_error
+              mov rax,qword ptr [rax]
+              mov qword ptr [rip+raw_result+0],rax
 
-              mov rdi,E_CUTLET
+              mov r14,qword ptr [r12+RES_CUTLET_NAME]
+              mov r13,1
+          cutlet_loop:
+              mov rdi,r13
               call catalog_get_cutlet
-              cmp rax,qword ptr [r12+RES_CUTLET_NAME]
-              jne fail
-              cmp qword ptr [r12+RES_DAY_IN_CUTLET],E_DCUT
-              jne fail
+              cmp rax,r14
+              je cutlet_found
+              inc r13
+              cmp r13,18
+              jb cutlet_loop
+              xor r13d,r13d
+          cutlet_found:
+              mov qword ptr [rip+raw_result+8],r13
 
-              mov rdi,E_MONTH
+              mov rax,qword ptr [r12+RES_DAY_IN_CUTLET]
+              mov qword ptr [rip+raw_result+16],rax
+
+              mov r14,qword ptr [r12+RES_MONTH_NAME]
+              mov r13,1
+          month_loop:
+              mov rdi,r13
               call catalog_get_month
-              cmp rax,qword ptr [r12+RES_MONTH_NAME]
-              jne fail
-              cmp qword ptr [r12+RES_DAY_IN_MONTH],E_DMONTH
-              jne fail
+              cmp rax,r14
+              je month_found
+              inc r13
+              cmp r13,48
+              jb month_loop
+              xor r13d,r13d
+          month_found:
+              mov qword ptr [rip+raw_result+24],r13
+
+              mov rax,qword ptr [r12+RES_DAY_IN_MONTH]
+              mov qword ptr [rip+raw_result+32],rax
 
               mov eax,1
               mov edi,1
-              lea rsi,[rip+pass_msg]
-              mov edx,pass_len
+              lea rsi,[rip+raw_result]
+              mov edx,40
               syscall
+
               mov eax,60
               xor edi,edi
               syscall
 
-          fail:
-              mov eax,1
-              mov edi,1
-              lea rsi,[rip+fail_msg]
-              mov edx,fail_len
-              syscall
+          calendar_error:
               mov eax,60
-              mov edi,1
+              mov edi,111
               syscall
           ASM
 
-      - name: Run 10 exact pairs
+      - name: Run the same 10 pairs and record actual Assembly tuples
         shell: bash
         run: |
           set -uo pipefail
           rc=0
-          : > differential-results.tsv
-          printf 'case\tcalculation_day\ttarget_day\tmain_tuple\tassembly_status\n' >> differential-results.tsv
+          printf 'case\tcalculation_day\ttarget_day\tmain_tuple\tassembly_tuple\tstatus\n' > differential-results.tsv
+
           pairs=(
             '-15055671 -15055671 5000,12,921,43,108'
             '-15055672 -15055672 5000,17,159,37,80'
@@ -220,36 +202,70 @@ jobs:
             '-15055671 -15053459 5001,14,582,6,33'
             '-15055671 -15053458 5001,14,583,23,37'
           )
+
           for n in $(seq 1 10); do
-            as --64 --defsym CASE=$n -o build/diff_probe_$n.o build/diff_probe.s || exit 201
-            ld --wrap=stage56SauceRawBowlSumCorrective \
-              -o build/diff_probe_$n \
+            as --64 --defsym CASE=$n -o "build/diff_probe_${n}.o" build/diff_probe.s || exit 201
+
+            # Stage 56 production semantics:
+            # deliberately NO historical compatibility bridge and NO --wrap.
+            ld -o "build/diff_probe_${n}" \
               build/arena.o \
               build/bigint.o \
               build/bootstrap.o \
               build/stage54_integration.o \
               build/stage56_bowlsum_corrective.o \
-              build/stage56_historical_sauce_bridge.o \
               build/catalog.o \
-              build/diff_probe_$n.o || exit 202
-            read -r c t tuple <<< "${pairs[$((n-1))]}"
-            if out="$(./build/diff_probe_$n 2>&1)"; then
-              status=PASS
+              "build/diff_probe_${n}.o" || exit 202
+
+            read -r c t main_tuple <<< "${pairs[$((n-1))]}"
+            raw="build/raw_${n}.bin"
+
+            if "./build/diff_probe_${n}" > "$raw"; then
+              actual="$(python3 - "$raw" <<'PY'
+          import struct, sys
+          data = open(sys.argv[1], "rb").read()
+          if len(data) != 40:
+              raise SystemExit(f"bad raw result length: {len(data)}")
+          print(",".join(map(str, struct.unpack("<QQQQQ", data))))
+          PY
+              )"
+              if [[ "$actual" == "$main_tuple" ]]; then
+                status=PASS
+              else
+                status=MISMATCH
+                rc=1
+              fi
             else
-              status=MISMATCH
+              probe_rc=$?
+              actual="ERROR:${probe_rc}"
+              status=ERROR
               rc=1
             fi
-            printf '%s\t%s\t%s\t%s\t%s\n' "$n" "$c" "$t" "$tuple" "$status" | tee -a differential-results.tsv
+
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+              "$n" "$c" "$t" "$main_tuple" "$actual" "$status" \
+              | tee -a differential-results.tsv
           done
+
           echo
           cat differential-results.tsv
-          exit "$rc"
+          printf '%s\n' "$rc" > build/differential_rc
 
-      - if: always()
+      - name: Upload differential result
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: assembly-sahidic-10pair-main-differential
           path: differential-results.tsv
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
+
+      - name: Require 10/10 agreement
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f build/differential_rc
+          test "$(cat build/differential_rc)" = "0"
+          test "$(grep -c $'\tPASS$' differential-results.tsv)" = "10"
 
