@@ -1,0 +1,236 @@
+on:
+  push:
+    branches:
+      - 'x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assembly-sahidic-stage56-final-audit
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit_evidence
+          git rev-parse HEAD | tee audit_evidence/HEAD_SHA.txt
+          uname -a | tee audit_evidence/ENVIRONMENT.txt
+          as --version | head -1 | tee -a audit_evidence/ENVIRONMENT.txt
+          ld --version | head -1 | tee -a audit_evidence/ENVIRONMENT.txt
+          bash --version | head -1 | tee -a audit_evidence/ENVIRONMENT.txt
+
+      - shell: bash
+        run: |
+          set -euo pipefail
+          bash -n build.sh
+          bash -n test.sh
+          bash -n audit_stage55.sh
+          bash -n audit_stage55_helpers.sh
+          printf '%s\n' 'SCRIPT_SYNTAX=PASS' | tee audit_evidence/SCRIPT_SYNTAX.txt
+
+      - id: build
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          ./build.sh >audit_evidence/BUILD.log 2>&1 || rc=$?
+          cat audit_evidence/BUILD.log
+          printf 'BUILD_RC=%s\n' "$rc" | tee audit_evidence/BUILD_STATUS.txt
+          exit "$rc"
+
+      - id: historical
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          : > audit_evidence/HISTORICAL_AND_SMOKE.log
+          while IFS= read -r cmd; do
+            [[ -n "$cmd" ]] || continue
+            printf 'CMD=%s\n' "$cmd" >> audit_evidence/HISTORICAL_AND_SMOKE.log
+            bash -c "$cmd" >>audit_evidence/HISTORICAL_AND_SMOKE.log 2>&1
+            x=$?
+            printf 'RC=%s\n' "$x" >> audit_evidence/HISTORICAL_AND_SMOKE.log
+            if (( x != 0 )); then rc=1; fi
+          done < <(grep -E '^\./build/' test.sh)
+          cat audit_evidence/HISTORICAL_AND_SMOKE.log
+          printf 'HISTORICAL_AND_SMOKE_RC=%s\n' "$rc" | tee audit_evidence/HISTORICAL_AND_SMOKE_STATUS.txt
+          exit "$rc"
+
+      - id: helpers
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          : > audit_evidence/STAGE55_HELPERS.log
+          while IFS= read -r cmd; do
+            [[ -n "$cmd" ]] || continue
+            printf 'CMD=%s\n' "$cmd" >> audit_evidence/STAGE55_HELPERS.log
+            bash -c "$cmd" >>audit_evidence/STAGE55_HELPERS.log 2>&1
+            x=$?
+            printf 'RC=%s\n' "$x" >> audit_evidence/STAGE55_HELPERS.log
+            if (( x != 0 )); then rc=1; fi
+          done < <(grep -E '^\./build/' audit_stage55_helpers.sh)
+          cat audit_evidence/STAGE55_HELPERS.log
+          printf 'STAGE55_HELPERS_RC=%s\n' "$rc" | tee audit_evidence/STAGE55_HELPERS_STATUS.txt
+          exit "$rc"
+
+      - id: stage55
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          : > audit_evidence/STAGE55_FULL.log
+          run_one() {
+            printf 'CMD=%s\n' "$1" >> audit_evidence/STAGE55_FULL.log
+            "$1" >>audit_evidence/STAGE55_FULL.log 2>&1
+            x=$?
+            printf 'RC=%s\n' "$x" >> audit_evidence/STAGE55_FULL.log
+            if (( x != 0 )); then rc=1; fi
+          }
+          for n in $(seq 1 14); do run_one "./build/stage55_end_to_end_$n"; done
+          for n in 1 2 3; do run_one "./build/stage55_far_end_to_end_$n"; done
+          run_one ./build/stage55_observability_audit
+          for n in 0 1 2 3; do run_one "./build/stage55_recovery_$n"; done
+          run_one ./build/stage55_error_cleanup_audit
+          run_one ./build/stage55_history_audit
+          run_one ./build/stage55_save_edges_audit
+          run_one ./build/stage55_wide_edges_audit
+          run_one ./build/stage55_short_edges_audit
+          run_one ./build/stage55_locale_catalog_audit
+          cat audit_evidence/STAGE55_FULL.log
+          printf 'STAGE55_FULL_RC=%s\n' "$rc" | tee audit_evidence/STAGE55_FULL_STATUS.txt
+          exit "$rc"
+
+      - id: stage56
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          {
+            as --64 -o build/stage56_semantic_runtime_audit.o tests/stage56_semantic_runtime_audit.s || exit 201
+            ld -o build/stage56_semantic_runtime_audit \
+              build/arena.o \
+              build/bigint.o \
+              build/bootstrap.o \
+              build/stage54_integration.o \
+              build/stage56_bowlsum_corrective.o \
+              build/catalog.o \
+              build/stage56_semantic_runtime_audit.o || exit 202
+            file build/stage56_semantic_runtime_audit
+            ./build/stage56_semantic_runtime_audit
+          } >audit_evidence/STAGE56_SEMANTIC.log 2>&1 || rc=$?
+          cat audit_evidence/STAGE56_SEMANTIC.log
+          printf 'STAGE56_SEMANTIC_RC=%s\n' "$rc" | tee audit_evidence/STAGE56_SEMANTIC_STATUS.txt
+          exit "$rc"
+
+      - id: static
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          {
+            printf '%s\n' '[source-kinds]'
+            find src/production src/runtime src/catalog -type f -print | sort
+            bad_kind="$(find src/production src/runtime src/catalog -type f ! -name '*.s' -print)"
+            if [[ -n "$bad_kind" ]]; then
+              printf '%s\n' "$bad_kind"
+              printf '%s\n' 'ASSEMBLY_ONLY=FAIL'
+              rc=1
+            else
+              printf '%s\n' 'ASSEMBLY_ONLY=PASS'
+            fi
+
+            printf '%s\n' '[oracle-production]'
+            if grep -R -nE 'oracle_|src/oracle|oracle_reference' src/production src/runtime src/catalog; then
+              printf '%s\n' 'PRODUCTION_ORACLE=FAIL'
+              rc=1
+            else
+              printf '%s\n' 'PRODUCTION_ORACLE=PASS'
+            fi
+
+            printf '%s\n' '[stage56-syscall]'
+            if grep -nE '^[[:space:]]*syscall([[:space:]]|$)' src/production/stage56_bowlsum_corrective.s; then
+              printf '%s\n' 'STAGE56_INTERNAL_SYSCALL=FAIL'
+              rc=1
+            else
+              printf '%s\n' 'STAGE56_INTERNAL_SYSCALL=PASS'
+            fi
+
+            printf '%s\n' '[runtime-process-abort]'
+            grep -R -n -E 'mov[[:space:]]+(e|r)ax,[[:space:]]*60' src/runtime || true
+            if grep -R -q -E 'mov[[:space:]]+(e|r)ax,[[:space:]]*60' src/runtime; then
+              printf '%s\n' 'RUNTIME_PROCESS_ABORT=FAIL'
+              rc=1
+            else
+              printf '%s\n' 'RUNTIME_PROCESS_ABORT=PASS'
+            fi
+
+            printf '%s\n' '[stage56-scar]'
+            grep -n 'stage56_LEGACY_POSTSTIR_CALL_COUNT' src/production/bootstrap.s || rc=1
+            grep -n 'stage56_LEGACY_SAVED_ORDER_WITNESS' src/production/bootstrap.s || rc=1
+            grep -n 'postStirOneOverwritingOrderMemoryStage22' src/production/stage56_bowlsum_corrective.s || rc=1
+            grep -n 'stage56PostStirRawBowlSumDetour' src/production/stage56_bowlsum_corrective.s || rc=1
+            grep -n 'stage56SauceRawBowlSumCorrective' src/production/stage54_integration.s || rc=1
+
+            printf '%s\n' '[elf]'
+            if [[ -f build/stage56_semantic_runtime_audit ]]; then
+              file build/stage56_semantic_runtime_audit
+              if readelf -l build/stage56_semantic_runtime_audit | grep -q 'INTERP'; then
+                printf '%s\n' 'NO_INTERP=FAIL'
+                rc=1
+              else
+                printf '%s\n' 'NO_INTERP=PASS'
+              fi
+            else
+              printf '%s\n' 'NO_INTERP=NOT_BUILT'
+              rc=1
+            fi
+          } >audit_evidence/STATIC_RUNTIME_AUDIT.log 2>&1
+          cat audit_evidence/STATIC_RUNTIME_AUDIT.log
+          printf 'STATIC_RUNTIME_AUDIT_RC=%s\n' "$rc" | tee audit_evidence/STATIC_RUNTIME_AUDIT_STATUS.txt
+          exit "$rc"
+
+      - if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          : > audit_evidence/FINAL_STATUS.txt
+          for f in \
+            audit_evidence/BUILD_STATUS.txt \
+            audit_evidence/HISTORICAL_AND_SMOKE_STATUS.txt \
+            audit_evidence/STAGE55_HELPERS_STATUS.txt \
+            audit_evidence/STAGE55_FULL_STATUS.txt \
+            audit_evidence/STAGE56_SEMANTIC_STATUS.txt \
+            audit_evidence/STATIC_RUNTIME_AUDIT_STATUS.txt; do
+            cat "$f" >>audit_evidence/FINAL_STATUS.txt 2>/dev/null || rc=1
+            if ! grep -q '_RC=0$' "$f" 2>/dev/null; then rc=1; fi
+          done
+          printf 'FINAL_RC=%s\n' "$rc" >> audit_evidence/FINAL_STATUS.txt
+          cat audit_evidence/FINAL_STATUS.txt
+          exit "$rc"
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assembly-sahidic-stage56-audit-evidence
+          path: audit_evidence/
+          if-no-files-found: error
+          retention-days: 30
