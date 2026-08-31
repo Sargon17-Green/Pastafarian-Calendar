@@ -1239,7 +1239,7 @@ stage54StructureSauce:
     mov rax,qword ptr [rbp-48]
     mov rdx,rax
     mov ecx,1
-    jmp .Ls54ss_done
+    jmp .Ls54ss_correct
 .Ls54ss_correct:
     mov rdi,r12
     mov rsi,qword ptr [rbp-56]
