@@ -807,3 +807,24 @@
 `tests/stage44_discovery22.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE44_REGRESSION_GREEN`. `oldCutletNameRowWithRepeats` ⲙⲛ `legacyCutletNamesWithRepeats` ⲟⲩⲏϩ byte-for-byte ⲛsame.
 
 Ⲙⲛ Stage 46 / Patch 23 month-length backend code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 45.
+
+
+## Ⲡeager month-length legacy list ⲙⲡⲃⲁⲑⲙⲟⲥ 46
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY 23 ⲡⲉ:
+
+`monster_month_length_family_route -> legacyMonthLengthMaterializedList -> oldMonthLengthMaterializedList`
+
+Ⲡbackend ⲟ ⲛ`kind=1`: ϥⲱϣ ⲙⲡbounded compositions ⲙⲡ`total` ⲉ`slots`, ⲉⲣⲉ part ⲛⲓⲙ ϩⲛ `[4,123]`, ϩⲙ lexicographic order. ϥⲣ ⲙⲡenumeration ⲛϣⲟⲣⲡ ⲉⲧⲣⲉϥⲥⲟⲩⲛ ⲙⲡrow count, ⲛϥallocate ⲙⲡfull `count*slots*8` bytes, ⲁⲩⲱ ⲛϥⲣ ⲙⲡenumeration ⲛⲕⲉⲥⲟⲡ ⲉⲧⲣⲉϥⲙⲟⲩϩ ⲙⲡrows.
+
+### Ⲡsafe cardinality proof
+
+`L=252,K=47` ϯ residual `64`, ⲉⲧⲃⲉ ⲡⲁⲓ:
+
+`count = C(64+47-1,47-1) = C(110,46)`
+
+`count = 22747362824110665179416185383175`
+
+ⲠStage 46 test ⲧⲁϫⲣⲟ ⲙⲡexact two-limb BigInt ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲁⲛ ⲉⲡeager materializer ϩⲓ ⲡlarge witness. Ⲡⲁⲓ ⲧⲁϫⲣⲟ ⲙⲡmaterialization defect without OOM.
+
+Ⲙⲛ `VirtualLegacyList`, DP-count ⲏ DP-unrank backend ⲙⲡStage 47 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 46.

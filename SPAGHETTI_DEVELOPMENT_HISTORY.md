@@ -999,3 +999,20 @@
 Ⲡ68-case sweep ⲧⲁϫⲣⲟ ⲙⲡfull `K=1..17` range ϩⲓ boundary ⲙⲛ middle ranks. Ⲡequal multi-name witness `K=2, rank=272` ϯ `[17,16]` ϩⲙ bad ⲙⲛ correct ⲙⲡⲉⲥⲛⲁⲩ.
 
 Ⲙⲛ month-length materialization / VirtualLegacyList / Patch 23 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 45.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 46 — DISCOVERY 23
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲁⲩⲕⲱ ⲙⲡmonth-length family ϫⲉ ⲟⲩlegacy list ⲛrows ⲧⲏⲣⲟⲩ ⲉϥϣϭⲙϭⲟⲙ ⲉϥⲧⲁⲙⲓⲟ ⲙⲙⲟⲟⲩ ⲉⲩⲥⲟⲡ. Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`oldMonthLengthMaterializedList` ⲉϥⲱϣ ⲙⲡbounded compositions ϩⲙ lexicographic order, ⲛϥⲗⲟⲅⲓⲍⲉ ⲙⲡrow count, ⲛϥallocate ⲙⲡfull row array, ⲁⲩⲱ ⲛϥⲥϩⲁⲓ ⲛⲟⲩrow ⲛⲓⲙ ⲉⲣⲟϥ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡsmall witness `L=15,K=3` ⲧⲁϫⲣⲟ ϫⲉ ⲡlegacy scar ⲣϩⲱⲃ ⲛⲁⲙⲉ ⲁⲩⲱ ⲧⲁⲙⲓⲟ ⲛ10 ⲛrows. Ⲡlarge proof ⲙⲡⲟⲩⲣ ⲙⲙⲟϥ ϩⲓⲧⲛ allocation. Ϩⲙ `L=252,K=47`, ⲡupper bound ⲛϥⲣϩⲱⲃ ⲁⲛ, ⲁⲩⲱ ⲡexact count ⲡⲉ `C(110,46)=22747362824110665179416185383175`, ⲟⲩ105-bit BigInt. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡmaterialized-list backend ⲟ ⲛregression ⲙⲡDISCOVERY 23.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲛⲥⲁ Patch 23
+
+Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲛ`VirtualLegacyList`. Ⲙⲡⲟⲩⲕⲱ ⲛexact bounded-DP `count` ⲏ `itemAt1` backend ϩⲙⲡproduction. Ⲡtest ⲙⲙⲁⲧⲉ ⲧⲁϫⲣⲟ ⲙⲡhuge cardinality without OOM.
+
+`STAGE46_DISCOVERY23_EXPECTED_RED`

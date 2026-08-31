@@ -788,3 +788,28 @@
 `STAGE45_PATCH22_GREEN`
 
 Ⲁⲩⲣ ⲛⲟⲩ68-case vector sweep ϩⲓ `K=1..17` ⲙⲛ first/second/middle/last ranks. Ⲙⲛ Stage 46 ⲏ PATCH 23 month-length backend code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 45.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 46 — DISCOVERY 23
+
+### Ⲡlegacy month-length list
+
+Ⲡ`oldMonthLengthMaterializedList` ⲧⲁⲙⲓⲟ ⲛⲟⲩmaterialized row ⲛⲓⲙ ⲙⲡbounded family ϩⲙⲡarena. Ⲡ`legacyMonthLengthMaterializedList` ⲕⲱ ⲙⲡscar callable, ⲁⲩⲱ ⲡsemantic route ⲙⲡDISCOVERY 23 ⲡⲉ:
+
+`monster_month_length_family_route -> legacyMonthLengthMaterializedList -> oldMonthLengthMaterializedList`
+
+Ⲡlegacy list object ϩⲁⲣⲉϩ ⲉ`count`, `total`, `slots`, `rows`, `kind=1` ⲙⲛ `rowBytes`. `legacyMonthLengthListItemAt1` ϫⲓ ⲛⲟⲩrow ⲉⲃⲟⲗ ϩⲙⲡmaterialized array. Ⲡsmall witness `L=15,K=3` ⲧⲁⲙⲓⲟ ⲛ10 ⲛrows ⲛⲁⲙⲉ; ⲡfirst ⲡⲉ `[4,4,7]` ⲁⲩⲱ ⲡlast ⲡⲉ `[7,4,4]`.
+
+### Ⲡfamily ⲉⲧⲛⲁⲁⲁ
+
+Ϩⲙ `L=252,K=47`, ⲙⲛⲛⲥⲁ ⲧⲉⲛⲃⲱⲗ ⲛ4 ⲉⲃⲟⲗ ϩⲙ month ⲛⲓⲙ, ⲡremaining total ⲡⲉ 64. Ⲉⲧⲃⲉ ϫⲉ 64 < 120, ⲡupper bound 123 ⲛϥⲕⲱⲗⲩ ⲁⲛ ⲛⲟⲩrow. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡexact family count ⲡⲉ:
+
+`C(110,46) = 22747362824110665179416185383175`
+
+ⲠStage 46 Assembly regression ⲧⲁϫⲣⲟ ⲙⲡBigInt ⲡⲁⲓ ϩⲙ two limbs: `0x11f1cb183ca:d6d1731e3f99a907`. Ⲡcount ⲟ ⲛ105-bit ⲁⲩⲱ ⲛⲁⲁⲁ ϩⲁ 2^64 rows. Ⲟⲩrow ⲛ47 ⲛu64 ϣⲁϫⲉ ⲛ376 bytes, ⲁⲩⲱ ⲡeager materialization ⲛⲁϣⲓⲛⲉ ⲛⲟⲩmemory ⲛⲁⲁⲁ ⲙⲙⲁⲧⲉ. Ⲡtest ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲙⲡhuge list; ϥⲗⲟⲅⲓⲍⲉ ⲙⲙⲁⲧⲉ ⲙⲡexact count, ⲉⲧⲃⲉ ⲡⲁⲓ ⲙⲛ OOM ⲉϥϣⲟⲟⲡ.
+
+### Ⲡtrace ⲙⲛ repository state
+
+`calendarDateSpaghetti` ⲙⲟⲩⲧⲉ ⲉ`monster_stage46_legacy_month_materialization_handler`; ⲡhandler ⲣϩⲱⲃ ϩⲓ ⲡsmall family ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡmaterialized list ϩⲙ invocation-local context. Ⲙⲛ `VirtualLegacyList`, exact bounded-DP backend ⲏ lexicographic DP unrank ⲙⲡPATCH 23 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
+
+ⲚStage 1–45 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 46 ϯ `STAGE46_DISCOVERY23_EXPECTED_RED`.
