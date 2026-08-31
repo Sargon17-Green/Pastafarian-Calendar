@@ -90,12 +90,12 @@ bi_reserve:
     cmp r13, r12
     jae .Lbires_allocate
     shl r13, 1
-    jc .Lbires_fail
+    jc .Lbires_soft_fail
     jmp .Lbires_grow
 .Lbires_allocate:
     mov rdi, r13
     shl rdi, 3
-    jc .Lbires_fail
+    jc .Lbires_soft_fail
     call arena_alloc
     mov r14, rax
     mov rdi, r14
@@ -119,7 +119,17 @@ bi_reserve:
     pop rbx
     leave
     ret
+.Lbires_soft_fail:
+    # Ⲡsoft-failure detour ⲙⲡreserve ⲕⲧⲟ ⲛNULL ⲉⲙⲛ sys_exit.
+    xor eax,eax
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
 .Lbires_fail:
+    # Ⲡlegacy abort scar ⲙⲡreserve.
     mov rax, 60
     mov rdi, 103
     syscall
@@ -845,7 +855,7 @@ bi_divmod_u64_abs:
     mov r12,rdi
     mov r13,rsi
     test r13,r13
-    je .Lbd64_fail
+    je .Lbd64_soft_fail
     mov rdi,qword ptr [r12+BI_LEN]
     test rdi,rdi
     jne .Lbd64_cap_ok
@@ -877,7 +887,13 @@ bi_divmod_u64_abs:
     xor edx,edx
     mov rax,r14
     jmp .Lbd64_done
+.Lbd64_soft_fail:
+    # Ⲡzero-divisor detour ⲕⲧⲟ ⲛ(NULL,0); ⲡlegacy scar ⲥⲱϫⲡ.
+    xor eax,eax
+    xor edx,edx
+    jmp .Lbd64_done
 .Lbd64_fail:
+    # Ⲡlegacy abort scar ⲙⲡu64 division.
     mov rax,60
     mov rdi,139
     syscall
@@ -905,9 +921,17 @@ bi_divmod_abs:
     mov r13, rsi
     cmp qword ptr [r13+BI_LEN], 0
     jne .Lbda_nonzero_div
+    jmp .Lbda_soft_fail
+.Lbda_fail:
+    # Ⲡlegacy abort scar ⲙⲡBigInt division.
     mov rax, 60
     mov rdi, 102
     syscall
+.Lbda_soft_fail:
+    # Ⲡzero-divisor detour ⲕⲧⲟ ⲛ(NULL,NULL) ⲉⲡcaller.
+    xor eax,eax
+    xor edx,edx
+    jmp .Lbda_done
 .Lbda_nonzero_div:
     mov rdi, r12
     mov rsi, r13

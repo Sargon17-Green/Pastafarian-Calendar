@@ -32,7 +32,7 @@ arena_alloc:
     mov rbx, qword ptr [rip + arena_current]
     mov r13, rbx
     add r13, r12
-    jc .Larena_fail
+    jc .Larena_soft_fail
     mov rdx, qword ptr [rip + arena_limit]
     cmp r13, rdx
     jbe .Larena_commit
@@ -42,7 +42,7 @@ arena_alloc:
     mov rax, 12
     syscall
     cmp rax, rdi
-    jb .Larena_fail
+    jb .Larena_soft_fail
     mov qword ptr [rip + arena_limit], rax
 .Larena_commit:
     mov qword ptr [rip + arena_current], r13
@@ -52,7 +52,16 @@ arena_alloc:
     pop rbx
     leave
     ret
+.Larena_soft_fail:
+    # Ⲡsoft-failure detour ⲕⲱ ⲙⲡlegacy abort scar ⲉϥⲟⲩⲟⲛϩ, ⲁⲗⲗⲁ ⲡlive route ⲕⲧⲟ ⲛNULL.
+    xor eax,eax
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
 .Larena_fail:
+    # Ⲡlegacy abort scar ⲙⲡarena allocation; ⲙⲛ ⲗⲁⲁⲩ ⲛlive branch ⲉⲣⲟϥ.
     mov rdi, 99
     mov rax, 60
     syscall
@@ -69,14 +78,19 @@ arena_mark:
 arena_reset:
     mov rax,qword ptr [rip+arena_current]
     cmp rdi,rax
-    ja .Larena_reset_fail
+    ja .Larena_reset_soft_fail
     mov rdx,qword ptr [rip+arena_limit]
     cmp rdi,rdx
-    ja .Larena_reset_fail
+    ja .Larena_reset_soft_fail
     mov qword ptr [rip+arena_current],rdi
     mov rax,rdi
     ret
+.Larena_reset_soft_fail:
+    # Ⲡinvalid mark ⲕⲧⲟ ⲛzero; ⲡlegacy scar ⲙⲛⲧⲁϥ live caller.
+    xor eax,eax
+    ret
 .Larena_reset_fail:
+    # Ⲡlegacy abort scar ⲙⲡarena reset.
     mov rdi,98
     mov rax,60
     syscall

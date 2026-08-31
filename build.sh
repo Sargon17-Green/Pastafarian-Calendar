@@ -175,3 +175,19 @@ ld -o build/stage55_short_edges_audit build/arena.o build/bigint.o build/bootstr
 # Ⲃⲁⲑⲙⲟⲥ 55 — ⲡlocale/catalog ⲛⲇⲟⲕⲓⲙⲏ.
 as --64 -o build/stage55_locale_catalog_audit.o tests/stage55_locale_catalog_audit.s
 ld --wrap=stage56SauceRawBowlSumCorrective --wrap=catalog_get_cutlet --wrap=catalog_get_month -o build/stage55_locale_catalog_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage55_locale_catalog_audit.o
+
+# Ⲃⲁⲑⲙⲟⲥ 56 — ⲡcorrective semantic/runtime audit ⲉϥⲥⲏϩ ϩⲛ Assembly.
+as --64 -o build/stage56_semantic_runtime_audit.o tests/stage56_semantic_runtime_audit.s
+ld -o build/stage56_semantic_runtime_audit \
+  build/arena.o \
+  build/bigint.o \
+  build/bootstrap.o \
+  build/stage54_integration.o \
+  build/stage56_bowlsum_corrective.o \
+  build/catalog.o \
+  build/stage56_semantic_runtime_audit.o
+as --64 -o build/stage56_runtime_soft_failure_audit.o tests/stage56_runtime_soft_failure_audit.s
+ld -o build/stage56_runtime_soft_failure_audit \
+  build/arena.o \
+  build/bigint.o \
+  build/stage56_runtime_soft_failure_audit.o
