@@ -261,7 +261,17 @@
 .equ CTX_STAGE46_LAST_ROW,2072
 .equ CTX_STAGE46_SEEN,2080
 .equ CTX_STAGE46_LEGACY_MATERIALIZED,2088
-.equ CTX_SIZE,2096
+.equ CTX_STAGE47_ROUTE_LIST,2096
+.equ CTX_STAGE47_ROUTE_KIND,2104
+.equ CTX_STAGE47_COUNT_BIG,2112
+.equ CTX_STAGE47_ROUTE_ROWS,2120
+.equ CTX_STAGE47_FIRST_ROW,2128
+.equ CTX_STAGE47_LAST_ROW,2136
+.equ CTX_STAGE47_GHOST_LIST,2144
+.equ CTX_STAGE47_GHOST_SEEN,2152
+.equ CTX_STAGE47_PATCH_SEEN,2160
+.equ CTX_STAGE47_SEEN,2168
+.equ CTX_SIZE,2176
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -332,6 +342,13 @@
 .equ ML46_KIND,40
 .equ ML46_ROW_BYTES,48
 .equ ML46_SIZE,56
+.equ ML47_RESIDUAL,56
+.equ ML47_STRIDE,64
+.equ ML47_DP_TABLE,72
+.equ ML47_GHOST_LIST,80
+.equ ML47_GHOST_SEEN,88
+.equ ML47_GHOST_SKIPPED,96
+.equ ML47_SIZE,104
 .equ E46_TOTAL,0
 .equ E46_SLOTS,8
 .equ E46_SCRATCH,16
@@ -597,6 +614,13 @@ legacy_bowl_stir_stone_by_position:
 .global legacyMonthLengthListItemAt1
 .global monster_month_length_family_route
 .global monster_stage46_legacy_month_materialization_handler
+.global VirtualLegacyList
+.global virtualMonthLengthListCount
+.global virtualMonthLengthListItemAt1Big
+.global virtualMonthLengthListItemAt1
+.global monthLengthVirtualListPatch23
+.global monster_stage47_month_length_patch_wrapper
+.global monster_stage47_virtual_month_length_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -9655,7 +9679,7 @@ legacyMonthLengthListItemAt1:
 
 .type monster_month_length_family_route,@function
 monster_month_length_family_route:
-    jmp legacyMonthLengthMaterializedList
+    jmp monster_stage47_month_length_patch_wrapper
 .size monster_month_length_family_route,.-monster_month_length_family_route
 
 # Ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲡlegacy route ϩⲓ ⲟⲩsmall family ⲉⲧⲣⲉⲡmaterialization ⲣϩⲱⲃ ⲛⲁⲙⲉ.
@@ -9674,7 +9698,7 @@ monster_stage46_legacy_month_materialization_handler:
     mov qword ptr [r12+CTX_STAGE46_MONTH_COUNT],3
     mov edi,15
     mov esi,3
-    call monster_month_length_family_route
+    call legacyMonthLengthMaterializedList
     test rax,rax
     je .Lms46_fail
     mov r13,rax
@@ -9727,6 +9751,466 @@ monster_stage46_legacy_month_materialization_handler:
     leave
     ret
 .size monster_stage46_legacy_month_materialization_handler,.-monster_stage46_legacy_month_materialization_handler
+
+
+# Ⲃⲁⲑⲙⲟⲥ 47 — PATCH 23
+# Ⲡlegacy materializer ⲟⲩⲏϩ callable. Ⲡdetour ⲕⲱ ⲛⲟⲩDP table ⲙⲙⲁⲧⲉ, ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲛrows ⲧⲏⲣⲟⲩ.
+
+# ⲠABI: rdi=yearLength, rsi=monthCount. rax=VirtualLegacyList*.
+.type VirtualLegacyList,@function
+VirtualLegacyList:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,88
+    mov r12,rdi
+    mov r13,rsi
+    test r13,r13
+    je .Lvll_fail
+    cmp r13,47
+    ja .Lvll_fail
+    mov rax,r13
+    shl rax,2
+    jc .Lvll_fail
+    cmp r12,rax
+    jb .Lvll_fail
+    mov rdx,r13
+    imul rdx,123
+    jo .Lvll_fail
+    cmp r12,rdx
+    ja .Lvll_fail
+    mov r14,r12
+    sub r14,rax
+    mov r15,r14
+    inc r15
+    jz .Lvll_fail
+
+    mov edi,ML47_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Lvll_fail
+    mov qword ptr [rbp-72],rax
+    mov qword ptr [rax+ML46_TOTAL],r12
+    mov qword ptr [rax+ML46_SLOTS],r13
+    mov qword ptr [rax+ML46_ROWS],0
+    mov qword ptr [rax+ML46_KIND],2
+    mov rcx,r13
+    shl rcx,3
+    jc .Lvll_fail
+    mov qword ptr [rax+ML46_ROW_BYTES],rcx
+    mov qword ptr [rax+ML47_RESIDUAL],r14
+    mov qword ptr [rax+ML47_STRIDE],r15
+    mov qword ptr [rax+ML47_GHOST_LIST],0
+    mov qword ptr [rax+ML47_GHOST_SEEN],0
+    mov qword ptr [rax+ML47_GHOST_SKIPPED],0
+
+    mov rax,r13
+    inc rax
+    mul r15
+    test rdx,rdx
+    jne .Lvll_fail
+    shl rax,3
+    jc .Lvll_fail
+    mov rdi,rax
+    call arena_alloc
+    test rax,rax
+    je .Lvll_fail
+    mov qword ptr [rbp-48],rax
+    mov rcx,qword ptr [rbp-72]
+    mov qword ptr [rcx+ML47_DP_TABLE],rax
+
+    xor edi,edi
+    call bi_from_u64
+    test rax,rax
+    je .Lvll_fail
+    mov qword ptr [rbp-56],rax
+    mov edi,1
+    call bi_from_u64
+    test rax,rax
+    je .Lvll_fail
+    mov qword ptr [rbp-64],rax
+
+    mov rdi,qword ptr [rbp-48]
+    mov rax,qword ptr [rbp-56]
+    mov rcx,r15
+    rep stosq
+    mov rdx,qword ptr [rbp-48]
+    mov rax,qword ptr [rbp-64]
+    mov qword ptr [rdx],rax
+
+    mov rbx,1
+.Lvll_k_loop:
+    cmp rbx,r13
+    ja .Lvll_table_done
+    mov qword ptr [rbp-80],0
+    mov rax,qword ptr [rbp-56]
+    mov qword ptr [rbp-88],rax
+.Lvll_s_loop:
+    mov rcx,qword ptr [rbp-80]
+    cmp rcx,r14
+    ja .Lvll_next_k
+    mov rax,rbx
+    dec rax
+    imul rax,r15
+    add rax,rcx
+    mov rdx,qword ptr [rbp-48]
+    mov rsi,qword ptr [rdx+rax*8]
+    mov rdi,qword ptr [rbp-88]
+    call bi_add_abs
+    test rax,rax
+    je .Lvll_fail
+    mov qword ptr [rbp-88],rax
+
+    mov rcx,qword ptr [rbp-80]
+    cmp rcx,120
+    jb .Lvll_store_cell
+    mov rax,rbx
+    dec rax
+    imul rax,r15
+    lea rax,[rax+rcx-120]
+    mov rdx,qword ptr [rbp-48]
+    mov rsi,qword ptr [rdx+rax*8]
+    mov rdi,qword ptr [rbp-88]
+    call bi_sub_abs
+    test rax,rax
+    je .Lvll_fail
+    mov qword ptr [rbp-88],rax
+.Lvll_store_cell:
+    mov rcx,qword ptr [rbp-80]
+    mov rax,rbx
+    imul rax,r15
+    add rax,rcx
+    mov rdx,qword ptr [rbp-48]
+    mov r9,qword ptr [rbp-88]
+    mov qword ptr [rdx+rax*8],r9
+    inc qword ptr [rbp-80]
+    jmp .Lvll_s_loop
+.Lvll_next_k:
+    inc rbx
+    jmp .Lvll_k_loop
+
+.Lvll_table_done:
+    mov rax,r13
+    imul rax,r15
+    add rax,r14
+    mov rdx,qword ptr [rbp-48]
+    mov rax,qword ptr [rdx+rax*8]
+    test rax,rax
+    je .Lvll_fail
+    mov qword ptr [rbp-96],rax
+    mov rdx,qword ptr [rbp-72]
+    mov qword ptr [rdx+ML46_COUNT_BIG],rax
+    mov qword ptr [rdx+ML46_COUNT_U64],0
+    cmp qword ptr [rax+BI_LEN],1
+    jne .Lvll_ready
+    mov rcx,qword ptr [rax+BI_DATA]
+    test rcx,rcx
+    je .Lvll_ready
+    mov rcx,qword ptr [rcx]
+    mov qword ptr [rdx+ML46_COUNT_U64],rcx
+.Lvll_ready:
+    mov rax,qword ptr [rbp-72]
+    jmp .Lvll_done
+.Lvll_fail:
+    xor eax,eax
+.Lvll_done:
+    add rsp,88
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size VirtualLegacyList,.-VirtualLegacyList
+
+# ⲠABI: rdi=VirtualLegacyList*. rax=BigInt*.
+.type virtualMonthLengthListCount,@function
+virtualMonthLengthListCount:
+    test rdi,rdi
+    je .Lvmlc_fail
+    cmp qword ptr [rdi+ML46_KIND],2
+    jne .Lvmlc_fail
+    mov rax,qword ptr [rdi+ML46_COUNT_BIG]
+    ret
+.Lvmlc_fail:
+    xor eax,eax
+    ret
+.size virtualMonthLengthListCount,.-virtualMonthLengthListCount
+
+# ⲠABI: rdi=VirtualLegacyList*, rsi=BigInt* rank1, rdx=out[slots]. rax=out ⲉϣϫⲉ success.
+.type virtualMonthLengthListItemAt1Big,@function
+virtualMonthLengthListItemAt1Big:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,40
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Lvmlib_fail
+    test r13,r13
+    je .Lvmlib_fail
+    test r14,r14
+    je .Lvmlib_fail
+    cmp qword ptr [r12+ML46_KIND],2
+    jne .Lvmlib_fail
+    cmp qword ptr [r13+BI_SIGN],1
+    jne .Lvmlib_fail
+    mov rdi,r13
+    call bi_is_zero
+    test eax,eax
+    jne .Lvmlib_fail
+    mov rdi,r13
+    mov rsi,qword ptr [r12+ML46_COUNT_BIG]
+    call bi_cmp
+    cmp eax,0
+    jg .Lvmlib_fail
+    mov rdi,r13
+    call bi_clone
+    test rax,rax
+    je .Lvmlib_fail
+    mov r15,rax
+    mov qword ptr [rbp-48],0
+    mov rax,qword ptr [r12+ML47_RESIDUAL]
+    mov qword ptr [rbp-56],rax
+    mov rbx,qword ptr [r12+ML46_SLOTS]
+
+.Lvmlib_position:
+    mov rcx,qword ptr [rbp-48]
+    cmp rcx,rbx
+    jae .Lvmlib_finish
+    mov qword ptr [rbp-64],0
+.Lvmlib_candidate:
+    mov r8,qword ptr [rbp-64]
+    cmp r8,119
+    ja .Lvmlib_fail
+    cmp r8,qword ptr [rbp-56]
+    ja .Lvmlib_fail
+    mov r9,rbx
+    sub r9,qword ptr [rbp-48]
+    dec r9
+    mov r10,qword ptr [rbp-56]
+    sub r10,r8
+    mov rax,r9
+    imul rax,qword ptr [r12+ML47_STRIDE]
+    add rax,r10
+    mov rdx,qword ptr [r12+ML47_DP_TABLE]
+    mov r11,qword ptr [rdx+rax*8]
+    test r11,r11
+    je .Lvmlib_next_candidate
+    cmp qword ptr [r11+BI_LEN],0
+    je .Lvmlib_next_candidate
+    mov qword ptr [rbp-72],r11
+    mov rdi,r15
+    mov rsi,r11
+    call bi_cmp
+    cmp eax,0
+    jle .Lvmlib_choose
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-72]
+    call bi_sub_abs
+    test rax,rax
+    je .Lvmlib_fail
+    mov r15,rax
+.Lvmlib_next_candidate:
+    inc qword ptr [rbp-64]
+    jmp .Lvmlib_candidate
+.Lvmlib_choose:
+    mov rcx,qword ptr [rbp-48]
+    mov r8,qword ptr [rbp-64]
+    lea r9,[r8+4]
+    mov qword ptr [r14+rcx*8],r9
+    sub qword ptr [rbp-56],r8
+    inc qword ptr [rbp-48]
+    jmp .Lvmlib_position
+.Lvmlib_finish:
+    cmp qword ptr [rbp-56],0
+    jne .Lvmlib_fail
+    mov rax,r14
+    jmp .Lvmlib_done
+.Lvmlib_fail:
+    xor eax,eax
+.Lvmlib_done:
+    add rsp,40
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size virtualMonthLengthListItemAt1Big,.-virtualMonthLengthListItemAt1Big
+
+# ⲠABI: rdi=VirtualLegacyList*, rsi=rank1 u64, rdx=out[slots].
+.type virtualMonthLengthListItemAt1,@function
+virtualMonthLengthListItemAt1:
+    push rbp
+    mov rbp,rsp
+    push r12
+    sub rsp,8
+    mov r12,rdi
+    mov qword ptr [rbp-16],rdx
+    mov rdi,rsi
+    call bi_from_u64
+    test rax,rax
+    je .Lvmlia_fail
+    mov rdi,r12
+    mov rsi,rax
+    mov rdx,qword ptr [rbp-16]
+    call virtualMonthLengthListItemAt1Big
+    jmp .Lvmlia_done
+.Lvmlia_fail:
+    xor eax,eax
+.Lvmlia_done:
+    add rsp,8
+    pop r12
+    leave
+    ret
+.size virtualMonthLengthListItemAt1,.-virtualMonthLengthListItemAt1
+
+# Ⲡdetour ⲧⲁⲙⲓⲟ ⲙⲡvirtual list. Ⲉϣϫⲉ ⲡfamily ⲕⲟⲩⲓ, ⲛϥⲣⲉⲡlegacy scar ⲉⲣϩⲱⲃ ⲛghost; ⲡghost ⲛϥⲟ ⲁⲛ ⲛauthoritative rows.
+.type monthLengthVirtualListPatch23,@function
+monthLengthVirtualListPatch23:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    call VirtualLegacyList
+    test rax,rax
+    je .Lmlvlp_fail
+    mov r14,rax
+    mov r15,qword ptr [r14+ML46_COUNT_BIG]
+    cmp qword ptr [r15+BI_LEN],1
+    jne .Lmlvlp_skip_ghost
+    mov rax,qword ptr [r15+BI_DATA]
+    test rax,rax
+    je .Lmlvlp_skip_ghost
+    cmp qword ptr [rax],256
+    ja .Lmlvlp_skip_ghost
+    mov rdi,r12
+    mov rsi,r13
+    call legacyMonthLengthMaterializedList
+    test rax,rax
+    je .Lmlvlp_skip_ghost
+    mov qword ptr [r14+ML47_GHOST_LIST],rax
+    mov qword ptr [r14+ML47_GHOST_SEEN],1
+    jmp .Lmlvlp_ok
+.Lmlvlp_skip_ghost:
+    mov qword ptr [r14+ML47_GHOST_SKIPPED],1
+.Lmlvlp_ok:
+    mov rax,r14
+    jmp .Lmlvlp_done
+.Lmlvlp_fail:
+    xor eax,eax
+.Lmlvlp_done:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size monthLengthVirtualListPatch23,.-monthLengthVirtualListPatch23
+
+.type monster_stage47_month_length_patch_wrapper,@function
+monster_stage47_month_length_patch_wrapper:
+    jmp monthLengthVirtualListPatch23
+.size monster_stage47_month_length_patch_wrapper,.-monster_stage47_month_length_patch_wrapper
+
+# Ⲡhandler ⲕⲱ ⲙⲡsmall route ⲛvirtual, ⲡfirst/last row, ⲙⲛ ⲡlive small legacy ghost ϩⲙⲡinvocation-local context.
+.type monster_stage47_virtual_month_length_patch_handler,@function
+monster_stage47_virtual_month_length_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms47_fail
+    mov edi,15
+    mov esi,3
+    call monster_month_length_family_route
+    test rax,rax
+    je .Lms47_fail
+    mov r13,rax
+    cmp qword ptr [r13+ML46_KIND],2
+    jne .Lms47_fail
+    cmp qword ptr [r13+ML46_COUNT_U64],10
+    jne .Lms47_fail
+    cmp qword ptr [r13+ML46_ROWS],0
+    jne .Lms47_fail
+    mov qword ptr [r12+CTX_STAGE47_ROUTE_LIST],r13
+    mov qword ptr [r12+CTX_STAGE47_ROUTE_KIND],2
+    mov rax,qword ptr [r13+ML46_COUNT_BIG]
+    mov qword ptr [r12+CTX_STAGE47_COUNT_BIG],rax
+    mov rax,qword ptr [r13+ML46_ROWS]
+    mov qword ptr [r12+CTX_STAGE47_ROUTE_ROWS],rax
+    mov rax,qword ptr [r13+ML47_GHOST_LIST]
+    mov qword ptr [r12+CTX_STAGE47_GHOST_LIST],rax
+    cmp qword ptr [r13+ML47_GHOST_SEEN],1
+    jne .Lms47_fail
+    test rax,rax
+    je .Lms47_fail
+    mov qword ptr [r12+CTX_STAGE47_GHOST_SEEN],1
+
+    mov edi,24
+    call arena_alloc
+    test rax,rax
+    je .Lms47_fail
+    mov r14,rax
+    mov rdi,r13
+    mov esi,1
+    mov rdx,r14
+    call virtualMonthLengthListItemAt1
+    test rax,rax
+    je .Lms47_fail
+    mov qword ptr [r12+CTX_STAGE47_FIRST_ROW],r14
+
+    mov edi,24
+    call arena_alloc
+    test rax,rax
+    je .Lms47_fail
+    mov r15,rax
+    mov rdi,r13
+    mov esi,10
+    mov rdx,r15
+    call virtualMonthLengthListItemAt1
+    test rax,rax
+    je .Lms47_fail
+    mov qword ptr [r12+CTX_STAGE47_LAST_ROW],r15
+    inc qword ptr [r12+CTX_STAGE47_PATCH_SEEN]
+    inc qword ptr [r12+CTX_STAGE47_SEEN]
+    mov eax,1
+    jmp .Lms47_done
+.Lms47_fail:
+    xor eax,eax
+.Lms47_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage47_virtual_month_length_patch_handler,.-monster_stage47_virtual_month_length_patch_handler
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -9901,6 +10385,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage46_legacy_month_materialization_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage47_virtual_month_length_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

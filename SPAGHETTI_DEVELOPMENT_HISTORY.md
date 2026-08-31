@@ -1016,3 +1016,28 @@
 Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲛ`VirtualLegacyList`. Ⲙⲡⲟⲩⲕⲱ ⲛexact bounded-DP `count` ⲏ `itemAt1` backend ϩⲙⲡproduction. Ⲡtest ⲙⲙⲁⲧⲉ ⲧⲁϫⲣⲟ ⲙⲡhuge cardinality without OOM.
 
 `STAGE46_DISCOVERY23_EXPECTED_RED`
+
+
+## Ⲃⲁⲑⲙⲟⲥ 47 — PATCH 23
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲙⲡⲟⲩⲃⲟⲗ ⲉⲃⲟⲗ ⲙⲡeager scar ⲙⲡStage 46. `oldMonthLengthMaterializedList` ⲙⲛ `legacyMonthLengthMaterializedList` ⲟⲩⲏϩ callable ⲙⲛ ⲡsame full-row enumeration. Ⲁⲩⲟⲩⲱϩ ⲙⲡ`VirtualLegacyList` backend ⲉϫⲛ ⲡscar.
+
+Ⲡvirtual object ⲛϥϩⲁⲣⲉϩ ⲁⲛ ⲉrows. Ⲛϥϩⲁⲣⲉϩ ⲉexact BigInt count ⲙⲛ ⲟⲩDP table ⲉⲧⲱϣ ⲙⲡbounded residual compositions. Ⲡtable ⲟ ⲛpolynomial storage ⲕⲁⲧⲁ `monthCount*(residual+1)`, ⲛϥⲟ ⲁⲛ ⲛstorage ⲕⲁⲧⲁ family cardinality.
+
+### Ⲡlexicographic equivalence
+
+Ⲡlegacy materializer ⲙⲟⲟϣⲉ ⲛⲥⲁ month length candidates ϩⲙ ascending order. Ⲡ`virtualMonthLengthListItemAt1Big` ⲙⲟⲟϣⲉ ⲛⲥⲁ ⲡsame candidates ϩⲙ ⲡsame order, ⲁⲩⲱ ⲡDP suffix count ⲙⲙⲁⲧⲉ ⲃⲱⲗ ⲉⲃⲟⲗ ϫⲉ ⲟⲩblock ⲛⲓⲙ ϣⲁϫⲉ ⲛⲟⲩⲏⲣ ⲛrows. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡunrank ⲧⲱⲛ row-for-row ⲙⲛ ⲡlegacy lexicographic list.
+
+ⲠAssembly sweep ⲧⲁϫⲣⲟ ⲙⲡrow-for-row equivalence ϩⲓ small families, ⲛⲕⲉⲥⲟⲡ ϩⲙ families ⲉⲧⲉ ⲡupper bound 123 ⲣϩⲱⲃ. Ⲡlarge `L=252,K=47` test ⲧⲁϫⲣⲟ ⲙⲡfirst rank ⲙⲛ ⲡfull-BigInt last rank without materialization.
+
+### Ⲡghost ⲉⲧⲟ ⲛsafe
+
+Ⲡdetour ⲙⲟⲩⲧⲉ ⲉⲡeager legacy scar ⲛghost ⲉϣϫⲉ ⲡfamily count `<=256`. Ⲡghost ⲟ ⲛdiagnostic invocation-local list ⲁⲩⲱ ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡauthoritative rows. Ⲉϣϫⲉ ⲡcount ⲛⲁⲁⲁ ⲏ multi-limb, ⲡdetour ⲥϩⲁⲓ ⲙⲡskip flag ⲁⲩⲱ ⲛϥⲣ ⲁⲛ ⲙⲡeager call, ⲉⲧⲣⲉϥⲁⲣⲉϩ ⲉⲡOOM boundary ⲉⲧⲁⲡDiscovery 23 ⲟⲩⲱⲛϩ ⲙⲙⲟϥ.
+
+`STAGE46_REGRESSION_GREEN`
+
+`STAGE47_PATCH23_GREEN`
+
+Ⲙⲛ `legacyChooseEachDaySeparately`, `DPUnrankLegalWeaving`, ⲏ Stage 48 semantic code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 47.

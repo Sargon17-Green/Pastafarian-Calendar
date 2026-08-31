@@ -813,3 +813,42 @@
 `calendarDateSpaghetti` ⲙⲟⲩⲧⲉ ⲉ`monster_stage46_legacy_month_materialization_handler`; ⲡhandler ⲣϩⲱⲃ ϩⲓ ⲡsmall family ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡmaterialized list ϩⲙ invocation-local context. Ⲙⲛ `VirtualLegacyList`, exact bounded-DP backend ⲏ lexicographic DP unrank ⲙⲡPATCH 23 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
 
 ⲚStage 1–45 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 46 ϯ `STAGE46_DISCOVERY23_EXPECTED_RED`.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 47 — PATCH 23
+
+### ⲠVirtualLegacyList detour
+
+Ⲡ`oldMonthLengthMaterializedList` ⲙⲛ `legacyMonthLengthMaterializedList` ⲟⲩⲏϩ callable ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡⲉⲩlegacy enumeration. Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
+
+`monster_month_length_family_route -> monster_stage47_month_length_patch_wrapper -> monthLengthVirtualListPatch23 -> VirtualLegacyList`
+
+Ⲡbase layout ⲙⲡvirtual object ⲧⲱⲛ ⲙⲛ ⲛϣⲟⲣⲡ fields ⲙⲡlegacy list: `count`, `total`, `slots`, `rows`, `kind`, `rowBytes`. Ⲡvirtual backend ⲕⲱ `kind=2` ⲁⲩⲱ `rows=0`; ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛⲟⲩfull row array.
+
+Ⲛⲥⲁ ⲧⲉⲛⲃⲱⲗ ⲛ4 ⲉⲃⲟⲗ ϩⲙ slot ⲛⲓⲙ, ⲡresidual ⲡⲉ:
+
+`S = yearLength - 4*monthCount`
+
+ⲁⲩⲱ ⲟⲩresidual part ⲛⲓⲙ ⲟ ϩⲛ `0..119`. `VirtualLegacyList` ⲕⲱ ⲛⲟⲩexact DP table `DP[k][s]`, ⲉⲣⲉ ⲡcell ⲛⲓⲙ ⲟ ⲛBigInt count ⲙⲡrows ⲉⲧⲉ ⲟⲩ`k` ⲛslot ⲥⲱϫⲡ ⲙⲛ residual `s`. Ⲡsliding-window recurrence ⲕⲱ ⲙⲡbound 119 without row materialization.
+
+### ⲠitemAt1
+
+`virtualMonthLengthListItemAt1Big` ⲟ ⲛexact one-based lexicographic unrank. Ϩⲙ position ⲛⲓⲙ, ⲛϥⲙⲟⲟϣⲉ ⲛⲥⲁ candidate month lengths `4..123` ϩⲙ ascending order, ⲛϥϫⲓ ⲙⲡDP suffix count ⲛcandidate ⲛⲓⲙ, ⲁⲩⲱ ⲛϥⲥⲱⲧⲡ ⲙⲡblock ⲉⲧⲉ ⲡrank ⲛϩⲏⲧϥ. `virtualMonthLengthListItemAt1` ⲕⲱ ⲛⲟⲩu64 compatibility rank ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉⲡBigInt unrank.
+
+Ⲡlarge witness `L=252,K=47` ⲕⲱ `kind=2`, `rows=0`, ⲙⲛ ⲡsame exact 105-bit count:
+
+`22747362824110665179416185383175`
+
+Ⲡrank 1 ϯ `46*4,68`; ⲡrank ⲉⲧⲧⲱⲛ ⲙⲛ ⲡfull BigInt count ϯ `68,46*4`. Ⲙⲛ eager huge allocation ⲉϥϣⲟⲟⲡ.
+
+### Ⲡlegacy ghost ⲙⲛ trace
+
+`monthLengthVirtualListPatch23` ⲣ ⲙⲡlegacy materializer ⲛghost ⲛⲟⲩⲙⲉ ⲉϣϫⲉ ⲡexact count ⲟ ⲛu64 ⲁⲩⲱ `count<=256`. Ⲡsmall witness `L=15,K=3` ⲕⲱ ⲛⲟⲩlive `kind=1` ghost ⲙⲛ 10 materialized rows, ⲁⲗⲗⲁ ⲡauthoritative object ⲟ ⲛ`kind=2` ⲙⲛ `rows=0`. Ⲉϣϫⲉ ⲡfamily ⲛⲁⲁⲁ, ⲡghost ⲛϥmaterialize ⲁⲛ ⲁⲩⲱ ⲡskip flag ⲟ ⲛ1.
+
+ⲠStage 46 handler ⲟⲩⲏϩ ⲉϥⲙⲟⲩⲧⲉ ⲉⲡdirect legacy scar ⲉⲧⲣⲉⲡStage 46 trace ⲟⲩⲏϩ materialized. ⲠStage 47 handler ⲕⲱ ⲙⲡvirtual route ⲙⲛ first/last rows ⲙⲛ live small ghost ϩⲙ invocation-local context.
+
+`STAGE46_REGRESSION_GREEN`
+
+`STAGE47_PATCH23_GREEN`
+
+Ⲙⲛ Stage 48 ⲏ PATCH 24 weaving code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 47.

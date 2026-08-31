@@ -828,3 +828,42 @@
 ⲠStage 46 test ⲧⲁϫⲣⲟ ⲙⲡexact two-limb BigInt ⲁⲩⲱ ⲛϥⲙⲟⲩⲧⲉ ⲁⲛ ⲉⲡeager materializer ϩⲓ ⲡlarge witness. Ⲡⲁⲓ ⲧⲁϫⲣⲟ ⲙⲡmaterialization defect without OOM.
 
 Ⲙⲛ `VirtualLegacyList`, DP-count ⲏ DP-unrank backend ⲙⲡStage 47 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 46.
+
+
+## Ⲡvirtual month-length list detour ⲙⲡⲃⲁⲑⲙⲟⲥ 47
+
+ⲠCOPY_DIAGNOSTIC scar ⲟⲩⲏϩ:
+
+`legacyMonthLengthMaterializedList -> oldMonthLengthMaterializedList`
+
+ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
+
+`monster_month_length_family_route -> monster_stage47_month_length_patch_wrapper -> monthLengthVirtualListPatch23 -> VirtualLegacyList`
+
+### Ⲡcompatible list shell
+
+Ⲛϣⲟⲣⲡ fields ⲙⲡ`VirtualLegacyList` ⲧⲱⲛ ⲙⲛ ⲡStage 46 list shell. `kind=2` ⲟⲩⲱⲛϩ ϫⲉ ⲡbackend ⲟ ⲛvirtual; `rows=0` ⲟⲩⲱⲛϩ ϫⲉ ⲙⲛ full family allocation. `count` ⲟ ⲛBigInt ⲛⲙⲉ.
+
+Ⲡinternal fields ϩⲁⲣⲉϩ ⲉ`residual`, `stride`, `DP table`, `ghost list`, `ghost-seen` ⲙⲛ `ghost-skipped`. Ⲛfield ⲛⲁⲓ ⲟ ⲛarena-owned invocation-local state.
+
+### ⲠDP invariant
+
+Ⲉⲣⲉ `S=L-4K`, ⲡcell `DP[k][s]` ⲧⲱⲛ ⲙⲛ ⲡexact number ⲙⲡ`k`-part sequences ⲉⲩsum ⲉ`s` ⲁⲩⲱ part ⲛⲓⲙ ϩⲛ `0..119`.
+
+`DP[0][0]=1`
+
+`DP[0][s>0]=0`
+
+Ⲡnext row ⲕⲱ ⲙⲡsliding sum ⲙⲡprevious 120 cells, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡcount ⲟ ⲛexact bounded DP ⲁⲩⲱ ⲛϥⲧⲁⲙⲓⲟ ⲁⲛ ⲛfamily rows.
+
+### Ⲡunrank invariant
+
+Ⲡcandidate month length ⲛposition ⲛⲓⲙ ⲛⲏⲩ ϩⲙ `4..123`. Ⲡsuffix block count ⲡⲉ ⲡDP cell ⲙⲡremaining slots ⲙⲛ remaining residual. Ⲡrank ⲟ ⲛBigInt, ⲁⲩⲱ ⲛϥsubtract ⲙⲡwhole blocks ϣⲁⲛⲧⲉϥϭⲓⲛⲉ ⲙⲡcandidate block. Ⲡⲁⲓ ⲕⲱ ⲙⲡsame lexicographic order ⲛⲧⲉⲡlegacy materializer.
+
+### Ⲡscar safety
+
+Ⲡsmall families `count<=256` ⲣ ⲙⲡlegacy materializer ⲛlive ghost. Ⲡlarge family ⲛϥmaterialize ⲁⲛ; ⲡskip ⲟ ⲛdiagnostic state ⲙⲙⲁⲧⲉ. Ⲡauthoritative count/itemAt1 ⲛⲥⲉϫⲓ ⲁⲛ ⲙⲡghost rows.
+
+`tests/stage46_discovery23.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE46_REGRESSION_GREEN`.
+
+Ⲙⲛ Stage 48 / PATCH 24 weaving layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 47.
