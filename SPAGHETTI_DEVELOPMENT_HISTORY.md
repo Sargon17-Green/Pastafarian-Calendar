@@ -1104,3 +1104,28 @@
 ⲠStage 50 handler ⲙⲡϥallocate ⲛrows ϩⲙⲡarena. Ⲛϥⲕⲱ ⲙⲙⲟⲟⲩ ϩⲙ stack scratch, ⲛϥϩⲁⲣⲉϩ ϩⲙ context ⲉscalar trace ⲙⲙⲁⲧⲉ. Ⲡⲁⲓ ϩⲁⲣⲉϩ ⲉⲡallocation history ⲛⲧⲉⲛprevious stages ⲁⲩⲱ ⲛϥⲕⲱ ⲁⲛ ⲛⲟⲩdiagnostic side effect ⲉϥⲣsemantic.
 
 Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲛpartial-permutation month-name unrank ⲏ Patch 25 selector ϩⲙⲡStage 50.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 51 — PATCH 25
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲙⲡⲟⲩⲃⲟⲗ ⲉⲃⲟⲗ ⲙⲡbase-47 scar ⲙⲡStage 50. `oldMonthNameRowWithRepeats` ⲙⲛ `legacyMonthNamesWithRepeats` ⲟⲩⲏϩ callable ⲙⲛ ⲡsame repeated-name behavior. Ⲁⲩⲟⲩⲱϩ ⲙⲡ`monthNamesPatch25` ⲛdetour ⲉϫⲛ ⲡscar.
+
+Ⲡdetour ⲣ ⲙⲡlegacy call ⲛϣⲟⲣⲡ ⲁⲩⲱ ⲧⲁⲙⲓⲟ ⲙⲡghost row. Ⲙⲛⲛⲥⲱⲥ ϥⲣ ⲙⲡpartial-permutation unrank ⲛ47 canonical names. Ⲡghost ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡsemantic output ⲉϣϫⲉ ⲛϥⲧⲱⲛ ⲁⲛ ⲙⲛ ⲡcorrect row.
+
+### Ⲡwide-rank correction
+
+Ⲡcutlet-name patch ⲙⲡStage 45 ϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲙⲡfull family ϩⲙ u64 ϫⲉ `17!` ⲟ ⲛsmall. Ⲡmonth-name family ⲛⲧⲟϥ ⲟ ⲛwide: `47!` ⲟ ⲛ198 bits. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲁⲩⲟⲩⲱϩ ⲛⲟⲩBigInt unrank path ⲉϥϫⲓ ⲙⲡfull rank domain, ⲁⲩⲱ ⲡu64 compatibility route ⲟⲩⲏϩ allocation-neutral.
+
+### Ⲡⲉⲛⲧⲁⲩⲧⲁϫⲣⲟ
+
+`K=6,rank1=1` ⲕⲱ ⲙⲡlegacy ghost `[1,1,1,1,1,1]` ⲁⲗⲗⲁ ⲡroute ϯ `[1,2,3,4,5,6]`. `K=2,rank1=2162` ⲧⲁϫⲣⲟ ⲙⲡnontrivial equal reuse `[47,46]`. Ⲡwide witness `K=47,rank=47!` ⲧⲁϫⲣⲟ ⲙⲡ198-bit last row `[47,46,...,1]`.
+
+Ⲡinternal Assembly differential ⲧⲁϫⲣⲟ ⲙⲡu64 route ⲙⲛ ⲡBigInt route ϩⲓ 12 ⲛpoints, ⲉⲣⲉ `K=20,47` ⲙⲛ `rank=UINT64_MAX` ϣⲟⲟⲡ ⲛϩⲏⲧⲟⲩ.
+
+`STAGE50_REGRESSION_GREEN`
+
+`STAGE51_PATCH25_GREEN`
+
+Ⲙⲛ day-in-month Patch 26 / Stage 52 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 51.

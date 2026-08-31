@@ -940,3 +940,32 @@
 ### Ⲡfuture boundary
 
 Ⲙⲛ `unrankDistinctMonthNames47`, falling-factorial BigInt family, equality-gated ghost selector ⲏ Stage 51 / PATCH 25 code ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 50.
+
+
+## Ⲡdistinct month-name partial-permutation route ⲙⲡⲃⲁⲑⲙⲟⲥ 51
+
+ⲠCOPY_DIAGNOSTIC scar ⲟⲩⲏϩ:
+
+`legacyMonthNamesWithRepeats -> oldMonthNameRowWithRepeats`
+
+ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
+
+`monster_month_names_route -> monster_stage51_month_names_patch_wrapper -> monthNamesPatch25`
+
+### Ⲡrank family
+
+Ⲡcanonical family ⲡⲉ ⲡlexicographic partial permutation ⲛ`1..47` ⲉⲣⲉ `K` positions ϣⲟⲟⲡ ⲁⲩⲱ ⲙⲛ index ⲉϥⲕⲧⲟ ⲛⲕⲉⲥⲟⲡ. Ⲡfamily size ⲡⲉ `P(47,K)`. `unrankDistinctMonthNames47` ⲧⲁϫⲣⲟ ⲙⲡsame order ϩⲙ u64 ranks, ⲁⲩⲱ `unrankDistinctMonthNames47Big` ⲧⲁϫⲣⲟ ⲙⲡfull BigInt rank domain.
+
+Ⲡu64 helper ⲕⲱ ⲛsaturating falling-factorial block. Ⲉϣϫⲉ ⲡexact block ⲟ ⲛwide ⲉⲡu64 domain, ⲡcurrent u64 rank ⲟ ⲛsmaller ⲉⲡblock ⲁⲩⲱ ⲡcandidate quotient ⲟ ⲛ0; ⲡⲁⲓ ⲕⲱ ⲙⲡsame lexicographic choice without arena allocation.
+
+### Ⲡwide path
+
+`stage51FallingBig` ⲗⲟⲅⲓⲍⲉ ⲙⲡfalling factorial ϩⲙ local BigInt runtime. `unrankDistinctMonthNames47Big` ⲃⲱⲗ ⲙⲡzero-based rank ϩⲓ exact BigInt blocks ⲁⲩⲱ ϥⲥⲱⲧⲡ ⲙⲡq-th unused canonical index ⲙⲛ ⲟⲩ47-bit used mask.
+
+### Ⲡghost ownership
+
+Ⲡu64 detour ⲕⲱ ⲙⲡghost ϩⲙ stack scratch, ⲉⲧⲣⲉϥⲛⲁⲩ ⲉⲡlegacy output without changing arena history. Ⲡwide detour ⲙⲟⲩⲧⲉ ⲉ`legacyMonthNamesWithRepeatsBigGhost`, ⲉⲧⲁⲙⲓⲟ ⲙⲡsame base-47 repeated-name row ⲉϫⲛ BigInt rank. Ⲡselector ⲛⲁⲕⲱ ⲙⲡghost ⲉⲡsemantic output ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ghost==correct.
+
+`tests/stage50_discovery25.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE50_REGRESSION_GREEN`.
+
+Ⲙⲛ Stage 52 / PATCH 26 day-in-month layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 51.

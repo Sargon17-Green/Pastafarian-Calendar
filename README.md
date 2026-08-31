@@ -937,3 +937,34 @@
 Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡStage 50 ϯ `STAGE50_DISCOVERY25_EXPECTED_RED`. ⲚStage 1–49 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛGREEN.
 
 Ⲙⲛ distinct-month-name detour, `unrankDistinctMonthNames47`, ghost/correct selector ⲏ Stage 51 code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 50.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 51 — PATCH 25
+
+### Ⲡdistinct month-name detour
+
+`oldMonthNameRowWithRepeats` ⲙⲛ `legacyMonthNamesWithRepeats` ⲟⲩⲏϩ callable ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡbase-47 repeated-name semantics. Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
+
+`monster_month_names_route -> monster_stage51_month_names_patch_wrapper -> monthNamesPatch25`
+
+Ⲡdetour ⲣ ⲙⲡlegacy scar ⲛϣⲟⲣⲡ ϩⲙ call ⲛⲓⲙ ⲉⲧⲣⲉϥⲧⲁⲙⲓⲟ ⲙⲡlive ghost. Ⲙⲛⲛⲥⲱⲥ `unrankDistinctMonthNames47` ⲧⲁⲙⲓⲟ ⲙⲡcorrect lexicographic partial-permutation row. Ⲉϣϫⲉ ⲡrows ⲧⲱⲛ byte-for-byte, ⲡghost ϣϭⲙϭⲟⲙ ⲉϥⲟ ⲛauthoritative output; ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡcorrect row ⲙⲁⲩⲁⲁϥ ⲡⲉ ⲡsemantic output.
+
+### Ⲡu64 ⲙⲛ BigInt rank
+
+Ⲡ`u64` route ⲙⲡϥallocate ⲛghost rows ϩⲙⲡarena. Ⲡghost ⲟ ⲛstack-local, ⲁⲩⲱ ⲡpartial-permutation block sizes ⲟ ⲛsaturating `u64`: ⲉϣϫⲉ ⲟⲩblock ⲣoverflow, ⲟⲩ`u64 rank` ⲛϥϣϭⲙϭⲟⲙ ⲁⲛ ⲉϥⲡⲱϩ ⲉⲡnext block, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡquotient ⲟ ⲛ0 ⲉϥⲧⲱⲛ ⲙⲛ ⲡexact BigInt path.
+
+`unrankDistinctMonthNames47Big` ⲙⲛ `monthNamesPatch25Big` ϫⲓ ⲛⲟⲩone-based BigInt rank ⲛⲁⲙⲉ. Ⲡfull family `P(47,47)=47!` ⲡⲉ:
+
+`258623241511168180642964355153611979969197632389120000000000`
+
+Ⲡⲁⲓ ⲟ ⲛ198-bit count. ⲠStage 51 test ϫⲓ ⲙⲡ`rank=47!` ⲁⲩⲱ ⲧⲁϫⲣⲟ ϫⲉ ⲡlast lexicographic row ⲡⲉ `[47,46,...,1]`.
+
+### Ⲡghost selector witnesses
+
+Ϩⲙ `K=6,rank1=1`, ⲡlegacy ghost ⲡⲉ `[1,1,1,1,1,1]`, ⲁⲗⲗⲁ ⲡroute ϯ `[1,2,3,4,5,6]`. Ϩⲙ `K=2,rank1=2162=P(47,2)`, ⲡghost ⲙⲛ ⲡcorrect ⲧⲱⲛ ⲉ `[47,46]`, ⲁⲩⲱ ⲡequality-gated reuse branch ⲣϩⲱⲃ ⲛⲟⲩⲙⲉ.
+
+`tests/stage50_discovery25.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE50_REGRESSION_GREEN`.
+
+`STAGE51_PATCH25_GREEN`
+
+Ⲙⲛ Stage 52 / PATCH 26 day-in-month code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 51.

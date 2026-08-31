@@ -297,7 +297,16 @@
 .equ CTX_STAGE50_LEGACY_SEEN,2360
 .equ CTX_STAGE50_ROUTE_SEEN,2368
 .equ CTX_STAGE50_SEEN,2376
-.equ CTX_SIZE,2384
+.equ CTX_STAGE51_GHOST_SUM,2384
+.equ CTX_STAGE51_CORRECT_SUM,2392
+.equ CTX_STAGE51_GHOST_SEEN,2400
+.equ CTX_STAGE51_PATCH_SEEN,2408
+.equ CTX_STAGE51_GHOST_REUSED_EQUAL,2416
+.equ CTX_STAGE51_CORRECT_USED_DIFFERENT,2424
+.equ CTX_STAGE51_EQUAL_GHOST_SUM,2432
+.equ CTX_STAGE51_EQUAL_ROUTE_SUM,2440
+.equ CTX_STAGE51_SEEN,2448
+.equ CTX_SIZE,2456
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -675,6 +684,13 @@ legacy_bowl_stir_stone_by_position:
 .global legacyMonthNamesWithRepeats
 .global monster_month_names_route
 .global monster_stage50_legacy_repeated_month_names_handler
+.global unrankDistinctMonthNames47
+.global unrankDistinctMonthNames47Big
+.global legacyMonthNamesWithRepeatsBigGhost
+.global monthNamesPatch25
+.global monthNamesPatch25Big
+.global monster_stage51_month_names_patch_wrapper
+.global monster_stage51_month_names_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -11368,10 +11384,556 @@ legacyMonthNamesWithRepeats:
     jmp oldMonthNameRowWithRepeats
 .size legacyMonthNamesWithRepeats,.-legacyMonthNamesWithRepeats
 
-# ⲠDISCOVERY route ⲟⲩⲏϩ authoritative ⲉⲡlegacy scar; ⲡdistinct-name detour ⲙⲡⲁⲧϥϣⲱⲡⲉ.
+# Ⲃⲁⲑⲙⲟⲥ 51 — PATCH 25
+# Ⲡhelper ⲡⲁⲓ ϯ P(n,k) ϩⲙ u64. Ⲉϣϫⲉ ⲟⲩoverflow ϣⲱⲡⲉ, rax=UINT64_MAX ⲁⲩⲱ rdx=0; ⲉⲙⲙⲟⲛ rdx=1.
+.type stage51FallingU64Saturating,@function
+stage51FallingU64Saturating:
+    cmp rsi,rdi
+    ja .Ls51fus_zero
+    mov eax,1
+    xor ecx,ecx
+.Ls51fus_loop:
+    cmp rcx,rsi
+    jae .Ls51fus_exact
+    mov r8,rdi
+    sub r8,rcx
+    mul r8
+    test rdx,rdx
+    jne .Ls51fus_over
+    inc rcx
+    jmp .Ls51fus_loop
+.Ls51fus_exact:
+    mov edx,1
+    ret
+.Ls51fus_over:
+    mov rax,-1
+    xor edx,edx
+    ret
+.Ls51fus_zero:
+    xor eax,eax
+    mov edx,1
+    ret
+.size stage51FallingU64Saturating,.-stage51FallingU64Saturating
+
+# rdi=rank1 u64, rsi=K, rdx=out. Ⲡunrank ⲟ ⲛexact ϩⲙⲡlexicographic partial-permutation family ⲛ47 names.
+.type unrankDistinctMonthNames47,@function
+unrankDistinctMonthNames47:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    test rdi,rdi
+    je .Ludmn47_fail
+    test rsi,rsi
+    je .Ludmn47_fail
+    cmp rsi,47
+    ja .Ludmn47_fail
+    test rdx,rdx
+    je .Ludmn47_fail
+    mov r15,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov edi,47
+    mov rsi,r13
+    call stage51FallingU64Saturating
+    test rax,rax
+    je .Ludmn47_fail
+    test rdx,rdx
+    je .Ludmn47_total_wide
+    cmp r15,rax
+    ja .Ludmn47_fail
+.Ludmn47_total_wide:
+    dec r15
+    xor r12d,r12d
+    xor ebx,ebx
+.Ludmn47_pos:
+    cmp rbx,r13
+    jae .Ludmn47_done
+    mov rdi,46
+    sub rdi,rbx
+    mov rsi,r13
+    sub rsi,rbx
+    dec rsi
+    call stage51FallingU64Saturating
+    test rax,rax
+    je .Ludmn47_fail
+    test rdx,rdx
+    je .Ludmn47_block_wide
+    mov r11,rax
+    mov rax,r15
+    xor edx,edx
+    div r11
+    mov r15,rdx
+    mov r9,rax
+    jmp .Ludmn47_have_q
+.Ludmn47_block_wide:
+    xor r9d,r9d
+.Ludmn47_have_q:
+    mov r8,47
+    sub r8,rbx
+    cmp r9,r8
+    jae .Ludmn47_fail
+    mov ecx,1
+.Ludmn47_find:
+    cmp ecx,47
+    ja .Ludmn47_fail
+    mov rdx,rcx
+    dec rdx
+    bt r12,rdx
+    jc .Ludmn47_used
+    test r9,r9
+    je .Ludmn47_choose
+    dec r9
+.Ludmn47_used:
+    inc rcx
+    jmp .Ludmn47_find
+.Ludmn47_choose:
+    bts r12,rdx
+    mov qword ptr [r14+rbx*8],rcx
+    inc rbx
+    jmp .Ludmn47_pos
+.Ludmn47_done:
+    mov rax,r14
+    jmp .Ludmn47_exit
+.Ludmn47_fail:
+    xor eax,eax
+.Ludmn47_exit:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size unrankDistinctMonthNames47,.-unrankDistinctMonthNames47
+
+# rdi=n, rsi=k; rax=BigInt* P(n,k).
+.type stage51FallingBig,@function
+stage51FallingBig:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    cmp r13,r12
+    ja .Ls51fb_fail
+    mov edi,1
+    call bi_from_u64
+    test rax,rax
+    je .Ls51fb_fail
+    mov r14,rax
+    xor ebx,ebx
+.Ls51fb_loop:
+    cmp rbx,r13
+    jae .Ls51fb_done
+    mov rsi,r12
+    sub rsi,rbx
+    mov rdi,r14
+    call bi_mul_u64
+    test rax,rax
+    je .Ls51fb_fail
+    mov r14,rax
+    inc rbx
+    jmp .Ls51fb_loop
+.Ls51fb_done:
+    mov rax,r14
+    jmp .Ls51fb_exit
+.Ls51fb_fail:
+    xor eax,eax
+.Ls51fb_exit:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage51FallingBig,.-stage51FallingBig
+
+# rdi=rank1 BigInt*, rsi=K, rdx=out. Ⲡwide unrank ⲟ ⲛexact ⲁⲩⲱ ⲛϥⲕⲱ ⲁⲛ ⲛⲟⲩ64-bit ceiling.
+.type unrankDistinctMonthNames47Big,@function
+unrankDistinctMonthNames47Big:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,40
+    test rdi,rdi
+    je .Ludmn47b_fail
+    test rsi,rsi
+    je .Ludmn47b_fail
+    cmp rsi,47
+    ja .Ludmn47b_fail
+    test rdx,rdx
+    je .Ludmn47b_fail
+    cmp qword ptr [rdi+BI_SIGN],1
+    jne .Ludmn47b_fail
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov edi,47
+    mov rsi,r13
+    call stage51FallingBig
+    test rax,rax
+    je .Ludmn47b_fail
+    mov qword ptr [rbp-48],rax
+    mov rdi,r12
+    mov rsi,rax
+    call bi_cmp
+    cmp eax,0
+    jg .Ludmn47b_fail
+    mov edi,1
+    call bi_from_u64
+    test rax,rax
+    je .Ludmn47b_fail
+    mov rdi,r12
+    mov rsi,rax
+    call bi_sub_abs
+    test rax,rax
+    je .Ludmn47b_fail
+    mov r15,rax
+    mov qword ptr [rbp-56],0
+    xor ebx,ebx
+.Ludmn47b_pos:
+    cmp rbx,r13
+    jae .Ludmn47b_done
+    mov rdi,46
+    sub rdi,rbx
+    mov rsi,r13
+    sub rsi,rbx
+    dec rsi
+    call stage51FallingBig
+    test rax,rax
+    je .Ludmn47b_fail
+    mov qword ptr [rbp-64],rax
+    mov rdi,r15
+    mov rsi,rax
+    call bi_divmod_abs
+    test rax,rax
+    je .Ludmn47b_fail
+    mov r15,rdx
+    cmp qword ptr [rax+BI_LEN],0
+    je .Ludmn47b_q_zero
+    cmp qword ptr [rax+BI_LEN],1
+    jne .Ludmn47b_fail
+    mov rcx,qword ptr [rax+BI_DATA]
+    mov r9,qword ptr [rcx]
+    jmp .Ludmn47b_have_q
+.Ludmn47b_q_zero:
+    xor r9d,r9d
+.Ludmn47b_have_q:
+    mov r8,47
+    sub r8,rbx
+    cmp r9,r8
+    jae .Ludmn47b_fail
+    mov ecx,1
+.Ludmn47b_find:
+    cmp ecx,47
+    ja .Ludmn47b_fail
+    mov rdx,rcx
+    dec rdx
+    bt qword ptr [rbp-56],rdx
+    jc .Ludmn47b_used
+    test r9,r9
+    je .Ludmn47b_choose
+    dec r9
+.Ludmn47b_used:
+    inc rcx
+    jmp .Ludmn47b_find
+.Ludmn47b_choose:
+    bts qword ptr [rbp-56],rdx
+    mov qword ptr [r14+rbx*8],rcx
+    inc rbx
+    jmp .Ludmn47b_pos
+.Ludmn47b_done:
+    mov rax,r14
+    jmp .Ludmn47b_exit
+.Ludmn47b_fail:
+    xor eax,eax
+.Ludmn47b_exit:
+    add rsp,40
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size unrankDistinctMonthNames47Big,.-unrankDistinctMonthNames47Big
+
+# rdi=rank1 BigInt*, rsi=K, rdx=out. Ⲡghost ⲁⲩⲁⲁϥ ⲕⲁⲧⲁ ⲡsame base-47 scar ⲉϫⲛ ⲟⲩwide rank.
+.type legacyMonthNamesWithRepeatsBigGhost,@function
+legacyMonthNamesWithRepeatsBigGhost:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    test rdi,rdi
+    je .Llmnwbg_fail
+    test rsi,rsi
+    je .Llmnwbg_fail
+    cmp rsi,47
+    ja .Llmnwbg_fail
+    test rdx,rdx
+    je .Llmnwbg_fail
+    cmp qword ptr [rdi+BI_SIGN],1
+    jne .Llmnwbg_fail
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov edi,1
+    call bi_from_u64
+    test rax,rax
+    je .Llmnwbg_fail
+    mov rdi,r12
+    mov rsi,rax
+    call bi_sub_abs
+    test rax,rax
+    je .Llmnwbg_fail
+    mov r15,rax
+    xor ebx,ebx
+.Llmnwbg_loop:
+    cmp rbx,r13
+    jae .Llmnwbg_done
+    mov rdi,r15
+    mov esi,47
+    call bi_divmod_u64_abs
+    test rax,rax
+    je .Llmnwbg_fail
+    mov r15,rax
+    inc rdx
+    mov qword ptr [r14+rbx*8],rdx
+    inc rbx
+    jmp .Llmnwbg_loop
+.Llmnwbg_done:
+    mov rax,r14
+    jmp .Llmnwbg_exit
+.Llmnwbg_fail:
+    xor eax,eax
+.Llmnwbg_exit:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size legacyMonthNamesWithRepeatsBigGhost,.-legacyMonthNamesWithRepeatsBigGhost
+
+# rdi=a, rsi=b, rdx=K; eax=1 ⲉϣϫⲉ ⲥⲉⲧⲱⲛ.
+.type stage51MonthNameRowsEqual,@function
+stage51MonthNameRowsEqual:
+    test rdi,rdi
+    je .Ls51mnre_no
+    test rsi,rsi
+    je .Ls51mnre_no
+    xor ecx,ecx
+.Ls51mnre_loop:
+    cmp rcx,rdx
+    jae .Ls51mnre_yes
+    mov rax,qword ptr [rdi+rcx*8]
+    cmp rax,qword ptr [rsi+rcx*8]
+    jne .Ls51mnre_no
+    inc rcx
+    jmp .Ls51mnre_loop
+.Ls51mnre_yes:
+    mov eax,1
+    ret
+.Ls51mnre_no:
+    xor eax,eax
+    ret
+.size stage51MonthNameRowsEqual,.-stage51MonthNameRowsEqual
+
+# rdi=rank1 u64, rsi=K, rdx=out. Ⲡscar ⲣϩⲱⲃ ⲛϣⲟⲣⲡ; ⲡghost ⲃⲱⲕ ⲉⲡoutput ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ghost==correct.
+# r8=ghost sum, rcx=1 ⲉϣϫⲉ ⲁⲩreuse ⲙⲡghost.
+.type monthNamesPatch25,@function
+monthNamesPatch25:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,392
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Lmnp25_fail
+    test r13,r13
+    je .Lmnp25_fail
+    cmp r13,47
+    ja .Lmnp25_fail
+    test r14,r14
+    je .Lmnp25_fail
+    lea r15,[rsp]
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r15
+    call legacyMonthNamesWithRepeats
+    test rax,rax
+    je .Lmnp25_fail
+    xor ebx,ebx
+    xor ecx,ecx
+.Lmnp25_sum:
+    cmp rcx,r13
+    jae .Lmnp25_correct
+    add rbx,qword ptr [r15+rcx*8]
+    inc rcx
+    jmp .Lmnp25_sum
+.Lmnp25_correct:
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    call unrankDistinctMonthNames47
+    test rax,rax
+    je .Lmnp25_fail
+    mov rdi,r15
+    mov rsi,r14
+    mov rdx,r13
+    call stage51MonthNameRowsEqual
+    test eax,eax
+    je .Lmnp25_different
+    xor ecx,ecx
+.Lmnp25_copy_ghost:
+    cmp rcx,r13
+    jae .Lmnp25_equal_done
+    mov rax,qword ptr [r15+rcx*8]
+    mov qword ptr [r14+rcx*8],rax
+    inc rcx
+    jmp .Lmnp25_copy_ghost
+.Lmnp25_equal_done:
+    mov ecx,1
+    jmp .Lmnp25_done
+.Lmnp25_different:
+    xor ecx,ecx
+.Lmnp25_done:
+    mov rax,r14
+    mov r8,rbx
+    jmp .Lmnp25_exit
+.Lmnp25_fail:
+    xor eax,eax
+    xor r8d,r8d
+    xor ecx,ecx
+.Lmnp25_exit:
+    add rsp,392
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size monthNamesPatch25,.-monthNamesPatch25
+
+# rdi=rank1 BigInt*, rsi=K, rdx=out. Ⲡwide detour ⲧⲁϫⲣⲟ ⲙⲡsame ghost/correct rule.
+.type monthNamesPatch25Big,@function
+monthNamesPatch25Big:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,392
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Lmnp25b_fail
+    test r13,r13
+    je .Lmnp25b_fail
+    cmp r13,47
+    ja .Lmnp25b_fail
+    test r14,r14
+    je .Lmnp25b_fail
+    lea r15,[rsp]
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r15
+    call legacyMonthNamesWithRepeatsBigGhost
+    test rax,rax
+    je .Lmnp25b_fail
+    xor ebx,ebx
+    xor ecx,ecx
+.Lmnp25b_sum:
+    cmp rcx,r13
+    jae .Lmnp25b_correct
+    add rbx,qword ptr [r15+rcx*8]
+    inc rcx
+    jmp .Lmnp25b_sum
+.Lmnp25b_correct:
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    call unrankDistinctMonthNames47Big
+    test rax,rax
+    je .Lmnp25b_fail
+    mov rdi,r15
+    mov rsi,r14
+    mov rdx,r13
+    call stage51MonthNameRowsEqual
+    test eax,eax
+    je .Lmnp25b_different
+    xor ecx,ecx
+.Lmnp25b_copy_ghost:
+    cmp rcx,r13
+    jae .Lmnp25b_equal_done
+    mov rax,qword ptr [r15+rcx*8]
+    mov qword ptr [r14+rcx*8],rax
+    inc rcx
+    jmp .Lmnp25b_copy_ghost
+.Lmnp25b_equal_done:
+    mov ecx,1
+    jmp .Lmnp25b_done
+.Lmnp25b_different:
+    xor ecx,ecx
+.Lmnp25b_done:
+    mov rax,r14
+    mov r8,rbx
+    jmp .Lmnp25b_exit
+.Lmnp25b_fail:
+    xor eax,eax
+    xor r8d,r8d
+    xor ecx,ecx
+.Lmnp25b_exit:
+    add rsp,392
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size monthNamesPatch25Big,.-monthNamesPatch25Big
+
+.type monster_stage51_month_names_patch_wrapper,@function
+monster_stage51_month_names_patch_wrapper:
+    jmp monthNamesPatch25
+.size monster_stage51_month_names_patch_wrapper,.-monster_stage51_month_names_patch_wrapper
+
 .type monster_month_names_route,@function
 monster_month_names_route:
-    jmp legacyMonthNamesWithRepeats
+    jmp monster_stage51_month_names_patch_wrapper
 .size monster_month_names_route,.-monster_month_names_route
 
 # rdi=MonsterContext*. Ⲡhandler ϫⲓ K=6, rank1=1 ⲉⲧⲣⲉⲡrepeat ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ ϩⲛ ⲡdirect scar ⲙⲛ ⲡroute.
@@ -11442,6 +12004,81 @@ monster_stage50_legacy_repeated_month_names_handler:
     leave
     ret
 .size monster_stage50_legacy_repeated_month_names_handler,.-monster_stage50_legacy_repeated_month_names_handler
+
+# rdi=MonsterContext*. Ⲡhandler ⲧⲁϫⲣⲟ ⲙⲡdifferent witness ⲙⲛ ⲡequal witness ⲉⲣⲉ ⲡscar ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ.
+.type monster_stage51_month_names_patch_handler,@function
+monster_stage51_month_names_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    sub rsp,112
+    mov r12,rdi
+    test r12,r12
+    je .Lms51_fail
+    lea r13,[rsp]
+    lea r14,[rsp+48]
+
+    mov edi,1
+    mov esi,6
+    mov rdx,r13
+    call monster_month_names_route
+    test rax,rax
+    je .Lms51_fail
+    cmp r8,6
+    jne .Lms51_fail
+    test rcx,rcx
+    jne .Lms51_fail
+    xor ebx,ebx
+    xor ecx,ecx
+.Lms51_sum_correct:
+    cmp ecx,6
+    jae .Lms51_diff_store
+    add rbx,qword ptr [r13+rcx*8]
+    inc ecx
+    jmp .Lms51_sum_correct
+.Lms51_diff_store:
+    cmp rbx,21
+    jne .Lms51_fail
+    mov qword ptr [r12+CTX_STAGE51_GHOST_SUM],6
+    mov qword ptr [r12+CTX_STAGE51_CORRECT_SUM],rbx
+    mov qword ptr [r12+CTX_STAGE51_GHOST_SEEN],1
+    mov qword ptr [r12+CTX_STAGE51_CORRECT_USED_DIFFERENT],1
+
+    mov edi,2162
+    mov esi,2
+    mov rdx,r14
+    call monster_month_names_route
+    test rax,rax
+    je .Lms51_fail
+    cmp r8,93
+    jne .Lms51_fail
+    cmp rcx,1
+    jne .Lms51_fail
+    cmp qword ptr [r14],47
+    jne .Lms51_fail
+    cmp qword ptr [r14+8],46
+    jne .Lms51_fail
+    mov qword ptr [r12+CTX_STAGE51_EQUAL_GHOST_SUM],93
+    mov qword ptr [r12+CTX_STAGE51_EQUAL_ROUTE_SUM],93
+    mov qword ptr [r12+CTX_STAGE51_GHOST_REUSED_EQUAL],1
+    mov qword ptr [r12+CTX_STAGE51_PATCH_SEEN],1
+    inc qword ptr [r12+CTX_STAGE51_SEEN]
+    mov eax,1
+    jmp .Lms51_done
+.Lms51_fail:
+    xor eax,eax
+.Lms51_done:
+    add rsp,112
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size monster_stage51_month_names_patch_handler,.-monster_stage51_month_names_patch_handler
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -11636,6 +12273,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage50_legacy_repeated_month_names_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage51_month_names_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
