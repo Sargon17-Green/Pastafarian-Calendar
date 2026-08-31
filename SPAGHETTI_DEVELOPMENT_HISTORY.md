@@ -1041,3 +1041,22 @@
 `STAGE47_PATCH23_GREEN`
 
 Ⲙⲛ `legacyChooseEachDaySeparately`, `DPUnrankLegalWeaving`, ⲏ Stage 48 semantic code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 47.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 48 — DISCOVERY 24
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲁⲩⲕⲱ ⲙⲡmonth weaving ϫⲉ ⲥϣϭⲙϭⲟⲙ ⲉⲥⲧⲁⲙⲓⲟ day-by-day: ϩⲙ day ⲛⲓⲙ ⲡanswer ⲥⲱⲧⲡ ⲛⲟⲩmonth, ⲁⲩⲱ ⲉϣϫⲉ ⲡmonth ⲙⲟⲩϩ ⲡlegacy ϥⲕⲱⲧⲉ ⲉⲡnext ⲉϥⲟⲩⲱϣ ⲛⲟⲩremaining slot. Ⲡⲁⲓ ⲧⲁϫⲣⲟ ⲙⲡmultiplicities ⲁⲩⲱ ϥⲧⲁⲙⲓⲟ ⲛⲟⲩfull row.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡlocal choice ⲛϥⲧⲁϫⲣⲟ ⲁⲛ ⲙⲡwhole-weave first/last ordering. Ϩⲙ `lengths=[4,4]` ⲙⲛ `answers=[2]`, ⲡlegacy row ⲡⲉ `[2,2,2,2,1,1,1,1]`. Ⲡmonth 2 ⲟⲩⲱⲛ ⲛϣⲟⲣⲡ ⲁⲩⲱ ⲙⲟⲩϩ ⲛϣⲟⲣⲡ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡrow ⲛϥⲟ ⲁⲛ ⲛⲟⲩlegal weaving.
+
+Ⲡ`wantedRank=1` ⲃⲱⲕ ϩⲓⲧⲛ ⲡroute ABI ⲁⲗⲗⲁ ⲡlegacy ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ. Ⲡtest-only rank-1 witness ⲡⲉ `[1,1,1,1,2,2,2,2]`, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡDISCOVERY 24 ⲟ ⲛEXPECTED_RED.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲛⲥⲁ Patch 24
+
+Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲛlegal-weaving DP ⲏ whole-weave unrank ϩⲙⲡproduction. Ⲙⲡⲟⲩⲕⲱ ⲛghost/correct equality selector. Ⲡlegacy chooser ⲙⲙⲁⲧⲉ ⲡⲉ ⲡauthoritative route ⲙⲡStage 48.
+
+`STAGE48_DISCOVERY24_EXPECTED_RED`

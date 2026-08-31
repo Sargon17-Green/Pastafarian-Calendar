@@ -867,3 +867,24 @@
 `tests/stage46_discovery23.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE46_REGRESSION_GREEN`.
 
 Ⲙⲛ Stage 48 / PATCH 24 weaving layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 47.
+
+
+## Ⲡdaily month-weaving legacy route ⲙⲡⲃⲁⲑⲙⲟⲥ 48
+
+ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
+
+`monster_month_weaving_route -> legacyChooseEachDaySeparately -> oldMonthWeavingEachDaySeparately`
+
+### Ⲡlegacy state
+
+Ⲡchooser ⲕⲱ ⲛⲟⲩstack-local `remaining[1..m]` copy. Ϩⲙ output position ⲛⲓⲙ ϥϫⲓ ⲙⲡanswer-stream element ⲕⲁⲧⲁ ring position, ϥⲧⲁⲙⲓⲟ ⲙⲡone-based month start ϩⲓⲧⲛ regular modulo, ⲁⲩⲱ ϥⲕⲱⲧⲉ ϩⲓ ⲛmonth ids ϣⲁⲛⲧⲉϥϩⲉ ⲉⲟⲩremaining count ⲉϥⲛⲁⲁ.
+
+Ⲡstate ⲛϥⲕⲱ ⲁⲛ ⲛⲟⲩopenedUpTo/closedUpTo invariant. Ⲡroute ABI ⲕⲱ ⲙⲡ`wantedRank` BigInt pointer, ⲁⲗⲗⲁ ⲡlegacy scar ⲛϥϫⲓ ⲙⲙⲟϥ ⲁⲛ ⲛsemantic input.
+
+### Ⲡinvocation trace
+
+`monster_stage48_legacy_daily_month_weaving_handler` ⲧⲁⲙⲓⲟ ⲛtwo arena-owned output rows: ⲟⲩdirect legacy scar row ⲙⲛ ⲟⲩroute row. Ⲡcontext ϩⲁⲣⲉϩ ⲉmonth count, witness pointers, wanted rank, direct ghost pointer, route pointer ⲙⲛ seen flags. Ⲙⲛ global mutable weaving state.
+
+### Ⲡfuture boundary
+
+Ⲙⲛ whole-weave DP count, `DPUnrankLegalWeaving`, first/last legality state, ⲏ equality-gated ghost selector ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction ⲙⲡStage 48. Ⲛⲁⲓ ⲟ ⲛboundary ⲙⲡPATCH 24 / Stage 49.
