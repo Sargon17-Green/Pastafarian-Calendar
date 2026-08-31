@@ -46,7 +46,7 @@ jobs:
         run: |
           set -uo pipefail
           rc=0
-          ./build.sh >audit_evidence/BUILD.log 2>&1 || rc=$?
+          bash build.sh >audit_evidence/BUILD.log 2>&1 || rc=$?
           cat audit_evidence/BUILD.log
           printf 'BUILD_RC=%s\n' "$rc" | tee audit_evidence/BUILD_STATUS.txt
           exit "$rc"
@@ -55,6 +55,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           rc=0
           : > audit_evidence/HISTORICAL_AND_SMOKE.log
@@ -74,6 +75,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           rc=0
           : > audit_evidence/STAGE55_HELPERS.log
@@ -93,6 +95,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           rc=0
           : > audit_evidence/STAGE55_FULL.log
