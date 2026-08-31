@@ -197,7 +197,14 @@
 .equ CTX_STAGE37_TELEMETRY_ONLY,1560
 .equ CTX_STAGE37_PATCH_SEEN,1568
 .equ CTX_STAGE37_TARGET_DAY,1576
-.equ CTX_SIZE,1584
+.equ CTX_STAGE38_CACHE_KEY_YEAR,1584
+.equ CTX_STAGE38_CALCULATION_STALE,1592
+.equ CTX_STAGE38_OPEN_STALE,1600
+.equ CTX_STAGE38_CLOSE_STALE,1608
+.equ CTX_STAGE38_ROUTE_CASES,1616
+.equ CTX_STAGE38_NUMBER_ONLY_KEY,1624
+.equ CTX_STAGE38_SEEN,1632
+.equ CTX_SIZE,1640
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -250,6 +257,11 @@
 .equ YJ_FIRST_DAY,16
 .equ YJ_CLOSE_DAY,24
 .equ YJ_SIZE,32
+.equ L38_CACHE_COUNT,0
+.equ L38_CACHE_SLOTS,8
+.equ L38_CACHE_SLOT_SIZE,16
+.equ L38_CACHE_CAPACITY,4
+.equ L38_CACHE_SIZE,72
 
 .section .data.rel.ro
 .align 8
@@ -327,6 +339,7 @@ legacy_bowl_stir_stone_by_position:
 .extern bi_from_u64
 .extern bi_clone
 .extern bi_add_u64
+.extern bi_add
 .global monster_context_new
 .global monster_validate_base
 .global monster_metrics_bump
@@ -459,6 +472,14 @@ legacy_bowl_stir_stone_by_position:
 .global findYearByWalkPatch
 .global monster_stage37_year_walk_patch_wrapper
 .global monster_stage37_year_walk_patch_handler
+.global stage38NewLegacyYearCache
+.global legacyYearNumberOnlyCacheGetOrPut
+.global buildLegacyYearCacheValueStage38
+.global stage38YearVariant
+.global legacyYearNumberOnlyCacheRoute
+.global monster_year_cache_route
+.global stage38LegacyCollisionCase
+.global monster_stage38_legacy_year_number_cache_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -6902,6 +6923,445 @@ monster_stage37_year_walk_patch_handler:
 .size monster_stage37_year_walk_patch_handler,.-monster_stage37_year_walk_patch_handler
 
 
+
+# Ⲃⲁⲑⲙⲟⲥ 38 — DISCOVERY 19
+# Ⲡlegacy cache ⲙⲟⲩⲧⲉ ⲙⲙⲁⲧⲉ ⲉⲡyear.number; ⲛϥϫⲓ ⲁⲛ ⲙⲡcalculation day ⲏ ⲛgate ϩⲙⲡhit decision.
+.type stage38NewLegacyYearCache,@function
+stage38NewLegacyYearCache:
+    push rbp
+    mov rbp,rsp
+    push r12
+    sub rsp,8
+    mov edi,L38_CACHE_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Ls38nc_fail
+    mov r12,rax
+    mov rdi,r12
+    xor eax,eax
+    mov ecx,L38_CACHE_SIZE/8
+    rep stosq
+    mov rax,r12
+    jmp .Ls38nc_done
+.Ls38nc_fail:
+    xor eax,eax
+.Ls38nc_done:
+    add rsp,8
+    pop r12
+    leave
+    ret
+.size stage38NewLegacyYearCache,.-stage38NewLegacyYearCache
+
+# rdi=cache, rsi=year-number BigInt*, rdx=fresh opaque value BigInt*.
+# rax=stored/cached value, rdx=1 HIT / 0 MISS.
+.type legacyYearNumberOnlyCacheGetOrPut,@function
+legacyYearNumberOnlyCacheGetOrPut:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Ll38cg_fail
+    test r13,r13
+    je .Ll38cg_fail
+    test r14,r14
+    je .Ll38cg_fail
+    mov r15,qword ptr [r12+L38_CACHE_COUNT]
+    xor ebx,ebx
+.Ll38cg_scan:
+    cmp rbx,r15
+    jae .Ll38cg_miss
+    mov rax,rbx
+    shl rax,4
+    lea rax,[r12+L38_CACHE_SLOTS+rax]
+    mov rdi,qword ptr [rax]
+    mov rsi,r13
+    call bi_cmp
+    test eax,eax
+    jne .Ll38cg_next
+    mov rax,rbx
+    shl rax,4
+    lea rax,[r12+L38_CACHE_SLOTS+rax]
+    mov rax,qword ptr [rax+8]
+    mov edx,1
+    jmp .Ll38cg_done
+.Ll38cg_next:
+    inc rbx
+    jmp .Ll38cg_scan
+.Ll38cg_miss:
+    cmp r15,L38_CACHE_CAPACITY
+    jae .Ll38cg_fail
+    mov rax,r15
+    shl rax,4
+    lea rax,[r12+L38_CACHE_SLOTS+rax]
+    mov qword ptr [rax],r13
+    mov qword ptr [rax+8],r14
+    inc r15
+    mov qword ptr [r12+L38_CACHE_COUNT],r15
+    mov rax,r14
+    xor edx,edx
+    jmp .Ll38cg_done
+.Ll38cg_fail:
+    xor eax,eax
+    xor edx,edx
+.Ll38cg_done:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size legacyYearNumberOnlyCacheGetOrPut,.-legacyYearNumberOnlyCacheGetOrPut
+
+# rdi=YJ*, rsi=calculation-day BigInt*. Ⲡvalue ⲟ ⲛopaque semantic token ⲙⲡDISCOVERY 19.
+.type buildLegacyYearCacheValueStage38,@function
+buildLegacyYearCacheValueStage38:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lblcv_fail
+    test r13,r13
+    je .Lblcv_fail
+    mov rdi,qword ptr [r12+YJ_OPEN_DAY]
+    mov esi,3
+    call bi_mul_u64
+    test rax,rax
+    je .Lblcv_fail
+    mov r14,rax
+    mov rdi,qword ptr [r12+YJ_CLOSE_DAY]
+    mov esi,5
+    call bi_mul_u64
+    test rax,rax
+    je .Lblcv_fail
+    mov rdi,r14
+    mov rsi,rax
+    call bi_add
+    test rax,rax
+    je .Lblcv_fail
+    mov rdi,rax
+    mov rsi,r13
+    call bi_add
+    jmp .Lblcv_done
+.Lblcv_fail:
+    xor eax,eax
+.Lblcv_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size buildLegacyYearCacheValueStage38,.-buildLegacyYearCacheValueStage38
+
+# rdi=YJ*, esi=1 open variant / 2 close variant. Ⲡnumber ⲟⲩⲏϩ ⲛⲟⲩⲱⲧ.
+.type stage38YearVariant,@function
+stage38YearVariant:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    mov r13d,esi
+    test r12,r12
+    je .Ls38yv_fail
+    cmp r13d,1
+    je .Ls38yv_mode_ok
+    cmp r13d,2
+    jne .Ls38yv_fail
+.Ls38yv_mode_ok:
+    mov edi,YJ_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Ls38yv_fail
+    mov r14,rax
+    mov rax,qword ptr [r12+YJ_NUMBER]
+    mov qword ptr [r14+YJ_NUMBER],rax
+    mov rax,qword ptr [r12+YJ_OPEN_DAY]
+    mov qword ptr [r14+YJ_OPEN_DAY],rax
+    mov rax,qword ptr [r12+YJ_FIRST_DAY]
+    mov qword ptr [r14+YJ_FIRST_DAY],rax
+    mov rax,qword ptr [r12+YJ_CLOSE_DAY]
+    mov qword ptr [r14+YJ_CLOSE_DAY],rax
+    cmp r13d,1
+    jne .Ls38yv_close
+    mov rdi,qword ptr [r12+YJ_OPEN_DAY]
+    mov esi,1
+    call bi_add_u64
+    test rax,rax
+    je .Ls38yv_fail
+    mov qword ptr [r14+YJ_OPEN_DAY],rax
+    mov rdi,qword ptr [r12+YJ_FIRST_DAY]
+    mov esi,1
+    call bi_add_u64
+    test rax,rax
+    je .Ls38yv_fail
+    mov qword ptr [r14+YJ_FIRST_DAY],rax
+    mov rax,r14
+    jmp .Ls38yv_done
+.Ls38yv_close:
+    mov rdi,qword ptr [r12+YJ_CLOSE_DAY]
+    mov esi,1
+    call bi_add_u64
+    test rax,rax
+    je .Ls38yv_fail
+    mov qword ptr [r14+YJ_CLOSE_DAY],rax
+    mov rax,r14
+    jmp .Ls38yv_done
+.Ls38yv_fail:
+    xor eax,eax
+.Ls38yv_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size stage38YearVariant,.-stage38YearVariant
+
+# rdi=cache, rsi=YJ*, rdx=calculation-day BigInt*.
+# rax=semantic cache output, rdx=fresh value, rcx=legacy hit flag.
+.type legacyYearNumberOnlyCacheRoute,@function
+legacyYearNumberOnlyCacheRoute:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Ll38cr_fail
+    test r13,r13
+    je .Ll38cr_fail
+    test r14,r14
+    je .Ll38cr_fail
+    mov rdi,r13
+    mov rsi,r14
+    call buildLegacyYearCacheValueStage38
+    test rax,rax
+    je .Ll38cr_fail
+    mov r15,rax
+    mov rdi,r12
+    mov rsi,qword ptr [r13+YJ_NUMBER]
+    mov rdx,r15
+    call legacyYearNumberOnlyCacheGetOrPut
+    test rax,rax
+    je .Ll38cr_fail
+    mov rcx,rdx
+    mov rdx,r15
+    jmp .Ll38cr_done
+.Ll38cr_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+.Ll38cr_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size legacyYearNumberOnlyCacheRoute,.-legacyYearNumberOnlyCacheRoute
+
+.type monster_year_cache_route,@function
+monster_year_cache_route:
+    jmp legacyYearNumberOnlyCacheRoute
+.size monster_year_cache_route,.-monster_year_cache_route
+
+# rdi=YJ*, rsi=calculation-day BigInt*, edx=1 calc / 2 open / 3 close.
+# rax=1 ⲉϣϫⲉ ⲡroute ϯ ⲛstale output, 0 ⲉϣϫⲉ fresh, -1 ⲉϣϫⲉ invariant ⲁϥⲃⲱⲗ.
+.type stage38LegacyCollisionCase,@function
+stage38LegacyCollisionCase:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,24
+    mov r12,rdi
+    mov r13,rsi
+    mov r14d,edx
+    test r12,r12
+    je .Ls38cc_pattern
+    test r13,r13
+    je .Ls38cc_pattern
+    cmp r14d,1
+    jb .Ls38cc_pattern
+    cmp r14d,3
+    ja .Ls38cc_pattern
+    call stage38NewLegacyYearCache
+    test rax,rax
+    je .Ls38cc_pattern
+    mov r15,rax
+
+    mov rdi,r15
+    mov rsi,r12
+    mov rdx,r13
+    call monster_year_cache_route
+    test rax,rax
+    je .Ls38cc_pattern
+    mov rbx,rax
+    mov qword ptr [rbp-48],rdx
+    mov rdi,rbx
+    mov rsi,qword ptr [rbp-48]
+    call bi_cmp
+    test eax,eax
+    jne .Ls38cc_pattern
+
+    mov qword ptr [rbp-56],r12
+    mov qword ptr [rbp-64],r13
+    cmp r14d,1
+    jne .Ls38cc_gate_variant
+    mov rdi,r13
+    mov esi,1
+    call bi_add_u64
+    test rax,rax
+    je .Ls38cc_pattern
+    mov qword ptr [rbp-64],rax
+    jmp .Ls38cc_second
+.Ls38cc_gate_variant:
+    mov rdi,r12
+    mov esi,r14d
+    dec esi
+    call stage38YearVariant
+    test rax,rax
+    je .Ls38cc_pattern
+    mov qword ptr [rbp-56],rax
+
+.Ls38cc_second:
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-56]
+    mov rdx,qword ptr [rbp-64]
+    call monster_year_cache_route
+    test rax,rax
+    je .Ls38cc_pattern
+    mov rbx,rax
+    mov qword ptr [rbp-48],rdx
+    mov rdi,rbx
+    mov rsi,qword ptr [rbp-48]
+    call bi_cmp
+    test eax,eax
+    setne al
+    movzx eax,al
+    jmp .Ls38cc_done
+
+.Ls38cc_pattern:
+    mov rax,-1
+.Ls38cc_done:
+    add rsp,24
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage38LegacyCollisionCase,.-stage38LegacyCollisionCase
+
+# Ⲡhandler ⲧⲁϫⲣⲟ ⲙⲡyear.number ⲉⲃⲟⲗ ϩⲙⲡPATCH 18 walk, ⲁⲩⲱ ⲛϥⲣⲉϥⲧⲁⲙⲓⲟ ⲛ3 ⲛstale collision ϩⲓ fresh caches.
+.type monster_stage38_legacy_year_number_cache_handler,@function
+monster_stage38_legacy_year_number_cache_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    test r12,r12
+    je .Lms38_fail
+
+    call stage36Year5000JumpAnchorFromPatchedTie
+    test rax,rax
+    je .Lms38_fail
+    mov r13,rax
+    mov rdi,qword ptr [r13+YJ_FIRST_DAY]
+    mov esi,365
+    call bi_add_u64
+    test rax,rax
+    je .Lms38_fail
+    mov r14,rax
+    mov rdi,r13
+    mov rsi,r14
+    call monster_year_jump_route
+    test rax,rax
+    je .Lms38_fail
+    test rdx,rdx
+    je .Lms38_fail
+    mov r15,rdx
+    mov qword ptr [r12+CTX_STAGE38_CACHE_KEY_YEAR],rax
+
+    mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
+    call bi_from_i64
+    test rax,rax
+    je .Lms38_fail
+    mov qword ptr [rbp-40],rax
+
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-40]
+    mov edx,1
+    call stage38LegacyCollisionCase
+    cmp rax,-1
+    je .Lms38_fail
+    mov qword ptr [r12+CTX_STAGE38_CALCULATION_STALE],rax
+    inc qword ptr [r12+CTX_STAGE38_ROUTE_CASES]
+
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-40]
+    mov edx,2
+    call stage38LegacyCollisionCase
+    cmp rax,-1
+    je .Lms38_fail
+    mov qword ptr [r12+CTX_STAGE38_OPEN_STALE],rax
+    inc qword ptr [r12+CTX_STAGE38_ROUTE_CASES]
+
+    mov rdi,r15
+    mov rsi,qword ptr [rbp-40]
+    mov edx,3
+    call stage38LegacyCollisionCase
+    cmp rax,-1
+    je .Lms38_fail
+    mov qword ptr [r12+CTX_STAGE38_CLOSE_STALE],rax
+    inc qword ptr [r12+CTX_STAGE38_ROUTE_CASES]
+
+    mov qword ptr [r12+CTX_STAGE38_NUMBER_ONLY_KEY],1
+    inc qword ptr [r12+CTX_STAGE38_SEEN]
+    mov eax,1
+    jmp .Lms38_done
+.Lms38_fail:
+    xor eax,eax
+.Lms38_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage38_legacy_year_number_cache_handler,.-monster_stage38_legacy_year_number_cache_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -7040,6 +7500,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage37_year_walk_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage38_legacy_year_number_cache_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

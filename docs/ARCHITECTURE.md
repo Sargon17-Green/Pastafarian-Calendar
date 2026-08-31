@@ -590,3 +590,26 @@
 Ⲡloop ⲛforward ⲟⲩⲏϩ ϣⲁⲛⲧⲉ `target<=closeDay`. Ⲡloop ⲛbackward ⲟⲩⲏϩ ϣⲁⲛⲧⲉ `target>openDay`. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡfinal record ⲧⲱⲛ ⲙⲛ `(openDay,closeDay]`.
 
 Ⲡlegacy /365 guess ⲥⲏϩ ⲛtelemetry ⲙⲙⲁⲧⲉ. Ⲡstep counters ⲙⲛ ⲡfinal Year pointer ⲟ ⲛinvocation-local; ⲙⲛ year cache ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 37.
+
+
+## Ⲡyear-number-only cache scar ⲙⲡⲃⲁⲑⲙⲟⲥ 38
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY 19 ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage38_legacy_year_number_cache_handler -> stage38LegacyCollisionCase -> monster_year_cache_route -> legacyYearNumberOnlyCacheRoute -> legacyYearNumberOnlyCacheGetOrPut`
+
+Ⲡcache map ⲟ ⲛ4-slot linear map ϩⲙⲡinvocation arena. Ⲡslot ⲕⲱ ⲛ2 ⲛpointer: exact BigInt `year.number` key ⲙⲛ opaque semantic value. Ⲡlookup comparison ⲙⲟⲩⲧⲉ ⲉ`bi_cmp` ϩⲓ ⲡyear number ⲙⲙⲁⲧⲉ.
+
+### Ⲡstale collision
+
+Ⲡrequest ⲛϣⲟⲣⲡ ⲕⲱ ⲙⲡfresh value ϩⲙⲡslot. Ⲡrequest ⲙⲙⲁϩ2 ⲙⲛ same number ⲣ ⲛHIT ⲁⲩⲱ ⲕⲧⲟ ⲉⲡstored value. Ⲡlookup ⲛϥⲱϣ ⲁⲛ ⲙⲡcalculation day ⲏ ⲛYear gate.
+
+Ⲡ`buildLegacyYearCacheValueStage38` ⲧⲁⲙⲓⲟ ⲛⲟⲩopaque exact BigInt token ⲉⲃⲟⲗ ϩⲙⲡrequest fields. Ⲡtoken ⲟ ⲛwitness carrier ⲙⲙⲁⲧⲉ; ⲙⲛ guard semantics ⲉϥϣⲟⲟⲡ ϩⲙⲡcache lookup.
+
+Ⲡthree collision modes ⲟ ⲛcalculation-day, open-gate ⲙⲛ close-gate mutation ⲙⲛ same `YJ_NUMBER`. ⲠStage 38 route ϯ ⲛstale output ϩⲓ ⲡⲉⲩϣⲟⲙⲛⲧ.
+
+### Ⲡstate ownership
+
+Ⲡcache ⲡⲟⲩⲁ ⲟ ⲛinvocation-local ⲁⲩⲱ ⲕⲏ ϩⲙⲡarena ⲛⲧⲉⲡsame handler. ⲠMonsterContext ϩⲁⲣⲉϩ ⲙⲙⲁⲧⲉ ⲉtrace/diagnostic flags. Ⲙⲛ cache pointer ⲉϥⲃⲱⲕ ⲉⲃⲟⲗ ⲙⲡinvocation.
+
+Ⲙⲛ guarded entry ⲙⲛ `calculationDayFingerprint/openGate/closeGate`, ⲙⲛ semantic HIT guard, ⲁⲩⲱ ⲙⲛ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 38.

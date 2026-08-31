@@ -785,3 +785,26 @@
 ⲠStage 36 historic flag `GUESS_USED_AS_SEMANTIC` ⲟⲩⲏϩ ⲉϥⲥϩⲁⲓ ⲙⲡlegacy belief. ⲠStage 37 state ⲉϥϣⲟⲃⲉ ϩⲁⲣⲉϩ ⲉ`telemetryGuess`, `patchedYear`, final Year pointer, forward/backward step counts ⲙⲛ `TELEMETRY_ONLY=1`.
 
 Ⲙⲛ cache, ⲙⲛ global mutable semantic year state, ⲁⲩⲱ ⲙⲛ code ⲙⲡPATCH 19.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 38 — DISCOVERY 19
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲙⲛⲛⲥⲁ ⲡsequential Year walk, ⲁⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡnumber ⲙⲡYear ⲣⲁϣⲉ ⲉⲣⲟϥ ⲛⲟⲩcache identity ⲛⲧⲟϥ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`legacyYearNumberOnlyCacheGetOrPut` ⲙⲛ map ⲉϥkeyed ⲙⲙⲁⲧⲉ ⲕⲁⲧⲁ `year.number`.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡsame number ⲛϥⲧⲁϫⲣⲟ ⲁⲛ ϫⲉ ⲡrequest semantic state ⲟ ⲛsame. Ⲟⲩcalculation day ⲉϥϣⲟⲃⲉ, ⲟⲩopen gate ⲉϥϣⲟⲃⲉ, ⲏ ⲟⲩclose gate ⲉϥϣⲟⲃⲉ ϣϭⲙϭⲟⲙ ⲉⲩⲧⲁⲙⲓⲟ ⲛⲟⲩfresh value ⲉϥϣⲟⲃⲉ, ⲁⲗⲗⲁ ⲡlegacy HIT ⲕⲧⲟ ⲙⲙⲁⲧⲉ ⲉⲡvalue ⲛϣⲟⲣⲡ.
+
+ⲠStage 38 regression ⲧⲁϫⲣⲟ ⲛ3 ⲛcollision ϩⲓ fresh caches. Ⲡdirect scar test ⲕⲱ ⲙⲡlegacy lookup ⲉϥⲣϩⲱⲃ ⲁⲩⲱ ⲛϥϫⲓ ⲁⲛ ⲛⲟⲩguard.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `stage38NewLegacyYearCache`, `legacyYearNumberOnlyCacheGetOrPut`, `buildLegacyYearCacheValueStage38`, `stage38YearVariant`, `legacyYearNumberOnlyCacheRoute`, `monster_year_cache_route`, `stage38LegacyCollisionCase` ⲙⲛ `monster_stage38_legacy_year_number_cache_handler`.
+
+Ⲡhandler ⲙⲟⲩⲧⲉ ⲉⲡStage 37 route ⲛϣⲟⲣⲡ ⲉⲧⲣⲉϥϫⲓ ⲙⲡsemantic Year 5000. Ⲡcache objects ⲟ ⲛinvocation-local ⲙⲛ explicit owner ϩⲙⲡhandler; ⲙⲛ shared semantic context ⲙⲛ ⲕⲉinvocation.
+
+ⲠStage 38 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–37 ⲥⲉⲟ ⲛ`GREEN`.
+
+Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲙⲡ`calculationDayFingerprint`, `openGate/closeGate` guarded entry, semantic HIT guard, ⲏ `oldStructureSauce` ⲙⲡPATCH 20.

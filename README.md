@@ -505,3 +505,34 @@
 ⲠStage 36 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE36_REGRESSION_GREEN`. ⲠStage 37 ⲟ ⲛ`STAGE37_PATCH18_GREEN`.
 
 Ⲙⲛ year cache ⲙⲡPATCH 19 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 38 — DISCOVERY 19
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲡ`year.number` ⲙⲙⲁⲧⲉ ⲣⲁϣⲉ ⲉⲣⲟϥ ⲛⲟⲩcache key ⲛⲧⲉⲡYear result. Ⲡlegacy map ⲧⲉⲛⲟⲩ ⲕⲱ ⲛ4 ⲛslot ⲁⲩⲱ lookup ⲙⲙⲁⲧⲉ ⲕⲁⲧⲁ ⲡexact BigInt `year.number`.
+
+`legacyYearNumberOnlyCacheGetOrPut(cache, year.number, freshValue)`
+
+ⲠHIT ⲛϥⲱϣ ⲁⲛ ⲙⲡcalculation day, ⲡopen gate ⲏ ⲡclose gate. Ⲡvalue ⲙⲡDISCOVERY 19 ⲟ ⲛopaque semantic token; ⲙⲛ guard entry ⲙⲡPATCH 19 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+ⲠStage 38 handler ϫⲓ ⲙⲡresolved Year 5000 ⲉⲃⲟⲗ ϩⲙⲡStage 37 sequential walk. Ⲙⲛⲛⲥⲱϥ ⲛϥⲣ 3 ⲛfresh-cache collision case ϩⲓ ⲡsame `year.number`:
+
+- calculation day ⲉϥϣⲟⲃⲉ;
+- open gate ⲉϥϣⲟⲃⲉ;
+- close gate ⲉϥϣⲟⲃⲉ.
+
+Ϩⲙⲡcase ⲛⲓⲙ ⲡrequest ⲛϣⲟⲣⲡ ⲣ ⲛMISS ⲁⲩⲱ ⲕⲱ ⲙⲡvalue ⲛϣⲟⲣⲡ. Ⲡrequest ⲙⲙⲁϩ2 ⲙⲛ ⲡsame `year.number` ϫⲓ ⲙⲡvalue ⲛϣⲟⲣⲡ ⲛHIT, ϩⲟⲡⲟⲩ ⲡfresh value ⲙⲙⲁϩ2 ϣⲟⲃⲉ. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲟⲩⲛ 3 ⲛsemantic mismatch ⲉⲩⲧⲟϣ.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+`calendarDateSpaghetti -> monster_stage38_legacy_year_number_cache_handler -> stage38LegacyCollisionCase -> monster_year_cache_route -> legacyYearNumberOnlyCacheRoute -> legacyYearNumberOnlyCacheGetOrPut`
+
+Ⲡ`stage38YearVariant` ϩⲁⲣⲉϩ ⲉⲡsame year number ⲁⲩⲱ ⲛϥϣⲓⲃⲉ ⲙⲙⲁⲧⲉ ⲙⲡopen/first gate ⲏ ⲡclose gate ⲕⲁⲧⲁ ⲡprobe. ⲠMonsterContext ϩⲁⲣⲉϩ ⲉⲡcache-key year, ⲡ3 stale flags, ⲡroute-case count, ⲡnumber-only-key scar ⲙⲛ ⲡseen counter.
+
+Ⲡdirect regression ⲧⲁϫⲣⲟ ϫⲉ ⲡlegacy map ⲛⲧⲟϥ ⲣ ⲛHIT ⲕⲁⲧⲁ year number ⲙⲙⲁⲧⲉ. Ⲡsemantic regression ⲟ ⲛ`EXPECTED_RED` ⲙⲛ 3 ⲛstale request ⲉⲩⲧⲟϣ.
+
+Ⲙⲛ `calculationDayFingerprint`, guarded hit, guard-entry value, ⲏ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
