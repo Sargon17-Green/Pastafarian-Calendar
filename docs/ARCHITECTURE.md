@@ -941,3 +941,20 @@
 ## Ⲃⲁⲑⲙⲟⲥ 52 — closed opening-gate interval scar
 
 `oldYearOwnsClosedInterval` ⲕⲱ ⲙⲡlegacy `[open,close]` ownership. `legacyFindYearByClosedIntervalWalk` ⲭⲣⲁⲱ ⲙⲡstrict `target<open` backward condition, ⲁⲩⲱ `monster_year_ownership_route` ⲟⲩⲏϩ authoritative ⲉⲡscar ϩⲙⲡDISCOVERY 26. Ⲡopening gate ⲙⲡYear 5000 ⲕⲱ ⲙⲡ5000 ⲉⲡⲙⲁ ⲙⲡ4999, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡstage ⲟ ⲛEXPECTED_RED.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 53 — half-open year-ownership detour
+
+ⲠCOPY_DIAGNOSTIC scar ⲟⲩⲏϩ:
+
+`legacyFindYearByClosedIntervalWalk -> oldYearOwnsClosedInterval`
+
+ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
+
+`monster_year_ownership_route -> monster_stage53_year_ownership_patch_wrapper -> yearOwnershipPatch26 -> findYearByHalfOpenIntervalWalkPatch26`
+
+Ⲡwrapper ⲣ ⲙⲡlegacy walk ⲛϣⲟⲣⲡ ⲛlive ghost. Ⲡcorrect walk ⲕⲱ ⲙⲡbackward condition `target<=year.openDay`, ⲉⲧⲣⲉⲡownership interval ⲟ ⲛ`(open,close]`. Ⲙⲛ jump ⲉyear ϣⲙⲙⲟ; ⲡwalk ⲟⲩⲏϩ year-by-year ϩⲓⲧⲛ `patchedNextYear` ⲙⲛ `patchedPreviousYear`.
+
+Ⲉϣϫⲉ ⲡlegacy ⲙⲛ ⲡcorrect year numbers ⲧⲱⲛ, ⲡlegacy ghost ⲕⲧⲟ ⲉⲡsemantic output. Ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡcorrect year ⲟⲩⲏϩ authoritative ⲁⲩⲱ ⲡghost ⲟⲩⲏϩ diagnostic.
+
+`tests/stage52_discovery26.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE52_REGRESSION_GREEN`. Ⲙⲛ Stage 54 final-integration layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 53.

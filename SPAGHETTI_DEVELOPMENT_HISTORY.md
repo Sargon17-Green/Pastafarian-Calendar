@@ -1109,3 +1109,20 @@
 Ⲡauthoritative specification ⲕⲱ ⲙⲡrepeated-name scar ⲉϫⲛ ⲛcutlet names ⲙⲛ ⲛmonth names ⲛⲥⲉⲛⲁϣⲱⲡⲉ distinct ϩⲙⲡsame year. Ⲡmonth-name branch ⲉⲧⲁϥϣⲱϣ ⲙⲡStage 45 ⲁⲩⲕⲧⲟϥ ⲉⲡPATCH 22: `legacyMonthNamesWithRepeats` ⲣϩⲱⲃ ⲛlive ghost, ⲁⲩⲱ `monthNamesPatch22` / `monthNamesPatch22Big` ϯ ⲙⲡexact lexicographic partial-permutation row ⲛ47 canonical names. Ⲡwide path ⲟ ⲛBigInt ⲁⲩⲱ ϥϣϭⲙϭⲟⲙ ⲉϥϫⲓ ⲙⲡrank ϣⲁ `47!`.
 
 `PATCH22_MONTH_NAMES_CORRECTION_GREEN`
+
+
+## Ⲃⲁⲑⲙⲟⲥ 53 — PATCH 26
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲙⲡⲟⲩⲃⲟⲗ ⲉⲃⲟⲗ ⲙⲡclosed-interval scar. `oldYearOwnsClosedInterval` ⲙⲛ `legacyFindYearByClosedIntervalWalk` ⲟⲩⲏϩ ϩⲙⲡsource ⲛⲥⲉϣⲓⲃⲉ ⲁⲛ, ⲁⲩⲱ ⲡlegacy walk ⲣϩⲱⲃ ⲛϣⲟⲣⲡ ϩⲙ invocation ⲛⲓⲙ ⲛlive ghost.
+
+### Ⲡhalf-open detour
+
+`findYearByHalfOpenIntervalWalkPatch26` ⲕⲱ ⲙⲡsame sequential `nextYear`/`previousYear` walk, ⲁⲗⲗⲁ ⲡbackward equality ⲧⲉⲛⲟⲩ ⲡⲉ `target<=open`. Ⲡfound year ⲧⲁϫⲣⲟ ⲙⲡ`open<target<=close`.
+
+`yearOwnershipPatch26` ⲥⲱⲧⲡ ⲙⲡcorrect year ⲉϣϫⲉ ⲡghost ϣⲟⲃⲉ; ⲉϣϫⲉ ⲡyear number ⲟⲩⲱⲧ, ⲡghost pointer ⲛⲧⲟϥ ⲕⲧⲟ ⲉⲡout. Ⲡopening-gate witness ⲧⲁϫⲣⲟ `5000 -> 4999`; ⲡclosing-gate witness ⲧⲁϫⲣⲟ ⲙⲡghost reuse ϩⲓ 5000.
+
+`STAGE52_REGRESSION_GREEN`
+
+`STAGE53_PATCH26_GREEN`
