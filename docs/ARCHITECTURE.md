@@ -638,3 +638,28 @@
 Ⲡlegacy number-only function ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲣϩⲱⲃ. Ⲡwrapper ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ϩⲓ diagnostic cache ⲉϥϣⲟⲃⲉ. Ⲡguarded cache ⲟ ⲛinvocation-local ⲕⲁⲧⲁ ⲡStage 38 ownership; ⲙⲛ global mutable semantic state.
 
 Ⲙⲛ structure-sauce ghost ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ.
+
+
+## Ⲡghost structure-sauce scar ⲙⲡⲃⲁⲑⲙⲟⲥ 40
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY 20 ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage40_legacy_structure_sauce_handler -> monster_structure_sauce_route -> legacyStructureSauceUsingOriginalTarget -> oldStructureSauce`
+
+`oldStructureSauce` ⲙⲟⲩⲧⲉ ⲉ`sauceWithOrderAt46Latch` ⲙⲛ `(cDay, originalTargetDay)`. ⲠYJ pointer ⲟⲩⲏϩ ϩⲙⲡadapter ABI, ⲁⲗⲗⲁ ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ.
+
+### Ⲡsame-line witness
+
+ⲠStage 37 walk ϭⲓⲛⲉ ⲙⲡYear 4999 ⲛⲧⲉⲡFOUNDATION target. Ⲡrecord ⲡⲉ:
+
+`openDay=-15056161`
+`firstDay=-15056160`
+`closeDay=-15055671`
+
+Ⲡoriginal target ⲟ ⲛcloseDay. Ⲡghost target ⲙⲛ ⲡyear-first-day target ϣⲟⲃⲉ ⲛ489 ⲛday. Ⲡsauce comparison ⲱϣ ⲛ6/6 ⲛfinal-bowl mismatch ⲙⲛ 5/6 ⲛquery-order mismatch.
+
+### Ⲡstate ownership
+
+ⲠYear pointer ⲙⲛ ⲛsauce pointers ⲧⲏⲣⲟⲩ ⲟ ⲛinvocation-local. ⲠMonsterContext ϩⲁⲣⲉϩ ⲉdiagnostic ⲙⲛ route trace ⲙⲙⲁⲧⲉ. Ⲙⲛ global mutable structure-sauce state.
+
+Ⲙⲛ `structureSaucePatch` ⲙⲛ year-first-day detour ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 40; ⲙⲛ cutlet-family patch code ⲙⲡStage 42 ⲉϥϣⲟⲟⲡ.

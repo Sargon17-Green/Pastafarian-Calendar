@@ -211,7 +211,15 @@
 .equ CTX_STAGE39_SAME_STATE_HIT,1672
 .equ CTX_STAGE39_NUMBER_ONLY_KEY_KEPT,1680
 .equ CTX_STAGE39_PATCH_SEEN,1688
-.equ CTX_SIZE,1696
+.equ CTX_STAGE40_YEAR,1696
+.equ CTX_STAGE40_YEAR_FIRST_DAY,1704
+.equ CTX_STAGE40_ORIGINAL_TARGET,1712
+.equ CTX_STAGE40_GHOST_SAUCE,1720
+.equ CTX_STAGE40_ROUTE_SAUCE,1728
+.equ CTX_STAGE40_TARGET_DIFFERS_FIRSTDAY,1736
+.equ CTX_STAGE40_GHOST_USED_AS_SEMANTIC,1744
+.equ CTX_STAGE40_SEEN,1752
+.equ CTX_SIZE,1760
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -499,6 +507,10 @@ legacy_bowl_stir_stone_by_position:
 .global monster_stage39_year_cache_guard_patch_wrapper
 .global stage39GuardedCollisionCase
 .global monster_stage39_year_cache_guard_patch_handler
+.global oldStructureSauce
+.global legacyStructureSauceUsingOriginalTarget
+.global monster_structure_sauce_route
+.global monster_stage40_legacy_structure_sauce_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -7906,6 +7918,104 @@ monster_stage39_year_cache_guard_patch_handler:
     ret
 .size monster_stage39_year_cache_guard_patch_handler,.-monster_stage39_year_cache_guard_patch_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 40 — DISCOVERY 20
+# Ⲡghost ⲛstructure sauce ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡoriginal target day. Ⲡyear.firstDay ⲛϥϫⲓ ⲙⲙⲟϥ ⲁⲛ ϩⲙⲡroute ⲡⲁⲓ.
+.type oldStructureSauce,@function
+oldStructureSauce:
+    jmp sauceWithOrderAt46Latch
+.size oldStructureSauce,.-oldStructureSauce
+
+# rdi=cDay i64, rsi=originalTargetDay i64, rdx=YJ* ⲉϥⲟ ⲛghost-only ignored year.
+.type legacyStructureSauceUsingOriginalTarget,@function
+legacyStructureSauceUsingOriginalTarget:
+    jmp oldStructureSauce
+.size legacyStructureSauceUsingOriginalTarget,.-legacyStructureSauceUsingOriginalTarget
+
+.type monster_structure_sauce_route,@function
+monster_structure_sauce_route:
+    jmp legacyStructureSauceUsingOriginalTarget
+.size monster_structure_sauce_route,.-monster_structure_sauce_route
+
+# Ⲡhandler ϭⲓⲛⲉ ⲙⲡyear ϩⲓⲧⲛ ⲡsequential walk, ⲁⲗⲗⲁ ⲡstructure sauce route ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡoriginal target.
+.type monster_stage40_legacy_structure_sauce_handler,@function
+monster_stage40_legacy_structure_sauce_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    test r12,r12
+    je .Lms40_fail
+
+    call stage36Year5000JumpAnchorFromPatchedTie
+    test rax,rax
+    je .Lms40_fail
+    mov r13,rax
+
+    mov rdi,qword ptr [r12+CTX_TARGET_DAY]
+    call bi_from_i64
+    test rax,rax
+    je .Lms40_fail
+    mov r14,rax
+
+    mov rdi,r13
+    mov rsi,r14
+    call monster_year_jump_route
+    test rax,rax
+    je .Lms40_fail
+    test rdx,rdx
+    je .Lms40_fail
+    mov r15,rdx
+    mov qword ptr [r12+CTX_STAGE40_YEAR],r15
+    mov rax,qword ptr [r15+YJ_FIRST_DAY]
+    mov qword ptr [r12+CTX_STAGE40_YEAR_FIRST_DAY],rax
+    mov rax,qword ptr [r12+CTX_TARGET_DAY]
+    mov qword ptr [r12+CTX_STAGE40_ORIGINAL_TARGET],rax
+
+    mov rdi,r14
+    mov rsi,qword ptr [r15+YJ_FIRST_DAY]
+    call bi_cmp
+    sete al
+    xor al,1
+    movzx eax,al
+    mov qword ptr [r12+CTX_STAGE40_TARGET_DIFFERS_FIRSTDAY],rax
+
+    # Ⲡghost direct call ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲛⲟⲩdiagnostic scar.
+    mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
+    mov rsi,qword ptr [r12+CTX_TARGET_DAY]
+    call oldStructureSauce
+    test rax,rax
+    je .Lms40_fail
+    mov qword ptr [r12+CTX_STAGE40_GHOST_SAUCE],rax
+
+    # ⲠDISCOVERY route ⲟⲩⲏϩ ⲉϥⲥⲉⲙⲛⲉ ⲙⲡsame original-target ghost ⲛsemantic sauce.
+    mov rdi,qword ptr [r12+CTX_CALCULATION_DAY]
+    mov rsi,qword ptr [r12+CTX_TARGET_DAY]
+    mov rdx,r15
+    call monster_structure_sauce_route
+    test rax,rax
+    je .Lms40_fail
+    mov qword ptr [r12+CTX_STAGE40_ROUTE_SAUCE],rax
+    mov qword ptr [r12+CTX_STAGE40_GHOST_USED_AS_SEMANTIC],1
+    inc qword ptr [r12+CTX_STAGE40_SEEN]
+    mov eax,1
+    jmp .Lms40_done
+.Lms40_fail:
+    xor eax,eax
+.Lms40_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage40_legacy_structure_sauce_handler,.-monster_stage40_legacy_structure_sauce_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -8054,6 +8164,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage39_year_cache_guard_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage40_legacy_structure_sauce_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

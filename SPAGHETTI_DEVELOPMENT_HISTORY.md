@@ -834,3 +834,26 @@
 ⲠStage 38 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE38_REGRESSION_GREEN`. ⲠStage 39 ⲟ ⲛ`STAGE39_PATCH19_GREEN`.
 
 Ⲙⲛ `oldStructureSauce` ⲏ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 40 — DISCOVERY 20
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲙⲛⲛⲥⲁ ⲡYear walk ⲙⲛ ⲡguarded bad-key cache, ⲁⲩⲕⲱ ⲙⲡ`oldStructureSauce(cDay, originalTargetDay)` ⲛⲟⲩghost helper. ⲠYear ⲉⲧⲁⲩϭⲓⲛⲉϥ ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ϩⲙⲡABI, ⲁⲗⲗⲁ ⲡlegacy structure-sauce route ⲛϥϫⲓ ⲁⲛ ⲙⲡ`year.firstDay`.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+ⲠFOUNDATION target ϭⲓⲛⲉ ⲙⲡYear 4999 ⲙⲛ `firstDay=-15056160` ⲙⲛ `closeDay=-15055671`. Ⲡoriginal target ⲟ ⲛcloseDay, ⲁⲩⲱ ⲛϥⲧⲱⲛ ⲁⲛ ⲙⲛ firstDay.
+
+Ⲡold ghost ⲗⲟⲅⲓⲍⲉ ⲙⲡsauce ⲙⲛ `target=-15055671`; ⲡsame-line normative probe ⲗⲟⲅⲓⲍⲉ ⲙⲡsauce ⲙⲛ `target=-15056160`. Ⲛ6 ⲛfinal bowl ⲧⲏⲣⲟⲩ ⲙⲛ 5/6 ⲙⲡquery-order position ϣⲟⲃⲉ, ⲉⲧⲃⲉ ⲡⲁⲓ ⲡghost ⲛϥϣϭⲙϭⲟⲙ ⲁⲛ ⲉϥⲟ ⲛsemantic structure sauce.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `oldStructureSauce`, `legacyStructureSauceUsingOriginalTarget`, `monster_structure_sauce_route` ⲙⲛ `monster_stage40_legacy_structure_sauce_handler`.
+
+Ⲡhandler ⲟ ⲛinvocation-local ⲁⲩⲱ ⲟⲩⲏϩ ϩⲙⲡmain dispatcher chain. Ⲡdirect ghost ⲙⲛ ⲡroute ⲥⲉⲣϩⲱⲃ ⲛⲟⲩⲙⲉ, ⲁⲩⲱ ⲡroute ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡghost ⲛsemantic result ϩⲙⲡDISCOVERY.
+
+ⲠStage 40 test ϯ `STAGE40_DISCOVERY20_EXPECTED_RED`; ⲛStage 1–39 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`.
+
+Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲙⲡ`structureSaucePatch`, year-first-day authoritative selector route, cutlet filtered family, ⲏ code ⲙⲡPATCH 21.

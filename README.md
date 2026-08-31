@@ -562,3 +562,34 @@
 ⲠStage 38 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE38_REGRESSION_GREEN`. ⲠStage 39 ⲟ ⲛ`STAGE39_PATCH19_GREEN`.
 
 Ⲙⲛ `oldStructureSauce` ⲏ code ⲙⲡPATCH 20 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 40 — DISCOVERY 20
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲁⲩⲧⲁⲙⲓⲟ ⲙⲡ`oldStructureSauce(cDay, originalTargetDay)` ⲉϥⲙⲟⲩⲧⲉ ⲉⲡsauce path ⲉⲧϣⲟⲟⲡ ⲙⲛ ⲛscar ⲧⲏⲣⲟⲩ. Ⲡhelper ⲡⲁⲓ ϫⲓ ⲙⲡoriginal target day ⲛⲧⲟϥ; ⲛϥϫⲓ ⲁⲛ ⲙⲡ`year.firstDay`.
+
+`oldStructureSauce(cDay, originalTargetDay) -> sauceWithOrderAt46Latch(cDay, originalTargetDay)`
+
+Ⲡ`legacyStructureSauceUsingOriginalTarget` ϫⲓ ⲙⲡYear pointer ϩⲓ ⲡⲉϥABI, ⲁⲗⲗⲁ ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ. `monster_structure_sauce_route` ⲙⲟⲟϣⲉ ⲉⲡlegacy adapter ⲙⲙⲁⲧⲉ ϩⲙⲡDISCOVERY 20.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡsame-line witness ϫⲓ ⲙⲡ`cDay=FOUNDATION` ⲙⲛ ⲡ`originalTargetDay=FOUNDATION`. ⲠStage 37 sequential walk ϭⲓⲛⲉ ⲙⲡYear 4999:
+
+`openDay  = -15056161`
+`firstDay = -15056160`
+`closeDay = -15055671`
+
+Ⲡoriginal target ⲟ ⲛ`closeDay`, ⲁⲩⲱ ϣⲟⲃⲉ ⲙⲛ ⲡ`firstDay` ⲛ489 ⲛday. Ⲡghost sauce ⲉⲧⲁⲩⲗⲟⲅⲓⲍⲉϥ ⲙⲛ ⲡoriginal target ϣⲟⲃⲉ ⲙⲛ ⲡsame-line sauce ⲉⲧⲁⲩⲗⲟⲅⲓⲍⲉϥ ⲙⲛ `year.firstDay`: ⲛ6 ⲛfinal bowl ⲧⲏⲣⲟⲩ ϣⲟⲃⲉ, ⲁⲩⲱ 5 ⲛposition ⲉⲃⲟⲗ ϩⲛ 6 ⲙⲡquery order ϣⲟⲃⲉ.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+`calendarDateSpaghetti -> monster_stage40_legacy_structure_sauce_handler -> monster_structure_sauce_route -> legacyStructureSauceUsingOriginalTarget -> oldStructureSauce`
+
+Ⲡhandler ϭⲓⲛⲉ ⲛϣⲟⲣⲡ ⲙⲡYear ⲉⲧⲧⲱⲛ ϩⲓⲧⲛ ⲡStage 37 walk. Ⲛϥϩⲁⲣⲉϩ ⲉⲡYear pointer, `year.firstDay`, original target, direct ghost sauce, route sauce, ⲡflag ϫⲉ target ϣⲟⲃⲉ ⲙⲛ firstDay, ⲙⲛ ⲡhistoric flag `GHOST_USED_AS_SEMANTIC=1`.
+
+Ⲡdirect ghost scar ⲧⲁϫⲣⲟ ⲛⲧⲟϥ ϫⲉ ⲡold sauce ⲟⲩⲏϩ ⲉϥϣⲟⲃⲉ ⲙⲛ ⲡyear-first-day sauce. Ⲡsemantic regression ⲱϣ ⲙⲡroute ⲙⲛ ⲡsame-line year-first-day reference ⲁⲩⲱ ϫⲓ 2 ⲛmismatch ⲉⲩⲧⲟϣ: ⲟⲩroute-sauce mismatch ⲙⲛ ⲟⲩghost-semantic flag.
+
+ⲠStage 40 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–39 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ `structureSaucePatch` ⲏ cutlet-family code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
