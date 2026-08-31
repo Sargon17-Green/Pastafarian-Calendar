@@ -744,3 +744,47 @@
 
 ⲚStage 1–43 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 44 ϯ `STAGE44_DISCOVERY22_EXPECTED_RED`.
 
+
+## Ⲃⲁⲑⲙⲟⲥ 45 — PATCH 22
+
+### Ⲡpartial-permutation detour
+
+Ⲡrepeated-name scar ⲙⲡStage 44 ⲙⲡⲟⲩⲃⲟⲗϥ ⲉⲃⲟⲗ. `oldCutletNameRowWithRepeats` ⲙⲛ `legacyCutletNamesWithRepeats` ⲟⲩⲏϩ callable ⲁⲩⲱ byte-for-byte ⲛsame.
+
+Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
+
+`monster_cutlet_names_route -> monster_stage45_cutlet_names_patch_wrapper -> cutletNamesPatch22`
+
+`cutletNamesPatch22` ⲙⲟⲩⲧⲉ ⲉⲡlegacy scar ⲛϣⲟⲣⲡ ϩⲙ call ⲛⲓⲙ ⲉⲟⲩseparate invocation-local ghost buffer. Ⲙⲛⲛⲥⲱϥ `unrankDistinctCutletNames17` ⲗⲟⲅⲓⲍⲉ ⲙⲡsame one-based rank ϩⲙⲡordered family ⲛdistinct canonical indices.
+
+Ⲡblock ⲙⲡposition ⲛⲓⲙ ⲡⲉ:
+
+`P(remaining-1, suffixLength)`
+
+ⲁⲩⲱ ⲡcandidate ⲥⲱⲧⲡ ⲕⲁⲧⲁ ascending unused canonical index. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡorder ⲧⲱⲛ ⲙⲛ ⲡlexicographic partial-permutation family ⲙⲡnormative scroll.
+
+### Ⲡbad/correct selector
+
+Ⲡghost ⲛⲉϥⲃⲱⲕ ⲁⲛ ⲉⲡsemantic output ⲉϣϫⲉ ϥϣⲟⲃⲉ ⲙⲛ ⲡcorrect row. Ⲉϣϫⲉ `bad==correct`, ⲡwrapper ⲕⲱ ⲙⲡbad row ⲉⲡoutput; ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡcorrect row ⲙⲙⲁⲧⲉ ⲟ ⲛauthoritative.
+
+ⲠStage 44 witness `K=6, rank1=1` ⲧⲉⲛⲟⲩ ϯ:
+
+`ghost = [1,1,1,1,1,1]`
+
+`route = [1,2,3,4,5,6]`
+
+Ⲡequal witness `K=2, rank1=272=P(17,2)` ϯ:
+
+`ghost = route = [17,16]`
+
+ⲁⲩⲱ ⲡreuse flag ⲟ ⲛ1.
+
+### Ⲡtrace ⲙⲛ regression
+
+ⲠMonsterContext ϩⲁⲣⲉϩ ⲉlive ghost pointer, ghost-seen, patch-seen, correct-used-different, equal-ghost-reused ⲙⲛ pointers ⲙⲡequal witness. Ⲛfield ⲛⲁⲓ ⲟ ⲛinvocation-local diagnostic state ⲙⲙⲁⲧⲉ.
+
+`STAGE44_REGRESSION_GREEN`
+
+`STAGE45_PATCH22_GREEN`
+
+Ⲁⲩⲣ ⲛⲟⲩ68-case vector sweep ϩⲓ `K=1..17` ⲙⲛ first/second/middle/last ranks. Ⲙⲛ Stage 46 ⲏ PATCH 23 month-length backend code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 45.

@@ -977,3 +977,25 @@
 
 ⲚStage 1–43 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 44 ϯ `STAGE44_DISCOVERY22_EXPECTED_RED`.
 
+
+## Ⲃⲁⲑⲙⲟⲥ 45 — PATCH 22
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲡbase-17 generator ⲙⲡStage 44 ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲛⲟⲩⲙⲉ. `oldCutletNameRowWithRepeats` ⲙⲛ `legacyCutletNamesWithRepeats` ⲙⲡⲟⲩϣⲓⲃⲉ ⲛⲟⲩbyte. Ⲁⲩⲟⲩⲱϩ ⲙⲡ`cutletNamesPatch22` ⲛdetour ⲉϫⲛ ⲡscar.
+
+Ⲡdetour ⲧⲁⲙⲓⲟ ⲛⲟⲩghost buffer, ⲙⲟⲩⲧⲉ ⲉⲡlegacy row, ⲁⲩⲱ ⲧⲁⲙⲓⲟ ⲛⲟⲩcorrect row ϩⲓⲧⲛ `unrankDistinctCutletNames17`. Ⲡunrank ⲕⲱ ⲙⲡfalling-factorial block size ⲕⲁⲧⲁ position ⲁⲩⲱ ⲃⲱⲗ ⲉⲃⲟⲗ ⲙⲡchosen canonical index ϩⲛ ⲛremaining indices.
+
+### Ⲡscar selector
+
+`bad=legacy candidate`
+
+`correct=partial-permutation unrank`
+
+Ⲉϣϫⲉ `bad==correct`, ⲡbad copy ⲃⲱⲕ ⲉⲡoutput ⲁⲩⲱ ⲡtrace ⲥϩⲁⲓ `ghost-reused=1`. Ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡbad ⲟⲩⲏϩ ghost-only ⲁⲩⲱ ⲡcorrect row ⲡⲉ ⲡsemantic output.
+
+ⲠStage 44 source ⲙⲡⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲁϥⲕⲧⲟϥ ⲉ`STAGE44_REGRESSION_GREEN`. ⲠStage 45 ϯ `STAGE45_PATCH22_GREEN`.
+
+Ⲡ68-case sweep ⲧⲁϫⲣⲟ ⲙⲡfull `K=1..17` range ϩⲓ boundary ⲙⲛ middle ranks. Ⲡequal multi-name witness `K=2, rank=272` ϯ `[17,16]` ϩⲙ bad ⲙⲛ correct ⲙⲡⲉⲥⲛⲁⲩ.
+
+Ⲙⲛ month-length materialization / VirtualLegacyList / Patch 23 code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 45.

@@ -244,7 +244,14 @@
 .equ CTX_STAGE44_REPEAT_SEEN,1936
 .equ CTX_STAGE44_ROUTE_SEEN,1944
 .equ CTX_STAGE44_SEEN,1952
-.equ CTX_SIZE,1960
+.equ CTX_STAGE45_GHOST_NAMES,1960
+.equ CTX_STAGE45_GHOST_SEEN,1968
+.equ CTX_STAGE45_PATCH_SEEN,1976
+.equ CTX_STAGE45_GHOST_REUSED_EQUAL,1984
+.equ CTX_STAGE45_CORRECT_USED_DIFFERENT,1992
+.equ CTX_STAGE45_EQUAL_ROUTE_NAMES,2000
+.equ CTX_STAGE45_EQUAL_GHOST_NAMES,2008
+.equ CTX_SIZE,2016
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -552,8 +559,13 @@ legacy_bowl_stir_stone_by_position:
 .global monster_stage43_cutlet_partition_patch_wrapper
 .global oldCutletNameRowWithRepeats
 .global legacyCutletNamesWithRepeats
+.global stage45FallingU64
+.global unrankDistinctCutletNames17
+.global cutletNamesPatch22
+.global monster_stage45_cutlet_names_patch_wrapper
 .global monster_cutlet_names_route
 .global monster_stage44_legacy_repeated_names_handler
+.global monster_stage45_cutlet_names_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -8929,9 +8941,239 @@ legacyCutletNamesWithRepeats:
     jmp oldCutletNameRowWithRepeats
 .size legacyCutletNamesWithRepeats,.-legacyCutletNamesWithRepeats
 
+# Ⲃⲁⲑⲙⲟⲥ 45 — PATCH 22
+# ⲠABI: rdi=n, rsi=k; rax=P(n,k). Ⲉϣϫⲉ ⲡinput ⲛϥⲥⲏϩ ⲁⲛ ⲏ ⲟⲩoverflow ϣⲱⲡⲉ, rax=0.
+.type stage45FallingU64,@function
+stage45FallingU64:
+    test rsi,rsi
+    je .Ls45ff_one
+    cmp rsi,rdi
+    ja .Ls45ff_zero
+    mov eax,1
+    xor ecx,ecx
+.Ls45ff_loop:
+    cmp rcx,rsi
+    jae .Ls45ff_done
+    mov r8,rdi
+    sub r8,rcx
+    mul r8
+    test rdx,rdx
+    jne .Ls45ff_zero
+    inc rcx
+    jmp .Ls45ff_loop
+.Ls45ff_one:
+    mov eax,1
+.Ls45ff_done:
+    ret
+.Ls45ff_zero:
+    xor eax,eax
+    ret
+.size stage45FallingU64,.-stage45FallingU64
+
+# ⲠABI: rdi=rank1, rsi=K, rdx=out canonical indices. Ⲡunrank ⲟ ⲛexact ⲕⲁⲧⲁ ⲡlexicographic partial-permutation order.
+.type unrankDistinctCutletNames17,@function
+unrankDistinctCutletNames17:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    test rdi,rdi
+    je .Lucn17_fail
+    test rsi,rsi
+    je .Lucn17_fail
+    cmp rsi,17
+    ja .Lucn17_fail
+    test rdx,rdx
+    je .Lucn17_fail
+    mov r15,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov edi,17
+    mov rsi,r13
+    call stage45FallingU64
+    test rax,rax
+    je .Lucn17_fail
+    cmp r15,rax
+    ja .Lucn17_fail
+    dec r15
+    xor r12d,r12d
+    xor ebx,ebx
+.Lucn17_pos:
+    cmp rbx,r13
+    jae .Lucn17_done
+    mov rdi,16
+    sub rdi,rbx
+    mov rsi,r13
+    sub rsi,rbx
+    dec rsi
+    call stage45FallingU64
+    test rax,rax
+    je .Lucn17_fail
+    mov r11,rax
+    mov rax,r15
+    xor edx,edx
+    div r11
+    mov r15,rdx
+    mov r9,rax
+    mov r8,17
+    sub r8,rbx
+    cmp r9,r8
+    jae .Lucn17_fail
+    mov ecx,1
+.Lucn17_find:
+    cmp ecx,17
+    ja .Lucn17_fail
+    mov rdx,rcx
+    dec rdx
+    bt r12,rdx
+    jc .Lucn17_used
+    test r9,r9
+    je .Lucn17_choose
+    dec r9
+.Lucn17_used:
+    inc rcx
+    jmp .Lucn17_find
+.Lucn17_choose:
+    bts r12,rdx
+    mov qword ptr [r14+rbx*8],rcx
+    inc rbx
+    jmp .Lucn17_pos
+.Lucn17_done:
+    mov rax,r14
+    jmp .Lucn17_exit
+.Lucn17_fail:
+    xor eax,eax
+.Lucn17_exit:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size unrankDistinctCutletNames17,.-unrankDistinctCutletNames17
+
+# ⲠABI: rdi=a, rsi=b, rdx=K; eax=1 ⲉϣϫⲉ ⲥⲉⲧⲱⲛ, ⲉⲙⲙⲟⲛ eax=0.
+.type stage45CutletNameRowsEqual,@function
+stage45CutletNameRowsEqual:
+    test rdi,rdi
+    je .Ls45re_no
+    test rsi,rsi
+    je .Ls45re_no
+    xor ecx,ecx
+.Ls45re_loop:
+    cmp rcx,rdx
+    jae .Ls45re_yes
+    mov rax,qword ptr [rdi+rcx*8]
+    cmp rax,qword ptr [rsi+rcx*8]
+    jne .Ls45re_no
+    inc rcx
+    jmp .Ls45re_loop
+.Ls45re_yes:
+    mov eax,1
+    ret
+.Ls45re_no:
+    xor eax,eax
+    ret
+.size stage45CutletNameRowsEqual,.-stage45CutletNameRowsEqual
+
+# Ⲡdetour ⲙⲟⲩⲧⲉ ⲉⲡbad scar ⲛϣⲟⲣⲡ. Ⲡbad ⲃⲱⲕ ⲉⲡsemantic output ⲙⲙⲁⲧⲉ ⲉϣϫⲉ bad==correct.
+# ⲠABI: rdi=rank1, rsi=K, rdx=out; rax=out, rdx=live ghost, rcx=1 ⲉϣϫⲉ ⲁⲩreuse ⲙⲡghost ϫⲉ bad==correct.
+.type cutletNamesPatch22,@function
+cutletNamesPatch22:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    test r12,r12
+    je .Lcnp22_fail
+    test r13,r13
+    je .Lcnp22_fail
+    cmp r13,17
+    ja .Lcnp22_fail
+    test r14,r14
+    je .Lcnp22_fail
+
+    mov rdi,r13
+    shl rdi,3
+    call arena_alloc
+    test rax,rax
+    je .Lcnp22_fail
+    mov r15,rax
+
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r15
+    call legacyCutletNamesWithRepeats
+    test rax,rax
+    je .Lcnp22_fail
+
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    call unrankDistinctCutletNames17
+    test rax,rax
+    je .Lcnp22_fail
+
+    mov rdi,r15
+    mov rsi,r14
+    mov rdx,r13
+    call stage45CutletNameRowsEqual
+    test eax,eax
+    je .Lcnp22_correct
+
+    xor ebx,ebx
+.Lcnp22_copy_bad:
+    cmp rbx,r13
+    jae .Lcnp22_equal_done
+    mov rax,qword ptr [r15+rbx*8]
+    mov qword ptr [r14+rbx*8],rax
+    inc rbx
+    jmp .Lcnp22_copy_bad
+.Lcnp22_equal_done:
+    mov ecx,1
+    jmp .Lcnp22_done
+.Lcnp22_correct:
+    xor ecx,ecx
+.Lcnp22_done:
+    mov rax,r14
+    mov rdx,r15
+    jmp .Lcnp22_exit
+.Lcnp22_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+.Lcnp22_exit:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size cutletNamesPatch22,.-cutletNamesPatch22
+
+.type monster_stage45_cutlet_names_patch_wrapper,@function
+monster_stage45_cutlet_names_patch_wrapper:
+    jmp cutletNamesPatch22
+.size monster_stage45_cutlet_names_patch_wrapper,.-monster_stage45_cutlet_names_patch_wrapper
+
 .type monster_cutlet_names_route,@function
 monster_cutlet_names_route:
-    jmp legacyCutletNamesWithRepeats
+    jmp monster_stage45_cutlet_names_patch_wrapper
 .size monster_cutlet_names_route,.-monster_cutlet_names_route
 
 # rdi=MonsterContext*. Ⲡhandler ϫⲓ K=6, rank1=1 ⲉⲧⲣⲉⲡbase-17 scar ⲟⲩⲱⲛϩ ⲉⲃⲟⲗ.
@@ -8997,6 +9239,73 @@ monster_stage44_legacy_repeated_names_handler:
     leave
     ret
 .size monster_stage44_legacy_repeated_names_handler,.-monster_stage44_legacy_repeated_names_handler
+
+# rdi=MonsterContext*. Ⲡhandler ϩⲁⲣⲉϩ ⲉⲡbad ghost ⲉϥⲟⲛϩ ⲙⲛ ⲡreuse ⲙⲡrow ⲉⲧⲧⲱⲛ.
+.type monster_stage45_cutlet_names_patch_handler,@function
+monster_stage45_cutlet_names_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms45_fail
+
+    # Ⲡcase ⲉⲧϣⲟⲃⲉ: K=6, rank1=1. Ⲡbad ⲕⲱ ⲛrepeats; ⲡcorrect ⲡⲉ 1..6.
+    mov edi,48
+    call arena_alloc
+    test rax,rax
+    je .Lms45_fail
+    mov r13,rax
+    mov edi,1
+    mov esi,6
+    mov rdx,r13
+    call monster_cutlet_names_route
+    test rax,rax
+    je .Lms45_fail
+    test rdx,rdx
+    je .Lms45_fail
+    mov r14,rdx
+    mov qword ptr [r12+CTX_STAGE45_GHOST_NAMES],r14
+    mov qword ptr [r12+CTX_STAGE45_GHOST_SEEN],1
+    test rcx,rcx
+    jne .Lms45_fail
+    mov qword ptr [r12+CTX_STAGE45_CORRECT_USED_DIFFERENT],1
+
+    # Ⲡcase ⲉⲧⲧⲱⲛ: K=2, rank1=P(17,2)=272. Ⲡbad ⲙⲛ ⲡcorrect ⲡⲉ [17,16]; ⲡbad ϣϭⲙϭⲟⲙ ⲉⲩreuse ⲙⲙⲟϥ.
+    mov edi,16
+    call arena_alloc
+    test rax,rax
+    je .Lms45_fail
+    mov r15,rax
+    mov edi,272
+    mov esi,2
+    mov rdx,r15
+    call monster_cutlet_names_route
+    test rax,rax
+    je .Lms45_fail
+    test rdx,rdx
+    je .Lms45_fail
+    cmp rcx,1
+    jne .Lms45_fail
+    mov qword ptr [r12+CTX_STAGE45_EQUAL_ROUTE_NAMES],r15
+    mov qword ptr [r12+CTX_STAGE45_EQUAL_GHOST_NAMES],rdx
+    mov qword ptr [r12+CTX_STAGE45_GHOST_REUSED_EQUAL],1
+    inc qword ptr [r12+CTX_STAGE45_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms45_done
+.Lms45_fail:
+    xor eax,eax
+.Lms45_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage45_cutlet_names_patch_handler,.-monster_stage45_cutlet_names_patch_handler
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -9161,6 +9470,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage44_legacy_repeated_names_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage45_cutlet_names_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

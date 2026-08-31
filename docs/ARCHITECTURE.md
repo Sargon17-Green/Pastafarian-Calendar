@@ -777,3 +777,33 @@
 
 Ⲡname-row buffer ⲙⲛ trace fields ⲟ ⲛinvocation-local arena state. Ⲙⲛ global mutable name state. Ⲙⲛ PATCH 22 selector/detour ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 44.
 
+
+## Ⲡpartial-permutation cutlet-name detour ⲙⲡⲃⲁⲑⲙⲟⲥ 45
+
+ⲠCOPY_DIAGNOSTIC ⲟⲩⲏϩ:
+
+`legacyCutletNamesWithRepeats -> oldCutletNameRowWithRepeats`
+
+ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_cutlet_names_route -> monster_stage45_cutlet_names_patch_wrapper -> cutletNamesPatch22`
+
+### EQUIVALENCE
+
+Ⲡmaster domain ⲡⲉ canonical indices `1..17`. Ⲡcorrect family size ⲡⲉ:
+
+`P(17,K) = 17 * 16 * ... * (17-K+1)`
+
+Ⲡ`unrankDistinctCutletNames17` ⲟ ⲛone-based exact lexicographic unrank. Ϩⲙ position `p`, ⲡblock size ⲡⲉ `P(remaining-1, suffixLength)`, ⲁⲩⲱ candidate ⲛⲓⲙ ⲛⲏⲩ ϩⲙ ascending canonical order ϩⲛ ⲛunused names.
+
+### Ⲡghost ownership
+
+`cutletNamesPatch22` ⲧⲁⲙⲓⲟ ⲛⲟⲩseparate arena row ⲙⲛ ⲡsame `rank1,K`, ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉⲡlegacy scar before ⲡcorrect unrank. Ⲡghost ⲟ ⲛinvocation-local diagnostic object. Ⲙⲛ global mutable name selector state.
+
+Ⲉϣϫⲉ `bad!=correct`, ⲡghost ⲛϥⲃⲱⲕ ⲁⲛ ⲉⲡauthoritative output. Ⲉϣϫⲉ `bad==correct`, ⲡwrapper ⲕⲱ ⲙⲡghost bytes ⲉⲡcaller output ⲁⲩⲱ ⲥϩⲁⲓ reuse flag.
+
+### ⲠStage 44 byte contract
+
+`tests/stage44_discovery22.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE44_REGRESSION_GREEN`. `oldCutletNameRowWithRepeats` ⲙⲛ `legacyCutletNamesWithRepeats` ⲟⲩⲏϩ byte-for-byte ⲛsame.
+
+Ⲙⲛ Stage 46 / Patch 23 month-length backend code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 45.
