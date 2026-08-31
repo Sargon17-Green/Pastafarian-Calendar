@@ -1166,3 +1166,26 @@
 Ⲛ`stage54_bucket_select` ⲙⲛ `stage54_year5000` internal failures ⲧⲉⲛⲟⲩ ⲕⲧⲟ `NULL` ⲉⲡstate machine; ⲙⲛ internal process abort ϩⲙⲡproduction.
 
 Ⲛaudit tests ⲥⲉⲕⲱ ⲛend-to-end cold cases, far-year cases, observability, recovery 0/1/2/exhaustion, error-cleanup, history A-B-A, SAVE edges, short/wide selection edges ⲙⲛ locale/catalog invariance. Ⲡstrict verification ⲙⲡⲁⲧϥⲟⲩⲱ, ⲉⲧⲃⲉ ⲡⲁⲓ `LAST_COMPLETED_STAGE=54` ⲙⲛ `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=NO` ⲟⲩⲏϩ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 56 — corrective raw bowl sum / ⲡverification ⲙⲡⲁⲧϥⲟⲩⲱ
+
+### Ⲡscar ⲉⲧⲟⲩⲏϩ
+
+`postStirOneOverwritingOrderMemoryStage22` ⲛϥⲃⲟⲗ ⲁⲛ ⲉⲃⲟⲗ. Ⲡlegacy `u` ⲟⲩⲏϩ ⲉϥϫⲓ ⲙⲡ`savedOrderNumber`. Ⲁⲩⲟⲩⲱϩ ⲙⲙⲁⲧⲉ ⲛⲟⲩdiagnostic witness ⲉⲡsaved order ⲙⲛ ⲟⲩcall counter; ⲙⲛ semantic operand ⲉⲁϥϣⲓⲃⲉ ϩⲙⲡscar.
+
+### Ⲡdetour ⲉⲧⲟⲩⲟⲛϩ
+
+`stage56SauceRawBowlSumCorrective` ⲥⲱⲟⲩϩ ⲙⲡsame 46-drop chain ϩⲓⲧⲛ ⲛroute ⲉⲧϣⲟⲟⲡ. Ⲙⲛⲛⲥⲁ drop 46, stir 1..12 ⲛⲓⲙ ⲣ ⲙⲡold scar ⲛϣⲟⲣⲡ ⲉϫⲛ ⲟⲩghost copy ⲙⲡauthoritative old bowls. Ⲙⲛⲛⲥⲱϥ `stage56PostStirRawBowlSumDetour` ⲕⲧⲟ ⲛⲟⲩⲱⲧ ⲙⲡnew bowls ⲉⲃⲟⲗ ϩⲙ `rawBowlSum`.
+
+Ⲡsix-bowl update ⲟ ⲛsimultaneous: ⲛold/previous/next ⲧⲏⲣⲟⲩ ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡsnapshot ⲛⲟⲩⲱⲧ, ⲁⲩⲱ ⲡcommit ⲣ ϩⲙⲡⲁϩⲟⲩ.
+
+### Ⲡorder guard
+
+Ⲡactual saved order number ⲙⲡlegacy scar ⲥⲏϩ ϩⲙ `stage56_LEGACY_SAVED_ORDER_WITNESS`. Ⲡdetour ⲕⲱ ⲛⲕⲉ`SAVE(rawBowlSum+149*stir)` ⲁⲩⲱ ϥⲥⲙⲓⲛⲉ ⲙⲙⲟⲟⲩ ϩⲓⲧⲛ `bi_cmp`. Ⲙⲛⲛⲥⲱⲥ ⲛ6 ⲛpermutation IDs ⲥⲉⲥⲙⲓⲛⲉ ⲟⲩⲁ ⲟⲩⲁ. Ⲉϣϫⲉ ⲟⲩguard ϩⲉ, ⲡcorrective sauce ⲕⲧⲟ `NULL`; ⲙⲛ alternate semantic answer.
+
+### Ⲡhistorical isolation
+
+Ⲡfinal `calendarDateSpaghetti` ⲣϩⲱⲃ ⲙⲡStage 56 sauce. ⲚStage 54/55 regression binaries ⲉⲧϩⲁⲑⲏ ⲥⲉlink ⲛ`stage56_historical_sauce_bridge.s` ⲙⲛ `--wrap=stage56SauceRawBowlSumCorrective`, ⲉⲧⲣⲉⲡhistorical outputs ⲟⲩⲏϩ ϩⲓ ⲡscar ⲛϣⲟⲣⲡ.
+
+Ⲡstrict Stage 56 tests ⲙⲡⲁⲧⲟⲩⲱ; ⲡpackage ⲡⲁⲓ ⲟ ⲛimplementation candidate ⲉϥϣϭⲙϭⲟⲙ ⲉⲩⲧⲁⲗⲟϥ ϩⲁⲑⲏ ⲙⲡverification.

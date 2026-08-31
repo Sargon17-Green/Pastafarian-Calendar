@@ -1000,3 +1000,20 @@
 - Ⲛinternal year-selection failures ⲕⲧⲟ ⲛexplicit error ⲉⲡstate machine; ⲙⲛ process-abort syscall ϩⲙ `src/production`.
 
 ⲚStage 55 audit surfaces ⲥⲉϣⲟⲟⲡ ϩⲙ `tests/stage55_*`, `audit_stage55.sh` ⲙⲛ `audit_stage55_helpers.sh`. Ⲡfar-year audit ⲛYears 1/0/-1 ⲟ ⲛsequential year-by-year ⲁⲩⲱ ϣϭⲙϭⲟⲙ ⲉϥⲱⲥⲕ ⲉⲙⲁⲧⲉ. Ⲡpackage ⲡⲁⲓ ⲛϥϣⲁϫⲉ ⲁⲛ ϫⲉ ⲡstrict verification ⲁϥⲟⲩⲱ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 56 — corrective raw bowl sum / verification pending
+
+Ⲡpost-stir scar ⲙⲡStage 22 ⲟⲩⲏϩ ϩⲙⲡsource: `postStirOneOverwritingOrderMemoryStage22` ⲟⲩⲏϩ ⲉϥⲟⲩⲁϩ `savedOrderNumber` ⲉⲡ`u`. Ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡformula ⲙⲡscar.
+
+Ⲡ`stage56PostStirRawBowlSumDetour` ⲙⲟⲩⲧⲉ ⲉⲡscar ⲛϣⲟⲣⲡ ⲛlive ghost ⲛstir ⲛⲓⲙ. Ⲙⲛⲛⲥⲱϥ ϥⲕⲧⲟ ⲛⲟⲩⲱⲧ ⲙⲡsame stir ⲉⲃⲟⲗ ϩⲙⲡsame old-bowl snapshot, ⲁⲗⲗⲁ ⲡoperand ⲙⲡ`u` ⲡⲉ `rawBowlSum`. Ⲡ`savedOrderNumber=SAVE(rawBowlSum+149*stir)` ⲟⲩⲏϩ ⲉϥⲟ ⲛsource ⲛⲟⲩⲱⲧ ⲙⲡpermutation.
+
+Ⲡguard ⲧⲁϫⲣⲟ ⲙⲡactual saved-order witness ⲙⲡscar ⲙⲛ ⲡsaved order ⲙⲡdetour, ⲁⲩⲱ ϥⲥⲙⲓⲛⲉ ⲙⲡ6 ⲛIDs ⲙⲡpermutation. Ⲡ`stage56_LEGACY_POSTSTIR_CALL_COUNT` ⲥⲏϩ ⲙⲡ12 ⲛlegacy calls ϩⲙⲡcorrective sauce.
+
+Ⲡ`MonsterContext` ⲕⲱ ⲛ`oldResult`, `correctedResult`, `rawBowlSum`, `savedOrderNumber`, `stirIndex`, `appliedCount`, `appliedFlag` ⲙⲛ `orderGuard`. Ⲡcontext ⲟ ⲛinvocation-local ⲁⲩⲱ ⲡactive pointer ⲕⲧⲟ ⲉⲡprevious pointer ϩⲙⲡexit.
+
+Ⲡfinal `sauceWithScars` ⲙⲟⲟϣⲉ ϩⲓⲧⲛ `stage56SauceRawBowlSumCorrective`. Ⲛhistorical Stage 54/55 regression binaries ⲥⲉϫⲓ ⲛⲟⲩtest-only linker bridge ⲉ` sauceWithOrderAt46Latch`, ⲉⲧⲣⲉⲡhistorical scar output ⲧⲙϣⲓⲃⲉ.
+
+`STAGE56_IMPLEMENTATION_READY=YES`
+
+`STAGE56_VERIFICATION_PENDING=YES`

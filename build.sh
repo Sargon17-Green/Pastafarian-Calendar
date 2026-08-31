@@ -42,6 +42,8 @@ as --64 -o build/stage30_discovery15.o tests/stage30_discovery15.s
 as --64 -o build/stage31_patch15.o tests/stage31_patch15.s
 as --64 -o build/stage32_discovery16.o tests/stage32_discovery16.s
 as --64 -o build/stage54_integration.o src/production/stage54_integration.s
+as --64 -o build/stage56_bowlsum_corrective.o src/production/stage56_bowlsum_corrective.s
+as --64 -o build/stage56_historical_sauce_bridge.o tests/stage56_historical_sauce_bridge.s
 as --64 -o build/stage54_previous_main_bridge.o tests/stage54_previous_main_bridge.s
 as --64 -o build/stage54_final_integration.o tests/stage54_final_integration.s
 ld --wrap=calendarDateSpaghetti -o build/stage01_tests build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/tests.o build/stage54_previous_main_bridge.o
@@ -140,26 +142,26 @@ as --64 -o build/stage52_discovery26.o tests/stage52_discovery26.s
 ld --wrap=calendarDateSpaghetti -o build/stage52_discovery26 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage52_discovery26.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage53_patch26.o tests/stage53_patch26.s
 ld --wrap=calendarDateSpaghetti -o build/stage53_patch26 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage53_patch26.o build/stage54_previous_main_bridge.o
-ld -o build/stage54_final_integration build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage54_final_integration.o
+ld --wrap=stage56SauceRawBowlSumCorrective -o build/stage54_final_integration build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage54_final_integration.o
 
 # Ⲃⲁⲑⲙⲟⲥ 55 — ⲛⲇⲟⲕⲓⲙⲏ ⲙⲡaudit.
 for n in $(seq 1 14); do
   as --64 --defsym AUDIT_CASE=$n -o build/stage55_end_to_end_$n.o tests/stage55_end_to_end_audit.s
-  ld -o build/stage55_end_to_end_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_end_to_end_$n.o
+  ld --wrap=stage56SauceRawBowlSumCorrective -o build/stage55_end_to_end_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage55_end_to_end_$n.o
 done
 for n in 1 2 3; do
   as --64 --defsym FAR_CASE=$n -o build/stage55_far_end_to_end_$n.o tests/stage55_far_end_to_end_audit.s
-  ld -o build/stage55_far_end_to_end_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_far_end_to_end_$n.o
+  ld --wrap=stage56SauceRawBowlSumCorrective -o build/stage55_far_end_to_end_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage55_far_end_to_end_$n.o
 done
 as --64 -o build/stage55_observability_audit.o tests/stage55_observability_audit.s
-ld --wrap=monster_context_new -o build/stage55_observability_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_observability_audit.o
+ld --wrap=stage56SauceRawBowlSumCorrective --wrap=monster_context_new -o build/stage55_observability_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage55_observability_audit.o
 as --64 -o build/stage55_error_cleanup_audit.o tests/stage55_error_cleanup_audit.s
-ld --wrap=catalog_get_cutlet -o build/stage55_error_cleanup_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_error_cleanup_audit.o
+ld --wrap=stage56SauceRawBowlSumCorrective --wrap=catalog_get_cutlet -o build/stage55_error_cleanup_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage55_error_cleanup_audit.o
 as --64 -o build/stage55_history_audit.o tests/stage55_history_audit.s
-ld -o build/stage55_history_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_history_audit.o
+ld --wrap=stage56SauceRawBowlSumCorrective -o build/stage55_history_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage55_history_audit.o
 for n in 0 1 2 3; do
   as --64 --defsym FAIL_N=$n -o build/stage55_recovery_$n.o tests/stage55_recovery_audit.s
-  ld --wrap=catalog_get_cutlet --wrap=monster_cutlet_partition_route -o build/stage55_recovery_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_recovery_$n.o
+  ld --wrap=stage56SauceRawBowlSumCorrective --wrap=catalog_get_cutlet --wrap=monster_cutlet_partition_route -o build/stage55_recovery_$n build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage55_recovery_$n.o
 done
 
 # Ⲃⲁⲑⲙⲟⲥ 55 — ⲛshort/wide/SAVE ⲛⲇⲟⲕⲓⲙⲏ.
@@ -172,4 +174,4 @@ ld -o build/stage55_short_edges_audit build/arena.o build/bigint.o build/bootstr
 
 # Ⲃⲁⲑⲙⲟⲥ 55 — ⲡlocale/catalog ⲛⲇⲟⲕⲓⲙⲏ.
 as --64 -o build/stage55_locale_catalog_audit.o tests/stage55_locale_catalog_audit.s
-ld --wrap=catalog_get_cutlet --wrap=catalog_get_month -o build/stage55_locale_catalog_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage55_locale_catalog_audit.o
+ld --wrap=stage56SauceRawBowlSumCorrective --wrap=catalog_get_cutlet --wrap=catalog_get_month -o build/stage55_locale_catalog_audit build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/stage56_bowlsum_corrective.o build/stage56_historical_sauce_bridge.o build/catalog.o build/stage55_locale_catalog_audit.o

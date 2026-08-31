@@ -1010,3 +1010,20 @@
 Ⲡmain recovery ⲕⲱ ⲙⲡfailed phase id. Ⲡpending structure ⲛϥⲕⲧⲟ ⲁⲛ ⲉcommitted ϩⲁⲑⲏ ⲙⲡvalidation; ⲡcommitted structure ⲛϥⲃⲟⲗ ⲁⲛ ⲉⲃⲟⲗ ϩⲙ result/final-validation retry. Ⲡexhaustion ⲕⲧⲟ ⲛexplicit error.
 
 ⲠStage 55 package ⲟ ⲛaudit candidate. Ⲛproduction repairs ⲥⲉϣⲟⲟⲡ, ⲁⲗⲗⲁ ⲡstrict audit completion ⲛϥⲥⲏϩ ⲁⲛ ⲛcompleted ϣⲁⲛⲧⲉ ⲛfar-year ⲙⲛ ⲛledger checks ⲧⲏⲣⲟⲩ ⲟⲩⲱ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 56 — raw-bowl-sum corrective detour
+
+ⲠCOPY_DIAGNOSTIC scar ⲟⲩⲏϩ:
+
+`postStirOneOverwritingOrderMemoryStage22 -> savedOrderNumber in u`
+
+ⲠCOPY_AUTHORITATIVE route ⲡⲉ:
+
+`sauceWithScars -> stage56SauceRawBowlSumCorrective -> stage56PostStirRawBowlSumDetour`
+
+Ⲡdetour ⲣ ⲙⲡlegacy post-stir ⲛϣⲟⲣⲡ 12 ⲛⲥⲟⲡ, ⲟⲩⲁ ⲛⲥⲁ stir. Ⲡlegacy output ⲟ ⲛghost. Ⲡcorrected output ⲕⲱ ⲙⲡ`rawBowlSum` ϩⲙⲡ`u`, ⲉⲣⲉ ⲡ`savedOrderNumber` ⲟⲩⲏϩ ⲙⲙⲁⲧⲉ ⲉⲡpermutation.
+
+Ⲡ`MonsterContext` ⲁϥⲁϣⲁⲓ ⲉ2768 bytes ⲙⲛ ⲛStage 56 witness fields. Ⲡactive-context adapter ⲟ ⲛstack-like ownership: `stage56ContextEnter` ϯ ⲙⲡprevious pointer, ⲁⲩⲱ `stage56ContextLeave` ⲕⲧⲟ ⲙⲙⲟϥ ϩⲙⲡexit.
+
+Ⲛhistorical regression binaries ⲥⲉⲟ ⲛisolated ϩⲓⲧⲛ test-only `--wrap=stage56SauceRawBowlSumCorrective`; ⲡproduction link ⲛϥϫⲓ ⲙⲡbridge ⲁⲛ.

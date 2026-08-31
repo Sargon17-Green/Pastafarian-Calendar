@@ -1,4 +1,6 @@
 .intel_syntax noprefix
+.comm stage56_LEGACY_SAVED_ORDER_WITNESS,8,8
+.comm stage56_LEGACY_POSTSTIR_CALL_COUNT,8,8
 .equ CTX_CALCULATION_DAY,0
 .equ CTX_TARGET_DAY,8
 .equ CTX_PHASE,16
@@ -337,7 +339,15 @@
 .equ CTX_STAGE54_LOGS,2680
 .equ CTX_STAGE54_LEGACY_STATUS,2688
 .equ CTX_STAGE54_SEEN,2696
-.equ CTX_SIZE,2704
+.equ CTX_STAGE56_OLD_RESULT,2704
+.equ CTX_STAGE56_CORRECTED_RESULT,2712
+.equ CTX_STAGE56_RAW_BOWL_SUM,2720
+.equ CTX_STAGE56_SAVED_ORDER_NUMBER,2728
+.equ CTX_STAGE56_STIR_INDEX,2736
+.equ CTX_STAGE56_APPLIED_COUNT,2744
+.equ CTX_STAGE56_APPLIED_FLAG,2752
+.equ CTX_STAGE56_ORDER_GUARD,2760
+.equ CTX_SIZE,2768
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -3909,6 +3919,7 @@ postStirOneOverwritingOrderMemoryStage22:
     jb .Lpsoom22_fail
     cmp r13,12
     ja .Lpsoom22_fail
+    inc qword ptr [rip+stage56_LEGACY_POSTSTIR_CALL_COUNT]
     mov edi,96
     call arena_alloc
     test rax,rax
@@ -3953,6 +3964,7 @@ postStirOneOverwritingOrderMemoryStage22:
     test rax,rax
     je .Lpsoom22_fail
     mov qword ptr [rbp-56],rax
+    mov qword ptr [rip+stage56_LEGACY_SAVED_ORDER_WITNESS],rax
     mov rdi,rax
     mov rsi,r14
     call orderPatchFromValue

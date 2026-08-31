@@ -84,6 +84,9 @@ stage54_FOUNDATION: .quad 0
 .extern monster_context_new
 .extern calendarDateSpaghettiLegacyDiagnostic
 .extern sauceWithOrderAt46Latch
+.extern stage56SauceRawBowlSumCorrective
+.extern stage56ContextEnter
+.extern stage56ContextLeave
 .extern oldStructureSauce
 .extern answerRingThroughPatchedNextBowl
 .extern ringAnswer
@@ -179,7 +182,7 @@ stage54AskRing:
     jmp answerRingThroughPatchedNextBowl
 .size stage54AskRing,.-stage54AskRing
 
-# ⲠsauceWithScars ⲙⲟⲟϣⲉ ϩⲓⲧⲛ sauceWithOrderAt46Latch ⲙⲛ ⲛscar ⲉⲧϩⲁⲑⲏ.
+# ⲠsauceWithScars ⲙⲟⲟϣⲉ ϩⲓⲧⲛ ⲡdetour ⲙⲡⲁⲧϣ 56; ⲡscar ⲛpost-stir ⲣϩⲱⲃ ⲛϣⲟⲣⲡ ϩⲙⲡdetour ⲛⲓⲙ.
 .type sauceWithScars,@function
 sauceWithScars:
     push rbp
@@ -213,7 +216,7 @@ sauceWithScars:
 .Ls54s_state_build:
     mov rdi,r14
     mov rsi,r15
-    call sauceWithOrderAt46Latch
+    call stage56SauceRawBowlSumCorrective
     test rax,rax
     je .Ls54s_recover
     mov rbx,rax
@@ -1127,6 +1130,8 @@ stage54_find_target_year:
     push r14
     mov r12,rdi
     mov r13,rsi
+    mov qword ptr [rbp-104],0
+    mov qword ptr [rbp-112],0
     mov rdi,r12
     call stage54_year5000
     mov r14,rax
@@ -1994,6 +1999,10 @@ calendarDateSpaghetti:
     test rax,rax
     je .Ls54cd_fail
     mov r14,rax
+    mov rdi,r14
+    call stage56ContextEnter
+    mov qword ptr [rbp-104],rax
+    mov qword ptr [rbp-112],1
     mov qword ptr [r14+CTX_STAGE54_PHASE],1
     mov qword ptr [r14+CTX_STAGE54_RETRY],2
     mov edi,0
@@ -2143,6 +2152,11 @@ calendarDateSpaghetti:
     xor eax,eax
     xor edx,edx
 .Ls54cd_done:
+    cmp qword ptr [rbp-112],0
+    je .Ls54cd_done_no56
+    mov rdi,qword ptr [rbp-104]
+    call stage56ContextLeave
+.Ls54cd_done_no56:
     add rsp,72
     pop r15
     pop r14
