@@ -223,7 +223,16 @@
 .equ CTX_STAGE41_ROUTE_GHOST_SEEN,1768
 .equ CTX_STAGE41_PATCH_SEEN,1776
 .equ CTX_STAGE41_GHOST_REUSE_EQUAL,1784
-.equ CTX_SIZE,1792
+.equ CTX_STAGE42_GAP_COUNT,1792
+.equ CTX_STAGE42_CUTLET_COUNT,1800
+.equ CTX_STAGE42_CALC_GATE_OFFSET,1808
+.equ CTX_STAGE42_ROUTE_FAMILY_COUNT,1816
+.equ CTX_STAGE42_ROUTE_PARTITION,1824
+.equ CTX_STAGE42_LEGACY_ALL_POSITIVE,1832
+.equ CTX_STAGE42_ROUTE_SEEN,1840
+.equ CTX_STAGE42_SEEN,1848
+.equ CTX_STAGE42_SELECTED_RANK,1856
+.equ CTX_SIZE,1864
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -517,6 +526,13 @@ legacy_bowl_stir_stone_by_position:
 .global monster_stage41_structure_sauce_patch_wrapper
 .global monster_structure_sauce_route
 .global monster_stage40_legacy_structure_sauce_handler
+.global stage42LegacyBinomialU64
+.global oldCutletPartitionFamilyCount
+.global oldCutletPartitionFamilyUnrank
+.global oldCutletPartitionFamily
+.global legacyCutletPartitionWithoutCalculationGate
+.global monster_cutlet_partition_route
+.global monster_stage42_legacy_cutlet_partition_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -8141,6 +8157,350 @@ monster_stage40_legacy_structure_sauce_handler:
     ret
 .size monster_stage40_legacy_structure_sauce_handler,.-monster_stage40_legacy_structure_sauce_handler
 
+
+
+# Ⲃⲁⲑⲙⲟⲥ 42 — DISCOVERY 21
+# Ⲡlegacy family ⲛcutlet partition ⲡⲉ ⲛpositive compositions ⲧⲏⲣⲟⲩ ⲙⲡgap count.
+# Ⲡoffset ⲙⲡcalculation-day gate ⲟⲩⲏϩ ⲉϥϣⲟⲟⲡ ϩⲙⲡABI, ⲁⲗⲗⲁ ⲡlegacy ⲛϥϫⲓ ⲁⲛ ⲙⲙⲟϥ.
+
+# rdi=n u64, rsi=k u64. rax=BigInt* C(n,k).
+.type stage42LegacyBinomialU64,@function
+stage42LegacyBinomialU64:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    cmp r13,r12
+    ja .Ls42bin_zero
+    mov r14,r12
+    sub r14,r13
+    cmp r13,r14
+    jbe .Ls42bin_k_ok
+    mov r13,r14
+.Ls42bin_k_ok:
+    mov edi,1
+    call bi_from_u64
+    test rax,rax
+    je .Ls42bin_fail
+    mov r15,rax
+    mov rbx,1
+.Ls42bin_loop:
+    cmp rbx,r13
+    ja .Ls42bin_return
+    mov rsi,r12
+    sub rsi,r13
+    add rsi,rbx
+    mov rdi,r15
+    call bi_mul_u64
+    test rax,rax
+    je .Ls42bin_fail
+    mov rdi,rax
+    mov rsi,rbx
+    call bi_divmod_u64_abs
+    test rax,rax
+    je .Ls42bin_fail
+    test rdx,rdx
+    jne .Ls42bin_fail
+    mov r15,rax
+    inc rbx
+    jmp .Ls42bin_loop
+.Ls42bin_return:
+    mov rax,r15
+    jmp .Ls42bin_done
+.Ls42bin_zero:
+    call bi_zero
+    jmp .Ls42bin_done
+.Ls42bin_fail:
+    xor eax,eax
+.Ls42bin_done:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage42LegacyBinomialU64,.-stage42LegacyBinomialU64
+
+# rdi=gap count, rsi=cutlet count. rax=BigInt*.
+# Ⲡscar ⲡⲁⲓ ⲗⲟⲅⲓⲍⲉ ⲛcompositions ⲧⲏⲣⲟⲩ: C(gap-1,cutlets-1).
+.type oldCutletPartitionFamilyCount,@function
+oldCutletPartitionFamilyCount:
+    test rsi,rsi
+    jne .Locpfc_slots
+    test rdi,rdi
+    jne .Locpfc_zero
+    mov edi,1
+    jmp bi_from_u64
+.Locpfc_slots:
+    cmp rdi,rsi
+    jb .Locpfc_zero
+    dec rdi
+    dec rsi
+    jmp stage42LegacyBinomialU64
+.Locpfc_zero:
+    jmp bi_zero
+.size oldCutletPartitionFamilyCount,.-oldCutletPartitionFamilyCount
+
+# rdi=gap, rsi=cutlets, rdx=rank1 BigInt*, rcx=out u64[cutlets].
+# rax=out ⲉϣϫⲉ success; 0 ⲉϣϫⲉ fail. Ⲡorder ⲡⲉ lexicographic ⲛpositive compositions.
+.type oldCutletPartitionFamilyUnrank,@function
+oldCutletPartitionFamilyUnrank:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,72
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    test r14,r14
+    je .Locpfu_fail
+    test r15,r15
+    je .Locpfu_fail
+    cmp qword ptr [r14+BI_SIGN],1
+    jne .Locpfu_fail
+
+    mov rdi,r12
+    mov rsi,r13
+    call oldCutletPartitionFamilyCount
+    test rax,rax
+    je .Locpfu_fail
+    mov qword ptr [rbp-48],rax
+    mov rdi,r14
+    mov rsi,rax
+    call bi_cmp
+    cmp eax,0
+    jg .Locpfu_fail
+    mov rdi,r14
+    call bi_clone
+    test rax,rax
+    je .Locpfu_fail
+    mov qword ptr [rbp-56],rax
+    mov qword ptr [rbp-64],r12
+    mov qword ptr [rbp-72],0
+
+    test r13,r13
+    jne .Locpfu_loop_check
+    test r12,r12
+    jne .Locpfu_fail
+    mov rax,r15
+    jmp .Locpfu_done
+
+.Locpfu_loop_check:
+    mov rax,qword ptr [rbp-72]
+    inc rax
+    cmp rax,r13
+    jae .Locpfu_last
+    mov qword ptr [rbp-80],1
+.Locpfu_candidate:
+    mov rax,r13
+    sub rax,qword ptr [rbp-72]
+    dec rax
+    mov qword ptr [rbp-88],rax
+    mov rbx,qword ptr [rbp-64]
+    sub rbx,rax
+    mov rax,qword ptr [rbp-80]
+    cmp rax,rbx
+    ja .Locpfu_fail
+
+    mov rdi,qword ptr [rbp-64]
+    sub rdi,qword ptr [rbp-80]
+    mov rsi,qword ptr [rbp-88]
+    call oldCutletPartitionFamilyCount
+    test rax,rax
+    je .Locpfu_fail
+    mov qword ptr [rbp-96],rax
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,rax
+    call bi_cmp
+    cmp eax,0
+    jle .Locpfu_take
+    mov rdi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-96]
+    call bi_sub
+    test rax,rax
+    je .Locpfu_fail
+    mov qword ptr [rbp-56],rax
+    inc qword ptr [rbp-80]
+    jmp .Locpfu_candidate
+
+.Locpfu_take:
+    mov rcx,qword ptr [rbp-72]
+    mov rax,qword ptr [rbp-80]
+    mov qword ptr [r15+rcx*8],rax
+    sub qword ptr [rbp-64],rax
+    inc qword ptr [rbp-72]
+    jmp .Locpfu_loop_check
+
+.Locpfu_last:
+    mov rcx,qword ptr [rbp-72]
+    mov rax,qword ptr [rbp-64]
+    test rax,rax
+    je .Locpfu_fail
+    mov qword ptr [r15+rcx*8],rax
+    mov rax,r15
+    jmp .Locpfu_done
+
+.Locpfu_fail:
+    xor eax,eax
+.Locpfu_done:
+    add rsp,72
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size oldCutletPartitionFamilyUnrank,.-oldCutletPartitionFamilyUnrank
+
+# rdi=gap, rsi=cutlets, rdx=rank1 BigInt*, rcx=out.
+# rax=legacy family count, rdx=1 success / 0 fail.
+.type oldCutletPartitionFamily,@function
+oldCutletPartitionFamily:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,8
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov rdi,r12
+    mov rsi,r13
+    call oldCutletPartitionFamilyCount
+    test rax,rax
+    je .Locpf_fail
+    mov rbx,rax
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    mov rcx,r15
+    call oldCutletPartitionFamilyUnrank
+    test rax,rax
+    je .Locpf_fail
+    mov rax,rbx
+    mov edx,1
+    jmp .Locpf_done
+.Locpf_fail:
+    xor eax,eax
+    xor edx,edx
+.Locpf_done:
+    add rsp,8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size oldCutletPartitionFamily,.-oldCutletPartitionFamily
+
+# rdi=gap, rsi=cutlets, rdx=required internal-gate offset, rcx=rank1, r8=out.
+# ⲠDISCOVERY 21 scar: rdx ⲛϥⲣϩⲱⲃ ⲁⲛ; ⲡfamily ⲟⲩⲏϩ all-positive.
+.type legacyCutletPartitionWithoutCalculationGate,@function
+legacyCutletPartitionWithoutCalculationGate:
+    mov rdx,rcx
+    mov rcx,r8
+    jmp oldCutletPartitionFamily
+.size legacyCutletPartitionWithoutCalculationGate,.-legacyCutletPartitionWithoutCalculationGate
+
+.type monster_cutlet_partition_route,@function
+monster_cutlet_partition_route:
+    jmp legacyCutletPartitionWithoutCalculationGate
+.size monster_cutlet_partition_route,.-monster_cutlet_partition_route
+
+# Ⲡhandler ⲧⲁϫⲣⲟ ⲛⲟⲩinternal-gate witness: gap=10, cutlets=3, offset=4, rank=1.
+# Ⲡlegacy route ⲙⲟⲩⲧⲉ ⲉall-positive family ⲁⲩⲱ ⲛϥfilter ⲁⲛ ⲕⲁⲧⲁ ⲡoffset.
+.type monster_stage42_legacy_cutlet_partition_handler,@function
+monster_stage42_legacy_cutlet_partition_handler:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,24
+    mov r12,rdi
+    test r12,r12
+    je .Lms42_fail
+    mov qword ptr [r12+CTX_STAGE42_GAP_COUNT],10
+    mov qword ptr [r12+CTX_STAGE42_CUTLET_COUNT],3
+    mov qword ptr [r12+CTX_STAGE42_CALC_GATE_OFFSET],4
+
+    mov edi,1
+    call bi_from_u64
+    test rax,rax
+    je .Lms42_fail
+    mov r13,rax
+    mov qword ptr [r12+CTX_STAGE42_SELECTED_RANK],rax
+
+    mov edi,24
+    call arena_alloc
+    test rax,rax
+    je .Lms42_fail
+    mov r14,rax
+    mov qword ptr [r12+CTX_STAGE42_ROUTE_PARTITION],rax
+
+    # Ⲡdirect scar ⲟⲩⲏϩ all-positive ⲙⲛ 36 ⲛmembers ϩⲙ witness ⲡⲁⲓ.
+    mov edi,10
+    mov esi,3
+    call oldCutletPartitionFamilyCount
+    test rax,rax
+    je .Lms42_fail
+    mov rdi,rax
+    mov esi,36
+    call bi_eq_u64
+    test eax,eax
+    je .Lms42_fail
+    mov qword ptr [r12+CTX_STAGE42_LEGACY_ALL_POSITIVE],1
+
+    mov edi,10
+    mov esi,3
+    mov edx,4
+    mov rcx,r13
+    mov r8,r14
+    call monster_cutlet_partition_route
+    test rax,rax
+    je .Lms42_fail
+    cmp rdx,1
+    jne .Lms42_fail
+    mov qword ptr [r12+CTX_STAGE42_ROUTE_FAMILY_COUNT],rax
+
+    mov qword ptr [r12+CTX_STAGE42_ROUTE_SEEN],1
+    inc qword ptr [r12+CTX_STAGE42_SEEN]
+    mov eax,1
+    jmp .Lms42_done
+.Lms42_fail:
+    xor eax,eax
+.Lms42_done:
+    add rsp,24
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size monster_stage42_legacy_cutlet_partition_handler,.-monster_stage42_legacy_cutlet_partition_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -8294,6 +8654,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage40_legacy_structure_sauce_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage42_legacy_cutlet_partition_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

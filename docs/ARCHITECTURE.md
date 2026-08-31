@@ -700,3 +700,36 @@
 `tests/stage40_discovery20.s` ⲟⲩⲏϩ byte-for-byte ⲛsame. Ⲡsource ⲛⲧⲟϥ ⲉⲓⲥ ⲟⲩcaller-red-zone stack scar ϩⲙⲡsauce comparator ⲉϥⲟⲩⲱⲛϩ ⲙⲙⲟϥ ⲙⲙⲁⲧⲉ ϩⲟⲧⲁⲛ ⲡroute ⲙⲛ reference ⲧⲱⲛ. `stage41_stage40_abi_bridge.s` ⲟ ⲛpure Assembly test-only link detour; `__real_bi_cmp` ⲟⲩⲏϩ ⲡcomparison ⲛⲙⲉ. Ⲡproduction binaries ⲛⲧⲉⲛStage 1–39 ⲙⲛ ⲡStage 41 test ⲛⲥⲉϫⲓ ⲁⲛ ⲙⲡbridge.
 
 Ⲙⲛ cutlet partition / Patch 21 semantic code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 41.
+
+
+## Ⲡall-positive cutlet-partition scar ⲙⲡⲃⲁⲑⲙⲟⲥ 42
+
+ⲠCOPY_AUTHORITATIVE ⲙⲡDISCOVERY 21 ⲡⲉ:
+
+`calendarDateSpaghetti -> monster_stage42_legacy_cutlet_partition_handler -> monster_cutlet_partition_route -> legacyCutletPartitionWithoutCalculationGate -> oldCutletPartitionFamily`
+
+### Ⲡlegacy family
+
+Ⲡfamily ⲟ ⲛpositive compositions ⲧⲏⲣⲟⲩ ⲙⲡ`gap` ⲉ`cutlets` ⲛparts. Ⲡcount ⲟ ⲛBigInt:
+
+`C(gap-1,cutlets-1)`
+
+`stage42LegacyBinomialU64` ⲧⲁⲙⲓⲟ ⲙⲡbinomial ϩⲓⲧⲛ exact multiply/divide steps ⲙⲛ `bi_mul_u64` ⲙⲛ `bi_divmod_u64_abs`. Ⲡunrank ⲧⲁⲙⲓⲟ ⲙⲡlexicographic family ⲛposition ⲕⲁⲧⲁ position ⲁⲩⲱ ⲛϥϫⲓ ⲛⲟⲩBigInt rank copy.
+
+### Ⲡignored gate offset
+
+ⲠABI ⲙⲡ`legacyCutletPartitionWithoutCalculationGate` ⲡⲉ:
+
+`(gap, cutlets, requiredOffset, rank1, out)`
+
+Ⲡ`requiredOffset` ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ. Ⲛϥrepack ⲙⲙⲁⲧⲉ ⲙⲡrank ⲙⲛ out pointer ⲁⲩⲱ ⲛϥⲃⲱⲕ ⲉ`oldCutletPartitionFamily`.
+
+### Ⲡwitness ⲙⲛ state ownership
+
+`gap=10, cutlets=3, requiredOffset=4, rank1=1`
+
+Ⲡroute ϯ `count=36`, partition `[1,1,8]`. Ⲡtest-only reference ϯ `count=8`, `[1,3,6]`. Ⲡprefix test ⲟ ⲛtest-only ⲁⲩⲱ ⲛϥⲟ ⲁⲛ ⲙⲙⲉⲣⲟⲥ ⲙⲡproduction.
+
+Ⲡpartition buffer, rank BigInt, count BigInt ⲙⲛ trace fields ⲟ ⲛinvocation-local arena state. Ⲙⲛ global mutable cutlet state.
+
+Ⲙⲛ filtered family, ⲙⲛ prefix-required selector, ⲙⲛ DP count/unrank ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 42.

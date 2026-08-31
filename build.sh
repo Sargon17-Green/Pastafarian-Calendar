@@ -109,3 +109,6 @@ ld --wrap=bi_cmp -o build/stage40_discovery20 build/arena.o build/bigint.o build
 
 as --64 -o build/stage41_patch20.o tests/stage41_patch20.s
 ld -o build/stage41_patch20 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage41_patch20.o
+
+as --64 -o build/stage42_discovery21.o tests/stage42_discovery21.s
+ld -o build/stage42_discovery21 build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/stage42_discovery21.o

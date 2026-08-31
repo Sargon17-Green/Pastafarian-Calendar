@@ -884,3 +884,30 @@
 `STAGE41_PATCH20_GREEN`
 
 Ⲙⲛ Patch 21 ⲏ cutlet filtered-family code ⲉϥⲟⲩⲱϩ ϩⲙⲡStage 41.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 42 — DISCOVERY 21
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲙⲛⲛⲥⲁ ⲡstructure-sauce detour, ⲁⲩⲙⲉⲉⲩⲉ ϫⲉ ⲟⲩpartition ⲙⲡYear gap ⲉcutlets ϣϭⲙϭⲟⲙ ⲉϥⲛⲏⲩ ⲉⲃⲟⲗ ϩⲛ positive compositions ⲧⲏⲣⲟⲩ. Ⲡlegacy generator ⲛϥⲱϣ ⲁⲛ ϫⲉ ⲡcalculation day ⲟ ⲛinternal gate ⲏ ⲁⲛ.
+
+Ⲁⲩⲟⲩⲱϩ ⲛ`stage42LegacyBinomialU64`, `oldCutletPartitionFamilyCount`, `oldCutletPartitionFamilyUnrank`, `oldCutletPartitionFamily`, `legacyCutletPartitionWithoutCalculationGate` ⲙⲛ `monster_cutlet_partition_route`. Ⲡcount ⲟ ⲛarbitrary-precision BigInt; ⲡunrank ⲟ ⲛexact lexicographic positive-composition unrank.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ϩⲙ `gap=10, cutlets=3, offset=4, rank=1`, ⲡdirect scar ⲙⲛ ⲡsemantic route ⲧⲱⲛ ⲉ`count=36`, `[1,1,8]`. Ⲡrequired internal-gate offset ⲥⲏϩ ϩⲙⲡABI ⲁⲗⲗⲁ ⲛϥϣⲓⲃⲉ ⲁⲛ ⲛⲟⲩdecision.
+
+Ⲡtest-only normative reference ⲧⲁϫⲣⲟ ⲙⲡfiltered family: `count=8`, rank 1 = `[1,3,6]`. Ⲡtest-only prefix diagnostic ϫⲓ ⲙⲡproper prefix `4`; ⲙⲛ such predicate ⲉϥⲃⲱⲕ ⲉⲡproduction route.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+ⲠStage 42 handler ⲟⲩⲏϩ ϩⲙⲡmain dispatcher chain. Ⲛϥⲧⲁⲙⲓⲟ ⲙⲡrank-1 witness, ⲛϥⲕⲱ ⲙⲡroute output ϩⲙⲡMonsterContext, ⲁⲩⲱ ⲛϥⲧⲁϫⲣⲟ ⲙⲡdirect all-positive scar.
+
+`monster_cutlet_partition_route -> legacyCutletPartitionWithoutCalculationGate -> oldCutletPartitionFamily`
+
+Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲙⲡfiltered-family detour, prefix-required DP count/unrank, ⲏ selector ⲙⲡPATCH 21. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡrepository state ⲟ ⲛ`EXPECTED_RED`.
+
+`STAGE42_DISCOVERY21_EXPECTED_RED`
+
+ⲚStage 1–41 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`.

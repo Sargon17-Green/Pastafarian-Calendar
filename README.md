@@ -629,3 +629,42 @@
 - ⲡlegacy adapter scar ⲟⲩⲏϩ callable.
 
 ⲠStage 40 ⲧⲉⲛⲟⲩ ϯ `STAGE40_REGRESSION_GREEN`; ⲡStage 41 ϯ `STAGE41_PATCH20_GREEN`. Ⲙⲛ cutlet-partition code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 41.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 42 — DISCOVERY 21
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲁⲩⲕⲱ ⲙⲡlegacy cutlet family ϫⲉ ⲡgap count ⲛⲧⲟϥ ⲙⲛ ⲡcutlet count ⲙⲙⲁⲧⲉ ⲣⲁϣⲉ ⲉⲣⲟⲟⲩ. Ⲡfamily ⲡⲉ ⲛpositive compositions ⲧⲏⲣⲟⲩ ⲙⲡgap count, ⲉⲩordered lexicographically.
+
+`oldCutletPartitionFamilyCount(gap, cutlets) = C(gap-1, cutlets-1)`
+
+`oldCutletPartitionFamily(gap, cutlets, rank1, out)`
+
+Ⲡ`legacyCutletPartitionWithoutCalculationGate` ϫⲓ ⲛⲟⲩ`requiredOffset` ϩⲙⲡABI, ⲁⲗⲗⲁ ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ. `monster_cutlet_partition_route` ⲙⲟⲟϣⲉ ⲉⲡlegacy adapter ⲙⲙⲁⲧⲉ ϩⲙⲡDISCOVERY 21.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲡwitness ⲡⲉ:
+
+`gap=10`
+
+`cutlets=3`
+
+`calculation-gate offset=4`
+
+`rank=1`
+
+Ⲡlegacy family count ⲡⲉ `36`, ⲁⲩⲱ ⲡrank-1 composition ⲡⲉ `[1,1,8]`. Ⲙⲛ proper prefix ⲉϥⲧⲱⲛ ⲙⲛ `4`.
+
+Ⲡtest-only normative reference ⲛⲧⲉⲡsame Assembly line ϯ `8` ⲛlegal compositions ⲁⲩⲱ rank 1 = `[1,3,6]`, ⲉⲣⲉ ⲡproper prefix `1+3=4`. ⲠDISCOVERY regression ⲱϣ ⲛ3 ⲛdivergence ⲉⲩⲧⲟϣ: family-count, rank-1 composition, ⲙⲛ required-prefix.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+`calendarDateSpaghetti -> monster_stage42_legacy_cutlet_partition_handler -> monster_cutlet_partition_route -> legacyCutletPartitionWithoutCalculationGate -> oldCutletPartitionFamily`
+
+ⲠMonsterContext ϩⲁⲣⲉϩ ⲉ`gap`, `cutletCount`, `calculationGateOffset`, route family count, route partition, selected rank, legacy-all-positive flag, route-seen ⲙⲛ seen counter. Ⲛfield ⲛⲁⲓ ⲟ ⲛinvocation-local trace state.
+
+Ⲡprefix check ⲙⲡregression ⲟ ⲛtest-only code. Ⲙⲛ prefix-filter, DP count/unrank, filtered family, ⲏ code ⲙⲡPATCH 21 ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
+
+ⲚStage 1–41 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛ`GREEN`; ⲡStage 42 ϯ `STAGE42_DISCOVERY21_EXPECTED_RED`.
