@@ -41,99 +41,103 @@ as --64 -o build/stage29_patch14.o tests/stage29_patch14.s
 as --64 -o build/stage30_discovery15.o tests/stage30_discovery15.s
 as --64 -o build/stage31_patch15.o tests/stage31_patch15.s
 as --64 -o build/stage32_discovery16.o tests/stage32_discovery16.s
-ld -o build/stage01_tests build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/tests.o
-ld -o build/stage01_smoke build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/smoke.o
-ld -o build/stage02_discovery01 build/arena.o build/bigint.o build/bootstrap.o build/stage02_discovery01.o
-ld -o build/stage03_patch01 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage03_patch01.o
-ld -o build/stage04_discovery02 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage04_discovery02.o
-ld -o build/stage05_patch02 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage05_patch02.o
-ld -o build/stage06_discovery03 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage06_discovery03.o
-ld -o build/stage07_patch03 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage07_patch03.o
-ld -o build/stage08_discovery04 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage08_discovery04.o
-ld -o build/stage09_patch04 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage09_patch04.o
-ld -o build/stage10_discovery05 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage10_discovery05.o
-ld -o build/stage11_patch05 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage11_patch05.o
-ld -o build/stage12_discovery06 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage12_discovery06.o
-ld -o build/stage13_patch06 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage13_patch06.o
-ld -o build/stage14_discovery07 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage14_discovery07.o
-ld -o build/stage15_patch07 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage15_patch07.o
+as --64 -o build/stage54_integration.o src/production/stage54_integration.s
+as --64 -o build/stage54_previous_main_bridge.o tests/stage54_previous_main_bridge.s
+as --64 -o build/stage54_final_integration.o tests/stage54_final_integration.s
+ld --wrap=calendarDateSpaghetti -o build/stage01_tests build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/tests.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage01_smoke build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/smoke.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage02_discovery01 build/arena.o build/bigint.o build/bootstrap.o build/stage02_discovery01.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage03_patch01 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage03_patch01.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage04_discovery02 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage04_discovery02.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage05_patch02 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage05_patch02.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage06_discovery03 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage06_discovery03.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage07_patch03 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage07_patch03.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage08_discovery04 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage08_discovery04.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage09_patch04 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage09_patch04.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage10_discovery05 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage10_discovery05.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage11_patch05 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage11_patch05.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage12_discovery06 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage12_discovery06.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage13_patch06 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage13_patch06.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage14_discovery07 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage14_discovery07.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage15_patch07 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage15_patch07.o build/stage54_previous_main_bridge.o
 
-ld -o build/stage16_discovery08 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage16_discovery08.o
-ld -o build/stage17_patch08 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage17_patch08.o
-ld -o build/stage18_discovery09 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage18_discovery09.o
-ld -o build/stage19_patch09 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage19_patch09.o
-ld -o build/stage20_discovery10 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage20_discovery10.o
-ld -o build/stage21_patch10 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage21_patch10.o
-ld -o build/stage22_discovery11 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage22_discovery11.o
-ld -o build/stage23_patch11 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage23_patch11.o
-ld -o build/stage24_discovery12 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage24_discovery12.o
-ld -o build/stage25_patch12 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage25_patch12.o
-ld -o build/stage26_discovery13 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage26_discovery13.o
+ld --wrap=calendarDateSpaghetti -o build/stage16_discovery08 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage16_discovery08.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage17_patch08 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage17_patch08.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage18_discovery09 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage18_discovery09.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage19_patch09 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage19_patch09.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage20_discovery10 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage20_discovery10.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage21_patch10 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage21_patch10.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage22_discovery11 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage22_discovery11.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage23_patch11 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage23_patch11.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage24_discovery12 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage24_discovery12.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage25_patch12 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage25_patch12.o build/stage54_previous_main_bridge.o
+ld --wrap=calendarDateSpaghetti -o build/stage26_discovery13 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage26_discovery13.o build/stage54_previous_main_bridge.o
 
-ld -o build/stage27_patch13 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage27_patch13.o
+ld --wrap=calendarDateSpaghetti -o build/stage27_patch13 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage27_patch13.o build/stage54_previous_main_bridge.o
 
-ld -o build/stage28_discovery14 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage28_discovery14.o
+ld --wrap=calendarDateSpaghetti -o build/stage28_discovery14 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage28_discovery14.o build/stage54_previous_main_bridge.o
 
-ld -o build/stage29_patch14 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage29_patch14.o
+ld --wrap=calendarDateSpaghetti -o build/stage29_patch14 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage29_patch14.o build/stage54_previous_main_bridge.o
 
-ld -o build/stage30_discovery15 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage30_discovery15.o
+ld --wrap=calendarDateSpaghetti -o build/stage30_discovery15 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage30_discovery15.o build/stage54_previous_main_bridge.o
 
-ld -o build/stage31_patch15 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage31_patch15.o
+ld --wrap=calendarDateSpaghetti -o build/stage31_patch15 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage31_patch15.o build/stage54_previous_main_bridge.o
 
-ld -o build/stage32_discovery16 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage32_discovery16.o
+ld --wrap=calendarDateSpaghetti -o build/stage32_discovery16 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage32_discovery16.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage33_patch16.o tests/stage33_patch16.s
-ld -o build/stage33_patch16 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage33_patch16.o
+ld --wrap=calendarDateSpaghetti -o build/stage33_patch16 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage33_patch16.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage34_discovery17.o tests/stage34_discovery17.s
-ld -o build/stage34_discovery17 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage34_discovery17.o
+ld --wrap=calendarDateSpaghetti -o build/stage34_discovery17 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage34_discovery17.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage35_patch17.o tests/stage35_patch17.s
-ld -o build/stage35_patch17 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage35_patch17.o
+ld --wrap=calendarDateSpaghetti -o build/stage35_patch17 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage35_patch17.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage36_discovery18.o tests/stage36_discovery18.s
-ld -o build/stage36_discovery18 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage36_discovery18.o
+ld --wrap=calendarDateSpaghetti -o build/stage36_discovery18 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage36_discovery18.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage37_patch18.o tests/stage37_patch18.s
-ld -o build/stage37_patch18 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage37_patch18.o
+ld --wrap=calendarDateSpaghetti -o build/stage37_patch18 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage37_patch18.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage38_discovery19.o tests/stage38_discovery19.s
-ld -o build/stage38_discovery19 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage38_discovery19.o
+ld --wrap=calendarDateSpaghetti -o build/stage38_discovery19 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage38_discovery19.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage39_patch19.o tests/stage39_patch19.s
-ld -o build/stage39_patch19 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage39_patch19.o
+ld --wrap=calendarDateSpaghetti -o build/stage39_patch19 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage39_patch19.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage40_discovery20.o tests/stage40_discovery20.s
 as --64 -o build/stage41_stage40_abi_bridge.o tests/stage41_stage40_abi_bridge.s
-ld --wrap=bi_cmp -o build/stage40_discovery20 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage40_discovery20.o build/stage41_stage40_abi_bridge.o
+ld --wrap=calendarDateSpaghetti --wrap=bi_cmp -o build/stage40_discovery20 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage40_discovery20.o build/stage41_stage40_abi_bridge.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage41_patch20.o tests/stage41_patch20.s
-ld -o build/stage41_patch20 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage41_patch20.o
+ld --wrap=calendarDateSpaghetti -o build/stage41_patch20 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage41_patch20.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage42_discovery21.o tests/stage42_discovery21.s
-ld -o build/stage42_discovery21 build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/stage42_discovery21.o
+ld --wrap=calendarDateSpaghetti -o build/stage42_discovery21 build/arena.o build/bigint.o build/bootstrap.o build/catalog.o build/oracle.o build/oracle_calendar.o build/oracle_structure.o build/stage42_discovery21.o build/stage54_previous_main_bridge.o
 
 as --64 -o build/stage43_patch21.o tests/stage43_patch21.s
-ld -o build/stage43_patch21 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage43_patch21.o
+ld --wrap=calendarDateSpaghetti -o build/stage43_patch21 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage43_patch21.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage44_discovery22.o tests/stage44_discovery22.s
-ld -o build/stage44_discovery22 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage44_discovery22.o
+ld --wrap=calendarDateSpaghetti -o build/stage44_discovery22 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage44_discovery22.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage45_patch22.o tests/stage45_patch22.s
-ld -o build/stage45_patch22 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage45_patch22.o
+ld --wrap=calendarDateSpaghetti -o build/stage45_patch22 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage45_patch22.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage46_discovery23.o tests/stage46_discovery23.s
-ld -o build/stage46_discovery23 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage46_discovery23.o
+ld --wrap=calendarDateSpaghetti -o build/stage46_discovery23 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage46_discovery23.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage47_patch23.o tests/stage47_patch23.s
-ld -o build/stage47_patch23 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage47_patch23.o
+ld --wrap=calendarDateSpaghetti -o build/stage47_patch23 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage47_patch23.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage48_discovery24.o tests/stage48_discovery24.s
-ld -o build/stage48_discovery24 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage48_discovery24.o
+ld --wrap=calendarDateSpaghetti -o build/stage48_discovery24 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage48_discovery24.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage49_patch24.o tests/stage49_patch24.s
-ld -o build/stage49_patch24 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage49_patch24.o
+ld --wrap=calendarDateSpaghetti -o build/stage49_patch24 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage49_patch24.o build/stage54_previous_main_bridge.o
 as --64 -o build/patch22_month_names_regression.o tests/patch22_month_names_regression.s
-ld -o build/patch22_month_names_regression build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/patch22_month_names_regression.o
+ld --wrap=calendarDateSpaghetti -o build/patch22_month_names_regression build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/patch22_month_names_regression.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage50_discovery25.o tests/stage50_discovery25.s
-ld -o build/stage50_discovery25 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage50_discovery25.o
+ld --wrap=calendarDateSpaghetti -o build/stage50_discovery25 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage50_discovery25.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage51_patch25.o tests/stage51_patch25.s
-ld -o build/stage51_patch25 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage51_patch25.o
+ld --wrap=calendarDateSpaghetti -o build/stage51_patch25 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage51_patch25.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage52_discovery26.o tests/stage52_discovery26.s
-ld -o build/stage52_discovery26 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage52_discovery26.o
+ld --wrap=calendarDateSpaghetti -o build/stage52_discovery26 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage52_discovery26.o build/stage54_previous_main_bridge.o
 as --64 -o build/stage53_patch26.o tests/stage53_patch26.s
-ld -o build/stage53_patch26 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage53_patch26.o
+ld --wrap=calendarDateSpaghetti -o build/stage53_patch26 build/arena.o build/bigint.o build/bootstrap.o build/oracle.o build/stage53_patch26.o build/stage54_previous_main_bridge.o
+ld -o build/stage54_final_integration build/arena.o build/bigint.o build/bootstrap.o build/stage54_integration.o build/catalog.o build/stage54_final_integration.o

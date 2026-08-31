@@ -963,3 +963,26 @@
 `STAGE53_PATCH26_GREEN`
 
 Ⲙⲛ Stage 54 integration code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 53.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 54 — FINAL SPAGHETTI-MONSTER INTEGRATION
+
+Ⲡ`calendarDateSpaghetti` ⲧⲉⲛⲟⲩ ⲡⲉ ⲡroute ⲛⲕⲩⲣⲓⲟⲥ ⲛⲟⲩⲱⲧ. Ⲡmain ⲛϥⲃⲟⲗ ⲁⲛ ⲉⲃⲟⲗ ⲙⲡⲉⲛⲧⲁϥϣⲱⲡⲉ ϩⲓ ⲛⲃⲁⲑⲙⲟⲥ 2..53: ⲡ`calendarDateSpaghettiLegacyDiagnostic` ⲟⲩⲏϩ callable ⲁⲩⲱ ϥⲣϩⲱⲃ ⲛϣⲟⲣⲡ ϩⲙ invocation ⲛⲓⲙ.
+
+Ⲡ`sauceWithScars` ⲙⲟⲟϣⲉ ϩⲓⲧⲛ `sauceWithOrderAt46Latch`; ⲡⲁⲓ ⲕⲱ ⲛⲥⲱϥ ⲙⲡpatched counts, stones, hidden/visible drops, permutation, alias pours, shadow bowls, `orderAt46Latch`, post-stirs, query ⲙⲛ `selectionPatch14`. Ⲙⲛⲛⲥⲱϥ ⲡyear manager ⲕⲱ ⲙⲡgate chain, candidate filter, Year 5000 ⲙⲛ sequential year walk. Ⲡstructure manager ⲥⲱⲟⲩϩ ⲙⲡ`stage54StructureSauce`, cutlet partition, distinct names, `VirtualLegacyList`, whole-weave DP, month names ⲙⲛ `monster_day_in_month_route`.
+
+### Ⲡghost transaction
+
+Ⲁⲩϭⲓⲛⲉ ϫⲉ `arena_reset` ⲕⲧⲟ ⲙⲙⲁⲧⲉ ⲙⲡpointer ⲁⲗⲗⲁ ⲛϥϥⲓ ⲁⲛ ⲛⲛbytes ⲛⲧⲁⲡlegacy manager ⲥϩⲁⲓ. Ⲡⲁⲓ ⲁϥⲧⲁⲙⲓⲟ ⲛⲟⲩhistory-dependent structure ϩⲙⲡintegration. Ⲙⲡⲟⲩⲃⲟⲗ ⲉⲃⲟⲗ ⲙⲡlegacy manager. Ⲁⲩⲟⲩⲱϩ ⲙⲡ`stage54ScrubGhostArena`: ⲡregion `[ghostStart,ghostEnd)` ⲥϩⲁⲓ ⲛ0 ⲉⲣⲟϥ ϩⲁⲑⲏ ⲙⲡ`arena_reset`. Ⲡyear-candidate table ⲥϩⲁⲓ ⲛ0 ⲉϩⲟⲩⲛ ⲛⲕⲉⲥⲟⲡ, ⲉⲧⲣⲉⲥⲧⲙϫⲓ ⲙⲡold bytes ⲛⲟⲩarena region.
+
+### Ⲡpending ⲙⲛ commit
+
+Ⲡyear structure ⲣ ⲛ`pending` ⲛϣⲟⲣⲡ. `stage54ValidatePendingStructure` ⲥⲙⲓⲛⲉ ⲙⲡcutlet/month bounds ⲙⲛ ⲡsum ⲙⲡmonth lengths. Ⲙⲟⲛⲟⲛ ⲙⲛⲛⲥⲁ ⲡvalidation ⲡpointer ⲕⲧⲟ ⲉ`committed`. `stage54FinalizeFiveFields` ⲧⲁⲙⲓⲟ ⲛⲟⲩRES ⲙⲛ 5 ⲛfields ⲙⲙⲁⲧⲉ.
+
+### Ⲡvalidation
+
+`STAGE54_INTEGRATION_GREEN`
+
+Ⲡsame-line Assembly differential ϩⲙ `calculationDay=FOUNDATION+1,targetDay=FOUNDATION` ⲧⲁϫⲣⲟ ⲙⲡ5 ⲛfields ⲧⲏⲣⲟⲩ ⲙⲛ ⲡlocal oracle, ⲛⲕⲉⲥⲟⲡ ⲉⲣⲉ ⲡoracle allocation history ϩⲁⲑⲏ ⲙⲡmonster call. Ⲟⲩtwo-call witness ⲧⲁϫⲣⲟ `STAGE54_REPEAT_GREEN`.
+
+Ⲛⲃⲁⲑⲙⲟⲥ 1..53 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛGREEN. Ⲙⲛ Stage 55 audit code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 54.

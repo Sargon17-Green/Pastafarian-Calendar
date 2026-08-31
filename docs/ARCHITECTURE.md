@@ -958,3 +958,44 @@
 Ⲉϣϫⲉ ⲡlegacy ⲙⲛ ⲡcorrect year numbers ⲧⲱⲛ, ⲡlegacy ghost ⲕⲧⲟ ⲉⲡsemantic output. Ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡcorrect year ⲟⲩⲏϩ authoritative ⲁⲩⲱ ⲡghost ⲟⲩⲏϩ diagnostic.
 
 `tests/stage52_discovery26.s` ⲟⲩⲏϩ byte-for-byte ⲛsame ⲁⲩⲱ ϯ `STAGE52_REGRESSION_GREEN`. Ⲙⲛ Stage 54 final-integration layer ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 53.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 54 — ⲡfinal authoritative monster
+
+Ⲡproduction entry ⲡⲉ `calendarDateSpaghetti`. Ⲡold entry ⲁϥϫⲓ ⲙⲡⲣⲁⲛ `calendarDateSpaghettiLegacyDiagnostic`; ⲡbody ⲛⲧⲟϥ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ. Ⲛtests ⲛⲧⲉ Stages 1..53 ⲙⲟⲟϣⲉ ϩⲓⲧⲛ `stage54_previous_main_bridge.s`, ⲁⲗⲗⲁ ⲡStage 54 binary ⲛϥlink ⲁⲛ ⲙⲡbridge.
+
+### Ⲡstate machine
+
+`phase 10` — legacy diagnostics
+
+`phase 20` — target-year manager
+
+`phase 30` — pending year-structure manager
+
+`phase 40` — duplicated validation ⲙⲛ commit
+
+`phase 50` — five-field builder
+
+`phase 60` — final invariant validation
+
+`phase 80` — retry/recovery
+
+`phase 90` — success
+
+Ⲡ`MonsterContext` ⲕⲱ ⲛ`pending`, `committed`, `result`, `year`, `structure`, `retry`, `validations`, `metrics`, `logs`, `legacyStatus` ⲙⲛ `seen`. Ⲛ`metrics` ⲙⲛ `logs` ⲥⲉⲟ ⲛobservability state ⲙⲙⲁⲧⲉ; ⲛⲥⲉϣⲟⲟⲡ ⲁⲛ ϩⲙⲡsemantic selector.
+
+### Ⲡghost ownership
+
+Ⲡlegacy manager ⲣϩⲱⲃ ⲛϣⲟⲣⲡ. Ⲡarena mark ⲕⲱ ⲙⲡstart. Ⲙⲛⲛⲥⲁ ⲡghost chain, `stage54ScrubGhostArena` ⲥϩⲁⲓ ⲛ0 ⲉⲡregion, ⲙⲛⲛⲥⲱⲥ `arena_reset` ⲕⲧⲟ ⲙⲡmark. Ⲙⲛ pointer ⲛⲧⲉⲡghost region ⲉϥⲃⲱⲕ ⲉⲡpending ⲏ committed state.
+
+### Ⲡauthoritative chain
+
+`sauceWithScars -> sauceWithOrderAt46Latch`
+
+`stage54_find_target_year -> gate chain -> year candidate filter -> sequential walk`
+
+`stage54BuildYearStructure -> stage54StructureSauce -> monster_cutlet_partition_route -> monster_cutlet_names_route -> monster_month_length_family_route -> stage54WeavingWithGhost -> monster_month_names_route_big`
+
+`stage54FinalizeFiveFields -> monster_day_in_month_route -> RES[5]`
+
+Ⲙⲛ oracle symbol ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction link ⲙⲡStage 54.

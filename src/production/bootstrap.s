@@ -325,7 +325,19 @@
 .equ CTX_STAGE53_EQUAL_GHOST_YEAR,2584
 .equ CTX_STAGE53_EQUAL_ROUTE_YEAR,2592
 .equ CTX_STAGE53_SEEN,2600
-.equ CTX_SIZE,2608
+.equ CTX_STAGE54_PHASE,2608
+.equ CTX_STAGE54_PENDING,2616
+.equ CTX_STAGE54_COMMITTED,2624
+.equ CTX_STAGE54_RESULT,2632
+.equ CTX_STAGE54_YEAR,2640
+.equ CTX_STAGE54_STRUCTURE,2648
+.equ CTX_STAGE54_RETRY,2656
+.equ CTX_STAGE54_VALIDATIONS,2664
+.equ CTX_STAGE54_METRICS,2672
+.equ CTX_STAGE54_LOGS,2680
+.equ CTX_STAGE54_LEGACY_STATUS,2688
+.equ CTX_STAGE54_SEEN,2696
+.equ CTX_SIZE,2704
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -507,7 +519,7 @@ legacy_bowl_stir_stone_by_position:
 .global monster_validate_base
 .global monster_metrics_bump
 .global monster_dispatch_base
-.global calendarDateSpaghetti
+.global calendarDateSpaghettiLegacyDiagnostic
 .global oldRemainder
 .global savePatch
 .global monster_stage03_save_patch_wrapper
@@ -12572,8 +12584,8 @@ monster_stage53_year_ownership_patch_handler:
 .size monster_stage53_year_ownership_patch_handler,.-monster_stage53_year_ownership_patch_handler
 
 
-.type calendarDateSpaghetti,@function
-calendarDateSpaghetti:
+.type calendarDateSpaghettiLegacyDiagnostic,@function
+calendarDateSpaghettiLegacyDiagnostic:
     push rbp
     mov rbp,rsp
     push r12
@@ -12791,4 +12803,4 @@ calendarDateSpaghetti:
     pop r12
     leave
     ret
-.size calendarDateSpaghetti,.-calendarDateSpaghetti
+.size calendarDateSpaghettiLegacyDiagnostic,.-calendarDateSpaghettiLegacyDiagnostic

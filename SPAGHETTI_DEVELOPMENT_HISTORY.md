@@ -1126,3 +1126,28 @@
 `STAGE52_REGRESSION_GREEN`
 
 `STAGE53_PATCH26_GREEN`
+
+
+## Ⲃⲁⲑⲙⲟⲥ 54 — FINAL SPAGHETTI-MONSTER INTEGRATION
+
+### Ⲛⲉⲩⲙⲉⲉⲩⲉ
+
+Ⲛⲉⲩⲙⲉⲉⲩⲉ ϫⲉ ⲟⲩ`arena_mark` ⲙⲛ `arena_reset` ⲛⲁⲣ ⲙⲡlegacy manager ⲉϥⲟ ⲛⲟⲩghost transaction ⲉϥⲧⲁϫⲣⲏⲩ, ϫⲉ ⲡsemantic pointers ⲛⲥⲉⲟⲩⲏϩ ⲁⲛ ϩⲙⲡghost region.
+
+### Ⲡⲉⲛⲧⲁⲩⲛⲁⲩ ⲉⲣⲟϥ
+
+Ⲁⲩⲛⲁⲩ ϫⲉ `arena_reset` ⲕⲧⲟ ⲙⲡallocation pointer ⲁⲗⲗⲁ ⲛϥⲥⲱϥ ⲁⲛ ⲛⲛbytes. Ⲡlegacy diagnostics ⲁⲩⲥϩⲁⲓ ϩⲙⲡregion ⲁⲩⲱ ⲡauthoritative year-candidate table ⲁϥⲱϣ ⲙⲡold bytes ϩⲙⲡⲙⲁ ⲛzero. Ⲡwitness ⲛϣⲟⲣⲡ ⲁϥϣⲓⲃⲉ ⲙⲡcutlet canonical index `10 -> 11` ⲙⲛⲛⲥⲁ ⲡghost chain.
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲛⲥⲱϥ
+
+Ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡlegacy chain ⲏ ⲛscar. Ⲁⲩⲟⲩⲱϩ ⲙⲡ`stage54ScrubGhostArena` ⲉϥⲥϩⲁⲓ ⲛ0 ⲉ`[start,end)` ϩⲁⲑⲏ ⲙⲡrollback. Ⲁⲩⲕⲱ ⲟⲛ ⲙⲡexplicit zero initialization ⲙⲡyear-candidate table. Ⲡⲁⲓ ⲕⲱ ⲙⲡghost ⲉϥⲣϩⲱⲃ ⲛⲁⲙⲉ, ⲁⲗⲗⲁ ⲛϥⲕⲱ ⲁⲛ ⲛⲟⲩsemantic residue.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡⲁⲓ ⲧⲱⲛ
+
+Ⲡscrub ⲙⲛ zero-init ⲛⲥⲉϣⲓⲃⲉ ⲁⲛ ⲙⲡnormative calculation; ⲥⲉϥⲓ ⲙⲙⲁⲧⲉ ⲙⲡallocation-history input ⲉⲧⲉ ⲛϥϣⲟⲟⲡ ⲁⲛ ϩⲙⲡscroll. Ⲡ`pending -> validate -> committed` chain ⲕⲱ ⲙⲡsemantic owner ⲉϥⲟⲩⲱⲛϩ.
+
+### Ⲡlayer ⲛⲧⲁⲩⲟⲩⲟϩⲥ
+
+Ⲁⲩⲟⲩⲱϩ ⲛ`stage54_integration.s`, `sauceWithScars`, gate/year managers, structure manager, validation manager, result manager, retry states, metrics/log counters, compatibility bridge ⲛⲛtests ⲉⲧϩⲁⲑⲏ, ghost scrub ⲙⲛ exact five-field commit.
+
+`STAGE54_INTEGRATION_GREEN`
