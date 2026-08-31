@@ -1027,3 +1027,42 @@
 Ⲡ`MonsterContext` ⲁϥⲁϣⲁⲓ ⲉ2768 bytes ⲙⲛ ⲛStage 56 witness fields. Ⲡactive-context adapter ⲟ ⲛstack-like ownership: `stage56ContextEnter` ϯ ⲙⲡprevious pointer, ⲁⲩⲱ `stage56ContextLeave` ⲕⲧⲟ ⲙⲙⲟϥ ϩⲙⲡexit.
 
 Ⲛhistorical regression binaries ⲥⲉⲟ ⲛisolated ϩⲓⲧⲛ test-only `--wrap=stage56SauceRawBowlSumCorrective`; ⲡproduction link ⲛϥϫⲓ ⲙⲡbridge ⲁⲛ.
+
+
+## Ⲡfinal corrective layer — Stage 56 VERIFIED
+
+Ⲡauthoritative sauce chain ⲧⲉⲛⲟⲩ ⲡⲉ:
+
+`sauceWithScars -> stage56SauceRawBowlSumCorrective -> stage56PostStirRawBowlSumDetour`
+
+Ⲡlegacy `postStirOneOverwritingOrderMemoryStage22` ⲣϩⲱⲃ ⲛϣⲟⲣⲡ ⲛstir ⲛⲓⲙ ⲉϫⲛ ghost copy. Ⲡsaved order number ⲟⲩⲏϩ source ⲙⲡpermutation; ⲡauthoritative post-stir `u` operand ⲡⲉ `rawBowlSum`.
+
+Ⲡfirst-day structure path ⲙⲟⲟϣⲉ ϩⲓⲧⲛ `.Ls54ss_correct`; ⲡequal-target Stage 41 ghost shortcut ⲛϥⲟ ⲁⲛ ⲛsemantic owner.
+
+### Ⲡruntime soft-failure detour
+
+Ⲡruntime ⲕⲱ ⲛ5 ⲛold process-abort scars ϩⲙⲡsource, ⲁⲗⲗⲁ ⲛlive failure edges ⲛⲥⲉⲙⲟⲟϣⲉ ⲁⲛ ⲉⲣⲟⲟⲩ. Ⲛlive detours ⲡⲉ:
+
+`arena_alloc -> .Larena_soft_fail`
+
+`arena_reset -> .Larena_reset_soft_fail`
+
+`bi_reserve -> .Lbires_soft_fail`
+
+`bi_divmod_u64_abs -> .Lbd64_soft_fail`
+
+`bi_divmod_abs -> .Lbda_soft_fail`
+
+Ⲡdetour ⲕⲧⲟ ⲛfailure sentinel ⲉⲡcaller/state-machine ⲁϫⲛ process termination. Ⲡlegacy exit code ⲟⲩⲏϩ byte-visible ⲙⲙⲁⲧⲉ ⲛscar.
+
+### Ⲡverification boundary
+
+Ⲡproduction trees `src/production`, `src/runtime`, `src/catalog` ⲟ ⲛAssembly `.s` ⲙⲙⲁⲧⲉ. Ⲙⲛ production oracle symbol, ⲙⲛ interpreter, ⲙⲛ Stage 56 internal syscall. ⲚStage 56 audit ELFs ⲟ ⲛx86-64 statically linked ⲁⲩⲱ `NO_INTERP=PASS`.
+
+`STAGE56_SEMANTIC_RUNTIME_RC=0`
+
+`STAGE55_FULL_RC=0`
+
+`STATIC_RUNTIME_AUDIT_RC=0`
+
+`FINAL_RC=0`

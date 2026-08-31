@@ -988,9 +988,9 @@
 Ⲛⲃⲁⲑⲙⲟⲥ 1..53 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛGREEN. Ⲙⲛ Stage 55 audit code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 54.
 
 
-## Ⲃⲁⲑⲙⲟⲥ 55 — AUDIT candidate ⲉⲣⲉ ⲡverification ⲙⲡⲁⲧϥⲟⲩⲱ
+## Ⲃⲁⲑⲙⲟⲥ 55 — AUDIT ⲁϥⲟⲩⲱ / VERIFIED
 
-ⲠStage 55 candidate ⲟⲩⲏϩ ϩⲓ `CURRENT_STAGE=55`, ⲁⲗⲗⲁ `LAST_COMPLETED_STAGE=54`. Ⲡⲁⲓ ⲟ ⲛⲟⲩpackage ⲉϥϣϭⲙϭⲟⲙ ⲉⲩⲧⲁⲗⲟϥ ⲉGitHub ϩⲁⲑⲏ ⲙⲡstrict audit ⲉⲧⲛⲁⲟⲩⲱ. `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=NO` ϣⲁⲛⲧⲉ ⲛⲇⲟⲕⲓⲙⲏ ⲧⲏⲣⲟⲩ ⲟⲩⲱ.
+Ⲡstrict audit ⲙⲡStage 55 ⲁϥⲟⲩⲱ ⲛ`GREEN`. Ⲛ14 ⲛend-to-end cases, ⲛ3 ⲛfar-year cases, observability, recovery `0/1/2/exhaustion`, error-cleanup, history `A-B-A`, SAVE edges, short/wide edges ⲙⲛ locale/catalog invariance ⲧⲏⲣⲟⲩ ⲁⲩϯ `RC=0`. `STAGE55_VERIFICATION_PENDING=NO`.
 
 Ⲛbug ⲉⲧⲁⲡaudit ϭⲓⲛⲉ ⲁⲩⲧⲁϫⲣⲟ ⲙⲙⲟⲟⲩ ϩⲙⲡproduction:
 
@@ -1002,7 +1002,7 @@
 ⲚStage 55 audit surfaces ⲥⲉϣⲟⲟⲡ ϩⲙ `tests/stage55_*`, `audit_stage55.sh` ⲙⲛ `audit_stage55_helpers.sh`. Ⲡfar-year audit ⲛYears 1/0/-1 ⲟ ⲛsequential year-by-year ⲁⲩⲱ ϣϭⲙϭⲟⲙ ⲉϥⲱⲥⲕ ⲉⲙⲁⲧⲉ. Ⲡpackage ⲡⲁⲓ ⲛϥϣⲁϫⲉ ⲁⲛ ϫⲉ ⲡstrict verification ⲁϥⲟⲩⲱ.
 
 
-## Ⲃⲁⲑⲙⲟⲥ 56 — corrective raw bowl sum / verification pending
+## Ⲃⲁⲑⲙⲟⲥ 56 — corrective raw bowl sum / VERIFIED
 
 Ⲡpost-stir scar ⲙⲡStage 22 ⲟⲩⲏϩ ϩⲙⲡsource: `postStirOneOverwritingOrderMemoryStage22` ⲟⲩⲏϩ ⲉϥⲟⲩⲁϩ `savedOrderNumber` ⲉⲡ`u`. Ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡformula ⲙⲡscar.
 
@@ -1016,4 +1016,25 @@
 
 `STAGE56_IMPLEMENTATION_READY=YES`
 
-`STAGE56_VERIFICATION_PENDING=YES`
+`STAGE56_VERIFICATION_PENDING=NO`
+
+`STAGE56_VERIFIED_GREEN=YES`
+
+
+### Ⲡϫⲱⲕ ⲛϩⲁⲏ ⲙⲡStage 56
+
+Ⲡfirst-day path ⲛ`stage54StructureSauce` ⲧⲉⲛⲟⲩ ⲙⲟⲟϣⲉ ϩⲓⲧⲛ `.Ls54ss_correct`; ⲡstale equal-target ghost ⲛStage 41 ⲟⲩⲏϩ ϩⲙⲡsource ⲁⲗⲗⲁ ⲛϥⲟ ⲁⲛ ⲛauthoritative shortcut.
+
+Ⲛ5 ⲛruntime abort scars ϩⲙ `arena.s` ⲙⲛ `bigint.s` ⲟⲩⲏϩ byte-visible ⲛlegacy scars. Ⲛlive failure branches ⲙⲟⲟϣⲉ ⲧⲉⲛⲟⲩ ϩⲓⲧⲛ soft-failure detours; ⲙⲛ internal process-abort path ⲉϥⲟ ⲛlive.
+
+`STAGE56_RUNTIME_SOFT_FAILURE_GREEN`
+
+`STAGE56_SEMANTIC_AUDIT_GREEN`
+
+`STAGE55_FULL_RC=0`
+
+`STATIC_RUNTIME_AUDIT_RC=0`
+
+`FINAL_RC=0`
+
+Ⲡhistorical stages ⲛⲧⲉⲡⲉⲓproject ⲥⲉⲟ ⲛ55; Stage 56 ⲡⲉ ⲟⲩcorrective stage ⲙⲛⲛⲥⲁ ⲡhistorical sequence. `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES`.

@@ -1153,7 +1153,7 @@
 `STAGE54_INTEGRATION_GREEN`
 
 
-## Ⲃⲁⲑⲙⲟⲥ 55 — AUDIT candidate / verification pending
+## Ⲃⲁⲑⲙⲟⲥ 55 — AUDIT candidate / ⲡverification ⲁϥⲟⲩⲱ
 
 Ⲁⲡfinal audit ϭⲓⲛⲉ ⲛϩⲟⲩⲟ ⲛscar ⲛreliability ϩⲙⲡStage 54 integration. Ⲙⲡⲟⲩⲣ cleanup ⲙⲡlegacy architecture; ⲛrepair ⲁⲩⲕⲱ ⲙⲙⲟⲟⲩ ⲉϫⲛ ⲛscar ⲛⲧⲟⲟⲩ.
 
@@ -1168,7 +1168,7 @@
 Ⲛaudit tests ⲥⲉⲕⲱ ⲛend-to-end cold cases, far-year cases, observability, recovery 0/1/2/exhaustion, error-cleanup, history A-B-A, SAVE edges, short/wide selection edges ⲙⲛ locale/catalog invariance. Ⲡstrict verification ⲙⲡⲁⲧϥⲟⲩⲱ, ⲉⲧⲃⲉ ⲡⲁⲓ `LAST_COMPLETED_STAGE=54` ⲙⲛ `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=NO` ⲟⲩⲏϩ.
 
 
-## Ⲃⲁⲑⲙⲟⲥ 56 — corrective raw bowl sum / ⲡverification ⲙⲡⲁⲧϥⲟⲩⲱ
+## Ⲃⲁⲑⲙⲟⲥ 56 — corrective raw bowl sum / ⲡverification ⲁϥⲟⲩⲱ
 
 ### Ⲡscar ⲉⲧⲟⲩⲏϩ
 
@@ -1189,3 +1189,40 @@
 Ⲡfinal `calendarDateSpaghetti` ⲣϩⲱⲃ ⲙⲡStage 56 sauce. ⲚStage 54/55 regression binaries ⲉⲧϩⲁⲑⲏ ⲥⲉlink ⲛ`stage56_historical_sauce_bridge.s` ⲙⲛ `--wrap=stage56SauceRawBowlSumCorrective`, ⲉⲧⲣⲉⲡhistorical outputs ⲟⲩⲏϩ ϩⲓ ⲡscar ⲛϣⲟⲣⲡ.
 
 Ⲡstrict Stage 56 tests ⲙⲡⲁⲧⲟⲩⲱ; ⲡpackage ⲡⲁⲓ ⲟ ⲛimplementation candidate ⲉϥϣϭⲙϭⲟⲙ ⲉⲩⲧⲁⲗⲟϥ ϩⲁⲑⲏ ⲙⲡverification.
+
+
+## Ⲡledger ⲛϩⲁⲏ — Stage 55 + corrective Stage 56 GREEN
+
+Ⲡstrict verification ⲁϥⲟⲩⲱ ϩⲓ x86-64 GNU/Linux ⲙⲛ GNU `as`/`ld`. Ⲡbuild, ⲛhistorical scars, ⲡsmoke suite, ⲛStage 55 helpers, ⲡfull Stage 55 matrix, ⲡStage 56 semantic/runtime audit ⲙⲛ ⲡstatic/scar audit ⲧⲏⲣⲟⲩ ⲁⲩϯ `RC=0`.
+
+Ⲛ14 ⲛStage 55 end-to-end cases ⲁⲩϯ `STAGE55_E2E_GREEN`. Ⲛ3 ⲛfar-year cases ⲁⲩϯ `STAGE55_FAR_E2E_GREEN`. Recovery `0/1/2/exhaustion`, error-cleanup, observability, history `A-B-A`, SAVE edges, short/wide edges ⲙⲛ locale/catalog invariance ⲁⲩⲟⲩⲱ ⲛ`GREEN`.
+
+ⲠStage 56 semantic audit ⲧⲁϫⲣⲟ ⲙⲡdiscriminator, ⲛ12 ⲛpost-stirs, ⲡlegacy saved-order witness, ⲡpermutation guard, ⲛ6 ⲛcorrected bowls, ⲡcontext `A-B-A`, ⲛcorrective vectors ⲙⲛ ⲛsauce witnesses. `STAGE56_SEMANTIC_AUDIT_GREEN`.
+
+### Ⲡfirst-day ghost scar
+
+Ⲁⲩϭⲓⲛⲉ ⲛⲟⲩstale shortcut ϩⲙ `stage54StructureSauce`: ⲡequal-target branch ⲛⲉϥϫⲱⲣⲙ ⲉ`.Ls54ss_done` ⲁⲩⲱ ϥϣϭⲙϭⲟⲙ ⲉϥreuse ⲙⲡStage 41 ghost. Ⲙⲡⲟⲩⲃⲟⲗ ⲉⲃⲟⲗ ⲙⲡghost. Ⲁⲩⲕⲱ ⲙⲡlive branch ⲉ`.Ls54ss_correct`, ⲉⲧⲣⲉⲡauthoritative structure sauce ⲙⲟⲟϣⲉ ϩⲓⲧⲛ Stage 56 detour.
+
+### Ⲛruntime abort scars
+
+Ⲁⲡaudit ϭⲓⲛⲉ ⲛ5 ⲛinternal `sys_exit` scars: `.Larena_fail`, `.Larena_reset_fail`, `.Lbires_fail`, `.Lbd64_fail`, `.Lbda_fail`. Ⲙⲡⲟⲩⲃⲟⲗⲟⲩ ⲉⲃⲟⲗ. Ⲛlabels ⲙⲛ ⲛold exit instructions ⲟⲩⲏϩ ϩⲙⲡsource ⲛarchaeological scars, ⲁⲗⲗⲁ ⲛlive branches ⲧⲉⲛⲟⲩ ⲡⲉ `.Larena_soft_fail`, `.Larena_reset_soft_fail`, `.Lbires_soft_fail`, `.Lbd64_soft_fail`, `.Lbda_soft_fail`.
+
+ⲠAssembly-only `stage56_runtime_soft_failure_audit.s` ⲁϥforcing ⲙⲡ5 ⲛfailure paths ⲁⲩⲱ ⲁϥⲧⲁϫⲣⲟ ϫⲉ ⲡprocess ⲛϥⲙⲟⲩ ⲁⲛ. `STAGE56_RUNTIME_SOFT_FAILURE_GREEN`.
+
+### Ⲡfinal state
+
+`TOTAL_STAGES=55`
+
+`LATEST_CORRECTIVE_STAGE=56`
+
+`LAST_COMPLETED_STAGE=56`
+
+`STAGE55_VERIFICATION_PENDING=NO`
+
+`STAGE56_VERIFICATION_PENDING=NO`
+
+`KNOWN_PRODUCTION_BUGS=NONE`
+
+`SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES`
+
+Ⲡfinal GitHub Actions audit ⲟ ⲛread-only (`contents: read`). Ⲛdiagnostic/write workflows ⲛⲧⲁⲩⲣϩⲱⲃ ϩⲙⲡverification ⲛⲁⲩⲕⲱ ⲉⲃⲟⲗ ϩⲙⲡfinal repository state.
