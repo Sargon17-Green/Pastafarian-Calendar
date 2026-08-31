@@ -764,3 +764,24 @@
 `legacyYearJumpAdapter` ⲙⲟⲩⲧⲉ ⲉ`oldJumpGuess` ⲛⲟⲩⲙⲉ. `monster_year_jump_route` ⲙⲟⲟϣⲉ ⲉⲡadapter ⲛⲧⲟϥ ϩⲙⲡDISCOVERY 18. `monster_stage36_legacy_year_jump_handler` ⲣ ⲛⲟⲩdirect copy ⲙⲛ ⲟⲩroute copy ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲡtrace ⲧⲏⲣϥ ϩⲙⲡMonsterContext ⲛⲧⲉⲡinvocation.
 
 Ⲙⲡⲟⲩⲧⲁⲙⲓⲟ ⲙⲡ`patchedNextYear`, `patchedPreviousYear`, `findYearByWalkPatch`, sequential transition trace, year cache, ⲏ code ⲙⲡPATCH 19.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 37 — PATCH 18
+
+### Ⲡⲉⲛⲧⲁⲩⲕⲱ ⲉϫⲱϥ
+
+Ⲡ`oldJumpGuess` ⲙⲡⲟⲩϥⲱϫⲉ ⲙⲙⲟϥ. Ⲡpatched path ⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛtelemetry ⲛϣⲟⲣⲡ, ⲁⲗⲗⲁ ⲛϥϫⲓ ⲁⲛ ⲙⲡⲉϥresult ⲛⲟⲩsemantic year.
+
+`findYearByWalkPatch` ⲁⲣⲭⲉⲓ ϩⲙⲡYear-5000 anchor. Ⲡforward loop ⲙⲟⲩⲧⲉ ⲉ`patchedNextYear` ⲛⲟⲩⲥⲟⲡ ϩⲓ iteration ⲛⲓⲙ; ⲡbackward loop ⲙⲟⲩⲧⲉ ⲉ`patchedPreviousYear` ⲛⲧⲉⲓϩⲉ ⲛⲟⲩⲱⲧ.
+
+### Ⲉⲧⲃⲉ ⲟⲩ ⲡPATCH ⲧⲱⲛ
+
+Ⲡtarget ownership ⲟ ⲛ`openDay < target <= closeDay`. Ⲡwalk ⲛϥⲕⲧⲟ ⲁⲛ ⲉⲟⲩguess; ⲛϥⲕⲧⲟ ⲙⲙⲁⲧⲉ ⲉⲟⲩYear ⲉⲁⲩⲡⲱϩ ⲉⲣⲟϥ ϩⲓⲧⲛ adjacent transitions.
+
+Ⲡregression ⲧⲁϫⲣⲟ ⲙⲡ0/1/2 transition ⲛⲧⲉⲡside ⲡⲟⲩⲁ. Ⲡ`oldJumpGuess(firstDay+365)` ⲟⲩⲏϩ ⲉϥϯ `5001`, ϩⲟⲡⲟⲩ ⲡpatched route ϯ `5000`.
+
+### Ⲡⲧⲁⲡ ⲙⲙⲟⲛⲥⲧⲉⲣ
+
+ⲠStage 36 historic flag `GUESS_USED_AS_SEMANTIC` ⲟⲩⲏϩ ⲉϥⲥϩⲁⲓ ⲙⲡlegacy belief. ⲠStage 37 state ⲉϥϣⲟⲃⲉ ϩⲁⲣⲉϩ ⲉ`telemetryGuess`, `patchedYear`, final Year pointer, forward/backward step counts ⲙⲛ `TELEMETRY_ONLY=1`.
+
+Ⲙⲛ cache, ⲙⲛ global mutable semantic year state, ⲁⲩⲱ ⲙⲛ code ⲙⲡPATCH 19.

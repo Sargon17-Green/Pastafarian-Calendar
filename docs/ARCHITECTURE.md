@@ -575,3 +575,18 @@
 ⲠStage 35 selected span ⲟ ⲛ490. Ⲡtarget `firstDay+365` ⲙⲛ `closeDay` ⲟ ⲛinside ⲙⲡYear 5000 interval, ⲁⲗⲗⲁ ⲡ/365 jump ϯ ⲛYear 5001. Ⲡtest-only normative reference ⲙⲟⲩⲧⲉ ⲙⲙⲁⲧⲉ ⲉⲡexplicit interval ownership ⲛⲧⲉⲡprobe; ⲙⲛ oracle call ⲉϥϣⲟⲟⲡ ϩⲙⲡproduction.
 
 Ⲡstate ⲧⲏⲣϥ ⲟ ⲛinvocation-local. Ⲙⲛ sequential year walk, ⲙⲛ year cache, ⲙⲛ global mutable semantic state, ⲁⲩⲱ ⲙⲛ future patch code.
+
+
+## Ⲡsequential Year walk detour ⲙⲡⲃⲁⲑⲙⲟⲥ 37
+
+ⲠCOPY_DIAGNOSTIC ⲟ ⲛ`oldJumpGuess(.../365...)`. ⲠCOPY_AUTHORITATIVE ⲡⲉ:
+
+`monster_year_jump_route -> monster_stage37_year_walk_patch_wrapper -> findYearByWalkPatch`
+
+Ⲡwalk record ⲟ ⲛ`number/openDay/firstDay/closeDay`. `patchedNextYear` ⲧⲁⲙⲓⲟ ⲛⲟⲩadjacent record ⲉⲣⲉ ⲡknown close ⲟ ⲛnew open; `patchedPreviousYear` ⲕⲱ ⲙⲡknown open ⲛnew close. Ⲡtransition ⲡⲟⲩⲁ ⲟ ⲛphysical call ⲉⲧⲟⲩⲱⲛϩ, ⲁⲛ ⲟⲩmulti-year arithmetic jump.
+
+### EQUIVALENCE
+
+Ⲡloop ⲛforward ⲟⲩⲏϩ ϣⲁⲛⲧⲉ `target<=closeDay`. Ⲡloop ⲛbackward ⲟⲩⲏϩ ϣⲁⲛⲧⲉ `target>openDay`. Ⲉⲧⲃⲉ ⲡⲁⲓ ⲡfinal record ⲧⲱⲛ ⲙⲛ `(openDay,closeDay]`.
+
+Ⲡlegacy /365 guess ⲥⲏϩ ⲛtelemetry ⲙⲙⲁⲧⲉ. Ⲡstep counters ⲙⲛ ⲡfinal Year pointer ⲟ ⲛinvocation-local; ⲙⲛ year cache ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 37.

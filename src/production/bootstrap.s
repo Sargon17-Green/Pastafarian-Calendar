@@ -189,7 +189,15 @@
 .equ CTX_STAGE36_ROUTE_SEEN,1496
 .equ CTX_STAGE36_GUESS_USED_AS_SEMANTIC,1504
 .equ CTX_STAGE36_ANCHOR_LENGTH,1512
-.equ CTX_SIZE,1520
+.equ CTX_STAGE37_TELEMETRY_GUESS,1520
+.equ CTX_STAGE37_PATCHED_YEAR,1528
+.equ CTX_STAGE37_FINAL_YEAR,1536
+.equ CTX_STAGE37_FORWARD_STEPS,1544
+.equ CTX_STAGE37_BACKWARD_STEPS,1552
+.equ CTX_STAGE37_TELEMETRY_ONLY,1560
+.equ CTX_STAGE37_PATCH_SEEN,1568
+.equ CTX_STAGE37_TARGET_DAY,1576
+.equ CTX_SIZE,1584
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -446,6 +454,11 @@ legacy_bowl_stir_stone_by_position:
 .global legacyYearJumpAdapter
 .global monster_year_jump_route
 .global monster_stage36_legacy_year_jump_handler
+.global patchedNextYear
+.global patchedPreviousYear
+.global findYearByWalkPatch
+.global monster_stage37_year_walk_patch_wrapper
+.global monster_stage37_year_walk_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -6550,9 +6563,223 @@ legacyYearJumpAdapter:
     jmp oldJumpGuess
 .size legacyYearJumpAdapter,.-legacyYearJumpAdapter
 
+# Ⲃⲁⲑⲙⲟⲥ 37 — PATCH 18
+# ⲠoldJumpGuess ⲟⲩⲏϩ ⲉϥⲣϩⲱⲃ ⲛⲟⲩtelemetry scar. Ⲡsemantic path ⲛϥϫⲓ ⲁⲛ ⲙⲡguess;
+# ⲛϥⲙⲟⲟϣⲉ ⲉⲃⲟⲗ ϩⲙⲡYear 5000 ⲛⲟⲩyear ⲛⲟⲩyear, ⲙⲛⲟⲩtransition ⲛⲟⲩⲱⲧ ϩⲓ ⲧⲉⲓⲟⲩⲟⲉⲓϣ.
+.type patchedNextYear,@function
+patchedNextYear:
+    # rdi=known YJ*, rax=new YJ*. Ⲡtransition span ⲛⲏⲩ ⲉⲃⲟⲗ ϩⲙⲡknown interval ⲙⲡstaged Year model.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lpny_fail
+    mov rdi,qword ptr [r12+YJ_CLOSE_DAY]
+    mov rsi,qword ptr [r12+YJ_OPEN_DAY]
+    call bi_sub
+    test rax,rax
+    je .Lpny_fail
+    cmp qword ptr [rax+BI_SIGN],1
+    jne .Lpny_fail
+    mov r13,rax
+    mov edi,YJ_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Lpny_fail
+    mov r14,rax
+    mov rdi,qword ptr [r12+YJ_NUMBER]
+    mov esi,1
+    call bi_add_u64
+    test rax,rax
+    je .Lpny_fail
+    mov qword ptr [r14+YJ_NUMBER],rax
+    mov rdi,qword ptr [r12+YJ_CLOSE_DAY]
+    call bi_clone
+    test rax,rax
+    je .Lpny_fail
+    mov qword ptr [r14+YJ_OPEN_DAY],rax
+    mov rdi,rax
+    mov esi,1
+    call bi_add_u64
+    test rax,rax
+    je .Lpny_fail
+    mov qword ptr [r14+YJ_FIRST_DAY],rax
+    mov rdi,qword ptr [r14+YJ_OPEN_DAY]
+    mov rsi,r13
+    call bi_add
+    test rax,rax
+    je .Lpny_fail
+    mov qword ptr [r14+YJ_CLOSE_DAY],rax
+    mov rax,r14
+    jmp .Lpny_done
+.Lpny_fail:
+    xor eax,eax
+.Lpny_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size patchedNextYear,.-patchedNextYear
+
+.type patchedPreviousYear,@function
+patchedPreviousYear:
+    # rdi=known YJ*, rax=new YJ*. Ⲡopen gate ⲛⲧⲉⲡknown year ⲟ ⲛclose gate ⲙⲡprevious year.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    sub rsp,8
+    mov r12,rdi
+    test r12,r12
+    je .Lppy_fail
+    mov rdi,qword ptr [r12+YJ_CLOSE_DAY]
+    mov rsi,qword ptr [r12+YJ_OPEN_DAY]
+    call bi_sub
+    test rax,rax
+    je .Lppy_fail
+    cmp qword ptr [rax+BI_SIGN],1
+    jne .Lppy_fail
+    mov r13,rax
+    mov edi,YJ_SIZE
+    call arena_alloc
+    test rax,rax
+    je .Lppy_fail
+    mov r14,rax
+    mov rdi,1
+    call bi_from_u64
+    mov rsi,rax
+    mov rdi,qword ptr [r12+YJ_NUMBER]
+    call bi_sub
+    test rax,rax
+    je .Lppy_fail
+    mov qword ptr [r14+YJ_NUMBER],rax
+    mov rdi,qword ptr [r12+YJ_OPEN_DAY]
+    call bi_clone
+    test rax,rax
+    je .Lppy_fail
+    mov qword ptr [r14+YJ_CLOSE_DAY],rax
+    mov rsi,r13
+    mov rdi,rax
+    call bi_sub
+    test rax,rax
+    je .Lppy_fail
+    mov qword ptr [r14+YJ_OPEN_DAY],rax
+    mov rdi,rax
+    mov esi,1
+    call bi_add_u64
+    test rax,rax
+    je .Lppy_fail
+    mov qword ptr [r14+YJ_FIRST_DAY],rax
+    mov rax,r14
+    jmp .Lppy_done
+.Lppy_fail:
+    xor eax,eax
+.Lppy_done:
+    add rsp,8
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size patchedPreviousYear,.-patchedPreviousYear
+
+.type findYearByWalkPatch,@function
+findYearByWalkPatch:
+    # rdi=Year-5000 anchor YJ*, rsi=target BigInt*.
+    # rax=semantic year-number BigInt*, rdx=final YJ*, rcx=forward steps, r8=backward steps, r9=legacy telemetry guess.
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,32
+    mov r12,rdi
+    mov r13,rsi
+    test r12,r12
+    je .Lfywp_fail
+    test r13,r13
+    je .Lfywp_fail
+
+    # Ⲡscar /365 ⲙⲟⲟϣⲉ ⲛⲟⲩⲙⲉ ⲁⲩⲱ ⲡresult ⲥⲏϩ ⲙⲙⲁⲧⲉ ϩⲙ telemetry.
+    mov rdi,r12
+    mov rsi,r13
+    call oldJumpGuess
+    test rax,rax
+    je .Lfywp_fail
+    mov qword ptr [rbp-40],rax
+    mov r14,r12
+    xor r15d,r15d
+    mov qword ptr [rbp-48],0
+
+.Lfywp_forward:
+    mov rdi,r13
+    mov rsi,qword ptr [r14+YJ_CLOSE_DAY]
+    call bi_cmp
+    test eax,eax
+    jle .Lfywp_backward
+    mov rdi,r14
+    call patchedNextYear
+    test rax,rax
+    je .Lfywp_fail
+    mov r14,rax
+    inc r15
+    jne .Lfywp_forward
+    jmp .Lfywp_fail
+
+.Lfywp_backward:
+    mov rdi,r13
+    mov rsi,qword ptr [r14+YJ_OPEN_DAY]
+    call bi_cmp
+    test eax,eax
+    jg .Lfywp_found
+    mov rdi,r14
+    call patchedPreviousYear
+    test rax,rax
+    je .Lfywp_fail
+    mov r14,rax
+    inc qword ptr [rbp-48]
+    jne .Lfywp_backward
+    jmp .Lfywp_fail
+
+.Lfywp_found:
+    mov rax,qword ptr [r14+YJ_NUMBER]
+    mov rdx,r14
+    mov rcx,r15
+    mov r8,qword ptr [rbp-48]
+    mov r9,qword ptr [rbp-40]
+    jmp .Lfywp_done
+.Lfywp_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+    xor r9d,r9d
+.Lfywp_done:
+    add rsp,32
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size findYearByWalkPatch,.-findYearByWalkPatch
+
+.type monster_stage37_year_walk_patch_wrapper,@function
+monster_stage37_year_walk_patch_wrapper:
+    jmp findYearByWalkPatch
+.size monster_stage37_year_walk_patch_wrapper,.-monster_stage37_year_walk_patch_wrapper
+
 .type monster_year_jump_route,@function
 monster_year_jump_route:
-    jmp legacyYearJumpAdapter
+    jmp monster_stage37_year_walk_patch_wrapper
 .size monster_year_jump_route,.-monster_year_jump_route
 
 # ⲠDISCOVERY 18 handler ⲕⲱ ⲙⲡguess /365 ⲛⲧⲟϥ ⲉⲣⲟϥ ⲛsemantic year number, ⲉⲧⲃⲉ ϫⲉ ⲡtarget ⲟⲩⲏϩ ϩⲙⲡanchor interval.
@@ -6617,6 +6844,62 @@ monster_stage36_legacy_year_jump_handler:
     leave
     ret
 .size monster_stage36_legacy_year_jump_handler,.-monster_stage36_legacy_year_jump_handler
+
+
+# ⲠPATCH 18 handler ϩⲁⲣⲉϩ ⲉⲡold guess ⲛtelemetry ⲁⲩⲱ ⲉⲡyear ⲉⲧⲁⲩϭⲓⲛⲉϥ ϩⲓⲧⲛ ⲡsequential walk.
+.type monster_stage37_year_walk_patch_handler,@function
+monster_stage37_year_walk_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms37_fail
+    call stage36Year5000JumpAnchorFromPatchedTie
+    test rax,rax
+    je .Lms37_fail
+    mov r13,rax
+    mov rdi,qword ptr [r13+YJ_FIRST_DAY]
+    mov esi,365
+    call bi_add_u64
+    test rax,rax
+    je .Lms37_fail
+    mov r14,rax
+    mov qword ptr [r12+CTX_STAGE37_TARGET_DAY],r14
+
+    mov rdi,r13
+    mov rsi,r14
+    call oldJumpGuess
+    test rax,rax
+    je .Lms37_fail
+    mov qword ptr [r12+CTX_STAGE37_TELEMETRY_GUESS],rax
+
+    mov rdi,r13
+    mov rsi,r14
+    call monster_year_jump_route
+    test rax,rax
+    je .Lms37_fail
+    mov qword ptr [r12+CTX_STAGE37_PATCHED_YEAR],rax
+    mov qword ptr [r12+CTX_STAGE37_FINAL_YEAR],rdx
+    mov qword ptr [r12+CTX_STAGE37_FORWARD_STEPS],rcx
+    mov qword ptr [r12+CTX_STAGE37_BACKWARD_STEPS],r8
+    mov qword ptr [r12+CTX_STAGE37_TELEMETRY_ONLY],1
+    inc qword ptr [r12+CTX_STAGE37_PATCH_SEEN]
+    mov eax,1
+    jmp .Lms37_done
+.Lms37_fail:
+    xor eax,eax
+.Lms37_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage37_year_walk_patch_handler,.-monster_stage37_year_walk_patch_handler
 
 
 .type calendarDateSpaghetti,@function
@@ -6752,6 +7035,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage36_legacy_year_jump_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage37_year_walk_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

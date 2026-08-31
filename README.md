@@ -488,3 +488,20 @@
 Ⲡsame-line regression ⲧⲁϫⲣⲟ 6 ⲛboundary/probe target. Ⲡroute ⲛStage 36 ϣⲟⲃⲉ 2 ⲛcase, ⲁⲩⲱ ⲡcontext probe ϣⲟⲃⲉ ⲟⲛ 1 ⲛcase; ⲡtotal ⲟ ⲛ3 ⲛmismatch ⲉⲩⲧⲟϣ.
 
 ⲠStage 36 ⲟ ⲛ`EXPECTED_RED`; ⲛStage 1–35 ⲥⲉⲟ ⲛ`GREEN`. Ⲙⲛ `patchedNextYear`, `patchedPreviousYear`, year-by-year walk ⲏ cache ⲙⲡPATCH 19 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 37 — PATCH 18
+
+Ⲡ`oldJumpGuess(.../365...)` ⲟⲩⲏϩ ⲁϫⲛ ⲟⲩϣⲓⲃⲉ ⲁⲩⲱ ⲉϥⲙⲟⲩⲧⲉ ⲉⲣⲟϥ ⲛⲟⲩⲙⲉ ⲛtelemetry. Ⲡresult ⲙⲡguess ⲛϥⲣ ⲁⲛ ⲛⲟⲩsemantic authority.
+
+Ⲁⲩⲟⲩⲱϩ ⲉϫⲛ `patchedNextYear`, `patchedPreviousYear` ⲙⲛ `findYearByWalkPatch`. Ⲡwalk ⲁⲣⲭⲉⲓ ϩⲙⲡYear 5000 anchor ⲁⲩⲱ ⲛϥⲣ ⲛⲟⲩtransition ⲛⲟⲩⲱⲧ ϩⲓ iteration ⲛⲓⲙ.
+
+`monster_year_jump_route -> monster_stage37_year_walk_patch_wrapper -> findYearByWalkPatch`
+
+Ⲡownership ⲟ ⲛ`(openDay,closeDay]`. Ⲉϣϫⲉ `target>closeDay`, ⲟⲩ`patchedNextYear` ⲛⲟⲩⲱⲧ ⲙⲟⲟϣⲉ. Ⲉϣϫⲉ `target<=openDay`, ⲟⲩ`patchedPreviousYear` ⲛⲟⲩⲱⲧ ⲙⲟⲟϣⲉ. Ⲛϥⲕⲧⲟ ⲙⲙⲁⲧⲉ ⲙⲛⲛⲥⲁ ⲡtarget ⲟ ϩⲙⲡinterval.
+
+Ⲡsame-line Stage 37 regression ⲧⲁϫⲣⲟ ⲙⲡ0, 1 ⲙⲛ 2 ⲛtransition ϩⲓ ⲡforward ⲙⲛ ⲡbackward side. Ⲡopening gate ⲛⲧⲉⲡYear 5000 ⲧⲁϫⲣⲟ ϫⲉ ⲟ ⲙⲡYear 4999.
+
+ⲠStage 36 test ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲙⲟϥ; ⲁϥⲕⲧⲟϥ ⲉ`STAGE36_REGRESSION_GREEN`. ⲠStage 37 ⲟ ⲛ`STAGE37_PATCH18_GREEN`.
+
+Ⲙⲛ year cache ⲙⲡPATCH 19 ⲉϥϣⲟⲟⲡ ⲉⲧⲓ.
