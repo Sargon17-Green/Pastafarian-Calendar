@@ -879,3 +879,34 @@
 `STAGE48_DISCOVERY24_EXPECTED_RED`
 
 ⲚStage 1–47 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛGREEN. Ⲙⲛ `DPUnrankLegalWeaving`, legal-weave DP, ghost/correct selector ⲏ Stage 49 code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 48.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 49 — PATCH 24
+
+### Ⲡwhole-weave DP detour
+
+Ⲡ`oldMonthWeavingEachDaySeparately` ⲙⲛ `legacyChooseEachDaySeparately` ⲟⲩⲏϩ callable ⲁⲩⲱ ⲙⲡⲟⲩϣⲓⲃⲉ ⲙⲡⲉⲩlegacy daily-choice work. Ⲡauthoritative route ⲧⲉⲛⲟⲩ ⲡⲉ:
+
+`monster_month_weaving_route -> monster_stage49_month_weaving_patch_wrapper -> monthWeavingPatch24`
+
+Ⲡdetour ⲧⲁⲙⲓⲟ ⲛⲟⲩseparate ghost row ⲁⲩⲱ ⲙⲟⲩⲧⲉ ⲉ`legacyChooseEachDaySeparately` ⲛϣⲟⲣⲡ ϩⲙ call ⲛⲓⲙ. Ⲙⲛⲛⲥⲱⲥ ϥⲙⲟⲩⲧⲉ ⲉ`DPUnrankLegalWeaving` ⲙⲛ ⲡsame `lengths` ⲙⲛ ⲡ`wantedRank` BigInt, ⲁⲩⲱ ⲡcorrect row ⲡⲉ ⲡauthoritative candidate.
+
+### Ⲡlegal DP invariant
+
+Ⲡstate ⲕⲱ ⲛ`remaining[1..m]`, `openedUpTo` ⲙⲛ `closedUpTo`. Ⲟⲩmonth `j` ϣϭⲙϭⲟⲙ ⲉϥⲃⲱⲕ ⲉⲡnext position ⲉϣϫⲉ `remaining[j]>0`, ⲁⲩⲱ ⲉϣϫⲉ ⲙⲡⲁⲧⲟⲩⲟⲩⲱⲛ ⲙⲙⲟϥ ϥϣⲟⲟⲡ `j=openedUpTo+1`; ⲉϣϫⲉ ⲡmove ⲛⲁⲙⲟⲩϩ ⲙⲡmonth, ϥϣⲟⲟⲡ `j=closedUpTo+1`. Ⲡⲁⲓ ⲧⲁϫⲣⲟ ⲙⲡfirst-occurrence order ⲙⲛ ⲡlast-occurrence order ⲙⲙⲁⲩⲁⲁⲩ.
+
+`CountWeavingsByDP` ϯ ⲙⲡexact BigInt count. `DPUnrankLegalWeaving` ⲟ ⲛone-based exact lexicographic unrank: ϩⲙ position ⲛⲓⲙ ϥϭⲱϣⲧ ⲉmonth ids ϩⲙ ascending order, ϥⲱϣ ⲙⲡlegal suffix count, ⲁⲩⲱ ϥⲃⲱⲗ ⲉⲃⲟⲗ ⲙⲡwhole blocks ϣⲁⲛⲧⲉϥϩⲉ ⲉⲡblock ⲙⲡrank. Ⲡcount ⲙⲛ ⲡrank ⲛⲥⲉⲕⲱ ⲁⲛ ⲛⲟⲩu64 boundary.
+
+### Ⲡghost selector ⲙⲛ witness
+
+Ⲉϣϫⲉ ⲡghost ⲧⲱⲛ exactly ⲙⲛ ⲡcorrect row, ⲡwrapper ⲕⲱ ⲙⲡghost bytes ⲉⲡoutput ⲁⲩⲱ ⲥϩⲁⲓ `ghost-reused=1`. Ⲉϣϫⲉ ⲥⲉϣⲟⲃⲉ, ⲡghost ⲟⲩⲏϩ diagnostic ⲙⲙⲁⲧⲉ ⲁⲩⲱ ⲡcorrect row ⲟⲩⲏϩ authoritative.
+
+Ϩⲙ `lengths=[4,4]`, `answers=[2]`, `wantedRank=1`, ⲡlive ghost ⲡⲉ `[2,2,2,2,1,1,1,1]`, ⲁⲗⲗⲁ ⲡroute ϯ `[1,1,1,1,2,2,2,2]`. Ⲡexact legal-family count ⲡⲉ 20. Ⲛranks 1, 2 ⲙⲛ 20 ⲁⲩⲧⲁϫⲣⲟ ⲛⲥⲉⲟ ⲛlexicographic order. Ϩⲙ `answers=[1]`, `rank=1`, ⲡghost ⲙⲛ ⲡcorrect ⲧⲱⲛ ⲁⲩⲱ ⲡreuse branch ⲣϩⲱⲃ ⲛⲟⲩⲙⲉ.
+
+ⲠAssembly differential sweep ⲧⲁϫⲣⲟ ⲙⲡcount/unrank ⲙⲛ ⲡsame-line Assembly oracle ϩⲓ 15 ⲛcases ⲙⲛ 2..4 ⲛmonths. Ⲟⲩ12-month witness ⲧⲁϫⲣⲟ ⲙⲡmulti-limb `rank=count`; ⲟⲩ47-month witness ⲧⲁϫⲣⲟ ⲙⲡmax month-count path ⲙⲛ rank 1.
+
+`STAGE48_REGRESSION_GREEN`
+
+`STAGE49_PATCH24_GREEN`
+
+Ⲙⲛ Stage 50 ⲏ PATCH 25 day-in-month code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 49.

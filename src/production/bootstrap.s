@@ -280,7 +280,17 @@
 .equ CTX_STAGE48_LEGACY_SEEN,2224
 .equ CTX_STAGE48_ROUTE_SEEN,2232
 .equ CTX_STAGE48_SEEN,2240
-.equ CTX_SIZE,2248
+.equ CTX_STAGE49_GHOST_WEAVE,2248
+.equ CTX_STAGE49_CORRECT_WEAVE,2256
+.equ CTX_STAGE49_COUNT_BIG,2264
+.equ CTX_STAGE49_GHOST_SEEN,2272
+.equ CTX_STAGE49_PATCH_SEEN,2280
+.equ CTX_STAGE49_GHOST_REUSED_EQUAL,2288
+.equ CTX_STAGE49_CORRECT_USED_DIFFERENT,2296
+.equ CTX_STAGE49_EQUAL_GHOST,2304
+.equ CTX_STAGE49_EQUAL_ROUTE,2312
+.equ CTX_STAGE49_SEEN,2320
+.equ CTX_SIZE,2328
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -365,6 +375,14 @@
 .equ E46_COUNT,32
 .equ E46_FILL,40
 .equ E46_SIZE,48
+.equ W49_LENGTHS,0
+.equ W49_M,8
+.equ W49_TOTAL,16
+.equ W49_STRIDE,24
+.equ W49_TABLE,32
+.equ W49_PROGRESS,40
+.equ W49_ONE,48
+.equ W49_SIZE,56
 
 .section .data.rel.ro
 .align 8
@@ -427,6 +445,8 @@ legacy_bowl_stir_stone_by_position:
 
 .section .text
 .extern arena_alloc
+.extern arena_mark
+.extern arena_reset
 .extern bi_abs
 .extern bi_divmod_u64_abs
 .extern bi_mod_abs
@@ -443,6 +463,11 @@ legacy_bowl_stir_stone_by_position:
 .extern bi_clone
 .extern bi_add_u64
 .extern bi_add
+.extern bi_zero
+.extern bi_new
+.extern bi_sub_abs_inplace
+.extern bi_cmp
+.extern bi_mul
 .global monster_context_new
 .global monster_validate_base
 .global monster_metrics_bump
@@ -634,6 +659,11 @@ legacy_bowl_stir_stone_by_position:
 .global legacyChooseEachDaySeparately
 .global monster_month_weaving_route
 .global monster_stage48_legacy_daily_month_weaving_handler
+.global CountWeavingsByDP
+.global DPUnrankLegalWeaving
+.global monthWeavingPatch24
+.global monster_stage49_month_weaving_patch_wrapper
+.global monster_stage49_month_weaving_patch_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -10334,7 +10364,7 @@ legacyChooseEachDaySeparately:
 # ⲠDISCOVERY route ⲟⲩⲏϩ authoritative ⲉⲡlegacy daily chooser; ⲡwantedRank ⲛϥⲣϩⲱⲃ ⲁⲛ.
 .type monster_month_weaving_route,@function
 monster_month_weaving_route:
-    jmp legacyChooseEachDaySeparately
+    jmp monster_stage49_month_weaving_patch_wrapper
 .size monster_month_weaving_route,.-monster_month_weaving_route
 
 .section .rodata
@@ -10417,6 +10447,871 @@ monster_stage48_legacy_daily_month_weaving_handler:
     leave
     ret
 .size monster_stage48_legacy_daily_month_weaving_handler,.-monster_stage48_legacy_daily_month_weaving_handler
+
+.section .rodata
+.align 8
+stage49_answers_equal:
+    .quad 1
+.section .text
+
+
+# Ⲃⲁⲑⲙⲟⲥ 49 — PATCH 24
+# Ⲡdaily chooser ⲟⲩⲏϩ callable ⲁⲩⲱ ⲉϥⲣϩⲱⲃ ⲛlive ghost. Ⲡauthoritative row ⲡⲉ ⲡlexicographic whole-weave unrank.
+
+# Ⲡvalidation ⲙⲡmonth-length row. rdi=lengths*, rsi=m; rax=total ⲉϣϫⲉ ⲥⲱⲧⲡ, 0 ⲉⲙⲙⲟⲛ.
+.type stage49ValidateWeavingInput,@function
+stage49ValidateWeavingInput:
+    test rdi,rdi
+    je .Ls49vwi_fail
+    test rsi,rsi
+    je .Ls49vwi_fail
+    cmp rsi,47
+    ja .Ls49vwi_fail
+    xor eax,eax
+    xor ecx,ecx
+.Ls49vwi_loop:
+    cmp rcx,rsi
+    jae .Ls49vwi_done
+    mov rdx,qword ptr [rdi+rcx*8]
+    cmp rdx,4
+    jb .Ls49vwi_fail
+    cmp rdx,123
+    ja .Ls49vwi_fail
+    add rax,rdx
+    jc .Ls49vwi_fail
+    cmp rax,5778
+    ja .Ls49vwi_fail
+    inc rcx
+    jmp .Ls49vwi_loop
+.Ls49vwi_done:
+    ret
+.Ls49vwi_fail:
+    xor eax,eax
+    ret
+.size stage49ValidateWeavingInput,.-stage49ValidateWeavingInput
+
+.type stage49WeavingBinomialStepDown,@function
+stage49WeavingBinomialStepDown:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    cmp r13,r14
+    jbe .Ls49bsd_zero
+    mov rsi,r13
+    sub rsi,r14
+    mov rdi,r12
+    call bi_mul_u64
+    mov r15,rax
+    mov rdi,r15
+    mov rsi,r13
+    call bi_divmod_u64_abs
+    mov r15,rax
+    test rdx,rdx
+    jne .Ls49bsd_fail
+    mov rax,r15
+    jmp .Ls49bsd_done
+.Ls49bsd_zero:
+    call bi_zero
+    jmp .Ls49bsd_done
+.Ls49bsd_fail:
+    xor eax,eax
+.Ls49bsd_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size stage49WeavingBinomialStepDown,.-stage49WeavingBinomialStepDown
+
+.type stage49WeavingPrepare,@function
+stage49WeavingPrepare:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    xor r14d,r14d
+    xor ebx,ebx
+.Ls49wp_sum:
+    cmp rbx,r13
+    jae .Ls49wp_sum_done
+    add r14,qword ptr [r12+rbx*8]
+    inc rbx
+    jmp .Ls49wp_sum
+.Ls49wp_sum_done:
+    mov rdi,W49_SIZE
+    call arena_alloc
+    mov r15,rax
+    mov qword ptr [r15+W49_LENGTHS],r12
+    mov qword ptr [r15+W49_M],r13
+    mov qword ptr [r15+W49_TOTAL],r14
+    lea rax,[r14+1]
+    mov qword ptr [r15+W49_STRIDE],rax
+    mov rcx,r13
+    inc rcx
+    imul rcx,rax
+    mov rdi,rcx
+    shl rdi,3
+    call arena_alloc
+    mov qword ptr [r15+W49_TABLE],rax
+    mov rdi,rax
+    xor eax,eax
+    mov rcx,qword ptr [r15+W49_M]
+    inc rcx
+    imul rcx,qword ptr [r15+W49_STRIDE]
+    rep stosq
+    mov rdi,qword ptr [r15+W49_M]
+    inc rdi
+    shl rdi,3
+    call arena_alloc
+    mov qword ptr [r15+W49_PROGRESS],rax
+    mov rdi,rax
+    xor eax,eax
+    mov rcx,qword ptr [r15+W49_M]
+    inc rcx
+    rep stosq
+    mov rdi,1
+    call bi_from_u64
+    mov qword ptr [r15+W49_ONE],rax
+    mov rax,r15
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage49WeavingPrepare,.-stage49WeavingPrepare
+
+.type stage49WeavingPersistScratch,@function
+stage49WeavingPersistScratch:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,4480
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,qword ptr [r12+BI_SIGN]
+    mov r15,qword ptr [r12+BI_LEN]
+    cmp r15,560
+    ja .Ls49wps_fail
+    mov rsi,qword ptr [r12+BI_DATA]
+    mov rdi,rsp
+    mov rcx,r15
+    rep movsq
+    mov rdi,r13
+    call arena_reset
+    mov rdi,r15
+    test rdi,rdi
+    jne .Ls49wps_cap
+    mov rdi,1
+.Ls49wps_cap:
+    call bi_new
+    mov rbx,rax
+    mov qword ptr [rbx+BI_SIGN],r14
+    mov qword ptr [rbx+BI_LEN],r15
+    test r15,r15
+    je .Ls49wps_done_copy
+    mov rsi,rsp
+    mov rdi,qword ptr [rbx+BI_DATA]
+    mov rcx,r15
+    rep movsq
+.Ls49wps_done_copy:
+    mov rax,rbx
+    add rsp,4480
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.Ls49wps_fail:
+    xor eax,eax
+    add rsp,4480
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage49WeavingPersistScratch,.-stage49WeavingPersistScratch
+
+.type stage49WeavingSuffixGet,@function
+stage49WeavingSuffixGet:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,48
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    cmp r13,qword ptr [r12+W49_M]
+    ja .Ls49ws_fail
+    cmp r14,qword ptr [r12+W49_TOTAL]
+    ja .Ls49ws_fail
+    cmp r13,qword ptr [r12+W49_M]
+    jne .Ls49ws_not_base
+    mov rax,qword ptr [r12+W49_ONE]
+    jmp .Ls49ws_done
+.Ls49ws_not_base:
+    mov rax,r13
+    imul rax,qword ptr [r12+W49_STRIDE]
+    add rax,r14
+    mov rdx,qword ptr [r12+W49_TABLE]
+    mov rax,qword ptr [rdx+rax*8]
+    test rax,rax
+    jne .Ls49ws_done
+    mov rdx,qword ptr [r12+W49_PROGRESS]
+    mov r15,qword ptr [rdx+r13*8]
+    test r15,r15
+    jne .Ls49ws_extend
+    mov rax,qword ptr [r12+W49_LENGTHS]
+    mov rbx,qword ptr [rax+r13*8]
+    mov rdi,r12
+    lea rsi,[r13+1]
+    lea rdx,[rbx-1]
+    call stage49WeavingSuffixGet
+    mov rcx,r13
+    imul rcx,qword ptr [r12+W49_STRIDE]
+    mov rdx,qword ptr [r12+W49_TABLE]
+    mov qword ptr [rdx+rcx*8],rax
+    mov rdx,qword ptr [r12+W49_PROGRESS]
+    mov qword ptr [rdx+r13*8],1
+    mov r15,1
+.Ls49ws_extend:
+    cmp r15,r14
+    ja .Ls49ws_fetch
+    mov qword ptr [rbp-48],r15
+    mov rax,qword ptr [r12+W49_LENGTHS]
+    mov rbx,qword ptr [rax+r13*8]
+    mov rdi,r12
+    lea rsi,[r13+1]
+    mov rdx,r15
+    add rdx,rbx
+    dec rdx
+    call stage49WeavingSuffixGet
+    mov qword ptr [rbp-56],rax
+    call arena_mark
+    mov qword ptr [rbp-72],rax
+    mov rdi,r15
+    add rdi,rbx
+    sub rdi,2
+    mov rsi,rbx
+    sub rsi,2
+    call stage42LegacyBinomialU64
+    mov rdi,rax
+    mov rsi,qword ptr [rbp-56]
+    call bi_mul
+    mov qword ptr [rbp-64],rax
+    mov rax,r13
+    imul rax,qword ptr [r12+W49_STRIDE]
+    add rax,r15
+    dec rax
+    mov rdx,qword ptr [r12+W49_TABLE]
+    mov rdi,qword ptr [rdx+rax*8]
+    mov rsi,qword ptr [rbp-64]
+    call bi_add
+    mov rdi,rax
+    mov rsi,qword ptr [rbp-72]
+    call stage49WeavingPersistScratch
+    mov r15,qword ptr [rbp-48]
+    mov rcx,r13
+    imul rcx,qword ptr [r12+W49_STRIDE]
+    add rcx,r15
+    mov rdx,qword ptr [r12+W49_TABLE]
+    mov qword ptr [rdx+rcx*8],rax
+    inc r15
+    mov rdx,qword ptr [r12+W49_PROGRESS]
+    mov qword ptr [rdx+r13*8],r15
+    jmp .Ls49ws_extend
+.Ls49ws_fetch:
+    mov rax,r13
+    imul rax,qword ptr [r12+W49_STRIDE]
+    add rax,r14
+    mov rdx,qword ptr [r12+W49_TABLE]
+    mov rax,qword ptr [rdx+rax*8]
+    test rax,rax
+    je .Ls49ws_fail
+.Ls49ws_done:
+    add rsp,48
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.Ls49ws_fail:
+    xor eax,eax
+    add rsp,48
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage49WeavingSuffixGet,.-stage49WeavingSuffixGet
+
+.type stage49WeavingActiveProduct,@function
+stage49WeavingActiveProduct:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov rdi,1
+    call bi_from_u64
+    mov r15,rax
+    xor ebx,ebx
+.Ls49wa_loop:
+    cmp r14,r13
+    jae .Ls49wa_done
+    mov rcx,qword ptr [r12+r14*8]
+    test rcx,rcx
+    je .Ls49wa_fail
+    mov rdi,rbx
+    add rdi,rcx
+    dec rdi
+    mov rsi,rcx
+    dec rsi
+    call stage42LegacyBinomialU64
+    mov rdi,r15
+    mov rsi,rax
+    call bi_mul
+    mov r15,rax
+    add rbx,qword ptr [r12+r14*8]
+    inc r14
+    jmp .Ls49wa_loop
+.Ls49wa_done:
+    mov rax,r15
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.Ls49wa_fail:
+    xor eax,eax
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage49WeavingActiveProduct,.-stage49WeavingActiveProduct
+
+.type stage49WeavingUnrankPrepared,@function
+stage49WeavingUnrankPrepared:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,128
+    mov r12,rdi
+    mov r15,rdx
+    mov rdi,rsi
+    call bi_clone
+    mov r14,rax
+    mov r13,qword ptr [r12+W49_M]
+    mov rdi,r13
+    shl rdi,3
+    call arena_alloc
+    mov qword ptr [rbp-48],rax
+    mov rdx,qword ptr [r12+W49_LENGTHS]
+    xor ecx,ecx
+    xor ebx,ebx
+.Ls49wu_init:
+    cmp rcx,r13
+    jae .Ls49wu_init_done
+    mov rax,qword ptr [rdx+rcx*8]
+    mov r8,qword ptr [rbp-48]
+    mov qword ptr [r8+rcx*8],rax
+    add rbx,rax
+    inc rcx
+    jmp .Ls49wu_init
+.Ls49wu_init_done:
+    mov qword ptr [rbp-56],0
+    mov qword ptr [rbp-64],0
+    mov qword ptr [rbp-72],0
+.Ls49wu_position:
+    cmp qword ptr [rbp-72],rbx
+    jae .Ls49wu_done
+    mov qword ptr [rbp-80],0
+.Ls49wu_candidate:
+    mov rax,qword ptr [rbp-80]
+    cmp rax,r13
+    jae .Ls49wu_fail
+    mov rdx,qword ptr [rbp-48]
+    mov rcx,qword ptr [rdx+rax*8]
+    test rcx,rcx
+    je .Ls49wu_next_candidate
+    mov r9,rax
+    inc r9
+    mov r10,qword ptr [rbp-56]
+    mov r11,qword ptr [rbp-64]
+    cmp r9,r10
+    jbe .Ls49wu_opened
+    lea rax,[r10+1]
+    cmp r9,rax
+    jne .Ls49wu_next_candidate
+    jmp .Ls49wu_open_rule_ok
+.Ls49wu_opened:
+    mov rax,qword ptr [r12+W49_LENGTHS]
+    mov rax,qword ptr [rax+r9*8-8]
+    cmp rcx,rax
+    jne .Ls49wu_open_rule_ok
+    mov rax,qword ptr [rbp-56]
+    inc rax
+    cmp r9,rax
+    jne .Ls49wu_next_candidate
+.Ls49wu_open_rule_ok:
+    cmp rcx,1
+    jne .Ls49wu_legal
+    mov rax,qword ptr [rbp-64]
+    inc rax
+    cmp r9,rax
+    jne .Ls49wu_next_candidate
+.Ls49wu_legal:
+    mov qword ptr [rbp-88],rcx
+    mov qword ptr [rbp-96],r10
+    mov qword ptr [rbp-104],r11
+    mov rax,qword ptr [rbp-80]
+    mov rdx,qword ptr [rbp-48]
+    dec qword ptr [rdx+rax*8]
+    mov rax,qword ptr [rbp-80]
+    mov rcx,qword ptr [r12+W49_LENGTHS]
+    mov rcx,qword ptr [rcx+rax*8]
+    cmp qword ptr [rbp-88],rcx
+    jne .Ls49wu_after_open_update
+    inc qword ptr [rbp-56]
+.Ls49wu_after_open_update:
+    cmp qword ptr [rbp-88],1
+    jne .Ls49wu_after_close_update
+    inc qword ptr [rbp-64]
+.Ls49wu_after_close_update:
+    mov rax,qword ptr [rbp-64]
+    xor r10d,r10d
+.Ls49wu_total_loop:
+    cmp rax,qword ptr [rbp-56]
+    jae .Ls49wu_total_done
+    mov rdx,qword ptr [rbp-48]
+    add r10,qword ptr [rdx+rax*8]
+    inc rax
+    jmp .Ls49wu_total_loop
+.Ls49wu_total_done:
+    mov qword ptr [rbp-112],r10
+    mov rdi,r12
+    mov rsi,qword ptr [rbp-56]
+    mov rdx,r10
+    call stage49WeavingSuffixGet
+    mov qword ptr [rbp-120],rax
+    call arena_mark
+    mov qword ptr [rbp-128],rax
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,qword ptr [rbp-56]
+    mov rdx,qword ptr [rbp-64]
+    call stage49WeavingActiveProduct
+    mov rdi,rax
+    mov rsi,qword ptr [rbp-120]
+    call bi_mul
+    mov qword ptr [rbp-136],rax
+    mov rdi,r14
+    mov rsi,rax
+    call bi_cmp
+    cmp eax,0
+    jle .Ls49wu_take
+    mov rdi,r14
+    mov rsi,qword ptr [rbp-136]
+    call bi_sub_abs_inplace
+    mov rdi,qword ptr [rbp-128]
+    call arena_reset
+    mov rax,qword ptr [rbp-80]
+    mov rdx,qword ptr [rbp-48]
+    mov rcx,qword ptr [rbp-88]
+    mov qword ptr [rdx+rax*8],rcx
+    mov rax,qword ptr [rbp-96]
+    mov qword ptr [rbp-56],rax
+    mov rax,qword ptr [rbp-104]
+    mov qword ptr [rbp-64],rax
+.Ls49wu_next_candidate:
+    inc qword ptr [rbp-80]
+    jmp .Ls49wu_candidate
+.Ls49wu_take:
+    mov rdi,qword ptr [rbp-128]
+    call arena_reset
+    mov rax,qword ptr [rbp-80]
+    inc rax
+    mov rcx,qword ptr [rbp-72]
+    mov qword ptr [r15+rcx*8],rax
+    inc qword ptr [rbp-72]
+    jmp .Ls49wu_position
+.Ls49wu_done:
+    mov rax,r15
+    add rsp,128
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.Ls49wu_fail:
+    xor eax,eax
+    add rsp,128
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size stage49WeavingUnrankPrepared,.-stage49WeavingUnrankPrepared
+
+# Ⲡexact count ⲙⲡlegal whole-weave family. rdi=lengths*, rsi=m; rax=BigInt*.
+.type CountWeavingsByDP,@function
+CountWeavingsByDP:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    mov r12,rdi
+    mov r13,rsi
+    call stage49ValidateWeavingInput
+    test rax,rax
+    je .Ls49cwd_fail
+    mov rdi,r12
+    mov rsi,r13
+    call stage49WeavingPrepare
+    test rax,rax
+    je .Ls49cwd_fail
+    mov rdi,rax
+    xor esi,esi
+    xor edx,edx
+    call stage49WeavingSuffixGet
+    jmp .Ls49cwd_done
+.Ls49cwd_fail:
+    xor eax,eax
+.Ls49cwd_done:
+    pop r13
+    pop r12
+    leave
+    ret
+.size CountWeavingsByDP,.-CountWeavingsByDP
+
+# Ⲡexact lexicographic unrank. rdi=lengths*, rsi=m, rdx=rank1 BigInt*, rcx=out*.
+.type DPUnrankLegalWeaving,@function
+DPUnrankLegalWeaving:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    test r14,r14
+    je .Ls49dulw_fail
+    test r15,r15
+    je .Ls49dulw_fail
+    cmp qword ptr [r14+BI_SIGN],1
+    jne .Ls49dulw_fail
+    mov rdi,r14
+    call bi_is_zero
+    test eax,eax
+    jne .Ls49dulw_fail
+    mov rdi,r12
+    mov rsi,r13
+    call stage49ValidateWeavingInput
+    test rax,rax
+    je .Ls49dulw_fail
+    mov rdi,r12
+    mov rsi,r13
+    call stage49WeavingPrepare
+    test rax,rax
+    je .Ls49dulw_fail
+    mov qword ptr [rbp-48],rax
+    mov rdi,rax
+    xor esi,esi
+    xor edx,edx
+    call stage49WeavingSuffixGet
+    test rax,rax
+    je .Ls49dulw_fail
+    mov qword ptr [rbp-56],rax
+    mov rdi,r14
+    mov rsi,rax
+    call bi_cmp
+    cmp eax,0
+    jg .Ls49dulw_fail
+    mov rdi,qword ptr [rbp-48]
+    mov rsi,r14
+    mov rdx,r15
+    call stage49WeavingUnrankPrepared
+    jmp .Ls49dulw_done
+.Ls49dulw_fail:
+    xor eax,eax
+.Ls49dulw_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size DPUnrankLegalWeaving,.-DPUnrankLegalWeaving
+
+# eax=1 ⲉϣϫⲉ ⲛrow ⲥⲛⲁⲩ ⲥⲉⲧⲱⲛ. rdi=a,rsi=b,rdx=count.
+.type stage49WeaveRowsEqual,@function
+stage49WeaveRowsEqual:
+    test rdi,rdi
+    je .Ls49wre_no
+    test rsi,rsi
+    je .Ls49wre_no
+    xor ecx,ecx
+.Ls49wre_loop:
+    cmp rcx,rdx
+    jae .Ls49wre_yes
+    mov rax,qword ptr [rdi+rcx*8]
+    cmp rax,qword ptr [rsi+rcx*8]
+    jne .Ls49wre_no
+    inc rcx
+    jmp .Ls49wre_loop
+.Ls49wre_yes:
+    mov eax,1
+    ret
+.Ls49wre_no:
+    xor eax,eax
+    ret
+.size stage49WeaveRowsEqual,.-stage49WeaveRowsEqual
+
+# Ⲡdetour ⲣ ⲙⲡlegacy ghost ⲛϣⲟⲣⲡ. Ⲡghost ⲃⲱⲕ ⲉⲡsemantic output ⲙⲙⲁⲧⲉ ⲉϣϫⲉ ghost==correct.
+# ABI ⲛⲧⲉ Stage48: rdi=lengths*,rsi=m,rdx=answers*,rcx=answerCount,r8=wantedRank BigInt*,r9=out*.
+# rax=out, rdx=live ghost*, rcx=1 ⲉϣϫⲉ ⲁⲩreuse ⲙⲡghost, r8=1 ⲉϣϫⲉ ⲡghost ⲁϥⲣϩⲱⲃ.
+.type monthWeavingPatch24,@function
+monthWeavingPatch24:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,24
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov rbx,r8
+    mov qword ptr [rbp-48],r9
+    test rbx,rbx
+    je .Ls49mwp_fail
+    cmp qword ptr [rbx+BI_SIGN],1
+    jne .Ls49mwp_fail
+    cmp qword ptr [rbp-48],0
+    je .Ls49mwp_fail
+    mov rdi,r12
+    mov rsi,r13
+    call stage49ValidateWeavingInput
+    test rax,rax
+    je .Ls49mwp_fail
+    mov qword ptr [rbp-56],rax
+    mov rdi,rax
+    shl rdi,3
+    jc .Ls49mwp_fail
+    call arena_alloc
+    test rax,rax
+    je .Ls49mwp_fail
+    mov qword ptr [rbp-64],rax
+
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,r14
+    mov rcx,r15
+    mov r8,rbx
+    mov r9,qword ptr [rbp-64]
+    call legacyChooseEachDaySeparately
+    test rax,rax
+    je .Ls49mwp_fail
+
+    mov rdi,r12
+    mov rsi,r13
+    mov rdx,rbx
+    mov rcx,qword ptr [rbp-48]
+    call DPUnrankLegalWeaving
+    test rax,rax
+    je .Ls49mwp_fail
+
+    mov rdi,qword ptr [rbp-64]
+    mov rsi,qword ptr [rbp-48]
+    mov rdx,qword ptr [rbp-56]
+    call stage49WeaveRowsEqual
+    test eax,eax
+    je .Ls49mwp_correct
+    xor r10d,r10d
+.Ls49mwp_copy_ghost:
+    cmp r10,qword ptr [rbp-56]
+    jae .Ls49mwp_equal
+    mov rax,qword ptr [rbp-64]
+    mov r11,qword ptr [rax+r10*8]
+    mov rax,qword ptr [rbp-48]
+    mov qword ptr [rax+r10*8],r11
+    inc r10
+    jmp .Ls49mwp_copy_ghost
+.Ls49mwp_equal:
+    mov ecx,1
+    jmp .Ls49mwp_success
+.Ls49mwp_correct:
+    xor ecx,ecx
+.Ls49mwp_success:
+    mov rax,qword ptr [rbp-48]
+    mov rdx,qword ptr [rbp-64]
+    mov r8d,1
+    jmp .Ls49mwp_done
+.Ls49mwp_fail:
+    xor eax,eax
+    xor edx,edx
+    xor ecx,ecx
+    xor r8d,r8d
+.Ls49mwp_done:
+    add rsp,24
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size monthWeavingPatch24,.-monthWeavingPatch24
+
+.type monster_stage49_month_weaving_patch_wrapper,@function
+monster_stage49_month_weaving_patch_wrapper:
+    jmp monthWeavingPatch24
+.size monster_stage49_month_weaving_patch_wrapper,.-monster_stage49_month_weaving_patch_wrapper
+
+# Ⲡhandler ⲧⲁϫⲣⲟ ⲙⲡdifferent branch ⲙⲛ ⲡequal branch ϩⲙⲡinvocation-local context.
+.type monster_stage49_month_weaving_patch_handler,@function
+monster_stage49_month_weaving_patch_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,16
+    mov r12,rdi
+    test r12,r12
+    je .Ls49handler_fail
+    mov edi,64
+    call arena_alloc
+    test rax,rax
+    je .Ls49handler_fail
+    mov r13,rax
+    mov edi,64
+    call arena_alloc
+    test rax,rax
+    je .Ls49handler_fail
+    mov r14,rax
+    mov edi,1
+    call bi_from_u64
+    test rax,rax
+    je .Ls49handler_fail
+    mov r15,rax
+
+    lea rdi,[rip+stage48_lengths_witness]
+    mov esi,2
+    call CountWeavingsByDP
+    test rax,rax
+    je .Ls49handler_fail
+    mov qword ptr [r12+CTX_STAGE49_COUNT_BIG],rax
+
+    lea rdi,[rip+stage48_lengths_witness]
+    mov esi,2
+    lea rdx,[rip+stage48_answers_witness]
+    mov ecx,1
+    mov r8,r15
+    mov r9,r13
+    call monster_month_weaving_route
+    test rax,rax
+    je .Ls49handler_fail
+    cmp r8,1
+    jne .Ls49handler_fail
+    cmp rcx,0
+    jne .Ls49handler_fail
+    test rdx,rdx
+    je .Ls49handler_fail
+    mov qword ptr [r12+CTX_STAGE49_GHOST_WEAVE],rdx
+    mov qword ptr [r12+CTX_STAGE49_CORRECT_WEAVE],r13
+    mov qword ptr [r12+CTX_STAGE49_GHOST_SEEN],1
+    mov qword ptr [r12+CTX_STAGE49_CORRECT_USED_DIFFERENT],1
+
+    lea rdi,[rip+stage48_lengths_witness]
+    mov esi,2
+    lea rdx,[rip+stage49_answers_equal]
+    mov ecx,1
+    mov r8,r15
+    mov r9,r14
+    call monster_month_weaving_route
+    test rax,rax
+    je .Ls49handler_fail
+    cmp r8,1
+    jne .Ls49handler_fail
+    cmp rcx,1
+    jne .Ls49handler_fail
+    test rdx,rdx
+    je .Ls49handler_fail
+    mov qword ptr [r12+CTX_STAGE49_EQUAL_GHOST],rdx
+    mov qword ptr [r12+CTX_STAGE49_EQUAL_ROUTE],r14
+    mov qword ptr [r12+CTX_STAGE49_GHOST_REUSED_EQUAL],1
+    inc qword ptr [r12+CTX_STAGE49_PATCH_SEEN]
+    inc qword ptr [r12+CTX_STAGE49_SEEN]
+    mov eax,1
+    jmp .Ls49handler_done
+.Ls49handler_fail:
+    xor eax,eax
+.Ls49handler_done:
+    add rsp,16
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage49_month_weaving_patch_handler,.-monster_stage49_month_weaving_patch_handler
+
 
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
@@ -10601,6 +11496,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage48_legacy_daily_month_weaving_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage49_month_weaving_patch_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail
