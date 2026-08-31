@@ -1,7 +1,7 @@
+name: Assembly Sahidic Stage 56 final audit
+
 on:
   push:
-    branches:
-      - 'x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
   workflow_dispatch:
 
 permissions:
@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   verify:
+    if: github.ref == 'refs/heads/x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
