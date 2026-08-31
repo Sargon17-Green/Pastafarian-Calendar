@@ -271,7 +271,16 @@
 .equ CTX_STAGE47_GHOST_SEEN,2152
 .equ CTX_STAGE47_PATCH_SEEN,2160
 .equ CTX_STAGE47_SEEN,2168
-.equ CTX_SIZE,2176
+.equ CTX_STAGE48_MONTH_COUNT,2176
+.equ CTX_STAGE48_LENGTHS,2184
+.equ CTX_STAGE48_ANSWER_STREAM,2192
+.equ CTX_STAGE48_WANTED_RANK,2200
+.equ CTX_STAGE48_DIRECT_GHOST,2208
+.equ CTX_STAGE48_ROUTE_WEAVE,2216
+.equ CTX_STAGE48_LEGACY_SEEN,2224
+.equ CTX_STAGE48_ROUTE_SEEN,2232
+.equ CTX_STAGE48_SEEN,2240
+.equ CTX_SIZE,2248
 .equ HCOUNTS_ACTION,0
 .equ HCOUNTS_TARGET,8
 .equ HCOUNTS_DISTANCE,16
@@ -621,6 +630,10 @@ legacy_bowl_stir_stone_by_position:
 .global monthLengthVirtualListPatch23
 .global monster_stage47_month_length_patch_wrapper
 .global monster_stage47_virtual_month_length_patch_handler
+.global oldMonthWeavingEachDaySeparately
+.global legacyChooseEachDaySeparately
+.global monster_month_weaving_route
+.global monster_stage48_legacy_daily_month_weaving_handler
 
 .type monster_context_new,@function
 monster_context_new:
@@ -10212,6 +10225,199 @@ monster_stage47_virtual_month_length_patch_handler:
     ret
 .size monster_stage47_virtual_month_length_patch_handler,.-monster_stage47_virtual_month_length_patch_handler
 
+
+# Ⲃⲁⲑⲙⲟⲥ 48 — DISCOVERY 24
+# Ⲡlegacy ϫⲓ ⲛⲟⲩmonth ⲙⲙⲏⲛⲉ ⲛⲥⲁ answer mod m, ⲁⲩⲱ ⲛϥⲕⲱⲧⲉ ϣⲁⲛⲧⲉϥϭⲓⲛⲉ ⲛⲟⲩmonth ⲉϥϣⲟⲟⲡ.
+# ABI: rdi=lengths*, rsi=m, rdx=answers*, rcx=answerCount, r8=wantedRank BigInt* ghost-only, r9=out*.
+.type oldMonthWeavingEachDaySeparately,@function
+oldMonthWeavingEachDaySeparately:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp,384
+    mov r12,rdi
+    mov r13,rsi
+    mov r14,rdx
+    mov r15,rcx
+    mov rbx,r9
+    test r12,r12
+    je .Lomweds_fail
+    test r13,r13
+    je .Lomweds_fail
+    cmp r13,47
+    ja .Lomweds_fail
+    test r14,r14
+    je .Lomweds_fail
+    test r15,r15
+    je .Lomweds_fail
+    test rbx,rbx
+    je .Lomweds_fail
+
+    xor r10d,r10d
+    xor ecx,ecx
+.Lomweds_copy:
+    cmp rcx,r13
+    jae .Lomweds_days_start
+    mov rax,qword ptr [r12+rcx*8]
+    cmp rax,4
+    jb .Lomweds_fail
+    cmp rax,123
+    ja .Lomweds_fail
+    mov qword ptr [rsp+rcx*8],rax
+    add r10,rax
+    inc rcx
+    jmp .Lomweds_copy
+
+.Lomweds_days_start:
+    xor r11d,r11d
+.Lomweds_day_loop:
+    cmp r11,r10
+    jae .Lomweds_ok
+
+    mov rax,r11
+    xor edx,edx
+    div r15
+    mov rax,qword ptr [r14+rdx*8]
+    test rax,rax
+    jne .Lomweds_answer_positive
+    mov rsi,r13
+    dec rsi
+    jmp .Lomweds_seek
+.Lomweds_answer_positive:
+    dec rax
+    xor edx,edx
+    div r13
+    mov rsi,rdx
+
+.Lomweds_seek:
+    cmp qword ptr [rsp+rsi*8],0
+    jne .Lomweds_take
+    inc rsi
+    cmp rsi,r13
+    jb .Lomweds_seek
+    xor esi,esi
+    jmp .Lomweds_seek
+
+.Lomweds_take:
+    lea rax,[rsi+1]
+    mov qword ptr [rbx+r11*8],rax
+    dec qword ptr [rsp+rsi*8]
+    inc r11
+    jmp .Lomweds_day_loop
+
+.Lomweds_ok:
+    mov rax,rbx
+    jmp .Lomweds_done
+.Lomweds_fail:
+    xor eax,eax
+.Lomweds_done:
+    add rsp,384
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    leave
+    ret
+.size oldMonthWeavingEachDaySeparately,.-oldMonthWeavingEachDaySeparately
+
+# Ⲡcallable scar ⲟⲩⲏϩ ϩⲓ ⲡsame daily chooser.
+.type legacyChooseEachDaySeparately,@function
+legacyChooseEachDaySeparately:
+    jmp oldMonthWeavingEachDaySeparately
+.size legacyChooseEachDaySeparately,.-legacyChooseEachDaySeparately
+
+# ⲠDISCOVERY route ⲟⲩⲏϩ authoritative ⲉⲡlegacy daily chooser; ⲡwantedRank ⲛϥⲣϩⲱⲃ ⲁⲛ.
+.type monster_month_weaving_route,@function
+monster_month_weaving_route:
+    jmp legacyChooseEachDaySeparately
+.size monster_month_weaving_route,.-monster_month_weaving_route
+
+.section .rodata
+.align 8
+stage48_lengths_witness:
+    .quad 4,4
+stage48_answers_witness:
+    .quad 2
+.section .text
+
+# Ⲡhandler ⲣ ⲙⲡdirect scar ⲙⲛ ⲡsemantic route ϩⲓ ⲡsame witness, ⲛϥϩⲁⲣⲉϩ ⲉⲡtrace ϩⲙⲡcontext.
+.type monster_stage48_legacy_daily_month_weaving_handler,@function
+monster_stage48_legacy_daily_month_weaving_handler:
+    push rbp
+    mov rbp,rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12,rdi
+    test r12,r12
+    je .Lms48_fail
+
+    mov edi,64
+    call arena_alloc
+    test rax,rax
+    je .Lms48_fail
+    mov r13,rax
+    mov edi,64
+    call arena_alloc
+    test rax,rax
+    je .Lms48_fail
+    mov r14,rax
+    mov edi,1
+    call bi_from_u64
+    test rax,rax
+    je .Lms48_fail
+    mov r15,rax
+
+    lea rdi,[rip+stage48_lengths_witness]
+    mov esi,2
+    lea rdx,[rip+stage48_answers_witness]
+    mov ecx,1
+    mov r8,r15
+    mov r9,r13
+    call legacyChooseEachDaySeparately
+    test rax,rax
+    je .Lms48_fail
+
+    lea rdi,[rip+stage48_lengths_witness]
+    mov esi,2
+    lea rdx,[rip+stage48_answers_witness]
+    mov ecx,1
+    mov r8,r15
+    mov r9,r14
+    call monster_month_weaving_route
+    test rax,rax
+    je .Lms48_fail
+
+    mov qword ptr [r12+CTX_STAGE48_MONTH_COUNT],2
+    lea rax,[rip+stage48_lengths_witness]
+    mov qword ptr [r12+CTX_STAGE48_LENGTHS],rax
+    lea rax,[rip+stage48_answers_witness]
+    mov qword ptr [r12+CTX_STAGE48_ANSWER_STREAM],rax
+    mov qword ptr [r12+CTX_STAGE48_WANTED_RANK],r15
+    mov qword ptr [r12+CTX_STAGE48_DIRECT_GHOST],r13
+    mov qword ptr [r12+CTX_STAGE48_ROUTE_WEAVE],r14
+    mov qword ptr [r12+CTX_STAGE48_LEGACY_SEEN],1
+    mov qword ptr [r12+CTX_STAGE48_ROUTE_SEEN],1
+    inc qword ptr [r12+CTX_STAGE48_SEEN]
+    mov eax,1
+    jmp .Lms48_done
+.Lms48_fail:
+    xor eax,eax
+.Lms48_done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    leave
+    ret
+.size monster_stage48_legacy_daily_month_weaving_handler,.-monster_stage48_legacy_daily_month_weaving_handler
+
 .type calendarDateSpaghetti,@function
 calendarDateSpaghetti:
     push rbp
@@ -10390,6 +10596,11 @@ calendarDateSpaghetti:
     je .Lcds_fail
     mov rdi,r12
     lea rsi,[rip+monster_stage47_virtual_month_length_patch_handler]
+    call monster_dispatch_base
+    test eax,eax
+    je .Lcds_fail
+    mov rdi,r12
+    lea rsi,[rip+monster_stage48_legacy_daily_month_weaving_handler]
     call monster_dispatch_base
     test eax,eax
     je .Lcds_fail

@@ -852,3 +852,30 @@
 `STAGE47_PATCH23_GREEN`
 
 Ⲙⲛ Stage 48 ⲏ PATCH 24 weaving code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 47.
+
+
+## Ⲃⲁⲑⲙⲟⲥ 48 — DISCOVERY 24
+
+### Ⲡlegacy daily month chooser
+
+Ⲁⲩⲟⲩⲱϩ ⲙⲡ`oldMonthWeavingEachDaySeparately` ⲙⲛ ⲡcallable scar `legacyChooseEachDaySeparately`. Ⲡlegacy chooser ⲕⲱ ⲛⲟⲩ`remaining` copy ⲙⲡmonth lengths, ⲁⲩⲱ ϩⲙ day-position ⲛⲓⲙ ϥϫⲓ ⲙⲡ`answer mod m` start month. Ⲉϣϫⲉ ⲡmonth ⲉⲧⲁϥⲥⲟⲧⲡϥ ⲙⲟⲩϩ, ϥⲕⲱⲧⲉ ⲉⲡnext month ϣⲁⲛⲧⲉϥϭⲓⲛⲉ ⲛⲟⲩremaining occurrence.
+
+ⲠDISCOVERY route ⲡⲉ:
+
+`monster_month_weaving_route -> legacyChooseEachDaySeparately -> oldMonthWeavingEachDaySeparately`
+
+ⲠABI ϩⲁⲣⲉϩ ⲉⲡ`wantedRank` BigInt ⲉⲧⲣⲉⲡlater patch ϣϭⲙϭⲟⲙ ⲉϥⲕⲱ ⲛⲟⲩwhole-weave selector ⲉϫⲛ ⲡsame route, ⲁⲗⲗⲁ ⲡStage 48 legacy ⲛϥⲱϣ ⲙⲙⲟϥ ⲁⲛ.
+
+### Ⲡwitness
+
+Ϩⲙ `lengths=[4,4]`, `answers=[2]`, `wantedRank=1`, ⲡlegacy daily chooser ϯ:
+
+`[2,2,2,2,1,1,1,1]`
+
+Ⲡrow ⲕⲱ ⲙⲡmultiplicity 4 ⲛⲟⲩmonth ⲛⲓⲙ, ⲁⲗⲗⲁ ⲡfirst occurrence ⲙⲡmonth 2 ⲛⲏⲩ ϩⲁ ⲡfirst occurrence ⲙⲡmonth 1, ⲁⲩⲱ ⲡlast occurrence ⲙⲡmonth 2 ⲛⲏⲩ ϩⲁ ⲡlast occurrence ⲙⲡmonth 1. Ⲡrank-1 legal lexicographic weave ⲙⲡsame lengths ⲡⲉ `[1,1,1,1,2,2,2,2]`.
+
+`calendarDateSpaghetti` ⲙⲟⲩⲧⲉ ⲉ`monster_stage48_legacy_daily_month_weaving_handler`; ⲡhandler ⲣ ⲙⲡdirect scar ⲙⲛ ⲡroute ⲛⲥⲛⲁⲩ ⲁⲩⲱ ϩⲁⲣⲉϩ ⲉⲛrow pointers ⲙⲛ ⲡwanted rank ϩⲙ invocation-local context.
+
+`STAGE48_DISCOVERY24_EXPECTED_RED`
+
+ⲚStage 1–47 ⲧⲏⲣⲟⲩ ⲥⲉⲟ ⲛGREEN. Ⲙⲛ `DPUnrankLegalWeaving`, legal-weave DP, ghost/correct selector ⲏ Stage 49 code ⲉϥϣⲟⲟⲡ ϩⲙⲡStage 48.
