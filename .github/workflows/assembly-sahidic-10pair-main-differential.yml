@@ -1,13 +1,14 @@
-name: Assembly Sahidic Stage56 first-day reuse diagnostic
+name: Assembly Sahidic 10-pair main differential
 
 on:
   push:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  diagnose:
+  verify-10-pairs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
 
@@ -21,6 +22,8 @@ jobs:
         run: |
           set -euo pipefail
           echo "HEAD=$(git rev-parse HEAD)"
+          test "$(git hash-object src/production/stage54_integration.s)" = \
+            "c86c4e888e39b1d3f4680b49c98252ee40cd6fa6"
           git diff --exit-code \
             2455c520d0f937fe7a0216c2487ab34e71428e78 \
             HEAD -- \
@@ -28,32 +31,9 @@ jobs:
             src/runtime/bigint.s \
             src/production/bootstrap.s \
             src/catalog/source_language_catalog.s \
-            src/production/stage54_integration.s \
             src/production/stage56_bowlsum_corrective.s
 
-      - name: Apply one-line Stage56 semantic detour in checkout only
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          p = Path("src/production/stage54_integration.s")
-          s = p.read_text(encoding="utf-8")
-
-          old = "    mov ecx,1\n    jmp .Ls54ss_done\n.Ls54ss_correct:"
-          new = "    mov ecx,1\n    jmp .Ls54ss_correct\n.Ls54ss_correct:"
-
-          if s.count(old) != 1:
-              raise SystemExit(f"expected exactly one historical equal-reuse jump, found {s.count(old)}")
-
-          p.write_text(s.replace(old, new, 1), encoding="utf-8")
-          print("Applied diagnostic detour: historical equal-reuse executes, then Stage56 corrected sauce wins.")
-          PY
-
-          git diff -- src/production/stage54_integration.s
-
-      - name: Build patched production objects
+      - name: Build current Stage56 production objects
         shell: bash
         run: |
           set -euo pipefail
@@ -204,12 +184,12 @@ jobs:
               syscall
           ASM
 
-      - name: Run patched 10-pair differential against corrected main JDN baseline
+      - name: Run 10-pair differential against corrected main JDN baseline
         shell: bash
         run: |
           set -uo pipefail
           rc=0
-          printf 'case\tcalculation_day\ttarget_day\tmain_correct_tuple\tpatched_assembly_tuple\tstatus\n' > stage56-firstday-diagnostic.tsv
+          printf 'case\tcalculation_day\ttarget_day\tmain_correct_tuple\tassembly_tuple\tstatus\n' > differential-results.tsv
 
           pairs=(
             '-15055671 -15055671 5000,4,762,12,105'
@@ -263,27 +243,27 @@ jobs:
 
             printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
               "$n" "$c" "$t" "$expected" "$actual" "$status" \
-              | tee -a stage56-firstday-diagnostic.tsv
+              | tee -a differential-results.tsv
           done
 
           echo
-          cat stage56-firstday-diagnostic.tsv
+          cat differential-results.tsv
           printf '%s\n' "$rc" > build/diagnostic_rc
 
-      - name: Upload diagnostic result
+      - name: Upload differential result
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: assembly-sahidic-stage56-firstday-reuse-diagnostic
-          path: stage56-firstday-diagnostic.tsv
+          name: assembly-sahidic-10pair-main-differential
+          path: differential-results.tsv
           if-no-files-found: warn
           retention-days: 30
 
-      - name: Require patched 10/10 agreement
+      - name: Require 10/10 agreement
         if: always()
         shell: bash
         run: |
           set -euo pipefail
           test -f build/diagnostic_rc
           test "$(cat build/diagnostic_rc)" = "0"
-          test "$(grep -c $'\tPASS$' stage56-firstday-diagnostic.tsv)" = "10"
+          test "$(grep -c $'\tPASS$' differential-results.tsv)" = "10"

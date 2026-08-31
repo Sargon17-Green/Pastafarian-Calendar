@@ -1,58 +1,28 @@
-name: Assembly Sahidic Stage56 source-only first-day fix
+name: Assembly Sahidic Stage56 first-day regression
 
 on:
   push:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  fix-source-only:
+  verify-first-day:
+    if: github.ref == 'refs/heads/x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref_name }}
 
-      - name: Patch source if still stale
-        id: patch
+      - name: Verify permanent scar detour is present
         shell: bash
         run: |
           set -euo pipefail
-
-          expected_branch='x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ'
-          test "$GITHUB_REF_NAME" = "$expected_branch"
-
-          python3 - <<'PY'
-          from pathlib import Path
-
-          p = Path("src/production/stage54_integration.s")
-          s = p.read_text(encoding="utf-8")
-
-          old = "    mov ecx,1\n    jmp .Ls54ss_done\n.Ls54ss_correct:"
-          new = "    mov ecx,1\n    jmp .Ls54ss_correct\n.Ls54ss_correct:"
-
-          n_old = s.count(old)
-          n_new = s.count(new)
-
-          if n_old == 1 and n_new == 0:
-              p.write_text(s.replace(old, new, 1), encoding="utf-8")
-              Path("build_patch_state.txt").write_text("PATCHED\n", encoding="utf-8")
-              print("PATCHED: stale Stage41 first-day ghost reuse now detours through Stage56.")
-          elif n_old == 0 and n_new == 1:
-              Path("build_patch_state.txt").write_text("ALREADY_PATCHED\n", encoding="utf-8")
-              print("ALREADY_PATCHED: permanent Stage56 detour is already present.")
-          else:
-              raise SystemExit(
-                  f"unexpected source state: old={n_old}, patched={n_new}"
-              )
-          PY
-
-          git diff -- src/production/stage54_integration.s
+          test "$(git hash-object src/production/stage54_integration.s)" = \
+            "c86c4e888e39b1d3f4680b49c98252ee40cd6fa6"
+          grep -A3 -B3 -n 'jmp \.Ls54ss_correct' src/production/stage54_integration.s
 
       - name: Build current production route
         shell: bash
@@ -178,30 +148,3 @@ jobs:
               "build/firstday_witness_${n}.o"
             "./build/firstday_witness_${n}"
           done
-
-      - name: Commit only the Assembly source
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          state="$(cat build_patch_state.txt)"
-          if [[ "$state" == "ALREADY_PATCHED" ]]; then
-            echo "Source was already patched; nothing to commit."
-            exit 0
-          fi
-
-          test "$state" = "PATCHED"
-
-          git config user.name "Stage56 scar keeper"
-          git config user.email "stage56-scar-keeper@users.noreply.github.com"
-
-          # Critical: stage ONLY the production Assembly file.
-          # Never stage this workflow or any other .github/workflows file.
-          git add -- src/production/stage54_integration.s
-
-          test "$(git diff --cached --name-only | wc -l)" = "1"
-          test "$(git diff --cached --name-only)" = "src/production/stage54_integration.s"
-          test "$(git diff --cached --numstat src/production/stage54_integration.s | awk '{print $1+$2}')" = "2"
-
-          git commit -m "Stage 56: detour stale first-day ghost reuse [skip ci]"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
