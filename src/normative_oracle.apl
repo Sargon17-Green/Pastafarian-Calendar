@@ -1,11 +1,12 @@
-⍝ Saubere testinterne Referenz für Stage 1. Kein Produktionspfad darf diese Funktionen aufrufen.
+⍝ Saubere testinterne Referenz für Stufe 1. Kein Produktionspfad darf diese Funktionen aufrufen.
+⍝ Gemischte arithmetische Terme sind ausdrücklich geklammert, weil APL Funktionen von rechts nach links auswertet.
 
 ∇ OracleInit
   ⎕IO←1
   ⎕CT←0
   M←170141183460469231731687303715884105727x
-  TABLETS_DAY←¯278522
-  FOUNDATION_DAY←¯15055671
+  TABLETS_DAY←¯278522x
+  FOUNDATION_DAY←¯15055671x
   GATE_GAP_MIN←42
   GATE_GAP_MAX←963
   YEAR_MIN_DAYS←252
@@ -37,37 +38,58 @@
   GateReset
 ∇
 
+
+∇ z←OracleExactDay x;dr;parts
+  :If 0≠⍴⍴x
+      ⎕ERROR 'Die normative Referenz akzeptiert nur skalare exakte Ganzzahltage.'
+  :EndIf
+  dr←⎕DR x
+  :If dr=14
+      parts←4 ⎕DR x
+      :If parts[2]≠1
+          ⎕ERROR 'Die normative Referenz akzeptiert keinen gebrochenen Tageswert.'
+      :EndIf
+      z←x
+  :ElseIf (dr=6412)∨dr=110
+      z←x×1x
+  :Else
+      ⎕ERROR 'Die normative Referenz akzeptiert keine Gleitkommatage.'
+  :EndIf
+∇
+
 ∇ z←d RegularMod x
   z←d|x
 ∇
 
 ∇ z←Save x
-  z←1+M RegularMod x-1
+  z←1+(M RegularMod (x-1))
 ∇
 
 ∇ z←size Wrap1 position
-  z←1+size RegularMod position-1
+  z←1+(size RegularMod (position-1))
 ∇
 
 ∇ z←CeilDiv ab;a;b
-  a←1⊃ab ⋄ b←2⊃ab
-  z←⌊(a+b-1)÷b
+  a←(1⊃ab)×1x ⋄ b←(2⊃ab)×1x
+  z←⌊(((a+b)-1)÷b)
 ∇
 
 ∇ z←DayCount day
+  day←OracleExactDay day
   :If day=FOUNDATION_DAY
-      z←1
+      z←1x
   :ElseIf day>FOUNDATION_DAY
-      z←1+2×day-FOUNDATION_DAY
+      z←1x+(2x×(day-FOUNDATION_DAY))
   :Else
-      z←2×FOUNDATION_DAY-day
+      z←2x×(FOUNDATION_DAY-day)
   :EndIf
 ∇
 
 ∇ z←c WorkCounts t;cc;tt;distance;connection;direction
+  c←OracleExactDay c ⋄ t←OracleExactDay t
   cc←DayCount c
   tt←DayCount t
-  distance←1+|t-c
+  distance←1+(|t-c)
   connection←cc+tt
   direction←2
   :If t<c
@@ -81,13 +103,13 @@
 ∇ z←BuildStones;table;i;old;nw;nb;ns;nm;nr
   table←46 5⍴0x
   table[1;]←17x 29x 43x 71x 101x
-  :For i :In 2+⍳45
+  :For i :In 1+⍳45
       old←table[i-1;]
-      nw←Save (old[WHEAT]×old[WHEAT])+3×old[BARLEY]+i
-      nb←Save (old[BARLEY]×old[BARLEY])+5×old[SALT]+old[WHEAT]
-      ns←Save (old[SALT]×old[SALT])+7×old[BITTER]+old[BARLEY]
-      nm←Save (old[BITTER]×old[BITTER])+11×old[RED]+old[SALT]
-      nr←Save (old[RED]×old[RED])+13×old[WHEAT]+old[BITTER]
+      nw←Save (old[WHEAT]×old[WHEAT])+(3×old[BARLEY])+i
+      nb←Save (old[BARLEY]×old[BARLEY])+(5×old[SALT])+old[WHEAT]
+      ns←Save (old[SALT]×old[SALT])+(7×old[BITTER])+old[BARLEY]
+      nm←Save (old[BITTER]×old[BITTER])+(11×old[RED])+old[SALT]
+      nr←Save (old[RED]×old[RED])+(13×old[WHEAT])+old[BITTER]
       table[i;]←nw nb ns nm nr
   :EndFor
   z←table
@@ -96,13 +118,13 @@
 ∇ z←BuildHidden counts;hidden;k;a;b;c;d;x;g;oldx;kind
   hidden←7⍴0x
   :For k :In ⍳7
-      a b c d←HIDDEN_COEFF[k;]
-      x←counts[1]+a×counts[2]+b×counts[3]+c×counts[4]+d×counts[5]+ +/STONES[k;]
+      (a b c d)←HIDDEN_COEFF[k;]
+      x←counts[1]+(a×counts[2])+(b×counts[3])+(c×counts[4])+(d×counts[5])+(+/STONES[k;])
       x←Save x
       :For g :In ⍳7
           oldx←x
           kind←HIDDEN_GRIND_STONE[g]
-          x←Save (oldx×oldx)+3×oldx+STONES[k;kind]+g
+          x←Save ((oldx×oldx)+(3×oldx)+STONES[k;kind]+g)
       :EndFor
       hidden[k]←x
   :EndFor
@@ -120,11 +142,11 @@
       p1←timeline[7+i-1]
       p3←timeline[7+i-3]
       p7←timeline[7+i-7]
-      x←Save STONES[i;WHEAT]×counts[1]+STONES[i;BARLEY]×counts[2]+STONES[i;SALT]×counts[3]+STONES[i;BITTER]×counts[4]+STONES[i;RED]×counts[5]+p1+3×p3+5×p7+i
+      x←Save ((STONES[i;WHEAT]×counts[1])+(STONES[i;BARLEY]×counts[2])+(STONES[i;SALT]×counts[3])+(STONES[i;BITTER]×counts[4])+(STONES[i;RED]×counts[5])+p1+(3×p3)+(5×p7)+i)
       :For g :In ⍳11
           row←VISIBLE_GRINDS[g;]
           oldx←x
-          x←Save (oldx×oldx)+row[1]×oldx+row[2]×p1+row[3]×p3+row[4]×p7+STONES[i;row[5]]
+          x←Save ((oldx×oldx)+(row[1]×oldx)+(row[2]×p1)+(row[3]×p3)+(row[4]×p7)+STONES[i;row[5]])
       :EndFor
       timeline[7+i]←x
       visible[i]←x
@@ -140,12 +162,15 @@
 ∇
 
 ∇ z←PermutationUnrank1 rank1;rank0;remaining;result;slots;block;q;chosen
+  :If (rank1<1)∨rank1>720
+      ⎕ERROR 'Ein Permutationsrang muss zwischen eins und 720 liegen.'
+  :EndIf
   rank0←rank1-1
   remaining←⍳6
   result←⍬
   :While 0<⍴remaining
       slots←⍴remaining
-      block←Factorial slots-1
+      block←Factorial (slots-1)
       q←⌊rank0÷block
       rank0←block RegularMod rank0
       chosen←remaining[q+1]
@@ -156,15 +181,15 @@
 ∇
 
 ∇ z←BowlOrderFromDrop drop;rank
-  rank←1+720 RegularMod drop-1
+  rank←1+(720 RegularMod (drop-1))
   z←PermutationUnrank1 rank
 ∇
 
 ∇ z←InitialBowls counts;bowls;id;s
   bowls←6⍴0x
   :For id :In ⍳6
-      s←counts[1]+counts[2]×id+counts[3]+counts[4]+counts[5]+BOWL_PRIME[id]×BOWL_PRIME[id]
-      bowls[id]←Save (s×s)+id
+      s←counts[1]+(counts[2]×id)+counts[3]+counts[4]+counts[5]+(BOWL_PRIME[id]×BOWL_PRIME[id])
+      bowls[id]←Save ((s×s)+id)
   :EndFor
   z←bowls
 ∇
@@ -176,17 +201,17 @@
       order←BowlOrderFromDrop drop
       old←bowls
       pour←6⍴0x
-      pour[1]←Save (drop×drop)+STONES[i;WHEAT]×old[order[1]]+3×i
-      pour[2]←Save (drop×drop)+STONES[i;BARLEY]×old[order[2]]+5×i
-      pour[3]←Save (drop×drop)+STONES[i;SALT]×old[order[3]]+7×i
+      pour[1]←Save ((drop×drop)+(STONES[i;WHEAT]×old[order[1]])+(3×i))
+      pour[2]←Save ((drop×drop)+(STONES[i;BARLEY]×old[order[2]])+(5×i))
+      pour[3]←Save ((drop×drop)+(STONES[i;SALT]×old[order[3]])+(7×i))
       nextBowls←6⍴0x
       :For position :In ⍳6
           id←order[position]
-          prev←order[6 Wrap1 position-1]
-          next←order[6 Wrap1 position+1]
+          prev←order[6 Wrap1 (position-1)]
+          next←order[6 Wrap1 (position+1)]
           kind←BOWL_STIR_STONE_BY_POSITION[position]
-          s←old[id]+2×old[prev]+3×old[next]+pour[position]+drop+STONES[i;kind]
-          nextBowls[id]←Save (s×s)+5×old[prev]×old[next]+i×position
+          s←old[id]+(2×old[prev])+(3×old[next])+pour[position]+drop+STONES[i;kind]
+          nextBowls[id]←Save ((s×s)+(5×old[prev]×old[next])+(i×position))
       :EndFor
       bowls←nextBowls
       :If i=46
@@ -196,19 +221,24 @@
   z←(⊂bowls),(⊂order46)
 ∇
 
+∇ z←PostStirSavedSum args;bowls;stir
+  bowls←⊃args[1] ⋄ stir←args[2]
+  z←Save ((+/bowls)+(149×stir))
+∇
+
 ∇ z←PostStir12 bowls;stir;old;saved;rank;order;nextBowls;position;id;prev;next;s
   :For stir :In ⍳12
       old←bowls
-      saved←Save (+/old)+149×stir
-      rank←1+720 RegularMod saved-1
+      saved←PostStirSavedSum (⊂old) stir
+      rank←1+(720 RegularMod (saved-1))
       order←PermutationUnrank1 rank
       nextBowls←6⍴0x
       :For position :In ⍳6
           id←order[position]
-          prev←order[6 Wrap1 position-1]
-          next←order[6 Wrap1 position+1]
-          s←old[id]+3×old[prev]+5×old[next]+saved+stir+position×position
-          nextBowls[id]←Save (s×s)+7×old[prev]×old[next]
+          prev←order[6 Wrap1 (position-1)]
+          next←order[6 Wrap1 (position+1)]
+          s←old[id]+(3×old[prev])+(5×old[next])+saved+stir+(position×position)
+          nextBowls[id]←Save ((s×s)+(7×old[prev]×old[next]))
       :EndFor
       bowls←nextBowls
   :EndFor
@@ -227,14 +257,21 @@
   z←(⊂final),(⊂order46)
 ∇
 
-∇ z←sauce AskBowl query;bowl;seal;bowls;order;pos;nextid;first;directionNumber;step
-  bowl←query[1] ⋄ seal←query[2]
-  bowls←⊃sauce[1]
+∇ z←sauce NextBowlInDrop46Order bowl;order;pos
   order←⊃sauce[2]
   pos←order⍳bowl
-  nextid←order[6 Wrap1 pos+1]
-  first←Save ((bowls[bowl]+seal+181)×(bowls[bowl]+seal+181))+179×bowls[nextid]+seal
-  directionNumber←Save ((first+seal+194)×(first+seal+194))+193×first+197×bowls[6]
+  :If pos>⍴order
+      ⎕ERROR 'Die abgefragte Schüssel fehlt in der Ordnung des 46. Tropfens.'
+  :EndIf
+  z←order[6 Wrap1 (pos+1)]
+∇
+
+∇ z←sauce AskBowl query;bowl;seal;bowls;nextid;first;directionNumber;step
+  bowl←query[1] ⋄ seal←query[2]
+  bowls←⊃sauce[1]
+  nextid←sauce NextBowlInDrop46Order bowl
+  first←Save (((bowls[bowl]+seal+181)×(bowls[bowl]+seal+181))+(179×bowls[nextid])+seal)
+  directionNumber←Save (((first+seal+194)×(first+seal+194))+(193×first)+(197×bowls[6]))
   step←¯1
   :If 1=2 RegularMod directionNumber
       step←1
@@ -243,16 +280,16 @@
 ∇
 
 ∇ z←stream AnswerAt k
-  z←1+M RegularMod stream[1]-1+stream[2]×k
+  z←1+M RegularMod ((stream[1]-1)+(stream[2]×k))
 ∇
 
 ∇ z←stream ChooseRankShort n;limit;k;x
-  limit←n×⌊M÷n
+  limit←n×(⌊M÷n)
   k←0
   :Repeat
       x←stream AnswerAt k
       :If x≤limit
-          z←1+n RegularMod x-1
+          z←1+(n RegularMod (x-1))
           :Return
       :EndIf
       k←k+1
@@ -268,18 +305,21 @@
   :EndWhile
   wide←1x
   weight←1x
-  :For j :In 0,⍳places-1
+  :For j :In (⍳places)-1
       wide←wide+((stream AnswerAt j)-1)×weight
       weight←weight×M
   :EndFor
-  limit←n×⌊space÷n
+  limit←n×(⌊space÷n)
   :While wide>limit
-      wide←1+space RegularMod wide-1+stream[2]
+      wide←1+space RegularMod ((wide-1)+stream[2])
   :EndWhile
-  z←1+n RegularMod wide-1
+  z←1+(n RegularMod (wide-1))
 ∇
 
 ∇ z←stream ChooseRank n
+  :If n<1
+      ⎕ERROR 'Eine geordnete Auswahl benötigt mindestens eine Möglichkeit.'
+  :EndIf
   :If n≤M
       z←stream ChooseRankShort n
   :Else
@@ -290,18 +330,25 @@
 ∇ z←FallingFactorial nk;n;k;j
   n←nk[1] ⋄ k←nk[2]
   z←1x
-  :For j :In 0,⍳k-1
-      z←z×n-j
+  :For j :In (⍳k)-1
+      z←z×(n-j)
   :EndFor
 ∇
 
-∇ z←masterCount UnrankDistinct args;k;rank;remaining;out;position;suffix;block;cand;chosen
+∇ z←masterCount UnrankDistinct args;k;rank;remaining;out;position;suffix;block;cand;chosen;all
   k←args[1] ⋄ rank←args[2]
+  :If (k<0)∨k>masterCount
+      ⎕ERROR 'Die Anzahl verschiedener Namen liegt außerhalb des Katalogs.'
+  :EndIf
+  all←FallingFactorial masterCount k
+  :If (rank<1)∨rank>all
+      ⎕ERROR 'Der Rang verschiedener Namen liegt außerhalb der geordneten Familie.'
+  :EndIf
   remaining←⍳masterCount
   out←⍬
   :For position :In ⍳k
       suffix←k-position
-      block←FallingFactorial (⍴remaining)-1 suffix
+      block←FallingFactorial ((⍴remaining)-1),suffix
       :For cand :In ⍳⍴remaining
           :If rank>block
               rank←rank-block
@@ -316,31 +363,42 @@
   z←out
 ∇
 
-∇ z←BoundedCount args;total;slots;lo;hi;dp;k;rem;x
+∇ z←BuildBoundedDP args;total;slots;lo;hi;dp;k;rem;x
   total←args[1] ⋄ slots←args[2] ⋄ lo←args[3] ⋄ hi←args[4]
   dp←(slots+1,total+1)⍴0x
   dp[1;1]←1x
   :For k :In ⍳slots
       :For rem :In 0,⍳total
-          :For x :In lo-1+⍳hi-lo+1
+          :For x :In (lo-1)+⍳((hi-lo)+1)
               :If rem≥x
-                  dp[k+1;rem+1]←dp[k+1;rem+1]+dp[k;rem-x+1]
+                  dp[k+1;rem+1]←dp[k+1;rem+1]+dp[k;(rem-x)+1]
               :EndIf
           :EndFor
       :EndFor
   :EndFor
+  z←dp
+∇
+
+∇ z←BoundedCount args;total;slots;lo;hi;dp
+  total←args[1] ⋄ slots←args[2] ⋄ lo←args[3] ⋄ hi←args[4]
+  dp←BuildBoundedDP total slots lo hi
   z←dp[slots+1;total+1]
 ∇
 
-∇ z←BoundedUnrank args;total;slots;lo;hi;rank;out;position;x;count;rem
+∇ z←BoundedUnrank args;total;slots;lo;hi;rank;out;position;x;count;rem;dp;suffixSlots
   total←args[1] ⋄ slots←args[2] ⋄ lo←args[3] ⋄ hi←args[4] ⋄ rank←args[5]
+  dp←BuildBoundedDP total slots lo hi
+  :If (rank<1)∨rank>dp[slots+1;total+1]
+      ⎕ERROR 'Interner Fehler der normativen Stufe-1-Referenz.'
+  :EndIf
   out←⍬ ⋄ rem←total
   :For position :In ⍳slots
-      :For x :In lo-1+⍳hi-lo+1
+      suffixSlots←slots-position
+      :For x :In (lo-1)+⍳((hi-lo)+1)
           :If rem-x<0
               :Continue
           :EndIf
-          count←BoundedCount (rem-x) (slots-position) lo hi
+          count←dp[suffixSlots+1;(rem-x)+1]
           :If rank>count
               rank←rank-count
           :Else
@@ -361,10 +419,9 @@
 ∇ z←GateGet k;p
   p←GATE_INDEX⍳k
   :If p>⍴GATE_INDEX
-      z←0
-  :Else
-      z←GATE_DAY[p]
+      ⎕ERROR 'Ein nicht erzeugter Gate-Index wurde abgefragt.'
   :EndIf
+  z←GATE_DAY[p]
 ∇
 
 ∇ GatePut pair;k;day;p
@@ -374,7 +431,9 @@
       GATE_INDEX←GATE_INDEX,k
       GATE_DAY←GATE_DAY,day
   :Else
-      GATE_DAY[p]←day
+      :If GATE_DAY[p]≠day
+          ⎕ERROR 'Ein bereits erzeugter Gate-Index darf nicht mit einem anderen Tag überschrieben werden.'
+      :EndIf
   :EndIf
 ∇
 
@@ -388,7 +447,7 @@
 ∇ EnsureGate k;max;min;n;prev;day
   max←⌈/GATE_INDEX ⋄ min←⌊/GATE_INDEX
   :If k>max
-      :For n :In max+⍳k-max
+      :For n :In max+⍳(k-max)
           prev←GateGet n-1
           day←prev+GateGap n
           GatePut n day
@@ -430,19 +489,21 @@
 ∇ z←ExactGateIndex day;i
   i←GateIndexAtOrBefore day
   :If (GateGet i)=day
-      z←i
+      z←1 i
   :Else
-      z←0x
+      z←0 0
   :EndIf
+∇
+
+∇ z←YearBoundsValid args;gaps;length
+  gaps←args[1] ⋄ length←args[2]
+  z←(gaps≥6)∧(YEAR_MIN_DAYS≤length)∧(length≤YEAR_MAX_DAYS)
 ∇
 
 ∇ z←ValidYearPair pair;i;j;length
   i←pair[1] ⋄ j←pair[2]
-  :If (j-i)<6
-      z←0 ⋄ :Return
-  :EndIf
   length←(GateGet j)-GateGet i
-  z←(YEAR_MIN_DAYS≤length)∧length≤YEAR_MAX_DAYS
+  z←YearBoundsValid (j-i) length
 ∇
 
 ∇ z←SortYear5000 candidates;out;used;n;p;q;best;bestLen;bestOpen;len;open
@@ -464,13 +525,26 @@
   z←out
 ∇
 
-∇ z←Year5000 c;low;high;indices;sortedIdx;a;b;i;j;open;close;len;candidates;r;stream;rank;chosen
+∇ z←Year5000 c;sortedIdx;localIdx;a;b;i;j;open;close;len;candidates;r;stream;rank;chosen
   EnsureGatesCover (c-YEAR_MAX_DAYS) (c+YEAR_MAX_DAYS)
   sortedIdx←GATE_INDEX[⍋GATE_INDEX]
+  ⍝ OPTIMIZATION: Für die Paarbildung bleiben nur Gates im geschlossenen Bereich c±5778 im lokalen Indexvektor.
+  ⍝ EQUIVALENCE: Jedes gültige Kandidatenjahr enthält c und ist höchstens 5778 Tage lang; daher können beide Endgates nie außerhalb dieses Bereichs liegen.
+  ⍝ EDGE CASES: Gates genau bei c-5778, c und c+5778 bleiben enthalten; die offene linke Jahresgrenze wird erst bei der Kandidatenprüfung angewandt.
+  ⍝ WHY SAFE: Entfernt wird nur ein Gate, das wegen der maximalen Jahreslänge in keinem gültigen, c enthaltenden Paar liegen kann; Reihenfolge und Rang der verbleibenden Paare bleiben unverändert.
+  localIdx←⍬
+  :For a :In ⍳⍴sortedIdx
+      i←sortedIdx[a]
+      open←GateGet i
+      :If ((c-YEAR_MAX_DAYS)≤open)∧open≤(c+YEAR_MAX_DAYS)
+          localIdx←localIdx,i
+      :EndIf
+  :EndFor
+  sortedIdx←localIdx
   candidates←0 4⍴0x
   :For a :In ⍳⍴sortedIdx
       i←sortedIdx[a]
-      :For b :In a+⍳(⍴sortedIdx)-a
+      :For b :In a+⍳((⍴sortedIdx)-a)
           j←sortedIdx[b]
           :If ~ValidYearPair i j ⋄ :Continue ⋄ :EndIf
           open←GateGet i ⋄ close←GateGet j
@@ -484,7 +558,7 @@
   stream←r AskBowl 1 SEAL_YEAR_5000
   rank←stream ChooseRank 1↑⍴candidates
   chosen←candidates[rank;]
-  z←5000 chosen[1] chosen[2] (GateGet chosen[1]) (GateGet chosen[2])
+  z←5000x chosen[1] chosen[2] (GateGet chosen[1]) (GateGet chosen[2])
 ∇
 
 ∇ z←SortByLength candidates;out;used;n;p;q;best;bestLen
@@ -495,7 +569,7 @@
       best←0 ⋄ bestLen←0x
       :For q :In ⍳n
           :If used[q] ⋄ :Continue ⋄ :EndIf
-          :If (best=0)∨candidates[q;2]<bestLen
+          :If (best=0)∨(candidates[q;2]<bestLen)
               best←q ⋄ bestLen←candidates[q;2]
           :EndIf
       :EndFor
@@ -606,10 +680,14 @@
   z←CutletCountState g k 0 0
 ∇
 
-∇ z←CutletFamilyUnrank args;g;k;required;rank;rem;slots;cum;hit;out;maxx;x;nextcum;nexthit;block
+∇ z←CutletFamilyUnrank args;g;k;required;rank;rem;slots;cum;hit;out;maxx;x;nextcum;nexthit;block;all
   g←args[1] ⋄ k←args[2] ⋄ required←args[3] ⋄ rank←args[4]
   CutletMemoReset
   CP_REQUIRED←required
+  all←CutletCountState g k 0 0
+  :If (rank<1)∨rank>all
+      ⎕ERROR 'Der Schnitzelpartitionsrang liegt außerhalb der geordneten Familie.'
+  :EndIf
   rem←g ⋄ slots←k ⋄ cum←0 ⋄ hit←0 ⋄ out←⍬
   :While slots>0
       maxx←rem-(slots-1)
@@ -652,11 +730,11 @@
       z←0 ⋄ :Return
   :EndIf
   already←remaining[j]<WEAVE_LENGTHS[j]
-  :If (~already)∧j≠opened+1
+  :If (~already)∧(j≠opened+1)
       z←0 ⋄ :Return
   :EndIf
   willClose←remaining[j]=1
-  :If willClose∧j≠closed+1
+  :If willClose∧(j≠closed+1)
       z←0 ⋄ :Return
   :EndIf
   z←1
@@ -702,10 +780,14 @@
   z←WeaveCountState state
 ∇
 
-∇ z←WeavingUnrank args;lengths;rank;state;out;j;next;block;total
+∇ z←WeavingUnrank args;lengths;rank;state;out;j;next;block;total;all
   lengths←⊃args[1] ⋄ rank←args[2]
   WeaveMemoReset lengths
   state←(⊂lengths),0,0
+  all←WeaveCountState state
+  :If (rank<1)∨rank>all
+      ⎕ERROR 'Der Webungsrang liegt außerhalb der geordneten Familie.'
+  :EndIf
   out←⍬ ⋄ total←+/lengths
   :While (⍴out)<total
       :For j :In ⍳⍴lengths
@@ -729,7 +811,7 @@
 ∇ z←sauce ChooseCutletCount year;gaps;candidates;k;stream;rank
   gaps←year[3]-year[2]
   candidates←⍬
-  :For k :In 6-1+⍳12
+  :For k :In 5+⍳12
       :If k≤gaps
           candidates←candidates,k
       :EndIf
@@ -739,12 +821,15 @@
   z←candidates[rank]
 ∇
 
-∇ z←ChooseCutletPartition args;c;year;sauce;k;g;required;familyCount;stream;rank
+∇ z←ChooseCutletPartition args;c;year;sauce;k;exact;g;required;familyCount;stream;rank
   c←⊃args[1] ⋄ year←⊃args[2] ⋄ sauce←⊃args[3] ⋄ k←args[4]
-  g←ExactGateIndex c
+  exact←ExactGateIndex c
   required←0
-  :If (g≠0)∧(year[2]<g)∧g<year[3]
-      required←g-year[2]
+  :If exact[1]
+      g←exact[2]
+      :If (year[2]<g)∧(g<year[3])
+          required←g-year[2]
+      :EndIf
   :EndIf
   familyCount←CutletFamilyCount (year[3]-year[2]) k required
   stream←sauce AskBowl 2 SEAL_CUTLET_PARTITION
@@ -773,14 +858,21 @@
   z←rows
 ∇
 
-∇ z←sauce ChooseMonthCount year;length;lo;hi;count;stream;rank
-  length←year[5]-year[4]
+∇ z←MonthCountBounds length;lo;hi
+  length←length×1x
   lo←CeilDiv length 123
   hi←47⌊⌊length÷4
-  count←hi-lo+1
+  z←lo hi
+∇
+
+∇ z←sauce ChooseMonthCount year;length;bounds;lo;hi;count;stream;rank
+  length←year[5]-year[4]
+  bounds←MonthCountBounds length
+  lo←bounds[1] ⋄ hi←bounds[2]
+  count←(hi-lo)+1
   stream←sauce AskBowl 3 SEAL_MONTH_COUNT
   rank←stream ChooseRank count
-  z←lo+rank-1
+  z←lo+(rank-1)
 ∇
 
 ∇ z←ChooseMonthLengths args;sauce;year;k;length;n;stream;rank
@@ -821,9 +913,9 @@
   z←(⊂year),(⊂partition),(⊂cutletNameIdx),(⊂cutlets),(⊂monthLengths),(⊂weave),(⊂monthNameIdx)
 ∇
 
-∇ z←c CalendarDate t;year;structure;cutletNameIdx;cutlets;weave;monthNameIdx;i;cutletId;dayInCutlet;offset;monthId;dayInMonth;p
-  year←c FindTargetYear t
-  structure←BuildYearStructure (⊂c),(⊂year)
+∇ z←ResolveCalendarFields args;structure;t;year;cutletNameIdx;cutlets;weave;monthNameIdx;i;cutletId;dayInCutlet;offset;monthId;dayInMonth;p
+  structure←⊃args[1] ⋄ t←OracleExactDay args[2]
+  year←⊃structure[1]
   cutletNameIdx←⊃structure[3]
   cutlets←⊃structure[4]
   weave←⊃structure[6]
@@ -837,16 +929,25 @@
   :EndFor
   :If cutletId=0
       ⎕←'FEHLER: Kein Schnitzel enthält den Zieltageswert.'
-      ⎕SIGNAL 11
+      ⎕ERROR 'Interner Fehler der normativen Stufe-1-Referenz.'
   :EndIf
-  dayInCutlet←t-cutlets[cutletId;3]+1
+  dayInCutlet←(t-cutlets[cutletId;3])+1
   offset←t-(year[4]+1)
   monthId←weave[offset+1]
   dayInMonth←0
-  :For p :In ⍳offset+1
+  :For p :In ⍳(offset+1)
       :If weave[p]=monthId
           dayInMonth←dayInMonth+1
       :EndIf
   :EndFor
   z←(⊂year[1]),(⊂CutletNameByIndex cutletNameIdx[cutletId]),(⊂dayInCutlet),(⊂MonthNameByIndex monthNameIdx[monthId]),(⊂dayInMonth)
+∇
+
+∇ z←c CalendarDate t;year;structure
+  c←OracleExactDay c ⋄ t←OracleExactDay t
+  ⍝ Jeder vollständige Referenzaufruf beginnt mit einem eigenen Gate-Zustand; Zwischenspeicher-Historie ist damit kein semantischer Eingang.
+  GateReset
+  year←c FindTargetYear t
+  structure←BuildYearStructure (⊂c),(⊂year)
+  z←ResolveCalendarFields (⊂structure),t
 ∇
