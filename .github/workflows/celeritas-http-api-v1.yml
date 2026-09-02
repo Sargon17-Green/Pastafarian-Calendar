@@ -58,7 +58,6 @@ jobs:
           set -euo pipefail
           sh build_http_api.sh
 
-
       - name: CORS restrictum cum ministro vero probare
         shell: bash
         run: |
@@ -70,6 +69,7 @@ jobs:
             if curl -fsS http://127.0.0.1:18079/v1/health >/dev/null; then break; fi
             sleep 0.1
           done
+
           curl -sS -D /tmp/cors-allowed.headers -o /tmp/cors-allowed.body -X OPTIONS \
             http://127.0.0.1:18079/v1/date \
             -H 'Origin: https://bwtbdyqtmsprytgydym-cpu.github.io' \
@@ -77,10 +77,25 @@ jobs:
             -H 'Access-Control-Request-Headers: content-type'
           grep -q '^HTTP/1.1 204' /tmp/cors-allowed.headers
           grep -qi '^Access-Control-Allow-Origin: https://bwtbdyqtmsprytgydym-cpu.github.io' /tmp/cors-allowed.headers
+
           curl -fsS -D /tmp/cors-get.headers -o /tmp/cors-get.body \
             http://127.0.0.1:18079/v1/meta \
             -H 'Origin: https://bwtbdyqtmsprytgydym-cpu.github.io'
           grep -qi '^Access-Control-Allow-Origin: https://bwtbdyqtmsprytgydym-cpu.github.io' /tmp/cors-get.headers
+
+          # Fasciculi file:// originem opacam plerumque ut `null` mittunt.
+          curl -sS -D /tmp/cors-null-preflight.headers -o /tmp/cors-null-preflight.body -X OPTIONS \
+            http://127.0.0.1:18079/v1/date \
+            -H 'Origin: null' \
+            -H 'Access-Control-Request-Method: GET'
+          grep -q '^HTTP/1.1 204' /tmp/cors-null-preflight.headers
+          grep -qi '^Access-Control-Allow-Origin: null' /tmp/cors-null-preflight.headers
+
+          curl -fsS -D /tmp/cors-null-get.headers -o /tmp/cors-null-get.body \
+            http://127.0.0.1:18079/v1/meta \
+            -H 'Origin: null'
+          grep -qi '^Access-Control-Allow-Origin: null' /tmp/cors-null-get.headers
+
           code=$(curl -sS -o /tmp/cors-denied.body -w '%{http_code}' -X OPTIONS \
             http://127.0.0.1:18079/v1/date \
             -H 'Origin: https://alien.example' \
