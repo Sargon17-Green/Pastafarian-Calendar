@@ -18,13 +18,28 @@ jobs:
       - name: Excerpere repository
         uses: actions/checkout@v5
 
+      - name: Instituere dependentias aedificationis
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libboost-dev \
+            clang \
+            lld \
+            curl
+
       - name: Verificare Boost et compilatores
         shell: bash
         run: |
           set -euo pipefail
           test -r /usr/include/boost/multiprecision/cpp_int.hpp
-          clang++ --version | head -1
-          g++ --version | head -1
+          test -r /usr/include/boost/beast.hpp
+          command -v clang++
+          command -v g++
+          command -v ld.lld
+          clang++ --version | sed -n '1p'
+          g++ --version | sed -n '1p'
 
       - name: Currere probationes cicatricis HTTP
         shell: bash
