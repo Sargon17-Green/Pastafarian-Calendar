@@ -1,0 +1,15 @@
+STAGE=1
+IMPLEMENTATION_STARTED_FROM_ZERO=YES
+PROGRAMMING_LANGUAGE=Lean
+SOURCE_LANGUAGE=norsk bokmål
+SOURCE_LANGUAGE_CATALOG_VERSION=1
+CUTLET_ENTRY_COUNT=17
+MONTH_ENTRY_COUNT=47
+SOURCE_LANGUAGE_CATALOG_FROZEN=YES
+FUTURE_PATCH_IDENTIFIERS_FOUND=NO
+PRODUCTION_ORACLE_CALL_FOUND=NO
+CROSS_IMPLEMENTATION_INPUT_USED=NO
+SEMANTIC_STATE_OWNER=PER_INVOCATION_MONSTER_CONTEXT
+OBSERVABILITY_STATE_IS_SEMANTIC_INPUT=NO
+
+Den statiske gjennomgangen fant ingen navn eller kontrollbaner fra de 26 fremtidige legacy-feilene eller lappene i produksjonsskallet. Den normative referansen ligger i en egen testorientert modul. Bootstrap-konteksten inneholder bare generelle faser, validering og observasjon.

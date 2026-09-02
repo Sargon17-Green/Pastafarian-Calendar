@@ -1,0 +1,15 @@
+STAGE=1
+EXPECTED_STATE=GREEN
+LEAN_FOUND_IN_EXECUTION_ENVIRONMENT=NO
+LAKE_FOUND_IN_EXECUTION_ENVIRONMENT=NO
+LOCAL_BUILD_EXECUTED=NO
+LOCAL_TESTS_EXECUTED=NO
+STATUS=BLOCKED_BY_MISSING_LEAN_TOOLCHAIN
+FOREIGN_LANGUAGE_RUNTIME_CALLED=NO
+CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
+CROSS_IMPLEMENTATION_HASH_CHECKS=NO
+CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
+GITHUB_ACTIONS_PERFORMED=NO
+GIT_HISTORY_MUTATED=NO
+
+Kjøremiljøet som var tilgjengelig under byggingen av leveransen, hadde verken `lean` eller `lake`. Forsøk på å hente den offisielle verktøykjeden fra nettverket mislyktes på navneoppløsning. Derfor er kildekoden og testene forberedt, men trinnet kan ikke erklæres grønt før `lake build` og `lake exe pastafari_stage1_tests` faktisk er kjørt med Lean.

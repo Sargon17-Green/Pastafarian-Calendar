@@ -1,0 +1,11 @@
+name = "pastafari_lean_bokmal"
+version = "0.1.0"
+defaultTargets = ["pastafari_stage1_tests"]
+testDriver = "pastafari_stage1_tests"
+
+[[lean_lib]]
+name = "PastafariLean"
+
+[[lean_exe]]
+name = "pastafari_stage1_tests"
+root = "Stage01Tests"
