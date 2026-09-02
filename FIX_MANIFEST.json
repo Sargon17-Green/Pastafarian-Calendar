@@ -1,0 +1,12 @@
+{
+  "package": "pastafari-stage01-hebrew-source-purity-fix",
+  "base_head": "73b71fdc102338bfe736bb2fcacfffc6353396b9",
+  "files": [
+    "browser/README.md",
+    "browser/i18n/locales.js",
+    "tests/browser-component-runtime.js",
+    "tests/browser-i18n-locales.js"
+  ],
+  "reason": "Stage 01 forbids raw Hebrew Unicode code points in every .js/.json/.md source file.",
+  "behavior": "Hebrew UI text remains unchanged at runtime because JavaScript Unicode escapes decode to the same strings."
+}

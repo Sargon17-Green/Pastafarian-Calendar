@@ -78,7 +78,7 @@ Li actual browser-strate suporte deci complet UI-lingues, includet localmen:
 
 - `ie` — Interlingue (default, LTR)
 - `en` — English (LTR)
-- `he` — עברית (RTL)
+- `he` — Hebrew (RTL)
 - `ar` — العربية (RTL)
 - `ru` — Русский (LTR)
 - `fr` — Français (LTR)
@@ -86,6 +86,10 @@ Li actual browser-strate suporte deci complet UI-lingues, includet localmen:
 - `es` — Español (LTR)
 - `it` — Italiano (LTR)
 - `cs` — Čeština (LTR)
+
+Hebrew runtime strings are stored in JavaScript with Unicode escape sequences so the
+Stage-01 source-language purity invariant remains intact while the browser still
+renders normal Hebrew text at runtime.
 
 Null rete, vendoring, fallback inter lingues o external i18n package es besonat.
 Omni message usat de ti component existe in omni activ locale; un mancant message es un

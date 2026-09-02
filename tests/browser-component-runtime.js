@@ -314,7 +314,7 @@ async function flush() {
   language.setAttribute('lang', 'he-IL');
   assert.strictEqual(language.getAttribute('dir'), 'rtl');
   assert.strictEqual(language.value.cutletName, rawName);
-  if (rawName === 'larice') assert(language._els.summary.textContent.includes('ארזית'));
+  if (rawName === 'larice') assert(language._els.summary.textContent.includes('\u05D0\u05E8\u05D6\u05D9\u05EA'));
 
   // Back to today resets both externally visible date inputs and coalesces the
   // resulting refresh through the connection epoch queue.

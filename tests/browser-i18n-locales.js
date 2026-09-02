@@ -107,7 +107,7 @@ for (const locale of [fr, de, es, it, cs]) assert.strictEqual(locale.dir, 'ltr')
 
 assert.strictEqual(i18n.translate(en, 'field.day'), 'Day');
 assert.strictEqual(i18n.translate(ie, 'field.day'), 'Die');
-assert.strictEqual(i18n.translate(he, 'field.day'), 'יום');
+assert.strictEqual(i18n.translate(he, 'field.day'), '\u05D9\u05D5\u05DD');
 assert.strictEqual(i18n.translate(ar, 'field.day'), 'اليوم');
 assert.strictEqual(i18n.translate(ru, 'field.day'), 'День');
 assert.strictEqual(i18n.translate(fr, 'field.day'), 'Jour');
@@ -119,13 +119,13 @@ assert.strictEqual(i18n.translate(cs, 'field.day'), 'Den');
 // Regression witnesses: current semantic identities, including names that differ
 // from the pinned old positional catalog.
 const witnesses = [
-  ['cutlet', 'larice', ['larice', 'Larch', 'ארזית', 'لاركس', 'Лиственница', 'Mélèze', 'Lärche', 'Alerce', 'Larice', 'Modřín']],
-  ['cutlet', 'Palgursh', ['Palgursh', 'Palgursh', 'פַּלְגּוּרְשׁ', 'بالغورش', 'Палгурш', 'Palgursh', 'Palgursh', 'Palgursh', 'Palgursh', 'Palgursh']],
-  ['cutlet', 'papirus', ['papirus', 'Papyrus', 'פפירוס', 'بردي', 'Папирус', 'Papyrus', 'Papyrus', 'Papiro', 'Papiro', 'Papyrus']],
-  ['month', 'Karshumb', ['Karshumb', 'Karshumb', 'כַּרְשׁוּמְב', 'كارشومب', 'Каршумб', 'Karshumb', 'Karshumb', 'Karshumb', 'Karshumb', 'Karshumb']],
-  ['month', 'leopard', ['leopard', 'Leopard', 'נמר', 'نمر', 'Леопард', 'Léopard', 'Leopard', 'Leopardo', 'Leopardo', 'Leopard']],
-  ['month', 'candel', ['candel', 'Candle', 'נר', 'شمعة', 'Свеча', 'Bougie', 'Kerze', 'Vela', 'Candela', 'Svíčka']],
-  ['month', 'lilie', ['lilie', 'Lily', 'שושן', 'زنبق', 'Лилия', 'Lis', 'Lilie', 'Lirio', 'Giglio', 'Lilie']],
+  ['cutlet', 'larice', ['larice', 'Larch', '\u05D0\u05E8\u05D6\u05D9\u05EA', 'لاركس', 'Лиственница', 'Mélèze', 'Lärche', 'Alerce', 'Larice', 'Modřín']],
+  ['cutlet', 'Palgursh', ['Palgursh', 'Palgursh', '\u05E4\u05B7\u05BC\u05DC\u05B0\u05D2\u05BC\u05D5\u05BC\u05E8\u05B0\u05E9\u05C1', 'بالغورش', 'Палгурш', 'Palgursh', 'Palgursh', 'Palgursh', 'Palgursh', 'Palgursh']],
+  ['cutlet', 'papirus', ['papirus', 'Papyrus', '\u05E4\u05E4\u05D9\u05E8\u05D5\u05E1', 'بردي', 'Папирус', 'Papyrus', 'Papyrus', 'Papiro', 'Papiro', 'Papyrus']],
+  ['month', 'Karshumb', ['Karshumb', 'Karshumb', '\u05DB\u05B7\u05BC\u05E8\u05B0\u05E9\u05C1\u05D5\u05BC\u05DE\u05B0\u05D1', 'كارشومب', 'Каршумб', 'Karshumb', 'Karshumb', 'Karshumb', 'Karshumb', 'Karshumb']],
+  ['month', 'leopard', ['leopard', 'Leopard', '\u05E0\u05DE\u05E8', 'نمر', 'Леопард', 'Léopard', 'Leopard', 'Leopardo', 'Leopardo', 'Leopard']],
+  ['month', 'candel', ['candel', 'Candle', '\u05E0\u05E8', 'شمعة', 'Свеча', 'Bougie', 'Kerze', 'Vela', 'Candela', 'Svíčka']],
+  ['month', 'lilie', ['lilie', 'Lily', '\u05E9\u05D5\u05E9\u05DF', 'زنبق', 'Лилия', 'Lis', 'Lilie', 'Lirio', 'Giglio', 'Lilie']],
 ];
 const locales = [ie, en, he, ar, ru, fr, de, es, it, cs];
 for (const [group, key, values] of witnesses) {
