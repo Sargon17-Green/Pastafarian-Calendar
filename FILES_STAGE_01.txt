@@ -7,6 +7,7 @@
 ./STAGE_01_EXECUTION_STATUS.txt
 ./docs/ARCHITECTURE.md
 ./docs/SOURCE_LANGUAGE_CATALOG.md
+./docs/STATE_OWNERSHIP_AUDIT.md
 ./docs/STAGE_01_STATIC_AUDIT.md
 ./fixtures/stage01_expected.tsv
 ./run_stage01.sh

@@ -1,90 +1,129 @@
 record CatalogEntry(canonicalIndex, text)
 record SourceLanguageCatalog(version, frozen, cutlets, months)
 
+procedure canonicalCutletKannada(canonicalIndex)
+    case canonicalIndex of {
+        1: return "ಕಂಚು"
+        2: return "ನರಿ"
+        3: return "ಮೂತ್ರಪಿಂಡ"
+        4: return "ಲಗಾಶ್"
+        5: return "ಚಿಂತನೆ"
+        6: return "ಒಂಬತ್ತರಲ್ಲಿ ನಾಲ್ಕು ಭಾಗಗಳು"
+        7: return "ಫಲ್ಗುರಶ್"
+        8: return "ಜೊಂಡು"
+        9: return "ಗೊಂಚಲು"
+        10: return "ಚೇಳು"
+        11: return "ಬೂದಿ"
+        12: return "ಗೋಧಿ"
+        13: return "ನದಿ"
+        14: return "ನಗು"
+        15: return "ಅಕ್ಕಾಡ್"
+        16: return "ಕೊಂಬು"
+        17: return "ಖಾಲಿ ಮಡಿಕೆ"
+        default: fail
+    }
+end
+
+procedure canonicalMonthKannada(canonicalIndex)
+    case canonicalIndex of {
+        1: return "ಕೆಸರು"
+        2: return "ದಾಳಿಂಬೆ"
+        3: return "ಮೊಣಕೈ"
+        4: return "ಅಸೂಯೆ"
+        5: return "ಎರಿಡು"
+        6: return "ದಂತಮಂಜನ"
+        7: return "ಐದರಲ್ಲಿ ಮೂರು ಭಾಗಗಳು"
+        8: return "ಕರ್ಷುಮಬ್"
+        9: return "ಚಿರತೆ"
+        10: return "ತವರ"
+        11: return "ಮಂಜು"
+        12: return "ಧೂಪದ ರಾಳ"
+        13: return "ತಕಲಿ"
+        14: return "ಪಕ್ಕೆಲುಬು"
+        15: return "ಕ್ಯಾರಬ್ ಹಣ್ಣು"
+        16: return "ಉರುಕ್"
+        17: return "ನಾಚಿಕೆ"
+        18: return "ಒಂಟೆ"
+        19: return "ತಾಮ್ರ"
+        20: return "ಬಾವಿ"
+        21: return "ಮೊಟ್ಟೆಯ ಹಳದಿ ಭಾಗ"
+        22: return "ನಕ್ಷತ್ರ"
+        23: return "ಜೇನು"
+        24: return "ಪ್ಲೀಹೆ"
+        25: return "ಸುಣ್ಣದ ಕಲ್ಲು"
+        26: return "ಸಂತೋಷ"
+        27: return "ಅಂಜೂರ"
+        28: return "ನಿನವೆ"
+        29: return "ಕಪ್ಪೆ"
+        30: return "ಡಾಮರು"
+        31: return "ಮೇಣದಬತ್ತಿ"
+        32: return "ಮುಚ್ಚಿದ ಬಾಗಿಲು"
+        33: return "ಎಳ್ಳು"
+        34: return "ಕುತ್ತಿಗೆಯ ಹಿಂಭಾಗ"
+        35: return "ಬೆಳ್ಳಿ"
+        36: return "ಲಿಲಿ ಹೂ"
+        37: return "ಬಿರುಗಾಳಿ"
+        38: return "ಕತ್ತೆ"
+        39: return "ಹಿಟ್ಟು"
+        40: return "ಪಶ್ಚಾತ್ತಾಪ"
+        41: return "ಬಾಬಿಲೋನ್"
+        42: return "ನಾಲಿಗೆ"
+        43: return "ಅಗಸೆ"
+        44: return "ಉಪ್ಪು"
+        45: return "ಪಿಯರ್ ಹಣ್ಣು"
+        46: return "ಬಿಲ್ಲು"
+        47: return "ಮರಳು"
+        default: fail
+    }
+end
+
 procedure buildSourceLanguageCatalog()
-    local cutlets, months
-
-    cutlets := [
-        CatalogEntry(1, "ಕಂಚು"),
-        CatalogEntry(2, "ನರಿ"),
-        CatalogEntry(3, "ಮೂತ್ರಪಿಂಡ"),
-        CatalogEntry(4, "ಲಗಾಶ್"),
-        CatalogEntry(5, "ಚಿಂತನೆ"),
-        CatalogEntry(6, "ಒಂಬತ್ತರಲ್ಲಿ ನಾಲ್ಕು ಭಾಗಗಳು"),
-        CatalogEntry(7, "ಫಲ್ಗುರಶ್"),
-        CatalogEntry(8, "ಜೊಂಡು"),
-        CatalogEntry(9, "ಗೊಂಚಲು"),
-        CatalogEntry(10, "ಚೇಳು"),
-        CatalogEntry(11, "ಬೂದಿ"),
-        CatalogEntry(12, "ಗೋಧಿ"),
-        CatalogEntry(13, "ನದಿ"),
-        CatalogEntry(14, "ನಗು"),
-        CatalogEntry(15, "ಅಕ್ಕಾಡ್"),
-        CatalogEntry(16, "ಕೊಂಬು"),
-        CatalogEntry(17, "ಖಾಲಿ ಮಡಿಕೆ")
-    ]
-
-    months := [
-        CatalogEntry(1, "ಕೆಸರು"),
-        CatalogEntry(2, "ದಾಳಿಂಬೆ"),
-        CatalogEntry(3, "ಮೊಣಕೈ"),
-        CatalogEntry(4, "ಅಸೂಯೆ"),
-        CatalogEntry(5, "ಎರಿಡು"),
-        CatalogEntry(6, "ದಂತಮಂಜನ"),
-        CatalogEntry(7, "ಐದರಲ್ಲಿ ಮೂರು ಭಾಗಗಳು"),
-        CatalogEntry(8, "ಕರ್ಷುಮಬ್"),
-        CatalogEntry(9, "ಚಿರತೆ"),
-        CatalogEntry(10, "ತವರ"),
-        CatalogEntry(11, "ಮಂಜು"),
-        CatalogEntry(12, "ಧೂಪದ ರಾಳ"),
-        CatalogEntry(13, "ತಕಲಿ"),
-        CatalogEntry(14, "ಪಕ್ಕೆಲುಬು"),
-        CatalogEntry(15, "ಕ್ಯಾರಬ್ ಹಣ್ಣು"),
-        CatalogEntry(16, "ಉರುಕ್"),
-        CatalogEntry(17, "ನಾಚಿಕೆ"),
-        CatalogEntry(18, "ಒಂಟೆ"),
-        CatalogEntry(19, "ತಾಮ್ರ"),
-        CatalogEntry(20, "ಬಾವಿ"),
-        CatalogEntry(21, "ಮೊಟ್ಟೆಯ ಹಳದಿ ಭಾಗ"),
-        CatalogEntry(22, "ನಕ್ಷತ್ರ"),
-        CatalogEntry(23, "ಜೇನು"),
-        CatalogEntry(24, "ಪ್ಲೀಹೆ"),
-        CatalogEntry(25, "ಸುಣ್ಣದ ಕಲ್ಲು"),
-        CatalogEntry(26, "ಸಂತೋಷ"),
-        CatalogEntry(27, "ಅಂಜೂರ"),
-        CatalogEntry(28, "ನಿನವೆ"),
-        CatalogEntry(29, "ಕಪ್ಪೆ"),
-        CatalogEntry(30, "ಡಾಮರು"),
-        CatalogEntry(31, "ಮೇಣದಬತ್ತಿ"),
-        CatalogEntry(32, "ಮುಚ್ಚಿದ ಬಾಗಿಲು"),
-        CatalogEntry(33, "ಎಳ್ಳು"),
-        CatalogEntry(34, "ಕುತ್ತಿಗೆಯ ಹಿಂಭಾಗ"),
-        CatalogEntry(35, "ಬೆಳ್ಳಿ"),
-        CatalogEntry(36, "ಲಿಲಿ ಹೂ"),
-        CatalogEntry(37, "ಬಿರುಗಾಳಿ"),
-        CatalogEntry(38, "ಕತ್ತೆ"),
-        CatalogEntry(39, "ಹಿಟ್ಟು"),
-        CatalogEntry(40, "ಪಶ್ಚಾತ್ತಾಪ"),
-        CatalogEntry(41, "ಬಾಬಿಲೋನ್"),
-        CatalogEntry(42, "ನಾಲಿಗೆ"),
-        CatalogEntry(43, "ಅಗಸೆ"),
-        CatalogEntry(44, "ಉಪ್ಪು"),
-        CatalogEntry(45, "ಪಿಯರ್ ಹಣ್ಣು"),
-        CatalogEntry(46, "ಬಿಲ್ಲು"),
-        CatalogEntry(47, "ಮರಳು")
-    ]
-
+    local cutlets, months, i
+    cutlets := []
+    i := 1
+    while i <= 17 do {
+        put(cutlets, CatalogEntry(i, canonicalCutletKannada(i)))
+        i := i + 1
+    }
+    months := []
+    i := 1
+    while i <= 47 do {
+        put(months, CatalogEntry(i, canonicalMonthKannada(i)))
+        i := i + 1
+    }
     return SourceLanguageCatalog("kn-v1", 1, cutlets, months)
 end
 
+procedure validateSourceLanguageCatalog(catalog)
+    local i
+    if /catalog then fail
+    if catalog.version ~== "kn-v1" then fail
+    if catalog.frozen ~= 1 then fail
+    if *catalog.cutlets ~= 17 then fail
+    if *catalog.months ~= 47 then fail
+    i := 1
+    while i <= 17 do {
+        if catalog.cutlets[i].canonicalIndex ~= i then fail
+        if catalog.cutlets[i].text ~== canonicalCutletKannada(i) then fail
+        i := i + 1
+    }
+    i := 1
+    while i <= 47 do {
+        if catalog.months[i].canonicalIndex ~= i then fail
+        if catalog.months[i].text ~== canonicalMonthKannada(i) then fail
+        i := i + 1
+    }
+    return 1
+end
+
 procedure catalogCutletText(catalog, canonicalIndex)
-    if 1 <= canonicalIndex & canonicalIndex <= *catalog.cutlets then
-        return catalog.cutlets[canonicalIndex].text
+    validateSourceLanguageCatalog(catalog) | fail
+    if 1 <= canonicalIndex & canonicalIndex <= 17 then return canonicalCutletKannada(canonicalIndex)
     fail
 end
 
 procedure catalogMonthText(catalog, canonicalIndex)
-    if 1 <= canonicalIndex & canonicalIndex <= *catalog.months then
-        return catalog.months[canonicalIndex].text
+    validateSourceLanguageCatalog(catalog) | fail
+    if 1 <= canonicalIndex & canonicalIndex <= 47 then return canonicalMonthKannada(canonicalIndex)
     fail
 end

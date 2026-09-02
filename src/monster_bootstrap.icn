@@ -1,4 +1,4 @@
-record BaseMonsterContext(calculationDay, targetDay, phase, subPhase, mode, status, semanticSnapshot, pendingSnapshot, rollbackSnapshot, metrics, logs, diagnostics, lastError, validationFailures)
+record BaseMonsterContext(calculationDay, targetDay, phase, subPhase, mode, status, semanticSnapshot, pendingSnapshot, rollbackSnapshot, snapshotActive, metrics, logs, diagnostics, lastError, validationFailures)
 record BaseDispatcher(currentPhase, handlersSeen)
 record BaseValidationState(checksRun, failures)
 record BaseErrorEnvelope(code, phase, detailCode)
@@ -15,12 +15,72 @@ procedure newBaseMonsterContext(calculationDay, targetDay)
         &null,
         &null,
         &null,
+        0,
         BaseMetrics(table(0)),
         [],
         [],
         &null,
         []
     )
+end
+
+procedure baseScalarSemanticType(typeName)
+    if typeName == "integer" | typeName == "string" | typeName == "cset" | typeName == "null" then return 1
+    fail
+end
+
+procedure baseScalarTableKey(value)
+    local typeName
+    typeName := type(value)
+    if typeName == "integer" | typeName == "string" | typeName == "cset" then return 1
+    fail
+end
+
+procedure baseCloneOwned(value, seen)
+    local typeName, out, i, k, element, probe, defaultValue
+    typeName := type(value)
+    if baseScalarSemanticType(typeName) then return value
+    if typeName == "real" then stop("E_SEMANTIC_REAL_FORBIDDEN")
+    if typeName == "co-expression" then stop("E_SEMANTIC_COEXPRESSION_FORBIDDEN")
+    if /seen then seen := table()
+    if \seen[value] then return seen[value]
+
+    if typeName == "list" then {
+        out := list(*value)
+        seen[value] := out
+        i := 1
+        while i <= *value do {
+            out[i] := baseCloneOwned(value[i], seen)
+            i := i + 1
+        }
+        return out
+    }
+
+    if typeName == "table" then {
+        probe := "__BASE_SNAPSHOT_DEFAULT_PROBE__"
+        while member(value, probe) do probe := probe || "_"
+        defaultValue := value[probe]
+        if /baseScalarSemanticType(type(defaultValue)) then stop("E_MUTABLE_TABLE_DEFAULT_FORBIDDEN")
+        out := copy(value)
+        seen[value] := out
+        every k := key(value) do {
+            if /baseScalarTableKey(k) then stop("E_MUTABLE_TABLE_KEY_FORBIDDEN")
+            out[k] := baseCloneOwned(value[k], seen)
+        }
+        return out
+    }
+
+    if typeName == "set" then {
+        out := set()
+        seen[value] := out
+        every element := !value do {
+            if /baseScalarTableKey(element) then stop("E_MUTABLE_SET_MEMBER_FORBIDDEN")
+            insert(out, element)
+        }
+        return out
+    }
+
+    stop("E_UNSUPPORTED_SEMANTIC_AGGREGATE")
 end
 
 procedure baseMetricBump(ctx, code)
@@ -48,28 +108,32 @@ procedure baseValidateIntegerDays(ctx)
 end
 
 procedure baseSnapshotBegin(ctx, semanticValue)
-    if \ctx.pendingSnapshot then fail
-    ctx.semanticSnapshot := semanticValue
-    ctx.rollbackSnapshot := semanticValue
-    ctx.pendingSnapshot := semanticValue
+    if ctx.snapshotActive ~= 0 then fail
+    ctx.rollbackSnapshot := baseCloneOwned(ctx.semanticSnapshot)
+    ctx.pendingSnapshot := baseCloneOwned(semanticValue)
+    ctx.snapshotActive := 1
     return 1
 end
 
 procedure baseSnapshotValidateAndCommit(ctx, validatorCode)
-    if /ctx.pendingSnapshot then fail
+    local committed
+    if ctx.snapshotActive ~= 1 then fail
     if validatorCode ~== "BOOTSTRAP_EXACT" then fail
-    ctx.semanticSnapshot := ctx.pendingSnapshot
+    committed := baseCloneOwned(ctx.pendingSnapshot)
+    ctx.semanticSnapshot := committed
     ctx.pendingSnapshot := &null
     ctx.rollbackSnapshot := &null
-    return ctx.semanticSnapshot
+    ctx.snapshotActive := 0
+    return baseCloneOwned(ctx.semanticSnapshot)
 end
 
 procedure baseSnapshotRollback(ctx)
-    if /ctx.rollbackSnapshot then fail
-    ctx.semanticSnapshot := ctx.rollbackSnapshot
+    if ctx.snapshotActive ~= 1 then fail
+    ctx.semanticSnapshot := baseCloneOwned(ctx.rollbackSnapshot)
     ctx.pendingSnapshot := &null
     ctx.rollbackSnapshot := &null
-    return ctx.semanticSnapshot
+    ctx.snapshotActive := 0
+    return baseCloneOwned(ctx.semanticSnapshot)
 end
 
 procedure baseDispatch(ctx, dispatcher, requestedPhase)
