@@ -1,9 +1,19 @@
-Փուլ 1-ի աղբյուրային ծառը և handoff փաթեթը պատրաստված են։
+Stage 1-ի աղբյուրային ծառը ամբողջացվել է այնքան, որքան հնարավոր է առանց native D toolchain-ի։
 
-Սպասվող արդյունքը՝ GREEN։
-Փաստացի տեղային D build/run արդյունք՝ ՉԻ ԳՈՐԾԱՐԿՎԵԼ։
-Պատճառը՝ այս աշխատանքային միջավայրում DMD, LDC2 կամ GDC compiler հասանելի չէ, իսկ ցանցային ներբեռնումը հասանելի չէ։
+Source-level ownership audit՝ ԱՎԱՐՏՎԱԾ։
+`SEMANTIC_STATE_OWNER_VALIDATED=YES`։
+SourceLanguageCatalog՝ սառեցված և canonicalIndex-ներով անփոփոխ։
+Ապագա Stage 2 patch/legacy կոդ՝ ՉԿԱ։
 
-Այս պատճառով Stage 1-ը դեռ չի կարելի հայտարարել ավարտված կամ GREEN։ `DEVELOPMENT_STAGE.md`-ում `LAST_COMPLETED_STAGE=0` և `SEMANTIC_STATE_OWNER_VALIDATED=NO` արժեքները դիտավորյալ պահպանված են։
+Ownership ստուգման ընթացքում վերացվել է manager-ի երկարատև class reference storage-ը. validator/dispatcher/error-wrapper-ը այժմ invocation-local են։ Oracle-ի mutable cache/memo state-ը instance-local է, mutable դաշտերը private են, իսկ canonical `normativeCalendarDate` entry point-ը յուրաքանչյուր կանչի համար ստեղծում է նոր `OracleCalendar`։ Array/slice aliasing-ի համար ավելացվել են առանձին regression-ներ։
 
-Ավարտման համար պետք է D compiler ունեցող միջավայրում գործարկել միայն `./run_stage01.sh`։ Եթե build-ը կամ թեստերը ձախողվեն, պետք է ուղղել միայն Stage 1-ը և կրկնել նույն տեղային թեստերը։ Stage 2-ը չպետք է սկսվի մինչև լիարժեք GREEN արդյունքը։
+Նորմատիվ integer audit-ի ընթացքում նաև հայտնաբերվել և ուղղվել է 64-bit սահմանափակում. `MonsterContext`-ի օրերը, oracle-ի օրերը, gate index-ները, gate day-երը և year number-ը այժմ `BigInt` են։ Նեղ integer conversion-ները մնացել են միայն այն արժեքների համար, որոնց նորմատիվ սահմանը նախապես փոքր է։ Ավելացվել է 64-bit տիրույթից շատ հեռու օրերի regression։
+
+Ավելացված թեստերը ծածկում են նաև բոլոր 17+47 catalog entry-ների dense/unique mapping-ը, SAVE/day/count/stone/permutation/selection helper-ները, bounded composition/cutlet partition/weaving փոքր exact family-ները, sauce structural invariants-ը, year-5000/next/previous/opening-closing boundary smoke-ը և invocation isolation-ը։ Վերջնական canonical oracle entry point-ը compile-time ստուգման մեջ ընդգրկված է։
+
+Սպասվող native արդյունքը՝ GREEN։
+Փաստացի native D build/run արդյունք՝ ՉԻ ԳՈՐԾԱՐԿՎԵԼ։
+Վերջին փորձը՝ `./run_stage01.sh`։
+Արդյունքը՝ exit code 127, քանի որ DMD/LDC/GDC compiler չի գտնվել։ Միացված հեռակա սարքն էլ այս պահին offline է։
+
+Այդ պատճառով `LAST_COMPLETED_STAGE=0` մնում է անփոփոխ։ Այլ հայտնի Stage 1 source, semantic կամ ownership աշխատանք չի մնացել. մնացել է միայն `./run_stage01.sh` native գործարկումը և, եթե այն GREEN է, `LAST_COMPLETED_STAGE=1` սահմանելը։ Stage 2-ը չի սկսվել։

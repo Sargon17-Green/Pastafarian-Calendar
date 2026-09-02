@@ -1,5 +1,6 @@
 module pastafari.monster_base;
 
+import std.bigint : BigInt;
 import std.exception : enforce;
 
 struct MetricBook
@@ -14,15 +15,15 @@ struct MetricBook
 
 struct MonsterContext
 {
-    long calculationDay;
-    long targetDay;
+    BigInt calculationDay;
+    BigInt targetDay;
     string phase;
     string status;
     string[] branchTrace;
     MetricBook metrics;
 }
 
-class BaseValidationManager
+final class BaseValidationManager
 {
     void validateInput(const MonsterContext ctx)
     {
@@ -35,7 +36,7 @@ class BaseValidationManager
     }
 }
 
-class BaseErrorWrapper
+final class BaseErrorWrapper
 {
     Exception wrap(Exception source, string code)
     {
@@ -43,17 +44,11 @@ class BaseErrorWrapper
     }
 }
 
-class BaseDispatcher
+final class BaseDispatcher
 {
-    BaseValidationManager validator;
-
-    this(BaseValidationManager validator)
+    MonsterContext dispatch(MonsterContext ctx, BaseValidationManager validator)
     {
-        this.validator = validator;
-    }
-
-    MonsterContext dispatch(MonsterContext ctx)
-    {
+        enforce(validator !is null, "E_VALIDATOR_NULL");
         ctx.branchTrace ~= "BOOTSTRAP_DISPATCH";
         ctx.metrics.bump("bootstrap.dispatch");
         validator.validateInput(ctx);
@@ -63,21 +58,14 @@ class BaseDispatcher
     }
 }
 
-class MonsterManager
+final class MonsterManager
 {
-    BaseValidationManager validator;
-    BaseDispatcher dispatcher;
-    BaseErrorWrapper errorWrapper;
-
-    this()
+    MonsterContext bootstrap(BigInt calculationDay, BigInt targetDay)
     {
-        validator = new BaseValidationManager();
-        dispatcher = new BaseDispatcher(validator);
-        errorWrapper = new BaseErrorWrapper();
-    }
+        auto validator = new BaseValidationManager();
+        auto dispatcher = new BaseDispatcher();
+        auto errorWrapper = new BaseErrorWrapper();
 
-    MonsterContext bootstrap(long calculationDay, long targetDay)
-    {
         MonsterContext ctx;
         ctx.calculationDay = calculationDay;
         ctx.targetDay = targetDay;
@@ -85,11 +73,16 @@ class MonsterManager
         ctx.status = "NEW";
         try
         {
-            return dispatcher.dispatch(ctx);
+            return dispatcher.dispatch(ctx, validator);
         }
         catch (Exception e)
         {
             throw errorWrapper.wrap(e, "E_BOOTSTRAP");
         }
+    }
+
+    MonsterContext bootstrap(long calculationDay, long targetDay)
+    {
+        return bootstrap(BigInt(calculationDay), BigInt(targetDay));
     }
 }

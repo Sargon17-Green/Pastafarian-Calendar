@@ -12,6 +12,7 @@ enum int GATE_GAP_MIN = 42;
 enum int GATE_GAP_MAX = 963;
 enum int YEAR_MIN_DAYS = 252;
 enum int YEAR_MAX_DAYS = 5778;
+enum int MIN_GATE_GAPS_PER_YEAR = 6;
 enum int MIN_CUTLETS = 6;
 enum int MAX_CUTLETS = 17;
 enum int MIN_MONTHS = 3;
@@ -59,7 +60,7 @@ BI save(BI x)
     return BI(1) + regularMod(x - 1, M());
 }
 
-long absLong(long x)
+BI absBI(BI x)
 {
     return x < 0 ? -x : x;
 }
@@ -84,24 +85,35 @@ struct WorkCounts
     int direction;
 }
 
-BI dayCount(long day)
+BI dayCount(BI day)
 {
-    if (day == FOUNDATION_DAY)
+    auto foundation = BI(FOUNDATION_DAY);
+    if (day == foundation)
         return BI(1);
-    if (day > FOUNDATION_DAY)
-        return BI(2) * (day - FOUNDATION_DAY) + 1;
-    return BI(2) * (FOUNDATION_DAY - day);
+    if (day > foundation)
+        return BI(2) * (day - foundation) + 1;
+    return BI(2) * (foundation - day);
 }
 
-WorkCounts workCounts(long calculationDay, long targetDay)
+BI dayCount(long day)
+{
+    return dayCount(BI(day));
+}
+
+WorkCounts workCounts(BI calculationDay, BI targetDay)
 {
     WorkCounts c;
     c.action = dayCount(calculationDay);
     c.target = dayCount(targetDay);
-    c.distance = BI(absLong(targetDay - calculationDay) + 1);
+    c.distance = absBI(targetDay - calculationDay) + 1;
     c.connection = c.action + c.target;
     c.direction = targetDay < calculationDay ? 1 : (targetDay == calculationDay ? 2 : 3);
     return c;
+}
+
+WorkCounts workCounts(long calculationDay, long targetDay)
+{
+    return workCounts(BI(calculationDay), BI(targetDay));
 }
 
 BI[][] buildStones()
@@ -249,7 +261,7 @@ int[] permutationUnrank1(long rank1)
 
 int[] bowlOrderFromDrop(BI drop)
 {
-    auto orderNumber = cast(long)((drop - 1) % 720) + 1;
+    auto orderNumber = ((drop - 1) % 720).toLong() + 1;
     return permutationUnrank1(orderNumber);
 }
 
@@ -315,7 +327,7 @@ BI[] postStir12(BI[] bowlsInput)
     {
         auto old = bowls.dup;
         BI savedBowlSum = save(old[1] + old[2] + old[3] + old[4] + old[5] + old[6] + 149 * stir);
-        auto orderNumber = cast(long)((savedBowlSum - 1) % 720) + 1;
+        auto orderNumber = ((savedBowlSum - 1) % 720).toLong() + 1;
         auto order = permutationUnrank1(orderNumber);
         BI[] nextBowls;
         nextBowls.length = 7;
@@ -339,7 +351,7 @@ struct SauceResult
     int[] orderAt46;
 }
 
-SauceResult sauce(long calculationDay, long targetDay)
+SauceResult sauce(BI calculationDay, BI targetDay)
 {
     auto counts = workCounts(calculationDay, targetDay);
     auto stones = buildStones();
@@ -349,6 +361,11 @@ SauceResult sauce(long calculationDay, long targetDay)
     auto afterDrops = applyVisibleDropsToBowls(bowls, visible, stones);
     auto finalBowls = postStir12(afterDrops.bowls);
     return SauceResult(finalBowls, afterDrops.orderAt46);
+}
+
+SauceResult sauce(long calculationDay, long targetDay)
+{
+    return sauce(BI(calculationDay), BI(targetDay));
 }
 
 struct AnswerStream
@@ -378,7 +395,7 @@ AnswerStream askBowl(SauceResult result, int queriedBowlId, int seal)
     return AnswerStream(first, step);
 }
 
-BI answerAt(AnswerStream stream, long k)
+BI answerAt(AnswerStream stream, BI k)
 {
     return BI(1) + regularMod(stream.first - 1 + BI(stream.step) * k, M());
 }
@@ -387,7 +404,7 @@ BI chooseRankShort(AnswerStream stream, BI N)
 {
     enforce(N >= 1 && N <= M(), "E_SHORT_N");
     auto limit = (M() / N) * N;
-    long k = 0;
+    BI k = 0;
     while (true)
     {
         auto x = answerAt(stream, k);
@@ -400,7 +417,7 @@ BI chooseRankShort(AnswerStream stream, BI N)
 BI chooseRankWide(AnswerStream stream, BI N)
 {
     enforce(N > M(), "E_WIDE_N");
-    int places = 1;
+    size_t places = 1;
     BI space = M();
     while (space < N)
     {
@@ -411,7 +428,7 @@ BI chooseRankWide(AnswerStream stream, BI N)
     BI weight = 1;
     foreach (j; 0 .. places)
     {
-        wide += (answerAt(stream, j) - 1) * weight;
+        wide += (answerAt(stream, BI(j)) - 1) * weight;
         weight *= M();
     }
     auto limit = (space / N) * N;
@@ -468,13 +485,13 @@ string key3(int a, int b, int c)
     return a.to!string ~ ":" ~ b.to!string ~ ":" ~ c.to!string;
 }
 
-class BoundedCompositionFamily
+final class BoundedCompositionFamily
 {
-    int total;
-    int slots;
-    int lo;
-    int hi;
-    BI[string] memo;
+    private int total;
+    private int slots;
+    private int lo;
+    private int hi;
+    private BI[string] memo;
 
     this(int total, int slots, int lo, int hi)
     {
@@ -536,12 +553,12 @@ string cutletStateKey(int rem, int slots, int cumulative, bool hit)
     return rem.to!string ~ ":" ~ slots.to!string ~ ":" ~ cumulative.to!string ~ ":" ~ (hit ? "1" : "0");
 }
 
-class CutletPartitionFamily
+final class CutletPartitionFamily
 {
-    int G;
-    int K;
-    int required;
-    BI[string] memo;
+    private int G;
+    private int K;
+    private int required;
+    private BI[string] memo;
 
     this(int G, int K, int required)
     {
@@ -641,10 +658,10 @@ string weaveStateKey(int[] remaining, int opened, int closed)
     return key;
 }
 
-class WeavingFamily
+final class WeavingFamily
 {
-    int[] lengths;
-    BI[string] memo;
+    private int[] lengths;
+    private BI[string] memo;
 
     this(int[] lengths)
     {
@@ -747,11 +764,11 @@ class WeavingFamily
 
 struct Year
 {
-    long number;
-    int openGateIndex;
-    int closeGateIndex;
-    long openGateDay;
-    long closeGateDay;
+    BI number;
+    BI openGateIndex;
+    BI closeGateIndex;
+    BI openGateDay;
+    BI closeGateDay;
 }
 
 struct YearStructure
@@ -759,10 +776,10 @@ struct YearStructure
     int cutletCount;
     int[] cutletPartition;
     int[] cutletNameIndices;
-    int[] cutletOpenGateIndices;
-    int[] cutletCloseGateIndices;
-    long[] cutletFirstDays;
-    long[] cutletLastDays;
+    BI[] cutletOpenGateIndices;
+    BI[] cutletCloseGateIndices;
+    BI[] cutletFirstDays;
+    BI[] cutletLastDays;
     int monthCount;
     int[] monthLengths;
     int[] monthWeaving;
@@ -771,81 +788,116 @@ struct YearStructure
 
 struct CalendarTuple
 {
-    long yearNumber;
+    BI yearNumber;
     int cutletCanonicalIndex;
-    long dayInCutlet;
+    BI dayInCutlet;
     int monthCanonicalIndex;
     int dayInMonth;
 }
 
-class OracleCalendar
+struct ExactGateIndex
 {
-    long[int] gates;
-    int minKnown = 0;
-    int maxKnown = 0;
+    bool found;
+    BI index;
+}
+
+
+final class OracleCalendar
+{
+    private BI[BI] gates;
+    private BI minKnown;
+    private BI maxKnown;
 
     this()
     {
-        gates[0] = FOUNDATION_DAY;
+        minKnown = BI(0);
+        maxKnown = BI(0);
+        gates[BI(0)] = BI(FOUNDATION_DAY);
     }
 
-    int positiveGateGap(int n)
+    BI gateAt(BI index)
     {
-        auto r = sauce(FOUNDATION_DAY, FOUNDATION_DAY + n);
+        auto p = index in gates;
+        enforce(p !is null, "E_GATE_MISSING");
+        return *p;
+    }
+
+    int positiveGateGap(BI n)
+    {
+        enforce(n >= 1, "E_POSITIVE_GATE_INDEX");
+        auto r = sauce(BI(FOUNDATION_DAY), BI(FOUNDATION_DAY) + n);
         auto stream = askBowl(r, 1, SEAL_GATE_GAP);
         auto chosen = chooseRank(stream, BI(922)).toLong();
         return cast(int)(41 + chosen);
     }
 
-    int negativeGateGap(int n)
+    int negativeGateGap(BI n)
     {
-        auto r = sauce(FOUNDATION_DAY, FOUNDATION_DAY - n);
+        enforce(n >= 1, "E_NEGATIVE_GATE_INDEX");
+        auto r = sauce(BI(FOUNDATION_DAY), BI(FOUNDATION_DAY) - n);
         auto stream = askBowl(r, 1, SEAL_GATE_GAP);
         auto chosen = chooseRank(stream, BI(922)).toLong();
         return cast(int)(41 + chosen);
     }
 
-    long ensureGateIndex(int k)
+    BI ensureGateIndex(BI k)
     {
         if (k > maxKnown)
         {
-            foreach (n; maxKnown + 1 .. k + 1)
+            BI n = maxKnown + 1;
+            while (n <= k)
             {
-                gates[n] = gates[n - 1] + positiveGateGap(n);
+                gates[n] = gateAt(n - 1) + positiveGateGap(n);
                 maxKnown = n;
+                n += 1;
             }
         }
         if (k < minKnown)
         {
-            int n = minKnown - 1;
+            BI n = minKnown - 1;
             while (n >= k)
             {
-                gates[n] = gates[n + 1] - negativeGateGap(-n);
+                gates[n] = gateAt(n + 1) - negativeGateGap(-n);
                 minKnown = n;
-                --n;
+                n -= 1;
             }
         }
-        return gates[k];
+        return gateAt(k);
     }
 
-    void ensureGatesCover(long lowDay, long highDay)
+    BI ensureGateIndex(long k)
+    {
+        return ensureGateIndex(BI(k));
+    }
+
+    void ensureGatesCover(BI lowDay, BI highDay)
     {
         enforce(lowDay <= highDay, "E_GATE_COVER");
-        while (gates[minKnown] > lowDay)
+        while (gateAt(minKnown) > lowDay)
             ensureGateIndex(minKnown - 1);
-        while (gates[maxKnown] < highDay)
+        while (gateAt(maxKnown) < highDay)
             ensureGateIndex(maxKnown + 1);
     }
 
-    int gateIndexAtOrBefore(long day)
+    void ensureGatesForwardThroughDay(BI day)
+    {
+        ensureGatesCover(gateAt(minKnown), day);
+    }
+
+    void ensureGatesBackwardThroughDay(BI day)
+    {
+        ensureGatesCover(day, gateAt(maxKnown));
+    }
+
+    BI gateIndexAtOrBefore(BI day)
     {
         ensureGatesCover(day, day);
-        int lo = minKnown;
-        int hi = maxKnown;
+        BI lo = minKnown;
+        BI hi = maxKnown;
         while (lo < hi)
         {
-            auto mid = lo + (hi - lo + 1) / 2;
-            if (gates[mid] <= day)
+            BI mid = lo + (hi - lo + 1) / 2;
+            if (gateAt(mid) <= day)
                 lo = mid;
             else
                 hi = mid - 1;
@@ -853,38 +905,49 @@ class OracleCalendar
         return lo;
     }
 
-    int exactGateIndex(long day)
+    BI gateIndexAtOrAfter(BI day)
     {
         auto i = gateIndexAtOrBefore(day);
-        return gates[i] == day ? i : int.min;
+        if (gateAt(i) == day)
+            return i;
+        return i + 1;
     }
 
-    bool validYearPair(int openIndex, int closeIndex)
+    ExactGateIndex exactGateIndex(BI day)
     {
-        if (closeIndex - openIndex < 6)
+        auto i = gateIndexAtOrBefore(day);
+        if (gateAt(i) == day)
+            return ExactGateIndex(true, i);
+        return ExactGateIndex(false, BI(0));
+    }
+
+    bool validYearPair(BI openIndex, BI closeIndex)
+    {
+        if (closeIndex - openIndex < MIN_GATE_GAPS_PER_YEAR)
             return false;
-        auto length = gates[closeIndex] - gates[openIndex];
+        auto length = gateAt(closeIndex) - gateAt(openIndex);
         return length >= YEAR_MIN_DAYS && length <= YEAR_MAX_DAYS;
     }
 
-    Year year5000(long calculationDay)
+    Year year5000(BI calculationDay)
     {
         ensureGatesCover(calculationDay - YEAR_MAX_DAYS, calculationDay + YEAR_MAX_DAYS);
-        struct Candidate { int i; int j; long length; long openDay; }
+        struct Candidate { BI i; BI j; BI length; BI openDay; }
         Candidate[] candidates;
-        foreach (i; minKnown .. maxKnown)
+        BI i = minKnown;
+        while (i < maxKnown)
         {
-            foreach (j; i + 1 .. maxKnown + 1)
+            BI j = i + 1;
+            while (j <= maxKnown)
             {
-                auto length = gates[j] - gates[i];
+                auto length = gateAt(j) - gateAt(i);
                 if (length > YEAR_MAX_DAYS)
                     break;
-                if (!validYearPair(i, j))
-                    continue;
-                if (!(gates[i] < calculationDay && calculationDay <= gates[j]))
-                    continue;
-                candidates ~= Candidate(i, j, length, gates[i]);
+                if (validYearPair(i, j) && gateAt(i) < calculationDay && calculationDay <= gateAt(j))
+                    candidates ~= Candidate(i, j, length, gateAt(i));
+                j += 1;
             }
+            i += 1;
         }
         for (size_t a = 1; a < candidates.length; ++a)
         {
@@ -903,17 +966,22 @@ class OracleCalendar
         auto stream = askBowl(r, 1, SEAL_YEAR_5000);
         auto rank = chooseRank(stream, BI(candidates.length)).toLong();
         auto c = candidates[cast(size_t)rank - 1];
-        return Year(5000, c.i, c.j, gates[c.i], gates[c.j]);
+        return Year(BI(5000), c.i, c.j, gateAt(c.i), gateAt(c.j));
     }
 
-    void sortCloseCandidates(ref int[] candidates, int openIndex)
+    Year year5000(long calculationDay)
+    {
+        return year5000(BI(calculationDay));
+    }
+
+    void sortCloseCandidates(ref BI[] candidates, BI openIndex)
     {
         for (size_t a = 1; a < candidates.length; ++a)
         {
             auto x = candidates[a];
-            auto xLength = gates[x] - gates[openIndex];
+            auto xLength = gateAt(x) - gateAt(openIndex);
             size_t b = a;
-            while (b > 0 && xLength < gates[candidates[b - 1]] - gates[openIndex])
+            while (b > 0 && xLength < gateAt(candidates[b - 1]) - gateAt(openIndex))
             {
                 candidates[b] = candidates[b - 1];
                 --b;
@@ -922,14 +990,14 @@ class OracleCalendar
         }
     }
 
-    void sortOpenCandidates(ref int[] candidates, int closeIndex)
+    void sortOpenCandidates(ref BI[] candidates, BI closeIndex)
     {
         for (size_t a = 1; a < candidates.length; ++a)
         {
             auto x = candidates[a];
-            auto xLength = gates[closeIndex] - gates[x];
+            auto xLength = gateAt(closeIndex) - gateAt(x);
             size_t b = a;
-            while (b > 0 && xLength < gates[closeIndex] - gates[candidates[b - 1]])
+            while (b > 0 && xLength < gateAt(closeIndex) - gateAt(candidates[b - 1]))
             {
                 candidates[b] = candidates[b - 1];
                 --b;
@@ -938,53 +1006,53 @@ class OracleCalendar
         }
     }
 
-    Year nextYear(long calculationDay, Year known)
+    Year nextYear(BI calculationDay, Year known)
     {
         auto openIndex = known.closeGateIndex;
-        int[] candidates;
-        int closeIndex = openIndex + 1;
+        BI[] candidates;
+        BI closeIndex = openIndex + 1;
         while (true)
         {
             ensureGateIndex(closeIndex);
-            if (gates[closeIndex] - gates[openIndex] > YEAR_MAX_DAYS)
+            if (gateAt(closeIndex) - gateAt(openIndex) > YEAR_MAX_DAYS)
                 break;
             if (validYearPair(openIndex, closeIndex))
                 candidates ~= closeIndex;
-            ++closeIndex;
+            closeIndex += 1;
         }
         sortCloseCandidates(candidates, openIndex);
         enforce(candidates.length > 0, "E_NEXT_YEAR_CANDIDATES");
-        auto r = sauce(calculationDay, gates[openIndex]);
+        auto r = sauce(calculationDay, gateAt(openIndex));
         auto stream = askBowl(r, 1, SEAL_NEXT_YEAR);
         auto rank = chooseRank(stream, BI(candidates.length)).toLong();
         closeIndex = candidates[cast(size_t)rank - 1];
-        return Year(known.number + 1, openIndex, closeIndex, gates[openIndex], gates[closeIndex]);
+        return Year(known.number + 1, openIndex, closeIndex, gateAt(openIndex), gateAt(closeIndex));
     }
 
-    Year previousYear(long calculationDay, Year known)
+    Year previousYear(BI calculationDay, Year known)
     {
         auto closeIndex = known.openGateIndex;
-        int[] candidates;
-        int openIndex = closeIndex - 1;
+        BI[] candidates;
+        BI openIndex = closeIndex - 1;
         while (true)
         {
             ensureGateIndex(openIndex);
-            if (gates[closeIndex] - gates[openIndex] > YEAR_MAX_DAYS)
+            if (gateAt(closeIndex) - gateAt(openIndex) > YEAR_MAX_DAYS)
                 break;
             if (validYearPair(openIndex, closeIndex))
                 candidates ~= openIndex;
-            --openIndex;
+            openIndex -= 1;
         }
         sortOpenCandidates(candidates, closeIndex);
         enforce(candidates.length > 0, "E_PREVIOUS_YEAR_CANDIDATES");
-        auto r = sauce(calculationDay, gates[closeIndex]);
+        auto r = sauce(calculationDay, gateAt(closeIndex));
         auto stream = askBowl(r, 1, SEAL_PREVIOUS_YEAR);
         auto rank = chooseRank(stream, BI(candidates.length)).toLong();
         openIndex = candidates[cast(size_t)rank - 1];
-        return Year(known.number - 1, openIndex, closeIndex, gates[openIndex], gates[closeIndex]);
+        return Year(known.number - 1, openIndex, closeIndex, gateAt(openIndex), gateAt(closeIndex));
     }
 
-    Year findTargetYear(long calculationDay, long targetDay)
+    Year findTargetYear(BI calculationDay, BI targetDay)
     {
         auto y = year5000(calculationDay);
         while (targetDay > y.closeGateDay)
@@ -997,7 +1065,9 @@ class OracleCalendar
 
     int chooseCutletCount(SauceResult structureSauce, Year year)
     {
-        auto gateGaps = year.closeGateIndex - year.openGateIndex;
+        auto gateGapsExact = year.closeGateIndex - year.openGateIndex;
+        enforce(gateGapsExact >= MIN_GATE_GAPS_PER_YEAR && gateGapsExact <= YEAR_MAX_DAYS / GATE_GAP_MIN, "E_GATE_GAPS_BOUNDS");
+        auto gateGaps = gateGapsExact.toInt();
         int[] candidates;
         foreach (k; MIN_CUTLETS .. MAX_CUTLETS + 1)
             if (k <= gateGaps)
@@ -1008,13 +1078,15 @@ class OracleCalendar
         return candidates[cast(size_t)rank - 1];
     }
 
-    int[] chooseCutletPartition(long calculationDay, SauceResult structureSauce, Year year, int cutletCount)
+    int[] chooseCutletPartition(BI calculationDay, SauceResult structureSauce, Year year, int cutletCount)
     {
-        auto G = year.closeGateIndex - year.openGateIndex;
+        auto GExact = year.closeGateIndex - year.openGateIndex;
+        enforce(GExact >= MIN_GATE_GAPS_PER_YEAR && GExact <= YEAR_MAX_DAYS / GATE_GAP_MIN, "E_PARTITION_GAPS_BOUNDS");
+        auto G = GExact.toInt();
         auto g = exactGateIndex(calculationDay);
         int required = -1;
-        if (g != int.min && year.openGateIndex < g && g < year.closeGateIndex)
-            required = g - year.openGateIndex;
+        if (g.found && year.openGateIndex < g.index && g.index < year.closeGateIndex)
+            required = (g.index - year.openGateIndex).toInt();
         auto family = new CutletPartitionFamily(G, cutletCount, required);
         auto stream = askBowl(structureSauce, 2, SEAL_CUTLET_PARTITION);
         auto rank = chooseRank(stream, family.count());
@@ -1031,7 +1103,7 @@ class OracleCalendar
 
     int chooseMonthCount(SauceResult structureSauce, Year year)
     {
-        auto L = year.closeGateDay - year.openGateDay;
+        auto L = (year.closeGateDay - year.openGateDay).toLong();
         auto lo = cast(int)ceilDivLong(L, 123);
         auto hiByLength = cast(int)(L / 4);
         auto hi = hiByLength < 47 ? hiByLength : 47;
@@ -1043,7 +1115,7 @@ class OracleCalendar
 
     int[] chooseMonthLengths(SauceResult structureSauce, Year year, int monthCount)
     {
-        auto L = cast(int)(year.closeGateDay - year.openGateDay);
+        auto L = cast(int)((year.closeGateDay - year.openGateDay).toLong());
         auto family = new BoundedCompositionFamily(L, monthCount, 4, 123);
         auto stream = askBowl(structureSauce, 3, SEAL_MONTH_LENGTHS);
         auto rank = chooseRank(stream, family.count());
@@ -1066,7 +1138,7 @@ class OracleCalendar
         return unrankDistinctIndices(47, monthCount, rank);
     }
 
-    YearStructure buildYearStructure(long calculationDay, Year year)
+    YearStructure buildYearStructure(BI calculationDay, Year year)
     {
         auto firstDay = year.openGateDay + 1;
         auto r = sauce(calculationDay, firstDay);
@@ -1078,7 +1150,7 @@ class OracleCalendar
         s.cutletCloseGateIndices.length = s.cutletCount;
         s.cutletFirstDays.length = s.cutletCount;
         s.cutletLastDays.length = s.cutletCount;
-        auto cursor = year.openGateIndex;
+        BI cursor = year.openGateIndex;
         foreach (k; 0 .. s.cutletCount)
         {
             auto open = cursor;
@@ -1087,8 +1159,8 @@ class OracleCalendar
             ensureGateIndex(close);
             s.cutletOpenGateIndices[k] = open;
             s.cutletCloseGateIndices[k] = close;
-            s.cutletFirstDays[k] = gates[open] + 1;
-            s.cutletLastDays[k] = gates[close];
+            s.cutletFirstDays[k] = gateAt(open) + 1;
+            s.cutletLastDays[k] = gateAt(close);
             cursor = close;
         }
         s.monthCount = chooseMonthCount(r, year);
@@ -1098,7 +1170,7 @@ class OracleCalendar
         return s;
     }
 
-    CalendarTuple calendarDate(long calculationDay, long targetDay)
+    CalendarTuple calendarDate(BI calculationDay, BI targetDay)
     {
         auto year = findTargetYear(calculationDay, targetDay);
         auto structure = buildYearStructure(calculationDay, year);
@@ -1107,13 +1179,15 @@ class OracleCalendar
         {
             if (structure.cutletFirstDays[k] <= targetDay && targetDay <= structure.cutletLastDays[k])
             {
-                cutletId = k;
+                cutletId = cast(int)k;
                 break;
             }
         }
         enforce(cutletId >= 0, "E_CUTLET_RESOLVE");
         auto dayInCutlet = targetDay - structure.cutletFirstDays[cutletId] + 1;
-        auto yearOffset0 = cast(int)(targetDay - (year.openGateDay + 1));
+        auto yearOffset0BI = targetDay - (year.openGateDay + 1);
+        enforce(yearOffset0BI >= 0 && yearOffset0BI < YEAR_MAX_DAYS, "E_YEAR_OFFSET");
+        auto yearOffset0 = cast(int)(yearOffset0BI.toLong());
         auto monthId = structure.monthWeaving[yearOffset0];
         int dayInMonth = 0;
         foreach (p; 0 .. yearOffset0 + 1)
@@ -1122,4 +1196,15 @@ class OracleCalendar
         return CalendarTuple(year.number, structure.cutletNameIndices[cutletId], dayInCutlet,
             structure.monthNameIndices[monthId - 1], dayInMonth);
     }
+}
+
+CalendarTuple normativeCalendarDate(BI calculationDay, BI targetDay)
+{
+    auto oracle = new OracleCalendar();
+    return oracle.calendarDate(calculationDay, targetDay);
+}
+
+CalendarTuple normativeCalendarDate(long calculationDay, long targetDay)
+{
+    return normativeCalendarDate(BI(calculationDay), BI(targetDay));
 }

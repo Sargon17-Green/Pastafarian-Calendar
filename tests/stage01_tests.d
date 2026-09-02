@@ -6,6 +6,12 @@ import pastafari.catalog;
 import pastafari.monster_base;
 import normative_oracle;
 
+static assert(is(typeof(MonsterContext.init.calculationDay) == BigInt));
+static assert(is(typeof(Year.init.number) == BigInt));
+static assert(is(typeof(Year.init.openGateIndex) == BigInt));
+static assert(is(typeof(Year.init.openGateDay) == BigInt));
+static assert(CalendarTuple.tupleof.length == 5);
+
 void testCatalog()
 {
     assert(sourceLanguageCatalogVersion == "1.0.0");
@@ -17,6 +23,26 @@ void testCatalog()
     assert(cutletNameByIndex(17) == "դատարկ սափոր");
     assert(monthNameByIndex(1) == "կավ");
     assert(monthNameByIndex(47) == "ավազ");
+
+    bool[string] cutletTexts;
+    foreach (entry; cutletCatalog)
+    {
+        assert(entry.text.length > 0);
+        assert(entry.text !in cutletTexts);
+        cutletTexts[entry.text] = true;
+        assert(cutletNameByIndex(entry.canonicalIndex) == entry.text);
+    }
+    assert(cutletTexts.length == 17);
+
+    bool[string] monthTexts;
+    foreach (entry; monthCatalog)
+    {
+        assert(entry.text.length > 0);
+        assert(entry.text !in monthTexts);
+        monthTexts[entry.text] = true;
+        assert(monthNameByIndex(entry.canonicalIndex) == entry.text);
+    }
+    assert(monthTexts.length == 47);
 }
 
 void testArithmeticFixtures()
@@ -48,6 +74,34 @@ void testDayFixtures()
     assert(cross.direction == 3);
 }
 
+
+void testArbitraryPrecisionDayAxis()
+{
+    auto huge = BigInt("10000000000000000000000000000000000000000");
+    auto negativeHuge = -huge;
+
+    auto positiveCount = dayCount(huge);
+    auto expectedPositive = BigInt(2) * (huge - BigInt(FOUNDATION_DAY)) + 1;
+    assert(positiveCount == expectedPositive);
+
+    auto negativeCount = dayCount(negativeHuge);
+    auto expectedNegative = BigInt(2) * (BigInt(FOUNDATION_DAY) - negativeHuge);
+    assert(negativeCount == expectedNegative);
+
+    auto counts = workCounts(negativeHuge, huge);
+    assert(counts.distance == BigInt(2) * huge + 1);
+    assert(counts.direction == 3);
+
+    auto manager = new MonsterManager();
+    auto calculation = negativeHuge;
+    auto target = huge;
+    auto ctx = manager.bootstrap(calculation, target);
+    calculation += 7;
+    target -= 11;
+    assert(ctx.calculationDay == negativeHuge);
+    assert(ctx.targetDay == huge);
+}
+
 void testStoneFixtures()
 {
     auto stones = buildStones();
@@ -76,6 +130,9 @@ void testSelectionFixtures()
     assert(chooseRankShort(stream, M()) == 1);
     auto wideN = M() + 1;
     assert(chooseRankWide(stream, wideN) == wideN);
+
+    auto hugeOffset = BigInt("100000000000000000000000000000000000000000000000000");
+    assert(answerAt(stream, hugeOffset) == BigInt(1) + regularMod(hugeOffset, M()));
 }
 
 void testCombinatorialFixtures()
@@ -133,6 +190,36 @@ void testSauceStructuralInvariants()
     assert(next == r.orderAt46[0]);
 }
 
+
+void testYearNavigationSmoke()
+{
+    auto calculationDay = BigInt(FOUNDATION_DAY);
+    auto oracle = new OracleCalendar();
+    auto y = oracle.year5000(calculationDay);
+    assert(y.number == 5000);
+    assert(y.openGateDay < calculationDay);
+    assert(calculationDay <= y.closeGateDay);
+    auto length = y.closeGateDay - y.openGateDay;
+    assert(length >= YEAR_MIN_DAYS);
+    assert(length <= YEAR_MAX_DAYS);
+    assert(y.closeGateIndex - y.openGateIndex >= MIN_GATE_GAPS_PER_YEAR);
+
+    auto next = oracle.nextYear(calculationDay, y);
+    assert(next.number == 5001);
+    assert(next.openGateIndex == y.closeGateIndex);
+    assert(next.openGateDay == y.closeGateDay);
+
+    auto previous = oracle.previousYear(calculationDay, y);
+    assert(previous.number == 4999);
+    assert(previous.closeGateIndex == y.openGateIndex);
+    assert(previous.closeGateDay == y.openGateDay);
+
+    auto atClosing = oracle.findTargetYear(calculationDay, y.closeGateDay);
+    assert(atClosing.number == 5000);
+    auto atOpening = oracle.findTargetYear(calculationDay, y.openGateDay);
+    assert(atOpening.number == 4999);
+}
+
 void testNeutralMonsterBootstrap()
 {
     auto manager = new MonsterManager();
@@ -145,18 +232,97 @@ void testNeutralMonsterBootstrap()
     assert(ctx.metrics.counters["bootstrap.dispatch"] == 1);
 }
 
+
+void testStateOwnershipIsolation()
+{
+    auto manager = new MonsterManager();
+    auto firstContext = manager.bootstrap(FOUNDATION_DAY, FOUNDATION_DAY);
+    auto secondContext = manager.bootstrap(FOUNDATION_DAY + 1, FOUNDATION_DAY - 1);
+
+    assert(firstContext.branchTrace.ptr != secondContext.branchTrace.ptr);
+    firstContext.branchTrace[0] = "EXTERNAL_MUTATION";
+    firstContext.metrics.bump("external.mutation");
+    assert(secondContext.branchTrace == ["BOOTSTRAP_DISPATCH"]);
+    assert("external.mutation" !in secondContext.metrics.counters);
+    assert(secondContext.metrics.counters["bootstrap.dispatch"] == 1);
+
+    auto repeatedContext = manager.bootstrap(FOUNDATION_DAY, FOUNDATION_DAY);
+    assert(repeatedContext.branchTrace == ["BOOTSTRAP_DISPATCH"]);
+    assert("external.mutation" !in repeatedContext.metrics.counters);
+    assert(repeatedContext.metrics.counters["bootstrap.dispatch"] == 1);
+
+    auto stonesA = buildStones();
+    auto stonesB = buildStones();
+    auto untouchedStone = stonesB[1][0];
+    auto nextRowBeforeMutation = stonesA[2][0];
+    stonesA[1][0] = save(stonesA[1][0] + 1);
+    assert(stonesB[1][0] == untouchedStone);
+    assert(stonesA[2][0] == nextRowBeforeMutation);
+    assert(stonesA[1].ptr != stonesA[2].ptr);
+    assert(stonesA[1].ptr != stonesB[1].ptr);
+
+    int[] callerLengths = [2,2];
+    auto family = new WeavingFamily(callerLengths);
+    callerLengths[0] = 1;
+    assert(family.count() == 2);
+    assert(family.unrank1(BigInt(1)) == [1,1,2,2]);
+    assert(family.unrank1(BigInt(2)) == [1,2,1,2]);
+
+    auto sauceA = sauce(FOUNDATION_DAY, FOUNDATION_DAY);
+    auto sauceB = sauce(FOUNDATION_DAY, FOUNDATION_DAY);
+    assert(sauceA.bowls == sauceB.bowls);
+    assert(sauceA.orderAt46 == sauceB.orderAt46);
+    auto preservedBowl = sauceB.bowls[1];
+    auto preservedOrder = sauceB.orderAt46[0];
+    sauceA.bowls[1] = save(sauceA.bowls[1] + 1);
+    sauceA.orderAt46[0] = 99;
+    assert(sauceB.bowls[1] == preservedBowl);
+    assert(sauceB.orderAt46[0] == preservedOrder);
+
+    auto gatesA = new OracleCalendar();
+    auto gatesB = new OracleCalendar();
+    auto positiveA = gatesA.ensureGateIndex(1);
+    auto negativeA = gatesA.ensureGateIndex(-1);
+    auto negativeB = gatesB.ensureGateIndex(-1);
+    auto positiveB = gatesB.ensureGateIndex(1);
+    assert(positiveA == positiveB);
+    assert(negativeA == negativeB);
+    assert(positiveA - FOUNDATION_DAY >= GATE_GAP_MIN);
+    assert(positiveA - FOUNDATION_DAY <= GATE_GAP_MAX);
+    assert(BigInt(FOUNDATION_DAY) - negativeA >= GATE_GAP_MIN);
+    assert(BigInt(FOUNDATION_DAY) - negativeA <= GATE_GAP_MAX);
+
+    assert(gatesA.gateIndexAtOrBefore(positiveA) == 1);
+    assert(gatesA.gateIndexAtOrAfter(positiveA) == 1);
+    auto exactPositive = gatesA.exactGateIndex(positiveA);
+    assert(exactPositive.found);
+    assert(exactPositive.index == 1);
+    gatesA.ensureGatesForwardThroughDay(positiveA);
+    gatesA.ensureGatesBackwardThroughDay(negativeA);
+
+    auto sixthGate = gatesA.ensureGateIndex(6);
+    assert(sixthGate > positiveA);
+    assert(gatesA.validYearPair(BigInt(0), BigInt(6)));
+
+    static assert(__traits(compiles, normativeCalendarDate(FOUNDATION_DAY, FOUNDATION_DAY)));
+    static assert(__traits(compiles, normativeCalendarDate(BigInt(FOUNDATION_DAY), BigInt(FOUNDATION_DAY))));
+}
+
 int main()
 {
     writeln("Փուլ 1. տեղային ստուգումները սկսվել են։");
     testCatalog();
     testArithmeticFixtures();
     testDayFixtures();
+    testArbitraryPrecisionDayAxis();
     testStoneFixtures();
     testPermutationFixtures();
     testSelectionFixtures();
     testCombinatorialFixtures();
     testSauceStructuralInvariants();
+    testYearNavigationSmoke();
     testNeutralMonsterBootstrap();
+    testStateOwnershipIsolation();
     writeln("Փուլ 1. բոլոր տեղային ստուգումները հաջողությամբ ավարտվել են։");
     return 0;
 }
