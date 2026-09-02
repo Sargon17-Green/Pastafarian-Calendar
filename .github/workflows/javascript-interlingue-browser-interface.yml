@@ -1,83 +1,69 @@
-name: Verificacion del interfacie de navigator — JavaScript + Interlingue
+name: JavaScript + Interlingue — interfacie de navigator
 
 on:
   push:
     branches:
-      - 'JavaScript\+Interlingue'
+      - "JavaScript+Interlingue"
     paths:
-      - 'browser/**'
-      - 'scripts/build-browser.mjs'
-      - 'tests/browser-interface-*.js'
-      - 'tests/browser-core-smoke.js'
-      - 'package.json'
-      - '.github/workflows/javascript-interlingue-browser-interface.yml'
-  pull_request:
-    branches:
-      - 'JavaScript\+Interlingue'
-    paths:
-      - 'browser/**'
-      - 'scripts/build-browser.mjs'
-      - 'tests/browser-interface-*.js'
-      - 'tests/browser-core-smoke.js'
-      - 'package.json'
-      - '.github/workflows/javascript-interlingue-browser-interface.yml'
+      - "browser/**"
+      - "scripts/build-browser.js"
+      - "tests/browser-*.js"
+      - "src/**"
+      - ".github/workflows/javascript-interlingue-browser-interface.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: javascript-interlingue-browser-interface-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_VERSION: '22.16.0'
-
 jobs:
   browser-interface:
-    name: Interfacie de navigator
+    name: Provar li additional browser-strate
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 45
 
     steps:
-      - name: Extraer li repository
+      - name: Obtener li repository
         uses: actions/checkout@v4
 
-      - name: Preparar Node.js
+      - name: Preparar Node.js 22.16.0
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: "22.16.0"
 
-      - name: Registrar versiones
-        run: |
-          node --version
-          npm --version
-
-      - name: Installar dependenties del compilation
-        run: npm install --no-audit --no-fund
-
-      - name: Verificar li nov strate de navigator
+      - name: Provar compatibilitá con Stage 01
         shell: bash
         run: |
-          set -euo pipefail
-          mkdir -p logs
-          {
-            echo "NODE=$(node --version)"
-            echo "NPM=$(npm --version)"
-            npm run test:browser-interface
-            npm run build:browser
-            test -f dist/browser/pastafari-date.js
-            test -f dist/browser/pastafari-worker.js
-            test -f dist/browser/standalone/pastafari-date.js
-            test -f dist/browser/standalone/pastafari-date.min.js
-            echo 'RESULT=PASS'
-          } 2>&1 | tee logs/browser-interface.log
+          set -o pipefail
+          node tests/verify-stage-01.js 2>&1 | tee -a browser-interface-ci.log
 
-      - name: Conservar li log
+      - name: Provar li browser-contract, lingues e cassa-nigri limite
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/browser-interface-all.js 2>&1 | tee -a browser-interface-ci.log
+
+      - name: Constructer Standard e Standalone artefacts
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/build-browser.js 2>&1 | tee -a browser-interface-ci.log
+
+      - name: Provar li constructet artefacts
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/browser-built-artifacts.js 2>&1 | tee -a browser-interface-ci.log
+
+      - name: Conservar li browser artefacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: javascript-interlingue-browser-interface
-          path: logs/browser-interface.log
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 14
+          path: |
+            browser-interface-ci.log
+            browser/dist/
+            browser/standalone/pastafari-date.js
+            browser/standalone/pastafari-date.min.js
+            browser/standalone/example-file.html
