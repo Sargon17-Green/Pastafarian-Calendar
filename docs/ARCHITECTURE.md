@@ -9,3 +9,5 @@
 `Normative_Oracle` పూర్తిగా test-only భావనలో స్వతంత్రంగా ఉంది. production skeleton దానిని పిలవదు. Oracle లో day counts, రాళ్లు, దాచిన మరియు కనిపించే చుక్కలు, కుండల క్రమం, pours, simultaneous bowl updates, A1 post-stir అర్థం, answer streams, short/wide selection, gates, year 5000, sequential year walk, కట్లెట్ partition DP, distinct-name unranking, bounded month-length DP, whole-weave DP మరియు ఐదు-field ఫలితం ఉన్నాయి.
 
 Semantic state మరియు observability state ఈ దశ నుంచే వేరు చేయబడ్డాయి. Metrics విలువలు dispatch/validation సంఖ్యలను మాత్రమే నమోదు చేస్తాయి; అవి semantic decision కు input కావు.
+
+Stage 1 ownership audit లో package-level mutable semantic object ఏదీ కనబడలేదు. `Monster_Context` invocation-local. Oracle gate maps, candidate vectors మరియు DP memo containers అన్నీ subprogram-local; package స్థాయిలో constants మాత్రమే ఉన్నాయి. `Source_Language_Catalog` లోని పేరు పట్టికలు immutable constants. Runtime isolation regressions test suite లో చేర్చబడ్డాయి. పూర్తి inventory `docs/SEMANTIC_STATE_OWNERSHIP.md` లో ఉంది.

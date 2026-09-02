@@ -1,0 +1,76 @@
+with Ada.Strings.Wide_Wide_Unbounded;
+
+package Stage01_Catalog_Fixtures is
+   use Ada.Strings.Wide_Wide_Unbounded;
+
+   type Cutlet_Name_Array is array (Positive range 1 .. 17) of Unbounded_Wide_Wide_String;
+   type Month_Name_Array is array (Positive range 1 .. 47) of Unbounded_Wide_Wide_String;
+
+   Cutlets : constant Cutlet_Name_Array :=
+     (1  => To_Unbounded_Wide_Wide_String ("కంచు"),
+      2  => To_Unbounded_Wide_Wide_String ("నక్క"),
+      3  => To_Unbounded_Wide_Wide_String ("మూత్రపిండం"),
+      4  => To_Unbounded_Wide_Wide_String ("లగాష్"),
+      5  => To_Unbounded_Wide_Wide_String ("ఆలోచన"),
+      6  => To_Unbounded_Wide_Wide_String ("తొమ్మిదిలో నాలుగు భాగాలు"),
+      7  => To_Unbounded_Wide_Wide_String ("పల్గూరాష్"),
+      8  => To_Unbounded_Wide_Wide_String ("జమ్ము"),
+      9  => To_Unbounded_Wide_Wide_String ("గుత్తి"),
+      10 => To_Unbounded_Wide_Wide_String ("తేలు"),
+      11 => To_Unbounded_Wide_Wide_String ("బూడిద"),
+      12 => To_Unbounded_Wide_Wide_String ("గోధుమ"),
+      13 => To_Unbounded_Wide_Wide_String ("నది"),
+      14 => To_Unbounded_Wide_Wide_String ("నవ్వు"),
+      15 => To_Unbounded_Wide_Wide_String ("అక్కాద్"),
+      16 => To_Unbounded_Wide_Wide_String ("కొమ్ము"),
+      17 => To_Unbounded_Wide_Wide_String ("ఖాళీ కుండ"));
+
+   Months : constant Month_Name_Array :=
+     (1  => To_Unbounded_Wide_Wide_String ("మట్టి"),
+      2  => To_Unbounded_Wide_Wide_String ("దానిమ్మ"),
+      3  => To_Unbounded_Wide_Wide_String ("మోచేయి"),
+      4  => To_Unbounded_Wide_Wide_String ("అసూయ"),
+      5  => To_Unbounded_Wide_Wide_String ("ఎరిడు"),
+      6  => To_Unbounded_Wide_Wide_String ("దంతమంజనం"),
+      7  => To_Unbounded_Wide_Wide_String ("ఐదులో మూడు భాగాలు"),
+      8  => To_Unbounded_Wide_Wide_String ("కర్షూమబ్"),
+      9  => To_Unbounded_Wide_Wide_String ("చిరుతపులి"),
+      10 => To_Unbounded_Wide_Wide_String ("తగరం"),
+      11 => To_Unbounded_Wide_Wide_String ("పొగమంచు"),
+      12 => To_Unbounded_Wide_Wide_String ("గుగ్గిలము"),
+      13 => To_Unbounded_Wide_Wide_String ("కదురు"),
+      14 => To_Unbounded_Wide_Wide_String ("పక్కటెముక"),
+      15 => To_Unbounded_Wide_Wide_String ("కరోబ్"),
+      16 => To_Unbounded_Wide_Wide_String ("ఉరుక్"),
+      17 => To_Unbounded_Wide_Wide_String ("సిగ్గు"),
+      18 => To_Unbounded_Wide_Wide_String ("ఒంటె"),
+      19 => To_Unbounded_Wide_Wide_String ("రాగి"),
+      20 => To_Unbounded_Wide_Wide_String ("బావి"),
+      21 => To_Unbounded_Wide_Wide_String ("గుడ్డుపచ్చసొన"),
+      22 => To_Unbounded_Wide_Wide_String ("నక్షత్రం"),
+      23 => To_Unbounded_Wide_Wide_String ("తేనె"),
+      24 => To_Unbounded_Wide_Wide_String ("ప్లీహం"),
+      25 => To_Unbounded_Wide_Wide_String ("సున్నపురాయి"),
+      26 => To_Unbounded_Wide_Wide_String ("ఆనందం"),
+      27 => To_Unbounded_Wide_Wide_String ("అత్తి"),
+      28 => To_Unbounded_Wide_Wide_String ("నినెవె"),
+      29 => To_Unbounded_Wide_Wide_String ("కప్ప"),
+      30 => To_Unbounded_Wide_Wide_String ("తారు"),
+      31 => To_Unbounded_Wide_Wide_String ("కొవ్వొత్తి"),
+      32 => To_Unbounded_Wide_Wide_String ("మూసిన తలుపు"),
+      33 => To_Unbounded_Wide_Wide_String ("నువ్వులు"),
+      34 => To_Unbounded_Wide_Wide_String ("మెడవెనుక భాగం"),
+      35 => To_Unbounded_Wide_Wide_String ("వెండి"),
+      36 => To_Unbounded_Wide_Wide_String ("లిల్లీపువ్వు"),
+      37 => To_Unbounded_Wide_Wide_String ("తుఫాను"),
+      38 => To_Unbounded_Wide_Wide_String ("గాడిద"),
+      39 => To_Unbounded_Wide_Wide_String ("పిండి"),
+      40 => To_Unbounded_Wide_Wide_String ("పశ్చాత్తాపం"),
+      41 => To_Unbounded_Wide_Wide_String ("బాబిలోన్"),
+      42 => To_Unbounded_Wide_Wide_String ("నాలుక"),
+      43 => To_Unbounded_Wide_Wide_String ("అవిసె"),
+      44 => To_Unbounded_Wide_Wide_String ("ఉప్పు"),
+      45 => To_Unbounded_Wide_Wide_String ("బేరిపండు"),
+      46 => To_Unbounded_Wide_Wide_String ("విల్లు"),
+      47 => To_Unbounded_Wide_Wide_String ("ఇసుక"));
+end Stage01_Catalog_Fixtures;

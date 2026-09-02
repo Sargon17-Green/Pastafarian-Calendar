@@ -9,6 +9,7 @@
 - 17 కట్లెట్ పేర్లు మరియు 47 నెల పేర్లకు స్థిరమైన `canonicalIndex` కలిగిన `Source_Language_Catalog`.
 - భవిష్యత్తు ట్యాగ్‌లు లేదా legacy మార్గాలు లేని సాధారణ `Monster_Context`, ప్రాథమిక dispatcher, validator, error boundary భావన మరియు metrics shell.
 - Ada లోనే Stage 1 పరీక్షలు మరియు స్థానిక fixtures.
+- invocation-local semantic state యాజమాన్యాన్ని పరీక్షించే isolation regressions మరియు పూర్తి ownership audit.
 
 ## నిర్మాణం మరియు పరీక్ష
 
@@ -18,7 +19,7 @@ GNAT మరియు GPRbuild ఉన్న పరిసరంలో ప్రా
 ./run_stage01.sh
 ```
 
-ఇది `gprbuild -p -P pastafari_calendar.gpr` నడిపి, తరువాత `bin/stage01_tests` ను నడుపుతుంది. ఈ shell ఫైలు build/run మాత్రమే చేస్తుంది; ఎటువంటి క్యాలెండర్ గణితం దానిలో లేదు.
+ఇది ముందుగా `gprbuild` ను ఉపయోగిస్తుంది; అది లేక `gnatmake` ఉంటే అదే Ada sources ను దానితో నిర్మిస్తుంది. తరువాత `bin/stage01_tests` ను నడుపుతుంది. ఈ shell ఫైలు build/run మాత్రమే చేస్తుంది; ఎటువంటి క్యాలెండర్ గణితం దానిలో లేదు.
 
 ## ముఖ్యమైన పరిమితి
 

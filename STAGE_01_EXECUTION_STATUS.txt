@@ -1,9 +1,13 @@
 STAGE=1
 KIND=BOOTSTRAP
-SOURCE_TREE_CREATED=YES
-ADA_COMPILER_AVAILABLE=NO
-ADA_BUILD_EXECUTED=NO
-ADA_TESTS_EXECUTED=NO
 EXPECTED_RESULT=GREEN
 ACTUAL_RESULT=NOT_EXECUTED
-BLOCKING_REASON=ఈ పరిసరంలో gnat1, gnatbind, gnatmake మరియు gprbuild అందుబాటులో లేవు; Debian mirror DNS కూడా అందుబాటులో లేకపోవడంతో Ada toolchain ను ఇక్కడ స్థాపించలేకపోయాం.
+LAST_COMPLETED_STAGE=0
+SOURCE_LANGUAGE_CATALOG_FROZEN=YES
+SEMANTIC_STATE_OWNER_VALIDATED=YES
+NATIVE_ADA_EXECUTION=NOT_EXECUTED
+
+తెలుగు గమనిక:
+Stage 1 అమలు పని మరియు semantic-state ownership source audit పూర్తయ్యాయి. Package-level mutable semantic state కనబడలేదు; invocation isolation, failure-history isolation, catalog-copy isolation మరియు oracle interleaving regressions చేర్చబడ్డాయి.
+
+ప్రస్తుత runtime లో gprbuild, gnatmake, gnatbind మరియు gnat1 అందుబాటులో లేవు. అందువల్ల native Ada build/test ఇంకా జరగలేదు. విజయవంతమైన native run వరకు LAST_COMPLETED_STAGE=0 గానే ఉంటుంది.
