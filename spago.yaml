@@ -7,6 +7,8 @@ package:
     - console
     - effect
     - either
+    - exceptions
+    - foldable-traversable
     - maybe
     - ordered-collections
     - prelude
