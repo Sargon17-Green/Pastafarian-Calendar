@@ -1,47 +1,26 @@
-JavaScript + Interlingue browser interface — bilingual initial upload
+JavaScript + Interlingue browser interface — semantic calendar-name localization v5
 
 BASE BRANCH: JavaScript+Interlingue
-BASE HEAD CHECKED: 71411b54c72ac3d726cba5e4bd1db5ea4bd8e3d3
+BASE HEAD CHECKED: fa3771373fd799be9a7a5639a10bfbd846cce1b5
 
-ADD/REPLACE:
-.github/workflows/javascript-interlingue-browser-interface.yml
-browser/README.md
-browser/black-box-cutlet.js
-browser/calendar-memory.js
-browser/calendar-service.js
-browser/date-axis.js
-browser/engine-client.js
-browser/example.html
-browser/package.json
-browser/pastafari-date.js
-browser/pastafari-worker-entry.js
-browser/result-normalizer.js
+REPLACE:
 browser/i18n/locales.js
 browser/i18n/runtime.js
-browser/standalone/example-file.html
-scripts/build-browser.js
-tests/browser-built-artifacts.js
+browser/README.md
 tests/browser-i18n-locales.js
-tests/browser-interface-all.js
 tests/browser-interface-black-box.js
-tests/browser-interface-contract.js
-tests/browser-interface-service.js
-tests/browser-stage01-compatibility.js
-
-DELETE:
-DELTA_apply-package-json.mjs
-scripts/build-browser.mjs
-tests/browser-core-smoke.js
 
 DO NOT MODIFY:
 package.json
 src/**
 DEVELOPMENT_STAGE.md
+.github/workflows/**
+other browser files
 historic/corrective/acceleration tests and artifacts
 
-INITIAL UI LOCALES:
+LOCALES IN THIS DELTA:
 ie (Interlingue, default)
 en (English)
 
 CALENDAR ENTITY NAMES:
-Not translated by the UI layer. Cutlet/month names remain exactly the semantic strings returned by the JavaScript+Interlingue black-box core.
+Visible cutlet/month names are localized to the selected UI language. Translation tables are keyed by the exact current Interlingue semantic source text returned by the black-box core, never by positional index. Raw `value`, `ready`, and `pastafari-change` results remain unchanged.

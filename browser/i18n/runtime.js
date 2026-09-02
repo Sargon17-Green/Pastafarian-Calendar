@@ -67,8 +67,26 @@
     return format(message, values);
   }
 
-  function calendarName(_locale, _group, sourceName) {
-    return String(sourceName);
+  function calendarName(locale, group, sourceName) {
+    if (!locale || !locale.calendar) {
+      throw new Error('Manca li calendar-nómines por li locale ' + (locale && locale.code ? locale.code : '<null>') + '.');
+    }
+    const names = group === 'cutlet'
+      ? locale.calendar.cutlets
+      : group === 'month'
+        ? locale.calendar.months
+        : null;
+    if (!names) throw new Error('Ínvalid grupp de calendar-nómine: ' + group + '.');
+
+    const key = String(sourceName);
+    if (!Object.prototype.hasOwnProperty.call(names, key)) {
+      throw new Error('Manca li ' + group + '-nómine ' + key + ' por li locale ' + locale.code + '.');
+    }
+    const localized = names[key];
+    if (typeof localized !== 'string' || localized.trim() === '') {
+      throw new Error('Li ' + group + '-nómine ' + key + ' es vacui por li locale ' + locale.code + '.');
+    }
+    return localized;
   }
 
   function supportedLocales() {

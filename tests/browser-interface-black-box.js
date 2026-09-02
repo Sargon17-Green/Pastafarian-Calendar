@@ -31,12 +31,18 @@ assert(!worker.includes('stage58'));
 assert(!worker.includes('Stage58'));
 assert(worker.includes('deriveCutletViewBlackBox'));
 
-
 const i18nRuntime = fs.readFileSync(path.join(ROOT, 'browser', 'i18n', 'runtime.js'), 'utf8');
 const localeSource = fs.readFileSync(path.join(ROOT, 'browser', 'i18n', 'locales.js'), 'utf8');
-assert(i18nRuntime.includes('return String(sourceName);'), 'Li i18n-strate deve conservar li semantic nómines del nov core.');
-assert(!localeSource.includes('calendar.cutlets'), 'Li old cutlet-tables ne deve esser copiat per positional index.');
-assert(!localeSource.includes('calendar.months'), 'Li old mensu-tables ne deve esser copiat per positional index.');
+assert(i18nRuntime.includes("Object.prototype.hasOwnProperty.call(names, key)"));
+assert(i18nRuntime.includes("group === 'cutlet'"));
+assert(i18nRuntime.includes("group === 'month'"));
+assert(!i18nRuntime.includes('return String(sourceName);'), 'Li presentation deve localisar calendar-nómines.');
+assert(localeSource.includes("keyMode: 'source-text'"));
+assert(localeSource.includes("larice: 'Larch'"));
+assert(localeSource.includes("leopard: 'Leopard'"));
+assert(!localeSource.includes("lagash:"), 'Li obsolete old positional cutlet key ne deve esser reintroductet.');
+assert(!localeSource.includes("tiger:"), 'Li obsolete old positional month key ne deve esser reintroductet.');
+assert(!localeSource.includes("susa:"), 'Li obsolete old positional month key ne deve esser reintroductet.');
 
 const service = fs.readFileSync(path.join(ROOT, 'browser', 'calendar-service.js'), 'utf8');
 assert(service.includes('installSharedCalendarMemory'));

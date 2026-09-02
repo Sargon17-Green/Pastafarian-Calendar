@@ -63,7 +63,7 @@ Ti UI-cache ne es li semantic/performance memory.
 
 ## Lingues — initial scope
 
-Ti prim correct upload suporte exactmen du UI-lingues, complet e includet localmen:
+Ti actual browser-strate suporte exactmen du UI-lingues, complet e includet localmen:
 
 - `ie` — Interlingue (default)
 - `en` — English
@@ -72,13 +72,18 @@ Null rete, vendoring, fallback inter lingues o external i18n package es besonat.
 Omni message usat de ti component existe in ambi locales; un mancant message es un
 errore, ne un silenciosi fallback.
 
-Li cutlet- e mensu-nómines ne es traductet per ti strate. Lor semantic identificatores
-in li old projecte ne es identic al congelat catalog de ti branche. Li presentation
-usa exactmen li Interlingue nómines retornat del nov black-box core. `value`, `ready`
-e `pastafari-change` resta ergo semanticmen identic quande `lang` change.
+Li visibil cutlet- e mensu-nómines es traductet al selectet UI-lingue. Li translation
+maps usa li exact semantic source-text retornat del actual Interlingue black-box core
+quam claves; ili ne usa positional indices e ne zip li old calendar-tables. Un mancant
+calendar-nómine es un explicit error.
 
-Additional lingues posse esser adjuntet plu tard in `browser/i18n/locales.js` sin
-changear li core, `CalendarService` o public date-result contract.
+`value`, `ready` e `pastafari-change` resta li raw semantic result del core, independent
+del lingue de presentation. Ergo un change de `lang` ne muta li calculat date-object;
+it muta solmen su visibil e ARIA presentation.
+
+Additional lingues posse esser adjuntet in `browser/i18n/locales.js` solmen quande ili
+have complet UI-message coverage e complet current cutlet/month coverage, sin changear
+li core, `CalendarService` o public date-result contract.
 
 ## Construction
 

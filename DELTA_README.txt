@@ -1,26 +1,24 @@
-Initial browser-interface upload for JavaScript + Interlingue.
+Browser-interface localization correction for JavaScript + Interlingue.
 
 Purpose:
-- port the old external <pastafari-date> browser interface;
-- keep the new calendar implementation a black box;
-- do not copy the old authoritative/fast dual-engine verifier;
-- leave an explicit CalendarMemory seam for later memoization;
-- start with only two complete UI locales: Interlingue and English.
+- make visible cutlet and month names use the selected UI language;
+- preserve the current calendar engine as an opaque black box;
+- map translations by exact semantic source identity, not by old positional tables;
+- fail explicitly if a locale lacks a current cutlet/month name.
 
 Apply:
 1. Overlay this package at the repository root on branch JavaScript+Interlingue.
-2. Delete every path listed in DELETE_PATHS.txt.
-3. Do NOT run DELTA_apply-package-json.mjs and do not add esbuild.
-4. Keep the root package.json unchanged.
-5. Run:
+2. Do not delete or change any other file.
+3. Keep root package.json, src/**, DEVELOPMENT_STAGE.md and workflows unchanged.
+4. Run:
    node tests/verify-stage-01.js
    node tests/browser-interface-all.js
    node scripts/build-browser.js
    node tests/browser-built-artifacts.js
-6. Push only after all four commands pass.
+5. Push only after all four commands pass.
 
-Important semantic boundary:
-The browser layer calls only calendarDateSpaghetti(calculationDay, targetDay). It must not read calendarDateSpaghettiWithContext(), context.structure, Stage 58 internals, managers, scars, or private catalog structures.
+Semantic boundary:
+The browser layer still calls only calendarDateSpaghetti(calculationDay, targetDay). Calendar display translation occurs after the raw black-box result is returned. Raw `value`, `ready`, and `pastafari-change` semantics do not change with `lang`.
 
-Language boundary:
-The `lang` attribute changes only UI chrome and ARIA text. `value`, `ready`, `pastafari-change`, cutletName and monthName remain the exact semantic result returned by the branch core. This intentionally avoids positional translation against the incompatible old calendar-name tables.
+Coverage rule:
+A locale is valid only when its calendar maps exactly cover the current SourceLanguageCatalog source texts (17 cutlets and 47 months). The tests compare key sets against src/source-language-catalog.js and include regressions for larice/Larch and leopard/Leopard, so old lagash/tiger/susa positional identities cannot slip back in silently.
