@@ -1,0 +1,1061 @@
+record WorkCounts(action, target, distance, connection, direction)
+record SauceResult(bowls, orderAtDrop46)
+record AnswerStream(first, directionStep)
+record Year(number, openGateIndex, closeGateIndex, openGateDay, closeGateDay)
+record CutletRecord(canonicalIndex, openGateIndex, closeGateIndex, firstDay, lastDay)
+record YearStructure(cutletCount, cutletPartition, cutletNameIndices, cutlets, monthCount, monthLengths, monthWeaving, monthNameIndices)
+
+global ORACLE_M
+global ORACLE_FOUNDATION_DAY
+global ORACLE_TABLETS_DAY
+global ORACLE_STONES
+global ORACLE_GATE
+global ORACLE_MIN_GATE_INDEX
+global ORACLE_MAX_GATE_INDEX
+
+procedure oracleInit()
+    if /ORACLE_M then {
+        ORACLE_M := (2 ^ 127) - 1
+        ORACLE_FOUNDATION_DAY := -15055671
+        ORACLE_TABLETS_DAY := -278522
+        ORACLE_STONES := oracleBuildStones()
+        ORACLE_GATE := table()
+        ORACLE_GATE[0] := ORACLE_FOUNDATION_DAY
+        ORACLE_MIN_GATE_INDEX := 0
+        ORACLE_MAX_GATE_INDEX := 0
+    }
+    return 1
+end
+
+procedure oracleRegularMod(x, d)
+    local r
+    if d < 1 then stop("E_MOD_DIVISOR")
+    r := x % d
+    if r < 0 then r := r + d
+    return r
+end
+
+procedure oracleFloorDiv(a, b)
+    local q, r
+    if b < 1 then stop("E_DIVISOR")
+    q := a / b
+    r := a % b
+    if a < 0 & r ~= 0 then q := q - 1
+    return q
+end
+
+procedure oracleCeilDiv(a, b)
+    if a < 0 | b < 1 then stop("E_CEILDIV")
+    return oracleFloorDiv(a + b - 1, b)
+end
+
+procedure oracleSave(x)
+    oracleInit()
+    return 1 + oracleRegularMod(x - 1, ORACLE_M)
+end
+
+procedure oracleWrap1(position, size)
+    if size < 1 then stop("E_WRAP")
+    return oracleRegularMod(position - 1, size) + 1
+end
+
+procedure oracleCloneList(a)
+    local out, i
+    out := []
+    i := 1
+    while i <= *a do {
+        put(out, a[i])
+        i := i + 1
+    }
+    return out
+end
+
+procedure oracleListsEqual(a, b)
+    local i
+    if *a ~= *b then fail
+    i := 1
+    while i <= *a do {
+        if a[i] ~== b[i] then fail
+        i := i + 1
+    }
+    return 1
+end
+
+procedure oracleFactorial(n)
+    local r, i
+    if n < 0 then stop("E_FACTORIAL")
+    r := 1
+    i := 2
+    while i <= n do {
+        r := r * i
+        i := i + 1
+    }
+    return r
+end
+
+procedure oracleFallingFactorial(n, k)
+    local r, j
+    if k < 0 | k > n then stop("E_FALLING")
+    r := 1
+    j := 0
+    while j < k do {
+        r := r * (n - j)
+        j := j + 1
+    }
+    return r
+end
+
+procedure oracleDayCount(day)
+    oracleInit()
+    if day = ORACLE_FOUNDATION_DAY then return 1
+    if day > ORACLE_FOUNDATION_DAY then return 2 * (day - ORACLE_FOUNDATION_DAY) + 1
+    return 2 * (ORACLE_FOUNDATION_DAY - day)
+end
+
+procedure oracleWorkCounts(calculationDay, targetDay)
+    local c, t, distance, connection, direction
+    c := oracleDayCount(calculationDay)
+    t := oracleDayCount(targetDay)
+    distance := abs(targetDay - calculationDay) + 1
+    connection := c + t
+    direction := 2
+    if targetDay < calculationDay then direction := 1
+    if targetDay > calculationDay then direction := 3
+    return WorkCounts(c, t, distance, connection, direction)
+end
+
+procedure oracleBuildStones()
+    local tableStones, old, i, nextStone
+    tableStones := list(46)
+    tableStones[1] := [17, 29, 43, 71, 101]
+    i := 2
+    while i <= 46 do {
+        old := tableStones[i - 1]
+        nextStone := list(5)
+        nextStone[1] := oracleSave(old[1] * old[1] + 3 * old[2] + i)
+        nextStone[2] := oracleSave(old[2] * old[2] + 5 * old[3] + old[1])
+        nextStone[3] := oracleSave(old[3] * old[3] + 7 * old[4] + old[2])
+        nextStone[4] := oracleSave(old[4] * old[4] + 11 * old[5] + old[3])
+        nextStone[5] := oracleSave(old[5] * old[5] + 13 * old[1] + old[4])
+        tableStones[i] := nextStone
+        i := i + 1
+    }
+    return tableStones
+end
+
+procedure oracleHiddenCoeff(k)
+    case k of {
+        1: return [3,4,6,8]
+        2: return [5,7,10,12]
+        3: return [7,10,14,16]
+        4: return [9,13,18,20]
+        5: return [11,16,22,24]
+        6: return [13,19,26,28]
+        7: return [15,22,30,32]
+        default: stop("E_HIDDEN_COEFF")
+    }
+end
+
+procedure oracleHiddenStoneKind(grind)
+    case grind of {
+        1: return 1
+        2: return 2
+        3: return 3
+        4: return 4
+        5: return 5
+        6: return 1
+        7: return 2
+        default: stop("E_HIDDEN_STONE")
+    }
+end
+
+procedure oracleBuildHiddenDrops(counts, stones)
+    local hidden, k, coeff, x, grind, oldX, kind
+    hidden := list(7)
+    k := 1
+    while k <= 7 do {
+        coeff := oracleHiddenCoeff(k)
+        x := counts.action + coeff[1] * counts.target + coeff[2] * counts.distance + coeff[3] * counts.connection + coeff[4] * counts.direction + stones[k][1] + stones[k][2] + stones[k][3] + stones[k][4] + stones[k][5]
+        x := oracleSave(x)
+        grind := 1
+        while grind <= 7 do {
+            oldX := x
+            kind := oracleHiddenStoneKind(grind)
+            x := oracleSave(oldX * oldX + 3 * oldX + stones[k][kind] + grind)
+            grind := grind + 1
+        }
+        hidden[k] := x
+        k := k + 1
+    }
+    return hidden
+end
+
+procedure oracleVisibleGrindRow(grind)
+    case grind of {
+        1: return [3,5,7,11,1]
+        2: return [5,7,11,13,2]
+        3: return [7,11,13,17,3]
+        4: return [11,13,17,19,4]
+        5: return [13,17,19,23,5]
+        6: return [17,19,23,29,1]
+        7: return [19,23,29,31,2]
+        8: return [23,29,31,37,3]
+        9: return [29,31,37,41,4]
+        10: return [31,37,41,43,5]
+        11: return [37,41,43,47,1]
+        default: stop("E_VISIBLE_GRIND")
+    }
+end
+
+procedure oraclePriorValue(visible, hidden, i, back)
+    local slot, k
+    slot := i - back
+    if slot >= 1 then return visible[slot]
+    k := 1 - slot
+    return hidden[k]
+end
+
+procedure oracleBuildVisibleDrops(counts, stones, hidden)
+    local visible, i, p1, p3, p7, x, grind, row, oldX
+    visible := list(46)
+    i := 1
+    while i <= 46 do {
+        p1 := oraclePriorValue(visible, hidden, i, 1)
+        p3 := oraclePriorValue(visible, hidden, i, 3)
+        p7 := oraclePriorValue(visible, hidden, i, 7)
+        x := oracleSave(stones[i][1] * counts.action + stones[i][2] * counts.target + stones[i][3] * counts.distance + stones[i][4] * counts.connection + stones[i][5] * counts.direction + p1 + 3 * p3 + 5 * p7 + i)
+        grind := 1
+        while grind <= 11 do {
+            row := oracleVisibleGrindRow(grind)
+            oldX := x
+            x := oracleSave(oldX * oldX + row[1] * oldX + row[2] * p1 + row[3] * p3 + row[4] * p7 + stones[i][row[5]])
+            grind := grind + 1
+        }
+        visible[i] := x
+        i := i + 1
+    }
+    return visible
+end
+
+procedure oraclePermutationUnrank1(rank1, itemsAscending)
+    local rank0, remaining, result, slotsLeft, block, q, chosen, i
+    if rank1 < 1 | rank1 > oracleFactorial(*itemsAscending) then stop("E_PERM_RANK")
+    rank0 := rank1 - 1
+    remaining := oracleCloneList(itemsAscending)
+    result := []
+    slotsLeft := *remaining
+    while slotsLeft >= 1 do {
+        block := oracleFactorial(slotsLeft - 1)
+        q := rank0 / block
+        rank0 := oracleRegularMod(rank0, block)
+        chosen := remaining[q + 1]
+        put(result, chosen)
+        i := q + 1
+        while i < *remaining do {
+            remaining[i] := remaining[i + 1]
+            i := i + 1
+        }
+        pull(remaining)
+        slotsLeft := slotsLeft - 1
+    }
+    return result
+end
+
+procedure oracleBowlOrderFromNumber(orderNumber)
+    return oraclePermutationUnrank1(orderNumber, [1,2,3,4,5,6])
+end
+
+procedure oracleBowlOrderFromDrop(dropValue)
+    return oracleBowlOrderFromNumber(oracleRegularMod(dropValue - 1, 720) + 1)
+end
+
+procedure oracleInitialBowls(counts)
+    local primes, bowls, id, s
+    primes := [17,19,23,29,31,37]
+    bowls := list(6)
+    id := 1
+    while id <= 6 do {
+        s := counts.action + counts.target * id + counts.distance + counts.connection + counts.direction + primes[id] * primes[id]
+        bowls[id] := oracleSave(s * s + id)
+        id := id + 1
+    }
+    return bowls
+end
+
+procedure oracleBowlStirStoneByPosition(position)
+    case position of {
+        1: return 1
+        2: return 2
+        3: return 3
+        4: return 4
+        5: return 5
+        6: return 1
+        default: stop("E_BOWL_STONE")
+    }
+end
+
+procedure oracleApplyVisibleDropsToBowls(bowls, visible, stones)
+    local i, dropValue, order, old, pour, firstBowl, secondBowl, thirdBowl, position, bowlId, prevId, nextId, stoneKind, s, nextBowls, orderAt46
+    orderAt46 := &null
+    i := 1
+    while i <= 46 do {
+        dropValue := visible[i]
+        order := oracleBowlOrderFromDrop(dropValue)
+        old := oracleCloneList(bowls)
+        pour := list(6, 0)
+        firstBowl := order[1]
+        secondBowl := order[2]
+        thirdBowl := order[3]
+        pour[1] := oracleSave(dropValue * dropValue + stones[i][1] * old[firstBowl] + 3 * i)
+        pour[2] := oracleSave(dropValue * dropValue + stones[i][2] * old[secondBowl] + 5 * i)
+        pour[3] := oracleSave(dropValue * dropValue + stones[i][3] * old[thirdBowl] + 7 * i)
+        nextBowls := list(6)
+        position := 1
+        while position <= 6 do {
+            bowlId := order[position]
+            prevId := order[oracleWrap1(position - 1, 6)]
+            nextId := order[oracleWrap1(position + 1, 6)]
+            stoneKind := oracleBowlStirStoneByPosition(position)
+            s := old[bowlId] + 2 * old[prevId] + 3 * old[nextId] + pour[position] + dropValue + stones[i][stoneKind]
+            nextBowls[bowlId] := oracleSave(s * s + 5 * old[prevId] * old[nextId] + i * position)
+            position := position + 1
+        }
+        bowls := nextBowls
+        if i = 46 then orderAt46 := oracleCloneList(order)
+        i := i + 1
+    }
+    return [bowls, orderAt46]
+end
+
+procedure oraclePostStir12(bowls)
+    local stir, old, savedStirSum, orderNumber, order, position, bowlId, prevId, nextId, s, nextBowls
+    stir := 1
+    while stir <= 12 do {
+        old := oracleCloneList(bowls)
+        savedStirSum := oracleSave(old[1] + old[2] + old[3] + old[4] + old[5] + old[6] + 149 * stir)
+        orderNumber := oracleRegularMod(savedStirSum - 1, 720) + 1
+        order := oracleBowlOrderFromNumber(orderNumber)
+        nextBowls := list(6)
+        position := 1
+        while position <= 6 do {
+            bowlId := order[position]
+            prevId := order[oracleWrap1(position - 1, 6)]
+            nextId := order[oracleWrap1(position + 1, 6)]
+            s := old[bowlId] + 3 * old[prevId] + 5 * old[nextId] + savedStirSum + stir + position * position
+            nextBowls[bowlId] := oracleSave(s * s + 7 * old[prevId] * old[nextId])
+            position := position + 1
+        }
+        bowls := nextBowls
+        stir := stir + 1
+    }
+    return bowls
+end
+
+procedure oracleSauce(calculationDay, targetDay)
+    local counts, hidden, visible, bowls, pair, finalBowls
+    oracleInit()
+    counts := oracleWorkCounts(calculationDay, targetDay)
+    hidden := oracleBuildHiddenDrops(counts, ORACLE_STONES)
+    visible := oracleBuildVisibleDrops(counts, ORACLE_STONES, hidden)
+    bowls := oracleInitialBowls(counts)
+    pair := oracleApplyVisibleDropsToBowls(bowls, visible, ORACLE_STONES)
+    finalBowls := oraclePostStir12(pair[1])
+    return SauceResult(finalBowls, pair[2])
+end
+
+procedure oracleIndexOf(a, value)
+    local i
+    i := 1
+    while i <= *a do {
+        if a[i] === value then return i
+        i := i + 1
+    }
+    fail
+end
+
+procedure oracleNextBowlInDrop46Order(sauceResult, queriedBowlId)
+    local p
+    p := oracleIndexOf(sauceResult.orderAtDrop46, queriedBowlId) | stop("E_QUERY_BOWL")
+    return sauceResult.orderAtDrop46[oracleWrap1(p + 1, 6)]
+end
+
+procedure oracleAskBowl(sauceResult, queriedBowlId, seal)
+    local nextId, first, directionNumber, step
+    nextId := oracleNextBowlInDrop46Order(sauceResult, queriedBowlId)
+    first := oracleSave((sauceResult.bowls[queriedBowlId] + seal + 181) ^ 2 + 179 * sauceResult.bowls[nextId] + seal)
+    directionNumber := oracleSave((first + seal + 1 + 193) ^ 2 + 193 * first + 197 * sauceResult.bowls[6])
+    step := -1
+    if oracleRegularMod(directionNumber, 2) = 1 then step := 1
+    return AnswerStream(first, step)
+end
+
+procedure oracleAnswerAt(stream, k)
+    oracleInit()
+    return 1 + oracleRegularMod(stream.first - 1 + stream.directionStep * k, ORACLE_M)
+end
+
+procedure oracleChooseRankShort(stream, n)
+    local acceptanceLimit, k, x
+    oracleInit()
+    if n < 1 | n > ORACLE_M then stop("E_SHORT_N")
+    acceptanceLimit := (ORACLE_M / n) * n
+    k := 0
+    while 1 do {
+        x := oracleAnswerAt(stream, k)
+        if x <= acceptanceLimit then return oracleRegularMod(x - 1, n) + 1
+        k := k + 1
+    }
+end
+
+procedure oracleSmallestPowerCount(base, n)
+    local k, space
+    k := 1
+    space := base
+    while space < n do {
+        k := k + 1
+        space := space * base
+    }
+    return [k, space]
+end
+
+procedure oracleChooseRankWide(stream, n)
+    local pair, k, space, wide0, weight, j, digit, acceptanceLimit, w
+    oracleInit()
+    if n <= ORACLE_M then stop("E_WIDE_N")
+    pair := oracleSmallestPowerCount(ORACLE_M, n)
+    k := pair[1]
+    space := pair[2]
+    wide0 := 1
+    weight := 1
+    j := 0
+    while j < k do {
+        digit := oracleAnswerAt(stream, j) - 1
+        wide0 := wide0 + digit * weight
+        weight := weight * ORACLE_M
+        j := j + 1
+    }
+    acceptanceLimit := (space / n) * n
+    w := wide0
+    while 1 do {
+        if w <= acceptanceLimit then return oracleRegularMod(w - 1, n) + 1
+        w := 1 + oracleRegularMod(w - 1 + stream.directionStep, space)
+    }
+end
+
+procedure oracleChooseRank(stream, n)
+    oracleInit()
+    if n < 1 then stop("E_CHOOSE_N")
+    if n <= ORACLE_M then return oracleChooseRankShort(stream, n)
+    return oracleChooseRankWide(stream, n)
+end
+
+procedure oracleUnrankDistinctIndices(masterCount, k, rank1)
+    local remaining, out, r, position, suffixLength, block, candidatePosition, chosenMasterIndex, i
+    if k < 0 | k > masterCount then stop("E_DISTINCT_K")
+    if rank1 < 1 | rank1 > oracleFallingFactorial(masterCount, k) then stop("E_DISTINCT_RANK")
+    remaining := []
+    i := 1
+    while i <= masterCount do {
+        put(remaining, i)
+        i := i + 1
+    }
+    out := []
+    r := rank1
+    position := 1
+    while position <= k do {
+        suffixLength := k - position
+        block := oracleFallingFactorial(*remaining - 1, suffixLength)
+        candidatePosition := 1
+        while candidatePosition <= *remaining do {
+            if r > block then r := r - block
+            else {
+                chosenMasterIndex := remaining[candidatePosition]
+                put(out, chosenMasterIndex)
+                i := candidatePosition
+                while i < *remaining do {
+                    remaining[i] := remaining[i + 1]
+                    i := i + 1
+                }
+                pull(remaining)
+                break
+            }
+            candidatePosition := candidatePosition + 1
+        }
+        position := position + 1
+    }
+    return out
+end
+
+procedure oracleBoundedKey(rem, slots)
+    return string(rem) || ":" || string(slots)
+end
+
+procedure oracleBoundedCount(rem, slots, lo, hi, memo)
+    local key, s, x
+    if slots = 0 then {
+        if rem = 0 then return 1
+        return 0
+    }
+    if rem < slots * lo | rem > slots * hi then return 0
+    key := oracleBoundedKey(rem, slots)
+    if \memo[key] then return memo[key]
+    s := 0
+    x := lo
+    while x <= hi do {
+        s := s + oracleBoundedCount(rem - x, slots - 1, lo, hi, memo)
+        x := x + 1
+    }
+    memo[key] := s
+    return s
+end
+
+procedure oracleCountBoundedCompositions(total, slots, lo, hi)
+    return oracleBoundedCount(total, slots, lo, hi, table())
+end
+
+procedure oracleUnrankBoundedComposition(total, slots, lo, hi, rank1)
+    local memo, totalCount, r, rem, out, position, x, countBlock
+    memo := table()
+    totalCount := oracleBoundedCount(total, slots, lo, hi, memo)
+    if rank1 < 1 | rank1 > totalCount then stop("E_BOUNDED_RANK")
+    r := rank1
+    rem := total
+    out := []
+    position := 1
+    while position <= slots do {
+        x := lo
+        while x <= hi do {
+            countBlock := oracleBoundedCount(rem - x, slots - position, lo, hi, memo)
+            if r > countBlock then r := r - countBlock
+            else {
+                put(out, x)
+                rem := rem - x
+                break
+            }
+            x := x + 1
+        }
+        position := position + 1
+    }
+    return out
+end
+
+procedure oraclePositiveGateGap(n)
+    local r, stream, chosen
+    oracleInit()
+    if n < 1 then stop("E_GATE_N")
+    r := oracleSauce(ORACLE_FOUNDATION_DAY, ORACLE_FOUNDATION_DAY + n)
+    stream := oracleAskBowl(r, 1, 1)
+    chosen := oracleChooseRank(stream, 922)
+    return 41 + chosen
+end
+
+procedure oracleNegativeGateGap(n)
+    local r, stream, chosen
+    oracleInit()
+    if n < 1 then stop("E_GATE_N")
+    r := oracleSauce(ORACLE_FOUNDATION_DAY, ORACLE_FOUNDATION_DAY - n)
+    stream := oracleAskBowl(r, 1, 1)
+    chosen := oracleChooseRank(stream, 922)
+    return 41 + chosen
+end
+
+procedure oracleEnsureGateIndex(k)
+    local n
+    oracleInit()
+    if k > ORACLE_MAX_GATE_INDEX then {
+        n := ORACLE_MAX_GATE_INDEX + 1
+        while n <= k do {
+            ORACLE_GATE[n] := ORACLE_GATE[n - 1] + oraclePositiveGateGap(n)
+            ORACLE_MAX_GATE_INDEX := n
+            n := n + 1
+        }
+    }
+    if k < ORACLE_MIN_GATE_INDEX then {
+        n := ORACLE_MIN_GATE_INDEX - 1
+        while n >= k do {
+            ORACLE_GATE[n] := ORACLE_GATE[n + 1] - oracleNegativeGateGap(abs(n))
+            ORACLE_MIN_GATE_INDEX := n
+            n := n - 1
+        }
+    }
+    return ORACLE_GATE[k]
+end
+
+procedure oracleEnsureGatesCover(lowDay, highDay)
+    oracleInit()
+    if lowDay > highDay then stop("E_GATE_RANGE")
+    while ORACLE_GATE[ORACLE_MIN_GATE_INDEX] > lowDay do oracleEnsureGateIndex(ORACLE_MIN_GATE_INDEX - 1)
+    while ORACLE_GATE[ORACLE_MAX_GATE_INDEX] < highDay do oracleEnsureGateIndex(ORACLE_MAX_GATE_INDEX + 1)
+    return 1
+end
+
+procedure oracleGateIndexAtOrBefore(day)
+    local lo, hi, mid
+    oracleEnsureGatesCover(day, day)
+    lo := ORACLE_MIN_GATE_INDEX
+    hi := ORACLE_MAX_GATE_INDEX
+    while lo < hi do {
+        mid := lo + ((hi - lo + 1) / 2)
+        if ORACLE_GATE[mid] <= day then lo := mid
+        else hi := mid - 1
+    }
+    return lo
+end
+
+procedure oracleExactGateIndex(day)
+    local i
+    i := oracleGateIndexAtOrBefore(day)
+    if ORACLE_GATE[i] = day then return i
+    fail
+end
+
+procedure oracleValidYearPair(openIndex, closeIndex)
+    local lengthDays
+    if closeIndex - openIndex < 6 then fail
+    oracleEnsureGateIndex(openIndex)
+    oracleEnsureGateIndex(closeIndex)
+    lengthDays := ORACLE_GATE[closeIndex] - ORACLE_GATE[openIndex]
+    if lengthDays < 252 | lengthDays > 5778 then fail
+    return 1
+end
+
+
+procedure oracleStableSortByFirst(a)
+    local out, i, j, item
+    out := oracleCloneList(a)
+    i := 2
+    while i <= *out do {
+        item := out[i]
+        j := i - 1
+        while j >= 1 & out[j][1] > item[1] do {
+            out[j + 1] := out[j]
+            j := j - 1
+        }
+        out[j + 1] := item
+        i := i + 1
+    }
+    return out
+end
+
+procedure oracleSortYear5000Candidates(a)
+    local out, i, j, item
+    out := oracleCloneList(a)
+    i := 2
+    while i <= *out do {
+        item := out[i]
+        j := i - 1
+        while j >= 1 do {
+            if out[j][1] > item[1] then {
+                out[j + 1] := out[j]
+                j := j - 1
+                next
+            }
+            if out[j][1] = item[1] & out[j][2] > item[2] then {
+                out[j + 1] := out[j]
+                j := j - 1
+                next
+            }
+            break
+        }
+        out[j + 1] := item
+        i := i + 1
+    }
+    return out
+end
+
+procedure oracleYear5000(calculationDay)
+    local candidates, i, j, lengthDays, r, stream, rank, chosen
+    oracleEnsureGatesCover(calculationDay - 5778, calculationDay + 5778)
+    candidates := []
+    i := ORACLE_MIN_GATE_INDEX
+    while i < ORACLE_MAX_GATE_INDEX do {
+        j := i + 1
+        while j <= ORACLE_MAX_GATE_INDEX do {
+            lengthDays := ORACLE_GATE[j] - ORACLE_GATE[i]
+            if lengthDays > 5778 then break
+            if oracleValidYearPair(i, j) then {
+                if ORACLE_GATE[i] < calculationDay & calculationDay <= ORACLE_GATE[j] then
+                    put(candidates, [lengthDays, ORACLE_GATE[i], i, j])
+            }
+            j := j + 1
+        }
+        i := i + 1
+    }
+    candidates := oracleSortYear5000Candidates(candidates)
+    if *candidates = 0 then stop("E_YEAR5000_NONE")
+    r := oracleSauce(calculationDay, calculationDay)
+    stream := oracleAskBowl(r, 1, 10)
+    rank := oracleChooseRank(stream, *candidates)
+    chosen := candidates[rank]
+    return Year(5000, chosen[3], chosen[4], ORACLE_GATE[chosen[3]], ORACLE_GATE[chosen[4]])
+end
+
+procedure oracleNextYear(calculationDay, knownYear)
+    local openIndex, candidates, closeIndex, lengthDays, r, stream, rank, chosen
+    openIndex := knownYear.closeGateIndex
+    oracleEnsureGatesCover(ORACLE_GATE[openIndex], ORACLE_GATE[openIndex] + 5778)
+    candidates := []
+    closeIndex := openIndex + 1
+    while 1 do {
+        oracleEnsureGateIndex(closeIndex)
+        lengthDays := ORACLE_GATE[closeIndex] - ORACLE_GATE[openIndex]
+        if lengthDays > 5778 then break
+        if oracleValidYearPair(openIndex, closeIndex) then put(candidates, [lengthDays, closeIndex])
+        closeIndex := closeIndex + 1
+    }
+    candidates := oracleStableSortByFirst(candidates)
+    if *candidates = 0 then stop("E_NEXT_YEAR_NONE")
+    r := oracleSauce(calculationDay, ORACLE_GATE[openIndex])
+    stream := oracleAskBowl(r, 1, 11)
+    rank := oracleChooseRank(stream, *candidates)
+    chosen := candidates[rank]
+    closeIndex := chosen[2]
+    return Year(knownYear.number + 1, openIndex, closeIndex, ORACLE_GATE[openIndex], ORACLE_GATE[closeIndex])
+end
+
+procedure oraclePreviousYear(calculationDay, knownYear)
+    local closeIndex, candidates, openIndex, lengthDays, r, stream, rank, chosen
+    closeIndex := knownYear.openGateIndex
+    oracleEnsureGatesCover(ORACLE_GATE[closeIndex] - 5778, ORACLE_GATE[closeIndex])
+    candidates := []
+    openIndex := closeIndex - 1
+    while 1 do {
+        oracleEnsureGateIndex(openIndex)
+        lengthDays := ORACLE_GATE[closeIndex] - ORACLE_GATE[openIndex]
+        if lengthDays > 5778 then break
+        if oracleValidYearPair(openIndex, closeIndex) then put(candidates, [lengthDays, openIndex])
+        openIndex := openIndex - 1
+    }
+    candidates := oracleStableSortByFirst(candidates)
+    if *candidates = 0 then stop("E_PREVIOUS_YEAR_NONE")
+    r := oracleSauce(calculationDay, ORACLE_GATE[closeIndex])
+    stream := oracleAskBowl(r, 1, 12)
+    rank := oracleChooseRank(stream, *candidates)
+    chosen := candidates[rank]
+    openIndex := chosen[2]
+    return Year(knownYear.number - 1, openIndex, closeIndex, ORACLE_GATE[openIndex], ORACLE_GATE[closeIndex])
+end
+
+procedure oracleFindTargetYear(calculationDay, targetDay)
+    local y
+    y := oracleYear5000(calculationDay)
+    while targetDay > y.closeGateDay do y := oracleNextYear(calculationDay, y)
+    while targetDay <= y.openGateDay do y := oraclePreviousYear(calculationDay, y)
+    if y.openGateDay >= targetDay | targetDay > y.closeGateDay then stop("E_YEAR_INTERVAL")
+    return y
+end
+
+procedure oracleCutletCount(structureSauce, year)
+    local gateGaps, candidates, k, stream, rank
+    gateGaps := year.closeGateIndex - year.openGateIndex
+    candidates := []
+    k := 6
+    while k <= 17 do {
+        if k <= gateGaps then put(candidates, k)
+        k := k + 1
+    }
+    stream := oracleAskBowl(structureSauce, 2, 20)
+    rank := oracleChooseRank(stream, *candidates)
+    return candidates[rank]
+end
+
+procedure oracleCutletMemoKey(rem, slots, cumulative, hit)
+    return string(rem) || ":" || string(slots) || ":" || string(cumulative) || ":" || string(hit)
+end
+
+procedure oracleCutletPartitionCountRec(rem, slots, cumulative, hit, required, memo)
+    local key, total, maxX, x, nextCumulative, nextHit
+    if slots = 0 then {
+        if rem ~= 0 then return 0
+        if /required then return 1
+        if hit = 1 then return 1
+        return 0
+    }
+    if rem < slots then return 0
+    key := oracleCutletMemoKey(rem, slots, cumulative, hit)
+    if \memo[key] then return memo[key]
+    total := 0
+    maxX := rem - (slots - 1)
+    x := 1
+    while x <= maxX do {
+        nextCumulative := cumulative + x
+        nextHit := hit
+        if \required & hit = 0 then {
+            if nextCumulative = required then nextHit := 1
+            else if nextCumulative > required then {
+                x := x + 1
+                next
+            }
+        }
+        total := total + oracleCutletPartitionCountRec(rem - x, slots - 1, nextCumulative, nextHit, required, memo)
+        x := x + 1
+    }
+    memo[key] := total
+    return total
+end
+
+procedure oracleCountCutletPartitions(gaps, k, required)
+    return oracleCutletPartitionCountRec(gaps, k, 0, 0, required, table())
+end
+
+procedure oracleUnrankCutletPartition(gaps, k, required, rank1)
+    local memo, totalCount, r, rem, slots, cumulative, hit, out, maxX, x, nextCumulative, nextHit, block
+    memo := table()
+    totalCount := oracleCutletPartitionCountRec(gaps, k, 0, 0, required, memo)
+    if rank1 < 1 | rank1 > totalCount then stop("E_CUTLET_PARTITION_RANK")
+    r := rank1
+    rem := gaps
+    slots := k
+    cumulative := 0
+    hit := 0
+    out := []
+    while slots > 0 do {
+        maxX := rem - (slots - 1)
+        x := 1
+        while x <= maxX do {
+            nextCumulative := cumulative + x
+            nextHit := hit
+            if \required & hit = 0 then {
+                if nextCumulative = required then nextHit := 1
+                else if nextCumulative > required then {
+                    x := x + 1
+                    next
+                }
+            }
+            block := oracleCutletPartitionCountRec(rem - x, slots - 1, nextCumulative, nextHit, required, memo)
+            if r > block then r := r - block
+            else {
+                put(out, x)
+                rem := rem - x
+                slots := slots - 1
+                cumulative := nextCumulative
+                hit := nextHit
+                break
+            }
+            x := x + 1
+        }
+    }
+    return out
+end
+
+procedure oracleChooseCutletPartition(calculationDay, structureSauce, year, cutletCount)
+    local gaps, g, required, totalCount, stream, rank
+    gaps := year.closeGateIndex - year.openGateIndex
+    required := &null
+    g := oracleExactGateIndex(calculationDay)
+    if \g then {
+        if year.openGateIndex < g & g < year.closeGateIndex then required := g - year.openGateIndex
+    }
+    totalCount := oracleCountCutletPartitions(gaps, cutletCount, required)
+    stream := oracleAskBowl(structureSauce, 2, 21)
+    rank := oracleChooseRank(stream, totalCount)
+    return oracleUnrankCutletPartition(gaps, cutletCount, required, rank)
+end
+
+procedure oracleChooseCutletNameIndices(structureSauce, cutletCount)
+    local n, stream, rank
+    n := oracleFallingFactorial(17, cutletCount)
+    stream := oracleAskBowl(structureSauce, 5, 22)
+    rank := oracleChooseRank(stream, n)
+    return oracleUnrankDistinctIndices(17, cutletCount, rank)
+end
+
+procedure oracleMaterializeCutlets(year, partition, nameIndices)
+    local cutlets, cursorGate, k, openGateIndex, closeGateIndex
+    cutlets := []
+    cursorGate := year.openGateIndex
+    k := 1
+    while k <= *partition do {
+        openGateIndex := cursorGate
+        closeGateIndex := cursorGate + partition[k]
+        oracleEnsureGateIndex(openGateIndex)
+        oracleEnsureGateIndex(closeGateIndex)
+        put(cutlets, CutletRecord(nameIndices[k], openGateIndex, closeGateIndex, ORACLE_GATE[openGateIndex] + 1, ORACLE_GATE[closeGateIndex]))
+        cursorGate := closeGateIndex
+        k := k + 1
+    }
+    return cutlets
+end
+
+procedure oracleChooseMonthCount(structureSauce, year)
+    local lengthDays, minMonths, maxMonths, countCandidates, stream, rank
+    lengthDays := year.closeGateDay - year.openGateDay
+    minMonths := oracleCeilDiv(lengthDays, 123)
+    maxMonths := 47
+    if lengthDays / 4 < maxMonths then maxMonths := lengthDays / 4
+    if minMonths < 3 | minMonths > maxMonths | maxMonths > 47 then stop("E_MONTH_BOUNDS")
+    countCandidates := maxMonths - minMonths + 1
+    stream := oracleAskBowl(structureSauce, 3, 30)
+    rank := oracleChooseRank(stream, countCandidates)
+    return minMonths + rank - 1
+end
+
+procedure oracleChooseMonthLengths(structureSauce, year, monthCount)
+    local lengthDays, totalCount, stream, rank
+    lengthDays := year.closeGateDay - year.openGateDay
+    totalCount := oracleCountBoundedCompositions(lengthDays, monthCount, 4, 123)
+    stream := oracleAskBowl(structureSauce, 3, 31)
+    rank := oracleChooseRank(stream, totalCount)
+    return oracleUnrankBoundedComposition(lengthDays, monthCount, 4, 123, rank)
+end
+
+procedure oracleWeaveStateKey(remaining, openedUpTo, closedUpTo)
+    local key, i
+    key := string(openedUpTo) || ":" || string(closedUpTo)
+    i := 1
+    while i <= *remaining do {
+        key := key || ":" || string(remaining[i])
+        i := i + 1
+    }
+    return key
+end
+
+procedure oracleWeaveLegalMove(remaining, openedUpTo, closedUpTo, j, originalLengths)
+    local alreadyOpened, willClose
+    if remaining[j] = 0 then fail
+    alreadyOpened := 0
+    if remaining[j] < originalLengths[j] then alreadyOpened := 1
+    if alreadyOpened = 0 & j ~= openedUpTo + 1 then fail
+    willClose := 0
+    if remaining[j] = 1 then willClose := 1
+    if willClose = 1 & j ~= closedUpTo + 1 then fail
+    return 1
+end
+
+procedure oracleWeaveApply(remaining, openedUpTo, closedUpTo, j, originalLengths)
+    local nextRemaining, nextOpened, nextClosed
+    nextRemaining := oracleCloneList(remaining)
+    nextOpened := openedUpTo
+    nextClosed := closedUpTo
+    if nextRemaining[j] = originalLengths[j] then nextOpened := j
+    nextRemaining[j] := nextRemaining[j] - 1
+    if nextRemaining[j] = 0 then nextClosed := j
+    return [nextRemaining, nextOpened, nextClosed]
+end
+
+procedure oracleAllZero(a)
+    local i
+    i := 1
+    while i <= *a do {
+        if a[i] ~= 0 then fail
+        i := i + 1
+    }
+    return 1
+end
+
+procedure oracleCountWeavingsRec(remaining, openedUpTo, closedUpTo, originalLengths, memo)
+    local key, total, j, nextState
+    if oracleAllZero(remaining) then return 1
+    key := oracleWeaveStateKey(remaining, openedUpTo, closedUpTo)
+    if \memo[key] then return memo[key]
+    total := 0
+    j := 1
+    while j <= *remaining do {
+        if oracleWeaveLegalMove(remaining, openedUpTo, closedUpTo, j, originalLengths) then {
+            nextState := oracleWeaveApply(remaining, openedUpTo, closedUpTo, j, originalLengths)
+            total := total + oracleCountWeavingsRec(nextState[1], nextState[2], nextState[3], originalLengths, memo)
+        }
+        j := j + 1
+    }
+    memo[key] := total
+    return total
+end
+
+procedure oracleCountWeavings(lengths)
+    return oracleCountWeavingsRec(oracleCloneList(lengths), 0, 0, lengths, table())
+end
+
+procedure oracleUnrankWeaving(lengths, rank1)
+    local memo, totalCount, remaining, openedUpTo, closedUpTo, r, out, totalLength, j, nextState, block
+    memo := table()
+    totalCount := oracleCountWeavingsRec(oracleCloneList(lengths), 0, 0, lengths, memo)
+    if rank1 < 1 | rank1 > totalCount then stop("E_WEAVE_RANK")
+    remaining := oracleCloneList(lengths)
+    openedUpTo := 0
+    closedUpTo := 0
+    r := rank1
+    out := []
+    totalLength := 0
+    j := 1
+    while j <= *lengths do {
+        totalLength := totalLength + lengths[j]
+        j := j + 1
+    }
+    while *out < totalLength do {
+        j := 1
+        while j <= *lengths do {
+            if oracleWeaveLegalMove(remaining, openedUpTo, closedUpTo, j, lengths) then {
+                nextState := oracleWeaveApply(remaining, openedUpTo, closedUpTo, j, lengths)
+                block := oracleCountWeavingsRec(nextState[1], nextState[2], nextState[3], lengths, memo)
+                if r > block then r := r - block
+                else {
+                    put(out, j)
+                    remaining := nextState[1]
+                    openedUpTo := nextState[2]
+                    closedUpTo := nextState[3]
+                    break
+                }
+            }
+            j := j + 1
+        }
+    }
+    return out
+end
+
+procedure oracleChooseMonthWeaving(structureSauce, monthLengths)
+    local totalCount, stream, rank
+    totalCount := oracleCountWeavings(monthLengths)
+    stream := oracleAskBowl(structureSauce, 4, 32)
+    rank := oracleChooseRank(stream, totalCount)
+    return oracleUnrankWeaving(monthLengths, rank)
+end
+
+procedure oracleChooseMonthNameIndices(structureSauce, monthCount)
+    local n, stream, rank
+    n := oracleFallingFactorial(47, monthCount)
+    stream := oracleAskBowl(structureSauce, 5, 33)
+    rank := oracleChooseRank(stream, n)
+    return oracleUnrankDistinctIndices(47, monthCount, rank)
+end
+
+procedure oracleBuildYearStructure(calculationDay, year)
+    local firstDay, r, cutletCount, cutletPartition, cutletNameIndices, cutlets, monthCount, monthLengths, monthWeaving, monthNameIndices
+    firstDay := year.openGateDay + 1
+    r := oracleSauce(calculationDay, firstDay)
+    cutletCount := oracleCutletCount(r, year)
+    cutletPartition := oracleChooseCutletPartition(calculationDay, r, year, cutletCount)
+    cutletNameIndices := oracleChooseCutletNameIndices(r, cutletCount)
+    cutlets := oracleMaterializeCutlets(year, cutletPartition, cutletNameIndices)
+    monthCount := oracleChooseMonthCount(r, year)
+    monthLengths := oracleChooseMonthLengths(r, year, monthCount)
+    monthWeaving := oracleChooseMonthWeaving(r, monthLengths)
+    monthNameIndices := oracleChooseMonthNameIndices(r, monthCount)
+    return YearStructure(cutletCount, cutletPartition, cutletNameIndices, cutlets, monthCount, monthLengths, monthWeaving, monthNameIndices)
+end
+
+procedure calendarDateNormative(calculationDay, targetDay, catalog)
+    local year, structure, chosenCutlet, i, dayInCutlet, yearOffset0, monthId, monthNameIndex, dayInMonth, p
+    year := oracleFindTargetYear(calculationDay, targetDay)
+    structure := oracleBuildYearStructure(calculationDay, year)
+    chosenCutlet := &null
+    i := 1
+    while i <= *structure.cutlets do {
+        if structure.cutlets[i].firstDay <= targetDay & targetDay <= structure.cutlets[i].lastDay then {
+            chosenCutlet := structure.cutlets[i]
+            break
+        }
+        i := i + 1
+    }
+    if /chosenCutlet then stop("E_CUTLET_NOT_FOUND")
+    dayInCutlet := targetDay - chosenCutlet.firstDay + 1
+    yearOffset0 := targetDay - (year.openGateDay + 1)
+    monthId := structure.monthWeaving[yearOffset0 + 1]
+    monthNameIndex := structure.monthNameIndices[monthId]
+    dayInMonth := 0
+    p := 1
+    while p <= yearOffset0 + 1 do {
+        if structure.monthWeaving[p] = monthId then dayInMonth := dayInMonth + 1
+        p := p + 1
+    }
+    return [year.number, catalogCutletText(catalog, chosenCutlet.canonicalIndex), dayInCutlet, catalogMonthText(catalog, monthNameIndex), dayInMonth]
+end

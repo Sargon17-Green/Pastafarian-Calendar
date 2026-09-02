@@ -1,0 +1,16 @@
+./DEVELOPMENT_STAGE.md
+./FILES_STAGE_01.txt
+./GITHUB_HANDOFF.md
+./HANDOFF_STAGE_01.md
+./README.md
+./SPAGHETTI_DEVELOPMENT_HISTORY.md
+./STAGE_01_EXECUTION_STATUS.txt
+./docs/ARCHITECTURE.md
+./docs/SOURCE_LANGUAGE_CATALOG.md
+./docs/STAGE_01_STATIC_AUDIT.md
+./fixtures/stage01_expected.tsv
+./run_stage01.sh
+./src/monster_bootstrap.icn
+./src/normative_oracle.icn
+./src/source_language_catalog.icn
+./test/stage01_tests.icn

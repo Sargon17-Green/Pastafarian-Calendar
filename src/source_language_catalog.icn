@@ -1,0 +1,90 @@
+record CatalogEntry(canonicalIndex, text)
+record SourceLanguageCatalog(version, frozen, cutlets, months)
+
+procedure buildSourceLanguageCatalog()
+    local cutlets, months
+
+    cutlets := [
+        CatalogEntry(1, "ಕಂಚು"),
+        CatalogEntry(2, "ನರಿ"),
+        CatalogEntry(3, "ಮೂತ್ರಪಿಂಡ"),
+        CatalogEntry(4, "ಲಗಾಶ್"),
+        CatalogEntry(5, "ಚಿಂತನೆ"),
+        CatalogEntry(6, "ಒಂಬತ್ತರಲ್ಲಿ ನಾಲ್ಕು ಭಾಗಗಳು"),
+        CatalogEntry(7, "ಫಲ್ಗುರಶ್"),
+        CatalogEntry(8, "ಜೊಂಡು"),
+        CatalogEntry(9, "ಗೊಂಚಲು"),
+        CatalogEntry(10, "ಚೇಳು"),
+        CatalogEntry(11, "ಬೂದಿ"),
+        CatalogEntry(12, "ಗೋಧಿ"),
+        CatalogEntry(13, "ನದಿ"),
+        CatalogEntry(14, "ನಗು"),
+        CatalogEntry(15, "ಅಕ್ಕಾಡ್"),
+        CatalogEntry(16, "ಕೊಂಬು"),
+        CatalogEntry(17, "ಖಾಲಿ ಮಡಿಕೆ")
+    ]
+
+    months := [
+        CatalogEntry(1, "ಕೆಸರು"),
+        CatalogEntry(2, "ದಾಳಿಂಬೆ"),
+        CatalogEntry(3, "ಮೊಣಕೈ"),
+        CatalogEntry(4, "ಅಸೂಯೆ"),
+        CatalogEntry(5, "ಎರಿಡು"),
+        CatalogEntry(6, "ದಂತಮಂಜನ"),
+        CatalogEntry(7, "ಐದರಲ್ಲಿ ಮೂರು ಭಾಗಗಳು"),
+        CatalogEntry(8, "ಕರ್ಷುಮಬ್"),
+        CatalogEntry(9, "ಚಿರತೆ"),
+        CatalogEntry(10, "ತವರ"),
+        CatalogEntry(11, "ಮಂಜು"),
+        CatalogEntry(12, "ಧೂಪದ ರಾಳ"),
+        CatalogEntry(13, "ತಕಲಿ"),
+        CatalogEntry(14, "ಪಕ್ಕೆಲುಬು"),
+        CatalogEntry(15, "ಕ್ಯಾರಬ್ ಹಣ್ಣು"),
+        CatalogEntry(16, "ಉರುಕ್"),
+        CatalogEntry(17, "ನಾಚಿಕೆ"),
+        CatalogEntry(18, "ಒಂಟೆ"),
+        CatalogEntry(19, "ತಾಮ್ರ"),
+        CatalogEntry(20, "ಬಾವಿ"),
+        CatalogEntry(21, "ಮೊಟ್ಟೆಯ ಹಳದಿ ಭಾಗ"),
+        CatalogEntry(22, "ನಕ್ಷತ್ರ"),
+        CatalogEntry(23, "ಜೇನು"),
+        CatalogEntry(24, "ಪ್ಲೀಹೆ"),
+        CatalogEntry(25, "ಸುಣ್ಣದ ಕಲ್ಲು"),
+        CatalogEntry(26, "ಸಂತೋಷ"),
+        CatalogEntry(27, "ಅಂಜೂರ"),
+        CatalogEntry(28, "ನಿನವೆ"),
+        CatalogEntry(29, "ಕಪ್ಪೆ"),
+        CatalogEntry(30, "ಡಾಮರು"),
+        CatalogEntry(31, "ಮೇಣದಬತ್ತಿ"),
+        CatalogEntry(32, "ಮುಚ್ಚಿದ ಬಾಗಿಲು"),
+        CatalogEntry(33, "ಎಳ್ಳು"),
+        CatalogEntry(34, "ಕುತ್ತಿಗೆಯ ಹಿಂಭಾಗ"),
+        CatalogEntry(35, "ಬೆಳ್ಳಿ"),
+        CatalogEntry(36, "ಲಿಲಿ ಹೂ"),
+        CatalogEntry(37, "ಬಿರುಗಾಳಿ"),
+        CatalogEntry(38, "ಕತ್ತೆ"),
+        CatalogEntry(39, "ಹಿಟ್ಟು"),
+        CatalogEntry(40, "ಪಶ್ಚಾತ್ತಾಪ"),
+        CatalogEntry(41, "ಬಾಬಿಲೋನ್"),
+        CatalogEntry(42, "ನಾಲಿಗೆ"),
+        CatalogEntry(43, "ಅಗಸೆ"),
+        CatalogEntry(44, "ಉಪ್ಪು"),
+        CatalogEntry(45, "ಪಿಯರ್ ಹಣ್ಣು"),
+        CatalogEntry(46, "ಬಿಲ್ಲು"),
+        CatalogEntry(47, "ಮರಳು")
+    ]
+
+    return SourceLanguageCatalog("kn-v1", 1, cutlets, months)
+end
+
+procedure catalogCutletText(catalog, canonicalIndex)
+    if 1 <= canonicalIndex & canonicalIndex <= *catalog.cutlets then
+        return catalog.cutlets[canonicalIndex].text
+    fail
+end
+
+procedure catalogMonthText(catalog, canonicalIndex)
+    if 1 <= canonicalIndex & canonicalIndex <= *catalog.months then
+        return catalog.months[canonicalIndex].text
+    fail
+end

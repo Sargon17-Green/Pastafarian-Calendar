@@ -1,0 +1,92 @@
+record BaseMonsterContext(calculationDay, targetDay, phase, subPhase, mode, status, semanticSnapshot, pendingSnapshot, rollbackSnapshot, metrics, logs, diagnostics, lastError, validationFailures)
+record BaseDispatcher(currentPhase, handlersSeen)
+record BaseValidationState(checksRun, failures)
+record BaseErrorEnvelope(code, phase, detailCode)
+record BaseMetrics(counters)
+
+procedure newBaseMonsterContext(calculationDay, targetDay)
+    return BaseMonsterContext(
+        calculationDay,
+        targetDay,
+        "BOOTSTRAP",
+        0,
+        "AUTHORITATIVE_PENDING",
+        "NEW",
+        &null,
+        &null,
+        &null,
+        BaseMetrics(table(0)),
+        [],
+        [],
+        &null,
+        []
+    )
+end
+
+procedure baseMetricBump(ctx, code)
+    local old
+    old := ctx.metrics.counters[code]
+    ctx.metrics.counters[code] := old + 1
+    return ctx.metrics.counters[code]
+end
+
+procedure baseLogEvent(ctx, code)
+    put(ctx.logs, code)
+    return *ctx.logs
+end
+
+procedure baseValidateIntegerDays(ctx)
+    if type(ctx.calculationDay) ~== "integer" then {
+        put(ctx.validationFailures, "E_CALCULATION_DAY_TYPE")
+        fail
+    }
+    if type(ctx.targetDay) ~== "integer" then {
+        put(ctx.validationFailures, "E_TARGET_DAY_TYPE")
+        fail
+    }
+    return 1
+end
+
+procedure baseSnapshotBegin(ctx, semanticValue)
+    if \ctx.pendingSnapshot then fail
+    ctx.semanticSnapshot := semanticValue
+    ctx.rollbackSnapshot := semanticValue
+    ctx.pendingSnapshot := semanticValue
+    return 1
+end
+
+procedure baseSnapshotValidateAndCommit(ctx, validatorCode)
+    if /ctx.pendingSnapshot then fail
+    if validatorCode ~== "BOOTSTRAP_EXACT" then fail
+    ctx.semanticSnapshot := ctx.pendingSnapshot
+    ctx.pendingSnapshot := &null
+    ctx.rollbackSnapshot := &null
+    return ctx.semanticSnapshot
+end
+
+procedure baseSnapshotRollback(ctx)
+    if /ctx.rollbackSnapshot then fail
+    ctx.semanticSnapshot := ctx.rollbackSnapshot
+    ctx.pendingSnapshot := &null
+    ctx.rollbackSnapshot := &null
+    return ctx.semanticSnapshot
+end
+
+procedure baseDispatch(ctx, dispatcher, requestedPhase)
+    if /baseValidateIntegerDays(ctx) then {
+        ctx.status := "FAILED_VALIDATION"
+        ctx.lastError := BaseErrorEnvelope("E_VALIDATION", ctx.phase, "E_INTEGER_DAY")
+        fail
+    }
+    dispatcher.currentPhase := requestedPhase
+    put(dispatcher.handlersSeen, requestedPhase)
+    ctx.phase := requestedPhase
+    ctx.subPhase := ctx.subPhase + 1
+    baseMetricBump(ctx, "dispatch.count")
+    baseLogEvent(ctx, "DISPATCH")
+    return requestedPhase
+end
+
+procedure newBaseDispatcher()
+    return BaseDispatcher("BOOTSTRAP", [])
+end

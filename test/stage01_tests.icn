@@ -1,0 +1,177 @@
+global TEST_FAILURES
+
+procedure testFail(code)
+    TEST_FAILURES := TEST_FAILURES + 1
+    write(&errout, "ಪರೀಕ್ಷೆ ವಿಫಲವಾಗಿದೆ: ", code)
+    return 0
+end
+
+procedure assertNumericEqual(actual, expected, code)
+    if actual ~= expected then return testFail(code)
+    return 1
+end
+
+procedure assertStringEqual(actual, expected, code)
+    if actual ~== expected then return testFail(code)
+    return 1
+end
+
+procedure assertListNumericEqual(actual, expected, code)
+    local i
+    if *actual ~= *expected then return testFail(code)
+    i := 1
+    while i <= *actual do {
+        if actual[i] ~= expected[i] then return testFail(code)
+        i := i + 1
+    }
+    return 1
+end
+
+procedure testCatalog(catalog)
+    local i, seen
+    assertNumericEqual(*catalog.cutlets, 17, "CATALOG_CUTLET_COUNT")
+    assertNumericEqual(*catalog.months, 47, "CATALOG_MONTH_COUNT")
+    assertNumericEqual(catalog.frozen, 1, "CATALOG_FROZEN")
+    assertStringEqual(catalog.version, "kn-v1", "CATALOG_VERSION")
+
+    seen := table()
+    i := 1
+    while i <= 17 do {
+        assertNumericEqual(catalog.cutlets[i].canonicalIndex, i, "CATALOG_CUTLET_INDEX")
+        if \seen[catalog.cutlets[i].text] then testFail("CATALOG_CUTLET_DUPLICATE")
+        seen[catalog.cutlets[i].text] := 1
+        i := i + 1
+    }
+
+    seen := table()
+    i := 1
+    while i <= 47 do {
+        assertNumericEqual(catalog.months[i].canonicalIndex, i, "CATALOG_MONTH_INDEX")
+        if \seen[catalog.months[i].text] then testFail("CATALOG_MONTH_DUPLICATE")
+        seen[catalog.months[i].text] := 1
+        i := i + 1
+    }
+
+    assertStringEqual(catalogCutletText(catalog, 12), "ಗೋಧಿ", "CATALOG_WHEAT")
+    assertStringEqual(catalogMonthText(catalog, 44), "ಉಪ್ಪು", "CATALOG_SALT")
+    assertStringEqual(catalogCutletText(catalog, 6), "ಒಂಬತ್ತರಲ್ಲಿ ನಾಲ್ಕು ಭಾಗಗಳು", "CATALOG_FRACTION_CUTLET")
+    assertStringEqual(catalogMonthText(catalog, 7), "ಐದರಲ್ಲಿ ಮೂರು ಭಾಗಗಳು", "CATALOG_FRACTION_MONTH")
+end
+
+procedure testArithmetic()
+    local m, f, counts
+    oracleInit()
+    m := ORACLE_M
+    f := ORACLE_FOUNDATION_DAY
+
+    assertNumericEqual(m, 170141183460469231731687303715884105727, "M_EXACT")
+    assertStringEqual(type(m), "integer", "M_INTEGER_TYPE")
+    assertNumericEqual(oracleSave(1), 1, "SAVE_1")
+    assertNumericEqual(oracleSave(m - 1), m - 1, "SAVE_M_MINUS_1")
+    assertNumericEqual(oracleSave(m), m, "SAVE_M")
+    assertNumericEqual(oracleSave(m + 1), 1, "SAVE_M_PLUS_1")
+    assertNumericEqual(oracleSave(2 * m), m, "SAVE_2M")
+    assertNumericEqual(oracleSave(-1), m - 1, "SAVE_NEGATIVE_1")
+
+    assertNumericEqual(oracleDayCount(f), 1, "DAY_FOUNDATION")
+    assertNumericEqual(oracleDayCount(f + 1), 3, "DAY_FOUNDATION_PLUS_1")
+    assertNumericEqual(oracleDayCount(f - 1), 2, "DAY_FOUNDATION_MINUS_1")
+
+    counts := oracleWorkCounts(f, f)
+    assertNumericEqual(counts.action, 1, "COUNTS_SAME_ACTION")
+    assertNumericEqual(counts.target, 1, "COUNTS_SAME_TARGET")
+    assertNumericEqual(counts.distance, 1, "COUNTS_SAME_DISTANCE")
+    assertNumericEqual(counts.connection, 2, "COUNTS_SAME_CONNECTION")
+    assertNumericEqual(counts.direction, 2, "COUNTS_SAME_DIRECTION")
+
+    counts := oracleWorkCounts(f, f + 1)
+    assertNumericEqual(counts.action, 1, "COUNTS_FORWARD_ACTION")
+    assertNumericEqual(counts.target, 3, "COUNTS_FORWARD_TARGET")
+    assertNumericEqual(counts.distance, 2, "COUNTS_FORWARD_DISTANCE")
+    assertNumericEqual(counts.connection, 4, "COUNTS_FORWARD_CONNECTION")
+    assertNumericEqual(counts.direction, 3, "COUNTS_FORWARD_DIRECTION")
+
+    counts := oracleWorkCounts(f + 1, f)
+    assertNumericEqual(counts.action, 3, "COUNTS_BACK_ACTION")
+    assertNumericEqual(counts.target, 1, "COUNTS_BACK_TARGET")
+    assertNumericEqual(counts.distance, 2, "COUNTS_BACK_DISTANCE")
+    assertNumericEqual(counts.connection, 4, "COUNTS_BACK_CONNECTION")
+    assertNumericEqual(counts.direction, 1, "COUNTS_BACK_DIRECTION")
+end
+
+procedure testCombinatorics()
+    local p, c, w
+    p := oraclePermutationUnrank1(1, [1,2,3,4,5,6])
+    assertListNumericEqual(p, [1,2,3,4,5,6], "PERM_1")
+    p := oraclePermutationUnrank1(720, [1,2,3,4,5,6])
+    assertListNumericEqual(p, [6,5,4,3,2,1], "PERM_720")
+
+    assertNumericEqual(oracleFallingFactorial(17, 6), 8910720, "FALLING_17_6")
+    assertNumericEqual(oracleCountBoundedCompositions(6, 2, 2, 4), 3, "BOUNDED_COUNT")
+    c := oracleUnrankBoundedComposition(6, 2, 2, 4, 1)
+    assertListNumericEqual(c, [2,4], "BOUNDED_RANK1")
+    c := oracleUnrankBoundedComposition(6, 2, 2, 4, 2)
+    assertListNumericEqual(c, [3,3], "BOUNDED_RANK2")
+    c := oracleUnrankBoundedComposition(6, 2, 2, 4, 3)
+    assertListNumericEqual(c, [4,2], "BOUNDED_RANK3")
+
+    assertNumericEqual(oracleCountWeavings([2,2]), 2, "WEAVE_2_2_COUNT")
+    w := oracleUnrankWeaving([2,2], 1)
+    assertListNumericEqual(w, [1,1,2,2], "WEAVE_2_2_RANK1")
+    w := oracleUnrankWeaving([2,2], 2)
+    assertListNumericEqual(w, [1,2,1,2], "WEAVE_2_2_RANK2")
+    assertNumericEqual(oracleCountWeavings([1,1,1]), 1, "WEAVE_1_1_1_COUNT")
+    w := oracleUnrankWeaving([1,1,1], 1)
+    assertListNumericEqual(w, [1,2,3], "WEAVE_1_1_1_RANK1")
+end
+
+procedure testSauceCore()
+    local f, a, b, i
+    oracleInit()
+    f := ORACLE_FOUNDATION_DAY
+    a := oracleSauce(f, f)
+    b := oracleSauce(f, f)
+    assertNumericEqual(*a.bowls, 6, "SAUCE_BOWL_COUNT")
+    assertNumericEqual(*a.orderAtDrop46, 6, "SAUCE_ORDER_COUNT")
+    i := 1
+    while i <= 6 do {
+        assertNumericEqual(a.bowls[i], b.bowls[i], "SAUCE_DETERMINISTIC_BOWLS")
+        assertNumericEqual(a.orderAtDrop46[i], b.orderAtDrop46[i], "SAUCE_DETERMINISTIC_ORDER")
+        i := i + 1
+    }
+    assertNumericEqual(oracleIndexOf(a.orderAtDrop46, a.orderAtDrop46[1]), 1, "SAUCE_ORDER_LOOKUP")
+    assertNumericEqual(oracleNextBowlInDrop46Order(a, a.orderAtDrop46[6]), a.orderAtDrop46[1], "SAUCE_CIRCULAR_SUCCESSOR")
+end
+
+procedure testBootstrapMonster()
+    local ctx, dispatcher
+    ctx := newBaseMonsterContext(-15055671, -15055671)
+    dispatcher := newBaseDispatcher()
+    if /baseValidateIntegerDays(ctx) then testFail("BASE_VALIDATE_INTEGER")
+    assertStringEqual(baseDispatch(ctx, dispatcher, "BASE_VALIDATION"), "BASE_VALIDATION", "BASE_DISPATCH")
+    assertNumericEqual(ctx.metrics.counters["dispatch.count"], 1, "BASE_METRIC")
+    assertNumericEqual(*ctx.logs, 1, "BASE_LOG")
+    if /baseSnapshotBegin(ctx, 17) then testFail("BASE_SNAPSHOT_BEGIN")
+    assertNumericEqual(baseSnapshotValidateAndCommit(ctx, "BOOTSTRAP_EXACT"), 17, "BASE_SNAPSHOT_COMMIT")
+    if \ctx.pendingSnapshot then testFail("BASE_PENDING_CLEARED")
+end
+
+procedure main()
+    local catalog
+    TEST_FAILURES := 0
+    catalog := buildSourceLanguageCatalog()
+
+    testCatalog(catalog)
+    testArithmetic()
+    testCombinatorics()
+    testSauceCore()
+    testBootstrapMonster()
+
+    if TEST_FAILURES = 0 then {
+        write("PASS")
+        exit(0)
+    }
+
+    write(&errout, "ಒಟ್ಟು ವಿಫಲ ಪರೀಕ್ಷೆಗಳು: ", TEST_FAILURES)
+    exit(1)
+end
