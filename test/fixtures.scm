@@ -1,0 +1,13 @@
+;; Små, uafhængigt aflæselige forventninger fra den indlejrede norm.
+
+(define FIXTURE-M 170141183460469231731687303715884105727)
+
+(define FIXTURE-STONE-1 '(17 29 43 71 101))
+(define FIXTURE-STONE-2 '(378 1073 2375 6195 10493))
+
+(define FIXTURE-PERMUTATION-FIRST '(1 2 3 4 5 6))
+(define FIXTURE-PERMUTATION-LAST '(6 5 4 3 2 1))
+
+(define FIXTURE-WORK-FOUNDATION '(1 1 1 2 2))
+(define FIXTURE-WORK-CROSS-FORWARD '(2 3 3 5 3))
+(define FIXTURE-WORK-CROSS-BACKWARD '(3 2 3 5 1))
