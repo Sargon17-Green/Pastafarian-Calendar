@@ -1,0 +1,6 @@
+ETAPAS=1
+BŪSENA=NEPALEISTA
+RACKET_VYKDYMAS=NEATLIKTAS
+RACO_TEST=NEATLIKTAS
+TIKĖTINA_GALUTINĖ_BŪSENA=GREEN
+PASTABA=Šis tarpinis perdavimas parengtas prieš faktinį Racket testų vykdymą.

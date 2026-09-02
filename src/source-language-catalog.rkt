@@ -1,0 +1,113 @@
+#lang racket/base
+
+(require racket/list)
+
+(provide
+ SOURCE-LANGUAGE-CATALOG-VERSION
+ (struct-out catalog-entry)
+ CUTLET-CATALOG MONTH-CATALOG
+ cutlet-name-by-index month-name-by-index
+ validate-source-language-catalog)
+
+(define SOURCE-LANGUAGE-CATALOG-VERSION "1.0.0-stage01")
+
+(struct catalog-entry (canonical-index text) #:transparent)
+
+(define CUTLET-CATALOG
+  (vector
+   (catalog-entry 1 "bronza")
+   (catalog-entry 2 "lapė")
+   (catalog-entry 3 "inkstas")
+   (catalog-entry 4 "Lagašas")
+   (catalog-entry 5 "mintis")
+   (catalog-entry 6 "keturios devintosios")
+   (catalog-entry 7 "Palguraš")
+   (catalog-entry 8 "nendrė")
+   (catalog-entry 9 "kekė")
+   (catalog-entry 10 "skorpionas")
+   (catalog-entry 11 "pelenai")
+   (catalog-entry 12 "kviečiai")
+   (catalog-entry 13 "upė")
+   (catalog-entry 14 "juokas")
+   (catalog-entry 15 "Akadas")
+   (catalog-entry 16 "ragas")
+   (catalog-entry 17 "tuščias ąsotis")))
+
+(define MONTH-CATALOG
+  (vector
+   (catalog-entry 1 "molis")
+   (catalog-entry 2 "granatas")
+   (catalog-entry 3 "alkūnė")
+   (catalog-entry 4 "pavydas")
+   (catalog-entry 5 "Eridu")
+   (catalog-entry 6 "dantų pasta")
+   (catalog-entry 7 "trys penktosios")
+   (catalog-entry 8 "Karšumab")
+   (catalog-entry 9 "tigras")
+   (catalog-entry 10 "alavas")
+   (catalog-entry 11 "rūkas")
+   (catalog-entry 12 "smilkalinė bosvelija")
+   (catalog-entry 13 "verpstė")
+   (catalog-entry 14 "šonkaulis")
+   (catalog-entry 15 "saldžiavaisio pupmedžio vaisius")
+   (catalog-entry 16 "Urukas")
+   (catalog-entry 17 "gėda")
+   (catalog-entry 18 "kupranugaris")
+   (catalog-entry 19 "varis")
+   (catalog-entry 20 "šulinys")
+   (catalog-entry 21 "trynys")
+   (catalog-entry 22 "žvaigždė")
+   (catalog-entry 23 "medus")
+   (catalog-entry 24 "blužnis")
+   (catalog-entry 25 "kalkakmenis")
+   (catalog-entry 26 "džiaugsmas")
+   (catalog-entry 27 "figa")
+   (catalog-entry 28 "Ninevė")
+   (catalog-entry 29 "varlė")
+   (catalog-entry 30 "degutas")
+   (catalog-entry 31 "žvakė")
+   (catalog-entry 32 "uždarytos durys")
+   (catalog-entry 33 "sezamas")
+   (catalog-entry 34 "sprandas")
+   (catalog-entry 35 "sidabras")
+   (catalog-entry 36 "lelija")
+   (catalog-entry 37 "audra")
+   (catalog-entry 38 "asilas")
+   (catalog-entry 39 "miltai")
+   (catalog-entry 40 "apgailestavimas")
+   (catalog-entry 41 "Babilonas")
+   (catalog-entry 42 "liežuvis")
+   (catalog-entry 43 "linai")
+   (catalog-entry 44 "druska")
+   (catalog-entry 45 "kriaušė")
+   (catalog-entry 46 "lankas")
+   (catalog-entry 47 "smėlis")))
+
+(define (name-by-index catalog idx who)
+  (unless (and (exact-integer? idx) (<= 1 idx (vector-length catalog)))
+    (raise-arguments-error who "neteisingas kanoninis indeksas" "canonicalIndex" idx))
+  (catalog-entry-text (vector-ref catalog (sub1 idx))))
+
+(define (cutlet-name-by-index idx)
+  (name-by-index CUTLET-CATALOG idx 'cutlet-name-by-index))
+
+(define (month-name-by-index idx)
+  (name-by-index MONTH-CATALOG idx 'month-name-by-index))
+
+(define (catalog-valid? catalog expected-count)
+  (and (= (vector-length catalog) expected-count)
+       (for/and ([entry (in-vector catalog)] [idx (in-naturals 1)])
+         (and (= (catalog-entry-canonical-index entry) idx)
+              (string? (catalog-entry-text entry))
+              (positive? (string-length (catalog-entry-text entry)))))
+       (= (length (remove-duplicates
+                   (for/list ([entry (in-vector catalog)])
+                     (catalog-entry-text entry))))
+          expected-count)))
+
+(define (validate-source-language-catalog)
+  (unless (catalog-valid? CUTLET-CATALOG 17)
+    (error 'validate-source-language-catalog "netinkamas kotletų šaltinio kalbos katalogas"))
+  (unless (catalog-valid? MONTH-CATALOG 47)
+    (error 'validate-source-language-catalog "netinkamas mėnesių šaltinio kalbos katalogas"))
+  #t)
