@@ -4,13 +4,6 @@ on:
   push:
     branches:
       - 'JavaScript\+Interlingue'
-    paths:
-      - 'index.html'
-      - 'browser/**'
-      - 'scripts/build-browser.js'
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/javascript-interlingue-pages-deploy.yml'
   workflow_dispatch:
 
 permissions:
