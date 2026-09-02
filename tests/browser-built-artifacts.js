@@ -28,6 +28,7 @@ for (const relative of required.filter((value) => value.endsWith('.js'))) {
 const standard = fs.readFileSync(path.join(ROOT, 'browser/dist/pastafari-date.js'), 'utf8');
 const standalone = fs.readFileSync(path.join(ROOT, 'browser/standalone/pastafari-date.js'), 'utf8');
 const worker = fs.readFileSync(path.join(ROOT, 'browser/dist/pastafari-worker.js'), 'utf8');
+const workerEntry = fs.readFileSync(path.join(ROOT, 'browser/pastafari-worker-entry.js'), 'utf8');
 
 assert(standard.includes('PastafariBrowserLocaleData'));
 assert(standard.includes("code: 'ie'"));
@@ -39,6 +40,16 @@ assert(standalone.includes('PastafariCalendarStandalone'));
 assert(standalone.includes('workerSource'));
 assert(worker.includes('calendarDateSpaghetti'));
 assert(worker.includes('deriveCutletViewBlackBox'));
-assert(!worker.includes('calendarDateSpaghettiWithContext'));
+
+/*
+ * Li build artefact contene li core self, ergo intern core identifiers posse
+ * aparir quam implementation details. Li cassa-nigri limite deve esser verificat
+ * al Worker entry: it posse invocar solmen li public calendarDateSpaghetti API.
+ */
+assert(workerEntry.includes('core.calendarDateSpaghetti('));
+assert(!workerEntry.includes('calendarDateSpaghettiWithContext'));
+assert(!workerEntry.includes('executeCalendarDate'));
+assert(!workerEntry.includes('STAGE57_GLOBAL_MANAGER'));
+assert(!workerEntry.includes('calendarDateSpaghettiWithContext('));
 
 console.log('browser-built-artifacts: PASS');
