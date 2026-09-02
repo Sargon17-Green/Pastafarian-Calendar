@@ -1,0 +1,17 @@
+LULUS bigint_exact
+LULUS save_fixture
+LULUS day_count_and_work_counts
+LULUS source_language_catalog
+LULUS bootstrap_infrastructure
+LULUS stone_fixtures
+LULUS sauce_fixtures
+LULUS gate_gap_fixtures
+LULUS selection_fixtures
+LULUS bounded_family_vs_bruteforce
+LULUS cutlet_partition_vs_bruteforce
+LULUS weaving_vs_bruteforce
+LULUS year5000_fixture
+LULUS no_future_patch_code_in_src
+LULUS source_php_has_no_hebrew_prose
+RINGKASAN lulus=15 gagal=0
+KEPUTUSAN LULUS

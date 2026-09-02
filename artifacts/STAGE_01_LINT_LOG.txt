@@ -1,0 +1,12 @@
+No syntax errors detected in /mnt/data/php-malay-stage01/tools/generate_stage01_fixtures.php
+No syntax errors detected in /mnt/data/php-malay-stage01/tests/TestHarness.php
+No syntax errors detected in /mnt/data/php-malay-stage01/tests/oracle/NormativeOracle.php
+No syntax errors detected in /mnt/data/php-malay-stage01/tests/oracle/NormativeMath.php
+No syntax errors detected in /mnt/data/php-malay-stage01/tests/oracle/OrderedFamilies.php
+No syntax errors detected in /mnt/data/php-malay-stage01/tests/oracle/NormativeSauce.php
+No syntax errors detected in /mnt/data/php-malay-stage01/tests/bootstrap.php
+No syntax errors detected in /mnt/data/php-malay-stage01/tests/stage01_tests.php
+No syntax errors detected in /mnt/data/php-malay-stage01/src/BootstrapKernel.php
+No syntax errors detected in /mnt/data/php-malay-stage01/src/SourceLanguageCatalog.php
+No syntax errors detected in /mnt/data/php-malay-stage01/src/BootstrapInfrastructure.php
+No syntax errors detected in /mnt/data/php-malay-stage01/src/BigInt.php
