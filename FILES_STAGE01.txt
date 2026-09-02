@@ -1,0 +1,13 @@
+ADD shard.yml
+ADD README.md
+ADD DEVELOPMENT_STAGE.md
+ADD SPAGHETTI_DEVELOPMENT_HISTORY.md
+ADD STAGE_01_EXECUTION_STATUS.txt
+ADD HANDOFF_GITHUB_GU.md
+ADD docs/ARCHITECTURE.md
+ADD src/source_language_catalog.cr
+ADD src/monster_base.cr
+ADD src/pastafarian_calendar.cr
+ADD src/stage01_probe.cr
+ADD test/normative_scroll.cr
+ADD test/stage01_spec.cr

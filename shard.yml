@@ -1,0 +1,7 @@
+name: pastafarian_calendar_crystal_gujarati
+version: 0.1.0-stage01
+crystal: '>= 1.19.0'
+license: UNLICENSED
+targets:
+  stage01_probe:
+    main: src/stage01_probe.cr
