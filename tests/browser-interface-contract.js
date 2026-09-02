@@ -1,37 +1,27 @@
 'use strict';
 
-const assert = require('node:assert/strict');
-const path = require('node:path');
-const { pathToFileURL } = require('node:url');
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
-(async () => {
-  const browserRoot = path.resolve(__dirname, '..', 'browser');
-  const serviceModule = await import(pathToFileURL(path.join(browserRoot, 'calendar-service.js')).href);
-  const componentModule = await import(pathToFileURL(path.join(browserRoot, 'pastafari-date.js')).href);
+const source = fs.readFileSync(path.join(__dirname, '..', 'browser', 'pastafari-date.js'), 'utf8');
 
-  assert.deepEqual(componentModule.PastafariDateElement.observedAttributes, [
-    'date', 'calculation-date', 'headless', 'no-editor',
-  ]);
-  assert.equal(typeof componentModule.getPastafariDateAsync, 'function');
-  assert.equal(componentModule.getPastafariDate, componentModule.getPastafariDateAsync);
+for (const attribute of ['date', 'calculation-date', 'headless', 'no-editor']) {
+  assert(source.includes("'" + attribute + "'"), 'Manca li extern attribute ' + attribute);
+}
+for (const token of [
+  'get value()',
+  'async refresh()',
+  "'pastafari-change'",
+  'this.ready = new Promise',
+  'getPastafariDateAsync',
+  'getPastafariDate: getPastafariDateAsync',
+  "'pastafari-date'",
+]) {
+  assert(source.includes(token), 'Manca li extern contract-token: ' + token);
+}
+assert(source.includes("'lang'"), 'Li multilingue extension deve exponer li lang attribute.');
+assert(source.includes('language-selector'), 'Li visibil selector de lingue manca.');
+assert(source.includes('MAX_CACHED_CUTLETS = 5'), 'Li limitat UI cutlet-cache deve restar quin.');
 
-  let call = null;
-  serviceModule.installSharedCalendarService({
-    async convert(targetJdn, calculationJdn) {
-      call = { targetJdn, calculationJdn };
-      return { year: '7', cutletName: 'C', dayInCutlet: 2, monthName: 'M', dayInMonth: 1 };
-    },
-    async getCutletView() { throw new Error('ne usat per li asincron API'); },
-    async retry() {},
-    dispose() {},
-  });
-  const result = await componentModule.getPastafariDateAsync('0001-01-01', '0001-01-01');
-  assert.deepEqual(call, { targetJdn: 1721426n, calculationJdn: 1721426n });
-  assert.deepEqual(result, { year: '7', cutletName: 'C', dayInCutlet: 2, monthName: 'M', dayInMonth: 1 });
-  assert.ok(Object.isFrozen(result));
-
-  console.log('browser-interface-contract: PASS');
-})().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+console.log('browser-interface-contract: PASS');

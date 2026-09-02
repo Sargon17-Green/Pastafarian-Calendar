@@ -1,20 +1,28 @@
-/**
- * Punctu de extension por futur strates de memorisat computation.
- * Un retorn de undefined significa un manca in li cache. Li predefinit implementation conserva necos.
- */
-export class NullCalendarMemory {
-  async getConversion(_calculationDay, _targetDay) { return undefined; }
-  async setConversion(_calculationDay, _targetDay, _value) {}
-  async getCutletView(_calculationDay, _targetDay) { return undefined; }
-  async setCutletView(_calculationDay, _targetDay, _value) {}
-  async clearCalculation(_calculationDay) {}
-  async clear() {}
-}
+'use strict';
 
-export function assertCalendarMemory(memory) {
-  if (!memory || typeof memory !== "object") throw new TypeError("CalendarMemory deve esser un object.");
-  for (const name of ["getConversion", "setConversion", "getCutletView", "setCutletView", "clearCalculation", "clear"]) {
-    if (typeof memory[name] !== "function") throw new TypeError(`CalendarMemory manca ${name}().`);
+(function (root) {
+  const ns = root.PastafariBrowserInternal || (root.PastafariBrowserInternal = Object.create(null));
+
+  class NullCalendarMemory {
+    getConversion() { return undefined; }
+    setConversion() {}
+    getCutletView() { return undefined; }
+    setCutletView() {}
+    clearCalculation() {}
+    clear() {}
   }
-  return memory;
-}
+
+  function assertCalendarMemory(memory) {
+    const required = [
+      'getConversion', 'setConversion',
+      'getCutletView', 'setCutletView',
+      'clearCalculation', 'clear',
+    ];
+    if (!memory || required.some((name) => typeof memory[name] !== 'function')) {
+      throw new TypeError('Li CalendarMemory contract es ínvalid.');
+    }
+    return memory;
+  }
+
+  ns.calendarMemory = Object.freeze({ NullCalendarMemory, assertCalendarMemory });
+})(typeof globalThis === 'object' ? globalThis : this);

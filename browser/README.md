@@ -1,76 +1,100 @@
-# Interfacie web del calendarium pastafarian
+# Interfacie de navigator
 
-Ti directorium adjunte al branche `JavaScript+Interlingue` li contract extern del interfacie web del anterior projecte, sin copiar su mecanisme de verification inter du motores.
+Ti directorie adjunte li extern browser-interfacie del anterior projecte al branche
+JavaScript + Interlingue, sin copiar li old du-engine verification router.
 
-## Contract extern
+## Extern contract
 
-Li custom element es `<pastafari-date>`. It conserva li attributes `date`, `calculation-date`, `no-editor`, `headless`; li proprietá `value`; li Promise `ready`; li metode `refresh()`; e li event `pastafari-change` (`bubbles: true`, `composed: true`).
+Li custom element es:
 
-`getPastafariDateAsync(targetDate, calculationDate)` e su compatibil alias `getPastafariDate(...)` retorna un Promise con un object gelat:
-
-```js
-{
-  year: "5000",
-  cutletName: "...",
-  dayInCutlet: 306,
-  monthName: "...",
-  dayInMonth: 23
-}
+```html
+<pastafari-date></pastafari-date>
 ```
 
-Li inputs posse esser ISO-strings, `Date`, `{ year, month, day }`, o `null`/vacui por li hodial local date. Negativ annus e annus con plu quam quar cifres es supportat.
+Con li original attributes:
 
-## Architectura e limite de cassa nigri
+- `date`
+- `calculation-date`
+- `no-editor`
+- `headless`
 
-Li component parla solmen con `CalendarService`. `CalendarService` parla con `PastafariEngineClient`, quel usa un Worker. Li Worker importa li existent core e invoca solmen:
+E li additive lingue-attribute:
 
-```js
+- `lang`
+
+Li public element contract conserva:
+
+- `value`
+- `ready`
+- `refresh()`
+- `pastafari-change`
+
+Li classic bundle expone `globalThis.PastafariCalendarBrowser`.
+Li Standalone bundle expone anc li compatibility alias
+`globalThis.PastafariCalendarStandalone`.
+
+Li Standard ESM facade es `browser/dist/pastafari-date.mjs`.
+
+## Semantic limite
+
+Li browser-strate ne lege context, structure, Stage scars o intern managers.
+Li Worker usa solmen:
+
+```text
 calendarDateSpaghetti(calculationDay, targetDay)
 ```
 
-Li cod del navigator ne lege `context`, `structure`, managers, internales de Stage 58 o altri semantic structures. Un complet cutlet es derivat quam cassa nigri: li selectet resultat da `dayInCutlet`, li die inicial es calculat, e li Worker avansa die-pos-die til `dayInCutlet` recomensa a 1. Un dur limite de 6000 dies impedi un scan sin termination.
+Li cutlet-view es derivat per black-box scanning: li selectet `dayInCutlet`
+determina li cutlet-comense, e li Worker continua die per die til li sequent
+`dayInCutlet == 1`. Li dur securitá-limite es 6000 dies.
 
-## Punctu preparat por futur memorisation
+## Memorisation
 
-`CalendarService` accepta un object `memory` con ti contract:
+`CalendarService` es li sol punctu usat del Web Component por semantic demandes.
+`CalendarMemory` es un explicit contract sub ti service.
 
-```js
-getConversion(calculationDay, targetDay)
-setConversion(calculationDay, targetDay, value)
-getCutletView(calculationDay, targetDay)
-setCutletView(calculationDay, targetDay, value)
-clearCalculation(calculationDay)
-clear()
-```
+Per default li implementation es `NullCalendarMemory`: null nov semantic cache es
+introducet per ti initial browser-version. Un futur memorisation implementation posse
+esser installat per `installSharedCalendarMemory(memory)` sin mutation del Web
+Component.
 
-Un manca es representat per `undefined`. Li predefinit `NullCalendarMemory` conserva necos. Ergo li extern component e su DOM-cache de quin cutlets ne deve esser changeat por adjunter futur memorisation semantic o de performance.
+Li Web Component tene separatmen max. quin cutlet-views por scroll/DOM ergonomie.
+Ti UI-cache ne es li semantic/performance memory.
 
-## Compilation
+## Lingues — initial scope
 
-Installar li dependenties e executer:
+Ti prim correct upload suporte exactmen du UI-lingues, complet e includet localmen:
+
+- `ie` — Interlingue (default)
+- `en` — English
+
+Null rete, vendoring, fallback inter lingues o external i18n package es besonat.
+Omni message usat de ti component existe in ambi locales; un mancant message es un
+errore, ne un silenciosi fallback.
+
+Li cutlet- e mensu-nómines ne es traductet per ti strate. Lor semantic identificatores
+in li old projecte ne es identic al congelat catalog de ti branche. Li presentation
+usa exactmen li Interlingue nómines retornat del nov black-box core. `value`, `ready`
+e `pastafari-change` resta ergo semanticmen identic quande `lang` change.
+
+Additional lingues posse esser adjuntet plu tard in `browser/i18n/locales.js` sin
+changear li core, `CalendarService` o public date-result contract.
+
+## Construction
 
 ```text
-npm run build:browser
+node scripts/build-browser.js
 ```
 
-Li compilation crea `dist/browser/pastafari-date.js`, `dist/browser/pastafari-worker.js`, e li autonom classic-script variantes sub `dist/browser/standalone/`.
+Null npm dependentie es besonat.
 
-Usation normal per HTTP/HTTPS:
+## Provas
 
-```html
-<script type="module" src="./pastafari-date.js"></script>
-<pastafari-date></pastafari-date>
+```text
+node tests/verify-stage-01.js
+node tests/browser-interface-all.js
+node scripts/build-browser.js
+node tests/browser-built-artifacts.js
 ```
 
-Usation autonom, includente `file://`:
-
-```html
-<pastafari-date></pastafari-date>
-<script src="./pastafari-date.js"></script>
-```
-
-Li autonom variante usa un classic Blob Worker e ne have fallback al principal thread. Su asincron API es anc disponibil quam `PastafariCalendarStandalone.getPastafariDateAsync(...)`.
-
-## Important separation
-
-Li cache intern del component es solmen un limitat cache de presentation e scroll (maxim quin cutlets). It ne es li futur semantic memorisation. Tal memorisation deve esser injectet sub `CalendarService`, preferibilmen sin changear li public contract del navigator.
+Li historic branch-test resta autoritativ por li original Stage 01–58 state.

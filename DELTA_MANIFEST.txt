@@ -1,28 +1,47 @@
-COMMIT_DE_BASA=c40cfae3b75d8daeb283e1fb4fd8b319b6fcb1c0
-FILES_DEL_CORE_MODIFICAT=NO
-ROUTER_DE_DU_MOTORES_COPIAT=NO
-PUNCTU_DE_EXTENSION_POR_MEMORISATION=CalendarMemory
-LIMITE_DEL_CACHE_UI_DE_CUTLETS=5
-LIMITE_DEL_SCAN_DEL_WORKER=6000
+JavaScript + Interlingue browser interface — bilingual initial upload
 
-FILES_A_ADJUNTER_AL_REPOSITORY:
-browser/package.json
-browser/date-axis.js
-browser/result-normalizer.js
-browser/calendar-memory.js
-browser/black-box-cutlet.js
-browser/engine-client.js
-browser/calendar-service.js
-browser/pastafari-worker-entry.js
-browser/pastafari-date.js
+BASE BRANCH: JavaScript+Interlingue
+BASE HEAD CHECKED: 71411b54c72ac3d726cba5e4bd1db5ea4bd8e3d3
+
+ADD/REPLACE:
+.github/workflows/javascript-interlingue-browser-interface.yml
 browser/README.md
+browser/black-box-cutlet.js
+browser/calendar-memory.js
+browser/calendar-service.js
+browser/date-axis.js
+browser/engine-client.js
 browser/example.html
+browser/package.json
+browser/pastafari-date.js
+browser/pastafari-worker-entry.js
+browser/result-normalizer.js
+browser/i18n/locales.js
+browser/i18n/runtime.js
 browser/standalone/example-file.html
-scripts/build-browser.mjs
-tests/browser-interface-service.js
-tests/browser-interface-contract.js
+scripts/build-browser.js
+tests/browser-built-artifacts.js
+tests/browser-i18n-locales.js
+tests/browser-interface-all.js
 tests/browser-interface-black-box.js
+tests/browser-interface-contract.js
+tests/browser-interface-service.js
+tests/browser-stage01-compatibility.js
+
+DELETE:
+DELTA_apply-package-json.mjs
+scripts/build-browser.mjs
 tests/browser-core-smoke.js
 
-FILE_A_MODIFICAR_IN_LI_REPOSITORY:
-package.json (per DELTA_apply-package-json.mjs)
+DO NOT MODIFY:
+package.json
+src/**
+DEVELOPMENT_STAGE.md
+historic/corrective/acceleration tests and artifacts
+
+INITIAL UI LOCALES:
+ie (Interlingue, default)
+en (English)
+
+CALENDAR ENTITY NAMES:
+Not translated by the UI layer. Cutlet/month names remain exactly the semantic strings returned by the JavaScript+Interlingue black-box core.

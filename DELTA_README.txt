@@ -1,32 +1,26 @@
-DELTA DEL INTERFACIE DE NAVIGATOR PASTAFARIAN
-============================================
-Repository de basa: Sargon17-Green/Pastafarian-Calendar
-Branche de basa: JavaScript+Interlingue
-Commit de basa: c40cfae3b75d8daeb283e1fb4fd8b319b6fcb1c0
+Initial browser-interface upload for JavaScript + Interlingue.
 
-Ti livraison ne fa alcun push e ne modifica GitHub directmen.
+Purpose:
+- port the old external <pastafari-date> browser interface;
+- keep the new calendar implementation a black box;
+- do not copy the old authoritative/fast dual-engine verifier;
+- leave an explicit CalendarMemory seam for later memoization;
+- start with only two complete UI locales: Interlingue and English.
 
-Aplicar desde un checkout de ti branche:
-  1. Copiar browser/, scripts/ e tests/ ex ti pacca al radice del repository.
-  2. Copiar temporarimen DELTA_apply-package-json.mjs al radice del repository.
-  3. Executer: node DELTA_apply-package-json.mjs
-  4. Deleter DELTA_apply-package-json.mjs ante li commit.
-  5. Executer: npm install
-  6. Executer: npm run test:browser-interface
-     (ti comande include li smoke-test contra li real core.)
-  7. Executer: npm run build:browser
-  8. Executer li existent complet suite del branche: npm test
+Apply:
+1. Overlay this package at the repository root on branch JavaScript+Interlingue.
+2. Delete every path listed in DELETE_PATHS.txt.
+3. Do NOT run DELTA_apply-package-json.mjs and do not add esbuild.
+4. Keep the root package.json unchanged.
+5. Run:
+   node tests/verify-stage-01.js
+   node tests/browser-interface-all.js
+   node scripts/build-browser.js
+   node tests/browser-built-artifacts.js
+6. Push only after all four commands pass.
 
-DELTA_README.txt e DELTA_apply-package-json.mjs es auxiliari files de livraison, ne files del repository.
-Li semantic core sub src/ resta intentionatmen intact.
-Li generat dist/browser es un artefact de compilation; commit it solmen si li politica del repository demanda it.
+Important semantic boundary:
+The browser layer calls only calendarDateSpaghetti(calculationDay, targetDay). It must not read calendarDateSpaghettiWithContext(), context.structure, Stage 58 internals, managers, scars, or private catalog structures.
 
-Architectura:
-  <pastafari-date> -> CalendarService -> PastafariEngineClient -> Worker
-  -> calendarDateSpaghetti(calculationDay, targetDay)
-
-Null router de du motores, statu de verification, comparation fast/authoritative, motor revers,
-o solver de restrictiones es copiat.
-
-Futur memorisation es injectet detra CalendarService tra CalendarMemory. Li DOM-cache de quin
-cutlets del component resta un separat cache de presentation e ne deve devenir semantic statu.
+Language boundary:
+The `lang` attribute changes only UI chrome and ARIA text. `value`, `ready`, `pastafari-change`, cutletName and monthName remain the exact semantic result returned by the branch core. This intentionally avoids positional translation against the incompatible old calendar-name tables.

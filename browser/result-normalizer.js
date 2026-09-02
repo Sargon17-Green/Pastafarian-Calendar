@@ -1,36 +1,47 @@
-const OUTPUT_FIELDS = Object.freeze(["year", "cutletName", "dayInCutlet", "monthName", "dayInMonth"]);
+'use strict';
 
-function safePositiveInteger(value, fieldName) {
-  const integer = typeof value === "bigint" ? value : BigInt(value);
-  if (integer <= 0n || integer > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new RangeError(`${fieldName} es extra li valid interval.`);
-  }
-  return Number(integer);
-}
+(function (root) {
+  const ns = root.PastafariBrowserInternal || (root.PastafariBrowserInternal = Object.create(null));
 
-export function normalizeCalendarResult(value) {
-  let source;
-  if (Array.isArray(value)) {
-    if (value.length !== OUTPUT_FIELDS.length) throw new TypeError("Li motor retornat un resultat con ínvalid longore.");
-    source = Object.fromEntries(OUTPUT_FIELDS.map((field, index) => [field, value[index]]));
-  } else if (value && typeof value === "object") {
-    source = value;
-  } else {
-    throw new TypeError("Li motor retornat un ínvalid resultat.");
+  function safePositiveInteger(value, field) {
+    const big = BigInt(value);
+    if (big < 1n || big > BigInt(Number.MAX_SAFE_INTEGER)) {
+      throw new RangeError(field + ' ne posse esser representat quam un secur JavaScript integer.');
+    }
+    return Number(big);
   }
 
-  const result = {
-    year: String(source.year),
-    cutletName: String(source.cutletName),
-    dayInCutlet: safePositiveInteger(source.dayInCutlet, "dayInCutlet"),
-    monthName: String(source.monthName),
-    dayInMonth: safePositiveInteger(source.dayInMonth, "dayInMonth"),
-  };
-  if (!result.cutletName || !result.monthName) throw new TypeError("Li motor retornat un vacui nómine.");
-  return Object.freeze(result);
-}
+  function normalizeCalendarResult(value) {
+    if (!Array.isArray(value) && (!value || typeof value !== 'object')) {
+      throw new TypeError('Li calendarium retornat un ínvalid resultate.');
+    }
+    const year = Array.isArray(value) ? value[0] : value.year;
+    const cutletName = Array.isArray(value) ? value[1] : value.cutletName;
+    const dayInCutlet = Array.isArray(value) ? value[2] : value.dayInCutlet;
+    const monthName = Array.isArray(value) ? value[3] : value.monthName;
+    const dayInMonth = Array.isArray(value) ? value[4] : value.dayInMonth;
+    if (cutletName == null || monthName == null) {
+      throw new TypeError('Li calendarium retornat un resultate sin nómin de cutlet o mensu.');
+    }
+    return Object.freeze({
+      year: String(year),
+      cutletName: String(cutletName),
+      dayInCutlet: safePositiveInteger(dayInCutlet, 'dayInCutlet'),
+      monthName: String(monthName),
+      dayInMonth: safePositiveInteger(dayInMonth, 'dayInMonth'),
+    });
+  }
 
-export function cloneCanonicalResult(value) {
-  const normalized = normalizeCalendarResult(value);
-  return Object.freeze({ ...normalized });
-}
+  function cloneCanonicalResult(value) {
+    const normalized = normalizeCalendarResult(value);
+    return Object.freeze({
+      year: normalized.year,
+      cutletName: normalized.cutletName,
+      dayInCutlet: normalized.dayInCutlet,
+      monthName: normalized.monthName,
+      dayInMonth: normalized.dayInMonth,
+    });
+  }
+
+  ns.resultNormalizer = Object.freeze({ normalizeCalendarResult, cloneCanonicalResult });
+})(typeof globalThis === 'object' ? globalThis : this);

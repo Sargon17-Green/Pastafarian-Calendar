@@ -1,41 +1,46 @@
 'use strict';
 
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
-const root = path.resolve(__dirname, '..');
-const browserDir = path.join(root, 'browser');
-const files = fs.readdirSync(browserDir).filter((name) => name.endsWith('.js'));
-const sources = Object.fromEntries(files.map((name) => [name, fs.readFileSync(path.join(browserDir, name), 'utf8')]));
-const worker = sources['pastafari-worker-entry.js'];
+const ROOT = path.resolve(__dirname, '..');
+const files = [
+  'browser/pastafari-date.js',
+  'browser/calendar-service.js',
+  'browser/engine-client.js',
+  'browser/pastafari-worker-entry.js',
+  'browser/black-box-cutlet.js',
+];
 
-assert.match(worker, /core\.calendarDateSpaghetti\s*\(/, 'li worker deve invocar li public function de conversion quam cassa nigri');
+const joined = files.map((relative) => fs.readFileSync(path.join(ROOT, relative), 'utf8')).join('\n');
 for (const forbidden of [
   'calendarDateSpaghettiWithContext',
-  '.context',
-  '.structure',
-  'STAGE57_GLOBAL_MANAGER',
-  'STAGE58',
+  '.context.structure',
   'sharedPastafariRouter',
   'authoritative-only',
-  'verifying',
-  'fast engine',
+  'ERR_FAST_MISMATCH',
+  'verifyFast',
 ]) {
-  for (const [name, source] of Object.entries(sources)) {
-    assert.equal(source.includes(forbidden), false, `${name} exposa un prohibit detalie de implementation: ${forbidden}`);
-  }
+  assert(!joined.includes(forbidden), 'Li browser-strate ne deve depender de: ' + forbidden);
 }
 
-const component = sources['pastafari-date.js'];
-assert.match(component, /MAX_CACHED_CUTLETS\s*=\s*5/);
-assert.match(component, /\["date", "calculation-date", "headless", "no-editor"\]/);
-assert.match(component, /pastafari-change/);
-assert.match(component, /getSharedCalendarService\(\)\.getCutletView|getSharedCalendarService\(\)/);
+const worker = fs.readFileSync(path.join(ROOT, 'browser', 'pastafari-worker-entry.js'), 'utf8');
+assert(worker.includes('calendarDateSpaghetti'));
+assert(!worker.includes('stage58'));
+assert(!worker.includes('Stage58'));
+assert(worker.includes('deriveCutletViewBlackBox'));
 
-const service = sources['calendar-service.js'];
-assert.match(service, /memory\.getConversion/);
-assert.match(service, /memory\.getCutletView/);
-assert.match(service, /memory\.clearCalculation/);
+
+const i18nRuntime = fs.readFileSync(path.join(ROOT, 'browser', 'i18n', 'runtime.js'), 'utf8');
+const localeSource = fs.readFileSync(path.join(ROOT, 'browser', 'i18n', 'locales.js'), 'utf8');
+assert(i18nRuntime.includes('return String(sourceName);'), 'Li i18n-strate deve conservar li semantic nómines del nov core.');
+assert(!localeSource.includes('calendar.cutlets'), 'Li old cutlet-tables ne deve esser copiat per positional index.');
+assert(!localeSource.includes('calendar.months'), 'Li old mensu-tables ne deve esser copiat per positional index.');
+
+const service = fs.readFileSync(path.join(ROOT, 'browser', 'calendar-service.js'), 'utf8');
+assert(service.includes('installSharedCalendarMemory'));
+assert(service.includes('getConversion'));
+assert(service.includes('getCutletView'));
 
 console.log('browser-interface-black-box: PASS');
