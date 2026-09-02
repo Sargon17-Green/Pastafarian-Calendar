@@ -14,6 +14,27 @@ HttpResponse error(int status,std::string code,std::string message,std::string f
     Object e{{"code",Value{std::move(code)}},{"message",Value{std::move(message)}}}; if(!field.empty())e.emplace("field",Value{std::move(field)});
     return response(status,json::stringify(Value{Object{{"error",Value{std::move(e)}}}}));
 }
+bool safeJavascriptCallback(std::string_view callback){
+    if(callback.empty()||callback.size()>64)return false;
+    auto alpha=[](unsigned char c){return(c>='A'&&c<='Z')||(c>='a'&&c<='z');};
+    auto digit=[](unsigned char c){return c>='0'&&c<='9';};
+    auto first=[&](unsigned char c){return alpha(c)||c=='_'||c=='$';};
+    auto rest=[&](unsigned char c){return alpha(c)||digit(c)||c=='_'||c=='$';};
+    if(!first(static_cast<unsigned char>(callback.front())))return false;
+    for(char c:callback.substr(1))if(!rest(static_cast<unsigned char>(c)))return false;
+    return true;
+}
+HttpResponse javascriptResponse(std::string_view callback,std::string jsonBody){
+    HttpResponse h{200,{{"Content-Type","application/javascript; charset=utf-8"},{"X-Content-Type-Options","nosniff"},{"Cross-Origin-Resource-Policy","cross-origin"},{"X-Pastafari-Engine","celeritas-per-sepulcra"},{"X-Pastafari-Semantics","stage56"}},std::string(callback)+"("+std::move(jsonBody)+");"};
+    return h;
+}
+HttpResponse javascriptError(std::string_view callback,int applicationStatus,std::string code,std::string message,std::string field=""){
+    auto j=error(applicationStatus,std::move(code),std::move(message),std::move(field));
+    auto h=javascriptResponse(callback,std::move(j.body));
+    h.headers["X-Pastafari-Application-Status"]=std::to_string(applicationStatus);
+    h.headers["Cache-Control"]="no-store";
+    return h;
+}
 std::string pct(std::string_view s){std::string o;for(std::size_t i=0;i<s.size();++i){char c=s[i];if(c=='+'){o.push_back(' ');continue;}if(c=='%'){if(i+2>=s.size())throw DateError("MALFORMED_QUERY","sequentia percent truncata est");auto hex=[](char h)->int{if(h>='0'&&h<='9')return h-'0';if(h>='A'&&h<='F')return h-'A'+10;if(h>='a'&&h<='f')return h-'a'+10;return-1;};int a=hex(s[i+1]),b=hex(s[i+2]);if(a<0||b<0)throw DateError("MALFORMED_QUERY","sequentia percent invalida est");o.push_back(char((a<<4)|b));i+=2;}else o.push_back(c);}return o;}
 std::map<std::string,std::string> query(std::string_view target,std::string& path){auto q=target.find('?');path=std::string(target.substr(0,q));std::map<std::string,std::string> out;if(q==std::string_view::npos)return out;std::size_t p=q+1;while(p<=target.size()){auto amp=target.find('&',p);auto piece=target.substr(p,amp==std::string_view::npos?target.size()-p:amp-p);if(!piece.empty()){auto eq=piece.find('=');std::string k=pct(piece.substr(0,eq)),v=eq==std::string_view::npos?"":pct(piece.substr(eq+1));if(!out.emplace(k,v).second)throw DateError("MALFORMED_QUERY","parametrum query duplicatum est: "+k);}if(amp==std::string_view::npos)break;p=amp+1;}return out;}
 std::string requireString(const Object&o,std::string_view k,bool required=true){auto*v=json::member(o,k);if(!v){if(required)throw DateError("MISSING_FIELD","campus deest: "+std::string(k));return{};}if(!v->isString())throw DateError("INVALID_TYPE",std::string(k)+" debet esse catena JSON");return v->string();}
@@ -39,6 +60,19 @@ HttpResponse HttpProtocol::handle(std::string_view method,std::string_view targe
     Array ls;for(auto&s:supportedNameLanguages())ls.push_back(Value{s});
     Object m{{"apiVersion",Value{std::string("1")}},{"engine",Value{std::string("celeritas-per-sepulcra")}},{"semanticStage",Value{json::Number{"56"}}},{"defaultCalendar",Value{std::string("gregorian")}},{"defaultLanguage",Value{std::string(DEFAULT_NAME_LANGUAGE)}},{"defaultCalculation",Value{std::string("request-instant-at-kisurra-venus-day")}},{"venusBoundaryModel",Value{std::string(VENUS_BOUNDARY_MODEL_VERSION)}},{"batchLimit",Value{json::Number{"1024"}}},{"calendars",Value{std::move(cs)}},{"languages",Value{std::move(ls)}}};
     return response(200,json::stringify(Value{std::move(m)}));
+  }
+  if(path=="/v1/date.js"){
+    if(method!="GET")return error(405,"METHOD_NOT_ALLOWED","date.js solum GET accipit");
+    auto cb=q.find("callback");if(cb==q.end())return error(400,"MISSING_FIELD","parametrum query deest: callback","callback");
+    if(!safeJavascriptCallback(cb->second))return error(400,"INVALID_CALLBACK","callback debet esse simplex identificator JavaScript ASCII","callback");
+    try{
+      auto it=q.find("date");if(it==q.end())throw DateError("MISSING_FIELD","parametrum query deest: date");TargetSpec t{it->second,"gregorian","auto"};if(q.contains("calendar"))t.calendar=q.at("calendar");if(q.contains("format"))t.format=q.at("format");
+      CalculationSpec c;if(q.contains("calculation_day")&&q.contains("calculation_instant"))throw DateError("AMBIGUOUS_CALCULATION","unam tantum emendationem calculationis adhibe");if(q.contains("calculation_day"))c={CalculationMode::EngineDay,q.at("calculation_day")};if(q.contains("calculation_instant"))c={CalculationMode::Instant,q.at("calculation_instant")};
+      std::string language=std::string(DEFAULT_NAME_LANGUAGE);if(q.contains("language"))language=q.at("language");
+      auto r=service_.calculate(t,c,sampledMs,language);auto h=javascriptResponse(cb->second,json::stringify(singleJson(r)));if(c.mode==CalculationMode::RequestInstant)h.headers["Cache-Control"]="no-store";return h;
+    }catch(const AstronomyError&e){return javascriptError(cb->second,503,"ASTRONOMY_UNAVAILABLE",e.what());}
+     catch(const DateError&e){return javascriptError(cb->second,statusFor(e),e.code,e.what());}
+     catch(const std::exception&e){return javascriptError(cb->second,500,"INTERNAL_ERROR",e.what());}
   }
   if(path=="/v1/date"&&method=="GET"){
     auto it=q.find("date");if(it==q.end())throw DateError("MISSING_FIELD","parametrum query deest: date");TargetSpec t{it->second,"gregorian","auto"};if(q.contains("calendar"))t.calendar=q.at("calendar");if(q.contains("format"))t.format=q.at("format");

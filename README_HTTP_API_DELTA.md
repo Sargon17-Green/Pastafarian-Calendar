@@ -16,3 +16,5 @@ Addit:
 - probationes et CI quae realem `src/monster.cpp` conectunt.
 
 Vide `docs/HTTP_API_V1.md` et `docs/HTTP_API_BUILD.md`.
+
+- `GET /v1/date.js`: transportus scripti additivus pro fasciculis `file://` et ambitus browser-isolation ubi `fetch` JSON in HTML involvitur. Callback stricte ad identificatorem ASCII simplicem restringitur; semantica Stage 56 immutata manet.

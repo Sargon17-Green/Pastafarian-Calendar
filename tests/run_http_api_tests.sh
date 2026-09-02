@@ -49,6 +49,9 @@ compile_test service tests/service_tests.cpp \
 compile_test protocol tests/http_protocol_tests.cpp \
   "$BUILD_DIR/date_conversion.o" "$BUILD_DIR/venus_boundary.o" \
   "$BUILD_DIR/service.o" "$BUILD_DIR/name_language.o" "$BUILD_DIR/strict_json.o" "$BUILD_DIR/http_protocol.o"
+compile_test jsonp_transport tests/jsonp_transport_tests.cpp \
+  "$BUILD_DIR/date_conversion.o" "$BUILD_DIR/venus_boundary.o" \
+  "$BUILD_DIR/service.o" "$BUILD_DIR/name_language.o" "$BUILD_DIR/strict_json.o" "$BUILD_DIR/http_protocol.o"
 compile_test pair_tomb tests/pair_tomb_tests.cpp \
   "$BUILD_DIR/pair_tomb.o"
 

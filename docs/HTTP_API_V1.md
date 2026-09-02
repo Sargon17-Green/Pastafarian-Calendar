@@ -68,6 +68,26 @@ GET /v1/date?date=2026-09-02&calculation_instant=2026-09-02T12%3A00%3A00Z
 
 `calculation_day` et `calculation_instant` simul vetantur.
 
+### `GET /v1/date.js` — transportus scripti pro `file://` / browser isolation
+
+Haec via additiva eosdem parametros computationis ac `GET /v1/date` accipit, plus parametro obligatorio `callback`. Eadem machina et eadem semantica adhibentur; tantum JSON in invocatione JavaScript involvitur.
+
+```http
+GET /v1/date.js?date=2026-09-02&calendar=gregorian&language=la&callback=pastafariDateCallback
+```
+
+Responsum felix:
+
+```javascript
+pastafariDateCallback({"apiVersion":"1", ... });
+```
+
+`Content-Type` est `application/javascript; charset=utf-8`; minister etiam `X-Content-Type-Options: nosniff` et `Cross-Origin-Resource-Policy: cross-origin` mittit. Via destinatur insertioni per `<script src="...">`, praesertim ubi `fetch` a browser-isolation vel proxy corporativo in HTML involvitur.
+
+`callback` simplex identificator ASCII esse debet, maxima longitudine 64. Puncta, parentheses et alia signa syntactica vetantur; ita `pastafariDateCallback` valet, `window.pastafariDateCallback` et `alert(1)` non valent.
+
+Post callback validatum, errores applicationis per eundem callback redduntur ut JavaScript HTTP `200`; caput `X-Pastafari-Application-Status` statum semanticum originalem continet. Cliens `result.error` examinare debet. Callback absens vel invalidus errorem HTTP JSON `400` reddit.
+
 ### `POST /v1/date`
 
 Forma minima:
