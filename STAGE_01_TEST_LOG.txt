@@ -1,0 +1,19 @@
+STAGE_01_PERL_COMPILE
+lib/Pastafari/Monster/BaseContext.pm syntax OK
+lib/Pastafari/Monster/BaseDispatcher.pm syntax OK
+lib/Pastafari/Monster/BaseErrorBoundary.pm syntax OK
+lib/Pastafari/Monster/BaseMetrics.pm syntax OK
+lib/Pastafari/Monster/BaseValidator.pm syntax OK
+lib/Pastafari/SourceLanguageCatalog.pm syntax OK
+lib/Pastafari/SpaghettiMonster.pm syntax OK
+t/lib/Pastafari/NormativeScroll.pm syntax OK
+STAGE_01_TEST_SUITE
+t/00_bootstrap.t ..................... ok
+t/01_catalog.t ....................... ok
+t/02_normative_helpers.t ............. ok
+t/03_normative_sauce.t ............... ok
+t/04_normative_families_and_year.t ... ok
+t/05_language_and_isolation_audit.t .. ok
+All tests successful.
+Files=6, Tests=106,  7 wallclock secs ( 0.03 usr  0.01 sys +  6.50 cusr  0.04 csys =  6.58 CPU)
+Result: PASS
