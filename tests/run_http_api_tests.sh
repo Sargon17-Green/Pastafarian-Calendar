@@ -18,6 +18,7 @@ TEST_OPT=${PASTAFARI_HTTP_TEST_OPT:--O0}
 FLAGS="-std=c++20 $TEST_OPT -Wall -Wextra -Werror -pthread -Iinclude"
 for source in \
   src/date_conversion.cpp \
+  src/cors.cpp \
   src/venus_boundary.cpp \
   src/service.cpp \
   src/name_language.cpp \
@@ -36,6 +37,8 @@ compile_test() {
   "$BUILD_DIR/$name"
 }
 
+compile_test cors tests/cors_tests.cpp \
+  "$BUILD_DIR/cors.o"
 compile_test core tests/http_api_core_tests.cpp \
   "$BUILD_DIR/date_conversion.o" "$BUILD_DIR/venus_boundary.o"
 compile_test strict_json tests/strict_json_tests.cpp \

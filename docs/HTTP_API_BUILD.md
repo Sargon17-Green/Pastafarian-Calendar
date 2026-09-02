@@ -80,3 +80,14 @@ Latentia invocationis frigidae machinae non est stabilis. In una probatione mode
 Terminatio TLS publica extra processum (e.g. reverse proxy) fieri debet; monstrum officium TLS non accipit.
 
 Unus processus/worker initio petitiones serialiter tractat. Hoc consulto contentionem cum cache/graveyard globalibus Celeritas vitat. Parallelismus fit pluribus processibus; unusquisque processum suum et cache calidum habet. Non fit hash per `calculationDay`, quia dies computationis implicitus plerisque petitionibus idem est et unum worker oneraret.
+
+## CORS
+
+Origo navigatoris implicite admissa est `https://bwtbdyqtmsprytgydym-cpu.github.io`. Allowlist ad distributionem mutatur per `PASTAFARI_CORS_ORIGINS`, originibus exactis commate separatis:
+
+```sh
+PASTAFARI_CORS_ORIGINS='https://calendar.example,https://admin.example' \
+  ./pastafari-http 0.0.0.0 8080
+```
+
+Wildcard `*` non adhibetur. Si variabile definitur, valorem implicitum substituit. Petitiones sine `Origin` non impediuntur.

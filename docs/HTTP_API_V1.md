@@ -143,6 +143,37 @@ Versionem API, machinam, semantic stage, calendaria conversionis, linguas nominu
 }
 ```
 
+
+## CORS navigatoris
+
+Minister CORS restrictum in strato transportus praebet, ut pagina web API directe per `fetch` vocare possit sine mutatione semanticae calendarii. Wildcard `Access-Control-Allow-Origin: *` consulto non adhibetur.
+
+Origo implicite admissa est:
+
+```text
+https://bwtbdyqtmsprytgydym-cpu.github.io
+```
+
+Petitio cum hac origine responsum includit:
+
+```text
+Access-Control-Allow-Origin: https://bwtbdyqtmsprytgydym-cpu.github.io
+Vary: Origin
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Access-Control-Max-Age: 600
+```
+
+Preflight `OPTIONS` ex origine admissa `204` reddit. Preflight ex origine non admissa `403 CORS_ORIGIN_NOT_ALLOWED` reddit. Petitiones sine capite `Origin` — exempli gratia clientela server-to-server — sicut antea procedunt.
+
+In alia distributione allowlist exacte substitui potest per variabile ambitus, originibus commate separatis:
+
+```sh
+PASTAFARI_CORS_ORIGINS='https://calendar.example,https://admin.example' ./pastafari-http 0.0.0.0 8080
+```
+
+Comparatio originum exacta est; slash finalis aliud valorem efficit. Ad evolutionem localem originem localem expresse in variabile adde. CORS tantum licentiam navigatoris solvit: minister ipse adhuc in host/publica infrastructura currere debet ut situs GitHub Pages eum attingere possit.
+
 ## Conversiones in hac cicatrice
 
 Implementatae nunc:

@@ -1,0 +1,13 @@
+DELETE THESE FILES FROM THE REPOSITORY ROOT
+
+HTTP_API_BUILD.md
+HTTP_API_V1.md
+cors.hpp
+cors.cpp
+http_server_main.cpp
+cors_tests.cpp
+run_http_api_tests.sh
+celeritas-http-api-v1.yml
+
+These are flattened duplicates. Their intended copies belong under docs/,
+include/pastafari/http_api/, src/, tests/, or .github/workflows/.
