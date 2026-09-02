@@ -1,41 +1,50 @@
-# COBOL + 简体中文实现
+# 第 1 阶段 — 已完成
 
-这是一个从零开始的独立实现线。它不读取、不移植、不运行、不散列、不比较任何其他编程语言或其他人类源语言的实现。
+本目录是 `COBOL + 简体中文` 实现线的第 1 阶段 Bootstrap。第 2 阶段尚未开始。
 
-当前目录对应第 1 阶段引导工作。它包含冻结的简体中文 `SourceLanguageCatalog`、中性的生产骨架、基础上下文/调度/验证/错误/指标外壳、本地任意精度整数基础设施，以及从任务内嵌 Appendix A 独立重写的完整测试 oracle 源码。
-
-规范日、闸门索引、闸门日和年份编号都使用本地动态任意精度整数。肉饼和月份的规范排序、rank、unrank、组合选择与语义缓存键只使用 `canonicalIndex`；简体中文名称只在最终展示层解析。
-
-本阶段不得包含 26 个历史缺陷或其补丁的任何专用代码，也不得提前建立未来补丁专用 flag、legacy 路径或兼容层。当前生产目录只包含规范允许的中性基础设施。
-
-## 测试内容
-
-当前测试源代码覆盖：
-
-- 任意精度整数解析、复制、比较、加减乘除、欧几里得余数和跨九位块边界；
-- `SAVE` 的关键边界；
-- 基础日计数和 `workCounts`；
-- 64 个源语言名称的 `canonicalIndex` 映射；
-- 短选择和宽选择的边界；
-- 小型有界组合、肉饼分割和月份编织的完整穷举对照；
-- 完整规范 oracle 的基础日烟雾入口。
-
-完整的静态审查记录见 `docs/STAGE_01_STATIC_AUDIT.md`。
-
-## 本地构建与运行
-
-需要 GnuCOBOL。仓库内的纯构建/运行脚本只执行编译和测试：
+真实 Windows / GnuCOBOL 3.2+svn.5686 验证结果：
 
 ```text
-./handoff/build_and_test.sh
+严格编译: PASS
+bootstrap: 181 / 181 PASS
+BOOTSTRAP_RESULT=PASS
+LAST_COMPLETED_STAGE=1
+SEMANTIC_STATE_OWNER_VALIDATED=YES
 ```
 
-也可以直接使用 handoff 文档中的完整 `cobc` 命令。
+## 重新验证
 
-## 当前验证状态
+如需在 Windows 上重新验证第 1 阶段，只运行：
 
-当前生成环境没有 `cobc` 或 `cobcrun`，网络也无法解析并取得 GnuCOBOL 包。因此本目录只能完成静态审查，不能声称源码已经成功编译或测试已经运行通过。
+```bat
+RUN_THIS_STAGE1_VERIFY.cmd
+```
 
-测试 oracle 还存在已记录的堆所有权限制：部分 DP 表和短期 BigInt 结果采用进程生命周期所有权，重复的大型 oracle 调用可能持续增长堆占用。当前没有证据表明这会改变规范值，但可靠性/所有权审查因此不能标记为完成。
+该入口使用 `-Werror` 编译完整 Stage 1 测试树（包括完整 test-only normative oracle），随后执行 181 项 bootstrap 验证。它不会启动数小时/数天的 Year-5000 压力循环。
 
-此外，本第 1 阶段工作序列早先已经使用过非 COBOL 运行时来编辑或检查文件。按照任务的严格来源规则，本工作序列不能诚实声明 `foreign_language_runtime_called=NO`。若要求形式上完全符合该规则，必须在受控环境中从零重新执行第 1 阶段。
+## 为什么不再等待 20 次 Year-5000
+
+工作过程中曾额外建立 `oracle_stress_tests.cob`，要求真实重型 Year-5000 oracle 连续运行 20 次，以调查 heap lifetime、Windows guard 与性能问题。这个压力门帮助发现并修正 Sauce arena 生命周期、BigInt 乘法和 arena unregister 等真实问题，但它不是第 1 阶段规范中的完成条件。
+
+规范允许对巨大有序组合族使用 **exact DP count、lexicographic unranking 与 memoization**，并要求在小空间用同语言 force-brute 证明等价。当前 181 项测试已经包含这种本地、精确的 brute-force / DP / unrank 验证，也包含错误路径与所有权基线检查。因此 20 次完整重型 witness 现在只保留为可选运行诊断，不参与 Stage 1 GREEN 判定。
+
+## 第 1 阶段内容
+
+- 冻结的简体中文 `SourceLanguageCatalog`：17 个肉饼名、47 个月份名，语义顺序只依赖 `canonicalIndex`；
+- 中性的 production skeleton：每次调用独占 context、dispatcher、validation/error wrapper、非语义 metrics/logging shell；
+- COBOL 本地任意精度整数支持；
+- 完整 test-only Appendix A normative reference；
+- COBOL-only tests / fixtures；
+- exact bounded families、month weaving count 与 lexicographic unrank；
+- ownership / failure cleanup / cache reset 验证。
+
+production 不调用 oracle，不读取 oracle 结果作为 fallback。没有提前加入第 2–53 阶段的 legacy defect 或 patch 语义。
+
+## 状态文件
+
+- `DEVELOPMENT_STAGE.md` — 当前正式阶段状态；
+- `STAGE_01_EXECUTION_STATUS.txt` — 机器可读的实际验证证据；
+- `docs/STAGE_01_COMPLETION_AUDIT.md` — 第 1 阶段关闭依据；
+- `SPAGHETTI_DEVELOPMENT_HISTORY.md` — 保留此前性能/内存调查的历史，不把历史诊断门误当成现行验收条件。
+
+早期工作序列曾调用非 COBOL runtime，因此 `FOREIGN_LANGUAGE_USAGE=VIOLATION_NON_COBOL_RUNTIME_USED_DURING_STAGE_1_WORK` 必须继续保留；本次关闭不会改写该历史事实。
