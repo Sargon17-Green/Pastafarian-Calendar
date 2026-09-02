@@ -12,7 +12,7 @@ module Pastafari.MonsterBase exposing
     )
 
 import Dict exposing (Dict)
-import Pastafari.ExactInt as BI exposing (BigInt)
+import Pastafari.ExactInt exposing (BigInt)
 
 
 type Phase

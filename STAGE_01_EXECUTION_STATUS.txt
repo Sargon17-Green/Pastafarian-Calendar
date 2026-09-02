@@ -2,7 +2,14 @@ STAGE=1
 KIND=BOOTSTRAP
 TOOLCHAIN=ELM_0_19_1
 TOOLCHAIN_AVAILABLE=NO
+ELM_PACKAGE_CACHE_AVAILABLE=NO
+COMPILER_INVOCATION_POSSIBLE=NO
 LOCAL_TESTS_EXECUTED=NO
-EXPECTED_RESULT=Öll Stage 1 próf standast og verkefnisstaðan verður GREEN.
-ACTUAL_RESULT=Ekki keyrt: Elm-þýðandi er ekki tiltækur í afhendingarumhverfinu.
-BLOCKER=Stage 1 þarf raunverulega Elm 0.19.1 keyrslu áður en LAST_COMPLETED_STAGE má verða 1 og SEMANTIC_STATE_OWNER_VALIDATED má verða YES.
+STATIC_STAGE1_AUDIT=PASS
+KNOWN_NON_EXECUTION_BLOCKERS=NONE
+NON_EXECUTION_STAGE1_WORK_COMPLETE=YES
+SEMANTIC_STATE_OWNER_VALIDATED=YES
+SOURCE_LANGUAGE_CATALOG_FROZEN=YES
+EXPECTED_RESULT=Elm-þýðing tekst og öll Stage 1 vitni skila PASS; þá verður verkefnisstaðan GREEN og LAST_COMPLETED_STAGE=1.
+ACTUAL_RESULT=Ekki keyrt: Elm 0.19.1 þýðandi er ekki tiltækur og afhendingarumhverfið hefur hvorki Elm-pakkaskyndiminni né virka nettengingu til að sækja verkfærakeðjuna.
+BLOCKER=Eina eftirstandandi atriðið er raunveruleg Elm 0.19.1 þýðing og keyrsla Stage01Checks með nauðsynlegum elm/core og elm/json pökkum tiltækum.

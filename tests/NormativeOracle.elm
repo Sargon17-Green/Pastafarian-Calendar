@@ -4,6 +4,7 @@ module NormativeOracle exposing
     , CanonicalCalendarDate
     , GateState
     , SauceResult
+    , Stone
     , WorkCounts
     , answerAt
     , buildStones
@@ -13,15 +14,22 @@ module NormativeOracle exposing
     , chooseRankShort
     , chooseRankWide
     , countBoundedCompositions
+    , countCutletPartitionsForTest
     , countWeavingsForLengths
     , dayCount
     , fallingFactorial
     , foundationDay
     , initialGateState
     , m
+    , negativeGateGap
     , permutationUnrank1
+    , positiveGateGap
     , save
+    , sauce
+    , tabletsDay
+    , yearMaxDays
     , unrankBoundedComposition
+    , unrankCutletPartition
     , unrankDistinctIndices
     , unrankWeavingForLengths
     , workCounts
@@ -84,6 +92,23 @@ type alias Stone =
     }
 
 
+type alias HiddenCoeff =
+    { a : Int
+    , b : Int
+    , c : Int
+    , d : Int
+    }
+
+
+type alias VisibleGrind =
+    { a : Int
+    , b : Int
+    , c : Int
+    , d : Int
+    , kind : StoneKind
+    }
+
+
 type alias SauceResult =
     { bowls : Array BigInt
     , orderAtDrop46 : List Int
@@ -97,16 +122,16 @@ type alias AnswerStream =
 
 
 type alias GateState =
-    { gates : Dict Int BigInt
-    , minKnown : Int
-    , maxKnown : Int
+    { gates : Dict String BigInt
+    , minKnown : BigInt
+    , maxKnown : BigInt
     }
 
 
 type alias Year =
     { number : BigInt
-    , openGateIndex : Int
-    , closeGateIndex : Int
+    , openGateIndex : BigInt
+    , closeGateIndex : BigInt
     , openGateDay : BigInt
     , closeGateDay : BigInt
     }
@@ -142,6 +167,16 @@ type alias CalendarDate =
     , monthName : String
     , dayInMonth : Int
     }
+
+
+expectMaybe : String -> Maybe a -> a
+expectMaybe message maybeValue =
+    case maybeValue of
+        Just value ->
+            value
+
+        Nothing ->
+            Debug.todo message
 
 
 save : BigInt -> BigInt
@@ -231,7 +266,7 @@ buildStones =
 stoneAt : Array Stone -> Int -> Stone
 stoneAt stones index =
     Array.get (index - 1) stones
-        |> Maybe.withDefault initialStone
+        |> expectMaybe "Steinavísitala er utan leyfilegs sviðs."
 
 
 stoneValue : StoneKind -> Stone -> BigInt
@@ -261,29 +296,29 @@ sumStone stone =
         |> BI.add stone.red
 
 
-hiddenCoeff : Int -> ( Int, Int, Int, Int )
+hiddenCoeff : Int -> HiddenCoeff
 hiddenCoeff k =
     case k of
         1 ->
-            ( 3, 4, 6, 8 )
+            { a = 3, b = 4, c = 6, d = 8 }
 
         2 ->
-            ( 5, 7, 10, 12 )
+            { a = 5, b = 7, c = 10, d = 12 }
 
         3 ->
-            ( 7, 10, 14, 16 )
+            { a = 7, b = 10, c = 14, d = 16 }
 
         4 ->
-            ( 9, 13, 18, 20 )
+            { a = 9, b = 13, c = 18, d = 20 }
 
         5 ->
-            ( 11, 16, 22, 24 )
+            { a = 11, b = 16, c = 22, d = 24 }
 
         6 ->
-            ( 13, 19, 26, 28 )
+            { a = 13, b = 19, c = 26, d = 28 }
 
         _ ->
-            ( 15, 22, 30, 32 )
+            { a = 15, b = 22, c = 30, d = 32 }
 
 
 hiddenStoneKind : Int -> StoneKind
@@ -317,7 +352,7 @@ buildHiddenDrops counts stones =
         |> List.map
             (\k ->
                 let
-                    ( a, b, c, d ) =
+                    coeff =
                         hiddenCoeff k
 
                     stone =
@@ -325,10 +360,10 @@ buildHiddenDrops counts stones =
 
                     start =
                         counts.action
-                            |> BI.add (BI.mulSmall counts.target a)
-                            |> BI.add (BI.mulSmall counts.distance b)
-                            |> BI.add (BI.mulSmall counts.connection c)
-                            |> BI.add (BI.mulSmall counts.direction d)
+                            |> BI.add (BI.mulSmall counts.target coeff.a)
+                            |> BI.add (BI.mulSmall counts.distance coeff.b)
+                            |> BI.add (BI.mulSmall counts.connection coeff.c)
+                            |> BI.add (BI.mulSmall counts.direction coeff.d)
                             |> BI.add (sumStone stone)
                             |> save
 
@@ -352,47 +387,47 @@ buildHiddenDrops counts stones =
         |> Array.fromList
 
 
-visibleGrind : Int -> ( Int, Int, Int, Int, StoneKind )
+visibleGrind : Int -> VisibleGrind
 visibleGrind grind =
     case grind of
         1 ->
-            ( 3, 5, 7, 11, Wheat )
+            { a = 3, b = 5, c = 7, d = 11, kind = Wheat }
 
         2 ->
-            ( 5, 7, 11, 13, Barley )
+            { a = 5, b = 7, c = 11, d = 13, kind = Barley }
 
         3 ->
-            ( 7, 11, 13, 17, Salt )
+            { a = 7, b = 11, c = 13, d = 17, kind = Salt }
 
         4 ->
-            ( 11, 13, 17, 19, Bitter )
+            { a = 11, b = 13, c = 17, d = 19, kind = Bitter }
 
         5 ->
-            ( 13, 17, 19, 23, Red )
+            { a = 13, b = 17, c = 19, d = 23, kind = Red }
 
         6 ->
-            ( 17, 19, 23, 29, Wheat )
+            { a = 17, b = 19, c = 23, d = 29, kind = Wheat }
 
         7 ->
-            ( 19, 23, 29, 31, Barley )
+            { a = 19, b = 23, c = 29, d = 31, kind = Barley }
 
         8 ->
-            ( 23, 29, 31, 37, Salt )
+            { a = 23, b = 29, c = 31, d = 37, kind = Salt }
 
         9 ->
-            ( 29, 31, 37, 41, Bitter )
+            { a = 29, b = 31, c = 37, d = 41, kind = Bitter }
 
         10 ->
-            ( 31, 37, 41, 43, Red )
+            { a = 31, b = 37, c = 41, d = 43, kind = Red }
 
         _ ->
-            ( 37, 41, 43, 47, Wheat )
+            { a = 37, b = 41, c = 43, d = 47, kind = Wheat }
 
 
 arrayGetBig : Array BigInt -> Int -> BigInt
 arrayGetBig values index =
     Array.get index values
-        |> Maybe.withDefault BI.zero
+        |> expectMaybe "Fylkisvísitala er utan leyfilegs sviðs."
 
 
 priorValue : Array BigInt -> Array BigInt -> Int -> Int -> BigInt
@@ -451,16 +486,16 @@ buildVisibleDrops counts stones hidden =
 
                         else
                             let
-                                ( a, b, c, d, kind ) =
+                                row =
                                     visibleGrind g
 
                                 next =
                                     BI.square x
-                                        |> BI.add (BI.mulSmall x a)
-                                        |> BI.add (BI.mulSmall p1 b)
-                                        |> BI.add (BI.mulSmall p3 c)
-                                        |> BI.add (BI.mulSmall p7 d)
-                                        |> BI.add (stoneValue kind stone)
+                                        |> BI.add (BI.mulSmall x row.a)
+                                        |> BI.add (BI.mulSmall p1 row.b)
+                                        |> BI.add (BI.mulSmall p3 row.c)
+                                        |> BI.add (BI.mulSmall p7 row.d)
+                                        |> BI.add (stoneValue row.kind stone)
                                         |> save
                             in
                             grind (g + 1) next
@@ -512,7 +547,7 @@ permutationUnrank1 rank1 itemsAscending =
                         chosen =
                             List.drop q remaining
                                 |> List.head
-                                |> Maybe.withDefault 1
+                                |> expectMaybe "Umröðunarröð gaf ógilda sæti."
                     in
                     loop nextRank (removeAt q remaining) (result ++ [ chosen ])
     in
@@ -523,7 +558,7 @@ smallMod : BigInt -> Int -> Int
 smallMod value divisor =
     BI.regularMod value (BI.fromInt divisor)
         |> BI.toIntMaybe
-        |> Maybe.withDefault 0
+        |> expectMaybe "Lítil leif komst ekki í Elm Int þótt deilirinn sé lítill."
 
 
 bowlOrderFromDrop : BigInt -> List Int
@@ -547,7 +582,7 @@ initialBowls counts =
                 let
                     prime =
                         Array.get (bowlId - 1) primes
-                            |> Maybe.withDefault 17
+                            |> expectMaybe "Skálavísitala fann ekki frumtölu."
 
                     s =
                         counts.action
@@ -571,7 +606,7 @@ orderAt : List Int -> Int -> Int
 orderAt order position =
     List.drop (position - 1) order
         |> List.head
-        |> Maybe.withDefault 1
+        |> expectMaybe "Skálaröð vantar umbeðið sæti."
 
 
 applyVisibleDropsToBowls : Array BigInt -> Array BigInt -> Array Stone -> ( Array BigInt, List Int )
@@ -773,7 +808,7 @@ indexOf wanted items =
         loop position rest =
             case rest of
                 [] ->
-                    1
+                    Debug.todo "Spurður skál fannst ekki í röð dropa 46."
 
                 x :: xs ->
                     if x == wanted then
@@ -824,13 +859,21 @@ askBowl sauceResult queriedBowlId seal =
     { first = first, directionStep = step }
 
 
-answerAt : AnswerStream -> Int -> BigInt
-answerAt stream k =
+answerAtBigOffset : AnswerStream -> BigInt -> BigInt
+answerAtBigOffset stream offset =
     let
+        signedOffset =
+            BI.mulSmall offset stream.directionStep
+
         shifted =
-            BI.add (BI.sub stream.first BI.one) (BI.fromInt (stream.directionStep * k))
+            BI.add (BI.sub stream.first BI.one) signedOffset
     in
     BI.add (BI.regularMod shifted m) BI.one
+
+
+answerAt : AnswerStream -> Int -> BigInt
+answerAt stream k =
+    answerAtBigOffset stream (BI.fromInt k)
 
 
 chooseRankShort : AnswerStream -> BigInt -> BigInt
@@ -839,18 +882,18 @@ chooseRankShort stream n =
         acceptanceLimit =
             BI.mul (BI.floorDivPositive m n) n
 
-        loop k =
+        loop offset =
             let
                 x =
-                    answerAt stream k
+                    answerAtBigOffset stream offset
             in
             if BI.compareBig x acceptanceLimit /= GT then
                 BI.add (BI.regularMod (BI.sub x BI.one) n) BI.one
 
             else
-                loop (k + 1)
+                loop (BI.add offset BI.one)
     in
-    loop 0
+    loop BI.zero
 
 
 smallestPowerCount : BigInt -> ( Int, BigInt )
@@ -934,7 +977,7 @@ unrankDistinctIndices masterSize k rank1 =
         chooseCandidate remaining block r candidatePosition =
             case List.drop candidatePosition remaining |> List.head of
                 Nothing ->
-                    ( 1, r, 0 )
+                    Debug.todo "Nafnavalröð fór út fyrir hlutumraðanafjölskylduna."
 
                 Just candidate ->
                     if BI.compareBig r block == GT then
@@ -1011,7 +1054,7 @@ unrankBoundedComposition total slots lo hi rank1 =
     let
         chooseX x rem slotsLeft r memo =
             if x > hi then
-                ( lo, r, memo )
+                Debug.todo "Röð takmarkaðrar samsetningar fór út fyrir fjölskylduna."
 
             else
                 let
@@ -1052,7 +1095,7 @@ listAt : List Int -> Int -> Int
 listAt values oneBasedIndex =
     List.drop (oneBasedIndex - 1) values
         |> List.head
-        |> Maybe.withDefault 0
+        |> expectMaybe "Listavísitala er utan leyfilegs sviðs."
 
 
 setListAt : Int -> Int -> List Int -> List Int
@@ -1182,7 +1225,7 @@ unrankWeavingForLengths lengths rank1 =
 
         chooseMove state j r memo =
             if j > List.length lengths then
-                ( 1, r, memo )
+                Debug.todo "Röð mánaðarvefjar fór út fyrir löglegu vefjafjölskylduna."
 
             else if not (legalWeaveMove lengths state j) then
                 chooseMove state (j + 1) r memo
@@ -1220,23 +1263,28 @@ unrankWeavingForLengths lengths rank1 =
 
 initialGateState : GateState
 initialGateState =
-    { gates = Dict.singleton 0 foundationDay
-    , minKnown = 0
-    , maxKnown = 0
+    { gates = Dict.singleton (gateKey BI.zero) foundationDay
+    , minKnown = BI.zero
+    , maxKnown = BI.zero
     }
 
 
-gateAt : GateState -> Int -> BigInt
+gateKey : BigInt -> String
+gateKey index =
+    BI.toString index
+
+
+gateAt : GateState -> BigInt -> BigInt
 gateAt state index =
-    Dict.get index state.gates
-        |> Maybe.withDefault foundationDay
+    Dict.get (gateKey index) state.gates
+        |> expectMaybe "Hliðavísitala var ekki mynduð áður en hún var lesin."
 
 
-positiveGateGap : Int -> BigInt
+positiveGateGap : BigInt -> BigInt
 positiveGateGap n =
     let
         target =
-            BI.add foundationDay (BI.fromInt n)
+            BI.add foundationDay n
 
         result =
             sauce foundationDay target
@@ -1250,11 +1298,11 @@ positiveGateGap n =
     BI.add (BI.fromInt 41) chosen
 
 
-negativeGateGap : Int -> BigInt
+negativeGateGap : BigInt -> BigInt
 negativeGateGap n =
     let
         target =
-            BI.sub foundationDay (BI.fromInt n)
+            BI.sub foundationDay n
 
         result =
             sauce foundationDay target
@@ -1268,38 +1316,38 @@ negativeGateGap n =
     BI.add (BI.fromInt 41) chosen
 
 
-ensureGateIndex : Int -> GateState -> ( BigInt, GateState )
+ensureGateIndex : BigInt -> GateState -> ( BigInt, GateState )
 ensureGateIndex wanted state =
-    if wanted > state.maxKnown then
+    if BI.compareBig wanted state.maxKnown == GT then
         let
             nextIndex =
-                state.maxKnown + 1
+                BI.add state.maxKnown BI.one
 
             nextDay =
                 BI.add (gateAt state state.maxKnown) (positiveGateGap nextIndex)
 
             nextState =
                 { state
-                    | gates = Dict.insert nextIndex nextDay state.gates
+                    | gates = Dict.insert (gateKey nextIndex) nextDay state.gates
                     , maxKnown = nextIndex
                 }
         in
         ensureGateIndex wanted nextState
 
-    else if wanted < state.minKnown then
+    else if BI.compareBig wanted state.minKnown == LT then
         let
             nextIndex =
-                state.minKnown - 1
+                BI.sub state.minKnown BI.one
 
             magnitude =
-                Basics.abs nextIndex
+                BI.absBig nextIndex
 
             nextDay =
                 BI.sub (gateAt state state.minKnown) (negativeGateGap magnitude)
 
             nextState =
                 { state
-                    | gates = Dict.insert nextIndex nextDay state.gates
+                    | gates = Dict.insert (gateKey nextIndex) nextDay state.gates
                     , minKnown = nextIndex
                 }
         in
@@ -1312,12 +1360,12 @@ ensureGateIndex wanted state =
 ensureGatesCover : BigInt -> BigInt -> GateState -> GateState
 ensureGatesCover lowDay highDay state =
     if BI.compareBig (gateAt state state.minKnown) lowDay == GT then
-        ensureGateIndex (state.minKnown - 1) state
+        ensureGateIndex (BI.sub state.minKnown BI.one) state
             |> Tuple.second
             |> ensureGatesCover lowDay highDay
 
     else if BI.compareBig (gateAt state state.maxKnown) highDay == LT then
-        ensureGateIndex (state.maxKnown + 1) state
+        ensureGateIndex (BI.add state.maxKnown BI.one) state
             |> Tuple.second
             |> ensureGatesCover lowDay highDay
 
@@ -1325,24 +1373,30 @@ ensureGatesCover lowDay highDay state =
         state
 
 
-binaryGateAtOrBefore : BigInt -> GateState -> Int -> Int -> Int
+binaryGateAtOrBefore : BigInt -> GateState -> BigInt -> BigInt -> BigInt
 binaryGateAtOrBefore day state lo hi =
-    if lo >= hi then
+    if BI.compareBig lo hi /= LT then
         lo
 
     else
         let
+            width =
+                BI.add (BI.sub hi lo) BI.one
+
+            half =
+                BI.floorDivPositive width (BI.fromInt 2)
+
             mid =
-                lo + ((hi - lo + 1) // 2)
+                BI.add lo half
         in
         if BI.compareBig (gateAt state mid) day /= GT then
             binaryGateAtOrBefore day state mid hi
 
         else
-            binaryGateAtOrBefore day state lo (mid - 1)
+            binaryGateAtOrBefore day state lo (BI.sub mid BI.one)
 
 
-gateIndexAtOrBefore : BigInt -> GateState -> ( Int, GateState )
+gateIndexAtOrBefore : BigInt -> GateState -> ( BigInt, GateState )
 gateIndexAtOrBefore day state =
     let
         covered =
@@ -1351,7 +1405,7 @@ gateIndexAtOrBefore day state =
     ( binaryGateAtOrBefore day covered covered.minKnown covered.maxKnown, covered )
 
 
-exactGateIndex : BigInt -> GateState -> ( Maybe Int, GateState )
+exactGateIndex : BigInt -> GateState -> ( Maybe BigInt, GateState )
 exactGateIndex day state =
     let
         ( index, covered ) =
@@ -1364,23 +1418,30 @@ exactGateIndex day state =
         ( Nothing, covered )
 
 
-yearLength : GateState -> Int -> Int -> BigInt
+yearLength : GateState -> BigInt -> BigInt -> BigInt
 yearLength state openIndex closeIndex =
     BI.sub (gateAt state closeIndex) (gateAt state openIndex)
 
 
-validYearPair : GateState -> Int -> Int -> Bool
+localGateGapCount : BigInt -> BigInt -> Int
+localGateGapCount openIndex closeIndex =
+    BI.sub closeIndex openIndex
+        |> BI.toIntMaybe
+        |> expectMaybe "Staðbundinn fjöldi hliðabila komst ekki í Elm Int."
+
+
+validYearPair : GateState -> BigInt -> BigInt -> Bool
 validYearPair state openIndex closeIndex =
     let
         lengthDays =
             yearLength state openIndex closeIndex
     in
-    closeIndex - openIndex >= 6
+    BI.compareBig (BI.sub closeIndex openIndex) (BI.fromInt 6) /= LT
         && BI.compareBig lengthDays (BI.fromInt yearMinDays) /= LT
         && BI.compareBig lengthDays (BI.fromInt yearMaxDays) /= GT
 
 
-compareYearPair : GateState -> ( Int, Int ) -> ( Int, Int ) -> Order
+compareYearPair : GateState -> ( BigInt, BigInt ) -> ( BigInt, BigInt ) -> Order
 compareYearPair state ( i1, j1 ) ( i2, j2 ) =
     case BI.compareBig (yearLength state i1 j1) (yearLength state i2 j2) of
         EQ ->
@@ -1390,7 +1451,7 @@ compareYearPair state ( i1, j1 ) ( i2, j2 ) =
             other
 
 
-makeYear : BigInt -> GateState -> Int -> Int -> Year
+makeYear : BigInt -> GateState -> BigInt -> BigInt -> Year
 makeYear number state openIndex closeIndex =
     { number = number
     , openGateIndex = openIndex
@@ -1402,20 +1463,43 @@ makeYear number state openIndex closeIndex =
 
 rankToInt : BigInt -> Int
 rankToInt rank =
-    BI.toIntMaybe rank |> Maybe.withDefault 1
+    BI.toIntMaybe rank
+        |> expectMaybe "Staðbundin valröð komst ekki í Elm Int."
+
+
+bigRangeInclusive : BigInt -> BigInt -> List BigInt
+bigRangeInclusive first last =
+    let
+        loop current reversed =
+            if BI.compareBig current last == GT then
+                List.reverse reversed
+
+            else
+                loop (BI.add current BI.one) (current :: reversed)
+    in
+    loop first []
 
 
 year5000 : BigInt -> GateState -> ( Year, GateState )
 year5000 calculationDay state =
     let
-        covered =
-            ensureGatesCover
-                (BI.sub calculationDay (BI.fromInt yearMaxDays))
-                (BI.add calculationDay (BI.fromInt yearMaxDays))
-                state
+        lowDay =
+            BI.sub calculationDay (BI.fromInt yearMaxDays)
+
+        highDay =
+            BI.add calculationDay (BI.fromInt yearMaxDays)
+
+        covered0 =
+            ensureGatesCover lowDay highDay state
+
+        ( lowIndex, covered1 ) =
+            gateIndexAtOrBefore lowDay covered0
+
+        ( highIndex, covered ) =
+            gateIndexAtOrBefore highDay covered1
 
         indices =
-            List.range covered.minKnown covered.maxKnown
+            bigRangeInclusive lowIndex highIndex
 
         candidates =
             indices
@@ -1424,7 +1508,7 @@ year5000 calculationDay state =
                         indices
                             |> List.filter
                                 (\j ->
-                                    j > i
+                                    BI.compareBig j i == GT
                                         && validYearPair covered i j
                                         && BI.compareBig (gateAt covered i) calculationDay == LT
                                         && BI.compareBig calculationDay (gateAt covered j) /= GT
@@ -1445,7 +1529,7 @@ year5000 calculationDay state =
         chosen =
             List.drop (rank - 1) candidates
                 |> List.head
-                |> Maybe.withDefault ( covered.minKnown, covered.maxKnown )
+                |> expectMaybe "Ár 5000 hafði engan gildan frambjóðanda."
     in
     ( makeYear (BI.fromInt 5000) covered (Tuple.first chosen) (Tuple.second chosen), covered )
 
@@ -1463,7 +1547,7 @@ nextYear calculationDay knownYear state =
             ensureGatesCover openDay (BI.add openDay (BI.fromInt yearMaxDays)) state
 
         scan index out =
-            if index > covered.maxKnown then
+            if BI.compareBig index covered.maxKnown == GT then
                 out
 
             else
@@ -1475,13 +1559,13 @@ nextYear calculationDay knownYear state =
                     out
 
                 else if validYearPair covered openIndex index then
-                    scan (index + 1) (out ++ [ index ])
+                    scan (BI.add index BI.one) (out ++ [ index ])
 
                 else
-                    scan (index + 1) out
+                    scan (BI.add index BI.one) out
 
         candidates =
-            scan (openIndex + 1) []
+            scan (BI.add openIndex BI.one) []
                 |> List.sortWith
                     (\a b -> BI.compareBig (yearLength covered openIndex a) (yearLength covered openIndex b))
 
@@ -1497,7 +1581,7 @@ nextYear calculationDay knownYear state =
         closeIndex =
             List.drop (rank - 1) candidates
                 |> List.head
-                |> Maybe.withDefault (openIndex + 6)
+                |> expectMaybe "Næsta ár hafði engan gildan lokahliðsframbjóðanda."
     in
     ( makeYear (BI.add knownYear.number BI.one) covered openIndex closeIndex, covered )
 
@@ -1515,7 +1599,7 @@ previousYear calculationDay knownYear state =
             ensureGatesCover (BI.sub closeDay (BI.fromInt yearMaxDays)) closeDay state
 
         scan index out =
-            if index < covered.minKnown then
+            if BI.compareBig index covered.minKnown == LT then
                 out
 
             else
@@ -1527,13 +1611,13 @@ previousYear calculationDay knownYear state =
                     out
 
                 else if validYearPair covered index closeIndex then
-                    scan (index - 1) (out ++ [ index ])
+                    scan (BI.sub index BI.one) (out ++ [ index ])
 
                 else
-                    scan (index - 1) out
+                    scan (BI.sub index BI.one) out
 
         candidates =
-            scan (closeIndex - 1) []
+            scan (BI.sub closeIndex BI.one) []
                 |> List.sortWith
                     (\a b -> BI.compareBig (yearLength covered a closeIndex) (yearLength covered b closeIndex))
 
@@ -1549,7 +1633,7 @@ previousYear calculationDay knownYear state =
         openIndex =
             List.drop (rank - 1) candidates
                 |> List.head
-                |> Maybe.withDefault (closeIndex - 6)
+                |> expectMaybe "Fyrra ár hafði engan gildan opnunarhliðsframbjóðanda."
     in
     ( makeYear (BI.sub knownYear.number BI.one) covered openIndex closeIndex, covered )
 
@@ -1671,6 +1755,12 @@ countCutletPartitionsMemo rem slots required cumulative hit memo =
                 scan 1 BI.zero memo
 
 
+countCutletPartitionsForTest : Int -> Int -> Maybe Int -> BigInt
+countCutletPartitionsForTest total slots required =
+    countCutletPartitionsMemo total slots required 0 False Dict.empty
+        |> Tuple.first
+
+
 unrankCutletPartition : Int -> Int -> Maybe Int -> BigInt -> List Int
 unrankCutletPartition total slots required rank1 =
     let
@@ -1680,7 +1770,7 @@ unrankCutletPartition total slots required rank1 =
                     rem - (slotsLeft - 1)
             in
             if x > maxX then
-                ( 1, cumulative, hit, r, memo )
+                Debug.todo "Röð kótilettuskiptingar fór út fyrir löglegu fjölskylduna."
 
             else
                 let
@@ -1718,7 +1808,12 @@ unrankCutletPartition total slots required rank1 =
                             chooseX (x + 1) rem slotsLeft cumulative hit (BI.sub r block) nextMemo
 
                         else
-                            ( x, nextCumulative, nextHit, r, nextMemo )
+                            { chosen = x
+                            , cumulative = nextCumulative
+                            , hit = nextHit
+                            , rank = r
+                            , memo = nextMemo
+                            }
 
         loop position rem cumulative hit r memo out =
             if position > slots then
@@ -1729,10 +1824,17 @@ unrankCutletPartition total slots required rank1 =
                     slotsLeft =
                         slots - position + 1
 
-                    ( chosen, nextCumulative, nextHit, nextRank, nextMemo ) =
+                    choice =
                         chooseX 1 rem slotsLeft cumulative hit r memo
                 in
-                loop (position + 1) (rem - chosen) nextCumulative nextHit nextRank nextMemo (out ++ [ chosen ])
+                loop
+                    (position + 1)
+                    (rem - choice.chosen)
+                    choice.cumulative
+                    choice.hit
+                    choice.rank
+                    choice.memo
+                    (out ++ [ choice.chosen ])
     in
     loop 1 total 0 False rank1 Dict.empty []
 
@@ -1741,7 +1843,7 @@ chooseCutletCount : SauceResult -> Year -> Int
 chooseCutletCount structureSauce year =
     let
         gaps =
-            year.closeGateIndex - year.openGateIndex
+            localGateGapCount year.openGateIndex year.closeGateIndex
 
         candidates =
             List.range 6 17 |> List.filter (\k -> k <= gaps)
@@ -1754,14 +1856,14 @@ chooseCutletCount structureSauce year =
     in
     List.drop (rank - 1) candidates
         |> List.head
-        |> Maybe.withDefault 6
+        |> expectMaybe "Kótilettufjöldi hafði engan gildan frambjóðanda."
 
 
 chooseCutletPartition : BigInt -> SauceResult -> Year -> GateState -> Int -> ( List Int, GateState )
 chooseCutletPartition calculationDay structureSauce year state cutletCount =
     let
         gaps =
-            year.closeGateIndex - year.openGateIndex
+            localGateGapCount year.openGateIndex year.closeGateIndex
 
         ( exact, covered ) =
             exactGateIndex calculationDay state
@@ -1769,8 +1871,14 @@ chooseCutletPartition calculationDay structureSauce year state cutletCount =
         required =
             case exact of
                 Just gateIndex ->
-                    if gateIndex > year.openGateIndex && gateIndex < year.closeGateIndex then
-                        Just (gateIndex - year.openGateIndex)
+                    if BI.compareBig gateIndex year.openGateIndex == GT
+                        && BI.compareBig gateIndex year.closeGateIndex == LT
+                    then
+                        Just
+                            (BI.sub gateIndex year.openGateIndex
+                                |> BI.toIntMaybe
+                                |> expectMaybe "Innra hliðabil komst ekki í Elm Int."
+                            )
 
                     else
                         Nothing
@@ -1813,7 +1921,7 @@ materializeCutlets year state partition names =
                 ( gapCount :: moreParts, canonicalIndex :: moreNames ) ->
                     let
                         closeIndex =
-                            cursor + gapCount
+                            BI.add cursor (BI.fromInt gapCount)
 
                         cutlet =
                             { canonicalIndex = canonicalIndex
@@ -1840,7 +1948,7 @@ chooseMonthCount structureSauce year =
         lengthDays =
             BI.sub year.closeGateDay year.openGateDay
                 |> BI.toIntMaybe
-                |> Maybe.withDefault yearMinDays
+                |> expectMaybe "Árslengd komst ekki í Elm Int þrátt fyrir 5778 daga hámark."
 
         low =
             ceilDivInt lengthDays 123
@@ -1863,7 +1971,7 @@ chooseMonthLengths structureSauce year monthCount =
         lengthDays =
             BI.sub year.closeGateDay year.openGateDay
                 |> BI.toIntMaybe
-                |> Maybe.withDefault yearMinDays
+                |> expectMaybe "Árslengd komst ekki í Elm Int þrátt fyrir 5778 daga hámark."
 
         count =
             countBoundedCompositions lengthDays monthCount 4 123
@@ -1957,11 +2065,7 @@ findCutlet targetDay cutlets =
                     && BI.compareBig targetDay cutlet.lastDay /= GT
             )
         |> List.head
-        |> Maybe.withDefault
-            { canonicalIndex = 1
-            , firstDay = targetDay
-            , lastDay = targetDay
-            }
+        |> expectMaybe "Markdagurinn fannst ekki í neinni kótilettu."
 
 
 countOccurrencesThrough : Int -> Int -> List Int -> Int
@@ -1990,7 +2094,7 @@ calendarDateCanonical calculationDay targetDay =
         offset =
             BI.sub targetDay (BI.add year.openGateDay BI.one)
                 |> BI.toIntMaybe
-                |> Maybe.withDefault 0
+                |> expectMaybe "Dagshliðrun innan árs komst ekki í Elm Int."
 
         monthId =
             listAt structure.monthWeaving (offset + 1)
@@ -2016,8 +2120,12 @@ calendarDate calculationDay targetDay =
             calendarDateCanonical calculationDay targetDay
     in
     { yearNumber = canonical.yearNumber
-    , cutletName = Catalog.cutletName canonical.cutletCanonicalIndex |> Maybe.withDefault ""
+    , cutletName =
+        Catalog.cutletName canonical.cutletCanonicalIndex
+            |> expectMaybe "Kótilettuvísitala vantar í frysta íslenska katalóginn."
     , dayInCutlet = canonical.dayInCutlet
-    , monthName = Catalog.monthName canonical.monthCanonicalIndex |> Maybe.withDefault ""
+    , monthName =
+        Catalog.monthName canonical.monthCanonicalIndex
+            |> expectMaybe "Mánaðarvísitala vantar í frysta íslenska katalóginn."
     , dayInMonth = canonical.dayInMonth
     }
