@@ -1,0 +1,8 @@
+STAGE=1
+KIND=BOOTSTRAP
+TOOLCHAIN=ELM_0_19_1
+TOOLCHAIN_AVAILABLE=NO
+LOCAL_TESTS_EXECUTED=NO
+EXPECTED_RESULT=Öll Stage 1 próf standast og verkefnisstaðan verður GREEN.
+ACTUAL_RESULT=Ekki keyrt: Elm-þýðandi er ekki tiltækur í afhendingarumhverfinu.
+BLOCKER=Stage 1 þarf raunverulega Elm 0.19.1 keyrslu áður en LAST_COMPLETED_STAGE má verða 1 og SEMANTIC_STATE_OWNER_VALIDATED má verða YES.
