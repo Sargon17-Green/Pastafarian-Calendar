@@ -1,0 +1,1 @@
+MCFLAGS=--warn-unused-imports --warn-unused-args --halt-at-warn

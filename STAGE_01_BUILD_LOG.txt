@@ -1,0 +1,2 @@
+=== STAGE 01 BUILD ATTEMPT ===
+./RUN_STAGE_01.sh: 3: mmc: not found
