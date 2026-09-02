@@ -1,0 +1,9 @@
+STAGE=1
+KIND=BOOTSTRAP
+SOURCE_TREE_CREATED=YES
+ADA_COMPILER_AVAILABLE=NO
+ADA_BUILD_EXECUTED=NO
+ADA_TESTS_EXECUTED=NO
+EXPECTED_RESULT=GREEN
+ACTUAL_RESULT=NOT_EXECUTED
+BLOCKING_REASON=ఈ పరిసరంలో gnat1, gnatbind, gnatmake మరియు gprbuild అందుబాటులో లేవు; Debian mirror DNS కూడా అందుబాటులో లేకపోవడంతో Ada toolchain ను ఇక్కడ స్థాపించలేకపోయాం.
