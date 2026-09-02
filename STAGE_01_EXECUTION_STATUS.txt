@@ -1,0 +1,9 @@
+STATO_ESECUZIONE=BLOCKED_NO_SCALA_TOOLCHAIN
+STADIO=1
+TIPO=BOOTSTRAP
+COMPILAZIONE_ESEGUITA=NO
+TEST_SCALA_ESEGUITI=NO
+RISULTATO_ATTESO=GREEN
+RISULTATO_REALE=NON_VERIFICATO
+
+La preparazione del Bootstrap è completa a livello di sorgenti e audit statico. Nell'ambiente di lavoro non sono disponibili scala, scalac o sbt. Il computer remoto autorizzato risulta offline. Non è quindi corretto dichiarare lo stadio completato o verde prima di una vera compilazione ed esecuzione Scala.
