@@ -1,0 +1,16 @@
+{
+  "name": "Pastafari-Raku-Estonian",
+  "version": "0.1.0-stage01",
+  "description": "Raku ja eesti lähtekeele sõltumatu esimese etapi teostus",
+  "auth": "zef:local-stage01",
+  "source-url": "",
+  "provides": {
+    "Pastafari::Bootstrap": "lib/Pastafari/Bootstrap.rakumod",
+    "Pastafari::Bootstrap::Context": "lib/Pastafari/Bootstrap/Context.rakumod",
+    "Pastafari::Bootstrap::Infrastructure": "lib/Pastafari/Bootstrap/Infrastructure.rakumod",
+    "Pastafari::Calendar": "lib/Pastafari/Calendar.rakumod",
+    "Pastafari::SourceLanguageCatalog": "lib/Pastafari/SourceLanguageCatalog.rakumod"
+  },
+  "depends": [],
+  "test-depends": []
+}

@@ -1,0 +1,6 @@
+STAATUS=EI_OLE_KÄIVITATUD
+PÕHJUS=Kohalikus töökeskkonnas puudub Raku/Rakudo käituskeskkond.
+NÕUTUD_KÄSK=raku -Ilib -It/lib t/01-stage01.t
+OODATUD_TULEMUS=Kõik Stage 1 testid PASS ja protsessi väljumiskood 0.
+TEGELIK_TULEMUS=Testikäivitust ei toimunud; PASS-i ei väideta.
+JÄRGMINE_SAMM=Käivita nõutud käsk Raku keskkonnas ja säilita täielik stdout/stderr.
