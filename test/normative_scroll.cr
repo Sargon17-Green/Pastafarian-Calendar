@@ -135,21 +135,19 @@ module NormativeScroll
     stones
   end
 
-  STONES = build_stones
+  HIDDEN_COEFF = {
+    {3, 4, 6, 8},
+    {5, 7, 10, 12},
+    {7, 10, 14, 16},
+    {9, 13, 18, 20},
+    {11, 16, 22, 24},
+    {13, 19, 26, 28},
+    {15, 22, 30, 32},
+  }
 
-  HIDDEN_COEFF = [
-    [3, 4, 6, 8],
-    [5, 7, 10, 12],
-    [7, 10, 14, 16],
-    [9, 13, 18, 20],
-    [11, 16, 22, 24],
-    [13, 19, 26, 28],
-    [15, 22, 30, 32],
-  ]
+  HIDDEN_GRIND_STONE = {WHEAT, BARLEY, SALT, BITTER, RED, WHEAT, BARLEY}
 
-  HIDDEN_GRIND_STONE = [WHEAT, BARLEY, SALT, BITTER, RED, WHEAT, BARLEY]
-
-  VISIBLE_GRINDS = [
+  VISIBLE_GRINDS = {
     {3, 5, 7, 11, WHEAT},
     {5, 7, 11, 13, BARLEY},
     {7, 11, 13, 17, SALT},
@@ -161,12 +159,12 @@ module NormativeScroll
     {29, 31, 37, 41, BITTER},
     {31, 37, 41, 43, RED},
     {37, 41, 43, 47, WHEAT},
-  ]
+  }
 
-  BOWL_PRIME = [17, 19, 23, 29, 31, 37]
-  BOWL_STIR_STONE_BY_POSITION = [WHEAT, BARLEY, SALT, BITTER, RED, WHEAT]
+  BOWL_PRIME = {17, 19, 23, 29, 31, 37}
+  BOWL_STIR_STONE_BY_POSITION = {WHEAT, BARLEY, SALT, BITTER, RED, WHEAT}
 
-  def self.build_hidden_drops(counts : WorkCounts, stones = STONES) : Array(BigInt)
+  def self.build_hidden_drops(counts : WorkCounts, stones : Array(Array(BigInt))) : Array(BigInt)
     hidden = Array(BigInt).new(7, BigInt.new(0))
     k = 1
     while k <= 7
@@ -187,7 +185,7 @@ module NormativeScroll
     hidden
   end
 
-  def self.build_visible_drops(counts : WorkCounts, stones = STONES, hidden = build_hidden_drops(counts, stones)) : Array(BigInt)
+  def self.build_visible_drops(counts : WorkCounts, stones : Array(Array(BigInt)), hidden : Array(BigInt)) : Array(BigInt)
     timeline = Hash(Int32, BigInt).new
     k = 1
     while k <= 7
@@ -269,7 +267,7 @@ module NormativeScroll
     bowls
   end
 
-  def self.apply_visible_drops_to_bowls(bowls : Array(BigInt), visible : Array(BigInt), stones = STONES) : Tuple(Array(BigInt), Array(Int32))
+  def self.apply_visible_drops_to_bowls(bowls : Array(BigInt), visible : Array(BigInt), stones : Array(Array(BigInt))) : Tuple(Array(BigInt), Array(Int32))
     order_at_drop_46 = [] of Int32
     i = 1
     while i <= 46
@@ -323,10 +321,11 @@ module NormativeScroll
 
   def self.sauce(calculation_day : BigInt, target_day : BigInt) : SauceResult
     counts = work_counts(calculation_day, target_day)
-    hidden = build_hidden_drops(counts)
-    visible = build_visible_drops(counts, STONES, hidden)
+    stones = build_stones
+    hidden = build_hidden_drops(counts, stones)
+    visible = build_visible_drops(counts, stones, hidden)
     bowls = initial_bowls(counts)
-    bowls_after_drops, order_at_drop_46 = apply_visible_drops_to_bowls(bowls, visible)
+    bowls_after_drops, order_at_drop_46 = apply_visible_drops_to_bowls(bowls, visible, stones)
     SauceResult.new(post_stir12(bowls_after_drops), order_at_drop_46)
   end
 
@@ -570,7 +569,8 @@ module NormativeScroll
   end
 
   class WeavingFamily
-    def initialize(@lengths : Array(Int32))
+    def initialize(lengths : Array(Int32))
+      @lengths = lengths.dup
       @memo = Hash(String, BigInt).new
     end
 

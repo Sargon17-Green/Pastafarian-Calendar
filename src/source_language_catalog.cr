@@ -6,7 +6,7 @@ module PastafarianCalendar
 
     record Entry, canonical_index : Int32, text : String
 
-    CUTLETS = [
+    CUTLETS = {
       Entry.new(1, "કાંસું"),
       Entry.new(2, "શિયાળ"),
       Entry.new(3, "વૃક્ક"),
@@ -24,9 +24,9 @@ module PastafarianCalendar
       Entry.new(15, "અક્કદ"),
       Entry.new(16, "શિંગડું"),
       Entry.new(17, "ખાલી ઘડો"),
-    ] of Entry
+    }
 
-    MONTHS = [
+    MONTHS = {
       Entry.new(1, "ચીકણી માટી"),
       Entry.new(2, "દાડમ"),
       Entry.new(3, "કોણી"),
@@ -74,7 +74,7 @@ module PastafarianCalendar
       Entry.new(45, "નાશપતી"),
       Entry.new(46, "ધનુષ્ય"),
       Entry.new(47, "રેતી"),
-    ] of Entry
+    }
 
     def self.cutlet(index : Int32) : String
       raise IndexError.new("E_CUTLET_INDEX") unless 1 <= index <= CUTLETS.size
