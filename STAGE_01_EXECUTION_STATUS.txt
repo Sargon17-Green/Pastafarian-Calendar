@@ -1,0 +1,9 @@
+STAGE_01_IMPLEMENTATION=PREPARED
+STAGE_01_TEST_EXECUTION=NOT_RUN
+REASON=R i Rscript no estan disponibles a l'entorn d'execució actual i la xarxa del contenidor no permet instal·lar-los.
+ALTERNATE_LANGUAGE_EXECUTION=NO
+EXPECTED_COMMAND_1=Rscript tests/run_tests.R
+EXPECTED_COMMAND_2=Rscript tests/oracle_smoke.R
+EXPECTED_RESULT_1=STAGE_01_TESTS=PASS
+EXPECTED_RESULT_2=STAGE_01_ORACLE_SMOKE=PASS
+STAGE_01_CAN_BE_MARKED_COMPLETE=NO
