@@ -47,7 +47,7 @@ jobs:
           CXX: clang++
         run: |
           set -euo pipefail
-          tests/run_http_api_tests.sh
+          sh tests/run_http_api_tests.sh
 
       - name: Aedificare ministrum cum monstro vero
         shell: bash
@@ -56,7 +56,7 @@ jobs:
           OUTPUT: /tmp/pastafari-http
         run: |
           set -euo pipefail
-          ./build_http_api.sh
+          sh build_http_api.sh
 
       - name: Fumum per socket apud Foundation probare
         shell: bash
