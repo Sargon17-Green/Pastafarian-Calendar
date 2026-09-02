@@ -1,0 +1,83 @@
+name: Cicatrix HTTP Celeritas v1
+
+on:
+  push:
+    branches:
+      - Celeritas-per-Sepulcra-HTTP-API
+      - Celeritas-per-Sepulcra
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  cicatrix-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v5
+
+      - name: Verificare Boost et compilatores
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          clang++ --version | head -1
+          g++ --version | head -1
+
+      - name: Currere probationes cicatricis HTTP
+        shell: bash
+        env:
+          CXX: clang++
+        run: |
+          set -euo pipefail
+          tests/run_http_api_tests.sh
+
+      - name: Aedificare ministrum cum monstro vero
+        shell: bash
+        env:
+          CXX: clang++
+          OUTPUT: /tmp/pastafari-http
+        run: |
+          set -euo pipefail
+          ./build_http_api.sh
+
+      - name: Fumum per socket apud Foundation probare
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/pastafari-http 127.0.0.1 18080 >/tmp/http.out 2>/tmp/http.err &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 100); do
+            if curl -fsS http://127.0.0.1:18080/v1/health >/tmp/health.json; then break; fi
+            sleep 0.1
+          done
+          grep -q '"status":"ok"' /tmp/health.json
+          timeout 5m curl -fsS \
+            'http://127.0.0.1:18080/v1/date?date=-15055671&calendar=engine-day&calculation_day=-15055671' \
+            >/tmp/foundation.json
+          grep -q '"year":"5000"' /tmp/foundation.json
+          grep -q '"index":4' /tmp/foundation.json
+          grep -q '"dayInCutlet":"762"' /tmp/foundation.json
+          grep -q '"index":12' /tmp/foundation.json
+          grep -q '"dayInMonth":"105"' /tmp/foundation.json
+
+      - name: Fumum implicitum Kisurra-Venus probare
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/pastafari-http 127.0.0.1 18081 >/tmp/http2.out 2>/tmp/http2.err &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 100); do
+            if curl -fsS http://127.0.0.1:18081/v1/health >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 15m curl -fsS \
+            'http://127.0.0.1:18081/v1/date?date=2026-09-02' \
+            >/tmp/implicit.json
+          grep -q '"source":"request-instant"' /tmp/implicit.json
+          grep -q '"site":"kisurra"' /tmp/implicit.json
+          grep -q 'venus-lower-transit-jpl-approx-1' /tmp/implicit.json
