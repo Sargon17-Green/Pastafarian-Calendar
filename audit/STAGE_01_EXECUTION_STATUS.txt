@@ -1,0 +1,14 @@
+Mərhələ 1 üçün Rust sınaq kodu və normativ oracle hazırlandı, lakin bu icra mühitində Rust kompilyatoru mövcud deyil.
+
+Yoxlama cəhdinin nəticəsi:
+- rustc: tapılmadı
+- cargo: tapılmadı
+- paket meneceri ilə quraşdırma: şəbəkə və DNS məhdudiyyətinə görə mümkün olmadı
+- ayrıca Rust alət zəncirinin endirilməsi: şəbəkə səviyyəsində bloklandı
+- yerli Rust sınaqları: icra olunmadı
+
+İş sahəsini hazırlamaq üçün istifadə olunan xarici redaktə və avtomatlaşdırma alətləri tətbiq xəttinin proqramlaşdırma dili məhdudiyyətinə daxil deyil. Layihə ağacında icra olunan tətbiq, oracle, test, generator və hesablama kodu yalnız Rust-dur; başqa proqramlaşdırma dilində layihə kodu və ya xarici dil runtime çağırışı yoxdur.
+
+Statik baxış zamanı `Cutlet` quruluşunda təkrarlanan `open_gate_index` sahəsi aşkar edildi və düzəldildi. `MonsterContext` giriş günləri də məhdud `i128` əvəzinə `BigInt` ilə saxlanılır. Mənbə dili kataloqunun bütün 17+47 mətn qiyməti ayrıca exact fixture ilə dondurulub.
+
+Faktiki `cargo test --all-targets` icrası olmadığı üçün nəticə hələ təsdiqlənmiş GREEN kimi qeyd edilmir. Kod və Stage 1 handoff tərkibi statik baxımdan hazırdır; qalan əməliyyat Rust alət zəncirində sınaqların real icrasıdır.

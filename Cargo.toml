@@ -1,0 +1,14 @@
+[package]
+name = "pastafarian-calendar-rust-az"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "pastafarian_calendar_rust_az"
+path = "src/lib.rs"
+
+[dependencies]
+num-bigint = "0.4"
+num-integer = "0.1"
+num-traits = "0.2"
