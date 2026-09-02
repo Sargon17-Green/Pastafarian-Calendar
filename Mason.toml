@@ -1,0 +1,7 @@
+[brick]
+name = "pastafarian_calendar_chapel_uk"
+version = "0.1.0"
+chplVersion = "2.9.0"
+license = "MIT"
+
+[dependencies]
