@@ -31,7 +31,7 @@ const worker = fs.readFileSync(path.join(ROOT, 'browser/dist/pastafari-worker.js
 const workerEntry = fs.readFileSync(path.join(ROOT, 'browser/pastafari-worker-entry.js'), 'utf8');
 
 assert(standard.includes('PastafariBrowserLocaleData'));
-for (const code of ['ie', 'en', 'he', 'ar', 'ru']) {
+for (const code of ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs']) {
   assert(standard.includes("code: '" + code + "'") || standard.includes('\"code\": \"' + code + '\"'),
     'Manca li locale in li constructet standard bundle: ' + code);
 }

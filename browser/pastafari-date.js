@@ -55,6 +55,8 @@
     element.style.setProperty('--month-edge', theme.edge);
     element.style.setProperty('--month-bg', theme.bg);
     element.style.setProperty('--month-wash', theme.wash);
+    element.style.setProperty('--month-ink', '#17130e');
+    element.style.setProperty('--month-text-bg', '#fffdf8');
     return theme;
   }
 
@@ -344,97 +346,96 @@
             font-size: clamp(1.5rem, 4vw, 2.6rem);
             line-height: 1.05;
           }
-          .month-run {
-            margin: 0 0 1.35rem;
-            overflow-x: auto;
-            border: 1px solid var(--month-edge, var(--line));
-            border-inline-start: .45rem solid var(--month-edge, var(--accent));
-            border-radius: 1rem;
-            background:
-              linear-gradient(180deg, var(--month-wash, transparent), transparent 10rem),
-              var(--month-bg, var(--panel));
-            box-shadow: 0 10px 30px rgb(54 36 20 / 7%);
-          }
-          .month-run:last-child { margin-bottom: 0; }
-          .month-heading {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: .7rem;
-            padding: .75rem .9rem;
-            border-bottom: 1px solid color-mix(in srgb, var(--month-edge, var(--line)) 42%, white);
-            background: rgb(255 255 255 / 54%);
-          }
-          .month-heading strong {
-            overflow-wrap: anywhere;
-            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
-            font-size: 1.08rem;
-          }
-          .month-range {
-            color: var(--muted);
-            font-size: .78rem;
-            white-space: nowrap;
-          }
-          .days {
+          /*
+           * Keep month-run semantic groups in the DOM, but let their cards take
+           * part in one flat cutlet grid. This matches the original public site:
+           * rows/columns are presentation, not weeks or month subdivisions.
+           */
+          .cutlet-grid {
+            position: relative;
             display: grid;
             grid-template-columns: repeat(7, minmax(7.5rem, 1fr));
-            gap: clamp(.55rem, 1vw, .85rem);
+            gap: clamp(.65rem, 1.2vw, 1rem);
             min-width: 58rem;
-            padding: .75rem;
+            padding-block: .5rem 1.5rem;
             align-items: stretch;
+          }
+          .month-run,
+          .days { display: contents; }
+          .month-heading {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            border: 0;
+            white-space: nowrap;
           }
           .day {
             position: relative;
             display: grid;
             min-width: 0;
-            min-height: 178px;
-            padding: 16px;
-            grid-template-rows: repeat(3, auto);
-            align-content: center;
-            gap: .62rem;
-            border: 1px solid var(--month-edge, var(--line));
-            border-top: 7px solid var(--month-edge, var(--accent));
-            border-radius: 20px;
-            background:
-              linear-gradient(180deg, color-mix(in srgb, var(--month-wash, white) 70%, white), rgb(255 255 255 / 0) 58%),
-              var(--month-bg, var(--panel));
-            color: var(--ink);
-            box-shadow: 0 8px 20px rgb(54 36 20 / 7%);
-            transform-origin: center center;
+            min-height: 10.5rem;
+            padding: .85rem;
+            grid-template-rows: auto auto auto;
+            align-content: stretch;
+            gap: .48rem;
+            overflow: hidden;
+            border: 2px solid var(--month-edge, var(--line));
+            border-radius: .85rem;
+            background-color: var(--month-bg, var(--panel));
+            background-image: var(--month-pattern-image, none);
+            background-size: var(--month-pattern-size, auto);
+            background-repeat: repeat;
+            color: var(--month-ink, var(--ink));
+            box-shadow: inset 0 1px rgb(255 255 255 / 14%);
           }
-          .day.mod0 { transform: rotate(-.28deg); }
-          .day.mod1 { transform: rotate(.18deg); }
-          .day.mod2 { transform: rotate(-.12deg); }
-          .day.mod3 { transform: rotate(.25deg); }
-          .day.mod4 { transform: rotate(-.2deg); }
-          .day.mod5 { transform: rotate(.1deg); }
-          .day.mod6 { transform: rotate(-.16deg); }
           .day[aria-current="date"] {
             z-index: 2;
-            transform: translateY(-4px) rotate(-.35deg) scale(1.035);
-            border: 2px solid var(--ink);
-            border-top: 7px solid var(--month-edge, var(--accent));
-            background:
-              linear-gradient(180deg, color-mix(in srgb, var(--month-wash, white) 82%, white), rgb(255 255 255 / 0) 58%),
-              var(--month-bg, #fff7e8);
-            box-shadow: 0 18px 0 rgb(23 19 14 / 12%), 0 30px 56px rgb(23 19 14 / 24%);
+            grid-template-rows: auto auto auto auto;
+            border: 6px solid white;
+            outline: 7px solid var(--ink);
+            outline-offset: -1px;
+            box-shadow:
+              0 0 0 5px var(--accent),
+              0 12px 28px rgb(0 0 0 / 40%);
           }
-          .day-line {
-            min-width: 0;
+          .target-badge {
+            display: block;
+            width: fit-content;
+            max-width: 100%;
+            margin-bottom: .1rem;
+            padding: .28rem .55rem;
             overflow-wrap: anywhere;
-            font-size: clamp(1.02rem, 2.1vw, 1.28rem);
-            font-weight: 700;
+            border: 2px solid currentcolor;
+            border-radius: 999px;
+            background: var(--month-text-bg, var(--month-bg));
+            font-size: .74rem;
+            font-weight: 950;
             line-height: 1.25;
           }
-          .day-line.year {
-            color: var(--muted);
-            font-size: clamp(.82rem, 1.5vw, .96rem);
-            font-weight: 750;
+          .day-line {
+            display: block;
+            min-width: 0;
+            margin: 0;
+            padding: .42rem .55rem;
+            overflow-wrap: anywhere;
+            border: 2px solid color-mix(in srgb, var(--month-ink, var(--ink)) 82%, transparent);
+            border-radius: .52rem;
+            background-color: var(--month-text-bg, var(--month-bg));
+            color: var(--month-ink, var(--ink));
+            box-shadow: 0 2px 7px rgb(0 0 0 / 22%);
+            font-size: clamp(.8rem, 1.25vw, .96rem);
+            font-weight: 600;
+            line-height: 1.35;
           }
-          .day-line.cutlet,
-          .day-line.month {
-            color: var(--accent-dark);
-            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+          .day-line strong {
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: 850;
+            font-variant-numeric: tabular-nums;
           }
 
           .overlay {
@@ -527,6 +528,48 @@
             .toolbar { align-items: stretch; flex-direction: column; }
             .toolbar-actions { justify-content: stretch; }
             .toolbar-actions button { flex: 1 1 9rem; }
+            .cutlet-grid {
+              grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+              min-width: 0;
+            }
+          }
+          @media (max-width: 26.25rem) {
+            .cutlet-grid { grid-template-columns: 1fr; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+              animation-duration: .01ms !important;
+              animation-iteration-count: 1 !important;
+              transition-duration: .01ms !important;
+            }
+          }
+          @media (forced-colors: active) {
+            .day, .target-beacon {
+              border: 2px solid CanvasText;
+              background: Canvas;
+              color: CanvasText;
+            }
+            .day-line, .beacon-line {
+              border: 2px solid CanvasText;
+              background: Canvas;
+              color: CanvasText;
+              box-shadow: none;
+            }
+            .day[aria-current="date"] {
+              border: 6px solid Highlight;
+              outline: 4px solid Highlight;
+            }
+          }
+          @media print {
+            :host { width: 100%; padding: 0; }
+            .masthead { grid-template-columns: 1fr; padding-block: 0 1rem; }
+            .language-control, .search-panel, .toolbar-actions { display: none; }
+            .viewport { max-height: none; overflow: visible; }
+            .cutlet-heading { position: static; box-shadow: none; }
+            .cutlet-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); min-width: 0; gap: .2rem; }
+            .day { min-height: 0; break-inside: avoid; border: 1px solid #111; background: white; color: black; box-shadow: none; }
+            .day[aria-current="date"] { border: 3px solid #111; outline: none; box-shadow: none; }
+            .day-line { border: 1px solid #111; background: white; color: black; box-shadow: none; font-size: .72rem; }
           }
         </style>
 
@@ -1018,15 +1061,19 @@
       heading.textContent = this._t('calendar.currentCutlet', { year: view.year }) + ' ' + localCutlet;
       section.append(heading);
 
+      const flatGrid = doc.createElement('div');
+      flatGrid.className = 'cutlet-grid';
+      flatGrid.setAttribute('role', 'list');
       let run = [];
       for (const day of view.days) {
         if (run.length > 0 && !sameMonthRun(run[run.length - 1], day)) {
-          section.append(this._renderMonthRun(run));
+          flatGrid.append(this._renderMonthRun(run));
           run = [];
         }
         run.push(day);
       }
-      if (run.length > 0) section.append(this._renderMonthRun(run));
+      if (run.length > 0) flatGrid.append(this._renderMonthRun(run));
+      section.append(flatGrid);
       return section;
     }
 
@@ -1036,6 +1083,7 @@
       const localMonth = this._localCalendarName('month', first.monthName);
       const group = doc.createElement('section');
       group.className = 'month-run';
+      group.setAttribute('role', 'group');
       applyMonthTheme(group, first.monthName);
 
       const heading = doc.createElement('header');
@@ -1050,15 +1098,15 @@
           : String(first.dayInMonth) + '–' + String(last.dayInMonth)
       );
       heading.append(title, range);
+      group.setAttribute('aria-label', localMonth + ' · ' + range.textContent);
 
       const grid = doc.createElement('div');
       grid.className = 'days';
-      grid.setAttribute('role', 'list');
       for (const day of days) {
         const localDayCutlet = this._localCalendarName('cutlet', day.cutletName);
         const localDayMonth = this._localCalendarName('month', day.monthName);
         const card = doc.createElement('article');
-        card.className = 'day mod' + String(((Number(day.dayInCutlet) % 7) + 7) % 7);
+        card.className = 'day';
         card.dataset.jdn = String(day.jdn);
         applyMonthTheme(card, day.monthName);
         card.setAttribute('role', 'listitem');
@@ -1069,7 +1117,16 @@
           dayInMonth: day.dayInMonth,
           monthName: localDayMonth,
         }));
-        if (BigInt(day.jdn) === this._targetJdn) card.setAttribute('aria-current', 'date');
+        const isTarget = BigInt(day.jdn) === this._targetJdn;
+        if (isTarget) card.setAttribute('aria-current', 'date');
+
+        if (isTarget) {
+          const targetBadge = doc.createElement('span');
+          targetBadge.className = 'target-badge';
+          targetBadge.setAttribute('aria-hidden', 'true');
+          targetBadge.textContent = this._t('target.searched');
+          card.append(targetBadge);
+        }
 
         const yearLine = doc.createElement('span');
         yearLine.className = 'day-line year';

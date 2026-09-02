@@ -340,7 +340,7 @@ async function flush() {
 
   // Month appearance is deterministic from the current semantic source name,
   // independent of locale and rendering order. Day cards keep the original
-  // editorial seven-position visual rhythm while remaining non-interactive.
+  // original flat-grid visual identity while remaining non-interactive.
   const themed = new PastafariDateElement();
   themed._locale = sandbox.PastafariBrowserInternal.i18n.resolveLocale('en', []);
   themed._targetJdn = 100n;
@@ -354,8 +354,11 @@ async function flush() {
   const grid = runA.children[1];
   const card = grid.children[0];
   assert.strictEqual(card.tagName, 'ARTICLE');
-  assert(card.className.includes('mod1'));
+  assert.strictEqual(card.className, 'day');
   assert.strictEqual(card.style.values.get('--month-edge'), runA.style.values.get('--month-edge'));
+  assert.strictEqual(card.style.values.get('--month-ink'), '#17130e');
+  assert.strictEqual(card.children[0].className, 'target-badge');
+  assert.strictEqual(card.children[0].textContent, 'This is the date you searched for');
 
   console.log('browser-component-runtime: PASS');
 })().catch((error) => {

@@ -34,21 +34,29 @@ for (const token of [
   "this._t('calendar.today')",
   "this._t('date.yearLine'",
   "doc.createElement('article')",
+  "className = 'cutlet-grid'",
   'grid-template-columns: repeat(7',
   '#17130e',
   '#9d3825',
-  'min-height: 178px',
-  'border-top: 7px solid',
-  'border-radius: 20px',
-  'translateY(-4px)',
+  'min-height: 10.5rem',
+  'border: 2px solid var(--month-edge',
+  'border-radius: .85rem',
+  'outline: 7px solid var(--ink)',
+  '0 0 0 5px var(--accent)',
+  "className = 'target-badge'",
   'MONTH_THEMES',
   'semanticHash',
-  "card.className = 'day mod'",
+  "card.className = 'day'",
 ]) {
   assert(source.includes(token), 'Manca li original-UI contract-token: ' + token);
 }
 assert(!source.includes("doc.createElement('button');\n        button.type = 'button';\n        button.className = 'day'"),
   'Li ordinary day-cards ne deve esser clickabil buttons.');
 assert(!source.includes('_selectDay(event)'), 'Li old click-to-select day handler ne deve retornar.');
+
+const page = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+assert(page.includes('#f4f0e7'));
+assert(page.includes('radial-gradient(circle at 12% 6%'));
+assert(page.includes('<pastafari-date lang="ie"></pastafari-date>'));
 
 console.log('browser-interface-contract: PASS');

@@ -1,19 +1,27 @@
-# Browser interface v7 delta
+# Browser interface v8 delta
 
-Apply these files to branch `JavaScript+Interlingue` over verified base HEAD
-`221c7af4e672fc11799d1c5582e788ee455cf717`.
+Apply over branch `JavaScript+Interlingue` at verified base HEAD:
 
-This delta does not include `src/**` or generated browser bundles.
+`d00e3ddf980097e1f390e7ff753171cf2e458d24`
 
-Main changes:
-- public visual shell closer to the pinned original site;
-- large three-line non-interactive day cards and target beacon;
-- stable month visual identity derived from current semantic month source name;
-- Web Component lifecycle/race hardening, including no-editor/headless modal closure;
-- complete UI + current 17 cutlet / 47 month localization for:
-  Interlingue, English, Hebrew, Arabic, Russian;
-- Hebrew and Arabic RTL;
-- raw `value`, `ready`, and `pastafari-change` remain the black-box core result.
+This delta continues the browser/interface port without changing the semantic core.
 
-The local workspace is not a full repository clone, so the GitHub Actions run after
-upload is authoritative for the real Stage-01/core integration.
+Highlights:
+- one visually flat cutlet grid instead of separate visible month panels;
+- original-site style day cards with three boxed date lines;
+- strong searched-day badge and outline;
+- original paper-gradient shell in the deployed `index.html`;
+- 10 complete UI languages: Interlingue, English, Hebrew, Arabic, Russian,
+  French, German, Spanish, Italian and Czech;
+- every active locale covers all 17 current cutlet names and all 47 current
+  month names;
+- calendar-name lookup keys are exact current Interlingue source strings,
+  never old positional indices.
+
+The old locale resources from pinned commit
+`d5cfe77ef7950a9a67ff0e6814833a3eedacae8a` are translation provenance only.
+Changed semantic identities such as `larice`, `Palgursh`, `papirus`,
+`Karshumb`, `leopard`, `candel` and `lilie` are translated explicitly for
+their current meaning/spelling.
+
+Generated browser bundles and `src/**` are intentionally not included.

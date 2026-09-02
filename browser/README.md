@@ -74,13 +74,18 @@ Ti UI-cache ne es li semantic/performance memory.
 
 ## Lingues
 
-Li actual browser-strate suporte quin complet UI-lingues, includet localmen:
+Li actual browser-strate suporte deci complet UI-lingues, includet localmen:
 
 - `ie` — Interlingue (default, LTR)
 - `en` — English (LTR)
 - `he` — עברית (RTL)
 - `ar` — العربية (RTL)
 - `ru` — Русский (LTR)
+- `fr` — Français (LTR)
+- `de` — Deutsch (LTR)
+- `es` — Español (LTR)
+- `it` — Italiano (LTR)
+- `cs` — Čeština (LTR)
 
 Null rete, vendoring, fallback inter lingues o external i18n package es besonat.
 Omni message usat de ti component existe in omni activ locale; un mancant message es un
@@ -104,8 +109,11 @@ li core, `CalendarService` o public date-result contract.
 
 Li visible shell resta inspirat del original public site: editorial `PASTAFARI` masthead,
 paper/panel palette, prominent date-search panel, target beacon, explicit cutlet toolbar
-e grand tri-line day cards. Li day cards es display units, ne implicit buttons. Li
-seven-column layout es visual arrangement, ne un week-semantic.
+e grand tri-line day cards. Li actual cards usa li original public-site structure: tri
+boxed lines, semantic month-colores e un fort target badge/outline. Li day cards es
+display units, ne implicit buttons. Month-runs resta semantic gruppes in li DOM ma ne
+frange li visible cutlet in separat panels. Li desktop seven-column layout es visual
+arrangement, ne un week-semantic; narrow screens reflow responsivmen.
 
 Mensu-colores es derivat deterministicmen del exact semantic source-name, ne del lingue
 o del position del month in un actual cutlet. Ergo un mensu conserva su visual identitá

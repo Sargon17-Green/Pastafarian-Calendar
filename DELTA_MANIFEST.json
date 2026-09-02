@@ -1,47 +1,52 @@
 {
-  "package": "pastafari-browser-interface-original-ui-multilingual-v7",
-  "base_branch": "JavaScript+Interlingue",
-  "base_head_verified": "221c7af4e672fc11799d1c5582e788ee455cf717",
-  "purpose": [
-    "restore more of the original public UI character",
-    "harden Web Component lifecycle and stale-generation behavior",
-    "add complete Hebrew, Arabic and Russian presentation beside Interlingue and English",
-    "localize all visible/ARIA cutlet and month names by exact current semantic source text",
-    "make month visual themes deterministic by semantic month identity"
+  "package": "pastafari-browser-interface-original-ui-10-locales-v8",
+  "branch": "JavaScript+Interlingue",
+  "base_head_verified": "d00e3ddf980097e1f390e7ff753171cf2e458d24",
+  "changes": [
+    "make the displayed cutlet a single flat seven-column desktop grid while keeping month-run semantic groups in the DOM",
+    "restore original public-site day-card structure with three boxed lines, strong target badge and target outline",
+    "restore the paper-gradient shell in the deployed index.html",
+    "add complete French, German, Spanish, Italian and Czech UI/calendar localization",
+    "keep all visible cutlet/month translations keyed by exact CURRENT Interlingue source text",
+    "add explicit regression coverage for larice, Palgursh, papirus, Karshumb, leopard, candel and lilie",
+    "add responsive, forced-colors, reduced-motion and print treatment for the restored visual layout"
   ],
-  "files": [
-    "index.html",
-    "browser/example.html",
-    "browser/pastafari-date.js",
-    "browser/i18n/locales.js",
-    "browser/README.md",
-    "tests/browser-i18n-locales.js",
-    "tests/browser-component-runtime.js",
-    "tests/browser-interface-all.js",
-    "tests/browser-interface-contract.js",
-    "tests/browser-interface-black-box.js",
-    "tests/browser-built-artifacts.js"
+  "active_locales": [
+    "ie",
+    "en",
+    "he",
+    "ar",
+    "ru",
+    "fr",
+    "de",
+    "es",
+    "it",
+    "cs"
   ],
+  "calendar_coverage_per_locale": {
+    "cutlets": 17,
+    "months": 47
+  },
   "excluded": [
     "src/**",
+    "root package.json",
     "browser/dist/**",
-    "browser/standalone/pastafari-date.js",
-    "browser/standalone/pastafari-date.min.js",
-    "visual-harness.html",
-    "local test scaffolding"
+    "browser/standalone generated bundles",
+    "workflow files",
+    "local visual harness and reconstructed core stubs"
   ],
   "local_validation": [
+    "browser-stage01-compatibility: PASS",
+    "browser-interface-service: PASS",
+    "browser-engine-client: PASS",
+    "browser-worker-runtime: PASS",
     "browser-interface-contract: PASS",
     "browser-interface-black-box: PASS",
     "browser-i18n-locales: PASS",
     "browser-component-runtime: PASS",
-    "browser-interface-service: PASS",
-    "browser-engine-client: PASS",
-    "browser-worker-runtime: PASS",
-    "browser-stage01-compatibility: PASS",
     "browser-interface-all: PASS",
-    "scripts/build-browser.js: PASS against local structural core stub",
-    "browser-built-artifacts: PASS against local structural build"
+    "scripts/build-browser.js: PASS",
+    "browser-built-artifacts: PASS"
   ],
-  "note": "The workspace is a delta reconstruction, not a full repository clone. Authoritative Stage-01/full-core validation is GitHub CI after upload."
+  "ci_note": "GitHub CI on the uploaded branch remains authoritative for integration against the repository's real core. At packaging time the v7 Pages run was still reported queued by GitHub."
 }
