@@ -1,0 +1,16 @@
+COMMAND=go test ./...
+ok  	go-kotava-stage01/catalog	(cached)
+?   	go-kotava-stage01/cmd/stage01check	[no test files]
+ok  	go-kotava-stage01/internal/testoracle	(cached)
+ok  	go-kotava-stage01/monster	(cached)
+ok  	go-kotava-stage01/stageaudit	0.003s
+COMMAND=go vet ./...
+COMMAND=go test -race ./...
+ok  	go-kotava-stage01/catalog	(cached)
+?   	go-kotava-stage01/cmd/stage01check	[no test files]
+ok  	go-kotava-stage01/internal/testoracle	(cached)
+ok  	go-kotava-stage01/monster	(cached)
+ok  	go-kotava-stage01/stageaudit	1.015s
+COMMAND=go run ./cmd/stage01check
+STAGE01_GREEN
+RESULT=GREEN
