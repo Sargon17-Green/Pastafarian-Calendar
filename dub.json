@@ -1,0 +1,8 @@
+{
+  "name": "pastafarian-calendar-d-modern-armenian",
+  "description": "Պաստաֆարյան օրացույցի D լեզվով սկզբնական իրականացում",
+  "authors": ["Sargon17-Green"],
+  "license": "UNLICENSED",
+  "targetType": "library",
+  "sourcePaths": ["source"]
+}
