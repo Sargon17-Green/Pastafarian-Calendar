@@ -2,9 +2,9 @@ Red [
     Title: "Чиста нормативна референца за тестове"
 ]
 
-norm-M: bi-from-decimal "170141183460469231731687303715884105727"
-norm-tablets-day: bi-from-integer -278522
-norm-foundation-day: bi-from-integer -15055671
+norm-M: func [] [bi-from-decimal "170141183460469231731687303715884105727"]
+norm-tablets-day: func [] [bi-from-integer -278522]
+norm-foundation-day: func [] [bi-from-integer -15055671]
 
 norm-gate-gap-min: 42
 norm-gate-gap-max: 963
@@ -118,9 +118,7 @@ norm-build-stones: func [/local table old i nw nb ns nm nr] [
     table
 ]
 
-norm-stones: norm-build-stones
-
-norm-hidden-coeff: [
+norm-hidden-coeff: func [] [copy/deep [
     [3 4 6 8]
     [5 7 10 12]
     [7 10 14 16]
@@ -128,15 +126,17 @@ norm-hidden-coeff: [
     [11 16 22 24]
     [13 19 26 28]
     [15 22 30 32]
-]
+]]
 
-norm-hidden-grind-stone: reduce [norm-wheat norm-barley norm-salt norm-bitter norm-red norm-wheat norm-barley]
+norm-hidden-grind-stone: func [] [reduce [norm-wheat norm-barley norm-salt norm-bitter norm-red norm-wheat norm-barley]]
 
-norm-build-hidden-drops: func [counts stones /local hidden k coeff x grind oldx stone-row stone-kind] [
+norm-build-hidden-drops: func [counts stones /local hidden k coeff x grind oldx stone-row stone-kind coeff-table grind-stones] [
+    coeff-table: norm-hidden-coeff
+    grind-stones: norm-hidden-grind-stone
     hidden: copy []
     k: 1
     while [k <= 7] [
-        coeff: pick norm-hidden-coeff k
+        coeff: pick coeff-table k
         stone-row: pick stones k
         x: bi-sum reduce [
             bi-copy counts/action
@@ -154,7 +154,7 @@ norm-build-hidden-drops: func [counts stones /local hidden k coeff x grind oldx 
         grind: 1
         while [grind <= 7] [
             oldx: x
-            stone-kind: pick norm-hidden-grind-stone grind
+            stone-kind: pick grind-stones grind
             x: norm-save bi-sum reduce [
                 bi-square oldx
                 bi-mul-small oldx 3
@@ -169,7 +169,7 @@ norm-build-hidden-drops: func [counts stones /local hidden k coeff x grind oldx 
     hidden
 ]
 
-norm-visible-grinds: reduce [
+norm-visible-grinds: func [] [reduce [
     reduce [3 5 7 11 norm-wheat]
     reduce [5 7 11 13 norm-barley]
     reduce [7 11 13 17 norm-salt]
@@ -182,7 +182,7 @@ norm-visible-grinds: reduce [
     reduce [31 37 41 43 norm-red]
     reduce [37 41 43 47 norm-wheat]
 ]
-
+]
 norm-prior-drop: func [visible hidden i [integer!] back [integer!] /local slot k] [
     slot: i - back
     if slot >= 1 [return bi-copy pick visible slot]
@@ -190,7 +190,8 @@ norm-prior-drop: func [visible hidden i [integer!] back [integer!] /local slot k
     bi-copy pick hidden k
 ]
 
-norm-build-visible-drops: func [counts stones hidden /local visible i p1 p3 p7 row stone-row x grind oldx] [
+norm-build-visible-drops: func [counts stones hidden /local visible i p1 p3 p7 row stone-row x grind oldx grind-table] [
+    grind-table: norm-visible-grinds
     visible: copy []
     i: 1
     while [i <= 46] [
@@ -211,7 +212,7 @@ norm-build-visible-drops: func [counts stones hidden /local visible i p1 p3 p7 r
         ]
         grind: 1
         while [grind <= 11] [
-            row: pick norm-visible-grinds grind
+            row: pick grind-table grind
             oldx: x
             x: norm-save bi-sum reduce [
                 bi-square oldx
@@ -260,7 +261,7 @@ norm-bowl-order-from-drop: func [drop /local order-number] [
 ]
 
 norm-initial-bowls: func [counts /local primes bowls id s] [
-    primes: [17 19 23 29 31 37]
+    primes: copy [17 19 23 29 31 37]
     bowls: copy []
     id: 1
     while [id <= 6] [
@@ -278,9 +279,10 @@ norm-initial-bowls: func [counts /local primes bowls id s] [
     bowls
 ]
 
-norm-stir-stone-by-position: reduce [norm-wheat norm-barley norm-salt norm-bitter norm-red norm-wheat]
+norm-stir-stone-by-position: func [] [reduce [norm-wheat norm-barley norm-salt norm-bitter norm-red norm-wheat]]
 
-norm-apply-visible-drops-to-bowls: func [bowls visible stones /local i drop order old first-bowl second-bowl third-bowl pour position bowl-id prev-id next-id stone-kind s next-bowls order46 stone-row result] [
+norm-apply-visible-drops-to-bowls: func [bowls visible stones /local i drop order old first-bowl second-bowl third-bowl pour position bowl-id prev-id next-id stone-kind s next-bowls order46 stone-row result stir-stones] [
+    stir-stones: norm-stir-stone-by-position
     order46: none
     i: 1
     while [i <= 46] [
@@ -306,7 +308,7 @@ norm-apply-visible-drops-to-bowls: func [bowls visible stones /local i drop orde
             bowl-id: pick order position
             prev-id: pick order norm-wrap1 position - 1 6
             next-id: pick order norm-wrap1 position + 1 6
-            stone-kind: pick norm-stir-stone-by-position position
+            stone-kind: pick stir-stones position
             s: bi-sum reduce [
                 bi-copy pick old bowl-id
                 bi-mul-small pick old prev-id 2
@@ -366,12 +368,19 @@ norm-post-stir12: func [bowls /local stir old saved-sum order-number order posit
     bowls
 ]
 
-norm-sauce: func [calculation-day target-day /local counts hidden visible bowls after-drops final-bowls] [
+norm-copy-stone-table: func [stones [block!] /local out row] [
+    out: copy []
+    foreach row stones [append/only out bi-block-copy row]
+    out
+]
+
+norm-sauce: func [oracle-context calculation-day target-day /local counts hidden visible bowls after-drops final-bowls stones] [
     counts: norm-work-counts calculation-day target-day
-    hidden: norm-build-hidden-drops counts norm-stones
-    visible: norm-build-visible-drops counts norm-stones hidden
+    stones: norm-copy-stone-table oracle-context/stones
+    hidden: norm-build-hidden-drops counts stones
+    visible: norm-build-visible-drops counts stones hidden
     bowls: norm-initial-bowls counts
-    after-drops: norm-apply-visible-drops-to-bowls bowls visible norm-stones
+    after-drops: norm-apply-visible-drops-to-bowls bowls visible stones
     final-bowls: norm-post-stir12 after-drops/bowls
     make object! [
         bowls: final-bowls
@@ -740,109 +749,115 @@ norm-make-gate-cache: func [/local cache] [
     cache
 ]
 
-norm-gates: norm-make-gate-cache
-
-norm-reset-gates: func [] [norm-gates: norm-make-gate-cache]
+norm-make-oracle-context: func [/local ctx] [
+    ctx: make object! [
+        gates: none
+        stones: none
+    ]
+    ctx/gates: norm-make-gate-cache
+    ctx/stones: norm-build-stones
+    ctx
+]
 
 norm-gate-key: func [index] [bi-to-decimal index]
 
-norm-gate-get: func [index /local value] [
-    value: select norm-gates/values norm-gate-key index
+norm-gate-get: func [oracle-context index /local value] [
+    value: select oracle-context/gates/values norm-gate-key index
     either none? value [none] [bi-copy value]
 ]
 
-norm-positive-gate-gap: func [n /local r stream chosen] [
-    r: norm-sauce norm-foundation-day bi-add norm-foundation-day n
+norm-positive-gate-gap: func [oracle-context n /local r stream chosen] [
+    r: norm-sauce oracle-context norm-foundation-day bi-add norm-foundation-day n
     stream: norm-ask-bowl r 1 norm-seal-gate-gap
     chosen: norm-choose-rank stream bi-from-integer 922
     bi-add-small chosen 41
 ]
 
-norm-negative-gate-gap: func [n /local r stream chosen] [
-    r: norm-sauce norm-foundation-day bi-sub norm-foundation-day n
+norm-negative-gate-gap: func [oracle-context n /local r stream chosen] [
+    r: norm-sauce oracle-context norm-foundation-day bi-sub norm-foundation-day n
     stream: norm-ask-bowl r 1 norm-seal-gate-gap
     chosen: norm-choose-rank stream bi-from-integer 922
     bi-add-small chosen 41
 ]
 
-norm-ensure-gate-index: func [k /local n prev next-value gap current] [
-    if bi-gt? k norm-gates/maxKnown [
-        n: bi-inc norm-gates/maxKnown
+norm-ensure-gate-index: func [oracle-context k /local n prev next-value gap current] [
+    if bi-gt? k oracle-context/gates/maxKnown [
+        n: bi-inc oracle-context/gates/maxKnown
         while [bi-le? n k] [
-            prev: norm-gate-get bi-dec n
-            gap: norm-positive-gate-gap n
+            prev: norm-gate-get oracle-context bi-dec n
+            gap: norm-positive-gate-gap oracle-context n
             current: bi-add prev gap
-            put norm-gates/values norm-gate-key n current
-            norm-gates/maxKnown: bi-copy n
+            put oracle-context/gates/values norm-gate-key n current
+            oracle-context/gates/maxKnown: bi-copy n
             n: bi-inc n
         ]
     ]
-    if bi-lt? k norm-gates/minKnown [
-        n: bi-dec norm-gates/minKnown
+    if bi-lt? k oracle-context/gates/minKnown [
+        n: bi-dec oracle-context/gates/minKnown
         while [bi-ge? n k] [
-            next-value: norm-gate-get bi-inc n
-            gap: norm-negative-gate-gap bi-abs n
+            next-value: norm-gate-get oracle-context bi-inc n
+            gap: norm-negative-gate-gap oracle-context bi-abs n
             current: bi-sub next-value gap
-            put norm-gates/values norm-gate-key n current
-            norm-gates/minKnown: bi-copy n
+            put oracle-context/gates/values norm-gate-key n current
+            oracle-context/gates/minKnown: bi-copy n
             n: bi-dec n
         ]
     ]
-    norm-gate-get k
+    norm-gate-get oracle-context k
 ]
 
-norm-ensure-gates-cover: func [low-day high-day /local current] [
-    while [bi-gt? norm-gate-get norm-gates/minKnown low-day] [
-        norm-ensure-gate-index bi-dec norm-gates/minKnown
+norm-ensure-gates-cover: func [oracle-context low-day high-day /local current] [
+    while [bi-gt? norm-gate-get oracle-context oracle-context/gates/minKnown low-day] [
+        norm-ensure-gate-index oracle-context bi-dec oracle-context/gates/minKnown
     ]
-    while [bi-lt? norm-gate-get norm-gates/maxKnown high-day] [
-        norm-ensure-gate-index bi-inc norm-gates/maxKnown
+    while [bi-lt? norm-gate-get oracle-context oracle-context/gates/maxKnown high-day] [
+        norm-ensure-gate-index oracle-context bi-inc oracle-context/gates/maxKnown
     ]
     true
 ]
 
-norm-gate-index-at-or-before: func [day /local lo hi sum mid gate-mid] [
-    norm-ensure-gates-cover day day
-    lo: bi-copy norm-gates/minKnown
-    hi: bi-copy norm-gates/maxKnown
+norm-gate-index-at-or-before: func [oracle-context day /local lo hi sum mid gate-mid] [
+    norm-ensure-gates-cover oracle-context day day
+    lo: bi-copy oracle-context/gates/minKnown
+    hi: bi-copy oracle-context/gates/maxKnown
     while [bi-lt? lo hi] [
         sum: bi-add-small bi-add lo hi 1
         mid: bi-floor-div-positive sum bi-from-integer 2
-        gate-mid: norm-gate-get mid
+        gate-mid: norm-gate-get oracle-context mid
         either bi-le? gate-mid day [lo: mid] [hi: bi-dec mid]
     ]
     lo
 ]
 
-norm-gate-index-at-or-after: func [day /local i g] [
-    i: norm-gate-index-at-or-before day
-    g: norm-gate-get i
+norm-gate-index-at-or-after: func [oracle-context day /local i g] [
+    i: norm-gate-index-at-or-before oracle-context day
+    g: norm-gate-get oracle-context i
     if bi-eq? g day [return i]
-    norm-ensure-gate-index bi-inc i
+    norm-ensure-gate-index oracle-context bi-inc i
     bi-inc i
 ]
 
-norm-exact-gate-index: func [day /local i g] [
-    i: norm-gate-index-at-or-before day
-    g: norm-gate-get i
+norm-exact-gate-index: func [oracle-context day /local i g] [
+    i: norm-gate-index-at-or-before oracle-context day
+    g: norm-gate-get oracle-context i
     either bi-eq? g day [i] [none]
 ]
 
-norm-year-length: func [open-index close-index] [
-    bi-sub norm-gate-get close-index norm-gate-get open-index
+norm-year-length: func [oracle-context open-index close-index] [
+    bi-sub norm-gate-get oracle-context close-index norm-gate-get oracle-context open-index
 ]
 
-norm-valid-year-pair?: func [open-index close-index /local gaps length-value] [
+norm-valid-year-pair?: func [oracle-context open-index close-index /local gaps length-value] [
     gaps: bi-sub close-index open-index
     if bi-lt? gaps bi-from-integer 6 [return false]
-    length-value: norm-year-length open-index close-index
+    length-value: norm-year-length oracle-context open-index close-index
     all [
         bi-ge? length-value bi-from-integer norm-year-min-days
         bi-le? length-value bi-from-integer norm-year-max-days
     ]
 ]
 
-norm-make-year: func [number open-index close-index /local y] [
+norm-make-year: func [oracle-context number open-index close-index /local y] [
     y: make object! [
         number: none
         openGateIndex: none
@@ -853,8 +868,8 @@ norm-make-year: func [number open-index close-index /local y] [
     y/number: bi-copy number
     y/openGateIndex: bi-copy open-index
     y/closeGateIndex: bi-copy close-index
-    y/openGateDay: norm-gate-get open-index
-    y/closeGateDay: norm-gate-get close-index
+    y/openGateDay: norm-gate-get oracle-context open-index
+    y/closeGateDay: norm-gate-get oracle-context close-index
     y
 ]
 
@@ -888,20 +903,20 @@ norm-sort-year-pairs: func [items /local out item] [
     out
 ]
 
-norm-year5000: func [calculation-day /local low-day high-day low-index high-index i j candidates open-day close-day length-value item sorted r stream rank-small chosen] [
+norm-year5000: func [oracle-context calculation-day /local low-day high-day low-index high-index i j candidates open-day close-day length-value item sorted r stream rank-small chosen] [
     low-day: bi-sub-small calculation-day norm-year-max-days
     high-day: bi-add-small calculation-day norm-year-max-days
-    norm-ensure-gates-cover low-day high-day
-    low-index: norm-gate-index-at-or-after low-day
-    high-index: norm-gate-index-at-or-before high-day
+    norm-ensure-gates-cover oracle-context low-day high-day
+    low-index: norm-gate-index-at-or-after oracle-context low-day
+    high-index: norm-gate-index-at-or-before oracle-context high-day
     candidates: copy []
     i: bi-copy low-index
     while [bi-lt? i high-index] [
         j: bi-inc i
         while [bi-le? j high-index] [
-            if norm-valid-year-pair? i j [
-                open-day: norm-gate-get i
-                close-day: norm-gate-get j
+            if norm-valid-year-pair? oracle-context i j [
+                open-day: norm-gate-get oracle-context i
+                close-day: norm-gate-get oracle-context j
                 if all [bi-lt? open-day calculation-day bi-le? calculation-day close-day] [
                     length-value: bi-sub close-day open-day
                     item: make object! [openIndex: none closeIndex: none openDay: none lengthValue: none]
@@ -917,11 +932,11 @@ norm-year5000: func [calculation-day /local low-day high-day low-index high-inde
         i: bi-inc i
     ]
     sorted: norm-sort-year-pairs candidates
-    r: norm-sauce calculation-day calculation-day
+    r: norm-sauce oracle-context calculation-day calculation-day
     stream: norm-ask-bowl r 1 norm-seal-year-5000
     rank-small: bi-to-small norm-choose-rank stream bi-from-integer length? sorted
     chosen: pick sorted rank-small
-    norm-make-year bi-from-integer 5000 chosen/openIndex chosen/closeIndex
+    norm-make-year oracle-context bi-from-integer 5000 chosen/openIndex chosen/closeIndex
 ]
 
 norm-index-candidate-before?: func [a b] [bi-lt? a/lengthValue b/lengthValue]
@@ -949,17 +964,17 @@ norm-sort-index-candidates: func [items /local out item] [
     out
 ]
 
-norm-next-year: func [calculation-day known-year /local open-index max-day candidates close-index length-value item sorted r stream rank-small chosen] [
+norm-next-year: func [oracle-context calculation-day known-year /local open-index max-day candidates close-index length-value item sorted r stream rank-small chosen] [
     open-index: bi-copy known-year/closeGateIndex
-    max-day: bi-add-small norm-gate-get open-index norm-year-max-days
-    norm-ensure-gates-cover norm-gate-get open-index max-day
+    max-day: bi-add-small norm-gate-get oracle-context open-index norm-year-max-days
+    norm-ensure-gates-cover oracle-context norm-gate-get oracle-context open-index max-day
     candidates: copy []
     close-index: bi-inc open-index
     while [true] [
-        norm-ensure-gate-index close-index
-        length-value: norm-year-length open-index close-index
+        norm-ensure-gate-index oracle-context close-index
+        length-value: norm-year-length oracle-context open-index close-index
         if bi-gt? length-value bi-from-integer norm-year-max-days [break]
-        if norm-valid-year-pair? open-index close-index [
+        if norm-valid-year-pair? oracle-context open-index close-index [
             item: make object! [index: none lengthValue: none]
             item/index: bi-copy close-index
             item/lengthValue: length-value
@@ -968,24 +983,24 @@ norm-next-year: func [calculation-day known-year /local open-index max-day candi
         close-index: bi-inc close-index
     ]
     sorted: norm-sort-index-candidates candidates
-    r: norm-sauce calculation-day norm-gate-get open-index
+    r: norm-sauce oracle-context calculation-day norm-gate-get oracle-context open-index
     stream: norm-ask-bowl r 1 norm-seal-next-year
     rank-small: bi-to-small norm-choose-rank stream bi-from-integer length? sorted
     chosen: pick sorted rank-small
-    norm-make-year bi-inc known-year/number open-index chosen/index
+    norm-make-year oracle-context bi-inc known-year/number open-index chosen/index
 ]
 
-norm-previous-year: func [calculation-day known-year /local close-index min-day candidates open-index length-value item sorted r stream rank-small chosen] [
+norm-previous-year: func [oracle-context calculation-day known-year /local close-index min-day candidates open-index length-value item sorted r stream rank-small chosen] [
     close-index: bi-copy known-year/openGateIndex
-    min-day: bi-sub-small norm-gate-get close-index norm-year-max-days
-    norm-ensure-gates-cover min-day norm-gate-get close-index
+    min-day: bi-sub-small norm-gate-get oracle-context close-index norm-year-max-days
+    norm-ensure-gates-cover oracle-context min-day norm-gate-get oracle-context close-index
     candidates: copy []
     open-index: bi-dec close-index
     while [true] [
-        norm-ensure-gate-index open-index
-        length-value: norm-year-length open-index close-index
+        norm-ensure-gate-index oracle-context open-index
+        length-value: norm-year-length oracle-context open-index close-index
         if bi-gt? length-value bi-from-integer norm-year-max-days [break]
-        if norm-valid-year-pair? open-index close-index [
+        if norm-valid-year-pair? oracle-context open-index close-index [
             item: make object! [index: none lengthValue: none]
             item/index: bi-copy open-index
             item/lengthValue: length-value
@@ -994,17 +1009,17 @@ norm-previous-year: func [calculation-day known-year /local close-index min-day 
         open-index: bi-dec open-index
     ]
     sorted: norm-sort-index-candidates candidates
-    r: norm-sauce calculation-day norm-gate-get close-index
+    r: norm-sauce oracle-context calculation-day norm-gate-get oracle-context close-index
     stream: norm-ask-bowl r 1 norm-seal-previous-year
     rank-small: bi-to-small norm-choose-rank stream bi-from-integer length? sorted
     chosen: pick sorted rank-small
-    norm-make-year bi-dec known-year/number chosen/index close-index
+    norm-make-year oracle-context bi-dec known-year/number chosen/index close-index
 ]
 
-norm-find-target-year: func [calculation-day target-day /local y] [
-    y: norm-year5000 calculation-day
-    while [bi-gt? target-day y/closeGateDay] [y: norm-next-year calculation-day y]
-    while [bi-le? target-day y/openGateDay] [y: norm-previous-year calculation-day y]
+norm-find-target-year: func [oracle-context calculation-day target-day /local y] [
+    y: norm-year5000 oracle-context calculation-day
+    while [bi-gt? target-day y/closeGateDay] [y: norm-next-year oracle-context calculation-day y]
+    while [bi-le? target-day y/openGateDay] [y: norm-previous-year oracle-context calculation-day y]
     y
 ]
 
@@ -1025,10 +1040,10 @@ norm-choose-cutlet-count: func [structure-sauce year /local gate-gaps candidates
     norm-choose-small-list-item stream candidates
 ]
 
-norm-choose-cutlet-partition: func [calculation-day structure-sauce year cutlet-count [integer!] /local g required gap-count family stream rank] [
+norm-choose-cutlet-partition: func [oracle-context calculation-day structure-sauce year cutlet-count [integer!] /local g required gap-count family stream rank] [
     gap-count: bi-to-small bi-sub year/closeGateIndex year/openGateIndex
     required: none
-    g: norm-exact-gate-index calculation-day
+    g: norm-exact-gate-index oracle-context calculation-day
     if not none? g [
         if all [bi-gt? g year/openGateIndex bi-lt? g year/closeGateIndex] [
             required: bi-to-small bi-sub g year/openGateIndex
@@ -1047,7 +1062,7 @@ norm-choose-cutlet-name-indices: func [structure-sauce cutlet-count [integer!] /
     norm-unrank-distinct-indices 17 cutlet-count rank
 ]
 
-norm-materialize-cutlets: func [year partition [block!] name-indices [block!] /local cursor k open-index close-index c out] [
+norm-materialize-cutlets: func [oracle-context year partition [block!] name-indices [block!] /local cursor k open-index close-index c out] [
     cursor: bi-copy year/openGateIndex
     out: copy []
     k: 1
@@ -1064,8 +1079,8 @@ norm-materialize-cutlets: func [year partition [block!] name-indices [block!] /l
         c/nameIndex: pick name-indices k
         c/openGateIndex: open-index
         c/closeGateIndex: close-index
-        c/firstDay: bi-add-small norm-gate-get open-index 1
-        c/lastDay: norm-gate-get close-index
+        c/firstDay: bi-add-small norm-gate-get oracle-context open-index 1
+        c/lastDay: norm-gate-get oracle-context close-index
         append/only out c
         cursor: close-index
         k: k + 1
@@ -1107,13 +1122,13 @@ norm-choose-month-name-indices: func [structure-sauce month-count [integer!] /lo
     norm-unrank-distinct-indices 47 month-count rank
 ]
 
-norm-build-year-structure: func [calculation-day year /local first-day r cutlet-count cutlet-partition cutlet-name-indices cutlets month-count month-lengths month-weaving month-name-indices s] [
+norm-build-year-structure: func [oracle-context calculation-day year /local first-day r cutlet-count cutlet-partition cutlet-name-indices cutlets month-count month-lengths month-weaving month-name-indices s] [
     first-day: bi-add-small year/openGateDay 1
-    r: norm-sauce calculation-day first-day
+    r: norm-sauce oracle-context calculation-day first-day
     cutlet-count: norm-choose-cutlet-count r year
-    cutlet-partition: norm-choose-cutlet-partition calculation-day r year cutlet-count
+    cutlet-partition: norm-choose-cutlet-partition oracle-context calculation-day r year cutlet-count
     cutlet-name-indices: norm-choose-cutlet-name-indices r cutlet-count
-    cutlets: norm-materialize-cutlets year cutlet-partition cutlet-name-indices
+    cutlets: norm-materialize-cutlets oracle-context year cutlet-partition cutlet-name-indices
     month-count: norm-choose-month-count r year
     month-lengths: norm-choose-month-lengths r year month-count
     month-weaving: norm-choose-month-weaving r month-lengths
@@ -1141,11 +1156,12 @@ norm-build-year-structure: func [calculation-day year /local first-day r cutlet-
     s
 ]
 
-norm-calendar-date: func [calculation-day target-day /local cday tday year structure chosen-cutlet cutlet-id i day-in-cutlet year-offset0-small month-id day-in-month p result] [
+norm-calendar-date: func [calculation-day target-day /local oracle-context cday tday year structure chosen-cutlet cutlet-id i day-in-cutlet year-offset0-small month-id day-in-month p result] [
+    oracle-context: norm-make-oracle-context
     cday: either integer? calculation-day [bi-from-integer calculation-day] [bi-copy calculation-day]
     tday: either integer? target-day [bi-from-integer target-day] [bi-copy target-day]
-    year: norm-find-target-year cday tday
-    structure: norm-build-year-structure cday year
+    year: norm-find-target-year oracle-context cday tday
+    structure: norm-build-year-structure oracle-context cday year
     chosen-cutlet: none
     cutlet-id: 0
     i: 1

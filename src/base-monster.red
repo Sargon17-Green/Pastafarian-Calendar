@@ -2,6 +2,17 @@ Red [
     Title: "Неутрална основа будућег спагети чудовишта"
 ]
 
+base-owned-copy: func [value] [
+    case [
+        object? value [copy/deep value]
+        block? value [copy/deep value]
+        map? value [copy/deep value]
+        string? value [copy value]
+        binary? value [copy value]
+        true [value]
+    ]
+]
+
 make-base-metrics: func [] [
     make object! [
         counters: make map! []
@@ -19,7 +30,7 @@ metrics-bump: func [metrics key [string!] /local old] [
 make-base-logs: func [] [copy []]
 
 log-observation: func [logs code payload] [
-    append/only logs reduce [code payload]
+    append/only logs reduce [code base-owned-copy payload]
     logs
 ]
 
@@ -35,13 +46,15 @@ make-base-context: func [calculation-day target-day /local ctx] [
         branchTrace: copy []
         semanticCommitted: none
         semanticPending: none
+        rollbackSnapshot: none
+        retryCount: 0
         metrics: none
         logs: none
         diagnostics: copy []
         lastError: none
     ]
-    ctx/calculationDay: calculation-day
-    ctx/targetDay: target-day
+    ctx/calculationDay: base-owned-copy calculation-day
+    ctx/targetDay: base-owned-copy target-day
     ctx/metrics: make-base-metrics
     ctx/logs: make-base-logs
     ctx
@@ -54,7 +67,7 @@ base-validate-input: func [ctx] [
 base-error-wrap: func [code detail /local e] [
     e: make object! [code: none detail: none]
     e/code: code
-    e/detail: detail
+    e/detail: base-owned-copy detail
     e
 ]
 
@@ -67,6 +80,37 @@ base-dispatch: func [ctx handler [function!] /local previous result] [
     ctx/previousHandler: ctx/currentHandler
     ctx/currentHandler: previous
     result
+]
+
+base-semantic-seed: func [ctx state] [
+    ctx/semanticCommitted: base-owned-copy state
+    ctx/semanticPending: none
+    ctx/rollbackSnapshot: none
+    base-owned-copy ctx/semanticCommitted
+]
+
+base-semantic-begin: func [ctx candidate-state] [
+    ctx/rollbackSnapshot: base-owned-copy ctx/semanticCommitted
+    ctx/semanticPending: base-owned-copy candidate-state
+    base-owned-copy ctx/semanticPending
+]
+
+base-semantic-commit: func [ctx] [
+    if none? ctx/semanticPending [return none]
+    ctx/semanticCommitted: base-owned-copy ctx/semanticPending
+    ctx/semanticPending: none
+    ctx/rollbackSnapshot: none
+    base-owned-copy ctx/semanticCommitted
+]
+
+base-semantic-rollback: func [ctx] [
+    if not none? ctx/rollbackSnapshot [
+        ctx/semanticCommitted: base-owned-copy ctx/rollbackSnapshot
+    ]
+    ctx/semanticPending: none
+    ctx/rollbackSnapshot: none
+    ctx/retryCount: ctx/retryCount + 1
+    base-owned-copy ctx/semanticCommitted
 ]
 
 bootstrap-production-handler: func [ctx] [

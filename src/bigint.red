@@ -31,6 +31,7 @@ bi-one: func [] [bi-new 1 [1]]
 bi-copy: func [x] [bi-new x/sign copy x/digits]
 
 bi-from-integer: func [n [integer!] /local s v ds q r] [
+    if n = -2147483648 [return bi-from-decimal "-2147483648"]
     if n = 0 [return bi-zero]
     s: either n < 0 [-1] [1]
     v: absolute n
