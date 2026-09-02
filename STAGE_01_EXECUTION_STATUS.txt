@@ -1,0 +1,20 @@
+Fase 1 is inhoudelijk opgebouwd maar nog niet als voltooid gemarkeerd.
+
+Verwacht testresultaat: GREEN.
+Werkelijk testresultaat in deze overdrachtsomgeving: NIET UITGEVOERD IN CLOJURE.
+
+De toegestane testopdracht is aangeroepen via `./run_stage01.sh`. Het werkelijke resultaat was:
+
+./run_stage01.sh: 2: exec: clojure: not found
+
+Processtatus: 127.
+
+De omgeving bevat geen Clojure-runtime. Een poging om een Clojure-runtimepakket beschikbaar te maken kon niet worden voltooid doordat externe pakketdownload vanuit de uitvoercontainer niet beschikbaar was.
+
+Er is geen andere programmeertaal gebruikt als vervangend orakel, testprogramma of fixturegenerator. Er is geen andere implementatielijn geraadpleegd of uitgevoerd.
+
+Om fase 1 geldig af te sluiten moet op een omgeving met Clojure worden uitgevoerd:
+
+clojure -M:test
+
+Pas wanneer die opdracht groen eindigt, mogen LAST_COMPLETED_STAGE en de eindstatus van fase 1 naar voltooid worden gezet.
