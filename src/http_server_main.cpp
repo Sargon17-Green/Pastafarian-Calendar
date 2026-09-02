@@ -9,7 +9,9 @@
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include <mutex>
 #include <string>
+#include <thread>
 
 namespace asio=boost::asio;
 namespace beast=boost::beast;
@@ -33,7 +35,11 @@ std::string requestOrigin(const http::request<http::string_body>& req){
     auto it=req.find("Origin");
     return it==req.end()?std::string{}:std::string(it->value());
 }
-void serveConnection(tcp::socket socket,HttpProtocol& protocol,const CorsPolicy& cors){
+bool isHealthTarget(std::string_view target){
+    const auto q=target.find('?');
+    return target.substr(0,q)=="/v1/health";
+}
+void serveConnection(tcp::socket socket,HttpProtocol& protocol,const CorsPolicy& cors,std::mutex& semanticMutex){
     beast::flat_buffer buffer;
     for(;;){
         http::request_parser<http::string_body> parser;parser.body_limit(BODY_LIMIT);
@@ -63,7 +69,17 @@ void serveConnection(tcp::socket socket,HttpProtocol& protocol,const CorsPolicy&
         }
         const std::int64_t sampled=nowMillis();
         std::string contentType;auto c=req.find(http::field::content_type);if(c!=req.end())contentType=std::string(c->value());
-        auto out=protocol.handle(std::string(req.method_string()),std::string(req.target()),contentType,req.body(),sampled);
+        HttpResponse out;
+        if(req.method()==http::verb::get && isHealthTarget(std::string_view(req.target().data(),req.target().size()))){
+            // Render health checks must remain responsive while the historical semantic
+            // engine performs a long calculation on another connection.
+            out=protocol.handle(std::string(req.method_string()),std::string(req.target()),contentType,req.body(),sampled);
+        }else{
+            // The semantic engine and Pair Tomb remain single-owner. Connections may
+            // coexist, but only one non-health protocol call enters semantic state.
+            std::lock_guard<std::mutex> lock(semanticMutex);
+            out=protocol.handle(std::string(req.method_string()),std::string(req.target()),contentType,req.body(),sampled);
+        }
         http::response<http::string_body> res{statusFrom(out.status),req.version()};
         for(auto&[k,v]:out.headers)res.set(k,v);
         addCorsHeaders(res,origin,cors);
@@ -78,8 +94,14 @@ int main(int argc,char**argv){
     try{
         std::string bind=argc>1?argv[1]:"127.0.0.1";unsigned short port=argc>2?static_cast<unsigned short>(std::stoul(argv[2])):8080;
         asio::io_context ioc{1};tcp::endpoint endpoint{asio::ip::make_address(bind),port};tcp::acceptor acceptor{ioc,endpoint};
-        CeleritasEnginePort engine;PairTombEnginePort pairTomb(engine);CalendarService service(pairTomb);HttpProtocol protocol(service);CorsPolicy cors=CorsPolicy::fromEnvironment();
+        CeleritasEnginePort engine;PairTombEnginePort pairTomb(engine);CalendarService service(pairTomb);HttpProtocol protocol(service);CorsPolicy cors=CorsPolicy::fromEnvironment();std::mutex semanticMutex;
         std::cerr<<"Pastafarian Celeritas HTTP v1 listening on "<<bind<<':'<<port<<"\n";
-        for(;;){tcp::socket socket{ioc};acceptor.accept(socket);serveConnection(std::move(socket),protocol,cors);}
+        for(;;){
+            tcp::socket socket{ioc};
+            acceptor.accept(socket);
+            std::thread([socket=std::move(socket),&protocol,&cors,&semanticMutex]() mutable {
+                serveConnection(std::move(socket),protocol,cors,semanticMutex);
+            }).detach();
+        }
     }catch(const std::exception&e){std::cerr<<"fatal: "<<e.what()<<'\n';return EXIT_FAILURE;}
 }

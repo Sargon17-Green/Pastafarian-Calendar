@@ -68,3 +68,8 @@ SCRIPT_TRANSPORT_JSONP_TESTS=PASS
 - semantic error per callback + X-Pastafari-Application-Status: PASS
 - content-type application/javascript + nosniff + CORP cross-origin: PASS
 - Foundation witness cum monstro vero per /v1/date.js: PASS
+
+HEALTH_DURING_LONG_FOUNDATION_CALC_LOCAL=PASS
+HEALTH_DURING_LONG_FOUNDATION_CALC_MS=9
+LONG_FOUNDATION_DATE_JS_LOCAL_MS=29182
+SEMANTIC_SERIALIZATION_TRANSPORT=PASS

@@ -34,3 +34,9 @@ Access-Control-Allow-Origin: null
 ```
 
 The service still rejects an ordinary unlisted web origin such as `https://alien.example`.
+
+## Long calculations and health checks
+
+The historical calendar calculation can occupy the semantic worker for many seconds. The HTTP transport therefore accepts connections concurrently while serializing every non-health protocol call behind one transport mutex. `GET /v1/health` bypasses that semantic gate and remains responsive during a long calculation.
+
+This is required for Render: its HTTP health checks must answer quickly even while a date request is still computing. The semantic engine itself is not made concurrent, and Pair Tomb ownership remains single-owner.
