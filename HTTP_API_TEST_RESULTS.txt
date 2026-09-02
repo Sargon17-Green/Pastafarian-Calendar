@@ -1,0 +1,57 @@
+Probatio localis cicatricis HTTP API
+===================================
+
+PASS  relatio canonica inter engine-day et JDN
+PASS  Gregorian -762-06-07 -> engine day -278522
+PASS  Foundation JDN -13334246 -> engine day -15055671
+PASS  validatio decimalis canonica
+PASS  acceptio deterministica Gregorian DMY/MDY
+PASS  reiectio ambigua Gregorian 03/04/2026
+PASS  convergentia ISO week (2026-W36-3 -> 2026-09-02)
+PASS  convergentia ordinalis (2026-245 -> 2026-09-02)
+PASS  convergentia nominis mensis Anglici
+PASS  via conversionis Iuliana
+PASS  via conversionis Hebraica arithmetica
+PASS  via conversionis islamic-civil arithmetica
+PASS  reiectio varietatis ambiguae `islamic`
+PASS  resolver termini Veneris momentum Unix epoch includit
+PASS  dies Veneris -> engine-day
+PASS  JSON strictum distinctionem catenae a numero servat
+PASS  JSON strictum claves duplicatas repudiat
+PASS  service cum engine-day explicito
+PASS  service cum momento petitionis implicito
+PASS  aequivalentia zonarum RFC3339
+PASS  lingua implicita `la`
+PASS  lingua explicita `la`
+PASS  reiectio `LANGUAGE_NOT_SUPPORTED`
+PASS  HTTP GET /v1/date
+PASS  HTTP POST /v1/date
+PASS  HTTP POST /v1/dates
+PASS  HTTP /v1/meta cum defaultLanguage et languages
+PASS  HTTP ambiguitas -> 422
+PASS  HTTP reiectio generis JSON falsi
+PASS  L0 Pair Tomb hit/miss/bypass/clear et fallback integer arbitrarii
+PASS  Boost.Beast socket smoke cum EnginePort ficticio
+PASS  CeleritasEnginePort contra verum `src/monster.cpp` conectitur
+PASS  Foundation per socket cum monstro vero
+PASS  vocatio directa moderna c=t=739861 cum monstro vero
+PASS  petitio implicita 2026-09-02 per Kisurra/Venus cum monstro vero
+PASS  petitio implicita reddit language=la
+PASS  lingua nondum addita reddit 422 LANGUAGE_NOT_SUPPORTED
+
+Testimonium modernum collectum:
+  target Gregorian = 2026-09-02
+  resolved calculation engineDay = 739861
+  resolved calculation JDN = 2461286
+  fons computationis = request-instant
+  site = kisurra
+  model = venus-lower-transit-jpl-approx-1
+  result = annus 5000, segmentum index 2 nomen vulpes dies 676, mensis index 9 nomen pardus dies 9
+
+Una mensura frigida directa: circiter 65.39 s.
+Una mensura HTTP frigida: circiter 64.70 s.
+Mensurae frigidae posteriores eiusdem computationis 150–180 s excedere potuerunt etiam sine HTTP.
+Latentia frigida igitur variabilis est et nulla promissio temporis datur.
+Petitio iterata post calefactionem Pair Tomb: statim reddita.
+
+CONCLUSIO=PASS
