@@ -124,6 +124,24 @@ jobs:
           grep -q '"index":12' /tmp/foundation.json
           grep -q '"dayInMonth":"105"' /tmp/foundation.json
 
+          # Transportus scripti ad fasciculos file:// et isolationem navigatoris.
+          timeout 5m curl -fsS -D /tmp/foundation-script.headers \
+            'http://127.0.0.1:18080/v1/date.js?date=-15055671&calendar=engine-day&calculation_day=-15055671&language=la&callback=pastafariDateCallback' \
+            >/tmp/foundation-script.js
+          grep -qi '^Content-Type: application/javascript; charset=utf-8' /tmp/foundation-script.headers
+          grep -qi '^X-Content-Type-Options: nosniff' /tmp/foundation-script.headers
+          grep -qi '^Cross-Origin-Resource-Policy: cross-origin' /tmp/foundation-script.headers
+          grep -q '^pastafariDateCallback({' /tmp/foundation-script.js
+          grep -q '"year":"5000"' /tmp/foundation-script.js
+          grep -q '"dayInCutlet":"762"' /tmp/foundation-script.js
+          grep -q '"dayInMonth":"105"' /tmp/foundation-script.js
+          grep -q ');$' /tmp/foundation-script.js
+
+          code=$(curl -sS -o /tmp/invalid-callback.json -w '%{http_code}' \
+            'http://127.0.0.1:18080/v1/date.js?date=-15055671&calendar=engine-day&calculation_day=-15055671&callback=alert%281%29')
+          test "$code" = 400
+          grep -q 'INVALID_CALLBACK' /tmp/invalid-callback.json
+
       - name: Fumum implicitum Kisurra-Venus probare
         shell: bash
         run: |
