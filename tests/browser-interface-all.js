@@ -12,6 +12,7 @@ const tests = [
   'browser-interface-contract.js',
   'browser-interface-black-box.js',
   'browser-i18n-locales.js',
+  'browser-component-runtime.js',
 ];
 
 for (const test of tests) {

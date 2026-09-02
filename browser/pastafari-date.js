@@ -11,20 +11,51 @@
     throw new Error('Li browser-strate ne esset cargat in li necessi órdine.');
   }
 
-  const MONTH_ACCENTS = Object.freeze([
-    '#8a7132', '#3f7b68', '#8b5c4d', '#5d6f9b', '#8b6b8d',
-    '#6e7d3c', '#9a6b2f', '#467487', '#7a5f47', '#6b6896',
+  const MONTH_THEMES = Object.freeze([
+    Object.freeze({ edge: '#9d3825', bg: '#fff5e8', wash: '#f0c9b8' }),
+    Object.freeze({ edge: '#386b5a', bg: '#eef7f1', wash: '#bfd8c8' }),
+    Object.freeze({ edge: '#705172', bg: '#f7eff8', wash: '#d8c1da' }),
+    Object.freeze({ edge: '#84651f', bg: '#fbf5df', wash: '#e5d39f' }),
+    Object.freeze({ edge: '#3e6682', bg: '#eef5f8', wash: '#bdd3df' }),
+    Object.freeze({ edge: '#7b4d3a', bg: '#f9f0eb', wash: '#dbbeb1' }),
+    Object.freeze({ edge: '#61713a', bg: '#f3f7e9', wash: '#cbd6aa' }),
+    Object.freeze({ edge: '#7d3f58', bg: '#faeef3', wash: '#dfb9c9' }),
+    Object.freeze({ edge: '#53616f', bg: '#f0f3f6', wash: '#c5ccd3' }),
+    Object.freeze({ edge: '#8c5f21', bg: '#fff2df', wash: '#e5c79d' }),
+    Object.freeze({ edge: '#426f75', bg: '#edf7f7', wash: '#bad7d9' }),
+    Object.freeze({ edge: '#6f5945', bg: '#f6f1eb', wash: '#d4c4b4' }),
   ]);
   const MAX_CACHED_CUTLETS = 5;
+  const doc = root.document || null;
+  const enqueueMicrotask = typeof root.queueMicrotask === 'function'
+    ? root.queueMicrotask.bind(root)
+    : (callback) => Promise.resolve().then(callback);
 
   function sameMonthRun(previous, current) {
     return previous && previous.monthName === current.monthName
       && current.dayInMonth === previous.dayInMonth + 1;
   }
 
-  function monthAccent(name, palette) {
-    if (!palette.has(name)) palette.set(name, MONTH_ACCENTS[palette.size % MONTH_ACCENTS.length]);
-    return palette.get(name);
+  function semanticHash(value) {
+    let hash = 2166136261;
+    const text = String(value);
+    for (let index = 0; index < text.length; index += 1) {
+      hash ^= text.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  function monthTheme(name) {
+    return MONTH_THEMES[semanticHash(name) % MONTH_THEMES.length];
+  }
+
+  function applyMonthTheme(element, name) {
+    const theme = monthTheme(name);
+    element.style.setProperty('--month-edge', theme.edge);
+    element.style.setProperty('--month-bg', theme.bg);
+    element.style.setProperty('--month-wash', theme.wash);
+    return theme;
   }
 
   function escapeSelector(value) {
@@ -51,7 +82,8 @@
     constructor() {
       super();
       this._connected = false;
-      this._refreshQueued = false;
+      this._connectionEpoch = 0;
+      this._refreshQueuedEpoch = null;
       this._generation = 0;
       this._navigationGeneration = 0;
       this._value = null;
@@ -72,96 +104,256 @@
       this.shadowRoot.innerHTML = `
         <style>
           :host {
+            --ink: #17130e;
+            --muted: #665f56;
+            --paper: #f4f0e7;
+            --panel: #fffdf8;
+            --line: #cfc6b7;
+            --accent: #9d3825;
+            --accent-dark: #672013;
+            --focus: #0068c9;
             display: block;
-            max-width: var(--pastafari-max-width, 64rem);
-            color: var(--pastafari-color, #28301f);
-            font-family: Arial, "Noto Sans Hebrew", sans-serif;
+            width: min(100% - 2rem, var(--pastafari-max-width, 94rem));
+            margin-inline: auto;
+            padding-block: clamp(1.25rem, 4vw, 4rem) 2rem;
+            color: var(--pastafari-color, var(--ink));
+            font-family: Arial, "Noto Sans Hebrew", "Segoe UI", sans-serif;
+            line-height: 1.55;
           }
           :host([headless]) { display: none !important; }
+          :host([no-editor]) .search-panel { display: none !important; }
           *, *::before, *::after { box-sizing: border-box; }
+          [hidden] { display: none !important; }
           button, input, select { font: inherit; }
+          button { min-height: 44px; }
+          button:focus-visible,
+          input:focus-visible,
+          select:focus-visible,
+          summary:focus-visible,
+          [tabindex]:focus-visible {
+            outline: 4px solid var(--focus);
+            outline-offset: 3px;
+          }
+
+          .masthead {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1.5rem 2rem;
+            align-items: start;
+            padding: clamp(1rem, 2vw, 2rem) 0 clamp(2rem, 5vw, 4rem);
+            border-bottom: 1px solid var(--line);
+          }
+          .brand,
+          .eyebrow,
+          .status-kicker {
+            margin: 0 0 .5rem;
+            color: var(--accent-dark);
+            font-size: .76rem;
+            font-weight: 800;
+            letter-spacing: .11em;
+            text-transform: uppercase;
+          }
+          .app-title {
+            max-width: 14ch;
+            margin: 0;
+            overflow-wrap: anywhere;
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: clamp(2.8rem, 8vw, 7rem);
+            font-weight: 700;
+            letter-spacing: -.055em;
+            line-height: .92;
+          }
+          .language-control {
+            display: grid;
+            min-width: min(14rem, 100%);
+            gap: .35rem;
+            color: var(--muted);
+            font-size: .82rem;
+            font-weight: 800;
+          }
+          .language-control select {
+            min-height: 46px;
+            width: 100%;
+            min-width: 0;
+            padding: .55rem .75rem;
+            border: 1px solid #8e8272;
+            border-radius: .7rem;
+            background: var(--panel);
+            color: var(--ink);
+            cursor: pointer;
+          }
+
+          .search-panel {
+            display: flex;
+            margin-block: clamp(2rem, 5vw, 4rem);
+            padding: clamp(1.2rem, 3.5vw, 2.5rem);
+            align-items: end;
+            justify-content: space-between;
+            gap: 1.25rem;
+            border: 1px solid var(--line);
+            border-radius: 1.25rem;
+            background: rgb(255 253 248 / 92%);
+            box-shadow: 0 18px 55px rgb(54 36 20 / 9%);
+          }
+          .search-heading {
+            max-width: 22ch;
+            margin: 0;
+            overflow-wrap: anywhere;
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            letter-spacing: -.035em;
+            line-height: 1;
+          }
+          .editor-link,
+          .nav-button,
+          .today-button,
+          .retry-button,
+          .dialog-actions button {
+            min-height: 46px;
+            padding: .65rem 1rem;
+            border: 1px solid #8e8272;
+            border-radius: .7rem;
+            background: #fffdf8;
+            color: var(--ink);
+            font-weight: 800;
+            cursor: pointer;
+          }
+          .editor-link {
+            flex: 0 0 auto;
+            border-color: var(--accent-dark);
+            background: var(--accent-dark);
+            color: white;
+          }
+          .editor-link:hover,
+          .today-button:hover { background: #49160e; color: white; }
+          .nav-button:hover,
+          .retry-button:hover,
+          .dialog-actions button:hover { background: #fff4ee; }
+
           .calendar {
             position: relative;
             min-height: 19rem;
-            overflow: hidden;
-            border: 1px solid var(--pastafari-border, #c9c1a8);
-            border-radius: var(--pastafari-radius, 16px);
-            background: var(--pastafari-background, #fffdf5);
-            box-shadow: var(--pastafari-shadow, 0 10px 32px rgb(66 55 24 / 10%));
           }
-          .toolbar {
+
+          .target-beacon {
+            position: relative;
             display: grid;
-            grid-template-columns: 2.85rem minmax(0, 1fr) 2.85rem;
-            align-items: center;
-            gap: .65rem;
-            padding: .85rem 1rem;
-            border-bottom: 1px solid var(--pastafari-border, #c9c1a8);
-            background: var(--pastafari-header-background, #f4eed8);
+            gap: .7rem;
+            margin-bottom: clamp(2rem, 5vw, 4rem);
+            padding: clamp(1.25rem, 3vw, 2.25rem);
+            overflow: hidden;
+            border: 4px solid var(--ink);
+            border-inline-start: clamp(.75rem, 2vw, 1.35rem) solid var(--accent);
+            border-radius: 1.1rem;
+            background: #fff7e8;
+            box-shadow: 0 16px 36px rgb(0 0 0 / 20%);
           }
-          .toolbar-copy { min-width: 0; text-align: center; }
-          .eyebrow { margin: 0 0 .2rem; color: #6c6551; font-size: .8rem; }
+          .beacon-label {
+            width: fit-content;
+            padding: .35rem .75rem;
+            border-radius: 999px;
+            background: var(--ink);
+            color: white;
+            font-size: .86rem;
+            font-weight: 900;
+            letter-spacing: .035em;
+          }
+          .beacon-date {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .7rem;
+          }
+          .beacon-line {
+            display: block;
+            min-width: 0;
+            padding: .8rem;
+            overflow-wrap: anywhere;
+            border: 1px solid #a8977d;
+            border-radius: .7rem;
+            background: white;
+            font-size: clamp(1rem, 2vw, 1.35rem);
+            font-weight: 650;
+            line-height: 1.35;
+          }
+          .beacon-context {
+            margin: 0;
+            color: var(--muted);
+            font-weight: 700;
+          }
+
+          .toolbar {
+            display: flex;
+            gap: 1.5rem;
+            align-items: end;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+          }
+          .toolbar-copy { min-width: 0; }
           .selected-summary {
             margin: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-size: clamp(1rem, 2.2vw, 1.2rem);
-            line-height: 1.45;
+            overflow-wrap: anywhere;
+            color: var(--muted);
+            font-size: 1rem;
+            font-weight: 700;
           }
-          .nav-button {
-            width: 2.65rem;
-            height: 2.65rem;
-            border: 1px solid transparent;
-            border-radius: 50%;
-            background: transparent;
-            color: inherit;
-            font-size: 1.6rem;
-            cursor: pointer;
+          .toolbar-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .55rem;
+            justify-content: end;
           }
-          .nav-button:hover, .nav-button:focus-visible {
-            border-color: var(--pastafari-border, #c9c1a8);
-            background: #ece3c4;
-            outline: none;
+          .today-button {
+            border-color: var(--accent-dark);
+            background: var(--accent-dark);
+            color: white;
           }
+
           .viewport {
             position: relative;
-            max-height: var(--pastafari-calendar-height, 34rem);
+            max-height: var(--pastafari-calendar-height, 46rem);
             overflow: auto;
-            padding: .75rem;
+            padding: 0;
             overscroll-behavior: contain;
             scrollbar-gutter: stable;
-            background: var(--pastafari-grid-background, #fffdf8);
           }
           .edge-loader {
             min-height: 1.8rem;
             display: grid;
             place-items: center;
-            color: #746d58;
+            color: var(--muted);
             font-size: .78rem;
           }
-          .cutlet { margin: 0 0 1.15rem; scroll-margin-block: .75rem; }
+          .cutlet {
+            margin: 0 0 2.25rem;
+            scroll-margin-block: .75rem;
+          }
           .cutlet:last-of-type { margin-bottom: 0; }
           .cutlet-heading {
             position: sticky;
-            top: -.75rem;
+            top: 0;
             z-index: 5;
-            margin: 0 0 .65rem;
-            padding: .72rem .85rem;
-            border: 1px solid var(--pastafari-border, #c9c1a8);
-            border-radius: .8rem;
-            background: color-mix(in srgb, var(--pastafari-header-background, #f4eed8) 92%, white);
-            box-shadow: 0 3px 10px rgb(66 55 24 / 8%);
-            text-align: center;
-            font-size: 1.05rem;
-            font-weight: 500;
+            margin: 0 0 1rem;
+            padding: .9rem 1rem;
+            overflow-wrap: anywhere;
+            border: 1px solid var(--line);
+            border-inline-start: .45rem solid var(--accent);
+            border-radius: .85rem;
+            background: rgb(255 253 248 / 96%);
+            box-shadow: 0 6px 18px rgb(54 36 20 / 10%);
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: clamp(1.5rem, 4vw, 2.6rem);
+            line-height: 1.05;
           }
           .month-run {
-            margin: 0 0 .75rem;
-            overflow: clip;
-            border: 1px solid #ded6bd;
-            border-inline-start: .38rem solid var(--month-accent);
-            border-radius: .78rem;
-            background: #fff;
+            margin: 0 0 1.35rem;
+            overflow-x: auto;
+            border: 1px solid var(--month-edge, var(--line));
+            border-inline-start: .45rem solid var(--month-edge, var(--accent));
+            border-radius: 1rem;
+            background:
+              linear-gradient(180deg, var(--month-wash, transparent), transparent 10rem),
+              var(--month-bg, var(--panel));
+            box-shadow: 0 10px 30px rgb(54 36 20 / 7%);
           }
           .month-run:last-child { margin-bottom: 0; }
           .month-heading {
@@ -169,79 +361,82 @@
             align-items: baseline;
             justify-content: space-between;
             gap: .7rem;
-            padding: .48rem .7rem;
-            border-bottom: 1px solid #e5dec9;
-            background: color-mix(in srgb, var(--month-accent) 10%, white);
+            padding: .75rem .9rem;
+            border-bottom: 1px solid color-mix(in srgb, var(--month-edge, var(--line)) 42%, white);
+            background: rgb(255 255 255 / 54%);
           }
-          .month-heading strong { font-size: .95rem; }
-          .month-range { color: #706955; font-size: .75rem; white-space: nowrap; }
+          .month-heading strong {
+            overflow-wrap: anywhere;
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: 1.08rem;
+          }
+          .month-range {
+            color: var(--muted);
+            font-size: .78rem;
+            white-space: nowrap;
+          }
           .days {
             display: grid;
-            grid-template-columns: repeat(7, minmax(0, 1fr));
-            gap: .4rem;
-            padding: .55rem;
+            grid-template-columns: repeat(7, minmax(7.5rem, 1fr));
+            gap: clamp(.55rem, 1vw, .85rem);
+            min-width: 58rem;
+            padding: .75rem;
+            align-items: stretch;
           }
           .day {
             position: relative;
-            min-height: 4.2rem;
             display: grid;
+            min-width: 0;
+            min-height: 178px;
+            padding: 16px;
+            grid-template-rows: repeat(3, auto);
             align-content: center;
-            justify-items: center;
-            gap: .15rem;
-            border: 1px solid #ded8c5;
-            border-radius: .62rem;
-            background: #fffefa;
-            color: inherit;
-            cursor: pointer;
+            gap: .62rem;
+            border: 1px solid var(--month-edge, var(--line));
+            border-top: 7px solid var(--month-edge, var(--accent));
+            border-radius: 20px;
+            background:
+              linear-gradient(180deg, color-mix(in srgb, var(--month-wash, white) 70%, white), rgb(255 255 255 / 0) 58%),
+              var(--month-bg, var(--panel));
+            color: var(--ink);
+            box-shadow: 0 8px 20px rgb(54 36 20 / 7%);
+            transform-origin: center center;
           }
-          .day:hover, .day:focus-visible {
-            border-color: var(--month-accent);
-            background: color-mix(in srgb, var(--month-accent) 7%, white);
-            outline: none;
-          }
+          .day.mod0 { transform: rotate(-.28deg); }
+          .day.mod1 { transform: rotate(.18deg); }
+          .day.mod2 { transform: rotate(-.12deg); }
+          .day.mod3 { transform: rotate(.25deg); }
+          .day.mod4 { transform: rotate(-.2deg); }
+          .day.mod5 { transform: rotate(.1deg); }
+          .day.mod6 { transform: rotate(-.16deg); }
           .day[aria-current="date"] {
-            border: 2px solid var(--pastafari-accent, #675817);
-            background: #f6ecc5;
-            box-shadow: 0 0 0 2px rgb(103 88 23 / 12%);
+            z-index: 2;
+            transform: translateY(-4px) rotate(-.35deg) scale(1.035);
+            border: 2px solid var(--ink);
+            border-top: 7px solid var(--month-edge, var(--accent));
+            background:
+              linear-gradient(180deg, color-mix(in srgb, var(--month-wash, white) 82%, white), rgb(255 255 255 / 0) 58%),
+              var(--month-bg, #fff7e8);
+            box-shadow: 0 18px 0 rgb(23 19 14 / 12%), 0 30px 56px rgb(23 19 14 / 24%);
           }
-          .day-in-month { font-size: 1.15rem; font-weight: 850; }
-          .day-in-cutlet { color: #756e5b; font-size: .7rem; }
-          .footer {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: .8rem;
-            min-height: 2.8rem;
-            padding: .55rem .85rem;
-            border-top: 1px solid var(--pastafari-border, #c9c1a8);
-            background: #fbf7e8;
+          .day-line {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            font-size: clamp(1.02rem, 2.1vw, 1.28rem);
+            font-weight: 700;
+            line-height: 1.25;
           }
-          .editor-link {
-            border: 0;
-            border-bottom: 1px dotted currentColor;
-            padding: .15rem .05rem;
-            background: transparent;
-            color: #5f5948;
-            font-size: .82rem;
-            cursor: pointer;
+          .day-line.year {
+            color: var(--muted);
+            font-size: clamp(.82rem, 1.5vw, .96rem);
+            font-weight: 750;
           }
-          :host([no-editor]) .editor-link { display: none; }
-          .language-control {
-            display: inline-flex;
-            align-items: center;
-            gap: .35rem;
-            color: #5f5948;
-            font-size: .78rem;
+          .day-line.cutlet,
+          .day-line.month {
+            color: var(--accent-dark);
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
           }
-          .language-control select {
-            max-width: 12rem;
-            border: 1px solid #c9c0a6;
-            border-radius: .45rem;
-            padding: .28rem .4rem;
-            background: #fff;
-            color: inherit;
-          }
+
           .overlay {
             position: absolute;
             inset: 0;
@@ -253,80 +448,128 @@
             min-height: 19rem;
             padding: 2rem;
             text-align: center;
-            background: var(--pastafari-background, #fffdf5);
+            border: 1px solid var(--line);
+            border-radius: 1.25rem;
+            background: var(--panel);
           }
-          .overlay[hidden] { display: none; }
           .spinner {
             width: 3.1rem;
             height: 3.1rem;
-            border: .32rem solid #ddd5bc;
-            border-top-color: var(--pastafari-accent, #675817);
+            border: .32rem solid #d7cfc1;
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin .9s linear infinite;
           }
-          .loading-title { margin: 0; font-weight: 850; }
-          .loading-note, .error-message { margin: 0; color: #69624f; font-size: .84rem; }
-          .retry-button {
-            border: 1px solid #a99d78;
-            border-radius: .65rem;
-            padding: .55rem .9rem;
-            background: #f4edd5;
-            color: inherit;
-            cursor: pointer;
+          .loading-title {
+            margin: 0;
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            font-weight: 850;
           }
+          .loading-note,
+          .error-message { margin: 0; color: var(--muted); font-size: .9rem; }
           @keyframes spin { to { transform: rotate(1turn); } }
-          @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
-          @media (max-width: 38rem) {
-            .days { gap: .28rem; padding: .42rem; }
-            .day { min-height: 3.55rem; }
-            .day-in-month { font-size: 1rem; }
-            .day-in-cutlet { font-size: .64rem; }
+          @media (prefers-reduced-motion: reduce) {
+            .spinner { animation-duration: 3s; }
           }
+
           dialog {
-            width: min(28rem, calc(100vw - 2rem));
+            width: min(34rem, calc(100vw - 2rem));
             border: 1px solid #bbb092;
             border-radius: 1rem;
             padding: 0;
-            color: inherit;
-            background: #fffdf7;
+            color: var(--ink);
+            background: var(--panel);
             box-shadow: 0 24px 70px rgb(0 0 0 / 28%);
           }
           dialog::backdrop { background: rgb(27 24 16 / 40%); }
-          .dialog-form { display: grid; gap: 1rem; padding: 1.1rem; }
-          .dialog-form h2 { margin: 0; font-size: 1.2rem; }
+          .dialog-form { display: grid; gap: 1rem; padding: 1.25rem; }
+          .dialog-form h2 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: 1.6rem;
+          }
           .field { display: grid; gap: .35rem; }
           .field span { font-size: .86rem; font-weight: 750; }
           .field input {
             width: 100%;
+            min-height: 46px;
             direction: ltr;
-            border: 1px solid #c9c0a6;
-            border-radius: .55rem;
+            border: 1px solid #8e8272;
+            border-radius: .7rem;
             padding: .58rem .68rem;
             background: white;
           }
           details { border-top: 1px solid #e0d8c0; padding-top: .75rem; }
-          summary { color: #625c4a; font-size: .82rem; cursor: pointer; }
+          summary { color: var(--accent-dark); font-size: .86rem; font-weight: 800; cursor: pointer; }
           details .field { margin-top: .75rem; }
-          .dialog-error { min-height: 1.1rem; margin: 0; color: #922; font-size: .8rem; }
-          .dialog-actions { display: flex; justify-content: flex-start; gap: .55rem; }
-          .dialog-actions button {
-            border: 1px solid #b9ae8d;
-            border-radius: .58rem;
-            padding: .55rem .85rem;
-            background: #f4edd5;
-            cursor: pointer;
+          .dialog-error { min-height: 1.1rem; margin: 0; color: #76180e; font-size: .82rem; font-weight: 750; }
+          .dialog-actions { display: flex; flex-wrap: wrap; gap: .55rem; }
+          .dialog-actions .primary {
+            border-color: var(--accent-dark);
+            background: var(--accent-dark);
+            color: white;
           }
-          .dialog-actions .primary { background: #675817; color: white; border-color: #675817; }
+
+          @media (max-width: 48rem) {
+            :host {
+              width: min(100% - 1rem, var(--pastafari-max-width, 94rem));
+              padding-block-start: .5rem;
+            }
+            .masthead { grid-template-columns: 1fr; }
+            .app-title { font-size: clamp(2.7rem, 16vw, 5.4rem); }
+            .language-control { width: 100%; }
+            .search-panel {
+              display: grid;
+              align-items: stretch;
+            }
+            .editor-link { width: 100%; }
+            .beacon-date { grid-template-columns: 1fr; }
+            .toolbar { align-items: stretch; flex-direction: column; }
+            .toolbar-actions { justify-content: stretch; }
+            .toolbar-actions button { flex: 1 1 9rem; }
+          }
         </style>
 
+        <header class="masthead" part="masthead">
+          <div class="masthead-copy">
+            <p class="brand">PASTAFARI</p>
+            <h1 class="app-title"></h1>
+          </div>
+          <label class="language-control">
+            <span class="language-label"></span>
+            <select class="language-selector"></select>
+          </label>
+        </header>
+
+        <section class="search-panel" part="editor">
+          <div>
+            <p class="eyebrow search-kicker"></p>
+            <h2 class="search-heading"></h2>
+          </div>
+          <button class="editor-link" type="button"></button>
+        </section>
+
         <section class="calendar" part="calendar" aria-busy="true">
+          <section class="target-beacon" part="target">
+            <span class="beacon-label"></span>
+            <div class="beacon-date">
+              <span class="beacon-line year-line"></span>
+              <span class="beacon-line cutlet-line"></span>
+              <span class="beacon-line month-line"></span>
+            </div>
+            <p class="beacon-context"></p>
+          </section>
+
           <header class="toolbar" part="toolbar">
-            <button class="nav-button previous" type="button"></button>
             <div class="toolbar-copy">
-              <p class="eyebrow"></p>
+              <p class="eyebrow cutlet-kicker"></p>
               <p class="selected-summary" aria-live="polite"></p>
             </div>
-            <button class="nav-button next" type="button"></button>
+            <div class="toolbar-actions">
+              <button class="nav-button previous" type="button"></button>
+              <button class="today-button" type="button"></button>
+              <button class="nav-button next" type="button"></button>
+            </div>
           </header>
 
           <div class="viewport" part="viewport" tabindex="0">
@@ -334,14 +577,6 @@
             <div class="cutlet-list"></div>
             <div class="edge-loader after" aria-hidden="true"></div>
           </div>
-
-          <footer class="footer" part="footer">
-            <button class="editor-link" type="button"></button>
-            <label class="language-control">
-              <span class="language-label"></span>
-              <select class="language-selector"></select>
-            </label>
-          </footer>
 
           <div class="overlay loading" part="loading">
             <div class="spinner" aria-hidden="true"></div>
@@ -382,14 +617,23 @@
       this._els = {
         calendar: this.shadowRoot.querySelector('.calendar'),
         toolbar: this.shadowRoot.querySelector('.toolbar'),
+        appTitle: this.shadowRoot.querySelector('.app-title'),
         previous: this.shadowRoot.querySelector('.previous'),
+        today: this.shadowRoot.querySelector('.today-button'),
         next: this.shadowRoot.querySelector('.next'),
-        eyebrow: this.shadowRoot.querySelector('.eyebrow'),
+        cutletKicker: this.shadowRoot.querySelector('.cutlet-kicker'),
         summary: this.shadowRoot.querySelector('.selected-summary'),
+        beaconLabel: this.shadowRoot.querySelector('.beacon-label'),
+        beaconYear: this.shadowRoot.querySelector('.beacon-line.year-line'),
+        beaconCutlet: this.shadowRoot.querySelector('.beacon-line.cutlet-line'),
+        beaconMonth: this.shadowRoot.querySelector('.beacon-line.month-line'),
+        beaconContext: this.shadowRoot.querySelector('.beacon-context'),
         viewport: this.shadowRoot.querySelector('.viewport'),
         list: this.shadowRoot.querySelector('.cutlet-list'),
         beforeLoader: this.shadowRoot.querySelector('.edge-loader.before'),
         afterLoader: this.shadowRoot.querySelector('.edge-loader.after'),
+        searchKicker: this.shadowRoot.querySelector('.search-kicker'),
+        searchHeading: this.shadowRoot.querySelector('.search-heading'),
         editorLink: this.shadowRoot.querySelector('.editor-link'),
         languageLabel: this.shadowRoot.querySelector('.language-label'),
         languageSelector: this.shadowRoot.querySelector('.language-selector'),
@@ -414,13 +658,13 @@
       };
 
       this._els.previous.addEventListener('click', () => this._scrollAdjacent(-1));
+      this._els.today.addEventListener('click', () => this._goToday());
       this._els.next.addEventListener('click', () => this._scrollAdjacent(1));
       this._els.editorLink.addEventListener('click', () => this._openDialog());
       this._els.retryButton.addEventListener('click', () => this._retry());
       this._els.cancelButton.addEventListener('click', () => this._closeDialog());
       this._els.form.addEventListener('submit', (event) => this._applyDialog(event));
       this._els.viewport.addEventListener('scroll', () => this._onScroll(), { passive: true });
-      this._els.list.addEventListener('click', (event) => this._selectDay(event));
       this._els.languageSelector.addEventListener('change', () => {
         this.setAttribute('lang', this._els.languageSelector.value);
       });
@@ -428,21 +672,30 @@
     }
 
     connectedCallback() {
+      if (this._connected) return;
       this._connected = true;
+      this._connectionEpoch += 1;
       this._applyLocale();
       this._queueRefresh();
     }
 
     disconnectedCallback() {
+      if (!this._connected) return;
       this._connected = false;
+      this._connectionEpoch += 1;
       this._generation += 1;
       this._navigationGeneration += 1;
+      this._refreshQueuedEpoch = null;
       this._cutletLoads.clear();
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
       if (oldValue === newValue || !this._connected) return;
-      if (name === 'no-editor') return;
+      if (name === 'no-editor') {
+        if (newValue !== null) this._closeDialog();
+        return;
+      }
+      if (name === 'headless' && newValue !== null) this._closeDialog();
       if (name === 'lang') {
         this._applyLocale();
         if (this._value) {
@@ -472,16 +725,21 @@
         ? root.navigator.languages : [];
       this._locale = i18n.resolveLocale(explicit, browserLanguages);
       if (!this._els) return;
+
       this.setAttribute('dir', this._locale.dir);
       this._els.calendar.setAttribute('dir', this._locale.dir);
       this._els.toolbar.setAttribute('aria-label', this._t('calendar.toolbarAria'));
+      this._els.appTitle.textContent = this._t('app.title');
+      this._els.previous.textContent = this._t('calendar.previous');
+      this._els.today.textContent = this._t('calendar.today');
+      this._els.next.textContent = this._t('calendar.next');
       this._els.previous.setAttribute('aria-label', this._t('calendar.previous'));
+      this._els.today.setAttribute('aria-label', this._t('calendar.today'));
       this._els.next.setAttribute('aria-label', this._t('calendar.next'));
-      this._els.previous.textContent = this._locale.dir === 'rtl' ? '›' : '‹';
-      this._els.next.textContent = this._locale.dir === 'rtl' ? '‹' : '›';
-      this._els.eyebrow.textContent = this._t('app.title');
-      if (!this._value) this._els.summary.textContent = this._t('loading.title');
-      this._els.editorLink.textContent = this._t('search.kicker');
+      this._els.cutletKicker.textContent = this._t('calendar.toolbarAria');
+      this._els.searchKicker.textContent = this._t('search.kicker');
+      this._els.searchHeading.textContent = this._t('search.heading');
+      this._els.editorLink.textContent = this._t('search.submit');
       this._els.languageLabel.textContent = this._t('language.label');
       this._els.loadingTitle.textContent = this._t('loading.title');
       this._els.loadingNote.textContent = this._t('loading.kicker');
@@ -493,12 +751,20 @@
       this._els.calculationLabel.textContent = this._t('settings.heading');
       this._els.applyButton.textContent = this._t('search.submit');
       this._els.cancelButton.textContent = this._t('reverse.action.cancel');
+      if (!this._value) {
+        this._els.summary.textContent = this._t('loading.title');
+        this._els.beaconLabel.textContent = this._t('target.searched');
+        this._els.beaconYear.textContent = '…';
+        this._els.beaconCutlet.textContent = '…';
+        this._els.beaconMonth.textContent = '…';
+        this._els.beaconContext.textContent = '';
+      }
 
       const locales = i18n.supportedLocales();
       const current = this._locale.code;
-      const fragment = document.createDocumentFragment();
+      const fragment = doc.createDocumentFragment();
       for (const locale of locales) {
-        const option = document.createElement('option');
+        const option = doc.createElement('option');
         option.value = locale.code;
         option.textContent = locale.displayName;
         if (locale.code === current) option.selected = true;
@@ -510,31 +776,34 @@
 
     async refresh() {
       const generation = ++this._generation;
-      const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
-      const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
-      const targetJdn = axis.gregorianToJdn(targetDate);
-      const calculationJdn = axis.gregorianToJdn(calculationDate);
       const headless = this.hasAttribute('headless');
-      const service = serviceApi.getSharedCalendarService();
-
-      this._targetJdn = targetJdn;
-      this._calculationJdn = calculationJdn;
-      this._cutlets.clear();
-      this._orderedStarts = [];
-      this._activeStartJdn = null;
-      this._loadingBefore = null;
-      this._loadingAfter = null;
-      this._cutletLoads.clear();
-      this._navigationGeneration += 1;
-
-      if (headless) {
-        if (this._els && this._els.list) this._els.list.replaceChildren();
-        if (this._els && this._els.calendar) this._els.calendar.setAttribute('aria-busy', 'true');
-      } else {
-        this._showLoading();
-      }
+      let inputValid = false;
 
       try {
+        const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
+        const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
+        const targetJdn = axis.gregorianToJdn(targetDate);
+        const calculationJdn = axis.gregorianToJdn(calculationDate);
+        inputValid = true;
+
+        this._targetJdn = targetJdn;
+        this._calculationJdn = calculationJdn;
+        this._cutlets.clear();
+        this._orderedStarts = [];
+        this._activeStartJdn = null;
+        this._loadingBefore = null;
+        this._loadingAfter = null;
+        this._cutletLoads.clear();
+        this._navigationGeneration += 1;
+
+        if (headless) {
+          if (this._els && this._els.list) this._els.list.replaceChildren();
+          if (this._els && this._els.calendar) this._els.calendar.setAttribute('aria-busy', 'true');
+        } else {
+          this._showLoading();
+        }
+
+        const service = serviceApi.getSharedCalendarService();
         if (headless) {
           const value = await service.convert(targetJdn, calculationJdn);
           if (generation !== this._generation) return null;
@@ -550,6 +819,7 @@
           service.getCutletView(targetJdn, calculationJdn),
         ]);
         if (generation !== this._generation) return null;
+
         this._value = resultApi.cloneCanonicalResult(values[0]);
         const currentView = values[1];
         this._storeCutlet(currentView);
@@ -558,13 +828,15 @@
         this._renderCutlets();
         this._hideOverlays();
         this._els.calendar.setAttribute('aria-busy', 'false');
-        queueMicrotask(() => this._scrollSelectedIntoView());
+        enqueueMicrotask(() => {
+          if (generation === this._generation && this._connected) this._scrollSelectedIntoView();
+        });
         this._publishValue();
         this._primeAdjacent(currentView, generation);
         return this._value;
       } catch (error) {
         if (generation !== this._generation) return null;
-        if (!headless) this._showError(error);
+        if (!headless) this._showError(error, inputValid ? 'error.engineFailed' : 'search.invalid');
         else if (this._els && this._els.calendar) this._els.calendar.setAttribute('aria-busy', 'false');
         throw error;
       }
@@ -575,7 +847,11 @@
         this._readySettled = true;
         this._resolveReady(this._value);
       }
-      this.dispatchEvent(new CustomEvent('pastafari-change', {
+      const EventCtor = root.CustomEvent;
+      if (typeof EventCtor !== 'function') {
+        throw new Error('Ti navigator ne supporta CustomEvent.');
+      }
+      this.dispatchEvent(new EventCtor('pastafari-change', {
         bubbles: true,
         composed: true,
         detail: this._value,
@@ -583,12 +859,21 @@
     }
 
     _queueRefresh() {
-      if (this._refreshQueued) return;
-      this._refreshQueued = true;
-      queueMicrotask(() => {
-        this._refreshQueued = false;
-        if (this._connected) this.refresh().catch(() => {});
+      if (!this._connected) return;
+      const epoch = this._connectionEpoch;
+      if (this._refreshQueuedEpoch === epoch) return;
+      this._refreshQueuedEpoch = epoch;
+      enqueueMicrotask(() => {
+        if (this._refreshQueuedEpoch === epoch) this._refreshQueuedEpoch = null;
+        if (!this._connected || this._connectionEpoch !== epoch) return;
+        this.refresh().catch(() => {});
       });
+    }
+
+    _goToday() {
+      if (this.hasAttribute('date')) this.removeAttribute('date');
+      if (this.hasAttribute('calculation-date')) this.removeAttribute('calculation-date');
+      this._queueRefresh();
     }
 
     _storeCutlet(view) {
@@ -684,17 +969,36 @@
       if (!this._value) return;
       const cutletName = this._localCalendarName('cutlet', this._value.cutletName);
       const monthName = this._localCalendarName('month', this._value.monthName);
-      this._els.summary.textContent = this._t('date.cutletLine', {
+      const targetDate = this._targetJdn == null
+        ? ''
+        : axis.toIsoDate(axis.jdnToGregorian(this._targetJdn));
+      const actionDate = this._calculationJdn == null
+        ? ''
+        : axis.toIsoDate(axis.jdnToGregorian(this._calculationJdn));
+
+      const yearLine = this._t('date.yearLine', { year: this._value.year });
+      const cutletLine = this._t('date.cutletLine', {
         dayInCutlet: this._value.dayInCutlet,
         cutletName,
-      }) + ' · ' + this._t('date.monthLine', {
+      });
+      const monthLine = this._t('date.monthLine', {
         dayInMonth: this._value.dayInMonth,
         monthName,
+      });
+
+      this._els.summary.textContent = cutletLine + ' · ' + monthLine;
+      this._els.beaconLabel.textContent = this._t('target.searched');
+      this._els.beaconYear.textContent = yearLine;
+      this._els.beaconCutlet.textContent = cutletLine;
+      this._els.beaconMonth.textContent = monthLine;
+      this._els.beaconContext.textContent = this._t('target.context', {
+        targetDate,
+        actionDate,
       });
     }
 
     _renderCutlets() {
-      const fragment = document.createDocumentFragment();
+      const fragment = doc.createDocumentFragment();
       for (const startJdn of this._orderedStarts) {
         fragment.append(this._renderCutlet(this._cutlets.get(startJdn)));
       }
@@ -702,44 +1006,43 @@
     }
 
     _renderCutlet(view) {
-      const section = document.createElement('section');
+      const section = doc.createElement('section');
       const localCutlet = this._localCalendarName('cutlet', view.cutletName);
       section.className = 'cutlet';
       section.dataset.startJdn = String(view.startJdn);
       section.dataset.endJdn = String(view.endJdn);
       section.setAttribute('aria-label', this._t('calendar.daysAria', { cutletName: localCutlet }));
 
-      const heading = document.createElement('h2');
+      const heading = doc.createElement('h2');
       heading.className = 'cutlet-heading';
       heading.textContent = this._t('calendar.currentCutlet', { year: view.year }) + ' ' + localCutlet;
       section.append(heading);
 
-      const palette = new Map();
       let run = [];
       for (const day of view.days) {
         if (run.length > 0 && !sameMonthRun(run[run.length - 1], day)) {
-          section.append(this._renderMonthRun(run, palette));
+          section.append(this._renderMonthRun(run));
           run = [];
         }
         run.push(day);
       }
-      if (run.length > 0) section.append(this._renderMonthRun(run, palette));
+      if (run.length > 0) section.append(this._renderMonthRun(run));
       return section;
     }
 
-    _renderMonthRun(days, palette) {
+    _renderMonthRun(days) {
       const first = days[0];
       const last = days[days.length - 1];
       const localMonth = this._localCalendarName('month', first.monthName);
-      const group = document.createElement('section');
+      const group = doc.createElement('section');
       group.className = 'month-run';
-      group.style.setProperty('--month-accent', monthAccent(first.monthName, palette));
+      applyMonthTheme(group, first.monthName);
 
-      const heading = document.createElement('header');
+      const heading = doc.createElement('header');
       heading.className = 'month-heading';
-      const title = document.createElement('strong');
+      const title = doc.createElement('strong');
       title.textContent = localMonth;
-      const range = document.createElement('span');
+      const range = doc.createElement('span');
       range.className = 'month-range';
       range.textContent = this._t('field.day') + ' ' + (
         first.dayInMonth === last.dayInMonth
@@ -748,42 +1051,49 @@
       );
       heading.append(title, range);
 
-      const grid = document.createElement('div');
+      const grid = doc.createElement('div');
       grid.className = 'days';
+      grid.setAttribute('role', 'list');
       for (const day of days) {
         const localDayCutlet = this._localCalendarName('cutlet', day.cutletName);
         const localDayMonth = this._localCalendarName('month', day.monthName);
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'day';
-        button.dataset.jdn = String(day.jdn);
-        button.style.setProperty('--month-accent', monthAccent(day.monthName, palette));
-        button.setAttribute('aria-label', this._t('date.aria', {
+        const card = doc.createElement('article');
+        card.className = 'day mod' + String(((Number(day.dayInCutlet) % 7) + 7) % 7);
+        card.dataset.jdn = String(day.jdn);
+        applyMonthTheme(card, day.monthName);
+        card.setAttribute('role', 'listitem');
+        card.setAttribute('aria-label', this._t('date.aria', {
           year: day.year,
           dayInCutlet: day.dayInCutlet,
           cutletName: localDayCutlet,
           dayInMonth: day.dayInMonth,
           monthName: localDayMonth,
         }));
-        if (BigInt(day.jdn) === this._targetJdn) button.setAttribute('aria-current', 'date');
+        if (BigInt(day.jdn) === this._targetJdn) card.setAttribute('aria-current', 'date');
 
-        const monthDay = document.createElement('span');
-        monthDay.className = 'day-in-month';
-        monthDay.textContent = String(day.dayInMonth);
-        const cutletDay = document.createElement('span');
-        cutletDay.className = 'day-in-cutlet';
-        cutletDay.textContent = this._t('field.day') + ' ' + String(day.dayInCutlet);
-        button.append(monthDay, cutletDay);
-        grid.append(button);
+        const yearLine = doc.createElement('span');
+        yearLine.className = 'day-line year';
+        yearLine.textContent = this._t('date.yearLine', { year: day.year });
+
+        const cutletLine = doc.createElement('span');
+        cutletLine.className = 'day-line cutlet';
+        cutletLine.textContent = this._t('date.cutletLine', {
+          dayInCutlet: day.dayInCutlet,
+          cutletName: localDayCutlet,
+        });
+
+        const monthLine = doc.createElement('span');
+        monthLine.className = 'day-line month';
+        monthLine.textContent = this._t('date.monthLine', {
+          dayInMonth: day.dayInMonth,
+          monthName: localDayMonth,
+        });
+
+        card.append(yearLine, cutletLine, monthLine);
+        grid.append(card);
       }
       group.append(heading, grid);
       return group;
-    }
-
-    _selectDay(event) {
-      const button = event.target.closest('button.day[data-jdn]');
-      if (!button) return;
-      this.setAttribute('date', axis.toIsoDate(axis.jdnToGregorian(BigInt(button.dataset.jdn))));
     }
 
     _scrollSelectedIntoView() {
@@ -922,12 +1232,14 @@
       if (this._els.error) this._els.error.hidden = true;
     }
 
-    _showError(error) {
+    _showError(error, messageKey) {
       if (this._els.calendar) this._els.calendar.setAttribute('aria-busy', 'false');
       if (this._els.loading) this._els.loading.hidden = true;
       if (this._els.error) this._els.error.hidden = false;
       if (root.console && typeof root.console.error === 'function') root.console.error(error);
-      if (this._els.errorMessage) this._els.errorMessage.textContent = this._t('error.engineFailed');
+      if (this._els.errorMessage) {
+        this._els.errorMessage.textContent = this._t(messageKey || 'error.engineFailed');
+      }
     }
   }
 

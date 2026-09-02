@@ -1,0 +1,47 @@
+{
+  "package": "pastafari-browser-interface-original-ui-multilingual-v7",
+  "base_branch": "JavaScript+Interlingue",
+  "base_head_verified": "221c7af4e672fc11799d1c5582e788ee455cf717",
+  "purpose": [
+    "restore more of the original public UI character",
+    "harden Web Component lifecycle and stale-generation behavior",
+    "add complete Hebrew, Arabic and Russian presentation beside Interlingue and English",
+    "localize all visible/ARIA cutlet and month names by exact current semantic source text",
+    "make month visual themes deterministic by semantic month identity"
+  ],
+  "files": [
+    "index.html",
+    "browser/example.html",
+    "browser/pastafari-date.js",
+    "browser/i18n/locales.js",
+    "browser/README.md",
+    "tests/browser-i18n-locales.js",
+    "tests/browser-component-runtime.js",
+    "tests/browser-interface-all.js",
+    "tests/browser-interface-contract.js",
+    "tests/browser-interface-black-box.js",
+    "tests/browser-built-artifacts.js"
+  ],
+  "excluded": [
+    "src/**",
+    "browser/dist/**",
+    "browser/standalone/pastafari-date.js",
+    "browser/standalone/pastafari-date.min.js",
+    "visual-harness.html",
+    "local test scaffolding"
+  ],
+  "local_validation": [
+    "browser-interface-contract: PASS",
+    "browser-interface-black-box: PASS",
+    "browser-i18n-locales: PASS",
+    "browser-component-runtime: PASS",
+    "browser-interface-service: PASS",
+    "browser-engine-client: PASS",
+    "browser-worker-runtime: PASS",
+    "browser-stage01-compatibility: PASS",
+    "browser-interface-all: PASS",
+    "scripts/build-browser.js: PASS against local structural core stub",
+    "browser-built-artifacts: PASS against local structural build"
+  ],
+  "note": "The workspace is a delta reconstruction, not a full repository clone. Authoritative Stage-01/full-core validation is GitHub CI after upload."
+}
