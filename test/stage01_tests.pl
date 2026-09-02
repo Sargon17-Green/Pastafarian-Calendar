@@ -1,5 +1,6 @@
 :- begin_tests(stage01).
 :- use_module(library(plunit)).
+:- use_module(library(readutil)).
 
 :- use_module('../src/source_language_catalog').
 :- use_module('../src/normative_oracle').
@@ -111,8 +112,54 @@ test(bootstrap_rexeita_dia_non_entero) :-
     Context = monster_context(_,_,bootstrap,failed,authoritative,validation_error,
                               0,base_validator,none,_,_,_,invalid_day_input).
 
+test(ownership_fallo_e_reintento_bootstrap) :-
+    monster_manager_execute(10,20,Baseline),
+    monster_manager_execute(day,20,Failed),
+    Failed = monster_context(_,_,bootstrap,failed,authoritative,validation_error,
+                             0,base_validator,none,_,_,_,invalid_day_input),
+    monster_manager_execute(10,20,AfterFailure),
+    assertion(AfterFailure == Baseline).
+
+test(ownership_orde_chamadas_bootstrap) :-
+    monster_manager_execute(10,20,A1),
+    monster_manager_execute(-7,31,B1),
+    monster_manager_execute(-7,31,B2),
+    monster_manager_execute(10,20,A2),
+    assertion(A1 == A2),
+    assertion(B1 == B2).
+
+test(ownership_memo_composicion_tras_fallo) :-
+    bounded_composition_count(5,2,1,4,BaselineCount),
+    \+ bounded_composition_unrank(5,2,1,4,99,_),
+    bounded_composition_count(5,2,1,4,AfterCount),
+    bounded_composition_unrank(5,2,1,4,3,AfterValue),
+    assertion(BaselineCount =:= 4),
+    assertion(AfterCount =:= BaselineCount),
+    assertion(AfterValue == [3,2]).
+
+test(ownership_memo_tecido_tras_fallo) :-
+    weaving_count([2,2],BaselineCount),
+    \+ weaving_unrank([2,2],99,_),
+    weaving_count([2,2],AfterCount),
+    weaving_unrank([2,2],2,AfterValue),
+    assertion(BaselineCount =:= 2),
+    assertion(AfterCount =:= BaselineCount),
+    assertion(AfterValue == [1,2,1,2]).
+
+test(ownership_orde_portas) :-
+    ensure_gate_index(2,PFirst),
+    ensure_gate_index(-2,NSecond),
+    ensure_gate_index(-2,NFirst),
+    ensure_gate_index(2,PSecond),
+    assertion(PFirst =:= PSecond),
+    assertion(NFirst =:= NSecond).
+
+
 test(production_non_chama_oraculo, [throws(error(stage_not_available(54),_))]) :-
     calendar_date_spaghetti(10,20,_).
+
+test(production_rexeita_entrada_invalida, [throws(error(invalid_day_input,_))]) :-
+    calendar_date_spaghetti(non_integer,20,_).
 
 test(salsa_determinista) :-
     foundation_day(F),
@@ -134,5 +181,6 @@ test(distancia_porta_negativa_en_rango) :-
     negative_gate_gap(1,Gap),
     assertion(Gap >= 42),
     assertion(Gap =< 963).
+
 
 :- end_tests(stage01).

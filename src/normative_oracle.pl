@@ -36,11 +36,7 @@
 
 :- use_module(source_language_catalog).
 :- use_module(library(lists)).
-
-:- dynamic gate_cache/2.
-:- dynamic bc_memo/5.
-:- dynamic cp_memo/8.
-:- dynamic weave_memo/5.
+:- use_module(library(assoc)).
 
 normative_m(170141183460469231731687303715884105727).
 tablets_day(-278522).
@@ -70,14 +66,7 @@ seal_month_weaving(32).
 seal_month_names(33).
 
 reset_oracle_state :-
-    retractall(gate_cache(_, _)),
-    foundation_day(F),
-    assertz(gate_cache(0, F)),
-    retractall(bc_memo(_, _, _, _, _)),
-    retractall(cp_memo(_, _, _, _, _, _, _, _)),
-    retractall(weave_memo(_, _, _, _, _)).
-
-:- initialization(reset_oracle_state).
+    true.
 
 regular_mod(X, D, R) :-
     R is X mod D.
@@ -483,85 +472,103 @@ range_list(Low, High, [Low|Rest]) :-
     range_list(Low2, High, Rest).
 
 bounded_composition_count(Total, Slots, Lo, Hi, Count) :-
-    retractall(bc_memo(_, _, _, _, _)),
-    bc_count(Total, Slots, Lo, Hi, Count).
+    bc_prepare(Total, Slots, Lo, Hi, _, Count).
 
-bc_count(Rem, Slots, Lo, Hi, Count) :-
-    ( bc_memo(Rem, Slots, Lo, Hi, Count) -> true
-    ; bc_count_uncached(Rem, Slots, Lo, Hi, Count),
-      assertz(bc_memo(Rem, Slots, Lo, Hi, Count))
+bc_prepare(Total, Slots, Lo, Hi, Memo, Count) :-
+    empty_assoc(Memo0),
+    bc_count(Total, Slots, Lo, Hi, Memo0, Memo, Count).
+
+bc_count(Rem, Slots, Lo, Hi, Memo0, Memo, Count) :-
+    Key = bc(Rem, Slots, Lo, Hi),
+    ( get_assoc(Key, Memo0, Cached) ->
+        Count = Cached,
+        Memo = Memo0
+    ; bc_count_uncached(Rem, Slots, Lo, Hi, Memo0, Memo1, Count),
+      put_assoc(Key, Memo1, Count, Memo)
     ).
 
-bc_count_uncached(Rem, 0, _, _, Count) :-
+bc_count_uncached(Rem, 0, _, _, Memo, Memo, Count) :-
     !,
     ( Rem =:= 0 -> Count = 1 ; Count = 0 ).
-bc_count_uncached(Rem, Slots, Lo, Hi, 0) :-
+bc_count_uncached(Rem, Slots, Lo, Hi, Memo, Memo, 0) :-
     ( Rem < Slots*Lo ; Rem > Slots*Hi ),
     !.
-bc_count_uncached(Rem, Slots, Lo, Hi, Count) :-
+bc_count_uncached(Rem, Slots, Lo, Hi, Memo0, Memo, Count) :-
     Slots1 is Slots - 1,
-    bc_sum_candidates(Lo, Hi, Rem, Slots1, Lo, Hi, 0, Count).
+    bc_sum_candidates(Lo, Hi, Rem, Slots1, Lo, Hi, Memo0, Memo, 0, Count).
 
-bc_sum_candidates(X, Hi, _, _, _, _, Acc, Acc) :- X > Hi, !.
-bc_sum_candidates(X, Hi, Rem, Slots1, Lo, BoundHi, Acc0, Count) :-
+bc_sum_candidates(X, Hi, _, _, _, _, Memo, Memo, Acc, Acc) :- X > Hi, !.
+bc_sum_candidates(X, Hi, Rem, Slots1, Lo, BoundHi, Memo0, Memo, Acc0, Count) :-
     Rem1 is Rem - X,
-    bc_count(Rem1, Slots1, Lo, BoundHi, C),
+    bc_count(Rem1, Slots1, Lo, BoundHi, Memo0, Memo1, C),
     Acc1 is Acc0 + C,
     X1 is X + 1,
-    bc_sum_candidates(X1, Hi, Rem, Slots1, Lo, BoundHi, Acc1, Count).
+    bc_sum_candidates(X1, Hi, Rem, Slots1, Lo, BoundHi, Memo1, Memo, Acc1, Count).
 
 bounded_composition_unrank(Total, Slots, Lo, Hi, Rank, Composition) :-
-    retractall(bc_memo(_, _, _, _, _)),
-    bc_count(Total, Slots, Lo, Hi, Count),
+    bc_prepare(Total, Slots, Lo, Hi, Memo0, Count),
     Rank >= 1,
     Rank =< Count,
-    bc_unrank(Total, Slots, Lo, Hi, Rank, Composition).
+    bc_unrank(Total, Slots, Lo, Hi, Rank, Memo0, _, Composition).
 
-bc_unrank(_, 0, _, _, _, []) :- !.
-bc_unrank(Rem, Slots, Lo, Hi, Rank, [X|Rest]) :-
+bc_unrank(_, 0, _, _, _, Memo, Memo, []) :- !.
+bc_unrank(Rem, Slots, Lo, Hi, Rank, Memo0, Memo, [X|Rest]) :-
     Slots1 is Slots - 1,
-    bc_pick_x(Lo, Hi, Rem, Slots1, Lo, Hi, Rank, X, NextRank),
+    bc_pick_x(Lo, Hi, Rem, Slots1, Lo, Hi, Rank, Memo0, Memo1, X, NextRank),
     Rem1 is Rem - X,
-    bc_unrank(Rem1, Slots1, Lo, Hi, NextRank, Rest).
+    bc_unrank(Rem1, Slots1, Lo, Hi, NextRank, Memo1, Memo, Rest).
 
-bc_pick_x(X, Hi, Rem, Slots1, Lo, BoundHi, Rank, Chosen, NextRank) :-
+bc_pick_x(X, Hi, Rem, Slots1, Lo, BoundHi, Rank, Memo0, Memo, Chosen, NextRank) :-
     X =< Hi,
     Rem1 is Rem - X,
-    bc_count(Rem1, Slots1, Lo, BoundHi, Block),
+    bc_count(Rem1, Slots1, Lo, BoundHi, Memo0, Memo1, Block),
     ( Rank > Block ->
         Rank2 is Rank - Block,
         X2 is X + 1,
-        bc_pick_x(X2, Hi, Rem, Slots1, Lo, BoundHi, Rank2, Chosen, NextRank)
+        bc_pick_x(X2, Hi, Rem, Slots1, Lo, BoundHi, Rank2,
+                  Memo1, Memo, Chosen, NextRank)
     ; Chosen = X,
-      NextRank = Rank
+      NextRank = Rank,
+      Memo = Memo1
     ).
 
 weaving_count(Lengths, Count) :-
-    retractall(weave_memo(_, _, _, _, _)),
-    weave_count_state(Lengths, Lengths, 0, 0, Count).
+    weave_prepare(Lengths, _, Count).
 
-weave_count_state(Lengths, Remaining, Opened, Closed, Count) :-
-    ( weave_memo(Lengths, Remaining, Opened, Closed, Count) -> true
-    ; weave_count_uncached(Lengths, Remaining, Opened, Closed, Count),
-      assertz(weave_memo(Lengths, Remaining, Opened, Closed, Count))
+weave_prepare(Lengths, Memo, Count) :-
+    empty_assoc(Memo0),
+    weave_count_state(Lengths, Lengths, 0, 0, Memo0, Memo, Count).
+
+weave_count_state(Lengths, Remaining, Opened, Closed, Memo0, Memo, Count) :-
+    Key = weave(Remaining, Opened, Closed),
+    ( get_assoc(Key, Memo0, Cached) ->
+        Count = Cached,
+        Memo = Memo0
+    ; weave_count_uncached(Lengths, Remaining, Opened, Closed, Memo0, Memo1, Count),
+      put_assoc(Key, Memo1, Count, Memo)
     ).
 
-weave_count_uncached(_, Remaining, _, _, 1) :- all_zero(Remaining), !.
-weave_count_uncached(Lengths, Remaining, Opened, Closed, Count) :-
+weave_count_uncached(_, Remaining, _, _, Memo, Memo, 1) :- all_zero(Remaining), !.
+weave_count_uncached(Lengths, Remaining, Opened, Closed, Memo0, Memo, Count) :-
     length(Lengths, M),
-    weave_sum_moves(1, M, Lengths, Remaining, Opened, Closed, 0, Count).
+    weave_sum_moves(1, M, Lengths, Remaining, Opened, Closed,
+                    Memo0, Memo, 0, Count).
 
-weave_sum_moves(J, M, _, _, _, _, Acc, Acc) :- J > M, !.
-weave_sum_moves(J, M, Lengths, Remaining, Opened, Closed, Acc0, Count) :-
+weave_sum_moves(J, M, _, _, _, _, Memo, Memo, Acc, Acc) :- J > M, !.
+weave_sum_moves(J, M, Lengths, Remaining, Opened, Closed,
+                Memo0, Memo, Acc0, Count) :-
     ( legal_weave_move(J, Lengths, Remaining, Opened, Closed) ->
         apply_weave_move(J, Lengths, Remaining, Opened, Closed,
                          NextRemaining, NextOpened, NextClosed),
-        weave_count_state(Lengths, NextRemaining, NextOpened, NextClosed, Block)
-    ; Block = 0
+        weave_count_state(Lengths, NextRemaining, NextOpened, NextClosed,
+                          Memo0, Memo1, Block)
+    ; Block = 0,
+      Memo1 = Memo0
     ),
     Acc1 is Acc0 + Block,
     J1 is J + 1,
-    weave_sum_moves(J1, M, Lengths, Remaining, Opened, Closed, Acc1, Count).
+    weave_sum_moves(J1, M, Lengths, Remaining, Opened, Closed,
+                    Memo1, Memo, Acc1, Count).
 
 legal_weave_move(J, Lengths, Remaining, Opened, Closed) :-
     nth1(J, Remaining, RemJ),
@@ -589,41 +596,47 @@ all_zero([]).
 all_zero([0|Xs]) :- all_zero(Xs).
 
 weaving_unrank(Lengths, Rank, Weave) :-
-    retractall(weave_memo(_, _, _, _, _)),
-    weave_count_state(Lengths, Lengths, 0, 0, Count),
+    weave_prepare(Lengths, Memo0, Count),
     Rank >= 1,
     Rank =< Count,
-    weave_unrank_state(Lengths, Lengths, 0, 0, Rank, [], Rev),
+    weave_unrank_state(Lengths, Lengths, 0, 0, Rank, Memo0, _, [], Rev),
     reverse(Rev, Weave).
 
-weave_unrank_state(_, Remaining, _, _, _, Acc, Acc) :- all_zero(Remaining), !.
-weave_unrank_state(Lengths, Remaining, Opened, Closed, Rank, Acc, Out) :-
+weave_unrank_state(_, Remaining, _, _, _, Memo, Memo, Acc, Acc) :- all_zero(Remaining), !.
+weave_unrank_state(Lengths, Remaining, Opened, Closed, Rank,
+                   Memo0, Memo, Acc, Out) :-
     length(Lengths, M),
     weave_pick_move(1, M, Lengths, Remaining, Opened, Closed, Rank,
+                    Memo0, Memo1,
                     J, NextRemaining, NextOpened, NextClosed, NextRank),
     weave_unrank_state(Lengths, NextRemaining, NextOpened, NextClosed,
-                       NextRank, [J|Acc], Out).
+                       NextRank, Memo1, Memo, [J|Acc], Out).
 
 weave_pick_move(J, M, Lengths, Remaining, Opened, Closed, Rank,
+                Memo0, Memo,
                 Chosen, NextRemaining, NextOpened, NextClosed, NextRank) :-
     J =< M,
     ( legal_weave_move(J, Lengths, Remaining, Opened, Closed) ->
         apply_weave_move(J, Lengths, Remaining, Opened, Closed,
                          CandidateRemaining, CandidateOpened, CandidateClosed),
-        weave_count_state(Lengths, CandidateRemaining, CandidateOpened, CandidateClosed, Block),
+        weave_count_state(Lengths, CandidateRemaining, CandidateOpened, CandidateClosed,
+                          Memo0, Memo1, Block),
         ( Rank > Block ->
             Rank2 is Rank - Block,
             J2 is J + 1,
             weave_pick_move(J2, M, Lengths, Remaining, Opened, Closed, Rank2,
+                            Memo1, Memo,
                             Chosen, NextRemaining, NextOpened, NextClosed, NextRank)
         ; Chosen = J,
           NextRemaining = CandidateRemaining,
           NextOpened = CandidateOpened,
           NextClosed = CandidateClosed,
-          NextRank = Rank
+          NextRank = Rank,
+          Memo = Memo1
         )
     ; J2 is J + 1,
       weave_pick_move(J2, M, Lengths, Remaining, Opened, Closed, Rank,
+                      Memo0, Memo,
                       Chosen, NextRemaining, NextOpened, NextClosed, NextRank)
     ).
 
@@ -645,86 +658,103 @@ negative_gate_gap(N, Gap) :-
     choose_rank(Stream, 922, Chosen),
     Gap is 41 + Chosen.
 
-ensure_gate_index(Index, Day) :- gate_cache(Index, Day), !.
-ensure_gate_index(Index, Day) :-
-    Index > 0,
-    Prev is Index - 1,
-    ensure_gate_index(Prev, PrevDay),
-    positive_gate_gap(Index, Gap),
-    Day is PrevDay + Gap,
-    assertz(gate_cache(Index, Day)),
-    !.
-ensure_gate_index(Index, Day) :-
-    Index < 0,
-    Next is Index + 1,
-    ensure_gate_index(Next, NextDay),
-    N is abs(Index),
-    negative_gate_gap(N, Gap),
-    Day is NextDay - Gap,
-    assertz(gate_cache(Index, Day)).
-
-ensure_gates_cover(Low, High) :-
-    ensure_day_reached(Low),
-    ensure_day_reached(High).
-
-ensure_day_reached(Day) :-
+new_gate_state(Cache) :-
+    empty_assoc(Empty),
     foundation_day(F),
-    ( Day >= F -> extend_positive_to_day(1, Day)
-    ; extend_negative_to_day(-1, Day)
+    put_assoc(0, Empty, F, Cache).
+
+ensure_gate_index(Index, Day) :-
+    new_gate_state(Cache0),
+    ensure_gate_index_state(Index, Cache0, _, Day).
+
+ensure_gate_index_state(Index, Cache0, Cache, Day) :-
+    ( get_assoc(Index, Cache0, Existing) ->
+        Day = Existing,
+        Cache = Cache0
+    ; Index > 0 ->
+        Prev is Index - 1,
+        ensure_gate_index_state(Prev, Cache0, Cache1, PrevDay),
+        positive_gate_gap(Index, Gap),
+        Day is PrevDay + Gap,
+        put_assoc(Index, Cache1, Day, Cache)
+    ; Index < 0 ->
+        Next is Index + 1,
+        ensure_gate_index_state(Next, Cache0, Cache1, NextDay),
+        N is abs(Index),
+        negative_gate_gap(N, Gap),
+        Day is NextDay - Gap,
+        put_assoc(Index, Cache1, Day, Cache)
     ).
 
-extend_positive_to_day(Index, Day) :-
-    ensure_gate_index(Index, GateDay),
-    ( GateDay >= Day -> true
+ensure_gates_cover_state(Low, High, Cache0, Cache) :-
+    ensure_day_reached_state(Low, Cache0, Cache1),
+    ensure_day_reached_state(High, Cache1, Cache).
+
+ensure_day_reached_state(Day, Cache0, Cache) :-
+    foundation_day(F),
+    ( Day >= F -> extend_positive_to_day_state(1, Day, Cache0, Cache)
+    ; extend_negative_to_day_state(-1, Day, Cache0, Cache)
+    ).
+
+extend_positive_to_day_state(Index, Day, Cache0, Cache) :-
+    ensure_gate_index_state(Index, Cache0, Cache1, GateDay),
+    ( GateDay >= Day -> Cache = Cache1
     ; Index2 is Index + 1,
-      extend_positive_to_day(Index2, Day)
+      extend_positive_to_day_state(Index2, Day, Cache1, Cache)
     ).
 
-extend_negative_to_day(Index, Day) :-
-    ensure_gate_index(Index, GateDay),
-    ( GateDay =< Day -> true
+extend_negative_to_day_state(Index, Day, Cache0, Cache) :-
+    ensure_gate_index_state(Index, Cache0, Cache1, GateDay),
+    ( GateDay =< Day -> Cache = Cache1
     ; Index2 is Index - 1,
-      extend_negative_to_day(Index2, Day)
+      extend_negative_to_day_state(Index2, Day, Cache1, Cache)
     ).
 
-known_gate_bounds(Min, Max) :-
-    findall(I, gate_cache(I,_), Indices),
+known_gate_bounds(Cache, Min, Max) :-
+    assoc_to_keys(Cache, Indices),
     min_list(Indices, Min),
     max_list(Indices, Max).
 
-gate_index_at_or_before(Day, Index) :-
-    ensure_day_reached(Day),
-    known_gate_bounds(Min, Max),
-    binary_gate_before(Min, Max, Day, Index).
+gate_index_at_or_before_state(Day, Cache0, Cache, Index) :-
+    ensure_day_reached_state(Day, Cache0, Cache1),
+    known_gate_bounds(Cache1, Min, Max),
+    binary_gate_before_state(Min, Max, Day, Cache1, Index),
+    Cache = Cache1.
 
-binary_gate_before(Lo, Hi, _, Lo) :- Lo >= Hi, !.
-binary_gate_before(Lo, Hi, Day, Index) :-
+binary_gate_before_state(Lo, Hi, _, _, Lo) :- Lo >= Hi, !.
+binary_gate_before_state(Lo, Hi, Day, Cache, Index) :-
     Mid is Lo + ((Hi - Lo + 1) // 2),
-    ensure_gate_index(Mid, MidDay),
-    ( MidDay =< Day -> binary_gate_before(Mid, Hi, Day, Index)
+    get_assoc(Mid, Cache, MidDay),
+    ( MidDay =< Day -> binary_gate_before_state(Mid, Hi, Day, Cache, Index)
     ; Hi2 is Mid - 1,
-      binary_gate_before(Lo, Hi2, Day, Index)
+      binary_gate_before_state(Lo, Hi2, Day, Cache, Index)
     ).
 
-gate_index_at_or_after(Day, Index) :-
-    gate_index_at_or_before(Day, I),
-    ensure_gate_index(I, GateDay),
-    ( GateDay =:= Day -> Index = I
+gate_index_at_or_after_state(Day, Cache0, Cache, Index) :-
+    gate_index_at_or_before_state(Day, Cache0, Cache1, I),
+    get_assoc(I, Cache1, GateDay),
+    ( GateDay =:= Day ->
+        Index = I,
+        Cache = Cache1
     ; I2 is I + 1,
-      ensure_gate_index(I2, _),
+      ensure_gate_index_state(I2, Cache1, Cache, _),
       Index = I2
     ).
 
 exact_gate_index(Day, Index) :-
-    gate_index_at_or_before(Day, I),
-    ensure_gate_index(I, GateDay),
+    new_gate_state(Cache0),
+    exact_gate_index_state(Day, Cache0, _, Index).
+
+exact_gate_index_state(Day, Cache0, Cache, Index) :-
+    gate_index_at_or_before_state(Day, Cache0, Cache, I),
+    get_assoc(I, Cache, GateDay),
     ( GateDay =:= Day -> Index = I ; Index = none ).
 
-year_pair_valid(Open, Close) :-
+year_pair_valid_cached(Cache, Open, Close) :-
     min_gate_gaps_per_year(MinGaps),
     Close - Open >= MinGaps,
-    ensure_gate_index(Open, OD),
-    ensure_gate_index(Close, CD),
+    get_assoc(Open, Cache, OD),
+    get_assoc(Close, Cache, CD),
     L is CD - OD,
     year_min_days(MinDays),
     year_max_days(MaxDays),
@@ -732,20 +762,24 @@ year_pair_valid(Open, Close) :-
     L =< MaxDays.
 
 year5000(CalculationDay, Year) :-
+    new_gate_state(Cache0),
+    year5000_state(CalculationDay, Cache0, _, Year).
+
+year5000_state(CalculationDay, Cache0, Cache, Year) :-
     year_max_days(MaxDays),
     Low is CalculationDay - MaxDays,
     High is CalculationDay + MaxDays,
-    ensure_gates_cover(Low, High),
-    gate_index_at_or_before(Low, MinIndex),
-    gate_index_at_or_after(High, MaxIndex),
+    ensure_gates_cover_state(Low, High, Cache0, Cache1),
+    gate_index_at_or_before_state(Low, Cache1, Cache2, MinIndex),
+    gate_index_at_or_after_state(High, Cache2, Cache3, MaxIndex),
     findall(key(Len,OpenDay)-pair(I,J),
         ( between(MinIndex, MaxIndex, I),
           J0 is I + 1,
           J0 =< MaxIndex,
           between(J0, MaxIndex, J),
-          year_pair_valid(I,J),
-          ensure_gate_index(I, OpenDay),
-          ensure_gate_index(J, CloseDay),
+          year_pair_valid_cached(Cache3,I,J),
+          get_assoc(I, Cache3, OpenDay),
+          get_assoc(J, Cache3, CloseDay),
           OpenDay < CalculationDay,
           CalculationDay =< CloseDay,
           Len is CloseDay - OpenDay
@@ -759,85 +793,98 @@ year5000(CalculationDay, Year) :-
     ask_bowl(R, 1, Seal, Stream),
     choose_rank(Stream, N, Rank),
     nth1(Rank, Candidates, _-pair(Open,Close)),
-    ensure_gate_index(Open, OpenDay),
-    ensure_gate_index(Close, CloseDay),
-    Year = year(5000,Open,Close,OpenDay,CloseDay).
+    get_assoc(Open, Cache3, OpenDay),
+    get_assoc(Close, Cache3, CloseDay),
+    Year = year(5000,Open,Close,OpenDay,CloseDay),
+    Cache = Cache3.
 
-next_year(CalculationDay, year(Number,_,Close,_,_), Year) :-
+next_year_state(CalculationDay, year(Number,_,Close,_,_), Cache0, Cache, Year) :-
     J0 is Close + 1,
-    collect_next_year_candidates(Close, J0, [], Rev),
+    collect_next_year_candidates_state(Close, J0, Cache0, Cache1, [], Rev),
     reverse(Rev, CandidatesInGenerationOrder),
     keysort(CandidatesInGenerationOrder, Sorted),
     length(Sorted, N),
     N >= 1,
-    ensure_gate_index(Close, OpenDay),
+    get_assoc(Close, Cache1, OpenDay),
     sauce(CalculationDay, OpenDay, R),
     seal_next_year(Seal),
     ask_bowl(R, 1, Seal, Stream),
     choose_rank(Stream, N, Rank),
     nth1(Rank, Sorted, _Len-CloseIndex),
-    ensure_gate_index(CloseIndex, CloseDay),
+    get_assoc(CloseIndex, Cache1, CloseDay),
     Number2 is Number + 1,
-    Year = year(Number2,Close,CloseIndex,OpenDay,CloseDay).
+    Year = year(Number2,Close,CloseIndex,OpenDay,CloseDay),
+    Cache = Cache1.
 
-collect_next_year_candidates(Open, J, Acc, Candidates) :-
-    ensure_gate_index(Open, OpenDay),
-    ensure_gate_index(J, CloseDay),
+collect_next_year_candidates_state(Open, J, Cache0, Cache, Acc, Candidates) :-
+    ensure_gate_index_state(Open, Cache0, Cache1, OpenDay),
+    ensure_gate_index_state(J, Cache1, Cache2, CloseDay),
     Len is CloseDay - OpenDay,
     year_max_days(MaxDays),
-    ( Len > MaxDays -> Candidates = Acc
-    ; ( year_pair_valid(Open,J) -> Acc1 = [Len-J|Acc] ; Acc1 = Acc ),
+    ( Len > MaxDays ->
+        Candidates = Acc,
+        Cache = Cache2
+    ; ( year_pair_valid_cached(Cache2,Open,J) -> Acc1 = [Len-J|Acc] ; Acc1 = Acc ),
       J2 is J + 1,
-      collect_next_year_candidates(Open, J2, Acc1, Candidates)
+      collect_next_year_candidates_state(Open, J2, Cache2, Cache, Acc1, Candidates)
     ).
 
-previous_year(CalculationDay, year(Number,Open,_,_,_), Year) :-
+previous_year_state(CalculationDay, year(Number,Open,_,_,_), Cache0, Cache, Year) :-
     I0 is Open - 1,
-    collect_previous_year_candidates(Open, I0, [], Rev),
+    collect_previous_year_candidates_state(Open, I0, Cache0, Cache1, [], Rev),
     reverse(Rev, CandidatesInGenerationOrder),
     keysort(CandidatesInGenerationOrder, Sorted),
     length(Sorted, N),
     N >= 1,
-    ensure_gate_index(Open, CloseDay),
+    get_assoc(Open, Cache1, CloseDay),
     sauce(CalculationDay, CloseDay, R),
     seal_previous_year(Seal),
     ask_bowl(R, 1, Seal, Stream),
     choose_rank(Stream, N, Rank),
     nth1(Rank, Sorted, _Len-OpenIndex),
-    ensure_gate_index(OpenIndex, OpenDay),
+    get_assoc(OpenIndex, Cache1, OpenDay),
     Number2 is Number - 1,
-    Year = year(Number2,OpenIndex,Open,OpenDay,CloseDay).
+    Year = year(Number2,OpenIndex,Open,OpenDay,CloseDay),
+    Cache = Cache1.
 
-collect_previous_year_candidates(Close, I, Acc, Candidates) :-
-    ensure_gate_index(Close, CloseDay),
-    ensure_gate_index(I, OpenDay),
+collect_previous_year_candidates_state(Close, I, Cache0, Cache, Acc, Candidates) :-
+    ensure_gate_index_state(Close, Cache0, Cache1, CloseDay),
+    ensure_gate_index_state(I, Cache1, Cache2, OpenDay),
     Len is CloseDay - OpenDay,
     year_max_days(MaxDays),
-    ( Len > MaxDays -> Candidates = Acc
-    ; ( year_pair_valid(I,Close) -> Acc1 = [Len-I|Acc] ; Acc1 = Acc ),
+    ( Len > MaxDays ->
+        Candidates = Acc,
+        Cache = Cache2
+    ; ( year_pair_valid_cached(Cache2,I,Close) -> Acc1 = [Len-I|Acc] ; Acc1 = Acc ),
       I2 is I - 1,
-      collect_previous_year_candidates(Close, I2, Acc1, Candidates)
+      collect_previous_year_candidates_state(Close, I2, Cache2, Cache, Acc1, Candidates)
     ).
 
 find_target_year(CalculationDay, TargetDay, Year) :-
-    year5000(CalculationDay, Y0),
-    walk_forward_if_needed(CalculationDay, TargetDay, Y0, Y1),
-    walk_backward_if_needed(CalculationDay, TargetDay, Y1, Year).
+    new_gate_state(Cache0),
+    find_target_year_state(CalculationDay, TargetDay, Cache0, _, Year).
 
-walk_forward_if_needed(CalculationDay, TargetDay, Y0, Year) :-
+find_target_year_state(CalculationDay, TargetDay, Cache0, Cache, Year) :-
+    year5000_state(CalculationDay, Cache0, Cache1, Y0),
+    walk_forward_if_needed_state(CalculationDay, TargetDay, Y0, Cache1, Cache2, Y1),
+    walk_backward_if_needed_state(CalculationDay, TargetDay, Y1, Cache2, Cache, Year).
+
+walk_forward_if_needed_state(CalculationDay, TargetDay, Y0, Cache0, Cache, Year) :-
     Y0 = year(_,_,_,_,CloseDay),
     ( TargetDay > CloseDay ->
-        next_year(CalculationDay, Y0, Y1),
-        walk_forward_if_needed(CalculationDay, TargetDay, Y1, Year)
-    ; Year = Y0
+        next_year_state(CalculationDay, Y0, Cache0, Cache1, Y1),
+        walk_forward_if_needed_state(CalculationDay, TargetDay, Y1, Cache1, Cache, Year)
+    ; Year = Y0,
+      Cache = Cache0
     ).
 
-walk_backward_if_needed(CalculationDay, TargetDay, Y0, Year) :-
+walk_backward_if_needed_state(CalculationDay, TargetDay, Y0, Cache0, Cache, Year) :-
     Y0 = year(_,_,_,OpenDay,_),
     ( TargetDay =< OpenDay ->
-        previous_year(CalculationDay, Y0, Y1),
-        walk_backward_if_needed(CalculationDay, TargetDay, Y1, Year)
-    ; Year = Y0
+        previous_year_state(CalculationDay, Y0, Cache0, Cache1, Y1),
+        walk_backward_if_needed_state(CalculationDay, TargetDay, Y1, Cache1, Cache, Year)
+    ; Year = Y0,
+      Cache = Cache0
     ).
 
 choose_cutlet_count(StructureSauce, year(_,Open,Close,_,_), K) :-
@@ -862,37 +909,41 @@ required_cutlet_boundary(CalculationDay, year(_,Open,Close,OpenDay,CloseDay), Re
     ; Required = none
     ).
 
-cutlet_partition_prepare(G, K, Required, Count) :-
-    retractall(cp_memo(_, _, _, _, _, _, _, _)),
-    cp_count(G, K, Required, G, K, 0, false, Count).
+cutlet_partition_prepare(G, K, Required, Memo, Count) :-
+    empty_assoc(Memo0),
+    cp_count(G, K, Required, G, K, 0, false, Memo0, Memo, Count).
 
-cp_count(G, K, Req, Rem, Slots, Cum, Hit, Count) :-
-    ( cp_memo(G,K,Req,Rem,Slots,Cum,Hit,Count) -> true
-    ; cp_count_uncached(G,K,Req,Rem,Slots,Cum,Hit,Count),
-      assertz(cp_memo(G,K,Req,Rem,Slots,Cum,Hit,Count))
+cp_count(G, K, Req, Rem, Slots, Cum, Hit, Memo0, Memo, Count) :-
+    Key = cp(G,K,Req,Rem,Slots,Cum,Hit),
+    ( get_assoc(Key, Memo0, Cached) ->
+        Count = Cached,
+        Memo = Memo0
+    ; cp_count_uncached(G,K,Req,Rem,Slots,Cum,Hit,Memo0,Memo1,Count),
+      put_assoc(Key, Memo1, Count, Memo)
     ).
 
-cp_count_uncached(_,_,Req,Rem,0,_,Hit,Count) :-
+cp_count_uncached(_,_,Req,Rem,0,_,Hit,Memo,Memo,Count) :-
     !,
     ( Rem =:= 0,
       ( Req == none ; Hit == true ) -> Count = 1 ; Count = 0 ).
-cp_count_uncached(_,_,_,Rem,Slots,_,_,0) :- Rem < Slots, !.
-cp_count_uncached(G,K,Req,Rem,Slots,Cum,Hit,Count) :-
+cp_count_uncached(_,_,_,Rem,Slots,_,_,Memo,Memo,0) :- Rem < Slots, !.
+cp_count_uncached(G,K,Req,Rem,Slots,Cum,Hit,Memo0,Memo,Count) :-
     MaxX is Rem - (Slots - 1),
-    cp_sum_x(1, MaxX, G,K,Req,Rem,Slots,Cum,Hit,0,Count).
+    cp_sum_x(1, MaxX, G,K,Req,Rem,Slots,Cum,Hit,Memo0,Memo,0,Count).
 
-cp_sum_x(X, MaxX, _,_,_,_,_,_,_,Acc,Acc) :- X > MaxX, !.
-cp_sum_x(X, MaxX, G,K,Req,Rem,Slots,Cum,Hit,Acc0,Count) :-
+cp_sum_x(X, MaxX, _,_,_,_,_,_,_,Memo,Memo,Acc,Acc) :- X > MaxX, !.
+cp_sum_x(X, MaxX, G,K,Req,Rem,Slots,Cum,Hit,Memo0,Memo,Acc0,Count) :-
     cp_transition(Req, X, Cum, Hit, NextCum, NextHit, Allowed),
     ( Allowed == true ->
         Rem1 is Rem - X,
         Slots1 is Slots - 1,
-        cp_count(G,K,Req,Rem1,Slots1,NextCum,NextHit,Block)
-    ; Block = 0
+        cp_count(G,K,Req,Rem1,Slots1,NextCum,NextHit,Memo0,Memo1,Block)
+    ; Block = 0,
+      Memo1 = Memo0
     ),
     Acc1 is Acc0 + Block,
     X2 is X + 1,
-    cp_sum_x(X2, MaxX, G,K,Req,Rem,Slots,Cum,Hit,Acc1,Count).
+    cp_sum_x(X2, MaxX, G,K,Req,Rem,Slots,Cum,Hit,Memo1,Memo,Acc1,Count).
 
 cp_transition(none, X, Cum, Hit, NextCum, Hit, true) :-
     NextCum is Cum + X.
@@ -907,53 +958,55 @@ cp_transition(Req, X, Cum, false, NextCum, NextHit, Allowed) :-
     ; NextHit = false, Allowed = false
     ).
 
-cutlet_partition_unrank(G,K,Req,Rank,Partition) :-
-    cp_unrank(G,K,Req,G,K,0,false,Rank,Partition).
+cutlet_partition_unrank(G,K,Req,Rank,Memo0,Partition) :-
+    cp_unrank(G,K,Req,G,K,0,false,Rank,Memo0,_,Partition).
 
-cp_unrank(_,_,_,_,0,_,_,_,[]) :- !.
-cp_unrank(G,K,Req,Rem,Slots,Cum,Hit,Rank,[X|Rest]) :-
+cp_unrank(_,_,_,_,0,_,_,_,Memo,Memo,[]) :- !.
+cp_unrank(G,K,Req,Rem,Slots,Cum,Hit,Rank,Memo0,Memo,[X|Rest]) :-
     MaxX is Rem - (Slots - 1),
-    cp_pick_x(1,MaxX,G,K,Req,Rem,Slots,Cum,Hit,Rank,
+    cp_pick_x(1,MaxX,G,K,Req,Rem,Slots,Cum,Hit,Rank,Memo0,Memo1,
               X,NextCum,NextHit,NextRank),
     Rem1 is Rem - X,
     Slots1 is Slots - 1,
-    cp_unrank(G,K,Req,Rem1,Slots1,NextCum,NextHit,NextRank,Rest).
+    cp_unrank(G,K,Req,Rem1,Slots1,NextCum,NextHit,NextRank,Memo1,Memo,Rest).
 
 cp_pick_x(X,MaxX,G,K,Req,Rem,Slots,Cum,Hit,Rank,
-          Chosen,NextCum,NextHit,NextRank) :-
+          Memo0,Memo,Chosen,NextCum,NextHit,NextRank) :-
     X =< MaxX,
     cp_transition(Req,X,Cum,Hit,CandidateCum,CandidateHit,Allowed),
     ( Allowed == true ->
         Rem1 is Rem - X,
         Slots1 is Slots - 1,
-        cp_count(G,K,Req,Rem1,Slots1,CandidateCum,CandidateHit,Block)
-    ; Block = 0
+        cp_count(G,K,Req,Rem1,Slots1,CandidateCum,CandidateHit,Memo0,Memo1,Block)
+    ; Block = 0,
+      Memo1 = Memo0
     ),
     ( Block =:= 0 ->
         X2 is X + 1,
         cp_pick_x(X2,MaxX,G,K,Req,Rem,Slots,Cum,Hit,Rank,
-                  Chosen,NextCum,NextHit,NextRank)
+                  Memo1,Memo,Chosen,NextCum,NextHit,NextRank)
     ; Rank > Block ->
         Rank2 is Rank - Block,
         X2 is X + 1,
         cp_pick_x(X2,MaxX,G,K,Req,Rem,Slots,Cum,Hit,Rank2,
-                  Chosen,NextCum,NextHit,NextRank)
+                  Memo1,Memo,Chosen,NextCum,NextHit,NextRank)
     ; Chosen = X,
       NextCum = CandidateCum,
       NextHit = CandidateHit,
-      NextRank = Rank
+      NextRank = Rank,
+      Memo = Memo1
     ).
 
 choose_cutlet_partition(CalculationDay, StructureSauce,
                         Year = year(_,Open,Close,_,_), K, Partition) :-
     G is Close - Open,
     required_cutlet_boundary(CalculationDay, Year, Required),
-    cutlet_partition_prepare(G,K,Required,Count),
+    cutlet_partition_prepare(G,K,Required,Memo,Count),
     Count >= 1,
     seal_cutlet_partition(Seal),
     ask_bowl(StructureSauce, 2, Seal, Stream),
     choose_rank(Stream, Count, Rank),
-    cutlet_partition_unrank(G,K,Required,Rank,Partition).
+    cutlet_partition_unrank(G,K,Required,Rank,Memo,Partition).
 
 choose_cutlet_names(StructureSauce, K, Indices) :-
     falling_factorial(17,K,N),
@@ -994,21 +1047,18 @@ choose_month_lengths(StructureSauce, year(_,_,_,OpenDay,CloseDay), K, Lengths) :
     L is CloseDay - OpenDay,
     min_month_days(Lo),
     max_month_days(Hi),
-    retractall(bc_memo(_, _, _, _, _)),
-    bc_count(L,K,Lo,Hi,Count),
+    bounded_composition_count(L,K,Lo,Hi,Count),
     seal_month_lengths(Seal),
     ask_bowl(StructureSauce, 3, Seal, Stream),
     choose_rank(Stream,Count,Rank),
-    bc_unrank(L,K,Lo,Hi,Rank,Lengths).
+    bounded_composition_unrank(L,K,Lo,Hi,Rank,Lengths).
 
 choose_month_weaving(StructureSauce, Lengths, Weave) :-
-    retractall(weave_memo(_, _, _, _, _)),
-    weave_count_state(Lengths,Lengths,0,0,Count),
+    weaving_count(Lengths,Count),
     seal_month_weaving(Seal),
     ask_bowl(StructureSauce,4,Seal,Stream),
     choose_rank(Stream,Count,Rank),
-    weave_unrank_state(Lengths,Lengths,0,0,Rank,[],Rev),
-    reverse(Rev,Weave).
+    weaving_unrank(Lengths,Rank,Weave).
 
 unrank_distinct_master(N, K, Rank, Indices) :-
     range_list(1,N,Remaining),

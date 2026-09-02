@@ -20,7 +20,9 @@ swipl -q -f test/run_tests.pl
 - `src/normative_oracle.pl`: referencia normativa limpa, só para probas.
 - `src/monster_bootstrap.pl`: contexto, despachador, validación, erros e métricas neutras do Stage 1.
 - `test/stage01_tests.pl`: probas do Bootstrap e da referencia normativa.
-- `test/run_tests.pl`: punto de entrada das probas.
+- `test/ownership_stage01_tests.pl`: probas específicas da propiedade e do illamento do estado.
+- `test/run_tests.pl`: punto de entrada das probas normais e de propiedade.
+- `docs/STATE_OWNERSHIP_STAGE01.md`: auditoría da propiedade do estado semántico.
 - `DEVELOPMENT_STAGE.md`: estado formal do desenvolvemento.
 - `SPAGHETTI_DEVELOPMENT_HISTORY.md`: historia escrita só ata o punto realmente alcanzado.
 

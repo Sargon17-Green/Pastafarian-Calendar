@@ -62,5 +62,9 @@ bump_dispatch_metric(
 
 calendar_date_spaghetti(CalculationDay, TargetDay, _) :-
     monster_manager_execute(CalculationDay, TargetDay, Context),
-    Context = monster_context(_,_,_,_,_,bootstrap_ready,_,_,_,_,_,_,_),
-    throw(error(stage_not_available(54), calendar_date_spaghetti/3)).
+    ( Context = monster_context(_,_,_,_,_,bootstrap_ready,_,_,_,_,_,_,_) ->
+        throw(error(stage_not_available(54), calendar_date_spaghetti/3))
+    ; Context = monster_context(_,_,_,failed,_,validation_error,_,_,_,_,_,_,Error) ->
+        throw(error(Error, calendar_date_spaghetti/3))
+    ; throw(error(bootstrap_invariant_failure, calendar_date_spaghetti/3))
+    ).

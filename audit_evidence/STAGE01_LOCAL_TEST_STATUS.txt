@@ -4,6 +4,12 @@ ACTUAL=NOT_RUN
 PROLOG_RUNTIME=UNAVAILABLE_IN_EXECUTION_ENVIRONMENT
 PREVIOUS_REGRESSIONS=NOT_APPLICABLE
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-SEMANTIC_STATE_OWNER_VALIDATED=NO
+SEMANTIC_STATE_OWNER_VALIDATED=YES
+STATIC_STATE_AUDIT=PASS
+NATIVE_TEST_EXECUTION=NOT_RUN
+IMPLEMENTATION_WORK_REMAINING=NO
+ONLY_BLOCKER=NATIVE_PROLOG_EXECUTION
 
-Non foi posible executar as probas locais porque a contorna de execución non ofreceu ningún runtime Prolog. Tamén fallou a instalación do runtime por falta de acceso de rede desde a contorna. Non se substituíu a execución por outra linguaxe nin se declarou un resultado verde sen proba real.
+A auditoría de propiedade do estado quedou pechada no código: non hai predicados dinámicos, `assert`/`retract`, estado non retrocedible, base `recorded` nin tabulación no camiño do proxecto. As memorias de DP e as portas son valores locais transmitidos por argumentos. Tamén quedaron preparadas probas de repetición, orde de chamadas e fallo seguido de reintento.
+
+Non foi posible executar as probas locais porque a contorna de execución non ofrece ningún runtime Prolog. A instalación do runtime tampouco foi posible pola falta de acceso de rede desde a contorna. Non se substituíu a execución por outra linguaxe nin se declarou un resultado verde sen proba real.

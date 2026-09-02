@@ -16,4 +16,6 @@ A única capa estrutural é un contexto por invocación cun despachador base e o
 
 ### Propiedade do estado
 
-Cada `monster_context` pertence a unha única invocación. Neste Stage non hai estado semántico mutable compartido nin cache semántica global no módulo de produción. O oráculo de probas conserva unicamente memorias auxiliares internas e unha caché determinista de portas, separadas da produción.
+Cada `monster_context` pertence a unha única invocación. O módulo de produción non ten estado semántico mutable compartido. O oráculo usa exclusivamente asociacións locais pasadas por argumentos para as memorias de DP e para o estado das portas. Eliminouse a dependencia de predicados dinámicos e de `assert`/`retract`; non se usa tabulación, base `recorded` nin variables globais non retrocedibles como estado do algoritmo.
+
+Preparáronse regresións específicas para repetición, orde A→B→A e fallo seguido de reintento. A verificación nativa destas regresións segue pendente unicamente porque a contorna dispoñible non contén un runtime Prolog.

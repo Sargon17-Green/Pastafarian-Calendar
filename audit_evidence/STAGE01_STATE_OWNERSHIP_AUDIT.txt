@@ -1,0 +1,21 @@
+STAGE=1
+AUDIT=SEMANTIC_STATE_OWNERSHIP
+RESULT=PASS_STATIC
+NATIVE_EXECUTION=NOT_RUN
+
+DYNAMIC_PREDICATES_IN_PROJECT_PATH=NONE
+ASSERT_RETRACT_IN_PROJECT_PATH=NONE
+NON_BACKTRACKABLE_WRITES_IN_PROJECT_PATH=NONE
+RECORDED_DATABASE_IN_PROJECT_PATH=NONE
+TABLING_IN_PROJECT_PATH=NONE
+SHARED_SEMANTIC_CACHE_IN_PRODUCTION=NONE
+ORACLE_DP_STATE=LOCAL_ASSOC_PASSED_BY_ARGUMENT
+ORACLE_GATE_STATE=LOCAL_ASSOC_PASSED_BY_ARGUMENT
+MONSTER_CONTEXT_OWNER=ONE_INVOCATION
+OBSERVABILITY_STATE=INSIDE_INVOCATION_TERM_ONLY
+
+A revisión do código confirmou que ningunha chamada publica publica estado semántico para a seguinte. As memorias auxiliares e as portas nacen dentro de cada cálculo e só continúan a través dos argumentos da recursión.
+
+As probas preparadas comproban tamén fallo seguido de reintento, repetición da mesma chamada, orde A→B→A, propiedades dos predicados cargados e estabilidade dos nomes de variables globais non retrocedibles antes e despois de novas execucións.
+
+O resultado é unha validación estática completa da propiedade. A única comprobación que queda pendente é executar estas regresións nun runtime Prolog nativo.
