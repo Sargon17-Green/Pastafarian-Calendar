@@ -1,0 +1,7 @@
+Q# 実行環境確認
+
+qsharp_cli=NOT_FOUND
+dotnet_cli=NOT_FOUND
+foreign_language_runtime_used_for_qsharp=NO
+
+この環境では Q# を直接実行できないため、Stage 1 の Q# テストは未実行である。代替言語を Q# ホストとして使用していない。

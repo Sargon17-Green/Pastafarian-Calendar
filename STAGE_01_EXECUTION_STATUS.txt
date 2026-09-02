@@ -1,0 +1,8 @@
+STAGE=1
+EXPECTED=GREEN
+ACTUAL=NOT_EXECUTED
+REASON=QSHARP_RUNTIME_NOT_AVAILABLE_IN_BUILD_ENVIRONMENT
+QSHARP_TEST_ENTRYPOINT=src/Main.qs::Pastafari.Main.Main
+FOREIGN_LANGUAGE_RUNTIME_CALLED=NO
+
+この作成環境には Q# を直接実行できる QDK/CLI が存在しなかった。仕様に反して Python や JavaScript を Q# のホストとして使うことはしていない。そのため、成功したという虚偽の実行記録は残さない。QDK 環境で Main を実行し、全テストが成功した時点で Stage 1 を完了扱いにできる。

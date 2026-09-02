@@ -1,0 +1,32 @@
+Stage 1 静的監査
+
+Q# ソース一覧:
+CanonicalCore.qs
+ExactMath.qs
+Main.qs
+MonsterInfrastructure.qs
+NormativeOracle.qs
+ProductionBaseline.qs
+SourceLanguageCatalog.qs
+Tests.qs
+
+将来パッチ固有識別子の検索:
+結果: PASS — 将来パッチ固有コードは見つからない。
+
+Q# コメント記号の検索:
+結果: PASS — ソース内にコメントはなく、非日本語コメント混入の余地はない。
+
+公開結果フィールド:
+    struct CalendarResult {
+        YearNumber : BigInt,
+        CutletName : String,
+        DayInCutlet : BigInt,
+        MonthName : String,
+        DayInMonth : BigInt,
+    }
+
+プロジェクト外部依存:
+結果: qsharp.json は空の最小 manifest で、外部依存を宣言しない。
+
+実行監査:
+結果: 未実行。Q# runtime が存在しないため、GREEN は未確認。
