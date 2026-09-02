@@ -58,6 +58,36 @@ jobs:
           set -euo pipefail
           sh build_http_api.sh
 
+
+      - name: CORS restrictum cum ministro vero probare
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/pastafari-http 127.0.0.1 18079 >/tmp/http-cors.out 2>/tmp/http-cors.err &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 100); do
+            if curl -fsS http://127.0.0.1:18079/v1/health >/dev/null; then break; fi
+            sleep 0.1
+          done
+          curl -sS -D /tmp/cors-allowed.headers -o /tmp/cors-allowed.body -X OPTIONS \
+            http://127.0.0.1:18079/v1/date \
+            -H 'Origin: https://bwtbdyqtmsprytgydym-cpu.github.io' \
+            -H 'Access-Control-Request-Method: POST' \
+            -H 'Access-Control-Request-Headers: content-type'
+          grep -q '^HTTP/1.1 204' /tmp/cors-allowed.headers
+          grep -qi '^Access-Control-Allow-Origin: https://bwtbdyqtmsprytgydym-cpu.github.io' /tmp/cors-allowed.headers
+          curl -fsS -D /tmp/cors-get.headers -o /tmp/cors-get.body \
+            http://127.0.0.1:18079/v1/meta \
+            -H 'Origin: https://bwtbdyqtmsprytgydym-cpu.github.io'
+          grep -qi '^Access-Control-Allow-Origin: https://bwtbdyqtmsprytgydym-cpu.github.io' /tmp/cors-get.headers
+          code=$(curl -sS -o /tmp/cors-denied.body -w '%{http_code}' -X OPTIONS \
+            http://127.0.0.1:18079/v1/date \
+            -H 'Origin: https://alien.example' \
+            -H 'Access-Control-Request-Method: POST')
+          test "$code" = 403
+          grep -q 'CORS_ORIGIN_NOT_ALLOWED' /tmp/cors-denied.body
+
       - name: Fumum per socket apud Foundation probare
         shell: bash
         run: |
