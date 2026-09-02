@@ -11,6 +11,7 @@ Addit:
 - campum optionalem `language` ad nomina segmentorum et mensium praesentanda; nunc sola lingua `la` publice sustinetur, sed stratum expansioni futurae praeparatum est;
 - adapter additivum ad `calendarDateSpaghetti` sine mutatione structurae historicae;
 - ministrum synchronous Boost.Beast;
+- CORS restrictum pro navigatore: origo situs publici implicite admittitur, `OPTIONS`/preflight tractatur, wildcard `*` non adhibetur, et allowlist per `PASTAFARI_CORS_ORIGINS` mutari potest;
 - primam cicatricem accelerationis `L0 Pair Tomb` (4096 loca direct-mapped), cum bypass/fallback integro;
 - probationes et CI quae realem `src/monster.cpp` conectunt.
 

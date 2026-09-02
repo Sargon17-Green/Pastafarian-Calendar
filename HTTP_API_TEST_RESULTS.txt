@@ -30,6 +30,12 @@ PASS  HTTP POST /v1/dates
 PASS  HTTP /v1/meta cum defaultLanguage et languages
 PASS  HTTP ambiguitas -> 422
 PASS  HTTP reiectio generis JSON falsi
+PASS  CORS allowlist exacta et parsing originum
+PASS  CORS preflight originis admissae -> 204 cum Access-Control-Allow-Origin
+PASS  CORS preflight originis alienae -> 403 CORS_ORIGIN_NOT_ALLOWED
+PASS  CORS GET originis admissae -> header Access-Control-Allow-Origin
+PASS  petitiones sine Origin sine mutatione procedunt
+PASS  CORS Foundation cum monstro vero et origine situs -> 200 cum Access-Control-Allow-Origin
 PASS  L0 Pair Tomb hit/miss/bypass/clear et fallback integer arbitrarii
 PASS  Boost.Beast socket smoke cum EnginePort ficticio
 PASS  CeleritasEnginePort contra verum `src/monster.cpp` conectitur

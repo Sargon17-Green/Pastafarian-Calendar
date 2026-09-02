@@ -41,6 +41,7 @@ fi
 
 for source in \
   src/date_conversion.cpp \
+  src/cors.cpp \
   src/venus_boundary.cpp \
   src/service.cpp \
   src/name_language.cpp \
