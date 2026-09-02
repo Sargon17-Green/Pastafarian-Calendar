@@ -1,0 +1,12 @@
+STAGE=1
+KIND=BOOTSTRAP
+EXPECTED_RESULT=GREEN
+ACTUAL_RESULT=NOT_RUN
+BLOCKER=COMPILADOR_OBJECT_PASCAL_INDISPONIVEL
+FPC_FOUND=NO
+DELPHI_FOUND=NO
+FOREIGN_LANGUAGE_RUNTIME_CALLED=NO
+GITHUB_ACTIONS_PERFORMED=NO
+GIT_HISTORY_MUTATED=NO
+
+A implementação foi preparada, mas não foi possível executar a compilação ou os testes neste ambiente. O Stage 1 continua aberto até existir uma execução real em Object Pascal / Delphi.
