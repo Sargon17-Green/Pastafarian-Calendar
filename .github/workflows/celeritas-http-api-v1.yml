@@ -142,6 +142,34 @@ jobs:
           test "$code" = 400
           grep -q 'INVALID_CALLBACK' /tmp/invalid-callback.json
 
+      - name: Sanitatem inter calculum longum probare
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/pastafari-http 127.0.0.1 18082 >/tmp/http-health-lane.out 2>/tmp/http-health-lane.err &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 100); do
+            if curl -fsS http://127.0.0.1:18082/v1/health >/dev/null; then break; fi
+            sleep 0.1
+          done
+
+          timeout 5m curl -fsS \
+            'http://127.0.0.1:18082/v1/date.js?date=-15055671&calendar=engine-day&calculation_day=-15055671&callback=healthLaneWitness' \
+            >/tmp/health-lane-date.js &
+          reqpid=$!
+          sleep 0.2
+          kill -0 "$reqpid"
+
+          # Ante cicatricem concurrentem, calculus semanticus unicum thread occupabat
+          # et health check Render usque ad finem calculi exspectabat.
+          curl --max-time 2 -fsS http://127.0.0.1:18082/v1/health >/tmp/health-during-calc.json
+          grep -q '"status":"ok"' /tmp/health-during-calc.json
+
+          wait "$reqpid"
+          grep -q '^healthLaneWitness({' /tmp/health-lane-date.js
+          grep -q '"year":"5000"' /tmp/health-lane-date.js
+
       - name: Fumum implicitum Kisurra-Venus probare
         shell: bash
         run: |
