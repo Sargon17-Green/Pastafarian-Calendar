@@ -1,8 +1,8 @@
 use "../src"
 primitive NormativeConstants
-  fun m(): BigInt => BigInt._parts(false, "170141183460469231731687303715884105727")
-  fun tablets_day(): BigInt => BigInt._parts(true, "278522")
-  fun foundation_day(): BigInt => BigInt._parts(true, "15055671")
+  fun m(): BigInt => BigInt.from_parts(false, "170141183460469231731687303715884105727")
+  fun tablets_day(): BigInt => BigInt.from_parts(true, "278522")
+  fun foundation_day(): BigInt => BigInt.from_parts(true, "15055671")
   fun year_min_days(): USize => 252
   fun year_max_days(): USize => 5778
 

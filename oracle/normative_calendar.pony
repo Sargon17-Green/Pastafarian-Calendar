@@ -39,7 +39,7 @@ class NormativeGateStore
         let prev = _known(prev_index)?
         let value = prev.add(one_gap(n)?)
         gates(n.string()) = value
-        max_known = BigInt._parts(false, n.string())
+        max_known = BigInt.from_parts(false, n.string())
         n = n.add(BigInt.from_u64(1))
       end
     end

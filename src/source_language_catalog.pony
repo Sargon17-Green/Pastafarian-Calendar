@@ -1,8 +1,8 @@
-class CatalogEntry
+class val CatalogEntry
   let canonical_index: USize
   let text: String
 
-  new create(canonical_index': USize, text': String) =>
+  new val create(canonical_index': USize, text': String) =>
     canonical_index = canonical_index'
     text = text'
 

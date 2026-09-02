@@ -20,7 +20,7 @@ primitive NormativeNames
       i = i + 1
     end
     let out = Array[USize](k)
-    var r = BigInt._parts(false, rank1.string())
+    var r = BigInt.from_parts(false, rank1.string())
     var position: USize = 1
     while position <= k do
       let suffix_length = k - position
@@ -86,7 +86,7 @@ class BoundedCompositionCounter
   fun ref unrank1(rank1: BigInt box): Array[USize] ? =>
     let count = count_all()
     if rank1.lt(BigInt.from_u64(1)) or rank1.gt(count) then error end
-    var r = BigInt._parts(false, rank1.string())
+    var r = BigInt.from_parts(false, rank1.string())
     var rem = total.i64()
     var position: USize = 1
     let out = Array[USize](slots)
@@ -175,7 +175,7 @@ class CutletPartitionCounter
 
   fun ref unrank1(rank1: BigInt box): Array[USize] ? =>
     if rank1.lt(BigInt.from_u64(1)) or rank1.gt(count_all()) then error end
-    var r = BigInt._parts(false, rank1.string())
+    var r = BigInt.from_parts(false, rank1.string())
     var rem = gaps
     var slots_left = parts
     var cumulative: USize = 0
@@ -243,15 +243,10 @@ class WeavingCounter
     for x in lengths.values() do s = s + x end
     s
 
-  fun _key(state: WeaveState): String =>
-    let out = String
-    out.append(state.opened_up_to.string())
-    out.push(58)
-    out.append(state.closed_up_to.string())
-    out.push(58)
+  fun _key(state: WeaveState): String val =>
+    var out: String val = state.opened_up_to.string() + ":" + state.closed_up_to.string() + ":"
     for x in state.remaining.values() do
-      out.append(x.string())
-      out.push(44)
+      out = out + x.string() + ","
     end
     out
 
@@ -310,7 +305,7 @@ class WeavingCounter
     let total = count_all()?
     if rank1.lt(BigInt.from_u64(1)) or rank1.gt(total) then error end
     var state = initial_state()
-    var r = BigInt._parts(false, rank1.string())
+    var r = BigInt.from_parts(false, rank1.string())
     let out = Array[USize](sum_lengths())
     while out.size() < sum_lengths() do
       var j: USize = 1
