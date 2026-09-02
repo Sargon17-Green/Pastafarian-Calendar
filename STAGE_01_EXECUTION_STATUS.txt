@@ -1,0 +1,5 @@
+POSMS=1
+STĀVOKLIS=GAIDA_IZPILDI
+IEMESLS=Šajā darba vidē nav pieejama Common Lisp izpildvide.
+GAIDĪTAIS=Visām 1. posma lokālajām Common Lisp pārbaudēm jāizdodas.
+IZPILDE=sbcl --script finalize-stage01.lisp

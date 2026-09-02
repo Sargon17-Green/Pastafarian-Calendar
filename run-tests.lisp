@@ -1,0 +1,6 @@
+(load "src/package.lisp")
+(load "src/source-language-catalog.lisp")
+(load "src/monster-base.lisp")
+(load "test/normative-oracle.lisp")
+(load "test/stage01-tests.lisp")
+(pastafari.lv.tests:run-stage-01-tests)
