@@ -1,26 +1,19 @@
-JavaScript + Interlingue browser interface — semantic calendar-name localization v5
+Base branch: JavaScript+Interlingue
+Base HEAD inspected: 98071beee4431075833bc237aad6132149c123b1
+Purpose: bounded semantic memoization, range-aware cutlet reuse, in-flight request coalescing, retry generation isolation, and executable Worker/client runtime tests.
 
-BASE BRANCH: JavaScript+Interlingue
-BASE HEAD CHECKED: fa3771373fd799be9a7a5639a10bfbd846cce1b5
+Replace:
+- browser/calendar-memory.js
+- browser/calendar-service.js
+- browser/README.md
+- tests/browser-interface-service.js
+- tests/browser-interface-all.js
 
-REPLACE:
-browser/i18n/locales.js
-browser/i18n/runtime.js
-browser/README.md
-tests/browser-i18n-locales.js
-tests/browser-interface-black-box.js
+Add:
+- tests/browser-engine-client.js
+- tests/browser-worker-runtime.js
 
-DO NOT MODIFY:
-package.json
-src/**
-DEVELOPMENT_STAGE.md
-.github/workflows/**
-other browser files
-historic/corrective/acceleration tests and artifacts
-
-LOCALES IN THIS DELTA:
-ie (Interlingue, default)
-en (English)
-
-CALENDAR ENTITY NAMES:
-Visible cutlet/month names are localized to the selected UI language. Translation tables are keyed by the exact current Interlingue semantic source text returned by the black-box core, never by positional index. Raw `value`, `ready`, and `pastafari-change` results remain unchanged.
+Do not upload generated browser/dist or browser/standalone bundles from this package; CI rebuilds them from branch HEAD.
+No root package.json change.
+No src/** change.
+No Stage state change.

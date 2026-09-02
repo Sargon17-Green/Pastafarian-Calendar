@@ -53,10 +53,21 @@ determina li cutlet-comense, e li Worker continua die per die til li sequent
 `CalendarService` es li sol punctu usat del Web Component por semantic demandes.
 `CalendarMemory` es un explicit contract sub ti service.
 
-Per default li implementation es `NullCalendarMemory`: null nov semantic cache es
-introducet per ti initial browser-version. Un futur memorisation implementation posse
-esser installat per `installSharedCalendarMemory(memory)` sin mutation del Web
-Component.
+Per default li service usa `BoundedCalendarMemory`: un local, process-only e bounded
+LRU semantic memory (2048 exact conversiones + 8 cutlet-views). Null rete, storage o
+persistent state es introductet. Li claves include sempre `calculationDay`, ergo semantic
+state ne es compartit inter diferent calculationes.
+
+Un memorisat cutlet-view es range-aware: un altri target intra li sam cutlet reutilisa li
+immutable day-array e retargeta solmen `selectedDay`/`selectedIndex`. `convert()` posse
+anc prender li exact die directmen ex ti cutlet-view, evitante un nov Worker call.
+Identic concurrent conversion/cutlet demandes es coalescet a un sol in-flight operation.
+
+`retry()` incrementa un memory-generation ante clear/restart, pro que un old asynchronous
+completion ne posse repopular li cache pos un retry. `clearCalculation()` resta isolat al
+selectet calculation day. Custom memory implementations posse esser installat per
+`installSharedCalendarMemory(memory)`; `NullCalendarMemory` resta disponibil internmen
+quam li null implementation del sam contract.
 
 Li Web Component tene separatmen max. quin cutlet-views por scroll/DOM ergonomie.
 Ti UI-cache ne es li semantic/performance memory.
