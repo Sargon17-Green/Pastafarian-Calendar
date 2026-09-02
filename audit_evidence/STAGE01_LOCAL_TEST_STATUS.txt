@@ -1,0 +1,9 @@
+STAGE=1
+EXPECTED=GREEN
+ACTUAL=NOT_RUN
+PROLOG_RUNTIME=UNAVAILABLE_IN_EXECUTION_ENVIRONMENT
+PREVIOUS_REGRESSIONS=NOT_APPLICABLE
+SOURCE_LANGUAGE_CATALOG_FROZEN=YES
+SEMANTIC_STATE_OWNER_VALIDATED=NO
+
+Non foi posible executar as probas locais porque a contorna de execución non ofreceu ningún runtime Prolog. Tamén fallou a instalación do runtime por falta de acceso de rede desde a contorna. Non se substituíu a execución por outra linguaxe nin se declarou un resultado verde sen proba real.

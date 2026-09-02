@@ -1,0 +1,17 @@
+DEVELOPMENT_STAGE.md
+README.md
+SOURCE_LANGUAGE_CATALOG_AUDIT.tsv
+SPAGHETTI_DEVELOPMENT_HISTORY.md
+audit_evidence/STAGE01_LOCAL_TEST_STATUS.txt
+audit_evidence/STAGE01_FILES_ADDED.txt
+docs/ARQUITECTURA_STAGE01.md
+docs/CATALOGO_LINGUA_FONTE.md
+docs/REFERENCE_SCOPE.md
+src/monster_bootstrap.pl
+src/normative_oracle.pl
+src/source_language_catalog.pl
+test/heavy_stage01_tests.pl
+test/run_heavy_tests.pl
+test/run_tests.pl
+test/stage01_fixtures.pl
+test/stage01_tests.pl
