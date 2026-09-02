@@ -12,3 +12,5 @@ services:
     envVars:
       - key: PASTAFARI_CORS_ORIGINS
         value: https://bwtbdyqtmsprytgydym-cpu.github.io
+      - key: PASTAFARI_CORS_ALLOW_NULL_ORIGIN
+        value: "1"

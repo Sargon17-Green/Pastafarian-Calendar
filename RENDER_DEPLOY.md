@@ -1,46 +1,36 @@
 # Render deployment — Celeritas per Sepulcra HTTP API
 
-This deployment layer does not alter Pastafarian calendar semantics.
+The public service accepts the Pastafarian GitHub Pages origin and, explicitly, opaque `Origin: null` requests so an HTML file opened directly with `file://` can use the API.
 
-## Files
+`Origin: null` is broader than local files: sandboxed/data documents can also have an opaque origin. The API therefore keeps this as a separate switch and does not enable credentials.
 
-- `Dockerfile` builds `pastafari-http` against the real `src/monster.cpp`.
-- `render.yaml` declares one public Render Web Service.
+## Render environment
 
-## Deploy
-
-1. Commit `Dockerfile` and `render.yaml` to branch `Celeritas-per-Sepulcra`.
-2. In Render, create a new Blueprint from:
-   `https://github.com/Sargon17-Green/Pastafarian-Calendar`
-3. Select branch `Celeritas-per-Sepulcra` if Render asks for a branch.
-4. Render reads `render.yaml` and creates `pastafari-celeritas-api`.
-5. Wait until `/v1/health` is healthy.
-6. Render assigns a public HTTPS hostname such as:
-   `https://pastafari-celeritas-api.onrender.com`
-
-## First public checks
-
-Replace `HOST` below with the assigned Render host.
-
-```sh
-curl -fsS https://HOST/v1/health
-
-curl -fsS   -H 'Origin: https://bwtbdyqtmsprytgydym-cpu.github.io'   'https://HOST/v1/date?date=2026-09-02&language=la'
+```text
+PASTAFARI_CORS_ORIGINS=https://bwtbdyqtmsprytgydym-cpu.github.io
+PASTAFARI_CORS_ALLOW_NULL_ORIGIN=1
 ```
 
-Browser preflight:
+To disable local/opaque-origin access later, set:
+
+```text
+PASTAFARI_CORS_ALLOW_NULL_ORIGIN=0
+```
+
+## Verification
 
 ```sh
-curl -i -X OPTIONS   -H 'Origin: https://bwtbdyqtmsprytgydym-cpu.github.io'   -H 'Access-Control-Request-Method: GET'   https://HOST/v1/date
+curl -i -X OPTIONS \
+  -H 'Origin: null' \
+  -H 'Access-Control-Request-Method: GET' \
+  https://HOST/v1/date
 ```
 
 Expected:
-- HTTP 204 for allowed preflight.
-- `Access-Control-Allow-Origin: https://bwtbdyqtmsprytgydym-cpu.github.io`
-- `/v1/health` returns a successful response.
 
-## Notes
+```text
+HTTP/... 204
+Access-Control-Allow-Origin: null
+```
 
-The service binds to `0.0.0.0` and uses Render's `PORT` variable.
-The public-site origin is explicitly allowlisted; wildcard CORS is not used.
-The initial Render configuration uses the free plan for deployment testing.
+The service still rejects an ordinary unlisted web origin such as `https://alien.example`.
