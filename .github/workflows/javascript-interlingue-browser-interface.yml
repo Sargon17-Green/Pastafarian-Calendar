@@ -3,7 +3,7 @@ name: JavaScript + Interlingue — interfacie de navigator
 on:
   push:
     branches:
-      - "JavaScript\+Interlingue"
+      - 'JavaScript\+Interlingue'
     paths:
       - "browser/**"
       - "scripts/build-browser.js"
