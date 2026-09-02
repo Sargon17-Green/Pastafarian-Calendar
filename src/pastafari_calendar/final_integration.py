@@ -367,6 +367,51 @@ def _chooseIntegratedRank(
         // family_count
     ) * family_count
 
+    # Yama 35: geniş rejection koridoru temizlenmez. Tarihsel while aşağıda
+    # aynen kalır. Python koridoru tek tek yürümeye kalkarsa yalnız son
+    # reddedilen taş öne çekilir; kabul adımını yine eski while kendi atar.
+    if (
+        wide > acceptance_limit
+        and ring.direction_step in (
+            -1,
+            1,
+        )
+    ):
+        yama_35_buried_wide = wide
+        yama_35_last_rejected_stone = (
+            space
+            if ring.direction_step == 1
+            else acceptance_limit + 1
+        )
+        wide = yama_35_last_rejected_stone
+
+        if ctx is not None:
+            ctx.metrics["wide_rejection_corridor_burials"] = (
+                ctx.metrics.get(
+                    "wide_rejection_corridor_burials",
+                    0,
+                )
+                + 1
+            )
+            ctx.branch_trace.append((
+                "YAMA_35_WIDE_REJECTION_CORRIDOR_BURIAL",
+                oracle_scope,
+                yama_35_buried_wide,
+                wide,
+                acceptance_limit,
+                space,
+                ring.direction_step,
+            ))
+            ctx.logs.append((
+                "yama-35-wide-rejection-corridor-burial",
+                oracle_scope,
+                yama_35_buried_wide,
+                wide,
+                acceptance_limit,
+                space,
+                ring.direction_step,
+            ))
+
     while wide > acceptance_limit:
         wide = 1 + regularMod(
             wide
