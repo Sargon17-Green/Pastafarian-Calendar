@@ -1,43 +1,34 @@
-# Browser-interface v11 — automatic lingue e compact status
+# JavaScript + Interlingue browser correctness + persistent cache delta
 
-Aplica ti delta al branche `JavaScript+Interlingue` super HEAD
-`784a3f94b29a5d362cdf7416a6b2499d3dc69605`.
+Base branch: `JavaScript+Interlingue`  
+Base HEAD: `9931b6e23ca0272f9e242935a0beb7123c78338c`
 
-Ti actualisation ne modifica li semantic core.
+Ti delta corrige li failure-class u li direct five-field conversion e li cutlet-view posse diverger por li sam `(calculationDay,targetDay)`.
 
-## Lingue
+## Correctness
 
-Li public `index.html` ne fixa plu `lang="ie"` sur `<pastafari-date>`.
-Li selection de lingue usa ti prioritá:
+- `CalendarService.convert()` es nu li authority por li exact target; un cutlet-view ne posse plu repopular o superscrir li direct conversion cache.
+- `getCutletView()` compara li selected day del view contra li direct five-field result ante display o cache.
+- Si li unesim view diverge, li single Worker es recreat e li cutlet-view es calculat un vez denov ex un clean black-box core instance.
+- Si li clean retry ancor diverge, li service falli cludet con `ERR_CALENDAR_INCONSISTENCY`, purga li calculation cache e ne monstra/cacha null arbitrari side.
+- Li build-artefact test pinna li observat semantic witness: project-day `739862` deve esser `(5000, bronze, 677, sand, 32)`.
 
-1. un explicit `lang` dat per un integrator;
-2. un manual selection memorisat localmen;
-3. `navigator.languages`;
-4. Interlingue quam final fallback.
+## Persistent browser cache
 
-Un manual selection es conservat sub `pastafari.browser.locale`.
-Si `localStorage` es prohibit o indisponibil, li selector e automatic detection
-continua functionar.
+- Li shared browser service usa `PersistentCalendarMemory`, con bounded hot memory + bounded `localStorage` persistence.
+- Direct conversions e exact requested cutlet-views survive un nov page load sur li sam computer/browser origin.
+- Persistent cutlet data es compact serialisat; quota failures degrada silentmen a in-memory cache.
+- Li persistent namespace include un SHA-256 fingerprint del exact bundled semantic core plus un cache schema version. Un core change ne posse reutilisar semantic cache entries de un old build.
+- Default direct `new CalendarService()` resta backward-compatible con `BoundedCalendarMemory`; persistence es li default solmen por li shared browser service.
 
-## Loading e error
+## Files
 
-Li loading/error state ne conserva plu li old target-beacon, toolbar o viewport
-visibil detra li status-panel. Ti evita que un old target-ring projecta se circum
-li loading panel durante un recalculation.
+- `browser/calendar-memory.js`
+- `browser/calendar-service.js`
+- `scripts/build-browser.js`
+- `tests/browser-interface-service.js`
+- `tests/browser-consistency-cache.js` (new)
+- `tests/browser-interface-all.js`
+- `tests/browser-built-artifacts.js`
 
-Li status-panel es nu bounded a max. 42 rem, have null artificial 19-rem
-min-height, e usa un compact horizontal layout sur larg ecranes. Sur strett
-ecranes it reflu a un compact vertical layout.
-
-Li public page anc remove li artificial `min-height: 100vh` del
-`pastafari-date` host. Li page-background continua ocupar li viewport, ma li
-component self ne reserva plu un grand vacui area.
-
-## Contracte
-
-Li raw API result, `ready`, `refresh()`, `pastafari-change`, `value`,
-`date`, `calculation-date`, `headless`, `no-editor` e explicit `lang`
-contractes resta compatibil.
-
-Li change de presentation ne modifica li current 47 distinct saturated
-month-themes ni li fort target indication de v10.
+Null `src/**`, root `package.json`, generated `browser/dist/**` o HANDOFF file es includet.

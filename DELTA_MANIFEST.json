@@ -1,32 +1,66 @@
 {
-  "package": "pastafari-browser-auto-locale-compact-status-v11",
-  "branch": "JavaScript+Interlingue",
-  "base_head_verified": "784a3f94b29a5d362cdf7416a6b2499d3dc69605",
+  "baseBranch": "JavaScript+Interlingue",
+  "baseHead": "9931b6e23ca0272f9e242935a0beb7123c78338c",
+  "purpose": "Prevent direct/view semantic divergence from being displayed or cached, recover once with a clean Worker, and add versioned persistent browser cache.",
   "files": [
-    "index.html",
-    "browser/pastafari-date.js",
-    "browser/README.md",
-    "tests/browser-component-runtime.js",
-    "tests/browser-interface-contract.js"
+    {
+      "path": "DELTA_README.md",
+      "sha256": "17c228db29af096f634302bfd613889959920980caee7b54742b91d292e5d71e",
+      "bytes": 2077
+    },
+    {
+      "path": "browser/calendar-memory.js",
+      "sha256": "1475a95fc6c215588064ec97d09c327301cabe62ae8493856030945df36beb16",
+      "bytes": 14951
+    },
+    {
+      "path": "browser/calendar-service.js",
+      "sha256": "8c1b63c07fa2c134aef1557dcc163c264b3c23c5ea6c82d1a3002f216dcb8be4",
+      "bytes": 9720
+    },
+    {
+      "path": "scripts/build-browser.js",
+      "sha256": "62a0949046466b72fc0092200ccd6dd8141eec2abf12025202ab14fed8e57b74",
+      "bytes": 5741
+    },
+    {
+      "path": "tests/browser-built-artifacts.js",
+      "sha256": "c2ca26c3c146b0050f7fc6e86c2eb2127fae0ba864d6dc3119e272d7bdbf3e80",
+      "bytes": 4057
+    },
+    {
+      "path": "tests/browser-consistency-cache.js",
+      "sha256": "00f3bbd3e5da67f797d364a5f2e2f197f0ebd340934c6cd375fdf022fc0e7957",
+      "bytes": 9175
+    },
+    {
+      "path": "tests/browser-interface-all.js",
+      "sha256": "21c4b42fa13145499989c5d8997d210c4572fb2d4ec8803c7cc293403a246df7",
+      "bytes": 654
+    },
+    {
+      "path": "tests/browser-interface-service.js",
+      "sha256": "9adbe8447eb95231adddd68a8144a1be74be850fd42e7ee85346f483fcfe91cf",
+      "bytes": 10620
+    }
   ],
-  "semantic_core_changed": false,
-  "public_api_changed": false,
-  "public_default_locale_behavior_changed": true,
-  "locale_precedence": [
-    "explicit lang attribute",
-    "stored manual selection",
-    "navigator.languages",
-    "Interlingue fallback"
+  "excluded": [
+    "src/**",
+    "package.json",
+    "browser/dist/**",
+    "browser/standalone/pastafari-date.js",
+    "HANDOFF*"
   ],
-  "locale_storage_key": "pastafari.browser.locale",
-  "status_panel_max_width": "42rem",
-  "status_panel_artificial_min_height_removed": true,
-  "host_100vh_min_height_removed": true,
-  "local_validation": [
-    "browser-interface-contract: PASS",
-    "browser-component-runtime: PASS",
-    "modified-js-syntax: PASS",
-    "raw-hebrew-source-scan: PASS"
+  "localValidation": [
+    "node --check on every changed JavaScript file: PASS",
+    "node tests/browser-interface-service.js: PASS (delta harness)",
+    "node tests/browser-consistency-cache.js: PASS (delta harness)",
+    "node tests/browser-worker-runtime.js: PASS (unchanged worker-entry harness)"
   ],
-  "readme_language": "Interlingue"
+  "ciRequired": [
+    "node tests/verify-stage-01.js",
+    "node tests/browser-interface-all.js",
+    "node scripts/build-browser.js",
+    "node tests/browser-built-artifacts.js"
+  ]
 }

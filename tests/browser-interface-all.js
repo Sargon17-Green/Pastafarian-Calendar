@@ -7,6 +7,7 @@ const ROOT = path.resolve(__dirname, '..');
 const tests = [
   'browser-stage01-compatibility.js',
   'browser-interface-service.js',
+  'browser-consistency-cache.js',
   'browser-engine-client.js',
   'browser-worker-runtime.js',
   'browser-interface-contract.js',

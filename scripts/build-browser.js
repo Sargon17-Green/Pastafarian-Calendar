@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
@@ -20,6 +21,14 @@ const MAIN_PARTS = Object.freeze([
 
 function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), 'utf8');
+}
+
+function coreFingerprint() {
+  const hash = crypto.createHash('sha256');
+  hash.update(read(path.join('src', 'source-language-catalog.js')), 'utf8');
+  hash.update('\0', 'utf8');
+  hash.update(read(path.join('src', 'index.js')), 'utf8');
+  return hash.digest('hex').slice(0, 24);
 }
 
 function coreWrapper() {
@@ -76,20 +85,26 @@ function mainBundle(configSource) {
   return parts.join('\n\n');
 }
 
-function standardConfig() {
+function standardConfig(cacheNamespace) {
   return [
     '(function (root) {',
     "  const script = typeof document === 'object' ? document.currentScript : null;",
     "  const base = script && script.src ? script.src : (typeof location === 'object' ? location.href : '');",
-    "  root.PastafariBrowserConfig = Object.freeze({ workerUrl: new URL('pastafari-worker.js', base).href });",
+    '  root.PastafariBrowserConfig = Object.freeze({',
+    "    workerUrl: new URL('pastafari-worker.js', base).href,",
+    '    cacheNamespace: ' + JSON.stringify(cacheNamespace),
+    '  });',
     "})(typeof globalThis === 'object' ? globalThis : this);",
   ].join('\n');
 }
 
-function standaloneConfig(workerSource) {
+function standaloneConfig(workerSource, cacheNamespace) {
   return [
     '(function (root) {',
-    '  root.PastafariBrowserConfig = Object.freeze({ workerSource: ' + JSON.stringify(workerSource) + ' });',
+    '  root.PastafariBrowserConfig = Object.freeze({',
+    '    workerSource: ' + JSON.stringify(workerSource) + ',',
+    '    cacheNamespace: ' + JSON.stringify(cacheNamespace),
+    '  });',
     "})(typeof globalThis === 'object' ? globalThis : this);",
   ].join('\n');
 }
@@ -122,9 +137,10 @@ function main() {
   fs.mkdirSync(DIST, { recursive: true });
   fs.mkdirSync(STANDALONE, { recursive: true });
 
+  const cacheNamespace = 'pc-browser-core-' + coreFingerprint();
   const worker = workerBundle();
-  const standard = mainBundle(standardConfig());
-  const standalone = mainBundle(standaloneConfig(worker)) + standaloneSuffix();
+  const standard = mainBundle(standardConfig(cacheNamespace));
+  const standalone = mainBundle(standaloneConfig(worker, cacheNamespace)) + standaloneSuffix();
 
   fs.writeFileSync(path.join(DIST, 'pastafari-worker.js'), worker, 'utf8');
   fs.writeFileSync(path.join(DIST, 'pastafari-date.js'), standard, 'utf8');
@@ -133,6 +149,7 @@ function main() {
   fs.writeFileSync(path.join(STANDALONE, 'pastafari-date.min.js'), standalone, 'utf8');
 
   process.stdout.write('Construction del navigator: PASS.\n');
+  process.stdout.write('Cache namespace: ' + cacheNamespace + '\n');
   process.stdout.write('Standard: browser/dist/pastafari-date.js + pastafari-worker.js + pastafari-date.mjs\n');
   process.stdout.write('Standalone: browser/standalone/pastafari-date.js\n');
 }

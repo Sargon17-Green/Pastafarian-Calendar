@@ -72,6 +72,17 @@ function makeView(startValue, endValue, selectedValue, cutletName) {
   });
 }
 
+function resultForFiveDayView(targetDay) {
+  const position = Number(targetDay) + 1;
+  return [
+    '5000',
+    'bronze',
+    position,
+    position <= 3 ? 'argile' : 'granat',
+    position <= 3 ? position : position - 3,
+  ];
+}
+
 const tabletsJdn = axis.gregorianToJdn({ year: -762n, month: 6, day: 7 });
 assert.strictEqual(axis.jdnToProjectDay(tabletsJdn), -278522n);
 assert.strictEqual(axis.projectDayToJdn(-278522n), tabletsJdn);
@@ -106,7 +117,8 @@ assert.strictEqual(axis.projectDayToJdn(-278522n), tabletsJdn);
   assert.strictEqual(bounded.getConversion(10n, 1n), undefined);
   assert.strictEqual(bounded.getCutletView(10n, 2n), undefined);
 
-  // Default CalendarService now owns a bounded semantic memory.
+  // A directly constructed CalendarService keeps the bounded in-memory default.
+  // The shared browser service installs the persistent wrapper separately.
   let engineCalls = 0;
   const fakeEngine = {
     async convert(_calculationDay, targetDay) {
@@ -147,13 +159,15 @@ assert.strictEqual(axis.projectDayToJdn(-278522n), tabletsJdn);
   assert.strictEqual(concurrentCalls, 1, 'Identic in-flight conversiones deve esser coalescet.');
   assert.strictEqual(concurrentResults.map((item) => item.dayInCutlet).join(','), '2,2,2');
 
-  // A cached cutlet is reusable for every target inside its semantic range.
+  // A cached cutlet remains range-reusable, but every selected target must first have
+  // an independently authoritative direct conversion. View-derived values never populate
+  // the direct conversion cache.
   let viewCalls = 0;
-  let convertCallsFromView = 0;
+  let directCallsForViews = 0;
   const rangeEngine = {
-    async convert() {
-      convertCallsFromView += 1;
-      return ['5000', 'bronze', 99, 'argile', 99];
+    async convert(_calculationDay, targetDay) {
+      directCallsForViews += 1;
+      return resultForFiveDayView(targetDay);
     },
     async getCutletView(_calculationDay, targetDay) {
       viewCalls += 1;
@@ -169,17 +183,21 @@ assert.strictEqual(axis.projectDayToJdn(-278522n), tabletsJdn);
     rangeService.getCutletView(projectJdn(2n), projectJdn(10n)),
   ]);
   assert.strictEqual(viewCalls, 1, 'Identic in-flight cutlet demandes deve esser coalescet.');
+  assert.strictEqual(directCallsForViews, 1, 'Li direct authority por identic in-flight demandes deve esser coalescet.');
   assert.strictEqual(sameViewPair[0].selectedIndex, 2);
+
   const neighboringView = await rangeService.getCutletView(projectJdn(3n), projectJdn(10n));
-  assert.strictEqual(viewCalls, 1, 'Un neighboring target in li sam cutlet deve esser servit ex memory.');
+  assert.strictEqual(viewCalls, 1, 'Un neighboring target in li sam cutlet deve esser servit ex cutlet memory.');
+  assert.strictEqual(directCallsForViews, 2, 'Un nov target deve esser verificat per un direct conversion ante range reuse.');
   assert.strictEqual(neighboringView.selectedIndex, 3);
   assert.strictEqual(neighboringView.selectedJdn, projectJdn(3n));
   const neighboringConversion = await rangeService.convert(projectJdn(3n), projectJdn(10n));
-  assert.strictEqual(convertCallsFromView, 0, 'Conversion deve esser derivat ex un memorisat cutlet sin nov Worker call.');
+  assert.strictEqual(directCallsForViews, 2, 'Li direct result verificat durant getCutletView deve esser reutilisat.');
   assert.strictEqual(neighboringConversion.dayInCutlet, 4);
 
   await rangeService.getCutletView(projectJdn(3n), projectJdn(11n));
   assert.strictEqual(viewCalls, 2, 'Li sam target sub un altri calculationDay ne deve compartir cutlet memory.');
+  assert.strictEqual(directCallsForViews, 3, 'Calculation-day isolation vale anc por direct authority.');
 
   // Retry invalidates semantic memory generation even if an old custom request settles later.
   let staleCalls = 0;

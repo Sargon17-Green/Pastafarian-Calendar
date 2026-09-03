@@ -11,6 +11,29 @@
     return String(BigInt(calculationDay)) + ':' + String(BigInt(targetDay));
   }
 
+  function sameCanonicalResult(aValue, bValue) {
+    const a = normalizeCalendarResult(aValue);
+    const b = normalizeCalendarResult(bValue);
+    return a.year === b.year &&
+      a.cutletName === b.cutletName &&
+      a.dayInCutlet === b.dayInCutlet &&
+      a.monthName === b.monthName &&
+      a.dayInMonth === b.dayInMonth;
+  }
+
+  function consistencyError(directValue, viewValue) {
+    const direct = normalizeCalendarResult(directValue);
+    const fromView = normalizeCalendarResult(viewValue);
+    const error = new Error(
+      'Li direct conversion e li cutlet-view diverge por li sam calculation-day e target-day.'
+    );
+    error.name = 'CalendarConsistencyError';
+    error.code = 'ERR_CALENDAR_INCONSISTENCY';
+    error.directResult = direct;
+    error.viewResult = fromView;
+    return error;
+  }
+
   function adaptViewToJdn(view) {
     const days = Object.freeze(view.days.map((day) => Object.freeze({
       jdn: axis.projectDayToJdn(day.day),
@@ -57,13 +80,11 @@
       const remembered = await this.memory.getConversion(calculationDay, targetDay);
       if (remembered !== undefined) return normalizeCalendarResult(remembered);
 
-      const rememberedView = await this.memory.getCutletView(calculationDay, targetDay);
-      const fromView = resultFromRememberedView(rememberedView, targetDay);
-      if (fromView !== undefined) {
-        await this.memory.setConversion(calculationDay, targetDay, fromView);
-        return fromView;
-      }
-
+      /*
+       * A cutlet-view is deliberately NOT an authority for convert().
+       * A prior implementation promoted a view-derived value into the direct conversion
+       * cache. If the two black-box calculations disagreed, that poisoned later loads.
+       */
       const key = requestKey(calculationDay, targetDay);
       const existing = this.conversionInflight.get(key);
       if (existing) return existing;
@@ -84,23 +105,66 @@
       }
     }
 
+    async _invalidateCalculation(calculationDay) {
+      this.memoryGeneration += 1;
+      await this.memory.clearCalculation(calculationDay);
+      this.conversionInflight.clear();
+      this.cutletInflight.clear();
+    }
+
     async getCutletView(targetJdn, calculationJdn) {
       const targetDay = axis.jdnToProjectDay(targetJdn);
       const calculationDay = axis.jdnToProjectDay(calculationJdn);
+
+      // The direct five-field conversion is the authority for this exact target.
+      // Concurrent callers coalesce through convert(), so this does not duplicate a direct request.
+      const direct = await this.convert(targetJdn, calculationJdn);
+
       const remembered = await this.memory.getCutletView(calculationDay, targetDay);
-      if (remembered !== undefined) return adaptViewToJdn(remembered);
+      if (remembered !== undefined) {
+        const selected = resultFromRememberedView(remembered, targetDay);
+        if (selected !== undefined && sameCanonicalResult(direct, selected)) {
+          return adaptViewToJdn(remembered);
+        }
+        // A stale/corrupt persistent view is discarded, but the already verified direct
+        // result is preserved and the view is rebuilt below.
+        await this._invalidateCalculation(calculationDay);
+        await this.memory.setConversion(calculationDay, targetDay, direct);
+      }
 
       const key = requestKey(calculationDay, targetDay);
       const existing = this.cutletInflight.get(key);
       if (existing) return adaptViewToJdn(await existing);
 
-      const memoryGeneration = this.memoryGeneration;
+      const requestGeneration = this.memoryGeneration;
       const request = (async () => {
-        const view = await this.engineClient.getCutletView(calculationDay, targetDay);
-        if (memoryGeneration === this.memoryGeneration) {
+        let generation = requestGeneration;
+        let view = await this.engineClient.getCutletView(calculationDay, targetDay);
+        let selected = resultFromRememberedView(view, targetDay);
+
+        if (generation === this.memoryGeneration &&
+            (selected === undefined || !sameCanonicalResult(direct, selected))) {
+          // The direct result already won the arbitration. A divergent view is never
+          // displayed or cached. Recreate the single Worker once, then repeat the whole
+          // cutlet derivation from a clean black-box core instance.
+          await this._invalidateCalculation(calculationDay);
+          this.engineClient.retry();
+          generation = this.memoryGeneration;
+          await this.memory.setConversion(calculationDay, targetDay, direct);
+
+          view = await this.engineClient.getCutletView(calculationDay, targetDay);
+          selected = resultFromRememberedView(view, targetDay);
+          if (selected === undefined || !sameCanonicalResult(direct, selected)) {
+            await this._invalidateCalculation(calculationDay);
+            this.engineClient.retry();
+            throw consistencyError(direct, selected || direct);
+          }
+        }
+
+        if (generation === this.memoryGeneration) {
+          await this.memory.setConversion(calculationDay, targetDay, direct);
           await this.memory.setCutletView(calculationDay, targetDay, view);
-          const selected = resultFromRememberedView(view, targetDay);
-          if (selected !== undefined) await this.memory.setConversion(calculationDay, targetDay, selected);
+          // Never overwrite a direct conversion with a value derived from a cutlet scan.
         }
         return view;
       })();
@@ -131,8 +195,18 @@
 
   let sharedCalendarService = null;
 
+  function persistentDefaultMemory() {
+    const config = root.PastafariBrowserConfig || {};
+    if (memoryApi && typeof memoryApi.PersistentCalendarMemory === 'function') {
+      return new memoryApi.PersistentCalendarMemory({ namespace: config.cacheNamespace });
+    }
+    return new memoryApi.BoundedCalendarMemory();
+  }
+
   function getSharedCalendarService() {
-    if (!sharedCalendarService) sharedCalendarService = new CalendarService();
+    if (!sharedCalendarService) {
+      sharedCalendarService = new CalendarService({ memory: persistentDefaultMemory() });
+    }
     return sharedCalendarService;
   }
 
@@ -160,5 +234,6 @@
     getSharedCalendarService,
     installSharedCalendarService,
     installSharedCalendarMemory,
+    sameCanonicalResult,
   });
 })(typeof globalThis === 'object' ? globalThis : this);
