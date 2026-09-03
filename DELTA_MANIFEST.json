@@ -1,52 +1,26 @@
 {
-  "package": "pastafari-browser-interface-original-ui-10-locales-v8",
+  "package": "pastafari-browser-visibility-color-translation-fix-v10",
   "branch": "JavaScript+Interlingue",
-  "base_head_verified": "d00e3ddf980097e1f390e7ff753171cf2e458d24",
-  "changes": [
-    "make the displayed cutlet a single flat seven-column desktop grid while keeping month-run semantic groups in the DOM",
-    "restore original public-site day-card structure with three boxed lines, strong target badge and target outline",
-    "restore the paper-gradient shell in the deployed index.html",
-    "add complete French, German, Spanish, Italian and Czech UI/calendar localization",
-    "keep all visible cutlet/month translations keyed by exact CURRENT Interlingue source text",
-    "add explicit regression coverage for larice, Palgursh, papirus, Karshumb, leopard, candel and lilie",
-    "add responsive, forced-colors, reduced-motion and print treatment for the restored visual layout"
+  "base_head_verified": "abf40ad23ca6b4253dbd698b32710bebfacff9d5",
+  "files": [
+    "browser/pastafari-date.js",
+    "browser/i18n/locales.js",
+    "tests/browser-component-runtime.js",
+    "tests/browser-i18n-locales.js",
+    "tests/browser-interface-contract.js"
   ],
-  "active_locales": [
-    "ie",
-    "en",
-    "he",
-    "ar",
-    "ru",
-    "fr",
-    "de",
-    "es",
-    "it",
-    "cs"
-  ],
-  "calendar_coverage_per_locale": {
-    "cutlets": 17,
-    "months": 47
-  },
-  "excluded": [
-    "src/**",
-    "root package.json",
-    "browser/dist/**",
-    "browser/standalone generated bundles",
-    "workflow files",
-    "local visual harness and reconstructed core stubs"
-  ],
+  "semantic_core_changed": false,
+  "public_api_changed": false,
+  "active_locales": ["ie", "en", "he", "ar", "ru", "fr", "de", "es", "it", "cs"],
+  "month_theme_count": 47,
+  "translation_corrections": ["gudron", "oliban"],
   "local_validation": [
-    "browser-stage01-compatibility: PASS",
-    "browser-interface-service: PASS",
-    "browser-engine-client: PASS",
-    "browser-worker-runtime: PASS",
+    "browser-component-runtime: PASS",
     "browser-interface-contract: PASS",
     "browser-interface-black-box: PASS",
     "browser-i18n-locales: PASS",
-    "browser-component-runtime: PASS",
     "browser-interface-all: PASS",
-    "scripts/build-browser.js: PASS",
-    "browser-built-artifacts: PASS"
-  ],
-  "ci_note": "GitHub CI on the uploaded branch remains authoritative for integration against the repository's real core. At packaging time the v7 Pages run was still reported queued by GitHub."
+    "modified-js-syntax: PASS",
+    "raw-hebrew-source-scan: PASS"
+  ]
 }

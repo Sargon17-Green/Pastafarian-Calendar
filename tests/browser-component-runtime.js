@@ -356,9 +356,27 @@ async function flush() {
   assert.strictEqual(card.tagName, 'ARTICLE');
   assert.strictEqual(card.className, 'day');
   assert.strictEqual(card.style.values.get('--month-edge'), runA.style.values.get('--month-edge'));
-  assert.strictEqual(card.style.values.get('--month-ink'), '#17130e');
+  assert.strictEqual(card.style.values.get('--month-ink'), '#111111');
+  assert.strictEqual(card.getAttribute('aria-current'), 'date');
   assert.strictEqual(card.children[0].className, 'target-badge');
   assert.strictEqual(card.children[0].textContent, 'This is the date you searched for');
+
+  // Every current semantic month gets a distinct, saturated background theme.
+  const monthNames = Object.keys(themed._locale.calendar.months);
+  const backgrounds = new Set();
+  const edges = new Set();
+  for (let index = 0; index < monthNames.length; index += 1) {
+    const monthName = monthNames[index];
+    const themedRun = themed._renderMonthRun([Object.freeze({
+      jdn: BigInt(1000 + index), year: '5000', cutletName: 'larice', dayInCutlet: index + 1,
+      monthName, dayInMonth: 1,
+    })]);
+    backgrounds.add(themedRun.style.values.get('--month-bg'));
+    edges.add(themedRun.style.values.get('--month-edge'));
+    assert(themedRun.style.values.get('--month-pattern-image').includes('repeating-linear-gradient'));
+  }
+  assert.strictEqual(backgrounds.size, monthNames.length);
+  assert.strictEqual(edges.size, monthNames.length);
 
   console.log('browser-component-runtime: PASS');
 })().catch((error) => {

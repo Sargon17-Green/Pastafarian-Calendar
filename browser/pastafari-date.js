@@ -11,20 +11,30 @@
     throw new Error('Li browser-strate ne esset cargat in li necessi órdine.');
   }
 
-  const MONTH_THEMES = Object.freeze([
-    Object.freeze({ edge: '#9d3825', bg: '#fff5e8', wash: '#f0c9b8' }),
-    Object.freeze({ edge: '#386b5a', bg: '#eef7f1', wash: '#bfd8c8' }),
-    Object.freeze({ edge: '#705172', bg: '#f7eff8', wash: '#d8c1da' }),
-    Object.freeze({ edge: '#84651f', bg: '#fbf5df', wash: '#e5d39f' }),
-    Object.freeze({ edge: '#3e6682', bg: '#eef5f8', wash: '#bdd3df' }),
-    Object.freeze({ edge: '#7b4d3a', bg: '#f9f0eb', wash: '#dbbeb1' }),
-    Object.freeze({ edge: '#61713a', bg: '#f3f7e9', wash: '#cbd6aa' }),
-    Object.freeze({ edge: '#7d3f58', bg: '#faeef3', wash: '#dfb9c9' }),
-    Object.freeze({ edge: '#53616f', bg: '#f0f3f6', wash: '#c5ccd3' }),
-    Object.freeze({ edge: '#8c5f21', bg: '#fff2df', wash: '#e5c79d' }),
-    Object.freeze({ edge: '#426f75', bg: '#edf7f7', wash: '#bad7d9' }),
-    Object.freeze({ edge: '#6f5945', bg: '#f6f1eb', wash: '#d4c4b4' }),
+  // Current semantic month names, never old positional identifiers. Each month
+  // receives its own saturated theme. The golden-angle hue spacing makes
+  // neighbouring indices diverge sharply instead of collapsing into pastels.
+  const MONTH_THEME_NAMES = Object.freeze([
+    'argile', 'granat', 'cubit', 'invidie', 'Eridu', 'dent-pasta',
+    'tri partes de quin', 'Karshumb', 'leopard', 'stann', 'brume', 'oliban',
+    'fus', 'costa', 'carob', 'Uruk', 'honte', 'camel', 'cupr', 'pute',
+    'vitelle', 'stelle', 'mel', 'splen', 'calcari', 'joy', 'fig', 'Ninive',
+    'ran', 'gudron', 'candel', 'li cludet porta', 'sesam', 'nuca', 'argent',
+    'lilie', 'tempeste', 'asin', 'farine', 'regret', 'Babylon', 'lingue',
+    'lin', 'sal', 'pir', 'arc', 'sand',
   ]);
+  const MONTH_THEME_INDEX = new Map(MONTH_THEME_NAMES.map((name, index) => [name, index]));
+  const MONTH_THEMES = Object.freeze(MONTH_THEME_NAMES.map((name, index) => {
+    const hue = Math.round((index * 137.508) % 360);
+    const secondaryHue = Math.round((hue + 151 + ((index % 3) * 17)) % 360);
+    const angle = (index * 37) % 180;
+    return Object.freeze({
+      edge: `hsl(${hue} 100% 22%)`,
+      bg: `hsl(${hue} 88% 49%)`,
+      wash: `hsl(${secondaryHue} 96% 52%)`,
+      pattern: `repeating-linear-gradient(${angle}deg, transparent 0 66%, hsl(${secondaryHue} 96% 52%) 66% 78%, transparent 78% 100%)`,
+    });
+  }));
   const MAX_CACHED_CUTLETS = 5;
   const doc = root.document || null;
   const enqueueMicrotask = typeof root.queueMicrotask === 'function'
@@ -47,6 +57,8 @@
   }
 
   function monthTheme(name) {
+    const exactIndex = MONTH_THEME_INDEX.get(String(name));
+    if (exactIndex !== undefined) return MONTH_THEMES[exactIndex];
     return MONTH_THEMES[semanticHash(name) % MONTH_THEMES.length];
   }
 
@@ -55,7 +67,8 @@
     element.style.setProperty('--month-edge', theme.edge);
     element.style.setProperty('--month-bg', theme.bg);
     element.style.setProperty('--month-wash', theme.wash);
-    element.style.setProperty('--month-ink', '#17130e');
+    element.style.setProperty('--month-pattern-image', theme.pattern);
+    element.style.setProperty('--month-ink', '#111111');
     element.style.setProperty('--month-text-bg', '#fffdf8');
     return theme;
   }
@@ -247,8 +260,9 @@
             border: 4px solid var(--ink);
             border-inline-start: clamp(.75rem, 2vw, 1.35rem) solid var(--accent);
             border-radius: 1.1rem;
-            background: #fff7e8;
-            box-shadow: 0 16px 36px rgb(0 0 0 / 20%);
+            background: #ffea00;
+            color: #000000;
+            box-shadow: 0 0 0 4px #ffffff, 0 0 0 8px #000000, 0 18px 38px rgb(0 0 0 / 32%);
           }
           .beacon-label {
             width: fit-content;
@@ -394,26 +408,41 @@
             box-shadow: inset 0 1px rgb(255 255 255 / 14%);
           }
           .day[aria-current="date"] {
-            z-index: 2;
+            z-index: 4;
             grid-template-rows: auto auto auto auto;
-            border: 6px solid white;
-            outline: 7px solid var(--ink);
-            outline-offset: -1px;
+            border: 8px solid #ffffff;
+            outline: 6px solid #000000;
+            outline-offset: -2px;
+            transform: scale(1.035);
             box-shadow:
-              0 0 0 5px var(--accent),
-              0 12px 28px rgb(0 0 0 / 40%);
+              0 0 0 8px #ffea00,
+              0 0 0 12px #000000,
+              0 18px 38px rgb(0 0 0 / 55%);
+          }
+          .day[aria-current="date"]::after {
+            content: "";
+            position: absolute;
+            inset: .34rem;
+            pointer-events: none;
+            border: 4px dashed #ffea00;
+            border-radius: .48rem;
+            box-shadow: inset 0 0 0 2px #000000;
           }
           .target-badge {
+            position: relative;
+            z-index: 2;
             display: block;
             width: fit-content;
             max-width: 100%;
             margin-bottom: .1rem;
-            padding: .28rem .55rem;
+            padding: .38rem .7rem;
             overflow-wrap: anywhere;
-            border: 2px solid currentcolor;
+            border: 4px solid #ffea00;
             border-radius: 999px;
-            background: var(--month-text-bg, var(--month-bg));
-            font-size: .74rem;
+            background: #000000;
+            color: #ffea00;
+            box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #000000;
+            font-size: .82rem;
             font-weight: 950;
             line-height: 1.25;
           }

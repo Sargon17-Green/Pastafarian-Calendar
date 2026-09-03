@@ -126,6 +126,8 @@ const witnesses = [
   ['month', 'leopard', ['leopard', 'Leopard', '\u05E0\u05DE\u05E8', 'نمر', 'Леопард', 'Léopard', 'Leopard', 'Leopardo', 'Leopardo', 'Leopard']],
   ['month', 'candel', ['candel', 'Candle', '\u05E0\u05E8', 'شمعة', 'Свеча', 'Bougie', 'Kerze', 'Vela', 'Candela', 'Svíčka']],
   ['month', 'lilie', ['lilie', 'Lily', '\u05E9\u05D5\u05E9\u05DF', 'زنبق', 'Лилия', 'Lis', 'Lilie', 'Lirio', 'Giglio', 'Lilie']],
+  ['month', 'gudron', ['gudron', 'Tar', '\u05D6\u05E4\u05EA', 'قطران', 'Гудрон', 'Goudron', 'Teer', 'Alquitrán', 'Catrame', 'Dehet']],
+  ['month', 'oliban', ['oliban', 'Frankincense', '\u05DC\u05D1\u05D5\u05E0\u05D4', 'لبان', 'Ладан', 'Oliban', 'Weihrauch', 'Olíbano', 'Olibano', 'Kadidlo']],
 ];
 const locales = [ie, en, he, ar, ru, fr, de, es, it, cs];
 for (const [group, key, values] of witnesses) {

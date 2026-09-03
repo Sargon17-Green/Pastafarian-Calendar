@@ -41,11 +41,14 @@ for (const token of [
   'min-height: 10.5rem',
   'border: 2px solid var(--month-edge',
   'border-radius: .85rem',
-  'outline: 7px solid var(--ink)',
-  '0 0 0 5px var(--accent)',
+  'outline: 6px solid #000000',
+  '0 0 0 8px #ffea00',
+  'border: 4px dashed #ffea00',
   "className = 'target-badge'",
+  'MONTH_THEME_NAMES',
   'MONTH_THEMES',
   'semanticHash',
+  '88% 49%',
   "card.className = 'day'",
 ]) {
   assert(source.includes(token), 'Manca li original-UI contract-token: ' + token);
