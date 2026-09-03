@@ -88,11 +88,20 @@ bool PairTombEnginePort::buryHotAlmanacDiagnostic(
     for(int monthId:weaving){if(monthId<1||static_cast<std::size_t>(monthId)>monthNames.size())return false;}
     for(std::size_t nameIndex:monthNames){if(nameIndex<1||nameIndex>pastafari::MONTH_SOURCE_CATALOG.size())return false;}
     HotAlmanac value{true,cn,year,on,cl,cutlets,weaving,monthNames};
+
+    // Cicatrix corridoris: iam non omne almanacum eiusdem calculationDay alterum
+    // devorat. Solum idem intervallum exactum rescribitur; anni vicini coexistunt.
     for(auto&slot:hotAlmanac_){
-        if(slot.occupied&&slot.calculationDay==cn){slot=std::move(value);return true;}
+        if(slot.occupied&&slot.calculationDay==cn&&slot.openDay==on&&slot.closeDay==cl){slot=std::move(value);return true;}
     }
     for(auto&slot:hotAlmanac_){
         if(!slot.occupied){slot=std::move(value);return true;}
+    }
+
+    // Sepulcrum veteris moris manet executabile tantum si capacitas 64 saturatur:
+    // cache semanticam mutare non potest; unum almanacum eiusdem c tum sacrificatur.
+    for(auto&slot:hotAlmanac_){
+        if(slot.occupied&&slot.calculationDay==cn){slot=std::move(value);return true;}
     }
     return false;
 }

@@ -16,8 +16,17 @@ int main(){Counting base;PairTombEnginePort tomb(base);tomb.clear();
  std::vector<std::size_t> monthNames{47,8};
  assert(tomb.buryHotAlmanacDiagnostic(42,5000,1000,1006,cutlets,weaving,monthNames));
  assert(tomb.generatedAlmanacCount()==1);
- auto f=tomb.calculate(42,1005);assert(base.calls==4);assert(f.year==5000&&f.cutletIndex==5&&f.cutletName=="cogitatio");assert(f.dayInCutlet==2);assert(f.monthIndex==8&&f.monthName=="Carsumav"&&f.dayInMonth==3);assert(tomb.metrics().almanacHits==1&&tomb.metrics().misses==0);
+
+ // Cicatrix corridoris: alius annus eodem calculationDay non priorem devorat.
+ std::vector<PairTombEnginePort::AlmanacCutlet> priorCutlets{{1,995,1000}};
+ std::vector<int> priorWeaving{1,1,1,1,1,1};
+ std::vector<std::size_t> priorMonthNames{1};
+ assert(tomb.buryHotAlmanacDiagnostic(42,4999,994,1000,priorCutlets,priorWeaving,priorMonthNames));
+ assert(tomb.generatedAlmanacCount()==2);
+ auto prior=tomb.calculate(42,999);assert(base.calls==4&&prior.year==4999);assert(tomb.metrics().almanacHits==1);
+
+ auto f=tomb.calculate(42,1005);assert(base.calls==4);assert(f.year==5000&&f.cutletIndex==5&&f.cutletName=="cogitatio");assert(f.dayInCutlet==2);assert(f.monthIndex==8&&f.monthName=="Carsumav"&&f.dayInMonth==3);assert(tomb.metrics().almanacHits==2&&tomb.metrics().misses==0);
  auto g=tomb.calculate(42,1005);assert(base.calls==4&&g.dayInMonth==3);assert(tomb.metrics().directMappedHits==1); // prima resurrectio almanaci tomb exactum nutrit.
  auto h=tomb.calculate(43,1005);assert(base.calls==5&&h.year==1048);assert(tomb.metrics().misses==1);
- auto i=tomb.calculate(42,1000);assert(base.calls==6&&i.year==1042); // porta aperiens ad annum priorem pertinet: (open,close].
+ auto i=tomb.calculate(42,1000);assert(base.calls==5&&i.year==4999); // porta aperiens anni 5000 ad annum priorem nunc ex almanaco corridoris pertinet.
  std::cout<<"PAIR_TOMB_TESTS=PASS\n";}

@@ -11,7 +11,10 @@ class PairTombEnginePort final : public EnginePort {
 public:
     static constexpr std::size_t SLOT_COUNT=4096;
     static constexpr std::size_t HOT_SEED_COUNT=4;
+    // Numerus historicus duorum almanacorum initialium retinetur ad compatibilitatem
+    // fontis. Capacitas corridoris infra separatim crescit; nullum Stage 57 nascitur.
     static constexpr std::size_t HOT_ALMANAC_COUNT=2;
+    static constexpr std::size_t HOT_ALMANAC_LIMIT=64;
 
     struct AlmanacCutlet {
         std::size_t canonicalIndex{};
@@ -43,7 +46,7 @@ private:
 
     EnginePort& buriedMonster_;
     std::array<Slot,HOT_SEED_COUNT> hotSeed_{};
-    std::array<HotAlmanac,HOT_ALMANAC_COUNT> hotAlmanac_{};
+    std::array<HotAlmanac,HOT_ALMANAC_LIMIT> hotAlmanac_{};
     std::array<Slot,SLOT_COUNT> tombs_{};
     Metrics metrics_{};
     bool enabled_=true;

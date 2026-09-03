@@ -1,6 +1,8 @@
 #include "pastafari/http_api/engine_port.hpp"
+#include "pastafari/http_api/pair_tomb.hpp"
 #include "pastafari/monster.hpp"
 #include "pastafari/source_language_catalog.hpp"
+#include <algorithm>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -8,11 +10,15 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 using namespace pastafari::http_api;
 
 namespace {
+constexpr std::int64_t HOT_CORRIDOR_BEHIND_DAYS = 10000;
+constexpr std::int64_t HOT_CORRIDOR_AHEAD_DAYS = 30000;
+
 std::int64_t parseDay(const char* text) {
     Integer value{std::string{text}};
     static const Integer lo = std::numeric_limits<std::int64_t>::min();
@@ -102,6 +108,54 @@ void emitAlmanac(std::ostream&out,int ordinal,std::int64_t c,const pastafari::St
     }
     out<<"},\n    ";emitIntVector(out,report.structure.monthWeaving);out<<",\n    ";emitSizeVector(out,report.structure.monthNameIndices);out<<");\n";
 }
+
+std::vector<pastafari::Stage54IntegrationReport> buildCorridor(std::int64_t calculationDay){
+    if(calculationDay<std::numeric_limits<std::int64_t>::min()+HOT_CORRIDOR_BEHIND_DAYS ||
+       calculationDay>std::numeric_limits<std::int64_t>::max()-HOT_CORRIDOR_AHEAD_DAYS)
+        throw std::runtime_error("calculationDay nimis prope terminum corridoris est");
+
+    const pastafari::Integer c{calculationDay};
+    const pastafari::Integer low{calculationDay-HOT_CORRIDOR_BEHIND_DAYS};
+    const pastafari::Integer high{calculationDay+HOT_CORRIDOR_AHEAD_DAYS};
+
+    pastafari::BaseMonsterManager manager;
+    auto center=manager.executeFinalIntegrationStage56(c,c);
+    if(!center.ready||!center.exactFiveFieldReturn)throw std::runtime_error("centrum corridoris non paratum est");
+
+    std::vector<pastafari::Stage54IntegrationReport> before;
+    auto cursorOpen=center.targetYear.openGateDay;
+    while(cursorOpen>low){
+        auto prior=manager.executeFinalIntegrationStage56(c,cursorOpen);
+        if(!prior.ready||!prior.exactFiveFieldReturn)throw std::runtime_error("annus prior corridoris non paratus est");
+        if(prior.targetYear.closeGateDay!=cursorOpen)throw std::runtime_error("continuitas prior corridoris fracta est");
+        if(prior.targetYear.openGateDay>=cursorOpen)throw std::runtime_error("corridor prior non progreditur");
+        cursorOpen=prior.targetYear.openGateDay;
+        before.push_back(std::move(prior));
+        if(before.size()+1>PairTombEnginePort::HOT_ALMANAC_LIMIT)throw std::runtime_error("nimis multi anni priores pro sepulcro corridoris");
+    }
+    std::reverse(before.begin(),before.end());
+
+    const auto centerClose=center.targetYear.closeGateDay;
+    std::vector<pastafari::Stage54IntegrationReport> after;
+    auto cursorClose=centerClose;
+    while(cursorClose<high){
+        const pastafari::Integer nextTarget=cursorClose+1;
+        auto next=manager.executeFinalIntegrationStage56(c,nextTarget);
+        if(!next.ready||!next.exactFiveFieldReturn)throw std::runtime_error("annus posterior corridoris non paratus est");
+        if(next.targetYear.openGateDay!=cursorClose)throw std::runtime_error("continuitas posterior corridoris fracta est");
+        if(next.targetYear.closeGateDay<=cursorClose)throw std::runtime_error("corridor posterior non progreditur");
+        cursorClose=next.targetYear.closeGateDay;
+        after.push_back(std::move(next));
+        if(before.size()+1+after.size()>PairTombEnginePort::HOT_ALMANAC_LIMIT)throw std::runtime_error("nimis multi anni pro sepulcro corridoris");
+    }
+
+    std::vector<pastafari::Stage54IntegrationReport> all;
+    all.reserve(before.size()+1+after.size());
+    for(auto&report:before)all.push_back(std::move(report));
+    all.push_back(std::move(center));
+    for(auto&report:after)all.push_back(std::move(report));
+    return all;
+}
 }
 
 int main(int argc,char**argv){
@@ -115,23 +169,33 @@ int main(int argc,char**argv){
         for(const auto&[c,t]:pairs)values.push_back(engine.calculate(Integer{c},Integer{t}));
 
         std::ofstream pairOut(argv[2]);if(!pairOut)throw std::runtime_error("pair output aperiri non potest");
-        pairOut<<"// PASTAFARI_HOT_SEED_BASE_DAY="<<base<<"\n// PASTAFARI_HOT_SEED_GENERATION=2\n// Quattuor sepulcra exacta; almanacum annuum infra separatim vivit.\n";
+        pairOut<<"// PASTAFARI_HOT_SEED_BASE_DAY="<<base<<"\n// PASTAFARI_HOT_SEED_GENERATION=2\n// Quattuor sepulcra exacta; corridor annorum infra separatim vivit.\n";
         for(std::size_t i=0;i<pairs.size();++i)emitPair(pairOut,pairs[i].first,pairs[i].second,values[i]);
         pairOut.close();
 
-        pastafari::BaseMonsterManager manager0;
-        const auto report0=manager0.executeFinalIntegrationStage56(pastafari::Integer{base},pastafari::Integer{base});
-        pastafari::BaseMonsterManager manager1;
-        const auto report1=manager1.executeFinalIntegrationStage56(pastafari::Integer{base+1},pastafari::Integer{base+1});
-        if(!same(canonicalFromFive(report0.result),values[0]))throw std::runtime_error("almanacum c cum calendario productionis discrepat");
-        if(!same(canonicalFromFive(report1.result),values[2]))throw std::runtime_error("almanacum c+1 cum calendario productionis discrepat");
+        auto corridor0=buildCorridor(base);
+        auto corridor1=buildCorridor(base+1);
+        const std::size_t total=corridor0.size()+corridor1.size();
+        if(total>PairTombEnginePort::HOT_ALMANAC_LIMIT)throw std::runtime_error("corridor duorum dierum capacitatem Pair Tomb excedit");
+
+        const auto center0=std::find_if(corridor0.begin(),corridor0.end(),[&](const auto&r){return r.targetYear.openGateDay<pastafari::Integer{base}&&pastafari::Integer{base}<=r.targetYear.closeGateDay;});
+        const auto center1=std::find_if(corridor1.begin(),corridor1.end(),[&](const auto&r){return r.targetYear.openGateDay<pastafari::Integer{base+1}&&pastafari::Integer{base+1}<=r.targetYear.closeGateDay;});
+        if(center0==corridor0.end()||center1==corridor1.end())throw std::runtime_error("centrum corridoris post collectionem amissum est");
+        if(!same(canonicalFromFive(center0->result),values[0]))throw std::runtime_error("corridor c cum calendario productionis discrepat");
+        if(!same(canonicalFromFive(center1->result),values[2]))throw std::runtime_error("corridor c+1 cum calendario productionis discrepat");
 
         std::ofstream almOut(argv[3]);if(!almOut)throw std::runtime_error("almanac output aperiri non potest");
-        almOut<<"// PASTAFARI_HOT_ALMANAC_BASE_DAY="<<base<<"\n// PASTAFARI_HOT_ALMANAC_GENERATION=1\n// Duo corpora compacta: annus continens c pro c et annus continens c+1 pro c+1.\n";
-        emitAlmanac(almOut,0,base,report0);
-        emitAlmanac(almOut,1,base+1,report1);
+        almOut<<"// PASTAFARI_HOT_ALMANAC_BASE_DAY="<<base<<"\n"
+              <<"// PASTAFARI_HOT_ALMANAC_GENERATION=2\n"
+              <<"// PASTAFARI_HOT_ALMANAC_CORRIDOR_BEHIND_DAYS="<<HOT_CORRIDOR_BEHIND_DAYS<<"\n"
+              <<"// PASTAFARI_HOT_ALMANAC_CORRIDOR_AHEAD_DAYS="<<HOT_CORRIDOR_AHEAD_DAYS<<"\n"
+              <<"// PASTAFARI_HOT_ALMANAC_COUNT="<<total<<"\n"
+              <<"// Duo calculationDays, c et c+1; omnes anni qui corridor [-10000,+30000] tangunt.\n";
+        int ordinal=0;
+        for(const auto&report:corridor0)emitAlmanac(almOut,ordinal++,base,report);
+        for(const auto&report:corridor1)emitAlmanac(almOut,ordinal++,base+1,report);
         almOut.close();
-        std::cerr<<"HOT_CACHE_SEED_GENERATED BASE="<<base<<"\n";
+        std::cerr<<"HOT_CACHE_SEED_GENERATED BASE="<<base<<" ALMANACS="<<total<<" BEHIND="<<HOT_CORRIDOR_BEHIND_DAYS<<" AHEAD="<<HOT_CORRIDOR_AHEAD_DAYS<<"\n";
         return 0;
     }catch(const std::exception&e){std::cerr<<"fatal: "<<e.what()<<'\n';return 1;}
 }
