@@ -51,15 +51,17 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site/dist
-          cp index.html _site/index.html
+          cp browser/dist/index.html _site/index.html
           cp browser/dist/pastafari-date.js _site/dist/pastafari-date.js
           cp browser/dist/pastafari-worker.js _site/dist/pastafari-worker.js
           cp browser/dist/pastafari-date.mjs _site/dist/pastafari-date.mjs
+          cp browser/dist/build-id.txt _site/dist/build-id.txt
           touch _site/.nojekyll
           test -s _site/index.html
           test -s _site/dist/pastafari-date.js
           test -s _site/dist/pastafari-worker.js
           test -s _site/dist/pastafari-date.mjs
+          test -s _site/dist/build-id.txt
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
