@@ -13,8 +13,9 @@ function load(context, relativePath) {
 }
 
 class FakeWorker {
-  constructor(mode) {
+  constructor(mode, replyBuildId) {
     this.mode = mode || 'reply';
+    this.replyBuildId = replyBuildId == null ? null : String(replyBuildId);
     this.listeners = new Map();
     this.messages = [];
     this.terminated = false;
@@ -27,36 +28,31 @@ class FakeWorker {
       if (this.terminated) return;
       const listener = this.listeners.get('message');
       if (!listener) return;
+      const envelope = { id: message.id, ok: true };
+      if (this.replyBuildId != null) envelope.buildId = this.replyBuildId;
       if (message.operation === 'convert') {
-        listener({ data: {
-          id: message.id,
-          ok: true,
-          value: ['5000', 'bronze', 3, 'argile', 3],
-        } });
+        envelope.value = ['5000', 'bronze', 3, 'argile', 3];
       } else if (message.operation === 'getCutletView') {
-        listener({ data: {
-          id: message.id,
-          ok: true,
-          value: {
-            selectedDay: message.targetDay,
-            selectedIndex: 0,
-            startDay: message.targetDay,
-            endDay: message.targetDay,
-            previousCutletDay: String(BigInt(message.targetDay) - 1n),
-            nextCutletDay: String(BigInt(message.targetDay) + 1n),
+        envelope.value = {
+          selectedDay: message.targetDay,
+          selectedIndex: 0,
+          startDay: message.targetDay,
+          endDay: message.targetDay,
+          previousCutletDay: String(BigInt(message.targetDay) - 1n),
+          nextCutletDay: String(BigInt(message.targetDay) + 1n),
+          year: '5000',
+          cutletName: 'bronze',
+          days: [{
+            day: message.targetDay,
             year: '5000',
             cutletName: 'bronze',
-            days: [{
-              day: message.targetDay,
-              year: '5000',
-              cutletName: 'bronze',
-              dayInCutlet: 1,
-              monthName: 'argile',
-              dayInMonth: 1,
-            }],
-          },
-        } });
+            dayInCutlet: 1,
+            monthName: 'argile',
+            dayInMonth: 1,
+          }],
+        };
       }
+      listener({ data: envelope });
     }, 0);
   }
   terminate() { this.terminated = true; }
@@ -69,7 +65,8 @@ class FakeWorker {
 const context = vm.createContext({ console, setTimeout, clearTimeout });
 load(context, 'browser/result-normalizer.js');
 load(context, 'browser/engine-client.js');
-const PastafariEngineClient = context.PastafariBrowserInternal.engineClient.PastafariEngineClient;
+const engineApi = context.PastafariBrowserInternal.engineClient;
+const PastafariEngineClient = engineApi.PastafariEngineClient;
 
 (async () => {
   const workers = [];
@@ -102,6 +99,55 @@ const PastafariEngineClient = context.PastafariBrowserInternal.engineClient.Past
   assert.strictEqual(Object.isFrozen(view), true);
   assert.strictEqual(Object.isFrozen(view.days), true);
   assert.strictEqual(workers.length, 1, 'Li client deve reutilisar un unic Worker til fatal/retry.');
+
+  // A generated build must bind request and response to the same main/Worker ID.
+  let coherentWorker;
+  const coherentClient = new PastafariEngineClient({
+    buildId: 'build-A',
+    workerFactory() {
+      coherentWorker = new FakeWorker('reply', 'build-A');
+      return coherentWorker;
+    },
+    timeoutMs: 1000,
+  });
+  const coherent = await coherentClient.convert(10n, 2n);
+  assert.strictEqual(coherent.monthName, 'argile');
+  assert.strictEqual(coherentWorker.messages[0].buildId, 'build-A');
+
+  // New main + stale Worker (missing ID) fails closed and terminates the Worker.
+  let staleWorker;
+  const staleClient = new PastafariEngineClient({
+    buildId: 'build-A',
+    workerFactory() {
+      staleWorker = new FakeWorker('reply');
+      return staleWorker;
+    },
+    timeoutMs: 1000,
+  });
+  await assert.rejects(
+    staleClient.convert(10n, 2n),
+    (error) => error && error.code === 'ERR_BROWSER_BUILD_MISMATCH'
+      && error.expectedBuildId === 'build-A' && error.actualBuildId === null,
+  );
+  assert.strictEqual(staleWorker.terminated, true);
+  assert.strictEqual(staleClient.pending.size, 0);
+
+  // A Worker from a different version is rejected even if its payload looks valid.
+  let wrongWorker;
+  const wrongClient = new PastafariEngineClient({
+    buildId: 'build-A',
+    workerFactory() {
+      wrongWorker = new FakeWorker('reply', 'build-B');
+      return wrongWorker;
+    },
+    timeoutMs: 1000,
+  });
+  await assert.rejects(
+    wrongClient.convert(10n, 2n),
+    (error) => error && error.code === 'ERR_BROWSER_BUILD_MISMATCH'
+      && error.actualBuildId === 'build-B',
+  );
+  assert.strictEqual(wrongWorker.terminated, true);
 
   // A fatal Worker error rejects all pending operations and the next request gets a new Worker.
   let fatalWorker;
@@ -148,9 +194,13 @@ const PastafariEngineClient = context.PastafariBrowserInternal.engineClient.Past
   assert.strictEqual(timeoutClient.pending.size, 0);
 
   client.dispose();
+  coherentClient.dispose();
+  staleClient.dispose();
+  wrongClient.dispose();
   recoveringClient.dispose();
   timeoutClient.dispose();
   assert.strictEqual(workers[0].terminated, true);
+  assert.strictEqual(engineApi.BUILD_MISMATCH_CODE, 'ERR_BROWSER_BUILD_MISMATCH');
 
   console.log('browser-engine-client: PASS');
 })().catch((error) => {

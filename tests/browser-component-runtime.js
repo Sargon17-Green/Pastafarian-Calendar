@@ -422,6 +422,40 @@ async function flush() {
   assert.strictEqual(backgrounds.size, monthNames.length);
   assert.strictEqual(edges.size, monthNames.length);
 
+  // A JDN may appear at most once in the rendered card model. Exact duplicates
+  // are deduplicated; semantic divergence for the same JDN fails closed.
+  const duplicateGuard = new PastafariDateElement();
+  duplicateGuard._targetJdn = 739862n;
+  const correctDay = Object.freeze({
+    jdn: 739862n, year: '5000', cutletName: 'bronze', dayInCutlet: 677, monthName: 'sand', dayInMonth: 32,
+  });
+  const exactDuplicate = Object.freeze({ ...correctDay });
+  const wrongDuplicate = Object.freeze({
+    ...correctDay, monthName: 'costa', dayInMonth: 12,
+  });
+  const firstView = Object.freeze({
+    startJdn: 739800n, endJdn: 739862n, cutletName: 'bronze', year: '5000', days: Object.freeze([correctDay]),
+  });
+  const exactView = Object.freeze({
+    startJdn: 739862n, endJdn: 739900n, cutletName: 'bronze', year: '5000', days: Object.freeze([exactDuplicate]),
+  });
+  duplicateGuard._cutlets = new Map([[739800n, firstView], [739862n, exactView]]);
+  duplicateGuard._orderedStarts = [739800n, 739862n];
+  const prepared = duplicateGuard._prepareRenderableCutlets();
+  assert.strictEqual(prepared.length, 1);
+  assert.strictEqual(prepared[0].days.length, 1);
+  assert.strictEqual(prepared[0].days[0].monthName, 'sand');
+
+  const wrongView = Object.freeze({
+    startJdn: 739862n, endJdn: 739900n, cutletName: 'bronze', year: '5000', days: Object.freeze([wrongDuplicate]),
+  });
+  duplicateGuard._cutlets = new Map([[739800n, firstView], [739862n, wrongView]]);
+  assert.throws(
+    () => duplicateGuard._prepareRenderableCutlets(),
+    (error) => error && error.code === 'ERR_CALENDAR_RENDER_INCONSISTENCY'
+      && error.jdn === '739862' && /different cards/.test(error.message),
+  );
+
   console.log('browser-component-runtime: PASS');
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);

@@ -37,6 +37,36 @@
   }));
   const MAX_CACHED_CUTLETS = 5;
   const LOCALE_STORAGE_KEY = 'pastafari.browser.locale';
+  const RENDER_CONSISTENCY_CODE = 'ERR_CALENDAR_RENDER_INCONSISTENCY';
+
+  class CalendarRenderConsistencyError extends Error {
+    constructor(jdn, first, second) {
+      super('Li browser-view contene du semanticmen different cards por JDN ' + String(jdn) + '.');
+      this.name = 'CalendarRenderConsistencyError';
+      this.code = RENDER_CONSISTENCY_CODE;
+      this.jdn = String(jdn);
+      this.first = first;
+      this.second = second;
+    }
+  }
+
+  function sameDaySemantics(first, second) {
+    return String(first.year) === String(second.year)
+      && String(first.cutletName) === String(second.cutletName)
+      && Number(first.dayInCutlet) === Number(second.dayInCutlet)
+      && String(first.monthName) === String(second.monthName)
+      && Number(first.dayInMonth) === Number(second.dayInMonth);
+  }
+
+  function semanticDaySnapshot(day) {
+    return Object.freeze({
+      year: String(day.year),
+      cutletName: String(day.cutletName),
+      dayInCutlet: Number(day.dayInCutlet),
+      monthName: String(day.monthName),
+      dayInMonth: Number(day.dayInMonth),
+    });
+  }
   const doc = root.document || null;
   const enqueueMicrotask = typeof root.queueMicrotask === 'function'
     ? root.queueMicrotask.bind(root)
@@ -1049,6 +1079,11 @@
         this._renderCutlets();
         this._restoreScrollAnchor(anchor);
         return view;
+      } catch (error) {
+        if (generation === this._generation && error && error.code === RENDER_CONSISTENCY_CODE) {
+          this._showError(error, 'error.engineFailed');
+        }
+        throw error;
       } finally {
         if (this[flag] === generation) {
           this[flag] = null;
@@ -1128,15 +1163,53 @@
       });
     }
 
-    _renderCutlets() {
-      const fragment = doc.createDocumentFragment();
+    _prepareRenderableCutlets() {
+      const seen = new Map();
+      const prepared = [];
       for (const startJdn of this._orderedStarts) {
-        fragment.append(this._renderCutlet(this._cutlets.get(startJdn)));
+        const view = this._cutlets.get(startJdn);
+        if (!view) continue;
+        const days = [];
+        for (const day of view.days) {
+          const jdn = String(BigInt(day.jdn));
+          const previous = seen.get(jdn);
+          if (!previous) {
+            seen.set(jdn, day);
+            days.push(day);
+            continue;
+          }
+          if (!sameDaySemantics(previous, day)) {
+            throw new CalendarRenderConsistencyError(
+              jdn,
+              semanticDaySnapshot(previous),
+              semanticDaySnapshot(day),
+            );
+          }
+          // Exact duplicate: one semantic date card is sufficient.
+        }
+        if (days.length > 0) prepared.push({ view, days });
       }
-      this._els.list.replaceChildren(fragment);
+      return prepared;
     }
 
-    _renderCutlet(view) {
+    _renderCutlets() {
+      const prepared = this._prepareRenderableCutlets();
+      const fragment = doc.createDocumentFragment();
+      for (const item of prepared) {
+        fragment.append(this._renderCutlet(item.view, item.days));
+      }
+      this._els.list.replaceChildren(fragment);
+      const selected = this._els.list.querySelectorAll('[aria-current="date"]');
+      if (selected.length > 1) {
+        throw new CalendarRenderConsistencyError(
+          this._targetJdn == null ? 'unknown' : this._targetJdn,
+          Object.freeze({ ariaCurrentCount: selected.length }),
+          Object.freeze({ ariaCurrentCount: selected.length }),
+        );
+      }
+    }
+
+    _renderCutlet(view, preparedDays) {
       const section = doc.createElement('section');
       const localCutlet = this._localCalendarName('cutlet', view.cutletName);
       section.className = 'cutlet';
@@ -1153,7 +1226,8 @@
       flatGrid.className = 'cutlet-grid';
       flatGrid.setAttribute('role', 'list');
       let run = [];
-      for (const day of view.days) {
+      const renderDays = Array.isArray(preparedDays) ? preparedDays : view.days;
+      for (const day of renderDays) {
         if (run.length > 0 && !sameMonthRun(run[run.length - 1], day)) {
           flatGrid.append(this._renderMonthRun(run));
           run = [];
@@ -1396,6 +1470,8 @@
   }
 
   const api = Object.freeze({
+    buildId: root.PastafariBrowserConfig && root.PastafariBrowserConfig.buildId != null
+      ? String(root.PastafariBrowserConfig.buildId) : null,
     getPastafariDateAsync,
     getPastafariDate: getPastafariDateAsync,
     PastafariDateElement,

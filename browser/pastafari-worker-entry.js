@@ -5,9 +5,26 @@
   const normalizeCalendarResult = ns.resultNormalizer.normalizeCalendarResult;
   const deriveCutletViewBlackBox = ns.blackBoxCutlet.deriveCutletViewBlackBox;
   const core = root.PastafariBrowserCore;
+  const workerConfig = root.PastafariBrowserWorkerConfig || {};
+  const buildId = workerConfig.buildId == null || String(workerConfig.buildId) === ''
+    ? null : String(workerConfig.buildId);
+  const BUILD_MISMATCH_CODE = 'ERR_BROWSER_BUILD_MISMATCH';
 
   if (!core || typeof core.calendarDateSpaghetti !== 'function') {
     throw new Error('Li JavaScript+Interlingue core ne exporta calendarDateSpaghetti().');
+  }
+
+  function assertRequestBuildId(message) {
+    if (buildId == null) return;
+    const requested = message && message.buildId != null ? String(message.buildId) : null;
+    if (requested === buildId) return;
+    const error = new Error(
+      'Li browser main-bundle e Worker ne apartene al sam build: Worker '
+      + buildId + ', request ' + (requested == null || requested === '' ? '(mancant)' : requested) + '.',
+    );
+    error.name = 'BrowserBuildMismatchError';
+    error.code = BUILD_MISMATCH_CODE;
+    throw error;
   }
 
   async function convert(calculationDay, targetDay) {
@@ -42,10 +59,16 @@
     };
   }
 
+  function responseEnvelope(payload) {
+    if (buildId == null) return payload;
+    return { ...payload, buildId };
+  }
+
   root.addEventListener('message', async (event) => {
     const message = event.data || {};
     const id = Number(message.id);
     try {
+      assertRequestBuildId(message);
       const calculationDay = BigInt(message.calculationDay);
       const targetDay = BigInt(message.targetDay);
       let value;
@@ -60,9 +83,9 @@
       } else {
         throw new Error('Ínconosset worker-operation: ' + String(message.operation));
       }
-      root.postMessage({ id, ok: true, value });
+      root.postMessage(responseEnvelope({ id, ok: true, value }));
     } catch (error) {
-      root.postMessage({ id, ok: false, error: serializeError(error) });
+      root.postMessage(responseEnvelope({ id, ok: false, error: serializeError(error) }));
     }
   });
 })(typeof globalThis === 'object' ? globalThis : self);

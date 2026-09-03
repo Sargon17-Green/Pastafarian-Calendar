@@ -4,6 +4,7 @@
   const ns = root.PastafariBrowserInternal || (root.PastafariBrowserInternal = Object.create(null));
   const normalizeCalendarResult = ns.resultNormalizer && ns.resultNormalizer.normalizeCalendarResult;
   const DEFAULT_TIMEOUT_MS = 240000;
+  const BUILD_MISMATCH_CODE = 'ERR_BROWSER_BUILD_MISMATCH';
 
   function deserializeView(value) {
     if (!value || typeof value !== 'object') throw new TypeError('Li worker retornat un ínvalid cutlet-view.');
@@ -30,12 +31,28 @@
     return error;
   }
 
+  function buildMismatchError(expected, actual) {
+    const error = new Error(
+      'Li browser main-bundle e Worker ne apartene al sam build: expectat '
+      + String(expected) + ', obtenet ' + (actual == null || actual === '' ? '(mancant)' : String(actual)) + '.',
+    );
+    error.name = 'BrowserBuildMismatchError';
+    error.code = BUILD_MISMATCH_CODE;
+    error.expectedBuildId = String(expected);
+    error.actualBuildId = actual == null ? null : String(actual);
+    return error;
+  }
+
   class PastafariEngineClient {
     constructor(options) {
       const selected = options || {};
+      const config = root.PastafariBrowserConfig || {};
       this.workerFactory = selected.workerFactory || null;
       this.workerUrl = selected.workerUrl || null;
       this.workerSource = selected.workerSource || null;
+      this.buildId = selected.buildId != null
+        ? String(selected.buildId)
+        : (config.buildId != null && String(config.buildId) !== '' ? String(config.buildId) : null);
       this.timeoutMs = selected.timeoutMs || DEFAULT_TIMEOUT_MS;
       this.worker = null;
       this.workerObjectUrl = null;
@@ -79,6 +96,13 @@
       const id = Number(message && message.id);
       const entry = this.pending.get(id);
       if (!entry) return;
+      if (this.buildId != null) {
+        const actualBuildId = message && message.buildId != null ? String(message.buildId) : null;
+        if (actualBuildId !== this.buildId) {
+          this._handleFatal(buildMismatchError(this.buildId, actualBuildId));
+          return;
+        }
+      }
       this.pending.delete(id);
       clearTimeout(entry.timer);
       if (message.ok) entry.resolve(message.value);
@@ -111,7 +135,9 @@
         }, limit);
         this.pending.set(id, { resolve, reject, timer });
         try {
-          worker.postMessage({ id, operation, ...payload });
+          const message = { id, operation, ...payload };
+          if (this.buildId != null) message.buildId = this.buildId;
+          worker.postMessage(message);
         } catch (error) {
           clearTimeout(timer);
           this.pending.delete(id);
@@ -144,5 +170,5 @@
     }
   }
 
-  ns.engineClient = Object.freeze({ PastafariEngineClient, DEFAULT_TIMEOUT_MS });
+  ns.engineClient = Object.freeze({ PastafariEngineClient, DEFAULT_TIMEOUT_MS, BUILD_MISMATCH_CODE });
 })(typeof globalThis === 'object' ? globalThis : this);

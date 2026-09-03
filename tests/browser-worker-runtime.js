@@ -19,6 +19,7 @@ const context = vm.createContext({
   console,
   addEventListener(type, listener) { listeners.set(type, listener); },
   postMessage(message) { posted.push(message); },
+  PastafariBrowserWorkerConfig: Object.freeze({ buildId: 'build-A' }),
   PastafariBrowserCore: {
     calendarDateSpaghetti(calculationDay, targetDay) {
       coreCalls.push([calculationDay, targetDay]);
@@ -36,10 +37,13 @@ const onMessage = listeners.get('message');
 assert.strictEqual(typeof onMessage, 'function', 'Li Worker entry deve registrar un message handler.');
 
 (async () => {
-  await onMessage({ data: { id: 1, operation: 'convert', calculationDay: '10', targetDay: '2' } });
+  await onMessage({ data: {
+    id: 1, operation: 'convert', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+  } });
   assert.strictEqual(posted.length, 1);
   assert.strictEqual(posted[0].id, 1);
   assert.strictEqual(posted[0].ok, true);
+  assert.strictEqual(posted[0].buildId, 'build-A');
   assert.strictEqual(posted[0].value.year, '5000');
   assert.strictEqual(posted[0].value.cutletName, 'bronze');
   assert.strictEqual(posted[0].value.dayInCutlet, 3);
@@ -49,9 +53,12 @@ assert.strictEqual(typeof onMessage, 'function', 'Li Worker entry deve registrar
 
   posted.length = 0;
   coreCalls.length = 0;
-  await onMessage({ data: { id: 2, operation: 'getCutletView', calculationDay: '10', targetDay: '2' } });
+  await onMessage({ data: {
+    id: 2, operation: 'getCutletView', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+  } });
   assert.strictEqual(posted.length, 1);
   assert.strictEqual(posted[0].ok, true);
+  assert.strictEqual(posted[0].buildId, 'build-A');
   const view = posted[0].value;
   assert.strictEqual(view.selectedDay, '2');
   assert.strictEqual(view.selectedIndex, 2);
@@ -64,16 +71,38 @@ assert.strictEqual(typeof onMessage, 'function', 'Li Worker entry deve registrar
   assert(coreCalls.length >= 5, 'Li cutlet-view deve esser derivat per public black-box conversiones.');
   for (const [calculationDay] of coreCalls) assert.strictEqual(calculationDay, 10n);
 
+  // Old/stale main + new Worker fails before any semantic core invocation.
   posted.length = 0;
-  await onMessage({ data: { id: 3, operation: 'not-an-operation', calculationDay: '10', targetDay: '2' } });
+  coreCalls.length = 0;
+  await onMessage({ data: { id: 3, operation: 'convert', calculationDay: '10', targetDay: '2' } });
+  assert.strictEqual(posted.length, 1);
   assert.strictEqual(posted[0].ok, false);
-  assert.strictEqual(posted[0].id, 3);
+  assert.strictEqual(posted[0].buildId, 'build-A');
+  assert.strictEqual(posted[0].error.code, 'ERR_BROWSER_BUILD_MISMATCH');
+  assert.strictEqual(coreCalls.length, 0);
+
+  posted.length = 0;
+  await onMessage({ data: {
+    id: 4, operation: 'convert', calculationDay: '10', targetDay: '2', buildId: 'build-B',
+  } });
+  assert.strictEqual(posted[0].ok, false);
+  assert.strictEqual(posted[0].error.code, 'ERR_BROWSER_BUILD_MISMATCH');
+  assert.strictEqual(coreCalls.length, 0);
+
+  posted.length = 0;
+  await onMessage({ data: {
+    id: 5, operation: 'not-an-operation', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+  } });
+  assert.strictEqual(posted[0].ok, false);
+  assert.strictEqual(posted[0].id, 5);
   assert(/operation/i.test(posted[0].error.message));
 
   posted.length = 0;
-  await onMessage({ data: { id: 4, operation: 'convert', calculationDay: 'bad', targetDay: '2' } });
+  await onMessage({ data: {
+    id: 6, operation: 'convert', calculationDay: 'bad', targetDay: '2', buildId: 'build-A',
+  } });
   assert.strictEqual(posted[0].ok, false);
-  assert.strictEqual(posted[0].id, 4);
+  assert.strictEqual(posted[0].id, 6);
   assert.strictEqual(typeof posted[0].error.name, 'string');
   assert.strictEqual(typeof posted[0].error.message, 'string');
 
