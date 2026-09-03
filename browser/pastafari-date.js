@@ -989,8 +989,20 @@
         this._renderCutlets();
         this._hideOverlays();
         this._els.calendar.setAttribute('aria-busy', 'false');
+        const scrollTarget = this._value;
         enqueueMicrotask(() => {
-          if (generation === this._generation && this._connected) this._scrollSelectedIntoView();
+          if (generation !== this._generation || !this._connected) return;
+          try {
+            this._scrollSelectedIntoView(
+              scrollTarget.year,
+              scrollTarget.cutletName,
+              scrollTarget.dayInCutlet,
+              scrollTarget.monthName,
+              scrollTarget.dayInMonth,
+            );
+          } catch (error) {
+            this._showError(error, 'error.engineFailed');
+          }
         });
         this._publishValue();
         this._primeAdjacent(currentView, generation);
@@ -1172,6 +1184,15 @@
         const days = [];
         for (const day of view.days) {
           const jdn = String(BigInt(day.jdn));
+          if (this._value && this._targetJdn != null
+              && BigInt(day.jdn) === this._targetJdn
+              && !sameDaySemantics(day, this._value)) {
+            throw new CalendarRenderConsistencyError(
+              jdn,
+              semanticDaySnapshot(this._value),
+              semanticDaySnapshot(day),
+            );
+          }
           const previous = seen.get(jdn);
           if (!previous) {
             seen.set(jdn, day);
@@ -1270,6 +1291,11 @@
         const card = doc.createElement('article');
         card.className = 'day';
         card.dataset.jdn = String(day.jdn);
+        card.dataset.year = String(day.year);
+        card.dataset.cutletName = String(day.cutletName);
+        card.dataset.dayInCutlet = String(day.dayInCutlet);
+        card.dataset.monthName = String(day.monthName);
+        card.dataset.dayInMonth = String(day.dayInMonth);
         applyMonthTheme(card, day.monthName);
         card.setAttribute('role', 'listitem');
         card.setAttribute('aria-label', this._t('date.aria', {
@@ -1279,7 +1305,7 @@
           dayInMonth: day.dayInMonth,
           monthName: localDayMonth,
         }));
-        const isTarget = BigInt(day.jdn) === this._targetJdn;
+        const isTarget = this._value != null && sameDaySemantics(day, this._value);
         if (isTarget) card.setAttribute('aria-current', 'date');
 
         if (isTarget) {
@@ -1315,10 +1341,51 @@
       return group;
     }
 
-    _scrollSelectedIntoView() {
-      const selected = this._els.list.querySelector('[aria-current="date"]');
-      if (selected) selected.scrollIntoView({ block: 'center', inline: 'nearest' });
-      const section = selected && selected.closest('.cutlet');
+    _scrollSelectedIntoView(year, cutletName, dayInCutlet, monthName, dayInMonth) {
+      if (arguments.length !== 5 || year == null || cutletName == null || dayInCutlet == null
+          || monthName == null || dayInMonth == null) {
+        throw new TypeError('Li target de scrolling deve contener omni quin semantic partes del date.');
+      }
+
+      const target = Object.freeze({
+        year: String(year),
+        cutletName: String(cutletName),
+        dayInCutlet: Number(dayInCutlet),
+        monthName: String(monthName),
+        dayInMonth: Number(dayInMonth),
+      });
+      const cards = Array.from(this._els.list.querySelectorAll('.day'));
+      const matches = cards.filter((card) => sameDaySemantics({
+        year: card.dataset.year,
+        cutletName: card.dataset.cutletName,
+        dayInCutlet: card.dataset.dayInCutlet,
+        monthName: card.dataset.monthName,
+        dayInMonth: card.dataset.dayInMonth,
+      }, target));
+
+      if (matches.length !== 1) {
+        throw new CalendarRenderConsistencyError(
+          this._targetJdn == null ? 'unknown' : this._targetJdn,
+          target,
+          Object.freeze({ semanticTargetMatchCount: matches.length }),
+        );
+      }
+
+      const selected = matches[0];
+      if (this._targetJdn != null && BigInt(selected.dataset.jdn) !== this._targetJdn) {
+        throw new CalendarRenderConsistencyError(
+          this._targetJdn,
+          target,
+          Object.freeze({ selectedJdn: String(selected.dataset.jdn) }),
+        );
+      }
+
+      for (const card of cards) {
+        if (card === selected) card.setAttribute('aria-current', 'date');
+        else card.removeAttribute('aria-current');
+      }
+      selected.scrollIntoView({ block: 'center', inline: 'nearest' });
+      const section = selected.closest('.cutlet');
       if (section) this._activeStartJdn = BigInt(section.dataset.startJdn);
     }
 

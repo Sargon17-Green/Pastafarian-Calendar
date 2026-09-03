@@ -56,6 +56,9 @@ for (const code of ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs'])
 }
 assert(!standard.includes('locales.generated.js'));
 assert(standard.includes('PastafariCalendarBrowser'));
+assert(standard.includes("const isTarget = this._value != null && sameDaySemantics(day, this._value);"));
+assert(standard.includes('semanticTargetMatchCount'));
+assert(!standard.includes('const isTarget = BigInt(day.jdn) === this._targetJdn;'));
 assert(standard.includes('cacheNamespace'));
 assert(standard.includes('pc-browser-core-368e258d1ca347f846f32d94'));
 assert(standalone.includes('PastafariCalendarStandalone'));

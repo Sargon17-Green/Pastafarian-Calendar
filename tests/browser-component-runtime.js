@@ -391,6 +391,13 @@ async function flush() {
   const themeDay = Object.freeze({
     jdn: 100n, year: '5000', cutletName: 'larice', dayInCutlet: 8, monthName: 'leopard', dayInMonth: 3,
   });
+  themed._value = Object.freeze({
+    year: themeDay.year,
+    cutletName: themeDay.cutletName,
+    dayInCutlet: themeDay.dayInCutlet,
+    monthName: themeDay.monthName,
+    dayInMonth: themeDay.dayInMonth,
+  });
   const runA = themed._renderMonthRun([themeDay]);
   const runB = themed._renderMonthRun([themeDay]);
   assert.strictEqual(runA.style.values.get('--month-edge'), runB.style.values.get('--month-edge'));
@@ -455,6 +462,65 @@ async function flush() {
     (error) => error && error.code === 'ERR_CALENDAR_RENDER_INCONSISTENCY'
       && error.jdn === '739862' && /different cards/.test(error.message),
   );
+
+  // The direct five-part Pastafarian result is authoritative for target
+  // selection. A cutlet view that offers the searched JDN with another tuple
+  // must fail closed even when there is no duplicate JDN card to compare it to.
+  const targetTupleGuard = new PastafariDateElement();
+  targetTupleGuard._targetJdn = 739862n;
+  targetTupleGuard._value = Object.freeze({
+    year: '5000', cutletName: 'bronze', dayInCutlet: 677, monthName: 'sand', dayInMonth: 32,
+  });
+  targetTupleGuard._cutlets = new Map([[739800n, Object.freeze({
+    startJdn: 739800n,
+    endJdn: 739862n,
+    cutletName: 'bronze',
+    year: '5000',
+    days: Object.freeze([wrongDuplicate]),
+  })]]);
+  targetTupleGuard._orderedStarts = [739800n];
+  assert.throws(
+    () => targetTupleGuard._prepareRenderableCutlets(),
+    (error) => error && error.code === 'ERR_CALENDAR_RENDER_INCONSISTENCY'
+      && error.jdn === '739862'
+      && error.first.monthName === 'sand'
+      && error.second.monthName === 'costa',
+  );
+
+  // Scrolling itself requires all five semantic date parts. JDN alone is not a
+  // selector: among cards carrying the same JDN, only the exact five-part tuple
+  // may become aria-current and receive scrollIntoView.
+  const semanticScroller = new PastafariDateElement();
+  semanticScroller._targetJdn = 739862n;
+  const wrongCard = new FakeElement('article');
+  Object.assign(wrongCard.dataset, {
+    jdn: '739862', year: '5000', cutletName: 'bronze', dayInCutlet: '677', monthName: 'costa', dayInMonth: '12',
+  });
+  wrongCard.scrolled = false;
+  wrongCard.scrollIntoView = () => { wrongCard.scrolled = true; };
+  wrongCard.closest = () => ({ dataset: { startJdn: '739800' } });
+
+  const correctCard = new FakeElement('article');
+  Object.assign(correctCard.dataset, {
+    jdn: '739862', year: '5000', cutletName: 'bronze', dayInCutlet: '677', monthName: 'sand', dayInMonth: '32',
+  });
+  correctCard.scrolled = false;
+  correctCard.scrollIntoView = () => { correctCard.scrolled = true; };
+  correctCard.closest = () => ({ dataset: { startJdn: '739800' } });
+  semanticScroller._els.list = {
+    querySelectorAll(selector) { return selector === '.day' ? [wrongCard, correctCard] : []; },
+  };
+
+  assert.throws(
+    () => semanticScroller._scrollSelectedIntoView('5000', 'bronze', 677, 'sand'),
+    /omni quin semantic partes/,
+  );
+  semanticScroller._scrollSelectedIntoView('5000', 'bronze', 677, 'sand', 32);
+  assert.strictEqual(wrongCard.scrolled, false);
+  assert.strictEqual(wrongCard.getAttribute('aria-current'), null);
+  assert.strictEqual(correctCard.scrolled, true);
+  assert.strictEqual(correctCard.getAttribute('aria-current'), 'date');
+  assert.strictEqual(semanticScroller._activeStartJdn, 739800n);
 
   console.log('browser-component-runtime: PASS');
 })().catch((error) => {

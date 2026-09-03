@@ -1,42 +1,46 @@
-# Persistent browser-cache invalidation — delta v13
+# JavaScript + Interlingue browser target-selection delta v14
 
-Ti delta clude un restant browser-correctness lacune sin modificar li semantic core.
+Base branch: `JavaScript+Interlingue`
+
+Base HEAD: `c41ec2fd87abbcfe57eee542ebe8ad081955d0c3`
+
+Expected browser build ID after construction: `ecd78d6244845a3ee5458c4f`
 
 ## Problema cludet
 
-Li persistent browser memory acceptet schema 2 conversions quam direct authority. Si un obsolete browser session hat jam persistet un incorrect direct conversion, un nov page-load pos li asset-coherence correction posse reutilisar ti value sin recalculation per li engine.
+Li target card esset marcat per JDN solmen. `_scrollSelectedIntoView()` poy seleccionat `[aria-current="date"]`, talmen li scrolling self ne verificat li quin semantic partes del Pastafarian date.
 
-Ti exact historic origine del observed divergence ne es declarat provat. Ti delta clude li confirmed persistence gap quel posse conservar un tal stale conversion si it existe.
+Ti delta transforma li target selection in un five-part semantic operation:
 
-## Correction
+1. Li direct conversion result fornece `year`, `cutletName`, `dayInCutlet`, `monthName`, e `dayInMonth` al scrolling function.
+2. Omni rendered day card publica ti quin raw semantic values in `data-*` attributes.
+3. `_scrollSelectedIntoView(year, cutletName, dayInCutlet, monthName, dayInMonth)` exige exactmen omni quin partes e sercha un unic full-tuple match.
+4. JDN ne es plu li selector del target. It resta un consistency check pos li full semantic match.
+5. Un card con li searched JDN ma un different five-part tuple fail cludet con `ERR_CALENDAR_RENDER_INCONSISTENCY` ante rendering.
+6. `aria-current="date"` es basat sur li full semantic tuple, ne sur JDN solmen.
 
-- `PERSISTENT_SCHEMA_VERSION` avansa de 2 a 3.
-- Al prim construction con li existent `pc-browser-core-*` namespace, schema-2 storage es ignorat e removet per li existent namespace cleanup.
-- Null semantic-core fingerprint es changeat.
-- Li browser build fingerprint cambia automaticmen pro que `browser/calendar-memory.js` es un build input; talmen li generated main e Worker recive un nov shared build ID.
+## Regression witness
 
-## Regression
+`tests/browser-component-runtime.js` construe du cards con li sam JDN `739862`:
 
-`tests/browser-consistency-cache.js` nu sema un schema-2 conversion por JDN 739862 con li stale value `5000 / bronze / 677 / costa / 12`. Li prova exige que schema 3:
+- stale: `5000 / bronze / 677 / costa / 12`
+- authoritative: `5000 / bronze / 677 / sand / 32`
 
-1. ne lee ti obsolete conversion;
-2. remove li schema-2 storage key;
-3. recalcula li direct result per li engine;
-4. retorna e persiste solmen `5000 / bronze / 677 / sand / 32` sub schema 3.
+Li scrolling function es invocat con li quin authoritative partes. Li prova exige que solmen `sand / 32` posse devenir `aria-current` e recever `scrollIntoView()`.
+
+Un separat prova verifica que un cutlet view con JDN `739862` ma `costa / 12`, contra li direct `sand / 32`, fail cludet mem si null duplicat JDN card existe.
 
 ## Local verification
 
-- `node tests/browser-consistency-cache.js` — PASS
 - `node tests/browser-interface-all.js` — PASS
 - `node scripts/build-browser.js` — PASS
-- generated browser build ID: `a51c85ecd1e7dd9bf262575d`
-- generated Pages script URL: `pastafari-date.js?v=a51c85ecd1e7dd9bf262575d`
-- `src/index.js` e `src/source-language-catalog.js` resta byte-identic al pre-delta source.
-- Classic-script parse de li changed JavaScript files — PASS
-- Raw Hebrew scan de li changed JS/JSON/MD files — PASS
+- classic-script parse del relevant generated `.js` — PASS
+- old JDN-only target selector absent ex generated standard bundle — PASS
+- raw Hebrew scan in `.js/.json/.md` — PASS
+- semantic core files resta byte-identic al known base core hashes
 
-`tests/browser-built-artifacts.js` ne finit localmen in li available execution environment durant li heavy real witness calculation. Ti sam heavy gate passat in GitHub Actions por v12 e deve esser executet denov per CI pos ti delta.
+`tests/browser-built-artifacts.js` passa su li static generated-asset assertions, ma li local execution esset stoppat per timeout durant li existent cold core witness. Li exact heavy witness deve restar un CI gate.
 
-## Files
+## Scope
 
-Ti ZIP contene solmen li files quel deve esser cargat por ti delta. Null generated `browser/dist`, null HANDOFF, null `package.json`, null semantic-core file e null workflow YAML es includet.
+Ti package ne include generated `dist/` files, semantic core files, `package.json`, workflow files, o un handoff.
