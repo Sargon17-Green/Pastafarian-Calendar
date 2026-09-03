@@ -1,0 +1,164 @@
+name: JavaScript + Interlingue — finalize corrected Stage 59
+
+on:
+  push:
+    branches:
+      - 'JavaScript+Interlingue'
+    paths:
+      - '.github/workflows/javascript-interlingue-stage59-finalize.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: javascript-interlingue-stage59-finalize
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Obtener li branche complet
+        uses: actions/checkout@v6
+        with:
+          ref: JavaScript+Interlingue
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verificar li statu actual e li pollution accidental
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
+          POLLUTED='0b4ba44110cfe6947cbaa279ac8467ca53f14590'
+          FINALIZER='.github/workflows/javascript-interlingue-stage59-finalize.yml'
+
+          git merge-base --is-ancestor "$GOOD" HEAD
+          git merge-base --is-ancestor "$POLLUTED" HEAD
+
+          mapfile -t changed < <(git diff --name-only "$GOOD"..HEAD)
+          for path in "${changed[@]}"; do
+            case "$path" in
+              README.txt|REFERENCE_CORRECTED_TREE.zip|SHA256SUMS.txt|STAGE_59_CORRECTED_MANIFEST.json|javascript-interlingue-stage59-apply-corrected.yml|"$FINALIZER")
+                ;;
+              *)
+                echo "Refusa: unexpected change after li successful rollback: $path" >&2
+                exit 1
+                ;;
+            esac
+          done
+
+      - name: Remover li accidental Web-package files e restaurar li root
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
+
+          git rm -f --ignore-unmatch \
+            README.txt \
+            REFERENCE_CORRECTED_TREE.zip \
+            STAGE_59_CORRECTED_MANIFEST.json \
+            javascript-interlingue-stage59-apply-corrected.yml
+
+          git restore --source="$GOOD" --staged --worktree -- SHA256SUMS.txt
+
+          cmp package.json <(git show "$GOOD:package.json")
+          cmp README.md <(git show "$GOOD:README.md")
+
+      - name: Constructer Stage 59 in li correct hierarchy
+        shell: bash
+        run: |
+          set -euo pipefail
+          FLAT='2635db4101a0b640a294fd79054fb2213008a8b8'
+          CI='19cff57d10b85ad93f2fb44ec5b9f5893551e285'
+
+          copy_flat() {
+            local source="$1"
+            local dest="$2"
+            mkdir -p "$(dirname "$dest")"
+            git show "$FLAT:$source" > "$dest"
+            git add "$dest"
+          }
+
+          copy_flat env.example server/.env.example
+          copy_flat Dockerfile server/Dockerfile
+          copy_flat README.md server/README.md
+          copy_flat cache-codec.js server/cache-codec.js
+          copy_flat cache-store.js server/cache-store.js
+          copy_flat calendar-engine.js server/calendar-engine.js
+          copy_flat compose.yaml server/compose.yaml
+          copy_flat engine-worker-client.js server/engine-worker-client.js
+          copy_flat engine-worker.js server/engine-worker.js
+          copy_flat http-server.js server/http-server.js
+          copy_flat index.js server/index.js
+          copy_flat package.json server/package.json
+          copy_flat stage58-persistence-bridge.js server/stage58-persistence-bridge.js
+
+          copy_flat server-stage59-all.js tests/server-stage59-all.js
+          copy_flat server-stage59-cache.js tests/server-stage59-cache.js
+          copy_flat server-stage59-fake-core.js tests/server-stage59-fake-core.js
+          copy_flat server-stage59-http.js tests/server-stage59-http.js
+          copy_flat server-stage59-real-benchmark.js tests/server-stage59-real-benchmark.js
+          copy_flat server-stage59-real-contract.js tests/server-stage59-real-contract.js
+
+          mkdir -p .github/workflows
+          git show "$CI:.github/workflows/javascript-interlingue-stage59-server.yml" \
+            > .github/workflows/javascript-interlingue-stage59-server.yml
+          git add .github/workflows/javascript-interlingue-stage59-server.yml
+
+      - name: Remover ti installer temporal del tree final
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm -f .github/workflows/javascript-interlingue-stage59-finalize.yml
+
+      - name: Verificar que solmen Stage 59 es changeat contra li base san
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
+
+          cmp package.json <(git show "$GOOD:package.json")
+          cmp README.md <(git show "$GOOD:README.md")
+          test -z "$(git diff --cached --name-only "$GOOD" -- src browser package.json README.md)"
+
+          mapfile -t proposed < <(git diff --cached --name-only "$GOOD")
+          for path in "${proposed[@]}"; do
+            case "$path" in
+              server/*|tests/server-stage59-*.js|.github/workflows/javascript-interlingue-stage59-server.yml)
+                ;;
+              *)
+                echo "Refusa unexpected final path: $path" >&2
+                exit 1
+                ;;
+            esac
+          done
+
+          git diff --cached --check
+
+      - name: Provar li historical e browser contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/verify-stage-01.js
+          node tests/browser-interface-all.js
+
+      - name: Provar Stage 59
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/server-stage59-all.js
+          node tests/server-stage59-real-contract.js
+          node tests/server-stage59-real-benchmark.js --run-heavy
+
+      - name: Crear e publicar li corrected Stage 59 commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git commit -m 'Adjunter Stage 59 in li correct repository hierarchy'
+          git push origin HEAD:JavaScript+Interlingue
