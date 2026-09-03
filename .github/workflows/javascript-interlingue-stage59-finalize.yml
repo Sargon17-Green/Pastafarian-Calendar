@@ -3,7 +3,7 @@ name: JavaScript + Interlingue — finalize corrected Stage 59
 on:
   push:
     branches:
-      - 'JavaScript\+Interlingue'
+      - 'JavaScript+Interlingue'
     paths:
       - '.github/workflows/javascript-interlingue-stage59-finalize.yml'
   workflow_dispatch:
