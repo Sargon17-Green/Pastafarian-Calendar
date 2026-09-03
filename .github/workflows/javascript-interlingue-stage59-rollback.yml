@@ -3,7 +3,7 @@ name: JavaScript + Interlingue — rollback incorrect Stage 59 upload
 on:
   push:
     branches:
-      - JavaScript+Interlingue
+      - 'JavaScript\+Interlingue'
     paths:
       - '.github/workflows/javascript-interlingue-stage59-rollback.yml'
   workflow_dispatch:
