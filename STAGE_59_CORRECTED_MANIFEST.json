@@ -1,0 +1,11 @@
+{
+  "schema": 3,
+  "purpose": "Web-UI-safe corrected Stage 59 delta",
+  "required_pre_stage59_tree": "3e6fe2bb035a300b02d33534015e4011ea767019",
+  "historical_flat_source_commit": "2635db4101a0b640a294fd79054fb2213008a8b8",
+  "historical_ci_source_commit": "19cff57d10b85ad93f2fb44ec5b9f5893551e285",
+  "temporary_apply_workflow": ".github/workflows/javascript-interlingue-stage59-apply-corrected.yml",
+  "final_stage59_workflow": ".github/workflows/javascript-interlingue-stage59-server.yml",
+  "root_package_json_must_remain_unchanged": true,
+  "root_readme_must_remain_unchanged": true
+}

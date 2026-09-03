@@ -1,0 +1,140 @@
+name: JavaScript + Interlingue — apply corrected Stage 59 hierarchy
+
+on:
+  push:
+    branches:
+      - JavaScript+Interlingue
+    paths:
+      - '.github/workflows/javascript-interlingue-stage59-apply-corrected.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: javascript-interlingue-stage59-apply-corrected
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Obtener li branche complet
+        uses: actions/checkout@v6
+        with:
+          ref: JavaScript+Interlingue
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verificar li post-rollback base
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
+          FLAT='2635db4101a0b640a294fd79054fb2213008a8b8'
+          CI='19cff57d10b85ad93f2fb44ec5b9f5893551e285'
+          APPLY_FILE='.github/workflows/javascript-interlingue-stage59-apply-corrected.yml'
+
+          test "$(git rev-parse "${FLAT}^")" = "$GOOD"
+          test "$(git rev-parse "${CI}^")" = "$FLAT"
+          git merge-base --is-ancestor "$GOOD" HEAD
+
+          mapfile -t changed < <(git diff --name-only "$GOOD"..HEAD)
+          for path in "${changed[@]}"; do
+            if [[ "$path" != "$APPLY_FILE" ]]; then
+              echo "Refusa apply: post-rollback tree have unexpected change: $path" >&2
+              exit 1
+            fi
+          done
+
+          git diff --quiet "$GOOD" HEAD -- package.json README.md src browser tests/verify-stage-01.js
+
+      - name: Reconstruer Stage 59 in su correct directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          FLAT='2635db4101a0b640a294fd79054fb2213008a8b8'
+          CI='19cff57d10b85ad93f2fb44ec5b9f5893551e285'
+          APPLY_FILE='.github/workflows/javascript-interlingue-stage59-apply-corrected.yml'
+
+          mkdir -p server tests .github/workflows
+
+          copy_from_flat() {
+            local source="$1"
+            local destination="$2"
+            git show "$FLAT:$source" > "$destination"
+          }
+
+          copy_from_flat 'env.example' 'server/.env.example'
+          copy_from_flat 'Dockerfile' 'server/Dockerfile'
+          copy_from_flat 'README.md' 'server/README.md'
+          copy_from_flat 'cache-codec.js' 'server/cache-codec.js'
+          copy_from_flat 'cache-store.js' 'server/cache-store.js'
+          copy_from_flat 'calendar-engine.js' 'server/calendar-engine.js'
+          copy_from_flat 'compose.yaml' 'server/compose.yaml'
+          copy_from_flat 'engine-worker-client.js' 'server/engine-worker-client.js'
+          copy_from_flat 'engine-worker.js' 'server/engine-worker.js'
+          copy_from_flat 'http-server.js' 'server/http-server.js'
+          copy_from_flat 'index.js' 'server/index.js'
+          copy_from_flat 'package.json' 'server/package.json'
+          copy_from_flat 'stage58-persistence-bridge.js' 'server/stage58-persistence-bridge.js'
+
+          for name in \
+            server-stage59-all.js \
+            server-stage59-cache.js \
+            server-stage59-fake-core.js \
+            server-stage59-http.js \
+            server-stage59-real-benchmark.js \
+            server-stage59-real-contract.js
+          do
+            copy_from_flat "$name" "tests/$name"
+          done
+
+          git show "$CI:.github/workflows/javascript-interlingue-stage59-server.yml" \
+            > .github/workflows/javascript-interlingue-stage59-server.yml
+
+          rm -f "$APPLY_FILE"
+
+      - name: Verificar li corrected delta ante publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
+
+          git diff --quiet "$GOOD" -- package.json README.md src browser
+
+          test -f server/package.json
+          test -f server/README.md
+          test -f tests/server-stage59-all.js
+          test -f .github/workflows/javascript-interlingue-stage59-server.yml
+
+          for forbidden in \
+            cache-codec.js cache-store.js calendar-engine.js compose.yaml \
+            engine-worker-client.js engine-worker.js env.example http-server.js index.js \
+            javascript-interlingue-stage59-server.yml stage58-persistence-bridge.js \
+            server-stage59-all.js server-stage59-cache.js server-stage59-fake-core.js \
+            server-stage59-http.js server-stage59-real-benchmark.js server-stage59-real-contract.js
+          do
+            if [[ -e "$forbidden" ]]; then
+              echo "Incorrect flat Stage 59 path still exists: $forbidden" >&2
+              exit 1
+            fi
+          done
+
+          node tests/verify-stage-01.js
+          node tests/browser-interface-all.js
+          node tests/server-stage59-all.js
+          node tests/server-stage59-real-contract.js
+          git diff --check
+
+      - name: Crear e publicar li corrected Stage 59 commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Reaplicar Stage 59 con li correct repository hierarchy'
+          git push origin HEAD:JavaScript+Interlingue
