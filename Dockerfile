@@ -6,7 +6,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 COPY . .
-RUN mkdir -p /out && CXX=clang++ OUTPUT=/out/pastafari-http sh build_http_api.sh
+RUN mkdir -p /out && \
+    CXX=clang++ \
+    OUTPUT=/out/pastafari-http \
+    PASTAFARI_HTTP_LOW_MEMORY_SCAR=1 \
+    sh build_http_api.sh
 
 FROM ubuntu:24.04 AS runtime
 ENV DEBIAN_FRONTEND=noninteractive
