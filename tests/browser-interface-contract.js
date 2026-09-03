@@ -50,6 +50,10 @@ for (const token of [
   'semanticHash',
   '88% 49%',
   "card.className = 'day'",
+  "LOCALE_STORAGE_KEY = 'pastafari.browser.locale'",
+  'data-state="loading"',
+  '.calendar[data-state="loading"] > .target-beacon',
+  'width: min(100%, 42rem)',
 ]) {
   assert(source.includes(token), 'Manca li original-UI contract-token: ' + token);
 }
@@ -60,6 +64,7 @@ assert(!source.includes('_selectDay(event)'), 'Li old click-to-select day handle
 const page = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 assert(page.includes('#f4f0e7'));
 assert(page.includes('radial-gradient(circle at 12% 6%'));
-assert(page.includes('<pastafari-date lang="ie"></pastafari-date>'));
+assert(page.includes('<pastafari-date></pastafari-date>'));
+assert(!page.includes('<pastafari-date lang="ie"'));
 
 console.log('browser-interface-contract: PASS');

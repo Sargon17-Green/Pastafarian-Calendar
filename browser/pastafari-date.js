@@ -36,6 +36,7 @@
     });
   }));
   const MAX_CACHED_CUTLETS = 5;
+  const LOCALE_STORAGE_KEY = 'pastafari.browser.locale';
   const doc = root.document || null;
   const enqueueMicrotask = typeof root.queueMicrotask === 'function'
     ? root.queueMicrotask.bind(root)
@@ -76,6 +77,26 @@
   function escapeSelector(value) {
     if (root.CSS && typeof root.CSS.escape === 'function') return root.CSS.escape(String(value));
     return String(value).replace(/["\\]/g, '\\$&');
+  }
+
+  function readStoredLocale() {
+    try {
+      if (!root.localStorage || typeof root.localStorage.getItem !== 'function') return null;
+      const value = root.localStorage.getItem(LOCALE_STORAGE_KEY);
+      return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function writeStoredLocale(value) {
+    try {
+      if (root.localStorage && typeof root.localStorage.setItem === 'function') {
+        root.localStorage.setItem(LOCALE_STORAGE_KEY, String(value));
+      }
+    } catch (_) {
+      // Language selection must remain usable when storage is disabled.
+    }
   }
 
   async function getPastafariDateAsync(targetDate, calculationDate) {
@@ -247,7 +268,15 @@
 
           .calendar {
             position: relative;
-            min-height: 19rem;
+            min-height: 0;
+          }
+          .calendar[data-state="loading"] > .target-beacon,
+          .calendar[data-state="loading"] > .toolbar,
+          .calendar[data-state="loading"] > .viewport,
+          .calendar[data-state="error"] > .target-beacon,
+          .calendar[data-state="error"] > .toolbar,
+          .calendar[data-state="error"] > .viewport {
+            display: none;
           }
 
           .target-beacon {
@@ -468,35 +497,53 @@
           }
 
           .overlay {
-            position: absolute;
-            inset: 0;
+            position: relative;
             z-index: 20;
             display: grid;
-            place-content: center;
-            justify-items: center;
-            gap: .75rem;
-            min-height: 19rem;
-            padding: 2rem;
-            text-align: center;
+            width: min(100%, 42rem);
+            min-height: 0;
+            margin: clamp(1rem, 3vw, 2rem) auto;
+            padding: clamp(1rem, 2.5vw, 1.6rem);
+            gap: .45rem .9rem;
             border: 1px solid var(--line);
-            border-radius: 1.25rem;
+            border-radius: 1.05rem;
             background: var(--panel);
+            box-shadow: 0 12px 34px rgb(54 36 20 / 10%);
+          }
+          .overlay.loading {
+            grid-template-columns: auto minmax(0, 1fr);
+            grid-template-areas:
+              "spinner title"
+              "spinner note";
+            align-items: center;
+            text-align: start;
+          }
+          .overlay.error {
+            justify-items: center;
+            text-align: center;
           }
           .spinner {
-            width: 3.1rem;
-            height: 3.1rem;
-            border: .32rem solid #d7cfc1;
+            grid-area: spinner;
+            width: 2.25rem;
+            height: 2.25rem;
+            border: 4px solid #d7cfc1;
             border-top-color: var(--accent);
             border-radius: 50%;
-            animation: spin .9s linear infinite;
+            animation: spin .8s linear infinite;
           }
           .loading-title {
+            grid-area: title;
             margin: 0;
-            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            overflow-wrap: anywhere;
+            font-size: clamp(1.1rem, 2.2vw, 1.55rem);
             font-weight: 850;
+            line-height: 1.2;
+          }
+          .loading-note {
+            grid-area: note;
           }
           .loading-note,
-          .error-message { margin: 0; color: var(--muted); font-size: .9rem; }
+          .error-message { margin: 0; color: var(--muted); font-size: .88rem; }
           @keyframes spin { to { transform: rotate(1turn); } }
           @media (prefers-reduced-motion: reduce) {
             .spinner { animation-duration: 3s; }
@@ -541,6 +588,12 @@
           }
 
           @media (max-width: 48rem) {
+            .overlay.loading {
+              grid-template-columns: 1fr;
+              grid-template-areas: "spinner" "title" "note";
+              justify-items: center;
+              text-align: center;
+            }
             :host {
               width: min(100% - 1rem, var(--pastafari-max-width, 94rem));
               padding-block-start: .5rem;
@@ -621,7 +674,7 @@
           <button class="editor-link" type="button"></button>
         </section>
 
-        <section class="calendar" part="calendar" aria-busy="true">
+        <section class="calendar" part="calendar" aria-busy="true" data-state="loading">
           <section class="target-beacon" part="target">
             <span class="beacon-label"></span>
             <div class="beacon-date">
@@ -738,7 +791,9 @@
       this._els.form.addEventListener('submit', (event) => this._applyDialog(event));
       this._els.viewport.addEventListener('scroll', () => this._onScroll(), { passive: true });
       this._els.languageSelector.addEventListener('change', () => {
-        this.setAttribute('lang', this._els.languageSelector.value);
+        const selected = this._els.languageSelector.value;
+        writeStoredLocale(selected);
+        this.setAttribute('lang', selected);
       });
       this._applyLocale();
     }
@@ -793,9 +848,13 @@
 
     _applyLocale() {
       const explicit = this.getAttribute && this.getAttribute('lang');
+      const stored = explicit ? null : readStoredLocale();
       const browserLanguages = root.navigator && Array.isArray(root.navigator.languages)
         ? root.navigator.languages : [];
-      this._locale = i18n.resolveLocale(explicit, browserLanguages);
+      this._locale = i18n.resolveLocale(explicit || stored, browserLanguages);
+      if (this.getAttribute && this.getAttribute('lang') !== this._locale.code) {
+        this.setAttribute('lang', this._locale.code);
+      }
       if (!this._els) return;
 
       this.setAttribute('dir', this._locale.dir);
@@ -1308,18 +1367,25 @@
     }
 
     _showLoading() {
-      if (this._els.calendar) this._els.calendar.setAttribute('aria-busy', 'true');
+      if (this._els.calendar) {
+        this._els.calendar.setAttribute('aria-busy', 'true');
+        this._els.calendar.setAttribute('data-state', 'loading');
+      }
       if (this._els.loading) this._els.loading.hidden = false;
       if (this._els.error) this._els.error.hidden = true;
     }
 
     _hideOverlays() {
+      if (this._els.calendar) this._els.calendar.removeAttribute('data-state');
       if (this._els.loading) this._els.loading.hidden = true;
       if (this._els.error) this._els.error.hidden = true;
     }
 
     _showError(error, messageKey) {
-      if (this._els.calendar) this._els.calendar.setAttribute('aria-busy', 'false');
+      if (this._els.calendar) {
+        this._els.calendar.setAttribute('aria-busy', 'false');
+        this._els.calendar.setAttribute('data-state', 'error');
+      }
       if (this._els.loading) this._els.loading.hidden = true;
       if (this._els.error) this._els.error.hidden = false;
       if (root.console && typeof root.console.error === 'function') root.console.error(error);

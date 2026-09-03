@@ -112,6 +112,14 @@ const customElements = {
   get(name) { return registry.get(name); },
 };
 
+const storedValues = new Map();
+const localStorage = {
+  getItem(key) { return storedValues.has(String(key)) ? storedValues.get(String(key)) : null; },
+  setItem(key, value) { storedValues.set(String(key), String(value)); },
+  removeItem(key) { storedValues.delete(String(key)); },
+  clear() { storedValues.clear(); },
+};
+
 let sharedService = null;
 const sandbox = {
   console: { log() {}, error() {} },
@@ -134,6 +142,7 @@ const sandbox = {
   document,
   customElements,
   navigator: { languages: ['ie'] },
+  localStorage,
   CSS: { escape(value) { return String(value); } },
   queueMicrotask,
   setTimeout,
@@ -202,6 +211,39 @@ async function flush() {
 }
 
 (async () => {
+  // Public-page language resolution: explicit lang wins; without one, a saved
+  // manual selection wins over navigator.languages, which wins over Interlingue.
+  localStorage.clear();
+  sandbox.navigator.languages = ['he-IL', 'en-US'];
+  const autoHebrew = new PastafariDateElement();
+  assert.strictEqual(autoHebrew._locale.code, 'he');
+  assert.strictEqual(autoHebrew.getAttribute('lang'), 'he');
+  assert.strictEqual(autoHebrew.getAttribute('dir'), 'rtl');
+
+  localStorage.setItem('pastafari.browser.locale', 'fr');
+  const storedFrench = new PastafariDateElement();
+  assert.strictEqual(storedFrench._locale.code, 'fr');
+  assert.strictEqual(storedFrench.getAttribute('lang'), 'fr');
+
+  const explicitEnglish = new PastafariDateElement();
+  explicitEnglish.setAttribute('lang', 'en');
+  explicitEnglish._applyLocale();
+  assert.strictEqual(explicitEnglish._locale.code, 'en');
+
+  localStorage.clear();
+  sandbox.navigator.languages = ['xx-ZZ'];
+  const fallbackInterlingue = new PastafariDateElement();
+  assert.strictEqual(fallbackInterlingue._locale.code, 'ie');
+
+  const manualLanguage = new PastafariDateElement();
+  manualLanguage._els.languageSelector.value = 'de';
+  manualLanguage._els.languageSelector.listeners.get('change')();
+  assert.strictEqual(localStorage.getItem('pastafari.browser.locale'), 'de');
+  assert.strictEqual(manualLanguage.getAttribute('lang'), 'de');
+
+  localStorage.clear();
+  sandbox.navigator.languages = ['ie'];
+
   // Rapid attribute changes: only the newest generation may commit or publish.
   const pending = new Map();
   sharedService = {
@@ -297,11 +339,13 @@ async function flush() {
   await assert.rejects(() => recover.refresh());
   assert.strictEqual(recover._els.error.hidden, false);
   assert.strictEqual(recover._els.calendar.getAttribute('aria-busy'), 'false');
+  assert.strictEqual(recover._els.calendar.getAttribute('data-state'), 'error');
   assert.strictEqual(recover._els.errorMessage.textContent, recover._t('search.invalid'));
   recover.setAttribute('date', '2026-09-06');
   const recovered = await recover.refresh();
   const recoveredReady = await recover.ready;
   assert.strictEqual(recoveredReady.cutletName, recovered.cutletName);
+  assert.strictEqual(recover._els.calendar.hasAttribute('data-state'), false);
 
   // Language changes rerender presentation only. Raw public value remains the
   // exact Interlingue semantic result from the core.

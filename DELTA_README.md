@@ -1,23 +1,43 @@
-# Browser-interface v10 — correction de visibilitá, colores e localisation
+# Browser-interface v11 — automatic lingue e compact status
 
-Aplica ti delta al branche `JavaScript+Interlingue`.
+Aplica ti delta al branche `JavaScript+Interlingue` super HEAD
+`784a3f94b29a5d362cdf7416a6b2499d3dc69605`.
 
-Ti actualisation ne modifica li semantic core. It ameliora solmen li browser-interface e su regression-tests.
+Ti actualisation ne modifica li semantic core.
 
-## Principal changes
+## Lingue
 
-- Li cercat die es marcat mult plu fortmen in li cutlet-grid, con fort contrast, extern ring e target-badge.
-- Li target-beacon anc usa un plu fort visual treatment.
-- Li old pastel month-themes es removet.
-- Chascun del 47 actual semantic month names have un distinct, saturat visual theme con fort edge e secondary pattern, por maximisar li visual separation inter months.
-- Li localisation de cutlet- e month-nómines es audit contra li actual Interlingue semantic source-text, ne contra li old positional catalog.
-- Semanticmen incorrect o inconsistent translations es corriget in li activ locales.
-- Additional regression witnesses protege actual identities tal quam `larice`, `Palgursh`, `papirus`, `Karshumb`, `leopard`, `candel`, `lilie`, `gudron` e `oliban`.
-- Li Hebrew localisation resta representat in source per Unicode escape-sequenties, por conservar li Stage 01 source-purity invariant.
+Li public `index.html` ne fixa plu `lang="ie"` sur `<pastafari-date>`.
+Li selection de lingue usa ti prioritá:
 
-## Contracte conservat
+1. un explicit `lang` dat per un integrator;
+2. un manual selection memorisat localmen;
+3. `navigator.languages`;
+4. Interlingue quam final fallback.
 
-Li raw API result resta exactmen li black-box core result.
-`ready`, `refresh()`, `pastafari-change`, `value`, `lang`, `date`, `calculation-date`, `no-editor` e `headless` ne es semanticmen changeat.
+Un manual selection es conservat sub `pastafari.browser.locale`.
+Si `localStorage` es prohibit o indisponibil, li selector e automatic detection
+continua functionar.
 
-Null file sub `src/**` es modificat per ti delta.
+## Loading e error
+
+Li loading/error state ne conserva plu li old target-beacon, toolbar o viewport
+visibil detra li status-panel. Ti evita que un old target-ring projecta se circum
+li loading panel durante un recalculation.
+
+Li status-panel es nu bounded a max. 42 rem, have null artificial 19-rem
+min-height, e usa un compact horizontal layout sur larg ecranes. Sur strett
+ecranes it reflu a un compact vertical layout.
+
+Li public page anc remove li artificial `min-height: 100vh` del
+`pastafari-date` host. Li page-background continua ocupar li viewport, ma li
+component self ne reserva plu un grand vacui area.
+
+## Contracte
+
+Li raw API result, `ready`, `refresh()`, `pastafari-change`, `value`,
+`date`, `calculation-date`, `headless`, `no-editor` e explicit `lang`
+contractes resta compatibil.
+
+Li change de presentation ne modifica li current 47 distinct saturated
+month-themes ni li fort target indication de v10.

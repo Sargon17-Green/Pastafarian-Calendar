@@ -87,9 +87,15 @@ Li actual browser-strate suporte deci complet UI-lingues, includet localmen:
 - `it` — Italiano (LTR)
 - `cs` — Čeština (LTR)
 
-Hebrew runtime strings are stored in JavaScript with Unicode escape sequences so the
-Stage-01 source-language purity invariant remains intact while the browser still
-renders normal Hebrew text at runtime.
+Li public `index.html` ne fixa un `lang` attribute sur `<pastafari-date>`. Li
+lingue es selectet in ti órdine: un explicit `lang` dat per un integrator; un manual
+selection memorisat localmen; `navigator.languages`; finalmen Interlingue quam fallback.
+Un manual selection es conservat in `localStorage` sub `pastafari.browser.locale`;
+si storage es prohibit o indisponibil, automatic detection continua functionar.
+
+Li Hebrew runtime-strings es conservat in JavaScript per Unicode escape-sequenties,
+talmen que li Stage 01 source-language purity invariant resta intact durante que li
+navigator monstra normal Hebrew text in runtime.
 
 Null rete, vendoring, fallback inter lingues o external i18n package es besonat.
 Omni message usat de ti component existe in omni activ locale; un mancant message es un
@@ -128,6 +134,10 @@ disconnect/reconnect e old asynchronous completions ne posse publicar stale `val
 `pastafari-change`. `headless` executa solmen li data conversion. Si `headless` o
 `no-editor` es activat durante que li editor-dialog es apert, li dialog es cludet.
 `Retro al hodie` reinicialisa tant `date` quam `calculation-date`.
+
+Durante loading o error, li old calendar-content es completmen suppresset, por que
+target-rings o altri stale visual elementes ne posse projecter se circum li status-panel.
+Li loading/error panel self es compact e bounded, in vice de ocupar li tot calendar-area.
 
 ## Construction
 

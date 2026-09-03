@@ -1,26 +1,32 @@
 {
-  "package": "pastafari-browser-visibility-color-translation-fix-v10",
+  "package": "pastafari-browser-auto-locale-compact-status-v11",
   "branch": "JavaScript+Interlingue",
-  "base_head_verified": "abf40ad23ca6b4253dbd698b32710bebfacff9d5",
+  "base_head_verified": "784a3f94b29a5d362cdf7416a6b2499d3dc69605",
   "files": [
+    "index.html",
     "browser/pastafari-date.js",
-    "browser/i18n/locales.js",
+    "browser/README.md",
     "tests/browser-component-runtime.js",
-    "tests/browser-i18n-locales.js",
     "tests/browser-interface-contract.js"
   ],
   "semantic_core_changed": false,
   "public_api_changed": false,
-  "active_locales": ["ie", "en", "he", "ar", "ru", "fr", "de", "es", "it", "cs"],
-  "month_theme_count": 47,
-  "translation_corrections": ["gudron", "oliban"],
+  "public_default_locale_behavior_changed": true,
+  "locale_precedence": [
+    "explicit lang attribute",
+    "stored manual selection",
+    "navigator.languages",
+    "Interlingue fallback"
+  ],
+  "locale_storage_key": "pastafari.browser.locale",
+  "status_panel_max_width": "42rem",
+  "status_panel_artificial_min_height_removed": true,
+  "host_100vh_min_height_removed": true,
   "local_validation": [
-    "browser-component-runtime: PASS",
     "browser-interface-contract: PASS",
-    "browser-interface-black-box: PASS",
-    "browser-i18n-locales: PASS",
-    "browser-interface-all: PASS",
+    "browser-component-runtime: PASS",
     "modified-js-syntax: PASS",
     "raw-hebrew-source-scan: PASS"
-  ]
+  ],
+  "readme_language": "Interlingue"
 }
