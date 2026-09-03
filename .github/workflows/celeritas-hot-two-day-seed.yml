@@ -1,4 +1,4 @@
-name: Sepulcra calida et corridor annorum
+name: Sepulcra calida et atlas annorum
 
 on:
   schedule:
@@ -18,10 +18,13 @@ on:
       - 'src/pair_tomb.cpp'
       - 'src/date_conversion.cpp'
       - 'src/venus_boundary.cpp'
+      - 'build_http_api.sh'
       - 'tools/http_low_memory_monster.awk'
       - 'tools/http_ancestral_year_index.awk'
+      - 'tools/http_cache_before_busy_server.awk'
       - 'tools/current_venus_engine_day.cpp'
-      - 'tools/generate_hot_cache_seed.cpp'
+      - 'tools/generate_hot_almanac_shard.cpp'
+      - 'tools/generate_hot_two_day_seed.cpp'
 
 permissions:
   contents: write
@@ -31,172 +34,197 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sepelire:
+  prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    outputs:
+      base: ${{ steps.day.outputs.base }}
+      need: ${{ steps.day.outputs.need }}
     steps:
-      - name: Excerpere branch
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
         with:
           ref: Celeritas-per-Sepulcra
           fetch-depth: 1
+      - name: Diem Veneris currentem invenire
+        id: day
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libboost-dev clang
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror -Iinclude \
+            tools/current_venus_engine_day.cpp src/date_conversion.cpp src/venus_boundary.cpp \
+            -o /tmp/current-venus-day
+          base=$(/tmp/current-venus-day)
+          old_base=$(sed -n 's|^// PASTAFARI_HOT_ALMANAC_BASE_DAY=||p' \
+            include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
+          old_gen=$(sed -n 's|^// PASTAFARI_HOT_ALMANAC_GENERATION=||p' \
+            include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
+          need=yes
+          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old_base" = "$base" ] && [ "$old_gen" = "3" ]; then
+            need=no
+          fi
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "need=$need" >> "$GITHUB_OUTPUT"
+          echo "ATLAS_BASE=$base OLD_BASE=${old_base:-NONE} OLD_GEN=${old_gen:-NONE} NEED=$need"
 
+  atlas:
+    needs: prepare
+    if: needs.prepare.outputs.need == 'yes'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: Celeritas-per-Sepulcra
+          fetch-depth: 1
       - name: Instituere dependentias
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libboost-dev clang lld curl
-
-      - name: Diem Veneris currentem sine monstro invenire
-        id: day
+          sudo apt-get install -y --no-install-recommends libboost-dev clang lld
+      - name: Monstrum low-memory/index semel aedificare
         shell: bash
         run: |
           set -euo pipefail
-          clang++ -std=c++20 -O2 -Wall -Wextra -Werror -Iinclude \
-            tools/current_venus_engine_day.cpp src/date_conversion.cpp src/venus_boundary.cpp \
-            -o /tmp/current-venus-day
-          base=$(/tmp/current-venus-day)
-          old_pair=$(sed -n 's/^\/\/ PASTAFARI_HOT_SEED_BASE_DAY=//p' \
-            include/pastafari/http_api/generated_hot_two_day_seed.inc | head -1)
-          old_almanac=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_BASE_DAY=//p' \
-            include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
-          old_generation=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_GENERATION=//p' \
-            include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
-          need=yes
-          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old_pair" = "$base" ] && [ "$old_almanac" = "$base" ] && [ "$old_generation" = "2" ]; then
-            need=no
-          fi
-          echo "base=$base" >> "$GITHUB_OUTPUT"
-          echo "need=$need" >> "$GITHUB_OUTPUT"
-          echo "HOT_CACHE_BASE_DAY=$base OLD_PAIR=${old_pair:-NONE} OLD_ALMANAC=${old_almanac:-NONE} OLD_GENERATION=${old_generation:-NONE} NEED=$need"
-
-      - name: Monstrum productionis low-memory semel aedificare
-        if: steps.day.outputs.need == 'yes'
-        shell: bash
-        run: |
-          set -euo pipefail
-          awk -f tools/http_low_memory_monster.awk src/monster.cpp >/tmp/monster.hot-cache.low.cpp
-          awk -f tools/http_ancestral_year_index.awk /tmp/monster.hot-cache.low.cpp >/tmp/monster.hot-cache.cpp
+          awk -f tools/http_low_memory_monster.awk src/monster.cpp >/tmp/monster.low.cpp
+          awk -f tools/http_ancestral_year_index.awk /tmp/monster.low.cpp >/tmp/monster.atlas.cpp
           clang++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude -Itests -I. \
-            -c /tmp/monster.hot-cache.cpp -o /tmp/monster.hot-cache.o
-
-      - name: Sepulcra exacta et corridor annorum generare
-        if: steps.day.outputs.need == 'yes'
+            -c /tmp/monster.atlas.cpp -o /tmp/monster.atlas.o
+      - name: Shard atlas generare
         shell: bash
         run: |
           set -euo pipefail
           clang++ -std=c++20 -O2 -Wall -Wextra -Werror -Iinclude \
-            tools/generate_hot_cache_seed.cpp src/celeritas_engine_port.cpp \
-            /tmp/monster.hot-cache.o -o /tmp/generate-hot-cache
-          timeout 45m /tmp/generate-hot-cache "${{ steps.day.outputs.base }}" \
-            /tmp/generated_hot_two_day_seed.inc \
-            /tmp/generated_hot_year_almanac_seed.inc
-          grep -q "^// PASTAFARI_HOT_SEED_BASE_DAY=${{ steps.day.outputs.base }}$" \
-            /tmp/generated_hot_two_day_seed.inc
-          grep -q "^// PASTAFARI_HOT_ALMANAC_BASE_DAY=${{ steps.day.outputs.base }}$" \
-            /tmp/generated_hot_year_almanac_seed.inc
-          grep -q '^// PASTAFARI_HOT_ALMANAC_GENERATION=2$' \
-            /tmp/generated_hot_year_almanac_seed.inc
-          grep -q '^// PASTAFARI_HOT_ALMANAC_CORRIDOR_BEHIND_DAYS=10000$' \
-            /tmp/generated_hot_year_almanac_seed.inc
-          grep -q '^// PASTAFARI_HOT_ALMANAC_CORRIDOR_AHEAD_DAYS=30000$' \
-            /tmp/generated_hot_year_almanac_seed.inc
-          count=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_COUNT=//p' \
-            /tmp/generated_hot_year_almanac_seed.inc | head -1)
-          test -n "$count"
-          test "$count" -ge 4
-          test "$count" -le 64
-          test "$(grep -c '^{true,' /tmp/generated_hot_two_day_seed.inc)" = 4
-          test "$(grep -c '^(void)buryHotAlmanacDiagnostic' /tmp/generated_hot_year_almanac_seed.inc)" = "$count"
-          echo "HOT_CORRIDOR_GENERATED_COUNT=$count"
-          cp /tmp/generated_hot_two_day_seed.inc \
-            include/pastafari/http_api/generated_hot_two_day_seed.inc
-          cp /tmp/generated_hot_year_almanac_seed.inc \
-            include/pastafari/http_api/generated_hot_year_almanac_seed.inc
+            tools/generate_hot_almanac_shard.cpp /tmp/monster.atlas.o \
+            -o /tmp/generate-atlas-shard
+          base=${{ needs.prepare.outputs.base }}
+          global_low=$((base-50000))
+          global_high=$((base+300000))
+          width=43750
+          low=$((global_low + ${{ matrix.shard }} * width))
+          high=$((low + width))
+          if [ "$high" -gt "$global_high" ]; then high=$global_high; fi
+          timeout 45m /tmp/generate-atlas-shard "$base" "$low" "$high" "$global_low" \
+            > "almanac-${{ matrix.shard }}.inc"
+          count=$(grep -c '^(void)buryHotAlmanacDiagnostic' "almanac-${{ matrix.shard }}.inc")
+          test "$count" -ge 1
+          echo "ATLAS_SHARD=${{ matrix.shard }} LOW=$low HIGH=$high COUNT=$count"
+          if [ "${{ matrix.shard }}" = "0" ]; then
+            clang++ -std=c++20 -O2 -Wall -Wextra -Werror -Iinclude \
+              tools/generate_hot_two_day_seed.cpp src/celeritas_engine_port.cpp \
+              /tmp/monster.atlas.o -o /tmp/generate-pairs
+            timeout 20m /tmp/generate-pairs "$base" > generated_hot_two_day_seed.inc
+            test "$(grep -c '^{true,' generated_hot_two_day_seed.inc)" = 4
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atlas-${{ matrix.shard }}
+          path: |
+            almanac-${{ matrix.shard }}.inc
+            generated_hot_two_day_seed.inc
+          if-no-files-found: ignore
+          retention-days: 1
 
-      - name: Cicatricem cache leviter probare
-        if: steps.day.outputs.need == 'yes'
+  finalize:
+    needs: [prepare, atlas]
+    if: needs.prepare.outputs.need == 'yes'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: Celeritas-per-Sepulcra
+          fetch-depth: 1
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: atlas-*
+          path: /tmp/atlas
+          merge-multiple: true
+      - name: Atlas componere
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=${{ needs.prepare.outputs.base }}
+          body=/tmp/atlas-body.inc
+          : > "$body"
+          for f in $(find /tmp/atlas -maxdepth 1 -name 'almanac-*.inc' | sort -V); do
+            cat "$f" >> "$body"
+          done
+          count=$(grep -c '^(void)buryHotAlmanacDiagnostic' "$body")
+          test "$count" -ge 80
+          test "$count" -le 192
+          out=include/pastafari/http_api/generated_hot_year_almanac_seed.inc
+          {
+            echo "// PASTAFARI_HOT_ALMANAC_BASE_DAY=$base"
+            echo "// PASTAFARI_HOT_ALMANAC_GENERATION=3"
+            echo "// PASTAFARI_HOT_ALMANAC_ATLAS_BEHIND_DAYS=50000"
+            echo "// PASTAFARI_HOT_ALMANAC_ATLAS_AHEAD_DAYS=300000"
+            echo "// PASTAFARI_HOT_ALMANAC_ATLAS_SHARDS=8"
+            echo "// PASTAFARI_HOT_ALMANAC_COUNT=$count"
+            echo "// Duo calculationDays, c et c+1; atlas per octo shard parallelos."
+            cat "$body"
+          } > "$out"
+          cp /tmp/atlas/generated_hot_two_day_seed.inc \
+            include/pastafari/http_api/generated_hot_two_day_seed.inc
+          echo "HOT_ATLAS_COMPOSED COUNT=$count"
+      - name: Cicatrices leves probare
         shell: bash
         env:
           CXX: clang++
         run: |
           set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libboost-dev clang lld curl
           sh tests/run_http_api_tests.sh
-
-      - name: Pair Tomb et corridor in ministro productionis probare
-        if: steps.day.outputs.need == 'yes'
+      - name: Ministrum productionis atlas probare
         shell: bash
         run: |
           set -euo pipefail
-          CXX=clang++ OUTPUT=/tmp/pastafari-hot-http \
-            PASTAFARI_HTTP_MONSTER_OBJECT=/tmp/monster.hot-cache.o \
+          awk -f tools/http_low_memory_monster.awk src/monster.cpp >/tmp/monster.low.cpp
+          awk -f tools/http_ancestral_year_index.awk /tmp/monster.low.cpp >/tmp/monster.atlas.cpp
+          clang++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude -Itests -I. \
+            -c /tmp/monster.atlas.cpp -o /tmp/monster.atlas.o
+          CXX=clang++ OUTPUT=/tmp/pastafari-atlas-http \
+            PASTAFARI_HTTP_MONSTER_OBJECT=/tmp/monster.atlas.o \
             PASTAFARI_HTTP_LOW_MEMORY_SCAR=0 \
             sh build_http_api.sh
-          /tmp/pastafari-hot-http 127.0.0.1 18084 >/tmp/hot-http.out 2>/tmp/hot-http.err &
+          /tmp/pastafari-atlas-http 127.0.0.1 18084 >/tmp/atlas-http.out 2>/tmp/atlas-http.err &
           pid=$!
           trap 'kill "$pid" 2>/dev/null || true' EXIT
           for i in $(seq 1 100); do
             if curl -fsS http://127.0.0.1:18084/v1/health >/dev/null; then break; fi
             sleep 0.1
           done
-          c=${{ steps.day.outputs.base }}
-          cp1=$((c+1))
-          cp2=$((c+2))
-          for pair in "$c:$c" "$c:$cp1" "$cp1:$cp1" "$cp1:$cp2"; do
-            calc=${pair%%:*}
-            target=${pair##*:}
-            curl --max-time 2 -fsS \
-              "http://127.0.0.1:18084/v1/date?date=$target&calendar=engine-day&calculation_day=$calc&language=la" \
-              >/tmp/hot-pair.json
-            grep -q '"apiVersion":"1"' /tmp/hot-pair.json
-            grep -q '"year":"' /tmp/hot-pair.json
-          done
-
-          count=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_COUNT=//p' \
-            include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
-          test -n "$count" && test "$count" -ge 4 && test "$count" -le 64
-          for ordinal in $(seq 0 $((count-1))); do
-            calc=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_CALCULATION_DAY=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
-            open=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_OPEN=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
-            close=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_CLOSE=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
-            test -n "$calc" && test -n "$open" && test -n "$close"
-            probe=$((open + (close-open)/2))
-            if [ "$probe" = "$calc" ] || [ "$probe" = "$((calc+1))" ]; then probe=$((probe+3)); fi
-            test "$probe" -gt "$open" && test "$probe" -le "$close"
-            curl --max-time 2 -fsS \
-              "http://127.0.0.1:18084/v1/date?date=$probe&calendar=engine-day&calculation_day=$calc&language=la" \
-              >/tmp/hot-almanac.json
-            grep -q '"apiVersion":"1"' /tmp/hot-almanac.json
-            grep -q '"year":"' /tmp/hot-almanac.json
-          done
-          echo "HOT_YEAR_CORRIDOR_SERVER_TEST=PASS BASE=$c COUNT=$count"
-
-          # Witnesses ex probatione navigatoris: 2006/2008/2096 nunc intra
-          # corridor [-10000,+30000] eiusdem calculationDay cadere debent.
-          for target in 732374 732526 733227 765369; do
-            curl --max-time 2 -fsS \
+          c=${{ needs.prepare.outputs.base }}
+          for target in 757973 765399 801893 842799 878491 878603 893081 1013672; do
+            curl --max-time 3 -fsS \
               "http://127.0.0.1:18084/v1/date?date=$target&calendar=engine-day&calculation_day=$c&language=la" \
-              >/tmp/hot-corridor-witness.json
-            grep -q '"apiVersion":"1"' /tmp/hot-corridor-witness.json
-            grep -q '"year":"' /tmp/hot-corridor-witness.json
+              >/tmp/atlas-hit.json
+            grep -q '"apiVersion":"1"' /tmp/atlas-hit.json
+            grep -q '"year":"' /tmp/atlas-hit.json
           done
-          echo "HOT_CORRIDOR_BROWSER_WITNESSES=PASS"
+          echo "HOT_ATLAS_BROWSER_WITNESSES=PASS"
 
-          # Witness dynamicus: prima petitio Foundation structuram anni sepelit;
-          # altera die eiusdem anni non year-walk iterum facit.
-          timeout 5m curl -fsS \
-            "http://127.0.0.1:18084/v1/date?date=-15055671&calendar=engine-day&calculation_day=-15055671&language=la" \
-            >/tmp/ancestral-first.json
-          grep -q '"year":"5000"' /tmp/ancestral-first.json
-          curl --max-time 3 -fsS \
-            "http://127.0.0.1:18084/v1/date?date=-15055670&calendar=engine-day&calculation_day=-15055671&language=la" \
-            >/tmp/ancestral-second.json
-          grep -q '"year":"5000"' /tmp/ancestral-second.json
-          echo "ANCESTRAL_INTERVAL_PREWALK_SERVER_TEST=PASS"
-
-      - name: Seeds recentes in branch sepelire
-        if: steps.day.outputs.need == 'yes'
+          # Eodem ministro adhuc vivo: missus cold owner capit, sed sepulcrum
+          # generatum synchronous ante busy respondere debet.
+          cb=atlasbusy
+          curl --max-time 2 -fsS \
+            "http://127.0.0.1:18084/v1/date-job.js?date=2000000&calendar=engine-day&calculation_day=$c&callback=$cb" \
+            >/tmp/cold-job.js
+          grep -q '"status":"running"' /tmp/cold-job.js
+          sleep 0.2
+          curl --max-time 5 -fsS \
+            "http://127.0.0.1:18084/v1/date?date=757973&calendar=engine-day&calculation_day=$c&language=la" \
+            >/tmp/hot-during-cold.json
+          grep -q '"apiVersion":"1"' /tmp/hot-during-cold.json
+          grep -q '"year":"' /tmp/hot-during-cold.json
+          echo "GENERATED_CACHE_BEFORE_BUSY=PASS"
+      - name: Seeds recentes sepelire
         shell: bash
         run: |
           set -euo pipefail
@@ -204,7 +232,7 @@ jobs:
           git fetch origin Celeritas-per-Sepulcra
           remote=$(git rev-parse origin/Celeritas-per-Sepulcra)
           if [ "$starting" != "$remote" ]; then
-            echo "BRANCH_MOVED_DURING_GENERATION; seed vetus non impellitur."
+            echo "BRANCH_MOVED_DURING_ATLAS; seed vetus non impellitur."
             exit 0
           fi
           git config user.name 'github-actions[bot]'
@@ -213,8 +241,8 @@ jobs:
             include/pastafari/http_api/generated_hot_two_day_seed.inc \
             include/pastafari/http_api/generated_hot_year_almanac_seed.inc
           if git diff --cached --quiet; then
-            echo "HOT_YEAR_CORRIDOR_SEED_UNCHANGED"
+            echo "HOT_ATLAS_SEED_UNCHANGED"
             exit 0
           fi
-          git commit -m "Corridor annorum cum sepulcris hodiernis renovare"
+          git commit -m "Atlas annorum calidorum per octo shard renovare"
           git push origin HEAD:Celeritas-per-Sepulcra
