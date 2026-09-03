@@ -1,0 +1,65 @@
+BEGIN { inserted = 0 }
+{
+    print $0
+    if ($0 == "FINAL_MAIN_YEAR_WALK: {") {
+        print "    // CICATRIX HTTP ANCESTRALIS: structura anni iam semantice probata"
+        print "    // ante year-walk ut index intervalli consulitur.  Corpus ipsum postea"
+        print "    // per PATCH 27 ordinarium in FINAL_MAIN_CACHE resurrectur."
+        print "    if (accelerationsOn() && !fullHistoricalValidationOn()) {"
+        print "        Patch18YearRecord preWalkYear{};"
+        print "        bool preWalkFound = false;"
+        print "        {"
+        print "            std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);"
+        print "            for (auto& sepulcrum : ancestralMemoryVault) {"
+        print "                const StructureVaultKey& vaultKey = sepulcrum.first;"
+        print "                BuriedFinalStructure& candidate = sepulcrum.second;"
+        print "                if (vaultKey.stage56 != ctx.stage56CorrectiveRequested ||"
+        print "                    vaultKey.calculationDay != ctx.calculationDay ||"
+        print "                    candidate.stage56 != ctx.stage56CorrectiveRequested ||"
+        print "                    candidate.calculationDayFingerprint != ctx.calculationDay ||"
+        print "                    candidate.poisoned ||"
+        print "                    !fingerprintAcceptable(candidate.semanticFingerprint,"
+        print "                                           static_cast<std::uint64_t>(candidate.burialGeneration),"
+        print "                                           27)) {"
+        print "                    continue;"
+        print "                }"
+        print "                if (!(candidate.openGate < ctx.targetDay &&"
+        print "                      ctx.targetDay <= candidate.closeGate) ||"
+        print "                    candidate.value.cutlets.empty()) {"
+        print "                    continue;"
+        print "                }"
+        print "                const SpaghettiCutletRecord& firstCutlet = candidate.value.cutlets.front();"
+        print "                const SpaghettiCutletRecord& lastCutlet = candidate.value.cutlets.back();"
+        print "                if (firstCutlet.firstDay != candidate.openGate + 1 ||"
+        print "                    lastCutlet.lastDay != candidate.closeGate) {"
+        print "                    continue;"
+        print "                }"
+        print "                preWalkYear = Patch18YearRecord{"
+        print "                    candidate.yearNumber,"
+        print "                    firstCutlet.openGateIndex,"
+        print "                    lastCutlet.closeGateIndex,"
+        print "                    candidate.openGate,"
+        print "                    candidate.closeGate"
+        print "                };"
+        print "                preWalkFound = true;"
+        print "                break;"
+        print "            }"
+        print "        }"
+        print "        if (preWalkFound) {"
+        print "            targetYear = preWalkYear;"
+        print "            ctx.finalCurrentYear = targetYear;"
+        print "            ctx.branchTrace.push_back(\"PATCH27:ANCESTRAL_INTERVAL_PREWALK\");"
+        print "            metrics.bump(ctx, \"patch27.ancestral.interval.prewalk\");"
+        print "            stage = 30;"
+        print "            goto FINAL_MAIN_DISPATCH;"
+        print "        }"
+        print "    }"
+        inserted++
+    }
+}
+END {
+    if (inserted != 1) {
+        print "http_ancestral_year_index.awk: expected exactly one FINAL_MAIN_YEAR_WALK insertion; got " inserted > "/dev/stderr"
+        exit 44
+    }
+}
