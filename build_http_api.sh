@@ -20,6 +20,7 @@ API_OPT=${PASTAFARI_HTTP_API_OPT:--O2}
 SERVER_OPT=${PASTAFARI_HTTP_SERVER_OPT:--O0}
 LOW_MEMORY_SCAR=${PASTAFARI_HTTP_LOW_MEMORY_SCAR:-0}
 ANCESTRAL_YEAR_INDEX_SCAR=${PASTAFARI_HTTP_ANCESTRAL_YEAR_INDEX_SCAR:-1}
+CACHE_BEFORE_BUSY_SCAR=${PASTAFARI_HTTP_CACHE_BEFORE_BUSY_SCAR:-1}
 TMPROOT=${TMPDIR:-/tmp}
 BUILD_DIR="$TMPROOT/pastafari-http-build.$$"
 mkdir -p "$BUILD_DIR"
@@ -31,9 +32,8 @@ API_FLAGS="-std=c++20 $API_OPT -Wall -Wextra -Werror -pthread -Iinclude"
 SERVER_FLAGS="-std=c++20 $SERVER_OPT -Wall -Wextra -Werror -pthread -Iinclude"
 MONSTER_FLAGS="-std=c++20 $MONSTER_OPT -Wall -Wextra -Wpedantic -Iinclude -Itests -I."
 MONSTER_SOURCE=src/monster.cpp
+SERVER_SOURCE=src/http_server_main.cpp
 
-# CICATRIX MEMORIAE HTTP: monstrum in repository intactum manet. Solum copia
-# temporaria aedificationis burialem gravissimam Patch 38 non persistentem facit.
 if [ "$LOW_MEMORY_SCAR" = "1" ]; then
   if [ -n "$MONSTER_OBJECT" ]; then
     echo "PASTAFARI_HTTP_LOW_MEMORY_SCAR non accipit MONSTER_OBJECT praecompilatum" >&2
@@ -45,8 +45,6 @@ if [ "$LOW_MEMORY_SCAR" = "1" ]; then
   MONSTER_SOURCE="$LOW_MEMORY_SOURCE"
 fi
 
-# CICATRIX INDICIS ANNI: structurae PATCH 27 iam sepultae ante year-walk
-# consuluntur. src/monster.cpp manet intactum; tantum copia HTTP hunc detour habet.
 if [ "$ANCESTRAL_YEAR_INDEX_SCAR" = "1" ] && [ -z "$MONSTER_OBJECT" ]; then
   test -r tools/http_ancestral_year_index.awk
   INDEXED_SOURCE="$BUILD_DIR/monster.http-ancestral-index.cpp"
@@ -54,7 +52,13 @@ if [ "$ANCESTRAL_YEAR_INDEX_SCAR" = "1" ] && [ -z "$MONSTER_OBJECT" ]; then
   MONSTER_SOURCE="$INDEXED_SOURCE"
 fi
 
-# Monstrum maximum primum compilatur, ante translation units Boost.
+if [ "$CACHE_BEFORE_BUSY_SCAR" = "1" ]; then
+  test -r tools/http_cache_before_busy_server.awk
+  PROBED_SERVER="$BUILD_DIR/http_server_main.cache-before-busy.cpp"
+  awk -f tools/http_cache_before_busy_server.awk "$SERVER_SOURCE" > "$PROBED_SERVER"
+  SERVER_SOURCE="$PROBED_SERVER"
+fi
+
 if [ -n "$MONSTER_OBJECT" ]; then
   test -r "$MONSTER_OBJECT"
   cp "$MONSTER_OBJECT" "$BUILD_DIR/monster.o"
@@ -76,7 +80,7 @@ for source in \
   "$CXX" $API_FLAGS -c "$source" -o "$object"
 done
 
-"$CXX" $SERVER_FLAGS -c src/http_server_main.cpp -o "$BUILD_DIR/http_server_main.o"
+"$CXX" $SERVER_FLAGS -c "$SERVER_SOURCE" -o "$BUILD_DIR/http_server_main.o"
 "$CXX" $LINKER_FLAGS -pthread "$BUILD_DIR"/*.o -o "$OUTPUT"
 
-echo "AEDIFICATIO_HTTP_TRANSIIT CXX=$CXX OUTPUT=$OUTPUT MONSTER_OPT=$MONSTER_OPT API_OPT=$API_OPT SERVER_OPT=$SERVER_OPT LINKER_FLAGS=$LINKER_FLAGS MONSTER_OBJECT=${MONSTER_OBJECT:-none} LOW_MEMORY_SCAR=$LOW_MEMORY_SCAR ANCESTRAL_YEAR_INDEX_SCAR=$ANCESTRAL_YEAR_INDEX_SCAR"
+echo "AEDIFICATIO_HTTP_TRANSIIT CXX=$CXX OUTPUT=$OUTPUT MONSTER_OPT=$MONSTER_OPT API_OPT=$API_OPT SERVER_OPT=$SERVER_OPT LINKER_FLAGS=$LINKER_FLAGS MONSTER_OBJECT=${MONSTER_OBJECT:-none} LOW_MEMORY_SCAR=$LOW_MEMORY_SCAR ANCESTRAL_YEAR_INDEX_SCAR=$ANCESTRAL_YEAR_INDEX_SCAR CACHE_BEFORE_BUSY_SCAR=$CACHE_BEFORE_BUSY_SCAR"

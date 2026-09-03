@@ -3,7 +3,21 @@
 #include <array>
 #include <cstdint>
 #include <vector>
+
 namespace pastafari::http_api {
+
+// Signum non-std::exception: HttpProtocol hoc non devorat.
+// Solum copia HTTP ante semanticOwner eo utitur ad probing sepulcrorum generatorum.
+struct GeneratedCacheMiss final {};
+
+class PairTombGeneratedProbeScope final {
+    bool previous_{};
+public:
+    PairTombGeneratedProbeScope();
+    ~PairTombGeneratedProbeScope();
+    PairTombGeneratedProbeScope(const PairTombGeneratedProbeScope&) = delete;
+    PairTombGeneratedProbeScope& operator=(const PairTombGeneratedProbeScope&) = delete;
+};
 
 // Prima cicatrix accelerationis supra engine historicum. Direct-mapped et sine
 // allocatione in lookup communi; missus semper ad EnginePort veterem cadit.
@@ -12,9 +26,9 @@ public:
     static constexpr std::size_t SLOT_COUNT=4096;
     static constexpr std::size_t HOT_SEED_COUNT=4;
     // Numerus historicus duorum almanacorum initialium retinetur ad compatibilitatem
-    // fontis. Capacitas corridoris infra separatim crescit; nullum Stage 57 nascitur.
+    // fontis. Atlas latius infra capacitatem separatam habet; nullum Stage 57 nascitur.
     static constexpr std::size_t HOT_ALMANAC_COUNT=2;
-    static constexpr std::size_t HOT_ALMANAC_LIMIT=64;
+    static constexpr std::size_t HOT_ALMANAC_LIMIT=192;
 
     struct AlmanacCutlet {
         std::size_t canonicalIndex{};
@@ -63,8 +77,6 @@ public:
     void clear();
     Metrics metrics()const{return metrics_;}
 
-    // Cicatrices diagnosticae: workflow fasciculos generatos probat sine
-    // mutatione semanticae monstri.
     bool buryHotSeedDiagnostic(const Integer&,const Integer&,const CanonicalPastafariDate&);
     std::size_t generatedSeededCount()const;
     bool buryHotAlmanacDiagnostic(const Integer& calculationDay,

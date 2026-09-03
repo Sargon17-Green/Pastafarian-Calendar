@@ -3,8 +3,11 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+
 namespace pastafari::http_api {
 namespace {
+thread_local bool generatedProbeOnly=false;
+
 std::uint64_t mix(std::uint64_t x){x+=0x9e3779b97f4a7c15ULL;x=(x^(x>>30))*0xbf58476d1ce4e5b9ULL;x=(x^(x>>27))*0x94d049bb133111ebULL;return x^(x>>31);}
 struct GeneratedHotSeedLiteral {
     bool occupied;
@@ -31,6 +34,10 @@ std::string monthNameAt(std::size_t canonicalIndex){
     return std::string(pastafari::monthSourceName(canonicalIndex));
 }
 }
+
+PairTombGeneratedProbeScope::PairTombGeneratedProbeScope():previous_(generatedProbeOnly){generatedProbeOnly=true;}
+PairTombGeneratedProbeScope::~PairTombGeneratedProbeScope(){generatedProbeOnly=previous_;}
+
 PairTombEnginePort::PairTombEnginePort(EnginePort& monster):buriedMonster_(monster){installGeneratedHotSeed();installGeneratedHotAlmanac();}
 bool PairTombEnginePort::narrow(const Integer&v,std::int64_t&out){
     static const Integer lo=std::numeric_limits<std::int64_t>::min(),hi=std::numeric_limits<std::int64_t>::max();
@@ -89,17 +96,12 @@ bool PairTombEnginePort::buryHotAlmanacDiagnostic(
     for(std::size_t nameIndex:monthNames){if(nameIndex<1||nameIndex>pastafari::MONTH_SOURCE_CATALOG.size())return false;}
     HotAlmanac value{true,cn,year,on,cl,cutlets,weaving,monthNames};
 
-    // Cicatrix corridoris: iam non omne almanacum eiusdem calculationDay alterum
-    // devorat. Solum idem intervallum exactum rescribitur; anni vicini coexistunt.
     for(auto&slot:hotAlmanac_){
         if(slot.occupied&&slot.calculationDay==cn&&slot.openDay==on&&slot.closeDay==cl){slot=std::move(value);return true;}
     }
     for(auto&slot:hotAlmanac_){
         if(!slot.occupied){slot=std::move(value);return true;}
     }
-
-    // Sepulcrum veteris moris manet executabile tantum si capacitas 64 saturatur:
-    // cache semanticam mutare non potest; unum almanacum eiusdem c tum sacrificatur.
     for(auto&slot:hotAlmanac_){
         if(slot.occupied&&slot.calculationDay==cn){slot=std::move(value);return true;}
     }
@@ -138,8 +140,19 @@ bool PairTombEnginePort::lookupHotAlmanac(std::int64_t c,std::int64_t t,Canonica
     return false;
 }
 CanonicalPastafariDate PairTombEnginePort::calculate(const Integer&c,const Integer&t){
+    std::int64_t cn,tn;
+    if(generatedProbeOnly){
+        if(!enabled_||!narrow(c,cn)||!narrow(t,tn))throw GeneratedCacheMiss{};
+        for(const auto&slot:hotSeed_){
+            if(slot.occupied&&slot.calculationDay==cn&&slot.targetDay==tn)return slot.value;
+        }
+        CanonicalPastafariDate generated{};
+        if(lookupHotAlmanac(cn,tn,generated))return generated;
+        throw GeneratedCacheMiss{};
+    }
+
     if(!enabled_){++metrics_.bypasses;return buriedMonster_.calculate(c,t);}
-    std::int64_t cn,tn;if(!narrow(c,cn)||!narrow(t,tn)){++metrics_.bypasses;return buriedMonster_.calculate(c,t);}
+    if(!narrow(c,cn)||!narrow(t,tn)){++metrics_.bypasses;return buriedMonster_.calculate(c,t);}
     for(const auto&slot:hotSeed_){
         if(slot.occupied&&slot.calculationDay==cn&&slot.targetDay==tn){++metrics_.hits;++metrics_.hotSeedHits;return slot.value;}
     }
@@ -152,7 +165,11 @@ CanonicalPastafariDate PairTombEnginePort::calculate(const Integer&c,const Integ
         slot={true,cn,tn,almanacValue};
         return almanacValue;
     }
-    ++metrics_.misses;auto result=buriedMonster_.calculate(c,t);if(slot.occupied)++metrics_.evictions;slot={true,cn,tn,result};return result;
+    ++metrics_.misses;
+    auto result=buriedMonster_.calculate(c,t);
+    if(slot.occupied)++metrics_.evictions;
+    slot={true,cn,tn,result};
+    return result;
 }
 void PairTombEnginePort::clear(){for(auto&s:hotSeed_)s=Slot{};for(auto&a:hotAlmanac_)a=HotAlmanac{};for(auto&s:tombs_)s=Slot{};metrics_={};}
 } // namespace pastafari::http_api
