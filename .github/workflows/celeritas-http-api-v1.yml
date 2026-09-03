@@ -187,6 +187,76 @@ jobs:
             >/tmp/post-busy-date.json
           grep -q '"year":"5000"' /tmp/post-busy-date.json
 
+      - name: Transportum job async apud Foundation probare
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/pastafari-http 127.0.0.1 18083 >/tmp/http-async-job.out 2>/tmp/http-async-job.err &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 100); do
+            if curl -fsS http://127.0.0.1:18083/v1/health >/dev/null; then break; fi
+            sleep 0.1
+          done
+
+          # Initium job intra duas secundas redit; calculus historicus postea in fundo currit.
+          curl --max-time 2 -fsS \
+            'http://127.0.0.1:18083/v1/date-job.js?date=-15055671&calendar=engine-day&calculation_day=-15055671&language=la&callback=jobStartWitness' \
+            >/tmp/async-start.js
+          grep -q '^jobStartWitness({' /tmp/async-start.js
+          grep -q '"status":"running"' /tmp/async-start.js
+          job=$(sed -n 's/.*"id":"\([^"]*\)".*/\1/p' /tmp/async-start.js)
+          test -n "$job"
+
+          # Control-plane et poll numquam post monstro exspectant.
+          curl --max-time 2 -fsS http://127.0.0.1:18083/v1/meta >/tmp/async-meta.json
+          grep -q '"semanticStage":56' /tmp/async-meta.json
+          curl --max-time 2 -fsS \
+            "http://127.0.0.1:18083/v1/date-job.js?job=$job&callback=jobPollWitness" \
+            >/tmp/async-poll-running.js
+          grep -q '"status":"running"' /tmp/async-poll-running.js
+
+          # Initium secundum non queue fit; per JavaScript 200 statim busy refert.
+          curl --max-time 2 -fsS -D /tmp/async-busy.headers \
+            'http://127.0.0.1:18083/v1/date-job.js?date=-15055671&calendar=engine-day&calculation_day=-15055671&callback=jobBusyWitness' \
+            >/tmp/async-busy.js
+          grep -q '"status":"busy"' /tmp/async-busy.js
+          grep -qi '^Retry-After: 5' /tmp/async-busy.headers
+
+          # Via synchrona eodem tempore ENGINE_BUSY accipit nec calculum alterum incipit.
+          code=$(curl --max-time 2 -sS -o /tmp/async-sync-busy.json -w '%{http_code}' \
+            'http://127.0.0.1:18083/v1/date?date=-15055671&calendar=engine-day&calculation_day=-15055671')
+          test "$code" = 503
+          grep -q 'ENGINE_BUSY' /tmp/async-sync-busy.json
+
+          complete=0
+          for i in $(seq 1 300); do
+            curl --max-time 2 -fsS \
+              "http://127.0.0.1:18083/v1/date-job.js?job=$job&callback=jobPollWitness" \
+              >/tmp/async-poll.js
+            if grep -q '"status":"failed"' /tmp/async-poll.js; then
+              cat /tmp/async-poll.js
+              exit 1
+            fi
+            if grep -q '"status":"complete"' /tmp/async-poll.js; then
+              complete=1
+              break
+            fi
+            grep -q '"status":"running"' /tmp/async-poll.js
+            sleep 1
+          done
+          test "$complete" = 1
+          grep -q '"year":"5000"' /tmp/async-poll.js
+          grep -q '"dayInCutlet":"762"' /tmp/async-poll.js
+          grep -q '"dayInMonth":"105"' /tmp/async-poll.js
+
+          # Resultatum transportale manet ad polling repetitum; hoc cache semanticus non est.
+          curl --max-time 2 -fsS \
+            "http://127.0.0.1:18083/v1/date-job.js?job=$job&callback=jobFinalWitness" \
+            >/tmp/async-final.js
+          grep -q '"status":"complete"' /tmp/async-final.js
+          grep -q '"year":"5000"' /tmp/async-final.js
+
       - name: Fumum implicitum Kisurra-Venus probare
         shell: bash
         run: |
