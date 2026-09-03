@@ -1,0 +1,153 @@
+name: Sepulcra calida hodie crasque
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - Celeritas-per-Sepulcra
+    paths:
+      - '.github/workflows/celeritas-hot-two-day-seed.yml'
+      - 'include/pastafari/monster.hpp'
+      - 'include/pastafari/source_language_catalog.hpp'
+      - 'include/pastafari/http_api/engine_port.hpp'
+      - 'include/pastafari/http_api/pair_tomb.hpp'
+      - 'src/monster.cpp'
+      - 'src/celeritas_engine_port.cpp'
+      - 'src/pair_tomb.cpp'
+      - 'src/date_conversion.cpp'
+      - 'src/venus_boundary.cpp'
+      - 'tools/http_low_memory_monster.awk'
+      - 'tools/current_venus_engine_day.cpp'
+      - 'tools/generate_hot_two_day_seed.cpp'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: celeritas-hot-two-day-seed
+  cancel-in-progress: true
+
+jobs:
+  sepelire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Excerpere branch
+        uses: actions/checkout@v5
+        with:
+          ref: Celeritas-per-Sepulcra
+          fetch-depth: 1
+
+      - name: Instituere dependentias
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libboost-dev clang lld curl
+
+      - name: Diem Veneris currentem sine monstro invenire
+        id: day
+        shell: bash
+        run: |
+          set -euo pipefail
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror -Iinclude \
+            tools/current_venus_engine_day.cpp src/date_conversion.cpp src/venus_boundary.cpp \
+            -o /tmp/current-venus-day
+          base=$(/tmp/current-venus-day)
+          old=$(sed -n 's/^\/\/ PASTAFARI_HOT_SEED_BASE_DAY=//p' \
+            include/pastafari/http_api/generated_hot_two_day_seed.inc | head -1)
+          need=yes
+          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old" = "$base" ]; then
+            need=no
+          fi
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "need=$need" >> "$GITHUB_OUTPUT"
+          echo "HOT_SEED_BASE_DAY=$base OLD_BASE_DAY=${old:-NONE} NEED=$need"
+
+      - name: Monstrum productionis low-memory semel aedificare
+        if: steps.day.outputs.need == 'yes'
+        shell: bash
+        run: |
+          set -euo pipefail
+          awk -f tools/http_low_memory_monster.awk src/monster.cpp >/tmp/monster.hot-seed.cpp
+          clang++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude -Itests -I. \
+            -c /tmp/monster.hot-seed.cpp -o /tmp/monster.hot-seed.o
+
+      - name: Quattuor sepulcra hodie crasque generare
+        if: steps.day.outputs.need == 'yes'
+        shell: bash
+        run: |
+          set -euo pipefail
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror -Iinclude \
+            tools/generate_hot_two_day_seed.cpp src/celeritas_engine_port.cpp \
+            /tmp/monster.hot-seed.o -o /tmp/generate-hot-seed
+          timeout 20m /tmp/generate-hot-seed "${{ steps.day.outputs.base }}" \
+            >/tmp/generated_hot_two_day_seed.inc
+          grep -q "^// PASTAFARI_HOT_SEED_BASE_DAY=${{ steps.day.outputs.base }}$" \
+            /tmp/generated_hot_two_day_seed.inc
+          test "$(grep -c '^{true,' /tmp/generated_hot_two_day_seed.inc)" = 4
+          cp /tmp/generated_hot_two_day_seed.inc \
+            include/pastafari/http_api/generated_hot_two_day_seed.inc
+
+      - name: Cicatricem cache leviter probare
+        if: steps.day.outputs.need == 'yes'
+        shell: bash
+        env:
+          CXX: clang++
+        run: |
+          set -euo pipefail
+          sh tests/run_http_api_tests.sh
+
+      - name: Seed in ministro productionis probare
+        if: steps.day.outputs.need == 'yes'
+        shell: bash
+        run: |
+          set -euo pipefail
+          CXX=clang++ OUTPUT=/tmp/pastafari-hot-http \
+            PASTAFARI_HTTP_MONSTER_OBJECT=/tmp/monster.hot-seed.o \
+            PASTAFARI_HTTP_LOW_MEMORY_SCAR=0 \
+            sh build_http_api.sh
+          /tmp/pastafari-hot-http 127.0.0.1 18084 >/tmp/hot-http.out 2>/tmp/hot-http.err &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 100); do
+            if curl -fsS http://127.0.0.1:18084/v1/health >/dev/null; then break; fi
+            sleep 0.1
+          done
+          c=${{ steps.day.outputs.base }}
+          cp1=$((c+1))
+          cp2=$((c+2))
+          for pair in "$c:$c" "$c:$cp1" "$cp1:$cp1" "$cp1:$cp2"; do
+            calc=${pair%%:*}
+            target=${pair##*:}
+            curl --max-time 2 -fsS \
+              "http://127.0.0.1:18084/v1/date?date=$target&calendar=engine-day&calculation_day=$calc&language=la" \
+              >/tmp/hot-pair.json
+            grep -q '"apiVersion":"1"' /tmp/hot-pair.json
+            grep -q '"year":"' /tmp/hot-pair.json
+          done
+          echo "HOT_TWO_DAY_SEED_SERVER_TEST=PASS BASE=$c"
+
+      - name: Seed recentem in branch sepelire
+        if: steps.day.outputs.need == 'yes'
+        shell: bash
+        run: |
+          set -euo pipefail
+          starting=$(git rev-parse HEAD)
+          git fetch origin Celeritas-per-Sepulcra
+          remote=$(git rev-parse origin/Celeritas-per-Sepulcra)
+          if [ "$starting" != "$remote" ]; then
+            echo "BRANCH_MOVED_DURING_GENERATION; seed vetus non impellitur."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add include/pastafari/http_api/generated_hot_two_day_seed.inc
+          if git diff --cached --quiet; then
+            echo "HOT_TWO_DAY_SEED_UNCHANGED"
+            exit 0
+          fi
+          git commit -m "Sepulcra hodierna et crastina renovare"
+          git push origin HEAD:Celeritas-per-Sepulcra
