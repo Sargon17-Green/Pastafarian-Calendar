@@ -1,0 +1,169 @@
+name: Audit normative Palgurash and Karshumab names across all branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      fail_on_known_bad:
+        description: Fail the job when exact known-bad Latin forms are found
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  audit-all-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch every branch ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*'
+
+      - name: Scan all branches
+        id: scan
+        shell: bash
+        env:
+          FAIL_ON_KNOWN_BAD: ${{ inputs.fail_on_known_bad }}
+        run: |
+          set -euo pipefail
+
+          report="$RUNNER_TEMP/name-audit.md"
+          tsv="$RUNNER_TEMP/name-audit.tsv"
+          : > "$tsv"
+
+          {
+            echo "# Normative invented-name audit"
+            echo
+            echo "Authoritative vocalizations:"
+            echo "- cutlet 7: פַּלְגּוּרַשׁ → Latin reference transliteration: \`Palgurash\`"
+            echo "- month 8: כַּרְשׁוּמַב → Latin reference transliteration: \`Karshumab\`"
+            echo
+            echo "The audit is intentionally diagnostic for non-Latin source languages: it does not guess how another script must transliterate the two names."
+            echo
+          } > "$report"
+
+          mapfile -t refs < <(
+            git for-each-ref \
+              --format='%(refname)' \
+              refs/remotes/origin/ \
+            | grep -v '^refs/remotes/origin/HEAD$' \
+            | LC_ALL=C sort
+          )
+
+          total_branches=0
+          bad_branches=0
+          bad_hits=0
+          good_hits=0
+          suspect_hits=0
+
+          for ref in "${refs[@]}"; do
+            branch="${ref#refs/remotes/origin/}"
+            total_branches=$((total_branches + 1))
+
+            bad_tmp="$RUNNER_TEMP/bad.$$"
+            good_tmp="$RUNNER_TEMP/good.$$"
+            suspect_tmp="$RUNNER_TEMP/suspect.$$"
+            : > "$bad_tmp"
+            : > "$good_tmp"
+            : > "$suspect_tmp"
+
+            # Exact known-bad forms found in the JavaScript+Interlingue catalog.
+            git grep -n -I -E '\b(Palgursh|Karshumb)\b' "$ref" -- . > "$bad_tmp" 2>/dev/null || true
+
+            # Exact corrected Latin forms.
+            git grep -n -I -E '\b(Palgurash|Karshumab)\b' "$ref" -- . > "$good_tmp" 2>/dev/null || true
+
+            # Wider Latin-script candidates. These are informational only.
+            git grep -n -I -i -E 'palgur[a-z-]*sh|karshum[a-z-]*b' "$ref" -- . > "$suspect_tmp" 2>/dev/null || true
+
+            branch_bad=$(wc -l < "$bad_tmp" | tr -d ' ')
+            branch_good=$(wc -l < "$good_tmp" | tr -d ' ')
+            branch_suspect=$(wc -l < "$suspect_tmp" | tr -d ' ')
+
+            bad_hits=$((bad_hits + branch_bad))
+            good_hits=$((good_hits + branch_good))
+            suspect_hits=$((suspect_hits + branch_suspect))
+            if [ "$branch_bad" -gt 0 ]; then
+              bad_branches=$((bad_branches + 1))
+            fi
+
+            printf '%s\t%s\t%s\t%s\n' \
+              "$branch" "$branch_bad" "$branch_good" "$branch_suspect" >> "$tsv"
+
+            {
+              echo "## \`$branch\`"
+              echo
+              echo "- exact known-bad hits: **$branch_bad**"
+              echo "- exact corrected Latin hits: **$branch_good**"
+              echo "- broader Latin phonetic candidates: **$branch_suspect**"
+              echo
+
+              if [ "$branch_bad" -gt 0 ]; then
+                echo "### Known-bad exact matches"
+                echo '```text'
+                cat "$bad_tmp"
+                echo '```'
+                echo
+              fi
+
+              if [ "$branch_good" -gt 0 ]; then
+                echo "### Corrected exact matches"
+                echo '```text'
+                cat "$good_tmp"
+                echo '```'
+                echo
+              fi
+
+              if [ "$branch_suspect" -gt 0 ]; then
+                echo "### Broader candidates for manual review"
+                echo '```text'
+                cat "$suspect_tmp"
+                echo '```'
+                echo
+              fi
+            } >> "$report"
+
+            rm -f "$bad_tmp" "$good_tmp" "$suspect_tmp"
+          done
+
+          {
+            echo "# Summary"
+            echo
+            echo "- branches scanned: **$total_branches**"
+            echo "- branches containing exact known-bad forms: **$bad_branches**"
+            echo "- exact known-bad hits: **$bad_hits**"
+            echo "- exact corrected Latin hits: **$good_hits**"
+            echo "- broader Latin phonetic candidates: **$suspect_hits**"
+            echo
+            echo "Full per-branch report is attached as the \`normative-name-audit\` artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          cp "$report" "$GITHUB_WORKSPACE/normative-name-audit.md"
+          cp "$tsv" "$GITHUB_WORKSPACE/normative-name-audit.tsv"
+
+          echo "bad_branches=$bad_branches" >> "$GITHUB_OUTPUT"
+          echo "bad_hits=$bad_hits" >> "$GITHUB_OUTPUT"
+
+          if [ "$FAIL_ON_KNOWN_BAD" = "true" ] && [ "$bad_hits" -gt 0 ]; then
+            echo "::error::Found $bad_hits exact known-bad occurrence(s) in $bad_branches branch(es)."
+            exit 1
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: normative-name-audit
+          path: |
+            normative-name-audit.md
+            normative-name-audit.tsv
+          if-no-files-found: error
+          retention-days: 30
