@@ -38,6 +38,7 @@
   const MAX_CACHED_CUTLETS = 5;
   const LOCALE_STORAGE_KEY = 'pastafari.browser.locale';
   const RENDER_CONSISTENCY_CODE = 'ERR_CALENDAR_RENDER_INCONSISTENCY';
+  const TARGET_CUTLET_CODE = 'ERR_TARGET_CUTLET_MISMATCH';
 
   class CalendarRenderConsistencyError extends Error {
     constructor(jdn, first, second) {
@@ -47,6 +48,18 @@
       this.jdn = String(jdn);
       this.first = first;
       this.second = second;
+    }
+  }
+
+  class CalendarTargetCutletError extends Error {
+    constructor(jdn, expected, actual, reason) {
+      super('Li cutlet selectet por li searched date ne concorda con su complet semantic date.');
+      this.name = 'CalendarTargetCutletError';
+      this.code = TARGET_CUTLET_CODE;
+      this.jdn = String(jdn);
+      this.expected = expected;
+      this.actual = actual;
+      this.reason = String(reason || 'target-cutlet-mismatch');
     }
   }
 
@@ -66,6 +79,61 @@
       monthName: String(day.monthName),
       dayInMonth: Number(day.dayInMonth),
     });
+  }
+
+
+  function targetCutletStartJdn(targetJdn, value) {
+    const dayInCutlet = Number(value && value.dayInCutlet);
+    if (!Number.isSafeInteger(dayInCutlet) || dayInCutlet < 1) {
+      throw new RangeError('Li dayInCutlet del searched date deve esser un positiv secur integer.');
+    }
+    return BigInt(targetJdn) - BigInt(dayInCutlet - 1);
+  }
+
+  function assertTargetCutletView(view, targetJdn, value, expectedStartJdn) {
+    const expected = semanticDaySnapshot(value);
+    const actualMeta = Object.freeze({
+      startJdn: view && view.startJdn != null ? String(view.startJdn) : null,
+      selectedJdn: view && view.selectedJdn != null ? String(view.selectedJdn) : null,
+      selectedIndex: view && view.selectedIndex != null ? Number(view.selectedIndex) : null,
+      year: view && view.year != null ? String(view.year) : null,
+      cutletName: view && view.cutletName != null ? String(view.cutletName) : null,
+    });
+    if (!view || typeof view !== 'object' || !Array.isArray(view.days)) {
+      throw new CalendarTargetCutletError(targetJdn, expected, actualMeta, 'invalid-view');
+    }
+    if (BigInt(view.startJdn) !== BigInt(expectedStartJdn)) {
+      throw new CalendarTargetCutletError(targetJdn, expected, actualMeta, 'wrong-start');
+    }
+    if (String(view.year) !== expected.year || String(view.cutletName) !== expected.cutletName) {
+      throw new CalendarTargetCutletError(targetJdn, expected, actualMeta, 'wrong-cutlet-identity');
+    }
+    if (BigInt(view.selectedJdn) !== BigInt(expectedStartJdn) || Number(view.selectedIndex) !== 0) {
+      throw new CalendarTargetCutletError(targetJdn, expected, actualMeta, 'view-not-selected-at-start');
+    }
+
+    const targetIndex = expected.dayInCutlet - 1;
+    const first = view.days[0];
+    const targetDay = view.days[targetIndex];
+    if (!first || BigInt(first.jdn) !== BigInt(expectedStartJdn)
+        || String(first.year) !== expected.year || String(first.cutletName) !== expected.cutletName
+        || Number(first.dayInCutlet) !== 1) {
+      throw new CalendarTargetCutletError(
+        targetJdn,
+        expected,
+        first ? semanticDaySnapshot(first) : Object.freeze({ missingFirstDay: true }),
+        'invalid-cutlet-start',
+      );
+    }
+    if (!targetDay || BigInt(targetDay.jdn) !== BigInt(targetJdn) || !sameDaySemantics(targetDay, expected)) {
+      throw new CalendarTargetCutletError(
+        targetJdn,
+        expected,
+        targetDay ? semanticDaySnapshot(targetDay) : Object.freeze({ missingTargetIndex: targetIndex }),
+        'target-not-in-expected-cutlet-position',
+      );
+    }
+    return view;
   }
   const doc = root.document || null;
   const enqueueMicrotask = typeof root.queueMicrotask === 'function'
@@ -975,16 +1043,20 @@
           return this._value;
         }
 
-        const values = await Promise.all([
-          service.convert(targetJdn, calculationJdn),
-          service.getCutletView(targetJdn, calculationJdn),
-        ]);
+        const directValue = await service.convert(targetJdn, calculationJdn);
         if (generation !== this._generation) return null;
+        this._value = resultApi.cloneCanonicalResult(directValue);
 
-        this._value = resultApi.cloneCanonicalResult(values[0]);
-        const currentView = values[1];
+        // The direct five-field result chooses the cutlet. dayInCutlet fixes its
+        // exact start JDN; getCutletView() no longer gets to choose a containing
+        // cutlet merely from the target JDN.
+        const targetStartJdn = targetCutletStartJdn(targetJdn, this._value);
+        const currentView = await service.getCutletView(targetStartJdn, calculationJdn);
+        if (generation !== this._generation) return null;
+        assertTargetCutletView(currentView, targetJdn, this._value, targetStartJdn);
+
         this._storeCutlet(currentView);
-        this._activeStartJdn = BigInt(currentView.startJdn);
+        this._activeStartJdn = targetStartJdn;
         this._renderSummary();
         this._renderCutlets();
         this._hideOverlays();
@@ -1236,6 +1308,8 @@
       section.className = 'cutlet';
       section.dataset.startJdn = String(view.startJdn);
       section.dataset.endJdn = String(view.endJdn);
+      section.dataset.year = String(view.year);
+      section.dataset.cutletName = String(view.cutletName);
       section.setAttribute('aria-label', this._t('calendar.daysAria', { cutletName: localCutlet }));
 
       const heading = doc.createElement('h2');
@@ -1305,7 +1379,8 @@
           dayInMonth: day.dayInMonth,
           monthName: localDayMonth,
         }));
-        const isTarget = this._value != null && sameDaySemantics(day, this._value);
+        const isTarget = this._value != null && this._targetJdn != null
+          && BigInt(day.jdn) === this._targetJdn && sameDaySemantics(day, this._value);
         if (isTarget) card.setAttribute('aria-current', 'date');
 
         if (isTarget) {
@@ -1355,28 +1430,42 @@
         dayInMonth: Number(dayInMonth),
       });
       const cards = Array.from(this._els.list.querySelectorAll('.day'));
-      const matches = cards.filter((card) => sameDaySemantics({
-        year: card.dataset.year,
-        cutletName: card.dataset.cutletName,
-        dayInCutlet: card.dataset.dayInCutlet,
-        monthName: card.dataset.monthName,
-        dayInMonth: card.dataset.dayInMonth,
-      }, target));
+      const matches = cards.filter((card) => {
+        if (this._targetJdn != null && BigInt(card.dataset.jdn) !== this._targetJdn) return false;
+        return sameDaySemantics({
+          year: card.dataset.year,
+          cutletName: card.dataset.cutletName,
+          dayInCutlet: card.dataset.dayInCutlet,
+          monthName: card.dataset.monthName,
+          dayInMonth: card.dataset.dayInMonth,
+        }, target);
+      });
 
       if (matches.length !== 1) {
         throw new CalendarRenderConsistencyError(
           this._targetJdn == null ? 'unknown' : this._targetJdn,
           target,
-          Object.freeze({ semanticTargetMatchCount: matches.length }),
+          Object.freeze({ exactTargetMatchCount: matches.length }),
         );
       }
 
       const selected = matches[0];
-      if (this._targetJdn != null && BigInt(selected.dataset.jdn) !== this._targetJdn) {
-        throw new CalendarRenderConsistencyError(
-          this._targetJdn,
+      const section = selected.closest('.cutlet');
+      const expectedStartJdn = this._targetJdn == null
+        ? null : targetCutletStartJdn(this._targetJdn, target);
+      if (!section || expectedStartJdn == null
+          || BigInt(section.dataset.startJdn) !== expectedStartJdn
+          || String(section.dataset.year) !== target.year
+          || String(section.dataset.cutletName) !== target.cutletName) {
+        throw new CalendarTargetCutletError(
+          this._targetJdn == null ? 'unknown' : this._targetJdn,
           target,
-          Object.freeze({ selectedJdn: String(selected.dataset.jdn) }),
+          section ? Object.freeze({
+            startJdn: String(section.dataset.startJdn),
+            year: String(section.dataset.year),
+            cutletName: String(section.dataset.cutletName),
+          }) : Object.freeze({ missingSection: true }),
+          'scroll-section-mismatch',
         );
       }
 
@@ -1385,8 +1474,7 @@
         else card.removeAttribute('aria-current');
       }
       selected.scrollIntoView({ block: 'center', inline: 'nearest' });
-      const section = selected.closest('.cutlet');
-      if (section) this._activeStartJdn = BigInt(section.dataset.startJdn);
+      this._activeStartJdn = expectedStartJdn;
     }
 
     async _scrollAdjacent(direction) {

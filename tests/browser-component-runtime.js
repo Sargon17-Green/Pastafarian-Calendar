@@ -208,6 +208,8 @@ function viewFor(targetJdn) {
 async function flush() {
   await Promise.resolve();
   await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
 }
 
 (async () => {
@@ -498,7 +500,7 @@ async function flush() {
   });
   wrongCard.scrolled = false;
   wrongCard.scrollIntoView = () => { wrongCard.scrolled = true; };
-  wrongCard.closest = () => ({ dataset: { startJdn: '739800' } });
+  wrongCard.closest = () => ({ dataset: { startJdn: '739186', year: '5000', cutletName: 'bronze' } });
 
   const correctCard = new FakeElement('article');
   Object.assign(correctCard.dataset, {
@@ -506,7 +508,7 @@ async function flush() {
   });
   correctCard.scrolled = false;
   correctCard.scrollIntoView = () => { correctCard.scrolled = true; };
-  correctCard.closest = () => ({ dataset: { startJdn: '739800' } });
+  correctCard.closest = () => ({ dataset: { startJdn: '739186', year: '5000', cutletName: 'bronze' } });
   semanticScroller._els.list = {
     querySelectorAll(selector) { return selector === '.day' ? [wrongCard, correctCard] : []; },
   };
@@ -520,7 +522,109 @@ async function flush() {
   assert.strictEqual(wrongCard.getAttribute('aria-current'), null);
   assert.strictEqual(correctCard.scrolled, true);
   assert.strictEqual(correctCard.getAttribute('aria-current'), 'date');
-  assert.strictEqual(semanticScroller._activeStartJdn, 739800n);
+  assert.strictEqual(semanticScroller._activeStartJdn, 739186n);
+
+  await flush();
+
+  // The initial cutlet request is derived from the authoritative direct tuple,
+  // not by asking getCutletView() to choose a containing cutlet from target JDN.
+  // dayInCutlet 677 fixes the only acceptable start at 739186.
+  const witnessValue = Object.freeze({
+    year: '5000', cutletName: 'bronze', dayInCutlet: 677, monthName: 'sand', dayInMonth: 32,
+  });
+  const witnessStart = 739186n;
+  const witnessDays = [];
+  for (let index = 0; index < 677; index += 1) {
+    const jdn = witnessStart + BigInt(index);
+    witnessDays.push(Object.freeze({
+      jdn,
+      year: '5000',
+      cutletName: 'bronze',
+      dayInCutlet: index + 1,
+      monthName: index === 676 ? 'sand' : 'argile',
+      dayInMonth: index === 676 ? 32 : index + 1,
+    }));
+  }
+  const witnessView = Object.freeze({
+    selectedJdn: witnessStart,
+    selectedIndex: 0,
+    startJdn: witnessStart,
+    endJdn: 739862n,
+    previousCutletJdn: witnessStart - 1n,
+    nextCutletJdn: 739863n,
+    year: '5000',
+    cutletName: 'bronze',
+    days: Object.freeze(witnessDays),
+  });
+  let requestedInitialView = null;
+  sharedService = {
+    async convert() { return witnessValue; },
+    async getCutletView(targetJdn) { requestedInitialView = BigInt(targetJdn); return witnessView; },
+    async retry() {},
+  };
+  const tupleLocated = new PastafariDateElement();
+  tupleLocated._primeAdjacent = () => {};
+  tupleLocated._renderCutlets = () => {};
+  tupleLocated._scrollSelectedIntoView = () => {};
+  tupleLocated._targetJdn = null;
+  tupleLocated.setAttribute('date', '2026-09-06');
+  const realAxisTarget = axis.gregorianToJdn(axis.parseIsoDate('2026-09-06'));
+  // Rebase the synthetic witness to the real attribute JDN while preserving a
+  // 677th-day cutlet shape; this checks the request arithmetic itself.
+  const rebasedStart = realAxisTarget - 676n;
+  const rebasedDays = witnessDays.map((day, index) => Object.freeze({
+    ...day,
+    jdn: rebasedStart + BigInt(index),
+  }));
+  const rebasedView = Object.freeze({
+    ...witnessView,
+    selectedJdn: rebasedStart,
+    startJdn: rebasedStart,
+    endJdn: realAxisTarget,
+    previousCutletJdn: rebasedStart - 1n,
+    nextCutletJdn: realAxisTarget + 1n,
+    days: Object.freeze(rebasedDays),
+  });
+  sharedService.getCutletView = async (targetJdn) => { requestedInitialView = BigInt(targetJdn); return rebasedView; };
+  await tupleLocated.refresh();
+  assert.strictEqual(requestedInitialView, rebasedStart);
+  assert.strictEqual(tupleLocated._activeStartJdn, rebasedStart);
+
+  // A view whose section identity disagrees with the direct five-part result is
+  // rejected before rendering/scrolling, even if it contains a target-like day.
+  sharedService = {
+    async convert() { return witnessValue; },
+    async getCutletView() {
+      return Object.freeze({ ...rebasedView, cutletName: 'larice' });
+    },
+    async retry() {},
+  };
+  const wrongCutletIdentity = new PastafariDateElement();
+  wrongCutletIdentity._primeAdjacent = () => {};
+  wrongCutletIdentity.setAttribute('date', '2026-09-06');
+  await assert.rejects(
+    () => wrongCutletIdentity.refresh(),
+    (error) => error && error.code === 'ERR_TARGET_CUTLET_MISMATCH'
+      && error.reason === 'wrong-cutlet-identity',
+  );
+
+  // Even a semantically correct target card cannot scroll from a section whose
+  // cutlet start or identity is wrong.
+  const wrongSectionScroller = new PastafariDateElement();
+  wrongSectionScroller._targetJdn = 739862n;
+  const onlyCard = new FakeElement('article');
+  Object.assign(onlyCard.dataset, {
+    jdn: '739862', year: '5000', cutletName: 'bronze', dayInCutlet: '677', monthName: 'sand', dayInMonth: '32',
+  });
+  onlyCard.closest = () => ({ dataset: { startJdn: '739800', year: '5000', cutletName: 'bronze' } });
+  wrongSectionScroller._els.list = {
+    querySelectorAll(selector) { return selector === '.day' ? [onlyCard] : []; },
+  };
+  assert.throws(
+    () => wrongSectionScroller._scrollSelectedIntoView('5000', 'bronze', 677, 'sand', 32),
+    (error) => error && error.code === 'ERR_TARGET_CUTLET_MISMATCH'
+      && error.reason === 'scroll-section-mismatch',
+  );
 
   console.log('browser-component-runtime: PASS');
 })().catch((error) => {

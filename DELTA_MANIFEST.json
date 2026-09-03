@@ -1,28 +1,22 @@
 {
-  "package": "pastafari-browser-five-part-target-scroll-v14",
-  "base_branch": "JavaScript+Interlingue",
-  "base_head": "c41ec2fd87abbcfe57eee542ebe8ad081955d0c3",
-  "expected_browser_build_id": "ecd78d6244845a3ee5458c4f",
-  "files": [
-    {
-      "path": "DELTA_README.md",
-      "sha256": "08e57ba42bc5d358d5c93720f6a65bc83736366328f7433622f7f22c833f122a",
-      "bytes": 2432
+  "base_head": "201484299f625e98fed0cfef545710ea4abc223a",
+  "browser_build_id": "2f8beede962fde247e344fc5",
+  "files": {
+    "DELTA_README.md": {
+      "bytes": 1790,
+      "sha256": "c77516211c53d8f5f02d55f41bab515750c417c15f2f5ff097f609f903f4db79"
     },
-    {
-      "path": "browser/pastafari-date.js",
-      "sha256": "bf649f7a932036d528c7b63496be4d3bec08ec0d7df748fd17489191ed042d17",
-      "bytes": 61224
+    "browser/pastafari-date.js": {
+      "bytes": 65540,
+      "sha256": "8c06c8877dbb5ee68c9b927a45128598ea4976e58b6027052070a7cd655202e7"
     },
-    {
-      "path": "tests/browser-built-artifacts.js",
-      "sha256": "d984153ad41f0cb20fd62e132d6a2f64a7bae9d6e94517ed695ab4b81a6d8895",
-      "bytes": 5860
+    "tests/browser-built-artifacts.js": {
+      "bytes": 6425,
+      "sha256": "482dddfe53a240929c97e8ee5ad8a8422208ab384d717102ce7300e9696bfd6b"
     },
-    {
-      "path": "tests/browser-component-runtime.js",
-      "sha256": "5bb9380aa5ad634093013894319d570df44c92256432642e41249f7ff4edd1fe",
-      "bytes": 20693
+    "tests/browser-component-runtime.js": {
+      "bytes": 24947,
+      "sha256": "46e6209308c213777188435646408e998f5d1d4a2e3ee1b385917cc574498dfd"
     }
-  ]
+  }
 }

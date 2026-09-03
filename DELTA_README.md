@@ -1,46 +1,26 @@
-# JavaScript + Interlingue browser target-selection delta v14
+# JavaScript + Interlingue browser target-cutlet locator v15
 
-Base branch: `JavaScript+Interlingue`
+Base branch HEAD before this delta: `201484299f625e98fed0cfef545710ea4abc223a`.
 
-Base HEAD: `c41ec2fd87abbcfe57eee542ebe8ad081955d0c3`
+This delta fixes the remaining initial-cutlet selection path. The direct five-field Pastafarian conversion is now authoritative before a cutlet view is requested. `dayInCutlet` determines the exact expected cutlet start JDN, and the browser requests `getCutletView()` at that start instead of asking a target-JDN lookup to choose the containing cutlet.
 
-Expected browser build ID after construction: `ecd78d6244845a3ee5458c4f`
+The returned view must prove all of the following before it can render or scroll:
 
-## Problema cludet
+- its `startJdn` equals `targetJdn - (dayInCutlet - 1)`;
+- its `year` and `cutletName` equal the direct five-part result;
+- the view is selected at its own start (`selectedIndex === 0`);
+- day 1 is really day 1 of that same year/cutlet;
+- the target is at index `dayInCutlet - 1`, has the requested JDN, and matches all five semantic fields.
 
-Li target card esset marcat per JDN solmen. `_scrollSelectedIntoView()` poy seleccionat `[aria-current="date"]`, talmen li scrolling self ne verificat li quin semantic partes del Pastafarian date.
+Rendered cutlet sections now carry raw `year` and `cutletName` metadata. `_scrollSelectedIntoView(year, cutletName, dayInCutlet, monthName, dayInMonth)` requires the exact five-field card plus the target JDN and verifies that its containing section has the expected cutlet start and identity before scrolling.
 
-Ti delta transforma li target selection in un five-part semantic operation:
+No semantic core source, root package contract, workflow, cache namespace or public calendar calculation API is changed.
 
-1. Li direct conversion result fornece `year`, `cutletName`, `dayInCutlet`, `monthName`, e `dayInMonth` al scrolling function.
-2. Omni rendered day card publica ti quin raw semantic values in `data-*` attributes.
-3. `_scrollSelectedIntoView(year, cutletName, dayInCutlet, monthName, dayInMonth)` exige exactmen omni quin partes e sercha un unic full-tuple match.
-4. JDN ne es plu li selector del target. It resta un consistency check pos li full semantic match.
-5. Un card con li searched JDN ma un different five-part tuple fail cludet con `ERR_CALENDAR_RENDER_INCONSISTENCY` ante rendering.
-6. `aria-current="date"` es basat sur li full semantic tuple, ne sur JDN solmen.
-
-## Regression witness
-
-`tests/browser-component-runtime.js` construe du cards con li sam JDN `739862`:
-
-- stale: `5000 / bronze / 677 / costa / 12`
-- authoritative: `5000 / bronze / 677 / sand / 32`
-
-Li scrolling function es invocat con li quin authoritative partes. Li prova exige que solmen `sand / 32` posse devenir `aria-current` e recever `scrollIntoView()`.
-
-Un separat prova verifica que un cutlet view con JDN `739862` ma `costa / 12`, contra li direct `sand / 32`, fail cludet mem si null duplicat JDN card existe.
-
-## Local verification
+Local verification:
 
 - `node tests/browser-interface-all.js` — PASS
 - `node scripts/build-browser.js` — PASS
-- classic-script parse del relevant generated `.js` — PASS
-- old JDN-only target selector absent ex generated standard bundle — PASS
-- raw Hebrew scan in `.js/.json/.md` — PASS
-- semantic core files resta byte-identic al known base core hashes
-
-`tests/browser-built-artifacts.js` passa su li static generated-asset assertions, ma li local execution esset stoppat per timeout durant li existent cold core witness. Li exact heavy witness deve restar un CI gate.
-
-## Scope
-
-Ti package ne include generated `dist/` files, semantic core files, `package.json`, workflow files, o un handoff.
+- browser build ID: `2f8beede962fde247e344fc5`
+- classic-script parse checks — PASS
+- raw Hebrew scan in modified `.js` — PASS
+- `tests/browser-built-artifacts.js` passes its updated static artifact assertions, then the real heavy core witness exceeded the local execution window; GitHub CI remains the runtime gate.

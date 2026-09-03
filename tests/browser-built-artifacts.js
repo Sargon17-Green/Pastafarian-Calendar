@@ -56,8 +56,15 @@ for (const code of ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs'])
 }
 assert(!standard.includes('locales.generated.js'));
 assert(standard.includes('PastafariCalendarBrowser'));
-assert(standard.includes("const isTarget = this._value != null && sameDaySemantics(day, this._value);"));
-assert(standard.includes('semanticTargetMatchCount'));
+assert(standard.includes('targetCutletStartJdn(targetJdn, this._value)'));
+assert(standard.includes('service.getCutletView(targetStartJdn, calculationJdn)'));
+assert(standard.includes('assertTargetCutletView(currentView, targetJdn, this._value, targetStartJdn)'));
+assert(standard.includes("const isTarget = this._value != null && this._targetJdn != null"));
+assert(standard.includes('BigInt(day.jdn) === this._targetJdn && sameDaySemantics(day, this._value)'));
+assert(standard.includes('exactTargetMatchCount'));
+assert(standard.includes('ERR_TARGET_CUTLET_MISMATCH'));
+assert(standard.includes('section.dataset.year = String(view.year)'));
+assert(standard.includes('section.dataset.cutletName = String(view.cutletName)'));
 assert(!standard.includes('const isTarget = BigInt(day.jdn) === this._targetJdn;'));
 assert(standard.includes('cacheNamespace'));
 assert(standard.includes('pc-browser-core-368e258d1ca347f846f32d94'));
