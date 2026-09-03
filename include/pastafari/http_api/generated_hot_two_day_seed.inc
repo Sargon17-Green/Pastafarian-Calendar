@@ -1,7 +1,7 @@
-// PASTAFARI_HOT_SEED_BASE_DAY=NONE
+// PASTAFARI_HOT_SEED_BASE_DAY=739862
 // PASTAFARI_HOT_SEED_GENERATION=1
-// Placeholder innocuum; workflow quattuor sepulcra vera hic scribet.
-{false,0,0,"0",0,"","0",0,"","0"},
-{false,0,0,"0",0,"","0",0,"","0"},
-{false,0,0,"0",0,"","0",0,"","0"},
-{false,0,0,"0",0,"","0",0,"","0"},
+// Quattuor sepulcra: hodie/cras pro die Veneris currenti et proximo.
+{true,739862LL,739862LL,"5000",1,"aes","677",47,"arena","32"},
+{true,739862LL,739863LL,"5000",1,"aes","678",8,"Carsumav","38"},
+{true,739863LL,739863LL,"5000",5,"cogitatio","678",16,"Uruk","52"},
+{true,739863LL,739864LL,"5000",5,"cogitatio","679",15,"ceratonia","51"},
