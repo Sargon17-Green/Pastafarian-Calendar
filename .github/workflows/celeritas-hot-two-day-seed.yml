@@ -1,4 +1,4 @@
-name: Sepulcra calida hodie crasque
+name: Sepulcra calida et almanacum anni
 
 on:
   schedule:
@@ -19,14 +19,15 @@ on:
       - 'src/date_conversion.cpp'
       - 'src/venus_boundary.cpp'
       - 'tools/http_low_memory_monster.awk'
+      - 'tools/http_ancestral_year_index.awk'
       - 'tools/current_venus_engine_day.cpp'
-      - 'tools/generate_hot_two_day_seed.cpp'
+      - 'tools/generate_hot_cache_seed.cpp'
 
 permissions:
   contents: write
 
 concurrency:
-  group: celeritas-hot-two-day-seed
+  group: celeritas-hot-year-seed
   cancel-in-progress: true
 
 jobs:
@@ -56,40 +57,49 @@ jobs:
             tools/current_venus_engine_day.cpp src/date_conversion.cpp src/venus_boundary.cpp \
             -o /tmp/current-venus-day
           base=$(/tmp/current-venus-day)
-          old=$(sed -n 's/^\/\/ PASTAFARI_HOT_SEED_BASE_DAY=//p' \
+          old_pair=$(sed -n 's/^\/\/ PASTAFARI_HOT_SEED_BASE_DAY=//p' \
             include/pastafari/http_api/generated_hot_two_day_seed.inc | head -1)
+          old_almanac=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_BASE_DAY=//p' \
+            include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
           need=yes
-          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old" = "$base" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old_pair" = "$base" ] && [ "$old_almanac" = "$base" ]; then
             need=no
           fi
           echo "base=$base" >> "$GITHUB_OUTPUT"
           echo "need=$need" >> "$GITHUB_OUTPUT"
-          echo "HOT_SEED_BASE_DAY=$base OLD_BASE_DAY=${old:-NONE} NEED=$need"
+          echo "HOT_CACHE_BASE_DAY=$base OLD_PAIR=${old_pair:-NONE} OLD_ALMANAC=${old_almanac:-NONE} NEED=$need"
 
       - name: Monstrum productionis low-memory semel aedificare
         if: steps.day.outputs.need == 'yes'
         shell: bash
         run: |
           set -euo pipefail
-          awk -f tools/http_low_memory_monster.awk src/monster.cpp >/tmp/monster.hot-seed.cpp
+          awk -f tools/http_low_memory_monster.awk src/monster.cpp >/tmp/monster.hot-cache.low.cpp
+          awk -f tools/http_ancestral_year_index.awk /tmp/monster.hot-cache.low.cpp >/tmp/monster.hot-cache.cpp
           clang++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude -Itests -I. \
-            -c /tmp/monster.hot-seed.cpp -o /tmp/monster.hot-seed.o
+            -c /tmp/monster.hot-cache.cpp -o /tmp/monster.hot-cache.o
 
-      - name: Quattuor sepulcra hodie crasque generare
+      - name: Sepulcra exacta et duo almanaca generare
         if: steps.day.outputs.need == 'yes'
         shell: bash
         run: |
           set -euo pipefail
           clang++ -std=c++20 -O2 -Wall -Wextra -Werror -Iinclude \
-            tools/generate_hot_two_day_seed.cpp src/celeritas_engine_port.cpp \
-            /tmp/monster.hot-seed.o -o /tmp/generate-hot-seed
-          timeout 20m /tmp/generate-hot-seed "${{ steps.day.outputs.base }}" \
-            >/tmp/generated_hot_two_day_seed.inc
+            tools/generate_hot_cache_seed.cpp src/celeritas_engine_port.cpp \
+            /tmp/monster.hot-cache.o -o /tmp/generate-hot-cache
+          timeout 25m /tmp/generate-hot-cache "${{ steps.day.outputs.base }}" \
+            /tmp/generated_hot_two_day_seed.inc \
+            /tmp/generated_hot_year_almanac_seed.inc
           grep -q "^// PASTAFARI_HOT_SEED_BASE_DAY=${{ steps.day.outputs.base }}$" \
             /tmp/generated_hot_two_day_seed.inc
+          grep -q "^// PASTAFARI_HOT_ALMANAC_BASE_DAY=${{ steps.day.outputs.base }}$" \
+            /tmp/generated_hot_year_almanac_seed.inc
           test "$(grep -c '^{true,' /tmp/generated_hot_two_day_seed.inc)" = 4
+          test "$(grep -c '^(void)buryHotAlmanacDiagnostic' /tmp/generated_hot_year_almanac_seed.inc)" = 2
           cp /tmp/generated_hot_two_day_seed.inc \
             include/pastafari/http_api/generated_hot_two_day_seed.inc
+          cp /tmp/generated_hot_year_almanac_seed.inc \
+            include/pastafari/http_api/generated_hot_year_almanac_seed.inc
 
       - name: Cicatricem cache leviter probare
         if: steps.day.outputs.need == 'yes'
@@ -100,13 +110,13 @@ jobs:
           set -euo pipefail
           sh tests/run_http_api_tests.sh
 
-      - name: Seed in ministro productionis probare
+      - name: Pair Tomb et almanacum in ministro productionis probare
         if: steps.day.outputs.need == 'yes'
         shell: bash
         run: |
           set -euo pipefail
           CXX=clang++ OUTPUT=/tmp/pastafari-hot-http \
-            PASTAFARI_HTTP_MONSTER_OBJECT=/tmp/monster.hot-seed.o \
+            PASTAFARI_HTTP_MONSTER_OBJECT=/tmp/monster.hot-cache.o \
             PASTAFARI_HTTP_LOW_MEMORY_SCAR=0 \
             sh build_http_api.sh
           /tmp/pastafari-hot-http 127.0.0.1 18084 >/tmp/hot-http.out 2>/tmp/hot-http.err &
@@ -128,9 +138,36 @@ jobs:
             grep -q '"apiVersion":"1"' /tmp/hot-pair.json
             grep -q '"year":"' /tmp/hot-pair.json
           done
-          echo "HOT_TWO_DAY_SEED_SERVER_TEST=PASS BASE=$c"
 
-      - name: Seed recentem in branch sepelire
+          for ordinal in 0 1; do
+            calc=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_CALCULATION_DAY=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
+            open=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_OPEN=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
+            close=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_CLOSE=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
+            test -n "$calc" && test -n "$open" && test -n "$close"
+            probe=$((open + (close-open)/2))
+            if [ "$probe" = "$calc" ] || [ "$probe" = "$((calc+1))" ]; then probe=$((probe+3)); fi
+            test "$probe" -gt "$open" && test "$probe" -le "$close"
+            curl --max-time 2 -fsS \
+              "http://127.0.0.1:18084/v1/date?date=$probe&calendar=engine-day&calculation_day=$calc&language=la" \
+              >/tmp/hot-almanac.json
+            grep -q '"apiVersion":"1"' /tmp/hot-almanac.json
+            grep -q '"year":"' /tmp/hot-almanac.json
+          done
+          echo "HOT_YEAR_ALMANAC_SERVER_TEST=PASS BASE=$c"
+
+          # Witness dynamicus: prima petitio Foundation structuram anni sepelit;
+          # altera die eiusdem anni non year-walk iterum facit.
+          timeout 5m curl -fsS \
+            "http://127.0.0.1:18084/v1/date?date=-15055671&calendar=engine-day&calculation_day=-15055671&language=la" \
+            >/tmp/ancestral-first.json
+          grep -q '"year":"5000"' /tmp/ancestral-first.json
+          curl --max-time 3 -fsS \
+            "http://127.0.0.1:18084/v1/date?date=-15055670&calendar=engine-day&calculation_day=-15055671&language=la" \
+            >/tmp/ancestral-second.json
+          grep -q '"year":"5000"' /tmp/ancestral-second.json
+          echo "ANCESTRAL_INTERVAL_PREWALK_SERVER_TEST=PASS"
+
+      - name: Seeds recentes in branch sepelire
         if: steps.day.outputs.need == 'yes'
         shell: bash
         run: |
@@ -144,10 +181,12 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add include/pastafari/http_api/generated_hot_two_day_seed.inc
+          git add \
+            include/pastafari/http_api/generated_hot_two_day_seed.inc \
+            include/pastafari/http_api/generated_hot_year_almanac_seed.inc
           if git diff --cached --quiet; then
-            echo "HOT_TWO_DAY_SEED_UNCHANGED"
+            echo "HOT_YEAR_ALMANAC_SEED_UNCHANGED"
             exit 0
           fi
-          git commit -m "Sepulcra hodierna et crastina renovare"
+          git commit -m "Almanacum anni cum sepulcris hodiernis renovare"
           git push origin HEAD:Celeritas-per-Sepulcra
