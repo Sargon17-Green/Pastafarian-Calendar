@@ -161,14 +161,31 @@ jobs:
           sleep 0.2
           kill -0 "$reqpid"
 
-          # Ante cicatricem concurrentem, calculus semanticus unicum thread occupabat
-          # et health check Render usque ad finem calculi exspectabat.
+          # Viae control-plane numquam post calculum semanticum exspectare debent.
           curl --max-time 2 -fsS http://127.0.0.1:18082/v1/health >/tmp/health-during-calc.json
           grep -q '"status":"ok"' /tmp/health-during-calc.json
+          curl --max-time 2 -fsS http://127.0.0.1:18082/v1/meta >/tmp/meta-during-calc.json
+          grep -q '"semanticStage":56' /tmp/meta-during-calc.json
+
+          # Petitio semantica secunda non in caterva invisibili manet. Statim 503
+          # ENGINE_BUSY accipit dum prima petitio adhuc monstro utitur.
+          code=$(curl --max-time 2 -sS -D /tmp/engine-busy.headers \
+            -o /tmp/engine-busy.json -w '%{http_code}' \
+            'http://127.0.0.1:18082/v1/date?date=-15055671&calendar=engine-day&calculation_day=-15055671')
+          test "$code" = 503
+          grep -q 'ENGINE_BUSY' /tmp/engine-busy.json
+          grep -qi '^Retry-After: 5' /tmp/engine-busy.headers
+          kill -0 "$reqpid"
 
           wait "$reqpid"
           grep -q '^healthLaneWitness({' /tmp/health-lane-date.js
           grep -q '"year":"5000"' /tmp/health-lane-date.js
+
+          # Claustrum liberatum est; idem par nunc per Pair Tomb statim serviri potest.
+          timeout 30s curl -fsS \
+            'http://127.0.0.1:18082/v1/date?date=-15055671&calendar=engine-day&calculation_day=-15055671' \
+            >/tmp/post-busy-date.json
+          grep -q '"year":"5000"' /tmp/post-busy-date.json
 
       - name: Fumum implicitum Kisurra-Venus probare
         shell: bash
