@@ -33,13 +33,44 @@ class FakeElement {
   hasAttribute(name) { return this.attributes.has(String(name)); }
   removeAttribute(name) { this.attributes.delete(String(name)); }
   addEventListener(type, fn) { this.listeners.set(type, fn); }
-  append(...items) { this.children.push(...items); }
-  replaceChildren(...items) { this.children = items; }
-  querySelector() { return null; }
-  querySelectorAll() { return []; }
+  append(...items) {
+    for (const item of items) {
+      if (item && typeof item === 'object') item.parentElement = this;
+      this.children.push(item);
+    }
+  }
+  replaceChildren(...items) {
+    this.children = [];
+    this.append(...items);
+  }
+  _matches(selector) {
+    if (selector === '.day') return String(this.className).split(/\s+/).includes('day');
+    if (selector === 'section.cutlet-section') return this.tagName === 'SECTION' && String(this.className).split(/\s+/).includes('cutlet-section');
+    if (selector === '[aria-current="date"]') return this.getAttribute('aria-current') === 'date';
+    const start = selector.match(/^\[data-start-jdn="(.*)"\]$/);
+    if (start) return String(this.dataset.startJdn) === start[1];
+    return false;
+  }
+  querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
+  querySelectorAll(selector) {
+    const found = [];
+    const visit = (node) => {
+      if (!node || typeof node !== 'object') return;
+      if (typeof node._matches === 'function' && node._matches(selector)) found.push(node);
+      for (const child of node.children || []) visit(child);
+    };
+    for (const child of this.children) visit(child);
+    return found;
+  }
   getBoundingClientRect() { return { top: 0, left: 0, width: 100, height: 20 }; }
-  scrollIntoView() {}
-  closest() { return null; }
+  closest(selector) {
+    let node = this;
+    while (node) {
+      if (typeof node._matches === 'function' && node._matches(selector)) return node;
+      node = node.parentElement || null;
+    }
+    return null;
+  }
   showModal() { this.setAttribute('open', ''); }
   close() { this.removeAttribute('open'); }
 }
@@ -213,6 +244,7 @@ async function flush() {
 }
 
 (async () => {
+  const watchdog = setTimeout(() => { throw new Error('browser-component-runtime timeout'); }, 15000);
   // Public-page language resolution: explicit lang wins; without one, a saved
   // manual selection wins over navigator.languages, which wins over Interlingue.
   localStorage.clear();
@@ -400,6 +432,15 @@ async function flush() {
     monthName: themeDay.monthName,
     dayInMonth: themeDay.dayInMonth,
   });
+  themed._scrollTarget = Object.freeze({
+    jdn: themeDay.jdn,
+    startJdn: themeDay.jdn - BigInt(themeDay.dayInCutlet - 1),
+    year: themeDay.year,
+    cutletName: themeDay.cutletName,
+    dayInCutlet: themeDay.dayInCutlet,
+    monthName: themeDay.monthName,
+    dayInMonth: themeDay.dayInMonth,
+  });
   const runA = themed._renderMonthRun([themeDay]);
   const runB = themed._renderMonthRun([themeDay]);
   assert.strictEqual(runA.style.values.get('--month-edge'), runB.style.values.get('--month-edge'));
@@ -473,6 +514,10 @@ async function flush() {
   targetTupleGuard._value = Object.freeze({
     year: '5000', cutletName: 'bronze', dayInCutlet: 677, monthName: 'sand', dayInMonth: 32,
   });
+  targetTupleGuard._scrollTarget = Object.freeze({
+    jdn: 739862n, startJdn: 739186n,
+    year: '5000', cutletName: 'bronze', dayInCutlet: 677, monthName: 'sand', dayInMonth: 32,
+  });
   targetTupleGuard._cutlets = new Map([[739800n, Object.freeze({
     startJdn: 739800n,
     endJdn: 739862n,
@@ -489,40 +534,110 @@ async function flush() {
       && error.second.monthName === 'costa',
   );
 
-  // Scrolling itself requires all five semantic date parts. JDN alone is not a
-  // selector: among cards carrying the same JDN, only the exact five-part tuple
-  // may become aria-current and receive scrollIntoView.
+  // Target positioning has one owner and one scroll primitive. It resolves the
+  // exact section and exact JDN+five-part card, then changes only viewport.scrollTop.
   const semanticScroller = new PastafariDateElement();
-  semanticScroller._targetJdn = 739862n;
+  const navigationTarget = Object.freeze({
+    jdn: 739862n, startJdn: 739186n,
+    year: '5000', cutletName: 'bronze', dayInCutlet: 677, monthName: 'sand', dayInMonth: 32,
+  });
+  semanticScroller._targetJdn = navigationTarget.jdn;
+  semanticScroller._scrollTarget = navigationTarget;
+  semanticScroller._els.viewport.scrollTop = 200;
+  semanticScroller._els.viewport.clientHeight = 500;
+  semanticScroller._els.viewport.scrollHeight = 4000;
+  semanticScroller._els.viewport.getBoundingClientRect = () => ({ top: 100, left: 0, width: 800, height: 500 });
+
+  const section = new FakeElement('section');
+  section.className = 'cutlet-section';
+  Object.assign(section.dataset, { startJdn: '739186', year: '5000', cutletName: 'bronze' });
   const wrongCard = new FakeElement('article');
+  wrongCard.className = 'day';
   Object.assign(wrongCard.dataset, {
     jdn: '739862', year: '5000', cutletName: 'bronze', dayInCutlet: '677', monthName: 'costa', dayInMonth: '12',
   });
-  wrongCard.scrolled = false;
-  wrongCard.scrollIntoView = () => { wrongCard.scrolled = true; };
-  wrongCard.closest = () => ({ dataset: { startJdn: '739186', year: '5000', cutletName: 'bronze' } });
+  wrongCard.getBoundingClientRect = () => ({ top: 300, left: 0, width: 100, height: 100 });
+  wrongCard.closest = () => section;
 
   const correctCard = new FakeElement('article');
+  correctCard.className = 'day';
   Object.assign(correctCard.dataset, {
     jdn: '739862', year: '5000', cutletName: 'bronze', dayInCutlet: '677', monthName: 'sand', dayInMonth: '32',
   });
-  correctCard.scrolled = false;
-  correctCard.scrollIntoView = () => { correctCard.scrolled = true; };
-  correctCard.closest = () => ({ dataset: { startJdn: '739186', year: '5000', cutletName: 'bronze' } });
+  correctCard.getBoundingClientRect = () => ({ top: 700, left: 0, width: 100, height: 100 });
+  correctCard.closest = () => section;
   semanticScroller._els.list = {
-    querySelectorAll(selector) { return selector === '.day' ? [wrongCard, correctCard] : []; },
+    querySelectorAll(selector) {
+      if (selector === 'section.cutlet-section') return [section];
+      if (selector === '.day') return [wrongCard, correctCard];
+      return [];
+    },
   };
 
-  assert.throws(
-    () => semanticScroller._scrollSelectedIntoView('5000', 'bronze', 677, 'sand'),
-    /omni quin semantic partes/,
-  );
-  semanticScroller._scrollSelectedIntoView('5000', 'bronze', 677, 'sand', 32);
-  assert.strictEqual(wrongCard.scrolled, false);
+  semanticScroller._positionTargetInViewport(navigationTarget);
   assert.strictEqual(wrongCard.getAttribute('aria-current'), null);
-  assert.strictEqual(correctCard.scrolled, true);
   assert.strictEqual(correctCard.getAttribute('aria-current'), 'date');
   assert.strictEqual(semanticScroller._activeStartJdn, 739186n);
+  // 700 - 100 - ((500 - 100) / 2) = +400 from the original 200.
+  assert.strictEqual(semanticScroller._els.viewport.scrollTop, 600);
+
+  // A full re-render caused by adjacent preloading preserves an exact visible
+  // day anchor, not merely a cutlet heading. This prevents post-target drift.
+  const anchorScroller = new PastafariDateElement();
+  anchorScroller._els.viewport.scrollTop = 500;
+  anchorScroller._els.viewport.clientHeight = 500;
+  anchorScroller._els.viewport.getBoundingClientRect = () => ({ top: 100, left: 0, width: 800, height: 500 });
+  const anchorSection = new FakeElement('section');
+  anchorSection.className = 'cutlet-section';
+  anchorSection.dataset.startJdn = '739186';
+  const beforeCard = new FakeElement('article');
+  beforeCard.className = 'day';
+  Object.assign(beforeCard.dataset, {
+    jdn: '739500', year: '5000', cutletName: 'bronze', dayInCutlet: '315', monthName: 'sand', dayInMonth: '7',
+  });
+  beforeCard.closest = () => anchorSection;
+  beforeCard.getBoundingClientRect = () => ({ top: 120, left: 0, width: 100, height: 100 });
+  let renderedCards = [beforeCard];
+  anchorScroller._els.list = {
+    querySelectorAll(selector) {
+      if (selector === '.day') return renderedCards;
+      if (selector === 'section.cutlet-section') return [anchorSection];
+      return [];
+    },
+  };
+  const anchor = anchorScroller._captureViewportAnchor();
+  const afterCard = new FakeElement('article');
+  afterCard.className = 'day';
+  Object.assign(afterCard.dataset, beforeCard.dataset);
+  afterCard.closest = () => anchorSection;
+  afterCard.getBoundingClientRect = () => ({ top: 170, left: 0, width: 100, height: 100 });
+  renderedCards = [afterCard];
+  assert.strictEqual(anchorScroller._restoreViewportAnchor(anchor), true);
+  assert.strictEqual(anchorScroller._els.viewport.scrollTop, 550);
+
+  // Structural cutlet selection must never confuse a day-line with a cutlet
+  // container. This was the original class-name collision behind active-cutlet
+  // drift: both used the class `cutlet`.
+  const activeScroller = new PastafariDateElement();
+  const structuralList = new FakeElement('div');
+  const structuralSection = new FakeElement('section');
+  structuralSection.className = 'cutlet-section';
+  structuralSection.dataset.startJdn = '739186';
+  structuralSection.getBoundingClientRect = () => ({ top: 90, left: 0, width: 800, height: 1200 });
+  const internalLine = new FakeElement('span');
+  internalLine.className = 'day-line cutlet-line';
+  internalLine.getBoundingClientRect = () => ({ top: 130, left: 0, width: 200, height: 20 });
+  structuralSection.append(internalLine);
+  structuralList.append(structuralSection);
+  activeScroller._els.list = structuralList;
+  activeScroller._els.viewport.scrollTop = 400;
+  activeScroller._els.viewport.scrollHeight = 2000;
+  activeScroller._els.viewport.clientHeight = 500;
+  activeScroller._els.viewport.getBoundingClientRect = () => ({ top: 100, left: 0, width: 800, height: 500 });
+  activeScroller._orderedStarts = [];
+  activeScroller._onScroll();
+  assert.strictEqual(activeScroller._activeStartJdn, 739186n);
+  assert.strictEqual(structuralList.querySelectorAll('section.cutlet-section').length, 1);
 
   await flush();
 
@@ -565,7 +680,7 @@ async function flush() {
   const tupleLocated = new PastafariDateElement();
   tupleLocated._primeAdjacent = () => {};
   tupleLocated._renderCutlets = () => {};
-  tupleLocated._scrollSelectedIntoView = () => {};
+  tupleLocated._positionTargetInViewport = (target) => { tupleLocated._activeStartJdn = target.startJdn; };
   tupleLocated._targetJdn = null;
   tupleLocated.setAttribute('date', '2026-09-06');
   const realAxisTarget = axis.gregorianToJdn(axis.parseIsoDate('2026-09-06'));
@@ -608,24 +723,36 @@ async function flush() {
       && error.reason === 'wrong-cutlet-identity',
   );
 
-  // Even a semantically correct target card cannot scroll from a section whose
-  // cutlet start or identity is wrong.
+  // A target can only be positioned inside the exact cutlet section owned by
+  // the navigation target; there is no alternate section-scroll path.
   const wrongSectionScroller = new PastafariDateElement();
-  wrongSectionScroller._targetJdn = 739862n;
+  const wrongSectionTarget = Object.freeze({
+    jdn: 739862n, startJdn: 739186n,
+    year: '5000', cutletName: 'bronze', dayInCutlet: 677, monthName: 'sand', dayInMonth: 32,
+  });
+  const wrongSection = new FakeElement('section');
+  wrongSection.className = 'cutlet-section';
+  Object.assign(wrongSection.dataset, { startJdn: '739800', year: '5000', cutletName: 'bronze' });
   const onlyCard = new FakeElement('article');
+  onlyCard.className = 'day';
   Object.assign(onlyCard.dataset, {
     jdn: '739862', year: '5000', cutletName: 'bronze', dayInCutlet: '677', monthName: 'sand', dayInMonth: '32',
   });
-  onlyCard.closest = () => ({ dataset: { startJdn: '739800', year: '5000', cutletName: 'bronze' } });
+  onlyCard.closest = () => wrongSection;
   wrongSectionScroller._els.list = {
-    querySelectorAll(selector) { return selector === '.day' ? [onlyCard] : []; },
+    querySelectorAll(selector) {
+      if (selector === 'section.cutlet-section') return [wrongSection];
+      if (selector === '.day') return [onlyCard];
+      return [];
+    },
   };
   assert.throws(
-    () => wrongSectionScroller._scrollSelectedIntoView('5000', 'bronze', 677, 'sand', 32),
+    () => wrongSectionScroller._positionTargetInViewport(wrongSectionTarget),
     (error) => error && error.code === 'ERR_TARGET_CUTLET_MISMATCH'
       && error.reason === 'scroll-section-mismatch',
   );
 
+  clearTimeout(watchdog);
   console.log('browser-component-runtime: PASS');
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);

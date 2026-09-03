@@ -82,16 +82,29 @@
   }
 
 
-  function targetCutletStartJdn(targetJdn, value) {
-    const dayInCutlet = Number(value && value.dayInCutlet);
-    if (!Number.isSafeInteger(dayInCutlet) || dayInCutlet < 1) {
+  function createScrollTarget(targetJdn, value) {
+    const semantic = semanticDaySnapshot(value);
+    if (!Number.isSafeInteger(semantic.dayInCutlet) || semantic.dayInCutlet < 1) {
       throw new RangeError('Li dayInCutlet del searched date deve esser un positiv secur integer.');
     }
-    return BigInt(targetJdn) - BigInt(dayInCutlet - 1);
+    if (!Number.isSafeInteger(semantic.dayInMonth) || semantic.dayInMonth < 1) {
+      throw new RangeError('Li dayInMonth del searched date deve esser un positiv secur integer.');
+    }
+    const jdn = BigInt(targetJdn);
+    return Object.freeze({
+      jdn,
+      startJdn: jdn - BigInt(semantic.dayInCutlet - 1),
+      ...semantic,
+    });
   }
 
-  function assertTargetCutletView(view, targetJdn, value, expectedStartJdn) {
-    const expected = semanticDaySnapshot(value);
+  function sameScrollTargetDay(day, target) {
+    return !!day && !!target
+      && BigInt(day.jdn) === BigInt(target.jdn)
+      && sameDaySemantics(day, target);
+  }
+
+  function resolveTargetCutletView(view, target) {
     const actualMeta = Object.freeze({
       startJdn: view && view.startJdn != null ? String(view.startJdn) : null,
       selectedJdn: view && view.selectedJdn != null ? String(view.selectedJdn) : null,
@@ -100,45 +113,56 @@
       cutletName: view && view.cutletName != null ? String(view.cutletName) : null,
     });
     if (!view || typeof view !== 'object' || !Array.isArray(view.days)) {
-      throw new CalendarTargetCutletError(targetJdn, expected, actualMeta, 'invalid-view');
+      throw new CalendarTargetCutletError(target.jdn, target, actualMeta, 'invalid-view');
     }
-    if (BigInt(view.startJdn) !== BigInt(expectedStartJdn)) {
-      throw new CalendarTargetCutletError(targetJdn, expected, actualMeta, 'wrong-start');
+    if (BigInt(view.startJdn) !== target.startJdn) {
+      throw new CalendarTargetCutletError(target.jdn, target, actualMeta, 'wrong-start');
     }
-    if (String(view.year) !== expected.year || String(view.cutletName) !== expected.cutletName) {
-      throw new CalendarTargetCutletError(targetJdn, expected, actualMeta, 'wrong-cutlet-identity');
+    if (String(view.year) !== target.year || String(view.cutletName) !== target.cutletName) {
+      throw new CalendarTargetCutletError(target.jdn, target, actualMeta, 'wrong-cutlet-identity');
     }
-    if (BigInt(view.selectedJdn) !== BigInt(expectedStartJdn) || Number(view.selectedIndex) !== 0) {
-      throw new CalendarTargetCutletError(targetJdn, expected, actualMeta, 'view-not-selected-at-start');
+    if (BigInt(view.selectedJdn) !== target.startJdn || Number(view.selectedIndex) !== 0) {
+      throw new CalendarTargetCutletError(target.jdn, target, actualMeta, 'view-not-selected-at-start');
     }
 
-    const targetIndex = expected.dayInCutlet - 1;
+    const targetIndex = target.dayInCutlet - 1;
     const first = view.days[0];
     const targetDay = view.days[targetIndex];
-    if (!first || BigInt(first.jdn) !== BigInt(expectedStartJdn)
-        || String(first.year) !== expected.year || String(first.cutletName) !== expected.cutletName
+    if (!first || BigInt(first.jdn) !== target.startJdn
+        || String(first.year) !== target.year || String(first.cutletName) !== target.cutletName
         || Number(first.dayInCutlet) !== 1) {
       throw new CalendarTargetCutletError(
-        targetJdn,
-        expected,
+        target.jdn,
+        target,
         first ? semanticDaySnapshot(first) : Object.freeze({ missingFirstDay: true }),
         'invalid-cutlet-start',
       );
     }
-    if (!targetDay || BigInt(targetDay.jdn) !== BigInt(targetJdn) || !sameDaySemantics(targetDay, expected)) {
+    if (!sameScrollTargetDay(targetDay, target)) {
       throw new CalendarTargetCutletError(
-        targetJdn,
-        expected,
+        target.jdn,
+        target,
         targetDay ? semanticDaySnapshot(targetDay) : Object.freeze({ missingTargetIndex: targetIndex }),
         'target-not-in-expected-cutlet-position',
       );
     }
     return view;
   }
+
   const doc = root.document || null;
   const enqueueMicrotask = typeof root.queueMicrotask === 'function'
     ? root.queueMicrotask.bind(root)
     : (callback) => Promise.resolve().then(callback);
+
+  function nextLayoutFrame() {
+    return new Promise((resolve) => {
+      if (typeof root.requestAnimationFrame === 'function') {
+        root.requestAnimationFrame(() => resolve());
+      } else {
+        enqueueMicrotask(resolve);
+      }
+    });
+  }
 
   function sameMonthRun(previous, current) {
     return previous && previous.monthName === current.monthName
@@ -170,11 +194,6 @@
     element.style.setProperty('--month-ink', '#111111');
     element.style.setProperty('--month-text-bg', '#fffdf8');
     return theme;
-  }
-
-  function escapeSelector(value) {
-    if (root.CSS && typeof root.CSS.escape === 'function') return root.CSS.escape(String(value));
-    return String(value).replace(/["\\]/g, '\\$&');
   }
 
   function readStoredLocale() {
@@ -223,6 +242,7 @@
       this._value = null;
       this._targetJdn = null;
       this._calculationJdn = null;
+      this._scrollTarget = null;
       this._cutlets = new Map();
       this._orderedStarts = [];
       this._activeStartJdn = null;
@@ -466,11 +486,11 @@
             color: var(--muted);
             font-size: .78rem;
           }
-          .cutlet {
+          .cutlet-section {
             margin: 0 0 2.25rem;
             scroll-margin-block: .75rem;
           }
-          .cutlet:last-of-type { margin-bottom: 0; }
+          .cutlet-section:last-of-type { margin-bottom: 0; }
           .cutlet-heading {
             position: sticky;
             top: 0;
@@ -925,7 +945,7 @@
         this._applyLocale();
         if (this._value) {
           this._renderSummary();
-          this._renderCutlets();
+          this._rerenderCutletsPreservingViewport();
         }
         return;
       }
@@ -1017,6 +1037,7 @@
 
         this._targetJdn = targetJdn;
         this._calculationJdn = calculationJdn;
+        this._scrollTarget = null;
         this._cutlets.clear();
         this._orderedStarts = [];
         this._activeStartJdn = null;
@@ -1046,37 +1067,28 @@
         const directValue = await service.convert(targetJdn, calculationJdn);
         if (generation !== this._generation) return null;
         this._value = resultApi.cloneCanonicalResult(directValue);
+        this._scrollTarget = createScrollTarget(targetJdn, this._value);
 
-        // The direct five-field result chooses the cutlet. dayInCutlet fixes its
-        // exact start JDN; getCutletView() no longer gets to choose a containing
-        // cutlet merely from the target JDN.
-        const targetStartJdn = targetCutletStartJdn(targetJdn, this._value);
-        const currentView = await service.getCutletView(targetStartJdn, calculationJdn);
+        // Navigation has one owner: the complete direct target. It determines
+        // which cutlet is loaded, which card is current, and where the viewport
+        // is positioned. No JDN-only scroll path runs in parallel with it.
+        const currentView = await service.getCutletView(this._scrollTarget.startJdn, calculationJdn);
         if (generation !== this._generation) return null;
-        assertTargetCutletView(currentView, targetJdn, this._value, targetStartJdn);
+        resolveTargetCutletView(currentView, this._scrollTarget);
 
         this._storeCutlet(currentView);
-        this._activeStartJdn = targetStartJdn;
         this._renderSummary();
         this._renderCutlets();
+        // Loading state hides the viewport with display:none. Reveal it first,
+        // then wait for one layout frame before measuring and positioning.
         this._hideOverlays();
+        await nextLayoutFrame();
+        if (generation !== this._generation) return null;
+        this._positionTargetInViewport(this._scrollTarget);
         this._els.calendar.setAttribute('aria-busy', 'false');
-        const scrollTarget = this._value;
-        enqueueMicrotask(() => {
-          if (generation !== this._generation || !this._connected) return;
-          try {
-            this._scrollSelectedIntoView(
-              scrollTarget.year,
-              scrollTarget.cutletName,
-              scrollTarget.dayInCutlet,
-              scrollTarget.monthName,
-              scrollTarget.dayInMonth,
-            );
-          } catch (error) {
-            this._showError(error, 'error.engineFailed');
-          }
-        });
         this._publishValue();
+        // Adjacent work starts only after the target has been positioned. Any
+        // later full re-render preserves an exact visible-card anchor.
         this._primeAdjacent(currentView, generation);
         return this._value;
       } catch (error) {
@@ -1158,10 +1170,12 @@
         const view = await serviceApi.getSharedCalendarService().getCutletView(targetJdn, this._calculationJdn);
         if (generation !== this._generation) return null;
         if (!this._storeCutlet(view)) return view;
-        const anchor = this._captureScrollAnchor();
-        this._trimCutlets(view.startJdn);
-        this._renderCutlets();
-        this._restoreScrollAnchor(anchor);
+        const anchor = this._captureViewportAnchor();
+        const preserveStart = anchor && anchor.cutletStartJdn != null
+          ? BigInt(anchor.cutletStartJdn)
+          : (anchor && anchor.startJdn != null ? BigInt(anchor.startJdn) : null);
+        this._trimCutlets(view.startJdn, preserveStart);
+        this._rerenderCutletsPreservingViewport(anchor);
         return view;
       } catch (error) {
         if (generation === this._generation && error && error.code === RENDER_CONSISTENCY_CODE) {
@@ -1176,10 +1190,13 @@
       }
     }
 
-    _trimCutlets(fallbackStartJdn) {
+    _trimCutlets(fallbackStartJdn, preserveStartJdn) {
       if (this._orderedStarts.length <= MAX_CACHED_CUTLETS) return;
-      const preferred = this._activeStartJdn != null && this._cutlets.has(this._activeStartJdn)
-        ? this._activeStartJdn : BigInt(fallbackStartJdn);
+      const explicitPreserve = preserveStartJdn != null ? BigInt(preserveStartJdn) : null;
+      const preferred = explicitPreserve != null && this._cutlets.has(explicitPreserve)
+        ? explicitPreserve
+        : (this._activeStartJdn != null && this._cutlets.has(this._activeStartJdn)
+          ? this._activeStartJdn : BigInt(fallbackStartJdn));
       const preferredIndex = Math.max(0, this._orderedStarts.findIndex((start) => start === preferred));
       const firstKeep = Math.max(0, Math.min(
         preferredIndex - Math.floor(MAX_CACHED_CUTLETS / 2),
@@ -1190,29 +1207,117 @@
       this._orderedStarts = this._orderedStarts.filter((start) => keep.has(start));
     }
 
-    _captureScrollAnchor() {
+    _moveViewportBy(delta) {
       const viewport = this._els.viewport;
-      const sections = Array.from(this._els.list.querySelectorAll('.cutlet'));
-      if (sections.length === 0) return null;
-      const viewportTop = viewport.getBoundingClientRect().top;
-      let anchor = sections[0];
-      for (const section of sections) {
-        if (section.getBoundingClientRect().top <= viewportTop + 1) anchor = section;
-        else break;
-      }
-      return {
-        startJdn: anchor.dataset.startJdn,
-        offset: anchor.getBoundingClientRect().top - viewportTop,
-      };
+      const amount = Number(delta);
+      if (!Number.isFinite(amount) || amount === 0) return viewport.scrollTop;
+      viewport.scrollTop = Math.max(0, Number(viewport.scrollTop || 0) + amount);
+      return viewport.scrollTop;
     }
 
-    _restoreScrollAnchor(anchor) {
-      if (!anchor) return;
+    _positionElementInViewport(element, block) {
+      if (!element) return false;
       const viewport = this._els.viewport;
-      const section = this._els.list.querySelector('[data-start-jdn="' + escapeSelector(anchor.startJdn) + '"]');
-      if (!section) return;
-      const newOffset = section.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
-      viewport.scrollTop += newOffset - anchor.offset;
+      const viewportRect = viewport.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const viewportHeight = Number(viewport.clientHeight || viewportRect.height || 0);
+      const elementHeight = Number(elementRect.height || 0);
+      const wantedOffset = block === 'center'
+        ? Math.max(0, (viewportHeight - elementHeight) / 2)
+        : 0;
+      this._moveViewportBy(Number(elementRect.top) - Number(viewportRect.top) - wantedOffset);
+      return true;
+    }
+
+    _findCutletSection(startJdn) {
+      const expected = String(BigInt(startJdn));
+      return Array.from(this._els.list.querySelectorAll('section.cutlet-section'))
+        .find((section) => String(section.dataset.startJdn) === expected) || null;
+    }
+
+    _dayCardIdentity(card) {
+      return Object.freeze({
+        jdn: String(card.dataset.jdn),
+        year: String(card.dataset.year),
+        cutletName: String(card.dataset.cutletName),
+        dayInCutlet: Number(card.dataset.dayInCutlet),
+        monthName: String(card.dataset.monthName),
+        dayInMonth: Number(card.dataset.dayInMonth),
+      });
+    }
+
+    _findRenderedDay(identity, section) {
+      const cards = Array.from(this._els.list.querySelectorAll('.day'));
+      return cards.find((card) => {
+        if (section && card.closest('section.cutlet-section') !== section) return false;
+        if (identity.jdn != null && String(card.dataset.jdn) !== String(identity.jdn)) return false;
+        return sameDaySemantics({
+          year: card.dataset.year,
+          cutletName: card.dataset.cutletName,
+          dayInCutlet: card.dataset.dayInCutlet,
+          monthName: card.dataset.monthName,
+          dayInMonth: card.dataset.dayInMonth,
+        }, identity);
+      }) || null;
+    }
+
+    _captureViewportAnchor() {
+      const viewport = this._els.viewport;
+      const viewportRect = viewport.getBoundingClientRect();
+      const viewportTop = Number(viewportRect.top);
+      const viewportBottom = viewportTop + Number(viewport.clientHeight || viewportRect.height || 0);
+      const cards = Array.from(this._els.list.querySelectorAll('.day'));
+      let card = null;
+      for (const candidate of cards) {
+        const rect = candidate.getBoundingClientRect();
+        const top = Number(rect.top);
+        const bottom = top + Number(rect.height || 0);
+        if (bottom > viewportTop + 1 && top < viewportBottom - 1) {
+          card = candidate;
+          break;
+        }
+      }
+      if (card) {
+        const section = card.closest('section.cutlet-section');
+        return Object.freeze({
+          kind: 'day',
+          identity: this._dayCardIdentity(card),
+          cutletStartJdn: section && section.dataset.startJdn != null
+            ? String(section.dataset.startJdn) : null,
+          offset: Number(card.getBoundingClientRect().top) - viewportTop,
+        });
+      }
+
+      const sections = Array.from(this._els.list.querySelectorAll('section.cutlet-section'));
+      if (sections.length === 0) return null;
+      let section = sections[0];
+      for (const candidate of sections) {
+        if (Number(candidate.getBoundingClientRect().top) <= viewportTop + 1) section = candidate;
+        else break;
+      }
+      return Object.freeze({
+        kind: 'cutlet',
+        startJdn: String(section.dataset.startJdn),
+        offset: Number(section.getBoundingClientRect().top) - viewportTop,
+      });
+    }
+
+    _restoreViewportAnchor(anchor) {
+      if (!anchor) return false;
+      const viewportTop = Number(this._els.viewport.getBoundingClientRect().top);
+      let element = null;
+      if (anchor.kind === 'day') element = this._findRenderedDay(anchor.identity, null);
+      else if (anchor.kind === 'cutlet') element = this._findCutletSection(anchor.startJdn);
+      if (!element) return false;
+      const newOffset = Number(element.getBoundingClientRect().top) - viewportTop;
+      this._moveViewportBy(newOffset - Number(anchor.offset));
+      return true;
+    }
+
+    _rerenderCutletsPreservingViewport(existingAnchor) {
+      const anchor = existingAnchor === undefined ? this._captureViewportAnchor() : existingAnchor;
+      this._renderCutlets();
+      this._restoreViewportAnchor(anchor);
     }
 
     _renderSummary() {
@@ -1256,12 +1361,11 @@
         const days = [];
         for (const day of view.days) {
           const jdn = String(BigInt(day.jdn));
-          if (this._value && this._targetJdn != null
-              && BigInt(day.jdn) === this._targetJdn
-              && !sameDaySemantics(day, this._value)) {
+          if (this._scrollTarget && BigInt(day.jdn) === this._scrollTarget.jdn
+              && !sameScrollTargetDay(day, this._scrollTarget)) {
             throw new CalendarRenderConsistencyError(
               jdn,
-              semanticDaySnapshot(this._value),
+              semanticDaySnapshot(this._scrollTarget),
               semanticDaySnapshot(day),
             );
           }
@@ -1305,7 +1409,7 @@
     _renderCutlet(view, preparedDays) {
       const section = doc.createElement('section');
       const localCutlet = this._localCalendarName('cutlet', view.cutletName);
-      section.className = 'cutlet';
+      section.className = 'cutlet-section';
       section.dataset.startJdn = String(view.startJdn);
       section.dataset.endJdn = String(view.endJdn);
       section.dataset.year = String(view.year);
@@ -1379,8 +1483,7 @@
           dayInMonth: day.dayInMonth,
           monthName: localDayMonth,
         }));
-        const isTarget = this._value != null && this._targetJdn != null
-          && BigInt(day.jdn) === this._targetJdn && sameDaySemantics(day, this._value);
+        const isTarget = this._scrollTarget != null && sameScrollTargetDay(day, this._scrollTarget);
         if (isTarget) card.setAttribute('aria-current', 'date');
 
         if (isTarget) {
@@ -1396,7 +1499,7 @@
         yearLine.textContent = this._t('date.yearLine', { year: day.year });
 
         const cutletLine = doc.createElement('span');
-        cutletLine.className = 'day-line cutlet';
+        cutletLine.className = 'day-line cutlet-line';
         cutletLine.textContent = this._t('date.cutletLine', {
           dayInCutlet: day.dayInCutlet,
           cutletName: localDayCutlet,
@@ -1416,49 +1519,15 @@
       return group;
     }
 
-    _scrollSelectedIntoView(year, cutletName, dayInCutlet, monthName, dayInMonth) {
-      if (arguments.length !== 5 || year == null || cutletName == null || dayInCutlet == null
-          || monthName == null || dayInMonth == null) {
-        throw new TypeError('Li target de scrolling deve contener omni quin semantic partes del date.');
+    _positionTargetInViewport(target) {
+      if (!target || target.jdn == null || target.startJdn == null) {
+        throw new TypeError('Li target de scrolling deve esser un complet navigation target.');
       }
-
-      const target = Object.freeze({
-        year: String(year),
-        cutletName: String(cutletName),
-        dayInCutlet: Number(dayInCutlet),
-        monthName: String(monthName),
-        dayInMonth: Number(dayInMonth),
-      });
-      const cards = Array.from(this._els.list.querySelectorAll('.day'));
-      const matches = cards.filter((card) => {
-        if (this._targetJdn != null && BigInt(card.dataset.jdn) !== this._targetJdn) return false;
-        return sameDaySemantics({
-          year: card.dataset.year,
-          cutletName: card.dataset.cutletName,
-          dayInCutlet: card.dataset.dayInCutlet,
-          monthName: card.dataset.monthName,
-          dayInMonth: card.dataset.dayInMonth,
-        }, target);
-      });
-
-      if (matches.length !== 1) {
-        throw new CalendarRenderConsistencyError(
-          this._targetJdn == null ? 'unknown' : this._targetJdn,
-          target,
-          Object.freeze({ exactTargetMatchCount: matches.length }),
-        );
-      }
-
-      const selected = matches[0];
-      const section = selected.closest('.cutlet');
-      const expectedStartJdn = this._targetJdn == null
-        ? null : targetCutletStartJdn(this._targetJdn, target);
-      if (!section || expectedStartJdn == null
-          || BigInt(section.dataset.startJdn) !== expectedStartJdn
-          || String(section.dataset.year) !== target.year
+      const section = this._findCutletSection(target.startJdn);
+      if (!section || String(section.dataset.year) !== target.year
           || String(section.dataset.cutletName) !== target.cutletName) {
         throw new CalendarTargetCutletError(
-          this._targetJdn == null ? 'unknown' : this._targetJdn,
+          target.jdn,
           target,
           section ? Object.freeze({
             startJdn: String(section.dataset.startJdn),
@@ -1469,23 +1538,57 @@
         );
       }
 
+      const selected = this._findRenderedDay(target, section);
+      if (!selected) {
+        throw new CalendarRenderConsistencyError(
+          target.jdn,
+          target,
+          Object.freeze({ exactTargetMatchCount: 0 }),
+        );
+      }
+      const cards = Array.from(this._els.list.querySelectorAll('.day'));
+      const duplicateCount = cards.filter((card) => sameScrollTargetDay({
+        jdn: card.dataset.jdn,
+        year: card.dataset.year,
+        cutletName: card.dataset.cutletName,
+        dayInCutlet: card.dataset.dayInCutlet,
+        monthName: card.dataset.monthName,
+        dayInMonth: card.dataset.dayInMonth,
+      }, target)).length;
+      if (duplicateCount !== 1) {
+        throw new CalendarRenderConsistencyError(
+          target.jdn,
+          target,
+          Object.freeze({ exactTargetMatchCount: duplicateCount }),
+        );
+      }
+
       for (const card of cards) {
         if (card === selected) card.setAttribute('aria-current', 'date');
         else card.removeAttribute('aria-current');
       }
-      selected.scrollIntoView({ block: 'center', inline: 'nearest' });
-      this._activeStartJdn = expectedStartJdn;
+      this._positionElementInViewport(selected, 'center');
+      this._activeStartJdn = target.startJdn;
+      return selected;
+    }
+
+    _positionCutletInViewport(startJdn) {
+      const start = BigInt(startJdn);
+      const section = this._findCutletSection(start);
+      if (!section) return false;
+      this._positionElementInViewport(section, 'start');
+      this._activeStartJdn = start;
+      return true;
     }
 
     async _scrollAdjacent(direction) {
       if (this._orderedStarts.length === 0) return false;
       const generation = this._generation;
       const navigationGeneration = ++this._navigationGeneration;
-      const currentIndex = this._activeStartJdn == null
-        ? this._orderedStarts.findIndex((start) => (
-          this._targetJdn >= start && this._targetJdn <= BigInt(this._cutlets.get(start).endJdn)
-        ))
-        : this._orderedStarts.findIndex((start) => start === this._activeStartJdn);
+      const currentStart = this._activeStartJdn != null
+        ? this._activeStartJdn
+        : (this._scrollTarget != null ? this._scrollTarget.startJdn : this._orderedStarts[0]);
+      const currentIndex = this._orderedStarts.findIndex((start) => start === currentStart);
       if (currentIndex < 0) return false;
 
       let start = this._orderedStarts[currentIndex + direction];
@@ -1506,10 +1609,7 @@
 
       if (!this._connected || generation !== this._generation
           || navigationGeneration !== this._navigationGeneration) return false;
-      const section = this._els.list.querySelector('[data-start-jdn="' + escapeSelector(String(start)) + '"]');
-      if (!section) return false;
-      section.scrollIntoView({ behavior: 'auto', block: 'start' });
-      this._activeStartJdn = start;
+      if (!this._positionCutletInViewport(start)) return false;
 
       const resolvedIndex = this._orderedStarts.findIndex((candidate) => candidate === start);
       if (direction < 0 && resolvedIndex === 0) {
@@ -1524,7 +1624,7 @@
 
     _onScroll() {
       const viewport = this._els.viewport;
-      const sections = Array.from(this._els.list.querySelectorAll('.cutlet'));
+      const sections = Array.from(this._els.list.querySelectorAll('section.cutlet-section'));
       if (sections.length > 0) {
         const top = viewport.getBoundingClientRect().top + 18;
         let active = sections[0];
