@@ -10,7 +10,7 @@ Addit:
 - `GET/POST /v1/date`, `POST /v1/dates`, `/v1/health`, `/v1/meta`;
 - campum optionalem `language` ad nomina segmentorum et mensium praesentanda; nunc sola lingua `la` publice sustinetur, sed stratum expansioni futurae praeparatum est;
 - adapter additivum ad `calendarDateSpaghetti` sine mutatione structurae historicae;
-- ministrum synchronous Boost.Beast;
+- ministrum Boost.Beast cuius conexiones concurrenter accipiuntur, semantica tamen unus-owner manet;
 - CORS restrictum pro navigatore: origo situs publici implicite admittitur, `OPTIONS`/preflight tractatur, wildcard `*` non adhibetur, et allowlist per `PASTAFARI_CORS_ORIGINS` mutari potest;
 - primam cicatricem accelerationis `L0 Pair Tomb` (4096 loca direct-mapped), cum bypass/fallback integro;
 - probationes et CI quae realem `src/monster.cpp` conectunt.
@@ -19,3 +19,5 @@ Vide `docs/HTTP_API_V1.md` et `docs/HTTP_API_BUILD.md`.
 
 - `GET /v1/date.js`: transportus scripti additivus pro fasciculis `file://` et ambitus browser-isolation ubi `fetch` JSON in HTML involvitur. Callback stricte ad identificatorem ASCII simplicem restringitur; semantica Stage 56 immutata manet.
 - Render health-lane scar: concurrent connections, serialized semantic requests, and `/v1/health` remains responsive during long calculations.
+
+- Anti-caterva transport scar: only semantic endpoints contend for the single semantic owner; `/v1/health` and `/v1/meta` remain immediate, and a concurrent semantic request receives `503 ENGINE_BUSY` with `Retry-After: 5` instead of surviving in an invisible mutex queue after its client has gone away.

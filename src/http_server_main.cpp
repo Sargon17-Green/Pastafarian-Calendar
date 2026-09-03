@@ -35,9 +35,21 @@ std::string requestOrigin(const http::request<http::string_body>& req){
     auto it=req.find("Origin");
     return it==req.end()?std::string{}:std::string(it->value());
 }
-bool isHealthTarget(std::string_view target){
+std::string_view requestPath(std::string_view target){
     const auto q=target.find('?');
-    return target.substr(0,q)=="/v1/health";
+    return target.substr(0,q);
+}
+bool isSemanticTarget(std::string_view target){
+    const auto path=requestPath(target);
+    return path=="/v1/date" || path=="/v1/date.js" || path=="/v1/dates";
+}
+HttpResponse engineBusyResponse(){
+    return {503,
+            {{"Content-Type","application/json; charset=utf-8"},
+             {"X-Pastafari-Engine","celeritas-per-sepulcra"},
+             {"X-Pastafari-Semantics","stage56"},
+             {"Retry-After","5"}},
+            R"({"error":{"code":"ENGINE_BUSY","message":"machina semantica aliam petitionem iam computat"}})"};
 }
 void serveConnection(tcp::socket socket,HttpProtocol& protocol,const CorsPolicy& cors,std::mutex& semanticMutex){
     beast::flat_buffer buffer;
@@ -70,14 +82,18 @@ void serveConnection(tcp::socket socket,HttpProtocol& protocol,const CorsPolicy&
         const std::int64_t sampled=nowMillis();
         std::string contentType;auto c=req.find(http::field::content_type);if(c!=req.end())contentType=std::string(c->value());
         HttpResponse out;
-        if(req.method()==http::verb::get && isHealthTarget(std::string_view(req.target().data(),req.target().size()))){
-            // Render health checks must remain responsive while the historical semantic
-            // engine performs a long calculation on another connection.
-            out=protocol.handle(std::string(req.method_string()),std::string(req.target()),contentType,req.body(),sampled);
+        const std::string_view targetView(req.target().data(),req.target().size());
+        if(isSemanticTarget(targetView)){
+            // Cicatrix anti-catervae: semantic requests never wait in an invisible queue.
+            // One request owns the historical engine/Pair Tomb; a concurrent semantic
+            // request receives ENGINE_BUSY immediately, even if its client would otherwise
+            // disappear behind an upstream 502 while the queued thread survived locally.
+            std::unique_lock<std::mutex> lock(semanticMutex,std::try_to_lock);
+            if(!lock.owns_lock()) out=engineBusyResponse();
+            else out=protocol.handle(std::string(req.method_string()),std::string(req.target()),contentType,req.body(),sampled);
         }else{
-            // The semantic engine and Pair Tomb remain single-owner. Connections may
-            // coexist, but only one non-health protocol call enters semantic state.
-            std::lock_guard<std::mutex> lock(semanticMutex);
+            // Control-plane and validation-only routes such as /v1/health and /v1/meta
+            // never wait for a long semantic calculation.
             out=protocol.handle(std::string(req.method_string()),std::string(req.target()),contentType,req.body(),sampled);
         }
         http::response<http::string_body> res{statusFrom(out.status),req.version()};

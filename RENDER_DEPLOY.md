@@ -37,6 +37,8 @@ The service still rejects an ordinary unlisted web origin such as `https://alien
 
 ## Long calculations and health checks
 
-The historical calendar calculation can occupy the semantic worker for many seconds. The HTTP transport therefore accepts connections concurrently while serializing every non-health protocol call behind one transport mutex. `GET /v1/health` bypasses that semantic gate and remains responsive during a long calculation.
+The historical calendar calculation can occupy the semantic worker for many seconds. The HTTP transport therefore accepts connections concurrently while keeping the historical semantic engine and Pair Tomb single-owner.
 
-This is required for Render: its HTTP health checks must answer quickly even while a date request is still computing. The semantic engine itself is not made concurrent, and Pair Tomb ownership remains single-owner.
+Only semantic routes (`/v1/date`, `/v1/date.js`, `/v1/dates`) compete for that owner. Control-plane routes such as `GET /v1/health` and `GET /v1/meta` never wait behind a long calculation.
+
+A second semantic request is not queued. While the semantic owner is occupied it receives `503 ENGINE_BUSY` immediately, with `Retry-After: 5`. This prevents upstream 502 responses or disconnected clients from leaving invisible request threads queued for later execution.
