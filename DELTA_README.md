@@ -1,40 +1,77 @@
-# Stage 59 server persistent memoization — initial implementation
+# JavaScript + Interlingue browser scroll navigation rebuild — v16
 
-Expected base HEAD: `3e6fe2bb035a300b02d33534015e4011ea767019`.
+Base branch: `JavaScript+Interlingue`
+Base HEAD: `2506723d40e273a55089952564607896d936fb2c`
 
-Ti delta adjunte un server Node long-lived sin modificar li semantic core o li browser implementation.
+## Scope
 
-## Implementat
+This delta rebuilds the browser calendar scrolling/navigation path as one coherent viewport-owned mechanism. It does not change the Pastafarian semantic core, `package.json`, GitHub workflows, persistent-cache schema, Worker protocol, or public calculation API.
 
-- HTTP API por exact Pastafarian conversions.
-- Dedicated warm calculation Worker, talmen un heavyweight synchronous core call ne bloca li HTTP event loop.
-- Exact final-result persistent cache per `(calculationDay,targetDay)`.
-- Per-request single-flight: concurrent exact misses comparte un calculation.
-- Per-initialization single-flight: concurrent first requests ne posse crear plu quam un Worker.
-- Semantic namespace per SHA-256 fingerprint de `src/index.js` (o explicit controlled override).
-- Persistent hydration/snapshot del actual Stage 58 strong caches del public Stage 57 route:
-  - shared gate days;
-  - shared gate gaps;
-  - Year 5000 anchors;
-  - adjacent-year transitions;
-  - authoritative year histories;
-  - semantic structures;
-  - integrated selection/rejection results;
-  - Stage 56 sauce results via a bounded persistent shadow ante li existent WeakRef cache.
-- Only portable values es persistet. Custom-prototype runtime objects es ignorat quam optimization misses in vice de esser reconstruet incorrectmen.
-- Failed calculations ne publica null nov intermediate snapshot e ne crea final cache entries.
-- Redis storage por production/multi-replica; persistent file fallback por un unic host.
-- Docker Compose con Redis AOF.
-- Metrics por hits, misses, coalescing, worker calls, cache failures e intermediate snapshot I/O.
+Changed implementation:
 
-Weak DP backends resta process-local in ti version; li long-lived Worker conserva lor existent Stage 58 reuse. Ili ne es serialisat ancor.
+- `browser/pastafari-date.js`
 
-## Local verification executet sur li delta
+Changed regression tests:
 
-- `node tests/server-stage59-cache.js` — PASS
-- `node tests/server-stage59-http.js` — PASS
-- `node tests/server-stage59-all.js` — PASS
+- `tests/browser-component-runtime.js`
+- `tests/browser-built-artifacts.js`
 
-Ti tests verifica BigInt-safe codec, single-flight, exact final hits, restart persistence, Stage 58 snapshot hydration, semantic namespace isolation, failed-call non-caching, HTTP output e cache headers.
+## Structural defect removed
 
-`tests/server-stage59-real-benchmark.js --run-heavy` es destinat por execution pos merge in li complet repository. It usa li normative witness `calendarDateSpaghetti(739862n,739862n) -> [5000n,"bronze",677n,"sand",32n]` e compara cold, warm final hit, restart final hit e nearby post-restart calculation.
+The previous DOM used the class `cutlet` for two unrelated objects:
+
+- the complete cutlet container: `section.cutlet`;
+- the cutlet text line inside every day card: `span.day-line.cutlet`.
+
+Navigation code queried `querySelectorAll('.cutlet')` for cutlet containers. Consequently, scroll-state and anchor code could receive an inner text span instead of a cutlet section. An inner span has no `data-start-jdn`, so active-cutlet resolution and scroll-anchor restoration could lose the actual cutlet identity. A preceding-cutlet preload could then re-render the list without restoring the visible location correctly.
+
+The DOM vocabulary is now unambiguous:
+
+- cutlet container: `section.cutlet-section`;
+- card text line: `span.day-line.cutlet-line`.
+
+All structural navigation selectors use `section.cutlet-section` explicitly.
+
+## One scrolling owner
+
+The browser calendar no longer uses `Element.scrollIntoView()`.
+
+Target positioning, previous/next cutlet positioning, and re-render restoration all move only the calendar viewport through one primitive that owns the sole `viewport.scrollTop = ...` assignment in the implementation.
+
+The direct conversion creates one immutable scroll target containing:
+
+- target JDN;
+- derived cutlet start JDN;
+- year;
+- cutlet name;
+- day in cutlet;
+- month name;
+- day in month.
+
+The same object determines the initially loaded cutlet, rendered current card, target lookup, containing section, and final viewport position.
+
+## Re-render anchoring
+
+Adjacent-cutlet preload and locale re-render no longer preserve only a section heading. They capture the first visible day card by JDN plus the complete five-part Pastafarian date and preserve its exact pixel offset after the DOM is rebuilt. The containing cutlet start is also retained so trimming cannot discard the visible cutlet while a preload is being committed.
+
+## Initial layout timing
+
+The loading state hides the viewport with `display:none`. The new path first renders the target cutlet, reveals the viewport, waits for a browser layout frame, and only then measures the target card and updates `scrollTop`. Adjacent preload begins after target positioning.
+
+## Local verification
+
+- `node tests/browser-component-runtime.js`: PASS
+- `node tests/browser-interface-all.js`: PASS
+- `node scripts/build-browser.js`: PASS
+- deterministic browser build ID after this delta: `20019f0618963ba2c3010bcc`
+- static portion of `tests/browser-built-artifacts.js`: PASS
+- full `tests/browser-built-artifacts.js` local run reaches the expensive real-core witness and was stopped by the local time limit; this remains a GitHub CI gate.
+- raw Hebrew Unicode scan of changed JS files: PASS
+- classic-script parse of changed JS files: PASS
+- implementation contains zero `scrollIntoView(` calls.
+- implementation contains zero ambiguous `.cutlet` structural selectors.
+- implementation contains exactly one `viewport.scrollTop =` assignment.
+
+A real headless Chromium layout exercise was also run with a target cutlet plus asynchronously preloaded previous and next cutlets. The target remained in the `bronze` cutlet and its viewport offset changed by only `0.046875px` across the two preload re-renders; the active cutlet start remained unchanged.
+
+Generated `dist/` and standalone bundles are intentionally not included. GitHub CI must rebuild them from source.

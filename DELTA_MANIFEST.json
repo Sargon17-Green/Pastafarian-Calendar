@@ -1,122 +1,43 @@
 {
-  "schema": 1,
-  "expected_base_head": "3e6fe2bb035a300b02d33534015e4011ea767019",
-  "purpose": "Stage 59 persistent server memoization and HTTP API",
-  "core_files_modified": false,
-  "browser_files_modified": false,
+  "delta": "pastafari-browser-scroll-navigation-rebuild-v16",
+  "base_branch": "JavaScript+Interlingue",
+  "base_head": "2506723d40e273a55089952564607896d936fb2c",
+  "expected_browser_build_id": "20019f0618963ba2c3010bcc",
   "files": [
     {
-      "path": ".github/workflows/javascript-interlingue-stage59-server.yml",
-      "sha256": "44c84acffa0d429cd80568357d65373e6bd04795567b6c731abae328ae0c4f34",
-      "bytes": 992
+      "path": "browser/pastafari-date.js",
+      "sha256": "632a33527cc6e2ac574e2dbde5481bbab8b2ec34aa6c3bfb84169b59e3246e54",
+      "bytes": 69474
+    },
+    {
+      "path": "tests/browser-component-runtime.js",
+      "sha256": "c0e159b429d88b8b943f4525d471e098999cf02edf15d87595ddccf500e46898",
+      "bytes": 30837
+    },
+    {
+      "path": "tests/browser-built-artifacts.js",
+      "sha256": "4b5451e5c87f7045d5cec637234ec1c23a369d55da8744bfcaac93f369bfc8b5",
+      "bytes": 7706
     },
     {
       "path": "DELTA_README.md",
-      "sha256": "4ba89cc25dd4cd34c2bc5ee18a38e44b65b1d09d82577ae27a867d4f85d02956",
-      "bytes": 2440
-    },
-    {
-      "path": "server/.env.example",
-      "sha256": "fd2a1a4d25c1c257220c89b9ab2409f1ec256674c20592c95d054f4731abc78e",
-      "bytes": 403
-    },
-    {
-      "path": "server/Dockerfile",
-      "sha256": "637c1bd012b74ef1007455ee6f8d0d79977ddc96b3d24d72a1fc5100a2c6c5e5",
-      "bytes": 227
-    },
-    {
-      "path": "server/README.md",
-      "sha256": "1fc4121df03c96d91a1e8532d6e6b15fe3d6b1fa255ff33359c85840ddc9d6a2",
-      "bytes": 3844
-    },
-    {
-      "path": "server/cache-codec.js",
-      "sha256": "50575d6e426bffff5b0ba33c4c05d5c84bb5db213f038d6921fe152b33ee9d0f",
-      "bytes": 4208
-    },
-    {
-      "path": "server/cache-store.js",
-      "sha256": "14e52c06d2dfde5f048675b4bd6ee1c2b610453b7839d01e8e0db44f356a0b78",
-      "bytes": 3688
-    },
-    {
-      "path": "server/calendar-engine.js",
-      "sha256": "212f9a8773e9279b44aceb761c535a3a68cf53675f5f27abddf1f8db3bd5d445",
-      "bytes": 6925
-    },
-    {
-      "path": "server/compose.yaml",
-      "sha256": "597f770524417c920b2d3b893078cf5f6f8ce5d96bd888a4ab9fa6523305c2a6",
-      "bytes": 630
-    },
-    {
-      "path": "server/engine-worker-client.js",
-      "sha256": "004986d38dea864211775f5082514ce08561bc221a28e3e78ed52514bf348ac7",
-      "bytes": 3425
-    },
-    {
-      "path": "server/engine-worker.js",
-      "sha256": "4e4f77029e95229f05e7a48f2af5a00952af8a4ddd30053c99e92552dc801b6c",
-      "bytes": 2689
-    },
-    {
-      "path": "server/http-server.js",
-      "sha256": "21b860b06bba5a397d61a4d5b9f0f7c6b002a95f914ebf7eeae9c66b8a1033ea",
-      "bytes": 3835
-    },
-    {
-      "path": "server/index.js",
-      "sha256": "324cb31cbf4a0bcfe9a36c4acb19ec3966236543fa4f2b9385eecae2d3c8f7c4",
-      "bytes": 1723
-    },
-    {
-      "path": "server/package.json",
-      "sha256": "3bdf4fb20ae5356f6ac186dc3f56d0da23e9d67c78b5d54305de85cef98911b0",
-      "bytes": 361
-    },
-    {
-      "path": "server/stage58-persistence-bridge.js",
-      "sha256": "5cb3b1b3268cd8210423ea636090334a9d245edc3ad88a3fb5cc18d878bf09aa",
-      "bytes": 9278
-    },
-    {
-      "path": "tests/server-stage59-all.js",
-      "sha256": "f50730698962f80b39a518cf59fe5c2ad53531bac0c047141a04bf2d14ca85cb",
-      "bytes": 405
-    },
-    {
-      "path": "tests/server-stage59-cache.js",
-      "sha256": "0586c9be7025ebbd95649299ca2bbdbd558ff1b915d97557bbdc89aab2934de7",
-      "bytes": 4158
-    },
-    {
-      "path": "tests/server-stage59-fake-core.js",
-      "sha256": "705cd8735bcb282dfba922c556c6e7d204def9eeb6ffc3b8c8c1a965127a34e7",
-      "bytes": 3029
-    },
-    {
-      "path": "tests/server-stage59-http.js",
-      "sha256": "128fffa8b0976f9bcec86d6c70bd1a1bc5d1dce01e9bf5c65e982b7414c17529",
-      "bytes": 2678
-    },
-    {
-      "path": "tests/server-stage59-real-benchmark.js",
-      "sha256": "095311fef74b821dd934fea513634606a3b28a1fba0c95614b1f6249ff82482d",
-      "bytes": 2534
-    },
-    {
-      "path": "tests/server-stage59-real-contract.js",
-      "sha256": "27840207f3c70374cffd2a177f43463f3c87f00918cee2f32a4c75ee4a9ed600",
-      "bytes": 992
+      "sha256": "618521ed86f270145078ab71340b0f8d540ebf342fe9c0d18b8dfff469f070eb",
+      "bytes": 3974
     }
   ],
-  "local_verification": [
-    "node tests/server-stage59-cache.js PASS",
-    "node tests/server-stage59-http.js PASS",
-    "node tests/server-stage59-all.js PASS",
-    "node tests/server-stage59-real-contract.js SKIP in delta-only workspace (requires repository src/index.js)",
-    "all server/tests JavaScript node --check PASS",
-    "raw Hebrew scan PASS"
-  ]
+  "excluded": [
+    "src/**",
+    "browser/dist/**",
+    "browser/standalone/**",
+    ".github/**",
+    "package.json"
+  ],
+  "local_validation": {
+    "browser_component_runtime": "PASS",
+    "browser_interface_all": "PASS",
+    "build_browser": "PASS",
+    "browser_built_artifacts_static": "PASS",
+    "browser_built_artifacts_full": "LOCAL_TIMEOUT_AT_REAL_CORE_WITNESS",
+    "chromium_preload_scroll_layout": "PASS"
+  }
 }
