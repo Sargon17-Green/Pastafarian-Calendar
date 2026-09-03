@@ -1,0 +1,73 @@
+name: JavaScript + Interlingue — rollback incorrect Stage 59 upload
+
+on:
+  push:
+    branches:
+      - JavaScript+Interlingue
+    paths:
+      - '.github/workflows/javascript-interlingue-stage59-rollback.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: javascript-interlingue-stage59-rollback
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Obtener li branche complet
+        uses: actions/checkout@v6
+        with:
+          ref: JavaScript+Interlingue
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verificar que null change ulterior va esser perdit
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
+          BAD='19cff57d10b85ad93f2fb44ec5b9f5893551e285'
+          ROLLBACK_FILE='.github/workflows/javascript-interlingue-stage59-rollback.yml'
+
+          test "$(git rev-parse "${BAD}^")" = '2635db4101a0b640a294fd79054fb2213008a8b8'
+          test "$(git rev-parse "${BAD}^^")" = "$GOOD"
+          git merge-base --is-ancestor "$BAD" HEAD
+
+          mapfile -t changed < <(git diff --name-only "$BAD"..HEAD)
+          for path in "${changed[@]}"; do
+            if [[ "$path" != "$ROLLBACK_FILE" ]]; then
+              echo "Refusa rollback: unexpected post-Stage59 change: $path" >&2
+              exit 1
+            fi
+          done
+
+      - name: Restaurar exactmen li tree ante Stage 59
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git restore --source="$GOOD" --staged --worktree -- .
+          git diff --cached --check
+          git commit -m 'Reverter li incorrect flat Stage 59 upload'
+
+          if ! git diff --quiet "$GOOD" HEAD -- .; then
+            echo 'Rollback result ne es exactmen egal al pre-Stage59 tree.' >&2
+            git diff --stat "$GOOD" HEAD -- . >&2
+            exit 1
+          fi
+
+      - name: Publicar li rollback commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:JavaScript+Interlingue
