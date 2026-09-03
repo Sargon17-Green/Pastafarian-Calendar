@@ -1,4 +1,4 @@
-name: Sepulcra calida et almanacum anni
+name: Sepulcra calida et corridor annorum
 
 on:
   schedule:
@@ -33,7 +33,7 @@ concurrency:
 jobs:
   sepelire:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 55
     steps:
       - name: Excerpere branch
         uses: actions/checkout@v5
@@ -61,13 +61,15 @@ jobs:
             include/pastafari/http_api/generated_hot_two_day_seed.inc | head -1)
           old_almanac=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_BASE_DAY=//p' \
             include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
+          old_generation=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_GENERATION=//p' \
+            include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
           need=yes
-          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old_pair" = "$base" ] && [ "$old_almanac" = "$base" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old_pair" = "$base" ] && [ "$old_almanac" = "$base" ] && [ "$old_generation" = "2" ]; then
             need=no
           fi
           echo "base=$base" >> "$GITHUB_OUTPUT"
           echo "need=$need" >> "$GITHUB_OUTPUT"
-          echo "HOT_CACHE_BASE_DAY=$base OLD_PAIR=${old_pair:-NONE} OLD_ALMANAC=${old_almanac:-NONE} NEED=$need"
+          echo "HOT_CACHE_BASE_DAY=$base OLD_PAIR=${old_pair:-NONE} OLD_ALMANAC=${old_almanac:-NONE} OLD_GENERATION=${old_generation:-NONE} NEED=$need"
 
       - name: Monstrum productionis low-memory semel aedificare
         if: steps.day.outputs.need == 'yes'
@@ -79,7 +81,7 @@ jobs:
           clang++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude -Itests -I. \
             -c /tmp/monster.hot-cache.cpp -o /tmp/monster.hot-cache.o
 
-      - name: Sepulcra exacta et duo almanaca generare
+      - name: Sepulcra exacta et corridor annorum generare
         if: steps.day.outputs.need == 'yes'
         shell: bash
         run: |
@@ -87,15 +89,27 @@ jobs:
           clang++ -std=c++20 -O2 -Wall -Wextra -Werror -Iinclude \
             tools/generate_hot_cache_seed.cpp src/celeritas_engine_port.cpp \
             /tmp/monster.hot-cache.o -o /tmp/generate-hot-cache
-          timeout 25m /tmp/generate-hot-cache "${{ steps.day.outputs.base }}" \
+          timeout 45m /tmp/generate-hot-cache "${{ steps.day.outputs.base }}" \
             /tmp/generated_hot_two_day_seed.inc \
             /tmp/generated_hot_year_almanac_seed.inc
           grep -q "^// PASTAFARI_HOT_SEED_BASE_DAY=${{ steps.day.outputs.base }}$" \
             /tmp/generated_hot_two_day_seed.inc
           grep -q "^// PASTAFARI_HOT_ALMANAC_BASE_DAY=${{ steps.day.outputs.base }}$" \
             /tmp/generated_hot_year_almanac_seed.inc
+          grep -q '^// PASTAFARI_HOT_ALMANAC_GENERATION=2$' \
+            /tmp/generated_hot_year_almanac_seed.inc
+          grep -q '^// PASTAFARI_HOT_ALMANAC_CORRIDOR_BEHIND_DAYS=10000$' \
+            /tmp/generated_hot_year_almanac_seed.inc
+          grep -q '^// PASTAFARI_HOT_ALMANAC_CORRIDOR_AHEAD_DAYS=30000$' \
+            /tmp/generated_hot_year_almanac_seed.inc
+          count=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_COUNT=//p' \
+            /tmp/generated_hot_year_almanac_seed.inc | head -1)
+          test -n "$count"
+          test "$count" -ge 4
+          test "$count" -le 64
           test "$(grep -c '^{true,' /tmp/generated_hot_two_day_seed.inc)" = 4
-          test "$(grep -c '^(void)buryHotAlmanacDiagnostic' /tmp/generated_hot_year_almanac_seed.inc)" = 2
+          test "$(grep -c '^(void)buryHotAlmanacDiagnostic' /tmp/generated_hot_year_almanac_seed.inc)" = "$count"
+          echo "HOT_CORRIDOR_GENERATED_COUNT=$count"
           cp /tmp/generated_hot_two_day_seed.inc \
             include/pastafari/http_api/generated_hot_two_day_seed.inc
           cp /tmp/generated_hot_year_almanac_seed.inc \
@@ -110,7 +124,7 @@ jobs:
           set -euo pipefail
           sh tests/run_http_api_tests.sh
 
-      - name: Pair Tomb et almanacum in ministro productionis probare
+      - name: Pair Tomb et corridor in ministro productionis probare
         if: steps.day.outputs.need == 'yes'
         shell: bash
         run: |
@@ -139,7 +153,10 @@ jobs:
             grep -q '"year":"' /tmp/hot-pair.json
           done
 
-          for ordinal in 0 1; do
+          count=$(sed -n 's/^\/\/ PASTAFARI_HOT_ALMANAC_COUNT=//p' \
+            include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
+          test -n "$count" && test "$count" -ge 4 && test "$count" -le 64
+          for ordinal in $(seq 0 $((count-1))); do
             calc=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_CALCULATION_DAY=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
             open=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_OPEN=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
             close=$(sed -n "s|^// PASTAFARI_HOT_ALMANAC_${ordinal}_CLOSE=||p" include/pastafari/http_api/generated_hot_year_almanac_seed.inc | head -1)
@@ -153,7 +170,18 @@ jobs:
             grep -q '"apiVersion":"1"' /tmp/hot-almanac.json
             grep -q '"year":"' /tmp/hot-almanac.json
           done
-          echo "HOT_YEAR_ALMANAC_SERVER_TEST=PASS BASE=$c"
+          echo "HOT_YEAR_CORRIDOR_SERVER_TEST=PASS BASE=$c COUNT=$count"
+
+          # Witnesses ex probatione navigatoris: 2006/2008/2096 nunc intra
+          # corridor [-10000,+30000] eiusdem calculationDay cadere debent.
+          for target in 732374 732526 733227 765369; do
+            curl --max-time 2 -fsS \
+              "http://127.0.0.1:18084/v1/date?date=$target&calendar=engine-day&calculation_day=$c&language=la" \
+              >/tmp/hot-corridor-witness.json
+            grep -q '"apiVersion":"1"' /tmp/hot-corridor-witness.json
+            grep -q '"year":"' /tmp/hot-corridor-witness.json
+          done
+          echo "HOT_CORRIDOR_BROWSER_WITNESSES=PASS"
 
           # Witness dynamicus: prima petitio Foundation structuram anni sepelit;
           # altera die eiusdem anni non year-walk iterum facit.
@@ -185,8 +213,8 @@ jobs:
             include/pastafari/http_api/generated_hot_two_day_seed.inc \
             include/pastafari/http_api/generated_hot_year_almanac_seed.inc
           if git diff --cached --quiet; then
-            echo "HOT_YEAR_ALMANAC_SEED_UNCHANGED"
+            echo "HOT_YEAR_CORRIDOR_SEED_UNCHANGED"
             exit 0
           fi
-          git commit -m "Almanacum anni cum sepulcris hodiernis renovare"
+          git commit -m "Corridor annorum cum sepulcris hodiernis renovare"
           git push origin HEAD:Celeritas-per-Sepulcra
