@@ -1,88 +1,21 @@
 {
-  "baseBranch": "JavaScript+Interlingue",
-  "baseHead": "10360f2781a833981c21f551afdbdde8286d93c5",
-  "package": "pastafari-browser-asset-coherence-jdn-guard-v12",
-  "browserBuildId": "caf64e842bc0963c57d3f1d3",
-  "semanticCacheNamespace": "pc-browser-core-368e258d1ca347f846f32d94",
-  "purpose": "Make Pages main/Worker assets build-coherent and fail closed on duplicate JDN semantic divergence.",
+  "delta": "pastafari-browser-persistent-cache-invalidation-v13",
+  "base_branch": "JavaScript+Interlingue",
+  "expected_base_head": "2089ce273ff2c6a1519fe0ffdfdec72f4b939a80",
+  "semantic_core_changed": false,
+  "persistent_schema_from": 2,
+  "persistent_schema_to": 3,
+  "local_browser_build_id": "a51c85ecd1e7dd9bf262575d",
   "files": [
     {
-      "path": "DELTA_README.md",
-      "sha256": "80459c101f3aeb091a9c6acc3dd24cde8a8fd8fb629ca54a672c2efa2424d60d",
-      "bytes": 3920
+      "path": "browser/calendar-memory.js",
+      "sha256": "14075eb4da357aeade92a1f4ad702d990b8b928ffe57d919e5eb90665226825d",
+      "bytes": 14951
     },
     {
-      "path": ".github/workflows/javascript-interlingue-pages-deploy.yml",
-      "sha256": "3abf3e8b88e7bfb6b4cd6c5d6612743531fca00e5e65f4dd88c256856815e55b",
-      "bytes": 2305
-    },
-    {
-      "path": "index.html",
-      "sha256": "fd991172688f1e1a30fbf39bb9a87183ae7bdd700ee6d747491ba8599287c635",
-      "bytes": 1240
-    },
-    {
-      "path": "scripts/build-browser.js",
-      "sha256": "5199080e10d259ddf12e46989f09ffa97c68f55c03dfcf6547c15982dd75373c",
-      "bytes": 8018
-    },
-    {
-      "path": "browser/engine-client.js",
-      "sha256": "d57ac620a545b55ddb7e97f5cb4b21805e4f99ac87e294e0e665f88628c1ee25",
-      "bytes": 6991
-    },
-    {
-      "path": "browser/pastafari-worker-entry.js",
-      "sha256": "99d45925f0e9153b3a6a0bde5b985fbc0556b1cc7a245465fded18dd4a2ed8be",
-      "bytes": 3259
-    },
-    {
-      "path": "browser/pastafari-date.js",
-      "sha256": "b79323465f3e12dd88fae71b92627d2e7cbeb151eb4a38598b604c6dc7b76d93",
-      "bytes": 58642
-    },
-    {
-      "path": "tests/browser-engine-client.js",
-      "sha256": "b92cc2bbb1050acd2db1b7da5214e2eee832e94afdf2e330eb1b39f61159b0cb",
-      "bytes": 7115
-    },
-    {
-      "path": "tests/browser-worker-runtime.js",
-      "sha256": "66d529e4a816b6a8f7246b0ffeaba03071874f312b690217c42bb5443a9e7e0f",
-      "bytes": 4401
-    },
-    {
-      "path": "tests/browser-component-runtime.js",
-      "sha256": "af4ffecc8257d5a4b9d35604b6fa4faa71c93b029907890909d0d6e74b94bc9c",
-      "bytes": 17765
-    },
-    {
-      "path": "tests/browser-built-artifacts.js",
-      "sha256": "31909e7127b75e4f96781f560cf8ffb360593da091d3ecf39ff27be09fe8b2f7",
-      "bytes": 5614
+      "path": "tests/browser-consistency-cache.js",
+      "sha256": "5ca98e5eec72b838935f4bbe4dbbcd745804d7068855d45b0e44e4b1acd3f694",
+      "bytes": 11636
     }
-  ],
-  "excluded": [
-    "src/**",
-    "package.json",
-    "browser/dist/**",
-    "browser/standalone generated bundles",
-    "HANDOFF*"
-  ],
-  "localValidation": [
-    "node tests/browser-interface-all.js: PASS",
-    "node scripts/build-browser.js: PASS",
-    "classic-script parse: PASS",
-    "raw-Hebrew source scan: PASS",
-    "src/index.js byte identity: PASS",
-    "src/source-language-catalog.js byte identity: PASS",
-    "built-asset coherence static checks: PASS"
-  ],
-  "builtWitnessLocal": "NOT_COMPLETED_WITHIN_15_MINUTES; diagnostics reached real calendarDateSpaghetti call; rerun in GitHub Actions",
-  "ciRequired": [
-    "node tests/verify-stage-01.js",
-    "node tests/browser-interface-all.js",
-    "node scripts/build-browser.js",
-    "node tests/browser-built-artifacts.js"
   ]
 }

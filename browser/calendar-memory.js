@@ -7,7 +7,7 @@
   const DEFAULT_MAX_CUTLETS = 8;
   const DEFAULT_MAX_PERSISTED_CONVERSIONS = 512;
   const DEFAULT_MAX_PERSISTED_CUTLETS = 4;
-  const PERSISTENT_SCHEMA_VERSION = 2;
+  const PERSISTENT_SCHEMA_VERSION = 3;
   const PERSISTENT_KEY_PREFIX = 'pastafari-calendar-cache:';
 
   class NullCalendarMemory {

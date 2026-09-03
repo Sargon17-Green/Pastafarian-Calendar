@@ -1,58 +1,42 @@
-# Browser asset-coherence + unique-JDN render guard delta
+# Persistent browser-cache invalidation — delta v13
 
-Base branch: `JavaScript+Interlingue`  
-Base HEAD: `10360f2781a833981c21f551afdbdde8286d93c5`
+Ti delta clude un restant browser-correctness lacune sin modificar li semantic core.
 
-Ti delta clude li failure-class u un stale o mixt browser build posse coexister con un altri main/Worker build, e u duplicat cutlet data posse renderisar li sam JDN plu quam un vez.
+## Problema cludet
 
-## Asset coherence
+Li persistent browser memory acceptet schema 2 conversions quam direct authority. Si un obsolete browser session hat jam persistet un incorrect direct conversion, un nov page-load pos li asset-coherence correction posse reutilisar ti value sin recalculation per li engine.
 
-- Li build crea un deterministic 24-hex browser build ID ex li exact browser/core build inputs.
-- Li existent semantic-cache namespace resta derivat separatmen ex li semantic core. Por ti base it resta exactmen `pc-browser-core-368e258d1ca347f846f32d94`; ti delta ne invalida valid semantic cache solmen pro un UI/build change.
-- Li public Pages HTML es generat quam `browser/dist/index.html` e carga `pastafari-date.js?v=<buildId>`.
-- Li standard main bundle crea su Worker con `pastafari-worker.js?v=<buildId>`.
-- Li main bundle include li expectat build ID in chascun Worker request; li Worker include su propri build ID in chascun response.
-- Un nov main con un old Worker, o un old main con un nov Worker, falli cludet con `ERR_BROWSER_BUILD_MISMATCH` invez de continuar con mixt assets.
-- Li Worker verifica li request build ID ante un semantic core call.
-- `browser/dist/build-id.txt` es creat quam observable deployment diagnostic. It ne participa in calendar semantics.
+Ti exact historic origine del observed divergence ne es declarat provat. Ti delta clude li confirmed persistence gap quel posse conservar un tal stale conversion si it existe.
 
-## Unique JDN guard
+## Correction
 
-- Ante DOM replacement, li component registra omni rendered day per exact JDN.
-- Si li sam JDN apari denov con exactmen li sam quin semantic fields, li duplicat card es omisset.
-- Si li sam JDN apari con diferent `year`, `cutletName`, `dayInCutlet`, `monthName` o `dayInMonth`, li component falli cludet con `ERR_CALENDAR_RENDER_INCONSISTENCY`.
-- Pos render, li component anc verifica que ne existe plu quam un `[aria-current="date"]`.
-- Ti es un data-correctness guard; li auto-scroll logic ne es usat por arbitrarmen selecter un del du resultates.
+- `PERSISTENT_SCHEMA_VERSION` avansa de 2 a 3.
+- Al prim construction con li existent `pc-browser-core-*` namespace, schema-2 storage es ignorat e removet per li existent namespace cleanup.
+- Null semantic-core fingerprint es changeat.
+- Li browser build fingerprint cambia automaticmen pro que `browser/calendar-memory.js` es un build input; talmen li generated main e Worker recive un nov shared build ID.
 
-## Investigation conclusion
+## Regression
 
-Li clean current HEAD ne reproducte li observat `sand 32` -> `costa 12` divergence in li public call sequence documentat in li handoff. Li previous main service at `9931b6e23ca0272f9e242935a0beb7123c78338c` posseva promoter un cutlet-view result al conversion cache; li current service ne posse plu far to.
+`tests/browser-consistency-cache.js` nu sema un schema-2 conversion por JDN 739862 con li stale value `5000 / bronze / 677 / costa / 12`. Li prova exige que schema 3:
 
-Un real cache-coherence lacune esset confirmat: Pages cargat li main bundle e li main cargat li Worker per unversioned URLs, sin un shared runtime build handshake. Ma li exact browser-cache state del screenshots ne esset capturat, e li Worker del immediate parent Pages build es byte-identic al current Worker. Ergo li exact historic cause del screenshots ne es forensically provat; ti delta elimina li mixt-build lacune e rende omni futur same-JDN semantic split fail-closed.
+1. ne lee ti obsolete conversion;
+2. remove li schema-2 storage key;
+3. recalcula li direct result per li engine;
+4. retorna e persiste solmen `5000 / bronze / 677 / sand / 32` sub schema 3.
 
-Null speculative `src/index.js` correction es includet.
+## Local verification
 
-## Local validation
+- `node tests/browser-consistency-cache.js` — PASS
+- `node tests/browser-interface-all.js` — PASS
+- `node scripts/build-browser.js` — PASS
+- generated browser build ID: `a51c85ecd1e7dd9bf262575d`
+- generated Pages script URL: `pastafari-date.js?v=a51c85ecd1e7dd9bf262575d`
+- `src/index.js` e `src/source-language-catalog.js` resta byte-identic al pre-delta source.
+- Classic-script parse de li changed JavaScript files — PASS
+- Raw Hebrew scan de li changed JS/JSON/MD files — PASS
 
-Passed:
-
-- `node tests/browser-interface-all.js`
-- `node scripts/build-browser.js`
-- classic-script parse of changed/relevant `.js`
-- raw-Hebrew source scan for `.js/.json/.md`
-- byte identity of `src/index.js` and `src/source-language-catalog.js` against li verified base
-- static built-asset coherence checks for generated HTML, main bundle and Worker
-
-Final build ID in ti package test build: `caf64e842bc0963c57d3f1d3`.
-
-Li real built-artifact witness `calendarDateSpaghetti(739862n,739862n)` esset startat localmen, ma li container ne completat li semantic calculation intra 15 minutes. Diagnostics confirma que li wait es intra li real `calendarDateSpaghetti` call, ne in li nov Worker protocol. Ti witness ne es declarat PASS localmen. Li unchanged base HEAD had passat li exact built witness in GitHub Actions; pos upload, CI deve rerun `tests/browser-built-artifacts.js` contra ti delta.
+`tests/browser-built-artifacts.js` ne finit localmen in li available execution environment durant li heavy real witness calculation. Ti sam heavy gate passat in GitHub Actions por v12 e deve esser executet denov per CI pos ti delta.
 
 ## Files
 
-Ti package include solmen source/workflow/test replacements plus ti README e manifest. It exclude:
-
-- `src/**`
-- root `package.json`
-- generated `browser/dist/**`
-- generated Standalone bundles
-- HANDOFF files
+Ti ZIP contene solmen li files quel deve esser cargat por ti delta. Null generated `browser/dist`, null HANDOFF, null `package.json`, null semantic-core file e null workflow YAML es includet.

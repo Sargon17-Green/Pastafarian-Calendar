@@ -84,6 +84,70 @@ function makeView(startValue, endValue, selectedValue, selectedMonth, selectedDa
 }
 
 (async () => {
+  // Schema 2 could contain an already-poisoned direct conversion from an older
+  // browser session. Schema 3 must ignore and remove that legacy storage before
+  // CalendarService gets a chance to trust it as a direct conversion authority.
+  const legacyStorage = makeLocalStorage();
+  const legacyNamespace = 'pc-browser-core-legacy-poison-test';
+  const legacyTargetJdn = 739862n;
+  const legacyCalculationJdn = 739862n;
+  const legacyTargetDay = axis.jdnToProjectDay(legacyTargetJdn);
+  const legacyCalculationDay = axis.jdnToProjectDay(legacyCalculationJdn);
+  const legacyPairKey = String(legacyCalculationDay) + ':' + String(legacyTargetDay);
+  const legacyStorageKey = 'pastafari-calendar-cache:' + legacyNamespace + ':schema-2';
+  legacyStorage.setItem(legacyStorageKey, JSON.stringify({
+    schemaVersion: 2,
+    conversions: [{
+      key: legacyPairKey,
+      value: {
+        year: '5000',
+        cutletName: 'bronze',
+        dayInCutlet: 677,
+        monthName: 'costa',
+        dayInMonth: 12,
+      },
+    }],
+    cutlets: [],
+  }));
+
+  const migratedMemory = new PersistentCalendarMemory({
+    namespace: legacyNamespace,
+    storage: legacyStorage,
+  });
+  assert.strictEqual(
+    migratedMemory.getConversion(legacyCalculationDay, legacyTargetDay),
+    undefined,
+    'Schema 3 ne deve leer un conversion direct poisonat ex schema 2.',
+  );
+  assert.strictEqual(
+    legacyStorage.getItem(legacyStorageKey),
+    null,
+    'Li obsolete schema-2 storage deve esser removet durant migration.',
+  );
+
+  let migratedEngineCalls = 0;
+  const canonicalAfterMigration = {
+    async convert() {
+      migratedEngineCalls += 1;
+      return ['5000', 'bronze', 677, 'sand', 32];
+    },
+    async getCutletView() { throw new Error('Li cutlet-view ne es parte de ti migration-prova.'); },
+    retry() {},
+    dispose() {},
+  };
+  const migratedService = new CalendarService({
+    engineClient: canonicalAfterMigration,
+    memory: migratedMemory,
+  });
+  const migratedResult = await migratedService.convert(legacyTargetJdn, legacyCalculationJdn);
+  assert.strictEqual(migratedEngineCalls, 1, 'Pos migration li direct authority deve esser recalculat ex li engine.');
+  assert.strictEqual(migratedResult.monthName, 'sand');
+  assert.strictEqual(migratedResult.dayInMonth, 32);
+  assert.ok(
+    legacyStorage.getItem('pastafari-calendar-cache:' + legacyNamespace + ':schema-3'),
+    'Li recalculat result deve esser persistet solmen sub schema 3.',
+  );
+
   // Persistent memory survives a new CalendarService instance on the same browser storage.
   const memoryA = new PersistentCalendarMemory({
     namespace: 'test-core-fingerprint',
