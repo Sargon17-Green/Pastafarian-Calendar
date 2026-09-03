@@ -1,4 +1,4 @@
-name: JavaScript + Interlingue — finalize corrected Stage 59
+name: JavaScript + Interlingue — finalize Stage 59 content only
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: javascript-interlingue-stage59-finalize
+  group: javascript-interlingue-stage59-finalize-content-only
   cancel-in-progress: false
 
 jobs:
@@ -27,52 +27,45 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Verificar li statu actual e li pollution accidental
+      - name: Guardar li expected branch state
         shell: bash
         run: |
           set -euo pipefail
-          GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
-          POLLUTED='0b4ba44110cfe6947cbaa279ac8467ca53f14590'
+          EXPECTED='e63ce8886d00b700f8b866c85530a356d4fd3414'
           FINALIZER='.github/workflows/javascript-interlingue-stage59-finalize.yml'
 
-          git merge-base --is-ancestor "$GOOD" HEAD
-          git merge-base --is-ancestor "$POLLUTED" HEAD
+          git merge-base --is-ancestor "$EXPECTED" HEAD
 
-          mapfile -t changed < <(git diff --name-only "$GOOD"..HEAD)
-          for path in "${changed[@]}"; do
+          mapfile -t after_expected < <(git diff --name-only "$EXPECTED"..HEAD)
+          for path in "${after_expected[@]}"; do
             case "$path" in
-              README.txt|REFERENCE_CORRECTED_TREE.zip|SHA256SUMS.txt|STAGE_59_CORRECTED_MANIFEST.json|javascript-interlingue-stage59-apply-corrected.yml|"$FINALIZER")
+              "$FINALIZER")
                 ;;
               *)
-                echo "Refusa: unexpected change after li successful rollback: $path" >&2
+                echo "Refusa unexpected change after expected branch state: $path" >&2
                 exit 1
                 ;;
             esac
           done
 
-      - name: Remover li accidental Web-package files e restaurar li root
+      - name: Restaurar li root e remover accidental package files
         shell: bash
         run: |
           set -euo pipefail
           GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
 
-          git rm -f --ignore-unmatch \
-            README.txt \
-            REFERENCE_CORRECTED_TREE.zip \
-            STAGE_59_CORRECTED_MANIFEST.json \
-            javascript-interlingue-stage59-apply-corrected.yml
+          git restore --source="$GOOD" --staged --worktree -- README.md SHA256SUMS.txt
 
-          git restore --source="$GOOD" --staged --worktree -- SHA256SUMS.txt
+          git rm -f --ignore-unmatch             README.txt             REFERENCE_CORRECTED_TREE.zip             STAGE_59_CORRECTED_MANIFEST.json             javascript-interlingue-stage59-apply-corrected.yml
 
-          cmp package.json <(git show "$GOOD:package.json")
           cmp README.md <(git show "$GOOD:README.md")
+          cmp package.json <(git show "$GOOD:package.json")
 
       - name: Constructer Stage 59 in li correct hierarchy
         shell: bash
         run: |
           set -euo pipefail
           FLAT='2635db4101a0b640a294fd79054fb2213008a8b8'
-          CI='19cff57d10b85ad93f2fb44ec5b9f5893551e285'
 
           copy_flat() {
             local source="$1"
@@ -103,39 +96,30 @@ jobs:
           copy_flat server-stage59-real-benchmark.js tests/server-stage59-real-benchmark.js
           copy_flat server-stage59-real-contract.js tests/server-stage59-real-contract.js
 
-          mkdir -p .github/workflows
-          git show "$CI:.github/workflows/javascript-interlingue-stage59-server.yml" \
-            > .github/workflows/javascript-interlingue-stage59-server.yml
-          git add .github/workflows/javascript-interlingue-stage59-server.yml
-
-      - name: Remover ti installer temporal del tree final
-        shell: bash
-        run: |
-          set -euo pipefail
-          git rm -f .github/workflows/javascript-interlingue-stage59-finalize.yml
-
-      - name: Verificar que solmen Stage 59 es changeat contra li base san
+      - name: Verificar li staged content e conservar li normative name correction
         shell: bash
         run: |
           set -euo pipefail
           GOOD='3e6fe2bb035a300b02d33534015e4011ea767019'
 
-          cmp package.json <(git show "$GOOD:package.json")
           cmp README.md <(git show "$GOOD:README.md")
-          test -z "$(git diff --cached --name-only "$GOOD" -- src browser package.json README.md)"
+          cmp package.json <(git show "$GOOD:package.json")
 
-          mapfile -t proposed < <(git diff --cached --name-only "$GOOD")
-          for path in "${proposed[@]}"; do
+          node tests/source-language-normative-names.js
+
+          mapfile -t staged < <(git diff --cached --name-only)
+          for path in "${staged[@]}"; do
             case "$path" in
-              server/*|tests/server-stage59-*.js|.github/workflows/javascript-interlingue-stage59-server.yml)
+              README.md|README.txt|REFERENCE_CORRECTED_TREE.zip|SHA256SUMS.txt|STAGE_59_CORRECTED_MANIFEST.json|javascript-interlingue-stage59-apply-corrected.yml|server/*|tests/server-stage59-*.js)
                 ;;
               *)
-                echo "Refusa unexpected final path: $path" >&2
+                echo "Refusa unexpected staged path: $path" >&2
                 exit 1
                 ;;
             esac
           done
 
+          test -z "$(git diff --cached --name-only -- '.github/workflows/**')"
           git diff --cached --check
 
       - name: Provar li historical e browser contracts
@@ -153,12 +137,13 @@ jobs:
           node tests/server-stage59-real-contract.js
           node tests/server-stage59-real-benchmark.js --run-heavy
 
-      - name: Crear e publicar li corrected Stage 59 commit
+      - name: Crear e publicar li non-workflow content commit
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-          git commit -m 'Adjunter Stage 59 in li correct repository hierarchy'
+          test -z "$(git diff --cached --name-only -- '.github/workflows/**')"
+          git commit -m 'Reparar li root e adjunter Stage 59 server hierarchy'
           git push origin HEAD:JavaScript+Interlingue
