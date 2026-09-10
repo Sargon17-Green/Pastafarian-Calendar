@@ -63,18 +63,17 @@ function assertCentralCheckpointShape(run) {
   const ordinaryAfter = core.calendarDateSpaghetti(c, t);
 
   assert.deepStrictEqual(ordinaryAfter, ordinaryBefore);
-  assert.strictEqual(trace.schemaVersion, '0.2.0');
+  assert.strictEqual(trace.schemaVersion, '0.3.0');
   assert.strictEqual(trace.coverage.sameSemanticExecutionAsFinalResult, true);
   assert.strictEqual(trace.coverage.independentExplanationEngine, false);
 
   assert.ok(trace.artifacts.sauceRuns.length >= 2);
   trace.artifacts.sauceRuns.forEach(assertCentralCheckpointShape);
 
-  assert.deepStrictEqual(trace.coverage.missingCoreCheckpoints, [
-    'stone-transition-operands',
-    'selection-candidate-rejections',
-    'full-gate-sauce-detail-without-rerun',
-  ]);
+  assert.deepStrictEqual(trace.coverage.missingCoreCheckpoints, []);
+  assert.strictEqual(trace.coverage.stoneTransitionOperands, 'captured-at-execution-shared-artifact');
+  assert.strictEqual(trace.coverage.selectionCandidateRejections, 'captured-lossless-run-encoding');
+  assert.strictEqual(trace.coverage.gateSauceDetail, 'same-execution-stream-option-available');
 
   // This recomputation exists only in the regression test. The adapter itself
   // exposes the u value recorded at the canonical execution point.

@@ -1052,24 +1052,42 @@ function cloneStoneState(state) {
   return { w: state.w, b: state.b, s: state.s, m: state.m, r: state.r };
 }
 
-function stonePatch(index, state) {
+function stonePatch(index, state, checkpoint = null) {
   const old = cloneStoneState(state);
   // Li call legacy resta real e intentional; su resultate es poy totalmen superscrit ex li snapshot old.
   const garbage = mutateStonesWrong(index, cloneStoneState(state));
-  garbage.w = savePatch(old.w * old.w + 3n * old.b + index);
-  garbage.b = savePatch(old.b * old.b + 5n * old.s + old.w);
-  garbage.s = savePatch(old.s * old.s + 7n * old.m + old.b);
-  garbage.m = savePatch(old.m * old.m + 11n * old.r + old.s);
-  garbage.r = savePatch(old.r * old.r + 13n * old.w + old.m);
+  const rawBeforeSave = {
+    w: old.w * old.w + 3n * old.b + index,
+    b: old.b * old.b + 5n * old.s + old.w,
+    s: old.s * old.s + 7n * old.m + old.b,
+    m: old.m * old.m + 11n * old.r + old.s,
+    r: old.r * old.r + 13n * old.w + old.m
+  };
+  garbage.w = savePatch(rawBeforeSave.w);
+  garbage.b = savePatch(rawBeforeSave.b);
+  garbage.s = savePatch(rawBeforeSave.s);
+  garbage.m = savePatch(rawBeforeSave.m);
+  garbage.r = savePatch(rawBeforeSave.r);
+  emitCookingTraceCheckpoint(checkpoint, 'stone-transition', {
+    ordinal: Number(index),
+    index,
+    before: cloneStoneState(old),
+    rawBeforeSave: { ...rawBeforeSave },
+    after: cloneStoneState(garbage)
+  });
   return garbage;
 }
 
-function getStoneTableThroughLegacyBuilder() {
+function getStoneTableThroughLegacyBuilder(checkpoint = null) {
   let state = { w: 17n, b: 29n, s: 43n, m: 71n, r: 101n };
   const table = [cloneStoneState(state)];
+  emitCookingTraceCheckpoint(checkpoint, 'stone-seed', {
+    ordinal: 1,
+    values: cloneStoneState(state)
+  });
   let index = 2n;
   while (index <= 46n) {
-    state = stonePatch(index, state);
+    state = stonePatch(index, state, checkpoint);
     table.push(cloneStoneState(state));
     index += 1n;
   }
@@ -2078,7 +2096,7 @@ function legacySelectionAssumingNLeM(stream, N) {
   return patchedSmallPick(stream, N);
 }
 
-function patchedSmallPick(stream, N) {
+function patchedSmallPick(stream, N, checkpoint = null) {
   if (!stream || typeof stream.first !== 'bigint' || typeof stream.directionStep !== 'bigint') {
     throw new TypeError('Li selector curt reparat exige un answer ring exact.');
   }
@@ -2095,15 +2113,37 @@ function patchedSmallPick(stream, N) {
   const limit = (M_OLD / N) * N;
   let offset = 0n;
   let x = ringAnswerAt(stream, offset);
+  const firstCandidate = x;
   while (x > limit) {
     offset += 1n;
     x = ringAnswerAt(stream, offset);
   }
   // Li helper legacy resta intact e es vocat solmen pos que li rejection ha removet li modulo bias.
+  if (checkpoint !== null && checkpoint !== undefined) {
+    const output = biasedLegacyPick(x, N);
+    emitCookingTraceCheckpoint(checkpoint, 'selection-result', {
+      mode: 'short',
+      familySize: N,
+      streamFirst: stream.first,
+      directionStep: stream.directionStep,
+      acceptanceLimit: limit,
+      firstCandidate,
+      rejectionSteps: offset,
+      acceptedCandidate: x,
+      output,
+      rejectionEncoding: {
+        kind: 'answer-ring-run',
+        start: firstCandidate,
+        directionStep: stream.directionStep,
+        count: offset
+      }
+    });
+    return output;
+  }
   return biasedLegacyPick(x, N);
 }
 
-function wideDetour(stream, N) {
+function wideDetour(stream, N, checkpoint = null) {
   if (!stream || typeof stream.first !== 'bigint' || typeof stream.directionStep !== 'bigint') {
     throw new TypeError('Li detour wide exige un answer ring exact.');
   }
@@ -2140,7 +2180,7 @@ function wideDetour(stream, N) {
     wide = 1n + regularMod(wide - 1n + stream.directionStep, space);
     rejectionSteps += 1n;
   }
-  return {
+  const result = {
     mode: 'wide',
     output: regularMod(wide - 1n, N) + 1n,
     places,
@@ -2152,9 +2192,31 @@ function wideDetour(stream, N) {
     acceptedWide: wide,
     rejectionSteps
   };
+  emitCookingTraceCheckpoint(checkpoint, 'selection-result', {
+    mode: 'wide',
+    familySize: N,
+    streamFirst: stream.first,
+    directionStep: stream.directionStep,
+    places,
+    space,
+    digits: digits.slice(),
+    initialWide,
+    acceptanceLimit,
+    rejectionSteps,
+    acceptedCandidate: wide,
+    output: result.output,
+    rejectionEncoding: {
+      kind: 'wide-ring-run',
+      start: initialWide,
+      directionStep: stream.directionStep,
+      modulus: space,
+      count: rejectionSteps
+    }
+  });
+  return result;
 }
 
-function selectionDispatcherWithWideDetour(stream, N) {
+function selectionDispatcherWithWideDetour(stream, N, checkpoint = null) {
   if (typeof N !== 'bigint') {
     throw new TypeError('Li dispatcher de selection exige un familie quam BigInt exact.');
   }
@@ -2162,6 +2224,20 @@ function selectionDispatcherWithWideDetour(stream, N) {
     throw new RangeError('Li dispatcher de selection exige un familie positiv.');
   }
   if (N <= M_OLD) {
+    if (checkpoint !== null && checkpoint !== undefined) {
+      return {
+        mode: 'short',
+        output: patchedSmallPick(stream, N, checkpoint),
+        places: null,
+        space: null,
+        digits: null,
+        digitReadCount: 0,
+        initialWide: null,
+        acceptanceLimit: null,
+        acceptedWide: null,
+        rejectionSteps: 0n
+      };
+    }
     return {
       mode: 'short',
       output: patchedSmallPick(stream, N),
@@ -2174,6 +2250,9 @@ function selectionDispatcherWithWideDetour(stream, N) {
       acceptedWide: null,
       rejectionSteps: 0n
     };
+  }
+  if (checkpoint !== null && checkpoint !== undefined) {
+    return wideDetour(stream, N, checkpoint);
   }
   return wideDetour(stream, N);
 }
@@ -2191,9 +2270,29 @@ function stage58ObserveRejectionIterationsWithoutChangingLegacySelection(stream,
   return offset;
 }
 
-function stage58SelectionDispatcherRemembered(stream, N, context = null, label = 'selection') {
+function stage58SelectionDispatcherRemembered(stream, N, context = null, label = 'selection', checkpoint = null) {
   if (!stream || typeof stream.first !== 'bigint' || typeof stream.directionStep !== 'bigint' || typeof N !== 'bigint') {
-    return selectionDispatcherWithWideDetour(stream, N);
+    return selectionDispatcherWithWideDetour(stream, N, checkpoint);
+  }
+  const contextCheckpoint = context && typeof context.cookingTraceSelectionCheckpoint === 'function'
+    ? context.cookingTraceSelectionCheckpoint
+    : null;
+  const activeCheckpoint = checkpoint || contextCheckpoint;
+  if (activeCheckpoint) {
+    const labeledCheckpoint = (kind, payload) => emitCookingTraceCheckpoint(activeCheckpoint, kind, {
+      label,
+      ...payload
+    });
+    const tracedFresh = selectionDispatcherWithWideDetour(stream, N, labeledCheckpoint);
+    if (context && Array.isArray(context.diagnostics)) {
+      context.diagnostics.push(Object.freeze({
+        label: 'cooking-trace-selection-execution',
+        source: label,
+        cacheBacked: false,
+        mode: tracedFresh.mode
+      }));
+    }
+    return tracedFresh;
   }
   const key = stream.first.toString() + ':' + stream.directionStep.toString() + ':' + N.toString();
   const rememberedEntry = STAGE58_SELECTION_MEMORY.get(key);
@@ -7754,7 +7853,9 @@ function sauceWithScarsStage56HistoricalUnremembered(calculationDay, targetDay, 
         programCounter = 20;
         break;
       case 20:
-        stones = stage58RememberedStoneTableThroughLegacyBuilder();
+        stones = checkpoint
+          ? getStoneTableThroughLegacyBuilder(checkpoint)
+          : stage58RememberedStoneTableThroughLegacyBuilder();
         trace.push('STONES_THROUGH_LEGACY_BUILDER');
         programCounter = 30;
         break;
@@ -7902,6 +8003,7 @@ class Stage54GateRegistry {
     this.stage58GateMemoryScar = stage58GateMemoryForProvider(sauceProvider);
     this.stage58GateCheckpointHits = 0n;
     this.stage58GateGapMemoryHits = 0n;
+    this.cookingTraceSelectionCheckpoint = null;
   }
 
   gateGap(signedIndex) {
@@ -7918,7 +8020,7 @@ class Stage54GateRegistry {
     const questionDay = gateQuestionWithSignedStep(signedIndex);
     const sauceResult = this.sauceProvider(FOUNDATION_DAY_OLD, questionDay);
     const stream = stage54AnswerRingWithScar(sauceResult, 1, 1n, null, 'gate-gap');
-    const selected = stage58SelectionDispatcherRemembered(stream, 922n, null, 'gate-gap');
+    const selected = stage58SelectionDispatcherRemembered(stream, 922n, null, 'gate-gap', this.cookingTraceSelectionCheckpoint);
     this.gapCalls += 1n;
     stage58Metric('stage58.gates.gapComputations');
     const gap = 41n + selected.output;

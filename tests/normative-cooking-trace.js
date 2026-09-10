@@ -51,7 +51,7 @@ function assertCentralSauceShape(run) {
 
   assert.deepStrictEqual(resultArray(trace1), before);
   assert.deepStrictEqual(after, before);
-  assert.strictEqual(trace1.schemaVersion, '0.2.0');
+  assert.strictEqual(trace1.schemaVersion, '0.3.0');
   assert.strictEqual(trace1.semanticProfile, 'PASTAFARIAN_STAGE57_STAGE56_RAW_SUM');
 
   assertNoBigInt(trace1);

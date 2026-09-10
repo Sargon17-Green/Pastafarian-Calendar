@@ -2,7 +2,7 @@
 
 const core = require('./index');
 
-const TRACE_SCHEMA_VERSION = '0.2.0';
+const TRACE_SCHEMA_VERSION = '0.3.0';
 const TRACE_SEMANTIC_PROFILE = 'PASTAFARIAN_STAGE57_STAGE56_RAW_SUM';
 const FOUNDATION_DAY = core.FOUNDATION_DAY_OLD;
 
@@ -53,6 +53,35 @@ function cloneCounts(counts) {
     connection: counts.connection,
     direction: counts.direction,
   };
+}
+
+function normalizeTraceOptions(options) {
+  if (options === null || options === undefined) {
+    return { onGateSauceDetail: null, gateDetailGateIndices: null };
+  }
+  if (!options || typeof options !== 'object' || Array.isArray(options)) {
+    throw new TypeError('Li options del cooking trace deve esser un plain object.');
+  }
+  const onGateSauceDetail = options.onGateSauceDetail === undefined
+    ? null
+    : options.onGateSauceDetail;
+  if (onGateSauceDetail !== null && typeof onGateSauceDetail !== 'function') {
+    throw new TypeError('onGateSauceDetail deve esser null o un function.');
+  }
+  let gateDetailGateIndices = null;
+  if (options.gateDetailGateIndices !== undefined && options.gateDetailGateIndices !== null) {
+    if (!Array.isArray(options.gateDetailGateIndices)) {
+      throw new TypeError('gateDetailGateIndices deve esser null o un array de BigInt.');
+    }
+    gateDetailGateIndices = new Set();
+    for (const index of options.gateDetailGateIndices) {
+      if (typeof index !== 'bigint' || index === 0n) {
+        throw new RangeError('Chascun gateDetailGateIndices deve esser un BigInt non-zero.');
+      }
+      gateDetailGateIndices.add(index);
+    }
+  }
+  return { onGateSauceDetail, gateDetailGateIndices };
 }
 
 function deepFreeze(value, seen = new Set()) {
@@ -141,8 +170,23 @@ function createCookingCheckpointCollector() {
   const visible = new Map();
   const initialBowls = [];
   const bowlRounds = [];
+  let stoneSeed = null;
+  const stoneTransitions = [];
 
   const observer = (kind, payload) => {
+    if (kind === 'stone-seed') {
+      stoneSeed = { ...payload, values: { ...payload.values } };
+      return;
+    }
+    if (kind === 'stone-transition') {
+      stoneTransitions.push({
+        ...payload,
+        before: { ...payload.before },
+        rawBeforeSave: { ...payload.rawBeforeSave },
+        after: { ...payload.after },
+      });
+      return;
+    }
     if (kind === 'hidden-start') {
       hidden.set(payload.ordinal, { ...payload, grinds: [] });
       return;
@@ -192,6 +236,16 @@ function createCookingCheckpointCollector() {
         visibleDrops: Array.from(visible.values())
           .sort((a, b) => a.ordinal - b.ordinal)
           .map((row) => ({ ...row, grinds: row.grinds.map((grind) => ({ ...grind })) })),
+        stoneSeed: stoneSeed ? { ...stoneSeed, values: { ...stoneSeed.values } } : null,
+        stoneTransitions: stoneTransitions
+          .slice()
+          .sort((a, b) => a.ordinal - b.ordinal)
+          .map((row) => ({
+            ...row,
+            before: { ...row.before },
+            rawBeforeSave: { ...row.rawBeforeSave },
+            after: { ...row.after },
+          })),
         initialBowls: initialBowls.slice().sort((a, b) => a.bowlId - b.bowlId),
         bowlRounds: bowlRounds.slice().sort((a, b) => a.ordinal - b.ordinal),
       };
@@ -210,6 +264,27 @@ class NormativeExecutionRecorder {
     this.authoritativeYears = [];
     this.authoritativeYearKeys = new Set();
     this.year5000 = null;
+    this.nextSelectionOrdinal = 1;
+    this.selectionEvents = [];
+    this.gateDetailSinkErrors = [];
+  }
+
+  recordSelection(kind, payload) {
+    if (kind !== 'selection-result' || !payload || typeof payload !== 'object') {
+      throw new TypeError('Li recorder expecta un selection-result checkpoint.');
+    }
+    const gateIndex = this.activeGateStack.length
+      ? this.activeGateStack[this.activeGateStack.length - 1]
+      : null;
+    this.selectionEvents.push({
+      id: 'selection-' + String(this.nextSelectionOrdinal++),
+      gateIndex,
+      ...payload,
+      rejectionEncoding: payload.rejectionEncoding
+        ? { ...payload.rejectionEncoding }
+        : null,
+      digits: Array.isArray(payload.digits) ? payload.digits.slice() : null,
+    });
   }
 
   beginGateGap(signedIndex) {
@@ -252,9 +327,10 @@ class NormativeExecutionRecorder {
       targetDay,
       gateIndex,
       transitionId: null,
+      detailStreamed: false,
       compact: compactSauceSnapshot(result),
-      coreCheckpoints: gateIndex === null ? coreCheckpoints : null,
-      fullResult: gateIndex === null ? result : null,
+      coreCheckpoints: coreCheckpoints || null,
+      fullResult: coreCheckpoints || gateIndex === null ? result : null,
       stage56StateRef: gateIndex === null && result ? result.stage56PostStirContext || null : null,
     };
     this.sauceRuns.push(row);
@@ -320,9 +396,10 @@ class NormativeExecutionRecorder {
 }
 
 class TracingGateRegistry extends core.Stage54GateRegistry {
-  constructor(provider, recorder) {
+  constructor(provider, recorder, selectionCheckpoint) {
     super(provider);
     this.recorder = recorder;
+    this.cookingTraceSelectionCheckpoint = selectionCheckpoint;
   }
 
   gateGap(signedIndex) {
@@ -364,6 +441,19 @@ class TracingYearMemory extends core.Stage58RememberedYearDetourManager {
     const value = super.rememberAuthoritative(calculationDay, year, lineage);
     this.recorder.recordAuthoritativeYear(year, lineage);
     return value;
+  }
+}
+
+class TracingStage57Manager extends core.Stage57MonsterIntegrationManager {
+  constructor(registry, selectionCheckpoint) {
+    super(registry);
+    this.cookingTraceSelectionCheckpoint = selectionCheckpoint;
+  }
+
+  prepareFinal(calculationDay, targetDay) {
+    const context = super.prepareFinal(calculationDay, targetDay);
+    context.cookingTraceSelectionCheckpoint = this.cookingTraceSelectionCheckpoint;
+    return context;
   }
 }
 
@@ -475,20 +565,43 @@ function fullSauceProjection(run, role, stoneTableId) {
       bowlRounds: 'captured-at-execution',
       postStirRounds: 'captured',
       postStirPositionU: 'captured-at-execution',
-      stoneTransitionOperands: 'needs-core-checkpoint',
+      stoneTransitionOperands: 'shared-artifact-captured-at-execution',
     },
   };
 }
 
 function buildStoneTable(recorder) {
-  const run = recorder.sauceRuns.find((item) => item.fullResult && Array.isArray(item.fullResult.stones));
+  const run = recorder.sauceRuns.find((item) =>
+    item.fullResult
+    && Array.isArray(item.fullResult.stones)
+    && item.coreCheckpoints
+    && item.coreCheckpoints.stoneSeed
+    && Array.isArray(item.coreCheckpoints.stoneTransitions)
+  );
   if (!run) return null;
+  const transitions = new Map(
+    run.coreCheckpoints.stoneTransitions.map((row) => [row.ordinal, row]),
+  );
   return {
     id: 'stone-table-1',
-    rows: run.fullResult.stones.map((row, index) => ({
-      ordinal: index + 1,
-      values: { w: row.w, b: row.b, s: row.s, m: row.m, r: row.r },
-    })),
+    seed: {
+      ordinal: run.coreCheckpoints.stoneSeed.ordinal,
+      values: { ...run.coreCheckpoints.stoneSeed.values },
+    },
+    rows: run.fullResult.stones.map((row, index) => {
+      const ordinal = index + 1;
+      const transition = transitions.get(ordinal) || null;
+      return {
+        ordinal,
+        values: { w: row.w, b: row.b, s: row.s, m: row.m, r: row.r },
+        transition: transition ? {
+          index: transition.index,
+          before: { ...transition.before },
+          rawBeforeSave: { ...transition.rawBeforeSave },
+          after: { ...transition.after },
+        } : null,
+      };
+    }),
   };
 }
 
@@ -539,10 +652,34 @@ function projectGateNetwork(recorder) {
         gap: row.gap,
         sauceRunId: row.sauceRunId,
         sauceSummary: sauce ? sauce.compact : null,
-        detailCoverage: 'compact-foundation-only',
+        detailCoverage: sauce && sauce.detailStreamed ? 'streamed-same-execution' : 'compact-stream-option-available',
       };
     });
   return { gates, gaps };
+}
+
+function projectSelections(recorder) {
+  return recorder.selectionEvents.map((row) => ({
+    id: row.id,
+    gateIndex: row.gateIndex,
+    sourceLabel: row.label,
+    mode: row.mode,
+    familySize: row.familySize,
+    stream: {
+      first: row.streamFirst,
+      directionStep: row.directionStep,
+    },
+    places: row.places === undefined ? null : row.places,
+    space: row.space === undefined ? null : row.space,
+    digits: Array.isArray(row.digits) ? row.digits.slice() : null,
+    acceptanceLimit: row.acceptanceLimit,
+    firstCandidate: row.firstCandidate === undefined ? null : row.firstCandidate,
+    initialWide: row.initialWide === undefined ? null : row.initialWide,
+    rejectionSteps: row.rejectionSteps,
+    acceptedCandidate: row.acceptedCandidate,
+    output: row.output,
+    rejectionEncoding: row.rejectionEncoding ? { ...row.rejectionEncoding } : null,
+  }));
 }
 
 function projectFinalResult(result) {
@@ -688,13 +825,22 @@ function buildChapters(trace) {
   ];
 }
 
-function calendarDateSpaghettiCookingTrace(calculationDay, targetDay) {
+function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = null) {
   requireDay(calculationDay, 'Li calculation-day del cooking trace');
   requireDay(targetDay, 'Li target-day del cooking trace');
+  const traceOptions = normalizeTraceOptions(options);
 
   const recorder = new NormativeExecutionRecorder();
+  const selectionCheckpoint = (kind, payload) => recorder.recordSelection(kind, payload);
   const provider = (cDay, tDay) => {
-    const collector = recorder.activeGateStack.length === 0
+    const gateIndex = recorder.activeGateStack.length
+      ? recorder.activeGateStack[recorder.activeGateStack.length - 1]
+      : null;
+    const streamGateDetail = gateIndex !== null
+      && traceOptions.onGateSauceDetail !== null
+      && (traceOptions.gateDetailGateIndices === null
+        || traceOptions.gateDetailGateIndices.has(gateIndex));
+    const collector = gateIndex === null || streamGateDetail
       ? createCookingCheckpointCollector()
       : null;
     const result = core.sauceWithScarsStage56(
@@ -702,20 +848,43 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay) {
       tDay,
       collector ? collector.observer : null,
     );
-    return recorder.recordSauce(
+    recorder.recordSauce(
       cDay,
       tDay,
       result,
       collector ? collector.snapshot() : null,
     );
+    const run = recorder.sauceRuns[recorder.sauceRuns.length - 1];
+    if (streamGateDetail) {
+      const detail = deepFreeze(exactJsonValue(fullSauceProjection(
+        run,
+        { kind: 'gate-gap', signedIndex: gateIndex },
+        'stone-table-1',
+      )));
+      try {
+        traceOptions.onGateSauceDetail(detail);
+        run.detailStreamed = true;
+      } catch (error) {
+        recorder.gateDetailSinkErrors.push(error);
+      } finally {
+        run.coreCheckpoints = null;
+        run.fullResult = null;
+      }
+    }
+    return result;
   };
 
-  const registry = new TracingGateRegistry(provider, recorder);
-  const manager = new core.Stage57MonsterIntegrationManager(registry);
+  const registry = new TracingGateRegistry(provider, recorder, selectionCheckpoint);
+  const manager = new TracingStage57Manager(registry, selectionCheckpoint);
   manager.sauceProvider = provider;
   manager.stage58YearMemoryScar = new TracingYearMemory(provider, recorder);
 
   const routed = manager.executeCalendarDate(calculationDay, targetDay);
+  if (recorder.gateDetailSinkErrors.length) {
+    const error = new Error('Un gate-detail sink fallit pos que li execution semantic finit.');
+    error.cause = recorder.gateDetailSinkErrors[0];
+    throw error;
+  }
   const context = routed.context;
   const stoneTable = buildStoneTable(recorder);
   const centralSauces = assignSauceRoles(recorder, context, stoneTable ? stoneTable.id : null);
@@ -741,6 +910,7 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay) {
       stoneTable,
       sauceRuns: centralSauces,
       gateNetwork: projectGateNetwork(recorder),
+      selections: projectSelections(recorder),
       yearWalk: {
         year5000: cloneYear(recorder.year5000 || context.year5000),
         authoritativeYears: recorder.authoritativeYears.map((row) => ({
@@ -762,6 +932,12 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay) {
       gateCountMaterialized: recorder.gates.size,
       gateGapCountMaterialized: recorder.gateGaps.size,
       semanticYearTransitionCount: semanticTransitions.length,
+      selectionCallsObserved: recorder.selectionEvents.length,
+      selectionRejectionStepsObserved: recorder.selectionEvents.reduce(
+        (sum, row) => sum + (typeof row.rejectionSteps === 'bigint' ? row.rejectionSteps : 0n),
+        0n,
+      ),
+      gateDetailChunksStreamed: recorder.sauceRuns.filter((row) => row.detailStreamed === true).length,
     },
     coverage: {
       sameSemanticExecutionAsFinalResult: true,
@@ -769,12 +945,18 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay) {
       languageNeutralSemanticKeys: true,
       exactIntegerTransport: 'decimal-string',
       cacheDiagnosticsExcludedFromSemantics: true,
-      gateSauceDetail: 'compact-foundation-only',
-      missingCoreCheckpoints: [
-        'stone-transition-operands',
-        'selection-candidate-rejections',
-        'full-gate-sauce-detail-without-rerun',
-      ],
+      stoneTransitionOperands: 'captured-at-execution-shared-artifact',
+      selectionCandidateRejections: 'captured-lossless-run-encoding',
+      gateSauceDetail: traceOptions.onGateSauceDetail === null
+        ? 'same-execution-stream-option-available'
+        : traceOptions.gateDetailGateIndices === null
+          ? 'streamed-from-same-execution'
+          : 'selected-gates-streamed-from-same-execution',
+      gateSauceDetailTransport: 'one-json-safe-chunk-per-gate-sauce',
+      gateDetailRequestedIndices: traceOptions.gateDetailGateIndices === null
+        ? null
+        : Array.from(traceOptions.gateDetailGateIndices.values()).sort(compareBigInt),
+      missingCoreCheckpoints: [],
     },
   };
   trace.chapters = buildChapters(trace);
