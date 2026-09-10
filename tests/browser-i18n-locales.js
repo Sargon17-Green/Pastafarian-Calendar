@@ -39,6 +39,37 @@ const REQUIRED_MESSAGES = Object.freeze([
   'date.monthLine',
   'target.searched',
   'target.context',
+  'cooking.open',
+  'cooking.title',
+  'cooking.subtitle',
+  'cooking.close',
+  'cooking.loading',
+  'cooking.error',
+  'cooking.retry',
+  'cooking.previous',
+  'cooking.next',
+  'cooking.exactShow',
+  'cooking.exactHide',
+  'cooking.captureGate',
+  'cooking.captureGateBusy',
+  'cooking.gateDetailReady',
+  'cooking.noYearWalk',
+  'cooking.empty',
+  'cooking.sameExecution',
+  'cooking.chapter.inputs',
+  'cooking.chapter.gates',
+  'cooking.chapter.year5000',
+  'cooking.chapter.yearWalk',
+  'cooking.chapter.structureSauce',
+  'cooking.chapter.cutlets',
+  'cooking.chapter.months',
+  'cooking.chapter.position',
+  'cooking.chapter.result',
+  'cooking.phase.stones',
+  'cooking.phase.hidden',
+  'cooking.phase.visible',
+  'cooking.phase.bowls',
+  'cooking.phase.postStirs',
 ]);
 
 const sandbox = { Intl, globalThis: null };
@@ -115,6 +146,10 @@ assert.strictEqual(i18n.translate(de, 'field.day'), 'Tag');
 assert.strictEqual(i18n.translate(es, 'field.day'), 'Día');
 assert.strictEqual(i18n.translate(it, 'field.day'), 'Giorno');
 assert.strictEqual(i18n.translate(cs, 'field.day'), 'Den');
+assert.strictEqual(i18n.translate(ie, 'cooking.chapter.gates'), 'Portas');
+assert.strictEqual(i18n.translate(en, 'cooking.title'), 'How this date was cooked');
+assert.strictEqual(i18n.translate(he, 'cooking.close'), 'סגור');
+assert.strictEqual(i18n.translate(ar, 'cooking.chapter.result'), 'النتيجة');
 
 // Regression witnesses: current semantic identities, including names that differ
 // from the pinned old positional catalog.

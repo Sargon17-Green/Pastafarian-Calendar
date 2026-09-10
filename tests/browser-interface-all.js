@@ -13,6 +13,7 @@ const tests = [
   'browser-interface-contract.js',
   'browser-interface-black-box.js',
   'browser-i18n-locales.js',
+  'browser-cooking-component.js',
   'browser-component-runtime.js',
 ];
 

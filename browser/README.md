@@ -187,3 +187,27 @@ integers. Detalliat gate Sauce es opt-in e es transmis quam it es productet, tal
 li Worker ne deve retener omni intern detail de omni gates simultanmen. Li ordinari
 date- e cutlet-view APIs resta sin change.
 
+
+## Component `<pastafari-cooking>`
+
+Li browser bundle registra un separat `<pastafari-cooking>` Web Component. It accepta
+`date`, `calculation-date`, `lang` e `open`. Sin `open` it es strictmen lazy e ne envia
+null cooking-trace demande al Worker.
+
+Li ordinari `<pastafari-date>` contene un visibil buton quel solmen sincronisa li du
+Gregorian dates e li locale, e poy aperte/clude li separat cooking component. Ergo li
+date component ne possede null Sauce-state e ne deven un duesim trace engine.
+
+Li cooking component monstra li nov capitules semantic del trace, con un bounded
+one-step-at-a-time inspector por stones, hidden drops, visible drops, bowl rounds e
+post-stirs. Exact integers tre long es abreviat visualmen ma resta expandibil al complet
+decimal valore in-place. Navigation es keyboard-focusabil, responsive, RTL-aware,
+reduced-motion-safe e print-safe.
+
+Gate Sauce resta compact in li initial trace. Un user posse demandar complet detail por
+li actual gate; ti action executa un nov normative trace explicitmen scopat al selectet
+gate, riceve su streamed same-execution chunk, e solmen poy substitue li visible final
+trace si su five-field result concorda exactmen. Null arithmetic detail es reconstruet
+in li presentation layer.
+
+Li public ESM facade exporta anc `PastafariCookingElement`.

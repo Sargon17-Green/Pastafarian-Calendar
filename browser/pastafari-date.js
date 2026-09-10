@@ -373,6 +373,7 @@
             line-height: 1;
           }
           .editor-link,
+          .cooking-open,
           .nav-button,
           .today-button,
           .retry-button,
@@ -392,6 +393,15 @@
             background: var(--accent-dark);
             color: white;
           }
+          .cooking-open {
+            width: fit-content;
+            max-width: 100%;
+            border-color: #000;
+            background: #17130e;
+            color: #fff;
+          }
+          .cooking-open:hover,
+          .cooking-open[aria-expanded="true"] { background: #9d3825; color: white; }
           .editor-link:hover,
           .today-button:hover { background: #49160e; color: white; }
           .nav-button:hover,
@@ -777,7 +787,7 @@
           @media print {
             :host { width: 100%; padding: 0; }
             .masthead { grid-template-columns: 1fr; padding-block: 0 1rem; }
-            .language-control, .search-panel, .toolbar-actions { display: none; }
+            .language-control, .search-panel, .toolbar-actions, .cooking-open { display: none; }
             .viewport { max-height: none; overflow: visible; }
             .cutlet-heading { position: static; box-shadow: none; }
             .cutlet-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); min-width: 0; gap: .2rem; }
@@ -815,7 +825,10 @@
               <span class="beacon-line month-line"></span>
             </div>
             <p class="beacon-context"></p>
+            <button class="cooking-open" type="button" aria-expanded="false"></button>
           </section>
+
+          <pastafari-cooking class="cooking-panel"></pastafari-cooking>
 
           <header class="toolbar" part="toolbar">
             <div class="toolbar-copy">
@@ -885,6 +898,8 @@
         beaconCutlet: this.shadowRoot.querySelector('.beacon-line.cutlet-line'),
         beaconMonth: this.shadowRoot.querySelector('.beacon-line.month-line'),
         beaconContext: this.shadowRoot.querySelector('.beacon-context'),
+        cookingOpen: this.shadowRoot.querySelector('.cooking-open'),
+        cookingPanel: this.shadowRoot.querySelector('pastafari-cooking'),
         viewport: this.shadowRoot.querySelector('.viewport'),
         list: this.shadowRoot.querySelector('.cutlet-list'),
         beforeLoader: this.shadowRoot.querySelector('.edge-loader.before'),
@@ -918,6 +933,10 @@
       this._els.today.addEventListener('click', () => this._goToday());
       this._els.next.addEventListener('click', () => this._scrollAdjacent(1));
       this._els.editorLink.addEventListener('click', () => this._openDialog());
+      this._els.cookingOpen.addEventListener('click', () => this._toggleCooking());
+      this._els.cookingPanel.addEventListener('pastafari-cooking-close', () => {
+        this._els.cookingOpen.setAttribute('aria-expanded', 'false');
+      });
       this._els.retryButton.addEventListener('click', () => this._retry());
       this._els.cancelButton.addEventListener('click', () => this._closeDialog());
       this._els.form.addEventListener('submit', (event) => this._applyDialog(event));
@@ -1014,6 +1033,8 @@
       this._els.calculationLabel.textContent = this._t('settings.heading');
       this._els.applyButton.textContent = this._t('search.submit');
       this._els.cancelButton.textContent = this._t('reverse.action.cancel');
+      this._els.cookingOpen.textContent = this._t('cooking.open');
+      this._els.cookingPanel.setAttribute('lang', this._locale.code);
       if (!this._value) {
         this._els.summary.textContent = this._t('loading.title');
         this._els.beaconLabel.textContent = this._t('target.searched');
@@ -1051,6 +1072,7 @@
 
         this._targetJdn = targetJdn;
         this._calculationJdn = calculationJdn;
+        this._syncCookingPanel();
         this._scrollTarget = null;
         this._cutlets.clear();
         this._orderedStarts = [];
@@ -1364,6 +1386,28 @@
         targetDate,
         actionDate,
       });
+      this._els.cookingOpen.textContent = this._t('cooking.open');
+      this._syncCookingPanel();
+    }
+
+    _syncCookingPanel() {
+      if (!this._els || !this._els.cookingPanel || this._targetJdn == null || this._calculationJdn == null) return;
+      this._els.cookingPanel.setAttribute('lang', this._locale ? this._locale.code : 'ie');
+      this._els.cookingPanel.setAttribute('date', axis.toIsoDate(axis.jdnToGregorian(this._targetJdn)));
+      this._els.cookingPanel.setAttribute('calculation-date', axis.toIsoDate(axis.jdnToGregorian(this._calculationJdn)));
+    }
+
+    _toggleCooking() {
+      const panel = this._els && this._els.cookingPanel;
+      if (!panel) return;
+      if (panel.hasAttribute('open')) {
+        panel.removeAttribute('open');
+        this._els.cookingOpen.setAttribute('aria-expanded', 'false');
+        return;
+      }
+      this._syncCookingPanel();
+      panel.setAttribute('open', '');
+      this._els.cookingOpen.setAttribute('aria-expanded', 'true');
     }
 
     _prepareRenderableCutlets() {
@@ -1745,6 +1789,7 @@
     getPastafariDate: getPastafariDateAsync,
     getPastafariCookingTraceAsync,
     PastafariDateElement,
+    PastafariCookingElement: ns.cookingComponent ? ns.cookingComponent.PastafariCookingElement : null,
     installSharedCalendarService: serviceApi.installSharedCalendarService,
     installSharedCalendarMemory: serviceApi.installSharedCalendarMemory,
   });

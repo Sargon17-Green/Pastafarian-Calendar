@@ -197,9 +197,11 @@ sandbox.PastafariBrowserInternal.calendarService = {
   installSharedCalendarService(service) { sharedService = service; return service; },
   installSharedCalendarMemory() { throw new Error('not used'); },
 };
+load('browser/pastafari-cooking.js');
 load('browser/pastafari-date.js');
 
-const { PastafariDateElement } = sandbox.PastafariCalendarBrowser;
+const { PastafariDateElement, PastafariCookingElement } = sandbox.PastafariCalendarBrowser;
+assert.strictEqual(PastafariCookingElement, registry.get('pastafari-cooking'));
 const axis = sandbox.PastafariBrowserInternal.dateAxis;
 
 function deferred() {
@@ -277,6 +279,23 @@ async function flush() {
 
   localStorage.clear();
   sandbox.navigator.languages = ['ie'];
+
+  // The public calendar owns only the open/close and date synchronization of
+  // the separate <pastafari-cooking> component. Merely constructing the date
+  // component never starts a cooking trace.
+  const integratedCooking = new PastafariDateElement();
+  integratedCooking._locale = sandbox.PastafariBrowserInternal.i18n.resolveLocale('ie', []);
+  integratedCooking._targetJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-11'));
+  integratedCooking._calculationJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-10'));
+  integratedCooking._toggleCooking();
+  assert.strictEqual(integratedCooking._els.cookingPanel.hasAttribute('open'), true);
+  assert.strictEqual(integratedCooking._els.cookingPanel.getAttribute('date'), '2026-09-11');
+  assert.strictEqual(integratedCooking._els.cookingPanel.getAttribute('calculation-date'), '2026-09-10');
+  assert.strictEqual(integratedCooking._els.cookingPanel.getAttribute('lang'), 'ie');
+  assert.strictEqual(integratedCooking._els.cookingOpen.getAttribute('aria-expanded'), 'true');
+  integratedCooking._toggleCooking();
+  assert.strictEqual(integratedCooking._els.cookingPanel.hasAttribute('open'), false);
+  assert.strictEqual(integratedCooking._els.cookingOpen.getAttribute('aria-expanded'), 'false');
 
   // Rapid attribute changes: only the newest generation may commit or publish.
   const pending = new Map();

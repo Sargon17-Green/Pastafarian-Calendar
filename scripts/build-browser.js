@@ -17,6 +17,7 @@ const MAIN_PARTS = Object.freeze([
   'engine-client.js',
   'calendar-service.js',
   path.join('i18n', 'runtime.js'),
+  'pastafari-cooking.js',
   'pastafari-date.js',
 ]);
 
@@ -33,6 +34,7 @@ const BUILD_INPUTS = Object.freeze([
   path.join('browser', 'calendar-service.js'),
   path.join('browser', 'i18n', 'locales.js'),
   path.join('browser', 'i18n', 'runtime.js'),
+  path.join('browser', 'pastafari-cooking.js'),
   path.join('browser', 'pastafari-date.js'),
   path.join('scripts', 'build-browser.js'),
 ]);
@@ -174,6 +176,7 @@ function moduleFacade() {
     'export const getPastafariDate = api.getPastafariDate;',
     'export const getPastafariCookingTraceAsync = api.getPastafariCookingTraceAsync;',
     'export const PastafariDateElement = api.PastafariDateElement;',
+    'export const PastafariCookingElement = api.PastafariCookingElement;',
     'export const installSharedCalendarService = api.installSharedCalendarService;',
     'export const installSharedCalendarMemory = api.installSharedCalendarMemory;',
     'export const buildId = api.buildId;',

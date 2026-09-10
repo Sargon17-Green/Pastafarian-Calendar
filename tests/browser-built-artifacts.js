@@ -50,6 +50,10 @@ assert(standalone.includes('buildId: ' + JSON.stringify(buildId)));
 assert(standalone.includes('PastafariBrowserWorkerConfig'));
 assert(moduleFacade.includes('export const buildId = api.buildId;'));
 assert(moduleFacade.includes('export const getPastafariCookingTraceAsync = api.getPastafariCookingTraceAsync;'));
+assert(moduleFacade.includes('export const PastafariCookingElement = api.PastafariCookingElement;'));
+assert(standard.includes('class PastafariCookingElement'));
+assert(standard.includes("customElements.define('pastafari-cooking'"));
+assert(standard.includes('cooking.open'));
 
 assert(standard.includes('PastafariBrowserLocaleData'));
 for (const code of ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs']) {

@@ -17,6 +17,8 @@ for (const token of [
   'getPastafariDateAsync',
   'getPastafariDate: getPastafariDateAsync',
   'getPastafariCookingTraceAsync',
+  'PastafariCookingElement',
+  'cooking-open',
   "'pastafari-date'",
 ]) {
   assert(source.includes(token), 'Manca li extern contract-token: ' + token);
@@ -61,6 +63,24 @@ for (const token of [
 assert(!source.includes("doc.createElement('button');\n        button.type = 'button';\n        button.className = 'day'"),
   'Li ordinary day-cards ne deve esser clickabil buttons.');
 assert(!source.includes('_selectDay(event)'), 'Li old click-to-select day handler ne deve retornar.');
+
+const cookingSource = fs.readFileSync(path.join(__dirname, '..', 'browser', 'pastafari-cooking.js'), 'utf8');
+for (const token of [
+  'class PastafariCookingElement',
+  "['date', 'calculation-date', 'lang', 'open']",
+  "'pastafari-cooking'",
+  'async load(',
+  '_loadGateDetail(',
+  'gateDetailGateIndices',
+  'onGateSauceDetail',
+  "this._t('cooking.sameExecution')",
+  'prefers-reduced-motion',
+  '@media print',
+]) {
+  assert(cookingSource.includes(token), 'Manca li cooking-component contract-token: ' + token);
+}
+assert(!cookingSource.includes('calendarDateSpaghettiWithContext'));
+assert(!cookingSource.includes('executeCalendarDate'));
 
 const page = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 assert(page.includes('#f4f0e7'));
