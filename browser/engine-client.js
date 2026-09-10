@@ -24,6 +24,47 @@
     });
   }
 
+  function deepFreezePlain(value, seen = new Set()) {
+    if (value === null || typeof value !== 'object' || seen.has(value)) return value;
+    seen.add(value);
+    const items = Array.isArray(value) ? value : Object.values(value);
+    for (const item of items) deepFreezePlain(item, seen);
+    return Object.freeze(value);
+  }
+
+  function normalizeCookingTraceOptions(options) {
+    if (options === null || options === undefined) {
+      return { onGateSauceDetail: null, gateDetailGateIndices: null, timeoutMs: null };
+    }
+    if (!options || typeof options !== 'object' || Array.isArray(options)) {
+      throw new TypeError('Li cooking-trace options deve esser un plain object.');
+    }
+    const onGateSauceDetail = options.onGateSauceDetail === undefined
+      ? null : options.onGateSauceDetail;
+    if (onGateSauceDetail !== null && typeof onGateSauceDetail !== 'function') {
+      throw new TypeError('onGateSauceDetail deve esser null o un function.');
+    }
+    let gateDetailGateIndices = null;
+    if (options.gateDetailGateIndices !== undefined && options.gateDetailGateIndices !== null) {
+      if (!Array.isArray(options.gateDetailGateIndices)) {
+        throw new TypeError('gateDetailGateIndices deve esser null o un array.');
+      }
+      gateDetailGateIndices = options.gateDetailGateIndices.map((value) => {
+        const index = BigInt(value);
+        if (index === 0n) throw new RangeError('Un gate-detail index ne posse esser zero.');
+        return index;
+      });
+      if (onGateSauceDetail === null) {
+        throw new TypeError('gateDetailGateIndices exige onGateSauceDetail.');
+      }
+    }
+    const timeoutMs = options.timeoutMs == null ? null : Number(options.timeoutMs);
+    if (timeoutMs !== null && (!Number.isFinite(timeoutMs) || timeoutMs <= 0)) {
+      throw new RangeError('timeoutMs del cooking trace deve esser positiv.');
+    }
+    return { onGateSauceDetail, gateDetailGateIndices, timeoutMs };
+  }
+
   function errorFromPayload(payload) {
     const error = new Error(payload && payload.message ? String(payload.message) : 'Li calendarium-worker raportat un ínconosset errore.');
     if (payload && payload.name) error.name = String(payload.name);
@@ -103,6 +144,18 @@
           return;
         }
       }
+      if (message && message.ok && message.kind === 'gate-detail') {
+        if (typeof entry.onChunk !== 'function') {
+          this._handleFatal(new Error('Li Worker inviat un gate-detail chunk sin un registrat sink.'));
+          return;
+        }
+        try {
+          entry.onChunk(deepFreezePlain(message.value));
+        } catch (error) {
+          this._handleFatal(error);
+        }
+        return;
+      }
       this.pending.delete(id);
       clearTimeout(entry.timer);
       if (message.ok) entry.resolve(message.value);
@@ -124,7 +177,7 @@
       this.pending.clear();
     }
 
-    _request(operation, payload, timeoutMs) {
+    _request(operation, payload, timeoutMs, onChunk = null) {
       const worker = this._ensureWorker();
       const id = this.nextRequestId++;
       const limit = timeoutMs || this.timeoutMs;
@@ -133,7 +186,7 @@
           if (!this.pending.has(id)) return;
           this._handleFatal(new Error('Li operation ' + operation + ' excedet ' + limit + ' ms.'));
         }, limit);
-        this.pending.set(id, { resolve, reject, timer });
+        this.pending.set(id, { resolve, reject, timer, onChunk });
         try {
           const message = { id, operation, ...payload };
           if (this.buildId != null) message.buildId = this.buildId;
@@ -159,6 +212,25 @@
         calculationDay: String(BigInt(calculationDay)),
         targetDay: String(BigInt(targetDay)),
       }));
+    }
+
+    async getCookingTrace(calculationDay, targetDay, options = null) {
+      const selected = normalizeCookingTraceOptions(options);
+      const payload = {
+        calculationDay: String(BigInt(calculationDay)),
+        targetDay: String(BigInt(targetDay)),
+        streamGateSauceDetail: selected.onGateSauceDetail !== null,
+      };
+      if (selected.gateDetailGateIndices !== null) {
+        payload.gateDetailGateIndices = selected.gateDetailGateIndices.map((value) => String(value));
+      }
+      const value = await this._request(
+        'cookingTrace',
+        payload,
+        selected.timeoutMs,
+        selected.onGateSauceDetail,
+      );
+      return deepFreezePlain(value);
     }
 
     retry() {

@@ -15,6 +15,7 @@ function load(context, relativePath) {
 const listeners = new Map();
 const posted = [];
 const coreCalls = [];
+const cookingTraceCalls = [];
 const context = vm.createContext({
   console,
   addEventListener(type, listener) { listeners.set(type, listener); },
@@ -25,6 +26,19 @@ const context = vm.createContext({
       coreCalls.push([calculationDay, targetDay]);
       const position = Number((targetDay % 5n + 5n) % 5n) + 1;
       return [5000n, 'bronze', BigInt(position), 'argile', BigInt(position)];
+    },
+  },
+  PastafariBrowserCookingTrace: {
+    calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options) {
+      cookingTraceCalls.push({ calculationDay, targetDay, options });
+      if (options && typeof options.onGateSauceDetail === 'function') {
+        options.onGateSauceDetail({ kind: 'gate-gap', signedIndex: '2', marker: 'chunk' });
+      }
+      return {
+        schemaVersion: '0.3.0',
+        inputs: { calculationDay: String(calculationDay), targetDay: String(targetDay) },
+        finalResult: { year: '5000' },
+      };
     },
   },
 });
@@ -70,6 +84,33 @@ assert.strictEqual(typeof onMessage, 'function', 'Li Worker entry deve registrar
   assert.strictEqual(view.days.map((day) => day.dayInCutlet).join(','), '1,2,3,4,5');
   assert(coreCalls.length >= 5, 'Li cutlet-view deve esser derivat per public black-box conversiones.');
   for (const [calculationDay] of coreCalls) assert.strictEqual(calculationDay, 10n);
+
+  posted.length = 0;
+  cookingTraceCalls.length = 0;
+  await onMessage({ data: {
+    id: 20, operation: 'cookingTrace', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+    streamGateSauceDetail: false,
+  } });
+  assert.strictEqual(posted.length, 1);
+  assert.strictEqual(posted[0].kind, 'result');
+  assert.strictEqual(posted[0].value.schemaVersion, '0.3.0');
+  assert.strictEqual(cookingTraceCalls.length, 1);
+  assert.strictEqual(cookingTraceCalls[0].calculationDay, 10n);
+  assert.strictEqual(cookingTraceCalls[0].targetDay, 2n);
+  assert.strictEqual(cookingTraceCalls[0].options, null);
+
+  posted.length = 0;
+  cookingTraceCalls.length = 0;
+  await onMessage({ data: {
+    id: 21, operation: 'cookingTrace', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+    streamGateSauceDetail: true,
+    gateDetailGateIndices: ['2', '-3'],
+  } });
+  assert.strictEqual(posted.length, 2);
+  assert.strictEqual(posted[0].kind, 'gate-detail');
+  assert.strictEqual(posted[0].value.marker, 'chunk');
+  assert.strictEqual(posted[1].kind, 'result');
+  assert.deepStrictEqual(Array.from(cookingTraceCalls[0].options.gateDetailGateIndices), [2n, -3n]);
 
   // Old/stale main + new Worker fails before any semantic core invocation.
   posted.length = 0;

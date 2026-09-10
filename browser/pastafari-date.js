@@ -16,7 +16,7 @@
   // neighbouring indices diverge sharply instead of collapsing into pastels.
   const MONTH_THEME_NAMES = Object.freeze([
     'argile', 'granat', 'cubit', 'invidie', 'Eridu', 'dent-pasta',
-    'tri partes de quin', 'Karshumb', 'leopard', 'stann', 'brume', 'oliban',
+    'tri partes de quin', 'Karshumab', 'leopard', 'stann', 'brume', 'oliban',
     'fus', 'costa', 'carob', 'Uruk', 'honte', 'camel', 'cupr', 'pute',
     'vitelle', 'stelle', 'mel', 'splen', 'calcari', 'joy', 'fig', 'Ninive',
     'ran', 'gudron', 'candel', 'li cludet porta', 'sesam', 'nuca', 'argent',
@@ -223,6 +223,20 @@
       axis.gregorianToJdn(target),
       axis.gregorianToJdn(calculation),
     ));
+  }
+
+  async function getPastafariCookingTraceAsync(targetDate, calculationDate, options = null) {
+    const target = axis.normalizeDateInput(targetDate, 'Li date a examinar');
+    const calculation = axis.normalizeDateInput(calculationDate, 'Li die de calculation');
+    const service = serviceApi.getSharedCalendarService();
+    if (!service || typeof service.getCookingTrace !== 'function') {
+      throw new TypeError('Li shared CalendarService ne supporta cooking trace.');
+    }
+    return service.getCookingTrace(
+      axis.gregorianToJdn(target),
+      axis.gregorianToJdn(calculation),
+      options,
+    );
   }
 
   const HTMLElementBase = root.HTMLElement || class {};
@@ -1729,6 +1743,7 @@
       ? String(root.PastafariBrowserConfig.buildId) : null,
     getPastafariDateAsync,
     getPastafariDate: getPastafariDateAsync,
+    getPastafariCookingTraceAsync,
     PastafariDateElement,
     installSharedCalendarService: serviceApi.installSharedCalendarService,
     installSharedCalendarMemory: serviceApi.installSharedCalendarMemory,

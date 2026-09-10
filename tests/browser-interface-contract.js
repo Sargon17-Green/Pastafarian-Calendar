@@ -16,6 +16,7 @@ for (const token of [
   'this.ready = new Promise',
   'getPastafariDateAsync',
   'getPastafariDate: getPastafariDateAsync',
+  'getPastafariCookingTraceAsync',
   "'pastafari-date'",
 ]) {
   assert(source.includes(token), 'Manca li extern contract-token: ' + token);

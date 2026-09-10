@@ -32,6 +32,23 @@ class FakeWorker {
       if (this.replyBuildId != null) envelope.buildId = this.replyBuildId;
       if (message.operation === 'convert') {
         envelope.value = ['5000', 'bronze', 3, 'argile', 3];
+      } else if (message.operation === 'cookingTrace') {
+        if (message.streamGateSauceDetail === true) {
+          const chunk = {
+            id: message.id,
+            ok: true,
+            kind: 'gate-detail',
+            value: { kind: 'gate-gap', signedIndex: '2', marker: 'client-chunk' },
+          };
+          if (this.replyBuildId != null) chunk.buildId = this.replyBuildId;
+          listener({ data: chunk });
+        }
+        envelope.kind = 'result';
+        envelope.value = {
+          schemaVersion: '0.3.0',
+          inputs: { calculationDay: message.calculationDay, targetDay: message.targetDay },
+          finalResult: { year: '5000' },
+        };
       } else if (message.operation === 'getCutletView') {
         envelope.value = {
           selectedDay: message.targetDay,
@@ -99,6 +116,30 @@ const PastafariEngineClient = engineApi.PastafariEngineClient;
   assert.strictEqual(Object.isFrozen(view), true);
   assert.strictEqual(Object.isFrozen(view.days), true);
   assert.strictEqual(workers.length, 1, 'Li client deve reutilisar un unic Worker til fatal/retry.');
+
+  const gateChunks = [];
+  const cookingTrace = await client.getCookingTrace(10n, 7n, {
+    gateDetailGateIndices: [2n, -3n],
+    onGateSauceDetail(chunk) { gateChunks.push(chunk); },
+  });
+  assert.strictEqual(cookingTrace.schemaVersion, '0.3.0');
+  assert.strictEqual(Object.isFrozen(cookingTrace), true);
+  assert.strictEqual(Object.isFrozen(cookingTrace.inputs), true);
+  assert.strictEqual(gateChunks.length, 1);
+  assert.strictEqual(gateChunks[0].marker, 'client-chunk');
+  assert.strictEqual(Object.isFrozen(gateChunks[0]), true);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(workers[0].messages[2])), {
+    id: 3,
+    operation: 'cookingTrace',
+    calculationDay: '10',
+    targetDay: '7',
+    streamGateSauceDetail: true,
+    gateDetailGateIndices: ['2', '-3'],
+  });
+  await assert.rejects(
+    Promise.resolve().then(() => client.getCookingTrace(10n, 7n, { gateDetailGateIndices: [2n] })),
+    /exige onGateSauceDetail/,
+  );
 
   // A generated build must bind request and response to the same main/Worker ID.
   let coherentWorker;

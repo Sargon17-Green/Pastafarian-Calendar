@@ -23,6 +23,7 @@ const MAIN_PARTS = Object.freeze([
 const BUILD_INPUTS = Object.freeze([
   path.join('src', 'source-language-catalog.js'),
   path.join('src', 'index.js'),
+  path.join('src', 'normative-cooking-trace.js'),
   path.join('browser', 'result-normalizer.js'),
   path.join('browser', 'black-box-cutlet.js'),
   path.join('browser', 'pastafari-worker-entry.js'),
@@ -66,10 +67,16 @@ function buildFingerprint() {
 function coreWrapper() {
   const catalog = read(path.join('src', 'source-language-catalog.js'));
   const index = read(path.join('src', 'index.js'));
+  const cookingTrace = read(path.join('src', 'normative-cooking-trace.js'));
   const requires = Array.from(index.matchAll(/\brequire\(\s*['"]([^'"]+)['"]\s*\)/g), (match) => match[1]);
   const foreign = Array.from(new Set(requires.filter((name) => name !== './source-language-catalog')));
   if (foreign.length > 0) {
     throw new Error('Li browser-worker builder ne conosse ti additional core require(s): ' + foreign.join(', '));
+  }
+  const traceRequires = Array.from(cookingTrace.matchAll(/\brequire\(\s*['"]([^'"]+)['"]\s*\)/g), (match) => match[1]);
+  const traceForeign = Array.from(new Set(traceRequires.filter((name) => name !== './index')));
+  if (traceForeign.length > 0) {
+    throw new Error('Li browser-worker builder ne conosse ti additional cooking-trace require(s): ' + traceForeign.join(', '));
   }
 
   return [
@@ -82,6 +89,9 @@ function coreWrapper() {
     "  modules['./index'] = function (module, exports, require) {",
     index,
     '  };',
+    "  modules['./normative-cooking-trace'] = function (module, exports, require) {",
+    cookingTrace,
+    '  };',
     '  const cache = Object.create(null);',
     '  function localRequire(id) {',
     '    if (cache[id]) return cache[id].exports;',
@@ -93,6 +103,7 @@ function coreWrapper() {
     '    return module.exports;',
     '  }',
     "  root.PastafariBrowserCore = localRequire('./index');",
+    "  root.PastafariBrowserCookingTrace = localRequire('./normative-cooking-trace');",
     "})(typeof globalThis === 'object' ? globalThis : self);",
     '',
   ].join('\n');
@@ -161,6 +172,7 @@ function moduleFacade() {
     'const api = globalThis.PastafariCalendarBrowser;',
     'export const getPastafariDateAsync = api.getPastafariDateAsync;',
     'export const getPastafariDate = api.getPastafariDate;',
+    'export const getPastafariCookingTraceAsync = api.getPastafariCookingTraceAsync;',
     'export const PastafariDateElement = api.PastafariDateElement;',
     'export const installSharedCalendarService = api.installSharedCalendarService;',
     'export const installSharedCalendarMemory = api.installSharedCalendarMemory;',

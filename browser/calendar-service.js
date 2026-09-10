@@ -176,6 +176,15 @@
       }
     }
 
+    async getCookingTrace(targetJdn, calculationJdn, options = null) {
+      if (!this.engineClient || typeof this.engineClient.getCookingTrace !== 'function') {
+        throw new TypeError('Li configurat engine-client ne supporta cooking trace.');
+      }
+      const targetDay = axis.jdnToProjectDay(targetJdn);
+      const calculationDay = axis.jdnToProjectDay(calculationJdn);
+      return this.engineClient.getCookingTrace(calculationDay, targetDay, options);
+    }
+
     async retry(calculationJdn) {
       this.memoryGeneration += 1;
       if (calculationJdn == null) await this.memory.clear();

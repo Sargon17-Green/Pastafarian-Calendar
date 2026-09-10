@@ -120,12 +120,17 @@ assert.strictEqual(axis.projectDayToJdn(-278522n), tabletsJdn);
   // A directly constructed CalendarService keeps the bounded in-memory default.
   // The shared browser service installs the persistent wrapper separately.
   let engineCalls = 0;
+  const cookingTraceEngineCalls = [];
   const fakeEngine = {
     async convert(_calculationDay, targetDay) {
       engineCalls += 1;
       return ['5000', 'bronze', Number((targetDay % 5n + 5n) % 5n) + 1, 'argile', 1];
     },
     async getCutletView() { throw new Error('Ne usat in ti parte del prova.'); },
+    async getCookingTrace(calculationDay, targetDay, options) {
+      cookingTraceEngineCalls.push({ calculationDay, targetDay, options });
+      return Object.freeze({ schemaVersion: '0.3.0', inputs: Object.freeze({ calculationDay: String(calculationDay), targetDay: String(targetDay) }) });
+    },
     retry() {},
     dispose() {},
   };
@@ -137,6 +142,14 @@ assert.strictEqual(axis.projectDayToJdn(-278522n), tabletsJdn);
   const second = await service.convert(targetJdn, calculationJdn);
   assert.deepStrictEqual(JSON.parse(JSON.stringify(first)), JSON.parse(JSON.stringify(second)));
   assert.strictEqual(engineCalls, 1, 'Li default memory deve evitar li duesim engine-call.');
+
+  const serviceTraceOptions = { onGateSauceDetail() {} };
+  const serviceTrace = await service.getCookingTrace(targetJdn, calculationJdn, serviceTraceOptions);
+  assert.strictEqual(serviceTrace.schemaVersion, '0.3.0');
+  assert.strictEqual(cookingTraceEngineCalls.length, 1);
+  assert.strictEqual(cookingTraceEngineCalls[0].calculationDay, 10n);
+  assert.strictEqual(cookingTraceEngineCalls[0].targetDay, 2n);
+  assert.strictEqual(cookingTraceEngineCalls[0].options, serviceTraceOptions);
 
   // Concurrent identical conversion requests share one Worker operation.
   let concurrentCalls = 0;

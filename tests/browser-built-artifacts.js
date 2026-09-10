@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
@@ -48,6 +49,7 @@ assert(worker.includes('ERR_BROWSER_BUILD_MISMATCH'));
 assert(standalone.includes('buildId: ' + JSON.stringify(buildId)));
 assert(standalone.includes('PastafariBrowserWorkerConfig'));
 assert(moduleFacade.includes('export const buildId = api.buildId;'));
+assert(moduleFacade.includes('export const getPastafariCookingTraceAsync = api.getPastafariCookingTraceAsync;'));
 
 assert(standard.includes('PastafariBrowserLocaleData'));
 for (const code of ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs']) {
@@ -86,19 +88,30 @@ assert(!standard.includes('_scrollSelectedIntoView('));
 assert.strictEqual((standard.match(/viewport\.scrollTop\s*=/g) || []).length, 1,
   'Omni browser scrolling deve esser possedet per un unic viewport.scrollTop primitive.');
 assert(standard.includes('cacheNamespace'));
-assert(standard.includes('pc-browser-core-368e258d1ca347f846f32d94'));
+const expectedCoreFingerprint = crypto.createHash('sha256')
+  .update(fs.readFileSync(path.join(ROOT, 'src/source-language-catalog.js'), 'utf8'), 'utf8')
+  .update('\0', 'utf8')
+  .update(fs.readFileSync(path.join(ROOT, 'src/index.js'), 'utf8'), 'utf8')
+  .digest('hex')
+  .slice(0, 24);
+assert(standard.includes('pc-browser-core-' + expectedCoreFingerprint));
 assert(standalone.includes('PastafariCalendarStandalone'));
 assert(standalone.includes('workerSource'));
 assert(standalone.includes('cacheNamespace'));
 assert(worker.includes('calendarDateSpaghetti'));
 assert(worker.includes('deriveCutletViewBlackBox'));
+assert(worker.includes('PastafariBrowserCookingTrace'));
+assert(worker.includes('calendarDateSpaghettiCookingTrace'));
+assert(worker.includes("message.operation === 'cookingTrace'"));
 
 /*
  * Li build artefact contene li core self, ergo intern core identifiers posse
  * aparir quam implementation details. Li cassa-nigri limite deve esser verificat
- * al Worker entry: it posse invocar solmen li public calendarDateSpaghetti API.
+ * al Worker entry: ordinari conversion usa li public calendarDateSpaghetti API;
+ * cooking trace usa solmen su dedicat normative adapter, ne intern managers.
  */
 assert(workerEntry.includes('core.calendarDateSpaghetti('));
+assert(workerEntry.includes('cookingTraceApi.calendarDateSpaghettiCookingTrace('));
 assert(!workerEntry.includes('calendarDateSpaghettiWithContext'));
 assert(!workerEntry.includes('executeCalendarDate'));
 assert(!workerEntry.includes('STAGE57_GLOBAL_MANAGER'));
@@ -124,7 +137,7 @@ function evaluateBuiltWorker() {
   // A stale main from an unversioned deployment cannot silently drive this Worker.
   const stale = evaluateBuiltWorker();
   await stale.handler({ data: {
-    id: 900, operation: 'convert', calculationDay: '739862', targetDay: '739862',
+    id: 900, operation: 'convert', calculationDay: '-15055671', targetDay: '-15055671',
   } });
   assert.strictEqual(stale.posted.length, 1);
   assert.strictEqual(stale.posted[0].ok, false);
@@ -135,7 +148,7 @@ function evaluateBuiltWorker() {
   const runtime = evaluateBuiltWorker();
   assert.strictEqual(typeof runtime.handler, 'function');
   const message = {
-    operation: 'convert', calculationDay: '739862', targetDay: '739862', buildId,
+    operation: 'convert', calculationDay: '-15055671', targetDay: '-15055671', buildId,
   };
 
   await runtime.handler({ data: { id: 901, ...message } });
@@ -145,10 +158,33 @@ function evaluateBuiltWorker() {
   assert.strictEqual(response.buildId, buildId);
   assert.deepStrictEqual(JSON.parse(JSON.stringify(response.value)), {
     year: '5000',
-    cutletName: 'bronze',
-    dayInCutlet: 677,
-    monthName: 'sand',
-    dayInMonth: 32,
+    cutletName: 'larice',
+    dayInCutlet: 762,
+    monthName: 'oliban',
+    dayInMonth: 105,
+  });
+
+  // The built Worker must also execute the bundled normative cooking trace.
+  const traceRuntime = evaluateBuiltWorker();
+  await traceRuntime.handler({ data: {
+    id: 902,
+    operation: 'cookingTrace',
+    calculationDay: '-15055671',
+    targetDay: '-15055671',
+    buildId,
+  } });
+  assert.strictEqual(traceRuntime.posted.length, 1);
+  const traceResponse = traceRuntime.posted[0];
+  assert.strictEqual(traceResponse.ok, true, traceResponse.error && traceResponse.error.message);
+  assert.strictEqual(traceResponse.kind, 'result');
+  assert.strictEqual(traceResponse.buildId, buildId);
+  assert.strictEqual(traceResponse.value.schemaVersion, '0.3.0');
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(traceResponse.value.finalResult)), {
+    year: '5000',
+    cutlet: { canonicalIndex: 4, sourceName: 'larice' },
+    dayInCutlet: '762',
+    month: { canonicalIndex: 12, sourceName: 'oliban' },
+    dayInMonth: '105',
   });
 
   console.log('browser-built-artifacts: PASS');

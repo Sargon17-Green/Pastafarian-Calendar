@@ -37,12 +37,17 @@ Li Standard ESM facade es `browser/dist/pastafari-date.mjs`.
 
 ## Semantic limite
 
-Li browser-strate ne lege context, structure, Stage scars o intern managers.
-Li Worker usa solmen:
+Por li ordinari date- e cutlet-view demandes, li browser-strate ne lege context,
+structure, Stage scars o intern managers. Li Worker usa solmen:
 
 ```text
 calendarDateSpaghetti(calculationDay, targetDay)
 ```
+
+Li opt-in cooking-trace operation usa separatmen
+`calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options)`. Ti adapter
+observa li real execution e ne recalcula valores semantic in un duesim explanation-engine.
+Li Worker entry ne invoca directmen intern managers o context APIs.
 
 Li cutlet-view es derivat per black-box scanning: li selectet `dayInCutlet`
 determina li cutlet-comense, e li Worker continua die per die til li sequent
@@ -157,3 +162,28 @@ node tests/browser-built-artifacts.js
 ```
 
 Li historic branch-test resta autoritativ por li original Stage 01–58 state.
+
+## API de normative cooking trace
+
+Li browser-Worker expone anc li normative cooking trace in li sam isolat Worker e sur
+li sam canonic core usat del browser-strate. Li public browser-facade expone:
+
+```js
+const trace = await PastafariCalendarBrowser.getPastafariCookingTraceAsync(
+  { year: 2026, month: 9, day: 11 },
+  { year: 2026, month: 9, day: 11 },
+  {
+    gateDetailGateIndices: [2n],
+    onGateSauceDetail(chunk) {
+      // JSON-safe detail capturat durant li sam semantic execution.
+      console.log(chunk);
+    },
+  },
+);
+```
+
+Li retornat trace e chascun streamed gate-detail chunk usa decimal strings por exact
+integers. Detalliat gate Sauce es opt-in e es transmis quam it es productet, talmen que
+li Worker ne deve retener omni intern detail de omni gates simultanmen. Li ordinari
+date- e cutlet-view APIs resta sin change.
+
