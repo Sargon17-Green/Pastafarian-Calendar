@@ -211,3 +211,17 @@ trace si su five-field result concorda exactmen. Null arithmetic detail es recon
 in li presentation layer.
 
 Li public ESM facade exporta anc `PastafariCookingElement`.
+
+Li titules human del cooking inspector usa li activ locale, durant que li labels de
+campes intern usa intentionalmen lor exact trace-schema identifiers (`rawBeforeSave`,
+`openGateIndex`, etc.) in monospace. Talmen li presentation ne presenta accidental
+anglesi prose quam si it vell esser un traduction, e li tecnic nomenclatura resta exact.
+
+Un trace ja completat es conservat localmen del component por su exact pare de
+`date`/`calculation-date`. Cluder e reapertar li sam trace ne inicia un nov costosi
+semantic execution; changear un del du dates invalida ti reuse naturalmente. Ti cache
+es solmen presentation-state del cooking component e ne es li ordinari calendar cache.
+
+Li region de trace es ARIA-labelled. Escape clude it, e quande it es usat intra
+`<pastafari-date>` li focus retorna al buton quel apertet it. Li buton expone anc
+`aria-controls` e `aria-expanded` por li actual relation con li trace-region.

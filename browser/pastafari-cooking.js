@@ -105,6 +105,7 @@
       this._generation = 0;
       this._queuedEpoch = null;
       this._trace = null;
+      this._traceInputKey = null;
       this._locale = null;
       this._activeChapter = 'inputs';
       this._chapterCursor = Object.create(null);
@@ -253,6 +254,8 @@
           }
           .kv dt {
             color: var(--muted);
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+            font-size: .86em;
             font-weight: 800;
           }
           .kv dd {
@@ -383,11 +386,11 @@
             .close, .nav, .step-controls, .phase-tabs, .gate-detail-button { display: none !important; }
           }
         </style>
-        <section class="shell" part="shell" aria-busy="false">
+        <section class="shell" part="shell" role="region" aria-labelledby="pastafari-cooking-title" aria-busy="false">
           <header class="head">
             <div>
               <p class="kicker">PASTAFARI · TRACE</p>
-              <h2 class="title"></h2>
+              <h2 class="title" id="pastafari-cooking-title"></h2>
               <p class="subtitle"></p>
             </div>
             <button class="close" type="button"></button>
@@ -418,6 +421,11 @@
         pane: this.shadowRoot.querySelector('.pane'),
       };
       this._els.close.addEventListener('click', () => this.close());
+      this.shadowRoot.addEventListener('keydown', (event) => {
+        if (!event || event.key !== 'Escape' || !this.hasAttribute('open')) return;
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        this.close();
+      });
       this._els.retry.addEventListener('click', () => this.load().catch(() => {}));
       this._applyLocale();
       this._renderState();
@@ -506,6 +514,7 @@
     }
 
     _t(key, values) { return i18n.translate(this._locale, key, values); }
+    _term(key) { return this._t('cooking.term.' + key); }
 
     async load(expectedGeneration) {
       if (!this.hasAttribute('open')) return null;
@@ -514,6 +523,13 @@
       const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
       const targetJdn = axis.gregorianToJdn(targetDate);
       const calculationJdn = axis.gregorianToJdn(calculationDate);
+      const inputKey = String(calculationJdn) + ':' + String(targetJdn);
+      if (this._trace && this._traceInputKey === inputKey) {
+        if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
+        this._hideStatus();
+        this._renderState();
+        return this._trace;
+      }
       const service = serviceApi.getSharedCalendarService();
       if (!service || typeof service.getCookingTrace !== 'function') {
         throw new TypeError('Li shared CalendarService ne supporta cooking trace.');
@@ -524,6 +540,7 @@
         const trace = await service.getCookingTrace(targetJdn, calculationJdn);
         if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
         this._trace = trace;
+        this._traceInputKey = inputKey;
         this._gateDetails.clear();
         this._gateDetailLoading = null;
         this._activeChapter = safeArray(trace.chapters).some((row) => row.id === this._activeChapter)
@@ -718,12 +735,12 @@
       const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
       const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
       this._kv(pane, [
-        { label: 'target date', value: axis.toIsoDate(targetDate) },
-        { label: 'calculation date', value: axis.toIsoDate(calculationDate) },
+        { label: 'targetDate', value: axis.toIsoDate(targetDate) },
+        { label: 'calculationDate', value: axis.toIsoDate(calculationDate) },
         { label: 'targetDay', value: this._trace.inputs.targetDay, exact: true },
         { label: 'calculationDay', value: this._trace.inputs.calculationDay, exact: true },
-        { label: 'schema', value: this._trace.schemaVersion },
-        { label: 'semantic profile', value: this._trace.semanticProfile },
+        { label: 'schemaVersion', value: this._trace.schemaVersion },
+        { label: 'semanticProfile', value: this._trace.semanticProfile },
       ]);
     }
 
@@ -772,19 +789,19 @@
       const gap = gaps[index];
       const card = doc.createElement('section');
       card.className = 'step-card';
-      this._heading(card, 'gate ' + String(gap.signedIndex), 4);
+      this._heading(card, this._term('gate') + ' ' + String(gap.signedIndex), 4);
       this._kv(card, [
         { label: 'signedIndex', value: gap.signedIndex, exact: true },
         { label: 'gap', value: gap.gap, exact: true },
-        { label: 'Sauce run', value: gap.sauceRunId || '—' },
-        { label: 'detail', value: gap.detailCoverage || '—' },
+        { label: 'sauceRunId', value: gap.sauceRunId || '—' },
+        { label: 'detailCoverage', value: gap.detailCoverage || '—' },
       ]);
       if (gap.sauceSummary) {
-        this._heading(card, 'compact Sauce', 4);
+        this._heading(card, this._term('compactSauce'), 4);
         this._renderCounters(card, gap.sauceSummary.counters);
         this._kv(card, [
-          { label: 'order@46', node: this._arrayValue(gap.sauceSummary.orderAtDrop46) },
-          { label: 'final bowls', node: this._arrayValue(gap.sauceSummary.finalBowls, true) },
+          { label: 'orderAtDrop46', node: this._arrayValue(gap.sauceSummary.orderAtDrop46) },
+          { label: 'finalBowls', node: this._arrayValue(gap.sauceSummary.finalBowls, true) },
         ]);
       }
       const detail = this._gateDetails.get(String(gap.signedIndex));
@@ -827,6 +844,7 @@
           throw new Error('Li final resultate diverget durant li gate-detail execution.');
         }
         this._trace = nextTrace;
+        this._traceInputKey = String(calculationJdn) + ':' + String(targetJdn);
         this._gateDetails.clear();
         this._gateDetails.set(signedIndex, chunk);
         this._gateDetailLoading = null;
@@ -846,7 +864,7 @@
       const year = this._trace.artifacts && this._trace.artifacts.yearWalk
         ? this._trace.artifacts.yearWalk.year5000 : null;
       if (!year) return this._empty(pane);
-      this._renderYearCard(pane, year, 'Year 5000');
+      this._renderYearCard(pane, year, this._t('cooking.chapter.year5000'));
       const run = safeArray(this._trace.artifacts.sauceRuns).find((item) => item.role && item.role.kind === 'year-5000');
       if (run) this._renderSauceInspector(pane, run, run.id);
     }
@@ -856,12 +874,12 @@
       card.className = 'step-card';
       this._heading(card, title, 4);
       this._kv(card, [
-        { label: 'year', value: year.number },
+        { label: 'number', value: year.number },
         { label: 'openDay', value: year.openDay, exact: true },
         { label: 'firstDay', value: year.firstDay, exact: true },
         { label: 'closeDay', value: year.closeDay, exact: true },
-        { label: 'open gate', value: year.openGateIndex, exact: true },
-        { label: 'close gate', value: year.closeGateIndex, exact: true },
+        { label: 'openGateIndex', value: year.openGateIndex, exact: true },
+        { label: 'closeGateIndex', value: year.closeGateIndex, exact: true },
       ]);
       container.append(card);
     }
@@ -885,7 +903,7 @@
         + ' → ' + String(transition.toYear.number), 4);
       this._kv(card, [
         { label: 'sharedDay', value: transition.sharedDay, exact: true },
-        { label: 'Sauce run', value: transition.sauceRunId || '—' },
+        { label: 'sauceRunId', value: transition.sauceRunId || '—' },
       ]);
       pane.append(card);
       const run = findSauce(this._trace, transition.sauceRunId);
@@ -919,7 +937,7 @@
       const sauce = doc.createElement('section');
       sauce.className = 'sauce';
       const role = run.role && run.role.kind ? String(run.role.kind) : 'Sauce';
-      this._heading(sauce, 'Sauce · ' + role, 4);
+      this._heading(sauce, this._term('sauce') + ' · ' + role, 4);
       this._renderCounters(sauce, run.counters);
 
       const phases = ['stones', 'hidden', 'visible', 'bowls', 'postStirs'];
@@ -980,7 +998,7 @@
     }
 
     _renderStone(container, row) {
-      this._heading(container, 'stone ' + String(row.ordinal), 4);
+      this._heading(container, this._term('stone') + ' ' + String(row.ordinal), 4);
       this._kv(container, Object.entries(row.values || {}).map(([key, value]) => ({ label: key, value, exact: true })));
       if (row.transition) {
         const grid = doc.createElement('div');
@@ -1003,23 +1021,23 @@
     }
 
     _renderHidden(container, row) {
-      this._heading(container, 'hidden drop ' + String(row.ordinal), 4);
+      this._heading(container, this._term('hiddenDrop') + ' ' + String(row.ordinal), 4);
       this._kv(container, [
         { label: 'value', value: row.value, exact: true },
-        { label: 'raw start', value: row.rawBeforeSave, exact: true },
+        { label: 'rawBeforeSave', value: row.rawBeforeSave, exact: true },
         { label: 'initial', value: row.initial, exact: true },
       ]);
       this._renderGrinds(container, row.grinds);
     }
 
     _renderVisible(container, row) {
-      this._heading(container, 'visible drop ' + String(row.ordinal), 4);
+      this._heading(container, this._term('visibleDrop') + ' ' + String(row.ordinal), 4);
       this._kv(container, [
         { label: 'value', value: row.value, exact: true },
         { label: 'prev1', value: row.priors && row.priors.prev1, exact: true },
         { label: 'prev3', value: row.priors && row.priors.prev3, exact: true },
         { label: 'prev7', value: row.priors && row.priors.prev7, exact: true },
-        { label: 'raw start', value: row.rawBeforeSave, exact: true },
+        { label: 'rawBeforeSave', value: row.rawBeforeSave, exact: true },
         { label: 'initial', value: row.initial, exact: true },
       ]);
       this._renderGrinds(container, row.grinds);
@@ -1031,11 +1049,11 @@
       for (const grind of safeArray(grinds)) {
         const li = doc.createElement('li');
         const title = doc.createElement('strong');
-        title.textContent = 'grind ' + String(grind.grind);
+        title.textContent = this._term('grind') + ' ' + String(grind.grind);
         li.append(title);
         this._kv(li, [
           { label: 'before', value: grind.before, exact: true },
-          { label: 'stone', value: grind.stoneValue, exact: true },
+          { label: 'stoneValue', value: grind.stoneValue, exact: true },
           { label: 'after', value: grind.after, exact: true },
         ]);
         list.append(li);
@@ -1044,26 +1062,26 @@
     }
 
     _renderBowlRound(container, row) {
-      this._heading(container, 'bowl round ' + String(row.ordinal), 4);
+      this._heading(container, this._term('bowlRound') + ' ' + String(row.ordinal), 4);
       this._kv(container, [
         { label: 'drop', value: row.drop, exact: true },
         { label: 'order', node: this._arrayValue(row.order) },
-        { label: 'pours', node: this._arrayValue(row.poursByPosition, true) },
-        { label: 'before bowls', node: this._arrayValue(row.beforeBowls, true) },
-        { label: 'after bowls', node: this._arrayValue(row.afterBowls, true) },
+        { label: 'poursByPosition', node: this._arrayValue(row.poursByPosition, true) },
+        { label: 'beforeBowls', node: this._arrayValue(row.beforeBowls, true) },
+        { label: 'afterBowls', node: this._arrayValue(row.afterBowls, true) },
       ]);
       const list = doc.createElement('ol');
       list.className = 'sequence';
       for (const position of safeArray(row.positions)) {
         const li = doc.createElement('li');
         const strong = doc.createElement('strong');
-        strong.textContent = 'position ' + String(position.position) + ' · bowl ' + String(position.bowlId);
+        strong.textContent = this._term('position') + ' ' + String(position.position) + ' · ' + this._term('bowl') + ' ' + String(position.bowlId);
         li.append(strong);
         this._kv(li, [
-          { label: 'prev / next', value: String(position.prevId) + ' / ' + String(position.nextId) },
-          { label: 'stone', value: position.stoneKind },
+          { label: 'prevId / nextId', value: String(position.prevId) + ' / ' + String(position.nextId) },
+          { label: 'stoneKind', value: position.stoneKind },
           { label: 'mixed', value: position.mixed, exact: true },
-          { label: 'raw before SAVE', value: position.rawBeforeSave, exact: true },
+          { label: 'rawBeforeSave', value: position.rawBeforeSave, exact: true },
           { label: 'output', value: position.output, exact: true },
         ]);
         list.append(li);
@@ -1072,24 +1090,24 @@
     }
 
     _renderPostStir(container, row) {
-      this._heading(container, 'post-stir ' + String(row.ordinal), 4);
+      this._heading(container, this._term('postStir') + ' ' + String(row.ordinal), 4);
       this._kv(container, [
-        { label: 'raw bowl sum', value: row.rawBowlSum, exact: true },
-        { label: 'saved order number', value: row.savedOrderNumber, exact: true },
+        { label: 'rawBowlSum', value: row.rawBowlSum, exact: true },
+        { label: 'savedOrderNumber', value: row.savedOrderNumber, exact: true },
         { label: 'order', node: this._arrayValue(row.order) },
-        { label: 'before bowls', node: this._arrayValue(row.beforeBowls, true) },
-        { label: 'after bowls', node: this._arrayValue(row.afterBowls, true) },
+        { label: 'beforeBowls', node: this._arrayValue(row.beforeBowls, true) },
+        { label: 'afterBowls', node: this._arrayValue(row.afterBowls, true) },
       ]);
       const list = doc.createElement('ol');
       list.className = 'sequence';
       for (const position of safeArray(row.positions)) {
         const li = doc.createElement('li');
         const strong = doc.createElement('strong');
-        strong.textContent = 'position ' + String(position.position) + ' · bowl ' + String(position.bowlId);
+        strong.textContent = this._term('position') + ' ' + String(position.position) + ' · ' + this._term('bowl') + ' ' + String(position.bowlId);
         li.append(strong);
         this._kv(li, [
           { label: 'u', value: position.u, exact: true },
-          { label: 'raw before SAVE', value: position.rawBeforeSave, exact: true },
+          { label: 'rawBeforeSave', value: position.rawBeforeSave, exact: true },
           { label: 'output', value: position.output, exact: true },
         ]);
         list.append(li);
@@ -1104,7 +1122,7 @@
       this._kv(pane, [
         { label: 'count', value: cutlets.count },
         { label: 'partition', node: this._arrayValue(cutlets.partition) },
-        { label: 'name canonical indices', node: this._arrayValue(cutlets.nameCanonicalIndices) },
+        { label: 'nameCanonicalIndices', node: this._arrayValue(cutlets.nameCanonicalIndices) },
       ]);
       const items = safeArray(cutlets.items);
       if (!items.length) return;
@@ -1114,11 +1132,11 @@
       const item = items[index];
       const card = doc.createElement('section');
       card.className = 'step-card';
-      this._heading(card, 'cutlet ' + String(index + 1), 4);
+      this._heading(card, this._term('cutlet') + ' ' + String(index + 1), 4);
       this._kv(card, [
-        { label: 'name canonical index', value: item.nameCanonicalIndex },
-        { label: 'open gate', value: item.openGateIndex, exact: true },
-        { label: 'close gate', value: item.closeGateIndex, exact: true },
+        { label: 'nameCanonicalIndex', value: item.nameCanonicalIndex },
+        { label: 'openGateIndex', value: item.openGateIndex, exact: true },
+        { label: 'closeGateIndex', value: item.closeGateIndex, exact: true },
         { label: 'firstDay', value: item.firstDay, exact: true },
         { label: 'lastDay', value: item.lastDay, exact: true },
       ]);
@@ -1131,7 +1149,7 @@
       if (!months) return this._empty(pane);
       this._kv(pane, [
         { label: 'count', value: months.count },
-        { label: 'name canonical indices', node: this._arrayValue(months.nameCanonicalIndices) },
+        { label: 'nameCanonicalIndices', node: this._arrayValue(months.nameCanonicalIndices) },
       ]);
       const count = Math.max(safeArray(months.lengths).length, safeArray(months.weaving).length);
       if (!count) return;
@@ -1140,11 +1158,11 @@
       this._stepControls(pane, key, count, () => this._renderChapter());
       const card = doc.createElement('section');
       card.className = 'step-card';
-      this._heading(card, 'month slot ' + String(index + 1), 4);
+      this._heading(card, this._term('monthSlot') + ' ' + String(index + 1), 4);
       this._kv(card, [
         { label: 'length', value: months.lengths[index] },
         { label: 'weaving', value: months.weaving[index] },
-        { label: 'name canonical index', value: months.nameCanonicalIndices[index] },
+        { label: 'nameCanonicalIndex', value: months.nameCanonicalIndices[index] },
       ]);
       pane.append(card);
     }
@@ -1154,12 +1172,12 @@
       if (!position) return this._empty(pane);
       this._kv(pane, [
         { label: 'targetDay', value: position.targetDay, exact: true },
-        { label: 'target position in year', value: position.targetPositionInYear },
-        { label: 'month id', value: position.monthId },
-        { label: 'day in cutlet', value: position.dayInCutlet },
-        { label: 'day in month', value: position.dayInMonth },
-        { label: 'cutlet canonical index', value: position.cutletCanonicalIndex },
-        { label: 'month canonical index', value: position.monthCanonicalIndex },
+        { label: 'targetPositionInYear', value: position.targetPositionInYear },
+        { label: 'monthId', value: position.monthId },
+        { label: 'dayInCutlet', value: position.dayInCutlet },
+        { label: 'dayInMonth', value: position.dayInMonth },
+        { label: 'cutletCanonicalIndex', value: position.cutletCanonicalIndex },
+        { label: 'monthCanonicalIndex', value: position.monthCanonicalIndex },
       ]);
     }
 
@@ -1190,7 +1208,7 @@
       if (this._trace.measurement) {
         const card = doc.createElement('section');
         card.className = 'step-card';
-        this._heading(card, 'measurement', 4);
+        this._heading(card, this._term('measurement'), 4);
         this._kv(card, Object.entries(this._trace.measurement).map(([key, value]) => ({
           label: key,
           value,

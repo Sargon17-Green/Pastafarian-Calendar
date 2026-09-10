@@ -825,10 +825,10 @@
               <span class="beacon-line month-line"></span>
             </div>
             <p class="beacon-context"></p>
-            <button class="cooking-open" type="button" aria-expanded="false"></button>
+            <button class="cooking-open" type="button" aria-expanded="false" aria-controls="pastafari-cooking-panel"></button>
           </section>
 
-          <pastafari-cooking class="cooking-panel"></pastafari-cooking>
+          <pastafari-cooking id="pastafari-cooking-panel" class="cooking-panel"></pastafari-cooking>
 
           <header class="toolbar" part="toolbar">
             <div class="toolbar-copy">
@@ -936,6 +936,7 @@
       this._els.cookingOpen.addEventListener('click', () => this._toggleCooking());
       this._els.cookingPanel.addEventListener('pastafari-cooking-close', () => {
         this._els.cookingOpen.setAttribute('aria-expanded', 'false');
+        if (typeof this._els.cookingOpen.focus === 'function') this._els.cookingOpen.focus();
       });
       this._els.retryButton.addEventListener('click', () => this._retry());
       this._els.cancelButton.addEventListener('click', () => this._closeDialog());

@@ -70,6 +70,21 @@ const REQUIRED_MESSAGES = Object.freeze([
   'cooking.phase.visible',
   'cooking.phase.bowls',
   'cooking.phase.postStirs',
+  'cooking.term.gate',
+  'cooking.term.compactSauce',
+  'cooking.term.year',
+  'cooking.term.sauce',
+  'cooking.term.stone',
+  'cooking.term.hiddenDrop',
+  'cooking.term.visibleDrop',
+  'cooking.term.grind',
+  'cooking.term.bowlRound',
+  'cooking.term.position',
+  'cooking.term.bowl',
+  'cooking.term.postStir',
+  'cooking.term.cutlet',
+  'cooking.term.monthSlot',
+  'cooking.term.measurement',
 ]);
 
 const sandbox = { Intl, globalThis: null };
@@ -149,7 +164,9 @@ assert.strictEqual(i18n.translate(cs, 'field.day'), 'Den');
 assert.strictEqual(i18n.translate(ie, 'cooking.chapter.gates'), 'Portas');
 assert.strictEqual(i18n.translate(en, 'cooking.title'), 'How this date was cooked');
 assert.strictEqual(i18n.translate(he, 'cooking.close'), 'סגור');
+assert.strictEqual(i18n.translate(he, 'cooking.term.gate'), 'שער');
 assert.strictEqual(i18n.translate(ar, 'cooking.chapter.result'), 'النتيجة');
+assert.strictEqual(i18n.translate(ar, 'cooking.term.stone'), 'حجر');
 
 // Regression witnesses: current semantic identities, including names that differ
 // from the pinned old positional catalog.

@@ -247,12 +247,25 @@ async function flush() {
   const targetJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-11'));
   assert.strictEqual(calls[0].targetJdn, String(targetJdn));
   assert.strictEqual(calls[0].calculationJdn, String(targetJdn));
+  assert(lazy.shadowRoot.innerHTML.includes('role="region"'));
+  assert(lazy.shadowRoot.innerHTML.includes('aria-labelledby="pastafari-cooking-title"'));
+
+  // Reopening the same completed trace reuses component-local trace state and
+  // does not schedule another expensive semantic execution.
+  lazy.close();
+  assert.strictEqual(lazy.hasAttribute('open'), false);
+  lazy.setAttribute('open', '');
+  await flush();
+  assert.strictEqual(calls.length, 1);
+  assert.strictEqual(lazy.trace.schemaVersion, '0.3.0');
 
   // Locale switching rerenders the component without a semantic rerun.
   lazy.setAttribute('lang', 'he');
   assert.strictEqual(lazy._locale.code, 'he');
   assert.strictEqual(lazy.getAttribute('dir'), 'rtl');
   assert.strictEqual(lazy._els.close.textContent, 'סגור');
+  assert.strictEqual(lazy._term('gate'), 'שער');
+  assert.strictEqual(lazy._term('bowlRound'), 'סבב קערות');
   assert.strictEqual(calls.length, 1);
 
   // Gate detail is a new semantic execution explicitly scoped to that gate;
@@ -275,7 +288,17 @@ async function flush() {
   exact.listeners.get('click')();
   assert(exact.textContent.includes('…'));
 
+  // A changed input pair must not reuse the old trace.
+  const beforeChangedInput = calls.length;
   lazy.close();
+  lazy.setAttribute('date', '2026-09-12');
+  lazy.setAttribute('open', '');
+  await flush();
+  assert.strictEqual(calls.length, beforeChangedInput + 1);
+
+  let prevented = false;
+  lazy.shadowRoot.listeners.get('keydown')({ key: 'Escape', preventDefault() { prevented = true; } });
+  assert.strictEqual(prevented, true);
   assert.strictEqual(lazy.hasAttribute('open'), false);
   assert(lazy.dispatched.some((event) => event.type === 'pastafari-cooking-close'));
 

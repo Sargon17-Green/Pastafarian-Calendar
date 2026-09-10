@@ -27,6 +27,7 @@ class FakeElement {
     this.scrollTop = 0;
     this.scrollHeight = 1000;
     this.clientHeight = 500;
+    this.focused = false;
   }
   setAttribute(name, value) { this.attributes.set(String(name), String(value)); }
   getAttribute(name) { return this.attributes.has(String(name)) ? this.attributes.get(String(name)) : null; }
@@ -73,6 +74,7 @@ class FakeElement {
   }
   showModal() { this.setAttribute('open', ''); }
   close() { this.removeAttribute('open'); }
+  focus() { this.focused = true; }
 }
 
 class FakeShadowRoot extends FakeElement {
@@ -293,9 +295,13 @@ async function flush() {
   assert.strictEqual(integratedCooking._els.cookingPanel.getAttribute('calculation-date'), '2026-09-10');
   assert.strictEqual(integratedCooking._els.cookingPanel.getAttribute('lang'), 'ie');
   assert.strictEqual(integratedCooking._els.cookingOpen.getAttribute('aria-expanded'), 'true');
+  assert(integratedCooking.shadowRoot.innerHTML.includes('aria-controls="pastafari-cooking-panel"'));
+  assert(integratedCooking.shadowRoot.innerHTML.includes('id="pastafari-cooking-panel"'));
   integratedCooking._toggleCooking();
   assert.strictEqual(integratedCooking._els.cookingPanel.hasAttribute('open'), false);
   assert.strictEqual(integratedCooking._els.cookingOpen.getAttribute('aria-expanded'), 'false');
+  integratedCooking._els.cookingPanel.listeners.get('pastafari-cooking-close')();
+  assert.strictEqual(integratedCooking._els.cookingOpen.focused, true);
 
   // Rapid attribute changes: only the newest generation may commit or publish.
   const pending = new Map();
