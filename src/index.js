@@ -987,6 +987,15 @@ function savePatch(value) {
   return remainder;
 }
 
+function emitCookingTraceCheckpoint(checkpoint, kind, payload) {
+  if (checkpoint === null || checkpoint === undefined) return;
+  if (typeof checkpoint !== 'function') {
+    throw new TypeError('Li cooking-trace checkpoint deve esser null o un function.');
+  }
+  checkpoint(kind, payload);
+}
+
+
 function oldDayTag(day) {
   const distance = day >= FOUNDATION_DAY_OLD
     ? day - FOUNDATION_DAY_OLD
@@ -1097,7 +1106,7 @@ function hiddenStoneKind(grind) {
   return HIDDEN_STONE_KIND_STRANGE[grind];
 }
 
-function makeHiddenPatched(k, counts, stones) {
+function makeHiddenPatched(k, counts, stones, checkpoint = null) {
   requireHiddenOrdinal(k, 'Li ordinal de hidden drop');
   const [a, b, c, d] = coeffForHidden(k);
   const row = stones[k - 1];
@@ -1110,26 +1119,43 @@ function makeHiddenPatched(k, counts, stones) {
   for (const kind of ['w', 'b', 's', 'm', 'r']) {
     x += row[kind];
   }
-  x = savePatch(x);
+  const rawInitial = x;
+  x = savePatch(rawInitial);
+  emitCookingTraceCheckpoint(checkpoint, 'hidden-start', {
+    ordinal: k,
+    coefficients: { a, b, c, d },
+    stoneRow: { ...row },
+    rawBeforeSave: rawInitial,
+    initial: x
+  });
   let grind = 1;
   while (grind <= 7) {
     const beforeSquare = x;
+    const stoneKind = hiddenStoneKind(grind);
     x = savePatch(
       beforeSquare * beforeSquare
       + 3n * beforeSquare
-      + row[hiddenStoneKind(grind)]
+      + row[stoneKind]
       + BigInt(grind)
     );
+    emitCookingTraceCheckpoint(checkpoint, 'hidden-grind', {
+      ordinal: k,
+      grind,
+      before: beforeSquare,
+      stoneKind,
+      stoneValue: row[stoneKind],
+      after: x
+    });
     grind += 1;
   }
   return x;
 }
 
-function buildHiddenWithBackwardStorage(counts, stones) {
+function buildHiddenWithBackwardStorage(counts, stones, checkpoint = null) {
   // Index 0 resta vacui por conservar li convention historic 1..7.
   const legacyHidden = new Array(8).fill(null);
   for (let k = 1; k <= 7; k += 1) {
-    legacyHidden[8 - k] = makeHiddenPatched(k, counts, stones);
+    legacyHidden[8 - k] = makeHiddenPatched(k, counts, stones, checkpoint);
   }
   return legacyHidden;
 }
@@ -1362,7 +1388,7 @@ function legacyStirOneDropInPlace(drop, index, bowls, stoneRow) {
   return { order, pours, bowls };
 }
 
-function stirOneDropViaShadow(drop, index, bowls, stoneRow) {
+function stirOneDropViaShadow(drop, index, bowls, stoneRow, checkpoint = null) {
   if (typeof drop !== 'bigint' || typeof index !== 'bigint') {
     throw new TypeError('Li drop e su index por li bowl-round reparat deve esser BigInt exact.');
   }
@@ -1395,6 +1421,7 @@ function stirOneDropViaShadow(drop, index, bowls, stoneRow) {
   const pours = poured.pours.slice();
   // Null output es commitet durante li loop: omni six writes va solmen in pending.
   const pending = new Array(7).fill(null);
+  const positionCheckpoints = checkpoint == null ? null : [];
   for (let position = 1; position <= 6; position += 1) {
     const bowlId = order[position - 1];
     const prevId = order[(position + 4) % 6];
@@ -1406,14 +1433,35 @@ function stirOneDropViaShadow(drop, index, bowls, stoneRow) {
       + pours[position]
       + drop
       + stoneRow[stoneKind];
-    pending[bowlId] = savePatch(
-      s * s
+    const rawBeforeSave = s * s
       + 5n * vaultOld[prevId] * vaultOld[nextId]
-      + index * BigInt(position)
-    );
+      + index * BigInt(position);
+    pending[bowlId] = savePatch(rawBeforeSave);
+    if (positionCheckpoints) {
+      positionCheckpoints.push({
+        position,
+        bowlId,
+        prevId,
+        nextId,
+        stoneKind,
+        mixed: s,
+        rawBeforeSave,
+        output: pending[bowlId]
+      });
+    }
   }
   // Li commit semantic evene solmen pos que omni six positions ha plenat pending.
   const committed = pending.slice();
+  emitCookingTraceCheckpoint(checkpoint, 'bowl-round', {
+    ordinal: Number(index),
+    drop,
+    order: order.slice(),
+    pours: pours.slice(),
+    beforeBowls: vaultOld.slice(),
+    stoneRow: { ...stoneRow },
+    positions: positionCheckpoints ? positionCheckpoints.map((row) => ({ ...row })) : [],
+    afterBowls: committed.slice()
+  });
   return {
     order,
     pours,
@@ -1430,7 +1478,7 @@ function stirOneDropViaShadow(drop, index, bowls, stoneRow) {
 
 const DISCOVERY11_BOWL_PRIMES = Object.freeze([null, 17n, 19n, 23n, 29n, 31n, 37n]);
 
-function initialBowlsForOrderMemoryDiscovery(counts) {
+function initialBowlsForOrderMemoryDiscovery(counts, checkpoint = null) {
   if (!counts || typeof counts !== 'object') {
     throw new TypeError('Li comptes por li bowls inicial deve esser un object exact.');
   }
@@ -1448,12 +1496,21 @@ function initialBowlsForOrderMemoryDiscovery(counts) {
       + counts.connection
       + counts.direction
       + prime * prime;
-    bowls[bowlId] = savePatch(seed * seed + BigInt(bowlId));
+    const rawBeforeSave = seed * seed + BigInt(bowlId);
+    const output = savePatch(rawBeforeSave);
+    bowls[bowlId] = output;
+    emitCookingTraceCheckpoint(checkpoint, 'initial-bowl', {
+      bowlId,
+      prime,
+      seed,
+      rawBeforeSave,
+      output
+    });
   }
   return bowls;
 }
 
-function visibleDropThroughCurrentLayers(index, counts, stones, dropStore, legacyHidden) {
+function visibleDropThroughCurrentLayers(index, counts, stones, dropStore, legacyHidden, checkpoint = null) {
   if (!Number.isInteger(index) || index < 1 || index > 46) {
     throw new RangeError('Li index del visible drop complet deve esser inter 1 e 46.');
   }
@@ -1467,7 +1524,7 @@ function visibleDropThroughCurrentLayers(index, counts, stones, dropStore, legac
   const prev1 = priorPatch(dropStore, legacyHidden, index, 1);
   const prev3 = priorPatch(dropStore, legacyHidden, index, 3);
   const prev7 = priorPatch(dropStore, legacyHidden, index, 7);
-  let x = savePatch(
+  const rawInitial = (
     row.w * counts.action
     + row.b * counts.target
     + row.s * counts.distance
@@ -1478,6 +1535,14 @@ function visibleDropThroughCurrentLayers(index, counts, stones, dropStore, legac
     + 5n * prev7
     + BigInt(index)
   );
+  let x = savePatch(rawInitial);
+  emitCookingTraceCheckpoint(checkpoint, 'visible-start', {
+    ordinal: index,
+    priors: { prev1, prev3, prev7 },
+    stoneRow: { ...row },
+    rawBeforeSave: rawInitial,
+    initial: x
+  });
   for (let grind = 1; grind <= 11; grind += 1) {
     const rule = grindRowWithSentinel(grind);
     const oldX = x;
@@ -1489,6 +1554,14 @@ function visibleDropThroughCurrentLayers(index, counts, stones, dropStore, legac
       + rule.d * prev7
       + row[rule.kind]
     );
+    emitCookingTraceCheckpoint(checkpoint, 'visible-grind', {
+      ordinal: index,
+      grind,
+      before: oldX,
+      rule: { kind: rule.kind, a: rule.a, b: rule.b, c: rule.c, d: rule.d },
+      stoneValue: row[rule.kind],
+      after: x
+    });
   }
   return x;
 }
@@ -1557,7 +1630,7 @@ function snapshotStage56PostStirContext(context) {
   });
 }
 
-function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context) {
+function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context, checkpoint = null) {
   if (!Number.isInteger(stirNumber) || stirNumber < 1 || stirNumber > 12) {
     throw new RangeError('Li ordinal del detour Stage 56 deve esser inter 1 e 12.');
   }
@@ -1585,6 +1658,7 @@ function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context
     throw new BootstrapStageError('Stage 56 refusa mutar orderNumber o permutation; solmen rawBowlSum posse diferer in u.');
   }
   const pending = new Array(7).fill(null);
+  const positionCheckpoints = checkpoint == null ? null : [];
   for (let position = 1; position <= 6; position += 1) {
     const bowlId = order[position - 1];
     const prevId = order[(position + 4) % 6];
@@ -1595,7 +1669,22 @@ function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context
       + rawBowlSum
       + BigInt(stirNumber)
       + BigInt(position * position);
-    pending[bowlId] = savePatch(u * u + 7n * old[prevId] * old[nextId]);
+    const rawBeforeSave = u * u + 7n * old[prevId] * old[nextId];
+    pending[bowlId] = savePatch(rawBeforeSave);
+    if (positionCheckpoints) {
+      positionCheckpoints.push({
+        position,
+        bowlId,
+        prevId,
+        nextId,
+        oldBowl: old[bowlId],
+        oldPrev: old[prevId],
+        oldNext: old[nextId],
+        u,
+        rawBeforeSave,
+        output: pending[bowlId]
+      });
+    }
   }
   const oldResult = Object.freeze({
     bowls: Object.freeze(legacyRound.bowls.slice()),
@@ -1612,6 +1701,9 @@ function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context
     correctedResult,
     rawBowlSum,
     savedOrderNumber,
+    ...(positionCheckpoints ? {
+      positions: Object.freeze(positionCheckpoints.map((row) => Object.freeze({ ...row })))
+    } : {}),
     stirIndex: stirNumber,
     appliedCount: context.appliedCount + 1,
     appliedFlag: true,
@@ -1628,22 +1720,22 @@ function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context
   return { bowls: pending.slice(), order: order.slice(), rawBowlSum, savedOrderNumber };
 }
 
-function legacySauceWithOverwritableOrderMemory(counts, stones) {
+function legacySauceWithOverwritableOrderMemory(counts, stones, checkpoint = null) {
   if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
     throw new TypeError('Li path legacy de order-memory exige comptes e 46 rows de stones.');
   }
-  const legacyHidden = buildHiddenWithBackwardStorage(counts, stones);
+  const legacyHidden = buildHiddenWithBackwardStorage(counts, stones, checkpoint);
   const drops = new Array(47).fill(null);
-  let bowls = initialBowlsForOrderMemoryDiscovery(counts);
+  let bowls = initialBowlsForOrderMemoryDiscovery(counts, checkpoint);
   let legacyOrderMemory = null;
   let orderWriteCount = 0;
   let lastSource = null;
   let drop46OrderDiagnostic = null;
 
   for (let index = 1; index <= 46; index += 1) {
-    const drop = visibleDropThroughCurrentLayers(index, counts, stones, drops, legacyHidden);
+    const drop = visibleDropThroughCurrentLayers(index, counts, stones, drops, legacyHidden, checkpoint);
     drops[index] = drop;
-    const round = stirOneDropViaShadow(drop, BigInt(index), bowls, stones[index - 1]);
+    const round = stirOneDropViaShadow(drop, BigInt(index), bowls, stones[index - 1], checkpoint);
     bowls = round.bowls.slice();
     // Li scar de Discovery 11 usa un unic memorie general: chascun drop superscri li order anterior.
     legacyOrderMemory = round.order.slice();
@@ -1784,12 +1876,12 @@ function sauceWithOrderAt46Latch(counts, stones) {
 }
 
 
-function sauceWithOrderAt46LatchStage58RememberedReplay(counts, stones) {
+function sauceWithOrderAt46LatchStage58RememberedReplay(counts, stones, checkpoint = null) {
   if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
     throw new TypeError('Li replay remembered de Stage 58 exige comptes e 46 rows de stones.');
   }
   // Li traversal legacy complet resta real. Li duesim traversal semantic es replayet ex su scars ja calculat.
-  const legacyGarbage = legacySauceWithOverwritableOrderMemory(counts, stones);
+  const legacyGarbage = legacySauceWithOverwritableOrderMemory(counts, stones, checkpoint);
   const latchState = createOrderAt46LatchState();
   const rememberedDrop46Round = { order: legacyGarbage.drop46OrderDiagnostic.slice() };
   writeOrderAt46LatchOnce(latchState, rememberedDrop46Round.order);
@@ -1871,12 +1963,12 @@ function sauceWithStage56RawBowlSumDetour(counts, stones) {
 }
 
 
-function sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones) {
+function sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones, checkpoint = null) {
   if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
     throw new TypeError('Li sauce corrective remembered Stage 58 exige comptes e 46 rows de stones.');
   }
   // Li Stage 56 historical sauce resta conceptualmente present, ma su duesim traversal es cache-backed per Patch 11 scars.
-  const historical = sauceWithOrderAt46LatchStage58RememberedReplay(counts, stones);
+  const historical = sauceWithOrderAt46LatchStage58RememberedReplay(counts, stones, checkpoint);
   let bowls = historical.bowlsAfterDrops.slice();
   const stage56Context = createStage56PostStirContext();
   let lastOrder = null;
@@ -1885,7 +1977,7 @@ function sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones) {
     const sourceSnapshot = bowls.slice();
     const legacyRound = postStirOneForOrderMemoryDiscovery(stir, sourceSnapshot);
     stage56Context.legacyScarCallCount += 1;
-    const correctedRound = stage56RawBowlSumPostStirDetour(stir, sourceSnapshot, legacyRound, stage56Context);
+    const correctedRound = stage56RawBowlSumPostStirDetour(stir, sourceSnapshot, legacyRound, stage56Context, checkpoint);
     bowls = correctedRound.bowls.slice();
     lastOrder = correctedRound.order.slice();
     lastSavedOrderNumber = correctedRound.savedOrderNumber;
@@ -7631,7 +7723,7 @@ function sauceWithScarsHistoricalUnremembered(calculationDay, targetDay) {
   }
 }
 
-function sauceWithScarsStage56HistoricalUnremembered(calculationDay, targetDay) {
+function sauceWithScarsStage56HistoricalUnremembered(calculationDay, targetDay, checkpoint = null) {
   stage54RequireDay(calculationDay, 'Li calculation-day del sauce Stage 56');
   stage54RequireDay(targetDay, 'Li target-day del sauce Stage 56');
   let programCounter = 0;
@@ -7674,7 +7766,7 @@ function sauceWithScarsStage56HistoricalUnremembered(calculationDay, targetDay) 
         programCounter = 40;
         break;
       case 40:
-        result = sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones);
+        result = sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones, checkpoint);
         trace.push('LEGACY_POST12_GHOST_THEN_STAGE56_RAW_SUM_POST12');
         programCounter = 50;
         break;
@@ -7735,9 +7827,16 @@ function sauceWithScars(calculationDay, targetDay) {
   return fresh;
 }
 
-function sauceWithScarsStage56(calculationDay, targetDay) {
+function sauceWithScarsStage56(calculationDay, targetDay, checkpoint = null) {
   stage54RequireDay(calculationDay, 'Li calculation-day del sauce remembered Stage 56');
   stage54RequireDay(targetDay, 'Li target-day del sauce remembered Stage 56');
+  if (checkpoint !== null && checkpoint !== undefined) {
+    if (typeof checkpoint !== 'function') {
+      throw new TypeError('Li cooking-trace checkpoint deve esser null o un function.');
+    }
+    const traced = sauceWithScarsStage56HistoricalUnremembered(calculationDay, targetDay, checkpoint);
+    return Object.freeze({ ...traced, stage58MemoryReplay: false, stage58SauceGeneration: 'STAGE56' });
+  }
   const key = stage58SauceKey(calculationDay, targetDay);
   const remembered = STAGE58_SAUCE56_MEMORY.get(key);
   if (remembered !== null && remembered.stage58SauceGeneration === 'STAGE56') {

@@ -2,7 +2,7 @@
 
 const core = require('./index');
 
-const TRACE_SCHEMA_VERSION = '0.1.0';
+const TRACE_SCHEMA_VERSION = '0.2.0';
 const TRACE_SEMANTIC_PROFILE = 'PASTAFARIAN_STAGE57_STAGE56_RAW_SUM';
 const FOUNDATION_DAY = core.FOUNDATION_DAY_OLD;
 
@@ -135,6 +135,70 @@ function compactSauceSnapshot(result) {
   };
 }
 
+
+function createCookingCheckpointCollector() {
+  const hidden = new Map();
+  const visible = new Map();
+  const initialBowls = [];
+  const bowlRounds = [];
+
+  const observer = (kind, payload) => {
+    if (kind === 'hidden-start') {
+      hidden.set(payload.ordinal, { ...payload, grinds: [] });
+      return;
+    }
+    if (kind === 'hidden-grind') {
+      const row = hidden.get(payload.ordinal);
+      if (!row) throw new Error('Hidden-grind apari ante su hidden-start.');
+      row.grinds.push({ ...payload });
+      return;
+    }
+    if (kind === 'visible-start') {
+      visible.set(payload.ordinal, { ...payload, grinds: [] });
+      return;
+    }
+    if (kind === 'visible-grind') {
+      const row = visible.get(payload.ordinal);
+      if (!row) throw new Error('Visible-grind apari ante su visible-start.');
+      row.grinds.push({ ...payload });
+      return;
+    }
+    if (kind === 'initial-bowl') {
+      initialBowls.push({ ...payload });
+      return;
+    }
+    if (kind === 'bowl-round') {
+      bowlRounds.push({
+        ...payload,
+        order: payload.order.slice(),
+        pours: payload.pours.slice(),
+        beforeBowls: payload.beforeBowls.slice(),
+        positions: payload.positions.map((row) => ({ ...row })),
+        afterBowls: payload.afterBowls.slice(),
+        stoneRow: { ...payload.stoneRow },
+      });
+      return;
+    }
+    throw new Error('Ínconosset cooking checkpoint: ' + String(kind));
+  };
+
+  return {
+    observer,
+    snapshot() {
+      return {
+        hiddenDrops: Array.from(hidden.values())
+          .sort((a, b) => a.ordinal - b.ordinal)
+          .map((row) => ({ ...row, grinds: row.grinds.map((grind) => ({ ...grind })) })),
+        visibleDrops: Array.from(visible.values())
+          .sort((a, b) => a.ordinal - b.ordinal)
+          .map((row) => ({ ...row, grinds: row.grinds.map((grind) => ({ ...grind })) })),
+        initialBowls: initialBowls.slice().sort((a, b) => a.bowlId - b.bowlId),
+        bowlRounds: bowlRounds.slice().sort((a, b) => a.ordinal - b.ordinal),
+      };
+    },
+  };
+}
+
 class NormativeExecutionRecorder {
   constructor() {
     this.nextSauceOrdinal = 1;
@@ -178,7 +242,7 @@ class NormativeExecutionRecorder {
     this.gates.set(index, day);
   }
 
-  recordSauce(calculationDay, targetDay, result) {
+  recordSauce(calculationDay, targetDay, result, coreCheckpoints = null) {
     const gateIndex = this.activeGateStack.length
       ? this.activeGateStack[this.activeGateStack.length - 1]
       : null;
@@ -189,6 +253,7 @@ class NormativeExecutionRecorder {
       gateIndex,
       transitionId: null,
       compact: compactSauceSnapshot(result),
+      coreCheckpoints: gateIndex === null ? coreCheckpoints : null,
       fullResult: gateIndex === null ? result : null,
       stage56StateRef: gateIndex === null && result ? result.stage56PostStirContext || null : null,
     };
@@ -314,6 +379,9 @@ function projectPostStirs(result) {
       rawBowlSum: row.rawBowlSum,
       savedOrderNumber: row.savedOrderNumber,
       order: row.correctedResult.order.slice(),
+      positions: Array.isArray(row.positions)
+        ? row.positions.map((position) => ({ ...position }))
+        : [],
       afterBowls: sixBowls(after),
     };
     before = after;
@@ -323,20 +391,51 @@ function projectPostStirs(result) {
 
 function fullSauceProjection(run, role, stoneTableId) {
   const result = run.fullResult;
+  const detail = run.coreCheckpoints;
   if (!result || !Array.isArray(result.stones)
       || !Array.isArray(result.hiddenBackward)
       || !Array.isArray(result.drops)
       || !Array.isArray(result.bowlsAfterDrops)) {
     throw new TypeError('Li Sauce central ne expone li checkpoints minim por un full trace.');
   }
+  if (!detail
+      || !Array.isArray(detail.hiddenDrops)
+      || !Array.isArray(detail.visibleDrops)
+      || !Array.isArray(detail.initialBowls)
+      || !Array.isArray(detail.bowlRounds)) {
+    throw new TypeError('Li Sauce central ne expone li checkpoints opt-in de cooking trace.');
+  }
 
+  const hiddenByOrdinal = new Map(detail.hiddenDrops.map((row) => [row.ordinal, row]));
+  const visibleByOrdinal = new Map(detail.visibleDrops.map((row) => [row.ordinal, row]));
   const hiddenDrops = [];
   for (let ordinal = 1; ordinal <= 7; ordinal += 1) {
-    hiddenDrops.push({ ordinal, value: result.hiddenBackward[8 - ordinal] });
+    const checkpoint = hiddenByOrdinal.get(ordinal);
+    if (!checkpoint) throw new Error('Mancant hidden checkpoint ' + ordinal + '.');
+    hiddenDrops.push({
+      ordinal,
+      value: result.hiddenBackward[8 - ordinal],
+      coefficients: { ...checkpoint.coefficients },
+      stoneRow: { ...checkpoint.stoneRow },
+      rawBeforeSave: checkpoint.rawBeforeSave,
+      initial: checkpoint.initial,
+      grinds: checkpoint.grinds.map((grind) => ({ ...grind })),
+    });
   }
+
   const visibleDrops = [];
   for (let ordinal = 1; ordinal <= 46; ordinal += 1) {
-    visibleDrops.push({ ordinal, value: result.drops[ordinal] });
+    const checkpoint = visibleByOrdinal.get(ordinal);
+    if (!checkpoint) throw new Error('Mancant visible checkpoint ' + ordinal + '.');
+    visibleDrops.push({
+      ordinal,
+      value: result.drops[ordinal],
+      priors: { ...checkpoint.priors },
+      stoneRow: { ...checkpoint.stoneRow },
+      rawBeforeSave: checkpoint.rawBeforeSave,
+      initial: checkpoint.initial,
+      grinds: checkpoint.grinds.map((grind) => ({ ...grind })),
+    });
   }
 
   return {
@@ -350,6 +449,17 @@ function fullSauceProjection(run, role, stoneTableId) {
     stoneTableRef: stoneTableId,
     hiddenDrops,
     visibleDrops,
+    initialBowls: detail.initialBowls.map((row) => ({ ...row })),
+    bowlRounds: detail.bowlRounds.map((row) => ({
+      ordinal: row.ordinal,
+      drop: row.drop,
+      order: row.order.slice(),
+      poursByPosition: row.pours.slice(1, 7),
+      beforeBowls: sixBowls(row.beforeBowls),
+      stoneRow: { ...row.stoneRow },
+      positions: row.positions.map((position) => ({ ...position })),
+      afterBowls: sixBowls(row.afterBowls),
+    })),
     bowlsAfterDrops: sixBowls(result.bowlsAfterDrops),
     orderAtDrop46: result.orderAt46Latch.slice(),
     postStirs: projectPostStirs(result),
@@ -358,14 +468,14 @@ function fullSauceProjection(run, role, stoneTableId) {
       counters: 'captured',
       stoneRows: 'shared-artifact',
       hiddenDropValues: 'captured',
+      hiddenGrinds: 'captured-at-execution',
       visibleDropValues: 'captured',
+      visiblePriorsAndGrinds: 'captured-at-execution',
+      initialBowls: 'captured-at-execution',
+      bowlRounds: 'captured-at-execution',
       postStirRounds: 'captured',
+      postStirPositionU: 'captured-at-execution',
       stoneTransitionOperands: 'needs-core-checkpoint',
-      hiddenGrinds: 'needs-core-checkpoint',
-      visiblePriorsAndGrinds: 'needs-core-checkpoint',
-      initialBowls: 'needs-core-checkpoint',
-      bowlRounds: 'needs-core-checkpoint',
-      postStirPositionU: 'needs-core-checkpoint',
     },
   };
 }
@@ -583,11 +693,22 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay) {
   requireDay(targetDay, 'Li target-day del cooking trace');
 
   const recorder = new NormativeExecutionRecorder();
-  const provider = (cDay, tDay) => recorder.recordSauce(
-    cDay,
-    tDay,
-    core.sauceWithScarsStage56(cDay, tDay),
-  );
+  const provider = (cDay, tDay) => {
+    const collector = recorder.activeGateStack.length === 0
+      ? createCookingCheckpointCollector()
+      : null;
+    const result = core.sauceWithScarsStage56(
+      cDay,
+      tDay,
+      collector ? collector.observer : null,
+    );
+    return recorder.recordSauce(
+      cDay,
+      tDay,
+      result,
+      collector ? collector.snapshot() : null,
+    );
+  };
 
   const registry = new TracingGateRegistry(provider, recorder);
   const manager = new core.Stage57MonsterIntegrationManager(registry);
@@ -651,11 +772,6 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay) {
       gateSauceDetail: 'compact-foundation-only',
       missingCoreCheckpoints: [
         'stone-transition-operands',
-        'hidden-drop-grinds',
-        'visible-drop-priors-and-grinds',
-        'initial-bowl-seeds',
-        'per-drop-bowl-rounds',
-        'post-stir-position-u',
         'selection-candidate-rejections',
         'full-gate-sauce-detail-without-rerun',
       ],
