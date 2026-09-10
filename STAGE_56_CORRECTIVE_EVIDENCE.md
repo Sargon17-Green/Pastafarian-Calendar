@@ -1,3 +1,10 @@
+# HISTORICUM - SUPERSESSUM
+
+This document is not current semantic authority.
+The Stage 56 text below treated rawBowlSum inside u as the correction. That is
+noncanonical. It is preserved only as a historical scar. The current saved-sum
+self-eating correction is documented in
+STAGE_56_SAVED_SUM_SELF_MONKEY_PATCH_EVIDENCE.md.
 # Gradus 56 correctivus — testimonia raw bowl sum
 
 Hoc documentum Gradum 55 historicum non rescribit. Gradus 55 clausuram originalis lineae 55 graduum retinet; Gradus 56 est correctio post clausuram propter discrepantiam semanticam post primam commotionem post guttam 46.

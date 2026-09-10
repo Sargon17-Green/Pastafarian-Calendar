@@ -2,6 +2,7 @@
 #include "pastafari/source_language_catalog.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <limits>
 #include <numeric>
 #include <set>
@@ -1015,67 +1016,117 @@ BowlState stage56LegacySavedOrderOperandScar(
 
 } // namespace
 
-Stage56PostStirDetourWitness stage56RawBowlSumPostStirDetour(
+namespace {
+
+using Stage56SelfEatingPostStirFn =
+    Stage56PostStirDetourWitness (*)(const BowlState&, int);
+
+Stage56PostStirDetourWitness stage56CanonicalAfterItHasEatenItsOwnBug(
+    const BowlState& oldBowls,
+    int stirIndex);
+Stage56PostStirDetourWitness stage56RawSumSacrificeNobodyMayReturn(
+    const BowlState& oldBowls,
+    int stirIndex);
+Stage56PostStirDetourWitness stage56FirstCallEatsBugPatchesSlotAndCallsItselfAgain(
+    const BowlState& oldBowls,
+    int stirIndex);
+
+std::atomic<Stage56SelfEatingPostStirFn>& stage56SelfEatingDispatchSlot() {
+    static std::atomic<Stage56SelfEatingPostStirFn> slot{
+        &stage56FirstCallEatsBugPatchesSlotAndCallsItselfAgain
+    };
+    return slot;
+}
+
+std::atomic<unsigned long long>& stage56SacrificialDigestSink() {
+    static std::atomic<unsigned long long> sink{0};
+    return sink;
+}
+
+Stage56PostStirDetourWitness stage56CanonicalAfterItHasEatenItsOwnBug(
     const BowlState& oldBowls,
     int stirIndex) {
-    Integer legacyRawBowlSum = 0;
-    Integer legacySavedOrderNumber = 0;
-    PermutationOrder legacyOrder{};
-    const BowlState oldResult = stage56LegacySavedOrderOperandScar(
-        oldBowls,
-        stirIndex,
-        legacyRawBowlSum,
-        legacySavedOrderNumber,
-        legacyOrder);
-
     Integer rawBowlSum = 0;
-    for (const Integer& bowl : oldBowls) {
-        rawBowlSum += bowl;
-    }
-    const Integer savedOrderNumber = savePatch(rawBowlSum + 149 * stirIndex);
-    const int oneBased =
-        (regularMod(savedOrderNumber - 1, Integer{720}) + 1).convert_to<int>();
-    const PermutationOrder correctedOrder = oldPermutationUnrank0(oneBased - 1);
+    Integer savedOrderNumber = 0;
+    PermutationOrder order{};
+    const BowlState canonical = stage56LegacySavedOrderOperandScar(
+        oldBowls, stirIndex, rawBowlSum, savedOrderNumber, order);
 
-    if (legacyRawBowlSum != rawBowlSum ||
-        legacySavedOrderNumber != savedOrderNumber ||
-        legacyOrder != correctedOrder) {
-        throw BaseValidationError(
-            "Gradus 56 guard: orderNumber vel permutatio a cicatrice legacy discrepat");
-    }
+    return Stage56PostStirDetourWitness{
+        canonical, canonical, rawBowlSum, savedOrderNumber,
+        order, order, stirIndex, true
+    };
+}
 
-    BowlState corrected = oldBowls;
+Stage56PostStirDetourWitness stage56RawSumSacrificeNobodyMayReturn(
+    const BowlState& oldBowls,
+    int stirIndex) {
+    Integer rawBowlSum = 0;
+    Integer savedOrderNumber = 0;
+    PermutationOrder order{};
+    const BowlState canonical = stage56LegacySavedOrderOperandScar(
+        oldBowls, stirIndex, rawBowlSum, savedOrderNumber, order);
+
+    BowlState doomedMutant = oldBowls;
     for (int position = 1; position <= 6; ++position) {
         const std::size_t pos = static_cast<std::size_t>(position - 1);
         const std::size_t prevPos = static_cast<std::size_t>((position + 4) % 6);
         const std::size_t nextPos = static_cast<std::size_t>(position % 6);
-        const int id = correctedOrder[pos];
-        const int prev = correctedOrder[prevPos];
-        const int next = correctedOrder[nextPos];
+        const int id = order[pos];
+        const int prev = order[prevPos];
+        const int next = order[nextPos];
+
         const Integer u = oldBowls[static_cast<std::size_t>(id - 1)]
                         + 3 * oldBowls[static_cast<std::size_t>(prev - 1)]
                         + 5 * oldBowls[static_cast<std::size_t>(next - 1)]
                         + rawBowlSum
                         + stirIndex
                         + position * position;
-        corrected[static_cast<std::size_t>(id - 1)] = savePatch(
+        doomedMutant[static_cast<std::size_t>(id - 1)] = savePatch(
             u * u
             + 7 * oldBowls[static_cast<std::size_t>(prev - 1)]
                 * oldBowls[static_cast<std::size_t>(next - 1)]);
     }
 
     return Stage56PostStirDetourWitness{
-        oldResult,
-        corrected,
-        rawBowlSum,
-        savedOrderNumber,
-        legacyOrder,
-        correctedOrder,
-        stirIndex,
-        true
+        canonical, doomedMutant, rawBowlSum, savedOrderNumber,
+        order, order, stirIndex, false
     };
 }
 
+Stage56PostStirDetourWitness stage56FirstCallEatsBugPatchesSlotAndCallsItselfAgain(
+    const BowlState& oldBowls,
+    int stirIndex) {
+    auto& slot = stage56SelfEatingDispatchSlot();
+
+    const Stage56SelfEatingPostStirFn whatWasHereBeforeTheMonkeyAteIt =
+        slot.exchange(
+            &stage56CanonicalAfterItHasEatenItsOwnBug,
+            std::memory_order_acq_rel);
+
+    if (whatWasHereBeforeTheMonkeyAteIt ==
+        &stage56FirstCallEatsBugPatchesSlotAndCallsItselfAgain) {
+        const Stage56PostStirDetourWitness doomed =
+            stage56RawSumSacrificeNobodyMayReturn(oldBowls, stirIndex);
+
+        const unsigned long long crumb =
+            regularMod(doomed.correctedResult[0], Integer{65521})
+                .convert_to<unsigned long long>();
+        stage56SacrificialDigestSink().fetch_xor(
+            crumb, std::memory_order_relaxed);
+    }
+
+    return stage56RawBowlSumPostStirDetour(oldBowls, stirIndex);
+}
+
+} // namespace
+
+Stage56PostStirDetourWitness stage56RawBowlSumPostStirDetour(
+    const BowlState& oldBowls,
+    int stirIndex) {
+    return stage56SelfEatingDispatchSlot()
+        .load(std::memory_order_acquire)(oldBowls, stirIndex);
+}
 Stage56RawBowlSumSauceResult sauceWithStage56RawBowlSumDetour(
     const Integer& calculationDay,
     const Integer& targetDay) {

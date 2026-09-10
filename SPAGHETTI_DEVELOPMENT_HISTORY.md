@@ -2124,4 +2124,25 @@ Regressiones historicae Gradus 55 servantur per adapter test-only `stage_56_hist
 ### Status post correctionem
 
 Gradus 56 corrective est GREEN. Gradus 55 manet certificatum historicum 55/55; nullus Gradus 57 creatur. Production nullum oracle importat, nullum runtime externum vocat et nullum fallback cross-engine habet.
+## Postscriptum canonicum post Gradum 56 - simia quae cicatricem devorat
 
+Gradus 56 non deletur neque in Gradum 57 convertitur. Narratio eius raw-sum
+supra manet ut cicatrix historica: correctio illa ipsa postea reperta est
+semantice falsa. Norma currens requirit R = SAVE(sum(oldBowls)+149*stir) et
+idem R tam ad permutationem quam intra u.
+
+Functio publica historice nominata stage56RawBowlSumPostStirDetour nomen falsum
+retinet. Prima vocatio slot atomicum suum ad corpus saved-sum rescribit,
+mutantem raw-sum semel ut phantasma non-semanticum exsequitur, deinde per
+eandem functionem publicam iterum intrat. Secunda ingressio target novum
+invenit. Invocationes posteriores solam lectionem atomicam indicis functionis
+et vocationem indirectam ante calculum canonicum patiuntur.
+
+Mutans raw-sum numquam exitus semanticus est. Priorum Gradus-56 bowl vectors,
+E2E witnesses, PASS log et final byte audit quae raw-sum tamquam correctionem
+probabant nunc testimonia historica tantum sunt. Non delentur.
+
+Hoc postscriptum statum gradus historicum non auget: LAST_COMPLETED_STAGE=56
+manet et NEXT_STAGE=NONE. Integra compilatio, audit staticus, differential
+saved-sum et regressiones rami denuo currenda sunt; donec currant, status novae
+correctionis non dicitur GREEN.
