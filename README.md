@@ -386,19 +386,19 @@ Wara l-qatra 46, l-ordni tinħażen bħala `orderAt46`.
 
 Wara l-qatra 46 isiru tnax-il pass sussegwenti ta’ tħawwid.
 
-F’kull pass ta’ tħawwid `r`:
+F’kull pass ta’ tħawwid `r`, l-ewwel tittieħed **snapshot wieħed** tas-sitt skutelli qodma. Minn dak l-istess snapshot jiġi kkalkulat:
 
 ```text
 S_r = SAVE(sum(oldBowls) + 149·r)
 ```
 
-L-istess valur jiżdied ma’ kull skutella u, fl-istess ħin, jintuża biex jiġi ddeterminat in-numru tal-ordni:
+`S_r` huwa l-valur miżmum kanoniku ta’ dak il-pass. L-istess `S_r` jintuża kemm għall-permutazzjoni kif ukoll bħala t-terminu addittiv ġewwa `u`:
 
 ```text
-1 + ((S_r-1) mod 720)
+permutationRank = 1 + ((S_r-1) mod 720)
 ```
 
-Jekk l-iskutella `B` tinsab fil-pożizzjoni `q` fl-ordni ta’ dak il-pass ta’ tħawwid, u l-iskutelli ġirien tagħha huma `P,N`:
+Jekk l-iskutella `B` tinsab fil-pożizzjoni `q` fil-permutazzjoni ta’ dak il-pass, u l-ġirien tagħha huma `P,N`:
 
 ```text
 u = old(B)
@@ -411,57 +411,9 @@ u = old(B)
 new(B) = SAVE(u² + 7·old(P)·old(N))
 ```
 
-Hawn ukoll, is-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
+Is-sitt valuri `new(B)` jiġu kkalkulati kollha mill-**istess** `oldBowls` snapshot u jiġu assenjati flimkien. L-ebda skutella ġdida ma tista’ tintuża biex tiġi kkalkulata skutella oħra fl-istess pass.
 
-## K½. Il-Mostru Jinduna bil-Mgħarfa Wara li Diġà Ħawwad
-
-L-istruzzjoni ta’ hawn fuq **ma titħassarx**. F’kull wieħed mit-tnax-il pass, il-Mostru l-ewwel iwettaqha kollha kemm hi, inkluż `+ S_r`, u jżomm is-sitt skutelli li joħorġu minnha bħala **riżultat fantasma storiku**. Dak ir-riżultat ma jitħalliex imur għand is-siġilli, ix-xtiebi, is-snin, il-pulpetti, ix-xhur jew ir-riżultat finali.
-
-Imbagħad, mingħajr ma juża l-iskutelli fantasma bħala input, il-Mostru jerġa’ jieħu **l-istess `oldBowls` li daħlu fil-pass** u jagħmel dawra oħra, għax sab li kien ħallat żewġ numri li għandhom xogħol differenti.
-
-L-ewwel jinżamm is-somma ordinarja, mhux miżmuma u mingħajr `149·r`:
-
-```text
-rawBowlSum_r = sum(oldBowls)
-```
-
-Minnha jinħadem numru separat għall-ordni:
-
-```text
-orderNumber_r = SAVE(rawBowlSum_r + 149·r)
-```
-
-Il-permutazzjoni tal-pass korrettiv tiġi minn:
-
-```text
-1 + ((orderNumber_r-1) mod 720)
-```
-
-Qabel ma jkompli, il-Mostru jqabbel dak li għadu kemm għamel ma’ dak li għamel ħażin ftit qabel:
-
-```text
-orderNumber_r = S_r
-correctedPermutation_r = historicalPermutation_r
-```
-
-Jekk waħda minn dawn iż-żewġ ugwaljanzi ma tkunx vera, il-kalkolu jieqaf: id-detour ma jistax jibdel l-ordni u ma jistax jaħbi żball ieħor.
-
-Wara l-guard, u **biss** wara l-guard, kull skutella terġa’ tiġi kkalkulata mill-istess `snapshot` antik. Jekk `B` tinsab fil-pożizzjoni `q` tal-permutazzjoni vverifikata u l-ġirien huma `P,N`:
-
-```text
-u_corrected = old(B)
-            + 3·old(P)
-            + 5·old(N)
-            + rawBowlSum_r
-            + r
-            + q²
-
-correctedNew(B) = SAVE(u_corrected² + 7·old(P)·old(N))
-```
-
-Hawnhekk `rawBowlSum_r` huwa **eżattament** `sum(oldBowls)`: ma jiġix applikat `SAVE` fuqu u ma jiżdiedx `149·r` miegħu. `149·r` jgħix biss ġewwa `orderNumber_r`.
-
-Is-sitt `correctedNew` jiġu kkalkulati kollha mill-istess `oldBowls` u jiġu assenjati flimkien. Dawn is-sitt skutelli korrettivi — u mhux is-sitt skutelli fantasma tal-ewwel dawra — isiru l-`oldBowls` tal-pass `r+1`. Għalhekk kull pass jagħmel, fl-ordni: **scar qadim reali → guard → detour korrettiv → commit korrettiv**.
+Mhux kanoniku li tuża `sum(oldBowls)` mhux miżmuma ġewwa `u` filwaqt li `S_r` jintuża biss għall-permutazzjoni. Dik kienet interpretazzjoni storika żbaljata u ma għandhiex tintuża bħala linja bażi ta’ konformità.
 
 Meta jsiru l-mistoqsijiet, “l-iskutella ta’ wara” tibqa’ ddeterminata minn `orderAt46`. Dawn it-tnax-il pass ta’ tħawwid jużaw l-ordnijiet tagħhom stess waqt it-tħawwid, filwaqt li l-ordni rreġistrata tal-qatra 46 tibqa’ tintuża meta jsiru l-mistoqsijiet.
 
@@ -926,19 +878,15 @@ Iż-żewġ komponenti tal-isem fil-vetturi jiġu rreġistrati bħala indiċijiet
  monthCanonicalIndex, dayInMonth)
 ```
 
-Il-valuri kollha f’dan il-kapitlu nkisbu permezz tat-tħaddim tal-`oracle` normattiv bl-`inputs` espliċiti, u nżammu bħala vetturi kanoniċi ta’ konformità.
-
-Dik is-sentenza baqgħet hawn għax kienet miktuba qabel ma l-Mostru nduna bil-mgħarfa żejda ta’ K½. Minn issa għandha tinqara b’żewġ saffi: l-ewwel tabella hija l-karta l-qadima li ma ntremitx; it-tieni tabella hija l-unika waħda li tista’ tgħaddi test ta’ konformità.
-
 Il-valur ta’ `F` huwa:
 
 ```text
 F = -15,055,671
 ```
 
-## AC.1. Il-Vetturi li Baqgħu fuq il-Karta l-Qadima
+## AC.1. Il-Vetturi Kanoniċi tas-Somma Miżmuma
 
-It-tabella li ġejja hija **scar storiku u ghost biss**. Implimentazzjoni tista’ tikkalkulaha biex turi li l-mogħdija l-qadima għadha teżisti, iżda **ma tistax** tuża dawn il-ħames komponenti bħala `expected output` ta’ konformità.
+Din hija **l-unika tabella normattiva ta’ konformità**. Dawn il-valuri joħorġu mill-post-stirs ta’ K, fejn l-istess `S_r = SAVE(sum(oldBowls)+149·r)` jintuża kemm għall-permutazzjoni kif ukoll ġewwa `u`.
 
 | # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
 |---:|---:|---:|---:|---:|---:|---:|---:|
@@ -953,13 +901,13 @@ It-tabella li ġejja hija **scar storiku u ghost biss**. Implimentazzjoni tista�
 | 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 10 | 1 | 45 |
 | 10 | -15,058,171 | -15,053,171 | 5002 | 5 | 288 | 29 | 13 |
 
-Il-vetturi 6, 7 u 10 jittestjaw b’mod espliċitu l-każijiet li fihom il-proċedura tgħaddi lil hinn mis-sena 5000: il-vettur 6 permezz ta’ `PREVIOUS₁₂`, u l-vetturi 7 u 10 permezz ta’ `NEXT₁₁`.
+Il-vettur 6 jgħaddi lura mis-sena 5000 permezz ta’ `PREVIOUS₁₂`; il-vetturi 7 u 10 jgħaddu ’l quddiem permezz ta’ `NEXT₁₁`.
 
-Dik l-aħħar sentenza wkoll tappartjeni għall-karta l-qadima. Ma għandhiex tintuża biex jiġi dedott li l-vettur 5 korrettiv jibqa’ fis-sena 5000.
+## AC.2. HISTORICAL — SUPERSEDED: Il-Vetturi tal-Mutant tas-Somma Mhux Miżmuma
 
-## AC.2. Il-Vetturi li Joħorġu mid-Detour Korrettiv
+**HISTORICAL — SUPERSEDED. MHUX NORMATTIV.**
 
-Din hija **l-unika tabella normattiva ta’ konformità**. Għal kull ringiela, il-mogħdija l-qadima ta’ K titħaddem bħala scar, iżda l-ħames komponenti jiġu mill-iskutelli li għaddew minn K½.
+It-tabella li ġejja tinżamm biss bħala evidenza storika u bħala materjal ta’ regression biex jiġi maqtul il-mutant li juża `rawBowlSum_r = sum(oldBowls)` ġewwa `u` u jħalli `SAVE(rawBowlSum_r+149·r)` għall-permutazzjoni biss. Dawn il-valuri **ma jistgħux** jintużaw bħala expected outputs ta’ konformità.
 
 | # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
 |---:|---:|---:|---:|---:|---:|---:|---:|
@@ -974,11 +922,7 @@ Din hija **l-unika tabella normattiva ta’ konformità**. Għal kull ringiela, 
 | 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 20 | 14 | 47 |
 | 10 | -15,058,171 | -15,053,171 | 5002 | 9 | 498 | 41 | 10 |
 
-Fil-mogħdija korrettiva, il-vettur 6 jgħaddi lura minn sena 5000 permezz ta’ `PREVIOUS₁₂`; il-vetturi 5, 7 u 10 jgħaddu ’l quddiem permezz ta’ `NEXT₁₁`. Il-vettur 5 għalhekk huwa wkoll discriminator intenzjonat kontra l-karta l-qadima.
-
-## `checkpoint` dettaljat: `c=t=F`
-
-**Dan il-checkpoint jibqa’ fiżikament bħala checkpoint storiku tal-mogħdija l-qadima.** Il-valuri tiegħu sal-ordni tal-qatra 46 għadhom komuni għaż-żewġ mogħdijiet. Is-sitt skutelli ta’ wara t-12-il pass, il-konfini tas-sena u r-riżultat testwali li jidhru f’dan il-blokk huma ghosts u ma jgħaddux għall-konformità.
+## `checkpoint` dettaljat kanoniku: `c=t=F`
 
 Għall-vettur 1, il-ħames għaddijiet użati fil-kalkolu huma:
 
@@ -1020,7 +964,7 @@ L-ordni tal-iskutelli tal-qatra 46:
 [4, 5, 2, 3, 6, 1]
 ```
 
-Is-sitt skutelli wara t-12-il pass addizzjonali ta’ tħawwid, skont l-identitajiet fissi `1..6`:
+Is-sitt skutelli kanoniċi wara t-12-il pass addizzjonali ta’ tħawwid, skont l-identitajiet fissi `1..6`, huma:
 
 ```text
 1: 65286679584284972964194865805379907599
@@ -1031,28 +975,32 @@ Is-sitt skutelli wara t-12-il pass addizzjonali ta’ tħawwid, skont l-identita
 6: 111207247632761530752404582123499651367
 ```
 
-Il-konfini tas-sena 5000 f’dan l-istess vettur:
+Il-konfini kanoniċi tas-sena 5000 f’dan l-istess vettur huma:
 
 ```text
 openGate  = -15,057,703
 closeGate = -15,053,459
 ```
 
-Ir-rappreżentazzjoni testwali tal-istess riżultat fil-katalgu Malti hija:
+Ir-rappreżentazzjoni testwali kanonika fil-katalgu Malti hija:
 
 ```text
 5000, Skorpjun, 503, Bir, 56
 ```
 
-Il-komponenti kanoniċi ta’ konformità hawnhekk huma l-indiċijiet 10 u 20; fil-katalgu Malti dawn jingħataw il-forom `Skorpjun` u `Bir`.
+Il-komponenti kanoniċi ta’ konformità huma għalhekk:
 
-Dik l-aħħar sentenza hija wkoll parti mill-ghost storiku: l-indiċijiet 10 u 20 m’għadhomx il-komponenti ta’ konformità tal-vettur 1.
+```text
+(5000, 10, 503, 20, 56)
+```
 
-## Il-`checkpoint` li l-Mostru Reġa’ Għamel Wara li Ma Fdax l-Ewwel Wieħed
+## HISTORICAL — SUPERSEDED: checkpoint tal-mutant `rawBowlSum`
 
-Għall-istess `c=t=F`, il-ħames għaddijiet, is-seba’ qatriet moħbija, l-ewwel qatra viżibbli, il-qatra viżibbli 46 u `orderAt46 = [4,5,2,3,6,1]` jibqgħu eżattament kif jidhru fil-checkpoint storiku. Id-diverġenza tibda fl-ewwel post-stir ta’ K½.
+**HISTORICAL — SUPERSEDED. MHUX NORMATTIV.**
 
-Wara li kull wieħed mit-tnax-il scars antiki jitħaddem u mbagħad jiġi mgħoddi mid-detour korrettiv, is-sitt skutelli awtorevoli, skont l-identitajiet fissi `1..6`, huma:
+Għall-istess `c=t=F`, il-ħames għaddijiet, is-seba’ qatriet moħbija, l-ewwel qatra viżibbli, il-qatra viżibbli 46 u `orderAt46 = [4,5,2,3,6,1]` jibqgħu l-istess. Id-diverġenza tibda fl-ewwel post-stir, meta l-mutant juża s-somma mhux miżmuma ġewwa `u`.
+
+Is-sitt skutelli finali tal-mutant, skont l-identitajiet fissi `1..6`, huma:
 
 ```text
 1: 67068226522203060890658143482200172502
@@ -1063,26 +1011,26 @@ Wara li kull wieħed mit-tnax-il scars antiki jitħaddem u mbagħad jiġi mgħod
 6: 154633989471499313687998830839607736513
 ```
 
-Dawn, u dawn biss, jitħallew jidħlu fil-mekkaniżmu tal-mistoqsijiet. Il-konfini awtorevoli tas-sena 5000 għal dan il-vettur huma:
+Il-konfini tas-sena 5000 tal-mutant huma:
 
 ```text
 openGate  = -15,059,693
 closeGate = -15,055,294
 ```
 
-Ir-rappreżentazzjoni testwali awtorevoli fil-katalgu Malti hija:
+Ir-rappreżentazzjoni testwali tal-mutant fil-katalgu Malti hija:
 
 ```text
 5000, Lagaš, 762, Libien, 105
 ```
 
-Il-komponenti kanoniċi normattivi huma għalhekk:
+Il-komponenti tiegħu huma:
 
 ```text
 (5000, 4, 762, 12, 105)
 ```
 
-Jekk implimentazzjoni tipproduċi l-checkpoint storiku ta’ fuq bħala riżultat finali, il-fatt li żammet l-istorja mhuwiex skuża: **il-konformità tfalli**. Jekk ma tistax turi li l-permutazzjoni tal-scar u tal-detour hija l-istess f’kull wieħed mit-12-il pass, il-konformità tfalli wkoll.
+Dawn il-valuri jinżammu biss bħala discriminator kontra l-interpretazzjoni żbaljata; implimentazzjoni li tipproduċihom bħala riżultat kanoniku tfalli l-konformità.
 
 ---
 
