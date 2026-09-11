@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
         };
 
         std::cout << "// PASTAFARI_HOT_SEED_BASE_DAY=" << base << "\n";
-        std::cout << "// PASTAFARI_HOT_SEED_GENERATION=1\n";
+        std::cout << "// PASTAFARI_HOT_SEED_GENERATION=4\n";
         std::cout << "// Quattuor sepulcra: hodie/cras pro die Veneris currenti et proximo.\n";
         for (const auto& [c, t] : pairs) {
             emit(c, t, engine.calculate(Integer{c}, Integer{t}));

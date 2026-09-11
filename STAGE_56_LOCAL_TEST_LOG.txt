@@ -1,3 +1,9 @@
+HISTORICAL_RECORD_STATUS=SUPERSEDED
+SUPERSEDED_BY=CANONICAL_SAVED_SUM_CORRECTION_2026_09_11
+DO_NOT_TREAT_AS_CURRENT_PASS=YES
+NOTE=The record below is preserved verbatim as historical raw-sum evidence.
+
+--- BEGIN SUPERSEDED HISTORICAL RECORD ---
 GRADUS=56_CORRECTIVUS_POST_COMPLETIONEM
 STATUS=PASS
 COMPILATOR=g++ (Debian 14.2.0-19) 14.2.0
@@ -46,3 +52,5 @@ REGRESSIONES_BOOTSTRAP_ET_GRADUS_2_53=PASS
 REGRESSIONES_1_55=PASS
 
 NOTA=Evidentia historica supra ex eadem arbore productionis Gradus 56 ante mutationes documentorum finalium servata est; fontes productionis post illas probationes non mutati sunt. Tentamen rerun Gradus 54 intra fenestram executionis huius sessionis non completum est, ergo non pro nova evidentia numeratur.
+
+--- END SUPERSEDED HISTORICAL RECORD ---

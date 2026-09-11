@@ -36,15 +36,25 @@ int main() {
                 "operandum legacy savedOrderNumber in u physice deest");
 
         require(cpp.find("stage56LegacySavedOrderOperandScar(") != std::string::npos,
-                "via cicatricis Gradus 56 deest");
-        require(cpp.find("const BowlState oldResult = stage56LegacySavedOrderOperandScar(") != std::string::npos,
-                "detour Gradus 56 cicatricem vere non vocat");
-        require(cpp.find("+ rawBowlSum") != std::string::npos,
-                "operandum correctum rawBowlSum deest");
-        require(cpp.find("legacyOrder != correctedOrder") != std::string::npos,
-                "guard permutationis Gradus 56 deest");
-        require(cpp.find("legacySavedOrderNumber != savedOrderNumber") != std::string::npos,
-                "guard orderNumber Gradus 56 deest");
+                "via canonica saved-sum Gradus 56 deest");
+        require(cpp.find("const BowlState canonicalResult = stage56LegacySavedOrderOperandScar(") != std::string::npos,
+                "compatibilitas Gradus 56 cicatricem saved-sum vere non vocat");
+        const std::string detourBegin =
+            "Stage56PostStirDetourWitness stage56RawBowlSumPostStirDetour(";
+        const std::string detourEnd =
+            "Stage56RawBowlSumSauceResult sauceWithStage56RawBowlSumDetourUnburied(";
+        const auto db = cpp.find(detourBegin);
+        const auto de = cpp.find(detourEnd, db);
+        require(db != std::string::npos && de != std::string::npos && de > db,
+                "corpus compatibilitatis Stage56 non inventum est");
+        const std::string detour = cpp.substr(db, de-db);
+        require(detour.find("+ rawBowlSum") == std::string::npos,
+                "operandum mutant rawBowlSum adhuc in via productionis Stage56 adest");
+        require(detour.find("canonicalResult") != std::string::npos &&
+                detour.find("savedOrderNumber") != std::string::npos,
+                "via productionis Stage56 canonicalem saved-sum non declarat");
+        require(cpp.find("SAUCE_GENERATION=STAGE56_CANONICAL_SAVED_SUM_2026_09_11") != std::string::npos,
+                "fingerprint cache semanticae saved-sum non renovatus est");
         require(cpp.find("out.legacyScarCallCount == 12 && out.appliedCount == 12") != std::string::npos,
                 "guard call-count 12/12 deest");
 
@@ -80,8 +90,8 @@ int main() {
                 "cicatrices historicae productionis inopinate imminutae sunt");
 
         std::cout
-            << "AUDIT_STATICUS_GRADUS_56_TRANSIIT: cicatrix savedOrderNumber physice servata, "
-               "detour rawBowlSum, guard order/permutation, status contextus, call-count 12/12, "
+            << "AUDIT_STATICUS_GRADUS_56_TRANSIIT: formula saved-sum physice servata, "
+               "mutans raw-sum exclusus e productione, fingerprint cache renovatus, status contextus, call-count 12/12, "
                "via historica separata, cache separatum et oracle productionis NONE probata sunt\n";
         return 0;
     } catch (const std::exception& e) {

@@ -1345,82 +1345,64 @@ Post correctionem recovery, bootstrap et omnia executabilia Graduum 2–54 contr
 
 Gradus 55 est GREEN. `LAST_COMPLETED_STAGE=55` et `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES`. Omnes 55 gradus specificationis expleti sunt. Nullus gradus posterior huic lineae pertinet.
 
-## Gradus 56 — correctio post completionem: raw bowl sum in duodecim post-commotionibus
+## Gradus 56 — correctio canonica post completionem: saved sum in duodecim post-commotionibus
 
-Gradus 55 manet clausura historica lineae quinquaginta quinque graduum. Haec correctio non fingit novam lineam progressionis nec testimonium Gradus 55 rescribit: Gradus 56 est correctio post completionem, addita quia discrepantia semantica externa post clausuram exacte localizata est.
+Gradus 55 manet clausura historica lineae quinquaginta quinque graduum. Gradus 56 est correctio post completionem, non Gradus 57. Correctio canonica die 2026-09-11 semanticam duodecim post-commotionum ad auctoritatem supremam reducit.
 
-### Prima discrepantia et cicatrix servata
+### Formula canonica
 
-Divergentia prima est prima ex duodecim post-commotionibus quae post guttam visibilem 46 fiunt. Usque ad latch guttae 46 lapides, valores occulti, 46 guttae visibiles, permutationes, infusiones et update simultaneum craterum congruunt. Cicatrix historica retinet operandum vetus:
-
-```text
-rawBowlSum       = sum(oldBowls)
-savedOrderNumber = SAVE(rawBowlSum + 149 * stir)
-order            = permutation(savedOrderNumber)
-u_legacy         = old[bowl] + 3*old[previous] + 5*old[next]
-                 + savedOrderNumber + stir + position^2
-```
-
-Corpus vetus non deletur neque in locum corrigitur. `stage56LegacySavedOrderOperandScar` exitum veterem vere computat in singulis duodecim commotionibus. Deinde `stage56RawBowlSumPostStirDetour` eundem snapshot `oldBowls` recomputat et solum operandum in `u` mutat:
+In unaquaque post-commotione `r = 1..12`, omnia sex nova craterum ex **uno eodemque** snapshot `oldBowls` computantur et deinde simul committuntur:
 
 ```text
-u_correctum = old[bowl] + 3*old[previous] + 5*old[next]
-            + rawBowlSum + stir + position^2
-new[bowl]   = SAVE(u_correctum^2 + 7*old[previous]*old[next])
+S = sum(oldBowls)
+R = SAVE(S + 149*r)
+permutationRank = 1 + ((R - 1) mod 720)
+order = lexicographicPermutation(permutationRank)
+
+u = old[B] + 3*old[P] + 5*old[N]
+  + R + r + position^2
+new[B] = SAVE(u^2 + 7*old[P]*old[N])
 ```
 
-`savedOrderNumber` manet unicus fons permutationis. Guard explicitus requirit `rawBowlSum`, `savedOrderNumber` et permutationem inter cicatricem et detour congruere. Sex crateres in utroque calculo ex eodem snapshot veteri leguntur et simul committuntur.
+`R`, non `S`, est et fons ordinis et operandum additive intra `u`. Omnes sex valores `new[B]` legunt tantum crateres veteres; nullus crater novus intra eandem commotionem retro alit alium.
 
-### Status et ownership
+### Mutans raw-sum historicus
 
-`BaseMonsterContext` campos explicitos Gradus 56 tenet: exitum veterem, exitum correctum, `rawBowlSum`, `savedOrderNumber`, indicem commotionis, numerum vocationum cicatricis, numerum applicationum et flag applicationis. Probatio duorum contextuum separat ownership et contaminationem inter instantias excludit.
+Interpretatio quae permutationem ex `R` eligit sed `S` crudum intra `u` ponit est **HISTORICA — SUPERSESSA — NON CANONICA**. Ea tantum in reference/test-only ut mutant discriminator servatur. Production nullam viam semanticam raw-sum activam habet.
 
-Via historica `calendarDateSpaghettiThroughStage55` semanticam clausae Gradus 55 retinet. Via publica `calendarDateSpaghetti` nunc per `executeFinalIntegrationStage56` transit et cache structuralem separatam habet. Si structura finalis sauce historicam ghost iam computat, ghost manet; ante usum semanticum sauce Gradus 56 recomputatur.
+Nomina publica/historica `Stage56RawBowlSum*` et `stage56RawBowlSumPostStirDetour` retinentur ad compatibilitatem ABI et ad memoriam cicatricis. In implementatione hodierna `rawBowlSum` in his structuris est valor diagnosticus tantum; `oldResult` et `correctedResult` ambo exitum saved-sum canonicum continent.
 
-### Testimonium externum et valores discriminantes
+### Cache et artefacta generata
 
-Commit testimonialis fixus est `d5cfe77ef7950a9a67ff0e6814833a3eedacae8a`. Inspectio directa `browser/pastafari-calendar-fast.js` confirmat ordinem ex `SAVE(bowlSum + 149*round)` sumi, dum `u` ipsum `bowlSum` crudum accipit. Codex externus non copiatur in productionem nec runtime alterius linguae ad fallback vel oracle adhibetur.
-
-Pro Foundation, ordo guttae 46 est `[4,5,2,3,6,1]` et crateres finales sunt:
-
-```text
-67068226522203060890658143482200172502
-156830781782038036265833091137164500083
-27860245395513113590943202859639481773
-154958270957687565769906933601352753179
-83762519477527209919484977230999195024
-154633989471499313687998830839607736513
-```
-
-Pro `c=t=-15048173`, ordo guttae 46 est `[3,4,6,5,2,1]` et crateres finales sunt:
-
-```text
-117774601791306122049402151598700069949
-25984316916056421874135403969605614983
-143826773047381553934876475558335320216
-59571312657074816751803206901536426066
-65620015217119503197726025514221700116
-28674863197150075414624507047786307945
-```
-
-Quattuor exitus canonici externi reproducuntur exacte:
-
-```text
-(-15055671,-15055671) -> (5000,4,762,12,105)
-(-15048173,-15048173) -> (5000,12,21,47,57)
-(-15048173,-15048172) -> (5000,12,22,18,58)
-(-15048173,-15048174) -> (5000,12,20,7,58)
-```
-
-Casus prope Foundation `(-15055672,-15055670)` reddit `(5000,3,1,3,96)`.
+Fingerprint persistentis sauce renovatus est ad `STAGE56_CANONICAL_SAVED_SUM_2026_09_11`, ut sepulcra semantica veteris generationis reiciantur. Seed duo-dierum et atlas annorum, quia valores compilatos sine fingerprint interno continent, in hac correctione fail-safe invalidantur (`occupied=false` / almanac count 0). Workflow `celeritas-hot-two-day-seed.yml` generationem 4 ex productione correcta regenerat; custodia schedule generationem validam tantum cum almanac count saltem 80 accipit.
 
 ### Probationes
 
-`stage_56_raw_bowl_sum_corrective_tests.cpp` probat discriminator `rawBowlSum != savedOrderNumber`, exitus legacy/correcti diversos, formulam raw-bowl-sum independentem, omnes XII commotiones, call-count `12/12` et ownership duorum contextuum. `stage_56_final_static_audit_tests.cpp` cicatricem veterem physice requirit, detour separatum, guard ordinis/permutationis, viam historicam, cache separatam et absentiam oracle productionis. `stage_56_e2e_worker.cpp` quattuor witnesses canonicos et casum prope Foundation processibus separatis exercet.
+`tests/stage_56_raw_bowl_sum_corrective_tests.cpp` nomen historicum retinet, sed nunc:
 
-Regressiones historicae Gradus 55 servantur per adapter test-only `stage_56_historical_path_compat.hpp`, qui nomen API publici ad viam historicam dirigit sine mutatione fontium testium historicorum. Evidentia regressiva completa Gradus 55 et Gradus 54 manet PASS; nova correctio non mutat documenta certificatoria `STAGE_55_*`.
+- discriminator `[1,2,3,4,5,6]` probat saved-sum et raw-sum mutant revera differre;
+- productionem requirit saved-sum independenti C++ oracle `reference::sauce` aequalem esse;
+- omnes XII post-commotiones singillatim comparat;
+- raw-sum mutantem a productione excludit;
+- ownership duorum contextuum probat;
+- publicam viam E2E ad Foundation absoluto `(5000,10,503,20,56)` custodit; tabula E2E separata quinque witnesses saved-sum exercet.
 
-### Status post correctionem
+`tests/stage_56_final_static_audit_tests.cpp` insuper requirit operandum `savedBowlSum` in cicatrice physice manere, `+ rawBowlSum` e corpore productionis Stage 56 abesse, fingerprint cache novum adesse, viam historicam separatam servari et nullum oracle test-only in productionem intrare.
 
-Gradus 56 corrective est GREEN. Gradus 55 manet certificatum historicum 55/55; nullus Gradus 57 creatur. Production nullum oracle importat, nullum runtime externum vocat et nullum fallback cross-engine habet.
+### Testimonia E2E saved-sum
 
+Witnesses actuales huius correctionis sunt:
+
+```text
+(-15055671,-15055671) -> (5000,10,503,20,56)
+(-15048173,-15048173) -> (5000,17,456,33,87)
+(-15048173,-15048172) -> (5000,17,457,36,84)
+(-15048173,-15048174) -> (5000,17,455,41,97)
+(-15055672,-15055670) -> (5000,15,1,20,15)
+```
+
+Valores raw-sum ante correctionem, inter quos Foundation `(5000,4,762,12,105)`, sunt testimonia historica supersessa et non amplius canonica.
+
+### Status
+
+Gradus 55 manet certificatum historicum 55/55; Gradus 56 manet correctivus post completionem; nullus Gradus 57 creatur. Production nullum `NormativeOracle` importat, nullum runtime externum vocat et nullum fallback cross-engine habet. Evidentia executionis hodiernae servatur in `CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt`; documenta `STAGE_56_*` priora servantur tantum ut historia supersessa.

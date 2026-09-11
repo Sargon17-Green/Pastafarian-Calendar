@@ -1,7 +1,9 @@
+// HISTORICAL FILENAME: this test formerly certified the incorrect raw-bowl-sum
+// post-stir mutant.  It now certifies the canonical saved-sum semantics while
+// retaining the path name so Stage 56 tooling/ABI need not be renamed.
 #include "pastafari/monster.hpp"
 #include "pastafari/source_language_catalog.hpp"
 #include "reference/normative_reference.hpp"
-#include "stage_55_fast_reference.hpp"
 
 #include <array>
 #include <fstream>
@@ -24,11 +26,7 @@ using pastafari::PermutationOrder;
 using pastafari::SpaghettiDateFive;
 using pastafari::Stage56PostStirDetourWitness;
 using pastafari::Stage56RawBowlSumSauceResult;
-using pastafari::reference::Big;
-using pastafari::reference::CalendarDate;
-using pastafari::reference::NormativeOracle;
 using pastafari::reference::SauceResult;
-using pastafari::reference::Year;
 
 namespace {
 
@@ -57,71 +55,46 @@ CanonicalFive canonical(const SpaghettiDateFive& d) {
             monthIndex(d.monthName), d.dayInMonth};
 }
 
-CanonicalFive canonical(const CalendarDate& d) {
-    return {d.yearNumber, cutletIndex(d.cutletName), d.dayInCutlet,
-            monthIndex(d.monthName), d.dayInMonth};
-}
-
-CalendarDate correctedFastCalendar(
-    NormativeOracle& oracle,
-    const Big& calculationDay,
-    const Big& targetDay) {
-    const Year year = oracle.findTargetYear(calculationDay, targetDay);
-    const SauceResult sauce = pastafari::reference::sauceRawBowlSum(
-        calculationDay,
-        year.openGateDay + 1);
-    const int cutletCount = oracle.chooseCutletCount(sauce, year);
-    const auto partition = oracle.chooseCutletPartition(
-        calculationDay, sauce, year, cutletCount);
-    const auto cutletNames = oracle.chooseCutletNameIndices(sauce, cutletCount);
-    const auto cutlets = oracle.materializeCutlets(year, partition, cutletNames);
-    const int monthCount = oracle.chooseMonthCount(sauce, year);
-    const auto monthLengths = oracle.chooseMonthLengths(sauce, year, monthCount);
-    const auto monthNames = oracle.chooseMonthNameIndices(sauce, monthCount);
-
-    pastafari::stage55audit::TexturaCelerReference weavingFamily(monthLengths);
-    const Big weavingRank = pastafari::reference::chooseRank(
-        pastafari::reference::askBowl(
-            sauce, 4, pastafari::reference::SEAL_MONTH_WEAVING),
-        weavingFamily.numerusOmnium());
-    const auto weaving = weavingFamily.aperiGradum(weavingRank);
-
-    int cutletPosition = -1;
-    for (std::size_t i = 0; i < cutlets.size(); ++i) {
-        if (cutlets[i].firstDay <= targetDay && targetDay <= cutlets[i].lastDay) {
-            cutletPosition = static_cast<int>(i);
-            break;
-        }
-    }
-    require(cutletPosition >= 0, "reference Gradus 56 segmentum target non invenit");
-    const Big dayInCutlet = targetDay - cutlets[static_cast<std::size_t>(cutletPosition)].firstDay + 1;
-    const Big offsetBig = targetDay - (year.openGateDay + 1);
-    require(offsetBig >= 0 && offsetBig < Big{weaving.size()},
-            "reference Gradus 56 positionem target extra texturam invenit");
-    const std::size_t offset = offsetBig.convert_to<std::size_t>();
-    const int monthId = weaving.at(offset);
-    Big dayInMonth = 0;
-    for (std::size_t p = 0; p <= offset; ++p) {
-        if (weaving[p] == monthId) ++dayInMonth;
-    }
-
-    return CalendarDate{
-        year.number,
-        std::string(pastafari::cutletSourceName(
-            static_cast<std::size_t>(cutletNames.at(static_cast<std::size_t>(cutletPosition))))),
-        dayInCutlet,
-        std::string(pastafari::monthSourceName(
-            static_cast<std::size_t>(monthNames.at(static_cast<std::size_t>(monthId - 1))))),
-        dayInMonth
-    };
-}
-
-BowlState independentCorrectedPostStir(
+BowlState independentCanonicalSavedSumPostStir(
     const BowlState& old,
     int stir,
     Integer& rawOut,
     Integer& savedOut,
     PermutationOrder& orderOut) {
+    Integer raw = 0;
+    for (const Integer& bowl : old) raw += bowl;
+    const Integer saved = pastafari::savePatch(raw + 149 * stir);
+    const int oneBased =
+        (pastafari::regularMod(saved - 1, Integer{720}) + 1).convert_to<int>();
+    const PermutationOrder order = pastafari::oldPermutationUnrank0(oneBased - 1);
+    BowlState next = old;
+    for (int position = 1; position <= 6; ++position) {
+        const std::size_t pos = static_cast<std::size_t>(position - 1);
+        const std::size_t prevPos = static_cast<std::size_t>((position + 4) % 6);
+        const std::size_t nextPos = static_cast<std::size_t>(position % 6);
+        const int id = order[pos];
+        const int prev = order[prevPos];
+        const int following = order[nextPos];
+        const Integer u = old[static_cast<std::size_t>(id - 1)]
+                        + 3 * old[static_cast<std::size_t>(prev - 1)]
+                        + 5 * old[static_cast<std::size_t>(following - 1)]
+                        + saved
+                        + stir
+                        + position * position;
+        next[static_cast<std::size_t>(id - 1)] = pastafari::savePatch(
+            u * u
+            + 7 * old[static_cast<std::size_t>(prev - 1)]
+                * old[static_cast<std::size_t>(following - 1)]);
+    }
+    rawOut = raw;
+    savedOut = saved;
+    orderOut = order;
+    return next;
+}
+
+BowlState independentRawSumMutantPostStir(
+    const BowlState& old,
+    int stir) {
     Integer raw = 0;
     for (const Integer& bowl : old) raw += bowl;
     const Integer saved = pastafari::savePatch(raw + 149 * stir);
@@ -147,56 +120,24 @@ BowlState independentCorrectedPostStir(
             + 7 * old[static_cast<std::size_t>(prev - 1)]
                 * old[static_cast<std::size_t>(following - 1)]);
     }
-    rawOut = raw;
-    savedOut = saved;
-    orderOut = order;
     return next;
 }
 
 void requireReferenceCommitWitnessConstants(
-    const Integer& c,
-    const Integer& t,
-    const Stage56RawBowlSumSauceResult& prod) {
-    BowlState expectedBowls{};
-    PermutationOrder expectedOrder{};
-    bool applicable = false;
-
-    if (c == Integer{-15055671} && t == Integer{-15055671}) {
-        expectedBowls = BowlState{{
-            Integer{"67068226522203060890658143482200172502"},
-            Integer{"156830781782038036265833091137164500083"},
-            Integer{"27860245395513113590943202859639481773"},
-            Integer{"154958270957687565769906933601352753179"},
-            Integer{"83762519477527209919484977230999195024"},
-            Integer{"154633989471499313687998830839607736513"}
-        }};
-        expectedOrder = PermutationOrder{{4,5,2,3,6,1}};
-        applicable = true;
-    } else if (c == Integer{-15048173} && t == Integer{-15048173}) {
-        expectedBowls = BowlState{{
-            Integer{"117774601791306122049402151598700069949"},
-            Integer{"25984316916056421874135403969605614983"},
-            Integer{"143826773047381553934876475558335320216"},
-            Integer{"59571312657074816751803206901536426066"},
-            Integer{"65620015217119503197726025514221700116"},
-            Integer{"28674863197150075414624507047786307945"}
-        }};
-        expectedOrder = PermutationOrder{{3,4,6,5,2,1}};
-        applicable = true;
-    }
-
-    if (!applicable) return;
-    require(prod.semanticSauce.finalBowls == expectedBowls,
-            "sex crateres contra reconstructionem numerorum commit testimonialis discrepant");
-    require(prod.semanticSauce.orderAt46Latch == expectedOrder,
-            "ordo guttae 46 contra reconstructionem commit testimonialis discrepat");
+    const Integer&,
+    const Integer&,
+    const Stage56RawBowlSumSauceResult&) {
+    // Intentional no-op.  The prior constants in this historical test file were
+    // generated by the now-superseded raw-sum mutant and therefore must not be
+    // accepted as canonical evidence.  The comparison below is against the
+    // independent saved-sum normative reference instead.
 }
 
 void requireSauceAgainstIndependentOracle(const Integer& c, const Integer& t) {
     const Stage56RawBowlSumSauceResult prod =
         pastafari::sauceWithStage56RawBowlSumDetour(c, t);
     requireReferenceCommitWitnessConstants(c, t, prod);
-    const SauceResult ref = pastafari::reference::sauceRawBowlSum(c, t);
+    const SauceResult ref = pastafari::reference::sauce(c, t);
     for (std::size_t i = 0; i < 6; ++i) {
         require(prod.semanticSauce.finalBowls[i] == ref.bowls[i],
                 "Gradus 56 final bowls contra oracle localem discrepant");
@@ -206,7 +147,7 @@ void requireSauceAgainstIndependentOracle(const Integer& c, const Integer& t) {
     require(prod.legacyScarCallCount == 12,
             "cicatrix legacy post-commotionis non exacte duodecies cucurrit");
     require(prod.appliedCount == 12 && prod.applied,
-            "detour raw bowl sum non exacte duodecies applicatus est");
+            "via compatibilitatis saved-sum non exacte duodecies applicata est");
 
     const auto counts = pastafari::reference::workCounts(c, t);
     const auto stones = pastafari::reference::buildStones();
@@ -221,7 +162,7 @@ void requireSauceAgainstIndependentOracle(const Integer& c, const Integer& t) {
         Integer raw{};
         Integer saved{};
         PermutationOrder order{};
-        expected = independentCorrectedPostStir(expected, stir, raw, saved, order);
+        expected = independentCanonicalSavedSumPostStir(expected, stir, raw, saved, order);
         const Stage56PostStirDetourWitness& witness =
             prod.stirWitnesses.at(static_cast<std::size_t>(stir - 1));
         require(witness.stirIndex == stir && witness.applied,
@@ -231,9 +172,9 @@ void requireSauceAgainstIndependentOracle(const Integer& c, const Integer& t) {
         require(witness.correctedOrder == order && witness.legacyOrder == order,
                 "guard permutationis Gradus 56 discrepat");
         require(witness.correctedResult == expected,
-                "una ex duodecim post-commotionibus contra formulam independentem discrepat");
-        require(witness.oldResult != witness.correctedResult,
-                "discriminator post-commotionis cicatricem a correctione non distinxit");
+                "una ex duodecim post-commotionibus contra formulam saved-sum independentem discrepat");
+        require(witness.oldResult == witness.correctedResult,
+                "cicatrix ABI Gradus 56 non debet mutantem raw-sum in productione retinere");
     }
 }
 
@@ -306,40 +247,16 @@ void requireContextOwnership() {
 }
 
 void requireExternalWitnessesAndNearFoundation() {
-    struct Witness {
-        Integer c;
-        Integer t;
-        CanonicalFive expected;
-        const char* name;
+    // Keep the core test compact: the dedicated E2E worker exercises the full
+    // saved-sum witness table.  Here one absolute public-API witness makes sure
+    // the corrected sauce reaches the five-field result.
+    const SpaghettiDateFive foundation = pastafari::calendarDateSpaghetti(
+        pastafari::FOUNDATION_DAY_OLD, pastafari::FOUNDATION_DAY_OLD);
+    const CanonicalFive expectedFoundation{
+        Integer{5000}, 10, Integer{503}, 20, Integer{56}
     };
-    const std::array<Witness,4> witnesses{{
-        {Integer{-15055671}, Integer{-15055671},
-         CanonicalFive{Integer{5000},4,Integer{762},12,Integer{105}}, "foundation"},
-        {Integer{-15048173}, Integer{-15048173},
-         CanonicalFive{Integer{5000},12,Integer{21},47,Integer{57}}, "idem"},
-        {Integer{-15048173}, Integer{-15048172},
-         CanonicalFive{Integer{5000},12,Integer{22},18,Integer{58}}, "post"},
-        {Integer{-15048173}, Integer{-15048174},
-         CanonicalFive{Integer{5000},12,Integer{20},7,Integer{58}}, "ante"}
-    }};
-
-    for (const Witness& w : witnesses) {
-        const SpaghettiDateFive prod = pastafari::calendarDateSpaghetti(w.c, w.t);
-        require(canonical(prod) == w.expected,
-                std::string("witness externus Gradus 56 discrepat: ") + w.name);
-    }
-
-    // Casus prope Foundation end-to-end manet separatus a quattuor testimoniis externis.
-    // Oracle C++ independens supra ad sex crateres et omnes XII commotiones adhibetur;
-    // hic iter DP longum consulto non duplicatur, quia testimonia canonica externa iam
-    // exitum calendarii finalem discriminatorie definiunt.
-    const Integer f = pastafari::FOUNDATION_DAY_OLD;
-    const SpaghettiDateFive prodCross = pastafari::calendarDateSpaghetti(f - 1, f + 1);
-    const CanonicalFive nearFoundationExpected{
-        Integer{5000}, 3, Integer{1}, 3, Integer{96}
-    };
-    require(canonical(prodCross) == nearFoundationExpected,
-            "casus end-to-end prope Foundation Gradus 56 discrepat");
+    require(canonical(foundation) == expectedFoundation,
+            "Foundation absolute saved-sum witness discrepat");
 }
 
 } // namespace
@@ -352,17 +269,20 @@ int main() {
             pastafari::stage56RawBowlSumPostStirDetour(discriminator, 1);
         require(d.rawBowlSum != d.savedOrderNumber,
                 "discriminator rawBowlSum != SAVE(rawBowlSum+149*stir) non distinxit");
-        require(d.oldResult != d.correctedResult,
-                "discriminator exitum legacy a correctione non distinxit");
+        require(d.oldResult == d.correctedResult,
+                "productione Stage56 mutantem raw-sum adhuc retinet");
         Integer raw{};
         Integer saved{};
         PermutationOrder order{};
-        const BowlState independent = independentCorrectedPostStir(
+        const BowlState independent = independentCanonicalSavedSumPostStir(
             discriminator, 1, raw, saved, order);
-        require(d.correctedResult == independent &&
+        const BowlState mutant = independentRawSumMutantPostStir(discriminator, 1);
+        require(independent != mutant,
+                "discriminator canonicalem saved-sum a mutante raw-sum non distinxit");
+        require(d.correctedResult == independent && d.correctedResult != mutant &&
                 d.rawBowlSum == raw && d.savedOrderNumber == saved &&
                 d.correctedOrder == order && d.legacyOrder == order,
-                "detour discriminatoris contra formulam independentem discrepat");
+                "via productionis discriminatoris non est formula canonica saved-sum");
 
         std::cerr << "GRADUS56_FASE=SAUCE_FOUNDATION\n";
         requireSauceAgainstIndependentOracle(
@@ -376,15 +296,17 @@ int main() {
         requireStaticScar();
         std::cerr << "GRADUS56_FASE=CONTEXTS\n";
         requireContextOwnership();
+        std::cerr << "GRADUS56_FASE=E2E_SAVED_SUM\n";
+        requireExternalWitnessesAndNearFoundation();
         std::cerr << "GRADUS56_FASE=FINIS\n";
 
         std::cout
-            << "GRADUS_56_CORRECTIO_RAW_BOWL_SUM_TRANSIIT: discriminator, cicatrix 12/12, "
-               "detour 12/12, guard ordinis, oracle C++ localis et duo contextus probati sunt; "
+            << "GRADUS_56_CORRECTIO_CANONICA_SAVED_SUM_TRANSIIT: discriminator saved-sum/raw-mutant, cicatrix ABI 12/12, "
+               "saved-sum 12/12, oracle C++ localis et duo contextus probati sunt; "
                "E2E processibus separatis exercetur\n";
         return 0;
     } catch (const std::exception& error) {
-        std::cerr << "GRADUS_56_CORRECTIO_RAW_BOWL_SUM_DEFECIT: " << error.what() << "\n";
+        std::cerr << "GRADUS_56_CORRECTIO_CANONICA_SAVED_SUM_DEFECIT: " << error.what() << "\n";
         return 1;
     }
 }

@@ -1,0 +1,321 @@
+{
+  "format": "pastafarian-calendar-delta-v1",
+  "created_date": "2026-09-11",
+  "repo": "Sargon17-Green/Pastafarian-Calendar",
+  "branch": "Celeritas-per-Sepulcra",
+  "expected_base_head": "8ce28c991a02994ea60c4a74854959717725144c",
+  "observed_base_head": "8ce28c991a02994ea60c4a74854959717725144c",
+  "base_head_match": true,
+  "source_archive_sha256": "44176d01b5b68c2f0a753a590721118d5f3eec866b8bf69e48e083d77d126812",
+  "semantic_correction": {
+    "before": "Stage 56 selected the final post-stir permutation using R=SAVE(S+149*r) but incorrectly added raw S inside u.",
+    "after": "Each of the 12 final post-stirs uses one old six-bowl snapshot, R=SAVE(S+149*r) for both permutation selection and the additive operand inside u, then commits all six new bowls together.",
+    "raw_sum_mutant": "retained only in test/reference code as an explicit non-canonical discriminator"
+  },
+  "changed_paths": [
+    ".github/workflows/celeritas-hot-two-day-seed.yml",
+    ".github/workflows/cpp-neolatin-soak.yml",
+    "DEVELOPMENT_STAGE.md",
+    "HOT_ATLAS_EXECUTION_STATUS.txt",
+    "HOT_TWO_DAY_TOMB_EXECUTION_STATUS.txt",
+    "HOT_YEAR_ALMANAC_EXECUTION_STATUS.txt",
+    "README.md",
+    "SPAGHETTI_DEVELOPMENT_HISTORY.md",
+    "STAGE_56_CORRECTIVE_EVIDENCE.md",
+    "STAGE_56_FINAL_BYTE_AUDIT.txt",
+    "STAGE_56_LOCAL_TEST_LOG.txt",
+    "include/pastafari/http_api/generated_hot_two_day_seed.inc",
+    "include/pastafari/http_api/generated_hot_year_almanac_seed.inc",
+    "include/pastafari/monster.hpp",
+    "src/monster.cpp",
+    "tests/stage_56_final_static_audit_tests.cpp",
+    "tests/stage_56_raw_bowl_sum_corrective_tests.cpp",
+    "tools/generate_hot_cache_seed.cpp",
+    "tools/generate_hot_two_day_seed.cpp"
+  ],
+  "new_paths": [
+    "CANONICAL_SAVED_SUM_CORRECTION_EVIDENCE.md",
+    "CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt",
+    "tests/canonical_saved_sum_cache_recovery_tests.cpp"
+  ],
+  "deleted_paths": [],
+  "files": [
+    {
+      "path": ".github/workflows/celeritas-hot-two-day-seed.yml",
+      "status": "changed",
+      "base_sha256": "3ec385b5af7a6090ce23d76fa7861ec9d7ad96a0f15e2829cdbc2d82622a9dd0",
+      "sha256": "9bae5a4bff0b1913276d95ef50797d8c98c766b1c4be100d704dd2a48db8359b",
+      "size": 10442
+    },
+    {
+      "path": ".github/workflows/cpp-neolatin-soak.yml",
+      "status": "changed",
+      "base_sha256": "28445e5e155476bdb4d5a71efab2134af11453e4cb550a5d258dcd5479adaa31",
+      "sha256": "51b8a34c155c77a4494cadfedbe2f233f8d2f5b932395348c1cb03d853d3606d",
+      "size": 41236
+    },
+    {
+      "path": "CANONICAL_SAVED_SUM_CORRECTION_EVIDENCE.md",
+      "status": "new",
+      "base_sha256": null,
+      "sha256": "7e7b930cadc4a4b597fd8a7e91ee059190a58d79346e5cf30c3998823bdc5c95",
+      "size": 6558
+    },
+    {
+      "path": "CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt",
+      "status": "new",
+      "base_sha256": null,
+      "sha256": "a77cab9faca9ab0936bb260dbeac1a9944f2968d3ac3c46e692ad35fcaf16c60",
+      "size": 3479
+    },
+    {
+      "path": "DEVELOPMENT_STAGE.md",
+      "status": "changed",
+      "base_sha256": "1d3bcf7044fec1d35a36a1b9eb4ed611eac5503f90214dc4ac953a90ff32c52a",
+      "sha256": "6d6a335286568330983aeaae692cb9f89f076d399b54a91df882fd9ee589795b",
+      "size": 4407
+    },
+    {
+      "path": "HOT_ATLAS_EXECUTION_STATUS.txt",
+      "status": "changed",
+      "base_sha256": "8a204702d6d1cfc8bc70e5666ed44374b620b2429b355e995f0cbb234147a189",
+      "sha256": "cf9596d34af3e9086b3895bd875dbe271dcb8884edf80f3a8887aa1ff0390495",
+      "size": 410
+    },
+    {
+      "path": "HOT_TWO_DAY_TOMB_EXECUTION_STATUS.txt",
+      "status": "changed",
+      "base_sha256": "16da2dac8e3b325d8964789a0e5e70e79a92025a42376779973b5192954933ee",
+      "sha256": "751af34600baa7b6d90f1bf748499813457a2d89233223ea1375756d2f0c4bd9",
+      "size": 421
+    },
+    {
+      "path": "HOT_YEAR_ALMANAC_EXECUTION_STATUS.txt",
+      "status": "changed",
+      "base_sha256": "5035d80065427663227a573547a9d6a287d7de67846ffea72cc28007a3561fdd",
+      "sha256": "e71256bb2bb5bebd51321d87320b5f8e4bffaef6d96e41c7905dd47eb095e4b5",
+      "size": 522
+    },
+    {
+      "path": "README.md",
+      "status": "changed",
+      "base_sha256": "8dbd58c0726d3c5f6f7ec5eff9875bb74947839d482cfe9b0efa4bd49c9af222",
+      "sha256": "6a0cd04e1df1c6c4a801a3308ae943d725207df01ff76c316f1739e6b9f7752c",
+      "size": 77462
+    },
+    {
+      "path": "SPAGHETTI_DEVELOPMENT_HISTORY.md",
+      "status": "changed",
+      "base_sha256": "cd853e0170fed9e968720444a462e060a7593c00146b3d5a0d42282e7492c092",
+      "sha256": "d541f700027e3ac2b549bd65498aecf153ecf9732c0847c2f00578d14af2fbeb",
+      "size": 158406
+    },
+    {
+      "path": "STAGE_56_CORRECTIVE_EVIDENCE.md",
+      "status": "changed",
+      "base_sha256": "c0e7213ac926637e215de8ed97260d59b0a55362c2159aa48a273033ff488508",
+      "sha256": "dbdfa9cd8d2c2a06459b2ab77f7e1a18a6cd94edf739368723a44cfe8b119fd2",
+      "size": 6144
+    },
+    {
+      "path": "STAGE_56_FINAL_BYTE_AUDIT.txt",
+      "status": "changed",
+      "base_sha256": "8ec639bb4c027451ba1fd044bb4244e3bfd5ee9626e5b0883c5fb3129d046076",
+      "sha256": "8b3f57779797ea22cd27c6ae657fbd382462446451071fe51882bd25a0ab2ef1",
+      "size": 1353
+    },
+    {
+      "path": "STAGE_56_LOCAL_TEST_LOG.txt",
+      "status": "changed",
+      "base_sha256": "ad99055352675b8992247d4b875a788beac0cab9571c6d7826aa8591dd9ce4df",
+      "sha256": "c465cf36fc59c220b205115fc1d3caa14265c3be7ac4b0dcd4339456b0b49a60",
+      "size": 2642
+    },
+    {
+      "path": "include/pastafari/http_api/generated_hot_two_day_seed.inc",
+      "status": "changed",
+      "base_sha256": "074a2476fd9501e7a12a1175290ae1a8594ed82f0f5bf8608693b4452685225f",
+      "sha256": "2e30f6800a7f5f4a8c872580885b1d1641465f430369ee3e2c3b2bc20bf7c3c3",
+      "size": 366
+    },
+    {
+      "path": "include/pastafari/http_api/generated_hot_year_almanac_seed.inc",
+      "status": "changed",
+      "base_sha256": "bc5d94639f9b8ea6b13eaabb843fd8db1dee7aa51353294cef1a35426d9b11e7",
+      "sha256": "01ab6ccdd58a41beab992f52b46e6ec39051c26402f72c9cc880a6d47afc82bd",
+      "size": 253
+    },
+    {
+      "path": "include/pastafari/monster.hpp",
+      "status": "changed",
+      "base_sha256": "f41ad66c9f8b418a9546a1bf18c97c6b403559308923282e40f6541aa2af13d1",
+      "sha256": "18b464f419bab8f5f3b1b17eeff0a63ff141ba6b0ca9fd85e14b88e033b925a5",
+      "size": 129064
+    },
+    {
+      "path": "src/monster.cpp",
+      "status": "changed",
+      "base_sha256": "7b8baab1a5c02ed1562b6d3b4eb654c2618a62f612fbd96b5d0738ae39fb04c6",
+      "sha256": "5b645f0db6b5d1c2dcb249ec5405b9d740feca5d27a88a7dd153149e9b5f9231",
+      "size": 516160
+    },
+    {
+      "path": "tests/canonical_saved_sum_cache_recovery_tests.cpp",
+      "status": "new",
+      "base_sha256": null,
+      "sha256": "ba24b505a60034cab0a7e4851b2cc04bee588159d7abf5f6eca884c183a6c501",
+      "size": 4006
+    },
+    {
+      "path": "tests/stage_56_final_static_audit_tests.cpp",
+      "status": "changed",
+      "base_sha256": "2f3ad995e6941f753c4aff11f81044a2da852da2cb848992fdef2c3ff3d92edb",
+      "sha256": "f9936baae63735ff8914524ab704a2ad2a22c308ef627dbadf722aa10f668568",
+      "size": 5632
+    },
+    {
+      "path": "tests/stage_56_raw_bowl_sum_corrective_tests.cpp",
+      "status": "changed",
+      "base_sha256": "b72b14eb2b9ead66d38e622f420ecbaca9748eb6fe96029c226460bfa9788925",
+      "sha256": "40201c311b16754467eae704b31f657168390ef194ab2c662ac244c39d8ec735",
+      "size": 14033
+    },
+    {
+      "path": "tools/generate_hot_cache_seed.cpp",
+      "status": "changed",
+      "base_sha256": "fdeae683e6a0f818d63da5e3cef5f5dba1d7a50efef7f57f90332d5418113f88",
+      "sha256": "5f48146dacbf1c768338be8cf277c5e365ecc2a50d7c7595c5f08f4eb15bc93e",
+      "size": 11444
+    },
+    {
+      "path": "tools/generate_hot_two_day_seed.cpp",
+      "status": "changed",
+      "base_sha256": "66227c019aac7cdedd88bdb456cb91be28927c428811abacd373ffaa39c5bf00",
+      "sha256": "c650a4981dd6cd014b05c204b50fe13ff6e9785242426256cb813ef230c8633b",
+      "size": 2903
+    }
+  ],
+  "tests_actually_run": [
+    {
+      "name": "Stage 56 core saved-sum discriminator/oracle/per-stir/ownership/Foundation",
+      "result": "PASS",
+      "details": "12/12 final post-stirs; independent saved-sum oracle on two contexts; exact raw-sum mutant discriminator; public Foundation witness; last observed runtime 12.48s"
+    },
+    {
+      "name": "Stage 56 static audit",
+      "result": "PASS",
+      "details": "saved-sum operand physically present; raw-sum additive operand absent from active Stage 56 production; cache fingerprint renewed; no production oracle"
+    },
+    {
+      "name": "Stage 56 cache/recovery audit",
+      "result": "PASS",
+      "details": "cold/warm, A->B->A, fresh-instance parity, failure->retry, retry exhaustion, clean retry; last observed runtime 5.06s"
+    },
+    {
+      "name": "Principal saved-sum E2E witnesses",
+      "result": "PASS",
+      "details": "5/5 including Foundation, self, t+1, t-1, and near-Foundation"
+    },
+    {
+      "name": "Additional workflow saved-sum E2E witnesses",
+      "result": "PASS",
+      "details": "6/6 for t+2 through t+7"
+    },
+    {
+      "name": "Secondary Stage55-vs-Stage56 saved-sum cross-check",
+      "result": "PASS",
+      "details": "2/2 contexts; sanity check only, not semantic authority"
+    },
+    {
+      "name": "HTTP / Pair Tomb suite after compiled-cache invalidation",
+      "result": "PASS",
+      "details": "CORS, core, strict JSON, service, HTTP protocol, JSONP, Pair Tomb; g++ TEST_OPT=-O0"
+    },
+    {
+      "name": "GitHub workflow YAML parse",
+      "result": "PASS",
+      "details": "cpp-neolatin-soak.yml and celeritas-hot-two-day-seed.yml parsed with PyYAML"
+    },
+    {
+      "name": "Current evidence guard grep",
+      "result": "PASS",
+      "details": "current canonical correction log exposes the four fields required by the updated CI guard"
+    }
+  ],
+  "tests_prepared_not_run": [
+    {
+      "name": "Fresh single-command g++ -O2 full rebuild",
+      "status": "NOT_COMPLETED",
+      "reason": "environment command timeout while compiling very large src/monster.cpp; only an existing missing-field-initializer warning was emitted; not counted as PASS"
+    },
+    {
+      "name": "Local regenerated two-day hot seed",
+      "status": "NOT_COMPLETED",
+      "reason": "environment command timeout before first generated record; no stale record was reused"
+    },
+    {
+      "name": "Clang optimization matrix",
+      "status": "NOT_RUN_LOCALLY",
+      "reason": "prepared in GitHub Actions; no push/CI run performed"
+    },
+    {
+      "name": "Sanitizer matrix",
+      "status": "NOT_RUN_LOCALLY",
+      "reason": "prepared in GitHub Actions; no push/CI run performed"
+    },
+    {
+      "name": "Complete historical Stages 1-55 regression matrix",
+      "status": "NOT_RERUN_FOR_THIS_CORRECTION",
+      "reason": "prior historical evidence retained but not promoted to current saved-sum evidence"
+    }
+  ],
+  "regenerated_or_invalidated_artifacts": [
+    {
+      "path": "include/pastafari/http_api/generated_hot_two_day_seed.inc",
+      "action": "invalidated_to_safe_miss",
+      "generation": 4,
+      "reason": "pre-correction compiled semantic outputs have no persistent fingerprint"
+    },
+    {
+      "path": "include/pastafari/http_api/generated_hot_year_almanac_seed.inc",
+      "action": "invalidated_to_safe_miss",
+      "generation": 4,
+      "count": 0,
+      "reason": "pre-correction compiled semantic outputs have no persistent fingerprint"
+    },
+    {
+      "path": ".github/workflows/celeritas-hot-two-day-seed.yml",
+      "action": "updated_regeneration_logic",
+      "details": "generation 4; scheduled skip requires matching base/generation and almanac count >= 80"
+    },
+    {
+      "path": "src/monster.cpp",
+      "action": "persistent_semantic_fingerprint_versioned",
+      "value": "STAGE56_CANONICAL_SAVED_SUM_2026_09_11"
+    },
+    {
+      "path": ".github/workflows/cpp-neolatin-soak.yml",
+      "action": "saved_sum_vectors_and_current_evidence_guard_updated"
+    }
+  ],
+  "historical_material": [
+    "STAGE_56_LOCAL_TEST_LOG.txt retained and marked HISTORICAL_RECORD_STATUS=SUPERSEDED / DO_NOT_TREAT_AS_CURRENT_PASS=YES",
+    "STAGE_56_CORRECTIVE_EVIDENCE.md retained and prominently marked HISTORICAL — SUPERSEDED",
+    "STAGE_56_FINAL_BYTE_AUDIT.txt retained and marked superseded",
+    "SPAGHETTI_DEVELOPMENT_HISTORY.md retains the old raw-sum section under a HISTORICUM — SUPERSESSUM heading with a current saved-sum addendum"
+  ],
+  "remaining_uncertainty": [
+    "No GitHub Actions run was triggered because no push or commit was performed.",
+    "The large generated hot atlas was not regenerated locally; it is deliberately empty/safe-miss in this delta and the corrected generation-4 workflow is prepared to rebuild it.",
+    "The local two-day seed regeneration attempt did not complete; it is deliberately safe-miss rather than populated with unverified or stale values.",
+    "Clang/sanitizer/full historical regression matrices remain to be exercised by CI or another environment; this delta does not claim them as current PASS."
+  ],
+  "git_commit_performed": false,
+  "github_push_performed": false,
+  "delete_paths_file_included": false,
+  "metadata_files": [
+    "DELTA_README.md",
+    "DELTA_MANIFEST.json",
+    "SHA256SUMS.txt"
+  ]
+}

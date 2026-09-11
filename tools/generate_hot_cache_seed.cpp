@@ -169,7 +169,7 @@ int main(int argc,char**argv){
         for(const auto&[c,t]:pairs)values.push_back(engine.calculate(Integer{c},Integer{t}));
 
         std::ofstream pairOut(argv[2]);if(!pairOut)throw std::runtime_error("pair output aperiri non potest");
-        pairOut<<"// PASTAFARI_HOT_SEED_BASE_DAY="<<base<<"\n// PASTAFARI_HOT_SEED_GENERATION=2\n// Quattuor sepulcra exacta; corridor annorum infra separatim vivit.\n";
+        pairOut<<"// PASTAFARI_HOT_SEED_BASE_DAY="<<base<<"\n// PASTAFARI_HOT_SEED_GENERATION=4\n// Quattuor sepulcra exacta; corridor annorum infra separatim vivit.\n";
         for(std::size_t i=0;i<pairs.size();++i)emitPair(pairOut,pairs[i].first,pairs[i].second,values[i]);
         pairOut.close();
 
@@ -186,7 +186,7 @@ int main(int argc,char**argv){
 
         std::ofstream almOut(argv[3]);if(!almOut)throw std::runtime_error("almanac output aperiri non potest");
         almOut<<"// PASTAFARI_HOT_ALMANAC_BASE_DAY="<<base<<"\n"
-              <<"// PASTAFARI_HOT_ALMANAC_GENERATION=2\n"
+              <<"// PASTAFARI_HOT_ALMANAC_GENERATION=4\n"
               <<"// PASTAFARI_HOT_ALMANAC_CORRIDOR_BEHIND_DAYS="<<HOT_CORRIDOR_BEHIND_DAYS<<"\n"
               <<"// PASTAFARI_HOT_ALMANAC_CORRIDOR_AHEAD_DAYS="<<HOT_CORRIDOR_AHEAD_DAYS<<"\n"
               <<"// PASTAFARI_HOT_ALMANAC_COUNT="<<total<<"\n"

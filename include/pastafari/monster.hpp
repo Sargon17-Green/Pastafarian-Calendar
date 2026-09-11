@@ -200,6 +200,10 @@ struct Patch11LatchedOrderSauceResult {
     std::string finalLegacyOrderSource;
 };
 
+// Nomina Stage56RawBowlSum* infra sunt cicatrices ABI historicae.  Post correctionem
+// canonicam 2026-09-11 rawBowlSum est tantum valor diagnosticus/mutant-discriminator;
+// production numquam eo ut operandum post-stir utitur.  oldResult et correctedResult
+// ambo exitum canonicalem saved-sum repraesentant.
 struct Stage56PostStirDetourWitness {
     BowlState oldResult{};
     BowlState correctedResult{};

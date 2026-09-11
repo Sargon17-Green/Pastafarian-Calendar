@@ -70,7 +70,7 @@ const std::string& persistentSemanticFingerprint() {
         "|LEGACY_MONTH_LENGTH_MIN=" + std::to_string(LEGACY_MONTH_LENGTH_MIN) +
         "|LEGACY_MONTH_LENGTH_MAX=" + std::to_string(LEGACY_MONTH_LENGTH_MAX) +
         "|PATCH_GENERATION=" + std::to_string(PERSISTENT_SCAR_GENERATION) +
-        "|SAUCE_GENERATION=STAGE56_RAW_BOWL_SUM" +
+        "|SAUCE_GENERATION=STAGE56_CANONICAL_SAVED_SUM_2026_09_11" +
         "|" + persistentCatalogFossilFingerprint();
     return fingerprint;
 }
@@ -1649,59 +1649,26 @@ BowlState stage56LegacySavedOrderOperandScar(
 Stage56PostStirDetourWitness stage56RawBowlSumPostStirDetour(
     const BowlState& oldBowls,
     int stirIndex) {
-    Integer legacyRawBowlSum = 0;
-    Integer legacySavedOrderNumber = 0;
-    PermutationOrder legacyOrder{};
-    const BowlState oldResult = stage56LegacySavedOrderOperandScar(
+    // Nomen functionis est cicatrix ABI Gradus 56.  Semantica canonica hodierna
+    // rawBowlSum tantum diagnostice retinet: operandum in u est semper
+    // savedOrderNumber = SAVE(sum(oldBowls) + 149*stirIndex).
+    Integer rawBowlSum = 0;
+    Integer savedOrderNumber = 0;
+    PermutationOrder order{};
+    const BowlState canonicalResult = stage56LegacySavedOrderOperandScar(
         oldBowls,
         stirIndex,
-        legacyRawBowlSum,
-        legacySavedOrderNumber,
-        legacyOrder);
-
-    Integer rawBowlSum = 0;
-    for (const Integer& bowl : oldBowls) {
-        rawBowlSum += bowl;
-    }
-    const Integer savedOrderNumber = savePatch(rawBowlSum + 149 * stirIndex);
-    const int oneBased =
-        (regularMod(savedOrderNumber - 1, Integer{720}) + 1).convert_to<int>();
-    const PermutationOrder correctedOrder = oldPermutationUnrank0(oneBased - 1);
-
-    if (legacyRawBowlSum != rawBowlSum ||
-        legacySavedOrderNumber != savedOrderNumber ||
-        legacyOrder != correctedOrder) {
-        throw BaseValidationError(
-            "Gradus 56 guard: orderNumber vel permutatio a cicatrice legacy discrepat");
-    }
-
-    BowlState corrected = oldBowls;
-    for (int position = 1; position <= 6; ++position) {
-        const std::size_t pos = static_cast<std::size_t>(position - 1);
-        const std::size_t prevPos = static_cast<std::size_t>((position + 4) % 6);
-        const std::size_t nextPos = static_cast<std::size_t>(position % 6);
-        const int id = correctedOrder[pos];
-        const int prev = correctedOrder[prevPos];
-        const int next = correctedOrder[nextPos];
-        const Integer u = oldBowls[static_cast<std::size_t>(id - 1)]
-                        + 3 * oldBowls[static_cast<std::size_t>(prev - 1)]
-                        + 5 * oldBowls[static_cast<std::size_t>(next - 1)]
-                        + rawBowlSum
-                        + stirIndex
-                        + position * position;
-        corrected[static_cast<std::size_t>(id - 1)] = savePatch(
-            u * u
-            + 7 * oldBowls[static_cast<std::size_t>(prev - 1)]
-                * oldBowls[static_cast<std::size_t>(next - 1)]);
-    }
-
-    return Stage56PostStirDetourWitness{
-        oldResult,
-        corrected,
         rawBowlSum,
         savedOrderNumber,
-        legacyOrder,
-        correctedOrder,
+        order);
+
+    return Stage56PostStirDetourWitness{
+        canonicalResult,
+        canonicalResult,
+        rawBowlSum,
+        savedOrderNumber,
+        order,
+        order,
         stirIndex,
         true
     };
@@ -11992,7 +11959,7 @@ void BaseValidationManager::requireFinalIntegrationReady(
          ctx.stage56AppliedCount != 12 ||
          ctx.stage56StirIndex != 12)) {
         throw BaseValidationError(
-            "integratio finalis Gradus 56 duodecim cicatrices raw bowl sum requirit");
+            "integratio finalis Gradus 56 duodecim commotiones canonicas saved-sum requirit");
     }
 }
 

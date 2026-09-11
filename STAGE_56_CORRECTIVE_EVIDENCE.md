@@ -1,3 +1,9 @@
+# HISTORICAL — SUPERSEDED — DO NOT USE AS CURRENT CANONICAL EVIDENCE
+
+The document below records the former raw-bowl-sum interpretation. It is preserved for history only. The canonical correction of 2026-09-11 uses the saved value `R = SAVE(S + 149*r)` inside `u`; see `CANONICAL_SAVED_SUM_CORRECTION_EVIDENCE.md`.
+
+---
+
 # Gradus 56 correctivus — testimonia raw bowl sum
 
 Hoc documentum Gradum 55 historicum non rescribit. Gradus 55 clausuram originalis lineae 55 graduum retinet; Gradus 56 est correctio post clausuram propter discrepantiam semanticam post primam commotionem post guttam 46.

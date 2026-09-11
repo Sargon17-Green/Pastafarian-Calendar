@@ -2046,7 +2046,7 @@ Audit staticus finalis numerat exacte 26 vias legacy `executeUnpatched...Diagnos
 
 Gradus 55 GREEN est et ultimus. `LAST_COMPLETED_STAGE=55`; `SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES`. Nulla actio Git/GitHub ab assistente facta est. Handoff est fasciculus separatus et non intrat ZIP repository. Nullus Gradus 56 creatur.
 
-## Gradus 56 — correctio post completionem: raw bowl sum in duodecim post-commotionibus
+## HISTORICUM — SUPERSESSUM: Gradus 56 raw bowl sum in duodecim post-commotionibus
 
 Gradus 55 manet clausura historica lineae quinquaginta quinque graduum. Haec correctio non fingit novam lineam progressionis nec testimonium Gradus 55 rescribit: Gradus 56 est correctio post completionem, addita quia discrepantia semantica externa post clausuram exacte localizata est.
 
@@ -2124,4 +2124,12 @@ Regressiones historicae Gradus 55 servantur per adapter test-only `stage_56_hist
 ### Status post correctionem
 
 Gradus 56 corrective est GREEN. Gradus 55 manet certificatum historicum 55/55; nullus Gradus 57 creatur. Production nullum oracle importat, nullum runtime externum vocat et nullum fallback cross-engine habet.
+
+### Addendum 2026-09-11 — correctio canonica saved-sum
+
+**STATUS PRAECEDENTIS SECTIONIS: HISTORICUM — SUPERSESSUM — NON CANONICUM.**
+
+Auctoritas canonica postea confirmata requirit `R = SAVE(sum(oldBowls) + 149*r)` non solum ad permutationem sed etiam intra `u`. Via activa productionis igitur ad saved-sum restituta est. Raw-sum supra descriptum servatur tantum ut memoria historica et mutant test-only; valores, PASS et witnesses illius sectionis non sunt testimonia currentia.
+
+Correctio non creat Gradum 57. Fingerprint persistentis sauce mutatus est; seed/atlas compilati veteris semanticae invalidati sunt donec generation 4 workflow eos ex productione correcta regeneret. Evidentia currentis correctionis est `CANONICAL_SAVED_SUM_CORRECTION_EVIDENCE.md` et `CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt`.
 
