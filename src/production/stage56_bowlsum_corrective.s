@@ -350,9 +350,9 @@ stage56PostStirRawBowlSumDetour:
     je .Ls56ps_fail
     mov qword ptr [rbp-120],rax
 
-    # Ⲡoperand ⲡⲁⲓ ⲡⲉ ⲡraw bowl sum; ⲡsaved order number ⲟⲩⲏϩ ⲉⲡpermutation ⲙⲙⲁⲧⲉ.
+    # Canonical operand: R = SAVE(S + 149*r); raw S remains diagnostic only.
     mov rdi,qword ptr [rbp-120]
-    mov rsi,qword ptr [rbp-56]
+    mov rsi,qword ptr [rbp-64]
     call bi_add_abs
     test rax,rax
     je .Ls56ps_fail

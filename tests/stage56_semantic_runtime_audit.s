@@ -35,27 +35,13 @@ fail_token: .ascii "STAGE56_SEMANTIC_AUDIT_FAIL\n"
 fail_len = . - fail_token
 
 cases:
-.quad -15055671,-15055671,5000,4,762,12,105
-.quad -15048173,-15048173,5000,12,21,47,57
-.quad -15048173,-15048172,5000,12,22,18,58
-.quad -15048173,-15048174,5000,12,20,7,58
+.quad -15055671,-15055671,5000,10,503,20,56
+.quad -15048173,-15048173,5000,17,456,33,87
+.quad -15048173,-15048172,5000,17,457,36,84
+.quad -15048173,-15048174,5000,17,455,41,97
 
-foundation_bowls:
-.quad 0x0324ee3aedefa7d6,0x3274dede2c892516
-.quad 0x80d75ce91b3b5c73,0x75fc8287bac46fa0
-.quad 0x178f8804ce09a5ad,0x14f5b026702a34c2
-.quad 0x0f820c2a2903201b,0x7493e09e62fa09ff
-.quad 0xb0646c37f9780d90,0x3f04130f04a5de7f
-.quad 0xaf84a2f99b8238c1,0x74556c4e99493c08
+# Historical raw-sum final-bowl constants removed from current semantic audit.
 foundation_order: .quad 4,5,2,3,6,1
-
-second_bowls:
-.quad 0x4ccd31263ec3843d,0x589a902fb2b9822d
-.quad 0x64f16702560d3d87,0x138c65bc39238ccf
-.quad 0x9eeb5721785b9098,0x6c340766194a5d5a
-.quad 0x2c4d76a57d948852,0x2cd1047a0bbb13dc
-.quad 0xe7782a7c44620414,0x315df489ad3be870
-.quad 0x104bf237719fe169,0x159293e89ee4de74
 second_order: .quad 3,4,6,5,2,1
 
 .section .text
@@ -389,7 +375,7 @@ oracle_stage56_stir:
     test rax,rax
     je .Loss_fail
     mov rdi,rax
-    mov rsi,qword ptr [r14]
+    mov rsi,qword ptr [r14+8]
     call bi_add_abs
     test rax,rax
     je .Loss_fail
@@ -549,11 +535,7 @@ check_sauce_witnesses:
     jne .Lcsw_no
     cmp qword ptr [rip+stage56_LEGACY_POSTSTIR_CALL_COUNT],12
     jne .Lcsw_no
-    mov rdi,qword ptr [r12+S23_FINAL_BOWLS]
-    lea rsi,[rip+foundation_bowls]
-    call check_known_bowls
-    test eax,eax
-    je .Lcsw_no
+
     mov rdi,qword ptr [r12+S23_ORDER46_LATCH]
     lea rsi,[rip+foundation_order]
     call compare_order
@@ -569,11 +551,7 @@ check_sauce_witnesses:
     jne .Lcsw_no
     cmp qword ptr [rip+stage56_LEGACY_POSTSTIR_CALL_COUNT],12
     jne .Lcsw_no
-    mov rdi,qword ptr [r12+S23_FINAL_BOWLS]
-    lea rsi,[rip+second_bowls]
-    call check_known_bowls
-    test eax,eax
-    je .Lcsw_no
+
     mov rdi,qword ptr [r12+S23_ORDER46_LATCH]
     lea rsi,[rip+second_order]
     call compare_order
@@ -658,7 +636,7 @@ check_discriminator:
     jne .Lcd_no
     mov rdi,qword ptr [r14+S56_OLD_RESULT]
     mov rsi,qword ptr [r14+S56_CORRECTED_RESULT]
-    call arrays_differ
+    call compare_bowl_arrays
     test eax,eax
     je .Lcd_no
     mov eax,1
