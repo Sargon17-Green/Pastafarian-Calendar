@@ -2242,7 +2242,7 @@ group('Stage 55 resta li certificate historic complet sin esser rescrit', () => 
   ok(!source.includes('AUDIT55'));
 });
 
-group('Stage 56 aplica rawBowlSum pos li scar legacy e conserva li route historic', () => {
+group('Stage 56 aplica canonical saved-sum pos li scar legacy e conserva li route historic', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   const stage = fs.readFileSync(path.join(__dirname, '..', 'DEVELOPMENT_STAGE.md'), 'utf8');
   const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'index.js'), 'utf8');
@@ -2259,14 +2259,19 @@ group('Stage 56 aplica rawBowlSum pos li scar legacy e conserva li route histori
   ok(stage.includes('STAGE_56_CORRECTIVE=COMPLETE'));
   ok(stage.includes('HISTORIC_COMPLETION_STAGE=55'));
   eq(typeof production.createStage56PostStirContext, 'function');
+  eq(typeof production.stage56CanonicalSavedSumPostStir, 'function');
   eq(typeof production.stage56RawBowlSumPostStirDetour, 'function');
+  eq(production.stage56RawBowlSumPostStirDetour, production.stage56CanonicalSavedSumPostStir);
+  eq(typeof production.sauceWithStage56CanonicalSavedSum, 'function');
   eq(typeof production.sauceWithStage56RawBowlSumDetour, 'function');
+  eq(production.sauceWithStage56RawBowlSumDetour, production.sauceWithStage56CanonicalSavedSum);
   eq(typeof production.sauceWithScarsStage56, 'function');
   eq(typeof production.calendarDateSpaghettiStage55Historical, 'function');
   eq(typeof production.calendarDateSpaghettiStage55HistoricalWithContext, 'function');
   eq(typeof production.Stage56MonsterIntegrationManager, 'function');
   ok(production.postStirOneForOrderMemoryDiscovery.toString().includes('+ savedStirSum'));
-  ok(production.stage56RawBowlSumPostStirDetour.toString().includes('+ rawBowlSum'));
+  ok(production.stage56CanonicalSavedSumPostStir.toString().includes('+ savedOrderNumber'));
+  ok(!production.stage56CanonicalSavedSumPostStir.toString().includes('+ rawBowlSum'));
   ok(source.includes('legacyScarCallCount'));
   ok(!source.includes("require('../tests/stage-56-reference')"));
   ok(!source.includes("require('../tests/normative-reference')"));
@@ -2274,12 +2279,12 @@ group('Stage 56 aplica rawBowlSum pos li scar legacy e conserva li route histori
   const legacy = production.postStirOneForOrderMemoryDiscovery(1, bowls);
   const context = production.createStage56PostStirContext();
   context.legacyScarCallCount += 1;
-  const corrected = production.stage56RawBowlSumPostStirDetour(1, bowls, legacy, context);
+  const corrected = production.stage56CanonicalSavedSumPostStir(1, bowls, legacy, context);
   eq(context.rawBowlSum, 21n);
   eq(context.savedOrderNumber, 170n);
   ok(context.rawBowlSum !== context.savedOrderNumber);
   eq(JSON.stringify(corrected.order), JSON.stringify(legacy.order));
-  ok(JSON.stringify(corrected.bowls.map(String)) !== JSON.stringify(legacy.bowls.map(String)));
+  eq(JSON.stringify(corrected.bowls.map(String)), JSON.stringify(legacy.bowls.map(String)));
 });
 
 group('Stage 57 conserva li round-trip Patch 26 quam ghost e li year Patch 18 quam semantic', () => {
@@ -2297,8 +2302,7 @@ group('Stage 57 conserva li round-trip Patch 26 quam ghost e li year Patch 18 qu
   ok(stage.includes('LAST_COMPLETED_STAGE=57'));
   ok(stage.includes('POST_COMPLETION_CORRECTIVE_STAGE=57'));
   ok(stage.includes('STAGE_57_CORRECTIVE=COMPLETE'));
-  ok(stage.includes('STAGE_56_CORRECTIVE=COMPLETE'));
-  ok(stage.includes('HISTORIC_COMPLETION_STAGE=55'));
+  ok(stage.includes('STAGE_56_CORRECTIVE=COMPLETE'));  ok(stage.includes('HISTORIC_COMPLETION_STAGE=55'));
   eq(typeof production.legacyStage54Patch26RoundTripGuard, 'function');
   eq(typeof production.stage57PreserveSequentialYearAfterPatch26Ghost, 'function');
   eq(typeof production.Stage57MonsterIntegrationManager, 'function');
