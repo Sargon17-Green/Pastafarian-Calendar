@@ -56,6 +56,12 @@ def sauceWithCurrentScars(
     *,
     corrective56_raw_bowlsum: bool = False,
 ) -> LegacyStructureSauceResult:
+    # ``corrective56_raw_bowlsum`` tarihsel API uyumluluğu için tutulur.
+    # 2026-09-11 kanonik düzeltmesinden sonra bu bayrak semantiği değiştirmez:
+    # post-stir her durumda R = SAVE(sum(oldBowls)+149*r) değerini hem
+    # permütasyonda hem de u içindeki ek terimde kullanır.
+    _ = corrective56_raw_bowlsum
+
     # Patch 20 semantic recomputation current Python implementation'ın
     # Stage 2–19 production method gövdelerini doğrudan kullanır. Bu direct
     # references module yüklenirken dondurulur; daha eski real-path call-count
@@ -67,7 +73,7 @@ def sauceWithCurrentScars(
         calculation_day=calculation_day,
         target_day=target_day,
     )
-    local_ctx.corrective56_raw_bowlsum_enabled = corrective56_raw_bowlsum
+    local_ctx.corrective56_raw_bowlsum_enabled = False
 
     day_tags = _CurrentDayTagAdapter()
     distance = _CurrentDistanceAdapter()

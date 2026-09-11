@@ -4,7 +4,6 @@ from .legacy_bowl_updates import (
 )
 from .legacy_permutation import patchedOrderFromDrop
 from .legacy_pours import LegacyPourAdapter
-from .post_stir_bowlsum_detour import rawBowlSumPostStirDetour
 
 
 def postStirRoundExact(
@@ -123,48 +122,19 @@ class LegacyOverwritableOrderMemoryAdapter:
         while stir <= 12:
             bowls_before_stir = bowls
 
-            # Tarihsel A1 scar kaldırılmaz ve gerçekten yürütülür.
-            legacy_wrong_bowls, stir_order, saved_stir_sum = postStirRoundExact(
+            # Kanonik post-stir: hem permütasyon hem de u içindeki ek terim aynı
+            # SAVEd değeri (saved_stir_sum) kullanır. Altı yeni kâse, aynı old
+            # snapshot'tan hesaplanır ve tur sonunda birlikte commit edilir.
+            bowls, stir_order, saved_stir_sum = postStirRoundExact(
                 stir,
                 bowls_before_stir,
             )
+            corrected_order = stir_order
+            order_number = saved_stir_sum
 
-            # Düzeltici Aşama 56 spaghetti detour yalnız authoritative final
-            # sauce bağlamında açılır. Historical 1–55 ana scar yürüyüşü eski
-            # sonucu kullanmayı sürdürür; böylece eski yol fiziksel ve semantik
-            # tanık olarak korunur.
-            if ctx.corrective56_raw_bowlsum_enabled:
-                bowls, corrected_order, raw_bowl_sum, order_number = rawBowlSumPostStirDetour(
-                    stir,
-                    bowls_before_stir,
-                    legacy_wrong_bowls,
-                    stir_order,
-                    saved_stir_sum,
-                )
-
-                ctx.corrective56_post_stir_last_stir = stir
-                ctx.corrective56_post_stir_last_raw_bowl_sum = raw_bowl_sum
-                ctx.corrective56_post_stir_last_order_number = order_number
-                ctx.corrective56_post_stir_last_legacy_wrong_result = legacy_wrong_bowls
-                ctx.corrective56_post_stir_last_corrected_result = bowls
-                ctx.corrective56_post_stir_applied_count += 1
-                ctx.corrective56_post_stir_applied = True
-                ctx.branch_trace.append((
-                    "DÜZELTİCİ_56_HAM_BOWLSUM_DETOUR",
-                    stir,
-                    raw_bowl_sum,
-                    order_number,
-                ))
-                ctx.logs.append((
-                    "düzeltici-56-ham-bowlsum-detour",
-                    stir,
-                    raw_bowl_sum,
-                    order_number,
-                ))
-            else:
-                bowls = legacy_wrong_bowls
-                corrected_order = stir_order
-                order_number = saved_stir_sum
+            # Düzeltici Aşama 56'ya ait raw-bowlSum bayrağı tarihsel telemetry
+            # alanı olarak bağlamda kalabilir; artık üretim semantiğini seçmez.
+            # Raw-sum formülü yalnız test/historical mutant modülünde tutulur.
 
             # Tarihsel kusurun ikinci yarısı: drop 46 sırası ayrı tutulmaz,
             # aynı genel order belleği her post-stir sırasında yeniden yazılır.

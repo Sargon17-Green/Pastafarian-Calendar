@@ -1,7 +1,13 @@
+"""Kanonik saved-sum post-stir düzeltmesi için hedefli regresyonlar.
+
+Dosya adı, eski CI çağrıları bozulmasın diye tarihsel olarak korunmuştur. Eski
+"Düzeltici Aşama 56 raw bowlSum" yorumu 2026-09-11 itibarıyla SUPERSEDED'dir.
+"""
+
+import random
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
@@ -25,25 +31,20 @@ from pastafari_calendar.legacy_stones import LegacyStoneBuilderAdapter
 from pastafari_calendar.legacy_structure_sauce import sauceWithCurrentScars
 from pastafari_calendar.legacy_visible_grinds import LegacyVisibleDropBuilderAdapter
 from pastafari_calendar.monster_bootstrap import MonsterContext
-from pastafari_calendar.post_stir_bowlsum_detour import rawBowlSumPostStirDetour
-from normative_reference import (
-    FOUNDATION_DAY,
-    post_stir12_corrective56,
-    sauce,
-    sauce_corrective56,
-)
+from pastafari_calendar.post_stir_bowlsum_detour import rawSumMutantPostStir
+from normative_reference import FOUNDATION_DAY, sauce
 
 
-class CorrectiveStage56BowlSumDetourTests(unittest.TestCase):
+class CanonicalSavedSumPostStirTests(unittest.TestCase):
     @staticmethod
-    def _independent_raw_sum_round(
+    def _independent_saved_sum_round(
         stir: int,
         bowls: tuple[int, ...],
-    ) -> tuple[int, ...]:
+    ) -> tuple[tuple[int, ...], tuple[int, ...], int]:
         old = tuple(bowls)
-        raw_bowl_sum = sum(old[1:7])
-        order_number = savePatch(raw_bowl_sum + 149 * stir)
-        order = patchedOrderFromDrop(order_number)
+        raw_sum = sum(old[1:7])
+        saved_sum = savePatch(raw_sum + 149 * stir)
+        order = patchedOrderFromDrop(saved_sum)
         pending = [0] * 7
 
         for position in range(1, 7):
@@ -54,7 +55,7 @@ class CorrectiveStage56BowlSumDetourTests(unittest.TestCase):
                 old[bowl_id]
                 + 3 * old[prev_id]
                 + 5 * old[next_id]
-                + raw_bowl_sum
+                + saved_sum
                 + stir
                 + position * position
             )
@@ -63,7 +64,7 @@ class CorrectiveStage56BowlSumDetourTests(unittest.TestCase):
                 + 7 * old[prev_id] * old[next_id]
             )
 
-        return tuple(pending)
+        return tuple(pending), order, saved_sum
 
     @staticmethod
     def _prepared_context(calculation_day: int, target_day: int) -> MonsterContext:
@@ -94,33 +95,30 @@ class CorrectiveStage56BowlSumDetourTests(unittest.TestCase):
         )
         return ctx
 
-    def test_old_a1_scar_still_diverges_from_raw_bowlsum_detour(self):
+    def test_discriminator_kills_raw_sum_mutant(self):
         bowls = (0, 11, 13, 17, 19, 23, 29)
         stir = 1
-        legacy_wrong, legacy_order, legacy_saved = postStirRoundExact(
+        canonical, canonical_order, saved_sum = postStirRoundExact(stir, bowls)
+        expected, expected_order, expected_saved = self._independent_saved_sum_round(
             stir,
             bowls,
         )
-        corrected, corrected_order, raw_sum, order_number = rawBowlSumPostStirDetour(
+        mutant, mutant_order, raw_sum, mutant_saved = rawSumMutantPostStir(
             stir,
             bowls,
-            legacy_wrong,
-            legacy_order,
-            legacy_saved,
         )
 
-        self.assertEqual(raw_sum, sum(bowls[1:7]))
-        self.assertEqual(order_number, savePatch(raw_sum + 149 * stir))
-        self.assertEqual(corrected_order, legacy_order)
-        self.assertNotEqual(raw_sum, order_number)
-        self.assertNotEqual(legacy_wrong, corrected)
-        self.assertEqual(
-            corrected,
-            self._independent_raw_sum_round(stir, bowls),
-        )
+        self.assertNotEqual(raw_sum, saved_sum)
+        self.assertEqual(saved_sum, savePatch(raw_sum + 149 * stir))
+        self.assertEqual(mutant_saved, saved_sum)
+        self.assertEqual(mutant_order, canonical_order)
+        self.assertEqual(expected_order, canonical_order)
+        self.assertEqual(expected_saved, saved_sum)
+        self.assertEqual(canonical, expected)
+        self.assertNotEqual(canonical, mutant)
 
-    def test_twelve_corrective_rounds_match_local_formula_oracle(self):
-        bowls = (
+    def test_all_twelve_rounds_match_saved_sum_and_mutant_diverges(self):
+        working = (
             0,
             123456789,
             987654321,
@@ -129,129 +127,89 @@ class CorrectiveStage56BowlSumDetourTests(unittest.TestCase):
             161803398,
             141421356,
         )
-        working = bowls
+        saw_mutant_divergence = False
 
         for stir in range(1, 13):
-            legacy_wrong, legacy_order, legacy_saved = postStirRoundExact(
+            actual, order, saved_sum = postStirRoundExact(stir, working)
+            expected, expected_order, expected_saved = self._independent_saved_sum_round(
                 stir,
                 working,
             )
-            working, _, _, _ = rawBowlSumPostStirDetour(
+            mutant, mutant_order, _, mutant_saved = rawSumMutantPostStir(
                 stir,
                 working,
-                legacy_wrong,
-                legacy_order,
-                legacy_saved,
             )
+            self.assertEqual(actual, expected)
+            self.assertEqual(order, expected_order)
+            self.assertEqual(saved_sum, expected_saved)
+            self.assertEqual(mutant_order, order)
+            self.assertEqual(mutant_saved, saved_sum)
+            saw_mutant_divergence |= mutant != actual
+            working = actual
 
-        self.assertEqual(
-            working,
-            post_stir12_corrective56(bowls),
-        )
+        self.assertTrue(saw_mutant_divergence)
 
-    def test_real_adapter_executes_old_scar_then_detour_twelve_times(self):
-        ctx = self._prepared_context(
-            FOUNDATION_DAY,
-            FOUNDATION_DAY,
-        )
-        ctx.corrective56_raw_bowlsum_enabled = True
-        adapter = LegacyOverwritableOrderMemoryAdapter()
+    def test_real_adapter_uses_canonical_round_even_if_historical_flag_is_true(self):
+        first = self._prepared_context(FOUNDATION_DAY, FOUNDATION_DAY)
+        second = self._prepared_context(FOUNDATION_DAY, FOUNDATION_DAY)
+        first.corrective56_raw_bowlsum_enabled = False
+        second.corrective56_raw_bowlsum_enabled = True
 
-        with patch(
-            "pastafari_calendar.legacy_order_memory.postStirRoundExact",
-            wraps=postStirRoundExact,
-        ) as legacy_mock, patch(
-            "pastafari_calendar.legacy_order_memory.rawBowlSumPostStirDetour",
-            wraps=rawBowlSumPostStirDetour,
-        ) as detour_mock:
-            result = adapter.run(ctx)
+        first_result = LegacyOverwritableOrderMemoryAdapter().run(first)
+        second_result = LegacyOverwritableOrderMemoryAdapter().run(second)
 
-        self.assertEqual(legacy_mock.call_count, 12)
-        self.assertEqual(detour_mock.call_count, 12)
-        self.assertEqual(ctx.corrective56_post_stir_applied_count, 12)
-        self.assertTrue(ctx.corrective56_post_stir_applied)
-        self.assertEqual(ctx.corrective56_post_stir_last_stir, 12)
-        self.assertEqual(result, ctx.legacy_post_stir_final_bowls)
-        self.assertEqual(
-            ctx.legacy_post_stir_last_saved_sum,
-            ctx.corrective56_post_stir_last_order_number,
-        )
-        self.assertNotEqual(
-            ctx.corrective56_post_stir_last_legacy_wrong_result,
-            ctx.corrective56_post_stir_last_corrected_result,
-        )
-        self.assertEqual(
-            sum(
-                1
-                for item in ctx.branch_trace
-                if item[0] == "DÜZELTİCİ_56_HAM_BOWLSUM_DETOUR"
-            ),
-            12,
-        )
-
-    def test_legacy_formula_remains_physical_and_detour_formula_is_separate(self):
-        legacy_source = (
-            ROOT
-            / "src"
-            / "pastafari_calendar"
-            / "legacy_order_memory.py"
-        ).read_text(encoding="utf-8")
-        detour_source = (
-            ROOT
-            / "src"
-            / "pastafari_calendar"
-            / "post_stir_bowlsum_detour.py"
-        ).read_text(encoding="utf-8")
-
-        self.assertIn("+ saved_stir_sum", legacy_source)
-        self.assertIn("legacy_wrong_bowls, stir_order, saved_stir_sum = postStirRoundExact", legacy_source)
-        self.assertIn("rawBowlSumPostStirDetour(", legacy_source)
-        self.assertIn("raw_bowl_sum = sum(old[1:7])", detour_source)
-        self.assertIn("+ raw_bowl_sum", detour_source)
-        self.assertIn("order_number = savePatch(", detour_source)
-
-
-    def test_authoritative_sauce_enables_detour_but_historical_default_stays_old(self):
-        historical = sauceWithCurrentScars(
-            FOUNDATION_DAY,
-            FOUNDATION_DAY,
-        )
-        authoritative = sauceWithScars(
-            FOUNDATION_DAY,
-            FOUNDATION_DAY,
-        )
-        historical_oracle = sauce(
-            FOUNDATION_DAY,
-            FOUNDATION_DAY,
-        )
-        corrective_oracle = sauce_corrective56(
-            FOUNDATION_DAY,
-            FOUNDATION_DAY,
-        )
-
-        self.assertEqual(historical.bowls, historical_oracle.bowls)
-        self.assertEqual(
-            historical.order_at_drop_46,
-            historical_oracle.order_at_drop_46,
-        )
-        self.assertEqual(authoritative.bowls, corrective_oracle.bowls)
-        self.assertEqual(
-            authoritative.order_at_drop_46,
-            corrective_oracle.order_at_drop_46,
-        )
-        self.assertNotEqual(historical.bowls, authoritative.bowls)
-
-    def test_corrective_state_is_owned_per_context(self):
-        first = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY)
-        second = MonsterContext(FOUNDATION_DAY + 1, FOUNDATION_DAY + 1)
-
-        first.corrective56_post_stir_applied = True
-        first.corrective56_post_stir_applied_count = 12
-        first.corrective56_post_stir_last_raw_bowl_sum = 777
-
-        self.assertFalse(second.corrective56_post_stir_applied)
+        self.assertEqual(first.legacy_bowls_after_46_drops, second.legacy_bowls_after_46_drops)
+        self.assertEqual(first_result, second_result)
+        self.assertEqual(first_result, first.legacy_post_stir_final_bowls)
+        self.assertEqual(second_result, second.legacy_post_stir_final_bowls)
         self.assertEqual(second.corrective56_post_stir_applied_count, 0)
-        self.assertIsNone(second.corrective56_post_stir_last_raw_bowl_sum)
+        self.assertFalse(second.corrective56_post_stir_applied)
+
+    def test_authoritative_sauce_matches_canonical_reference(self):
+        cases = (
+            (FOUNDATION_DAY, FOUNDATION_DAY),
+            (FOUNDATION_DAY, FOUNDATION_DAY + 1),
+            (FOUNDATION_DAY, FOUNDATION_DAY - 1),
+            (FOUNDATION_DAY - 11, FOUNDATION_DAY + 23),
+        )
+        for calculation_day, target_day in cases:
+            with self.subTest(calculation_day=calculation_day, target_day=target_day):
+                actual = sauceWithScars(calculation_day, target_day)
+                expected = sauce(calculation_day, target_day)
+                self.assertEqual(actual.bowls, expected.bowls)
+                self.assertEqual(actual.order_at_drop_46, expected.order_at_drop_46)
+
+    def test_current_structure_sauce_default_is_canonical(self):
+        actual = sauceWithCurrentScars(FOUNDATION_DAY, FOUNDATION_DAY)
+        expected = sauce(FOUNDATION_DAY, FOUNDATION_DAY)
+        self.assertEqual(actual.bowls, expected.bowls)
+        self.assertEqual(actual.order_at_drop_46, expected.order_at_drop_46)
+
+    def test_seeded_sauce_corpus_matches_canonical_reference(self):
+        rng = random.Random(560911)
+        cases = [(FOUNDATION_DAY, FOUNDATION_DAY)]
+        for _ in range(12):
+            c = FOUNDATION_DAY + rng.randint(-2000, 2000)
+            t = c + rng.randint(-2000, 2000)
+            cases.append((c, t))
+
+        for calculation_day, target_day in cases:
+            with self.subTest(calculation_day=calculation_day, target_day=target_day):
+                actual = sauceWithScars(calculation_day, target_day)
+                expected = sauce(calculation_day, target_day)
+                self.assertEqual(actual.bowls, expected.bowls)
+                self.assertEqual(actual.order_at_drop_46, expected.order_at_drop_46)
+
+    def test_raw_mutant_is_isolated_from_production_imports(self):
+        production = ROOT / "src" / "pastafari_calendar"
+        order_memory = (production / "legacy_order_memory.py").read_text(encoding="utf-8")
+        mutant_module = (production / "post_stir_bowlsum_detour.py").read_text(encoding="utf-8")
+
+        self.assertNotIn("post_stir_bowlsum_detour import", order_memory)
+        self.assertNotIn("rawSumMutantPostStir(", order_memory)
+        self.assertIn("+ saved_stir_sum", order_memory)
+        self.assertIn("HISTORICAL — SUPERSEDED", mutant_module)
+        self.assertIn("INTENTIONAL MUTANT", mutant_module)
 
 
 if __name__ == "__main__":

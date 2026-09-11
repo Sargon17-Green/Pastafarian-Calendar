@@ -1,135 +1,73 @@
 # Python + Türkçe Makarna Canavarı takvim uygulaması
 
-Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştiren 55 aşamalı bağımsız uygulama çizgisinin tamamlanmış durumudur. Çizgi sıfırdan kurulmuştur; başka bir programlama dilindeki uygulamanın kodu, testi, çıktısı, özeti, önbelleği, günlüğü veya sağlaması kaynak olarak kullanılmamıştır.
+Bu ağaç, zaman tomarının normatif algoritmasını Python ile gerçekleştiren 55 aşamalı bağımsız uygulama çizgisinin tamamlanmış durumudur. Özgün 55 aşamalı geliştirme kapsamı değiştirilmemiştir.
 
 ## Güncel aşama
 
-Aşama 55/55 `AUDIT` tamamlanmıştır.
-
-Aşama 55 production kodunu değiştirmemiştir; `src/` ağacı Aşama 54 ile byte-for-byte aynıdır.
-
-Doğrulama sonucu:
-
-```text
-Aşama 1–53 historical regressions: 365/365 PASS
-Aşama 54 integration: 10/10 PASS
-Aşama 55 final audit: 21/21 PASS
-Toplam: 396 doğrulanmış test
-Failure: 0
-Error: 0
-```
-
-Bütün 26 legacy kusur fiziksel scar olarak korunur ve bütün 26 patch/detour layer semantic düzeltmeyi taşır.
-
-Production test-only oracle kullanmaz.
-
-Frozen SourceLanguageCatalog v1.3.1 korunur.
-
-Final public semantic sonuç tam beş alan taşır.
+Aşama 55/55 `AUDIT` tamamlanmıştır. Bu saved-sum düzeltmesi yeni bir geliştirme aşaması değildir; tamamlanmış ağacın kanonik semantiğine yapılan bir düzeltmedir.
 
 ```text
 SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES
 ```
 
-Özgün 55 aşamalı tarihsel çizgide Aşama 56 yoktur. Tamamlanma sonrasında doğrulanmış bir semantic drift için ayrı bir Düzeltici Aşama 56 uygulanmıştır.
+## Kanonik 12 final post-stir kuralı — 2026-09-11
 
-## Korunan birinci aşama temeli
+Tomarın güncel hükmüne göre her post-stir turunda altı kâse için **tek bir eski snapshot** alınır:
 
-- Python standart kitaplığına dayanan temiz ve yalnızca test amaçlı normatif başvuru uygulaması.
-- On yedi köfte adı ve kırk yedi ay adı için dondurulmuş `SourceLanguageCatalog`.
-- Her ad için değişmez `canonicalIndex`; sıralama ve seçim yalnızca bu indislerle yapılır.
-- Üretim tarafında çağrı başına `MonsterContext`, temel dağıtıcı, doğrulayıcı, hata sarmalayıcısı ve gözlem sayaçları.
-- `calendar_date_spaghetti` artık authoritative integrated beş alanlı tarih sonucunu üretir; bütün historical başlangıç/patch zinciri fiziksel olarak korunur.
+```text
+S = sum(oldBowls)
+R = SAVE(S + 149*r)
+permutationRank = 1 + ((R - 1) mod 720)
+permutation = lexicographic permutation(permutationRank)
+
+u = old[B]
+  + 3*old[P]
+  + 5*old[N]
+  + R
+  + r
+  + position^2
+
+new[B] = SAVE(u^2 + 7*old[P]*old[N])
+```
+
+Altı `new[B]` değeri aynı `oldBowls` snapshot'ından hesaplanır ve tur sonunda birlikte commit edilir. `R` yalnız permütasyon için değil, `u` içindeki ek terim için de kullanılır.
+
+Aşağıdaki tarihsel varyant **yanlıştır** ve yalnız mutant/regresyon malzemesi olarak saklanır:
+
+```text
+R = SAVE(S + 149*r)
+# permutation R'den
+u = ... + S + r + position^2   # YANLIŞ
+```
+
+`src/pastafari_calendar/post_stir_bowlsum_detour.py` artık açıkça `HISTORICAL — SUPERSEDED` olarak işaretli test-mutantıdır. Üretim yolu bu modülü import etmez. `legacy_order_memory.postStirRoundExact` kanonik saved-sum kuralını uygular.
+
+Tarihsel `corrective56_raw_bowlsum` bayrak/alan adları geriye dönük telemetry/API uyumluluğu için kalabilir; `legacy_structure_sauce.sauceWithCurrentScars` bu bayrağın semantiği değiştirmesine izin vermez.
+
+## Eski “Düzeltici Aşama 56” kaydı
+
+Önceki belgeler, raw bowl sum değerinin `u` içine konmasını “düzeltme” olarak tanımlıyordu. Bu hüküm **HISTORICAL — SUPERSEDED** durumundadır. Eski rapor ve witness'lar silinmemiş, açıkça tarihsel/yanlış olarak etiketlenmiştir. Eski raw-sum çıktı değerleri kanonik expected değer olarak kullanılmamalıdır.
 
 ## Kaynak dili
 
-Bu uygulamanın tek insan kaynak dili Türkçedir. Anlam taşıyan kaynak adları Türkçedeki anlamlarıyla çevrilmiştir. Yer adlarında yerleşik Türkçe biçimler kullanılmıştır. Uydurma ses dizileri sabit ve belgelenmiş bir çevriyazı kuralıyla yazılır. Metin hiçbir zaman normatif sıralamaya katılmaz; normatif kimlik `canonicalIndex` değeridir.
+Bu uygulamanın programlama dili Python, insan kaynak dili Türkçedir. Metin normatif sıralamaya katılmaz; normatif kimlik `canonicalIndex` değeridir.
 
-## Çalıştırma
+## Doğrulama
 
-Historical regressions:
-
-```text
-python -m unittest discover -s tests -p "test_stage_*.py" -q
-```
-
-Aşama 54 integration:
-
-```text
-python -m unittest discover -s tests -p "integration_stage_54.py" -q
-```
-
-Final Aşama 55 denetimi:
-
-```text
-python tests/run_stage_55_audit.py
-```
-
-Beklenen final durum:
-
-```text
-HISTORICAL_REGRESSIONS: PASS
-STAGE54_INTEGRATION: PASS
-STAGE55_FINAL_AUDIT: PASS
-SPAGHETTI_MONSTER_IMPLEMENTATION_COMPLETE=YES
-```
-
-
-## Düzeltici Aşama 56 — raw bowlSum / saved orderNumber spaghetti detour
-
-55 aşamalı çizgi tamamlandıktan sonra yapılan cross-engine forensic karşılaştırma,
-ilk semantic ayrışmanın 46. damladan sonraki ilk post-stir içinde olduğunu gösterdi.
-
-Tarihsel A1 scar şu davranışı taşır ve kaldırılmamıştır:
-
-```text
-savedOrderNumber = SAVE(sum(oldBowls) + 149 * stir)
-permutation = permutation(savedOrderNumber)
-u += savedOrderNumber
-```
-
-Düzeltici detour ise authoritative final sauce için şu ayrımı uygular:
-
-```text
-rawBowlSum = sum(oldBowls)
-orderNumber = SAVE(rawBowlSum + 149 * stir)
-permutation = permutation(orderNumber)
-u += rawBowlSum
-```
-
-Eski A1 fonksiyonu her 12 post-stir turunda önce gerçekten çalışır. Sonucu ghost
-olarak kaydedilir. Authoritative final bağlamında ayrı detour aynı permutation
-numarasını doğrular ve yalnız `u` içindeki operandı ham `rawBowlSum` olarak yeniden
-kurar. Altı kâse yine aynı eski snapshot üzerinden birlikte güncellenir.
-
-Historical 1–55 scar yürüyüşünde corrective flag kapalıdır; bu sayede 365 historical
-regression değişmeden korunur. `sauceWithScars` ve final integration bağlamında flag
-açıktır. Final year structure, target zaten year-first-day olsa bile corrective sauce
-ile yeniden hesaplanır; historical context sauce yalnız ghost kalır.
-
-Düzeltici doğrulama:
-
-```text
-Historical regressions: 365/365 PASS
-Aşama 54 integration: 10/10 PASS
-Aşama 55 final audit: 21/21 PASS
-Düzeltici Aşama 56: 6/6 PASS
-Toplam: 402 PASS
-```
-
-Forensic external witness kontrolü:
-
-```text
-Foundation:                (5000, 4, 762, 12, 105)
-c=t=-15048173:             (5000, 12, 21, 47, 57)
-c=-15048173,t=-15048172:   (5000, 12, 22, 18, 58)
-c=-15048173,t=-15048174:   (5000, 12, 20, 7, 58)
-```
-
-Bu tuple'larda ad metni değil canonicalIndex karşılaştırılmıştır.
-
-Düzeltici test:
+Hedefli saved-sum testi:
 
 ```text
 python -m unittest discover -s tests -p "corrective_stage_56_bowlsum_detour.py" -q
 ```
+
+Tam yerel doğrulama zinciri:
+
+```text
+python -m unittest discover -s tests -p "test_stage_*.py" -q
+python -m unittest discover -s tests -p "integration_stage_54.py" -q
+python tests/run_stage_55_audit.py
+python -m unittest discover -s tests -p "corrective_stage_56_bowlsum_detour.py" -q
+python -m unittest discover -s tests -p "test_acceleration_patches_27_33.py" -q
+```
+
+Bu delta hazırlanırken tam repository çalışma ağacı bu oturumun yerel yürütme ortamına indirilemediği için yukarıdaki tam zincir burada **PASS olarak iddia edilmemektedir**. Delta metadata'sı hangi kontrollerin gerçekten çalıştırıldığını ve hangilerinin hazırlanıp çalıştırılmadığını ayrı ayrı kaydeder.

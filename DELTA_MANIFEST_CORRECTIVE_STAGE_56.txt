@@ -1,36 +1,11 @@
-DÜZELTİCİ_AŞAMA=56
-KIND=SPAGHETTI_DETOUR
-BASE_BRANCH=Python+Türkçe
-BASE_COMMIT=d1ab163f12f95934d9fc260d496bdd3cdeaf952e
-REFERENCE_COMMIT=d5cfe77ef7950a9a67ff0e6814833a3eedacae8a
-ROOT_CAUSE=POST_STIR_RAW_BOWLSUM_VS_SAVED_ORDER_NUMBER
-LEGACY_A1_SCAR_REMOVED=NO
-LEGACY_A1_SCAR_EXECUTES=YES
-AUTHORITATIVE_DETOUR_ACTIVE=YES
-SOURCE_LANGUAGE_CATALOG_CHANGED=NO
-DELETED_FILES=NONE
-HISTORICAL_REGRESSIONS=365/365_PASS
-STAGE54_INTEGRATION=10/10_PASS
-STAGE55_AUDIT=21/21_PASS
-CORRECTIVE56_TESTS=6/6_PASS
-TOTAL_VALIDATED_TESTS=402
+HISTORICAL_SUPERSEDED=YES
+SUPERSEDED_ON=2026-09-11
+SUPERSEDED_REASON=Scroll requires saved R inside u; historical corrective-56 used raw bowl sum
 
-DOSYALAR:
-- .github/workflows/python-turkish-final-verification.yml
-- DEVELOPMENT_STAGE.md
-- README.md
-- SPAGHETTI_DEVELOPMENT_HISTORY.md
-- CORRECTIVE_STAGE_56_REPORT.md
-- DELTA_MANIFEST_CORRECTIVE_STAGE_56.txt
-- src/pastafari_calendar/post_stir_bowlsum_detour.py
-- src/pastafari_calendar/legacy_order_memory.py
-- src/pastafari_calendar/legacy_structure_sauce.py
-- src/pastafari_calendar/final_integration.py
-- src/pastafari_calendar/monster_bootstrap.py
-- tests/normative_reference.py
-- tests/integration_stage_54.py
-- tests/audit_stage_55.py
-- tests/corrective_stage_56_bowlsum_detour.py
-- artifacts/corrective-stage-56/FINAL_VERIFICATION_GREEN.txt
-- artifacts/corrective-stage-56/EXTERNAL_ALIGNMENT_WITNESSES.txt
-- artifacts/corrective-stage-56/ROOT_CAUSE.txt
+# Aşağıdaki kayıt, eski corrective-56 teslimatının tarihsel indeksidir.
+# Kanonik expected-output veya baseline olarak kullanılmamalıdır.
+HISTORICAL_CORRECTIVE_NAME=RAW_BOWLSUM_VS_SAVED_ORDER_NUMBER
+HISTORICAL_STATUS=SUPERSEDED
+HISTORICAL_REFERENCE_COMMIT=d5cfe77ef7950a9a67ff0e6814833a3eedacae8a
+CURRENT_CANONICAL_RULE=R_SAVE_SUM_PLUS_149R_USED_IN_PERMUTATION_AND_U
+CURRENT_RAW_SUM_MUTANT_STATUS=TEST_ONLY

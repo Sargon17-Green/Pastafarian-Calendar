@@ -158,10 +158,12 @@ def sauceWithScars(
     calculation_day: int,
     target_day: int,
 ) -> LegacyStructureSauceResult:
+    # 2026-09-11 kanonik düzeltmesi: historical raw-bowlSum bayrağı artık
+    # authoritative yola geçirilmez. sauceWithCurrentScars saved-sum post-stir
+    # semantiğini kullanır: R hem permütasyonun hem de u'nun girdisidir.
     return sauceWithCurrentScars(
         calculation_day,
         target_day,
-        corrective56_raw_bowlsum=True,
     )
 
 
@@ -1973,9 +1975,10 @@ class FinalSpaghettiIntegrationManager:
                 order_at_drop_46=self.ctx.orderAt46Latch,
             )
 
-        # Düzeltici Aşama 56: historical context sauce yalnız ghost olarak kalır.
-        # Hedef zaten yılın ilk günü olsa bile authoritative structure, raw-bowlSum
-        # post-stir detour'u açık yeni sauce üzerinden yeniden üretilir.
+        # 2026-09-11 kanonik düzeltmesi: historical corrective-56 trace token'ı
+        # compatibility için kalır; authoritative structure yeni sauce'u yılın ilk
+        # günü için saved-sum post-stir semantiğiyle yeniden üretir. Raw bowl sum
+        # artık u'nun girdisi değildir.
         semantic_sauce = sauceWithScars(
             calculation_day,
             first_day,

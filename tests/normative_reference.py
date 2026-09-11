@@ -324,7 +324,8 @@ def post_stir12(bowls: tuple[int, ...]) -> tuple[int, ...]:
     return working
 
 
-def post_stir12_corrective56(bowls: tuple[int, ...]) -> tuple[int, ...]:
+def post_stir12_raw_sum_mutant(bowls: tuple[int, ...]) -> tuple[int, ...]:
+    """HISTORICAL — SUPERSEDED: kasıtlı raw-sum mutantı, yalnız regresyon için."""
     working = bowls
     for stir in range(1, 13):
         old = working
@@ -352,6 +353,11 @@ def post_stir12_corrective56(bowls: tuple[int, ...]) -> tuple[int, ...]:
     return working
 
 
+def post_stir12_corrective56(bowls: tuple[int, ...]) -> tuple[int, ...]:
+    """Tarihsel API adı; 2026-09-11'den beri kanonik saved-sum yoluna alias'tır."""
+    return post_stir12(bowls)
+
+
 def sauce(calculation_day: int, target_day: int) -> SauceResult:
     counts = work_counts(calculation_day, target_day)
     hidden = build_hidden_drops(counts)
@@ -362,14 +368,20 @@ def sauce(calculation_day: int, target_day: int) -> SauceResult:
     return SauceResult(final_bowls, order_at_46)
 
 
-def sauce_corrective56(calculation_day: int, target_day: int) -> SauceResult:
+def sauce_raw_sum_mutant(calculation_day: int, target_day: int) -> SauceResult:
+    """HISTORICAL — SUPERSEDED: yalnız raw-sum discriminator/regresyon mutantı."""
     counts = work_counts(calculation_day, target_day)
     hidden = build_hidden_drops(counts)
     visible = build_visible_drops(counts, hidden)
     bowls = initial_bowls(counts)
     bowls_after, order_at_46 = apply_visible_drops_to_bowls(bowls, visible)
-    final_bowls = post_stir12_corrective56(bowls_after)
+    final_bowls = post_stir12_raw_sum_mutant(bowls_after)
     return SauceResult(final_bowls, order_at_46)
+
+
+def sauce_corrective56(calculation_day: int, target_day: int) -> SauceResult:
+    """Tarihsel API adı; artık kanonik ``sauce`` ile tamamen aynıdır."""
+    return sauce(calculation_day, target_day)
 
 
 @dataclass(frozen=True, slots=True)

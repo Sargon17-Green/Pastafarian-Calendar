@@ -1,0 +1,102 @@
+Pastafarian Calendar — Python+Türkçe canonical saved-sum correction
+Local execution log — 2026-09-11
+Base HEAD: cdb1033ac19f78acf16aedc769efba81052f2c5c
+
+ACTUALLY EXECUTED
+=================
+
+1. Python syntax compilation of every changed Python source/test file
+   Result: PASS
+   Command class: python -m py_compile <changed .py files>
+
+2. Targeted production discriminator against the real postStirRoundExact implementation
+   Isolated dependency stubs were used only to load the production module because the complete
+   branch worktree could not be materialized locally. The production function itself was executed.
+   Result: PASS
+
+   Input old bowls: (0, 11, 13, 17, 19, 23, 29)
+   stir r: 1
+   S = 112
+   R = SAVE(S + 149*r) = 261
+   permutation rank = 261
+   permutation = (3, 1, 6, 4, 2, 5)
+   canonical saved-sum output:
+     (0, 227180, 225843, 164987, 204240, 199572, 184647)
+   raw-sum mutant output:
+     (0, 108427, 107388, 66796, 92639, 89163, 79304)
+
+   Assertions checked:
+   - S != R
+   - permutation is derived from R
+   - production postStirRoundExact agrees with independently calculated saved-sum result
+   - raw-sum mutant differs
+   - one round reads one old six-bowl snapshot and commits all six new values together
+
+3. Normative-reference compatibility aliases on four deterministic cases
+   Cases included Foundation c=t, t=c+1, t=c-1, and an additional separated target.
+   Result: PASS (4 cases)
+   Checked:
+   - sauce_corrective56 == canonical sauce
+   - sauce_raw_sum_mutant final bowls differ from canonical
+
+4. Independent intermediate witness generation
+   Result: PASS
+   Generated artifacts/canonical-saved-sum/INTERMEDIATE_WITNESSES.json for four cases.
+   Each record contains:
+   - bowls immediately after visible drop 46
+   - drop-46 order
+   - all 12 post-stirs, including S, R, rank, permutation and six new bowls
+   - final canonical bowls
+   - raw-sum-mutant final bowls and explicit divergence flag
+
+5. Production-entry bytecode/cache-fingerprint audit
+   Result: PASS
+   Compared the old and corrected sauceWithScars source at Python bytecode level.
+   BYTECODE_CHANGED = True
+   Old co_names: ('sauceWithCurrentScars', 'corrective56_raw_bowlsum')
+   New co_names: ('sauceWithCurrentScars',)
+   Old constants: (None, True, ('corrective56_raw_bowlsum',))
+   New constants: (None,)
+   acceleration_scars semantic fingerprints include a code mark of sauceWithScars, so the
+   semantic fingerprint changes with this correction. Old process-local semantic cache entries
+   therefore cannot match the corrected implementation's fingerprint.
+
+6. Source isolation/static audit
+   Result: PASS
+   Checked the prepared delta sources for:
+   - no production call passing corrective56_raw_bowlsum=True
+   - no production import of rawSumMutantPostStir/rawBowlSumPostStirDetour
+   - raw-sum implementation retained only in the explicitly HISTORICAL — SUPERSEDED mutant module
+   - final_integration.py parses successfully and exposes the expected integration functions/classes
+
+7. Repository-tree public-route audit using the observed branch tree
+   Result: PASS
+   No browser HTML, JavaScript application bundle, service worker, or public API/site implementation
+   exists in this branch tree, so no browser/API/site rebuild is applicable.
+
+ATTEMPTED BUT NOT COMPLETED
+===========================
+
+- A standalone final five-field date computation through the partially materialized normative
+  reference exceeded the 120-second local execution limit and produced no completed result.
+  It is NOT reported as PASS.
+
+PREPARED BUT NOT RUN IN THIS SESSION
+====================================
+
+The complete GitHub branch worktree could not be materialized in the local execution filesystem.
+The GitHub source/tree was available for audit and file retrieval, and Python itself was available,
+but unchanged branch dependencies required by the whole native suite were not all present locally.
+Therefore these prepared tests are intentionally NOT reported as executed:
+
+- tests/corrective_stage_56_bowlsum_detour.py: 7 canonical saved-sum/discriminator tests
+- tests/integration_stage_54.py: downstream integration coverage
+- tests/audit_stage_55.py: final audit coverage
+- existing historical regression suite
+- tests/test_acceleration_patches_27_33.py: acceleration/cache behavior
+- full downstream gate/year/cutlet/month/five-field-date differential runs
+- Year 5000 witness-region full integration run
+- cold/warm/repeated-call/A→B→A/import-order/failure→retry cache suite
+
+The workflow is updated to execute the preserved historical tests plus Stage 54, Stage 55,
+the 7 saved-sum discriminator tests and acceleration tests when applied to a complete branch checkout.
