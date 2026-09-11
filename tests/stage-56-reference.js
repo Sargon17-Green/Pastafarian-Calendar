@@ -1,15 +1,17 @@
 'use strict';
 
-// Oracle local correctiv de Stage 56. It reutilisa solmen li parte pre-post-stir del reference
-// JavaScript del sam linea; null function production es importat ci.
+// HISTORICAL — SUPERSEDED MUTANT ONLY.
+// This file deliberately implements the rejected Stage-56 raw-sum interpretation so
+// regression tests can prove that the canonical saved-sum path disagrees with it.
+// It MUST NOT be used as a canonical oracle or to regenerate normative expectations.
 const base = require('./normative-reference');
 
-function rawBowlSumPostStirOne(stirNumber, bowls) {
+function rawSumMutantPostStirOne(stirNumber, bowls) {
   if (!Number.isInteger(stirNumber) || stirNumber < 1 || stirNumber > 12) {
-    throw new RangeError('Li stir del oracle Stage 56 deve esser inter 1 e 12.');
+    throw new RangeError('Li stir del raw-sum mutant deve esser inter 1 e 12.');
   }
   if (!Array.isArray(bowls) || bowls.length !== 6 || bowls.some((value) => typeof value !== 'bigint')) {
-    throw new TypeError('Li oracle Stage 56 exige exactmen six bowls BigInt.');
+    throw new TypeError('Li raw-sum mutant exige exactmen six bowls BigInt.');
   }
   const old = bowls.slice();
   const rawBowlSum = old.reduce((sum, value) => sum + value, 0n);
@@ -37,23 +39,23 @@ function rawBowlSumPostStirOne(stirNumber, bowls) {
   });
 }
 
-function rawBowlSumPostStir12(bowls) {
+function rawSumMutantPostStir12(bowls) {
   let current = bowls.slice();
   const rounds = [];
   for (let stir = 1; stir <= 12; stir += 1) {
-    const round = rawBowlSumPostStirOne(stir, current);
+    const round = rawSumMutantPostStirOne(stir, current);
     rounds.push(round);
     current = round.bowls.slice();
   }
   return Object.freeze({ bowls: Object.freeze(current.slice()), rounds: Object.freeze(rounds.slice()) });
 }
 
-function sauce(calculationDay, targetDay) {
+function rawSumMutantSauce(calculationDay, targetDay) {
   const counts = base.workCounts(calculationDay, targetDay);
   const hidden = base.buildHiddenDrops(counts, base.STONES);
   const visible = base.buildVisibleDrops(counts, base.STONES, hidden);
   const afterDrops = base.applyVisibleDropsToBowls(base.initialBowls(counts), visible, base.STONES);
-  const post = rawBowlSumPostStir12(afterDrops.bowls);
+  const post = rawSumMutantPostStir12(afterDrops.bowls);
   return Object.freeze({
     bowlsAfterDrops: Object.freeze(afterDrops.bowls.slice()),
     bowls: Object.freeze(post.bowls.slice()),
@@ -63,10 +65,8 @@ function sauce(calculationDay, targetDay) {
 }
 
 module.exports = Object.freeze({
-  SourceLanguageCatalog: base.SourceLanguageCatalog,
-  SAVE: base.SAVE,
-  regularMod: base.regularMod,
-  rawBowlSumPostStirOne,
-  rawBowlSumPostStir12,
-  sauce
+  HISTORICAL_SUPERSEDED_RAW_SUM_MUTANT: true,
+  rawSumMutantPostStirOne,
+  rawSumMutantPostStir12,
+  rawSumMutantSauce
 });

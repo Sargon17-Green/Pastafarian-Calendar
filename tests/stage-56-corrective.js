@@ -3,130 +3,196 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 const production = require('../src');
-const oracle = require('./stage-56-reference');
+const reference = require('./normative-reference');
+const rawMutant = require('./stage-56-reference');
 
 const F = production.FOUNDATION_DAY_OLD;
 let groups = 0;
-
 function group(label, fn) {
   fn();
   groups += 1;
-  console.log('STAGE 56 PASS — ' + label);
+  console.log('SAVED-SUM PASS — ' + label);
+}
+function oneBased(values) { return [null, ...values]; }
+
+function canonicalPostStirOne(stirNumber, bowls) {
+  const old = bowls.slice();
+  const rawBowlSum = old.reduce((sum, value) => sum + value, 0n);
+  const savedOrderNumber = reference.SAVE(rawBowlSum + 149n * BigInt(stirNumber));
+  const orderNumber = reference.regularMod(savedOrderNumber - 1n, 720n) + 1n;
+  const order = reference.bowlOrderFromNumber(orderNumber);
+  const nextBowls = new Array(6);
+  const positions = [];
+  for (let position = 1; position <= 6; position += 1) {
+    const bowlId = order[position - 1];
+    const prevId = order[reference.wrap1(position - 1, 6) - 1];
+    const nextId = order[reference.wrap1(position + 1, 6) - 1];
+    const u = old[bowlId - 1]
+      + 3n * old[prevId - 1]
+      + 5n * old[nextId - 1]
+      + savedOrderNumber
+      + BigInt(stirNumber)
+      + BigInt(position * position);
+    const rawBeforeSave = reference.square(u) + 7n * old[prevId - 1] * old[nextId - 1];
+    nextBowls[bowlId - 1] = reference.SAVE(rawBeforeSave);
+    positions.push({ position, bowlId, prevId, nextId, u, rawBeforeSave, output: nextBowls[bowlId - 1] });
+  }
+  return { bowls: nextBowls, order, rawBowlSum, savedOrderNumber, positions };
 }
 
-function canonicalFive(result) {
-  const cutlet = production.SourceLanguageCatalog.cutlets.find((row) => row.text === result[1]);
-  const month = production.SourceLanguageCatalog.months.find((row) => row.text === result[3]);
-  assert.ok(cutlet, 'Li nom de cutlet deve resolver a un canonicalIndex.');
-  assert.ok(month, 'Li nom de mensu deve resolver a un canonicalIndex.');
-  return [result[0], cutlet.canonicalIndex, result[2], month.canonicalIndex, result[4]];
+function independentSauceRounds(calculationDay, targetDay) {
+  const counts = reference.workCounts(calculationDay, targetDay);
+  const hidden = reference.buildHiddenDrops(counts, reference.STONES);
+  const visible = reference.buildVisibleDrops(counts, reference.STONES, hidden);
+  const afterDrops = reference.applyVisibleDropsToBowls(reference.initialBowls(counts), visible, reference.STONES);
+  let bowls = afterDrops.bowls.slice();
+  const rounds = [];
+  for (let stir = 1; stir <= 12; stir += 1) {
+    const round = canonicalPostStirOne(stir, bowls);
+    rounds.push(round);
+    bowls = round.bowls.slice();
+  }
+  return { bowlsAfterDrops: afterDrops.bowls.slice(), orderAtDrop46: afterDrops.orderAtDrop46.slice(), rounds, bowls };
 }
 
-function oneBasedReferenceBowls(values) {
-  return [null, ...values];
-}
-
-group('discriminator separa rawBowlSum de savedOrderNumber sin mutar permutation', () => {
-  const bowls = [null, 1n, 2n, 3n, 4n, 5n, 6n];
-  const legacy = production.postStirOneForOrderMemoryDiscovery(1, bowls);
+group('discriminator kills rawSumMutant when S != R', () => {
+  const bowls0 = [1n, 2n, 3n, 4n, 5n, 6n];
+  const bowls1 = oneBased(bowls0);
+  const legacy = production.postStirOneForOrderMemoryDiscovery(1, bowls1);
   const context = production.createStage56PostStirContext();
   context.legacyScarCallCount += 1;
-  const corrected = production.stage56RawBowlSumPostStirDetour(1, bowls, legacy, context);
-  const expected = oracle.rawBowlSumPostStirOne(1, bowls.slice(1));
-  assert.equal(context.rawBowlSum, 21n);
-  assert.equal(context.savedOrderNumber, 170n);
-  assert.notEqual(context.rawBowlSum, context.savedOrderNumber);
-  assert.deepEqual(corrected.order, legacy.order);
-  assert.deepEqual(corrected.order, expected.order);
-  assert.notDeepEqual(corrected.bowls, legacy.bowls);
-  assert.deepEqual(corrected.bowls, oneBasedReferenceBowls(expected.bowls));
+  const actual = production.stage56CanonicalSavedSumPostStir(1, bowls1, legacy, context);
+  const canonical = canonicalPostStirOne(1, bowls0);
+  const mutant = rawMutant.rawSumMutantPostStirOne(1, bowls0);
+
+  assert.equal(canonical.rawBowlSum, 21n);
+  assert.equal(canonical.savedOrderNumber, 170n);
+  assert.notEqual(canonical.rawBowlSum, canonical.savedOrderNumber);
+  assert.deepEqual(canonical.order, [2, 4, 1, 3, 6, 5]);
+  assert.deepEqual(canonical.positions.map((row) => row.u), [209n, 190n, 208n, 223n, 236n, 240n]);
+  assert.deepEqual(canonical.bowls, [43348n, 43821n, 49771n, 36114n, 57684n, 55801n]);
+  assert.deepEqual(mutant.bowls, [3565n, 3740n, 5518n, 1695n, 8365n, 7674n]);
+  assert.notDeepEqual(canonical.bowls, mutant.bowls);
+  assert.deepEqual(actual.order, canonical.order);
+  assert.deepEqual(actual.bowls, oneBased(canonical.bowls));
+  assert.notDeepEqual(actual.bowls, oneBased(mutant.bowls));
 });
 
-group('scar static conserva +savedStirSum e detour usa +rawBowlSum', () => {
-  const legacySource = production.postStirOneForOrderMemoryDiscovery.toString();
-  const patchSource = production.stage56RawBowlSumPostStirDetour.toString();
-  assert.match(legacySource, /\+ savedStirSum/);
-  assert.doesNotMatch(legacySource, /\+ rawBowlSum/);
-  assert.match(patchSource, /\+ rawBowlSum/);
-  assert.match(patchSource, /legacyRound\.savedStirSum !== savedOrderNumber/);
-  assert.match(patchSource, /stage54ArraysEqual\(legacyRound\.order, order\)/);
+group('reachable implementation source adds savedOrderNumber, not rawBowlSum, inside u', () => {
+  const source = production.stage56CanonicalSavedSumPostStir.toString();
+  assert.match(source, /\+ savedOrderNumber\s*\+ BigInt\(stirNumber\)/);
+  assert.doesNotMatch(source, /\+ rawBowlSum\s*\+ BigInt\(stirNumber\)/);
+  assert.match(source, /const old = bowls\.slice\(\)/);
+  assert.match(source, /const pending = new Array\(7\)\.fill\(null\)/);
 });
 
-group('omni 12 post-stirs concorda con oracle local raw-bowl-sum', () => {
+group('bowls after drop 46 and all 12 post-stirs match independent canonical reference', () => {
   for (const [calculationDay, targetDay] of [[F, F], [-15048173n, -15048173n]]) {
     const actual = production.sauceWithScarsStage56(calculationDay, targetDay);
-    const expected = oracle.sauce(calculationDay, targetDay);
-    const state = actual.stage56PostStirContext;
-    assert.equal(state.appliedCount, 12);
-    assert.equal(state.legacyScarCallCount, 12);
-    assert.equal(state.appliedFlag, true);
-    assert.equal(state.stirIndex, 12);
-    assert.equal(state.history.length, 12);
+    const expected = independentSauceRounds(calculationDay, targetDay);
+    assert.deepEqual(actual.bowlsAfterDrops.slice(1), expected.bowlsAfterDrops);
+    assert.deepEqual(actual.orderAt46Latch, expected.orderAtDrop46);
+    assert.equal(actual.stage56SavedSumApplied, true);
+    assert.equal(actual.stage56RawBowlSumApplied, false);
+    assert.equal(actual.stage56PostStirContext.history.length, 12);
     for (let index = 0; index < 12; index += 1) {
-      const witness = state.history[index];
-      const expectedRound = expected.rounds[index];
-      assert.equal(witness.stirIndex, index + 1);
-      assert.equal(witness.legacyScarCallCount, index + 1);
-      assert.equal(witness.rawBowlSum, expectedRound.rawBowlSum);
-      assert.equal(witness.savedOrderNumber, expectedRound.savedOrderNumber);
-      assert.deepEqual(witness.oldResult.order, expectedRound.order);
-      assert.deepEqual(witness.correctedResult.order, expectedRound.order);
-      assert.deepEqual(witness.correctedResult.bowls, oneBasedReferenceBowls(expectedRound.bowls));
+      const got = actual.stage56PostStirContext.history[index];
+      const want = expected.rounds[index];
+      assert.equal(got.stirIndex, index + 1);
+      assert.equal(got.rawBowlSum, want.rawBowlSum);
+      assert.equal(got.savedOrderNumber, want.savedOrderNumber);
+      assert.deepEqual(got.correctedResult.order, want.order);
+      assert.deepEqual(got.correctedResult.bowls, oneBased(want.bowls));
+      assert.notEqual(got.rawBowlSum, got.savedOrderNumber, 'each witness round should discriminate S from R');
     }
     assert.deepEqual(actual.bowls.slice(1), expected.bowls);
-    assert.deepEqual(actual.orderAt46Latch, expected.orderAtDrop46);
   }
 });
 
-group('Foundation bowls e order-46 es reconstructet independentmen', () => {
+group('Foundation final bowls are canonical saved-sum bowls', () => {
   const actual = production.sauceWithScarsStage56(F, F);
-  const expected = oracle.sauce(F, F);
-  assert.deepEqual(actual.bowls.slice(1), expected.bowls);
-  assert.deepEqual(actual.orderAt46Latch, expected.orderAtDrop46);
   assert.deepEqual(actual.bowls.slice(1).map(String), [
-    '67068226522203060890658143482200172502',
-    '156830781782038036265833091137164500083',
-    '27860245395513113590943202859639481773',
-    '154958270957687565769906933601352753179',
-    '83762519477527209919484977230999195024',
-    '154633989471499313687998830839607736513'
+    '65286679584284972964194865805379907599',
+    '127720283375330263615328810127751035299',
+    '54364069496183805843611594721403108554',
+    '93072329024469476118876155742008280619',
+    '54867842942953573450868747713087920246',
+    '111207247632761530752404582123499651367'
   ]);
-  assert.deepEqual(actual.orderAt46Latch, [4, 5, 2, 3, 6, 1]);
 });
 
-group('second sauce witness bowls e order-46 es reconstructet independentmen', () => {
-  const actual = production.sauceWithScarsStage56(-15048173n, -15048173n);
-  const expected = oracle.sauce(-15048173n, -15048173n);
-  assert.deepEqual(actual.bowls.slice(1), expected.bowls);
-  assert.deepEqual(actual.orderAt46Latch, expected.orderAtDrop46);
-  assert.deepEqual(actual.bowls.slice(1).map(String), [
-    '117774601791306122049402151598700069949',
-    '25984316916056421874135403969605614983',
-    '143826773047381553934876475558335320216',
-    '59571312657074816751803206901536426066',
-    '65620015217119503197726025514221700116',
-    '28674863197150075414624507047786307945'
-  ]);
-  assert.deepEqual(actual.orderAt46Latch, [3, 4, 6, 5, 2, 1]);
+group('Stage 58 remembered sauce preserves canonical saved-sum and cold/warm equality', () => {
+  production.resetStage58AccelerationMetrics();
+  const a = production.sauceWithScarsStage56(F + 17n, F - 9n);
+  const b = production.sauceWithScarsStage56(F + 17n, F - 9n);
+  assert.equal(a.stage56SavedSumApplied, true);
+  assert.equal(b.stage56SavedSumApplied, true);
+  assert.equal(a.stage56RawBowlSumApplied, false);
+  assert.equal(b.stage56RawBowlSumApplied, false);
+  assert.deepEqual(b.bowls, a.bowls);
+  assert.deepEqual(b.orderAt46Latch, a.orderAt46Latch);
+  assert.equal(b.stage58MemoryReplay, true);
 });
 
-group('context ownership es separat inter du sauces', () => {
-  const leftSauce = production.sauceWithScarsStage56(F, F);
-  const rightSauce = production.sauceWithScarsStage56(F, F);
-  assert.notStrictEqual(leftSauce.stage56PostStirContext, rightSauce.stage56PostStirContext);
-  assert.notStrictEqual(leftSauce.stage56PostStirContext.history, rightSauce.stage56PostStirContext.history);
-  assert.equal(Object.isFrozen(leftSauce.stage56PostStirContext), true);
-  assert.equal(Object.isFrozen(leftSauce.stage56PostStirContext.history), true);
-  assert.equal(leftSauce.stage56PostStirContext.appliedCount, 12);
-  assert.equal(rightSauce.stage56PostStirContext.appliedCount, 12);
+group('deterministic random corpus matches canonical bowls, drop-46 order and query streams', () => {
+  let state = 0x5a17n;
+  const next = () => {
+    state = (1103515245n * state + 12345n) & 0x7fffffffn;
+    return state;
+  };
+  for (let i = 0; i < 12; i += 1) {
+    const center = i % 2 === 0 ? F : -15048173n;
+    const calculationDay = center + (next() % 2001n) - 1000n;
+    const targetDay = calculationDay + (next() % 2001n) - 1000n;
+    const actual = production.sauceWithScarsStage56(calculationDay, targetDay);
+    const expected = reference.sauce(calculationDay, targetDay);
+    assert.deepEqual(actual.bowls.slice(1), expected.bowls);
+    assert.deepEqual(actual.orderAt46Latch, expected.orderAtDrop46);
+    for (const [bowlId, seal] of [[1, 1n], [2, 21n], [3, 31n], [5, 33n]]) {
+      const semanticNext = production.nextBowlFromOrderAt46Latch(actual.orderAt46Latch, bowlId);
+      const got = production.answerRingFromCurrentState(actual.bowls, bowlId, semanticNext, seal);
+      const want = reference.askBowl(expected, bowlId, seal);
+      assert.deepEqual(got, want);
+    }
+  }
 });
 
-group('production ne importa null oracle e li Stage 55 certificate resta separat', () => {
+group('semantic caches survive repeat, A→B→A, import-order and failure→retry', () => {
+  const a = [F + 41n, F - 73n];
+  const b = [-15048173n + 19n, -15048173n + 271n];
+  const a1 = production.sauceWithScarsStage56(...a);
+  const b1 = production.sauceWithScarsStage56(...b);
+  const a2 = production.sauceWithScarsStage56(...a);
+  assert.deepEqual(a2.bowls, a1.bowls);
+  assert.deepEqual(a2.orderAt46Latch, a1.orderAt46Latch);
+  assert.notDeepEqual(b1.bowls, a1.bowls);
+  assert.equal(a2.stage58MemoryReplay, true);
+
+  let injected = false;
+  assert.throws(() => production.sauceWithScarsStage56(F + 83n, F + 91n, () => {
+    if (!injected) { injected = true; throw new Error('injected-checkpoint-failure'); }
+  }), /injected-checkpoint-failure/);
+  const retry = production.sauceWithScarsStage56(F + 83n, F + 91n);
+  const retryReference = reference.sauce(F + 83n, F + 91n);
+  assert.deepEqual(retry.bowls.slice(1), retryReference.bowls);
+
+  const root = path.join(__dirname, '..');
+  const scriptA = `const p=require(${JSON.stringify(root + '/src')});require(${JSON.stringify(root + '/src/normative-cooking-trace')});const x=p.sauceWithScarsStage56(p.FOUNDATION_DAY_OLD+5n,p.FOUNDATION_DAY_OLD-7n);process.stdout.write(JSON.stringify(x.bowls.slice(1).map(String)));`;
+  const scriptB = `require(${JSON.stringify(root + '/src/normative-cooking-trace')});const p=require(${JSON.stringify(root + '/src')});const x=p.sauceWithScarsStage56(p.FOUNDATION_DAY_OLD+5n,p.FOUNDATION_DAY_OLD-7n);process.stdout.write(JSON.stringify(x.bowls.slice(1).map(String)));`;
+  const runA = spawnSync(process.execPath, ['-e', scriptA], { encoding: 'utf8' });
+  const runB = spawnSync(process.execPath, ['-e', scriptB], { encoding: 'utf8' });
+  assert.equal(runA.status, 0, runA.stderr);
+  assert.equal(runB.status, 0, runB.stderr);
+  assert.equal(runA.stdout, runB.stdout);
+});
+
+group('historical raw-sum reference is isolated as mutant, never imported by production', () => {
+  assert.equal(rawMutant.HISTORICAL_SUPERSEDED_RAW_SUM_MUTANT, true);
   const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'index.js'), 'utf8');
-  assert.equal(source.includes("require('../tests/normative-reference')"), false);
   assert.equal(source.includes("require('../tests/stage-56-reference')"), false);
-  assert.equal(fs.existsSync(path.join(__dirname, '..', 'FINAL_AUDIT_STAGE_55.md')), true);
+  assert.equal(source.includes("require('../tests/normative-reference')"), false);
 });
 
-console.log('STAGE 56 CORRECTIVE PASS — ' + groups + ' gruppes; rawBowlSum detour es authoritative e li scar legacy resta activ.');
+console.log('CANONICAL SAVED-SUM CORRECTION PASS — ' + groups + ' groups.');

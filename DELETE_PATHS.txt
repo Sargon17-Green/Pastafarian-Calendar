@@ -1,3 +1,4 @@
-DELTA_apply-package-json.mjs
-scripts/build-browser.mjs
-tests/browser-core-smoke.js
+artifacts/STAGE_58_BASELINE_BENCHMARK.jsonl
+artifacts/STAGE_58_AFTER_BENCHMARK.jsonl
+artifacts/STAGE_58_BENCHMARK_REPORT.json
+STAGE_58_DELTA_MANIFEST.txt

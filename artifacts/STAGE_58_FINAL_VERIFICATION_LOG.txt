@@ -1,72 +1,43 @@
-Stage 58 remembered-acceleration final verification
-Date: 2026-08-30
-Branch target: JavaScript+Interlingue
-Public compatibility version: 0.0.57-stage-57-corrective
-Authoritative current stage metadata: CURRENT_STAGE=57, LAST_COMPLETED_STAGE=57
-Acceleration scar: Stage58RememberedAcceleration (post-Stage-57 internal layer)
+Canonical saved-sum correction verification — JavaScript + Interlingue
+Date: 2026-09-11
+Node: v22.16.0
+Expected prompt HEAD: 78eb29ae0b1fd67ccbaf02e336482eafcc89d9d0
+Observed/revalidated HEAD: b8126dfe6a36f05fd6eb8c45479062e039412678
 
-FINAL RESULT: PASS
+Actually executed in this session:
+PASS  node --check src/index.js
+PASS  node --check src/normative-cooking-trace.js
+PASS  node --check changed Stage-56/57/cooking-trace tests
+PASS  node tests/stage-56-corrective.js
+      8 groups: discriminator; source semantic guard; drop46 + all 12 stirs;
+      Foundation bowls; cold/warm Stage58; deterministic random corpus;
+      repeat/A-B-A/import-order/failure-retry; mutant isolation.
+PASS  node tests/stage-56-e2e-foundation.js
+      canonical indices (5000,10,503,20,56)
+PASS  node tests/stage-56-e2e-reference.js
+      independent fixture: year, streams, cutlets, months, boundaries, final dates;
+      covers Foundation, c=t, t<c, t>c, negative gate indices, Patch-26 witness.
+PASS  node tests/stage-57-e2e-reference.js
+      Patch 26 preserved; semantic year and round-trip agree under saved-sum.
+PASS  node tests/stage-57-historical-scar.js
+      raw-name production exports are compatibility aliases only; mutant isolated.
+PASS  node tests/normative-cooking-trace.js
+PASS  node tests/normative-cooking-trace-checkpoints.js
+PASS  regenerated STAGE_58_SAUCE_PROBE.json
+PASS  regenerated STAGE_58_GATE_CHECKPOINT_PROBE.json
+PASS  regenerated STAGE_58_MEMORY_PROBE.json
 
-Syntax:
-- node --check src/index.js: PASS
+A combined long command was also attempted and hit the execution timeout after the
+Stage-56 differential shards had passed. No PASS claim is based on that timed-out aggregate;
+the later heavy shards above were rerun separately and passed.
 
-Base / historical chain:
-- tests/run-tests.js: PASS
-- tests/verify-stage-01.js: PASS after restoring public version/current-stage compatibility tokens
-- discovery-01..26: PASS
-- patch-01..26: PASS
-- integration-54.js: PASS
+Prepared but not executed here because the complete checked-out branch/browser source tree
+was not available in the local sandbox and the authorized remote computer was offline:
+- node tests/verify-stage-01.js
+- node tests/browser-interface-all.js
+- node scripts/build-browser.js
+- node tests/browser-built-artifacts.js
+- full historical npm test chain
+- GitHub Pages corrected-build smoke test
 
-Stage 55 audits:
-- final-audit-55.js: PASS (29 groups)
-- final-audit-55-e2e.js: PASS (6 differential groups)
-- final-audit-55-cross.js: PASS
-
-Stage 56:
-- stage-56-corrective.js: PASS (7 groups)
-- stage-56-e2e-foundation.js: PASS
-- stage-56-e2e-near-foundation.js: PASS
-- stage-56-e2e-reference.js: PASS
-
-Stage 57:
-- stage-57-corrective.js: PASS
-- stage-57-e2e-reference.js: PASS
-- stage-57-historical-scar.js: PASS
-
-Stage 58 acceleration:
-- stage-58-acceleration.js: PASS
-- exhaustive remembered weaving equivalence: 1301/1301 ranks PASS
-- weak-memory probe: PASS
-  afterCall heapUsed ~397.1 MB
-  afterGC heapUsed ~5.0 MB
-  weak sauce/DP live values after GC: 0
-
-Benchmark evidence:
-- 10/10 baseline-vs-Stage58 canonical result comparisons: PASS
-- Stage 57 cold: 20371.367 ms -> 15732.753 ms (-22.8%)
-- identical repeat: 4.205 ms -> 0.705 ms (~5.96x)
-- same year +1: 3.837 ms -> 0.321 ms (~11.95x)
-- same year -1: 3.776 ms -> 0.221 ms (~17.09x)
-- same calculation day +2500: 3.961 ms -> 0.413 ms (~9.59x)
-- neighboring year backward: 7994.777 ms -> 5664.486 ms (-29.1%)
-- far forward +12000: 4695.496 ms -> 3571.076 ms (-23.9%)
-- far backward -12000: 28517.259 ms -> 22675.463 ms (-20.5%)
-- Stage 54 historical cold: 27575.810 ms -> 22555.254 ms (-18.2%)
-- Stage 56 historical cold: 19090.659 ms -> 16363.735 ms (-14.3%)
-
-Compatibility correction discovered during final verification:
-- DO NOT bump package.json version for this optimization layer.
-- DO NOT change CURRENT_STAGE/LAST_COMPLETED_STAGE away from 57.
-- Existing verify-stage-01.js correctly caught both draft metadata regressions.
-- Historical test was not weakened or rewritten; metadata was restored instead.
-
-No Git history was mutated and no GitHub write was performed.
-No HANDOFF_* file is part of the upload tree.
-
-[CI INTEGRATION CORRECTION]
-YAML_PARSE=PASS
-WORKFLOW_JOB=acceleration-58
-WORKFLOW_COMMAND=node tests/stage-58-acceleration.js
-COMPLETE_BRANCH_REQUIRES_ACCELERATION_58=YES
-STAGE_58_ACCELERATION_RECHECK=PASS
-BENCHMARKS_AS_CI_GATE=NO (intentional; evidence-only)
+No GitHub push, commit, branch write, release, or history mutation was performed.

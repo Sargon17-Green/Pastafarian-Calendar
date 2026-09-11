@@ -3,7 +3,7 @@
 const core = require('./index');
 
 const TRACE_SCHEMA_VERSION = '0.4.0';
-const TRACE_SEMANTIC_PROFILE = 'PASTAFARIAN_STAGE57_STAGE56_RAW_SUM';
+const TRACE_SEMANTIC_PROFILE = 'PASTAFARIAN_STAGE57_CANONICAL_SAVED_SUM';
 const FOUNDATION_DAY = core.FOUNDATION_DAY_OLD;
 
 function requireDay(value, label) {
@@ -160,6 +160,7 @@ function compactSauceSnapshot(result) {
     counters: cloneCounts(result.counts),
     finalBowls: sixBowls(result.bowls),
     orderAtDrop46: result.orderAt46Latch.slice(),
+    stage56SavedSumApplied: result.stage56SavedSumApplied === true,
     stage56RawBowlSumApplied: result.stage56RawBowlSumApplied === true,
   };
 }

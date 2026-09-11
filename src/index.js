@@ -1648,7 +1648,8 @@ function snapshotStage56PostStirContext(context) {
   });
 }
 
-function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context, checkpoint = null) {
+function stage56CanonicalSavedSumPostStir(stirNumber, bowls, legacyRound, context, checkpoint = null) {
+  // Canonical Scroll semantics: the preserved R=SAVE(sum(old)+149*r) enters both permutation and u.
   if (!Number.isInteger(stirNumber) || stirNumber < 1 || stirNumber > 12) {
     throw new RangeError('Li ordinal del detour Stage 56 deve esser inter 1 e 12.');
   }
@@ -1673,7 +1674,7 @@ function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context
   const savedOrderNumber = savePatch(rawBowlSum + 149n * BigInt(stirNumber));
   const order = orderPatchFromValue(savedOrderNumber);
   if (legacyRound.savedStirSum !== savedOrderNumber || !stage54ArraysEqual(legacyRound.order, order)) {
-    throw new BootstrapStageError('Stage 56 refusa mutar orderNumber o permutation; solmen rawBowlSum posse diferer in u.');
+    throw new BootstrapStageError('Stage 56 exige que savedOrderNumber e permutation concorda con li canonical saved-sum scar.');
   }
   const pending = new Array(7).fill(null);
   const positionCheckpoints = checkpoint == null ? null : [];
@@ -1684,7 +1685,7 @@ function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context
     const u = old[bowlId]
       + 3n * old[prevId]
       + 5n * old[nextId]
-      + rawBowlSum
+      + savedOrderNumber
       + BigInt(stirNumber)
       + BigInt(position * position);
     const rawBeforeSave = u * u + 7n * old[prevId] * old[nextId];
@@ -1737,6 +1738,10 @@ function stage56RawBowlSumPostStirDetour(stirNumber, bowls, legacyRound, context
   context.history.push(historyRow);
   return { bowls: pending.slice(), order: order.slice(), rawBowlSum, savedOrderNumber };
 }
+
+// Deprecated compatibility alias. The old name records branch archaeology only;
+// it no longer denotes raw-sum semantics. The reachable implementation above is canonical saved-sum.
+const stage56RawBowlSumPostStirDetour = stage56CanonicalSavedSumPostStir;
 
 function legacySauceWithOverwritableOrderMemory(counts, stones, checkpoint = null) {
   if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
@@ -1944,7 +1949,7 @@ function oldNextBowlFixedName(id) {
   return id === 6 ? 1 : id + 1;
 }
 
-function sauceWithStage56RawBowlSumDetour(counts, stones) {
+function sauceWithStage56CanonicalSavedSum(counts, stones) {
   if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
     throw new TypeError('Li sauce corrective Stage 56 exige comptes e 46 rows de stones.');
   }
@@ -1959,7 +1964,7 @@ function sauceWithStage56RawBowlSumDetour(counts, stones) {
     // Li scar legacy es vocat realmen ante chascun detour e su resultate resta quam witness.
     const legacyRound = postStirOneForOrderMemoryDiscovery(stir, sourceSnapshot);
     stage56Context.legacyScarCallCount += 1;
-    const correctedRound = stage56RawBowlSumPostStirDetour(stir, sourceSnapshot, legacyRound, stage56Context);
+    const correctedRound = stage56CanonicalSavedSumPostStir(stir, sourceSnapshot, legacyRound, stage56Context);
     bowls = correctedRound.bowls.slice();
     lastOrder = correctedRound.order.slice();
     lastSavedOrderNumber = correctedRound.savedOrderNumber;
@@ -1976,12 +1981,13 @@ function sauceWithStage56RawBowlSumDetour(counts, stones) {
     stage56HistoricalBowls: historical.bowls.slice(),
     stage56HistoricalLastPostStirOrder: historical.lastPostStirOrder.slice(),
     stage56PostStirContext: snapshotStage56PostStirContext(stage56Context),
-    stage56RawBowlSumApplied: true
+    stage56SavedSumApplied: true,
+    stage56RawBowlSumApplied: false
   };
 }
 
 
-function sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones, checkpoint = null) {
+function sauceWithStage56CanonicalSavedSumStage58Remembered(counts, stones, checkpoint = null) {
   if (!counts || typeof counts !== 'object' || !Array.isArray(stones) || stones.length < 46) {
     throw new TypeError('Li sauce corrective remembered Stage 58 exige comptes e 46 rows de stones.');
   }
@@ -1995,7 +2001,7 @@ function sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones, check
     const sourceSnapshot = bowls.slice();
     const legacyRound = postStirOneForOrderMemoryDiscovery(stir, sourceSnapshot);
     stage56Context.legacyScarCallCount += 1;
-    const correctedRound = stage56RawBowlSumPostStirDetour(stir, sourceSnapshot, legacyRound, stage56Context, checkpoint);
+    const correctedRound = stage56CanonicalSavedSumPostStir(stir, sourceSnapshot, legacyRound, stage56Context, checkpoint);
     bowls = correctedRound.bowls.slice();
     lastOrder = correctedRound.order.slice();
     lastSavedOrderNumber = correctedRound.savedOrderNumber;
@@ -2013,10 +2019,16 @@ function sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones, check
     stage56HistoricalBowls: historical.bowls.slice(),
     stage56HistoricalLastPostStirOrder: historical.lastPostStirOrder.slice(),
     stage56PostStirContext: snapshotStage56PostStirContext(stage56Context),
-    stage56RawBowlSumApplied: true,
+    stage56SavedSumApplied: true,
+    stage56RawBowlSumApplied: false,
     stage58RememberedHistoricalTraversal: true
   };
 }
+
+// Deprecated compatibility aliases for callers that imported Stage-56 historical symbol names.
+// Both aliases execute the canonical saved-sum implementation; raw-sum survives only in tests as a mutant.
+const sauceWithStage56RawBowlSumDetour = sauceWithStage56CanonicalSavedSum;
+const sauceWithStage56RawBowlSumDetourStage58Remembered = sauceWithStage56CanonicalSavedSumStage58Remembered;
 
 function nextBowlFromOrderAt46Latch(orderAt46Latch, queriedBowlId) {
   if (!Array.isArray(orderAt46Latch) || orderAt46Latch.length !== 6) {
@@ -7839,7 +7851,8 @@ function sauceWithScarsStage56HistoricalUnremembered(calculationDay, targetDay, 
     useAliasPours: true,
     useShadowBowls: true,
     useLatchedQueryOrder: true,
-    useStage56RawBowlSumDetour: true
+    useStage56SavedSumCorrection: true,
+    useStage56RawBowlSumDetour: false
   });
   while (true) {
     switch (programCounter) {
@@ -7867,8 +7880,8 @@ function sauceWithScarsStage56HistoricalUnremembered(calculationDay, targetDay, 
         programCounter = 40;
         break;
       case 40:
-        result = sauceWithStage56RawBowlSumDetourStage58Remembered(counts, stones, checkpoint);
-        trace.push('LEGACY_POST12_GHOST_THEN_STAGE56_RAW_SUM_POST12');
+        result = sauceWithStage56CanonicalSavedSumStage58Remembered(counts, stones, checkpoint);
+        trace.push('LEGACY_POST12_GHOST_THEN_CANONICAL_SAVED_SUM_POST12');
         programCounter = 50;
         break;
       case 50: {
@@ -7897,7 +7910,8 @@ function sauceWithScarsStage56HistoricalUnremembered(calculationDay, targetDay, 
           queryOrder: Object.freeze(result.queryOrder.slice()),
           nextDiagnostics: Object.freeze(nextDiagnostics),
           stage56PostStirContext: result.stage56PostStirContext,
-          stage56RawBowlSumApplied: true,
+          stage56SavedSumApplied: true,
+          stage56RawBowlSumApplied: false,
           compatibility,
           stateMachineTrace: Object.freeze(trace.slice())
         });
@@ -8457,7 +8471,7 @@ function stage56CaptureSauceState(context, sauceResult, label) {
       generation: sauceResult.stage58SauceGeneration || null
     }));
   }
-  if (!context || !sauceResult || sauceResult.stage56RawBowlSumApplied !== true || !sauceResult.stage56PostStirContext) return;
+  if (!context || !sauceResult || sauceResult.stage56SavedSumApplied !== true || !sauceResult.stage56PostStirContext) return;
   if (!Array.isArray(context.stage56SauceStates)) context.stage56SauceStates = [];
   context.stage56SauceStates.push(Object.freeze({ label, state: sauceResult.stage56PostStirContext }));
 }
@@ -8897,7 +8911,7 @@ class Stage56MonsterIntegrationManager extends Stage54MonsterIntegrationManager 
     context.stage56SauceStates = [];
     context.stage56HistoricalStructureSauceGhost = null;
     context.stage56CorrectiveApplied = true;
-    context.compatibilityFlags = Object.freeze({ ...context.compatibilityFlags, useStage56RawBowlSumDetour: true });
+    context.compatibilityFlags = Object.freeze({ ...context.compatibilityFlags, useStage56SavedSumCorrection: true, useStage56RawBowlSumDetour: false });
     context.phase = 'STAGE_56_CORRECTIVE_ENTRY';
     context.branchTrace.push('STAGE_56_CORRECTIVE_ENTRY');
     return context;
@@ -9075,12 +9089,14 @@ module.exports = Object.freeze({
   visibleDropThroughCurrentLayers,
   postStirOneForOrderMemoryDiscovery,
   createStage56PostStirContext,
+  stage56CanonicalSavedSumPostStir,
   stage56RawBowlSumPostStirDetour,
   legacySauceWithOverwritableOrderMemory,
   createOrderAt46LatchState,
   writeOrderAt46LatchOnce,
   readOrderAt46Latch,
   sauceWithOrderAt46Latch,
+  sauceWithStage56CanonicalSavedSum,
   sauceWithStage56RawBowlSumDetour,
   oldNextBowlFixedName,
   nextBowlFromOrderAt46Latch,
@@ -9196,6 +9212,7 @@ module.exports = Object.freeze({
   sauceWithScarsHistoricalUnremembered,
   sauceWithScarsStage56HistoricalUnremembered,
   sauceWithOrderAt46LatchStage58RememberedReplay,
+  sauceWithStage56CanonicalSavedSumStage58Remembered,
   sauceWithStage56RawBowlSumDetourStage58Remembered,
   Stage58BoundedRememberingScar,
   Stage58WeakRememberingScar,

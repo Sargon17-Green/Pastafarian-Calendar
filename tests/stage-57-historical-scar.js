@@ -1,12 +1,12 @@
 'use strict';
-
 const assert = require('assert/strict');
 const production = require('../src');
-
-assert.throws(
-  () => production.calendarDateSpaghettiStage56Historical(-15048553n, -15044872n),
-  (error) => error instanceof production.BootstrapStageError
-    && error.message === 'Patch 26 final diverge del year resoluet per li sequential walk.'
-);
-
-console.log('STAGE 57 HISTORIC SCAR PASS: li route Stage 56 continua executer e faller sur li witness old; Stage 57 solmen circumva it in li path final.');
+const mutant = require('./stage-56-reference');
+const c = -15048553n;
+const t = -15044872n;
+const stage56 = production.calendarDateSpaghettiStage56Historical(c, t);
+const stage57 = production.calendarDateSpaghetti(c, t);
+assert.deepEqual(stage56, stage57);
+assert.equal(mutant.HISTORICAL_SUPERSEDED_RAW_SUM_MUTANT, true);
+assert.equal(production.stage56RawBowlSumPostStirDetour, production.stage56CanonicalSavedSumPostStir);
+console.log('STAGE 57 HISTORIC SCAR PASS — old RawBowlSum symbol is compatibility-only; raw semantics are isolated as a mutant.');

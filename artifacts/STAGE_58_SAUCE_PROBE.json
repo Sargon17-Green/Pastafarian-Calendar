@@ -1,8 +1,19 @@
 {
-  "firstMs": 20.373160999999996,
-  "secondMs": 0.22219100000000935,
+  "semanticProfile": "CANONICAL_SAVED_SUM",
+  "firstMs": 7.508683000000001,
+  "secondMs": 0.1444580000000002,
   "sameBowls": true,
   "secondReplay": true,
+  "savedSumApplied": true,
+  "rawSumApplied": false,
+  "finalBowls": [
+    "35960215982853854189887223919239307886",
+    "106418666277005445749038296856169029407",
+    "103367109196315068795584028199861502029",
+    "141609964400084448128219024968876941079",
+    "33246526982377718428385999738533315855",
+    "116942893686132708993161303698837629607"
+  ],
   "metrics": {
     "stage58.sauce56.misses": "1",
     "stage58.sauce56.recomputations": "1",

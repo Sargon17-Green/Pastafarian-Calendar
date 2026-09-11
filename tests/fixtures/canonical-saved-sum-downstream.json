@@ -1,0 +1,777 @@
+{
+  "schema": 1,
+  "authority": "current Scroll saved-sum semantics",
+  "provenance": "Generated from an independent canonical reference: repository tests/normative-reference.js for all arithmetic/selection/gate/year/cutlet/month rules, with a semantics-equivalent optimized lexicographic month-weaving DP used only in the local generation harness. Production src/index.js was not imported by the generator.",
+  "invariant": "For each final post-stir R=SAVE(sum(oldBowls)+149*r) feeds both permutation rank and u; all six outputs use one old snapshot.",
+  "cases": [
+    {
+      "label": "foundation",
+      "calculationDay": "-15055671",
+      "year": {
+        "number": "5000",
+        "openGateIndex": "-4",
+        "closeGateIndex": "4",
+        "openDay": "-15057703",
+        "firstDay": "-15057702",
+        "closeDay": "-15053459"
+      },
+      "queryStreams": {
+        "cutletCount": {
+          "first": "93728771178345598494857861143584352540",
+          "directionStep": "-1"
+        },
+        "cutletPartition": {
+          "first": "80530325379197470255117014657238263159",
+          "directionStep": "1"
+        },
+        "cutletNames": {
+          "first": "73304315000187316667903226612386068223",
+          "directionStep": "-1"
+        },
+        "monthCount": {
+          "first": "81778901639473882019855462426029763179",
+          "directionStep": "1"
+        },
+        "monthLengths": {
+          "first": "152123056961069897844627847530821202182",
+          "directionStep": "-1"
+        },
+        "monthWeaving": {
+          "first": "106458209471735273212934705135928382248",
+          "directionStep": "-1"
+        },
+        "monthNames": {
+          "first": "64807661530580137725274994811043336616",
+          "directionStep": "-1"
+        }
+      },
+      "cutletCount": 6,
+      "cutletPartition": [
+        1,
+        2,
+        1,
+        2,
+        1,
+        1
+      ],
+      "cutletNameIndices": [
+        15,
+        17,
+        10,
+        14,
+        8,
+        13
+      ],
+      "cutlets": [
+        {
+          "nameIndex": 15,
+          "openGateIndex": "-4",
+          "closeGateIndex": "-3",
+          "firstDay": "-15057702",
+          "lastDay": "-15056944"
+        },
+        {
+          "nameIndex": 17,
+          "openGateIndex": "-3",
+          "closeGateIndex": "-1",
+          "firstDay": "-15056943",
+          "lastDay": "-15056174"
+        },
+        {
+          "nameIndex": 10,
+          "openGateIndex": "-1",
+          "closeGateIndex": "0",
+          "firstDay": "-15056173",
+          "lastDay": "-15055671"
+        },
+        {
+          "nameIndex": 14,
+          "openGateIndex": "0",
+          "closeGateIndex": "2",
+          "firstDay": "-15055670",
+          "lastDay": "-15054508"
+        },
+        {
+          "nameIndex": 8,
+          "openGateIndex": "2",
+          "closeGateIndex": "3",
+          "firstDay": "-15054507",
+          "lastDay": "-15053677"
+        },
+        {
+          "nameIndex": 13,
+          "openGateIndex": "3",
+          "closeGateIndex": "4",
+          "firstDay": "-15053676",
+          "lastDay": "-15053459"
+        }
+      ],
+      "monthCount": 45,
+      "monthLengths": [
+        115,
+        108,
+        119,
+        109,
+        106,
+        81,
+        115,
+        114,
+        117,
+        120,
+        98,
+        52,
+        81,
+        97,
+        121,
+        97,
+        115,
+        96,
+        107,
+        61,
+        106,
+        115,
+        119,
+        39,
+        84,
+        103,
+        115,
+        107,
+        55,
+        119,
+        97,
+        50,
+        122,
+        110,
+        81,
+        54,
+        101,
+        83,
+        88,
+        40,
+        25,
+        77,
+        98,
+        122,
+        105
+      ],
+      "monthNameIndices": [
+        18,
+        14,
+        37,
+        28,
+        24,
+        42,
+        6,
+        20,
+        19,
+        41,
+        16,
+        39,
+        25,
+        1,
+        9,
+        38,
+        3,
+        46,
+        27,
+        40,
+        12,
+        43,
+        35,
+        32,
+        29,
+        10,
+        44,
+        36,
+        23,
+        17,
+        33,
+        5,
+        30,
+        15,
+        11,
+        45,
+        8,
+        4,
+        7,
+        31,
+        34,
+        22,
+        13,
+        2,
+        26
+      ],
+      "targets": [
+        {
+          "kind": "base",
+          "targetDay": "-15055671",
+          "five": [
+            "5000",
+            10,
+            "503",
+            20,
+            "56"
+          ]
+        },
+        {
+          "kind": "first",
+          "targetDay": "-15057702",
+          "five": [
+            "5000",
+            15,
+            "1",
+            18,
+            "1"
+          ]
+        },
+        {
+          "kind": "close",
+          "targetDay": "-15053459",
+          "five": [
+            "5000",
+            13,
+            "218",
+            26,
+            "105"
+          ]
+        },
+        {
+          "kind": "cutlet-last",
+          "targetDay": "-15056944",
+          "five": [
+            "5000",
+            15,
+            "759",
+            16,
+            "20"
+          ]
+        },
+        {
+          "kind": "cutlet-next",
+          "targetDay": "-15056943",
+          "five": [
+            "5000",
+            17,
+            "1",
+            40,
+            "12"
+          ]
+        },
+        {
+          "kind": "month2-first",
+          "targetDay": "-15057701",
+          "five": [
+            "5000",
+            15,
+            "2",
+            14,
+            "1"
+          ]
+        },
+        {
+          "kind": "month1-last",
+          "targetDay": "-15053566",
+          "five": [
+            "5000",
+            13,
+            "111",
+            18,
+            "115"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "ct",
+      "calculationDay": "-15048173",
+      "year": {
+        "number": "5000",
+        "openGateIndex": "6",
+        "closeGateIndex": "15",
+        "openDay": "-15052469",
+        "firstDay": "-15052468",
+        "closeDay": "-15047236"
+      },
+      "queryStreams": {
+        "cutletCount": {
+          "first": "42690880788688373152673819323721354926",
+          "directionStep": "1"
+        },
+        "cutletPartition": {
+          "first": "132680442235969096237132440199165411553",
+          "directionStep": "1"
+        },
+        "cutletNames": {
+          "first": "69540460552025743995681752205064162710",
+          "directionStep": "-1"
+        },
+        "monthCount": {
+          "first": "71274446708479311554796281747229697484",
+          "directionStep": "-1"
+        },
+        "monthLengths": {
+          "first": "84969790043513972569199124068470405192",
+          "directionStep": "1"
+        },
+        "monthWeaving": {
+          "first": "103788250411106506036108745520573567695",
+          "directionStep": "-1"
+        },
+        "monthNames": {
+          "first": "38301672485330431324408312491609177701",
+          "directionStep": "1"
+        }
+      },
+      "cutletCount": 7,
+      "cutletPartition": [
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        1
+      ],
+      "cutletNameIndices": [
+        1,
+        11,
+        16,
+        5,
+        10,
+        17,
+        7
+      ],
+      "cutlets": [
+        {
+          "nameIndex": 1,
+          "openGateIndex": "6",
+          "closeGateIndex": "7",
+          "firstDay": "-15052468",
+          "lastDay": "-15051795"
+        },
+        {
+          "nameIndex": 11,
+          "openGateIndex": "7",
+          "closeGateIndex": "8",
+          "firstDay": "-15051794",
+          "lastDay": "-15051146"
+        },
+        {
+          "nameIndex": 16,
+          "openGateIndex": "8",
+          "closeGateIndex": "9",
+          "firstDay": "-15051145",
+          "lastDay": "-15050529"
+        },
+        {
+          "nameIndex": 5,
+          "openGateIndex": "9",
+          "closeGateIndex": "11",
+          "firstDay": "-15050528",
+          "lastDay": "-15049315"
+        },
+        {
+          "nameIndex": 10,
+          "openGateIndex": "11",
+          "closeGateIndex": "13",
+          "firstDay": "-15049314",
+          "lastDay": "-15048629"
+        },
+        {
+          "nameIndex": 17,
+          "openGateIndex": "13",
+          "closeGateIndex": "14",
+          "firstDay": "-15048628",
+          "lastDay": "-15047892"
+        },
+        {
+          "nameIndex": 7,
+          "openGateIndex": "14",
+          "closeGateIndex": "15",
+          "firstDay": "-15047891",
+          "lastDay": "-15047236"
+        }
+      ],
+      "monthCount": 46,
+      "monthLengths": [
+        123,
+        102,
+        119,
+        122,
+        119,
+        112,
+        116,
+        121,
+        118,
+        120,
+        121,
+        122,
+        118,
+        123,
+        109,
+        117,
+        123,
+        107,
+        118,
+        119,
+        116,
+        120,
+        103,
+        123,
+        123,
+        112,
+        105,
+        112,
+        109,
+        119,
+        108,
+        122,
+        115,
+        97,
+        54,
+        122,
+        120,
+        112,
+        116,
+        114,
+        116,
+        119,
+        119,
+        105,
+        105,
+        98
+      ],
+      "monthNameIndices": [
+        23,
+        19,
+        4,
+        18,
+        40,
+        43,
+        31,
+        45,
+        15,
+        16,
+        41,
+        13,
+        46,
+        11,
+        22,
+        14,
+        5,
+        32,
+        34,
+        9,
+        17,
+        8,
+        24,
+        6,
+        30,
+        25,
+        38,
+        37,
+        27,
+        39,
+        26,
+        42,
+        20,
+        36,
+        35,
+        47,
+        33,
+        21,
+        1,
+        29,
+        28,
+        3,
+        12,
+        10,
+        7,
+        44
+      ],
+      "targets": [
+        {
+          "kind": "past",
+          "targetDay": "-15048174",
+          "five": [
+            "5000",
+            17,
+            "455",
+            41,
+            "97"
+          ]
+        },
+        {
+          "kind": "base",
+          "targetDay": "-15048173",
+          "five": [
+            "5000",
+            17,
+            "456",
+            33,
+            "87"
+          ]
+        },
+        {
+          "kind": "future",
+          "targetDay": "-15048172",
+          "five": [
+            "5000",
+            17,
+            "457",
+            36,
+            "84"
+          ]
+        },
+        {
+          "kind": "first",
+          "targetDay": "-15052468",
+          "five": [
+            "5000",
+            1,
+            "1",
+            23,
+            "1"
+          ]
+        },
+        {
+          "kind": "close",
+          "targetDay": "-15047236",
+          "five": [
+            "5000",
+            7,
+            "656",
+            44,
+            "98"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "patch26",
+      "calculationDay": "-15048553",
+      "year": {
+        "number": "5000",
+        "openGateIndex": "11",
+        "closeGateIndex": "20",
+        "openDay": "-15049315",
+        "firstDay": "-15049314",
+        "closeDay": "-15044808"
+      },
+      "queryStreams": {
+        "cutletCount": {
+          "first": "26029789380180218131342008181631848790",
+          "directionStep": "1"
+        },
+        "cutletPartition": {
+          "first": "150952512378338829827049616490891320758",
+          "directionStep": "1"
+        },
+        "cutletNames": {
+          "first": "94775843293128998318018303903706170868",
+          "directionStep": "-1"
+        },
+        "monthCount": {
+          "first": "12160946602415726882034186740091923819",
+          "directionStep": "1"
+        },
+        "monthLengths": {
+          "first": "149441282211997777603555553842748233416",
+          "directionStep": "1"
+        },
+        "monthWeaving": {
+          "first": "112526820233591119051114367512874060019",
+          "directionStep": "-1"
+        },
+        "monthNames": {
+          "first": "32069430839874949496713755895911524287",
+          "directionStep": "-1"
+        }
+      },
+      "cutletCount": 7,
+      "cutletPartition": [
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1
+      ],
+      "cutletNameIndices": [
+        12,
+        4,
+        10,
+        9,
+        13,
+        6,
+        5
+      ],
+      "cutlets": [
+        {
+          "nameIndex": 12,
+          "openGateIndex": "11",
+          "closeGateIndex": "12",
+          "firstDay": "-15049314",
+          "lastDay": "-15049049"
+        },
+        {
+          "nameIndex": 4,
+          "openGateIndex": "12",
+          "closeGateIndex": "13",
+          "firstDay": "-15049048",
+          "lastDay": "-15048629"
+        },
+        {
+          "nameIndex": 10,
+          "openGateIndex": "13",
+          "closeGateIndex": "14",
+          "firstDay": "-15048628",
+          "lastDay": "-15047892"
+        },
+        {
+          "nameIndex": 9,
+          "openGateIndex": "14",
+          "closeGateIndex": "17",
+          "firstDay": "-15047891",
+          "lastDay": "-15045752"
+        },
+        {
+          "nameIndex": 13,
+          "openGateIndex": "17",
+          "closeGateIndex": "18",
+          "firstDay": "-15045751",
+          "lastDay": "-15045298"
+        },
+        {
+          "nameIndex": 6,
+          "openGateIndex": "18",
+          "closeGateIndex": "19",
+          "firstDay": "-15045297",
+          "lastDay": "-15045219"
+        },
+        {
+          "nameIndex": 5,
+          "openGateIndex": "19",
+          "closeGateIndex": "20",
+          "firstDay": "-15045218",
+          "lastDay": "-15044808"
+        }
+      ],
+      "monthCount": 37,
+      "monthLengths": [
+        122,
+        119,
+        123,
+        123,
+        122,
+        122,
+        121,
+        123,
+        122,
+        123,
+        121,
+        121,
+        121,
+        123,
+        123,
+        122,
+        123,
+        122,
+        121,
+        122,
+        123,
+        123,
+        123,
+        123,
+        123,
+        120,
+        123,
+        121,
+        122,
+        123,
+        123,
+        123,
+        112,
+        123,
+        123,
+        119,
+        121
+      ],
+      "monthNameIndices": [
+        19,
+        45,
+        39,
+        43,
+        3,
+        2,
+        47,
+        31,
+        20,
+        5,
+        9,
+        27,
+        32,
+        28,
+        38,
+        35,
+        26,
+        13,
+        7,
+        25,
+        40,
+        16,
+        42,
+        11,
+        21,
+        15,
+        22,
+        1,
+        41,
+        46,
+        36,
+        10,
+        34,
+        23,
+        44,
+        24,
+        4
+      ],
+      "targets": [
+        {
+          "kind": "base",
+          "targetDay": "-15044872",
+          "five": [
+            "5000",
+            5,
+            "347",
+            31,
+            "123"
+          ]
+        },
+        {
+          "kind": "first",
+          "targetDay": "-15049314",
+          "five": [
+            "5000",
+            12,
+            "1",
+            19,
+            "1"
+          ]
+        },
+        {
+          "kind": "close",
+          "targetDay": "-15044808",
+          "five": [
+            "5000",
+            5,
+            "411",
+            4,
+            "121"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,43 +1,141 @@
 {
-  "delta": "pastafari-browser-scroll-navigation-rebuild-v16",
-  "base_branch": "JavaScript+Interlingue",
-  "base_head": "2506723d40e273a55089952564607896d936fb2c",
-  "expected_browser_build_id": "20019f0618963ba2c3010bcc",
-  "files": [
+  "schema": 1,
+  "repository": "Sargon17-Green/Pastafarian-Calendar",
+  "branch": "JavaScript+Interlingue",
+  "expected_base_head": "78eb29ae0b1fd67ccbaf02e336482eafcc89d9d0",
+  "observed_head": "b8126dfe6a36f05fd6eb8c45479062e039412678",
+  "head_mismatch": true,
+  "semantic_classification_before": "raw-sum reachable: R selected permutation, raw S entered final-stir u",
+  "semantic_classification_after": "canonical saved-sum reachable: same saved R selects permutation and enters final-stir u",
+  "changed_paths": [
+    "DEVELOPMENT_STAGE.md",
+    "STAGE_56_CORRECTIVE_REPORT.md",
+    "STAGE_57_CORRECTIVE_REPORT.md",
+    "STAGE_58_ACCELERATION_REPORT.md",
+    "artifacts/STAGE_58_FINAL_VERIFICATION_LOG.txt",
+    "artifacts/STAGE_58_GATE_CHECKPOINT_PROBE.json",
+    "artifacts/STAGE_58_MEMORY_PROBE.json",
+    "artifacts/STAGE_58_SAUCE_PROBE.json",
+    "src/index.js",
+    "src/normative-cooking-trace.js",
+    "tests/normative-cooking-trace-checkpoints.js",
+    "tests/normative-cooking-trace.js",
+    "tests/stage-56-corrective.js",
+    "tests/stage-56-e2e-foundation.js",
+    "tests/stage-56-e2e-reference.js",
+    "tests/stage-56-reference.js",
+    "tests/stage-57-e2e-reference.js",
+    "tests/stage-57-historical-scar.js"
+  ],
+  "new_paths": [
+    "CANONICAL_SAVED_SUM_CORRECTION.md",
+    "artifacts/CANONICAL_SAVED_SUM_VERIFICATION.json",
+    "tests/fixtures/canonical-saved-sum-downstream.json"
+  ],
+  "deleted_paths": [
+    "artifacts/STAGE_58_BASELINE_BENCHMARK.jsonl",
+    "artifacts/STAGE_58_AFTER_BENCHMARK.jsonl",
+    "artifacts/STAGE_58_BENCHMARK_REPORT.json",
+    "STAGE_58_DELTA_MANIFEST.txt"
+  ],
+  "payload_sha256": {
+    "DEVELOPMENT_STAGE.md": "b57568b0de1205b3729639b43d68daf82183e614e92a4799cee38f9ce15ee6e8",
+    "STAGE_56_CORRECTIVE_REPORT.md": "0e65dc51092452c0b177900a8bb5f2cbbbdc298786b3ff9aa3f8d5168e309880",
+    "STAGE_57_CORRECTIVE_REPORT.md": "2000da2c05bb8778ae73f99e1bfdf780c81a7942f5ac81cf8e30208b3e8a160e",
+    "STAGE_58_ACCELERATION_REPORT.md": "327fe1d8d1f0c4ec66f5d7d7d325a1c2f7d6aae3f648ae044f1aeb4789b42a0f",
+    "artifacts/STAGE_58_FINAL_VERIFICATION_LOG.txt": "5b10afe15ac2dd63a53618bac43c3414f32fd46cfe5ef662e6bebaf142270f28",
+    "artifacts/STAGE_58_GATE_CHECKPOINT_PROBE.json": "549dd6f97ffa59b4d78a0bccc4ef2c81dc8309ca1c1e543dddbfc968c2312c4b",
+    "artifacts/STAGE_58_MEMORY_PROBE.json": "9cac7ed8913bb376c7a3f40193513e0cc596f28cf125c7826787eb2b1f2da24e",
+    "artifacts/STAGE_58_SAUCE_PROBE.json": "f1918218c23d88718f72c3a09b152c1bf9e352e840d6439d27b9156488a39c47",
+    "src/index.js": "86f2193e7c7ea2c1031fb9928581b73b4f3b7a2e2489381aa390793e0199bc7a",
+    "src/normative-cooking-trace.js": "db4a972661d142e7afeecf40df5d18f51480dbf747e8e61b8a24982e070f80ff",
+    "tests/normative-cooking-trace-checkpoints.js": "8c5770bf56dd757f637be50423dd02e57da321ff03bece881809d6f821da06f8",
+    "tests/normative-cooking-trace.js": "66c6b8cc0d065f8af800ab138013af44b62fbda64843aa3e92b5f84c73c93834",
+    "tests/stage-56-corrective.js": "747160b4df9dd2b2b61dc58d4e0f3234897e7de5c3382bfea052d0f23ce8736c",
+    "tests/stage-56-e2e-foundation.js": "8a1001466b8d71f708e64eba6efb9f4c61a87388cac193bb297762d4390d85cd",
+    "tests/stage-56-e2e-reference.js": "7dc99344953dfc3e608a6bfa7d0654c1ef71357b7c97af90cea4b8d74fd1a720",
+    "tests/stage-56-reference.js": "e2171edbc38883a88462d4179ebe1faf174a35d7e23a94a846bbf5e0b6c04dea",
+    "tests/stage-57-e2e-reference.js": "0b8f04c41fb60e336e76cbec49fee2f2733d0542a63d3c3b6dbeb1c44b91e3eb",
+    "tests/stage-57-historical-scar.js": "bb55f0aad553e67c27337e1618da7810b28f6d46ce7a04280d1f5a26850be88c",
+    "CANONICAL_SAVED_SUM_CORRECTION.md": "c0218bc16adeeb2d4ba09bc6065079b72e510eb35cb04000157c51173460381a",
+    "artifacts/CANONICAL_SAVED_SUM_VERIFICATION.json": "9095af23c6813bdfff0365b221be1ab6b6ecdb939810bc002cf3c5a9dd4b2850",
+    "tests/fixtures/canonical-saved-sum-downstream.json": "f7710426ac30016ed2f8e3c6f78c957d88be7de5ded68ed11c74e6d2053de13c"
+  },
+  "tests_actually_run": [
     {
-      "path": "browser/pastafari-date.js",
-      "sha256": "632a33527cc6e2ac574e2dbde5481bbab8b2ec34aa6c3bfb84169b59e3246e54",
-      "bytes": 69474
+      "command": "node --check changed JavaScript source/test files",
+      "result": "PASS"
     },
     {
-      "path": "tests/browser-component-runtime.js",
-      "sha256": "c0e159b429d88b8b943f4525d471e098999cf02edf15d87595ddccf500e46898",
-      "bytes": 30837
+      "command": "node tests/stage-56-corrective.js",
+      "result": "PASS",
+      "details": "8 groups; discriminator, drop46, all 12 post-stirs, random corpus, caches/import-order/failure-retry, mutant isolation"
     },
     {
-      "path": "tests/browser-built-artifacts.js",
-      "sha256": "4b5451e5c87f7045d5cec637234ec1c23a369d55da8744bfcaac93f369bfc8b5",
-      "bytes": 7706
+      "command": "node tests/stage-56-e2e-foundation.js",
+      "result": "PASS"
     },
     {
-      "path": "DELTA_README.md",
-      "sha256": "618521ed86f270145078ab71340b0f8d540ebf342fe9c0d18b8dfff469f070eb",
-      "bytes": 3974
+      "command": "node tests/stage-56-e2e-reference.js",
+      "result": "PASS",
+      "details": "independent downstream fixture; gates/year/streams/cutlets/months/boundaries/final dates"
+    },
+    {
+      "command": "node tests/stage-57-e2e-reference.js",
+      "result": "PASS"
+    },
+    {
+      "command": "node tests/stage-57-historical-scar.js",
+      "result": "PASS"
+    },
+    {
+      "command": "node tests/normative-cooking-trace.js",
+      "result": "PASS"
+    },
+    {
+      "command": "node tests/normative-cooking-trace-checkpoints.js",
+      "result": "PASS"
+    },
+    {
+      "command": "regenerate Stage-58 sauce/gate/memory probes and validate CANONICAL_SAVED_SUM profile",
+      "result": "PASS"
+    },
+    {
+      "command": "combined long verification command",
+      "result": "TIMEOUT",
+      "details": "No PASS claims derived from this aggregate; later heavy shards rerun separately."
     }
   ],
-  "excluded": [
-    "src/**",
-    "browser/dist/**",
-    "browser/standalone/**",
-    ".github/**",
-    "package.json"
+  "tests_prepared_but_not_run": [
+    "full npm test / historical Stage 01-58 chain",
+    "node tests/verify-stage-01.js",
+    "node tests/browser-interface-all.js",
+    "node scripts/build-browser.js",
+    "node tests/browser-built-artifacts.js",
+    "corrected GitHub Pages public-route smoke test"
   ],
-  "local_validation": {
-    "browser_component_runtime": "PASS",
-    "browser_interface_all": "PASS",
-    "build_browser": "PASS",
-    "browser_built_artifacts_static": "PASS",
-    "browser_built_artifacts_full": "LOCAL_TIMEOUT_AT_REAL_CORE_WITNESS",
-    "chromium_preload_scroll_layout": "PASS"
-  }
+  "generated_artifacts_regenerated": [
+    "tests/fixtures/canonical-saved-sum-downstream.json",
+    "artifacts/CANONICAL_SAVED_SUM_VERIFICATION.json",
+    "artifacts/STAGE_58_SAUCE_PROBE.json",
+    "artifacts/STAGE_58_GATE_CHECKPOINT_PROBE.json",
+    "artifacts/STAGE_58_MEMORY_PROBE.json",
+    "artifacts/STAGE_58_FINAL_VERIFICATION_LOG.txt"
+  ],
+  "generated_artifacts_deleted_as_stale": [
+    "artifacts/STAGE_58_BASELINE_BENCHMARK.jsonl",
+    "artifacts/STAGE_58_AFTER_BENCHMARK.jsonl",
+    "artifacts/STAGE_58_BENCHMARK_REPORT.json",
+    "STAGE_58_DELTA_MANIFEST.txt"
+  ],
+  "semantic_cache_status": {
+    "stage58_runtime_caches": "process-local/weak/bounded; exercised cold/warm, repeat, A-B-A, import-order, failure-retry",
+    "browser_build_cache": "source-fingerprint-derived; corrected build not executed in this sandbox"
+  },
+  "remaining_uncertainty": [
+    "Full branch/browser rebuild and public Pages smoke test were not run because the complete checked-out branch was unavailable locally and the authorized remote device was offline.",
+    "Observed base tests/browser-cooking-component.js contains a synthetic presentation mock with the old semantic-profile string; it was audited as non-oracle mock data but was not rewritten in this delta."
+  ],
+  "github_writes_performed": false,
+  "hand_off_files_included": false
 }

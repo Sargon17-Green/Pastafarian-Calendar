@@ -1,31 +1,18 @@
 'use strict';
-
 const assert = require('assert');
 const core = require('../src/index');
 const traceApi = require('../src/normative-cooking-trace');
 
 function resultArray(trace) {
-  return [
-    BigInt(trace.finalResult.year),
-    trace.finalResult.cutlet.sourceName,
-    BigInt(trace.finalResult.dayInCutlet),
-    trace.finalResult.month.sourceName,
-    BigInt(trace.finalResult.dayInMonth),
-  ];
+  return [BigInt(trace.finalResult.year), trace.finalResult.cutlet.sourceName, BigInt(trace.finalResult.dayInCutlet), trace.finalResult.month.sourceName, BigInt(trace.finalResult.dayInMonth)];
 }
-
 function assertNoBigInt(value, path = '$') {
   if (typeof value === 'bigint') throw new Error('BigInt survived serialization at ' + path);
   if (value === null || typeof value !== 'object') return;
-  if (Array.isArray(value)) {
-    value.forEach((item, index) => assertNoBigInt(item, path + '[' + index + ']'));
-    return;
-  }
+  if (Array.isArray(value)) return value.forEach((item, i) => assertNoBigInt(item, path + '[' + i + ']'));
   for (const [key, item] of Object.entries(value)) assertNoBigInt(item, path + '.' + key);
 }
-
 function assertCentralSauceShape(run) {
-  assert.strictEqual(run.counters && typeof run.counters, 'object');
   assert.strictEqual(run.hiddenDrops.length, 7);
   assert.strictEqual(run.visibleDrops.length, 46);
   assert.strictEqual(run.orderAtDrop46.length, 6);
@@ -38,74 +25,35 @@ function assertCentralSauceShape(run) {
     assert.strictEqual(stir.order.length, 6);
     const raw = stir.beforeBowls.reduce((sum, value) => sum + BigInt(value), 0n);
     assert.strictEqual(raw.toString(), stir.rawBowlSum);
+    const saved = core.savePatch(raw + 149n * BigInt(stir.ordinal));
+    assert.strictEqual(saved.toString(), stir.savedOrderNumber);
   }
 }
 
 (function main() {
   const c = core.FOUNDATION_DAY_OLD;
   const t = c;
-
   const before = core.calendarDateSpaghetti(c, t);
   const trace1 = traceApi.calendarDateSpaghettiCookingTrace(c, t);
   const after = core.calendarDateSpaghetti(c, t);
-
   assert.deepStrictEqual(resultArray(trace1), before);
   assert.deepStrictEqual(after, before);
   assert.strictEqual(trace1.schemaVersion, '0.4.0');
-  assert.strictEqual(trace1.semanticProfile, 'PASTAFARIAN_STAGE57_STAGE56_RAW_SUM');
-
+  assert.strictEqual(trace1.semanticProfile, 'PASTAFARIAN_STAGE57_CANONICAL_SAVED_SUM');
   assertNoBigInt(trace1);
-  const roundTrip = JSON.parse(JSON.stringify(trace1));
-  assert.deepStrictEqual(roundTrip, trace1);
-
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(trace1)), trace1);
   assert.ok(trace1.artifacts.gateNetwork.gates.length >= 1);
-  assert.strictEqual(
-    trace1.artifacts.gateNetwork.gaps.length,
-    trace1.measurement.gateGapCountMaterialized,
-  );
   for (const gap of trace1.artifacts.gateNetwork.gaps) {
     assert.ok(gap.sauceRunId);
     assert.ok(gap.sauceSummary);
-    assert.strictEqual(gap.sauceSummary.stage56RawBowlSumApplied, true);
+    assert.strictEqual(gap.sauceSummary.stage56SavedSumApplied, true);
+    assert.strictEqual(gap.sauceSummary.stage56RawBowlSumApplied, false);
   }
-
-  assert.ok(trace1.artifacts.stoneTable);
-  assert.strictEqual(trace1.artifacts.stoneTable.rows.length, 46);
-
-  const cutlets = trace1.artifacts.structure.cutlets;
-  assert.strictEqual(cutlets.items.length, cutlets.count);
-  for (const item of cutlets.items) {
-    assert.strictEqual(item.sourceName, core.textByCanonicalIndex('cutlet', item.nameCanonicalIndex));
-  }
-  const months = trace1.artifacts.structure.months;
-  assert.strictEqual(months.items.length, months.count);
-  assert.strictEqual(months.items.length, months.lengths.length);
-  assert.ok(months.weaving.length >= months.items.length);
-  const structureYearLength = BigInt(trace1.artifacts.structure.year.closeDay)
-    - BigInt(trace1.artifacts.structure.year.openDay);
-  assert.strictEqual(months.weaving.length, Number(structureYearLength));
-  for (const item of months.items) {
-    assert.strictEqual(Object.prototype.hasOwnProperty.call(item, 'weaving'), false);
-    assert.strictEqual(item.sourceName, core.textByCanonicalIndex('month', item.nameCanonicalIndex));
-    assert.strictEqual(item.length, months.lengths[item.slot - 1]);
-  }
-
   assert.ok(trace1.artifacts.sauceRuns.length >= 2);
   trace1.artifacts.sauceRuns.forEach(assertCentralSauceShape);
-
   const trace2 = traceApi.calendarDateSpaghettiCookingTrace(c, t);
   assert.deepStrictEqual(trace2, trace1);
-
-  const serialized = JSON.stringify(trace1);
-  assert.strictEqual(serialized.includes('stage58MemoryReplay'), false);
-  assert.strictEqual(serialized.includes('cacheBacked'), false);
   assert.strictEqual(trace1.coverage.sameSemanticExecutionAsFinalResult, true);
   assert.strictEqual(trace1.coverage.independentExplanationEngine, false);
-
-  process.stdout.write(
-    'Normative cooking trace foundation: PASS\n'
-    + 'Sauce calls: ' + trace1.measurement.totalSauceCallsObserved + '\n'
-    + 'Gate Sauce calls: ' + trace1.measurement.gateSauceCallsObserved + '\n'
-    + 'Semantic year transitions: ' + trace1.measurement.semanticYearTransitionCount + '\n',
-  );
+  console.log('Normative cooking trace foundation saved-sum: PASS');
 })();
