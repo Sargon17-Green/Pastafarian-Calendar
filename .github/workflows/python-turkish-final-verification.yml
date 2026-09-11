@@ -42,7 +42,7 @@ jobs:
       - name: Aşama 55 final audit runner'ını çalıştır
         run: python tests/run_stage_55_audit.py
 
-      - name: Düzeltici Aşama 56 bowlSum detour testlerini çalıştır
+      - name: Kanonik saved-sum post-stir discriminator testlerini çalıştır
         run: python -m unittest discover -s tests -p "corrective_stage_56_bowlsum_detour.py" -q
 
       - name: Patch 27–33 acceleration correctness paketini çalıştır
@@ -55,6 +55,6 @@ jobs:
           echo "Beklenen historical regressions: 365/365 PASS"
           echo "Beklenen Aşama 54 integration: 10/10 PASS"
           echo "Beklenen Aşama 55 audit: 21/21 PASS"
-          echo "Beklenen Düzeltici Aşama 56: 6/6 PASS"
+          echo "Beklenen kanonik saved-sum discriminator: 7/7 PASS"
           echo "Beklenen Patch 27–33 acceleration correctness: 7/7 PASS"
-          echo "Beklenen toplam doğrulama: 409 PASS"
+          echo "Beklenen toplam doğrulama: 410 PASS"
