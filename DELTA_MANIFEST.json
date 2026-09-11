@@ -1,0 +1,63 @@
+{
+  "repository": "Sargon17-Green/Pastafarian-Calendar",
+  "branch": "SQL+தமிழ்",
+  "expected_base_head": "81d9dca5cf025aacda5b719392ee8f95d890d46b",
+  "observed_head": "81d9dca5cf025aacda5b719392ee8f95d890d46b",
+  "head_mismatch": false,
+  "semantic_classification_before": "saved-sum canonical in the isolated Stage-1 normative oracle; no production Sauce path exists yet",
+  "semantic_classification_after": "saved-sum canonical; implementation unchanged; explicit raw-sum-mutant discriminator added",
+  "changed_paths": [],
+  "new_paths": [
+    "sql/test/25_saved_sum_discriminator.sql"
+  ],
+  "deleted_paths": [],
+  "payload_sha256": {
+    "sql/test/25_saved_sum_discriminator.sql": "55c529f650798966bcb397de9c56090ed6bf5c34a00e1fead2427d5b8757b680"
+  },
+  "tests_actually_run": [
+    {
+      "name": "HEAD revalidation",
+      "result": "PASS",
+      "details": "GitHub branch head equals expected SHA 81d9dca5cf025aacda5b719392ee8f95d890d46b"
+    },
+    {
+      "name": "Static saved-sum source audit",
+      "result": "PASS",
+      "details": "post_stir_round computes SAVE(sum(p_bowls)+149*p_stir), uses that same saved value for permutation and inside mix, and reads the unchanged p_bowls snapshot for all six outputs"
+    },
+    {
+      "name": "Independent discriminator arithmetic",
+      "result": "PASS",
+      "details": "old=[1,2,3,4,5,6], stir=1: S=21, R=170, order=[2,4,1,3,6,5], Bowl1 u_saved=208, u_raw=59, canonical=[43348,43821,49771,36114,57684,55801], mutant=[3565,3740,5518,1695,8365,7674]"
+    }
+  ],
+  "tests_prepared_but_not_run": [
+    {
+      "path": "sql/test/25_saved_sum_discriminator.sql",
+      "reason": "psql/PostgreSQL is not installed in the current packaging environment",
+      "expected_assertions": 7
+    }
+  ],
+  "prior_stored_test_evidence_inspected": {
+    "base_head_postgresql_version": "17.6",
+    "regular_assertions": "52/52 PASS",
+    "heavy_assertions": "3/3 PASS",
+    "production_isolation_assertions": "4/4 PASS",
+    "total": "59/59 PASS",
+    "caveat": "These are repository-stored historical results at the base HEAD, not a rerun of the new discriminator."
+  },
+  "generated_artifacts_regenerated": false,
+  "vectors_regenerated": false,
+  "caches_regenerated_or_reversioned": false,
+  "regeneration_reason": "Not required: no raw-sum-derived artifact or cache was found; implementation was already saved-sum canonical.",
+  "historical_artifacts_retained": [
+    "artifacts/stage-01/POSTGRESQL_EXECUTION_LOG.txt",
+    "artifacts/stage-01/TEST_RESULTS.md"
+  ],
+  "historical_labeling_change": "none; these reports are not contradicted by the saved-sum audit",
+  "remaining_uncertainty": [
+    "The new SQL discriminator has not been executed under PostgreSQL in this session because the native toolchain is unavailable."
+  ],
+  "hand_off_files_included": false,
+  "delete_paths_file_present": false
+}
