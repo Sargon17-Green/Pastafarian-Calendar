@@ -75,21 +75,24 @@ jobs:
           set -euo pipefail
           for f in \
             DEVELOPMENT_STAGE.md \
+            CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt \
+            CANONICAL_SAVED_SUM_CORRECTION_EVIDENCE.md \
             STAGE_56_LOCAL_TEST_LOG.txt \
             STAGE_56_CORRECTIVE_EVIDENCE.md \
             STAGE_56_FINAL_BYTE_AUDIT.txt \
             tests/stage_56_raw_bowl_sum_corrective_tests.cpp \
             tests/stage_56_final_static_audit_tests.cpp \
+            tests/canonical_saved_sum_cache_recovery_tests.cpp \
             tests/stage_56_e2e_worker.cpp \
             tests/stage_56_historical_path_compat.hpp \
             src/monster.cpp \
             include/pastafari/monster.hpp; do
             test -f "$f" || { echo "DEFECTUS: deest $f" >&2; exit 1; }
           done
-          grep -q 'GRADUS=56_CORRECTIVUS_POST_COMPLETIONEM' STAGE_56_LOCAL_TEST_LOG.txt
-          grep -q 'STATUS=PASS' STAGE_56_LOCAL_TEST_LOG.txt
-          grep -q 'CORE_XII_COMMOTIONES=12/12_PASS' STAGE_56_LOCAL_TEST_LOG.txt
-          grep -q 'E2E_EXTERNI_CANONICI=4/4_PASS' STAGE_56_LOCAL_TEST_LOG.txt
+          grep -q 'CORRECTION=CANONICAL_SAVED_SUM_2026_09_11' CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt
+          grep -q 'STATUS=PASS' CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt
+          grep -q 'CORE_XII_COMMOTIONES=12/12_PASS' CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt
+          grep -q 'E2E_SAVED_SUM_WITNESSES=5/5_PASS' CANONICAL_SAVED_SUM_CORRECTION_TEST_LOG.txt
           echo 'TESTIMONIA_STAGE56=PASS' | tee soak-logs/stage56-evidence-guard.log
 
       - name: Servare logs custodiae
@@ -452,6 +455,9 @@ jobs:
             tests/stage_56_final_static_audit_tests.cpp \
             -o build_soak/stage56/static
           "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/canonical_saved_sum_cache_recovery_tests.cpp build_soak/stage56/monster.o \
+            -o build_soak/stage56/cache-recovery
+          "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES \
             tests/stage_56_e2e_worker.cpp build_soak/stage56/monster.o \
             -o build_soak/stage56/e2e
 
@@ -461,6 +467,7 @@ jobs:
           set -euo pipefail
           timeout 30m build_soak/stage56/core 2>&1 | tee soak-logs/core.log
           timeout 5m build_soak/stage56/static 2>&1 | tee soak-logs/static.log
+          timeout 30m build_soak/stage56/cache-recovery 2>&1 | tee soak-logs/cache-recovery.log
 
       - name: Currere witnesses canonicos et prope Foundation
         shell: bash
@@ -468,11 +475,11 @@ jobs:
           set -euo pipefail
           exec > >(tee soak-logs/e2e-canonical.log) 2>&1
           e=build_soak/stage56/e2e
-          timeout 15m "$e" -15055671 -15055671 5000 4 762 12 105
-          timeout 15m "$e" -15048173 -15048173 5000 12 21 47 57
-          timeout 15m "$e" -15048173 -15048172 5000 12 22 18 58
-          timeout 15m "$e" -15048173 -15048174 5000 12 20 7 58
-          timeout 15m "$e" -15055672 -15055670 5000 3 1 3 96
+          timeout 15m "$e" -15055671 -15055671 5000 10 503 20 56
+          timeout 15m "$e" -15048173 -15048173 5000 17 456 33 87
+          timeout 15m "$e" -15048173 -15048172 5000 17 457 36 84
+          timeout 15m "$e" -15048173 -15048174 5000 17 455 41 97
+          timeout 15m "$e" -15055672 -15055670 5000 15 1 20 15
           echo 'E2E_CANONICA_STAGE56=5/5_PASS'
 
       - name: Servare logs matrix
@@ -712,16 +719,16 @@ jobs:
           exec > >(tee soak-logs/differential-10.log) 2>&1
           e=build_soak/differential/e2e
           cat > soak-logs/pairs.tsv <<'EOF'
-          -15055671 -15055671 5000 4 762 12 105
-          -15048173 -15048173 5000 12 21 47 57
-          -15048173 -15048172 5000 12 22 18 58
-          -15048173 -15048174 5000 12 20 7 58
-          -15048173 -15048171 5000 12 23 5 61
-          -15048173 -15048170 5000 12 24 2 57
-          -15048173 -15048169 5000 12 25 28 58
-          -15048173 -15048168 5000 12 26 15 61
-          -15048173 -15048167 5000 12 27 13 51
-          -15048173 -15048166 5000 12 28 23 52
+          -15055671 -15055671 5000 10 503 20 56
+          -15048173 -15048173 5000 17 456 33 87
+          -15048173 -15048172 5000 17 457 36 84
+          -15048173 -15048174 5000 17 455 41 97
+          -15048173 -15048171 5000 17 458 11 103
+          -15048173 -15048170 5000 17 459 15 100
+          -15048173 -15048169 5000 17 460 33 88
+          -15048173 -15048168 5000 17 461 14 93
+          -15048173 -15048167 5000 17 462 21 95
+          -15048173 -15048166 5000 17 463 44 79
           EOF
           numerus=0
           while read -r c t y k dk m dm; do
@@ -808,11 +815,11 @@ jobs:
           set -euo pipefail
           timeout 40m build_soak/san/core 2>&1 | tee soak-logs/sanitizer-core.log
           {
-            timeout 20m build_soak/san/e2e -15055671 -15055671 5000 4 762 12 105
-            timeout 20m build_soak/san/e2e -15048173 -15048173 5000 12 21 47 57
-            timeout 20m build_soak/san/e2e -15048173 -15048172 5000 12 22 18 58
-            timeout 20m build_soak/san/e2e -15048173 -15048174 5000 12 20 7 58
-            timeout 20m build_soak/san/e2e -15055672 -15055670 5000 3 1 3 96
+            timeout 20m build_soak/san/e2e -15055671 -15055671 5000 10 503 20 56
+            timeout 20m build_soak/san/e2e -15048173 -15048173 5000 17 456 33 87
+            timeout 20m build_soak/san/e2e -15048173 -15048172 5000 17 457 36 84
+            timeout 20m build_soak/san/e2e -15048173 -15048174 5000 17 455 41 97
+            timeout 20m build_soak/san/e2e -15055672 -15055670 5000 15 1 20 15
           } 2>&1 | tee soak-logs/sanitizer-e2e.log
 
       - name: Servare logs sanitatorum
@@ -896,16 +903,16 @@ jobs:
           for r in $(seq 1 "$rounds"); do
             echo "===== CIRCUITUS $r/$rounds ====="
             timeout 30m build_soak/repeat/core
-            timeout 20m "$e" -15055671 -15055671 5000 4 762 12 105
-            timeout 20m "$e" -15048173 -15048173 5000 12 21 47 57
-            timeout 20m "$e" -15048173 -15048172 5000 12 22 18 58
-            timeout 20m "$e" -15048173 -15048174 5000 12 20 7 58
-            timeout 20m "$e" -15048173 -15048171 5000 12 23 5 61
-            timeout 20m "$e" -15048173 -15048170 5000 12 24 2 57
-            timeout 20m "$e" -15048173 -15048169 5000 12 25 28 58
-            timeout 20m "$e" -15048173 -15048168 5000 12 26 15 61
-            timeout 20m "$e" -15048173 -15048167 5000 12 27 13 51
-            timeout 20m "$e" -15048173 -15048166 5000 12 28 23 52
+            timeout 20m "$e" -15055671 -15055671 5000 10 503 20 56
+            timeout 20m "$e" -15048173 -15048173 5000 17 456 33 87
+            timeout 20m "$e" -15048173 -15048172 5000 17 457 36 84
+            timeout 20m "$e" -15048173 -15048174 5000 17 455 41 97
+            timeout 20m "$e" -15048173 -15048171 5000 17 458 11 103
+            timeout 20m "$e" -15048173 -15048170 5000 17 459 15 100
+            timeout 20m "$e" -15048173 -15048169 5000 17 460 33 88
+            timeout 20m "$e" -15048173 -15048168 5000 17 461 14 93
+            timeout 20m "$e" -15048173 -15048167 5000 17 462 21 95
+            timeout 20m "$e" -15048173 -15048166 5000 17 463 44 79
             timeout 30m build_soak/repeat/state-history
           done
           echo "SOAK_REPETITUM=${rounds}/${rounds}_PASS"

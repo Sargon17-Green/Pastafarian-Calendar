@@ -59,13 +59,15 @@ jobs:
             include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
           old_gen=$(sed -n 's|^// PASTAFARI_HOT_ALMANAC_GENERATION=||p' \
             include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
+          old_count=$(sed -n 's|^// PASTAFARI_HOT_ALMANAC_COUNT=||p' \
+            include/pastafari/http_api/generated_hot_year_almanac_seed.inc 2>/dev/null | head -1 || true)
           need=yes
-          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old_base" = "$base" ] && [ "$old_gen" = "3" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = schedule ] && [ "$old_base" = "$base" ] && [ "$old_gen" = "4" ] && [ "${old_count:-0}" -ge 80 ]; then
             need=no
           fi
           echo "base=$base" >> "$GITHUB_OUTPUT"
           echo "need=$need" >> "$GITHUB_OUTPUT"
-          echo "ATLAS_BASE=$base OLD_BASE=${old_base:-NONE} OLD_GEN=${old_gen:-NONE} NEED=$need"
+          echo "ATLAS_BASE=$base OLD_BASE=${old_base:-NONE} OLD_GEN=${old_gen:-NONE} OLD_COUNT=${old_count:-NONE} NEED=$need"
 
   atlas:
     needs: prepare
@@ -161,7 +163,7 @@ jobs:
           out=include/pastafari/http_api/generated_hot_year_almanac_seed.inc
           {
             echo "// PASTAFARI_HOT_ALMANAC_BASE_DAY=$base"
-            echo "// PASTAFARI_HOT_ALMANAC_GENERATION=3"
+            echo "// PASTAFARI_HOT_ALMANAC_GENERATION=4"
             echo "// PASTAFARI_HOT_ALMANAC_ATLAS_BEHIND_DAYS=50000"
             echo "// PASTAFARI_HOT_ALMANAC_ATLAS_AHEAD_DAYS=300000"
             echo "// PASTAFARI_HOT_ALMANAC_ATLAS_SHARDS=8"
