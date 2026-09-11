@@ -1,4 +1,4 @@
-name: Comparatio decem milium — C++ + Latina Nova
+name: Comparatio decem milium — canon saved-sum + celeritas
 
 on:
   push:
@@ -14,14 +14,15 @@ env:
   COMMON_WARNINGS: '-Wall -Wextra -Wpedantic'
   PAIRS_PER_SHARD: '100'
   MIN_SPEEDUP: '2.0'
+  MIN_BASELINE_SHARDS: '95'
 
 jobs:
   fabricare-duo-monstra:
-    name: Fabricare monstrum principale et sepulcrale
+    name: Fabricare candidatum, canonem et baseline historicum
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
-      - name: Excerpere ramum principalem
+      - name: Excerpere baseline historicum
         uses: actions/checkout@v5
         with:
           ref: 'C++&Latina'
@@ -41,32 +42,51 @@ jobs:
           timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
           test -r /usr/include/boost/multiprecision/cpp_int.hpp
 
-      - name: Compilare duo executabilia eodem compilatore
+      - name: Compilare executabilia
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p bin
+
+          # Baseline historicum: ad celeritatem tantum. Non est auctoritas
+          # semantica post correctionem canonicalem saved-sum.
           clang++ $CXXSTD -O2 $COMMON_WARNINGS \
             -Ibaseline/include -Ibaseline/tests -Ibaseline \
             candidate/tools/branch_vector_runner.cpp baseline/src/monster.cpp \
             -o bin/baseline-vector
+
+          # Candidatus productionis.
           clang++ $CXXSTD -O2 $COMMON_WARNINGS \
             -Icandidate/include -Icandidate/tests -Icandidate \
             candidate/tools/branch_vector_runner.cpp candidate/src/monster.cpp \
             -o bin/candidate-vector
+
+          # Oracle independens: NormativeOracle(false) = canonical saved-sum,
+          # cum TexturaCelerReference quae contra reference naivam probata est.
+          clang++ $CXXSTD -O2 $COMMON_WARNINGS \
+            -Icandidate/include -Icandidate/tests -Icandidate \
+            candidate/tools/canonical_saved_sum_vector_runner.cpp \
+            candidate/tests/reference/normative_reference.cpp \
+            -o bin/canonical-vector
+
           clang++ $CXXSTD -O2 $COMMON_WARNINGS \
             -Icandidate/include -Icandidate/tests -Icandidate \
             candidate/tools/patch40_wide_funeral_probe.cpp candidate/src/monster.cpp \
             -o bin/candidate-patch40-probe
+
           clang++ --version | head -1
-          sha256sum bin/baseline-vector bin/candidate-vector bin/candidate-patch40-probe
+          sha256sum \
+            bin/baseline-vector \
+            bin/candidate-vector \
+            bin/canonical-vector \
+            bin/candidate-patch40-probe
 
       - name: Probare exsequias rejectionis latae PATCH 40
         shell: bash
         run: |
           set -euo pipefail
           timeout 2m bin/candidate-patch40-probe | tee patch40-wide-funeral.log
-          grep -q '^PATCH40_EXSEQUIAE_REIECTIONIS_LATAE=PASS' patch40-wide-funeral.log
+          grep -q '^PATCH40_EXSEQUIAE_REIECTIONIS_LATAE=PASS hits=2$' patch40-wide-funeral.log
 
       - name: Servare executabilia
         uses: actions/upload-artifact@v6
@@ -80,7 +100,7 @@ jobs:
     name: Comparare shard ${{ matrix.shard }} / 99
     needs: fabricare-duo-monstra
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 65
     strategy:
       fail-fast: false
       max-parallel: 20
@@ -93,43 +113,94 @@ jobs:
           name: cpp-latina-comparison-binaries
           path: bin
 
-      - name: Currere utrumque ordine alternante
+      - name: Currere candidatum, canonem et baseline historicum
         shell: bash
         run: |
           set -euo pipefail
-          chmod +x bin/baseline-vector bin/candidate-vector
+          chmod +x bin/baseline-vector bin/candidate-vector bin/canonical-vector
           mkdir -p out
           shard='${{ matrix.shard }}'
+
+          run_baseline() {
+            set +e
+            timeout 40m bin/baseline-vector \
+              "$shard" "$PAIRS_PER_SHARD" \
+              out/baseline.tsv out/baseline.time
+            rc=$?
+            set -e
+            printf 'baseline_rc=%s\n' "$rc" > out/baseline.status
+            if (( rc != 0 )); then
+              echo "BASELINE_HISTORICUM=UNAVAILABLE rc=$rc"
+              rm -f out/baseline.tsv out/baseline.time
+            fi
+            return 0
+          }
+
+          run_candidate() {
+            timeout 10m bin/candidate-vector \
+              "$shard" "$PAIRS_PER_SHARD" \
+              out/candidate.tsv out/candidate.time
+          }
+
+          # Alternatio ordinis retinet mensuram celeritatis minus biased.
+          # Defectus baseline historici numquam impedit probationem canonicalem.
           if (( shard % 2 == 0 )); then
-            timeout 40m bin/baseline-vector "$shard" "$PAIRS_PER_SHARD" out/baseline.tsv out/baseline.time
-            timeout 40m bin/candidate-vector "$shard" "$PAIRS_PER_SHARD" out/candidate.tsv out/candidate.time
+            run_baseline
+            run_candidate
           else
-            timeout 40m bin/candidate-vector "$shard" "$PAIRS_PER_SHARD" out/candidate.tsv out/candidate.time
-            timeout 40m bin/baseline-vector "$shard" "$PAIRS_PER_SHARD" out/baseline.tsv out/baseline.time
+            run_candidate
+            run_baseline
           fi
 
-      - name: Exigere identitatem exactam
+          timeout 10m bin/canonical-vector \
+            "$shard" "$PAIRS_PER_SHARD" \
+            out/canonical.tsv out/canonical.time
+
+      - name: Exigere canonem saved-sum
         shell: bash
         run: |
           set -euo pipefail
-          if ! cmp -s out/baseline.tsv out/candidate.tsv; then
-            echo 'COMPARATIO_EXACTA=FAIL' | tee out/verdict.txt
-            diff -u out/baseline.tsv out/candidate.tsv | head -200 | tee out/first-difference.diff || true
+
+          if ! cmp -s out/candidate.tsv out/canonical.tsv; then
+            echo 'CANONICAL_SAVED_SUM_COMPARATIO=FAIL' | tee out/verdict.txt
+            diff -u out/canonical.tsv out/candidate.tsv \
+              | head -200 | tee out/first-canonical-difference.diff || true
             exit 1
           fi
-          b=$(awk -F= '$1=="total_ms"{print $2}' out/baseline.time)
+
           c=$(awk -F= '$1=="total_ms"{print $2}' out/candidate.time)
-          bf=$(awk -F= '$1=="first_ms"{print $2}' out/baseline.time)
           cf=$(awk -F= '$1=="first_ms"{print $2}' out/candidate.time)
+          rc=$(awk -F= '$1=="baseline_rc"{print $2}' out/baseline.status)
+
+          baseline_available=0
+          baseline_ms=0
+          baseline_first_ms=0
+          candidate_faster=0
+          historical_semantic_divergence='unknown'
+
+          if [[ "$rc" == "0" && -f out/baseline.time && -f out/baseline.tsv ]]; then
+            baseline_available=1
+            baseline_ms=$(awk -F= '$1=="total_ms"{print $2}' out/baseline.time)
+            baseline_first_ms=$(awk -F= '$1=="first_ms"{print $2}' out/baseline.time)
+            if (( c < baseline_ms )); then candidate_faster=1; fi
+            if cmp -s out/baseline.tsv out/candidate.tsv; then
+              historical_semantic_divergence='no'
+            else
+              historical_semantic_divergence='yes'
+            fi
+          fi
+
           {
-            echo 'COMPARATIO_EXACTA=PASS'
+            echo 'CANONICAL_SAVED_SUM_COMPARATIO=PASS'
             echo "shard=${{ matrix.shard }}"
             echo "pairs=$PAIRS_PER_SHARD"
-            echo "baseline_ms=$b"
             echo "candidate_ms=$c"
-            echo "baseline_first_ms=$bf"
             echo "candidate_first_ms=$cf"
-            if (( c < b )); then echo 'candidate_faster=1'; else echo 'candidate_faster=0'; fi
+            echo "baseline_available=$baseline_available"
+            echo "baseline_ms=$baseline_ms"
+            echo "baseline_first_ms=$baseline_first_ms"
+            echo "candidate_faster=$candidate_faster"
+            echo "historical_semantic_divergence=$historical_semantic_divergence"
           } | tee out/verdict.txt
 
       - name: Servare testimonium shard
@@ -142,7 +213,7 @@ jobs:
           retention-days: 30
 
   sententia-finalis:
-    name: Sententia — identitas 10000 et celeritas
+    name: Sententia — canon 10000 et celeritas
     needs: comparare-centum-shards
     if: always()
     runs-on: ubuntu-24.04
@@ -161,6 +232,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import math
           import sys
 
           verdicts = sorted(Path('shards').glob('*/verdict.txt'))
@@ -169,44 +241,70 @@ jobs:
               sys.exit(2)
 
           total_pairs = 0
-          baseline = 0
-          candidate = 0
+          canonical = 0
+          baseline_available = 0
+          baseline_total = 0
+          candidate_on_baseline_total = 0
           faster = 0
-          exact = 0
+          divergence = 0
+
           for path in verdicts:
               data = {}
               for line in path.read_text(encoding='utf-8').splitlines():
                   if '=' in line:
                       k, v = line.split('=', 1)
                       data[k] = v
-              if data.get('COMPARATIO_EXACTA') == 'PASS':
-                  exact += 1
-              total_pairs += int(data.get('pairs', '0'))
-              baseline += int(data.get('baseline_ms', '0'))
-              candidate += int(data.get('candidate_ms', '0'))
-              faster += int(data.get('candidate_faster', '0'))
 
-          if exact != 100 or total_pairs != 10000:
-              print(f'VERDICTUM=FAIL exact_shards={exact}/100 pairs={total_pairs}/10000')
+              if data.get('CANONICAL_SAVED_SUM_COMPARATIO') == 'PASS':
+                  canonical += 1
+              total_pairs += int(data.get('pairs', '0'))
+
+              if int(data.get('baseline_available', '0')) == 1:
+                  baseline_available += 1
+                  baseline_total += int(data.get('baseline_ms', '0'))
+                  candidate_on_baseline_total += int(data.get('candidate_ms', '0'))
+                  faster += int(data.get('candidate_faster', '0'))
+                  if data.get('historical_semantic_divergence') == 'yes':
+                      divergence += 1
+
+          if canonical != 100 or total_pairs != 10000:
+              print(
+                  f'VERDICTUM=FAIL canonical_shards={canonical}/100 '
+                  f'pairs={total_pairs}/10000'
+              )
               sys.exit(3)
-          if candidate <= 0:
-              print('VERDICTUM=FAIL candidate tempus invalidum')
+
+          print('CANONICAL_SAVED_SUM=10000/10000_PASS')
+          print(f'HISTORICAL_BASELINE_AVAILABLE={baseline_available}/100')
+          print(f'HISTORICAL_SEMANTIC_DIVERGENCE={divergence}/{baseline_available}')
+
+          minimum_baselines = int('${{ env.MIN_BASELINE_SHARDS }}')
+          if baseline_available < minimum_baselines:
+              print(
+                  f'PERFORMANCE_GATE=FAIL baseline_available='
+                  f'{baseline_available} required={minimum_baselines}'
+              )
               sys.exit(4)
 
-          speedup = baseline / candidate
-          minimum = float('${{ env.MIN_SPEEDUP }}')
-          print('COMPARATIO_EXACTA=10000/10000_PASS')
-          print(f'BASELINE_TOTAL_MS={baseline}')
-          print(f'CANDIDATE_TOTAL_MS={candidate}')
-          print(f'SPEEDUP={speedup:.3f}x')
-          print(f'FASTER_SHARDS={faster}/100')
-          print(f'MIN_SPEEDUP_REQUIRED={minimum:.3f}x')
-
-          # "Significanter" operationaliter: saltem duplex celeritas aggregata,
-          # nec victoria ex paucis outlieribus tantum (>=90/100 shards celeriores).
-          if speedup < minimum or faster < 90:
-              print('PERFORMANCE_GATE=FAIL')
+          if candidate_on_baseline_total <= 0:
+              print('PERFORMANCE_GATE=FAIL candidate tempus invalidum')
               sys.exit(5)
+
+          speedup = baseline_total / candidate_on_baseline_total
+          minimum = float('${{ env.MIN_SPEEDUP }}')
+          required_faster = math.ceil(0.90 * baseline_available)
+
+          print(f'BASELINE_TOTAL_MS={baseline_total}')
+          print(f'CANDIDATE_MATCHED_BASELINE_TOTAL_MS={candidate_on_baseline_total}')
+          print(f'SPEEDUP={speedup:.3f}x')
+          print(f'FASTER_SHARDS={faster}/{baseline_available}')
+          print(f'MIN_SPEEDUP_REQUIRED={minimum:.3f}x')
+          print(f'MIN_FASTER_SHARDS={required_faster}/{baseline_available}')
+
+          if speedup < minimum or faster < required_faster:
+              print('PERFORMANCE_GATE=FAIL')
+              sys.exit(6)
+
           print('PERFORMANCE_GATE=PASS')
           print('PR_CANDIDATUS=YES')
           PY
