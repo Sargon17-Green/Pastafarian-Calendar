@@ -310,15 +310,29 @@ group('production resta isolat del reference test-only', () => {
   }
 });
 
-group('production resta pur de textu hebreic e isolat del integration future pos Patch 26', () => {
+group('production core resta pur de textu hebreic e isolat del integration future pos Patch 26', () => {
   const root = path.join(__dirname, '..');
-  const textFiles = listFiles(root).filter((file) => /\.(?:js|json|md)$/.test(file));
-  for (const file of textFiles) {
+  const srcRoot = path.join(root, 'src');
+  const browserRoot = path.join(root, 'browser');
+  const multilingualLocaleData = path.join(browserRoot, 'i18n', 'locales.js');
+  const generatedBrowserRoots = [
+    path.join(browserRoot, 'dist'),
+    path.join(browserRoot, 'standalone'),
+  ];
+  const productionTextFiles = [
+    ...listFiles(srcRoot),
+    ...listFiles(browserRoot).filter((file) => !generatedBrowserRoots.some((generatedRoot) => (
+      file === generatedRoot || file.startsWith(generatedRoot + path.sep)
+    ))),
+  ].filter((file) => /\.(?:js|json|md)$/.test(file));
+  for (const file of productionTextFiles) {
+    if (file === multilingualLocaleData) continue;
     const source = fs.readFileSync(file, 'utf8');
     ok(!/[\u0590-\u05FF]/u.test(source), file);
   }
+  ok(/[\u0590-\u05FF]/u.test(fs.readFileSync(multilingualLocaleData, 'utf8')), multilingualLocaleData);
   const futureTokens = ['patchedCounts', 'bowlOrderWithRankBridge'];
-  const productionText = listFiles(path.join(root, 'src')).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
+  const productionText = listFiles(srcRoot).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
   for (const token of futureTokens) ok(!productionText.includes(token), token);
 });
 
