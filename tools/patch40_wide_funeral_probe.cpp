@@ -44,19 +44,16 @@ int main() {
                 "PATCH40 -1 rank discrepat");
     }
 
-    // Shard 83 witness that exposed the astronomical +1 rejection walk.
-    {
-        const auto d = calendarDateSpaghetti(Integer{-15043652}, Integer{-15043556});
-        require(d.yearNumber == 5000, "PATCH40 witness annus discrepat");
-        require(d.cutletName == "cornu", "PATCH40 witness segmentum discrepat");
-        require(d.dayInCutlet == 411, "PATCH40 witness dies segmenti discrepat");
-        require(d.monthName == "arena", "PATCH40 witness mensis discrepat");
-        require(d.dayInMonth == 50, "PATCH40 witness dies mensis discrepat");
-    }
-
+    // HISTORICAL — SUPERSEDED integration witness:
+    // under the former raw-bowl-sum semantics, one public Shard-83 date also
+    // traversed PATCH 40.  The canonical saved-sum correction changes that
+    // downstream route, so that historical date is no longer a PATCH-40
+    // witness.  Do not manufacture a replacement date merely to preserve the
+    // old route.  The two adversarial +1/-1 cases above exercise the actual
+    // wide-rejection shortcut deterministically and check its exact result.
     const auto m = persistentScarMetricsDiagnostic();
-    require(m.patch40WideFuneralShortcut >= 3,
-            "PATCH40 exsequiae latae non observatae sunt");
+    require(m.patch40WideFuneralShortcut == 2,
+            "PATCH40 duo testes directi exsequias latas exercere debent");
     std::cout << "PATCH40_EXSEQUIAE_REIECTIONIS_LATAE=PASS hits="
               << m.patch40WideFuneralShortcut << "\n";
 }
