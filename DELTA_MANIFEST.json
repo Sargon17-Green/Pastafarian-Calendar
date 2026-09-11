@@ -1,136 +1,27 @@
 {
-  "schema_version": 1,
   "repository": "Sargon17-Green/Pastafarian-Calendar",
   "branch": "Python+Türkçe",
-  "expected_base_head": "cdb1033ac19f78acf16aedc769efba81052f2c5c",
-  "observed_head": "cdb1033ac19f78acf16aedc769efba81052f2c5c",
-  "head_matches_expected": true,
-  "semantic_classification_before": "AFFECTED: reachable production integration selected the noncanonical raw-sum final-post-stir detour even though postStirRoundExact itself was saved-sum correct.",
-  "semantic_classification_after": "CANONICAL SAVED-SUM: R=SAVE(sum(oldBowls)+149*r) is used for both permutation selection and the additive term inside u; all six bowls read one old snapshot and commit together.",
+  "expected_base_head": "e65a951a2fb80a85bcef7c4019c1eb8e110a9ed2",
+  "observed_head": "e65a951a2fb80a85bcef7c4019c1eb8e110a9ed2",
   "changed_paths": [
-    ".github/workflows/python-turkish-final-verification.yml",
-    "README.md",
-    "DEVELOPMENT_STAGE.md",
-    "CORRECTIVE_STAGE_56_REPORT.md",
-    "DELTA_MANIFEST_CORRECTIVE_STAGE_56.txt",
-    "artifacts/corrective-stage-56/EXTERNAL_ALIGNMENT_WITNESSES.txt",
-    "artifacts/corrective-stage-56/FINAL_VERIFICATION_GREEN.txt",
-    "artifacts/corrective-stage-56/ROOT_CAUSE.txt",
-    "src/pastafari_calendar/final_integration.py",
-    "src/pastafari_calendar/legacy_order_memory.py",
-    "src/pastafari_calendar/legacy_structure_sauce.py",
-    "src/pastafari_calendar/post_stir_bowlsum_detour.py",
-    "tests/normative_reference.py",
-    "tests/corrective_stage_56_bowlsum_detour.py"
+    "tests/test_acceleration_patches_27_33.py"
   ],
-  "new_paths": [
-    "CANONICAL_SAVED_SUM_CORRECTION.md",
-    "artifacts/canonical-saved-sum/DISCRIMINATOR.json",
-    "artifacts/canonical-saved-sum/INTERMEDIATE_WITNESSES.json",
-    "artifacts/canonical-saved-sum/LOCAL_EXECUTION_LOG.txt"
-  ],
+  "new_paths": [],
   "deleted_paths": [],
-  "package_metadata_paths": [
-    "DELTA_README.md",
-    "DELTA_MANIFEST.json",
-    "SHA256SUMS.txt"
-  ],
   "payload_sha256": {
-    ".github/workflows/python-turkish-final-verification.yml": "2b6750ab89e3b8a4435887a6ad6da1ebfb48d2c378c196a71599bbb7a256dfff",
-    "README.md": "8e00a3735699f35abad8665d7f7d2656124abb05c106ffd21530f71cc2a236bd",
-    "DEVELOPMENT_STAGE.md": "84a5671096726ce57086e100936c3b1ea097c36424ef4161d278dfbf552eef71",
-    "CORRECTIVE_STAGE_56_REPORT.md": "d1c1d51404ffd66faf1fa32b64bc4fc95b9d048ba98d4dbee38e518f4b991846",
-    "DELTA_MANIFEST_CORRECTIVE_STAGE_56.txt": "954032b5283e237f4ef9d3f184d48c2600796a8a5632715c0073596696abede2",
-    "artifacts/corrective-stage-56/EXTERNAL_ALIGNMENT_WITNESSES.txt": "a98027c41a7881bc7faa36229606caea6fea72933f2c37d0175fc6ee753890a2",
-    "artifacts/corrective-stage-56/FINAL_VERIFICATION_GREEN.txt": "2c23570fe800673780618cd7871b19d4f4b326faf240f4a0c5ae15ae519e445f",
-    "artifacts/corrective-stage-56/ROOT_CAUSE.txt": "8a24698578f3c2ca9bf3ef9861325cc06db12b8bc457d43434d5e06250688823",
-    "src/pastafari_calendar/final_integration.py": "017321fae5059fba87a10fbce0cc06abc488fbfa81ad0ce5ff0e3bac6a056b8c",
-    "src/pastafari_calendar/legacy_order_memory.py": "27709ae06f0b551f8dfbc38b7caceaa4fd677d57dd0fa31128dc2a1d2635f3b8",
-    "src/pastafari_calendar/legacy_structure_sauce.py": "1463bf50545fabb0a4327e3d5997b1bfbc1d826d9c00164c5551952c2bdc79db",
-    "src/pastafari_calendar/post_stir_bowlsum_detour.py": "89b6578fb25d0630298a86390857db6c2fca7ae3192a060535f4802cb8cdb124",
-    "tests/normative_reference.py": "ee8022c241a80257e266a642a47e6ff7d71c0576c5bd1a40e341fcfaacea1b77",
-    "tests/corrective_stage_56_bowlsum_detour.py": "da2af5a5eac2b52d142b542ee599e45378d56fc67d824632aa2caf7276306055",
-    "CANONICAL_SAVED_SUM_CORRECTION.md": "22691a43bf63a648874ba852d3543bc17a59beeda5532120c6fa013615270d64",
-    "artifacts/canonical-saved-sum/DISCRIMINATOR.json": "1ff111417f445e3348efd44b27d5c1b6996f9594392dea16223c3054bc92267a",
-    "artifacts/canonical-saved-sum/INTERMEDIATE_WITNESSES.json": "430cd0b829ff6bfdc0c1c99a4cc19ba1ce700a01f670d1bc110ca72247f5b8ba",
-    "artifacts/canonical-saved-sum/LOCAL_EXECUTION_LOG.txt": "999dfa02b3e6a47290ff42bb09c4396ef2a7f395d42639ac5ad6870b2c99054e"
+    "tests/test_acceleration_patches_27_33.py": "ed0f53d818c3c3a3be6ffeb296070f8caa90f6ad16841f44e74053cf98562550"
   },
   "tests_actually_run": [
     {
-      "name": "py_compile_changed_python_files",
+      "command": "python -m py_compile tests/test_acceleration_patches_27_33.py",
       "result": "PASS"
-    },
-    {
-      "name": "targeted_real_postStirRoundExact_saved_sum_vs_raw_sum_mutant_discriminator",
-      "result": "PASS",
-      "evidence": "artifacts/canonical-saved-sum/DISCRIMINATOR.json"
-    },
-    {
-      "name": "normative_reference_compatibility_aliases_four_deterministic_cases",
-      "result": "PASS"
-    },
-    {
-      "name": "independent_drop46_and_all_12_post_stirs_witness_generation_four_cases",
-      "result": "PASS",
-      "evidence": "artifacts/canonical-saved-sum/INTERMEDIATE_WITNESSES.json"
-    },
-    {
-      "name": "production_entry_bytecode_and_semantic_cache_fingerprint_audit",
-      "result": "PASS"
-    },
-    {
-      "name": "source_isolation_static_audit_no_reachable_raw_flag_or_mutant_import",
-      "result": "PASS"
-    },
-    {
-      "name": "repository_tree_browser_api_service_worker_route_audit",
-      "result": "PASS_NOT_APPLICABLE_NO_SUCH_ROUTE"
     }
   ],
-  "tests_attempted_but_not_completed": [
-    {
-      "name": "standalone_final_five_field_date_via_partially_materialized_reference",
-      "result": "NOT_COMPLETED",
-      "reason": "exceeded 120-second local execution limit"
-    }
+  "tests_prepared_not_run": [
+    "python -m unittest tests.test_acceleration_patches_27_33.AccelerationPatches2733Tests.test_poisoned_checkpoint_is_rejected_then_legacy_year_walk_finishes",
+    "python -m unittest tests.test_acceleration_patches_27_33",
+    "full Python+Türkçe GitHub Actions verification workflow"
   ],
-  "tests_prepared_but_not_run": [
-    "tests/corrective_stage_56_bowlsum_detour.py complete 7-test suite on full checkout",
-    "tests/integration_stage_54.py",
-    "tests/audit_stage_55.py / tests/run_stage_55_audit.py",
-    "historical regression suite tests/test_stage_*.py",
-    "tests/test_acceleration_patches_27_33.py",
-    "full downstream query-stream/gate/year/cutlet/month/five-field-date differential suite",
-    "Year 5000 witness-region full integration run",
-    "cold/warm/repeated-call/A→B→A/import-order/failure→retry cache suite"
-  ],
-  "generated_artifacts_regenerated": true,
-  "regenerated_artifacts": [
-    "artifacts/canonical-saved-sum/DISCRIMINATOR.json",
-    "artifacts/canonical-saved-sum/INTERMEDIATE_WITNESSES.json",
-    "artifacts/canonical-saved-sum/LOCAL_EXECUTION_LOG.txt"
-  ],
-  "vectors_regenerated": true,
-  "semantic_caches": {
-    "persistent_cache_payload_regenerated": false,
-    "reason": "No checked-in semantic cache payload was identified in the branch tree.",
-    "invalidation_mechanism_audited": true,
-    "result": "sauceWithScars bytecode/code-mark changes, therefore acceleration semantic fingerprints change and stale process-local semantic entries cannot match the corrected implementation."
-  },
-  "historical_artifacts_retained": [
-    "CORRECTIVE_STAGE_56_REPORT.md",
-    "DELTA_MANIFEST_CORRECTIVE_STAGE_56.txt",
-    "artifacts/corrective-stage-56/EXTERNAL_ALIGNMENT_WITNESSES.txt",
-    "artifacts/corrective-stage-56/FINAL_VERIFICATION_GREEN.txt",
-    "artifacts/corrective-stage-56/ROOT_CAUSE.txt"
-  ],
-  "historical_artifact_labeling": "Retained but prominently marked HISTORICAL — SUPERSEDED / HISTORICAL_SUPERSEDED=YES and explicitly barred from canonical expected-output use.",
-  "generated_browser_api_site_artifacts_regenerated": false,
-  "generated_browser_api_site_reason": "No browser HTML, JavaScript app bundle, service worker, or public-site/API implementation was present in the observed branch tree.",
-  "remaining_uncertainty": [
-    "The full native repository test suite was not executed in this session because a complete branch worktree could not be materialized in the local execution filesystem.",
-    "Downstream final five-field-date, Year 5000, boundary, and full cache-behavior coverage therefore remains to be executed on a complete checkout; it is prepared in the updated workflow/tests but is not claimed PASS here."
-  ],
-  "github_push_or_commit_performed": false,
-  "delete_paths_file_present": false
+  "production_code_changed": false,
+  "remaining_uncertainty": "The corrected regression witness has not yet been executed in a complete repository worktree; rerun CI after upload."
 }

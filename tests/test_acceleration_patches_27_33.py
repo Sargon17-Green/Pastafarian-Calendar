@@ -159,23 +159,39 @@ print(json.dumps(rows, ensure_ascii=False))
             scars._FINAL_RESULTS.maximum = old_maximum
 
     def test_poisoned_checkpoint_is_rejected_then_legacy_year_walk_finishes(self):
-        expected_ctx = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY + 1000)
+        # Derive the witness from the current Year 5000 anchor instead of a
+        # fixed Foundation+1000 offset.  The saved-sum correction changed the
+        # anchor geometry, so the old fixed target could leave the injected
+        # checkpoint no closer than the anchor and classify it as a miss.
+        seed_ctx = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY)
+        seed_manager = FinalSpaghettiIntegrationManager(seed_ctx)
+        seed_anchor = seed_manager.year5000(FOUNDATION_DAY)
+        target_day = seed_anchor.close_gate_day + 1
+
+        expected_ctx = MonsterContext(FOUNDATION_DAY, target_day)
         expected_manager = FinalSpaghettiIntegrationManager(expected_ctx)
         with acceleration_mode(False):
             expected = expected_manager.findTargetYear(
                 FOUNDATION_DAY,
-                FOUNDATION_DAY + 1000,
+                target_day,
             )
 
-        ctx = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY + 1000)
+        ctx = MonsterContext(FOUNDATION_DAY, target_day)
         ctx.acceleration_scars.enabled = True
         manager = FinalSpaghettiIntegrationManager(ctx)
         anchor = manager.year5000(FOUNDATION_DAY)
+        self.assertEqual(target_day, anchor.close_gate_day + 1)
+
+        # Make the false checkpoint claim an exact (distance-zero) hit for the
+        # target while retaining Year 5000 gate indices.  It must therefore be
+        # selected ahead of the anchor (distance one), then fail gate-boundary
+        # validation and be recorded as rejected/poisoned before the legacy
+        # year walk finishes normally.
         bad = YearCheckpoint(
             calculation_day=FOUNDATION_DAY,
             year_number=5001,
-            first_day=anchor.open_gate_day + 2,
-            last_day=anchor.close_gate_day + 2000,
+            first_day=target_day,
+            last_day=target_day,
             open_gate_index=anchor.open_gate_index,
             close_gate_index=anchor.close_gate_index,
             relevant_gate_index=anchor.open_gate_index,
@@ -185,7 +201,7 @@ print(json.dumps(rows, ensure_ascii=False))
 
         actual = manager.findTargetYear(
             FOUNDATION_DAY,
-            FOUNDATION_DAY + 1000,
+            target_day,
         )
         self.assertEqual(actual, expected)
         self.assertGreaterEqual(ctx.acceleration_scars.checkpoint_rejected, 1)

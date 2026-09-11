@@ -1,73 +1,38 @@
-# Python+Türkçe — kanonik saved-sum düzeltme deltası
+# Python+Türkçe — Patch 28 checkpoint regression test follow-up
 
-Bu paket `Sargon17-Green/Pastafarian-Calendar` deposundaki `Python+Türkçe` dalına,
-`cdb1033ac19f78acf16aedc769efba81052f2c5c` tabanı üzerine uygulanmak üzere hazırlanmıştır.
-Gözlenen HEAD, beklenen HEAD ile aynıdır.
+Repository: `Sargon17-Green/Pastafarian-Calendar`
+Branch: `Python+Türkçe`
+Base/observed HEAD: `e65a951a2fb80a85bcef7c4019c1eb8e110a9ed2`
 
-## Sonuç
+## Scope
 
-Düzeltme gereklidir. Dalın temel post-stir yordamı `postStirRoundExact` zaten doğru
-saved-sum kuralını uyguluyordu; ancak güncel üretim entegrasyonu tarihsel
-`corrective56_raw_bowlsum=True` yolunu etkinleştirerek sonucu noncanonical raw-sum
-varyantına çeviriyordu. Bu delta, üretim ve normative/reference yollarını yeniden
-kanonik saved-sum semantiğine bağlar ve raw-sum yordamını yalnız açıkça işaretli
-regresyon mutantı olarak bırakır.
+This follow-up changes only `tests/test_acceleration_patches_27_33.py`.
+No production/calendar/acceleration implementation is changed.
 
-Kanonik tur:
+The prior CI run passed 409/410 tests.  The only failure was
+`test_poisoned_checkpoint_is_rejected_then_legacy_year_walk_finishes`.
+The saved-sum correction changed the Year 5000 anchor geometry, so the old
+fixed target `FOUNDATION_DAY + 1000` could make the injected checkpoint no
+closer than the anchor.  In that case the acceleration layer correctly
+classified it as a miss instead of selecting it and later recording a poisoned
+checkpoint rejection.
 
-```text
-S = sum(oldBowls)
-R = SAVE(S + 149*r)
-rank = 1 + ((R - 1) mod 720)
-u = old[B] + 3*old[P] + 5*old[N] + R + r + position^2
-new[B] = SAVE(u^2 + 7*old[P]*old[N])
-```
+## Test witness correction
 
-Altı `new[B]` aynı `oldBowls` snapshot'ını okur ve birlikte commit edilir.
+The revised test derives a target from the current anchor:
 
-## Discriminator kanıtı
+`target_day = anchor.close_gate_day + 1`
 
-Gerçekten çalıştırılan hedefli örnek:
+The injected false checkpoint claims an exact distance-zero hit for that target
+while retaining the Year 5000 gate indices.  Therefore it must be selected over
+the anchor (distance one), fail gate-boundary validation, be recorded as
+rejected/poisoned, and then fall back to the legacy year walk.
 
-- old bowls: `(0, 11, 13, 17, 19, 23, 29)`
-- `r = 1`
-- `S = 112`
-- `R = 261`
-- permutation rank: `261`
-- permutation: `(3, 1, 6, 4, 2, 5)`
-- kanonik/üretim sonucu: `(0, 227180, 225843, 164987, 204240, 199572, 184647)`
-- raw-sum mutant sonucu: `(0, 108427, 107388, 66796, 92639, 89163, 79304)`
+## Validation performed locally
 
-Böylece `S != R`, permutation aynı `R` üzerinden seçilir ve fark yalnız yanlış
-raw `S` teriminin `u` içine sokulmasıyla ortaya çıkar. Mutant öldürülür.
+- Python syntax compilation of the changed test file: PASS.
+- Branch HEAD revalidated before packaging: exact match with the base above.
+- Full repository test execution was not possible in the local packaging
+  environment; the GitHub Actions workflow should be rerun after upload.
 
-## Yerel doğrulama
-
-Gerçekten çalıştırılan kontroller ve sonuçları `artifacts/canonical-saved-sum/LOCAL_EXECUTION_LOG.txt`
-içinde ayrıntılıdır. Özet:
-
-- değiştirilen Python dosyaları için `py_compile`: PASS;
-- gerçek `postStirRoundExact` üzerinde hedefli saved-sum/raw-sum discriminator: PASS;
-- dört deterministik oracle uyumluluk vakası: PASS;
-- drop 46 sonrası bowls + 12 turun her biri için bağımsız intermediate witness üretimi: PASS;
-- production raw-flag/import izolasyon taraması: PASS;
-- semantic-cache fingerprint değişikliği denetimi: PASS;
-- dal ağacında browser/JS/service-worker/public-site yolu bulunmadığının denetimi: PASS.
-
-Tam native repository suite bu paket hazırlanırken çalıştırılmadı. Tam checkout üzerinde
-çalıştırılmak üzere güncellenmiş GitHub Actions işi; historical regressions, Stage 54,
-Stage 55, saved-sum discriminator ve acceleration/cache testlerini içerir. Çalıştırılmamış
-kontroller manifestte açıkça `prepared_but_not_run` altında listelenmiştir; hiçbiri PASS
-olarak sunulmaz.
-
-## Tarihsel materyal
-
-Eski corrective-56 raw-sum raporu ve witness dosyaları silinmez; başlarına/açıklamalarına
-`HISTORICAL — SUPERSEDED` / `HISTORICAL_SUPERSEDED=YES` işaretleri eklenmiştir.
-Raw-sum kodu yalnız `post_stir_bowlsum_detour.py` içinde kasıtlı test mutantı olarak tutulur.
-
-## Uygulama
-
-ZIP içeriğini depo köküne göre overlay olarak açın. Silinmesi gereken yol yoktur; bu nedenle
-`DELETE_PATHS.txt` kasıtlı olarak yoktur. `.git`, build cache, editor dosyaları ve hiçbir
-`HANDOFF_*` dosyası pakete dahil değildir.
+No deletions. No commit or push was performed.
