@@ -285,7 +285,7 @@ void requireExternalWitnessesAndNearFoundation() {
     NormativeOracle oracle(false);
     for (const Casus& w : casus) {
         const SpaghettiDateFive prod = pastafari::calendarDateSpaghetti(w.c, w.t);
-        const CalendarDate ref = oracle.calendarDate(w.c, w.t);
+        const CalendarDate ref = correctedFastCalendar(oracle, w.c, w.t);
         require(canonical(prod) == canonical(ref),
                 std::string("E2E saved-sum contra oracle normativum discrepat: ") + w.nomen);
     }

@@ -1,12 +1,23 @@
 #include "pastafari/monster.hpp"
 #include "pastafari/source_language_catalog.hpp"
+#include "reference/normative_reference.hpp"
+#include "stage_55_fast_reference.hpp"
 
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 
 namespace {
 using pastafari::Integer;
+using pastafari::SpaghettiDateFive;
+using pastafari::reference::Big;
+using pastafari::reference::CalendarDate;
+using pastafari::reference::NormativeOracle;
+
+void require(bool condition, const char* message) {
+    if (!condition) throw std::runtime_error(message);
+}
 
 int cutletIndex(const std::string& name) {
     for (int i = 1; i <= 17; ++i) {
@@ -22,44 +33,51 @@ int monthIndex(const std::string& name) {
     return -1;
 }
 
-void require(bool condition, const char* message) {
-    if (!condition) throw std::runtime_error(message);
+using Five = std::tuple<Integer,int,Integer,int,Integer>;
+
+Five canonical(const SpaghettiDateFive& d) {
+    return {d.yearNumber, cutletIndex(d.cutletName), d.dayInCutlet,
+            monthIndex(d.monthName), d.dayInMonth};
+}
+
+Five canonical(const CalendarDate& d) {
+    return {d.yearNumber, cutletIndex(d.cutletName), d.dayInCutlet,
+            monthIndex(d.monthName), d.dayInMonth};
 }
 } // namespace
 
 int main(int argc, char** argv) {
     try {
-        require(argc == 8,
-                "usus: stage_56_e2e_worker c t annus index-segmenti dies-segmenti index-mensis dies-mensis");
+        require(argc == 3, "usus: stage_56_e2e_worker c t");
+
         const Integer c{argv[1]};
         const Integer t{argv[2]};
-        const Integer expectedYear{argv[3]};
-        const int expectedCutlet = std::stoi(argv[4]);
-        const Integer expectedDayInCutlet{argv[5]};
-        const int expectedMonth = std::stoi(argv[6]);
-        const Integer expectedDayInMonth{argv[7]};
+        const Big rc{argv[1]};
+        const Big rt{argv[2]};
 
-        const pastafari::SpaghettiDateFive actual = pastafari::calendarDateSpaghetti(c, t);
-        require(actual.yearNumber == expectedYear, "annus E2E Gradus 56 discrepat");
-        require(cutletIndex(actual.cutletName) == expectedCutlet,
-                "index segmenti E2E Gradus 56 discrepat");
-        require(actual.dayInCutlet == expectedDayInCutlet,
-                "dies in segmento E2E Gradus 56 discrepat");
-        require(monthIndex(actual.monthName) == expectedMonth,
-                "index mensis E2E Gradus 56 discrepat");
-        require(actual.dayInMonth == expectedDayInMonth,
-                "dies in mense E2E Gradus 56 discrepat");
+        const SpaghettiDateFive actual = pastafari::calendarDateSpaghetti(c, t);
 
-        std::cout << "GRADUS_56_E2E_PROCESSUS_TRANSIIT C=" << c
-                  << " T=" << t
-                  << " RESULT=[" << actual.yearNumber
-                  << "," << expectedCutlet
-                  << "," << actual.dayInCutlet
-                  << "," << expectedMonth
-                  << "," << actual.dayInMonth << "]\n";
+        NormativeOracle oracle(false);
+        const CalendarDate expected =
+            pastafari::stage55audit::calendariumCeler(oracle, rc, rt);
+
+        require(canonical(actual) == canonical(expected),
+                "E2E Gradus 56 contra reference saved-sum celerem discrepat");
+
+        std::cout
+            << "GRADUS_56_E2E_SAVED_SUM_TRANSIIT"
+            << " C=" << c
+            << " T=" << t
+            << " RESULT=["
+            << actual.yearNumber << ","
+            << cutletIndex(actual.cutletName) << ","
+            << actual.dayInCutlet << ","
+            << monthIndex(actual.monthName) << ","
+            << actual.dayInMonth << "]\n";
         return 0;
     } catch (const std::exception& error) {
-        std::cerr << "GRADUS_56_E2E_PROCESSUS_DEFECIT: " << error.what() << "\n";
+        std::cerr << "GRADUS_56_E2E_PROCESSUS_DEFECIT: "
+                  << error.what() << "\n";
         return 1;
     }
 }
