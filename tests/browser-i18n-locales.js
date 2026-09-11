@@ -85,6 +85,22 @@ const REQUIRED_MESSAGES = Object.freeze([
   'cooking.term.cutlet',
   'cooking.term.monthSlot',
   'cooking.term.measurement',
+  'cooking.term.gateGap',
+  'cooking.term.weaving',
+  'cooking.term.selection',
+  'cooking.term.stream',
+  'cooking.term.initialBowls',
+  'cooking.term.checkpoints',
+  'cooking.term.archaeology',
+  'cooking.term.fromYear',
+  'cooking.term.toYear',
+  'cooking.term.finalYear',
+  'cooking.result.year',
+  'cooking.result.cutlet',
+  'cooking.result.dayInCutlet',
+  'cooking.result.month',
+  'cooking.result.dayInMonth',
+  'cooking.archaeology.note',
 ]);
 
 const sandbox = { Intl, globalThis: null };
@@ -165,6 +181,8 @@ assert.strictEqual(i18n.translate(ie, 'cooking.chapter.gates'), 'Portas');
 assert.strictEqual(i18n.translate(en, 'cooking.title'), 'How this date was cooked');
 assert.strictEqual(i18n.translate(he, 'cooking.close'), 'סגור');
 assert.strictEqual(i18n.translate(he, 'cooking.term.gate'), 'שער');
+assert.strictEqual(i18n.translate(he, 'cooking.term.gateGap'), 'מרווח שער');
+assert.strictEqual(i18n.translate(he, 'cooking.term.archaeology'), 'ארכאולוגיה היסטורית');
 assert.strictEqual(i18n.translate(ar, 'cooking.chapter.result'), 'النتيجة');
 assert.strictEqual(i18n.translate(ar, 'cooking.term.stone'), 'حجر');
 

@@ -45,7 +45,7 @@ class FakeWorker {
         }
         envelope.kind = 'result';
         envelope.value = {
-          schemaVersion: '0.3.0',
+          schemaVersion: '0.4.0',
           inputs: { calculationDay: message.calculationDay, targetDay: message.targetDay },
           finalResult: { year: '5000' },
         };
@@ -122,7 +122,7 @@ const PastafariEngineClient = engineApi.PastafariEngineClient;
     gateDetailGateIndices: [2n, -3n],
     onGateSauceDetail(chunk) { gateChunks.push(chunk); },
   });
-  assert.strictEqual(cookingTrace.schemaVersion, '0.3.0');
+  assert.strictEqual(cookingTrace.schemaVersion, '0.4.0');
   assert.strictEqual(Object.isFrozen(cookingTrace), true);
   assert.strictEqual(Object.isFrozen(cookingTrace.inputs), true);
   assert.strictEqual(gateChunks.length, 1);

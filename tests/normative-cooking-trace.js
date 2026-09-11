@@ -51,7 +51,7 @@ function assertCentralSauceShape(run) {
 
   assert.deepStrictEqual(resultArray(trace1), before);
   assert.deepStrictEqual(after, before);
-  assert.strictEqual(trace1.schemaVersion, '0.3.0');
+  assert.strictEqual(trace1.schemaVersion, '0.4.0');
   assert.strictEqual(trace1.semanticProfile, 'PASTAFARIAN_STAGE57_STAGE56_RAW_SUM');
 
   assertNoBigInt(trace1);
@@ -71,6 +71,25 @@ function assertCentralSauceShape(run) {
 
   assert.ok(trace1.artifacts.stoneTable);
   assert.strictEqual(trace1.artifacts.stoneTable.rows.length, 46);
+
+  const cutlets = trace1.artifacts.structure.cutlets;
+  assert.strictEqual(cutlets.items.length, cutlets.count);
+  for (const item of cutlets.items) {
+    assert.strictEqual(item.sourceName, core.textByCanonicalIndex('cutlet', item.nameCanonicalIndex));
+  }
+  const months = trace1.artifacts.structure.months;
+  assert.strictEqual(months.items.length, months.count);
+  assert.strictEqual(months.items.length, months.lengths.length);
+  assert.ok(months.weaving.length >= months.items.length);
+  const structureYearLength = BigInt(trace1.artifacts.structure.year.closeDay)
+    - BigInt(trace1.artifacts.structure.year.openDay);
+  assert.strictEqual(months.weaving.length, Number(structureYearLength));
+  for (const item of months.items) {
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(item, 'weaving'), false);
+    assert.strictEqual(item.sourceName, core.textByCanonicalIndex('month', item.nameCanonicalIndex));
+    assert.strictEqual(item.length, months.lengths[item.slot - 1]);
+  }
+
   assert.ok(trace1.artifacts.sauceRuns.length >= 2);
   trace1.artifacts.sauceRuns.forEach(assertCentralSauceShape);
 

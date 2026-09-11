@@ -2,7 +2,7 @@
 
 const core = require('./index');
 
-const TRACE_SCHEMA_VERSION = '0.3.0';
+const TRACE_SCHEMA_VERSION = '0.4.0';
 const TRACE_SEMANTIC_PROFILE = 'PASTAFARIAN_STAGE57_STAGE56_RAW_SUM';
 const FOUNDATION_DAY = core.FOUNDATION_DAY_OLD;
 
@@ -722,6 +722,7 @@ function projectStructure(context, centralSauces) {
       nameCanonicalIndices: structure.cutletNameIndices.slice(),
       items: structure.cutlets.map((row) => ({
         nameCanonicalIndex: row.nameIndex,
+        sourceName: core.textByCanonicalIndex('cutlet', row.nameIndex),
         openGateIndex: row.openGateIndex,
         closeGateIndex: row.closeGateIndex,
         firstDay: row.firstDay,
@@ -745,6 +746,12 @@ function projectStructure(context, centralSauces) {
       lengths: structure.monthLengths.slice(),
       weaving: structure.monthWeaving.slice(),
       nameCanonicalIndices: structure.monthNameIndices.slice(),
+      items: structure.monthLengths.map((length, index) => ({
+        slot: index + 1,
+        length,
+        nameCanonicalIndex: structure.monthNameIndices[index],
+        sourceName: core.textByCanonicalIndex('month', structure.monthNameIndices[index]),
+      })),
       countStream: streamForSeal(context, 30),
       lengthStream: streamForSeal(context, 31),
       lengthSelection: monthLengths ? {

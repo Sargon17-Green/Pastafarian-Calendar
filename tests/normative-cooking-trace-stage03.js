@@ -108,7 +108,7 @@ function assertSelectionRunEncoding(trace) {
   const ordinaryAfter = core.calendarDateSpaghetti(c, t);
 
   assert.deepStrictEqual(ordinaryAfter, ordinaryBefore);
-  assert.strictEqual(trace.schemaVersion, '0.3.0');
+  assert.strictEqual(trace.schemaVersion, '0.4.0');
   assert.deepStrictEqual(trace.coverage.missingCoreCheckpoints, []);
   assert.strictEqual(trace.coverage.gateSauceDetail, 'selected-gates-streamed-from-same-execution');
   assert.strictEqual(trace.coverage.gateSauceDetailTransport, 'one-json-safe-chunk-per-gate-sauce');

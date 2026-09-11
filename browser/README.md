@@ -225,3 +225,25 @@ es solmen presentation-state del cooking component e ne es li ordinari calendar 
 Li region de trace es ARIA-labelled. Escape clude it, e quande it es usat intra
 `<pastafari-date>` li focus retorna al buton quel apertet it. Li buton expone anc
 `aria-controls` e `aria-expanded` por li actual relation con li trace-region.
+
+### Trace schema 0.4.0 e content-completitá
+
+Li cooking trace 0.4.0 adjunte `sourceName` al projected cutlet items e un separat
+`items` liste por li mensús, derivat directmen ex lor canonic indices in li
+SourceLanguageCatalog. Li mensu-item contene su slot, longore, canonic index e
+source-name; it ne presenta `monthWeaving` quam si it vell esser un proprietá del
+mensu. `monthWeaving` es li real day-per-day intertexe del tot annu e li component
+monstra it in un separat bounded inspector quam `positionInYear` e `monthId`.
+
+Li nov content audit expone anc li materialisat gate-days, semantic selection streams
+e lor lossless rejection-run metadata, Year-5000 selection, authoritative year-walk
+snapshots, Sauce inputs, six initial bowls, final checkpoints, hidden/visible grind
+operands e rules, bowl/post-stir operands, e li semantic selectiones por cutlets e
+mensús. Historic scars resta separat sub un explicit archeologie section e ne es
+presentat quam semantic causes del final resultate.
+
+Lifecycle del gate-detail es generation-guarded anc tra close/reopen, disconnect,
+input changes e asynchronous failure. Un falliment de complet gate-detail ne substitue
+li ja util base trace per un fatal error-panel; it resta un inline error e posse esser
+retryat. Un stale completion ne posse lassar li detail-control permanentmen blocat.
+

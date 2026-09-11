@@ -35,7 +35,7 @@ const context = vm.createContext({
         options.onGateSauceDetail({ kind: 'gate-gap', signedIndex: '2', marker: 'chunk' });
       }
       return {
-        schemaVersion: '0.3.0',
+        schemaVersion: '0.4.0',
         inputs: { calculationDay: String(calculationDay), targetDay: String(targetDay) },
         finalResult: { year: '5000' },
       };
@@ -93,7 +93,7 @@ assert.strictEqual(typeof onMessage, 'function', 'Li Worker entry deve registrar
   } });
   assert.strictEqual(posted.length, 1);
   assert.strictEqual(posted[0].kind, 'result');
-  assert.strictEqual(posted[0].value.schemaVersion, '0.3.0');
+  assert.strictEqual(posted[0].value.schemaVersion, '0.4.0');
   assert.strictEqual(cookingTraceCalls.length, 1);
   assert.strictEqual(cookingTraceCalls[0].calculationDay, 10n);
   assert.strictEqual(cookingTraceCalls[0].targetDay, 2n);

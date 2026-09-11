@@ -112,6 +112,7 @@
       this._sauceState = new Map();
       this._gateDetails = new Map();
       this._gateDetailLoading = null;
+      this._gateDetailError = null;
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -349,6 +350,15 @@
             padding: .55rem .85rem;
           }
           .gate-detail-button[disabled] { opacity: .65; cursor: wait; }
+          .inline-error {
+            margin: .65rem 0 0;
+            padding: .6rem .7rem;
+            border-inline-start: .3rem solid #9b1c1c;
+            background: #fff1f1;
+            color: #651010;
+            font-weight: 700;
+          }
+          .archaeology-note { color: var(--muted); font-style: italic; }
           .result-five {
             display: grid;
             grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -443,6 +453,8 @@
       this._connected = false;
       this._generation += 1;
       this._queuedEpoch = null;
+      this._gateDetailLoading = null;
+      this._gateDetailError = null;
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -454,7 +466,12 @@
       }
       if (name === 'open') {
         if (newValue !== null && this._connected) this._queueLoad();
-        else this._generation += 1;
+        else {
+          this._generation += 1;
+          this._queuedEpoch = null;
+          this._gateDetailLoading = null;
+          this._gateDetailError = null;
+        }
         return;
       }
       if (this._connected && this.hasAttribute('open')) this._queueLoad();
@@ -480,6 +497,8 @@
 
     _queueLoad() {
       if (!this._connected || !this.hasAttribute('open')) return;
+      this._gateDetailLoading = null;
+      this._gateDetailError = null;
       const epoch = ++this._generation;
       this._queuedEpoch = epoch;
       enqueueMicrotask(() => {
@@ -519,30 +538,30 @@
     async load(expectedGeneration) {
       if (!this.hasAttribute('open')) return null;
       const generation = expectedGeneration === undefined ? ++this._generation : expectedGeneration;
-      const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
-      const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
-      const targetJdn = axis.gregorianToJdn(targetDate);
-      const calculationJdn = axis.gregorianToJdn(calculationDate);
-      const inputKey = String(calculationJdn) + ':' + String(targetJdn);
-      if (this._trace && this._traceInputKey === inputKey) {
-        if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
-        this._hideStatus();
-        this._renderState();
-        return this._trace;
-      }
-      const service = serviceApi.getSharedCalendarService();
-      if (!service || typeof service.getCookingTrace !== 'function') {
-        throw new TypeError('Li shared CalendarService ne supporta cooking trace.');
-      }
-
       this._showLoading();
       try {
+        const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
+        const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
+        const targetJdn = axis.gregorianToJdn(targetDate);
+        const calculationJdn = axis.gregorianToJdn(calculationDate);
+        const inputKey = String(calculationJdn) + ':' + String(targetJdn);
+        if (this._trace && this._traceInputKey === inputKey) {
+          if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
+          this._hideStatus();
+          this._renderState();
+          return this._trace;
+        }
+        const service = serviceApi.getSharedCalendarService();
+        if (!service || typeof service.getCookingTrace !== 'function') {
+          throw new TypeError('Li shared CalendarService ne supporta cooking trace.');
+        }
         const trace = await service.getCookingTrace(targetJdn, calculationJdn);
         if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
         this._trace = trace;
         this._traceInputKey = inputKey;
         this._gateDetails.clear();
         this._gateDetailLoading = null;
+        this._gateDetailError = null;
         this._activeChapter = safeArray(trace.chapters).some((row) => row.id === this._activeChapter)
           ? this._activeChapter : 'inputs';
         this._hideStatus();
@@ -675,7 +694,7 @@
       const dl = doc.createElement('dl');
       dl.className = 'kv';
       for (const row of rows) {
-        if (!row || row.value === undefined || row.value === null) continue;
+        if (!row || ((row.value === undefined || row.value === null) && !row.node)) continue;
         const dt = doc.createElement('dt');
         dt.textContent = String(row.label);
         const dd = doc.createElement('dd');
@@ -742,6 +761,18 @@
         { label: 'schemaVersion', value: this._trace.schemaVersion },
         { label: 'semanticProfile', value: this._trace.semanticProfile },
       ]);
+      const coverage = this._trace.coverage;
+      if (coverage) {
+        const card = doc.createElement('section');
+        card.className = 'step-card';
+        this._heading(card, 'coverage', 4);
+        const scalar = Object.entries(coverage).filter(([, value]) => value === null || typeof value !== 'object');
+        this._kv(card, scalar.map(([key, value]) => ({ label: key, value })));
+        for (const [key, value] of Object.entries(coverage)) {
+          if (Array.isArray(value)) this._kv(card, [{ label: key, node: this._arrayValue(value), value: key }]);
+        }
+        pane.append(card);
+      }
     }
 
     _cursor(key, length) {
@@ -779,17 +810,112 @@
       container.append(controls);
     }
 
+    _selectionEvent(sourceLabel, gateIndex = null) {
+      const selections = safeArray(this._trace && this._trace.artifacts && this._trace.artifacts.selections);
+      return selections.find((row) => row
+        && row.sourceLabel === sourceLabel
+        && (gateIndex === null || String(row.gateIndex) === String(gateIndex))) || null;
+    }
+
+    _exactish(value) {
+      return typeof value === 'bigint' || /^-?\d+$/.test(String(value));
+    }
+
+    _renderMiniObject(container, title, value) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+      const mini = doc.createElement('section');
+      mini.className = 'mini';
+      const strong = doc.createElement('strong');
+      strong.textContent = title;
+      mini.append(strong);
+      this._kv(mini, Object.entries(value).map(([key, item]) => ({
+        label: key,
+        value: item,
+        exact: this._exactish(item),
+      })));
+      container.append(mini);
+    }
+
+    _renderSelectionCard(container, title, stream = null, summary = null, event = null) {
+      if (!stream && !summary && !event) return;
+      const card = doc.createElement('section');
+      card.className = 'step-card';
+      this._heading(card, this._term('selection') + ' · ' + String(title), 4);
+
+      const actualStream = stream || (event && event.stream) || null;
+      if (actualStream) {
+        this._heading(card, this._term('stream'), 4);
+        this._kv(card, [
+          { label: 'first', value: actualStream.first, exact: true },
+          { label: 'directionStep', value: actualStream.directionStep, exact: true },
+        ]);
+      }
+
+      if (summary && typeof summary === 'object') {
+        this._kv(card, Object.entries(summary).map(([key, value]) => ({
+          label: key,
+          value,
+          exact: this._exactish(value),
+        })));
+      }
+
+      if (event) {
+        const rows = [
+          ['sourceLabel', event.sourceLabel, false],
+          ['mode', event.mode, false],
+          ['familySize', event.familySize, true],
+          ['places', event.places, true],
+          ['space', event.space, true],
+          ['acceptanceLimit', event.acceptanceLimit, true],
+          ['firstCandidate', event.firstCandidate, true],
+          ['initialWide', event.initialWide, true],
+          ['rejectionSteps', event.rejectionSteps, true],
+          ['acceptedCandidate', event.acceptedCandidate, true],
+          ['output', event.output, true],
+        ].map(([label, value, exact]) => ({ label, value, exact }));
+        this._kv(card, rows);
+        if (safeArray(event.digits).length) {
+          this._kv(card, [{ label: 'digits', node: this._arrayValue(event.digits, true), value: 'digits' }]);
+        }
+        if (event.rejectionEncoding) {
+          const grid = doc.createElement('div');
+          grid.className = 'mini-grid';
+          this._renderMiniObject(grid, 'rejectionEncoding', event.rejectionEncoding);
+          card.append(grid);
+        }
+      }
+      container.append(card);
+    }
+
     _renderGates(pane) {
-      const gaps = safeArray(this._trace.artifacts && this._trace.artifacts.gateNetwork
-        && this._trace.artifacts.gateNetwork.gaps);
-      if (!gaps.length) return this._empty(pane);
-      const key = 'gates';
+      const network = this._trace.artifacts && this._trace.artifacts.gateNetwork;
+      const gates = safeArray(network && network.gates);
+      const gaps = safeArray(network && network.gaps);
+      if (!gates.length && !gaps.length) return this._empty(pane);
+
+      if (gates.length) {
+        const gateKey = 'gatePoints';
+        const gateIndex = this._cursor(gateKey, gates.length);
+        this._stepControls(pane, gateKey, gates.length, () => this._renderChapter());
+        const gate = gates[gateIndex];
+        const gateCard = doc.createElement('section');
+        gateCard.className = 'step-card';
+        this._heading(gateCard, this._term('gate') + ' ' + String(gate.index), 4);
+        this._kv(gateCard, [
+          { label: 'index', value: gate.index, exact: true },
+          { label: 'day', value: gate.day, exact: true },
+        ]);
+        pane.append(gateCard);
+      }
+
+      if (!gaps.length) return;
+      const key = 'gateGaps';
       const index = this._cursor(key, gaps.length);
       this._stepControls(pane, key, gaps.length, () => this._renderChapter());
       const gap = gaps[index];
       const card = doc.createElement('section');
       card.className = 'step-card';
-      this._heading(card, this._term('gate') + ' ' + String(gap.signedIndex), 4);
+      this._heading(card, this._term('gateGap') + ' ' + String(gap.signedIndex), 4);
       this._kv(card, [
         { label: 'signedIndex', value: gap.signedIndex, exact: true },
         { label: 'gap', value: gap.gap, exact: true },
@@ -800,8 +926,8 @@
         this._heading(card, this._term('compactSauce'), 4);
         this._renderCounters(card, gap.sauceSummary.counters);
         this._kv(card, [
-          { label: 'orderAtDrop46', node: this._arrayValue(gap.sauceSummary.orderAtDrop46) },
-          { label: 'finalBowls', node: this._arrayValue(gap.sauceSummary.finalBowls, true) },
+          { label: 'orderAtDrop46', node: this._arrayValue(gap.sauceSummary.orderAtDrop46), value: 'orderAtDrop46' },
+          { label: 'finalBowls', node: this._arrayValue(gap.sauceSummary.finalBowls, true), value: 'finalBowls' },
         ]);
       }
       const detail = this._gateDetails.get(String(gap.signedIndex));
@@ -817,8 +943,18 @@
         button.disabled = this._gateDetailLoading !== null;
         button.addEventListener('click', () => this._loadGateDetail(String(gap.signedIndex)).catch(() => {}));
         card.append(button);
+        if (this._gateDetailError && this._gateDetailError.signedIndex === String(gap.signedIndex)) {
+          const error = doc.createElement('p');
+          error.className = 'inline-error';
+          error.setAttribute('role', 'alert');
+          error.textContent = this._t('cooking.error');
+          card.append(error);
+        }
       }
       pane.append(card);
+
+      const selection = this._selectionEvent('gate-gap', gap.signedIndex);
+      this._renderSelectionCard(pane, 'gate-gap', selection && selection.stream, null, selection);
     }
 
     async _loadGateDetail(signedIndex) {
@@ -832,6 +968,7 @@
       const service = serviceApi.getSharedCalendarService();
       let chunk = null;
       this._gateDetailLoading = signedIndex;
+      this._gateDetailError = null;
       this._renderChapter();
       try {
         const nextTrace = await service.getCookingTrace(targetJdn, calculationJdn, {
@@ -848,23 +985,29 @@
         this._gateDetails.clear();
         this._gateDetails.set(signedIndex, chunk);
         this._gateDetailLoading = null;
+        this._gateDetailError = null;
         this._renderNav();
         this._renderChapter();
         return chunk;
       } catch (error) {
-        if (generation === this._generation) {
+        if (generation === this._generation && this._connected && this.hasAttribute('open')) {
           this._gateDetailLoading = null;
-          this._showError(error);
+          this._gateDetailError = { signedIndex: String(signedIndex) };
+          this._renderChapter();
+          if (root.console && typeof root.console.error === 'function') root.console.error(error);
         }
         throw error;
       }
     }
 
     _renderYear5000(pane) {
-      const year = this._trace.artifacts && this._trace.artifacts.yearWalk
-        ? this._trace.artifacts.yearWalk.year5000 : null;
+      const yearWalk = this._trace.artifacts && this._trace.artifacts.yearWalk;
+      const year = yearWalk ? yearWalk.year5000 : null;
       if (!year) return this._empty(pane);
+      if (yearWalk.interval) this._kv(pane, [{ label: 'interval', value: yearWalk.interval }]);
       this._renderYearCard(pane, year, this._t('cooking.chapter.year5000'));
+      const selection = this._selectionEvent('YEAR_5000-semantic');
+      this._renderSelectionCard(pane, 'YEAR_5000-semantic', selection && selection.stream, null, selection);
       const run = safeArray(this._trace.artifacts.sauceRuns).find((item) => item.role && item.role.kind === 'year-5000');
       if (run) this._renderSauceInspector(pane, run, run.id);
     }
@@ -885,11 +1028,24 @@
     }
 
     _renderYearWalk(pane) {
-      const transitions = safeArray(this._trace.artifacts && this._trace.artifacts.yearWalk
-        && this._trace.artifacts.yearWalk.transitions);
+      const yearWalk = this._trace.artifacts && this._trace.artifacts.yearWalk;
+      const transitions = safeArray(yearWalk && yearWalk.transitions);
+      if (yearWalk && yearWalk.interval) this._kv(pane, [{ label: 'interval', value: yearWalk.interval }]);
+      const authoritativeYears = safeArray(yearWalk && yearWalk.authoritativeYears);
+      if (authoritativeYears.length) {
+        const authKey = 'authoritativeYears';
+        const authIndex = this._cursor(authKey, authoritativeYears.length);
+        this._stepControls(pane, authKey, authoritativeYears.length, () => this._renderChapter());
+        const authoritative = authoritativeYears[authIndex];
+        const card = doc.createElement('section');
+        card.className = 'step-card';
+        this._heading(card, this._term('year'), 4);
+        this._kv(card, [{ label: 'lineage', value: authoritative.lineage }]);
+        pane.append(card);
+        if (authoritative.year) this._renderYearCard(pane, authoritative.year, this._term('year'));
+      }
       if (!transitions.length) {
-        const finalYear = this._trace.artifacts && this._trace.artifacts.yearWalk
-          ? this._trace.artifacts.yearWalk.finalYear : null;
+        const finalYear = yearWalk ? yearWalk.finalYear : null;
         if (finalYear) this._renderYearCard(pane, finalYear, this._t('cooking.noYearWalk'));
         return;
       }
@@ -902,17 +1058,25 @@
       this._heading(card, String(transition.direction) + ' · ' + String(transition.fromYear.number)
         + ' → ' + String(transition.toYear.number), 4);
       this._kv(card, [
+        { label: 'direction', value: transition.direction },
         { label: 'sharedDay', value: transition.sharedDay, exact: true },
         { label: 'sauceRunId', value: transition.sauceRunId || '—' },
       ]);
       pane.append(card);
+      this._renderYearCard(pane, transition.fromYear, this._term('fromYear'));
+      this._renderYearCard(pane, transition.toYear, this._term('toYear'));
+      if (yearWalk && yearWalk.finalYear && index === transitions.length - 1) {
+        this._renderYearCard(pane, yearWalk.finalYear, this._term('finalYear'));
+      }
       const run = findSauce(this._trace, transition.sauceRunId);
       if (run) this._renderSauceInspector(pane, run, run.id);
     }
 
     _renderStructureSauce(pane) {
+      const structure = this._trace.artifacts && this._trace.artifacts.structure;
       const run = safeArray(this._trace.artifacts && this._trace.artifacts.sauceRuns)
         .find((item) => item.role && item.role.kind === 'year-structure');
+      if (structure && structure.year) this._renderYearCard(pane, structure.year, this._term('year'));
       if (!run) return this._empty(pane);
       this._renderSauceInspector(pane, run, run.id);
     }
@@ -933,12 +1097,53 @@
       return existing;
     }
 
+    _renderInitialBowls(container, run) {
+      const rows = safeArray(run && run.initialBowls);
+      if (!rows.length) return;
+      this._heading(container, this._term('initialBowls'), 4);
+      const grid = doc.createElement('div');
+      grid.className = 'mini-grid';
+      for (const row of rows) {
+        const mini = doc.createElement('section');
+        mini.className = 'mini';
+        const strong = doc.createElement('strong');
+        strong.textContent = this._term('bowl') + ' ' + String(row.bowlId);
+        mini.append(strong);
+        this._kv(mini, [
+          { label: 'prime', value: row.prime, exact: true },
+          { label: 'seed', value: row.seed, exact: true },
+          { label: 'rawBeforeSave', value: row.rawBeforeSave, exact: true },
+          { label: 'output', value: row.output, exact: true },
+        ]);
+        grid.append(mini);
+      }
+      container.append(grid);
+    }
+
+    _renderSauceCheckpoints(container, run) {
+      this._heading(container, this._term('checkpoints'), 4);
+      this._kv(container, [
+        { label: 'orderAtDrop46', node: this._arrayValue(run.orderAtDrop46), value: 'orderAtDrop46' },
+        { label: 'bowlsAfterDrops', node: this._arrayValue(run.bowlsAfterDrops, true), value: 'bowlsAfterDrops' },
+        { label: 'finalBowls', node: this._arrayValue(run.finalBowls, true), value: 'finalBowls' },
+      ]);
+    }
+
     _renderSauceInspector(container, run, scope) {
       const sauce = doc.createElement('section');
       sauce.className = 'sauce';
       const role = run.role && run.role.kind ? String(run.role.kind) : 'Sauce';
       this._heading(sauce, this._term('sauce') + ' · ' + role, 4);
+      if (run.inputs) {
+        this._kv(sauce, [
+          { label: 'calculationDay', value: run.inputs.calculationDay, exact: true },
+          { label: 'targetDay', value: run.inputs.targetDay, exact: true },
+          { label: 'stoneTableRef', value: run.stoneTableRef },
+        ]);
+      }
       this._renderCounters(sauce, run.counters);
+      this._renderInitialBowls(sauce, run);
+      this._renderSauceCheckpoints(sauce, run);
 
       const phases = ['stones', 'hidden', 'visible', 'bowls', 'postStirs'];
       const state = this._sauceStateFor(scope, phases);
@@ -1005,17 +1210,9 @@
         grid.className = 'mini-grid';
         for (const [label, values] of [
           ['before', row.transition.before],
-          ['raw before SAVE', row.transition.rawBeforeSave],
+          ['rawBeforeSave', row.transition.rawBeforeSave],
           ['after', row.transition.after],
-        ]) {
-          const mini = doc.createElement('section');
-          mini.className = 'mini';
-          const strong = doc.createElement('strong');
-          strong.textContent = label;
-          mini.append(strong);
-          this._kv(mini, Object.entries(values || {}).map(([key, value]) => ({ label: key, value, exact: true })));
-          grid.append(mini);
-        }
+        ]) this._renderMiniObject(grid, label, values);
         container.append(grid);
       }
     }
@@ -1027,6 +1224,11 @@
         { label: 'rawBeforeSave', value: row.rawBeforeSave, exact: true },
         { label: 'initial', value: row.initial, exact: true },
       ]);
+      const grid = doc.createElement('div');
+      grid.className = 'mini-grid';
+      this._renderMiniObject(grid, 'coefficients', row.coefficients);
+      this._renderMiniObject(grid, 'stoneRow', row.stoneRow);
+      if (grid.children.length) container.append(grid);
       this._renderGrinds(container, row.grinds);
     }
 
@@ -1040,6 +1242,10 @@
         { label: 'rawBeforeSave', value: row.rawBeforeSave, exact: true },
         { label: 'initial', value: row.initial, exact: true },
       ]);
+      const grid = doc.createElement('div');
+      grid.className = 'mini-grid';
+      this._renderMiniObject(grid, 'stoneRow', row.stoneRow);
+      if (grid.children.length) container.append(grid);
       this._renderGrinds(container, row.grinds);
     }
 
@@ -1053,9 +1259,16 @@
         li.append(title);
         this._kv(li, [
           { label: 'before', value: grind.before, exact: true },
+          { label: 'stoneKind', value: grind.stoneKind },
           { label: 'stoneValue', value: grind.stoneValue, exact: true },
           { label: 'after', value: grind.after, exact: true },
         ]);
+        if (grind.rule) {
+          const grid = doc.createElement('div');
+          grid.className = 'mini-grid';
+          this._renderMiniObject(grid, 'rule', grind.rule);
+          li.append(grid);
+        }
         list.append(li);
       }
       container.append(list);
@@ -1065,11 +1278,15 @@
       this._heading(container, this._term('bowlRound') + ' ' + String(row.ordinal), 4);
       this._kv(container, [
         { label: 'drop', value: row.drop, exact: true },
-        { label: 'order', node: this._arrayValue(row.order) },
-        { label: 'poursByPosition', node: this._arrayValue(row.poursByPosition, true) },
-        { label: 'beforeBowls', node: this._arrayValue(row.beforeBowls, true) },
-        { label: 'afterBowls', node: this._arrayValue(row.afterBowls, true) },
+        { label: 'order', node: this._arrayValue(row.order), value: 'order' },
+        { label: 'poursByPosition', node: this._arrayValue(row.poursByPosition, true), value: 'poursByPosition' },
+        { label: 'beforeBowls', node: this._arrayValue(row.beforeBowls, true), value: 'beforeBowls' },
+        { label: 'afterBowls', node: this._arrayValue(row.afterBowls, true), value: 'afterBowls' },
       ]);
+      const stoneGrid = doc.createElement('div');
+      stoneGrid.className = 'mini-grid';
+      this._renderMiniObject(stoneGrid, 'stoneRow', row.stoneRow);
+      if (stoneGrid.children.length) container.append(stoneGrid);
       const list = doc.createElement('ol');
       list.className = 'sequence';
       for (const position of safeArray(row.positions)) {
@@ -1078,7 +1295,8 @@
         strong.textContent = this._term('position') + ' ' + String(position.position) + ' · ' + this._term('bowl') + ' ' + String(position.bowlId);
         li.append(strong);
         this._kv(li, [
-          { label: 'prevId / nextId', value: String(position.prevId) + ' / ' + String(position.nextId) },
+          { label: 'prevId', value: position.prevId },
+          { label: 'nextId', value: position.nextId },
           { label: 'stoneKind', value: position.stoneKind },
           { label: 'mixed', value: position.mixed, exact: true },
           { label: 'rawBeforeSave', value: position.rawBeforeSave, exact: true },
@@ -1094,9 +1312,9 @@
       this._kv(container, [
         { label: 'rawBowlSum', value: row.rawBowlSum, exact: true },
         { label: 'savedOrderNumber', value: row.savedOrderNumber, exact: true },
-        { label: 'order', node: this._arrayValue(row.order) },
-        { label: 'beforeBowls', node: this._arrayValue(row.beforeBowls, true) },
-        { label: 'afterBowls', node: this._arrayValue(row.afterBowls, true) },
+        { label: 'order', node: this._arrayValue(row.order), value: 'order' },
+        { label: 'beforeBowls', node: this._arrayValue(row.beforeBowls, true), value: 'beforeBowls' },
+        { label: 'afterBowls', node: this._arrayValue(row.afterBowls, true), value: 'afterBowls' },
       ]);
       const list = doc.createElement('ol');
       list.className = 'sequence';
@@ -1106,6 +1324,11 @@
         strong.textContent = this._term('position') + ' ' + String(position.position) + ' · ' + this._term('bowl') + ' ' + String(position.bowlId);
         li.append(strong);
         this._kv(li, [
+          { label: 'prevId', value: position.prevId },
+          { label: 'nextId', value: position.nextId },
+          { label: 'oldBowl', value: position.oldBowl, exact: true },
+          { label: 'oldPrev', value: position.oldPrev, exact: true },
+          { label: 'oldNext', value: position.oldNext, exact: true },
           { label: 'u', value: position.u, exact: true },
           { label: 'rawBeforeSave', value: position.rawBeforeSave, exact: true },
           { label: 'output', value: position.output, exact: true },
@@ -1121,9 +1344,13 @@
       if (!cutlets) return this._empty(pane);
       this._kv(pane, [
         { label: 'count', value: cutlets.count },
-        { label: 'partition', node: this._arrayValue(cutlets.partition) },
-        { label: 'nameCanonicalIndices', node: this._arrayValue(cutlets.nameCanonicalIndices) },
+        { label: 'partition', node: this._arrayValue(cutlets.partition), value: 'partition' },
+        { label: 'nameCanonicalIndices', node: this._arrayValue(cutlets.nameCanonicalIndices), value: 'nameCanonicalIndices' },
       ]);
+      this._renderSelectionCard(pane, 'cutlet-count', cutlets.countStream, null, this._selectionEvent('cutlet-count'));
+      this._renderSelectionCard(pane, 'cutlet-partition-semantic', cutlets.partitionStream, cutlets.partitionSelection, this._selectionEvent('cutlet-partition-semantic'));
+      this._renderSelectionCard(pane, 'cutlet-names-distinct-rank', cutlets.nameStream, cutlets.nameSelection, this._selectionEvent('cutlet-names-distinct-rank'));
+
       const items = safeArray(cutlets.items);
       if (!items.length) return;
       const key = 'cutlets';
@@ -1132,8 +1359,10 @@
       const item = items[index];
       const card = doc.createElement('section');
       card.className = 'step-card';
-      this._heading(card, this._term('cutlet') + ' ' + String(index + 1), 4);
+      const name = item.sourceName ? i18n.calendarName(this._locale, 'cutlet', item.sourceName) : null;
+      this._heading(card, this._term('cutlet') + ' ' + String(index + 1) + (name ? ' · ' + name : ''), 4);
       this._kv(card, [
+        { label: 'sourceName', value: item.sourceName },
         { label: 'nameCanonicalIndex', value: item.nameCanonicalIndex },
         { label: 'openGateIndex', value: item.openGateIndex, exact: true },
         { label: 'closeGateIndex', value: item.closeGateIndex, exact: true },
@@ -1149,27 +1378,56 @@
       if (!months) return this._empty(pane);
       this._kv(pane, [
         { label: 'count', value: months.count },
-        { label: 'nameCanonicalIndices', node: this._arrayValue(months.nameCanonicalIndices) },
+        { label: 'nameCanonicalIndices', node: this._arrayValue(months.nameCanonicalIndices), value: 'nameCanonicalIndices' },
       ]);
-      const count = Math.max(safeArray(months.lengths).length, safeArray(months.weaving).length);
-      if (!count) return;
-      const key = 'months';
-      const index = this._cursor(key, count);
-      this._stepControls(pane, key, count, () => this._renderChapter());
-      const card = doc.createElement('section');
-      card.className = 'step-card';
-      this._heading(card, this._term('monthSlot') + ' ' + String(index + 1), 4);
-      this._kv(card, [
-        { label: 'length', value: months.lengths[index] },
-        { label: 'weaving', value: months.weaving[index] },
-        { label: 'nameCanonicalIndex', value: months.nameCanonicalIndices[index] },
-      ]);
-      pane.append(card);
+      this._renderSelectionCard(pane, 'month-count', months.countStream, null, this._selectionEvent('month-count'));
+      this._renderSelectionCard(pane, 'month-lengths', months.lengthStream, months.lengthSelection, this._selectionEvent('month-lengths'));
+      this._renderSelectionCard(pane, 'month-weaving', months.weavingStream, months.weavingSelection, this._selectionEvent('month-weaving'));
+      this._renderSelectionCard(pane, 'month-names-distinct-rank', months.nameStream, months.nameSelection, this._selectionEvent('month-names-distinct-rank'));
+
+      const items = safeArray(months.items);
+      const count = items.length || safeArray(months.lengths).length;
+      if (count) {
+        const key = 'months';
+        const index = this._cursor(key, count);
+        this._stepControls(pane, key, count, () => this._renderChapter());
+        const item = items[index] || {
+          slot: index + 1,
+          length: months.lengths[index],
+          nameCanonicalIndex: months.nameCanonicalIndices[index],
+        };
+        const card = doc.createElement('section');
+        card.className = 'step-card';
+        const name = item.sourceName ? i18n.calendarName(this._locale, 'month', item.sourceName) : null;
+        this._heading(card, this._term('monthSlot') + ' ' + String(item.slot || index + 1) + (name ? ' · ' + name : ''), 4);
+        this._kv(card, [
+          { label: 'sourceName', value: item.sourceName },
+          { label: 'length', value: item.length },
+          { label: 'nameCanonicalIndex', value: item.nameCanonicalIndex },
+        ]);
+        pane.append(card);
+      }
+
+      const weaving = safeArray(months.weaving);
+      if (weaving.length) {
+        const weavingKey = 'monthWeaving';
+        const weavingIndex = this._cursor(weavingKey, weaving.length);
+        this._stepControls(pane, weavingKey, weaving.length, () => this._renderChapter());
+        const card = doc.createElement('section');
+        card.className = 'step-card';
+        this._heading(card, this._term('weaving') + ' · ' + String(weavingIndex + 1), 4);
+        this._kv(card, [
+          { label: 'positionInYear', value: weavingIndex + 1 },
+          { label: 'monthId', value: weaving[weavingIndex] },
+        ]);
+        pane.append(card);
+      }
     }
 
     _renderPosition(pane) {
       const position = this._trace.artifacts && this._trace.artifacts.positioning;
       if (!position) return this._empty(pane);
+      if (position.year) this._renderYearCard(pane, position.year, this._term('finalYear'));
       this._kv(pane, [
         { label: 'targetDay', value: position.targetDay, exact: true },
         { label: 'targetPositionInYear', value: position.targetPositionInYear },
@@ -1181,6 +1439,36 @@
       ]);
     }
 
+    _renderArchaeology(container) {
+      const rows = safeArray(this._trace && this._trace.archaeology);
+      if (!rows.length) return;
+      const section = doc.createElement('section');
+      section.className = 'step-card';
+      this._heading(section, this._term('archaeology'), 4);
+      const note = doc.createElement('p');
+      note.className = 'archaeology-note';
+      note.textContent = this._t('cooking.archaeology.note');
+      section.append(note);
+      for (const row of rows) {
+        const item = doc.createElement('section');
+        item.className = 'mini';
+        const strong = doc.createElement('strong');
+        strong.textContent = String(row.kind || 'historical-scar');
+        item.append(strong);
+        const scalarEntries = Object.entries(row).filter(([key, value]) => key !== 'kind'
+          && value !== null && value !== undefined && (typeof value !== 'object'));
+        this._kv(item, scalarEntries.map(([key, value]) => ({
+          label: key,
+          value,
+          exact: this._exactish(value),
+        })));
+        if (row.semanticYear) this._renderYearCard(item, row.semanticYear, 'semanticYear');
+        if (row.ghostYear) this._renderYearCard(item, row.ghostYear, 'ghostYear');
+        section.append(item);
+      }
+      container.append(section);
+    }
+
     _renderResult(pane) {
       const result = this._trace.finalResult;
       if (!result) return this._empty(pane);
@@ -1189,11 +1477,11 @@
       const grid = doc.createElement('div');
       grid.className = 'result-five';
       const values = [
-        ['year', result.year],
-        ['cutlet', cutletName],
-        ['day', result.dayInCutlet],
-        ['month', monthName],
-        ['day', result.dayInMonth],
+        [this._t('cooking.result.year'), result.year],
+        [this._t('cooking.result.cutlet'), cutletName],
+        [this._t('cooking.result.dayInCutlet'), result.dayInCutlet],
+        [this._t('cooking.result.month'), monthName],
+        [this._t('cooking.result.dayInMonth'), result.dayInMonth],
       ];
       for (const [label, value] of values) {
         const box = doc.createElement('div');
@@ -1216,6 +1504,7 @@
         })));
         pane.append(card);
       }
+      this._renderArchaeology(pane);
     }
 
     _empty(container) {

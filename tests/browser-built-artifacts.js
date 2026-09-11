@@ -182,7 +182,7 @@ function evaluateBuiltWorker() {
   assert.strictEqual(traceResponse.ok, true, traceResponse.error && traceResponse.error.message);
   assert.strictEqual(traceResponse.kind, 'result');
   assert.strictEqual(traceResponse.buildId, buildId);
-  assert.strictEqual(traceResponse.value.schemaVersion, '0.3.0');
+  assert.strictEqual(traceResponse.value.schemaVersion, '0.4.0');
   assert.deepStrictEqual(JSON.parse(JSON.stringify(traceResponse.value.finalResult)), {
     year: '5000',
     cutlet: { canonicalIndex: 4, sourceName: 'larice' },

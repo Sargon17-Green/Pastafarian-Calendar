@@ -148,12 +148,93 @@ const { PastafariCookingElement } = sandbox.PastafariBrowserInternal.cookingComp
 const axis = sandbox.PastafariBrowserInternal.dateAxis;
 
 function sampleTrace() {
+  const counters = Object.freeze({ action: '1', target: '2', distance: '2', connection: '3', direction: '1' });
+  const stream = (first, directionStep) => Object.freeze({ first: String(first), directionStep: String(directionStep) });
+  const selection = (sourceLabel, output, gateIndex = null) => Object.freeze({
+    id: 'selection-' + sourceLabel + '-' + String(gateIndex),
+    gateIndex,
+    sourceLabel,
+    mode: 'short',
+    familySize: '922',
+    stream: stream('17', '1'),
+    places: null,
+    space: null,
+    digits: null,
+    acceptanceLimit: '170141183460469231731687303715884105000',
+    firstCandidate: '170141183460469231731687303715884105001',
+    initialWide: null,
+    rejectionSteps: '1',
+    acceptedCandidate: '170141183460469231731687303715884105000',
+    output: String(output),
+    rejectionEncoding: Object.freeze({ kind: 'answer-ring-run', start: '170141183460469231731687303715884105001', directionStep: '-1', count: '1' }),
+  });
+  const initialBowls = Object.freeze([1, 2, 3, 4, 5, 6].map((bowlId) => Object.freeze({
+    bowlId,
+    prime: String([17, 19, 23, 29, 31, 37][bowlId - 1]),
+    seed: String(100 + bowlId),
+    rawBeforeSave: String(200 + bowlId),
+    output: String(300 + bowlId),
+  })));
+  const hiddenDrops = Object.freeze([Object.freeze({
+    ordinal: 1,
+    value: '41',
+    coefficients: Object.freeze({ a: '1', b: '2', c: '3' }),
+    stoneRow: Object.freeze({ w: '17', b: '29', s: '43', m: '71', r: '101' }),
+    rawBeforeSave: '42',
+    initial: '43',
+    grinds: Object.freeze([Object.freeze({ ordinal: 1, grind: 1, before: '43', stoneKind: 'w', stoneValue: '17', after: '44' })]),
+  })]);
+  const visibleDrops = Object.freeze([Object.freeze({
+    ordinal: 1,
+    value: '51',
+    priors: Object.freeze({ prev1: '41', prev3: '42', prev7: '43' }),
+    stoneRow: Object.freeze({ w: '17', b: '29', s: '43', m: '71', r: '101' }),
+    rawBeforeSave: '52',
+    initial: '53',
+    grinds: Object.freeze([Object.freeze({ ordinal: 1, grind: 1, before: '53', rule: Object.freeze({ kind: 'visible', a: '1', b: '2', c: '3', d: '4' }), stoneValue: '29', after: '54' })]),
+  })]);
+  const bowlRounds = Object.freeze([Object.freeze({
+    ordinal: 1,
+    drop: '51',
+    order: Object.freeze([1, 2, 3, 4, 5, 6]),
+    poursByPosition: Object.freeze(['1', '2', '3', '4', '5', '6']),
+    beforeBowls: Object.freeze(['301', '302', '303', '304', '305', '306']),
+    stoneRow: Object.freeze({ w: '17', b: '29', s: '43', m: '71', r: '101' }),
+    positions: Object.freeze([Object.freeze({ position: 1, bowlId: 1, prevId: 6, nextId: 2, stoneKind: 'w', mixed: '400', rawBeforeSave: '401', output: '402' })]),
+    afterBowls: Object.freeze(['402', '302', '303', '304', '305', '306']),
+  })]);
+  const postStirs = Object.freeze([Object.freeze({
+    ordinal: 1,
+    beforeBowls: Object.freeze(['402', '302', '303', '304', '305', '306']),
+    rawBowlSum: '1922',
+    savedOrderNumber: '2071',
+    order: Object.freeze([1, 2, 3, 4, 5, 6]),
+    positions: Object.freeze([Object.freeze({ position: 1, bowlId: 1, prevId: 6, nextId: 2, oldBowl: '402', oldPrev: '306', oldNext: '302', u: '2200', rawBeforeSave: '4840000', output: '4999' })]),
+    afterBowls: Object.freeze(['4999', '302', '303', '304', '305', '306']),
+  })]);
+  const sauceRun = (id, kind) => Object.freeze({
+    id,
+    role: Object.freeze({ kind }),
+    inputs: Object.freeze({ calculationDay: '-15055671', targetDay: '-15055671' }),
+    stoneTableRef: 'stone-table-1',
+    counters,
+    hiddenDrops,
+    visibleDrops,
+    initialBowls,
+    bowlRounds,
+    bowlsAfterDrops: Object.freeze(['402', '302', '303', '304', '305', '306']),
+    orderAtDrop46: Object.freeze([1, 2, 3, 4, 5, 6]),
+    postStirs,
+    finalBowls: Object.freeze(['4999', '302', '303', '304', '305', '306']),
+  });
+  const year5000 = Object.freeze({ number: '5000', openDay: '-15059693', firstDay: '-15059692', closeDay: '-15055294', openGateIndex: '-6', closeGateIndex: '1' });
+  const finalYear = Object.freeze({ number: '5001', openDay: '-15055294', firstDay: '-15055293', closeDay: '-15050000', openGateIndex: '1', closeGateIndex: '8' });
   return Object.freeze({
-    schemaVersion: '0.3.0',
+    schemaVersion: '0.4.0',
     semanticProfile: 'PASTAFARIAN_STAGE57_STAGE56_RAW_SUM',
     inputs: Object.freeze({ calculationDay: '-15055671', targetDay: '-15055671' }),
     finalResult: Object.freeze({
-      year: '5000',
+      year: '5001',
       cutlet: Object.freeze({ canonicalIndex: 4, sourceName: 'larice' }),
       dayInCutlet: '762',
       month: Object.freeze({ canonicalIndex: 12, sourceName: 'oliban' }),
@@ -163,34 +244,69 @@ function sampleTrace() {
       'inputs', 'gates', 'year-5000', 'year-walk', 'structure-sauce', 'cutlets', 'months', 'position', 'result',
     ].map((id) => Object.freeze({ id, kind: id, refs: Object.freeze([]) }))),
     artifacts: Object.freeze({
-      stoneTable: Object.freeze({ id: 'stone-table-1', rows: Object.freeze([]) }),
-      sauceRuns: Object.freeze([]),
+      stoneTable: Object.freeze({ id: 'stone-table-1', rows: Object.freeze([Object.freeze({ ordinal: 1, values: Object.freeze({ w: '17', b: '29', s: '43', m: '71', r: '101' }), transition: null })]) }),
+      sauceRuns: Object.freeze([sauceRun('sauce-y5000', 'year-5000'), sauceRun('sauce-transition', 'year-transition'), sauceRun('sauce-structure', 'year-structure')]),
       gateNetwork: Object.freeze({
-        gates: Object.freeze([]),
+        gates: Object.freeze([Object.freeze({ index: '-1', day: '-15055671' })]),
         gaps: Object.freeze([Object.freeze({
           signedIndex: '-1', gap: '553', sauceRunId: 'sauce-1', detailCoverage: 'compact-stream-option-available',
-          sauceSummary: Object.freeze({
-            counters: Object.freeze({ action: '1', target: '2', distance: '2', connection: '3', direction: '1' }),
-            finalBowls: Object.freeze(['1', '2', '3', '4', '5', '6']),
-            orderAtDrop46: Object.freeze([1, 2, 3, 4, 5, 6]),
-          }),
+          sauceSummary: Object.freeze({ counters, finalBowls: Object.freeze(['1', '2', '3', '4', '5', '6']), orderAtDrop46: Object.freeze([1, 2, 3, 4, 5, 6]) }),
         })]),
       }),
+      selections: Object.freeze([
+        selection('gate-gap', '512', '-1'),
+        selection('YEAR_5000-semantic', '5000'),
+        selection('cutlet-count', '1'),
+        selection('cutlet-partition-semantic', '1'),
+        selection('cutlet-names-distinct-rank', '4'),
+        selection('month-count', '1'),
+        selection('month-lengths', '1'),
+        selection('month-weaving', '1'),
+        selection('month-names-distinct-rank', '12'),
+      ]),
       yearWalk: Object.freeze({
-        year5000: Object.freeze({ number: '5000', openDay: '-15059693', firstDay: '-15059692', closeDay: '-15055294', openGateIndex: '-6', closeGateIndex: '1' }),
-        transitions: Object.freeze([]),
-        finalYear: Object.freeze({ number: '5000', openDay: '-15059693', firstDay: '-15059692', closeDay: '-15055294', openGateIndex: '-6', closeGateIndex: '1' }),
+        year5000,
+        authoritativeYears: Object.freeze([Object.freeze({ lineage: 'patch18', year: year5000 }), Object.freeze({ lineage: 'patch18', year: finalYear })]),
+        transitions: Object.freeze([Object.freeze({ direction: 'next', fromYear: year5000, toYear: finalYear, sharedDay: '-15055294', sauceRunId: 'sauce-transition' })]),
+        finalYear,
+        interval: '(open,close]',
       }),
       structure: Object.freeze({
+        sauceRunId: 'sauce-structure',
+        year: Object.freeze({ number: '5001', openDay: '-15055294', closeDay: '-15050000' }),
         cutlets: Object.freeze({
-          count: 1, partition: Object.freeze([1]), nameCanonicalIndices: Object.freeze([4]),
-          items: Object.freeze([Object.freeze({ nameCanonicalIndex: 4, openGateIndex: '-1', closeGateIndex: '1', firstDay: '-15055671', lastDay: '-15055294' })]),
+          count: 1,
+          partition: Object.freeze([1]),
+          nameCanonicalIndices: Object.freeze([4]),
+          countStream: stream('20', '1'),
+          partitionStream: stream('21', '1'),
+          partitionSelection: Object.freeze({ familyCount: '11', selectedRank: '1', requiredInternalGateOffset: '0' }),
+          nameStream: stream('22', '1'),
+          nameSelection: Object.freeze({ familyCount: '17', selectedRank: '4' }),
+          items: Object.freeze([Object.freeze({ sourceName: 'larice', nameCanonicalIndex: 4, openGateIndex: '-1', closeGateIndex: '1', firstDay: '-15055671', lastDay: '-15055294' })]),
         }),
-        months: Object.freeze({ count: 1, lengths: Object.freeze([100]), weaving: Object.freeze([1]), nameCanonicalIndices: Object.freeze([12]) }),
+        months: Object.freeze({
+          count: 1,
+          lengths: Object.freeze([100]),
+          weaving: Object.freeze([1, 1, 1]),
+          nameCanonicalIndices: Object.freeze([12]),
+          countStream: stream('30', '1'),
+          lengthStream: stream('31', '1'),
+          lengthSelection: Object.freeze({ familyCount: '45', selectedRank: '1' }),
+          weavingStream: stream('32', '1'),
+          weavingSelection: Object.freeze({ familyCount: '100', selectedRank: '1' }),
+          nameStream: stream('33', '1'),
+          nameSelection: Object.freeze({ familyCount: '47', selectedRank: '12' }),
+          items: Object.freeze([Object.freeze({ slot: 1, length: 100, nameCanonicalIndex: 12, sourceName: 'oliban' })]),
+        }),
       }),
-      positioning: Object.freeze({ targetDay: '-15055671', targetPositionInYear: 4022, monthId: 38, dayInCutlet: '762', dayInMonth: '105', cutletCanonicalIndex: 4, monthCanonicalIndex: 12 }),
+      positioning: Object.freeze({ targetDay: '-15055671', year: finalYear, targetPositionInYear: 4022, monthId: 38, dayInCutlet: '762', dayInMonth: '105', cutletCanonicalIndex: 4, monthCanonicalIndex: 12 }),
     }),
-    measurement: Object.freeze({ totalSauceCallsObserved: 22, gateSauceCallsObserved: 20 }),
+    archaeology: Object.freeze([
+      Object.freeze({ kind: 'stage56-raw-bowl-sum-corrective', semanticRule: 'post-stir-u-uses-raw-bowl-sum', historicalScarExecuted: true, historicalValuesIncluded: false }),
+      Object.freeze({ kind: 'stage57-patch26-round-trip-ghost', mismatch: true, legacyGuardExecuted: true, legacyGuardPassed: false, semanticYear: finalYear, ghostYear: year5000 }),
+    ]),
+    measurement: Object.freeze({ totalSauceCallsObserved: 22, gateSauceCallsObserved: 20, selectionCallsObserved: 9 }),
     coverage: Object.freeze({ sameSemanticExecutionAsFinalResult: true, missingCoreCheckpoints: Object.freeze([]) }),
   });
 }
@@ -207,6 +323,18 @@ function gateChunk() {
     postStirs: Object.freeze([]),
     finalBowls: Object.freeze(['1', '2', '3', '4', '5', '6']),
   });
+}
+
+function treeText(node) {
+  if (!node || typeof node !== 'object') return '';
+  return [node.textContent || '', ...((node.children || []).map(treeText))].join(' ');
+}
+
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+  return { promise, resolve, reject };
 }
 
 async function flush() {
@@ -240,7 +368,7 @@ async function flush() {
   lazy.setAttribute('open', '');
   await flush();
   assert.strictEqual(calls.length, 1);
-  assert.strictEqual(lazy.trace.schemaVersion, '0.3.0');
+  assert.strictEqual(lazy.trace.schemaVersion, '0.4.0');
   assert.strictEqual(lazy._els.shell.getAttribute('aria-busy'), 'false');
   assert.strictEqual(lazy._els.nav.children.length, 9);
   assert.strictEqual(lazy._locale.code, 'ie');
@@ -257,7 +385,7 @@ async function flush() {
   lazy.setAttribute('open', '');
   await flush();
   assert.strictEqual(calls.length, 1);
-  assert.strictEqual(lazy.trace.schemaVersion, '0.3.0');
+  assert.strictEqual(lazy.trace.schemaVersion, '0.4.0');
 
   // Locale switching rerenders the component without a semantic rerun.
   lazy.setAttribute('lang', 'he');
@@ -267,6 +395,40 @@ async function flush() {
   assert.strictEqual(lazy._term('gate'), 'שער');
   assert.strictEqual(lazy._term('bowlRound'), 'סבב קערות');
   assert.strictEqual(calls.length, 1);
+
+  // Every chapter exposes the semantic material already captured by the trace,
+  // without reconstructing arithmetic in the presentation component.
+  const chapterExpectations = {
+    inputs: ['schemaVersion', '0.4.0', 'coverage', 'sameSemanticExecutionAsFinalResult'],
+    gates: ['מרווח שער', '-15055671', 'gate-gap', 'rejectionEncoding'],
+    'year-5000': ['(open,close]', 'YEAR_5000-semantic', '5000'],
+    'year-walk': ['שנת המקור', 'שנת היעד', 'sharedDay', '5001'],
+    'structure-sauce': ['קערות התחלה', 'prime', 'bowlsAfterDrops', 'finalBowls', 'calculationDay', 'stoneTableRef'],
+    cutlets: ['cutlet-partition-semantic', 'cutlet-names-distinct-rank', 'ארזית', 'sourceName'],
+    months: ['month-lengths', 'month-weaving', 'month-names-distinct-rank', 'לבונה', 'positionInYear', '1 / 3'],
+    position: ['השנה הסופית', 'targetPositionInYear', '5001'],
+    result: ['שנה', 'קציצה', 'יום בקציצה', 'חודש', 'יום בחודש', 'ארכאולוגיה היסטורית', 'stage57-patch26-round-trip-ghost'],
+  };
+  for (const [chapter, needles] of Object.entries(chapterExpectations)) {
+    lazy._activeChapter = chapter;
+    lazy._renderChapter();
+    const text = treeText(lazy._els.pane);
+    for (const needle of needles) assert(text.includes(needle), chapter + ' manca ' + needle);
+  }
+
+  // The nested Sauce inspector exposes captured operands and rule metadata.
+  lazy._activeChapter = 'structure-sauce';
+  for (const [phase, needles] of [
+    ['hidden', ['coefficients', 'stoneRow', 'stoneKind']],
+    ['visible', ['stoneRow', 'rule', 'stoneValue']],
+    ['bowls', ['stoneRow', 'prevId', 'nextId', 'mixed']],
+    ['postStirs', ['oldBowl', 'oldPrev', 'oldNext', 'u', 'rawBowlSum']],
+  ]) {
+    lazy._sauceState.set('sauce-structure', { phase, index: 0 });
+    lazy._renderChapter();
+    const text = treeText(lazy._els.pane);
+    for (const needle of needles) assert(text.includes(needle), phase + ' manca ' + needle);
+  }
 
   // Gate detail is a new semantic execution explicitly scoped to that gate;
   // its chunk and replacement final trace belong to the same execution.
@@ -301,6 +463,154 @@ async function flush() {
   assert.strictEqual(prevented, true);
   assert.strictEqual(lazy.hasAttribute('open'), false);
   assert(lazy.dispatched.some((event) => event.type === 'pastafari-cooking-close'));
+
+  // A pending gate-detail request cannot leave the component stuck after
+  // close/reopen. Its eventual result is stale and may not populate gate detail.
+  const staleDetail = deferred();
+  let staleDetailOptions = null;
+  let staleDetailCalls = 0;
+  sharedService = {
+    getCookingTrace(targetJdn, calculationJdn, options = null) {
+      staleDetailCalls += 1;
+      if (!options) return Promise.resolve(sampleTrace());
+      staleDetailOptions = options;
+      return staleDetail.promise;
+    },
+  };
+  const race = new PastafariCookingElement();
+  race.setAttribute('date', '2026-09-11');
+  race.setAttribute('calculation-date', '2026-09-11');
+  race.connectedCallback();
+  race.setAttribute('open', '');
+  await flush();
+  assert.strictEqual(staleDetailCalls, 1);
+  race._activeChapter = 'gates';
+  const stalePromise = race._loadGateDetail('-1').catch(() => null);
+  assert.strictEqual(race._gateDetailLoading, '-1');
+  assert.strictEqual(staleDetailCalls, 2);
+  race.close();
+  race.setAttribute('open', '');
+  await flush();
+  assert.strictEqual(race._gateDetailLoading, null);
+  assert.strictEqual(staleDetailCalls, 2, 'reopen of cached base trace must not rerun');
+  staleDetailOptions.onGateSauceDetail(gateChunk());
+  staleDetail.resolve(sampleTrace());
+  await stalePromise;
+  assert.strictEqual(race._gateDetailLoading, null);
+  assert.strictEqual(race._gateDetails.has('-1'), false, 'stale detail must not commit');
+
+  // A current gate-detail failure preserves the already useful base trace and
+  // reports the failure inline instead of replacing the whole pane.
+  let failCalls = 0;
+  sharedService = {
+    getCookingTrace(targetJdn, calculationJdn, options = null) {
+      failCalls += 1;
+      if (!options) return Promise.resolve(sampleTrace());
+      return Promise.reject(new Error('synthetic gate detail failure'));
+    },
+  };
+  const failure = new PastafariCookingElement();
+  failure.setAttribute('lang', 'he');
+  failure.setAttribute('date', '2026-09-11');
+  failure.setAttribute('calculation-date', '2026-09-11');
+  failure.connectedCallback();
+  failure.setAttribute('open', '');
+  await flush();
+  failure._activeChapter = 'gates';
+  await failure._loadGateDetail('-1').catch(() => null);
+  assert.strictEqual(failCalls, 2);
+  assert.strictEqual(failure.trace.schemaVersion, '0.4.0');
+  assert.strictEqual(failure._els.error.hidden, true);
+  assert.strictEqual(failure._els.pane.hidden, false);
+  assert.strictEqual(failure._gateDetailLoading, null);
+  assert.strictEqual(failure._gateDetailError.signedIndex, '-1');
+  assert(treeText(failure._els.pane).includes('לא ניתן לחשב את המעקב.'));
+
+  // Locale changes during a pending gate-detail execution do not invalidate or
+  // rerun the semantic work; the completed detail renders in the newest locale.
+  const localePending = deferred();
+  let localeOptions = null;
+  let localeCalls = 0;
+  sharedService = {
+    getCookingTrace(targetJdn, calculationJdn, options = null) {
+      localeCalls += 1;
+      if (!options) return Promise.resolve(sampleTrace());
+      localeOptions = options;
+      return localePending.promise;
+    },
+  };
+  const localeRace = new PastafariCookingElement();
+  localeRace.setAttribute('date', '2026-09-11');
+  localeRace.setAttribute('calculation-date', '2026-09-11');
+  localeRace.connectedCallback();
+  localeRace.setAttribute('open', '');
+  await flush();
+  localeRace._activeChapter = 'gates';
+  const localePromise = localeRace._loadGateDetail('-1');
+  localeRace.setAttribute('lang', 'he');
+  assert.strictEqual(localeCalls, 2);
+  localeOptions.onGateSauceDetail(gateChunk());
+  localePending.resolve(sampleTrace());
+  await localePromise;
+  assert.strictEqual(localeCalls, 2);
+  assert.strictEqual(localeRace._locale.code, 'he');
+  assert.strictEqual(localeRace._gateDetails.has('-1'), true);
+  assert(treeText(localeRace._els.pane).includes('פירוט מלא של השער'));
+
+  // Rapid input replacement while a base trace is pending: only the newest
+  // generation may commit to the component.
+  const firstBase = deferred();
+  let baseCalls = 0;
+  sharedService = {
+    getCookingTrace() {
+      baseCalls += 1;
+      if (baseCalls === 1) return firstBase.promise;
+      return Promise.resolve(sampleTrace());
+    },
+  };
+  const inputRace = new PastafariCookingElement();
+  inputRace.setAttribute('date', '2026-09-11');
+  inputRace.setAttribute('calculation-date', '2026-09-11');
+  inputRace.connectedCallback();
+  inputRace.setAttribute('open', '');
+  await flush();
+  assert.strictEqual(baseCalls, 1);
+  inputRace.setAttribute('date', '2026-09-12');
+  await flush();
+  assert.strictEqual(baseCalls, 2);
+  assert.strictEqual(inputRace.trace.schemaVersion, '0.4.0');
+  const committedKey = inputRace._traceInputKey;
+  firstBase.resolve(sampleTrace());
+  await flush();
+  assert.strictEqual(inputRace._traceInputKey, committedKey, 'stale base trace replaced newer generation');
+
+  // Disconnect/reconnect invalidates a still-pending base execution. A later
+  // completion from the disconnected epoch cannot publish over the reconnect.
+  const disconnectedBase = deferred();
+  let reconnectCalls = 0;
+  sharedService = {
+    getCookingTrace() {
+      reconnectCalls += 1;
+      if (reconnectCalls === 1) return disconnectedBase.promise;
+      return Promise.resolve(sampleTrace());
+    },
+  };
+  const reconnect = new PastafariCookingElement();
+  reconnect.setAttribute('date', '2026-09-11');
+  reconnect.setAttribute('calculation-date', '2026-09-11');
+  reconnect.setAttribute('open', '');
+  reconnect.connectedCallback();
+  await flush();
+  assert.strictEqual(reconnectCalls, 1);
+  reconnect.disconnectedCallback();
+  reconnect.connectedCallback();
+  await flush();
+  assert.strictEqual(reconnectCalls, 2);
+  assert.strictEqual(reconnect.trace.schemaVersion, '0.4.0');
+  const reconnectKey = reconnect._traceInputKey;
+  disconnectedBase.resolve(sampleTrace());
+  await flush();
+  assert.strictEqual(reconnect._traceInputKey, reconnectKey, 'disconnected stale trace committed after reconnect');
 
   console.log('browser-cooking-component: PASS');
 })().catch((error) => {

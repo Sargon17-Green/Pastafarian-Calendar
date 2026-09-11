@@ -129,7 +129,7 @@ assert.strictEqual(axis.projectDayToJdn(-278522n), tabletsJdn);
     async getCutletView() { throw new Error('Ne usat in ti parte del prova.'); },
     async getCookingTrace(calculationDay, targetDay, options) {
       cookingTraceEngineCalls.push({ calculationDay, targetDay, options });
-      return Object.freeze({ schemaVersion: '0.3.0', inputs: Object.freeze({ calculationDay: String(calculationDay), targetDay: String(targetDay) }) });
+      return Object.freeze({ schemaVersion: '0.4.0', inputs: Object.freeze({ calculationDay: String(calculationDay), targetDay: String(targetDay) }) });
     },
     retry() {},
     dispose() {},
@@ -145,7 +145,7 @@ assert.strictEqual(axis.projectDayToJdn(-278522n), tabletsJdn);
 
   const serviceTraceOptions = { onGateSauceDetail() {} };
   const serviceTrace = await service.getCookingTrace(targetJdn, calculationJdn, serviceTraceOptions);
-  assert.strictEqual(serviceTrace.schemaVersion, '0.3.0');
+  assert.strictEqual(serviceTrace.schemaVersion, '0.4.0');
   assert.strictEqual(cookingTraceEngineCalls.length, 1);
   assert.strictEqual(cookingTraceEngineCalls[0].calculationDay, 10n);
   assert.strictEqual(cookingTraceEngineCalls[0].targetDay, 2n);

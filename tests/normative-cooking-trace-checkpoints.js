@@ -63,7 +63,7 @@ function assertCentralCheckpointShape(run) {
   const ordinaryAfter = core.calendarDateSpaghetti(c, t);
 
   assert.deepStrictEqual(ordinaryAfter, ordinaryBefore);
-  assert.strictEqual(trace.schemaVersion, '0.3.0');
+  assert.strictEqual(trace.schemaVersion, '0.4.0');
   assert.strictEqual(trace.coverage.sameSemanticExecutionAsFinalResult, true);
   assert.strictEqual(trace.coverage.independentExplanationEngine, false);
 
