@@ -162,10 +162,10 @@ function evaluateBuiltWorker() {
   assert.strictEqual(response.buildId, buildId);
   assert.deepStrictEqual(JSON.parse(JSON.stringify(response.value)), {
     year: '5000',
-    cutletName: 'larice',
-    dayInCutlet: 762,
-    monthName: 'oliban',
-    dayInMonth: 105,
+    cutletName: 'scorpion',
+    dayInCutlet: 503,
+    monthName: 'pute',
+    dayInMonth: 56,
   });
 
   // The built Worker must also execute the bundled normative cooking trace.
@@ -185,10 +185,10 @@ function evaluateBuiltWorker() {
   assert.strictEqual(traceResponse.value.schemaVersion, '0.4.0');
   assert.deepStrictEqual(JSON.parse(JSON.stringify(traceResponse.value.finalResult)), {
     year: '5000',
-    cutlet: { canonicalIndex: 4, sourceName: 'larice' },
-    dayInCutlet: '762',
-    month: { canonicalIndex: 12, sourceName: 'oliban' },
-    dayInMonth: '105',
+    cutlet: { canonicalIndex: 10, sourceName: 'scorpion' },
+    dayInCutlet: '503',
+    month: { canonicalIndex: 20, sourceName: 'pute' },
+    dayInMonth: '56',
   });
 
   console.log('browser-built-artifacts: PASS');
