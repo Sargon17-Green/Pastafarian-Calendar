@@ -191,6 +191,9 @@ function evaluateBuiltWorker() {
     dayInMonth: '56',
   });
 
+  assert(worker.includes("semanticRule: 'post-stir-u-uses-saved-order-number'"));
+  assert.ok(!worker.includes("semanticRule: 'post-stir-u-uses-raw-bowl-sum'"));
+
   console.log('browser-built-artifacts: PASS');
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);

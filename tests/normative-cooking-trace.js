@@ -49,6 +49,10 @@ function assertCentralSauceShape(run) {
     assert.strictEqual(gap.sauceSummary.stage56SavedSumApplied, true);
     assert.strictEqual(gap.sauceSummary.stage56RawBowlSumApplied, false);
   }
+  const stage56Archaeology = trace1.archaeology.find((row) => row.kind === 'stage56-raw-bowl-sum-corrective');
+  assert.ok(stage56Archaeology);
+  assert.strictEqual(stage56Archaeology.semanticRule, 'post-stir-u-uses-saved-order-number');
+  assert.ok(!trace1.archaeology.some((row) => row.semanticRule === 'post-stir-u-uses-raw-bowl-sum'));
   assert.ok(trace1.artifacts.sauceRuns.length >= 2);
   trace1.artifacts.sauceRuns.forEach(assertCentralSauceShape);
   const trace2 = traceApi.calendarDateSpaghettiCookingTrace(c, t);

@@ -790,7 +790,7 @@ function projectPositioning(context, finalResult) {
 function projectArchaeology(context, recorder) {
   const rows = [{
     kind: 'stage56-raw-bowl-sum-corrective',
-    semanticRule: 'post-stir-u-uses-raw-bowl-sum',
+    semanticRule: 'post-stir-u-uses-saved-order-number',
     historicalScarExecuted: true,
     historicalValuesIncluded: false,
   }];
