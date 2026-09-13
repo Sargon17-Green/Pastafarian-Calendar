@@ -6,7 +6,7 @@ Catalogul este sursa unică de prezentare pentru cele 17 nume de chiftele și ce
 
 Un nume cu sens lexical este tradus în română după sens. Un nume de loc sau un nume propriu folosește forma românească consacrată atunci când există. Un nume inventat sau un șir fonetic fără sens este transliterat determinist; pentru sunetul redat prin litera ebraică șin se folosește `ș`, iar vocalele sunt păstrate cât mai direct după forma dată de specificație.
 
-Formele inventate înghețate în această versiune sunt `Palguraș` și `Karșumab`. Formele consacrate folosite pentru toponime sunt `Lagaș`, `Akkad`, `Eridu`, `Uruk`, `Ninive` și `Babilon`.
+Formele inventate înghețate în această versiune sunt `Palguraș` și `Karșumav`. Formele consacrate folosite pentru toponime sunt `Lagaș`, `Akkad`, `Eridu`, `Uruk`, `Ninive`, `Susa` și `Babilon`.
 
 ## Interdicție de collation semantic
 
