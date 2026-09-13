@@ -183,7 +183,7 @@ class Stage01Tests(unittest.TestCase):
         self.assertGreaterEqual(checked, 80)
 
     def test_source_language_catalog_is_frozen_and_index_stable(self):
-        self.assertEqual(SOURCE_LANGUAGE_CATALOG.version, "1.3.1")
+        self.assertEqual(SOURCE_LANGUAGE_CATALOG.version, "1.3.2")
         self.assertEqual(SOURCE_LANGUAGE_CATALOG.natural_language, "Türkçe")
         self.assertEqual(len(SOURCE_LANGUAGE_CATALOG.cutlets), 17)
         self.assertEqual(len(SOURCE_LANGUAGE_CATALOG.months), 47)

@@ -2,12 +2,14 @@
 
 `SourceLanguageCatalog` bu uygulama çizgisinin birinci aşamasında dondurulmuştur.
 
+Geçerli katalog sürümü: `1.3.2`.
+
 ## Kurallar
 
 1. Anlamlı sıradan adlar Türkçedeki doğal anlamlarıyla çevrilir.
 2. Yer adlarında yerleşik Türkçe biçim varsa o biçim kullanılır.
 3. Uydurma ses dizilerinde sabit çevriyazı uygulanır: ş, g, r, l, p, k, m ve b sesleri Türkçe Latin yazımındaki karşılıklarıyla korunur; kaynakta açıkça verilen ünlüler de Türkçe Latin harfleriyle kararlı biçimde yazılır.
-4. Kesir adları tek bir ad olarak doğal Türkçe kesir ifadesiyle çevrilir.
+4. Kesir adları tek bir ad olarak, kaynak tam adını koruyan doğal Türkçe ifadeyle çevrilir; yalnız kesir kısaltmasına indirgenmez.
 5. Normatif sıra yalnızca `canonicalIndex` ile belirlenir. Alfabetik sıra, Unicode sırası, yerel sıralama veya gösterim metni normatif değildir.
 6. Önbellek anahtarları, sıralama, derece açma ve seçim işlemleri metin yerine indis kullanır.
 7. Türkçe metin yalnızca sunum katmanında çözülür.
@@ -20,11 +22,11 @@
 | 1 | Tunç |
 | 2 | Tilki |
 | 3 | Böbrek |
-| 4 | Melez ağacı |
+| 4 | Lagaş |
 | 5 | Düşünce |
-| 6 | Dokuzda dört |
+| 6 | Dokuz parçadan dördü |
 | 7 | Palguraş |
-| 8 | Papirüs |
+| 8 | Papirüs bitkisi |
 | 9 | Salkım |
 | 10 | Akrep |
 | 11 | Kül |
@@ -33,7 +35,7 @@
 | 14 | Kahkaha |
 | 15 | Akad |
 | 16 | Boynuz |
-| 17 | Boş testi |
+| 17 | Boş kavanoz |
 
 ## Ay adları
 
@@ -45,11 +47,11 @@
 | 4 | Kıskançlık |
 | 5 | Eridu |
 | 6 | Diş macunu |
-| 7 | Beşte üç |
-| 8 | Karşumab |
+| 7 | Beş parçadan üçü |
+| 8 | Karşumav |
 | 9 | Leopar |
 | 10 | Kalay |
-| 11 | Sis |
+| 11 | Pus |
 | 12 | Akgünlük |
 | 13 | İğ |
 | 14 | Kaburga |
@@ -69,12 +71,12 @@
 | 28 | Ninova |
 | 29 | Kurbağa |
 | 30 | Zift |
-| 31 | Mum |
+| 31 | Lamba |
 | 32 | Kapalı kapı |
 | 33 | Susam |
 | 34 | Ense |
 | 35 | Gümüş |
-| 36 | Zambak |
+| 36 | Susa |
 | 37 | Fırtına |
 | 38 | Eşek |
 | 39 | Un |

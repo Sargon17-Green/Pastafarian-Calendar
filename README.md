@@ -52,6 +52,8 @@ Tarihsel `corrective56_raw_bowlsum` bayrak/alan adları geriye dönük telemetry
 
 Bu uygulamanın programlama dili Python, insan kaynak dili Türkçedir. Metin normatif sıralamaya katılmaz; normatif kimlik `canonicalIndex` değeridir.
 
+Kanonik kaynak dil kataloğunun sürümü `1.3.2`'dir; bu düzeltme yalnız sunum adlarını düzeltir ve `canonicalIndex` değerlerini değiştirmez.
+
 ## Doğrulama
 
 Hedefli saved-sum testi:
