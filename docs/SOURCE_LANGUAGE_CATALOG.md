@@ -4,7 +4,7 @@
 
 Katalog ma wersję `1.0.0`. Każda pozycja ma stały `canonicalIndex`. Żadne sortowanie alfabetyczne, porządek Unicode, ustawienia regionalne ani tekst przetłumaczony nie uczestniczą w wyborze, rangowaniu, rozwijaniu rangi, kluczach semantycznych ani pamięci podręcznej. Tekst jest warstwą prezentacji.
 
-Nazwy o zwykłym znaczeniu zostały przetłumaczone semantycznie na naturalny polski. Ustalone nazwy miejsc zapisano w przyjętej polskiej postaci: Lagasz, Akad, Eridu, Uruk, Niniwa, Suza i Babilon. Dwa wymyślone ciągi dźwięków zapisano deterministycznie jako `Palgurasz` i `Karszumb`.
+Nazwy o zwykłym znaczeniu zostały przetłumaczone semantycznie na naturalny polski. Ustalone nazwy miejsc zapisano w przyjętej polskiej postaci: Lagasz, Akad, Eridu, Uruk, Niniwa, Suza i Babilon. Dwa wymyślone ciągi dźwięków zapisano deterministycznie jako `Palgurasz` i `Karszumaw`.
 
 Dla wymyślonych nazw przyjęto zasadę: spółgłoski źródłowe zachowują najbliższą polską wartość głoskową, `sz` oznacza głoskę odpowiadającą źródłowemu „sz”, a samogłoski odtwarza się według jawnego brzmienia zapisanego w nazwie. Ta reguła jest zamrożona razem z katalogiem; jej zmiana wymaga jawnej zmiany specyfikacji.
 
@@ -41,11 +41,11 @@ Dla wymyślonych nazw przyjęto zasadę: spółgłoski źródłowe zachowują na
 | 5 | Eridu |
 | 6 | pasta do zębów |
 | 7 | trzy części z pięciu |
-| 8 | Karszumb |
-| 9 | tygrys |
+| 8 | Karszumaw |
+| 9 | lampart |
 | 10 | cyna |
 | 11 | mgła |
-| 12 | kadzidło |
+| 12 | olibanum |
 | 13 | wrzeciono |
 | 14 | żebro |
 | 15 | karob |
@@ -64,7 +64,7 @@ Dla wymyślonych nazw przyjęto zasadę: spółgłoski źródłowe zachowują na
 | 28 | Niniwa |
 | 29 | żaba |
 | 30 | smoła |
-| 31 | świeca |
+| 31 | lampa |
 | 32 | zamknięte drzwi |
 | 33 | sezam |
 | 34 | kark |
