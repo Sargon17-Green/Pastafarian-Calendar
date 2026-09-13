@@ -18,5 +18,5 @@
   FIX_YEAR_BOUNDS_MAX←1
   FIX_YEAR_BOUNDS_TOO_LONG←0
   FIX_MONTH_BOUNDS_252←3 47
-  FIX_FINAL_SYNTHETIC←(⊂5000x),(⊂'Weizen'),(⊂1x),(⊂'Drei Fünftel'),(⊂2)
+  FIX_FINAL_SYNTHETIC←(⊂5000x),(⊂'Weizen'),(⊂1x),(⊂'Drei Teile von Fünf'),(⊂2)
 ∇

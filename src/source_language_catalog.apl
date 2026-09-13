@@ -5,8 +5,8 @@
   ⎕IO←1
   SOURCE_LANGUAGE_CATALOG_VERSION←1
   SOURCE_LANGUAGE_CATALOG_FROZEN←1
-  CUTLET_NAMES←'Bronze' 'Fuchs' 'Niere' 'Lagasch' 'Gedanke' 'Vier Neuntel' 'Palgurasch' 'Binse' 'Traube' 'Skorpion' 'Asche' 'Weizen' 'Fluss' 'Lachen' 'Akkad' 'Horn' 'Der leere Krug'
-  MONTH_NAMES←'Ton' 'Granatapfel' 'Ellenbogen' 'Neid' 'Eridu' 'Zahnpasta' 'Drei Fünftel' 'Karschumav' 'Leopard' 'Zinn' 'Nebel' 'Weihrauch' 'Spindel' 'Rippe' 'Johannisbrot' 'Uruk' 'Scham' 'Kamel' 'Kupfer' 'Brunnen' 'Eigelb' 'Stern' 'Honig' 'Milz' 'Kalkstein' 'Freude' 'Feige' 'Ninive' 'Frosch' 'Teer' 'Kerze' 'Die geschlossene Tür' 'Sesam' 'Nacken' 'Silber' 'Lilie' 'Sturm' 'Esel' 'Mehl' 'Reue' 'Babylon' 'Zunge' 'Flachs' 'Salz' 'Birne' 'Bogen' 'Sand'
+  CUTLET_NAMES←'Bronze' 'Fuchs' 'Niere' 'Lagasch' 'Gedanke' 'Vier Teile von Neun' 'Palgurasch' 'Papyrusstaude' 'Cluster' 'Skorpion' 'Asche' 'Weizen' 'Fluss' 'Lachen' 'Akkad' 'Horn' 'Das leere Gefäß'
+  MONTH_NAMES←'Ton' 'Granatapfel' 'Ellenbogen' 'Neid' 'Eridu' 'Zahnpasta' 'Drei Teile von Fünf' 'Karschumav' 'Leopard' 'Zinn' 'Nebel' 'Weihrauch' 'Spindel' 'Rippe' 'Johannisbrot' 'Uruk' 'Scham' 'Kamel' 'Kupfer' 'Brunnen' 'Eigelb' 'Stern' 'Honig' 'Milz' 'Kalkstein' 'Freude' 'Feige' 'Ninive' 'Frosch' 'Pech' 'Lampe' 'Die geschlossene Tür' 'Sesam' 'Nacken' 'Silber' 'Susa' 'Sturm' 'Esel' 'Mehl' 'Reue' 'Babylon' 'Zunge' 'Flachs' 'Salz' 'Birne' 'Bogen' 'Sand'
   CUTLET_CANONICAL_INDEX←⍳17
   MONTH_CANONICAL_INDEX←⍳47
 ∇
@@ -25,8 +25,8 @@
   :If frozen≠1 ⋄ z←0 ⋄ :Return ⋄ :EndIf
   :If ~cutletIndex≡⍳17 ⋄ z←0 ⋄ :Return ⋄ :EndIf
   :If ~monthIndex≡⍳47 ⋄ z←0 ⋄ :Return ⋄ :EndIf
-  :If ~cutletNames≡'Bronze' 'Fuchs' 'Niere' 'Lagasch' 'Gedanke' 'Vier Neuntel' 'Palgurasch' 'Binse' 'Traube' 'Skorpion' 'Asche' 'Weizen' 'Fluss' 'Lachen' 'Akkad' 'Horn' 'Der leere Krug' ⋄ z←0 ⋄ :Return ⋄ :EndIf
-  :If ~monthNames≡'Ton' 'Granatapfel' 'Ellenbogen' 'Neid' 'Eridu' 'Zahnpasta' 'Drei Fünftel' 'Karschumav' 'Leopard' 'Zinn' 'Nebel' 'Weihrauch' 'Spindel' 'Rippe' 'Johannisbrot' 'Uruk' 'Scham' 'Kamel' 'Kupfer' 'Brunnen' 'Eigelb' 'Stern' 'Honig' 'Milz' 'Kalkstein' 'Freude' 'Feige' 'Ninive' 'Frosch' 'Teer' 'Kerze' 'Die geschlossene Tür' 'Sesam' 'Nacken' 'Silber' 'Lilie' 'Sturm' 'Esel' 'Mehl' 'Reue' 'Babylon' 'Zunge' 'Flachs' 'Salz' 'Birne' 'Bogen' 'Sand' ⋄ z←0 ⋄ :Return ⋄ :EndIf
+  :If ~cutletNames≡'Bronze' 'Fuchs' 'Niere' 'Lagasch' 'Gedanke' 'Vier Teile von Neun' 'Palgurasch' 'Papyrusstaude' 'Cluster' 'Skorpion' 'Asche' 'Weizen' 'Fluss' 'Lachen' 'Akkad' 'Horn' 'Das leere Gefäß' ⋄ z←0 ⋄ :Return ⋄ :EndIf
+  :If ~monthNames≡'Ton' 'Granatapfel' 'Ellenbogen' 'Neid' 'Eridu' 'Zahnpasta' 'Drei Teile von Fünf' 'Karschumav' 'Leopard' 'Zinn' 'Nebel' 'Weihrauch' 'Spindel' 'Rippe' 'Johannisbrot' 'Uruk' 'Scham' 'Kamel' 'Kupfer' 'Brunnen' 'Eigelb' 'Stern' 'Honig' 'Milz' 'Kalkstein' 'Freude' 'Feige' 'Ninive' 'Frosch' 'Pech' 'Lampe' 'Die geschlossene Tür' 'Sesam' 'Nacken' 'Silber' 'Susa' 'Sturm' 'Esel' 'Mehl' 'Reue' 'Babylon' 'Zunge' 'Flachs' 'Salz' 'Birne' 'Bogen' 'Sand' ⋄ z←0 ⋄ :Return ⋄ :EndIf
 ∇
 
 ∇ z←SourceLanguageCatalogValidate;snapshot
