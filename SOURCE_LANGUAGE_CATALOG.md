@@ -13,14 +13,14 @@ La traduko-regulo esas ca:
 
 | canonicalIndex | Ido fonto-nomo | speco |
 |---:|---|---|
-| 1 | Ard | translitero |
+| 1 | bronzo | traduko |
 | 2 | vulpo | traduko |
 | 3 | reno | traduko |
-| 4 | larico | traduko |
+| 4 | Lagash | propra nomo |
 | 5 | penso | traduko |
 | 6 | quar de non egala parti | traduko |
 | 7 | Palgurash | translitero |
-| 8 | papiruso | traduko |
+| 8 | papiriero | traduko |
 | 9 | grapolo | traduko |
 | 10 | skorpiono | traduko |
 | 11 | cindro | traduko |
@@ -43,7 +43,7 @@ La traduko-regulo esas ca:
 | 6 | dentopasto | traduko |
 | 7 | tri de kin egala parti | traduko |
 | 8 | Karshumav | translitero |
-| 9 | tigro | traduko |
+| 9 | leopardo | traduko |
 | 10 | stano | traduko |
 | 11 | nebulo | traduko |
 | 12 | olibano | traduko |
@@ -65,12 +65,12 @@ La traduko-regulo esas ca:
 | 28 | Ninive | propra nomo |
 | 29 | rano | traduko |
 | 30 | bitumo | traduko |
-| 31 | kandelo | traduko |
+| 31 | lampo | traduko |
 | 32 | la klozita pordo | traduko |
 | 33 | sezamo | traduko |
 | 34 | nuko | traduko |
 | 35 | arjento | traduko |
-| 36 | lilio | traduko |
+| 36 | Susa | propra nomo |
 | 37 | tempesto | traduko |
 | 38 | asno | traduko |
 | 39 | farino | traduko |
