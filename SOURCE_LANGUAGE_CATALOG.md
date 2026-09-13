@@ -25,7 +25,7 @@ För uppfunna ljudnamn används en fast translitterering. Konsonantordningen bev
 | 5 | tanke |
 | 6 | fyra delar av nio |
 | 7 | Palgurash |
-| 8 | säv |
+| 8 | papyrus |
 | 9 | klase |
 | 10 | skorpion |
 | 11 | aska |
@@ -48,7 +48,7 @@ För uppfunna ljudnamn används en fast translitterering. Konsonantordningen bev
 | 6 | tandkräm |
 | 7 | tre delar av fem |
 | 8 | Karshumav |
-| 9 | tiger |
+| 9 | leopard |
 | 10 | tenn |
 | 11 | dimma |
 | 12 | olibanum |
@@ -69,13 +69,13 @@ För uppfunna ljudnamn används en fast translitterering. Konsonantordningen bev
 | 27 | fikon |
 | 28 | Nineve |
 | 29 | groda |
-| 30 | tjära |
-| 31 | ljus |
+| 30 | beck |
+| 31 | lampa |
 | 32 | den stängda dörren |
 | 33 | sesam |
 | 34 | nacke |
 | 35 | silver |
-| 36 | lilja |
+| 36 | Susa |
 | 37 | storm |
 | 38 | åsna |
 | 39 | mjöl |
@@ -85,7 +85,7 @@ För uppfunna ljudnamn används en fast translitterering. Konsonantordningen bev
 | 43 | lin |
 | 44 | salt |
 | 45 | päron |
-| 46 | båge |
+| 46 | pilbåge |
 | 47 | sand |
 
 Katalogen får inte ändras efter steg 1 utan en uttrycklig specifikationsändring.
