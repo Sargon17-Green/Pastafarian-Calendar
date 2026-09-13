@@ -139,6 +139,10 @@ Sub Main
     For i = 1 To 47: CheckLong "MONTH_INDEX_" & CStr(i), CatalogMonthCanonicalIndex(i), i: Next i
     CheckString "CATALOG_WHEAT", CatalogCutletName(12), "ਕਣਕ"
     CheckString "CATALOG_SALT", CatalogMonthName(44), "ਨਮਕ"
+    CheckString "CATALOG_PAPYRUS_SEDGE", CatalogCutletName(8), "ਪੈਪੀਰਸ ਸੇਜ"
+    CheckString "CATALOG_KARSHUMAV", CatalogMonthName(8), "ਕਰਸ਼ੂਮਵ"
+    CheckString "CATALOG_LAMP", CatalogMonthName(31), "ਦੀਵਾ"
+    CheckString "CATALOG_SUSA", CatalogMonthName(36), "ਸੂਸਾ"
 
     ctxA = BootstrapNewContext("000123", "-000456")
     ctxB = BootstrapNewContext("123", "-456")
