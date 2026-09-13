@@ -58,6 +58,15 @@ internal static class Program
         True(SourceLanguageCatalog.Months.All(x => !string.IsNullOrWhiteSpace(x.ClassicalArabic)), "كل أسماء الأشهر غير فارغة");
     }
 
+    // CANONICAL_NAME_CORRECTION_REGRESSION_TESTS
+    private static void RunCanonicalNameCorrectionRegressionTests()
+    {
+        Equal("\u0628\u064F\u0631\u064F\u0648\u0646\u0652\u0632", SourceLanguageCatalog.ResolveCutlet(1), "corrected cutlet canonicalIndex 1");
+        Equal("\u0623\u064E\u0631\u0652\u0628\u064E\u0639\u064E\u0629\u064F\u0020\u0623\u064E\u062C\u0652\u0632\u064E\u0627\u0621\u064D\u0020\u0645\u0650\u0646\u0652\u0020\u062A\u0650\u0633\u0652\u0639\u064E\u0629\u064D", SourceLanguageCatalog.ResolveCutlet(6), "corrected cutlet canonicalIndex 6");
+        Equal("\u062B\u064E\u0644\u064E\u0627\u062B\u064E\u0629\u064F\u0020\u0623\u064E\u062C\u0652\u0632\u064E\u0627\u0621\u064D\u0020\u0645\u0650\u0646\u0652\u0020\u062E\u064E\u0645\u0652\u0633\u064E\u0629\u064D", SourceLanguageCatalog.ResolveMonth(7), "corrected month canonicalIndex 7");
+        Equal("\u0643\u064E\u0631\u0652\u0634\u064F\u0648\u0645\u064E\u06A4", SourceLanguageCatalog.ResolveMonth(8), "corrected month canonicalIndex 8");
+        Equal("\u0633\u064F\u0648\u0633\u064E\u0627", SourceLanguageCatalog.ResolveMonth(36), "corrected month canonicalIndex 36");
+    }
     private static void RunArithmeticTests()
     {
         Equal(new BigInteger(14777149), NormativeScroll.TabletsDay - NormativeScroll.FoundationDay, "المسافة بين يوم الألواح ويوم التأسيس");
@@ -156,6 +165,7 @@ internal static class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         RunCatalogTests();
+        RunCanonicalNameCorrectionRegressionTests();
         RunArithmeticTests();
         RunStoneAndPermutationTests();
         RunFamilyTests();
