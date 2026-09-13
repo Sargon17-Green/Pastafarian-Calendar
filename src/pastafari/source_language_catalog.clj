@@ -6,9 +6,9 @@
   [{:canonical-index 1 :source "brons"}
    {:canonical-index 2 :source "vos"}
    {:canonical-index 3 :source "nier"}
-   {:canonical-index 4 :source "lariks"}
+   {:canonical-index 4 :source "Lagash"}
    {:canonical-index 5 :source "gedachte"}
-   {:canonical-index 6 :source "vier negenden"}
+   {:canonical-index 6 :source "vier delen van negen"}
    {:canonical-index 7 :source "Palgoerasj"}
    {:canonical-index 8 :source "papyrusriet"}
    {:canonical-index 9 :source "tros"}
@@ -19,7 +19,7 @@
    {:canonical-index 14 :source "gelach"}
    {:canonical-index 15 :source "Akkad"}
    {:canonical-index 16 :source "hoorn"}
-   {:canonical-index 17 :source "de lege kruik"}])
+   {:canonical-index 17 :source "de lege pot"}])
 
 (def month-catalog
   [{:canonical-index 1 :source "klei"}
@@ -28,8 +28,8 @@
    {:canonical-index 4 :source "afgunst"}
    {:canonical-index 5 :source "Eridu"}
    {:canonical-index 6 :source "tandpasta"}
-   {:canonical-index 7 :source "drie vijfden"}
-   {:canonical-index 8 :source "Karsjoemab"}
+   {:canonical-index 7 :source "drie delen van vijf"}
+   {:canonical-index 8 :source "Karsjoemav"}
    {:canonical-index 9 :source "luipaard"}
    {:canonical-index 10 :source "tin"}
    {:canonical-index 11 :source "mist"}
@@ -51,13 +51,13 @@
    {:canonical-index 27 :source "vijg"}
    {:canonical-index 28 :source "Nineve"}
    {:canonical-index 29 :source "kikker"}
-   {:canonical-index 30 :source "teer"}
-   {:canonical-index 31 :source "kaars"}
+   {:canonical-index 30 :source "pek"}
+   {:canonical-index 31 :source "lamp"}
    {:canonical-index 32 :source "de gesloten deur"}
    {:canonical-index 33 :source "sesam"}
    {:canonical-index 34 :source "nek"}
    {:canonical-index 35 :source "zilver"}
-   {:canonical-index 36 :source "lelie"}
+   {:canonical-index 36 :source "Susa"}
    {:canonical-index 37 :source "storm"}
    {:canonical-index 38 :source "ezel"}
    {:canonical-index 39 :source "meel"}
