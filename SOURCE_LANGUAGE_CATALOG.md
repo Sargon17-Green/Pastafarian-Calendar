@@ -13,11 +13,11 @@ Merkingarbær almenn orð eru þýdd eftir merkingu. Heilir orðasambandsliðir,
 1. brons
 2. refur
 3. nýra
-4. lerki
+4. Lagash
 5. hugsun
-6. fjórir níundu hlutar
+6. fjórir hlutar af níu
 7. Palgúrasj
-8. sef
+8. papýrussef
 9. klasi
 10. sporðdreki
 11. aska
@@ -26,7 +26,7 @@ Merkingarbær almenn orð eru þýdd eftir merkingu. Heilir orðasambandsliðir,
 14. hlátur
 15. Akkad
 16. horn
-17. tóma kannan
+17. tóma krukkan
 
 ## Mánuðir
 
@@ -36,11 +36,11 @@ Merkingarbær almenn orð eru þýdd eftir merkingu. Heilir orðasambandsliðir,
 4. öfund
 5. Erídú
 6. tannkrem
-7. þrír fimmtu hlutar
-8. Karsjúmab
-9. tígrisdýr
+7. þrír hlutar af fimm
+8. Karsjúmav
+9. hlébarði
 10. tin
-11. þoka
+11. mistur
 12. reykelsi
 13. snælda
 14. rif
@@ -59,13 +59,13 @@ Merkingarbær almenn orð eru þýdd eftir merkingu. Heilir orðasambandsliðir,
 27. fíkja
 28. Níníve
 29. froskur
-30. tjara
-31. kerti
+30. bik
+31. lampi
 32. lokaða hurðin
 33. sesam
 34. hnakki
 35. silfur
-36. lilja
+36. Súsa
 37. stormur
 38. asni
 39. mjöl

@@ -25,11 +25,11 @@ cutletEntries =
     [ { canonicalIndex = 1, sourceId = "BRONZE", text = "brons" }
     , { canonicalIndex = 2, sourceId = "FOX", text = "refur" }
     , { canonicalIndex = 3, sourceId = "KIDNEY", text = "nýra" }
-    , { canonicalIndex = 4, sourceId = "LARCH", text = "lerki" }
+    , { canonicalIndex = 4, sourceId = "LAGASH", text = "Lagash" }
     , { canonicalIndex = 5, sourceId = "THOUGHT", text = "hugsun" }
-    , { canonicalIndex = 6, sourceId = "FOUR_NINTHS", text = "fjórir níundu hlutar" }
+    , { canonicalIndex = 6, sourceId = "FOUR_PARTS_OF_NINE", text = "fjórir hlutar af níu" }
     , { canonicalIndex = 7, sourceId = "PALGURASH", text = "Palgúrasj" }
-    , { canonicalIndex = 8, sourceId = "SEDGE", text = "sef" }
+    , { canonicalIndex = 8, sourceId = "PAPYRUS_SEDGE", text = "papýrussef" }
     , { canonicalIndex = 9, sourceId = "CLUSTER", text = "klasi" }
     , { canonicalIndex = 10, sourceId = "SCORPION", text = "sporðdreki" }
     , { canonicalIndex = 11, sourceId = "ASH", text = "aska" }
@@ -38,7 +38,7 @@ cutletEntries =
     , { canonicalIndex = 14, sourceId = "LAUGHTER", text = "hlátur" }
     , { canonicalIndex = 15, sourceId = "AKKAD", text = "Akkad" }
     , { canonicalIndex = 16, sourceId = "HORN", text = "horn" }
-    , { canonicalIndex = 17, sourceId = "EMPTY_JUG", text = "tóma kannan" }
+    , { canonicalIndex = 17, sourceId = "EMPTY_JAR", text = "tóma krukkan" }
     ]
 
 
@@ -50,11 +50,11 @@ monthEntries =
     , { canonicalIndex = 4, sourceId = "ENVY", text = "öfund" }
     , { canonicalIndex = 5, sourceId = "ERIDU", text = "Erídú" }
     , { canonicalIndex = 6, sourceId = "TOOTHPASTE", text = "tannkrem" }
-    , { canonicalIndex = 7, sourceId = "THREE_FIFTHS", text = "þrír fimmtu hlutar" }
-    , { canonicalIndex = 8, sourceId = "KARSHUMAB", text = "Karsjúmab" }
-    , { canonicalIndex = 9, sourceId = "TIGER", text = "tígrisdýr" }
+    , { canonicalIndex = 7, sourceId = "THREE_PARTS_OF_FIVE", text = "þrír hlutar af fimm" }
+    , { canonicalIndex = 8, sourceId = "KARSHUMAV", text = "Karsjúmav" }
+    , { canonicalIndex = 9, sourceId = "LEOPARD", text = "hlébarði" }
     , { canonicalIndex = 10, sourceId = "TIN", text = "tin" }
-    , { canonicalIndex = 11, sourceId = "FOG", text = "þoka" }
+    , { canonicalIndex = 11, sourceId = "MIST", text = "mistur" }
     , { canonicalIndex = 12, sourceId = "FRANKINCENSE", text = "reykelsi" }
     , { canonicalIndex = 13, sourceId = "SPINDLE", text = "snælda" }
     , { canonicalIndex = 14, sourceId = "RIB", text = "rif" }
@@ -73,13 +73,13 @@ monthEntries =
     , { canonicalIndex = 27, sourceId = "FIG", text = "fíkja" }
     , { canonicalIndex = 28, sourceId = "NINEVEH", text = "Níníve" }
     , { canonicalIndex = 29, sourceId = "FROG", text = "froskur" }
-    , { canonicalIndex = 30, sourceId = "TAR", text = "tjara" }
-    , { canonicalIndex = 31, sourceId = "CANDLE", text = "kerti" }
+    , { canonicalIndex = 30, sourceId = "PITCH", text = "bik" }
+    , { canonicalIndex = 31, sourceId = "LAMP", text = "lampi" }
     , { canonicalIndex = 32, sourceId = "CLOSED_DOOR", text = "lokaða hurðin" }
     , { canonicalIndex = 33, sourceId = "SESAME", text = "sesam" }
     , { canonicalIndex = 34, sourceId = "NAPE", text = "hnakki" }
     , { canonicalIndex = 35, sourceId = "SILVER", text = "silfur" }
-    , { canonicalIndex = 36, sourceId = "LILY", text = "lilja" }
+    , { canonicalIndex = 36, sourceId = "SUSA", text = "Súsa" }
     , { canonicalIndex = 37, sourceId = "STORM", text = "stormur" }
     , { canonicalIndex = 38, sourceId = "DONKEY", text = "asni" }
     , { canonicalIndex = 39, sourceId = "FLOUR", text = "mjöl" }
