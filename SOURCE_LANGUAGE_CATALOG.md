@@ -4,7 +4,7 @@ Phiên bản danh mục: `1.0.0`.
 
 Thứ tự chuẩn chỉ phụ thuộc vào `canonicalIndex`. Chuỗi tiếng Việt không được dùng để sắp xếp, xếp hạng, mở hạng, chọn lựa hay tạo khóa bộ nhớ đệm ngữ nghĩa.
 
-Tên có nghĩa được dịch theo nghĩa. Tên địa danh cổ giữ dạng Latin quốc tế quen dùng trong văn liệu kỹ thuật. Với hai chuỗi âm không có nghĩa và không có quy tắc chuyển tự tiếng Việt duy nhất, dòng triển khai cố định hai dạng `Palgurash` và `Karshumab`. Sau giai đoạn 1, cả chuỗi và chỉ số này đều được xem là đóng băng cho dòng triển khai hiện tại.
+Tên có nghĩa được dịch theo nghĩa. Tên địa danh cổ giữ dạng Latin quốc tế quen dùng trong văn liệu kỹ thuật. Với hai chuỗi âm không có nghĩa và không có quy tắc chuyển tự tiếng Việt duy nhất, dòng triển khai cố định hai dạng `Palgurash` và `Karshumav`. Sau giai đoạn 1, cả chuỗi và chỉ số này đều được xem là đóng băng cho dòng triển khai hiện tại.
 
 ## Tên miếng
 
@@ -17,7 +17,7 @@ Tên có nghĩa được dịch theo nghĩa. Tên địa danh cổ giữ dạng 
 | 5 | ý nghĩ |
 | 6 | bốn phần chín |
 | 7 | Palgurash |
-| 8 | cói |
+| 8 | cói giấy |
 | 9 | chùm |
 | 10 | bọ cạp |
 | 11 | tro |
@@ -39,7 +39,7 @@ Tên có nghĩa được dịch theo nghĩa. Tên địa danh cổ giữ dạng 
 | 5 | Eridu |
 | 6 | kem đánh răng |
 | 7 | ba phần năm |
-| 8 | Karshumab |
+| 8 | Karshumav |
 | 9 | báo hoa mai |
 | 10 | thiếc |
 | 11 | sương mù |
@@ -62,12 +62,12 @@ Tên có nghĩa được dịch theo nghĩa. Tên địa danh cổ giữ dạng 
 | 28 | Nineveh |
 | 29 | ếch |
 | 30 | hắc ín |
-| 31 | nến |
+| 31 | đèn |
 | 32 | cánh cửa đóng |
 | 33 | mè |
 | 34 | gáy |
 | 35 | bạc |
-| 36 | hoa loa kèn |
+| 36 | Susa |
 | 37 | bão |
 | 38 | lừa |
 | 39 | bột |

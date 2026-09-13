@@ -4,7 +4,7 @@ defmodule PastafariCalendarElixirVietnamese.SourceLanguageCatalog do
 
   Chỉ số chuẩn là nguồn sự thật về thứ tự. Chuỗi tiếng Việt chỉ dùng ở lớp trình bày.
   Tên có nghĩa được dịch theo nghĩa. Tên địa danh cổ giữ dạng Latin quốc tế quen dùng.
-  Hai chuỗi âm vô nghĩa được cố định thành `Palgurash` và `Karshumab`; không suy diễn nghĩa cho chúng.
+  Hai chuỗi âm vô nghĩa được cố định thành `Palgurash` và `Karshumav`; không suy diễn nghĩa cho chúng.
   Danh mục này được đóng băng từ giai đoạn 1 và không được đổi nếu không có thay đổi đặc tả rõ ràng.
   """
 
@@ -18,7 +18,7 @@ defmodule PastafariCalendarElixirVietnamese.SourceLanguageCatalog do
     {5, "ý nghĩ"},
     {6, "bốn phần chín"},
     {7, "Palgurash"},
-    {8, "cói"},
+    {8, "cói giấy"},
     {9, "chùm"},
     {10, "bọ cạp"},
     {11, "tro"},
@@ -38,7 +38,7 @@ defmodule PastafariCalendarElixirVietnamese.SourceLanguageCatalog do
     {5, "Eridu"},
     {6, "kem đánh răng"},
     {7, "ba phần năm"},
-    {8, "Karshumab"},
+    {8, "Karshumav"},
     {9, "báo hoa mai"},
     {10, "thiếc"},
     {11, "sương mù"},
@@ -61,12 +61,12 @@ defmodule PastafariCalendarElixirVietnamese.SourceLanguageCatalog do
     {28, "Nineveh"},
     {29, "ếch"},
     {30, "hắc ín"},
-    {31, "nến"},
+    {31, "đèn"},
     {32, "cánh cửa đóng"},
     {33, "mè"},
     {34, "gáy"},
     {35, "bạc"},
-    {36, "hoa loa kèn"},
+    {36, "Susa"},
     {37, "bão"},
     {38, "lừa"},
     {39, "bột"},
