@@ -1,4 +1,4 @@
-# SourceLanguageCatalog — Filipino
+# SourceLanguageCatalog ׳³ֲ³ײ²ֲ³׳²ֲ²ײ²ֲ³׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ³׳³ֲ³ײ²ֲ²׳²ֲ²ײ²ֲ²׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ³׳³ֲ³ײ²ֲ³׳²ֲ²ײ²ֲ³׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג‚¬ֲײ²ֲ¬׳³ג€™׳’ג‚¬ֲײ²ֲ¢׳³ֲ³ײ²ֲ³׳³ג€™׳’ג€ֲ¬׳’ג€ֲ¢׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג‚¬ֲײ²ֲ¬׳²ֲ²ײ²ֲ׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ¬׳³ֲ³ײ²ֲ³׳³ג€™׳’ג€ֲ¬׳’ג€ֲ¢׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג‚¬ֲײ²ֲ¬׳²ֲ²ײ²ֲ׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ¢׳³ֲ³ײ²ֲ³׳²ֲ²ײ²ֲ³׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ³׳³ֲ³ײ²ֲ³׳³ג€™׳’ג€ֲ¬׳’ג€ֲ¢׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג€ֲ¬ײ²ֲ׳²ֲ²ײ²ֲ¬׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג€ֲ¬ײ²ֲ׳²ֲ²ײ²ֲ¢׳³ֲ³ײ²ֲ³׳²ֲ²ײ²ֲ³׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג‚¬ֲײ²ֲ¬׳³ג€™׳’ג‚¬ֲײ²ֲ¢׳³ֲ³ײ²ֲ³׳³ג€™׳’ג€ֲ¬׳’ג€ֲ¢׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג‚¬ֲײ²ֲ¬׳²ֲ²ײ²ֲ׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ¬׳³ֲ³ײ²ֲ²׳²ֲ²ײ²ֲ²׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ׳³ֲ³ײ²ֲ³׳²ֲ²ײ²ֲ²׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ²׳³ֲ³ײ²ֲ²׳²ֲ²ײ²ֲ²׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ¬׳³ֲ³ײ²ֲ³׳²ֲ²ײ²ֲ³׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ³׳³ֲ³ײ²ֲ³׳³ג€™׳’ג€ֲ¬׳’ג€ֲ¢׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג€ֲ¬ײ²ֲ׳²ֲ²ײ²ֲ¬׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג€ֲ¬ײ²ֲ׳²ֲ²ײ²ֲ¢׳³ֲ³ײ²ֲ³׳²ֲ²ײ²ֲ³׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג‚¬ֲײ²ֲ¬׳³ג€™׳’ג‚¬ֲײ²ֲ¢׳³ֲ³ײ²ֲ³׳³ג€™׳’ג€ֲ¬׳’ג€ֲ¢׳³ֲ³׳’ג‚¬ג„¢׳³ג€™׳’ג€ֲ¬ײ²ֲ׳²ֲ²ײ²ֲ¬׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ׳³ֲ³ײ²ֲ²׳²ֲ²ײ²ֲ²׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ¬׳³ֲ³ײ²ֲ³׳²ֲ²ײ²ֲ²׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ²׳³ֲ³ײ²ֲ²׳²ֲ²ײ²ֲ²׳³ֲ²ײ²ֲ²׳²ֲ²ײ²ֲ Filipino
 
 Bersyon: `1.0.0-stage01`
 
@@ -8,7 +8,7 @@ Ang catalog ay frozen sa pagtatapos ng Stage 1. Bawat pangalan ay may permanente
 
 Kapag literal ang kahulugan, isinasalin ang kahulugan sa natural na Filipino. Ang buong parirala ay nananatiling iisang pangalan; halimbawa, ang mga fractional phrase ay isinasalin bilang isang buong pariralang Filipino.
 
-Kapag pangalan ng lugar, pangalan ng sarili, o sadyang imbentong tunog ang pinagmulan, hindi ito binibigyan ng bagong kahulugan. Gumagamit ang catalog ng nakapirming Latin spelling na dokumentado rito: `Lagash`, `Palgurash`, `Akkad`, `Eridu`, `Karshumab`, `Uruk`, `Nineve`, at `Babilonia`.
+Kapag pangalan ng lugar, pangalan ng sarili, o sadyang imbentong tunog ang pinagmulan, hindi ito binibigyan ng bagong kahulugan. Gumagamit ang catalog ng nakapirming Latin spelling na dokumentado rito: `Lagash`, `Palgurash`, `Akkad`, `Eridu`, `Karshumav`, `Uruk`, `Nineve`, `Susa`, at `Babilonia`.
 
 Ang lokalisasyon sa hinaharap ay presentation layer lamang:
 
@@ -27,7 +27,7 @@ Hindi kailanman binabaligtad ang daloy upang gawing semantic input ang localized
 5. Kaisipan
 6. Apat na bahagi sa siyam
 7. Palgurash
-8. Tambo
+8. Papiro
 9. Kumpol
 10. Alakdan
 11. Abo
@@ -47,8 +47,8 @@ Hindi kailanman binabaligtad ang daloy upang gawing semantic input ang localized
 5. Eridu
 6. Pasta ng ngipin
 7. Tatlong bahagi sa lima
-8. Karshumab
-9. Tigre
+8. Karshumav
+9. Leopardo
 10. Estanyo
 11. Hamog
 12. Kamanyang
@@ -70,12 +70,12 @@ Hindi kailanman binabaligtad ang daloy upang gawing semantic input ang localized
 28. Nineve
 29. Palaka
 30. Alkitran
-31. Kandila
+31. Lampara
 32. Saradong pinto
 33. Linga
 34. Batok
 35. Pilak
-36. Liryo
+36. Susa
 37. Bagyo
 38. Asno
 39. Harina
@@ -85,5 +85,5 @@ Hindi kailanman binabaligtad ang daloy upang gawing semantic input ang localized
 43. Lino
 44. Asin
 45. Peras
-46. Bahaghari
+46. Busog
 47. Buhangin
