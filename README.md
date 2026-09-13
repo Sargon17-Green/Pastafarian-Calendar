@@ -654,9 +654,9 @@ Il-kompożizzjonijiet eliġibbli jiġu ordnati lessikografikament. Jekk Jum il-K
 3  Kilwa
 4  Lagaš
 5  Ħsieb
-6  Erbgħa minn Disgħa
+6  Erba’ Partijiet minn Disgħa
 7  Palgurax
-8  Buda
+8  Papiru
 9  Għanqud
 10 Skorpjun
 11 Rmied
@@ -665,7 +665,7 @@ Il-kompożizzjonijiet eliġibbli jiġu ordnati lessikografikament. Jekk Jum il-K
 14 Daħk
 15 Akkad
 16 Qarn
-17 Il-Buqar Vojt
+17 Il-Ġarra Vojta
 ```
 
 Għal `K` pulpetti jintgħażlu `K` ismijiet differenti. Is-sekwenzi kollha possibbli tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi tagħhom, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 22.
@@ -717,14 +717,14 @@ Għal kull prefiss, l-implimentazzjoni tikkalkula eżattament id-daqs tal-blokk 
 # W. Is-Sebgħa u Erbgħin Isem tax-Xhur
 
 ```text
-1  Tajn
+1  Tafal
 2  Rummiena
 3  Minkeb
 4  Għira
 5  Eridu
 6  Tutpejst
-7  Tlieta minn Ħamsa
-8  Karxumab
+7  Tliet Partijiet minn Ħamsa
+8  Karxumav
 9  Leopard
 10 Landa
 11 Ċpar
@@ -747,12 +747,12 @@ Għal kull prefiss, l-implimentazzjoni tikkalkula eżattament id-daqs tal-blokk 
 28 Ninwe
 29 Żrinġ
 30 Żift
-31 Xemgħa
+31 Lampa
 32 Il-Bieb Magħluq
 33 Ġulġlien
 34 Kozz
 35 Fidda
-36 Ġilju
+36 Susa
 37 Maltempata
 38 Ħmar
 39 Dqiq
