@@ -9,11 +9,11 @@ ni'o lo ti liste cu se tcita `1.0.0-stage01`. lo `canonicalIndex` cu stodi gi'e 
 | 1 | ransu |
 | 2 | lorxu |
 | 3 | lo rango poi se pilno lo nu vimcu lo festi lo xadni |
-| 4 | lo ckunu be la .lariks. |
+| 4 | .lagac. |
 | 5 | lo se pensi |
-| 6 | li vo fi'u so |
+| 6 | vo lo so pagbu |
 | 7 | .palgurac. |
-| 8 | lo clani srasu |
+| 8 | misryplespa |
 | 9 | lo gunma |
 | 10 | lo jukni be la .skorpiones. |
 | 11 | lo festi be lo fagri |
@@ -22,7 +22,7 @@ ni'o lo ti liste cu se tcita `1.0.0-stage01`. lo `canonicalIndex` cu stodi gi'e 
 | 14 | lo nu cmila |
 | 15 | .akad. |
 | 16 | jirna |
-| 17 | lo kunti kabri |
+| 17 | lo kunti botpi |
 
 ## lo masti cmene
 
@@ -34,9 +34,9 @@ ni'o lo ti liste cu se tcita `1.0.0-stage01`. lo `canonicalIndex` cu stodi gi'e 
 | 4 | lo nu jilra |
 | 5 | .eridus. |
 | 6 | lo pesxu poi se pilno lo nu lumci lo denci |
-| 7 | li ci fi'u mu |
-| 8 | .karcumab. |
-| 9 | tirxu |
+| 7 | ci lo mu pagbu |
+| 8 | .karcumav. |
+| 9 | pardu |
 | 10 | tinci |
 | 11 | bumru |
 | 12 | lo panci marji be lo tricu be la .boswelias. |
@@ -63,7 +63,7 @@ ni'o lo ti liste cu se tcita `1.0.0-stage01`. lo `canonicalIndex` cu stodi gi'e 
 | 33 | lo tsiju be lo spati be la .sesamum.indikum. |
 | 34 | lo trixe be lo galxe |
 | 35 | rijno |
-| 36 | lelxe |
+| 36 | .susas. |
 | 37 | lo vlile tcima |
 | 38 | xasli |
 | 39 | lo purmo be lo maxri |

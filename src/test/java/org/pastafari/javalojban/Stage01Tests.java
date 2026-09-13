@@ -161,7 +161,7 @@ public final class Stage01Tests {
         eq("silna",SourceLanguageCatalog.monthName(44),"E_CAT_SALT");
         eq("ransu",SourceLanguageCatalog.cutletName(1),"E_CAT_BRONZE");
         eq("lorxu",SourceLanguageCatalog.cutletName(2),"E_CAT_FOX");
-        eq("tirxu",SourceLanguageCatalog.monthName(9),"E_CAT_TIGER");
+        eq("pardu",SourceLanguageCatalog.monthName(9),"E_CAT_LEOPARD");
         eq("tinci",SourceLanguageCatalog.monthName(10),"E_CAT_TIN");
         eq("bumru",SourceLanguageCatalog.monthName(11),"E_CAT_FOG");
         eq("kumte",SourceLanguageCatalog.monthName(18),"E_CAT_CAMEL");
@@ -169,7 +169,7 @@ public final class Stage01Tests {
         eq("tarla",SourceLanguageCatalog.monthName(30),"E_CAT_TAR");
         eq("figre",SourceLanguageCatalog.monthName(27),"E_CAT_FIG");
         eq("rijno",SourceLanguageCatalog.monthName(35),"E_CAT_SILVER");
-        eq("lelxe",SourceLanguageCatalog.monthName(36),"E_CAT_LILY");
+        eq(".susas.",SourceLanguageCatalog.monthName(36),"E_CAT_SUSA");
         eq("lo nu xenru",SourceLanguageCatalog.monthName(40),"E_CAT_REGRET");
         eq("tance",SourceLanguageCatalog.monthName(42),"E_CAT_TONGUE");
         eq("matli",SourceLanguageCatalog.monthName(43),"E_CAT_FLAX");
