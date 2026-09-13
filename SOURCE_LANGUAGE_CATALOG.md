@@ -6,7 +6,7 @@ Vèsyon katalòg la se `1.0.0`, epi lang sous la se Kreyòl ayisyen. Apre Stage 
 
 Chak non gen yon `canonicalIndex` fiks. Se endis sa a ki antre nan tout rank, unrank ak chwa konbinatwa. Chèn Kreyòl la pa janm sèvi kòm kle semantik pou klase oswa chwazi yon non.
 
-Mo ki gen sans literal yo tradui dapre sans yo. Non kote, non pwòp ak non envante yo pa resevwa yon sans envante; yo pase nan yon transliterasyon detèminis. Pou son ki ekri `sh` oswa `š` nan yon fòm Latin, katalòg sa a sèvi ak `ch`; son /u/ nan non pwòp yo sèvi ak `ou` lè sa nesesè pou òtograf Kreyòl la. Konsòn final yo rete la si yo fè pati non an. Règ sa a bay, pa egzanp, `Lagach`, `Palgourach` ak `Karchoumab`.
+Mo ki gen sans literal yo tradui dapre sans yo. Non kote, non pwòp ak non envante yo pa resevwa yon sans envante; yo pase nan yon transliterasyon detèminis. Pou son ki ekri `sh` oswa `š` nan yon fòm Latin, katalòg sa a sèvi ak `ch`; son /u/ nan non pwòp yo sèvi ak `ou` lè sa nesesè pou òtograf Kreyòl la. Konsòn final yo rete la si yo fè pati non an. Règ sa a bay, pa egzanp, `Lagach`, `Palgourach` ak `Karchoumav`.
 
 Ekspresyon fraksyon yo rete yon sèl non: `kat pati sou nèf` ak `twa pati sou senk`.
 
@@ -21,7 +21,7 @@ Ekspresyon fraksyon yo rete yon sèl non: `kat pati sou nèf` ak `twa pati sou s
 | 5 | panse |
 | 6 | kat pati sou nèf |
 | 7 | Palgourach |
-| 8 | jon |
+| 8 | papiris |
 | 9 | grap |
 | 10 | eskòpyon |
 | 11 | sann |
@@ -43,8 +43,8 @@ Ekspresyon fraksyon yo rete yon sèl non: `kat pati sou nèf` ak `twa pati sou s
 | 5 | Eridou |
 | 6 | pat dan |
 | 7 | twa pati sou senk |
-| 8 | Karchoumab |
-| 9 | tig |
+| 8 | Karchoumav |
+| 9 | leyopa |
 | 10 | eten |
 | 11 | bwouya |
 | 12 | lansan |
@@ -66,12 +66,12 @@ Ekspresyon fraksyon yo rete yon sèl non: `kat pati sou nèf` ak `twa pati sou s
 | 28 | Niniv |
 | 29 | krapo |
 | 30 | goudwon |
-| 31 | bouji |
+| 31 | lanp |
 | 32 | pòt fèmen |
 | 33 | wowoli |
 | 34 | dèyè kou |
 | 35 | ajan |
-| 36 | flè lis |
+| 36 | Souz |
 | 37 | tanpèt |
 | 38 | bourik |
 | 39 | farin |
