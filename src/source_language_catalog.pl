@@ -17,7 +17,7 @@ cutlet_source_name(4,  'Lagash').
 cutlet_source_name(5,  'pensamento').
 cutlet_source_name(6,  'catro partes de nove').
 cutlet_source_name(7,  'Palgurash').
-cutlet_source_name(8,  'xunco').
+cutlet_source_name(8,  'papiro').
 cutlet_source_name(9,  'acio').
 cutlet_source_name(10, 'escorpión').
 cutlet_source_name(11, 'cinza').
@@ -35,11 +35,11 @@ month_source_name(4,  'envexa').
 month_source_name(5,  'Eridu').
 month_source_name(6,  'pasta de dentes').
 month_source_name(7,  'tres partes de cinco').
-month_source_name(8,  'Karshumab').
-month_source_name(9,  'tigre').
+month_source_name(8,  'Karshumav').
+month_source_name(9,  'leopardo').
 month_source_name(10, 'estaño').
 month_source_name(11, 'néboa').
-month_source_name(12, 'incenso').
+month_source_name(12, 'olíbano').
 month_source_name(13, 'fuso').
 month_source_name(14, 'costela').
 month_source_name(15, 'alfarroba').
@@ -57,17 +57,17 @@ month_source_name(26, 'alegría').
 month_source_name(27, 'figo').
 month_source_name(28, 'Nínive').
 month_source_name(29, 'ra').
-month_source_name(30, 'alcatrán').
-month_source_name(31, 'vela').
+month_source_name(30, 'pez').
+month_source_name(31, 'lámpada').
 month_source_name(32, 'a porta pechada').
 month_source_name(33, 'sésamo').
 month_source_name(34, 'caluga').
 month_source_name(35, 'prata').
-month_source_name(36, 'lirio').
+month_source_name(36, 'Susa').
 month_source_name(37, 'treboada').
 month_source_name(38, 'burro').
 month_source_name(39, 'fariña').
-month_source_name(40, 'arrepentimento').
+month_source_name(40, 'pesar').
 month_source_name(41, 'Babilonia').
 month_source_name(42, 'lingua').
 month_source_name(43, 'liño').
