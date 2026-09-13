@@ -6,7 +6,7 @@ This catalog is frozen at Stage 1. Canonical ordering is determined only by `can
 
 Literal semantic names are translated by meaning into natural English. Established historical place names use their conventional English forms. Invented sound strings without a semantic meaning use a deterministic readable transliteration: consonants follow their ordinary modern Hebrew sound values, `sh` represents the shin sound, and written vowel marks are represented by the closest simple English vowel spelling. This rule is used only for names identified by the embedded source as invented or non-semantic; it is never used in place of semantic translation.
 
-The two invented source strings in this catalog are frozen as `Palgurash` and `Karshumav`. Established place names are frozen as `Lagash`, `Akkad`, `Eridu`, `Uruk`, `Nineveh`, and `Babylon`.
+The two invented source strings in this catalog are frozen as `Palgurash` and `Karshumav`. Established place names are frozen as `Lagash`, `Akkad`, `Eridu`, `Uruk`, `Nineveh`, `Susa`, and `Babylon`.
 
 ## Cutlet names
 
@@ -42,9 +42,9 @@ The two invented source strings in this catalog are frozen as `Palgurash` and `K
 | 6 | Toothpaste |
 | 7 | Three Parts of Five |
 | 8 | Karshumav |
-| 9 | Tiger |
+| 9 | Leopard |
 | 10 | Tin |
-| 11 | Fog |
+| 11 | Mist |
 | 12 | Frankincense |
 | 13 | Spindle |
 | 14 | Rib |
@@ -63,13 +63,13 @@ The two invented source strings in this catalog are frozen as `Palgurash` and `K
 | 27 | Fig |
 | 28 | Nineveh |
 | 29 | Frog |
-| 30 | Tar |
-| 31 | Candle |
+| 30 | Pitch |
+| 31 | Lamp |
 | 32 | The Closed Door |
 | 33 | Sesame |
 | 34 | Nape |
 | 35 | Silver |
-| 36 | Lily |
+| 36 | Susa |
 | 37 | Storm |
 | 38 | Donkey |
 | 39 | Flour |

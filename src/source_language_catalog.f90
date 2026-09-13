@@ -34,9 +34,9 @@ module source_language_catalog
        'Toothpaste', &
        'Three Parts of Five', &
        'Karshumav', &
-       'Tiger', &
+       'Leopard', &
        'Tin', &
-       'Fog', &
+       'Mist', &
        'Frankincense', &
        'Spindle', &
        'Rib', &
@@ -55,13 +55,13 @@ module source_language_catalog
        'Fig', &
        'Nineveh', &
        'Frog', &
-       'Tar', &
-       'Candle', &
+       'Pitch', &
+       'Lamp', &
        'The Closed Door', &
        'Sesame', &
        'Nape', &
        'Silver', &
-       'Lily', &
+       'Susa', &
        'Storm', &
        'Donkey', &
        'Flour', &
