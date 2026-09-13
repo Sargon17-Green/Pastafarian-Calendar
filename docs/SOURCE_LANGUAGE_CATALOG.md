@@ -21,7 +21,7 @@ Ar gyfer enwau dyfeisiedig diystyr nad oes confensiwn safonol iddynt, defnyddir 
 | 5 | meddwl |
 | 6 | pedair rhan o naw |
 | 7 | Palgwrash |
-| 8 | hesgen |
+| 8 | papurfrwynen |
 | 9 | clwstwr |
 | 10 | sgorpion |
 | 11 | lludw |
@@ -30,20 +30,18 @@ Ar gyfer enwau dyfeisiedig diystyr nad oes confensiwn safonol iddynt, defnyddir 
 | 14 | chwerthin |
 | 15 | Akkad |
 | 16 | corn |
-| 17 | y piser gwag |
-
-## Misoedd
+| 17 | y jar wag |## Misoedd
 
 | canonicalIndex | Cymraeg |
 |---:|---|
-| 1 | mwd |
+| 1 | clai |
 | 2 | pomgranad |
 | 3 | penelin |
 | 4 | cenfigen |
 | 5 | Eridu |
 | 6 | past dannedd |
 | 7 | tair rhan o bump |
-| 8 | Carshwmab |
+| 8 | Carshwmav |
 | 9 | llewpard |
 | 10 | tun |
 | 11 | niwl |
@@ -65,13 +63,13 @@ Ar gyfer enwau dyfeisiedig diystyr nad oes confensiwn safonol iddynt, defnyddir 
 | 27 | ffigysen |
 | 28 | Ninefe |
 | 29 | broga |
-| 30 | tar |
-| 31 | cannwyll |
+| 30 | pyg |
+| 31 | lamp |
 | 32 | y drws caeedig |
 | 33 | sesame |
 | 34 | gwegil |
 | 35 | arian |
-| 36 | lili |
+| 36 | Susa |
 | 37 | storm |
 | 38 | asyn |
 | 39 | blawd |
