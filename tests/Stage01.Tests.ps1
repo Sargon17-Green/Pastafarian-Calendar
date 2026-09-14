@@ -115,3 +115,4 @@ for ($id = 1; $id -le 6; $id++) {
 
 $ok = Complete-StageTestRun
 if (-not $ok) { exit 1 }
+exit 0
