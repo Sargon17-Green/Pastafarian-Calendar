@@ -118,6 +118,9 @@ jobs:
           env -u PYTHONPATH "$RELEASE_VENV/bin/python" \
             "$GITHUB_WORKSPACE/tests/release_clean_package_smoke.py" sdist
 
+      - name: Release adayı dondurma denetimini çalıştır
+        run: python -m unittest discover -s tests -p "release_rc_freeze_audit.py" -q
+
       - name: Final doğrulama özetini yaz
         if: success()
         run: |
@@ -129,4 +132,6 @@ jobs:
           echo "Beklenen Patch 27–33 acceleration correctness: 12/12 PASS"
           echo "Beklenen eski Python diferansiyel regresyonu: 6/6 PASS"
           echo "Temiz sdist/wheel kurulum doğrulaması: PASS"
+          echo "Release adayı dondurma denetimi: 4/4 PASS"
+          echo "Cold-start performans tanığı Patch 27–33 paketinde: PASS"
           echo "Beklenen toplam semantik doğrulama: 421 PASS"
