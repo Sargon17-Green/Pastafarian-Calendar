@@ -97,3 +97,19 @@ Regresja obejmuje ten sam dzień oraz kilka par wokół Foundation. Między inny
 
 W etapie 6 nie ma jeszcze PATCH 03 ani końcowego `+1`. Historyczny `oldDistance` ma pozostać fizycznie zachowany; etap 7 doda nad nim detour z chronologiczną różnicą dni. Ponowna weryfikacja natywnego MATLAB-a pozostaje odłożona do końcowego cyklu uruchomień.
 
+## Etap 7 — PATCH 03: chronological distance
+
+Historyczny `oldDistance` pozostaje fizycznie bez zmian. Nadal oblicza bezwzględną różnicę poprawionych tagów dni i nadal może zwracać błędne wartości.
+
+Dodano osobny `ChronologicalDistancePatch`. Trasa najpierw wykonuje i zachowuje surowy `oldDistance`, a następnie całkowicie zastępuje go właściwym dystansem osi dni:
+
+`abs(targetDay - calculationDay) + 1`.
+
+Końcowe `+1` jest częścią wymaganej semantyki dystansu, dlatego ten sam dzień daje zawsze `1`.
+
+`WorkCountsCompatibilityRoute` publikuje po patchu poprawne `distance`, zachowując jednocześnie poprawne `action`, `target`, `connection` i `direction`. Ślad wykonania i metryki rejestrują osobno historyczny oldDistance oraz PATCH 03.
+
+Niezmieniony regression z Discovery 03 ma po tym etapie przejść na zielono. Dodatkowy test etapu 7 obejmuje ruch w przód i wstecz po obu stronach Foundation oraz osobno potwierdza granicę tego samego dnia.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
