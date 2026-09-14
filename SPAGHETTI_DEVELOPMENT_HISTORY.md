@@ -195,3 +195,15 @@ Niezmieniony regression Stage 12 ma po tej zmianie przejść na GREEN. Test Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 14 — DISCOVERY 07: grind table index
+
+Dodano siódmy historyczny defekt. Produkcyjna ścieżka po poprawnym `priorPatch` przechodzi przez osobną historyczną warstwę indeksowania 11-wierszowej tabeli mielenia.
+
+Legacy traktuje numer mielenia jak indeks przesunięty o jeden i żąda fizycznego wiersza `grindNumber+1`. Ponieważ tabela nie ma jeszcze sentinel row odpowiadającego logicznemu indeksowi 0, pierwsze mielenie zamiast kanonicznego wiersza `3,5,7,11,1` pobiera drugi wiersz `5,7,11,13,2`. Historyczny guard końca tabeli nasyca żądanie wychodzące poza ostatni wiersz.
+
+`GrindTableCompatibilityRoute` otrzymuje poprawne visible drops sprzed nowej wady, zachowuje je w kontekście, a następnie ponownie buduje 46 widocznych kropli z przesuniętym lookupem grind. Dzięki temu Discovery 07 izoluje nowy defekt bez naruszania wcześniejszego PATCH 06.
+
+W etapie 14 nie ma jeszcze wiersza sentinel. Dopiero Stage 15 ma zachować historyczny wzór indeksowania i dodać wiersz pod logicznym indeksem 0, tak aby wszystkie 11 mielenia wróciły do właściwych wierszy.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

@@ -1,6 +1,6 @@
 function result = calendarDateSpaghetti(calculationDay, targetDay)
-% Szkielet produkcyjny rozbudowany do etapu 12; aktywne są PATCH 01-05
-% oraz Discovery 06.
+% Szkielet produkcyjny rozbudowany do etapu 14; aktywne są PATCH 01-06
+% oraz Discovery 07.
 
 pastafari.ValidationManager.requireExactIntegerInput(calculationDay);
 pastafari.ValidationManager.requireExactIntegerInput(targetDay);
@@ -14,13 +14,15 @@ ctx = pastafari.MonsterDispatcher.dispatch(ctx, @bootstrapHandler);
 [ctx, stones] = pastafari.StoneTableCompatibilityRoute.call(ctx);
 [ctx, hidden] = pastafari.HiddenCompatibilityRoute.call( ...
     ctx, counts, stones);
+[ctx, priorVisible] = pastafari.VisibleDropCompatibilityRoute.call( ...
+    ctx, counts, stones, hidden);
 
-% Discovery 06 włącza legacyPrior bez obsługi slotów 0..-6.
-[ctx, ~] = pastafari.VisibleDropCompatibilityRoute.call( ...
-    ctx, counts, stones, hidden); %#ok<ASGLU>
+% Discovery 07 nakłada nową historyczną wadę już po poprawnym priorPatch.
+[ctx, ~] = pastafari.GrindTableCompatibilityRoute.call( ...
+    ctx, counts, stones, hidden, priorVisible); %#ok<ASGLU>
 
 error('Pastafari:Bootstrap:NotImplementedYet', ...
-    ['Etap 12 aktywuje historyczną ścieżkę Discovery 06; ', ...
+    ['Etap 14 aktywuje historyczną ścieżkę Discovery 07; ', ...
      'pełna semantyka kalendarza nie jest jeszcze zaimplementowana.']);
 
     function inner = bootstrapHandler(inner)

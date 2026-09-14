@@ -34,6 +34,11 @@ classdef MonsterContext < handle
         legacyPriorMissingMatrix
         legacyVisibleDrops
         visibleDropsCandidate
+        preGrindVisibleDrops
+        legacyGrindRequestedIndices
+        legacyGrindResolvedIndices
+        legacyGrindVisibleDrops
+        grindVisibleCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -70,6 +75,11 @@ classdef MonsterContext < handle
             obj.legacyPriorMissingMatrix = [];
             obj.legacyVisibleDrops = [];
             obj.visibleDropsCandidate = [];
+            obj.preGrindVisibleDrops = [];
+            obj.legacyGrindRequestedIndices = [];
+            obj.legacyGrindResolvedIndices = [];
+            obj.legacyGrindVisibleDrops = [];
+            obj.grindVisibleCandidate = [];
         end
     end
 end
