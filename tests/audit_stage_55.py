@@ -981,7 +981,7 @@ class Stage55FinalAuditTests(unittest.TestCase):
     def test_13_catalog_indices_are_frozen_unique_and_locale_can_only_change_presentation(self):
         self.assertEqual(
             SOURCE_LANGUAGE_CATALOG.version,
-            "1.3.1",
+            "1.3.2",
         )
         self.assertEqual(
             SOURCE_LANGUAGE_CATALOG.natural_language,
