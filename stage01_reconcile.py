@@ -19,7 +19,7 @@ from typing import Dict, Iterable, Tuple
 OWNER = "Sargon17-Green"
 REPO = "Pastafarian-Calendar"
 BRANCH = "MATLAB+Polski"
-EXPECTED_HEAD = "b8be028d24b0a2aedd2d6a7a17f1fac2db3d23de"
+EXPECTED_HEAD = "6e8f328fe4148ea714e790a79e917a07a57036c0"
 
 BASE = Path.home() / "Pastafarian_MATLAB_Polski_STAGE01_RECONCILE"
 REPO_DIR = BASE / "repo"
@@ -27,6 +27,8 @@ ARCHIVE = BASE / "repo.zip"
 RESULT = BASE / "RESULT.txt"
 LOG = BASE / "ROLLING_LOG.txt"
 DIFF = BASE / "FINAL_DIFF.patch"
+UPLOAD_ZIP = BASE / "UPLOAD_STAGE01_RECONCILE_CORRECT.zip"
+DELETE_LIST = BASE / "DELETE_FROM_GITHUB.txt"
 
 TARGET_FILES = [
     "src/+pastafari/BigInt.m",
@@ -102,7 +104,7 @@ def fetch_current_head() -> str:
 
 def fresh_snapshot() -> None:
     if BASE.exists():
-        for p in [REPO_DIR, ARCHIVE, RESULT, LOG, DIFF]:
+        for p in [REPO_DIR, ARCHIVE, RESULT, LOG, DIFF, UPLOAD_ZIP, DELETE_LIST]:
             if p.is_dir():
                 shutil.rmtree(p, ignore_errors=True)
             elif p.exists():
@@ -317,6 +319,17 @@ def main() -> None:
             ],
         )
 
+    # Build a deliberately minimal upload archive. It contains only the three
+    # repository files modified by this reconciliation; helper scripts are excluded.
+    with zipfile.ZipFile(UPLOAD_ZIP, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for rel in TARGET_FILES:
+            zf.write(REPO_DIR / rel, arcname=rel)
+    DELETE_LIST.write_text(
+        "README_HE.txt\nRUN_STAGE01_RECONCILE.cmd\nstage01_reconcile.py\n",
+        encoding="utf-8",
+    )
+    log(f"Minimal upload archive created: {UPLOAD_ZIP}")
+
     write_result(
         [
             "STATUS=PASS",
@@ -328,6 +341,8 @@ def main() -> None:
             "EXACT_UINT64_INT64_REGRESSIONS=PASS",
             f"PATCHED_REPO={REPO_DIR}",
             f"DIFF={DIFF}",
+            f"UPLOAD_ZIP={UPLOAD_ZIP}",
+            f"DELETE_LIST={DELETE_LIST}",
             "MODIFIED_FILES=" + ",".join(TARGET_FILES),
             "GITHUB_PUSH=NO",
             "STAGE01_FORMALLY_CLOSED=NO",
