@@ -180,7 +180,12 @@ $h->test('source_language_catalog', function() use ($h): void {
     $h->same('gandum', SourceLanguageCatalog::cutletName(12));
     $h->same('garam', SourceLanguageCatalog::monthName(44));
     $h->same('Palgurasy', SourceLanguageCatalog::cutletName(7));
+    $h->same('Papyrus Sedge', SourceLanguageCatalog::cutletName(8));
     $h->same('Karsyumab', SourceLanguageCatalog::monthName(8));
+    $h->same('harimau bintang', SourceLanguageCatalog::monthName(9));
+    $h->same('Pitch', SourceLanguageCatalog::monthName(30));
+    $h->same('Lamp', SourceLanguageCatalog::monthName(31));
+    $h->same('Susa', SourceLanguageCatalog::monthName(36));
 });
 
 $h->test('bootstrap_infrastructure', function() use ($h): void {
