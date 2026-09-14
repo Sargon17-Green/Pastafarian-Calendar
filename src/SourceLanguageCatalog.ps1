@@ -90,7 +90,7 @@ function Get-CutletCatalog {
             sourceString = [string]$script:CutletSourceNames[$i]
         })
     }
-    return ,$out.ToArray()
+    return $out.ToArray()
 }
 
 function Get-MonthCatalog {
@@ -104,7 +104,7 @@ function Get-MonthCatalog {
             sourceString = [string]$script:MonthSourceNames[$i]
         })
     }
-    return ,$out.ToArray()
+    return $out.ToArray()
 }
 
 function Resolve-CutletSourceString {
