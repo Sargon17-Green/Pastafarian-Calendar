@@ -1,0 +1,258 @@
+name: Stage 7 path repair and self-delete
+
+on:
+  push:
+    branches:
+      - 'PowerShell\+Tagalog'
+    paths:
+      - '.github/workflows/stage07-path-repair-self-delete.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    name: Repair Stage 7 paths
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Require workflow-capable write token
+        shell: pwsh
+        env:
+          REPAIR_TOKEN: ${{ secrets.WORKFLOW_WRITE_TOKEN }}
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+
+          if ([string]::IsNullOrWhiteSpace($env:REPAIR_TOKEN)) {
+              throw 'WORKFLOW_WRITE_TOKEN is missing. Create repository secret WORKFLOW_WRITE_TOKEN with permission to write repository contents and workflow files. No repository files were changed by this run.'
+          }
+
+      - name: Check out triggering revision
+        uses: actions/checkout@v4
+        with:
+          ref: 'PowerShell+Tagalog'
+          fetch-depth: 2
+          token: ${{ secrets.WORKFLOW_WRITE_TOKEN }}
+          persist-credentials: true
+
+      - name: Verify exact trigger and broken Stage 7 state
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+
+          $expectedParent = '8fe50c968ed0b645e23a4bf10b7550f0c3b8611a'
+          $selfPath = '.github/workflows/stage07-path-repair-self-delete.yml'
+
+          $actualBranch = git branch --show-current
+          if ($actualBranch -ne 'PowerShell+Tagalog') {
+              throw "Unexpected branch: $actualBranch"
+          }
+
+          $parent = (git rev-parse HEAD^).Trim()
+          if ($parent -ne $expectedParent) {
+              throw "Unexpected parent commit. Expected $expectedParent, got $parent."
+          }
+
+          $triggerChanges = @(
+              git diff --name-only --no-renames HEAD^ HEAD |
+              Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+          )
+          if ($triggerChanges.Count -ne 1 -or $triggerChanges[0] -ne $selfPath) {
+              throw "The workflow-upload commit must change only $selfPath. Found: $($triggerChanges -join ', ')"
+          }
+
+          $metadata = Get-Content -LiteralPath 'DEVELOPMENT_STAGE.md' -Raw -Encoding UTF8
+          foreach ($required in @(
+              'CURRENT_STAGE=7',
+              'CURRENT_KIND=PATCH',
+              'CURRENT_PATCH=03',
+              'LAST_COMPLETED_STAGE=6',
+              'EXPECTED_REPOSITORY_STATE=GREEN',
+              'STAGE06_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED',
+              'STAGE07_PATCH=PATCHED_COUNTS',
+              'STAGE07_RUNTIME_VERIFICATION=AWAITING'
+          )) {
+              if (-not $metadata.Contains($required)) {
+                  throw "Missing expected Stage 7 metadata: $required"
+              }
+          }
+
+          $expectedHashes = @{
+          'ARCHITECTURE.md' = 'A2406A246BCEE2D5FA2A6DBF55126B2BB8193B45367CBB0AFDA71CC0BCE85E95'
+          'MonsterSkeleton.ps1' = '5DF79E4EA94C2574BEE6DAAF8EFD23DE54053D227ED663C2710D73A541D7C4AB'
+          'Patch03.ps1' = 'B5E2485D55D419E6F9C902C23E62FC643E002D07CC069CE7C3FE00FC7A3AA357'
+          'FinalizeStage07.ps1' = '544EA2E670ECB5ADBD4D33D65088CB8922D3DC7FE2AAB16679C4E9D8E58E426E'
+          'Stage07.Tests.ps1' = 'A9ACCDCCDA3E5394459433268ABA352DF9EE9F9CF175A5022B40F29511521A70'
+          }
+
+          $pathMap = @{
+          'ARCHITECTURE.md' = 'docs/ARCHITECTURE.md'
+          'MonsterSkeleton.ps1' = 'src/MonsterSkeleton.ps1'
+          'Patch03.ps1' = 'src/Patch03.ps1'
+          'FinalizeStage07.ps1' = 'tests/FinalizeStage07.ps1'
+          'Stage07.Tests.ps1' = 'tests/Stage07.Tests.ps1'
+          }
+
+          foreach ($source in $pathMap.Keys) {
+              if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+                  throw "Missing flattened Stage 7 source file: $source"
+              }
+
+              $actualHash = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToUpperInvariant()
+              if ($actualHash -ne $expectedHashes[$source]) {
+                  throw "Unexpected content in $source. Expected SHA-256 $($expectedHashes[$source]), got $actualHash."
+              }
+
+              $destination = $pathMap[$source]
+              $parentDir = Split-Path -Parent $destination
+              if (-not (Test-Path -LiteralPath $parentDir -PathType Container)) {
+                  throw "Expected destination directory is missing: $parentDir"
+              }
+          }
+
+          if (-not (Test-Path -LiteralPath $selfPath -PathType Leaf)) {
+              throw 'Workflow file is unexpectedly missing before repair.'
+          }
+
+          Write-Host 'Preflight verification PASS.'
+
+      - name: Repair paths, verify bytes, and stage self-deletion
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+
+          $selfPath = '.github/workflows/stage07-path-repair-self-delete.yml'
+
+          $expectedHashes = @{
+          'ARCHITECTURE.md' = 'A2406A246BCEE2D5FA2A6DBF55126B2BB8193B45367CBB0AFDA71CC0BCE85E95'
+          'MonsterSkeleton.ps1' = '5DF79E4EA94C2574BEE6DAAF8EFD23DE54053D227ED663C2710D73A541D7C4AB'
+          'Patch03.ps1' = 'B5E2485D55D419E6F9C902C23E62FC643E002D07CC069CE7C3FE00FC7A3AA357'
+          'FinalizeStage07.ps1' = '544EA2E670ECB5ADBD4D33D65088CB8922D3DC7FE2AAB16679C4E9D8E58E426E'
+          'Stage07.Tests.ps1' = 'A9ACCDCCDA3E5394459433268ABA352DF9EE9F9CF175A5022B40F29511521A70'
+          }
+
+          $pathMap = @{
+          'ARCHITECTURE.md' = 'docs/ARCHITECTURE.md'
+          'MonsterSkeleton.ps1' = 'src/MonsterSkeleton.ps1'
+          'Patch03.ps1' = 'src/Patch03.ps1'
+          'FinalizeStage07.ps1' = 'tests/FinalizeStage07.ps1'
+          'Stage07.Tests.ps1' = 'tests/Stage07.Tests.ps1'
+          }
+
+          foreach ($source in $pathMap.Keys) {
+              $destination = $pathMap[$source]
+              Copy-Item -LiteralPath $source -Destination $destination -Force
+
+              $destinationHash = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToUpperInvariant()
+              if ($destinationHash -ne $expectedHashes[$source]) {
+                  throw "Post-copy SHA-256 mismatch for $destination."
+              }
+          }
+
+          foreach ($source in $pathMap.Keys) {
+              Remove-Item -LiteralPath $source -Force
+          }
+
+          foreach ($source in $pathMap.Keys) {
+              if (Test-Path -LiteralPath $source) {
+                  throw "Flattened root file still exists after repair: $source"
+              }
+
+              $destination = $pathMap[$source]
+              if (-not (Test-Path -LiteralPath $destination -PathType Leaf)) {
+                  throw "Correct nested file is missing after repair: $destination"
+              }
+
+              $destinationHash = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToUpperInvariant()
+              if ($destinationHash -ne $expectedHashes[$source]) {
+                  throw "Final SHA-256 mismatch for $destination."
+              }
+          }
+
+          # Delete the one-shot workflow only after all Stage 7 content checks pass.
+          Remove-Item -LiteralPath $selfPath -Force
+
+          git add -A
+
+          $expectedChanges = @(
+              '.github/workflows/stage07-path-repair-self-delete.yml',
+              'ARCHITECTURE.md',
+              'FinalizeStage07.ps1',
+              'MonsterSkeleton.ps1',
+              'Patch03.ps1',
+              'Stage07.Tests.ps1',
+              'docs/ARCHITECTURE.md',
+              'src/MonsterSkeleton.ps1',
+              'src/Patch03.ps1',
+              'tests/FinalizeStage07.ps1',
+              'tests/Stage07.Tests.ps1'
+          ) | Sort-Object
+
+          $actualChanges = @(
+              git diff --cached --name-only --no-renames |
+              Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+              Sort-Object
+          )
+
+          if ($actualChanges.Count -ne $expectedChanges.Count) {
+              throw "Unexpected staged path count. Expected $($expectedChanges.Count), got $($actualChanges.Count). Actual: $($actualChanges -join ', ')"
+          }
+
+          for ($i = 0; $i -lt $expectedChanges.Count; $i++) {
+              if ($actualChanges[$i] -ne $expectedChanges[$i]) {
+                  throw "Unexpected staged path set. Expected: $($expectedChanges -join ', '); actual: $($actualChanges -join ', ')"
+              }
+          }
+
+          git diff --cached --check
+          if ($LASTEXITCODE -ne 0) {
+              throw 'git diff --cached --check failed.'
+          }
+
+          Write-Host 'Repair verification PASS.'
+          Write-Host 'Self-deletion is staged.'
+
+      - name: Commit and push verified repair
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git commit `
+            -m 'Ayusin ang mga path ng Stage 7 at alisin ang repair workflow' `
+            -m 'Ilipat ang limang maling root-level Stage 7 files sa kanilang eksaktong docs/src/tests paths, patunayan ang pinned SHA-256 ng bawat file, alisin ang limang flattened duplicates, at burahin ang one-shot repair workflow matapos ang matagumpay na verification. Walang pagbabago sa Stage 7 semantics.'
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Repair commit failed.'
+          }
+
+          git push origin HEAD:'PowerShell+Tagalog'
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Repair push failed. The local verified commit was not accepted by GitHub.'
+          }
+
+          $localHead = (git rev-parse HEAD).Trim()
+          $remoteLine = (git ls-remote origin 'refs/heads/PowerShell+Tagalog' | Select-Object -First 1)
+          if ([string]::IsNullOrWhiteSpace($remoteLine)) {
+              throw 'Could not read remote branch after push.'
+          }
+
+          $remoteHead = ($remoteLine -split '\s+')[0]
+          if ($remoteHead -ne $localHead) {
+              throw "Remote verification failed. Local $localHead, remote $remoteHead."
+          }
+
+          if (Test-Path -LiteralPath '.github/workflows/stage07-path-repair-self-delete.yml') {
+              throw 'Workflow file unexpectedly still exists in the committed worktree.'
+          }
+
+          Write-Host "STAGE07_PATH_REPAIR_COMMIT=$localHead"
+          Write-Host 'STAGE07_PATH_REPAIR_RESULT=PASS'
+          Write-Host 'SELF_DELETE_RESULT=PASS'
