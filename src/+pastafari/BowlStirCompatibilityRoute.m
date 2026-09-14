@@ -1,10 +1,8 @@
 classdef BowlStirCompatibilityRoute
-    % Produkcyjna trasa Discovery 10.
-    % PATCH 09 pozostaje osobną, zieloną warstwą. Ta nowa warstwa ponownie
-    % buduje rounds z poprawnymi bowl aliases, lecz sześć bowl writes wykonuje
-    % sekwencyjnie in-place przez LegacyInPlaceBowlUpdateWrong.
-    %
-    % W etapie 20 nie istnieje jeszcze vaultOld ani pending dla tej trasy.
+    % Produkcyjna trasa mis po PATCH 10.
+    % Najpierw wykonuje pełną surową ścieżkę Discovery 10 przez niezmieniony
+    % LegacyInPlaceBowlUpdateWrong. Publikowana ścieżka używa vaultOld +
+    % pending i zatwierdza wszystkie sześć writes dopiero po całym round.
     methods (Static)
         function [ctx, bowls] = call( ...
                 ctx, counts, stones, visible, preInPlaceBowls)
@@ -12,21 +10,17 @@ classdef BowlStirCompatibilityRoute
 
             if ~iscell(stones) || ~isequal(size(stones), [46, 5])
                 error('Pastafari:Bowls:StirStoneShape', ...
-                    'Discovery 10 wymaga tabeli kamieni 46x5.');
+                    'Trasa bowl stir wymaga tabeli kamieni 46x5.');
             end
             if ~iscell(visible) || numel(visible) ~= 46
                 error('Pastafari:Bowls:StirVisibleShape', ...
-                    'Discovery 10 wymaga dokładnie 46 visible drops.');
+                    'Trasa bowl stir wymaga dokładnie 46 visible drops.');
             end
             if ~iscell(preInPlaceBowls) || numel(preInPlaceBowls) ~= 6
                 error('Pastafari:Bowls:PreInPlaceShape', ...
-                    'Discovery 10 wymaga sześciu mis z zielonego PATCH 09.');
+                    'PATCH 10 wymaga sześciu mis z zielonego PATCH 09.');
             end
 
-            ctx.phase = 'DISCOVERY_10';
-            ctx.subPhase = 10;
-            ctx.mode = 'SEQUENTIAL_IN_PLACE_BOWL_STIR';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_10_IN_PLACE_BOWL_CONTAMINATION';
             ctx.metrics = pastafari.MetricsShell.bump( ...
@@ -34,15 +28,49 @@ classdef BowlStirCompatibilityRoute
 
             ctx.preInPlaceBowlsCandidate = preInPlaceBowls;
 
-            bowls = pastafari.BowlStirCompatibilityRoute.initialBowls(counts);
+            initial = pastafari.BowlStirCompatibilityRoute.initialBowls(counts);
+
+            [legacyFinal, legacyFirst, ~] = ...
+                pastafari.BowlStirCompatibilityRoute.buildLegacy( ...
+                    initial, stones, visible);
+
+            ctx.phase = 'PATCH_10';
+            ctx.subPhase = 10;
+            ctx.mode = 'VAULT_OLD_PENDING_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = 'PATCH_10_VAULT_OLD_PENDING';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch10.vaultOldPending.calls');
+
+            [bowls, patchedFirst, finalOrder] = ...
+                pastafari.BowlStirCompatibilityRoute.buildPatched( ...
+                    initial, stones, visible);
+
+            ctx.legacyInPlaceFirstRoundBowls = legacyFirst;
+            ctx.firstRoundStirCandidate = patchedFirst;
+            ctx.legacyInPlaceFinalBowls = legacyFinal;
+            ctx.stirBowlsCandidate = bowls;
+            ctx.bowlsCandidate = bowls;
+            ctx.currentBowlOrder = finalOrder;
+            ctx.diagnostics{end + 1} = ...
+                ['PATCH 10 zachowuje surową ścieżkę in-place jako bliznę, ', ...
+                 'ale publikuje rounds czytające wyłącznie z vaultOld, ', ...
+                 'piszące do pending i commitujące po sześciu positions.'];
+        end
+    end
+
+    methods (Static, Access = private)
+        function [bowls, firstRound, finalOrder] = ...
+                buildLegacy(initial, stones, visible)
+            bowls = initial;
+            firstRound = [];
+            finalOrder = [];
 
             for dropNumber = 1:46
                 drop = visible{dropNumber};
                 order = ...
                     pastafari.BowlStirCompatibilityRoute.orderFromDrop(drop);
 
-                % PATCH 09 pozostaje aktywny: pours są poprawnie mapowane przez
-                % bieżący order. Nowa wada dotyczy wyłącznie bowl stir.
                 pours = pastafari.BowlAliasPatch.computePours( ...
                     bowls, drop, stones(dropNumber, :), dropNumber, order);
 
@@ -51,23 +79,40 @@ classdef BowlStirCompatibilityRoute
                     order, pours);
 
                 if dropNumber == 1
-                    ctx.legacyInPlaceFirstRoundBowls = bowls;
-                    ctx.firstRoundStirCandidate = bowls;
+                    firstRound = bowls;
                 end
-
-                ctx.currentBowlOrder = order;
+                finalOrder = order;
             end
-
-            ctx.legacyInPlaceFinalBowls = bowls;
-            ctx.stirBowlsCandidate = bowls;
-            ctx.bowlsCandidate = bowls;
-            ctx.diagnostics{end + 1} = ...
-                ['Discovery 10 zapisuje każdą bowl natychmiast do working; ', ...
-                 'późniejsze positions czytają już zmienionych sąsiadów.'];
         end
-    end
 
-    methods (Static, Access = private)
+        function [bowls, firstRound, finalOrder] = ...
+                buildPatched(initial, stones, visible)
+            bowls = initial;
+            firstRound = [];
+            finalOrder = [];
+
+            for dropNumber = 1:46
+                drop = visible{dropNumber};
+                order = ...
+                    pastafari.BowlStirCompatibilityRoute.orderFromDrop(drop);
+
+                % Pours także muszą czytać stan wejściowy tego round.
+                vaultOld = bowls;
+                pours = pastafari.BowlAliasPatch.computePours( ...
+                    vaultOld, drop, stones(dropNumber, :), ...
+                    dropNumber, order);
+
+                bowls = pastafari.VaultOldPendingPatch.apply( ...
+                    vaultOld, dropNumber, drop, stones(dropNumber, :), ...
+                    order, pours);
+
+                if dropNumber == 1
+                    firstRound = bowls;
+                end
+                finalOrder = order;
+            end
+        end
+
         function bowls = initialBowls(counts)
             primes = [17 19 23 29 31 37];
             bowls = cell(1, 6);

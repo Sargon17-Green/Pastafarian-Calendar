@@ -320,3 +320,19 @@ W etapie 20 nie istnieją jeszcze `vaultOld`, osobny `pending` ani późny commi
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 21 — PATCH 10: vaultOld + pending
+
+Historyczny `LegacyInPlaceBowlUpdateWrong` pozostaje fizycznie bez zmian. Nadal wykonuje sześć sekwencyjnych writes na jednym `working` i nadal pozostaje obserwowalną blizną Discovery 10.
+
+Dodano osobny `VaultOldPendingPatch`. Na początku każdego round bieżące sześć mis jest kopiowane logicznie do `vaultOld`. Każde z sześciu obliczeń `current`, `previous` i `next` czyta wyłącznie z tego samego `vaultOld`, niezależnie od tego, które positions zostały już policzone.
+
+Wynik każdej position trafia do osobnego `pending{id}`. Żadna wartość `pending` nie jest używana jako wejście dla kolejnej position. Dopiero po obliczeniu wszystkich sześciu positions całe `pending` staje się stanem następnego round.
+
+`BowlStirCompatibilityRoute` wykonuje teraz dwie pełne ścieżki: najpierw niezmieniony legacy in-place i zachowuje jego pierwszy oraz końcowy stan jako bliznę, a następnie osobno buduje publikowaną ścieżkę przez `vaultOld + pending`.
+
+PATCH 09 pozostaje aktywny w obu ścieżkach na poziomie pours: semantyczne positions nadal są mapowane przez `bowlAlias[position]=order[position]`.
+
+Niezmieniony regression Stage 20 ma po tej zmianie przejść na GREEN. Test Stage 21 ponownie sprawdza mały dokładny witness oraz kilka 46-round sekwencji o różnych order, porównując każdą końcową bowl z niezależną transakcyjną ścieżką reference.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
