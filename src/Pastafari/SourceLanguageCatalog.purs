@@ -29,7 +29,7 @@ cutletCatalog =
   , { canonicalIndex: 5, sourceText: "विचार" }
   , { canonicalIndex: 6, sourceText: "नौमध्ये चार भाग" }
   , { canonicalIndex: 7, sourceText: "पल्गुराश" }
-  , { canonicalIndex: 8, sourceText: "नर्कट" }
+  , { canonicalIndex: 8, sourceText: "पपाइरस" }
   , { canonicalIndex: 9, sourceText: "गुच्छा" }
   , { canonicalIndex: 10, sourceText: "बिच्छी" }
   , { canonicalIndex: 11, sourceText: "खरानी" }
@@ -43,15 +43,15 @@ cutletCatalog =
 
 monthCatalog :: Array CatalogEntry
 monthCatalog =
-  [ { canonicalIndex: 1, sourceText: "माटो" }
+  [ { canonicalIndex: 1, sourceText: "क्ले" }
   , { canonicalIndex: 2, sourceText: "अनार" }
   , { canonicalIndex: 3, sourceText: "कुहिनो" }
   , { canonicalIndex: 4, sourceText: "ईर्ष्या" }
   , { canonicalIndex: 5, sourceText: "एरिडु" }
   , { canonicalIndex: 6, sourceText: "दन्तमञ्जन" }
   , { canonicalIndex: 7, sourceText: "पाँचमध्ये तीन भाग" }
-  , { canonicalIndex: 8, sourceText: "कर्शुमाब" }
-  , { canonicalIndex: 9, sourceText: "बाघ" }
+  , { canonicalIndex: 8, sourceText: "कर्शुमाव" }
+  , { canonicalIndex: 9, sourceText: "चितुवा" }
   , { canonicalIndex: 10, sourceText: "टिन" }
   , { canonicalIndex: 11, sourceText: "कुहिरो" }
   , { canonicalIndex: 12, sourceText: "लोबान" }
@@ -72,13 +72,13 @@ monthCatalog =
   , { canonicalIndex: 27, sourceText: "अञ्जिर" }
   , { canonicalIndex: 28, sourceText: "निनवे" }
   , { canonicalIndex: 29, sourceText: "भ्यागुतो" }
-  , { canonicalIndex: 30, sourceText: "अलकत्रा" }
-  , { canonicalIndex: 31, sourceText: "मैनबत्ती" }
+  , { canonicalIndex: 30, sourceText: "पिच" }
+  , { canonicalIndex: 31, sourceText: "दियो" }
   , { canonicalIndex: 32, sourceText: "बन्द ढोका" }
   , { canonicalIndex: 33, sourceText: "तिल" }
   , { canonicalIndex: 34, sourceText: "गर्दनको पछाडिको भाग" }
   , { canonicalIndex: 35, sourceText: "चाँदी" }
-  , { canonicalIndex: 36, sourceText: "लिली" }
+  , { canonicalIndex: 36, sourceText: "शूशन" }
   , { canonicalIndex: 37, sourceText: "आँधी" }
   , { canonicalIndex: 38, sourceText: "गधा" }
   , { canonicalIndex: 39, sourceText: "पीठो" }
