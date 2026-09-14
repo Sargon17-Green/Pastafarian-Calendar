@@ -8,26 +8,37 @@ Natapos at napatunayan sa aktuwal na Windows PowerShell 5.1 ang Stage 1. Nananat
 
 ## Stage 2 — Discovery 01
 
-Ang Stage 2 ay sadyang naglalagay ng unang makasaysayang legacy defect sa production path:
+Napatunayan ang historical defect:
 
 ```text
 oldRemainder(x) = regularMod(x, M)
 ```
 
-Hindi nito ginagawa ang normative `0 -> M` correction. Dahil dito, ang `M`, `2M`, at `3M` ay sadyang nagbubunga ng `0` sa legacy path samantalang `M` ang normative na inaasahan. Ang `M+1` ay nananatiling tugma at nagbubunga ng `1`.
+Para sa mga multiple ng `M`, nagbubunga ang legacy path ng `0` sa halip na normative `M`. Nakumpirma sa runtime ang eksaktong Discovery 01 `EXPECTED_RED` surface.
 
-Ang production route ay:
+## Stage 3 — Patch 01
+
+Ang Patch 01 ay hindi nagbubura o nagpapalit sa `oldRemainder`. Sa halip, idinadagdag nito ang makitid na correction:
+
+```text
+savePatch(legacyRemainder) =
+    M, kung legacyRemainder = 0
+    legacyRemainder, kung hindi
+```
+
+Ang production route ay ngayon:
 
 ```text
 Invoke-CalendarDateSpaghetti
 -> base dispatcher
--> Invoke-Discovery01LegacyAdapter
+-> Invoke-Patch01SaveAdapter
 -> oldRemainder
+-> savePatch
 ```
 
-Ang adapter ay nagtatala lamang ng state sa sariling invocation context. Walang mutable semantic global state at hindi tumatawag sa normative oracle ang production path.
+Sa ganitong paraan, nananatiling nakikita at nasusubok ang historical scar, ngunit ang public production result ng kasalukuyang stage ay muling tumutugma sa normative `SAVE` behavior.
 
-Wala pang `savePatch` sa Stage 2. Ang correction ay para lamang sa susunod na PATCH stage.
+Walang Stage 4 discovery logic sa Stage 3.
 
 ## Pagpapatakbo ng mga pagsusuri
 
@@ -37,23 +48,23 @@ Stage 1 regression:
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
 ```
 
-Discovery 01:
+Patch 01:
 
 ```powershell
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage02.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage03.Tests.ps1
 ```
 
-Buong Stage 2 verification at finalization:
+Buong Stage 3 verification at finalization:
 
 ```powershell
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage02.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage03.ps1
 ```
 
-Sa matagumpay na Discovery 01 verification, kailangang lumitaw ang `STAGE02_RESULT=PASS` at `STAGE02_REPOSITORY_STATE=EXPECTED_RED`.
+Sa matagumpay na Patch 01 verification, kailangang lumitaw ang `STAGE03_RESULT=PASS` at `STAGE03_REPOSITORY_STATE=GREEN`.
 
 ## Tumpak na integer
 
-Ginagamit ng linya ang `System.Numerics.BigInteger`, na bahagi ng .NET runtime na ginagamit mismo ng PowerShell. Walang floating point sa normative o Discovery 01 arithmetic.
+Ginagamit ng linya ang `System.Numerics.BigInteger`, na bahagi ng .NET runtime na ginagamit mismo ng PowerShell. Walang floating point sa normative, Discovery 01, o Patch 01 arithmetic.
 
 ## Wika ng pinagmulan
 

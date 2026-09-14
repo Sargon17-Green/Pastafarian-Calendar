@@ -6,12 +6,6 @@
 
 Nilikha mula sa wala ang PowerShell project tree, ang malinis na normative oracle, ang test harness, ang frozen source-language catalog, at ang neutral na pundasyon ng magiging monster architecture.
 
-### Ano ang sadyang hindi pa umiiral
-
-Wala pang maling legacy remainder, maling day tag, maling distance, in-place stone mutation, backward hidden storage, sentinel grind table, zero-based rank scar, bowl alias, shadow bowl patch, order-at-46 latch, biased selector, wide detour, gate-side scar, year-5781 scar, cache scar, ghost structure sauce, cutlet filter scar, repeated-name scar, virtual legacy list scar, weaving ghost, contiguous-month ghost, o opening-gate scar.
-
-Hindi isinulat nang maaga ang kasaysayan ng alinmang patch. Lalabas lamang ang bawat sugat sa sarili nitong DISCOVERY at PATCH stage.
-
 ### Neutral na monster layer
 
 May base invocation context, dispatcher, validation manager, error wrapper, metrics shell, at deterministic log shell. Ang mga ito ay walang normative policy at hindi nagbabasa ng observability state para magpasya ng sagot.
@@ -34,19 +28,41 @@ Kapag eksaktong multiple ng `M` ang input, ibinabalik nito ang `0`. Salungat ito
 
 ### Eksaktong regression surface
 
-Ang Discovery 01 verification ay sadyang nangangailangan ng sumusunod:
+Napatunayan sa aktuwal na Windows PowerShell 5.1 ang sumusunod:
 
 - `M`: legacy `0`, normative `M`, `EXPECTED_RED`.
 - `2M`: legacy `0`, normative `M`, `EXPECTED_RED`.
 - `3M`: legacy `0`, normative `M`, `EXPECTED_RED`.
 - `M+1`: legacy `1`, normative `1`, tugma.
 
-Ang stable discovery identifier para sa divergence ay `Pastafari:Discovery01:LegacyRemainderDivergence`.
+Ang stable discovery identifier ay `Pastafari:Discovery01:LegacyRemainderDivergence`.
 
 ### Production route at ownership
 
-Ang `Invoke-CalendarDateSpaghetti` ay dumadaan sa base dispatcher at saka sa `Invoke-Discovery01LegacyAdapter`. Ang adapter lamang ang tumatawag sa `oldRemainder`. Ang `legacyRemainderInput`, `legacyRemainderValue`, at `discovery01Status` ay pag-aari ng sariling invocation context at dumadaan sa semantic transaction bago ma-commit.
+Ang Discovery 01 adapter ay nagtatala ng `legacyRemainderInput` at `legacyRemainderValue` sa sariling invocation context at dumadaan sa semantic transaction bago mag-commit.
 
-### Sadyang hindi pa inaayos
+## Stage 3 — Patch 01: save correction
 
-Walang `savePatch`, walang `0 -> M` correction, at walang code mula sa Stage 3 o sa alinmang mas huling historical patch.
+### Correction
+
+Idinagdag ang `savePatch`, na tumatanggap ng output ng `oldRemainder` at gumagawa lamang ng isang correction:
+
+```text
+0 -> M
+```
+
+Lahat ng nonzero legacy remainder ay ibinabalik nang walang pagbabago.
+
+### Historical scar retention
+
+Hindi binura, pinalitan, o itinago ang `oldRemainder`. Maaari pa ring tawagin nang direkta ang legacy function at mapatunayan ang Stage 2 defect. Ang Patch 01 ay isang hiwalay na layer sa ibabaw nito.
+
+### Kasalukuyang production route
+
+Ang `Invoke-CalendarDateSpaghetti` ay dumadaan sa `Invoke-Patch01SaveAdapter`. Kinukuha ng adapter ang legacy remainder, ina-apply ang `savePatch`, at nagko-commit ng parehong legacy at patched value sa sariling invocation context.
+
+### Inaasahang estado
+
+Ang Stage 3 production result ay GREEN para sa dating divergent cases at para sa mga control case, habang nananatiling hiwalay at deterministic ang semantic state.
+
+Wala pang Stage 4 discovery behavior.
