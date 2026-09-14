@@ -79,6 +79,11 @@ classdef MonsterContext < handle
         legacyWideSelectionError
         legacyGeneralSelectionResult
         generalSelectionCandidate
+        gateSignedStep
+        legacyPositiveOnlyGateQuestionDay
+        legacyPositiveOnlyGateGap
+        gateQuestionDayCandidate
+        gateGapCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -160,6 +165,11 @@ classdef MonsterContext < handle
             obj.legacyWideSelectionError = '';
             obj.legacyGeneralSelectionResult = [];
             obj.generalSelectionCandidate = [];
+            obj.gateSignedStep = [];
+            obj.legacyPositiveOnlyGateQuestionDay = [];
+            obj.legacyPositiveOnlyGateGap = [];
+            obj.gateQuestionDayCandidate = [];
+            obj.gateGapCandidate = [];
         end
     end
 end

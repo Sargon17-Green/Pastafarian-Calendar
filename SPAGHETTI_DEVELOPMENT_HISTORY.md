@@ -486,3 +486,21 @@ Niezmieniony regression Stage 28 ma po tej zmianie przejść na GREEN. Test Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 30 — DISCOVERY 15: positive-only gate question
+
+Dodano piętnasty historyczny defekt. Po raz pierwszy ścieżka produkcyjna zaczyna pytać o odstępy bram po obu stronach Foundation.
+
+`GateQuestionEngine` jest warstwą neutralną względem znaku. Otrzymuje już konkretny target day, buduje aktualny sauce dla `Foundation -> target`, pyta bowl 1 z seal 1, wybiera jedną z 922 dróg przez aktualny general selector i zwraca `41 + chosen`.
+
+Historyczny błąd znajduje się w `LegacyPositiveOnlyGateQuestion`. Dla signed step `+n` pyta poprawnie `Foundation+n`. Dla signed step `-n` ignoruje znak i również pyta `Foundation+n`, czyli używa `Foundation+abs(step)`.
+
+`GateGapCompatibilityRoute` w Stage 30 publikuje dokładnie wynik tej legacy warstwy. Dodatnie bramy są więc poprawne przypadkiem, a ujemne są lustrzanie błędne.
+
+Kontrolne wartości wynikające z normatywnej ścieżki rozróżniają znak natychmiast: dla `n=1` dodatni gap wynosi `345`, a ujemny `503`; dla `n=2` odpowiednio `818` i `441`; dla `n=3` odpowiednio `831` i `329`.
+
+Regresja Stage 30 wymaga, aby raw legacy question day i raw legacy gap dla `-n` pozostały identyczne z dodatnim `+n`. Jednocześnie publikowany wynik jest porównywany z prawdziwym pytaniem `Foundation-n`, dzięki czemu Stage 30 jest celowo `EXPECTED_RED`.
+
+Dopiero Stage 31 ma pozostawić `LegacyPositiveOnlyGateQuestion` fizycznie bez zmian jako bliznę, ale dla semantic path zbudować signed question day dokładnie jako `Foundation+signedStep`. Dla kroku ujemnego jest to `Foundation-abs(step)`.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

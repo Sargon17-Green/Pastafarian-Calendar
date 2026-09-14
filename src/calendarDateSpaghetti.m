@@ -1,6 +1,6 @@
 function result = calendarDateSpaghetti(calculationDay, targetDay)
-% Szkielet produkcyjny rozbudowany do etapu 28; aktywne są PATCH 01-13
-% oraz Discovery 14.
+% Szkielet produkcyjny rozbudowany do etapu 30; aktywne są PATCH 01-14
+% oraz Discovery 15.
 
 pastafari.ValidationManager.requireExactIntegerInput(calculationDay);
 pastafari.ValidationManager.requireExactIntegerInput(targetDay);
@@ -42,17 +42,19 @@ selectionNextId = ...
 stream = pastafari.AnswerRingStreamFactory.fromSauce( ...
     finalBowls, selectionBowlId, selectionNextId, 1);
 
-% PATCH 13 pozostaje zielony dla realnego short consumer N=922.
 [ctx, ~] = pastafari.SmallPickCompatibilityRoute.call( ...
     ctx, stream, pastafari.BigInt(922)); %#ok<ASGLU>
 
-% Discovery 14 ujawnia brak wide dispatchu na pierwszym N>M.
 M = pastafari.BigInt('170141183460469231731687303715884105727');
 [ctx, ~] = pastafari.GeneralSelectionCompatibilityRoute.call( ...
     ctx, stream, M + pastafari.BigInt(1)); %#ok<ASGLU>
 
+% Discovery 15: pierwsze realne pytanie o bramę ujemną.
+[ctx, ~] = pastafari.GateGapCompatibilityRoute.call( ...
+    ctx, pastafari.BigInt(-1)); %#ok<ASGLU>
+
 error('Pastafari:Bootstrap:NotImplementedYet', ...
-    ['Etap 28 aktywuje historyczną ścieżkę Discovery 14; ', ...
+    ['Etap 30 aktywuje historyczną ścieżkę Discovery 15; ', ...
      'pełna semantyka kalendarza nie jest jeszcze zaimplementowana.']);
 
     function inner = bootstrapHandler(inner)
