@@ -446,3 +446,19 @@ Niezmieniony regression Stage 26 ma po tej zmianie przejść na GREEN. Test Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 28 — DISCOVERY 14: short-only selector
+
+Dodano czternasty historyczny defekt. PATCH 13 pozostaje zielonym i poprawnym selektorem dla `1 <= N <= M`, ale nowy general-selection dispatcher błędnie zakłada, że każdy dodatni rozmiar rodziny jest wyborem krótkim.
+
+`LegacyShortOnlySelectionDispatcher` przekazuje więc także `N>M` bezpośrednio do `SmallPickCompatibilityRoute`. Nie istnieje rozgałęzienie na wide selection, nie oblicza się `places`, `space`, cyfr wide ani wide rejection.
+
+Gdy short route odrzuca `N>M` błędem `Pastafari:Selection:LegacyShortAssumption`, dispatcher zachowuje invocation-local historyczną bliznę: `legacyWideSelectionUnsupported=true`, identyfikator błędu oraz pusty `legacyGeneralSelectionResult`.
+
+`GeneralSelectionCompatibilityRoute` w etapie 28 publikuje dokładnie wynik legacy dispatchera. Dla wide request jest to więc wynik pusty, podczas gdy normatywny oracle posiada dokładny wide rank.
+
+Regresja używa jednego prostego answer ring `first=1`, `directionStep=+1` i trzech rozmiarów: `M+1`, `M^2` oraz `M^3`. Wszystkie trzy muszą być `EXPECTED_RED`, a kontrolny `N=922` musi nadal przechodzić poprawnie przez PATCH 13.
+
+W etapie 28 nie ma jeszcze żadnej wide arithmetic ani wide detour. Dopiero Stage 29 ma zachować cały raw short-only failure jako bliznę, a dla `N>M` zbudować minimalną liczbę `places` z `space=M^places>=N`, odczytać cyfry z tego samego answer ring, zbudować little-endian wide value i wykonać rejection w przestrzeni `space`.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

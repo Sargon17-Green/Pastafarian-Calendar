@@ -73,6 +73,12 @@ classdef MonsterContext < handle
         legacyBiasedPickSize
         legacyBiasedPickRank
         smallPickCandidate
+        legacyShortOnlyAssumed
+        legacyGeneralSelectionRequestedSize
+        legacyWideSelectionUnsupported
+        legacyWideSelectionError
+        legacyGeneralSelectionResult
+        generalSelectionCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -148,6 +154,12 @@ classdef MonsterContext < handle
             obj.legacyBiasedPickSize = [];
             obj.legacyBiasedPickRank = [];
             obj.smallPickCandidate = [];
+            obj.legacyShortOnlyAssumed = false;
+            obj.legacyGeneralSelectionRequestedSize = [];
+            obj.legacyWideSelectionUnsupported = false;
+            obj.legacyWideSelectionError = '';
+            obj.legacyGeneralSelectionResult = [];
+            obj.generalSelectionCandidate = [];
         end
     end
 end
