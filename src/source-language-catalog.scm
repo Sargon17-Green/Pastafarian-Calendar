@@ -1,6 +1,6 @@
 ;; Kildesprogskatalogen er normativt indeksfast og må ikke sorteres efter tekst.
 ;; Kendte stednavne bruger almindelige danske former. De to opdigtede navne
-;; transskriberes deterministisk: hebraisk shin gengives som "sh", og de
+;; transskriberes deterministisk: hebraisk shin gengives som "sh", hebraisk bet uden dagesh som "v", og de
 ;; skrevne vokaler bevares i rækkefølge uden at tillægge navnet en betydning.
 
 (define SOURCE-LANGUAGE-CATALOG-VERSION "da-1.0.0")
@@ -12,9 +12,9 @@
    "nyre"
    "Lagash"
    "tanke"
-   "fire niendedele"
+   "fire dele af ni"
    "Palgurash"
-   "papyrus"
+   "papyrusplante"
    "klase"
    "skorpion"
    "aske"
@@ -33,8 +33,8 @@
    "misundelse"
    "Eridu"
    "tandpasta"
-   "tre femtedele"
-   "Karshumab"
+   "tre dele af fem"
+   "Karshumav"
    "leopard"
    "tin"
    "tåge"
@@ -56,13 +56,13 @@
    "figen"
    "Nineve"
    "frø"
-   "tjære"
-   "lys"
+   "beg"
+   "lampe"
    "den lukkede dør"
    "sesam"
    "nakke"
    "sølv"
-   "lilje"
+   "Susa"
    "storm"
    "æsel"
    "mel"

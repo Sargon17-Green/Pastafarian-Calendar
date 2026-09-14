@@ -8,9 +8,9 @@ Kanonisk rækkefølge bestemmes kun af `canonicalIndex`. Den danske tekst er en 
 
 Ord med almindelig betydning er oversat efter betydningen, blandt andet `hvede`, `nyre`, `skorpion`, `honning`, `kalksten` og `den lukkede dør`. Kendte historiske stednavne bruger almindelige danske former som `Akkad`, `Eridu`, `Uruk`, `Nineve` og `Babylon`.
 
-De to opdigtede lydnavne er bevaret uden opfundet betydning som `Palgurash` og `Karshumab`. For disse to navne er reglen deterministisk: konsonantrækkefølgen bevares, shin gengives som `sh`, og de eksplicit skrevne vokaler bevares i rækkefølge. Reglen er del af version `da-1.0.0` og må ikke ændres efter etap 1 uden en udtrykkelig specifikationsændring.
+De to opdigtede lydnavne er bevaret uden opfundet betydning som `Palgurash` og `Karshumav`. For disse to navne er reglen deterministisk: konsonantrækkefølgen bevares, shin gengives som `sh`, bet uden dagesh gengives som `v`, og de eksplicit skrevne vokaler bevares i rækkefølge. Reglen er del af version `da-1.0.0` og må ikke ændres efter etap 1 uden en udtrykkelig specifikationsændring.
 
-Brøker er oversat som hele navne: `fire niendedele` og `tre femtedele`.
+Brøker er oversat som hele navne: `fire dele af ni` og `tre dele af fem`.
 
 ## Fremtidige sprog
 
