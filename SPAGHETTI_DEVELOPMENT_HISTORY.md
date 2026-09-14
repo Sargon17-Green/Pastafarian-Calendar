@@ -69,3 +69,17 @@ Regresja sprawdza `FOUNDATION-1`, `FOUNDATION` i `FOUNDATION+1`. Oczekiwany wzor
 
 W etapie 4 nie ma jeszcze korekty Foundation scar. `oldDayTag` ma pozostać niezmieniony; dopiero etap 5 doda osobną korektę strony późniejszej i drugi guard dla Foundation. Ponowna weryfikacja natywnego MATLAB-a pozostaje odłożona do końcowego cyklu uruchomień.
 
+## Etap 5 — PATCH 02: Foundation scar
+
+Historyczny `oldDayTag(day)=2*abs(day-FOUNDATION)` pozostaje bez zmian. Łata nie poprawia starej funkcji w miejscu.
+
+Dodano osobny `FoundationScarPatch`. Najpierw bierze surowy wynik `oldDayTag`. Jeżeli `day >= FOUNDATION`, dodaje `1`. Następnie wykonuje drugi, celowo redundantny guard: jeżeli `day == FOUNDATION` i wynik nadal nie jest równy `1`, wymusza `1`.
+
+Ten drugi guard pozostaje w kodzie jako wymagana historyczna blizna, mimo że po wcześniejszym dodaniu `+1` normalnie nie zmienia już wyniku Foundation.
+
+`DayTagCompatibilityRoute` nadal wywołuje i zapisuje surowy `oldDayTag`, a dopiero potem nakłada Foundation scar. Dzięki temu historyczna wada pozostaje obserwowalna, natomiast publikowany licznik dnia zgadza się z normatywnym `dayCount`.
+
+Niezmieniony regression z Discovery 02 ma po tym etapie przejść na zielono. Dodatkowy test etapu 5 obejmuje zakres od `FOUNDATION-2` do `FOUNDATION+2`, potwierdza zachowanie starej blizny oraz zgodność wyniku po patchu.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

@@ -1,25 +1,34 @@
 classdef DayTagCompatibilityRoute
-    % Produkcyjna trasa licznika dnia w stanie Discovery 02.
-    % W etapie 4 publikuje bezpośrednio błędny wynik oldDayTag.
+    % Produkcyjna trasa licznika dnia po PATCH 02.
+    % Zachowuje surowy oldDayTag, po czym nakłada FoundationScarPatch.
     methods (Static)
         function [ctx, value] = call(ctx, day)
             pastafari.ValidationManager.requireContext(ctx);
             pastafari.ValidationManager.requireExactIntegerInput(day);
 
-            ctx.phase = 'DISCOVERY_02';
+            ctx.phase = 'PATCH_02';
             ctx.subPhase = 2;
-            ctx.mode = 'LEGACY_DAY_TAG';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
+            ctx.mode = 'FOUNDATION_SCAR_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+
             ctx.branchTrace{end + 1} = 'DISCOVERY_02_OLD_DAY_TAG';
             ctx.metrics = pastafari.MetricsShell.bump( ...
                 ctx.metrics, 'discovery02.oldDayTag.calls');
 
             ctx.dayTagInput = pastafari.BigInt.coerce(day);
-            value = pastafari.LegacyDayTagAdapter.oldDayTag(ctx.dayTagInput);
-            ctx.legacyDayTagValue = value;
+            rawLegacy = pastafari.LegacyDayTagAdapter.oldDayTag(ctx.dayTagInput);
+            ctx.legacyDayTagValue = rawLegacy;
+
+            ctx.branchTrace{end + 1} = 'PATCH_02_FOUNDATION_SCAR';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch02.foundationScar.calls');
+
+            value = pastafari.FoundationScarPatch.apply( ...
+                ctx.dayTagInput, rawLegacy);
             ctx.dayTagCandidate = value;
             ctx.diagnostics{end + 1} = ...
-                'Aktywna historyczna ścieżka oldDayTag bez łaty Foundation scar.';
+                ['FoundationScarPatch dodaje +1 od Foundation wzwyż i ', ...
+                 'zachowuje redundantny guard Foundation jako bliznę.'];
         end
     end
 end
