@@ -462,3 +462,27 @@ W etapie 28 nie ma jeszcze żadnej wide arithmetic ani wide detour. Dopiero Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 29 — PATCH 14: wide detour
+
+Historyczny `LegacyShortOnlySelectionDispatcher` pozostaje fizycznie bez zmian. Nadal kieruje każde dodatnie `N`, także `N>M`, do short selector PATCH 13. Dla wide request nadal zachowuje `legacyWideSelectionUnsupported=true`, błąd `Pastafari:Selection:LegacyShortAssumption` oraz pusty raw result.
+
+Dodano osobny `WideSelectionDetourPatch`. Patch jest używany wyłącznie dla `N>M`. Najpierw wybiera minimalne `places`, dla którego `space=M^places >= N`.
+
+Następnie czyta dokładnie `places` kolejnych odpowiedzi z tego samego answer ring. Każda cyfra ma postać `answerAt(stream,j)-1` i należy do `0..M-1`. Wide value jest składane little-endian:
+
+`wide = 1 + Σ digit_j * M^j`.
+
+Po zbudowaniu wide value patch oblicza:
+
+`acceptanceLimit = floor(space/N) * N`.
+
+Jeżeli wide przekracza limit, nie tworzy nowego streamu i nie przebudowuje cyfr. Zamiast tego przesuwa bieżące `w` o `directionStep` w tym samym szerokim pierścieniu `1..space`, z zawijaniem modulo `space`, aż `w<=acceptanceLimit`.
+
+Zaakceptowany wide rank jest następnie mapowany przez `regularMod(w-1,N)+1`.
+
+`GeneralSelectionCompatibilityRoute` zawsze najpierw wykonuje surowy Stage 28 dispatcher. Dla `N<=M` publikowany wynik pozostaje dokładnie istniejącą zieloną ścieżką PATCH 13. Dla `N>M` raw unsupported scar pozostaje nienaruszony, ale publikowany wynik pochodzi z `WideSelectionDetourPatch`.
+
+Niezmieniony regression Stage 28 ma po tej zmianie przejść na GREEN. Test Stage 29 sprawdza witnesses `M+1`, `M^2`, `M^3`, minimalność `places`, zachowanie raw unsupported scar, short passthrough oraz dokładny witness jednego wide rejection względem lokalnego normatywnego oracle.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
