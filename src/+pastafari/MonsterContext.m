@@ -24,6 +24,9 @@ classdef MonsterContext < handle
         distanceCandidate
         connectionCount
         directionCount
+        legacyStoneTable
+        legacySecondStoneRow
+        stoneTableCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -50,6 +53,9 @@ classdef MonsterContext < handle
             obj.distanceCandidate = [];
             obj.connectionCount = [];
             obj.directionCount = [];
+            obj.legacyStoneTable = [];
+            obj.legacySecondStoneRow = [];
+            obj.stoneTableCandidate = [];
         end
     end
 end

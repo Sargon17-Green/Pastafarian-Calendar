@@ -113,3 +113,17 @@ Niezmieniony regression z Discovery 03 ma po tym etapie przejść na zielono. Do
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 8 — DISCOVERY 04: sekwencyjna mutacja kamieni
+
+Dodano czwarty historyczny defekt. Tabela 46×5 kamieni jest budowana przez stary mutator, który aktualizuje pięć kamieni każdego nowego wiersza kolejno w tym samym buforze.
+
+Pierwszy kamień korzysta jeszcze wyłącznie z poprzedniego wiersza. Drugi używa już zaktualizowanego kamienia 1, trzeci używa zaktualizowanego kamienia 2, czwarty używa zaktualizowanego kamienia 3, a piąty używa zaktualizowanych kamieni 1 i 4.
+
+Dlatego drugi wiersz legacy ma wartości `378, 1434, 3780, 9932, 25047`, podczas gdy snapshot oracle daje `378, 1073, 2375, 6195, 10493`. Pierwszy kamień pozostaje przypadkowo zgodny, a kamienie 2–5 rozchodzą się natychmiast.
+
+`StoneTableCompatibilityRoute` w etapie 8 publikuje bezpośrednio sekwencyjnie mutowaną tabelę i zachowuje ją w kontekście.
+
+PATCH 04 nie został jeszcze dodany. Historyczny mutator musi pozostać fizycznie zachowany; etap 9 ma wywołać legacy na klonie, lecz nadpisać wszystkie pięć wyników na podstawie niezmienionego snapshotu poprzedniego wiersza.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
