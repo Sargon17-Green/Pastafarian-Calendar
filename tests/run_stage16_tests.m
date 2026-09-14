@@ -1,6 +1,7 @@
 function run_stage16_tests()
 % DISCOVERY 08: zero-based rank jest używany jako końcowa ranga permutacji.
-% Ten sam regression ma stać się zielony po one-based rank detour w etapie 17.
+% Surowa blizna musi pozostać także po PATCH 08, ale publikowana ścieżka
+% ma wtedy przejść na GREEN.
 
 run_stage15_tests();
 
@@ -10,8 +11,6 @@ addpath(fullfile(root, 'src'));
 addpath(fullfile(here, 'oracle'));
 cleanup = onCleanup(@() cleanupPaths(root, here)); %#ok<NASGU>
 
-% Sama historyczna funkcja unrank0 jest poprawnym zero-based unrankiem
-% i musi pozostać fizycznie zachowana także po patchu.
 first0 = pastafari.LegacyPermutationUnrank0.unrank0( ...
     pastafari.BigInt(0), 1:6);
 last0 = pastafari.LegacyPermutationUnrank0.unrank0( ...
@@ -22,7 +21,7 @@ assert(isequal(last0, [6 5 4 3 2 1]), ...
     'Historyczny unrank0 rank 719 powinien zwracać ostatnią permutację.');
 
 inputs = {pastafari.BigInt(1), pastafari.BigInt(720)};
-expectedRank0 = {pastafari.BigInt(1), pastafari.BigInt(0)};
+expectedRawRank0 = {pastafari.BigInt(1), pastafari.BigInt(0)};
 legacyExpected = { ...
     [1 2 3 4 6 5], ...
     [1 2 3 4 5 6]};
@@ -38,13 +37,16 @@ for k = 1:2
 
     assert(ctx.permutationInput == inputs{k}, ...
         ['Kontekst utracił wejście permutacji dla ', labels{k}, '.']);
-    assert(ctx.legacyPermutationRank0 == expectedRank0{k}, ...
+    assert(ctx.legacyPermutationRank0 == expectedRawRank0{k}, ...
         ['Historyczna ranga zero-based jest błędna dla ', labels{k}, '.']);
     assert(isequal(ctx.legacyPermutationOrder, legacyExpected{k}), ...
         ['Surowa historyczna permutacja jest nieoczekiwana dla ', ...
          labels{k}, '.']);
 
-    % To jest właściwa historyczna blizna, która ma pozostać także po PATCH 08.
+    % Historyczna blizna ma pozostać rozbieżna także po PATCH 08.
+    assert(~isequal(ctx.legacyPermutationOrder, expected), ...
+        ['Surowa blizna Discovery 08 zniknęła dla ', labels{k}, '.']);
+
     rawAgain = pastafari.LegacyPermutationUnrank0.unrank0( ...
         ctx.legacyPermutationRank0, 1:6);
     assert(isequal(rawAgain, ctx.legacyPermutationOrder), ...
@@ -67,9 +69,6 @@ for k = 1:2
         classification(divergent(k)));
 end
 
-assert(isequal(divergent, [true, true]), ...
-    'Discovery 08 musi ujawnić rozbieżność zarówno dla rangi 1, jak i 720.');
-
 foundation = pastafari.BigInt('-15055671');
 caught = false;
 try
@@ -81,6 +80,8 @@ assert(caught, ...
     'Publiczna trasa nie zachowała kontrolowanej granicy etapu 16.');
 
 if any(divergent)
+    assert(isequal(divergent, [true, true]), ...
+        'W stanie Discovery 08 rangi 1 i 720 powinny obie być rozbieżne.');
     fprintf('STAGE_16_DISCOVERY_08_EXPECTED_RED\n');
     error('Pastafari:Discovery08:ZeroBasedPermutationRank', ...
         ['Oczekiwana rozbieżność Discovery 08: regularMod(v,720) jest ', ...

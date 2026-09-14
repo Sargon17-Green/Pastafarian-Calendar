@@ -237,3 +237,27 @@ W etapie 16 nie ma jeszcze detour rankingu 1-based. Dopiero Stage 17 ma obliczy�
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 17 — PATCH 08: one-based rank detour
+
+Historyczny `LegacyPermutationUnrank0` pozostaje fizycznie bez zmian i nadal przyjmuje rangę zero-based `0..719`. PATCH 08 nie przepisuje algorytmu unrank.
+
+`PermutationCompatibilityRoute` nadal najpierw wykonuje dokładnie surową ścieżkę Discovery 08: oblicza `regularMod(v,720)` i rozwija tę błędną rangę przez legacy unrank0. Surowa ranga oraz surowa permutacja pozostają zapisane w kontekście jako obserwowalna blizna.
+
+Dodano osobny `OneBasedRankDetourPatch`. Poprawna ranga jest tworzona jako:
+
+`rank1 = regularMod(v-1,720)+1`.
+
+Dopiero na granicy starego unranku wykonywane jest:
+
+`rank0 = rank1-1`.
+
+Ten `rank0` trafia do tego samego, niezmienionego `LegacyPermutationUnrank0`.
+
+W rezultacie wejście `1` publikuje pierwszą permutację `[1,2,3,4,5,6]`, a wejście `720` publikuje ostatnią `[6,5,4,3,2,1]`. Detour zachowuje również prawidłowe zawijanie rang większych od 720.
+
+W trakcie PATCH 08 skorygowano konstrukcję regresji Stage 16: wcześniejszy test wymagał bezwarunkowo, aby publikowane wyniki dla rang 1 i 720 pozostały rozbieżne, przez co prawidłowy patch nie mógłby przejść na GREEN. Zmieniony test nadal bezwzględnie wymaga rozbieżnej surowej blizny legacy, ale klasyfikuje RED/GREEN według publikowanego wyniku.
+
+Test Stage 17 sprawdza granice 1 i 720, kilka rang wewnętrznych, zawinięcia 721 i 1440, zachowanie surowej blizny oraz zgodność detour z lokalnym normatywnym oracle.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

@@ -42,6 +42,8 @@ classdef MonsterContext < handle
         permutationInput
         legacyPermutationRank0
         legacyPermutationOrder
+        permutationRank1Candidate
+        permutationDetourRank0
         permutationOrderCandidate
     end
     methods
@@ -87,6 +89,8 @@ classdef MonsterContext < handle
             obj.permutationInput = [];
             obj.legacyPermutationRank0 = [];
             obj.legacyPermutationOrder = [];
+            obj.permutationRank1Candidate = [];
+            obj.permutationDetourRank0 = [];
             obj.permutationOrderCandidate = [];
         end
     end
