@@ -358,3 +358,19 @@ W etapie 22 nie istnieje jeszcze `orderAt46Latch`. Dopiero Stage 23 ma po drop 4
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 23 — PATCH 11: orderAt46Latch
+
+Historyczny `LegacyOverwritableOrderMemory` pozostaje fizycznie bez zmian. Nadal otrzymuje 46 zapisów order podczas visible drops i 12 kolejnych podczas post-stirs, czyli dokładnie 58 historycznych writes. Jego końcowa wartość nadal pochodzi z `post-stir 12`.
+
+Dodano osobny `OrderAt46LatchPatch`. Bezpośrednio po zapisaniu order dla drop 46, a jeszcze przed rozpoczęciem post-stir 1, wykonywany jest dokładnie jeden `captureOnce(order46)`. Latch przechowuje własny snapshot sześciu bowl IDs.
+
+Latch jest jednokrotny. Drugie `captureOnce` jest błędem, a query przed pierwszym capture również jest błędem. Pętla 12 post-stirs nigdy nie zapisuje do latcha.
+
+`OrderAt46CompatibilityRoute` nadal wykonuje wszystkie 58 zapisów do historycznej pamięci i zachowuje jej końcową wartość oraz ostatnie źródło jako obserwowalną bliznę. Zmienia się wyłącznie źródło publikowanego `queryOrder`: od PATCH 11 odpowiedź pochodzi wyłącznie z `orderAt46Latch`.
+
+Dla Foundation raw legacy memory nadal kończy się wartością `1,6,5,2,4,3` z post-stir 12, natomiast publikowany order pozostaje poprawnym snapshotem drop 46: `4,5,2,3,6,1`.
+
+Niezmieniony regression Stage 22 ma po tej zmianie przejść na GREEN. Test Stage 23 dodatkowo sprawdza semantykę jednokrotnego capture, niezależność snapshotu, zakaz drugiego zapisu, zachowanie wszystkich 58 legacy writes oraz niezmienione final bowls.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
