@@ -4,7 +4,7 @@ cutlet	2	CUTLET_02	Zorro	traducción semántica
 cutlet	3	CUTLET_03	Riñón	traducción semántica
 cutlet	4	CUTLET_04	Lagash	transliteración determinista de topónimo
 cutlet	5	CUTLET_05	Pensamiento	traducción semántica
-cutlet	6	CUTLET_06	Cuatro novenos	traducción del sintagma completo
+cutlet	6	CUTLET_06	Cuatro partes de nueve	traducción del sintagma completo
 cutlet	7	CUTLET_07	Palgurash	transliteración determinista de nombre inventado
 cutlet	8	CUTLET_08	Papiro	traducción semántica
 cutlet	9	CUTLET_09	Racimo	traducción semántica
@@ -22,7 +22,7 @@ month	3	MONTH_03	Codo	traducción semántica
 month	4	MONTH_04	Envidia	traducción semántica
 month	5	MONTH_05	Eridu	transliteración determinista de topónimo
 month	6	MONTH_06	Pasta de dientes	traducción semántica
-month	7	MONTH_07	Tres quintos	traducción del sintagma completo
+month	7	MONTH_07	Tres partes de cinco	traducción del sintagma completo
 month	8	MONTH_08	Karshumav	transliteración determinista de nombre inventado
 month	9	MONTH_09	Leopardo	traducción semántica
 month	10	MONTH_10	Estaño	traducción semántica
@@ -45,8 +45,8 @@ month	26	MONTH_26	Alegría	traducción semántica
 month	27	MONTH_27	Higo	traducción semántica
 month	28	MONTH_28	Nínive	transliteración española estable de topónimo
 month	29	MONTH_29	Rana	traducción semántica
-month	30	MONTH_30	Alquitrán	traducción semántica
-month	31	MONTH_31	Vela	traducción semántica
+month	30	MONTH_30	Brea	traducción semántica
+month	31	MONTH_31	Lámpara	traducción semántica
 month	32	MONTH_32	La puerta cerrada	traducción semántica
 month	33	MONTH_33	Sésamo	traducción semántica
 month	34	MONTH_34	Nuca	traducción semántica
@@ -55,7 +55,7 @@ month	36	MONTH_36	Susa	forma española estable del topónimo
 month	37	MONTH_37	Tormenta	traducción semántica
 month	38	MONTH_38	Asno	traducción semántica
 month	39	MONTH_39	Harina	traducción semántica
-month	40	MONTH_40	Arrepentimiento	traducción semántica
+month	40	MONTH_40	Pesar	traducción semántica
 month	41	MONTH_41	Babilonia	forma española estable del topónimo
 month	42	MONTH_42	Lengua	traducción semántica
 month	43	MONTH_43	Lino	traducción semántica
