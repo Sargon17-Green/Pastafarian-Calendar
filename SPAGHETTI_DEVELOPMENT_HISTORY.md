@@ -57,3 +57,15 @@ Niezmieniony regression z Discovery 01 ma po tym etapie przejść na zielono dla
 
 Ponowne uruchomienie w natywnym MATLAB-ie jest odłożone do końcowego, zbiorczego cyklu weryfikacji.
 
+## Etap 4 — DISCOVERY 02: oldDayTag
+
+Dodano drugą historyczną wadę produkcyjną. `oldDayTag(day)` oblicza dokładnie `2*abs(day-FOUNDATION)` i pozostaje celowo błędny.
+
+Przed Dniem Założenia wzór przypadkiem zgadza się z normatywnym licznikiem dnia. Na samym Foundation zwraca `0` zamiast `1`, a po stronie późniejszej brakuje przesunięcia `+1` — na przykład pierwszy dzień po Foundation otrzymuje `2` zamiast `3`.
+
+Nowa `DayTagCompatibilityRoute` w etapie 4 publikuje bezpośrednio wynik `oldDayTag`, zachowuje surową wartość w kontekście oraz rejestruje ślad i metrykę. Publiczna ścieżka produkcyjna przechodzi zarówno przez zachowany PATCH 01, jak i przez nową warstwę Discovery 02.
+
+Regresja sprawdza `FOUNDATION-1`, `FOUNDATION` i `FOUNDATION+1`. Oczekiwany wzorzec to zgodność przed Foundation oraz `EXPECTED_RED` na Foundation i po stronie późniejszej.
+
+W etapie 4 nie ma jeszcze korekty Foundation scar. `oldDayTag` ma pozostać niezmieniony; dopiero etap 5 doda osobną korektę strony późniejszej i drugi guard dla Foundation. Ponowna weryfikacja natywnego MATLAB-a pozostaje odłożona do końcowego cyklu uruchomień.
+

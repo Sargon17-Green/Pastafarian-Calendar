@@ -15,6 +15,9 @@ classdef MonsterContext < handle
         legacyRemainderInput
         legacyRemainderValue
         saveCandidate
+        dayTagInput
+        legacyDayTagValue
+        dayTagCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -32,6 +35,9 @@ classdef MonsterContext < handle
             obj.legacyRemainderInput = [];
             obj.legacyRemainderValue = [];
             obj.saveCandidate = [];
+            obj.dayTagInput = [];
+            obj.legacyDayTagValue = [];
+            obj.dayTagCandidate = [];
         end
     end
 end
