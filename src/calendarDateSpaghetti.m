@@ -1,6 +1,6 @@
 function result = calendarDateSpaghetti(calculationDay, targetDay)
-% Szkielet produkcyjny rozbudowany do etapu 8; aktywne są PATCH 01-03
-% oraz Discovery 04.
+% Szkielet produkcyjny rozbudowany do etapu 10; aktywne są PATCH 01-04
+% oraz Discovery 05.
 
 pastafari.ValidationManager.requireExactIntegerInput(calculationDay);
 pastafari.ValidationManager.requireExactIntegerInput(targetDay);
@@ -9,14 +9,16 @@ ctx.metrics = pastafari.MetricsShell.bump(ctx.metrics, 'calendar.bootstrap.calls
 ctx = pastafari.MonsterDispatcher.dispatch(ctx, @bootstrapHandler);
 
 [ctx, ~] = pastafari.SaveCompatibilityRoute.call(ctx, calculationDay); %#ok<ASGLU>
-[ctx, ~] = pastafari.WorkCountsCompatibilityRoute.call( ...
-    ctx, calculationDay, targetDay); %#ok<ASGLU>
+[ctx, counts] = pastafari.WorkCountsCompatibilityRoute.call( ...
+    ctx, calculationDay, targetDay);
+[ctx, stones] = pastafari.StoneTableCompatibilityRoute.call(ctx);
 
-% Discovery 04 włącza historyczną tabelę kamieni mutowaną sekwencyjnie.
-[ctx, ~] = pastafari.StoneTableCompatibilityRoute.call(ctx); %#ok<ASGLU>
+% Discovery 05 włącza fizycznie odwrócony magazyn hidden.
+[ctx, ~] = pastafari.HiddenCompatibilityRoute.call( ...
+    ctx, counts, stones); %#ok<ASGLU>
 
 error('Pastafari:Bootstrap:NotImplementedYet', ...
-    ['Etap 8 aktywuje historyczną ścieżkę Discovery 04; ', ...
+    ['Etap 10 aktywuje historyczną ścieżkę Discovery 05; ', ...
      'pełna semantyka kalendarza nie jest jeszcze zaimplementowana.']);
 
     function inner = bootstrapHandler(inner)

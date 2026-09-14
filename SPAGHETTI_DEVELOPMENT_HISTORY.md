@@ -139,3 +139,17 @@ Dlatego drugi wiersz legacy nadal ma `378, 1434, 3780, 9932, 25047`, ale publiko
 
 Niezmieniony regression z Discovery 04 ma po tym etapie przejść na zielono. Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 10 — DISCOVERY 05: backward hidden storage
+
+Dodano piąty historyczny defekt. Siedem wartości hidden jest obliczanych według właściwych formuł, lecz fizyczny magazyn zapisuje je w odwrotnej kolejności:
+
+`hidden7, hidden6, hidden5, hidden4, hidden3, hidden2, hidden1`.
+
+Historyczny odczyt nadal traktuje jednak fizyczny slot `k` jako logiczne `hidden k`. W rezultacie logiczne hidden są widziane w kolejności `7..1`.
+
+`HiddenCompatibilityRoute` zachowuje fizyczny odwrócony magazyn w kontekście oraz publikuje naiwne odczyty legacy. Regresja Stage 10 niezależnie oblicza siedem wartości hidden, potwierdza dokładną relację odwrócenia magazynu i wykazuje rozbieżność logicznego indeksowania.
+
+W etapie 10 nie istnieje jeszcze translator indeksu. Nie wolno odwracać ani przepisywać magazynu. Dopiero Stage 11 ma sprawić, że każde żądanie `hidden k` odczyta fizyczny slot `8-k`.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
