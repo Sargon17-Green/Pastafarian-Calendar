@@ -127,3 +127,15 @@ PATCH 04 nie został jeszcze dodany. Historyczny mutator musi pozostać fizyczni
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 9 — PATCH 04: snapshot kamieni
+
+Historyczny sekwencyjny mutator kamieni pozostaje fizycznie bez zmian. PATCH 04 nie usuwa go ani nie naprawia w miejscu.
+
+Dla każdego nowego wiersza zapisywany jest niezmienny snapshot pięciu kamieni poprzedniego wiersza. Historyczny mutator jest nadal wykonywany na kopii tego snapshotu, dzięki czemu jego błędne wyniki pozostają obserwowalne.
+
+Następnie PATCH 04 nadpisuje wszystkie pięć publikowanych wyników, obliczając każdy z nich wyłącznie z niezmiennego snapshotu poprzedniego wiersza. Żaden kamień nowego wiersza nie może zobaczyć aktualizacji wykonanej wcześniej w tym samym wierszu.
+
+Dlatego drugi wiersz legacy nadal ma `378, 1434, 3780, 9932, 25047`, ale publikowany drugi wiersz ma `378, 1073, 2375, 6195, 10493`. Test etapu 9 porównuje po patchu całą tabelę 46×5 z lokalnym normatywnym oracle.
+
+Niezmieniony regression z Discovery 04 ma po tym etapie przejść na zielono. Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
