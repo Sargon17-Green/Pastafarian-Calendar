@@ -4,48 +4,42 @@ Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`.
 
 ## Mga naunang stage
 
-Napatunayan ang Stage 1 bootstrap, Discovery 01 at Patch 01 para sa save remainder, at Discovery 02 at Patch 02 para sa Foundation day tags. Nananatiling pisikal ang lahat ng raw historical scars.
+Natapos ang Bootstrap, ang save remainder discovery/patch pair, ang Foundation day-tag discovery/patch pair, at ang legacy distance discovery.
 
-## Stage 6 — Discovery 03
+## Stage 7 — Patch 03
 
-Idinadagdag ang ikatlong historical defect:
-
-```text
-oldDistance(calculationDay, targetDay) =
-    abs(
-        dayTagWithFoundationScar(calculationDay)
-        - dayTagWithFoundationScar(targetDay)
-    )
-```
-
-Ang maling palagay ay ang absolute difference ng patched day tags ay kapareho ng chronological inclusive distance.
-
-Ang normative distance ay:
+Hindi binabago ang `oldDistance`. Ang bagong helper ay:
 
 ```text
-abs(targetDay - calculationDay) + 1
+legacy = oldDistance(calculationDay, targetDay)
+chronological = abs(targetDay - calculationDay)
+
+if legacy != chronological:
+    legacy = chronological
+
+distance = legacy + 1
 ```
 
-Sa limang historical probes:
+Mahalaga ang huling `+1` kahit sa branch na hindi nangangailangan ng replacement. Ito ang nagbabalik ng inclusive normative distance.
 
-```text
-F -> F       : legacy 0, normative 1   : EXPECTED_RED
-F -> F+1     : legacy 2, normative 2   : MATCH
-F -> F+3     : legacy 6, normative 4   : EXPECTED_RED
-F-1 -> F     : legacy 1, normative 2   : EXPECTED_RED
-F-3 -> F+3   : legacy 1, normative 7   : EXPECTED_RED
-```
+Ang production route ay nagpapatakbo ng Patch 01, Patch 02, at saka Patch 03. Itinatago nang hiwalay ang:
 
-Ang production route ay talagang tumatawag sa `oldDistance` sa pamamagitan ng Discovery 03 adapter. Ang Patch 01 at Patch 02 state ay nananatiling GREEN at per-invocation.
+- raw legacy distance;
+- chronological distance;
+- final patched distance;
+- kung pinalitan ang raw legacy value;
+- kung inilapat ang Patch 03.
 
-Walang `patchedCounts`, chronological replacement guard, o final `+1` Patch 03 logic sa Stage 6.
+Ang `oldDistance` historical scar ay nananatiling pisikal at direktang nasusubok.
+
+Walang `mutateStonesWrong` o anumang Stage 8 Discovery 04 logic sa Stage 7.
 
 ## Pagpapatakbo
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage06.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage06.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage07.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage07.ps1
 ```
 
-Sa matagumpay na Discovery 03 verification, kailangang lumitaw ang `STAGE06_RESULT=PASS` at `STAGE06_REPOSITORY_STATE=EXPECTED_RED`.
+Sa matagumpay na verification, kailangang lumitaw ang `STAGE07_RESULT=PASS` at `STAGE07_REPOSITORY_STATE=GREEN`.

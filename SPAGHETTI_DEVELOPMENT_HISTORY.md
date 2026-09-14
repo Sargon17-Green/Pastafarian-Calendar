@@ -2,57 +2,66 @@
 
 ## Stage 1 — Bootstrap
 
-Nilikha ang neutral na PowerShell foundation, test-only normative oracle, frozen source-language catalog, at per-invocation semantic state.
+Neutral na PowerShell base, test-only normative oracle, frozen source-language catalog, at per-invocation semantic state.
 
 ## Stage 2 — Discovery 01
 
-Ipinakilala ang raw `oldRemainder` defect.
+Raw `oldRemainder` defect.
 
 ## Stage 3 — Patch 01
 
-Idinagdag ang `savePatch` nang hindi binubura ang raw remainder scar.
+`savePatch` correction sa ibabaw ng raw remainder scar.
 
 ## Stage 4 — Discovery 02
 
-Ipinakilala ang raw `oldDayTag(day)=2*abs(day-FOUNDATION)` defect.
+Raw `oldDayTag` defect.
 
 ## Stage 5 — Patch 02
 
-Idinagdag ang `dayTagWithFoundationScar`, kasama ang pisikal na redundant Foundation guard, habang nananatili ang raw `oldDayTag`.
+`dayTagWithFoundationScar` correction, kasama ang historical redundant Foundation guard.
 
-## Stage 6 — Discovery 03: day-tag difference bilang distance
+## Stage 6 — Discovery 03
 
-### Historical assumption
+Raw `oldDistance(c,t)=abs(dayTagWithFoundationScar(c)-dayTagWithFoundationScar(t))` defect.
 
-Ang lumang distance helper ay:
+## Stage 7 — Patch 03: chronological inclusive distance
+
+### Historical repair
+
+Ang Patch 03 ay hindi nag-eedit sa `oldDistance`. Sa halip:
 
 ```text
-oldDistance(c,t) =
-    abs(dayTagWithFoundationScar(c) - dayTagWithFoundationScar(t))
+raw = oldDistance(c,t)
+chronological = abs(t-c)
+if raw != chronological:
+    raw = chronological
+return raw + 1
 ```
 
-Ibig sabihin, ginagamit nito ang naunang patched day-tag layer, ngunit maling ipinapalagay na ang tag difference ay chronological distance.
+### Dalawang branch
 
-### Bakit mali
+Kapag mali ang raw tag-difference distance, pinapalitan ito ng chronological difference bago idagdag ang inclusive `+1`.
 
-Ang patched day tags ay hindi tumataas nang tig-iisang unit sa chronological axis. Sa Foundation at pagkatapos nito, isang araw na galaw ay karaniwang dalawang tag units. Bukod dito, inclusive ang normative distance at kailangang may final `+1`.
+Kapag pareho na ang raw at chronological difference, walang replacement, ngunit idinadagdag pa rin ang `+1`.
 
-### Historical regression surface
+### Required edges
 
-Limang probe ang ginagamit:
+Pitong probe ang kailangang maging GREEN:
 
-- `F -> F`: legacy `0`, normative `1`, `EXPECTED_RED`.
-- `F -> F+1`: legacy `2`, normative `2`, `MATCH`.
-- `F -> F+3`: legacy `6`, normative `4`, `EXPECTED_RED`.
-- `F-1 -> F`: legacy `1`, normative `2`, `EXPECTED_RED`.
-- `F-3 -> F+3`: legacy `1`, normative `7`, `EXPECTED_RED`.
+- `F -> F`
+- `F -> F+1`
+- `F -> F+3`
+- `F-1 -> F`
+- `F-3 -> F+3`
+- `F+9 -> F+2`
+- `F-9 -> F-2`
 
-Kaya eksaktong apat ang expected-red at isa ang match.
+Sa mga ito, limang probe ang nangangailangan ng legacy replacement at dalawa ang hindi; lahat ay nagtatapos sa normative inclusive distance.
 
 ### State ownership
 
-Ang Discovery 03 adapter ay nagko-commit ng calculation day, target day, at raw legacy distance sa sariling invocation context lamang.
+Ang raw legacy distance, chronological distance, final patched distance, replacement flag, at applied flag ay sariling state ng bawat invocation.
 
 ### Hindi pa kasama
 
-Walang `patchedCounts`, walang chronological replacement, at walang final `+1` correction ng Stage 7/Patch 03.
+Walang `mutateStonesWrong` at walang Stage 8 Discovery 04 code.
