@@ -29,6 +29,7 @@ classdef MonsterContext < handle
         stoneTableCandidate
         hiddenBackward
         legacyHiddenLogicalCandidate
+        hiddenLogicalCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -60,6 +61,7 @@ classdef MonsterContext < handle
             obj.stoneTableCandidate = [];
             obj.hiddenBackward = [];
             obj.legacyHiddenLogicalCandidate = [];
+            obj.hiddenLogicalCandidate = [];
         end
     end
 end

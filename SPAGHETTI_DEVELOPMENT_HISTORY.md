@@ -153,3 +153,15 @@ W etapie 10 nie istnieje jeszcze translator indeksu. Nie wolno odwracać ani prz
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 11 — PATCH 05: translator indeksu hidden
+
+Fizyczny magazyn z Discovery 05 pozostaje bez zmian i nadal przechowuje wartości w kolejności `hidden7..hidden1`. PATCH 05 nie odwraca tablicy, nie kopiuje jej do kolejności logicznej i nie usuwa historycznej blizny.
+
+Dodano osobny `HiddenIndexTranslator`. Żądanie logicznego `hidden k` jest mapowane na fizyczny slot `8-k`. Trasa nadal oblicza i zachowuje naiwny historyczny odczyt slotu `k`, ale publikuje wartość odczytaną przez translator.
+
+W trakcie przygotowania PATCH 05 skorygowano również konstrukcję regresji Stage 10: wcześniejszy test błędnie wymagał, aby publikowany wynik zawsze pozostawał równy naiwnemu slotowi legacy, co uniemożliwiałoby przejście na GREEN po prawidłowym patchu. Zmieniona regresja nadal bezwzględnie wymaga fizycznego układu `7..1` i zachowania naiwnego odczytu w kontekście, lecz klasyfikuje RED/GREEN według publikowanego wyniku logicznego. Nie zmienia to historycznego defektu Stage 10.
+
+Po PATCH 05 logiczne hidden 1..7 odpowiadają normatywnym wartościom, podczas gdy pamięć i naiwny odczyt legacy pozostają obserwowalne jako blizna.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

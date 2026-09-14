@@ -1,7 +1,8 @@
 function run_stage10_tests()
-% DISCOVERY 05: hidden są fizycznie zapisane w kolejności 7..1,
-% a legacy odczytuje slot k bez translatora 8-k.
-% Ten sam regression ma stać się zielony po PATCH 05 w etapie 11.
+% DISCOVERY 05: hidden są fizycznie zapisane w kolejności 7..1.
+% Regresja zachowuje fizyczną bliznę, ale klasyfikuje stan według
+% logicznego wyniku publikowanego przez HiddenCompatibilityRoute.
+% Po PATCH 05 ten sam test ma przejść na GREEN bez odwracania magazynu.
 
 run_stage09_tests();
 
@@ -29,7 +30,7 @@ for caseIndex = 1:size(cases, 1)
 
     storage = pastafari.LegacyBackwardHiddenStore.build(counts, stones);
 
-    % Najpierw potwierdź samą historyczną formę magazynu: 7,6,...,1.
+    % Historyczna forma pamięci musi pozostać dokładnie 7,6,...,1.
     for k = 1:7
         assert(storage{k} == expected{8 - k}, ...
             ['Magazyn legacy nie jest dokładnym odwróceniem hidden dla ', ...
@@ -39,23 +40,18 @@ for caseIndex = 1:size(cases, 1)
     ctx = pastafari.MonsterContext(c, t);
     [ctx, actual] = pastafari.HiddenCompatibilityRoute.call(ctx, counts, stones);
 
-    divergent = false(1, 7);
+    % Niezależnie od obecności PATCH 05 kontekst ma zachować naiwny
+    % historyczny odczyt slot-k jako obserwowalną bliznę.
+    assert(numel(ctx.legacyHiddenLogicalCandidate) == 7, ...
+        'Kontekst nie zachował siedmiu naiwnych odczytów legacy.');
     for k = 1:7
-        assert(actual{k} == storage{k}, ...
-            ['Discovery 05 nie odczytał naiwnego slotu ', num2str(k), '.']);
-        divergent(k) = actual{k} ~= expected{k};
-
-        fprintf(['STAGE10 DISCOVERY05 CASE=%s HIDDEN=%d STORAGE_SLOT=%d ', ...
-            'ACTUAL=%s EXPECTED=%s CLASSIFICATION=%s\n'], ...
-            labels{caseIndex}, k, k, char(actual{k}), char(expected{k}), ...
-            classification(divergent(k)));
+        assert(ctx.legacyHiddenLogicalCandidate{k} == storage{k}, ...
+            ['Kontekst utracił naiwny odczyt legacy dla ', ...
+             labels{caseIndex}, ', hidden ', num2str(k), '.']);
     end
 
     assert(isequal(ctx.hiddenBackward, storage), ...
         ['Kontekst nie zachował fizycznego magazynu backward dla ', ...
-         labels{caseIndex}, '.']);
-    assert(isequal(ctx.legacyHiddenLogicalCandidate, actual), ...
-        ['Kontekst nie zachował logicznego wyniku legacy dla ', ...
          labels{caseIndex}, '.']);
     assert(any(strcmp(ctx.branchTrace, ...
         'DISCOVERY_05_BACKWARD_HIDDEN_STORAGE')), ...
@@ -66,16 +62,16 @@ for caseIndex = 1:size(cases, 1)
     assert(isfield(ctx.metrics, metricKey) && ctx.metrics.(metricKey) == 1, ...
         'Licznik backward hidden storage jest niepoprawny.');
 
-    anyDivergence = anyDivergence || any(divergent);
-
-    % Jeżeli jakieś wartości przypadkowo się zderzą, relacja odwrócenia nadal
-    % musi być dokładna. Co najmniej jeden slot w zestawie testowym musi jednak
-    % ujawnić błąd logicznego indeksowania.
+    divergent = false(1, 7);
     for k = 1:7
-        assert(actual{k} == expected{8 - k}, ...
-            ['Naiwny odczyt nie odpowiada expected{8-k} dla ', ...
-             labels{caseIndex}, ', hidden ', num2str(k), '.']);
+        divergent(k) = actual{k} ~= expected{k};
+        fprintf(['STAGE10 DISCOVERY05 CASE=%s HIDDEN=%d ACTUAL=%s ', ...
+            'EXPECTED=%s CLASSIFICATION=%s\n'], ...
+            labels{caseIndex}, k, char(actual{k}), char(expected{k}), ...
+            classification(divergent(k)));
     end
+
+    anyDivergence = anyDivergence || any(divergent);
 end
 
 caught = false;
@@ -91,11 +87,10 @@ if anyDivergence
     fprintf('STAGE_10_DISCOVERY_05_EXPECTED_RED\n');
     error('Pastafari:Discovery05:BackwardHiddenStorage', ...
         ['Oczekiwana rozbieżność Discovery 05: fizyczny magazyn hidden ma ', ...
-         'kolejność 7..1, lecz legacy odczytuje slot k bez translatora 8-k.']);
+         'kolejność 7..1, a bieżąca trasa nie tłumaczy jeszcze logicznego indeksu.']);
 end
 
-error('Pastafari:Discovery05:MissingDivergence', ...
-    'Zestaw Discovery 05 nie ujawnił żadnej rozbieżności hidden.');
+fprintf('STAGE_10_DISCOVERY_05_REGRESSION_GREEN\n');
 end
 
 function hidden = referenceHiddenDrops(counts, stones)
