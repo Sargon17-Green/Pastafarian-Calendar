@@ -165,3 +165,17 @@ Po PATCH 05 logiczne hidden 1..7 odpowiadają normatywnym wartościom, podczas g
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 12 — DISCOVERY 06: legacyPrior
+
+Dodano szósty historyczny defekt. Widoczna kropla `i` potrzebuje poprzedników `i-1`, `i-3` i `i-7`. Siedem hidden tworzy historię dla logicznych pozycji `0,-1,...,-6`.
+
+Historyczny `legacyPrior` rozumie jednak wyłącznie dodatnie indeksy już zbudowanych visible drops. Gdy pierwsze siedem kropli pyta o slot `0` albo ujemny, legacy zgłasza brak wartości. Aby ścieżka mogła dalej wykonywać kolejne obliczenia, Discovery 06 podstawia w brakującym miejscu zero; samo podstawienie nie jest poprawką semantyczną.
+
+Dla drop 1 brakuje wszystkich trzech poprzedników, dla drop 2 i 3 brakuje dwóch, a dla drops 4–7 brakuje poprzednika `i-7`. Od drop 8 wszystkie trzy wymagane indeksy visible są już dodatnie.
+
+`VisibleDropCompatibilityRoute` zapisuje żądane sloty, macierz braków i pełny surowy ciąg legacy. Regresja zachowuje tę bliznę niezależnie od późniejszego patcha, a stan Stage 12 jest `EXPECTED_RED`.
+
+W etapie 12 nie istnieje jeszcze `priorPatch`. Dopiero Stage 13 ma mapować brakujące logiczne sloty `0..-6` na odpowiednie hidden 1..7, bez modyfikowania `legacyPrior`.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

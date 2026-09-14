@@ -30,6 +30,10 @@ classdef MonsterContext < handle
         hiddenBackward
         legacyHiddenLogicalCandidate
         hiddenLogicalCandidate
+        legacyPriorRequestedSlots
+        legacyPriorMissingMatrix
+        legacyVisibleDrops
+        visibleDropsCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -62,6 +66,10 @@ classdef MonsterContext < handle
             obj.hiddenBackward = [];
             obj.legacyHiddenLogicalCandidate = [];
             obj.hiddenLogicalCandidate = [];
+            obj.legacyPriorRequestedSlots = [];
+            obj.legacyPriorMissingMatrix = [];
+            obj.legacyVisibleDrops = [];
+            obj.visibleDropsCandidate = [];
         end
     end
 end
