@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=9
-CURRENT_KIND=PATCH
-CURRENT_PATCH=04
+CURRENT_STAGE=10
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=05
 LAST_COMPLETED_STAGE=9
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 04 stonePatch layer na kumukuha muna ng lumang stone snapshot, tunay na nagpapatakbo ng mutateStonesWrong sa hiwalay na clone, sinusukat ang legacy garbage, at saka isinusulat muli ang lahat ng limang bato mula lamang sa lumang snapshot.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 05 hidden-drop layer na gumagawa ng exact hidden values mula sa patched counts at patched stone table, pisikal na nag-iimbak ng mga ito bilang hidden7..hidden1, at pagkatapos ay maling bumabasa ng near-ness k nang diretso sa legacyHidden[k].
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -33,3 +33,7 @@ STAGE08_DISCOVERY=MUTATE_STONES_WRONG
 STAGE08_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
 STAGE09_PATCH=STONE_PATCH
 STAGE09_RUNTIME_VERIFICATION=GREEN_CONFIRMED
+STAGE10_DISCOVERY=BACKWARD_HIDDEN_DIRECT_ACCESS
+STAGE10_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `10` lamang matapos mapatunayan sa aktuwal na PowerShell runtime ang backward hidden storage at ang eksaktong Discovery 05 surface na apat na EXPECTED_RED (`k=1,2,6,7`) at isang MATCH (`k=4`), habang nananatiling GREEN ang lahat ng naunang patch.

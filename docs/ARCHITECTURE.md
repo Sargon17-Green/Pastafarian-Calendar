@@ -1,6 +1,6 @@
-# Arkitektura hanggang Stage 9
+# Arkitektura hanggang Stage 10
 
-Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8 ay historical discovery layers. Ang Stage 3/5/7/9 ay correction wrappers na nagpapanatili sa raw scars.
+Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10 ay historical discovery layers. Ang Stage 3/5/7/9 ay correction wrappers na nagpapanatili sa raw scars.
 
 ## Mga boundary
 
@@ -9,51 +9,61 @@ Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8 ay historical discovery layers. 
 - `src/Discovery01.ps1` / `src/Patch01.ps1` — remainder.
 - `src/Discovery02.ps1` / `src/Patch02.ps1` — day tags.
 - `src/Discovery03.ps1` / `src/Patch03.ps1` — distance.
-- `src/Discovery04.ps1` — raw sequential in-place stone mutation.
-- `src/Patch04.ps1` — snapshot/legacy-garbage/five-field overwrite correction.
-- `src/MonsterSkeleton.ps1` — dispatcher host at production route.
+- `src/Discovery04.ps1` / `src/Patch04.ps1` — stone table.
+- `src/Discovery05.ps1` — backward hidden storage at wrong direct near-ness access.
+- `src/MonsterSkeleton.ps1` — production route at invocation-owned semantic state.
 
-## Stage 9 production route
+## Stage 10 production route
 
 ```text
 Invoke-CalendarDateSpaghetti
--> Invoke-Patch01SaveAdapter
--> Invoke-Patch02DayTagAdapter
--> Invoke-Patch03DistanceAdapter
--> Invoke-Patch04StoneAdapter
--> Get-Patch04StoneTableThroughLegacyBuilder
--> stonePatch (rows 2..46)
-   -> old snapshot
-   -> mutateStonesWrong on separate clone
-   -> legacy garbage capture
-   -> overwrite w,b,s,m,r from old snapshot only
+-> Patch 01
+-> Patch 02
+-> Patch 03
+-> Patch 04
+-> Discovery 05
+   -> exact hidden values from patched counts + patched stones
+   -> physical storage hidden7..hidden1
+   -> wrong direct read storage[1] for requested k=1
 ```
 
-## Preserved historical scar
+## Hidden computation
 
-`mutateStonesWrong` remains in `Discovery04.ps1` and still mutates one state in order `w,b,s,m,r`.
+Para sa bawat `k=1..7`, kinukuha ang coefficient tuple, exact counts, patched stone row `k`, at seven-grind recurrence. Ang lahat ng modular saving ay dumadaan sa kasalukuyang SAVE patch semantics.
 
-`Get-Discovery04LegacyStoneTable` also remains available as the raw wrong builder for direct historical testing.
+Ang coefficient storage ay historical reversed layout:
 
-## Patch 04 state
+```text
+slot 1 = coeff(k=7)
+...
+slot 7 = coeff(k=1)
+```
 
-The production invocation owns:
+`Get-Discovery05CoeffForHidden(k)` ay kumukuha ng `slot 8-k`, kaya tama ang value generation bago pa lumitaw ang access defect.
 
-- `legacyStoneTable`
-- `legacyStoneRowsBuilt=46`
-- `patch04RowsPatched=45`
-- `patch04LastOldStones`
-- `patch04LastLegacyGarbage`
-- `patch04LastCommittedStones`
-- `patch04Status`
-- `patch04InvocationCount`
+## Historical scar
 
-Logs, metrics, at diagnostics ay hindi input sa normative computation.
+Ang backward physical storage ay nananatiling totoong reversed array.
 
-## GREEN contract
+Ang maling accessor ay nananatiling:
 
-Lahat ng patched rows 1–46 ay dapat eksaktong tumugma sa test-only normative stone table.
+```text
+legacyHiddenDirectByAssumedNearness(storage,k) = storage[k]
+```
 
-Ang raw Stage 8 builder ay dapat manatiling divergent sa rows 2, 3, at 46.
+## Invocation-owned state
 
-Wala pang Stage 10 logic.
+- `legacyHiddenStorage`
+- `legacyHiddenCount`
+- `legacyHiddenLastRequestedK`
+- `legacyHiddenLastReturnedValue`
+- `discovery05Status`
+- `discovery05InvocationCount`
+
+## EXPECTED_RED contract
+
+`k=1,2,6,7` — divergent.
+
+`k=4` — MATCH dahil midpoint.
+
+Wala pang `hiddenByNearness` translator at walang Stage 11 correction.

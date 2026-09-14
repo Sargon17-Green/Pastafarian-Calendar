@@ -2,39 +2,58 @@
 
 Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`.
 
-## Stage 9 — Patch 04
+## Stage 10 — Discovery 05
 
-Nananatiling pisikal at direktang nasusubok ang historical `mutateStonesWrong`: binabago pa rin nito nang sunod-sunod ang iisang mutable five-stone state at kaya nitong gumawa ng maling legacy rows.
+Idinadagdag ng Stage 10 ang ikalimang historical defect: backward hidden-drop storage na maling ina-access bilang normal near-ness order.
 
-Ang bagong `stonePatch` ay isang hiwalay na correction layer:
+Ang pitong hidden value ay tunay na kinakalkula mula sa:
+
+- patched action/target/distance counts;
+- connection at direction;
+- GREEN Patch 04 stone table;
+- historical reversed coefficient storage;
+- `savePatch`;
+- pitong hidden grinds.
+
+Pagkatapos, pisikal silang iniimbak nang pabaliktad:
 
 ```text
-old = clone(state)
-garbage = mutateStonesWrong(i, clone(state))
-
-garbage.w = SAVE(old.w*old.w + 3*old.b + i)
-garbage.b = SAVE(old.b*old.b + 5*old.s + old.w)
-garbage.s = SAVE(old.s*old.s + 7*old.m + old.b)
-garbage.m = SAVE(old.m*old.m + 11*old.r + old.s)
-garbage.r = SAVE(old.r*old.r + 13*old.w + old.m)
+slot 1 = hidden7
+slot 2 = hidden6
+slot 3 = hidden5
+slot 4 = hidden4
+slot 5 = hidden3
+slot 6 = hidden2
+slot 7 = hidden1
 ```
 
-Mahalaga ang tatlong bagay:
+Ang historical access defect ay:
 
-1. tunay na tumatakbo ang legacy mutator;
-2. tumatakbo ito sa hiwalay na clone, kaya hindi nasisira ang old snapshot;
-3. lahat ng limang overwrite ay bumabasa lamang sa old snapshot, hindi sa garbage.
+```text
+legacyHiddenDirectByAssumedNearness(storage, k)
+    -> storage[k]
+```
 
-Ang patched builder ay nagpapatakbo ng `stonePatch` sa rows 2–46: eksaktong 45 patched rows. Ang production context ay nagtatago ng huling old snapshot, legacy garbage, at committed row bilang invocation-local scar state.
+Kaya sa normatibong near-ness probes na `k=1,2,4,6,7`, inaasahan ang:
 
-Inaasahang repository state: `GREEN`.
+- `k=1` — EXPECTED_RED
+- `k=2` — EXPECTED_RED
+- `k=4` — MATCH
+- `k=6` — EXPECTED_RED
+- `k=7` — EXPECTED_RED
 
-Wala pang Stage 10 logic.
+Ang `k=4` lamang ang nananatiling tama dahil ito ang midpoint ng pitong-slot reversal.
+
+Ang production route ay talagang gumagawa ng backward storage at pagkatapos ay gumagawa ng maling direct read para sa `k=1`.
+
+Wala pang Patch 05. Hindi idinadagdag ang `hiddenByNearness(storage,k) -> storage[8-k]`, at hindi binabaligtad ang physical storage.
 
 ## Pagpapatakbo
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage09.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage09.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage10.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage10.ps1
 ```
+
+Ang Stage 10 ay dapat magtapos sa `STAGE10_RESULT=PASS` habang ang repository state ay `EXPECTED_RED`.

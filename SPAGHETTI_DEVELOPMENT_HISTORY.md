@@ -83,3 +83,46 @@ Ang production context ay nagtatago ng:
 Ang mga scar state na ito ay invocation-local lamang.
 
 Wala pang Stage 10 o anumang susunod na historical defect/patch.
+
+## Stage 10 — Discovery 05: backward hidden-drop storage
+
+### Historical physical layout
+
+Ang hidden-drop layer ay hindi nag-imbak ng hidden values sa near-ness order. Sa halip:
+
+```text
+legacyHidden[1] = hidden7
+legacyHidden[2] = hidden6
+legacyHidden[3] = hidden5
+legacyHidden[4] = hidden4
+legacyHidden[5] = hidden3
+legacyHidden[6] = hidden2
+legacyHidden[7] = hidden1
+```
+
+Ang coefficient table ay nakaimbak ding reversed bilang historical layout scar, ngunit ang `Get-Discovery05CoeffForHidden` ay ginagamit ang tamang coefficient para sa mismong hidden computation. Ang bagong Discovery 05 defect ay nasa access layer, hindi sa coefficient selection.
+
+### Historical access defect
+
+Ang unang near-ness accessor ay ipinagpalagay na ang physical storage ay forward:
+
+```text
+legacyHiddenDirectByAssumedNearness(storage, k)
+    -> storage[k]
+```
+
+Kaya ang `hidden1` request ay nagbabalik ng `hidden7`, at ang `hidden2` request ay nagbabalik ng `hidden6`.
+
+Ang `hidden4` ay fixed midpoint at nagkataong tama.
+
+### Production route
+
+Pagkatapos ng Patch 04 stone table, ang tunay na production route ay gumagawa ng backward hidden storage at aktuwal na gumagawa ng maling `k=1` direct read.
+
+Ang storage, hidden count, last requested k, at last returned value ay invocation-owned semantic state.
+
+### EXPECTED_RED contract
+
+Sa `k=1,2,4,6,7`, eksaktong apat ang divergent (`1,2,6,7`) at eksaktong isa ang MATCH (`4`).
+
+Wala pang `hiddenByNearness` Patch 05 translator at walang Stage 11 correction.
