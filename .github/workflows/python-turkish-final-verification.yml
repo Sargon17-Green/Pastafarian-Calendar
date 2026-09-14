@@ -51,6 +51,73 @@ jobs:
       - name: Eski Python diferansiyel regresyonunu çalıştır
         run: python -m unittest discover -s tests -p "test_release_legacy_python_differential.py" -q
 
+      - name: Temiz Release ağacında sdist ve wheel oluştur
+        env:
+          RELEASE_TREE: ${{ runner.temp }}/python-turkce-release-tree
+          RELEASE_DIST: ${{ runner.temp }}/python-turkce-dist
+          RELEASE_BOOTSTRAP: ${{ runner.temp }}/python-turkce-build-bootstrap
+        run: |
+          rm -rf "$RELEASE_TREE" "$RELEASE_DIST" "$RELEASE_BOOTSTRAP"
+          mkdir -p "$RELEASE_TREE" "$RELEASE_DIST" "$RELEASE_BOOTSTRAP"
+          git archive HEAD | tar -x -C "$RELEASE_TREE"
+          python -m pip download --disable-pip-version-check --dest "$RELEASE_BOOTSTRAP" "setuptools>=68"
+          python -m pip install --disable-pip-version-check --no-index \
+            --find-links "$RELEASE_BOOTSTRAP" "setuptools>=68"
+          cd "$RELEASE_TREE"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from setuptools.build_meta import build_sdist, build_wheel
+
+          output = os.environ["RELEASE_DIST"]
+          sdist = build_sdist(output)
+          wheel = build_wheel(output)
+          expected = {
+              "pastafari_calendar_python-1.0.0.tar.gz",
+              "pastafari_calendar_python-1.0.0-py3-none-any.whl",
+          }
+          actual = {path.name for path in Path(output).iterdir() if path.is_file()}
+          if actual != expected:
+              raise SystemExit(f"Beklenmeyen Release artifact kümesi: {sorted(actual)!r}")
+          print(f"SDIST={sdist}")
+          print(f"WHEEL={wheel}")
+          PY
+
+      - name: Wheel'i temiz venv içinde doğrula
+        env:
+          RELEASE_DIST: ${{ runner.temp }}/python-turkce-dist
+          RELEASE_VENV: ${{ runner.temp }}/python-turkce-release-venv
+        run: |
+          rm -rf "$RELEASE_VENV"
+          python -m venv "$RELEASE_VENV"
+          "$RELEASE_VENV/bin/python" -m pip install --disable-pip-version-check --no-deps \
+            "$RELEASE_DIST/pastafari_calendar_python-1.0.0-py3-none-any.whl"
+          cd "${{ runner.temp }}"
+          env -u PYTHONPATH "$RELEASE_VENV/bin/python" \
+            "$GITHUB_WORKSPACE/tests/release_clean_package_smoke.py" wheel
+
+      - name: Paketi kaldır ve sdist'ten yeniden kur
+        env:
+          RELEASE_DIST: ${{ runner.temp }}/python-turkce-dist
+          RELEASE_VENV: ${{ runner.temp }}/python-turkce-release-venv
+          RELEASE_BOOTSTRAP: ${{ runner.temp }}/python-turkce-build-bootstrap
+        run: |
+          "$RELEASE_VENV/bin/python" -m pip uninstall -y pastafari-calendar-python
+          cd "${{ runner.temp }}"
+          env -u PYTHONPATH "$RELEASE_VENV/bin/python" - <<'PY'
+          import importlib.util
+          if importlib.util.find_spec("pastafari_calendar") is not None:
+              raise SystemExit("Uninstall sonrasında pastafari_calendar hâlâ import edilebilir")
+          print("UNINSTALL_ISOLATION=PASS")
+          PY
+          "$RELEASE_VENV/bin/python" -m pip install --disable-pip-version-check --no-index \
+            --find-links "$RELEASE_BOOTSTRAP" "setuptools>=68"
+          "$RELEASE_VENV/bin/python" -m pip install --disable-pip-version-check \
+            --no-build-isolation --no-deps \
+            "$RELEASE_DIST/pastafari_calendar_python-1.0.0.tar.gz"
+          env -u PYTHONPATH "$RELEASE_VENV/bin/python" \
+            "$GITHUB_WORKSPACE/tests/release_clean_package_smoke.py" sdist
+
       - name: Final doğrulama özetini yaz
         if: success()
         run: |
@@ -61,4 +128,5 @@ jobs:
           echo "Beklenen kanonik saved-sum discriminator: 7/7 PASS"
           echo "Beklenen Patch 27–33 acceleration correctness: 12/12 PASS"
           echo "Beklenen eski Python diferansiyel regresyonu: 6/6 PASS"
-          echo "Beklenen toplam doğrulama: 421 PASS"
+          echo "Temiz sdist/wheel kurulum doğrulaması: PASS"
+          echo "Beklenen toplam semantik doğrulama: 421 PASS"
