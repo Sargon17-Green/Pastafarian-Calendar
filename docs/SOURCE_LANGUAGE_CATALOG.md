@@ -22,7 +22,7 @@ tõlgitud string -> sortimine või aste -> semantika
 
 ## Tõlkimine
 
-Tavalise leksikaalse tähendusega nimed on tõlgitud eesti keelde tähenduse järgi. Näiteks nisu on `nisu`, jõgi on `jõgi`, sool on `sool` ja suletud ukse nimetus on `suletud uks`. Murdnimed on käsitatud ühe tervikliku nimena: `neli üheksandikku` ja `kolm viiendikku`.
+Tavalise leksikaalse tähendusega nimed on tõlgitud eesti keelde tähenduse järgi. Näiteks nisu on `nisu`, jõgi on `jõgi`, sool on `sool` ja suletud ukse nimetus on `suletud uks`. Murdnimed on käsitatud ühe tervikliku nimena: `neli osa üheksast` ja `kolm osa viiest`.
 
 ## Kohanimed ja väljamõeldud nimed
 
