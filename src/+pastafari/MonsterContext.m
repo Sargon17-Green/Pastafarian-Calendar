@@ -18,6 +18,12 @@ classdef MonsterContext < handle
         dayTagInput
         legacyDayTagValue
         dayTagCandidate
+        actionCount
+        targetCount
+        legacyDistanceValue
+        distanceCandidate
+        connectionCount
+        directionCount
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -38,6 +44,12 @@ classdef MonsterContext < handle
             obj.dayTagInput = [];
             obj.legacyDayTagValue = [];
             obj.dayTagCandidate = [];
+            obj.actionCount = [];
+            obj.targetCount = [];
+            obj.legacyDistanceValue = [];
+            obj.distanceCandidate = [];
+            obj.connectionCount = [];
+            obj.directionCount = [];
         end
     end
 end

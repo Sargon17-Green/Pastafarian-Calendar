@@ -83,3 +83,17 @@ Niezmieniony regression z Discovery 02 ma po tym etapie przejść na zielono. Do
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 6 — DISCOVERY 03: oldDistance
+
+Dodano trzeci historyczny defekt. `oldDistance(c,t)` nie mierzy odległości na osi dni. Zamiast tego bierze bezwzględną różnicę poprawionych tagów dni:
+
+`abs(dayTagWithFoundationScar(c) - dayTagWithFoundationScar(t))`.
+
+W tej wersji nie ma jeszcze końcowego `+1`. Sama różnica tagów jest szczególnie zdradliwa wokół Foundation, ponieważ tagi po obu stronach tej granicy nie stanowią liniowej osi chronologicznej.
+
+Nowa `WorkCountsCompatibilityRoute` oblicza poprawne `action`, `target`, `connection` i `direction`, lecz publikuje błędny legacy distance. Dzięki temu Discovery 03 izoluje wyłącznie trzeci defekt.
+
+Regresja obejmuje ten sam dzień oraz kilka par wokół Foundation. Między innymi ten sam dzień daje `0` zamiast `1`, Foundation do Foundation+3 daje `6` zamiast `4`, Foundation-3 do Foundation+3 daje `1` zamiast `7`, natomiast Foundation do Foundation+1 przypadkowo pozostaje zgodne (`2`).
+
+W etapie 6 nie ma jeszcze PATCH 03 ani końcowego `+1`. Historyczny `oldDistance` ma pozostać fizycznie zachowany; etap 7 doda nad nim detour z chronologiczną różnicą dni. Ponowna weryfikacja natywnego MATLAB-a pozostaje odłożona do końcowego cyklu uruchomień.
+
