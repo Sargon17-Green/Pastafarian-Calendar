@@ -1,7 +1,8 @@
 classdef GrindTableCompatibilityRoute
-    % Produkcyjna trasa Discovery 07.
-    % Poprzedni PATCH 06 pozostaje poprawny; nowa wada dotyczy wyłącznie
-    % przesuniętego indeksowania 11-wierszowej tabeli mielenia.
+    % Produkcyjna trasa mielenia po PATCH 07.
+    % Historyczny lookup grind+1 jest wykonywany najpierw na tabeli bez
+    % sentinel i zachowywany jako blizna. Publikowana ścieżka używa tego
+    % samego lookupu na tabeli z sentinel row pod logicznym indeksem 0.
     methods (Static)
         function [ctx, visible] = call(ctx, counts, stones, hidden, priorVisible)
             pastafari.ValidationManager.requireContext(ctx);
@@ -19,33 +20,43 @@ classdef GrindTableCompatibilityRoute
                     'Trasa mielenia wymaga 46 poprawionych visible drops.');
             end
 
-            ctx.phase = 'DISCOVERY_07';
-            ctx.subPhase = 7;
-            ctx.mode = 'SHIFTED_GRIND_TABLE_INDEX';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
             ctx.branchTrace{end + 1} = 'DISCOVERY_07_GRIND_TABLE_INDEX';
             ctx.metrics = pastafari.MetricsShell.bump( ...
                 ctx.metrics, 'discovery07.grindTableIndex.calls');
 
-            rows = pastafari.LegacyGrindTableAdapter.rowsWithoutSentinel();
-            [visible, requested, resolved] = ...
-                pastafari.GrindTableCompatibilityRoute.buildLegacy( ...
-                    counts, stones, hidden, rows);
+            legacyRows = ...
+                pastafari.LegacyGrindTableAdapter.rowsWithoutSentinel();
+            [legacyVisible, requested, resolved] = ...
+                pastafari.GrindTableCompatibilityRoute.buildWithRows( ...
+                    counts, stones, hidden, legacyRows);
+
+            ctx.phase = 'PATCH_07';
+            ctx.subPhase = 7;
+            ctx.mode = 'SENTINEL_GRIND_ROW_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = 'PATCH_07_SENTINEL_GRIND_ROW';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch07.sentinelGrindRow.calls');
+
+            patchedRows = pastafari.SentinelGrindRowPatch.rowsWithSentinel();
+            [visible, ~, ~] = ...
+                pastafari.GrindTableCompatibilityRoute.buildWithRows( ...
+                    counts, stones, hidden, patchedRows);
 
             ctx.preGrindVisibleDrops = priorVisible;
             ctx.legacyGrindRequestedIndices = requested;
             ctx.legacyGrindResolvedIndices = resolved;
-            ctx.legacyGrindVisibleDrops = visible;
+            ctx.legacyGrindVisibleDrops = legacyVisible;
             ctx.grindVisibleCandidate = visible;
             ctx.visibleDropsCandidate = visible;
             ctx.diagnostics{end + 1} = ...
-                ['Legacy używa indeksu grind+1 bez sentinel row 0; ', ...
-                 'pierwsze mielenie pobiera drugi wiersz tabeli.'];
+                ['PATCH 07 zachowuje historyczne grind+1, ale dodaje ', ...
+                 'sentinel row przed 11 kanonicznymi wierszami.'];
         end
     end
 
     methods (Static, Access = private)
-        function [visible, requested, resolved] = buildLegacy( ...
+        function [visible, requested, resolved] = buildWithRows( ...
                 counts, stones, hidden, rows)
             visible = cell(1, 46);
             requested = zeros(1, 11);

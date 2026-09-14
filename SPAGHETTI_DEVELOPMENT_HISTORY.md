@@ -207,3 +207,19 @@ W etapie 14 nie ma jeszcze wiersza sentinel. Dopiero Stage 15 ma zachować histo
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 15 — PATCH 07: sentinel grind row
+
+Historyczne indeksowanie `grindNumber+1` pozostaje fizycznie bez zmian. `LegacyGrindTableAdapter` nadal na surowej 11-wierszowej tabeli przesuwa pierwsze mielenie na wiersz 2 i nasyca ostatnie żądanie poza końcem tabeli.
+
+Dodano osobny `SentinelGrindRowPatch`, który nie zmienia lookupu. Przed 11 kanonicznymi wierszami dodaje jeden zerowy wiersz sentinel reprezentujący logiczny indeks 0. Powstaje fizyczna tabela 12×5: sentinel zajmuje wiersz 1, a kanoniczne grinds 1..11 zajmują wiersze 2..12.
+
+Dzięki temu ten sam historyczny lookup `grindNumber+1` wybiera dla grinds 1..11 dokładnie fizyczne wiersze 2..12, czyli wszystkie właściwe wiersze kanoniczne.
+
+`GrindTableCompatibilityRoute` najpierw wykonuje i zachowuje pełną surową ścieżkę Discovery 07 na tabeli bez sentinel, a następnie osobno buduje publikowaną ścieżkę na tabeli z sentinel. Historyczna blizna pozostaje więc obserwowalna.
+
+W trakcie PATCH 07 skorygowano konstrukcję regresji Stage 14: wcześniejszy test wiązał publikowany wynik bezpośrednio z surowym wynikiem legacy, przez co poprawny patch nie mógłby przejść na GREEN. Zmieniony test nadal bezwzględnie sprawdza przesunięte indeksy i surową rozbieżność legacy, ale klasyfikuje stan według publikowanej ścieżki.
+
+Test Stage 15 sprawdza wszystkie 11 mapowań tabeli, zachowanie surowej blizny oraz zgodność wszystkich 46 widocznych kropli z lokalnym normatywnym oracle.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

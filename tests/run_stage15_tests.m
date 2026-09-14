@@ -1,9 +1,8 @@
-function run_stage14_tests()
-% DISCOVERY 07: przesunięte indeksowanie tabeli 11 mielenia.
-% Surowa blizna musi pozostać także po PATCH 07, ale publikowana ścieżka
-% ma wtedy przejść na GREEN dzięki sentinel row.
+function run_stage15_tests()
+% PATCH 07: zachowaj grind+1 i dodaj sentinel row pod indeksem logicznym 0.
 
-run_stage13_tests();
+% Poprawiona regresja Discovery 07 ma po PATCH 07 przejść na GREEN.
+run_stage14_tests();
 
 here = fileparts(mfilename('fullpath'));
 root = fileparts(here);
@@ -11,31 +10,43 @@ addpath(fullfile(root, 'src'));
 addpath(fullfile(here, 'oracle'));
 cleanup = onCleanup(@() cleanupPaths(root, here)); %#ok<NASGU>
 
-rows = pastafari.LegacyGrindTableAdapter.rowsWithoutSentinel();
-canonicalFirst = [3 5 7 11 1];
-legacyFirstExpected = [5 7 11 13 2];
+canonical = pastafari.LegacyGrindTableAdapter.rowsWithoutSentinel();
+rows = pastafari.SentinelGrindRowPatch.rowsWithSentinel();
 
-[firstRow, requestedFirst, resolvedFirst] = ...
-    pastafari.LegacyGrindTableAdapter.rowForGrind(rows, 1);
-assert(isequal(firstRow, legacyFirstExpected), ...
-    'Historyczna pierwsza grind musi pobierać drugi wiersz tabeli.');
-assert(~isequal(firstRow, canonicalFirst), ...
-    'Discovery 07 nie ujawniło przesunięcia pierwszego mielenia.');
-assert(requestedFirst == 2 && resolvedFirst == 2, ...
-    'Pierwsze mielenie musi żądać i rozwiązać fizyczny indeks 2.');
+assert(isequal(size(rows), [12, 5]), ...
+    'PATCH 07 musi utworzyć tabelę 12x5 z jednym sentinel row.');
+assert(isequal(rows(1, :), zeros(1, 5)), ...
+    'Pierwszy fizyczny wiersz musi być sentinel row logicznego indeksu 0.');
+assert(isequal(rows(2:12, :), canonical), ...
+    'PATCH 07 nie może zmieniać żadnego z 11 kanonicznych wierszy.');
 
-[~, requestedLast, resolvedLast] = ...
-    pastafari.LegacyGrindTableAdapter.rowForGrind(rows, 11);
-assert(requestedLast == 12 && resolvedLast == 11, ...
-    'Historyczny guard końca tabeli ma nasycić żądanie 12 do ostatniego wiersza.');
+for grind = 1:11
+    [row, requested, resolved] = ...
+        pastafari.LegacyGrindTableAdapter.rowForGrind(rows, grind);
+    assert(requested == grind + 1, ...
+        ['PATCH 07 zmienił historyczne indeksowanie dla grind ', ...
+         num2str(grind), '.']);
+    assert(resolved == grind + 1, ...
+        ['Sentinel row nie usunął nasycenia/odchylenia dla grind ', ...
+         num2str(grind), '.']);
+    assert(isequal(row, canonical(grind, :)), ...
+        ['PATCH 07 wybrał błędny wiersz dla grind ', num2str(grind), '.']);
+end
+
+% Surowa historyczna tabela bez sentinel nadal musi wykazywać wadę.
+[legacyFirst, legacyRequested, legacyResolved] = ...
+    pastafari.LegacyGrindTableAdapter.rowForGrind(canonical, 1);
+assert(isequal(legacyFirst, canonical(2, :)), ...
+    'Historyczna blizna pierwszego grind zniknęła.');
+assert(legacyRequested == 2 && legacyResolved == 2, ...
+    'Historyczne grind+1 zostało zmienione.');
 
 foundation = pastafari.BigInt('-15055671');
 cases = { ...
     foundation, foundation; ...
-    foundation - 3, foundation + 4};
-labels = {'FOUNDATION_SAME', 'CROSS_FOUNDATION'};
-
-anyDivergence = false;
+    foundation - 3, foundation + 4; ...
+    foundation + 12, foundation - 5};
+labels = {'FOUNDATION_SAME', 'CROSS_FOUNDATION', 'BACKWARD_WIDE'};
 
 for caseIndex = 1:size(cases, 1)
     c = cases{caseIndex, 1};
@@ -51,67 +62,44 @@ for caseIndex = 1:size(cases, 1)
         pastafari.VisibleDropCompatibilityRoute.call( ...
             priorCtx, counts, stones, hidden);
 
-    for i = 1:46
-        assert(priorVisible{i} == expected{i}, ...
-            ['PATCH 06 nie jest zielony przed Discovery 07 dla ', ...
-             labels{caseIndex}, ', drop ', num2str(i), '.']);
-    end
-
     ctx = pastafari.MonsterContext(c, t);
     [ctx, actual] = pastafari.GrindTableCompatibilityRoute.call( ...
         ctx, counts, stones, hidden, priorVisible);
 
-    % Fizyczna blizna Discovery 07 nie może zniknąć po patchu.
-    assert(isequal(ctx.legacyGrindRequestedIndices, 2:12), ...
-        'Discovery 07 zapisało nieoczekiwane żądane indeksy grind.');
-    assert(isequal(ctx.legacyGrindResolvedIndices, [2:11 11]), ...
-        'Discovery 07 zapisało nieoczekiwane rozwiązane indeksy grind.');
-    assert(ctx.legacyGrindVisibleDrops{1} ~= expected{1}, ...
-        ['Surowy grind-table legacy powinien nadal rozchodzić się dla ', ...
-         labels{caseIndex}, ', drop 1.']);
-
-    divergent = false(1, 46);
     for i = 1:46
-        divergent(i) = actual{i} ~= expected{i};
-        if i <= 3
-            fprintf(['STAGE14 DISCOVERY07 CASE=%s DROP=%d ACTUAL=%s ', ...
-                'EXPECTED=%s CLASSIFICATION=%s\n'], ...
-                labels{caseIndex}, i, char(actual{i}), char(expected{i}), ...
-                classification(divergent(i)));
-        end
+        assert(actual{i} == expected{i}, ...
+            ['PATCH 07 rozchodzi się z oracle dla ', ...
+             labels{caseIndex}, ', drop ', num2str(i), '.']);
+        assert(ctx.grindVisibleCandidate{i} == expected{i}, ...
+            ['Kontekst nie zachował poprawionego grind drop ', ...
+             num2str(i), ' dla ', labels{caseIndex}, '.']);
     end
 
-    assert(ctx.grindVisibleCandidate{1} == actual{1}, ...
-        'Kontekst nie zachował publikowanego wyniku grind-table.');
+    assert(ctx.legacyGrindVisibleDrops{1} ~= expected{1}, ...
+        ['Surowa blizna grind-table zniknęła dla ', labels{caseIndex}, '.']);
+    assert(isequal(ctx.legacyGrindRequestedIndices, 2:12), ...
+        'PATCH 07 zmienił historyczne requested indices.');
+    assert(isequal(ctx.legacyGrindResolvedIndices, [2:11 11]), ...
+        'PATCH 07 zmienił historyczne resolved indices.');
+
     assert(any(strcmp(ctx.branchTrace, ...
         'DISCOVERY_07_GRIND_TABLE_INDEX')), ...
-        'Brakuje śladu Discovery 07.');
+        'Brakuje śladu historycznego grind-table index.');
+    assert(any(strcmp(ctx.branchTrace, ...
+        'PATCH_07_SENTINEL_GRIND_ROW')), ...
+        'Brakuje śladu PATCH 07.');
 
-    metricKey = matlab.lang.makeValidName( ...
+    legacyKey = matlab.lang.makeValidName( ...
         'discovery07.grindTableIndex.calls');
-    assert(isfield(ctx.metrics, metricKey) && ctx.metrics.(metricKey) == 1, ...
-        'Licznik grind-table index jest niepoprawny.');
-
-    anyDivergence = anyDivergence || any(divergent);
+    patchKey = matlab.lang.makeValidName( ...
+        'patch07.sentinelGrindRow.calls');
+    assert(isfield(ctx.metrics, legacyKey) && ctx.metrics.(legacyKey) == 1, ...
+        'Licznik historycznego grind-table index jest niepoprawny.');
+    assert(isfield(ctx.metrics, patchKey) && ctx.metrics.(patchKey) == 1, ...
+        'Licznik PATCH 07 jest niepoprawny.');
 end
 
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 14.');
-
-if anyDivergence
-    fprintf('STAGE_14_DISCOVERY_07_EXPECTED_RED\n');
-    error('Pastafari:Discovery07:GrindTableIndex', ...
-        ['Oczekiwana rozbieżność Discovery 07: historyczne indeksowanie ', ...
-         'grind+1 przesuwa 11-wierszową tabelę mielenia.']);
-end
-
-fprintf('STAGE_14_DISCOVERY_07_REGRESSION_GREEN\n');
+fprintf('STAGE_15_PATCH_07_GREEN\n');
 end
 
 function hidden = referenceHiddenDrops(counts, stones)
@@ -201,14 +189,6 @@ function value = saveReference(x)
 M = pastafari.BigInt('170141183460469231731687303715884105727');
 value = pastafari.BigInt(1) + ...
     (pastafari.BigInt.coerce(x) - pastafari.BigInt(1)).regularMod(M);
-end
-
-function text = classification(isDivergent)
-if isDivergent
-    text = 'EXPECTED_RED';
-else
-    text = 'MATCH';
-end
 end
 
 function cleanupPaths(root, here)
