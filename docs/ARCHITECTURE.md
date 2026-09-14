@@ -1,6 +1,6 @@
-# Arkitektura hanggang Stage 10
+# Arkitektura hanggang Stage 11
 
-Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10 ay historical discovery layers. Ang Stage 3/5/7/9 ay correction wrappers na nagpapanatili sa raw scars.
+Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10 ay historical discovery layers. Ang Stage 3/5/7/9/11 ay correction wrappers na nagpapanatili sa raw scars.
 
 ## Mga boundary
 
@@ -10,10 +10,11 @@ Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10 ay historical discovery layer
 - `src/Discovery02.ps1` / `src/Patch02.ps1` — day tags.
 - `src/Discovery03.ps1` / `src/Patch03.ps1` — distance.
 - `src/Discovery04.ps1` / `src/Patch04.ps1` — stone table.
-- `src/Discovery05.ps1` — backward hidden storage at wrong direct near-ness access.
+- `src/Discovery05.ps1` — backward hidden storage at wrong direct accessor.
+- `src/Patch05.ps1` — near-ness `8-k` translator habang pinapatakbo pa rin ang raw wrong accessor.
 - `src/MonsterSkeleton.ps1` — production route at invocation-owned semantic state.
 
-## Stage 10 production route
+## Stage 11 production route
 
 ```text
 Invoke-CalendarDateSpaghetti
@@ -22,48 +23,41 @@ Invoke-CalendarDateSpaghetti
 -> Patch 03
 -> Patch 04
 -> Discovery 05
-   -> exact hidden values from patched counts + patched stones
-   -> physical storage hidden7..hidden1
-   -> wrong direct read storage[1] for requested k=1
+   -> build hidden7..hidden1 physical storage
+-> Patch 05
+   -> raw legacyHidden[k] read
+   -> capture raw scar
+   -> hiddenByNearness(storage,k)
+   -> storage[8-k]
+   -> authoritative corrected value
 ```
 
-## Hidden computation
+## Preserved Stage 10 scars
 
-Para sa bawat `k=1..7`, kinukuha ang coefficient tuple, exact counts, patched stone row `k`, at seven-grind recurrence. Ang lahat ng modular saving ay dumadaan sa kasalukuyang SAVE patch semantics.
+`Discovery05.ps1` ay hindi binabago ng Stage 11.
 
-Ang coefficient storage ay historical reversed layout:
+Ang physical storage ay nananatiling reversed.
 
-```text
-slot 1 = coeff(k=7)
-...
-slot 7 = coeff(k=1)
-```
+Ang `legacyHiddenDirectByAssumedNearness` ay nananatiling maling direct accessor at aktuwal na tinatawag ng Patch 05.
 
-`Get-Discovery05CoeffForHidden(k)` ay kumukuha ng `slot 8-k`, kaya tama ang value generation bago pa lumitaw ang access defect.
+## Patch 05 state
 
-## Historical scar
+Ang invocation context ay nagmamay-ari ng:
 
-Ang backward physical storage ay nananatiling totoong reversed array.
+- `patch05RequestedK`
+- `patch05TranslatedSlot`
+- `patch05LegacyDirectValue`
+- `patch05CorrectedValue`
+- `patch05Applied`
+- `patch05Status`
+- `patch05InvocationCount`
 
-Ang maling accessor ay nananatiling:
+Ang `legacyHiddenLastReturnedValue` ay authoritative corrected value na pagkatapos ng Patch 05.
 
-```text
-legacyHiddenDirectByAssumedNearness(storage,k) = storage[k]
-```
+## GREEN contract
 
-## Invocation-owned state
+Para sa lahat ng `k=1..7`, ang Patch 05 result ay dapat tumugma sa normative hidden `k`.
 
-- `legacyHiddenStorage`
-- `legacyHiddenCount`
-- `legacyHiddenLastRequestedK`
-- `legacyHiddenLastReturnedValue`
-- `discovery05Status`
-- `discovery05InvocationCount`
+Para sa production `k=1`, ang raw scar ay `hidden7`, translated slot ay `7`, at corrected result ay `hidden1`.
 
-## EXPECTED_RED contract
-
-`k=1,2,6,7` — divergent.
-
-`k=4` — MATCH dahil midpoint.
-
-Wala pang `hiddenByNearness` translator at walang Stage 11 correction.
+Wala pang Stage 12 `legacyPrior` o visible-history logic.

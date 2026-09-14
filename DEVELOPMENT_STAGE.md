@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=10
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=11
+CURRENT_KIND=PATCH
 CURRENT_PATCH=05
 LAST_COMPLETED_STAGE=10
-EXPECTED_REPOSITORY_STATE=RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 05 hidden-drop layer na gumagawa ng exact hidden values mula sa patched counts at patched stone table, pisikal na nag-iimbak ng mga ito bilang hidden7..hidden1, at pagkatapos ay maling bumabasa ng near-ness k nang diretso sa legacyHidden[k].
+MONSTER_ARCHITECTURE_GROWTH=Pinanatili ang backward hidden storage na hidden7..hidden1 at ang maling legacy direct accessor; idinagdag ang hiwalay na Patch 05 hiddenByNearness translator na gumagamit ng physical slot 8-k matapos talagang patakbuhin at i-capture ang maling direct legacy value.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -35,3 +35,7 @@ STAGE09_PATCH=STONE_PATCH
 STAGE09_RUNTIME_VERIFICATION=GREEN_CONFIRMED
 STAGE10_DISCOVERY=BACKWARD_HIDDEN_DIRECT_ACCESS
 STAGE10_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
+STAGE11_PATCH=HIDDEN_BY_NEARNESS
+STAGE11_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `11` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na GREEN ang Patch 05 para sa lahat ng pitong near-ness slots habang nananatiling pisikal ang backward storage at maling direct accessor scars.

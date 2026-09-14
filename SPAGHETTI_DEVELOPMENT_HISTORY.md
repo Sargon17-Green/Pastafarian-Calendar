@@ -126,3 +126,56 @@ Ang storage, hidden count, last requested k, at last returned value ay invocatio
 Sa `k=1,2,4,6,7`, eksaktong apat ang divergent (`1,2,6,7`) at eksaktong isa ang MATCH (`4`).
 
 Wala pang `hiddenByNearness` Patch 05 translator at walang Stage 11 correction.
+
+## Stage 11 — Patch 05: 8-k translator sa backward hidden storage
+
+### Ano ang hindi binago
+
+Nananatiling backward ang physical hidden storage:
+
+```text
+slot 1 = hidden7
+slot 2 = hidden6
+slot 3 = hidden5
+slot 4 = hidden4
+slot 5 = hidden3
+slot 6 = hidden2
+slot 7 = hidden1
+```
+
+Nananatili ring pisikal ang historical wrong direct accessor:
+
+```text
+legacyHiddenDirectByAssumedNearness(storage,k)
+    -> storage[k]
+```
+
+### Correction layer
+
+Ang hiwalay na `hiddenByNearness` translator ay gumagamit ng:
+
+```text
+storage[8-k]
+```
+
+Ito ang eksaktong inverse ng physical write position ng hidden `k`.
+
+### Preserved scar execution
+
+Ang `Invoke-Patch05HiddenNearnessRepair` ay hindi nilalaktawan ang lumang defect. Una nitong tinatawag ang wrong direct accessor at iniimbak ang raw value. Pagkatapos lamang nito binabasa ang corrected `8-k` slot.
+
+Ang context ay invocation-local na nagtatago ng:
+- requested `k`;
+- translated physical slot;
+- legacy direct value;
+- corrected value;
+- applied status;
+- invocation count.
+
+### GREEN contract
+
+Lahat ng pitong `k=1..7` corrected reads ay dapat tumugma sa test-only normative hidden values.
+
+Ang raw `k=1` direct accessor ay dapat manatiling `hidden7` at manatiling mali laban sa normative `hidden1`.
+
+Wala pang Stage 12 `legacyPrior`, `priorPatch`, visible-history adapter, o anumang mas huling correction.

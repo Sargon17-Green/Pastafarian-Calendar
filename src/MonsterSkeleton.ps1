@@ -10,6 +10,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Discovery04.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch04.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery05.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Patch05.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -77,6 +78,13 @@ function New-BaseMonsterContext {
         legacyHiddenLastReturnedValue = $null
         discovery05Status = 'HISTORICAL_SCAR_PRESENT'
         discovery05InvocationCount = 0
+        patch05RequestedK = $null
+        patch05TranslatedSlot = $null
+        patch05LegacyDirectValue = $null
+        patch05CorrectedValue = $null
+        patch05Applied = $false
+        patch05Status = 'NOT_RUN'
+        patch05InvocationCount = 0
     }
 }
 
@@ -212,7 +220,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 10.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 11.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -223,26 +231,26 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'DISCOVERY05'
+    $ctx.phase = 'PATCH05'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY05' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH05' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
         $withPatch03 = Invoke-Patch03DistanceAdapter -Context $withPatch02
         $withPatch04 = Invoke-Patch04StoneAdapter -Context $withPatch03
         $withDiscovery05 = Invoke-Discovery05LegacyHiddenAdapter -Context $withPatch04
-        [void](Read-Discovery05LegacyHiddenByAssumedNearness -Context $withDiscovery05 -K 1)
+        [void](Invoke-Patch05HiddenNearnessRepair -Context $withDiscovery05 -K 1)
         return $withDiscovery05
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.discovery05.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.patch05.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'DISCOVERY05_COMPLETE'
+    $result.status = 'PATCH05_COMPLETE'
     return $result
 }
