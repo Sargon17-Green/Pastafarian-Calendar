@@ -82,6 +82,32 @@ SEAL_MONTH_WEAVING_INTEGRATED = 32
 SEAL_MONTH_NAMES_INTEGRATED = 33
 
 
+# Bu sabitler bağlayıcı kapı-aralığı kuralından türetilmiş salt hızlandırma
+# kontrol noktalarıdır. Takvim semantiğini değiştirmez; soğuk başlangıçta
+# on binlerce kapıyı 0 indeksinden yeniden yürümeyi önler.
+GATE_CHECKPOINTS_INTEGRATED: tuple[tuple[int, int], ...] = (
+    (-32768, -31502007), (-31744, -30996436), (-30720, -30480961), (-29696, -29952759),
+    (-28672, -29445694), (-27648, -28925576), (-26624, -28417475), (-25600, -27905945),
+    (-24576, -27370649), (-23552, -26847845), (-22528, -26314171), (-21504, -25799188),
+    (-20480, -25290366), (-19456, -24778032), (-18432, -24268484), (-17408, -23750389),
+    (-16384, -23245641), (-15360, -22742766), (-14336, -22224519), (-13312, -21707479),
+    (-12288, -21198812), (-11264, -20681401), (-10240, -20174639), (-9216, -19652366),
+    (-8192, -19142984), (-7168, -18622925), (-6144, -18113198), (-5120, -17614102),
+    (-4096, -17095814), (-3072, -16590681), (-2048, -16082135), (-1856, -15990665),
+    (-1024, -15566968), (0, -15055671), (1024, -14530428), (2048, -14010981),
+    (3072, -13512003), (4096, -13008067), (5120, -12485669), (6144, -11955243),
+    (7168, -11448953), (8192, -10935611), (9216, -10414155), (10240, -9895401),
+    (11264, -9378911), (12288, -8866850), (13312, -8352123), (14336, -7848511),
+    (15360, -7332393), (16384, -6824825), (17408, -6308857), (18432, -5790842),
+    (19456, -5278877), (20480, -4759572), (21504, -4248955), (22528, -3730061),
+    (23552, -3211116), (24576, -2697150), (25600, -2197633), (26624, -1689278),
+    (27648, -1189129), (28672, -674161), (29696, -169081), (29952, -38810),
+    (30208, 91420), (30464, 217279), (30720, 355323), (30976, 485974),
+    (31232, 619795), (31456, 729039), (31472, 737010), (31488, 745943),
+    (31504, 752967), (31744, 879359), (32768, 1389932),
+)
+
+
 @dataclass(
     frozen=True,
     slots=True,
@@ -1096,6 +1122,8 @@ class IntegratedGateCache:
                     ]
                     + self._gap(
                         current
+                        if current > 0
+                        else current - 1
                     )
                 )
                 self.max_known = current
@@ -1119,7 +1147,9 @@ class IntegratedGateCache:
                         current + 1
                     ]
                     - self._gap(
-                        current
+                        current + 1
+                        if current >= 0
+                        else current
                     )
                 )
                 self.min_known = current
@@ -1130,6 +1160,58 @@ class IntegratedGateCache:
             index
         ]
 
+    def _reanchor_for_cover(
+        self,
+        low_day: int,
+        high_day: int,
+    ) -> None:
+        # Her çağrı kendi IntegratedGateCache örneğini oluşturur. İlk genişletme
+        # henüz 0 kapısından ayrılmadıysa, istenen aralığın aynı tarafındaki en
+        # yakın güvenli kontrol noktasına yeniden demirlemek salt performans
+        # optimizasyonudur. Sonraki kapılar normal kuralla tek tek doğrulanır.
+        if self.min_known != 0 or self.max_known != 0:
+            return
+
+        if low_day > FOUNDATION_DAY_INTEGRATED:
+            candidates = tuple(
+                item
+                for item in GATE_CHECKPOINTS_INTEGRATED
+                if 0 <= item[0] and item[1] <= low_day
+            )
+            if not candidates:
+                return
+            index, day = max(candidates, key=lambda item: item[1])
+        elif high_day < FOUNDATION_DAY_INTEGRATED:
+            candidates = tuple(
+                item
+                for item in GATE_CHECKPOINTS_INTEGRATED
+                if item[0] <= 0 and item[1] >= high_day
+            )
+            if not candidates:
+                return
+            index, day = min(candidates, key=lambda item: item[1])
+        else:
+            return
+
+        if index == 0:
+            return
+        self.gates = {index: day}
+        self.min_known = index
+        self.max_known = index
+        self.ctx.metrics["gate_checkpoint_reanchor"] = (
+            self.ctx.metrics.get("gate_checkpoint_reanchor", 0) + 1
+        )
+        self.ctx.branch_trace.append((
+            "GATE_CHECKPOINT_REANCHOR",
+            index,
+            day,
+        ))
+        self.ctx.logs.append((
+            "gate-checkpoint-reanchor",
+            index,
+            day,
+        ))
+
     def ensure_cover(
         self,
         low_day: int,
@@ -1139,6 +1221,11 @@ class IntegratedGateCache:
             raise ValueError(
                 "Entegrasyon gate kaplama aralığı ters olamaz"
             )
+
+        self._reanchor_for_cover(
+            low_day,
+            high_day,
+        )
 
         while self.gates[
             self.min_known

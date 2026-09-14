@@ -25,6 +25,7 @@ from pastafari_calendar.acceleration_scars import (
 )
 from pastafari_calendar.calendar import calendar_date_spaghetti
 from pastafari_calendar.final_integration import (
+    GATE_CHECKPOINTS_INTEGRATED,
     FinalSpaghettiIntegrationManager,
     IntegratedCutlet,
     IntegratedGateCache,
@@ -244,6 +245,67 @@ print(json.dumps(rows, ensure_ascii=False))
         self.assertEqual(fresh.gates[scars.GATE_SHARD_SIZE], days[-1])
         self.assertEqual(fresh_ctx.acceleration_scars.gate_shard_hits, 1)
         self.assertEqual(fresh_ctx.integration_gate_questions, 0)
+
+    def test_release_gate_checkpoints_are_monotonic_and_keep_foundation_anchor(self):
+        indices = tuple(index for index, _ in GATE_CHECKPOINTS_INTEGRATED)
+        days = tuple(day for _, day in GATE_CHECKPOINTS_INTEGRATED)
+
+        self.assertEqual(tuple(sorted(indices)), indices)
+        self.assertEqual(tuple(sorted(days)), days)
+        self.assertEqual(len(indices), len(set(indices)))
+        self.assertEqual(len(days), len(set(days)))
+        self.assertIn((0, FOUNDATION_DAY), GATE_CHECKPOINTS_INTEGRATED)
+
+    def test_release_gate_checkpoint_positive_reanchor_walks_both_directions_exactly(self):
+        anchor_index = 31472
+        anchor_day = 737010
+
+        forward_ctx = MonsterContext(FOUNDATION_DAY, anchor_day)
+        forward = IntegratedGateCache(forward_ctx)
+        forward._reanchor_for_cover(anchor_day, anchor_day)
+        self.assertEqual((forward.min_known, forward.max_known), (anchor_index, anchor_index))
+        self.assertEqual(forward.gates, {anchor_index: anchor_day})
+        self.assertEqual(forward.ensure_index(31488), 745943)
+
+        backward_ctx = MonsterContext(FOUNDATION_DAY, anchor_day)
+        backward = IntegratedGateCache(backward_ctx)
+        backward._reanchor_for_cover(anchor_day, anchor_day)
+        self.assertEqual(backward.ensure_index(31456), 729039)
+
+        for ctx in (forward_ctx, backward_ctx):
+            self.assertEqual(ctx.metrics.get("gate_checkpoint_reanchor"), 1)
+            self.assertIn(
+                ("GATE_CHECKPOINT_REANCHOR", anchor_index, anchor_day),
+                ctx.branch_trace,
+            )
+
+    def test_release_gate_checkpoint_negative_reanchor_walks_both_directions_exactly(self):
+        left_index = -2048
+        left_day = -16082135
+        right_index = -1856
+        right_day = -15990665
+
+        forward_ctx = MonsterContext(FOUNDATION_DAY, left_day)
+        forward = IntegratedGateCache(forward_ctx)
+        forward._reanchor_for_cover(left_day, left_day)
+        self.assertEqual((forward.min_known, forward.max_known), (left_index, left_index))
+        self.assertEqual(forward.ensure_index(right_index), right_day)
+
+        backward_ctx = MonsterContext(FOUNDATION_DAY, right_day)
+        backward = IntegratedGateCache(backward_ctx)
+        backward._reanchor_for_cover(right_day, right_day)
+        self.assertEqual((backward.min_known, backward.max_known), (right_index, right_index))
+        self.assertEqual(backward.ensure_index(left_index), left_day)
+
+    def test_release_gate_checkpoint_does_not_reanchor_cover_crossing_foundation(self):
+        ctx = MonsterContext(FOUNDATION_DAY, FOUNDATION_DAY)
+        cache = IntegratedGateCache(ctx)
+        cache.ensure_cover(FOUNDATION_DAY - 1, FOUNDATION_DAY + 1)
+
+        self.assertEqual(ctx.metrics.get("gate_checkpoint_reanchor", 0), 0)
+        self.assertIn(0, cache.gates)
+        self.assertLess(cache.min_known, 0)
+        self.assertGreater(cache.max_known, 0)
 
     def test_external_rollback_containment_restores_only_declared_stage_fields(self):
         year = IntegratedYear(
