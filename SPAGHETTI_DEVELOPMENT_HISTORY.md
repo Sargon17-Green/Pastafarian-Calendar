@@ -570,3 +570,23 @@ Stage 33 celowo nie dodaje jeszcze sortowania ani wyboru Year 5000. Dopiero Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 34 — DISCOVERY 17: Year 5000 tie
+
+Dodano siedemnasty historyczny defekt w porządkowaniu kandydatów roku 5000.
+
+Kandydaci wejściowi najpierw przechodzą przez PATCH 16, więc kandydaci dłużsi niż `5778` nie biorą udziału w tej warstwie.
+
+Historyczny `LegacyYear5000StableLengthSort` wykonuje jawny stabilny sort wyłącznie po `lengthDays = closeGateDay-openGateDay`. Dla różnych długości kolejność jest poprawna: krótszy kandydat stoi wcześniej.
+
+Błąd występuje wyłącznie przy równej długości. Stabilność zachowuje wtedy pierwotną kolejność wejściową, zamiast normatywnego drugiego klucza: rosnącego opening gate.
+
+Regresja zawiera dwie niezależne tie runs. Dla input IDs `1,2,3,4,5,6` historyczny stable-length order wynosi `2,4,1,3,5,6`, natomiast normatywny order `length ASC, opening gate ASC` wynosi `4,2,3,5,1,6`.
+
+`Year5000OrderingCompatibilityRoute` w Stage 34 zachowuje input listę oraz raw stable-length order i publikuje jeszcze dokładnie ten historyczny order. Stan jest więc celowo `EXPECTED_RED`.
+
+Stage 34 nie wykonuje jeszcze wyboru rank Year 5000. Izoluje wyłącznie porządkowanie listy, tak aby następny patch nie mógł zmienić innych części wyboru.
+
+Dopiero Stage 35 ma pozostawić `LegacyYear5000StableLengthSort` fizycznie bez zmian, a po jego wykonaniu posortować wyłącznie contiguous equal-length runs po opening gate. Kandydaci z różnymi długościami nie mogą zostać ponownie globalnie przemieszani.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

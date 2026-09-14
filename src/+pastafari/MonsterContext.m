@@ -88,6 +88,9 @@ classdef MonsterContext < handle
         legacyYearCandidateLengths
         legacyYearCandidatesAccepted
         yearCandidatesCandidate
+        year5000InputCandidates
+        legacyYear5000StableLengthOrder
+        year5000CandidateOrder
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -178,6 +181,9 @@ classdef MonsterContext < handle
             obj.legacyYearCandidateLengths = [];
             obj.legacyYearCandidatesAccepted = {};
             obj.yearCandidatesCandidate = {};
+            obj.year5000InputCandidates = {};
+            obj.legacyYear5000StableLengthOrder = {};
+            obj.year5000CandidateOrder = {};
         end
     end
 end
