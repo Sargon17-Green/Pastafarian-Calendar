@@ -29,13 +29,17 @@ namespace Pastafari.Tests {
             Fact(months[i-1].CanonicalIndex == i, "月名の canonicalIndex が連続していません。");
         }
         Fact(ResolveCutlet(1) == "青銅", "第1カツレツ名が一致しません。");
-        Fact(ResolveCutlet(6) == "九分の四", "分数形式のカツレツ名が一致しません。");
+        Fact(ResolveCutlet(4) == "ラガシュ", "ラガシュの表記が一致しません。");
+        Fact(ResolveCutlet(6) == "九つの部分のうち四つ", "部分を明示したカツレツ名が一致しません。");
         Fact(ResolveCutlet(7) == "パルグラシュ", "造語の転写が一致しません。");
         Fact(ResolveCutlet(12) == "小麦", "小麦の翻訳が一致しません。");
         Fact(ResolveCutlet(15) == "アッカド", "アッカドの表記が一致しません。");
-        Fact(ResolveMonth(7) == "五分の三", "分数形式の月名が一致しません。");
-        Fact(ResolveMonth(8) == "カルシュマブ", "造語の月名転写が一致しません。");
+        Fact(ResolveMonth(7) == "五つの部分のうち三つ", "部分を明示した月名が一致しません。");
+        Fact(ResolveMonth(1) == "粘土", "粘土の月名が一致しません。");
+        Fact(ResolveMonth(8) == "カルシュマヴ", "造語の月名転写が一致しません。");
         Fact(ResolveMonth(28) == "ニネヴェ", "ニネヴェの表記が一致しません。");
+        Fact(ResolveMonth(31) == "ランプ", "ランプの月名が一致しません。");
+        Fact(ResolveMonth(36) == "スーサ", "スーサの表記が一致しません。");
         Fact(ResolveMonth(41) == "バビロン", "バビロンの表記が一致しません。");
         Fact(ResolveMonth(47) == "砂", "最後の月名が一致しません。");
     }
