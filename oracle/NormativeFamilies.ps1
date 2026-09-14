@@ -114,7 +114,7 @@ function Get-NormCutletPartitionCountInternal {
         return [System.Numerics.BigInteger]::Zero
     }
     if ($Rem -lt $Slots) { return [System.Numerics.BigInteger]::Zero }
-    $reqKey = if ($null -eq $RequiredBoundary) { 'none' } else { [string]$RequiredBoundary.Value }
+    $reqKey = if ($null -eq $RequiredBoundary) { 'none' } else { [string]([int]$RequiredBoundary) }
     $key = "$Rem|$Slots|$Cumulative|$HitBoundary|$reqKey"
     if ($Memo.ContainsKey($key)) { return [System.Numerics.BigInteger]$Memo[$key] }
     $total = [System.Numerics.BigInteger]::Zero
@@ -123,8 +123,8 @@ function Get-NormCutletPartitionCountInternal {
         $nextCumulative = $Cumulative + $x
         $nextHit = $HitBoundary
         if ($null -ne $RequiredBoundary -and -not $HitBoundary) {
-            if ($nextCumulative -eq $RequiredBoundary.Value) { $nextHit = $true }
-            elseif ($nextCumulative -gt $RequiredBoundary.Value) { continue }
+            if ($nextCumulative -eq ([int]$RequiredBoundary)) { $nextHit = $true }
+            elseif ($nextCumulative -gt ([int]$RequiredBoundary)) { continue }
         }
         $total += Get-NormCutletPartitionCountInternal ($Rem - $x) ($Slots - 1) $nextCumulative $nextHit $RequiredBoundary $Memo
     }
@@ -161,8 +161,8 @@ function Get-NormCutletPartitionUnrank {
             $nextCumulative = $cumulative + $x
             $nextHit = $hit
             if ($null -ne $RequiredBoundary -and -not $hit) {
-                if ($nextCumulative -eq $RequiredBoundary.Value) { $nextHit = $true }
-                elseif ($nextCumulative -gt $RequiredBoundary.Value) { continue }
+                if ($nextCumulative -eq ([int]$RequiredBoundary)) { $nextHit = $true }
+                elseif ($nextCumulative -gt ([int]$RequiredBoundary)) { continue }
             }
             $block = Get-NormCutletPartitionCountInternal ($rem - $x) ($slots - 1) $nextCumulative $nextHit $RequiredBoundary $memo
             if ($r -gt $block) { $r -= $block }
