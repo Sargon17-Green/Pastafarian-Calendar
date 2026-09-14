@@ -179,3 +179,19 @@ W etapie 12 nie istnieje jeszcze `priorPatch`. Dopiero Stage 13 ma mapować brak
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 13 — PATCH 06: priorPatch
+
+Historyczny `LegacyPriorAdapter` pozostaje fizycznie bez zmian. Nadal rozumie wyłącznie dodatnie indeksy wcześniej zbudowanych visible drops i nadal zgłasza brak wartości dla logicznych slotów `0..-6`.
+
+Dodano osobny `PriorPatch`. Jeżeli `legacyPrior` nie znajduje poprzednika i żądany logiczny slot należy do zakresu `0..-6`, patch mapuje go na odpowiednie hidden według reguły:
+
+`hiddenIndex = 1 - slot`.
+
+Oznacza to dokładnie `0 -> hidden1`, `-1 -> hidden2`, ..., `-6 -> hidden7`.
+
+`VisibleDropCompatibilityRoute` zachowuje pełną surową ścieżkę Discovery 06 z zerowymi fallbackami jako obserwowalną bliznę. Osobno buduje publikowaną ścieżkę: dodatnie sloty nadal przechodzą przez historyczny `legacyPrior`, a wyłącznie brakujące sloty `0..-6` są uzupełniane przez `PriorPatch`.
+
+Niezmieniony regression Stage 12 ma po tej zmianie przejść na GREEN. Test Stage 13 dodatkowo sprawdza wszystkie siedem mapowań oraz zgodność wszystkich 46 widocznych kropli z lokalnym normatywnym oracle dla kilku kierunków i odległości.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
