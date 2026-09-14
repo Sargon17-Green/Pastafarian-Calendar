@@ -1,8 +1,10 @@
 classdef SmallPickCompatibilityRoute
-    % Produkcyjna trasa Discovery 13.
+    % Produkcyjna trasa krótkiego wyboru po PATCH 13.
     %
-    % Legacy bierze pierwszą odpowiedź answer ring i natychmiast wywołuje
-    % biasedLegacyPick. Nie ma jeszcze rejection ani acceptance limit.
+    % Najpierw wykonuje dokładnie surową ścieżkę Discovery 13:
+    % biasedLegacyPick na pierwszym x bez rejection.
+    % Publikowana ścieżka przesuwa się po tym samym answer ring aż
+    % x<=limit i dopiero wtedy wywołuje ten sam LegacyBiasedPick.
     methods (Static)
         function [ctx, rank] = call(ctx, stream, N)
             pastafari.ValidationManager.requireContext(ctx);
@@ -17,34 +19,45 @@ classdef SmallPickCompatibilityRoute
             end
             if N > M
                 error('Pastafari:Selection:LegacyShortAssumption', ...
-                    ['Historyczna krótka ścieżka Discovery 13 zakłada ', ...
-                     'N nie większe od rozmiaru answer ring.']);
+                    ['Krótka ścieżka PATCH 13 wymaga N nie większego ', ...
+                     'od rozmiaru answer ring.']);
             end
 
-            ctx.phase = 'DISCOVERY_13';
-            ctx.subPhase = 13;
-            ctx.mode = 'BIASED_LEGACY_PICK_MODULO';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
+            % Surowa historyczna blizna Discovery 13.
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_13_BIASED_LEGACY_PICK_MODULO';
             ctx.metrics = pastafari.MetricsShell.bump( ...
                 ctx.metrics, 'discovery13.biasedLegacyPick.calls');
 
-            x = pastafari.AnswerRingStreamFactory.answerAt( ...
+            rawX = pastafari.AnswerRingStreamFactory.answerAt( ...
                 stream, pastafari.BigInt(0));
-            rawRank = pastafari.LegacyBiasedPick.pick(x, N);
+            rawRank = pastafari.LegacyBiasedPick.pick(rawX, N);
 
             ctx.answerRingFirst = pastafari.BigInt.coerce(stream.first);
             ctx.answerRingDirectionStep = stream.directionStep;
-            ctx.legacyBiasedPickInput = x;
+            ctx.legacyBiasedPickInput = rawX;
             ctx.legacyBiasedPickSize = N;
             ctx.legacyBiasedPickRank = rawRank;
-            ctx.smallPickCandidate = rawRank;
-            ctx.diagnostics{end + 1} = ...
-                ['Discovery 13 wywołuje biasedLegacyPick na pierwszej ', ...
-                 'odpowiedzi pierścienia bez rejection.'];
 
-            rank = rawRank;
+            % PATCH 13: rejection przed semantic call do legacy pickera.
+            ctx.phase = 'PATCH_13';
+            ctx.subPhase = 13;
+            ctx.mode = 'REJECTION_ON_ANSWER_RING_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = ...
+                'PATCH_13_REJECTION_ON_ANSWER_RING';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch13.rejectionOnAnswerRing.calls');
+
+            [rank, acceptedX, offset, acceptanceLimit] = ...
+                pastafari.AnswerRingRejectionPatch.apply(stream, N);
+
+            ctx.smallPickCandidate = rank;
+            ctx.diagnostics{end + 1} = sprintf( ...
+                ['PATCH 13: limit=%s, acceptedX=%s, offset=%s; ', ...
+                 'LegacyBiasedPick został wywołany semantycznie dopiero ', ...
+                 'po zaakceptowaniu odpowiedzi na tym samym answer ring.'], ...
+                char(acceptanceLimit), char(acceptedX), char(offset));
         end
     end
 end

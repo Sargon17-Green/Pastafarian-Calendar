@@ -428,3 +428,21 @@ W etapie 26 nie istnieje jeszcze rejection patch. Dopiero Stage 27 ma zachować 
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 27 — PATCH 13: rejection on answer ring
+
+Historyczny `LegacyBiasedPick` pozostaje fizycznie bez zmian. Nadal implementuje wyłącznie `regularMod(x-1,N)+1` i nadal jest wykonywany na pierwszej odpowiedzi jako obserwowalna blizna Discovery 13.
+
+Dodano osobny `AnswerRingRejectionPatch`. Dla krótkiego wyboru `1 <= N <= M` patch oblicza:
+
+`acceptanceLimit = floor(M/N) * N`.
+
+Następnie zaczyna od offsetu 0 i pobiera odpowiedzi wyłącznie przez `AnswerRingStreamFactory.answerAt(stream, offset)`. Jeżeli `x > acceptanceLimit`, offset jest zwiększany o jeden i pobierana jest następna odpowiedź z tego samego ring. Nie tworzy się nowego streamu, nie oblicza ponownie first i nie losuje nowego kierunku.
+
+Dopiero pierwsze `x <= acceptanceLimit` jest przekazywane do niezmienionego `LegacyBiasedPick.pick(x,N)`. Dzięki temu modulo legacy staje się poprawnym ostatnim krokiem po bezstronnym rejection.
+
+`SmallPickCompatibilityRoute` najpierw wykonuje i zachowuje surowe x oraz raw rank Discovery 13. Następnie osobno wykonuje PATCH 13 i publikuje wynik po rejection.
+
+Niezmieniony regression Stage 26 ma po tej zmianie przejść na GREEN. Test Stage 27 sprawdza witness jednego rejection, brak rejection, zawinięcie `M -> 1` w kierunku dodatnim, 17 kolejnych rejection na jednym ring oraz kilka różnych rozmiarów N w porównaniu z lokalnym normatywnym oracle.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
