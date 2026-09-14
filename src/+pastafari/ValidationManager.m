@@ -10,10 +10,18 @@ classdef ValidationManager
             if isa(value, 'pastafari.BigInt')
                 return
             end
-            if ~(isnumeric(value) && isscalar(value) && isreal(value) && isfinite(value) && fix(value) == value && abs(double(value)) <= flintmax)
+            if ~(isnumeric(value) && isscalar(value) && isreal(value))
                 error('Pastafari:Validation:IntegerInput', ...
                     'Dzień musi być dokładną liczbą całkowitą albo obiektem pastafari.BigInt.');
             end
+            if isinteger(value)
+                return
+            end
+            if isfloat(value) && isfinite(value) && fix(value) == value && abs(double(value)) <= flintmax
+                return
+            end
+            error('Pastafari:Validation:IntegerInput', ...
+                'Dzień musi być dokładną liczbą całkowitą albo obiektem pastafari.BigInt.');
         end
     end
 end
