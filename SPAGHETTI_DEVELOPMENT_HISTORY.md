@@ -44,3 +44,16 @@ Nowa trasa `SaveCompatibilityRoute` deleguje w tym etapie bezpośrednio do `oldR
 Regresja Discovery 01 sprawdza przypadki `M`, `2M`, `3M` i `M+1`. Dla pierwszych trzech przypadków legacy zwraca `0`, podczas gdy normatywne `SAVE` zwraca `M`; dla `M+1` oba zwracają `1`. Stan etapu jest zatem celowo `EXPECTED_RED`.
 
 W etapie 2 nie dodano jeszcze `savePatch`. Błędny `oldRemainder` musi pozostać niezmieniony jako historyczna blizna; dopiero etap 3 ma dodać łatę nad nim.
+
+## Etap 3 — PATCH 01: savePatch
+
+Historyczny `oldRemainder` pozostaje bez zmian i nadal zwraca `0` dla dodatnich wielokrotności `M`. Łata nie naprawia starej funkcji w miejscu.
+
+Dodano osobny `SavePatch`, który otrzymuje surowy wynik legacy i wykonuje dokładnie jedną korektę: gdy wynik jest równy `0`, zwraca `M`; każdą niezerową wartość pozostawia bez zmian.
+
+`SaveCompatibilityRoute` najpierw wykonuje i zapisuje wynik `oldRemainder`, a dopiero potem nakłada `savePatch`. Dzięki temu ślad historycznej wady pozostaje obserwowalny, natomiast publikowany wynik SAVE jest zgodny z normatywnym oracle.
+
+Niezmieniony regression z Discovery 01 ma po tym etapie przejść na zielono dla `M`, `2M`, `3M` i `M+1`. Dodatkowy test etapu 3 sprawdza, że surowa wada nadal istnieje, patch jest wywoływany dokładnie raz i modyfikuje wyłącznie zero.
+
+Ponowne uruchomienie w natywnym MATLAB-ie jest odłożone do końcowego, zbiorczego cyklu weryfikacji.
+
