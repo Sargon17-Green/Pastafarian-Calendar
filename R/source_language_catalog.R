@@ -14,12 +14,12 @@ MONTH_SOURCE_CATALOG <- data.frame(
   canonicalIndex = 1:47,
   text = c(
     'argila', 'magrana', 'colze', 'enveja', 'Èridu', 'pasta de dents',
-    'tres parts de cinc', 'Karxumab', 'tigre', 'estany', 'boira', 'encens',
+    'tres parts de cinc', 'Karxumav', 'lleopard', 'estany', 'boira', 'olíban',
     'fus', 'costella', 'garrofa', 'Uruk', 'vergonya', 'camell', 'coure',
     'pou', 'rovell', 'estrella', 'mel', 'melsa', 'pedra calcària', 'alegria',
-    'figa', 'Nínive', 'granota', 'quitrà', 'espelma', 'la porta tancada',
-    'sèsam', 'clatell', 'plata', 'lliri', 'tempesta', 'ase', 'farina',
-    'penediment', 'Babilònia', 'llengua', 'lli', 'sal', 'pera', 'arc', 'sorra'
+    'figa', 'Nínive', 'granota', 'pega', 'llàntia', 'la porta tancada',
+    'sèsam', 'clatell', 'plata', 'Susa', 'tempesta', 'ase', 'farina',
+    'recança', 'Babilònia', 'llengua', 'lli', 'sal', 'pera', 'arc', 'sorra'
   ),
   stringsAsFactors = FALSE
 )

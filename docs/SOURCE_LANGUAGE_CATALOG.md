@@ -6,9 +6,9 @@ Versió congelada: `1.0.0-stage01-frozen`.
 
 Els noms amb significat lèxic es tradueixen pel significat, no per la forma gràfica de l'hebreu de la referència. Els topònims amb forma catalana establerta usen aquesta forma. Els noms inventats sense significat es transcriuen de manera determinista.
 
-Per als noms inventats, la transcripció conserva l'ordre de fonemes i aplica aquestes decisions: /p b t d k g m n r l f v s z h/ conserven una lletra catalana directa; /ʃ/ s'escriu `x` davant d'una vocal i `ix` al final de mot després d'una vocal; les vocals /a e i o u/ es mantenen. Amb aquesta regla, els dos noms inventats del catàleg queden fixats com `Palguraix` i `Karxumab`.
+Per als noms inventats, la transcripció conserva l'ordre de fonemes i aplica aquestes decisions: /p b t d k g m n r l f v s z h/ conserven una lletra catalana directa; /ʃ/ s'escriu `x` davant d'una vocal i `ix` al final de mot després d'una vocal; les vocals /a e i o u/ es mantenen. Amb aquesta regla, els dos noms inventats del catàleg queden fixats com `Palguraix` i `Karxumav`.
 
-Els topònims d'aquest catàleg queden fixats com `Lagaix`, `Accad`, `Èridu`, `Uruk`, `Nínive` i `Babilònia`. Aquesta decisió de presentació no participa en la semàntica.
+Els topònims d'aquest catàleg queden fixats com `Lagaix`, `Accad`, `Èridu`, `Uruk`, `Nínive`, `Susa` i `Babilònia`. Aquesta decisió de presentació no participa en la semàntica.
 
 ## Mandonguilles
 
@@ -43,11 +43,11 @@ Els topònims d'aquest catàleg queden fixats com `Lagaix`, `Accad`, `Èridu`, `
 | 5 | Èridu |
 | 6 | pasta de dents |
 | 7 | tres parts de cinc |
-| 8 | Karxumab |
-| 9 | tigre |
+| 8 | Karxumav |
+| 9 | lleopard |
 | 10 | estany |
 | 11 | boira |
-| 12 | encens |
+| 12 | olíban |
 | 13 | fus |
 | 14 | costella |
 | 15 | garrofa |
@@ -65,17 +65,17 @@ Els topònims d'aquest catàleg queden fixats com `Lagaix`, `Accad`, `Èridu`, `
 | 27 | figa |
 | 28 | Nínive |
 | 29 | granota |
-| 30 | quitrà |
-| 31 | espelma |
+| 30 | pega |
+| 31 | llàntia |
 | 32 | la porta tancada |
 | 33 | sèsam |
 | 34 | clatell |
 | 35 | plata |
-| 36 | lliri |
+| 36 | Susa |
 | 37 | tempesta |
 | 38 | ase |
 | 39 | farina |
-| 40 | penediment |
+| 40 | recança |
 | 41 | Babilònia |
 | 42 | llengua |
 | 43 | lli |
