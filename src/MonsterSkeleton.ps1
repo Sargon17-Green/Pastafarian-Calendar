@@ -4,6 +4,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Discovery01.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch01.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery02.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Patch02.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -35,8 +36,15 @@ function New-BaseMonsterContext {
         patch01InvocationCount = 0
         legacyActionDayTag = $null
         legacyTargetDayTag = $null
-        discovery02Status = 'NOT_RUN'
+        discovery02Status = 'HISTORICAL_SCAR_PRESENT'
         discovery02InvocationCount = 0
+        patch02ActionDayTag = $null
+        patch02TargetDayTag = $null
+        patch02ActionApplied = $false
+        patch02TargetApplied = $false
+        patch02FoundationGuardSeen = $false
+        patch02Status = 'NOT_RUN'
+        patch02InvocationCount = 0
     }
 }
 
@@ -69,9 +77,7 @@ function New-BaseDispatcher {
     [CmdletBinding()]
     param()
 
-    return [pscustomobject]@{
-        handlers = @{}
-    }
+    return [pscustomobject]@{ handlers = @{} }
 }
 
 function Register-BaseHandler {
@@ -187,7 +193,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 4.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 5.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -198,21 +204,21 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'DISCOVERY02'
+    $ctx.phase = 'PATCH02'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY02' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH02' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
-        return Invoke-Discovery02LegacyDayTagAdapter -Context $withPatch01
+        return Invoke-Patch02DayTagAdapter -Context $withPatch01
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.discovery02.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.patch02.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'DISCOVERY02_COMPLETE'
+    $result.status = 'PATCH02_COMPLETE'
     return $result
 }

@@ -1,42 +1,46 @@
-# Arkitektura hanggang Stage 4
+# Arkitektura hanggang Stage 5
 
-Ang Stage 1 ay neutral na shell. Ang Stage 2 ay nagdagdag ng unang historical defect. Ang Stage 3 ay nagdagdag ng unang correction layer. Ang Stage 4 ay nagdaragdag ng ikalawang defect habang pinananatiling GREEN ang Patch 01.
+Ang Stage 1 ay neutral na shell. Stage 2 at 4 ay historical discoveries. Stage 3 at 5 ay hiwalay na patch layers na hindi binubura ang raw scars.
 
-## Mga hangganan
+## Mga file boundary
 
-`oracle/NormativeScroll.ps1` ang test-only reference at hindi maaaring tawagin ng production path.
+`oracle/NormativeScroll.ps1` ay test-only reference.
 
-`src/Discovery01.ps1` ang historical legacy remainder.
+`src/Discovery01.ps1` ay raw legacy remainder.
 
-`src/Patch01.ps1` ang save correction layer.
+`src/Patch01.ps1` ay save patch.
 
-`src/Discovery02.ps1` ang historical legacy day-tag implementation.
+`src/Discovery02.ps1` ay raw legacy day tag.
 
-`src/MonsterSkeleton.ps1` ang dispatcher host at kasalukuyang production route.
+`src/Patch02.ps1` ay `dayTagWithFoundationScar`, ang pisikal na Foundation guard, at Patch 02 adapter.
 
-## Stage 4 route
+`src/MonsterSkeleton.ps1` ang production dispatcher host.
+
+## Stage 5 route
 
 ```text
 Invoke-CalendarDateSpaghetti
--> PATCH01 adapter
--> DISCOVERY02 adapter
--> oldDayTag(calculationDay)
--> oldDayTag(targetDay)
+-> Invoke-Patch01SaveAdapter
+-> Invoke-Patch02DayTagAdapter
+-> dayTagWithFoundationScar(action)
+-> oldDayTag(action)
+-> dayTagWithFoundationScar(target)
+-> oldDayTag(target)
 ```
 
-Ang `oldDayTag` ay eksaktong `2 * abs(day - FOUNDATION)` at sadyang walang Patch 02 correction.
+## Raw at patched state
 
-## State ownership
-
-Ang Patch 01 state at Discovery 02 state ay parehong nakaimbak sa sariling invocation context. Ang Discovery 02 transaction ay nagdadagdag ng:
+Ang Patch 02 adapter ay nagko-commit ng parehong raw at patched values:
 
 - `legacyActionDayTag`
 - `legacyTargetDayTag`
+- `patch02ActionDayTag`
+- `patch02TargetDayTag`
 
-nang hindi binabago ang committed Patch 01 fields.
+Ang `patch02FoundationGuardSeen` ay observability ng historical guard at hindi normative input.
 
-## Expected-red contract
+## GREEN contract
 
-Dapat manatiling GREEN ang Patch 01 regression habang ang bagong day-tag regression ay eksaktong may tatlong divergence: Foundation, Foundation+1, at Foundation+2.
+Ang patched action at target day tags ay dapat tumugma sa normative `day_count` para sa mga araw bago, sa, at pagkatapos ng Foundation. Ang direct `oldDayTag` ay dapat manatiling mali sa historical surface.
 
-Walang `dayTagWithFoundationScar` sa Stage 4.
+Walang `oldDistance` sa Stage 5.
