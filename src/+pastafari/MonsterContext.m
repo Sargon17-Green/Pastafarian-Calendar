@@ -51,6 +51,11 @@ classdef MonsterContext < handle
         legacyFixedBowlFinalBowls
         bowlsCandidate
         currentBowlOrder
+        preInPlaceBowlsCandidate
+        legacyInPlaceFirstRoundBowls
+        firstRoundStirCandidate
+        legacyInPlaceFinalBowls
+        stirBowlsCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -104,6 +109,11 @@ classdef MonsterContext < handle
             obj.legacyFixedBowlFinalBowls = [];
             obj.bowlsCandidate = [];
             obj.currentBowlOrder = [];
+            obj.preInPlaceBowlsCandidate = [];
+            obj.legacyInPlaceFirstRoundBowls = [];
+            obj.firstRoundStirCandidate = [];
+            obj.legacyInPlaceFinalBowls = [];
+            obj.stirBowlsCandidate = [];
         end
     end
 end

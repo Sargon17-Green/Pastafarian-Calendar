@@ -298,3 +298,25 @@ Niezmieniony regression Stage 18 ma po tej zmianie przejść na GREEN. Test Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 20 — DISCOVERY 10: in-place bowl stir contamination
+
+Dodano dziesiąty historyczny defekt. Poprzedni PATCH 09 pozostaje osobną zieloną warstwą: pours nadal używają `bowlAlias[position]=order[position]`.
+
+Nowa `LegacyInPlaceBowlUpdateWrong` wykonuje jednak sześć aktualizacji bowl jednego round na jednym mutable logicznie `working`. Każda pozycja czyta `current`, `previous` i `next` z bieżącego `working`, oblicza nową wartość i natychmiast zapisuje ją z powrotem. Późniejsze positions mogą więc odczytać wynik zapisany wcześniej w tym samym round zamiast stanu wejściowego round.
+
+Mały dokładny witness używa bowls `11,13,17,19,23,29`, drop `1`, indeksu `4`, stones `2,3,5,7,11` oraz identity order. Simultaneous reference daje:
+
+`23205, 23443, 49647, 18871, 28375, 13610`.
+
+Historyczna ścieżka in-place daje:
+
+`23205, 2167757877, 18796698741299337031, 52134066600902479800271676581807921729, 49276137518158613509478075707571518903, 122328037836810514334452521434516846956`.
+
+Pierwsza pozycja pozostaje zgodna, ponieważ żaden wcześniejszy write jeszcze nie nastąpił; bowls 2–6 są już skażone.
+
+Aby nie psuć regresji PATCH 09, Discovery 10 jest nową downstream warstwą `BowlStirCompatibilityRoute`. Zielona ścieżka PATCH 09 jest nadal wykonywana i zachowywana osobno, a dopiero nowa warstwa publikuje zanieczyszczone bowls.
+
+W etapie 20 nie istnieją jeszcze `vaultOld`, osobny `pending` ani późny commit. Dopiero Stage 21 ma pozostawić legacy in-place fizycznie bez zmian, ale wykonać wszystkie reads z jednego `vaultOld`, wszystkie writes do `pending` i zatwierdzić wynik dopiero po sześciu pozycjach.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
