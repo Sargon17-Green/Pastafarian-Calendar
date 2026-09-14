@@ -8,11 +8,11 @@ A szemantikai sorrendet kizárólag a `canonicalIndex` határozza meg. A magyar 
 
 ## Fordítási szabály
 
-A köznévi vagy egyértelmű jelentéssel rendelkező forrásneveket természetes magyar jelentésükre fordítottuk. A törtszerű teljes kifejezések egyetlen névként maradnak meg: például `négy kilenced` és `háromötöd`.
+A köznévi vagy egyértelmű jelentéssel rendelkező forrásneveket természetes magyar jelentésükre fordítottuk. A törtszerű teljes kifejezések egyetlen névként maradnak meg: például `kilencből négy rész` és `ötből három rész`.
 
 A hagyományosan magyar alakban használt történeti helynevek a megszokott magyar formát kapják, például `Akkád`, `Ninive` és `Babilon`. Az olyan helynevek, amelyeknél nincs szükség külön magyaros alakra, változatlan latin betűs névként szerepelnek, például `Eridu` és `Uruk`.
 
-A kitalált vagy önálló jelentés nélküli hangalakoknál determinisztikus magyar átírást használunk. A [ʃ] hangot `s`, a [s] hangot `sz`, a [k] hangot `k`, a [g] hangot `g`, a [r] hangot `r`, a magánhangzókat pedig a forrás kiejtéséhez legközelebbi egyszerű magyar betű jelöli. E szabály alapján a rögzített alakok között szerepel `Palguras` és `Karsumab`.
+A kitalált vagy önálló jelentés nélküli hangalakoknál determinisztikus magyar átírást használunk. A [ʃ] hangot `s`, a [s] hangot `sz`, a [k] hangot `k`, a [g] hangot `g`, a [r] hangot `r`, a [v] hangot `v`, a magánhangzókat pedig a forrás kiejtéséhez legközelebbi egyszerű magyar betű jelöli. E szabály alapján a rögzített alakok között szerepel `Palguras` és `Karsumav`.
 
 A katalógus szövege az 1. szakasz után specifikációmódosítás nélkül nem változtatható meg.
 
@@ -23,9 +23,9 @@ A katalógus szövege az 1. szakasz után specifikációmódosítás nélkül ne
 | 1 | bronz |
 | 2 | róka |
 | 3 | vese |
-| 4 | Lákis |
+| 4 | Lagash |
 | 5 | gondolat |
-| 6 | négy kilenced |
+| 6 | kilencből négy rész |
 | 7 | Palguras |
 | 8 | sás |
 | 9 | fürt |
@@ -48,8 +48,8 @@ A katalógus szövege az 1. szakasz után specifikációmódosítás nélkül ne
 | 4 | irigység |
 | 5 | Eridu |
 | 6 | fogkrém |
-| 7 | háromötöd |
-| 8 | Karsumab |
+| 7 | ötből három rész |
+| 8 | Karsumav |
 | 9 | leopárd |
 | 10 | ón |
 | 11 | köd |
@@ -71,13 +71,13 @@ A katalógus szövege az 1. szakasz után specifikációmódosítás nélkül ne
 | 27 | füge |
 | 28 | Ninive |
 | 29 | béka |
-| 30 | kátrány |
-| 31 | gyertya |
+| 30 | szurok |
+| 31 | lámpa |
 | 32 | a zárt ajtó |
 | 33 | szezám |
 | 34 | tarkó |
 | 35 | ezüst |
-| 36 | liliom |
+| 36 | Szúza |
 | 37 | vihar |
 | 38 | szamár |
 | 39 | liszt |
