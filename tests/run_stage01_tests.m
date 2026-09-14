@@ -21,6 +21,49 @@ assert((pastafari.BigInt('999999999999999999') * pastafari.BigInt('8888888888888
     pastafari.BigInt('888888888888888887111111111111111112'), ...
     'Mnożenie dowolnej precyzji jest niepoprawne.');
 
+% Regresje dokładnych wejść natywnych powyżej flintmax.
+uBeyond = bitshift(uint64(1), 53) + uint64(1);
+iBeyond = -int64(bitshift(uint64(1), 53)) - int64(1);
+uMax = intmax('uint64');
+iMin = intmin('int64');
+assert(strcmp(char(pastafari.BigInt(uBeyond)), '9007199254740993'), ...
+    'uint64(2^53+1) utracił dokładność podczas konwersji do BigInt.');
+assert(strcmp(char(pastafari.BigInt(iBeyond)), '-9007199254740993'), ...
+    'int64(-(2^53+1)) utracił dokładność podczas konwersji do BigInt.');
+assert(strcmp(char(pastafari.BigInt(uMax)), '18446744073709551615'), ...
+    'intmax(uint64) utracił dokładność podczas konwersji do BigInt.');
+assert(strcmp(char(pastafari.BigInt(iMin)), '-9223372036854775808'), ...
+    'intmin(int64) utracił dokładność podczas konwersji do BigInt.');
+pastafari.ValidationManager.requireExactIntegerInput(uBeyond);
+pastafari.ValidationManager.requireExactIntegerInput(iBeyond);
+pastafari.ValidationManager.requireExactIntegerInput(uMax);
+pastafari.ValidationManager.requireExactIntegerInput(iMin);
+
+unsafeFloat = flintmax + 2;
+caught = false;
+try
+    pastafari.BigInt(unsafeFloat);
+catch err
+    caught = strcmp(err.identifier, 'Pastafari:BigInt:UnsafeNumericInput');
+end
+assert(caught, 'BigInt zaakceptował zmiennoprzecinkowe wejście większe niż flintmax.');
+
+caught = false;
+try
+    pastafari.ValidationManager.requireExactIntegerInput(unsafeFloat);
+catch err
+    caught = strcmp(err.identifier, 'Pastafari:Validation:IntegerInput');
+end
+assert(caught, 'Walidator zaakceptował zmiennoprzecinkowe wejście większe niż flintmax.');
+
+caught = false;
+try
+    calendarDateSpaghetti(uBeyond, uBeyond);
+catch err
+    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
+end
+assert(caught, 'Pełna ścieżka wejścia odrzuciła dokładny uint64 powyżej flintmax.');
+
 assert(strcmp(char(normative_oracle('SAVE', 0)), f.saveZero), 'SAVE(0) jest niepoprawne.');
 assert(strcmp(char(normative_oracle('SAVE', M)), f.saveM), 'SAVE(M) jest niepoprawne.');
 assert(strcmp(char(normative_oracle('SAVE', M + 1)), f.saveMPlusOne), 'SAVE(M+1) jest niepoprawne.');
