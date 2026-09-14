@@ -1,5 +1,5 @@
 classdef MonsterContext < handle
-    % Neutralny kontekst jednego wywołania. Podczas rozruchu nie zawiera pól przyszłych łat.
+    % Kontekst jednego wywołania, rozbudowywany historycznie wraz z kolejnymi etapami.
     properties
         calculationDay
         targetDay
@@ -12,6 +12,9 @@ classdef MonsterContext < handle
         logs
         diagnostics
         lastError
+        legacyRemainderInput
+        legacyRemainderValue
+        saveCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -26,6 +29,9 @@ classdef MonsterContext < handle
             obj.logs = {};
             obj.diagnostics = {};
             obj.lastError = [];
+            obj.legacyRemainderInput = [];
+            obj.legacyRemainderValue = [];
+            obj.saveCandidate = [];
         end
     end
 end

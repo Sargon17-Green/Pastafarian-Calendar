@@ -28,3 +28,19 @@ Pełną weryfikację uruchomiono w rzeczywistym MATLAB-ie `26.1.0.3346908 (R2026
 Ciężkie testowe źródło odniesienia wykonało pełne `calendar` dla Dnia Założenia i zakończyło się znacznikiem `STAGE_01_HEAVY_ORACLE_TEST_PASS`. Dokładne zliczenie rodziny splotów dla 45 miesięcy zwróciło liczbę o 6765 cyfrach, a rozwijanie rangi zakończyło wszystkie 4244 pozycje. Pełne wywołanie kalendarza źródła odniesienia trwało 664.715 s.
 
 Końcowe znaczniki `WYNIK_1=PASS`, `WYNIK_2=PASS`, `STAGE_01_COMPLETE_CANDIDATE=YES` i `STAGE_01_VERIFICATION_PASS` potwierdzają zakończenie rozruchu. `LAST_COMPLETED_STAGE` ustawiono na `1`. Żadna wada historyczna ani łata przyszłego etapu nie została dodana; następnym dozwolonym etapem jest etap 2, `DISCOVERY 01`.
+
+## Korekta stanu wejściowego przed etapem 2
+
+Po zamknięciu etapu 1 ponownie przejrzano bieżący kod. Obsługę natywnych `int64` i `uint64` poprawiono tak, aby nie przechodziła przez `double`, a regresje wartości poza `flintmax` znajdują się obecnie w szybkim zestawie testowym.
+
+Jednocześnie bieżący kod `BigInt` używa dokładnego mnożenia szkolnego oraz dokładnego dzielenia długiego z wyszukiwaniem cyfry ilorazu. Wcześniejsze etykiety dokumentacyjne „Karatsuba” i „Knuth D” nie opisują obecnego kodu i wymagają końcowego ponownego audytu dokumentacji. Ponowne uruchomienie natywnego MATLAB-a po tej korekcie zostało odłożone do zbiorczego cyklu weryfikacji.
+
+## Etap 2 — DISCOVERY 01: SAVE nad zwykłym modulo
+
+Po raz pierwszy dodano rzeczywistą historyczną wadę produkcyjną. `oldRemainder(x)` wykonuje dokładnie `regularMod(x, M)` i pozostaje celowo błędny dla dodatnich wielokrotności `M`.
+
+Nowa trasa `SaveCompatibilityRoute` deleguje w tym etapie bezpośrednio do `oldRemainder`, zapisuje wejście i wynik w kontekście wywołania oraz rejestruje ślad i metrykę. Publiczny szkielet produkcyjny przechodzi już przez tę warstwę, lecz nadal zatrzymuje się na kontrolowanej granicy niezaimplementowanego pełnego kalendarza.
+
+Regresja Discovery 01 sprawdza przypadki `M`, `2M`, `3M` i `M+1`. Dla pierwszych trzech przypadków legacy zwraca `0`, podczas gdy normatywne `SAVE` zwraca `M`; dla `M+1` oba zwracają `1`. Stan etapu jest zatem celowo `EXPECTED_RED`.
+
+W etapie 2 nie dodano jeszcze `savePatch`. Błędny `oldRemainder` musi pozostać niezmieniony jako historyczna blizna; dopiero etap 3 ma dodać łatę nad nim.
