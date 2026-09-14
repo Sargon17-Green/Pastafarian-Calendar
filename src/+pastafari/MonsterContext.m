@@ -84,6 +84,10 @@ classdef MonsterContext < handle
         legacyPositiveOnlyGateGap
         gateQuestionDayCandidate
         gateGapCandidate
+        legacyYearMaxDays
+        legacyYearCandidateLengths
+        legacyYearCandidatesAccepted
+        yearCandidatesCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -170,6 +174,10 @@ classdef MonsterContext < handle
             obj.legacyPositiveOnlyGateGap = [];
             obj.gateQuestionDayCandidate = [];
             obj.gateGapCandidate = [];
+            obj.legacyYearMaxDays = [];
+            obj.legacyYearCandidateLengths = [];
+            obj.legacyYearCandidatesAccepted = {};
+            obj.yearCandidatesCandidate = {};
         end
     end
 end

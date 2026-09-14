@@ -522,3 +522,29 @@ Niezmieniony regression Stage 30 ma po tej zmianie przejść na GREEN. Test Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 32 — DISCOVERY 16: legacy year max 5781
+
+Dodano szesnasty historyczny defekt w warstwie kandydatów roku.
+
+Normatywne `validYearPair` wymaga co najmniej sześciu odstępów bram oraz długości roku od `252` do `5778` dni. Historyczny generator zachowuje poprawne minimum i minimalny gate span, lecz używa błędnego maksimum `5781`.
+
+Dodano `LegacyYearMax5781Filter`. Kandydat jest mierzony przez:
+
+`gateSpan = closeGateIndex - openGateIndex`
+
+oraz
+
+`lengthDays = closeGateDay - openGateDay`.
+
+Legacy przyjmuje kandydata, gdy `gateSpan>=6`, `lengthDays>=252` i `lengthDays<=5781`.
+
+`YearCandidateCompatibilityRoute` w Stage 32 publikuje jeszcze dokładnie tę surową listę. Nie istnieje jeszcze żaden late max-5778 filter.
+
+Regresja używa kandydatów o długościach `251,252,5778,5779,5780,5781,5782` oraz osobnego kandydata o poprawnej długości, lecz z gate span `5`. Historyczna lista zawiera `252,5778,5779,5780,5781`; normatywna lista zawiera wyłącznie `252,5778`. Historyczna blizna składa się więc dokładnie z `5779,5780,5781`.
+
+Stage 32 celowo nie implementuje jeszcze Year 5000 ani jego tie-breaking. Ta warstwa jedynie ustanawia listę kandydatów, na której będą pracować kolejne etapy.
+
+Dopiero Stage 33 ma pozostawić `LegacyYearMax5781Filter` fizycznie bez zmian i zachować jego pełną raw listę, a następnie zastosować osobny late filter `lengthDays<=5778` przed publikacją kandydatów.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
