@@ -394,3 +394,17 @@ W etapie 24 nie istnieje jeszcze latched successor patch. Dopiero Stage 25 ma po
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 25 — PATCH 12: latched successor
+
+Historyczny `LegacyFixedNameSuccessor` pozostaje fizycznie bez zmian. Nadal wyznacza successor według stałego pierścienia nazw `1->2->3->4->5->6->1` i nadal jest wykonywany jako obserwowalna blizna Discovery 12.
+
+Dodano osobny `LatchedSuccessorPatch`. Patch nie modyfikuje order ani nazw bowl. Otrzymuje poprawny `orderAt46Latch` oraz `queriedBowlId`, znajduje dokładną pozycję queried ID w latchu, a następnie zwraca element z następnej pozycji. Pozycja szósta zawija się do pierwszej.
+
+`NextBowlCompatibilityRoute` najpierw wykonuje surowy `LegacyFixedNameSuccessor.next(id)` i zachowuje wynik w kontekście. Następnie publikowany successor jest obliczany przez `LatchedSuccessorPatch`.
+
+Dla Foundation latch `4,5,2,3,6,1` daje mapę successor `1->4`, `2->3`, `3->6`, `4->5`, `5->2`, `6->1`. Historyczna fixed-name mapa `1->2`, `2->3`, `3->4`, `4->5`, `5->6`, `6->1` pozostaje zachowana i nadal rozchodzi się dla IDs `1,3,5`.
+
+Niezmieniony regression Stage 24 ma po tej zmianie przejść na GREEN. Test Stage 25 sprawdza wszystkie sześć IDs kontrolowanego Foundation latch, jawne zawinięcie ostatniej pozycji oraz wszystkie 720 możliwych permutacji order dla wszystkich sześciu queried IDs.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
