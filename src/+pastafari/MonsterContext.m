@@ -39,6 +39,10 @@ classdef MonsterContext < handle
         legacyGrindResolvedIndices
         legacyGrindVisibleDrops
         grindVisibleCandidate
+        permutationInput
+        legacyPermutationRank0
+        legacyPermutationOrder
+        permutationOrderCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -80,6 +84,10 @@ classdef MonsterContext < handle
             obj.legacyGrindResolvedIndices = [];
             obj.legacyGrindVisibleDrops = [];
             obj.grindVisibleCandidate = [];
+            obj.permutationInput = [];
+            obj.legacyPermutationRank0 = [];
+            obj.legacyPermutationOrder = [];
+            obj.permutationOrderCandidate = [];
         end
     end
 end

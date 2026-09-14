@@ -223,3 +223,17 @@ Test Stage 15 sprawdza wszystkie 11 mapowań tabeli, zachowanie surowej blizny o
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 16 — DISCOVERY 08: oldPermutationUnrank0
+
+Dodano ósmy historyczny defekt. Nowy `LegacyPermutationUnrank0` jest historycznym rozwijaniem rangi zero-based i przyjmuje zakres `0..719` dla sześciu mis.
+
+Defekt nie polega na samym algorytmie zero-based. Produkcyjna trasa błędnie traktuje `regularMod(v,720)` jako końcową rangę zero-based zamiast najpierw utworzyć kanoniczną rangę 1-based.
+
+Dlatego dla wejścia `1` legacy używa `rank0=1` i zwraca drugą permutację leksykograficzną `[1,2,3,4,6,5]` zamiast pierwszej `[1,2,3,4,5,6]`. Dla wejścia `720` legacy używa `rank0=0` i wraca do pierwszej permutacji zamiast ostatniej `[6,5,4,3,2,1]`.
+
+`PermutationCompatibilityRoute` zapisuje wejście, surową rangę zero-based i surową historyczną permutację w kontekście. Publiczny szkielet przechodzi przez nową warstwę po poprawionych visible drops.
+
+W etapie 16 nie ma jeszcze detour rankingu 1-based. Dopiero Stage 17 ma obliczyć `regularMod(v-1,720)+1`, odjąć `1` i dopiero wtedy wywołać niezmieniony legacy unrank0.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
