@@ -88,7 +88,7 @@ $ctx1.semanticPending['x'] = [System.Numerics.BigInteger]9
 Complete-BaseSemanticTransaction $ctx1 { param($pending) return ($pending['x'] -eq 9) }
 Assert-StageEqual ([System.Numerics.BigInteger]9) $ctx1.semanticCommitted['x'] 'Validated commit sa neutral transaction shell'
 
-$monsterText = Get-Content -Raw (Join-Path $root 'src/MonsterSkeleton.ps1')
+$monsterText = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
 Assert-StageTrue -Condition ($monsterText -notmatch 'Invoke-NormSauce|Get-NormCalendarDate') -Name 'Hindi tumatawag sa oracle ang production skeleton'
 $futureNames = @('oldRemainder','oldDayTag','oldDistance','mutateStonesWrong','orderAt46Latch','biasedLegacyPick','LEGACY_YEAR_MAX','VirtualLegacyList','oldContiguousMonthDayGuess')
 foreach ($name in $futureNames) {
@@ -98,7 +98,7 @@ foreach ($name in $futureNames) {
 $projectTextFiles = Get-ChildItem -Path $root -Recurse -File | Where-Object { $_.Extension -in @('.ps1','.psd1','.md') }
 $hasHebrew = $false
 foreach ($file in $projectTextFiles) {
-    $textForLanguageAudit = Get-Content -Raw $file.FullName
+    $textForLanguageAudit = Get-Content -Raw -Encoding UTF8 $file.FullName
     if ($file.Name -eq 'DEVELOPMENT_STAGE.md') { $textForLanguageAudit = $textForLanguageAudit -replace '(?m)^NATURAL_LANGUAGE=.*$', 'NATURAL_LANGUAGE=MACHINE_METADATA' }
     if ($textForLanguageAudit -match '[\u0590-\u05FF]') { $hasHebrew = $true; break }
 }
