@@ -1,8 +1,9 @@
 classdef GateGapCompatibilityRoute
-    % Produkcyjna trasa Discovery 15.
+    % Produkcyjna trasa odstępu bramy po PATCH 15.
     %
-    % Publikuje jeszcze historyczne pytanie positive-only:
-    % signedStep=-n jest mapowany na Foundation+n zamiast Foundation-n.
+    % Najpierw wykonuje historyczne positive-only question i zachowuje
+    % jego mirrored day/gap jako bliznę. Publikowana ścieżka pyta dokładnie
+    % Foundation+signedStep.
     methods (Static)
         function [ctx, gap] = call(ctx, signedStep)
             pastafari.ValidationManager.requireContext(ctx);
@@ -14,10 +15,7 @@ classdef GateGapCompatibilityRoute
                     'Pytanie o odstęp bramy wymaga kroku różnego od zera.');
             end
 
-            ctx.phase = 'DISCOVERY_15';
-            ctx.subPhase = 15;
-            ctx.mode = 'POSITIVE_ONLY_GATE_QUESTION';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
+            % Surowa historyczna blizna Discovery 15.
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_15_POSITIVE_ONLY_GATE_QUESTION';
             ctx.metrics = pastafari.MetricsShell.bump( ...
@@ -26,16 +24,27 @@ classdef GateGapCompatibilityRoute
             [rawGap, rawQuestionDay] = ...
                 pastafari.LegacyPositiveOnlyGateQuestion.ask(step);
 
+            % PATCH 15: znak signedStep jest częścią pytania semantycznego.
+            ctx.phase = 'PATCH_15';
+            ctx.subPhase = 15;
+            ctx.mode = 'SIGNED_GATE_QUESTION_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = ...
+                'PATCH_15_SIGNED_GATE_QUESTION';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch15.signedGateQuestion.calls');
+
+            [gap, signedQuestionDay] = ...
+                pastafari.SignedGateQuestionPatch.ask(step);
+
             ctx.gateSignedStep = step;
             ctx.legacyPositiveOnlyGateQuestionDay = rawQuestionDay;
             ctx.legacyPositiveOnlyGateGap = rawGap;
-            ctx.gateQuestionDayCandidate = rawQuestionDay;
-            ctx.gateGapCandidate = rawGap;
+            ctx.gateQuestionDayCandidate = signedQuestionDay;
+            ctx.gateGapCandidate = gap;
             ctx.diagnostics{end + 1} = ...
-                ['Discovery 15 ignoruje znak signedStep i dla bramy ujemnej ', ...
-                 'zadaje lustrzane pytanie Foundation+abs(step).'];
-
-            gap = rawGap;
+                ['PATCH 15 zachowuje mirrored positive-only scar, ', ...
+                 'ale publikuje pytanie Foundation+signedStep.'];
         end
     end
 end

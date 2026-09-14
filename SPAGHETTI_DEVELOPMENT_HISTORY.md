@@ -504,3 +504,21 @@ Dopiero Stage 31 ma pozostawić `LegacyPositiveOnlyGateQuestion` fizycznie bez z
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 31 — PATCH 15: signed gate question
+
+Historyczny `LegacyPositiveOnlyGateQuestion` pozostaje fizycznie bez zmian. Nadal ignoruje znak kroku i dla `signedStep=-n` pyta `Foundation+n`, zachowując mirrored positive day i positive gap jako obserwowalną bliznę Discovery 15.
+
+Dodano osobny `SignedGateQuestionPatch`. Semantic question day jest budowany dokładnie jako:
+
+`questionDay = Foundation + signedStep`.
+
+Dla `+n` zachowanie pozostaje identyczne z dotychczasową poprawną ścieżką dodatnią. Dla `-n` pytanie trafia do `Foundation-n`, bez użycia `abs` i bez lustrzanego przejścia na stronę dodatnią.
+
+Sam `GateQuestionEngine` pozostaje bez zmian. Otrzymuje konkretny signed target day i wykonuje ten sam sauce/answer-ring/general-selection pipeline co wcześniej.
+
+`GateGapCompatibilityRoute` najpierw wykonuje surowe positive-only pytanie i zachowuje jego question day oraz gap w polach legacy. Następnie osobno wykonuje `SignedGateQuestionPatch` i publikuje signed question day oraz signed gap.
+
+Niezmieniony regression Stage 30 ma po tej zmianie przejść na GREEN. Test Stage 31 sprawdza `±1`, `±2`, `±3`, zachowanie dokładnych fixture gaps, obecność obu trace/metrics, odrzucenie kroku zero oraz fizyczne zachowanie historycznego mirrored wyniku dla `-1`.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
