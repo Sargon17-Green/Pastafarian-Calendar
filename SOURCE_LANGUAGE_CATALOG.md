@@ -18,7 +18,7 @@ Kiekvienas vardas turi nekintamą `canonicalIndex`. Normatyvinė tvarka visada n
 
 Išgalvoti arba reikšmės neturintys garsiniai vardai neverčiami semantiškai. Jų skiemenų seka išlaikoma, šnypščiamasis garsas žymimas `š`, kiti priebalsiai ir balsiai perteikiami artimiausiomis lietuviškomis lotyniško rašto raidėmis. Pradinė raidė rašoma didžioji, jei vardas naudojamas kaip tikrinis vardas. Vienam kanoniniam indeksui pasirinkta forma vėliau nebekeičiama be specifikacijos pakeitimo.
 
-Šio katalogo išgalvotoms formoms pritaikytos užšaldytos formos yra `Palguraš` ir `Karšumab`.
+Šio katalogo išgalvotoms formoms pritaikytos užšaldytos formos yra `Palguraš` ir `Karšumav`.
 
 ## Semantikos atskyrimas
 
