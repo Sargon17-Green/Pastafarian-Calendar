@@ -87,9 +87,12 @@ function Get-Discovery05HiddenValue {
     param(
         [Parameter(Mandatory)][int]$K,
         [Parameter(Mandatory)]$Counts,
-        [Parameter(Mandatory)][System.Array]$Stones
+        [Parameter(Mandatory)][AllowNull()][System.Array]$Stones
     )
 
+    if ($null -eq $Stones) {
+        throw 'Hindi maaaring null ang patched stone table.'
+    }
     if ($null -eq $Stones[$K]) {
         throw "Walang patched stone row para sa hidden drop k=$K."
     }
@@ -130,8 +133,12 @@ function Get-Discovery05BackwardHiddenStorage {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]$Counts,
-        [Parameter(Mandatory)][System.Array]$Stones
+        [Parameter(Mandatory)][AllowNull()][System.Array]$Stones
     )
+
+    if ($null -eq $Stones) {
+        throw 'Hindi maaaring null ang patched stone table.'
+    }
 
     $legacyHidden = [object[]]::new(8)
 
@@ -147,10 +154,13 @@ function Get-Discovery05BackwardHiddenStorage {
 function legacyHiddenDirectByAssumedNearness {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory)][System.Array]$LegacyHidden,
+        [Parameter(Mandatory)][AllowNull()][System.Array]$LegacyHidden,
         [Parameter(Mandatory)][int]$K
     )
 
+    if ($null -eq $LegacyHidden) {
+        throw 'Hindi maaaring null ang legacy hidden storage.'
+    }
     if ($K -lt 1 -or $K -gt 7) {
         throw 'Ang hidden-drop near-ness index ay dapat nasa 1..7.'
     }
