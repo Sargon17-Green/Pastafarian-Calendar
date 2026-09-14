@@ -408,3 +408,23 @@ Niezmieniony regression Stage 24 ma po tej zmianie przejść na GREEN. Test Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 26 — DISCOVERY 13: biased legacy pick modulo
+
+Dodano trzynasty historyczny defekt. Po utworzeniu normatywnego answer ring historyczny selector natychmiast przekazuje pierwszą odpowiedź `x` do:
+
+`biasedLegacyPick(x,N) = regularMod(x-1,N)+1`.
+
+Nie istnieje jeszcze rejection.
+
+To mapowanie jest obciążone, gdy rozmiar answer ring `M` nie jest wielokrotnością `N`. Dla kontrolowanego `N=922` zachodzi `M mod 922 = 221`, więc bez rejection rangi 1..221 otrzymują o jeden punkt pierścienia więcej niż pozostałe rangi.
+
+Dodano `AnswerRingStreamFactory`, który buduje `first` i `directionStep` zgodnie z normatywną formułą pytanej misy, oraz udostępnia `answerAt(offset)` jako ruch po jednym i tym samym pierścieniu rozmiaru M. Ta warstwa nie dokonuje wyboru ani rejection.
+
+Regresja Discovery 13 używa celowego witnessa syntetycznego: `first = limit+1`, `directionStep=-1`, `N=922`, gdzie `limit=floor(M/N)*N`. Legacy natychmiast mapuje `limit+1` na rank `1`. Normatywna ścieżka odrzuca tę odpowiedź, wykonuje dokładnie jeden krok na tym samym answer ring do `x=limit`, a dopiero wtedy mapuje wynik na rank `922`.
+
+`SmallPickCompatibilityRoute` zapisuje surowe `x`, `N` i legacy rank w kontekście i w Stage 26 publikuje jeszcze bezpośrednio surowy biased rank. Stan jest więc celowo `EXPECTED_RED`.
+
+W etapie 26 nie istnieje jeszcze rejection patch. Dopiero Stage 27 ma zachować `LegacyBiasedPick` fizycznie bez zmian, obliczyć `limit=floor(M/N)*N`, przesuwać offset na tym samym answer ring aż `x<=limit`, i dopiero wtedy wywołać `biasedLegacyPick(x,N)`.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

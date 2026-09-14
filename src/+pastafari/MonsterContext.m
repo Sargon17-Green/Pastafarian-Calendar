@@ -67,6 +67,12 @@ classdef MonsterContext < handle
         successorQueriedBowlId
         legacyFixedNameSuccessor
         nextBowlCandidate
+        answerRingFirst
+        answerRingDirectionStep
+        legacyBiasedPickInput
+        legacyBiasedPickSize
+        legacyBiasedPickRank
+        smallPickCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -136,6 +142,12 @@ classdef MonsterContext < handle
             obj.successorQueriedBowlId = [];
             obj.legacyFixedNameSuccessor = [];
             obj.nextBowlCandidate = [];
+            obj.answerRingFirst = [];
+            obj.answerRingDirectionStep = [];
+            obj.legacyBiasedPickInput = [];
+            obj.legacyBiasedPickSize = [];
+            obj.legacyBiasedPickRank = [];
+            obj.smallPickCandidate = [];
         end
     end
 end

@@ -1,6 +1,6 @@
 function result = calendarDateSpaghetti(calculationDay, targetDay)
-% Szkielet produkcyjny rozbudowany do etapu 24; aktywne są PATCH 01-11
-% oraz Discovery 12.
+% Szkielet produkcyjny rozbudowany do etapu 26; aktywne są PATCH 01-12
+% oraz Discovery 13.
 
 pastafari.ValidationManager.requireExactIntegerInput(calculationDay);
 pastafari.ValidationManager.requireExactIntegerInput(targetDay);
@@ -28,16 +28,26 @@ ctx = pastafari.MonsterDispatcher.dispatch(ctx, @bootstrapHandler);
 [ctx, bowlsAfterDrop46] = pastafari.BowlStirCompatibilityRoute.call( ...
     ctx, counts, stones, visible, preInPlaceBowls);
 
-[ctx, ~, orderAt46] = pastafari.OrderAt46CompatibilityRoute.call( ...
-    ctx, visible, bowlsAfterDrop46);
+[ctx, finalBowls, orderAt46] = ...
+    pastafari.OrderAt46CompatibilityRoute.call( ...
+        ctx, visible, bowlsAfterDrop46);
 
-% Historyczny downstream consumer pyta o bowl z pozycji 4 latcha.
+% Zachowany consumer Discovery 12 / PATCH 12.
 queriedBowlId = orderAt46(4);
 [ctx, ~] = pastafari.NextBowlCompatibilityRoute.call( ...
     ctx, orderAt46, queriedBowlId); %#ok<ASGLU>
 
+% Pierwszy realny short-selection consumer używa bowl 1 i seal 1.
+selectionBowlId = 1;
+selectionNextId = ...
+    pastafari.LatchedSuccessorPatch.apply(orderAt46, selectionBowlId);
+stream = pastafari.AnswerRingStreamFactory.fromSauce( ...
+    finalBowls, selectionBowlId, selectionNextId, 1);
+[ctx, ~] = pastafari.SmallPickCompatibilityRoute.call( ...
+    ctx, stream, pastafari.BigInt(922)); %#ok<ASGLU>
+
 error('Pastafari:Bootstrap:NotImplementedYet', ...
-    ['Etap 24 aktywuje historyczną ścieżkę Discovery 12; ', ...
+    ['Etap 26 aktywuje historyczną ścieżkę Discovery 13; ', ...
      'pełna semantyka kalendarza nie jest jeszcze zaimplementowana.']);
 
     function inner = bootstrapHandler(inner)
