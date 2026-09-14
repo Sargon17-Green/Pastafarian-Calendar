@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=7
-CURRENT_KIND=PATCH
-CURRENT_PATCH=03
+CURRENT_STAGE=8
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=04
 LAST_COMPLETED_STAGE=7
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 03 distance wrapper na nagpapanatili sa raw oldDistance scar, pumapalit lamang kapag iba ito sa chronological distance, at laging nagdaragdag ng final inclusive +1.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 04 legacy stone builder na sunod-sunod na nagbabago sa parehong limang-bato state; ikinabit ito sa production route pagkatapos ng Patch 03 at ang maling table ay nananatiling pag-aari ng bawat invocation.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -29,3 +29,7 @@ STAGE06_DISCOVERY=OLD_DISTANCE
 STAGE06_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
 STAGE07_PATCH=PATCHED_COUNTS
 STAGE07_RUNTIME_VERIFICATION=GREEN_CONFIRMED
+STAGE08_DISCOVERY=MUTATE_STONES_WRONG
+STAGE08_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `8` lamang matapos mapatunayan sa aktuwal na PowerShell runtime ang eksaktong Discovery 04 `EXPECTED_RED` surface sa stone rows 2, 3, at 46 habang nananatiling GREEN ang Patch 01, Patch 02, at Patch 03.

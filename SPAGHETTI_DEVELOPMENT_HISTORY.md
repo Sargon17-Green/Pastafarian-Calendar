@@ -24,44 +24,42 @@ Raw `oldDayTag` defect.
 
 Raw `oldDistance(c,t)=abs(dayTagWithFoundationScar(c)-dayTagWithFoundationScar(t))` defect.
 
-## Stage 7 — Patch 03: chronological inclusive distance
+## Stage 7 — Patch 03
 
-### Historical repair
+Tinatawag muna ang raw `oldDistance`, inihahambing sa chronological difference, pinapalitan lamang kapag magkaiba, at laging dinaragdagan ng final inclusive `+1`.
 
-Ang Patch 03 ay hindi nag-eedit sa `oldDistance`. Sa halip:
+## Stage 8 — Discovery 04: sunod-sunod na pagdumi ng stone state
+
+### Historical defect
+
+Ang limang stone value ay binago sa iisang mutable state object sa ganitong pagkakasunod:
 
 ```text
-raw = oldDistance(c,t)
-chronological = abs(t-c)
-if raw != chronological:
-    raw = chronological
-return raw + 1
+S.w = SAVE(S.w*S.w + 3*S.b + i)
+S.b = SAVE(S.b*S.b + 5*S.s + S.w)
+S.s = SAVE(S.s*S.s + 7*S.m + S.b)
+S.m = SAVE(S.m*S.m + 11*S.r + S.s)
+S.r = SAVE(S.r*S.r + 13*S.w + S.m)
 ```
 
-### Dalawang branch
+Ang unang formula lamang ang siguradong nakakakita sa buong lumang row. Ang mga susunod na formula ay nakakabasa ng mga bagong intermediate value na naisulat na sa parehong invocation.
 
-Kapag mali ang raw tag-difference distance, pinapalitan ito ng chronological difference bago idagdag ang inclusive `+1`.
+### Normative contrast
 
-Kapag pareho na ang raw at chronological difference, walang replacement, ngunit idinadagdag pa rin ang `+1`.
+Ang normative row ay kumukuha muna ng lumang row at kinakalkula nang hiwalay ang lahat ng limang bagong value mula sa snapshot na iyon.
 
-### Required edges
+Sa row 2, ang legacy `w` ay nagkataong kapareho ng normative `w`, ngunit ang legacy `b`, `s`, `m`, at `r` ay iba.
 
-Pitong probe ang kailangang maging GREEN:
+Ang pagkakaiba ay patuloy sa mga susunod na row.
 
-- `F -> F`
-- `F -> F+1`
-- `F -> F+3`
-- `F-1 -> F`
-- `F-3 -> F+3`
-- `F+9 -> F+2`
-- `F-9 -> F-2`
+### Discovery surface
 
-Sa mga ito, limang probe ang nangangailangan ng legacy replacement at dalawa ang hindi; lahat ay nagtatapos sa normative inclusive distance.
+Ang rows 2, 3, at 46 ng tunay na legacy builder ay inihahambing sa test-only normative stone table. Lahat ng tatlong probe ay inaasahang `EXPECTED_RED`.
 
 ### State ownership
 
-Ang raw legacy distance, chronological distance, final patched distance, replacement flag, at applied flag ay sariling state ng bawat invocation.
+Ang legacy stone table at `legacyStoneRowsBuilt=46` ay nakaimbak lamang sa invocation context na gumawa sa mga ito. Ang ibang invocation ay nananatiling malinis.
 
 ### Hindi pa kasama
 
-Walang `mutateStonesWrong` at walang Stage 8 Discovery 04 code.
+Wala pang `stonePatch`, walang preserved legacy clone, walang legacy-garbage capture, at walang snapshot-based overwrite ng limang field. Ang mga iyon ay para sa Patch 04 sa susunod na stage.

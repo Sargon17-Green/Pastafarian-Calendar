@@ -7,6 +7,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Patch02.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery03.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch03.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Discovery04.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -58,6 +59,10 @@ function New-BaseMonsterContext {
         patch03Applied = $false
         patch03Status = 'NOT_RUN'
         patch03InvocationCount = 0
+        legacyStoneTable = $null
+        legacyStoneRowsBuilt = 0
+        discovery04Status = 'HISTORICAL_SCAR_PRESENT'
+        discovery04InvocationCount = 0
     }
 }
 
@@ -193,7 +198,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 7.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 8.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -204,22 +209,23 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'PATCH03'
+    $ctx.phase = 'DISCOVERY04'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH03' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY04' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
-        return Invoke-Patch03DistanceAdapter -Context $withPatch02
+        $withPatch03 = Invoke-Patch03DistanceAdapter -Context $withPatch02
+        return Invoke-Discovery04LegacyStoneAdapter -Context $withPatch03
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.patch03.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.discovery04.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'PATCH03_COMPLETE'
+    $result.status = 'DISCOVERY04_COMPLETE'
     return $result
 }

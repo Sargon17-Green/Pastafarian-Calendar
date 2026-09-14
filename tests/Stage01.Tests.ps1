@@ -90,7 +90,7 @@ Assert-StageEqual ([System.Numerics.BigInteger]9) $ctx1.semanticCommitted['x'] '
 
 $monsterText = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
 Assert-StageTrue -Condition ($monsterText -notmatch 'Invoke-NormSauce|Get-NormCalendarDate') -Name 'Hindi tumatawag sa oracle ang production skeleton'
-$futureNames = @('oldRemainder','oldDayTag','oldDistance','mutateStonesWrong','orderAt46Latch','biasedLegacyPick','LEGACY_YEAR_MAX','VirtualLegacyList','oldContiguousMonthDayGuess')
+$futureNames = @('oldRemainder','oldDayTag','oldDistance','orderAt46Latch','biasedLegacyPick','LEGACY_YEAR_MAX','VirtualLegacyList','oldContiguousMonthDayGuess')
 foreach ($name in $futureNames) {
     Assert-StageTrue -Condition ($monsterText -notmatch [regex]::Escape($name)) -Name "Walang future patch code: $name"
 }
