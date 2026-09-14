@@ -2,67 +2,54 @@
 
 ## Stage 1 — Bootstrap
 
-### Ano ang itinayo
-
-Nilikha mula sa wala ang PowerShell project tree, ang malinis na normative oracle, ang test harness, ang frozen source-language catalog, at ang neutral na pundasyon ng magiging monster architecture.
-
-### Neutral na monster layer
-
-May base invocation context, dispatcher, validation manager, error wrapper, metrics shell, at deterministic log shell. Ang mga ito ay walang normative policy at hindi nagbabasa ng observability state para magpasya ng sagot.
-
-### Pagmamay-ari ng state
-
-Ang semantic state ay pag-aari ng isang invocation context lamang. Ang base shell ay walang mutable semantic global state. Ang metrics at logs ay observability lamang at hindi input sa oracle o sa production skeleton.
+Nilikha mula sa wala ang PowerShell project tree, malinis na normative oracle, frozen source-language catalog, test harness, at neutral na per-invocation monster shell.
 
 ## Stage 2 — Discovery 01: legacy remainder
 
-### Natuklasang sugat
-
-Idinagdag sa production path ang makasaysayang pag-uugaling:
+Ipinakilala at napatunayan ang:
 
 ```text
 oldRemainder(x) = regularMod(x, M)
 ```
 
-Kapag eksaktong multiple ng `M` ang input, ibinabalik nito ang `0`. Salungat ito sa normative `SAVE`, na nagmamapa sa naturang residue sa `M`.
-
-### Eksaktong regression surface
-
-Napatunayan sa aktuwal na Windows PowerShell 5.1 ang sumusunod:
-
-- `M`: legacy `0`, normative `M`, `EXPECTED_RED`.
-- `2M`: legacy `0`, normative `M`, `EXPECTED_RED`.
-- `3M`: legacy `0`, normative `M`, `EXPECTED_RED`.
-- `M+1`: legacy `1`, normative `1`, tugma.
-
-Ang stable discovery identifier ay `Pastafari:Discovery01:LegacyRemainderDivergence`.
-
-### Production route at ownership
-
-Ang Discovery 01 adapter ay nagtatala ng `legacyRemainderInput` at `legacyRemainderValue` sa sariling invocation context at dumadaan sa semantic transaction bago mag-commit.
+Ang mga multiple ng `M` ay nagbubunga ng `0` sa legacy path sa halip na normative `M`.
 
 ## Stage 3 — Patch 01: save correction
 
-### Correction
+Idinagdag ang `savePatch`, na tanging nagmamapa sa legacy zero residue tungo sa `M`. Hindi binura ang `oldRemainder`; nanatili itong physical historical scar.
 
-Idinagdag ang `savePatch`, na tumatanggap ng output ng `oldRemainder` at gumagawa lamang ng isang correction:
+## Stage 4 — Discovery 02: maling day tag
+
+### Natuklasang sugat
+
+Idinagdag ang eksaktong historical function:
 
 ```text
-0 -> M
+oldDayTag(day) = 2 * abs(day - FOUNDATION)
 ```
 
-Lahat ng nonzero legacy remainder ay ibinabalik nang walang pagbabago.
+kung saan:
 
-### Historical scar retention
+```text
+FOUNDATION = -15055671
+```
 
-Hindi binura, pinalitan, o itinago ang `oldRemainder`. Maaari pa ring tawagin nang direkta ang legacy function at mapatunayan ang Stage 2 defect. Ang Patch 01 ay isang hiwalay na layer sa ibabaw nito.
+### Eksaktong regression surface
 
-### Kasalukuyang production route
+Ang Discovery 02 verification ay nangangailangan ng:
 
-Ang `Invoke-CalendarDateSpaghetti` ay dumadaan sa `Invoke-Patch01SaveAdapter`. Kinukuha ng adapter ang legacy remainder, ina-apply ang `savePatch`, at nagko-commit ng parehong legacy at patched value sa sariling invocation context.
+- `FOUNDATION-2`: legacy `4`, normative `4`, tugma.
+- `FOUNDATION-1`: legacy `2`, normative `2`, tugma.
+- `FOUNDATION`: legacy `0`, normative `1`, `EXPECTED_RED`.
+- `FOUNDATION+1`: legacy `2`, normative `3`, `EXPECTED_RED`.
+- `FOUNDATION+2`: legacy `4`, normative `5`, `EXPECTED_RED`.
 
-### Inaasahang estado
+May eksaktong tatlong divergence sa limang pangunahing probe.
 
-Ang Stage 3 production result ay GREEN para sa dating divergent cases at para sa mga control case, habang nananatiling hiwalay at deterministic ang semantic state.
+### Production route at state
 
-Wala pang Stage 4 discovery behavior.
+Ang kasalukuyang route ay nagpapatakbo muna ng Patch 01 save adapter upang mapanatili ang naunang GREEN behavior. Pagkatapos, ang Discovery 02 legacy day-tag adapter ay kumukuwenta ng hiwalay na legacy action at target day tags at kino-commit ang mga ito sa sariling invocation context.
+
+### Sadyang hindi pa inaayos
+
+Walang `dayTagWithFoundationScar`, walang `+1` correction pagkatapos ng Foundation, at walang Stage 5/Patch 02 code sa Stage 4.
