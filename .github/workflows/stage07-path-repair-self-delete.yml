@@ -43,7 +43,27 @@ jobs:
           Set-StrictMode -Version Latest
           $ErrorActionPreference = 'Stop'
 
-          $expectedParent = '8fe50c968ed0b645e23a4bf10b7550f0c3b8611a'
+          function Get-NormalizedTextSha256 {
+              param([Parameter(Mandatory)][string]$Path)
+
+              $text = [System.IO.File]::ReadAllText(
+                  (Resolve-Path -LiteralPath $Path),
+                  [System.Text.Encoding]::UTF8
+              )
+              $normalized = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+              $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+              $bytes = $utf8NoBom.GetBytes($normalized)
+              $sha = [System.Security.Cryptography.SHA256]::Create()
+              try {
+                  $hash = $sha.ComputeHash($bytes)
+              }
+              finally {
+                  $sha.Dispose()
+              }
+              return (($hash | ForEach-Object { $_.ToString('X2') }) -join '')
+          }
+
+          $expectedParent = 'ce51360c6c1bf7a653f1db38a8b7664a81f4c018'
           $selfPath = '.github/workflows/stage07-path-repair-self-delete.yml'
 
           $actualBranch = git branch --show-current
@@ -61,7 +81,7 @@ jobs:
               Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
           )
           if ($triggerChanges.Count -ne 1 -or $triggerChanges[0] -ne $selfPath) {
-              throw "The workflow-upload commit must change only $selfPath. Found: $($triggerChanges -join ', ')"
+              throw "The workflow-update commit must change only $selfPath. Found: $($triggerChanges -join ', ')"
           }
 
           $metadata = Get-Content -LiteralPath 'DEVELOPMENT_STAGE.md' -Raw -Encoding UTF8
@@ -101,9 +121,9 @@ jobs:
                   throw "Missing flattened Stage 7 source file: $source"
               }
 
-              $actualHash = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToUpperInvariant()
+              $actualHash = Get-NormalizedTextSha256 -Path $source
               if ($actualHash -ne $expectedHashes[$source]) {
-                  throw "Unexpected content in $source. Expected SHA-256 $($expectedHashes[$source]), got $actualHash."
+                  throw "Unexpected normalized content in $source. Expected SHA-256 $($expectedHashes[$source]), got $actualHash."
               }
 
               $destination = $pathMap[$source]
@@ -119,11 +139,31 @@ jobs:
 
           Write-Host 'Preflight verification PASS.'
 
-      - name: Repair paths, verify bytes, and stage self-deletion
+      - name: Repair paths, verify normalized content, and stage self-deletion
         shell: pwsh
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = 'Stop'
+
+          function Get-NormalizedTextSha256 {
+              param([Parameter(Mandatory)][string]$Path)
+
+              $text = [System.IO.File]::ReadAllText(
+                  (Resolve-Path -LiteralPath $Path),
+                  [System.Text.Encoding]::UTF8
+              )
+              $normalized = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+              $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+              $bytes = $utf8NoBom.GetBytes($normalized)
+              $sha = [System.Security.Cryptography.SHA256]::Create()
+              try {
+                  $hash = $sha.ComputeHash($bytes)
+              }
+              finally {
+                  $sha.Dispose()
+              }
+              return (($hash | ForEach-Object { $_.ToString('X2') }) -join '')
+          }
 
           $selfPath = '.github/workflows/stage07-path-repair-self-delete.yml'
 
@@ -147,9 +187,9 @@ jobs:
               $destination = $pathMap[$source]
               Copy-Item -LiteralPath $source -Destination $destination -Force
 
-              $destinationHash = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToUpperInvariant()
+              $destinationHash = Get-NormalizedTextSha256 -Path $destination
               if ($destinationHash -ne $expectedHashes[$source]) {
-                  throw "Post-copy SHA-256 mismatch for $destination."
+                  throw "Post-copy normalized SHA-256 mismatch for $destination."
               }
           }
 
@@ -167,13 +207,12 @@ jobs:
                   throw "Correct nested file is missing after repair: $destination"
               }
 
-              $destinationHash = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToUpperInvariant()
+              $destinationHash = Get-NormalizedTextSha256 -Path $destination
               if ($destinationHash -ne $expectedHashes[$source]) {
-                  throw "Final SHA-256 mismatch for $destination."
+                  throw "Final normalized SHA-256 mismatch for $destination."
               }
           }
 
-          # Delete the one-shot workflow only after all Stage 7 content checks pass.
           Remove-Item -LiteralPath $selfPath -Force
 
           git add -A
@@ -227,7 +266,7 @@ jobs:
 
           git commit `
             -m 'Ayusin ang mga path ng Stage 7 at alisin ang repair workflow' `
-            -m 'Ilipat ang limang maling root-level Stage 7 files sa kanilang eksaktong docs/src/tests paths, patunayan ang pinned SHA-256 ng bawat file, alisin ang limang flattened duplicates, at burahin ang one-shot repair workflow matapos ang matagumpay na verification. Walang pagbabago sa Stage 7 semantics.'
+            -m 'Ilipat ang limang maling root-level Stage 7 files sa kanilang eksaktong docs/src/tests paths, patunayan ang normalized UTF-8 content ng bawat file, alisin ang limang flattened duplicates, at burahin ang one-shot repair workflow matapos ang matagumpay na verification. Walang pagbabago sa Stage 7 semantics.'
 
           if ($LASTEXITCODE -ne 0) {
               throw 'Repair commit failed.'
