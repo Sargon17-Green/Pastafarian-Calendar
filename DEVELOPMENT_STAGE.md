@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=8
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=9
+CURRENT_KIND=PATCH
 CURRENT_PATCH=04
 LAST_COMPLETED_STAGE=8
-EXPECTED_REPOSITORY_STATE=RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 04 legacy stone builder na sunod-sunod na nagbabago sa parehong limang-bato state; ikinabit ito sa production route pagkatapos ng Patch 03 at ang maling table ay nananatiling pag-aari ng bawat invocation.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 04 stonePatch layer na kumukuha muna ng lumang stone snapshot, tunay na nagpapatakbo ng mutateStonesWrong sa hiwalay na clone, sinusukat ang legacy garbage, at saka isinusulat muli ang lahat ng limang bato mula lamang sa lumang snapshot.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -31,3 +31,7 @@ STAGE07_PATCH=PATCHED_COUNTS
 STAGE07_RUNTIME_VERIFICATION=GREEN_CONFIRMED
 STAGE08_DISCOVERY=MUTATE_STONES_WRONG
 STAGE08_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
+STAGE09_PATCH=STONE_PATCH
+STAGE09_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `9` lamang matapos mapatunayan sa aktuwal na PowerShell runtime na GREEN ang Patch 04 habang nananatiling pisikal at direktang nasusubok ang `mutateStonesWrong` historical scar.

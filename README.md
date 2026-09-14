@@ -2,68 +2,39 @@
 
 Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`.
 
-## Mga natapos na naunang stage
+## Stage 9 — Patch 04
 
-Napatunayan na ang Bootstrap, ang remainder discovery/patch pair, ang Foundation day-tag discovery/patch pair, at ang distance discovery/patch pair.
+Nananatiling pisikal at direktang nasusubok ang historical `mutateStonesWrong`: binabago pa rin nito nang sunod-sunod ang iisang mutable five-stone state at kaya nitong gumawa ng maling legacy rows.
 
-## Stage 8 — Discovery 04
-
-Sa Stage 8, idinadagdag sa tunay na production route ang ikaapat na historical defect: `mutateStonesWrong`.
-
-May limang bato sa state:
+Ang bagong `stonePatch` ay isang hiwalay na correction layer:
 
 ```text
-w, b, s, m, r
+old = clone(state)
+garbage = mutateStonesWrong(i, clone(state))
+
+garbage.w = SAVE(old.w*old.w + 3*old.b + i)
+garbage.b = SAVE(old.b*old.b + 5*old.s + old.w)
+garbage.s = SAVE(old.s*old.s + 7*old.m + old.b)
+garbage.m = SAVE(old.m*old.m + 11*old.r + old.s)
+garbage.r = SAVE(old.r*old.r + 13*old.w + old.m)
 ```
 
-Ang maling historical code ay nagbabago sa iisang mutable state nang sunod-sunod:
+Mahalaga ang tatlong bagay:
 
-```text
-S.w = SAVE(S.w*S.w + 3*S.b + i)
-S.b = SAVE(S.b*S.b + 5*S.s + S.w)
-S.s = SAVE(S.s*S.s + 7*S.m + S.b)
-S.m = SAVE(S.m*S.m + 11*S.r + S.s)
-S.r = SAVE(S.r*S.r + 13*S.w + S.m)
-```
+1. tunay na tumatakbo ang legacy mutator;
+2. tumatakbo ito sa hiwalay na clone, kaya hindi nasisira ang old snapshot;
+3. lahat ng limang overwrite ay bumabasa lamang sa old snapshot, hindi sa garbage.
 
-Dahil dito, ang `b` ay nakakabasa na ng bagong `w`, ang `s` ng bagong `b`, ang `m` ng bagong `s`, at ang `r` ng bagong `w` at bagong `m`.
+Ang patched builder ay nagpapatakbo ng `stonePatch` sa rows 2–46: eksaktong 45 patched rows. Ang production context ay nagtatago ng huling old snapshot, legacy garbage, at committed row bilang invocation-local scar state.
 
-Ang normative stone row ay dapat gumamit ng iisang lumang snapshot para sa lahat ng limang formula.
+Inaasahang repository state: `GREEN`.
 
-### Inaasahang pulang surface
-
-Ang tunay na legacy builder ay gumagawa ng rows 1–46. Ang rows 2, 3, at 46 ay inihahambing sa test-only normative stone table.
-
-Inaasahan sa Stage 8:
-
-- row 2 — `EXPECTED_RED`;
-- row 3 — `EXPECTED_RED`;
-- row 46 — `EXPECTED_RED`;
-- eksaktong tatlong divergences at walang matching control sa tatlong probe na ito.
-
-Sa row 2, ang unang bato `w` ay nagkataong tama dahil ito ang unang ina-update; ang `b`, `s`, `m`, at `r` ay mali na.
-
-### Production route
-
-```text
-Invoke-CalendarDateSpaghetti
--> Patch 01
--> Patch 02
--> Patch 03
--> Discovery 04 legacy stone adapter
--> mutateStonesWrong
-```
-
-Ang maling stone table at row count ay pag-aari lamang ng kasalukuyang invocation.
-
-Wala pang Patch 04. Walang `stonePatch`, walang snapshot-based five-field overwrite, at walang Stage 9 correction.
+Wala pang Stage 10 logic.
 
 ## Pagpapatakbo
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage08.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage08.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage09.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage09.ps1
 ```
-
-Ang Stage 8 verification ay dapat magtapos sa `STAGE08_RESULT=PASS`, habang ang repository state ay `EXPECTED_RED`.

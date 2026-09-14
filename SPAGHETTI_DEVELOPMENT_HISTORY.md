@@ -63,3 +63,23 @@ Ang legacy stone table at `legacyStoneRowsBuilt=46` ay nakaimbak lamang sa invoc
 ### Hindi pa kasama
 
 Wala pang `stonePatch`, walang preserved legacy clone, walang legacy-garbage capture, at walang snapshot-based overwrite ng limang field. Ang mga iyon ay para sa Patch 04 sa susunod na stage.
+
+## Stage 9 — Patch 04: snapshot sa ibabaw ng legacy stone mutation
+
+Hindi binago ang `mutateStonesWrong`.
+
+Ang `stonePatch` ay kumukuha muna ng old snapshot. Pagkatapos, pinapatakbo nito ang raw legacy mutator sa hiwalay na clone at kinukuha ang maling `legacy garbage`. Sa huli, lahat ng limang field ng garbage object ay dini-deterministically overwrite gamit lamang ang old snapshot.
+
+Sa row 2, ang legacy garbage `w` ay nagkataong tama at ang `b/s/m/r` ay mali; pagkatapos ng overwrite, lahat ng limang field ay normative.
+
+Ang patched builder ay gumagamit ng `stonePatch` sa rows 2–46. Ang 45 trace entries ay nagpapatunay na hindi nilaktawan ang historical call.
+
+Ang production context ay nagtatago ng:
+- `patch04RowsPatched`;
+- `patch04LastOldStones`;
+- `patch04LastLegacyGarbage`;
+- `patch04LastCommittedStones`.
+
+Ang mga scar state na ito ay invocation-local lamang.
+
+Wala pang Stage 10 o anumang susunod na historical defect/patch.

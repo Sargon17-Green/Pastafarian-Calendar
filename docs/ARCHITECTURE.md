@@ -1,63 +1,59 @@
-# Arkitektura hanggang Stage 8
+# Arkitektura hanggang Stage 9
 
-Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8 ay historical discovery layers. Ang Stage 3/5/7 ay correction wrappers na nagpapanatili sa raw scars.
+Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8 ay historical discovery layers. Ang Stage 3/5/7/9 ay correction wrappers na nagpapanatili sa raw scars.
 
 ## Mga boundary
 
 `oracle/NormativeScroll.ps1` ay test-only at hindi bahagi ng production computation.
 
-`src/Discovery01.ps1` / `src/Patch01.ps1` — remainder.
+- `src/Discovery01.ps1` / `src/Patch01.ps1` — remainder.
+- `src/Discovery02.ps1` / `src/Patch02.ps1` — day tags.
+- `src/Discovery03.ps1` / `src/Patch03.ps1` — distance.
+- `src/Discovery04.ps1` — raw sequential in-place stone mutation.
+- `src/Patch04.ps1` — snapshot/legacy-garbage/five-field overwrite correction.
+- `src/MonsterSkeleton.ps1` — dispatcher host at production route.
 
-`src/Discovery02.ps1` / `src/Patch02.ps1` — day tags.
-
-`src/Discovery03.ps1` / `src/Patch03.ps1` — distance.
-
-`src/Discovery04.ps1` — legacy stone table na may sequential in-place mutation.
-
-`src/MonsterSkeleton.ps1` — dispatcher host at production route.
-
-## Stage 8 production route
+## Stage 9 production route
 
 ```text
 Invoke-CalendarDateSpaghetti
 -> Invoke-Patch01SaveAdapter
 -> Invoke-Patch02DayTagAdapter
 -> Invoke-Patch03DistanceAdapter
--> Invoke-Discovery04LegacyStoneAdapter
--> Get-Discovery04LegacyStoneTable
--> mutateStonesWrong
+-> Invoke-Patch04StoneAdapter
+-> Get-Patch04StoneTableThroughLegacyBuilder
+-> stonePatch (rows 2..46)
+   -> old snapshot
+   -> mutateStonesWrong on separate clone
+   -> legacy garbage capture
+   -> overwrite w,b,s,m,r from old snapshot only
 ```
 
-## Legacy stone state
+## Preserved historical scar
 
-Ang row 1 ay:
+`mutateStonesWrong` remains in `Discovery04.ps1` and still mutates one state in order `w,b,s,m,r`.
 
-```text
-w=17, b=29, s=43, m=71, r=101
-```
+`Get-Discovery04LegacyStoneTable` also remains available as the raw wrong builder for direct historical testing.
 
-Para sa bawat `i=2..46`, ang historical routine ay nagmu-mutate sa parehong state sa pagkakasunod na `w`, `b`, `s`, `m`, `r`.
+## Patch 04 state
 
-Ang table row ay kinokopya pagkatapos ng bawat mutation upang hindi mabago nang retroactive ang mga naunang row.
-
-## Semantic state
-
-Discovery 04 commits:
+The production invocation owns:
 
 - `legacyStoneTable`
-- `legacyStoneRowsBuilt`
+- `legacyStoneRowsBuilt=46`
+- `patch04RowsPatched=45`
+- `patch04LastOldStones`
+- `patch04LastLegacyGarbage`
+- `patch04LastCommittedStones`
+- `patch04Status`
+- `patch04InvocationCount`
 
-At ang invocation context ay may:
+Logs, metrics, at diagnostics ay hindi input sa normative computation.
 
-- `discovery04Status`
-- `discovery04InvocationCount`
+## GREEN contract
 
-Hindi ginagamit ang logs o metrics bilang input sa computation.
+Lahat ng patched rows 1–46 ay dapat eksaktong tumugma sa test-only normative stone table.
 
-## EXPECTED_RED contract
+Ang raw Stage 8 builder ay dapat manatiling divergent sa rows 2, 3, at 46.
 
-Dapat mag-diverge sa test-only normative table ang rows 2, 3, at 46.
-
-Sa row 2, ang `w` ay dapat tumugma pa rin sa normative value, samantalang ang `b`, `s`, `m`, at `r` ay dapat mag-diverge.
-
-Wala pang `stonePatch` o anumang Stage 9 correction.
+Wala pang Stage 10 logic.
