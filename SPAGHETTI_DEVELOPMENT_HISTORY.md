@@ -280,3 +280,21 @@ W etapie 18 nie istnieje jeszcze `bowlAlias`. Dopiero Stage 19 ma ustawić `bowl
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 19 — PATCH 09: bowl aliases
+
+Historyczny `LegacyFixedBowlPourAdapter` pozostaje fizycznie bez zmian. Nadal interpretuje positions 1, 2 i 3 jako stałe bowl IDs 1, 2 i 3 i nadal produkuje surową rozbieżną ścieżkę Discovery 09.
+
+Dodano osobny `BowlAliasPatch`. Dla każdego bieżącego order tworzy dokładne mapowanie:
+
+`bowlAlias[position] = order[position]`.
+
+Trzy publikowane pours odczytują więc odpowiednio `old{bowlAlias(1)}`, `old{bowlAlias(2)}` i `old{bowlAlias(3)}`. Nie zmienia to samego order ani historycznej funkcji fixed-bowl.
+
+`BowlPourCompatibilityRoute` wykonuje teraz dwie pełne ścieżki. Najpierw buduje i zachowuje surowe legacy pours oraz końcowe bowls z historycznym fixed-bowl adapterem. Następnie osobno buduje publikowaną ścieżkę z `BowlAliasPatch`.
+
+Obie ścieżki wciąż są transakcyjne: każdy round zachowuje snapshot `old`, wszystkie sześć wyników trafia do osobnego `pending`, a commit następuje dopiero po zakończeniu całego round. Dzięki temu PATCH 09 nie wyprzedza Discovery 10 dotyczącego in-place bowl contamination.
+
+Niezmieniony regression Stage 18 ma po tej zmianie przejść na GREEN. Test Stage 19 dodatkowo sprawdza kilka różnych permutacji, zachowanie surowej historycznej blizny oraz zgodność pełnej 46-round ścieżki z niezależnym reference.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

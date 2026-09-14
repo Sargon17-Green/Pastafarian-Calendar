@@ -1,7 +1,8 @@
 classdef BowlPourCompatibilityRoute
-    % Produkcyjna trasa Discovery 09.
-    % Tylko pours pozostają historycznie przywiązane do bowls 1,2,3.
-    % Aktualizacja sześciu mis korzysta jeszcze z poprawnego snapshotu old;
+    % Produkcyjna trasa mis po PATCH 09.
+    % Najpierw wykonuje pełną historyczną ścieżkę fixed-bowl pours jako bliznę.
+    % Publikowana ścieżka używa bowlAlias[position]=order[position].
+    % Obie ścieżki nadal używają snapshotu old i osobnego pending;
     % wada in-place contamination należy dopiero do Discovery 10.
     methods (Static)
         function [ctx, bowls] = call(ctx, counts, stones, visible)
@@ -16,16 +17,47 @@ classdef BowlPourCompatibilityRoute
                     'Trasa mis wymaga dokładnie 46 visible drops.');
             end
 
-            ctx.phase = 'DISCOVERY_09';
-            ctx.subPhase = 9;
-            ctx.mode = 'FIXED_BOWL_POURS';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
             ctx.branchTrace{end + 1} = 'DISCOVERY_09_FIXED_BOWL_POURS';
             ctx.metrics = pastafari.MetricsShell.bump( ...
                 ctx.metrics, 'discovery09.fixedBowlPours.calls');
 
-            bowls = pastafari.BowlPourCompatibilityRoute.initialBowls(counts);
-            ctx.initialBowlsCandidate = bowls;
+            initial = pastafari.BowlPourCompatibilityRoute.initialBowls(counts);
+            ctx.initialBowlsCandidate = initial;
+
+            [legacyFinal, legacyFirstPours, ~] = ...
+                pastafari.BowlPourCompatibilityRoute.buildRounds( ...
+                    initial, stones, visible, false);
+
+            ctx.phase = 'PATCH_09';
+            ctx.subPhase = 9;
+            ctx.mode = 'BOWL_ALIASES_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = 'PATCH_09_BOWL_ALIASES';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch09.bowlAliases.calls');
+
+            [bowls, patchedFirstPours, finalOrder] = ...
+                pastafari.BowlPourCompatibilityRoute.buildRounds( ...
+                    initial, stones, visible, true);
+
+            ctx.legacyFirstRoundPours = legacyFirstPours;
+            ctx.firstRoundPoursCandidate = patchedFirstPours;
+            ctx.legacyFixedBowlFinalBowls = legacyFinal;
+            ctx.bowlsCandidate = bowls;
+            ctx.currentBowlOrder = finalOrder;
+            ctx.diagnostics{end + 1} = ...
+                ['PATCH 09 zachowuje fixed-bowl pours jako bliznę, ale ', ...
+                 'publikuje pours czytające old{bowlAlias(position)}, gdzie ', ...
+                 'bowlAlias(position)=order(position).'];
+        end
+    end
+
+    methods (Static, Access = private)
+        function [bowls, firstPours, finalOrder] = buildRounds( ...
+                initial, stones, visible, useAliases)
+            bowls = initial;
+            firstPours = [];
+            finalOrder = [];
             stoneByPosition = [1 2 3 4 5 1];
 
             for dropNumber = 1:46
@@ -33,12 +65,16 @@ classdef BowlPourCompatibilityRoute
                 order = pastafari.BowlPourCompatibilityRoute.orderFromDrop(drop);
                 old = bowls;
 
-                pours = pastafari.LegacyFixedBowlPourAdapter.compute( ...
-                    old, drop, stones(dropNumber, :), dropNumber);
+                if useAliases
+                    pours = pastafari.BowlAliasPatch.computePours( ...
+                        old, drop, stones(dropNumber, :), dropNumber, order);
+                else
+                    pours = pastafari.LegacyFixedBowlPourAdapter.compute( ...
+                        old, drop, stones(dropNumber, :), dropNumber);
+                end
 
                 if dropNumber == 1
-                    ctx.legacyFirstRoundPours = pours;
-                    ctx.firstRoundPoursCandidate = pours;
+                    firstPours = pours;
                 end
 
                 pending = cell(1, 6);
@@ -63,18 +99,10 @@ classdef BowlPourCompatibilityRoute
                 end
 
                 bowls = pending;
-                ctx.currentBowlOrder = order;
+                finalOrder = order;
             end
-
-            ctx.legacyFixedBowlFinalBowls = bowls;
-            ctx.bowlsCandidate = bowls;
-            ctx.diagnostics{end + 1} = ...
-                ['Discovery 09 interpretuje trzy pours jako bowl IDs 1,2,3 ', ...
-                 'zamiast positions mapowanych przez bieżący order.'];
         end
-    end
 
-    methods (Static, Access = private)
         function bowls = initialBowls(counts)
             primes = [17 19 23 29 31 37];
             bowls = cell(1, 6);
