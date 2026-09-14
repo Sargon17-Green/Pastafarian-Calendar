@@ -63,6 +63,10 @@ classdef MonsterContext < handle
         legacyOrderMemoryLastSource
         queriedOrderCandidate
         postStirBowlsCandidate
+        successorOrderAt46
+        successorQueriedBowlId
+        legacyFixedNameSuccessor
+        nextBowlCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -128,6 +132,10 @@ classdef MonsterContext < handle
             obj.legacyOrderMemoryLastSource = '';
             obj.queriedOrderCandidate = [];
             obj.postStirBowlsCandidate = [];
+            obj.successorOrderAt46 = [];
+            obj.successorQueriedBowlId = [];
+            obj.legacyFixedNameSuccessor = [];
+            obj.nextBowlCandidate = [];
         end
     end
 end

@@ -374,3 +374,23 @@ Niezmieniony regression Stage 22 ma po tej zmianie przejść na GREEN. Test Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 24 — DISCOVERY 12: fixed-name successor
+
+Dodano dwunasty historyczny defekt. PATCH 11 nadal poprawnie zachowuje i publikuje `orderAt46Latch`, lecz downstream consumer wyznacza następną bowl według stałych nazw numerycznych, a nie według pozycji w latchu.
+
+`LegacyFixedNameSuccessor.next(id)` implementuje dokładnie stały pierścień:
+
+`1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 1`.
+
+Funkcja w ogóle nie czyta `orderAt46Latch`.
+
+Dla Foundation latch wynosi `4,5,2,3,6,1`. Normatywny successor jest więc następnym elementem tej właśnie kolejności: `1->4`, `2->3`, `3->6`, `4->5`, `5->2`, `6->1`. Fixed-name legacy rozchodzi się dokładnie dla IDs `1,3,5`.
+
+Historyczny publiczny consumer pyta o bowl znajdującą się na pozycji 4 latcha. Dla Foundation jest to ID `3`. Legacy zwraca `4`, podczas gdy poprawny successor w latched order wynosi `6`.
+
+`NextBowlCompatibilityRoute` zapisuje latched order, queried ID i surowy legacy successor osobno. W etapie 24 publikuje jeszcze surowy fixed-name result, dlatego stan jest `EXPECTED_RED`.
+
+W etapie 24 nie istnieje jeszcze latched successor patch. Dopiero Stage 25 ma pozostawić `LegacyFixedNameSuccessor` fizycznie bez zmian i wykonywać go jako diagnostyczną bliznę, natomiast semantic path ma znaleźć pozycję `queriedBowlId` w `orderAt46Latch` i zwrócić następny element z zawijaniem na początek.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
