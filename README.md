@@ -2,56 +2,50 @@
 
 Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`.
 
-## Stage 1 — Bootstrap
+## Mga naunang stage
 
-Napatunayan sa Windows PowerShell 5.1 ang neutral na base, malinis na test-only normative oracle, frozen source-language catalog, at per-invocation semantic state.
+Napatunayan ang Stage 1 bootstrap, Discovery 01 at Patch 01 para sa save remainder, at Discovery 02 at Patch 02 para sa Foundation day tags. Nananatiling pisikal ang lahat ng raw historical scars.
 
-## Stage 2 — Discovery 01
+## Stage 6 — Discovery 03
 
-Napatunayan ang historical `oldRemainder(x)=regularMod(x,M)` defect.
-
-## Stage 3 — Patch 01
-
-Idinagdag ang `savePatch`, na nagmamapa lamang ng legacy zero residue sa `M`; nananatili ang raw `oldRemainder` scar.
-
-## Stage 4 — Discovery 02
-
-Napatunayan ang historical:
+Idinadagdag ang ikatlong historical defect:
 
 ```text
-oldDayTag(day) = 2 * abs(day - FOUNDATION)
+oldDistance(calculationDay, targetDay) =
+    abs(
+        dayTagWithFoundationScar(calculationDay)
+        - dayTagWithFoundationScar(targetDay)
+    )
 ```
 
-Bago ang Foundation ay tumutugma ito sa normative count; sa Foundation at pagkatapos nito ay kulang ito ng isa.
+Ang maling palagay ay ang absolute difference ng patched day tags ay kapareho ng chronological inclusive distance.
 
-## Stage 5 — Patch 02
-
-Hindi binabago ang `oldDayTag`. Ang patch ay hiwalay na wrapper:
+Ang normative distance ay:
 
 ```text
-n = oldDayTag(day)
-if day >= FOUNDATION:
-    n += 1
-if day == FOUNDATION and n != 1:
-    n = 1
+abs(targetDay - calculationDay) + 1
 ```
 
-Ang ikalawang Foundation guard ay kalabisan para sa kasalukuyang `oldDayTag`, ngunit sadyang nananatili bilang pisikal na historical scar.
+Sa limang historical probes:
 
-Ang production route ay nagpapatakbo muna ng Patch 01 at saka ng Patch 02. Ang raw legacy action/target day tags at ang patched action/target day tags ay parehong itinatago sa sariling invocation context.
+```text
+F -> F       : legacy 0, normative 1   : EXPECTED_RED
+F -> F+1     : legacy 2, normative 2   : MATCH
+F -> F+3     : legacy 6, normative 4   : EXPECTED_RED
+F-1 -> F     : legacy 1, normative 2   : EXPECTED_RED
+F-3 -> F+3   : legacy 1, normative 7   : EXPECTED_RED
+```
 
-Walang `oldDistance` o Stage 6 Discovery 03 logic sa Stage 5.
+Ang production route ay talagang tumatawag sa `oldDistance` sa pamamagitan ng Discovery 03 adapter. Ang Patch 01 at Patch 02 state ay nananatiling GREEN at per-invocation.
+
+Walang `patchedCounts`, chronological replacement guard, o final `+1` Patch 03 logic sa Stage 6.
 
 ## Pagpapatakbo
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage05.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage05.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage06.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage06.ps1
 ```
 
-Sa matagumpay na verification, kailangang lumitaw ang `STAGE05_RESULT=PASS` at `STAGE05_REPOSITORY_STATE=GREEN`.
-
-## Wika
-
-Ang Filipino ang nag-iisang wikang pantao ng implementasyong ito. Ang mga identifier at machine-readable key ay maaaring manatili sa teknikal na anyo.
+Sa matagumpay na Discovery 03 verification, kailangang lumitaw ang `STAGE06_RESULT=PASS` at `STAGE06_REPOSITORY_STATE=EXPECTED_RED`.

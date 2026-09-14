@@ -1,46 +1,47 @@
-# Arkitektura hanggang Stage 5
+# Arkitektura hanggang Stage 6
 
-Ang Stage 1 ay neutral na shell. Stage 2 at 4 ay historical discoveries. Stage 3 at 5 ay hiwalay na patch layers na hindi binubura ang raw scars.
+Ang Stage 1 ay neutral na shell. Ang Stage 2 at 4 ay historical defects. Ang Stage 3 at 5 ay correction wrappers na nagpapanatili sa raw scars. Ang Stage 6 ay ikatlong discovery layer.
 
 ## Mga file boundary
 
 `oracle/NormativeScroll.ps1` ay test-only reference.
 
-`src/Discovery01.ps1` ay raw legacy remainder.
+`src/Discovery01.ps1` at `src/Patch01.ps1` ang remainder scar at correction.
 
-`src/Patch01.ps1` ay save patch.
+`src/Discovery02.ps1` at `src/Patch02.ps1` ang day-tag scar at correction.
 
-`src/Discovery02.ps1` ay raw legacy day tag.
-
-`src/Patch02.ps1` ay `dayTagWithFoundationScar`, ang pisikal na Foundation guard, at Patch 02 adapter.
+`src/Discovery03.ps1` ang raw legacy distance.
 
 `src/MonsterSkeleton.ps1` ang production dispatcher host.
 
-## Stage 5 route
+## Stage 6 route
 
 ```text
 Invoke-CalendarDateSpaghetti
 -> Invoke-Patch01SaveAdapter
 -> Invoke-Patch02DayTagAdapter
--> dayTagWithFoundationScar(action)
--> oldDayTag(action)
--> dayTagWithFoundationScar(target)
--> oldDayTag(target)
+-> Invoke-Discovery03LegacyDistanceAdapter
+-> oldDistance
+-> dayTagWithFoundationScar(calculationDay)
+-> dayTagWithFoundationScar(targetDay)
 ```
 
-## Raw at patched state
+Ang `oldDistance` ay sadyang hindi gumagamit ng chronological day difference.
 
-Ang Patch 02 adapter ay nagko-commit ng parehong raw at patched values:
+## Per-invocation state
 
-- `legacyActionDayTag`
-- `legacyTargetDayTag`
-- `patch02ActionDayTag`
-- `patch02TargetDayTag`
+Ang Discovery 03 adapter ay nagdadagdag ng:
 
-Ang `patch02FoundationGuardSeen` ay observability ng historical guard at hindi normative input.
+- `legacyDistanceCalculationDay`
+- `legacyDistanceTargetDay`
+- `legacyDistanceValue`
+- `discovery03Status`
+- `discovery03InvocationCount`
 
-## GREEN contract
+Hindi ginagamit ang logs o metrics bilang semantic input.
 
-Ang patched action at target day tags ay dapat tumugma sa normative `day_count` para sa mga araw bago, sa, at pagkatapos ng Foundation. Ang direct `oldDayTag` ay dapat manatiling mali sa historical surface.
+## Expected-red contract
 
-Walang `oldDistance` sa Stage 5.
+Dapat manatiling GREEN ang Patch 01 at Patch 02 outputs. Ang bagong distance layer ay dapat magkaroon ng eksaktong apat na divergence at isang matching control sa limang historical probes.
+
+Walang Patch 03 correction sa Stage 6.

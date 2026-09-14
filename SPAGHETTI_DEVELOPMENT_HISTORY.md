@@ -2,56 +2,57 @@
 
 ## Stage 1 — Bootstrap
 
-Nilikha mula sa wala ang PowerShell tree, test-only normative oracle, frozen source-language catalog, test harness, at neutral na per-invocation monster shell.
+Nilikha ang neutral na PowerShell foundation, test-only normative oracle, frozen source-language catalog, at per-invocation semantic state.
 
-## Stage 2 — Discovery 01: legacy remainder
+## Stage 2 — Discovery 01
 
-Ipinakilala ang `oldRemainder(x)=regularMod(x,M)`. Ang mga multiple ng `M` ay naging `0` sa legacy path sa halip na normative `M`.
+Ipinakilala ang raw `oldRemainder` defect.
 
-## Stage 3 — Patch 01: save correction
+## Stage 3 — Patch 01
 
-Idinagdag ang `savePatch` sa ibabaw ng raw legacy remainder. Ang `oldRemainder` mismo ay hindi binago.
+Idinagdag ang `savePatch` nang hindi binubura ang raw remainder scar.
 
-## Stage 4 — Discovery 02: maling day tag
+## Stage 4 — Discovery 02
 
-Ipinakilala ang:
+Ipinakilala ang raw `oldDayTag(day)=2*abs(day-FOUNDATION)` defect.
 
-```text
-oldDayTag(day) = 2 * abs(day - FOUNDATION)
-```
+## Stage 5 — Patch 02
 
-Napatunayang tama lamang ito bago ang Foundation. Sa Foundation at pagkatapos nito, kulang ito ng isa.
+Idinagdag ang `dayTagWithFoundationScar`, kasama ang pisikal na redundant Foundation guard, habang nananatili ang raw `oldDayTag`.
 
-## Stage 5 — Patch 02: ibalik ang odd day tags mula Foundation pasulong
+## Stage 6 — Discovery 03: day-tag difference bilang distance
 
-### Correction
+### Historical assumption
 
-Hindi binago ang `oldDayTag`. Ang patch ay:
+Ang lumang distance helper ay:
 
 ```text
-n = oldDayTag(day)
-if day >= FOUNDATION:
-    n += 1
-if day == FOUNDATION and n != 1:
-    n = 1
+oldDistance(c,t) =
+    abs(dayTagWithFoundationScar(c) - dayTagWithFoundationScar(t))
 ```
 
-Ang ikalawang guard ay hindi kailangan upang makuha ang tamang resulta sa kasalukuyang formula, ngunit ito ay historical scar at hindi inaalis.
+Ibig sabihin, ginagamit nito ang naunang patched day-tag layer, ngunit maling ipinapalagay na ang tag difference ay chronological distance.
 
-### Normative equivalence
+### Bakit mali
 
-Bago ang Foundation, ang raw legacy value ay normative na at hindi binabago.
+Ang patched day tags ay hindi tumataas nang tig-iisang unit sa chronological axis. Sa Foundation at pagkatapos nito, isang araw na galaw ay karaniwang dalawang tag units. Bukod dito, inclusive ang normative distance at kailangang may final `+1`.
 
-Sa Foundation, ang raw `0` ay nagiging `1`. Pagkatapos ng Foundation, ang raw `2*d` ay nagiging normative `2*d+1`.
+### Historical regression surface
 
-### Historical scar retention
+Limang probe ang ginagamit:
 
-Ang direct tests ng `oldDayTag` ay patuloy na umaasang makuha ang lumang maling values. Ang Patch 02 tests ay hiwalay na nagpapatunay na ang public adapter output ay normative.
+- `F -> F`: legacy `0`, normative `1`, `EXPECTED_RED`.
+- `F -> F+1`: legacy `2`, normative `2`, `MATCH`.
+- `F -> F+3`: legacy `6`, normative `4`, `EXPECTED_RED`.
+- `F-1 -> F`: legacy `1`, normative `2`, `EXPECTED_RED`.
+- `F-3 -> F+3`: legacy `1`, normative `7`, `EXPECTED_RED`.
+
+Kaya eksaktong apat ang expected-red at isa ang match.
 
 ### State ownership
 
-Para sa action at target path, hiwalay na itinatago ang raw legacy value, patched value, applied status, at kung nakita ang Foundation guard. Walang state na ibinabahagi sa ibang invocation.
+Ang Discovery 03 adapter ay nagko-commit ng calculation day, target day, at raw legacy distance sa sariling invocation context lamang.
 
 ### Hindi pa kasama
 
-Walang `oldDistance`, walang chronological distance guard, at walang Stage 6/7 code.
+Walang `patchedCounts`, walang chronological replacement, at walang final `+1` correction ng Stage 7/Patch 03.
