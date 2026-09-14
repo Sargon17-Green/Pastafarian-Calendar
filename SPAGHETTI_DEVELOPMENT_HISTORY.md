@@ -336,3 +336,25 @@ Niezmieniony regression Stage 20 ma po tej zmianie przejść na GREEN. Test Stag
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 22 — DISCOVERY 11: lost order at drop 46
+
+Dodano jedenasty historyczny defekt ownership. Poprawna ścieżka bowls z PATCH 10 pozostaje bez zmian, a dwanaście normatywnych post-stirs jest wykonywanych z jednym snapshotem `old` i wspólnym commitem każdego stir.
+
+Historyczny problem dotyczy wyłącznie przechowywania order. `LegacyOverwritableOrderMemory` ma jedno nadpisywalne pole. To samo pole otrzymuje 46 zapisów order — po jednym dla każdego visible drop — a następnie 12 kolejnych zapisów order podczas post-stirs.
+
+Bezpośrednio po drop 46 pamięć zawiera właściwy order. Dla Foundation jest to:
+
+`4,5,2,3,6,1`.
+
+Nie istnieje jednak osobny latch. Post-stirs 1–12 nadpisują to samo pole. Po ostatnim, 58. zapisie pamięć pochodzi z `post-stir 12`; dla Foundation zawiera:
+
+`1,6,5,2,4,3`.
+
+`queryOrder` czyta właśnie to jedno legacy pole, dlatego zwraca końcowy order post-stir zamiast order z drop 46.
+
+Same bowls pozostają poprawne. Każdy post-stir oblicza `savedStirSum = SAVE(sum(oldBowls)+149*stir)`, wyznacza order i aktualizuje sześć mis jednocześnie ze wspólnego snapshotu `old`. Final bowls muszą być identyczne z lokalnym normatywnym oracle.
+
+W etapie 22 nie istnieje jeszcze `orderAt46Latch`. Dopiero Stage 23 ma po drop 46 i przed post-stir 1 wykonać dokładnie jeden `orderAt46Latch = clone(order46)`, nigdy nie zapisywać latch podczas post-stirs i skierować `queryOrder` wyłącznie do latcha. Jednocześnie legacy overwritable memory oraz wszystkie 58 historycznych writes muszą pozostać fizycznie zachowane.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

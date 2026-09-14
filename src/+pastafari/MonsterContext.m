@@ -56,6 +56,13 @@ classdef MonsterContext < handle
         firstRoundStirCandidate
         legacyInPlaceFinalBowls
         stirBowlsCandidate
+        prePostStirBowlsCandidate
+        legacyOrderAtDrop46Observed
+        legacyOverwritableOrderMemoryFinal
+        legacyOrderMemoryWriteCount
+        legacyOrderMemoryLastSource
+        queriedOrderCandidate
+        postStirBowlsCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -114,6 +121,13 @@ classdef MonsterContext < handle
             obj.firstRoundStirCandidate = [];
             obj.legacyInPlaceFinalBowls = [];
             obj.stirBowlsCandidate = [];
+            obj.prePostStirBowlsCandidate = [];
+            obj.legacyOrderAtDrop46Observed = [];
+            obj.legacyOverwritableOrderMemoryFinal = [];
+            obj.legacyOrderMemoryWriteCount = [];
+            obj.legacyOrderMemoryLastSource = '';
+            obj.queriedOrderCandidate = [];
+            obj.postStirBowlsCandidate = [];
         end
     end
 end
