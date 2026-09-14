@@ -175,7 +175,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: python-turkce-1.0.0-checksum-candidate-${{ github.sha }}
-          path: ${{ runner.temp }}/python-turkce-release/candidate/SHA256SUMS.txt
+          path: ${{ env.RELEASE_WORK }}/candidate/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
 
@@ -298,6 +298,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: python-turkce-1.0.0-release-assets-${{ github.sha }}
-          path: ${{ runner.temp }}/python-turkce-release/assets/*
+          path: ${{ env.RELEASE_WORK }}/assets/*
           if-no-files-found: error
           retention-days: 30
