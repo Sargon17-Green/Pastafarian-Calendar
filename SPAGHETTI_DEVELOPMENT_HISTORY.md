@@ -261,3 +261,22 @@ Test Stage 17 sprawdza granice 1 i 720, kilka rang wewnętrznych, zawinięcia 72
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 18 — DISCOVERY 09: fixed-bowl pours
+
+Dodano dziewiąty historyczny defekt. Po poprawnym wyznaczeniu order dla sześciu mis trzy pours nadal są liczone tak, jakby positions 1, 2 i 3 były na stałe bowl IDs 1, 2 i 3.
+
+Historyczna warstwa wykonuje więc:
+- pour position 1 z `old{1}`,
+- pour position 2 z `old{2}`,
+- pour position 3 z `old{3}`,
+
+zamiast czytać misy wskazane przez `order(1)`, `order(2)` i `order(3)`.
+
+Pozostała część bowl round jest w tym etapie celowo poprawna: wszystkie odczyty sześciu aktualizacji pochodzą z jednego snapshotu `old`, wyniki trafiają do osobnego `pending`, a commit następuje dopiero po wyliczeniu wszystkich sześciu mis. Wada in-place contamination nie została jeszcze wprowadzona; należy ona dopiero do Discovery 10.
+
+Regresja używa kontrolowanego drop `121`, którego porządek mis zaczyna się `[2,1,3,4,5,6]`. Dzięki temu legacy pour 1 i 2 rozchodzą się natychmiast, natomiast pour 3 przypadkowo pozostaje zgodny. Surowe legacy pours są zapisywane osobno, aby przyszły PATCH 09 mógł zachować bliznę i naprawić wyłącznie publikowaną ścieżkę.
+
+W etapie 18 nie istnieje jeszcze `bowlAlias`. Dopiero Stage 19 ma ustawić `bowlAlias[position]=order[position]` i skierować każde odczytanie misy dla pours przez ten alias.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

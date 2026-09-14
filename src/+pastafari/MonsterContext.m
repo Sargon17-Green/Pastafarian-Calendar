@@ -45,6 +45,12 @@ classdef MonsterContext < handle
         permutationRank1Candidate
         permutationDetourRank0
         permutationOrderCandidate
+        initialBowlsCandidate
+        legacyFirstRoundPours
+        firstRoundPoursCandidate
+        legacyFixedBowlFinalBowls
+        bowlsCandidate
+        currentBowlOrder
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -92,6 +98,12 @@ classdef MonsterContext < handle
             obj.permutationRank1Candidate = [];
             obj.permutationDetourRank0 = [];
             obj.permutationOrderCandidate = [];
+            obj.initialBowlsCandidate = [];
+            obj.legacyFirstRoundPours = [];
+            obj.firstRoundPoursCandidate = [];
+            obj.legacyFixedBowlFinalBowls = [];
+            obj.bowlsCandidate = [];
+            obj.currentBowlOrder = [];
         end
     end
 end

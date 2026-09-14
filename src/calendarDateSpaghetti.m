@@ -1,6 +1,6 @@
 function result = calendarDateSpaghetti(calculationDay, targetDay)
-% Szkielet produkcyjny rozbudowany do etapu 16; aktywne są PATCH 01-07
-% oraz Discovery 08.
+% Szkielet produkcyjny rozbudowany do etapu 18; aktywne są PATCH 01-08
+% oraz Discovery 09.
 
 pastafari.ValidationManager.requireExactIntegerInput(calculationDay);
 pastafari.ValidationManager.requireExactIntegerInput(targetDay);
@@ -19,13 +19,16 @@ ctx = pastafari.MonsterDispatcher.dispatch(ctx, @bootstrapHandler);
 [ctx, visible] = pastafari.GrindTableCompatibilityRoute.call( ...
     ctx, counts, stones, hidden, priorVisible);
 
-% Discovery 08 używa pierwszej widocznej kropli jako wejścia do
-% historycznego zero-based unrank bez detour rankingu 1-based.
+% Zachowujemy jawne przejście przez PATCH 08.
 [ctx, ~] = pastafari.PermutationCompatibilityRoute.call( ...
     ctx, visible{1}); %#ok<ASGLU>
 
+% Discovery 09 dodaje historyczne pours do stałych bowl IDs 1,2,3.
+[ctx, ~] = pastafari.BowlPourCompatibilityRoute.call( ...
+    ctx, counts, stones, visible); %#ok<ASGLU>
+
 error('Pastafari:Bootstrap:NotImplementedYet', ...
-    ['Etap 16 aktywuje historyczną ścieżkę Discovery 08; ', ...
+    ['Etap 18 aktywuje historyczną ścieżkę Discovery 09; ', ...
      'pełna semantyka kalendarza nie jest jeszcze zaimplementowana.']);
 
     function inner = bootstrapHandler(inner)
