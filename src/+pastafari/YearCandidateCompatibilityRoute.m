@@ -1,16 +1,14 @@
 classdef YearCandidateCompatibilityRoute
-    % Produkcyjna trasa Discovery 16.
+    % Produkcyjna trasa kandydatów roku po PATCH 16.
     %
-    % W etapie 32 publikuje jeszcze raw listę wygenerowaną z historycznym
-    % maksimum 5781. Nie istnieje jeszcze late filter do 5778.
+    % Najpierw wykonuje historyczny generator max-5781 i zachowuje jego
+    % pełną raw listę. Dopiero potem osobny late filter usuwa length>5778.
+    % Nie ma jeszcze sortowania ani wyboru Year 5000.
     methods (Static)
         function [ctx, candidates] = call(ctx, rawCandidates)
             pastafari.ValidationManager.requireContext(ctx);
 
-            ctx.phase = 'DISCOVERY_16';
-            ctx.subPhase = 16;
-            ctx.mode = 'LEGACY_YEAR_MAX_5781';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
+            % Surowa historyczna blizna Discovery 16.
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_16_LEGACY_YEAR_MAX_5781';
             ctx.metrics = pastafari.MetricsShell.bump( ...
@@ -22,12 +20,26 @@ classdef YearCandidateCompatibilityRoute
             ctx.legacyYearMaxDays = pastafari.BigInt(5781);
             ctx.legacyYearCandidateLengths = legacyLengths;
             ctx.legacyYearCandidatesAccepted = legacyAccepted;
-            ctx.yearCandidatesCandidate = legacyAccepted;
-            ctx.diagnostics{end + 1} = ...
-                ['Discovery 16 publikuje kandydatów do 5781 dni; ', ...
-                 'normatywny late max 5778 nie został jeszcze zastosowany.'];
 
-            candidates = legacyAccepted;
+            % PATCH 16: późne odfiltrowanie wyłącznie ponad normatywny max.
+            ctx.phase = 'PATCH_16';
+            ctx.subPhase = 16;
+            ctx.mode = 'LATE_5778_FILTER_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = 'PATCH_16_LATE_5778_FILTER';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch16.late5778Filter.calls');
+
+            [filtered, rejected] = ...
+                pastafari.YearMax5778LateFilter.apply(legacyAccepted);
+
+            ctx.yearCandidatesCandidate = filtered;
+            ctx.diagnostics{end + 1} = sprintf( ...
+                ['PATCH 16 zachowuje %d raw legacy candidates i publikuje ', ...
+                 '%d po późnym filtrze lengthDays<=5778; odrzucono %d.'], ...
+                numel(legacyAccepted), numel(filtered), numel(rejected));
+
+            candidates = filtered;
         end
     end
 end

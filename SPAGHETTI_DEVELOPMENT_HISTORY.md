@@ -548,3 +548,25 @@ Dopiero Stage 33 ma pozostawić `LegacyYearMax5781Filter` fizycznie bez zmian i 
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 33 — PATCH 16: late 5778 filter
+
+Historyczny `LegacyYearMax5781Filter` pozostaje fizycznie bez zmian. Nadal generuje kandydatów z długością do `5781` dni i nadal zachowuje `5779`, `5780` oraz `5781` w pełnej raw liście Discovery 16.
+
+Dodano osobny `YearMax5778LateFilter`. Otrzymuje on dopiero listę, która już przeszła przez historyczny generator. Nie regeneruje kandydatów, nie sortuje ich i nie wykonuje żadnego wyboru roku.
+
+Late filter mierzy wyłącznie:
+
+`lengthDays = closeGateDay - openGateDay`
+
+i zachowuje kandydata wtedy i tylko wtedy, gdy `lengthDays<=5778`.
+
+Kolejność kandydatów jest zachowywana dokładnie. Kandydaci `5779`, `5780` oraz `5781` pozostają obserwowalni w `legacyYearCandidatesAccepted` i `legacyYearCandidateLengths`, lecz nie trafiają do publikowanego `yearCandidatesCandidate`.
+
+`YearCandidateCompatibilityRoute` najpierw wykonuje raw generator max-5781 i zapisuje pełną historyczną listę. Następnie osobno wykonuje PATCH 16 i publikuje dopiero late-filtered listę.
+
+Niezmieniony regression Stage 32 ma po tej zmianie przejść z EXPECTED_RED do GREEN. Test Stage 33 sprawdza dokładne boundary `5778/5779`, zachowanie kolejności, usunięcie dokładnie `5779..5781`, obecność obu trace/metrics oraz fizyczne zachowanie `LegacyYearMax5781Filter`.
+
+Stage 33 celowo nie dodaje jeszcze sortowania ani wyboru Year 5000. Dopiero Stage 34 wprowadzi historyczny tie defect przy sortowaniu kandydatów roku 5000.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
