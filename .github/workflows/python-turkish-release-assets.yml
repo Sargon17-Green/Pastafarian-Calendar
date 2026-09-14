@@ -21,7 +21,7 @@ jobs:
     env:
       RELEASE_BASENAME: Python-Turkce-1.0.0
       RELEASE_TAG: python-turkish-v1.0.0
-      RELEASE_WORK: ${{ runner.temp }}/python-turkce-release
+      RELEASE_WORK: /tmp/python-turkce-release-${{ github.run_id }}
 
     steps:
       - name: Depoyu al
