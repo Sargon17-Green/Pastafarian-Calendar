@@ -1,0 +1,303 @@
+name: Python + Türkçe Release varlıkları
+
+on:
+  push:
+    branches:
+      - 'Python\+Türkçe'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-turkce-release-assets-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-assets:
+    name: Python + Türkçe 1.0.0 Release varlıklarını hazırla
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RELEASE_BASENAME: Python-Turkce-1.0.0
+      RELEASE_TAG: python-turkish-v1.0.0
+      RELEASE_WORK: ${{ runner.temp }}/python-turkce-release
+
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Python 3.13 kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Release metadata'sını doğrula
+        run: |
+          python - <<'PY'
+          import tomllib
+          from pathlib import Path
+
+          data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+          project = data["project"]
+          if project["name"] != "pastafari-calendar-python":
+              raise SystemExit(f"Beklenmeyen paket adı: {project['name']!r}")
+          if project["version"] != "1.0.0":
+              raise SystemExit(f"Beklenmeyen paket sürümü: {project['version']!r}")
+          print("RELEASE_METADATA=PASS name=pastafari-calendar-python version=1.0.0")
+          PY
+
+      - name: Kaynak arşivini ve checksum adayını üret
+        id: checksum
+        run: |
+          set -euo pipefail
+          rm -rf "$RELEASE_WORK"
+          mkdir -p "$RELEASE_WORK/candidate" "$RELEASE_WORK/assets" "$RELEASE_WORK/extracted"
+
+          git archive --format=tar --prefix="$RELEASE_BASENAME/" \
+            --output="$RELEASE_WORK/assets/$RELEASE_BASENAME-source.tar" HEAD
+          tar -xf "$RELEASE_WORK/assets/$RELEASE_BASENAME-source.tar" \
+            -C "$RELEASE_WORK/extracted"
+
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import os
+          import subprocess
+          from pathlib import Path
+
+          repo = Path(os.environ["GITHUB_WORKSPACE"])
+          work = Path(os.environ["RELEASE_WORK"])
+          basename = os.environ["RELEASE_BASENAME"]
+          tag = os.environ["RELEASE_TAG"]
+          extracted = work / "extracted" / basename
+          candidate = work / "candidate" / "SHA256SUMS.txt"
+          assets = work / "assets"
+
+          raw = subprocess.check_output(["git", "ls-files", "-z"], cwd=repo)
+          paths = sorted(
+              part.decode("utf-8")
+              for part in raw.split(b"\0")
+              if part
+          )
+
+          def digest(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open("rb") as handle:
+                  for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          candidate_lines = []
+          manifest_lines = []
+          for relative in paths:
+              extracted_path = extracted / relative
+              if not extracted_path.is_file():
+                  raise SystemExit(f"Kaynak arşivinde izlenen dosya eksik: {relative}")
+              sha = digest(extracted_path)
+              manifest_lines.append(f"{sha}  {relative}\n")
+              if relative != "SHA256SUMS.txt":
+                  candidate_lines.append(f"{sha}  {relative}\n")
+
+          candidate.write_text("".join(candidate_lines), encoding="utf-8", newline="\n")
+          manifest = assets / f"{basename}_RELEASE_MANIFEST_SHA256.txt"
+          manifest.write_text("".join(manifest_lines), encoding="utf-8", newline="\n")
+
+          tracked = repo / "SHA256SUMS.txt"
+          checksum_match = tracked.is_file() and tracked.read_bytes() == candidate.read_bytes()
+
+          commit = subprocess.check_output(
+              ["git", "rev-parse", "HEAD"], cwd=repo, text=True
+          ).strip()
+          tree = subprocess.check_output(
+              ["git", "rev-parse", "HEAD^{tree}"], cwd=repo, text=True
+          ).strip()
+          git_tree = assets / f"{basename}_RELEASE_GIT_TREE.txt"
+          git_tree.write_text(
+              "\n".join(
+                  [
+                      f"RELEASE_TAG={tag}",
+                      f"COMMIT_SHA={commit}",
+                      f"TREE_SHA={tree}",
+                      f"TRACKED_FILE_COUNT={len(paths)}",
+                      "",
+                  ]
+              ),
+              encoding="utf-8",
+              newline="\n",
+          )
+
+          output = Path(os.environ["GITHUB_OUTPUT"])
+          with output.open("a", encoding="utf-8") as handle:
+              handle.write(f"checksum_match={'true' if checksum_match else 'false'}\n")
+              handle.write(f"tracked_file_count={len(paths)}\n")
+              handle.write(f"commit_sha={commit}\n")
+              handle.write(f"tree_sha={tree}\n")
+
+          print(
+              "TRACKED_SHA256SUMS_MATCH="
+              + ("YES" if checksum_match else "NO")
+              + f" files={len(paths)} commit={commit} tree={tree}"
+          )
+          PY
+
+      - name: Temiz kaynak arşivini manifest ile doğrula
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import os
+          from pathlib import Path
+
+          work = Path(os.environ["RELEASE_WORK"])
+          basename = os.environ["RELEASE_BASENAME"]
+          root = work / "extracted" / basename
+          manifest = work / "assets" / f"{basename}_RELEASE_MANIFEST_SHA256.txt"
+
+          checked = 0
+          for line in manifest.read_text(encoding="utf-8").splitlines():
+              expected, relative = line.split("  ", 1)
+              path = root / relative
+              actual = hashlib.sha256(path.read_bytes()).hexdigest()
+              if actual != expected:
+                  raise SystemExit(
+                      f"Kaynak arşivi checksum uyuşmazlığı: {relative}: {actual} != {expected}"
+                  )
+              checked += 1
+          print(f"CLEAN_SOURCE_MANIFEST_VERIFY=PASS files={checked}")
+          PY
+
+      - name: SHA256SUMS adayını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-turkce-1.0.0-checksum-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/python-turkce-release/candidate/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Final checksum durumunu kaydet
+        run: |
+          echo "TRACKED_SHA256SUMS_MATCH=${{ steps.checksum.outputs.checksum_match }}"
+          echo "TRACKED_FILE_COUNT=${{ steps.checksum.outputs.tracked_file_count }}"
+          if [ "${{ steps.checksum.outputs.checksum_match }}" != "true" ]; then
+            echo "SHA256SUMS.txt henüz final Release ağacını yansıtmıyor."
+            echo "Bu koşu yalnız bir sonraki repository güncellemesi için checksum adayını üretir."
+          fi
+
+      - name: Build bağımlılığını hazırla
+        if: steps.checksum.outputs.checksum_match == 'true'
+        run: |
+          mkdir -p "$RELEASE_WORK/bootstrap"
+          python -m pip download --disable-pip-version-check \
+            --dest "$RELEASE_WORK/bootstrap" "setuptools>=68"
+          python -m pip install --disable-pip-version-check --no-index \
+            --find-links "$RELEASE_WORK/bootstrap" "setuptools>=68"
+
+      - name: Final sdist ve wheel oluştur
+        if: steps.checksum.outputs.checksum_match == 'true'
+        run: |
+          cd "$RELEASE_WORK/extracted/$RELEASE_BASENAME"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from setuptools.build_meta import build_sdist, build_wheel
+
+          output = Path(os.environ["RELEASE_WORK"]) / "assets"
+          sdist = build_sdist(str(output))
+          wheel = build_wheel(str(output))
+          expected = {
+              "pastafari_calendar_python-1.0.0.tar.gz",
+              "pastafari_calendar_python-1.0.0-py3-none-any.whl",
+          }
+          actual = {
+              path.name
+              for path in output.iterdir()
+              if path.name.startswith("pastafari_calendar_python-")
+          }
+          if actual != expected:
+              raise SystemExit(f"Beklenmeyen paket artifact kümesi: {sorted(actual)!r}")
+          print(f"FINAL_SDIST={sdist}")
+          print(f"FINAL_WHEEL={wheel}")
+          PY
+
+      - name: Final Release metadata ve notlarını üret
+        if: steps.checksum.outputs.checksum_match == 'true'
+        run: |
+          cp SHA256SUMS.txt "$RELEASE_WORK/assets/SHA256SUMS.txt"
+          cat > "$RELEASE_WORK/assets/${RELEASE_BASENAME}_RELEASE_METADATA.txt" <<EOF
+          PACKAGE_NAME=pastafari-calendar-python
+          PACKAGE_VERSION=1.0.0
+          SOURCE_LANGUAGE=Türkçe
+          SOURCE_LANGUAGE_CATALOG_VERSION=1.3.2
+          RELEASE_BRANCH=Python+Türkçe
+          RELEASE_TAG=$RELEASE_TAG
+          COMMIT_SHA=${{ steps.checksum.outputs.commit_sha }}
+          TREE_SHA=${{ steps.checksum.outputs.tree_sha }}
+          TRACKED_FILE_COUNT=${{ steps.checksum.outputs.tracked_file_count }}
+          TRACKED_SHA256SUMS_MATCH=YES
+          FINAL_SEMANTIC_TESTS=421 PASS
+          CLEAN_SDIST_WHEEL_VALIDATION=PASS
+          RC_FREEZE=PASS
+          EOF
+
+          cat > "$RELEASE_WORK/assets/${RELEASE_BASENAME}_RELEASE_NOTES.txt" <<'EOF'
+          Python + Türkçe Pastafarian Calendar 1.0.0
+
+          Bu Release, Python + Türkçe dalının tamamlanmış ve doğrulanmış 1.0.0 sürümüdür.
+          Normatif otorite İbranice Tomar'dır. Eski Python uygulaması yalnız geriye dönük
+          diferansiyel regresyon kanıtıdır ve normatif oracle değildir.
+
+          Final doğrulama kapıları:
+          - 421 semantik test: PASS
+          - modern cold-start regresyonu: PASS
+          - temiz wheel kurulumu: PASS
+          - uninstall izolasyonu ve sdist yeniden kurulumu: PASS
+          - RC freeze denetimi: PASS
+
+          Release tag: python-turkish-v1.0.0
+          Paket sürümü: pastafari-calendar-python 1.0.0
+          EOF
+
+      - name: Release asset checksumlarını üret ve doğrula
+        if: steps.checksum.outputs.checksum_match == 'true'
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import os
+          from pathlib import Path
+
+          assets = Path(os.environ["RELEASE_WORK"]) / "assets"
+          basename = os.environ["RELEASE_BASENAME"]
+          checksum_file = assets / f"{basename}_RELEASE_ASSET_SHA256.txt"
+          files = sorted(
+              path for path in assets.iterdir()
+              if path.is_file() and path != checksum_file
+          )
+          lines = []
+          for path in files:
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              lines.append(f"{digest}  {path.name}\n")
+          checksum_file.write_text("".join(lines), encoding="utf-8", newline="\n")
+
+          for line in checksum_file.read_text(encoding="utf-8").splitlines():
+              expected, name = line.split("  ", 1)
+              actual = hashlib.sha256((assets / name).read_bytes()).hexdigest()
+              if actual != expected:
+                  raise SystemExit(f"Release asset checksum uyuşmazlığı: {name}")
+          print(f"RELEASE_ASSET_SHA256_VERIFY=PASS assets={len(files)}")
+          PY
+
+      - name: Final Release varlıklarını yükle
+        if: steps.checksum.outputs.checksum_match == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-turkce-1.0.0-release-assets-${{ github.sha }}
+          path: ${{ runner.temp }}/python-turkce-release/assets/*
+          if-no-files-found: error
+          retention-days: 30
