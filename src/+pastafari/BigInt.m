@@ -27,10 +27,22 @@ classdef BigInt
                 obj = obj.normalize();
                 return
             end
-            if isnumeric(value) && isscalar(value) && isreal(value) && isfinite(value) && fix(value) == value
+            if isinteger(value) && isscalar(value)
+                if strncmp(class(value), 'uint', 4)
+                    s = sprintf('%u', value);
+                else
+                    s = sprintf('%d', value);
+                end
+                [sgn, lm] = pastafari.BigInt.parseDecimal(s);
+                obj.signValue = sgn;
+                obj.limbs = lm;
+                obj = obj.normalize();
+                return
+            end
+            if isfloat(value) && isscalar(value) && isreal(value) && isfinite(value) && fix(value) == value
                 if abs(double(value)) > flintmax
                     error('Pastafari:BigInt:UnsafeNumericInput', ...
-                        'Wartość numeryczna przekracza zakres dokładnych liczb całkowitych MATLAB-a; użyj napisu dziesiętnego.');
+                        'Wartość zmiennoprzecinkowa przekracza bezpieczny zakres dokładnych liczb całkowitych MATLAB-a; użyj natywnego typu całkowitego albo napisu dziesiętnego.');
                 end
                 [sgn, lm] = pastafari.BigInt.parseDecimal(sprintf('%.0f', double(value)));
                 obj.signValue = sgn;
