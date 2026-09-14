@@ -6,6 +6,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Discovery02.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch02.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery03.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Patch03.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -49,8 +50,14 @@ function New-BaseMonsterContext {
         legacyDistanceCalculationDay = $null
         legacyDistanceTargetDay = $null
         legacyDistanceValue = $null
-        discovery03Status = 'NOT_RUN'
+        discovery03Status = 'HISTORICAL_SCAR_PRESENT'
         discovery03InvocationCount = 0
+        patch03ChronologicalDistance = $null
+        patch03DistanceValue = $null
+        patch03LegacyReplaced = $false
+        patch03Applied = $false
+        patch03Status = 'NOT_RUN'
+        patch03InvocationCount = 0
     }
 }
 
@@ -61,7 +68,6 @@ function Add-BaseMetric {
         [Parameter(Mandatory)][string]$Name,
         [System.Numerics.BigInteger]$Amount = [System.Numerics.BigInteger]::One
     )
-
     if (-not $Context.metrics.ContainsKey($Name)) {
         $Context.metrics[$Name] = [System.Numerics.BigInteger]::Zero
     }
@@ -75,14 +81,12 @@ function Add-BaseLog {
         [Parameter(Mandatory)][string]$Code,
         [object]$Data = $null
     )
-
     $Context.logs.Add([pscustomobject]@{ code = $Code; data = $Data })
 }
 
 function New-BaseDispatcher {
     [CmdletBinding()]
     param()
-
     return [pscustomobject]@{ handlers = @{} }
 }
 
@@ -93,7 +97,6 @@ function Register-BaseHandler {
         [Parameter(Mandatory)][string]$Phase,
         [Parameter(Mandatory)][scriptblock]$Handler
     )
-
     if ($Dispatcher.handlers.ContainsKey($Phase)) {
         throw "May nakarehistro nang handler para sa phase '$Phase'."
     }
@@ -106,7 +109,6 @@ function Invoke-BaseDispatch {
         [Parameter(Mandatory)]$Dispatcher,
         [Parameter(Mandatory)]$Context
     )
-
     if (-not $Dispatcher.handlers.ContainsKey([string]$Context.phase)) {
         throw "Walang handler para sa phase '$($Context.phase)'."
     }
@@ -116,7 +118,6 @@ function Invoke-BaseDispatch {
 function Assert-BaseContextOwnership {
     [CmdletBinding()]
     param([Parameter(Mandatory)]$Context)
-
     if ($null -eq $Context.semanticCommitted) {
         throw 'Walang committed semantic state ang invocation context.'
     }
@@ -132,7 +133,6 @@ function Assert-BaseContextOwnership {
 function Start-BaseSemanticTransaction {
     [CmdletBinding()]
     param([Parameter(Mandatory)]$Context)
-
     if ($null -ne $Context.semanticPending) {
         throw 'May bukas nang semantic transaction.'
     }
@@ -146,11 +146,9 @@ function Complete-BaseSemanticTransaction {
         [Parameter(Mandatory)]$Context,
         [Parameter(Mandatory)][scriptblock]$Validator
     )
-
     if ($null -eq $Context.semanticPending) {
         throw 'Walang semantic transaction na maaaring i-commit.'
     }
-
     $ok = & $Validator $Context.semanticPending
     if ($ok -ne $true) {
         $Context.semanticPending = $null
@@ -158,7 +156,6 @@ function Complete-BaseSemanticTransaction {
         $Context.rollbackSnapshot = $null
         throw 'Tinanggihan ng validator ang pending semantic state.'
     }
-
     $Context.semanticCommitted = @{} + $Context.semanticPending
     $Context.semanticPending = $null
     $Context.rollbackSnapshot = $null
@@ -167,7 +164,6 @@ function Complete-BaseSemanticTransaction {
 function Undo-BaseSemanticTransaction {
     [CmdletBinding()]
     param([Parameter(Mandatory)]$Context)
-
     if ($null -ne $Context.rollbackSnapshot) {
         $Context.semanticCommitted = @{} + $Context.rollbackSnapshot
     }
@@ -181,7 +177,6 @@ function Wrap-BaseMonsterError {
         [Parameter(Mandatory)][System.Exception]$Exception,
         [Parameter(Mandatory)][string]$Phase
     )
-
     return [System.InvalidOperationException]::new(
         "Nabigo ang monster base sa phase '$Phase': $($Exception.Message)",
         $Exception
@@ -194,12 +189,11 @@ function Invoke-CalendarDateSpaghettiBootstrap {
         [Parameter(Mandatory)][System.Numerics.BigInteger]$CalculationDay,
         [Parameter(Mandatory)][System.Numerics.BigInteger]$TargetDay
     )
-
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 6.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 7.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -210,22 +204,22 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'DISCOVERY03'
+    $ctx.phase = 'PATCH03'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY03' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH03' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
-        return Invoke-Discovery03LegacyDistanceAdapter -Context $withPatch02
+        return Invoke-Patch03DistanceAdapter -Context $withPatch02
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.discovery03.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.patch03.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'DISCOVERY03_COMPLETE'
+    $result.status = 'PATCH03_COMPLETE'
     return $result
 }

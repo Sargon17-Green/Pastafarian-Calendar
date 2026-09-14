@@ -1,47 +1,51 @@
-# Arkitektura hanggang Stage 6
+# Arkitektura hanggang Stage 7
 
-Ang Stage 1 ay neutral na shell. Ang Stage 2 at 4 ay historical defects. Ang Stage 3 at 5 ay correction wrappers na nagpapanatili sa raw scars. Ang Stage 6 ay ikatlong discovery layer.
+Ang Stage 1 ay neutral shell. Ang Stage 2/4/6 ay historical discovery layers. Ang Stage 3/5/7 ay correction wrappers na nagpapanatili sa raw scars.
 
-## Mga file boundary
+## Mga boundary
 
-`oracle/NormativeScroll.ps1` ay test-only reference.
+`oracle/NormativeScroll.ps1` ay test-only.
 
-`src/Discovery01.ps1` at `src/Patch01.ps1` ang remainder scar at correction.
+`src/Discovery01.ps1` / `src/Patch01.ps1` — remainder.
 
-`src/Discovery02.ps1` at `src/Patch02.ps1` ang day-tag scar at correction.
+`src/Discovery02.ps1` / `src/Patch02.ps1` — day tags.
 
-`src/Discovery03.ps1` ang raw legacy distance.
+`src/Discovery03.ps1` — raw legacy distance.
 
-`src/MonsterSkeleton.ps1` ang production dispatcher host.
+`src/Patch03.ps1` — `patchedCounts` at production Patch 03 adapter.
 
-## Stage 6 route
+`src/MonsterSkeleton.ps1` — dispatcher host.
+
+## Stage 7 production route
 
 ```text
 Invoke-CalendarDateSpaghetti
--> Invoke-Patch01SaveAdapter
--> Invoke-Patch02DayTagAdapter
--> Invoke-Discovery03LegacyDistanceAdapter
+-> Patch 01
+-> Patch 02
+-> Patch 03
+-> patchedCounts
 -> oldDistance
--> dayTagWithFoundationScar(calculationDay)
--> dayTagWithFoundationScar(targetDay)
+-> compare raw legacy distance with abs(target-calculation)
+-> replace only when unequal
+-> add final inclusive +1
 ```
 
-Ang `oldDistance` ay sadyang hindi gumagamit ng chronological day difference.
+## Semantic state
 
-## Per-invocation state
-
-Ang Discovery 03 adapter ay nagdadagdag ng:
+Patch 03 commits:
 
 - `legacyDistanceCalculationDay`
 - `legacyDistanceTargetDay`
 - `legacyDistanceValue`
-- `discovery03Status`
-- `discovery03InvocationCount`
+- `patch03ChronologicalDistance`
+- `patch03DistanceValue`
+- `patch03LegacyReplaced`
+- `patch03Applied`
 
-Hindi ginagamit ang logs o metrics bilang semantic input.
+Observability state is not used to compute the result.
 
-## Expected-red contract
+## GREEN contract
 
-Dapat manatiling GREEN ang Patch 01 at Patch 02 outputs. Ang bagong distance layer ay dapat magkaroon ng eksaktong apat na divergence at isang matching control sa limang historical probes.
+The patched distance must equal normative `abs(target-calculation)+1` on all required edges while direct `oldDistance` retains the Stage 6 historical values.
 
-Walang Patch 03 correction sa Stage 6.
+Walang Stage 8 Discovery 04 logic.
