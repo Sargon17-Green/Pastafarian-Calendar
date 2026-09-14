@@ -307,6 +307,51 @@ print(json.dumps(rows, ensure_ascii=False))
         self.assertLess(cache.min_known, 0)
         self.assertGreater(cache.max_known, 0)
 
+    def test_release_modern_cold_production_path_stays_fast_and_canonical(self):
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        src_root = os.path.join(repo_root, "src")
+        cases = (
+            (739834, 739834, [5000, "Böbrek", 306, "Dil", 23]),
+            (739834, 739840, [5000, "Böbrek", 312, "Fırtına", 33]),
+        )
+
+        child = r"""
+import json
+import sys
+from pastafari_calendar.acceleration_scars import acceleration_mode, reset_acceleration_scars_for_tests
+from pastafari_calendar.calendar import calendar_date_spaghetti
+
+cases = json.loads(sys.argv[1])
+rows = []
+for calculation_day, target_day, expected in cases:
+    reset_acceleration_scars_for_tests()
+    with acceleration_mode(True):
+        result = calendar_date_spaghetti(calculation_day, target_day)
+    rows.append([
+        result.year_number,
+        result.cutlet_name,
+        result.day_in_cutlet,
+        result.month_name,
+        result.day_in_month,
+    ])
+print(json.dumps(rows, ensure_ascii=False))
+"""
+
+        env = os.environ.copy()
+        existing = env.get("PYTHONPATH")
+        env["PYTHONPATH"] = src_root if not existing else src_root + os.pathsep + existing
+        completed = subprocess.run(
+            [sys.executable, "-c", child, json.dumps(cases, ensure_ascii=False)],
+            cwd=repo_root,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=True,
+            timeout=45,
+        )
+        rows = json.loads(completed.stdout.strip().splitlines()[-1])
+        self.assertEqual(rows, [expected for _, _, expected in cases])
+
     def test_external_rollback_containment_restores_only_declared_stage_fields(self):
         year = IntegratedYear(
             number=5000,
