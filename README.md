@@ -2,30 +2,58 @@
 
 Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`. Nagsimula ang punong ito mula sa wala sa Stage 1 at hindi gumamit ng code, fixture, output, hash, oracle, o artifact mula sa ibang pagpapatupad.
 
-## Saklaw ng Stage 1
+## Stage 1 — Bootstrap
 
-- May nakahiwalay na malinis na normative oracle sa `oracle/NormativeScroll.ps1`.
-- May nakapirming `SourceLanguageCatalog` na may 17 pangalan ng cutlet at 47 pangalan ng buwan.
-- Ang lahat ng normative ordering ay gumagamit lamang ng `canonicalIndex`.
-- May neutral na base context, dispatcher, validator, error wrapper, metrics, at logging shell.
-- Wala pang legacy defect, historical scar, compatibility flag, o patch mula sa Stage 2 pataas.
-- Ang lahat ng executable code at test code ay PowerShell lamang.
+Natapos at napatunayan sa aktuwal na Windows PowerShell 5.1 ang Stage 1. Nananatiling hiwalay ang malinis na normative oracle, nakapirmi ang `SourceLanguageCatalog`, at per-invocation ang semantic state.
+
+## Stage 2 — Discovery 01
+
+Ang Stage 2 ay sadyang naglalagay ng unang makasaysayang legacy defect sa production path:
+
+```text
+oldRemainder(x) = regularMod(x, M)
+```
+
+Hindi nito ginagawa ang normative `0 -> M` correction. Dahil dito, ang `M`, `2M`, at `3M` ay sadyang nagbubunga ng `0` sa legacy path samantalang `M` ang normative na inaasahan. Ang `M+1` ay nananatiling tugma at nagbubunga ng `1`.
+
+Ang production route ay:
+
+```text
+Invoke-CalendarDateSpaghetti
+-> base dispatcher
+-> Invoke-Discovery01LegacyAdapter
+-> oldRemainder
+```
+
+Ang adapter ay nagtatala lamang ng state sa sariling invocation context. Walang mutable semantic global state at hindi tumatawag sa normative oracle ang production path.
+
+Wala pang `savePatch` sa Stage 2. Ang correction ay para lamang sa susunod na PATCH stage.
 
 ## Pagpapatakbo ng mga pagsusuri
 
+Stage 1 regression:
+
 ```powershell
-pwsh -NoLogo -NoProfile -File ./tests/Stage01.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
 ```
 
-Ang inaasahang huling linya sa matagumpay na runtime ay:
+Discovery 01:
 
-```text
-STAGE01_RESULT=PASS
+```powershell
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage02.Tests.ps1
 ```
+
+Buong Stage 2 verification at finalization:
+
+```powershell
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage02.ps1
+```
+
+Sa matagumpay na Discovery 01 verification, kailangang lumitaw ang `STAGE02_RESULT=PASS` at `STAGE02_REPOSITORY_STATE=EXPECTED_RED`.
 
 ## Tumpak na integer
 
-Ginagamit ng linya ang `System.Numerics.BigInteger`, na bahagi ng .NET runtime na ginagamit mismo ng PowerShell. Walang floating point sa normative arithmetic.
+Ginagamit ng linya ang `System.Numerics.BigInteger`, na bahagi ng .NET runtime na ginagamit mismo ng PowerShell. Walang floating point sa normative o Discovery 01 arithmetic.
 
 ## Wika ng pinagmulan
 
