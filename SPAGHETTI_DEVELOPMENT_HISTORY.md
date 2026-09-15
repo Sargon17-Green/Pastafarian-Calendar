@@ -925,3 +925,29 @@ Dopiero Stage 47 ma dodać `VirtualLegacyList` z exact sliding-window DP `count(
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 47 — PATCH 23: VirtualLegacyList
+
+Historyczne `LegacyAllMonthLengthWaysAPI`, `legacyMaterializeMonthLengthWays` oraz `LegacyMonthLengthMaterializationAdapter` pozostają fizycznie bez zmian.
+
+`MonthLengthCompatibilityRoute` nadal zawsze wykonuje legacy materialization attempt jako pierwszy. Dla ogromnych rodzin zachowuje więc ten sam `blocked` scar, error id, safe cap, lower-bound proof i brak concrete rows.
+
+Dodano `VirtualLegacyList`.
+
+Obiekt reprezentuje dokładnie tę samą leksykograficzną rodzinę bounded compositions: dokładnie `monthCount` wartości, każda w `4..123`, o sumie `totalDays`. Nie przechowuje żadnych wierszy rodziny.
+
+Konstruktor buduje wyłącznie tabelę exact counts przez sliding-window DP. `count()` zwraca exact BigInt count całej rodziny.
+
+`itemAt1(rank1)` wykonuje dokładny 1-based lexicographic unrank. Dla każdej pozycji skanuje legalne wartości rosnąco i odejmuje count odpowiedniego suffix block. Kolejność pozostaje identyczna z historycznym recursive `list_all_ways`.
+
+Dla małych rodzin route nadal wykonuje concrete legacy list i raw selection, a następnie wymaga pełnej zgodności concrete count, raw row i virtual itemAt1.
+
+Dla ogromnych rodzin, w których legacy materialization jest blocked, route wykonuje bowl `3` / seal `31` selection bezpośrednio na exact virtual count i pobiera tylko wybrany row.
+
+Główny witness `300/10` zachowuje blocked legacy scar, ma exact count `16972992395495488`, rank `60447` i publikuje `[4,4,4,4,4,4,15,68,114,79]`.
+
+Niezmieniony regression Stage 46 ma po tej zmianie przejść z EXPECTED_RED do GREEN.
+
+Stage 47 nie wprowadza daily month chooser ani month weaving. Dopiero Stage 48 rozpocznie Discovery 24.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
