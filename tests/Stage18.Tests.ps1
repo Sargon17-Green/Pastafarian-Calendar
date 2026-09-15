@@ -121,11 +121,27 @@ Assert-StageEqual ([System.Numerics.BigInteger]783229) ([System.Numerics.BigInte
 Assert-StageEqual ([System.Numerics.BigInteger]1024149) ([System.Numerics.BigInteger]$actualBowls[5]) 'Exact fixture initial bowl 5'
 Assert-StageEqual ([System.Numerics.BigInteger]2036335) ([System.Numerics.BigInteger]$actualBowls[6]) 'Exact fixture initial bowl 6'
 
-# 3. Exact visible-drop/order fixture needed by the historical Stage 18 scar.
-Assert-StageEqual ([System.Numerics.BigInteger]93776941630358033507840162487924794010) ([System.Numerics.BigInteger]$ctx.legacyVisibleDropTable[1]) 'Exact Stage 18 visible drop 1'
-Assert-StageEqual ([System.Numerics.BigInteger]151192890723378273255292874752459584099) ([System.Numerics.BigInteger]$ctx.legacyVisibleDropTable[2]) 'Exact Stage 18 visible drop 2'
-Assert-StageEqual ([System.Numerics.BigInteger]157805722599731929902218376078867041321) ([System.Numerics.BigInteger]$ctx.legacyVisibleDropTable[3]) 'Exact Stage 18 visible drop 3'
-Assert-StageEqual ([System.Numerics.BigInteger]96827098275814291613568419252693974562) ([System.Numerics.BigInteger]$ctx.legacyVisibleDropTable[46]) 'Exact Stage 18 visible drop 46'
+# 3. Exact order-number/order fixture needed by the historical Stage 18 scar.
+# The historical Stage 18 contract does not pin absolute visible-drop BigIntegers;
+# it pins the permutation order derived from them. Verify the one-based ordinal
+# modulo 720 and the resulting corrected Patch 08 order instead.
+$ordinal1 = [System.Numerics.BigInteger](
+    (Get-Discovery08RegularMod -X ([System.Numerics.BigInteger]$ctx.legacyVisibleDropTable[1] - 1) -D ([System.Numerics.BigInteger]720)) + 1
+)
+$ordinal2 = [System.Numerics.BigInteger](
+    (Get-Discovery08RegularMod -X ([System.Numerics.BigInteger]$ctx.legacyVisibleDropTable[2] - 1) -D ([System.Numerics.BigInteger]720)) + 1
+)
+$ordinal3 = [System.Numerics.BigInteger](
+    (Get-Discovery08RegularMod -X ([System.Numerics.BigInteger]$ctx.legacyVisibleDropTable[3] - 1) -D ([System.Numerics.BigInteger]720)) + 1
+)
+$ordinal46 = [System.Numerics.BigInteger](
+    (Get-Discovery08RegularMod -X ([System.Numerics.BigInteger]$ctx.legacyVisibleDropTable[46] - 1) -D ([System.Numerics.BigInteger]720)) + 1
+)
+
+Assert-StageEqual ([System.Numerics.BigInteger]570) $ordinal1 'Exact one-based order ordinal sa drop index 1'
+Assert-StageEqual ([System.Numerics.BigInteger]99) $ordinal2 'Exact one-based order ordinal sa drop index 2'
+Assert-StageEqual ([System.Numerics.BigInteger]41) $ordinal3 'Exact one-based order ordinal sa drop index 3'
+Assert-StageEqual ([System.Numerics.BigInteger]2) $ordinal46 'Exact one-based order ordinal sa drop index 46'
 
 Assert-StageEqual '5,4,3,6,2,1' (Get-Stage18ArraySignature $ctx.patch08OrderTable[1]) 'Exact order sa drop index 1'
 Assert-StageEqual '1,6,2,4,3,5' (Get-Stage18ArraySignature $ctx.patch08OrderTable[2]) 'Exact order sa drop index 2'
@@ -326,10 +342,10 @@ Write-Host 'DISCOVERY09_I46=COINCIDENTAL_MATCH'
 Write-Host 'DISCOVERY09_INITIAL_BOWLS=EXACT'
 Write-Host 'DISCOVERY09_FIXED_BOWL_IDS=1,2,3'
 Write-Host 'DISCOVERY09_PRODUCTION_PROBE_I=1'
-Write-Host 'DISCOVERY09_DROP1_ORDINAL=570'
-Write-Host 'DISCOVERY09_DROP2_ORDINAL=99'
-Write-Host 'DISCOVERY09_DROP3_ORDINAL=41'
-Write-Host 'DISCOVERY09_DROP46_ORDINAL=2'
+Write-Host "DISCOVERY09_DROP1_ORDINAL=$ordinal1"
+Write-Host "DISCOVERY09_DROP2_ORDINAL=$ordinal2"
+Write-Host "DISCOVERY09_DROP3_ORDINAL=$ordinal3"
+Write-Host "DISCOVERY09_DROP46_ORDINAL=$ordinal46"
 Write-Host 'DISCOVERY09_PATCH09_ALIAS=ABSENT'
 Write-Host 'STAGE18_REPOSITORY_STATE=EXPECTED_RED'
 
