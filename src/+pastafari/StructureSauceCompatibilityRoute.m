@@ -1,8 +1,9 @@
 classdef StructureSauceCompatibilityRoute
-    % Produkcyjna trasa Discovery 20.
+    % Produkcyjna trasa structure sauce po PATCH 20.
     %
-    % Stage 40 publikuje jeszcze oldStructureSauce(cDay, originalTargetDay).
-    % Pierwszy dzień roku jest znany, ale nie jest używany do semantic sauce.
+    % Najpierw zawsze wykonuje realny historyczny ghost
+    % oldStructureSauce(cDay,originalTargetDay) i zachowuje go jako bliznę.
+    % Semantic path używa Sauce(cDay,openGateDay+1).
     methods (Static)
         function [ctx, sauceResult] = call( ...
                 ctx, cDay, originalTargetDay, year)
@@ -23,10 +24,7 @@ classdef StructureSauceCompatibilityRoute
                     'cDay structure sauce musi należeć do bieżącego context.');
             end
 
-            ctx.phase = 'DISCOVERY_20';
-            ctx.subPhase = 20;
-            ctx.mode = 'OLD_STRUCTURE_SAUCE_TARGET';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
+            % Surowa historyczna blizna Discovery 20.
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_20_OLD_STRUCTURE_SAUCE_TARGET';
             ctx.metrics = pastafari.MetricsShell.bump( ...
@@ -41,13 +39,29 @@ classdef StructureSauceCompatibilityRoute
             ctx.legacyStructureSauce = ghost;
             ctx.legacyStructureSauceBowl2 = ghost.bowl2;
             ctx.legacyStructureSauceOrderAt46 = ghost.orderAt46Latch;
-            ctx.structureSauceCandidate = ghost;
-            ctx.structureSauceBowl2Candidate = ghost.bowl2;
-            ctx.diagnostics{end + 1} = ...
-                ['Discovery 20 używa originalTargetDay do structure sauce; ', ...
-                 'znany yearFirstDay=openGateDay+1 pozostaje zignorowany.'];
 
-            sauceResult = ghost;
+            % PATCH 20: autorytatywny target struktury to pierwszy dzień roku.
+            ctx.phase = 'PATCH_20';
+            ctx.subPhase = 20;
+            ctx.mode = 'AUTHORITATIVE_FIRST_DAY_STRUCTURE_SAUCE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = ...
+                'PATCH_20_STRUCTURE_SAUCE_DETOUR';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch20.structureSauceDetour.calls');
+
+            [semanticSauce, reusedGhost] = ...
+                pastafari.StructureSauceDetourPatch.apply( ...
+                    calculationDay, originalTarget, yearFirstDay, ghost);
+
+            ctx.structureSauceCandidate = semanticSauce;
+            ctx.structureSauceBowl2Candidate = semanticSauce.bowl2;
+            ctx.diagnostics{end + 1} = sprintf( ...
+                ['PATCH 20 zachowuje ghost target=%s, ale publikuje ', ...
+                 'firstDayOfYear=%s; reusedGhost=%d.'], ...
+                char(originalTarget), char(yearFirstDay), reusedGhost);
+
+            sauceResult = semanticSauce;
         end
     end
 

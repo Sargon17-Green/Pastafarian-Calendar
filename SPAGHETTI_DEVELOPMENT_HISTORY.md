@@ -741,3 +741,33 @@ Dopiero Stage 41 ma najpierw wykonać dokładnie ten sam historyczny ghost call,
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 41 — PATCH 20: structure sauce detour
+
+Historyczny `oldStructureSauce(cDay,originalTargetDay)` pozostaje fizycznie bez zmian i nadal jest realnie wykonywany przy każdym przejściu przez `StructureSauceCompatibilityRoute`.
+
+Jego target, finalny `bowl2` oraz `orderAt46` pozostają zapisane w polach legacy jako obserwowalna blizna Discovery 20.
+
+Dodano osobny `StructureSauceDetourPatch`.
+
+Autorytatywny target do budowania struktury roku jest wyliczany wyłącznie jako:
+
+`firstDayOfYear = openGateDay + 1`.
+
+Jeżeli `originalTargetDay` różni się od `firstDayOfYear`, semantic path wykonuje osobny:
+
+`Sauce(cDay,firstDayOfYear)`
+
+przez neutralny `sauceWithCurrentScars`.
+
+Jeżeli `originalTargetDay==firstDayOfYear`, historyczny ghost jest już dokładnie właściwym sauce i może zostać użyty ponownie bez drugiego obliczenia.
+
+`StructureSauceCompatibilityRoute` zawsze wykonuje ghost jako pierwszy, zapisuje jego pełną bliznę, a dopiero potem publikuje wynik PATCH 20 w `structureSauceCandidate` i `structureSauceBowl2Candidate`.
+
+Niezmieniony regression Stage 40 ma po tej zmianie przejść z EXPECTED_RED do GREEN.
+
+Test Stage 41 sprawdza wszystkie trzy dokładne witnesses Stage 40, porównuje wszystkie sześć bowls i `orderAt46` z normatywnym oracle, sprawdza niezależność struktury tego samego roku od dwóch różnych original targets oraz potwierdza reuse przy `originalTargetDay==firstDayOfYear`.
+
+`oldStructureSauce` nie jest przekierowywany, usuwany ani zastępowany.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
