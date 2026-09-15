@@ -951,3 +951,43 @@ Stage 47 nie wprowadza daily month chooser ani month weaving. Dopiero Stage 48 r
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 48 — DISCOVERY 24: daily month chooser
+
+Dodano dwudziesty czwarty historyczny defekt w splocie miesięcy.
+
+Normatywna rodzina splotów nie wybiera miesiąca niezależnie dla każdego dnia. Dla zadanego wektora długości musi zachować dokładne multiplicities, kolejność pierwszego otwarcia miesięcy `1,2,...` oraz kolejność ich ostatecznego zamknięcia `1,2,...`.
+
+Historyczny `legacyChooseEachDaySeparately` tego nie robi.
+
+Dla każdego kolejnego dnia pobiera `answerAt(stream,k)`, mapuje go niezależnie modulo `monthCount` do month id i, jeżeli proponowany miesiąc jest już pełny, przesuwa się cyklicznie przez `wrapMonth` do pierwszego miesiąca z pozostałą pojemnością.
+
+Algorytm zawsze zużywa dokładne multiplicities, ale może otworzyć miesiąc 2 lub 3 przed miesiącem 1 albo zamknąć późniejszy miesiąc przed wcześniejszym.
+
+`buildMonthWeavingAnswerRing` używa właściwego źródła odpowiedzi dla splotu: bowl `4`, seal `32`, z następną misą według latched orderAt46.
+
+`LegacyMonthWeavingAdapter` wykonuje historyczny chooser jako realny ghost. `MonthWeavingCompatibilityRoute` w Stage 48 zapisuje stream, raw proposals, ghost i finalne zero remaining counts, a następnie publikuje dokładnie ghost.
+
+Główny syntetyczny witness ma month lengths `[4,4,4]`, bowls `[17,19,23,29,31,37]` i orderAt46 `[1,2,3,4,5,6]`.
+
+Bowl `4` / seal `32` daje `first=64145`, `directionStep=+1`.
+
+Daily chooser publikuje:
+
+`[2,3,1,2,3,1,2,3,1,2,3,1]`.
+
+Multiplicities są poprawne, ale pierwszy występuje miesiąc `2`, więc splot jest nielegalny.
+
+Test-only whole-weave reference dla `[4,4,4]` ma dokładnie `1301` legalnych splotów. Ten sam answer-ring stream wybiera rank `396`; expected legal weave wynosi:
+
+`[1,1,2,3,2,1,3,2,1,2,3,3]`.
+
+Regression zachowuje również trzy wcześniej utrwalone answer-ring witnesses z poprawnego structure-sauce path. Wszystkie historyczne ghosty zużywają dokładnie `4+4+4` dni, lecz naruszają legalny whole-weave ordering.
+
+Stage 48 pozostaje celowo `EXPECTED_RED`.
+
+Dopiero Stage 49 ma pozostawić daily ghost fizycznie bez zmian i wykonać go jako pierwszy, a następnie zbudować whole-weave DP family, policzyć jej exact count, wybrać jeden rank dla całego splotu i wykonać exact lexicographic unrank. Jeżeli ghost przypadkiem jest równy poprawnemu whole weave, może zostać reuse; w przeciwnym razie publikowany jest DP unrank.
+
+Stage 48 nie implementuje żadnego whole-weave production count/unrank.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

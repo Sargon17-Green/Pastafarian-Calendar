@@ -153,6 +153,13 @@ classdef MonsterContext < handle
         legacyMonthLengthConcreteWays
         legacyMonthLengthRank
         monthLengthsCandidate
+        monthWeavingLengthsInput
+        monthWeavingStreamFirst
+        monthWeavingStreamDirectionStep
+        legacyDailyMonthRawProposals
+        legacyDailyMonthWeaving
+        legacyDailyMonthRemainingFinal
+        monthWeavingCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -308,6 +315,13 @@ classdef MonsterContext < handle
             obj.legacyMonthLengthConcreteWays = {};
             obj.legacyMonthLengthRank = [];
             obj.monthLengthsCandidate = [];
+            obj.monthWeavingLengthsInput = [];
+            obj.monthWeavingStreamFirst = [];
+            obj.monthWeavingStreamDirectionStep = [];
+            obj.legacyDailyMonthRawProposals = [];
+            obj.legacyDailyMonthWeaving = [];
+            obj.legacyDailyMonthRemainingFinal = [];
+            obj.monthWeavingCandidate = [];
         end
     end
 end
