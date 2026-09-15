@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=12
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=13
+CURRENT_KIND=PATCH
 CURRENT_PATCH=06
 LAST_COMPLETED_STAGE=12
-EXPECTED_REPOSITORY_STATE=RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 06 legacyPrior layer na nakakakita lamang sa visible dropStore[i-back]; ikinabit ito sa tunay na production route sa pamamagitan ng valid slot-1 probe, habang sinasadyang wala pa ring hidden-history fallback para sa slot 0 hanggang -6.
+MONSTER_ARCHITECTURE_GROWTH=Pinanatili ang raw legacyPrior bilang visible-only dropStore[i-back] scar; idinagdag ang hiwalay na Patch 06 priorPatch na gumagamit pa rin ng legacyPrior para sa slot>=1 at nagta-translate ng slot<=0 sa hiddenK=1-slot bago tumawag sa hiddenByNearness.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -39,3 +39,7 @@ STAGE11_PATCH=HIDDEN_BY_NEARNESS
 STAGE11_RUNTIME_VERIFICATION=GREEN_CONFIRMED
 STAGE12_DISCOVERY=LEGACY_PRIOR_VISIBLE_ONLY
 STAGE12_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
+STAGE13_PATCH=PRIOR_PATCH_HIDDEN_FALLBACK
+STAGE13_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `13` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na GREEN ang visible at hidden branches ng Patch 06, na nananatiling pisikal ang raw legacyPrior scar, at wala pang Stage 14 grind-table indexing defect.

@@ -1,6 +1,6 @@
-# Arkitektura hanggang Stage 12
+# Arkitektura hanggang Stage 13
 
-Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10/12 ay historical discovery layers. Ang Stage 3/5/7/9/11 ay correction wrappers na nagpapanatili sa raw scars.
+Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10/12 ay historical discovery layers. Ang Stage 3/5/7/9/11/13 ay correction wrappers na nagpapanatili sa raw scars.
 
 ## Mga boundary
 
@@ -11,10 +11,37 @@ Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10/12 ay historical discovery la
 - `src/Discovery03.ps1` / `src/Patch03.ps1` — distance.
 - `src/Discovery04.ps1` / `src/Patch04.ps1` — stone table.
 - `src/Discovery05.ps1` / `src/Patch05.ps1` — backward hidden storage at near-ness correction.
-- `src/Discovery06.ps1` — visible-only prior/history access.
+- `src/Discovery06.ps1` — raw visible-only `legacyPrior`.
+- `src/Patch06.ps1` — visible/hidden branch correction.
 - `src/MonsterSkeleton.ps1` — production route at invocation-owned semantic state.
 
-## Stage 12 production route
+## Raw Stage 12 scar
+
+```text
+legacyPrior(dropStore,i,back)
+    -> dropStore[i-back]
+```
+
+`Discovery06.ps1` ay hindi binago ng Stage 13.
+
+## Patch 06
+
+```text
+slot = i - back
+
+slot >= 1
+    -> legacyPrior(dropStore,i,back)
+
+slot <= 0
+    -> hiddenK = 1-slot
+    -> hiddenByNearness(legacyHidden,hiddenK)
+```
+
+Ang positive branch ay hindi nangangailangan ng hidden storage.
+
+Ang nonpositive branch ay nangangailangan ng hidden storage at gumagamit ng Stage 11 near-ness translator.
+
+## Stage 13 production route
 
 ```text
 Invoke-CalendarDateSpaghetti
@@ -23,40 +50,38 @@ Invoke-CalendarDateSpaghetti
 -> Patch 03
 -> Patch 04
 -> Discovery 05
--> Patch 05 (k=1)
--> Discovery 06 production probe
-   -> probeStore[1] = Patch05 corrected value
-   -> legacyPrior(probeStore, i=2, back=1)
-   -> visible slot 1
+-> Patch 05
+-> Patch 06 production probe
+   -> i=2
+   -> back=1
+   -> slot=1
+   -> raw legacyPrior
 ```
 
-Ang production probe ay hindi visible-drop calculation at hindi bagong input sa calendar semantics.
+Ang probe ay hindi visible-drop computation at hindi pa sinisimulan ang Stage 14 builder.
 
-## Discovery 06 raw access
+## Patch 06 state
 
-```text
-legacyPrior(dropStore,i,back)
-    -> dropStore[i-back]
-```
+Invocation-owned:
 
-Walang hidden fallback.
+- `patch06Slot`
+- `patch06UsedHidden`
+- `patch06HiddenK`
+- `patch06Value`
+- `patch06Applied`
+- `patch06Status`
+- `patch06InvocationCount`
 
-Ang raw adapter ay nagtatago ng `i`, `back`, computed slot, at returned value sa invocation context.
+Patuloy ding naka-record ang Stage 12 coordinates at authoritative `legacyPriorValue`.
 
-## Missing hidden-history surface
+## GREEN contract
 
-```text
-slot 0  -> hidden1
-slot -2 -> hidden3
-slot -6 -> hidden7
-```
+Ang dating Stage 12 cases na slot `0,-2,-6` ay tumutugma na sa `hidden1,hidden3,hidden7`.
 
-Sa Stage 12, walang laman ang visible store sa mga slot na ito, kaya ang tatlong exact probe ay EXPECTED_RED.
+Ang visible branch ay nagpapatunay ng tunay na raw legacy call at gumagana kahit walang hidden storage.
 
-## Preserved Stage 11 behavior
+Ang hidden branch ay hindi tumatawag sa raw helper at tumatawag nang eksaktong isang beses sa `hiddenByNearness`.
 
-Ang Patch 05 ay nananatiling GREEN at ang production `k=1` corrected value ang ginagamit lamang bilang value ng valid slot-1 probe.
+## Wala pang Stage 14
 
-## Wala pang Stage 13
-
-Walang `priorPatch`, walang `hiddenK=1-slot` translation, at walang tawag sa `hiddenByNearness` mula sa `Discovery06.ps1`.
+Walang `legacyGrindRow`, `LEGACY_VISIBLE_GRIND_TABLE`, `SENTINEL_GRIND_ROW`, `GRIND_TABLE_WITH_SENTINEL`, o `LegacyVisibleDropBuilder`.

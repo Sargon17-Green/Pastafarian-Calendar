@@ -2,30 +2,43 @@
 
 Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`.
 
-## Stage 12 — Discovery 06
+## Stage 13 — Patch 06
 
-Idinadagdag ng Stage 12 ang historical visible-history helper:
+Nananatiling pisikal at sadyang mali ang Stage 12 helper:
 
 ```text
 legacyPrior(dropStore, i, back)
     -> dropStore[i-back]
 ```
 
-Ang helper na ito ay nakakakita lamang sa positive visible slots. Kapag ang `i-back` ay `0` o negatibo, wala itong alam tungkol sa hidden history.
+Ang correction ay nasa hiwalay na layer:
 
-Sa normative timeline:
+```text
+slot = i - back
+
+if slot >= 1:
+    return legacyPrior(dropStore, i, back)
+
+hiddenK = 1 - slot
+return hiddenByNearness(legacyHidden, hiddenK)
+```
+
+Ibig sabihin:
+
+- positive visible slot: talagang ginagamit pa rin ang raw `legacyPrior`;
+- walang hidden storage na kailangan sa positive branch;
+- nonpositive slot: ginagamit ang `hiddenK=1-slot`;
+- ang hidden branch ay dumadaan sa Stage 11 `hiddenByNearness`.
+
+Ang tatlong Stage 12 cases ay GREEN na ngayon:
 
 ```text
 slot 0  -> hidden1
-slot -1 -> hidden2
 slot -2 -> hidden3
-...
 slot -6 -> hidden7
 ```
 
-Ngunit wala pang fallback na ito sa Discovery 06.
-
-Ang tunay na production route ay nagpapatakbo ng isang valid at semantically neutral probe:
+Ang production route ay nagpapanatili ng parehong neutral probe:
 
 ```text
 i=2
@@ -33,22 +46,16 @@ back=1
 slot=1
 ```
 
-Ginagamit lamang nito ang visible probe store upang patunayan na talagang nasa real production chain ang `legacyPrior`. Hindi pa sinisimulan ang visible-drop computation.
+Dahil visible branch ito, ang production probe ay patuloy na nagpapatunay na aktuwal na tinatawag ang raw `legacyPrior`.
 
-Ang exact discovery regression ay:
+Inaasahang repository state: `GREEN`.
 
-- `slot 0` laban sa `hidden1` — EXPECTED_RED
-- `slot -2` laban sa `hidden3` — EXPECTED_RED
-- `slot -6` laban sa `hidden7` — EXPECTED_RED
-
-Inaasahang repository state: `EXPECTED_RED`.
-
-Wala pang Stage 13 `priorPatch`, walang `hiddenK=1-slot` translation, at walang hidden fallback sa `Discovery06.ps1`.
+Wala pang Stage 14 `legacyGrindRow`, zero-based visible-grind table, sentinel row, o visible-drop builder.
 
 ## Pagpapatakbo
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage12.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage12.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage13.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage13.ps1
 ```

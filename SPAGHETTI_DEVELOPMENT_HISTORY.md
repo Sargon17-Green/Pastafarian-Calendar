@@ -241,3 +241,67 @@ Ang context ay nagtatago ng:
 
 Wala pang `priorPatch`, walang `hiddenK=1-slot`, at walang `hiddenByNearness` fallback sa Discovery 06. Hindi pa sinisimulan ang visible-drop grind logic o anumang Stage 13+ correction.
 
+## Stage 13 — Patch 06: nonpositive history slots papunta sa hidden history
+
+### Preserved raw scar
+
+Hindi binago ang `legacyPrior`:
+
+```text
+legacyPrior(dropStore, i, back)
+    -> dropStore[i-back]
+```
+
+Ang helper na ito ay visible-only pa rin at walang kaalaman sa hidden history.
+
+### Correction layer
+
+Ang hiwalay na `priorPatch` ay gumagamit ng computed slot:
+
+```text
+slot = i - back
+
+if slot >= 1:
+    return legacyPrior(dropStore, i, back)
+
+hiddenK = 1 - slot
+return hiddenByNearness(legacyHidden, hiddenK)
+```
+
+Sa positive branch, talagang tinatawag ang raw legacy helper at hindi kinakailangan ang hidden storage.
+
+Sa nonpositive branch, hindi tinatawag ang raw helper. Sa halip, ang exact `hiddenK=1-slot` mapping ay ipinapasa sa Stage 11 near-ness translator.
+
+### Stage 12 regression becomes GREEN
+
+Ang dating red mapping ay:
+
+```text
+slot 0  -> hidden1
+slot -2 -> hidden3
+slot -6 -> hidden7
+```
+
+Lahat ng tatlo ay GREEN na sa patched adapter.
+
+### Invocation-owned branch state
+
+Ang context ay nagtatago ng:
+- `patch06Slot`;
+- `patch06UsedHidden`;
+- `patch06HiddenK`;
+- `patch06Value`;
+- `patch06Applied`;
+- Patch 06 status at invocation count.
+
+Ang Stage 12 coordinates na `legacyPriorI`, `legacyPriorBack`, `legacyPriorSlot`, at `legacyPriorValue` ay nananatili rin.
+
+### Production route
+
+Ang tunay na production probe ay nananatiling `i=2, back=1, slot=1`.
+
+Dahil positive slot ito, talagang dumadaan ang production route sa raw `legacyPrior` sa loob ng Patch 06.
+
+### Hindi pa kasama
+
+Wala pang Stage 14 `legacyGrindRow`, `LEGACY_VISIBLE_GRIND_TABLE`, sentinel row, o visible-drop builder.
