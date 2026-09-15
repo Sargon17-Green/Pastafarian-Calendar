@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=18
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=19
+CURRENT_KIND=PATCH
 CURRENT_PATCH=09
 LAST_COMPLETED_STAGE=18
-EXPECTED_REPOSITORY_STATE=RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 09 fixed-bowl pour scar sa tunay na 46-drop production plumbing: tama ang old initial-bowl factory, tama ang patched visible drops at permutation orders, ngunit ang legacy pour helper ay nagbabasa ng fixed bowl IDs 1,2,3 sa halip na bowl IDs sa order positions 1,2,3.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 09 bowl-alias repair: pinananatili at talagang pinapatakbo muna ang Discovery 09 fixed-bowl pour scar, saka ini-install ang bowlAlias[position]=order[position], at lahat ng corrected pour reads ay dumadaan sa bowlByLegacyPosition bago ibalik ang corrected pours.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -51,3 +51,7 @@ STAGE17_PATCH=ONE_BASED_TO_ZERO_BASED_PERMUTATION_RANK
 STAGE17_RUNTIME_VERIFICATION=GREEN_CONFIRMED
 STAGE18_DISCOVERY=FIXED_BOWL_IDS_INSTEAD_OF_ORDER_POSITIONS
 STAGE18_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
+STAGE19_PATCH=BOWL_ALIAS_POSITION_REPAIR
+STAGE19_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `19` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na GREEN ang lahat ng 46 isolated Patch 09 pour sets, na preserved at talagang tinatawag muna ang Discovery 09 fixed-bowl scar, na lahat ng corrected reads sa positions 1,2,3 ay dumaraan sa bowl alias helper, at wala pang Stage 20 Patch 10 vaultOld/pending in-place bowl update logic.

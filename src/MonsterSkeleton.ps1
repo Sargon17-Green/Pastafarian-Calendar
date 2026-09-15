@@ -18,6 +18,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Discovery08.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch08.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery09.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Patch09.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -152,6 +153,14 @@ function New-BaseMonsterContext {
         legacyPourProbeValues = $null
         discovery09Status = 'HISTORICAL_SCAR_PRESENT'
         discovery09InvocationCount = 0
+        patch09DropIndex = $null
+        patch09BowlAlias = $null
+        patch09LegacyFixedPours = $null
+        patch09CorrectedPours = $null
+        patch09ProductionPours = $null
+        patch09Applied = $false
+        patch09Status = 'NOT_RUN'
+        patch09InvocationCount = 0
     }
 }
 
@@ -287,7 +296,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 18.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 19.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -298,11 +307,11 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'DISCOVERY09'
+    $ctx.phase = 'PATCH09'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY09' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH09' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
@@ -373,27 +382,34 @@ function Invoke-CalendarDateSpaghetti {
             -Context $withDiscovery05 `
             -VisibleDrops $withDiscovery05.legacyVisibleDropTable
 
-        # Discovery 09 production probe: real drop index 1, still fixed bowl IDs 1,2,3.
-        $withDiscovery05.legacyPourProbeValues = Invoke-Discovery09LegacyPourAdapter `
+        # Patch 09 production probe: talagang pinapatakbo muna ng wrapper ang
+        # Discovery 09 fixed-bowl scar, saka ini-install ang order aliases.
+        $withDiscovery05.patch09ProductionPours = Invoke-Patch09BowlAliasRepair `
             -Context $withDiscovery05 `
             -I 1
 
+        # Panatilihing hiwalay at observable ang raw Discovery 09 predecessor scar.
+        $withDiscovery05.legacyPourProbeValues = $withDiscovery05.patch09LegacyFixedPours
+
         Add-BaseMetric -Context $withDiscovery05 -Name 'discovery09.pour.probes'
-        Add-BaseLog -Context $withDiscovery05 -Code 'monster.discovery09.productionProbe' -Data ([pscustomobject]@{
+        Add-BaseMetric -Context $withDiscovery05 -Name 'patch09.pour.probes'
+        Add-BaseLog -Context $withDiscovery05 -Code 'monster.patch09.productionProbe' -Data ([pscustomobject]@{
             i = 1
             drop = $withDiscovery05.legacyPourLastDropValue
             order = $withDiscovery05.legacyPourLastOrder
-            pours = $withDiscovery05.legacyPourProbeValues
+            bowlAlias = $withDiscovery05.patch09BowlAlias
+            legacyFixed = $withDiscovery05.patch09LegacyFixedPours
+            corrected = $withDiscovery05.patch09ProductionPours
         })
 
         return $withDiscovery05
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.discovery09.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.patch09.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'DISCOVERY09_COMPLETE'
+    $result.status = 'PATCH09_COMPLETE'
     return $result
 }

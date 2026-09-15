@@ -507,3 +507,35 @@ Sa Foundation fixture, i=1,2,3 ay lahat divergent. Ang i=46 ay incidental match 
 
 Isang real production pour probe lamang ang ginagawa sa i=1. Wala pang bowl stir/update, walang `bowlAlias`, walang corrected pours at walang Patch 10.
 
+## Stage 19 — Patch 09: bowl alias ayon sa permutation positions
+
+### Preserved Discovery 09 scar
+
+Nananatili ang `legacyFixedBowlPours` at talagang tinatawag muna ng Patch 09 wrapper. Ang raw tuple nito ay kino-capture sa `patch09LegacyFixedPours`.
+
+### Alias installation
+
+```text
+bowlAlias[position] = order[position]
+```
+
+para sa positions 1..6. Ang slot 0 ay sentinel na `0`.
+
+### Corrected bowl reads
+
+Ang `aliasedPositionPours` ay hindi direktang nag-i-index sa old bowls gamit ang semantic position. Lahat ng tatlong reads ay dumadaan sa:
+
+```text
+bowlByLegacyPosition(oldBowls, bowlAlias, position)
+```
+
+at pagkatapos lamang ginagamit ang resolved bowl value sa pour formula.
+
+### Full isolated sweep
+
+Lahat ng 46 supplied visible-drop/order pairs ay dumadaan sa parehong wrapper at dapat tumugma sa position-based semantics.
+
+### Stage boundary
+
+Wala pang `vaultOld`, pending bowl updates, in-place bowl mutation patch, o anumang Patch 10 behavior.
+

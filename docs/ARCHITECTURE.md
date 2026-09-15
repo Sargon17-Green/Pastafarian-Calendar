@@ -1,54 +1,53 @@
-# Arkitektura hanggang Stage 18
+# Arkitektura hanggang Stage 19
 
-## Stage 18 support plumbing
-
-Ang real production route ay ngayon nagtatayo ng:
+## Preserved raw pour layer
 
 ```text
-patched stone table
--> hidden storage
--> patched prior reads
--> sentinel-corrected visible grinds
--> 46 visible drops
--> Patch 08 corrected 46-order table
--> Discovery 09 fixed-bowl pour probe
+legacyFixedBowlPours
+    position 1 -> fixed old bowl ID 1
+    position 2 -> fixed old bowl ID 2
+    position 3 -> fixed old bowl ID 3
 ```
 
-Ang visible-drop builder ay gumagamit ng existing Patch 06 history semantics at Patch 07 grind rows; wala itong bagong scar.
+Ang raw layer ay nananatiling pisikal at talagang pinapatakbo muna.
 
-## Discovery 09 scar
-
-Ang exact old initial bowls ay:
+## Patch 09
 
 ```text
-temp = action + target*bowlId + distance + connection + direction + prime^2
-oldBowls[bowlId] = SAVE(temp^2 + bowlId)
+Invoke-Patch09BowlAliasRepair
+-> legacyFixedBowlPours
+-> installOrderAliases(order)
+-> aliasedPositionPours
+   -> bowlByLegacyPosition(..., position=1)
+   -> bowlByLegacyPosition(..., position=2)
+   -> bowlByLegacyPosition(..., position=3)
+-> corrected pours
 ```
 
-na may primes `17,19,23,29,31,37`.
-
-Ang raw pour helper:
+Ang alias table ay 1-based:
 
 ```text
-pour1 = SAVE(drop^2 + wheat * oldBowls[1] + 3*i)
-pour2 = SAVE(drop^2 + barley * oldBowls[2] + 5*i)
-pour3 = SAVE(drop^2 + salt * oldBowls[3] + 7*i)
+alias[1] = order[0]
+...
+alias[6] = order[5]
 ```
 
-ay sadyang hindi tumitingin sa permutation order.
+at slot 0 ay sentinel `0`.
 
-## Production probe
+## Production route
 
-Sa Foundation fixture, `i=1`:
+Ang Stage 19 production route ay gumagamit ng real 46-drop table at Patch 08 corrected order table. Sa production probe `i=1`, kino-capture nang hiwalay ang raw Discovery 09 pours at ang corrected Patch 09 pours; ang corrected tuple ang authoritative result.
 
-```text
-drop ordinal = 570
-order = 5,4,3,6,2,1
-raw reads = bowl IDs 1,2,3
-```
+## Invocation-owned Patch 09 state
 
-kaya red ang positions 1 at 2; position 3 ay coincidentally pareho sa bowl 3 ngunit buong tuple ay divergent.
+- `patch09DropIndex`
+- `patch09BowlAlias`
+- `patch09LegacyFixedPours`
+- `patch09CorrectedPours`
+- `patch09Applied`
+- `patch09Status`
+- `patch09InvocationCount`
 
 ## Stage boundary
 
-Wala pang `installOrderAliases`, `bowlByLegacyPosition`, `aliasedPositionPours`, `bowlAlias`, `patchedPours`, `vaultOld`, o in-place bowl update patch.
+Wala pang Stage 20 / Patch 10 `vaultOld`, pending bowl-update table, o in-place bowl-update repair.

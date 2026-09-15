@@ -1,28 +1,39 @@
 # Kalendaryong Pastafarian — PowerShell + Filipino
 
-## Stage 18 — Discovery 09
+## Stage 19 — Patch 09
 
-Ang old initial-bowl factory ay tama. Mula sa patched counts, eksaktong binubuo nito ang anim na initial bowls gamit ang primes `17,19,23,29,31,37`.
-
-Ang bagong historical scar ay nasa pours:
+Pinananatiling pisikal ang Discovery 09 fixed-bowl scar:
 
 ```text
-pour position 1 -> fixed old bowl ID 1
-pour position 2 -> fixed old bowl ID 2
-pour position 3 -> fixed old bowl ID 3
+position 1 -> oldBowls[1]
+position 2 -> oldBowls[2]
+position 3 -> oldBowls[3]
 ```
 
-Sa normatibong position semantics, dapat gamitin ang bowl IDs mula sa corrected permutation order positions 1,2,3.
+Hindi ito binubura o inaayos sa mismong raw helper. Ang Patch 09 wrapper ay talagang nagpapatakbo muna rito at kino-capture ang raw pours.
 
-Ang Stage 18 production route ay lumalawak sa full 46 visible drops at corrected 46-order table upang ang pour defect ay talagang nasa real path. Pagkatapos nito ay isang raw fixed-bowl pour lamang sa `i=1` ang ginagawa; wala pang bowl stir/update.
-
-Sa exact Foundation fixture:
+Pagkatapos, ini-install ang alias table:
 
 ```text
-i=1  order = 5,4,3,6,2,1  -> EXPECTED_RED
-i=2  order = 1,6,2,4,3,5  -> EXPECTED_RED
-i=3  order = 1,3,5,6,2,4  -> EXPECTED_RED
-i=46 order = 1,2,3,4,6,5  -> incidental MATCH
+bowlAlias[position] = order[position]
 ```
 
-Wala pang Patch 09 `bowlAlias` correction at wala pang Patch 10 in-place bowl update logic.
+para sa positions `1..6`.
+
+Lahat ng corrected bowl reads para sa pour positions `1,2,3` ay dumadaan sa `bowlByLegacyPosition`, kaya ang bowl ID ay mula sa current corrected permutation order.
+
+Sa Foundation fixture, ang unang order ay:
+
+```text
+5,4,3,6,2,1
+```
+
+at ang alias table ay:
+
+```text
+0,5,4,3,6,2,1
+```
+
+Ang lahat ng 46 isolated corrected pour sets ay inaasahang GREEN.
+
+Wala pang Stage 20 / Patch 10 `vaultOld`, pending bowl updates, o in-place bowl-update logic.
