@@ -865,3 +865,33 @@ Ten sam mechanizm distinct-family będzie nadawał się również do miesięcy z
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 45 — PATCH 22: distinct-name detour
+
+Historyczny `LegacyRepeatedNameGenerator` pozostaje fizycznie bez zmian. Nadal definiuje rodzinę `masterCount^K`, dopuszcza powtórzenia i jest wykonywany jako pierwszy przy każdym name selection. Raw family count, raw rank i bad candidate pozostają obserwowalną blizną Discovery 22.
+
+Dodano `partialPermutationNameRowCount`. Liczba poprawnych distinct rows to falling factorial:
+
+`N * (N-1) * ... * (N-K+1)`.
+
+Dodano `partialPermutationNameRowUnrank`. Funkcja wykonuje dokładny 1-based lexicographic unrank partial permutation przez listę pozostałych canonical indices oraz kombinatoryczny rozmiar każdego suffix block. Nie materializuje pełnej rodziny.
+
+Dodano `RepeatedNamePatchWrapper`.
+
+Wrapper otrzymuje już wykonany `badCandidate`, oblicza rank ponownie na tym samym answer-ring stream, lecz względem falling-factorial distinct family, i unrankuje `correct`.
+
+Jeżeli `badCandidate==correct`, wrapper reuse historyczny candidate. Jeżeli są różne, publikuje `correct`.
+
+`CutletNameCompatibilityRoute` nadal pyta bowl `5` z seal `22`, wykonuje raw repeated-name generator jako pierwszy, a następnie PATCH 22. Dla syntetycznego witness raw scar pozostaje `17^6=24137569`, rank `61401`, `[1,1,13,9,8,14]`; distinct family ma `17P6=8910720`, ten sam rank `61401`, a publikowany row to `[1,3,16,4,11,13]`.
+
+Dodano `MonthNameCompatibilityRoute`. Używa tego samego mechanizmu z katalogiem `47`, bowl `5` i seal `33`. Dla tego samego syntetycznego sauce answer ring zaczyna się od `66681`. Raw repeated family `47^6=10779215329` daje `[1,1,1,31,9,35]`, natomiast distinct family `47P6=7731052560` publikuje `[1,2,3,40,44,30]`.
+
+Regression Stage 45 porównuje produkcyjny partial-permutation unrank z małym brute-force oracle dla wszystkich `5P3=60` ranks, sprawdza obie gałęzie wrappera, zachowanie raw legacy scar oraz brak powtórzeń dla kotletów i miesięcy.
+
+Sprawdzany jest również pełny count `47!`, który przekracza SAVE modulus i pozostaje reprezentowalny jako BigInt; rank 1 unrankuje się do `1:47`.
+
+Niezmieniony regression Stage 44 ma po tej zmianie przejść z EXPECTED_RED do GREEN.
+
+Stage 45 nie implementuje żadnej rodziny długości miesięcy, nie materializuje takich długości i nie zawiera kodu `VirtualLegacyList`. Dopiero Stage 46 wprowadzi historyczny defekt materialized month lengths.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

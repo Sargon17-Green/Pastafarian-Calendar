@@ -1,65 +1,62 @@
-classdef CutletNameCompatibilityRoute
-    % Produkcyjna trasa nazw kotletów po PATCH 22.
+classdef MonthNameCompatibilityRoute
+    % PATCH 22: nazwy miesięcy korzystają z tego samego distinct-name detour.
     %
-    % Najpierw zawsze wykonuje historyczną repeated-name family na
-    % bowl 5 / seal 22 i zachowuje bad candidate. Następnie distinct-name
-    % detour wybiera z falling-factorial partial-permutation family.
+    % Master katalogu miesięcy ma 47 pozycji. Answer ring: bowl 5 / seal 33.
+    % Raw repeated candidate jest nadal wykonywany i zachowywany jako scar.
     methods (Static)
         function [ctx, nameIndices] = call( ...
-                ctx, structureSauce, cutletCount)
+                ctx, structureSauce, monthCount)
             pastafari.ValidationManager.requireContext(ctx);
-            pastafari.ValidationManager.requireExactIntegerInput(cutletCount);
+            pastafari.ValidationManager.requireExactIntegerInput(monthCount);
 
-            count = pastafari.BigInt.coerce(cutletCount);
+            count = pastafari.BigInt.coerce(monthCount);
             if count < pastafari.BigInt(1) || ...
-                    count > pastafari.BigInt(17)
-                error('Pastafari:Names:CutletCount', ...
-                    'cutletCount musi należeć do 1..17.');
+                    count > pastafari.BigInt(47)
+                error('Pastafari:Names:MonthCount', ...
+                    'monthCount musi należeć do 1..47.');
             end
 
-            pastafari.CutletNameCompatibilityRoute.requireSauce( ...
+            pastafari.MonthNameCompatibilityRoute.requireSauce( ...
                 structureSauce);
 
             nextBowlId = pastafari.LatchedSuccessorPatch.apply( ...
                 structureSauce.orderAt46Latch, 5);
             stream = pastafari.AnswerRingStreamFactory.fromSauce( ...
-                structureSauce.bowls, 5, nextBowlId, 22);
+                structureSauce.bowls, 5, nextBowlId, 33);
 
-            % Realna historyczna blizna Discovery 22.
             [ctx, rawRank, rawIndices, rawFamilyCount, rawDescriptor] = ...
                 pastafari.LegacyRepeatedNameGenerator.callWithRing( ...
-                    ctx, stream, pastafari.BigInt(17), count); %#ok<ASGLU>
+                    ctx, stream, pastafari.BigInt(47), count); %#ok<ASGLU>
 
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_22_REPEATED_NAMES';
             ctx.metrics = pastafari.MetricsShell.bump( ...
                 ctx.metrics, 'discovery22.repeatedNames.calls');
 
-            ctx.cutletNameStreamFirst = stream.first;
-            ctx.cutletNameStreamDirectionStep = stream.directionStep;
-            ctx.legacyCutletNameFamilyCount = rawFamilyCount;
-            ctx.legacyCutletNameRank = rawRank;
-            ctx.legacyNameCandidateIndices = rawIndices;
+            ctx.monthNameStreamFirst = stream.first;
+            ctx.monthNameStreamDirectionStep = stream.directionStep;
+            ctx.legacyMonthNameFamilyCount = rawFamilyCount;
+            ctx.legacyMonthNameRank = rawRank;
+            ctx.legacyMonthNameCandidateIndices = rawIndices;
 
-            % PATCH 22: ten sam stream, distinct partial-permutation family.
             [ctx, distinctRank, semanticIndices, distinctCount, reusedLegacy] = ...
                 pastafari.RepeatedNamePatchWrapper.callWithRing( ...
-                    ctx, stream, pastafari.BigInt(17), count, rawIndices);
+                    ctx, stream, pastafari.BigInt(47), count, rawIndices);
 
             ctx.phase = 'PATCH_22';
             ctx.subPhase = 22;
-            ctx.mode = 'DISTINCT_CUTLET_NAMES_ACTIVE';
+            ctx.mode = 'DISTINCT_MONTH_NAMES_ACTIVE';
             ctx.status = 'PATCHED_PATH_ACTIVE';
             ctx.branchTrace{end + 1} = ...
                 'PATCH_22_DISTINCT_NAME_DETOUR';
             ctx.metrics = pastafari.MetricsShell.bump( ...
                 ctx.metrics, 'patch22.distinctNameDetour.calls');
 
-            ctx.distinctCutletNameFamilyCount = distinctCount;
-            ctx.distinctCutletNameRank = distinctRank;
-            ctx.cutletNameIndicesCandidate = semanticIndices;
+            ctx.distinctMonthNameFamilyCount = distinctCount;
+            ctx.distinctMonthNameRank = distinctRank;
+            ctx.monthNameIndicesCandidate = semanticIndices;
             ctx.diagnostics{end + 1} = sprintf( ...
-                ['PATCH 22 cutlets rawFamily=%s rawRank=%s ', ...
+                ['PATCH 22 months rawFamily=%s rawRank=%s ', ...
                  'distinctFamily=%s distinctRank=%s reusedLegacy=%d.'], ...
                 char(rawFamilyCount), char(rawRank), ...
                 char(distinctCount), char(distinctRank), reusedLegacy);
@@ -74,7 +71,7 @@ classdef CutletNameCompatibilityRoute
                     ~isfield(sauce, 'bowls') || ...
                     ~isfield(sauce, 'orderAt46Latch')
                 error('Pastafari:Names:StructureSauceShape', ...
-                    'Cutlet names wymagają bowls i orderAt46Latch.');
+                    'Month names wymagają bowls i orderAt46Latch.');
             end
 
             if ~iscell(sauce.bowls) || numel(sauce.bowls) ~= 6
