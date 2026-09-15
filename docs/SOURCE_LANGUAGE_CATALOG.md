@@ -8,7 +8,7 @@ Ord og uttrykk med vanleg tyding er omsette etter tydinga til naturleg nynorsk. 
 
 ## Regel for namn og lydformer
 
-Etablerte stad- og kulturnamn bruker ei stabil latinsk form som er vanleg i norsk fagtekst, til dømes `Lagash`, `Akkad`, `Eridu`, `Uruk`, `Ninive` og `Babylon`. Oppdikta lydformer utan leksikalsk tyding blir ikkje omsette semantisk. For dei lydformene som finst i denne katalogen, er translittereringa frosen som `Palgurash` og `Karshumab`.
+Etablerte stad- og kulturnamn bruker ei stabil latinsk form som er vanleg i norsk fagtekst, til dømes `Lagash`, `Akkad`, `Eridu`, `Uruk`, `Ninive` og `Babylon`. Oppdikta lydformer utan leksikalsk tyding blir ikkje omsette semantisk. For dei lydformene som finst i denne katalogen, er translittereringa frosen som `Palgurash` og `Karshumav`.
 
 Når den kjeldeortografiske forma blir lesen bokstavleg for slike oppdikta namn, bruker denne lina følgjande relevante konsonantverdiar: p, b, g, k, l, m, r og `sh` for sj-lyden. Vokalteikn blir attgjevne med a, i eller u når dei er uttrykte i kjelda. Den frosne katalogtabellen under er endeleg autoritet for presentasjonsstrengen i denne implementasjonslina.
 
@@ -45,7 +45,7 @@ Når den kjeldeortografiske forma blir lesen bokstavleg for slike oppdikta namn,
 | 5 | Eridu |
 | 6 | tannkrem |
 | 7 | tre delar av fem |
-| 8 | Karshumab |
+| 8 | Karshumav |
 | 9 | leopard |
 | 10 | tinn |
 | 11 | tåke |
@@ -67,13 +67,13 @@ Når den kjeldeortografiske forma blir lesen bokstavleg for slike oppdikta namn,
 | 27 | fiken |
 | 28 | Ninive |
 | 29 | frosk |
-| 30 | tjøre |
-| 31 | lys |
+| 30 | bek |
+| 31 | lampe |
 | 32 | den stengde døra |
 | 33 | sesam |
 | 34 | nakke |
 | 35 | sølv |
-| 36 | lilje |
+| 36 | Susa |
 | 37 | storm |
 | 38 | esel |
 | 39 | mjøl |
