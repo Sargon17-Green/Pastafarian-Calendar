@@ -681,3 +681,31 @@ Dopiero Stage 39 ma zachować fizyczny key `year.number`, ale dopuścić semanti
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 39 — PATCH 19: guarded cache
+
+Historyczny `LegacyYearNumberStructureCache` pozostaje fizycznie bez zmian. Process-persistent map nadal jest keyed wyłącznie przez `year.number`, więc sam raw lookup nadal może trafić w entry należący do innego kontekstu obliczeniowego.
+
+Dodano osobny `GuardedYearCachePatch`.
+
+Semantic cache hit jest uznawany za poprawny wyłącznie wtedy, gdy jednocześnie zgadzają się trzy pola istniejącego entry:
+
+`calculationDayFingerprint`,
+`openGate`,
+`closeGate`.
+
+Fizyczny key nie zostaje rozszerzony ani zmieniony.
+
+`YearStructureCacheCompatibilityRoute` zawsze najpierw wykonuje historyczny raw lookup i zachowuje jego key, hit, stale value oraz guard fields jako obserwowalną bliznę Discovery 19.
+
+Następnie PATCH 19 sprawdza guard. Jeżeli wszystkie trzy pola są zgodne, istniejący cached value może zostać ponownie użyty bez uruchamiania producenta.
+
+Jeżeli choć jedno pole jest różne albo raw entry nie istnieje, semantic path traktuje lookup jako miss. Najpierw oblicza nową wartość przez producer. Dopiero po pomyślnym zakończeniu obliczenia nadpisuje ten sam historyczny `year.number` entry nowym fingerprintem, gates i value.
+
+Takie uporządkowanie zapewnia transactional overwrite na poziomie tej warstwy: jeżeli producer zgłosi błąd, dotychczasowy cache entry pozostaje nienaruszony.
+
+Niezmieniony regression Stage 38 ma po tej zmianie przejść z EXPECTED_RED do GREEN. Dla requestu `calculationDay=222` raw hit nadal pokazuje fingerprint `111` oraz stale value `A`, ale publikowany semantic result staje się `B`, a fizyczny entry zostaje następnie nadpisany danymi kontekstu 222.
+
+Test Stage 39 sprawdza osobno mismatch fingerprintu, mismatch `openGate`, mismatch `closeGate`, prawidłowy guarded warm hit, zachowanie starego entry przy błędzie producenta oraz fakt, że fizyczny key nadal pozostaje historycznie błędnym `year.number`.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
