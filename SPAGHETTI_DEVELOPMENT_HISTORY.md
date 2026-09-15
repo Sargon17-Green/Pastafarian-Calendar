@@ -835,3 +835,33 @@ Stage 43 nie dodaje żadnej logiki nazw kotletów. Dopiero Stage 44 rozpocznie o
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 44 — DISCOVERY 22: repeated names
+
+Dodano dwudziesty drugi historyczny defekt: nazwy kotletów są wybierane z rodziny, która dopuszcza powtarzanie tego samego `canonicalIndex` w obrębie jednego roku.
+
+`LegacyRepeatedNameGenerator` definiuje rodzinę `masterCount^K` sekwencji. Każda z `K` pozycji wybiera niezależnie indeks `1..masterCount`. Unrank interpretuje `rank-1` jako `K` cyfr base-`masterCount`, z ostatnią pozycją jako najmniej znaczącą cyfrą. Daje to zwykły porządek leksykograficzny wszystkich sekwencji z powtórzeniami.
+
+Dla nazw kotletów `masterCount=17`.
+
+`CutletNameCompatibilityRoute` korzysta z authoritative structure sauce po PATCH 20, pyta bowl `5` z seal `22` i przekazuje resulting answer-ring stream do historycznego generatora.
+
+Stage 44 nie zawiera żadnego distinct-name detour.
+
+Regression zawiera trzy kontrolowane raw witnesses dla `K=6`: rank `1` daje `[1,1,1,1,1,1]`, rank `2` daje `[1,1,1,1,1,2]`, a rank `18` daje `[1,1,1,1,2,1]`. Każdy zawiera powtórzenie i różni się od test-only distinct partial-permutation reference o tym samym rank.
+
+Dodatkowo realny wiring witness używa bowls `[17,19,23,29,31,37]`, orderAt46 `[1,2,3,4,5,6]`, bowl `5` i seal `22`. Answer ring zaczyna się od `61401`; dla `K=6` legacy family `17^6=24137569` wybiera rank `61401` i zwraca:
+
+`[1,1,13,9,8,14]`.
+
+Indeks `1` powtarza się. Test-only normatywny partial-permutation unrank dla tego samego rank daje:
+
+`[1,3,16,4,11,13]`.
+
+Raw rank, family count i repeated indices są przechowywane w `MonsterContext` jako obserwowalna blizna Discovery 22.
+
+Dopiero Stage 45 ma pozostawić `LegacyRepeatedNameGenerator` fizycznie bez zmian, wykonać go jako pierwszy i zachować `bad`, a następnie obliczyć distinct family przez falling factorial i partial-permutation unrank na tym samym bowl-5/seal-22 stream.
+
+Ten sam mechanizm distinct-family będzie nadawał się również do miesięcy z katalogiem `47` i seal `33`, lecz Stage 44 nie wprowadza jeszcze month-name route.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

@@ -123,6 +123,12 @@ classdef MonsterContext < handle
         legacyCutletPartitionRank
         legacyCutletPartition
         cutletPartitionCandidate
+        cutletNameStreamFirst
+        cutletNameStreamDirectionStep
+        legacyCutletNameFamilyCount
+        legacyCutletNameRank
+        legacyNameCandidateIndices
+        cutletNameIndicesCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -248,6 +254,12 @@ classdef MonsterContext < handle
             obj.legacyCutletPartitionRank = [];
             obj.legacyCutletPartition = [];
             obj.cutletPartitionCandidate = [];
+            obj.cutletNameStreamFirst = [];
+            obj.cutletNameStreamDirectionStep = [];
+            obj.legacyCutletNameFamilyCount = [];
+            obj.legacyCutletNameRank = [];
+            obj.legacyNameCandidateIndices = [];
+            obj.cutletNameIndicesCandidate = [];
         end
     end
 end
