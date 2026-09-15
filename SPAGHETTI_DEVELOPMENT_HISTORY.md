@@ -590,3 +590,23 @@ Dopiero Stage 35 ma pozostawić `LegacyYear5000StableLengthSort` fizycznie bez z
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 35 — PATCH 17: tie run sort
+
+Historyczny `LegacyYear5000StableLengthSort` pozostaje fizycznie bez zmian. Nadal wykonuje stabilny sort wyłącznie po `lengthDays`, a przy ties zachowuje kolejność wejściową jako obserwowalną bliznę Discovery 17.
+
+Dodano osobny `Year5000TieRunSortPatch`. Patch otrzymuje już listę po historycznym length-only sort i najpierw potwierdza, że długości są niemalejące.
+
+Następnie wykrywa wyłącznie contiguous runs kandydatów o identycznym `lengthDays`. Każdy taki run jest stabilnie sortowany po `openGateDay` rosnąco. Kandydaci należący do różnych długości nie są ponownie globalnie sortowani ani przemieszczani między runs.
+
+Jeżeli dwa kandydaty mają również identyczny `openGateDay`, zachowana zostaje ich kolejność wejściowa.
+
+`Year5000OrderingCompatibilityRoute` zawsze najpierw wykonuje raw legacy sorter i zapisuje `legacyYear5000StableLengthOrder`. Następnie osobno wykonuje PATCH 17 i publikuje patched order w `year5000CandidateOrder`.
+
+Niezmieniony regression Stage 34 ma po tej zmianie przejść z EXPECTED_RED do GREEN. Dla głównego fixture raw order pozostaje `2,4,1,3,5,6`, a publikowany order staje się `4,2,3,5,1,6`.
+
+Test Stage 35 sprawdza dwie niezależne tie runs, niezmienione membership i length-run boundaries, już poprawny run, stabilność przy identycznym opening gate, odrzucenie wejścia nieposortowanego po długości oraz fizyczne zachowanie legacy sorter.
+
+Stage 35 nadal nie wykonuje wyboru rank Year 5000 ani wyszukiwania następnych/poprzednich lat. Kolejny etap wprowadzi historyczny old-year jump guess by 365.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
