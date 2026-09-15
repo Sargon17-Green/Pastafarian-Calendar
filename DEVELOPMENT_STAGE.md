@@ -2,7 +2,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=21
 CURRENT_KIND=PATCH
 CURRENT_PATCH=10
-LAST_COMPLETED_STAGE=20
+LAST_COMPLETED_STAGE=21
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -56,6 +56,4 @@ STAGE19_RUNTIME_VERIFICATION=GREEN_CONFIRMED
 STAGE20_DISCOVERY=IN_PLACE_BOWL_UPDATE_READS_UPDATED_WORKING_VALUES
 STAGE20_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
 STAGE21_PATCH=SNAPSHOT_BOWL_UPDATE_WITH_PENDING_BATCH
-STAGE21_RUNTIME_VERIFICATION=AWAITING
-
-Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `21` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na nananatiling pisikal at talagang tinatawag muna ang Discovery 10 in-place scar, na hiwalay na clone ang vaultOld, na lahat ng reads ay mula sa vaultOld at lahat ng writes ay sa pending, na sabay kino-commit ang anim na positions, at wala pang Patch 11 order-at-46 o anumang mas huling patch code.
+STAGE21_RUNTIME_VERIFICATION=GREEN_CONFIRMED
