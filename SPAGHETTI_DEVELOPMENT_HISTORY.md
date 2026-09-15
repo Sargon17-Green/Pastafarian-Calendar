@@ -1163,3 +1163,43 @@ Stage 52 nie zawiera open-closed interval patch.
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 53 — PATCH 26: open-closed interval
+
+Historyczny `LegacyClosedOpeningYearResolver` pozostaje fizycznie bez zmian.
+
+`YearIntervalCompatibilityRoute` nadal zawsze wykonuje go jako pierwszy i zachowuje pełną bliznę Discovery 26: anchor number, target day, raw final year number, raw open/close, raw forward/backward steps oraz pełny raw year candidate.
+
+Dodano `OpenClosedYearIntervalPatch`.
+
+Semantic resolver startuje od tego samego anchor year, ale wykonuje krok wstecz dla:
+
+`target <= open`.
+
+Krok wprzód nadal wykonuje wyłącznie dla:
+
+`target > close`.
+
+Po zakończeniu wymaga dokładnie:
+
+`open < target && target <= close`.
+
+Opening gate jest więc otwarty, a closing gate pozostaje domknięty.
+
+Na wspólnej granicy kolejnych lat dzień należy wyłącznie do roku po lewej stronie: jest jego closing gate, a nie dniem roku po prawej.
+
+Regression Stage 53 najpierw uruchamia niezmieniony Stage 52, który po PATCH 26 ma przejść z EXPECTED_RED do GREEN.
+
+Następnie sprawdza opening gate, closing gate, kolejną wspólną granicę, wielokrokowy spacer wstecz, wielokrokowy spacer wprzód oraz pełny kontrolowany zestaw targetów przeciw niezależnemu test-only `(open,close]` resolverowi.
+
+Produkcyjna route nadal zapisuje raw `[open,close]` ghost przed wykonaniem PATCH 26.
+
+Semantic `yearIntervalCandidate` i wynik funkcji po PATCH 26 pochodzą wyłącznie z `OpenClosedYearIntervalPatch`.
+
+Fizyczny `LegacyClosedOpeningYearResolver` nadal zwraca historycznie błędny rok po prawej stronie, gdy target jest dokładnie jego opening gate.
+
+Stage 53 zamyka dwudziesty szósty historyczny defect/patch pair.
+
+Stage 53 nie wykonuje jeszcze finalnej integracji całego potwora. Dopiero Stage 54 ma połączyć wszystkie legacy scars i patches w jedną authoritative trasę.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
