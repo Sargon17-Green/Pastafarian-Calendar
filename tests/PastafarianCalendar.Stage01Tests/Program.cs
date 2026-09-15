@@ -155,13 +155,13 @@ internal static class Program
 
     private static void RunSelectorTests()
     {
-        var forward = new AnswerStream(BigInteger.One, 1);
+        var forward = new PastafarianCalendar.Stage01Tests.Normative.AnswerStream(BigInteger.One, 1);
         Equal(BigInteger.One, NormativeScroll.ChooseRankShort(forward, 10), "اختيار قصير بلا رفض");
 
-        var backward = new AnswerStream(NormativeScroll.M, -1);
+        var backward = new PastafarianCalendar.Stage01Tests.Normative.AnswerStream(NormativeScroll.M, -1);
         Equal(new BigInteger(10), NormativeScroll.ChooseRankShort(backward, 10), "اختيار قصير بعد رفض متتابع");
 
-        var wide = new AnswerStream(BigInteger.One, 1);
+        var wide = new PastafarianCalendar.Stage01Tests.Normative.AnswerStream(BigInteger.One, 1);
         Equal(NormativeScroll.M + 1, NormativeScroll.ChooseRankWide(wide, NormativeScroll.M + 1), "اختيار واسع فوق المنتهى مباشرة");
     }
 
@@ -175,6 +175,20 @@ internal static class Program
         True(first.OrderAtDrop46.OrderBy(x => x).SequenceEqual(new[] { 1, 2, 3, 4, 5, 6 }), "ترتيب القطرة السادسة والأربعين تبديل كامل");
         var next = NormativeScroll.NextBowlInDrop46Order(first, first.OrderAtDrop46[5]);
         Equal(first.OrderAtDrop46[0], next, "التفاف الوعاء التالي في ترتيب القطرة السادسة والأربعين");
+    }
+
+    private static void RunProductionSauceTests()
+    {
+        var expected = NormativeScroll.Sauce(NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1);
+        var actual = SauceCore.Brew(NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1);
+        SequenceEqual(expected.Bowls, actual.Bowls, "أوعية الصلصة الإنتاجية");
+        SequenceEqual(expected.OrderAtDrop46, actual.OrderAtDrop46, "ترتيب القطرة السادسة والأربعين الإنتاجي");
+        Equal(NormativeScroll.NextBowlInDrop46Order(expected, expected.OrderAtDrop46[5]), SauceCore.NextBowlInDrop46Order(actual, actual.OrderAtDrop46[5]), "الوعاء التالي الإنتاجي");
+        var expectedStream = NormativeScroll.AskBowl(expected, 2, 21);
+        var actualStream = SauceCore.AskBowl(actual, 2, 21);
+        Equal(expectedStream.First, actualStream.First, "أول جواب إنتاجي");
+        Equal(expectedStream.DirectionStep, actualStream.DirectionStep, "اتجاه الجواب الإنتاجي");
+        Equal(NormativeScroll.ChooseRank(expectedStream, 922), SauceCore.ChooseRank(actualStream, 922), "رتبة الاختيار الإنتاجية");
     }
 
     private static void RunGateSmokeTests()
@@ -206,6 +220,7 @@ internal static class Program
         RunFamilyTests();
         RunSelectorTests();
         RunSauceSmokeTests();
+        RunProductionSauceTests();
         RunGateSmokeTests();
         RunMonsterBootstrapTests();
         Console.WriteLine("الاختبارات الناجحة: " + _passed);
