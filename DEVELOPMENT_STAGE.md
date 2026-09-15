@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=19
-CURRENT_KIND=PATCH
-CURRENT_PATCH=09
+CURRENT_STAGE=20
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=10
 LAST_COMPLETED_STAGE=19
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 09 bowl-alias repair: pinananatili at talagang pinapatakbo muna ang Discovery 09 fixed-bowl pour scar, saka ini-install ang bowlAlias[position]=order[position], at lahat ng corrected pour reads ay dumadaan sa bowlByLegacyPosition bago ibalik ang corrected pours.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 10 bowl-update contamination scar: ang six-position update loop ay nagbabasa at agad nagsusulat sa iisang working bowl storage, kaya ang mga huling positions ay maaaring makabasa ng bagong values mula sa naunang positions sa parehong drop.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -53,3 +53,7 @@ STAGE18_DISCOVERY=FIXED_BOWL_IDS_INSTEAD_OF_ORDER_POSITIONS
 STAGE18_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
 STAGE19_PATCH=BOWL_ALIAS_POSITION_REPAIR
 STAGE19_RUNTIME_VERIFICATION=GREEN_CONFIRMED
+STAGE20_DISCOVERY=IN_PLACE_BOWL_UPDATE_READS_UPDATED_WORKING_VALUES
+STAGE20_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `20` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na tumutugma ang unang position sa snapshot semantics, na EXPECTED_RED ang eksaktong required probes sa positions 2,3,6, na nasa tunay na production path ang raw in-place update sa i=1, at wala pang Patch 10 snapshot/write-buffer/commit-after-six repair.

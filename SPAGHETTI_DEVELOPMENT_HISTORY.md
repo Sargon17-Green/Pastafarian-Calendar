@@ -539,3 +539,20 @@ Lahat ng 46 supplied visible-drop/order pairs ay dumadaan sa parehong wrapper at
 
 Wala pang `vaultOld`, pending bowl updates, in-place bowl mutation patch, o anumang Patch 10 behavior.
 
+## Stage 20 — Discovery 10: same-storage bowl-update contamination
+
+Pagkatapos ng Patch 09, tama na ang pour-to-bowl position mapping. Ang susunod na historical defect ay nasa bowl mutation loop.
+
+Ang helper ay gumagawa ng isang working bowl storage at sa bawat position ay parehong:
+
+1. nagbabasa ng current/previous/next bowl values mula rito; at
+2. agad nagsusulat ng bagong current bowl value pabalik rito.
+
+Kaya ang later positions ay maaaring makabasa ng bagong value na nilikha ng earlier position sa parehong drop.
+
+Sa required Stage 20 regression, ang unang position ay tumutugma sa snapshot result dahil wala pang naunang write. Ang required positions 2,3,6 ay divergent at siyang EXPECTED_RED surface.
+
+Isang real production probe sa `i=1` ang idinagdag pagkatapos ng Patch 09 corrected pours.
+
+Wala pang hiwalay na old snapshot, pending write buffer, o bulk commit ng Patch 10.
+

@@ -19,6 +19,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Patch08.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery09.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch09.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Discovery10.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -161,6 +162,15 @@ function New-BaseMonsterContext {
         patch09Applied = $false
         patch09Status = 'NOT_RUN'
         patch09InvocationCount = 0
+        legacyBowlUpdateLastDropIndex = $null
+        legacyBowlUpdateLastInput = $null
+        legacyBowlUpdateLastPours = $null
+        legacyBowlUpdateLastOrder = $null
+        legacyBowlUpdateLastDrop = $null
+        legacyBowlUpdateLastResult = $null
+        legacyBowlUpdateProductionResult = $null
+        discovery10Status = 'HISTORICAL_SCAR_PRESENT'
+        discovery10InvocationCount = 0
     }
 }
 
@@ -296,7 +306,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 19.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 20.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -307,11 +317,11 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'PATCH09'
+    $ctx.phase = 'DISCOVERY10'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH09' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY10' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
@@ -402,14 +412,30 @@ function Invoke-CalendarDateSpaghetti {
             corrected = $withDiscovery05.patch09ProductionPours
         })
 
+        # Discovery 10 production probe: real i=1 bowl update. The historical
+        # helper reads and writes one shared working bowl storage.
+        $withDiscovery05.legacyBowlUpdateProductionResult = Invoke-Discovery10LegacyBowlUpdateAdapter `
+            -Context $withDiscovery05 `
+            -I 1 `
+            -Bowls $withDiscovery05.legacyInitialBowls `
+            -Pours $withDiscovery05.patch09ProductionPours
+
+        Add-BaseMetric -Context $withDiscovery05 -Name 'discovery10.bowlUpdate.probes'
+        Add-BaseLog -Context $withDiscovery05 -Code 'monster.discovery10.productionProbe' -Data ([pscustomobject]@{
+            i = 1
+            drop = $withDiscovery05.legacyBowlUpdateLastDrop
+            order = $withDiscovery05.legacyBowlUpdateLastOrder
+            result = $withDiscovery05.legacyBowlUpdateProductionResult
+        })
+
         return $withDiscovery05
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.patch09.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.discovery10.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'PATCH09_COMPLETE'
+    $result.status = 'DISCOVERY10_COMPLETE'
     return $result
 }

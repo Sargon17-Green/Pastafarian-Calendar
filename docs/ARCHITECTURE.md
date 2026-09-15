@@ -1,53 +1,44 @@
-# Arkitektura hanggang Stage 19
+# Arkitektura hanggang Stage 20
 
-## Preserved raw pour layer
+## Input sa Discovery 10
 
-```text
-legacyFixedBowlPours
-    position 1 -> fixed old bowl ID 1
-    position 2 -> fixed old bowl ID 2
-    position 3 -> fixed old bowl ID 3
-```
+Ang bowl-update scar ay tumatanggap ng:
 
-Ang raw layer ay nananatiling pisikal at talagang pinapatakbo muna.
+- real visible drop `i`;
+- Patch 08 corrected order;
+- Patch 09 corrected pours;
+- patched stone row;
+- current six bowl values.
 
-## Patch 09
-
-```text
-Invoke-Patch09BowlAliasRepair
--> legacyFixedBowlPours
--> installOrderAliases(order)
--> aliasedPositionPours
-   -> bowlByLegacyPosition(..., position=1)
-   -> bowlByLegacyPosition(..., position=2)
-   -> bowlByLegacyPosition(..., position=3)
--> corrected pours
-```
-
-Ang alias table ay 1-based:
+## Historical update
 
 ```text
-alias[1] = order[0]
-...
-alias[6] = order[5]
+working = copy(current bowls)
+
+for position = 1..6:
+    bowlId = order[position]
+    prevId = previous order position
+    nextId = next order position
+    s = working[bowlId]
+        + 2*working[prevId]
+        + 3*working[nextId]
+        + pours[position]
+        + drop
+        + stone[position-kind]
+
+    working[bowlId] = SAVE(
+        s^2
+        + 5*working[prevId]*working[nextId]
+        + i*position
+    )
 ```
 
-at slot 0 ay sentinel `0`.
+Ang contamination ay dahil parehong storage ang source ng reads at destination ng bawat immediate write.
 
 ## Production route
 
-Ang Stage 19 production route ay gumagamit ng real 46-drop table at Patch 08 corrected order table. Sa production probe `i=1`, kino-capture nang hiwalay ang raw Discovery 09 pours at ang corrected Patch 09 pours; ang corrected tuple ang authoritative result.
-
-## Invocation-owned Patch 09 state
-
-- `patch09DropIndex`
-- `patch09BowlAlias`
-- `patch09LegacyFixedPours`
-- `patch09CorrectedPours`
-- `patch09Applied`
-- `patch09Status`
-- `patch09InvocationCount`
+Stage 20 keeps Stage 19 intact, then executes one real `i=1` Discovery 10 bowl update using `legacyInitialBowls` and `patch09ProductionPours`. The raw result remains observable but is not yet corrected.
 
 ## Stage boundary
 
-Wala pang Stage 20 / Patch 10 `vaultOld`, pending bowl-update table, o in-place bowl-update repair.
+Wala pang separate old snapshot, pending output table, o commit-after-all-six update. Iyon ay Patch 10 / Stage 21.

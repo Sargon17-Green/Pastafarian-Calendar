@@ -1,39 +1,28 @@
 # Kalendaryong Pastafarian — PowerShell + Filipino
 
-## Stage 19 — Patch 09
+## Stage 20 — Discovery 10
 
-Pinananatiling pisikal ang Discovery 09 fixed-bowl scar:
+Ang bagong historical scar ay nasa six-position bowl update loop.
 
-```text
-position 1 -> oldBowls[1]
-position 2 -> oldBowls[2]
-position 3 -> oldBowls[3]
-```
-
-Hindi ito binubura o inaayos sa mismong raw helper. Ang Patch 09 wrapper ay talagang nagpapatakbo muna rito at kino-capture ang raw pours.
-
-Pagkatapos, ini-install ang alias table:
+Sa bawat position, kinukuha ang `bowlId`, `prevId`, at `nextId` mula sa corrected permutation order. Ngunit ang legacy helper ay nagbabasa at agad nagsusulat sa **iisang working bowl storage**:
 
 ```text
-bowlAlias[position] = order[position]
+working[bowlId] = SAVE(
+    s^2 + 5*working[prevId]*working[nextId] + i*position
+)
 ```
 
-para sa positions `1..6`.
+Dahil dito, ang mga position na susunod ay maaaring makabasa ng values na naisulat na ng naunang position sa parehong drop.
 
-Lahat ng corrected bowl reads para sa pour positions `1,2,3` ay dumadaan sa `bowlByLegacyPosition`, kaya ang bowl ID ay mula sa current corrected permutation order.
+Ang tamang snapshot semantics ay dapat magbasa lamang mula sa lumang bowl snapshot at magsulat sa hiwalay na output storage, ngunit **hindi pa iyon ipinapatupad sa Stage 20**.
 
-Sa Foundation fixture, ang unang order ay:
+Sa historical required fixture:
 
 ```text
-5,4,3,6,2,1
+position 1 -> snapshot MATCH
+positions 2,3,6 -> EXPECTED_RED
 ```
 
-at ang alias table ay:
+Ang raw helper ay nasa tunay na production path sa `i=1`, gamit ang corrected Patch 09 pours.
 
-```text
-0,5,4,3,6,2,1
-```
-
-Ang lahat ng 46 isolated corrected pour sets ay inaasahang GREEN.
-
-Wala pang Stage 20 / Patch 10 `vaultOld`, pending bowl updates, o in-place bowl-update logic.
+Wala pang Patch 10 snapshot/write-buffer/commit-after-six repair.
