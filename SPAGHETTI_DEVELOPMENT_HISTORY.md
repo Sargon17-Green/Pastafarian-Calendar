@@ -449,3 +449,41 @@ Samakatuwid, ordinal `1` ay nagbabalik ng permutation 2, ordinal `719` ay nagbab
 
 Ang production route ay gumagamit lamang ng neutral `dropValue=1` probe at hindi pa nagsisimula ng bowl-pour logic. Wala pang Patch 08 bridge na nagbabawas ng isa.
 
+## Stage 17 — Patch 08: one-based ordinal papunta sa legacy zero-based rank
+
+### Preserved Discovery 08 scar
+
+Hindi binago ang `oldPermutationUnrank0` o ang Discovery 08 wrong caller. Ang raw path ay patuloy na nagpapasa ng one-based ordinal nang direkta bilang `rank0`.
+
+### Patch 08 correction
+
+Ang wrapper ay talagang tumatawag muna sa raw `LegacyPermutationRankAdapter`, kino-capture ang wrong order o undefined/range scar, at saka lamang kinukuwenta:
+
+```text
+oneBased = regularMod(drop-1,720)+1
+legacyRank0 = oneBased-1
+corrected = oldPermutationUnrank0(legacyRank0)
+```
+
+Ang corrected order lamang ang semantic result.
+
+### Boundary behavior
+
+```text
+drop 1:
+  raw       = permutation 2
+  corrected = permutation 1
+
+drop 720:
+  raw       = undefined
+  corrected = permutation 720
+```
+
+### 46-slot order table
+
+May helper para bumuo ng order table mula sa 46 supplied visible-drop values. Hindi ito gumagawa ng visible drops; ginagamit lamang nito ang mga value na ibinigay sa caller.
+
+### Hindi pa kasama
+
+Wala pang fixed-bowl pour defect ng Stage 18, walang `bowlAlias`, walang `patchedPours`, at walang Patch 09.
+

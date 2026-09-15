@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=16
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=17
+CURRENT_KIND=PATCH
 CURRENT_PATCH=08
 LAST_COMPLETED_STAGE=16
-EXPECTED_REPOSITORY_STATE=RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 08 permutation-rank scar: nananatiling zero-based at tama lamang para sa rank0 0..719 ang oldPermutationUnrank0, ngunit ang historical caller ay kumukuha ng one-based ordinal 1..720 mula sa drop at ipinapasa iyon nang diretso bilang rank0.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 08 permutation-rank wrapper: talagang pinapatakbo muna ang Discovery 08 wrong caller at kino-capture ang raw wrong order o rank0=720 undefined scar, pagkatapos ay kinukuwenta ang oneBased ordinal, isinasalin ito sa legacyRank0=oneBased-1, at tumatawag sa preserved oldPermutationUnrank0 upang ibalik lamang ang corrected order.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -47,3 +47,7 @@ STAGE15_PATCH=SENTINEL_GRIND_TABLE_REPAIR
 STAGE15_RUNTIME_VERIFICATION=GREEN_CONFIRMED
 STAGE16_DISCOVERY=ZERO_BASED_PERMUTATION_DIRECT_ONE_BASED_ORDINAL
 STAGE16_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
+STAGE17_PATCH=ONE_BASED_TO_ZERO_BASED_PERMUTATION_RANK
+STAGE17_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `17` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na GREEN ang lahat ng 720 Patch 08 ordinals, na preserved at talagang tinatawag muna ang Discovery 08 wrong caller, at wala pang Stage 18 fixed-bowl pour defect, bowlAlias, patchedPours, o Patch 09 logic.

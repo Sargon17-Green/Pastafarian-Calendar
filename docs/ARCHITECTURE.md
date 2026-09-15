@@ -1,34 +1,67 @@
-# Arkitektura hanggang Stage 16
+# Arkitektura hanggang Stage 17
 
-Ang Stage 16 ay Discovery 08 para sa zero-based permutation helper na tinatawag gamit ang one-based ordinal.
+Ang Stage 17 ay Patch 08 para sa permutation-rank off-by-one scar ng Discovery 08.
 
-## Raw helper
+## Preserved raw layer
 
 ```text
 oldPermutationUnrank0(rank0)
+legacy caller:
+    oneBased = regularMod(drop-1,720)+1
+    raw = oldPermutationUnrank0(oneBased)
 ```
 
-ay valid sa `0..719`.
+Ang layer na ito ay nananatiling pisikal at talagang tinatawag.
 
-## Historical caller
+## Patch 08
 
 ```text
-oneBasedOrdinal = regularMod(dropValue - 1, 720) + 1
-legacyRank0Input = oneBasedOrdinal
-order = oldPermutationUnrank0(legacyRank0Input)
+Invoke-Patch08PermutationRankRepair
+-> LegacyPermutationRankAdapter         # raw scar first
+-> oneBased = regularMod(drop-1,720)+1
+-> legacyRank0 = oneBased-1
+-> oldPermutationUnrank0(legacyRank0)
+-> corrected order
 ```
 
-Ang equality ng `legacyRank0Input` at `oneBasedOrdinal` ang scar.
+Sa raw ordinal 720, kino-capture ang undefined/range scar at nagpapatuloy ang corrected chain sa rank0 719.
 
 ## Production route
 
-Pagkatapos ng Patch 07 probe, ang real route ay nagpapatakbo ng `LegacyPermutationRankAdapter(dropValue=1)`. Ito ay nagbabalik ng `1,2,3,4,6,5` sa halip na normative `1,2,3,4,5,6`.
-
-## EXPECTED_RED contract
+Pagkatapos ng Patch 07 probe:
 
 ```text
-EXPECTED_RED = 720
-MATCH = 0
+Invoke-Patch08PermutationRankRepair(dropIndex=1, dropValue=1)
+    raw Discovery 08 -> 1,2,3,4,6,5
+    corrected rank0=0 -> 1,2,3,4,5,6
 ```
 
-Wala pang Patch 08 bridge at wala pang bowl aliases ng susunod na patch family.
+Ang raw order ay nananatiling observable sa `legacyPermutationProbeOrder`; ang authoritative probe value ay `patch08ProductionOrder`.
+
+## Patch 08 state
+
+Invocation-owned:
+
+- `patch08DropIndex`
+- `patch08DropValue`
+- `patch08OneBasedOrdinal`
+- `patch08LegacyRank0`
+- `patch08LegacyWrongOrder`
+- `patch08LegacyWrongUndefined`
+- `patch08LegacyWrongError`
+- `patch08CorrectedOrder`
+- `patch08Applied`
+- `patch08Status`
+- `patch08InvocationCount`
+
+## GREEN contract
+
+- raw Discovery 08 RED count = 720;
+- corrected translator GREEN count = 720;
+- supplied visible-drop order table = 46/46 GREEN;
+- raw scar executes before correction;
+- drop 720 raw undefined, corrected final permutation.
+
+## Wala pang Stage 18
+
+Walang fixed-bowl pour defect, `LegacyPourAdapter`, `bowlAlias`, `patchedPours`, o Patch 09.
