@@ -15,6 +15,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Patch06.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery07.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch07.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Discovery08.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -117,6 +118,14 @@ function New-BaseMonsterContext {
         patch07Applied = $false
         patch07Status = 'NOT_RUN'
         patch07InvocationCount = 0
+        legacyPermutationDropValue = $null
+        legacyPermutationOneBasedOrdinal = $null
+        legacyPermutationRank0Input = $null
+        legacyPermutationOrder = $null
+        legacyPermutationUndefined = $false
+        legacyPermutationProbeOrder = $null
+        discovery08Status = 'HISTORICAL_SCAR_PRESENT'
+        discovery08InvocationCount = 0
     }
 }
 
@@ -252,7 +261,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 15.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 16.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -263,11 +272,11 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'PATCH07'
+    $ctx.phase = 'DISCOVERY08'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH07' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY08' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
@@ -309,14 +318,27 @@ function Invoke-CalendarDateSpaghetti {
             correctedRow = $withDiscovery05.legacyGrindProbeRow
         })
 
+        # Discovery 08 neutral probe; wala pang visible-drop o bowl-pour builder.
+        $withDiscovery05.legacyPermutationProbeOrder = LegacyPermutationRankAdapter `
+            -Context $withDiscovery05 `
+            -DropValue ([System.Numerics.BigInteger]1)
+
+        Add-BaseMetric -Context $withDiscovery05 -Name 'discovery08.permutation.probes'
+        Add-BaseLog -Context $withDiscovery05 -Code 'monster.discovery08.productionProbe' -Data ([pscustomobject]@{
+            dropValue = 1
+            oneBasedOrdinal = $withDiscovery05.legacyPermutationOneBasedOrdinal
+            rank0Input = $withDiscovery05.legacyPermutationRank0Input
+            order = $withDiscovery05.legacyPermutationProbeOrder
+        })
+
         return $withDiscovery05
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.patch07.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.discovery08.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'PATCH07_COMPLETE'
+    $result.status = 'DISCOVERY08_COMPLETE'
     return $result
 }

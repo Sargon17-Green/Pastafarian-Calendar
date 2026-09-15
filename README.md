@@ -2,55 +2,25 @@
 
 Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`.
 
-## Stage 15 — Patch 07
+## Stage 16 — Discovery 08
 
-Hindi binabago ang Stage 14 raw table o raw helper:
-
-```text
-LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED
-legacyGrindRow(grind)
-    -> rawTable[grind]
-```
-
-Nananatili itong sadyang mali para sa semantic ordinals `1..11`.
-
-Ang correction ay hiwalay:
+Ang historical permutation helper ay zero-based:
 
 ```text
-SENTINEL_GRIND_ROW = [0,0,0,0,NONE]
-
-GRIND_TABLE_WITH_SENTINEL = [
-    SENTINEL_GRIND_ROW,
-    raw row 1,
-    raw row 2,
-    ...
-    raw row 11
-]
-
-grindRowWithSentinel(grind)
-    -> GRIND_TABLE_WITH_SENTINEL[grind]
+oldPermutationUnrank0(rank0)
+    valid lamang sa 0..719
 ```
 
-Sa ganitong layout, eksaktong tumutugma ang semantic ordinals `1..11` sa historical rows `1..11`.
+Ang helper mismo ay tama sa domain na iyon. Ang defect ay nasa caller: kinukuha nito ang semantic one-based ordinal na `1..720` mula sa drop at ipinapasa iyon nang diretso bilang `rank0`.
 
-Ang `Invoke-Patch07GrindRowRepair` ay talagang nagpapatakbo muna ng Stage 14 `LegacyGrindTableAdapter` at kino-capture ang raw scar bago ibalik ang corrected row.
+Kaya ang ordinals `1..719` ay isang permutation na huli, at ang ordinal `720` ay undefined. Lahat ng 720 ordinals ay `EXPECTED_RED`.
 
-Sa production probe:
-
-```text
-grind = 1
-raw legacy result = row 2
-corrected result  = row 1
-```
-
-Inaasahang repository state: `GREEN`.
-
-Wala pang `LegacyVisibleDropBuilder`, `visibleDropThroughCurrentLayers`, `oldPermutationUnrank0`, o anumang Stage 16+ logic.
+Sa production route ay may neutral `dropValue=1` probe. Wala pang Patch 08 `oneBased-1` bridge at wala pang bowl-alias logic.
 
 ## Pagpapatakbo
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage15.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage15.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage16.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage16.ps1
 ```

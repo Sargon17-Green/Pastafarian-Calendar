@@ -441,3 +441,11 @@ Ang raw scar ay `row 2`; ang authoritative Patch 07 result ay `row 1`.
 
 Wala pang visible-drop builder, `visibleDropThroughCurrentLayers`, permutation-unrank scar, o anumang Stage 16+ layer.
 
+## Stage 16 — Discovery 08: one-based ordinal na direktang ipinasa sa zero-based permutation helper
+
+Ang `oldPermutationUnrank0(rank0)` ay nananatiling zero-based at tama sa `0..719`. Ang historical caller ay nagko-compute ng `oneBasedOrdinal = regularMod(drop-1,720)+1` ngunit ipinapasa iyon nang direkta bilang `rank0`.
+
+Samakatuwid, ordinal `1` ay nagbabalik ng permutation 2, ordinal `719` ay nagbabalik ng permutation 720, at ordinal `720` ay undefined. Lahat ng 720 ordinals ay `EXPECTED_RED`.
+
+Ang production route ay gumagamit lamang ng neutral `dropValue=1` probe at hindi pa nagsisimula ng bowl-pour logic. Wala pang Patch 08 bridge na nagbabawas ng isa.
+
