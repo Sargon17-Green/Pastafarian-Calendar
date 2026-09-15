@@ -14,6 +14,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Discovery06.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch06.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery07.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Patch07.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -109,6 +110,13 @@ function New-BaseMonsterContext {
         legacyGrindProbeRow = $null
         discovery07Status = 'HISTORICAL_SCAR_PRESENT'
         discovery07InvocationCount = 0
+        patch07RequestedGrind = $null
+        patch07SentinelIndex = $null
+        patch07RawLegacyRow = $null
+        patch07CorrectedRow = $null
+        patch07Applied = $false
+        patch07Status = 'NOT_RUN'
+        patch07InvocationCount = 0
     }
 }
 
@@ -244,7 +252,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 14.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 15.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -255,11 +263,11 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'DISCOVERY07'
+    $ctx.phase = 'PATCH07'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY07' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH07' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
@@ -287,28 +295,28 @@ function Invoke-CalendarDateSpaghetti {
             value = $withDiscovery05.legacyPriorProbeValue
         })
 
-        # Discovery 07 production probe: ginagamit ang one-based grind ordinal 1
-        # laban sa raw zero-based table. Telemetry lamang ito at hindi pa
-        # visible-drop computation.
-        $withDiscovery05.legacyGrindProbeRow = LegacyGrindTableAdapter `
+        # Patch 07 production probe: ang wrapper mismo ang talagang tumatawag
+        # muna sa raw Stage 14 adapter bago magbalik ng corrected grind row.
+        $withDiscovery05.legacyGrindProbeRow = Invoke-Patch07GrindRowRepair `
             -Context $withDiscovery05 `
             -Grind 1
 
-        Add-BaseMetric -Context $withDiscovery05 -Name 'discovery07.grind.probes'
-        Add-BaseLog -Context $withDiscovery05 -Code 'monster.discovery07.productionProbe' -Data ([pscustomobject]@{
+        Add-BaseMetric -Context $withDiscovery05 -Name 'patch07.grind.probes'
+        Add-BaseLog -Context $withDiscovery05 -Code 'monster.patch07.productionProbe' -Data ([pscustomobject]@{
             grind = 1
-            directIndex = 1
-            row = $withDiscovery05.legacyGrindProbeRow
+            sentinelIndex = 1
+            rawLegacyRow = $withDiscovery05.patch07RawLegacyRow
+            correctedRow = $withDiscovery05.legacyGrindProbeRow
         })
 
         return $withDiscovery05
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.discovery07.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.patch07.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'DISCOVERY07_COMPLETE'
+    $result.status = 'PATCH07_COMPLETE'
     return $result
 }

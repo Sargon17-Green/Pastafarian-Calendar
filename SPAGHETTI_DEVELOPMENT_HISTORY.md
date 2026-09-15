@@ -378,3 +378,66 @@ Ang context ay nagtatago ng:
 
 Wala pang sentinel row, walang `GRIND_TABLE_WITH_SENTINEL`, walang `grindRowWithSentinel`, at walang visible-drop builder. Ang mga iyon ay para sa Patch 07 sa Stage 15.
 
+## Stage 15 — Patch 07: sentinel wrapper sa zero-based grind table
+
+### Preserved raw scar
+
+Hindi binago ang Stage 14 `LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED` o `legacyGrindRow`.
+
+Patuloy na mali ang raw helper:
+
+```text
+legacyGrindRow(1)  -> raw row 2
+...
+legacyGrindRow(10) -> raw row 11
+legacyGrindRow(11) -> undefined
+```
+
+### Correction layer
+
+Ang Patch 07 ay nagdaragdag ng hiwalay na sentinel row:
+
+```text
+[0,0,0,0,NONE]
+```
+
+at bumubuo ng:
+
+```text
+GRIND_TABLE_WITH_SENTINEL[0]  = sentinel
+GRIND_TABLE_WITH_SENTINEL[1]  = raw row 1
+...
+GRIND_TABLE_WITH_SENTINEL[11] = raw row 11
+```
+
+Kaya:
+
+```text
+grindRowWithSentinel(g)
+    -> GRIND_TABLE_WITH_SENTINEL[g]
+```
+
+ay GREEN para sa lahat ng `g=1..11`.
+
+### Preserved scar execution
+
+Ang `Invoke-Patch07GrindRowRepair` ay hindi nilalaktawan ang Stage 14 defect. Una nitong tinatawag ang `LegacyGrindTableAdapter`, kaya aktuwal na tumatakbo ang raw `legacyGrindRow`. Pagkatapos lamang nito kinukuha ang corrected sentinel-indexed row.
+
+Ang context ay nagtatago ng:
+- requested grind;
+- sentinel index;
+- raw legacy row;
+- corrected row;
+- applied flag;
+- Patch 07 status at invocation count.
+
+### Production route
+
+Ang production probe ay nananatiling `grind=1`.
+
+Ang raw scar ay `row 2`; ang authoritative Patch 07 result ay `row 1`.
+
+### Hindi pa kasama
+
+Wala pang visible-drop builder, `visibleDropThroughCurrentLayers`, permutation-unrank scar, o anumang Stage 16+ layer.
+

@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=14
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=15
+CURRENT_KIND=PATCH
 CURRENT_PATCH=07
 LAST_COMPLETED_STAGE=14
-EXPECTED_REPOSITORY_STATE=RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 07 zero-based visible-grind table scar: 11 tunay na rows ang nakaimbak sa indices 0..10, ngunit ang legacyGrindRow ay tumatanggap ng one-based grind ordinal 1..11 at direktang ginagamit ito bilang array index; kaya grind 1..10 ay isang row na huli at grind 11 ay undefined.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 07 sentinel repair nang hindi binabago ang raw zero-based grind table o legacyGrindRow scar: isang hiwalay na SENTINEL_GRIND_ROW ang inilalagay sa index 0 ng GRIND_TABLE_WITH_SENTINEL, kaya ang semantic grind ordinals 1..11 ay tumuturo sa eksaktong labing-isang historical rows.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -43,3 +43,7 @@ STAGE13_PATCH=PRIOR_PATCH_HIDDEN_FALLBACK
 STAGE13_RUNTIME_VERIFICATION=GREEN_CONFIRMED
 STAGE14_DISCOVERY=ZERO_BASED_VISIBLE_GRIND_TABLE_DIRECT_ORDINAL_INDEX
 STAGE14_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
+STAGE15_PATCH=SENTINEL_GRIND_TABLE_REPAIR
+STAGE15_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `15` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na GREEN ang lahat ng labing-isang Patch 07 grind ordinals, habang nananatiling pisikal at talagang tinatawag ang Stage 14 raw indexing scar at wala pang visible-drop builder o Stage 16 logic.
