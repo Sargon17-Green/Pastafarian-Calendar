@@ -1,67 +1,54 @@
-# Arkitektura hanggang Stage 17
+# Arkitektura hanggang Stage 18
 
-Ang Stage 17 ay Patch 08 para sa permutation-rank off-by-one scar ng Discovery 08.
+## Stage 18 support plumbing
 
-## Preserved raw layer
-
-```text
-oldPermutationUnrank0(rank0)
-legacy caller:
-    oneBased = regularMod(drop-1,720)+1
-    raw = oldPermutationUnrank0(oneBased)
-```
-
-Ang layer na ito ay nananatiling pisikal at talagang tinatawag.
-
-## Patch 08
+Ang real production route ay ngayon nagtatayo ng:
 
 ```text
-Invoke-Patch08PermutationRankRepair
--> LegacyPermutationRankAdapter         # raw scar first
--> oneBased = regularMod(drop-1,720)+1
--> legacyRank0 = oneBased-1
--> oldPermutationUnrank0(legacyRank0)
--> corrected order
+patched stone table
+-> hidden storage
+-> patched prior reads
+-> sentinel-corrected visible grinds
+-> 46 visible drops
+-> Patch 08 corrected 46-order table
+-> Discovery 09 fixed-bowl pour probe
 ```
 
-Sa raw ordinal 720, kino-capture ang undefined/range scar at nagpapatuloy ang corrected chain sa rank0 719.
+Ang visible-drop builder ay gumagamit ng existing Patch 06 history semantics at Patch 07 grind rows; wala itong bagong scar.
 
-## Production route
+## Discovery 09 scar
 
-Pagkatapos ng Patch 07 probe:
+Ang exact old initial bowls ay:
 
 ```text
-Invoke-Patch08PermutationRankRepair(dropIndex=1, dropValue=1)
-    raw Discovery 08 -> 1,2,3,4,6,5
-    corrected rank0=0 -> 1,2,3,4,5,6
+temp = action + target*bowlId + distance + connection + direction + prime^2
+oldBowls[bowlId] = SAVE(temp^2 + bowlId)
 ```
 
-Ang raw order ay nananatiling observable sa `legacyPermutationProbeOrder`; ang authoritative probe value ay `patch08ProductionOrder`.
+na may primes `17,19,23,29,31,37`.
 
-## Patch 08 state
+Ang raw pour helper:
 
-Invocation-owned:
+```text
+pour1 = SAVE(drop^2 + wheat * oldBowls[1] + 3*i)
+pour2 = SAVE(drop^2 + barley * oldBowls[2] + 5*i)
+pour3 = SAVE(drop^2 + salt * oldBowls[3] + 7*i)
+```
 
-- `patch08DropIndex`
-- `patch08DropValue`
-- `patch08OneBasedOrdinal`
-- `patch08LegacyRank0`
-- `patch08LegacyWrongOrder`
-- `patch08LegacyWrongUndefined`
-- `patch08LegacyWrongError`
-- `patch08CorrectedOrder`
-- `patch08Applied`
-- `patch08Status`
-- `patch08InvocationCount`
+ay sadyang hindi tumitingin sa permutation order.
 
-## GREEN contract
+## Production probe
 
-- raw Discovery 08 RED count = 720;
-- corrected translator GREEN count = 720;
-- supplied visible-drop order table = 46/46 GREEN;
-- raw scar executes before correction;
-- drop 720 raw undefined, corrected final permutation.
+Sa Foundation fixture, `i=1`:
 
-## Wala pang Stage 18
+```text
+drop ordinal = 570
+order = 5,4,3,6,2,1
+raw reads = bowl IDs 1,2,3
+```
 
-Walang fixed-bowl pour defect, `LegacyPourAdapter`, `bowlAlias`, `patchedPours`, o Patch 09.
+kaya red ang positions 1 at 2; position 3 ay coincidentally pareho sa bowl 3 ngunit buong tuple ay divergent.
+
+## Stage boundary
+
+Wala pang `installOrderAliases`, `bowlByLegacyPosition`, `aliasedPositionPours`, `bowlAlias`, `patchedPours`, `vaultOld`, o in-place bowl update patch.

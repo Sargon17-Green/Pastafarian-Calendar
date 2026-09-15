@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=17
-CURRENT_KIND=PATCH
-CURRENT_PATCH=08
+CURRENT_STAGE=18
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=09
 LAST_COMPLETED_STAGE=17
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 08 permutation-rank wrapper: talagang pinapatakbo muna ang Discovery 08 wrong caller at kino-capture ang raw wrong order o rank0=720 undefined scar, pagkatapos ay kinukuwenta ang oneBased ordinal, isinasalin ito sa legacyRank0=oneBased-1, at tumatawag sa preserved oldPermutationUnrank0 upang ibalik lamang ang corrected order.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 09 fixed-bowl pour scar sa tunay na 46-drop production plumbing: tama ang old initial-bowl factory, tama ang patched visible drops at permutation orders, ngunit ang legacy pour helper ay nagbabasa ng fixed bowl IDs 1,2,3 sa halip na bowl IDs sa order positions 1,2,3.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -49,3 +49,7 @@ STAGE16_DISCOVERY=ZERO_BASED_PERMUTATION_DIRECT_ONE_BASED_ORDINAL
 STAGE16_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
 STAGE17_PATCH=ONE_BASED_TO_ZERO_BASED_PERMUTATION_RANK
 STAGE17_RUNTIME_VERIFICATION=GREEN_CONFIRMED
+STAGE18_DISCOVERY=FIXED_BOWL_IDS_INSTEAD_OF_ORDER_POSITIONS
+STAGE18_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `18` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime ang eksaktong tatlong Discovery 09 EXPECTED_RED probes sa i=1,2,3, ang incidental match sa i=46, ang exact initial bowls, at ang tunay na production i=1 fixed-bowl pour call, habang wala pang Patch 09 bowlAlias correction o Patch 10 in-place bowl update logic.

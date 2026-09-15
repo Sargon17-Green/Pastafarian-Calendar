@@ -487,3 +487,23 @@ May helper para bumuo ng order table mula sa 46 supplied visible-drop values. Hi
 
 Wala pang fixed-bowl pour defect ng Stage 18, walang `bowlAlias`, walang `patchedPours`, at walang Patch 09.
 
+## Stage 18 — Discovery 09: fixed bowl IDs 1,2,3 sa halip na order positions
+
+Ang old initial-bowl factory ay nananatiling exact.
+
+Ang historical pour helper ay mali sa ibang lugar: itinuturing nitong literal bowl IDs ang semantic pour positions 1,2,3.
+
+```text
+position 1 -> oldBowls[1]
+position 2 -> oldBowls[2]
+position 3 -> oldBowls[3]
+```
+
+Dapat sana nitong basahin ang bowl IDs sa corrected permutation order positions.
+
+Upang ang scar ay nasa tunay na route, Stage 18 ay bumubuo ng 46 visible drops gamit ang lahat ng kasalukuyang corrected prior/grind layers at saka 46 corrected permutation orders gamit ang Patch 08.
+
+Sa Foundation fixture, i=1,2,3 ay lahat divergent. Ang i=46 ay incidental match dahil ang unang tatlong order positions ay eksaktong 1,2,3.
+
+Isang real production pour probe lamang ang ginagawa sa i=1. Wala pang bowl stir/update, walang `bowlAlias`, walang corrected pours at walang Patch 10.
+
