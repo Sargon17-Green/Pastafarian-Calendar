@@ -91,6 +91,14 @@ classdef MonsterContext < handle
         year5000InputCandidates
         legacyYear5000StableLengthOrder
         year5000CandidateOrder
+        legacyYearJumpAnchorNumber
+        legacyYearJumpAnchorOpenDay
+        legacyYearJumpTargetDay
+        legacyYearJumpDeltaDays
+        legacyYearJumpOffset365
+        legacyYearJumpGuessNumber
+        legacyYearJumpGuessedYear
+        targetYearCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -184,6 +192,14 @@ classdef MonsterContext < handle
             obj.year5000InputCandidates = {};
             obj.legacyYear5000StableLengthOrder = {};
             obj.year5000CandidateOrder = {};
+            obj.legacyYearJumpAnchorNumber = [];
+            obj.legacyYearJumpAnchorOpenDay = [];
+            obj.legacyYearJumpTargetDay = [];
+            obj.legacyYearJumpDeltaDays = [];
+            obj.legacyYearJumpOffset365 = [];
+            obj.legacyYearJumpGuessNumber = [];
+            obj.legacyYearJumpGuessedYear = [];
+            obj.targetYearCandidate = [];
         end
     end
 end

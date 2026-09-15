@@ -610,3 +610,27 @@ Stage 35 nadal nie wykonuje wyboru rank Year 5000 ani wyszukiwania następnych/p
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 36 — DISCOVERY 18: old year jump guess by 365
+
+Dodano osiemnasty historyczny defekt w wyszukiwaniu roku zawierającego odległy target day.
+
+Historyczna `LegacyOldYearJumpGuess` nie chodzi po kolejnych rzeczywistych latach. Zamiast tego traktuje rok jako przybliżenie 365-dniowe i oblicza bezpośrednio:
+
+`guessOffset365 = floor((targetDay - anchor.openGateDay) / 365)`
+
+oraz
+
+`guessedYearNumber = anchor.number + guessOffset365`.
+
+Następnie wybiera od razu rok o tym numerze z dostępnego łańcucha. Nie sprawdza po drodze rzeczywistych granic kolejnych lat.
+
+Dla bliskich targetów wokół anchor Year 5000 defect może pozostać niewidoczny. Regression zawiera więc controls, w których `4999`, `5000` i `5001` są trafiane poprawnie.
+
+Dla odległych targetów zmienne długości lat kumulują drift. W kontrolowanym łańcuchu przyszły target `1500` należy do roku `5003`, ale `/365` wybiera `5004`. Analogicznie target `-1200` należy do `4997`, lecz raw guess wybiera `4996`.
+
+`TargetYearCompatibilityRoute` w Stage 36 publikuje jeszcze bezpośrednio raw guessed year i zapisuje pełną telemetrię: anchor number/open day, target, delta days, `/365` offset, guessed number oraz guessed year.
+
+Stage 36 celowo nie implementuje jeszcze sequential walk. Dopiero Stage 37 ma zachować całą raw guess telemetry i raw guessed year jako historyczną bliznę, ale semantic path ma zaczynać od anchor year i chodzić `next` lub `previous` dokładnie po jednym rzeczywistym roku, dopóki target nie spełni przedziału `(openGateDay, closeGateDay]`.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
