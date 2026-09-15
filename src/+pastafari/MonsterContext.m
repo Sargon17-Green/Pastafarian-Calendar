@@ -99,6 +99,14 @@ classdef MonsterContext < handle
         legacyYearJumpGuessNumber
         legacyYearJumpGuessedYear
         targetYearCandidate
+        legacyYearCacheKey
+        legacyYearCacheHit
+        legacyYearCacheEntryCalculationDayFingerprint
+        legacyYearCacheEntryOpenGate
+        legacyYearCacheEntryCloseGate
+        legacyYearCacheRawValue
+        legacyYearCacheProducerExecuted
+        yearStructureCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -200,6 +208,14 @@ classdef MonsterContext < handle
             obj.legacyYearJumpGuessNumber = [];
             obj.legacyYearJumpGuessedYear = [];
             obj.targetYearCandidate = [];
+            obj.legacyYearCacheKey = [];
+            obj.legacyYearCacheHit = false;
+            obj.legacyYearCacheEntryCalculationDayFingerprint = [];
+            obj.legacyYearCacheEntryOpenGate = [];
+            obj.legacyYearCacheEntryCloseGate = [];
+            obj.legacyYearCacheRawValue = [];
+            obj.legacyYearCacheProducerExecuted = false;
+            obj.yearStructureCandidate = [];
         end
     end
 end

@@ -656,3 +656,28 @@ Test Stage 37 sprawdza również lokalne lata `4999/5000/5001`, dokładne granic
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 38 — DISCOVERY 19: bad year cache key
+
+Dodano dziewiętnasty historyczny defekt: process-persistent cache struktury roku keyed wyłącznie przez `year.number`.
+
+`LegacyYearNumberStructureCache` przechowuje pod tym złym kluczem pełny entry zawierający:
+
+`calculationDayFingerprint`,
+`openGate`,
+`closeGate`,
+`value`.
+
+Te pola istnieją już w entry, lecz historyczny `getRaw` ich nie sprawdza. O trafieniu decyduje wyłącznie obecność wpisu o tym samym numerze roku.
+
+`YearStructureCacheCompatibilityRoute` najpierw wykonuje raw lookup. Przy miss uruchamia producenta struktury i zapisuje entry. Przy hit w Stage 38 publikuje od razu raw cached value, bez sprawdzania calculationDay fingerprint ani obu gate days.
+
+Regresja najpierw wykonuje cold fill dla roku 5000 i `calculationDay=111`, a następnie poprawny warm hit dla tego samego kontekstu. Potem wykonuje drugi request dla tego samego `year.number=5000` i tych samych gates, lecz `calculationDay=222`.
+
+Raw cache nadal trafia w entry pierwszego calculationDay i zwraca strukturę A zamiast oczekiwanej struktury B. Stage 38 jest więc celowo `EXPECTED_RED`.
+
+Regression został przygotowany tak, aby Stage 39 nie usuwał historycznej blizny: także po patchu raw lookup musi nadal raportować hit, fingerprint 111 oraz stale value A. Zmienić ma się wyłącznie publikowany semantic value.
+
+Dopiero Stage 39 ma zachować fizyczny key `year.number`, ale dopuścić semantic cache hit tylko wtedy, gdy jednocześnie zgadzają się `calculationDayFingerprint`, `openGate` i `closeGate`. W przeciwnym razie ma nastąpić miss, recompute oraz transactional overwrite tego samego złego key.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
