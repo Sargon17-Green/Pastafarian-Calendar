@@ -1,5 +1,6 @@
 using System.Numerics;
 using PastafarianCalendar;
+using PastafarianCalendar.Core;
 using PastafarianCalendar.Monster;
 using PastafarianCalendar.Stage01Tests.Normative;
 
@@ -81,6 +82,39 @@ internal static class Program
         var same = NormativeScroll.WorkCountsFor(NormativeScroll.FoundationDay, NormativeScroll.FoundationDay);
         Equal(BigInteger.One, same.Distance, "مسافة اليوم إلى نفسه");
         Equal(2, same.Direction, "جهة اليوم إلى نفسه");
+    }
+
+    private static void RunProductionArithmeticTests()
+    {
+        Equal(NormativeScroll.M, CanonicalArithmetic.SauceModulus, "منتهى الصلصة الإنتاجي");
+        Equal(NormativeScroll.FoundationDay, CanonicalArithmetic.FoundationDay, "يوم التأسيس الإنتاجي");
+        Equal(NormativeScroll.TabletsDay, CanonicalArithmetic.TabletsDay, "يوم الألواح الإنتاجي");
+
+        var values = new BigInteger[] { -3, -1, 0, 1, NormativeScroll.M - 1, NormativeScroll.M, NormativeScroll.M + 1 };
+        foreach (var value in values)
+            Equal(NormativeScroll.Save(value), CanonicalArithmetic.Save(value), "الحفظ الإنتاجي " + value);
+
+        foreach (var day in new[] { NormativeScroll.FoundationDay - 3, NormativeScroll.FoundationDay - 1, NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1, NormativeScroll.FoundationDay + 3 })
+            Equal(NormativeScroll.DayCount(day), CanonicalArithmetic.DayCount(day), "عدّ اليوم الإنتاجي " + day);
+
+        foreach (var pair in new[]
+        {
+            (NormativeScroll.FoundationDay, NormativeScroll.FoundationDay),
+            (NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1),
+            (NormativeScroll.FoundationDay + 1, NormativeScroll.FoundationDay)
+        })
+        {
+            var expected = NormativeScroll.WorkCountsFor(pair.Item1, pair.Item2);
+            var actual = CanonicalArithmetic.WorkCountsFor(pair.Item1, pair.Item2);
+            Equal(expected.Action, actual.CalculationCount, "منين العمل الإنتاجي");
+            Equal(expected.Target, actual.TargetCount, "منين المطلوب الإنتاجي");
+            Equal(expected.Distance, actual.DistanceCount, "منين البعد الإنتاجي");
+            Equal(expected.Connection, actual.ConnectionCount, "منين الوصل الإنتاجي");
+            Equal(expected.Direction, actual.Direction, "منين الطريق الإنتاجي");
+        }
+
+        Equal(NormativeScroll.FallingFactorial(7, 4), CanonicalArithmetic.FallingFactorial(7, 4), "المضروب الناقص الإنتاجي");
+        SequenceEqual(NormativeScroll.UnrankDistinctIndices(6, 4, 201), CanonicalArithmetic.UnrankDistinctIndices(6, 4, 201), "فك رتبة الأسماء الإنتاجي");
     }
 
     private static void RunStoneAndPermutationTests()
@@ -167,6 +201,7 @@ internal static class Program
         RunCatalogTests();
         RunCanonicalNameCorrectionRegressionTests();
         RunArithmeticTests();
+        RunProductionArithmeticTests();
         RunStoneAndPermutationTests();
         RunFamilyTests();
         RunSelectorTests();
