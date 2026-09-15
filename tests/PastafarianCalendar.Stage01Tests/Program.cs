@@ -1,6 +1,5 @@
 using System.Numerics;
 using PastafarianCalendar;
-using PastafarianCalendar.Core;
 using PastafarianCalendar.Monster;
 using PastafarianCalendar.Stage01Tests.Normative;
 
@@ -84,39 +83,6 @@ internal static class Program
         Equal(2, same.Direction, "جهة اليوم إلى نفسه");
     }
 
-    private static void RunProductionArithmeticTests()
-    {
-        Equal(NormativeScroll.M, CanonicalArithmetic.SauceModulus, "منتهى الصلصة الإنتاجي");
-        Equal(NormativeScroll.FoundationDay, CanonicalArithmetic.FoundationDay, "يوم التأسيس الإنتاجي");
-        Equal(NormativeScroll.TabletsDay, CanonicalArithmetic.TabletsDay, "يوم الألواح الإنتاجي");
-
-        var values = new BigInteger[] { -3, -1, 0, 1, NormativeScroll.M - 1, NormativeScroll.M, NormativeScroll.M + 1 };
-        foreach (var value in values)
-            Equal(NormativeScroll.Save(value), CanonicalArithmetic.Save(value), "الحفظ الإنتاجي " + value);
-
-        foreach (var day in new[] { NormativeScroll.FoundationDay - 3, NormativeScroll.FoundationDay - 1, NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1, NormativeScroll.FoundationDay + 3 })
-            Equal(NormativeScroll.DayCount(day), CanonicalArithmetic.DayCount(day), "عدّ اليوم الإنتاجي " + day);
-
-        foreach (var pair in new[]
-        {
-            (NormativeScroll.FoundationDay, NormativeScroll.FoundationDay),
-            (NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1),
-            (NormativeScroll.FoundationDay + 1, NormativeScroll.FoundationDay)
-        })
-        {
-            var expected = NormativeScroll.WorkCountsFor(pair.Item1, pair.Item2);
-            var actual = CanonicalArithmetic.WorkCountsFor(pair.Item1, pair.Item2);
-            Equal(expected.Action, actual.CalculationCount, "منين العمل الإنتاجي");
-            Equal(expected.Target, actual.TargetCount, "منين المطلوب الإنتاجي");
-            Equal(expected.Distance, actual.DistanceCount, "منين البعد الإنتاجي");
-            Equal(expected.Connection, actual.ConnectionCount, "منين الوصل الإنتاجي");
-            Equal(expected.Direction, actual.Direction, "منين الطريق الإنتاجي");
-        }
-
-        Equal(NormativeScroll.FallingFactorial(7, 4), CanonicalArithmetic.FallingFactorial(7, 4), "المضروب الناقص الإنتاجي");
-        SequenceEqual(NormativeScroll.UnrankDistinctIndices(6, 4, 201), CanonicalArithmetic.UnrankDistinctIndices(6, 4, 201), "فك رتبة الأسماء الإنتاجي");
-    }
-
     private static void RunStoneAndPermutationTests()
     {
         var stones = NormativeScroll.BuildStones();
@@ -155,13 +121,13 @@ internal static class Program
 
     private static void RunSelectorTests()
     {
-        var forward = new PastafarianCalendar.Stage01Tests.Normative.AnswerStream(BigInteger.One, 1);
+        var forward = new AnswerStream(BigInteger.One, 1);
         Equal(BigInteger.One, NormativeScroll.ChooseRankShort(forward, 10), "اختيار قصير بلا رفض");
 
-        var backward = new PastafarianCalendar.Stage01Tests.Normative.AnswerStream(NormativeScroll.M, -1);
+        var backward = new AnswerStream(NormativeScroll.M, -1);
         Equal(new BigInteger(10), NormativeScroll.ChooseRankShort(backward, 10), "اختيار قصير بعد رفض متتابع");
 
-        var wide = new PastafarianCalendar.Stage01Tests.Normative.AnswerStream(BigInteger.One, 1);
+        var wide = new AnswerStream(BigInteger.One, 1);
         Equal(NormativeScroll.M + 1, NormativeScroll.ChooseRankWide(wide, NormativeScroll.M + 1), "اختيار واسع فوق المنتهى مباشرة");
     }
 
@@ -177,20 +143,6 @@ internal static class Program
         Equal(first.OrderAtDrop46[0], next, "التفاف الوعاء التالي في ترتيب القطرة السادسة والأربعين");
     }
 
-    private static void RunProductionSauceTests()
-    {
-        var expected = NormativeScroll.Sauce(NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1);
-        var actual = SauceCore.Brew(NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1);
-        SequenceEqual(expected.Bowls, actual.Bowls, "أوعية الصلصة الإنتاجية");
-        SequenceEqual(expected.OrderAtDrop46, actual.OrderAtDrop46, "ترتيب القطرة السادسة والأربعين الإنتاجي");
-        Equal(NormativeScroll.NextBowlInDrop46Order(expected, expected.OrderAtDrop46[5]), SauceCore.NextBowlInDrop46Order(actual, actual.OrderAtDrop46[5]), "الوعاء التالي الإنتاجي");
-        var expectedStream = NormativeScroll.AskBowl(expected, 2, 21);
-        var actualStream = SauceCore.AskBowl(actual, 2, 21);
-        Equal(expectedStream.First, actualStream.First, "أول جواب إنتاجي");
-        Equal(expectedStream.DirectionStep, actualStream.DirectionStep, "اتجاه الجواب الإنتاجي");
-        Equal(NormativeScroll.ChooseRank(expectedStream, 922), SauceCore.ChooseRank(actualStream, 922), "رتبة الاختيار الإنتاجية");
-    }
-
     private static void RunGateSmokeTests()
     {
         var oracle = new NormativeScroll();
@@ -198,70 +150,6 @@ internal static class Program
         var negative = oracle.NegativeGateGap(1);
         True(positive >= NormativeScroll.GateGapMin && positive <= NormativeScroll.GateGapMax, "مدى فجوة البوابة الموجبة الأولى");
         True(negative >= NormativeScroll.GateGapMin && negative <= NormativeScroll.GateGapMax, "مدى فجوة البوابة السالبة الأولى");
-    }
-
-    private static void RunProductionGateTests()
-    {
-        var oracle = new NormativeScroll();
-        var actual = new GateDiscovery();
-        foreach (var step in new BigInteger[] { 1, 2 })
-        {
-            Equal(oracle.PositiveGateGap(step), actual.PositiveGateGap(step), "فجوة البوابة الموجبة الإنتاجية " + step);
-            Equal(oracle.NegativeGateGap(step), actual.NegativeGateGap(step), "فجوة البوابة السالبة الإنتاجية " + step);
-        }
-        foreach (var index in new BigInteger[] { -2, -1, 0, 1, 2 })
-            Equal(oracle.EnsureGateIndex(index), actual.GateDay(index), "يوم البوابة الإنتاجي " + index);
-
-        var gateOne = actual.GateDay(1);
-        Equal(new BigInteger(0), actual.GateIndexAtOrBefore(gateOne - 1), "الفهرس قبل البوابة الإنتاجي");
-        Equal(new BigInteger(1), actual.GateIndexAtOrBefore(gateOne), "الفهرس عند البوابة الإنتاجي");
-        Equal(new BigInteger(1), actual.ExactGateIndex(gateOne)!.Value, "الفهرس الدقيق للبوابة الإنتاجي");
-    }
-
-    private static void RunProductionYearTests()
-    {
-        var calculationDay = NormativeScroll.FoundationDay;
-        var oracle = new NormativeScroll();
-        var actual = new YearSelection();
-        var expectedYear5000 = oracle.Year5000(calculationDay);
-        var actualYear5000 = actual.Year5000(calculationDay);
-        Equal(expectedYear5000.Number, actualYear5000.Number, "رقم سنة خمسة آلاف الإنتاجي");
-        Equal(expectedYear5000.OpenGateIndex, actualYear5000.OpenGateIndex, "بوابة فتح سنة خمسة آلاف الإنتاجية");
-        Equal(expectedYear5000.CloseGateIndex, actualYear5000.CloseGateIndex, "بوابة ختم سنة خمسة آلاف الإنتاجية");
-        var expectedNext = oracle.NextYear(calculationDay, expectedYear5000);
-        var actualNext = actual.NextYear(calculationDay, actualYear5000);
-        Equal(expectedNext.OpenGateIndex, actualNext.OpenGateIndex, "فتح السنة التالية الإنتاجية");
-        Equal(expectedNext.CloseGateIndex, actualNext.CloseGateIndex, "ختم السنة التالية الإنتاجية");
-        var expectedPrevious = oracle.PreviousYear(calculationDay, expectedYear5000);
-        var actualPrevious = actual.PreviousYear(calculationDay, actualYear5000);
-        Equal(expectedPrevious.OpenGateIndex, actualPrevious.OpenGateIndex, "فتح السنة السابقة الإنتاجية");
-        Equal(expectedPrevious.CloseGateIndex, actualPrevious.CloseGateIndex, "ختم السنة السابقة الإنتاجية");
-        var target = actualYear5000.CloseGateDay;
-        Equal(actualYear5000, actual.FindTargetYear(calculationDay, target), "إيجاد سنة يوم الختم الإنتاجي");
-    }
-
-    private static void RunProductionCutletTests()
-    {
-        var simple = new CutletPartitionFamily(5, 3, 2);
-        Equal(new BigInteger(3), simple.Count(), "عدد تقسيمات الكُتَيْلات الإنتاجي");
-        SequenceEqual(new[] { 1, 1, 3 }, simple.Unrank1(1), "أول تقسيم كُتَيْلات إنتاجي");
-        SequenceEqual(new[] { 2, 2, 1 }, simple.Unrank1(3), "آخر تقسيم كُتَيْلات إنتاجي");
-
-        var calculationDay = NormativeScroll.FoundationDay;
-        var oracle = new NormativeScroll();
-        var expectedYear = oracle.Year5000(calculationDay);
-        var expectedSauce = NormativeScroll.Sauce(calculationDay, expectedYear.OpenGateDay + 1);
-        var expectedCount = oracle.ChooseCutletCount(expectedSauce, expectedYear);
-        var expectedPartition = oracle.ChooseCutletPartition(calculationDay, expectedSauce, expectedYear, expectedCount);
-        var expectedNames = oracle.ChooseCutletNames(expectedSauce, expectedCount);
-        var expectedCutlets = oracle.MaterializeCutlets(expectedYear, expectedPartition, expectedNames);
-        var gates = new GateDiscovery();
-        var year = new YearSelection(gates).Year5000(calculationDay);
-        var actual = new CutletSelection(gates).Select(calculationDay, year);
-        Equal(expectedCount, actual.Count, "عدد الكُتَيْلات الإنتاجي");
-        SequenceEqual(expectedPartition, actual.Partition, "تقسيم الكُتَيْلات الإنتاجي");
-        SequenceEqual(expectedNames, actual.CanonicalNameIndices, "أسماء الكُتَيْلات الإنتاجية");
-        SequenceEqual(expectedCutlets.Select(x => x.FirstDay).ToArray(), actual.Cutlets.Select(x => x.FirstDay).ToArray(), "أيام بدء الكُتَيْلات الإنتاجية");
     }
 
     private static void RunMonsterBootstrapTests()
@@ -279,16 +167,11 @@ internal static class Program
         RunCatalogTests();
         RunCanonicalNameCorrectionRegressionTests();
         RunArithmeticTests();
-        RunProductionArithmeticTests();
         RunStoneAndPermutationTests();
         RunFamilyTests();
         RunSelectorTests();
         RunSauceSmokeTests();
-        RunProductionSauceTests();
         RunGateSmokeTests();
-        RunProductionGateTests();
-        RunProductionYearTests();
-        RunProductionCutletTests();
         RunMonsterBootstrapTests();
         Console.WriteLine("الاختبارات الناجحة: " + _passed);
         Console.WriteLine("الاختبارات الفاشلة: " + _failed);

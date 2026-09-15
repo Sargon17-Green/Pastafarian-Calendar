@@ -1,9 +1,0 @@
-STAGE=6
-EXPECTED=GREEN
-ACTUAL=GREEN
-TOOLCHAIN=.NET_SDK_10.0.100
-COMMAND=dotnet run --project tests/PastafarianCalendar.Stage01Tests/PastafarianCalendar.Stage01Tests.csproj --configuration Release
-PASSED=122
-FAILED=0
-PRODUCTION_SCOPE=CUTLET_STRUCTURE
-ORACLE_COMPARISON=YES
