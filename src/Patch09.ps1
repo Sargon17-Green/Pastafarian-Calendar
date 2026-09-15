@@ -99,11 +99,12 @@ function aliasedPositionPours {
     return ,$pour
 }
 
-function Invoke-Patch09BowlAliasRepair {
+function Invoke-Patch09BowlAliasRepairWithBowls {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]$Context,
-        [Parameter(Mandatory)][int]$I
+        [Parameter(Mandatory)][int]$I,
+        [AllowNull()][Parameter(Mandatory)][System.Array]$OldBowls
     )
 
     Assert-BaseContextOwnership -Context $Context | Out-Null
@@ -120,21 +121,20 @@ function Invoke-Patch09BowlAliasRepair {
     if ($null -eq $Context.patch08OrderTable) {
         throw 'Kailangang handa ang corrected permutation order table bago Patch 09.'
     }
-
-    if ($null -eq $Context.legacyInitialBowls) {
-        $counts = Get-Discovery05CountsFromContext -Context $Context
-        $Context.legacyInitialBowls = Get-Discovery09InitialBowlsThroughOldFactory -Counts $counts
+    if ($null -eq $OldBowls -or $OldBowls.Count -lt 7) {
+        throw 'Kailangan ang current 1-based bowl table na may slots 1..6.'
     }
 
     $drop = [System.Numerics.BigInteger]$Context.legacyVisibleDropTable[$I]
     $order = $Context.patch08OrderTable[$I]
 
-    # Preserved Discovery 09 scar: talagang patakbuhin muna ang fixed bowl IDs 1,2,3.
+    # Preserved Discovery 09 scar: run the fixed bowl-ID predecessor on the
+    # actual bowls entering this drop, exactly as the historical call_with_bowls path did.
     $legacyFixed = legacyFixedBowlPours `
         -I $I `
         -Drop $drop `
         -Stones $Context.legacyStoneTable `
-        -OldBowls $Context.legacyInitialBowls
+        -OldBowls $OldBowls
 
     $bowlAlias = installOrderAliases -Order $order
 
@@ -142,7 +142,7 @@ function Invoke-Patch09BowlAliasRepair {
         -I $I `
         -Drop $drop `
         -Stones $Context.legacyStoneTable `
-        -OldBowls $Context.legacyInitialBowls `
+        -OldBowls $OldBowls `
         -BowlAlias $bowlAlias
 
     Start-BaseSemanticTransaction -Context $Context
@@ -188,7 +188,6 @@ function Invoke-Patch09BowlAliasRepair {
         throw
     }
 
-    # Ang Discovery 09 scar ay nananatiling observable bilang raw predecessor state.
     $Context.discovery09Status = 'FIXED_BOWL_ID_POURS_ACTIVE'
     $Context.discovery09InvocationCount++
     $Context.legacyPourLastDropIndex = $I
@@ -216,4 +215,24 @@ function Invoke-Patch09BowlAliasRepair {
     })
 
     return ,$corrected
+}
+
+function Invoke-Patch09BowlAliasRepair {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]$Context,
+        [Parameter(Mandatory)][int]$I
+    )
+
+    Assert-BaseContextOwnership -Context $Context | Out-Null
+
+    if ($null -eq $Context.legacyInitialBowls) {
+        $counts = Get-Discovery05CountsFromContext -Context $Context
+        $Context.legacyInitialBowls = Get-Discovery09InitialBowlsThroughOldFactory -Counts $counts
+    }
+
+    return ,(Invoke-Patch09BowlAliasRepairWithBowls `
+        -Context $Context `
+        -I $I `
+        -OldBowls $Context.legacyInitialBowls)
 }

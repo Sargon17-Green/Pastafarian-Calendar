@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=21
-CURRENT_KIND=PATCH
-CURRENT_PATCH=10
+CURRENT_STAGE=22
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=11
 LAST_COMPLETED_STAGE=21
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 10 snapshot bowl-update repair: talagang pinapatakbo muna ang Discovery 10 in-place scar, saka kino-clone ang input bowls sa vaultOld, lahat ng six-position reads ay mula lamang sa vaultOld, lahat ng writes ay sa hiwalay na pending table, at saka lamang kino-commit ang buong anim na results bilang isang batch.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 11 full 46-drop plus 12-post-stir path na gumagamit ng isang legacy overwritable order memory. Isinusulat dito ang bawat drop order at bawat post-stir order; kaya ang drop-46 order ay pansamantalang tama ngunit napapalitan ng stir 1..12, at ang semantic query ay nagbabasa pa rin ng huling overwrite.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -57,3 +57,7 @@ STAGE20_DISCOVERY=IN_PLACE_BOWL_UPDATE_READS_UPDATED_WORKING_VALUES
 STAGE20_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
 STAGE21_PATCH=SNAPSHOT_BOWL_UPDATE_WITH_PENDING_BATCH
 STAGE21_RUNTIME_VERIFICATION=GREEN_CONFIRMED
+STAGE22_DISCOVERY=DROP46_ORDER_OVERWRITTEN_BY_POST_STIR_ORDER_MEMORY
+STAGE22_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `22` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na exact ang 46 drop bowl rounds at 12 post-stir rounds, na 58 beses naisusulat ang iisang legacy order memory at stir 12 ang huling source, na EXPECTED_RED ang eksaktong query-order probes sa positions 1,2,6, at wala pang hiwalay na orderAt46 latch o Patch 12 next-bowl logic.

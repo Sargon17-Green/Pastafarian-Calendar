@@ -578,3 +578,25 @@ Hindi ginagamit ang anumang pending write bilang source ng later position sa par
 
 Nananatili ang Stage 15 sentinel, Patch 08 permutation repair, Patch 09 bowl alias, at Discovery 10 scar. Wala pang Patch 11 order-at-46 o anumang mas huling patch logic.
 
+## Stage 22 — Discovery 11: overwritable order memory
+
+### Full bowl path
+
+Tumatakbo ang lahat ng 46 visible-drop bowl rounds gamit ang corrected Patch 09 pours sa current bowls at Patch 10 snapshot/pending bowl update. Pagkatapos nito ay tumatakbo ang 12 exact post-stir rounds.
+
+### Exact post-stir rule
+
+`postStirRoundExact` ay gumagamit ng frozen old bowls, `savedStirSum = SAVE(sum(old[1..6]) + 149*stir)`, Patch 08 order mula sa saved sum, at hiwalay na pending bowl table.
+
+### Historical scar
+
+Iisang general order memory lamang ang ginagamit. Isinusulat dito ang 46 drop orders at saka ang 12 post-stir orders, kaya 58 writes ang kabuuan at stir 12 ang huling source. Walang hiwalay na drop-46 latch.
+
+### Expected red surface
+
+Ang semantic query ay nagbabalik ng huling overwritten stir order. Laban sa tunay na drop-46 order, ang required positions 1,2,6 ay EXPECTED_RED.
+
+### Stage boundary
+
+Nananatili ang Stage 15 sentinel, Patch 08 permutation repair, Patch 09 bowl alias, at Patch 10 snapshot/pending repair. Wala pang Patch 11 latch repair at wala pang Patch 12 next-bowl logic.
+

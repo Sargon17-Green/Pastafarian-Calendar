@@ -21,6 +21,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Patch09.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery10.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch10.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Discovery11.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -182,6 +183,15 @@ function New-BaseMonsterContext {
         patch10Applied = $false
         patch10Status = 'NOT_RUN'
         patch10InvocationCount = 0
+        legacyOverwritableOrderMemory = $null
+        legacyOrderMemoryWriteCount = 0
+        legacyOrderMemoryLastSource = $null
+        legacyBowlsAfter46Drops = $null
+        legacyPostStirLastSavedSum = $null
+        legacyPostStirFinalBowls = $null
+        legacyQueriedOrder = $null
+        discovery11Status = 'HISTORICAL_SCAR_PRESENT'
+        discovery11InvocationCount = 0
     }
 }
 
@@ -317,7 +327,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 21.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 22.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -328,11 +338,11 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'PATCH10'
+    $ctx.phase = 'DISCOVERY11'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH10' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY11' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
@@ -448,14 +458,31 @@ function Invoke-CalendarDateSpaghetti {
             commitAfterSix = $withDiscovery05.patch10CommitAfterSix
         })
 
+        # Discovery 11 expands the real path through all 46 exact drop bowl
+        # rounds and all 12 exact post-stir rounds. One general order memory
+        # is intentionally reused and overwritten throughout the whole pass.
+        [void](Invoke-Discovery11OverwritableOrderMemory -Context $withDiscovery05)
+
+        $withDiscovery05.legacyQueriedOrder = Get-Discovery11LegacyQueriedOrder `
+            -Context $withDiscovery05
+
+        Add-BaseMetric -Context $withDiscovery05 -Name 'discovery11.orderMemory.queries'
+        Add-BaseLog -Context $withDiscovery05 -Code 'monster.discovery11.productionQuery' -Data ([pscustomobject]@{
+            writes = $withDiscovery05.legacyOrderMemoryWriteCount
+            lastSourceKind = $withDiscovery05.legacyOrderMemoryLastSource.kind
+            lastSourceIndex = $withDiscovery05.legacyOrderMemoryLastSource.index
+            queriedOrder = $withDiscovery05.legacyQueriedOrder
+            expectedDrop46Order = $withDiscovery05.patch08OrderTable[46]
+        })
+
         return $withDiscovery05
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.patch10.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.discovery11.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'PATCH10_COMPLETE'
+    $result.status = 'DISCOVERY11_COMPLETE'
     return $result
 }
