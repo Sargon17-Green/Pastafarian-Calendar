@@ -139,6 +139,20 @@ classdef MonsterContext < handle
         distinctMonthNameFamilyCount
         distinctMonthNameRank
         monthNameIndicesCandidate
+        monthLengthTotalDays
+        monthLengthCountCandidate
+        monthLengthStreamFirst
+        monthLengthStreamDirectionStep
+        legacyMonthLengthSafeCap
+        legacyMonthLengthLowerBound
+        legacyMonthLengthProofWidth
+        legacyMonthLengthMaterializationAttempted
+        legacyMonthLengthMaterializationBlocked
+        legacyMonthLengthMaterializationError
+        legacyMonthLengthConcreteCount
+        legacyMonthLengthConcreteWays
+        legacyMonthLengthRank
+        monthLengthsCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -280,6 +294,20 @@ classdef MonsterContext < handle
             obj.distinctMonthNameFamilyCount = [];
             obj.distinctMonthNameRank = [];
             obj.monthNameIndicesCandidate = [];
+            obj.monthLengthTotalDays = [];
+            obj.monthLengthCountCandidate = [];
+            obj.monthLengthStreamFirst = [];
+            obj.monthLengthStreamDirectionStep = [];
+            obj.legacyMonthLengthSafeCap = [];
+            obj.legacyMonthLengthLowerBound = [];
+            obj.legacyMonthLengthProofWidth = [];
+            obj.legacyMonthLengthMaterializationAttempted = false;
+            obj.legacyMonthLengthMaterializationBlocked = false;
+            obj.legacyMonthLengthMaterializationError = '';
+            obj.legacyMonthLengthConcreteCount = [];
+            obj.legacyMonthLengthConcreteWays = {};
+            obj.legacyMonthLengthRank = [];
+            obj.monthLengthsCandidate = [];
         end
     end
 end

@@ -895,3 +895,33 @@ Stage 45 nie implementuje żadnej rodziny długości miesięcy, nie materializuj
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 46 — DISCOVERY 23: materialized month lengths
+
+Dodano dwudziesty trzeci historyczny defekt: API długości miesięcy oczekuje konkretnej listy wszystkich bounded compositions.
+
+Każdy wiersz ma dokładnie `monthCount` długości, każda długość należy do `4..123`, a suma wynosi długość roku.
+
+`LegacyAllMonthLengthWaysAPI` zachowuje historyczny model `ALL_WAYS_CONCRETE_ARRAY`. Mała rodzina jest realnie materializowana w porządku leksykograficznym przez `legacyMaterializeMonthLengthWays`.
+
+Aby nie odtwarzać prawdziwego OOM, historyczny scar ma twardy `safeCap=100000`.
+
+Przed jakąkolwiek dużą alokacją `proveLegacyMonthLengthFamilyLowerBound` buduje legalną kartezjańską podrodzinę. Dla pierwszych `K-1` miesięcy wybiera wspólny przedział `[a,b]`, dla którego niezależnie od wyborów ostatni miesiąc zawsze pozostaje w `4..123`. To dowodzi co najmniej `width^(K-1)` różnych legalnych wierszy bez materializacji rodziny.
+
+Trzy ogromne witnesses:
+
+- `total=300`, `K=10`: width `13`, lower bound `13^9=10604499373`; test-only exact count `16972992395495488`.
+- `total=400`, `K=10`: width `14`, lower bound `14^9=20661046784`; test-only exact count `230112572610023588`.
+- `total=1000`, `K=20`: width `6`, lower bound `6^19=609359740010496`; test-only exact count `219529195724680298522930699726339455920`.
+
+Dokładne liczby w regression są obliczane przez lokalny, test-only sliding-window DP. Żaden exact DP nie jest jeszcze częścią production path.
+
+`LegacyMonthLengthMaterializationAdapter` wykonuje realną próbę historycznego API. Dla witness `300/10` preflight lower bound już przekracza safe cap, więc próba zostaje bezpiecznie zablokowana przed concrete allocation. Context zachowuje attempt, blocked flag, error id, safe cap, proof width i lower bound.
+
+`MonthLengthCompatibilityRoute` w Stage 46 nie ma jeszcze alternatywy dla konkretnej listy. Jeżeli legacy materialization jest blocked, route kończy się kontrolowanym `EXPECTED_RED`. Dla małych rodzin nadal materializuje listę, pyta bowl `3` z seal `31`, wybiera rank i publikuje konkretny wiersz.
+
+Niezmieniony regression Stage 46 został przygotowany tak, aby po Stage 47 zachować dokładnie ten blocked legacy scar, lecz zaakceptować semantic month-length row zwrócony bez materializacji.
+
+Dopiero Stage 47 ma dodać `VirtualLegacyList` z exact sliding-window DP `count()` oraz dokładnym 1-based lexicographic `itemAt1(rank1)`, pozostawiając historyczne materialization API fizycznie bez zmian i wykonywane jako pierwsze.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

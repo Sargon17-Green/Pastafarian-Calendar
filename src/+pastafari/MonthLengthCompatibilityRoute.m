@@ -1,0 +1,89 @@
+classdef MonthLengthCompatibilityRoute
+    % Produkcyjna trasa Discovery 23.
+    %
+    % Stage 46 wymaga jeszcze konkretnej legacy listy wszystkich bounded
+    % compositions. Jeżeli safe cap blokuje materializację, semantic path
+    % nie ma jeszcze wirtualnego backendu i kończy się EXPECTED_RED.
+    methods (Static)
+        function [ctx, monthLengths] = call( ...
+                ctx, structureSauce, totalDays, monthCount)
+            pastafari.ValidationManager.requireContext(ctx);
+            pastafari.MonthLengthCompatibilityRoute.requireSauce( ...
+                structureSauce);
+
+            [ctx, ways, descriptor, blocked] = ...
+                pastafari.LegacyMonthLengthMaterializationAdapter.call( ...
+                    ctx, totalDays, monthCount);
+
+            ctx.phase = 'DISCOVERY_23';
+            ctx.subPhase = 23;
+            ctx.mode = 'MATERIALIZED_MONTH_LENGTHS';
+            ctx.status = 'LEGACY_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = ...
+                'DISCOVERY_23_MATERIALIZED_MONTH_LENGTHS';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'discovery23.materializedMonthLengths.calls');
+
+            if blocked
+                ctx.diagnostics{end + 1} = sprintf( ...
+                    ['Discovery 23 legacy list blocked: lowerBound=%s ', ...
+                     'safeCap=%s.'], ...
+                    char(ctx.legacyMonthLengthLowerBound), ...
+                    char(ctx.legacyMonthLengthSafeCap));
+                error('Pastafari:Discovery23:MaterializedMonthLengths', ...
+                    ['Historyczne API wymaga konkretnej listy wszystkich ', ...
+                     'month-length ways; VirtualLegacyList jeszcze nie istnieje.']);
+            end
+
+            familyCount = pastafari.BigInt(numel(ways));
+            if familyCount < pastafari.BigInt(1)
+                error('Pastafari:MonthLengths:LegacyFamilyEmpty', ...
+                    'Konkretna rodzina długości miesięcy jest pusta.');
+            end
+
+            nextBowlId = pastafari.LatchedSuccessorPatch.apply( ...
+                structureSauce.orderAt46Latch, 3);
+            stream = pastafari.AnswerRingStreamFactory.fromSauce( ...
+                structureSauce.bowls, 3, nextBowlId, 31);
+
+            [ctx, rank] = ...
+                pastafari.GeneralSelectionCompatibilityRoute.call( ...
+                    ctx, stream, familyCount);
+
+            monthLengths = ways{rank.toDoubleExact()};
+
+            ctx.monthLengthStreamFirst = stream.first;
+            ctx.monthLengthStreamDirectionStep = stream.directionStep;
+            ctx.legacyMonthLengthRank = rank;
+            ctx.monthLengthsCandidate = monthLengths;
+            ctx.diagnostics{end + 1} = sprintf( ...
+                ['Discovery 23 wybrało rank=%s z konkretnej listy count=%s ', ...
+                 'family=%s.'], ...
+                char(rank), char(familyCount), descriptor.familyName);
+        end
+    end
+
+    methods (Static, Access = private)
+        function requireSauce(sauce)
+            if ~isstruct(sauce) || ...
+                    ~isfield(sauce, 'bowls') || ...
+                    ~isfield(sauce, 'orderAt46Latch')
+                error('Pastafari:MonthLengths:StructureSauceShape', ...
+                    'Month lengths wymagają bowls i orderAt46Latch.');
+            end
+
+            if ~iscell(sauce.bowls) || numel(sauce.bowls) ~= 6
+                error('Pastafari:MonthLengths:StructureSauceBowls', ...
+                    'Structure sauce musi zawierać sześć bowls.');
+            end
+
+            order = sauce.orderAt46Latch;
+            if ~(isnumeric(order) && isvector(order) && ...
+                    numel(order) == 6 && ...
+                    isequal(sort(order(:).'), 1:6))
+                error('Pastafari:MonthLengths:StructureSauceOrder', ...
+                    'orderAt46Latch musi być permutacją 1..6.');
+            end
+        end
+    end
+end
