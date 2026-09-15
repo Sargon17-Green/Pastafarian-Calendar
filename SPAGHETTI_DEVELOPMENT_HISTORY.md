@@ -634,3 +634,25 @@ Stage 36 celowo nie implementuje jeszcze sequential walk. Dopiero Stage 37 ma za
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 37 — PATCH 18: sequential year walk
+
+Historyczny `LegacyOldYearJumpGuess` pozostaje fizycznie bez zmian. Nadal oblicza numer przez `anchor.number + floor((targetDay-anchor.openGateDay)/365)` i raw guessed year wraz z pełną telemetrią pozostają obserwowalną blizną Discovery 18.
+
+Dodano osobny `SequentialYearWalkPatch`.
+
+Semantic path zaczyna dokładnie od anchor year. Jeżeli `targetDay > current.closeGateDay`, przechodzi do roku o numerze `current.number+1`. Jeżeli `targetDay <= current.openGateDay`, przechodzi do roku o numerze `current.number-1`.
+
+Każdy krok obejmuje dokładnie jeden rzeczywisty rok. Patch nie przeskakuje numerów i sprawdza, że granica następnego roku styka się z bieżącym close, a granica poprzedniego z bieżącym open.
+
+Spacer kończy się wyłącznie wtedy, gdy target spełnia normatywny przedział:
+
+`openGateDay < targetDay <= closeGateDay`.
+
+`TargetYearCompatibilityRoute` zawsze najpierw wykonuje raw `/365` guess i zachowuje anchor, delta, offset, guessed number oraz raw guessed year. Następnie osobno wykonuje PATCH 18 i publikuje wynik sequential walk w `targetYearCandidate`.
+
+Niezmieniony regression Stage 36 ma po tej zmianie przejść z EXPECTED_RED do GREEN. Dla przyszłego target `1500` raw guess pozostaje `5004`, ale publikowany rok staje się `5003`; dla target `-1200` raw guess pozostaje `4996`, ale publikowany rok staje się `4997`.
+
+Test Stage 37 sprawdza również lokalne lata `4999/5000/5001`, dokładne granice `(open,close]`, liczbę kroków forward/backward, brakujący kolejny numer roku, niespójną granicę sąsiadów oraz fizyczne zachowanie LegacyOldYearJumpGuess.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

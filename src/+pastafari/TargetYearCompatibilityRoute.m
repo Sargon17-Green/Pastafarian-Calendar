@@ -1,16 +1,14 @@
 classdef TargetYearCompatibilityRoute
-    % Produkcyjna trasa Discovery 18.
+    % Produkcyjna trasa target year po PATCH 18.
     %
-    % Stage 36 publikuje jeszcze wynik starego jump guess /365.
-    % Nie istnieje jeszcze sequential next/previous year walk.
+    % Najpierw wykonuje historyczny /365 guess i zachowuje pełną telemetrię.
+    % Publikowana ścieżka startuje od anchor year i chodzi po jednym
+    % rzeczywistym roku next/previous aż target należy do (open, close].
     methods (Static)
         function [ctx, year] = call(ctx, anchorYear, targetDay, years)
             pastafari.ValidationManager.requireContext(ctx);
 
-            ctx.phase = 'DISCOVERY_18';
-            ctx.subPhase = 18;
-            ctx.mode = 'OLD_YEAR_JUMP_GUESS_BY_365';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
+            % Surowa historyczna blizna Discovery 18.
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_18_OLD_YEAR_JUMP_GUESS_BY_365';
             ctx.metrics = pastafari.MetricsShell.bump( ...
@@ -27,12 +25,25 @@ classdef TargetYearCompatibilityRoute
             ctx.legacyYearJumpOffset365 = telemetry.guessOffset365;
             ctx.legacyYearJumpGuessNumber = telemetry.guessedNumber;
             ctx.legacyYearJumpGuessedYear = rawYear;
-            ctx.targetYearCandidate = rawYear;
-            ctx.diagnostics{end + 1} = ...
-                ['Discovery 18 wybiera rok bezpośrednio z oszacowania ', ...
-                 'floor(deltaDays/365), bez sequential year walk.'];
 
-            year = rawYear;
+            % PATCH 18: rzeczywisty sequential walk.
+            ctx.phase = 'PATCH_18';
+            ctx.subPhase = 18;
+            ctx.mode = 'SEQUENTIAL_YEAR_WALK_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = ...
+                'PATCH_18_SEQUENTIAL_YEAR_WALK';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch18.sequentialYearWalk.calls');
+
+            [year, walk] = pastafari.SequentialYearWalkPatch.apply( ...
+                anchorYear, targetDay, years);
+
+            ctx.targetYearCandidate = year;
+            ctx.diagnostics{end + 1} = sprintf( ...
+                ['PATCH 18 zachowuje raw /365 guess, ale publikuje rok po ', ...
+                 'sequential walk: forward=%d, backward=%d, final=%s.'], ...
+                walk.forwardSteps, walk.backwardSteps, char(walk.finalNumber));
         end
     end
 end
