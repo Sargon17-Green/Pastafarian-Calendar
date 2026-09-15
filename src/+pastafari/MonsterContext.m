@@ -115,6 +115,14 @@ classdef MonsterContext < handle
         legacyStructureSauceOrderAt46
         structureSauceCandidate
         structureSauceBowl2Candidate
+        cutletGapCount
+        cutletCountCandidate
+        cutletInternalGateOffset
+        legacyPositiveCompositions
+        legacyCutletPartitionFamilyCount
+        legacyCutletPartitionRank
+        legacyCutletPartition
+        cutletPartitionCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -232,6 +240,14 @@ classdef MonsterContext < handle
             obj.legacyStructureSauceOrderAt46 = [];
             obj.structureSauceCandidate = [];
             obj.structureSauceBowl2Candidate = [];
+            obj.cutletGapCount = [];
+            obj.cutletCountCandidate = [];
+            obj.cutletInternalGateOffset = [];
+            obj.legacyPositiveCompositions = [];
+            obj.legacyCutletPartitionFamilyCount = [];
+            obj.legacyCutletPartitionRank = [];
+            obj.legacyCutletPartition = [];
+            obj.cutletPartitionCandidate = [];
         end
     end
 end

@@ -771,3 +771,35 @@ Test Stage 41 sprawdza wszystkie trzy dokładne witnesses Stage 40, porównuje w
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 42 — DISCOVERY 21: unfiltered cutlet partitions
+
+Dodano dwudziesty pierwszy historyczny defekt w rodzinie podziałów kotletów.
+
+`LegacyAllPositiveCutletPartitionFamily` reprezentuje wszystkie dodatnie kompozycje `gapCount` na dokładnie `cutletCount` części, w porządku leksykograficznym. Rodzina celowo nie zna `internalGateOffset`.
+
+`LegacyCutletPartitionAdapter` wybiera rank z pełnej rodziny przez istniejący general selection pipeline i wykonuje leksykograficzne unrank. Adapter również nie przyjmuje żadnego internal gate.
+
+`CutletPartitionCompatibilityRoute` zna i zapisuje `internalGateOffset`, ale Stage 42 nie przekazuje go ani do generatora rodziny, ani do raw selection. Publikowany wynik jest więc nadal surowym wynikiem historycznym.
+
+Normatywny warunek jest inny: jeżeli `calculationDay` wypada dokładnie na wewnętrznym gate roku, wybrana kompozycja musi zawierać ten gate jako granicę między kotletami. Dla offsetu względem opening gate oznacza to, że jakiś wewnętrzny prefix sum kompozycji musi być dokładnie równy `internalGateOffset`.
+
+Główny witness ma `gapCount=10`, `cutletCount=8`, `internalGateOffset=4`.
+
+Pełna legacy family ma `36` elementów. Kontrolowany answer-ring stream z `first=87` wybiera z niej rank `15`, czyli:
+
+`[1,1,1,3,1,1,1,1]`.
+
+Jej kolejne prefix sums wynoszą `1,2,3,6,7,8,9`, więc nie zawiera wymaganej granicy `4`.
+
+Normatywna rodzina jest dokładnie leksykograficzną subsekwencją legacy family zawierającą prefix sum `4`; ma `28` elementów. Ten sam stream wybiera z niej rank `3`, czyli:
+
+`[1,1,1,1,1,1,3,1]`.
+
+Stage 42 pozostaje celowo `EXPECTED_RED`.
+
+Regression zachowuje descriptor pełnej legacy family, raw count `36`, raw rank `15` oraz raw partition jako obserwowalną bliznę. Jest również control bez wewnętrznego gate; w takim przypadku również przyszły PATCH 21 ma przepuścić raw selection bez filtrowania.
+
+Dopiero Stage 43 ma pozostawić `LegacyAllPositiveCutletPartitionFamily` oraz `LegacyCutletPartitionAdapter` fizycznie bez zmian i uruchamiać je diagnostycznie jako pierwsze. Semantic family ma być dokładnie leksykograficzną subsekwencją legacy family, której prefix sum trafia w wymagany internal gate offset.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+
