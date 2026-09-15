@@ -16,7 +16,8 @@ function Get-Discovery09InitialBowlsThroughOldFactory {
         [Parameter(Mandatory)]$Counts
     )
 
-    $bowls = [object[]]::new(7)
+    $bowls = [System.Numerics.BigInteger[]]::new(7)
+    # Historical tuple semantics: slot 0 remains numeric zero.
 
     for ($bowlId = 1; $bowlId -le 6; $bowlId++) {
         $prime = [System.Numerics.BigInteger]$script:Discovery09BowlPrime[$bowlId]

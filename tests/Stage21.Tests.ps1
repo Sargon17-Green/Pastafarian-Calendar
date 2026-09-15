@@ -104,6 +104,11 @@ $pours = $ready.patch09CorrectedPours
 $drop = [System.Numerics.BigInteger]$ready.legacyVisibleDropTable[$i]
 $order = $ready.patch08OrderTable[$i]
 
+Assert-StageEqual `
+    ([System.Numerics.BigInteger]0) `
+    ([System.Numerics.BigInteger]$bowls[0]) `
+    'Initial bowl slot 0 ay historical numeric zero'
+
 # 1. Raw Discovery 10 helper remains physically wrong.
 $legacyWrong = legacyInPlaceBowlUpdateWrong `
     -I $i -Drop $drop -Order $order -Pours $pours `
@@ -278,6 +283,7 @@ foreach ($name in $futureNames) {
     Assert-StageTrue -Condition ($productionText -notmatch [regex]::Escape($name)) -Name "Wala pang Patch 11 o mas huling patch code: $name"
 }
 
+Write-Host 'PATCH10_INITIAL_BOWL_SLOT0=ZERO'
 Write-Host 'PATCH10_RAW_DISCOVERY10_SCAR=PRESERVED_AND_CALLED'
 Write-Host 'PATCH10_VAULT_OLD=PHYSICAL_CLONE'
 Write-Host 'PATCH10_READ_SOURCE=VAULT_OLD_ONLY'
