@@ -68,7 +68,8 @@ function aliasedPositionPours {
     }
 
     $stoneRow = $Stones[$I]
-    $pour = [object[]]::new(7)
+    $pour = [System.Numerics.BigInteger[]]::new(7)
+    # Historical tuple semantics: slots 0,4,5,6 remain numeric zero.
 
     $pour[1] = [System.Numerics.BigInteger](
         Get-Discovery04SavedValue -Value (

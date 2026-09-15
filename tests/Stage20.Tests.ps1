@@ -104,6 +104,26 @@ $pours = $ready.patch09CorrectedPours
 $drop = [System.Numerics.BigInteger]$ready.legacyVisibleDropTable[$i]
 $order = $ready.patch08OrderTable[$i]
 
+# Historical pour tuples are zero-filled outside the three populated pour positions.
+# This is required because the six-position bowl-update loop reads positions 1..6.
+$rawPourZeroProbe = legacyFixedBowlPours `
+    -I $i `
+    -Drop $drop `
+    -Stones $ready.legacyStoneTable `
+    -OldBowls $ready.legacyInitialBowls
+
+foreach ($position in ([int[]](4,5,6))) {
+    Assert-StageEqual `
+        ([System.Numerics.BigInteger]0) `
+        ([System.Numerics.BigInteger]$rawPourZeroProbe[$position]) `
+        "Raw Discovery 09 pour position $position ay historical zero"
+
+    Assert-StageEqual `
+        ([System.Numerics.BigInteger]0) `
+        ([System.Numerics.BigInteger]$pours[$position]) `
+        "Corrected Patch 09 pour position $position ay historical zero"
+}
+
 # 1. Historical helper and snapshot reference.
 $actual = legacyInPlaceBowlUpdateWrong `
     -I $i `
@@ -271,6 +291,7 @@ Write-Host 'DISCOVERY10_POSITION1=SNAPSHOT_MATCH'
 Write-Host 'DISCOVERY10_WORKING_STORAGE=READ_WRITE_SHARED'
 Write-Host 'DISCOVERY10_PRODUCTION_I=1'
 Write-Host 'DISCOVERY10_PATCH09_POURS=USED'
+Write-Host 'DISCOVERY10_POURS_4_5_6=ZERO'
 Write-Host 'DISCOVERY10_PATCH10_SNAPSHOT=ABSENT'
 Write-Host 'STAGE20_REPOSITORY_STATE=EXPECTED_RED'
 
