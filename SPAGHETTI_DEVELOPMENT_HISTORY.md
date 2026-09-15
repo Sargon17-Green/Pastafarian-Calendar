@@ -1119,3 +1119,47 @@ Stage 51 nie zmienia żadnej logiki przypisania dnia do roku ani semantyki openi
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 52 — DISCOVERY 26: closed opening gate
+
+Dodano dwudziesty szósty historyczny defekt: finalne przypisanie dnia do roku traktuje rok jako przedział domknięty z obu stron `[open,close]`.
+
+`LegacyClosedOpeningYearResolver` startuje od anchor year.
+
+Jeżeli `target < open`, idzie do poprzedniego roku. Jeżeli `target > close`, idzie do następnego roku.
+
+Historyczna wada polega dokładnie na pierwszym warunku: dla `target == open` resolver nie idzie wstecz.
+
+Po zakończeniu wymaga więc jedynie:
+
+`open <= target && target <= close`.
+
+Przy wspólnej granicy dwóch kolejnych lat ten sam dzień jest close poprzedniego roku i open następnego roku. Normatywna semantyka `(open,close]` przypisuje go wyłącznie do poprzedniego roku.
+
+Główny witness używa trzech lat:
+
+- year `10`: `(0,100]`,
+- year `11`: `(100,200]`,
+- year `12`: `(200,300]`.
+
+Anchor to year `11`, target to `100`.
+
+Historyczne `[open,close]` publikuje year `11`, wykonując zero kroków wstecz.
+
+Normatywne `(open,close]` publikuje year `10`, ponieważ `100` jest closing gate roku 10 i opening gate roku 11.
+
+Closing gate `200` pozostaje poprawnie w year `11` zarówno w legacy, jak i w normatywnej semantyce. Dzięki temu Discovery 26 izoluje wyłącznie błędne domknięcie strony `open`.
+
+Dodatkowy witness z anchor year `12` i target `200` odtwarza ten sam błąd na kolejnej wspólnej granicy.
+
+Punkty wewnętrzne oraz zwykłe przejścia forward/backward pozostają zgodne.
+
+`YearIntervalCompatibilityRoute` w Stage 52 zapisuje anchor, target, raw year number, raw open/close, forward/backward steps oraz pełny raw year candidate. Publikowany `yearIntervalCandidate` jest nadal historycznym `[open,close]` ghostem.
+
+Stage 52 pozostaje celowo `EXPECTED_RED`.
+
+Dopiero Stage 53 ma wykonać ten sam historyczny resolver jako pierwszy, zachować pełny ghost, a następnie szukać wstecz także dla `target<=open` i publikować wyłącznie rok spełniający `(open,close]`.
+
+Stage 52 nie zawiera open-closed interval patch.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

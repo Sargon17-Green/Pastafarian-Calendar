@@ -173,6 +173,15 @@ classdef MonsterContext < handle
         legacyContiguousDayInMonth
         monthAtTargetCandidate
         dayInMonthCandidate
+        yearIntervalAnchorNumber
+        yearIntervalTargetDay
+        legacyClosedOpeningYearNumber
+        legacyClosedOpeningOpenDay
+        legacyClosedOpeningCloseDay
+        legacyClosedOpeningForwardSteps
+        legacyClosedOpeningBackwardSteps
+        legacyClosedOpeningYearCandidate
+        yearIntervalCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -348,6 +357,15 @@ classdef MonsterContext < handle
             obj.legacyContiguousDayInMonth = [];
             obj.monthAtTargetCandidate = [];
             obj.dayInMonthCandidate = [];
+            obj.yearIntervalAnchorNumber = [];
+            obj.yearIntervalTargetDay = [];
+            obj.legacyClosedOpeningYearNumber = [];
+            obj.legacyClosedOpeningOpenDay = [];
+            obj.legacyClosedOpeningCloseDay = [];
+            obj.legacyClosedOpeningForwardSteps = [];
+            obj.legacyClosedOpeningBackwardSteps = [];
+            obj.legacyClosedOpeningYearCandidate = [];
+            obj.yearIntervalCandidate = [];
         end
     end
 end
