@@ -240,6 +240,30 @@ internal static class Program
         Equal(actualYear5000, actual.FindTargetYear(calculationDay, target), "إيجاد سنة يوم الختم الإنتاجي");
     }
 
+    private static void RunProductionCutletTests()
+    {
+        var simple = new CutletPartitionFamily(5, 3, 2);
+        Equal(new BigInteger(3), simple.Count(), "عدد تقسيمات الكُتَيْلات الإنتاجي");
+        SequenceEqual(new[] { 1, 1, 3 }, simple.Unrank1(1), "أول تقسيم كُتَيْلات إنتاجي");
+        SequenceEqual(new[] { 2, 2, 1 }, simple.Unrank1(3), "آخر تقسيم كُتَيْلات إنتاجي");
+
+        var calculationDay = NormativeScroll.FoundationDay;
+        var oracle = new NormativeScroll();
+        var expectedYear = oracle.Year5000(calculationDay);
+        var expectedSauce = NormativeScroll.Sauce(calculationDay, expectedYear.OpenGateDay + 1);
+        var expectedCount = oracle.ChooseCutletCount(expectedSauce, expectedYear);
+        var expectedPartition = oracle.ChooseCutletPartition(calculationDay, expectedSauce, expectedYear, expectedCount);
+        var expectedNames = oracle.ChooseCutletNames(expectedSauce, expectedCount);
+        var expectedCutlets = oracle.MaterializeCutlets(expectedYear, expectedPartition, expectedNames);
+        var gates = new GateDiscovery();
+        var year = new YearSelection(gates).Year5000(calculationDay);
+        var actual = new CutletSelection(gates).Select(calculationDay, year);
+        Equal(expectedCount, actual.Count, "عدد الكُتَيْلات الإنتاجي");
+        SequenceEqual(expectedPartition, actual.Partition, "تقسيم الكُتَيْلات الإنتاجي");
+        SequenceEqual(expectedNames, actual.CanonicalNameIndices, "أسماء الكُتَيْلات الإنتاجية");
+        SequenceEqual(expectedCutlets.Select(x => x.FirstDay).ToArray(), actual.Cutlets.Select(x => x.FirstDay).ToArray(), "أيام بدء الكُتَيْلات الإنتاجية");
+    }
+
     private static void RunMonsterBootstrapTests()
     {
         var context = CalendarDateSpaghetti.BootstrapInvocation(NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1);
@@ -264,6 +288,7 @@ internal static class Program
         RunGateSmokeTests();
         RunProductionGateTests();
         RunProductionYearTests();
+        RunProductionCutletTests();
         RunMonsterBootstrapTests();
         Console.WriteLine("الاختبارات الناجحة: " + _passed);
         Console.WriteLine("الاختبارات الفاشلة: " + _failed);
