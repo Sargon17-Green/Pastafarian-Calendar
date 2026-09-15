@@ -305,3 +305,76 @@ Dahil positive slot ito, talagang dumadaan ang production route sa raw `legacyPr
 ### Hindi pa kasama
 
 Wala pang Stage 14 `legacyGrindRow`, `LEGACY_VISIBLE_GRIND_TABLE`, sentinel row, o visible-drop builder.
+
+## Stage 14 — Discovery 07: one-based grind ordinal laban sa zero-based table
+
+### Historical physical table
+
+Ang visible-grind table ay may labing-isang totoong row lamang at zero-based ang physical indexing:
+
+```text
+index 0  = [3,5,7,11,WHEAT]
+index 1  = [5,7,11,13,BARLEY]
+index 2  = [7,11,13,17,SALT]
+index 3  = [11,13,17,19,BITTER]
+index 4  = [13,17,19,23,RED]
+index 5  = [17,19,23,29,WHEAT]
+index 6  = [19,23,29,31,BARLEY]
+index 7  = [23,29,31,37,SALT]
+index 8  = [29,31,37,41,BITTER]
+index 9  = [31,37,41,43,RED]
+index 10 = [37,41,43,47,WHEAT]
+```
+
+### Historical defect
+
+Ang semantic grind ordinal ay `1..11`, ngunit ang raw helper ay direktang ginagamit iyon bilang zero-based array index:
+
+```text
+legacyGrindRow(grind)
+    -> table[grind]
+```
+
+Kaya ang ordinals `1..10` ay laging nakakakuha ng susunod na row, at ang ordinal `11` ay undefined.
+
+### Production route
+
+Ang Stage 13 Patch 06 production probe ay nananatiling buo at GREEN.
+
+Pagkatapos nito, ang tunay na route ay gumagawa ng neutral Discovery 07 probe sa `grind=1`:
+
+```text
+LegacyGrindTableAdapter
+-> Discovery07GrindIndexHandler
+-> legacyGrindRow(1)
+-> physical index 1
+-> semantic row 2
+```
+
+Hindi ginagamit ang row bilang bagong calendar semantic input.
+
+### EXPECTED_RED contract
+
+Ang lahat ng semantic grind ordinals `1..11` ay divergent laban sa normative row na may parehong ordinal.
+
+Exact count:
+
+```text
+EXPECTED_RED = 11
+MATCH = 0
+```
+
+### Invocation-owned scar state
+
+Ang context ay nagtatago ng:
+- requested grind ordinal;
+- direct physical index;
+- returned legacy row;
+- undefined flag;
+- production probe row;
+- Discovery 07 status at invocation count.
+
+### Hindi pa kasama
+
+Wala pang sentinel row, walang `GRIND_TABLE_WITH_SENTINEL`, walang `grindRowWithSentinel`, at walang visible-drop builder. Ang mga iyon ay para sa Patch 07 sa Stage 15.
+

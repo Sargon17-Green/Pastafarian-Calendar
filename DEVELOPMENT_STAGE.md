@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=13
-CURRENT_KIND=PATCH
-CURRENT_PATCH=06
+CURRENT_STAGE=14
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=07
 LAST_COMPLETED_STAGE=13
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Pinanatili ang raw legacyPrior bilang visible-only dropStore[i-back] scar; idinagdag ang hiwalay na Patch 06 priorPatch na gumagamit pa rin ng legacyPrior para sa slot>=1 at nagta-translate ng slot<=0 sa hiddenK=1-slot bago tumawag sa hiddenByNearness.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 07 zero-based visible-grind table scar: 11 tunay na rows ang nakaimbak sa indices 0..10, ngunit ang legacyGrindRow ay tumatanggap ng one-based grind ordinal 1..11 at direktang ginagamit ito bilang array index; kaya grind 1..10 ay isang row na huli at grind 11 ay undefined.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -41,3 +41,7 @@ STAGE12_DISCOVERY=LEGACY_PRIOR_VISIBLE_ONLY
 STAGE12_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
 STAGE13_PATCH=PRIOR_PATCH_HIDDEN_FALLBACK
 STAGE13_RUNTIME_VERIFICATION=GREEN_CONFIRMED
+STAGE14_DISCOVERY=ZERO_BASED_VISIBLE_GRIND_TABLE_DIRECT_ORDINAL_INDEX
+STAGE14_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `14` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime ang eksaktong 11 Discovery 07 EXPECTED_RED grind ordinals 1..11, habang nananatiling GREEN ang Stage 1–13 at wala pang Patch 07 sentinel repair o visible-drop builder.

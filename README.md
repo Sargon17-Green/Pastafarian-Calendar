@@ -2,60 +2,52 @@
 
 Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`.
 
-## Stage 13 — Patch 06
+## Stage 14 — Discovery 07
 
-Nananatiling pisikal at sadyang mali ang Stage 12 helper:
-
-```text
-legacyPrior(dropStore, i, back)
-    -> dropStore[i-back]
-```
-
-Ang correction ay nasa hiwalay na layer:
+Ang historical visible-grind table ay may eksaktong labing-isang totoong row at pisikal na zero-based:
 
 ```text
-slot = i - back
-
-if slot >= 1:
-    return legacyPrior(dropStore, i, back)
-
-hiddenK = 1 - slot
-return hiddenByNearness(legacyHidden, hiddenK)
+index 0  = grind row 1
+index 1  = grind row 2
+...
+index 10 = grind row 11
 ```
 
-Ibig sabihin:
-
-- positive visible slot: talagang ginagamit pa rin ang raw `legacyPrior`;
-- walang hidden storage na kailangan sa positive branch;
-- nonpositive slot: ginagamit ang `hiddenK=1-slot`;
-- ang hidden branch ay dumadaan sa Stage 11 `hiddenByNearness`.
-
-Ang tatlong Stage 12 cases ay GREEN na ngayon:
+Ngunit ang raw helper ay tumatanggap ng semantic grind ordinal `1..11` at ginagamit iyon nang diretso bilang physical index:
 
 ```text
-slot 0  -> hidden1
-slot -2 -> hidden3
-slot -6 -> hidden7
+legacyGrindRow(grind)
+    -> LEGACY_VISIBLE_GRIND_TABLE_ZERO_BASED[grind]
 ```
 
-Ang production route ay nagpapanatili ng parehong neutral probe:
+Kaya:
+
+- grind 1 -> row 2;
+- grind 2 -> row 3;
+- ...
+- grind 10 -> row 11;
+- grind 11 -> undefined.
+
+Lahat ng labing-isang ordinals ay `EXPECTED_RED` laban sa normative one-based row semantics.
+
+Ang production route ay nagpapatakbo ng isang semantically neutral raw probe sa `grind=1`, sa pamamagitan ng:
 
 ```text
-i=2
-back=1
-slot=1
+LegacyGrindTableAdapter
+-> Discovery07GrindIndexHandler
+-> legacyGrindRow
 ```
 
-Dahil visible branch ito, ang production probe ay patuloy na nagpapatunay na aktuwal na tinatawag ang raw `legacyPrior`.
+Hindi pa sinisimulan ang visible-drop builder.
 
-Inaasahang repository state: `GREEN`.
+Inaasahang repository state: `EXPECTED_RED`.
 
-Wala pang Stage 14 `legacyGrindRow`, zero-based visible-grind table, sentinel row, o visible-drop builder.
+Wala pang Stage 15 sentinel row, `GRIND_TABLE_WITH_SENTINEL`, `grindRowWithSentinel`, o `LegacyVisibleDropBuilder`.
 
 ## Pagpapatakbo
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage13.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage13.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage14.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage14.ps1
 ```
