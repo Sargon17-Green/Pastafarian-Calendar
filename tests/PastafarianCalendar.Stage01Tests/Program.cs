@@ -200,6 +200,24 @@ internal static class Program
         True(negative >= NormativeScroll.GateGapMin && negative <= NormativeScroll.GateGapMax, "مدى فجوة البوابة السالبة الأولى");
     }
 
+    private static void RunProductionGateTests()
+    {
+        var oracle = new NormativeScroll();
+        var actual = new GateDiscovery();
+        foreach (var step in new BigInteger[] { 1, 2 })
+        {
+            Equal(oracle.PositiveGateGap(step), actual.PositiveGateGap(step), "فجوة البوابة الموجبة الإنتاجية " + step);
+            Equal(oracle.NegativeGateGap(step), actual.NegativeGateGap(step), "فجوة البوابة السالبة الإنتاجية " + step);
+        }
+        foreach (var index in new BigInteger[] { -2, -1, 0, 1, 2 })
+            Equal(oracle.EnsureGateIndex(index), actual.GateDay(index), "يوم البوابة الإنتاجي " + index);
+
+        var gateOne = actual.GateDay(1);
+        Equal(new BigInteger(0), actual.GateIndexAtOrBefore(gateOne - 1), "الفهرس قبل البوابة الإنتاجي");
+        Equal(new BigInteger(1), actual.GateIndexAtOrBefore(gateOne), "الفهرس عند البوابة الإنتاجي");
+        Equal(new BigInteger(1), actual.ExactGateIndex(gateOne)!.Value, "الفهرس الدقيق للبوابة الإنتاجي");
+    }
+
     private static void RunMonsterBootstrapTests()
     {
         var context = CalendarDateSpaghetti.BootstrapInvocation(NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1);
@@ -222,6 +240,7 @@ internal static class Program
         RunSauceSmokeTests();
         RunProductionSauceTests();
         RunGateSmokeTests();
+        RunProductionGateTests();
         RunMonsterBootstrapTests();
         Console.WriteLine("الاختبارات الناجحة: " + _passed);
         Console.WriteLine("الاختبارات الفاشلة: " + _failed);
