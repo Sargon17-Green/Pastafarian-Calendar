@@ -1035,3 +1035,49 @@ Stage 49 nie oblicza `dayInMonth` z pozycji ciągłej ani nie zakłada, że wyst
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 50 — DISCOVERY 25: contiguous month day
+
+Dodano dwudziesty piąty historyczny defekt: `dayInMonth` jest nadal wyznaczany jak w kalendarzu, w którym każdy miesiąc stanowi jeden contiguous blok dni.
+
+`LegacyContiguousMonthDay` przyjmuje whole weave, opening day roku oraz target day.
+
+Pozycja dnia w roku wynosi:
+
+`targetPosition1 = targetDay - yearOpenDay`.
+
+Month id jest odczytywany z whole weave na tej pozycji.
+
+Historyczny ghost znajduje pierwsze wystąpienie tego month id, przelicza jego absolutny dzień, a następnie zwraca:
+
+`dayInMonth = targetDay - firstOccurrenceDay + 1`.
+
+To jest poprawne tylko wtedy, gdy wszystkie dni miesiąca od pierwszego wystąpienia do targetu są contiguous.
+
+Po PATCH 24 założenie to jest fałszywe: legalny whole weave może wielokrotnie opuszczać dany miesiąc i później do niego wracać.
+
+Główny witness używa exact Stage 49 weave dla `[4,4,4]`, rank `396`:
+
+`[1,1,2,3,2,1,3,2,1,2,3,3]`.
+
+Przy `yearOpenDay=1000` i `targetDay=1009` target position wynosi `9`, a month id wynosi `1`.
+
+Pierwsze wystąpienie month 1 jest na position `1`, czyli absolute day `1001`.
+
+Historyczna różnica zwraca więc `dayInMonth=9`.
+
+Jednak do target position 9 month id `1` wystąpił tylko cztery razy: na positions `1,2,6,9`.
+
+Normatywny dayInMonth wynosi zatem `4`, nie `9`.
+
+Regression sprawdza również wszystkie rozdzielone pozycje `5..12`, dla których contiguous difference różni się od occurrence count, oraz control prefix `1..4`, gdzie historyczny wynik jeszcze przypadkowo jest zgodny.
+
+`MonthDayCompatibilityRoute` w Stage 50 zapisuje pełny ghost: year open day, target day, target position, month id, first occurrence position, first absolute day i legacy dayInMonth. Publikowany `dayInMonthCandidate` jest nadal wartością historyczną.
+
+Stage 50 pozostaje celowo `EXPECTED_RED`.
+
+Dopiero Stage 51 ma uruchomić ten sam `LegacyContiguousMonthDay` jako pierwszy, zachować wszystkie jego pola jako obserwowalną bliznę, a następnie nadpisać wyłącznie semantic `dayInMonth` liczbą wystąpień wybranego month id w `weaving(1:targetPosition1)`.
+
+Stage 50 nie zawiera occurrence-count patch.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

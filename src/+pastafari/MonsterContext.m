@@ -164,6 +164,15 @@ classdef MonsterContext < handle
         wholeMonthWeavingRank
         wholeMonthWeavingDPResult
         wholeMonthWeavingReusedGhost
+        monthDayYearOpenDay
+        monthDayTargetDay
+        monthDayTargetPosition1
+        legacyContiguousMonthId
+        legacyContiguousMonthFirstPosition1
+        legacyContiguousMonthFirstDay
+        legacyContiguousDayInMonth
+        monthAtTargetCandidate
+        dayInMonthCandidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -330,6 +339,15 @@ classdef MonsterContext < handle
             obj.wholeMonthWeavingRank = [];
             obj.wholeMonthWeavingDPResult = [];
             obj.wholeMonthWeavingReusedGhost = false;
+            obj.monthDayYearOpenDay = [];
+            obj.monthDayTargetDay = [];
+            obj.monthDayTargetPosition1 = [];
+            obj.legacyContiguousMonthId = [];
+            obj.legacyContiguousMonthFirstPosition1 = [];
+            obj.legacyContiguousMonthFirstDay = [];
+            obj.legacyContiguousDayInMonth = [];
+            obj.monthAtTargetCandidate = [];
+            obj.dayInMonthCandidate = [];
         end
     end
 end

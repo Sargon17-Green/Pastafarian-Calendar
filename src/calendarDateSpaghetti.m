@@ -1,6 +1,6 @@
 function result = calendarDateSpaghetti(calculationDay, targetDay)
-% Szkielet produkcyjny rozbudowany do etapu 48; aktywne są PATCH 01-23
-% oraz Discovery 24.
+% Szkielet produkcyjny rozbudowany do etapu 50; aktywne są PATCH 01-24
+% oraz Discovery 25.
 
 pastafari.ValidationManager.requireExactIntegerInput(calculationDay);
 pastafari.ValidationManager.requireExactIntegerInput(targetDay);
@@ -111,11 +111,17 @@ cutletPartitionProbeStream = struct( ...
         pastafari.BigInt(2));
 
 % Discovery 24: każdy dzień wybiera miesiąc niezależnie.
-[ctx, ~] = pastafari.MonthWeavingCompatibilityRoute.call( ...
-    ctx, structureSauceProbe, monthLengthProbe); %#ok<ASGLU>
+[ctx, monthWeavingProbe] = ...
+    pastafari.MonthWeavingCompatibilityRoute.call( ...
+        ctx, structureSauceProbe, monthLengthProbe);
+
+% Discovery 25: dayInMonth nadal liczony jak dla contiguous month block.
+[ctx, ~, ~] = pastafari.MonthDayCompatibilityRoute.call( ...
+    ctx, monthWeavingProbe, pastafari.BigInt(0), ...
+    pastafari.BigInt(1)); %#ok<ASGLU>
 
 error('Pastafari:Bootstrap:NotImplementedYet', ...
-    ['Etap 48 aktywuje historyczną ścieżkę Discovery 24; ', ...
+    ['Etap 50 aktywuje historyczną ścieżkę Discovery 25; ', ...
      'pełna semantyka kalendarza nie jest jeszcze zaimplementowana.']);
 
     function inner = bootstrapHandler(inner)
