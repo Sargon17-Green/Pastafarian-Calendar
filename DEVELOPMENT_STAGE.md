@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=20
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=21
+CURRENT_KIND=PATCH
 CURRENT_PATCH=10
 LAST_COMPLETED_STAGE=20
-EXPECTED_REPOSITORY_STATE=RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=PowerShell
 NATURAL_LANGUAGE=טגלוג / Filipino
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Discovery 10 bowl-update contamination scar: ang six-position update loop ay nagbabasa at agad nagsusulat sa iisang working bowl storage, kaya ang mga huling positions ay maaaring makabasa ng bagong values mula sa naunang positions sa parehong drop.
+MONSTER_ARCHITECTURE_GROWTH=Idinagdag ang Patch 10 snapshot bowl-update repair: talagang pinapatakbo muna ang Discovery 10 in-place scar, saka kino-clone ang input bowls sa vaultOld, lahat ng six-position reads ay mula lamang sa vaultOld, lahat ng writes ay sa hiwalay na pending table, at saka lamang kino-commit ang buong anim na results bilang isang batch.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
@@ -55,3 +55,7 @@ STAGE19_PATCH=BOWL_ALIAS_POSITION_REPAIR
 STAGE19_RUNTIME_VERIFICATION=GREEN_CONFIRMED
 STAGE20_DISCOVERY=IN_PLACE_BOWL_UPDATE_READS_UPDATED_WORKING_VALUES
 STAGE20_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED
+STAGE21_PATCH=SNAPSHOT_BOWL_UPDATE_WITH_PENDING_BATCH
+STAGE21_RUNTIME_VERIFICATION=AWAITING
+
+Paalala: Ang `LAST_COMPLETED_STAGE` ay dapat maging `21` lamang matapos mapatunayan sa aktuwal na Windows PowerShell 5.1 runtime na nananatiling pisikal at talagang tinatawag muna ang Discovery 10 in-place scar, na hiwalay na clone ang vaultOld, na lahat ng reads ay mula sa vaultOld at lahat ng writes ay sa pending, na sabay kino-commit ang anim na positions, at wala pang Patch 11 order-at-46 o anumang mas huling patch code.

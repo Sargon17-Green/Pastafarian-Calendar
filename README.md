@@ -1,28 +1,25 @@
 # Kalendaryong Pastafarian — PowerShell + Filipino
 
-## Stage 20 — Discovery 10
+## Stage 21 — Patch 10
 
-Ang bagong historical scar ay nasa six-position bowl update loop.
+Pinananatili ang Discovery 10 historical in-place bowl-update scar at talagang pinapatakbo muna ito ng Patch 10 wrapper.
 
-Sa bawat position, kinukuha ang `bowlId`, `prevId`, at `nextId` mula sa corrected permutation order. Ngunit ang legacy helper ay nagbabasa at agad nagsusulat sa **iisang working bowl storage**:
-
-```text
-working[bowlId] = SAVE(
-    s^2 + 5*working[prevId]*working[nextId] + i*position
-)
-```
-
-Dahil dito, ang mga position na susunod ay maaaring makabasa ng values na naisulat na ng naunang position sa parehong drop.
-
-Ang tamang snapshot semantics ay dapat magbasa lamang mula sa lumang bowl snapshot at magsulat sa hiwalay na output storage, ngunit **hindi pa iyon ipinapatupad sa Stage 20**.
-
-Sa historical required fixture:
+Pagkatapos, ginagawa ang tamang snapshot semantics:
 
 ```text
-position 1 -> snapshot MATCH
-positions 2,3,6 -> EXPECTED_RED
+vaultOld = clone(input bowls)
+pending = six empty numeric bowl slots
+
+for position = 1..6:
+    read current/previous/next bowls only from vaultOld
+    compute the new bowl value
+    write only to pending[bowlId]
+
+commit pending only after all six positions are complete
 ```
 
-Ang raw helper ay nasa tunay na production path sa `i=1`, gamit ang corrected Patch 09 pours.
+Ang `vaultOld` ay hiwalay na physical clone at hindi reference sa original input bowls. Hindi binabago ang original initial bowls.
 
-Wala pang Patch 10 snapshot/write-buffer/commit-after-six repair.
+Ang raw in-place result at corrected snapshot result ay parehong nananatiling observable, ngunit ang corrected pending result lamang ang authoritative Patch 10 result.
+
+Wala pang Patch 11 `orderAt46Latch` o anumang mas huling patch logic.

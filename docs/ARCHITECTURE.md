@@ -1,44 +1,42 @@
-# Arkitektura hanggang Stage 20
+# Arkitektura hanggang Stage 21
 
-## Input sa Discovery 10
-
-Ang bowl-update scar ay tumatanggap ng:
-
-- real visible drop `i`;
-- Patch 08 corrected order;
-- Patch 09 corrected pours;
-- patched stone row;
-- current six bowl values.
-
-## Historical update
+## Discovery 10 predecessor
 
 ```text
-working = copy(current bowls)
-
-for position = 1..6:
-    bowlId = order[position]
-    prevId = previous order position
-    nextId = next order position
-    s = working[bowlId]
-        + 2*working[prevId]
-        + 3*working[nextId]
-        + pours[position]
-        + drop
-        + stone[position-kind]
-
-    working[bowlId] = SAVE(
-        s^2
-        + 5*working[prevId]*working[nextId]
-        + i*position
-    )
+legacyInPlaceBowlUpdateWrong
+    reads working
+    writes working immediately
 ```
 
-Ang contamination ay dahil parehong storage ang source ng reads at destination ng bawat immediate write.
+Nananatili itong pisikal at talagang tinatawag muna ng Patch 10 wrapper.
 
-## Production route
+## Patch 10
 
-Stage 20 keeps Stage 19 intact, then executes one real `i=1` Discovery 10 bowl update using `legacyInitialBowls` and `patch09ProductionPours`. The raw result remains observable but is not yet corrected.
+```text
+Invoke-Patch10SnapshotBowlUpdateRepair
+-> legacyInPlaceBowlUpdateWrong          # preserved raw scar
+-> vaultOld = clone(input bowls)
+-> snapshotBowlUpdatePatched
+   -> reads only vaultOld
+   -> writes only pending
+   -> completes positions 1..6
+-> commit/return completed pending table
+```
+
+## Patch 10 state
+
+- `patch10DropIndex`
+- `patch10VaultOld`
+- `patch10Pending`
+- `patch10LegacyWrongResult`
+- `patch10CorrectedResult`
+- `patch10CommitAfterSix`
+- `patch10Applied`
+- `patch10Status`
+- `patch10InvocationCount`
+
+Ang raw predecessor result ay hiwalay na observable; ang corrected result ang authoritative bowl-update output.
 
 ## Stage boundary
 
-Wala pang separate old snapshot, pending output table, o commit-after-all-six update. Iyon ay Patch 10 / Stage 21.
+Wala pang `orderAt46Latch` / Patch 11 at wala pang anumang mas huling defect/patch logic.

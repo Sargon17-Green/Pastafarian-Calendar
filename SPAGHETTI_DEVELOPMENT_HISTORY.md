@@ -556,3 +556,25 @@ Isang real production probe sa `i=1` ang idinagdag pagkatapos ng Patch 09 correc
 
 Wala pang hiwalay na old snapshot, pending write buffer, o bulk commit ng Patch 10.
 
+## Stage 21 — Patch 10: snapshot bowl update
+
+### Preserved Discovery 10 scar
+
+Ang `legacyInPlaceBowlUpdateWrong` ay hindi binubura o nire-rewrite. Talagang pinapatakbo muna ito ng Patch 10 wrapper at kino-capture ang divergent raw result.
+
+### Frozen source
+
+Bago ang corrected loop, kino-clone ang input bowl table sa `vaultOld`. Ang clone ay value-equal ngunit pisikal na hiwalay sa original.
+
+### Buffered destination
+
+Ang lahat ng six-position reads ay mula lamang sa `vaultOld`. Ang bawat bagong bowl value ay isinusulat lamang sa hiwalay na `pending` table.
+
+### Commit boundary
+
+Hindi ginagamit ang anumang pending write bilang source ng later position sa parehong drop. Pagkatapos lamang makumpleto ang lahat ng anim na positions ibinabalik/kinokommit ang completed pending table.
+
+### Stage boundary
+
+Nananatili ang Stage 15 sentinel, Patch 08 permutation repair, Patch 09 bowl alias, at Discovery 10 scar. Wala pang Patch 11 order-at-46 o anumang mas huling patch logic.
+
