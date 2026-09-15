@@ -218,6 +218,28 @@ internal static class Program
         Equal(new BigInteger(1), actual.ExactGateIndex(gateOne)!.Value, "الفهرس الدقيق للبوابة الإنتاجي");
     }
 
+    private static void RunProductionYearTests()
+    {
+        var calculationDay = NormativeScroll.FoundationDay;
+        var oracle = new NormativeScroll();
+        var actual = new YearSelection();
+        var expectedYear5000 = oracle.Year5000(calculationDay);
+        var actualYear5000 = actual.Year5000(calculationDay);
+        Equal(expectedYear5000.Number, actualYear5000.Number, "رقم سنة خمسة آلاف الإنتاجي");
+        Equal(expectedYear5000.OpenGateIndex, actualYear5000.OpenGateIndex, "بوابة فتح سنة خمسة آلاف الإنتاجية");
+        Equal(expectedYear5000.CloseGateIndex, actualYear5000.CloseGateIndex, "بوابة ختم سنة خمسة آلاف الإنتاجية");
+        var expectedNext = oracle.NextYear(calculationDay, expectedYear5000);
+        var actualNext = actual.NextYear(calculationDay, actualYear5000);
+        Equal(expectedNext.OpenGateIndex, actualNext.OpenGateIndex, "فتح السنة التالية الإنتاجية");
+        Equal(expectedNext.CloseGateIndex, actualNext.CloseGateIndex, "ختم السنة التالية الإنتاجية");
+        var expectedPrevious = oracle.PreviousYear(calculationDay, expectedYear5000);
+        var actualPrevious = actual.PreviousYear(calculationDay, actualYear5000);
+        Equal(expectedPrevious.OpenGateIndex, actualPrevious.OpenGateIndex, "فتح السنة السابقة الإنتاجية");
+        Equal(expectedPrevious.CloseGateIndex, actualPrevious.CloseGateIndex, "ختم السنة السابقة الإنتاجية");
+        var target = actualYear5000.CloseGateDay;
+        Equal(actualYear5000, actual.FindTargetYear(calculationDay, target), "إيجاد سنة يوم الختم الإنتاجي");
+    }
+
     private static void RunMonsterBootstrapTests()
     {
         var context = CalendarDateSpaghetti.BootstrapInvocation(NormativeScroll.FoundationDay, NormativeScroll.FoundationDay + 1);
@@ -241,6 +263,7 @@ internal static class Program
         RunProductionSauceTests();
         RunGateSmokeTests();
         RunProductionGateTests();
+        RunProductionYearTests();
         RunMonsterBootstrapTests();
         Console.WriteLine("الاختبارات الناجحة: " + _passed);
         Console.WriteLine("الاختبارات الفاشلة: " + _failed);

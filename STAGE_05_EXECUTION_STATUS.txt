@@ -1,0 +1,9 @@
+STAGE=5
+EXPECTED=GREEN
+ACTUAL=GREEN
+TOOLCHAIN=.NET_SDK_10.0.100
+COMMAND=dotnet run --project tests/PastafarianCalendar.Stage01Tests/PastafarianCalendar.Stage01Tests.csproj --configuration Release
+PASSED=115
+FAILED=0
+PRODUCTION_SCOPE=YEAR_SELECTION
+ORACLE_COMPARISON=YES
