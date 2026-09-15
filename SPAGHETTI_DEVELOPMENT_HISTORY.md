@@ -803,3 +803,35 @@ Dopiero Stage 43 ma pozostawić `LegacyAllPositiveCutletPartitionFamily` oraz `L
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 43 — PATCH 21: filtered partition family
+
+Historyczne `LegacyAllPositiveCutletPartitionFamily` oraz `LegacyCutletPartitionAdapter` pozostają fizycznie bez zmian.
+
+Każde przejście przez `CutletPartitionCompatibilityRoute` nadal wykonuje pełną raw family i raw selection jako pierwsze. Descriptor, count, rank oraz selected partition pozostają zapisane jako obserwowalna blizna Discovery 21.
+
+Dodano `FilteredLegacyCutletPartitionFamily`.
+
+Jeżeli istnieje `internalGateOffset`, semantic family jest dokładnie leksykograficznym podciągiem raw all-positive family, zawierającym tylko kompozycje, których właściwy prefix sum jest równy wymaganej granicy.
+
+Rodzina produkcyjna nie jest materializowana. Jej count wynosi kombinatorycznie:
+
+`C(gapCount-2, cutletCount-2)`.
+
+`unrank1` skanuje możliwe wartości kolejnych części w tym samym porządku co legacy family i oblicza rozmiar każdego legalnego descendant block. Dzięki temu zachowuje dokładnie kolejność filtrowanej subsekwencji bez budowania pełnej listy.
+
+Dodano `CutletPartitionGatePatchWrapper`.
+
+Gdy internal gate istnieje, wrapper wykonuje wybór rank ponownie nad filtrowanym count i unrankuje z `FilteredLegacyCutletPartitionFamily`.
+
+Gdy internal gate nie istnieje, wrapper nie wykonuje drugiego wyboru: reuse dokładnie raw rank, raw partition, raw count i raw descriptor.
+
+Dla głównego witness `gapCount=10`, `cutletCount=8`, `offset=4` raw scar pozostaje `count=36`, `rank=15`, `[1,1,1,3,1,1,1,1]`, natomiast semantic path używa `count=28`, `rank=3` i publikuje `[1,1,1,1,1,1,3,1]`.
+
+Dodatkowy witness `gapCount=10`, `cutletCount=3`, `offset=4` potwierdza count `8`; filtered rank 1 daje `[1,3,6]`, a rank 8 daje `[4,5,1]`.
+
+Niezmieniony regression Stage 42 ma po tej zmianie przejść z EXPECTED_RED do GREEN.
+
+Stage 43 nie dodaje żadnej logiki nazw kotletów. Dopiero Stage 44 rozpocznie osobny historyczny defekt repeated cutlet names.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

@@ -1,8 +1,9 @@
 classdef CutletPartitionCompatibilityRoute
-    % Produkcyjna trasa Discovery 21.
+    % Produkcyjna trasa podziałów kotletów po PATCH 21.
     %
-    % internalGateOffset jest obserwowalny, ale legacy family/selection
-    % celowo go ignorują. Stage 42 publikuje surową kompozycję legacy.
+    % Raw all-positive family/selection jest zawsze wykonywana jako pierwsza
+    % i zachowywana jako blizna Discovery 21. Semantic path filtruje tylko
+    % wtedy, gdy istnieje internal calculation-day gate.
     methods (Static)
         function [ctx, partition] = call( ...
                 ctx, stream, gapCount, cutletCount, internalGateOffset)
@@ -32,14 +33,11 @@ classdef CutletPartitionCompatibilityRoute
                 end
             end
 
-            [ctx, rank, rawPartition, familyCount, descriptor] = ...
+            % Realny historyczny ghost: pełna rodzina i raw selection.
+            [ctx, rawRank, rawPartition, rawFamilyCount, rawDescriptor] = ...
                 pastafari.LegacyCutletPartitionAdapter.callWithRing( ...
                     ctx, stream, G, K);
 
-            ctx.phase = 'DISCOVERY_21';
-            ctx.subPhase = 21;
-            ctx.mode = 'UNFILTERED_CUTLET_PARTITIONS';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_21_UNFILTERED_CUTLET_PARTITIONS';
             ctx.metrics = pastafari.MetricsShell.bump( ...
@@ -49,16 +47,35 @@ classdef CutletPartitionCompatibilityRoute
             ctx.cutletGapCount = G;
             ctx.cutletCountCandidate = K;
             ctx.cutletInternalGateOffset = offset;
-            ctx.legacyPositiveCompositions = descriptor;
-            ctx.legacyCutletPartitionFamilyCount = familyCount;
-            ctx.legacyCutletPartitionRank = rank;
+            ctx.legacyPositiveCompositions = rawDescriptor;
+            ctx.legacyCutletPartitionFamilyCount = rawFamilyCount;
+            ctx.legacyCutletPartitionRank = rawRank;
             ctx.legacyCutletPartition = rawPartition;
-            ctx.cutletPartitionCandidate = rawPartition;
-            ctx.diagnostics{end + 1} = ...
-                ['Discovery 21 publikuje wszystkie dodatnie kompozycje; ', ...
-                 'internalGateOffset jest zapisany, ale nie filtruje rodziny.'];
 
-            partition = rawPartition;
+            [ctx, semanticRank, semanticPartition, semanticCount, ...
+                semanticDescriptor, reusedLegacy] = ...
+                pastafari.CutletPartitionGatePatchWrapper.callWithRing( ...
+                    ctx, stream, G, K, offset, ...
+                    rawRank, rawPartition, rawFamilyCount, rawDescriptor);
+
+            ctx.phase = 'PATCH_21';
+            ctx.subPhase = 21;
+            ctx.mode = 'FILTERED_CUTLET_PARTITION_FAMILY_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = ...
+                'PATCH_21_FILTERED_PARTITION_FAMILY';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch21.filteredPartitionFamily.calls');
+
+            ctx.cutletPartitionCandidate = semanticPartition;
+            ctx.diagnostics{end + 1} = sprintf( ...
+                ['PATCH 21 rawCount=%s rawRank=%s semanticFamily=%s ', ...
+                 'semanticCount=%s semanticRank=%s reusedLegacy=%d.'], ...
+                char(rawFamilyCount), char(rawRank), ...
+                semanticDescriptor.familyName, char(semanticCount), ...
+                char(semanticRank), reusedLegacy);
+
+            partition = semanticPartition;
         end
     end
 end
