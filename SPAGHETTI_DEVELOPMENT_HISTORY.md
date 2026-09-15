@@ -709,3 +709,35 @@ Test Stage 39 sprawdza osobno mismatch fingerprintu, mismatch `openGate`, mismat
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 40 — DISCOVERY 20: old structure sauce target
+
+Dodano dwudziesty historyczny defekt w budowaniu sauce używanego do struktury roku.
+
+Wspólna funkcja `sauceWithCurrentScars(cDay,targetDay)` wykonuje aktualny naprawiony pipeline sauce dla dokładnie przekazanej pary `(c,t)`. Nie interpretuje roli targetu.
+
+Historyczna funkcja `oldStructureSauce(cDay,originalTargetDay)` pozostaje osobną, realnie wykonywaną warstwą. Wywołuje sauce z oryginalnym targetem zapytania użytkownika.
+
+To jest wada: struktura konkretnego roku musi być determinowana przez sauce dla pierwszego dnia tego roku. Przy reprezentacji roku przez opening gate normatywny pierwszy dzień wynosi:
+
+`firstDayOfYear = openGateDay + 1`.
+
+`StructureSauceCompatibilityRoute` zna zarówno `originalTargetDay`, jak i `yearFirstDay`, ale w Stage 40 nadal publikuje wyłącznie wynik `oldStructureSauce(cDay,originalTargetDay)`.
+
+Regression zawiera trzy dokładne witnesses, mierzone przez finalny `bowl 2`.
+
+1. `cDay=-15055671`, `originalTarget=-15055668`, `yearFirstDay=-15050770`: raw bowl2 `30490712077192838912252735934522861502`, authoritative bowl2 `25571125800832315000523776987293072647`.
+
+2. `cDay=-15055664`, `originalTarget=-15055666`, `yearFirstDay=-15055564`: raw bowl2 `44486119807401318534404702377176765242`, authoritative bowl2 `163498808332082587884523302982947090138`.
+
+3. `cDay=-15055682`, `originalTarget=-15055677`, `yearFirstDay=-15055782`: raw bowl2 `115056314572464196578969473149772288830`, authoritative bowl2 `73239755307544431731595307996239836106`.
+
+Wartości authoritative są dodatkowo porównywane z lokalnym normatywnym oracle `sauce(cDay,firstDayOfYear)`.
+
+Stage 40 zachowuje także control, w którym `originalTargetDay==firstDayOfYear`; wtedy stary i normatywny sauce są identyczne.
+
+Stan Stage 40 jest celowo `EXPECTED_RED`. `oldStructureSauce` nie jest naprawiany ani przekierowywany.
+
+Dopiero Stage 41 ma najpierw wykonać dokładnie ten sam historyczny ghost call, zachować jego target/bowl2/orderAt46 jako bliznę, a następnie dla semantic path użyć sauce z `firstDayOfYear`. Jeżeli original target już jest first day, patch może wykorzystać ten sam ghost result bez ponownego liczenia.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

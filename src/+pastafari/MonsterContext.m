@@ -107,6 +107,14 @@ classdef MonsterContext < handle
         legacyYearCacheRawValue
         legacyYearCacheProducerExecuted
         yearStructureCandidate
+        structureSauceCalculationDay
+        structureSauceOriginalTargetDay
+        structureSauceYearFirstDay
+        legacyStructureSauce
+        legacyStructureSauceBowl2
+        legacyStructureSauceOrderAt46
+        structureSauceCandidate
+        structureSauceBowl2Candidate
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -216,6 +224,14 @@ classdef MonsterContext < handle
             obj.legacyYearCacheRawValue = [];
             obj.legacyYearCacheProducerExecuted = false;
             obj.yearStructureCandidate = [];
+            obj.structureSauceCalculationDay = [];
+            obj.structureSauceOriginalTargetDay = [];
+            obj.structureSauceYearFirstDay = [];
+            obj.legacyStructureSauce = [];
+            obj.legacyStructureSauceBowl2 = [];
+            obj.legacyStructureSauceOrderAt46 = [];
+            obj.structureSauceCandidate = [];
+            obj.structureSauceBowl2Candidate = [];
         end
     end
 end
