@@ -991,3 +991,47 @@ Stage 48 nie implementuje żadnego whole-weave production count/unrank.
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 49 — PATCH 24: weaving DP detour
+
+Historyczne `legacyChooseEachDaySeparately`, `wrapMonth`, `buildMonthWeavingAnswerRing` oraz `LegacyMonthWeavingAdapter` pozostają fizycznie bez zmian.
+
+`MonthWeavingCompatibilityRoute` nadal zawsze wykonuje daily chooser jako pierwszy i zapisuje answer-ring stream, raw proposals, ghost oraz finalne remaining counts jako obserwowalną bliznę Discovery 24.
+
+Dodano `WholeMonthWeavingFamily`.
+
+Stan DP jest dokładnie `(remaining, openedUpTo, closedUpTo)`.
+
+Legalny następny month id musi mieć pozostałą multiplicity. Jeżeli nie był jeszcze otwarty, może być wyłącznie `openedUpTo+1`. Jeżeli jego następne użycie zamyka miesiąc, może być wyłącznie `closedUpTo+1`.
+
+W ten sposób state graph koduje jednocześnie dokładne multiplicities, kolejność pierwszych wystąpień oraz kolejność ostatnich wystąpień.
+
+Rodzina nie materializuje legalnych splotów.
+
+Forward pass buduje osiągalny DAG stanów warstwami według liczby zużytych dni. Reverse pass przypisuje każdemu stanowi exact BigInt completion count.
+
+`count()` zwraca exact liczbę pełnych legalnych splotów.
+
+`itemAt1(rank1)` wykonuje jeden 1-based lexicographic unrank całego splotu, skanując legalne month IDs rosnąco i odejmując completion count kolejnych child blocks.
+
+Dodano `MonthWeavingDPPatchWrapper`.
+
+Wrapper otrzymuje wcześniej wykonany daily ghost, wybiera dokładnie jeden rank nad całą legalną whole-weave family na tym samym bowl-4/seal-32 stream i wykonuje DP unrank.
+
+Jeżeli ghost jest dokładnie równy poprawnemu DP result, może zostać reuse. W przeciwnym razie publikowany jest wyłącznie DP result.
+
+Dla głównego witness `[4,4,4]` raw ghost pozostaje:
+
+`[2,3,1,2,3,1,2,3,1,2,3,1]`.
+
+Whole-weave family ma dokładnie `1301` elementów. Ten sam stream wybiera rank `396` i publikuje:
+
+`[1,1,2,3,2,1,3,2,1,2,3,3]`.
+
+Regression Stage 49 porównuje wszystkie `1301` production itemAt1 values z niezależną test-only enumeracją legalnych splotów, sprawdza trzy historyczne stream witnesses, główny route witness, gałąź reuse dla jednomiesięcznej rodziny oraz fizyczne zachowanie raw daily chooser.
+
+Niezmieniony regression Stage 48 ma po tej zmianie przejść z EXPECTED_RED do GREEN.
+
+Stage 49 nie oblicza `dayInMonth` z pozycji ciągłej ani nie zakłada, że wystąpienia miesiąca są contiguous. Dopiero Stage 50 rozpocznie Discovery 25: contiguous month day.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

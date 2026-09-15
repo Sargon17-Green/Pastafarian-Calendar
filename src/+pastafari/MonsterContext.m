@@ -160,6 +160,10 @@ classdef MonsterContext < handle
         legacyDailyMonthWeaving
         legacyDailyMonthRemainingFinal
         monthWeavingCandidate
+        wholeMonthWeavingFamilyCount
+        wholeMonthWeavingRank
+        wholeMonthWeavingDPResult
+        wholeMonthWeavingReusedGhost
     end
     methods
         function obj = MonsterContext(calculationDay, targetDay)
@@ -322,6 +326,10 @@ classdef MonsterContext < handle
             obj.legacyDailyMonthWeaving = [];
             obj.legacyDailyMonthRemainingFinal = [];
             obj.monthWeavingCandidate = [];
+            obj.wholeMonthWeavingFamilyCount = [];
+            obj.wholeMonthWeavingRank = [];
+            obj.wholeMonthWeavingDPResult = [];
+            obj.wholeMonthWeavingReusedGhost = false;
         end
     end
 end
