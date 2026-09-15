@@ -1,6 +1,6 @@
-# Arkitektura hanggang Stage 11
+# Arkitektura hanggang Stage 12
 
-Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10 ay historical discovery layers. Ang Stage 3/5/7/9/11 ay correction wrappers na nagpapanatili sa raw scars.
+Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10/12 ay historical discovery layers. Ang Stage 3/5/7/9/11 ay correction wrappers na nagpapanatili sa raw scars.
 
 ## Mga boundary
 
@@ -10,11 +10,11 @@ Ang Stage 1 ay neutral shell. Ang Stage 2/4/6/8/10 ay historical discovery layer
 - `src/Discovery02.ps1` / `src/Patch02.ps1` — day tags.
 - `src/Discovery03.ps1` / `src/Patch03.ps1` — distance.
 - `src/Discovery04.ps1` / `src/Patch04.ps1` — stone table.
-- `src/Discovery05.ps1` — backward hidden storage at wrong direct accessor.
-- `src/Patch05.ps1` — near-ness `8-k` translator habang pinapatakbo pa rin ang raw wrong accessor.
+- `src/Discovery05.ps1` / `src/Patch05.ps1` — backward hidden storage at near-ness correction.
+- `src/Discovery06.ps1` — visible-only prior/history access.
 - `src/MonsterSkeleton.ps1` — production route at invocation-owned semantic state.
 
-## Stage 11 production route
+## Stage 12 production route
 
 ```text
 Invoke-CalendarDateSpaghetti
@@ -23,41 +23,40 @@ Invoke-CalendarDateSpaghetti
 -> Patch 03
 -> Patch 04
 -> Discovery 05
-   -> build hidden7..hidden1 physical storage
--> Patch 05
-   -> raw legacyHidden[k] read
-   -> capture raw scar
-   -> hiddenByNearness(storage,k)
-   -> storage[8-k]
-   -> authoritative corrected value
+-> Patch 05 (k=1)
+-> Discovery 06 production probe
+   -> probeStore[1] = Patch05 corrected value
+   -> legacyPrior(probeStore, i=2, back=1)
+   -> visible slot 1
 ```
 
-## Preserved Stage 10 scars
+Ang production probe ay hindi visible-drop calculation at hindi bagong input sa calendar semantics.
 
-`Discovery05.ps1` ay hindi binabago ng Stage 11.
+## Discovery 06 raw access
 
-Ang physical storage ay nananatiling reversed.
+```text
+legacyPrior(dropStore,i,back)
+    -> dropStore[i-back]
+```
 
-Ang `legacyHiddenDirectByAssumedNearness` ay nananatiling maling direct accessor at aktuwal na tinatawag ng Patch 05.
+Walang hidden fallback.
 
-## Patch 05 state
+Ang raw adapter ay nagtatago ng `i`, `back`, computed slot, at returned value sa invocation context.
 
-Ang invocation context ay nagmamay-ari ng:
+## Missing hidden-history surface
 
-- `patch05RequestedK`
-- `patch05TranslatedSlot`
-- `patch05LegacyDirectValue`
-- `patch05CorrectedValue`
-- `patch05Applied`
-- `patch05Status`
-- `patch05InvocationCount`
+```text
+slot 0  -> hidden1
+slot -2 -> hidden3
+slot -6 -> hidden7
+```
 
-Ang `legacyHiddenLastReturnedValue` ay authoritative corrected value na pagkatapos ng Patch 05.
+Sa Stage 12, walang laman ang visible store sa mga slot na ito, kaya ang tatlong exact probe ay EXPECTED_RED.
 
-## GREEN contract
+## Preserved Stage 11 behavior
 
-Para sa lahat ng `k=1..7`, ang Patch 05 result ay dapat tumugma sa normative hidden `k`.
+Ang Patch 05 ay nananatiling GREEN at ang production `k=1` corrected value ang ginagamit lamang bilang value ng valid slot-1 probe.
 
-Para sa production `k=1`, ang raw scar ay `hidden7`, translated slot ay `7`, at corrected result ay `hidden1`.
+## Wala pang Stage 13
 
-Wala pang Stage 12 `legacyPrior` o visible-history logic.
+Walang `priorPatch`, walang `hiddenK=1-slot` translation, at walang tawag sa `hiddenByNearness` mula sa `Discovery06.ps1`.

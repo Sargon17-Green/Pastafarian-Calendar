@@ -2,48 +2,53 @@
 
 Ito ang malayang linya ng pagpapatupad para sa `PowerShell` at `Filipino`.
 
-## Stage 11 — Patch 05
+## Stage 12 — Discovery 06
 
-Hindi binabago ng Stage 11 ang historical physical hidden storage. Nananatili itong:
-
-```text
-slot 1 = hidden7
-slot 2 = hidden6
-slot 3 = hidden5
-slot 4 = hidden4
-slot 5 = hidden3
-slot 6 = hidden2
-slot 7 = hidden1
-```
-
-Nananatili rin ang raw historical defect:
+Idinadagdag ng Stage 12 ang historical visible-history helper:
 
 ```text
-legacyHiddenDirectByAssumedNearness(storage, k)
-    -> storage[k]
+legacyPrior(dropStore, i, back)
+    -> dropStore[i-back]
 ```
 
-Ang bagong correction layer lamang ang nagdadagdag ng tamang near-ness translation:
+Ang helper na ito ay nakakakita lamang sa positive visible slots. Kapag ang `i-back` ay `0` o negatibo, wala itong alam tungkol sa hidden history.
+
+Sa normative timeline:
 
 ```text
-hiddenByNearness(storage, k)
-    -> storage[8-k]
+slot 0  -> hidden1
+slot -1 -> hidden2
+slot -2 -> hidden3
+...
+slot -6 -> hidden7
 ```
 
-Bago ibalik ang corrected value, ang Patch 05 wrapper ay talagang nagpapatakbo muna ng maling direct accessor at nagtatago ng raw legacy value bilang scar.
+Ngunit wala pang fallback na ito sa Discovery 06.
 
-Ang invocation context ay hiwalay na nagtatago ng requested `k`, translated physical slot, raw direct value, corrected value, applied state, at invocation count.
+Ang tunay na production route ay nagpapatakbo ng isang valid at semantically neutral probe:
 
-Ang production route para sa `k=1` ay kaya talagang nakikita muna ang physical slot 1 (`hidden7`) at pagkatapos ay nagbabalik ng authoritative physical slot 7 (`hidden1`).
+```text
+i=2
+back=1
+slot=1
+```
 
-Inaasahang repository state: `GREEN`.
+Ginagamit lamang nito ang visible probe store upang patunayan na talagang nasa real production chain ang `legacyPrior`. Hindi pa sinisimulan ang visible-drop computation.
 
-Wala pang Stage 12 `legacyPrior` / visible-history defect.
+Ang exact discovery regression ay:
+
+- `slot 0` laban sa `hidden1` — EXPECTED_RED
+- `slot -2` laban sa `hidden3` — EXPECTED_RED
+- `slot -6` laban sa `hidden7` — EXPECTED_RED
+
+Inaasahang repository state: `EXPECTED_RED`.
+
+Wala pang Stage 13 `priorPatch`, walang `hiddenK=1-slot` translation, at walang hidden fallback sa `Discovery06.ps1`.
 
 ## Pagpapatakbo
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage01.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage11.Tests.ps1
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage11.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\tests\Stage12.Tests.ps1
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\Run-Stage12.ps1
 ```

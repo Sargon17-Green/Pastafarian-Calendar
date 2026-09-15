@@ -179,3 +179,65 @@ Lahat ng pitong `k=1..7` corrected reads ay dapat tumugma sa test-only normative
 Ang raw `k=1` direct accessor ay dapat manatiling `hidden7` at manatiling mali laban sa normative `hidden1`.
 
 Wala pang Stage 12 `legacyPrior`, `priorPatch`, visible-history adapter, o anumang mas huling correction.
+
+## Stage 12 — Discovery 06: hindi alam ng visible history ang hidden history
+
+### Historical helper
+
+Ang unang prior/history helper ay visible store lamang ang alam:
+
+```text
+legacyPrior(dropStore, i, back)
+    -> dropStore[i-back]
+```
+
+Kapag positive ang `i-back`, normal na visible slot ang nababasa nito.
+
+Kapag `i-back <= 0`, walang nakalaang hidden-history translation.
+
+### Normative hidden timeline
+
+Ang nonpositive history slots ay dapat tumukoy sa hidden drops:
+
+```text
+slot 0  -> hidden1
+slot -1 -> hidden2
+slot -2 -> hidden3
+...
+slot -6 -> hidden7
+```
+
+Hindi alam ng raw helper ang mapping na ito.
+
+### Production route
+
+Hindi pa sinisimulan ang visible-drop computation. Sa halip, ang tunay na production chain ay nagpapatakbo ng valid probe na `i=2, back=1`, kaya `slot=1`.
+
+Ang probe store slot 1 ay naglalaman ng kasalukuyang corrected Patch 05 hidden value. Ang probe ay patunay lamang na nasa real chain ang raw helper at hindi ito ginagamit bilang bagong calendar semantic input.
+
+### EXPECTED_RED contract
+
+Ang tunay na adapter ay sinusukat sa tatlong missing-history cases:
+
+```text
+i=1, back=1 -> slot 0  -> hidden1
+i=1, back=3 -> slot -2 -> hidden3
+i=1, back=7 -> slot -6 -> hidden7
+```
+
+Dahil visible store lamang ang raw helper, lahat ng tatlo ay walang value at lahat ay `EXPECTED_RED`.
+
+### Invocation-owned scar state
+
+Ang context ay nagtatago ng:
+- `legacyPriorI`;
+- `legacyPriorBack`;
+- `legacyPriorSlot`;
+- `legacyPriorValue`;
+- `legacyPriorProbeValue`;
+- Discovery 06 status at invocation count.
+
+### Hindi pa kasama
+
+Wala pang `priorPatch`, walang `hiddenK=1-slot`, at walang `hiddenByNearness` fallback sa Discovery 06. Hindi pa sinisimulan ang visible-drop grind logic o anumang Stage 13+ correction.
+
