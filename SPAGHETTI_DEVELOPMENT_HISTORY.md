@@ -1081,3 +1081,41 @@ Stage 50 nie zawiera occurrence-count patch.
 
 Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
 
+## Etap 51 — PATCH 25: occurrence count
+
+Historyczny `LegacyContiguousMonthDay` pozostaje fizycznie bez zmian.
+
+`MonthDayCompatibilityRoute` nadal zawsze wykonuje go jako pierwszy i zapisuje pełny ghost Discovery 25: year open day, target day, target position, month id, first occurrence position, first absolute day oraz błędny contiguous `dayInMonth`.
+
+Dodano `MonthDayOccurrencePatchWrapper`.
+
+Wrapper nie zmienia month id ani target position. Sprawdza, że month id z ghosta rzeczywiście znajduje się na target position, a następnie liczy wyłącznie:
+
+`sum(weaving(1:targetPosition1) == monthId)`.
+
+Wynik jest publikowany jako exact BigInt semantic `dayInMonth`.
+
+Nie jest liczona liczba wszystkich wystąpień miesiąca w całym roku — wyłącznie prefix kończący się na target day.
+
+Dla głównego witness Stage 50:
+
+`[1,1,2,3,2,1,3,2,1,2,3,3]`
+
+przy `yearOpenDay=1000` i `targetDay=1009`, fizyczny legacy ghost nadal zwraca `dayInMonth=9`, natomiast PATCH 25 publikuje occurrence count `4`.
+
+Dodatkowy prefix witness na position `6` potwierdza, że month 1 ma semantic `dayInMonth=3`, mimo że w całym roku występuje cztery razy.
+
+Gałąź zgodności jest również zachowana: na position `2` legacy contiguous day oraz occurrence count wynoszą oba `2`.
+
+Regression Stage 51 sprawdza wszystkie `12` pozycje witness weave. Oczekiwane occurrence-based dayInMonth values to:
+
+`[1,2,1,1,2,3,2,3,4,4,3,4]`.
+
+Dla każdej pozycji zachowywany jest dokładnie ten sam historyczny ghost, a publikowany month id pozostaje niezmieniony.
+
+Niezmieniony regression Stage 50 ma po tej zmianie przejść z EXPECTED_RED do GREEN.
+
+Stage 51 nie zmienia żadnej logiki przypisania dnia do roku ani semantyki opening/closing gates. Dopiero Stage 52 rozpocznie Discovery 26: closed opening gate.
+
+Ponowna weryfikacja w natywnym MATLAB-ie pozostaje odłożona do końcowego, zbiorczego cyklu uruchomień.
+

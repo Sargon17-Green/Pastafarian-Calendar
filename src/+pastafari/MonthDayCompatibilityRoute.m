@@ -1,20 +1,18 @@
 classdef MonthDayCompatibilityRoute
-    % Produkcyjna trasa Discovery 25.
+    % Produkcyjna trasa month/day po PATCH 25.
     %
-    % Stage 50 publikuje jeszcze historyczne contiguous-difference
-    % dayInMonth. Whole weave może jednak rozdzielać wystąpienia miesiąca.
+    % Najpierw zawsze wykonuje LegacyContiguousMonthDay i zachowuje pełny
+    % ghost Discovery 25. Następnie nadpisuje wyłącznie semantic dayInMonth
+    % prefix occurrence count wybranego month id.
     methods (Static)
         function [ctx, monthId, dayInMonth] = call( ...
                 ctx, weaving, yearOpenDay, targetDay)
             pastafari.ValidationManager.requireContext(ctx);
 
+            % Realna historyczna blizna Discovery 25.
             ghost = pastafari.LegacyContiguousMonthDay.compute( ...
                 weaving, yearOpenDay, targetDay);
 
-            ctx.phase = 'DISCOVERY_25';
-            ctx.subPhase = 25;
-            ctx.mode = 'CONTIGUOUS_MONTH_DAY';
-            ctx.status = 'LEGACY_PATH_ACTIVE';
             ctx.branchTrace{end + 1} = ...
                 'DISCOVERY_25_CONTIGUOUS_MONTH_DAY';
             ctx.metrics = pastafari.MetricsShell.bump( ...
@@ -29,16 +27,30 @@ classdef MonthDayCompatibilityRoute
             ctx.legacyContiguousMonthFirstPosition1 = ghost.firstPosition1;
             ctx.legacyContiguousMonthFirstDay = ghost.firstDay;
             ctx.legacyContiguousDayInMonth = ghost.dayInMonth;
+
+            [correctDay, reusedLegacy] = ...
+                pastafari.MonthDayOccurrencePatchWrapper.apply( ...
+                    weaving, ghost);
+
+            ctx.phase = 'PATCH_25';
+            ctx.subPhase = 25;
+            ctx.mode = 'MONTH_OCCURRENCE_COUNT_ACTIVE';
+            ctx.status = 'PATCHED_PATH_ACTIVE';
+            ctx.branchTrace{end + 1} = ...
+                'PATCH_25_OCCURRENCE_COUNT';
+            ctx.metrics = pastafari.MetricsShell.bump( ...
+                ctx.metrics, 'patch25.occurrenceCount.calls');
+
             ctx.monthAtTargetCandidate = ghost.monthId;
-            ctx.dayInMonthCandidate = ghost.dayInMonth;
+            ctx.dayInMonthCandidate = correctDay;
             ctx.diagnostics{end + 1} = sprintf( ...
-                ['Discovery 25 month=%d targetPosition=%s firstPosition=%s ', ...
-                 'legacyDayInMonth=%s przez różnicę dni.'], ...
+                ['PATCH 25 month=%d targetPosition=%s legacyDay=%s ', ...
+                 'occurrenceDay=%s reusedLegacy=%d.'], ...
                 ghost.monthId, char(ghost.targetPosition1), ...
-                char(ghost.firstPosition1), char(ghost.dayInMonth));
+                char(ghost.dayInMonth), char(correctDay), reusedLegacy);
 
             monthId = ghost.monthId;
-            dayInMonth = ghost.dayInMonth;
+            dayInMonth = correctDay;
         end
     end
 end
