@@ -21,7 +21,7 @@ Els topònims d'aquest catàleg queden fixats com `Lagaix`, `Accad`, `Èridu`, `
 | 5 | pensament |
 | 6 | quatre parts de nou |
 | 7 | Palguraix |
-| 8 | jonc |
+| 8 | papir |
 | 9 | ramell |
 | 10 | escorpí |
 | 11 | cendra |

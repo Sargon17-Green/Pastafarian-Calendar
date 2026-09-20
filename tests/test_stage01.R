@@ -50,6 +50,7 @@ run_stage01_tests <- function(root) {
   expect_true(source_catalog_validate(), 'validació del catàleg de llengua font')
   expect_identical(CUTLET_SOURCE_CATALOG$canonicalIndex, 1:17, 'índexs canònics de mandonguilles')
   expect_identical(MONTH_SOURCE_CATALOG$canonicalIndex, 1:47, 'índexs canònics de mesos')
+  expect_identical(cutlet_name_by_index(8L), 'papir', 'nom canònic precís del papir')
   expect_identical(cutlet_name_by_index(12L), 'blat', 'traducció semàntica de blat')
   expect_identical(month_name_by_index(41L), 'Babilònia', 'nom propi de Babilònia')
 
