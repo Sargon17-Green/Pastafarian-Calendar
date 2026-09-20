@@ -21,6 +21,7 @@ end
 to t.catalog
   t.require source.catalog.validp [La fonto-linguo katalogo devas havar 17 e 47 stabila indexi.]
   t.require equalp source.catalog.cutlet.name 6 [quar de non egala parti] [La sesma koteleto-nomo devas esar la Ido frazo por quar nonimi.]
+  t.require equalp source.catalog.cutlet.name 9 [grapo] [La nonesma koteleto-nomo devas esar la Ido-vorto grapo.]
   t.require equalp source.catalog.month.name 7 [tri de kin egala parti] [La sepesma monato-nomo devas esar la Ido frazo por tri kinimi.]
 end
 

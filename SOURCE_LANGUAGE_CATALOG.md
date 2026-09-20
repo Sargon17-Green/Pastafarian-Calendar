@@ -21,7 +21,7 @@ La traduko-regulo esas ca:
 | 6 | quar de non egala parti | traduko |
 | 7 | Palgurash | translitero |
 | 8 | papiriero | traduko |
-| 9 | grapolo | traduko |
+| 9 | grapo | traduko |
 | 10 | skorpiono | traduko |
 | 11 | cindro | traduko |
 | 12 | tritiko | traduko |
