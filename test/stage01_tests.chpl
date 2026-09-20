@@ -142,6 +142,8 @@ proc testOrderedFamilies() {
 proc testCatalog() {
   check(CUTLET_DOMAIN.size == 17, "каталог має 17 котлет");
   check(MONTH_DOMAIN.size == 47, "каталог має 47 місяців");
+  check(cutletNameByCanonicalIndex(9) == "скупчення",
+        "канонічний індекс 9 котлети означає загальне скупчення");
   check(cutletNameByCanonicalIndex(12) == "пшениця",
         "канонічний індекс 12 котлети означає пшеницю");
   check(monthNameByCanonicalIndex(44) == "сіль",
