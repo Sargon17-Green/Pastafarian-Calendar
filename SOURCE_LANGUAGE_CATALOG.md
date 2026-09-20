@@ -21,7 +21,7 @@ Pro duabus vocibus ficticiis huius catalogi soni vocalici signis vocalibus fonti
 | 5 | cogitatio |
 | 6 | quattuor partes ex novem |
 | 7 | Palguras |
-| 8 | cyperus |
+| 8 | papyrus |
 | 9 | racemus |
 | 10 | scorpio |
 | 11 | cinis |
