@@ -97,6 +97,8 @@ main(!IO) :-
         list_eq_z(entry_indices(Months), range_int(1, 47)), !IO),
     report("котлетын бүх эх мөр хоосон биш", strings_nonempty(Cutlets), !IO),
     report("сарын бүх эх мөр хоосон биш", strings_nonempty(Months), !IO),
+    report("ирвэсийн каноник нэр",
+        (if resolve(month, 9) = yes("Газрын бар") then yes else no), !IO),
     report("каталог хөлдсөн", (if catalog_is_frozen then yes else no), !IO),
 
     Ctx0 = new_context(F, F),

@@ -53,7 +53,7 @@ month_entries = [
     catalog_entry(6,  "Шүдний оо"),
     catalog_entry(7,  "Таван хэсгийн гурав"),
     catalog_entry(8,  "Каршумав"),
-    catalog_entry(9,  "Цоохор ирвэс"),
+    catalog_entry(9,  "Газрын бар"),
     catalog_entry(10, "Цагаан тугалга"),
     catalog_entry(11, "Манан"),
     catalog_entry(12, "Гүгэл"),
