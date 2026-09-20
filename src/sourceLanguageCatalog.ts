@@ -21,7 +21,7 @@ export const CUTLET_CATALOG = freezeEntries([
   { canonicalIndex: 5, text: "विचार", kind: "meaning" },
   { canonicalIndex: 6, text: "नऊपैकी चार भाग", kind: "meaning" },
   { canonicalIndex: 7, text: "पलगुरश", kind: "invented" },
-  { canonicalIndex: 8, text: "लव्हाळा", kind: "meaning" },
+  { canonicalIndex: 8, text: "पपायरस सेज", kind: "meaning" },
   { canonicalIndex: 9, text: "घड", kind: "meaning" },
   { canonicalIndex: 10, text: "विंचू", kind: "meaning" },
   { canonicalIndex: 11, text: "राख", kind: "meaning" },
@@ -30,7 +30,7 @@ export const CUTLET_CATALOG = freezeEntries([
   { canonicalIndex: 14, text: "हसू", kind: "meaning" },
   { canonicalIndex: 15, text: "अक्कद", kind: "proper" },
   { canonicalIndex: 16, text: "शिंग", kind: "meaning" },
-  { canonicalIndex: 17, text: "रिकामा घडा", kind: "meaning" }
+  { canonicalIndex: 17, text: "रिकामी काचपात्र", kind: "meaning" }
 ]);
 
 export const MONTH_CATALOG = freezeEntries([
@@ -42,7 +42,7 @@ export const MONTH_CATALOG = freezeEntries([
   { canonicalIndex: 6, text: "दातांची पेस्ट", kind: "meaning" },
   { canonicalIndex: 7, text: "पाचपैकी तीन भाग", kind: "meaning" },
   { canonicalIndex: 8, text: "खर्शुमव", kind: "invented" },
-  { canonicalIndex: 9, text: "वाघ", kind: "meaning" },
+  { canonicalIndex: 9, text: "बिबट्या", kind: "meaning" },
   { canonicalIndex: 10, text: "कथील", kind: "meaning" },
   { canonicalIndex: 11, text: "धुके", kind: "meaning" },
   { canonicalIndex: 12, text: "लोबान", kind: "meaning" },
@@ -64,12 +64,12 @@ export const MONTH_CATALOG = freezeEntries([
   { canonicalIndex: 28, text: "निनेवे", kind: "proper" },
   { canonicalIndex: 29, text: "बेडूक", kind: "meaning" },
   { canonicalIndex: 30, text: "डांबर", kind: "meaning" },
-  { canonicalIndex: 31, text: "मेणबत्ती", kind: "meaning" },
+  { canonicalIndex: 31, text: "दिवा", kind: "meaning" },
   { canonicalIndex: 32, text: "बंद दरवाजा", kind: "meaning" },
   { canonicalIndex: 33, text: "तीळ", kind: "meaning" },
   { canonicalIndex: 34, text: "मानेचा मागचा भाग", kind: "meaning" },
   { canonicalIndex: 35, text: "चांदी", kind: "meaning" },
-  { canonicalIndex: 36, text: "लिली", kind: "meaning" },
+  { canonicalIndex: 36, text: "सुसा", kind: "proper" },
   { canonicalIndex: 37, text: "वादळ", kind: "meaning" },
   { canonicalIndex: 38, text: "गाढव", kind: "meaning" },
   { canonicalIndex: 39, text: "पीठ", kind: "meaning" },
