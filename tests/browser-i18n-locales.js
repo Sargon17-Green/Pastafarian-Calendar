@@ -189,14 +189,14 @@ assert.strictEqual(i18n.translate(ar, 'cooking.term.stone'), 'حجر');
 // Regression witnesses: current semantic identities, including names that differ
 // from the pinned old positional catalog.
 const witnesses = [
-  ['cutlet', 'larice', ['larice', 'Larch', '\u05D0\u05E8\u05D6\u05D9\u05EA', 'لاركس', 'Лиственница', 'Mélèze', 'Lärche', 'Alerce', 'Larice', 'Modřín']],
+  ['cutlet', 'Lagash', ['Lagash', 'Lagash', 'לגש', 'لَجَش', 'Лагаш', 'Lagash', 'Lagasch', 'Lagash', 'Lagash', 'Lagaš']],
   ['cutlet', 'Palgurash', ['Palgurash', 'Palgursh', '\u05E4\u05B7\u05BC\u05DC\u05B0\u05D2\u05BC\u05D5\u05BC\u05E8\u05B0\u05E9\u05C1', 'بالغورش', 'Палгурш', 'Palgursh', 'Palgursh', 'Palgursh', 'Palgursh', 'Palgursh']],
   ['cutlet', 'papirus', ['papirus', 'Papyrus', '\u05E4\u05E4\u05D9\u05E8\u05D5\u05E1', 'بردي', 'Папирус', 'Papyrus', 'Papyrus', 'Papiro', 'Papiro', 'Papyrus']],
-  ['month', 'Karshumab', ['Karshumab', 'Karshumb', '\u05DB\u05B7\u05BC\u05E8\u05B0\u05E9\u05C1\u05D5\u05BC\u05DE\u05B0\u05D1', 'كارشومب', 'Каршумб', 'Karshumb', 'Karshumb', 'Karshumb', 'Karshumb', 'Karshumb']],
+  ['month', 'Karshumav', ['Karshumav', 'Karshumav', 'כַּרְשׁוּמַב', 'كَرْشُومَڤ', 'Каршумав', 'Karshumav', 'Karschumav', 'Karshumav', 'Karshumav', 'Karšumav']],
   ['month', 'leopard', ['leopard', 'Leopard', '\u05E0\u05DE\u05E8', 'نمر', 'Леопард', 'Léopard', 'Leopard', 'Leopardo', 'Leopardo', 'Leopard']],
-  ['month', 'candel', ['candel', 'Candle', '\u05E0\u05E8', 'شمعة', 'Свеча', 'Bougie', 'Kerze', 'Vela', 'Candela', 'Svíčka']],
-  ['month', 'lilie', ['lilie', 'Lily', '\u05E9\u05D5\u05E9\u05DF', 'زنبق', 'Лилия', 'Lis', 'Lilie', 'Lirio', 'Giglio', 'Lilie']],
-  ['month', 'gudron', ['gudron', 'Tar', '\u05D6\u05E4\u05EA', 'قطران', 'Гудрон', 'Goudron', 'Teer', 'Alquitrán', 'Catrame', 'Dehet']],
+  ['month', 'lampe', ['lampe', 'Lamp', 'נר', 'سِرَاج', 'лампа', 'lampe', 'Lampe', 'Lámpara', 'lampada', 'lampa']],
+  ['month', 'Susa', ['Susa', 'Susa', 'שושן', 'سُوسَا', 'Сузы', 'Suse', 'Susa', 'Susa', 'Susa', 'Súsy']],
+  ['month', 'pech', ['pech', 'Pitch', 'זפת', 'قَار', 'пек', 'poix', 'Pech', 'Brea', 'bitume', 'smůla']],
   ['month', 'oliban', ['oliban', 'Frankincense', '\u05DC\u05D1\u05D5\u05E0\u05D4', 'لبان', 'Ладан', 'Oliban', 'Weihrauch', 'Olíbano', 'Olibano', 'Kadidlo']],
 ];
 const locales = [ie, en, he, ar, ru, fr, de, es, it, cs];

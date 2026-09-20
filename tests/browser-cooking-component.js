@@ -235,7 +235,7 @@ function sampleTrace() {
     inputs: Object.freeze({ calculationDay: '-15055671', targetDay: '-15055671' }),
     finalResult: Object.freeze({
       year: '5001',
-      cutlet: Object.freeze({ canonicalIndex: 4, sourceName: 'larice' }),
+      cutlet: Object.freeze({ canonicalIndex: 4, sourceName: 'Lagash' }),
       dayInCutlet: '762',
       month: Object.freeze({ canonicalIndex: 12, sourceName: 'oliban' }),
       dayInMonth: '105',
@@ -283,7 +283,7 @@ function sampleTrace() {
           partitionSelection: Object.freeze({ familyCount: '11', selectedRank: '1', requiredInternalGateOffset: '0' }),
           nameStream: stream('22', '1'),
           nameSelection: Object.freeze({ familyCount: '17', selectedRank: '4' }),
-          items: Object.freeze([Object.freeze({ sourceName: 'larice', nameCanonicalIndex: 4, openGateIndex: '-1', closeGateIndex: '1', firstDay: '-15055671', lastDay: '-15055294' })]),
+          items: Object.freeze([Object.freeze({ sourceName: 'Lagash', nameCanonicalIndex: 4, openGateIndex: '-1', closeGateIndex: '1', firstDay: '-15055671', lastDay: '-15055294' })]),
         }),
         months: Object.freeze({
           count: 1,
@@ -404,7 +404,7 @@ async function flush() {
     'year-5000': ['(open,close]', 'YEAR_5000-semantic', '5000'],
     'year-walk': ['שנת המקור', 'שנת היעד', 'sharedDay', '5001'],
     'structure-sauce': ['קערות התחלה', 'prime', 'bowlsAfterDrops', 'finalBowls', 'calculationDay', 'stoneTableRef'],
-    cutlets: ['cutlet-partition-semantic', 'cutlet-names-distinct-rank', 'ארזית', 'sourceName'],
+    cutlets: ['cutlet-partition-semantic', 'cutlet-names-distinct-rank', 'לגש', 'sourceName'],
     months: ['month-lengths', 'month-weaving', 'month-names-distinct-rank', 'לבונה', 'positionInYear', '1 / 3'],
     position: ['השנה הסופית', 'targetPositionInYear', '5001'],
     result: ['שנה', 'קציצה', 'יום בקציצה', 'חודש', 'יום בחודש', 'ארכאולוגיה היסטורית', 'stage57-patch26-round-trip-ghost'],

@@ -61,12 +61,12 @@ for (const locale of localeData.locales) {
   assert.strictEqual(Object.keys(locale.calendar.months).length, 47);
 }
 const english = localeData.locales.find((locale) => locale.code === 'en');
-assert.strictEqual(english.calendar.cutlets.larice, 'Larch');
+assert.strictEqual(english.calendar.cutlets.Lagash, 'Lagash');
 assert.strictEqual(english.calendar.months.leopard, 'Leopard');
-assert.strictEqual(english.calendar.months.candel, 'Candle');
-assert.strictEqual(english.calendar.months.lilie, 'Lily');
+assert.strictEqual(english.calendar.months.lampe, 'Lamp');
+assert.strictEqual(english.calendar.months.Susa, 'Susa');
 const french = localeData.locales.find((locale) => locale.code === 'fr');
-assert.strictEqual(french.calendar.cutlets.larice, 'Mélèze');
+assert.strictEqual(french.calendar.cutlets.Lagash, 'Lagash');
 assert.strictEqual(french.calendar.months.leopard, 'Léopard');
 assert.strictEqual(localeData.locales.length, 10);
 assert(localeSource.includes('no-positional-remap'));

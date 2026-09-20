@@ -16,11 +16,11 @@
   // neighbouring indices diverge sharply instead of collapsing into pastels.
   const MONTH_THEME_NAMES = Object.freeze([
     'argile', 'granat', 'cubit', 'invidie', 'Eridu', 'dent-pasta',
-    'tri partes de quin', 'Karshumab', 'leopard', 'stann', 'brume', 'oliban',
+    'tri partes de quin', 'Karshumav', 'leopard', 'stann', 'brume', 'oliban',
     'fus', 'costa', 'carob', 'Uruk', 'honte', 'camel', 'cupr', 'pute',
     'vitelle', 'stelle', 'mel', 'splen', 'calcari', 'joy', 'fig', 'Ninive',
-    'ran', 'gudron', 'candel', 'li cludet porta', 'sesam', 'nuca', 'argent',
-    'lilie', 'tempeste', 'asin', 'farine', 'regret', 'Babylon', 'lingue',
+    'ran', 'pech', 'lampe', 'li cludet porta', 'sesam', 'nuca', 'argent',
+    'Susa', 'tempeste', 'asin', 'farine', 'regret', 'Babylon', 'lingue',
     'lin', 'sal', 'pir', 'arc', 'sand',
   ]);
   const MONTH_THEME_INDEX = new Map(MONTH_THEME_NAMES.map((name, index) => [name, index]));

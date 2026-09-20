@@ -217,7 +217,7 @@ function valueFor(targetJdn) {
   const even = BigInt(targetJdn) % 2n === 0n;
   return Object.freeze({
     year: '5000',
-    cutletName: even ? 'larice' : 'bronze',
+    cutletName: even ? 'Lagash' : 'bronze',
     dayInCutlet: 1,
     monthName: even ? 'leopard' : 'argile',
     dayInMonth: 1,
@@ -417,7 +417,7 @@ async function flush() {
   language.setAttribute('lang', 'he-IL');
   assert.strictEqual(language.getAttribute('dir'), 'rtl');
   assert.strictEqual(language.value.cutletName, rawName);
-  if (rawName === 'larice') assert(language._els.summary.textContent.includes('\u05D0\u05E8\u05D6\u05D9\u05EA'));
+  if (rawName === 'Lagash') assert(language._els.summary.textContent.includes('\u05DC\u05D2\u05E9'));
 
   // Back to today resets both externally visible date inputs and coalesces the
   // resulting refresh through the connection epoch queue.
@@ -448,7 +448,7 @@ async function flush() {
   themed._locale = sandbox.PastafariBrowserInternal.i18n.resolveLocale('en', []);
   themed._targetJdn = 100n;
   const themeDay = Object.freeze({
-    jdn: 100n, year: '5000', cutletName: 'larice', dayInCutlet: 8, monthName: 'leopard', dayInMonth: 3,
+    jdn: 100n, year: '5000', cutletName: 'Lagash', dayInCutlet: 8, monthName: 'leopard', dayInMonth: 3,
   });
   themed._value = Object.freeze({
     year: themeDay.year,
@@ -487,7 +487,7 @@ async function flush() {
   for (let index = 0; index < monthNames.length; index += 1) {
     const monthName = monthNames[index];
     const themedRun = themed._renderMonthRun([Object.freeze({
-      jdn: BigInt(1000 + index), year: '5000', cutletName: 'larice', dayInCutlet: index + 1,
+      jdn: BigInt(1000 + index), year: '5000', cutletName: 'Lagash', dayInCutlet: index + 1,
       monthName, dayInMonth: 1,
     })]);
     backgrounds.add(themedRun.style.values.get('--month-bg'));
@@ -735,7 +735,7 @@ async function flush() {
   sharedService = {
     async convert() { return witnessValue; },
     async getCutletView() {
-      return Object.freeze({ ...rebasedView, cutletName: 'larice' });
+      return Object.freeze({ ...rebasedView, cutletName: 'Lagash' });
     },
     async retry() {},
   };
