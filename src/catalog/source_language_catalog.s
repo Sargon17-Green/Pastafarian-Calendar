@@ -4,7 +4,7 @@
 .global source_catalog_version
 source_catalog_version: .asciz "1.0.0"
 
-cutlet_01: .asciz "ⲭⲁⲗⲕⲟⲥ"
+cutlet_01: .asciz "ⲃⲁⲣⲱⲧ"
 cutlet_02: .asciz "ⲃⲁϣⲟⲣ"
 cutlet_03: .asciz "ⲛⲉⲫⲣⲟⲥ"
 cutlet_04: .asciz "Ⲗⲁⲅⲁϣ"
@@ -40,7 +40,7 @@ month_15: .asciz "ⲭⲁⲣⲟⲩⲡⲓⲟⲛ"
 month_16: .asciz "Ⲟⲩⲣⲟⲩⲕ"
 month_17: .asciz "ϣⲓⲡⲉ"
 month_18: .asciz "ⲕⲁⲙⲏⲗⲟⲥ"
-month_19: .asciz "ⲭⲁⲗⲕⲟⲥ"
+month_19: .asciz "ϩⲟⲙⲛⲧ"
 month_20: .asciz "ⲫⲣⲉⲁⲣ"
 month_21: .asciz "ⲗⲉⲕⲓⲑⲟⲥ"
 month_22: .asciz "ⲥⲓⲟⲩ"

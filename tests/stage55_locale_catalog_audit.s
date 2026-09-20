@@ -14,6 +14,8 @@ green_token: .ascii "STAGE55_LOCALE_CATALOG_GREEN\n"
 green_len=.-green_token
 fail_token: .ascii "STAGE55_LOCALE_CATALOG_FAIL\n"
 fail_len=.-fail_token
+expected_bronze: .asciz "ⲃⲁⲣⲱⲧ"
+expected_copper: .asciz "ϩⲟⲙⲛⲧ"
 .section .text
 .global _start
 .global __wrap_catalog_get_cutlet
@@ -47,6 +49,23 @@ __wrap_catalog_get_month:
 .Lwm_bad:
     xor eax,eax
     ret
+.Lstreq:
+.Lstreq_loop:
+    mov al,byte ptr [rdi]
+    mov dl,byte ptr [rsi]
+    cmp al,dl
+    jne .Lstreq_no
+    test al,al
+    je .Lstreq_yes
+    inc rdi
+    inc rsi
+    jmp .Lstreq_loop
+.Lstreq_yes:
+    mov eax,1
+    ret
+.Lstreq_no:
+    xor eax,eax
+    ret
 _start:
     call catalog_validate
     cmp eax,1
@@ -56,6 +75,32 @@ _start:
     jne .Lfail
     call catalog_month_count
     cmp eax,47
+    jne .Lfail
+
+    mov rdi,1
+    call __real_catalog_get_cutlet
+    test rax,rax
+    je .Lfail
+    mov r15,rax
+    mov rdi,rax
+    lea rsi,[rip+expected_bronze]
+    call .Lstreq
+    test eax,eax
+    je .Lfail
+    mov rdi,19
+    call __real_catalog_get_month
+    test rax,rax
+    je .Lfail
+    mov r14,rax
+    mov rdi,rax
+    lea rsi,[rip+expected_copper]
+    call .Lstreq
+    test eax,eax
+    je .Lfail
+    mov rdi,r15
+    mov rsi,r14
+    call .Lstreq
+    test eax,eax
     jne .Lfail
 
     mov r12,1
