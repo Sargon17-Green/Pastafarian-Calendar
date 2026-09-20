@@ -14,7 +14,7 @@ Adi mənalı isim və ifadələr Azərbaycan dilində mənasına görə verilir.
 
 Tarixi yer adlarında Azərbaycan dilində işlək formaya üstünlük verilir: `Laqaş`, `Akkad`, `Eridu`, `Uruk`, `Ninova`, `Babil`.
 
-Uydurma və mənasız səs birləşmələrində hərf-səs uyğunluğu sabit saxlanılır: p→`p`, b→`b`, g→`g`, r→`r`, ş→`ş`, l→`l`, m→`m`; açıq `a` səsi `a`, `u` səsi `u` ilə yazılır. Mənbədə açıq `a` ilə verilən heca `a` kimi saxlanılır. Buna görə iki uydurma forma `Palguraş` və `Karşumab` kimi dondurulub. Bu formalar üçün ayrıca məna uydurulmur.
+Uydurma və mənasız səs birləşmələrində hərf-səs uyğunluğu sabit saxlanılır: p→`p`, b→`b`, v→`v`, g→`g`, r→`r`, ş→`ş`, l→`l`, m→`m`; açıq `a` səsi `a`, `u` səsi `u` ilə yazılır. Mənbədə açıq `a` ilə verilən heca `a` kimi saxlanılır. Buna görə iki uydurma forma `Palguraş` və `Karşumav` kimi dondurulub. Bu formalar üçün ayrıca məna uydurulmur.
 
 46-cı ay adı mənbədə çoxmənalı ümumi isimdir. Bu kataloq konkret isim mənasını `yay` kimi dondurur. Bu seçim yalnız təqdimat mətnidir; `canonical_index=46` normativ mənanı daşıyır və mətn sonradan yalnız açıq spesifikasiya dəyişikliyi ilə dəyişə bilər.
 
@@ -47,12 +47,12 @@ Uydurma və mənasız səs birləşmələrində hərf-səs uyğunluğu sabit sax
 | 1 | gil |
 | 2 | nar |
 | 3 | dirsək |
-| 4 | qısqanclıq |
+| 4 | həsəd |
 | 5 | Eridu |
 | 6 | diş məcunu |
 | 7 | beşin üç hissəsi |
-| 8 | Karşumab |
-| 9 | pələng |
+| 8 | Karşumav |
+| 9 | bəbir |
 | 10 | qalay |
 | 11 | duman |
 | 12 | kündür |
@@ -73,13 +73,13 @@ Uydurma və mənasız səs birləşmələrində hərf-səs uyğunluğu sabit sax
 | 27 | əncir |
 | 28 | Ninova |
 | 29 | qurbağa |
-| 30 | qatran |
-| 31 | şam |
+| 30 | zift |
+| 31 | lampa |
 | 32 | bağlı qapı |
 | 33 | küncüt |
 | 34 | ənsə |
 | 35 | gümüş |
-| 36 | zanbaq |
+| 36 | Susa |
 | 37 | fırtına |
 | 38 | eşşək |
 | 39 | un |
