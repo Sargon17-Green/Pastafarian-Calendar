@@ -33,12 +33,12 @@ begin
   CutletNames[1] := 'bronze';
   CutletNames[2] := 'raposa';
   CutletNames[3] := 'rim';
-  CutletNames[4] := 'lárix';
+  CutletNames[4] := 'Lagash';
   CutletNames[5] := 'pensamento';
   CutletNames[6] := 'quatro partes de nove';
   CutletNames[7] := 'Palgurash';
-  CutletNames[8] := 'junco';
-  CutletNames[9] := 'cacho';
+  CutletNames[8] := 'papiro';
+  CutletNames[9] := 'aglomerado';
   CutletNames[10] := 'escorpião';
   CutletNames[11] := 'cinza';
   CutletNames[12] := 'trigo';
@@ -46,7 +46,7 @@ begin
   CutletNames[14] := 'riso';
   CutletNames[15] := 'Acade';
   CutletNames[16] := 'chifre';
-  CutletNames[17] := 'o jarro vazio';
+  CutletNames[17] := 'o boião vazio';
 
   MonthNames[1] := 'barro';
   MonthNames[2] := 'romã';
@@ -78,16 +78,16 @@ begin
   MonthNames[28] := 'Nínive';
   MonthNames[29] := 'rã';
   MonthNames[30] := 'piche';
-  MonthNames[31] := 'vela';
+  MonthNames[31] := 'lâmpada';
   MonthNames[32] := 'a porta fechada';
   MonthNames[33] := 'gergelim';
   MonthNames[34] := 'nuca';
   MonthNames[35] := 'prata';
-  MonthNames[36] := 'lírio';
+  MonthNames[36] := 'Susa';
   MonthNames[37] := 'tempestade';
   MonthNames[38] := 'burro';
   MonthNames[39] := 'farinha';
-  MonthNames[40] := 'arrependimento';
+  MonthNames[40] := 'pesar';
   MonthNames[41] := 'Babilónia';
   MonthNames[42] := 'língua';
   MonthNames[43] := 'linho';

@@ -17,12 +17,12 @@ A ordem normativa é exclusivamente o `canonicalIndex`. A comparação alfabéti
 | 1 | bronze |
 | 2 | raposa |
 | 3 | rim |
-| 4 | lárix |
+| 4 | Lagash |
 | 5 | pensamento |
 | 6 | quatro partes de nove |
 | 7 | Palgurash |
-| 8 | junco |
-| 9 | cacho |
+| 8 | papiro |
+| 9 | aglomerado |
 | 10 | escorpião |
 | 11 | cinza |
 | 12 | trigo |
@@ -30,7 +30,7 @@ A ordem normativa é exclusivamente o `canonicalIndex`. A comparação alfabéti
 | 14 | riso |
 | 15 | Acade |
 | 16 | chifre |
-| 17 | o jarro vazio |
+| 17 | o boião vazio |
 
 ## Meses
 
@@ -66,16 +66,16 @@ A ordem normativa é exclusivamente o `canonicalIndex`. A comparação alfabéti
 | 28 | Nínive |
 | 29 | rã |
 | 30 | piche |
-| 31 | vela |
+| 31 | lâmpada |
 | 32 | a porta fechada |
 | 33 | gergelim |
 | 34 | nuca |
 | 35 | prata |
-| 36 | lírio |
+| 36 | Susa |
 | 37 | tempestade |
 | 38 | burro |
 | 39 | farinha |
-| 40 | arrependimento |
+| 40 | pesar |
 | 41 | Babilónia |
 | 42 | língua |
 | 43 | linho |
