@@ -19,7 +19,7 @@ inline constexpr std::array<CatalogEntry, 17> CUTLET_SOURCE_CATALOG{{
     {5, "cogitatio"},
     {6, "quattuor partes ex novem"},
     {7, "Palguras"},
-    {8, "cyperus"},
+    {8, "papyrus"},
     {9, "racemus"},
     {10, "scorpio"},
     {11, "cinis"},

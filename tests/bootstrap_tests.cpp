@@ -135,6 +135,7 @@ int main(int argc, char** argv) {
 
         require(pastafari::CUTLET_SOURCE_CATALOG.size() == 17, "catalogus segmentorum non septemdecim nomina habet");
         require(pastafari::MONTH_SOURCE_CATALOG.size() == 47, "catalogus mensium non quadraginta septem nomina habet");
+        require(pastafari::cutletSourceName(8) == "papyrus", "octavum nomen segmenti papyrus esse debet");
         for (std::size_t i = 0; i < pastafari::CUTLET_SOURCE_CATALOG.size(); ++i) {
             require(pastafari::CUTLET_SOURCE_CATALOG[i].canonicalIndex == i + 1,
                     "index canonicus segmenti falsus est");
