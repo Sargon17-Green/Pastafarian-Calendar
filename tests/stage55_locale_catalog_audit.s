@@ -16,6 +16,7 @@ fail_token: .ascii "STAGE55_LOCALE_CATALOG_FAIL\n"
 fail_len=.-fail_token
 expected_bronze: .asciz "ⲃⲁⲣⲱⲧ"
 expected_copper: .asciz "ϩⲟⲙⲛⲧ"
+expected_cluster: .asciz "ⲥⲱⲟⲩϩ"
 .section .text
 .global _start
 .global __wrap_catalog_get_cutlet
@@ -102,6 +103,16 @@ _start:
     call .Lstreq
     test eax,eax
     jne .Lfail
+
+    mov rdi,9
+    call __real_catalog_get_cutlet
+    test rax,rax
+    je .Lfail
+    mov rdi,rax
+    lea rsi,[rip+expected_cluster]
+    call .Lstreq
+    test eax,eax
+    je .Lfail
 
     mov r12,1
 .Lcut_outer:
