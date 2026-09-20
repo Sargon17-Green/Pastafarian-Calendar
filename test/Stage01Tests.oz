@@ -64,7 +64,7 @@ define
       {AssertEqual monthCount Catalog.monthCount 47}
       {AssertEqual firstCutletName {Catalog.cutletName 1} "bronca"}
       {AssertEqual wheatCutletName {Catalog.cutletName 12} "pšenica"}
-      {AssertEqual emptyJugCutletName {Catalog.cutletName 17} "prazni vrč"}
+      {AssertEqual emptyJugCutletName {Catalog.cutletName 17} "prazna tegla"}
       {AssertEqual firstMonthName {Catalog.monthName 1} "glina"}
       {AssertEqual lastMonthName {Catalog.monthName 47} "pijesak"}
 

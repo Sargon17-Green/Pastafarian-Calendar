@@ -15,7 +15,7 @@ Nazivi s običnim leksičkim značenjem prevedeni su po značenju. Vlastita imen
 | 3 | bubreg |
 | 4 | Lagaš |
 | 5 | misao |
-| 6 | četiri devetine |
+| 6 | četiri dijela od devet |
 | 7 | Palguraš |
 | 8 | papirus |
 | 9 | grozd |
@@ -26,7 +26,7 @@ Nazivi s običnim leksičkim značenjem prevedeni su po značenju. Vlastita imen
 | 14 | smijeh |
 | 15 | Akad |
 | 16 | rog |
-| 17 | prazni vrč |
+| 17 | prazna tegla |
 
 ## Mjeseci
 
@@ -38,7 +38,7 @@ Nazivi s običnim leksičkim značenjem prevedeni su po značenju. Vlastita imen
 | 4 | zavist |
 | 5 | Eridu |
 | 6 | pasta za zube |
-| 7 | tri petine |
+| 7 | tri dijela od pet |
 | 8 | Karšumav |
 | 9 | leopard |
 | 10 | kositar |
@@ -62,12 +62,12 @@ Nazivi s običnim leksičkim značenjem prevedeni su po značenju. Vlastita imen
 | 28 | Niniva |
 | 29 | žaba |
 | 30 | katran |
-| 31 | svijeća |
+| 31 | svjetiljka |
 | 32 | zatvorena vrata |
 | 33 | sezam |
 | 34 | zatiljak |
 | 35 | srebro |
-| 36 | ljiljan |
+| 36 | Susa |
 | 37 | oluja |
 | 38 | magarac |
 | 39 | brašno |
