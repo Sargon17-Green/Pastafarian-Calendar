@@ -8,7 +8,7 @@ Katalog ini beku selepas Stage 1. Urutan normatif ditentukan hanya oleh `canonic
 
 Nama yang mempunyai makna leksikal diterjemahkan mengikut maknanya. Contohnya, nama yang bermakna gandum menjadi `gandum`, garam menjadi `garam`, sungai menjadi `sungai`, dan pintu tertutup menjadi `pintu tertutup`.
 
-Bagi dua entri yang boleh membawa lebih daripada satu nuansa dalam sumber, bootstrap ini membekukan tafsiran leksikal berikut: `canonicalIndex` 1 diperlakukan sebagai gangsa dan `canonicalIndex` 8 diperlakukan sebagai Papyrus Sedge. Tafsiran ini menjadi sebahagian daripada katalog Stage 1 dan tidak boleh diubah pada tahap kemudian tanpa perubahan spesifikasi yang jelas.
+Bagi dua entri yang boleh membawa lebih daripada satu nuansa dalam sumber, bootstrap ini membekukan tafsiran leksikal berikut: `canonicalIndex` 1 diperlakukan sebagai gangsa dan `canonicalIndex` 8 diperlakukan sebagai Papyrus Sedge, dengan nama paparan Melayu `papirus`. Nama leksikal lain juga diterjemahkan ke Bahasa Melayu; khususnya Pitch ialah `gegala` dan Lamp ialah `lampu`. Tafsiran ini menjadi sebahagian daripada katalog Stage 1 dan tidak boleh diubah pada tahap kemudian tanpa perubahan spesifikasi yang jelas.
 
 ## Kaedah transliterasi
 
