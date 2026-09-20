@@ -45,6 +45,7 @@ suite "Forrásnyelvi katalógus":
     for entry in MonthCatalog:
       check entry.text notin monthTexts
       monthTexts.incl(entry.text)
+    check cutletText(8) == "papiruszsás"
     check cutletText(12) == "búza"
     check monthText(6) == "fogkrém"
     check monthText(44) == "só"

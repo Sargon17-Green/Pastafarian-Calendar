@@ -27,7 +27,7 @@ A katalógus szövege az 1. szakasz után specifikációmódosítás nélkül ne
 | 5 | gondolat |
 | 6 | kilencből négy rész |
 | 7 | Palguras |
-| 8 | sás |
+| 8 | papiruszsás |
 | 9 | fürt |
 | 10 | skorpió |
 | 11 | hamu |

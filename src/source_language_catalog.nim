@@ -14,7 +14,7 @@ const
     CatalogEntry(canonicalIndex: 5, text: "gondolat"),
     CatalogEntry(canonicalIndex: 6, text: "kilencből négy rész"),
     CatalogEntry(canonicalIndex: 7, text: "Palguras"),
-    CatalogEntry(canonicalIndex: 8, text: "sás"),
+    CatalogEntry(canonicalIndex: 8, text: "papiruszsás"),
     CatalogEntry(canonicalIndex: 9, text: "fürt"),
     CatalogEntry(canonicalIndex: 10, text: "skorpió"),
     CatalogEntry(canonicalIndex: 11, text: "hamu"),
