@@ -27,10 +27,10 @@ my %month_seen;
 $month_seen{$_->{source}}++ for @$months;
 is(scalar(keys %month_seen),47,'月份名稱沒有重複顯示字串');
 
-is(cutlet_name_by_index(6),'九分之四','完整分數肉排名稱按語意翻譯');
+is(cutlet_name_by_index(6),'九份中的四份','完整分數肉排名稱按語意翻譯');
 is(cutlet_name_by_index(12),'小麥','小麥名稱使用語意翻譯');
 is(cutlet_name_by_index(15),'阿卡德','阿卡德使用固定地名轉寫');
-is(month_name_by_index(7),'五分之三','完整分數月份名稱按語意翻譯');
+is(month_name_by_index(7),'五份中的三份','完整分數月份名稱按語意翻譯');
 is(month_name_by_index(41),'巴比倫','巴比倫使用固定地名名稱');
 is(month_name_by_index(47),'沙','最後一個月份名稱保留固定規範索引');
 
