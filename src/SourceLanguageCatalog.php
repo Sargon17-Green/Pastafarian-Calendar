@@ -40,7 +40,7 @@ final class SourceLanguageCatalog
         5 => 'Eridu',
         6 => 'ubat gigi',
         7 => 'tiga bahagian daripada lima',
-        8 => 'Karsyumab',
+        8 => 'Karsyumav',
         9 => 'harimau bintang',
         10 => 'timah',
         11 => 'kabus',

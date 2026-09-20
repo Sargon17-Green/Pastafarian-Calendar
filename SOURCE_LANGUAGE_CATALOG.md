@@ -14,7 +14,7 @@ Bagi dua entri yang boleh membawa lebih daripada satu nuansa dalam sumber, boots
 
 Nama tempat sejarah yang mempunyai ejaan Latin konvensional dikekalkan dengan ejaan katalog tetap: `Lagash`, `Akkad`, `Eridu`, `Uruk`, `Nineveh` dan `Babylon`.
 
-Bagi nama ciptaan yang tidak mempunyai makna leksikal, transliterasi menggunakan ejaan Rumi yang tetap. Bunyi /ʃ/ ditulis `sy`; oleh itu bentuk katalog ialah `Palgurasy` dan `Karsyumab`. Huruf vokal dikekalkan mengikut bentuk sumber yang dibekukan dalam katalog. Kaedah ini tidak digunakan untuk menentukan urutan normatif; ia hanya menghasilkan rentetan paparan bagi indeks yang sudah dipilih.
+Bagi nama ciptaan yang tidak mempunyai makna leksikal, transliterasi menggunakan ejaan Rumi yang tetap. Bunyi /ʃ/ ditulis `sy`; oleh itu bentuk katalog ialah `Palgurasy` dan `Karsyumav`. Huruf vokal dikekalkan mengikut bentuk sumber yang dibekukan dalam katalog. Kaedah ini tidak digunakan untuk menentukan urutan normatif; ia hanya menghasilkan rentetan paparan bagi indeks yang sudah dipilih.
 
 ## Jaminan indeks
 
