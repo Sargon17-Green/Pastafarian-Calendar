@@ -123,6 +123,7 @@ testCatalog = do
   assertEqual "indexy měsíců jsou přesně 1 až 47" [1..47] monthIndices
   assertEqual "indexy kotlet se neopakují" 17 (length (nub cutletIndices))
   assertEqual "indexy měsíců se neopakují" 47 (length (nub monthIndices))
+  assertEqual "papyrusový šáchor je osmá kotleta" (Just "šáchor papírodárný") (cutletNameByIndex 8)
   assertEqual "pšenice je dvanáctá kotleta" (Just "pšenice") (cutletNameByIndex 12)
   assertEqual "sůl je čtyřicátý čtvrtý měsíc" (Just "sůl") (monthNameByIndex 44)
   assertEqual "verze katalogu" "cs-stage01-v1" catalogFrozenVersion

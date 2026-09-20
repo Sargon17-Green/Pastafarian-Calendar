@@ -26,7 +26,7 @@ cutletCatalog =
   , CatalogEntry 5 "myšlenka"
   , CatalogEntry 6 "čtyři části z devíti"
   , CatalogEntry 7 "Palguraš"
-  , CatalogEntry 8 "šáchor"
+  , CatalogEntry 8 "šáchor papírodárný"
   , CatalogEntry 9 "hrozen"
   , CatalogEntry 10 "štír"
   , CatalogEntry 11 "popel"
