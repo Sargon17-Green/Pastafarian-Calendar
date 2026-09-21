@@ -1,0 +1,26 @@
+name: Canonical Names Lock
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify canonical names lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r expected path; do
+            [ -n "$expected" ] || continue
+            actual="$(git cat-file blob "HEAD:$path" | sha256sum | cut -d' ' -f1)"
+            if [ "$actual" != "$expected" ]; then
+              echo "::error file=$path::Canonical name lock mismatch"
+              exit 1
+            fi
+          done < CANONICAL_NAMES_LOCK.sha256
