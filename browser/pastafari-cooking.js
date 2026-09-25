@@ -274,15 +274,18 @@
           }
           .kv {
             display: grid;
-            grid-template-columns: minmax(9rem, 13rem) minmax(0, 1fr);
+            grid-template-columns: minmax(12rem, 22rem) minmax(0, 1fr);
             gap: .45rem 1rem;
             margin: 0;
           }
           .kv dt {
+            min-width: 0;
             color: var(--muted);
             font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
             font-size: .86em;
             font-weight: 800;
+            overflow-wrap: anywhere;
+            word-break: break-word;
           }
           .kv dd {
             min-width: 0;
