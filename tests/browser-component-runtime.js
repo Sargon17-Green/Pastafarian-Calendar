@@ -321,6 +321,9 @@ async function flush() {
   };
   const race = new PastafariDateElement();
   race._primeAdjacent = () => {};
+  race._showError = (error) => {
+    console.log('RACE_REFRESH_ERROR: ' + (error && error.stack ? error.stack : String(error)));
+  };
   race.setAttribute('date', '2026-09-02');
   race.connectedCallback();
   await flush();
