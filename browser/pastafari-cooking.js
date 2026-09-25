@@ -129,14 +129,20 @@
             --accent: #9d3825;
             --accent-dark: #672013;
             --focus: #0068c9;
-            display: block;
-            width: 100%;
-            margin-block: clamp(1.25rem, 3vw, 2.5rem);
+            display: none;
             color: var(--pastafari-color, var(--ink));
             font-family: Arial, "Noto Sans Hebrew", "Segoe UI", sans-serif;
             line-height: 1.5;
           }
-          :host(:not([open])) { display: none !important; }
+          :host([open]) {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: block;
+            width: 0;
+            height: 0;
+            margin: 0;
+          }
           *, *::before, *::after { box-sizing: border-box; }
           [hidden] { display: none !important; }
           button { font: inherit; min-height: 44px; }
@@ -146,11 +152,26 @@
             outline-offset: 3px;
           }
           .shell {
+            width: min(72rem, calc(100vw - 2rem));
+            height: min(52rem, calc(100dvh - 2rem));
+            max-width: none;
+            max-height: calc(100dvh - 2rem);
+            margin: auto;
+            padding: 0;
             overflow: hidden;
             border: 2px solid var(--ink);
             border-radius: 1.2rem;
             background: var(--panel);
-            box-shadow: 0 20px 55px rgb(54 36 20 / 12%);
+            color: var(--ink);
+            box-shadow: 0 24px 70px rgb(0 0 0 / 28%);
+          }
+          .shell[open] {
+            display: grid;
+            grid-template-rows: auto auto minmax(0, 1fr);
+          }
+          .shell::backdrop {
+            background: rgb(23 19 14 / 48%);
+            backdrop-filter: blur(2px);
           }
           .head {
             display: grid;
@@ -201,11 +222,11 @@
           .gate-detail-button:hover { background: #fff1e8; }
           .nav {
             display: flex;
+            flex-wrap: wrap;
             gap: .45rem;
             padding: .75rem clamp(1rem, 3vw, 2rem);
-            overflow-x: auto;
+            overflow: visible;
             border-bottom: 1px solid var(--line);
-            scrollbar-gutter: stable;
           }
           .nav button,
           .phase-tabs button {
@@ -231,6 +252,10 @@
           .status button { padding: .55rem .9rem; }
           .pane {
             min-width: 0;
+            min-height: 0;
+            overflow: auto;
+            overscroll-behavior: contain;
+            scrollbar-gutter: stable;
             padding: clamp(1rem, 3vw, 2rem);
           }
           .chapter-heading {
@@ -311,8 +336,9 @@
           }
           .phase-tabs {
             display: flex;
+            flex-wrap: wrap;
             gap: .4rem;
-            overflow-x: auto;
+            overflow: visible;
             margin-bottom: 1rem;
             padding-bottom: .25rem;
           }
@@ -375,8 +401,34 @@
           .result-five strong { display: block; color: var(--muted); font-size: .78rem; }
           .result-five span { display: block; margin-top: .25rem; font-weight: 900; }
           @media (max-width: 700px) {
-            .head { grid-template-columns: 1fr; }
-            .close { justify-self: start; }
+            .shell {
+              width: 100vw;
+              height: 100dvh;
+              max-height: 100dvh;
+              border: 0;
+              border-radius: 0;
+            }
+            .head {
+              grid-template-columns: minmax(0, 1fr) auto;
+              gap: .65rem;
+              padding: .8rem 1rem;
+            }
+            .head h2 { font-size: clamp(1.55rem, 8vw, 2.35rem); }
+            .subtitle { margin-top: .4rem; font-size: .86rem; }
+            .close { align-self: start; justify-self: end; }
+            .nav {
+              display: grid;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: .35rem;
+              padding: .55rem .75rem;
+            }
+            .nav button {
+              min-width: 0;
+              min-height: 44px;
+              white-space: normal;
+              line-height: 1.2;
+            }
+            .pane { padding: 1rem; }
             .kv { grid-template-columns: 1fr; gap: .15rem; }
             .kv dd { margin-bottom: .55rem; }
             .result-five { grid-template-columns: 1fr 1fr; }
@@ -396,7 +448,7 @@
             .close, .nav, .step-controls, .phase-tabs, .gate-detail-button { display: none !important; }
           }
         </style>
-        <section class="shell" part="shell" role="region" aria-labelledby="pastafari-cooking-title" aria-busy="false">
+        <dialog class="shell" part="shell" aria-modal="true" aria-labelledby="pastafari-cooking-title" aria-busy="false">
           <header class="head">
             <div>
               <p class="kicker">PASTAFARI · TRACE</p>
@@ -414,7 +466,7 @@
             <button class="retry" type="button"></button>
           </div>
           <section class="pane" tabindex="-1"></section>
-        </section>
+        </dialog>
       `;
 
       this._els = {
