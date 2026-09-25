@@ -44,9 +44,16 @@ for (const token of [
   'min-height: 10.5rem',
   'border: 2px solid var(--month-edge',
   'border-radius: .85rem',
-  'outline: 6px solid #000000',
-  '0 0 0 8px #ffea00',
+  'outline: 4px solid #000000',
+  'inset 0 0 0 4px #ffea00',
+  'transform: none',
   'border: 4px dashed #ffea00',
+  '@media (max-width: 74rem)',
+  'grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr))',
+  'unicode-bidi: isolate',
+  'white-space: nowrap',
+  "doc.createElement('bdi')",
+  '.overlay.error .loading-title',
   "className = 'target-badge'",
   'MONTH_THEME_NAMES',
   'MONTH_THEMES',
@@ -63,6 +70,9 @@ for (const token of [
 assert(!source.includes("doc.createElement('button');\n        button.type = 'button';\n        button.className = 'day'"),
   'Li ordinary day-cards ne deve esser clickabil buttons.');
 assert(!source.includes('_selectDay(event)'), 'Li old click-to-select day handler ne deve retornar.');
+assert(!source.includes('transform: scale(1.035)'), 'Li selected card ne deve plu crescer extra su layout-box.');
+assert(!source.includes('outline: 6px solid #000000'), 'Li clipped old six-pixel outline ne deve retornar.');
+assert(!source.includes('0 0 0 8px #ffea00'), 'Li external yellow ring ne deve retornar.');
 
 const cookingSource = fs.readFileSync(path.join(__dirname, '..', 'browser', 'pastafari-cooking.js'), 'utf8');
 for (const token of [
