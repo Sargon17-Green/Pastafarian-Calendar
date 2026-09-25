@@ -26,6 +26,7 @@ for (const token of [
 assert(source.includes("'lang'"), 'Li multilingue extension deve exponer li lang attribute.');
 assert(source.includes('language-selector'), 'Li visibil selector de lingue manca.');
 assert(source.includes('MAX_CACHED_CUTLETS = 5'), 'Li limitat UI cutlet-cache deve restar quin.');
+assert(source.includes('MAX_RENDERED_DAYS = 28'), 'Li rendered day-window deve restar explicitmen bounded a 28.');
 
 // Public visual contract inherited from the original site character.
 for (const token of [
@@ -54,6 +55,12 @@ for (const token of [
   'white-space: nowrap',
   "doc.createElement('bdi')",
   '.overlay.error .loading-title',
+  'class="target-button"',
+  'class="window-controls before"',
+  'class="window-controls after"',
+  'overflow: visible',
+  "this._t('calendar.target')",
+  "this._t('calendar.windowStatus'",
   "className = 'target-badge'",
   'MONTH_THEME_NAMES',
   'MONTH_THEMES',
@@ -73,6 +80,9 @@ assert(!source.includes('_selectDay(event)'), 'Li old click-to-select day handle
 assert(!source.includes('transform: scale(1.035)'), 'Li selected card ne deve plu crescer extra su layout-box.');
 assert(!source.includes('outline: 6px solid #000000'), 'Li clipped old six-pixel outline ne deve retornar.');
 assert(!source.includes('0 0 0 8px #ffea00'), 'Li external yellow ring ne deve retornar.');
+assert(!source.includes('class="edge-loader'), 'Li old edge-loading scroll sentinels ne deve retornar.');
+assert(!source.includes("this._els.viewport.addEventListener('scroll'"), 'Li calendar ne deve plu depender de nested-scroll edge loading.');
+assert(!source.includes('max-height: var(--pastafari-calendar-height, 46rem)'), 'Li old internal vertical scroll viewport ne deve retornar.');
 
 const cookingSource = fs.readFileSync(path.join(__dirname, '..', 'browser', 'pastafari-cooking.js'), 'utf8');
 for (const token of [
