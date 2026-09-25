@@ -36,6 +36,7 @@
     });
   }));
   const MAX_CACHED_CUTLETS = 5;
+  const MAX_RENDERED_DAYS = 28;
   const LOCALE_STORAGE_KEY = 'pastafari.browser.locale';
   const RENDER_CONSISTENCY_CODE = 'ERR_CALENDAR_RENDER_INCONSISTENCY';
   const TARGET_CUTLET_CODE = 'ERR_TARGET_CUTLET_MISMATCH';
@@ -260,6 +261,7 @@
       this._cutlets = new Map();
       this._orderedStarts = [];
       this._activeStartJdn = null;
+      this._windowStart = 0;
       this._loadingBefore = null;
       this._loadingAfter = null;
       this._cutletLoads = new Map();
@@ -490,10 +492,21 @@
             font-weight: 700;
           }
           .toolbar-actions {
+            display: grid;
+            gap: .55rem;
+            justify-items: end;
+          }
+          .cutlet-nav,
+          .reset-nav {
             display: flex;
             flex-wrap: wrap;
             gap: .55rem;
             justify-content: end;
+          }
+          .target-button {
+            border-color: #8e8272;
+            background: #fffdf8;
+            color: var(--ink);
           }
           .today-button {
             border-color: var(--accent-dark);
@@ -503,18 +516,38 @@
 
           .viewport {
             position: relative;
-            max-height: var(--pastafari-calendar-height, 46rem);
-            overflow: auto;
+            max-height: none;
+            overflow: visible;
             padding: 0;
-            overscroll-behavior: contain;
-            scrollbar-gutter: stable;
           }
-          .edge-loader {
-            min-height: 1.8rem;
-            display: grid;
-            place-items: center;
+          .window-controls {
+            display: flex;
+            min-height: 3rem;
+            gap: .7rem;
+            align-items: center;
+            justify-content: space-between;
+            margin-block: .35rem .8rem;
+          }
+          .window-controls.after {
+            justify-content: end;
+            margin-block: .8rem 0;
+          }
+          .window-button {
+            min-height: 44px;
+            padding: .55rem .9rem;
+            border: 1px solid #8e8272;
+            border-radius: .7rem;
+            background: #fffdf8;
+            color: var(--ink);
+            font-weight: 800;
+            cursor: pointer;
+          }
+          .window-button:hover { background: #fff4ee; }
+          .window-status {
             color: var(--muted);
-            font-size: .78rem;
+            font-size: .88rem;
+            font-weight: 750;
+            text-align: center;
           }
           .cutlet-section {
             margin: 0 0 2.25rem;
@@ -772,8 +805,17 @@
             .editor-link { width: 100%; }
             .beacon-date { grid-template-columns: 1fr; }
             .toolbar { align-items: stretch; flex-direction: column; }
-            .toolbar-actions { justify-content: stretch; }
-            .toolbar-actions button { flex: 1 1 9rem; }
+            .toolbar-actions { justify-items: stretch; }
+            .cutlet-nav,
+            .reset-nav { justify-content: stretch; }
+            .cutlet-nav button,
+            .reset-nav button { flex: 1 1 9rem; }
+            .window-controls {
+              align-items: stretch;
+              flex-direction: column;
+            }
+            .window-controls.after { align-items: stretch; }
+            .window-button { width: 100%; }
             .cutlet-grid {
               grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
               min-width: 0;
@@ -858,16 +900,26 @@
               <p class="selected-summary" aria-live="polite"></p>
             </div>
             <div class="toolbar-actions">
-              <button class="nav-button previous" type="button"></button>
-              <button class="today-button" type="button"></button>
-              <button class="nav-button next" type="button"></button>
+              <div class="cutlet-nav">
+                <button class="nav-button previous" type="button"></button>
+                <button class="nav-button next" type="button"></button>
+              </div>
+              <div class="reset-nav">
+                <button class="target-button" type="button" hidden></button>
+                <button class="today-button" type="button"></button>
+              </div>
             </div>
           </header>
 
-          <div class="viewport" part="viewport" tabindex="0">
-            <div class="edge-loader before" aria-hidden="true"></div>
+          <div class="viewport" part="viewport">
+            <div class="window-controls before">
+              <button class="window-button earlier" type="button" hidden></button>
+              <span class="window-status" aria-live="polite"></span>
+            </div>
             <div class="cutlet-list"></div>
-            <div class="edge-loader after" aria-hidden="true"></div>
+            <div class="window-controls after">
+              <button class="window-button later" type="button" hidden></button>
+            </div>
           </div>
 
           <div class="overlay loading" part="loading">
@@ -912,6 +964,7 @@
         appTitle: this.shadowRoot.querySelector('.app-title'),
         previous: this.shadowRoot.querySelector('.previous'),
         today: this.shadowRoot.querySelector('.today-button'),
+        targetButton: this.shadowRoot.querySelector('.target-button'),
         next: this.shadowRoot.querySelector('.next'),
         cutletKicker: this.shadowRoot.querySelector('.cutlet-kicker'),
         summary: this.shadowRoot.querySelector('.selected-summary'),
@@ -924,8 +977,9 @@
         cookingPanel: this.shadowRoot.querySelector('pastafari-cooking'),
         viewport: this.shadowRoot.querySelector('.viewport'),
         list: this.shadowRoot.querySelector('.cutlet-list'),
-        beforeLoader: this.shadowRoot.querySelector('.edge-loader.before'),
-        afterLoader: this.shadowRoot.querySelector('.edge-loader.after'),
+        windowEarlier: this.shadowRoot.querySelector('.window-button.earlier'),
+        windowLater: this.shadowRoot.querySelector('.window-button.later'),
+        windowStatus: this.shadowRoot.querySelector('.window-status'),
         searchKicker: this.shadowRoot.querySelector('.search-kicker'),
         searchHeading: this.shadowRoot.querySelector('.search-heading'),
         editorLink: this.shadowRoot.querySelector('.editor-link'),
@@ -952,8 +1006,11 @@
       };
 
       this._els.previous.addEventListener('click', () => this._scrollAdjacent(-1));
-      this._els.today.addEventListener('click', () => this._goToday());
       this._els.next.addEventListener('click', () => this._scrollAdjacent(1));
+      this._els.targetButton.addEventListener('click', () => this._returnToTarget());
+      this._els.today.addEventListener('click', () => this._goToday());
+      this._els.windowEarlier.addEventListener('click', () => this._shiftWindow(-1));
+      this._els.windowLater.addEventListener('click', () => this._shiftWindow(1));
       this._els.editorLink.addEventListener('click', () => this._openDialog());
       this._els.cookingOpen.addEventListener('click', () => this._toggleCooking());
       this._els.cookingPanel.addEventListener('pastafari-cooking-close', () => {
@@ -963,7 +1020,6 @@
       this._els.retryButton.addEventListener('click', () => this._retry());
       this._els.cancelButton.addEventListener('click', () => this._closeDialog());
       this._els.form.addEventListener('submit', (event) => this._applyDialog(event));
-      this._els.viewport.addEventListener('scroll', () => this._onScroll(), { passive: true });
       this._els.languageSelector.addEventListener('change', () => {
         const selected = this._els.languageSelector.value;
         writeStoredLocale(selected);
@@ -1036,11 +1092,17 @@
       this._els.toolbar.setAttribute('aria-label', this._t('calendar.toolbarAria'));
       this._els.appTitle.textContent = this._t('app.title');
       this._els.previous.textContent = this._t('calendar.previous');
-      this._els.today.textContent = this._t('calendar.today');
       this._els.next.textContent = this._t('calendar.next');
+      this._els.targetButton.textContent = this._t('calendar.target');
+      this._els.today.textContent = this._t('calendar.today');
+      this._els.windowEarlier.textContent = this._t('calendar.earlierDays');
+      this._els.windowLater.textContent = this._t('calendar.laterDays');
       this._els.previous.setAttribute('aria-label', this._t('calendar.previous'));
-      this._els.today.setAttribute('aria-label', this._t('calendar.today'));
       this._els.next.setAttribute('aria-label', this._t('calendar.next'));
+      this._els.targetButton.setAttribute('aria-label', this._t('calendar.target'));
+      this._els.today.setAttribute('aria-label', this._t('calendar.today'));
+      this._els.windowEarlier.setAttribute('aria-label', this._t('calendar.earlierDays'));
+      this._els.windowLater.setAttribute('aria-label', this._t('calendar.laterDays'));
       this._els.cutletKicker.textContent = this._t('calendar.toolbarAria');
       this._els.searchKicker.textContent = this._t('search.kicker');
       this._els.searchHeading.textContent = this._t('search.heading');
@@ -1100,6 +1162,7 @@
         this._cutlets.clear();
         this._orderedStarts = [];
         this._activeStartJdn = null;
+        this._windowStart = 0;
         this._loadingBefore = null;
         this._loadingAfter = null;
         this._cutletLoads.clear();
@@ -1136,6 +1199,8 @@
         resolveTargetCutletView(currentView, this._scrollTarget);
 
         this._storeCutlet(currentView);
+        this._activeStartJdn = BigInt(currentView.startJdn);
+        this._setWindowAroundIndex(currentView, this._scrollTarget.dayInCutlet - 1);
         this._renderSummary();
         this._renderCutlets();
         // Loading state hides the viewport with display:none. Reveal it first,
