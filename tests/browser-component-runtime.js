@@ -621,11 +621,14 @@ async function flush() {
     async retry() {},
   };
 
+  console.log('PHASE_B_TEST: construct');
   const bounded = new PastafariDateElement();
   bounded._primeAdjacent = () => {};
   bounded.setAttribute('date', '2026-09-06');
   bounded._connected = true;
+  console.log('PHASE_B_TEST: refresh-start');
   await bounded.refresh();
+  console.log('PHASE_B_TEST: refresh-done');
 
   assert.strictEqual(bounded._activeStartJdn, boundedStart);
   assert(bounded._els.list.querySelectorAll('.day').length <= 28);
@@ -633,6 +636,7 @@ async function flush() {
   assert.strictEqual(bounded._els.targetButton.hidden, true);
 
   const initialWindowStart = bounded._windowStart;
+  console.log('PHASE_B_TEST: shift-start');
   assert.strictEqual(bounded._shiftWindow(1), true);
   assert(bounded._els.list.querySelectorAll('.day').length <= 28);
   assert.strictEqual(bounded._els.targetButton.hidden, false);
@@ -641,7 +645,9 @@ async function flush() {
 
   // Move away from the target window, then return to it inside the same cutlet.
   bounded._shiftWindow(1);
+  console.log('PHASE_B_TEST: first-return-start');
   assert.strictEqual(await bounded._returnToTarget(), true);
+  console.log('PHASE_B_TEST: first-return-done');
   assert.strictEqual(bounded._activeStartJdn, boundedStart);
   assert.strictEqual(bounded._els.targetButton.hidden, true);
   const selectedInTarget = bounded._els.list.querySelector('[aria-current="date"]');
@@ -650,16 +656,21 @@ async function flush() {
 
   // Twenty explicit next-cutlet operations must keep both rendered DOM and the
   // semantic cache bounded. The original target should eventually be evicted.
+  console.log('PHASE_B_TEST: loop-start');
   for (let step = 0; step < 20; step += 1) {
     assert.strictEqual(await bounded._scrollAdjacent(1), true);
+    if (step % 5 === 4) console.log('PHASE_B_TEST: loop-step-' + (step + 1));
     assert(bounded._els.list.querySelectorAll('.day').length <= 28, 'rendered day count grew past the bound');
     assert(bounded._cutlets.size <= 5, 'semantic cutlet cache grew past five');
   }
   assert.strictEqual(bounded._cutlets.has(boundedStart), false, 'target cutlet should have been evicted after long navigation');
   assert.strictEqual(bounded._els.targetButton.hidden, false);
 
+  console.log('PHASE_B_TEST: loop-done');
   const requestCountBeforeReturn = boundedRequests.length;
+  console.log('PHASE_B_TEST: long-return-start');
   assert.strictEqual(await bounded._returnToTarget(), true);
+  console.log('PHASE_B_TEST: long-return-done');
   assert(boundedRequests.length > requestCountBeforeReturn, 'evicted target was not reloaded');
   assert.strictEqual(bounded._activeStartJdn, boundedStart);
   assert.strictEqual(bounded._cutlets.has(boundedStart), true, 'reloaded target was trimmed out immediately');
