@@ -49,6 +49,14 @@
             "calendar.toolbarAria": "Navigation inter cutlets",
             "calendar.previous": "Precedent cutlet",
             "calendar.next": "Sequent cutlet",
+
+            "calendar.target": "Retro al date serchat",
+
+            "calendar.earlierDays": "Dies precedent",
+
+            "calendar.laterDays": "Dies sequent",
+
+            "calendar.windowStatus": "Dies {start}–{end} de {total}",
             "calendar.daysAria": "Dies in li cutlet {cutletName}",
             "calendar.currentCutlet": "Annu {year} · cutlet",
             "calendar.cutletDescription": "{count} dies · die de labor: {actionDate}",
@@ -218,6 +226,14 @@
             "calendar.toolbarAria": "Cutlet navigation",
             "calendar.previous": "Previous cutlet",
             "calendar.next": "Next cutlet",
+
+            "calendar.target": "Return to searched date",
+
+            "calendar.earlierDays": "Earlier days",
+
+            "calendar.laterDays": "Later days",
+
+            "calendar.windowStatus": "Days {start}–{end} of {total}",
             "calendar.daysAria": "Days in the cutlet {cutletName}",
             "calendar.currentCutlet": "Year {year} · cutlet",
             "calendar.cutletDescription": "{count} days · day of working: {actionDate}",
@@ -388,6 +404,14 @@
             "calendar.previous": "\u05D4\u05E7\u05E6\u05D9\u05E6\u05D4 \u05D4\u05E7\u05D5\u05D3\u05DE\u05EA",
             "calendar.today": "\u05D7\u05D6\u05E8\u05D4 \u05DC\u05D4\u05D9\u05D5\u05DD",
             "calendar.next": "\u05D4\u05E7\u05E6\u05D9\u05E6\u05D4 \u05D4\u05D1\u05D0\u05D4",
+
+            "calendar.target": "\u05D7\u05D6\u05E8\u05D4 \u05DC\u05EA\u05D0\u05E8\u05D9\u05DA \u05E9\u05D7\u05D9\u05E4\u05E9\u05EA",
+
+            "calendar.earlierDays": "\u05D9\u05DE\u05D9\u05DD \u05E7\u05D5\u05D3\u05DE\u05D9\u05DD",
+
+            "calendar.laterDays": "\u05D9\u05DE\u05D9\u05DD \u05D4\u05D1\u05D0\u05D9\u05DD",
+
+            "calendar.windowStatus": "\u05D9\u05DE\u05D9\u05DD {start}\u2013{end} \u05DE\u05EA\u05D5\u05DA {total}",
             "calendar.daysAria": "\u05D9\u05DE\u05D9 \u05D4\u05E7\u05E6\u05D9\u05E6\u05D4 {cutletName}",
             "calendar.currentCutlet": "\u05E9\u05E0\u05D4 {year} · \u05E7\u05E6\u05D9\u05E6\u05D4",
             "calendar.cutletDescription": "{count} \u05D9\u05DE\u05D9\u05DD · \u05D9\u05D5\u05DD \u05D4\u05DE\u05E2\u05E9\u05D4: {actionDate}",
@@ -557,6 +581,14 @@
             "calendar.previous": "القطعة السابقة",
             "calendar.today": "العودة إلى اليوم",
             "calendar.next": "القطعة التالية",
+
+            "calendar.target": "العودة إلى التاريخ الذي بحثت عنه",
+
+            "calendar.earlierDays": "أيام أسبق",
+
+            "calendar.laterDays": "أيام لاحقة",
+
+            "calendar.windowStatus": "الأيام {start}–{end} من {total}",
             "calendar.daysAria": "الأيام في القطعة {cutletName}",
             "calendar.currentCutlet": "السنة {year} · قطعة",
             "calendar.cutletDescription": "{count} يومًا · يوم العمل: {actionDate}",
@@ -726,6 +758,14 @@
             "calendar.previous": "Предыдущая котлета",
             "calendar.today": "Вернуться к сегодня",
             "calendar.next": "Следующая котлета",
+
+            "calendar.target": "Вернуться к искомой дате",
+
+            "calendar.earlierDays": "Более ранние дни",
+
+            "calendar.laterDays": "Более поздние дни",
+
+            "calendar.windowStatus": "Дни {start}–{end} из {total}",
             "calendar.daysAria": "Дни в котлете {cutletName}",
             "calendar.currentCutlet": "Год {year} · котлета",
             "calendar.cutletDescription": "{count} дней · день действия: {actionDate}",
@@ -895,6 +935,14 @@
             "calendar.previous": "Boulette précédente",
             "calendar.today": "Retour à aujourd’hui",
             "calendar.next": "Boulette suivante",
+
+            "calendar.target": "Retour à la date recherchée",
+
+            "calendar.earlierDays": "Jours précédents",
+
+            "calendar.laterDays": "Jours suivants",
+
+            "calendar.windowStatus": "Jours {start}–{end} sur {total}",
             "calendar.daysAria": "Jours de la boulette {cutletName}",
             "calendar.currentCutlet": "Année {year} · boulette",
             "calendar.cutletDescription": "{count} jours · jour de travail : {actionDate}",
@@ -1064,6 +1112,14 @@
             "calendar.previous": "Vorheriges Schnitzel",
             "calendar.today": "Zurück zu heute",
             "calendar.next": "Nächstes Schnitzel",
+
+            "calendar.target": "Zurück zum gesuchten Datum",
+
+            "calendar.earlierDays": "Frühere Tage",
+
+            "calendar.laterDays": "Spätere Tage",
+
+            "calendar.windowStatus": "Tage {start}–{end} von {total}",
             "calendar.daysAria": "Tage im Schnitzel {cutletName}",
             "calendar.currentCutlet": "Jahr {year} · Schnitzel",
             "calendar.cutletDescription": "{count} Tage · Tag der Ausführung: {actionDate}",
@@ -1233,6 +1289,14 @@
             "calendar.previous": "Croqueta anterior",
             "calendar.today": "Volver a hoy",
             "calendar.next": "Croqueta siguiente",
+
+            "calendar.target": "Volver a la fecha buscada",
+
+            "calendar.earlierDays": "Días anteriores",
+
+            "calendar.laterDays": "Días siguientes",
+
+            "calendar.windowStatus": "Días {start}–{end} de {total}",
             "calendar.daysAria": "Días de la croqueta {cutletName}",
             "calendar.currentCutlet": "Año {year} · croqueta",
             "calendar.cutletDescription": "{count} días · día de trabajo: {actionDate}",
@@ -1402,6 +1466,14 @@
             "calendar.previous": "Cotoletta precedente",
             "calendar.today": "Torna a oggi",
             "calendar.next": "Cotoletta successiva",
+
+            "calendar.target": "Torna alla data cercata",
+
+            "calendar.earlierDays": "Giorni precedenti",
+
+            "calendar.laterDays": "Giorni successivi",
+
+            "calendar.windowStatus": "Giorni {start}–{end} di {total}",
             "calendar.daysAria": "Giorni nella cotoletta {cutletName}",
             "calendar.currentCutlet": "Anno {year} · cotoletta",
             "calendar.cutletDescription": "{count} giorni · giorno di lavoro: {actionDate}",
@@ -1571,6 +1643,14 @@
             "calendar.previous": "Předchozí řízek",
             "calendar.today": "Zpět na dnešek",
             "calendar.next": "Další řízek",
+
+            "calendar.target": "Zpět na hledané datum",
+
+            "calendar.earlierDays": "Dřívější dny",
+
+            "calendar.laterDays": "Pozdější dny",
+
+            "calendar.windowStatus": "Dny {start}–{end} z {total}",
             "calendar.daysAria": "Dny v řízku {cutletName}",
             "calendar.currentCutlet": "Rok {year} · řízek",
             "calendar.cutletDescription": "{count} dní · den činnosti: {actionDate}",
