@@ -30,10 +30,18 @@ const REVERSE_MONTHS = Object.freeze([
 ]);
 
 function currentValue(calculationJdn, targetJdn) {
-  return current.calendarDateSpaghetti(
+  const tuple = current.calendarDateSpaghetti(
     calculationJdn - PROJECT_OFFSET,
     targetJdn - PROJECT_OFFSET,
   );
+  assert(Array.isArray(tuple) && tuple.length === 5, 'Stage 57 forward result must remain a five-part tuple.');
+  return {
+    year: String(tuple[0]),
+    cutletName: String(tuple[1]),
+    dayInCutlet: Number(tuple[2]),
+    monthName: String(tuple[3]),
+    dayInMonth: Number(tuple[4]),
+  };
 }
 
 function mapFastToCurrent(value) {
