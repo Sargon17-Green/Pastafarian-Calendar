@@ -92,6 +92,39 @@ assert(!source.includes("this._els.viewport.addEventListener('scroll'"), 'Li cal
 assert(!source.includes('max-height: var(--pastafari-calendar-height, 46rem)'), 'Li old internal vertical scroll viewport ne deve retornar.');
 assert(source.includes('_cookingPagePosition'), 'Li calendar deve memorisar su page-position durant li modal trace.');
 assert(source.includes('preventScroll: true'), 'Li trace-close focus return deve evitar involuntari scrolling.');
+assert(source.includes('const reverseApi = ns.reverseBridge || null'), 'Li public UI deve usar li verified reverse bridge.');
+assert(source.includes('class="reverse-open"'), 'Li public reverse-search entry point manca.');
+assert(source.includes('class="reverse-dialog"'), 'Li public reverse-search dialog manca.');
+assert(source.includes('class="reverse-form"'), 'Li public reverse-search form manca.');
+for (const field of [
+  'reverse-year',
+  'reverse-cutlet',
+  'reverse-day-cutlet',
+  'reverse-month',
+  'reverse-day-month',
+  'reverse-calculation',
+]) {
+  assert(source.includes('name="' + field + '"'), 'Manca li reverse-search field: ' + field);
+}
+assert(source.includes('async _applyReverseDialog(event)'), 'Li reverse-search submit workflow manca.');
+assert(source.includes('reverseApi.solveSimplePastafariDate'), 'Li reverse-search UI ne usa li verified bridge.');
+assert(source.includes('timeoutMs: 120000'), 'Li reverse-search UI deve haver un explicit timeout.');
+assert(source.includes('onProgress: (progress)'), 'Li reverse-search UI deve exponer truthful progress.');
+assert(source.includes('_selectReverseResult(solution)'), 'Li reverse result ne retorna al ordinari target flow.');
+assert(source.includes("date.setAttribute('dir', 'ltr')"), 'Li reverse Gregorian result deve esser BiDi-isolat.');
+assert(source.includes("this.setAttribute('date', targetIso)"), 'Li reverse result deve usar li ordinari date attribute.');
+assert(source.includes("this.setAttribute('calculation-date', calculationIso)"), 'Li reverse result deve conservar li calculation day.');
+assert(source.includes('reverseOpen.hidden = !(reverseApi'), 'Li reverse entry point deve esser celat si li engine ne es disponibil.');
+
+const reverseBridgeSource = fs.readFileSync(path.join(__dirname, '..', 'browser', 'reverse-bridge.js'), 'utf8');
+assert(reverseBridgeSource.includes('async function solveSimplePastafariDate'));
+assert(reverseBridgeSource.includes('moduleApi.solvePastafariConstraints(problem, options || {})'));
+assert(reverseBridgeSource.includes('await service.convert(targetJdn, calc)'),
+  'Omni reverse candidate deve esser verificat per li authoritative forward service.');
+assert(reverseBridgeSource.includes('ERR_REVERSE_FORWARD_MISMATCH'),
+  'Li reverse bridge deve fallir explicitmen si forward verification diverge.');
+assert(reverseBridgeSource.includes('solutions: Object.freeze(verified)'),
+  'Li reverse bridge deve publicar solmen verified solutions.');
 
 const cookingSource = fs.readFileSync(path.join(__dirname, '..', 'browser', 'pastafari-cooking.js'), 'utf8');
 for (const token of [
