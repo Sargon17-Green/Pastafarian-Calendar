@@ -4,6 +4,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const childProcess = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 
@@ -21,7 +22,15 @@ const javascript = list(ROOT).filter((file) => file.endsWith('.js'));
 assert(javascript.length >= 10);
 for (const file of javascript) {
   const source = fs.readFileSync(file, 'utf8');
-  new vm.Script(source, { filename: file });
+  const relative = path.relative(ROOT, file).replace(/\\/g, '/');
+  if (relative.startsWith('browser/reverse-engine/')) {
+    childProcess.execFileSync(process.execPath, ['--input-type=module', '--check'], {
+      input: source,
+      stdio: ['pipe', 'ignore', 'pipe'],
+    });
+  } else {
+    new vm.Script(source, { filename: file });
+  }
 }
 
 assert(!fs.existsSync(path.join(ROOT, 'DELTA_apply-package-json.mjs')));
