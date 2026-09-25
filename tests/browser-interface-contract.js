@@ -42,7 +42,7 @@ for (const token of [
   'grid-template-columns: repeat(7',
   '#17130e',
   '#9d3825',
-  'min-height: 8.4rem',
+  'min-height: 6.4rem',
   'border: 1px solid var(--month-edge',
   'border-radius: .8rem',
   'border: 3px solid var(--accent-dark)',
@@ -85,6 +85,8 @@ assert(!source.includes('border: 4px dashed'), 'Li old dashed target ring ne dev
 assert(source.includes('width: min(100%, 68rem)'), 'Li search card deve restar compact e bounded.');
 assert(source.includes('font-size: clamp(2.5rem, 5.6vw, 5.2rem)'), 'Li masthead title deve restar visualmen bounded.');
 assert(source.includes('.day-line.month'), 'Li day-card hierarchy deve dar un separat month line.');
+assert(!source.includes("yearLine.className = 'day-line year'"), 'Li repeated year line ne deve retornar in omni day-card.');
+assert(source.includes("cutletLine.textContent = this._t('field.day') + ' ' + String(day.dayInCutlet)"), 'Li compact day-in-cutlet line deve restar.');
 assert(!source.includes('class="edge-loader'), 'Li old edge-loading scroll sentinels ne deve retornar.');
 assert(!source.includes("this._els.viewport.addEventListener('scroll'"), 'Li calendar ne deve plu depender de nested-scroll edge loading.');
 assert(!source.includes('max-height: var(--pastafari-calendar-height, 46rem)'), 'Li old internal vertical scroll viewport ne deve retornar.');
