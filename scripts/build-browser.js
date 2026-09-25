@@ -16,6 +16,7 @@ const MAIN_PARTS = Object.freeze([
   'calendar-memory.js',
   'engine-client.js',
   'calendar-service.js',
+  'reverse-bridge.js',
   path.join('i18n', 'runtime.js'),
   'pastafari-cooking.js',
   'pastafari-date.js',
@@ -32,6 +33,12 @@ const BUILD_INPUTS = Object.freeze([
   path.join('browser', 'calendar-memory.js'),
   path.join('browser', 'engine-client.js'),
   path.join('browser', 'calendar-service.js'),
+  path.join('browser', 'reverse-bridge.js'),
+  path.join('browser', 'reverse-engine', 'pastafari-diagnostics.js'),
+  path.join('browser', 'reverse-engine', 'pastafari-calendar-fast.js'),
+  path.join('browser', 'reverse-engine', 'pastafari-constraints.js'),
+  path.join('browser', 'reverse-engine', 'pastafari-reverse-worker.js'),
+  path.join('browser', 'reverse-engine', 'pastafari-constraints-client.js'),
   path.join('browser', 'i18n', 'locales.js'),
   path.join('browser', 'i18n', 'runtime.js'),
   path.join('browser', 'pastafari-cooking.js'),
@@ -149,6 +156,7 @@ function standardConfig(cacheNamespace, buildId) {
     '  const buildId = ' + JSON.stringify(buildId) + ';',
     '  root.PastafariBrowserConfig = Object.freeze({',
     "    workerUrl: new URL('pastafari-worker.js?v=' + encodeURIComponent(buildId), base).href,",
+    "    reverseClientUrl: new URL('reverse-engine/pastafari-constraints-client.js?v=' + encodeURIComponent(buildId), base).href,",
     '    cacheNamespace: ' + JSON.stringify(cacheNamespace) + ',',
     '    buildId,',
     '  });',
@@ -162,6 +170,7 @@ function standaloneConfig(workerSource, cacheNamespace, buildId) {
     '  root.PastafariBrowserConfig = Object.freeze({',
     '    workerSource: ' + JSON.stringify(workerSource) + ',',
     '    cacheNamespace: ' + JSON.stringify(cacheNamespace) + ',',
+    '    reverseClientUrl: null,',
     '    buildId: ' + JSON.stringify(buildId) + ',',
     '  });',
     "})(typeof globalThis === 'object' ? globalThis : this);",
@@ -204,6 +213,21 @@ function builtIndex(buildId) {
   return template.replace(BUILD_ID_PLACEHOLDER, encodeURIComponent(buildId));
 }
 
+function copyReverseEngine() {
+  const sourceDir = path.join(BROWSER, 'reverse-engine');
+  const targetDir = path.join(DIST, 'reverse-engine');
+  fs.mkdirSync(targetDir, { recursive: true });
+  for (const name of [
+    'pastafari-diagnostics.js',
+    'pastafari-calendar-fast.js',
+    'pastafari-constraints.js',
+    'pastafari-reverse-worker.js',
+    'pastafari-constraints-client.js',
+  ]) {
+    fs.copyFileSync(path.join(sourceDir, name), path.join(targetDir, name));
+  }
+}
+
 function main() {
   fs.mkdirSync(DIST, { recursive: true });
   fs.mkdirSync(STANDALONE, { recursive: true });
@@ -219,13 +243,14 @@ function main() {
   fs.writeFileSync(path.join(DIST, 'pastafari-date.mjs'), moduleFacade(), 'utf8');
   fs.writeFileSync(path.join(DIST, 'index.html'), builtIndex(buildId), 'utf8');
   fs.writeFileSync(path.join(DIST, 'build-id.txt'), buildId + '\n', 'utf8');
+  copyReverseEngine();
   fs.writeFileSync(path.join(STANDALONE, 'pastafari-date.js'), standalone, 'utf8');
   fs.writeFileSync(path.join(STANDALONE, 'pastafari-date.min.js'), standalone, 'utf8');
 
   process.stdout.write('Construction del navigator: PASS.\n');
   process.stdout.write('Cache namespace: ' + cacheNamespace + '\n');
   process.stdout.write('Browser build ID: ' + buildId + '\n');
-  process.stdout.write('Standard: browser/dist/index.html + pastafari-date.js + pastafari-worker.js + pastafari-date.mjs\n');
+  process.stdout.write('Standard: browser/dist/index.html + pastafari-date.js + pastafari-worker.js + reverse-engine/* + pastafari-date.mjs\n');
   process.stdout.write('Standalone: browser/standalone/pastafari-date.js\n');
 }
 
