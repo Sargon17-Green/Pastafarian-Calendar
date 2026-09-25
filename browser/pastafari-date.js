@@ -6,6 +6,7 @@
   const axis = ns.dateAxis;
   const resultApi = ns.resultNormalizer;
   const i18n = ns.i18n;
+  const reverseApi = ns.reverseBridge || null;
 
   if (!serviceApi || !axis || !resultApi || !i18n) {
     throw new Error('Li browser-strate ne esset cargat in li necessi órdine.');
@@ -266,6 +267,10 @@
       this._loadingAfter = null;
       this._cutletLoads = new Map();
       this._cookingPagePosition = null;
+      this._reverseController = null;
+      this._reverseGeneration = 0;
+      this._reverseCalculationIso = null;
+      this._reverseSolutions = [];
       this._readySettled = false;
       this._locale = null;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
@@ -377,6 +382,7 @@
             line-height: 1;
           }
           .editor-link,
+          .reverse-open,
           .cooking-open,
           .nav-button,
           .today-button,
@@ -391,12 +397,26 @@
             font-weight: 800;
             cursor: pointer;
           }
+          .search-actions {
+            display: flex;
+            flex: 0 0 auto;
+            flex-wrap: wrap;
+            gap: .6rem;
+            justify-content: end;
+          }
           .editor-link {
             flex: 0 0 auto;
             border-color: var(--accent-dark);
             background: var(--accent-dark);
             color: white;
           }
+          .reverse-open {
+            flex: 0 0 auto;
+            border-color: var(--accent-dark);
+            background: #fffdf8;
+            color: var(--accent-dark);
+          }
+          .reverse-open:hover { background: #fff0e9; }
           .cooking-open {
             width: fit-content;
             max-width: 100%;
@@ -760,14 +780,71 @@
           }
           .field { display: grid; gap: .35rem; }
           .field span { font-size: .86rem; font-weight: 750; }
-          .field input {
+          .field input,
+          .field select {
             width: 100%;
             min-height: 46px;
-            direction: ltr;
             border: 1px solid #8e8272;
             border-radius: .7rem;
             padding: .58rem .68rem;
             background: white;
+            color: var(--ink);
+          }
+          .field input { direction: ltr; }
+          .reverse-dialog {
+            width: min(48rem, calc(100vw - 2rem));
+            max-height: calc(100dvh - 1rem);
+            overflow: auto;
+            overscroll-behavior: contain;
+          }
+          .reverse-form {
+            display: grid;
+            gap: 1rem;
+            padding: 1.25rem;
+          }
+          .reverse-form h2 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: 1.6rem;
+          }
+          .reverse-fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .8rem 1rem;
+          }
+          .reverse-status {
+            min-height: 1.35rem;
+            margin: 0;
+            color: var(--muted);
+            font-size: .88rem;
+            font-weight: 700;
+          }
+          .reverse-status[data-kind="error"] { color: #76180e; }
+          .reverse-results {
+            display: grid;
+            gap: .55rem;
+          }
+          .reverse-result {
+            display: flex;
+            min-height: 46px;
+            width: 100%;
+            padding: .65rem .8rem;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            border: 1px solid #8e8272;
+            border-radius: .7rem;
+            background: #fffdf8;
+            color: var(--ink);
+            font-weight: 800;
+            cursor: pointer;
+          }
+          .reverse-result:hover { background: #fff4ee; }
+          .reverse-result bdi {
+            direction: ltr;
+            unicode-bidi: isolate;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
           }
           details { border-top: 1px solid #e0d8c0; padding-top: .75rem; }
           summary { color: var(--accent-dark); font-size: .86rem; font-weight: 800; cursor: pointer; }
@@ -808,7 +885,27 @@
               display: grid;
               align-items: stretch;
             }
-            .editor-link { width: 100%; }
+            .search-actions {
+              display: grid;
+              grid-template-columns: 1fr;
+              width: 100%;
+            }
+            .editor-link,
+            .reverse-open { width: 100%; }
+            .reverse-form {
+              gap: .6rem;
+              padding: .8rem 1rem;
+            }
+            .reverse-form h2 {
+              font-size: 1.35rem;
+              line-height: 1.18;
+            }
+            .reverse-fields {
+              grid-template-columns: 1fr;
+              gap: .5rem;
+            }
+            .reverse-form .field { gap: .2rem; }
+            .reverse-status { min-height: 1rem; font-size: .8rem; }
             .beacon-date { grid-template-columns: 1fr; }
             .toolbar { align-items: stretch; flex-direction: column; }
             .toolbar-actions { justify-items: stretch; }
@@ -885,7 +982,10 @@
             <p class="eyebrow search-kicker"></p>
             <h2 class="search-heading"></h2>
           </div>
-          <button class="editor-link" type="button"></button>
+          <div class="search-actions">
+            <button class="editor-link" type="button"></button>
+            <button class="reverse-open" type="button"></button>
+          </div>
         </section>
 
         <section class="calendar" part="calendar" aria-busy="true" data-state="loading">
@@ -964,6 +1064,44 @@
             </div>
           </form>
         </dialog>
+
+        <dialog class="reverse-dialog">
+          <form class="reverse-form" novalidate>
+            <h2 class="reverse-heading"></h2>
+            <div class="reverse-fields">
+              <label class="field reverse-year-field">
+                <span></span>
+                <input name="reverse-year" inputmode="numeric" autocomplete="off" required>
+              </label>
+              <label class="field reverse-cutlet-field">
+                <span></span>
+                <select name="reverse-cutlet" required></select>
+              </label>
+              <label class="field reverse-day-cutlet-field">
+                <span></span>
+                <input name="reverse-day-cutlet" inputmode="numeric" autocomplete="off" required>
+              </label>
+              <label class="field reverse-month-field">
+                <span></span>
+                <select name="reverse-month" required></select>
+              </label>
+              <label class="field reverse-day-month-field">
+                <span></span>
+                <input name="reverse-day-month" inputmode="numeric" autocomplete="off" required>
+              </label>
+              <label class="field reverse-calculation-field">
+                <span></span>
+                <input name="reverse-calculation" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD" required>
+              </label>
+            </div>
+            <p class="reverse-status" role="status" aria-live="polite"></p>
+            <div class="reverse-results"></div>
+            <div class="dialog-actions reverse-actions">
+              <button class="primary reverse-submit" type="submit"></button>
+              <button class="reverse-cancel" type="button"></button>
+            </div>
+          </form>
+        </dialog>
       `;
 
       this._els = {
@@ -991,6 +1129,26 @@
         searchKicker: this.shadowRoot.querySelector('.search-kicker'),
         searchHeading: this.shadowRoot.querySelector('.search-heading'),
         editorLink: this.shadowRoot.querySelector('.editor-link'),
+        reverseOpen: this.shadowRoot.querySelector('.reverse-open'),
+        reverseDialog: this.shadowRoot.querySelector('.reverse-dialog'),
+        reverseForm: this.shadowRoot.querySelector('.reverse-form'),
+        reverseHeading: this.shadowRoot.querySelector('.reverse-heading'),
+        reverseYearLabel: this.shadowRoot.querySelector('.reverse-year-field span'),
+        reverseCutletLabel: this.shadowRoot.querySelector('.reverse-cutlet-field span'),
+        reverseDayCutletLabel: this.shadowRoot.querySelector('.reverse-day-cutlet-field span'),
+        reverseMonthLabel: this.shadowRoot.querySelector('.reverse-month-field span'),
+        reverseDayMonthLabel: this.shadowRoot.querySelector('.reverse-day-month-field span'),
+        reverseCalculationLabel: this.shadowRoot.querySelector('.reverse-calculation-field span'),
+        reverseYear: this.shadowRoot.querySelector('input[name="reverse-year"]'),
+        reverseCutlet: this.shadowRoot.querySelector('select[name="reverse-cutlet"]'),
+        reverseDayCutlet: this.shadowRoot.querySelector('input[name="reverse-day-cutlet"]'),
+        reverseMonth: this.shadowRoot.querySelector('select[name="reverse-month"]'),
+        reverseDayMonth: this.shadowRoot.querySelector('input[name="reverse-day-month"]'),
+        reverseCalculation: this.shadowRoot.querySelector('input[name="reverse-calculation"]'),
+        reverseStatus: this.shadowRoot.querySelector('.reverse-status'),
+        reverseResults: this.shadowRoot.querySelector('.reverse-results'),
+        reverseSubmit: this.shadowRoot.querySelector('.reverse-submit'),
+        reverseCancel: this.shadowRoot.querySelector('.reverse-cancel'),
         languageLabel: this.shadowRoot.querySelector('.language-label'),
         languageSelector: this.shadowRoot.querySelector('.language-selector'),
         loading: this.shadowRoot.querySelector('.overlay.loading'),
@@ -1020,6 +1178,13 @@
       this._els.windowEarlier.addEventListener('click', () => this._shiftWindow(-1));
       this._els.windowLater.addEventListener('click', () => this._shiftWindow(1));
       this._els.editorLink.addEventListener('click', () => this._openDialog());
+      this._els.reverseOpen.addEventListener('click', () => this._openReverseDialog());
+      this._els.reverseCancel.addEventListener('click', () => this._closeReverseDialog(true));
+      this._els.reverseForm.addEventListener('submit', (event) => this._applyReverseDialog(event));
+      this._els.reverseDialog.addEventListener('cancel', (event) => {
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        this._closeReverseDialog(true);
+      });
       this._els.cookingOpen.addEventListener('click', () => this._toggleCooking());
       this._els.cookingPanel.addEventListener('pastafari-cooking-close', () => {
         this._els.cookingOpen.setAttribute('aria-expanded', 'false');
@@ -1063,15 +1228,22 @@
       this._navigationGeneration += 1;
       this._refreshQueuedEpoch = null;
       this._cutletLoads.clear();
+      this._abortReverseSearch();
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
       if (oldValue === newValue || !this._connected) return;
       if (name === 'no-editor') {
-        if (newValue !== null) this._closeDialog();
+        if (newValue !== null) {
+          this._closeDialog();
+          this._closeReverseDialog(true);
+        }
         return;
       }
-      if (name === 'headless' && newValue !== null) this._closeDialog();
+      if (name === 'headless' && newValue !== null) {
+        this._closeDialog();
+        this._closeReverseDialog(true);
+      }
       if (name === 'lang') {
         this._applyLocale();
         if (this._value) {
@@ -1126,6 +1298,18 @@
       this._els.searchKicker.textContent = this._t('search.kicker');
       this._els.searchHeading.textContent = this._t('search.heading');
       this._els.editorLink.textContent = this._t('search.submit');
+      this._els.reverseOpen.textContent = this._t('reverse.open');
+      this._els.reverseOpen.hidden = !(reverseApi && typeof reverseApi.isAvailable === 'function' && reverseApi.isAvailable());
+      this._els.reverseHeading.textContent = this._t('reverse.heading');
+      this._els.reverseYearLabel.textContent = this._t('reverse.year');
+      this._els.reverseCutletLabel.textContent = this._t('reverse.cutlet');
+      this._els.reverseDayCutletLabel.textContent = this._t('reverse.dayInCutlet');
+      this._els.reverseMonthLabel.textContent = this._t('reverse.month');
+      this._els.reverseDayMonthLabel.textContent = this._t('reverse.dayInMonth');
+      this._els.reverseCalculationLabel.textContent = this._t('reverse.calculation');
+      this._els.reverseSubmit.textContent = this._t('reverse.submit');
+      this._els.reverseCancel.textContent = this._t('reverse.action.cancel');
+      this._populateReverseSelectors();
       this._els.languageLabel.textContent = this._t('language.label');
       this._els.loadingTitle.textContent = this._t('loading.title');
       this._els.loadingNote.textContent = this._t('loading.kicker');
@@ -1818,6 +2002,212 @@
       this._renderCutlets();
       this._scrollCalendarStart();
       this._primeAdjacent(loaded, generation);
+      return true;
+    }
+
+    _populateReverseSelectors() {
+      if (!this._els || !this._els.reverseCutlet || !this._els.reverseMonth || !reverseApi) return;
+      const populate = (select, names, group) => {
+        const previous = select.value;
+        const fragment = doc.createDocumentFragment();
+        for (const sourceName of names || []) {
+          const option = doc.createElement('option');
+          option.value = String(sourceName);
+          option.textContent = this._localCalendarName(group, sourceName);
+          if (String(sourceName) === previous) option.selected = true;
+          fragment.append(option);
+        }
+        select.replaceChildren(fragment);
+        if (previous && Array.from(names || []).includes(previous)) select.value = previous;
+      };
+      populate(this._els.reverseCutlet, reverseApi.CURRENT_CUTLETS, 'cutlet');
+      populate(this._els.reverseMonth, reverseApi.CURRENT_MONTHS, 'month');
+    }
+
+    _abortReverseSearch() {
+      this._reverseGeneration += 1;
+      const controller = this._reverseController;
+      this._reverseController = null;
+      if (controller && typeof controller.abort === 'function') {
+        try { controller.abort(); } catch (_) { /* best effort */ }
+      }
+    }
+
+    _openReverseDialog() {
+      if (!reverseApi || typeof reverseApi.isAvailable !== 'function' || !reverseApi.isAvailable()) return;
+      this._abortReverseSearch();
+      this._reverseSolutions = [];
+      this._els.reverseResults.replaceChildren();
+      this._els.reverseStatus.textContent = '';
+      this._els.reverseStatus.removeAttribute('data-kind');
+      this._els.reverseSubmit.disabled = false;
+      this._populateReverseSelectors();
+
+      if (this._value) {
+        this._els.reverseYear.value = String(this._value.year);
+        this._els.reverseCutlet.value = String(this._value.cutletName);
+        this._els.reverseDayCutlet.value = String(this._value.dayInCutlet);
+        this._els.reverseMonth.value = String(this._value.monthName);
+        this._els.reverseDayMonth.value = String(this._value.dayInMonth);
+      } else {
+        this._els.reverseYear.value = '';
+        this._els.reverseDayCutlet.value = '';
+        this._els.reverseDayMonth.value = '';
+      }
+      const calculationJdn = this._calculationJdn == null
+        ? axis.gregorianToJdn(axis.localToday()) : this._calculationJdn;
+      this._els.reverseCalculation.value = axis.toIsoDate(axis.jdnToGregorian(calculationJdn));
+
+      if (typeof this._els.reverseDialog.showModal === 'function') this._els.reverseDialog.showModal();
+      else this._els.reverseDialog.setAttribute('open', '');
+      enqueueMicrotask(() => {
+        if (typeof this._els.reverseYear.focus === 'function') {
+          try { this._els.reverseYear.focus({ preventScroll: true }); }
+          catch (_) { this._els.reverseYear.focus(); }
+        }
+      });
+    }
+
+    _closeReverseDialog(abortSearch) {
+      if (abortSearch !== false) this._abortReverseSearch();
+      if (typeof this._els.reverseDialog.close === 'function') this._els.reverseDialog.close();
+      else this._els.reverseDialog.removeAttribute('open');
+      this._els.reverseSubmit.disabled = false;
+      if (typeof this._els.reverseOpen.focus === 'function') {
+        try { this._els.reverseOpen.focus({ preventScroll: true }); }
+        catch (_) { this._els.reverseOpen.focus(); }
+      }
+    }
+
+    _readReverseForm() {
+      const yearText = String(this._els.reverseYear.value || '').trim();
+      if (!/^-?\d+$/.test(yearText)) throw new RangeError('reverse-year');
+      const year = String(BigInt(yearText));
+
+      const cutletName = String(this._els.reverseCutlet.value || '');
+      const monthName = String(this._els.reverseMonth.value || '');
+      if (!reverseApi.CURRENT_CUTLETS.includes(cutletName)) throw new RangeError('reverse-cutlet');
+      if (!reverseApi.CURRENT_MONTHS.includes(monthName)) throw new RangeError('reverse-month');
+
+      const dayInCutlet = Number(String(this._els.reverseDayCutlet.value || '').trim());
+      const dayInMonth = Number(String(this._els.reverseDayMonth.value || '').trim());
+      if (!Number.isSafeInteger(dayInCutlet) || dayInCutlet < 1) throw new RangeError('reverse-day-cutlet');
+      if (!Number.isSafeInteger(dayInMonth) || dayInMonth < 1) throw new RangeError('reverse-day-month');
+
+      const calculation = axis.parseIsoDate(
+        String(this._els.reverseCalculation.value || '').trim(),
+        'Li die de calculation',
+      );
+      const calculationIso = axis.toIsoDate(calculation);
+      const calculationJdn = axis.gregorianToJdn(calculation);
+      return Object.freeze({
+        value: Object.freeze({ year, cutletName, dayInCutlet, monthName, dayInMonth }),
+        calculationIso,
+        calculationJdn,
+      });
+    }
+
+    async _applyReverseDialog(event) {
+      if (event && typeof event.preventDefault === 'function') event.preventDefault();
+      if (!reverseApi || typeof reverseApi.solveSimplePastafariDate !== 'function' || !reverseApi.isAvailable()) {
+        this._els.reverseStatus.textContent = this._t('reverse.error');
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        return;
+      }
+
+      let input;
+      try {
+        input = this._readReverseForm();
+      } catch (_) {
+        this._els.reverseStatus.textContent = this._t('search.invalid');
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        return;
+      }
+
+      this._abortReverseSearch();
+      const generation = this._reverseGeneration;
+      const AbortCtor = typeof root.AbortController === 'function' ? root.AbortController : null;
+      const controller = AbortCtor ? new AbortCtor() : null;
+      this._reverseController = controller;
+      this._reverseCalculationIso = input.calculationIso;
+      this._reverseSolutions = [];
+      this._els.reverseResults.replaceChildren();
+      this._els.reverseStatus.removeAttribute('data-kind');
+      this._els.reverseStatus.textContent = this._t('reverse.searching');
+      this._els.reverseSubmit.disabled = true;
+
+      try {
+        const result = await reverseApi.solveSimplePastafariDate(
+          input.value,
+          input.calculationJdn,
+          {
+            signal: controller ? controller.signal : undefined,
+            timeoutMs: 120000,
+            onProgress: (progress) => {
+              if (generation !== this._reverseGeneration || !this._els.reverseDialog.hasAttribute('open')) return;
+              const scanned = progress && progress.scanned != null ? String(progress.scanned) : '0';
+              this._els.reverseStatus.textContent = this._t('reverse.progress', { scanned });
+            },
+          },
+        );
+        if (generation !== this._reverseGeneration) return;
+        this._reverseController = null;
+        this._reverseSolutions = Array.from(result.solutions || []);
+        this._renderReverseResults(result);
+      } catch (error) {
+        if (generation !== this._reverseGeneration) return;
+        this._reverseController = null;
+        if (error && error.name === 'AbortError') return;
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        this._els.reverseStatus.textContent = error && error.name === 'TimeoutError'
+          ? this._t('reverse.timeout') : this._t('reverse.error');
+        if (root.console && typeof root.console.error === 'function') root.console.error(error);
+      } finally {
+        if (generation === this._reverseGeneration) this._els.reverseSubmit.disabled = false;
+      }
+    }
+
+    _renderReverseResults(result) {
+      this._els.reverseResults.replaceChildren();
+      const solutions = Array.from(result && result.solutions || []);
+      if (solutions.length === 0) {
+        this._els.reverseStatus.textContent = result && result.complete === false
+          ? this._t('reverse.incomplete') : this._t('reverse.noMatch');
+        return;
+      }
+
+      const status = this._t('reverse.found', { count: solutions.length });
+      this._els.reverseStatus.textContent = result && result.complete === false
+        ? status + ' ' + this._t('reverse.incomplete') : status;
+
+      const fragment = doc.createDocumentFragment();
+      for (const solution of solutions) {
+        if (!solution || solution.jdn == null) continue;
+        const iso = axis.toIsoDate(axis.jdnToGregorian(BigInt(solution.jdn)));
+        const button = doc.createElement('button');
+        button.type = 'button';
+        button.className = 'reverse-result';
+        const label = doc.createElement('span');
+        label.textContent = this._t('reverse.useResult');
+        const date = doc.createElement('bdi');
+        date.setAttribute('dir', 'ltr');
+        date.textContent = iso;
+        button.append(label, date);
+        button.addEventListener('click', () => this._selectReverseResult(solution));
+        fragment.append(button);
+      }
+      this._els.reverseResults.replaceChildren(fragment);
+    }
+
+    _selectReverseResult(solution) {
+      if (!solution || solution.jdn == null) return false;
+      const targetIso = axis.toIsoDate(axis.jdnToGregorian(BigInt(solution.jdn)));
+      const calculationIso = this._reverseCalculationIso || axis.toIsoDate(axis.localToday());
+      this.setAttribute('date', targetIso);
+      const todayIso = axis.toIsoDate(axis.localToday());
+      if (calculationIso === todayIso) this.removeAttribute('calculation-date');
+      else this.setAttribute('calculation-date', calculationIso);
+      this._closeReverseDialog(false);
       return true;
     }
 

@@ -171,6 +171,7 @@ const sandbox = {
   Error,
   TypeError,
   RangeError,
+  AbortController,
   HTMLElement: FakeHTMLElement,
   CustomEvent: FakeCustomEvent,
   document,
@@ -200,6 +201,26 @@ sandbox.PastafariBrowserInternal.calendarService = {
   installSharedCalendarService(service) { sharedService = service; return service; },
   installSharedCalendarMemory() { throw new Error('not used'); },
 };
+const reverseCalls = [];
+sandbox.PastafariBrowserInternal.reverseBridge = Object.freeze({
+  CURRENT_CUTLETS: Object.freeze(['bronze', 'Lagash']),
+  CURRENT_MONTHS: Object.freeze(['argile', 'leopard']),
+  isAvailable() { return true; },
+  async solveSimplePastafariDate(value, calculationJdn, options = {}) {
+    reverseCalls.push({ value, calculationJdn: BigInt(calculationJdn), options });
+    if (options.onProgress) options.onProgress(Object.freeze({
+      scanned: 3n, total: null, matches: 0, phase: 'reverse', complete: false,
+    }));
+    if (String(value.year) === '4999') {
+      return Object.freeze({ solutions: Object.freeze([]), complete: true, termination: 'complete' });
+    }
+    return Object.freeze({
+      solutions: Object.freeze([Object.freeze({ jdn: 2461309n })]),
+      complete: true,
+      termination: 'complete',
+    });
+  },
+});
 load('browser/pastafari-cooking.js');
 load('browser/pastafari-date.js');
 
@@ -282,6 +303,65 @@ async function flush() {
 
   localStorage.clear();
   sandbox.navigator.languages = ['ie'];
+
+  // Public reverse search is a first-class UI path backed by the separately
+  // verified reverse bridge. It starts from the currently displayed five-part
+  // date and hands a selected Gregorian result back to the normal target path.
+  const reverseUi = new PastafariDateElement();
+  reverseUi._value = Object.freeze({
+    year: '5000',
+    cutletName: 'bronze',
+    dayInCutlet: 7,
+    monthName: 'argile',
+    dayInMonth: 4,
+  });
+  reverseUi._targetJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-11'));
+  reverseUi._calculationJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-10'));
+  assert.strictEqual(reverseUi._els.reverseOpen.hidden, false);
+  reverseUi._openReverseDialog();
+  assert.strictEqual(reverseUi._els.reverseDialog.hasAttribute('open'), true);
+  assert.strictEqual(reverseUi._els.reverseYear.value, '5000');
+  assert.strictEqual(reverseUi._els.reverseCutlet.value, 'bronze');
+  assert.strictEqual(reverseUi._els.reverseDayCutlet.value, '7');
+  assert.strictEqual(reverseUi._els.reverseMonth.value, 'argile');
+  assert.strictEqual(reverseUi._els.reverseDayMonth.value, '4');
+  assert.strictEqual(reverseUi._els.reverseCalculation.value, '2026-09-10');
+
+  reverseUi._els.reverseYear.value = '5000';
+  reverseUi._els.reverseCutlet.value = 'bronze';
+  reverseUi._els.reverseDayCutlet.value = '7';
+  reverseUi._els.reverseMonth.value = 'argile';
+  reverseUi._els.reverseDayMonth.value = '4';
+  reverseUi._els.reverseCalculation.value = '2026-09-10';
+  await reverseUi._applyReverseDialog({ preventDefault() {} });
+  assert.strictEqual(reverseCalls.length, 1);
+  assert.strictEqual(reverseCalls[0].value.year, '5000');
+  assert.strictEqual(reverseCalls[0].value.cutletName, 'bronze');
+  assert.strictEqual(reverseCalls[0].value.dayInCutlet, 7);
+  assert.strictEqual(reverseCalls[0].value.monthName, 'argile');
+  assert.strictEqual(reverseCalls[0].value.dayInMonth, 4);
+  assert.strictEqual(reverseUi._reverseSolutions.length, 1);
+  assert(reverseUi._els.reverseStatus.textContent.includes('1'));
+
+  const reverseIso = axis.toIsoDate(axis.jdnToGregorian(2461309n));
+  assert.strictEqual(reverseUi._selectReverseResult(reverseUi._reverseSolutions[0]), true);
+  assert.strictEqual(reverseUi.getAttribute('date'), reverseIso);
+  assert.strictEqual(reverseUi.getAttribute('calculation-date'), '2026-09-10');
+  assert.strictEqual(reverseUi._els.reverseDialog.hasAttribute('open'), false);
+  assert.strictEqual(reverseUi._els.reverseOpen.focused, true);
+
+  reverseUi._openReverseDialog();
+  reverseUi._els.reverseYear.value = '4999';
+  reverseUi._els.reverseCutlet.value = 'bronze';
+  reverseUi._els.reverseDayCutlet.value = '1';
+  reverseUi._els.reverseMonth.value = 'argile';
+  reverseUi._els.reverseDayMonth.value = '1';
+  reverseUi._els.reverseCalculation.value = '2026-09-10';
+  await reverseUi._applyReverseDialog({ preventDefault() {} });
+  assert.strictEqual(reverseCalls.length, 2);
+  assert.strictEqual(reverseUi._reverseSolutions.length, 0);
+  assert.strictEqual(reverseUi._els.reverseStatus.textContent, reverseUi._t('reverse.noMatch'));
+  reverseUi._closeReverseDialog(true);
 
   // The public calendar owns only the open/close and date synchronization of
   // the separate <pastafari-cooking> component. Merely constructing the date

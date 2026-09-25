@@ -68,6 +68,40 @@
             "settings.heading": "Changear li die de labor",
             "settings.invalid": "Li die de labor es invalid. Controla li date e prova denov.",
             "reverse.action.cancel": "Anullar",
+
+            "reverse.open": "Serchar per date Pastafarian",
+
+            "reverse.heading": "Trovar un die per su date Pastafarian",
+
+            "reverse.year": "Annu desde li Creation del Munde",
+
+            "reverse.cutlet": "Cutlet",
+
+            "reverse.dayInCutlet": "Die in li cutlet",
+
+            "reverse.month": "Mensu",
+
+            "reverse.dayInMonth": "Die in li mensu",
+
+            "reverse.calculation": "Die de labor",
+
+            "reverse.submit": "Serchar",
+
+            "reverse.searching": "Serchante…",
+
+            "reverse.progress": "Examinat {scanned} candidates…",
+
+            "reverse.noMatch": "Null concordant date Gregorian esset trovat.",
+
+            "reverse.found": "Resultates trovat: {count}.",
+
+            "reverse.incomplete": "Li sercha haltat ante que completitá esset provat.",
+
+            "reverse.error": "Li sercha retrograd fallit.",
+
+            "reverse.timeout": "Li sercha retrograd dura tro long.",
+
+            "reverse.useResult": "Monstrar ti date",
             "field.day": "Die",
             "date.aria": "Annu {year} desde li Creation del Munde, die {dayInCutlet} in li cutlet {cutletName}, die {dayInMonth} in li mensu {monthName}",
             "date.cutletLine": "Die {dayInCutlet} in li cutlet {cutletName}",
@@ -245,6 +279,40 @@
             "settings.heading": "Change the day of working",
             "settings.invalid": "The day of working is invalid. Check the date and try again.",
             "reverse.action.cancel": "Cancel",
+
+            "reverse.open": "Search by Pastafarian date",
+
+            "reverse.heading": "Find a day by its Pastafarian date",
+
+            "reverse.year": "Year from the Creation of the World",
+
+            "reverse.cutlet": "Cutlet",
+
+            "reverse.dayInCutlet": "Day in cutlet",
+
+            "reverse.month": "Month",
+
+            "reverse.dayInMonth": "Day in month",
+
+            "reverse.calculation": "Day of working",
+
+            "reverse.submit": "Search",
+
+            "reverse.searching": "Searching…",
+
+            "reverse.progress": "Scanned {scanned} candidates…",
+
+            "reverse.noMatch": "No matching Gregorian date was found.",
+
+            "reverse.found": "Matching dates found: {count}.",
+
+            "reverse.incomplete": "The search stopped before completeness was proved.",
+
+            "reverse.error": "Reverse search failed.",
+
+            "reverse.timeout": "Reverse search took too long.",
+
+            "reverse.useResult": "Show this date",
             "field.day": "Day",
             "date.aria": "Year {year} from the Creation of the World, day {dayInCutlet} in the cutlet {cutletName}, day {dayInMonth} in the month {monthName}",
             "date.cutletLine": "Day {dayInCutlet} in the cutlet {cutletName}",
@@ -423,6 +491,40 @@
             "settings.heading": "\u05E9\u05D9\u05E0\u05D5\u05D9 \u05D9\u05D5\u05DD \u05D4\u05DE\u05E2\u05E9\u05D4",
             "settings.invalid": "\u05D9\u05D5\u05DD \u05D4\u05DE\u05E2\u05E9\u05D4 \u05D0\u05D9\u05E0\u05D5 \u05EA\u05E7\u05D9\u05DF. \u05D1\u05D3\u05E7\u05D5 \u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05D5\u05E0\u05E1\u05D5 \u05E9\u05D5\u05D1.",
             "reverse.action.cancel": "\u05D1\u05D9\u05D8\u05D5\u05DC \u05D4\u05D7\u05D9\u05E4\u05D5\u05E9",
+
+            "reverse.open": "חיפוש לפי תאריך פסטפרי",
+
+            "reverse.heading": "מציאת יום לפי התאריך הפסטפרי שלו",
+
+            "reverse.year": "שנה לבריאת העולם",
+
+            "reverse.cutlet": "קציצה",
+
+            "reverse.dayInCutlet": "יום בקציצה",
+
+            "reverse.month": "חודש",
+
+            "reverse.dayInMonth": "יום בחודש",
+
+            "reverse.calculation": "יום המעשה",
+
+            "reverse.submit": "חיפוש",
+
+            "reverse.searching": "מחפש…",
+
+            "reverse.progress": "נבדקו {scanned} מועמדים…",
+
+            "reverse.noMatch": "לא נמצא תאריך גרגוריאני תואם.",
+
+            "reverse.found": "נמצאו {count} תאריכים תואמים.",
+
+            "reverse.incomplete": "החיפוש נעצר לפני שהוכח שהוא ממצה.",
+
+            "reverse.error": "החיפוש ההפוך נכשל.",
+
+            "reverse.timeout": "החיפוש ההפוך נמשך זמן רב מדי.",
+
+            "reverse.useResult": "הצג תאריך זה",
             "field.day": "\u05D9\u05D5\u05DD",
             "date.aria": "\u05E9\u05E0\u05EA {year} \u05DC\u05D1\u05E8\u05D9\u05D0\u05EA \u05D4\u05E2\u05D5\u05DC\u05DD, \u05D9\u05D5\u05DD {dayInCutlet} \u05DC\u05E7\u05E6\u05D9\u05E6\u05D4 {cutletName}, {dayInMonth} \u05D1\u05D7\u05D5\u05D3\u05E9 {monthName}",
             "date.yearLine": "\u05E9\u05E0\u05EA {year} \u05DC\u05D1\u05E8\u05D9\u05D0\u05EA \u05D4\u05E2\u05D5\u05DC\u05DD",
@@ -600,6 +702,40 @@
             "settings.heading": "تغيير يوم العمل",
             "settings.invalid": "يوم العمل غير صالح. تحقّق من التاريخ وحاول مرة أخرى.",
             "reverse.action.cancel": "إلغاء البحث",
+
+            "reverse.open": "البحث بالتاريخ الباستافاري",
+
+            "reverse.heading": "العثور على يوم من تاريخه الباستافاري",
+
+            "reverse.year": "السنة منذ خلق العالم",
+
+            "reverse.cutlet": "القطعة",
+
+            "reverse.dayInCutlet": "اليوم في القطعة",
+
+            "reverse.month": "الشهر",
+
+            "reverse.dayInMonth": "اليوم في الشهر",
+
+            "reverse.calculation": "يوم العمل",
+
+            "reverse.submit": "بحث",
+
+            "reverse.searching": "جارٍ البحث…",
+
+            "reverse.progress": "تم فحص {scanned} مرشحًا…",
+
+            "reverse.noMatch": "لم يُعثر على تاريخ غريغوري مطابق.",
+
+            "reverse.found": "عدد التواريخ المطابقة: {count}.",
+
+            "reverse.incomplete": "توقف البحث قبل إثبات اكتماله.",
+
+            "reverse.error": "فشل البحث العكسي.",
+
+            "reverse.timeout": "استغرق البحث العكسي وقتًا أطول من اللازم.",
+
+            "reverse.useResult": "عرض هذا التاريخ",
             "field.day": "اليوم",
             "date.aria": "السنة {year} منذ خلق العالم، اليوم {dayInCutlet} في القطعة {cutletName}، اليوم {dayInMonth} في الشهر {monthName}",
             "date.yearLine": "السنة {year} منذ خلق العالم",
@@ -777,6 +913,40 @@
             "settings.heading": "Изменить день действия",
             "settings.invalid": "День действия недопустим. Проверьте дату и повторите попытку.",
             "reverse.action.cancel": "Отменить поиск",
+
+            "reverse.open": "Поиск по пастафарианской дате",
+
+            "reverse.heading": "Найти день по его пастафарианской дате",
+
+            "reverse.year": "Год от Сотворения мира",
+
+            "reverse.cutlet": "Котлета",
+
+            "reverse.dayInCutlet": "День в котлете",
+
+            "reverse.month": "Месяц",
+
+            "reverse.dayInMonth": "День в месяце",
+
+            "reverse.calculation": "День действия",
+
+            "reverse.submit": "Найти",
+
+            "reverse.searching": "Поиск…",
+
+            "reverse.progress": "Проверено кандидатов: {scanned}…",
+
+            "reverse.noMatch": "Подходящая григорианская дата не найдена.",
+
+            "reverse.found": "Найдено совпадений: {count}.",
+
+            "reverse.incomplete": "Поиск остановлен до доказательства полноты.",
+
+            "reverse.error": "Обратный поиск завершился ошибкой.",
+
+            "reverse.timeout": "Обратный поиск занял слишком много времени.",
+
+            "reverse.useResult": "Показать эту дату",
             "field.day": "День",
             "date.aria": "Год {year} от Сотворения мира, день {dayInCutlet} в котлете {cutletName}, день {dayInMonth} в месяце {monthName}",
             "date.yearLine": "Год {year} от Сотворения мира",
@@ -954,6 +1124,40 @@
             "settings.heading": "Changer le jour de travail",
             "settings.invalid": "Le jour de travail n’est pas valide. Vérifiez la date et réessayez.",
             "reverse.action.cancel": "Annuler la recherche",
+
+            "reverse.open": "Rechercher par date pastafarienne",
+
+            "reverse.heading": "Trouver un jour à partir de sa date pastafarienne",
+
+            "reverse.year": "Année depuis la Création du Monde",
+
+            "reverse.cutlet": "Boulette",
+
+            "reverse.dayInCutlet": "Jour dans la boulette",
+
+            "reverse.month": "Mois",
+
+            "reverse.dayInMonth": "Jour dans le mois",
+
+            "reverse.calculation": "Jour de travail",
+
+            "reverse.submit": "Rechercher",
+
+            "reverse.searching": "Recherche…",
+
+            "reverse.progress": "{scanned} candidats examinés…",
+
+            "reverse.noMatch": "Aucune date grégorienne correspondante n’a été trouvée.",
+
+            "reverse.found": "Dates correspondantes trouvées : {count}.",
+
+            "reverse.incomplete": "La recherche s’est arrêtée avant que son exhaustivité soit démontrée.",
+
+            "reverse.error": "La recherche inverse a échoué.",
+
+            "reverse.timeout": "La recherche inverse a pris trop de temps.",
+
+            "reverse.useResult": "Afficher cette date",
             "field.day": "Jour",
             "date.aria": "Année {year} depuis la Création du Monde, jour {dayInCutlet} dans la boulette {cutletName}, jour {dayInMonth} dans le mois {monthName}",
             "date.yearLine": "Année {year} depuis la Création du Monde",
@@ -1131,6 +1335,40 @@
             "settings.heading": "Tag der Ausführung ändern",
             "settings.invalid": "Der Tag der Ausführung ist ungültig. Prüfe das Datum und versuche es erneut.",
             "reverse.action.cancel": "Suche abbrechen",
+
+            "reverse.open": "Nach pastafarischem Datum suchen",
+
+            "reverse.heading": "Einen Tag über sein pastafarisches Datum finden",
+
+            "reverse.year": "Jahr seit der Erschaffung der Welt",
+
+            "reverse.cutlet": "Schnitzel",
+
+            "reverse.dayInCutlet": "Tag im Schnitzel",
+
+            "reverse.month": "Monat",
+
+            "reverse.dayInMonth": "Tag im Monat",
+
+            "reverse.calculation": "Tag der Ausführung",
+
+            "reverse.submit": "Suchen",
+
+            "reverse.searching": "Suche…",
+
+            "reverse.progress": "{scanned} Kandidaten geprüft…",
+
+            "reverse.noMatch": "Es wurde kein passendes gregorianisches Datum gefunden.",
+
+            "reverse.found": "Gefundene passende Daten: {count}.",
+
+            "reverse.incomplete": "Die Suche wurde beendet, bevor Vollständigkeit nachgewiesen war.",
+
+            "reverse.error": "Die Rückwärtssuche ist fehlgeschlagen.",
+
+            "reverse.timeout": "Die Rückwärtssuche dauerte zu lange.",
+
+            "reverse.useResult": "Dieses Datum anzeigen",
             "field.day": "Tag",
             "date.aria": "Jahr {year} seit der Erschaffung der Welt, Tag {dayInCutlet} im Schnitzel {cutletName}, Tag {dayInMonth} im Monat {monthName}",
             "date.yearLine": "Jahr {year} seit der Erschaffung der Welt",
@@ -1308,6 +1546,40 @@
             "settings.heading": "Cambiar el día de trabajo",
             "settings.invalid": "El día de trabajo no es válido. Comprueba la fecha e inténtalo de nuevo.",
             "reverse.action.cancel": "Cancelar búsqueda",
+
+            "reverse.open": "Buscar por fecha pastafari",
+
+            "reverse.heading": "Encontrar un día a partir de su fecha pastafari",
+
+            "reverse.year": "Año desde la Creación del Mundo",
+
+            "reverse.cutlet": "Croqueta",
+
+            "reverse.dayInCutlet": "Día en la croqueta",
+
+            "reverse.month": "Mes",
+
+            "reverse.dayInMonth": "Día en el mes",
+
+            "reverse.calculation": "Día de trabajo",
+
+            "reverse.submit": "Buscar",
+
+            "reverse.searching": "Buscando…",
+
+            "reverse.progress": "Se han examinado {scanned} candidatos…",
+
+            "reverse.noMatch": "No se encontró ninguna fecha gregoriana coincidente.",
+
+            "reverse.found": "Fechas coincidentes encontradas: {count}.",
+
+            "reverse.incomplete": "La búsqueda se detuvo antes de demostrar que era exhaustiva.",
+
+            "reverse.error": "La búsqueda inversa falló.",
+
+            "reverse.timeout": "La búsqueda inversa tardó demasiado.",
+
+            "reverse.useResult": "Mostrar esta fecha",
             "field.day": "Día",
             "date.aria": "Año {year} desde la Creación del Mundo, día {dayInCutlet} de la croqueta {cutletName}, día {dayInMonth} del mes {monthName}",
             "date.yearLine": "Año {year} desde la Creación del Mundo",
@@ -1485,6 +1757,40 @@
             "settings.heading": "Cambia il giorno di lavoro",
             "settings.invalid": "Il giorno di lavoro non è valido. Controlla la data e riprova.",
             "reverse.action.cancel": "Annulla ricerca",
+
+            "reverse.open": "Cerca per data pastafariana",
+
+            "reverse.heading": "Trova un giorno dalla sua data pastafariana",
+
+            "reverse.year": "Anno dalla Creazione del Mondo",
+
+            "reverse.cutlet": "Cotoletta",
+
+            "reverse.dayInCutlet": "Giorno nella cotoletta",
+
+            "reverse.month": "Mese",
+
+            "reverse.dayInMonth": "Giorno nel mese",
+
+            "reverse.calculation": "Giorno di lavoro",
+
+            "reverse.submit": "Cerca",
+
+            "reverse.searching": "Ricerca…",
+
+            "reverse.progress": "Esaminati {scanned} candidati…",
+
+            "reverse.noMatch": "Non è stata trovata alcuna data gregoriana corrispondente.",
+
+            "reverse.found": "Date corrispondenti trovate: {count}.",
+
+            "reverse.incomplete": "La ricerca si è fermata prima che ne fosse dimostrata la completezza.",
+
+            "reverse.error": "La ricerca inversa non è riuscita.",
+
+            "reverse.timeout": "La ricerca inversa ha impiegato troppo tempo.",
+
+            "reverse.useResult": "Mostra questa data",
             "field.day": "Giorno",
             "date.aria": "Anno {year} dalla Creazione del Mondo, giorno {dayInCutlet} nella cotoletta {cutletName}, giorno {dayInMonth} nel mese {monthName}",
             "date.yearLine": "Anno {year} dalla Creazione del Mondo",
@@ -1662,6 +1968,40 @@
             "settings.heading": "Změnit den činnosti",
             "settings.invalid": "Den činnosti není platný. Zkontrolujte datum a zkuste to znovu.",
             "reverse.action.cancel": "Zrušit hledání",
+
+            "reverse.open": "Hledat podle pastafariánského data",
+
+            "reverse.heading": "Najít den podle jeho pastafariánského data",
+
+            "reverse.year": "Rok od Stvoření světa",
+
+            "reverse.cutlet": "Řízek",
+
+            "reverse.dayInCutlet": "Den v řízku",
+
+            "reverse.month": "Měsíc",
+
+            "reverse.dayInMonth": "Den v měsíci",
+
+            "reverse.calculation": "Den činnosti",
+
+            "reverse.submit": "Hledat",
+
+            "reverse.searching": "Hledání…",
+
+            "reverse.progress": "Prověřeno kandidátů: {scanned}…",
+
+            "reverse.noMatch": "Nebyla nalezena odpovídající gregoriánská data.",
+
+            "reverse.found": "Počet nalezených shod: {count}.",
+
+            "reverse.incomplete": "Hledání skončilo dříve, než byla prokázána úplnost.",
+
+            "reverse.error": "Zpětné hledání selhalo.",
+
+            "reverse.timeout": "Zpětné hledání trvalo příliš dlouho.",
+
+            "reverse.useResult": "Zobrazit toto datum",
             "field.day": "Den",
             "date.aria": "Rok {year} od Stvoření světa, den {dayInCutlet} v řízku {cutletName}, den {dayInMonth} v měsíci {monthName}",
             "date.yearLine": "Rok {year} od Stvoření světa",

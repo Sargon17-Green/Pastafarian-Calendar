@@ -1,6 +1,8 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const current = require('../src/index.js');
@@ -30,10 +32,18 @@ const REVERSE_MONTHS = Object.freeze([
 ]);
 
 function currentValue(calculationJdn, targetJdn) {
-  return current.calendarDateSpaghetti(
+  const tuple = current.calendarDateSpaghetti(
     calculationJdn - PROJECT_OFFSET,
     targetJdn - PROJECT_OFFSET,
   );
+  assert(Array.isArray(tuple) && tuple.length === 5, 'Stage 57 forward result must remain a five-part tuple.');
+  return {
+    year: String(tuple[0]),
+    cutletName: String(tuple[1]),
+    dayInCutlet: Number(tuple[2]),
+    monthName: String(tuple[3]),
+    dayInMonth: Number(tuple[4]),
+  };
 }
 
 function mapFastToCurrent(value) {
@@ -65,11 +75,20 @@ function mapCurrentToFast(value) {
 }
 
 (async () => {
-  const fastUrl = pathToFileURL(path.resolve(__dirname, '../browser/reverse-engine/pastafari-calendar-fast.js')).href;
-  const clientUrl = pathToFileURL(path.resolve(__dirname, '../browser/reverse-engine/pastafari-constraints-client.js')).href;
-  const fast = await import(fastUrl);
-  const constraints = await import(clientUrl);
-  const fastCalendar = new fast.PastafariCalendar();
+  // The application intentionally keeps the repository's historical CommonJS
+  // package mode while the vendored reverse engine is native ESM in browsers.
+  // Mirror the browser module boundary in an isolated temporary package so Node
+  // parses the exact vendored sources as ESM without changing project-wide mode.
+  const moduleRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'pastafari-reverse-vendor-'));
+  fs.cpSync(path.resolve(__dirname, '../browser/reverse-engine'), moduleRoot, { recursive: true });
+  fs.writeFileSync(path.join(moduleRoot, 'package.json'), '{"type":"module"}\n', 'utf8');
+
+  try {
+    const fastUrl = pathToFileURL(path.join(moduleRoot, 'pastafari-calendar-fast.js')).href;
+    const clientUrl = pathToFileURL(path.join(moduleRoot, 'pastafari-constraints-client.js')).href;
+    const fast = await import(fastUrl);
+    const constraints = await import(clientUrl);
+    const fastCalendar = new fast.PastafariCalendar();
 
   const calculations = [2461259n, 2461309n];
   const offsets = [-400n, -31n, -1n, 0n, 1n, 7n, 31n, 180n, 400n, 1200n];
@@ -113,7 +132,10 @@ function mapCurrentToFast(value) {
       'reverse solution fails Stage 57 forward verification');
   }
 
-  console.log('browser-reverse-vendor: PASS (' + checked + ' forward differential witnesses + reverse round-trip)');
+    console.log('browser-reverse-vendor: PASS (' + checked + ' forward differential witnesses + reverse round-trip)');
+  } finally {
+    fs.rmSync(moduleRoot, { recursive: true, force: true });
+  }
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);
   process.exitCode = 1;
