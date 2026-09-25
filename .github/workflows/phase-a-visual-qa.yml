@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - 'JavaScript+Interlingue'
+      - main
     paths:
       - 'browser/**'
       - '.github/workflows/phase-a-visual-qa.yml'
