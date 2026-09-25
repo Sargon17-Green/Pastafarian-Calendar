@@ -517,6 +517,7 @@ async function flush() {
   });
   duplicateGuard._cutlets = new Map([[739800n, firstView], [739862n, exactView]]);
   duplicateGuard._orderedStarts = [739800n, 739862n];
+  duplicateGuard._activeStartJdn = 739800n;
   const prepared = duplicateGuard._prepareRenderableCutlets();
   assert.strictEqual(prepared.length, 1);
   assert.strictEqual(prepared[0].days.length, 1);
@@ -526,6 +527,12 @@ async function flush() {
     startJdn: 739862n, endJdn: 739900n, cutletName: 'bronze', year: '5000', days: Object.freeze([wrongDuplicate]),
   });
   duplicateGuard._cutlets = new Map([[739800n, firstView], [739862n, wrongView]]);
+  duplicateGuard._orderedStarts = [739800n, 739862n];
+  duplicateGuard._activeStartJdn = 739862n;
+  duplicateGuard._scrollTarget = Object.freeze({
+    jdn: 739862n, startJdn: 739186n,
+    year: '5000', cutletName: 'bronze', dayInCutlet: 677, monthName: 'sand', dayInMonth: 32,
+  });
   assert.throws(
     () => duplicateGuard._prepareRenderableCutlets(),
     (error) => error && error.code === 'ERR_CALENDAR_RENDER_INCONSISTENCY'
