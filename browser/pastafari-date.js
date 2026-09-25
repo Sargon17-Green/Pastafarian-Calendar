@@ -1474,7 +1474,10 @@
       if (!panel) return;
       if (panel.hasAttribute('open')) {
         if (typeof panel.close === 'function') panel.close();
-        else panel.removeAttribute('open');
+        else {
+          panel.removeAttribute('open');
+          this._els.cookingOpen.setAttribute('aria-expanded', 'false');
+        }
         return;
       }
       this._syncCookingPanel();
