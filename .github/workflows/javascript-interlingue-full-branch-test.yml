@@ -293,3 +293,253 @@ jobs:
           test "${{ needs.corrective-57.result }}" = "success"
           test "${{ needs.acceleration-58.result }}" = "success"
           echo 'JAVASCRIPT_INTERLINGUE_BRANCH=GREEN'
+
+
+  phase-c-trace-visual-qa:
+    name: Phase C — trace modal visual assertions
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Extraer li repository
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Constructer li browser artefact
+        run: |
+          set -euo pipefail
+          node tests/verify-stage-01.js
+          node tests/browser-interface-all.js
+          node scripts/build-browser.js
+          node tests/browser-built-artifacts.js
+
+      - name: Preparar Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/phase-c-qa"
+          cd "$RUNNER_TEMP/phase-c-qa"
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Provar visualmen li modal trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE="$RUNNER_TEMP/phase-c-site"
+          rm -rf "$SITE"
+          mkdir -p "$SITE/dist"
+          cp browser/dist/index.html "$SITE/index.html"
+          cp browser/dist/pastafari-date.js "$SITE/dist/pastafari-date.js"
+          cp browser/dist/pastafari-worker.js "$SITE/dist/pastafari-worker.js"
+          cp browser/dist/pastafari-date.mjs "$SITE/dist/pastafari-date.mjs"
+          cp browser/dist/build-id.txt "$SITE/dist/build-id.txt"
+          cd "$SITE"
+          python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/phase-c-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+
+          cd "$RUNNER_TEMP/phase-c-qa"
+          cat > qa.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const out = path.join(process.cwd(), 'out');
+          fs.mkdirSync(out,{recursive:true});
+          const base='http://127.0.0.1:4173/';
+          const profiles=[
+            {name:'desktop1440_en',width:1440,height:1000,mobile:false,locale:'en-US',lang:'en'},
+            {name:'tablet800_he',width:800,height:1100,mobile:false,locale:'he-IL',lang:'he'},
+            {name:'mobile390_ar',width:390,height:844,mobile:true,locale:'ar',lang:'ar'},
+            {name:'mobile320_he',width:320,height:740,mobile:true,locale:'he-IL',lang:'he'},
+          ];
+          function assert(v,m){ if(!v) throw new Error(m); }
+
+          async function waitCalendar(page){
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('pastafari-date')?.shadowRoot;
+              const c=s?.querySelector('.calendar');
+              return !!c && !c.hasAttribute('data-state');
+            },null,{timeout:180000});
+            await page.waitForTimeout(500);
+          }
+
+          async function setLang(page,lang){
+            await page.evaluate((lang)=>{
+              const host=document.querySelector('pastafari-date');
+              host.setAttribute('lang',lang);
+            },lang);
+            await page.waitForTimeout(250);
+          }
+
+          async function modalState(page){
+            return page.evaluate(()=>{
+              const host=document.querySelector('pastafari-date');
+              const s=host.shadowRoot;
+              const panel=s.querySelector('pastafari-cooking');
+              const ps=panel.shadowRoot;
+              const shell=ps.querySelector('.shell');
+              const pane=ps.querySelector('.pane');
+              const nav=ps.querySelector('.nav');
+              const rect=shell.getBoundingClientRect();
+              const navRect=nav.getBoundingClientRect();
+              const buttons=[...nav.querySelectorAll('button')].map(b=>{
+                const r=b.getBoundingClientRect();
+                return {text:b.textContent,x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,current:b.getAttribute('aria-current')};
+              });
+              const openButton=s.querySelector('.cooking-open');
+              const active=document.activeElement===host && s.activeElement===panel
+                ? ps.activeElement
+                : (ps.activeElement || s.activeElement || document.activeElement);
+              return {
+                open: shell.hasAttribute('open'),
+                hostOpen: panel.hasAttribute('open'),
+                viewport:{w:innerWidth,h:innerHeight},
+                rect:{x:rect.x,y:rect.y,right:rect.right,bottom:rect.bottom,width:rect.width,height:rect.height},
+                navRect:{x:navRect.x,y:navRect.y,right:navRect.right,bottom:navRect.bottom,width:navRect.width,height:navRect.height},
+                navScrollWidth:nav.scrollWidth,
+                navClientWidth:nav.clientWidth,
+                navOverflowX:getComputedStyle(nav).overflowX,
+                navButtons:buttons,
+                navCount:buttons.length,
+                paneOverflowY:getComputedStyle(pane).overflowY,
+                paneClientHeight:pane.clientHeight,
+                paneScrollHeight:pane.scrollHeight,
+                bodyScrollWidth:document.documentElement.scrollWidth,
+                bodyClientWidth:document.documentElement.clientWidth,
+                pageY:scrollY,
+                expanded:openButton.getAttribute('aria-expanded'),
+                activeClass:active && active.className ? String(active.className) : '',
+                dir:panel.getAttribute('dir'),
+              };
+            });
+          }
+
+          async function screenshot(page,name){
+            await page.screenshot({path:path.join(out,name+'.png'),fullPage:false});
+          }
+
+          async function check(browser,p){
+            const ctx=await browser.newContext({
+              viewport:{width:p.width,height:p.height},
+              locale:p.locale,isMobile:p.mobile,hasTouch:p.mobile,deviceScaleFactor:1
+            });
+            const page=await ctx.newPage();
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await waitCalendar(page);
+            await setLang(page,p.lang);
+
+            // Put the opener away from the top so any page jump is detectable.
+            const opener=page.locator('pastafari-date').locator('.cooking-open');
+            await opener.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(200);
+            const beforeY=await page.evaluate(()=>scrollY);
+            await opener.click();
+
+            await page.waitForFunction(()=>{
+              const p=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('pastafari-cooking');
+              return !!p?.shadowRoot?.querySelector('.shell[open]');
+            },null,{timeout:180000});
+            await page.waitForFunction(()=>{
+              const p=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('pastafari-cooking');
+              return p?.shadowRoot?.querySelectorAll('.nav button').length===9;
+            },null,{timeout:180000});
+            await page.waitForTimeout(800);
+
+            const opened=await modalState(page);
+            fs.writeFileSync(path.join(out,p.name+'__opened.json'),JSON.stringify({beforeY,opened},null,2));
+            assert(opened.open && opened.hostOpen,p.name+': modal did not open');
+            assert(opened.expanded==='true',p.name+': opener aria-expanded is not true');
+            assert(opened.navCount===9,p.name+': expected 9 chapters, got '+opened.navCount);
+            assert(opened.bodyScrollWidth<=opened.bodyClientWidth+1,p.name+': page horizontal overflow while modal open');
+            assert(opened.navScrollWidth<=opened.navClientWidth+2,p.name+': chapter navigation still needs horizontal scrolling');
+            assert(opened.rect.x>=-1 && opened.rect.y>=-1,p.name+': modal starts outside viewport');
+            assert(opened.rect.right<=opened.viewport.w+1 && opened.rect.bottom<=opened.viewport.h+1,p.name+': modal exceeds viewport');
+            assert(Math.abs(opened.pageY-beforeY)<=2,p.name+': opening modal changed document scrollY');
+            assert(opened.paneOverflowY==='auto',p.name+': trace content pane is not the bounded scroll owner');
+            if(p.mobile){
+              assert(opened.rect.width>=opened.viewport.w-2,p.name+': mobile modal is not full width');
+              assert(opened.rect.height>=opened.viewport.h-2,p.name+': mobile modal is not full height');
+            }
+
+            // Every chapter control itself must be visible inside the modal nav.
+            for(const b of opened.navButtons){
+              assert(b.x>=opened.navRect.x-1 && b.right<=opened.navRect.right+1,p.name+': chapter clipped horizontally: '+b.text);
+              assert(b.y>=opened.navRect.y-1 && b.bottom<=opened.navRect.bottom+1,p.name+': chapter clipped vertically: '+b.text);
+            }
+            await screenshot(page,p.name+'__opened');
+
+            // Open a late chapter and verify the active chapter changes without page movement.
+            const navButtons=page.locator('pastafari-date').locator('pastafari-cooking').locator('.nav button');
+            await navButtons.nth(8).click();
+            await page.waitForTimeout(300);
+            const late=await modalState(page);
+            assert(late.navButtons[8].current==='page',p.name+': final chapter did not become active');
+            assert(Math.abs(late.pageY-beforeY)<=2,p.name+': chapter switch changed document scrollY');
+            await screenshot(page,p.name+'__result_chapter');
+
+            // Expand one exact number if present; even huge values must remain inside modal width.
+            const exact=page.locator('pastafari-date').locator('pastafari-cooking').locator('.exact-number').first();
+            if(await exact.count()){
+              await exact.click();
+              await page.waitForTimeout(150);
+              const overflow=await page.evaluate(()=>{
+                const p=document.querySelector('pastafari-date').shadowRoot.querySelector('pastafari-cooking').shadowRoot;
+                const shell=p.querySelector('.shell').getBoundingClientRect();
+                const e=p.querySelector('.exact-number[data-expanded="true"]')?.getBoundingClientRect();
+                return e ? {left:e.left,right:e.right,shellLeft:shell.left,shellRight:shell.right} : null;
+              });
+              if(overflow) assert(overflow.left>=overflow.shellLeft-1 && overflow.right<=overflow.shellRight+1,p.name+': expanded exact integer escapes modal');
+            }
+
+            // Close through the visible control. Page position and focus must return.
+            const close=page.locator('pastafari-date').locator('pastafari-cooking').locator('.close');
+            await close.click();
+            await page.waitForFunction(()=>{
+              const host=document.querySelector('pastafari-date');
+              const panel=host?.shadowRoot?.querySelector('pastafari-cooking');
+              return !!panel && !panel.hasAttribute('open');
+            },null,{timeout:5000});
+            await page.waitForTimeout(250);
+            const after=await page.evaluate(()=>{
+              const host=document.querySelector('pastafari-date');
+              const s=host.shadowRoot;
+              return {
+                pageY:scrollY,
+                expanded:s.querySelector('.cooking-open').getAttribute('aria-expanded'),
+                focusReturned:s.activeElement===s.querySelector('.cooking-open'),
+              };
+            });
+            fs.writeFileSync(path.join(out,p.name+'__closed.json'),JSON.stringify({beforeY,after},null,2));
+            assert(Math.abs(after.pageY-beforeY)<=2,p.name+': closing modal changed document scrollY');
+            assert(after.expanded==='false',p.name+': opener aria-expanded did not reset');
+            assert(after.focusReturned,p.name+': focus did not return to opener');
+            await screenshot(page,p.name+'__closed');
+            await ctx.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for(const p of profiles) await check(browser,p);
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node qa.js
+
+      - name: Conservar li Phase C visual QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-c-trace-visual-qa
+          path: ${{ runner.temp }}/phase-c-qa/out
+          if-no-files-found: warn
+          retention-days: 14
