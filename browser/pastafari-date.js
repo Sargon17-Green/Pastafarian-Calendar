@@ -1987,6 +1987,212 @@
       return true;
     }
 
+    _populateReverseSelectors() {
+      if (!this._els || !this._els.reverseCutlet || !this._els.reverseMonth || !reverseApi) return;
+      const populate = (select, names, group) => {
+        const previous = select.value;
+        const fragment = doc.createDocumentFragment();
+        for (const sourceName of names || []) {
+          const option = doc.createElement('option');
+          option.value = String(sourceName);
+          option.textContent = this._localCalendarName(group, sourceName);
+          if (String(sourceName) === previous) option.selected = true;
+          fragment.append(option);
+        }
+        select.replaceChildren(fragment);
+        if (previous && Array.from(names || []).includes(previous)) select.value = previous;
+      };
+      populate(this._els.reverseCutlet, reverseApi.CURRENT_CUTLETS, 'cutlet');
+      populate(this._els.reverseMonth, reverseApi.CURRENT_MONTHS, 'month');
+    }
+
+    _abortReverseSearch() {
+      this._reverseGeneration += 1;
+      const controller = this._reverseController;
+      this._reverseController = null;
+      if (controller && typeof controller.abort === 'function') {
+        try { controller.abort(); } catch (_) { /* best effort */ }
+      }
+    }
+
+    _openReverseDialog() {
+      if (!reverseApi || typeof reverseApi.isAvailable !== 'function' || !reverseApi.isAvailable()) return;
+      this._abortReverseSearch();
+      this._reverseSolutions = [];
+      this._els.reverseResults.replaceChildren();
+      this._els.reverseStatus.textContent = '';
+      this._els.reverseStatus.removeAttribute('data-kind');
+      this._els.reverseSubmit.disabled = false;
+      this._populateReverseSelectors();
+
+      if (this._value) {
+        this._els.reverseYear.value = String(this._value.year);
+        this._els.reverseCutlet.value = String(this._value.cutletName);
+        this._els.reverseDayCutlet.value = String(this._value.dayInCutlet);
+        this._els.reverseMonth.value = String(this._value.monthName);
+        this._els.reverseDayMonth.value = String(this._value.dayInMonth);
+      } else {
+        this._els.reverseYear.value = '';
+        this._els.reverseDayCutlet.value = '';
+        this._els.reverseDayMonth.value = '';
+      }
+      const calculationJdn = this._calculationJdn == null
+        ? axis.gregorianToJdn(axis.localToday()) : this._calculationJdn;
+      this._els.reverseCalculation.value = axis.toIsoDate(axis.jdnToGregorian(calculationJdn));
+
+      if (typeof this._els.reverseDialog.showModal === 'function') this._els.reverseDialog.showModal();
+      else this._els.reverseDialog.setAttribute('open', '');
+      enqueueMicrotask(() => {
+        if (typeof this._els.reverseYear.focus === 'function') {
+          try { this._els.reverseYear.focus({ preventScroll: true }); }
+          catch (_) { this._els.reverseYear.focus(); }
+        }
+      });
+    }
+
+    _closeReverseDialog(abortSearch) {
+      if (abortSearch !== false) this._abortReverseSearch();
+      if (typeof this._els.reverseDialog.close === 'function') this._els.reverseDialog.close();
+      else this._els.reverseDialog.removeAttribute('open');
+      this._els.reverseSubmit.disabled = false;
+      if (typeof this._els.reverseOpen.focus === 'function') {
+        try { this._els.reverseOpen.focus({ preventScroll: true }); }
+        catch (_) { this._els.reverseOpen.focus(); }
+      }
+    }
+
+    _readReverseForm() {
+      const yearText = String(this._els.reverseYear.value || '').trim();
+      if (!/^-?\d+$/.test(yearText)) throw new RangeError('reverse-year');
+      const year = String(BigInt(yearText));
+
+      const cutletName = String(this._els.reverseCutlet.value || '');
+      const monthName = String(this._els.reverseMonth.value || '');
+      if (!reverseApi.CURRENT_CUTLETS.includes(cutletName)) throw new RangeError('reverse-cutlet');
+      if (!reverseApi.CURRENT_MONTHS.includes(monthName)) throw new RangeError('reverse-month');
+
+      const dayInCutlet = Number(String(this._els.reverseDayCutlet.value || '').trim());
+      const dayInMonth = Number(String(this._els.reverseDayMonth.value || '').trim());
+      if (!Number.isSafeInteger(dayInCutlet) || dayInCutlet < 1) throw new RangeError('reverse-day-cutlet');
+      if (!Number.isSafeInteger(dayInMonth) || dayInMonth < 1) throw new RangeError('reverse-day-month');
+
+      const calculation = axis.parseIsoDate(
+        String(this._els.reverseCalculation.value || '').trim(),
+        'Li die de calculation',
+      );
+      const calculationIso = axis.toIsoDate(calculation);
+      const calculationJdn = axis.gregorianToJdn(calculation);
+      return Object.freeze({
+        value: Object.freeze({ year, cutletName, dayInCutlet, monthName, dayInMonth }),
+        calculationIso,
+        calculationJdn,
+      });
+    }
+
+    async _applyReverseDialog(event) {
+      if (event && typeof event.preventDefault === 'function') event.preventDefault();
+      if (!reverseApi || typeof reverseApi.solveSimplePastafariDate !== 'function' || !reverseApi.isAvailable()) {
+        this._els.reverseStatus.textContent = this._t('reverse.error');
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        return;
+      }
+
+      let input;
+      try {
+        input = this._readReverseForm();
+      } catch (_) {
+        this._els.reverseStatus.textContent = this._t('search.invalid');
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        return;
+      }
+
+      this._abortReverseSearch();
+      const generation = this._reverseGeneration;
+      const AbortCtor = typeof root.AbortController === 'function' ? root.AbortController : null;
+      const controller = AbortCtor ? new AbortCtor() : null;
+      this._reverseController = controller;
+      this._reverseCalculationIso = input.calculationIso;
+      this._reverseSolutions = [];
+      this._els.reverseResults.replaceChildren();
+      this._els.reverseStatus.removeAttribute('data-kind');
+      this._els.reverseStatus.textContent = this._t('reverse.searching');
+      this._els.reverseSubmit.disabled = true;
+
+      try {
+        const result = await reverseApi.solveSimplePastafariDate(
+          input.value,
+          input.calculationJdn,
+          {
+            signal: controller ? controller.signal : undefined,
+            timeoutMs: 120000,
+            onProgress: (progress) => {
+              if (generation !== this._reverseGeneration || !this._els.reverseDialog.hasAttribute('open')) return;
+              const scanned = progress && progress.scanned != null ? String(progress.scanned) : '0';
+              this._els.reverseStatus.textContent = this._t('reverse.progress', { scanned });
+            },
+          },
+        );
+        if (generation !== this._reverseGeneration) return;
+        this._reverseController = null;
+        this._reverseSolutions = Array.from(result.solutions || []);
+        this._renderReverseResults(result);
+      } catch (error) {
+        if (generation !== this._reverseGeneration) return;
+        this._reverseController = null;
+        if (error && error.name === 'AbortError') return;
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        this._els.reverseStatus.textContent = error && error.name === 'TimeoutError'
+          ? this._t('reverse.timeout') : this._t('reverse.error');
+        if (root.console && typeof root.console.error === 'function') root.console.error(error);
+      } finally {
+        if (generation === this._reverseGeneration) this._els.reverseSubmit.disabled = false;
+      }
+    }
+
+    _renderReverseResults(result) {
+      this._els.reverseResults.replaceChildren();
+      const solutions = Array.from(result && result.solutions || []);
+      if (solutions.length === 0) {
+        this._els.reverseStatus.textContent = result && result.complete === false
+          ? this._t('reverse.incomplete') : this._t('reverse.noMatch');
+        return;
+      }
+
+      const status = this._t('reverse.found', { count: solutions.length });
+      this._els.reverseStatus.textContent = result && result.complete === false
+        ? status + ' ' + this._t('reverse.incomplete') : status;
+
+      const fragment = doc.createDocumentFragment();
+      for (const solution of solutions) {
+        if (!solution || solution.jdn == null) continue;
+        const iso = axis.toIsoDate(axis.jdnToGregorian(BigInt(solution.jdn)));
+        const button = doc.createElement('button');
+        button.type = 'button';
+        button.className = 'reverse-result';
+        const label = doc.createElement('span');
+        label.textContent = this._t('reverse.useResult');
+        const date = doc.createElement('bdi');
+        date.setAttribute('dir', 'ltr');
+        date.textContent = iso;
+        button.append(label, date);
+        button.addEventListener('click', () => this._selectReverseResult(solution));
+        fragment.append(button);
+      }
+      this._els.reverseResults.replaceChildren(fragment);
+    }
+
+    _selectReverseResult(solution) {
+      if (!solution || solution.jdn == null) return false;
+      const targetIso = axis.toIsoDate(axis.jdnToGregorian(BigInt(solution.jdn)));
+      const calculationIso = this._reverseCalculationIso || axis.toIsoDate(axis.localToday());
+      this.setAttribute('date', targetIso);
+      const todayIso = axis.toIsoDate(axis.localToday());
+      if (calculationIso === todayIso) this.removeAttribute('calculation-date');
+      else this.setAttribute('calculation-date', calculationIso);
+      this._closeReverseDialog(false);
+      return true;
+    }
+
     _openDialog() {
       this._els.dialogError.textContent = '';
       this._els.targetInput.value = axis.toIsoDate(axis.jdnToGregorian(
