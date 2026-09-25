@@ -12,19 +12,20 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Prepare Playwright
         shell: bash
         run: |
           set -euo pipefail
+          rm -rf "$RUNNER_TEMP/visual-audit"
           mkdir -p "$RUNNER_TEMP/visual-audit"
           cd "$RUNNER_TEMP/visual-audit"
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null
           npx playwright install --with-deps chromium >/dev/null
 
-      - name: Capture live site
+      - name: Capture live site extended states
         shell: bash
         env:
           SITE_URL: https://sargon17-green.github.io/Pastafarian-Calendar/
@@ -35,104 +36,88 @@ jobs:
           const { chromium } = require('playwright');
           const fs = require('fs');
           const path = require('path');
-
           const out = path.join(process.cwd(), 'out');
           fs.mkdirSync(out, { recursive: true });
           const url = process.env.SITE_URL;
 
           const profiles = [
-            {name:'desktop', width:1440, height:1000, isMobile:false},
-            {name:'tablet', width:1024, height:1366, isMobile:false},
-            {name:'mobile', width:390, height:844, isMobile:true},
+            {name:'desktop', width:1440, height:1000, mobile:false, search:[125,454], lang:[72,136]},
+            {name:'tablet', width:1024, height:1366, mobile:false, search:[120,358], lang:[72,110]},
+            {name:'mobile', width:390, height:844, mobile:true, search:[237,450], lang:[195,239]},
           ];
 
-          async function settle(page, ms=3000) {
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(ms);
-          }
-
-          async function captureProfile(browser, p) {
+          async function makePage(browser,p) {
             const ctx = await browser.newContext({
-              viewport: {width:p.width, height:p.height},
-              locale: 'he-IL',
-              isMobile: p.isMobile,
-              hasTouch: p.isMobile,
-              deviceScaleFactor: 1,
+              viewport:{width:p.width,height:p.height}, locale:'he-IL',
+              isMobile:p.mobile, hasTouch:p.mobile, deviceScaleFactor:1
             });
             const page = await ctx.newPage();
-            const errors = [];
-            page.on('console', m => { if (m.type()==='error') errors.push('console: '+m.text()); });
-            page.on('pageerror', e => errors.push('pageerror: '+String(e)));
-            page.on('requestfailed', r => errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+            const errors=[];
+            page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
+            page.on('pageerror',e=>errors.push('pageerror: '+String(e)));
+            page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+            await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForTimeout(5000);
+            return {ctx,page,errors};
+          }
 
-            await page.goto(url, {waitUntil:'domcontentloaded', timeout:120000});
-            await settle(page, 5000);
-
-            await page.screenshot({path:path.join(out, `${p.name}__top__05s.png`), fullPage:false});
-            await page.screenshot({path:path.join(out, `${p.name}__full__05s.png`), fullPage:true});
-
-            // Let expensive initial computation finish if it is still running.
-            await page.waitForTimeout(35000);
-            await page.screenshot({path:path.join(out, `${p.name}__top__40s.png`), fullPage:false});
-            await page.screenshot({path:path.join(out, `${p.name}__full__40s.png`), fullPage:true});
-
-            const dims = await page.evaluate(() => ({
-              scrollWidth: document.documentElement.scrollWidth,
-              scrollHeight: document.documentElement.scrollHeight,
-              clientWidth: document.documentElement.clientWidth,
-              clientHeight: document.documentElement.clientHeight,
-              title: document.title,
-              lang: document.documentElement.lang,
-              dir: document.documentElement.dir,
-            }));
-
-            const step = Math.max(300, Math.floor(p.height * 0.78));
-            let idx = 0;
-            for (let y=0; y<dims.scrollHeight && idx<30; y+=step, idx++) {
-              await page.evaluate(v => window.scrollTo(0, v), y);
-              await page.waitForTimeout(250);
-              await page.screenshot({path:path.join(out, `${p.name}__slice_${String(idx).padStart(2,'0')}__y${y}.png`), fullPage:false});
+          async function extendedWait(browser,p) {
+            const {ctx,page,errors}=await makePage(browser,p);
+            for (const sec of [5,60,120,180]) {
+              const elapsed = sec===5 ? 5 : sec;
+              if (sec>5) await page.waitForTimeout((sec-(sec===60?5:sec===120?60:120))*1000);
+              await page.screenshot({path:path.join(out,`${p.name}__wait_${String(sec).padStart(3,'0')}s.png`),fullPage:true});
             }
-            await page.evaluate(() => window.scrollTo(0,0));
-
-            const controls = await page.evaluate(() => {
-              const els = [...document.querySelectorAll('button,input,select,textarea,a,[role="button"],[role="tab"],[role="combobox"],[role="switch"]')];
-              return els.map((el, i) => {
-                const r = el.getBoundingClientRect();
-                const cs = getComputedStyle(el);
-                return {
-                  i,
-                  tag: el.tagName,
-                  type: el.getAttribute('type'),
-                  role: el.getAttribute('role'),
-                  text: (el.innerText || el.value || el.getAttribute('aria-label') || el.getAttribute('title') || '').trim().replace(/\s+/g,' ').slice(0,200),
-                  aria: el.getAttribute('aria-label'),
-                  title: el.getAttribute('title'),
-                  name: el.getAttribute('name'),
-                  id: el.id,
-                  href: el.getAttribute('href'),
-                  visible: !!(r.width && r.height && cs.visibility!=='hidden' && cs.display!=='none'),
-                  rect: {x:r.x,y:r.y,width:r.width,height:r.height},
-                };
-              }).filter(x => x.visible);
-            });
-
-            fs.writeFileSync(path.join(out, `${p.name}__meta.json`), JSON.stringify({profile:p,dims,controls,errors}, null, 2));
+            fs.writeFileSync(path.join(out,`${p.name}__wait_errors.json`),JSON.stringify(errors,null,2));
             await ctx.close();
           }
 
-          (async() => {
-            const browser = await chromium.launch({headless:true});
-            for (const p of profiles) await captureProfile(browser, p);
+          async function searchClick(browser,p) {
+            const {ctx,page,errors}=await makePage(browser,p);
+            await page.mouse.click(p.search[0],p.search[1]);
+            await page.waitForTimeout(1200);
+            await page.screenshot({path:path.join(out,`${p.name}__search_click.png`),fullPage:true});
+            // Keyboard-only exploration from the opened state.
+            for (let i=1;i<=8;i++) {
+              await page.keyboard.press('Tab');
+              await page.waitForTimeout(120);
+              await page.screenshot({path:path.join(out,`${p.name}__search_tab_${String(i).padStart(2,'0')}.png`),fullPage:false});
+            }
+            await page.keyboard.press('Escape');
+            fs.writeFileSync(path.join(out,`${p.name}__search_errors.json`),JSON.stringify(errors,null,2));
+            await ctx.close();
+          }
+
+          async function languageKeyboard(browser,p,where,key) {
+            const {ctx,page,errors}=await makePage(browser,p);
+            await page.mouse.click(p.lang[0],p.lang[1]);
+            await page.keyboard.press(key);
+            await page.keyboard.press('Enter');
+            await page.waitForTimeout(3000);
+            await page.screenshot({path:path.join(out,`${p.name}__language_${where}.png`),fullPage:true});
+            const visibleText = await page.locator('body').innerText().catch(()=> '');
+            fs.writeFileSync(path.join(out,`${p.name}__language_${where}.txt`),visibleText.slice(0,10000));
+            fs.writeFileSync(path.join(out,`${p.name}__language_${where}_errors.json`),JSON.stringify(errors,null,2));
+            await ctx.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for (const p of profiles) {
+              await searchClick(browser,p);
+              await languageKeyboard(browser,p,'home','Home');
+              await languageKeyboard(browser,p,'end','End');
+            }
+            for (const p of profiles) await extendedWait(browser,p);
             await browser.close();
-          })().catch(e => { console.error(e); process.exit(1); });
+          })().catch(e=>{console.error(e);process.exit(1)});
           JS
           node capture.js
 
       - name: Upload screenshots and metadata
         uses: actions/upload-artifact@v4
         with:
-          name: main-site-visual-audit-initial
+          name: main-site-visual-audit-extended
           path: ${{ runner.temp }}/visual-audit/out
           if-no-files-found: error
           retention-days: 14
