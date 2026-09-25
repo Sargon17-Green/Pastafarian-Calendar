@@ -1396,7 +1396,9 @@
           iso.textContent = part === targetMarker ? targetDate : actionDate;
           fragment.append(iso);
         } else if (part) {
-          fragment.append(doc.createTextNode(part));
+          const text = doc.createElement('span');
+          text.textContent = part;
+          fragment.append(text);
         }
       }
       this._els.beaconContext.replaceChildren(fragment);
