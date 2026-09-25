@@ -483,8 +483,15 @@
         pane: this.shadowRoot.querySelector('.pane'),
       };
       this._els.close.addEventListener('click', () => this.close());
+      this._els.shell.addEventListener('cancel', (event) => {
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        this.close();
+      });
       this.shadowRoot.addEventListener('keydown', (event) => {
         if (!event || event.key !== 'Escape' || !this.hasAttribute('open')) return;
+        // Native modal dialogs own Escape through the cancel event. Keep this
+        // path only as a fallback for environments without showModal().
+        if (typeof this._els.shell.showModal === 'function') return;
         if (typeof event.preventDefault === 'function') event.preventDefault();
         this.close();
       });
@@ -497,12 +504,17 @@
       if (this._connected) return;
       this._connected = true;
       this._applyLocale();
+      this._syncDialogOpen();
       if (this.hasAttribute('open')) this._queueLoad();
     }
 
     disconnectedCallback() {
       if (!this._connected) return;
       this._connected = false;
+      if (this._els && this._els.shell && this._els.shell.hasAttribute('open')) {
+        if (typeof this._els.shell.close === 'function') this._els.shell.close();
+        else this._els.shell.removeAttribute('open');
+      }
       this._generation += 1;
       this._queuedEpoch = null;
       this._gateDetailLoading = null;
@@ -517,6 +529,7 @@
         return;
       }
       if (name === 'open') {
+        this._syncDialogOpen();
         if (newValue !== null && this._connected) this._queueLoad();
         else {
           this._generation += 1;
@@ -544,6 +557,31 @@
       const EventCtor = root.CustomEvent;
       if (typeof EventCtor === 'function') {
         this.dispatchEvent(new EventCtor('pastafari-cooking-close', { bubbles: true, composed: true }));
+      }
+    }
+
+    _syncDialogOpen() {
+      if (!this._els || !this._els.shell) return;
+      const shell = this._els.shell;
+      const shouldOpen = this.hasAttribute('open') && this._connected;
+      const isOpen = shell.hasAttribute('open');
+      if (shouldOpen && !isOpen) {
+        try {
+          if (typeof shell.showModal === 'function') shell.showModal();
+          else shell.setAttribute('open', '');
+        } catch (_) {
+          shell.setAttribute('open', '');
+        }
+        enqueueMicrotask(() => {
+          if (!this._connected || !this.hasAttribute('open')) return;
+          if (this._els && this._els.close && typeof this._els.close.focus === 'function') {
+            try { this._els.close.focus({ preventScroll: true }); }
+            catch (_) { this._els.close.focus(); }
+          }
+        });
+      } else if (!shouldOpen && isOpen) {
+        if (typeof shell.close === 'function') shell.close();
+        else shell.removeAttribute('open');
       }
     }
 
