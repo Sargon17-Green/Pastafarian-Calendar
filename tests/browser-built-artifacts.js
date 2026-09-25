@@ -54,6 +54,14 @@ assert(moduleFacade.includes('export const PastafariCookingElement = api.Pastafa
 assert(standard.includes('class PastafariCookingElement'));
 assert(standard.includes("customElements.define('pastafari-cooking'"));
 assert(standard.includes('cooking.open'));
+assert(standard.includes('<dialog class="shell"'));
+assert(standard.includes('aria-modal="true"'));
+assert(standard.includes('height: min(52rem, calc(100dvh - 2rem))'));
+assert(standard.includes('grid-template-rows: auto auto minmax(0, 1fr)'));
+assert(standard.includes('grid-template-columns: repeat(2, minmax(0, 1fr))'));
+assert(standard.includes('_syncDialogOpen()'));
+assert(standard.includes('_cookingPagePosition'));
+assert(!standard.includes('.nav {\n            display: flex;\n            gap: .45rem;\n            padding: .75rem clamp(1rem, 3vw, 2rem);\n            overflow-x: auto'));
 
 assert(standard.includes('PastafariBrowserLocaleData'));
 for (const code of ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs']) {
