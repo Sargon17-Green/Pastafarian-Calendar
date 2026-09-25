@@ -892,7 +892,20 @@
             }
             .editor-link,
             .reverse-open { width: 100%; }
-            .reverse-fields { grid-template-columns: 1fr; }
+            .reverse-form {
+              gap: .6rem;
+              padding: .8rem 1rem;
+            }
+            .reverse-form h2 {
+              font-size: 1.35rem;
+              line-height: 1.18;
+            }
+            .reverse-fields {
+              grid-template-columns: 1fr;
+              gap: .5rem;
+            }
+            .reverse-form .field { gap: .2rem; }
+            .reverse-status { min-height: 1rem; font-size: .8rem; }
             .beacon-date { grid-template-columns: 1fr; }
             .toolbar { align-items: stretch; flex-direction: column; }
             .toolbar-actions { justify-items: stretch; }
