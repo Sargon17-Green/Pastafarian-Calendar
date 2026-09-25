@@ -41,6 +41,8 @@
             "language.label": "Lingue",
             "loading.kicker": "Calculat localmen",
             "loading.title": "Trovante li cutlet e li date…",
+
+            "loading.long": "Li calcul continua localmen; ti casu prende plu long quam usual.",
             "error.kicker": "Ne posse monstrar li calendare",
             "error.reload": "Recargar",
             "error.timeout": "Li calcul dura tro long.",
@@ -252,6 +254,8 @@
             "language.label": "Language",
             "loading.kicker": "Calculated locally",
             "loading.title": "Finding the cutlet and date…",
+
+            "loading.long": "The calculation is still running locally; this case is taking longer than usual.",
             "error.kicker": "Unable to display the calendar",
             "error.reload": "Reload",
             "error.timeout": "The calculation is taking too long.",
@@ -463,6 +467,8 @@
             "language.label": "\u05E9\u05E4\u05D4",
             "loading.kicker": "\u05DE\u05D7\u05E9\u05D1 \u05DE\u05E7\u05D5\u05DE\u05D9\u05EA",
             "loading.title": "\u05DE\u05D0\u05EA\u05E8 \u05D0\u05EA \u05D4\u05E7\u05E6\u05D9\u05E6\u05D4 \u05D5\u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA…",
+
+            "loading.long": "החישוב עדיין מתבצע מקומית; המקרה הזה נמשך זמן רב מהרגיל.",
             "error.kicker": "\u05DC\u05D0 \u05E0\u05D9\u05EA\u05DF \u05DC\u05D4\u05E6\u05D9\u05D2 \u05D0\u05EA \u05D4\u05DC\u05D5\u05D7",
             "error.reload": "\u05D8\u05E2\u05D9\u05E0\u05D4 \u05DE\u05D7\u05D3\u05E9",
             "error.timeout": "\u05D4\u05D7\u05D9\u05E9\u05D5\u05D1 \u05E0\u05DE\u05E9\u05DA \u05D6\u05DE\u05DF \u05E8\u05D1 \u05DE\u05D3\u05D9.",
@@ -674,6 +680,8 @@
             "language.label": "اللغة",
             "loading.kicker": "يُحسب محليًا",
             "loading.title": "جارٍ العثور على القطعة والتاريخ…",
+
+            "loading.long": "لا يزال الحساب جارياً محلياً؛ هذه الحالة تستغرق وقتاً أطول من المعتاد.",
             "error.kicker": "تعذر عرض التقويم",
             "error.reload": "إعادة التحميل",
             "error.timeout": "يستغرق الحساب وقتًا أطول من اللازم.",
@@ -885,6 +893,8 @@
             "language.label": "Язык",
             "loading.kicker": "Вычисляется локально",
             "loading.title": "Поиск котлеты и даты…",
+
+            "loading.long": "Вычисление всё ещё выполняется локально; этот случай занимает больше времени, чем обычно.",
             "error.kicker": "Не удаётся отобразить календарь",
             "error.reload": "Перезагрузить",
             "error.timeout": "Расчёт выполняется слишком долго.",
@@ -1096,6 +1106,8 @@
             "language.label": "Langue",
             "loading.kicker": "Calculé localement",
             "loading.title": "Recherche de la boulette et de la date…",
+
+            "loading.long": "Le calcul se poursuit toujours localement ; ce cas prend plus de temps que d’habitude.",
             "error.kicker": "Impossible d’afficher le calendrier",
             "error.reload": "Recharger",
             "error.timeout": "Le calcul prend trop de temps.",
@@ -1307,6 +1319,8 @@
             "language.label": "Sprache",
             "loading.kicker": "Lokal berechnet",
             "loading.title": "Schnitzel und Datum werden gesucht…",
+
+            "loading.long": "Die Berechnung läuft weiterhin lokal; dieser Fall dauert länger als gewöhnlich.",
             "error.kicker": "Kalender kann nicht angezeigt werden",
             "error.reload": "Neu laden",
             "error.timeout": "Die Berechnung dauert zu lange.",
@@ -1518,6 +1532,8 @@
             "language.label": "Idioma",
             "loading.kicker": "Calculado localmente",
             "loading.title": "Buscando la croqueta y la fecha…",
+
+            "loading.long": "El cálculo sigue ejecutándose localmente; este caso está tardando más de lo habitual.",
             "error.kicker": "No se puede mostrar el calendario",
             "error.reload": "Recargar",
             "error.timeout": "El cálculo está tardando demasiado.",
@@ -1729,6 +1745,8 @@
             "language.label": "Lingua",
             "loading.kicker": "Calcolato localmente",
             "loading.title": "Ricerca della cotoletta e della data…",
+
+            "loading.long": "Il calcolo è ancora in esecuzione locale; questo caso sta richiedendo più tempo del solito.",
             "error.kicker": "Impossibile mostrare il calendario",
             "error.reload": "Ricarica",
             "error.timeout": "Il calcolo sta richiedendo troppo tempo.",
@@ -1940,6 +1958,8 @@
             "language.label": "Jazyk",
             "loading.kicker": "Počítáno místně",
             "loading.title": "Hledá se řízek a datum…",
+
+            "loading.long": "Výpočet stále probíhá místně; tento případ trvá déle než obvykle.",
             "error.kicker": "Kalendář nelze zobrazit",
             "error.reload": "Načíst znovu",
             "error.timeout": "Výpočet trvá příliš dlouho.",
