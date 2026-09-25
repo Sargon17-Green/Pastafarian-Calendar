@@ -25,7 +25,7 @@ jobs:
           npm install playwright@1.55.0 >/dev/null
           npx playwright install --with-deps chromium >/dev/null
 
-      - name: Capture interaction states
+      - name: Capture final trace and scroll diagnostics
         shell: bash
         env:
           SITE_URL: https://sargon17-green.github.io/Pastafarian-Calendar/
@@ -41,22 +41,14 @@ jobs:
           const url = process.env.SITE_URL;
 
           const profiles = [
-            {
-              name:'desktop', width:1440, height:1000, mobile:false,
-              search:[125,454], submit:[902,615], sauce:[976,655],
-              sauceScrollY:0
-            },
-            {
-              name:'mobile', width:390, height:844, mobile:true,
-              search:[237,450], submit:[285,538], sauce:[233,610],
-              sauceScrollY:260
-            }
+            {name:'desktop', width:1440, height:1000, mobile:false, sauce:[976,655], sauceScrollY:0},
+            {name:'mobile', width:390, height:844, mobile:true, sauce:[233,610], sauceScrollY:260}
           ];
 
-          async function openPage(browser,p,wait=5000) {
+          async function openPage(browser,p) {
             const ctx=await browser.newContext({
-              viewport:{width:p.width,height:p.height}, locale:'he-IL',
-              isMobile:p.mobile, hasTouch:p.mobile, deviceScaleFactor:1
+              viewport:{width:p.width,height:p.height},
+              locale:'he-IL', isMobile:p.mobile, hasTouch:p.mobile, deviceScaleFactor:1
             });
             const page=await ctx.newPage();
             const errors=[];
@@ -64,73 +56,84 @@ jobs:
             page.on('pageerror',e=>errors.push('pageerror: '+String(e)));
             page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
             await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
-            await page.waitForTimeout(wait);
+            await page.waitForTimeout(65000);
             return {ctx,page,errors};
           }
 
-          async function frameTexts(page) {
-            const arr=[];
-            for (const fr of page.frames()) {
-              let txt='';
-              try { txt=await fr.locator('body').innerText({timeout:1000}); } catch {}
-              arr.push({url:fr.url(), text:txt.slice(0,20000)});
-            }
-            return arr;
+          async function deepAudit(page) {
+            return await page.evaluate(() => {
+              const items=[];
+              const scrollables=[];
+              let seq=0;
+              function walk(root,path='document') {
+                const nodes = root.querySelectorAll ? [...root.querySelectorAll('*')] : [];
+                for (const el of nodes) {
+                  const r=el.getBoundingClientRect();
+                  const cs=getComputedStyle(el);
+                  const visible=!!(r.width && r.height && cs.display!=='none' && cs.visibility!=='hidden');
+                  const isInteractive = /^(A|BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY)$/.test(el.tagName) ||
+                    ['button','link','tab','combobox','switch'].includes(el.getAttribute('role'));
+                  if (visible && isInteractive) {
+                    items.push({
+                      seq:seq++, path, tag:el.tagName, type:el.getAttribute('type'),
+                      role:el.getAttribute('role'), id:el.id,
+                      text:(el.innerText||el.value||el.getAttribute('aria-label')||el.getAttribute('title')||'').trim().replace(/\s+/g,' ').slice(0,300),
+                      aria:el.getAttribute('aria-label'), title:el.getAttribute('title'),
+                      rect:{x:r.x,y:r.y,width:r.width,height:r.height}
+                    });
+                  }
+                  if (visible && (el.scrollHeight>el.clientHeight+2 || el.scrollWidth>el.clientWidth+2)) {
+                    scrollables.push({
+                      path, tag:el.tagName, id:el.id,
+                      cls:typeof el.className==='string'?el.className.slice(0,200):'',
+                      clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,
+                      clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,
+                      overflowX:cs.overflowX,overflowY:cs.overflowY,
+                      rect:{x:r.x,y:r.y,width:r.width,height:r.height}
+                    });
+                  }
+                  if (el.shadowRoot) walk(el.shadowRoot, path+' > '+el.tagName.toLowerCase()+(el.id?'#'+el.id:'')+'::shadow');
+                }
+              }
+              walk(document);
+              return {
+                document:{
+                  scrollWidth:document.documentElement.scrollWidth,
+                  scrollHeight:document.documentElement.scrollHeight,
+                  clientWidth:document.documentElement.clientWidth,
+                  clientHeight:document.documentElement.clientHeight,
+                  bodyScrollHeight:document.body?.scrollHeight,
+                  title:document.title,lang:document.documentElement.lang,dir:document.documentElement.dir
+                },
+                items,scrollables
+              };
+            });
           }
 
-          async function advanced(browser,p) {
+          async function runProfile(browser,p) {
             const {ctx,page,errors}=await openPage(browser,p);
-            await page.mouse.click(...p.search);
-            await page.waitForTimeout(800);
-            // input is auto-focused; first Tab moves to the advanced-options disclosure.
-            await page.keyboard.press('Tab');
-            await page.keyboard.press('Enter');
-            await page.waitForTimeout(800);
-            await page.screenshot({path:path.join(out,`${p.name}__advanced_open.png`),fullPage:true});
-            fs.writeFileSync(path.join(out,`${p.name}__advanced_text.json`),JSON.stringify(await frameTexts(page),null,2));
-            for(let i=1;i<=12;i++){
-              await page.keyboard.press('Tab');
-              await page.waitForTimeout(80);
-              await page.screenshot({path:path.join(out,`${p.name}__advanced_tab_${String(i).padStart(2,'0')}.png`),fullPage:false});
-            }
-            fs.writeFileSync(path.join(out,`${p.name}__advanced_errors.json`),JSON.stringify(errors,null,2));
-            await ctx.close();
-          }
+            await page.screenshot({path:path.join(out,`${p.name}__final_ready.png`),fullPage:true});
+            fs.writeFileSync(path.join(out,`${p.name}__deep_before.json`),JSON.stringify(await deepAudit(page),null,2));
 
-          async function emptySubmit(browser,p) {
-            const {ctx,page,errors}=await openPage(browser,p);
-            await page.mouse.click(...p.search);
-            await page.waitForTimeout(600);
-            await page.keyboard.press('Control+A');
-            await page.keyboard.press('Backspace');
-            await page.waitForTimeout(200);
-            await page.mouse.click(...p.submit);
-            await page.waitForTimeout(800);
-            await page.screenshot({path:path.join(out,`${p.name}__empty_submit.png`),fullPage:true});
-            fs.writeFileSync(path.join(out,`${p.name}__empty_submit_errors.json`),JSON.stringify(errors,null,2));
-            await ctx.close();
-          }
-
-          async function sauce(browser,p) {
-            const {ctx,page,errors}=await openPage(browser,p,65000);
             await page.evaluate(y=>window.scrollTo(0,y),p.sauceScrollY);
             await page.waitForTimeout(400);
-            await page.screenshot({path:path.join(out,`${p.name}__before_sauce.png`),fullPage:false});
             await page.mouse.click(...p.sauce);
-            await page.waitForTimeout(1000);
-            await page.screenshot({path:path.join(out,`${p.name}__sauce_open.png`),fullPage:true});
-            fs.writeFileSync(path.join(out,`${p.name}__sauce_text.json`),JSON.stringify(await frameTexts(page),null,2));
-            fs.writeFileSync(path.join(out,`${p.name}__sauce_errors.json`),JSON.stringify(errors,null,2));
+            await page.waitForTimeout(60000);
+            await page.screenshot({path:path.join(out,`${p.name}__trace_after_60s.png`),fullPage:true});
+            fs.writeFileSync(path.join(out,`${p.name}__deep_trace.json`),JSON.stringify(await deepAudit(page),null,2));
+
+            // Verify the actual bottom a user reaches with normal page scrolling.
+            await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
+            await page.waitForTimeout(500);
+            await page.screenshot({path:path.join(out,`${p.name}__window_bottom.png`),fullPage:false});
+
+            fs.writeFileSync(path.join(out,`${p.name}__errors.json`),JSON.stringify(errors,null,2));
             await ctx.close();
           }
 
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            for(const p of profiles){
-              await advanced(browser,p);
-              await emptySubmit(browser,p);
-              await sauce(browser,p);
-            }
+            for(const p of profiles) await runProfile(browser,p);
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
@@ -139,7 +142,7 @@ jobs:
       - name: Upload screenshots and metadata
         uses: actions/upload-artifact@v4
         with:
-          name: main-site-visual-audit-interactions
+          name: main-site-visual-audit-final-diagnostics
           path: ${{ runner.temp }}/visual-audit/out
           if-no-files-found: error
           retention-days: 14
