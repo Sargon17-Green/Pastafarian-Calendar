@@ -331,7 +331,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cd browser/dist
+          SITE="$RUNNER_TEMP/phase-a-site"
+          rm -rf "$SITE"
+          mkdir -p "$SITE/dist"
+          cp browser/dist/index.html "$SITE/index.html"
+          cp browser/dist/pastafari-date.js "$SITE/dist/pastafari-date.js"
+          cp browser/dist/pastafari-worker.js "$SITE/dist/pastafari-worker.js"
+          cp browser/dist/pastafari-date.mjs "$SITE/dist/pastafari-date.mjs"
+          cp browser/dist/build-id.txt "$SITE/dist/build-id.txt"
+          cd "$SITE"
           python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/phase-a-http.log" 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
