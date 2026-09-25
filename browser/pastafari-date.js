@@ -1265,6 +1265,50 @@
       return true;
     }
 
+    _cachedCutletContaining(targetJdn) {
+      const target = BigInt(targetJdn);
+      for (const view of this._cutlets.values()) {
+        if (target >= BigInt(view.startJdn) && target <= BigInt(view.endJdn)) return view;
+      }
+      return null;
+    }
+
+    _activeView() {
+      if (this._activeStartJdn != null && this._cutlets.has(this._activeStartJdn)) {
+        return this._cutlets.get(this._activeStartJdn);
+      }
+      if (this._scrollTarget && this._cutlets.has(BigInt(this._scrollTarget.startJdn))) {
+        return this._cutlets.get(BigInt(this._scrollTarget.startJdn));
+      }
+      const first = this._orderedStarts[0];
+      return first == null ? null : this._cutlets.get(first);
+    }
+
+    _windowBounds(view) {
+      const length = view && Array.isArray(view.days) ? view.days.length : 0;
+      const maxStart = Math.max(0, length - MAX_RENDERED_DAYS);
+      const start = Math.max(0, Math.min(Number(this._windowStart || 0), maxStart));
+      const end = Math.min(length, start + MAX_RENDERED_DAYS);
+      return Object.freeze({ start, end, length });
+    }
+
+    _setWindowStart(view, start) {
+      const length = view && Array.isArray(view.days) ? view.days.length : 0;
+      const maxStart = Math.max(0, length - MAX_RENDERED_DAYS);
+      this._windowStart = Math.max(0, Math.min(Number(start) || 0, maxStart));
+      return this._windowStart;
+    }
+
+    _setWindowAroundIndex(view, index) {
+      const length = view && Array.isArray(view.days) ? view.days.length : 0;
+      if (length === 0) {
+        this._windowStart = 0;
+        return 0;
+      }
+      const safeIndex = Math.max(0, Math.min(Number(index) || 0, length - 1));
+      return this._setWindowStart(view, safeIndex - Math.floor(MAX_RENDERED_DAYS / 2));
+    }
+
     _primeAdjacent(currentView, generation) {
       Promise.allSettled([
         this._loadCutletAt(currentView.previousCutletJdn, 'before', generation),
@@ -1275,6 +1319,8 @@
     _loadCutletAt(targetJdn, direction, generation) {
       const generationValue = generation == null ? this._generation : generation;
       const target = BigInt(targetJdn);
+      const cached = this._cachedCutletContaining(target);
+      if (cached) return Promise.resolve(cached);
       const key = generationValue + ':' + target;
       if (this._cutletLoads.has(key)) return this._cutletLoads.get(key);
       const task = this._loadCutletAtOnce(target, direction, generationValue);
@@ -1289,17 +1335,11 @@
       const flag = direction === 'before' ? '_loadingBefore' : '_loadingAfter';
       if (this[flag] === generation) return null;
       this[flag] = generation;
-      this._updateEdgeLoaders();
       try {
         const view = await serviceApi.getSharedCalendarService().getCutletView(targetJdn, this._calculationJdn);
         if (generation !== this._generation) return null;
-        if (!this._storeCutlet(view)) return view;
-        const anchor = this._captureViewportAnchor();
-        const preserveStart = anchor && anchor.cutletStartJdn != null
-          ? BigInt(anchor.cutletStartJdn)
-          : (anchor && anchor.startJdn != null ? BigInt(anchor.startJdn) : null);
-        this._trimCutlets(view.startJdn, preserveStart);
-        this._rerenderCutletsPreservingViewport(anchor);
+        this._storeCutlet(view);
+        this._trimCutlets(view.startJdn, this._activeStartJdn);
         return view;
       } catch (error) {
         if (generation === this._generation && error && error.code === RENDER_CONSISTENCY_CODE) {
@@ -1307,10 +1347,7 @@
         }
         throw error;
       } finally {
-        if (this[flag] === generation) {
-          this[flag] = null;
-          this._updateEdgeLoaders();
-        }
+        if (this[flag] === generation) this[flag] = null;
       }
     }
 
