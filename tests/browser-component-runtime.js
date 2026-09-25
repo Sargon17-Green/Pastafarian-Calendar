@@ -300,8 +300,10 @@ async function flush() {
   assert(integratedCooking.shadowRoot.innerHTML.includes('id="pastafari-cooking-panel"'));
   integratedCooking._toggleCooking();
   assert.strictEqual(integratedCooking._els.cookingPanel.hasAttribute('open'), false);
-  assert.strictEqual(integratedCooking._els.cookingOpen.getAttribute('aria-expanded'), 'false');
+  // Fake dispatchEvent records but does not bubble/call listeners; emulate the
+  // close event delivery that a real browser performs.
   integratedCooking._els.cookingPanel.listeners.get('pastafari-cooking-close')();
+  assert.strictEqual(integratedCooking._els.cookingOpen.getAttribute('aria-expanded'), 'false');
   assert.strictEqual(integratedCooking._els.cookingOpen.focused, true);
 
   // Rapid attribute changes: only the newest generation may commit or publish.
