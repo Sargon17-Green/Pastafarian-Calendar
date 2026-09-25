@@ -38,6 +38,7 @@
   }));
   const MAX_CACHED_CUTLETS = 5;
   const MAX_RENDERED_DAYS = 28;
+  const LONG_LOADING_DELAY_MS = 8000;
   const LOCALE_STORAGE_KEY = 'pastafari.browser.locale';
   const RENDER_CONSISTENCY_CODE = 'ERR_CALENDAR_RENDER_INCONSISTENCY';
   const TARGET_CUTLET_CODE = 'ERR_TARGET_CUTLET_MISMATCH';
@@ -271,6 +272,7 @@
       this._reverseGeneration = 0;
       this._reverseCalculationIso = null;
       this._reverseSolutions = [];
+      this._loadingNoticeTimer = null;
       this._readySettled = false;
       this._locale = null;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
@@ -1229,6 +1231,7 @@
       this._refreshQueuedEpoch = null;
       this._cutletLoads.clear();
       this._abortReverseSearch();
+      this._clearLoadingNotice();
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -2255,22 +2258,43 @@
       }
     }
 
+    _clearLoadingNotice() {
+      if (this._loadingNoticeTimer != null && typeof root.clearTimeout === 'function') {
+        try { root.clearTimeout(this._loadingNoticeTimer); } catch (_) { /* best effort */ }
+      }
+      this._loadingNoticeTimer = null;
+    }
+
     _showLoading() {
+      this._clearLoadingNotice();
       if (this._els.calendar) {
         this._els.calendar.setAttribute('aria-busy', 'true');
         this._els.calendar.setAttribute('data-state', 'loading');
       }
       if (this._els.loading) this._els.loading.hidden = false;
+      if (this._els.loadingNote) this._els.loadingNote.textContent = this._t('loading.kicker');
       if (this._els.error) this._els.error.hidden = true;
+
+      const generation = this._generation;
+      if (typeof root.setTimeout === 'function') {
+        this._loadingNoticeTimer = root.setTimeout(() => {
+          this._loadingNoticeTimer = null;
+          if (!this._connected || generation !== this._generation) return;
+          if (!this._els.calendar || this._els.calendar.getAttribute('data-state') !== 'loading') return;
+          if (this._els.loadingNote) this._els.loadingNote.textContent = this._t('loading.long');
+        }, LONG_LOADING_DELAY_MS);
+      }
     }
 
     _hideOverlays() {
+      this._clearLoadingNotice();
       if (this._els.calendar) this._els.calendar.removeAttribute('data-state');
       if (this._els.loading) this._els.loading.hidden = true;
       if (this._els.error) this._els.error.hidden = true;
     }
 
     _showError(error, messageKey) {
+      this._clearLoadingNotice();
       if (this._els.calendar) {
         this._els.calendar.setAttribute('aria-busy', 'false');
         this._els.calendar.setAttribute('data-state', 'error');
