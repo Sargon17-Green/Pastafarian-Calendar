@@ -12,6 +12,7 @@ const REQUIRED_MESSAGES = Object.freeze([
   'language.label',
   'loading.kicker',
   'loading.title',
+  'loading.long',
   'error.kicker',
   'error.reload',
   'error.timeout',
