@@ -477,7 +477,7 @@ jobs:
             const editor=page.locator('pastafari-date').locator('.editor-link');
             await editor.focus(); await page.keyboard.press('Enter');
             await page.waitForTimeout(100);
-            assert(await page.locator('pastafari-date').locator('dialog:not(.reverse-dialog)').getAttribute('open')!==null,'search dialog did not keyboard-open');
+            assert(await page.locator('pastafari-date').locator('dialog:has(> .dialog-form)').getAttribute('open')!==null,'search dialog did not keyboard-open');
             await page.locator('pastafari-date').locator('details summary').click();
             await page.locator('pastafari-date').locator('input[name="target"]').fill('2026-99-99');
             await page.locator('pastafari-date').locator('.dialog-actions .primary').click();
@@ -487,7 +487,7 @@ jobs:
             await page.screenshot({path:path.join(out,'search_invalid_390_he.png'),fullPage:false});
             await page.keyboard.press('Escape');
             await page.waitForTimeout(100);
-            assert(await page.locator('pastafari-date').locator('dialog:not(.reverse-dialog)').getAttribute('open')===null,'search dialog did not Escape-close');
+            assert(await page.locator('pastafari-date').locator('dialog:has(> .dialog-form)').getAttribute('open')===null,'search dialog did not Escape-close');
 
             // Move by bounded window, then return to the searched target.
             const later=page.locator('pastafari-date').locator('.window-button.later');
