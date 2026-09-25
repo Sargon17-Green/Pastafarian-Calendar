@@ -12,8 +12,8 @@
   }
 
   // Current semantic month names, never old positional identifiers. Each month
-  // receives its own saturated theme. The golden-angle hue spacing makes
-  // neighbouring indices diverge sharply instead of collapsing into pastels.
+  // keeps a deterministic hue identity, but the public calendar uses a light
+  // paper-like wash so month coding supports the content instead of dominating it.
   const MONTH_THEME_NAMES = Object.freeze([
     'argile', 'granat', 'cubit', 'invidie', 'Eridu', 'dent-pasta',
     'tri partes de quin', 'Karshumav', 'leopard', 'stann', 'brume', 'oliban',
@@ -29,10 +29,10 @@
     const secondaryHue = Math.round((hue + 151 + ((index % 3) * 17)) % 360);
     const angle = (index * 37) % 180;
     return Object.freeze({
-      edge: `hsl(${hue} 100% 22%)`,
-      bg: `hsl(${hue} 88% 49%)`,
-      wash: `hsl(${secondaryHue} 96% 52%)`,
-      pattern: `repeating-linear-gradient(${angle}deg, transparent 0 66%, hsl(${secondaryHue} 96% 52%) 66% 78%, transparent 78% 100%)`,
+      edge: `hsl(${hue} 58% 34%)`,
+      bg: `hsl(${hue} 62% 88%)`,
+      wash: `hsl(${secondaryHue} 64% 82%)`,
+      pattern: `repeating-linear-gradient(${angle}deg, transparent 0 72%, hsl(${secondaryHue} 64% 70% / 28%) 72% 80%, transparent 80% 100%)`,
     });
   }));
   const MAX_CACHED_CUTLETS = 5;
@@ -311,7 +311,7 @@
             grid-template-columns: minmax(0, 1fr) auto;
             gap: 1.5rem 2rem;
             align-items: start;
-            padding: clamp(1rem, 2vw, 2rem) 0 clamp(2rem, 5vw, 4rem);
+            padding: clamp(.75rem, 1.5vw, 1.35rem) 0 clamp(1.25rem, 3vw, 2.25rem);
             border-bottom: 1px solid var(--line);
           }
           .brand,
@@ -325,18 +325,18 @@
             text-transform: uppercase;
           }
           .app-title {
-            max-width: 14ch;
+            max-width: 20ch;
             margin: 0;
             overflow-wrap: anywhere;
             font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
-            font-size: clamp(2.8rem, 8vw, 7rem);
+            font-size: clamp(2.5rem, 5.6vw, 5.2rem);
             font-weight: 700;
             letter-spacing: -.055em;
             line-height: .92;
           }
           .language-control {
             display: grid;
-            min-width: min(14rem, 100%);
+            min-width: min(11.5rem, 100%);
             gap: .35rem;
             color: var(--muted);
             font-size: .82rem;
@@ -356,11 +356,12 @@
 
           .search-panel {
             display: flex;
-            margin-block: clamp(2rem, 5vw, 4rem);
-            padding: clamp(1.2rem, 3.5vw, 2.5rem);
-            align-items: end;
+            width: min(100%, 68rem);
+            margin: clamp(1.25rem, 3vw, 2.4rem) auto;
+            padding: clamp(1rem, 2.4vw, 1.6rem);
+            align-items: center;
             justify-content: space-between;
-            gap: 1.25rem;
+            gap: 1rem 1.5rem;
             border: 1px solid var(--line);
             border-radius: 1.25rem;
             background: rgb(255 253 248 / 92%);
@@ -371,7 +372,7 @@
             margin: 0;
             overflow-wrap: anywhere;
             font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
-            font-size: clamp(2rem, 5vw, 4rem);
+            font-size: clamp(1.75rem, 3.6vw, 3rem);
             letter-spacing: -.035em;
             line-height: 1;
           }
@@ -427,22 +428,22 @@
           .target-beacon {
             position: relative;
             display: grid;
-            gap: .7rem;
-            margin-bottom: clamp(2rem, 5vw, 4rem);
-            padding: clamp(1.25rem, 3vw, 2.25rem);
+            gap: .65rem;
+            margin-bottom: clamp(1.4rem, 3vw, 2.5rem);
+            padding: clamp(1rem, 2.4vw, 1.6rem);
             overflow: hidden;
-            border: 4px solid var(--ink);
-            border-inline-start: clamp(.75rem, 2vw, 1.35rem) solid var(--accent);
-            border-radius: 1.1rem;
-            background: #ffea00;
-            color: #000000;
-            box-shadow: 0 0 0 4px #ffffff, 0 0 0 8px #000000, 0 18px 38px rgb(0 0 0 / 32%);
+            border: 1px solid #d8cdb9;
+            border-inline-start: .5rem solid var(--accent);
+            border-radius: 1rem;
+            background: #fff7e3;
+            color: var(--ink);
+            box-shadow: 0 10px 28px rgb(54 36 20 / 10%);
           }
           .beacon-label {
             width: fit-content;
             padding: .35rem .75rem;
             border-radius: 999px;
-            background: var(--ink);
+            background: var(--accent-dark);
             color: white;
             font-size: .86rem;
             font-weight: 900;
@@ -456,13 +457,13 @@
           .beacon-line {
             display: block;
             min-width: 0;
-            padding: .8rem;
+            padding: .35rem .45rem;
             overflow-wrap: anywhere;
-            border: 1px solid #a8977d;
-            border-radius: .7rem;
-            background: white;
-            font-size: clamp(1rem, 2vw, 1.35rem);
-            font-weight: 650;
+            border: 0;
+            border-radius: .45rem;
+            background: rgb(255 253 248 / 72%);
+            font-size: clamp(.98rem, 1.6vw, 1.2rem);
+            font-weight: 700;
             line-height: 1.35;
           }
           .beacon-context {
@@ -559,15 +560,16 @@
             position: static;
             z-index: 5;
             margin: 0 0 1rem;
-            padding: .9rem 1rem;
+            padding: .6rem .75rem;
             overflow-wrap: anywhere;
-            border: 1px solid var(--line);
-            border-inline-start: .45rem solid var(--accent);
-            border-radius: .85rem;
-            background: rgb(255 253 248 / 96%);
-            box-shadow: 0 6px 18px rgb(54 36 20 / 10%);
+            border: 0;
+            border-block-end: 1px solid var(--line);
+            border-inline-start: .35rem solid var(--accent);
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
             font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
-            font-size: clamp(1.5rem, 4vw, 2.6rem);
+            font-size: clamp(1.35rem, 3vw, 2rem);
             line-height: 1.05;
           }
           /*
@@ -602,40 +604,28 @@
             position: relative;
             display: grid;
             min-width: 0;
-            min-height: 10.5rem;
-            padding: .85rem;
+            min-height: 8.4rem;
+            padding: .7rem;
             grid-template-rows: auto auto auto;
-            align-content: stretch;
-            gap: .48rem;
+            align-content: start;
+            gap: .28rem;
             overflow: hidden;
-            border: 2px solid var(--month-edge, var(--line));
-            border-radius: .85rem;
+            border: 1px solid var(--month-edge, var(--line));
+            border-radius: .8rem;
             background-color: var(--month-bg, var(--panel));
             background-image: var(--month-pattern-image, none);
             background-size: var(--month-pattern-size, auto);
             background-repeat: repeat;
             color: var(--month-ink, var(--ink));
-            box-shadow: inset 0 1px rgb(255 255 255 / 14%);
+            box-shadow: 0 2px 9px rgb(54 36 20 / 7%);
           }
           .day[aria-current="date"] {
             z-index: 4;
             grid-template-rows: auto auto auto auto;
-            border: 6px solid #ffffff;
-            outline: 4px solid #000000;
-            outline-offset: -4px;
+            border: 3px solid var(--accent-dark);
+            outline: 0;
             transform: none;
-            box-shadow:
-              inset 0 0 0 4px #ffea00,
-              0 10px 24px rgb(0 0 0 / 38%);
-          }
-          .day[aria-current="date"]::after {
-            content: "";
-            position: absolute;
-            inset: .34rem;
-            pointer-events: none;
-            border: 4px dashed #ffea00;
-            border-radius: .48rem;
-            box-shadow: inset 0 0 0 2px #000000;
+            box-shadow: 0 8px 20px rgb(54 36 20 / 20%);
           }
           .target-badge {
             position: relative;
@@ -643,32 +633,47 @@
             display: block;
             width: fit-content;
             max-width: 100%;
-            margin-bottom: .1rem;
-            padding: .38rem .7rem;
+            margin-bottom: .15rem;
+            padding: .3rem .55rem;
             overflow-wrap: anywhere;
-            border: 4px solid #ffea00;
+            border: 0;
             border-radius: 999px;
-            background: #000000;
-            color: #ffea00;
-            box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #000000;
-            font-size: .82rem;
-            font-weight: 950;
+            background: var(--accent-dark);
+            color: #ffffff;
+            box-shadow: none;
+            font-size: .76rem;
+            font-weight: 850;
             line-height: 1.25;
           }
           .day-line {
             display: block;
             min-width: 0;
             margin: 0;
-            padding: .42rem .55rem;
+            padding: .12rem .15rem;
             overflow-wrap: anywhere;
-            border: 2px solid color-mix(in srgb, var(--month-ink, var(--ink)) 82%, transparent);
-            border-radius: .52rem;
-            background-color: var(--month-text-bg, var(--month-bg));
+            border: 0;
+            border-radius: 0;
+            background: transparent;
             color: var(--month-ink, var(--ink));
-            box-shadow: 0 2px 7px rgb(0 0 0 / 22%);
-            font-size: clamp(.8rem, 1.25vw, .96rem);
+            box-shadow: none;
+            font-size: clamp(.76rem, 1.1vw, .9rem);
             font-weight: 600;
-            line-height: 1.35;
+            line-height: 1.32;
+          }
+          .day-line.year {
+            color: #5d554c;
+            font-size: clamp(.68rem, .95vw, .78rem);
+            font-weight: 700;
+          }
+          .day-line.cutlet-line {
+            color: #3f3933;
+          }
+          .day-line.month {
+            margin-top: .15rem;
+            padding-top: .42rem;
+            border-top: 1px solid color-mix(in srgb, var(--month-edge, var(--line)) 55%, transparent);
+            font-size: clamp(.82rem, 1.2vw, .96rem);
+            font-weight: 800;
           }
           .day-line strong {
             font-family: Georgia, "Times New Roman", serif;
@@ -797,8 +802,11 @@
               padding-block-start: .5rem;
             }
             .masthead { grid-template-columns: 1fr; }
-            .app-title { font-size: clamp(2.7rem, 16vw, 5.4rem); }
-            .language-control { width: 100%; }
+            .app-title { font-size: clamp(2.4rem, 12vw, 4rem); }
+            .language-control {
+              width: min(100%, 12rem);
+              justify-self: end;
+            }
             .search-panel {
               display: grid;
               align-items: stretch;
