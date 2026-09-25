@@ -1460,7 +1460,10 @@
         monthName,
       });
 
-      this._els.summary.textContent = cutletLine + ' · ' + monthLine;
+      // The target beacon already carries the complete five-part context.
+      // Keep only the cutlet position here so the browsing toolbar does not
+      // repeat the month line immediately above the cutlet heading.
+      this._els.summary.textContent = cutletLine;
       this._els.beaconLabel.textContent = this._t('target.searched');
       this._els.beaconYear.textContent = yearLine;
       this._els.beaconCutlet.textContent = cutletLine;
