@@ -1558,48 +1558,27 @@
     }
 
     _prepareRenderableCutlets() {
-      const seen = new Map();
-      const prepared = [];
-      for (const startJdn of this._orderedStarts) {
-        const view = this._cutlets.get(startJdn);
-        if (!view) continue;
-        const days = [];
-        for (const day of view.days) {
-          const jdn = String(BigInt(day.jdn));
-          if (this._scrollTarget && BigInt(day.jdn) === this._scrollTarget.jdn
-              && !sameScrollTargetDay(day, this._scrollTarget)) {
-            throw new CalendarRenderConsistencyError(
-              jdn,
-              semanticDaySnapshot(this._scrollTarget),
-              semanticDaySnapshot(day),
-            );
-          }
-          const previous = seen.get(jdn);
-          if (!previous) {
-            seen.set(jdn, day);
-            days.push(day);
-            continue;
-          }
-          if (!sameDaySemantics(previous, day)) {
-            throw new CalendarRenderConsistencyError(
-              jdn,
-              semanticDaySnapshot(previous),
-              semanticDaySnapshot(day),
-            );
-          }
-          // Exact duplicate: one semantic date card is sufficient.
+      const view = this._activeView();
+      if (!view) return [];
+      const bounds = this._windowBounds(view);
+      const days = view.days.slice(bounds.start, bounds.end);
+      for (const day of days) {
+        if (this._scrollTarget && BigInt(day.jdn) === this._scrollTarget.jdn
+            && !sameScrollTargetDay(day, this._scrollTarget)) {
+          throw new CalendarRenderConsistencyError(
+            day.jdn,
+            semanticDaySnapshot(this._scrollTarget),
+            semanticDaySnapshot(day),
+          );
         }
-        if (days.length > 0) prepared.push({ view, days });
       }
-      return prepared;
+      return days.length > 0 ? [{ view, days }] : [];
     }
 
     _renderCutlets() {
       const prepared = this._prepareRenderableCutlets();
       const fragment = doc.createDocumentFragment();
-      for (const item of prepared) {
-        fragment.append(this._renderCutlet(item.view, item.days));
-      }
+      for (const item of prepared) fragment.append(this._renderCutlet(item.view, item.days));
       this._els.list.replaceChildren(fragment);
       const selected = this._els.list.querySelectorAll('[aria-current="date"]');
       if (selected.length > 1) {
@@ -1609,6 +1588,52 @@
           Object.freeze({ ariaCurrentCount: selected.length }),
         );
       }
+      this._updateWindowControls();
+    }
+
+    _updateWindowControls() {
+      const view = this._activeView();
+      if (!view) {
+        this._els.windowEarlier.hidden = true;
+        this._els.windowLater.hidden = true;
+        this._els.targetButton.hidden = true;
+        this._els.windowStatus.textContent = '';
+        return;
+      }
+      const bounds = this._windowBounds(view);
+      this._els.windowEarlier.hidden = bounds.start === 0;
+      this._els.windowLater.hidden = bounds.end >= bounds.length;
+      this._els.windowEarlier.disabled = bounds.start === 0;
+      this._els.windowLater.disabled = bounds.end >= bounds.length;
+      this._els.windowStatus.textContent = this._t('calendar.windowStatus', {
+        start: bounds.length === 0 ? 0 : bounds.start + 1,
+        end: bounds.end,
+        total: bounds.length,
+      });
+      const targetVisible = this._scrollTarget != null
+        && BigInt(view.startJdn) === BigInt(this._scrollTarget.startJdn)
+        && this._scrollTarget.dayInCutlet - 1 >= bounds.start
+        && this._scrollTarget.dayInCutlet - 1 < bounds.end;
+      this._els.targetButton.hidden = targetVisible || this._scrollTarget == null;
+    }
+
+    _scrollCalendarStart() {
+      const section = this._els.list.querySelector('section.cutlet-section');
+      if (section && typeof section.scrollIntoView === 'function') {
+        section.scrollIntoView({ block: 'start', inline: 'nearest' });
+      }
+    }
+
+    _shiftWindow(direction) {
+      const view = this._activeView();
+      if (!view) return false;
+      const bounds = this._windowBounds(view);
+      const wanted = bounds.start + (direction < 0 ? -MAX_RENDERED_DAYS : MAX_RENDERED_DAYS);
+      const next = this._setWindowStart(view, wanted);
+      if (next === bounds.start) return false;
+      this._renderCutlets();
+      this._scrollCalendarStart();
+      return true;
     }
 
     _renderCutlet(view, preparedDays) {
