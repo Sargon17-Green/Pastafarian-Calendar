@@ -826,6 +826,8 @@
               grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
               min-width: 0;
             }
+            .day-line.cutlet-line { font-size: .82rem; }
+            .day-line.month { font-size: .92rem; }
           }
           @media (max-width: 26.25rem) {
             .cutlet-grid { grid-template-columns: 1fr; }
