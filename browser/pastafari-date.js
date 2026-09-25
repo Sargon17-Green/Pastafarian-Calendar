@@ -467,6 +467,12 @@
             color: var(--muted);
             font-weight: 700;
           }
+          .iso-date {
+            direction: ltr;
+            unicode-bidi: isolate;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+          }
 
           .toolbar {
             display: flex;
@@ -516,8 +522,7 @@
           }
           .cutlet-section:last-of-type { margin-bottom: 0; }
           .cutlet-heading {
-            position: sticky;
-            top: 0;
+            position: static;
             z-index: 5;
             margin: 0 0 1rem;
             padding: .9rem 1rem;
@@ -581,14 +586,13 @@
           .day[aria-current="date"] {
             z-index: 4;
             grid-template-rows: auto auto auto auto;
-            border: 8px solid #ffffff;
-            outline: 6px solid #000000;
-            outline-offset: -2px;
-            transform: scale(1.035);
+            border: 6px solid #ffffff;
+            outline: 4px solid #000000;
+            outline-offset: -4px;
+            transform: none;
             box-shadow:
-              0 0 0 8px #ffea00,
-              0 0 0 12px #000000,
-              0 18px 38px rgb(0 0 0 / 55%);
+              inset 0 0 0 4px #ffea00,
+              0 10px 24px rgb(0 0 0 / 38%);
           }
           .day[aria-current="date"]::after {
             content: "";
@@ -661,8 +665,19 @@
             text-align: start;
           }
           .overlay.error {
-            justify-items: center;
-            text-align: center;
+            grid-template-columns: minmax(0, 1fr);
+            grid-auto-flow: row;
+            gap: .7rem;
+            justify-items: start;
+            text-align: start;
+          }
+          .overlay.error .loading-title,
+          .overlay.error .error-message,
+          .overlay.error .retry-button {
+            grid-area: auto;
+          }
+          .overlay.error .retry-button {
+            justify-self: start;
           }
           .spinner {
             grid-area: spinner;
@@ -727,6 +742,13 @@
             border-color: var(--accent-dark);
             background: var(--accent-dark);
             color: white;
+          }
+
+          @media (max-width: 74rem) {
+            .cutlet-grid {
+              grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+              min-width: 0;
+            }
           }
 
           @media (max-width: 48rem) {
@@ -1357,6 +1379,29 @@
       this._restoreViewportAnchor(anchor);
     }
 
+    _renderTargetContext(targetDate, actionDate) {
+      const targetMarker = '__PASTAFARI_TARGET_ISO__';
+      const actionMarker = '__PASTAFARI_ACTION_ISO__';
+      const text = this._t('target.context', {
+        targetDate: targetMarker,
+        actionDate: actionMarker,
+      });
+      const parts = String(text).split(new RegExp('(' + targetMarker + '|' + actionMarker + ')', 'g'));
+      const fragment = doc.createDocumentFragment();
+      for (const part of parts) {
+        if (part === targetMarker || part === actionMarker) {
+          const iso = doc.createElement('bdi');
+          iso.className = 'iso-date';
+          iso.setAttribute('dir', 'ltr');
+          iso.textContent = part === targetMarker ? targetDate : actionDate;
+          fragment.append(iso);
+        } else if (part) {
+          fragment.append(doc.createTextNode(part));
+        }
+      }
+      this._els.beaconContext.replaceChildren(fragment);
+    }
+
     _renderSummary() {
       if (!this._value) return;
       const cutletName = this._localCalendarName('cutlet', this._value.cutletName);
@@ -1383,10 +1428,7 @@
       this._els.beaconYear.textContent = yearLine;
       this._els.beaconCutlet.textContent = cutletLine;
       this._els.beaconMonth.textContent = monthLine;
-      this._els.beaconContext.textContent = this._t('target.context', {
-        targetDate,
-        actionDate,
-      });
+      this._renderTargetContext(targetDate, actionDate);
       this._els.cookingOpen.textContent = this._t('cooking.open');
       this._syncCookingPanel();
     }
