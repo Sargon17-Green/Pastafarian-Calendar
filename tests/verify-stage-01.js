@@ -4,6 +4,7 @@ const assert = require('assert/strict');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const childProcess = require('child_process');
 const production = require('../src');
 const o = require('./normative-reference');
 
@@ -288,7 +289,18 @@ group('syntax de omni JavaScript es valid con li runtime local', () => {
   ok(files.length >= 6);
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8');
-    new vm.Script(source, { filename: file });
+    const relative = path.relative(root, file).replace(/\\/g, '/');
+    if (relative.startsWith('browser/reverse-engine/')) {
+      // Vendored reverse files are intentionally native ES modules. Parse the
+      // exact source in module mode; all other project JavaScript remains under
+      // the historical classic-script/CommonJS syntax check.
+      childProcess.execFileSync(process.execPath, ['--input-type=module', '--check'], {
+        input: source,
+        stdio: ['pipe', 'ignore', 'pipe'],
+      });
+    } else {
+      new vm.Script(source, { filename: file });
+    }
     assertions += 1;
   }
 });
