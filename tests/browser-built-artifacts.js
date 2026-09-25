@@ -13,6 +13,11 @@ const required = [
   'browser/dist/pastafari-worker.js',
   'browser/dist/pastafari-date.js',
   'browser/dist/pastafari-date.mjs',
+  'browser/dist/reverse-engine/pastafari-diagnostics.js',
+  'browser/dist/reverse-engine/pastafari-calendar-fast.js',
+  'browser/dist/reverse-engine/pastafari-constraints.js',
+  'browser/dist/reverse-engine/pastafari-reverse-worker.js',
+  'browser/dist/reverse-engine/pastafari-constraints-client.js',
   'browser/standalone/pastafari-date.js',
   'browser/standalone/pastafari-date.min.js',
 ];
@@ -42,6 +47,10 @@ assert(page.includes('pastafari-date.js?v=' + buildId));
 assert(!page.includes('__PASTAFARI_BROWSER_BUILD_ID__'));
 assert(standard.includes('const buildId = ' + JSON.stringify(buildId)));
 assert(standard.includes("pastafari-worker.js?v=' + encodeURIComponent(buildId)"));
+assert(standard.includes("reverse-engine/pastafari-constraints-client.js?v=' + encodeURIComponent(buildId)"));
+assert(standard.includes('solveSimplePastafariDate'));
+assert(standard.includes('ERR_REVERSE_FORWARD_MISMATCH'));
+assert(standalone.includes('reverseClientUrl: null'));
 assert(standard.includes('buildId,'));
 assert(worker.includes('PastafariBrowserWorkerConfig'));
 assert(worker.includes('buildId: ' + JSON.stringify(buildId)));
