@@ -604,9 +604,9 @@
             position: relative;
             display: grid;
             min-width: 0;
-            min-height: 8.4rem;
+            min-height: 6.4rem;
             padding: .7rem;
-            grid-template-rows: auto auto auto;
+            grid-template-rows: auto auto;
             align-content: start;
             gap: .28rem;
             overflow: hidden;
@@ -621,7 +621,7 @@
           }
           .day[aria-current="date"] {
             z-index: 4;
-            grid-template-rows: auto auto auto auto;
+            grid-template-rows: auto auto auto;
             border: 3px solid var(--accent-dark);
             outline: 0;
             transform: none;
@@ -660,13 +660,10 @@
             font-weight: 600;
             line-height: 1.32;
           }
-          .day-line.year {
-            color: #5d554c;
-            font-size: clamp(.68rem, .95vw, .78rem);
-            font-weight: 700;
-          }
           .day-line.cutlet-line {
-            color: #3f3933;
+            color: #514940;
+            font-size: clamp(.74rem, 1vw, .86rem);
+            font-weight: 750;
           }
           .day-line.month {
             margin-top: .15rem;
@@ -1668,13 +1665,10 @@
           card.append(targetBadge);
         }
 
-        const yearLine = doc.createElement('span');
-        yearLine.className = 'day-line year';
-        yearLine.textContent = this._t('date.yearLine', { year: day.year });
-
         const cutletLine = doc.createElement('span');
         cutletLine.className = 'day-line cutlet-line';
-        cutletLine.textContent = this._t('date.cutletLine', {
+        cutletLine.textContent = this._t('field.day') + ' ' + String(day.dayInCutlet);
+        cutletLine.title = this._t('date.cutletLine', {
           dayInCutlet: day.dayInCutlet,
           cutletName: localDayCutlet,
         });
@@ -1686,7 +1680,7 @@
           monthName: localDayMonth,
         });
 
-        card.append(yearLine, cutletLine, monthLine);
+        card.append(cutletLine, monthLine);
         grid.append(card);
       }
       group.append(heading, grid);
