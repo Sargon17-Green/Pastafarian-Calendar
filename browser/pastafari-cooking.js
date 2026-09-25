@@ -303,7 +303,11 @@
             overflow-wrap: anywhere;
             cursor: zoom-in;
           }
-          .exact-number[data-expanded="true"] { cursor: zoom-out; }
+          .exact-number[data-expanded="true"] {
+            cursor: zoom-out;
+            white-space: normal;
+            word-break: break-all;
+          }
           code {
             font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
             overflow-wrap: anywhere;
@@ -820,6 +824,7 @@
     _renderChapter() {
       const pane = this._els.pane;
       pane.replaceChildren();
+      pane.scrollTop = 0;
       this._heading(pane, this._chapterTitle(this._activeChapter));
       const note = doc.createElement('p');
       note.className = 'same-execution';
