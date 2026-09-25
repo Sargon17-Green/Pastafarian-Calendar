@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const childProcess = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const required = [
@@ -30,7 +31,14 @@ for (const relative of required) {
 
 for (const relative of required.filter((value) => value.endsWith('.js'))) {
   const source = fs.readFileSync(path.join(ROOT, relative), 'utf8');
-  new vm.Script(source, { filename: relative });
+  if (relative.startsWith('browser/dist/reverse-engine/')) {
+    childProcess.execFileSync(process.execPath, ['--input-type=module', '--check'], {
+      input: source,
+      stdio: ['pipe', 'ignore', 'pipe'],
+    });
+  } else {
+    new vm.Script(source, { filename: relative });
+  }
 }
 
 const buildId = fs.readFileSync(path.join(ROOT, 'browser/dist/build-id.txt'), 'utf8').trim();
