@@ -293,3 +293,199 @@ jobs:
           test "${{ needs.corrective-57.result }}" = "success"
           test "${{ needs.acceleration-58.result }}" = "success"
           echo 'JAVASCRIPT_INTERLINGUE_BRANCH=GREEN'
+
+
+  phase-b-visual-qa:
+    name: Phase B — visual assertions
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Extraer li repository
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Constructer li browser artefact
+        run: |
+          set -euo pipefail
+          node tests/verify-stage-01.js
+          node tests/browser-interface-all.js
+          node scripts/build-browser.js
+          node tests/browser-built-artifacts.js
+
+      - name: Preparar Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/phase-b-qa"
+          cd "$RUNNER_TEMP/phase-b-qa"
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Provar visualmen li Phase B
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE="$RUNNER_TEMP/phase-b-site"
+          rm -rf "$SITE"
+          mkdir -p "$SITE/dist"
+          cp browser/dist/index.html "$SITE/index.html"
+          cp browser/dist/pastafari-date.js "$SITE/dist/pastafari-date.js"
+          cp browser/dist/pastafari-worker.js "$SITE/dist/pastafari-worker.js"
+          cp browser/dist/pastafari-date.mjs "$SITE/dist/pastafari-date.mjs"
+          cp browser/dist/build-id.txt "$SITE/dist/build-id.txt"
+          cd "$SITE"
+          python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/phase-b-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+
+          cd "$RUNNER_TEMP/phase-b-qa"
+          cat > qa.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const out = path.join(process.cwd(), 'out');
+          fs.mkdirSync(out,{recursive:true});
+          const base='http://127.0.0.1:4173/';
+          const profiles=[
+            {name:'desktop1440',width:1440,height:1000,mobile:false},
+            {name:'tablet800',width:800,height:1280,mobile:false},
+            {name:'mobile390',width:390,height:844,mobile:true},
+            {name:'mobile320',width:320,height:740,mobile:true},
+          ];
+
+          function assert(v,m){ if(!v) throw new Error(m); }
+
+          async function waitReady(page){
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('pastafari-date')?.shadowRoot;
+              const c=s?.querySelector('.calendar');
+              return !!c && !c.hasAttribute('data-state');
+            },null,{timeout:180000});
+            await page.waitForTimeout(800);
+          }
+
+          async function state(page){
+            return page.evaluate(()=>{
+              const host=document.querySelector('pastafari-date');
+              const s=host.shadowRoot;
+              const viewport=s.querySelector('.viewport');
+              const prev=s.querySelector('.previous').getBoundingClientRect();
+              const next=s.querySelector('.next').getBoundingClientRect();
+              const target=s.querySelector('.target-button');
+              const current=s.querySelector('.day[aria-current="date"]');
+              return {
+                days:s.querySelectorAll('.day').length,
+                sections:s.querySelectorAll('.cutlet-section').length,
+                viewportOverflow:getComputedStyle(viewport).overflow,
+                viewportOverflowY:getComputedStyle(viewport).overflowY,
+                bodyClientWidth:document.documentElement.clientWidth,
+                bodyScrollWidth:document.documentElement.scrollWidth,
+                targetHidden:target.hidden,
+                currentText:current?.innerText||null,
+                status:s.querySelector('.window-status').innerText,
+                earlierHidden:s.querySelector('.window-button.earlier').hidden,
+                laterHidden:s.querySelector('.window-button.later').hidden,
+                prev:{x:prev.x,y:prev.y,width:prev.width,height:prev.height},
+                next:{x:next.x,y:next.y,width:next.width,height:next.height},
+              };
+            });
+          }
+
+          async function screenshot(page,name){
+            await page.screenshot({path:path.join(out,name+'.png'),fullPage:true});
+          }
+
+          async function checkProfile(browser,p){
+            const ctx=await browser.newContext({
+              viewport:{width:p.width,height:p.height},locale:'he-IL',
+              isMobile:p.mobile,hasTouch:p.mobile,deviceScaleFactor:1
+            });
+            const page=await ctx.newPage();
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await waitReady(page);
+
+            const initial=await state(page);
+            assert(initial.days<=28,p.name+': initial rendered day count '+initial.days);
+            assert(initial.sections===1,p.name+': more than one rendered cutlet');
+            assert(initial.viewportOverflowY==='visible',p.name+': nested vertical scroll still active: '+initial.viewportOverflowY);
+            assert(initial.bodyScrollWidth<=initial.bodyClientWidth+1,p.name+': document horizontal overflow');
+            if(p.mobile){
+              assert(Math.abs(initial.prev.y-initial.next.y)<4,p.name+': previous/next are not on same row');
+              assert(Math.abs(initial.prev.width-initial.next.width)<8,p.name+': previous/next widths are asymmetric');
+            }
+            fs.writeFileSync(path.join(out,p.name+'__initial.json'),JSON.stringify(initial,null,2));
+            await screenshot(page,p.name+'__initial');
+
+            // Move one bounded day window in whichever direction is available.
+            const canLater=!initial.laterHidden;
+            const canEarlier=!initial.earlierHidden;
+            assert(canLater||canEarlier,p.name+': no day-window navigation is available');
+            const selector=canLater?'.window-button.later':'.window-button.earlier';
+            await page.locator(selector).click();
+            await page.waitForTimeout(350);
+            const shifted=await state(page);
+            assert(shifted.days<=28,p.name+': shifted rendered day count '+shifted.days);
+            assert(shifted.status!==initial.status,p.name+': day-window status did not change');
+            assert(shifted.targetHidden===false,p.name+': return-target control did not appear after leaving target window');
+            fs.writeFileSync(path.join(out,p.name+'__shifted.json'),JSON.stringify(shifted,null,2));
+            await screenshot(page,p.name+'__shifted');
+
+            await page.locator('.target-button').click();
+            await page.waitForTimeout(600);
+            const returned=await state(page);
+            assert(returned.days<=28,p.name+': returned rendered day count '+returned.days);
+            assert(returned.targetHidden===true,p.name+': return-target stayed visible on target');
+            assert(returned.currentText,p.name+': target card is not rendered after return');
+            fs.writeFileSync(path.join(out,p.name+'__returned.json'),JSON.stringify(returned,null,2));
+            await screenshot(page,p.name+'__returned');
+
+            // Exercise explicit cutlet navigation enough to cross the five-cutlet cache bound.
+            for(let i=0;i<6;i++){
+              await page.locator('.next').click();
+              await page.waitForTimeout(2500);
+              const moved=await state(page);
+              assert(moved.days<=28,p.name+': day DOM grew after cutlet navigation at step '+i);
+              assert(moved.sections===1,p.name+': multiple rendered cutlets after navigation at step '+i);
+            }
+            const away=await state(page);
+            assert(away.targetHidden===false,p.name+': target control missing after cutlet navigation');
+            await screenshot(page,p.name+'__six_cutlets_away');
+
+            await page.locator('.target-button').click();
+            await page.waitForTimeout(3000);
+            const finalState=await state(page);
+            assert(finalState.days<=28,p.name+': day DOM grew after long return');
+            assert(finalState.targetHidden===true,p.name+': target return failed after cutlet navigation');
+            assert(finalState.currentText,p.name+': target card absent after long return');
+            fs.writeFileSync(path.join(out,p.name+'__final.json'),JSON.stringify(finalState,null,2));
+            await screenshot(page,p.name+'__final');
+
+            await ctx.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for(const p of profiles) await checkProfile(browser,p);
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node qa.js
+
+      - name: Conservar li Phase B visual QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-b-visual-qa
+          path: ${{ runner.temp }}/phase-b-qa/out
+          if-no-files-found: warn
+          retention-days: 14
