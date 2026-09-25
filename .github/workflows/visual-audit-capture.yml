@@ -1,0 +1,138 @@
+name: Visual audit capture (diagnostic only)
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/visual-audit-capture.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Prepare Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/visual-audit"
+          cd "$RUNNER_TEMP/visual-audit"
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Capture live site
+        shell: bash
+        env:
+          SITE_URL: https://sargon17-green.github.io/Pastafarian-Calendar/
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/visual-audit"
+          cat > capture.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+
+          const out = path.join(process.cwd(), 'out');
+          fs.mkdirSync(out, { recursive: true });
+          const url = process.env.SITE_URL;
+
+          const profiles = [
+            {name:'desktop', width:1440, height:1000, isMobile:false},
+            {name:'tablet', width:1024, height:1366, isMobile:false},
+            {name:'mobile', width:390, height:844, isMobile:true},
+          ];
+
+          async function settle(page, ms=3000) {
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForTimeout(ms);
+          }
+
+          async function captureProfile(browser, p) {
+            const ctx = await browser.newContext({
+              viewport: {width:p.width, height:p.height},
+              locale: 'he-IL',
+              isMobile: p.isMobile,
+              hasTouch: p.isMobile,
+              deviceScaleFactor: 1,
+            });
+            const page = await ctx.newPage();
+            const errors = [];
+            page.on('console', m => { if (m.type()==='error') errors.push('console: '+m.text()); });
+            page.on('pageerror', e => errors.push('pageerror: '+String(e)));
+            page.on('requestfailed', r => errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+
+            await page.goto(url, {waitUntil:'domcontentloaded', timeout:120000});
+            await settle(page, 5000);
+
+            await page.screenshot({path:path.join(out, `${p.name}__top__05s.png`), fullPage:false});
+            await page.screenshot({path:path.join(out, `${p.name}__full__05s.png`), fullPage:true});
+
+            // Let expensive initial computation finish if it is still running.
+            await page.waitForTimeout(35000);
+            await page.screenshot({path:path.join(out, `${p.name}__top__40s.png`), fullPage:false});
+            await page.screenshot({path:path.join(out, `${p.name}__full__40s.png`), fullPage:true});
+
+            const dims = await page.evaluate(() => ({
+              scrollWidth: document.documentElement.scrollWidth,
+              scrollHeight: document.documentElement.scrollHeight,
+              clientWidth: document.documentElement.clientWidth,
+              clientHeight: document.documentElement.clientHeight,
+              title: document.title,
+              lang: document.documentElement.lang,
+              dir: document.documentElement.dir,
+            }));
+
+            const step = Math.max(300, Math.floor(p.height * 0.78));
+            let idx = 0;
+            for (let y=0; y<dims.scrollHeight && idx<30; y+=step, idx++) {
+              await page.evaluate(v => window.scrollTo(0, v), y);
+              await page.waitForTimeout(250);
+              await page.screenshot({path:path.join(out, `${p.name}__slice_${String(idx).padStart(2,'0')}__y${y}.png`), fullPage:false});
+            }
+            await page.evaluate(() => window.scrollTo(0,0));
+
+            const controls = await page.evaluate(() => {
+              const els = [...document.querySelectorAll('button,input,select,textarea,a,[role="button"],[role="tab"],[role="combobox"],[role="switch"]')];
+              return els.map((el, i) => {
+                const r = el.getBoundingClientRect();
+                const cs = getComputedStyle(el);
+                return {
+                  i,
+                  tag: el.tagName,
+                  type: el.getAttribute('type'),
+                  role: el.getAttribute('role'),
+                  text: (el.innerText || el.value || el.getAttribute('aria-label') || el.getAttribute('title') || '').trim().replace(/\s+/g,' ').slice(0,200),
+                  aria: el.getAttribute('aria-label'),
+                  title: el.getAttribute('title'),
+                  name: el.getAttribute('name'),
+                  id: el.id,
+                  href: el.getAttribute('href'),
+                  visible: !!(r.width && r.height && cs.visibility!=='hidden' && cs.display!=='none'),
+                  rect: {x:r.x,y:r.y,width:r.width,height:r.height},
+                };
+              }).filter(x => x.visible);
+            });
+
+            fs.writeFileSync(path.join(out, `${p.name}__meta.json`), JSON.stringify({profile:p,dims,controls,errors}, null, 2));
+            await ctx.close();
+          }
+
+          (async() => {
+            const browser = await chromium.launch({headless:true});
+            for (const p of profiles) await captureProfile(browser, p);
+            await browser.close();
+          })().catch(e => { console.error(e); process.exit(1); });
+          JS
+          node capture.js
+
+      - name: Upload screenshots and metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-site-visual-audit-initial
+          path: ${{ runner.temp }}/visual-audit/out
+          if-no-files-found: error
+          retention-days: 14
