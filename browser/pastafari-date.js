@@ -1797,88 +1797,88 @@
         if (card === selected) card.setAttribute('aria-current', 'date');
         else card.removeAttribute('aria-current');
       }
-      this._positionElementInViewport(selected, 'center');
-      this._activeStartJdn = target.startJdn;
+      this._activeStartJdn = BigInt(target.startJdn);
+      this._updateWindowControls();
       return selected;
     }
 
-    _positionCutletInViewport(startJdn) {
-      const start = BigInt(startJdn);
-      const section = this._findCutletSection(start);
-      if (!section) return false;
-      this._positionElementInViewport(section, 'start');
-      this._activeStartJdn = start;
+    _assertTargetInView(view, target) {
+      if (!view || BigInt(view.startJdn) !== BigInt(target.startJdn)
+          || String(view.year) !== String(target.year)
+          || String(view.cutletName) !== String(target.cutletName)) {
+        throw new CalendarTargetCutletError(
+          target.jdn,
+          target,
+          view ? Object.freeze({
+            startJdn: String(view.startJdn),
+            year: String(view.year),
+            cutletName: String(view.cutletName),
+          }) : Object.freeze({ missingView: true }),
+          'wrong-cutlet-identity',
+        );
+      }
+      const targetDay = view.days[target.dayInCutlet - 1];
+      if (!sameScrollTargetDay(targetDay, target)) {
+        throw new CalendarTargetCutletError(
+          target.jdn,
+          target,
+          targetDay ? semanticDaySnapshot(targetDay) : Object.freeze({ missingTargetDay: true }),
+          'target-not-in-expected-cutlet-position',
+        );
+      }
+      return view;
+    }
+
+    async _returnToTarget() {
+      if (!this._scrollTarget) return false;
+      const generation = this._generation;
+      const navigationGeneration = ++this._navigationGeneration;
+      let view = this._cutlets.get(BigInt(this._scrollTarget.startJdn));
+      if (!view) {
+        try {
+          view = await this._loadCutletAt(this._scrollTarget.startJdn, 'after', generation);
+        } catch (_) {
+          return false;
+        }
+      }
+      if (!view || !this._connected || generation !== this._generation
+          || navigationGeneration !== this._navigationGeneration) return false;
+      this._assertTargetInView(view, this._scrollTarget);
+      this._activeStartJdn = BigInt(view.startJdn);
+      this._setWindowAroundIndex(view, this._scrollTarget.dayInCutlet - 1);
+      this._renderCutlets();
+      await nextLayoutFrame();
+      if (!this._connected || generation !== this._generation
+          || navigationGeneration !== this._navigationGeneration) return false;
+      const selected = this._positionTargetInViewport(this._scrollTarget);
+      if (selected && typeof selected.scrollIntoView === 'function') {
+        selected.scrollIntoView({ block: 'center', inline: 'nearest' });
+      }
+      this._primeAdjacent(view, generation);
       return true;
     }
 
     async _scrollAdjacent(direction) {
-      if (this._orderedStarts.length === 0) return false;
+      const current = this._activeView();
+      if (!current) return false;
       const generation = this._generation;
       const navigationGeneration = ++this._navigationGeneration;
-      const currentStart = this._activeStartJdn != null
-        ? this._activeStartJdn
-        : (this._scrollTarget != null ? this._scrollTarget.startJdn : this._orderedStarts[0]);
-      const currentIndex = this._orderedStarts.findIndex((start) => start === currentStart);
-      if (currentIndex < 0) return false;
-
-      let start = this._orderedStarts[currentIndex + direction];
-      if (start === undefined) {
-        const current = this._cutlets.get(this._orderedStarts[currentIndex]);
-        if (!current) return false;
-        const requested = direction < 0 ? current.previousCutletJdn : current.nextCutletJdn;
-        let loaded;
-        try {
-          loaded = await this._loadCutletAt(requested, direction < 0 ? 'before' : 'after', generation);
-        } catch (_) {
-          return false;
-        }
-        if (!loaded || !this._connected || generation !== this._generation
-            || navigationGeneration !== this._navigationGeneration) return false;
-        start = BigInt(loaded.startJdn);
+      const requested = direction < 0 ? current.previousCutletJdn : current.nextCutletJdn;
+      let loaded;
+      try {
+        loaded = await this._loadCutletAt(requested, direction < 0 ? 'before' : 'after', generation);
+      } catch (_) {
+        return false;
       }
-
-      if (!this._connected || generation !== this._generation
+      if (!loaded || !this._connected || generation !== this._generation
           || navigationGeneration !== this._navigationGeneration) return false;
-      if (!this._positionCutletInViewport(start)) return false;
 
-      const resolvedIndex = this._orderedStarts.findIndex((candidate) => candidate === start);
-      if (direction < 0 && resolvedIndex === 0) {
-        const first = this._cutlets.get(start);
-        if (first) this._loadCutletAt(first.previousCutletJdn, 'before', generation).catch(() => {});
-      } else if (direction > 0 && resolvedIndex === this._orderedStarts.length - 1) {
-        const last = this._cutlets.get(start);
-        if (last) this._loadCutletAt(last.nextCutletJdn, 'after', generation).catch(() => {});
-      }
+      this._activeStartJdn = BigInt(loaded.startJdn);
+      this._setWindowStart(loaded, 0);
+      this._renderCutlets();
+      this._scrollCalendarStart();
+      this._primeAdjacent(loaded, generation);
       return true;
-    }
-
-    _onScroll() {
-      const viewport = this._els.viewport;
-      const sections = Array.from(this._els.list.querySelectorAll('section.cutlet-section'));
-      if (sections.length > 0) {
-        const top = viewport.getBoundingClientRect().top + 18;
-        let active = sections[0];
-        for (const section of sections) {
-          if (section.getBoundingClientRect().top <= top) active = section;
-          else break;
-        }
-        this._activeStartJdn = BigInt(active.dataset.startJdn);
-      }
-
-      if (viewport.scrollTop < 180 && this._orderedStarts.length > 0) {
-        const first = this._cutlets.get(this._orderedStarts[0]);
-        this._loadCutletAt(first.previousCutletJdn, 'before').catch(() => {});
-      }
-      if (viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 180
-          && this._orderedStarts.length > 0) {
-        const last = this._cutlets.get(this._orderedStarts[this._orderedStarts.length - 1]);
-        this._loadCutletAt(last.nextCutletJdn, 'after').catch(() => {});
-      }
-    }
-
-    _updateEdgeLoaders() {
-      this._els.beforeLoader.textContent = this._loadingBefore !== null ? '…' : '';
-      this._els.afterLoader.textContent = this._loadingAfter !== null ? '…' : '';
     }
 
     _openDialog() {
