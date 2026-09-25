@@ -250,7 +250,6 @@ async function flush() {
 
 (async () => {
   const watchdog = setTimeout(() => { throw new Error('browser-component-runtime timeout'); }, 15000);
-  console.log('RUNTIME_TRACE: start');
   // Public-page language resolution: explicit lang wins; without one, a saved
   // manual selection wins over navigator.languages, which wins over Interlingue.
   localStorage.clear();
@@ -284,7 +283,6 @@ async function flush() {
   localStorage.clear();
   sandbox.navigator.languages = ['ie'];
 
-  console.log('RUNTIME_TRACE: locales-done');
   // The public calendar owns only the open/close and date synchronization of
   // the separate <pastafari-cooking> component. Merely constructing the date
   // component never starts a cooking trace.
@@ -306,7 +304,6 @@ async function flush() {
   integratedCooking._els.cookingPanel.listeners.get('pastafari-cooking-close')();
   assert.strictEqual(integratedCooking._els.cookingOpen.focused, true);
 
-  console.log('RUNTIME_TRACE: cooking-done');
   // Rapid attribute changes: only the newest generation may commit or publish.
   const pending = new Map();
   sharedService = {
@@ -321,9 +318,6 @@ async function flush() {
   };
   const race = new PastafariDateElement();
   race._primeAdjacent = () => {};
-  race._showError = (error) => {
-    console.log('RACE_REFRESH_ERROR: ' + (error && error.stack ? error.stack : String(error)));
-  };
   race.setAttribute('date', '2026-09-02');
   race.connectedCallback();
   await flush();
@@ -351,7 +345,6 @@ async function flush() {
   assert.strictEqual(race.value.cutletName, valueFor(secondJdn).cutletName, 'stale result replaced current value');
   assert.strictEqual(race.dispatched.length, 1, 'stale result published an event');
 
-  console.log('RUNTIME_TRACE: race-done');
   // Disconnect invalidates a pending generation. Reconnect can safely start anew.
   const disconnectPending = deferred();
   let disconnectCalls = 0;
@@ -378,7 +371,6 @@ async function flush() {
   await flush();
   assert.strictEqual(reconnect.dispatched.length, 1);
 
-  console.log('RUNTIME_TRACE: reconnect-done');
   // Headless conversion is data-only and does not ask for a cutlet view.
   let headlessViews = 0;
   sharedService = {
@@ -394,7 +386,6 @@ async function flush() {
   assert.strictEqual(headlessViews, 0);
   assert.strictEqual(headless.dispatched.length, 1);
 
-  console.log('RUNTIME_TRACE: headless-done');
   // Invalid external date attributes reach the visible error state, while ready
   // remains usable and resolves after a later successful refresh.
   sharedService = {
@@ -416,7 +407,6 @@ async function flush() {
   assert.strictEqual(recoveredReady.cutletName, recovered.cutletName);
   assert.strictEqual(recover._els.calendar.hasAttribute('data-state'), false);
 
-  console.log('RUNTIME_TRACE: recover-done');
   // Language changes rerender presentation only. Raw public value remains the
   // exact Interlingue semantic result from the core.
   const language = new PastafariDateElement();
@@ -430,7 +420,6 @@ async function flush() {
   assert.strictEqual(language.value.cutletName, rawName);
   if (rawName === 'Lagash') assert(language._els.summary.textContent.includes('\u05DC\u05D2\u05E9'));
 
-  console.log('RUNTIME_TRACE: language-done');
   // Back to today resets both externally visible date inputs and coalesces the
   // resulting refresh through the connection epoch queue.
   language.setAttribute('calculation-date', '2026-09-01');
@@ -438,7 +427,6 @@ async function flush() {
   assert.strictEqual(language.hasAttribute('date'), false);
   assert.strictEqual(language.hasAttribute('calculation-date'), false);
 
-  console.log('RUNTIME_TRACE: today-done');
   // Presentation-suppression attributes close any already-open editor. This
   // prevents a modal from surviving after no-editor/headless makes that UI
   // unavailable. Removing no-editor itself is presentation-only.
@@ -454,7 +442,6 @@ async function flush() {
   suppression.setAttribute('headless', '');
   assert.strictEqual(suppression._els.dialog.hasAttribute('open'), false);
 
-  console.log('RUNTIME_TRACE: suppression-done');
   // Month appearance is deterministic from the current semantic source name,
   // independent of locale and rendering order. Day cards keep the original
   // original flat-grid visual identity while remaining non-interactive.
@@ -494,7 +481,6 @@ async function flush() {
   assert.strictEqual(card.children[0].className, 'target-badge');
   assert.strictEqual(card.children[0].textContent, 'This is the date you searched for');
 
-  console.log('RUNTIME_TRACE: theme-card-done');
   // Every current semantic month gets a distinct, saturated background theme.
   const monthNames = Object.keys(themed._locale.calendar.months);
   const backgrounds = new Set();
@@ -512,7 +498,6 @@ async function flush() {
   assert.strictEqual(backgrounds.size, monthNames.length);
   assert.strictEqual(edges.size, monthNames.length);
 
-  console.log('RUNTIME_TRACE: month-themes-done');
   // A JDN may appear at most once in the rendered card model. Exact duplicates
   // are deduplicated; semantic divergence for the same JDN fails closed.
   const duplicateGuard = new PastafariDateElement();
@@ -554,7 +539,6 @@ async function flush() {
       && error.jdn === '739862' && /different cards/.test(error.message),
   );
 
-  console.log('RUNTIME_TRACE: duplicate-guard-done');
   // The direct five-part Pastafarian result is authoritative for target
   // selection. A cutlet view that offers the searched JDN with another tuple
   // must fail closed even when there is no duplicate JDN card to compare it to.
@@ -637,14 +621,11 @@ async function flush() {
     async retry() {},
   };
 
-  console.log('PHASE_B_TEST: construct');
   const bounded = new PastafariDateElement();
   bounded._primeAdjacent = () => {};
   bounded.setAttribute('date', '2026-09-06');
   bounded._connected = true;
-  console.log('PHASE_B_TEST: refresh-start');
   await bounded.refresh();
-  console.log('PHASE_B_TEST: refresh-done');
 
   assert.strictEqual(bounded._activeStartJdn, boundedStart);
   assert(bounded._els.list.querySelectorAll('.day').length <= 28);
@@ -652,7 +633,6 @@ async function flush() {
   assert.strictEqual(bounded._els.targetButton.hidden, true);
 
   const initialWindowStart = bounded._windowStart;
-  console.log('PHASE_B_TEST: shift-start');
   assert.strictEqual(bounded._shiftWindow(1), true);
   assert(bounded._els.list.querySelectorAll('.day').length <= 28);
   assert.strictEqual(bounded._els.targetButton.hidden, false);
@@ -661,9 +641,7 @@ async function flush() {
 
   // Move away from the target window, then return to it inside the same cutlet.
   bounded._shiftWindow(1);
-  console.log('PHASE_B_TEST: first-return-start');
   assert.strictEqual(await bounded._returnToTarget(), true);
-  console.log('PHASE_B_TEST: first-return-done');
   assert.strictEqual(bounded._activeStartJdn, boundedStart);
   assert.strictEqual(bounded._els.targetButton.hidden, true);
   const selectedInTarget = bounded._els.list.querySelector('[aria-current="date"]');
@@ -672,21 +650,16 @@ async function flush() {
 
   // Twenty explicit next-cutlet operations must keep both rendered DOM and the
   // semantic cache bounded. The original target should eventually be evicted.
-  console.log('PHASE_B_TEST: loop-start');
   for (let step = 0; step < 20; step += 1) {
     assert.strictEqual(await bounded._scrollAdjacent(1), true);
-    if (step % 5 === 4) console.log('PHASE_B_TEST: loop-step-' + (step + 1));
     assert(bounded._els.list.querySelectorAll('.day').length <= 28, 'rendered day count grew past the bound');
     assert(bounded._cutlets.size <= 5, 'semantic cutlet cache grew past five');
   }
   assert.strictEqual(bounded._cutlets.has(boundedStart), false, 'target cutlet should have been evicted after long navigation');
   assert.strictEqual(bounded._els.targetButton.hidden, false);
 
-  console.log('PHASE_B_TEST: loop-done');
   const requestCountBeforeReturn = boundedRequests.length;
-  console.log('PHASE_B_TEST: long-return-start');
   assert.strictEqual(await bounded._returnToTarget(), true);
-  console.log('PHASE_B_TEST: long-return-done');
   assert(boundedRequests.length > requestCountBeforeReturn, 'evicted target was not reloaded');
   assert.strictEqual(bounded._activeStartJdn, boundedStart);
   assert.strictEqual(bounded._cutlets.has(boundedStart), true, 'reloaded target was trimmed out immediately');
