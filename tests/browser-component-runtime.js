@@ -483,7 +483,8 @@ async function flush() {
   assert.strictEqual(card.children[0].className, 'target-badge');
   assert.strictEqual(card.children[0].textContent, 'This is the date you searched for');
 
-  // Every current semantic month gets a distinct, saturated background theme.
+  // Every current semantic month keeps a distinct deterministic hue, but
+  // Phase D uses a light paper-like background instead of the old saturated fill.
   const monthNames = Object.keys(themed._locale.calendar.months);
   const backgrounds = new Set();
   const edges = new Set();
@@ -495,6 +496,8 @@ async function flush() {
     })]);
     backgrounds.add(themedRun.style.values.get('--month-bg'));
     edges.add(themedRun.style.values.get('--month-edge'));
+    assert(themedRun.style.values.get('--month-bg').includes('62% 88%'));
+    assert(themedRun.style.values.get('--month-edge').includes('58% 34%'));
     assert(themedRun.style.values.get('--month-pattern-image').includes('repeating-linear-gradient'));
   }
   assert.strictEqual(backgrounds.size, monthNames.length);
