@@ -293,3 +293,230 @@ jobs:
           test "${{ needs.corrective-57.result }}" = "success"
           test "${{ needs.acceleration-58.result }}" = "success"
           echo 'JAVASCRIPT_INTERLINGUE_BRANCH=GREEN'
+
+
+  phase-e-reverse-visual-qa:
+    name: Phase E — reverse-search visual assertions
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Extraer li repository
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Constructer e provar li browser artefact
+        run: |
+          set -euo pipefail
+          node tests/browser-interface-all.js
+          node scripts/build-browser.js
+          node tests/browser-built-artifacts.js
+
+      - name: Preparar Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/phase-e-qa"
+          cd "$RUNNER_TEMP/phase-e-qa"
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Provar visualmen li reverse search
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE="$RUNNER_TEMP/phase-e-site"
+          rm -rf "$SITE"
+          mkdir -p "$SITE/dist"
+          cp browser/dist/index.html "$SITE/index.html"
+          cp browser/dist/pastafari-date.js "$SITE/dist/pastafari-date.js"
+          cp browser/dist/pastafari-worker.js "$SITE/dist/pastafari-worker.js"
+          cp browser/dist/pastafari-date.mjs "$SITE/dist/pastafari-date.mjs"
+          cp browser/dist/build-id.txt "$SITE/dist/build-id.txt"
+          cp -R browser/dist/reverse-engine "$SITE/dist/reverse-engine"
+          cd "$SITE"
+          python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/phase-e-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+
+          cd "$RUNNER_TEMP/phase-e-qa"
+          cat > qa.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const out = path.join(process.cwd(), 'out');
+          fs.mkdirSync(out,{recursive:true});
+          const base='http://127.0.0.1:4173/';
+          const profiles=[
+            {name:'desktop1440_en',width:1440,height:1000,locale:'en-US',lang:'en'},
+            {name:'tablet800_he',width:800,height:1100,locale:'he-IL',lang:'he'},
+            {name:'mobile390_ar',width:390,height:844,locale:'ar',lang:'ar'},
+            {name:'mobile320_de',width:320,height:740,locale:'de-DE',lang:'de'},
+          ];
+          function assert(v,m){ if(!v) throw new Error(m); }
+          async function waitReady(page){
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('pastafari-date')?.shadowRoot;
+              const c=s?.querySelector('.calendar');
+              return !!c && !c.hasAttribute('data-state');
+            },null,{timeout:180000});
+            await page.waitForTimeout(700);
+          }
+          async function reverseState(page){
+            return page.evaluate(()=>{
+              const h=document.querySelector('pastafari-date');
+              const s=h.shadowRoot;
+              const d=s.querySelector('.reverse-dialog');
+              const r=d.getBoundingClientRect();
+              const fields=[...d.querySelectorAll('input,select,button')].map(el=>{
+                const x=el.getBoundingClientRect();
+                return {name:el.getAttribute('name')||el.className||el.textContent,top:x.top,bottom:x.bottom,left:x.left,right:x.right,width:x.width,height:x.height};
+              });
+              return {
+                open:d.hasAttribute('open'),
+                dir:h.getAttribute('dir'),
+                bodyCW:document.documentElement.clientWidth,
+                bodySW:document.documentElement.scrollWidth,
+                viewport:{w:innerWidth,h:innerHeight},
+                dialog:{top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height,scrollHeight:d.scrollHeight,clientHeight:d.clientHeight},
+                fields,
+                status:s.querySelector('.reverse-status').innerText,
+                resultCount:s.querySelectorAll('.reverse-result').length,
+                reverseVisible:!s.querySelector('.reverse-open').hidden,
+              };
+            });
+          }
+          async function openAndValidate(browser,p){
+            const ctx=await browser.newContext({viewport:{width:p.width,height:p.height},locale:p.locale,isMobile:p.width<500,hasTouch:p.width<500,deviceScaleFactor:1});
+            const page=await ctx.newPage();
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await waitReady(page);
+            await page.evaluate(lang=>document.querySelector('pastafari-date').setAttribute('lang',lang),p.lang);
+            await page.waitForTimeout(250);
+            const open=page.locator('pastafari-date').locator('.reverse-open');
+            assert(await open.isVisible(),p.name+': reverse entry point not visible');
+            await open.click();
+            await page.waitForTimeout(250);
+            const st=await reverseState(page);
+            assert(st.open,p.name+': reverse dialog did not open');
+            assert(st.reverseVisible,p.name+': reverse control unexpectedly hidden');
+            assert(st.bodySW<=st.bodyCW+1,p.name+': page horizontal overflow');
+            assert(st.dialog.left>=-1 && st.dialog.right<=st.viewport.w+1,p.name+': reverse dialog escapes viewport horizontally');
+            assert(st.dialog.top>=-1 && st.dialog.bottom<=st.viewport.h+1,p.name+': reverse dialog escapes viewport vertically');
+            assert(st.dialog.clientHeight<=st.viewport.h+1,p.name+': reverse dialog is taller than viewport');
+            for(const f of st.fields){
+              assert(f.left>=st.dialog.left-1 && f.right<=st.dialog.right+1,p.name+': field escapes dialog: '+f.name);
+            }
+            fs.writeFileSync(path.join(out,p.name+'__open.json'),JSON.stringify(st,null,2));
+            await page.screenshot({path:path.join(out,p.name+'__open.png'),fullPage:false});
+
+            // Invalid local input must fail in the dialog without touching the engine.
+            const year=page.locator('pastafari-date').locator('input[name="reverse-year"]');
+            await year.fill('not-a-year');
+            await page.locator('pastafari-date').locator('.reverse-submit').click();
+            await page.waitForTimeout(150);
+            const invalid=await reverseState(page);
+            assert(invalid.open,p.name+': invalid input closed reverse dialog');
+            assert(invalid.status.trim().length>0,p.name+': invalid input has no visible message');
+            await page.screenshot({path:path.join(out,p.name+'__invalid.png'),fullPage:false});
+
+            await page.locator('pastafari-date').locator('.reverse-cancel').click();
+            await page.waitForTimeout(150);
+            const closed=await page.evaluate(()=>!document.querySelector('pastafari-date').shadowRoot.querySelector('.reverse-dialog').hasAttribute('open'));
+            assert(closed,p.name+': cancel did not close reverse dialog');
+            await ctx.close();
+          }
+
+          async function realRoundTrip(browser){
+            const ctx=await browser.newContext({viewport:{width:1440,height:1000},locale:'en-US',deviceScaleFactor:1});
+            const page=await ctx.newPage();
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await waitReady(page);
+            await page.evaluate(()=>document.querySelector('pastafari-date').setAttribute('lang','en'));
+            await page.locator('pastafari-date').locator('.reverse-open').click();
+            await page.waitForTimeout(200);
+
+            // The dialog is prefilled from the currently displayed authoritative result.
+            const before=await page.evaluate(()=>{
+              const s=document.querySelector('pastafari-date').shadowRoot;
+              return {
+                target:s.querySelector('.beacon-context').innerText,
+                year:s.querySelector('input[name="reverse-year"]').value,
+                cutlet:s.querySelector('select[name="reverse-cutlet"]').value,
+                dayCutlet:s.querySelector('input[name="reverse-day-cutlet"]').value,
+                month:s.querySelector('select[name="reverse-month"]').value,
+                dayMonth:s.querySelector('input[name="reverse-day-month"]').value,
+                calculation:s.querySelector('input[name="reverse-calculation"]').value,
+              };
+            });
+            fs.writeFileSync(path.join(out,'real_roundtrip_prefill.json'),JSON.stringify(before,null,2));
+
+            await page.locator('pastafari-date').locator('.reverse-submit').click();
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('pastafari-date')?.shadowRoot;
+              const button=s?.querySelector('.reverse-submit');
+              return !!button && button.disabled===false && (
+                s.querySelectorAll('.reverse-result').length>0 ||
+                s.querySelector('.reverse-status').getAttribute('data-kind')==='error' ||
+                /No matching|matching dates|stopped/i.test(s.querySelector('.reverse-status').innerText)
+              );
+            },null,{timeout:180000});
+            const searched=await reverseState(page);
+            fs.writeFileSync(path.join(out,'real_roundtrip_result.json'),JSON.stringify(searched,null,2));
+            await page.screenshot({path:path.join(out,'real_roundtrip_result.png'),fullPage:false});
+            assert(searched.resultCount>0,'real reverse round-trip returned no result');
+            const iso=await page.locator('pastafari-date').locator('.reverse-result bdi').first().innerText();
+            assert(/^\d{4}-\d{2}-\d{2}$/.test(iso),'reverse result ISO malformed: '+iso);
+            const dir=await page.locator('pastafari-date').locator('.reverse-result bdi').first().getAttribute('dir');
+            assert(dir==='ltr','reverse result ISO is not LTR isolated');
+
+            await page.locator('pastafari-date').locator('.reverse-result').first().click();
+            await page.waitForFunction(()=>{
+              const h=document.querySelector('pastafari-date');
+              return !h.shadowRoot.querySelector('.reverse-dialog').hasAttribute('open') &&
+                h.getAttribute('date')!=null;
+            },null,{timeout:5000});
+            await waitReady(page);
+            const after=await page.evaluate(()=>{
+              const h=document.querySelector('pastafari-date');
+              const s=h.shadowRoot;
+              return {
+                date:h.getAttribute('date'),
+                calculation:h.getAttribute('calculation-date'),
+                selected:!!s.querySelector('.day[aria-current="date"]'),
+                selectedAria:s.querySelector('.day[aria-current="date"]')?.getAttribute('aria-label')||null,
+              };
+            });
+            fs.writeFileSync(path.join(out,'real_roundtrip_after.json'),JSON.stringify(after,null,2));
+            assert(after.date===iso,'selected reverse result did not become ordinary target date');
+            assert(after.selected,'ordinary calendar did not select reverse result');
+            await page.screenshot({path:path.join(out,'real_roundtrip_after.png'),fullPage:true});
+            await ctx.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for(const p of profiles) await openAndValidate(browser,p);
+            await realRoundTrip(browser);
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node qa.js
+
+      - name: Conservar li Phase E visual QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-e-reverse-visual-qa
+          path: ${{ runner.temp }}/phase-e-qa/out
+          if-no-files-found: warn
+          retention-days: 14
