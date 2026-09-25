@@ -83,12 +83,21 @@ assert(!source.includes('0 0 0 8px #ffea00'), 'Li external yellow ring ne deve r
 assert(!source.includes('class="edge-loader'), 'Li old edge-loading scroll sentinels ne deve retornar.');
 assert(!source.includes("this._els.viewport.addEventListener('scroll'"), 'Li calendar ne deve plu depender de nested-scroll edge loading.');
 assert(!source.includes('max-height: var(--pastafari-calendar-height, 46rem)'), 'Li old internal vertical scroll viewport ne deve retornar.');
+assert(source.includes('_cookingPagePosition'), 'Li calendar deve memorisar su page-position durant li modal trace.');
+assert(source.includes('preventScroll: true'), 'Li trace-close focus return deve evitar involuntari scrolling.');
 
 const cookingSource = fs.readFileSync(path.join(__dirname, '..', 'browser', 'pastafari-cooking.js'), 'utf8');
 for (const token of [
   'class PastafariCookingElement',
   "['date', 'calculation-date', 'lang', 'open']",
   "'pastafari-cooking'",
+  '<dialog class="shell"',
+  'aria-modal="true"',
+  'height: min(52rem, calc(100dvh - 2rem))',
+  'grid-template-rows: auto auto minmax(0, 1fr)',
+  'flex-wrap: wrap',
+  'grid-template-columns: repeat(2, minmax(0, 1fr))',
+  'overscroll-behavior: contain',
   'async load(',
   '_loadGateDetail(',
   'gateDetailGateIndices',
@@ -101,6 +110,7 @@ for (const token of [
 }
 assert(!cookingSource.includes('calendarDateSpaghettiWithContext'));
 assert(!cookingSource.includes('executeCalendarDate'));
+assert(!cookingSource.includes('overflow-x: auto'), 'Li trace chapter navigation ne deve depender de hidden horizontal overflow.');
 
 const page = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 assert(page.includes('#f4f0e7'));
