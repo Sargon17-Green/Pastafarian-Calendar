@@ -42,13 +42,13 @@ for (const token of [
   'grid-template-columns: repeat(7',
   '#17130e',
   '#9d3825',
-  'min-height: 10.5rem',
-  'border: 2px solid var(--month-edge',
-  'border-radius: .85rem',
-  'outline: 4px solid #000000',
-  'inset 0 0 0 4px #ffea00',
+  'min-height: 8.4rem',
+  'border: 1px solid var(--month-edge',
+  'border-radius: .8rem',
+  'border: 3px solid var(--accent-dark)',
+  'background: #fff7e3',
   'transform: none',
-  'border: 4px dashed #ffea00',
+  'box-shadow: 0 8px 20px rgb(54 36 20 / 20%)',
   '@media (max-width: 74rem)',
   'grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr))',
   'unicode-bidi: isolate',
@@ -65,7 +65,7 @@ for (const token of [
   'MONTH_THEME_NAMES',
   'MONTH_THEMES',
   'semanticHash',
-  '88% 49%',
+  '62% 88%',
   "card.className = 'day'",
   "LOCALE_STORAGE_KEY = 'pastafari.browser.locale'",
   'data-state="loading"',
@@ -80,6 +80,11 @@ assert(!source.includes('_selectDay(event)'), 'Li old click-to-select day handle
 assert(!source.includes('transform: scale(1.035)'), 'Li selected card ne deve plu crescer extra su layout-box.');
 assert(!source.includes('outline: 6px solid #000000'), 'Li clipped old six-pixel outline ne deve retornar.');
 assert(!source.includes('0 0 0 8px #ffea00'), 'Li external yellow ring ne deve retornar.');
+assert(!source.includes('#ffea00'), 'Li old high-noise yellow target treatment ne deve retornar.');
+assert(!source.includes('border: 4px dashed'), 'Li old dashed target ring ne deve retornar.');
+assert(source.includes('width: min(100%, 68rem)'), 'Li search card deve restar compact e bounded.');
+assert(source.includes('font-size: clamp(2.5rem, 5.6vw, 5.2rem)'), 'Li masthead title deve restar visualmen bounded.');
+assert(source.includes('.day-line.month'), 'Li day-card hierarchy deve dar un separat month line.');
 assert(!source.includes('class="edge-loader'), 'Li old edge-loading scroll sentinels ne deve retornar.');
 assert(!source.includes("this._els.viewport.addEventListener('scroll'"), 'Li calendar ne deve plu depender de nested-scroll edge loading.');
 assert(!source.includes('max-height: var(--pastafari-calendar-height, 46rem)'), 'Li old internal vertical scroll viewport ne deve retornar.');
