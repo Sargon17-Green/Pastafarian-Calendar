@@ -27,6 +27,9 @@ assert(source.includes("'lang'"), 'Li multilingue extension deve exponer li lang
 assert(source.includes('language-selector'), 'Li visibil selector de lingue manca.');
 assert(source.includes('MAX_CACHED_CUTLETS = 5'), 'Li limitat UI cutlet-cache deve restar quin.');
 assert(source.includes('MAX_RENDERED_DAYS = 28'), 'Li rendered day-window deve restar explicitmen bounded a 28.');
+assert(source.includes('LONG_LOADING_DELAY_MS = 8000'), 'Li long-calculation orientation threshold deve restar explicit.');
+assert(source.includes("this._t('loading.long')"), 'Li long calculation deve mutar a truthful local-running guidance.');
+assert(source.includes('_clearLoadingNotice()'), 'Li loading guidance timer deve esser cancellabil.');
 
 // Public visual contract inherited from the original site character.
 for (const token of [
