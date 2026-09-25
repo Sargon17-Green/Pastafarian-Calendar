@@ -293,3 +293,164 @@ jobs:
           test "${{ needs.corrective-57.result }}" = "success"
           test "${{ needs.acceleration-58.result }}" = "success"
           echo 'JAVASCRIPT_INTERLINGUE_BRANCH=GREEN'
+
+
+  phase-d-hierarchy-visual-qa:
+    name: Phase D — hierarchy visual assertions
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Extraer li repository
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Constructer li browser artefact
+        run: |
+          set -euo pipefail
+          node tests/verify-stage-01.js
+          node tests/browser-interface-all.js
+          node scripts/build-browser.js
+          node tests/browser-built-artifacts.js
+
+      - name: Preparar Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/phase-d-qa"
+          cd "$RUNNER_TEMP/phase-d-qa"
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Provar visualmen li hierarchy
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE="$RUNNER_TEMP/phase-d-site"
+          rm -rf "$SITE"
+          mkdir -p "$SITE/dist"
+          cp browser/dist/index.html "$SITE/index.html"
+          cp browser/dist/pastafari-date.js "$SITE/dist/pastafari-date.js"
+          cp browser/dist/pastafari-worker.js "$SITE/dist/pastafari-worker.js"
+          cp browser/dist/pastafari-date.mjs "$SITE/dist/pastafari-date.mjs"
+          cp browser/dist/build-id.txt "$SITE/dist/build-id.txt"
+          cd "$SITE"
+          python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/phase-d-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+
+          cd "$RUNNER_TEMP/phase-d-qa"
+          cat > qa.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const out = path.join(process.cwd(), 'out');
+          fs.mkdirSync(out,{recursive:true});
+          const base='http://127.0.0.1:4173/';
+          const profiles=[
+            {name:'w1440_en',width:1440,height:1000,locale:'en-US',lang:'en'},
+            {name:'w1024_he',width:1024,height:900,locale:'he-IL',lang:'he'},
+            {name:'w800_ar',width:800,height:1000,locale:'ar',lang:'ar'},
+            {name:'w768_de',width:768,height:1000,locale:'de-DE',lang:'de'},
+            {name:'w390_ru',width:390,height:844,locale:'ru-RU',lang:'ru'},
+            {name:'w320_he',width:320,height:740,locale:'he-IL',lang:'he'},
+          ];
+          function assert(v,m){ if(!v) throw new Error(m); }
+          async function waitReady(page){
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('pastafari-date')?.shadowRoot;
+              const c=s?.querySelector('.calendar');
+              return !!c && !c.hasAttribute('data-state');
+            },null,{timeout:180000});
+            await page.waitForTimeout(700);
+          }
+          async function measure(page){
+            return page.evaluate(()=>{
+              const host=document.querySelector('pastafari-date');
+              const s=host.shadowRoot;
+              const rect=(el)=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+              const cards=[...s.querySelectorAll('.day')];
+              const selected=s.querySelector('.day[aria-current="date"]');
+              const selectedStyle=selected?getComputedStyle(selected):null;
+              const beacon=s.querySelector('.target-beacon');
+              const beaconStyle=getComputedStyle(beacon);
+              const search=s.querySelector('.search-panel');
+              const masthead=s.querySelector('.masthead');
+              const title=s.querySelector('.app-title');
+              const lang=s.querySelector('.language-control');
+              const clipping=cards.map((card,i)=>({
+                i,
+                cw:card.clientWidth,sw:card.scrollWidth,
+                ch:card.clientHeight,sh:card.scrollHeight,
+                text:card.innerText.slice(0,160)
+              })).filter(x=>x.sw>x.cw+2 || x.sh>x.ch+2);
+              const lineStyles=cards.length?[...cards[0].querySelectorAll('.day-line')].map(el=>{
+                const cs=getComputedStyle(el);return {borderTopWidth:cs.borderTopWidth,boxShadow:cs.boxShadow,background:cs.backgroundColor};
+              }):[];
+              return {
+                viewport:{w:innerWidth,h:innerHeight},
+                body:{clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth},
+                masthead:rect(masthead),
+                title:rect(title),
+                language:rect(lang),
+                search:rect(search),
+                beacon:rect(beacon),
+                beaconBackground:beaconStyle.backgroundColor,
+                beaconBorderTop:beaconStyle.borderTopWidth,
+                cards:cards.length,
+                firstCard:cards[0]?rect(cards[0]):null,
+                clipping,
+                selected:selected?rect(selected):null,
+                selectedOutline:selectedStyle?selectedStyle.outlineStyle:null,
+                selectedBorder:selectedStyle?selectedStyle.borderTopWidth:null,
+                lineStyles,
+              };
+            });
+          }
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for(const p of profiles){
+              const ctx=await browser.newContext({viewport:{width:p.width,height:p.height},locale:p.locale,deviceScaleFactor:1});
+              const page=await ctx.newPage();
+              await page.goto(base,{waitUntil:'domcontentloaded'});
+              await waitReady(page);
+              await page.evaluate((lang)=>document.querySelector('pastafari-date').setAttribute('lang',lang),p.lang);
+              await page.waitForTimeout(350);
+              const m=await measure(page);
+              fs.writeFileSync(path.join(out,p.name+'.json'),JSON.stringify(m,null,2));
+              assert(m.body.scrollWidth<=m.body.clientWidth+1,p.name+': document horizontal overflow');
+              assert(m.cards>0 && m.cards<=28,p.name+': invalid rendered day count '+m.cards);
+              assert(m.clipping.length===0,p.name+': clipped day-card content: '+JSON.stringify(m.clipping.slice(0,3)));
+              assert(m.search.width<=Math.min(m.viewport.w,1088)+2,p.name+': search card is not bounded');
+              assert(m.beaconBackground!=='rgb(255, 234, 0)',p.name+': old saturated yellow beacon returned');
+              assert(m.selectedOutline==='none',p.name+': selected day still uses an outline ring');
+              assert(m.selectedBorder==='3px',p.name+': selected day border is not the quiet 3px treatment');
+              for(const ls of m.lineStyles){
+                assert(ls.boxShadow==='none',p.name+': nested day-line shadow returned');
+              }
+              if(p.width>=1024) assert(m.title.height<190,p.name+': masthead title is still excessively tall');
+              await page.screenshot({path:path.join(out,p.name+'__full.png'),fullPage:true});
+              await ctx.close();
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node qa.js
+
+      - name: Conservar li Phase D visual QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-d-hierarchy-visual-qa
+          path: ${{ runner.temp }}/phase-d-qa/out
+          if-no-files-found: warn
+          retention-days: 14
