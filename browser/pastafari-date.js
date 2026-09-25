@@ -1286,7 +1286,7 @@
 
     _windowBounds(view) {
       const length = view && Array.isArray(view.days) ? view.days.length : 0;
-      const maxStart = Math.max(0, length - MAX_RENDERED_DAYS);
+      const maxStart = Math.max(0, length - 1);
       const start = Math.max(0, Math.min(Number(this._windowStart || 0), maxStart));
       const end = Math.min(length, start + MAX_RENDERED_DAYS);
       return Object.freeze({ start, end, length });
@@ -1294,7 +1294,7 @@
 
     _setWindowStart(view, start) {
       const length = view && Array.isArray(view.days) ? view.days.length : 0;
-      const maxStart = Math.max(0, length - MAX_RENDERED_DAYS);
+      const maxStart = Math.max(0, length - 1);
       this._windowStart = Math.max(0, Math.min(Number(start) || 0, maxStart));
       return this._windowStart;
     }
@@ -1306,7 +1306,9 @@
         return 0;
       }
       const safeIndex = Math.max(0, Math.min(Number(index) || 0, length - 1));
-      return this._setWindowStart(view, safeIndex - Math.floor(MAX_RENDERED_DAYS / 2));
+      const centered = safeIndex - Math.floor(MAX_RENDERED_DAYS / 2);
+      const fullWindowMax = Math.max(0, length - MAX_RENDERED_DAYS);
+      return this._setWindowStart(view, Math.min(centered, fullWindowMax));
     }
 
     _primeAdjacent(currentView, generation) {
@@ -1339,7 +1341,10 @@
         const view = await serviceApi.getSharedCalendarService().getCutletView(targetJdn, this._calculationJdn);
         if (generation !== this._generation) return null;
         this._storeCutlet(view);
-        this._trimCutlets(view.startJdn, this._activeStartJdn);
+        // The requested view must survive trimming. This is essential when a
+        // return-to-target action reloads a cutlet that was evicted far behind
+        // the currently active browsing position.
+        this._trimCutlets(view.startJdn, view.startJdn);
         return view;
       } catch (error) {
         if (generation === this._generation && error && error.code === RENDER_CONSISTENCY_CODE) {
