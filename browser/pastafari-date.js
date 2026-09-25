@@ -1373,6 +1373,27 @@
       this._orderedStarts = this._orderedStarts.filter((start) => keep.has(start));
     }
 
+    _findCutletSection(startJdn) {
+      const expected = String(BigInt(startJdn));
+      return Array.from(this._els.list.querySelectorAll('section.cutlet-section'))
+        .find((section) => String(section.dataset.startJdn) === expected) || null;
+    }
+
+    _findRenderedDay(identity, section) {
+      const cards = Array.from(this._els.list.querySelectorAll('.day'));
+      return cards.find((card) => {
+        if (section && card.closest('section.cutlet-section') !== section) return false;
+        if (identity.jdn != null && String(card.dataset.jdn) !== String(identity.jdn)) return false;
+        return sameDaySemantics({
+          year: card.dataset.year,
+          cutletName: card.dataset.cutletName,
+          dayInCutlet: card.dataset.dayInCutlet,
+          monthName: card.dataset.monthName,
+          dayInMonth: card.dataset.dayInMonth,
+        }, identity);
+      }) || null;
+    }
+
     _renderTargetContext(targetDate, actionDate) {
       const targetMarker = '__PASTAFARI_TARGET_ISO__';
       const actionMarker = '__PASTAFARI_ACTION_ISO__';
