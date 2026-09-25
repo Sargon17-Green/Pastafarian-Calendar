@@ -265,6 +265,7 @@
       this._loadingBefore = null;
       this._loadingAfter = null;
       this._cutletLoads = new Map();
+      this._cookingPagePosition = null;
       this._readySettled = false;
       this._locale = null;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
@@ -1015,7 +1016,18 @@
       this._els.cookingOpen.addEventListener('click', () => this._toggleCooking());
       this._els.cookingPanel.addEventListener('pastafari-cooking-close', () => {
         this._els.cookingOpen.setAttribute('aria-expanded', 'false');
-        if (typeof this._els.cookingOpen.focus === 'function') this._els.cookingOpen.focus();
+        if (typeof this._els.cookingOpen.focus === 'function') {
+          try { this._els.cookingOpen.focus({ preventScroll: true }); }
+          catch (_) { this._els.cookingOpen.focus(); }
+        }
+        const position = this._cookingPagePosition;
+        this._cookingPagePosition = null;
+        if (position && typeof root.scrollTo === 'function') {
+          enqueueMicrotask(() => {
+            try { root.scrollTo({ left: position.x, top: position.y, behavior: 'auto' }); }
+            catch (_) { root.scrollTo(position.x, position.y); }
+          });
+        }
       });
       this._els.retryButton.addEventListener('click', () => this._retry());
       this._els.cancelButton.addEventListener('click', () => this._closeDialog());
@@ -1461,12 +1473,17 @@
       const panel = this._els && this._els.cookingPanel;
       if (!panel) return;
       if (panel.hasAttribute('open')) {
-        panel.removeAttribute('open');
-        this._els.cookingOpen.setAttribute('aria-expanded', 'false');
+        if (typeof panel.close === 'function') panel.close();
+        else panel.removeAttribute('open');
         return;
       }
       this._syncCookingPanel();
-      panel.setAttribute('open', '');
+      this._cookingPagePosition = Object.freeze({
+        x: Number.isFinite(Number(root.scrollX)) ? Number(root.scrollX) : 0,
+        y: Number.isFinite(Number(root.scrollY)) ? Number(root.scrollY) : 0,
+      });
+      if (typeof panel.show === 'function') panel.show();
+      else panel.setAttribute('open', '');
       this._els.cookingOpen.setAttribute('aria-expanded', 'true');
     }
 
