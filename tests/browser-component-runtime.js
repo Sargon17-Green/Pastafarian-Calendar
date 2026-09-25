@@ -301,6 +301,31 @@ async function flush() {
   assert.strictEqual(localStorage.getItem('pastafari.browser.locale'), 'de');
   assert.strictEqual(manualLanguage.getAttribute('lang'), 'de');
 
+
+  // A genuinely long calculation changes its explanatory text without fake
+  // percentages, and the delayed notice is cancelled when loading ends.
+  const originalSandboxSetTimeout = sandbox.setTimeout;
+  const originalSandboxClearTimeout = sandbox.clearTimeout;
+  let longLoadingCallback = null;
+  let clearedLoadingTimer = null;
+  sandbox.setTimeout = (fn) => { longLoadingCallback = fn; return 4242; };
+  sandbox.clearTimeout = (id) => { clearedLoadingTimer = id; };
+  const longLoading = new PastafariDateElement();
+  longLoading._connected = true;
+  longLoading._generation = 17;
+  longLoading._showLoading();
+  assert.strictEqual(longLoading._loadingNoticeTimer, 4242);
+  assert.strictEqual(longLoading._els.loadingNote.textContent, longLoading._t('loading.kicker'));
+  assert.strictEqual(typeof longLoadingCallback, 'function');
+  longLoadingCallback();
+  assert.strictEqual(longLoading._els.loadingNote.textContent, longLoading._t('loading.long'));
+  longLoading._showLoading();
+  longLoading._hideOverlays();
+  assert.strictEqual(clearedLoadingTimer, 4242);
+  assert.strictEqual(longLoading._loadingNoticeTimer, null);
+  sandbox.setTimeout = originalSandboxSetTimeout;
+  sandbox.clearTimeout = originalSandboxClearTimeout;
+
   localStorage.clear();
   sandbox.navigator.languages = ['ie'];
 
