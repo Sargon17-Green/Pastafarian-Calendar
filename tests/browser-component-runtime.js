@@ -250,6 +250,7 @@ async function flush() {
 
 (async () => {
   const watchdog = setTimeout(() => { throw new Error('browser-component-runtime timeout'); }, 15000);
+  console.log('RUNTIME_TRACE: start');
   // Public-page language resolution: explicit lang wins; without one, a saved
   // manual selection wins over navigator.languages, which wins over Interlingue.
   localStorage.clear();
@@ -283,6 +284,7 @@ async function flush() {
   localStorage.clear();
   sandbox.navigator.languages = ['ie'];
 
+  console.log('RUNTIME_TRACE: locales-done');
   // The public calendar owns only the open/close and date synchronization of
   // the separate <pastafari-cooking> component. Merely constructing the date
   // component never starts a cooking trace.
@@ -304,6 +306,7 @@ async function flush() {
   integratedCooking._els.cookingPanel.listeners.get('pastafari-cooking-close')();
   assert.strictEqual(integratedCooking._els.cookingOpen.focused, true);
 
+  console.log('RUNTIME_TRACE: cooking-done');
   // Rapid attribute changes: only the newest generation may commit or publish.
   const pending = new Map();
   sharedService = {
@@ -345,6 +348,7 @@ async function flush() {
   assert.strictEqual(race.value.cutletName, valueFor(secondJdn).cutletName, 'stale result replaced current value');
   assert.strictEqual(race.dispatched.length, 1, 'stale result published an event');
 
+  console.log('RUNTIME_TRACE: race-done');
   // Disconnect invalidates a pending generation. Reconnect can safely start anew.
   const disconnectPending = deferred();
   let disconnectCalls = 0;
@@ -371,6 +375,7 @@ async function flush() {
   await flush();
   assert.strictEqual(reconnect.dispatched.length, 1);
 
+  console.log('RUNTIME_TRACE: reconnect-done');
   // Headless conversion is data-only and does not ask for a cutlet view.
   let headlessViews = 0;
   sharedService = {
@@ -386,6 +391,7 @@ async function flush() {
   assert.strictEqual(headlessViews, 0);
   assert.strictEqual(headless.dispatched.length, 1);
 
+  console.log('RUNTIME_TRACE: headless-done');
   // Invalid external date attributes reach the visible error state, while ready
   // remains usable and resolves after a later successful refresh.
   sharedService = {
@@ -407,6 +413,7 @@ async function flush() {
   assert.strictEqual(recoveredReady.cutletName, recovered.cutletName);
   assert.strictEqual(recover._els.calendar.hasAttribute('data-state'), false);
 
+  console.log('RUNTIME_TRACE: recover-done');
   // Language changes rerender presentation only. Raw public value remains the
   // exact Interlingue semantic result from the core.
   const language = new PastafariDateElement();
@@ -420,6 +427,7 @@ async function flush() {
   assert.strictEqual(language.value.cutletName, rawName);
   if (rawName === 'Lagash') assert(language._els.summary.textContent.includes('\u05DC\u05D2\u05E9'));
 
+  console.log('RUNTIME_TRACE: language-done');
   // Back to today resets both externally visible date inputs and coalesces the
   // resulting refresh through the connection epoch queue.
   language.setAttribute('calculation-date', '2026-09-01');
@@ -427,6 +435,7 @@ async function flush() {
   assert.strictEqual(language.hasAttribute('date'), false);
   assert.strictEqual(language.hasAttribute('calculation-date'), false);
 
+  console.log('RUNTIME_TRACE: today-done');
   // Presentation-suppression attributes close any already-open editor. This
   // prevents a modal from surviving after no-editor/headless makes that UI
   // unavailable. Removing no-editor itself is presentation-only.
@@ -442,6 +451,7 @@ async function flush() {
   suppression.setAttribute('headless', '');
   assert.strictEqual(suppression._els.dialog.hasAttribute('open'), false);
 
+  console.log('RUNTIME_TRACE: suppression-done');
   // Month appearance is deterministic from the current semantic source name,
   // independent of locale and rendering order. Day cards keep the original
   // original flat-grid visual identity while remaining non-interactive.
@@ -481,6 +491,7 @@ async function flush() {
   assert.strictEqual(card.children[0].className, 'target-badge');
   assert.strictEqual(card.children[0].textContent, 'This is the date you searched for');
 
+  console.log('RUNTIME_TRACE: theme-card-done');
   // Every current semantic month gets a distinct, saturated background theme.
   const monthNames = Object.keys(themed._locale.calendar.months);
   const backgrounds = new Set();
@@ -498,6 +509,7 @@ async function flush() {
   assert.strictEqual(backgrounds.size, monthNames.length);
   assert.strictEqual(edges.size, monthNames.length);
 
+  console.log('RUNTIME_TRACE: month-themes-done');
   // A JDN may appear at most once in the rendered card model. Exact duplicates
   // are deduplicated; semantic divergence for the same JDN fails closed.
   const duplicateGuard = new PastafariDateElement();
@@ -539,6 +551,7 @@ async function flush() {
       && error.jdn === '739862' && /different cards/.test(error.message),
   );
 
+  console.log('RUNTIME_TRACE: duplicate-guard-done');
   // The direct five-part Pastafarian result is authoritative for target
   // selection. A cutlet view that offers the searched JDN with another tuple
   // must fail closed even when there is no duplicate JDN card to compare it to.
