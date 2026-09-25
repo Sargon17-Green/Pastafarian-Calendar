@@ -75,6 +75,7 @@ class FakeElement {
   showModal() { this.setAttribute('open', ''); }
   close() { this.removeAttribute('open'); }
   focus() { this.focused = true; }
+  scrollIntoView(options) { this.scrolledIntoView = options || true; }
 }
 
 class FakeShadowRoot extends FakeElement {
@@ -559,8 +560,107 @@ async function flush() {
       && error.second.monthName === 'costa',
   );
 
-  // Target positioning has one owner and one scroll primitive. It resolves the
-  // exact section and exact JDN+five-part card, then changes only viewport.scrollTop.
+  // Phase B: the calendar renders a bounded window in normal document flow.
+  // Paging never grows the rendered day DOM; explicit cutlet navigation keeps
+  // the semantic cache bounded, and return-to-target works even after eviction.
+  const boundedTargetJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-06'));
+  const boundedTargetIndex = 49;
+  const boundedStart = boundedTargetJdn - BigInt(boundedTargetIndex);
+  const boundedCount = 90;
+
+  function boundedView(startJdn) {
+    const start = BigInt(startJdn);
+    const days = [];
+    for (let index = 0; index < boundedCount; index += 1) {
+      days.push(Object.freeze({
+        jdn: start + BigInt(index),
+        year: '5000',
+        cutletName: 'bronze',
+        dayInCutlet: index + 1,
+        monthName: 'argile',
+        dayInMonth: index + 1,
+      }));
+    }
+    return Object.freeze({
+      selectedJdn: start,
+      selectedIndex: 0,
+      startJdn: start,
+      endJdn: start + BigInt(boundedCount - 1),
+      previousCutletJdn: start - BigInt(boundedCount),
+      nextCutletJdn: start + BigInt(boundedCount),
+      year: '5000',
+      cutletName: 'bronze',
+      days: Object.freeze(days),
+    });
+  }
+
+  const boundedValue = Object.freeze({
+    year: '5000',
+    cutletName: 'bronze',
+    dayInCutlet: boundedTargetIndex + 1,
+    monthName: 'argile',
+    dayInMonth: boundedTargetIndex + 1,
+  });
+  const boundedRequests = [];
+  sharedService = {
+    async convert(targetJdn) {
+      assert.strictEqual(BigInt(targetJdn), boundedTargetJdn);
+      return boundedValue;
+    },
+    async getCutletView(startJdn) {
+      boundedRequests.push(BigInt(startJdn));
+      return boundedView(startJdn);
+    },
+    async retry() {},
+  };
+
+  const bounded = new PastafariDateElement();
+  bounded._primeAdjacent = () => {};
+  bounded.setAttribute('date', '2026-09-06');
+  bounded._connected = true;
+  await bounded.refresh();
+
+  assert.strictEqual(bounded._activeStartJdn, boundedStart);
+  assert(bounded._els.list.querySelectorAll('.day').length <= 28);
+  assert.strictEqual(bounded._els.viewport.style.values.get('overflow'), undefined);
+  assert.strictEqual(bounded._els.targetButton.hidden, true);
+
+  const initialWindowStart = bounded._windowStart;
+  assert.strictEqual(bounded._shiftWindow(1), true);
+  assert(bounded._els.list.querySelectorAll('.day').length <= 28);
+  assert.strictEqual(bounded._els.targetButton.hidden, false);
+  assert.strictEqual(bounded._shiftWindow(-1), true);
+  assert.strictEqual(bounded._windowStart, initialWindowStart, 'window paging must be reversible');
+
+  // Move away from the target window, then return to it inside the same cutlet.
+  bounded._shiftWindow(1);
+  assert.strictEqual(await bounded._returnToTarget(), true);
+  assert.strictEqual(bounded._activeStartJdn, boundedStart);
+  assert.strictEqual(bounded._els.targetButton.hidden, true);
+  const selectedInTarget = bounded._els.list.querySelector('[aria-current="date"]');
+  assert(selectedInTarget);
+  assert(selectedInTarget.scrolledIntoView, 'return-to-target must reveal the exact target card');
+
+  // Twenty explicit next-cutlet operations must keep both rendered DOM and the
+  // semantic cache bounded. The original target should eventually be evicted.
+  for (let step = 0; step < 20; step += 1) {
+    assert.strictEqual(await bounded._scrollAdjacent(1), true);
+    assert(bounded._els.list.querySelectorAll('.day').length <= 28, 'rendered day count grew past the bound');
+    assert(bounded._cutlets.size <= 5, 'semantic cutlet cache grew past five');
+  }
+  assert.strictEqual(bounded._cutlets.has(boundedStart), false, 'target cutlet should have been evicted after long navigation');
+  assert.strictEqual(bounded._els.targetButton.hidden, false);
+
+  const requestCountBeforeReturn = boundedRequests.length;
+  assert.strictEqual(await bounded._returnToTarget(), true);
+  assert(boundedRequests.length > requestCountBeforeReturn, 'evicted target was not reloaded');
+  assert.strictEqual(bounded._activeStartJdn, boundedStart);
+  assert.strictEqual(bounded._cutlets.has(boundedStart), true, 'reloaded target was trimmed out immediately');
+  assert(bounded._els.list.querySelectorAll('.day').length <= 28);
+  assert.strictEqual(bounded._els.targetButton.hidden, true);
+
+  // Target matching remains semantic and never treats an incorrect same-JDN
+  // card as the selected target.
   const semanticScroller = new PastafariDateElement();
   const navigationTarget = Object.freeze({
     jdn: 739862n, startJdn: 739186n,
@@ -568,10 +668,6 @@ async function flush() {
   });
   semanticScroller._targetJdn = navigationTarget.jdn;
   semanticScroller._scrollTarget = navigationTarget;
-  semanticScroller._els.viewport.scrollTop = 200;
-  semanticScroller._els.viewport.clientHeight = 500;
-  semanticScroller._els.viewport.scrollHeight = 4000;
-  semanticScroller._els.viewport.getBoundingClientRect = () => ({ top: 100, left: 0, width: 800, height: 500 });
 
   const section = new FakeElement('section');
   section.className = 'cutlet-section';
@@ -581,7 +677,6 @@ async function flush() {
   Object.assign(wrongCard.dataset, {
     jdn: '739862', year: '5000', cutletName: 'bronze', dayInCutlet: '677', monthName: 'costa', dayInMonth: '12',
   });
-  wrongCard.getBoundingClientRect = () => ({ top: 300, left: 0, width: 100, height: 100 });
   wrongCard.closest = () => section;
 
   const correctCard = new FakeElement('article');
@@ -589,7 +684,6 @@ async function flush() {
   Object.assign(correctCard.dataset, {
     jdn: '739862', year: '5000', cutletName: 'bronze', dayInCutlet: '677', monthName: 'sand', dayInMonth: '32',
   });
-  correctCard.getBoundingClientRect = () => ({ top: 700, left: 0, width: 100, height: 100 });
   correctCard.closest = () => section;
   semanticScroller._els.list = {
     querySelectorAll(selector) {
@@ -603,66 +697,6 @@ async function flush() {
   assert.strictEqual(wrongCard.getAttribute('aria-current'), null);
   assert.strictEqual(correctCard.getAttribute('aria-current'), 'date');
   assert.strictEqual(semanticScroller._activeStartJdn, 739186n);
-  // 700 - 100 - ((500 - 100) / 2) = +400 from the original 200.
-  assert.strictEqual(semanticScroller._els.viewport.scrollTop, 600);
-
-  // A full re-render caused by adjacent preloading preserves an exact visible
-  // day anchor, not merely a cutlet heading. This prevents post-target drift.
-  const anchorScroller = new PastafariDateElement();
-  anchorScroller._els.viewport.scrollTop = 500;
-  anchorScroller._els.viewport.clientHeight = 500;
-  anchorScroller._els.viewport.getBoundingClientRect = () => ({ top: 100, left: 0, width: 800, height: 500 });
-  const anchorSection = new FakeElement('section');
-  anchorSection.className = 'cutlet-section';
-  anchorSection.dataset.startJdn = '739186';
-  const beforeCard = new FakeElement('article');
-  beforeCard.className = 'day';
-  Object.assign(beforeCard.dataset, {
-    jdn: '739500', year: '5000', cutletName: 'bronze', dayInCutlet: '315', monthName: 'sand', dayInMonth: '7',
-  });
-  beforeCard.closest = () => anchorSection;
-  beforeCard.getBoundingClientRect = () => ({ top: 120, left: 0, width: 100, height: 100 });
-  let renderedCards = [beforeCard];
-  anchorScroller._els.list = {
-    querySelectorAll(selector) {
-      if (selector === '.day') return renderedCards;
-      if (selector === 'section.cutlet-section') return [anchorSection];
-      return [];
-    },
-  };
-  const anchor = anchorScroller._captureViewportAnchor();
-  const afterCard = new FakeElement('article');
-  afterCard.className = 'day';
-  Object.assign(afterCard.dataset, beforeCard.dataset);
-  afterCard.closest = () => anchorSection;
-  afterCard.getBoundingClientRect = () => ({ top: 170, left: 0, width: 100, height: 100 });
-  renderedCards = [afterCard];
-  assert.strictEqual(anchorScroller._restoreViewportAnchor(anchor), true);
-  assert.strictEqual(anchorScroller._els.viewport.scrollTop, 550);
-
-  // Structural cutlet selection must never confuse a day-line with a cutlet
-  // container. This was the original class-name collision behind active-cutlet
-  // drift: both used the class `cutlet`.
-  const activeScroller = new PastafariDateElement();
-  const structuralList = new FakeElement('div');
-  const structuralSection = new FakeElement('section');
-  structuralSection.className = 'cutlet-section';
-  structuralSection.dataset.startJdn = '739186';
-  structuralSection.getBoundingClientRect = () => ({ top: 90, left: 0, width: 800, height: 1200 });
-  const internalLine = new FakeElement('span');
-  internalLine.className = 'day-line cutlet-line';
-  internalLine.getBoundingClientRect = () => ({ top: 130, left: 0, width: 200, height: 20 });
-  structuralSection.append(internalLine);
-  structuralList.append(structuralSection);
-  activeScroller._els.list = structuralList;
-  activeScroller._els.viewport.scrollTop = 400;
-  activeScroller._els.viewport.scrollHeight = 2000;
-  activeScroller._els.viewport.clientHeight = 500;
-  activeScroller._els.viewport.getBoundingClientRect = () => ({ top: 100, left: 0, width: 800, height: 500 });
-  activeScroller._orderedStarts = [];
-  activeScroller._onScroll();
-  assert.strictEqual(activeScroller._activeStartJdn, 739186n);
-  assert.strictEqual(structuralList.querySelectorAll('section.cutlet-section').length, 1);
 
   await flush();
 
