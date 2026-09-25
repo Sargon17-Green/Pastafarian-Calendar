@@ -791,7 +791,12 @@
             color: var(--ink);
           }
           .field input { direction: ltr; }
-          .reverse-dialog { width: min(48rem, calc(100vw - 2rem)); }
+          .reverse-dialog {
+            width: min(48rem, calc(100vw - 2rem));
+            max-height: calc(100dvh - 1rem);
+            overflow: auto;
+            overscroll-behavior: contain;
+          }
           .reverse-form {
             display: grid;
             gap: 1rem;
