@@ -442,7 +442,7 @@ async function flush() {
   );
   assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'));
   assert.strictEqual(
-    live._els.megillahSourceLink.href,
+    live._els.megillahSourceLink.getAttribute('href'),
     'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
     'every Megillah quotation must link to the canonical blog source',
   );
