@@ -440,7 +440,7 @@ async function flush() {
     live._els.megillahQuote.textContent,
     'למלאכת הלוח קח שני ימים. לראשון קרא יום המעשה ולשני קרא היום אשר עליו תשאל.',
   );
-  assert(live._els.megillahSource.textContent.includes('מגילת העיתים'));
+  assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'));
   assert.strictEqual(
     live._els.megillahSourceLink.href,
     'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
@@ -520,7 +520,7 @@ async function flush() {
     live._renderLiveStageGuide(key, true);
     assert(live._els.liveExplanation.textContent.trim().length > 0, 'missing explanation for ' + key);
     assert(live._els.megillahQuote.textContent.trim().length > 0, 'missing Megillah quote for ' + key);
-    assert(live._els.megillahSource.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
+    assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
     assert.strictEqual(
       live._els.megillahSourceLink.href,
       'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
