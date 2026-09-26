@@ -452,7 +452,7 @@ async function flush() {
     'stone-stage explanation must describe the 46-row stone table');
   assert.strictEqual(
     live._els.megillahQuote.textContent,
-    'כל אחת מחמש האבנים החדשות עשה מחמש האבנים הישנות.',
+    'כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.',
   );
 
   live.appendLiveProgress({ sequence: 2, kind: 'bowl-round', elapsedMs: 7, durationMs: 5, payload: { sauceId: 'sauce-1', ordinal: 1, drop: '51', afterBowls: ['1', '2', '3', '4', '5', '6'] } });
@@ -463,7 +463,7 @@ async function flush() {
     'visible-drop explanation must follow the stage currently being awaited');
   assert.strictEqual(
     live._els.megillahQuote.textContent,
-    'את ראשית הטיפה טחון עשתי עשרה פעמים.',
+    'את ראשית הטיפה טחון עשתי עשרה טחינות.',
   );
 
   live.appendLiveProgress({ sequence: 3, kind: 'post-stir', elapsedMs: 10, durationMs: 3, payload: { sauceId: 'sauce-1', stirIndex: 1, afterBowls: ['7', '8', '9', '10', '11', '12'] } });
@@ -474,7 +474,7 @@ async function flush() {
     'post-stir explanation must match the current post-stir phase');
   assert.strictEqual(
     live._els.megillahQuote.textContent,
-    'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה פעמים.',
+    'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה בלילות.',
   );
 
   // Every live semantic context must map to the explanation/verse for the
