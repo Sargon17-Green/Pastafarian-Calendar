@@ -201,6 +201,7 @@ jobs:
               return {
                 live:p.hasAttribute('live'),
                 retained:p._liveEntries.length,
+                rendered:p.shadowRoot.querySelectorAll('.live-row').length,
                 trace:!!p.trace,
                 traceKey:p._traceInputKey,
                 oldNav:p.shadowRoot.querySelectorAll('.nav button').length,
@@ -222,7 +223,8 @@ jobs:
             const retained=await liveMetrics(page);
             assert(!retained.live && retained.open,'retained cooking log did not open as modal');
             assert(retained.ariaModal==='true','retained modal has wrong aria-modal');
-            assert(retained.rendered===finished.retained,'retained modal changed row count');
+            assert(retained.entries===finished.retained,'retained modal changed event count');
+            assert(retained.rendered===finished.rendered,'retained modal changed rendered row count');
             assert(retained.groups>=3,'retained log is not grouped into collapsible phases');
             assert(retained.sauces>=1,'retained log has no nested Sauce groups');
             assert(await page.locator('pastafari-date').locator('pastafari-cooking').locator('.nav button').count()===0,
