@@ -50,3 +50,11 @@ jobs:
           echo $! > /tmp/pastafari-http.pid
       - name: Run real live-stage probe
         run: node scripts/qa-live-stage-guide-playwright.js
+      - name: Upload temporary visual QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-stage-guide-visual-qa
+          if-no-files-found: warn
+          retention-days: 3
+          path: qa-artifacts/live-stage-guide/
