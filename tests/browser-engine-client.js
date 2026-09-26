@@ -32,6 +32,31 @@ class FakeWorker {
       if (this.replyBuildId != null) envelope.buildId = this.replyBuildId;
       if (message.operation === 'convert') {
         envelope.value = ['5000', 'bronze', 3, 'argile', 3];
+      } else if (message.operation === 'convertWithTrace') {
+        if (message.streamProgress === true) {
+          const chunk = {
+            id: message.id,
+            ok: true,
+            kind: 'progress',
+            value: { sequence: 1, kind: 'stone-transition', elapsedMs: 2, durationMs: 2, payload: { ordinal: 2 } },
+          };
+          if (this.replyBuildId != null) chunk.buildId = this.replyBuildId;
+          listener({ data: chunk });
+        }
+        envelope.kind = 'result';
+        envelope.value = {
+          result: ['5000', 'bronze', 3, 'argile', 3],
+          trace: {
+            schemaVersion: '0.4.0',
+            finalResult: {
+              year: '5000',
+              cutlet: { sourceName: 'bronze' },
+              dayInCutlet: '3',
+              month: { sourceName: 'argile' },
+              dayInMonth: '3',
+            },
+          },
+        };
       } else if (message.operation === 'cookingTrace') {
         if (message.streamGateSauceDetail === true) {
           const chunk = {
@@ -43,6 +68,16 @@ class FakeWorker {
           if (this.replyBuildId != null) chunk.buildId = this.replyBuildId;
           listener({ data: chunk });
         }
+        if (message.streamProgress === true) {
+          const progress = {
+            id: message.id,
+            ok: true,
+            kind: 'progress',
+            value: { sequence: 1, kind: 'bowl-round', elapsedMs: 3, durationMs: 3, payload: { ordinal: 1 } },
+          };
+          if (this.replyBuildId != null) progress.buildId = this.replyBuildId;
+          listener({ data: progress });
+        }
         envelope.kind = 'result';
         envelope.value = {
           schemaVersion: '0.4.0',
@@ -50,6 +85,16 @@ class FakeWorker {
           finalResult: { year: '5000' },
         };
       } else if (message.operation === 'getCutletView') {
+        if (message.streamProgress === true) {
+          const progress = {
+            id: message.id,
+            ok: true,
+            kind: 'progress',
+            value: { kind: 'view-day-ready', elapsedMs: 4, durationMs: 4, payload: { ordinal: 1, targetDay: message.targetDay } },
+          };
+          if (this.replyBuildId != null) progress.buildId = this.replyBuildId;
+          listener({ data: progress });
+        }
         envelope.value = {
           selectedDay: message.targetDay,
           selectedIndex: 0,
@@ -108,7 +153,10 @@ const PastafariEngineClient = engineApi.PastafariEngineClient;
     targetDay: '2',
   });
 
-  const view = await client.getCutletView(10n, 7n);
+  const viewProgress = [];
+  const view = await client.getCutletView(10n, 7n, (event) => viewProgress.push(event));
+  assert.strictEqual(viewProgress.length, 1);
+  assert.strictEqual(viewProgress[0].kind, 'view-day-ready');
   assert.strictEqual(view.selectedDay, 7n);
   assert.strictEqual(view.startDay, 7n);
   assert.strictEqual(view.days[0].day, 7n);
@@ -118,9 +166,11 @@ const PastafariEngineClient = engineApi.PastafariEngineClient;
   assert.strictEqual(workers.length, 1, 'Li client deve reutilisar un unic Worker til fatal/retry.');
 
   const gateChunks = [];
+  const progressChunks = [];
   const cookingTrace = await client.getCookingTrace(10n, 7n, {
     gateDetailGateIndices: [2n, -3n],
     onGateSauceDetail(chunk) { gateChunks.push(chunk); },
+    onProgress(chunk) { progressChunks.push(chunk); },
   });
   assert.strictEqual(cookingTrace.schemaVersion, '0.4.0');
   assert.strictEqual(Object.isFrozen(cookingTrace), true);
@@ -128,18 +178,30 @@ const PastafariEngineClient = engineApi.PastafariEngineClient;
   assert.strictEqual(gateChunks.length, 1);
   assert.strictEqual(gateChunks[0].marker, 'client-chunk');
   assert.strictEqual(Object.isFrozen(gateChunks[0]), true);
+  assert.strictEqual(progressChunks.length, 1);
+  assert.strictEqual(progressChunks[0].kind, 'bowl-round');
+  assert.strictEqual(Object.isFrozen(progressChunks[0]), true);
   assert.deepStrictEqual(JSON.parse(JSON.stringify(workers[0].messages[2])), {
     id: 3,
     operation: 'cookingTrace',
     calculationDay: '10',
     targetDay: '7',
     streamGateSauceDetail: true,
+    streamProgress: true,
     gateDetailGateIndices: ['2', '-3'],
   });
   await assert.rejects(
     Promise.resolve().then(() => client.getCookingTrace(10n, 7n, { gateDetailGateIndices: [2n] })),
     /exige onGateSauceDetail/,
   );
+
+  const tracedProgress = [];
+  const traced = await client.convertWithTrace(10n, 7n, (event) => tracedProgress.push(event));
+  assert.strictEqual(traced.result.year, '5000');
+  assert.strictEqual(traced.trace.schemaVersion, '0.4.0');
+  assert.strictEqual(tracedProgress.length, 1);
+  assert.strictEqual(tracedProgress[0].kind, 'stone-transition');
+  assert.strictEqual(Object.isFrozen(traced.trace), true);
 
   // A generated build must bind request and response to the same main/Worker ID.
   let coherentWorker;
