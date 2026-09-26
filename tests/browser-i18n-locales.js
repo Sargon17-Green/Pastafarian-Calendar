@@ -64,6 +64,13 @@ const REQUIRED_MESSAGES = Object.freeze([
   'cooking.loading',
   'cooking.error',
   'cooking.retry',
+  'cooking.live.kicker',
+  'cooking.live.title',
+  'cooking.live.subtitle',
+  'cooking.live.starting',
+  'cooking.live.now',
+  'cooking.live.nextGate',
+  'cooking.live.yearAnchor',
   'cooking.previous',
   'cooking.next',
   'cooking.exactShow',
@@ -197,6 +204,9 @@ assert.strictEqual(i18n.translate(it, 'field.day'), 'Giorno');
 assert.strictEqual(i18n.translate(cs, 'field.day'), 'Den');
 assert.strictEqual(i18n.translate(ie, 'cooking.chapter.gates'), 'Portas');
 assert.strictEqual(i18n.translate(en, 'cooking.title'), 'How this date was cooked');
+assert.strictEqual(i18n.translate(en, 'cooking.live.title'), 'The calculation is in motion');
+assert.strictEqual(i18n.translate(he, 'cooking.live.title'), 'החישוב מתבשל עכשיו');
+assert.strictEqual(i18n.translate(he, 'cooking.live.now', { step: 'אבן 3' }), 'עכשיו: אבן 3…');
 assert.strictEqual(i18n.translate(he, 'cooking.close'), 'סגור');
 assert.strictEqual(i18n.translate(he, 'cooking.term.gate'), 'שער');
 assert.strictEqual(i18n.translate(he, 'cooking.term.gateGap'), 'מרווח שער');
