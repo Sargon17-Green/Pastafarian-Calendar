@@ -152,6 +152,45 @@ function createLiveProgressEmitter(callback) {
   });
 }
 
+function compactLiveCheckpoint(kind, payload) {
+  const row = payload && typeof payload === 'object' ? payload : {};
+  switch (kind) {
+    case 'stone-seed':
+      return { ordinal: row.ordinal, values: row.values };
+    case 'stone-transition':
+      return { ordinal: row.ordinal, index: row.index, after: row.after };
+    case 'hidden-start':
+    case 'visible-start':
+      return { ordinal: row.ordinal, initial: row.initial, rawBeforeSave: row.rawBeforeSave };
+    case 'hidden-grind':
+    case 'visible-grind':
+      return { ordinal: row.ordinal, grind: row.grind, stoneKind: row.stoneKind, after: row.after };
+    case 'initial-bowl':
+      return { bowlId: row.bowlId, value: row.value, prime: row.prime };
+    case 'bowl-round':
+      return { ordinal: row.ordinal, drop: row.drop, order: row.order, afterBowls: row.afterBowls };
+    case 'post-stir':
+      return {
+        stirIndex: row.stirIndex,
+        rawBowlSum: row.rawBowlSum,
+        savedOrderNumber: row.savedOrderNumber,
+        order: row.order,
+        afterBowls: row.afterBowls,
+      };
+    case 'selection-result':
+      return {
+        label: row.label,
+        mode: row.mode,
+        familySize: row.familySize,
+        rejectionSteps: row.rejectionSteps,
+        acceptedCandidate: row.acceptedCandidate,
+        output: row.output,
+      };
+    default:
+      return row;
+  }
+}
+
 function canonicalIndexFor(group, text) {
   const rows = group === 'cutlet'
     ? core.SourceLanguageCatalog.cutlets
@@ -923,7 +962,7 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
     const checkpoint = collector
       ? (kind, payload) => {
         collector.observer(kind, payload);
-        progress.emit(kind, { sauceId, gateIndex, ...payload });
+        progress.emit(kind, { sauceId, gateIndex, ...compactLiveCheckpoint(kind, payload) });
       }
       : null;
     const result = core.sauceWithScarsStage56(
