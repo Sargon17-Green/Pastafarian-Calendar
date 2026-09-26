@@ -495,6 +495,7 @@ async function flush() {
     });
   }
   compacted._drainLiveRows();
+  await flush();
   assert(compacted._els.liveCurrent.textContent.includes(compacted._t('cooking.live.nextGate')),
     'current gate status must describe the gate operation now being awaited, not the last completed gate');
   assert.strictEqual(compacted._liveObservedCount, 256);
