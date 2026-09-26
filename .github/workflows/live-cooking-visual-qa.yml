@@ -182,11 +182,14 @@ jobs:
             },null,{timeout:30000});
             await page.waitForFunction(() => {
               const p=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('pastafari-cooking');
-              return (p?._liveObservedCount||0)>=40 && (p?._liveEntries?.length||0)>=2;
+              const entries=Array.from(p?._liveEntries||[]);
+              return (p?._liveObservedCount||0)>=128
+                && entries.some((event)=>event && event.kind==='gate-run')
+                && (p?.shadowRoot?.querySelectorAll('.live-row').length||0)>=1;
             },null,{timeout:180000});
             const live=await liveMetrics(page);
             assert(live.live && live.open,'real stream is not visibly live');
-            assert(live.observed>=40 && live.entries>=2 && live.rendered>0,'real stream did not accumulate internal operations');
+            assert(live.observed>=128 && live.rendered>0,'real stream did not accumulate a rendered gate range');
             assert(live.monster && live.sauceDrips===2,'monster/drips missing in real live state');
             assert(live.timingCount>0,'real live rows show no timings');
             assert(live.ariaModal==='false','inline live shell incorrectly claims modal semantics');
