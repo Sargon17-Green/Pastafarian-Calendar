@@ -34,10 +34,19 @@ const context = vm.createContext({
       if (options && typeof options.onGateSauceDetail === 'function') {
         options.onGateSauceDetail({ kind: 'gate-gap', signedIndex: '2', marker: 'chunk' });
       }
+      if (options && typeof options.onProgress === 'function') {
+        options.onProgress({ sequence: 1, kind: 'stone-transition', elapsedMs: 2, durationMs: 2, payload: { ordinal: 2 } });
+      }
       return {
         schemaVersion: '0.4.0',
         inputs: { calculationDay: String(calculationDay), targetDay: String(targetDay) },
-        finalResult: { year: '5000' },
+        finalResult: {
+          year: '5000',
+          cutlet: { sourceName: 'bronze' },
+          dayInCutlet: '3',
+          month: { sourceName: 'argile' },
+          dayInMonth: '3',
+        },
       };
     },
   },
@@ -111,6 +120,43 @@ assert.strictEqual(typeof onMessage, 'function', 'Li Worker entry deve registrar
   assert.strictEqual(posted[0].value.marker, 'chunk');
   assert.strictEqual(posted[1].kind, 'result');
   assert.deepStrictEqual(Array.from(cookingTraceCalls[0].options.gateDetailGateIndices), [2n, -3n]);
+
+  posted.length = 0;
+  cookingTraceCalls.length = 0;
+  await onMessage({ data: {
+    id: 22, operation: 'cookingTrace', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+    streamGateSauceDetail: false,
+    streamProgress: true,
+  } });
+  assert.strictEqual(posted.length, 2);
+  assert.strictEqual(posted[0].kind, 'progress');
+  assert.strictEqual(posted[0].value.kind, 'stone-transition');
+  assert.strictEqual(posted[1].kind, 'result');
+  assert.strictEqual(typeof cookingTraceCalls[0].options.onProgress, 'function');
+
+  posted.length = 0;
+  cookingTraceCalls.length = 0;
+  await onMessage({ data: {
+    id: 23, operation: 'convertWithTrace', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+    streamProgress: true,
+  } });
+  assert.strictEqual(posted.length, 2);
+  assert.strictEqual(posted[0].kind, 'progress');
+  assert.strictEqual(posted[1].kind, 'result');
+  assert.strictEqual(posted[1].value.result.year, '5000');
+  assert.strictEqual(posted[1].value.result.cutletName, 'bronze');
+  assert.strictEqual(posted[1].value.trace.schemaVersion, '0.4.0');
+
+  posted.length = 0;
+  coreCalls.length = 0;
+  await onMessage({ data: {
+    id: 24, operation: 'getCutletView', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+    streamProgress: true,
+  } });
+  assert(posted.length > 1);
+  assert(posted.slice(0, -1).every((row) => row.kind === 'progress'));
+  assert.strictEqual(posted[posted.length - 1].ok, true);
+  assert.strictEqual(posted[posted.length - 1].value.days.length, 5);
 
   // Old/stale main + new Worker fails before any semantic core invocation.
   posted.length = 0;
