@@ -1513,8 +1513,10 @@
           if (label === 'YEAR_5000-semantic') return 'years';
           if (label === 'cutlet-count' || label === 'cutlet-partition-raw'
               || label === 'cutlet-partition-semantic' || label === 'cutlet-names-distinct-rank') return 'cutlets';
-          if (label === 'month-count' || label === 'month-names-distinct-rank') return 'months';
-          if (label === 'month-lengths' || label === 'month-weaving') return 'weaving';
+          if (label === 'month-count') return 'months';
+          if (label === 'month-lengths') return 'weaving';
+          if (label === 'month-weaving') return 'months';
+          if (label === 'month-names-distinct-rank') return 'structure';
           return 'selection';
         }
         case 'cutlet-count-ready':
@@ -1527,12 +1529,13 @@
         case 'month-lengths-ready':
           return 'weaving';
         case 'month-weaving-ready':
-        case 'month-names-ready':
           return 'months';
+        case 'month-names-ready':
+          return 'structure';
         case 'structure-finished':
+          return 'result';
         case 'final-result-ready':
         case 'semantic-execution-finished':
-          return 'result';
         case 'trace-ready':
         case 'view-start':
         case 'view-day-ready':
@@ -1629,7 +1632,7 @@
         }
         case 'post-stir': {
           const stir = Number(p.stirIndex);
-          return Number.isFinite(stir) && stir < 12 ? post(stir + 1) : this._term('sauce');
+          return Number.isFinite(stir) && stir < 12 ? post(stir + 1) : this._term('selection');
         }
         case 'sauce-finished':
           return this._term('selection');
@@ -1669,10 +1672,9 @@
         case 'month-names-ready':
           return this._chapterTitle('structure-sauce');
         case 'structure-finished':
-          return this._chapterTitle('position');
+          return this._chapterTitle('result');
         case 'final-result-ready':
         case 'semantic-execution-finished':
-          return this._t('cooking.live.trace');
         case 'trace-ready':
         case 'view-start':
         case 'view-day-ready':
