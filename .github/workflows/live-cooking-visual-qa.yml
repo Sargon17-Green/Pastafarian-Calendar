@@ -78,7 +78,7 @@ jobs:
           </head>
           <body>
             <script src="/dist/pastafari-date.js"></script>
-            <pastafari-date id="fixture-host" headless lang="en" date="2026-09-26" calculation-date="2026-09-26"></pastafari-date>
+            <pastafari-date id="fixture-host" lang="en" date="not-a-date" calculation-date="2026-09-26"></pastafari-date>
           </body>
           </html>
           HTML
