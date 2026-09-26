@@ -1115,6 +1115,21 @@
       return '·';
     }
 
+    _liveSelectionLabel(label) {
+      switch (String(label || '')) {
+        case 'gate-gap': return this._term('gateGap');
+        case 'YEAR_5000-semantic': return this._chapterTitle('year-5000');
+        case 'cutlet-count': return this._chapterTitle('cutlets');
+        case 'cutlet-partition-semantic': return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+        case 'cutlet-names-distinct-rank': return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
+        case 'month-count': return this._chapterTitle('months');
+        case 'month-lengths': return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
+        case 'month-weaving': return this._term('weaving');
+        case 'month-names-distinct-rank': return this._chapterTitle('months') + ' · ' + this._t('cooking.live.names');
+        default: return '';
+      }
+    }
+
     _liveEventLabel(event) {
       const p = event && event.payload || {};
       switch (String(event && event.kind || '')) {
@@ -1147,7 +1162,10 @@
         case 'initial-bowl': return this._term('initialBowls') + ' · ' + this._term('bowl') + ' ' + String(p.bowlId);
         case 'bowl-round': return this._term('bowlRound') + ' ' + String(p.ordinal);
         case 'post-stir': return this._term('postStir') + ' ' + String(p.stirIndex);
-        case 'selection-result': return this._term('selection') + (p.label ? ' · ' + String(p.label) : '');
+        case 'selection-result': {
+          const label = this._liveSelectionLabel(p.label);
+          return this._term('selection') + (label ? ' · ' + label : '');
+        }
         case 'structure-start': return this._chapterTitle('structure-sauce');
         case 'structure-finished': return this._chapterTitle('structure-sauce') + ' ✓';
         case 'cutlet-count-ready': return this._term('cutlet') + ' × ' + String(p.count);
