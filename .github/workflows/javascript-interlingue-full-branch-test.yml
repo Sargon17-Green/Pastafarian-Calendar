@@ -293,3 +293,436 @@ jobs:
           test "${{ needs.corrective-57.result }}" = "success"
           test "${{ needs.acceleration-58.result }}" = "success"
           echo 'JAVASCRIPT_INTERLINGUE_BRANCH=GREEN'
+
+
+  phase-f-final-visual-qa:
+    name: Phase F — final integrated visual QA
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Extraer li repository
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Constructer li browser artefact
+        run: |
+          set -euo pipefail
+          node scripts/build-browser.js
+          node tests/browser-built-artifacts.js
+
+      - name: Preparar Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/phase-f-qa"
+          cd "$RUNNER_TEMP/phase-f-qa"
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Executer final integrated QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE="$RUNNER_TEMP/phase-f-site"
+          rm -rf "$SITE"
+          mkdir -p "$SITE/dist"
+          cp browser/dist/index.html "$SITE/index.html"
+          cp browser/dist/pastafari-date.js "$SITE/dist/pastafari-date.js"
+          cp browser/dist/pastafari-worker.js "$SITE/dist/pastafari-worker.js"
+          cp browser/dist/pastafari-date.mjs "$SITE/dist/pastafari-date.mjs"
+          cp browser/dist/build-id.txt "$SITE/dist/build-id.txt"
+          cp -R browser/dist/reverse-engine "$SITE/dist/reverse-engine"
+          cd "$SITE"
+          python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/phase-f-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+
+          cd "$RUNNER_TEMP/phase-f-qa"
+          cat > qa.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const out = path.join(process.cwd(),'out');
+          fs.mkdirSync(out,{recursive:true});
+          const base='http://127.0.0.1:4173/';
+          const locales=['ie','en','he','ar','ru','fr','de','es','it','cs'];
+          const localeDir={ie:'ltr',en:'ltr',he:'rtl',ar:'rtl',ru:'ltr',fr:'ltr',de:'ltr',es:'ltr',it:'ltr',cs:'ltr'};
+          const profiles=[
+            {name:'desktop1440_en',width:1440,height:1000,lang:'en',locale:'en-US',mobile:false},
+            {name:'tablet1024_he',width:1024,height:1366,lang:'he',locale:'he-IL',mobile:false},
+            {name:'tablet800_ar',width:800,height:1280,lang:'ar',locale:'ar',mobile:false},
+            {name:'tablet768_de',width:768,height:1024,lang:'de',locale:'de-DE',mobile:false},
+            {name:'mobile390_fr',width:390,height:844,lang:'fr',locale:'fr-FR',mobile:true},
+            {name:'mobile320_he',width:320,height:740,lang:'he',locale:'he-IL',mobile:true},
+          ];
+          function assert(v,m){if(!v)throw new Error(m);}
+          function write(name,data){fs.writeFileSync(path.join(out,name),typeof data==='string'?data:JSON.stringify(data,null,2));}
+          async function ready(page,timeout=180000){
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('pastafari-date')?.shadowRoot;
+              const cal=s?.querySelector('.calendar');
+              return !!cal && !cal.hasAttribute('data-state');
+            },null,{timeout});
+            await page.waitForTimeout(500);
+          }
+          async function setLang(page,lang){
+            await page.evaluate(lang=>document.querySelector('pastafari-date').setAttribute('lang',lang),lang);
+            await page.waitForTimeout(250);
+          }
+          async function coreState(page){
+            return page.evaluate(()=>{
+              const host=document.querySelector('pastafari-date');
+              const s=host.shadowRoot;
+              const v=s.querySelector('.viewport');
+              const cur=s.querySelector('.day[aria-current="date"]');
+              const iso=[...s.querySelectorAll('.beacon-context bdi.iso-date')].map(n=>({
+                text:n.textContent,dir:n.getAttribute('dir'),whiteSpace:getComputedStyle(n).whiteSpace
+              }));
+              return {
+                lang:host.getAttribute('lang'),dir:host.getAttribute('dir'),
+                bodyCW:document.documentElement.clientWidth,bodySW:document.documentElement.scrollWidth,
+                viewportCW:v.clientWidth,viewportSW:v.scrollWidth,
+                viewportOverflowY:getComputedStyle(v).overflowY,
+                days:s.querySelectorAll('.day').length,
+                sections:s.querySelectorAll('.cutlet-section').length,
+                current:!!cur,
+                currentAria:cur?.getAttribute('aria-label')||null,
+                iso,
+                targetHidden:s.querySelector('.target-button').hidden,
+                status:s.querySelector('.window-status').innerText,
+              };
+            });
+          }
+          function assertCore(st,name){
+            assert(st.bodySW<=st.bodyCW+1,name+': document horizontal overflow');
+            assert(st.viewportSW<=st.viewportCW+1,name+': calendar horizontal overflow');
+            assert(st.viewportOverflowY==='visible',name+': nested calendar vertical scrolling returned');
+            assert(st.days>0 && st.days<=28,name+': rendered day count '+st.days);
+            assert(st.sections===1,name+': expected one rendered cutlet section');
+            assert(st.current,name+': current target card missing');
+            if(st.iso.length){
+              assert(st.iso.length===2,name+': expected two ISO tokens');
+              for(const iso of st.iso){
+                assert(/^\d{4}-\d{2}-\d{2}$/.test(iso.text),name+': malformed ISO '+iso.text);
+                assert(iso.dir==='ltr',name+': ISO not LTR isolated');
+                assert(iso.whiteSpace==='nowrap',name+': ISO may wrap internally');
+              }
+            }
+          }
+          async function newPage(browser,p,extra={}){
+            const ctx=await browser.newContext({
+              viewport:{width:p.width,height:p.height},
+              locale:p.locale,isMobile:p.mobile,hasTouch:p.mobile,deviceScaleFactor:1,
+              ...extra
+            });
+            const page=await ctx.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror: '+String(e)));
+            page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
+            page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+            return {ctx,page,errors};
+          }
+
+          async function viewportReadyMatrix(browser){
+            for(const p of profiles){
+              const {ctx,page,errors}=await newPage(browser,p);
+              await page.goto(base,{waitUntil:'domcontentloaded'});
+              await page.screenshot({path:path.join(out,p.name+'__initial_loading.png'),fullPage:false});
+              await ready(page);
+              await setLang(page,p.lang);
+              const st=await coreState(page);
+              assertCore(st,p.name);
+              assert(st.dir===localeDir[p.lang],p.name+': wrong direction');
+              write(p.name+'__ready.json',{state:st,errors});
+              assert(errors.length===0,p.name+': unexpected normal-path errors '+errors.join(' | '));
+              await page.screenshot({path:path.join(out,p.name+'__ready.png'),fullPage:true});
+              await ctx.close();
+            }
+          }
+
+          async function localeSmoke(browser){
+            const p={width:390,height:844,locale:'en-US',mobile:true};
+            const {ctx,page,errors}=await newPage(browser,p);
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await ready(page);
+            for(const lang of locales){
+              await setLang(page,lang);
+              const st=await coreState(page);
+              assertCore(st,'locale-'+lang);
+              assert(st.dir===localeDir[lang],'locale-'+lang+': wrong direction');
+              write('locale_'+lang+'.json',st);
+              await page.screenshot({path:path.join(out,'locale_'+lang+'.png'),fullPage:false});
+            }
+            assert(errors.length===0,'locale smoke errors: '+errors.join(' | '));
+            await ctx.close();
+          }
+
+          async function searchAndNavigation(browser){
+            const p={width:390,height:844,locale:'he-IL',mobile:true};
+            const {ctx,page,errors}=await newPage(browser,p);
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await ready(page); await setLang(page,'he');
+
+            // Keyboard-open ordinary search.
+            const editor=page.locator('pastafari-date').locator('.editor-link');
+            await editor.focus(); await page.keyboard.press('Enter');
+            await page.waitForTimeout(100);
+            assert(await page.locator('pastafari-date').locator('dialog:has(> .dialog-form)').getAttribute('open')!==null,'search dialog did not keyboard-open');
+            await page.locator('pastafari-date').locator('details summary').click();
+            await page.locator('pastafari-date').locator('input[name="target"]').fill('2026-99-99');
+            await page.locator('pastafari-date').locator('dialog:has(> .dialog-form) .dialog-actions .primary').click();
+            await page.waitForTimeout(100);
+            const invalid=await page.locator('pastafari-date').locator('.dialog-error').innerText();
+            assert(invalid.trim().length>0,'ordinary invalid input has no error');
+            await page.screenshot({path:path.join(out,'search_invalid_390_he.png'),fullPage:false});
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(100);
+            assert(await page.locator('pastafari-date').locator('dialog:has(> .dialog-form)').getAttribute('open')===null,'search dialog did not Escape-close');
+
+            // Move by bounded window, then return to the searched target.
+            const later=page.locator('pastafari-date').locator('.window-button.later');
+            const earlier=page.locator('pastafari-date').locator('.window-button.earlier');
+            const before=await coreState(page);
+            const move=!await later.isHidden()?later:earlier;
+            await move.click(); await page.waitForTimeout(250);
+            const shifted=await coreState(page);
+            assert(shifted.days<=28,'window shift grew DOM');
+            assert(shifted.status!==before.status,'window status did not move');
+            assert(shifted.targetHidden===false,'return-target not exposed after shift');
+            await page.locator('pastafari-date').locator('.target-button').click();
+            await page.waitForTimeout(400);
+            const returned=await coreState(page);
+            assert(returned.targetHidden===true && returned.current,'return-target failed');
+
+            // Cutlet next, then target return; today remains a separate action.
+            await page.locator('pastafari-date').locator('.next').click();
+            await page.waitForTimeout(2500);
+            let away=await coreState(page);
+            assert(away.days<=28 && away.targetHidden===false,'cutlet navigation lost bounded/target state');
+            await page.locator('pastafari-date').locator('.target-button').click();
+            await page.waitForTimeout(2500);
+            let back=await coreState(page);
+            assert(back.current && back.targetHidden===true,'return-target failed after cutlet navigation');
+            await page.locator('pastafari-date').locator('.today-button').click();
+            await page.waitForTimeout(2500);
+            const today=await coreState(page);
+            assert(today.days<=28 && today.current,'today navigation failed');
+            write('search_navigation_he.json',{before,shifted,returned,away,back,today,errors});
+            assert(errors.length===0,'search/navigation errors: '+errors.join(' | '));
+            await ctx.close();
+          }
+
+          async function longLoading(browser){
+            const p={width:800,height:1000,locale:'de-DE',mobile:false};
+            const {ctx,page}=await newPage(browser,p);
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await ready(page); await setLang(page,'de');
+            const initial=await page.evaluate(()=>{
+              const h=document.querySelector('pastafari-date'); const s=h.shadowRoot;
+              h._showLoading(); return s.querySelector('.loading-note').innerText;
+            });
+            await page.waitForTimeout(8300);
+            const later=await page.evaluate(()=>{
+              const h=document.querySelector('pastafari-date'); const s=h.shadowRoot;
+              return {text:s.querySelector('.loading-note').innerText,state:s.querySelector('.calendar').getAttribute('data-state')};
+            });
+            assert(later.state==='loading','long loading state disappeared unexpectedly');
+            assert(later.text && later.text!==initial,'long loading guidance did not change');
+            await page.screenshot({path:path.join(out,'long_loading_de.png'),fullPage:false});
+            await page.evaluate(()=>document.querySelector('pastafari-date')._hideOverlays());
+            write('long_loading_de.json',{initial,later});
+            await ctx.close();
+          }
+
+          async function errorRetry(browser,p,name){
+            const {ctx,page,errors}=await newPage(browser,p);
+            let block=true;
+            await page.route('**/pastafari-worker.js*',route=>block?route.abort():route.continue());
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('pastafari-date')?.shadowRoot;
+              return s?.querySelector('.calendar')?.getAttribute('data-state')==='error';
+            },null,{timeout:90000});
+            const err=await page.evaluate(()=>{
+              const s=document.querySelector('pastafari-date').shadowRoot;
+              return {
+                title:s.querySelector('.error-title').innerText,
+                message:s.querySelector('.error-message').innerText,
+                button:s.querySelector('.retry-button').innerText,
+                bodySW:document.documentElement.scrollWidth,bodyCW:document.documentElement.clientWidth
+              };
+            });
+            assert(err.title&&err.message&&err.button,name+': incoherent error state');
+            assert(err.bodySW<=err.bodyCW+1,name+': error state overflow');
+            await page.screenshot({path:path.join(out,name+'__error.png'),fullPage:true});
+            block=false;
+            await page.locator('pastafari-date').locator('.retry-button').click();
+            await ready(page,180000);
+            const recovered=await coreState(page); assertCore(recovered,name+'-recovered');
+            await page.screenshot({path:path.join(out,name+'__recovered.png'),fullPage:true});
+            // Ignore the deliberately aborted worker request, but no pageerror is allowed.
+            assert(!errors.some(x=>x.startsWith('pageerror:')),name+': pageerror during retry '+errors.join(' | '));
+            write(name+'__error_retry.json',{err,recovered,errors});
+            await ctx.close();
+          }
+
+          async function traceQA(browser){
+            const p={width:1440,height:1000,locale:'en-US',mobile:false};
+            const {ctx,page,errors}=await newPage(browser,p);
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await ready(page); await setLang(page,'en');
+            const opener=page.locator('pastafari-date').locator('.cooking-open');
+            await opener.focus(); await page.keyboard.press('Enter');
+            await page.waitForFunction(()=>{
+              const p=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('pastafari-cooking');
+              const shell=p?.shadowRoot?.querySelector('.shell');
+              const load=p?.shadowRoot?.querySelector('.status.loading');
+              return !!shell?.hasAttribute('open') && !!load && load.hidden;
+            },null,{timeout:240000});
+            const nav=page.locator('pastafari-date').locator('pastafari-cooking').locator('.nav button');
+            assert(await nav.count()===9,'trace does not expose 9 chapters');
+            for(let i=0;i<9;i++){
+              await nav.nth(i).click(); await page.waitForTimeout(150);
+              const current=await nav.nth(i).getAttribute('aria-current');
+              assert(current==='page','trace chapter '+i+' did not become current');
+              await page.screenshot({path:path.join(out,'trace_chapter_'+String(i).padStart(2,'0')+'.png'),fullPage:false});
+            }
+            const navMetrics=await page.evaluate(()=>{
+              const p=document.querySelector('pastafari-date').shadowRoot.querySelector('pastafari-cooking').shadowRoot;
+              const nav=p.querySelector('.nav'); const shell=p.querySelector('.shell').getBoundingClientRect();
+              return {sw:nav.scrollWidth,cw:nav.clientWidth,shell:{l:shell.left,r:shell.right,t:shell.top,b:shell.bottom},vw:innerWidth,vh:innerHeight};
+            });
+            assert(navMetrics.sw<=navMetrics.cw+2,'trace chapter nav horizontally overflows');
+            assert(navMetrics.shell.l>=-1&&navMetrics.shell.r<=navMetrics.vw+1&&navMetrics.shell.t>=-1&&navMetrics.shell.b<=navMetrics.vh+1,'trace modal escapes viewport');
+            await page.keyboard.press('Escape'); await page.waitForTimeout(150);
+            const closed=await page.evaluate(()=>{
+              const h=document.querySelector('pastafari-date'); const s=h.shadowRoot;
+              const p=s.querySelector('pastafari-cooking');
+              return {open:p.hasAttribute('open'),focus:s.activeElement===s.querySelector('.cooking-open')};
+            });
+            assert(!closed.open && closed.focus,'trace Escape/focus-return failed');
+            assert(errors.length===0,'trace normal-path errors: '+errors.join(' | '));
+            write('trace_final.json',{navMetrics,closed,errors});
+            await ctx.close();
+          }
+
+          async function traceMobile(browser){
+            const p={width:320,height:740,locale:'ar',mobile:true};
+            const {ctx,page,errors}=await newPage(browser,p);
+            await page.goto(base,{waitUntil:'domcontentloaded'});
+            await ready(page); await setLang(page,'ar');
+            await page.locator('pastafari-date').locator('.cooking-open').click();
+            await page.waitForFunction(()=>{
+              const p=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('pastafari-cooking');
+              const load=p?.shadowRoot?.querySelector('.status.loading');
+              return !!p?.hasAttribute('open') && !!load && load.hidden;
+            },null,{timeout:240000});
+            const m=await page.evaluate(()=>{
+              const p=document.querySelector('pastafari-date').shadowRoot.querySelector('pastafari-cooking').shadowRoot;
+              const shell=p.querySelector('.shell').getBoundingClientRect(); const nav=p.querySelector('.nav');
+              return {count:nav.querySelectorAll('button').length,sw:nav.scrollWidth,cw:nav.clientWidth,w:shell.width,h:shell.height,vw:innerWidth,vh:innerHeight};
+            });
+            assert(m.count===9&&m.sw<=m.cw+2,'mobile trace chapter discoverability failed');
+            assert(m.w>=m.vw-2&&m.h>=m.vh-2,'mobile trace is not full-screen');
+            await page.screenshot({path:path.join(out,'trace_mobile_ar.png'),fullPage:false});
+            assert(errors.length===0,'mobile trace errors: '+errors.join(' | '));
+            await ctx.close();
+          }
+
+          async function reverseQA(browser){
+            const p={width:800,height:1000,locale:'de-DE',mobile:false};
+            const {ctx,page,errors}=await newPage(browser,p);
+            await page.goto(base,{waitUntil:'domcontentloaded'}); await ready(page); await setLang(page,'de');
+            const opener=page.locator('pastafari-date').locator('.reverse-open');
+            await opener.focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(150);
+            assert(await page.locator('pastafari-date').locator('.reverse-dialog').getAttribute('open')!==null,'reverse dialog did not keyboard-open');
+            const prefill=await page.evaluate(()=>{
+              const s=document.querySelector('pastafari-date').shadowRoot;
+              return {
+                y:s.querySelector('input[name="reverse-year"]').value,
+                c:s.querySelector('select[name="reverse-cutlet"]').value,
+                dc:s.querySelector('input[name="reverse-day-cutlet"]').value,
+                m:s.querySelector('select[name="reverse-month"]').value,
+                dm:s.querySelector('input[name="reverse-day-month"]').value,
+                calc:s.querySelector('input[name="reverse-calculation"]').value
+              };
+            });
+            assert(prefill.y&&prefill.c&&prefill.dc&&prefill.m&&prefill.dm&&prefill.calc,'reverse prefill incomplete');
+            await page.locator('pastafari-date').locator('.reverse-submit').click();
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('pastafari-date')?.shadowRoot;
+              return !s.querySelector('.reverse-submit').disabled && (
+                s.querySelectorAll('.reverse-result').length>0 ||
+                s.querySelector('.reverse-status').getAttribute('data-kind')==='error'
+              );
+            },null,{timeout:180000});
+            const count=await page.locator('pastafari-date').locator('.reverse-result').count();
+            assert(count>0,'real reverse round-trip returned no result');
+            const iso=await page.locator('pastafari-date').locator('.reverse-result bdi').first().innerText();
+            const dir=await page.locator('pastafari-date').locator('.reverse-result bdi').first().getAttribute('dir');
+            assert(/^\d{4}-\d{2}-\d{2}$/.test(iso)&&dir==='ltr','reverse ISO result invalid/BiDi unsafe');
+            await page.screenshot({path:path.join(out,'reverse_real_de.png'),fullPage:false});
+            await page.locator('pastafari-date').locator('.reverse-result').first().click();
+            await ready(page);
+            const after=await page.evaluate(()=>{
+              const h=document.querySelector('pastafari-date'),s=h.shadowRoot;
+              return {date:h.getAttribute('date'),selected:!!s.querySelector('.day[aria-current="date"]')};
+            });
+            assert(after.date===iso&&after.selected,'reverse selection did not land on ordinary target');
+            assert(errors.length===0,'reverse normal-path errors: '+errors.join(' | '));
+            write('reverse_final.json',{prefill,count,iso,after,errors});
+            await ctx.close();
+          }
+
+          async function a11yMedia(browser){
+            const p={width:390,height:844,locale:'en-US',mobile:true};
+            const {ctx,page}=await newPage(browser,p,{reducedMotion:'reduce',forcedColors:'active'});
+            await page.goto(base,{waitUntil:'domcontentloaded'}); await ready(page);
+            const data=await page.evaluate(()=>{
+              const s=document.querySelector('pastafari-date').shadowRoot;
+              const spin=getComputedStyle(s.querySelector('.spinner'));
+              const current=getComputedStyle(s.querySelector('.day[aria-current="date"]'));
+              return {animationDuration:spin.animationDuration,currentBorder:current.borderTopWidth,currentOutline:current.outlineStyle};
+            });
+            assert(parseFloat(data.animationDuration)<=0.001,'reduced-motion animation was not effectively disabled');
+            assert(data.currentBorder!=='0px' || data.currentOutline!=='none','forced-colors selected state has no visible boundary');
+            write('a11y_media.json',data);
+            await page.screenshot({path:path.join(out,'a11y_forced_colors.png'),fullPage:false});
+            await ctx.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            await viewportReadyMatrix(browser);
+            await localeSmoke(browser);
+            await searchAndNavigation(browser);
+            await longLoading(browser);
+            await errorRetry(browser,{width:1440,height:1000,locale:'en-US',mobile:false},'error_retry_desktop');
+            await errorRetry(browser,{width:390,height:844,locale:'he-IL',mobile:true},'error_retry_mobile');
+            await traceQA(browser);
+            await traceMobile(browser);
+            await reverseQA(browser);
+            await a11yMedia(browser);
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node qa.js
+
+      - name: Conservar li Phase F final QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-f-final-visual-qa
+          path: ${{ runner.temp }}/phase-f-qa/out
+          if-no-files-found: warn
+          retention-days: 14
