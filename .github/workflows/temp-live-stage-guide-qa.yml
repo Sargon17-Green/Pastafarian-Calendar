@@ -22,6 +22,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Build browser bundle
         run: node scripts/build-browser.js
+      - name: Run targeted browser component regressions
+        run: |
+          node tests/browser-cooking-component.js
+          node tests/browser-i18n-locales.js
       - name: Install Playwright Chromium
         run: |
           npm install --no-save playwright@1.55.0
