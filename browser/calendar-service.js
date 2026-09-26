@@ -134,6 +134,10 @@
       const memoryGeneration = this.memoryGeneration;
       const tracedPromise = this.engineClient.convertWithTrace(calculationDay, targetDay, onProgress);
       const resultPromise = tracedPromise.then((traced) => normalizeCalendarResult(traced.result));
+      // This derived promise exists for ordinary convert() callers that join the same
+      // in-flight request. Consume its rejection here as well so a traced failure
+      // never creates an unhandled rejection when no second caller is waiting.
+      resultPromise.catch(() => {});
       this.conversionInflight.set(key, resultPromise);
       try {
         const traced = await tracedPromise;
