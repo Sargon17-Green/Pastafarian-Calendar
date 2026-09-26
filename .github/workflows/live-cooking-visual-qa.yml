@@ -237,7 +237,11 @@ jobs:
             assertNoOverflow(retained,'retained-modal',spec.width,spec.height,true);
             await page.screenshot({path:path.join(out,'retained_log_desktop.png'),fullPage:false});
 
-            const firstGateRange=page.locator('pastafari-date').locator('pastafari-cooking').locator('.live-gate-range').first();
+            const yearWalkGroup=page.locator('pastafari-date').locator('pastafari-cooking').locator('.live-group[data-group="year-walk"]');
+            if (!(await yearWalkGroup.evaluate(n=>n.open))) {
+              await yearWalkGroup.locator(':scope > summary').click();
+            }
+            const firstGateRange=yearWalkGroup.locator('.live-gate-range').first();
             await firstGateRange.locator(':scope > summary').click();
             const expandedGateSteps=await firstGateRange.locator('.live-gate-step').count();
             assert(expandedGateSteps===128,'real retained gate range did not lazily expose all 128 individual gate steps');
