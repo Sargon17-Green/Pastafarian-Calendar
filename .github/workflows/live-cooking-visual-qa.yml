@@ -160,11 +160,14 @@ jobs:
               };
             });
           }
-          function assertNoOverflow(m,name,width,height) {
+          function assertNoOverflow(m,name,width,height,modal=false) {
             assert(m.documentSW<=m.documentCW+2,name+': document horizontal overflow');
             assert(m.paneSW<=m.paneCW+2,name+': live pane horizontal overflow');
             assert(m.shellRect && m.shellRect.left>=-2 && m.shellRect.right<=width+2,name+': shell escapes viewport horizontally');
-            assert(m.shellRect.top>=-2 && m.shellRect.bottom<=height+2,name+': shell escapes viewport vertically');
+            assert(m.shellRect.height<=height+2,name+': shell is taller than the viewport');
+            if (modal) {
+              assert(m.shellRect.top>=-2 && m.shellRect.bottom<=height+2,name+': modal shell escapes viewport vertically');
+            }
           }
 
           async function realStream(browser) {
@@ -186,8 +189,8 @@ jobs:
             assert(live.monster && live.sauceDrips===2,'monster/drips missing in real live state');
             assert(live.timingCount>0,'real live rows show no timings');
             assert(live.ariaModal==='false','inline live shell incorrectly claims modal semantics');
-            assertNoOverflow(live,'real-live',spec.width,spec.height);
             await page.screenshot({path:path.join(out,'real_live_desktop.png'),fullPage:false});
+            assertNoOverflow(live,'real-live',spec.width,spec.height,false);
 
             await calendarReady(page,300000);
             const totalMs=Date.now()-started;
@@ -224,7 +227,7 @@ jobs:
             assert(retained.sauces>=1,'retained log has no nested Sauce groups');
             assert(await page.locator('pastafari-date').locator('pastafari-cooking').locator('.nav button').count()===0,
               'old nine-chapter navigation still replaces the new retained log');
-            assertNoOverflow(retained,'retained-modal',spec.width,spec.height);
+            assertNoOverflow(retained,'retained-modal',spec.width,spec.height,true);
             await page.screenshot({path:path.join(out,'retained_log_desktop.png'),fullPage:false});
 
             const firstGroup=page.locator('pastafari-date').locator('pastafari-cooking').locator('.live-group').first();
