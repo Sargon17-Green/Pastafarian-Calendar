@@ -356,7 +356,7 @@ jobs:
               });
               const expectedDir=(spec.lang==='he'||spec.lang==='ar')?'rtl':'ltr';
               assert(m.dir===expectedDir,spec.name+': wrong direction');
-              assert(m.entries===m.rows && m.rows>150,spec.name+': dense log not fully rendered');
+              assert(m.entries>m.rows && m.rows>150,spec.name+': completed-operation log did not render densely');
               assert(m.groups>=4,spec.name+': missing collapsible execution phases');
               assert(m.sauces>=2,spec.name+': missing nested Sauce groups');
               assert(m.monster && m.drips===2,spec.name+': monster visuals missing');
