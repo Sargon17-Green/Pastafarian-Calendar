@@ -381,9 +381,9 @@
           .live-current {
             margin: 0;
             overflow-wrap: anywhere;
-            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-family: Arial, "Noto Sans Hebrew", "Segoe UI", sans-serif;
             font-size: clamp(1rem, 2vw, 1.35rem);
-            font-weight: 800;
+            font-weight: 850;
           }
           .live-stage-guide {
             display: grid;
