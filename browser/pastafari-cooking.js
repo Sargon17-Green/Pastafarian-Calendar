@@ -1216,6 +1216,15 @@
         const to = p.toYear && p.toYear.number != null ? p.toYear.number : '?';
         return String(from) + ' → ' + String(to);
       }
+      if (kind === 'year-walk-step') return short(p.fromNumber) + ' → ' + short(p.toNumber);
+      if (kind === 'year-walk-finished') {
+        const arrow = p.direction === 'previous' ? '←' : (p.direction === 'next' ? '→' : '↔');
+        return arrow + ' × ' + short(p.stepCount) + ' · ' + short(p.number);
+      }
+      if (kind === 'year-authoritative' && p.year) {
+        return [p.year.number, p.year.openDay, p.year.closeDay].filter((x) => x != null).map(short).join(' · ');
+      }
+      if (kind === 'sauce-finished') return safeArray(p.finalBowls).map(short).join(' / ');
       if (kind === 'cutlet-partition-ready') return safeArray(p.partition).join(' · ');
       if (kind === 'cutlet-names-ready' || kind === 'month-names-ready') return safeArray(p.indices).join(' · ');
       if (kind === 'month-lengths-ready') return safeArray(p.lengths).join(' · ');
@@ -1226,7 +1235,7 @@
       const scalars = Object.entries(p).filter(([, value]) =>
         value === null || ['string', 'number', 'boolean'].includes(typeof value)
       ).slice(0, 3);
-      return scalars.map(([key, value]) => key + '=' + short(value)).join(' · ');
+      return scalars.map(([, value]) => short(value)).join(' · ');
     }
 
     _liveTimeText(event) {
