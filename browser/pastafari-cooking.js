@@ -127,7 +127,7 @@
       this._liveCurrentPending = null;
       this._liveCurrentEvent = null;
       this._liveGuideStageKey = null;
-      this._liveRetainedStageKey = null;
+      this._liveRetainedStageKeys = new Set();
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -1112,7 +1112,7 @@
       this._liveCurrentPending = null;
       this._liveCurrentEvent = null;
       this._liveGuideStageKey = null;
-      this._liveRetainedStageKey = null;
+      this._liveRetainedStageKeys = new Set();
       if (this._els && this._els.pane) this._els.pane.replaceChildren();
       if (this._els && this._els.nav) this._els.nav.replaceChildren();
     }
@@ -1661,7 +1661,7 @@
     _appendRetainedStageGuide(target, event) {
       if (!target || !target.list) return;
       const data = this._stageGuideData(this._retainedStageForEvent(event));
-      if (!data || this._liveRetainedStageKey === data.key) return;
+      if (!data || this._liveRetainedStageKeys.has(data.key)) return;
       const guide = this._retainedStageGuideNode(data.key);
       if (!guide) return;
       const item = doc.createElement('li');
@@ -1669,7 +1669,7 @@
       item.dataset.stage = data.key;
       item.append(guide);
       target.list.append(item);
-      this._liveRetainedStageKey = data.key;
+      this._liveRetainedStageKeys.add(data.key);
     }
 
     _liveCurrentStep(event) {
@@ -2097,7 +2097,7 @@
         this._liveSauceNodes = new Map();
         this._liveLastGroupKey = null;
         this._livePhaseKey = null;
-        this._liveRetainedStageKey = null;
+        this._liveRetainedStageKeys = new Set();
       }
       this._els.nav.replaceChildren();
       this._els.pane.hidden = false;
