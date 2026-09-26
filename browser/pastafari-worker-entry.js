@@ -114,7 +114,7 @@
   }
 
   function convertWithTraceForRequest(calculationDay, targetDay, message, id) {
-    const trace = cookingTraceForRequest(calculationDay, targetDay, { ...message, streamProgress: true }, id);
+    const trace = cookingTraceForRequest(calculationDay, targetDay, message, id);
     return { result: resultFromCookingTrace(trace), trace };
   }
 
