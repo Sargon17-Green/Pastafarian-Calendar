@@ -1,0 +1,34 @@
+name: TEMP live stage guide Chromium QA
+
+on:
+  push:
+    branches:
+      - 'fix/live-stage-guide-sync-retained'
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22.16.0'
+
+jobs:
+  chromium-real-trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Build browser bundle
+        run: node scripts/build-browser.js
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Serve built site
+        run: |
+          python3 -m http.server 4173 --directory browser/dist > /tmp/pastafari-http.log 2>&1 &
+          echo $! > /tmp/pastafari-http.pid
+      - name: Run real live-stage probe
+        run: node scripts/qa-live-stage-guide-playwright.js
