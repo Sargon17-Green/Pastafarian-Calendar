@@ -7,6 +7,7 @@ const { chromium } = require('playwright');
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.on('console', (msg) => console.log('[browser]', msg.type(), msg.text()));
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'load' });
+  await page.waitForFunction(() => Boolean(customElements.get('pastafari-date')));
   const result = await page.evaluate(async () => {
     document.body.replaceChildren();
     const host = document.createElement('pastafari-date');
