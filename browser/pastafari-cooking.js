@@ -1440,7 +1440,7 @@
         const targetJdn = axis.gregorianToJdn(targetDate);
         const calculationJdn = axis.gregorianToJdn(calculationDate);
         const inputKey = String(calculationJdn) + ':' + String(targetJdn);
-        if (this._trace && this._traceInputKey === inputKey && this._liveEntries.length) {
+        if (this._trace && this._traceInputKey === inputKey) {
           if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
           this._hideStatus();
           this._renderState();
