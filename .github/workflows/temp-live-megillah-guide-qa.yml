@@ -154,7 +154,7 @@ jobs:
             assert(gate.explanation.includes('רצף שערים'), 'gate explanation is missing or unrelated');
             assert(gate.quote === 'וכן עשה שער אחר שער.', 'wrong canonical Megillah quotation for gates');
             assert(gate.source.includes('לוח שבעה עשר: שערי הקציצה'), 'wrong Megillah source for gates');
-            assert(gate.quoteLang === 'he' && gate.quoteDir === 'rtl', 'Megillah quotation is not explicitly Judaean-Hebrew/RTL');
+            assert(gate.quoteLang === 'he' && gate.quoteDir === 'rtl', 'Megillah quotation is not explicitly canonical Hebrew/RTL');
             assert(gate.quoteFont !== gate.explanationFont, 'Megillah quotation is using the ordinary explanation font');
             assert(gate.quoteFont !== gate.currentFont, 'Megillah quotation is using the same font stack as the live stage title');
             assert(/SBL Hebrew|Taamey Frank CLM|Frank Ruehl CLM|Noto Serif Hebrew/.test(gate.quoteFont),
