@@ -573,7 +573,7 @@ async function flush() {
   assert(compacted._els.liveExplanation.textContent.includes('chain of gates'),
     'live explanation must translate when locale changes');
   assert.strictEqual(compacted._els.megillahQuote.textContent, 'וכן עשה שער אחר שער.',
-    'canonical Megillah quotation must remain Judaean Hebrew in every locale');
+    'canonical Megillah quotation must remain canonical pseudo-archaic Hebrew in every locale');
   compacted.setAttribute('lang', 'he');
   assert.strictEqual(compacted._liveObservedCount, 256);
   assert.strictEqual(compacted._liveEntries.length, 2);
