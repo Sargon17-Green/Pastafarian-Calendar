@@ -122,6 +122,8 @@
       this._liveLastGroupKey = null;
       this._livePhaseKey = null;
       this._liveRenderedLocale = null;
+      this._liveObservedCount = 0;
+      this._liveGateBatch = null;
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -929,6 +931,8 @@
       this._liveLastGroupKey = null;
       this._livePhaseKey = null;
       this._liveRenderedLocale = null;
+      this._liveObservedCount = 0;
+      this._liveGateBatch = null;
       if (this._els && this._els.pane) this._els.pane.replaceChildren();
       if (this._els && this._els.nav) this._els.nav.replaceChildren();
     }
@@ -951,20 +955,101 @@
       return this;
     }
 
+    _isGateSweepEvent(event) {
+      const kind = String(event && event.kind || '');
+      const p = event && event.payload || {};
+      if (kind === 'gate-gap-start' || kind === 'gate-gap-finished' || kind === 'gate-ready') return true;
+      if ((kind === 'sauce-start' || kind === 'sauce-finished') && p.gateIndex !== null && p.gateIndex !== undefined) return true;
+      return kind === 'selection-result' && String(p.label || '') === 'gate-gap';
+    }
+
+    _gateSweepIndex(event) {
+      const p = event && event.payload || {};
+      if (p.signedIndex !== null && p.signedIndex !== undefined) return String(p.signedIndex);
+      if (p.gateIndex !== null && p.gateIndex !== undefined) return String(p.gateIndex);
+      if (p.index !== null && p.index !== undefined) return String(p.index);
+      return null;
+    }
+
+    _consumeGateSweep(event) {
+      if (!this._isGateSweepEvent(event)) return false;
+      const p = event.payload || {};
+      const index = this._gateSweepIndex(event);
+      if (!this._liveGateBatch) {
+        this._liveGateBatch = {
+          firstIndex: index,
+          lastIndex: index,
+          count: 0,
+          sauceCount: 0,
+          lastGap: null,
+          lastDay: null,
+          lastSelection: null,
+          totalMs: 0,
+          lastElapsedMs: 0,
+          sequence: Number(event.sequence) || 0,
+        };
+      }
+      const batch = this._liveGateBatch;
+      if (batch.firstIndex == null && index != null) batch.firstIndex = index;
+      if (index != null) batch.lastIndex = index;
+      batch.totalMs += Math.max(0, Number(event.durationMs) || 0);
+      batch.lastElapsedMs = Math.max(batch.lastElapsedMs, Number(event.elapsedMs) || 0);
+      batch.sequence = Math.max(batch.sequence, Number(event.sequence) || 0);
+      if (event.kind === 'sauce-finished') batch.sauceCount += 1;
+      if (event.kind === 'selection-result' && p.output != null) batch.lastSelection = String(p.output);
+      if (event.kind === 'gate-gap-finished' && p.gap != null) batch.lastGap = String(p.gap);
+      if (event.kind === 'gate-ready') {
+        batch.count += 1;
+        if (p.day != null) batch.lastDay = String(p.day);
+        if (batch.count >= 128) this._flushGateSweep();
+      }
+      return true;
+    }
+
+    _flushGateSweep() {
+      const batch = this._liveGateBatch;
+      if (!batch || batch.count <= 0) {
+        this._liveGateBatch = null;
+        return;
+      }
+      this._liveEntries.push({
+        sequence: batch.sequence,
+        kind: 'gate-run',
+        elapsedMs: batch.lastElapsedMs,
+        durationMs: batch.totalMs,
+        payload: {
+          firstIndex: batch.firstIndex,
+          lastIndex: batch.lastIndex,
+          count: batch.count,
+          operationCount: batch.count,
+          sauceCount: batch.sauceCount,
+          lastGap: batch.lastGap,
+          lastDay: batch.lastDay,
+          lastSelection: batch.lastSelection,
+        },
+      });
+      this._liveGateBatch = null;
+      this._scheduleLiveDrain();
+    }
+
     appendLiveProgress(event) {
       if (!event || typeof event !== 'object') return;
       const copy = plainClone(event);
       copy.kind = String(copy.kind || 'progress');
       copy.payload = copy.payload && typeof copy.payload === 'object' ? copy.payload : {};
-      this._liveEntries.push(copy);
+      this._liveObservedCount += 1;
       if (this._liveState === 'idle' || this._liveState === 'complete') this._liveState = 'running';
       if (this._els && this._els.liveCurrent) {
         this._els.liveCurrent.textContent = this._liveEventLabel(copy);
       }
+      if (this._consumeGateSweep(copy)) return;
+      this._flushGateSweep();
+      this._liveEntries.push(copy);
       this._scheduleLiveDrain();
     }
 
     finishLiveTrace(trace = null) {
+      this._flushGateSweep();
       if (trace && typeof trace === 'object') {
         this._trace = trace;
         this._traceInputKey = this._currentInputKey();
@@ -981,6 +1066,7 @@
     }
 
     failLiveTrace(error) {
+      this._flushGateSweep();
       this._liveState = 'error';
       this._drainLiveRows();
       if (this.hasAttribute('live')) this.removeAttribute('live');
@@ -1005,6 +1091,9 @@
         }
         if (modal && !live) enqueueMicrotask(() => {
           if (!this._connected || !this.hasAttribute('open') || this.hasAttribute('live')) return;
+          if (this._els && this._els.pane) {
+            try { this._els.pane.scrollTop = 0; } catch (_) { /* best effort */ }
+          }
           if (this._els && this._els.close && typeof this._els.close.focus === 'function') {
             try { this._els.close.focus({ preventScroll: true }); }
             catch (_) { this._els.close.focus(); }
@@ -1083,7 +1172,7 @@
       const kind = String(event && event.kind || '');
       if (kind.includes('drop') || kind.includes('grind')) return 'drop';
       if (kind.includes('bowl') || kind === 'post-stir') return 'bowl';
-      if (kind.startsWith('gate-')) return 'gate';
+      if (kind.startsWith('gate-') || kind === 'gate-run') return 'gate';
       if (kind.startsWith('stone-')) return 'stone';
       if (kind.startsWith('year-')) return 'year';
       if (kind === 'selection-result') return 'selection';
@@ -1106,6 +1195,7 @@
       if (p.ordinal != null) return compact(p.ordinal);
       if (p.bowlId != null) return compact(p.bowlId);
       if (p.stirIndex != null) return compact(p.stirIndex);
+      if (kind === 'gate-run' && p.count != null) return compact(p.count);
       if (p.signedIndex != null) return compact(p.signedIndex);
       if (p.index != null) return compact(p.index);
       if (kind === 'year-transition' && p.toYear && p.toYear.number != null) return compact(p.toYear.number);
@@ -1140,6 +1230,12 @@
         case 'gate-gap-start': return this._term('gateGap') + ' ' + String(p.signedIndex);
         case 'gate-gap-finished': return this._term('gateGap') + ' ' + String(p.signedIndex);
         case 'gate-ready': return this._term('gate') + ' ' + String(p.index);
+        case 'gate-run': {
+          const range = p.firstIndex === p.lastIndex
+            ? String(p.lastIndex == null ? '' : p.lastIndex)
+            : String(p.firstIndex == null ? '?' : p.firstIndex) + ' → ' + String(p.lastIndex == null ? '?' : p.lastIndex);
+          return this._term('gate') + ' ' + range + ' · ×' + String(p.count || 0);
+        }
         case 'year-resolution-start': return this._chapterTitle('year-walk');
         case 'year-5000-ready':
         case 'year-5000-memory': return this._chapterTitle('year-5000');
@@ -1153,8 +1249,8 @@
         case 'year-authoritative': return this._term('year') + ' ' + String(p.year && p.year.number != null ? p.year.number : '');
         case 'year-walk-finished':
         case 'year-resolution-finished': return this._chapterTitle('year-walk') + ' ✓';
-        case 'sauce-start': return this._term('sauce') + ' ' + String(p.sauceId || '');
-        case 'sauce-finished': return this._term('sauce') + ' ' + String(p.sauceId || '') + ' ✓';
+        case 'sauce-start': return this._term('sauce') + ' ' + String(p.sauceId || '').replace(/^sauce-/, '');
+        case 'sauce-finished': return this._term('sauce') + ' ' + String(p.sauceId || '').replace(/^sauce-/, '') + ' ✓';
         case 'stone-seed': return this._term('stone') + ' 1';
         case 'stone-transition': return this._term('stone') + ' ' + String(p.ordinal);
         case 'hidden-start': return this._term('hiddenDrop') + ' ' + String(p.ordinal);
@@ -1213,6 +1309,13 @@
       }
       if (kind === 'gate-gap-finished') return 'Δ=' + short(p.gap);
       if (kind === 'gate-ready') return short(p.day);
+      if (kind === 'gate-run') {
+        const parts = [];
+        if (p.lastGap != null) parts.push('Δ=' + short(p.lastGap));
+        if (p.lastDay != null) parts.push(short(p.lastDay));
+        if (p.lastSelection != null) parts.push('→ ' + short(p.lastSelection));
+        return parts.join(' · ');
+      }
       if (kind === 'year-transition') {
         const from = p.fromYear && p.fromYear.number != null ? p.fromYear.number : '?';
         const to = p.toYear && p.toYear.number != null ? p.toYear.number : '?';
@@ -1351,7 +1454,8 @@
       if (kind === 'sauce-start') this._ensureLiveSauce(group, event);
       if (markerOnly) return false;
       const durationMs = Math.max(0, Number(event && event.durationMs) || 0);
-      group.value += 1;
+      const operationCount = Math.max(1, Number(event && event.payload && event.payload.operationCount) || 1);
+      group.value += operationCount;
       group.totalMs += durationMs;
       group.count.textContent = this._liveBadgeText(group);
       const target = this._ensureLiveSauce(group, event);
