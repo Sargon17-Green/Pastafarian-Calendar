@@ -9,15 +9,10 @@ const { chromium } = require('playwright');
   await page.goto('http://127.0.0.1:4173/live-stage-qa.html', { waitUntil: 'load' });
   await page.waitForFunction(() => Boolean(customElements.get('pastafari-date')));
   const result = await page.evaluate(async () => {
-    const host = document.createElement('pastafari-date');
-    host.setAttribute('lang', 'he');
-    host.setAttribute('date', '2026-09-11');
-    host.setAttribute('calculation-date', '2026-09-11');
-    document.body.append(host);
-    await customElements.whenDefined('pastafari-cooking');
-    await new Promise((resolve) => requestAnimationFrame(resolve));
-    const panel = host.shadowRoot && host.shadowRoot.querySelector('pastafari-cooking');
-    if (!panel || !panel.shadowRoot) throw new Error('Cooking panel is not upgraded in clean QA shell');
+    const host = document.querySelector('pastafari-date');
+    if (!host || !host.shadowRoot) throw new Error('Preconfigured QA component is not upgraded');
+    const panel = host.shadowRoot.querySelector('pastafari-cooking');
+    if (!panel || !panel.shadowRoot) throw new Error('Preconfigured cooking panel is not upgraded');
 
     const transitions = [];
     let last = '';
@@ -45,10 +40,12 @@ const { chromium } = require('playwright');
       attributeFilter: ['data-stage', 'href'],
     });
     sample();
-    await new Promise((resolve, reject) => {
-      host.addEventListener('pastafari-change', resolve, { once: true });
-      setTimeout(() => reject(new Error('Timed out waiting for clean real calculation')), 180000);
-    });
+    if (!host.value) {
+      await new Promise((resolve, reject) => {
+        host.addEventListener('pastafari-change', resolve, { once: true });
+        setTimeout(() => reject(new Error('Timed out waiting for isolated real calculation')), 180000);
+      });
+    }
     sample();
     observer.disconnect();
     return {
