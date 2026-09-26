@@ -983,6 +983,10 @@
         stageGuide: this.shadowRoot.querySelector('.live-stage-guide'),
         pane: this.shadowRoot.querySelector('.pane'),
       };
+      if (this._els.megillahSourceLink) {
+        this._els.megillahSourceLink.setAttribute('target', '_blank');
+        this._els.megillahSourceLink.setAttribute('rel', 'noopener noreferrer');
+      }
       this._els.close.addEventListener('click', () => this.close());
       this._els.shell.addEventListener('cancel', (event) => {
         if (typeof event.preventDefault === 'function') event.preventDefault();
@@ -1575,7 +1579,7 @@
       this._els.liveExplanation.textContent = this._t(guide.explanationKey);
       this._els.megillahQuote.textContent = guide.quote;
       this._els.megillahSourceLink.textContent = guide.source;
-      this._els.megillahSourceLink.href = canonicalUrl;
+      this._els.megillahSourceLink.setAttribute('href', canonicalUrl);
       if (this._els.stageGuide) this._els.stageGuide.dataset.stage = key;
     }
 
