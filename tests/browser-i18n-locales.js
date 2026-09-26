@@ -156,10 +156,20 @@ assert(data);
 assert.strictEqual(data.schemaVersion, 3);
 assert.strictEqual(data.defaultLocale, 'ie');
 assert(data.megillahStageGuide, 'manca canonical Megillah stage guide');
+assert.strictEqual(
+  data.megillahCanonicalUrl,
+  'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
+);
 assert.strictEqual(Object.keys(data.megillahStageGuide).length, 16);
 assert.strictEqual(data.megillahStageGuide.gates.quote, 'וכן עשה שער אחר שער.');
 assert(data.megillahStageGuide.gates.source.includes('לוח שבעה עשר: שערי הקציצה'));
-assert.strictEqual(data.megillahStageGuide.weaving.quote, 'לא תבחר כל יום לבדו. את השזירה כולה תבחר.');
+assert.strictEqual(data.megillahStageGuide.yearAnchor.quote, 'לשנה אשר תבחר קרא שנת חמשת אלפים לבריאת העולם.');
+assert.strictEqual(data.megillahStageGuide.stones.quote, 'כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.');
+assert.strictEqual(data.megillahStageGuide.hidden.quote, 'כל טיפה נסתרת טחון שבע טחינות.');
+assert.strictEqual(data.megillahStageGuide.visible.quote, 'את ראשית הטיפה טחון עשתי עשרה טחינות.');
+assert.strictEqual(data.megillahStageGuide.postStirs.quote, 'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה בלילות.');
+assert.strictEqual(data.megillahStageGuide.weaving.quote, 'לא תבחר את הימים אחד אחד. את השזירה כולה תבחר.');
+assert.strictEqual(data.megillahStageGuide.position.quote, 'אחרי אשר תעשה את דבר השנה הדברים האלה יוצאים ממקום היום בתוך אשר עשית.');
 assert.deepStrictEqual(Array.from(data.locales, (locale) => locale.code), ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs']);
 
 const sourceCutlets = SourceLanguageCatalog.cutlets.map((row) => row.text).sort();
