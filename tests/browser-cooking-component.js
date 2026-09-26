@@ -346,13 +346,22 @@ async function flush() {
 
 (async () => {
   assert.strictEqual(customElements.get('pastafari-cooking'), PastafariCookingElement);
-  assert.deepStrictEqual(Array.from(PastafariCookingElement.observedAttributes), ['date', 'calculation-date', 'lang', 'open']);
+  assert.deepStrictEqual(Array.from(PastafariCookingElement.observedAttributes), ['date', 'calculation-date', 'lang', 'open', 'live']);
 
   const calls = [];
   sharedService = {
     async getCookingTrace(targetJdn, calculationJdn, options = null) {
       calls.push({ targetJdn: String(targetJdn), calculationJdn: String(calculationJdn), options });
       if (options && typeof options.onGateSauceDetail === 'function') options.onGateSauceDetail(gateChunk());
+      if (options && typeof options.onProgress === 'function') {
+        options.onProgress({ sequence: 1, kind: 'run-start', elapsedMs: 0, durationMs: 0, payload: {} });
+        options.onProgress({ sequence: 2, kind: 'bowl-round', elapsedMs: 4, durationMs: 4, payload: {
+          sauceId: 'sauce-1', ordinal: 1, drop: '51', afterBowls: ['1', '2', '3', '4', '5', '6'],
+        } });
+        options.onProgress({ sequence: 3, kind: 'final-result-ready', elapsedMs: 5, durationMs: 1, payload: {
+          year: '5001', cutletName: 'Lagash', dayInCutlet: '762', monthName: 'oliban', dayInMonth: '105',
+        } });
+      }
       return sampleTrace();
     },
   };
@@ -370,7 +379,9 @@ async function flush() {
   assert.strictEqual(calls.length, 1);
   assert.strictEqual(lazy.trace.schemaVersion, '0.4.0');
   assert.strictEqual(lazy._els.shell.getAttribute('aria-busy'), 'false');
-  assert.strictEqual(lazy._els.nav.children.length, 9);
+  assert.strictEqual(lazy._els.nav.children.length, 0, 'streamed log replaces the old chapter navigation');
+  assert.strictEqual(lazy._liveEntries.length, 3);
+  assert(treeText(lazy._els.pane).includes('sauce-1') || treeText(lazy._els.pane).includes('Sauce'));
   assert.strictEqual(lazy._locale.code, 'ie');
   const targetJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-11'));
   assert.strictEqual(calls[0].targetJdn, String(targetJdn));
@@ -391,6 +402,37 @@ async function flush() {
   assert.strictEqual(calls.length, 1);
   assert.strictEqual(lazy._els.shell.hasAttribute('open'), true);
   assert.strictEqual(lazy.trace.schemaVersion, '0.4.0');
+
+  // Live mode is an inline accumulating trace while the calculation runs. Finishing
+  // hides the inline shell but retains the same log/trace for the existing button.
+  const live = new PastafariCookingElement();
+  live.setAttribute('lang', 'he');
+  live.setAttribute('date', '2026-09-11');
+  live.setAttribute('calculation-date', '2026-09-11');
+  live.connectedCallback();
+  live.beginLiveTrace();
+  assert.strictEqual(live.hasAttribute('live'), true);
+  assert.strictEqual(live._els.shell.hasAttribute('open'), true);
+  live.appendLiveProgress({ sequence: 1, kind: 'stone-transition', elapsedMs: 2, durationMs: 2, payload: { ordinal: 2, after: { w: '17' } } });
+  live.appendLiveProgress({ sequence: 2, kind: 'bowl-round', elapsedMs: 7, durationMs: 5, payload: { sauceId: 'sauce-1', ordinal: 1, drop: '51', afterBowls: ['1', '2', '3', '4', '5', '6'] } });
+  live.appendLiveProgress({ sequence: 3, kind: 'post-stir', elapsedMs: 10, durationMs: 3, payload: { sauceId: 'sauce-1', stirIndex: 1, afterBowls: ['7', '8', '9', '10', '11', '12'] } });
+  await flush();
+  assert.strictEqual(live._liveEntries.length, 3);
+  assert(treeText(live._els.pane).includes('סבב קערות'));
+  assert(treeText(live._els.pane).includes('+5.0 ms'));
+  assert(live.shadowRoot.innerHTML.includes('monster-meatball'));
+  assert(live.shadowRoot.innerHTML.includes('sauce-drip'));
+  live.finishLiveTrace(sampleTrace());
+  assert.strictEqual(live.hasAttribute('live'), false);
+  assert.strictEqual(live.trace.schemaVersion, '0.4.0');
+  assert.strictEqual(live._liveState, 'complete');
+  const beforeLiveOpen = calls.length;
+  live.setAttribute('open', '');
+  await flush();
+  assert.strictEqual(calls.length, beforeLiveOpen, 'opening retained live trace must not rerun semantics');
+  assert.strictEqual(live._els.shell.hasAttribute('open'), true);
+  assert.strictEqual(live._els.nav.children.length, 0);
+  assert(treeText(live._els.pane).includes('אבן'));
 
   // Locale switching rerenders the component without a semantic rerun.
   lazy.setAttribute('lang', 'he');
@@ -477,7 +519,7 @@ async function flush() {
   sharedService = {
     getCookingTrace(targetJdn, calculationJdn, options = null) {
       staleDetailCalls += 1;
-      if (!options) return Promise.resolve(sampleTrace());
+      if (!options || typeof options.onGateSauceDetail !== 'function') return Promise.resolve(sampleTrace());
       staleDetailOptions = options;
       return staleDetail.promise;
     },
@@ -510,7 +552,7 @@ async function flush() {
   sharedService = {
     getCookingTrace(targetJdn, calculationJdn, options = null) {
       failCalls += 1;
-      if (!options) return Promise.resolve(sampleTrace());
+      if (!options || typeof options.onGateSauceDetail !== 'function') return Promise.resolve(sampleTrace());
       return Promise.reject(new Error('synthetic gate detail failure'));
     },
   };
@@ -539,7 +581,7 @@ async function flush() {
   sharedService = {
     getCookingTrace(targetJdn, calculationJdn, options = null) {
       localeCalls += 1;
-      if (!options) return Promise.resolve(sampleTrace());
+      if (!options || typeof options.onGateSauceDetail !== 'function') return Promise.resolve(sampleTrace());
       localeOptions = options;
       return localePending.promise;
     },
