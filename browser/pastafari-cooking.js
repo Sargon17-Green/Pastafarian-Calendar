@@ -96,7 +96,7 @@
 
   class PastafariCookingElement extends HTMLElementBase {
     static get observedAttributes() {
-      return ['date', 'calculation-date', 'lang', 'open'];
+      return ['date', 'calculation-date', 'lang', 'open', 'live'];
     }
 
     constructor() {
@@ -113,6 +113,13 @@
       this._gateDetails = new Map();
       this._gateDetailLoading = null;
       this._gateDetailError = null;
+      this._liveEntries = [];
+      this._liveState = 'idle';
+      this._liveRenderedCount = 0;
+      this._liveGroupNodes = new Map();
+      this._liveSauceNodes = new Map();
+      this._liveRenderQueued = false;
+      this._liveLastGroupKey = null;
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -143,6 +150,14 @@
             height: 0;
             margin: 0;
           }
+          :host([live]) {
+            position: relative;
+            z-index: 25;
+            display: block;
+            width: min(100%, 72rem);
+            height: auto;
+            margin: clamp(1rem, 3vw, 2rem) auto;
+          }
           *, *::before, *::after { box-sizing: border-box; }
           [hidden] { display: none !important; }
           button { font: inherit; min-height: 44px; }
@@ -167,8 +182,20 @@
           }
           .shell[open] {
             display: grid;
-            grid-template-rows: auto auto minmax(0, 1fr);
+            grid-template-rows: auto auto auto minmax(0, 1fr);
           }
+          :host([live]) .shell {
+            position: relative;
+            width: 100%;
+            height: min(42rem, 72dvh);
+            max-height: min(42rem, 72dvh);
+            margin: 0;
+            border-color: #a75a42;
+            box-shadow: 0 18px 50px rgb(54 36 20 / 16%);
+          }
+          :host([live]) .shell::backdrop { display: none; }
+          :host([live]) .close,
+          :host([live]) .nav { display: none !important; }
           .shell::backdrop {
             background: rgb(23 19 14 / 48%);
             backdrop-filter: blur(2px);
@@ -239,6 +266,113 @@
             border-color: var(--accent-dark);
             background: var(--accent-dark);
             color: white;
+          }
+          .live-hero {
+            display: none;
+            grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
+            gap: 1rem;
+            align-items: center;
+            min-height: 8rem;
+            padding: .8rem clamp(1rem, 3vw, 2rem);
+            overflow: hidden;
+            border-bottom: 1px solid var(--line);
+            background:
+              radial-gradient(circle at 15% 20%, rgb(255 224 183 / 55%), transparent 30%),
+              linear-gradient(90deg, #fff8eb, #fffdf8);
+          }
+          :host([live]) .live-hero { display: grid; }
+          .monster-stage {
+            position: relative;
+            height: 6.5rem;
+            min-width: 9rem;
+          }
+          .monster {
+            position: absolute;
+            inset: .2rem .5rem auto;
+            height: 5.6rem;
+            animation: monster-float 2.2s ease-in-out infinite;
+            filter: drop-shadow(0 .5rem .35rem rgb(70 36 18 / 16%));
+          }
+          .monster-noodle {
+            position: absolute;
+            width: 4.4rem;
+            height: 2.1rem;
+            border: .34rem solid #d6a83a;
+            border-inline-start-color: transparent;
+            border-inline-end-color: transparent;
+            border-radius: 50%;
+          }
+          .monster-noodle.n1 { inset: 1.3rem auto auto .2rem; transform: rotate(-16deg); }
+          .monster-noodle.n2 { inset: 2.3rem .1rem auto auto; transform: rotate(19deg); }
+          .monster-noodle.n3 { inset: 3rem auto auto 2.7rem; transform: rotate(5deg); width: 5.2rem; }
+          .monster-meatball {
+            position: absolute;
+            top: 1.55rem;
+            width: 2.45rem;
+            height: 2.45rem;
+            border: .18rem solid #6f281b;
+            border-radius: 48% 52% 46% 54%;
+            background:
+              radial-gradient(circle at 32% 28%, #d77755 0 12%, transparent 13%),
+              radial-gradient(circle at 68% 62%, #7f2f20 0 11%, transparent 12%),
+              #a8442c;
+          }
+          .monster-meatball.m1 { left: 2.25rem; transform: rotate(-8deg); }
+          .monster-meatball.m2 { right: 2.25rem; transform: rotate(7deg); }
+          .monster-eye {
+            position: absolute;
+            top: -1.35rem;
+            left: .78rem;
+            width: .72rem;
+            height: .72rem;
+            border: .14rem solid #17130e;
+            border-radius: 50%;
+            background: #fffdf8;
+            box-shadow: 0 1rem 0 -.27rem #d6a83a;
+          }
+          .monster-eye::after {
+            content: "";
+            position: absolute;
+            inset: .18rem;
+            border-radius: 50%;
+            background: #17130e;
+          }
+          .sauce-drip {
+            position: absolute;
+            top: 3.55rem;
+            width: .58rem;
+            height: 1.2rem;
+            border-radius: 50% 50% 65% 65%;
+            background: #9d3825;
+            transform-origin: top center;
+            animation: sauce-drip 1.8s ease-in infinite;
+          }
+          .sauce-drip.d1 { left: 4.25rem; }
+          .sauce-drip.d2 { right: 3.3rem; animation-delay: .75s; }
+          .live-current-wrap { min-width: 0; }
+          .live-current-kicker {
+            margin: 0 0 .25rem;
+            color: var(--accent-dark);
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+          }
+          .live-current {
+            margin: 0;
+            overflow-wrap: anywhere;
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: clamp(1rem, 2vw, 1.35rem);
+            font-weight: 800;
+          }
+          @keyframes monster-float {
+            0%, 100% { transform: translateY(.15rem) rotate(-1deg); }
+            50% { transform: translateY(-.35rem) rotate(1deg); }
+          }
+          @keyframes sauce-drip {
+            0% { transform: translateY(0) scaleY(.45); opacity: .9; }
+            72% { transform: translateY(1.1rem) scaleY(1); opacity: .8; }
+            100% { transform: translateY(1.75rem) scale(.4); opacity: 0; }
           }
           .status {
             min-height: 10rem;
@@ -407,6 +541,166 @@
           }
           .result-five strong { display: block; color: var(--muted); font-size: .78rem; }
           .result-five span { display: block; margin-top: .25rem; font-weight: 900; }
+
+          .live-log {
+            display: grid;
+            gap: .7rem;
+          }
+          .live-group,
+          .live-sauce {
+            min-width: 0;
+            border: 1px solid var(--line);
+            border-radius: .85rem;
+            background: #fff;
+            overflow: clip;
+          }
+          .live-group > summary,
+          .live-sauce > summary {
+            display: flex;
+            gap: .65rem;
+            align-items: center;
+            min-height: 46px;
+            padding: .7rem .85rem;
+            cursor: pointer;
+            font-weight: 900;
+            list-style-position: inside;
+          }
+          .live-group > summary { background: #fff7e8; }
+          .live-sauce {
+            margin: .55rem;
+            border-color: #dfc9b9;
+            background: #fffdfa;
+          }
+          .live-sauce > summary { background: #fff4ee; font-size: .92rem; }
+          .live-group-count {
+            margin-inline-start: auto;
+            min-width: 2.1rem;
+            padding: .12rem .45rem;
+            border-radius: 999px;
+            background: #efe5d8;
+            color: #4a382d;
+            font-size: .78rem;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+          }
+          .live-list {
+            display: grid;
+            gap: .35rem;
+            margin: 0;
+            padding: .5rem;
+            list-style: none;
+          }
+          .live-row {
+            display: grid;
+            grid-template-columns: 2.7rem minmax(0, 1fr) auto;
+            gap: .65rem;
+            align-items: center;
+            min-width: 0;
+            padding: .5rem .6rem;
+            border: 1px solid #ebe3d8;
+            border-radius: .65rem;
+            background: #fcfaf6;
+          }
+          .live-row-copy { min-width: 0; }
+          .live-row-label {
+            display: block;
+            overflow-wrap: anywhere;
+            font-weight: 850;
+            line-height: 1.25;
+          }
+          .live-row-value {
+            display: block;
+            margin-top: .13rem;
+            overflow-wrap: anywhere;
+            color: var(--muted);
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+            font-size: .76rem;
+            line-height: 1.3;
+          }
+          .live-time {
+            align-self: start;
+            padding-top: .15rem;
+            color: var(--muted);
+            font-size: .72rem;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+          }
+          .live-icon {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            color: #26150f;
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+            font-size: .66rem;
+            font-weight: 950;
+            line-height: 1;
+          }
+          .live-icon--drop {
+            width: 1.9rem;
+            height: 1.9rem;
+            margin: .18rem;
+            border: 2px solid #672013;
+            border-radius: 58% 44% 62% 35%;
+            background: #d86d4c;
+            transform: rotate(45deg);
+          }
+          .live-icon--drop > span { transform: rotate(-45deg); }
+          .live-icon--bowl {
+            height: 1.65rem;
+            margin-top: .45rem;
+            border: 3px solid #7d5a33;
+            border-top: 1px solid #7d5a33;
+            border-radius: 15% 15% 52% 52%;
+            background: linear-gradient(#fffdf8 0 30%, #e6c77d 31%);
+          }
+          .live-icon--gate {
+            height: 2.1rem;
+            border: 3px solid #6f5138;
+            border-bottom-width: 1px;
+            border-radius: 1.05rem 1.05rem .15rem .15rem;
+            background: #f5e8d5;
+          }
+          .live-icon--stone {
+            width: 2rem;
+            height: 1.75rem;
+            margin: .25rem;
+            border: 2px solid #6c665e;
+            border-radius: 48% 56% 42% 58%;
+            background: #d7d1c8;
+          }
+          .live-icon--year,
+          .live-icon--selection,
+          .live-icon--result,
+          .live-icon--view {
+            border: 2px solid #672013;
+            border-radius: 50%;
+            background: #fff1e8;
+          }
+          .live-icon--selection {
+            box-shadow: inset 0 0 0 .28rem #fffdf8, inset 0 0 0 .4rem #9d3825;
+          }
+          .live-icon--weave {
+            border: 2px solid #85662f;
+            border-radius: .35rem;
+            background:
+              repeating-linear-gradient(45deg, #e7c86d 0 .2rem, transparent .2rem .4rem),
+              repeating-linear-gradient(-45deg, #d78b45 0 .2rem, #fff4da .2rem .4rem);
+          }
+          .live-icon--sauce {
+            border: 2px solid #9d3825;
+            border-radius: 50% 45% 55% 42%;
+            background: radial-gradient(circle at 40% 35%, #eeaa75, #b94e32 65%, #8d2f20);
+            color: white;
+          }
+          .live-complete-note {
+            margin: 0 0 .8rem;
+            padding: .65rem .8rem;
+            border-inline-start: .35rem solid #4f713d;
+            background: #f0f6e9;
+            font-weight: 800;
+          }
           @media (max-width: 700px) {
             .shell {
               width: 100vw;
@@ -415,6 +709,25 @@
               border: 0;
               border-radius: 0;
             }
+            :host([live]) {
+              width: 100%;
+              margin: .75rem auto;
+            }
+            :host([live]) .shell {
+              width: 100%;
+              height: min(38rem, 76dvh);
+              max-height: min(38rem, 76dvh);
+              border: 1px solid var(--line);
+              border-radius: .85rem;
+            }
+            .live-hero {
+              grid-template-columns: 7.5rem minmax(0, 1fr);
+              min-height: 7rem;
+              padding: .65rem .75rem;
+            }
+            .monster-stage { transform: scale(.82); transform-origin: center; }
+            .live-row { grid-template-columns: 2.4rem minmax(0, 1fr); }
+            .live-time { grid-column: 2; padding: 0; }
             .head {
               grid-template-columns: minmax(0, 1fr) auto;
               gap: .65rem;
@@ -444,7 +757,11 @@
             .result-five { grid-template-columns: 1fr; }
           }
           @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+            *, *::before, *::after {
+              scroll-behavior: auto !important;
+              transition: none !important;
+              animation: none !important;
+            }
           }
           @media (forced-colors: active) {
             .shell, .step-card, .sauce, .mini, .result-five > div { border: 2px solid CanvasText; }
@@ -465,6 +782,23 @@
             <button class="close" type="button"></button>
           </header>
           <nav class="nav" aria-label="Trace chapters"></nav>
+          <section class="live-hero">
+            <div class="monster-stage" aria-hidden="true">
+              <div class="monster">
+                <i class="monster-noodle n1"></i>
+                <i class="monster-noodle n2"></i>
+                <i class="monster-noodle n3"></i>
+                <span class="monster-meatball m1"><i class="monster-eye"></i></span>
+                <span class="monster-meatball m2"><i class="monster-eye"></i></span>
+                <i class="sauce-drip d1"></i>
+                <i class="sauce-drip d2"></i>
+              </div>
+            </div>
+            <div class="live-current-wrap">
+              <p class="live-current-kicker">PASTAFARI · LIVE</p>
+              <p class="live-current" role="status" aria-live="polite"></p>
+            </div>
+          </section>
           <div class="status loading" hidden role="status" aria-live="polite">
             <p class="loading-text"></p>
           </div>
@@ -487,6 +821,7 @@
         error: this.shadowRoot.querySelector('.status.error'),
         errorText: this.shadowRoot.querySelector('.error-text'),
         retry: this.shadowRoot.querySelector('.retry'),
+        liveCurrent: this.shadowRoot.querySelector('.live-current'),
         pane: this.shadowRoot.querySelector('.pane'),
       };
       this._els.close.addEventListener('click', () => this.close());
