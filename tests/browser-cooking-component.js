@@ -431,17 +431,37 @@ async function flush() {
   live.beginLiveTrace();
   assert.strictEqual(live.hasAttribute('live'), true);
   assert.strictEqual(live._els.shell.hasAttribute('open'), true);
+  assert.strictEqual(live._els.title.textContent, 'החישוב מתבשל עכשיו');
+  assert(!live._els.title.textContent.includes('בושל'), 'live title must not describe the calculation in past tense');
+  assert.strictEqual(live._els.liveCurrent.textContent, 'מכינים את החישוב…');
+
   live.appendLiveProgress({ sequence: 1, kind: 'stone-transition', elapsedMs: 2, durationMs: 2, payload: { ordinal: 2, after: { w: '17' } } });
+  await flush();
+  assert(live._els.liveCurrent.textContent.includes(live._term('stone') + ' 3'),
+    'current status must advance to the stone now being computed, not remain on the completed stone');
+
   live.appendLiveProgress({ sequence: 2, kind: 'bowl-round', elapsedMs: 7, durationMs: 5, payload: { sauceId: 'sauce-1', ordinal: 1, drop: '51', afterBowls: ['1', '2', '3', '4', '5', '6'] } });
+  await flush();
+  assert(live._els.liveCurrent.textContent.includes(live._term('visibleDrop') + ' 2'),
+    'current status must show the next visible drop after a completed bowl round');
+
   live.appendLiveProgress({ sequence: 3, kind: 'post-stir', elapsedMs: 10, durationMs: 3, payload: { sauceId: 'sauce-1', stirIndex: 1, afterBowls: ['7', '8', '9', '10', '11', '12'] } });
   await flush();
+  assert(live._els.liveCurrent.textContent.includes(live._term('postStir') + ' 2'),
+    'current status must show the post-stir presently being awaited');
   assert.strictEqual(live._liveEntries.length, 3);
   assert(treeText(live._els.pane).includes('סבב קערות'));
   assert(treeText(live._els.pane).includes('+5.0 ms'));
   assert(live.shadowRoot.innerHTML.includes('monster-meatball'));
-  assert(live.shadowRoot.innerHTML.includes('sauce-drip'));
+  assert.strictEqual((live.shadowRoot.innerHTML.match(/monster-noodle n\d+/g) || []).length, 14,
+    'live monster should have a visibly dense mass of noodles');
+  assert(live.shadowRoot.innerHTML.includes('animation: sauce-drip 7.2s'),
+    'sauce drips should be intermittent rather than continuous');
+  assert(live.shadowRoot.innerHTML.includes('0%, 72%'),
+    'sauce drip animation should remain hidden for most of each cycle');
   live.finishLiveTrace(sampleTrace());
   assert.strictEqual(live.hasAttribute('live'), false);
+  assert.strictEqual(live._els.title.textContent, 'כיצד התאריך הזה בושל');
   assert.strictEqual(live.trace.schemaVersion, '0.4.0');
   assert.strictEqual(live._liveState, 'complete');
   const beforeLiveOpen = calls.length;
@@ -475,6 +495,9 @@ async function flush() {
     });
   }
   compacted._drainLiveRows();
+  await flush();
+  assert(compacted._els.liveCurrent.textContent.includes(compacted._t('cooking.live.nextGate')),
+    'current gate status must describe the gate operation now being awaited, not the last completed gate');
   assert.strictEqual(compacted._liveObservedCount, 256);
   assert.strictEqual(compacted._liveEntries.length, 2);
   assert(compacted._liveEntries.every((row) => row.kind === 'gate-run'));

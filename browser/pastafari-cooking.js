@@ -302,14 +302,26 @@
             position: absolute;
             width: 4.4rem;
             height: 2.1rem;
-            border: .34rem solid #d6a83a;
+            border: .28rem solid #d6a83a;
             border-inline-start-color: transparent;
             border-inline-end-color: transparent;
             border-radius: 50%;
+            opacity: .94;
           }
-          .monster-noodle.n1 { inset: 1.3rem auto auto .2rem; transform: rotate(-16deg); }
-          .monster-noodle.n2 { inset: 2.3rem .1rem auto auto; transform: rotate(19deg); }
-          .monster-noodle.n3 { inset: 3rem auto auto 2.7rem; transform: rotate(5deg); width: 5.2rem; }
+          .monster-noodle.n1  { inset: .35rem auto auto -.15rem; transform: rotate(-31deg); width: 4.9rem; }
+          .monster-noodle.n2  { inset: .55rem -.2rem auto auto; transform: rotate(27deg); width: 5rem; }
+          .monster-noodle.n3  { inset: 1.1rem auto auto .1rem; transform: rotate(-18deg); width: 5.7rem; }
+          .monster-noodle.n4  { inset: 1.25rem .05rem auto auto; transform: rotate(13deg); width: 5.4rem; }
+          .monster-noodle.n5  { inset: 1.9rem auto auto -.35rem; transform: rotate(-8deg); width: 5.5rem; }
+          .monster-noodle.n6  { inset: 2rem -.3rem auto auto; transform: rotate(35deg); width: 5rem; }
+          .monster-noodle.n7  { inset: 2.55rem auto auto .2rem; transform: rotate(11deg); width: 6rem; }
+          .monster-noodle.n8  { inset: 2.7rem -.15rem auto auto; transform: rotate(-24deg); width: 5.7rem; }
+          .monster-noodle.n9  { inset: 3.2rem auto auto -.2rem; transform: rotate(24deg); width: 5rem; }
+          .monster-noodle.n10 { inset: 3.4rem -.25rem auto auto; transform: rotate(-10deg); width: 5.2rem; }
+          .monster-noodle.n11 { inset: 3.85rem auto auto .65rem; transform: rotate(-28deg); width: 5.1rem; }
+          .monster-noodle.n12 { inset: 4rem .4rem auto auto; transform: rotate(21deg); width: 4.8rem; }
+          .monster-noodle.n13 { inset: 4.35rem auto auto 1.5rem; transform: rotate(8deg); width: 5.4rem; }
+          .monster-noodle.n14 { inset: .85rem auto auto 2.1rem; transform: rotate(42deg); width: 4.9rem; }
           .monster-meatball {
             position: absolute;
             top: 1.55rem;
@@ -350,10 +362,11 @@
             border-radius: 50% 50% 65% 65%;
             background: #9d3825;
             transform-origin: top center;
-            animation: sauce-drip 1.8s ease-in infinite;
+            opacity: 0;
+            animation: sauce-drip 7.2s ease-in-out infinite;
           }
-          .sauce-drip.d1 { left: 4.25rem; }
-          .sauce-drip.d2 { right: 3.3rem; animation-delay: .75s; }
+          .sauce-drip.d1 { left: 4.25rem; animation-delay: .6s; }
+          .sauce-drip.d2 { right: 3.3rem; animation-delay: 4.2s; }
           .live-current-wrap { min-width: 0; }
           .live-current-kicker {
             margin: 0 0 .25rem;
@@ -375,9 +388,10 @@
             50% { transform: translateY(-.35rem) rotate(1deg); }
           }
           @keyframes sauce-drip {
-            0% { transform: translateY(0) scaleY(.45); opacity: .9; }
-            72% { transform: translateY(1.1rem) scaleY(1); opacity: .8; }
-            100% { transform: translateY(1.75rem) scale(.4); opacity: 0; }
+            0%, 72% { transform: translateY(0) scaleY(.28); opacity: 0; }
+            76% { transform: translateY(.08rem) scaleY(.52); opacity: .92; }
+            88% { transform: translateY(1.15rem) scaleY(1); opacity: .82; }
+            96%, 100% { transform: translateY(1.9rem) scale(.38); opacity: 0; }
           }
           .status {
             min-height: 10rem;
@@ -835,6 +849,17 @@
                 <i class="monster-noodle n1"></i>
                 <i class="monster-noodle n2"></i>
                 <i class="monster-noodle n3"></i>
+                <i class="monster-noodle n4"></i>
+                <i class="monster-noodle n5"></i>
+                <i class="monster-noodle n6"></i>
+                <i class="monster-noodle n7"></i>
+                <i class="monster-noodle n8"></i>
+                <i class="monster-noodle n9"></i>
+                <i class="monster-noodle n10"></i>
+                <i class="monster-noodle n11"></i>
+                <i class="monster-noodle n12"></i>
+                <i class="monster-noodle n13"></i>
+                <i class="monster-noodle n14"></i>
                 <span class="monster-meatball m1"><i class="monster-eye"></i></span>
                 <span class="monster-meatball m2"><i class="monster-eye"></i></span>
                 <i class="sauce-drip d1"></i>
@@ -931,6 +956,7 @@
       }
       if (name === 'live') {
         this._syncDialogOpen();
+        this._applyLocale();
         return;
       }
       if (this._connected && this.hasAttribute('open')) this._queueLoad();
@@ -994,7 +1020,7 @@
       this._syncDialogOpen();
       this._hideStatus();
       if (this._els && this._els.liveCurrent) {
-        this._els.liveCurrent.textContent = this._t('cooking.loading');
+        this._els.liveCurrent.textContent = this._t('cooking.live.starting');
       }
       return this;
     }
@@ -1189,14 +1215,15 @@
         this.setAttribute('dir', this._locale.dir);
       }
       if (!this._els) return;
-      this._els.title.textContent = this._t('cooking.title');
-      this._els.subtitle.textContent = this._t('cooking.subtitle');
+      const live = this.hasAttribute('live');
+      this._els.title.textContent = this._t(live ? 'cooking.live.title' : 'cooking.title');
+      this._els.subtitle.textContent = this._t(live ? 'cooking.live.subtitle' : 'cooking.subtitle');
       this._els.close.textContent = this._t('cooking.close');
       this._els.loadingText.textContent = this._t('cooking.loading');
       this._els.errorText.textContent = this._t('cooking.error');
       this._els.retry.textContent = this._t('cooking.retry');
       if (this._els.liveKicker) this._els.liveKicker.textContent = this._t('cooking.live.kicker');
-      this._els.nav.setAttribute('aria-label', this._t('cooking.title'));
+      this._els.nav.setAttribute('aria-label', this._t(live ? 'cooking.live.title' : 'cooking.title'));
     }
 
     _t(key, values) { return i18n.translate(this._locale, key, values); }
@@ -1336,6 +1363,131 @@
         case 'trace-ready': return this._chapterTitle('result') + ' · ' + this._t('cooking.live.trace') + ' ✓';
         default: return String(event && event.kind || 'progress');
       }
+    }
+
+    _liveCurrentStep(event) {
+      const p = event && event.payload || {};
+      const kind = String(event && event.kind || '');
+      const number = (value) => String(value == null ? '' : value);
+      const stone = (ordinal) => this._term('stone') + ' ' + number(ordinal);
+      const hidden = (ordinal, grind = null) => this._term('hiddenDrop') + ' ' + number(ordinal)
+        + (grind == null ? '' : ' · ' + this._term('grind') + ' ' + number(grind));
+      const visible = (ordinal, grind = null) => this._term('visibleDrop') + ' ' + number(ordinal)
+        + (grind == null ? '' : ' · ' + this._term('grind') + ' ' + number(grind));
+      const bowl = (id) => this._term('initialBowls') + ' · ' + this._term('bowl') + ' ' + number(id);
+      const post = (id) => this._term('postStir') + ' ' + number(id);
+
+      switch (kind) {
+        case 'run-start':
+        case 'year-resolution-start':
+          return this._chapterTitle('year-walk');
+        case 'conversion-cache-hit':
+          return this._chapterTitle('position');
+        case 'gate-gap-start':
+          return this._term('gateGap') + ' ' + number(p.signedIndex);
+        case 'gate-gap-finished':
+        case 'gate-ready':
+        case 'gate-run':
+          return this._t('cooking.live.nextGate');
+        case 'year-5000-ready':
+        case 'year-5000-memory':
+          return this._t('cooking.live.yearAnchor');
+        case 'year-walk-anchor':
+        case 'year-walk-step':
+        case 'year-transition':
+          return this._chapterTitle('year-walk');
+        case 'year-authoritative':
+        case 'year-walk-finished':
+          return this._chapterTitle('year-walk');
+        case 'year-resolution-finished':
+          return this._chapterTitle('structure-sauce');
+        case 'sauce-start':
+          return stone(1);
+        case 'stone-seed':
+          return stone(2);
+        case 'stone-transition': {
+          const n = Number(p.ordinal);
+          return Number.isFinite(n) && n < 46 ? stone(n + 1) : hidden(1);
+        }
+        case 'hidden-start':
+          return hidden(p.ordinal, 1);
+        case 'hidden-grind': {
+          const ordinal = Number(p.ordinal);
+          const grind = Number(p.grind);
+          if (Number.isFinite(grind) && grind < 7) return hidden(ordinal, grind + 1);
+          if (Number.isFinite(ordinal) && ordinal < 7) return hidden(ordinal + 1);
+          return bowl(1);
+        }
+        case 'initial-bowl': {
+          const id = Number(p.bowlId);
+          return Number.isFinite(id) && id < 6 ? bowl(id + 1) : visible(1);
+        }
+        case 'visible-start':
+          return visible(p.ordinal, 1);
+        case 'visible-grind': {
+          const ordinal = Number(p.ordinal);
+          const grind = Number(p.grind);
+          if (Number.isFinite(grind) && grind < 11) return visible(ordinal, grind + 1);
+          return this._term('bowlRound') + ' ' + number(ordinal);
+        }
+        case 'bowl-round': {
+          const ordinal = Number(p.ordinal);
+          return Number.isFinite(ordinal) && ordinal < 46 ? visible(ordinal + 1) : post(1);
+        }
+        case 'post-stir': {
+          const stir = Number(p.stirIndex);
+          return Number.isFinite(stir) && stir < 12 ? post(stir + 1) : this._term('sauce');
+        }
+        case 'sauce-finished':
+          return this._term('selection');
+        case 'selection-result': {
+          const label = String(p.label || '');
+          if (label === 'cutlet-count') return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+          if (label === 'cutlet-partition-raw' || label === 'cutlet-partition-semantic') return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
+          if (label === 'cutlet-names-distinct-rank') return this._chapterTitle('cutlets');
+          if (label === 'month-count') return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
+          if (label === 'month-lengths') return this._term('weaving');
+          if (label === 'month-weaving') return this._chapterTitle('months') + ' · ' + this._t('cooking.live.names');
+          if (label === 'month-names-distinct-rank') return this._chapterTitle('structure-sauce');
+          if (label === 'YEAR_5000-semantic') return this._chapterTitle('year-walk');
+          return this._term('selection');
+        }
+        case 'structure-start':
+          return this._chapterTitle('structure-sauce');
+        case 'cutlet-count-ready':
+          return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+        case 'cutlet-partition-ready':
+          return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
+        case 'cutlet-names-ready':
+          return this._chapterTitle('cutlets');
+        case 'cutlets-materialized':
+          return this._chapterTitle('months');
+        case 'month-count-ready':
+          return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
+        case 'month-lengths-ready':
+          return this._term('weaving');
+        case 'month-weaving-ready':
+          return this._chapterTitle('months') + ' · ' + this._t('cooking.live.names');
+        case 'month-names-ready':
+          return this._chapterTitle('structure-sauce');
+        case 'structure-finished':
+          return this._chapterTitle('position');
+        case 'final-result-ready':
+        case 'semantic-execution-finished':
+          return this._t('cooking.live.trace');
+        case 'trace-ready':
+        case 'view-start':
+        case 'view-day-ready':
+          return this._chapterTitle('position');
+        case 'view-finished':
+          return this._chapterTitle('position');
+        default:
+          return this._t('cooking.next');
+      }
+    }
+
+    _liveCurrentLabel(event) {
+      return this._t('cooking.live.now', { step: this._liveCurrentStep(event) });
     }
 
     _livePayloadSummary(event) {
@@ -1672,7 +1824,7 @@
       const flush = () => {
         this._liveRenderQueued = false;
         if (this._liveCurrentPending && this._els && this._els.liveCurrent) {
-          this._els.liveCurrent.textContent = this._liveEventLabel(this._liveCurrentPending);
+          this._els.liveCurrent.textContent = this._liveCurrentLabel(this._liveCurrentPending);
           this._liveCurrentPending = null;
         }
         this._drainLiveRows();
@@ -1704,7 +1856,7 @@
         this._traceInputKey = null;
         this._resetLiveLog('running');
         this._hideStatus();
-        if (this._els && this._els.liveCurrent) this._els.liveCurrent.textContent = this._t('cooking.loading');
+        if (this._els && this._els.liveCurrent) this._els.liveCurrent.textContent = this._t('cooking.live.starting');
         const trace = await service.getCookingTrace(targetJdn, calculationJdn, {
           onProgress: (event) => {
             if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return;
