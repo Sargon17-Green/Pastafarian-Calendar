@@ -476,6 +476,47 @@ async function flush() {
     live._els.megillahQuote.textContent,
     'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה פעמים.',
   );
+
+  // Every live semantic context must map to the explanation/verse for the
+  // operation currently being awaited, including phase-boundary events.
+  const stageCases = [
+    [{ kind: 'unknown', payload: {} }, 'inputs'],
+    [{ kind: 'gate-gap-finished', payload: { signedIndex: '8' } }, 'gates'],
+    [{ kind: 'selection-result', payload: { label: 'gate-gap', gateIndex: '8' } }, 'gates'],
+    [{ kind: 'year-5000-ready', payload: {} }, 'yearAnchor'],
+    [{ kind: 'year-walk-step', payload: {} }, 'years'],
+    [{ kind: 'stone-transition', payload: { ordinal: 2 } }, 'stones'],
+    [{ kind: 'stone-transition', payload: { ordinal: 46 } }, 'hidden'],
+    [{ kind: 'visible-start', payload: { ordinal: 1 } }, 'visible'],
+    [{ kind: 'visible-grind', payload: { ordinal: 1, grind: 11 } }, 'bowls'],
+    [{ kind: 'bowl-round', payload: { ordinal: 46 } }, 'postStirs'],
+    [{ kind: 'post-stir', payload: { stirIndex: 12 } }, 'selection'],
+    [{ kind: 'year-resolution-finished', payload: {} }, 'structure'],
+    [{ kind: 'cutlet-count-ready', payload: {} }, 'cutlets'],
+    [{ kind: 'cutlets-materialized', payload: {} }, 'months'],
+    [{ kind: 'month-lengths-ready', payload: {} }, 'weaving'],
+    [{ kind: 'structure-finished', payload: {} }, 'result'],
+    [{ kind: 'final-result-ready', payload: {} }, 'position'],
+    [{ kind: 'selection-result', payload: { label: 'month-weaving' } }, 'months'],
+    [{ kind: 'selection-result', payload: { label: 'month-names-distinct-rank' } }, 'structure'],
+    [{ kind: 'month-names-ready', payload: {} }, 'structure'],
+  ];
+  for (const [event, expectedStage] of stageCases) {
+    assert.strictEqual(live._liveCurrentStage(event), expectedStage, 'wrong live guide stage for ' + event.kind + ':' + String(event.payload.label || ''));
+  }
+
+  const guideKeys = [
+    'inputs', 'gates', 'yearAnchor', 'years', 'stones', 'hidden', 'visible', 'bowls',
+    'postStirs', 'selection', 'structure', 'cutlets', 'months', 'weaving', 'result', 'position',
+  ];
+  for (const key of guideKeys) {
+    live._renderLiveStageGuide(key, true);
+    assert(live._els.liveExplanation.textContent.trim().length > 0, 'missing explanation for ' + key);
+    assert(live._els.megillahQuote.textContent.trim().length > 0, 'missing Megillah quote for ' + key);
+    assert(live._els.megillahSource.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
+  }
+
+  live._renderLiveStageGuide('postStirs', true);
   assert.strictEqual(live._liveEntries.length, 3);
   assert(treeText(live._els.pane).includes('סבב קערות'));
   assert(treeText(live._els.pane).includes('+5.0 ms'));
