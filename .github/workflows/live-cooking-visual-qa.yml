@@ -328,13 +328,13 @@ jobs:
               let c=document.querySelector('#c');
               if (!c || typeof c.beginLiveTrace !== 'function') {
                 if (c) c.remove();
-                c=document.createElement('pastafari-cooking');
-                c.id='c';
-                c.setAttribute('date','2026-09-26');
-                c.setAttribute('calculation-date','2026-09-26');
-                document.body.append(c);
+                document.body.insertAdjacentHTML(
+                  'beforeend',
+                  '<pastafari-cooking id="c" date="2026-09-26" calculation-date="2026-09-26"></pastafari-cooking>'
+                );
+                c=document.querySelector('#c');
               }
-              if (typeof c.beginLiveTrace !== 'function') throw new Error('pastafari-cooking fixture failed to upgrade');
+              if (typeof c.beginLiveTrace !== 'function') throw new Error('pastafari-cooking parser fixture failed to upgrade');
               c.setAttribute('lang',lang);
               c.beginLiveTrace();
               for(const event of events) c.appendLiveProgress(event);
