@@ -24,7 +24,7 @@ function preparePagesSite(outputPath = path.join(ROOT, '_site')) {
   fs.copyFileSync(stagedIndex, path.join(output, 'index.html'));
   fs.rmSync(stagedIndex);
 
-  for (const name of ['favicon-16x16.png', 'favicon-32x32.png']) {
+  for (const name of ['favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png']) {
     const source = path.join(ROOT, name);
     if (!fs.existsSync(source)) {
       throw new Error('Manca li favicon source: ' + name);
