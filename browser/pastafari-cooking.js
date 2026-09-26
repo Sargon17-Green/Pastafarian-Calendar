@@ -1571,6 +1571,7 @@
         if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
         this._trace = trace;
         this._traceInputKey = inputKey;
+        this._flushGateSweep();
         this._liveState = 'complete';
         this._drainLiveRows();
         this._gateDetails.clear();
@@ -1595,6 +1596,7 @@
         return trace;
       } catch (error) {
         if (generation !== this._generation) return null;
+        this._flushGateSweep();
         this._liveState = 'error';
         if (this._liveEntries.length) {
           this._hideStatus();
