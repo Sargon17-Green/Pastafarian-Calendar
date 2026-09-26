@@ -526,6 +526,8 @@ async function flush() {
       'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
       'missing canonical source link for ' + key,
     );
+    assert.strictEqual(live._els.megillahSourceLink.getAttribute('target'), '_blank');
+    assert.strictEqual(live._els.megillahSourceLink.getAttribute('rel'), 'noopener noreferrer');
   }
 
   live._renderLiveStageGuide('postStirs', true);
