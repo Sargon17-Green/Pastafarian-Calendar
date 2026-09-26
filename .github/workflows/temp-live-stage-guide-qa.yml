@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: temp-live-stage-guide-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_VERSION: '22.16.0'
 
