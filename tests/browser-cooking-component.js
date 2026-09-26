@@ -337,6 +337,17 @@ function treeCountByClass(node, className) {
     + (node.children || []).reduce((sum, child) => sum + treeCountByClass(child, className), 0);
 }
 
+function treeFindByClass(node, className) {
+  if (!node || typeof node !== 'object') return null;
+  const classes = String(node.className || '').split(/\s+/).filter(Boolean);
+  if (classes.includes(className)) return node;
+  for (const child of node.children || []) {
+    const found = treeFindByClass(child, className);
+    if (found) return found;
+  }
+  return null;
+}
+
 function deferred() {
   let resolve;
   let reject;
@@ -453,10 +464,14 @@ async function flush() {
   for (let index = 1; index <= 256; index += 1) {
     compacted.appendLiveProgress({
       sequence: index,
-      kind: 'gate-ready',
+      kind: 'gate-gap-finished',
       elapsedMs: index,
       durationMs: 1,
-      payload: { index: String(index), day: String(700000 + index) },
+      payload: {
+        signedIndex: String(index),
+        gap: String(41 + (index % 30)),
+        selectionOutput: String(1 + (index % 30)),
+      },
     });
   }
   compacted._drainLiveRows();
@@ -464,9 +479,23 @@ async function flush() {
   assert.strictEqual(compacted._liveEntries.length, 2);
   assert(compacted._liveEntries.every((row) => row.kind === 'gate-run'));
   assert(compacted._liveEntries.every((row) => row.payload.count === 128));
-  assert.strictEqual(treeCountByClass(compacted._els.pane, 'live-row'), 2);
+  assert(compacted._liveEntries.every((row) => row.payload.steps.length === 128));
+  assert.strictEqual(treeCountByClass(compacted._els.pane, 'live-gate-range'), 2);
+  assert.strictEqual(treeCountByClass(compacted._els.pane, 'live-gate-step'), 0, 'gate ranges must stay lazy while collapsed');
   assert(treeText(compacted._els.pane).includes('1 → 128'));
   assert(treeText(compacted._els.pane).includes('129 → 256'));
+
+  const firstRange = treeFindByClass(compacted._els.pane, 'live-gate-range');
+  assert(firstRange, 'first lazy gate range missing');
+  firstRange.open = true;
+  const onToggle = firstRange.listeners.get('toggle');
+  assert.strictEqual(typeof onToggle, 'function');
+  onToggle();
+  assert.strictEqual(treeCountByClass(compacted._els.pane, 'live-gate-step'), 128);
+  const expandedText = treeText(firstRange);
+  assert(expandedText.includes('מרווח שער 1'));
+  assert(expandedText.includes('Δ=42'));
+  assert(expandedText.includes('+1.0 ms'));
 
   // Locale switching rerenders the component without a semantic rerun.
   lazy.setAttribute('lang', 'he');
