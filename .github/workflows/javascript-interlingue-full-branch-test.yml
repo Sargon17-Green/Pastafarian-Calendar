@@ -694,7 +694,7 @@ jobs:
               const current=getComputedStyle(s.querySelector('.day[aria-current="date"]'));
               return {animationDuration:spin.animationDuration,currentBorder:current.borderTopWidth,currentOutline:current.outlineStyle};
             });
-            assert(data.animationDuration==='3s','reduced-motion spinner rule lost');
+            assert(parseFloat(data.animationDuration)<=0.001,'reduced-motion animation was not effectively disabled');
             assert(data.currentBorder!=='0px' || data.currentOutline!=='none','forced-colors selected state has no visible boundary');
             write('a11y_media.json',data);
             await page.screenshot({path:path.join(out,'a11y_forced_colors.png'),fullPage:false});
