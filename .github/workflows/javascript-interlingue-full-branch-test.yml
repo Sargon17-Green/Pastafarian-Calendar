@@ -480,7 +480,7 @@ jobs:
             assert(await page.locator('pastafari-date').locator('dialog:has(> .dialog-form)').getAttribute('open')!==null,'search dialog did not keyboard-open');
             await page.locator('pastafari-date').locator('details summary').click();
             await page.locator('pastafari-date').locator('input[name="target"]').fill('2026-99-99');
-            await page.locator('pastafari-date').locator('.dialog-actions .primary').click();
+            await page.locator('pastafari-date').locator('dialog:has(> .dialog-form) .dialog-actions .primary').click();
             await page.waitForTimeout(100);
             const invalid=await page.locator('pastafari-date').locator('.dialog-error').innerText();
             assert(invalid.trim().length>0,'ordinary invalid input has no error');
