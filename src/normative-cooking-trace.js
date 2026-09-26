@@ -962,12 +962,15 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
         || traceOptions.gateDetailGateIndices.has(gateIndex));
     const sauceId = 'sauce-' + String(recorder.nextSauceOrdinal);
     progress.emit('sauce-start', { sauceId, calculationDay: cDay, targetDay: tDay, gateIndex });
-    const collector = gateIndex === null || streamGateDetail || progress.enabled
+    // Full checkpoint retention is needed for central Sauce runs and for an
+    // explicitly requested gate detail. Live progress alone only observes and
+    // streams compact rows; it must not retain a second full gate-Sauce snapshot.
+    const collector = gateIndex === null || streamGateDetail
       ? createCookingCheckpointCollector()
       : null;
-    const checkpoint = collector
+    const checkpoint = collector || progress.enabled
       ? (kind, payload) => {
-        collector.observer(kind, payload);
+        if (collector) collector.observer(kind, payload);
         progress.emit(kind, { sauceId, gateIndex, ...compactLiveCheckpoint(kind, payload) });
       }
       : null;
