@@ -795,7 +795,7 @@
               </div>
             </div>
             <div class="live-current-wrap">
-              <p class="live-current-kicker">PASTAFARI · LIVE</p>
+              <p class="live-current-kicker"><span>PASTAFARI</span> · <span class="live-kicker"></span></p>
               <p class="live-current" role="status" aria-live="polite"></p>
             </div>
           </section>
@@ -821,6 +821,7 @@
         error: this.shadowRoot.querySelector('.status.error'),
         errorText: this.shadowRoot.querySelector('.error-text'),
         retry: this.shadowRoot.querySelector('.retry'),
+        liveKicker: this.shadowRoot.querySelector('.live-kicker'),
         liveCurrent: this.shadowRoot.querySelector('.live-current'),
         pane: this.shadowRoot.querySelector('.pane'),
       };
@@ -989,6 +990,7 @@
       const live = this.hasAttribute('live');
       const modal = this.hasAttribute('open');
       const shouldOpen = (live || modal) && this._connected;
+      shell.setAttribute('aria-modal', modal && !live ? 'true' : 'false');
       const isOpen = shell.hasAttribute('open');
       if (shouldOpen && !isOpen) {
         try {
@@ -1044,6 +1046,7 @@
       this._els.loadingText.textContent = this._t('cooking.loading');
       this._els.errorText.textContent = this._t('cooking.error');
       this._els.retry.textContent = this._t('cooking.retry');
+      if (this._els.liveKicker) this._els.liveKicker.textContent = this._t('cooking.live.kicker');
       this._els.nav.setAttribute('aria-label', this._t('cooking.title'));
     }
 
@@ -1110,7 +1113,7 @@
       const p = event && event.payload || {};
       switch (String(event && event.kind || '')) {
         case 'run-start': return this._chapterTitle('inputs');
-        case 'conversion-cache-hit': return this._term('checkpoints') + ' · cache';
+        case 'conversion-cache-hit': return this._term('checkpoints') + ' · ' + this._t('cooking.live.cache');
         case 'gate-gap-start': return this._term('gateGap') + ' ' + String(p.signedIndex);
         case 'gate-gap-finished': return this._term('gateGap') + ' ' + String(p.signedIndex);
         case 'gate-ready': return this._term('gate') + ' ' + String(p.index);
@@ -1142,18 +1145,18 @@
         case 'structure-finished': return this._chapterTitle('structure-sauce') + ' ✓';
         case 'cutlet-count-ready': return this._term('cutlet') + ' × ' + String(p.count);
         case 'cutlet-partition-ready': return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
-        case 'cutlet-names-ready': return this._chapterTitle('cutlets') + ' · names';
+        case 'cutlet-names-ready': return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
         case 'cutlets-materialized': return this._chapterTitle('cutlets') + ' ✓';
         case 'month-count-ready': return this._chapterTitle('months') + ' × ' + String(p.count);
-        case 'month-lengths-ready': return this._chapterTitle('months') + ' · lengths';
+        case 'month-lengths-ready': return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
         case 'month-weaving-ready': return this._term('weaving') + ' ✓';
-        case 'month-names-ready': return this._chapterTitle('months') + ' · names';
+        case 'month-names-ready': return this._chapterTitle('months') + ' · ' + this._t('cooking.live.names');
         case 'final-result-ready': return this._chapterTitle('result') + ' ✓';
         case 'semantic-execution-finished': return this._t('cooking.sameExecution');
         case 'view-day-ready': return this._chapterTitle('position') + ' · ' + this._t('field.day') + ' ' + String(p.ordinal);
         case 'view-start': return this._chapterTitle('position');
         case 'view-finished': return this._chapterTitle('position') + ' ✓';
-        case 'trace-ready': return this._chapterTitle('result') + ' · trace ✓';
+        case 'trace-ready': return this._chapterTitle('result') + ' · ' + this._t('cooking.live.trace') + ' ✓';
         default: return String(event && event.kind || 'progress');
       }
     }
@@ -1477,6 +1480,7 @@
       this._els.close.textContent = this._t('cooking.close');
       this._els.loadingText.textContent = this._t('cooking.loading');
       this._els.retry.textContent = this._t('cooking.retry');
+      if (this._els.liveKicker) this._els.liveKicker.textContent = this._t('cooking.live.kicker');
     }
 
     _renderNav() {
