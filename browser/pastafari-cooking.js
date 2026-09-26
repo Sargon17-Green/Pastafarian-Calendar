@@ -120,6 +120,7 @@
       this._liveSauceNodes = new Map();
       this._liveRenderQueued = false;
       this._liveLastGroupKey = null;
+      this._livePhaseKey = null;
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -925,6 +926,7 @@
       this._liveSauceNodes = new Map();
       this._liveRenderQueued = false;
       this._liveLastGroupKey = null;
+      this._livePhaseKey = null;
       if (this._els && this._els.pane) this._els.pane.replaceChildren();
       if (this._els && this._els.nav) this._els.nav.replaceChildren();
     }
@@ -1055,25 +1057,23 @@
 
     _liveGroupKey(event) {
       const kind = String(event && event.kind || '');
-      if (kind === 'run-start' || kind === 'conversion-cache-hit') return 'inputs';
-      if (kind.startsWith('gate-')) return 'gates';
-      if (kind.startsWith('year-5000')) return 'year-5000';
-      if (kind.startsWith('year-')) return 'year-walk';
-      if (kind === 'sauce-start' || kind === 'sauce-finished'
-          || kind === 'stone-seed' || kind === 'stone-transition'
-          || kind.startsWith('hidden-') || kind.startsWith('visible-')
-          || kind === 'initial-bowl' || kind === 'bowl-round' || kind === 'post-stir') return 'sauce';
-      if (kind === 'selection-result') return 'selection';
-      if (kind.startsWith('cutlet-') || kind === 'cutlets-materialized') return 'cutlets';
-      if (kind.startsWith('month-')) return 'months';
-      if (kind.startsWith('view-')) return 'position';
-      return 'result';
+      if (kind === 'run-start' || kind === 'conversion-cache-hit') this._livePhaseKey = 'inputs';
+      else if (kind === 'year-resolution-start') this._livePhaseKey = 'year-walk';
+      else if (kind === 'structure-start') this._livePhaseKey = 'structure-sauce';
+      else if (kind === 'final-result-ready' || kind === 'semantic-execution-finished' || kind === 'trace-ready') {
+        this._livePhaseKey = 'result';
+      } else if (kind === 'view-start' || kind.startsWith('view-')) {
+        this._livePhaseKey = 'position';
+      }
+      if (!this._livePhaseKey) {
+        if (kind.startsWith('year-') || kind.startsWith('gate-')) this._livePhaseKey = 'year-walk';
+        else this._livePhaseKey = 'inputs';
+      }
+      return this._livePhaseKey;
     }
 
     _liveGroupTitle(key) {
       if (CHAPTER_KEYS[key]) return this._t(CHAPTER_KEYS[key]);
-      if (key === 'sauce') return this._term('sauce');
-      if (key === 'selection') return this._term('selection');
       return String(key);
     }
 
@@ -1225,7 +1225,16 @@
     }
 
     _ensureLiveGroup(key) {
-      if (this._liveGroupNodes.has(key)) return this._liveGroupNodes.get(key);
+      if (this._liveGroupNodes.has(key)) {
+        const existing = this._liveGroupNodes.get(key);
+        if (this.hasAttribute('live') && this._liveLastGroupKey !== key) {
+          const previous = this._liveGroupNodes.get(this._liveLastGroupKey);
+          if (previous) previous.details.open = false;
+          existing.details.open = true;
+          this._liveLastGroupKey = key;
+        }
+        return existing;
+      }
       const details = doc.createElement('details');
       details.className = 'live-group';
       details.dataset.group = key;
@@ -1273,7 +1282,10 @@
       const list = doc.createElement('ol');
       list.className = 'live-list';
       details.append(summary, list);
-      group.list.append(details);
+      const wrapper = doc.createElement('li');
+      wrapper.className = 'live-sauce-item';
+      wrapper.append(details);
+      group.list.append(wrapper);
       const node = { details, list, count, value: 0 };
       this._liveSauceNodes.set(sauceId, node);
       return node;
@@ -1318,18 +1330,13 @@
         this._liveGroupNodes = new Map();
         this._liveSauceNodes = new Map();
         this._liveLastGroupKey = null;
+        this._livePhaseKey = null;
       }
       this._els.nav.replaceChildren();
       this._els.pane.hidden = false;
       this._els.loading.hidden = true;
       this._els.error.hidden = true;
       this._els.shell.setAttribute('aria-busy', this._liveState === 'running' ? 'true' : 'false');
-      if (this._liveState === 'complete' && this._liveRenderedCount === 0) {
-        const note = doc.createElement('p');
-        note.className = 'live-complete-note';
-        note.textContent = this._chapterTitle('result') + ' ✓';
-        this._els.pane.append(note);
-      }
     }
 
     _drainLiveRows(reset = false) {
