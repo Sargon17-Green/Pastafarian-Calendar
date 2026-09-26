@@ -1398,9 +1398,9 @@
           return this._chapterTitle('year-walk');
         case 'year-authoritative':
         case 'year-walk-finished':
-          return this._t('cooking.live.yearFinalize');
+          return this._chapterTitle('year-walk');
         case 'year-resolution-finished':
-          return this._t('cooking.live.structureCheck');
+          return this._chapterTitle('structure-sauce');
         case 'sauce-start':
           return stone(1);
         case 'stone-seed':
@@ -1436,53 +1436,53 @@
         }
         case 'post-stir': {
           const stir = Number(p.stirIndex);
-          return Number.isFinite(stir) && stir < 12 ? post(stir + 1) : this._t('cooking.live.sauceFinalize');
+          return Number.isFinite(stir) && stir < 12 ? post(stir + 1) : this._term('sauce');
         }
         case 'sauce-finished':
           return this._term('selection');
         case 'selection-result': {
           const label = String(p.label || '');
-          if (label === 'cutlet-count') return this._t('cooking.live.cutletPartition');
-          if (label === 'cutlet-partition-raw' || label === 'cutlet-partition-semantic') return this._t('cooking.live.cutletNames');
-          if (label === 'cutlet-names-distinct-rank') return this._t('cooking.live.cutletMaterialize');
-          if (label === 'month-count') return this._t('cooking.live.monthLengths');
+          if (label === 'cutlet-count') return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+          if (label === 'cutlet-partition-raw' || label === 'cutlet-partition-semantic') return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
+          if (label === 'cutlet-names-distinct-rank') return this._chapterTitle('cutlets');
+          if (label === 'month-count') return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
           if (label === 'month-lengths') return this._term('weaving');
-          if (label === 'month-weaving') return this._t('cooking.live.monthNames');
-          if (label === 'month-names-distinct-rank') return this._t('cooking.live.structureFinalize');
-          if (label === 'YEAR_5000-semantic') return this._t('cooking.live.yearFinalize');
-          return this._t('cooking.live.selectionContinue');
+          if (label === 'month-weaving') return this._chapterTitle('months') + ' · ' + this._t('cooking.live.names');
+          if (label === 'month-names-distinct-rank') return this._chapterTitle('structure-sauce');
+          if (label === 'YEAR_5000-semantic') return this._chapterTitle('year-walk');
+          return this._term('selection');
         }
         case 'structure-start':
           return this._chapterTitle('structure-sauce');
         case 'cutlet-count-ready':
-          return this._t('cooking.live.cutletPartition');
+          return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
         case 'cutlet-partition-ready':
-          return this._t('cooking.live.cutletNames');
+          return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
         case 'cutlet-names-ready':
-          return this._t('cooking.live.cutletMaterialize');
+          return this._chapterTitle('cutlets');
         case 'cutlets-materialized':
-          return this._t('cooking.live.monthCount');
+          return this._chapterTitle('months');
         case 'month-count-ready':
-          return this._t('cooking.live.monthLengths');
+          return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
         case 'month-lengths-ready':
           return this._term('weaving');
         case 'month-weaving-ready':
-          return this._t('cooking.live.monthNames');
+          return this._chapterTitle('months') + ' · ' + this._t('cooking.live.names');
         case 'month-names-ready':
-          return this._t('cooking.live.structureFinalize');
+          return this._chapterTitle('structure-sauce');
         case 'structure-finished':
-          return this._t('cooking.live.finalPosition');
+          return this._chapterTitle('position');
         case 'final-result-ready':
         case 'semantic-execution-finished':
-          return this._t('cooking.live.traceFinalize');
+          return this._t('cooking.live.trace');
         case 'trace-ready':
         case 'view-start':
         case 'view-day-ready':
-          return this._t('cooking.live.viewBuild');
+          return this._chapterTitle('position');
         case 'view-finished':
-          return this._t('cooking.live.screenFinalize');
+          return this._chapterTitle('position');
         default:
-          return this._t('cooking.live.nextStep');
+          return this._t('cooking.next');
       }
     }
 
