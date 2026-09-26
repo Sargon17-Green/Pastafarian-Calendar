@@ -1121,6 +1121,7 @@
         case 'year-5000-ready':
         case 'year-5000-memory': return this._chapterTitle('year-5000');
         case 'year-walk-anchor': return this._term('year') + ' ' + String(p.number);
+        case 'year-walk-step': return this._term('year') + ' ' + String(p.fromNumber) + ' → ' + String(p.toNumber);
         case 'year-transition': {
           const from = p.fromYear && p.fromYear.number != null ? p.fromYear.number : '?';
           const to = p.toYear && p.toYear.number != null ? p.toYear.number : '?';
