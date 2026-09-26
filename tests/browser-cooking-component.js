@@ -438,7 +438,7 @@ async function flush() {
     'initial live explanation must describe the two input days');
   assert.strictEqual(
     live._els.megillahQuote.textContent,
-    'למלאכת הלוח קח שני ימים. לראשון קרא יום המעשה ולשני קרא היום אשר עליו תשאל.',
+    'כל צמד ימים הניתן ללוח, הראשון הוא יום המעשה והשני הוא היום הנשאל. החלפת שני הימים אסורה.',
   );
   assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'));
   assert.strictEqual(
@@ -460,7 +460,7 @@ async function flush() {
     'stone-stage explanation must describe the 46-row stone table');
   assert.strictEqual(
     live._els.megillahQuote.textContent,
-    'כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.',
+    'חשב את כל חמש האבנים החדשות מתוך חמש האבנים הישנות של אותה טיפה קודמת. אל ישתמש באבן חדשה שמצא כדי לחשב אבן חדשה אחרת.',
   );
 
   live.appendLiveProgress({ sequence: 2, kind: 'bowl-round', elapsedMs: 7, durationMs: 5, payload: { sauceId: 'sauce-1', ordinal: 1, drop: '51', afterBowls: ['1', '2', '3', '4', '5', '6'] } });
@@ -471,18 +471,18 @@ async function flush() {
     'visible-drop explanation must follow the stage currently being awaited');
   assert.strictEqual(
     live._els.megillahQuote.textContent,
-    'את ראשית הטיפה טחון עשתי עשרה טחינות.',
+    'את עיסת הטיפה טחן אחת עשרה טחינות.',
   );
 
   live.appendLiveProgress({ sequence: 3, kind: 'post-stir', elapsedMs: 10, durationMs: 3, payload: { sauceId: 'sauce-1', stirIndex: 1, afterBowls: ['7', '8', '9', '10', '11', '12'] } });
   await flush();
   assert(live._els.liveCurrent.textContent.includes(live._term('postStir') + ' 2'),
     'current status must show the post-stir presently being awaited');
-  assert(live._els.liveExplanation.textContent.includes('שתים עשרה בלילות'),
+  assert(live._els.liveExplanation.textContent.includes('שתים עשרה בחישות'),
     'post-stir explanation must match the current post-stir phase');
   assert.strictEqual(
     live._els.megillahQuote.textContent,
-    'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה בלילות.',
+    'לאחר שנמזגה הטיפה השש וארבעים, אל יאמר החכם כי מלאכת הקערות נשלמה.',
   );
 
   // Every live semantic context must map to the explanation/verse for the
@@ -567,8 +567,8 @@ async function flush() {
     'retained log must not duplicate semantic guidance every time a stage recurs');
   assert(treeText(live._els.pane).includes('46 שורות'),
     'retained log must keep the localized stone-stage explanation');
-  assert(treeText(live._els.pane).includes('כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.'),
-    'retained log must keep the canonical pseudo-archaic Megillah quotation');
+  assert(treeText(live._els.pane).includes('חשב את כל חמש האבנים החדשות מתוך חמש האבנים הישנות של אותה טיפה קודמת. אל ישתמש באבן חדשה שמצא כדי לחשב אבן חדשה אחרת.'),
+    'retained log must keep the audited current Megillah quotation');
   const retainedSource = treeFindByClass(live._els.pane, 'megillah-source-link');
   assert(retainedSource, 'retained stage guide must expose a clickable Megillah source');
   assert(retainedSource.getAttribute('href').startsWith(
@@ -647,12 +647,12 @@ async function flush() {
     'current gate status must describe the gate operation now being awaited, not the last completed gate');
   assert(compacted._els.liveExplanation.textContent.includes('רצף שערים'),
     'gate-stage explanation must describe the gate chain');
-  assert.strictEqual(compacted._els.megillahQuote.textContent, 'וכן עשה שער אחר שער.');
+  assert.strictEqual(compacted._els.megillahQuote.textContent, 'כדי למצוא את המרחק מן השער הראשון אל השני, השתמש ביום השני שלאחר יום היסוד כיום הנשאל. לשער השלישי השתמש ביום השלישי, וכן הלאה. יום המעשה נשאר יום היסוד.');
   compacted.setAttribute('lang', 'en');
   assert(compacted._els.liveExplanation.textContent.includes('chain of gates'),
     'live explanation must translate when locale changes');
-  assert.strictEqual(compacted._els.megillahQuote.textContent, 'וכן עשה שער אחר שער.',
-    'canonical Megillah quotation must remain canonical pseudo-archaic Hebrew in every locale');
+  assert.strictEqual(compacted._els.megillahQuote.textContent, 'כדי למצוא את המרחק מן השער הראשון אל השני, השתמש ביום השני שלאחר יום היסוד כיום הנשאל. לשער השלישי השתמש ביום השלישי, וכן הלאה. יום המעשה נשאר יום היסוד.',
+    'canonical Megillah quotation must remain the same audited Hebrew source text in every locale');
   compacted.setAttribute('lang', 'he');
   assert.strictEqual(compacted._liveObservedCount, 256);
   assert.strictEqual(compacted._liveEntries.length, 2);
