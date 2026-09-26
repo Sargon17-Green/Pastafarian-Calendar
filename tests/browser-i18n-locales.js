@@ -155,6 +155,11 @@ const data = sandbox.PastafariBrowserLocaleData;
 assert(data);
 assert.strictEqual(data.schemaVersion, 3);
 assert.strictEqual(data.defaultLocale, 'ie');
+assert(data.megillahStageGuide, 'manca canonical Megillah stage guide');
+assert.strictEqual(Object.keys(data.megillahStageGuide).length, 16);
+assert.strictEqual(data.megillahStageGuide.gates.quote, 'וכן עשה שער אחר שער.');
+assert(data.megillahStageGuide.gates.source.includes('לוח שבעה עשר: שערי הקציצה'));
+assert.strictEqual(data.megillahStageGuide.weaving.quote, 'לא תבחר כל יום לבדו. את השזירה כולה תבחר.');
 assert.deepStrictEqual(Array.from(data.locales, (locale) => locale.code), ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs']);
 
 const sourceCutlets = SourceLanguageCatalog.cutlets.map((row) => row.text).sort();
