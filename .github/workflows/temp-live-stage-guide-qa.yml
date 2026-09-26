@@ -26,9 +26,11 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
+      - name: Prepare Pages site
+        run: node scripts/prepare-pages-site.js _site
       - name: Serve built site
         run: |
-          python3 -m http.server 4173 --directory browser/dist > /tmp/pastafari-http.log 2>&1 &
+          python3 -m http.server 4173 --directory _site > /tmp/pastafari-http.log 2>&1 &
           echo $! > /tmp/pastafari-http.pid
       - name: Run real live-stage probe
         run: node scripts/qa-live-stage-guide-playwright.js
