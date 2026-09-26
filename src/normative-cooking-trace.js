@@ -968,9 +968,9 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
     const collector = gateIndex === null || streamGateDetail
       ? createCookingCheckpointCollector()
       : null;
-    const checkpoint = collector || progress.enabled
+    const checkpoint = collector
       ? (kind, payload) => {
-        if (collector) collector.observer(kind, payload);
+        collector.observer(kind, payload);
         progress.emit(kind, { sauceId, gateIndex, ...compactLiveCheckpoint(kind, payload) });
       }
       : null;
