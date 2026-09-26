@@ -1,0 +1,153 @@
+name: Temporary — live cooking refinement visual QA
+
+on:
+  pull_request:
+    branches:
+      - 'JavaScript\+Interlingue'
+    paths:
+      - 'browser/**'
+      - 'tests/browser-*.js'
+      - '.github/workflows/temp-live-cooking-refinement-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22.16.0'
+
+jobs:
+  visual:
+    name: Live copy, current step and monster visual QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Build browser
+        run: |
+          set -euo pipefail
+          node tests/browser-cooking-component.js
+          node tests/browser-i18n-locales.js
+          node scripts/build-browser.js
+          node tests/browser-built-artifacts.js
+          node scripts/prepare-pages-site.js _site
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          QA="$RUNNER_TEMP/live-refine-qa"
+          mkdir -p "$QA"
+          cd "$QA"
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Run real visual smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE="$GITHUB_WORKSPACE/_site"
+          QA="$RUNNER_TEMP/live-refine-qa"
+          cd "$SITE"
+          python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/live-refine-http.log" 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 1
+          done
+          cd "$QA"
+          cat > qa.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const out=path.join(process.cwd(),'out');
+          fs.mkdirSync(out,{recursive:true});
+          const assert=(v,m)=>{if(!v)throw new Error(m);};
+          async function metrics(page){
+            return page.evaluate(()=>{
+              const h=document.querySelector('pastafari-date'),r=h?.shadowRoot,p=r?.querySelector('pastafari-cooking'),s=p?.shadowRoot;
+              const noodles=[...(s?.querySelectorAll('.monster-noodle')||[])];
+              const drips=[...(s?.querySelectorAll('.sauce-drip')||[])];
+              return {
+                title:s?.querySelector('.title')?.textContent||'',
+                subtitle:s?.querySelector('.subtitle')?.textContent||'',
+                current:s?.querySelector('.live-current')?.textContent||'',
+                live:!!p?.hasAttribute('live'),
+                observed:p?._liveObservedCount||0,
+                ranges:s?.querySelectorAll('.live-gate-range').length||0,
+                noodles:noodles.length,
+                dripDurations:drips.map(n=>getComputedStyle(n).animationDuration),
+                dripDelays:drips.map(n=>getComputedStyle(n).animationDelay),
+                docOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+                paneOverflow:(s?.querySelector('.pane')?.scrollWidth||0)-(s?.querySelector('.pane')?.clientWidth||0)
+              };
+            });
+          }
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const ctx=await browser.newContext({viewport:{width:1440,height:1000},locale:'he-IL'});
+            const page=await ctx.newPage();
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+            await page.waitForFunction(()=>{
+              const h=document.querySelector('pastafari-date');
+              if(!h?.shadowRoot)return false;
+              h.setAttribute('lang','he');
+              const p=h.shadowRoot.querySelector('pastafari-cooking');
+              return !!p?.hasAttribute('live');
+            },null,{timeout:30000});
+            await page.waitForFunction(()=>{
+              const p=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('pastafari-cooking');
+              return (p?._liveObservedCount||0)>=128 && (p?.shadowRoot?.querySelectorAll('.live-gate-range').length||0)>0;
+            },null,{timeout:300000});
+            await page.waitForTimeout(100);
+            const live=await metrics(page);
+            assert(live.title==='החישוב מתבשל עכשיו','live title is not the new present-tense Hebrew copy');
+            assert(!live.title.includes('בושל'),'live title still contains past-tense wording');
+            assert(live.subtitle.includes('הפעולה שמתבצעת כרגע'),'live subtitle does not explain current operation semantics');
+            assert(live.current.includes('מחשבים את מרווח השער הבא'),'current line describes the last finished gate instead of the gate now being computed');
+            assert(live.noodles===14,'monster does not contain 14 noodles');
+            assert(live.dripDurations.every(x=>x==='7.2s'),'drip cadence is not 7.2 seconds');
+            assert(live.dripDelays.length===2 && live.dripDelays[0]!==live.dripDelays[1],'drips are not staggered');
+            assert(live.docOverflow<=2 && live.paneOverflow<=2,'desktop live UI overflows');
+            await page.screenshot({path:path.join(out,'desktop-he-live.png'),fullPage:false});
+
+            await page.setViewportSize({width:390,height:844});
+            await page.waitForTimeout(100);
+            const mobile=await metrics(page);
+            assert(mobile.docOverflow<=2 && mobile.paneOverflow<=2,'mobile live UI overflows');
+            await page.screenshot({path:path.join(out,'mobile-he-live.png'),fullPage:false});
+            await ctx.close();
+
+            const reduced=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
+            const rp=await reduced.newPage();
+            await rp.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+            await rp.waitForFunction(()=>{
+              const p=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('pastafari-cooking');
+              return !!p?.hasAttribute('live') && !!p.shadowRoot?.querySelector('.monster');
+            },null,{timeout:30000});
+            const motion=await rp.evaluate(()=>{
+              const s=document.querySelector('pastafari-date').shadowRoot.querySelector('pastafari-cooking').shadowRoot;
+              return {
+                monster:getComputedStyle(s.querySelector('.monster')).animationName,
+                drip:getComputedStyle(s.querySelector('.sauce-drip')).animationName
+              };
+            });
+            assert(motion.monster==='none' && motion.drip==='none','reduced-motion does not disable monster animation');
+            await reduced.close();
+            await browser.close();
+            fs.writeFileSync(path.join(out,'metrics.json'),JSON.stringify({live,mobile,motion},null,2));
+            console.log('LIVE_REFINEMENT_VISUAL_QA=PASS');
+          })().catch(e=>{console.error(e?.stack||e);process.exit(1);});
+          JS
+          node qa.js
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-cooking-refinement-visual
+          path: ${{ runner.temp }}/live-refine-qa/out
+          if-no-files-found: warn
+          retention-days: 14
