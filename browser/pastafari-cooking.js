@@ -881,6 +881,10 @@
         }
         return;
       }
+      if (name === 'live') {
+        this._syncDialogOpen();
+        return;
+      }
       if (this._connected && this.hasAttribute('open')) this._queueLoad();
     }
 
@@ -902,20 +906,99 @@
       }
     }
 
+    _currentInputKey() {
+      try {
+        const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
+        const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
+        return String(axis.gregorianToJdn(calculationDate)) + ':' + String(axis.gregorianToJdn(targetDate));
+      } catch (_) {
+        return null;
+      }
+    }
+
+    _resetLiveLog(state = 'running') {
+      this._liveEntries = [];
+      this._liveState = state;
+      this._liveRenderedCount = 0;
+      this._liveGroupNodes = new Map();
+      this._liveSauceNodes = new Map();
+      this._liveRenderQueued = false;
+      this._liveLastGroupKey = null;
+      if (this._els && this._els.pane) this._els.pane.replaceChildren();
+      if (this._els && this._els.nav) this._els.nav.replaceChildren();
+    }
+
+    beginLiveTrace() {
+      this._generation += 1;
+      this._queuedEpoch = null;
+      this._trace = null;
+      this._traceInputKey = null;
+      this._gateDetails.clear();
+      this._gateDetailLoading = null;
+      this._gateDetailError = null;
+      this._resetLiveLog('running');
+      this.setAttribute('live', '');
+      this._syncDialogOpen();
+      this._hideStatus();
+      if (this._els && this._els.liveCurrent) {
+        this._els.liveCurrent.textContent = this._t('cooking.loading');
+      }
+      return this;
+    }
+
+    appendLiveProgress(event) {
+      if (!event || typeof event !== 'object') return;
+      const copy = plainClone(event);
+      copy.kind = String(copy.kind || 'progress');
+      copy.payload = copy.payload && typeof copy.payload === 'object' ? copy.payload : {};
+      this._liveEntries.push(copy);
+      if (this._liveState === 'idle' || this._liveState === 'complete') this._liveState = 'running';
+      if (this._els && this._els.liveCurrent) {
+        this._els.liveCurrent.textContent = this._liveEventLabel(copy);
+      }
+      this._scheduleLiveDrain();
+    }
+
+    finishLiveTrace(trace = null) {
+      if (trace && typeof trace === 'object') {
+        this._trace = trace;
+        this._traceInputKey = this._currentInputKey();
+      }
+      this._liveState = 'complete';
+      this._drainLiveRows();
+      if (this.hasAttribute('live')) this.removeAttribute('live');
+      this._syncDialogOpen();
+      if (this.hasAttribute('open')) {
+        this._hideStatus();
+        this._renderState();
+      }
+      return trace;
+    }
+
+    failLiveTrace(error) {
+      this._liveState = 'error';
+      this._drainLiveRows();
+      if (this.hasAttribute('live')) this.removeAttribute('live');
+      this._syncDialogOpen();
+      if (root.console && typeof root.console.error === 'function') root.console.error(error);
+    }
+
     _syncDialogOpen() {
       if (!this._els || !this._els.shell) return;
       const shell = this._els.shell;
-      const shouldOpen = this.hasAttribute('open') && this._connected;
+      const live = this.hasAttribute('live');
+      const modal = this.hasAttribute('open');
+      const shouldOpen = (live || modal) && this._connected;
       const isOpen = shell.hasAttribute('open');
       if (shouldOpen && !isOpen) {
         try {
-          if (typeof shell.showModal === 'function') shell.showModal();
+          if (modal && !live && typeof shell.showModal === 'function') shell.showModal();
           else shell.setAttribute('open', '');
         } catch (_) {
           shell.setAttribute('open', '');
         }
-        enqueueMicrotask(() => {
-          if (!this._connected || !this.hasAttribute('open')) return;
+        if (modal && !live) enqueueMicrotask(() => {
+          if (!this._connected || !this.hasAttribute('open') || this.hasAttribute('live')) return;
           if (this._els && this._els.close && typeof this._els.close.focus === 'function') {
             try { this._els.close.focus({ preventScroll: true }); }
             catch (_) { this._els.close.focus(); }
@@ -966,6 +1049,314 @@
 
     _t(key, values) { return i18n.translate(this._locale, key, values); }
     _term(key) { return this._t('cooking.term.' + key); }
+
+    _liveGroupKey(event) {
+      const kind = String(event && event.kind || '');
+      if (kind === 'run-start' || kind === 'conversion-cache-hit') return 'inputs';
+      if (kind.startsWith('gate-')) return 'gates';
+      if (kind.startsWith('year-5000')) return 'year-5000';
+      if (kind.startsWith('year-')) return 'year-walk';
+      if (kind === 'sauce-start' || kind === 'sauce-finished'
+          || kind === 'stone-seed' || kind === 'stone-transition'
+          || kind.startsWith('hidden-') || kind.startsWith('visible-')
+          || kind === 'initial-bowl' || kind === 'bowl-round' || kind === 'post-stir') return 'sauce';
+      if (kind === 'selection-result') return 'selection';
+      if (kind.startsWith('cutlet-') || kind === 'cutlets-materialized') return 'cutlets';
+      if (kind.startsWith('month-')) return 'months';
+      if (kind.startsWith('view-')) return 'position';
+      return 'result';
+    }
+
+    _liveGroupTitle(key) {
+      if (CHAPTER_KEYS[key]) return this._t(CHAPTER_KEYS[key]);
+      if (key === 'sauce') return this._term('sauce');
+      if (key === 'selection') return this._term('selection');
+      return String(key);
+    }
+
+    _liveIconKind(event) {
+      const kind = String(event && event.kind || '');
+      if (kind.includes('drop') || kind.includes('grind')) return 'drop';
+      if (kind.includes('bowl') || kind === 'post-stir') return 'bowl';
+      if (kind.startsWith('gate-')) return 'gate';
+      if (kind.startsWith('stone-')) return 'stone';
+      if (kind.startsWith('year-')) return 'year';
+      if (kind === 'selection-result') return 'selection';
+      if (kind.includes('weaving') || kind.includes('month')) return 'weave';
+      if (kind.startsWith('view-')) return 'view';
+      if (kind.startsWith('sauce-')) return 'sauce';
+      return 'result';
+    }
+
+    _liveEventNumber(event) {
+      const p = event && event.payload || {};
+      const kind = String(event && event.kind || '');
+      if (kind === 'hidden-grind' || kind === 'visible-grind') return String(p.ordinal || '') + '.' + String(p.grind || '');
+      if (p.ordinal != null) return String(p.ordinal);
+      if (p.bowlId != null) return String(p.bowlId);
+      if (p.stirIndex != null) return String(p.stirIndex);
+      if (p.signedIndex != null) return String(p.signedIndex);
+      if (p.index != null) return String(p.index);
+      if (kind === 'year-transition' && p.toYear && p.toYear.number != null) return String(p.toYear.number);
+      if (p.number != null) return String(p.number);
+      if (p.count != null) return String(p.count);
+      if (kind === 'selection-result' && p.output != null) return exactDisplay(p.output);
+      if (p.sauceId) return String(p.sauceId).replace(/^sauce-/, '');
+      if (kind === 'final-result-ready' || kind === 'trace-ready') return '✓';
+      return '·';
+    }
+
+    _liveEventLabel(event) {
+      const p = event && event.payload || {};
+      switch (String(event && event.kind || '')) {
+        case 'run-start': return this._chapterTitle('inputs');
+        case 'conversion-cache-hit': return this._term('checkpoints') + ' · cache';
+        case 'gate-gap-start': return this._term('gateGap') + ' ' + String(p.signedIndex);
+        case 'gate-gap-finished': return this._term('gateGap') + ' ' + String(p.signedIndex);
+        case 'gate-ready': return this._term('gate') + ' ' + String(p.index);
+        case 'year-resolution-start': return this._chapterTitle('year-walk');
+        case 'year-5000-ready':
+        case 'year-5000-memory': return this._chapterTitle('year-5000');
+        case 'year-walk-anchor': return this._term('year') + ' ' + String(p.number);
+        case 'year-transition': {
+          const from = p.fromYear && p.fromYear.number != null ? p.fromYear.number : '?';
+          const to = p.toYear && p.toYear.number != null ? p.toYear.number : '?';
+          return this._term('year') + ' ' + String(from) + ' → ' + String(to);
+        }
+        case 'year-authoritative': return this._term('year') + ' ' + String(p.year && p.year.number != null ? p.year.number : '');
+        case 'year-walk-finished':
+        case 'year-resolution-finished': return this._chapterTitle('year-walk') + ' ✓';
+        case 'sauce-start': return this._term('sauce') + ' ' + String(p.sauceId || '');
+        case 'sauce-finished': return this._term('sauce') + ' ' + String(p.sauceId || '') + ' ✓';
+        case 'stone-seed': return this._term('stone') + ' 1';
+        case 'stone-transition': return this._term('stone') + ' ' + String(p.ordinal);
+        case 'hidden-start': return this._term('hiddenDrop') + ' ' + String(p.ordinal);
+        case 'hidden-grind': return this._term('hiddenDrop') + ' ' + String(p.ordinal) + ' · ' + this._term('grind') + ' ' + String(p.grind);
+        case 'visible-start': return this._term('visibleDrop') + ' ' + String(p.ordinal);
+        case 'visible-grind': return this._term('visibleDrop') + ' ' + String(p.ordinal) + ' · ' + this._term('grind') + ' ' + String(p.grind);
+        case 'initial-bowl': return this._term('initialBowls') + ' · ' + this._term('bowl') + ' ' + String(p.bowlId);
+        case 'bowl-round': return this._term('bowlRound') + ' ' + String(p.ordinal);
+        case 'post-stir': return this._term('postStir') + ' ' + String(p.stirIndex);
+        case 'selection-result': return this._term('selection') + (p.label ? ' · ' + String(p.label) : '');
+        case 'structure-start': return this._chapterTitle('structure-sauce');
+        case 'structure-finished': return this._chapterTitle('structure-sauce') + ' ✓';
+        case 'cutlet-count-ready': return this._term('cutlet') + ' × ' + String(p.count);
+        case 'cutlet-partition-ready': return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+        case 'cutlet-names-ready': return this._chapterTitle('cutlets') + ' · names';
+        case 'cutlets-materialized': return this._chapterTitle('cutlets') + ' ✓';
+        case 'month-count-ready': return this._chapterTitle('months') + ' × ' + String(p.count);
+        case 'month-lengths-ready': return this._chapterTitle('months') + ' · lengths';
+        case 'month-weaving-ready': return this._term('weaving') + ' ✓';
+        case 'month-names-ready': return this._chapterTitle('months') + ' · names';
+        case 'final-result-ready': return this._chapterTitle('result') + ' ✓';
+        case 'semantic-execution-finished': return this._t('cooking.sameExecution');
+        case 'view-day-ready': return this._chapterTitle('position') + ' · ' + this._t('field.day') + ' ' + String(p.ordinal);
+        case 'view-start': return this._chapterTitle('position');
+        case 'view-finished': return this._chapterTitle('position') + ' ✓';
+        case 'trace-ready': return this._chapterTitle('result') + ' · trace ✓';
+        default: return String(event && event.kind || 'progress');
+      }
+    }
+
+    _livePayloadSummary(event) {
+      const p = event && event.payload || {};
+      const kind = String(event && event.kind || '');
+      const short = (value) => value == null ? '' : exactDisplay(value);
+      if (kind === 'stone-seed' && p.values) {
+        return Object.entries(p.values).map(([key, value]) => key + '=' + short(value)).join(' · ');
+      }
+      if (kind === 'stone-transition' && p.after) {
+        return Object.entries(p.after).map(([key, value]) => key + '=' + short(value)).join(' · ');
+      }
+      if (kind.endsWith('-grind')) return (p.stoneKind ? String(p.stoneKind) + ' → ' : '') + short(p.after);
+      if (kind.endsWith('-start')) return p.initial != null ? short(p.initial) : '';
+      if (kind === 'initial-bowl') return short(p.value);
+      if (kind === 'bowl-round') {
+        return (p.drop != null ? this._term('visibleDrop') + '=' + short(p.drop) + ' · ' : '')
+          + safeArray(p.afterBowls).map(short).join(' / ');
+      }
+      if (kind === 'post-stir') return safeArray(p.afterBowls).map(short).join(' / ');
+      if (kind === 'selection-result') {
+        return (p.familySize != null ? 'N=' + short(p.familySize) + ' · ' : '')
+          + (p.rejectionSteps != null ? '↻' + short(p.rejectionSteps) + ' · ' : '')
+          + '→ ' + short(p.output);
+      }
+      if (kind === 'gate-gap-finished') return 'Δ=' + short(p.gap);
+      if (kind === 'gate-ready') return short(p.day);
+      if (kind === 'year-transition') {
+        const from = p.fromYear && p.fromYear.number != null ? p.fromYear.number : '?';
+        const to = p.toYear && p.toYear.number != null ? p.toYear.number : '?';
+        return String(from) + ' → ' + String(to);
+      }
+      if (kind === 'cutlet-partition-ready') return safeArray(p.partition).join(' · ');
+      if (kind === 'cutlet-names-ready' || kind === 'month-names-ready') return safeArray(p.indices).join(' · ');
+      if (kind === 'month-lengths-ready') return safeArray(p.lengths).join(' · ');
+      if (kind === 'final-result-ready') {
+        return [p.year, p.cutletName, p.dayInCutlet, p.monthName, p.dayInMonth].filter((x) => x != null).join(' · ');
+      }
+      if (kind === 'view-day-ready' && p.targetDay != null) return String(p.targetDay);
+      const scalars = Object.entries(p).filter(([, value]) =>
+        value === null || ['string', 'number', 'boolean'].includes(typeof value)
+      ).slice(0, 3);
+      return scalars.map(([key, value]) => key + '=' + short(value)).join(' · ');
+    }
+
+    _liveTimeText(event) {
+      const ms = Number(event && event.durationMs);
+      if (!Number.isFinite(ms) || ms < 0) return '';
+      if (ms < 1 && ms > 0) return '+' + ms.toFixed(2) + ' ms';
+      if (ms < 10) return '+' + ms.toFixed(1) + ' ms';
+      return '+' + String(Math.round(ms)) + ' ms';
+    }
+
+    _liveIcon(event) {
+      const icon = doc.createElement('span');
+      const kind = this._liveIconKind(event);
+      icon.className = 'live-icon live-icon--' + kind;
+      icon.setAttribute('aria-hidden', 'true');
+      const value = doc.createElement('span');
+      value.textContent = this._liveEventNumber(event);
+      icon.append(value);
+      return icon;
+    }
+
+    _ensureLiveGroup(key) {
+      if (this._liveGroupNodes.has(key)) return this._liveGroupNodes.get(key);
+      const details = doc.createElement('details');
+      details.className = 'live-group';
+      details.dataset.group = key;
+      details.open = true;
+      const summary = doc.createElement('summary');
+      const title = doc.createElement('span');
+      title.textContent = this._liveGroupTitle(key);
+      const count = doc.createElement('span');
+      count.className = 'live-group-count';
+      count.textContent = '0';
+      summary.append(title, count);
+      const list = doc.createElement('ol');
+      list.className = 'live-list';
+      details.append(summary, list);
+      this._els.pane.append(details);
+      const node = { details, list, count, value: 0 };
+      this._liveGroupNodes.set(key, node);
+      if (this.hasAttribute('live') && this._liveLastGroupKey && this._liveLastGroupKey !== key) {
+        const previous = this._liveGroupNodes.get(this._liveLastGroupKey);
+        if (previous) previous.details.open = false;
+      }
+      this._liveLastGroupKey = key;
+      return node;
+    }
+
+    _ensureLiveSauce(group, event) {
+      const p = event && event.payload || {};
+      const sauceId = p.sauceId == null ? null : String(p.sauceId);
+      if (!sauceId) return group;
+      if (this._liveSauceNodes.has(sauceId)) return this._liveSauceNodes.get(sauceId);
+      if (event.kind === 'sauce-start') {
+        for (const prior of this._liveSauceNodes.values()) prior.details.open = false;
+      }
+      const details = doc.createElement('details');
+      details.className = 'live-sauce';
+      details.open = true;
+      const summary = doc.createElement('summary');
+      const title = doc.createElement('span');
+      title.textContent = this._term('sauce') + ' ' + sauceId.replace(/^sauce-/, '')
+        + (p.gateIndex != null ? ' · ' + this._term('gate') + ' ' + String(p.gateIndex) : '');
+      const count = doc.createElement('span');
+      count.className = 'live-group-count';
+      count.textContent = '0';
+      summary.append(title, count);
+      const list = doc.createElement('ol');
+      list.className = 'live-list';
+      details.append(summary, list);
+      group.list.append(details);
+      const node = { details, list, count, value: 0 };
+      this._liveSauceNodes.set(sauceId, node);
+      return node;
+    }
+
+    _appendLiveRow(event) {
+      const key = this._liveGroupKey(event);
+      const group = this._ensureLiveGroup(key);
+      group.value += 1;
+      group.count.textContent = String(group.value);
+      const target = key === 'sauce' ? this._ensureLiveSauce(group, event) : group;
+      if (target !== group) {
+        target.value += 1;
+        target.count.textContent = String(target.value);
+      }
+      const li = doc.createElement('li');
+      li.className = 'live-row';
+      li.dataset.kind = String(event.kind);
+      li.append(this._liveIcon(event));
+      const copy = doc.createElement('span');
+      copy.className = 'live-row-copy';
+      const label = doc.createElement('span');
+      label.className = 'live-row-label';
+      label.textContent = this._liveEventLabel(event);
+      const value = doc.createElement('span');
+      value.className = 'live-row-value';
+      value.textContent = this._livePayloadSummary(event);
+      if (!value.textContent) value.hidden = true;
+      copy.append(label, value);
+      const time = doc.createElement('small');
+      time.className = 'live-time';
+      time.textContent = this._liveTimeText(event);
+      li.append(copy, time);
+      target.list.append(li);
+    }
+
+    _prepareLiveLog(reset = false) {
+      if (!this._els) return;
+      if (reset) {
+        this._els.pane.replaceChildren();
+        this._liveRenderedCount = 0;
+        this._liveGroupNodes = new Map();
+        this._liveSauceNodes = new Map();
+        this._liveLastGroupKey = null;
+      }
+      this._els.nav.replaceChildren();
+      this._els.pane.hidden = false;
+      this._els.loading.hidden = true;
+      this._els.error.hidden = true;
+      this._els.shell.setAttribute('aria-busy', this._liveState === 'running' ? 'true' : 'false');
+      if (this._liveState === 'complete' && this._liveRenderedCount === 0) {
+        const note = doc.createElement('p');
+        note.className = 'live-complete-note';
+        note.textContent = this._chapterTitle('result') + ' ✓';
+        this._els.pane.append(note);
+      }
+    }
+
+    _drainLiveRows(reset = false) {
+      if (!this._els || !this._liveEntries.length) return;
+      const pane = this._els.pane;
+      const scrollHeight = Number(pane.scrollHeight) || 0;
+      const scrollTop = Number(pane.scrollTop) || 0;
+      const clientHeight = Number(pane.clientHeight) || 0;
+      const follow = this.hasAttribute('live')
+        && (scrollHeight === 0 || clientHeight === 0 || scrollHeight - scrollTop - clientHeight < 96);
+      if (reset) this._prepareLiveLog(true);
+      else if (this._liveRenderedCount === 0) this._prepareLiveLog(false);
+      while (this._liveRenderedCount < this._liveEntries.length) {
+        this._appendLiveRow(this._liveEntries[this._liveRenderedCount]);
+        this._liveRenderedCount += 1;
+      }
+      if (follow) {
+        try { pane.scrollTop = pane.scrollHeight; } catch (_) { /* best effort */ }
+      }
+    }
+
+    _scheduleLiveDrain() {
+      if (this._liveRenderQueued) return;
+      this._liveRenderQueued = true;
+      const flush = () => {
+        this._liveRenderQueued = false;
+        this._drainLiveRows();
+      };
+      if (typeof root.requestAnimationFrame === 'function') root.requestAnimationFrame(flush);
+      else enqueueMicrotask(flush);
+    }
 
     async load(expectedGeneration) {
       if (!this.hasAttribute('open')) return null;
