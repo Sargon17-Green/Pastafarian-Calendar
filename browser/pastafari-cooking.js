@@ -2047,10 +2047,9 @@
         || kind === 'gate-gap-start'
         || kind === 'sauce-start';
       if (markerOnly) {
-        if (kind === 'sauce-start') {
-          const group = this._ensureLiveGroup(key);
-          this._ensureLiveSauce(group, event);
-        }
+        const group = this._ensureLiveGroup(key);
+        const target = kind === 'sauce-start' ? this._ensureLiveSauce(group, event) : group;
+        this._appendRetainedStageGuide(target, event);
         return false;
       }
       const group = this._ensureLiveGroup(key);
