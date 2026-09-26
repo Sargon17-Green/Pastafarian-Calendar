@@ -92,6 +92,7 @@ jobs:
                 quoteLang: quote?.closest('figure')?.getAttribute('lang') || '',
                 quoteDir: quote?.closest('figure')?.getAttribute('dir') || '',
                 quoteFont: quote ? getComputedStyle(quote).fontFamily : '',
+                currentFont: shadow?.querySelector('.live-current') ? getComputedStyle(shadow.querySelector('.live-current')).fontFamily : '',
                 explanationFont: explanation ? getComputedStyle(explanation).fontFamily : '',
                 docOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
                 paneOverflow: (pane?.scrollWidth || 0) - (pane?.clientWidth || 0),
@@ -155,6 +156,7 @@ jobs:
             assert(gate.source.includes('לוח שבעה עשר: שערי הקציצה'), 'wrong Megillah source for gates');
             assert(gate.quoteLang === 'he' && gate.quoteDir === 'rtl', 'Megillah quotation is not explicitly Judaean-Hebrew/RTL');
             assert(gate.quoteFont !== gate.explanationFont, 'Megillah quotation is using the ordinary explanation font');
+            assert(gate.quoteFont !== gate.currentFont, 'Megillah quotation is using the same font stack as the live stage title');
             assert(/SBL Hebrew|Taamey Frank CLM|Frank Ruehl CLM|Noto Serif Hebrew/.test(gate.quoteFont),
               'Megillah quotation font stack is not the dedicated square Hebrew stack');
             assert(gate.docOverflow <= 2 && gate.paneOverflow <= 2, 'desktop live guide causes horizontal overflow');
