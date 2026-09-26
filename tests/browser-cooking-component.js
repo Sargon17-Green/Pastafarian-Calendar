@@ -522,7 +522,7 @@ async function flush() {
     assert(live._els.megillahQuote.textContent.trim().length > 0, 'missing Megillah quote for ' + key);
     assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
     const expectedQuoteUrl = 'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html'
-      + '#:~:text=' + encodeURIComponent(live._els.megillahQuote.textContent);
+      + '#:~:text=' + encodeURIComponent(live._els.megillahQuote.textContent).replace(/-/g, '%2D');
     assert.strictEqual(
       live._els.megillahSourceLink.getAttribute('href'),
       expectedQuoteUrl,
