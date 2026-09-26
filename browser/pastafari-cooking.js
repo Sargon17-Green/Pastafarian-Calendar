@@ -1238,12 +1238,24 @@
       return scalars.map(([, value]) => short(value)).join(' · ');
     }
 
-    _liveTimeText(event) {
-      const ms = Number(event && event.durationMs);
+    _liveDurationText(value, withPlus = false) {
+      const ms = Number(value);
       if (!Number.isFinite(ms) || ms < 0) return '';
-      if (ms < 1 && ms > 0) return '+' + ms.toFixed(2) + ' ms';
-      if (ms < 10) return '+' + ms.toFixed(1) + ' ms';
-      return '+' + String(Math.round(ms)) + ' ms';
+      const prefix = withPlus ? '+' : '';
+      if (ms < 1 && ms > 0) return prefix + ms.toFixed(2) + ' ms';
+      if (ms < 10) return prefix + ms.toFixed(1) + ' ms';
+      if (ms < 1000) return prefix + String(Math.round(ms)) + ' ms';
+      if (ms < 10000) return prefix + (ms / 1000).toFixed(2) + ' s';
+      return prefix + (ms / 1000).toFixed(1) + ' s';
+    }
+
+    _liveTimeText(event) {
+      return this._liveDurationText(event && event.durationMs, true);
+    }
+
+    _liveBadgeText(node) {
+      const duration = this._liveDurationText(node && node.totalMs, false);
+      return String(node && node.value || 0) + (duration ? ' · ' + duration : '');
     }
 
     _liveIcon(event) {
@@ -1260,7 +1272,7 @@
     _ensureLiveGroup(key) {
       if (this._liveGroupNodes.has(key)) {
         const existing = this._liveGroupNodes.get(key);
-        if (this.hasAttribute('live') && this._liveLastGroupKey !== key) {
+        if (this._liveState === 'running' && this._liveLastGroupKey !== key) {
           const previous = this._liveGroupNodes.get(this._liveLastGroupKey);
           if (previous) previous.details.open = false;
           existing.details.open = true;
@@ -1271,7 +1283,7 @@
       const details = doc.createElement('details');
       details.className = 'live-group';
       details.dataset.group = key;
-      details.open = true;
+      details.open = this._liveState === 'running';
       const summary = doc.createElement('summary');
       const title = doc.createElement('span');
       title.textContent = this._liveGroupTitle(key);
@@ -1283,9 +1295,9 @@
       list.className = 'live-list';
       details.append(summary, list);
       this._els.pane.append(details);
-      const node = { details, list, count, value: 0 };
+      const node = { details, list, count, value: 0, totalMs: 0 };
       this._liveGroupNodes.set(key, node);
-      if (this.hasAttribute('live') && this._liveLastGroupKey && this._liveLastGroupKey !== key) {
+      if (this._liveState === 'running' && this._liveLastGroupKey && this._liveLastGroupKey !== key) {
         const previous = this._liveGroupNodes.get(this._liveLastGroupKey);
         if (previous) previous.details.open = false;
       }
@@ -1303,7 +1315,7 @@
       }
       const details = doc.createElement('details');
       details.className = 'live-sauce';
-      details.open = true;
+      details.open = this._liveState === 'running';
       const summary = doc.createElement('summary');
       const title = doc.createElement('span');
       title.textContent = this._term('sauce') + ' ' + sauceId.replace(/^sauce-/, '')
@@ -1319,7 +1331,7 @@
       wrapper.className = 'live-sauce-item';
       wrapper.append(details);
       group.list.append(wrapper);
-      const node = { details, list, count, value: 0 };
+      const node = { details, list, count, value: 0, totalMs: 0 };
       this._liveSauceNodes.set(sauceId, node);
       return node;
     }
@@ -1336,12 +1348,15 @@
         || kind === 'sauce-start';
       if (kind === 'sauce-start') this._ensureLiveSauce(group, event);
       if (markerOnly) return false;
+      const durationMs = Math.max(0, Number(event && event.durationMs) || 0);
       group.value += 1;
-      group.count.textContent = String(group.value);
+      group.totalMs += durationMs;
+      group.count.textContent = this._liveBadgeText(group);
       const target = this._ensureLiveSauce(group, event);
       if (target !== group) {
         target.value += 1;
-        target.count.textContent = String(target.value);
+        target.totalMs += durationMs;
+        target.count.textContent = this._liveBadgeText(target);
       }
       const li = doc.createElement('li');
       li.className = 'live-row';
@@ -1395,6 +1410,10 @@
       while (this._liveRenderedCount < this._liveEntries.length) {
         this._appendLiveRow(this._liveEntries[this._liveRenderedCount]);
         this._liveRenderedCount += 1;
+      }
+      if (this._liveState === 'complete' && this._liveLastGroupKey) {
+        const last = this._liveGroupNodes.get(this._liveLastGroupKey);
+        if (last) last.details.open = true;
       }
       if (follow) {
         try { pane.scrollTop = pane.scrollHeight; } catch (_) { /* best effort */ }
