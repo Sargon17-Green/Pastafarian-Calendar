@@ -29,7 +29,7 @@ cutletEntries =
     , { canonicalIndex = 5, sourceId = "THOUGHT", text = "hugsun" }
     , { canonicalIndex = 6, sourceId = "FOUR_PARTS_OF_NINE", text = "fjórir hlutar af níu" }
     , { canonicalIndex = 7, sourceId = "PALGURASH", text = "Palgúrasj" }
-    , { canonicalIndex = 8, sourceId = "PAPYRUS_SEDGE", text = "papýrussef" }
+    , { canonicalIndex = 8, sourceId = "PAPYRUS_SEDGE", text = "papýrusstör" }
     , { canonicalIndex = 9, sourceId = "CLUSTER", text = "klasi" }
     , { canonicalIndex = 10, sourceId = "SCORPION", text = "sporðdreki" }
     , { canonicalIndex = 11, sourceId = "ASH", text = "aska" }
