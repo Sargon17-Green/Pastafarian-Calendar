@@ -760,10 +760,6 @@
           .loading-note,
           .error-message { margin: 0; color: var(--muted); font-size: .88rem; }
           @keyframes spin { to { transform: rotate(1turn); } }
-          @media (prefers-reduced-motion: reduce) {
-            .spinner { animation-duration: 3s; }
-          }
-
           dialog {
             width: min(34rem, calc(100vw - 2rem));
             border: 1px solid #bbb092;
