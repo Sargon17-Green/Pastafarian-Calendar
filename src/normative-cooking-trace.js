@@ -127,26 +127,32 @@ function exactJsonValue(value, seen = new Set()) {
 
 function createLiveProgressEmitter(callback) {
   const enabled = typeof callback === 'function';
-  const startedAt = Date.now();
+  const clock = typeof globalThis === 'object'
+      && globalThis.performance && typeof globalThis.performance.now === 'function'
+    ? () => globalThis.performance.now()
+    : () => Date.now();
+  const cleanMs = (value) => Math.max(0, Math.round(Number(value) * 100) / 100);
+  const startedAt = clock();
   let previousAt = startedAt;
   let sequence = 0;
   return Object.freeze({
     enabled,
     emit(kind, payload = {}) {
       if (!enabled) return;
-      const now = Date.now();
-      const event = deepFreeze(exactJsonValue({
-        sequence: ++sequence,
-        kind: String(kind),
-        elapsedMs: Math.max(0, now - startedAt),
-        durationMs: Math.max(0, now - previousAt),
-        payload,
-      }));
-      previousAt = now;
+      const now = clock();
       try {
+        const event = deepFreeze(exactJsonValue({
+          sequence: ++sequence,
+          kind: String(kind),
+          elapsedMs: cleanMs(now - startedAt),
+          durationMs: cleanMs(now - previousAt),
+          payload,
+        }));
         callback(event);
       } catch (_) {
         // Progress is observational UI telemetry and may never change calendar semantics.
+      } finally {
+        previousAt = now;
       }
     },
   });
