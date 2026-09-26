@@ -493,10 +493,13 @@ class TracingGateRegistry extends core.Stage54GateRegistry {
 
   gateGap(signedIndex) {
     this.recorder.beginGateGap(signedIndex);
-    this.progress.emit('gate-gap-start', { signedIndex });
     try {
       const gap = super.gateGap(signedIndex);
       this.recorder.finishGateGap(signedIndex, gap);
+      // A gate search may span tens of thousands of gates. Emit exactly one
+      // completed live event per real gate-gap computation; the accelerated
+      // Sauce/selection substeps are retained in the normative recorder but are
+      // not duplicated as separate UI messages.
       this.progress.emit('gate-gap-finished', { signedIndex, gap });
       return gap;
     } finally {
@@ -505,10 +508,8 @@ class TracingGateRegistry extends core.Stage54GateRegistry {
   }
 
   ensureIndex(index) {
-    const wasKnown = this.recorder.gates.has(index);
     const day = super.ensureIndex(index);
     this.recorder.recordGate(index, day);
-    if (!wasKnown) this.progress.emit('gate-ready', { index, day });
     return day;
   }
 }
@@ -950,7 +951,10 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
   const recorder = new NormativeExecutionRecorder();
   const selectionCheckpoint = (kind, payload) => {
     recorder.recordSelection(kind, payload);
-    progress.emit(kind, payload);
+    // gate-gap selections are already represented by the completed gate-gap
+    // event. Sending a second event for each of ~30k gates adds no truthful
+    // information and substantially slows the live UI.
+    if (String(payload && payload.label || '') !== 'gate-gap') progress.emit(kind, payload);
   };
   const provider = (cDay, tDay) => {
     const gateIndex = recorder.activeGateStack.length
@@ -961,7 +965,10 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
       && (traceOptions.gateDetailGateIndices === null
         || traceOptions.gateDetailGateIndices.has(gateIndex));
     const sauceId = 'sauce-' + String(recorder.nextSauceOrdinal);
-    progress.emit('sauce-start', { sauceId, calculationDay: cDay, targetDay: tDay, gateIndex });
+    const streamSauceProgress = gateIndex === null || streamGateDetail;
+    if (streamSauceProgress) {
+      progress.emit('sauce-start', { sauceId, calculationDay: cDay, targetDay: tDay, gateIndex });
+    }
     // Full checkpoint retention is needed for central Sauce runs and for an
     // explicitly requested gate detail. Live progress alone only observes and
     // streams compact rows; it must not retain a second full gate-Sauce snapshot.
@@ -986,14 +993,16 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
       collector ? collector.snapshot() : null,
     );
     const run = recorder.sauceRuns[recorder.sauceRuns.length - 1];
-    progress.emit('sauce-finished', {
-      sauceId: run.id,
-      gateIndex,
-      calculationDay: cDay,
-      targetDay: tDay,
-      finalBowls: run.compact.finalBowls.slice(),
-      orderAtDrop46: run.compact.orderAtDrop46.slice(),
-    });
+    if (streamSauceProgress) {
+      progress.emit('sauce-finished', {
+        sauceId: run.id,
+        gateIndex,
+        calculationDay: cDay,
+        targetDay: tDay,
+        finalBowls: run.compact.finalBowls.slice(),
+        orderAtDrop46: run.compact.orderAtDrop46.slice(),
+      });
+    }
     if (streamGateDetail) {
       const detail = deepFreeze(exactJsonValue(fullSauceProjection(
         run,
