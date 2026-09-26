@@ -23,16 +23,15 @@
   }
 
   /*
-   * Canonical live-stage quotations copied verbatim from:
-   * Sargon-17-Green/Marak/megillah/original/Megilat_HaItim_Yehuda_FINAL_2026-09-18.md
-   * Original SHA-256 pinned by Marak:
-   * 7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b
-   * The canonical quotations remain Judaean Hebrew in every UI locale.
+   * Canonical live-stage quotations copied verbatim from the Hebrew Scroll:
+   * https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html
+   * This is the pseudo-archaic Hebrew source text; the quotations remain
+   * unchanged in every UI locale.
    */
   const megillahStageGuide = Object.freeze({
     inputs: Object.freeze({
       explanationKey: 'cooking.live.explain.inputs',
-      source: 'מגילת העיתים · דברי בעל הלוח אל הסופר הכותב ואל חכם הימים',
+      source: 'מגילת העיתים · דברי בעל הלוח אל הסופר הכותב ואל חכם העיתים',
       quote: 'למלאכת הלוח קח שני ימים. לראשון קרא יום המעשה ולשני קרא היום אשר עליו תשאל.',
     }),
     gates: Object.freeze({
@@ -43,37 +42,37 @@
     yearAnchor: Object.freeze({
       explanationKey: 'cooking.live.explain.yearAnchor',
       source: 'מגילת העיתים · לוח שמונה עשר: שנת חמשת אלפים',
-      quote: 'לשנה אשר תבחר קרא שנת חמשת אלפים מיום ברוא מפלצת הספגטי המעופפת שמים וארץ.',
+      quote: 'לשנה אשר תבחר קרא שנת חמשת אלפים לבריאת העולם.',
     }),
     years: Object.freeze({
       explanationKey: 'cooking.live.explain.years',
       source: 'מגילת העיתים · לוח תשעה עשר: יתר השנים',
-      quote: 'משנת חמשת אלפים לך שנה אחר שנה. לא תדלג אל שנה רחוקה.',
+      quote: 'משנת חמשת אלפים לך שנה אחר שנה. לא תדלג אל שנה רחוקה לאמר כל שנה תולד משער אחותה אשר לפניה.',
     }),
     stones: Object.freeze({
       explanationKey: 'cooking.live.explain.stones',
       source: 'מגילת העיתים · לוח שבע: חמש האבנים',
-      quote: 'כל אחת מחמש האבנים החדשות עשה מחמש האבנים הישנות.',
+      quote: 'כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.',
     }),
     hidden: Object.freeze({
       explanationKey: 'cooking.live.explain.hidden',
       source: 'מגילת העיתים · לוח שמונה: שבע הטיפות הנסתרות',
-      quote: 'טחון כל טיפה נסתרת שבע פעמים.',
+      quote: 'כל טיפה נסתרת טחון שבע טחינות.',
     }),
     visible: Object.freeze({
       explanationKey: 'cooking.live.explain.visible',
       source: 'מגילת העיתים · לוח תשעה: עשיית שש וארבעים הטיפות',
-      quote: 'את ראשית הטיפה טחון עשתי עשרה פעמים.',
+      quote: 'את ראשית הטיפה טחון עשתי עשרה טחינות.',
     }),
     bowls: Object.freeze({
       explanationKey: 'cooking.live.explain.bowls',
-      source: 'מגילת העיתים · לוח שלשה עשר: לבלול את שש הקערות אחר הטיפה',
+      source: 'מגילת העיתים · לוח שלושה עשר: בלילת שש הקערות אחר הטיפה',
       quote: 'כל שש הקערות ישתו מן המספרים אשר היו בהן טרם הטיפה.',
     }),
     postStirs: Object.freeze({
       explanationKey: 'cooking.live.explain.postStirs',
-      source: 'מגילת העיתים · לוח ארבעה עשר: לבלול שתים עשרה פעמים אחר הטיפה האחרונה',
-      quote: 'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה פעמים.',
+      source: 'מגילת העיתים · לוח ארבעה עשר: שתים עשרה בלילות אחר הטיפה האחרונה',
+      quote: 'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה בלילות.',
     }),
     selection: Object.freeze({
       explanationKey: 'cooking.live.explain.selection',
@@ -98,7 +97,7 @@
     weaving: Object.freeze({
       explanationKey: 'cooking.live.explain.weaving',
       source: 'מגילת העיתים · לוח אחד ועשרים: החודשים · שזירת החודשים',
-      quote: 'לא תבחר כל יום לבדו. את השזירה כולה תבחר.',
+      quote: 'לא תבחר את הימים אחד אחד. את השזירה כולה תבחר.',
     }),
     result: Object.freeze({
       explanationKey: 'cooking.live.explain.result',
@@ -108,7 +107,7 @@
     position: Object.freeze({
       explanationKey: 'cooking.live.explain.position',
       source: 'מגילת העיתים · לוח אחרון: לדעת שם היום',
-      quote: 'אחרי אשר תעשה את דבר השנה הדברים האלה יוצאים ממקום היום בתוך מלאכת השנה אשר עשית.',
+      quote: 'אחרי אשר תעשה את דבר השנה הדברים האלה יוצאים ממקום היום בתוך אשר עשית.',
     }),
   });
 
