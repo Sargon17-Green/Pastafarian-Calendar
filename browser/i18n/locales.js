@@ -25,91 +25,92 @@
   const MEGILLAH_CANONICAL_URL = 'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html';
 
   /*
-   * Canonical live-stage quotations copied verbatim from the Hebrew Scroll:
+   * Canonical live-stage quotations copied verbatim from the Hebrew Scroll as
+   * currently published by Blogger. Source audit: the current Blogger JSON/Atom
+   * feed for this post, not an older preserved draft or adaptation.
    * https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html
-   * This is the pseudo-archaic Hebrew source text; the quotations remain
-   * unchanged in every UI locale.
+   * The Hebrew quotations remain unchanged in every UI locale.
    */
   const megillahStageGuide = Object.freeze({
     inputs: Object.freeze({
       explanationKey: 'cooking.live.explain.inputs',
-      source: 'מגילת העיתים · דברי בעל הלוח אל הסופר הכותב ואל חכם העיתים',
-      quote: 'למלאכת הלוח קח שני ימים. לראשון קרא יום המעשה ולשני קרא היום אשר עליו תשאל.',
+      source: 'מגילת העיתים · דברי בעל הלוח אל הסופר המעתיק ואל חכם העיתים',
+      quote: 'כל צמד ימים הניתן ללוח, הראשון הוא יום המעשה והשני הוא היום הנשאל. החלפת שני הימים אסורה.',
     }),
     gates: Object.freeze({
       explanationKey: 'cooking.live.explain.gates',
-      source: 'מגילת העיתים · לוח שבעה עשר: שערי הקציצה',
-      quote: 'וכן עשה שער אחר שער.',
+      source: 'מגילת העיתים · הלוח השבעה עשר: שערי הקציצה',
+      quote: 'כדי למצוא את המרחק מן השער הראשון אל השני, השתמש ביום השני שלאחר יום היסוד כיום הנשאל. לשער השלישי השתמש ביום השלישי, וכן הלאה. יום המעשה נשאר יום היסוד.',
     }),
     yearAnchor: Object.freeze({
       explanationKey: 'cooking.live.explain.yearAnchor',
-      source: 'מגילת העיתים · לוח שמונה עשר: שנת חמשת אלפים',
-      quote: 'לשנה אשר תבחר קרא שנת חמשת אלפים לבריאת העולם.',
+      source: 'מגילת העיתים · הלוח השמונה עשר: שנת חמשת אלפים',
+      quote: 'השנה הזאת תיקרא שנת חמשת אלפים לבריאת העולם.',
     }),
     years: Object.freeze({
       explanationKey: 'cooking.live.explain.years',
-      source: 'מגילת העיתים · לוח תשעה עשר: יתר השנים',
-      quote: 'משנת חמשת אלפים לך שנה אחר שנה. לא תדלג אל שנה רחוקה לאמר כל שנה תולד משער אחותה אשר לפניה.',
+      source: 'מגילת העיתים · הלוח התשעה עשר: יתר השנים',
+      quote: 'אל ידלג חכם העיתים משנת חמשת אלפים אל שנה רחוקה לפי אומדן. ילך שנה אחר שנה, כי כל שנה נולדת משער קודמתה.',
     }),
     stones: Object.freeze({
       explanationKey: 'cooking.live.explain.stones',
-      source: 'מגילת העיתים · לוח שבע: חמש האבנים',
-      quote: 'כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.',
+      source: 'מגילת העיתים · הלוח השביעי: חמש האבנים',
+      quote: 'חשב את כל חמש האבנים החדשות מתוך חמש האבנים הישנות של אותה טיפה קודמת. אל ישתמש באבן חדשה שמצא כדי לחשב אבן חדשה אחרת.',
     }),
     hidden: Object.freeze({
       explanationKey: 'cooking.live.explain.hidden',
-      source: 'מגילת העיתים · לוח שמונה: שבע הטיפות הנסתרות',
-      quote: 'כל טיפה נסתרת טחון שבע טחינות.',
+      source: 'מגילת העיתים · הלוח השמיני: שבע הטיפות הנסתרות',
+      quote: 'לאחר ההוספה שמור, ואחר כך טחן כל טיפה נסתרת שבע טחינות.',
     }),
     visible: Object.freeze({
       explanationKey: 'cooking.live.explain.visible',
-      source: 'מגילת העיתים · לוח תשעה: עשיית שש וארבעים הטיפות',
-      quote: 'את ראשית הטיפה טחון עשתי עשרה טחינות.',
+      source: 'מגילת העיתים · הלוח התשיעי: עשיית שש וארבעים הטיפות',
+      quote: 'את עיסת הטיפה טחן אחת עשרה טחינות.',
     }),
     bowls: Object.freeze({
       explanationKey: 'cooking.live.explain.bowls',
-      source: 'מגילת העיתים · לוח שלושה עשר: בלילת שש הקערות אחר הטיפה',
-      quote: 'כל שש הקערות ישתו מן המספרים אשר היו בהן טרם הטיפה.',
+      source: 'מגילת העיתים · הלוח השלושה עשר: בחישת שש הקערות',
+      quote: 'כל שש הקערות שותות מן התכולות הישנות, ולא מן החדשות.',
     }),
     postStirs: Object.freeze({
       explanationKey: 'cooking.live.explain.postStirs',
-      source: 'מגילת העיתים · לוח ארבעה עשר: שתים עשרה בלילות אחר הטיפה האחרונה',
-      quote: 'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה בלילות.',
+      source: 'מגילת העיתים · הלוח הארבעה עשר: שתים עשרה הבחישות שלאחר המזיגה',
+      quote: 'לאחר שנמזגה הטיפה השש וארבעים, אל יאמר החכם כי מלאכת הקערות נשלמה.',
     }),
     selection: Object.freeze({
       explanationKey: 'cooking.live.explain.selection',
-      source: 'מגילת העיתים · לוח ששה עשר: לבחור אחת מדרכים רבות',
-      quote: 'כי יהיו דברים רבים אשר יוכל החכם לקחת ואחד מהם יקח ולא שניים קרא לכל אחד מהם דרך.',
+      source: 'מגילת העיתים · הלוח השישה עשר: בחירה שווה בין דרכים',
+      quote: 'היו לפני החכם דרכים כשרות, ערוכות זו אחר זו בסדר שנקבע להן. למספרן קרא מניין הדרכים.',
     }),
     structure: Object.freeze({
       explanationKey: 'cooking.live.explain.structure',
-      source: 'מגילת העיתים · לוח אחרון: לדעת שם היום',
-      quote: 'אחרי אשר תדע את שער ראשית השנה ואת שער אחריתה עשה פעם אחת את כל דבר השנה.',
+      source: 'מגילת העיתים · הלוח האחרון: ידיעת שם היום',
+      quote: 'לאחר שנמצאו גבולות השנה, חשב את מבנה השנה פעם אחת כאשר יום המעשה הוא היום הראשון מבין שני הימים שניתנו, והיום הנשאל המוזן למלאכת המבנה הוא היום הראשון של אותה שנה.',
     }),
     cutlets: Object.freeze({
       explanationKey: 'cooking.live.explain.cutlets',
-      source: 'מגילת העיתים · לוח עשרים: הקציצות',
-      quote: 'כספר החלקים אשר תבחר כן תחלק השנה לקציצות.',
+      source: 'מגילת העיתים · הלוח העשרים: הקציצות',
+      quote: 'כל שנה תחולק לשש קציצות לפחות ולא יותר משבע עשרה.',
     }),
     months: Object.freeze({
       explanationKey: 'cooking.live.explain.months',
-      source: 'מגילת העיתים · לוח אחד ועשרים: החודשים',
-      quote: 'כספר ימי החודשים אשר תבחר כן יהיו ימי החודשים בשנה.',
+      source: 'מגילת העיתים · הלוח האחד ועשרים: החודשים',
+      quote: 'כל חודש יכיל לפחות ארבעה ימים ולא יותר משלושה ועשרים ומאה ימים.',
     }),
     weaving: Object.freeze({
       explanationKey: 'cooking.live.explain.weaving',
-      source: 'מגילת העיתים · לוח אחד ועשרים: החודשים · שזירת החודשים',
-      quote: 'לא תבחר את הימים אחד אחד. את השזירה כולה תבחר.',
+      source: 'מגילת העיתים · הלוח האחד ועשרים: החודשים · שזירת החודשים',
+      quote: 'אין לבחור כל יום לבדו. הבחירה היא של האריג כולו.',
     }),
     result: Object.freeze({
       explanationKey: 'cooking.live.explain.result',
-      source: 'מגילת העיתים · לוח אחרון: לדעת שם היום',
-      quote: 'אחרי אשר תעשה את כל אלה הוצא מן היום אשר עליו שאלת חמשה דברים.',
+      source: 'מגילת העיתים · הלוח האחרון: ידיעת שם היום',
+      quote: 'אלה חמשת הדברים היוצאים ממלאכת היום, וזה סדרם:',
     }),
     position: Object.freeze({
       explanationKey: 'cooking.live.explain.position',
-      source: 'מגילת העיתים · לוח אחרון: לדעת שם היום',
-      quote: 'אחרי אשר תעשה את דבר השנה הדברים האלה יוצאים ממקום היום בתוך אשר עשית.',
+      source: 'מגילת העיתים · הלוח האחרון: ידיעת שם היום',
+      quote: 'אין לשאול את הקערות מהו היום בחודש, מהו היום בקציצה, לאיזו קציצה שייך היום או לאיזה חודש הוא שייך. אלה תולדות מקומו של היום בתוך המבנה שכבר נקבע.',
     }),
   });
 
