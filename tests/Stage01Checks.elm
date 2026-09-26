@@ -337,7 +337,7 @@ checks =
         "sama niðurstaða fyrir sama inntak eftir millikall"
         (if sameSauce sauceA sauceAAgain then "sama niðurstaða" else "frávik eftir millikall")
     , check
-        "Sautján kótilettunöfn hafa nákvæma canonicalIndex-röð"
+        "Sautján kótelettunöfn hafa nákvæma canonicalIndex-röð"
         (indicesExactly 17 Catalog.cutletEntries)
         "1..17, hvert gildi einu sinni"
         (String.fromInt (List.length Catalog.cutletEntries) ++ " færslur")
@@ -347,7 +347,7 @@ checks =
         "1..47, hvert gildi einu sinni"
         (String.fromInt (List.length Catalog.monthEntries) ++ " færslur")
     , check
-        "Fryst kótilettuskrá hefur nákvæm íslensk heiti"
+        "Fryst kótelettuskrá hefur nákvæm íslensk heiti"
         (cutletTexts == Fixtures.cutletTexts)
         (String.join " | " Fixtures.cutletTexts)
         (String.join " | " cutletTexts)
