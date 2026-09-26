@@ -57,7 +57,7 @@ function cloneCounts(counts) {
 
 function normalizeTraceOptions(options) {
   if (options === null || options === undefined) {
-    return { onGateSauceDetail: null, gateDetailGateIndices: null };
+    return { onGateSauceDetail: null, gateDetailGateIndices: null, onProgress: null };
   }
   if (!options || typeof options !== 'object' || Array.isArray(options)) {
     throw new TypeError('Li options del cooking trace deve esser un plain object.');
@@ -67,6 +67,10 @@ function normalizeTraceOptions(options) {
     : options.onGateSauceDetail;
   if (onGateSauceDetail !== null && typeof onGateSauceDetail !== 'function') {
     throw new TypeError('onGateSauceDetail deve esser null o un function.');
+  }
+  const onProgress = options.onProgress === undefined ? null : options.onProgress;
+  if (onProgress !== null && typeof onProgress !== 'function') {
+    throw new TypeError('onProgress deve esser null o un function.');
   }
   let gateDetailGateIndices = null;
   if (options.gateDetailGateIndices !== undefined && options.gateDetailGateIndices !== null) {
@@ -81,7 +85,7 @@ function normalizeTraceOptions(options) {
       gateDetailGateIndices.add(index);
     }
   }
-  return { onGateSauceDetail, gateDetailGateIndices };
+  return { onGateSauceDetail, gateDetailGateIndices, onProgress };
 }
 
 function deepFreeze(value, seen = new Set()) {
@@ -119,6 +123,33 @@ function exactJsonValue(value, seen = new Set()) {
   }
   seen.delete(value);
   return out;
+}
+
+function createLiveProgressEmitter(callback) {
+  const enabled = typeof callback === 'function';
+  const startedAt = Date.now();
+  let previousAt = startedAt;
+  let sequence = 0;
+  return Object.freeze({
+    enabled,
+    emit(kind, payload = {}) {
+      if (!enabled) return;
+      const now = Date.now();
+      const event = deepFreeze(exactJsonValue({
+        sequence: ++sequence,
+        kind: String(kind),
+        elapsedMs: Math.max(0, now - startedAt),
+        durationMs: Math.max(0, now - previousAt),
+        payload,
+      }));
+      previousAt = now;
+      try {
+        callback(event);
+      } catch (_) {
+        // Progress is observational UI telemetry and may never change calendar semantics.
+      }
+    },
+  });
 }
 
 function canonicalIndexFor(group, text) {
@@ -171,6 +202,7 @@ function createCookingCheckpointCollector() {
   const visible = new Map();
   const initialBowls = [];
   const bowlRounds = [];
+  const postStirs = [];
   let stoneSeed = null;
   const stoneTransitions = [];
 
@@ -224,6 +256,15 @@ function createCookingCheckpointCollector() {
       });
       return;
     }
+    if (kind === 'post-stir') {
+      postStirs.push({
+        ...payload,
+        order: payload.order.slice(),
+        positions: Array.isArray(payload.positions) ? payload.positions.map((row) => ({ ...row })) : [],
+        afterBowls: payload.afterBowls.slice(),
+      });
+      return;
+    }
     throw new Error('Ínconosset cooking checkpoint: ' + String(kind));
   };
 
@@ -249,6 +290,7 @@ function createCookingCheckpointCollector() {
           })),
         initialBowls: initialBowls.slice().sort((a, b) => a.bowlId - b.bowlId),
         bowlRounds: bowlRounds.slice().sort((a, b) => a.ordinal - b.ordinal),
+        postStirs: postStirs.slice().sort((a, b) => a.stirIndex - b.stirIndex),
       };
     },
   };
@@ -397,17 +439,20 @@ class NormativeExecutionRecorder {
 }
 
 class TracingGateRegistry extends core.Stage54GateRegistry {
-  constructor(provider, recorder, selectionCheckpoint) {
+  constructor(provider, recorder, selectionCheckpoint, progress) {
     super(provider);
     this.recorder = recorder;
+    this.progress = progress;
     this.cookingTraceSelectionCheckpoint = selectionCheckpoint;
   }
 
   gateGap(signedIndex) {
     this.recorder.beginGateGap(signedIndex);
+    this.progress.emit('gate-gap-start', { signedIndex });
     try {
       const gap = super.gateGap(signedIndex);
       this.recorder.finishGateGap(signedIndex, gap);
+      this.progress.emit('gate-gap-finished', { signedIndex, gap });
       return gap;
     } finally {
       this.recorder.endGateGap(signedIndex);
@@ -415,45 +460,62 @@ class TracingGateRegistry extends core.Stage54GateRegistry {
   }
 
   ensureIndex(index) {
+    const wasKnown = this.recorder.gates.has(index);
     const day = super.ensureIndex(index);
     this.recorder.recordGate(index, day);
+    if (!wasKnown) this.progress.emit('gate-ready', { index, day });
     return day;
   }
 }
 
 class TracingYearMemory extends core.Stage58RememberedYearDetourManager {
-  constructor(provider, recorder) {
+  constructor(provider, recorder, progress) {
     super(provider);
     this.recorder = recorder;
+    this.progress = progress;
   }
 
   rememberYear5000(calculationDay, year) {
+    const first = this.recorder.year5000 === null;
     this.recorder.recordYear5000(year);
+    if (first) this.progress.emit('year-5000-memory', { calculationDay, year: cloneYear(year) });
     return super.rememberYear5000(calculationDay, year);
   }
 
   rememberTransition(calculationDay, knownYear, direction, resultYear) {
     const value = super.rememberTransition(calculationDay, knownYear, direction, resultYear);
     this.recorder.recordTransition(calculationDay, knownYear, direction, resultYear);
+    this.progress.emit('year-transition', {
+      calculationDay,
+      direction,
+      fromYear: cloneYear(knownYear),
+      toYear: cloneYear(resultYear),
+    });
     return value;
   }
 
   rememberAuthoritative(calculationDay, year, lineage = 'origin') {
+    const before = this.recorder.authoritativeYears.length;
     const value = super.rememberAuthoritative(calculationDay, year, lineage);
     this.recorder.recordAuthoritativeYear(year, lineage);
+    if (this.recorder.authoritativeYears.length !== before) {
+      this.progress.emit('year-authoritative', { calculationDay, lineage, year: cloneYear(year) });
+    }
     return value;
   }
 }
 
 class TracingStage57Manager extends core.Stage57MonsterIntegrationManager {
-  constructor(registry, selectionCheckpoint) {
+  constructor(registry, selectionCheckpoint, progressCheckpoint) {
     super(registry);
     this.cookingTraceSelectionCheckpoint = selectionCheckpoint;
+    this.cookingTraceProgressCheckpoint = progressCheckpoint;
   }
 
   prepareFinal(calculationDay, targetDay) {
     const context = super.prepareFinal(calculationDay, targetDay);
     context.cookingTraceSelectionCheckpoint = this.cookingTraceSelectionCheckpoint;
+    context.cookingTraceProgressCheckpoint = this.cookingTraceProgressCheckpoint;
     return context;
   }
 }
@@ -837,9 +899,14 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
   requireDay(calculationDay, 'Li calculation-day del cooking trace');
   requireDay(targetDay, 'Li target-day del cooking trace');
   const traceOptions = normalizeTraceOptions(options);
+  const progress = createLiveProgressEmitter(traceOptions.onProgress);
+  progress.emit('run-start', { calculationDay, targetDay });
 
   const recorder = new NormativeExecutionRecorder();
-  const selectionCheckpoint = (kind, payload) => recorder.recordSelection(kind, payload);
+  const selectionCheckpoint = (kind, payload) => {
+    recorder.recordSelection(kind, payload);
+    progress.emit(kind, payload);
+  };
   const provider = (cDay, tDay) => {
     const gateIndex = recorder.activeGateStack.length
       ? recorder.activeGateStack[recorder.activeGateStack.length - 1]
@@ -848,13 +915,21 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
       && traceOptions.onGateSauceDetail !== null
       && (traceOptions.gateDetailGateIndices === null
         || traceOptions.gateDetailGateIndices.has(gateIndex));
-    const collector = gateIndex === null || streamGateDetail
+    const sauceId = 'sauce-' + String(recorder.nextSauceOrdinal);
+    progress.emit('sauce-start', { sauceId, calculationDay: cDay, targetDay: tDay, gateIndex });
+    const collector = gateIndex === null || streamGateDetail || progress.enabled
       ? createCookingCheckpointCollector()
+      : null;
+    const checkpoint = collector
+      ? (kind, payload) => {
+        collector.observer(kind, payload);
+        progress.emit(kind, { sauceId, gateIndex, ...payload });
+      }
       : null;
     const result = core.sauceWithScarsStage56(
       cDay,
       tDay,
-      collector ? collector.observer : null,
+      checkpoint,
     );
     recorder.recordSauce(
       cDay,
@@ -863,6 +938,14 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
       collector ? collector.snapshot() : null,
     );
     const run = recorder.sauceRuns[recorder.sauceRuns.length - 1];
+    progress.emit('sauce-finished', {
+      sauceId: run.id,
+      gateIndex,
+      calculationDay: cDay,
+      targetDay: tDay,
+      finalBowls: run.compact.finalBowls.slice(),
+      orderAtDrop46: run.compact.orderAtDrop46.slice(),
+    });
     if (streamGateDetail) {
       const detail = deepFreeze(exactJsonValue(fullSauceProjection(
         run,
@@ -882,12 +965,14 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
     return result;
   };
 
-  const registry = new TracingGateRegistry(provider, recorder, selectionCheckpoint);
-  const manager = new TracingStage57Manager(registry, selectionCheckpoint);
+  const registry = new TracingGateRegistry(provider, recorder, selectionCheckpoint, progress);
+  const progressCheckpoint = (kind, payload) => progress.emit(kind, payload);
+  const manager = new TracingStage57Manager(registry, selectionCheckpoint, progressCheckpoint);
   manager.sauceProvider = provider;
-  manager.stage58YearMemoryScar = new TracingYearMemory(provider, recorder);
+  manager.stage58YearMemoryScar = new TracingYearMemory(provider, recorder, progress);
 
   const routed = manager.executeCalendarDate(calculationDay, targetDay);
+  progress.emit('semantic-execution-finished', { result: routed.result.slice() });
   if (recorder.gateDetailSinkErrors.length) {
     const error = new Error('Un gate-detail sink fallit pos que li execution semantic finit.');
     error.cause = recorder.gateDetailSinkErrors[0];
@@ -968,6 +1053,11 @@ function calendarDateSpaghettiCookingTrace(calculationDay, targetDay, options = 
     },
   };
   trace.chapters = buildChapters(trace);
+  progress.emit('trace-ready', {
+    sauceRuns: recorder.sauceRuns.length,
+    gates: recorder.gates.size,
+    selections: recorder.selectionEvents.length,
+  });
 
   return deepFreeze(exactJsonValue(trace));
 }
