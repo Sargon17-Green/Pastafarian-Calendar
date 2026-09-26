@@ -997,8 +997,12 @@
       batch.sequence = Math.max(batch.sequence, Number(event.sequence) || 0);
       if (event.kind === 'sauce-finished') batch.sauceCount += 1;
       if (event.kind === 'selection-result' && p.output != null) batch.lastSelection = String(p.output);
-      if (event.kind === 'gate-gap-finished' && p.gap != null) batch.lastGap = String(p.gap);
-      if (event.kind === 'gate-ready') {
+      if (event.kind === 'gate-gap-finished') {
+        if (p.gap != null) batch.lastGap = String(p.gap);
+        batch.count += 1;
+        if (p.day != null) batch.lastDay = String(p.day);
+        if (batch.count >= 128) this._flushGateSweep();
+      } else if (event.kind === 'gate-ready') {
         batch.count += 1;
         if (p.day != null) batch.lastDay = String(p.day);
         if (batch.count >= 128) this._flushGateSweep();
