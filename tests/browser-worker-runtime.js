@@ -148,6 +148,16 @@ assert.strictEqual(typeof onMessage, 'function', 'Li Worker entry deve registrar
   assert.strictEqual(posted[1].value.trace.schemaVersion, '0.4.0');
 
   posted.length = 0;
+  cookingTraceCalls.length = 0;
+  await onMessage({ data: {
+    id: 230, operation: 'convertWithTrace', calculationDay: '10', targetDay: '2', buildId: 'build-A',
+    streamProgress: false,
+  } });
+  assert.strictEqual(posted.length, 1);
+  assert.strictEqual(posted[0].kind, 'result');
+  assert.strictEqual(cookingTraceCalls[0].options, null);
+
+  posted.length = 0;
   coreCalls.length = 0;
   await onMessage({ data: {
     id: 24, operation: 'getCutletView', calculationDay: '10', targetDay: '2', buildId: 'build-A',
