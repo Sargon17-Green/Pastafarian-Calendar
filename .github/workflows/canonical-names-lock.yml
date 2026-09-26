@@ -1,4 +1,4 @@
-name: Canonical Names Lock
+name: Lás kanónískra heita
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify canonical names lock
+      - name: Staðfesta lás kanónískra heita
         shell: bash
         run: |
           set -euo pipefail
@@ -20,7 +20,7 @@ jobs:
             [ -n "$expected" ] || continue
             actual="$(git cat-file blob "HEAD:$path" | sha256sum | cut -d' ' -f1)"
             if [ "$actual" != "$expected" ]; then
-              echo "::error file=$path::Canonical name lock mismatch"
+              echo "::error file=$path::Misræmi í lás kanónískra heita; vænt=$expected raun=$actual"
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
