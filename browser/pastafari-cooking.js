@@ -1094,17 +1094,23 @@
     _liveEventNumber(event) {
       const p = event && event.payload || {};
       const kind = String(event && event.kind || '');
-      if (kind === 'hidden-grind' || kind === 'visible-grind') return String(p.ordinal || '') + '.' + String(p.grind || '');
-      if (p.ordinal != null) return String(p.ordinal);
-      if (p.bowlId != null) return String(p.bowlId);
-      if (p.stirIndex != null) return String(p.stirIndex);
-      if (p.signedIndex != null) return String(p.signedIndex);
-      if (p.index != null) return String(p.index);
-      if (kind === 'year-transition' && p.toYear && p.toYear.number != null) return String(p.toYear.number);
-      if (p.number != null) return String(p.number);
-      if (p.count != null) return String(p.count);
-      if (kind === 'selection-result' && p.output != null) return exactDisplay(p.output);
-      if (p.sauceId) return String(p.sauceId).replace(/^sauce-/, '');
+      const compact = (value) => {
+        const text = String(value == null ? '' : value);
+        return text.length <= 5 ? text : text.slice(0, 4) + '…';
+      };
+      if (kind === 'hidden-grind' || kind === 'visible-grind') {
+        return compact(String(p.ordinal || '') + '.' + String(p.grind || ''));
+      }
+      if (p.ordinal != null) return compact(p.ordinal);
+      if (p.bowlId != null) return compact(p.bowlId);
+      if (p.stirIndex != null) return compact(p.stirIndex);
+      if (p.signedIndex != null) return compact(p.signedIndex);
+      if (p.index != null) return compact(p.index);
+      if (kind === 'year-transition' && p.toYear && p.toYear.number != null) return compact(p.toYear.number);
+      if (p.number != null) return compact(p.number);
+      if (p.count != null) return compact(p.count);
+      if (kind === 'selection-result' && p.output != null) return compact(p.output);
+      if (p.sauceId) return compact(String(p.sauceId).replace(/^sauce-/, ''));
       if (kind === 'final-result-ready' || kind === 'trace-ready') return '✓';
       return '·';
     }
