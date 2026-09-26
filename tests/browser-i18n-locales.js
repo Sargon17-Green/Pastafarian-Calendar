@@ -71,6 +71,22 @@ const REQUIRED_MESSAGES = Object.freeze([
   'cooking.live.now',
   'cooking.live.nextGate',
   'cooking.live.yearAnchor',
+  'cooking.live.explain.inputs',
+  'cooking.live.explain.gates',
+  'cooking.live.explain.yearAnchor',
+  'cooking.live.explain.years',
+  'cooking.live.explain.stones',
+  'cooking.live.explain.hidden',
+  'cooking.live.explain.visible',
+  'cooking.live.explain.bowls',
+  'cooking.live.explain.postStirs',
+  'cooking.live.explain.selection',
+  'cooking.live.explain.structure',
+  'cooking.live.explain.cutlets',
+  'cooking.live.explain.months',
+  'cooking.live.explain.weaving',
+  'cooking.live.explain.result',
+  'cooking.live.explain.position',
   'cooking.previous',
   'cooking.next',
   'cooking.exactShow',
@@ -207,6 +223,9 @@ assert.strictEqual(i18n.translate(en, 'cooking.title'), 'How this date was cooke
 assert.strictEqual(i18n.translate(en, 'cooking.live.title'), 'The calculation is in motion');
 assert.strictEqual(i18n.translate(he, 'cooking.live.title'), 'החישוב מתבשל עכשיו');
 assert.strictEqual(i18n.translate(he, 'cooking.live.now', { step: 'אבן 3' }), 'עכשיו: אבן 3…');
+assert(i18n.translate(he, 'cooking.live.explain.gates').includes('רצף שערים'));
+assert(i18n.translate(en, 'cooking.live.explain.weaving').includes('complete weaving'));
+assert(i18n.translate(de, 'cooking.live.explain.stones').includes('46 Zeilen'));
 assert.strictEqual(i18n.translate(he, 'cooking.close'), 'סגור');
 assert.strictEqual(i18n.translate(he, 'cooking.term.gate'), 'שער');
 assert.strictEqual(i18n.translate(he, 'cooking.term.gateGap'), 'מרווח שער');
