@@ -7,9 +7,22 @@ on:
     paths:
       - "browser/**"
       - "scripts/build-browser.js"
+      - "scripts/prepare-pages-site.js"
       - "tests/browser-*.js"
       - "src/**"
       - ".github/workflows/javascript-interlingue-browser-interface.yml"
+      - ".github/workflows/javascript-interlingue-pages-deploy.yml"
+  pull_request:
+    branches:
+      - 'JavaScript\+Interlingue'
+    paths:
+      - "browser/**"
+      - "scripts/build-browser.js"
+      - "scripts/prepare-pages-site.js"
+      - "tests/browser-*.js"
+      - "src/**"
+      - ".github/workflows/javascript-interlingue-browser-interface.yml"
+      - ".github/workflows/javascript-interlingue-pages-deploy.yml"
   workflow_dispatch:
 
 permissions:
@@ -53,6 +66,12 @@ jobs:
         run: |
           set -o pipefail
           node tests/browser-built-artifacts.js 2>&1 | tee -a browser-interface-ci.log
+
+      - name: Provar li Pages artefact complet
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/browser-pages-artifact.js 2>&1 | tee -a browser-interface-ci.log
 
       - name: Conservar li browser artefacts
         if: always()
