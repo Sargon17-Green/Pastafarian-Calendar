@@ -203,6 +203,12 @@ const PastafariEngineClient = engineApi.PastafariEngineClient;
   assert.strictEqual(tracedProgress[0].kind, 'stone-transition');
   assert.strictEqual(Object.isFrozen(traced.trace), true);
 
+  const tracedWithoutProgress = await client.convertWithTrace(10n, 8n);
+  assert.strictEqual(tracedWithoutProgress.result.year, '5000');
+  assert.strictEqual(tracedWithoutProgress.trace.schemaVersion, '0.4.0');
+  assert.strictEqual(workers[0].messages[4].operation, 'convertWithTrace');
+  assert.strictEqual(workers[0].messages[4].streamProgress, false);
+
   // A generated build must bind request and response to the same main/Worker ID.
   let coherentWorker;
   const coherentClient = new PastafariEngineClient({
