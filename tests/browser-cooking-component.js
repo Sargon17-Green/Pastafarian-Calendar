@@ -434,21 +434,89 @@ async function flush() {
   assert.strictEqual(live._els.title.textContent, 'החישוב מתבשל עכשיו');
   assert(!live._els.title.textContent.includes('בושל'), 'live title must not describe the calculation in past tense');
   assert.strictEqual(live._els.liveCurrent.textContent, 'מכינים את החישוב…');
+  assert(live._els.liveExplanation.textContent.includes('שני ימים נפרדים'),
+    'initial live explanation must describe the two input days');
+  assert.strictEqual(
+    live._els.megillahQuote.textContent,
+    'למלאכת הלוח קח שני ימים. לראשון קרא יום המעשה ולשני קרא היום אשר עליו תשאל.',
+  );
+  assert(live._els.megillahSource.textContent.includes('מגילת העיתים'));
+  assert(live.shadowRoot.innerHTML.includes('"SBL Hebrew", "Taamey Frank CLM"'),
+    'Megillah quotation must use a dedicated square/archaic Hebrew serif font stack');
 
   live.appendLiveProgress({ sequence: 1, kind: 'stone-transition', elapsedMs: 2, durationMs: 2, payload: { ordinal: 2, after: { w: '17' } } });
   await flush();
   assert(live._els.liveCurrent.textContent.includes(live._term('stone') + ' 3'),
     'current status must advance to the stone now being computed, not remain on the completed stone');
+  assert(live._els.liveExplanation.textContent.includes('46 שורות'),
+    'stone-stage explanation must describe the 46-row stone table');
+  assert.strictEqual(
+    live._els.megillahQuote.textContent,
+    'כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.',
+  );
 
   live.appendLiveProgress({ sequence: 2, kind: 'bowl-round', elapsedMs: 7, durationMs: 5, payload: { sauceId: 'sauce-1', ordinal: 1, drop: '51', afterBowls: ['1', '2', '3', '4', '5', '6'] } });
   await flush();
   assert(live._els.liveCurrent.textContent.includes(live._term('visibleDrop') + ' 2'),
     'current status must show the next visible drop after a completed bowl round');
+  assert(live._els.liveExplanation.textContent.includes('46 הטיפות הגלויות'),
+    'visible-drop explanation must follow the stage currently being awaited');
+  assert.strictEqual(
+    live._els.megillahQuote.textContent,
+    'את ראשית הטיפה טחון עשתי עשרה טחינות.',
+  );
 
   live.appendLiveProgress({ sequence: 3, kind: 'post-stir', elapsedMs: 10, durationMs: 3, payload: { sauceId: 'sauce-1', stirIndex: 1, afterBowls: ['7', '8', '9', '10', '11', '12'] } });
   await flush();
   assert(live._els.liveCurrent.textContent.includes(live._term('postStir') + ' 2'),
     'current status must show the post-stir presently being awaited');
+  assert(live._els.liveExplanation.textContent.includes('שתים עשרה בלילות'),
+    'post-stir explanation must match the current post-stir phase');
+  assert.strictEqual(
+    live._els.megillahQuote.textContent,
+    'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה בלילות.',
+  );
+
+  // Every live semantic context must map to the explanation/verse for the
+  // operation currently being awaited, including phase-boundary events.
+  const stageCases = [
+    [{ kind: 'unknown', payload: {} }, 'inputs'],
+    [{ kind: 'gate-gap-finished', payload: { signedIndex: '8' } }, 'gates'],
+    [{ kind: 'selection-result', payload: { label: 'gate-gap', gateIndex: '8' } }, 'gates'],
+    [{ kind: 'year-5000-ready', payload: {} }, 'yearAnchor'],
+    [{ kind: 'year-walk-step', payload: {} }, 'years'],
+    [{ kind: 'stone-transition', payload: { ordinal: 2 } }, 'stones'],
+    [{ kind: 'stone-transition', payload: { ordinal: 46 } }, 'hidden'],
+    [{ kind: 'visible-start', payload: { ordinal: 1 } }, 'visible'],
+    [{ kind: 'visible-grind', payload: { ordinal: 1, grind: 11 } }, 'bowls'],
+    [{ kind: 'bowl-round', payload: { ordinal: 46 } }, 'postStirs'],
+    [{ kind: 'post-stir', payload: { stirIndex: 12 } }, 'selection'],
+    [{ kind: 'year-resolution-finished', payload: {} }, 'structure'],
+    [{ kind: 'cutlet-count-ready', payload: {} }, 'cutlets'],
+    [{ kind: 'cutlets-materialized', payload: {} }, 'months'],
+    [{ kind: 'month-lengths-ready', payload: {} }, 'weaving'],
+    [{ kind: 'structure-finished', payload: {} }, 'result'],
+    [{ kind: 'final-result-ready', payload: {} }, 'position'],
+    [{ kind: 'selection-result', payload: { label: 'month-weaving' } }, 'months'],
+    [{ kind: 'selection-result', payload: { label: 'month-names-distinct-rank' } }, 'structure'],
+    [{ kind: 'month-names-ready', payload: {} }, 'structure'],
+  ];
+  for (const [event, expectedStage] of stageCases) {
+    assert.strictEqual(live._liveCurrentStage(event), expectedStage, 'wrong live guide stage for ' + event.kind + ':' + String(event.payload.label || ''));
+  }
+
+  const guideKeys = [
+    'inputs', 'gates', 'yearAnchor', 'years', 'stones', 'hidden', 'visible', 'bowls',
+    'postStirs', 'selection', 'structure', 'cutlets', 'months', 'weaving', 'result', 'position',
+  ];
+  for (const key of guideKeys) {
+    live._renderLiveStageGuide(key, true);
+    assert(live._els.liveExplanation.textContent.trim().length > 0, 'missing explanation for ' + key);
+    assert(live._els.megillahQuote.textContent.trim().length > 0, 'missing Megillah quote for ' + key);
+    assert(live._els.megillahSource.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
+  }
+
+  live._renderLiveStageGuide('postStirs', true);
   assert.strictEqual(live._liveEntries.length, 3);
   assert(treeText(live._els.pane).includes('סבב קערות'));
   assert(treeText(live._els.pane).includes('+5.0 ms'));
@@ -498,6 +566,15 @@ async function flush() {
   await flush();
   assert(compacted._els.liveCurrent.textContent.includes(compacted._t('cooking.live.nextGate')),
     'current gate status must describe the gate operation now being awaited, not the last completed gate');
+  assert(compacted._els.liveExplanation.textContent.includes('רצף שערים'),
+    'gate-stage explanation must describe the gate chain');
+  assert.strictEqual(compacted._els.megillahQuote.textContent, 'וכן עשה שער אחר שער.');
+  compacted.setAttribute('lang', 'en');
+  assert(compacted._els.liveExplanation.textContent.includes('chain of gates'),
+    'live explanation must translate when locale changes');
+  assert.strictEqual(compacted._els.megillahQuote.textContent, 'וכן עשה שער אחר שער.',
+    'canonical Megillah quotation must remain canonical pseudo-archaic Hebrew in every locale');
+  compacted.setAttribute('lang', 'he');
   assert.strictEqual(compacted._liveObservedCount, 256);
   assert.strictEqual(compacted._liveEntries.length, 2);
   assert(compacted._liveEntries.every((row) => row.kind === 'gate-run'));

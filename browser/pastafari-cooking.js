@@ -125,6 +125,8 @@
       this._liveObservedCount = 0;
       this._liveGateBatch = null;
       this._liveCurrentPending = null;
+      this._liveCurrentEvent = null;
+      this._liveGuideStageKey = null;
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -379,9 +381,53 @@
           .live-current {
             margin: 0;
             overflow-wrap: anywhere;
-            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-family: Arial, "Noto Sans Hebrew", "Segoe UI", sans-serif;
             font-size: clamp(1rem, 2vw, 1.35rem);
-            font-weight: 800;
+            font-weight: 850;
+          }
+          .live-stage-guide {
+            display: grid;
+            gap: .5rem;
+            margin-top: .55rem;
+            max-width: 72ch;
+          }
+          .live-explanation {
+            margin: 0;
+            color: #51483f;
+            font-size: .88rem;
+            line-height: 1.48;
+          }
+          .megillah-quote {
+            margin: 0;
+            padding: .52rem .72rem .45rem;
+            border: 1px solid #c7ae7a;
+            border-inline-start: .34rem solid #8a6327;
+            border-radius: .48rem;
+            background:
+              linear-gradient(90deg, rgb(194 150 72 / 8%), transparent 22%),
+              #fbf4df;
+            color: #2c2115;
+          }
+          .megillah-quote blockquote {
+            margin: 0;
+            direction: rtl;
+            text-align: right;
+            font-family: "SBL Hebrew", "Taamey Frank CLM", "Frank Ruehl CLM", "Noto Serif Hebrew", "David Libre", "Times New Roman", serif;
+            font-size: clamp(.95rem, 1.7vw, 1.08rem);
+            font-style: normal;
+            font-weight: 650;
+            line-height: 1.58;
+            letter-spacing: .008em;
+          }
+          .megillah-source {
+            margin-top: .24rem;
+            color: #6f5838;
+            direction: rtl;
+            font-family: "SBL Hebrew", "Taamey Frank CLM", "Frank Ruehl CLM", "Noto Serif Hebrew", "David Libre", "Times New Roman", serif;
+            font-size: .68rem;
+            font-weight: 700;
+            line-height: 1.3;
+            text-align: right;
           }
           @keyframes monster-float {
             0%, 100% { transform: translateY(.15rem) rotate(-1deg); }
@@ -814,6 +860,19 @@
             .kv dd { margin-bottom: .55rem; }
             .result-five { grid-template-columns: 1fr 1fr; }
           }
+          @media (max-width: 520px) {
+            .live-hero {
+              grid-template-columns: 1fr;
+              gap: .35rem;
+            }
+            .monster-stage {
+              width: 9rem;
+              height: 5.6rem;
+              justify-self: center;
+            }
+            .live-current-wrap { width: 100%; }
+            .live-stage-guide { max-width: none; }
+          }
           @media (max-width: 420px) {
             .result-five { grid-template-columns: 1fr; }
           }
@@ -825,7 +884,7 @@
             }
           }
           @media (forced-colors: active) {
-            .shell, .step-card, .sauce, .mini, .result-five > div { border: 2px solid CanvasText; }
+            .shell, .step-card, .sauce, .mini, .result-five > div, .megillah-quote { border: 2px solid CanvasText; }
           }
           @media print {
             :host(:not([open])) { display: none !important; }
@@ -869,6 +928,13 @@
             <div class="live-current-wrap">
               <p class="live-current-kicker"><span>PASTAFARI</span> · <span class="live-kicker"></span></p>
               <p class="live-current" role="status" aria-live="polite"></p>
+              <div class="live-stage-guide" aria-live="off">
+                <p class="live-explanation"></p>
+                <figure class="megillah-quote" lang="he" dir="rtl">
+                  <blockquote></blockquote>
+                  <figcaption class="megillah-source"></figcaption>
+                </figure>
+              </div>
             </div>
           </section>
           <div class="status loading" hidden role="status" aria-live="polite">
@@ -895,6 +961,10 @@
         retry: this.shadowRoot.querySelector('.retry'),
         liveKicker: this.shadowRoot.querySelector('.live-kicker'),
         liveCurrent: this.shadowRoot.querySelector('.live-current'),
+        liveExplanation: this.shadowRoot.querySelector('.live-explanation'),
+        megillahQuote: this.shadowRoot.querySelector('.megillah-quote blockquote'),
+        megillahSource: this.shadowRoot.querySelector('.megillah-source'),
+        stageGuide: this.shadowRoot.querySelector('.live-stage-guide'),
         pane: this.shadowRoot.querySelector('.pane'),
       };
       this._els.close.addEventListener('click', () => this.close());
@@ -1003,6 +1073,8 @@
       this._liveObservedCount = 0;
       this._liveGateBatch = null;
       this._liveCurrentPending = null;
+      this._liveCurrentEvent = null;
+      this._liveGuideStageKey = null;
       if (this._els && this._els.pane) this._els.pane.replaceChildren();
       if (this._els && this._els.nav) this._els.nav.replaceChildren();
     }
@@ -1022,6 +1094,7 @@
       if (this._els && this._els.liveCurrent) {
         this._els.liveCurrent.textContent = this._t('cooking.live.starting');
       }
+      this._renderLiveStageGuide('inputs', true);
       return this;
     }
 
@@ -1223,6 +1296,15 @@
       this._els.errorText.textContent = this._t('cooking.error');
       this._els.retry.textContent = this._t('cooking.retry');
       if (this._els.liveKicker) this._els.liveKicker.textContent = this._t('cooking.live.kicker');
+      if (live) {
+        if (this._liveCurrentEvent && this._els.liveCurrent) {
+          this._els.liveCurrent.textContent = this._liveCurrentLabel(this._liveCurrentEvent);
+          this._renderLiveStageGuide(this._liveCurrentStage(this._liveCurrentEvent), true);
+        } else {
+          if (this._els.liveCurrent) this._els.liveCurrent.textContent = this._t('cooking.live.starting');
+          this._renderLiveStageGuide('inputs', true);
+        }
+      }
       this._els.nav.setAttribute('aria-label', this._t(live ? 'cooking.live.title' : 'cooking.title'));
     }
 
@@ -1365,6 +1447,120 @@
       }
     }
 
+    _liveCurrentStage(event) {
+      const p = event && event.payload || {};
+      const kind = String(event && event.kind || '');
+      switch (kind) {
+        case 'run-start':
+        case 'year-resolution-start':
+          return 'years';
+        case 'conversion-cache-hit':
+          return 'position';
+        case 'gate-gap-start':
+        case 'gate-gap-finished':
+        case 'gate-ready':
+        case 'gate-run':
+          return 'gates';
+        case 'year-5000-ready':
+        case 'year-5000-memory':
+          return 'yearAnchor';
+        case 'year-walk-anchor':
+        case 'year-walk-step':
+        case 'year-transition':
+        case 'year-authoritative':
+        case 'year-walk-finished':
+          return 'years';
+        case 'year-resolution-finished':
+        case 'structure-start':
+          return 'structure';
+        case 'sauce-start':
+        case 'stone-seed':
+          return 'stones';
+        case 'stone-transition': {
+          const ordinal = Number(p.ordinal);
+          return Number.isFinite(ordinal) && ordinal >= 46 ? 'hidden' : 'stones';
+        }
+        case 'hidden-start':
+          return 'hidden';
+        case 'hidden-grind': {
+          const ordinal = Number(p.ordinal);
+          const grind = Number(p.grind);
+          return ordinal === 7 && grind === 7 ? 'bowls' : 'hidden';
+        }
+        case 'initial-bowl': {
+          const id = Number(p.bowlId);
+          return Number.isFinite(id) && id >= 6 ? 'visible' : 'bowls';
+        }
+        case 'visible-start':
+          return 'visible';
+        case 'visible-grind': {
+          const grind = Number(p.grind);
+          return Number.isFinite(grind) && grind >= 11 ? 'bowls' : 'visible';
+        }
+        case 'bowl-round': {
+          const ordinal = Number(p.ordinal);
+          return Number.isFinite(ordinal) && ordinal >= 46 ? 'postStirs' : 'visible';
+        }
+        case 'post-stir': {
+          const stir = Number(p.stirIndex);
+          return Number.isFinite(stir) && stir >= 12 ? 'selection' : 'postStirs';
+        }
+        case 'sauce-finished':
+          return 'selection';
+        case 'selection-result': {
+          const label = String(p.label || '');
+          if (label === 'gate-gap') return 'gates';
+          if (label === 'YEAR_5000-semantic') return 'years';
+          if (label === 'cutlet-count' || label === 'cutlet-partition-raw'
+              || label === 'cutlet-partition-semantic' || label === 'cutlet-names-distinct-rank') return 'cutlets';
+          if (label === 'month-count') return 'months';
+          if (label === 'month-lengths') return 'weaving';
+          if (label === 'month-weaving') return 'months';
+          if (label === 'month-names-distinct-rank') return 'structure';
+          return 'selection';
+        }
+        case 'cutlet-count-ready':
+        case 'cutlet-partition-ready':
+        case 'cutlet-names-ready':
+          return 'cutlets';
+        case 'cutlets-materialized':
+        case 'month-count-ready':
+          return 'months';
+        case 'month-lengths-ready':
+          return 'weaving';
+        case 'month-weaving-ready':
+          return 'months';
+        case 'month-names-ready':
+          return 'structure';
+        case 'structure-finished':
+          return 'result';
+        case 'final-result-ready':
+        case 'semantic-execution-finished':
+        case 'trace-ready':
+        case 'view-start':
+        case 'view-day-ready':
+        case 'view-finished':
+          return 'position';
+        default:
+          return 'inputs';
+      }
+    }
+
+    _renderLiveStageGuide(stageKey, force = false) {
+      if (!this._els || !this._els.liveExplanation || !this._els.megillahQuote || !this._els.megillahSource) return;
+      const localeData = root.PastafariBrowserLocaleData;
+      const guideTable = localeData && localeData.megillahStageGuide;
+      if (!guideTable) return;
+      const key = guideTable[stageKey] ? stageKey : 'inputs';
+      if (!force && this._liveGuideStageKey === key) return;
+      const guide = guideTable[key];
+      this._liveGuideStageKey = key;
+      this._els.liveExplanation.textContent = this._t(guide.explanationKey);
+      this._els.megillahQuote.textContent = guide.quote;
+      this._els.megillahSource.textContent = guide.source;
+      if (this._els.stageGuide) this._els.stageGuide.dataset.stage = key;
+    }
+
     _liveCurrentStep(event) {
       const p = event && event.payload || {};
       const kind = String(event && event.kind || '');
@@ -1436,14 +1632,19 @@
         }
         case 'post-stir': {
           const stir = Number(p.stirIndex);
-          return Number.isFinite(stir) && stir < 12 ? post(stir + 1) : this._term('sauce');
+          return Number.isFinite(stir) && stir < 12 ? post(stir + 1) : this._term('selection');
         }
         case 'sauce-finished':
           return this._term('selection');
         case 'selection-result': {
           const label = String(p.label || '');
+          if (label === 'gate-gap') {
+            const gateIndex = p.gateIndex != null ? p.gateIndex : p.signedIndex;
+            return this._term('gateGap') + (gateIndex == null ? '' : ' ' + number(gateIndex));
+          }
           if (label === 'cutlet-count') return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
-          if (label === 'cutlet-partition-raw' || label === 'cutlet-partition-semantic') return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
+          if (label === 'cutlet-partition-raw') return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+          if (label === 'cutlet-partition-semantic') return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
           if (label === 'cutlet-names-distinct-rank') return this._chapterTitle('cutlets');
           if (label === 'month-count') return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
           if (label === 'month-lengths') return this._term('weaving');
@@ -1471,10 +1672,9 @@
         case 'month-names-ready':
           return this._chapterTitle('structure-sauce');
         case 'structure-finished':
-          return this._chapterTitle('position');
+          return this._chapterTitle('result');
         case 'final-result-ready':
         case 'semantic-execution-finished':
-          return this._t('cooking.live.trace');
         case 'trace-ready':
         case 'view-start':
         case 'view-day-ready':
@@ -1824,7 +2024,10 @@
       const flush = () => {
         this._liveRenderQueued = false;
         if (this._liveCurrentPending && this._els && this._els.liveCurrent) {
-          this._els.liveCurrent.textContent = this._liveCurrentLabel(this._liveCurrentPending);
+          const current = this._liveCurrentPending;
+          this._liveCurrentEvent = current;
+          this._els.liveCurrent.textContent = this._liveCurrentLabel(current);
+          this._renderLiveStageGuide(this._liveCurrentStage(current));
           this._liveCurrentPending = null;
         }
         this._drainLiveRows();
@@ -1857,6 +2060,7 @@
         this._resetLiveLog('running');
         this._hideStatus();
         if (this._els && this._els.liveCurrent) this._els.liveCurrent.textContent = this._t('cooking.live.starting');
+        this._renderLiveStageGuide('inputs', true);
         const trace = await service.getCookingTrace(targetJdn, calculationJdn, {
           onProgress: (event) => {
             if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return;
@@ -1957,12 +2161,22 @@
 
     _applyLocaleLabelsOnly() {
       if (!this._locale || !this._els) return;
-      this._els.title.textContent = this._t('cooking.title');
-      this._els.subtitle.textContent = this._t('cooking.subtitle');
+      const live = this.hasAttribute('live');
+      this._els.title.textContent = this._t(live ? 'cooking.live.title' : 'cooking.title');
+      this._els.subtitle.textContent = this._t(live ? 'cooking.live.subtitle' : 'cooking.subtitle');
       this._els.close.textContent = this._t('cooking.close');
       this._els.loadingText.textContent = this._t('cooking.loading');
       this._els.retry.textContent = this._t('cooking.retry');
       if (this._els.liveKicker) this._els.liveKicker.textContent = this._t('cooking.live.kicker');
+      if (live) {
+        if (this._liveCurrentEvent && this._els.liveCurrent) {
+          this._els.liveCurrent.textContent = this._liveCurrentLabel(this._liveCurrentEvent);
+          this._renderLiveStageGuide(this._liveCurrentStage(this._liveCurrentEvent), true);
+        } else {
+          if (this._els.liveCurrent) this._els.liveCurrent.textContent = this._t('cooking.live.starting');
+          this._renderLiveStageGuide('inputs', true);
+        }
+      }
     }
 
     _renderNav() {
