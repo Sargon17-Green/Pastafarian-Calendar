@@ -553,6 +553,62 @@ async function flush() {
   assert.strictEqual(live._els.shell.hasAttribute('open'), true);
   assert.strictEqual(live._els.nav.children.length, 0);
   assert(treeText(live._els.pane).includes('אבן'));
+  assert(treeCountByClass(live._els.pane, 'retained-stage-guide') >= 3,
+    'retained how-cooked log must keep semantic stage guides instead of only the live hero guide');
+  assert(treeText(live._els.pane).includes('46 שורות'),
+    'retained log must keep the localized stone-stage explanation');
+  assert(treeText(live._els.pane).includes('כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.'),
+    'retained log must keep the canonical pseudo-archaic Megillah quotation');
+  const retainedSource = treeFindByClass(live._els.pane, 'megillah-source-link');
+  assert(retainedSource, 'retained stage guide must expose a clickable Megillah source');
+  assert.strictEqual(
+    retainedSource.getAttribute('href'),
+    'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
+  );
+  assert.strictEqual(retainedSource.getAttribute('target'), '_blank');
+  assert.strictEqual(retainedSource.getAttribute('rel'), 'noopener noreferrer');
+  const retainedGuide = treeFindByClass(live._els.pane, 'retained-stage-guide');
+  assert.strictEqual(retainedGuide.getAttribute('aria-live'), 'off',
+    'retained quotations must stay outside live screen-reader announcements');
+
+  // In a real browser requestAnimationFrame can coalesce thousands of progress
+  // events. A semantic-stage boundary must update the current line and guide
+  // immediately, and finishLiveTrace must flush the final pending micro-step.
+  const queuedFrames = [];
+  sandbox.requestAnimationFrame = (callback) => {
+    queuedFrames.push(callback);
+    return queuedFrames.length;
+  };
+  const rafLive = new PastafariCookingElement();
+  rafLive.setAttribute('lang', 'he');
+  rafLive.setAttribute('date', '2026-09-11');
+  rafLive.setAttribute('calculation-date', '2026-09-11');
+  rafLive.connectedCallback();
+  rafLive.beginLiveTrace();
+  rafLive.appendLiveProgress({
+    sequence: 1,
+    kind: 'stone-transition',
+    elapsedMs: 2,
+    durationMs: 2,
+    payload: { ordinal: 2, after: { w: '17' } },
+  });
+  assert(rafLive._els.liveCurrent.textContent.includes(rafLive._term('stone') + ' 3'),
+    'semantic stage boundary must not wait for requestAnimationFrame');
+  assert.strictEqual(rafLive._els.stageGuide.dataset.stage, 'stones');
+  rafLive.appendLiveProgress({
+    sequence: 2,
+    kind: 'stone-transition',
+    elapsedMs: 3,
+    durationMs: 1,
+    payload: { ordinal: 3, after: { w: '18' } },
+  });
+  assert(rafLive._els.liveCurrent.textContent.includes(rafLive._term('stone') + ' 3'),
+    'same-stage micro-steps may remain frame-throttled');
+  rafLive.finishLiveTrace(sampleTrace());
+  assert(rafLive._els.liveCurrent.textContent.includes(rafLive._term('stone') + ' 4'),
+    'finishLiveTrace must synchronously flush the last pending current operation');
+  for (const callback of queuedFrames.splice(0)) callback();
+  delete sandbox.requestAnimationFrame;
 
   // A huge real gate walk must remain truthful without turning tens of thousands
   // of completed gates into tens of thousands of DOM cards. Every gate updates
