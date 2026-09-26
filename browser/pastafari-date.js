@@ -1382,6 +1382,7 @@
           if (this._els.cookingPanel && typeof this._els.cookingPanel.beginLiveTrace === 'function') {
             this._els.cookingPanel.beginLiveTrace();
             if (this._els.loading) this._els.loading.hidden = true;
+            this._clearLoadingNotice();
           }
         }
 
