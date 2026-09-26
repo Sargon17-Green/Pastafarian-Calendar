@@ -124,6 +124,7 @@
       this._liveRenderedLocale = null;
       this._liveObservedCount = 0;
       this._liveGateBatch = null;
+      this._liveCurrentPending = null;
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -933,6 +934,7 @@
       this._liveRenderedLocale = null;
       this._liveObservedCount = 0;
       this._liveGateBatch = null;
+      this._liveCurrentPending = null;
       if (this._els && this._els.pane) this._els.pane.replaceChildren();
       if (this._els && this._els.nav) this._els.nav.replaceChildren();
     }
@@ -1044,13 +1046,11 @@
       copy.payload = copy.payload && typeof copy.payload === 'object' ? copy.payload : {};
       this._liveObservedCount += 1;
       if (this._liveState === 'idle' || this._liveState === 'complete') this._liveState = 'running';
-      if (this._els && this._els.liveCurrent) {
-        this._els.liveCurrent.textContent = this._liveEventLabel(copy);
-      }
+      this._liveCurrentPending = copy;
+      this._scheduleLiveDrain();
       if (this._consumeGateSweep(copy)) return;
       this._flushGateSweep();
       this._liveEntries.push(copy);
-      this._scheduleLiveDrain();
     }
 
     finishLiveTrace(trace = null) {
@@ -1537,6 +1537,10 @@
       this._liveRenderQueued = true;
       const flush = () => {
         this._liveRenderQueued = false;
+        if (this._liveCurrentPending && this._els && this._els.liveCurrent) {
+          this._els.liveCurrent.textContent = this._liveEventLabel(this._liveCurrentPending);
+          this._liveCurrentPending = null;
+        }
         this._drainLiveRows();
       };
       if (typeof root.requestAnimationFrame === 'function') root.requestAnimationFrame(flush);
