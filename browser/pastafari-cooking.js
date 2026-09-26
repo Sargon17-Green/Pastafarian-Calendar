@@ -1294,9 +1294,18 @@
     _appendLiveRow(event) {
       const key = this._liveGroupKey(event);
       const group = this._ensureLiveGroup(key);
+      const kind = String(event && event.kind || '');
+      const markerOnly = kind === 'run-start'
+        || kind === 'year-resolution-start'
+        || kind === 'structure-start'
+        || kind === 'view-start'
+        || kind === 'gate-gap-start'
+        || kind === 'sauce-start';
+      if (kind === 'sauce-start') this._ensureLiveSauce(group, event);
+      if (markerOnly) return false;
       group.value += 1;
       group.count.textContent = String(group.value);
-      const target = key === 'sauce' ? this._ensureLiveSauce(group, event) : group;
+      const target = this._ensureLiveSauce(group, event);
       if (target !== group) {
         target.value += 1;
         target.count.textContent = String(target.value);
@@ -1320,6 +1329,7 @@
       time.textContent = this._liveTimeText(event);
       li.append(copy, time);
       target.list.append(li);
+      return true;
     }
 
     _prepareLiveLog(reset = false) {
