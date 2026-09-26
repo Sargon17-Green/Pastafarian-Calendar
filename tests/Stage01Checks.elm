@@ -342,7 +342,7 @@ checks =
         "1..17, hvert gildi einu sinni"
         (String.fromInt (List.length Catalog.cutletEntries) ++ " færslur")
     , check
-        "Fjörutíu og sjö mánaðanöfn hafa nákvæma canonicalIndex-röð"
+        "Fjörutíu og sjö mánaðarnöfn hafa nákvæma canonicalIndex-röð"
         (indicesExactly 47 Catalog.monthEntries)
         "1..47, hvert gildi einu sinni"
         (String.fromInt (List.length Catalog.monthEntries) ++ " færslur")
