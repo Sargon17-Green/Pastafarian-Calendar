@@ -522,7 +522,7 @@ async function flush() {
     assert(live._els.megillahQuote.textContent.trim().length > 0, 'missing Megillah quote for ' + key);
     assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
     assert.strictEqual(
-      live._els.megillahSourceLink.href,
+      live._els.megillahSourceLink.getAttribute('href'),
       'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
       'missing canonical source link for ' + key,
     );
