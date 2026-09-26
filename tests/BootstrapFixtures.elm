@@ -31,7 +31,7 @@ cutletTexts =
     , "hugsun"
     , "fjórir hlutar af níu"
     , "Palgúrasj"
-    , "papýrussef"
+    , "papýrusstör"
     , "klasi"
     , "sporðdreki"
     , "aska"
