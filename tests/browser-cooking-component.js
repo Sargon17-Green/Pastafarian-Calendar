@@ -375,16 +375,21 @@ async function flush() {
   const targetJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-11'));
   assert.strictEqual(calls[0].targetJdn, String(targetJdn));
   assert.strictEqual(calls[0].calculationJdn, String(targetJdn));
-  assert(lazy.shadowRoot.innerHTML.includes('role="region"'));
+  assert(lazy.shadowRoot.innerHTML.includes('<dialog class="shell"'));
+  assert(lazy.shadowRoot.innerHTML.includes('aria-modal="true"'));
   assert(lazy.shadowRoot.innerHTML.includes('aria-labelledby="pastafari-cooking-title"'));
+  assert.strictEqual(lazy._els.shell.hasAttribute('open'), true);
+  assert.strictEqual(lazy._els.close.focused, true);
 
   // Reopening the same completed trace reuses component-local trace state and
   // does not schedule another expensive semantic execution.
   lazy.close();
   assert.strictEqual(lazy.hasAttribute('open'), false);
+  assert.strictEqual(lazy._els.shell.hasAttribute('open'), false);
   lazy.setAttribute('open', '');
   await flush();
   assert.strictEqual(calls.length, 1);
+  assert.strictEqual(lazy._els.shell.hasAttribute('open'), true);
   assert.strictEqual(lazy.trace.schemaVersion, '0.4.0');
 
   // Locale switching rerenders the component without a semantic rerun.

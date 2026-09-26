@@ -41,6 +41,8 @@
             "language.label": "Lingue",
             "loading.kicker": "Calculat localmen",
             "loading.title": "Trovante li cutlet e li date…",
+
+            "loading.long": "Li calcul continua localmen; ti casu prende plu long quam usual.",
             "error.kicker": "Ne posse monstrar li calendare",
             "error.reload": "Recargar",
             "error.timeout": "Li calcul dura tro long.",
@@ -49,6 +51,14 @@
             "calendar.toolbarAria": "Navigation inter cutlets",
             "calendar.previous": "Precedent cutlet",
             "calendar.next": "Sequent cutlet",
+
+            "calendar.target": "Retro al date serchat",
+
+            "calendar.earlierDays": "Dies precedent",
+
+            "calendar.laterDays": "Dies sequent",
+
+            "calendar.windowStatus": "Dies {start}–{end} de {total}",
             "calendar.daysAria": "Dies in li cutlet {cutletName}",
             "calendar.currentCutlet": "Annu {year} · cutlet",
             "calendar.cutletDescription": "{count} dies · die de labor: {actionDate}",
@@ -60,6 +70,40 @@
             "settings.heading": "Changear li die de labor",
             "settings.invalid": "Li die de labor es invalid. Controla li date e prova denov.",
             "reverse.action.cancel": "Anullar",
+
+            "reverse.open": "Serchar per date Pastafarian",
+
+            "reverse.heading": "Trovar un die per su date Pastafarian",
+
+            "reverse.year": "Annu desde li Creation del Munde",
+
+            "reverse.cutlet": "Cutlet",
+
+            "reverse.dayInCutlet": "Die in li cutlet",
+
+            "reverse.month": "Mensu",
+
+            "reverse.dayInMonth": "Die in li mensu",
+
+            "reverse.calculation": "Die de labor",
+
+            "reverse.submit": "Serchar",
+
+            "reverse.searching": "Serchante…",
+
+            "reverse.progress": "Examinat {scanned} candidates…",
+
+            "reverse.noMatch": "Null concordant date Gregorian esset trovat.",
+
+            "reverse.found": "Resultates trovat: {count}.",
+
+            "reverse.incomplete": "Li sercha haltat ante que completitá esset provat.",
+
+            "reverse.error": "Li sercha retrograd fallit.",
+
+            "reverse.timeout": "Li sercha retrograd dura tro long.",
+
+            "reverse.useResult": "Monstrar ti date",
             "field.day": "Die",
             "date.aria": "Annu {year} desde li Creation del Munde, die {dayInCutlet} in li cutlet {cutletName}, die {dayInMonth} in li mensu {monthName}",
             "date.cutletLine": "Die {dayInCutlet} in li cutlet {cutletName}",
@@ -210,6 +254,8 @@
             "language.label": "Language",
             "loading.kicker": "Calculated locally",
             "loading.title": "Finding the cutlet and date…",
+
+            "loading.long": "The calculation is still running locally; this case is taking longer than usual.",
             "error.kicker": "Unable to display the calendar",
             "error.reload": "Reload",
             "error.timeout": "The calculation is taking too long.",
@@ -218,6 +264,14 @@
             "calendar.toolbarAria": "Cutlet navigation",
             "calendar.previous": "Previous cutlet",
             "calendar.next": "Next cutlet",
+
+            "calendar.target": "Return to searched date",
+
+            "calendar.earlierDays": "Earlier days",
+
+            "calendar.laterDays": "Later days",
+
+            "calendar.windowStatus": "Days {start}–{end} of {total}",
             "calendar.daysAria": "Days in the cutlet {cutletName}",
             "calendar.currentCutlet": "Year {year} · cutlet",
             "calendar.cutletDescription": "{count} days · day of working: {actionDate}",
@@ -229,6 +283,40 @@
             "settings.heading": "Change the day of working",
             "settings.invalid": "The day of working is invalid. Check the date and try again.",
             "reverse.action.cancel": "Cancel",
+
+            "reverse.open": "Search by Pastafarian date",
+
+            "reverse.heading": "Find a day by its Pastafarian date",
+
+            "reverse.year": "Year from the Creation of the World",
+
+            "reverse.cutlet": "Cutlet",
+
+            "reverse.dayInCutlet": "Day in cutlet",
+
+            "reverse.month": "Month",
+
+            "reverse.dayInMonth": "Day in month",
+
+            "reverse.calculation": "Day of working",
+
+            "reverse.submit": "Search",
+
+            "reverse.searching": "Searching…",
+
+            "reverse.progress": "Scanned {scanned} candidates…",
+
+            "reverse.noMatch": "No matching Gregorian date was found.",
+
+            "reverse.found": "Matching dates found: {count}.",
+
+            "reverse.incomplete": "The search stopped before completeness was proved.",
+
+            "reverse.error": "Reverse search failed.",
+
+            "reverse.timeout": "Reverse search took too long.",
+
+            "reverse.useResult": "Show this date",
             "field.day": "Day",
             "date.aria": "Year {year} from the Creation of the World, day {dayInCutlet} in the cutlet {cutletName}, day {dayInMonth} in the month {monthName}",
             "date.cutletLine": "Day {dayInCutlet} in the cutlet {cutletName}",
@@ -379,6 +467,8 @@
             "language.label": "\u05E9\u05E4\u05D4",
             "loading.kicker": "\u05DE\u05D7\u05E9\u05D1 \u05DE\u05E7\u05D5\u05DE\u05D9\u05EA",
             "loading.title": "\u05DE\u05D0\u05EA\u05E8 \u05D0\u05EA \u05D4\u05E7\u05E6\u05D9\u05E6\u05D4 \u05D5\u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA…",
+
+            "loading.long": "החישוב עדיין מתבצע מקומית; המקרה הזה נמשך זמן רב מהרגיל.",
             "error.kicker": "\u05DC\u05D0 \u05E0\u05D9\u05EA\u05DF \u05DC\u05D4\u05E6\u05D9\u05D2 \u05D0\u05EA \u05D4\u05DC\u05D5\u05D7",
             "error.reload": "\u05D8\u05E2\u05D9\u05E0\u05D4 \u05DE\u05D7\u05D3\u05E9",
             "error.timeout": "\u05D4\u05D7\u05D9\u05E9\u05D5\u05D1 \u05E0\u05DE\u05E9\u05DA \u05D6\u05DE\u05DF \u05E8\u05D1 \u05DE\u05D3\u05D9.",
@@ -388,6 +478,14 @@
             "calendar.previous": "\u05D4\u05E7\u05E6\u05D9\u05E6\u05D4 \u05D4\u05E7\u05D5\u05D3\u05DE\u05EA",
             "calendar.today": "\u05D7\u05D6\u05E8\u05D4 \u05DC\u05D4\u05D9\u05D5\u05DD",
             "calendar.next": "\u05D4\u05E7\u05E6\u05D9\u05E6\u05D4 \u05D4\u05D1\u05D0\u05D4",
+
+            "calendar.target": "\u05D7\u05D6\u05E8\u05D4 \u05DC\u05EA\u05D0\u05E8\u05D9\u05DA \u05E9\u05D7\u05D9\u05E4\u05E9\u05EA",
+
+            "calendar.earlierDays": "\u05D9\u05DE\u05D9\u05DD \u05E7\u05D5\u05D3\u05DE\u05D9\u05DD",
+
+            "calendar.laterDays": "\u05D9\u05DE\u05D9\u05DD \u05D4\u05D1\u05D0\u05D9\u05DD",
+
+            "calendar.windowStatus": "\u05D9\u05DE\u05D9\u05DD {start}\u2013{end} \u05DE\u05EA\u05D5\u05DA {total}",
             "calendar.daysAria": "\u05D9\u05DE\u05D9 \u05D4\u05E7\u05E6\u05D9\u05E6\u05D4 {cutletName}",
             "calendar.currentCutlet": "\u05E9\u05E0\u05D4 {year} · \u05E7\u05E6\u05D9\u05E6\u05D4",
             "calendar.cutletDescription": "{count} \u05D9\u05DE\u05D9\u05DD · \u05D9\u05D5\u05DD \u05D4\u05DE\u05E2\u05E9\u05D4: {actionDate}",
@@ -399,6 +497,40 @@
             "settings.heading": "\u05E9\u05D9\u05E0\u05D5\u05D9 \u05D9\u05D5\u05DD \u05D4\u05DE\u05E2\u05E9\u05D4",
             "settings.invalid": "\u05D9\u05D5\u05DD \u05D4\u05DE\u05E2\u05E9\u05D4 \u05D0\u05D9\u05E0\u05D5 \u05EA\u05E7\u05D9\u05DF. \u05D1\u05D3\u05E7\u05D5 \u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05D5\u05E0\u05E1\u05D5 \u05E9\u05D5\u05D1.",
             "reverse.action.cancel": "\u05D1\u05D9\u05D8\u05D5\u05DC \u05D4\u05D7\u05D9\u05E4\u05D5\u05E9",
+
+            "reverse.open": "חיפוש לפי תאריך פסטפרי",
+
+            "reverse.heading": "מציאת יום לפי התאריך הפסטפרי שלו",
+
+            "reverse.year": "שנה לבריאת העולם",
+
+            "reverse.cutlet": "קציצה",
+
+            "reverse.dayInCutlet": "יום בקציצה",
+
+            "reverse.month": "חודש",
+
+            "reverse.dayInMonth": "יום בחודש",
+
+            "reverse.calculation": "יום המעשה",
+
+            "reverse.submit": "חיפוש",
+
+            "reverse.searching": "מחפש…",
+
+            "reverse.progress": "נבדקו {scanned} מועמדים…",
+
+            "reverse.noMatch": "לא נמצא תאריך גרגוריאני תואם.",
+
+            "reverse.found": "נמצאו {count} תאריכים תואמים.",
+
+            "reverse.incomplete": "החיפוש נעצר לפני שהוכח שהוא ממצה.",
+
+            "reverse.error": "החיפוש ההפוך נכשל.",
+
+            "reverse.timeout": "החיפוש ההפוך נמשך זמן רב מדי.",
+
+            "reverse.useResult": "הצג תאריך זה",
             "field.day": "\u05D9\u05D5\u05DD",
             "date.aria": "\u05E9\u05E0\u05EA {year} \u05DC\u05D1\u05E8\u05D9\u05D0\u05EA \u05D4\u05E2\u05D5\u05DC\u05DD, \u05D9\u05D5\u05DD {dayInCutlet} \u05DC\u05E7\u05E6\u05D9\u05E6\u05D4 {cutletName}, {dayInMonth} \u05D1\u05D7\u05D5\u05D3\u05E9 {monthName}",
             "date.yearLine": "\u05E9\u05E0\u05EA {year} \u05DC\u05D1\u05E8\u05D9\u05D0\u05EA \u05D4\u05E2\u05D5\u05DC\u05DD",
@@ -548,6 +680,8 @@
             "language.label": "اللغة",
             "loading.kicker": "يُحسب محليًا",
             "loading.title": "جارٍ العثور على القطعة والتاريخ…",
+
+            "loading.long": "لا يزال الحساب جارياً محلياً؛ هذه الحالة تستغرق وقتاً أطول من المعتاد.",
             "error.kicker": "تعذر عرض التقويم",
             "error.reload": "إعادة التحميل",
             "error.timeout": "يستغرق الحساب وقتًا أطول من اللازم.",
@@ -557,6 +691,14 @@
             "calendar.previous": "القطعة السابقة",
             "calendar.today": "العودة إلى اليوم",
             "calendar.next": "القطعة التالية",
+
+            "calendar.target": "العودة إلى التاريخ الذي بحثت عنه",
+
+            "calendar.earlierDays": "أيام أسبق",
+
+            "calendar.laterDays": "أيام لاحقة",
+
+            "calendar.windowStatus": "الأيام {start}–{end} من {total}",
             "calendar.daysAria": "الأيام في القطعة {cutletName}",
             "calendar.currentCutlet": "السنة {year} · قطعة",
             "calendar.cutletDescription": "{count} يومًا · يوم العمل: {actionDate}",
@@ -568,6 +710,40 @@
             "settings.heading": "تغيير يوم العمل",
             "settings.invalid": "يوم العمل غير صالح. تحقّق من التاريخ وحاول مرة أخرى.",
             "reverse.action.cancel": "إلغاء البحث",
+
+            "reverse.open": "البحث بالتاريخ الباستافاري",
+
+            "reverse.heading": "العثور على يوم من تاريخه الباستافاري",
+
+            "reverse.year": "السنة منذ خلق العالم",
+
+            "reverse.cutlet": "القطعة",
+
+            "reverse.dayInCutlet": "اليوم في القطعة",
+
+            "reverse.month": "الشهر",
+
+            "reverse.dayInMonth": "اليوم في الشهر",
+
+            "reverse.calculation": "يوم العمل",
+
+            "reverse.submit": "بحث",
+
+            "reverse.searching": "جارٍ البحث…",
+
+            "reverse.progress": "تم فحص {scanned} مرشحًا…",
+
+            "reverse.noMatch": "لم يُعثر على تاريخ غريغوري مطابق.",
+
+            "reverse.found": "عدد التواريخ المطابقة: {count}.",
+
+            "reverse.incomplete": "توقف البحث قبل إثبات اكتماله.",
+
+            "reverse.error": "فشل البحث العكسي.",
+
+            "reverse.timeout": "استغرق البحث العكسي وقتًا أطول من اللازم.",
+
+            "reverse.useResult": "عرض هذا التاريخ",
             "field.day": "اليوم",
             "date.aria": "السنة {year} منذ خلق العالم، اليوم {dayInCutlet} في القطعة {cutletName}، اليوم {dayInMonth} في الشهر {monthName}",
             "date.yearLine": "السنة {year} منذ خلق العالم",
@@ -717,6 +893,8 @@
             "language.label": "Язык",
             "loading.kicker": "Вычисляется локально",
             "loading.title": "Поиск котлеты и даты…",
+
+            "loading.long": "Вычисление всё ещё выполняется локально; этот случай занимает больше времени, чем обычно.",
             "error.kicker": "Не удаётся отобразить календарь",
             "error.reload": "Перезагрузить",
             "error.timeout": "Расчёт выполняется слишком долго.",
@@ -726,6 +904,14 @@
             "calendar.previous": "Предыдущая котлета",
             "calendar.today": "Вернуться к сегодня",
             "calendar.next": "Следующая котлета",
+
+            "calendar.target": "Вернуться к искомой дате",
+
+            "calendar.earlierDays": "Более ранние дни",
+
+            "calendar.laterDays": "Более поздние дни",
+
+            "calendar.windowStatus": "Дни {start}–{end} из {total}",
             "calendar.daysAria": "Дни в котлете {cutletName}",
             "calendar.currentCutlet": "Год {year} · котлета",
             "calendar.cutletDescription": "{count} дней · день действия: {actionDate}",
@@ -737,6 +923,40 @@
             "settings.heading": "Изменить день действия",
             "settings.invalid": "День действия недопустим. Проверьте дату и повторите попытку.",
             "reverse.action.cancel": "Отменить поиск",
+
+            "reverse.open": "Поиск по пастафарианской дате",
+
+            "reverse.heading": "Найти день по его пастафарианской дате",
+
+            "reverse.year": "Год от Сотворения мира",
+
+            "reverse.cutlet": "Котлета",
+
+            "reverse.dayInCutlet": "День в котлете",
+
+            "reverse.month": "Месяц",
+
+            "reverse.dayInMonth": "День в месяце",
+
+            "reverse.calculation": "День действия",
+
+            "reverse.submit": "Найти",
+
+            "reverse.searching": "Поиск…",
+
+            "reverse.progress": "Проверено кандидатов: {scanned}…",
+
+            "reverse.noMatch": "Подходящая григорианская дата не найдена.",
+
+            "reverse.found": "Найдено совпадений: {count}.",
+
+            "reverse.incomplete": "Поиск остановлен до доказательства полноты.",
+
+            "reverse.error": "Обратный поиск завершился ошибкой.",
+
+            "reverse.timeout": "Обратный поиск занял слишком много времени.",
+
+            "reverse.useResult": "Показать эту дату",
             "field.day": "День",
             "date.aria": "Год {year} от Сотворения мира, день {dayInCutlet} в котлете {cutletName}, день {dayInMonth} в месяце {monthName}",
             "date.yearLine": "Год {year} от Сотворения мира",
@@ -886,6 +1106,8 @@
             "language.label": "Langue",
             "loading.kicker": "Calculé localement",
             "loading.title": "Recherche de la boulette et de la date…",
+
+            "loading.long": "Le calcul se poursuit toujours localement ; ce cas prend plus de temps que d’habitude.",
             "error.kicker": "Impossible d’afficher le calendrier",
             "error.reload": "Recharger",
             "error.timeout": "Le calcul prend trop de temps.",
@@ -895,6 +1117,14 @@
             "calendar.previous": "Boulette précédente",
             "calendar.today": "Retour à aujourd’hui",
             "calendar.next": "Boulette suivante",
+
+            "calendar.target": "Retour à la date recherchée",
+
+            "calendar.earlierDays": "Jours précédents",
+
+            "calendar.laterDays": "Jours suivants",
+
+            "calendar.windowStatus": "Jours {start}–{end} sur {total}",
             "calendar.daysAria": "Jours de la boulette {cutletName}",
             "calendar.currentCutlet": "Année {year} · boulette",
             "calendar.cutletDescription": "{count} jours · jour de travail : {actionDate}",
@@ -906,6 +1136,40 @@
             "settings.heading": "Changer le jour de travail",
             "settings.invalid": "Le jour de travail n’est pas valide. Vérifiez la date et réessayez.",
             "reverse.action.cancel": "Annuler la recherche",
+
+            "reverse.open": "Rechercher par date pastafarienne",
+
+            "reverse.heading": "Trouver un jour à partir de sa date pastafarienne",
+
+            "reverse.year": "Année depuis la Création du Monde",
+
+            "reverse.cutlet": "Boulette",
+
+            "reverse.dayInCutlet": "Jour dans la boulette",
+
+            "reverse.month": "Mois",
+
+            "reverse.dayInMonth": "Jour dans le mois",
+
+            "reverse.calculation": "Jour de travail",
+
+            "reverse.submit": "Rechercher",
+
+            "reverse.searching": "Recherche…",
+
+            "reverse.progress": "{scanned} candidats examinés…",
+
+            "reverse.noMatch": "Aucune date grégorienne correspondante n’a été trouvée.",
+
+            "reverse.found": "Dates correspondantes trouvées : {count}.",
+
+            "reverse.incomplete": "La recherche s’est arrêtée avant que son exhaustivité soit démontrée.",
+
+            "reverse.error": "La recherche inverse a échoué.",
+
+            "reverse.timeout": "La recherche inverse a pris trop de temps.",
+
+            "reverse.useResult": "Afficher cette date",
             "field.day": "Jour",
             "date.aria": "Année {year} depuis la Création du Monde, jour {dayInCutlet} dans la boulette {cutletName}, jour {dayInMonth} dans le mois {monthName}",
             "date.yearLine": "Année {year} depuis la Création du Monde",
@@ -1055,6 +1319,8 @@
             "language.label": "Sprache",
             "loading.kicker": "Lokal berechnet",
             "loading.title": "Schnitzel und Datum werden gesucht…",
+
+            "loading.long": "Die Berechnung läuft weiterhin lokal; dieser Fall dauert länger als gewöhnlich.",
             "error.kicker": "Kalender kann nicht angezeigt werden",
             "error.reload": "Neu laden",
             "error.timeout": "Die Berechnung dauert zu lange.",
@@ -1064,6 +1330,14 @@
             "calendar.previous": "Vorheriges Schnitzel",
             "calendar.today": "Zurück zu heute",
             "calendar.next": "Nächstes Schnitzel",
+
+            "calendar.target": "Zurück zum gesuchten Datum",
+
+            "calendar.earlierDays": "Frühere Tage",
+
+            "calendar.laterDays": "Spätere Tage",
+
+            "calendar.windowStatus": "Tage {start}–{end} von {total}",
             "calendar.daysAria": "Tage im Schnitzel {cutletName}",
             "calendar.currentCutlet": "Jahr {year} · Schnitzel",
             "calendar.cutletDescription": "{count} Tage · Tag der Ausführung: {actionDate}",
@@ -1075,6 +1349,40 @@
             "settings.heading": "Tag der Ausführung ändern",
             "settings.invalid": "Der Tag der Ausführung ist ungültig. Prüfe das Datum und versuche es erneut.",
             "reverse.action.cancel": "Suche abbrechen",
+
+            "reverse.open": "Nach pastafarischem Datum suchen",
+
+            "reverse.heading": "Einen Tag über sein pastafarisches Datum finden",
+
+            "reverse.year": "Jahr seit der Erschaffung der Welt",
+
+            "reverse.cutlet": "Schnitzel",
+
+            "reverse.dayInCutlet": "Tag im Schnitzel",
+
+            "reverse.month": "Monat",
+
+            "reverse.dayInMonth": "Tag im Monat",
+
+            "reverse.calculation": "Tag der Ausführung",
+
+            "reverse.submit": "Suchen",
+
+            "reverse.searching": "Suche…",
+
+            "reverse.progress": "{scanned} Kandidaten geprüft…",
+
+            "reverse.noMatch": "Es wurde kein passendes gregorianisches Datum gefunden.",
+
+            "reverse.found": "Gefundene passende Daten: {count}.",
+
+            "reverse.incomplete": "Die Suche wurde beendet, bevor Vollständigkeit nachgewiesen war.",
+
+            "reverse.error": "Die Rückwärtssuche ist fehlgeschlagen.",
+
+            "reverse.timeout": "Die Rückwärtssuche dauerte zu lange.",
+
+            "reverse.useResult": "Dieses Datum anzeigen",
             "field.day": "Tag",
             "date.aria": "Jahr {year} seit der Erschaffung der Welt, Tag {dayInCutlet} im Schnitzel {cutletName}, Tag {dayInMonth} im Monat {monthName}",
             "date.yearLine": "Jahr {year} seit der Erschaffung der Welt",
@@ -1224,6 +1532,8 @@
             "language.label": "Idioma",
             "loading.kicker": "Calculado localmente",
             "loading.title": "Buscando la croqueta y la fecha…",
+
+            "loading.long": "El cálculo sigue ejecutándose localmente; este caso está tardando más de lo habitual.",
             "error.kicker": "No se puede mostrar el calendario",
             "error.reload": "Recargar",
             "error.timeout": "El cálculo está tardando demasiado.",
@@ -1233,6 +1543,14 @@
             "calendar.previous": "Croqueta anterior",
             "calendar.today": "Volver a hoy",
             "calendar.next": "Croqueta siguiente",
+
+            "calendar.target": "Volver a la fecha buscada",
+
+            "calendar.earlierDays": "Días anteriores",
+
+            "calendar.laterDays": "Días siguientes",
+
+            "calendar.windowStatus": "Días {start}–{end} de {total}",
             "calendar.daysAria": "Días de la croqueta {cutletName}",
             "calendar.currentCutlet": "Año {year} · croqueta",
             "calendar.cutletDescription": "{count} días · día de trabajo: {actionDate}",
@@ -1244,6 +1562,40 @@
             "settings.heading": "Cambiar el día de trabajo",
             "settings.invalid": "El día de trabajo no es válido. Comprueba la fecha e inténtalo de nuevo.",
             "reverse.action.cancel": "Cancelar búsqueda",
+
+            "reverse.open": "Buscar por fecha pastafari",
+
+            "reverse.heading": "Encontrar un día a partir de su fecha pastafari",
+
+            "reverse.year": "Año desde la Creación del Mundo",
+
+            "reverse.cutlet": "Croqueta",
+
+            "reverse.dayInCutlet": "Día en la croqueta",
+
+            "reverse.month": "Mes",
+
+            "reverse.dayInMonth": "Día en el mes",
+
+            "reverse.calculation": "Día de trabajo",
+
+            "reverse.submit": "Buscar",
+
+            "reverse.searching": "Buscando…",
+
+            "reverse.progress": "Se han examinado {scanned} candidatos…",
+
+            "reverse.noMatch": "No se encontró ninguna fecha gregoriana coincidente.",
+
+            "reverse.found": "Fechas coincidentes encontradas: {count}.",
+
+            "reverse.incomplete": "La búsqueda se detuvo antes de demostrar que era exhaustiva.",
+
+            "reverse.error": "La búsqueda inversa falló.",
+
+            "reverse.timeout": "La búsqueda inversa tardó demasiado.",
+
+            "reverse.useResult": "Mostrar esta fecha",
             "field.day": "Día",
             "date.aria": "Año {year} desde la Creación del Mundo, día {dayInCutlet} de la croqueta {cutletName}, día {dayInMonth} del mes {monthName}",
             "date.yearLine": "Año {year} desde la Creación del Mundo",
@@ -1393,6 +1745,8 @@
             "language.label": "Lingua",
             "loading.kicker": "Calcolato localmente",
             "loading.title": "Ricerca della cotoletta e della data…",
+
+            "loading.long": "Il calcolo è ancora in esecuzione locale; questo caso sta richiedendo più tempo del solito.",
             "error.kicker": "Impossibile mostrare il calendario",
             "error.reload": "Ricarica",
             "error.timeout": "Il calcolo sta richiedendo troppo tempo.",
@@ -1402,6 +1756,14 @@
             "calendar.previous": "Cotoletta precedente",
             "calendar.today": "Torna a oggi",
             "calendar.next": "Cotoletta successiva",
+
+            "calendar.target": "Torna alla data cercata",
+
+            "calendar.earlierDays": "Giorni precedenti",
+
+            "calendar.laterDays": "Giorni successivi",
+
+            "calendar.windowStatus": "Giorni {start}–{end} di {total}",
             "calendar.daysAria": "Giorni nella cotoletta {cutletName}",
             "calendar.currentCutlet": "Anno {year} · cotoletta",
             "calendar.cutletDescription": "{count} giorni · giorno di lavoro: {actionDate}",
@@ -1413,6 +1775,40 @@
             "settings.heading": "Cambia il giorno di lavoro",
             "settings.invalid": "Il giorno di lavoro non è valido. Controlla la data e riprova.",
             "reverse.action.cancel": "Annulla ricerca",
+
+            "reverse.open": "Cerca per data pastafariana",
+
+            "reverse.heading": "Trova un giorno dalla sua data pastafariana",
+
+            "reverse.year": "Anno dalla Creazione del Mondo",
+
+            "reverse.cutlet": "Cotoletta",
+
+            "reverse.dayInCutlet": "Giorno nella cotoletta",
+
+            "reverse.month": "Mese",
+
+            "reverse.dayInMonth": "Giorno nel mese",
+
+            "reverse.calculation": "Giorno di lavoro",
+
+            "reverse.submit": "Cerca",
+
+            "reverse.searching": "Ricerca…",
+
+            "reverse.progress": "Esaminati {scanned} candidati…",
+
+            "reverse.noMatch": "Non è stata trovata alcuna data gregoriana corrispondente.",
+
+            "reverse.found": "Date corrispondenti trovate: {count}.",
+
+            "reverse.incomplete": "La ricerca si è fermata prima che ne fosse dimostrata la completezza.",
+
+            "reverse.error": "La ricerca inversa non è riuscita.",
+
+            "reverse.timeout": "La ricerca inversa ha impiegato troppo tempo.",
+
+            "reverse.useResult": "Mostra questa data",
             "field.day": "Giorno",
             "date.aria": "Anno {year} dalla Creazione del Mondo, giorno {dayInCutlet} nella cotoletta {cutletName}, giorno {dayInMonth} nel mese {monthName}",
             "date.yearLine": "Anno {year} dalla Creazione del Mondo",
@@ -1562,6 +1958,8 @@
             "language.label": "Jazyk",
             "loading.kicker": "Počítáno místně",
             "loading.title": "Hledá se řízek a datum…",
+
+            "loading.long": "Výpočet stále probíhá místně; tento případ trvá déle než obvykle.",
             "error.kicker": "Kalendář nelze zobrazit",
             "error.reload": "Načíst znovu",
             "error.timeout": "Výpočet trvá příliš dlouho.",
@@ -1571,6 +1969,14 @@
             "calendar.previous": "Předchozí řízek",
             "calendar.today": "Zpět na dnešek",
             "calendar.next": "Další řízek",
+
+            "calendar.target": "Zpět na hledané datum",
+
+            "calendar.earlierDays": "Dřívější dny",
+
+            "calendar.laterDays": "Pozdější dny",
+
+            "calendar.windowStatus": "Dny {start}–{end} z {total}",
             "calendar.daysAria": "Dny v řízku {cutletName}",
             "calendar.currentCutlet": "Rok {year} · řízek",
             "calendar.cutletDescription": "{count} dní · den činnosti: {actionDate}",
@@ -1582,6 +1988,40 @@
             "settings.heading": "Změnit den činnosti",
             "settings.invalid": "Den činnosti není platný. Zkontrolujte datum a zkuste to znovu.",
             "reverse.action.cancel": "Zrušit hledání",
+
+            "reverse.open": "Hledat podle pastafariánského data",
+
+            "reverse.heading": "Najít den podle jeho pastafariánského data",
+
+            "reverse.year": "Rok od Stvoření světa",
+
+            "reverse.cutlet": "Řízek",
+
+            "reverse.dayInCutlet": "Den v řízku",
+
+            "reverse.month": "Měsíc",
+
+            "reverse.dayInMonth": "Den v měsíci",
+
+            "reverse.calculation": "Den činnosti",
+
+            "reverse.submit": "Hledat",
+
+            "reverse.searching": "Hledání…",
+
+            "reverse.progress": "Prověřeno kandidátů: {scanned}…",
+
+            "reverse.noMatch": "Nebyla nalezena odpovídající gregoriánská data.",
+
+            "reverse.found": "Počet nalezených shod: {count}.",
+
+            "reverse.incomplete": "Hledání skončilo dříve, než byla prokázána úplnost.",
+
+            "reverse.error": "Zpětné hledání selhalo.",
+
+            "reverse.timeout": "Zpětné hledání trvalo příliš dlouho.",
+
+            "reverse.useResult": "Zobrazit toto datum",
             "field.day": "Den",
             "date.aria": "Rok {year} od Stvoření světa, den {dayInCutlet} v řízku {cutletName}, den {dayInMonth} v měsíci {monthName}",
             "date.yearLine": "Rok {year} od Stvoření světa",

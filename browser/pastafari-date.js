@@ -6,14 +6,15 @@
   const axis = ns.dateAxis;
   const resultApi = ns.resultNormalizer;
   const i18n = ns.i18n;
+  const reverseApi = ns.reverseBridge || null;
 
   if (!serviceApi || !axis || !resultApi || !i18n) {
     throw new Error('Li browser-strate ne esset cargat in li necessi órdine.');
   }
 
   // Current semantic month names, never old positional identifiers. Each month
-  // receives its own saturated theme. The golden-angle hue spacing makes
-  // neighbouring indices diverge sharply instead of collapsing into pastels.
+  // keeps a deterministic hue identity, but the public calendar uses a light
+  // paper-like wash so month coding supports the content instead of dominating it.
   const MONTH_THEME_NAMES = Object.freeze([
     'argile', 'granat', 'cubit', 'invidie', 'Eridu', 'dent-pasta',
     'tri partes de quin', 'Karshumav', 'leopard', 'stann', 'brume', 'oliban',
@@ -29,13 +30,15 @@
     const secondaryHue = Math.round((hue + 151 + ((index % 3) * 17)) % 360);
     const angle = (index * 37) % 180;
     return Object.freeze({
-      edge: `hsl(${hue} 100% 22%)`,
-      bg: `hsl(${hue} 88% 49%)`,
-      wash: `hsl(${secondaryHue} 96% 52%)`,
-      pattern: `repeating-linear-gradient(${angle}deg, transparent 0 66%, hsl(${secondaryHue} 96% 52%) 66% 78%, transparent 78% 100%)`,
+      edge: `hsl(${hue} 58% 34%)`,
+      bg: `hsl(${hue} 62% 88%)`,
+      wash: `hsl(${secondaryHue} 64% 82%)`,
+      pattern: `repeating-linear-gradient(${angle}deg, transparent 0 72%, hsl(${secondaryHue} 64% 70% / 28%) 72% 80%, transparent 80% 100%)`,
     });
   }));
   const MAX_CACHED_CUTLETS = 5;
+  const MAX_RENDERED_DAYS = 28;
+  const LONG_LOADING_DELAY_MS = 8000;
   const LOCALE_STORAGE_KEY = 'pastafari.browser.locale';
   const RENDER_CONSISTENCY_CODE = 'ERR_CALENDAR_RENDER_INCONSISTENCY';
   const TARGET_CUTLET_CODE = 'ERR_TARGET_CUTLET_MISMATCH';
@@ -260,9 +263,16 @@
       this._cutlets = new Map();
       this._orderedStarts = [];
       this._activeStartJdn = null;
+      this._windowStart = 0;
       this._loadingBefore = null;
       this._loadingAfter = null;
       this._cutletLoads = new Map();
+      this._cookingPagePosition = null;
+      this._reverseController = null;
+      this._reverseGeneration = 0;
+      this._reverseCalculationIso = null;
+      this._reverseSolutions = [];
+      this._loadingNoticeTimer = null;
       this._readySettled = false;
       this._locale = null;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
@@ -308,7 +318,7 @@
             grid-template-columns: minmax(0, 1fr) auto;
             gap: 1.5rem 2rem;
             align-items: start;
-            padding: clamp(1rem, 2vw, 2rem) 0 clamp(2rem, 5vw, 4rem);
+            padding: clamp(.75rem, 1.5vw, 1.35rem) 0 clamp(1.25rem, 3vw, 2.25rem);
             border-bottom: 1px solid var(--line);
           }
           .brand,
@@ -322,18 +332,18 @@
             text-transform: uppercase;
           }
           .app-title {
-            max-width: 14ch;
+            max-width: 20ch;
             margin: 0;
             overflow-wrap: anywhere;
             font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
-            font-size: clamp(2.8rem, 8vw, 7rem);
+            font-size: clamp(2.5rem, 5.6vw, 5.2rem);
             font-weight: 700;
             letter-spacing: -.055em;
             line-height: .92;
           }
           .language-control {
             display: grid;
-            min-width: min(14rem, 100%);
+            min-width: min(11.5rem, 100%);
             gap: .35rem;
             color: var(--muted);
             font-size: .82rem;
@@ -353,11 +363,12 @@
 
           .search-panel {
             display: flex;
-            margin-block: clamp(2rem, 5vw, 4rem);
-            padding: clamp(1.2rem, 3.5vw, 2.5rem);
-            align-items: end;
+            width: min(100%, 68rem);
+            margin: clamp(1.25rem, 3vw, 2.4rem) auto;
+            padding: clamp(1rem, 2.4vw, 1.6rem);
+            align-items: center;
             justify-content: space-between;
-            gap: 1.25rem;
+            gap: 1rem 1.5rem;
             border: 1px solid var(--line);
             border-radius: 1.25rem;
             background: rgb(255 253 248 / 92%);
@@ -368,11 +379,12 @@
             margin: 0;
             overflow-wrap: anywhere;
             font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
-            font-size: clamp(2rem, 5vw, 4rem);
+            font-size: clamp(1.75rem, 3.6vw, 3rem);
             letter-spacing: -.035em;
             line-height: 1;
           }
           .editor-link,
+          .reverse-open,
           .cooking-open,
           .nav-button,
           .today-button,
@@ -387,12 +399,26 @@
             font-weight: 800;
             cursor: pointer;
           }
+          .search-actions {
+            display: flex;
+            flex: 0 0 auto;
+            flex-wrap: wrap;
+            gap: .6rem;
+            justify-content: end;
+          }
           .editor-link {
             flex: 0 0 auto;
             border-color: var(--accent-dark);
             background: var(--accent-dark);
             color: white;
           }
+          .reverse-open {
+            flex: 0 0 auto;
+            border-color: var(--accent-dark);
+            background: #fffdf8;
+            color: var(--accent-dark);
+          }
+          .reverse-open:hover { background: #fff0e9; }
           .cooking-open {
             width: fit-content;
             max-width: 100%;
@@ -407,6 +433,10 @@
           .nav-button:hover,
           .retry-button:hover,
           .dialog-actions button:hover { background: #fff4ee; }
+          .dialog-actions .primary:hover {
+            background: #49160e;
+            color: white;
+          }
 
           .calendar {
             position: relative;
@@ -424,22 +454,22 @@
           .target-beacon {
             position: relative;
             display: grid;
-            gap: .7rem;
-            margin-bottom: clamp(2rem, 5vw, 4rem);
-            padding: clamp(1.25rem, 3vw, 2.25rem);
+            gap: .65rem;
+            margin-bottom: clamp(1.4rem, 3vw, 2.5rem);
+            padding: clamp(1rem, 2.4vw, 1.6rem);
             overflow: hidden;
-            border: 4px solid var(--ink);
-            border-inline-start: clamp(.75rem, 2vw, 1.35rem) solid var(--accent);
-            border-radius: 1.1rem;
-            background: #ffea00;
-            color: #000000;
-            box-shadow: 0 0 0 4px #ffffff, 0 0 0 8px #000000, 0 18px 38px rgb(0 0 0 / 32%);
+            border: 1px solid #d8cdb9;
+            border-inline-start: .5rem solid var(--accent);
+            border-radius: 1rem;
+            background: #fff7e3;
+            color: var(--ink);
+            box-shadow: 0 10px 28px rgb(54 36 20 / 10%);
           }
           .beacon-label {
             width: fit-content;
             padding: .35rem .75rem;
             border-radius: 999px;
-            background: var(--ink);
+            background: var(--accent-dark);
             color: white;
             font-size: .86rem;
             font-weight: 900;
@@ -453,19 +483,25 @@
           .beacon-line {
             display: block;
             min-width: 0;
-            padding: .8rem;
+            padding: .35rem .45rem;
             overflow-wrap: anywhere;
-            border: 1px solid #a8977d;
-            border-radius: .7rem;
-            background: white;
-            font-size: clamp(1rem, 2vw, 1.35rem);
-            font-weight: 650;
+            border: 0;
+            border-radius: .45rem;
+            background: rgb(255 253 248 / 72%);
+            font-size: clamp(.98rem, 1.6vw, 1.2rem);
+            font-weight: 700;
             line-height: 1.35;
           }
           .beacon-context {
             margin: 0;
             color: var(--muted);
             font-weight: 700;
+          }
+          .iso-date {
+            direction: ltr;
+            unicode-bidi: isolate;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
           }
 
           .toolbar {
@@ -484,10 +520,21 @@
             font-weight: 700;
           }
           .toolbar-actions {
+            display: grid;
+            gap: .55rem;
+            justify-items: end;
+          }
+          .cutlet-nav,
+          .reset-nav {
             display: flex;
             flex-wrap: wrap;
             gap: .55rem;
             justify-content: end;
+          }
+          .target-button {
+            border-color: #8e8272;
+            background: #fffdf8;
+            color: var(--ink);
           }
           .today-button {
             border-color: var(--accent-dark);
@@ -497,18 +544,38 @@
 
           .viewport {
             position: relative;
-            max-height: var(--pastafari-calendar-height, 46rem);
-            overflow: auto;
+            max-height: none;
+            overflow: visible;
             padding: 0;
-            overscroll-behavior: contain;
-            scrollbar-gutter: stable;
           }
-          .edge-loader {
-            min-height: 1.8rem;
-            display: grid;
-            place-items: center;
+          .window-controls {
+            display: flex;
+            min-height: 3rem;
+            gap: .7rem;
+            align-items: center;
+            justify-content: space-between;
+            margin-block: .35rem .8rem;
+          }
+          .window-controls.after {
+            justify-content: end;
+            margin-block: .8rem 0;
+          }
+          .window-button {
+            min-height: 44px;
+            padding: .55rem .9rem;
+            border: 1px solid #8e8272;
+            border-radius: .7rem;
+            background: #fffdf8;
+            color: var(--ink);
+            font-weight: 800;
+            cursor: pointer;
+          }
+          .window-button:hover { background: #fff4ee; }
+          .window-status {
             color: var(--muted);
-            font-size: .78rem;
+            font-size: .88rem;
+            font-weight: 750;
+            text-align: center;
           }
           .cutlet-section {
             margin: 0 0 2.25rem;
@@ -516,19 +583,19 @@
           }
           .cutlet-section:last-of-type { margin-bottom: 0; }
           .cutlet-heading {
-            position: sticky;
-            top: 0;
+            position: static;
             z-index: 5;
             margin: 0 0 1rem;
-            padding: .9rem 1rem;
+            padding: .6rem .75rem;
             overflow-wrap: anywhere;
-            border: 1px solid var(--line);
-            border-inline-start: .45rem solid var(--accent);
-            border-radius: .85rem;
-            background: rgb(255 253 248 / 96%);
-            box-shadow: 0 6px 18px rgb(54 36 20 / 10%);
+            border: 0;
+            border-block-end: 1px solid var(--line);
+            border-inline-start: .35rem solid var(--accent);
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
             font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
-            font-size: clamp(1.5rem, 4vw, 2.6rem);
+            font-size: clamp(1.35rem, 3vw, 2rem);
             line-height: 1.05;
           }
           /*
@@ -563,41 +630,28 @@
             position: relative;
             display: grid;
             min-width: 0;
-            min-height: 10.5rem;
-            padding: .85rem;
-            grid-template-rows: auto auto auto;
-            align-content: stretch;
-            gap: .48rem;
+            min-height: 6.4rem;
+            padding: .7rem;
+            grid-template-rows: auto auto;
+            align-content: start;
+            gap: .28rem;
             overflow: hidden;
-            border: 2px solid var(--month-edge, var(--line));
-            border-radius: .85rem;
+            border: 1px solid var(--month-edge, var(--line));
+            border-radius: .8rem;
             background-color: var(--month-bg, var(--panel));
             background-image: var(--month-pattern-image, none);
             background-size: var(--month-pattern-size, auto);
             background-repeat: repeat;
             color: var(--month-ink, var(--ink));
-            box-shadow: inset 0 1px rgb(255 255 255 / 14%);
+            box-shadow: 0 2px 9px rgb(54 36 20 / 7%);
           }
           .day[aria-current="date"] {
             z-index: 4;
-            grid-template-rows: auto auto auto auto;
-            border: 8px solid #ffffff;
-            outline: 6px solid #000000;
-            outline-offset: -2px;
-            transform: scale(1.035);
-            box-shadow:
-              0 0 0 8px #ffea00,
-              0 0 0 12px #000000,
-              0 18px 38px rgb(0 0 0 / 55%);
-          }
-          .day[aria-current="date"]::after {
-            content: "";
-            position: absolute;
-            inset: .34rem;
-            pointer-events: none;
-            border: 4px dashed #ffea00;
-            border-radius: .48rem;
-            box-shadow: inset 0 0 0 2px #000000;
+            grid-template-rows: auto auto auto;
+            border: 3px solid var(--accent-dark);
+            outline: 0;
+            transform: none;
+            box-shadow: 0 8px 20px rgb(54 36 20 / 20%);
           }
           .target-badge {
             position: relative;
@@ -605,32 +659,44 @@
             display: block;
             width: fit-content;
             max-width: 100%;
-            margin-bottom: .1rem;
-            padding: .38rem .7rem;
+            margin-bottom: .15rem;
+            padding: .3rem .55rem;
             overflow-wrap: anywhere;
-            border: 4px solid #ffea00;
+            border: 0;
             border-radius: 999px;
-            background: #000000;
-            color: #ffea00;
-            box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #000000;
-            font-size: .82rem;
-            font-weight: 950;
+            background: var(--accent-dark);
+            color: #ffffff;
+            box-shadow: none;
+            font-size: .76rem;
+            font-weight: 850;
             line-height: 1.25;
           }
           .day-line {
             display: block;
             min-width: 0;
             margin: 0;
-            padding: .42rem .55rem;
+            padding: .12rem .15rem;
             overflow-wrap: anywhere;
-            border: 2px solid color-mix(in srgb, var(--month-ink, var(--ink)) 82%, transparent);
-            border-radius: .52rem;
-            background-color: var(--month-text-bg, var(--month-bg));
+            border: 0;
+            border-radius: 0;
+            background: transparent;
             color: var(--month-ink, var(--ink));
-            box-shadow: 0 2px 7px rgb(0 0 0 / 22%);
-            font-size: clamp(.8rem, 1.25vw, .96rem);
+            box-shadow: none;
+            font-size: clamp(.76rem, 1.1vw, .9rem);
             font-weight: 600;
-            line-height: 1.35;
+            line-height: 1.32;
+          }
+          .day-line.cutlet-line {
+            color: #514940;
+            font-size: clamp(.74rem, 1vw, .86rem);
+            font-weight: 750;
+          }
+          .day-line.month {
+            margin-top: .15rem;
+            padding-top: .42rem;
+            border-top: 1px solid color-mix(in srgb, var(--month-edge, var(--line)) 55%, transparent);
+            font-size: clamp(.82rem, 1.2vw, .96rem);
+            font-weight: 800;
           }
           .day-line strong {
             font-family: Georgia, "Times New Roman", serif;
@@ -661,8 +727,19 @@
             text-align: start;
           }
           .overlay.error {
-            justify-items: center;
-            text-align: center;
+            grid-template-columns: minmax(0, 1fr);
+            grid-auto-flow: row;
+            gap: .7rem;
+            justify-items: start;
+            text-align: start;
+          }
+          .overlay.error .loading-title,
+          .overlay.error .error-message,
+          .overlay.error .retry-button {
+            grid-area: auto;
+          }
+          .overlay.error .retry-button {
+            justify-self: start;
           }
           .spinner {
             grid-area: spinner;
@@ -687,10 +764,6 @@
           .loading-note,
           .error-message { margin: 0; color: var(--muted); font-size: .88rem; }
           @keyframes spin { to { transform: rotate(1turn); } }
-          @media (prefers-reduced-motion: reduce) {
-            .spinner { animation-duration: 3s; }
-          }
-
           dialog {
             width: min(34rem, calc(100vw - 2rem));
             border: 1px solid #bbb092;
@@ -709,14 +782,71 @@
           }
           .field { display: grid; gap: .35rem; }
           .field span { font-size: .86rem; font-weight: 750; }
-          .field input {
+          .field input,
+          .field select {
             width: 100%;
             min-height: 46px;
-            direction: ltr;
             border: 1px solid #8e8272;
             border-radius: .7rem;
             padding: .58rem .68rem;
             background: white;
+            color: var(--ink);
+          }
+          .field input { direction: ltr; }
+          .reverse-dialog {
+            width: min(48rem, calc(100vw - 2rem));
+            max-height: calc(100dvh - 1rem);
+            overflow: auto;
+            overscroll-behavior: contain;
+          }
+          .reverse-form {
+            display: grid;
+            gap: 1rem;
+            padding: 1.25rem;
+          }
+          .reverse-form h2 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: 1.6rem;
+          }
+          .reverse-fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .8rem 1rem;
+          }
+          .reverse-status {
+            min-height: 1.35rem;
+            margin: 0;
+            color: var(--muted);
+            font-size: .88rem;
+            font-weight: 700;
+          }
+          .reverse-status[data-kind="error"] { color: #76180e; }
+          .reverse-results {
+            display: grid;
+            gap: .55rem;
+          }
+          .reverse-result {
+            display: flex;
+            min-height: 46px;
+            width: 100%;
+            padding: .65rem .8rem;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            border: 1px solid #8e8272;
+            border-radius: .7rem;
+            background: #fffdf8;
+            color: var(--ink);
+            font-weight: 800;
+            cursor: pointer;
+          }
+          .reverse-result:hover { background: #fff4ee; }
+          .reverse-result bdi {
+            direction: ltr;
+            unicode-bidi: isolate;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
           }
           details { border-top: 1px solid #e0d8c0; padding-top: .75rem; }
           summary { color: var(--accent-dark); font-size: .86rem; font-weight: 800; cursor: pointer; }
@@ -727,6 +857,13 @@
             border-color: var(--accent-dark);
             background: var(--accent-dark);
             color: white;
+          }
+
+          @media (max-width: 74rem) {
+            .cutlet-grid {
+              grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+              min-width: 0;
+            }
           }
 
           @media (max-width: 48rem) {
@@ -741,21 +878,55 @@
               padding-block-start: .5rem;
             }
             .masthead { grid-template-columns: 1fr; }
-            .app-title { font-size: clamp(2.7rem, 16vw, 5.4rem); }
-            .language-control { width: 100%; }
+            .app-title { font-size: clamp(2.4rem, 12vw, 4rem); }
+            .language-control {
+              width: min(100%, 12rem);
+              justify-self: end;
+            }
             .search-panel {
               display: grid;
               align-items: stretch;
             }
-            .editor-link { width: 100%; }
+            .search-actions {
+              display: grid;
+              grid-template-columns: 1fr;
+              width: 100%;
+            }
+            .editor-link,
+            .reverse-open { width: 100%; }
+            .reverse-form {
+              gap: .6rem;
+              padding: .8rem 1rem;
+            }
+            .reverse-form h2 {
+              font-size: 1.35rem;
+              line-height: 1.18;
+            }
+            .reverse-fields {
+              grid-template-columns: 1fr;
+              gap: .5rem;
+            }
+            .reverse-form .field { gap: .2rem; }
+            .reverse-status { min-height: 1rem; font-size: .8rem; }
             .beacon-date { grid-template-columns: 1fr; }
             .toolbar { align-items: stretch; flex-direction: column; }
-            .toolbar-actions { justify-content: stretch; }
-            .toolbar-actions button { flex: 1 1 9rem; }
+            .toolbar-actions { justify-items: stretch; }
+            .cutlet-nav,
+            .reset-nav { justify-content: stretch; }
+            .cutlet-nav button,
+            .reset-nav button { flex: 1 1 9rem; }
+            .window-controls {
+              align-items: stretch;
+              flex-direction: column;
+            }
+            .window-controls.after { align-items: stretch; }
+            .window-button { width: 100%; }
             .cutlet-grid {
               grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
               min-width: 0;
             }
+            .day-line.cutlet-line { font-size: .82rem; }
+            .day-line.month { font-size: .92rem; }
           }
           @media (max-width: 26.25rem) {
             .cutlet-grid { grid-template-columns: 1fr; }
@@ -813,7 +984,10 @@
             <p class="eyebrow search-kicker"></p>
             <h2 class="search-heading"></h2>
           </div>
-          <button class="editor-link" type="button"></button>
+          <div class="search-actions">
+            <button class="editor-link" type="button"></button>
+            <button class="reverse-open" type="button"></button>
+          </div>
         </section>
 
         <section class="calendar" part="calendar" aria-busy="true" data-state="loading">
@@ -836,16 +1010,26 @@
               <p class="selected-summary" aria-live="polite"></p>
             </div>
             <div class="toolbar-actions">
-              <button class="nav-button previous" type="button"></button>
-              <button class="today-button" type="button"></button>
-              <button class="nav-button next" type="button"></button>
+              <div class="cutlet-nav">
+                <button class="nav-button previous" type="button"></button>
+                <button class="nav-button next" type="button"></button>
+              </div>
+              <div class="reset-nav">
+                <button class="target-button" type="button" hidden></button>
+                <button class="today-button" type="button"></button>
+              </div>
             </div>
           </header>
 
-          <div class="viewport" part="viewport" tabindex="0">
-            <div class="edge-loader before" aria-hidden="true"></div>
+          <div class="viewport" part="viewport">
+            <div class="window-controls before">
+              <button class="window-button earlier" type="button" hidden></button>
+              <span class="window-status" aria-live="polite"></span>
+            </div>
             <div class="cutlet-list"></div>
-            <div class="edge-loader after" aria-hidden="true"></div>
+            <div class="window-controls after">
+              <button class="window-button later" type="button" hidden></button>
+            </div>
           </div>
 
           <div class="overlay loading" part="loading">
@@ -882,6 +1066,44 @@
             </div>
           </form>
         </dialog>
+
+        <dialog class="reverse-dialog">
+          <form class="reverse-form" novalidate>
+            <h2 class="reverse-heading"></h2>
+            <div class="reverse-fields">
+              <label class="field reverse-year-field">
+                <span></span>
+                <input name="reverse-year" inputmode="numeric" autocomplete="off" required>
+              </label>
+              <label class="field reverse-cutlet-field">
+                <span></span>
+                <select name="reverse-cutlet" required></select>
+              </label>
+              <label class="field reverse-day-cutlet-field">
+                <span></span>
+                <input name="reverse-day-cutlet" inputmode="numeric" autocomplete="off" required>
+              </label>
+              <label class="field reverse-month-field">
+                <span></span>
+                <select name="reverse-month" required></select>
+              </label>
+              <label class="field reverse-day-month-field">
+                <span></span>
+                <input name="reverse-day-month" inputmode="numeric" autocomplete="off" required>
+              </label>
+              <label class="field reverse-calculation-field">
+                <span></span>
+                <input name="reverse-calculation" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD" required>
+              </label>
+            </div>
+            <p class="reverse-status" role="status" aria-live="polite"></p>
+            <div class="reverse-results"></div>
+            <div class="dialog-actions reverse-actions">
+              <button class="primary reverse-submit" type="submit"></button>
+              <button class="reverse-cancel" type="button"></button>
+            </div>
+          </form>
+        </dialog>
       `;
 
       this._els = {
@@ -890,6 +1112,7 @@
         appTitle: this.shadowRoot.querySelector('.app-title'),
         previous: this.shadowRoot.querySelector('.previous'),
         today: this.shadowRoot.querySelector('.today-button'),
+        targetButton: this.shadowRoot.querySelector('.target-button'),
         next: this.shadowRoot.querySelector('.next'),
         cutletKicker: this.shadowRoot.querySelector('.cutlet-kicker'),
         summary: this.shadowRoot.querySelector('.selected-summary'),
@@ -902,11 +1125,32 @@
         cookingPanel: this.shadowRoot.querySelector('pastafari-cooking'),
         viewport: this.shadowRoot.querySelector('.viewport'),
         list: this.shadowRoot.querySelector('.cutlet-list'),
-        beforeLoader: this.shadowRoot.querySelector('.edge-loader.before'),
-        afterLoader: this.shadowRoot.querySelector('.edge-loader.after'),
+        windowEarlier: this.shadowRoot.querySelector('.window-button.earlier'),
+        windowLater: this.shadowRoot.querySelector('.window-button.later'),
+        windowStatus: this.shadowRoot.querySelector('.window-status'),
         searchKicker: this.shadowRoot.querySelector('.search-kicker'),
         searchHeading: this.shadowRoot.querySelector('.search-heading'),
         editorLink: this.shadowRoot.querySelector('.editor-link'),
+        reverseOpen: this.shadowRoot.querySelector('.reverse-open'),
+        reverseDialog: this.shadowRoot.querySelector('.reverse-dialog'),
+        reverseForm: this.shadowRoot.querySelector('.reverse-form'),
+        reverseHeading: this.shadowRoot.querySelector('.reverse-heading'),
+        reverseYearLabel: this.shadowRoot.querySelector('.reverse-year-field span'),
+        reverseCutletLabel: this.shadowRoot.querySelector('.reverse-cutlet-field span'),
+        reverseDayCutletLabel: this.shadowRoot.querySelector('.reverse-day-cutlet-field span'),
+        reverseMonthLabel: this.shadowRoot.querySelector('.reverse-month-field span'),
+        reverseDayMonthLabel: this.shadowRoot.querySelector('.reverse-day-month-field span'),
+        reverseCalculationLabel: this.shadowRoot.querySelector('.reverse-calculation-field span'),
+        reverseYear: this.shadowRoot.querySelector('input[name="reverse-year"]'),
+        reverseCutlet: this.shadowRoot.querySelector('select[name="reverse-cutlet"]'),
+        reverseDayCutlet: this.shadowRoot.querySelector('input[name="reverse-day-cutlet"]'),
+        reverseMonth: this.shadowRoot.querySelector('select[name="reverse-month"]'),
+        reverseDayMonth: this.shadowRoot.querySelector('input[name="reverse-day-month"]'),
+        reverseCalculation: this.shadowRoot.querySelector('input[name="reverse-calculation"]'),
+        reverseStatus: this.shadowRoot.querySelector('.reverse-status'),
+        reverseResults: this.shadowRoot.querySelector('.reverse-results'),
+        reverseSubmit: this.shadowRoot.querySelector('.reverse-submit'),
+        reverseCancel: this.shadowRoot.querySelector('.reverse-cancel'),
         languageLabel: this.shadowRoot.querySelector('.language-label'),
         languageSelector: this.shadowRoot.querySelector('.language-selector'),
         loading: this.shadowRoot.querySelector('.overlay.loading'),
@@ -930,18 +1174,38 @@
       };
 
       this._els.previous.addEventListener('click', () => this._scrollAdjacent(-1));
-      this._els.today.addEventListener('click', () => this._goToday());
       this._els.next.addEventListener('click', () => this._scrollAdjacent(1));
+      this._els.targetButton.addEventListener('click', () => this._returnToTarget());
+      this._els.today.addEventListener('click', () => this._goToday());
+      this._els.windowEarlier.addEventListener('click', () => this._shiftWindow(-1));
+      this._els.windowLater.addEventListener('click', () => this._shiftWindow(1));
       this._els.editorLink.addEventListener('click', () => this._openDialog());
+      this._els.reverseOpen.addEventListener('click', () => this._openReverseDialog());
+      this._els.reverseCancel.addEventListener('click', () => this._closeReverseDialog(true));
+      this._els.reverseForm.addEventListener('submit', (event) => this._applyReverseDialog(event));
+      this._els.reverseDialog.addEventListener('cancel', (event) => {
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        this._closeReverseDialog(true);
+      });
       this._els.cookingOpen.addEventListener('click', () => this._toggleCooking());
       this._els.cookingPanel.addEventListener('pastafari-cooking-close', () => {
         this._els.cookingOpen.setAttribute('aria-expanded', 'false');
-        if (typeof this._els.cookingOpen.focus === 'function') this._els.cookingOpen.focus();
+        if (typeof this._els.cookingOpen.focus === 'function') {
+          try { this._els.cookingOpen.focus({ preventScroll: true }); }
+          catch (_) { this._els.cookingOpen.focus(); }
+        }
+        const position = this._cookingPagePosition;
+        this._cookingPagePosition = null;
+        if (position && typeof root.scrollTo === 'function') {
+          enqueueMicrotask(() => {
+            try { root.scrollTo({ left: position.x, top: position.y, behavior: 'auto' }); }
+            catch (_) { root.scrollTo(position.x, position.y); }
+          });
+        }
       });
       this._els.retryButton.addEventListener('click', () => this._retry());
       this._els.cancelButton.addEventListener('click', () => this._closeDialog());
       this._els.form.addEventListener('submit', (event) => this._applyDialog(event));
-      this._els.viewport.addEventListener('scroll', () => this._onScroll(), { passive: true });
       this._els.languageSelector.addEventListener('change', () => {
         const selected = this._els.languageSelector.value;
         writeStoredLocale(selected);
@@ -966,20 +1230,28 @@
       this._navigationGeneration += 1;
       this._refreshQueuedEpoch = null;
       this._cutletLoads.clear();
+      this._abortReverseSearch();
+      this._clearLoadingNotice();
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
       if (oldValue === newValue || !this._connected) return;
       if (name === 'no-editor') {
-        if (newValue !== null) this._closeDialog();
+        if (newValue !== null) {
+          this._closeDialog();
+          this._closeReverseDialog(true);
+        }
         return;
       }
-      if (name === 'headless' && newValue !== null) this._closeDialog();
+      if (name === 'headless' && newValue !== null) {
+        this._closeDialog();
+        this._closeReverseDialog(true);
+      }
       if (name === 'lang') {
         this._applyLocale();
         if (this._value) {
           this._renderSummary();
-          this._rerenderCutletsPreservingViewport();
+          this._renderCutlets();
         }
         return;
       }
@@ -1014,15 +1286,33 @@
       this._els.toolbar.setAttribute('aria-label', this._t('calendar.toolbarAria'));
       this._els.appTitle.textContent = this._t('app.title');
       this._els.previous.textContent = this._t('calendar.previous');
-      this._els.today.textContent = this._t('calendar.today');
       this._els.next.textContent = this._t('calendar.next');
+      this._els.targetButton.textContent = this._t('calendar.target');
+      this._els.today.textContent = this._t('calendar.today');
+      this._els.windowEarlier.textContent = this._t('calendar.earlierDays');
+      this._els.windowLater.textContent = this._t('calendar.laterDays');
       this._els.previous.setAttribute('aria-label', this._t('calendar.previous'));
-      this._els.today.setAttribute('aria-label', this._t('calendar.today'));
       this._els.next.setAttribute('aria-label', this._t('calendar.next'));
+      this._els.targetButton.setAttribute('aria-label', this._t('calendar.target'));
+      this._els.today.setAttribute('aria-label', this._t('calendar.today'));
+      this._els.windowEarlier.setAttribute('aria-label', this._t('calendar.earlierDays'));
+      this._els.windowLater.setAttribute('aria-label', this._t('calendar.laterDays'));
       this._els.cutletKicker.textContent = this._t('calendar.toolbarAria');
       this._els.searchKicker.textContent = this._t('search.kicker');
       this._els.searchHeading.textContent = this._t('search.heading');
       this._els.editorLink.textContent = this._t('search.submit');
+      this._els.reverseOpen.textContent = this._t('reverse.open');
+      this._els.reverseOpen.hidden = !(reverseApi && typeof reverseApi.isAvailable === 'function' && reverseApi.isAvailable());
+      this._els.reverseHeading.textContent = this._t('reverse.heading');
+      this._els.reverseYearLabel.textContent = this._t('reverse.year');
+      this._els.reverseCutletLabel.textContent = this._t('reverse.cutlet');
+      this._els.reverseDayCutletLabel.textContent = this._t('reverse.dayInCutlet');
+      this._els.reverseMonthLabel.textContent = this._t('reverse.month');
+      this._els.reverseDayMonthLabel.textContent = this._t('reverse.dayInMonth');
+      this._els.reverseCalculationLabel.textContent = this._t('reverse.calculation');
+      this._els.reverseSubmit.textContent = this._t('reverse.submit');
+      this._els.reverseCancel.textContent = this._t('reverse.action.cancel');
+      this._populateReverseSelectors();
       this._els.languageLabel.textContent = this._t('language.label');
       this._els.loadingTitle.textContent = this._t('loading.title');
       this._els.loadingNote.textContent = this._t('loading.kicker');
@@ -1078,6 +1368,7 @@
         this._cutlets.clear();
         this._orderedStarts = [];
         this._activeStartJdn = null;
+        this._windowStart = 0;
         this._loadingBefore = null;
         this._loadingAfter = null;
         this._cutletLoads.clear();
@@ -1114,6 +1405,8 @@
         resolveTargetCutletView(currentView, this._scrollTarget);
 
         this._storeCutlet(currentView);
+        this._activeStartJdn = BigInt(currentView.startJdn);
+        this._setWindowAroundIndex(currentView, this._scrollTarget.dayInCutlet - 1);
         this._renderSummary();
         this._renderCutlets();
         // Loading state hides the viewport with display:none. Reveal it first,
@@ -1178,6 +1471,52 @@
       return true;
     }
 
+    _cachedCutletContaining(targetJdn) {
+      const target = BigInt(targetJdn);
+      for (const view of this._cutlets.values()) {
+        if (target >= BigInt(view.startJdn) && target <= BigInt(view.endJdn)) return view;
+      }
+      return null;
+    }
+
+    _activeView() {
+      if (this._activeStartJdn != null && this._cutlets.has(this._activeStartJdn)) {
+        return this._cutlets.get(this._activeStartJdn);
+      }
+      if (this._scrollTarget && this._cutlets.has(BigInt(this._scrollTarget.startJdn))) {
+        return this._cutlets.get(BigInt(this._scrollTarget.startJdn));
+      }
+      const first = this._orderedStarts[0];
+      return first == null ? null : this._cutlets.get(first);
+    }
+
+    _windowBounds(view) {
+      const length = view && Array.isArray(view.days) ? view.days.length : 0;
+      const maxStart = Math.max(0, length - 1);
+      const start = Math.max(0, Math.min(Number(this._windowStart || 0), maxStart));
+      const end = Math.min(length, start + MAX_RENDERED_DAYS);
+      return Object.freeze({ start, end, length });
+    }
+
+    _setWindowStart(view, start) {
+      const length = view && Array.isArray(view.days) ? view.days.length : 0;
+      const maxStart = Math.max(0, length - 1);
+      this._windowStart = Math.max(0, Math.min(Number(start) || 0, maxStart));
+      return this._windowStart;
+    }
+
+    _setWindowAroundIndex(view, index) {
+      const length = view && Array.isArray(view.days) ? view.days.length : 0;
+      if (length === 0) {
+        this._windowStart = 0;
+        return 0;
+      }
+      const safeIndex = Math.max(0, Math.min(Number(index) || 0, length - 1));
+      const centered = safeIndex - Math.floor(MAX_RENDERED_DAYS / 2);
+      const fullWindowMax = Math.max(0, length - MAX_RENDERED_DAYS);
+      return this._setWindowStart(view, Math.min(centered, fullWindowMax));
+    }
+
     _primeAdjacent(currentView, generation) {
       Promise.allSettled([
         this._loadCutletAt(currentView.previousCutletJdn, 'before', generation),
@@ -1188,6 +1527,8 @@
     _loadCutletAt(targetJdn, direction, generation) {
       const generationValue = generation == null ? this._generation : generation;
       const target = BigInt(targetJdn);
+      const cached = this._cachedCutletContaining(target);
+      if (cached) return Promise.resolve(cached);
       const key = generationValue + ':' + target;
       if (this._cutletLoads.has(key)) return this._cutletLoads.get(key);
       const task = this._loadCutletAtOnce(target, direction, generationValue);
@@ -1202,17 +1543,14 @@
       const flag = direction === 'before' ? '_loadingBefore' : '_loadingAfter';
       if (this[flag] === generation) return null;
       this[flag] = generation;
-      this._updateEdgeLoaders();
       try {
         const view = await serviceApi.getSharedCalendarService().getCutletView(targetJdn, this._calculationJdn);
         if (generation !== this._generation) return null;
-        if (!this._storeCutlet(view)) return view;
-        const anchor = this._captureViewportAnchor();
-        const preserveStart = anchor && anchor.cutletStartJdn != null
-          ? BigInt(anchor.cutletStartJdn)
-          : (anchor && anchor.startJdn != null ? BigInt(anchor.startJdn) : null);
-        this._trimCutlets(view.startJdn, preserveStart);
-        this._rerenderCutletsPreservingViewport(anchor);
+        this._storeCutlet(view);
+        // The requested view must survive trimming. This is essential when a
+        // return-to-target action reloads a cutlet that was evicted far behind
+        // the currently active browsing position.
+        this._trimCutlets(view.startJdn, view.startJdn);
         return view;
       } catch (error) {
         if (generation === this._generation && error && error.code === RENDER_CONSISTENCY_CODE) {
@@ -1220,10 +1558,7 @@
         }
         throw error;
       } finally {
-        if (this[flag] === generation) {
-          this[flag] = null;
-          this._updateEdgeLoaders();
-        }
+        if (this[flag] === generation) this[flag] = null;
       }
     }
 
@@ -1244,43 +1579,10 @@
       this._orderedStarts = this._orderedStarts.filter((start) => keep.has(start));
     }
 
-    _moveViewportBy(delta) {
-      const viewport = this._els.viewport;
-      const amount = Number(delta);
-      if (!Number.isFinite(amount) || amount === 0) return viewport.scrollTop;
-      viewport.scrollTop = Math.max(0, Number(viewport.scrollTop || 0) + amount);
-      return viewport.scrollTop;
-    }
-
-    _positionElementInViewport(element, block) {
-      if (!element) return false;
-      const viewport = this._els.viewport;
-      const viewportRect = viewport.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      const viewportHeight = Number(viewport.clientHeight || viewportRect.height || 0);
-      const elementHeight = Number(elementRect.height || 0);
-      const wantedOffset = block === 'center'
-        ? Math.max(0, (viewportHeight - elementHeight) / 2)
-        : 0;
-      this._moveViewportBy(Number(elementRect.top) - Number(viewportRect.top) - wantedOffset);
-      return true;
-    }
-
     _findCutletSection(startJdn) {
       const expected = String(BigInt(startJdn));
       return Array.from(this._els.list.querySelectorAll('section.cutlet-section'))
         .find((section) => String(section.dataset.startJdn) === expected) || null;
-    }
-
-    _dayCardIdentity(card) {
-      return Object.freeze({
-        jdn: String(card.dataset.jdn),
-        year: String(card.dataset.year),
-        cutletName: String(card.dataset.cutletName),
-        dayInCutlet: Number(card.dataset.dayInCutlet),
-        monthName: String(card.dataset.monthName),
-        dayInMonth: Number(card.dataset.dayInMonth),
-      });
     }
 
     _findRenderedDay(identity, section) {
@@ -1298,63 +1600,29 @@
       }) || null;
     }
 
-    _captureViewportAnchor() {
-      const viewport = this._els.viewport;
-      const viewportRect = viewport.getBoundingClientRect();
-      const viewportTop = Number(viewportRect.top);
-      const viewportBottom = viewportTop + Number(viewport.clientHeight || viewportRect.height || 0);
-      const cards = Array.from(this._els.list.querySelectorAll('.day'));
-      let card = null;
-      for (const candidate of cards) {
-        const rect = candidate.getBoundingClientRect();
-        const top = Number(rect.top);
-        const bottom = top + Number(rect.height || 0);
-        if (bottom > viewportTop + 1 && top < viewportBottom - 1) {
-          card = candidate;
-          break;
+    _renderTargetContext(targetDate, actionDate) {
+      const targetMarker = '__PASTAFARI_TARGET_ISO__';
+      const actionMarker = '__PASTAFARI_ACTION_ISO__';
+      const text = this._t('target.context', {
+        targetDate: targetMarker,
+        actionDate: actionMarker,
+      });
+      const parts = String(text).split(new RegExp('(' + targetMarker + '|' + actionMarker + ')', 'g'));
+      const fragment = doc.createDocumentFragment();
+      for (const part of parts) {
+        if (part === targetMarker || part === actionMarker) {
+          const iso = doc.createElement('bdi');
+          iso.className = 'iso-date';
+          iso.setAttribute('dir', 'ltr');
+          iso.textContent = part === targetMarker ? targetDate : actionDate;
+          fragment.append(iso);
+        } else if (part) {
+          const text = doc.createElement('span');
+          text.textContent = part;
+          fragment.append(text);
         }
       }
-      if (card) {
-        const section = card.closest('section.cutlet-section');
-        return Object.freeze({
-          kind: 'day',
-          identity: this._dayCardIdentity(card),
-          cutletStartJdn: section && section.dataset.startJdn != null
-            ? String(section.dataset.startJdn) : null,
-          offset: Number(card.getBoundingClientRect().top) - viewportTop,
-        });
-      }
-
-      const sections = Array.from(this._els.list.querySelectorAll('section.cutlet-section'));
-      if (sections.length === 0) return null;
-      let section = sections[0];
-      for (const candidate of sections) {
-        if (Number(candidate.getBoundingClientRect().top) <= viewportTop + 1) section = candidate;
-        else break;
-      }
-      return Object.freeze({
-        kind: 'cutlet',
-        startJdn: String(section.dataset.startJdn),
-        offset: Number(section.getBoundingClientRect().top) - viewportTop,
-      });
-    }
-
-    _restoreViewportAnchor(anchor) {
-      if (!anchor) return false;
-      const viewportTop = Number(this._els.viewport.getBoundingClientRect().top);
-      let element = null;
-      if (anchor.kind === 'day') element = this._findRenderedDay(anchor.identity, null);
-      else if (anchor.kind === 'cutlet') element = this._findCutletSection(anchor.startJdn);
-      if (!element) return false;
-      const newOffset = Number(element.getBoundingClientRect().top) - viewportTop;
-      this._moveViewportBy(newOffset - Number(anchor.offset));
-      return true;
-    }
-
-    _rerenderCutletsPreservingViewport(existingAnchor) {
-      const anchor = existingAnchor === undefined ? this._captureViewportAnchor() : existingAnchor;
-      this._renderCutlets();
-      this._restoreViewportAnchor(anchor);
+      this._els.beaconContext.replaceChildren(fragment);
     }
 
     _renderSummary() {
@@ -1378,15 +1646,15 @@
         monthName,
       });
 
-      this._els.summary.textContent = cutletLine + ' · ' + monthLine;
+      // The target beacon already carries the complete five-part context.
+      // Keep only the cutlet position here so the browsing toolbar does not
+      // repeat the month line immediately above the cutlet heading.
+      this._els.summary.textContent = cutletLine;
       this._els.beaconLabel.textContent = this._t('target.searched');
       this._els.beaconYear.textContent = yearLine;
       this._els.beaconCutlet.textContent = cutletLine;
       this._els.beaconMonth.textContent = monthLine;
-      this._els.beaconContext.textContent = this._t('target.context', {
-        targetDate,
-        actionDate,
-      });
+      this._renderTargetContext(targetDate, actionDate);
       this._els.cookingOpen.textContent = this._t('cooking.open');
       this._syncCookingPanel();
     }
@@ -1402,58 +1670,45 @@
       const panel = this._els && this._els.cookingPanel;
       if (!panel) return;
       if (panel.hasAttribute('open')) {
-        panel.removeAttribute('open');
-        this._els.cookingOpen.setAttribute('aria-expanded', 'false');
+        if (typeof panel.close === 'function') panel.close();
+        else {
+          panel.removeAttribute('open');
+          this._els.cookingOpen.setAttribute('aria-expanded', 'false');
+        }
         return;
       }
       this._syncCookingPanel();
-      panel.setAttribute('open', '');
+      this._cookingPagePosition = Object.freeze({
+        x: Number.isFinite(Number(root.scrollX)) ? Number(root.scrollX) : 0,
+        y: Number.isFinite(Number(root.scrollY)) ? Number(root.scrollY) : 0,
+      });
+      if (typeof panel.show === 'function') panel.show();
+      else panel.setAttribute('open', '');
       this._els.cookingOpen.setAttribute('aria-expanded', 'true');
     }
 
     _prepareRenderableCutlets() {
-      const seen = new Map();
-      const prepared = [];
-      for (const startJdn of this._orderedStarts) {
-        const view = this._cutlets.get(startJdn);
-        if (!view) continue;
-        const days = [];
-        for (const day of view.days) {
-          const jdn = String(BigInt(day.jdn));
-          if (this._scrollTarget && BigInt(day.jdn) === this._scrollTarget.jdn
-              && !sameScrollTargetDay(day, this._scrollTarget)) {
-            throw new CalendarRenderConsistencyError(
-              jdn,
-              semanticDaySnapshot(this._scrollTarget),
-              semanticDaySnapshot(day),
-            );
-          }
-          const previous = seen.get(jdn);
-          if (!previous) {
-            seen.set(jdn, day);
-            days.push(day);
-            continue;
-          }
-          if (!sameDaySemantics(previous, day)) {
-            throw new CalendarRenderConsistencyError(
-              jdn,
-              semanticDaySnapshot(previous),
-              semanticDaySnapshot(day),
-            );
-          }
-          // Exact duplicate: one semantic date card is sufficient.
+      const view = this._activeView();
+      if (!view) return [];
+      const bounds = this._windowBounds(view);
+      const days = view.days.slice(bounds.start, bounds.end);
+      for (const day of days) {
+        if (this._scrollTarget && BigInt(day.jdn) === this._scrollTarget.jdn
+            && !sameScrollTargetDay(day, this._scrollTarget)) {
+          throw new CalendarRenderConsistencyError(
+            day.jdn,
+            semanticDaySnapshot(this._scrollTarget),
+            semanticDaySnapshot(day),
+          );
         }
-        if (days.length > 0) prepared.push({ view, days });
       }
-      return prepared;
+      return days.length > 0 ? [{ view, days }] : [];
     }
 
     _renderCutlets() {
       const prepared = this._prepareRenderableCutlets();
       const fragment = doc.createDocumentFragment();
-      for (const item of prepared) {
-        fragment.append(this._renderCutlet(item.view, item.days));
-      }
+      for (const item of prepared) fragment.append(this._renderCutlet(item.view, item.days));
       this._els.list.replaceChildren(fragment);
       const selected = this._els.list.querySelectorAll('[aria-current="date"]');
       if (selected.length > 1) {
@@ -1463,6 +1718,52 @@
           Object.freeze({ ariaCurrentCount: selected.length }),
         );
       }
+      this._updateWindowControls();
+    }
+
+    _updateWindowControls() {
+      const view = this._activeView();
+      if (!view) {
+        this._els.windowEarlier.hidden = true;
+        this._els.windowLater.hidden = true;
+        this._els.targetButton.hidden = true;
+        this._els.windowStatus.textContent = '';
+        return;
+      }
+      const bounds = this._windowBounds(view);
+      this._els.windowEarlier.hidden = bounds.start === 0;
+      this._els.windowLater.hidden = bounds.end >= bounds.length;
+      this._els.windowEarlier.disabled = bounds.start === 0;
+      this._els.windowLater.disabled = bounds.end >= bounds.length;
+      this._els.windowStatus.textContent = this._t('calendar.windowStatus', {
+        start: bounds.length === 0 ? 0 : bounds.start + 1,
+        end: bounds.end,
+        total: bounds.length,
+      });
+      const targetVisible = this._scrollTarget != null
+        && BigInt(view.startJdn) === BigInt(this._scrollTarget.startJdn)
+        && this._scrollTarget.dayInCutlet - 1 >= bounds.start
+        && this._scrollTarget.dayInCutlet - 1 < bounds.end;
+      this._els.targetButton.hidden = targetVisible || this._scrollTarget == null;
+    }
+
+    _scrollCalendarStart() {
+      const section = this._els.list.querySelector('section.cutlet-section');
+      if (section && typeof section.scrollIntoView === 'function') {
+        section.scrollIntoView({ block: 'start', inline: 'nearest' });
+      }
+    }
+
+    _shiftWindow(direction) {
+      const view = this._activeView();
+      if (!view) return false;
+      const bounds = this._windowBounds(view);
+      const wanted = bounds.start + (direction < 0 ? -MAX_RENDERED_DAYS : MAX_RENDERED_DAYS);
+      const next = this._setWindowStart(view, wanted);
+      if (next === bounds.start) return false;
+      this._renderCutlets();
+      this._scrollCalendarStart();
+      return true;
     }
 
     _renderCutlet(view, preparedDays) {
@@ -1553,13 +1854,10 @@
           card.append(targetBadge);
         }
 
-        const yearLine = doc.createElement('span');
-        yearLine.className = 'day-line year';
-        yearLine.textContent = this._t('date.yearLine', { year: day.year });
-
         const cutletLine = doc.createElement('span');
         cutletLine.className = 'day-line cutlet-line';
-        cutletLine.textContent = this._t('date.cutletLine', {
+        cutletLine.textContent = this._t('field.day') + ' ' + String(day.dayInCutlet);
+        cutletLine.title = this._t('date.cutletLine', {
           dayInCutlet: day.dayInCutlet,
           cutletName: localDayCutlet,
         });
@@ -1571,7 +1869,7 @@
           monthName: localDayMonth,
         });
 
-        card.append(yearLine, cutletLine, monthLine);
+        card.append(cutletLine, monthLine);
         grid.append(card);
       }
       group.append(heading, grid);
@@ -1626,88 +1924,294 @@
         if (card === selected) card.setAttribute('aria-current', 'date');
         else card.removeAttribute('aria-current');
       }
-      this._positionElementInViewport(selected, 'center');
-      this._activeStartJdn = target.startJdn;
+      this._activeStartJdn = BigInt(target.startJdn);
+      this._updateWindowControls();
       return selected;
     }
 
-    _positionCutletInViewport(startJdn) {
-      const start = BigInt(startJdn);
-      const section = this._findCutletSection(start);
-      if (!section) return false;
-      this._positionElementInViewport(section, 'start');
-      this._activeStartJdn = start;
+    _assertTargetInView(view, target) {
+      if (!view || BigInt(view.startJdn) !== BigInt(target.startJdn)
+          || String(view.year) !== String(target.year)
+          || String(view.cutletName) !== String(target.cutletName)) {
+        throw new CalendarTargetCutletError(
+          target.jdn,
+          target,
+          view ? Object.freeze({
+            startJdn: String(view.startJdn),
+            year: String(view.year),
+            cutletName: String(view.cutletName),
+          }) : Object.freeze({ missingView: true }),
+          'wrong-cutlet-identity',
+        );
+      }
+      const targetDay = view.days[target.dayInCutlet - 1];
+      if (!sameScrollTargetDay(targetDay, target)) {
+        throw new CalendarTargetCutletError(
+          target.jdn,
+          target,
+          targetDay ? semanticDaySnapshot(targetDay) : Object.freeze({ missingTargetDay: true }),
+          'target-not-in-expected-cutlet-position',
+        );
+      }
+      return view;
+    }
+
+    async _returnToTarget() {
+      if (!this._scrollTarget) return false;
+      const generation = this._generation;
+      const navigationGeneration = ++this._navigationGeneration;
+      let view = this._cutlets.get(BigInt(this._scrollTarget.startJdn));
+      if (!view) {
+        try {
+          view = await this._loadCutletAt(this._scrollTarget.startJdn, 'after', generation);
+        } catch (_) {
+          return false;
+        }
+      }
+      if (!view || !this._connected || generation !== this._generation
+          || navigationGeneration !== this._navigationGeneration) return false;
+      this._assertTargetInView(view, this._scrollTarget);
+      this._activeStartJdn = BigInt(view.startJdn);
+      this._setWindowAroundIndex(view, this._scrollTarget.dayInCutlet - 1);
+      this._renderCutlets();
+      await nextLayoutFrame();
+      if (!this._connected || generation !== this._generation
+          || navigationGeneration !== this._navigationGeneration) return false;
+      const selected = this._positionTargetInViewport(this._scrollTarget);
+      if (selected && typeof selected.scrollIntoView === 'function') {
+        selected.scrollIntoView({ block: 'center', inline: 'nearest' });
+      }
+      this._primeAdjacent(view, generation);
       return true;
     }
 
     async _scrollAdjacent(direction) {
-      if (this._orderedStarts.length === 0) return false;
+      const current = this._activeView();
+      if (!current) return false;
       const generation = this._generation;
       const navigationGeneration = ++this._navigationGeneration;
-      const currentStart = this._activeStartJdn != null
-        ? this._activeStartJdn
-        : (this._scrollTarget != null ? this._scrollTarget.startJdn : this._orderedStarts[0]);
-      const currentIndex = this._orderedStarts.findIndex((start) => start === currentStart);
-      if (currentIndex < 0) return false;
-
-      let start = this._orderedStarts[currentIndex + direction];
-      if (start === undefined) {
-        const current = this._cutlets.get(this._orderedStarts[currentIndex]);
-        if (!current) return false;
-        const requested = direction < 0 ? current.previousCutletJdn : current.nextCutletJdn;
-        let loaded;
-        try {
-          loaded = await this._loadCutletAt(requested, direction < 0 ? 'before' : 'after', generation);
-        } catch (_) {
-          return false;
-        }
-        if (!loaded || !this._connected || generation !== this._generation
-            || navigationGeneration !== this._navigationGeneration) return false;
-        start = BigInt(loaded.startJdn);
+      const requested = direction < 0 ? current.previousCutletJdn : current.nextCutletJdn;
+      let loaded;
+      try {
+        loaded = await this._loadCutletAt(requested, direction < 0 ? 'before' : 'after', generation);
+      } catch (_) {
+        return false;
       }
-
-      if (!this._connected || generation !== this._generation
+      if (!loaded || !this._connected || generation !== this._generation
           || navigationGeneration !== this._navigationGeneration) return false;
-      if (!this._positionCutletInViewport(start)) return false;
 
-      const resolvedIndex = this._orderedStarts.findIndex((candidate) => candidate === start);
-      if (direction < 0 && resolvedIndex === 0) {
-        const first = this._cutlets.get(start);
-        if (first) this._loadCutletAt(first.previousCutletJdn, 'before', generation).catch(() => {});
-      } else if (direction > 0 && resolvedIndex === this._orderedStarts.length - 1) {
-        const last = this._cutlets.get(start);
-        if (last) this._loadCutletAt(last.nextCutletJdn, 'after', generation).catch(() => {});
-      }
+      this._activeStartJdn = BigInt(loaded.startJdn);
+      this._setWindowStart(loaded, 0);
+      this._renderCutlets();
+      this._scrollCalendarStart();
+      this._primeAdjacent(loaded, generation);
       return true;
     }
 
-    _onScroll() {
-      const viewport = this._els.viewport;
-      const sections = Array.from(this._els.list.querySelectorAll('section.cutlet-section'));
-      if (sections.length > 0) {
-        const top = viewport.getBoundingClientRect().top + 18;
-        let active = sections[0];
-        for (const section of sections) {
-          if (section.getBoundingClientRect().top <= top) active = section;
-          else break;
+    _populateReverseSelectors() {
+      if (!this._els || !this._els.reverseCutlet || !this._els.reverseMonth || !reverseApi) return;
+      const populate = (select, names, group) => {
+        const previous = select.value;
+        const fragment = doc.createDocumentFragment();
+        for (const sourceName of names || []) {
+          const option = doc.createElement('option');
+          option.value = String(sourceName);
+          option.textContent = this._localCalendarName(group, sourceName);
+          if (String(sourceName) === previous) option.selected = true;
+          fragment.append(option);
         }
-        this._activeStartJdn = BigInt(active.dataset.startJdn);
-      }
+        select.replaceChildren(fragment);
+        if (previous && Array.from(names || []).includes(previous)) select.value = previous;
+      };
+      populate(this._els.reverseCutlet, reverseApi.CURRENT_CUTLETS, 'cutlet');
+      populate(this._els.reverseMonth, reverseApi.CURRENT_MONTHS, 'month');
+    }
 
-      if (viewport.scrollTop < 180 && this._orderedStarts.length > 0) {
-        const first = this._cutlets.get(this._orderedStarts[0]);
-        this._loadCutletAt(first.previousCutletJdn, 'before').catch(() => {});
-      }
-      if (viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 180
-          && this._orderedStarts.length > 0) {
-        const last = this._cutlets.get(this._orderedStarts[this._orderedStarts.length - 1]);
-        this._loadCutletAt(last.nextCutletJdn, 'after').catch(() => {});
+    _abortReverseSearch() {
+      this._reverseGeneration += 1;
+      const controller = this._reverseController;
+      this._reverseController = null;
+      if (controller && typeof controller.abort === 'function') {
+        try { controller.abort(); } catch (_) { /* best effort */ }
       }
     }
 
-    _updateEdgeLoaders() {
-      this._els.beforeLoader.textContent = this._loadingBefore !== null ? '…' : '';
-      this._els.afterLoader.textContent = this._loadingAfter !== null ? '…' : '';
+    _openReverseDialog() {
+      if (!reverseApi || typeof reverseApi.isAvailable !== 'function' || !reverseApi.isAvailable()) return;
+      this._abortReverseSearch();
+      this._reverseSolutions = [];
+      this._els.reverseResults.replaceChildren();
+      this._els.reverseStatus.textContent = '';
+      this._els.reverseStatus.removeAttribute('data-kind');
+      this._els.reverseSubmit.disabled = false;
+      this._populateReverseSelectors();
+
+      if (this._value) {
+        this._els.reverseYear.value = String(this._value.year);
+        this._els.reverseCutlet.value = String(this._value.cutletName);
+        this._els.reverseDayCutlet.value = String(this._value.dayInCutlet);
+        this._els.reverseMonth.value = String(this._value.monthName);
+        this._els.reverseDayMonth.value = String(this._value.dayInMonth);
+      } else {
+        this._els.reverseYear.value = '';
+        this._els.reverseDayCutlet.value = '';
+        this._els.reverseDayMonth.value = '';
+      }
+      const calculationJdn = this._calculationJdn == null
+        ? axis.gregorianToJdn(axis.localToday()) : this._calculationJdn;
+      this._els.reverseCalculation.value = axis.toIsoDate(axis.jdnToGregorian(calculationJdn));
+
+      if (typeof this._els.reverseDialog.showModal === 'function') this._els.reverseDialog.showModal();
+      else this._els.reverseDialog.setAttribute('open', '');
+      enqueueMicrotask(() => {
+        if (typeof this._els.reverseYear.focus === 'function') {
+          try { this._els.reverseYear.focus({ preventScroll: true }); }
+          catch (_) { this._els.reverseYear.focus(); }
+        }
+      });
+    }
+
+    _closeReverseDialog(abortSearch) {
+      if (abortSearch !== false) this._abortReverseSearch();
+      if (typeof this._els.reverseDialog.close === 'function') this._els.reverseDialog.close();
+      else this._els.reverseDialog.removeAttribute('open');
+      this._els.reverseSubmit.disabled = false;
+      if (typeof this._els.reverseOpen.focus === 'function') {
+        try { this._els.reverseOpen.focus({ preventScroll: true }); }
+        catch (_) { this._els.reverseOpen.focus(); }
+      }
+    }
+
+    _readReverseForm() {
+      const yearText = String(this._els.reverseYear.value || '').trim();
+      if (!/^-?\d+$/.test(yearText)) throw new RangeError('reverse-year');
+      const year = String(BigInt(yearText));
+
+      const cutletName = String(this._els.reverseCutlet.value || '');
+      const monthName = String(this._els.reverseMonth.value || '');
+      if (!reverseApi.CURRENT_CUTLETS.includes(cutletName)) throw new RangeError('reverse-cutlet');
+      if (!reverseApi.CURRENT_MONTHS.includes(monthName)) throw new RangeError('reverse-month');
+
+      const dayInCutlet = Number(String(this._els.reverseDayCutlet.value || '').trim());
+      const dayInMonth = Number(String(this._els.reverseDayMonth.value || '').trim());
+      if (!Number.isSafeInteger(dayInCutlet) || dayInCutlet < 1) throw new RangeError('reverse-day-cutlet');
+      if (!Number.isSafeInteger(dayInMonth) || dayInMonth < 1) throw new RangeError('reverse-day-month');
+
+      const calculation = axis.parseIsoDate(
+        String(this._els.reverseCalculation.value || '').trim(),
+        'Li die de calculation',
+      );
+      const calculationIso = axis.toIsoDate(calculation);
+      const calculationJdn = axis.gregorianToJdn(calculation);
+      return Object.freeze({
+        value: Object.freeze({ year, cutletName, dayInCutlet, monthName, dayInMonth }),
+        calculationIso,
+        calculationJdn,
+      });
+    }
+
+    async _applyReverseDialog(event) {
+      if (event && typeof event.preventDefault === 'function') event.preventDefault();
+      if (!reverseApi || typeof reverseApi.solveSimplePastafariDate !== 'function' || !reverseApi.isAvailable()) {
+        this._els.reverseStatus.textContent = this._t('reverse.error');
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        return;
+      }
+
+      let input;
+      try {
+        input = this._readReverseForm();
+      } catch (_) {
+        this._els.reverseStatus.textContent = this._t('search.invalid');
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        return;
+      }
+
+      this._abortReverseSearch();
+      const generation = this._reverseGeneration;
+      const AbortCtor = typeof root.AbortController === 'function' ? root.AbortController : null;
+      const controller = AbortCtor ? new AbortCtor() : null;
+      this._reverseController = controller;
+      this._reverseCalculationIso = input.calculationIso;
+      this._reverseSolutions = [];
+      this._els.reverseResults.replaceChildren();
+      this._els.reverseStatus.removeAttribute('data-kind');
+      this._els.reverseStatus.textContent = this._t('reverse.searching');
+      this._els.reverseSubmit.disabled = true;
+
+      try {
+        const result = await reverseApi.solveSimplePastafariDate(
+          input.value,
+          input.calculationJdn,
+          {
+            signal: controller ? controller.signal : undefined,
+            timeoutMs: 120000,
+            onProgress: (progress) => {
+              if (generation !== this._reverseGeneration || !this._els.reverseDialog.hasAttribute('open')) return;
+              const scanned = progress && progress.scanned != null ? String(progress.scanned) : '0';
+              this._els.reverseStatus.textContent = this._t('reverse.progress', { scanned });
+            },
+          },
+        );
+        if (generation !== this._reverseGeneration) return;
+        this._reverseController = null;
+        this._reverseSolutions = Array.from(result.solutions || []);
+        this._renderReverseResults(result);
+      } catch (error) {
+        if (generation !== this._reverseGeneration) return;
+        this._reverseController = null;
+        if (error && error.name === 'AbortError') return;
+        this._els.reverseStatus.setAttribute('data-kind', 'error');
+        this._els.reverseStatus.textContent = error && error.name === 'TimeoutError'
+          ? this._t('reverse.timeout') : this._t('reverse.error');
+        if (root.console && typeof root.console.error === 'function') root.console.error(error);
+      } finally {
+        if (generation === this._reverseGeneration) this._els.reverseSubmit.disabled = false;
+      }
+    }
+
+    _renderReverseResults(result) {
+      this._els.reverseResults.replaceChildren();
+      const solutions = Array.from(result && result.solutions || []);
+      if (solutions.length === 0) {
+        this._els.reverseStatus.textContent = result && result.complete === false
+          ? this._t('reverse.incomplete') : this._t('reverse.noMatch');
+        return;
+      }
+
+      const status = this._t('reverse.found', { count: solutions.length });
+      this._els.reverseStatus.textContent = result && result.complete === false
+        ? status + ' ' + this._t('reverse.incomplete') : status;
+
+      const fragment = doc.createDocumentFragment();
+      for (const solution of solutions) {
+        if (!solution || solution.jdn == null) continue;
+        const iso = axis.toIsoDate(axis.jdnToGregorian(BigInt(solution.jdn)));
+        const button = doc.createElement('button');
+        button.type = 'button';
+        button.className = 'reverse-result';
+        const label = doc.createElement('span');
+        label.textContent = this._t('reverse.useResult');
+        const date = doc.createElement('bdi');
+        date.setAttribute('dir', 'ltr');
+        date.textContent = iso;
+        button.append(label, date);
+        button.addEventListener('click', () => this._selectReverseResult(solution));
+        fragment.append(button);
+      }
+      this._els.reverseResults.replaceChildren(fragment);
+    }
+
+    _selectReverseResult(solution) {
+      if (!solution || solution.jdn == null) return false;
+      const targetIso = axis.toIsoDate(axis.jdnToGregorian(BigInt(solution.jdn)));
+      const calculationIso = this._reverseCalculationIso || axis.toIsoDate(axis.localToday());
+      this.setAttribute('date', targetIso);
+      const todayIso = axis.toIsoDate(axis.localToday());
+      if (calculationIso === todayIso) this.removeAttribute('calculation-date');
+      else this.setAttribute('calculation-date', calculationIso);
+      this._closeReverseDialog(false);
+      return true;
     }
 
     _openDialog() {
@@ -1754,22 +2258,43 @@
       }
     }
 
+    _clearLoadingNotice() {
+      if (this._loadingNoticeTimer != null && typeof root.clearTimeout === 'function') {
+        try { root.clearTimeout(this._loadingNoticeTimer); } catch (_) { /* best effort */ }
+      }
+      this._loadingNoticeTimer = null;
+    }
+
     _showLoading() {
+      this._clearLoadingNotice();
       if (this._els.calendar) {
         this._els.calendar.setAttribute('aria-busy', 'true');
         this._els.calendar.setAttribute('data-state', 'loading');
       }
       if (this._els.loading) this._els.loading.hidden = false;
+      if (this._els.loadingNote) this._els.loadingNote.textContent = this._t('loading.kicker');
       if (this._els.error) this._els.error.hidden = true;
+
+      const generation = this._generation;
+      if (typeof root.setTimeout === 'function') {
+        this._loadingNoticeTimer = root.setTimeout(() => {
+          this._loadingNoticeTimer = null;
+          if (!this._connected || generation !== this._generation) return;
+          if (!this._els.calendar || this._els.calendar.getAttribute('data-state') !== 'loading') return;
+          if (this._els.loadingNote) this._els.loadingNote.textContent = this._t('loading.long');
+        }, LONG_LOADING_DELAY_MS);
+      }
     }
 
     _hideOverlays() {
+      this._clearLoadingNotice();
       if (this._els.calendar) this._els.calendar.removeAttribute('data-state');
       if (this._els.loading) this._els.loading.hidden = true;
       if (this._els.error) this._els.error.hidden = true;
     }
 
     _showError(error, messageKey) {
+      this._clearLoadingNotice();
       if (this._els.calendar) {
         this._els.calendar.setAttribute('aria-busy', 'false');
         this._els.calendar.setAttribute('data-state', 'error');

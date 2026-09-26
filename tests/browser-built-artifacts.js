@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const childProcess = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const required = [
@@ -13,6 +14,11 @@ const required = [
   'browser/dist/pastafari-worker.js',
   'browser/dist/pastafari-date.js',
   'browser/dist/pastafari-date.mjs',
+  'browser/dist/reverse-engine/pastafari-diagnostics.js',
+  'browser/dist/reverse-engine/pastafari-calendar-fast.js',
+  'browser/dist/reverse-engine/pastafari-constraints.js',
+  'browser/dist/reverse-engine/pastafari-reverse-worker.js',
+  'browser/dist/reverse-engine/pastafari-constraints-client.js',
   'browser/standalone/pastafari-date.js',
   'browser/standalone/pastafari-date.min.js',
 ];
@@ -25,7 +31,14 @@ for (const relative of required) {
 
 for (const relative of required.filter((value) => value.endsWith('.js'))) {
   const source = fs.readFileSync(path.join(ROOT, relative), 'utf8');
-  new vm.Script(source, { filename: relative });
+  if (relative.startsWith('browser/dist/reverse-engine/')) {
+    childProcess.execFileSync(process.execPath, ['--input-type=module', '--check'], {
+      input: source,
+      stdio: ['pipe', 'ignore', 'pipe'],
+    });
+  } else {
+    new vm.Script(source, { filename: relative });
+  }
 }
 
 const buildId = fs.readFileSync(path.join(ROOT, 'browser/dist/build-id.txt'), 'utf8').trim();
@@ -42,6 +55,10 @@ assert(page.includes('pastafari-date.js?v=' + buildId));
 assert(!page.includes('__PASTAFARI_BROWSER_BUILD_ID__'));
 assert(standard.includes('const buildId = ' + JSON.stringify(buildId)));
 assert(standard.includes("pastafari-worker.js?v=' + encodeURIComponent(buildId)"));
+assert(standard.includes("reverse-engine/pastafari-constraints-client.js?v=' + encodeURIComponent(buildId)"));
+assert(standard.includes('solveSimplePastafariDate'));
+assert(standard.includes('ERR_REVERSE_FORWARD_MISMATCH'));
+assert(standalone.includes('reverseClientUrl: null'));
 assert(standard.includes('buildId,'));
 assert(worker.includes('PastafariBrowserWorkerConfig'));
 assert(worker.includes('buildId: ' + JSON.stringify(buildId)));
@@ -54,6 +71,14 @@ assert(moduleFacade.includes('export const PastafariCookingElement = api.Pastafa
 assert(standard.includes('class PastafariCookingElement'));
 assert(standard.includes("customElements.define('pastafari-cooking'"));
 assert(standard.includes('cooking.open'));
+assert(standard.includes('<dialog class="shell"'));
+assert(standard.includes('aria-modal="true"'));
+assert(standard.includes('height: min(52rem, calc(100dvh - 2rem))'));
+assert(standard.includes('grid-template-rows: auto auto minmax(0, 1fr)'));
+assert(standard.includes('grid-template-columns: repeat(2, minmax(0, 1fr))'));
+assert(standard.includes('_syncDialogOpen()'));
+assert(standard.includes('_cookingPagePosition'));
+assert(!standard.includes('.nav {\n            display: flex;\n            gap: .45rem;\n            padding: .75rem clamp(1rem, 3vw, 2rem);\n            overflow-x: auto'));
 
 assert(standard.includes('PastafariBrowserLocaleData'));
 for (const code of ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs']) {
@@ -72,11 +97,14 @@ assert(standard.includes('exactTargetMatchCount'));
 assert(standard.includes('ERR_TARGET_CUTLET_MISMATCH'));
 assert(standard.includes('section.dataset.year = String(view.year)'));
 assert(standard.includes('section.dataset.cutletName = String(view.cutletName)'));
-assert(standard.includes('_positionElementInViewport(element, block)'));
-assert(standard.includes('_positionCutletInViewport(startJdn)'));
-assert(standard.includes('_captureViewportAnchor()'));
-assert(standard.includes('_restoreViewportAnchor(anchor)'));
-assert(standard.includes('_rerenderCutletsPreservingViewport(existingAnchor)'));
+assert(standard.includes('MAX_RENDERED_DAYS = 28'));
+assert(standard.includes('_shiftWindow(direction)'));
+assert(standard.includes('async _returnToTarget()'));
+assert(standard.includes("class=\"window-controls before\""));
+assert(standard.includes('overflow: visible'));
+assert(standard.includes('this._trimCutlets(view.startJdn, view.startJdn)'));
+assert(standard.includes("selected.scrollIntoView({ block: 'center', inline: 'nearest' })"));
+assert(standard.includes("section.scrollIntoView({ block: 'start', inline: 'nearest' })"));
 assert(standard.includes("section.className = 'cutlet-section'"));
 assert(standard.includes("cutletLine.className = 'day-line cutlet-line'"));
 assert(standard.includes("querySelectorAll('section.cutlet-section')"));
@@ -87,10 +115,16 @@ assert(!standard.includes("section.className = 'cutlet'"));
 assert(!standard.includes("querySelectorAll('.cutlet')"));
 assert(!standard.includes("closest('.cutlet')"));
 assert(!standard.includes("cutletLine.className = 'day-line cutlet'"));
-assert(!standard.includes('scrollIntoView('));
+assert(!standard.includes('_positionElementInViewport('));
+assert(!standard.includes('_positionCutletInViewport('));
+assert(!standard.includes('_captureViewportAnchor('));
+assert(!standard.includes('_restoreViewportAnchor('));
+assert(!standard.includes('_rerenderCutletsPreservingViewport('));
+assert(!standard.includes('_onScroll('));
+assert(!standard.includes("viewport.scrollTop ="));
+assert(!standard.includes('max-height: var(--pastafari-calendar-height, 46rem)'));
+assert(!standard.includes('class="edge-loader'));
 assert(!standard.includes('_scrollSelectedIntoView('));
-assert.strictEqual((standard.match(/viewport\.scrollTop\s*=/g) || []).length, 1,
-  'Omni browser scrolling deve esser possedet per un unic viewport.scrollTop primitive.');
 assert(standard.includes('cacheNamespace'));
 const expectedCoreFingerprint = crypto.createHash('sha256')
   .update(fs.readFileSync(path.join(ROOT, 'src/source-language-catalog.js'), 'utf8'), 'utf8')

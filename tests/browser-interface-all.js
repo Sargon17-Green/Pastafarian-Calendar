@@ -14,6 +14,7 @@ const tests = [
   'browser-interface-black-box.js',
   'browser-i18n-locales.js',
   'browser-cooking-component.js',
+  'browser-reverse-vendor.js',
   'browser-component-runtime.js',
 ];
 
