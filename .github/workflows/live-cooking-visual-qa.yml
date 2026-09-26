@@ -457,10 +457,10 @@ jobs:
 
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            await realStream(browser);
             await fixtureMatrix(browser);
             await localeSmoke(browser);
             await mediaQA(browser);
+            await realStream(browser);
             await browser.close();
           })().catch(e=>{console.error(e&&e.stack?e.stack:e);process.exit(1);});
           JS
