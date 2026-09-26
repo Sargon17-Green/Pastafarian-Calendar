@@ -6,13 +6,18 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.on('console', (msg) => console.log('[browser]', msg.type(), msg.text()));
-  await page.goto('http://127.0.0.1:4173/', { waitUntil: 'load' });
+  await page.goto('http://127.0.0.1:4173/live-stage-qa.html', { waitUntil: 'load' });
   await page.waitForFunction(() => Boolean(customElements.get('pastafari-date')));
   const result = await page.evaluate(async () => {
-    const host = document.querySelector('pastafari-date');
-    if (!host || !host.shadowRoot) throw new Error('Page pastafari-date is not upgraded');
-    const panel = host.shadowRoot.querySelector('pastafari-cooking');
-    if (!panel || !panel.shadowRoot) throw new Error('Cooking panel is not upgraded');
+    const host = document.createElement('pastafari-date');
+    host.setAttribute('lang', 'he');
+    host.setAttribute('date', '2026-09-11');
+    host.setAttribute('calculation-date', '2026-09-11');
+    document.body.append(host);
+    await customElements.whenDefined('pastafari-cooking');
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const panel = host.shadowRoot && host.shadowRoot.querySelector('pastafari-cooking');
+    if (!panel || !panel.shadowRoot) throw new Error('Cooking panel is not upgraded in clean QA shell');
 
     const transitions = [];
     let last = '';
@@ -31,21 +36,21 @@ const { chromium } = require('playwright');
         last = key;
       }
     };
-
-    const completed = new Promise((resolve, reject) => {
-      host.addEventListener('pastafari-change', resolve, { once: true });
-      setTimeout(() => reject(new Error('Timed out waiting for the scheduled real calculation')), 180000);
+    const observer = new MutationObserver(sample);
+    observer.observe(panel.shadowRoot, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['data-stage', 'href'],
     });
-    const timer = setInterval(sample, 20);
-    host.setAttribute('lang', 'he');
-    host.setAttribute('date', '2026-09-11');
-    host.setAttribute('calculation-date', '2026-09-11');
     sample();
-    await completed;
+    await new Promise((resolve, reject) => {
+      host.addEventListener('pastafari-change', resolve, { once: true });
+      setTimeout(() => reject(new Error('Timed out waiting for clean real calculation')), 180000);
+    });
     sample();
-    clearInterval(timer);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    sample();
+    observer.disconnect();
     return {
       transitions,
       liveState: panel._liveState,
