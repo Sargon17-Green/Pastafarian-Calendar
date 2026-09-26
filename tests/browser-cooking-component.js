@@ -440,7 +440,14 @@ async function flush() {
     live._els.megillahQuote.textContent,
     'למלאכת הלוח קח שני ימים. לראשון קרא יום המעשה ולשני קרא היום אשר עליו תשאל.',
   );
-  assert(live._els.megillahSource.textContent.includes('מגילת העיתים'));
+  assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'));
+  assert.strictEqual(
+    live._els.megillahSourceLink.getAttribute('href'),
+    'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
+    'every Megillah quotation must link to the canonical blog source',
+  );
+  assert.strictEqual(live._els.megillahSourceLink.getAttribute('target'), '_blank');
+  assert.strictEqual(live._els.megillahSourceLink.getAttribute('rel'), 'noopener noreferrer');
   assert(live.shadowRoot.innerHTML.includes('"SBL Hebrew", "Taamey Frank CLM"'),
     'Megillah quotation must use a dedicated square/archaic Hebrew serif font stack');
 
@@ -513,7 +520,14 @@ async function flush() {
     live._renderLiveStageGuide(key, true);
     assert(live._els.liveExplanation.textContent.trim().length > 0, 'missing explanation for ' + key);
     assert(live._els.megillahQuote.textContent.trim().length > 0, 'missing Megillah quote for ' + key);
-    assert(live._els.megillahSource.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
+    assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
+    assert.strictEqual(
+      live._els.megillahSourceLink.getAttribute('href'),
+      'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
+      'missing canonical source link for ' + key,
+    );
+    assert.strictEqual(live._els.megillahSourceLink.getAttribute('target'), '_blank');
+    assert.strictEqual(live._els.megillahSourceLink.getAttribute('rel'), 'noopener noreferrer');
   }
 
   live._renderLiveStageGuide('postStirs', true);

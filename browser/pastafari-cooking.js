@@ -421,13 +421,26 @@
           }
           .megillah-source {
             margin-top: .24rem;
-            color: #6f5838;
             direction: rtl;
             font-family: "SBL Hebrew", "Taamey Frank CLM", "Frank Ruehl CLM", "Noto Serif Hebrew", "David Libre", "Times New Roman", serif;
             font-size: .68rem;
             font-weight: 700;
             line-height: 1.3;
             text-align: right;
+          }
+          .megillah-source-link {
+            color: #6f5838;
+            text-decoration: underline;
+            text-decoration-thickness: .08em;
+            text-underline-offset: .16em;
+          }
+          .megillah-source-link:hover {
+            color: #493716;
+          }
+          .megillah-source-link:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: .15rem;
+            border-radius: .12rem;
           }
           @keyframes monster-float {
             0%, 100% { transform: translateY(.15rem) rotate(-1deg); }
@@ -932,7 +945,9 @@
                 <p class="live-explanation"></p>
                 <figure class="megillah-quote" lang="he" dir="rtl">
                   <blockquote></blockquote>
-                  <figcaption class="megillah-source"></figcaption>
+                  <figcaption class="megillah-source">
+                    <a class="megillah-source-link" target="_blank" rel="noopener noreferrer"></a>
+                  </figcaption>
                 </figure>
               </div>
             </div>
@@ -964,9 +979,14 @@
         liveExplanation: this.shadowRoot.querySelector('.live-explanation'),
         megillahQuote: this.shadowRoot.querySelector('.megillah-quote blockquote'),
         megillahSource: this.shadowRoot.querySelector('.megillah-source'),
+        megillahSourceLink: this.shadowRoot.querySelector('.megillah-source-link'),
         stageGuide: this.shadowRoot.querySelector('.live-stage-guide'),
         pane: this.shadowRoot.querySelector('.pane'),
       };
+      if (this._els.megillahSourceLink) {
+        this._els.megillahSourceLink.setAttribute('target', '_blank');
+        this._els.megillahSourceLink.setAttribute('rel', 'noopener noreferrer');
+      }
       this._els.close.addEventListener('click', () => this.close());
       this._els.shell.addEventListener('cancel', (event) => {
         if (typeof event.preventDefault === 'function') event.preventDefault();
@@ -1547,17 +1567,21 @@
     }
 
     _renderLiveStageGuide(stageKey, force = false) {
-      if (!this._els || !this._els.liveExplanation || !this._els.megillahQuote || !this._els.megillahSource) return;
+      if (!this._els || !this._els.liveExplanation || !this._els.megillahQuote || !this._els.megillahSourceLink) return;
       const localeData = root.PastafariBrowserLocaleData;
       const guideTable = localeData && localeData.megillahStageGuide;
-      if (!guideTable) return;
+      const canonicalUrl = localeData && localeData.megillahCanonicalUrl;
+      if (!guideTable || !canonicalUrl) return;
       const key = guideTable[stageKey] ? stageKey : 'inputs';
       if (!force && this._liveGuideStageKey === key) return;
       const guide = guideTable[key];
       this._liveGuideStageKey = key;
       this._els.liveExplanation.textContent = this._t(guide.explanationKey);
       this._els.megillahQuote.textContent = guide.quote;
-      this._els.megillahSource.textContent = guide.source;
+      this._els.megillahSourceLink.textContent = guide.source;
+      this._els.megillahSourceLink.setAttribute('href', canonicalUrl);
+      this._els.megillahSourceLink.setAttribute('target', '_blank');
+      this._els.megillahSourceLink.setAttribute('rel', 'noopener noreferrer');
       if (this._els.stageGuide) this._els.stageGuide.dataset.stage = key;
     }
 
