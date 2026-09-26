@@ -1448,7 +1448,6 @@
 
     _appendLiveRow(event) {
       const key = this._liveGroupKey(event);
-      const group = this._ensureLiveGroup(key);
       const kind = String(event && event.kind || '');
       const markerOnly = kind === 'run-start'
         || kind === 'year-resolution-start'
@@ -1456,8 +1455,14 @@
         || kind === 'view-start'
         || kind === 'gate-gap-start'
         || kind === 'sauce-start';
-      if (kind === 'sauce-start') this._ensureLiveSauce(group, event);
-      if (markerOnly) return false;
+      if (markerOnly) {
+        if (kind === 'sauce-start') {
+          const group = this._ensureLiveGroup(key);
+          this._ensureLiveSauce(group, event);
+        }
+        return false;
+      }
+      const group = this._ensureLiveGroup(key);
       const durationMs = Math.max(0, Number(event && event.durationMs) || 0);
       const operationCount = Math.max(1, Number(event && event.payload && event.payload.operationCount) || 1);
       group.value += operationCount;
