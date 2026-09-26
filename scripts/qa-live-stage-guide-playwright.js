@@ -32,12 +32,16 @@ const { chromium } = require('playwright');
       }
     };
 
+    const completed = new Promise((resolve, reject) => {
+      host.addEventListener('pastafari-change', resolve, { once: true });
+      setTimeout(() => reject(new Error('Timed out waiting for the scheduled real calculation')), 180000);
+    });
+    const timer = setInterval(sample, 20);
     host.setAttribute('lang', 'he');
     host.setAttribute('date', '2026-09-11');
     host.setAttribute('calculation-date', '2026-09-11');
-    const timer = setInterval(sample, 20);
     sample();
-    await host.refresh();
+    await completed;
     sample();
     clearInterval(timer);
     await new Promise((resolve) => setTimeout(resolve, 100));
