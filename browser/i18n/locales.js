@@ -23,6 +23,96 @@
   }
 
   /*
+   * Canonical live-stage quotations copied verbatim from:
+   * Sargon-17-Green/Marak/megillah/original/Megilat_HaItim_Yehuda_FINAL_2026-09-18.md
+   * Original SHA-256 pinned by Marak:
+   * 7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b
+   * The canonical quotations remain Judaean Hebrew in every UI locale.
+   */
+  const megillahStageGuide = Object.freeze({
+    inputs: Object.freeze({
+      explanationKey: 'cooking.live.explain.inputs',
+      source: 'מגילת העיתים · דברי בעל הלוח אל הסופר הכותב ואל חכם הימים',
+      quote: 'למלאכת הלוח קח שני ימים. לראשון קרא יום המעשה ולשני קרא היום אשר עליו תשאל.',
+    }),
+    gates: Object.freeze({
+      explanationKey: 'cooking.live.explain.gates',
+      source: 'מגילת העיתים · לוח שבעה עשר: שערי הקציצה',
+      quote: 'וכן עשה שער אחר שער.',
+    }),
+    yearAnchor: Object.freeze({
+      explanationKey: 'cooking.live.explain.yearAnchor',
+      source: 'מגילת העיתים · לוח שמונה עשר: שנת חמשת אלפים',
+      quote: 'לשנה אשר תבחר קרא שנת חמשת אלפים מיום ברוא מפלצת הספגטי המעופפת שמים וארץ.',
+    }),
+    years: Object.freeze({
+      explanationKey: 'cooking.live.explain.years',
+      source: 'מגילת העיתים · לוח תשעה עשר: יתר השנים',
+      quote: 'משנת חמשת אלפים לך שנה אחר שנה. לא תדלג אל שנה רחוקה.',
+    }),
+    stones: Object.freeze({
+      explanationKey: 'cooking.live.explain.stones',
+      source: 'מגילת העיתים · לוח שבע: חמש האבנים',
+      quote: 'כל אחת מחמש האבנים החדשות עשה מחמש האבנים הישנות.',
+    }),
+    hidden: Object.freeze({
+      explanationKey: 'cooking.live.explain.hidden',
+      source: 'מגילת העיתים · לוח שמונה: שבע הטיפות הנסתרות',
+      quote: 'טחון כל טיפה נסתרת שבע פעמים.',
+    }),
+    visible: Object.freeze({
+      explanationKey: 'cooking.live.explain.visible',
+      source: 'מגילת העיתים · לוח תשעה: עשיית שש וארבעים הטיפות',
+      quote: 'את ראשית הטיפה טחון עשתי עשרה פעמים.',
+    }),
+    bowls: Object.freeze({
+      explanationKey: 'cooking.live.explain.bowls',
+      source: 'מגילת העיתים · לוח שלשה עשר: לבלול את שש הקערות אחר הטיפה',
+      quote: 'כל שש הקערות ישתו מן המספרים אשר היו בהן טרם הטיפה.',
+    }),
+    postStirs: Object.freeze({
+      explanationKey: 'cooking.live.explain.postStirs',
+      source: 'מגילת העיתים · לוח ארבעה עשר: לבלול שתים עשרה פעמים אחר הטיפה האחרונה',
+      quote: 'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה פעמים.',
+    }),
+    selection: Object.freeze({
+      explanationKey: 'cooking.live.explain.selection',
+      source: 'מגילת העיתים · לוח ששה עשר: לבחור אחת מדרכים רבות',
+      quote: 'כי יהיו דברים רבים אשר יוכל החכם לקחת ואחד מהם יקח ולא שניים קרא לכל אחד מהם דרך.',
+    }),
+    structure: Object.freeze({
+      explanationKey: 'cooking.live.explain.structure',
+      source: 'מגילת העיתים · לוח אחרון: לדעת שם היום',
+      quote: 'אחרי אשר תדע את שער ראשית השנה ואת שער אחריתה עשה פעם אחת את כל דבר השנה.',
+    }),
+    cutlets: Object.freeze({
+      explanationKey: 'cooking.live.explain.cutlets',
+      source: 'מגילת העיתים · לוח עשרים: הקציצות',
+      quote: 'כספר החלקים אשר תבחר כן תחלק השנה לקציצות.',
+    }),
+    months: Object.freeze({
+      explanationKey: 'cooking.live.explain.months',
+      source: 'מגילת העיתים · לוח אחד ועשרים: החודשים',
+      quote: 'כספר ימי החודשים אשר תבחר כן יהיו ימי החודשים בשנה.',
+    }),
+    weaving: Object.freeze({
+      explanationKey: 'cooking.live.explain.weaving',
+      source: 'מגילת העיתים · לוח אחד ועשרים: החודשים · שזירת החודשים',
+      quote: 'לא תבחר כל יום לבדו. את השזירה כולה תבחר.',
+    }),
+    result: Object.freeze({
+      explanationKey: 'cooking.live.explain.result',
+      source: 'מגילת העיתים · לוח אחרון: לדעת שם היום',
+      quote: 'אחרי אשר תעשה את כל אלה הוצא מן היום אשר עליו שאלת חמשה דברים.',
+    }),
+    position: Object.freeze({
+      explanationKey: 'cooking.live.explain.position',
+      source: 'מגילת העיתים · לוח אחרון: לדעת שם היום',
+      quote: 'אחרי אשר תעשה את דבר השנה הדברים האלה יוצאים ממקום היום בתוך מלאכת השנה אשר עשית.',
+    }),
+  });
+
+  /*
    * Every calendar-name key below is an exact source string from the CURRENT
    * JavaScript+Interlingue SourceLanguageCatalog. The pinned old locale files
    * are translation provenance only; their old positional arrays/identifiers
@@ -2440,5 +2530,6 @@
     provenance: 'current-source-text+pinned-d5cfe77-browser-ui-translations;no-positional-remap',
     defaultLocale: 'ie',
     locales,
+    megillahStageGuide,
   });
 })(typeof globalThis === 'object' ? globalThis : this);
