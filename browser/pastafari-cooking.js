@@ -1361,14 +1361,13 @@
     async load(expectedGeneration) {
       if (!this.hasAttribute('open')) return null;
       const generation = expectedGeneration === undefined ? ++this._generation : expectedGeneration;
-      this._showLoading();
       try {
         const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
         const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
         const targetJdn = axis.gregorianToJdn(targetDate);
         const calculationJdn = axis.gregorianToJdn(calculationDate);
         const inputKey = String(calculationJdn) + ':' + String(targetJdn);
-        if (this._trace && this._traceInputKey === inputKey) {
+        if (this._trace && this._traceInputKey === inputKey && this._liveEntries.length) {
           if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
           this._hideStatus();
           this._renderState();
@@ -1378,10 +1377,22 @@
         if (!service || typeof service.getCookingTrace !== 'function') {
           throw new TypeError('Li shared CalendarService ne supporta cooking trace.');
         }
-        const trace = await service.getCookingTrace(targetJdn, calculationJdn);
+        this._trace = null;
+        this._traceInputKey = null;
+        this._resetLiveLog('running');
+        this._hideStatus();
+        if (this._els && this._els.liveCurrent) this._els.liveCurrent.textContent = this._t('cooking.loading');
+        const trace = await service.getCookingTrace(targetJdn, calculationJdn, {
+          onProgress: (event) => {
+            if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return;
+            this.appendLiveProgress(event);
+          },
+        });
         if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
         this._trace = trace;
         this._traceInputKey = inputKey;
+        this._liveState = 'complete';
+        this._drainLiveRows();
         this._gateDetails.clear();
         this._gateDetailLoading = null;
         this._gateDetailError = null;
@@ -1404,7 +1415,13 @@
         return trace;
       } catch (error) {
         if (generation !== this._generation) return null;
-        this._showError(error);
+        this._liveState = 'error';
+        if (this._liveEntries.length) {
+          this._hideStatus();
+          this._renderState();
+        } else {
+          this._showError(error);
+        }
         throw error;
       }
     }
@@ -1438,6 +1455,11 @@
     _renderState() {
       if (!this._els) return;
       this._applyLocaleLabelsOnly();
+      if (this._liveEntries.length) {
+        this._prepareLiveLog(true);
+        this._drainLiveRows();
+        return;
+      }
       if (!this._trace) {
         this._els.nav.replaceChildren();
         if (!this._els.loading.hidden || !this._els.error.hidden) return;
