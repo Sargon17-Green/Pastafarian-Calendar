@@ -1770,7 +1770,7 @@ unrankCutletPartition total slots required rank1 =
                     rem - (slotsLeft - 1)
             in
             if x > maxX then
-                Debug.todo "Röð kótilettuskiptingar fór út fyrir löglegu fjölskylduna."
+                Debug.todo "Röð kótelettuskiptingar fór út fyrir löglegu fjölskylduna."
 
             else
                 let
@@ -2065,7 +2065,7 @@ findCutlet targetDay cutlets =
                     && BI.compareBig targetDay cutlet.lastDay /= GT
             )
         |> List.head
-        |> expectMaybe "Markdagurinn fannst ekki í neinni kótilettu."
+        |> expectMaybe "Markdagurinn fannst ekki í neinni kótelettu."
 
 
 countOccurrencesThrough : Int -> Int -> List Int -> Int
