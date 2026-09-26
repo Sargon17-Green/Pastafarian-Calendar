@@ -354,6 +354,7 @@ class NormativeExecutionRecorder {
     this.year5000 = null;
     this.nextSelectionOrdinal = 1;
     this.selectionEvents = [];
+    this.gateLiveSelections = new Map();
     this.gateDetailSinkErrors = [];
   }
 
@@ -373,6 +374,15 @@ class NormativeExecutionRecorder {
         : null,
       digits: Array.isArray(payload.digits) ? payload.digits.slice() : null,
     });
+    if (gateIndex !== null && String(payload.label || '') === 'gate-gap') {
+      this.gateLiveSelections.set(gateIndex, payload.output);
+    }
+  }
+
+  consumeGateLiveSelection(signedIndex) {
+    const value = this.gateLiveSelections.get(signedIndex);
+    this.gateLiveSelections.delete(signedIndex);
+    return value;
   }
 
   beginGateGap(signedIndex) {
@@ -496,11 +506,12 @@ class TracingGateRegistry extends core.Stage54GateRegistry {
     try {
       const gap = super.gateGap(signedIndex);
       this.recorder.finishGateGap(signedIndex, gap);
+      const selectionOutput = this.recorder.consumeGateLiveSelection(signedIndex);
       // A gate search may span tens of thousands of gates. Emit exactly one
       // completed live event per real gate-gap computation; the accelerated
       // Sauce/selection substeps are retained in the normative recorder but are
       // not duplicated as separate UI messages.
-      this.progress.emit('gate-gap-finished', { signedIndex, gap });
+      this.progress.emit('gate-gap-finished', { signedIndex, gap, selectionOutput });
       return gap;
     } finally {
       this.recorder.endGateGap(signedIndex);
