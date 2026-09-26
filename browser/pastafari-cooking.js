@@ -127,6 +127,7 @@
       this._liveCurrentPending = null;
       this._liveCurrentEvent = null;
       this._liveGuideStageKey = null;
+      this._liveRetainedStageKeys = new Set();
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -390,6 +391,22 @@
             gap: .5rem;
             margin-top: .55rem;
             max-width: 72ch;
+          }
+          .retained-stage-guide-item {
+            min-width: 0;
+            margin: .15rem 0 .55rem;
+          }
+          .retained-stage-guide {
+            display: grid;
+            gap: .5rem;
+            min-width: 0;
+            padding: .7rem;
+            border: 1px solid #d8c8a8;
+            border-radius: .68rem;
+            background: #fffaf0;
+          }
+          .retained-stage-guide .live-explanation {
+            font-size: .86rem;
           }
           .live-explanation {
             margin: 0;
@@ -897,7 +914,7 @@
             }
           }
           @media (forced-colors: active) {
-            .shell, .step-card, .sauce, .mini, .result-five > div, .megillah-quote { border: 2px solid CanvasText; }
+            .shell, .step-card, .sauce, .mini, .result-five > div, .megillah-quote, .retained-stage-guide { border: 2px solid CanvasText; }
           }
           @media print {
             :host(:not([open])) { display: none !important; }
@@ -1095,6 +1112,7 @@
       this._liveCurrentPending = null;
       this._liveCurrentEvent = null;
       this._liveGuideStageKey = null;
+      this._liveRetainedStageKeys = new Set();
       if (this._els && this._els.pane) this._els.pane.replaceChildren();
       if (this._els && this._els.nav) this._els.nav.replaceChildren();
     }
@@ -1216,7 +1234,11 @@
       copy.payload = copy.payload && typeof copy.payload === 'object' ? copy.payload : {};
       this._liveObservedCount += 1;
       if (this._liveState === 'idle' || this._liveState === 'complete') this._liveState = 'running';
+      const displayedStage = this._liveCurrentEvent
+        ? this._liveCurrentStage(this._liveCurrentEvent)
+        : (this._liveGuideStageKey || 'inputs');
       this._liveCurrentPending = copy;
+      if (this._liveCurrentStage(copy) !== displayedStage) this._drainLiveCurrent();
       this._scheduleLiveDrain();
       if (this._consumeGateSweep(copy)) return;
       this._flushGateSweep();
@@ -1230,6 +1252,7 @@
         this._traceInputKey = this._currentInputKey();
       }
       this._liveState = 'complete';
+      this._drainLiveCurrent();
       this._drainLiveRows();
       if (this.hasAttribute('live')) this.removeAttribute('live');
       this._syncDialogOpen();
@@ -1243,6 +1266,7 @@
     failLiveTrace(error) {
       this._flushGateSweep();
       this._liveState = 'error';
+      this._drainLiveCurrent();
       this._drainLiveRows();
       if (this.hasAttribute('live')) this.removeAttribute('live');
       this._syncDialogOpen();
@@ -1566,23 +1590,86 @@
       }
     }
 
-    _renderLiveStageGuide(stageKey, force = false) {
-      if (!this._els || !this._els.liveExplanation || !this._els.megillahQuote || !this._els.megillahSourceLink) return;
+    _stageGuideData(stageKey) {
       const localeData = root.PastafariBrowserLocaleData;
       const guideTable = localeData && localeData.megillahStageGuide;
       const canonicalUrl = localeData && localeData.megillahCanonicalUrl;
-      if (!guideTable || !canonicalUrl) return;
+      if (!guideTable || !canonicalUrl) return null;
       const key = guideTable[stageKey] ? stageKey : 'inputs';
-      if (!force && this._liveGuideStageKey === key) return;
-      const guide = guideTable[key];
+      return { key, guide: guideTable[key], canonicalUrl };
+    }
+
+    _fillStageGuide(explanationNode, quoteNode, sourceLinkNode, stageKey) {
+      const data = this._stageGuideData(stageKey);
+      if (!data || !explanationNode || !quoteNode || !sourceLinkNode) return null;
+      explanationNode.textContent = this._t(data.guide.explanationKey);
+      quoteNode.textContent = data.guide.quote;
+      sourceLinkNode.textContent = data.guide.source;
+      sourceLinkNode.setAttribute('href', data.canonicalUrl);
+      sourceLinkNode.setAttribute('target', '_blank');
+      sourceLinkNode.setAttribute('rel', 'noopener noreferrer');
+      return data.key;
+    }
+
+    _renderLiveStageGuide(stageKey, force = false) {
+      if (!this._els || !this._els.liveExplanation || !this._els.megillahQuote || !this._els.megillahSourceLink) return;
+      const data = this._stageGuideData(stageKey);
+      if (!data) return;
+      if (!force && this._liveGuideStageKey === data.key) return;
+      const key = this._fillStageGuide(
+        this._els.liveExplanation,
+        this._els.megillahQuote,
+        this._els.megillahSourceLink,
+        data.key,
+      );
+      if (!key) return;
       this._liveGuideStageKey = key;
-      this._els.liveExplanation.textContent = this._t(guide.explanationKey);
-      this._els.megillahQuote.textContent = guide.quote;
-      this._els.megillahSourceLink.textContent = guide.source;
-      this._els.megillahSourceLink.setAttribute('href', canonicalUrl);
-      this._els.megillahSourceLink.setAttribute('target', '_blank');
-      this._els.megillahSourceLink.setAttribute('rel', 'noopener noreferrer');
       if (this._els.stageGuide) this._els.stageGuide.dataset.stage = key;
+    }
+
+    _retainedStageForEvent(event) {
+      return String(event && event.kind || '') === 'run-start' ? 'inputs' : this._liveCurrentStage(event);
+    }
+
+    _retainedStageGuideNode(stageKey) {
+      const data = this._stageGuideData(stageKey);
+      if (!data) return null;
+      const guide = doc.createElement('section');
+      guide.className = 'retained-stage-guide';
+      guide.dataset.stage = data.key;
+      guide.setAttribute('aria-live', 'off');
+
+      const explanation = doc.createElement('p');
+      explanation.className = 'live-explanation';
+      const figure = doc.createElement('figure');
+      figure.className = 'megillah-quote';
+      figure.setAttribute('lang', 'he');
+      figure.setAttribute('dir', 'rtl');
+      const quote = doc.createElement('blockquote');
+      const source = doc.createElement('figcaption');
+      source.className = 'megillah-source';
+      const link = doc.createElement('a');
+      link.className = 'megillah-source-link';
+      source.append(link);
+      figure.append(quote, source);
+      guide.append(explanation, figure);
+
+      if (!this._fillStageGuide(explanation, quote, link, data.key)) return null;
+      return guide;
+    }
+
+    _appendRetainedStageGuide(target, event) {
+      if (!target || !target.list) return;
+      const data = this._stageGuideData(this._retainedStageForEvent(event));
+      if (!data || this._liveRetainedStageKeys.has(data.key)) return;
+      const guide = this._retainedStageGuideNode(data.key);
+      if (!guide) return;
+      const item = doc.createElement('li');
+      item.className = 'retained-stage-guide-item';
+      item.dataset.stage = data.key;
+      item.append(guide);
+      target.list.append(item);
+      this._liveRetainedStageKeys.add(data.key);
     }
 
     _liveCurrentStep(event) {
@@ -1960,10 +2047,9 @@
         || kind === 'gate-gap-start'
         || kind === 'sauce-start';
       if (markerOnly) {
-        if (kind === 'sauce-start') {
-          const group = this._ensureLiveGroup(key);
-          this._ensureLiveSauce(group, event);
-        }
+        const group = this._ensureLiveGroup(key);
+        const target = kind === 'sauce-start' ? this._ensureLiveSauce(group, event) : group;
+        this._appendRetainedStageGuide(target, event);
         return false;
       }
       const group = this._ensureLiveGroup(key);
@@ -1973,6 +2059,7 @@
       group.totalMs += durationMs;
       group.count.textContent = this._liveBadgeText(group);
       const target = this._ensureLiveSauce(group, event);
+      this._appendRetainedStageGuide(target, event);
       if (target !== group) {
         target.value += 1;
         target.totalMs += durationMs;
@@ -2010,6 +2097,7 @@
         this._liveSauceNodes = new Map();
         this._liveLastGroupKey = null;
         this._livePhaseKey = null;
+        this._liveRetainedStageKeys = new Set();
       }
       this._els.nav.replaceChildren();
       this._els.pane.hidden = false;
@@ -2042,18 +2130,22 @@
       }
     }
 
+    _drainLiveCurrent() {
+      if (!this._liveCurrentPending || !this._els || !this._els.liveCurrent) return false;
+      const current = this._liveCurrentPending;
+      this._liveCurrentPending = null;
+      this._liveCurrentEvent = current;
+      this._els.liveCurrent.textContent = this._liveCurrentLabel(current);
+      this._renderLiveStageGuide(this._liveCurrentStage(current));
+      return true;
+    }
+
     _scheduleLiveDrain() {
       if (this._liveRenderQueued) return;
       this._liveRenderQueued = true;
       const flush = () => {
         this._liveRenderQueued = false;
-        if (this._liveCurrentPending && this._els && this._els.liveCurrent) {
-          const current = this._liveCurrentPending;
-          this._liveCurrentEvent = current;
-          this._els.liveCurrent.textContent = this._liveCurrentLabel(current);
-          this._renderLiveStageGuide(this._liveCurrentStage(current));
-          this._liveCurrentPending = null;
-        }
+        this._drainLiveCurrent();
         this._drainLiveRows();
       };
       if (typeof root.requestAnimationFrame === 'function') root.requestAnimationFrame(flush);
