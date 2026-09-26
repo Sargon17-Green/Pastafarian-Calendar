@@ -78,7 +78,7 @@ jobs:
           </head>
           <body>
             <script src="/dist/pastafari-date.js"></script>
-            <pastafari-cooking id="c" lang="en" date="2026-09-26" calculation-date="2026-09-26"></pastafari-cooking>
+            <pastafari-date id="fixture-host" headless lang="en" date="2026-09-26" calculation-date="2026-09-26"></pastafari-date>
           </body>
           </html>
           HTML
@@ -323,19 +323,18 @@ jobs:
 
           async function populateHarness(page, lang) {
             await page.goto(harness,{waitUntil:'domcontentloaded'});
-            await page.evaluate(() => customElements.whenDefined('pastafari-cooking'));
+            await page.waitForFunction(() => {
+              const h=document.querySelector('#fixture-host');
+              const c=h?.shadowRoot?.querySelector('pastafari-cooking');
+              return !!c && typeof c.beginLiveTrace==='function';
+            },null,{timeout:30000});
             await page.evaluate(({lang,events}) => {
-              let c=document.querySelector('#c');
-              if (!c || typeof c.beginLiveTrace !== 'function') {
-                if (c) c.remove();
-                document.body.insertAdjacentHTML(
-                  'beforeend',
-                  '<pastafari-cooking id="c" date="2026-09-26" calculation-date="2026-09-26"></pastafari-cooking>'
-                );
-                c=document.querySelector('#c');
-              }
-              if (typeof c.beginLiveTrace !== 'function') throw new Error('pastafari-cooking parser fixture failed to upgrade');
+              const h=document.querySelector('#fixture-host');
+              const c=h.shadowRoot.querySelector('pastafari-cooking');
+              h.setAttribute('lang',lang);
               c.setAttribute('lang',lang);
+              c.setAttribute('date','2026-09-26');
+              c.setAttribute('calculation-date','2026-09-26');
               c.beginLiveTrace();
               for(const event of events) c.appendLiveProgress(event);
               c._drainLiveRows();
@@ -356,7 +355,7 @@ jobs:
               const {ctx,page,errors}=await contextPage(browser,spec);
               await populateHarness(page,spec.lang);
               const m=await page.evaluate(() => {
-                const c=document.querySelector('#c'),s=c.shadowRoot,shell=s.querySelector('.shell'),pane=s.querySelector('.pane');
+                const h=document.querySelector('#fixture-host'),c=h.shadowRoot.querySelector('pastafari-cooking'),s=c.shadowRoot,shell=s.querySelector('.shell'),pane=s.querySelector('.pane');
                 const r=shell.getBoundingClientRect();
                 const groups=[...s.querySelectorAll('.live-group')];
                 const sauces=[...s.querySelectorAll('.live-sauce')];
@@ -402,7 +401,7 @@ jobs:
               const {ctx,page,errors}=await contextPage(browser,spec);
               await populateHarness(page,lang);
               const m=await page.evaluate(() => {
-                const c=document.querySelector('#c'),s=c.shadowRoot;
+                const h=document.querySelector('#fixture-host'),c=h.shadowRoot.querySelector('pastafari-cooking'),s=c.shadowRoot;
                 return {
                   dir:c.getAttribute('dir'),
                   title:s.querySelector('.title').textContent,
@@ -427,7 +426,7 @@ jobs:
             const {ctx,page,errors}=await contextPage(browser,spec,{reducedMotion:'reduce'});
             await populateHarness(page,'he');
             const m=await page.evaluate(() => {
-              const s=document.querySelector('#c').shadowRoot;
+              const h=document.querySelector('#fixture-host'),s=h.shadowRoot.querySelector('pastafari-cooking').shadowRoot;
               const monster=getComputedStyle(s.querySelector('.monster'));
               const drip=getComputedStyle(s.querySelector('.sauce-drip'));
               return {monsterAnimation:monster.animationName,monsterDuration:monster.animationDuration,
@@ -443,7 +442,7 @@ jobs:
             const fc=await contextPage(browser,spec,{forcedColors:'active'});
             await populateHarness(fc.page,'he');
             const b=await fc.page.evaluate(() => {
-              const s=document.querySelector('#c').shadowRoot;
+              const h=document.querySelector('#fixture-host'),s=h.shadowRoot.querySelector('pastafari-cooking').shadowRoot;
               const group=getComputedStyle(s.querySelector('.live-group'));
               const bowl=getComputedStyle(s.querySelector('.live-icon--bowl'));
               return {groupBorder:group.borderTopWidth,bowlBorder:bowl.borderTopWidth};
