@@ -144,6 +144,7 @@ jobs:
                 open:!!shell?.hasAttribute('open'),
                 ariaModal:shell?.getAttribute('aria-modal'),
                 entries:p?._liveEntries?.length||0,
+                observed:p?._liveObservedCount||0,
                 rendered:rows.length,
                 groups:groups.length,
                 openGroups:groups.filter(n=>n.open).length,
@@ -181,11 +182,11 @@ jobs:
             },null,{timeout:30000});
             await page.waitForFunction(() => {
               const p=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('pastafari-cooking');
-              return (p?._liveEntries?.length||0)>=40;
+              return (p?._liveObservedCount||0)>=40 && (p?._liveEntries?.length||0)>=2;
             },null,{timeout:180000});
             const live=await liveMetrics(page);
             assert(live.live && live.open,'real stream is not visibly live');
-            assert(live.entries>=40 && live.rendered>0,'real stream did not accumulate internal operations');
+            assert(live.observed>=40 && live.entries>=2 && live.rendered>0,'real stream did not accumulate internal operations');
             assert(live.monster && live.sauceDrips===2,'monster/drips missing in real live state');
             assert(live.timingCount>0,'real live rows show no timings');
             assert(live.ariaModal==='false','inline live shell incorrectly claims modal semantics');
@@ -211,6 +212,7 @@ jobs:
             });
             assert(!finished.live,'live mode did not end');
             assert(finished.retained>=live.entries,'completed log lost live rows');
+            assert(finished.rendered<5000,'completed log retained too many DOM rows instead of compacting repeated gate sweeps');
             assert(finished.trace,'completed run did not retain full trace');
             assert(finished.selected && finished.days>0 && finished.days<=28,'calendar result failed after live trace');
 
@@ -318,6 +320,7 @@ jobs:
 
           async function populateHarness(page, lang) {
             await page.goto(harness,{waitUntil:'domcontentloaded'});
+            await page.evaluate(() => customElements.whenDefined('pastafari-cooking'));
             await page.evaluate(({lang,events}) => {
               const c=document.querySelector('#c');
               c.setAttribute('lang',lang);
