@@ -1,4 +1,4 @@
-# Pastafaríska tímatalan — Elm og íslenska
+# Pastafari-dagatalið — Elm og íslenska
 
 Þetta verkefni er sjálfstæð grunnsmíð Stage 1 fyrir Elm-línuna með íslensku sem eina mannlega frumtextamálið. Verkefnið var stofnað frá auðu tré og notar engin forrit, prófanir, niðurstöður, töflur, skyndiminni, rekjanir eða gátreikninga úr annarri útfærslu.
 
