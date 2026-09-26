@@ -28,7 +28,7 @@ Jákvæð hlið spyr um `FOUNDATION+n` og neikvæð hlið um `FOUNDATION-n`. Hli
 
 ## Kótilettur og mánuðir
 
-Fjöldi kóteletta er takmarkaður við 6..17 og ekki meiri en fjöldi hliðabila ársins. Skipting kóteletta er nákvæm lexíkógrafísk talning/opnun; ef verknaðardagurinn er innra hlið verður það millimark skiptingarinnar. Nöfn eru valin sem hlutumraðanir án endurtekningar og innri merkingin er `canonicalIndex`.
+Fjöldi kóteletta er takmarkaður við 6..17 og ekki meiri en fjöldi hliðabila ársins. Skipting kóteletta er nákvæm lexíkógrafísk talning/opnun; ef aðgerðardagurinn er innra hlið verður það millimark skiptingarinnar. Nöfn eru valin sem hlutumraðanir án endurtekningar og innri merkingin er `canonicalIndex`.
 
 Mánaðafjöldi fylgir mörkunum 4..123 dagar og að hámarki 47 mánuðir. Mánaðalengdir eru taldar og opnaðar með nákvæmu DP án þess að efnisgera alla fjölskylduna. Vefurinn er valinn sem ein heild með DP sem varðveitir bæði röð fyrstu og síðustu birtingar. `dayInMonth` er fjöldi birtinga valins mánaðar frá upphafi árs til og með markdegi.
 
