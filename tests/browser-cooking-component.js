@@ -555,6 +555,8 @@ async function flush() {
   assert(treeText(live._els.pane).includes('אבן'));
   assert(treeCountByClass(live._els.pane, 'retained-stage-guide') >= 3,
     'retained how-cooked log must keep semantic stage guides instead of only the live hero guide');
+  assert(treeCountByClass(live._els.pane, 'retained-stage-guide') <= 16,
+    'retained log must not duplicate semantic guidance every time a stage recurs');
   assert(treeText(live._els.pane).includes('46 שורות'),
     'retained log must keep the localized stone-stage explanation');
   assert(treeText(live._els.pane).includes('כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.'),
