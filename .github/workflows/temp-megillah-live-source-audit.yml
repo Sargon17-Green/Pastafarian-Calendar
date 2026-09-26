@@ -12,7 +12,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,12 +22,7 @@ jobs:
         with:
           node-version: 22.16.0
 
-      - name: Install Playwright
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
-
-      - name: Fetch live Hebrew source in Chromium
+      - name: Probe live Blogger page and feeds
         run: node scripts/temp-megillah-live-source-audit.js
 
       - name: Upload audit
