@@ -34,7 +34,7 @@
 
   function normalizeCookingTraceOptions(options) {
     if (options === null || options === undefined) {
-      return { onGateSauceDetail: null, gateDetailGateIndices: null, timeoutMs: null };
+      return { onGateSauceDetail: null, onProgress: null, gateDetailGateIndices: null, timeoutMs: null };
     }
     if (!options || typeof options !== 'object' || Array.isArray(options)) {
       throw new TypeError('Li cooking-trace options deve esser un plain object.');
@@ -43,6 +43,10 @@
       ? null : options.onGateSauceDetail;
     if (onGateSauceDetail !== null && typeof onGateSauceDetail !== 'function') {
       throw new TypeError('onGateSauceDetail deve esser null o un function.');
+    }
+    const onProgress = options.onProgress === undefined ? null : options.onProgress;
+    if (onProgress !== null && typeof onProgress !== 'function') {
+      throw new TypeError('onProgress deve esser null o un function.');
     }
     let gateDetailGateIndices = null;
     if (options.gateDetailGateIndices !== undefined && options.gateDetailGateIndices !== null) {
@@ -62,7 +66,7 @@
     if (timeoutMs !== null && (!Number.isFinite(timeoutMs) || timeoutMs <= 0)) {
       throw new RangeError('timeoutMs del cooking trace deve esser positiv.');
     }
-    return { onGateSauceDetail, gateDetailGateIndices, timeoutMs };
+    return { onGateSauceDetail, onProgress, gateDetailGateIndices, timeoutMs };
   }
 
   function errorFromPayload(payload) {
@@ -144,13 +148,16 @@
           return;
         }
       }
-      if (message && message.ok && message.kind === 'gate-detail') {
-        if (typeof entry.onChunk !== 'function') {
-          this._handleFatal(new Error('Li Worker inviat un gate-detail chunk sin un registrat sink.'));
+      if (message && message.ok && (message.kind === 'gate-detail' || message.kind === 'progress')) {
+        const handler = message.kind === 'gate-detail'
+          ? entry.onGateSauceDetail
+          : entry.onProgress;
+        if (typeof handler !== 'function') {
+          this._handleFatal(new Error('Li Worker inviat un ' + message.kind + ' chunk sin un registrat sink.'));
           return;
         }
         try {
-          entry.onChunk(deepFreezePlain(message.value));
+          handler(deepFreezePlain(message.value));
         } catch (error) {
           this._handleFatal(error);
         }
@@ -177,7 +184,7 @@
       this.pending.clear();
     }
 
-    _request(operation, payload, timeoutMs, onChunk = null) {
+    _request(operation, payload, timeoutMs, handlers = null) {
       const worker = this._ensureWorker();
       const id = this.nextRequestId++;
       const limit = timeoutMs || this.timeoutMs;
@@ -186,7 +193,16 @@
           if (!this.pending.has(id)) return;
           this._handleFatal(new Error('Li operation ' + operation + ' excedet ' + limit + ' ms.'));
         }, limit);
-        this.pending.set(id, { resolve, reject, timer, onChunk });
+        const selectedHandlers = typeof handlers === 'function'
+          ? { onGateSauceDetail: handlers, onProgress: null }
+          : (handlers || {});
+        this.pending.set(id, {
+          resolve,
+          reject,
+          timer,
+          onGateSauceDetail: selectedHandlers.onGateSauceDetail || null,
+          onProgress: selectedHandlers.onProgress || null,
+        });
         try {
           const message = { id, operation, ...payload };
           if (this.buildId != null) message.buildId = this.buildId;
@@ -207,11 +223,33 @@
       return normalizeCalendarResult(value);
     }
 
-    async getCutletView(calculationDay, targetDay) {
+    async convertWithTrace(calculationDay, targetDay, onProgress = null) {
+      if (onProgress !== null && typeof onProgress !== 'function') {
+        throw new TypeError('onProgress deve esser null o un function.');
+      }
+      const value = await this._request('convertWithTrace', {
+        calculationDay: String(BigInt(calculationDay)),
+        targetDay: String(BigInt(targetDay)),
+        streamProgress: onProgress !== null,
+      }, null, { onProgress });
+      if (!value || typeof value !== 'object' || !value.trace) {
+        throw new TypeError('Li Worker ne retornat un traced conversion valid.');
+      }
+      return Object.freeze({
+        result: normalizeCalendarResult(value.result),
+        trace: deepFreezePlain(value.trace),
+      });
+    }
+
+    async getCutletView(calculationDay, targetDay, onProgress = null) {
+      if (onProgress !== null && typeof onProgress !== 'function') {
+        throw new TypeError('onProgress deve esser null o un function.');
+      }
       return deserializeView(await this._request('getCutletView', {
         calculationDay: String(BigInt(calculationDay)),
         targetDay: String(BigInt(targetDay)),
-      }));
+        streamProgress: onProgress !== null,
+      }, null, { onProgress }));
     }
 
     async getCookingTrace(calculationDay, targetDay, options = null) {
@@ -220,6 +258,7 @@
         calculationDay: String(BigInt(calculationDay)),
         targetDay: String(BigInt(targetDay)),
         streamGateSauceDetail: selected.onGateSauceDetail !== null,
+        streamProgress: selected.onProgress !== null,
       };
       if (selected.gateDetailGateIndices !== null) {
         payload.gateDetailGateIndices = selected.gateDetailGateIndices.map((value) => String(value));
@@ -228,7 +267,10 @@
         'cookingTrace',
         payload,
         selected.timeoutMs,
-        selected.onGateSauceDetail,
+        {
+          onGateSauceDetail: selected.onGateSauceDetail,
+          onProgress: selected.onProgress,
+        },
       );
       return deepFreezePlain(value);
     }

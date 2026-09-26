@@ -995,6 +995,13 @@ function emitCookingTraceCheckpoint(checkpoint, kind, payload) {
   checkpoint(kind, payload);
 }
 
+function emitCookingProgress(context, kind, payload) {
+  const checkpoint = context && typeof context.cookingTraceProgressCheckpoint === 'function'
+    ? context.cookingTraceProgressCheckpoint
+    : null;
+  if (checkpoint) checkpoint(kind, payload);
+}
+
 
 function oldDayTag(day) {
   const distance = day >= FOUNDATION_DAY_OLD
@@ -1736,6 +1743,14 @@ function stage56CanonicalSavedSumPostStir(stirNumber, bowls, legacyRound, contex
   context.appliedCount += 1;
   context.appliedFlag = true;
   context.history.push(historyRow);
+  emitCookingTraceCheckpoint(checkpoint, 'post-stir', {
+    stirIndex: stirNumber,
+    rawBowlSum,
+    savedOrderNumber,
+    order: order.slice(),
+    positions: positionCheckpoints ? positionCheckpoints.map((row) => ({ ...row })) : [],
+    afterBowls: pending.slice()
+  });
   return { bowls: pending.slice(), order: order.slice(), rawBowlSum, savedOrderNumber };
 }
 
@@ -8336,7 +8351,13 @@ function stage57PreserveSequentialYearAfterPatch26Ghost(context, authoritativeBe
 }
 
 function stage54ResolveTargetYear(calculationDay, targetDay, registry, context, sauceProvider = sauceWithScars, yearMemory = null) {
+  emitCookingProgress(context, 'year-resolution-start', { calculationDay, targetDay });
   const year5000 = stage54BuildYear5000(calculationDay, registry, context, sauceProvider, yearMemory);
+  emitCookingProgress(context, 'year-5000-ready', {
+    number: year5000.number,
+    openDay: year5000.openDay,
+    closeDay: year5000.closeDay
+  });
   context.diagnostics.push(Object.freeze({ label: 'oldJumpGuess', value: oldJumpGuess(year5000, targetDay) }));
   const source = Object.freeze({
     nextYear: (year) => stage54BuildAdjacentYear(calculationDay, year, 'next', registry, context, sauceProvider, yearMemory),
@@ -8345,6 +8366,13 @@ function stage54ResolveTargetYear(calculationDay, targetDay, registry, context, 
   const walkLineage = targetDay > year5000.closeDay ? 'next' : targetDay <= year5000.openDay ? 'previous' : 'origin';
   const rememberedAnchor = yearMemory ? yearMemory.nearestAuthoritative(calculationDay, targetDay, walkLineage) : null;
   const walkAnchor = rememberedAnchor === null ? year5000 : stage54EnrichYear(registry, rememberedAnchor);
+  emitCookingProgress(context, 'year-walk-anchor', {
+    number: walkAnchor.number,
+    openDay: walkAnchor.openDay,
+    closeDay: walkAnchor.closeDay,
+    lineage: walkLineage,
+    cacheBacked: rememberedAnchor !== null
+  });
   context.diagnostics.push(Object.freeze({
     label: 'stage58-year-walk-anchor', cacheBacked: rememberedAnchor !== null,
     anchorYear: walkAnchor.number, originalYear5000: year5000.number, lineage: walkLineage
@@ -8354,16 +8382,37 @@ function stage54ResolveTargetYear(calculationDay, targetDay, registry, context, 
     targetDay,
     (year) => {
       const next = source.nextYear(year);
+      emitCookingProgress(context, 'year-walk-step', {
+        direction: 'next',
+        fromNumber: year.number,
+        toNumber: next.number,
+        openDay: next.openDay,
+        closeDay: next.closeDay
+      });
       if (yearMemory) yearMemory.rememberAuthoritative(calculationDay, next, walkLineage);
       return next;
     },
     (year) => {
       const previous = source.previousYear(year);
+      emitCookingProgress(context, 'year-walk-step', {
+        direction: 'previous',
+        fromNumber: year.number,
+        toNumber: previous.number,
+        openDay: previous.openDay,
+        closeDay: previous.closeDay
+      });
       if (yearMemory) yearMemory.rememberAuthoritative(calculationDay, previous, walkLineage);
       return previous;
     }
   );
   if (yearMemory) yearMemory.rememberAuthoritative(calculationDay, walked.year, walkLineage);
+  emitCookingProgress(context, 'year-walk-finished', {
+    direction: walked.direction,
+    stepCount: walked.stepCount,
+    number: walked.year.number,
+    openDay: walked.year.openDay,
+    closeDay: walked.year.closeDay
+  });
   const authoritativeBeforePatch26 = stage54EnrichYear(registry, walked.year);
   let ownershipAnchor = authoritativeBeforePatch26;
   if (targetDay === authoritativeBeforePatch26.closeDay) {
@@ -8397,6 +8446,11 @@ function stage54ResolveTargetYear(calculationDay, targetDay, registry, context, 
   context.patch26LegacyYear = stage54CloneYear(legacyInterval.year);
   context.patch26ResolvedYear = stage54CloneYear(patch26RoundTripYear);
   context.patch26SemanticYearNumber = finalYear.number;
+  emitCookingProgress(context, 'year-resolution-finished', {
+    number: finalYear.number,
+    openDay: finalYear.openDay,
+    closeDay: finalYear.closeDay
+  });
   context.diagnostics.push(Object.freeze({
     label: 'opening-gate-interval',
     legacyYear: legacyInterval.year.number,
@@ -8500,6 +8554,11 @@ function stage58SemanticStructurePut(manager, calculationDay, year, structure) {
 }
 
 function stage54BuildStructure(manager, context, calculationDay, targetDay, year, registry, sauceProvider = sauceWithScars) {
+  emitCookingProgress(context, 'structure-start', {
+    year: year.number,
+    openDay: year.openDay,
+    closeDay: year.closeDay
+  });
   const rememberedStructure = stage58SemanticStructureGet(manager, calculationDay, year);
   const guarded = cacheGetWithActionGuard(manager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER, year, calculationDay);
   context.cacheEvents.push(Object.freeze({
@@ -8550,6 +8609,7 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
   const cutletCountStream = stage54AnswerRingWithScar(structureSauce, 2, 20n, context, 'cutlet-count');
   const cutletCountPick = stage58SelectionDispatcherRemembered(cutletCountStream, BigInt(cutletCountCandidates.length), context, 'cutlet-count');
   const cutletCount = cutletCountCandidates[Number(cutletCountPick.output - 1n)];
+  emitCookingProgress(context, 'cutlet-count-ready', { count: cutletCount });
 
   const rawPartitionFamily = legacyPositiveCompositions(gapCount, cutletCount);
   const partitionStream = stage54AnswerRingWithScar(structureSauce, 2, 21n, context, 'cutlet-partition');
@@ -8575,6 +8635,12 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
     }
     if (!hit) throw new BootstrapStageError('Li partition filtrat final manca li calculation gate intern.');
   }
+  emitCookingProgress(context, 'cutlet-partition-ready', {
+    count: partition.length,
+    partition: partition.slice(),
+    selectedRank: semanticPartitionRank,
+    familyCount: semanticPartitionCount
+  });
   context.diagnostics.push(Object.freeze({
     label: 'cutlet-partition-scar',
     rawCount: rawPartitionFamily.count(), rawRank: rawPartitionRank, raw: Object.freeze(rawPartition.slice()),
@@ -8587,7 +8653,13 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
   if (new Set(cutletNameIndices).size !== cutletNameIndices.length) {
     throw new BootstrapStageError('Li cutlet names final ne es distinct.');
   }
+  emitCookingProgress(context, 'cutlet-names-ready', { indices: cutletNameIndices.slice() });
   const cutlets = stage54MaterializeCutlets(year, partition, cutletNameIndices, registry);
+  emitCookingProgress(context, 'cutlets-materialized', {
+    count: cutlets.length,
+    firstDay: cutlets.length ? cutlets[0].firstDay : null,
+    lastDay: cutlets.length ? cutlets[cutlets.length - 1].lastDay : null
+  });
 
   const yearLengthBig = year.closeDay - year.openDay;
   let minMonths = Number((yearLengthBig + 122n) / 123n);
@@ -8598,6 +8670,7 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
   const monthCountStream = stage54AnswerRingWithScar(structureSauce, 3, 30n, context, 'month-count');
   const monthCountRank = stage58SelectionDispatcherRemembered(monthCountStream, BigInt(maxMonths - minMonths + 1), context, 'month-count').output;
   const monthCount = minMonths + Number(monthCountRank - 1n);
+  emitCookingProgress(context, 'month-count-ready', { count: monthCount });
 
   const legacyMonthApi = new LegacyMonthLengthAllWaysAPI();
   const probe = legacyMonthApi.probeAllWays(Number(yearLengthBig), monthCount, 128);
@@ -8609,6 +8682,11 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
   if (!stage54ArraysEqual(monthLengths, monthLengthsAgain)) {
     throw new BootstrapStageError('Li validation duplicat de VirtualLegacyList final diverge.');
   }
+  emitCookingProgress(context, 'month-lengths-ready', {
+    count: monthLengths.length,
+    lengths: monthLengths.slice(),
+    selectedRank: monthLengthRank
+  });
   context.diagnostics.push(Object.freeze({
     label: 'month-length-concrete-scar',
     concreteProbeCount: probe.ways.length,
@@ -8625,6 +8703,10 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
   const rememberedTraversalFamily = new LegalMonthWeavingDP(monthLengths);
   const correctWeaving = rememberedTraversalFamily.unrank1Stage58RememberedTraversal(wantedRank);
   const weaving = stage54ArraysEqual(ghostWeaving, correctWeaving) ? ghostWeaving : correctWeaving;
+  emitCookingProgress(context, 'month-weaving-ready', {
+    length: weaving.length,
+    selectedRank: wantedRank
+  });
   context.diagnostics.push(Object.freeze({
     label: 'month-weaving-ghost',
     familyCount: weavingFamily.count(), wantedRank,
@@ -8639,6 +8721,7 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
   if (new Set(monthNameIndices).size !== monthNameIndices.length) {
     throw new BootstrapStageError('Li month names final ne es distinct.');
   }
+  emitCookingProgress(context, 'month-names-ready', { indices: monthNameIndices.slice() });
 
   const candidateStructure = Object.freeze({
     yearNumber: year.number,
@@ -8666,6 +8749,11 @@ function stage54BuildStructure(manager, context, calculationDay, targetDay, year
   cachePutWithGuard(manager.LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER, year, calculationDay, context.structure);
   stage58SemanticStructurePut(manager, calculationDay, year, context.structure);
   context.cacheEvents.push(Object.freeze({ type: 'COMMIT', year: year.number }));
+  emitCookingProgress(context, 'structure-finished', {
+    year: year.number,
+    cutletCount: context.structure.cutletCount,
+    monthCount: context.structure.monthCount
+  });
   return context.structure;
 }
 
@@ -8858,6 +8946,13 @@ class Stage54MonsterIntegrationManager extends BaseMonsterManager {
           case 80:
             context.subPhase = 'FINAL_RESOLVER';
             context.resultFive = stage54ResolveFive(context, year, structure, targetDay);
+            emitCookingProgress(context, 'final-result-ready', {
+              year: context.resultFive[0],
+              cutletName: context.resultFive[1],
+              dayInCutlet: context.resultFive[2],
+              monthName: context.resultFive[3],
+              dayInMonth: context.resultFive[4]
+            });
             context.commitToken = 'STAGE54_RESULT_VALIDATED';
             committedSnapshot = this.recoveryManager.snapshot(context, 80);
             programCounter = 90;

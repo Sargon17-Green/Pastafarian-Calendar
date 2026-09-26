@@ -1379,6 +1379,11 @@
           if (this._els && this._els.calendar) this._els.calendar.setAttribute('aria-busy', 'true');
         } else {
           this._showLoading();
+          if (this._els.cookingPanel && typeof this._els.cookingPanel.beginLiveTrace === 'function') {
+            this._els.cookingPanel.beginLiveTrace();
+            if (this._els.loading) this._els.loading.hidden = true;
+            this._clearLoadingNotice();
+          }
         }
 
         const service = serviceApi.getSharedCalendarService();
@@ -1392,23 +1397,49 @@
           return this._value;
         }
 
-        const directValue = await service.convert(targetJdn, calculationJdn);
+        const progressSink = (event) => {
+          if (generation !== this._generation) return;
+          const panel = this._els && this._els.cookingPanel;
+          if (panel && typeof panel.appendLiveProgress === 'function') panel.appendLiveProgress(event);
+        };
+        const traced = typeof service.convertWithTrace === 'function'
+          ? await service.convertWithTrace(targetJdn, calculationJdn, progressSink)
+          : Object.freeze({ result: await service.convert(targetJdn, calculationJdn), trace: null });
         if (generation !== this._generation) return null;
-        this._value = resultApi.cloneCanonicalResult(directValue);
+        this._value = resultApi.cloneCanonicalResult(traced.result);
         this._scrollTarget = createScrollTarget(targetJdn, this._value);
 
         // Navigation has one owner: the complete direct target. It determines
         // which cutlet is loaded, which card is current, and where the viewport
         // is positioned. No JDN-only scroll path runs in parallel with it.
-        const currentView = await service.getCutletView(this._scrollTarget.startJdn, calculationJdn);
+        progressSink(Object.freeze({
+          kind: 'view-start',
+          durationMs: 0,
+          elapsedMs: 0,
+          payload: Object.freeze({ targetDay: String(this._scrollTarget.startJdn) }),
+        }));
+        const currentView = await service.getCutletView(
+          this._scrollTarget.startJdn,
+          calculationJdn,
+          progressSink,
+        );
         if (generation !== this._generation) return null;
         resolveTargetCutletView(currentView, this._scrollTarget);
+        progressSink(Object.freeze({
+          kind: 'view-finished',
+          durationMs: 0,
+          elapsedMs: 0,
+          payload: Object.freeze({ count: currentView.days.length }),
+        }));
 
         this._storeCutlet(currentView);
         this._activeStartJdn = BigInt(currentView.startJdn);
         this._setWindowAroundIndex(currentView, this._scrollTarget.dayInCutlet - 1);
         this._renderSummary();
         this._renderCutlets();
+        if (this._els.cookingPanel && typeof this._els.cookingPanel.finishLiveTrace === 'function') {
+          this._els.cookingPanel.finishLiveTrace(traced.trace);
+        }
         // Loading state hides the viewport with display:none. Reveal it first,
         // then wait for one layout frame before measuring and positioning.
         this._hideOverlays();
@@ -1423,6 +1454,10 @@
         return this._value;
       } catch (error) {
         if (generation !== this._generation) return null;
+        if (!headless && this._els && this._els.cookingPanel
+            && typeof this._els.cookingPanel.failLiveTrace === 'function') {
+          this._els.cookingPanel.failLiveTrace(error);
+        }
         if (!headless) this._showError(error, inputValid ? 'error.engineFailed' : 'search.invalid');
         else if (this._els && this._els.calendar) this._els.calendar.setAttribute('aria-busy', 'false');
         throw error;

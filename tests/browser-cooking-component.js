@@ -330,6 +330,24 @@ function treeText(node) {
   return [node.textContent || '', ...((node.children || []).map(treeText))].join(' ');
 }
 
+function treeCountByClass(node, className) {
+  if (!node || typeof node !== 'object') return 0;
+  const classes = String(node.className || '').split(/\s+/).filter(Boolean);
+  return (classes.includes(className) ? 1 : 0)
+    + (node.children || []).reduce((sum, child) => sum + treeCountByClass(child, className), 0);
+}
+
+function treeFindByClass(node, className) {
+  if (!node || typeof node !== 'object') return null;
+  const classes = String(node.className || '').split(/\s+/).filter(Boolean);
+  if (classes.includes(className)) return node;
+  for (const child of node.children || []) {
+    const found = treeFindByClass(child, className);
+    if (found) return found;
+  }
+  return null;
+}
+
 function deferred() {
   let resolve;
   let reject;
@@ -346,13 +364,22 @@ async function flush() {
 
 (async () => {
   assert.strictEqual(customElements.get('pastafari-cooking'), PastafariCookingElement);
-  assert.deepStrictEqual(Array.from(PastafariCookingElement.observedAttributes), ['date', 'calculation-date', 'lang', 'open']);
+  assert.deepStrictEqual(Array.from(PastafariCookingElement.observedAttributes), ['date', 'calculation-date', 'lang', 'open', 'live']);
 
   const calls = [];
   sharedService = {
     async getCookingTrace(targetJdn, calculationJdn, options = null) {
       calls.push({ targetJdn: String(targetJdn), calculationJdn: String(calculationJdn), options });
       if (options && typeof options.onGateSauceDetail === 'function') options.onGateSauceDetail(gateChunk());
+      if (options && typeof options.onProgress === 'function') {
+        options.onProgress({ sequence: 1, kind: 'run-start', elapsedMs: 0, durationMs: 0, payload: {} });
+        options.onProgress({ sequence: 2, kind: 'bowl-round', elapsedMs: 4, durationMs: 4, payload: {
+          sauceId: 'sauce-1', ordinal: 1, drop: '51', afterBowls: ['1', '2', '3', '4', '5', '6'],
+        } });
+        options.onProgress({ sequence: 3, kind: 'final-result-ready', elapsedMs: 5, durationMs: 1, payload: {
+          year: '5001', cutletName: 'Lagash', dayInCutlet: '762', monthName: 'oliban', dayInMonth: '105',
+        } });
+      }
       return sampleTrace();
     },
   };
@@ -370,7 +397,9 @@ async function flush() {
   assert.strictEqual(calls.length, 1);
   assert.strictEqual(lazy.trace.schemaVersion, '0.4.0');
   assert.strictEqual(lazy._els.shell.getAttribute('aria-busy'), 'false');
-  assert.strictEqual(lazy._els.nav.children.length, 9);
+  assert.strictEqual(lazy._els.nav.children.length, 0, 'streamed log replaces the old chapter navigation');
+  assert.strictEqual(lazy._liveEntries.length, 3);
+  assert(treeText(lazy._els.pane).includes('sauce-1') || treeText(lazy._els.pane).includes('Sauce'));
   assert.strictEqual(lazy._locale.code, 'ie');
   const targetJdn = axis.gregorianToJdn(axis.parseIsoDate('2026-09-11'));
   assert.strictEqual(calls[0].targetJdn, String(targetJdn));
@@ -391,6 +420,82 @@ async function flush() {
   assert.strictEqual(calls.length, 1);
   assert.strictEqual(lazy._els.shell.hasAttribute('open'), true);
   assert.strictEqual(lazy.trace.schemaVersion, '0.4.0');
+
+  // Live mode is an inline accumulating trace while the calculation runs. Finishing
+  // hides the inline shell but retains the same log/trace for the existing button.
+  const live = new PastafariCookingElement();
+  live.setAttribute('lang', 'he');
+  live.setAttribute('date', '2026-09-11');
+  live.setAttribute('calculation-date', '2026-09-11');
+  live.connectedCallback();
+  live.beginLiveTrace();
+  assert.strictEqual(live.hasAttribute('live'), true);
+  assert.strictEqual(live._els.shell.hasAttribute('open'), true);
+  live.appendLiveProgress({ sequence: 1, kind: 'stone-transition', elapsedMs: 2, durationMs: 2, payload: { ordinal: 2, after: { w: '17' } } });
+  live.appendLiveProgress({ sequence: 2, kind: 'bowl-round', elapsedMs: 7, durationMs: 5, payload: { sauceId: 'sauce-1', ordinal: 1, drop: '51', afterBowls: ['1', '2', '3', '4', '5', '6'] } });
+  live.appendLiveProgress({ sequence: 3, kind: 'post-stir', elapsedMs: 10, durationMs: 3, payload: { sauceId: 'sauce-1', stirIndex: 1, afterBowls: ['7', '8', '9', '10', '11', '12'] } });
+  await flush();
+  assert.strictEqual(live._liveEntries.length, 3);
+  assert(treeText(live._els.pane).includes('סבב קערות'));
+  assert(treeText(live._els.pane).includes('+5.0 ms'));
+  assert(live.shadowRoot.innerHTML.includes('monster-meatball'));
+  assert(live.shadowRoot.innerHTML.includes('sauce-drip'));
+  live.finishLiveTrace(sampleTrace());
+  assert.strictEqual(live.hasAttribute('live'), false);
+  assert.strictEqual(live.trace.schemaVersion, '0.4.0');
+  assert.strictEqual(live._liveState, 'complete');
+  const beforeLiveOpen = calls.length;
+  live.setAttribute('open', '');
+  await flush();
+  assert.strictEqual(calls.length, beforeLiveOpen, 'opening retained live trace must not rerun semantics');
+  assert.strictEqual(live._els.shell.hasAttribute('open'), true);
+  assert.strictEqual(live._els.nav.children.length, 0);
+  assert(treeText(live._els.pane).includes('אבן'));
+
+  // A huge real gate walk must remain truthful without turning tens of thousands
+  // of completed gates into tens of thousands of DOM cards. Every gate updates
+  // the live status, while the retained log rolls consecutive gates into ranges.
+  const compacted = new PastafariCookingElement();
+  compacted.setAttribute('lang', 'he');
+  compacted.setAttribute('date', '2026-09-11');
+  compacted.setAttribute('calculation-date', '2026-09-11');
+  compacted.connectedCallback();
+  compacted.beginLiveTrace();
+  for (let index = 1; index <= 256; index += 1) {
+    compacted.appendLiveProgress({
+      sequence: index,
+      kind: 'gate-gap-finished',
+      elapsedMs: index,
+      durationMs: 1,
+      payload: {
+        signedIndex: String(index),
+        gap: String(41 + (index % 30)),
+        selectionOutput: String(1 + (index % 30)),
+      },
+    });
+  }
+  compacted._drainLiveRows();
+  assert.strictEqual(compacted._liveObservedCount, 256);
+  assert.strictEqual(compacted._liveEntries.length, 2);
+  assert(compacted._liveEntries.every((row) => row.kind === 'gate-run'));
+  assert(compacted._liveEntries.every((row) => row.payload.count === 128));
+  assert(compacted._liveEntries.every((row) => row.payload.steps.length === 128));
+  assert.strictEqual(treeCountByClass(compacted._els.pane, 'live-gate-range'), 2);
+  assert.strictEqual(treeCountByClass(compacted._els.pane, 'live-gate-step'), 0, 'gate ranges must stay lazy while collapsed');
+  assert(treeText(compacted._els.pane).includes('1 → 128'));
+  assert(treeText(compacted._els.pane).includes('129 → 256'));
+
+  const firstRange = treeFindByClass(compacted._els.pane, 'live-gate-range');
+  assert(firstRange, 'first lazy gate range missing');
+  firstRange.open = true;
+  const onToggle = firstRange.listeners.get('toggle');
+  assert.strictEqual(typeof onToggle, 'function');
+  onToggle();
+  assert.strictEqual(treeCountByClass(compacted._els.pane, 'live-gate-step'), 128);
+  const expandedText = treeText(firstRange);
+  assert(expandedText.includes('מרווח שער 1'));
+  assert(expandedText.includes('Δ=42'));
+  assert(expandedText.includes('+1.0 ms'));
 
   // Locale switching rerenders the component without a semantic rerun.
   lazy.setAttribute('lang', 'he');
@@ -477,7 +582,7 @@ async function flush() {
   sharedService = {
     getCookingTrace(targetJdn, calculationJdn, options = null) {
       staleDetailCalls += 1;
-      if (!options) return Promise.resolve(sampleTrace());
+      if (!options || typeof options.onGateSauceDetail !== 'function') return Promise.resolve(sampleTrace());
       staleDetailOptions = options;
       return staleDetail.promise;
     },
@@ -510,7 +615,7 @@ async function flush() {
   sharedService = {
     getCookingTrace(targetJdn, calculationJdn, options = null) {
       failCalls += 1;
-      if (!options) return Promise.resolve(sampleTrace());
+      if (!options || typeof options.onGateSauceDetail !== 'function') return Promise.resolve(sampleTrace());
       return Promise.reject(new Error('synthetic gate detail failure'));
     },
   };
@@ -539,7 +644,7 @@ async function flush() {
   sharedService = {
     getCookingTrace(targetJdn, calculationJdn, options = null) {
       localeCalls += 1;
-      if (!options) return Promise.resolve(sampleTrace());
+      if (!options || typeof options.onGateSauceDetail !== 'function') return Promise.resolve(sampleTrace());
       localeOptions = options;
       return localePending.promise;
     },

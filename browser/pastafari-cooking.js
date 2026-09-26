@@ -96,7 +96,7 @@
 
   class PastafariCookingElement extends HTMLElementBase {
     static get observedAttributes() {
-      return ['date', 'calculation-date', 'lang', 'open'];
+      return ['date', 'calculation-date', 'lang', 'open', 'live'];
     }
 
     constructor() {
@@ -113,6 +113,18 @@
       this._gateDetails = new Map();
       this._gateDetailLoading = null;
       this._gateDetailError = null;
+      this._liveEntries = [];
+      this._liveState = 'idle';
+      this._liveRenderedCount = 0;
+      this._liveGroupNodes = new Map();
+      this._liveSauceNodes = new Map();
+      this._liveRenderQueued = false;
+      this._liveLastGroupKey = null;
+      this._livePhaseKey = null;
+      this._liveRenderedLocale = null;
+      this._liveObservedCount = 0;
+      this._liveGateBatch = null;
+      this._liveCurrentPending = null;
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -143,6 +155,14 @@
             height: 0;
             margin: 0;
           }
+          :host([live]) {
+            position: relative;
+            z-index: 25;
+            display: block;
+            width: min(100%, 72rem);
+            height: auto;
+            margin: clamp(1rem, 3vw, 2rem) auto;
+          }
           *, *::before, *::after { box-sizing: border-box; }
           [hidden] { display: none !important; }
           button { font: inherit; min-height: 44px; }
@@ -167,8 +187,20 @@
           }
           .shell[open] {
             display: grid;
-            grid-template-rows: auto auto minmax(0, 1fr);
+            grid-template-rows: auto auto auto minmax(0, 1fr);
           }
+          :host([live]) .shell {
+            position: relative;
+            width: 100%;
+            height: min(42rem, 72dvh);
+            max-height: min(42rem, 72dvh);
+            margin: 0;
+            border-color: #a75a42;
+            box-shadow: 0 18px 50px rgb(54 36 20 / 16%);
+          }
+          :host([live]) .shell::backdrop { display: none; }
+          :host([live]) .close,
+          :host([live]) .nav { display: none !important; }
           .shell::backdrop {
             background: rgb(23 19 14 / 48%);
             backdrop-filter: blur(2px);
@@ -239,6 +271,113 @@
             border-color: var(--accent-dark);
             background: var(--accent-dark);
             color: white;
+          }
+          .live-hero {
+            display: none;
+            grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
+            gap: 1rem;
+            align-items: center;
+            min-height: 8rem;
+            padding: .8rem clamp(1rem, 3vw, 2rem);
+            overflow: hidden;
+            border-bottom: 1px solid var(--line);
+            background:
+              radial-gradient(circle at 15% 20%, rgb(255 224 183 / 55%), transparent 30%),
+              linear-gradient(90deg, #fff8eb, #fffdf8);
+          }
+          :host([live]) .live-hero { display: grid; }
+          .monster-stage {
+            position: relative;
+            height: 6.5rem;
+            min-width: 9rem;
+          }
+          .monster {
+            position: absolute;
+            inset: .2rem .5rem auto;
+            height: 5.6rem;
+            animation: monster-float 2.2s ease-in-out infinite;
+            filter: drop-shadow(0 .5rem .35rem rgb(70 36 18 / 16%));
+          }
+          .monster-noodle {
+            position: absolute;
+            width: 4.4rem;
+            height: 2.1rem;
+            border: .34rem solid #d6a83a;
+            border-inline-start-color: transparent;
+            border-inline-end-color: transparent;
+            border-radius: 50%;
+          }
+          .monster-noodle.n1 { inset: 1.3rem auto auto .2rem; transform: rotate(-16deg); }
+          .monster-noodle.n2 { inset: 2.3rem .1rem auto auto; transform: rotate(19deg); }
+          .monster-noodle.n3 { inset: 3rem auto auto 2.7rem; transform: rotate(5deg); width: 5.2rem; }
+          .monster-meatball {
+            position: absolute;
+            top: 1.55rem;
+            width: 2.45rem;
+            height: 2.45rem;
+            border: .18rem solid #6f281b;
+            border-radius: 48% 52% 46% 54%;
+            background:
+              radial-gradient(circle at 32% 28%, #d77755 0 12%, transparent 13%),
+              radial-gradient(circle at 68% 62%, #7f2f20 0 11%, transparent 12%),
+              #a8442c;
+          }
+          .monster-meatball.m1 { left: 2.25rem; transform: rotate(-8deg); }
+          .monster-meatball.m2 { right: 2.25rem; transform: rotate(7deg); }
+          .monster-eye {
+            position: absolute;
+            top: -1.35rem;
+            left: .78rem;
+            width: .72rem;
+            height: .72rem;
+            border: .14rem solid #17130e;
+            border-radius: 50%;
+            background: #fffdf8;
+            box-shadow: 0 1rem 0 -.27rem #d6a83a;
+          }
+          .monster-eye::after {
+            content: "";
+            position: absolute;
+            inset: .18rem;
+            border-radius: 50%;
+            background: #17130e;
+          }
+          .sauce-drip {
+            position: absolute;
+            top: 3.55rem;
+            width: .58rem;
+            height: 1.2rem;
+            border-radius: 50% 50% 65% 65%;
+            background: #9d3825;
+            transform-origin: top center;
+            animation: sauce-drip 1.8s ease-in infinite;
+          }
+          .sauce-drip.d1 { left: 4.25rem; }
+          .sauce-drip.d2 { right: 3.3rem; animation-delay: .75s; }
+          .live-current-wrap { min-width: 0; }
+          .live-current-kicker {
+            margin: 0 0 .25rem;
+            color: var(--accent-dark);
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+          }
+          .live-current {
+            margin: 0;
+            overflow-wrap: anywhere;
+            font-family: Georgia, "Times New Roman", "Noto Serif Hebrew", serif;
+            font-size: clamp(1rem, 2vw, 1.35rem);
+            font-weight: 800;
+          }
+          @keyframes monster-float {
+            0%, 100% { transform: translateY(.15rem) rotate(-1deg); }
+            50% { transform: translateY(-.35rem) rotate(1deg); }
+          }
+          @keyframes sauce-drip {
+            0% { transform: translateY(0) scaleY(.45); opacity: .9; }
+            72% { transform: translateY(1.1rem) scaleY(1); opacity: .8; }
+            100% { transform: translateY(1.75rem) scale(.4); opacity: 0; }
           }
           .status {
             min-height: 10rem;
@@ -407,6 +546,206 @@
           }
           .result-five strong { display: block; color: var(--muted); font-size: .78rem; }
           .result-five span { display: block; margin-top: .25rem; font-weight: 900; }
+
+          .live-log {
+            display: grid;
+            gap: .7rem;
+          }
+          .live-group,
+          .live-sauce {
+            min-width: 0;
+            border: 1px solid var(--line);
+            border-radius: .85rem;
+            background: #fff;
+            overflow: clip;
+          }
+          .live-group > summary,
+          .live-sauce > summary {
+            display: flex;
+            gap: .65rem;
+            align-items: center;
+            min-height: 46px;
+            padding: .7rem .85rem;
+            cursor: pointer;
+            font-weight: 900;
+            list-style-position: inside;
+          }
+          .live-group > summary { background: #fff7e8; }
+          .live-sauce {
+            margin: .55rem;
+            border-color: #dfc9b9;
+            background: #fffdfa;
+          }
+          .live-sauce > summary { background: #fff4ee; font-size: .92rem; }
+          .live-group-count {
+            margin-inline-start: auto;
+            min-width: 2.1rem;
+            padding: .12rem .45rem;
+            border-radius: 999px;
+            background: #efe5d8;
+            color: #4a382d;
+            font-size: .78rem;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+          }
+          .live-list {
+            display: grid;
+            gap: .35rem;
+            margin: 0;
+            padding: .5rem;
+            list-style: none;
+          }
+          .live-row {
+            display: grid;
+            grid-template-columns: 2.7rem minmax(0, 1fr) auto;
+            gap: .65rem;
+            align-items: center;
+            min-width: 0;
+            padding: .5rem .6rem;
+            border: 1px solid #ebe3d8;
+            border-radius: .65rem;
+            background: #fcfaf6;
+          }
+          .live-gate-range {
+            min-width: 0;
+            border: 1px solid #dfd2c2;
+            border-radius: .7rem;
+            background: #fcfaf6;
+            overflow: clip;
+          }
+          .live-gate-range > summary {
+            display: grid;
+            grid-template-columns: 2.7rem minmax(0, 1fr) auto;
+            gap: .65rem;
+            align-items: center;
+            min-width: 0;
+            padding: .5rem .6rem;
+            cursor: pointer;
+            list-style-position: inside;
+            background: #fbf3e7;
+          }
+          .live-gate-range[open] > summary {
+            border-bottom: 1px solid #e6daca;
+          }
+          .live-gate-steps {
+            display: grid;
+            gap: .3rem;
+            margin: 0;
+            padding: .45rem;
+            list-style: none;
+            background: #fffdfa;
+          }
+          .live-gate-step {
+            display: grid;
+            grid-template-columns: 2.45rem minmax(0, 1fr) auto;
+            gap: .55rem;
+            align-items: center;
+            min-width: 0;
+            padding: .42rem .5rem;
+            border: 1px solid #eee5d9;
+            border-radius: .55rem;
+            background: #fff;
+          }
+          .live-row-copy { min-width: 0; }
+          .live-row-label {
+            display: block;
+            overflow-wrap: anywhere;
+            font-weight: 850;
+            line-height: 1.25;
+          }
+          .live-row-value {
+            display: block;
+            margin-top: .13rem;
+            overflow-wrap: anywhere;
+            color: var(--muted);
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+            font-size: .76rem;
+            line-height: 1.3;
+          }
+          .live-time {
+            align-self: start;
+            padding-top: .15rem;
+            color: var(--muted);
+            font-size: .72rem;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+          }
+          .live-icon {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            color: #26150f;
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+            font-size: .66rem;
+            font-weight: 950;
+            line-height: 1;
+          }
+          .live-icon--drop {
+            width: 1.9rem;
+            height: 1.9rem;
+            margin: .18rem;
+            border: 2px solid #672013;
+            border-radius: 58% 44% 62% 35%;
+            background: #d86d4c;
+            transform: rotate(45deg);
+          }
+          .live-icon--drop > span { transform: rotate(-45deg); }
+          .live-icon--bowl {
+            height: 1.65rem;
+            margin-top: .45rem;
+            border: 3px solid #7d5a33;
+            border-top: 1px solid #7d5a33;
+            border-radius: 15% 15% 52% 52%;
+            background: linear-gradient(#fffdf8 0 30%, #e6c77d 31%);
+          }
+          .live-icon--gate {
+            height: 2.1rem;
+            border: 3px solid #6f5138;
+            border-bottom-width: 1px;
+            border-radius: 1.05rem 1.05rem .15rem .15rem;
+            background: #f5e8d5;
+          }
+          .live-icon--stone {
+            width: 2rem;
+            height: 1.75rem;
+            margin: .25rem;
+            border: 2px solid #6c665e;
+            border-radius: 48% 56% 42% 58%;
+            background: #d7d1c8;
+          }
+          .live-icon--year,
+          .live-icon--selection,
+          .live-icon--result,
+          .live-icon--view {
+            border: 2px solid #672013;
+            border-radius: 50%;
+            background: #fff1e8;
+          }
+          .live-icon--selection {
+            box-shadow: inset 0 0 0 .28rem #fffdf8, inset 0 0 0 .4rem #9d3825;
+          }
+          .live-icon--weave {
+            border: 2px solid #85662f;
+            border-radius: .35rem;
+            background:
+              repeating-linear-gradient(45deg, #e7c86d 0 .2rem, transparent .2rem .4rem),
+              repeating-linear-gradient(-45deg, #d78b45 0 .2rem, #fff4da .2rem .4rem);
+          }
+          .live-icon--sauce {
+            border: 2px solid #9d3825;
+            border-radius: 50% 45% 55% 42%;
+            background: radial-gradient(circle at 40% 35%, #eeaa75, #b94e32 65%, #8d2f20);
+            color: white;
+          }
+          .live-complete-note {
+            margin: 0 0 .8rem;
+            padding: .65rem .8rem;
+            border-inline-start: .35rem solid #4f713d;
+            background: #f0f6e9;
+            font-weight: 800;
+          }
           @media (max-width: 700px) {
             .shell {
               width: 100vw;
@@ -415,6 +754,27 @@
               border: 0;
               border-radius: 0;
             }
+            :host([live]) {
+              width: 100%;
+              margin: .75rem auto;
+            }
+            :host([live]) .shell {
+              width: 100%;
+              height: min(38rem, 76dvh);
+              max-height: min(38rem, 76dvh);
+              border: 1px solid var(--line);
+              border-radius: .85rem;
+            }
+            .live-hero {
+              grid-template-columns: 7.5rem minmax(0, 1fr);
+              min-height: 7rem;
+              padding: .65rem .75rem;
+            }
+            .monster-stage { transform: scale(.82); transform-origin: center; }
+            .live-row,
+            .live-gate-range > summary,
+            .live-gate-step { grid-template-columns: 2.4rem minmax(0, 1fr); }
+            .live-time { grid-column: 2; padding: 0; }
             .head {
               grid-template-columns: minmax(0, 1fr) auto;
               gap: .65rem;
@@ -444,7 +804,11 @@
             .result-five { grid-template-columns: 1fr; }
           }
           @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+            *, *::before, *::after {
+              scroll-behavior: auto !important;
+              transition: none !important;
+              animation: none !important;
+            }
           }
           @media (forced-colors: active) {
             .shell, .step-card, .sauce, .mini, .result-five > div { border: 2px solid CanvasText; }
@@ -465,6 +829,23 @@
             <button class="close" type="button"></button>
           </header>
           <nav class="nav" aria-label="Trace chapters"></nav>
+          <section class="live-hero">
+            <div class="monster-stage" aria-hidden="true">
+              <div class="monster">
+                <i class="monster-noodle n1"></i>
+                <i class="monster-noodle n2"></i>
+                <i class="monster-noodle n3"></i>
+                <span class="monster-meatball m1"><i class="monster-eye"></i></span>
+                <span class="monster-meatball m2"><i class="monster-eye"></i></span>
+                <i class="sauce-drip d1"></i>
+                <i class="sauce-drip d2"></i>
+              </div>
+            </div>
+            <div class="live-current-wrap">
+              <p class="live-current-kicker"><span>PASTAFARI</span> · <span class="live-kicker"></span></p>
+              <p class="live-current" role="status" aria-live="polite"></p>
+            </div>
+          </section>
           <div class="status loading" hidden role="status" aria-live="polite">
             <p class="loading-text"></p>
           </div>
@@ -487,6 +868,8 @@
         error: this.shadowRoot.querySelector('.status.error'),
         errorText: this.shadowRoot.querySelector('.error-text'),
         retry: this.shadowRoot.querySelector('.retry'),
+        liveKicker: this.shadowRoot.querySelector('.live-kicker'),
+        liveCurrent: this.shadowRoot.querySelector('.live-current'),
         pane: this.shadowRoot.querySelector('.pane'),
       };
       this._els.close.addEventListener('click', () => this.close());
@@ -546,6 +929,10 @@
         }
         return;
       }
+      if (name === 'live') {
+        this._syncDialogOpen();
+        return;
+      }
       if (this._connected && this.hasAttribute('open')) this._queueLoad();
     }
 
@@ -567,20 +954,202 @@
       }
     }
 
+    _currentInputKey() {
+      try {
+        const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
+        const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
+        return String(axis.gregorianToJdn(calculationDate)) + ':' + String(axis.gregorianToJdn(targetDate));
+      } catch (_) {
+        return null;
+      }
+    }
+
+    _resetLiveLog(state = 'running') {
+      this._liveEntries = [];
+      this._liveState = state;
+      this._liveRenderedCount = 0;
+      this._liveGroupNodes = new Map();
+      this._liveSauceNodes = new Map();
+      this._liveRenderQueued = false;
+      this._liveLastGroupKey = null;
+      this._livePhaseKey = null;
+      this._liveRenderedLocale = null;
+      this._liveObservedCount = 0;
+      this._liveGateBatch = null;
+      this._liveCurrentPending = null;
+      if (this._els && this._els.pane) this._els.pane.replaceChildren();
+      if (this._els && this._els.nav) this._els.nav.replaceChildren();
+    }
+
+    beginLiveTrace() {
+      this._generation += 1;
+      this._queuedEpoch = null;
+      this._trace = null;
+      this._traceInputKey = null;
+      this._gateDetails.clear();
+      this._gateDetailLoading = null;
+      this._gateDetailError = null;
+      this._resetLiveLog('running');
+      this.setAttribute('live', '');
+      this._syncDialogOpen();
+      this._hideStatus();
+      if (this._els && this._els.liveCurrent) {
+        this._els.liveCurrent.textContent = this._t('cooking.loading');
+      }
+      return this;
+    }
+
+    _isGateSweepEvent(event) {
+      const kind = String(event && event.kind || '');
+      const p = event && event.payload || {};
+      if (kind === 'gate-gap-start' || kind === 'gate-gap-finished' || kind === 'gate-ready') return true;
+      if ((kind === 'sauce-start' || kind === 'sauce-finished') && p.gateIndex !== null && p.gateIndex !== undefined) return true;
+      return kind === 'selection-result' && String(p.label || '') === 'gate-gap';
+    }
+
+    _gateSweepIndex(event) {
+      const p = event && event.payload || {};
+      if (p.signedIndex !== null && p.signedIndex !== undefined) return String(p.signedIndex);
+      if (p.gateIndex !== null && p.gateIndex !== undefined) return String(p.gateIndex);
+      if (p.index !== null && p.index !== undefined) return String(p.index);
+      return null;
+    }
+
+    _consumeGateSweep(event) {
+      if (!this._isGateSweepEvent(event)) return false;
+      const p = event.payload || {};
+      const index = this._gateSweepIndex(event);
+      if (!this._liveGateBatch) {
+        this._liveGateBatch = {
+          firstIndex: index,
+          lastIndex: index,
+          count: 0,
+          sauceCount: 0,
+          lastGap: null,
+          lastDay: null,
+          lastSelection: null,
+          totalMs: 0,
+          lastElapsedMs: 0,
+          sequence: Number(event.sequence) || 0,
+          steps: [],
+        };
+      }
+      const batch = this._liveGateBatch;
+      if (batch.firstIndex == null && index != null) batch.firstIndex = index;
+      if (index != null) batch.lastIndex = index;
+      batch.totalMs += Math.max(0, Number(event.durationMs) || 0);
+      batch.lastElapsedMs = Math.max(batch.lastElapsedMs, Number(event.elapsedMs) || 0);
+      batch.sequence = Math.max(batch.sequence, Number(event.sequence) || 0);
+      if (event.kind === 'sauce-finished') batch.sauceCount += 1;
+      if (event.kind === 'selection-result' && p.output != null) batch.lastSelection = String(p.output);
+      if (event.kind === 'gate-gap-finished') {
+        if (p.gap != null) batch.lastGap = String(p.gap);
+        if (p.selectionOutput != null) batch.lastSelection = String(p.selectionOutput);
+        batch.count += 1;
+        batch.steps.push({
+          index: index,
+          gap: p.gap == null ? null : String(p.gap),
+          selectionOutput: p.selectionOutput == null ? null : String(p.selectionOutput),
+          durationMs: Math.max(0, Number(event.durationMs) || 0),
+          elapsedMs: Math.max(0, Number(event.elapsedMs) || 0),
+        });
+        if (p.day != null) batch.lastDay = String(p.day);
+        if (batch.count >= 128) this._flushGateSweep();
+      } else if (event.kind === 'gate-ready') {
+        batch.count += 1;
+        if (p.day != null) batch.lastDay = String(p.day);
+        if (batch.count >= 128) this._flushGateSweep();
+      }
+      return true;
+    }
+
+    _flushGateSweep() {
+      const batch = this._liveGateBatch;
+      if (!batch || batch.count <= 0) {
+        this._liveGateBatch = null;
+        return;
+      }
+      this._liveEntries.push({
+        sequence: batch.sequence,
+        kind: 'gate-run',
+        elapsedMs: batch.lastElapsedMs,
+        durationMs: batch.totalMs,
+        payload: {
+          firstIndex: batch.firstIndex,
+          lastIndex: batch.lastIndex,
+          count: batch.count,
+          operationCount: batch.count,
+          sauceCount: batch.sauceCount,
+          lastGap: batch.lastGap,
+          lastDay: batch.lastDay,
+          lastSelection: batch.lastSelection,
+          steps: batch.steps.slice(),
+        },
+      });
+      this._liveGateBatch = null;
+      this._scheduleLiveDrain();
+    }
+
+    appendLiveProgress(event) {
+      if (!event || typeof event !== 'object') return;
+      const copy = plainClone(event);
+      copy.kind = String(copy.kind || 'progress');
+      copy.payload = copy.payload && typeof copy.payload === 'object' ? copy.payload : {};
+      this._liveObservedCount += 1;
+      if (this._liveState === 'idle' || this._liveState === 'complete') this._liveState = 'running';
+      this._liveCurrentPending = copy;
+      this._scheduleLiveDrain();
+      if (this._consumeGateSweep(copy)) return;
+      this._flushGateSweep();
+      this._liveEntries.push(copy);
+    }
+
+    finishLiveTrace(trace = null) {
+      this._flushGateSweep();
+      if (trace && typeof trace === 'object') {
+        this._trace = trace;
+        this._traceInputKey = this._currentInputKey();
+      }
+      this._liveState = 'complete';
+      this._drainLiveRows();
+      if (this.hasAttribute('live')) this.removeAttribute('live');
+      this._syncDialogOpen();
+      if (this.hasAttribute('open')) {
+        this._hideStatus();
+        this._renderState();
+      }
+      return trace;
+    }
+
+    failLiveTrace(error) {
+      this._flushGateSweep();
+      this._liveState = 'error';
+      this._drainLiveRows();
+      if (this.hasAttribute('live')) this.removeAttribute('live');
+      this._syncDialogOpen();
+      if (root.console && typeof root.console.error === 'function') root.console.error(error);
+    }
+
     _syncDialogOpen() {
       if (!this._els || !this._els.shell) return;
       const shell = this._els.shell;
-      const shouldOpen = this.hasAttribute('open') && this._connected;
+      const live = this.hasAttribute('live');
+      const modal = this.hasAttribute('open');
+      const shouldOpen = (live || modal) && this._connected;
+      shell.setAttribute('aria-modal', modal && !live ? 'true' : 'false');
       const isOpen = shell.hasAttribute('open');
       if (shouldOpen && !isOpen) {
         try {
-          if (typeof shell.showModal === 'function') shell.showModal();
+          if (modal && !live && typeof shell.showModal === 'function') shell.showModal();
           else shell.setAttribute('open', '');
         } catch (_) {
           shell.setAttribute('open', '');
         }
-        enqueueMicrotask(() => {
-          if (!this._connected || !this.hasAttribute('open')) return;
+        if (modal && !live) enqueueMicrotask(() => {
+          if (!this._connected || !this.hasAttribute('open') || this.hasAttribute('live')) return;
+          if (this._els && this._els.pane) {
+            try { this._els.pane.scrollTop = 0; } catch (_) { /* best effort */ }
+          }
           if (this._els && this._els.close && typeof this._els.close.focus === 'function') {
             try { this._els.close.focus({ preventScroll: true }); }
             catch (_) { this._els.close.focus(); }
@@ -626,16 +1195,495 @@
       this._els.loadingText.textContent = this._t('cooking.loading');
       this._els.errorText.textContent = this._t('cooking.error');
       this._els.retry.textContent = this._t('cooking.retry');
+      if (this._els.liveKicker) this._els.liveKicker.textContent = this._t('cooking.live.kicker');
       this._els.nav.setAttribute('aria-label', this._t('cooking.title'));
     }
 
     _t(key, values) { return i18n.translate(this._locale, key, values); }
     _term(key) { return this._t('cooking.term.' + key); }
 
+    _liveGroupKey(event) {
+      const kind = String(event && event.kind || '');
+      if (kind === 'gate-run' || kind.startsWith('gate-')) return 'gates';
+      if (kind === 'run-start' || kind === 'conversion-cache-hit') this._livePhaseKey = 'inputs';
+      else if (kind === 'year-resolution-start' || kind.startsWith('year-')) this._livePhaseKey = 'year-walk';
+      else if (kind === 'structure-start') this._livePhaseKey = 'structure-sauce';
+      else if (kind === 'final-result-ready' || kind === 'semantic-execution-finished' || kind === 'trace-ready') {
+        this._livePhaseKey = 'result';
+      } else if (kind === 'view-start' || kind.startsWith('view-')) {
+        this._livePhaseKey = 'position';
+      }
+      if (!this._livePhaseKey) this._livePhaseKey = 'inputs';
+      return this._livePhaseKey;
+    }
+
+    _liveGroupTitle(key) {
+      if (CHAPTER_KEYS[key]) return this._t(CHAPTER_KEYS[key]);
+      return String(key);
+    }
+
+    _liveIconKind(event) {
+      const kind = String(event && event.kind || '');
+      if (kind.includes('drop') || kind.includes('grind')) return 'drop';
+      if (kind.includes('bowl') || kind === 'post-stir') return 'bowl';
+      if (kind.startsWith('gate-') || kind === 'gate-run') return 'gate';
+      if (kind.startsWith('stone-')) return 'stone';
+      if (kind.startsWith('year-')) return 'year';
+      if (kind === 'selection-result') return 'selection';
+      if (kind.includes('weaving') || kind.includes('month')) return 'weave';
+      if (kind.startsWith('view-')) return 'view';
+      if (kind.startsWith('sauce-')) return 'sauce';
+      return 'result';
+    }
+
+    _liveEventNumber(event) {
+      const p = event && event.payload || {};
+      const kind = String(event && event.kind || '');
+      const compact = (value) => {
+        const text = String(value == null ? '' : value);
+        return text.length <= 5 ? text : text.slice(0, 4) + '…';
+      };
+      if (kind === 'hidden-grind' || kind === 'visible-grind') {
+        return compact(String(p.ordinal || '') + '.' + String(p.grind || ''));
+      }
+      if (p.ordinal != null) return compact(p.ordinal);
+      if (p.bowlId != null) return compact(p.bowlId);
+      if (p.stirIndex != null) return compact(p.stirIndex);
+      if (kind === 'gate-run' && p.count != null) return compact(p.count);
+      if (p.signedIndex != null) return compact(p.signedIndex);
+      if (p.index != null) return compact(p.index);
+      if (kind === 'year-transition' && p.toYear && p.toYear.number != null) return compact(p.toYear.number);
+      if (p.number != null) return compact(p.number);
+      if (p.count != null) return compact(p.count);
+      if (kind === 'selection-result' && p.output != null) return compact(p.output);
+      if (p.sauceId) return compact(String(p.sauceId).replace(/^sauce-/, ''));
+      if (kind === 'final-result-ready' || kind === 'trace-ready') return '✓';
+      return '·';
+    }
+
+    _liveSelectionLabel(label) {
+      switch (String(label || '')) {
+        case 'gate-gap': return this._term('gateGap');
+        case 'YEAR_5000-semantic': return this._chapterTitle('year-5000');
+        case 'cutlet-count': return this._chapterTitle('cutlets');
+        case 'cutlet-partition-semantic': return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+        case 'cutlet-names-distinct-rank': return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
+        case 'month-count': return this._chapterTitle('months');
+        case 'month-lengths': return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
+        case 'month-weaving': return this._term('weaving');
+        case 'month-names-distinct-rank': return this._chapterTitle('months') + ' · ' + this._t('cooking.live.names');
+        default: return '';
+      }
+    }
+
+    _liveEventLabel(event) {
+      const p = event && event.payload || {};
+      switch (String(event && event.kind || '')) {
+        case 'run-start': return this._chapterTitle('inputs');
+        case 'conversion-cache-hit': return this._term('checkpoints') + ' · ' + this._t('cooking.live.cache');
+        case 'gate-gap-start': return this._term('gateGap') + ' ' + String(p.signedIndex);
+        case 'gate-gap-finished': return this._term('gateGap') + ' ' + String(p.signedIndex);
+        case 'gate-ready': return this._term('gate') + ' ' + String(p.index);
+        case 'gate-run': {
+          const range = p.firstIndex === p.lastIndex
+            ? String(p.lastIndex == null ? '' : p.lastIndex)
+            : String(p.firstIndex == null ? '?' : p.firstIndex) + ' → ' + String(p.lastIndex == null ? '?' : p.lastIndex);
+          return this._term('gate') + ' ' + range + ' · ×' + String(p.count || 0);
+        }
+        case 'year-resolution-start': return this._chapterTitle('year-walk');
+        case 'year-5000-ready':
+        case 'year-5000-memory': return this._chapterTitle('year-5000');
+        case 'year-walk-anchor': return this._term('year') + ' ' + String(p.number);
+        case 'year-walk-step': return this._term('year') + ' ' + String(p.fromNumber) + ' → ' + String(p.toNumber);
+        case 'year-transition': {
+          const from = p.fromYear && p.fromYear.number != null ? p.fromYear.number : '?';
+          const to = p.toYear && p.toYear.number != null ? p.toYear.number : '?';
+          return this._term('year') + ' ' + String(from) + ' → ' + String(to);
+        }
+        case 'year-authoritative': return this._term('year') + ' ' + String(p.year && p.year.number != null ? p.year.number : '');
+        case 'year-walk-finished':
+        case 'year-resolution-finished': return this._chapterTitle('year-walk') + ' ✓';
+        case 'sauce-start': return this._term('sauce') + ' ' + String(p.sauceId || '').replace(/^sauce-/, '');
+        case 'sauce-finished': return this._term('sauce') + ' ' + String(p.sauceId || '').replace(/^sauce-/, '') + ' ✓';
+        case 'stone-seed': return this._term('stone') + ' 1';
+        case 'stone-transition': return this._term('stone') + ' ' + String(p.ordinal);
+        case 'hidden-start': return this._term('hiddenDrop') + ' ' + String(p.ordinal);
+        case 'hidden-grind': return this._term('hiddenDrop') + ' ' + String(p.ordinal) + ' · ' + this._term('grind') + ' ' + String(p.grind);
+        case 'visible-start': return this._term('visibleDrop') + ' ' + String(p.ordinal);
+        case 'visible-grind': return this._term('visibleDrop') + ' ' + String(p.ordinal) + ' · ' + this._term('grind') + ' ' + String(p.grind);
+        case 'initial-bowl': return this._term('initialBowls') + ' · ' + this._term('bowl') + ' ' + String(p.bowlId);
+        case 'bowl-round': return this._term('bowlRound') + ' ' + String(p.ordinal);
+        case 'post-stir': return this._term('postStir') + ' ' + String(p.stirIndex);
+        case 'selection-result': {
+          const label = this._liveSelectionLabel(p.label);
+          return this._term('selection') + (label ? ' · ' + label : '');
+        }
+        case 'structure-start': return this._chapterTitle('structure-sauce');
+        case 'structure-finished': return this._chapterTitle('structure-sauce') + ' ✓';
+        case 'cutlet-count-ready': return this._term('cutlet') + ' × ' + String(p.count);
+        case 'cutlet-partition-ready': return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+        case 'cutlet-names-ready': return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
+        case 'cutlets-materialized': return this._chapterTitle('cutlets') + ' ✓';
+        case 'month-count-ready': return this._chapterTitle('months') + ' × ' + String(p.count);
+        case 'month-lengths-ready': return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
+        case 'month-weaving-ready': return this._term('weaving') + ' ✓';
+        case 'month-names-ready': return this._chapterTitle('months') + ' · ' + this._t('cooking.live.names');
+        case 'final-result-ready': return this._chapterTitle('result') + ' ✓';
+        case 'semantic-execution-finished': return this._t('cooking.sameExecution');
+        case 'view-day-ready': return this._chapterTitle('position') + ' · ' + this._t('field.day') + ' ' + String(p.ordinal);
+        case 'view-start': return this._chapterTitle('position');
+        case 'view-finished': return this._chapterTitle('position') + ' ✓';
+        case 'trace-ready': return this._chapterTitle('result') + ' · ' + this._t('cooking.live.trace') + ' ✓';
+        default: return String(event && event.kind || 'progress');
+      }
+    }
+
+    _livePayloadSummary(event) {
+      const p = event && event.payload || {};
+      const kind = String(event && event.kind || '');
+      const short = (value) => value == null ? '' : exactDisplay(value);
+      if (kind === 'stone-seed' && p.values) {
+        return Object.entries(p.values).map(([key, value]) => key + '=' + short(value)).join(' · ');
+      }
+      if (kind === 'stone-transition' && p.after) {
+        return Object.entries(p.after).map(([key, value]) => key + '=' + short(value)).join(' · ');
+      }
+      if (kind.endsWith('-grind')) return (p.stoneKind ? String(p.stoneKind) + ' → ' : '') + short(p.after);
+      if (kind.endsWith('-start')) return p.initial != null ? short(p.initial) : '';
+      if (kind === 'initial-bowl') return short(p.value);
+      if (kind === 'bowl-round') {
+        return (p.drop != null ? this._term('visibleDrop') + '=' + short(p.drop) + ' · ' : '')
+          + safeArray(p.afterBowls).map(short).join(' / ');
+      }
+      if (kind === 'post-stir') return safeArray(p.afterBowls).map(short).join(' / ');
+      if (kind === 'selection-result') {
+        return (p.familySize != null ? 'N=' + short(p.familySize) + ' · ' : '')
+          + (p.rejectionSteps != null ? '↻' + short(p.rejectionSteps) + ' · ' : '')
+          + '→ ' + short(p.output);
+      }
+      if (kind === 'gate-gap-finished') return 'Δ=' + short(p.gap);
+      if (kind === 'gate-ready') return short(p.day);
+      if (kind === 'gate-run') {
+        const parts = [];
+        if (p.lastGap != null) parts.push('Δ=' + short(p.lastGap));
+        if (p.lastDay != null) parts.push(short(p.lastDay));
+        if (p.lastSelection != null) parts.push('→ ' + short(p.lastSelection));
+        return parts.join(' · ');
+      }
+      if (kind === 'year-transition') {
+        const from = p.fromYear && p.fromYear.number != null ? p.fromYear.number : '?';
+        const to = p.toYear && p.toYear.number != null ? p.toYear.number : '?';
+        return String(from) + ' → ' + String(to);
+      }
+      if (kind === 'year-walk-step') return short(p.fromNumber) + ' → ' + short(p.toNumber);
+      if (kind === 'year-walk-finished') {
+        const arrow = p.direction === 'previous' ? '←' : (p.direction === 'next' ? '→' : '↔');
+        return arrow + ' × ' + short(p.stepCount) + ' · ' + short(p.number);
+      }
+      if (kind === 'year-authoritative' && p.year) {
+        return [p.year.number, p.year.openDay, p.year.closeDay].filter((x) => x != null).map(short).join(' · ');
+      }
+      if (kind === 'sauce-finished') return safeArray(p.finalBowls).map(short).join(' / ');
+      if (kind === 'cutlet-partition-ready') return safeArray(p.partition).join(' · ');
+      if (kind === 'cutlet-names-ready' || kind === 'month-names-ready') return safeArray(p.indices).join(' · ');
+      if (kind === 'month-lengths-ready') return safeArray(p.lengths).join(' · ');
+      if (kind === 'final-result-ready') {
+        return [p.year, p.cutletName, p.dayInCutlet, p.monthName, p.dayInMonth].filter((x) => x != null).join(' · ');
+      }
+      if (kind === 'view-day-ready' && p.targetDay != null) return String(p.targetDay);
+      const scalars = Object.entries(p).filter(([, value]) =>
+        value === null || ['string', 'number', 'boolean'].includes(typeof value)
+      ).slice(0, 3);
+      return scalars.map(([, value]) => short(value)).join(' · ');
+    }
+
+    _liveDurationText(value, withPlus = false) {
+      const ms = Number(value);
+      if (!Number.isFinite(ms) || ms < 0) return '';
+      const prefix = withPlus ? '+' : '';
+      if (ms < 1 && ms > 0) return prefix + ms.toFixed(2) + ' ms';
+      if (ms < 10) return prefix + ms.toFixed(1) + ' ms';
+      if (ms < 1000) return prefix + String(Math.round(ms)) + ' ms';
+      if (ms < 10000) return prefix + (ms / 1000).toFixed(2) + ' s';
+      return prefix + (ms / 1000).toFixed(1) + ' s';
+    }
+
+    _liveTimeText(event) {
+      return this._liveDurationText(event && event.durationMs, true);
+    }
+
+    _liveBadgeText(node) {
+      const duration = this._liveDurationText(node && node.totalMs, false);
+      return String(node && node.value || 0) + (duration ? ' · ' + duration : '');
+    }
+
+    _liveIcon(event) {
+      const icon = doc.createElement('span');
+      const kind = this._liveIconKind(event);
+      icon.className = 'live-icon live-icon--' + kind;
+      icon.setAttribute('aria-hidden', 'true');
+      const value = doc.createElement('span');
+      value.textContent = this._liveEventNumber(event);
+      icon.append(value);
+      return icon;
+    }
+
+    _ensureLiveGroup(key) {
+      if (this._liveGroupNodes.has(key)) {
+        const existing = this._liveGroupNodes.get(key);
+        if (this._liveState === 'running' && this._liveLastGroupKey !== key) {
+          const previous = this._liveGroupNodes.get(this._liveLastGroupKey);
+          if (previous) previous.details.open = false;
+          existing.details.open = true;
+          this._liveLastGroupKey = key;
+        }
+        return existing;
+      }
+      const details = doc.createElement('details');
+      details.className = 'live-group';
+      details.dataset.group = key;
+      details.open = this._liveState === 'running';
+      const summary = doc.createElement('summary');
+      const title = doc.createElement('span');
+      title.textContent = this._liveGroupTitle(key);
+      const count = doc.createElement('span');
+      count.className = 'live-group-count';
+      count.textContent = '0';
+      summary.append(title, count);
+      const list = doc.createElement('ol');
+      list.className = 'live-list';
+      details.append(summary, list);
+      this._els.pane.append(details);
+      const node = { details, list, count, value: 0, totalMs: 0 };
+      this._liveGroupNodes.set(key, node);
+      if (this._liveState === 'running' && this._liveLastGroupKey && this._liveLastGroupKey !== key) {
+        const previous = this._liveGroupNodes.get(this._liveLastGroupKey);
+        if (previous) previous.details.open = false;
+      }
+      this._liveLastGroupKey = key;
+      return node;
+    }
+
+    _ensureLiveSauce(group, event) {
+      const p = event && event.payload || {};
+      const sauceId = p.sauceId == null ? null : String(p.sauceId);
+      if (!sauceId) return group;
+      if (this._liveSauceNodes.has(sauceId)) return this._liveSauceNodes.get(sauceId);
+      if (event.kind === 'sauce-start') {
+        for (const prior of this._liveSauceNodes.values()) prior.details.open = false;
+      }
+      const details = doc.createElement('details');
+      details.className = 'live-sauce';
+      details.open = this._liveState === 'running';
+      const summary = doc.createElement('summary');
+      const title = doc.createElement('span');
+      title.textContent = this._term('sauce') + ' ' + sauceId.replace(/^sauce-/, '')
+        + (p.gateIndex != null ? ' · ' + this._term('gate') + ' ' + String(p.gateIndex) : '');
+      const count = doc.createElement('span');
+      count.className = 'live-group-count';
+      count.textContent = '0';
+      summary.append(title, count);
+      const list = doc.createElement('ol');
+      list.className = 'live-list';
+      details.append(summary, list);
+      const wrapper = doc.createElement('li');
+      wrapper.className = 'live-sauce-item';
+      wrapper.append(details);
+      group.list.append(wrapper);
+      const node = { details, list, count, value: 0, totalMs: 0 };
+      this._liveSauceNodes.set(sauceId, node);
+      return node;
+    }
+
+    _liveGateStepRow(step) {
+      const event = {
+        kind: 'gate-gap-finished',
+        durationMs: step && step.durationMs,
+        payload: {
+          signedIndex: step && step.index,
+          gap: step && step.gap,
+          selectionOutput: step && step.selectionOutput,
+        },
+      };
+      const li = doc.createElement('li');
+      li.className = 'live-gate-step';
+      li.dataset.kind = 'gate-gap-finished';
+      li.append(this._liveIcon(event));
+      const copy = doc.createElement('span');
+      copy.className = 'live-row-copy';
+      const label = doc.createElement('span');
+      label.className = 'live-row-label';
+      label.textContent = this._term('gateGap') + ' ' + String(step && step.index != null ? step.index : '');
+      const value = doc.createElement('span');
+      value.className = 'live-row-value';
+      const values = [];
+      if (step && step.gap != null) values.push('Δ=' + exactDisplay(step.gap));
+      if (step && step.selectionOutput != null) values.push('→ ' + exactDisplay(step.selectionOutput));
+      value.textContent = values.join(' · ');
+      if (!value.textContent) value.hidden = true;
+      copy.append(label, value);
+      const time = doc.createElement('small');
+      time.className = 'live-time';
+      time.textContent = this._liveDurationText(step && step.durationMs, true);
+      li.append(copy, time);
+      return li;
+    }
+
+    _appendGateRange(target, event) {
+      const p = event && event.payload || {};
+      const steps = safeArray(p.steps);
+      const wrapper = doc.createElement('li');
+      wrapper.className = 'live-gate-range-item';
+      const details = doc.createElement('details');
+      details.className = 'live-gate-range';
+      const summary = doc.createElement('summary');
+      summary.append(this._liveIcon(event));
+      const copy = doc.createElement('span');
+      copy.className = 'live-row-copy';
+      const label = doc.createElement('span');
+      label.className = 'live-row-label';
+      label.textContent = this._liveEventLabel(event);
+      const value = doc.createElement('span');
+      value.className = 'live-row-value';
+      value.textContent = this._livePayloadSummary(event);
+      if (!value.textContent) value.hidden = true;
+      copy.append(label, value);
+      const time = doc.createElement('small');
+      time.className = 'live-time';
+      time.textContent = this._liveTimeText(event);
+      summary.append(copy, time);
+      const list = doc.createElement('ol');
+      list.className = 'live-gate-steps';
+      list.hidden = true;
+      let populated = false;
+      const populate = () => {
+        if (populated) return;
+        populated = true;
+        for (const step of steps) list.append(this._liveGateStepRow(step));
+      };
+      details.addEventListener('toggle', () => {
+        if (details.open) {
+          populate();
+          list.hidden = false;
+        } else {
+          list.hidden = true;
+        }
+      });
+      details.append(summary, list);
+      wrapper.append(details);
+      target.list.append(wrapper);
+      return true;
+    }
+
+    _appendLiveRow(event) {
+      const key = this._liveGroupKey(event);
+      const kind = String(event && event.kind || '');
+      const markerOnly = kind === 'year-resolution-start'
+        || kind === 'structure-start'
+        || kind === 'view-start'
+        || kind === 'gate-gap-start'
+        || kind === 'sauce-start';
+      if (markerOnly) {
+        if (kind === 'sauce-start') {
+          const group = this._ensureLiveGroup(key);
+          this._ensureLiveSauce(group, event);
+        }
+        return false;
+      }
+      const group = this._ensureLiveGroup(key);
+      const durationMs = Math.max(0, Number(event && event.durationMs) || 0);
+      const operationCount = Math.max(1, Number(event && event.payload && event.payload.operationCount) || 1);
+      group.value += operationCount;
+      group.totalMs += durationMs;
+      group.count.textContent = this._liveBadgeText(group);
+      const target = this._ensureLiveSauce(group, event);
+      if (target !== group) {
+        target.value += 1;
+        target.totalMs += durationMs;
+        target.count.textContent = this._liveBadgeText(target);
+      }
+      if (kind === 'gate-run') return this._appendGateRange(target, event);
+      const li = doc.createElement('li');
+      li.className = 'live-row';
+      li.dataset.kind = String(event.kind);
+      li.append(this._liveIcon(event));
+      const copy = doc.createElement('span');
+      copy.className = 'live-row-copy';
+      const label = doc.createElement('span');
+      label.className = 'live-row-label';
+      label.textContent = this._liveEventLabel(event);
+      const value = doc.createElement('span');
+      value.className = 'live-row-value';
+      value.textContent = this._livePayloadSummary(event);
+      if (!value.textContent) value.hidden = true;
+      copy.append(label, value);
+      const time = doc.createElement('small');
+      time.className = 'live-time';
+      time.textContent = this._liveTimeText(event);
+      li.append(copy, time);
+      target.list.append(li);
+      return true;
+    }
+
+    _prepareLiveLog(reset = false) {
+      if (!this._els) return;
+      if (reset) {
+        this._els.pane.replaceChildren();
+        this._liveRenderedCount = 0;
+        this._liveGroupNodes = new Map();
+        this._liveSauceNodes = new Map();
+        this._liveLastGroupKey = null;
+        this._livePhaseKey = null;
+      }
+      this._els.nav.replaceChildren();
+      this._els.pane.hidden = false;
+      this._els.loading.hidden = true;
+      this._els.error.hidden = true;
+      this._els.shell.setAttribute('aria-busy', this._liveState === 'running' ? 'true' : 'false');
+    }
+
+    _drainLiveRows(reset = false) {
+      if (!this._els || !this._liveEntries.length) return;
+      const pane = this._els.pane;
+      const scrollHeight = Number(pane.scrollHeight) || 0;
+      const scrollTop = Number(pane.scrollTop) || 0;
+      const clientHeight = Number(pane.clientHeight) || 0;
+      const follow = this.hasAttribute('live')
+        && (scrollHeight === 0 || clientHeight === 0 || scrollHeight - scrollTop - clientHeight < 96);
+      if (reset) this._prepareLiveLog(true);
+      else if (this._liveRenderedCount === 0) this._prepareLiveLog(false);
+      while (this._liveRenderedCount < this._liveEntries.length) {
+        this._appendLiveRow(this._liveEntries[this._liveRenderedCount]);
+        this._liveRenderedCount += 1;
+      }
+      this._liveRenderedLocale = this._locale ? this._locale.code : null;
+      if (this._liveState === 'complete' && this._liveLastGroupKey) {
+        const last = this._liveGroupNodes.get(this._liveLastGroupKey);
+        if (last) last.details.open = true;
+      }
+      if (follow) {
+        try { pane.scrollTop = pane.scrollHeight; } catch (_) { /* best effort */ }
+      }
+    }
+
+    _scheduleLiveDrain() {
+      if (this._liveRenderQueued) return;
+      this._liveRenderQueued = true;
+      const flush = () => {
+        this._liveRenderQueued = false;
+        if (this._liveCurrentPending && this._els && this._els.liveCurrent) {
+          this._els.liveCurrent.textContent = this._liveEventLabel(this._liveCurrentPending);
+          this._liveCurrentPending = null;
+        }
+        this._drainLiveRows();
+      };
+      if (typeof root.requestAnimationFrame === 'function') root.requestAnimationFrame(flush);
+      else enqueueMicrotask(flush);
+    }
+
     async load(expectedGeneration) {
       if (!this.hasAttribute('open')) return null;
       const generation = expectedGeneration === undefined ? ++this._generation : expectedGeneration;
-      this._showLoading();
       try {
         const targetDate = axis.normalizeDateInput(this.getAttribute('date'), 'Li date a examinar');
         const calculationDate = axis.normalizeDateInput(this.getAttribute('calculation-date'), 'Li die de calculation');
@@ -652,10 +1700,23 @@
         if (!service || typeof service.getCookingTrace !== 'function') {
           throw new TypeError('Li shared CalendarService ne supporta cooking trace.');
         }
-        const trace = await service.getCookingTrace(targetJdn, calculationJdn);
+        this._trace = null;
+        this._traceInputKey = null;
+        this._resetLiveLog('running');
+        this._hideStatus();
+        if (this._els && this._els.liveCurrent) this._els.liveCurrent.textContent = this._t('cooking.loading');
+        const trace = await service.getCookingTrace(targetJdn, calculationJdn, {
+          onProgress: (event) => {
+            if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return;
+            this.appendLiveProgress(event);
+          },
+        });
         if (generation !== this._generation || !this._connected || !this.hasAttribute('open')) return null;
         this._trace = trace;
         this._traceInputKey = inputKey;
+        this._flushGateSweep();
+        this._liveState = 'complete';
+        this._drainLiveRows();
         this._gateDetails.clear();
         this._gateDetailLoading = null;
         this._gateDetailError = null;
@@ -678,7 +1739,14 @@
         return trace;
       } catch (error) {
         if (generation !== this._generation) return null;
-        this._showError(error);
+        this._flushGateSweep();
+        this._liveState = 'error';
+        if (this._liveEntries.length) {
+          this._hideStatus();
+          this._renderState();
+        } else {
+          this._showError(error);
+        }
         throw error;
       }
     }
@@ -712,6 +1780,19 @@
     _renderState() {
       if (!this._els) return;
       this._applyLocaleLabelsOnly();
+      if (this._liveEntries.length) {
+        const localeCode = this._locale ? this._locale.code : null;
+        const rendered = this._liveRenderedCount === this._liveEntries.length
+          && this._liveRenderedLocale === localeCode
+          && this._els.pane.querySelector('.live-row');
+        if (rendered) {
+          this._prepareLiveLog(false);
+        } else {
+          this._prepareLiveLog(true);
+          this._drainLiveRows();
+        }
+        return;
+      }
       if (!this._trace) {
         this._els.nav.replaceChildren();
         if (!this._els.loading.hidden || !this._els.error.hidden) return;
@@ -729,6 +1810,7 @@
       this._els.close.textContent = this._t('cooking.close');
       this._els.loadingText.textContent = this._t('cooking.loading');
       this._els.retry.textContent = this._t('cooking.retry');
+      if (this._els.liveKicker) this._els.liveKicker.textContent = this._t('cooking.live.kicker');
     }
 
     _renderNav() {

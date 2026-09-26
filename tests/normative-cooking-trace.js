@@ -55,8 +55,54 @@ function assertCentralSauceShape(run) {
   assert.ok(!trace1.archaeology.some((row) => row.semanticRule === 'post-stir-u-uses-raw-bowl-sum'));
   assert.ok(trace1.artifacts.sauceRuns.length >= 2);
   trace1.artifacts.sauceRuns.forEach(assertCentralSauceShape);
-  const trace2 = traceApi.calendarDateSpaghettiCookingTrace(c, t);
-  assert.deepStrictEqual(trace2, trace1);
+  const progressEvents = [];
+  const trace2 = traceApi.calendarDateSpaghettiCookingTrace(c, t, {
+    onProgress(event) { progressEvents.push(event); },
+  });
+  assert.deepStrictEqual(trace2, trace1, 'progress observation must not change the deterministic trace');
+  assert.ok(progressEvents.length > 100, 'live progress should expose the internal execution, not a token spinner');
+  assertNoBigInt(progressEvents);
+  const kinds = new Set(progressEvents.map((event) => event.kind));
+  for (const kind of [
+    'run-start',
+    'stone-transition',
+    'hidden-grind',
+    'visible-grind',
+    'initial-bowl',
+    'bowl-round',
+    'post-stir',
+    'selection-result',
+    'gate-gap-finished',
+    'year-resolution-finished',
+    'cutlet-count-ready',
+    'month-weaving-ready',
+    'final-result-ready',
+    'trace-ready',
+  ]) {
+    assert.ok(kinds.has(kind), 'missing live progress kind: ' + kind);
+  }
+  for (let index = 0; index < progressEvents.length; index += 1) {
+    const event = progressEvents[index];
+    assert.strictEqual(event.sequence, index + 1);
+    assert(Number.isFinite(event.elapsedMs) && event.elapsedMs >= 0);
+    assert(Number.isFinite(event.durationMs) && event.durationMs >= 0);
+  }
+  const expensiveInnerKinds = new Set([
+    'stone-seed', 'stone-transition', 'hidden-start', 'hidden-grind',
+    'visible-start', 'visible-grind', 'initial-bowl', 'bowl-round', 'post-stir',
+  ]);
+  assert.strictEqual(progressEvents.some((event) =>
+    expensiveInnerKinds.has(event.kind)
+      && event.payload && event.payload.gateIndex !== null && event.payload.gateIndex !== undefined
+  ), false, 'live observation must not disable Stage 58 acceleration merely to expand each gate Sauce');
+  assert.strictEqual(progressEvents.some((event) =>
+    event.kind === 'sauce-finished'
+      && event.payload && event.payload.gateIndex !== null && event.payload.gateIndex !== undefined
+  ), false, 'accelerated gate Sauce work must be represented by its gate completion, not duplicated as a second UI event');
+  assert.ok(progressEvents.some((event) =>
+    event.kind === 'gate-gap-finished'
+      && event.payload && event.payload.signedIndex !== null && event.payload.signedIndex !== undefined
+  ), 'real completed gate-gap steps must remain visible');
   assert.strictEqual(trace1.coverage.sameSemanticExecutionAsFinalResult, true);
   assert.strictEqual(trace1.coverage.independentExplanationEngine, false);
   console.log('Normative cooking trace foundation saved-sum: PASS');

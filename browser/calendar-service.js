@@ -105,6 +105,52 @@
       }
     }
 
+    async convertWithTrace(targetJdn, calculationJdn, onProgress = null) {
+      if (onProgress !== null && typeof onProgress !== 'function') {
+        throw new TypeError('onProgress deve esser null o un function.');
+      }
+      const targetDay = axis.jdnToProjectDay(targetJdn);
+      const calculationDay = axis.jdnToProjectDay(calculationJdn);
+      const remembered = await this.memory.getConversion(calculationDay, targetDay);
+      if (remembered !== undefined) {
+        if (onProgress) {
+          onProgress(Object.freeze({
+            kind: 'conversion-cache-hit',
+            elapsedMs: 0,
+            durationMs: 0,
+            payload: Object.freeze({ targetDay: String(targetDay) }),
+          }));
+        }
+        return Object.freeze({ result: normalizeCalendarResult(remembered), trace: null });
+      }
+      if (!this.engineClient || typeof this.engineClient.convertWithTrace !== 'function') {
+        return Object.freeze({ result: await this.convert(targetJdn, calculationJdn), trace: null });
+      }
+
+      const key = requestKey(calculationDay, targetDay);
+      const existing = this.conversionInflight.get(key);
+      if (existing) return Object.freeze({ result: await existing, trace: null });
+
+      const memoryGeneration = this.memoryGeneration;
+      const tracedPromise = this.engineClient.convertWithTrace(calculationDay, targetDay, onProgress);
+      const resultPromise = tracedPromise.then((traced) => normalizeCalendarResult(traced.result));
+      // This derived promise exists for ordinary convert() callers that join the same
+      // in-flight request. Consume its rejection here as well so a traced failure
+      // never creates an unhandled rejection when no second caller is waiting.
+      resultPromise.catch(() => {});
+      this.conversionInflight.set(key, resultPromise);
+      try {
+        const traced = await tracedPromise;
+        const result = normalizeCalendarResult(traced.result);
+        if (memoryGeneration === this.memoryGeneration) {
+          await this.memory.setConversion(calculationDay, targetDay, result);
+        }
+        return Object.freeze({ result, trace: traced.trace || null });
+      } finally {
+        if (this.conversionInflight.get(key) === resultPromise) this.conversionInflight.delete(key);
+      }
+    }
+
     async _invalidateCalculation(calculationDay) {
       this.memoryGeneration += 1;
       await this.memory.clearCalculation(calculationDay);
@@ -112,7 +158,10 @@
       this.cutletInflight.clear();
     }
 
-    async getCutletView(targetJdn, calculationJdn) {
+    async getCutletView(targetJdn, calculationJdn, onProgress = null) {
+      if (onProgress !== null && typeof onProgress !== 'function') {
+        throw new TypeError('onProgress deve esser null o un function.');
+      }
       const targetDay = axis.jdnToProjectDay(targetJdn);
       const calculationDay = axis.jdnToProjectDay(calculationJdn);
 
@@ -139,7 +188,7 @@
       const requestGeneration = this.memoryGeneration;
       const request = (async () => {
         let generation = requestGeneration;
-        let view = await this.engineClient.getCutletView(calculationDay, targetDay);
+        let view = await this.engineClient.getCutletView(calculationDay, targetDay, onProgress);
         let selected = resultFromRememberedView(view, targetDay);
 
         if (generation === this.memoryGeneration &&
@@ -152,7 +201,7 @@
           generation = this.memoryGeneration;
           await this.memory.setConversion(calculationDay, targetDay, direct);
 
-          view = await this.engineClient.getCutletView(calculationDay, targetDay);
+          view = await this.engineClient.getCutletView(calculationDay, targetDay, onProgress);
           selected = resultFromRememberedView(view, targetDay);
           if (selected === undefined || !sameCanonicalResult(direct, selected)) {
             await this._invalidateCalculation(calculationDay);
