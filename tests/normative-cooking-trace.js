@@ -95,10 +95,14 @@ function assertCentralSauceShape(run) {
     expensiveInnerKinds.has(event.kind)
       && event.payload && event.payload.gateIndex !== null && event.payload.gateIndex !== undefined
   ), false, 'live observation must not disable Stage 58 acceleration merely to expand each gate Sauce');
-  assert.ok(progressEvents.some((event) =>
+  assert.strictEqual(progressEvents.some((event) =>
     event.kind === 'sauce-finished'
       && event.payload && event.payload.gateIndex !== null && event.payload.gateIndex !== undefined
-  ), 'gate Sauce executions must remain visible as real completed operations');
+  ), false, 'accelerated gate Sauce work must be represented by its gate completion, not duplicated as a second UI event');
+  assert.ok(progressEvents.some((event) =>
+    event.kind === 'gate-gap-finished'
+      && event.payload && event.payload.signedIndex !== null && event.payload.signedIndex !== undefined
+  ), 'real completed gate-gap steps must remain visible');
   assert.strictEqual(trace1.coverage.sameSemanticExecutionAsFinalResult, true);
   assert.strictEqual(trace1.coverage.independentExplanationEngine, false);
   console.log('Normative cooking trace foundation saved-sum: PASS');
