@@ -22,6 +22,8 @@
     });
   }
 
+  const MEGILLAH_CANONICAL_URL = 'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html';
+
   /*
    * Canonical live-stage quotations copied verbatim from the Hebrew Scroll:
    * https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html
@@ -2529,6 +2531,7 @@
     provenance: 'current-source-text+pinned-d5cfe77-browser-ui-translations;no-positional-remap',
     defaultLocale: 'ie',
     locales,
+    megillahCanonicalUrl: MEGILLAH_CANONICAL_URL,
     megillahStageGuide,
   });
 })(typeof globalThis === 'object' ? globalThis : this);
