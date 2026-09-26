@@ -30,93 +30,6 @@
     postStirs: 'cooking.phase.postStirs',
   });
 
-  // Canonical quotations are copied verbatim from:
-  // Sargon-17-Green/Marak/megillah/original/Megilat_HaItim_Yehuda_FINAL_2026-09-18.md
-  // Original SHA-256 pinned by that repository: 7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b
-  // The quotations intentionally remain in the canonical Judaean Hebrew in every UI locale.
-  const MEGILLAH_STAGE_GUIDE = Object.freeze({
-    inputs: Object.freeze({
-      explanationKey: 'cooking.live.explain.inputs',
-      source: 'דברי בעל הלוח אל הסופר הכותב ואל חכם הימים',
-      quote: 'למלאכת הלוח קח שני ימים. לראשון קרא יום המעשה ולשני קרא היום אשר עליו תשאל.',
-    }),
-    gates: Object.freeze({
-      explanationKey: 'cooking.live.explain.gates',
-      source: 'לוח שבעה עשר: שערי הקציצה',
-      quote: 'וכן עשה שער אחר שער.',
-    }),
-    yearAnchor: Object.freeze({
-      explanationKey: 'cooking.live.explain.yearAnchor',
-      source: 'לוח שמונה עשר: שנת חמשת אלפים',
-      quote: 'לשנה אשר תבחר קרא שנת חמשת אלפים מיום ברוא מפלצת הספגטי המעופפת שמים וארץ.',
-    }),
-    years: Object.freeze({
-      explanationKey: 'cooking.live.explain.years',
-      source: 'לוח תשעה עשר: יתר השנים',
-      quote: 'משנת חמשת אלפים לך שנה אחר שנה. לא תדלג אל שנה רחוקה.',
-    }),
-    stones: Object.freeze({
-      explanationKey: 'cooking.live.explain.stones',
-      source: 'לוח שבע: חמש האבנים',
-      quote: 'כל אחת מחמש האבנים החדשות עשה מחמש האבנים הישנות.',
-    }),
-    hidden: Object.freeze({
-      explanationKey: 'cooking.live.explain.hidden',
-      source: 'לוח שמונה: שבע הטיפות הנסתרות',
-      quote: 'טחון כל טיפה נסתרת שבע פעמים.',
-    }),
-    visible: Object.freeze({
-      explanationKey: 'cooking.live.explain.visible',
-      source: 'לוח תשעה: עשיית שש וארבעים הטיפות',
-      quote: 'את ראשית הטיפה טחון עשתי עשרה פעמים.',
-    }),
-    bowls: Object.freeze({
-      explanationKey: 'cooking.live.explain.bowls',
-      source: 'לוח שלשה עשר: לבלול את שש הקערות אחר הטיפה',
-      quote: 'כל שש הקערות ישתו מן המספרים אשר היו בהן טרם הטיפה.',
-    }),
-    postStirs: Object.freeze({
-      explanationKey: 'cooking.live.explain.postStirs',
-      source: 'לוח ארבעה עשר: לבלול שתים עשרה פעמים אחר הטיפה האחרונה',
-      quote: 'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה פעמים.',
-    }),
-    selection: Object.freeze({
-      explanationKey: 'cooking.live.explain.selection',
-      source: 'לוח ששה עשר: לבחור אחת מדרכים רבות',
-      quote: 'כי יהיו דברים רבים אשר יוכל החכם לקחת ואחד מהם יקח ולא שניים קרא לכל אחד מהם דרך.',
-    }),
-    structure: Object.freeze({
-      explanationKey: 'cooking.live.explain.structure',
-      source: 'לוח אחרון: לדעת שם היום',
-      quote: 'אחרי אשר תדע את שער ראשית השנה ואת שער אחריתה עשה פעם אחת את כל דבר השנה.',
-    }),
-    cutlets: Object.freeze({
-      explanationKey: 'cooking.live.explain.cutlets',
-      source: 'לוח עשרים: הקציצות',
-      quote: 'כספר החלקים אשר תבחר כן תחלק השנה לקציצות.',
-    }),
-    months: Object.freeze({
-      explanationKey: 'cooking.live.explain.months',
-      source: 'לוח אחד ועשרים: החודשים',
-      quote: 'כספר ימי החודשים אשר תבחר כן יהיו ימי החודשים בשנה.',
-    }),
-    weaving: Object.freeze({
-      explanationKey: 'cooking.live.explain.weaving',
-      source: 'לוח אחד ועשרים: החודשים · שזירת החודשים',
-      quote: 'לא תבחר כל יום לבדו. את השזירה כולה תבחר.',
-    }),
-    result: Object.freeze({
-      explanationKey: 'cooking.live.explain.result',
-      source: 'לוח אחרון: לדעת שם היום',
-      quote: 'אחרי אשר תעשה את כל אלה הוצא מן היום אשר עליו שאלת חמשה דברים.',
-    }),
-    position: Object.freeze({
-      explanationKey: 'cooking.live.explain.position',
-      source: 'לוח אחרון: לדעת שם היום',
-      quote: 'אחרי אשר תעשה את דבר השנה הדברים האלה יוצאים ממקום היום בתוך מלאכת השנה אשר עשית.',
-    }),
-  });
-
   const doc = root.document || null;
   const enqueueMicrotask = typeof root.queueMicrotask === 'function'
     ? root.queueMicrotask.bind(root)
@@ -1631,13 +1544,16 @@
 
     _renderLiveStageGuide(stageKey, force = false) {
       if (!this._els || !this._els.liveExplanation || !this._els.megillahQuote || !this._els.megillahSource) return;
-      const key = MEGILLAH_STAGE_GUIDE[stageKey] ? stageKey : 'inputs';
+      const localeData = root.PastafariBrowserLocaleData;
+      const guideTable = localeData && localeData.megillahStageGuide;
+      if (!guideTable) return;
+      const key = guideTable[stageKey] ? stageKey : 'inputs';
       if (!force && this._liveGuideStageKey === key) return;
-      const guide = MEGILLAH_STAGE_GUIDE[key];
+      const guide = guideTable[key];
       this._liveGuideStageKey = key;
       this._els.liveExplanation.textContent = this._t(guide.explanationKey);
       this._els.megillahQuote.textContent = guide.quote;
-      this._els.megillahSource.textContent = 'מגילת העיתים · ' + guide.source;
+      this._els.megillahSource.textContent = guide.source;
       if (this._els.stageGuide) this._els.stageGuide.dataset.stage = key;
     }
 
