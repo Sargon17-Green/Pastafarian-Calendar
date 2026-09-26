@@ -330,6 +330,13 @@ function treeText(node) {
   return [node.textContent || '', ...((node.children || []).map(treeText))].join(' ');
 }
 
+function treeCountByClass(node, className) {
+  if (!node || typeof node !== 'object') return 0;
+  const classes = String(node.className || '').split(/\s+/).filter(Boolean);
+  return (classes.includes(className) ? 1 : 0)
+    + (node.children || []).reduce((sum, child) => sum + treeCountByClass(child, className), 0);
+}
+
 function deferred() {
   let resolve;
   let reject;
@@ -457,7 +464,7 @@ async function flush() {
   assert.strictEqual(compacted._liveEntries.length, 2);
   assert(compacted._liveEntries.every((row) => row.kind === 'gate-run'));
   assert(compacted._liveEntries.every((row) => row.payload.count === 128));
-  assert.strictEqual(compacted.shadowRoot.querySelectorAll('.live-row').length, 2);
+  assert.strictEqual(treeCountByClass(compacted._els.pane, 'live-row'), 2);
   assert(treeText(compacted._els.pane).includes('1 → 128'));
   assert(treeText(compacted._els.pane).includes('129 → 256'));
 
