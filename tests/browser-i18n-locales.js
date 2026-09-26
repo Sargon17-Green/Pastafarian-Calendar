@@ -166,15 +166,15 @@ assert.strictEqual(
   16,
   'every Megillah stage quotation must be unique for exact text-fragment deep links',
 );
-assert.strictEqual(data.megillahStageGuide.gates.quote, 'וכן עשה שער אחר שער.');
-assert(data.megillahStageGuide.gates.source.includes('לוח שבעה עשר: שערי הקציצה'));
-assert.strictEqual(data.megillahStageGuide.yearAnchor.quote, 'לשנה אשר תבחר קרא שנת חמשת אלפים לבריאת העולם.');
-assert.strictEqual(data.megillahStageGuide.stones.quote, 'כל אחת מחמש האבנים החדשות עשה מן חמש האבנים הישנות.');
-assert.strictEqual(data.megillahStageGuide.hidden.quote, 'כל טיפה נסתרת טחון שבע טחינות.');
-assert.strictEqual(data.megillahStageGuide.visible.quote, 'את ראשית הטיפה טחון עשתי עשרה טחינות.');
-assert.strictEqual(data.megillahStageGuide.postStirs.quote, 'אחרי אשר תעשה את הטיפה השש וארבעים בלול עוד שתים עשרה בלילות.');
-assert.strictEqual(data.megillahStageGuide.weaving.quote, 'לא תבחר את הימים אחד אחד. את השזירה כולה תבחר.');
-assert.strictEqual(data.megillahStageGuide.position.quote, 'אחרי אשר תעשה את דבר השנה הדברים האלה יוצאים ממקום היום בתוך אשר עשית.');
+assert.strictEqual(data.megillahStageGuide.gates.quote, 'כדי למצוא את המרחק מן השער הראשון אל השני, השתמש ביום השני שלאחר יום היסוד כיום הנשאל. לשער השלישי השתמש ביום השלישי, וכן הלאה. יום המעשה נשאר יום היסוד.');
+assert(data.megillahStageGuide.gates.source.includes('הלוח השבעה עשר: שערי הקציצה'));
+assert.strictEqual(data.megillahStageGuide.yearAnchor.quote, 'השנה הזאת תיקרא שנת חמשת אלפים לבריאת העולם.');
+assert.strictEqual(data.megillahStageGuide.stones.quote, 'חשב את כל חמש האבנים החדשות מתוך חמש האבנים הישנות של אותה טיפה קודמת. אל ישתמש באבן חדשה שמצא כדי לחשב אבן חדשה אחרת.');
+assert.strictEqual(data.megillahStageGuide.hidden.quote, 'לאחר ההוספה שמור, ואחר כך טחן כל טיפה נסתרת שבע טחינות.');
+assert.strictEqual(data.megillahStageGuide.visible.quote, 'את עיסת הטיפה טחן אחת עשרה טחינות.');
+assert.strictEqual(data.megillahStageGuide.postStirs.quote, 'לאחר שנמזגה הטיפה השש וארבעים, אל יאמר החכם כי מלאכת הקערות נשלמה.');
+assert.strictEqual(data.megillahStageGuide.weaving.quote, 'אין לבחור כל יום לבדו. הבחירה היא של האריג כולו.');
+assert.strictEqual(data.megillahStageGuide.position.quote, 'אין לשאול את הקערות מהו היום בחודש, מהו היום בקציצה, לאיזו קציצה שייך היום או לאיזה חודש הוא שייך. אלה תולדות מקומו של היום בתוך המבנה שכבר נקבע.');
 assert.deepStrictEqual(Array.from(data.locales, (locale) => locale.code), ['ie', 'en', 'he', 'ar', 'ru', 'fr', 'de', 'es', 'it', 'cs']);
 
 const sourceCutlets = SourceLanguageCatalog.cutlets.map((row) => row.text).sort();
