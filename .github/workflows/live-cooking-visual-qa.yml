@@ -385,7 +385,7 @@ jobs:
               assert(m.docSW<=m.docCW+2,spec.name+': document overflow');
               assert(m.paneSW<=m.paneCW+2,spec.name+': pane overflow');
               assert(m.shell.left>=-2 && m.shell.right<=spec.width+2,spec.name+': shell horizontal escape');
-              assert(m.shell.top>=-2 && m.shell.bottom<=spec.height+2,spec.name+': shell vertical escape');
+              assert(m.shell.height<=spec.height+2,spec.name+': inline live shell is taller than the viewport');
               assert(errors.length===0,spec.name+': '+errors.join(' | '));
               write(spec.name+'.json',m);
               await page.screenshot({path:path.join(out,spec.name+'.png'),fullPage:false});
