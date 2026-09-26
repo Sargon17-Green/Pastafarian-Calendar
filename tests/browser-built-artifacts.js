@@ -74,7 +74,13 @@ assert(standard.includes('cooking.open'));
 assert(standard.includes('<dialog class="shell"'));
 assert(standard.includes('aria-modal="true"'));
 assert(standard.includes('height: min(52rem, calc(100dvh - 2rem))'));
-assert(standard.includes('grid-template-rows: auto auto minmax(0, 1fr)'));
+assert(standard.includes('grid-template-rows: auto auto auto minmax(0, 1fr)'));
+assert(standard.includes(':host([live])'));
+assert(standard.includes('monster-meatball'));
+assert(standard.includes('sauce-drip'));
+assert(standard.includes('beginLiveTrace()'));
+assert(standard.includes('appendLiveProgress(event)'));
+assert(standard.includes('finishLiveTrace(trace = null)'));
 assert(standard.includes('grid-template-columns: repeat(2, minmax(0, 1fr))'));
 assert(standard.includes('_syncDialogOpen()'));
 assert(standard.includes('_cookingPagePosition'));
@@ -89,7 +95,10 @@ assert(!standard.includes('locales.generated.js'));
 assert(standard.includes('PastafariCalendarBrowser'));
 assert(standard.includes('function createScrollTarget(targetJdn, value)'));
 assert(standard.includes('this._scrollTarget = createScrollTarget(targetJdn, this._value)'));
-assert(standard.includes('service.getCutletView(this._scrollTarget.startJdn, calculationJdn)'));
+assert(standard.includes('const currentView = await service.getCutletView('));
+assert(standard.includes('service.convertWithTrace(targetJdn, calculationJdn, progressSink)'));
+assert(standard.includes("kind: 'view-start'"));
+assert(standard.includes("kind: 'view-finished'"));
 assert(standard.includes('resolveTargetCutletView(currentView, this._scrollTarget)'));
 assert(standard.includes('this._positionTargetInViewport(this._scrollTarget)'));
 assert(standard.includes('const isTarget = this._scrollTarget != null && sameScrollTargetDay(day, this._scrollTarget)'));
@@ -141,6 +150,8 @@ assert(worker.includes('deriveCutletViewBlackBox'));
 assert(worker.includes('PastafariBrowserCookingTrace'));
 assert(worker.includes('calendarDateSpaghettiCookingTrace'));
 assert(worker.includes("message.operation === 'cookingTrace'"));
+assert(worker.includes("message.operation === 'convertWithTrace'"));
+assert(worker.includes("kind: 'progress'"));
 
 /*
  * Li build artefact contene li core self, ergo intern core identifiers posse
