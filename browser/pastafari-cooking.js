@@ -1596,7 +1596,9 @@
       const canonicalUrl = localeData && localeData.megillahCanonicalUrl;
       if (!guideTable || !canonicalUrl) return null;
       const key = guideTable[stageKey] ? stageKey : 'inputs';
-      return { key, guide: guideTable[key], canonicalUrl };
+      const guide = guideTable[key];
+      const sourceUrl = canonicalUrl + '#:~:text=' + encodeURIComponent(guide.quote).replace(/-/g, '%2D');
+      return { key, guide, canonicalUrl, sourceUrl };
     }
 
     _fillStageGuide(explanationNode, quoteNode, sourceLinkNode, stageKey) {
@@ -1605,7 +1607,7 @@
       explanationNode.textContent = this._t(data.guide.explanationKey);
       quoteNode.textContent = data.guide.quote;
       sourceLinkNode.textContent = data.guide.source;
-      sourceLinkNode.setAttribute('href', data.canonicalUrl);
+      sourceLinkNode.setAttribute('href', data.sourceUrl);
       sourceLinkNode.setAttribute('target', '_blank');
       sourceLinkNode.setAttribute('rel', 'noopener noreferrer');
       return data.key;

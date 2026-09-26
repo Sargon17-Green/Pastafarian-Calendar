@@ -161,6 +161,11 @@ assert.strictEqual(
   'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
 );
 assert.strictEqual(Object.keys(data.megillahStageGuide).length, 16);
+assert.strictEqual(
+  new Set(Object.values(data.megillahStageGuide).map((row) => row.quote)).size,
+  16,
+  'every Megillah stage quotation must be unique for exact text-fragment deep links',
+);
 assert.strictEqual(data.megillahStageGuide.gates.quote, 'וכן עשה שער אחר שער.');
 assert(data.megillahStageGuide.gates.source.includes('לוח שבעה עשר: שערי הקציצה'));
 assert.strictEqual(data.megillahStageGuide.yearAnchor.quote, 'לשנה אשר תבחר קרא שנת חמשת אלפים לבריאת העולם.');

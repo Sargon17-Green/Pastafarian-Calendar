@@ -443,8 +443,9 @@ async function flush() {
   assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'));
   assert.strictEqual(
     live._els.megillahSourceLink.getAttribute('href'),
-    'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
-    'every Megillah quotation must link to the canonical blog source',
+    'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html'
+      + '#:~:text=' + encodeURIComponent(live._els.megillahQuote.textContent).replace(/-/g, '%2D'),
+    'every Megillah quotation must deep-link to its exact canonical text',
   );
   assert.strictEqual(live._els.megillahSourceLink.getAttribute('target'), '_blank');
   assert.strictEqual(live._els.megillahSourceLink.getAttribute('rel'), 'noopener noreferrer');
@@ -521,10 +522,17 @@ async function flush() {
     assert(live._els.liveExplanation.textContent.trim().length > 0, 'missing explanation for ' + key);
     assert(live._els.megillahQuote.textContent.trim().length > 0, 'missing Megillah quote for ' + key);
     assert(live._els.megillahSourceLink.textContent.includes('מגילת העיתים'), 'missing Megillah source for ' + key);
+    const expectedQuoteUrl = 'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html'
+      + '#:~:text=' + encodeURIComponent(live._els.megillahQuote.textContent).replace(/-/g, '%2D');
     assert.strictEqual(
       live._els.megillahSourceLink.getAttribute('href'),
-      'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
-      'missing canonical source link for ' + key,
+      expectedQuoteUrl,
+      'source link must deep-link to the exact canonical quotation for ' + key,
+    );
+    assert.strictEqual(
+      decodeURIComponent(live._els.megillahSourceLink.getAttribute('href').split('#:~:text=')[1]),
+      live._els.megillahQuote.textContent,
+      'text fragment must decode exactly to the displayed canonical quotation for ' + key,
     );
     assert.strictEqual(live._els.megillahSourceLink.getAttribute('target'), '_blank');
     assert.strictEqual(live._els.megillahSourceLink.getAttribute('rel'), 'noopener noreferrer');
@@ -563,10 +571,9 @@ async function flush() {
     'retained log must keep the canonical pseudo-archaic Megillah quotation');
   const retainedSource = treeFindByClass(live._els.pane, 'megillah-source-link');
   assert(retainedSource, 'retained stage guide must expose a clickable Megillah source');
-  assert.strictEqual(
-    retainedSource.getAttribute('href'),
-    'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
-  );
+  assert(retainedSource.getAttribute('href').startsWith(
+    'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html#:~:text='
+  ), 'retained source must deep-link into the canonical Scroll text');
   assert.strictEqual(retainedSource.getAttribute('target'), '_blank');
   assert.strictEqual(retainedSource.getAttribute('rel'), 'noopener noreferrer');
   const retainedGuide = treeFindByClass(live._els.pane, 'retained-stage-guide');
