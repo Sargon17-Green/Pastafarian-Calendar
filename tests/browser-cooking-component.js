@@ -434,6 +434,33 @@ async function flush() {
   assert.strictEqual(live._els.nav.children.length, 0);
   assert(treeText(live._els.pane).includes('אבן'));
 
+  // A huge real gate walk must remain truthful without turning tens of thousands
+  // of completed gates into tens of thousands of DOM cards. Every gate updates
+  // the live status, while the retained log rolls consecutive gates into ranges.
+  const compacted = new PastafariCookingElement();
+  compacted.setAttribute('lang', 'he');
+  compacted.setAttribute('date', '2026-09-11');
+  compacted.setAttribute('calculation-date', '2026-09-11');
+  compacted.connectedCallback();
+  compacted.beginLiveTrace();
+  for (let index = 1; index <= 256; index += 1) {
+    compacted.appendLiveProgress({
+      sequence: index,
+      kind: 'gate-ready',
+      elapsedMs: index,
+      durationMs: 1,
+      payload: { index: String(index), day: String(700000 + index) },
+    });
+  }
+  compacted._drainLiveRows();
+  assert.strictEqual(compacted._liveObservedCount, 256);
+  assert.strictEqual(compacted._liveEntries.length, 2);
+  assert(compacted._liveEntries.every((row) => row.kind === 'gate-run'));
+  assert(compacted._liveEntries.every((row) => row.payload.count === 128));
+  assert.strictEqual(compacted.shadowRoot.querySelectorAll('.live-row').length, 2);
+  assert(treeText(compacted._els.pane).includes('1 → 128'));
+  assert(treeText(compacted._els.pane).includes('129 → 256'));
+
   // Locale switching rerenders the component without a semantic rerun.
   lazy.setAttribute('lang', 'he');
   assert.strictEqual(lazy._locale.code, 'he');
