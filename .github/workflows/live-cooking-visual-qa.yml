@@ -321,13 +321,15 @@ jobs:
             return out;
           }
 
-          async function populateHarness(page, lang) {
+          async function populateHarness(page, lang, errors=null) {
             await page.goto(harness,{waitUntil:'domcontentloaded'});
             await page.waitForFunction(() => {
               const h=document.querySelector('#fixture-host');
               const c=h?.shadowRoot?.querySelector('pastafari-cooking');
               return !!c && typeof c.beginLiveTrace==='function';
             },null,{timeout:30000});
+            await page.waitForTimeout(50);
+            if (errors) errors.length=0;
             await page.evaluate(({lang,events}) => {
               const h=document.querySelector('#fixture-host');
               const c=h.shadowRoot.querySelector('pastafari-cooking');
@@ -353,7 +355,7 @@ jobs:
             ];
             for(const spec of profiles){
               const {ctx,page,errors}=await contextPage(browser,spec);
-              await populateHarness(page,spec.lang);
+              await populateHarness(page,spec.lang,errors);
               const m=await page.evaluate(() => {
                 const h=document.querySelector('#fixture-host'),c=h.shadowRoot.querySelector('pastafari-cooking'),s=c.shadowRoot,shell=s.querySelector('.shell'),pane=s.querySelector('.pane');
                 const r=shell.getBoundingClientRect();
@@ -399,7 +401,7 @@ jobs:
             for(const lang of locales){
               const spec={width:390,height:844,locale:lang==='he'?'he-IL':lang==='ar'?'ar':'en-US',mobile:true};
               const {ctx,page,errors}=await contextPage(browser,spec);
-              await populateHarness(page,lang);
+              await populateHarness(page,lang,errors);
               const m=await page.evaluate(() => {
                 const h=document.querySelector('#fixture-host'),c=h.shadowRoot.querySelector('pastafari-cooking'),s=c.shadowRoot;
                 return {
@@ -424,7 +426,7 @@ jobs:
           async function mediaQA(browser) {
             const spec={width:390,height:844,locale:'he-IL',mobile:true};
             const {ctx,page,errors}=await contextPage(browser,spec,{reducedMotion:'reduce'});
-            await populateHarness(page,'he');
+            await populateHarness(page,'he',errors);
             const m=await page.evaluate(() => {
               const h=document.querySelector('#fixture-host'),s=h.shadowRoot.querySelector('pastafari-cooking').shadowRoot;
               const monster=getComputedStyle(s.querySelector('.monster'));
@@ -440,7 +442,7 @@ jobs:
             await ctx.close();
 
             const fc=await contextPage(browser,spec,{forcedColors:'active'});
-            await populateHarness(fc.page,'he');
+            await populateHarness(fc.page,'he',fc.errors);
             const b=await fc.page.evaluate(() => {
               const h=document.querySelector('#fixture-host'),s=h.shadowRoot.querySelector('pastafari-cooking').shadowRoot;
               const group=getComputedStyle(s.querySelector('.live-group'));
