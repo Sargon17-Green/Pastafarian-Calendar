@@ -1,0 +1,139 @@
+name: Main-site temporary final navigation QA
+
+on:
+  push:
+    branches:
+      - fix/main-site-phase-a-2026-09-25
+
+jobs:
+  focused:
+    name: Valid search + previous/next cutlet
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+      - name: Build
+        run: |
+          node scripts/build-browser.js
+          node tests/browser-built-artifacts.js
+      - name: Prepare Chromium
+        run: |
+          mkdir -p "$RUNNER_TEMP/navqa"
+          cd "$RUNNER_TEMP/navqa"
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Run focused QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE="$RUNNER_TEMP/navsite"
+          rm -rf "$SITE"
+          mkdir -p "$SITE/dist"
+          cp browser/dist/index.html "$SITE/index.html"
+          cp browser/dist/pastafari-date.js "$SITE/dist/pastafari-date.js"
+          cp browser/dist/pastafari-worker.js "$SITE/dist/pastafari-worker.js"
+          cp browser/dist/pastafari-date.mjs "$SITE/dist/pastafari-date.mjs"
+          cp browser/dist/build-id.txt "$SITE/dist/build-id.txt"
+          cp -R browser/dist/reverse-engine "$SITE/dist/reverse-engine"
+          cd "$SITE"
+          python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/nav-http.log" 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          cd "$RUNNER_TEMP/navqa"
+          cat > qa.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs=require('fs'), path=require('path');
+          const out=path.join(process.cwd(),'out'); fs.mkdirSync(out,{recursive:true});
+          function assert(v,m){if(!v)throw new Error(m)}
+          async function ready(page,timeout=180000){
+            await page.waitForFunction(()=>{
+              const c=document.querySelector('pastafari-date')?.shadowRoot?.querySelector('.calendar');
+              return !!c && !c.hasAttribute('data-state');
+            },null,{timeout});
+            await page.waitForTimeout(300);
+          }
+          async function state(page){
+            return page.evaluate(()=>{
+              const h=document.querySelector('pastafari-date'),s=h.shadowRoot;
+              const cur=s.querySelector('.day[aria-current="date"]');
+              return {
+                date:h.getAttribute('date'),
+                calculationDate:h.getAttribute('calculation-date'),
+                current:!!cur,
+                currentAria:cur?.getAttribute('aria-label')||null,
+                days:s.querySelectorAll('.day').length,
+                targetHidden:s.querySelector('.target-button').hidden,
+                heading:s.querySelector('.cutlet-heading')?.innerText||'',
+                bodySW:document.documentElement.scrollWidth,
+                bodyCW:document.documentElement.clientWidth
+              };
+            });
+          }
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const ctx=await browser.newContext({viewport:{width:768,height:1024},locale:'es-ES'});
+            const page=await ctx.newPage();
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+            await ready(page);
+            await page.evaluate(()=>document.querySelector('pastafari-date').setAttribute('lang','es'));
+            await page.waitForTimeout(150);
+
+            // Successful ordinary search.
+            await page.locator('pastafari-date').locator('.editor-link').click();
+            const target=page.locator('pastafari-date').locator('input[name="target"]');
+            await target.fill('2026-09-25');
+            await page.locator('pastafari-date').locator('dialog:has(> .dialog-form) .dialog-actions .primary').click();
+            await ready(page);
+            let st=await state(page);
+            assert(st.date==='2026-09-25' && st.current,'valid ordinary search did not select requested target');
+            assert(st.days>0&&st.days<=28,'valid search broke bounded rendering');
+            assert(st.bodySW<=st.bodyCW+1,'valid search caused horizontal overflow');
+            fs.writeFileSync(path.join(out,'valid_search.json'),JSON.stringify(st,null,2));
+            await page.screenshot({path:path.join(out,'valid_search_768_es.png'),fullPage:true});
+
+            // Previous cutlet.
+            const beforeHeading=st.heading;
+            await page.locator('pastafari-date').locator('.previous').click();
+            await page.waitForTimeout(3000);
+            st=await state(page);
+            assert(st.heading!==beforeHeading,'previous cutlet did not change heading');
+            assert(st.days>0&&st.days<=28 && !st.targetHidden,'previous cutlet lost bounded/return-target state');
+            fs.writeFileSync(path.join(out,'previous_cutlet.json'),JSON.stringify(st,null,2));
+            await page.screenshot({path:path.join(out,'previous_cutlet_768_es.png'),fullPage:true});
+
+            // Next cutlet from previous should move again, then explicit return to target.
+            const previousHeading=st.heading;
+            await page.locator('pastafari-date').locator('.next').click();
+            await page.waitForTimeout(3000);
+            st=await state(page);
+            assert(st.heading!==previousHeading,'next cutlet did not change heading');
+            assert(st.days>0&&st.days<=28,'next cutlet broke bounded rendering');
+            fs.writeFileSync(path.join(out,'next_cutlet.json'),JSON.stringify(st,null,2));
+            await page.screenshot({path:path.join(out,'next_cutlet_768_es.png'),fullPage:true});
+
+            if(!st.targetHidden){
+              await page.locator('pastafari-date').locator('.target-button').click();
+              await page.waitForTimeout(1000);
+              st=await state(page);
+            }
+            assert(st.current && st.targetHidden,'return to target failed after previous/next cutlet');
+            fs.writeFileSync(path.join(out,'return_target.json'),JSON.stringify(st,null,2));
+            await page.screenshot({path:path.join(out,'return_target_768_es.png'),fullPage:true});
+
+            await ctx.close(); await browser.close();
+            console.log('FINAL_NAVIGATION_QA=PASS');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node qa.js
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-site-final-navigation-qa
+          path: ${{ runner.temp }}/navqa/out
+          retention-days: 14
