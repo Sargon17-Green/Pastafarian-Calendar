@@ -64,6 +64,13 @@ try {
   assert(fs.existsSync(path.join(site, '.nojekyll')), 'Manca .nojekyll in li Pages artefact.');
   assert(!fs.existsSync(path.join(site, 'dist', 'index.html')), 'index.html ne deve duplicar se sub /dist/.');
 
+  for (const name of ['favicon-16x16.png', 'favicon-32x32.png']) {
+    const source = path.join(ROOT, name);
+    const deployed = path.join(site, name);
+    assert(fs.existsSync(deployed), 'Manca li favicon in li Pages artefact: ' + name);
+    sameBytes(source, deployed, name);
+  }
+
   for (const relative of [
     'reverse-engine/pastafari-diagnostics.js',
     'reverse-engine/pastafari-calendar-fast.js',
