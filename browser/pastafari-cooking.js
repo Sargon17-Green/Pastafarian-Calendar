@@ -606,6 +606,46 @@
             border-radius: .65rem;
             background: #fcfaf6;
           }
+          .live-gate-range {
+            min-width: 0;
+            border: 1px solid #dfd2c2;
+            border-radius: .7rem;
+            background: #fcfaf6;
+            overflow: clip;
+          }
+          .live-gate-range > summary {
+            display: grid;
+            grid-template-columns: 2.7rem minmax(0, 1fr) auto;
+            gap: .65rem;
+            align-items: center;
+            min-width: 0;
+            padding: .5rem .6rem;
+            cursor: pointer;
+            list-style-position: inside;
+            background: #fbf3e7;
+          }
+          .live-gate-range[open] > summary {
+            border-bottom: 1px solid #e6daca;
+          }
+          .live-gate-steps {
+            display: grid;
+            gap: .3rem;
+            margin: 0;
+            padding: .45rem;
+            list-style: none;
+            background: #fffdfa;
+          }
+          .live-gate-step {
+            display: grid;
+            grid-template-columns: 2.45rem minmax(0, 1fr) auto;
+            gap: .55rem;
+            align-items: center;
+            min-width: 0;
+            padding: .42rem .5rem;
+            border: 1px solid #eee5d9;
+            border-radius: .55rem;
+            background: #fff;
+          }
           .live-row-copy { min-width: 0; }
           .live-row-label {
             display: block;
@@ -731,7 +771,9 @@
               padding: .65rem .75rem;
             }
             .monster-stage { transform: scale(.82); transform-origin: center; }
-            .live-row { grid-template-columns: 2.4rem minmax(0, 1fr); }
+            .live-row,
+            .live-gate-range > summary,
+            .live-gate-step { grid-template-columns: 2.4rem minmax(0, 1fr); }
             .live-time { grid-column: 2; padding: 0; }
             .head {
               grid-template-columns: minmax(0, 1fr) auto;
@@ -989,6 +1031,7 @@
           totalMs: 0,
           lastElapsedMs: 0,
           sequence: Number(event.sequence) || 0,
+          steps: [],
         };
       }
       const batch = this._liveGateBatch;
@@ -1003,6 +1046,13 @@
         if (p.gap != null) batch.lastGap = String(p.gap);
         if (p.selectionOutput != null) batch.lastSelection = String(p.selectionOutput);
         batch.count += 1;
+        batch.steps.push({
+          index: index,
+          gap: p.gap == null ? null : String(p.gap),
+          selectionOutput: p.selectionOutput == null ? null : String(p.selectionOutput),
+          durationMs: Math.max(0, Number(event.durationMs) || 0),
+          elapsedMs: Math.max(0, Number(event.elapsedMs) || 0),
+        });
         if (p.day != null) batch.lastDay = String(p.day);
         if (batch.count >= 128) this._flushGateSweep();
       } else if (event.kind === 'gate-ready') {
@@ -1033,6 +1083,7 @@
           lastGap: batch.lastGap,
           lastDay: batch.lastDay,
           lastSelection: batch.lastSelection,
+          steps: batch.steps.slice(),
         },
       });
       this._liveGateBatch = null;
@@ -1444,6 +1495,86 @@
       return node;
     }
 
+    _liveGateStepRow(step) {
+      const event = {
+        kind: 'gate-gap-finished',
+        durationMs: step && step.durationMs,
+        payload: {
+          signedIndex: step && step.index,
+          gap: step && step.gap,
+          selectionOutput: step && step.selectionOutput,
+        },
+      };
+      const li = doc.createElement('li');
+      li.className = 'live-gate-step';
+      li.dataset.kind = 'gate-gap-finished';
+      li.append(this._liveIcon(event));
+      const copy = doc.createElement('span');
+      copy.className = 'live-row-copy';
+      const label = doc.createElement('span');
+      label.className = 'live-row-label';
+      label.textContent = this._term('gateGap') + ' ' + String(step && step.index != null ? step.index : '');
+      const value = doc.createElement('span');
+      value.className = 'live-row-value';
+      const values = [];
+      if (step && step.gap != null) values.push('Δ=' + exactDisplay(step.gap));
+      if (step && step.selectionOutput != null) values.push('→ ' + exactDisplay(step.selectionOutput));
+      value.textContent = values.join(' · ');
+      if (!value.textContent) value.hidden = true;
+      copy.append(label, value);
+      const time = doc.createElement('small');
+      time.className = 'live-time';
+      time.textContent = this._liveDurationText(step && step.durationMs, true);
+      li.append(copy, time);
+      return li;
+    }
+
+    _appendGateRange(target, event) {
+      const p = event && event.payload || {};
+      const steps = safeArray(p.steps);
+      const wrapper = doc.createElement('li');
+      wrapper.className = 'live-gate-range-item';
+      const details = doc.createElement('details');
+      details.className = 'live-gate-range';
+      const summary = doc.createElement('summary');
+      summary.append(this._liveIcon(event));
+      const copy = doc.createElement('span');
+      copy.className = 'live-row-copy';
+      const label = doc.createElement('span');
+      label.className = 'live-row-label';
+      label.textContent = this._liveEventLabel(event);
+      const value = doc.createElement('span');
+      value.className = 'live-row-value';
+      value.textContent = this._livePayloadSummary(event);
+      if (!value.textContent) value.hidden = true;
+      copy.append(label, value);
+      const time = doc.createElement('small');
+      time.className = 'live-time';
+      time.textContent = this._liveTimeText(event);
+      summary.append(copy, time);
+      const list = doc.createElement('ol');
+      list.className = 'live-gate-steps';
+      list.hidden = true;
+      let populated = false;
+      const populate = () => {
+        if (populated) return;
+        populated = true;
+        for (const step of steps) list.append(this._liveGateStepRow(step));
+      };
+      details.addEventListener('toggle', () => {
+        if (details.open) {
+          populate();
+          list.hidden = false;
+        } else {
+          list.hidden = true;
+        }
+      });
+      details.append(summary, list);
+      wrapper.append(details);
+      target.list.append(wrapper);
+      return true;
+    }
+
     _appendLiveRow(event) {
       const key = this._liveGroupKey(event);
       const kind = String(event && event.kind || '');
@@ -1471,6 +1602,7 @@
         target.totalMs += durationMs;
         target.count.textContent = this._liveBadgeText(target);
       }
+      if (kind === 'gate-run') return this._appendGateRange(target, event);
       const li = doc.createElement('li');
       li.className = 'live-row';
       li.dataset.kind = String(event.kind);
