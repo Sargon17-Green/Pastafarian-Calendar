@@ -121,6 +121,7 @@
       this._liveRenderQueued = false;
       this._liveLastGroupKey = null;
       this._livePhaseKey = null;
+      this._liveRenderedLocale = null;
       this._readySettled = false;
       this.ready = new Promise((resolve) => { this._resolveReady = resolve; });
 
@@ -927,6 +928,7 @@
       this._liveRenderQueued = false;
       this._liveLastGroupKey = null;
       this._livePhaseKey = null;
+      this._liveRenderedLocale = null;
       if (this._els && this._els.pane) this._els.pane.replaceChildren();
       if (this._els && this._els.nav) this._els.nav.replaceChildren();
     }
@@ -1411,6 +1413,7 @@
         this._appendLiveRow(this._liveEntries[this._liveRenderedCount]);
         this._liveRenderedCount += 1;
       }
+      this._liveRenderedLocale = this._locale ? this._locale.code : null;
       if (this._liveState === 'complete' && this._liveLastGroupKey) {
         const last = this._liveGroupNodes.get(this._liveLastGroupKey);
         if (last) last.details.open = true;
@@ -1529,8 +1532,16 @@
       if (!this._els) return;
       this._applyLocaleLabelsOnly();
       if (this._liveEntries.length) {
-        this._prepareLiveLog(true);
-        this._drainLiveRows();
+        const localeCode = this._locale ? this._locale.code : null;
+        const rendered = this._liveRenderedCount === this._liveEntries.length
+          && this._liveRenderedLocale === localeCode
+          && this._els.pane.querySelector('.live-row');
+        if (rendered) {
+          this._prepareLiveLog(false);
+        } else {
+          this._prepareLiveLog(true);
+          this._drainLiveRows();
+        }
         return;
       }
       if (!this._trace) {
