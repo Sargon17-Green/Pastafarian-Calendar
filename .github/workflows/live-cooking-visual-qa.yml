@@ -239,13 +239,13 @@ jobs:
 
             const firstGroup=page.locator('pastafari-date').locator('pastafari-cooking').locator('.live-group').first();
             const wasOpen=await firstGroup.evaluate(n=>n.open);
-            await firstGroup.locator('summary').click();
+            await firstGroup.locator(':scope > summary').click();
             const nowOpen=await firstGroup.evaluate(n=>n.open);
             assert(wasOpen!==nowOpen,'phase group is not collapsible');
             const firstSauce=page.locator('pastafari-date').locator('pastafari-cooking').locator('.live-sauce').first();
             await firstSauce.evaluate(n=>{ const parent=n.closest('.live-group'); if(parent) parent.open=true; });
             const sauceWas=await firstSauce.evaluate(n=>n.open);
-            await firstSauce.locator('summary').click();
+            await firstSauce.locator(':scope > summary').click();
             const sauceNow=await firstSauce.evaluate(n=>n.open);
             assert(sauceWas!==sauceNow,'Sauce subgroup is not collapsible');
             await page.screenshot({path:path.join(out,'retained_log_collapsed_desktop.png'),fullPage:false});
