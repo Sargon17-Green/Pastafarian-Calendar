@@ -1580,6 +1580,8 @@
       this._els.megillahQuote.textContent = guide.quote;
       this._els.megillahSourceLink.textContent = guide.source;
       this._els.megillahSourceLink.setAttribute('href', canonicalUrl);
+      this._els.megillahSourceLink.setAttribute('target', '_blank');
+      this._els.megillahSourceLink.setAttribute('rel', 'noopener noreferrer');
       if (this._els.stageGuide) this._els.stageGuide.dataset.stage = key;
     }
 
