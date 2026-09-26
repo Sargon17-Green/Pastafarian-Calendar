@@ -433,6 +433,10 @@
           .nav-button:hover,
           .retry-button:hover,
           .dialog-actions button:hover { background: #fff4ee; }
+          .dialog-actions .primary:hover {
+            background: #49160e;
+            color: white;
+          }
 
           .calendar {
             position: relative;
