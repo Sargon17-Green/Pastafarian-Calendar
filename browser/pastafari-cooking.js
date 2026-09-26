@@ -1597,7 +1597,7 @@
       if (!guideTable || !canonicalUrl) return null;
       const key = guideTable[stageKey] ? stageKey : 'inputs';
       const guide = guideTable[key];
-      const sourceUrl = canonicalUrl + '#:~:text=' + encodeURIComponent(guide.quote);
+      const sourceUrl = canonicalUrl + '#:~:text=' + encodeURIComponent(guide.quote).replace(/-/g, '%2D');
       return { key, guide, canonicalUrl, sourceUrl };
     }
 
