@@ -8,7 +8,7 @@ Merkingarbær almenn orð eru þýdd eftir merkingu. Heilir orðasambandsliðir,
 
 `canonicalIndex` er eina staðlaða röðunin. Textastrengir eru birtingargögn og mega aldrei ráða `rank`, `unrank`, vali, merkingarlegum skyndiminnislykli eða samsetningaröð.
 
-## Kótilettur
+## Kótelettur
 
 1. brons
 2. refur
