@@ -1153,18 +1153,16 @@
 
     _liveGroupKey(event) {
       const kind = String(event && event.kind || '');
+      if (kind === 'gate-run' || kind.startsWith('gate-')) return 'gates';
       if (kind === 'run-start' || kind === 'conversion-cache-hit') this._livePhaseKey = 'inputs';
-      else if (kind === 'year-resolution-start') this._livePhaseKey = 'year-walk';
+      else if (kind === 'year-resolution-start' || kind.startsWith('year-')) this._livePhaseKey = 'year-walk';
       else if (kind === 'structure-start') this._livePhaseKey = 'structure-sauce';
       else if (kind === 'final-result-ready' || kind === 'semantic-execution-finished' || kind === 'trace-ready') {
         this._livePhaseKey = 'result';
       } else if (kind === 'view-start' || kind.startsWith('view-')) {
         this._livePhaseKey = 'position';
       }
-      if (!this._livePhaseKey) {
-        if (kind.startsWith('year-') || kind.startsWith('gate-')) this._livePhaseKey = 'year-walk';
-        else this._livePhaseKey = 'inputs';
-      }
+      if (!this._livePhaseKey) this._livePhaseKey = 'inputs';
       return this._livePhaseKey;
     }
 
@@ -1449,8 +1447,7 @@
     _appendLiveRow(event) {
       const key = this._liveGroupKey(event);
       const kind = String(event && event.kind || '');
-      const markerOnly = kind === 'run-start'
-        || kind === 'year-resolution-start'
+      const markerOnly = kind === 'year-resolution-start'
         || kind === 'structure-start'
         || kind === 'view-start'
         || kind === 'gate-gap-start'
