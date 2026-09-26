@@ -8382,11 +8382,25 @@ function stage54ResolveTargetYear(calculationDay, targetDay, registry, context, 
     targetDay,
     (year) => {
       const next = source.nextYear(year);
+      emitCookingProgress(context, 'year-walk-step', {
+        direction: 'next',
+        fromNumber: year.number,
+        toNumber: next.number,
+        openDay: next.openDay,
+        closeDay: next.closeDay
+      });
       if (yearMemory) yearMemory.rememberAuthoritative(calculationDay, next, walkLineage);
       return next;
     },
     (year) => {
       const previous = source.previousYear(year);
+      emitCookingProgress(context, 'year-walk-step', {
+        direction: 'previous',
+        fromNumber: year.number,
+        toNumber: previous.number,
+        openDay: previous.openDay,
+        closeDay: previous.closeDay
+      });
       if (yearMemory) yearMemory.rememberAuthoritative(calculationDay, previous, walkLineage);
       return previous;
     }
