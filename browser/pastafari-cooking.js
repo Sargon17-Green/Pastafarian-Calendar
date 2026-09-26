@@ -999,6 +999,7 @@
       if (event.kind === 'selection-result' && p.output != null) batch.lastSelection = String(p.output);
       if (event.kind === 'gate-gap-finished') {
         if (p.gap != null) batch.lastGap = String(p.gap);
+        if (p.selectionOutput != null) batch.lastSelection = String(p.selectionOutput);
         batch.count += 1;
         if (p.day != null) batch.lastDay = String(p.day);
         if (batch.count >= 128) this._flushGateSweep();
