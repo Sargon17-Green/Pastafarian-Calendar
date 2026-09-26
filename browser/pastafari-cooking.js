@@ -1509,6 +1509,7 @@
           return 'selection';
         case 'selection-result': {
           const label = String(p.label || '');
+          if (label === 'gate-gap') return 'gates';
           if (label === 'YEAR_5000-semantic') return 'years';
           if (label === 'cutlet-count' || label === 'cutlet-partition-raw'
               || label === 'cutlet-partition-semantic' || label === 'cutlet-names-distinct-rank') return 'cutlets';
@@ -1634,8 +1635,13 @@
           return this._term('selection');
         case 'selection-result': {
           const label = String(p.label || '');
+          if (label === 'gate-gap') {
+            const gateIndex = p.gateIndex != null ? p.gateIndex : p.signedIndex;
+            return this._term('gateGap') + (gateIndex == null ? '' : ' ' + number(gateIndex));
+          }
           if (label === 'cutlet-count') return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
-          if (label === 'cutlet-partition-raw' || label === 'cutlet-partition-semantic') return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
+          if (label === 'cutlet-partition-raw') return this._chapterTitle('cutlets') + ' · ' + this._term('selection');
+          if (label === 'cutlet-partition-semantic') return this._chapterTitle('cutlets') + ' · ' + this._t('cooking.live.names');
           if (label === 'cutlet-names-distinct-rank') return this._chapterTitle('cutlets');
           if (label === 'month-count') return this._chapterTitle('months') + ' · ' + this._t('cooking.live.lengths');
           if (label === 'month-lengths') return this._term('weaving');
