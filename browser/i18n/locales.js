@@ -118,9 +118,9 @@
    * Every calendar-name key below is an exact source string from the CURRENT
    * JavaScript+Interlingue SourceLanguageCatalog. The pinned old locale files
    * are translation provenance only; their old positional arrays/identifiers
-   * are not used as lookup keys. Semantically changed identities such as
-   * Lagash, Palgurash, papirus, Karshumav, leopard, pech, lampe and Susa are explicit
-   * translations of the current meaning/spelling.
+   * are not used as lookup keys. Explicitly adopted language forms govern where
+   * the corpus admits them; other locale strings remain presentation data and
+   * do not become canonical merely by being present here.
    */
   const rows = [
     {
@@ -302,7 +302,7 @@
             "pense": "pense",
             "quar partes de nin": "quar partes de nin",
             "Palgurash": "Palgurash",
-            "papirus": "papirus",
+            "cyperus": "cyperus",
             "grappe": "grappe",
             "scorpion": "scorpion",
             "cindre": "cindre",
@@ -542,7 +542,7 @@
             "pense": "Thought",
             "quar partes de nin": "Four Parts of Nine",
             "Palgurash": "Palgursh",
-            "papirus": "Papyrus",
+            "cyperus": "flatsedge",
             "grappe": "Cluster",
             "scorpion": "Scorpion",
             "cindre": "Ash",
@@ -782,7 +782,7 @@
             "pense": "\u05DE\u05D7\u05E9\u05D1\u05D4",
             "quar partes de nin": "\u05D0\u05E8\u05D1\u05E2\u05D4 \u05D7\u05DC\u05E7\u05D9\u05DD \u05DE\u05EA\u05E9\u05E2\u05D4",
             "Palgurash": "\u05E4\u05B7\u05BC\u05DC\u05B0\u05D2\u05BC\u05D5\u05BC\u05E8\u05B0\u05E9\u05C1",
-            "papirus": "\u05E4\u05E4\u05D9\u05E8\u05D5\u05E1",
+            "cyperus": "\u05D2\u05D5\u05DE\u05D0",
             "grappe": "\u05D0\u05E9\u05DB\u05D5\u05DC",
             "scorpion": "\u05E2\u05E7\u05E8\u05D1",
             "cindre": "\u05D0\u05E4\u05E8",
@@ -1022,7 +1022,7 @@
             "pense": "فكرة",
             "quar partes de nin": "أربعة أجزاء من تسعة",
             "Palgurash": "بالغورش",
-            "papirus": "بردي",
+            "cyperus": "السعد",
             "grappe": "عنقود",
             "scorpion": "عقرب",
             "cindre": "رماد",
@@ -1262,7 +1262,7 @@
             "pense": "Мысль",
             "quar partes de nin": "Четыре части из девяти",
             "Palgurash": "Палгурш",
-            "papirus": "Папирус",
+            "cyperus": "Папирус",
             "grappe": "Гроздь",
             "scorpion": "Скорпион",
             "cindre": "Пепел",
@@ -1502,7 +1502,7 @@
             "pense": "Pensée",
             "quar partes de nin": "Quatre parties de neuf",
             "Palgurash": "Palgursh",
-            "papirus": "Papyrus",
+            "cyperus": "Papyrus",
             "grappe": "Grappe",
             "scorpion": "Scorpion",
             "cindre": "Cendre",
@@ -1742,7 +1742,7 @@
             "pense": "Gedanke",
             "quar partes de nin": "Vier Teile von Neun",
             "Palgurash": "Palgursh",
-            "papirus": "Papyrus",
+            "cyperus": "Zypergras",
             "grappe": "Traube",
             "scorpion": "Skorpion",
             "cindre": "Asche",
@@ -1982,7 +1982,7 @@
             "pense": "Pensamiento",
             "quar partes de nin": "Cuatro partes de nueve",
             "Palgurash": "Palgursh",
-            "papirus": "Papiro",
+            "cyperus": "juncia",
             "grappe": "Racimo",
             "scorpion": "Escorpión",
             "cindre": "Ceniza",
@@ -2222,7 +2222,7 @@
             "pense": "Pensiero",
             "quar partes de nin": "Quattro parti di nove",
             "Palgurash": "Palgursh",
-            "papirus": "Papiro",
+            "cyperus": "cipero",
             "grappe": "Grappolo",
             "scorpion": "Scorpione",
             "cindre": "Cenere",
@@ -2462,7 +2462,7 @@
             "pense": "Myšlenka",
             "quar partes de nin": "Čtyři části z devíti",
             "Palgurash": "Palgursh",
-            "papirus": "Papyrus",
+            "cyperus": "šáchor",
             "grappe": "Hrozen",
             "scorpion": "Štír",
             "cindre": "Popel",

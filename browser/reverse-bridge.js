@@ -6,7 +6,7 @@
   const axis = ns.dateAxis;
 
   const CURRENT_CUTLETS = Object.freeze([
-    'bronze','vulpe','ren','Lagash','pense','quar partes de nin','Palgurash','papirus','grappe',
+    'bronze','vulpe','ren','Lagash','pense','quar partes de nin','Palgurash','cyperus','grappe',
     'scorpion','cindre','frument','fluvie','rise','Akkad','corn','li vacui vase',
   ]);
   const REVERSE_CUTLETS = Object.freeze([
