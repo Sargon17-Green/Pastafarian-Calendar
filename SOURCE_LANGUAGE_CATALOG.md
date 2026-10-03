@@ -13,7 +13,7 @@ ni'o lo ti liste cu se tcita `1.0.0-stage01`. lo `canonicalIndex` cu stodi gi'e 
 | 5 | lo se pensi |
 | 6 | vo lo so pagbu |
 | 7 | .palgurac. |
-| 8 | misryplespa |
+| 8 | ciprusa |
 | 9 | lo gunma |
 | 10 | lo jukni be la .skorpiones. |
 | 11 | lo festi be lo fagri |

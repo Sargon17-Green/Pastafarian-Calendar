@@ -15,7 +15,7 @@ public final class SourceLanguageCatalog {
         new Entry(5, "lo se pensi"),
         new Entry(6, "vo lo so pagbu"),
         new Entry(7, ".palgurac."),
-        new Entry(8, "misryplespa"),
+        new Entry(8, "ciprusa"),
         new Entry(9, "lo gunma"),
         new Entry(10, "lo jukni be la .skorpiones."),
         new Entry(11, "lo festi be lo fagri"),
