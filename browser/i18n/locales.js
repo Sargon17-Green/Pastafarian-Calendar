@@ -22,12 +22,12 @@
     });
   }
 
-  const MEGILLAH_CANONICAL_URL = 'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html';
+  const MEGILLAH_PUBLIC_SOURCE_URL = 'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html';
 
   /*
-   * Canonical live-stage quotations copied verbatim from the Hebrew Scroll as
-   * currently published by Blogger. Source audit: the current Blogger JSON/Atom
-   * feed for this post, not an older preserved draft or adaptation.
+   * Exact live-stage quotations copied verbatim from the inspected public Hebrew
+   * Scroll source. The quotation text is provenance-preserved; the Blogger URL is
+   * a source location, not semantic authority.
    * https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html
    * The Hebrew quotations remain unchanged in every UI locale.
    */
@@ -2532,7 +2532,9 @@
     provenance: 'current-source-text+pinned-d5cfe77-browser-ui-translations;no-positional-remap',
     defaultLocale: 'ie',
     locales,
-    megillahCanonicalUrl: MEGILLAH_CANONICAL_URL,
+    megillahSourceUrl: MEGILLAH_PUBLIC_SOURCE_URL,
+    // Compatibility alias only; the URL is provenance/navigation, not canon.
+    megillahCanonicalUrl: MEGILLAH_PUBLIC_SOURCE_URL,
     megillahStageGuide,
   });
 })(typeof globalThis === 'object' ? globalThis : this);
