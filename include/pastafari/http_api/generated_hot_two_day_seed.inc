@@ -1,7 +1,7 @@
-// PASTAFARI_HOT_SEED_BASE_DAY=739879
+// PASTAFARI_HOT_SEED_BASE_DAY=739892
 // PASTAFARI_HOT_SEED_GENERATION=4
 // Quattuor sepulcra: hodie/cras pro die Veneris currenti et proximo.
-{true,739879LL,739879LL,"5000",13,"flumen","351",7,"tres partes ex quinque","73"},
-{true,739879LL,739880LL,"5000",13,"flumen","352",15,"ceratonia","70"},
-{true,739880LL,739880LL,"5000",7,"Palguras","352",22,"stella","14"},
-{true,739880LL,739881LL,"5000",7,"Palguras","353",36,"Susa","9"},
+{true,739892LL,739892LL,"5000",17,"urna vacua","364",20,"puteus","68"},
+{true,739892LL,739893LL,"5000",17,"urna vacua","365",4,"invidia","74"},
+{true,739893LL,739893LL,"5000",15,"Accad","365",10,"stannum","48"},
+{true,739893LL,739894LL,"5000",15,"Accad","366",5,"Eridu","50"},
