@@ -19,7 +19,7 @@ Dla wymyślonych nazw przyjęto zasadę: spółgłoski źródłowe zachowują na
 | 5 | myśl |
 | 6 | cztery części z dziewięciu |
 | 7 | Palgurasz |
-| 8 | papirus |
+| 8 | cibora |
 | 9 | kiść |
 | 10 | skorpion |
 | 11 | popiół |
