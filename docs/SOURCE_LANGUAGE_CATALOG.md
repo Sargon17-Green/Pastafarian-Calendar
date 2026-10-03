@@ -27,7 +27,7 @@ Hindi kailanman binabaligtad ang daloy upang gawing semantic input ang localized
 5. Kaisipan
 6. Apat na bahagi sa siyam
 7. Palgurash
-8. Papiro
+8. muthâ
 9. Kumpol
 10. Alakdan
 11. Abo

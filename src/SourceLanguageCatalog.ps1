@@ -11,7 +11,7 @@ $script:CutletSourceNames = @(
     'Kaisipan',
     'Apat na bahagi sa siyam',
     'Palgurash',
-    'Papiro',
+    'muthâ',
     'Kumpol',
     'Alakdan',
     'Abo',
