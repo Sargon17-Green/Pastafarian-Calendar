@@ -35,7 +35,7 @@ _CUTLET_TEXTS = (
     "Düşünce",
     "Dokuz parçadan dördü",
     "Palguraş",
-    "Papirüs bitkisi",
+    "topalak",
     "Salkım",
     "Akrep",
     "Kül",

@@ -40,3 +40,9 @@ Katalog sürümü `1.3.1` → `1.3.2` olarak yükseltilmiştir.
 - Stage 55 audit: temiz HEAD baseline ile karşılaştırıldı; yeni regresyon yok
 - Stage 56 saved-sum düzeltme testi: temiz HEAD baseline ile karşılaştırıldı; yeni regresyon yok
 - Hızlandırma yamaları 27-33 regresyon testleri: temiz HEAD baseline ile karşılaştırıldı; yeni regresyon yok
+
+## 2026-09-27 tarihli son proje sahibi kararı
+
+- Köfte 8: Papirüs bitkisi → topalak
+
+Bu sonraki nihai karar yalnızca yukarıda kaydedilen köfte-8 hedefinin yerini alır; 2026-09-13 tarihli diğer düzeltmeler tarihsel kayıt olarak korunur. Yukarıdaki Scroll üstünlüğü ifadesi de 2026-09-13 düzeltmesinin tarihsel bağlamı olarak korunur; güncel kanonik otorite nihai korpustur.

@@ -26,7 +26,7 @@ Geçerli katalog sürümü: `1.3.2`.
 | 5 | Düşünce |
 | 6 | Dokuz parçadan dördü |
 | 7 | Palguraş |
-| 8 | Papirüs bitkisi |
+| 8 | topalak |
 | 9 | Salkım |
 | 10 | Akrep |
 | 11 | Kül |
