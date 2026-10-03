@@ -23,7 +23,7 @@ Når den kjeldeortografiske forma blir lesen bokstavleg for slike oppdikta namn,
 | 5 | tanke |
 | 6 | fire delar av ni |
 | 7 | Palgurash |
-| 8 | papyrus |
+| 8 | skjermsivaks |
 | 9 | klase |
 | 10 | skorpion |
 | 11 | oske |

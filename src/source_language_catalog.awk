@@ -10,7 +10,7 @@ function catalog_init(    i) {
     CUTLET_TEXT[5]="tanke"
     CUTLET_TEXT[6]="fire delar av ni"
     CUTLET_TEXT[7]="Palgurash"
-    CUTLET_TEXT[8]="papyrus"
+    CUTLET_TEXT[8]="skjermsivaks"
     CUTLET_TEXT[9]="klase"
     CUTLET_TEXT[10]="skorpion"
     CUTLET_TEXT[11]="oske"
