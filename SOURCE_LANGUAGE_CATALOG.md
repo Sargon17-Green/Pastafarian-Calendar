@@ -20,7 +20,7 @@ La traduko-regulo esas ca:
 | 5 | penso | traduko |
 | 6 | quar de non egala parti | traduko |
 | 7 | Palgurash | translitero |
-| 8 | papiriero | traduko |
+| 8 | cipero | traduko |
 | 9 | grapo | traduko |
 | 10 | skorpiono | traduko |
 | 11 | cindro | traduko |
