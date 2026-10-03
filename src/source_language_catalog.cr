@@ -14,7 +14,7 @@ module PastafarianCalendar
       Entry.new(5, "વિચાર"),
       Entry.new(6, "નવમાંથી ચાર ભાગ"),
       Entry.new(7, "ફલ્ગુરશ"),
-      Entry.new(8, "પેપિરસ"),
+      Entry.new(8, "મોથ"),
       Entry.new(9, "ગુચ્છ"),
       Entry.new(10, "વીંછી"),
       Entry.new(11, "રાખ"),
