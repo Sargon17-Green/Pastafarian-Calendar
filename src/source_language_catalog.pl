@@ -17,7 +17,7 @@ cutlet_source_name(4,  'Lagash').
 cutlet_source_name(5,  'pensamento').
 cutlet_source_name(6,  'catro partes de nove').
 cutlet_source_name(7,  'Palgurash').
-cutlet_source_name(8,  'papiro').
+cutlet_source_name(8,  'cana de azucre').
 cutlet_source_name(9,  'acio').
 cutlet_source_name(10, 'escorpión').
 cutlet_source_name(11, 'cinza').
