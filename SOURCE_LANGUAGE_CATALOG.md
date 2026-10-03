@@ -21,7 +21,7 @@ A ordem normativa é exclusivamente o `canonicalIndex`. A comparação alfabéti
 | 5 | pensamento |
 | 6 | quatro partes de nove |
 | 7 | Palgurash |
-| 8 | papiro |
+| 8 | junça |
 | 9 | aglomerado |
 | 10 | escorpião |
 | 11 | cinza |

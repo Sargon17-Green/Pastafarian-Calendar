@@ -37,7 +37,7 @@ begin
   CutletNames[5] := 'pensamento';
   CutletNames[6] := 'quatro partes de nove';
   CutletNames[7] := 'Palgurash';
-  CutletNames[8] := 'papiro';
+  CutletNames[8] := 'junça';
   CutletNames[9] := 'aglomerado';
   CutletNames[10] := 'escorpião';
   CutletNames[11] := 'cinza';
