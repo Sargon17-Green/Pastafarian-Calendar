@@ -4,7 +4,7 @@ CUTLET_SOURCE_CATALOG <- data.frame(
   canonicalIndex = 1:17,
   text = c(
     'bronze', 'guineu', 'ronyó', 'Lagaix', 'pensament', 'quatre parts de nou',
-    'Palguraix', 'papir', 'ramell', 'escorpí', 'cendra', 'blat', 'riu',
+    'Palguraix', 'jonça', 'ramell', 'escorpí', 'cendra', 'blat', 'riu',
     'riure', 'Accad', 'banya', 'la gerra buida'
   ),
   stringsAsFactors = FALSE
