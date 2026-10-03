@@ -10,7 +10,7 @@ procedure canonicalCutletKannada(canonicalIndex)
         5: return "ಚಿಂತನೆ"
         6: return "ಒಂಬತ್ತರಲ್ಲಿ ನಾಲ್ಕು ಭಾಗಗಳು"
         7: return "ಫಲ್ಗುರಶ್"
-        8: return "ಪ್ಯಾಪಿರಸ್"
+        8: return "ತುಂಗೆಹುಲ್ಲು"
         9: return "ಗೊಂಚಲು"
         10: return "ಚೇಳು"
         11: return "ಬೂದಿ"
