@@ -28,7 +28,7 @@ private def cutletTexts : Array String := #[
   "tanke",
   "fire deler av ni",
   "Palgurasj",
-  "papyrus",
+  "skjermsivaks",
   "klase",
   "skorpion",
   "aske",
