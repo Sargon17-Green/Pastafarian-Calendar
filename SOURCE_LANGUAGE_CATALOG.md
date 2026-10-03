@@ -17,7 +17,7 @@ Nazivi s običnim leksičkim značenjem prevedeni su po značenju. Vlastita imen
 | 5 | misao |
 | 6 | četiri dijela od devet |
 | 7 | Palguraš |
-| 8 | papirus |
+| 8 | šilj |
 | 9 | grozd |
 | 10 | škorpion |
 | 11 | pepeo |

@@ -22,7 +22,7 @@ define
       entry(canonicalIndex:5  text:"misao")
       entry(canonicalIndex:6  text:"četiri dijela od devet")
       entry(canonicalIndex:7  text:"Palguraš")
-      entry(canonicalIndex:8  text:"papirus")
+      entry(canonicalIndex:8  text:"šilj")
       entry(canonicalIndex:9  text:"grozd")
       entry(canonicalIndex:10 text:"škorpion")
       entry(canonicalIndex:11 text:"pepeo")
