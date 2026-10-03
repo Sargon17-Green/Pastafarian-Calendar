@@ -14,7 +14,7 @@
    "tanke"
    "fire dele af ni"
    "Palgurash"
-   "papyrusplante"
+   "fladaks"
    "klase"
    "skorpion"
    "aske"
