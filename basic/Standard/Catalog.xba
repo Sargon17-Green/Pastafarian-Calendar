@@ -22,7 +22,7 @@ Public Sub CatalogInitialize()
     cutletNames(5) = "ਵਿਚਾਰ"
     cutletNames(6) = "ਨੌਂ ਵਿੱਚੋਂ ਚਾਰ ਹਿੱਸੇ"
     cutletNames(7) = "ਪਲਗੂਰਸ਼"
-    cutletNames(8) = "ਪੈਪੀਰਸ ਸੇਜ"
+    cutletNames(8) = "ਮੋਥਾ"
     cutletNames(9) = "ਗੁੱਛਾ"
     cutletNames(10) = "ਬਿਛੂ"
     cutletNames(11) = "ਰਾਖ"

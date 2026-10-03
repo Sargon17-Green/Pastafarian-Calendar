@@ -13,3 +13,10 @@
 ਸਾਰੇ `canonicalIndex`, ਉਹਨਾਂ ਦਾ ਕ੍ਰਮ ਅਤੇ calendar mathematics ਬਦਲੇ ਨਹੀਂ ਗਏ।
 Regression checks ਇਨ੍ਹਾਂ ਚਾਰ canonical indices ਲਈ ਜੋੜੇ ਗਏ ਹਨ।
 ਇਸ ਸੋਧ ਨਾਲ project stage ਅੱਗੇ ਨਹੀਂ ਵਧਾਇਆ ਗਿਆ।
+
+
+## 2026-09-27 owner adjudication
+
+- ਕਟਲੈਟ canonicalIndex 8: ਪੈਪੀਰਸ ਸੇਜ → ਮੋਥਾ
+
+This later final owner adjudication supersedes only the cutlet-8 target recorded above. The other corrections remain part of the historical 2026-09 correction record. The statement above naming the Hebrew Scroll as supreme authority is likewise preserved only as historical context; current canonical authority is the final corpus.
