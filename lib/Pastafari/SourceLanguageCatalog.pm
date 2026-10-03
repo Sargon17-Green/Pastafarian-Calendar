@@ -21,7 +21,7 @@ my @CUTLETS = (
     { canonicalIndex => 5,  source => '思想' },
     { canonicalIndex => 6,  source => '九份中的四份' },
     { canonicalIndex => 7,  source => '帕爾古拉什' },
-    { canonicalIndex => 8,  source => '紙莎草' },
+    { canonicalIndex => 8,  source => '莎草' },
     { canonicalIndex => 9,  source => '簇' },
     { canonicalIndex => 10, source => '蠍子' },
     { canonicalIndex => 11, source => '灰燼' },
