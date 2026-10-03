@@ -13,7 +13,7 @@ object SourceLanguageCatalog {
     CanonicalName(5, "pensiero"),
     CanonicalName(6, "quattro parti di nove"),
     CanonicalName(7, "Palgurash"),
-    CanonicalName(8, "papiro"),
+    CanonicalName(8, "cipero"),
     CanonicalName(9, "grappolo"),
     CanonicalName(10, "scorpione"),
     CanonicalName(11, "cenere"),
