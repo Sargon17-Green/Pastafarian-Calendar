@@ -25,7 +25,7 @@ För uppfunna ljudnamn används en fast translitterering. Konsonantordningen bev
 | 5 | tanke |
 | 6 | fyra delar av nio |
 | 7 | Palgurash |
-| 8 | papyrus |
+| 8 | papyrusar |
 | 9 | klase |
 | 10 | skorpion |
 | 11 | aska |

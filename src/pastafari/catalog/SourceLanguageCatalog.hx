@@ -22,7 +22,7 @@ class SourceLanguageCatalog {
         "tanke",
         "fyra delar av nio",
         "Palgurash",
-        "papyrus",
+        "papyrusar",
         "klase",
         "skorpion",
         "aska",
