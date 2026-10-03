@@ -19,7 +19,7 @@ final class SourceLanguageCatalog
         5 => 'pemikiran',
         6 => 'empat bahagian daripada sembilan',
         7 => 'Palgurasy',
-        8 => 'papirus',
+        8 => 'teki',
         9 => 'gugusan',
         10 => 'kala jengking',
         11 => 'abu',
