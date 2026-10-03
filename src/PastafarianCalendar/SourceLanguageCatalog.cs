@@ -18,7 +18,7 @@ public static class SourceLanguageCatalog
         new SourceNameEntry(5, "فِكْر"),
         new SourceNameEntry(6, "أَرْبَعَةُ أَجْزَاءٍ مِنْ تِسْعَةٍ"),
         new SourceNameEntry(7, "فَلْجُورَش"),
-        new SourceNameEntry(8, "بَرْدِيّ"),
+        new SourceNameEntry(8, "السُّعْد"),
         new SourceNameEntry(9, "عُنْقُود"),
         new SourceNameEntry(10, "عَقْرَب"),
         new SourceNameEntry(11, "رَمَاد"),
