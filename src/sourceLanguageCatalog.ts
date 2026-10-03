@@ -21,7 +21,7 @@ export const CUTLET_CATALOG = freezeEntries([
   { canonicalIndex: 5, text: "विचार", kind: "meaning" },
   { canonicalIndex: 6, text: "नऊपैकी चार भाग", kind: "meaning" },
   { canonicalIndex: 7, text: "पलगुरश", kind: "invented" },
-  { canonicalIndex: 8, text: "पपायरस सेज", kind: "meaning" },
+  { canonicalIndex: 8, text: "नागरमोथा", kind: "meaning" },
   { canonicalIndex: 9, text: "घड", kind: "meaning" },
   { canonicalIndex: 10, text: "विंचू", kind: "meaning" },
   { canonicalIndex: 11, text: "राख", kind: "meaning" },
