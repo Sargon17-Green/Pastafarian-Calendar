@@ -19,7 +19,7 @@ The two invented source strings in this catalog are frozen as `Palgurash` and `K
 | 5 | Thought |
 | 6 | Four Parts of Nine |
 | 7 | Palgurash |
-| 8 | Papyrus Sedge |
+| 8 | flatsedge |
 | 9 | Cluster |
 | 10 | Scorpion |
 | 11 | Ash |

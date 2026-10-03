@@ -14,7 +14,7 @@ module source_language_catalog
        'Thought', &
        'Four Parts of Nine', &
        'Palgurash', &
-       'Papyrus Sedge', &
+       'flatsedge', &
        'Cluster', &
        'Scorpion', &
        'Ash', &
