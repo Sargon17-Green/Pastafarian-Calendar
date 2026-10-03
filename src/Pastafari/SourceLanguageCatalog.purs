@@ -29,7 +29,7 @@ cutletCatalog =
   , { canonicalIndex: 5, sourceText: "विचार" }
   , { canonicalIndex: 6, sourceText: "नौमध्ये चार भाग" }
   , { canonicalIndex: 7, sourceText: "पल्गुराश" }
-  , { canonicalIndex: 8, sourceText: "पपाइरस" }
+  , { canonicalIndex: 8, sourceText: "मोथे" }
   , { canonicalIndex: 9, sourceText: "गुच्छा" }
   , { canonicalIndex: 10, sourceText: "बिच्छी" }
   , { canonicalIndex: 11, sourceText: "खरानी" }
