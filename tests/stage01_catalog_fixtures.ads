@@ -14,7 +14,7 @@ package Stage01_Catalog_Fixtures is
       5  => To_Unbounded_Wide_Wide_String ("ఆలోచన"),
       6  => To_Unbounded_Wide_Wide_String ("తొమ్మిదిలో నాలుగు భాగాలు"),
       7  => To_Unbounded_Wide_Wide_String ("పల్గూరాష్"),
-      8  => To_Unbounded_Wide_Wide_String ("పాపిరస్ సెడ్జ్"),
+      8  => To_Unbounded_Wide_Wide_String ("తుంగ"),
       9  => To_Unbounded_Wide_Wide_String ("గుత్తి"),
       10 => To_Unbounded_Wide_Wide_String ("తేలు"),
       11 => To_Unbounded_Wide_Wide_String ("బూడిద"),
