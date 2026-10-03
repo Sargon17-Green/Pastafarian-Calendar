@@ -18,7 +18,7 @@ defmodule PastafariCalendarElixirVietnamese.SourceLanguageCatalog do
     {5, "ý nghĩ"},
     {6, "bốn phần chín"},
     {7, "Palgurash"},
-    {8, "cói giấy"},
+    {8, "cói"},
     {9, "chùm"},
     {10, "bọ cạp"},
     {11, "tro"},

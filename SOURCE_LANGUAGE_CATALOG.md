@@ -17,7 +17,7 @@ Tên có nghĩa được dịch theo nghĩa. Tên địa danh cổ giữ dạng 
 | 5 | ý nghĩ |
 | 6 | bốn phần chín |
 | 7 | Palgurash |
-| 8 | cói giấy |
+| 8 | cói |
 | 9 | chùm |
 | 10 | bọ cạp |
 | 11 | tro |
