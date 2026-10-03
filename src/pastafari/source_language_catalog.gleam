@@ -18,7 +18,7 @@ pub fn cutlet_name(canonical_index: Int) -> String {
     5 -> "penso"
     6 -> "kvar partoj el naŭ"
     7 -> "Palguraŝ"
-    8 -> "papiruso"
+    8 -> "papiruscipero"
     9 -> "grapolo"
     10 -> "skorpio"
     11 -> "cindro"
