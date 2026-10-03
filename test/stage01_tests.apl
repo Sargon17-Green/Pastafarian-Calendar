@@ -184,7 +184,7 @@
   AssertEqual (⊂'Weizen') (⊂CutletNameByIndex 12) (⊂'Die Bedeutung Weizen ist wirklich deutsch übersetzt')
   AssertEqual (⊂'Drei Teile von Fünf') (⊂MonthNameByIndex 7) (⊂'Der Bruchname ist als deutscher Gesamtausdruck übersetzt')
   AssertEqual (⊂'Vier Teile von Neun') (⊂CutletNameByIndex 6) (⊂'Schnitzel-canonicalIndex 6 bewahrt die kanonische Bruchbedeutung')
-  AssertEqual (⊂'Papyrusstaude') (⊂CutletNameByIndex 8) (⊂'Schnitzel-canonicalIndex 8 bewahrt die kanonische Papyruspflanze')
+  AssertEqual (⊂'Zypergras') (⊂CutletNameByIndex 8) (⊂'Schnitzel-canonicalIndex 8 bewahrt die kanonische Papyruspflanze')
   AssertEqual (⊂'Cluster') (⊂CutletNameByIndex 9) (⊂'Schnitzel-canonicalIndex 9 bewahrt die kanonische allgemeine Clusterbedeutung')
   AssertEqual (⊂'Das leere Gefäß') (⊂CutletNameByIndex 17) (⊂'Schnitzel-canonicalIndex 17 bewahrt die kanonische Bedeutung des leeren Gefäßes')
   AssertEqual (⊂'Pech') (⊂MonthNameByIndex 30) (⊂'Monats-canonicalIndex 30 bewahrt die kanonische Pechbedeutung')
