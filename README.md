@@ -5,7 +5,7 @@ Expected base HEAD when prepared:
 
 Normative corrections:
 - cutlet canonical index 7: `Palgursh` -> `Palgurash`
-- month canonical index 8: `Karshumb` -> `Karshumab`
+- month canonical index 8: `Karshumb` -> `Karshumav`
 
 No canonical index, ordering, selection rule, calendar arithmetic, or public API shape is changed.
 
@@ -18,6 +18,6 @@ After copying into the branch, run:
 
 The existing `tests/run-tests.js` should also receive these two exact assertions when convenient:
 - `textByCanonicalIndex('cutlet', 7) === 'Palgurash'`
-- `textByCanonicalIndex('month', 8) === 'Karshumab'`
+- `textByCanonicalIndex('month', 8) === 'Karshumav'`
 
 This delta intentionally does not touch `.github`; the all-branch audit workflow is delivered separately.
