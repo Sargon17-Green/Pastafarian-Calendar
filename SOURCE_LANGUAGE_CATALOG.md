@@ -21,7 +21,7 @@ Ekspresyon fraksyon yo rete yon sèl non: `kat pati sou nèf` ak `twa pati sou s
 | 5 | panse |
 | 6 | kat pati sou nèf |
 | 7 | Palgourach |
-| 8 | papiris |
+| 8 | afyo |
 | 9 | grap |
 | 10 | eskòpyon |
 | 11 | sann |

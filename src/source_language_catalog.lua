@@ -11,7 +11,7 @@ local cutlets = {
     "panse",
     "kat pati sou nèf",
     "Palgourach",
-    "papiris",
+    "afyo",
     "grap",
     "eskòpyon",
     "sann",
