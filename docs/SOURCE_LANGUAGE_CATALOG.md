@@ -29,7 +29,7 @@ Uydurma və mənasız səs birləşmələrində hərf-səs uyğunluğu sabit sax
 | 5 | düşüncə |
 | 6 | doqquzun dörd hissəsi |
 | 7 | Palguraş |
-| 8 | papirus |
+| 8 | topalaq |
 | 9 | salxım |
 | 10 | əqrəb |
 | 11 | kül |

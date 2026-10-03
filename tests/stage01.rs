@@ -170,7 +170,7 @@ fn source_language_catalog_exact_strings_are_frozen() {
         "düşüncə",
         "doqquzun dörd hissəsi",
         "Palguraş",
-        "papirus",
+        "topalaq",
         "salxım",
         "əqrəb",
         "kül",

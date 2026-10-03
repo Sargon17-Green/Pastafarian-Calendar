@@ -14,7 +14,7 @@ pub const CUTLET_NAMES: [CatalogEntry; 17] = [
     CatalogEntry { canonical_index: 5, source_text: "düşüncə" },
     CatalogEntry { canonical_index: 6, source_text: "doqquzun dörd hissəsi" },
     CatalogEntry { canonical_index: 7, source_text: "Palguraş" },
-    CatalogEntry { canonical_index: 8, source_text: "papirus" },
+    CatalogEntry { canonical_index: 8, source_text: "topalaq" },
     CatalogEntry { canonical_index: 9, source_text: "salxım" },
     CatalogEntry { canonical_index: 10, source_text: "əqrəb" },
     CatalogEntry { canonical_index: 11, source_text: "kül" },
