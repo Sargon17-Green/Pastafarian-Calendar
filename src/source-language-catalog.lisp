@@ -16,7 +16,7 @@
    (make-catalog-entry 5 "doma" :semantic)
    (make-catalog-entry 6 "četras daļas no deviņām" :semantic)
    (make-catalog-entry 7 "Palguraš" :invented)
-   (make-catalog-entry 8 "papirusniedre" :semantic)
+   (make-catalog-entry 8 "dižmeldrs" :semantic)
    (make-catalog-entry 9 "ķekars" :semantic)
    (make-catalog-entry 10 "skorpions" :semantic)
    (make-catalog-entry 11 "pelni" :semantic)
