@@ -25,7 +25,7 @@ canonical semantics -> canonicalIndex -> اردو source string -> locale transl
 | 5 | خیال |
 | 6 | نو میں سے چار حصے |
 | 7 | پلگورش |
-| 8 | پیپرس |
+| 8 | سعد کوفی |
 | 9 | گچھا |
 | 10 | بچھو |
 | 11 | راکھ |
