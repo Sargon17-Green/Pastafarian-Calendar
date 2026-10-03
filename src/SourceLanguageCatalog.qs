@@ -17,7 +17,7 @@ namespace Pastafari.SourceLanguageCatalog {
             SourceName(5, "思考"),
             SourceName(6, "九つの部分のうち四つ"),
             SourceName(7, "パルグラシュ"),
-            SourceName(8, "パピルス"),
+            SourceName(8, "カヤツリグサ"),
             SourceName(9, "房"),
             SourceName(10, "蠍"),
             SourceName(11, "灰"),
