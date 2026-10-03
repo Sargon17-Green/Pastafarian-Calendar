@@ -11,7 +11,7 @@ my constant @CUTLET_SOURCE = (
     { canonicalIndex => 5,  text => 'mõte' },
     { canonicalIndex => 6,  text => 'neli osa üheksast' },
     { canonicalIndex => 7,  text => 'Palguraš' },
-    { canonicalIndex => 8,  text => 'papüürus' },
+    { canonicalIndex => 8,  text => 'lõikhein' },
     { canonicalIndex => 9,  text => 'kobar' },
     { canonicalIndex => 10, text => 'skorpion' },
     { canonicalIndex => 11, text => 'tuhk' },
