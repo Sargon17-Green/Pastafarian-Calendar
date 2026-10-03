@@ -16,7 +16,7 @@ const CUTLET_SOURCE_CATALOG = (
     SourceNameEntry(5, :thought, "aslela"),
     SourceNameEntry(6, :four_parts_of_nine, "apšala alẓilui"),
     SourceNameEntry(7, :palgurash, "palguraš"),
-    SourceNameEntry(8, :papyrus_sedge, "eḑkyala"),
+    SourceNameEntry(8, :papyrus_sedge, "oḑkyala"),
     SourceNameEntry(9, :cluster, "acyäla"),
     SourceNameEntry(10, :scorpion, "aggzaloubva"),
     SourceNameEntry(11, :ash, "ugçila ažxaloi"),

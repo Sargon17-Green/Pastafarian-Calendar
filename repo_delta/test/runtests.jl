@@ -24,7 +24,7 @@ using .NormativeOracle
         (5, :thought, "aslela"),
         (6, :four_parts_of_nine, "apšala alẓilui"),
         (7, :palgurash, "palguraš"),
-        (8, :papyrus_sedge, "eḑkyala"),
+        (8, :papyrus_sedge, "oḑkyala"),
         (9, :cluster, "acyäla"),
         (10, :scorpion, "aggzaloubva"),
         (11, :ash, "ugçila ažxaloi"),
