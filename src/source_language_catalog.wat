@@ -13,7 +13,7 @@
   (data (i32.const 4352) "Pensamiento\00")
   (data (i32.const 4416) "Cuatro partes de nueve\00")
   (data (i32.const 4480) "Palgurash\00")
-  (data (i32.const 4544) "Papiro\00")
+  (data (i32.const 4544) "juncia\00")
   (data (i32.const 4608) "Racimo\00")
   (data (i32.const 4672) "Escorpión\00")
   (data (i32.const 4736) "Ceniza\00")
