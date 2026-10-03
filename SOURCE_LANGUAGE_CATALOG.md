@@ -17,7 +17,7 @@ Merkingarbær almenn orð eru þýdd eftir merkingu. Heilir orðasambandsliðir,
 5. hugsun
 6. fjórir hlutar af níu
 7. Palgúrasj
-8. papýrusstör
+8. sveipsef
 9. klasi
 10. sporðdreki
 11. aska
