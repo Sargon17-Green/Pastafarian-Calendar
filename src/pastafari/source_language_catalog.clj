@@ -10,7 +10,7 @@
    {:canonical-index 5 :source "gedachte"}
    {:canonical-index 6 :source "vier delen van negen"}
    {:canonical-index 7 :source "Palgoerasj"}
-   {:canonical-index 8 :source "papyrusriet"}
+   {:canonical-index 8 :source "cypergras"}
    {:canonical-index 9 :source "tros"}
    {:canonical-index 10 :source "schorpioen"}
    {:canonical-index 11 :source "as"}

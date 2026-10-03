@@ -29,7 +29,7 @@ Deze transcriptieregel is alleen een presentatieregel. Zij kan geen `canonicalIn
 | 5 | gedachte |
 | 6 | vier delen van negen |
 | 7 | Palgoerasj |
-| 8 | papyrusriet |
+| 8 | cypergras |
 | 9 | tros |
 | 10 | schorpioen |
 | 11 | as |
