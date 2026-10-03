@@ -14,7 +14,7 @@ make-cutlet-source-names: func [/local out] [
         make object! [canonicalIndex: 5  text: copy "мисао"]
         make object! [canonicalIndex: 6  text: copy "четири дела од девет"]
         make object! [canonicalIndex: 7  text: copy "Палгураш"]
-        make object! [canonicalIndex: 8  text: copy "папирус"]
+        make object! [canonicalIndex: 8  text: copy "шиљ"]
         make object! [canonicalIndex: 9  text: copy "грозд"]
         make object! [canonicalIndex: 10 text: copy "шкорпион"]
         make object! [canonicalIndex: 11 text: copy "пепео"]
