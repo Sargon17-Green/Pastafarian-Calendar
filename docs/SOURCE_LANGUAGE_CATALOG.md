@@ -21,7 +21,7 @@ Ar gyfer enwau dyfeisiedig diystyr nad oes confensiwn safonol iddynt, defnyddir 
 | 5 | meddwl |
 | 6 | pedair rhan o naw |
 | 7 | Palgwrash |
-| 8 | papurfrwynen |
+| 8 | Ysnoden Fair |
 | 9 | clwstwr |
 | 10 | sgorpion |
 | 11 | lludw |

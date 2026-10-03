@@ -30,7 +30,7 @@ object SourceLanguageCatalog {
             CanonicalName(5, "meddwl"),
             CanonicalName(6, "pedair rhan o naw"),
             CanonicalName(7, "Palgwrash"),
-            CanonicalName(8, "papurfrwynen"),
+            CanonicalName(8, "Ysnoden Fair"),
             CanonicalName(9, "clwstwr"),
             CanonicalName(10, "sgorpion"),
             CanonicalName(11, "lludw"),
