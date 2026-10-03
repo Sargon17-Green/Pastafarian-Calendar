@@ -8,7 +8,7 @@ const CUTLETS = Object.freeze([
   Object.freeze({ canonicalIndex: 5, text: 'pense' }),
   Object.freeze({ canonicalIndex: 6, text: 'quar partes de nin' }),
   Object.freeze({ canonicalIndex: 7, text: 'Palgurash' }),
-  Object.freeze({ canonicalIndex: 8, text: 'papirus' }),
+  Object.freeze({ canonicalIndex: 8, text: 'cyperus' }),
   Object.freeze({ canonicalIndex: 9, text: 'grappe' }),
   Object.freeze({ canonicalIndex: 10, text: 'scorpion' }),
   Object.freeze({ canonicalIndex: 11, text: 'cindre' }),

@@ -157,8 +157,13 @@ assert.strictEqual(data.schemaVersion, 3);
 assert.strictEqual(data.defaultLocale, 'ie');
 assert(data.megillahStageGuide, 'manca canonical Megillah stage guide');
 assert.strictEqual(
-  data.megillahCanonicalUrl,
+  data.megillahSourceUrl,
   'https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html',
+);
+assert.strictEqual(
+  data.megillahCanonicalUrl,
+  data.megillahSourceUrl,
+  'legacy URL alias must remain a compatibility alias for the public source location',
 );
 assert.strictEqual(Object.keys(data.megillahStageGuide).length, 16);
 assert.strictEqual(
@@ -258,7 +263,7 @@ assert.strictEqual(i18n.translate(ar, 'cooking.term.stone'), 'حجر');
 const witnesses = [
   ['cutlet', 'Lagash', ['Lagash', 'Lagash', 'לגש', 'لَجَش', 'Лагаш', 'Lagash', 'Lagasch', 'Lagash', 'Lagash', 'Lagaš']],
   ['cutlet', 'Palgurash', ['Palgurash', 'Palgursh', '\u05E4\u05B7\u05BC\u05DC\u05B0\u05D2\u05BC\u05D5\u05BC\u05E8\u05B0\u05E9\u05C1', 'بالغورش', 'Палгурш', 'Palgursh', 'Palgursh', 'Palgursh', 'Palgursh', 'Palgursh']],
-  ['cutlet', 'papirus', ['papirus', 'Papyrus', '\u05E4\u05E4\u05D9\u05E8\u05D5\u05E1', 'بردي', 'Папирус', 'Papyrus', 'Papyrus', 'Papiro', 'Papiro', 'Papyrus']],
+  ['cutlet', 'cyperus', ['cyperus', 'flatsedge', '\\u05D2\\u05D5\\u05DE\\u05D0', 'السعد', 'Папирус', 'Papyrus', 'Zypergras', 'juncia', 'cipero', 'šáchor']],
   ['month', 'Karshumav', ['Karshumav', 'Karshumav', 'כַּרְשׁוּמַב', 'كَرْشُومَڤ', 'Каршумав', 'Karshumav', 'Karschumav', 'Karshumav', 'Karshumav', 'Karšumav']],
   ['month', 'leopard', ['leopard', 'Leopard', '\u05E0\u05DE\u05E8', 'نمر', 'Леопард', 'Léopard', 'Leopard', 'Leopardo', 'Leopardo', 'Leopard']],
   ['month', 'lampe', ['lampe', 'Lamp', 'נר', 'سِرَاج', 'лампа', 'lampe', 'Lampe', 'Lámpara', 'lampada', 'lampa']],
