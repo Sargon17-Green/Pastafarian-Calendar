@@ -656,7 +656,7 @@ Il-kompożizzjonijiet eliġibbli jiġu ordnati lessikografikament. Jekk Jum il-K
 5  Ħsieb
 6  Erba’ Partijiet minn Disgħa
 7  Palgurax
-8  Papiru
+8  bordi
 9  Għanqud
 10 Skorpjun
 11 Rmied
