@@ -15,7 +15,7 @@ pub const cutlets = [_]Entry{
     .{ .canonical_index = 5, .text = "Ой" },
     .{ .canonical_index = 6, .text = "Тоғыздың төрт бөлігі" },
     .{ .canonical_index = 7, .text = "Палгураш" },
-    .{ .canonical_index = 8, .text = "Папирус" },
+    .{ .canonical_index = 8, .text = "сәлемшөп" },
     .{ .canonical_index = 9, .text = "Шоқ" },
     .{ .canonical_index = 10, .text = "Сарышаян" },
     .{ .canonical_index = 11, .text = "Күл" },
