@@ -6,7 +6,9 @@
 
 അർത്ഥമുള്ള സാധാരണ പേരുകൾ ശബ്ദരൂപം പകർത്താതെ അർത്ഥം മലയാളത്തിൽ നൽകുന്നു. ഒറ്റ മലയാള പദം സ്വാഭാവികമല്ലെങ്കിൽ സ്വാഭാവികമായ ചെറിയ മലയാള പദസമുച്ചയം ഉപയോഗിക്കുന്നു. അതുകൊണ്ടാണ് `മുട്ടയുടെ മഞ്ഞ`, `അടഞ്ഞ വാതിൽ`, `ശൂന്യമായ കുടം` തുടങ്ങിയ രൂപങ്ങൾ ഉപയോഗിക്കുന്നത്.
 
-`Papyrus Sedge` എന്ന കാനോനിക സസ്യനാമത്തിലെ `Sedge` കൃത്യത നഷ്ടപ്പെടാതിരിക്കാൻ `പാപ്പിറസ് കോരപ്പുല്ല്` ഉപയോഗിക്കുന്നു.
+### 2026-09-27 explicit adopted exception
+
+For cutlet canonicalIndex 8, the explicitly adopted Malayalam form is മുത്തങ്ങ. It supersedes the earlier പാപ്പിറസ് കോരപ്പുല്ല്. The technical identifier does not determine botanical taxonomy; this explicit adopted form overrides the generic semantic-translation rule above.
 
 ഭാഗസംഖ്യാ പേരുകൾ വേർതിരിച്ച ഘടകങ്ങളായി കാണുന്നില്ല; ഓരോന്നും ഒരൊറ്റ കാനോനിക പേരാണ്. അവ `ഒൻപതിൽ നാല് ഭാഗങ്ങൾ`, `അഞ്ചിൽ മൂന്ന് ഭാഗങ്ങൾ` എന്ന സ്വാഭാവിക മലയാള രൂപങ്ങളിൽ മരവിപ്പിക്കുന്നു.
 
