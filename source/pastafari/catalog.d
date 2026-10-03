@@ -18,7 +18,7 @@ enum CatalogEntry[17] cutletCatalog = [
     CatalogEntry(5,  "միտք"),
     CatalogEntry(6,  "ինը մասից չորսը"),
     CatalogEntry(7,  "Փալգուրաշ"),
-    CatalogEntry(8,  "պրտու"),
+    CatalogEntry(8,  "Ցիպերուս"),
     CatalogEntry(9,  "ողկույզ"),
     CatalogEntry(10, "կարիճ"),
     CatalogEntry(11, "մոխիր"),
