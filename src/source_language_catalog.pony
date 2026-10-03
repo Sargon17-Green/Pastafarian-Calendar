@@ -18,7 +18,7 @@ primitive SourceLanguageCatalog
       CatalogEntry(5, "ความคิด")
       CatalogEntry(6, "เศษสี่ส่วนเก้า")
       CatalogEntry(7, "พัลกูรัช")
-      CatalogEntry(8, "กกปาปิรัส")
+      CatalogEntry(8, "แห้วหมู")
       CatalogEntry(9, "พวง")
       CatalogEntry(10, "แมงป่อง")
       CatalogEntry(11, "เถ้า")
