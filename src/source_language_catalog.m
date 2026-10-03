@@ -32,7 +32,7 @@ cutlet_entries = [
     catalog_entry(5,  "Бодол"),
     catalog_entry(6,  "Есөн хэсгийн дөрөв"),
     catalog_entry(7,  "Фалгураш"),
-    catalog_entry(8,  "Папирусын улалж"),
+    catalog_entry(8,  "өлөвс"),
     catalog_entry(9,  "Бөөгнөрөл"),
     catalog_entry(10, "Хилэнц"),
     catalog_entry(11, "Үнс"),
