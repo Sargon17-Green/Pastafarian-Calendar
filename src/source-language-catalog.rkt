@@ -22,7 +22,7 @@
    (catalog-entry 5 "mintis")
    (catalog-entry 6 "keturios dalys iš devynių")
    (catalog-entry 7 "Palguraš")
-   (catalog-entry 8 "papirusinė viksvuolė")
+   (catalog-entry 8 "viksvuolė")
    (catalog-entry 9 "kekė")
    (catalog-entry 10 "skorpionas")
    (catalog-entry 11 "pelenai")
