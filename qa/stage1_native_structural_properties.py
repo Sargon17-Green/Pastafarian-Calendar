@@ -79,9 +79,10 @@ def bounded_composition_family(total, slots, lower, upper):
         previous = item
         visited.add(item)
     for bad_rank in [0, cardinality + 1]:
-        if native(unranker, args + (bad_rank,)) != (-1,):
-            raise AssertionError("bounded invalid rank accepted %r %d" %
-                                 (args, bad_rank))
+        got = native(unranker, args + (bad_rank,))
+        if got != (-1,):
+            raise AssertionError("bounded invalid rank accepted %r rank=%d output=%r" %
+                                 (args, bad_rank, got))
     print("NATIVE_BOUNDED_FAMILY_PASS", args, "count", cardinality,
           "checked", len(visited))
 
