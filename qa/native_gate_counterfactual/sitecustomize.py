@@ -15,6 +15,9 @@ if os.environ.get("BF98_GATE_COUNTERFACTUAL"):
     sys.stderr.write("CF_HOOK_LOADED executable gate test\n")
     sys.stderr.flush()
     _target=(1500,1750)
+    _mode=os.environ.get("BF98_GATE_COUNTERFACTUAL")
+    if _mode not in ("mutation","sham"):
+        raise RuntimeError("unsupported native gate experiment mode: "+repr(_mode))
     _observed=[0]
     _mutated=[False]
     _steps_after=[0]
@@ -39,13 +42,19 @@ if os.environ.get("BF98_GATE_COUNTERFACTUAL"):
                     # noncardinal delta; native 'v' turns it to (0,+1).
                     # Counterfactual does not change the stack or any
                     # original p calculation, only one executed code cell.
-                    self.space.put(ip.position,ord(" "))
+                    # Mutation experiment: neutralize the executed v.
+                    # Sham control: exercise exactly the same monkeypatch and
+                    # same-cell p hook while preserving the native v opcode.
+                    # A sham that changes output indicates instrumentation
+                    # interference and must invalidate the counterfactual.
+                    replacement=(ord(" ") if _mode=="mutation" else ord("v"))
+                    self.space.put(ip.position,replacement)
                     _mutated[0]=True
                     sys.stderr.write(
                       "CF_GATE_TRIGGER position=(1500,1750) "
-                      "opcode_before=118 opcode_after=32 "
-                      "observed_visit=%d delta_before=%r\n" %
-                      (_observed[0],tuple(ip.delta)))
+                      "opcode_before=118 opcode_after=%d "
+                      "mode=%s observed_visit=%d delta_before=%r\n" %
+                      (replacement,_mode,_observed[0],tuple(ip.delta)))
                     sys.stderr.flush()
         return _original_step(self)
     def _traced_execute(self):
