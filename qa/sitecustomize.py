@@ -11,6 +11,7 @@ if os.environ.get("BF98_TRACE_LOG"):
 
     def _bf_traced_step(self):
         pending = []
+        pending_reads = []
         for ip in list(self.ips):
             position = tuple(ip.position)
             direction = tuple(ip.delta)
@@ -22,6 +23,19 @@ if os.environ.get("BF98_TRACE_LOG"):
                 "STEP\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n" %
                 (tick, ip.id, position[0], position[1],
                  direction[0], direction[1], opcode, depth))
+            if opcode == ord("g"):
+                stack = list(ip.stack[_bfmod.TOSS])
+                if len(stack) < 2:
+                    _bf_log.write("INSUFFICIENT_G_STACK\t%d\t%d\n" %
+                                  (tick, len(stack)))
+                else:
+                    px, py = stack[-2:]
+                    point = ip.position.__class__((px, py))
+                    before = self.space.get(point)
+                    _bf_log.write(
+                        "READ_BEFORE\t%d\t%d\t%d\t%d\n" %
+                        (tick, px, py, before))
+                    pending_reads.append((tick, px, py, before, ip))
             if opcode == ord("p"):
                 stack = list(ip.stack[_bfmod.TOSS])
                 if len(stack) < 3:
@@ -39,6 +53,11 @@ if os.environ.get("BF98_TRACE_LOG"):
         for tick, px, py, value, point in pending:
             actual = self.space.get(point)
             _bf_log.write("WRITE_AFTER\t%d\t%d\t%d\t%d\n" %
+                          (tick, px, py, actual))
+        for tick, px, py, expected, ip in pending_reads:
+            top = list(ip.stack[_bfmod.TOSS])
+            actual = top[-1] if top else -99999999
+            _bf_log.write("READ_AFTER\t%d\t%d\t%d\t%d\n" %
                           (tick, px, py, actual))
         if _bf_tick[0] % 2048 == 0:
             _bf_log.flush()
