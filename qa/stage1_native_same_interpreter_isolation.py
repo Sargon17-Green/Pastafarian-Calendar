@@ -53,6 +53,7 @@ def make_instance(path, input_text):
         program.create_ip()
     if len(program.ips) != 1:
         raise AssertionError("unexpected initial IP count")
+    program._qa_vector_constructor = program.ips[0].position.__class__
     return program, outstream
 
 def run_instance(path, input_text):
@@ -93,15 +94,17 @@ inputs=[
 ]
 created=[]
 snapshots=[]
+def sample_space(program, positions):
+    point=program._qa_vector_constructor
+    return tuple(program.space.get(point(coords)) for coords in positions)
 guard_positions=((0,0),(5,0),(10,49),(500,1500),(100,500),(1528,2014))
 for j in [0,1,0,4,2,3,1,5,6,0,2,4]:
     for path in PATHS:
         program=compare(path,inputs[j])
         created.append(program)
-        snapshots.append((program,tuple(program.space.get(p)
-                                        for p in guard_positions)))
+        snapshots.append((program,sample_space(program,guard_positions)))
 for program,expected in snapshots:
-    actual=tuple(program.space.get(p) for p in guard_positions)
+    actual=sample_space(program,guard_positions)
     if actual!=expected:
         raise AssertionError("previous native Program was mutated by a later run")
 if len(set(id(p.space) for p in created)) != len(created):
