@@ -111,4 +111,5 @@ jobs:
                 "0 5000 0 6 0 252".split())
           print("STAGE1_TARGETED_NATIVE_REGRESSION_PASS total_invocations="+str(n))
           PY
+              python qa/stage1_native_process_isolation.py
             '
