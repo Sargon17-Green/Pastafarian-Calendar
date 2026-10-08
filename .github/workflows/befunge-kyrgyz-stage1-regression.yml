@@ -468,6 +468,7 @@ jobs:
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               python -u qa/stage1_weaving_rank_ip_probe.py
+              python -u qa/stage1_native_distinct_rank_ip_probe.py
               timeout --kill-after=5s 650s python -u qa/stage1_native_adversarial_rank_domains.py
             '
 
