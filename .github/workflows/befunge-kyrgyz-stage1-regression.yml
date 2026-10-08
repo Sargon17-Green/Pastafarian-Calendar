@@ -150,12 +150,22 @@ jobs:
               printf "1 15055672 1 15055670\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/interleaved_work_counts.b98 > /traces/valid.out
               export BF98_TRACE_LOG=/traces/invalid.tsv
               printf "2 10 0 10\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/interleaved_work_counts.b98 > /traces/invalid.out
+              export BF98_TRACE_LOG=/traces/candidate_valid.tsv
+              printf "1 15055672 1 15055670\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 qa/interleaved_work_counts_lexical_candidate.b98 > /traces/candidate_valid.out
+              export BF98_TRACE_LOG=/traces/candidate_invalid.tsv
+              printf "2 10 0 10\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 qa/interleaved_work_counts_lexical_candidate.b98 > /traces/candidate_invalid.out
             '
           test "$(wc -w < "$RUNNER_TEMP/native-befunge-traces/valid.out")" -eq 7
           test "$(tr -s '[:space:]' ' ' < "$RUNNER_TEMP/native-befunge-traces/invalid.out" | xargs)" = "-1 -1 -1 -1 -1 -1 -1"
           python3 qa/stage1_native_write_audit.py \
             "$RUNNER_TEMP/native-befunge-traces/valid.tsv" \
             "$RUNNER_TEMP/native-befunge-traces/invalid.tsv"
+          python3 qa/stage1_native_write_audit.py \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.tsv"
+          cmp "$RUNNER_TEMP/native-befunge-traces/valid.out" "$RUNNER_TEMP/native-befunge-traces/candidate_valid.out"
+          cmp "$RUNNER_TEMP/native-befunge-traces/invalid.out" "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.out"
+          echo NATIVE_BEFUNGE_SCANNER_GEOMETRY_AND_TRACE_PARITY_PASS
           sha256sum src/interleaved_work_counts.b98
 
       - name: Save raw native execution trace and exact write evidence
