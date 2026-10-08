@@ -75,10 +75,7 @@ def probe_native_integer_character_handoff():
     # four integer-input opcodes. This is diagnostic native Befunge, not math.
     fd,name=tempfile.mkstemp(suffix=".b98")
     try:
-        os.write(fd,"&for item in BOUNDED:
-for item in BOUNDED:
-for item in BOUNDED:
-$~.@\n")
+        os.write(fd,b"&$&$&$&$~.@\n")
         os.close(fd)
         observed=run(name,[5,2,1,4,1])
         print("NATIVE_INTEGER_CHARACTER_HANDOFF_ASCII",observed)
