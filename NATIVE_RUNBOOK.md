@@ -148,3 +148,26 @@ Input `2 10` же canonical эмес `1 0` → output `-1 -1`.
 Бул тартип source'ту ар башка тилге которбойт жана reference
 ордуна Python математикалык календарь эсептөөсүн колдонбойт.
 Канондук branch'ка merge жүргүзбө; Stage 2 башталган жок.
+
+
+## 2026-10-08 — Native 6/6 акыркы PASS жана жетинчи QA job
+
+Туура repo / branch QA run:
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37833658868
+(HEAD 82fc82929dc301e34041c750587aee7d6b58207f).
+
+- native-regression: PASS, 421 targeted native invocations;
+- native-write-audit: PASS, 26,708 жана 12,194 native event parity;
+- native-same-interpreter-isolation: PASS, 24 fresh + 2 interleaved pairs;
+- native-lexical-parser-candidate: PASS, 43 valid + 48 invalid;
+- native-integrated-lexical-candidate: PASS, 123 native invocations;
+- native-lexical-contract: PASS, 8 minus rejections жана old-source negative control.
+
+\`src/interleaved_work_counts.b98\` QAда native-PASS lexical parser blob,
+canonical \`Befunge+Кыргызча\` дагы өзгөргөн жок.
+
+Жаңы \`native-exact-program-object-reset\` жетинчи job
+аткарылышы керек. Ал бир эле Program объекттин Funge-space,
+stack/IP, I/O абалын ачык reset кылып, ар бир жолу native
+CLI'ге салыштырат. PASS чыкканча аны жабык деп эсептебегиле.
+Ал кошулганы Stage 1 толук аяктаганын билдирбейт.
