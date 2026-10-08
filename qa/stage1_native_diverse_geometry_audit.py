@@ -23,6 +23,26 @@ def require(ok,why):
     if not ok:
         raise AssertionError(why)
 
+def read_arithmetic_edges(path):
+    """Only native steps from original arithmetic handoff, not scanner."""
+    entered=False
+    previous=None
+    with open(path,"r",encoding="ascii") as stream:
+        for line in stream:
+            if not line.startswith("STEP\\t"):
+                continue
+            fields=line.rstrip("\\n").split("\\t")
+            require(len(fields)==9,"invalid native IP graph STEP")
+            now=(int(fields[3]),int(fields[4]))
+            if not entered:
+                if now!=(5,0):
+                    continue
+                entered=True
+            if previous is not None:
+                yield previous,now
+            previous=now
+    require(entered,"missing arithmetic handoff in native graph")
+
 def main(folder):
     with open(os.path.join(folder,"diverse_manifest.json"),"r",encoding="utf-8") as src:
         manifest=json.load(src)
@@ -35,6 +55,8 @@ def main(folder):
     require(sum(not bool(x["valid"]) for x in items)==2,"native invalid family missing")
     source=geometry.load_source("src/interleaved_work_counts.b98")
     reports=[]
+    cross_input_out={}
+    cross_input_in={}
     opcode_totals={key:0 for key in WATCHED}
     fingerprints=set()
     for item in items:
@@ -45,6 +67,9 @@ def main(folder):
         with open(path,"rb") as stream:
             sha=hashlib.sha256(stream.read()).hexdigest()
         require(sha==item["trace_sha256"],"native trace digest mismatch "+label)
+        for prev,nxt in read_arithmetic_edges(path):
+            cross_input_out.setdefault(prev,set()).add(nxt)
+            cross_input_in.setdefault(nxt,set()).add(prev)
         actual=geometry.analyze(source,path)
         stats=actual["statistics"]
         require(stats["native_ip_ids"]==1,"unexpected multiple native IPs")
@@ -78,6 +103,14 @@ def main(folder):
         print("NATIVE_DIVERSE_SOURCE_GRAPH_PASS",label,
               "steps",stats["arithmetic_steps"],
               "changed_reexecuted",stats["executed_content_changing_gate_writes"])
+    forks={p for p,targets in cross_input_out.items() if len(targets)>1}
+    joins={p for p,sources in cross_input_in.items() if len(sources)>1}
+    merge_forks=forks & joins
+    # This is an actual native across-input route property. Individual
+    # runs have no merge-and-fork nodes, but two different signed-day
+    # classes may follow different branches of the same arithmetic cell.
+    require(len(forks)>=1 and len(joins)>=1,
+            "no measured cross-input arithmetic fork/join differentiation")
     require(len(fingerprints)>=3,
             "diverse native cases generated insufficient route differentiation")
     with open(os.path.join(folder,"diverse_geometry_evidence.json"),"w",
@@ -86,12 +119,21 @@ def main(folder):
                    "source":"native PyFunge executed IP/p/g traces",
                    "status":"OBSERVED_GEOMETRY_ONLY_NOT_FULL_SPAGHETTI_PASS",
                    "route_fingerprints":len(fingerprints),
+                   "cross_input_native_union_arithmetic_forks":len(forks),
+                   "cross_input_native_union_arithmetic_joins":len(joins),
+                   "cross_input_native_union_merge_and_fork_nodes":len(merge_forks),
+                   "cross_input_native_union_fork_coordinates":
+                       [list(x) for x in sorted(forks)],
+                   "cross_input_native_union_join_coordinates":
+                       [list(x) for x in sorted(joins)],
                    "coverage":reports,
                    "watched_advanced_opcode_execution_totals":opcode_totals,
                    "open":"Full structural geometry acceptance, anti-dead-code, cross-input gate"},
                   out,sort_keys=True,indent=2)
     print("NATIVE_STAGE1_DIVERSE_GEOMETRY_EVIDENCE_PASS",
-          len(items),"native cases",len(fingerprints),"distinct route fingerprints")
+          len(items),"native cases",len(fingerprints),"distinct route fingerprints",
+          "cross-input forks",len(forks),
+          "joins",len(joins),"merge-and-fork",len(merge_forks))
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO pending full architectural proof")
 if __name__=="__main__":
     require(len(sys.argv)==2,"usage: ... DIVERSE_TRACE_DIR")
