@@ -587,3 +587,37 @@ jobs:
               timeout --kill-after=5s 720s python -u qa/stage1_native_kplus_candidate.py
             '
           echo NATIVE_KPLUS_2D_ARITHMETIC_QA_PRODUCTION_ONLY_CANONICAL_UNCHANGED
+
+  # Native read-only stack evidence for designing genuine input-dependent
+  # arithmetic forks; discovery is NOT final geometric acceptance.
+  native-operand-telemetry-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify interpreter and execute 10 native operand telemetry probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_operand_discovery.py qa/native_operand_probe/sitecustomize.py
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/native-operand-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-operand-evidence:/operands" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 730s python -u qa/stage1_native_operand_discovery.py
+            '
+          test -s "$RUNNER_TEMP/native-operand-evidence/native_operand_discovery.json"
+          echo NATIVE_OBSERVATIONAL_OPERAND_EVIDENCE_ONLY_NOT_GEOMETRY_ACCEPTANCE
+      - name: Preserve exact native operand evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-operand-telemetry
+          path: \${{ runner.temp }}/native-operand-evidence/
+          retention-days: 30
