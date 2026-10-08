@@ -24,7 +24,8 @@ JUMP_OUT=(958,1325)
 WATCH=set((FORK,ENTRY_UP,ENTRY_DOWN,REJOIN,AFTER,
            (962,1334),(964,1336),
            (958,1334),(958,1333),(958,1332),
-           (958,1331),(958,1325),(958,1324),(958,1323)))
+           (958,1331),(958,1325),(958,1324),(958,1323),
+           (958,1322),(959,1334)))
 
 def require(flag,why):
     if not flag:
@@ -48,7 +49,8 @@ def native_route(path):
     require(branch in ("up","down"),"Native branch did not use either arm")
     coords=[(e[2],e[3]) for e in hits]
     expected=[FORK,ENTRY_UP,(958,1334),(958,1333),(958,1332),
-              JUMP_IN,JUMP_OUT,(958,1324),(958,1323),(962,1334),REJOIN,AFTER] \
+              JUMP_IN,JUMP_OUT,(958,1324),(958,1323),
+              (958,1322),(959,1334),(962,1334),REJOIN,AFTER] \
             if branch=="up" else [FORK,ENTRY_DOWN,(964,1336),REJOIN,AFTER]
     require(coords==expected,"Native executed arm, jump and rejoin wrong: "+repr(coords))
     require((hits[0][4],hits[0][5],hits[0][6],hits[0][7])==(-1,0,124,2),
@@ -69,7 +71,7 @@ def native_route(path):
             "rejoined arithmetic lane's next native stack/vector differs")
     if branch=="up":
         opcodes=[e[6] for e in hits]
-        require(opcodes[2:9]==list(map(ord,"^05j1bx")),
+        require(opcodes[2:10]==list(map(ord,"^05jcc1x")),
                 "Native j + skipped-space arithmetic excursion not executed exactly")
         require(hits[5][7]==5 and hits[6][7]==4,
                 "native jump must consume the actual 5-cell skip count")
@@ -77,8 +79,11 @@ def native_route(path):
                 "native j changed IP heading unexpectedly")
         require(hits[6][0]==hits[5][0]+1,
                 "Native interpreter did not jump across unexecuted intervening cells")
-        require(hits[8][7]==6,
-                "dynamic x must consume computed rejoin vector from stack")
+        require(hits[9][7]==7 and hits[9][6]==ord("x"),
+                "dynamic x must consume (1,12) rejoin vector from stack")
+        require(hits[10][6]==ord(">") and hits[10][4:6]==(1,12)
+                and hits[10][7]==5,
+                "native resumed at required heading-reset gate without losing arithmetic")
     return branch, [{"tick":e[0],"x":e[2],"y":e[3],"dx":e[4],
                      "dy":e[5],"opcode":e[6],"depth":e[7]} for e in hits]
 
