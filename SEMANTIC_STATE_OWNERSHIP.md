@@ -62,3 +62,43 @@ QA branch: qa-befunge98-stage1-order-isolation-20261008
 **Корутунду:** азыр толук семантикалык ээлик үчүн
 SEMANTIC_STATE_OWNER_VALIDATED=NO_FINAL_AUDIT гана туура;
 Stage 1 OPEN бойдон калат.
+
+
+## 2026-10-08 — native g-read жана same-interpreter ownership
+
+Test-only qa/sitecustomize.py эми ар бир аткарылган g opcode боюнча
+READ_BEFORE жана READ_AFTER окуясын жазат: клетканын дареги, Funge-space
+мааниси жана аткаруудан кийинки stack үстүндөгү сан. QAнын
+qa/stage1_native_write_audit.py текшерүүчүсү ар бир native g жана p
+операциясын бирден жуптап, жөнөкөй артефакттагы жоголгон жана
+бузулган окуяларды четке кагат.
+
+(5,0) арифметикалык handoff'тон кийин сканердин жаңы код
+клеткасына, scratch клеткасына же кириш көпүрөсүнө жасалган
+IP execution, g read, p write = FAIL. Test-only
+qa/stage1_native_trace_auditor_selftest.py синтетикалык окуяларды
+текшерет (жети атайылап бузулган трасса четке кагылууга тийиш).
+Бул native interpreter PASS эмес, аудитордун fail-closed
+жөндөмдүүлүгү үчүн гана selftest.
+
+Өз алдынча Funge instruction simulator эски жана интеграцияланган
+кандидатты 18 input менен салыштырды: 18/18 output паритети,
+3713 кошулган executable source cell боюнча арифметикалык
+handoff'тон кийин 0 IP execution, 0 g read, 0 p write. Коддогу
+qa/stage1_full_execution_geometry_sim.py эми ошол коргонуу
+шартын автоматтык кармайт. Бул 18 testcase гана,
+бардык мүмкүн input'тардын далили эмес.
+
+PyFunge 0.5-rc2нин документтелген Program, BufferedPlatform,
+Program.execute_step интерфейси менен
+qa/stage1_native_same_interpreter_isolation.py кошулду:
+24 жаңы Program объекти бир Python процессте ырааттуу
+иштетилет жана эки жуп өзүнчө Program объекттери
+кадам сайын interleave кылынат. Native CLI менен
+чыгарылышы салыштырылат; Funge-space identity
+жана мурунку Program snapshot'ы өзгөрбөгөнү талап кылынат.
+
+Кошумча native QA RESULT азырынча ырастала элек.
+Дал ошол эле Program объектин reset кылып кайра колдонуу
+дагы өзүнчө ачык талап, fresh Program / same-process
+reentrancy муну алмаштырбайт. LAST_COMPLETED_STAGE=0.
