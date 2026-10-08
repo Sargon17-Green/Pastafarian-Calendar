@@ -49,7 +49,7 @@ require(newrows[0][5:] == oldrows[0][5:],
 # original arithmetic opcode (1470,100): '+' -> 'v', while (1471,100)
 # retains its original dynamic 'x'. The new row-101 circuit compensates
 # for PyFunge's execute-k-then-execute-next semantics and rejoins at x.
-baseline_rows = lexical_baseline.split(b"\\n")
+baseline_rows = lexical_baseline.split(b"\n")
 require(len(newrows) == len(baseline_rows),
         "native k+ geometry changed row count")
 require(newrows[:100] == baseline_rows[:100],
