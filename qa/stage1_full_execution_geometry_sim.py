@@ -11,6 +11,24 @@ OLD = "src/interleaved_work_counts.b98"
 NEW = "qa/interleaved_work_counts_lexical_candidate.b98"
 BOUNDS = (1531,2016)
 
+def scanner_footprint():
+    with open(OLD,"r",encoding="ascii") as f:
+        old=f.read().split("\n")
+    with open(NEW,"r",encoding="ascii") as f:
+        new=f.read().split("\n")
+    if len(old)!=len(new):
+        raise AssertionError("Funge-space height changed")
+    overlay={(x,y) for y in range(1,50)
+             for x,c in enumerate(new[y]) if c!=" " and
+             (x>=len(old[y]) or old[y][x]==" ")}
+    if len(overlay)!=3713:
+        raise AssertionError("scanner executable-source footprint unexpectedly changed")
+    scratch={(x,49) for x in (0,1,2,3,10,11,12,13)}
+    entry={(x,0) for x in range(5)}
+    return overlay|scratch|entry
+
+SCANNER_OWNED=scanner_footprint()
+
 def run(path, source):
     with open(path,"r",encoding="ascii") as f:
         rows=f.read().split("\n")
@@ -46,6 +64,8 @@ def run(path, source):
             raise AssertionError("non-ASCII instruction %s at %s" % (v,(x,y)))
         op=chr(v)
         if entry is not None:
+            if (x,y) in SCANNER_OWNED:
+                raise AssertionError("arithmetic IP entered scanner cell %r" % ((x,y),))
             mark("S",x,y,dx,dy,v)
             after_steps+=1
         if 48<=v<=57: push(v-48)
@@ -75,9 +95,14 @@ def run(path, source):
         elif v==96:
             a=pop();bb=pop();push(int(bb>a))
         elif op=="g":
-            yy=pop();xx=pop();push(code.get((xx,yy),32))
+            yy=pop();xx=pop()
+            if entry is not None and (xx,yy) in SCANNER_OWNED:
+                raise AssertionError("arithmetic g read scanner cell %r" % ((xx,yy),))
+            push(code.get((xx,yy),32))
         elif op=="p":
             yy=pop();xx=pop();value=pop()
+            if entry is not None and (xx,yy) in SCANNER_OWNED:
+                raise AssertionError("arithmetic p overwrote scanner cell %r" % ((xx,yy),))
             code[(xx,yy)]=value
             if entry is not None:
                 mark("P",xx,yy,value)
@@ -117,6 +142,13 @@ cases=[
     "1 987654321 0 123456789\n",
     "0 1 0 2\n",
     "0 2 0 1\n",
+    "0 0 1 15055671\n",
+    "1 15055671 0 0\n",
+    "1 1 0 1\n",
+    "1 2 1 3\n",
+    "0 10 0 20\n",
+    "0 0 0 1\n",
+    "0 999999999 0 999999999\n",
     "1 0 0 0\n",
     "2 10 0 10\n",
     "0 170141183460469231731687303715884105727 1 1\n",
@@ -137,4 +169,5 @@ for malformed in ("0 -1 0 1\n","-0 1 0 1\n","0 1 -0 1",
     eq("invalid-not-passed-to-original-arithmetic",observed["entry"],None)
 print("STAGE1_FULL_EXECUTION_SIMULATOR_PASS",len(cases),
       "full trace-equivalent examples; six lexical rejects")
+print("STAGE1_SCANNER_OWNERSHIP_LOCAL_PASS",len(SCANNER_OWNED),"owned cells guarded")
 print("LOCAL_SIMULATOR_ONLY; Native PyFunge still required")
