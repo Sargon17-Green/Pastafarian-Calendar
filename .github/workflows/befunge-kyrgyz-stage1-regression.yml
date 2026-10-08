@@ -197,6 +197,12 @@ jobs:
             "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.tsv" \
             "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.graph.json"
           echo NATIVE_STAGE1_DIRECTED_ROUTE_GRAPHS_CREATED
+          python3 -m py_compile qa/stage1_native_geometry_evidence.py
+          python3 qa/stage1_native_geometry_evidence.py "$RUNNER_TEMP/native-befunge-traces"
+          test -s "$RUNNER_TEMP/native-befunge-traces/geometry_evidence.json"
+          test -s "$RUNNER_TEMP/native-befunge-traces/candidate_valid_native_route.svg"
+          test -s "$RUNNER_TEMP/native-befunge-traces/candidate_invalid_native_route.svg"
+          echo NATIVE_OBSERVED_GEOMETRY_AND_EVIDENCE_ARTIFACTS_PASS
           echo NATIVE_BEFUNGE_SCANNER_GEOMETRY_AND_TRACE_PARITY_PASS
           sha256sum src/interleaved_work_counts.b98
 
