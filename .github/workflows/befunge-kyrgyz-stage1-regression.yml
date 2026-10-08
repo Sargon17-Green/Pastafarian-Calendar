@@ -745,3 +745,28 @@ jobs:
               timeout --kill-after=5s 450s python -u qa/stage1_native_advanced_opcode_counterfactual.py
             '
           echo NATIVE_ADVANCED_OPCODE_COUNTERFACTUAL_QA_ONLY
+
+  # Native candidate proves the executed j bypasses an actual reflect gate.
+  # Controls and mutants run under the real PyFunge interpreter only.
+  native-guarded-jump-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Native guarded 10-case differential and causal opcode mutation checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "20ff8d38011017fa9182147e864347be4ca9a79c"
+          test "$(git hash-object qa/interleaved_work_counts_advanced_guarded_jump_candidate.b98)" = "f1a9ce836c5717600f0e3355dcd430500248ec69"
+          python3 -m py_compile qa/stage1_native_guarded_jump_candidate.py
+          curl -fsSL "https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz" -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 800s python -u qa/stage1_native_guarded_jump_candidate.py
+            '
+          echo NATIVE_GUARDED_JUMP_CANDIDATE_NOT_PROMOTED
