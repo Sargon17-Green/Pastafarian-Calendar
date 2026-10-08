@@ -62,3 +62,68 @@ GitHub CI дагы өзүнчө текшерилүүгө тийиш.
 
 **Stage 1 OPEN, LAST_COMPLETED_STAGE=0, Stage 2 NOT STARTED.**
 PR #17 QA only, canonical branch өзгөртүлгөн эмес.
+
+
+## 2026-10-08 — Ten native day-input geometry proofs (QA-only)
+
+**Native evidence**: run
+[37840062911](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37840062911),
+job \`native-diverse-production-geometry\`, 10/10 native oracle/trace/
+versioned Funge-space checks PASS. The **entire workflow** may still be in
+progress; only this job's PASS is asserted here.
+
+\`qa/stage1_native_diverse_geometry.py\` runs eight valid and two invalid
+signed-day pairs in **native PyFunge-98** (not a Python calendar engine).
+Eight valid expected outputs are assembled from independent native
+\`reference/work_counts.b98\` and two \`reference/save.b98\` executions.
+Invalid numeric input must produce seven \`-1\` outputs. Each sample's
+native \`STEP\`, \`READ_BEFORE/AFTER\`, \`WRITE_BEFORE/AFTER\` evidence is retained.
+\`qa/stage1_native_diverse_geometry_audit.py\` verifies the source-cell
+version lifecycle and saves each actual directed route graph.
+
+| Native signed-day input case | Real post-handoff IP steps | Executed, changed code gates |
+|---|---:|---:|
+| equal zero | 7,374 | 2 |
+| crosses Foundation | 25,982 | 3 |
+| forward adjacent | 9,700 | 3 |
+| reverse adjacent | 9,700 | 3 |
+| small mixed sign | 9,700 | 3 |
+| positive → negative | 28,308 | 3 |
+| negative → positive | 28,308 | 3 |
+| values around 2^127 | 98,088 | 3 |
+| noncanonical minus-zero sign | 7,250 | 2 |
+| sign outside 0/1 | 11,902 | 3 |
+
+**Input-dependent geometry**: 7 native route fingerprints.
+The union of native **arithmetic-only** edges (lexical scanner excluded)
+exhibits 2 distinct fork nodes, 1 distinct join node, and **zero nodes
+that are both fork and join**. A per-case directed merge-and-fork count
+of zero also holds for all 10 cases. The 14 watched advanced opcodes
+\`(\`, \`)\`, \`[\`, \`]\`, \`_\`, \`j\`, \`k\`, \`r\`, \`t\`,
+\`u\`, \`w\`, \`{\`, \`|\`, \`}\` were each executed **zero
+times** across all ten traces.
+
+This is a **concrete acceptance gap**, not a false Native regression:
+native results and runtime mutable-space integrity are PASS within the
+sampled families; the stronger, intentionally difficult, nontrivial 2D
+spaghetti architecture still lacks some required types of route/data
+entanglement and executed control operators. In particular, adding inert
+operators or unused routes would not satisfy the contract.
+
+**Next implementation work in Stage 1:**
+
+1. Design a real arithmetic-influencing input-dependent branch with
+   nontrivial dynamic rejoin/reentry in production Befunge-98, not a
+   test-only or decorative route.
+2. Exercise it with actual Funge directional/stack-stack instructions
+   under explicit IP, stack and mutable-cell ownership invariants.
+3. Keep the native independent-reference oracle, exact output contract,
+   negative lexical controls, versioned source map and anti-dead-code
+   route analysis mandatory.
+4. Run **all** Native regression and diverse geometry jobs at exact
+   post-change SHA, then separately adjudicate \`FULL_FUNCTIONAL_QA_PASS\`
+   and \`GEOMETRIC_SPAGHETTI_QA_PASS\`.
+
+This does not permit reimplementation or fallback in Python. The
+Befunge calendar algorithm and canonical branch remain untouched.
+\`CURRENT_STAGE=1\`, \`LAST_COMPLETED_STAGE=0\`.
