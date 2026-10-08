@@ -121,3 +121,30 @@ Input `2 10` же canonical эмес `1 0` → output `-1 -1`.
 - Толук таануу жана кабыл алуу чектөөлөрү: `artifacts/stage-01/INTERLEAVED_DAY_SAVE_NATIVE_QA.md`.
 
 Бул pair операциясы толук CalendarDate converter эмес, Stage 1деги кеңейтилген негиз гана; Stage 2 башталган жок.
+
+
+## 2026-10-08 — QA-only lexical-source promotion and acceptance gate
+
+Бул бөлүк мурунку тарыхый run'дардын үстүнөн жаңыртылган QA статусун берет.
+
+- Canonical \`Befunge+Кыргызча\` **өзгөргөн жок**.
+- QA branch: \`qa-befunge98-stage1-order-isolation-20261008\`;
+  draft PR: https://github.com/Sargon17-Green/Pastafarian-Calendar/pull/17.
+- 2026-10-08деги native run:
+  https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37831929988.
+  Алгач 5/6 jobs PASS болгон. Жалгыз FAIL — мурдагы original
+  production'дун \`-0\` белгисин четке какпаганы.
+- QA гана: \`src/interleaved_work_counts.b98\` native-дa текшерилген
+  parser scanner candidate'дин так байттары менен алмаштырылды:
+  Git blob \`e2b39b066d1d47bcb8ce4f234b093fca94cb21d1\`.
+- Эски source \`qa/interleaved_work_counts_pre_lexical_baseline.b98\`
+  жолунда, Git blob
+  \`e06d8f75d6502b2771d6a76b00397c6b6dbee543\`.
+- Эми GitHub Actions'тагы алты job толук PASS болгону жаңы HEAD үчүн
+  **далилдениши керек**. Биринчи беш job мурдагы HEAD'де PASS
+  болгону жаңы HEAD үчүн автоматтык кабыл алуу эмес.
+- Same-Program exact-object reset/reuse дагы өзүнчө ачык acceptance.
+
+Бул тартип source'ту ар башка тилге которбойт жана reference
+ордуна Python математикалык календарь эсептөөсүн колдонбойт.
+Канондук branch'ка merge жүргүзбө; Stage 2 башталган жок.
