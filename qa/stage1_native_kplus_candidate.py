@@ -16,8 +16,8 @@ import stage1_native_diverse_geometry as native_suite
 SOURCE = "qa/interleaved_work_counts_kplus_2d_candidate.b98"
 PICK = ("zero_equal", "forward_short", "foundation_cross",
         "large_values", "invalid_big_sign")
-STEPS = ((1470, 100, 118), (1474, 101, 107),
-         (1482, 101, 120), (1471, 100, 120))
+STEPS = ((1470, 100, 118), (1475, 101, 107),
+         (1483, 101, 120), (1471, 100, 120))
 
 def require(ok, message):
     if not ok:
@@ -81,8 +81,8 @@ def main():
                     if (x, y, opcode) in STEPS:
                         seq.append((x, y, opcode))
                         if (x, y) == (1471, 100):
-                            require((int(parts[5]), int(parts[6])) == (-11, -1),
-                                    "return did not land on native x with vector (-11,-1)")
+                            require((int(parts[5]), int(parts[6])) == (-12, -1),
+                                    "return did not land on native x with vector (-12,-1)")
                             require(int(parts[8]) == 5,
                                     "k-assisted arithmetic changed the native pre-x stack depth")
                             expect_target = True
