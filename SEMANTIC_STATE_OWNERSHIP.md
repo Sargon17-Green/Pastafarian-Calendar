@@ -132,3 +132,30 @@ exact native-qualified scanner blob
 reset кылып кайра иштетүүнүн state neutrality далили жок.
 Ошондуктан семантикалык ownership'ти Stage 1 боюнча жабык деп
 жариялабагыла. LAST_COMPLETED_STAGE=0; Stage 2 жок.
+
+
+## 2026-10-08 — QA source Native 6/6 PASS, exact-object reset still open
+
+GitHub Actions native run 37833658868, SHA
+82fc82929dc301e34041c750587aee7d6b58207f:
+алтынын алтысы PASS. Эми \`src/interleaved_work_counts.b98\`
+lexical input терс белгини кабыл албайт. Негизги 421 native regression,
+123 native oracle-integrated cases, 43+48 lexical parser cases,
+8 production lexical rejection case, 10/4 кийин аткарылган
+self-modifying gate writes жана г/п/IP трассалары кайра текшерилди.
+Бир interpreter ичинде 24 fresh Program жана 2 interleaved pair да PASS.
+
+Ачык болгон өзүнчө ownership милдети: **так ошол эле Program объектти**
+кайра колдонуу. Жаңы QA тест:
+\`qa/stage1_native_same_program_reset.py\` 16 жолу ошол эле
+Program identity менен иштейт, ар бир жолу Funge-space'ти, кириш/чыгыш
+платформасын жана IP'ти өзүнчө баштапкы абалга келтирип,
+натыйжаны көз карандысыз native PyFunge CLI менен салыштырат.
+Эски/жаңы source ортосунда алмашып, \`p\` өзгөрткөн мурунку
+Funge-space кийинкиде тийилбегенин текшерет. Бул \`load_code\`
+гана аткарып, мурунку өзгөргөн space'ти кайра колдонууга уруксат эмес.
+
+Жетинчи Native job жаңы commit үчүн кошулду, **PASS далили
+азырынча жок**. Мындан тышкары FULL_FUNCTIONAL_QA жана
+GEOMETRIC_SPAGHETTI_QA мурдагыдай ачык. Stage 1 жабык эмес;
+канондук branch жана main өзгөргөн жок; Stage 2 башталган жок.
