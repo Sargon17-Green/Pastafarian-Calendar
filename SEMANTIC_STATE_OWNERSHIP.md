@@ -159,3 +159,31 @@ Funge-space кийинкиде тийилбегенин текшерет. Бул
 азырынча жок**. Мындан тышкары FULL_FUNCTIONAL_QA жана
 GEOMETRIC_SPAGHETTI_QA мурдагыдай ачык. Stage 1 жабык эмес;
 канондук branch жана main өзгөргөн жок; Stage 2 башталган жок.
+
+
+## 2026-10-08 — same-object reset биринчи Native FAIL жана remediation
+
+GitHub Actions run 37834875763, HEAD
+589a0b2612bd0c2a22bef9c8b749623a58d7b924:
+алты мурдагы Native job PASS, жаңы жетинчи
+\`native-exact-program-object-reset\` FAIL.
+Анын биринчи case'инде standalone CLI жети туура санды чыгарды,
+бирок ошол эле \`Program\` object'индеги new stdout \`[]\` болду.
+QA checker \`program.platform\` гана алмаштырып,
+мурдагы \`program.semantics.platform\` объектин кайра байлаган
+эмес. Native арифметикалык mismatch далилденген жок;
+QA lifecycle reset bug табылды.
+
+Remediation: \`qa/stage1_native_same_program_reset.py\`
+эмки iteration алдында дал **ошол эле Program объектке**
+\`Program.__init__(program,Befunge98,platform=platform)\`
+колдонуп, бардык semantics, mutable Funge-space жана IP queue
+туура кайра курулганын текшерет. Identity өзгөрбөшү,
+семантика эски объект эмес болушу, \`semantics.platform\`
+жаңы input/output менен так бир объект болушу,
+Funge-space мурунку mutated space эмес болушу шарт.
+Мурунку completed space snapshots кийинки аткарууда
+өзгөрбөшү керек.
+
+Бул оңдоо QA branch'та. **Жаңы Native PASS али жок.**
+Original canonical branch дагы өзгөргөн жок. Stage 1 OPEN.
