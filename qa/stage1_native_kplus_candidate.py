@@ -93,9 +93,27 @@ def main():
             print("NATIVE_KPLUS_CANDIDATE_DIFF_AND_ROUTE_PASS", label,
                   "route", len(seq), "outputs", len(actual))
             sys.stdout.flush()
+        # Native-only differential coverage for every other established
+        # production geometry case, without claiming that all these inputs
+        # must enter this particular detour. The routed subset above retains
+        # its stronger four-event IP/stack assertions.
+        remaining = sorted(set(cases) - set(PICK))
+        for label in remaining:
+            values, valid = cases[label]
+            raw = " ".join(map(str, values)) + "\n"
+            actual = native_suite.native(SOURCE, raw)
+            expect = (native_suite.expected_for(*values) if valid
+                      else ["-1"] * 7)
+            require(actual == expect,
+                    "untraced native candidate parity mismatch %s: %r vs %r" %
+                    (label, actual, expect))
+            print("NATIVE_KPLUS_FULL_CORPUS_PARITY_PASS", label,
+                  "valid", valid, "output_fields", len(actual))
+            sys.stdout.flush()
     finally:
         shutil.rmtree(folder)
     print("NATIVE_KPLUS_CANDIDATE_TEST_ONLY_PASS", len(PICK), "of", len(PICK))
+    print("NATIVE_KPLUS_ALL_TEN_CASE_NATIVE_DIFFERENTIAL_PASS", len(cases))
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO (candidate only)")
 
 if __name__ == "__main__":
