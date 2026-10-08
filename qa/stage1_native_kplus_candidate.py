@@ -16,8 +16,8 @@ import stage1_native_diverse_geometry as native_suite
 SOURCE = "qa/interleaved_work_counts_kplus_2d_candidate.b98"
 PICK = ("zero_equal", "forward_short", "foundation_cross",
         "large_values", "invalid_big_sign")
-STEPS = ((1470, 100, 118), (1472, 101, 107),
-         (1480, 101, 120), (1471, 100, 120))
+STEPS = ((1470, 100, 118), (1474, 101, 107),
+         (1482, 101, 120), (1471, 100, 120))
 
 def require(ok, message):
     if not ok:
@@ -65,6 +65,7 @@ def main():
                     "candidate native differential mismatch for %s: %r != %r" %
                     (label, actual, expect))
             seq = []
+            expect_target = False
             with open(trace, "rb") as stream:
                 for line in stream:
                     if not line.startswith("STEP\t"):
@@ -72,11 +73,20 @@ def main():
                     parts = line.rstrip("\n").split("\t")
                     require(len(parts) == 9, "malformed native STEP record")
                     x, y, opcode = map(int, (parts[3], parts[4], parts[7]))
+                    if expect_target:
+                        require((x, y, opcode) == (1430, 1335, 94)
+                                and (int(parts[5]), int(parts[6])) == (-41, 1235),
+                                "native x rejoin did not preserve original arithmetic continuation")
+                        expect_target = False
                     if (x, y, opcode) in STEPS:
                         seq.append((x, y, opcode))
                         if (x, y) == (1471, 100):
-                            require((int(parts[5]), int(parts[6])) == (-9, -1),
-                                    "return did not land on native x with vector (-9,-1)")
+                            require((int(parts[5]), int(parts[6])) == (-11, -1),
+                                    "return did not land on native x with vector (-11,-1)")
+                            require(int(parts[8]) == 5,
+                                    "k-assisted arithmetic changed the native pre-x stack depth")
+                            expect_target = True
+            require(not expect_target, "x rejoin target never executed")
             require(seq == list(STEPS),
                     "native executed k+ route missing/reordered for %s: %r" %
                     (label, seq))
