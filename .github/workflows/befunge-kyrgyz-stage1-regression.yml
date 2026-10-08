@@ -364,7 +364,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object reference/count_weavings.b98)" = "d57ef8da12e7cae7e62153407214f9f903eca280"
-          test "$(git hash-object reference/unrank_weaving.b98)" = "6caadb311e31cf6f498dc7112f323900034fae96"
+          test "$(git hash-object reference/unrank_weaving.b98)" = "a48359619ab5391b156e6eefdd6d36a5e500611a"
           test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
           test "$(git hash-object reference/falling_factorial.b98)" = "d20317d31740e633e8696302faaee6d63639e080"
           test "$(git hash-object src/interleaved_work_counts.b98)" = "e2b39b066d1d47bcb8ce4f234b093fca94cb21d1"
