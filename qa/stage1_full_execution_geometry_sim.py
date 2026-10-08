@@ -7,8 +7,8 @@ PyFunge native tests and the independent Befunge-98 reference remain required.
 """
 import hashlib
 
-OLD = "src/interleaved_work_counts.b98"
-NEW = "qa/interleaved_work_counts_lexical_candidate.b98"
+OLD = "qa/interleaved_work_counts_pre_lexical_baseline.b98"
+NEW = "src/interleaved_work_counts.b98"
 BOUNDS = (1531,2016)
 
 def scanner_footprint():
