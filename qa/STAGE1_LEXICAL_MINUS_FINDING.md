@@ -55,3 +55,27 @@ character-input opcode жок. Баштапкы киргизүү жолу `>&&&&
 
 `CURRENT_STAGE=1`; `LAST_COMPLETED_STAGE=0`;
 `LEXICAL_NEGATIVE_REJECTION=KNOWN_FAIL`.
+
+## 2026-10-08 — Funge-98 character parser candidate
+
+Test-only candidate: `qa/lexical_candidate.b98`, көз карандысыз
+`qa/stage1_native_lexical_candidate.py` жана workflow
+`native-lexical-parser-candidate`.
+
+Бул баштапкы production'га интеграция эмес. Мурдагы төрт `&`
+буйругун өзгөртпөйт. Candidate'тин өзүндө `~`, `#`, `v`,
+`x`, `j`, `p/g` аркылуу символдон так 4 digit-only токен
+чогултулат, андан кийин алардын сандык мааниси чыгарылат.
+Терс лексикалык белги, башка символ, кем/ашык токен четке кагылат.
+
+**Маанилүү Funge-98 тактоо:** EOF учурунда `~`
+`-1` санын бербейт; interpreter `r` сыяктуу reflection
+жасайт. Candidate ушул чыныгы тескери маршрутту `#v~`
+көпүрөсүнө колдонуп EOF handler'ге өтөт. LF талап кылынбайт:
+токендер newline менен да, EOF менен да бүтө алат.
+
+Локалдык BigInt-safe Funge instruction simulator менен
+**15/15** тандалган сценарий PASS; бул native interpreter
+PASS эмес жана акыркы production'дун иштешин далилдебейт.
+Native PyFunge текшерүүсү deterministic 90дон ашык valid/invalid
+кезекти өзүнчө аткарат; жыйынтык дагы текшериле элек.
