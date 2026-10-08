@@ -555,3 +555,28 @@ jobs:
               timeout --kill-after=5s 100s python -u qa/stage1_native_opcode_capabilities.py
             '
           echo NATIVE_ADVANCED_OPCODE_CAPABILITY_PROBE_ONLY_NO_STAGE1_ACCEPTANCE
+
+  # Candidate isolated from src/. This gate must not elevate full production
+  # GEOMETRIC_SPAGHETTI_QA_PASS or replace the independent Befunge oracles.
+  native-kplus-2d-arithmetic-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin candidate and reference and execute native k-plus arithmetic trace differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "e2b39b066d1d47bcb8ce4f234b093fca94cb21d1"
+          test "$(git hash-object qa/interleaved_work_counts_kplus_2d_candidate.b98)" = "d43efdd7088bb2617908e63011f2fc72ccea20ac"
+          python3 -m py_compile qa/stage1_native_kplus_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 720s python -u qa/stage1_native_kplus_candidate.py
+            '
+          echo NATIVE_KPLUS_2D_ARITHMETIC_CANDIDATE_NOT_PROMOTED
