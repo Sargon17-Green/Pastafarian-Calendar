@@ -122,3 +122,30 @@ There is still no verified reset/reuse of **the exact same previously
 mutated Program object**. This is separate from the passed 24-fresh-Program
 and two-pair interleaving tests. Stage 1 and ownership audit remain open;
 \`LAST_COMPLETED_STAGE=0\`, Stage 2 not started.
+
+
+## Run 37833658868 — confirmed all-six native acceptance
+
+HEAD \`82fc82929dc301e34041c750587aee7d6b58207f\`:
+GitHub Native workflow concluded **SUCCESS**, 6/6 jobs green.
+Full job logs reviewed:
+- 421 targeted independent native regression calls;
+- 43 valid and 48 invalid standalone lexical parser;
+- 19 valid integrated calendar pairs, six numeric invalid,
+  fifteen lexical invalid, 123 native calls;
+- eight forbidden raw-minus tokens rejected by the promoted
+  \`src\`, with old-source negative control still reproducing defect;
+- native IP/stack-depth/g-read/p-write exact post-handoff
+  parity: 26,708 events valid, 12,194 events invalid;
+- 24 separate Programs in one interpreter, plus two
+  interleaved stepwise Program pairs passed.
+
+**Historical development-only "native unverified" language above
+is obsolete as of this checkpoint.** The QA branch source has not
+been merged with canonical \`Befunge+Кыргызча\`.
+
+Separate seventh Native job \`native-exact-program-object-reset\`
+was added afterward. It attempts 16 native executions of the exact
+same object under an explicit reset of the previously modified Funge-space,
+input/output streams and IP. Its run is **PENDING**, and even a PASS
+does not close all remaining full Stage 1 oracle/geometric QA.
