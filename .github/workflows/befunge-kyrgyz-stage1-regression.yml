@@ -770,3 +770,29 @@ jobs:
               timeout --kill-after=5s 800s python -u qa/stage1_native_guarded_jump_candidate.py
             '
           echo NATIVE_GUARDED_JUMP_CANDIDATE_NOT_PROMOTED
+
+  native-stack-sensitive-j-dependency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin non-production native arithmetic stack-sensitive jump candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/interleaved_work_counts_arithmetic_dependency_j_candidate.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
+          python3 -m py_compile qa/stage1_native_arithmetic_jump_dependency_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute candidate in actual Befunge-98 and demand j non-inertness
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 700s python -u qa/stage1_native_arithmetic_jump_dependency_candidate.py
+            '
+          echo NATIVE_STACK_SENSITIVE_J_CANDIDATE_NOT_PROMOTED
