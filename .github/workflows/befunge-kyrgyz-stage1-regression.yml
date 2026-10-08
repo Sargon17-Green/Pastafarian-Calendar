@@ -27,6 +27,7 @@ jobs:
           echo NATIVE_STAGE1_PINNED_SOURCE_SHA_PASS
           python3 qa/stage1_parser_integration_structure.py
           python3 qa/stage1_full_execution_geometry_sim.py
+          python3 qa/stage1_native_trace_auditor_selftest.py
       - name: Verify pinned PyFunge-98 package
         shell: bash
         run: |
