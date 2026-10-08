@@ -171,3 +171,23 @@ canonical \`Befunge+Кыргызча\` дагы өзгөргөн жок.
 stack/IP, I/O абалын ачык reset кылып, ар бир жолу native
 CLI'ге салыштырат. PASS чыкканча аны жабык деп эсептебегиле.
 Ал кошулганы Stage 1 толук аяктаганын билдирбейт.
+
+
+## 2026-10-08 — жетинчи native job биринчи FAIL, reset оңдолду
+
+Эски run:
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37834875763.
+6/7 jobs PASS; жетинчи \`native-exact-program-object-reset\`
+биринчи iteration'да \`got=[]\` чыгарды (өзүнчө PyFunge CLI
+жети туура сан чыгарган). Себеби QA reset code
+\`program.platform\` гана алмаштырып, Python PyFunge
+\`semantics.platform\` талаасын өзгөрткөн эмес.
+
+Тууралоо QA source file
+\`qa/stage1_native_same_program_reset.py\` ичинде аткарылды:
+бир эле \`Program\` identity менен constructor аркылуу
+толук explicit reinitialization колдонулат жана semantics,
+space, IP, input/output invariants текшерилет.
+
+**Бул fix'тин кийинки Native CI кайра иштетүүсү күтүлүүдө**;
+ал өтмөйүнчө same-object reset PASS деп айтпагыла.
