@@ -1,0 +1,114 @@
+name: Befunge Kyrgyz Stage 1 Native Regression
+
+on:
+  push:
+  pull_request:
+    branches:
+      - 'Befunge+Кыргызча'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned PyFunge-98 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute production, independent native reference, and fixture corpora
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              pyfunge --version
+              python - <<'"'"'PY'"'"'
+          from __future__ import print_function
+          import csv,os,subprocess,sys,time
+          root=""
+          command=["pyfunge","--disable-fprint","--no-concurrent","--no-filesystem","-v98","-d2"]
+          n=0
+          def invoke(path,data,limit="50s"):
+              global n
+              n+=1
+              p=subprocess.Popen(["timeout","--kill-after=2s",limit]+command+[path],
+                 stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+              o,e=p.communicate((data or "")+"\n")
+              if p.returncode:
+                  print("NATIVE_PROCESS_ERROR",path,data,p.returncode,e,o);raise SystemExit(1)
+              return o.split()
+          def exact(label,file,data,expected,limit="50s"):
+              got=invoke(root+file,data,limit)
+              if got!=expected:
+                  print("NATIVE_MISMATCH",label,data,got,expected);raise SystemExit(1)
+              print("PASS",label)
+          def differential(name,samples):
+              for inp in samples:
+                  expected=invoke(root+"reference/"+name,inp)
+                  exact("production/"+name+":"+inp, "src/"+name, inp, expected)
+          exact("runtime-contract","src/runtime_contract.b98","",["1"])
+          for inp,out in [("0",["1"]),("1",["0"]),("10",["0"])]:
+              exact("bootstrap:"+inp,"src/bootstrap.b98",inp,out)
+          for name in ["anchor_constants.b98","great_number.b98","save_edges.b98",
+                       "reference_day_count_edges.b98","sign_validation.b98",
+                       "stones_drop2.b98","year_bounds.b98"]:
+              exact("smoke/"+name,"test/"+name,"",["1"])
+          magnitudes=["0","1","2","10","15055670","15055671","15055672",
+                      "170141183460469231731687303715884105726",
+                      "170141183460469231731687303715884105727",
+                      "170141183460469231731687303715884105728",
+                      str(10**40+987654321),str(10**79+987654321)]
+          for name in ["day_count.b98","save.b98"]:
+              samples=[s+" "+m for s in ["0","1","2"] for m in magnitudes]
+              differential(name,samples)
+          for s in ["0","1","2","3"]:
+              for m in magnitudes:
+                  inp=s+" "+m
+                  a=invoke(root+"reference/day_count.b98",inp)
+                  b=invoke(root+"reference/save.b98",inp)
+                  exact("fused/native:"+inp,"src/interleaved_day_save.b98",inp,a+b)
+          exact("fused-hard-zero","src/interleaved_day_save.b98","0 0",
+                ["30111343","170141183460469231731687303715884105727"])
+          exact("fused-hard-invalid","src/interleaved_day_save.b98","2 10",["-1","-1"])
+          fused_days=[
+              (0,0,0,0),(1,15055671,1,15055671),
+              (1,15055672,1,15055670),(0,123456789,1,987654321),
+              (1,987654321,0,123456789),(0,0,1,15055671),
+              (1,15055671,0,0),(0,1,0,2),(0,2,0,1),
+              (0,10**50+987654321,1,10**51+123456789),
+              (1,10**77+987654321,0,10**78+123456789),
+          ]
+          for signC,magC,signT,magT in fused_days:
+              textargs=" ".join(map(str,[signC,magC,signT,magT]))
+              five=invoke(root+"reference/work_counts.b98",textargs)
+              savedC=invoke(root+"reference/save.b98",str(signC)+" "+str(magC))
+              savedT=invoke(root+"reference/save.b98",str(signT)+" "+str(magT))
+              exact("fused-workcounts:"+textargs,"src/interleaved_work_counts.b98",textargs,five+savedC+savedT)
+          for invalid in ["1 0 0 0","0 0 1 0","2 10 0 10","0 10 2 10"]:
+              exact("fused-workcounts-rejection:"+invalid,
+                    "src/interleaved_work_counts.b98",invalid,["-1"]*7)
+          for fixture in ["REFERENCE_PRIMITIVE_FIXTURES.tsv","REFERENCE_INTEGRATION_FIXTURES.tsv"]:
+              with open(root+"fixtures/"+fixture,"rb") as f:
+                  for i,row in enumerate(csv.DictReader(f,delimiter="\t"),1):
+                      exact(fixture+":"+str(i), "reference/"+row["reference_file"],
+                            row["input_tokens"].strip(),row["expected_output_tokens"].split())
+          exact("count-weaving-333","reference/count_weavings.b98","3 3 3 3",["71"])
+          exact("count-weaving-444","reference/count_weavings.b98","3 4 4 4",["1301"],"120s")
+          exact("unrank-weaving-444-last","reference/unrank_weaving.b98","3 4 4 4 1301",
+                "1 2 3 3 3 2 2 1 1 1 2 3".split(),"120s")
+          exact("year5000","reference/year5000_from_gates_rank.b98",
+                "0 100 0 0 7 0 0 0 42 0 84 0 126 0 168 0 210 0 252 1",
+                "0 5000 0 6 0 252".split())
+          print("STAGE1_TARGETED_NATIVE_REGRESSION_PASS total_invocations="+str(n))
+          PY
+            '
