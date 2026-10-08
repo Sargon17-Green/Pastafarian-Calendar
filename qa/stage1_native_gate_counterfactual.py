@@ -83,6 +83,14 @@ def main():
                     label+" stderr="+repr(merr[-350:]))
         assert_true("CF_GATE_POST_WINDOW" in merr,
                     "counterfactual did not log modified instruction path: "+label)
+        sham_path=next(line for line in serr.splitlines()
+                       if line.startswith("CF_GATE_POST_WINDOW"))
+        mutated_path=next(line for line in merr.splitlines()
+                          if line.startswith("CF_GATE_POST_WINDOW"))
+        assert_true(sham_path!=mutated_path,
+                    "neutralizing the native runtime-written gate did not "
+                    "cause immediate directional path divergence: "+label)
+        print("NATIVE_COUNTERFACTUAL_DIRECTED_ROUTE_DIFFERENCE_PASS",label)
         # A different result, or no finite result within the hard execution
         # budget, proves the executed opcode participates in reaching the
         # native program's output. Merely taking a different graphical
@@ -99,6 +107,9 @@ def main():
                  "native_sham_exit_code":src,
                  "native_sham_output_identical_to_reference":sout==raw,
                  "native_sham_hook_bound_and_executed":True,
+                 "native_sham_first_five_post_gate_steps":sham_path,
+                 "native_mutation_first_five_post_gate_steps":mutated_path,
+                 "native_immediate_directional_divergence":True,
                  "counterfactual_trigger":
                     next(line for line in merr.splitlines()
                          if line.startswith("CF_GATE_TRIGGER")),
@@ -114,7 +125,7 @@ def main():
                                     "not full geometric spaghetti acceptance",
                             "cases":results},sort_keys=True,indent=2)+"\n")
     print("NATIVE_COUNTERFACTUAL_SHAM_INSTRUMENTATION_INVARIANCE_PASS",len(results))
-    print("NATIVE_COUNTERFACTUAL_EXECUTABLE_ROUTE_IMPACTS_OUTPUT_PASS",len(results))
+    print("NATIVE_COUNTERFACTUAL_TIME_BOUNDED_COMPLETION_DEPENDENCE_PASS",len(results))
     print("STAGE1_GEOMETRIC_SPAGHETTI_ACCEPTANCE_STILL_OPEN")
 
 if __name__=="__main__":main()
