@@ -37,7 +37,7 @@ require(len(oldrows) == len(newrows), "source height changed")
 require(max(map(len, oldrows)) == max(map(len, newrows)),
         "Funge-space horizontal bounds changed")
 require(newrows[0][:5] == b"v    ", "entry vector unexpected")
-require(oldrows[0][:5] == b">&", "legacy input entry unexpected")
+require(oldrows[0][:5] == b">&" + b"&"*3, "legacy input entry unexpected")
 require(newrows[0][5:] == oldrows[0][5:],
         "any original day arithmetic at y=0 changed")
 require(newrows[50:] == oldrows[50:],
