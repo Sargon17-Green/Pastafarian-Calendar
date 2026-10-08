@@ -32,7 +32,7 @@ for rank in (0,1):
         seenreturn=[(i,step) for i,step in enumerate(steps)
                     if step[1:3]==(293,0)]
         seenx=[(i,step) for i,step in enumerate(steps)
-               if step[1:3]==(711,1)]
+               if step[1:3]==(712,1)]
         print("NATIVE_WEAVING_RANK_IP_PROBE",
               "rank",rank,"exit",p.returncode,
               "out",stdout.split(),"steps",len(steps),
