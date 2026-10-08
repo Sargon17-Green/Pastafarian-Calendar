@@ -59,3 +59,25 @@ PROBES = [
 for a, b in PROBES:
     test_case(a, b)
 print("NATIVE_LEXICAL_REJECTION_PASS", len(PROBES))
+
+# Preserve an independent negative control: the byte-identical historic
+# baseline demonstrably accepts a forbidden minus lexeme. Do not use it
+# as the production oracle; it merely proves this CI gate detects the fix.
+legacy_command = CMD[:-1] + ["qa/interleaved_work_counts_pre_lexical_baseline.b98"]
+def legacy_native(text):
+    proc = subprocess.Popen(legacy_command, stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = proc.communicate(text + "\n")
+    if proc.returncode:
+        raise AssertionError("NATIVE_LEGACY_PROCESS_CRASH %r" % (err[-500:],))
+    return out.split()
+
+baseline_bad = legacy_native("-0 1 0 1")
+baseline_good = legacy_native("0 1 0 1")
+if baseline_bad != baseline_good or baseline_bad == ERROR or len(baseline_bad) != 7:
+    raise AssertionError("old source no longer exhibits the historical lexical failure")
+if native("-0 1 0 1") != ERROR:
+    raise AssertionError("promoted production still accepts a forbidden raw sign")
+print("NATIVE_LEXICAL_LEGACY_NEGATIVE_CONTROL_PASS", "baseline_bug_confirmed",
+      "promoted_src_rejects")
+
