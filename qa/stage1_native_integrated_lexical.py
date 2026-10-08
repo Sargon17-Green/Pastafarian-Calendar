@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Native PyFunge test for the test-only integrated lexical+2D production candidate.
+"""Native PyFunge test for the QA-promoted integrated lexical+2D production candidate.
 
 Expected seven calendar values arise exclusively from independent native
 Befunge reference programs; the old production is used only as regression
@@ -11,8 +11,8 @@ import hashlib
 import subprocess
 import sys
 
-NEW = "qa/interleaved_work_counts_lexical_candidate.b98"
-OLD = "src/interleaved_work_counts.b98"
+NEW = "src/interleaved_work_counts.b98"
+OLD = "qa/interleaved_work_counts_pre_lexical_baseline.b98"
 REF_COUNTS = "reference/work_counts.b98"
 REF_SAVE = "reference/save.b98"
 CMD = ["pyfunge", "--disable-fprint", "--no-concurrent", "--no-filesystem",
@@ -99,4 +99,4 @@ print("NATIVE_INTEGRATED_LEXICAL_CANDIDATE_PASS",
       len(ILLEGAL_NUMERIC), "numeric_rejections",
       len(ILLEGAL_LEXICAL), "lexical_rejections",
       RUNS[0], "native_executions")
-print("ACCEPTANCE_SCOPE=test-only Funge-space integration; full Stage 1 remains OPEN")
+print("ACCEPTANCE_SCOPE=QA-branch production lexer qualification; full Stage 1 remains OPEN")
