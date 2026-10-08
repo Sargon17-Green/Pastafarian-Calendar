@@ -7,8 +7,8 @@ p/g ownership and actual execution still require native replay and IP trace.
 """
 import hashlib
 
-OLD = "src/interleaved_work_counts.b98"
-NEW = "qa/interleaved_work_counts_lexical_candidate.b98"
+OLD = "qa/interleaved_work_counts_pre_lexical_baseline.b98"
+NEW = "src/interleaved_work_counts.b98"
 LEX = "qa/lexical_candidate.b98"
 BASELINE_GIT_BLOB_SHA = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
 
@@ -28,9 +28,11 @@ def require(pred, message):
 
 old = load(OLD)
 new = load(NEW)
+require(new == load("qa/interleaved_work_counts_lexical_candidate.b98"),
+        "QA production not byte-for-byte identical to Native-qualified scanner")
 lex = load(LEX)
 require(git_blob_sha(old) == BASELINE_GIT_BLOB_SHA,
-        "production changed since native geometry baseline")
+        "pre-lexical baseline changed since native geometry baseline")
 
 oldrows, newrows, lexrows = [p.split(b"\n") for p in (old, new, lex)]
 require(len(oldrows) == len(newrows), "source height changed")
