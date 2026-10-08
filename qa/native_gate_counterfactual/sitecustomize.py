@@ -11,6 +11,9 @@ import sys
 if os.environ.get("BF98_GATE_COUNTERFACTUAL"):
     import funge.program as _program
     _original_step=_program.Program.execute_step
+    _original_execute=_program.Program.execute
+    sys.stderr.write("CF_HOOK_LOADED executable gate test\n")
+    sys.stderr.flush()
     _target=(1500,1750)
     _observed=[0]
     _mutated=[False]
@@ -45,4 +48,11 @@ if os.environ.get("BF98_GATE_COUNTERFACTUAL"):
                       (_observed[0],tuple(ip.delta)))
                     sys.stderr.flush()
         return _original_step(self)
-    _program.Program.execute_step=_test_step
+    def _traced_execute(self):
+        sys.stderr.write("CF_HOOK_BOUND to native Program.execute\n")
+        sys.stderr.flush()
+        # Match the already native-verified qa/sitecustomize.py trace hook:
+        # bind to the *instance*, not only the Program class.
+        self.execute_step=_test_step.__get__(self,self.__class__)
+        return _original_execute(self)
+    _program.Program.execute=_traced_execute
