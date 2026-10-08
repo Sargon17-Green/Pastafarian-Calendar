@@ -56,18 +56,18 @@ def verify(label,inputs,count_mod,unrank_mod):
         if got!=(-1,):
             raise AssertionError("%s rank=%d count=%d incorrectly accepted: %r" %
                                  (label,rank,count,got))
-    for rank in sorted(set([1,count])):
+    for rank in sorted(set(r for r in [1,2,3,count//3,count//2,count-2,count-1,count] if 1<=r<=count)):
         got=run(unrank_mod,inputs+(rank,))
         if got==(-1,) or len(got)<1:
             raise AssertionError("%s rejects legal rank %d of %d: %r" %
                                  (label,rank,count,got))
-        if unrank_mod.startswith("qa/"):
-            baseline=("unrank_bounded_composition" if "bounded" in unrank_mod
-                      else "unrank_weaving")
-            expected=run(baseline,inputs+(rank,))
-            if got!=expected:
-                raise AssertionError("%s candidate changed legal rank %d: %r != %r" %
-                                     (label,rank,got,expected))
+        baseline=("qa/unrank_bounded_composition_pre_strict_rank_baseline.b98"
+                  if label.startswith("bounded:") else
+                  "qa/unrank_weaving_pre_strict_rank_baseline.b98")
+        expected=run(baseline,inputs+(rank,))
+        if got!=expected:
+            raise AssertionError("%s strict rank parser changed legal rank %d: %r != %r" %
+                                 (label,rank,got,expected))
     print("NATIVE_ADVERSARIAL_RANK_DOMAIN_PASS",label,"count",count,
           "rejected",len(invalid))
     sys.stdout.flush()
@@ -90,10 +90,10 @@ probe_native_integer_character_handoff()
 
 for item in BOUNDED:
     verify("bounded:"+str(item),item,
-           "count_bounded_compositions","qa/unrank_bounded_composition_strict_candidate.b98")
+           "count_bounded_compositions","unrank_bounded_composition")
 for item in WEAVINGS:
     fields=(len(item),)+item
-    verify("weaving:"+str(item),fields,"count_weavings","qa/unrank_weaving_strict_candidate.b98")
+    verify("weaving:"+str(item),fields,"count_weavings","unrank_weaving")
 
 print("NATIVE_STAGE1_ADVERSARIAL_RANK_DOMAIN_PASS native_invocations=%d" %
       NATIVE[0])
