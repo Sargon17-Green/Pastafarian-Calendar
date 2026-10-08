@@ -28,8 +28,11 @@ def require(pred, message):
 
 old = load(OLD)
 new = load(NEW)
-require(new == load("qa/interleaved_work_counts_lexical_candidate.b98"),
-        "QA production not byte-for-byte identical to Native-qualified scanner")
+# All QA production bytes must equal the separately native-qualified k+
+# arithmetic source, rather than the now-frozen earlier lexical scanner.
+lexical_baseline = load("qa/interleaved_work_counts_lexical_candidate.b98")
+require(new == load("qa/interleaved_work_counts_kplus_2d_candidate.b98"),
+        "QA production differs from its exact Native-qualified k+ source")
 lex = load(LEX)
 require(git_blob_sha(old) == BASELINE_GIT_BLOB_SHA,
         "pre-lexical baseline changed since native geometry baseline")
@@ -42,8 +45,27 @@ require(newrows[0][:5] == b"v   >", "entry vector/right-heading bridge unexpecte
 require(oldrows[0][:5] == b">&" + b"&"*3, "legacy input entry unexpected")
 require(newrows[0][5:] == oldrows[0][5:],
         "any original day arithmetic at y=0 changed")
-require(newrows[50:] == oldrows[50:],
-        "original production geometry changed outside reserved rows")
+# Verify strictly localized intentional executable geometry insertion:
+# original arithmetic opcode (1470,100): '+' -> 'v', while (1471,100)
+# retains its original dynamic 'x'. The new row-101 circuit compensates
+# for PyFunge's execute-k-then-execute-next semantics and rejoins at x.
+baseline_rows = lexical_baseline.split(b"\\n")
+require(len(newrows) == len(baseline_rows),
+        "native k+ geometry changed row count")
+require(newrows[:100] == baseline_rows[:100],
+        "production changed unrelated rows before k+ injection")
+require(newrows[100][:1470] == baseline_rows[100][:1470]
+        and baseline_rows[100][1470:1472] == b"+x"
+        and newrows[100][1470:1472] == b"vx"
+        and newrows[100][1472:] == baseline_rows[100][1472:],
+        "unexpected source edit outside the exact arithmetic k+ entry")
+k_lane = b">1-11k+0c-01-x"
+require(newrows[101][:1470].rstrip() == baseline_rows[101][:1470].rstrip()
+        and not baseline_rows[101][1470:].strip()
+        and newrows[101][1470:].rstrip() == k_lane,
+        "native arithmetic k+ detour not isolated to verified row-101 lane")
+require(newrows[102:] == baseline_rows[102:],
+        "production geometry outside the approved k+ circuit changed")
 require(all(not row.strip() for row in oldrows[1:50]),
         "reserved top-of-map region no longer unoccupied")
 for i in range(1, 50):
@@ -61,7 +83,7 @@ require(b"~" in newrows[5],
         "new lexical parser must operate at character level")
 print("STAGE1_SCANNER_SOURCE_MAP_STATIC_PASS",
       "same_2d_extent=YES",
-      "original_arithmetic_bytes_preserved=YES",
+      "original_arithmetic_except_verified_kplus=YES",
       "reserved_parser_rows=1..49",
       "legacy_program_sha="+BASELINE_GIT_BLOB_SHA)
 print("STATIC_PROOF_NOT_NATIVE_FUNCTIONAL_OR_STATE_OWNERSHIP_ACCEPTANCE")
