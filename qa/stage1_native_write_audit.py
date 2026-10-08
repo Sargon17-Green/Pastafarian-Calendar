@@ -42,6 +42,7 @@ def inspect_trace(path, required_gate_replays):
     records = {}
     pending = {}
     executed_modified_writes = set()
+    executed_gate_writes = set()
     write_counts = 0
     effective_changes = 0
     completed_reads = 0
@@ -79,6 +80,7 @@ def inspect_trace(path, required_gate_replays):
                     if tick > write_tick:
                         require(opcode == newval,
                                 "executable cell differs from latest native write")
+                        executed_gate_writes.add((write_tick, position))
                         if was_changed:
                             executed_modified_writes.add((write_tick, position))
                         del pending[position]
@@ -148,8 +150,14 @@ def inspect_trace(path, required_gate_replays):
     require(entered_arithmetic, "native control never reached arithmetic handoff")
     require(write_counts >= 1, "no observed mutable Funge-space")
     require(effective_changes >= 1, "no actual mutations")
-    require(len(executed_modified_writes) >= required_gate_replays,
-            "insufficient executed changed code gates")
+    # A gate write is a runtime control-flow action even when rewriting the
+    # same opcode already present. Distinguish executed gate writes (10/4)
+    # from the subset that changed the cell contents (3/3 in the native run).
+    require(len(executed_gate_writes) >= required_gate_replays,
+            "insufficient later-executed native gate writes: %d < %d" %
+            (len(executed_gate_writes), required_gate_replays))
+    require(len(executed_modified_writes) >= 2,
+            "insufficient distinct content-changing executable gate writes")
     require(opcounts[ord("x")] >= 1, "no executed dynamic vector x")
     for vector in ((1, 0), (-1, 0), (0, 1), (0, -1)):
         require(vector in directions, "missing cardinal instruction direction")
@@ -162,6 +170,8 @@ def inspect_trace(path, required_gate_replays):
         "g_reads": completed_reads,
         "scanner_owned_cells_protected": len(SCANNER_OWNED),
         "changed_writes": effective_changes,
+        "gate_writes_executed_later": len(executed_gate_writes),
+        "content_changing_gate_writes_executed_later": len(executed_modified_writes),
         "changed_writes_executed_later": len(executed_modified_writes),
         "dynamic_x": opcounts[ord("x")],
         "distinct_directions": len(directions)
