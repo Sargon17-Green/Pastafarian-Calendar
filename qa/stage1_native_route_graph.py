@@ -92,6 +92,13 @@ def analyze(rows,trace_path):
                 current_step+=1
                 require(tick==current_step,"nonsequential native STEP tick")
                 require(depth>=0,"negative native stack depth")
+                # In a single-IP --no-concurrent native run a zero vector
+                # makes x/y stationary and can silently spin forever.
+                # The strict rank-unrank candidate exposed this exact failure
+                # in its separate native IP diagnostic.
+                require((dx,dy)!=(0,0),
+                        "native zero-velocity IP (nonprogress), tick=%d cell=(%d,%d)"%
+                        (tick,x,y))
                 ip_ids.add(ip)
                 point=(x,y)
                 actual=changed.get(point,initial_byte(rows,x,y))
@@ -264,6 +271,18 @@ def selftest():
                     "unexpected selftest error: %s" % err)
         else:
             raise AssertionError("synthetic input incorrectly passed native geometry gate")
+        # Adversarial negative: reject a stationary IP, even if the
+        # byte at the position is otherwise a valid Befunge opcode.
+        with open(trace,"w",encoding="utf-8") as stream:
+            stream.write("STEP\\t1\\t1\\t0\\t0\\t0\\t0\\t49\\t1\\n")
+        try:
+            analyze(rows,trace)
+        except AssertionError as err:
+            require("zero-velocity IP" in str(err),
+                    "stationary native IP did not trip its exact guard")
+        else:
+            raise AssertionError("native zero-velocity IP falsely passed audit")
+    print("NATIVE_ROUTE_GRAPH_ZERO_VELOCITY_NEGATIVE_CONTROL_PASS")
     print("NATIVE_ROUTE_GRAPH_SELFTEST_PASS")
 
 def main(argv):
