@@ -113,3 +113,38 @@ jobs:
           PY
               python qa/stage1_native_process_isolation.py
             '
+
+  native-write-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned PyFunge-98 for native Funge-space trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native IP, exact p writes and subsequent executable gate reads
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-befunge-traces"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-befunge-traces:/traces" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              export PYTHONPATH=/work/qa
+              export BF98_TRACE_LOG=/traces/valid.tsv
+              printf "1 15055672 1 15055670\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/interleaved_work_counts.b98 > /traces/valid.out
+              export BF98_TRACE_LOG=/traces/invalid.tsv
+              printf "2 10 0 10\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/interleaved_work_counts.b98 > /traces/invalid.out
+            '
+          test "$(wc -w < "$RUNNER_TEMP/native-befunge-traces/valid.out")" -eq 7
+          test "$(tr -s '[:space:]' ' ' < "$RUNNER_TEMP/native-befunge-traces/invalid.out" | xargs)" = "-1 -1 -1 -1 -1 -1 -1"
+          python3 qa/stage1_native_write_audit.py \
+            "$RUNNER_TEMP/native-befunge-traces/valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.tsv"
+          sha256sum src/interleaved_work_counts.b98
