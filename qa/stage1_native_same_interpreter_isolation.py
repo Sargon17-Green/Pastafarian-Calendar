@@ -20,6 +20,7 @@ import StringIO
 from funge.program import Program
 from funge.languages.funge98 import Befunge98
 from funge.platform import BufferedPlatform
+from funge.exception import IPQuitted, IPStopped
 
 CMD = ["timeout","--kill-after=2s","50s","pyfunge",
        "--disable-fprint","--no-concurrent","--no-filesystem",
@@ -131,14 +132,31 @@ def interleaved(a_case,b_case):
     b,bo=make_instance(b_path,b_case)
     if a.space is b.space:
         raise AssertionError("two live Program instances share Funge-space")
+    def tick_one(program):
+        # execute() handles these interpreter control exceptions internally.
+        # Calling execute_step() directly must perform that lifecycle handling.
+        if not program.ips:
+            return
+        if len(program.ips)!=1:
+            raise AssertionError("unexpected multiple IPs in no-concurrent QA")
+        current=program.ips[0]
+        try:
+            program.execute_step()
+        except IPStopped:
+            program.remove_ip(current)
+        except IPQuitted as exc:
+            # Whole-program termination (for example @ in this PyFunge path).
+            # A quit ends ALL IPs, but our candidate has exactly one.
+            for ip in list(program.ips):
+                program.remove_ip(ip)
     ticks=0
     while a.ips or b.ips:
         if ticks>=150000:
             raise AssertionError("native interleaved Program.execute_step timeout")
         if a.ips:
-            a.execute_step()
+            tick_one(a)
         if b.ips:
-            b.execute_step()
+            tick_one(b)
         ticks+=1
     got_a=ao.getvalue().split()
     got_b=bo.getvalue().split()
