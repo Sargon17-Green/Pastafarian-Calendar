@@ -25,6 +25,7 @@ jobs:
           test "$(git hash-object src/save.b98)" = "dd6f10aa196e3a9523ee786e4ba41a91f303d199"
           test "$(git hash-object README.md)" = "74c424b44eadd4ece3f29072ddbf873236557604"
           echo NATIVE_STAGE1_PINNED_SOURCE_SHA_PASS
+          python3 qa/stage1_parser_integration_structure.py
       - name: Verify pinned PyFunge-98 package
         shell: bash
         run: |
