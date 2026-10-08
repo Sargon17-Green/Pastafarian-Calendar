@@ -20,7 +20,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           test "$(git hash-object qa/interleaved_work_counts_lexical_candidate.b98)" = "e2b39b066d1d47bcb8ce4f234b093fca94cb21d1"
           test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
           test "$(git hash-object src/day_count.b98)" = "4f25f514f7b6362105dfff77db6f36769efe36c3"
@@ -322,7 +322,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
@@ -374,7 +374,7 @@ jobs:
           test "$(git hash-object reference/unrank_weaving.b98)" = "a48359619ab5391b156e6eefdd6d36a5e500611a"
           test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
           test "$(git hash-object reference/falling_factorial.b98)" = "d20317d31740e633e8696302faaee6d63639e080"
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
       - name: Native weaving rank coverage and Year5000 translation/boundary invariants
@@ -421,7 +421,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
           python3 -m py_compile qa/stage1_native_diverse_geometry_audit.py qa/stage1_native_route_graph.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
@@ -489,7 +489,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
       - name: Execute native counterfactual against written-and-executed 2D gate
@@ -524,7 +524,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
       - name: Native g/p failure injection and same Program object explicit recovery
@@ -574,7 +574,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           test "$(git hash-object qa/interleaved_work_counts_kplus_2d_candidate.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
           python3 -m py_compile qa/stage1_native_kplus_candidate.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
@@ -600,7 +600,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m py_compile qa/stage1_native_operand_discovery.py qa/native_operand_probe/sitecustomize.py
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
           mkdir -p "$RUNNER_TEMP/native-operand-evidence"
@@ -634,7 +634,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           test "$(git hash-object qa/interleaved_work_counts_native_bifurcation_candidate.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
           python3 -m py_compile qa/stage1_native_bifurcation_candidate.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"

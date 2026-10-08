@@ -31,8 +31,8 @@ new = load(NEW)
 # All QA production bytes must equal the separately native-qualified k+
 # arithmetic source, rather than the now-frozen earlier lexical scanner.
 lexical_baseline = load("qa/interleaved_work_counts_lexical_candidate.b98")
-require(new == load("qa/interleaved_work_counts_kplus_2d_candidate.b98"),
-        "QA production differs from its exact Native-qualified k+ source")
+require(new == load("qa/interleaved_work_counts_native_bifurcation_candidate.b98"),
+        "QA production differs from its exact Native-qualified bifurcation source")
 lex = load(LEX)
 require(git_blob_sha(old) == BASELINE_GIT_BLOB_SHA,
         "pre-lexical baseline changed since native geometry baseline")
@@ -64,8 +64,27 @@ require(newrows[101][:1470].rstrip() == baseline_rows[101][:1470].rstrip()
         and not baseline_rows[101][1470:].strip()
         and newrows[101][1470:].rstrip() == k_lane,
         "native arithmetic k+ detour not isolated to verified row-101 lane")
-require(newrows[102:] == baseline_rows[102:],
-        "production geometry outside the approved k+ circuit changed")
+require(newrows[102:1334] == baseline_rows[102:1334],
+        "production geometry changed before the approved conditional fork")
+require(newrows[1337:] == baseline_rows[1337:],
+        "production geometry changed after the approved conditional fork")
+require(baseline_rows[1335][950:952] == b"+!" and
+        newrows[1335][:950] == baseline_rows[1335][:950] and
+        newrows[1335][950:952] == b"x|" and
+        newrows[1335][952:] == baseline_rows[1335][952:],
+        "native logical-not and addition were not replaced by the exact fork/rejoin")
+upper = b">0+01-00c-1x"
+lower = b">1+01-00e-01-x"
+require(not baseline_rows[1334][951:951+len(upper)].strip() and
+        newrows[1334][:951] == baseline_rows[1334][:951] and
+        newrows[1334][951:951+len(upper)] == upper and
+        newrows[1334][951+len(upper):] == baseline_rows[1334][951+len(upper):],
+        "upper native arithmetic fork escaped its allocated source-map lane")
+require(not baseline_rows[1336][951:951+len(lower)].strip() and
+        newrows[1336][:951] == baseline_rows[1336][:951] and
+        newrows[1336][951:951+len(lower)] == lower and
+        newrows[1336][951+len(lower):] == baseline_rows[1336][951+len(lower):],
+        "lower native arithmetic fork escaped its allocated source-map lane")
 require(all(not row.strip() for row in oldrows[1:50]),
         "reserved top-of-map region no longer unoccupied")
 for i in range(1, 50):
@@ -83,7 +102,7 @@ require(b"~" in newrows[5],
         "new lexical parser must operate at character level")
 print("STAGE1_SCANNER_SOURCE_MAP_STATIC_PASS",
       "same_2d_extent=YES",
-      "original_arithmetic_except_verified_kplus=YES",
+      "original_arithmetic_except_verified_kplus_and_bifurcation=YES",
       "reserved_parser_rows=1..49",
       "legacy_program_sha="+BASELINE_GIT_BLOB_SHA)
 print("STATIC_PROOF_NOT_NATIVE_FUNCTIONAL_OR_STATE_OWNERSHIP_ACCEPTANCE")
