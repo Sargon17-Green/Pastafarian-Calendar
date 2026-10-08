@@ -1,5 +1,7 @@
 # Жергиликтүү Befunge аткаруусун текшерүү
 
+> Канондук repository: `Sargon17-Green/Pastafarian-Calendar`; branch: `Befunge+Кыргызча`. Бардык `src/`, `reference/`, `test/` жолдору branch root'уна салыштырмалуу көрсөтүлөт. 2026-10-08деги туура repo native regression: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37790547734 (421/421 PASS). Төмөндөгү `pastafari-calendar` URL'дери көчүрүүгө чейинки **тарыхый QA** гана; азыркы репонун жыйынтыктары катары колдонбоо керек.
+
 Бул файл `Stage 1` үчүн Befunge-98 менен жергиликтүү аткаруунун минималдуу тартибин берет.
 
 ## Интерпретатор шарты
@@ -7,7 +9,7 @@
 Интерпретатор `src/runtime_contract.b98` программасын ийгиликтүү өткөрүшү керек. PyFunge колдонулса кошумча семантикаларды өчүрүп иштетүү сунушталат:
 
 ```text
-pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 implementations/befunge-kyrgyz/src/runtime_contract.b98
+pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/runtime_contract.b98
 ```
 
 Күтүлгөн сандык токен: `1`.
@@ -17,7 +19,7 @@ Funge-98деги `.` бүтүн санды ондук түрүндө чыгар�
 ## Баштапкы ишке киргизүү
 
 ```text
-pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 implementations/befunge-kyrgyz/src/bootstrap.b98
+pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/bootstrap.b98
 ```
 
 Киргизүү `0`; күтүлгөн сандык токен `1`.
@@ -44,13 +46,13 @@ pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 implementation
 Төмөнкү файлдардын ар бири `1` сандык токенин чыгарышы керек:
 
 ```text
-implementations/befunge-kyrgyz/test/anchor_constants.b98
-implementations/befunge-kyrgyz/test/great_number.b98
-implementations/befunge-kyrgyz/test/save_edges.b98
-implementations/befunge-kyrgyz/test/reference_day_count_edges.b98
-implementations/befunge-kyrgyz/test/sign_validation.b98
-implementations/befunge-kyrgyz/test/stones_drop2.b98
-implementations/befunge-kyrgyz/test/year_bounds.b98
+test/anchor_constants.b98
+test/great_number.b98
+test/save_edges.b98
+test/reference_day_count_edges.b98
+test/sign_validation.b98
+test/stones_drop2.b98
+test/year_bounds.b98
 ```
 
 Ар бир файлды ушул үлгү менен иштетүү керек:
@@ -105,7 +107,7 @@ choose_rank_short.b98:
 `src/interleaved_day_save.b98` эки өз алдынча program'ды external `=` аркылуу чакырбайт: signed input'ту **бир эле эсептик циклде** иштетип, эки натыйжаны ирети менен чыгарат:
 
 ```text
-pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 implementations/befunge-kyrgyz/src/interleaved_day_save.b98
+pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/interleaved_day_save.b98
 ```
 
 Input `0 0` → output `30111343 170141183460469231731687303715884105727`.
