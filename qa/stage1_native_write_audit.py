@@ -9,6 +9,26 @@ import collections
 import json
 import sys
 
+def scanner_owned_cells():
+    """Cells introduced for lexical code, scratch and entry redirection."""
+    with open("src/interleaved_work_counts.b98","r",encoding="ascii") as stream:
+        before=stream.read().split("\n")
+    with open("qa/interleaved_work_counts_lexical_candidate.b98",
+              "r",encoding="ascii") as stream:
+        after=stream.read().split("\n")
+    if len(before)!=len(after):
+        raise AssertionError("unexpected Funge-space height")
+    overlay={(x,y) for y in range(1,50)
+             for x,c in enumerate(after[y])
+             if c!=" " and (x>=len(before[y]) or before[y][x]==" ")}
+    if len(overlay)!=3713:
+        raise AssertionError("unexpected scanner source footprint")
+    scratch={(x,49) for x in (0,1,2,3,10,11,12,13)}
+    changed_entry={(x,0) for x in range(5)}
+    return overlay|scratch|changed_entry
+
+SCANNER_OWNED=scanner_owned_cells()
+
 def require(condition, message):
     if not condition:
         raise AssertionError(message)
@@ -24,6 +44,8 @@ def inspect_trace(path, required_gate_replays):
     executed_modified_writes = set()
     write_counts = 0
     effective_changes = 0
+    completed_reads = 0
+    entered_arithmetic = False
     with open(path, "r", encoding="utf-8") as stream:
         for raw in stream:
             if not raw.strip():
@@ -47,6 +69,11 @@ def inspect_trace(path, required_gate_replays):
                 directions.add((dx, dy))
                 opcounts[opcode] += 1
                 position = (x, y)
+                if position == (5,0):
+                    entered_arithmetic = True
+                if entered_arithmetic:
+                    require(position not in SCANNER_OWNED,
+                            "native IP executed reserved scanner Funge-space")
                 if position in pending:
                     write_tick, newval, was_changed = pending[position]
                     if tick > write_tick:
@@ -56,12 +83,37 @@ def inspect_trace(path, required_gate_replays):
                             executed_modified_writes.add((write_tick, position))
                         del pending[position]
                 records[tick] = {"opcode": opcode}
+            elif tag == "READ_BEFORE":
+                require(len(vals) == 4, "bad READ_BEFORE shape")
+                tick, x, y, expected = vals
+                require(tick in records and records[tick]["opcode"] == ord("g"),
+                        "read not attached to a native g")
+                require("read" not in records[tick], "duplicate read before")
+                if entered_arithmetic:
+                    require((x,y) not in SCANNER_OWNED,
+                            "native g accessed reserved scanner Funge-space")
+                records[tick]["read"] = ((x,y),expected)
+            elif tag == "READ_AFTER":
+                require(len(vals) == 4, "bad READ_AFTER shape")
+                tick, x, y, actual = vals
+                require(tick in records and "read" in records[tick],
+                        "read after without native before")
+                target, expected = records[tick]["read"]
+                require(target == (x,y), "g read target changed")
+                require(actual == expected, "native g stack differs from cell value")
+                require("read_complete" not in records[tick],
+                        "duplicate read after")
+                records[tick]["read_complete"] = True
+                completed_reads += 1
             elif tag == "WRITE_BEFORE":
                 require(len(vals) == 5, "bad WRITE_BEFORE shape")
                 tick, x, y, previous, proposed = vals
                 require(tick in records and records[tick]["opcode"] == ord("p"),
                         "write not tied to executed p")
                 require("write" not in records[tick], "duplicate write")
+                if entered_arithmetic:
+                    require((x,y) not in SCANNER_OWNED,
+                            "native p overwrote reserved scanner Funge-space")
                 records[tick]["write"] = ((x, y), previous, proposed)
             elif tag == "WRITE_AFTER":
                 require(len(vals) == 4, "bad WRITE_AFTER shape")
@@ -77,6 +129,8 @@ def inspect_trace(path, required_gate_replays):
                 effective_changes += int(changed)
                 write_counts += 1
                 pending[(x, y)] = (tick, actual, changed)
+            elif tag == "INSUFFICIENT_G_STACK":
+                raise AssertionError("cannot audit native g with insufficient stack")
             elif tag == "INSUFFICIENT_P_STACK":
                 raise AssertionError("cannot audit native p with insufficient stack")
             else:
@@ -87,6 +141,11 @@ def inspect_trace(path, required_gate_replays):
             "missing or unpaired p write observations")
     require(all("complete" in v for v in records.values() if "write" in v),
             "unfinished p write")
+    require(completed_reads == opcounts[ord("g")],
+            "missing or unpaired native Funge-space g reads")
+    require(all("read_complete" in v for v in records.values() if "read" in v),
+            "unfinished g read")
+    require(entered_arithmetic, "native control never reached arithmetic handoff")
     require(write_counts >= 1, "no observed mutable Funge-space")
     require(effective_changes >= 1, "no actual mutations")
     require(len(executed_modified_writes) >= required_gate_replays,
@@ -100,6 +159,8 @@ def inspect_trace(path, required_gate_replays):
         "revisits": steps - len(visited),
         "ip_count": len(step_ids),
         "p_writes": write_counts,
+        "g_reads": completed_reads,
+        "scanner_owned_cells_protected": len(SCANNER_OWNED),
         "changed_writes": effective_changes,
         "changed_writes_executed_later": len(executed_modified_writes),
         "dynamic_x": opcounts[ord("x")],
