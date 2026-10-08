@@ -329,3 +329,31 @@ jobs:
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=5s 850s python -u qa/stage1_native_structural_properties.py
             '
+
+  native-stage1-structural-corpus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin independent Befunge structural references
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reference/count_weavings.b98)" = "d57ef8da12e7cae7e62153407214f9f903eca280"
+          test "$(git hash-object reference/unrank_weaving.b98)" = "6caadb311e31cf6f498dc7112f323900034fae96"
+          test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
+          test "$(git hash-object reference/falling_factorial.b98)" = "d20317d31740e633e8696302faaee6d63639e080"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "e2b39b066d1d47bcb8ce4f234b093fca94cb21d1"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native weaving rank coverage and Year5000 translation/boundary invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 720s python -u qa/stage1_native_structural_corpus.py
+            '
