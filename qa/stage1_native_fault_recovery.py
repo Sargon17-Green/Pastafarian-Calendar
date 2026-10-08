@@ -91,7 +91,7 @@ for index,(watch,depth,timing) in enumerate(SCENARIOS):
     original_step=program.execute_step
     observed=[0]
     changed=[0]
-    def injected_step():
+    def injected_step(self):
         if not program.ips:
             return original_step()
         ip=program.ips[0]
@@ -115,7 +115,7 @@ for index,(watch,depth,timing) in enumerate(SCENARIOS):
             raise DeliberateNativeFault("AFTER %s at #%d" % (watch,depth))
         return result
 
-    program.execute_step=injected_step
+    program.execute_step=injected_step.__get__(program,program.__class__)
     caught=None
     try:
         program.execute()
