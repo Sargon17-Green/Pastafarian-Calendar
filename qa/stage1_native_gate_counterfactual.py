@@ -61,6 +61,10 @@ def main():
         assert_true(raw==expected,
                     "unmodified production diverged from native oracle "+label)
         mrc,mout,merr=run(SRC,data,modified=True)
+        assert_true("CF_HOOK_LOADED" in merr and "CF_HOOK_BOUND" in merr,
+                    "counterfactual sitecustomize import or Program.execute "
+                    "monkeypatch not active: "+label+
+                    " stderr="+repr(merr[-600:]))
         assert_true("CF_GATE_TRIGGER position=(1500,1750)" in merr,
                     "counterfactual hook did not witness executed changed gate: "+
                     label+" stderr="+repr(merr[-350:]))
