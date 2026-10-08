@@ -65,7 +65,7 @@ def verify(label,inputs,count_mod,unrank_mod):
                   if label.startswith("bounded:") else
                   ("qa/unrank_weaving_pre_strict_rank_baseline.b98"
                    if label.startswith("weaving:") else
-                   "reference/unrank_distinct_names.b98"))
+                   "qa/unrank_distinct_names_pre_strict_rank_baseline.b98"))
         expected=run(baseline,inputs+(rank,))
         if got!=expected:
             raise AssertionError("%s strict rank parser changed legal rank %d: %r != %r" %
@@ -101,7 +101,7 @@ for item in WEAVINGS:
 # risk exists whenever a signed token is read using native numeric '&'.
 for n,k in [(3,2),(4,2)]:
     verify("names:%d/%d"%(n,k),(n,k),
-           "falling_factorial","qa/unrank_distinct_names_strict_candidate.b98")
+           "falling_factorial","unrank_distinct_names")
 
 print("NATIVE_STAGE1_ADVERSARIAL_RANK_DOMAIN_PASS native_invocations=%d" %
       NATIVE[0])
