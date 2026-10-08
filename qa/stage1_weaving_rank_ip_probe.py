@@ -22,6 +22,8 @@ for rank in (0,1):
             for row in stream:
                 if row.startswith("STEP\t"):
                     parts=row.strip().split("\t")
+                    if len(parts)!=9:
+                        continue  # truncated partial record after timeout
                     steps.append((int(parts[1]),int(parts[3]),
                                  int(parts[4]),int(parts[5]),
                                  int(parts[6]),int(parts[7])))
