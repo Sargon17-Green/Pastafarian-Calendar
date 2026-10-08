@@ -53,3 +53,44 @@
 - Бул QA санактары этаптагы бардык функционалдык талаптар бүткөнүн же өндүрүш коду келечекте жөнөкөйлөтүлбөй турганын далилдебейт. Баштапкы 2026-10-07деги `SEMANTIC_STATE_OWNER_VALIDATED=YES` тастыктоо жаңы mutable Funge программалар үчүн жараксыз. Эки gate `FUNCTIONAL_QA_PASS` жана `GEOMETRIC_SPAGHETTI_QA_PASS` боюнча дагы толук жана өз алдынча далил талап кылынат.
 
 **CURRENT_STAGE=1; LAST_COMPLETED_STAGE=0; Stage 2 башталган жок.**
+
+## 2026-10-08 — native 7/7 далилдери жана акыркы Stage 1 gap review
+
+Бул жаңы бөлүк мурунку native-ownership `PENDING_NEW_AUDIT` статусун
+жаңылайт; жогорудагы тарыхый таблица эски чекиттин абалын билдирет.
+
+**Verified run:** [37835677064](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37835677064),
+HEAD `8002a5d959e1a4f0d0b586974ba0bdae22ad57f6`.
+Seven of seven native jobs completed successfully, including:
+421 targeted regression native calls, 123 lexical-integrated native calls,
+43+48 standalone parser checks, eight forbidden sign rejection checks,
+per-execution native `g/p`+IP parity, 24 isolated native Programs and
+two interleaved pairs, and 16 native runs that explicitly reinitialize
+**the exact same Program object**. The 16 cases include alternating
+original/new native Befunge sources, legal/illegal inputs, identity
+invariants, separate I/O and Funge-space.
+
+**Маанилүү чек:** алтоо + жетинчи PASS — Stage 1дин баары PASS
+дегенди билдирбейт. `Program` объектине **explicit reset**
+жасалганы далилденди; мурдагы өзгөртүлгөн space'ти тазалабай
+reuse кылса болот деген талап же далил жок.
+
+| Stage 1 кабыл алуу бөлүгү | Азыркы так далил / ачык маселе |
+|---|---|
+| Lexical production correction | QA source Native PASS, 8 negative-sign checks; canonical branch'ка merge жок |
+| Native source geometry and mutable trace | Native trace exactly replayed for 26,708 valid + 12,194 invalid post-handoff events; 10/4 replayed executable gate writes |
+| State-owner fresh/reentrant/exact-object reset | PASS for documented specific input families (24 fresh Programs, 2 concurrent-live pairs, 16 exact-object explicit resets); whole architecture ownership final sign-off still OPEN |
+| Weaving, combinatorics, Year 5000 native coverage | NEW `qa/stage1_native_structural_corpus.py` and `qa/stage1_native_structural_properties.py` CI gates added; final native acceptance **PENDING** |
+| Full structural geometry acceptance | **OPEN**. In measured original arithmetic path after handoff: valid 25,982 IP steps, 9,532 distinct cells, 668 non-cardinal dynamic vectors, 128 p, 235 g; invalid 11,902 steps, 9,408 cells, 308 dynamic vectors, 56 p, 90 g. Advanced opcode/crossing/lifecycle and multi-input route graph acceptance remains incomplete |
+| Complete bootstrap acceptance and handoff | **OPEN**; `FULL_FUNCTIONAL_QA_PASS` and `GEOMETRIC_SPAGHETTI_QA_PASS` not certified; `HANDOFF_PACKAGE_PREPARED=NO` |
+
+Geometry evidence report:
+`artifacts/stage-01/NATIVE_GEOMETRY_EVIDENCE_LEDGER_2026-10-08.md`.
+The two measured traces do not execute `_`, `|`, `[`, `]`,
+`r`, `w`, `k`, `j`, `{`, `}`, or `u`.
+Бул deterministic кодуңдагы башка input'тарда ушул операциялар
+колдонулбайт деген универсалдуу далил эмес, бирок финалдык geometry
+acceptance'ке бул эки trace жетишсиз.
+
+**Stage 1 OPEN; LAST_COMPLETED_STAGE=0; Stage 2 башталган жок.
+Canonical `Befunge+Кыргызча` жана main өзгөртүлгөн жок.**
