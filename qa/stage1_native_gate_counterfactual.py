@@ -24,15 +24,16 @@ def assert_true(ok,why):
     if not ok:
         raise AssertionError(why)
 
-def run(path,data,modified=False):
+def run(path,data,mode=None):
     env=os.environ.copy()
     env.pop("BF98_TRACE_LOG",None)
     env.pop("BF98_GATE_COUNTERFACTUAL",None)
     env.pop("PYTHONPATH",None)
-    if modified:
-        env["BF98_GATE_COUNTERFACTUAL"]="1"
+    if mode:
+        assert_true(mode in ("mutation","sham"),"invalid counterfactual mode")
+        env["BF98_GATE_COUNTERFACTUAL"]=mode
         env["PYTHONPATH"]="/work/qa/native_gate_counterfactual"
-    cmd=["timeout","--kill-after=2s","12s" if modified else "50s"]+list(NATIVE)+[path]
+    cmd=["timeout","--kill-after=2s","12s" if mode=="mutation" else "50s"]+list(NATIVE)+[path]
     p=subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE,env=env)
     out,err=p.communicate(data)
@@ -60,7 +61,19 @@ def main():
         expected=oracle(data) if isvalid else ["-1"]*7
         assert_true(raw==expected,
                     "unmodified production diverged from native oracle "+label)
-        mrc,mout,merr=run(SRC,data,modified=True)
+        src,sout,serr=run(SRC,data,mode="sham")
+        assert_true(src==0 and sout==raw,
+                    "native SHAM control changed output or termination: "+label+
+                    " rc="+repr(src)+" output="+repr(sout))
+        for expected_signal in ("CF_HOOK_LOADED","CF_HOOK_BOUND",
+                                "CF_GATE_TRIGGER position=(1500,1750)",
+                                "mode=sham","CF_GATE_POST_WINDOW"):
+            assert_true(expected_signal in serr,
+                        "native SHAM control did not exercise patched native "
+                        "opcode: "+label+" missing "+expected_signal+
+                        " stderr="+repr(serr[-450:]))
+        print("NATIVE_COUNTERFACTUAL_SHAM_CONTROL_PASS",label,"output_unchanged")
+        mrc,mout,merr=run(SRC,data,mode="mutation")
         assert_true("CF_HOOK_LOADED" in merr and "CF_HOOK_BOUND" in merr,
                     "counterfactual sitecustomize import or Program.execute "
                     "monkeypatch not active: "+label+
@@ -74,6 +87,8 @@ def main():
         # budget, proves the executed opcode participates in reaching the
         # native program's output. Merely taking a different graphical
         # route with the same output would NOT satisfy this stronger check.
+        assert_true("mode=mutation" in merr,
+                    "counterfactual mutated control mode not observed: "+label)
         changed = mrc!=0 or mout!=raw
         assert_true(changed,
                     "neutralizing mutated executable gate did NOT affect "
@@ -81,6 +96,9 @@ def main():
         outcome={"case":label,"input":data.strip(),"unmodified_native_output":raw,
                  "mutated_output":mout,"mutated_exit_code":mrc,
                  "observed_output_or_termination_dependency":True,
+                 "native_sham_exit_code":src,
+                 "native_sham_output_identical_to_reference":sout==raw,
+                 "native_sham_hook_bound_and_executed":True,
                  "counterfactual_trigger":
                     next(line for line in merr.splitlines()
                          if line.startswith("CF_GATE_TRIGGER")),
@@ -95,6 +113,7 @@ def main():
                             "scope":"observed genuine gate dependence, "
                                     "not full geometric spaghetti acceptance",
                             "cases":results},sort_keys=True,indent=2)+"\n")
+    print("NATIVE_COUNTERFACTUAL_SHAM_INSTRUMENTATION_INVARIANCE_PASS",len(results))
     print("NATIVE_COUNTERFACTUAL_EXECUTABLE_ROUTE_IMPACTS_OUTPUT_PASS",len(results))
     print("STAGE1_GEOMETRIC_SPAGHETTI_ACCEPTANCE_STILL_OPEN")
 
