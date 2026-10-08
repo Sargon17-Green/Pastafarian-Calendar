@@ -77,5 +77,5 @@ Test-only candidate: `qa/lexical_candidate.b98`, көз карандысыз
 Локалдык BigInt-safe Funge instruction simulator менен
 **15/15** тандалган сценарий PASS; бул native interpreter
 PASS эмес жана акыркы production'дун иштешин далилдебейт.
-Native PyFunge текшерүүсү deterministic 90дон ашык valid/invalid
+Native PyFunge текшерүүсү deterministic 90 valid/invalid
 кезекти өзүнчө аткарат; жыйынтык дагы текшериле элек.
