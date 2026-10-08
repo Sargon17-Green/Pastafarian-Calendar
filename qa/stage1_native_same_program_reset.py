@@ -58,17 +58,31 @@ def replay(program,source_path,raw,iteration,previous):
         raise AssertionError("prior native IP was not fully terminated")
 
     old_space=program.space
+    old_semantics=program.semantics
+    object_id=id(program)
     if previous:
         old_snapshot,old_vector_type=previous
         if sample(old_space,old_vector_type)!=old_snapshot:
             raise AssertionError("prior completed Funge-space changed before reset")
     platform,stdout=fresh_platform(raw)
 
-    # Explicit reset/reload; object identity must remain unchanged.
-    program.platform=platform
-    program.space=program.semantics.create_space()
+    # A Program holds *two* relevant references: its mutable Funge-space
+    # and its semantics instance, whose platform performs native I/O.
+    # Assigning program.platform alone does NOT update semantics.platform
+    # and can send all stdout to the stale stream. The existing Program
+    # object is explicitly reinitialized via PyFunge's own constructor.
+    # This refreshes semantics, Funge-space, IP queue, and I/O together.
+    Program.__init__(program,Befunge98,platform=platform)
+    if id(program)!=object_id:
+        raise AssertionError("reset replaced the original Program identity")
+    if program.semantics is old_semantics:
+        raise AssertionError("reset retained stale opcode semantics")
+    if program.semantics.platform is not platform:
+        raise AssertionError("reset failed to bind semantics to new input/output")
     if program.space is old_space:
         raise AssertionError("new run reused previous mutable Funge-space")
+    if program.ips:
+        raise AssertionError("program reinitialization retained old IPs")
     program.load_code(CODES[source_path])
     program.create_ip()
     if len(program.ips)!=1:
