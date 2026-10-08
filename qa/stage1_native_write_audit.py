@@ -11,9 +11,9 @@ import sys
 
 def scanner_owned_cells():
     """Cells introduced for lexical code, scratch and entry redirection."""
-    with open("src/interleaved_work_counts.b98","r",encoding="ascii") as stream:
+    with open("qa/interleaved_work_counts_pre_lexical_baseline.b98","r",encoding="ascii") as stream:
         before=stream.read().split("\n")
-    with open("qa/interleaved_work_counts_lexical_candidate.b98",
+    with open("src/interleaved_work_counts.b98",
               "r",encoding="ascii") as stream:
         after=stream.read().split("\n")
     if len(before)!=len(after):
