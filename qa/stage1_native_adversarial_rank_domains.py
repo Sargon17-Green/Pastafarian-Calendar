@@ -61,15 +61,15 @@ def verify(label,inputs,count_mod,unrank_mod):
         if got==(-1,) or len(got)<1:
             raise AssertionError("%s rejects legal rank %d of %d: %r" %
                                  (label,rank,count,got))
-        baseline=(("qa/unrank_bounded_composition_pre_strict_rank_baseline.b98"
-                   if label.startswith("bounded:") else
-                   "qa/unrank_weaving_pre_strict_rank_baseline.b98")
-                  if not label.startswith("names:") else None)
-        if baseline:
-            expected=run(baseline,inputs+(rank,))
-            if got!=expected:
-                raise AssertionError("%s strict rank parser changed legal rank %d: %r != %r" %
-                                     (label,rank,got,expected))
+        baseline=("qa/unrank_bounded_composition_pre_strict_rank_baseline.b98"
+                  if label.startswith("bounded:") else
+                  ("qa/unrank_weaving_pre_strict_rank_baseline.b98"
+                   if label.startswith("weaving:") else
+                   "reference/unrank_distinct_names.b98"))
+        expected=run(baseline,inputs+(rank,))
+        if got!=expected:
+            raise AssertionError("%s strict rank parser changed legal rank %d: %r != %r" %
+                                 (label,rank,got,expected))
     print("NATIVE_ADVERSARIAL_RANK_DOMAIN_PASS",label,"count",count,
           "rejected",len(invalid))
     sys.stdout.flush()
@@ -101,7 +101,7 @@ for item in WEAVINGS:
 # risk exists whenever a signed token is read using native numeric '&'.
 for n,k in [(3,2),(4,2)]:
     verify("names:%d/%d"%(n,k),(n,k),
-           "falling_factorial","unrank_distinct_names")
+           "falling_factorial","qa/unrank_distinct_names_strict_candidate.b98")
 
 print("NATIVE_STAGE1_ADVERSARIAL_RANK_DOMAIN_PASS native_invocations=%d" %
       NATIVE[0])
