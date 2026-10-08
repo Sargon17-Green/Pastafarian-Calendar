@@ -168,6 +168,15 @@ jobs:
             "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.tsv"
           cmp "$RUNNER_TEMP/native-befunge-traces/valid.out" "$RUNNER_TEMP/native-befunge-traces/candidate_valid.out"
           cmp "$RUNNER_TEMP/native-befunge-traces/invalid.out" "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.out"
+          python3 qa/stage1_native_posthandoff_parity.py \
+            "$RUNNER_TEMP/native-befunge-traces/valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/valid.out" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_valid.out" \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.out" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.out"
           echo NATIVE_BEFUNGE_SCANNER_GEOMETRY_AND_TRACE_PARITY_PASS
           sha256sum src/interleaved_work_counts.b98
 
