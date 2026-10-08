@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Fail-closed selftests for the NATIVE TRACE VERIFIER, not calendar results.
+
+These small traces are synthetic and do not establish native Befunge-98 QA.
+They only prove that the trace verifier accepts well-paired events and
+rejects corrupt g/p observations or illegal scanner source ownership.
+"""
+import os
+import sys
+import tempfile
+
+sys.path.insert(0, os.path.dirname(__file__))
+import stage1_native_write_audit as auditor
+
+def good_trace(gates=10):
+    rows = []
+    tick = 0
+    vectors = [(1,0),(-1,0),(0,1),(0,-1)]
+    def instruction(x,y,opcode):
+        nonlocal tick
+        tick += 1
+        dx,dy = vectors[tick % 4]
+        rows.append("STEP\t%d\t0\t%d\t%d\t%d\t%d\t%d\t0" %
+                    (tick,x,y,dx,dy,opcode))
+        return tick
+    instruction(5,0,ord("x"))  # arithmetic handoff
+    for j in range(gates):
+        t=instruction(100+j,500,ord("p"))
+        rows.append("WRITE_BEFORE\t%d\t%d\t1500\t32\t49" % (t,500+j))
+        rows.append("WRITE_AFTER\t%d\t%d\t1500\t49" % (t,500+j))
+        instruction(500+j,1500,49)  # previously blank gate, now '1'
+    t=instruction(200,500,ord("g"))
+    rows.append("READ_BEFORE\t%d\t600\t1500\t32" % t)
+    rows.append("READ_AFTER\t%d\t600\t1500\t32" % t)
+    instruction(201,500,ord("@"))
+    return "\n".join(rows)+"\n"
+
+def analyze(src,gate_count=10):
+    with tempfile.NamedTemporaryFile(mode="w",suffix=".tsv",
+                                      encoding="utf-8",delete=False) as stream:
+        stream.write(src)
+        path = stream.name
+    try:
+        return auditor.inspect_trace(path, gate_count)
+    finally:
+        os.unlink(path)
+
+def should_reject(label, src):
+    try:
+        analyze(src)
+    except AssertionError as e:
+        print("SELFTEST_EXPECTED_REJECTION",label,str(e)[:120])
+        return
+    raise AssertionError("AUDIT FALSE ACCEPT: "+label)
+
+good = good_trace()
+result = analyze(good)
+assert result["changed_writes_executed_later"] == 10
+assert result["p_writes"] == 10
+assert result["g_reads"] == 1
+assert result["scanner_owned_cells_protected"] >= 3713
+print("SELFTEST_POSITIVE_NATIVE_TRACE_FORMAT_PASS")
+
+should_reject("wrong-p-write-after",
+    good.replace("WRITE_AFTER\t2\t500\t1500\t49",
+                 "WRITE_AFTER\t2\t500\t1500\t50",1))
+should_reject("wrong-g-result",
+    good.replace("READ_AFTER\t", "READ_AFTER\t",1).replace(
+        "\t600\t1500\t32\nSTEP", "\t600\t1500\t33\nSTEP",1))
+should_reject("missing-g-after",
+    "\n".join(x for x in good.split("\n") if not x.startswith("READ_AFTER"))+"\n")
+should_reject("missing-p-after",
+    "\n".join(x for x in good.split("\n")
+              if not x.startswith("WRITE_AFTER\t2\t"))+"\n")
+should_reject("scanner-ip-collision",
+    good.replace("STEP\t3\t0\t500\t1500\t",
+                 "STEP\t3\t0\t10\t49\t",1))
+should_reject("scanner-g-collision",
+    good.replace("READ_BEFORE\t", "READ_BEFORE\t",1).replace(
+        "\t600\t1500\t32\nREAD_AFTER", "\t10\t49\t32\nREAD_AFTER",1))
+should_reject("scanner-p-collision",
+    good.replace("WRITE_BEFORE\t2\t500\t1500\t",
+                 "WRITE_BEFORE\t2\t10\t49\t",1))
+print("STAGE1_NATIVE_TRACE_AUDITOR_SELFTEST_PASS",7,"negative corruptions")
+print("TEST_ONLY_SYNTHETIC_TRACE: not a native interpreter result")
