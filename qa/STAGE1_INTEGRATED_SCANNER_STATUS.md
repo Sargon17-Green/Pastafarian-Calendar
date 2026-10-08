@@ -86,3 +86,39 @@ scanner events occur before that handoff; they are extra code, not counted
 as equivalent original arithmetic events. This is evidence of precise
 geometry preservation for these cases **in the local simulation only**.
 Independent native interpreter confirmation remains PENDING.
+
+
+## Checkpoint 2026-10-08 — native-qualified QA-source promotion
+
+**This section supersedes prior "unverified candidate" language above; the earlier
+paragraphs are kept as historical development evidence.**
+
+Native run [37831929988](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37831929988)
+at SHA \`cc02c86d75b1fd5aa3598e25a04a64cdf33d5ade\`
+established 5 PASS jobs: 421 targeted native regression invocations plus
+order permutations; 43 valid + 48 invalid native standalone lexical parser cases;
+123 integrated native differential invocations; exact native IP and g/p
+post-handoff parity over 26,708 valid and 12,194 invalid events;
+24 fresh native Program runs plus two simultaneously live stepwise pairs.
+The sole failing job reproduced the original lexical bug in the old \`src\`.
+
+**QA-only promotion performed AFTER those native successes:**
+
+- \`src/interleaved_work_counts.b98\` in the **QA branch only** now has
+  exact Git blob \`e2b39b066d1d47bcb8ce4f234b093fca94cb21d1\`,
+  identical to the independently native-tested
+  \`qa/interleaved_work_counts_lexical_candidate.b98\`.
+- \`qa/interleaved_work_counts_pre_lexical_baseline.b98\` preserves the
+  original Git blob \`e06d8f75d6502b2771d6a76b00397c6b6dbee543\`.
+- The canonical branch \`Befunge+Кыргызча\` still contains the original
+  source and \`main\` has not been changed. No merge.
+- The six CI jobs are rewired to use the promoted QA production as the
+  source under test, with the original byte-identical baseline for
+  differential IP/p/g comparison and a historical negative control for
+  malformed sign tokens. Exact source hashes are pinned.
+- **Post-promotion all-six-Native-CI result: PENDING.**
+
+There is still no verified reset/reuse of **the exact same previously
+mutated Program object**. This is separate from the passed 24-fresh-Program
+and two-pair interleaving tests. Stage 1 and ownership audit remain open;
+\`LAST_COMPLETED_STAGE=0\`, Stage 2 not started.
