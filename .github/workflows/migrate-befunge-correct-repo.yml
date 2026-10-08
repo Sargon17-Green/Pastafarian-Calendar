@@ -1,0 +1,87 @@
+name: One-time Befunge Kyrgyz repository relocation
+on:
+  push:
+    branches:
+      - 'Befunge+Кыргызча'
+    paths:
+      - '.github/workflows/migrate-befunge-correct-repo.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - name: Fetch only the Befunge implementation from the mistaken repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          origin='https://github.com/Sargon17-Green/pastafari-calendar.git'
+          git clone --quiet --depth 1 --filter=blob:none --sparse --branch 'Befunge+Кыргызча' "$origin" "$RUNNER_TEMP/befunge-origin"
+          git -C "$RUNNER_TEMP/befunge-origin" sparse-checkout set implementations/befunge-kyrgyz
+          source="$RUNNER_TEMP/befunge-origin/implementations/befunge-kyrgyz"
+          test -f "$source/DEVELOPMENT_STAGE.md"
+          test -f "$source/src/interleaved_work_counts.b98"
+          test -f "$source/reference/work_counts.b98"
+          test -f "$source/SOURCE_LANGUAGE_CATALOG.md"
+          test "$(git hash-object "$source/src/interleaved_work_counts.b98")" = 'e06d8f75d6502b2771d6a76b00397c6b6dbee543'
+          cp -a "$source/." ./
+          echo 'MIGRATION_COPY_COMPLETE'
+          find src reference test fixtures -type f | wc -l
+      - name: Place the implementation at the correct repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .github/workflows
+          cp "$RUNNER_TEMP/befunge-origin/.github/workflows/befunge-kyrgyz-stage1-regression.yml" .github/workflows/befunge-kyrgyz-stage1-regression.yml
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path(".github/workflows/befunge-kyrgyz-stage1-regression.yml")
+          s=p.read_text(encoding="utf-8")
+          assert 'implementations/befunge-kyrgyz/' in s
+          s=s.replace('implementations/befunge-kyrgyz/', '')
+          p.write_text(s,encoding="utf-8")
+          p=Path("DEVELOPMENT_STAGE.md")
+          state=p.read_text(encoding="utf-8")
+          assert 'CURRENT_STAGE=1' in state and 'LAST_COMPLETED_STAGE=0' in state
+          state += ("\nCANONICAL_GITHUB_REPO=Sargon17-Green/Pastafarian-Calendar\n"
+                    "CANONICAL_GITHUB_REPO_ID=1347352423\n"
+                    "WRONG_REPO_SOURCE=Sargon17-Green/pastafari-calendar\n"
+                    "MIGRATION_QA_REPLAY_IN_CORRECT_REPO=PENDING\n")
+          p.write_text(state, encoding="utf-8")
+          Path("MIGRATION_FROM_WRONG_REPOSITORY.md").write_text(
+              "# Кыргызча — Befunge-98 relocation record\n\n"
+              "The implementation was mistakenly developed under "
+              "`Sargon17-Green/pastafari-calendar` (repository ID 1325151817). "
+              "It belongs in `Sargon17-Green/Pastafarian-Calendar` "
+              "(repository ID 1347352423).\n\n"
+              "This branch imports its 95 source/reference/test/documentation artifacts "
+              "without altering any `.b98` executable contents. "
+              "The previous GitHub Actions evidence URLs inside QA documents "
+              "are provenance from the mistaken repository, not new test results "
+              "in this repository. The native regression workflow has been "
+              "relocated and its paths adjusted to this repository's root.\n\n"
+              "Stage 1 of 55 remains incomplete; Stage 2 has not started.\n",
+              encoding="utf-8")
+          PY
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 'e06d8f75d6502b2771d6a76b00397c6b6dbee543'
+          test "$(git hash-object src/day_count.b98)" = '4f25f514f7b6362105dfff77db6f36769efe36c3'
+          test "$(git hash-object src/save.b98)" = 'dd6f10aa196e3a9523ee786e4ba41a91f303d199'
+          test "$(git hash-object src/interleaved_day_save.b98)" = '4da7c9af6d5b52a42f3fc7679c42eec0e51fc6dc'
+          echo 'MIGRATION_SOURCE_HASHES_PASS'
+      - name: Commit migrated code, then remove this one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Befunge migration automation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md DEVELOPMENT_STAGE.md NATIVE_RUNBOOK.md SOURCE_LANGUAGE_CATALOG.md SPAGHETTI_DEVELOPMENT_HISTORY.md SEMANTIC_STATE_OWNERSHIP.md BEFUNGE98_SPAGHETTI_ARCHITECTURE_CONTRACT.md MIGRATION_FROM_WRONG_REPOSITORY.md src reference test fixtures artifacts .github/workflows/befunge-kyrgyz-stage1-regression.yml
+          git rm -f .github/workflows/migrate-befunge-correct-repo.yml
+          git commit -m 'Relocate native Befunge-98 + Кыргызча implementation to its canonical language-branch repository'
+          git push origin HEAD:refs/heads/Befunge+Кыргызча
+          echo 'MIGRATION_CANONICAL_PUSH_PASS'
