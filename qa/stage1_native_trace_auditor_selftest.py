@@ -62,6 +62,44 @@ assert result["g_reads"] == 1
 assert result["scanner_owned_cells_protected"] >= 3713
 print("SELFTEST_POSITIVE_NATIVE_TRACE_FORMAT_PASS")
 
+# Genuine Funge-98 self-modifying gate loops frequently write the same
+# executable byte repeatedly before changing its value. Distinguish
+# *executed gate writes* from *content-changing executed gate writes*.
+def repeated_gate_trace():
+    lines=["STEP\t1\t0\t5\t0\t1\t0\t120\t0"]
+    tick=1
+    previous=32
+    for j in range(10):
+        tick+=1
+        proposed=118 if j<8 else (62 if j==8 else 118)
+        target_y=1500 if j<9 else 1501
+        old=previous if j<9 else 32
+        lines.append("STEP\t%d\t0\t100\t500\t0\t1\t112\t3" % tick)
+        lines.append("WRITE_BEFORE\t%d\t500\t%d\t%d\t%d" %
+                     (tick,target_y,old,proposed))
+        lines.append("WRITE_AFTER\t%d\t500\t%d\t%d" %
+                     (tick,target_y,proposed))
+        tick+=1
+        lines.append("STEP\t%d\t0\t500\t%d\t1\t0\t%d\t0" %
+                     (tick,target_y,proposed))
+        if j<9:
+            previous=proposed
+    tick+=1
+    lines.append("STEP\t%d\t0\t200\t500\t0\t-1\t103\t2" % tick)
+    lines.append("READ_BEFORE\t%d\t600\t1500\t32" % tick)
+    lines.append("READ_AFTER\t%d\t600\t1500\t32" % tick)
+    tick+=1
+    lines.append("STEP\t%d\t0\t201\t500\t-1\t0\t64\t0" % tick)
+    return "\n".join(lines)+"\n"
+
+repeat_result=analyze(repeated_gate_trace())
+assert repeat_result["gate_writes_executed_later"]==10
+assert repeat_result["content_changing_gate_writes_executed_later"]==3
+print("SELFTEST_REPEATED_NATIVE_GATE_WRITES_PASS",
+      "executed=10","changed=3")
+
+
+
 should_reject("wrong-p-write-after",
     good.replace("WRITE_AFTER\t2\t500\t1500\t49",
                  "WRITE_AFTER\t2\t500\t1500\t50",1))
