@@ -69,7 +69,7 @@ def native_route(path):
             "rejoined arithmetic lane's next native stack/vector differs")
     if branch=="up":
         opcodes=[e[6] for e in hits]
-        require(opcodes[2:9]==list(map(ord,"^05jb1x")),
+        require(opcodes[2:9]==list(map(ord,"^05j1bx")),
                 "Native j + skipped-space arithmetic excursion not executed exactly")
         require(hits[5][7]==5 and hits[6][7]==4,
                 "native jump must consume the actual 5-cell skip count")
