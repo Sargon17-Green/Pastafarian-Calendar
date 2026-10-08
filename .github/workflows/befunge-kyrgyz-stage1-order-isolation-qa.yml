@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - 'qa-befunge98-stage1-order-isolation-20261008'
+  pull_request:
+    branches:
+      - 'Befunge+Кыргызча'
   workflow_dispatch:
 
 permissions:
