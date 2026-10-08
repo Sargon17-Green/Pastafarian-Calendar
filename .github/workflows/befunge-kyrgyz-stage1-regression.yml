@@ -423,7 +423,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
           test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
-          python3 -m py_compile qa/stage1_native_diverse_geometry_audit.py qa/stage1_native_route_graph.py
+          python3 -m py_compile qa/stage1_native_diverse_geometry_audit.py qa/stage1_native_route_graph.py qa/stage1_native_spaghetti_frontier.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
       - name: Collect ten independent native signed-day execution traces
@@ -444,6 +444,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 qa/stage1_native_diverse_geometry_audit.py "$RUNNER_TEMP/native-diverse-traces"
+          # Independent, measured-gap analysis on the EXACT audited Native
+          # traces. It cannot mark Stage 1 complete or turn zero counts green.
+          python3 qa/stage1_native_spaghetti_frontier.py "$RUNNER_TEMP/native-diverse-traces"
+          test -s "$RUNNER_TEMP/native-diverse-traces/native_spaghetti_frontier.json"
           test -s "$RUNNER_TEMP/native-diverse-traces/diverse_geometry_evidence.json"
           echo NATIVE_DIVERSE_PRODUCTION_GEOMETRY_CORPUS_RECORDED_NOT_FULL_STAGE1_ACCEPTANCE
       - name: Preserve measured native geometry corpus and fail-closed evidence
