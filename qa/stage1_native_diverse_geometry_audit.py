@@ -29,9 +29,9 @@ def read_arithmetic_edges(path):
     previous=None
     with open(path,"r",encoding="ascii") as stream:
         for line in stream:
-            if not line.startswith("STEP\\t"):
+            if not line.startswith("STEP\t"):
                 continue
-            fields=line.rstrip("\\n").split("\\t")
+            fields=line.rstrip("\n").split("\t")
             require(len(fields)==9,"invalid native IP graph STEP")
             now=(int(fields[3]),int(fields[4]))
             if not entered:
