@@ -50,8 +50,8 @@ def check_weaving(seq,lengths,tag):
     for j,length in enumerate(lengths,1):
         if vals.count(j)!=length:
             raise AssertionError("weaving multiplicity invalid: "+tag)
-    if any(vals[j]==vals[j+1] for j in range(len(vals)-1)):
-        raise AssertionError("weaving contains adjacent equal months: "+tag)
+    # Adjacent equal month identifiers are legal: even rank 1 of [4,4,4]
+    # groups months into contiguous runs. Validate multiplicity only.
     return vals
 
 print("STAGE1_STRUCTURAL_NATIVE_START")
@@ -101,7 +101,8 @@ print("STAGE1_WEAVING_4_4_4_NATIVE_BOUNDARIES_PASS")
 # the selected opening/closing gate coordinates by that integer.
 def selection(shift,calculation_offset=100,rank=1):
     gates=[shift+42*i for i in range(7)]
-    toks=[0,shift+calculation_offset,len(gates)]
+    # Calendar-related day pair precedes the gate count: 0 100 0 0 7 ...
+    toks=[0,shift+calculation_offset,0,0,len(gates)]
     for gate in gates:
         toks += [0,gate]
     toks += [rank]
