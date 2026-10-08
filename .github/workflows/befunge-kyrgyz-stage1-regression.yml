@@ -16,6 +16,15 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin unchanged Befunge production and canonical shared README
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
+          test "$(git hash-object src/day_count.b98)" = "4f25f514f7b6362105dfff77db6f36769efe36c3"
+          test "$(git hash-object src/save.b98)" = "dd6f10aa196e3a9523ee786e4ba41a91f303d199"
+          test "$(git hash-object README.md)" = "74c424b44eadd4ece3f29072ddbf873236557604"
+          echo NATIVE_STAGE1_PINNED_SOURCE_SHA_PASS
       - name: Verify pinned PyFunge-98 package
         shell: bash
         run: |
@@ -148,3 +157,11 @@ jobs:
             "$RUNNER_TEMP/native-befunge-traces/valid.tsv" \
             "$RUNNER_TEMP/native-befunge-traces/invalid.tsv"
           sha256sum src/interleaved_work_counts.b98
+
+      - name: Save raw native execution trace and exact write evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-write-audit
+          path: ${{ runner.temp }}/native-befunge-traces/
+          retention-days: 30
