@@ -92,13 +92,22 @@ inputs=[
     "2 10 0 10\n"
 ]
 created=[]
+snapshots=[]
+guard_positions=((0,0),(5,0),(10,49),(500,1500),(100,500),(1528,2014))
 for j in [0,1,0,4,2,3,1,5,6,0,2,4]:
     for path in PATHS:
         program=compare(path,inputs[j])
         created.append(program)
+        snapshots.append((program,tuple(program.space.get(p)
+                                        for p in guard_positions)))
+for program,expected in snapshots:
+    actual=tuple(program.space.get(p) for p in guard_positions)
+    if actual!=expected:
+        raise AssertionError("previous native Program was mutated by a later run")
 if len(set(id(p.space) for p in created)) != len(created):
     raise AssertionError("independent Program instances unexpectedly share Funge-space")
-print("NATIVE_SAME_PYTHON_PROCESS_FRESH_PROGRAM_PASS",len(created),"runs")
+print("NATIVE_SAME_PYTHON_PROCESS_FRESH_PROGRAM_PASS",len(created),"runs",
+      "preserved_finished_program_snapshots",len(snapshots))
 
 def interleaved(a_case,b_case):
     a_path=PATHS[1]
