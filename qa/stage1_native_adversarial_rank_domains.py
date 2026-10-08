@@ -61,8 +61,10 @@ def verify(label,inputs,count_mod,unrank_mod):
         if got==(-1,) or len(got)<1:
             raise AssertionError("%s rejects legal rank %d of %d: %r" %
                                  (label,rank,count,got))
-        if unrank_mod=="qa/unrank_bounded_composition_strict_candidate.b98":
-            expected=run("unrank_bounded_composition",inputs+(rank,))
+        if unrank_mod.startswith("qa/"):
+            baseline=("unrank_bounded_composition" if "bounded" in unrank_mod
+                      else "unrank_weaving")
+            expected=run(baseline,inputs+(rank,))
             if got!=expected:
                 raise AssertionError("%s candidate changed legal rank %d: %r != %r" %
                                      (label,rank,got,expected))
@@ -91,7 +93,7 @@ for item in BOUNDED:
            "count_bounded_compositions","qa/unrank_bounded_composition_strict_candidate.b98")
 for item in WEAVINGS:
     fields=(len(item),)+item
-    verify("weaving:"+str(item),fields,"count_weavings","unrank_weaving")
+    verify("weaving:"+str(item),fields,"count_weavings","qa/unrank_weaving_strict_candidate.b98")
 
 print("NATIVE_STAGE1_ADVERSARIAL_RANK_DOMAIN_PASS native_invocations=%d" %
       NATIVE[0])
