@@ -102,3 +102,33 @@ qa/stage1_native_same_interpreter_isolation.py кошулду:
 Дал ошол эле Program объектин reset кылып кайра колдонуу
 дагы өзүнчө ачык талап, fresh Program / same-process
 reentrancy муну алмаштырбайт. LAST_COMPLETED_STAGE=0.
+
+
+## 2026-10-08 — Native ownership replay PASS, QA-only source promotion
+
+Бул жаңы checkpoint жогорудагы мурунку "Native текшерилген эмес"
+деген билдирүүлөрдү алмаштырат, бирок ошол тарыхый QA белгилерин
+өчүрбөйт.
+
+Native run 37831929988 (HEAD cc02c86d75b1fd5aa3598e25a04a64cdf33d5ade):
+- \`native-write-audit\` PASS: жупталган бардык p writes жана g reads,
+  мыйзамдуу executable gate replay (10 valid, 4 invalid), changed
+  executable gates (3 valid, 3 invalid), scanner менен байланышкан
+  арифметикалык Funge-space collision аныкталган жок;
+- 26,708 valid жана 12,194 invalid **native post-handoff events**
+  эски parser менен жаңыланган parser ортосунда так дал келди;
+- \`native-same-interpreter-isolation\` PASS: 24 fresh Program объект
+  бир Python process'те, 2 жуп stepwise interleaving,
+  эски completed anchor Funge-space snapshots өзгөргөн жок.
+
+Эми QA branch \`src/interleaved_work_counts.b98\`
+exact native-qualified scanner blob
+\`e2b39b066d1d47bcb8ce4f234b093fca94cb21d1\` колдонот.
+Канондук branch'тагы original source өзгөрбөйт,
+ал эми pre-lexical clone QAда сакталат.
+
+**Ачык далил:** жаңы source promotion'дон кийин алты CI job кайра
+толук PASS керек. Так ошол эле \`Program\` объектин контролдуу
+reset кылып кайра иштетүүнүн state neutrality далили жок.
+Ошондуктан семантикалык ownership'ти Stage 1 боюнча жабык деп
+жариялабагыла. LAST_COMPLETED_STAGE=0; Stage 2 жок.
