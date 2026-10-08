@@ -30,6 +30,7 @@ jobs:
           python3 qa/stage1_parser_integration_structure.py
           python3 qa/stage1_full_execution_geometry_sim.py
           python3 qa/stage1_native_trace_auditor_selftest.py
+          python3 qa/stage1_native_route_graph.py --selftest
       - name: Verify pinned PyFunge-98 package
         shell: bash
         run: |
@@ -179,6 +180,23 @@ jobs:
             "$RUNNER_TEMP/native-befunge-traces/candidate_valid.out" \
             "$RUNNER_TEMP/native-befunge-traces/invalid.out" \
             "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.out"
+          python3 qa/stage1_native_route_graph.py \
+            qa/interleaved_work_counts_pre_lexical_baseline.b98 \
+            "$RUNNER_TEMP/native-befunge-traces/valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/valid.graph.json"
+          python3 qa/stage1_native_route_graph.py \
+            qa/interleaved_work_counts_pre_lexical_baseline.b98 \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.graph.json"
+          python3 qa/stage1_native_route_graph.py \
+            src/interleaved_work_counts.b98 \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_valid.graph.json"
+          python3 qa/stage1_native_route_graph.py \
+            src/interleaved_work_counts.b98 \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.graph.json"
+          echo NATIVE_STAGE1_DIRECTED_ROUTE_GRAPHS_CREATED
           echo NATIVE_BEFUNGE_SCANNER_GEOMETRY_AND_TRACE_PARITY_PASS
           sha256sum src/interleaved_work_counts.b98
 
