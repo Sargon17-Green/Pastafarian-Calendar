@@ -274,7 +274,7 @@ def selftest():
         # Adversarial negative: reject a stationary IP, even if the
         # byte at the position is otherwise a valid Befunge opcode.
         with open(trace,"w",encoding="utf-8") as stream:
-            stream.write("STEP\\t1\\t1\\t0\\t0\\t0\\t0\\t49\\t1\\n")
+            stream.write("STEP\t1\t1\t0\t0\t0\t0\t49\t1\n")
         try:
             analyze(rows,trace)
         except AssertionError as err:
