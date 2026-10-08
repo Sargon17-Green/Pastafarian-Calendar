@@ -69,3 +69,20 @@ calendar calculations.
 differences, then graduate the candidate to production only after the
 full Stage 1 functional and geometric gates. Do not mark Stage 1 complete
 or begin Stage 2 based on these tests.
+
+## Additional exact execution-trajectory reconciliation
+
+A separate JS BigInt-compatible Funge instruction simulation compared the
+**entire post-entry IP stream** (x/y, direction, executed instruction) and
+the complete **post-entry `p` write stream** for three input families:
+
+- `0 0 0 0`: 7,406 observed instruction/write events, 32 `p` writes;
+- `1 15055672 1 15055670`: 26,110 events, 128 `p` writes;
+- `2 10 0 10`: 11,958 events, 56 `p` writes.
+
+All three original-versus-integrated event streams were **byte-for-byte
+equal after the handoff to (5,0)** in this local simulator. Runtime
+scanner events occur before that handoff; they are extra code, not counted
+as equivalent original arithmetic events. This is evidence of precise
+geometry preservation for these cases **in the local simulation only**.
+Independent native interpreter confirmation remains PENDING.
