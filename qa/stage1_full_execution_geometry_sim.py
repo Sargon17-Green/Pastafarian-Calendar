@@ -3,12 +3,12 @@
 """Test-only Funge-space simulator for comparing two instruction pointer traces.
 
 This IS NOT the Pastafarian production algorithm or independent oracle.
-PyFunge native tests and the independent Befunge-98 reference remain required.
+The simulator is intentionally scoped to the frozen baseline-vs-lexical-scanner\ntrace; the promoted k+ production path contains advanced opcodes and is\nvalidated independently by native PyFunge, not this limited simulator.\nPyFunge native tests and the independent Befunge-98 reference remain required.
 """
 import hashlib
 
 OLD = "qa/interleaved_work_counts_pre_lexical_baseline.b98"
-NEW = "src/interleaved_work_counts.b98"
+NEW = "qa/interleaved_work_counts_lexical_candidate.b98"
 BOUNDS = (1531,2016)
 
 def scanner_footprint():
