@@ -32,14 +32,16 @@ new = load(NEW)
 # circuit. Frozen prior sources remain separately checked for exact provenance.
 lexical_baseline = load("qa/interleaved_work_counts_lexical_candidate.b98")
 previous_bifurcation = load("qa/interleaved_work_counts_native_bifurcation_candidate.b98")
-require(new == load("qa/interleaved_work_counts_advanced_turn_jump_candidate.b98"),
-        "QA production differs from exact Native-qualified advanced turn/jump source")
+require(new == load("qa/interleaved_work_counts_arithmetic_dependency_j_candidate.b98"),
+        "QA production differs from Native-qualified arithmetic j/p/g dependency source")
 lex = load(LEX)
 require(git_blob_sha(old) == BASELINE_GIT_BLOB_SHA,
         "pre-lexical baseline changed since native geometry baseline")
 
 oldrows, newrows, lexrows = [p.split(b"\n") for p in (old, new, lex)]
 priorrows = previous_bifurcation.split(b"\n")
+advancedrows = load("qa/interleaved_work_counts_advanced_turn_jump_candidate.b98").split(b"\n")
+require(len(advancedrows) == len(newrows), "frozen advanced source height changed")
 require(len(priorrows) == len(newrows), "prior source height changed")
 require(len(oldrows) == len(newrows), "source height changed")
 require(max(map(len, oldrows)) == max(map(len, newrows)),
@@ -105,7 +107,7 @@ permitted = {
     (951,1336): (ord(">"),ord("["))
 }
 observed = {}
-for y, (former, current) in enumerate(zip(priorrows,newrows)):
+for y, (former, current) in enumerate(zip(priorrows,advancedrows)):
     require(len(former) == len(current),
             "native advanced circuit unexpectedly changed source row extent y=%d" % y)
     if former != current:
@@ -114,6 +116,18 @@ for y, (former, current) in enumerate(zip(priorrows,newrows)):
                 observed[(x,y)] = (left,right)
 require(observed == permitted,
         "advanced turn/j/x source differs from exact 11-cell native-qualified circuit")
+# The promoted Native-calculated arithmetic continuation differs from
+# the previously qualified advanced route ONLY at one contiguous executed
+# y=1334 interval, x=960..1027. The exact source bytes include native p/g.
+native_pg_lane = b"1a*4+a*9+a*0+1a*6+a*0+a*0+p+:1a*4+a*9+a*0+1a*6+a*0+a*0+g+6a*5++0\\-1x"
+require(len(native_pg_lane) == 68 and
+        newrows[:1334] == advancedrows[:1334] and
+        newrows[1335:] == advancedrows[1335:] and
+        newrows[1334][:960] == advancedrows[1334][:960] and
+        newrows[1334][960:1028] == native_pg_lane and
+        newrows[1334][1028:] == advancedrows[1334][1028:],
+        "Native arithmetic j/p/g continuation edited source outside exact 68 cells")
+
 require(all(not row.strip() for row in oldrows[1:50]),
         "reserved top-of-map region no longer unoccupied")
 for i in range(1, 50):
@@ -131,7 +145,7 @@ require(b"~" in newrows[5],
         "new lexical parser must operate at character level")
 print("STAGE1_SCANNER_SOURCE_MAP_STATIC_PASS",
       "same_2d_extent=YES",
-      "original_arithmetic_except_verified_kplus_bifurcation_and_advanced=YES",
+      "original_arithmetic_except_verified_kplus_bifurcation_advanced_and_arithmetic_pg=YES",
       "reserved_parser_rows=1..49",
       "legacy_program_sha="+BASELINE_GIT_BLOB_SHA)
 print("STATIC_PROOF_NOT_NATIVE_FUNCTIONAL_OR_STATE_OWNERSHIP_ACCEPTANCE")
