@@ -42,9 +42,9 @@ def main():
                     seen = 0
                     with open(trace, "rb") as failure_log:
                         for event in failure_log:
-                            if not event.startswith("STEP\\t".replace("\\\\", "\\")):
+                            if not event.startswith("STEP\t"):
                                 continue
-                            fields = event.rstrip("\\n".replace("\\\\", "\\")).split("\\t".replace("\\\\", "\\"))
+                            fields = event.rstrip("\n").split("\t")
                             if len(fields) != 9:
                                 continue
                             if not recording and fields[3:5] == ["1470", "100"]:
