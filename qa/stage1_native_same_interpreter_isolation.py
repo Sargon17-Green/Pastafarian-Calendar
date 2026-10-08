@@ -26,8 +26,8 @@ CMD = ["timeout","--kill-after=2s","50s","pyfunge",
        "--disable-fprint","--no-concurrent","--no-filesystem",
        "-v98","-d2"]
 PATHS = [
-    "src/interleaved_work_counts.b98",
-    "qa/interleaved_work_counts_lexical_candidate.b98"
+    "qa/interleaved_work_counts_pre_lexical_baseline.b98",
+    "src/interleaved_work_counts.b98"
 ]
 source = {}
 for path in PATHS:
