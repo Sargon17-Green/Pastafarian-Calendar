@@ -92,8 +92,10 @@ inputs=[
     "1 0 0 0\n",
     "2 10 0 10\n"
 ]
-created=[]
-snapshots=[]
+# Memory boundedness is part of this regression: a large Funge-space is
+# allocated per Program. Retain only two immutable anchor Programs, not all 24.
+anchors=[]
+completed=0
 def sample_space(program, positions):
     point=program._qa_vector_constructor
     return tuple(program.space.get(point(coords)) for coords in positions)
@@ -101,16 +103,24 @@ guard_positions=((0,0),(5,0),(10,49),(500,1500),(100,500),(1528,2014))
 for j in [0,1,0,4,2,3,1,5,6,0,2,4]:
     for path in PATHS:
         program=compare(path,inputs[j])
-        created.append(program)
-        snapshots.append((program,sample_space(program,guard_positions)))
-for program,expected in snapshots:
-    actual=sample_space(program,guard_positions)
-    if actual!=expected:
-        raise AssertionError("previous native Program was mutated by a later run")
-if len(set(id(p.space) for p in created)) != len(created):
-    raise AssertionError("independent Program instances unexpectedly share Funge-space")
-print("NATIVE_SAME_PYTHON_PROCESS_FRESH_PROGRAM_PASS",len(created),"runs",
-      "preserved_finished_program_snapshots",len(snapshots))
+        completed+=1
+        if len(anchors)<2:
+            if anchors and program.space is anchors[0][0].space:
+                raise AssertionError("two separate Program objects share Funge-space")
+            anchors.append((program,sample_space(program,guard_positions)))
+        else:
+            if any(program.space is anchor.space for anchor,expected in anchors):
+                raise AssertionError("new Program shares an old live Funge-space")
+        for anchor,expected in anchors:
+            if sample_space(anchor,guard_positions)!=expected:
+                raise AssertionError("completed native Program was mutated by later run")
+        if len(anchors)>=2 and completed%4==0:
+            print("NATIVE_SAME_PROCESS_PROGRESS",completed,"completed")
+# Release the final non-anchor Program; only two snapshots remain live.
+program=None
+print("NATIVE_SAME_PYTHON_PROCESS_FRESH_PROGRAM_PASS",completed,"runs",
+      "retained_anchor_spaces",len(anchors),
+      "preserved_anchor_snapshots_after_each_run",True)
 
 def interleaved(a_case,b_case):
     a_path=PATHS[1]
