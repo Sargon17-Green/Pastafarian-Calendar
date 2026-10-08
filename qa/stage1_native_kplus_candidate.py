@@ -32,7 +32,33 @@ def main():
             values, valid = cases[label]
             raw = " ".join(map(str, values)) + "\n"
             trace = os.path.join(folder, label + ".tsv")
-            actual = native_suite.native(SOURCE, raw, trace=trace)
+            try:
+                actual = native_suite.native(SOURCE, raw, trace=trace)
+            except Exception:
+                print("NATIVE_KPLUS_DIAGNOSTIC_FIRST_FAIL", label)
+                if os.path.isfile(trace):
+                    recording = False
+                    count = 0
+                    seen = 0
+                    with open(trace, "rb") as failure_log:
+                        for event in failure_log:
+                            if not event.startswith("STEP\\t".replace("\\\\", "\\")):
+                                continue
+                            fields = event.rstrip("\\n".replace("\\\\", "\\")).split("\\t".replace("\\\\", "\\"))
+                            if len(fields) != 9:
+                                continue
+                            if not recording and fields[3:5] == ["1470", "100"]:
+                                recording = True
+                            if recording and count < 65:
+                                print("NATIVE_KPLUS_DIAG_STEP", event.strip())
+                                count += 1
+                            seen += 1
+                    print("NATIVE_KPLUS_DIAG_TOTAL_STEPS", seen)
+                    print("NATIVE_KPLUS_DIAG_CAPTURED_AFTER_ENTRY", count)
+                else:
+                    print("NATIVE_KPLUS_DIAG_TRACE_NOT_FOUND")
+                sys.stdout.flush()
+                raise
             expect = (native_suite.expected_for(*values) if valid
                       else ["-1"] * 7)
             require(actual == expect,
