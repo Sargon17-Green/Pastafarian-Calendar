@@ -1,78 +1,64 @@
-# `Stage 1` — семантикалык абалдын ээлиги
+# Stage 1 — семантикалык абалдын ээлиги / Mutable Funge-space ownership
 
-Күн: 2026-10-07
+**Абал: АУДИТ АЧЫК.** Бул документ 2026-10-08 күнү азыркы өндүрүштүк кодго ылайык жаңыланды.
+CURRENT_STAGE=1; LAST_COMPLETED_STAGE=0. Бул жерде акыркы толук PASS жарыяланбайт.
 
-## Ээлик эрежеси
+## Эски аудиттин колдонулуу чеги
 
-Азыркы Befunge production өзөгүндө ар бир ишке киргизүүнүн семантикалык абалы ошол ишке киргизүүнүн өзүнө гана таандык.
+2026-10-07деги аудит баштапкы бейтарап Bootstrap shell'ге гана тиешелүү болчу.
+Анда p/g жок деген билдирүү жаңы өндүрүштүк жол үчүн **жалган**:
+src/day_count.b98, src/save.b98, src/interleaved_day_save.b98 жана
+src/interleaved_work_counts.b98 азыр чыныгы эки өлчөмдүү Funge-space
+жана аткарылып жаткан executable gate'терди p/g аркылуу динамикалык өзгөртөт.
+Ошондуктан эски SEMANTIC_STATE_OWNER_VALIDATED=YES белгисин
+жаңы production'га жайылтууга болбойт.
 
-Ээлик кылган нерселер:
+## Негизги абал жана менчик чек арасы
 
-- instruction pointer;
-- data stack;
-- ушул process'тин input агымы;
-- ошол invocation үчүн эсептелген убактылуу бүтүн сандар.
+- Ар бир жаңы pyfunge процесси өзүнүн IP'син, стегин,
+  Funge-space'ин жана киргизүү агымын алат. Процесс аралык глобалдык
+  реестр, shared heap же файлга жазылган семантикалык cache production
+  келишиминде каралган эмес.
+- Runtime code overwrite — ошол invocation'дун Funge-space клеткасына
+  p аркылуу берилген семантикалык өзгөртүү; аны жөн гана debug output
+  катары эсептөөгө болбойт.
+- --no-concurrent --no-filesystem --disable-fprint native QA режими
+  тышкы файлдык механизмди, fingerprint'ти жана кошумча IP'лерди
+  атайылап чектейт. Бул башка runtime үчүн кепилдик эмес.
+- Source .b98 GitHub'та өзгөрүүсүз сакталат; бир process ичиндеги
+  self-modification Git blob'ун өзгөртүү эмес.
+- Бир interpreter instance ичинде Funge-space кайра колдонулса,
+  жүктөө/тазалоо өзүнчө далилдениши керек. Fresh-process QA
+  мындай reuse үчүн далил боло албайт.
+- reference/ тесттик эталону өзүнүн өзүнчө scratch state'ин колдонот;
+  ал production аткаруу жолуна чакырылбайт.
 
-Булар башка invocation менен бөлүшүлбөйт.
+## Жаңы көз карандысыз QA
 
-## Funge-space боюнча чектөө
+QA branch: qa-befunge98-stage1-order-isolation-20261008
+(канондук repository гана).
 
-Азыркы `src/*.b98` production файлдары кайра сканерленди.
+- qa/stage1_native_process_isolation.py: native Befunge эталон менен
+  салыштыруу, ар түрдүү input тартибинде fresh process replay жана
+  эки concurrent process pair.
+- qa/sitecustomize.py: PyFunge чыныгы Program.execute_step
+  instrumentation; IP координаттары, opcode, stack depth, p алдындагы
+  жана андан кийинки Funge-space маанилери. Test-only.
+- qa/stage1_native_write_audit.py: native p алдында жана кийинки
+  маанини так салыштыруу; жазылган жаңы opcode кийин аткарылган
+  учурларды саноо.
+- Native workflow: .github/workflows/befunge-kyrgyz-stage1-regression.yml.
+  Native QA SUCCESS чыкмайынча булар далил эмес, сыноо талаптары.
 
-Төмөнкү state-mutating же тышкы I/O буйруктарынын эч бири жок:
+## Калган кабыл алуу боштуктары
 
-- `p`, `g` — Funge-space жазуу/окуу;
-- `i`, `o` — файлдык киргизүү/чыгаруу;
-- `=` — тышкы команда;
-- `t` — кошумча instruction pointer;
-- `(`, `)` — fingerprint жүктөө/түшүрүү;
-- `?` — кокустук багыт;
-- `{`, `}`, `u` — stack-stack state.
+1. Native CI'ден жаңы isolation жана write audit SUCCESS алуу.
+2. p/g write-coordinate whitelist жана executable-cell version
+   lifecycle'ын көп valid/invalid input боюнча бекитүү.
+3. Бир interpreter instance'ин кайра колдонуу, толук reset,
+   state ownership жана reentrancy'ни сыноо.
+4. Бардык Stage 1 reference corpus жана геометриянын кабыл алуусун жабуу.
 
-Демек source Funge-space runtime учурунда өзгөрбөйт жана production семантикасы process аралык mutable state'ке ээ эмес.
-
-## Контекст
-
-`src/base_context.b98` нейтралдуу төрт токендик Bootstrap seed чыгарат:
-
-```text
-contextVersion phase status observabilityCount
-1              0     0      0
-```
-
-Бул азырынча calendar semantics алып жүрбөйт. Келечектеги patch-specific state Stage 1де алдын ала кошулган жок.
-
-## Validation жана error
-
-`src/base_validator.b98` signed input representation үчүн канондук форманы текшерет:
-
-- `0,m` — жарактуу;
-- `1,m` — `m>0` болгондо гана жарактуу;
-- `1,0` — жараксыз;
-- башка sign — жараксыз.
-
-`src/error_wrapper.b98` status `0` болгондо semantic value'ну өзгөртпөй өткөрөт; башка status үчүн `-1` deterministic error sentinel чыгарат.
-
-## Metrics/logging
-
-`src/metrics_shell.b98` жана `src/logging_shell.b98` эки токен окуйт:
-
-```text
-semanticValue counter
-```
-
-жана чыгарат:
-
-```text
-semanticValue counter+1
-```
-
-Биринчи токен counter маанисинен көз каранды эмес. Демек observability state семантикалык чечимге кайра кирбейт.
-
-## Корутунду
-
-Азыркы Stage 1 production катмары үчүн:
-
-`SEMANTIC_STATE_OWNER_VALIDATED=YES`
-
-Бул далил азыркы Bootstrap катмарына гана тиешелүү. Кийинки этаптарда mutable cache, snapshot, recovery же башка state пайда болсо, ownership кайра текшерилиши керек.
+**Корутунду:** азыр толук семантикалык ээлик үчүн
+SEMANTIC_STATE_OWNER_VALIDATED=NO_FINAL_AUDIT гана туура;
+Stage 1 OPEN бойдон калат.
