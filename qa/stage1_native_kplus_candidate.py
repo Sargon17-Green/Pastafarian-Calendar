@@ -9,6 +9,7 @@ It does not certify full production geometry or Stage 1 completion.
 from __future__ import print_function
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import stage1_native_diverse_geometry as native_suite
@@ -109,6 +110,40 @@ def main():
                     (label, actual, expect))
             print("NATIVE_KPLUS_FULL_CORPUS_PARITY_PASS", label,
                   "valid", valid, "output_fields", len(actual))
+            sys.stdout.flush()
+        # Native counterfactual: the 'k' cell must actually influence
+        # computation, not merely appear on a rendered source map. A sham
+        # exact-byte copy must retain output; replacing precisely one
+        # executed opcode with a zero-digit must not retain successful output.
+        with open(SOURCE, "rb") as stream:
+            original_bytes = stream.read()
+        rows = original_bytes.split("\n")
+        require(rows[101][1475] == "k", "Native k site changed unexpectedly")
+        sham = os.path.join(folder, "control_same_opcode.b98")
+        mutant = os.path.join(folder, "mutant_zero_instead_of_k.b98")
+        shutil.copyfile(SOURCE, sham)
+        rows[101] = rows[101][:1475] + "0" + rows[101][1476:]
+        with open(mutant, "wb") as output:
+            output.write("\n".join(rows))
+        for label in ("zero_equal", "foundation_cross"):
+            values, valid = cases[label]
+            raw = " ".join(map(str, values)) + "\n"
+            natural = native_suite.native(SOURCE, raw)
+            sham_output = native_suite.native(sham, raw)
+            require(sham_output == natural,
+                    "source-copy sham changed native result for " + label)
+            cmd = ["timeout", "--kill-after=2s", "8s"] + native_suite.COMMAND + [mutant]
+            p = subprocess.Popen(cmd, stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            counter_output, counter_stderr = p.communicate(raw)
+            changed = p.returncode != 0 or counter_output.split() != natural
+            require(changed,
+                    "native k-to-zero counterfactual had no observable effect: "+
+                    label)
+            print("NATIVE_KPLUS_COUNTERFACTUAL_NON_INERT_PASS", label,
+                  "sham_identical", True,
+                  "mutant_exit", p.returncode,
+                  "mutant_output_changed", counter_output.split() != natural)
             sys.stdout.flush()
     finally:
         shutil.rmtree(folder)
