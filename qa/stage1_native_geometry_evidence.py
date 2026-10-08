@@ -201,15 +201,38 @@ def main():
     coords={}
     for label in labels:
         old=load_trace(os.path.join(folder,label+".tsv"))
+        scanner=load_trace(os.path.join(folder,"scanner_"+label+".tsv"))
         new=load_trace(os.path.join(folder,"candidate_"+label+".tsv"))
         metric,positions,edges,gates,changed=summarize(new)
         baseline,old_positions,old_edges,_,_=summarize(old)
-        require(metric==baseline,"new lexical scanner modified native arithmetic geometry")
-        require(positions==old_positions and edges==old_edges,
-                "original and updated native post-handoff route graph diverged")
+        frozen,scanner_positions,scanner_edges,_,_=summarize(scanner)
+        # Exact legacy arithmetic route parity remains mandatory for the
+        # frozen native lexical-only scanner; it is not silently removed
+        # because QA production now executes an approved additional circuit.
+        require(frozen==baseline,
+                "frozen lexical scanner altered native arithmetic metrics")
+        require(scanner_positions==old_positions and scanner_edges==old_edges,
+                "frozen scanner changed native post-handoff directed route")
+        # Source-level checks and native k+ differential independently pin
+        # the circuit. This proof counts ONLY native executed instructions.
+        require(metric["advanced_opcode_executions"]["k"]>=1 and
+                frozen["advanced_opcode_executions"]["k"]==0,
+                "production's arithmetic k detour not actually executed")
+        require(any(x==1475 and y==101 and op==ord("k")
+                    for tick,ip,x,y,dx,dy,op,depth in new["post"]),
+                "expected Native arithmetic k opcode missing at exact cell")
+        require((1475,101) in positions and (1475,101) not in scanner_positions,
+                "k executed path is not a genuinely new spatial excursion")
+        require(len(positions ^ scanner_positions)>=8,
+                "native k detour lacked minimum actual geometric impact")
         report["traces"][label]=dict(metric,sha256=new["sha256"],
-            baseline_sha256=old["sha256"],scanner_steps=new["pre_steps"],
-            baseline_steps=old["pre_steps"],native_total_steps=new["trace_steps"])
+            baseline_sha256=old["sha256"],
+            frozen_scanner_sha256=scanner["sha256"],
+            frozen_scanner_post_handoff_exact_parity=True,
+            measured_executed_k_detour=metric["advanced_opcode_executions"]["k"],
+            new_native_coordinates=len(positions-scanner_positions),
+            scanner_steps=new["pre_steps"],baseline_steps=old["pre_steps"],
+            native_total_steps=new["trace_steps"])
         render_svg(os.path.join(folder,"candidate_"+label+"_native_route.svg"),
                    "Befunge Stage 1 Native executed "+label+" route",
                    new["post"],metric,changed)
