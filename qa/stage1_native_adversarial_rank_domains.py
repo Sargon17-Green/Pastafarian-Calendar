@@ -9,6 +9,8 @@ Python only marshals data and checks protocol/shape; no calendar oracle.
 from __future__ import print_function
 import subprocess
 import sys
+import os
+import tempfile
 
 BF98=["pyfunge","--disable-fprint","--no-concurrent","--no-filesystem",
       "-v98","-d2"]
@@ -67,6 +69,25 @@ def verify(label,inputs,count_mod,unrank_mod):
     print("NATIVE_ADVERSARIAL_RANK_DOMAIN_PASS",label,"count",count,
           "rejected",len(invalid))
     sys.stdout.flush()
+
+def probe_native_integer_character_handoff():
+    # Probe the interpreter's actual character position immediately after
+    # four integer-input opcodes. This is diagnostic native Befunge, not math.
+    fd,name=tempfile.mkstemp(suffix=".b98")
+    try:
+        os.write(fd,"&for item in BOUNDED:
+for item in BOUNDED:
+for item in BOUNDED:
+$~.@\n")
+        os.close(fd)
+        observed=run(name,[5,2,1,4,1])
+        print("NATIVE_INTEGER_CHARACTER_HANDOFF_ASCII",observed)
+        sys.stdout.flush()
+    finally:
+        try: os.unlink(name)
+        except OSError: pass
+
+probe_native_integer_character_handoff()
 
 for item in BOUNDED:
     verify("bounded:"+str(item),item,
