@@ -74,6 +74,24 @@ Thus the dynamically written 40/41 values were **never executed as Funge command
 
 **Limits:** one specific interpreter's Funge-space.put entrypoint was intercepted. Additional interpreter APIs that might mutate memory were not exhaustively instrumented, nor were all possible input domains exercised. These facts do not close full Funge-space mutation, semantic ownership or final geometric Stage-1 acceptance.
 
+## Dynamic opcode-looking values are actively read as numeric data
+
+A separate exact GitHub Actions Native execution on QA commit `8f37425d54ae5e67b662a4983b1c9b3a2b3adca7`, [run 37965338945](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37965338945), instrumented actual Funge-space `put` and direct native `g` execution over the same 32 valid input families × both fork arms.
+
+All **23,488** execution-time `put` calls were attributed to a real `p` opcode; no indirect `put` calls were observed. Of these writes, **22** stored the numbers 40 or 41 (which happen to be the ASCII codes of `(` and `)`) at only four numeric storage coordinates:
+
+| Data coordinate | Numeric value written | Writes | Actual Native direct `g` reads of that coordinate | Reads returning exactly the opcode-like value |
+|---|---:|---:|---:|---:|
+| `(43,1702)` | 40 | 10 | 2,176 | 20 |
+| `(47,1703)` | 40 | 4 | 2,176 | 8 |
+| `(53,1704)` | 41 | 4 | 1,216 | 4 |
+| `(61,1706)` | 41 | 4 | 1,216 | 4 |
+| **Total** | | **22** | **6,784** | **36** |
+
+The native IP **never executed a dynamically written opcode-looking byte** in the 64 measured runs. The independent Python 3 auditor cross-checked all direct `g` returns against the latest prior real `put` to that cell or the original source value. Thus at least 36 directly witnessed reads consumed literal 40/41 values **as numeric data, not instructions**. The later audit pins these exact counts and includes a hostile forged literal-read report; that strengthening has its own exact-commit CI status.
+
+This is not a global proof about all input domains or other Funge-space mutation/read APIs. `LAST_COMPLETED_STAGE=0`; both final functional and geometric acceptance remain OPEN.
+
 ## Acceptance boundary
 
 The upstream `|` universal-output-causality question remains OPEN. The 32-domain diagnostic shows a reproducible branch-dependent asymmetry, not a universal final-output dependence. It neither changes the Befunge algorithm nor begins Stage 2.
