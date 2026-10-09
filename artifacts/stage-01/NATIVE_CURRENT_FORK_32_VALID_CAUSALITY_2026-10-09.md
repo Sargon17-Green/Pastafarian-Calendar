@@ -43,6 +43,16 @@ A later Native job, [37952921013](https://github.com/Sargon17-Green/Pastafarian-
 
 The next QA replay records the **real PyFunge IP storage offset, string/invert/queue modes, and input cursor** on both executed branches at the five already matched motion checkpoints, covering 32 valid input pairs. The independent evidence checker rejects two extra adversarial mutations to these fields. These are bounded runtime-context observations, **not** an assertion of equal entire Funge-space, all fingerprints, or complete execution state. Exact-commit Native CI is required before accepting the results.
 
+## One precisely localized native p-scratch divergence
+
+The [real PyFunge-98 run 37957517917](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37957517917) at QA commit `9a0643c9612aba54a9d5c0e233cafa680bdcf26a` retained the raw all-stack-frame and p-modified-Funge-cell values, along with the independently checked SHA-256, at five matching IP-motion checkpoints for each of the 32 normal/forced-opposite run pairs. Original GitHub artifact ID: `11627988606`.
+
+Inspection of **all 160 paired checkpoints** shows exactly one differing p-mutated coordinate: **(1490,1600)**. In all 20 naturally nonzero | cases the normal arm wrote decimal **12** there and the forced arm retained the source's original blank byte. In the 12 naturally zero | cases the sides are reversed. All remaining cells changed by p had equal physical values at the matching motion steps, despite different path histories.
+
+The actual p operation counts differ by **exactly one per paired run**, with the extra write on the side possessing value 12 at that scratch cell. The observed 160 stack-of-stacks snapshots all contained exactly one frame, so the previously reported 20-case full-frame equivalence follows from the measured TOSS equivalence at those checkpoints.
+
+**Limit:** this proves a localized divergence of the native *p*-mutated memory, not the entirety of Funge-space, every past write, remaining input, or global semantic-state ownership. The QA evidence checker now enforces the exact-cell, exact-value, write-count and initially-blank invariants, including two new hostile mutations. Its latest exact-HEAD regression must pass before the new guard can be marked complete.
+
 ## Acceptance boundary
 
 The upstream `|` universal-output-causality question remains OPEN. The 32-domain diagnostic shows a reproducible branch-dependent asymmetry, not a universal final-output dependence. It neither changes the Befunge algorithm nor begins Stage 2.
