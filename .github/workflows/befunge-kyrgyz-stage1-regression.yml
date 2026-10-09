@@ -1330,7 +1330,6 @@ jobs:
             -v "$RUNNER_TEMP/native-invalid-memory:/invalid" \
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
-              python -m py_compile qa/stage1_native_invalid_memory_ownership.py
               timeout --kill-after=5s 450s python -u qa/stage1_native_invalid_memory_ownership.py
             '
           test -s "$RUNNER_TEMP/native-invalid-memory/native_invalid_memory.json"
