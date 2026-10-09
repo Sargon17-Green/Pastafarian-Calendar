@@ -145,3 +145,20 @@ evidence and rejects eight falsified reports. This check does not claim
 coverage of nested k-dispatched g, alternative mutation APIs, untested
 input domains, global semantic ownership, or Stage-1 completion. The
 exact-head CI result is required before marking it PASS.
+
+
+## Native k repeat-next target audit (QA-only; exact-head CI pending)
+
+The existing 64 real-program engine-level writer inventory now also tracks
+executed k instruction IPs, directions, immediate next-opcode bytes, and
+unmodified stack top before dispatch. The pinned arithmetic circuit is
+at (1475,101), with actual subsequent plus at (1476,101); any real k
+whose observed target differs fails the QA check. The watch for runtime
+written instruction bytes includes dynamically generated k, not just the
+previous source-absent mutators. A distinct Python-3 auditor independently
+checks all native k source/target snapshots and adds three hostile evidence
+variants, for twelve negative reports in total.
+
+This is finite-sample Native evidence and does not establish coverage of
+all interpreter memory APIs, all input domains or global Stage-1 ownership.
+Canonical production source remains unchanged; Stage 1 remains OPEN.

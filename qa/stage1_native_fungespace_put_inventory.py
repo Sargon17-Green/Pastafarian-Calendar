@@ -21,6 +21,7 @@ import stage1_native_current_fork_route_differential as fork
 SOURCE="src/interleaved_work_counts.b98"
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
 FORBIDDEN="sio=()t"
+GENERATED_WATCHED="sio=()tk"
 SPECIAL_DATA=((43,1702),(47,1703),(53,1704),(61,1706))
 OUT="/writes/native_fungespace_put_inventory.json"
 
@@ -44,6 +45,7 @@ def run(src,name,raw,opposite,oracle):
     generated_live={}
     generated_byte_visits=[]
     direct_g_data_reads=[]
+    repeat_k_events=[]
     direct_p=[]
     gate=[]
     ticks=[0]
@@ -64,7 +66,7 @@ def run(src,name,raw,opposite,oracle):
         puts.append({"tick":ticks[0],"ip":position,"opcode":opcode,
                      "target":target,"value":stored})
         key=tuple(target)
-        if stored in [ord(c) for c in FORBIDDEN]:
+        if stored in [ord(c) for c in GENERATED_WATCHED]:
             generated_live[key]=stored
         else:
             generated_live.pop(key,None)
@@ -88,6 +90,22 @@ def run(src,name,raw,opposite,oracle):
             if opposite:
                 ip.stack[0][-1]=0 if original else 1
             gate.append([original,int(bool(ip.stack[0][-1]))])
+        if op==ord("k") and not ip.stringmode:
+            require(len(ip.stack[0])>0,
+                    "Native k was executed without data stack operand")
+            direction=(int(ip.delta[0]),int(ip.delta[1]))
+            target=(int(xy[0])+direction[0],int(xy[1])+direction[1])
+            target_byte=int(self.space.get(ip.position.__class__(target)))
+            repeat_k_events.append({
+                "tick":ticks[0],
+                "ip":[int(xy[0]),int(xy[1])],
+                "direction":list(direction),
+                "target":list(target),
+                "target_byte":target_byte,
+                "stack_top_before_k":str(ip.stack[0][-1])})
+            require(tuple(xy)==(1475,101) and
+                    target==(1476,101) and target_byte==ord("+"),
+                    "Native executed k target unexpectedly differs from plus")
         if op==ord("p") and not ip.stringmode:
             direct_p.append([int(ip.position[0]),int(ip.position[1]),ticks[0]])
         pending_g=None
@@ -142,6 +160,7 @@ def run(src,name,raw,opposite,oracle):
             "created_other_mutator_cells":len(created),
             "generated_byte_ip_visits":generated_byte_visits,
             "direct_g_reads_of_special_cells":direct_g_data_reads,
+            "real_native_k_repeat_targets":repeat_k_events,
             "native_put_events":puts}
 
 def main():
@@ -167,6 +186,7 @@ def main():
     generated=sum(r["created_other_mutator_cells"] for r in records)
     generated_visits=sum(len(r["generated_byte_ip_visits"]) for r in records)
     data_reads=sum(len(r["direct_g_reads_of_special_cells"]) for r in records)
+    k_visits=sum(len(r["real_native_k_repeat_targets"]) for r in records)
     require(total>64,"Native Funge-space write inventory implausibly empty")
     evidence={"schema":"befunge-stage1-native-fungespace-put-surface-v1",
               "status":"QA_ONLY_NOT_COMPLETE_SEMANTIC_OWNERSHIP",
@@ -178,6 +198,9 @@ def main():
               "new_forbidden_mutator_bytes_written":generated,
               "generated_mutator_byte_ip_visits":generated_visits,
               "direct_g_reads_of_special_cells":data_reads,
+              "real_native_k_repeat_visits":k_visits,
+              "real_native_k_repeat_target_not_p_or_g":True,
+              "generated_mutator_or_k_byte_executions":generated_visits,
               "indirect_or_non_g_memory_reads_not_audited":True,
               "other_space_mutation_APIs_audited":False,
               "stage1_final_acceptance":False,"records":records}
@@ -187,7 +210,8 @@ def main():
           "total_puts",total,"non_p_attributed",indirect,
           "generated_other_mutators",generated,
           "generated_byte_ip_visits",generated_visits,
-          "direct_g_data_reads",data_reads)
+          "direct_g_data_reads",data_reads,
+          "native_k_visits",k_visits)
     print("STAGE1_SEMANTIC_OWNERSHIP_FINAL_GATE=OPEN")
 
 if __name__=="__main__":
