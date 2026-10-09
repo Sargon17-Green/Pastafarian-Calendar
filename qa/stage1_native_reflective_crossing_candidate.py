@@ -120,7 +120,8 @@ def bounded_native(program,raw):
 def controlled_mutant():
     raw="0 0 0 0\n"
     want=suite.expected_for(0,0,0,0)
-    sham=shutil.copyfile(CANDIDATE,os.path.join(OUT,"sham_exact.b98"))
+    sham=os.path.join(OUT,"sham_exact.b98")
+    shutil.copyfile(CANDIDATE,sham)
     original=open(CANDIDATE,"rb").read()
     require(open(sham,"rb").read()==original,"negative-control copy diverged")
     rc,out,err=bounded_native(sham,raw)
