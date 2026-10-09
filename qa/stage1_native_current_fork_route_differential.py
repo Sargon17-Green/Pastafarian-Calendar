@@ -162,7 +162,7 @@ def main():
               "forced_vector",opposite[:4],
               "common_5_event_motion",overlap is not None)
         sys.stdout.flush()
-    require(len(report)==14 and sum(z["changed_final_semantics"] for z in report[:5])==2,
+    require(len(report)==14 and sum(z["changed_final_semantics"] for z in report if z["case"] in ("zero_equal","foundation_cross","forward_short","mixed_small"))==2,
             "incomplete or unexpectedly classified Native fork corpus")
     data={"schema":"befunge-stage1-current-native-fork-route-differential-v1",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
