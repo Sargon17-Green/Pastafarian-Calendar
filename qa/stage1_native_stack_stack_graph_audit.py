@@ -17,9 +17,9 @@ import stage1_native_reflective_candidate_domain_matrix as wide
 
 BASE="qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98"
 BLOB="b6cf50de9ed45376db5fc4ebd003157210dff03b"
-CAND_SHA="b4be66d2ff83c35bb1ef7d4d1e71c6b88cd63c8afa8487dcda6275172394583c"
+CAND_SHA="1b3d1b51936638064192e09c8a3bcd07c2a2e6fa07283b16911936cb7a29a222"
 OUT="stack_stack_candidate.b98"
-CORRIDOR={(954,y) for y in range(1319,1331)} | {(954,1332),(955,1332)}
+CORRIDOR={(954,y) for y in range(1318,1331)} | {(954,1332),(955,1332)}
 REJOIN=(955,1332)
 CASES_UP={"zero_equal","forward_short","reverse_short","positive_negative",
           "large_values","epoch_forward_one","epoch_reverse_one",
@@ -40,13 +40,13 @@ def source_check(directory):
             [len(row) for row in a]==[len(row) for row in b],
             "Native stack-stack source dimensions/rows changed")
     expected={(954,1332):(ord("0"),ord("^")),(955,1332):(ord("1"),ord(">"))}
-    for y,ch in zip(range(1330,1318,-1),b"{1u:1-2}11dx"):
+    for y,ch in zip(range(1330,1317,-1),b"{1u:1-\\2}11ex"):
         expected[(954,y)]=(32,ch)
     actual={}
     for y,(r,s) in enumerate(zip(a,b)):
         for x,(left,right) in enumerate(zip(r,s)):
             if left!=right:actual[(x,y)]=(left,right)
-    require(expected==actual and len(actual)==14,
+    require(expected==actual and len(actual)==15,
             "stack-stack source byte edits are off the reserved Native corridor")
     return graph.load_source(os.path.join(directory,OUT)),set(expected)
 
@@ -62,7 +62,7 @@ def main(directory):
     require(proof["schema"]=="befunge-stage1-native-stack-stack-arithmetic-v1"
             and proof["status"]=="QA_EXPERIMENT_ONLY_NO_STAGE1_ACCEPTANCE"
             and proof["candidate_sha256"]==CAND_SHA
-            and proof["changed_exact_executable_cells"]==14,
+            and proof["changed_exact_executable_cells"]==15,
             "stack-stack runner proof provenance mismatch")
     cases=proof["seventeen_native_cases"]
     require(len(cases)==17 and
@@ -110,8 +110,8 @@ def main(directory):
                     and srcnode["final_byte"]==ord("u") and
                     srcnode["visits"]==1,
                     "Native actual stack-stack u instruction not byte/visit stable")
-            prev,following=edge_set(edges,(954,1319))
-            require(prev=={(954,1320)} and following=={REJOIN},
+            prev,following=edge_set(edges,(954,1318))
+            require(prev=={(954,1319)} and following=={REJOIN},
                     "Native actual x detour did not return to arithmetic")
         else:
             require(not incoming and not outgoing and
