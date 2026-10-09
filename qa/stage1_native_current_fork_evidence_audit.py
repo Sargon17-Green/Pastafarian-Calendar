@@ -22,7 +22,7 @@ import sys
 
 SOURCE="src/interleaved_work_counts.b98"
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
-SCHEMA="befunge-stage1-current-native-fork-route-differential-v4"
+SCHEMA="befunge-stage1-current-native-fork-route-differential-v5"
 VALID_SHA=re.compile(r"^[0-9a-f]{64}$")
 SPECIAL={"zero_equal":False,"foundation_cross":True,
          "forward_short":False,"mixed_small":True}
@@ -33,6 +33,15 @@ def require(ok,message):
 def source_git_blob(path):
     with open(path,"rb") as stream: data=stream.read()
     return hashlib.sha1(("blob %d\0"%len(data)).encode("ascii")+data).hexdigest()
+
+def tupleize_native_snapshot(value):
+    # JSON arrays originally serialized from Python-2 nested tuples;
+    # reconstruct the exact tuple repr before computing the sha256.
+    if isinstance(value,list):
+        return tuple(tupleize_native_snapshot(item) for item in value)
+    require(type(value) in (int,str),
+            "raw native frame/p-cell snapshot contains nonnumeric value")
+    return value
 
 def verify(proof):
     require(proof.get("schema")==SCHEMA and
@@ -109,13 +118,21 @@ def verify(proof):
             forced_hashes=record.get("first_rejoin_"+prefix+"_sha256_forced")
             equal_steps=record.get("first_rejoin_"+prefix+"_equal_each_step")
             equal_count=record.get("first_rejoin_"+prefix+"_equal_count")
+            raw0=record.get("first_rejoin_"+prefix+"_raw_control")
+            raw1=record.get("first_rejoin_"+prefix+"_raw_forced")
             require(all(isinstance(z,list) and len(z)==5 for z in
-                        (control,forced_hashes,equal_steps)) and
+                        (control,forced_hashes,equal_steps,raw0,raw1)) and
                     all(isinstance(value,str) and VALID_SHA.match(value)
                         for value in control+forced_hashes) and
                     all(type(flag) is bool for flag in equal_steps) and
                     [x==y for x,y in zip(control,forced_hashes)]==equal_steps and
-                    sum(equal_steps)==equal_count,
+                    sum(equal_steps)==equal_count and
+                    [hashlib.sha256(repr(tupleize_native_snapshot(v)).encode("ascii")).hexdigest()
+                     for v in raw0]==control and
+                    [hashlib.sha256(repr(tupleize_native_snapshot(v)).encode("ascii")).hexdigest()
+                     for v in raw1]==forced_hashes and
+                    [tupleize_native_snapshot(left)==tupleize_native_snapshot(right)
+                     for left,right in zip(raw0,raw1)]==equal_steps,
                     "native full-frame/p-cell snapshot digest/class contradiction: "+
                     label+"/"+prefix)
         for prefix in ("frame_count","p_modified_cells_count"):
@@ -143,6 +160,11 @@ def verify(proof):
     require(tally=={"zero":12,"nonzero":20,"causal":12,"inert":20,
                     "rejoin_full_toss_equal":20},
             "Native output/branch/TOSS corpus totals changed")
+    require(proof.get("raw_native_rejoin_frames_and_p_modified_values_retained") is True and
+            proof.get("p_modified_cells_unequal_all_five_observed_cases")==32 and
+            all(z["first_rejoin_p_modified_cells_equal_count"]==0
+                for z in cases),
+            "Native p-written Funge-space difference not preserved")
     require(proof.get("native_stack_frame_rejoin_snapshots_measured")==320 and
             proof.get("native_p_mutated_cell_rejoin_snapshots_measured")==320 and
             proof.get("non_p_fungespace_mutations_excluded_from_proof") is True and

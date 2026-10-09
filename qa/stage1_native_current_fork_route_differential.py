@@ -243,6 +243,10 @@ def main():
                 "first_rejoin_toss_depth_forced":[len(s) for s in stack_b],
                 "first_rejoin_toss_sha256_control":[hashlib.sha256(repr(s)).hexdigest() for s in stack_a],
                 "first_rejoin_toss_sha256_forced":[hashlib.sha256(repr(s)).hexdigest() for s in stack_b],
+                "first_rejoin_all_stack_frames_raw_control":frames_a,
+                "first_rejoin_all_stack_frames_raw_forced":frames_b,
+                "first_rejoin_p_modified_cells_raw_control":changed_a,
+                "first_rejoin_p_modified_cells_raw_forced":changed_b,
                 "first_rejoin_all_stack_frames_equal_each_step":equal_frames,
                 "first_rejoin_all_stack_frames_equal_count":sum(equal_frames),
                 "first_rejoin_all_stack_frames_sha256_control":[hashlib.sha256(repr(s)).hexdigest() for s in frames_a],
@@ -291,7 +295,9 @@ def main():
     require(all(z["first_rejoin_native_toss_identical_all_five"] !=
                 z["changed_final_semantics"] for z in report),
             "output-causal and five-step Native TOSS-rejoin classes collided")
-    data={"schema":"befunge-stage1-current-native-fork-route-differential-v4",
+    require(all(z["first_rejoin_p_modified_cells_equal_count"]==0 for z in report),
+            "Native p-modified Funge-space unexpectedly reconverged in checked motion")
+    data={"schema":"befunge-stage1-current-native-fork-route-differential-v5",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
           "source_git_blob":PIN,"real_PyFunge_runs":64,
           "valid_input_cases":32,
@@ -315,6 +321,9 @@ def main():
               all(z["first_rejoin_all_stack_frames_equal_each_step"]) for z in report),
           "native_p_changed_cells_all_five_equal_cases":sum(
               all(z["first_rejoin_p_modified_cells_equal_each_step"]) for z in report),
+          "p_modified_cells_unequal_all_five_observed_cases":sum(
+              z["first_rejoin_p_modified_cells_equal_count"]==0 for z in report),
+          "raw_native_rejoin_frames_and_p_modified_values_retained":True,
           "non_p_fungespace_mutations_excluded_from_proof":True,
           "records":report}
     with open(OUT,"wb") as sink:
