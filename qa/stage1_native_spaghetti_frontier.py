@@ -48,8 +48,13 @@ def main(directory):
     forks=evidence["cross_input_native_union_arithmetic_forks"]
     joins=evidence["cross_input_native_union_arithmetic_joins"]
     dual=evidence["cross_input_native_union_merge_and_fork_nodes"]
-    require(forks>=1 and joins>=1 and 0<=dual<=min(forks,joins),
-            "invalid measured cross-input directed graph frontier")
+    require(forks>=4 and joins>=3 and 1<=dual<=min(forks,joins),
+            "promoted QA production lost its Native measured 4/3/1 dual graph frontier")
+    observed_dual_cases=sum(x["graph_merge_and_fork_nodes"]>=1 for x in coverage)
+    require(observed_dual_cases>=11,
+            "Native 17-case corpus lost the 11 actual single-run dual-node routes")
+    require(totals.get("r",0)>=11,
+            "Native reflective reverse operator no longer executes in upper routes")
     require(all(totals.get(ch,0)>0 for ch in ("[","]","|","j","k")),
             "promoted Native input-dependent turn/jump/k architecture missing")
     # The native graph's opcode watcher intentionally omits ordinary direction
@@ -71,6 +76,7 @@ def main(directory):
       "cross_input_arithmetic_forks":forks,
       "cross_input_arithmetic_joins":joins,
       "dual_merge_and_fork_nodes":dual,
+      "single_run_cases_with_dual_nodes":observed_dual_cases,
       "route_fingerprints":evidence["route_fingerprints"],
       "advanced_executed_opcode_totals":totals,
       "missing_watched_advanced_control_operators":missing,
@@ -80,9 +86,9 @@ def main(directory):
       "self_modifying_execution_minimum":min(
           x["changed_executable_gate_reexecutions"] for x in coverage),
       "current_geometry_gate":"OPEN",
-      "reason":"Full interwoven recursive spaghetti, w/r/_ and stack-stack "
-               "accounting are not proved by measured routes; "
-               "merge-and-fork intersections require additional evidence",
+      "reason":"A real dual node and executed r are now proven in QA production. "
+               "Meaningful executed w/_ and stack-stack { } u, deeper "
+               "entanglement and complete Stage-1 acceptance remain unproved",
       "current_functional_gate":"NOT_INFERRED_FROM_GEOMETRY",
       "last_completed_stage":"UNCHANGED_0",
     }
