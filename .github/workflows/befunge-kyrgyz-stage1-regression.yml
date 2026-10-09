@@ -1065,7 +1065,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "8f2cf8afef61818244747582fe7c20a74ee18943"
           test "$(git hash-object qa/interleaved_work_counts_w_data_branch_candidate.b98)" = "31807edb2b44b141d2af340555d6e97e63428613"
-          test "$(git hash-object qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98)" = "1cf3ffa0466ea33465bf8acc632a3d10fa568587"
+          test "$(git hash-object qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98)" = "b6cf50de9ed45376db5fc4ebd003157210dff03b"
           python3 -m py_compile qa/stage1_native_w_valid_two_arithmetic_arms_candidate.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
@@ -1082,7 +1082,7 @@ jobs:
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=5s 850s python -u qa/stage1_native_w_valid_two_arithmetic_arms_candidate.py
             '
-          test -s "$RUNNER_TEMP/native-valid-w-evidence/native_valid_w_two_arm_proof.json"
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/native_two_valid_w_evidence.json"
           echo NATIVE_TWO_VALID_W_CANDIDATE_ONLY_STAGE1_STILL_OPEN
       - name: Retain exact Native real execution evidence
         if: always()
