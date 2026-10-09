@@ -939,6 +939,7 @@ jobs:
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=5s 720s python -u qa/stage1_native_w_data_branch_candidate.py
+              timeout --kill-after=5s 180s python -u qa/stage1_native_w_fault_reset.py
             '
           test -s "$RUNNER_TEMP/native-w-evidence/w_data_candidate_proof.json"
           python3 -m py_compile qa/stage1_native_w_source_ownership_audit.py
