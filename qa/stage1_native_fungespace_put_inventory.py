@@ -40,8 +40,10 @@ def run(src,name,raw,opposite,oracle):
     space=program.space
     cls=type(space)
     original_put=cls.put
+    original_putspace=cls.putspace
     original_step=program.execute_step
     puts=[]
+    putspace_calls=[]
     generated_live={}
     generated_byte_visits=[]
     direct_g_data_reads=[]
@@ -71,6 +73,16 @@ def run(src,name,raw,opposite,oracle):
         else:
             generated_live.pop(key,None)
         return result
+    def spy_putspace(self,*args,**kwargs):
+        require(self is space,
+                "real Native putspace invoked on unexpected Funge-space")
+        # Program.load_code finished BEFORE hooks were installed.
+        # This catches only true execution-time alternative writes.
+        putspace_calls.append({
+            "tick":ticks[0],"argument_count":len(args),
+            "ip":[int(program.ips[0].position[0]),
+                  int(program.ips[0].position[1])] if program.ips else None})
+        return original_putspace(self,*args,**kwargs)
     def step(self):
         ticks[0]+=1
         if ticks[0]>fork.BOUND:
@@ -130,6 +142,7 @@ def run(src,name,raw,opposite,oracle):
         return result
     try:
         cls.put=spy_put
+        cls.putspace=spy_putspace
         program.execute_step=step.__get__(program,program.__class__)
         status="normal"
         try:program.execute()
@@ -138,6 +151,7 @@ def run(src,name,raw,opposite,oracle):
         if "execute_step" in program.__dict__:
             del program.execute_step
         cls.put=original_put
+        cls.putspace=original_putspace
     require(len(gate)==1 and len(puts)>0,
             "Native real fork/space-put observation incomplete")
     expected=oracle==stdout.getvalue().split()
@@ -161,6 +175,7 @@ def run(src,name,raw,opposite,oracle):
             "generated_byte_ip_visits":generated_byte_visits,
             "direct_g_reads_of_special_cells":direct_g_data_reads,
             "real_native_k_repeat_targets":repeat_k_events,
+            "native_runtime_putspace_calls":putspace_calls,
             "native_put_events":puts}
 
 def main():
@@ -187,6 +202,7 @@ def main():
     generated_visits=sum(len(r["generated_byte_ip_visits"]) for r in records)
     data_reads=sum(len(r["direct_g_reads_of_special_cells"]) for r in records)
     k_visits=sum(len(r["real_native_k_repeat_targets"]) for r in records)
+    runtime_putspace=sum(len(r["native_runtime_putspace_calls"]) for r in records)
     require(total>64,"Native Funge-space write inventory implausibly empty")
     evidence={"schema":"befunge-stage1-native-fungespace-put-surface-v1",
               "status":"QA_ONLY_NOT_COMPLETE_SEMANTIC_OWNERSHIP",
@@ -199,6 +215,8 @@ def main():
               "generated_mutator_byte_ip_visits":generated_visits,
               "direct_g_reads_of_special_cells":data_reads,
               "real_native_k_repeat_visits":k_visits,
+              "real_native_runtime_putspace_invocations":runtime_putspace,
+              "putspace_instrumented_after_source_load":True,
               "real_native_k_repeat_target_not_p_or_g":True,
               "generated_mutator_or_k_byte_executions":generated_visits,
               "indirect_or_non_g_memory_reads_not_audited":True,
@@ -211,7 +229,8 @@ def main():
           "generated_other_mutators",generated,
           "generated_byte_ip_visits",generated_visits,
           "direct_g_data_reads",data_reads,
-          "native_k_visits",k_visits)
+          "native_k_visits",k_visits,
+          "runtime_putspace_calls",runtime_putspace)
     print("STAGE1_SEMANTIC_OWNERSHIP_FINAL_GATE=OPEN")
 
 if __name__=="__main__":

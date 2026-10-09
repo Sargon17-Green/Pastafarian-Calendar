@@ -162,3 +162,20 @@ variants, for twelve negative reports in total.
 This is finite-sample Native evidence and does not establish coverage of
 all interpreter memory APIs, all input domains or global Stage-1 ownership.
 Canonical production source remains unchanged; Stage 1 remains OPEN.
+
+
+## Separate runtime Space.putspace hook (exact-head CI pending)
+
+PyFunge 0.5-rc2 documents putspace as a second API for writing Funge
+space. The existing engine-level 64-program test now hooks *both*
+Space.put and Space.putspace after initial source load, while executing
+the exact source under Native interpretation. Each runtime putspace call
+would be retained and would fail the independent zero-calls auditor;
+three newly forged putspace-report variants test that guard. The initial
+Program.load_code is deliberately excluded because it is legitimate
+source initialization, not mutation during Befunge execution.
+
+This extension does not claim to intercept other undocumented mutation
+APIs, custom fingerprints, different runtime modes, or untested inputs.
+Stage-1 final semantic-state ownership and the functional/geometric
+acceptance gates remain OPEN.

@@ -70,6 +70,7 @@ def verify(data,rows,source_mutators):
     g_by_target=Counter()
     g_literal=Counter()
     native_k=0
+    native_putspace=0
     for pair in range(0,64,2):
         a,b=records[pair:pair+2]
         label=a.get("case")
@@ -117,6 +118,10 @@ def verify(data,rows,source_mutators):
                     rows[101][1476]==ord("+"),
                     "actual Native k source, operand, or target was forged")
         native_k+=len(k_events)
+        putspace_record=record.get("native_runtime_putspace_calls")
+        require(putspace_record==[],
+                "Native unexpected execution-time alternative putspace writer")
+        native_putspace+=len(putspace_record)
         observed=record.get("direct_g_reads_of_special_cells")
         require(isinstance(observed,list),
                 "missing native g data-cell observations")
@@ -184,6 +189,10 @@ def verify(data,rows,source_mutators):
         total+=len(events)
         indirect+=record["non_p_attributed_puts"]
         visits+=len(record["generated_byte_ip_visits"])
+    require(native_putspace==0 and
+            data.get("real_native_runtime_putspace_invocations")==0 and
+            data.get("putspace_instrumented_after_source_load") is True,
+            "Native execution-time putspace instrumentation mismatch")
     require(native_k>0 and
             data.get("real_native_k_repeat_visits")==native_k and
             data.get("real_native_k_repeat_target_not_p_or_g") is True and
@@ -209,6 +218,7 @@ def verify(data,rows,source_mutators):
             "actual_generated_instruction_visits":0,
             "real_direct_g_data_reads":g_reads,
             "native_executed_k_repeat_targets":native_k,
+            "native_runtime_putspace_invocations":native_putspace,
             "real_opcode_looking_byte_g_reads":sum(g_literal.values()),
             "direct_g_read_target_counts":dict(
                 (str(p),count) for p,count in g_by_target.items()),
@@ -260,6 +270,15 @@ def main(folder):
                     lambda p:p["records"][0]["direct_g_reads_of_special_cells"]
                     .append({"tick":1,"ip":[0,0],"target":[43,1702],
                              "before":40,"returned":40})),
+        must_reject("forged_putspace_event",report,rows,mutators,
+                    lambda p:p["records"][0]["native_runtime_putspace_calls"]
+                    .append({"tick":1,"ip":[0,0],"argument_count":2})),
+        must_reject("forged_putspace_total",report,rows,mutators,
+                    lambda p:p.__setitem__(
+                        "real_native_runtime_putspace_invocations",1)),
+        must_reject("forged_putspace_instrumentation",report,rows,mutators,
+                    lambda p:p.__setitem__(
+                        "putspace_instrumented_after_source_load",False)),
         must_reject("forged_k_target",report,rows,mutators,
                     lambda p:p["records"][0]["real_native_k_repeat_targets"][0]
                     .__setitem__("target",[1476,102])),
@@ -274,8 +293,8 @@ def main(folder):
                         if entry["returned"] in (40,41))
                     .__setitem__("returned",42)),
     ]
-    require(len(rejections)==12,"Native write adversaries not fully exercised")
-    output={"schema":"befunge-stage1-native-fungespace-put-audit-v4",
+    require(len(rejections)==15,"Native write adversaries not fully exercised")
+    output={"schema":"befunge-stage1-native-fungespace-put-audit-v5",
             "source_git_blob":PIN,"real_native_records_verified":64,
             "proof_scope":"finite corpus and observable Funge-space.put method",
             "stage1_final_acceptance":False,"verified_counts":result,
@@ -284,7 +303,7 @@ def main(folder):
             "w",encoding="utf-8") as out:
         json.dump(output,out,sort_keys=True,indent=2)
         out.write("\n")
-    print("NATIVE_SPACE_PUT_INDEPENDENT_12_NEGATIVE_REPORTS_PASS")
+    print("NATIVE_SPACE_PUT_INDEPENDENT_15_NEGATIVE_REPORTS_PASS")
 
 if __name__=="__main__":
     require(len(sys.argv)==2,"usage: NATIVE_WRITER_EVIDENCE_DIR")
