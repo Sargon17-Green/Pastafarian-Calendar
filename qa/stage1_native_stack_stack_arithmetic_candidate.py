@@ -129,9 +129,64 @@ def call(source_path,raw,seconds):
     out,err=p.communicate(raw)
     return p.returncode,out.split(),err[-300:]
 
+def native_pre_arithmetic_stack(source_file,raw):
+    """Read-only LIVE PyFunge TOSS immediately before original - arithmetic.
+
+    The same pinned interpreter, actual input and source bytes are used,
+    with no Python implementation of Befunge semantics or calendar arithmetic.
+    Stop once at the first exact production rejoin IP; do not execute a
+    potentially nonterminating candidate merely to inspect its stack.
+    """
+    import StringIO
+    from funge.program import Program
+    from funge.languages.funge98 import Befunge98
+    from funge.platform import BufferedPlatform
+    class ObservationReady(Exception):pass
+    stdout=StringIO.StringIO()
+    platform=BufferedPlatform([],{},stdin=StringIO.StringIO(raw),stdout=stdout)
+    program=Program(Befunge98,platform=platform)
+    with open(source_file,"rb") as f: program.load_code(f.read())
+    program.create_ip()
+    original=program.execute_step
+    observations=[]
+    tick=[0]
+    def watched_step(self):
+        tick[0]+=1
+        require(tick[0]<40000,
+                "Native pre-arithmetic operand watcher failed to reach rejoin")
+        if self.ips:
+            ip=self.ips[0]
+            xy=tuple(ip.position)
+            if xy==(956,1332):
+                require(tuple(ip.delta)==(1,0),
+                        "Native pre-arithmetic IP heading is not east")
+                values=tuple(map(str,list(ip.stack[0])))
+                observations.append(values)
+                raise ObservationReady()
+        return original()
+    program.execute_step=watched_step.__get__(program,program.__class__)
+    try:
+        program.execute()
+    except ObservationReady:
+        pass
+    finally:
+        del program.execute_step
+    require(len(observations)==1 and observations[0],
+            "Native interpreter did not expose exact pre-arithmetic stack")
+    return observations[0]
+
+
 def main():
     require(os.path.isdir(OUT),"Native /stack evidence destination unavailable")
     data=source()
+    raw_probe="0 0 0 0\n"
+    baseline_stack=native_pre_arithmetic_stack(BASE,raw_probe)
+    candidate_stack=native_pre_arithmetic_stack(CAND,raw_probe)
+    print("NATIVE_STACK_STACK_LIVE_PRE_ARITHMETIC_VALUES",
+          "reference",repr(baseline_stack),"candidate",repr(candidate_stack))
+    sys.stdout.flush()
+    require(baseline_stack==candidate_stack,
+            "ACTUAL_NATIVE_STACK_STACK_VALUES_DIFFER_AT_REJOIN")
     proof=[]
     for label,fields,valid in native.CASES:
         raw=" ".join(map(str,fields))+"\n"
