@@ -1083,6 +1083,18 @@ jobs:
               timeout --kill-after=5s 850s python -u qa/stage1_native_w_valid_two_arithmetic_arms_candidate.py
             '
           test -s "$RUNNER_TEMP/native-valid-w-evidence/native_two_valid_w_evidence.json"
+          python3 -m py_compile qa/stage1_native_two_valid_w_independent_graph.py
+          python3 qa/stage1_native_two_valid_w_independent_graph.py "$RUNNER_TEMP/native-valid-w-evidence"
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/two_valid_w_independent_graph.json"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-valid-w-evidence:/validw" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 420s python -u qa/stage1_native_two_valid_w_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/two_valid_w_fault_reset.json"
           python3 -m py_compile qa/stage1_native_w_valid_two_arithmetic_arms_graph_audit.py
           python3 qa/stage1_native_w_valid_two_arithmetic_arms_graph_audit.py "$RUNNER_TEMP/native-valid-w-evidence"
           test -s "$RUNNER_TEMP/native-valid-w-evidence/native_two_valid_w_graph_audit.json"
