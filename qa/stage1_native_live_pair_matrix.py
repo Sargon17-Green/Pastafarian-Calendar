@@ -113,32 +113,94 @@ def pair(source, left, right, schedule, expected):
          a["program"].semantics is not b["program"].semantics and
          a["stdin"] is not b["stdin"] and a["stdout"] is not b["stdout"],
          "native independent objects share execution state")
+    cls = type(a["program"].space)
+    need(cls is type(b["program"].space),
+         "live Native pair has incompatible Space APIs")
+    get_orig, put_orig, putspace_orig = cls.get, cls.put, cls.putspace
+    active = [None]
+    counters = {
+        left: {"get": 0, "put": 0, "putspace": 0, "direct_p": 0},
+        right: {"get": 0, "put": 0, "putspace": 0, "direct_p": 0}
+    }
+    def guarded_get(self, *args, **kwargs):
+        current = active[0]
+        if current is not None:
+            need(self is current["program"].space,
+                 "Native executing Program read a different Program's Funge-space")
+            counters[current["label"]]["get"] += 1
+        return get_orig(self, *args, **kwargs)
+    def guarded_put(self, *args, **kwargs):
+        current = active[0]
+        need(current is not None and self is current["program"].space and
+             len(args) >= 2,
+             "Native executing Program wrote another Program's Funge-space")
+        result = put_orig(self, *args, **kwargs)
+        need(int(get_orig(self, args[0])) == int(args[1]),
+             "Native Space.put did not persist its written value")
+        counters[current["label"]]["put"] += 1
+        return result
+    def guarded_putspace(self, *args, **kwargs):
+        current = active[0]
+        need(current is not None and self is current["program"].space,
+             "Native Space.putspace escaped its own Program")
+        counters[current["label"]]["putspace"] += 1
+        return putspace_orig(self, *args, **kwargs)
     overlap = checks = rounds = 0
     order = (a, b) if schedule == "AB" else (b, a)
-    while a["program"].ips or b["program"].ips:
-        rounds += 1
-        if a["program"].ips and b["program"].ips:
-            overlap += 1
-        for current, other in ((order[0], order[1]), (order[1], order[0])):
-            if not current["program"].ips:
-                continue
-            witness = rounds <= 8 or rounds % 211 == 0
-            before = state(other) if witness else None
-            tick(current)
-            if witness:
-                need(state(other) == before,
-                     "one Native Program step mutated another live Program")
-                checks += 1
-        need(rounds <= BUDGET, "native pair scheduling exceeded budget")
+    try:
+        cls.get, cls.put, cls.putspace = (
+            guarded_get, guarded_put, guarded_putspace)
+        while a["program"].ips or b["program"].ips:
+            rounds += 1
+            if a["program"].ips and b["program"].ips:
+                overlap += 1
+            for current, other in ((order[0], order[1]), (order[1], order[0])):
+                if not current["program"].ips:
+                    continue
+                witness = rounds <= 8 or rounds % 211 == 0
+                before = state(other) if witness else None
+                p = current["program"]
+                ip = p.ips[0]
+                direct_opcode = int(get_orig(p.space, ip.position))
+                if direct_opcode == ord("p") and not ip.stringmode:
+                    counters[current["label"]]["direct_p"] += 1
+                active[0] = current
+                try:
+                    tick(current)
+                finally:
+                    active[0] = None
+                if witness:
+                    need(state(other) == before,
+                         "one Native Program step mutated another live Program")
+                    checks += 1
+            need(rounds <= BUDGET, "native pair scheduling exceeded budget")
+    finally:
+        active[0] = None
+        cls.get, cls.put, cls.putspace = (
+            get_orig, put_orig, putspace_orig)
     got_a = a["stdout"].getvalue().split()
     got_b = b["stdout"].getvalue().split()
     need(overlap > 0 and checks >= 16,
          "native pair insufficiently interleaved or insufficient snapshots")
     need(got_a == expected[left] and got_b == expected[right],
          "live pair Native outputs differ from independent Befunge references")
+    for label in (left, right):
+        counts = counters[label]
+        need(counts["get"] > 0 and counts["put"] > 0 and
+             counts["putspace"] == 0 and counts["put"] == counts["direct_p"],
+             "executed Native memory read/write API accounting incomplete")
     return {"left": left, "right": right, "schedule": schedule,
             "left_output": got_a, "right_output": got_b,
             "left_steps": a["steps"], "right_steps": b["steps"],
+            "left_memory_gets": counters[left]["get"],
+            "right_memory_gets": counters[right]["get"],
+            "left_memory_puts": counters[left]["put"],
+            "right_memory_puts": counters[right]["put"],
+            "left_direct_p_steps": counters[left]["direct_p"],
+            "right_direct_p_steps": counters[right]["direct_p"],
+            "left_runtime_putspace": counters[left]["putspace"],
+            "right_runtime_putspace": counters[right]["putspace"],
+            "every_api_read_write_owned_by_active_program": True,
             "overlap_rounds": overlap, "cross_program_checks": checks,
             "terminated": True, "private_programs": True,
             "private_spaces": True, "private_semantics": True,
@@ -170,10 +232,12 @@ def main():
               "interpreter": "PyFunge-0.5-rc2", "native_pair_runs": 24,
               "native_program_executions": 48,
               "independent_native_oracle_calls": 18,
+              "api_ownership_trace_instrumented": True,
               "stage1_final_acceptance": False,
               "expected_by_label": expected, "records": results}
     with open(OUT, "wb") as fh:
         fh.write(json.dumps(report, sort_keys=True, indent=2) + "\n")
+    print("NATIVE_LIVE_PAIR_MEMORY_API_OWNER_24_PAIRS_PASS")
     print("NATIVE_LIVE_PAIR_MATRIX_24_REAL_PAIRS_PASS")
     print("STAGE1_SEMANTIC_OWNERSHIP_FINAL_GATE=OPEN")
 
