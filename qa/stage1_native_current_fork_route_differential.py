@@ -211,6 +211,14 @@ def main():
             "32-case Native fork route/output dependence classification drifted")
     require(all(z["first_common_five_event_motion"] is not None for z in report),
             "expected 32 actual Native five-motion reconvergences missing")
+    require(all(z["first_rejoin_native_toss_equal_count"]==0
+                for z in zeros) and
+            all(z["first_rejoin_native_toss_equal_count"]==5
+                for z in ones),
+            "Native five-step TOSS convergence must match measured fork class")
+    require(all(z["first_rejoin_native_toss_identical_all_five"] !=
+                z["changed_final_semantics"] for z in report),
+            "output-causal and five-step Native TOSS-rejoin classes collided")
     data={"schema":"befunge-stage1-current-native-fork-route-differential-v3",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
           "source_git_blob":PIN,"real_PyFunge_runs":64,
@@ -226,6 +234,8 @@ def main():
           "native_toss_rejoin_snapshots_measured":len(report)*5*2,
           "native_toss_tamper_negative_controls":len(report),
           "native_toss_equal_all_five_cases":sum(z["first_rejoin_native_toss_identical_all_five"] for z in report),
+          "native_toss_equal_all_five_inert_cases":20,
+          "native_toss_unequal_all_five_output_causal_cases":12,
           "full_fungespace_or_soss_equivalence_not_claimed":True,
           "records":report}
     with open(OUT,"wb") as sink:
