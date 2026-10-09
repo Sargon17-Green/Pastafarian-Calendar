@@ -22,7 +22,7 @@ import sys
 
 SOURCE="src/interleaved_work_counts.b98"
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
-SCHEMA="befunge-stage1-current-native-fork-route-differential-v3"
+SCHEMA="befunge-stage1-current-native-fork-route-differential-v4"
 VALID_SHA=re.compile(r"^[0-9a-f]{64}$")
 SPECIAL={"zero_equal":False,"foundation_cross":True,
          "forward_short":False,"mixed_small":True}
@@ -99,6 +99,35 @@ def verify(proof):
                 depth0==depth1 and
                 [row[4] for row in common["real_motion_sample"]]==depth0,
                 "real five-step TOSS/hash/count/motion contradiction: "+label)
+        # Independent five-checkpoint snapshot provenance: the producer
+        # reports SHA-256 digests of *all native stack frames* and of the
+        # sparse p-mutated Funge-space cells at each common IP motion.
+        # The consistency check does not invent frame contents or replay
+        # an unprovided Funge-space; it rejects any contradictory summary.
+        for prefix in ("all_stack_frames","p_modified_cells"):
+            control=record.get("first_rejoin_"+prefix+"_sha256_control")
+            forced_hashes=record.get("first_rejoin_"+prefix+"_sha256_forced")
+            equal_steps=record.get("first_rejoin_"+prefix+"_equal_each_step")
+            equal_count=record.get("first_rejoin_"+prefix+"_equal_count")
+            require(all(isinstance(z,list) and len(z)==5 for z in
+                        (control,forced_hashes,equal_steps)) and
+                    all(isinstance(value,str) and VALID_SHA.match(value)
+                        for value in control+forced_hashes) and
+                    all(type(flag) is bool for flag in equal_steps) and
+                    [x==y for x,y in zip(control,forced_hashes)]==equal_steps and
+                    sum(equal_steps)==equal_count,
+                    "native full-frame/p-cell snapshot digest/class contradiction: "+
+                    label+"/"+prefix)
+        for prefix in ("frame_count","p_modified_cells_count"):
+            cnt0=record.get("first_rejoin_"+prefix+"_control")
+            cnt1=record.get("first_rejoin_"+prefix+"_forced")
+            require(all(isinstance(a,list) and len(a)==5 and
+                        all(type(n) is int and n>=0 for n in a)
+                        for a in (cnt0,cnt1)),
+                    "native stack frame/p-write count shape mismatch: "+
+                    label+"/"+prefix)
+        require(record.get("all_fungespace_mutators_audited") is False,
+                "unsupported claim of full Funge-space state equivalence")
         causal=record.get("changed_final_semantics")
         require(type(causal) is bool and causal==(original==0) and
                 all(reported)==(not causal) and
@@ -114,6 +143,16 @@ def verify(proof):
     require(tally=={"zero":12,"nonzero":20,"causal":12,"inert":20,
                     "rejoin_full_toss_equal":20},
             "Native output/branch/TOSS corpus totals changed")
+    require(proof.get("native_stack_frame_rejoin_snapshots_measured")==320 and
+            proof.get("native_p_mutated_cell_rejoin_snapshots_measured")==320 and
+            proof.get("non_p_fungespace_mutations_excluded_from_proof") is True and
+            proof.get("native_frame_all_five_equal_cases")==sum(
+                all(row["first_rejoin_all_stack_frames_equal_each_step"])
+                for row in cases) and
+            proof.get("native_p_changed_cells_all_five_equal_cases")==sum(
+                all(row["first_rejoin_p_modified_cells_equal_each_step"])
+                for row in cases),
+            "reported frame/p-cell Native totals disagree with observed cases")
     require(proof.get("zero_operand_cases")==12 and
             proof.get("nonzero_operand_cases")==20 and
             proof.get("zero_operand_final_causal_cases")==12 and
@@ -159,10 +198,16 @@ def main(folder):
         ("duplicate_case",lambda p:p["records"][1].__setitem__(
             "case",p["records"][0]["case"])),
         ("forged_aggregate",lambda p:p.__setitem__(
-            "native_toss_equal_all_five_cases",19)))
+            "native_toss_equal_all_five_cases",19)),
+        ("forged_full_frame_digest",lambda p:p["records"][0]
+            ["first_rejoin_all_stack_frames_sha256_control"].__setitem__(0,"f"*64)),
+        ("forged_p_cell_digest",lambda p:p["records"][0]
+            ["first_rejoin_p_modified_cells_sha256_forced"].__setitem__(0,"f"*64)),
+        ("forged_full_frame_equal_flag",lambda p:p["records"][0]
+            ["first_rejoin_all_stack_frames_equal_each_step"].__setitem__(0,False)))
     refused=[must_reject(name,data,change) for name,change in attempts]
-    require(len(refused)==6,"negative manifest checks incomplete")
-    report={"schema":"befunge-stage1-native-fork-manifest-adversarial-v1",
+    require(len(refused)==9,"negative manifest checks incomplete")
+    report={"schema":"befunge-stage1-native-fork-manifest-adversarial-v2",
             "status":"QA_ONLY_NOT_FINAL_STAGE1_ACCEPTANCE",
             "source_blob":PIN,
             "external_raw_native_trace_replay_claimed":False,
@@ -174,7 +219,7 @@ def main(folder):
         json.dump(report,stream,sort_keys=True,indent=2)
         stream.write("\n")
     print("NATIVE_FORK_32_MANIFEST_AND_SIX_ADVERSARIES_PASS",
-          32,"positive,6 negative")
+          32,"positive,9 negative")
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; no full-state equivalence asserted")
 
 if __name__=="__main__":

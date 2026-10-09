@@ -53,6 +53,15 @@ def native_run(source,raw,opposite):
     gate_events=[]
     post=[]
     post_toss=[]
+    post_frames=[]
+    post_modified_p_cells=[]
+    rows=source.split("\n")
+    modified_p_cells={}
+    p_write_events=[0]
+    def initial_byte(px,py):
+        if 0<=py<len(rows) and 0<=px<len(rows[py]):
+            return ord(rows[py][px])
+        return 32
     def hook(self):
         total[0]+=1
         if total[0]>BOUND:
@@ -81,7 +90,33 @@ def native_run(source,raw,opposite):
                 # This is stronger than motion-only reconvergence, but does
                 # not claim equivalence of SOSS, Funge-space or full state.
                 post_toss.append(tuple(str(v) for v in ip.stack[0]))
-        return old_step()
+                post_frames.append(tuple(
+                    tuple(str(value) for value in frame) for frame in ip.stack))
+                post_modified_p_cells.append(tuple(
+                    (point[0],point[1],modified_p_cells[point])
+                    for point in sorted(modified_p_cells)))
+        pending_p=None
+        if self.ips:
+            active=self.ips[0]
+            if self.space.get(active.position)==ord("p"):
+                values=active.stack[0]
+                require(len(values)>=3,
+                        "Native current fork reached p with too few operands")
+                expected_value,px,py=map(int,list(values)[-3:])
+                point=active.position.__class__((px,py))
+                pending_p=(point,(px,py),expected_value)
+        result=old_step()
+        if pending_p is not None:
+            point,coord,expected_value=pending_p
+            observed_value=int(self.space.get(point))
+            require(observed_value==expected_value,
+                    "Native p write did not update the expected physical Funge-space cell")
+            if observed_value==initial_byte(coord[0],coord[1]):
+                modified_p_cells.pop(coord,None)
+            else:
+                modified_p_cells[coord]=str(observed_value)
+            p_write_events[0]+=1
+        return result
     p.execute_step=hook.__get__(p,p.__class__)
     status="normal"
     try:p.execute()
@@ -90,7 +125,10 @@ def native_run(source,raw,opposite):
     return {"status":status,"output":out.getvalue().split(),
             "remaining_ips":len(p.ips),"steps":total[0],
             "gates":gate_events,"route":post,
-            "post_toss":post_toss}
+            "post_toss":post_toss,
+            "post_frames":post_frames,
+            "post_modified_p_cells":post_modified_p_cells,
+            "observed_native_p_writes":p_write_events[0]}
 
 def common_subpath(a,b,length):
     # A common 5-event native directed motion window is stronger than a
@@ -161,6 +199,23 @@ def main():
         # Python 2 list-comprehension variables leak into this scope: do
         # not clobber a/b, the native gate event dictionaries above.
         equal_toss=[left==right for left,right in zip(stack_a,stack_b)]
+        frames_a=unmodified["post_frames"][ia:ia+5]
+        frames_b=altered["post_frames"][ib:ib+5]
+        changed_a=unmodified["post_modified_p_cells"][ia:ia+5]
+        changed_b=altered["post_modified_p_cells"][ib:ib+5]
+        require(len(frames_a)==len(frames_b)==len(changed_a)==len(changed_b)==5,
+                "Native stack-frame and p-cell snapshots are incomplete")
+        require(all(len(frames)>0 for frames in frames_a+frames_b),
+                "PyFunge stack-of-stacks unexpectedly lacked TOSS at rejoin")
+        require(all(frames[0]==toss for frames,toss in
+                    zip(frames_a,stack_a)) and
+                all(frames[0]==toss for frames,toss in
+                    zip(frames_b,stack_b)),
+                "measured Native stack-of-stacks conflicts with the original TOSS")
+        equal_frames=[left==right for left,right in zip(frames_a,frames_b)]
+        equal_modified_p=[left==right for left,right in zip(changed_a,changed_b)]
+        # This only covers p-written mutations relative to the original
+        # Funge source, not possible non-p mutations or all interpreter state.
         # Negative control: a forged TOSS snapshot with unchanged native
         # IP motion must not pass the exact stack comparison.
         tampered=list(stack_a)
@@ -188,6 +243,21 @@ def main():
                 "first_rejoin_toss_depth_forced":[len(s) for s in stack_b],
                 "first_rejoin_toss_sha256_control":[hashlib.sha256(repr(s)).hexdigest() for s in stack_a],
                 "first_rejoin_toss_sha256_forced":[hashlib.sha256(repr(s)).hexdigest() for s in stack_b],
+                "first_rejoin_all_stack_frames_equal_each_step":equal_frames,
+                "first_rejoin_all_stack_frames_equal_count":sum(equal_frames),
+                "first_rejoin_all_stack_frames_sha256_control":[hashlib.sha256(repr(s)).hexdigest() for s in frames_a],
+                "first_rejoin_all_stack_frames_sha256_forced":[hashlib.sha256(repr(s)).hexdigest() for s in frames_b],
+                "first_rejoin_frame_count_control":[len(s) for s in frames_a],
+                "first_rejoin_frame_count_forced":[len(s) for s in frames_b],
+                "first_rejoin_p_modified_cells_equal_each_step":equal_modified_p,
+                "first_rejoin_p_modified_cells_equal_count":sum(equal_modified_p),
+                "first_rejoin_p_modified_cells_sha256_control":[hashlib.sha256(repr(s)).hexdigest() for s in changed_a],
+                "first_rejoin_p_modified_cells_sha256_forced":[hashlib.sha256(repr(s)).hexdigest() for s in changed_b],
+                "first_rejoin_p_modified_cells_count_control":[len(s) for s in changed_a],
+                "first_rejoin_p_modified_cells_count_forced":[len(s) for s in changed_b],
+                "real_p_write_count_control":unmodified["observed_native_p_writes"],
+                "real_p_write_count_forced":altered["observed_native_p_writes"],
+                "all_fungespace_mutators_audited":False,
                 "full_semantic_state_equivalence_proven":False}
         report.append(result)
         print("NATIVE_CURRENT_FORK_ROUTE_VS_OUTPUT_MEASURED",
@@ -196,7 +266,9 @@ def main():
               "first_vector",first[:4],
               "forced_vector",opposite[:4],
               "common_5_event_motion",overlap is not None,
-              "rejoin_toss_equal_steps",sum(equal_toss))
+              "rejoin_toss_equal_steps",sum(equal_toss),
+              "rejoin_all_frames_equal_steps",sum(equal_frames),
+              "rejoin_p_modified_cells_equal_steps",sum(equal_modified_p))
         sys.stdout.flush()
     require(len(report)==32 and sum(z["changed_final_semantics"] for z in report if z["case"] in ("zero_equal","foundation_cross","forward_short","mixed_small"))==2,
             "incomplete or unexpectedly classified Native fork corpus")
@@ -219,7 +291,7 @@ def main():
     require(all(z["first_rejoin_native_toss_identical_all_five"] !=
                 z["changed_final_semantics"] for z in report),
             "output-causal and five-step Native TOSS-rejoin classes collided")
-    data={"schema":"befunge-stage1-current-native-fork-route-differential-v3",
+    data={"schema":"befunge-stage1-current-native-fork-route-differential-v4",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
           "source_git_blob":PIN,"real_PyFunge_runs":64,
           "valid_input_cases":32,
@@ -237,6 +309,13 @@ def main():
           "native_toss_equal_all_five_inert_cases":20,
           "native_toss_unequal_all_five_output_causal_cases":12,
           "full_fungespace_or_soss_equivalence_not_claimed":True,
+          "native_stack_frame_rejoin_snapshots_measured":320,
+          "native_p_mutated_cell_rejoin_snapshots_measured":320,
+          "native_frame_all_five_equal_cases":sum(
+              all(z["first_rejoin_all_stack_frames_equal_each_step"]) for z in report),
+          "native_p_changed_cells_all_five_equal_cases":sum(
+              all(z["first_rejoin_p_modified_cells_equal_each_step"]) for z in report),
+          "non_p_fungespace_mutations_excluded_from_proof":True,
           "records":report}
     with open(OUT,"wb") as sink:
         sink.write(json.dumps(data,sort_keys=True,indent=2)+"\n")
