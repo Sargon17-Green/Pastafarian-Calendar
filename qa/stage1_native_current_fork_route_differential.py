@@ -166,6 +166,14 @@ def main():
         sys.stdout.flush()
     require(len(report)==32 and sum(z["changed_final_semantics"] for z in report if z["case"] in ("zero_equal","foundation_cross","forward_short","mixed_small"))==2,
             "incomplete or unexpectedly classified Native fork corpus")
+    zeros=[z for z in report if z["gate_observed_nonzero"]==0]
+    ones=[z for z in report if z["gate_observed_nonzero"]==1]
+    require(len(zeros)==20 and len(ones)==12 and
+            all(not z["changed_final_semantics"] for z in zeros) and
+            all(z["changed_final_semantics"] for z in ones),
+            "32-case Native fork route/output dependence classification drifted")
+    require(all(z["first_common_five_event_motion"] is not None for z in report),
+            "expected 32 actual Native five-motion reconvergences missing")
     data={"schema":"befunge-stage1-current-native-fork-route-differential-v2",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
           "source_git_blob":PIN,"real_PyFunge_runs":64,
