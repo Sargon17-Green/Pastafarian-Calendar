@@ -17,7 +17,7 @@ import stage1_native_reflective_candidate_domain_matrix as wide
 
 BASE="qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98"
 BLOB="b6cf50de9ed45376db5fc4ebd003157210dff03b"
-CAND_SHA="9d43930d0b94bb740b117470f5765fd96f77e3447fee391458a126fc1c5be4d4"
+CAND_SHA="3e64ba67eaaaf684fef221be33c368527a50a3c986e9f0b63e73ef81b21cdb59"
 OUT="stack_stack_candidate.b98"
 CORRIDOR={(954,y) for y in range(1318,1331)} | {(954,1332),(955,1332)}
 REJOIN=(955,1332)
@@ -40,13 +40,13 @@ def source_check(directory):
             [len(row) for row in a]==[len(row) for row in b],
             "Native stack-stack source dimensions/rows changed")
     expected={(954,1332):(ord("0"),ord("^")),(955,1332):(ord("1"),ord(">"))}
-    for y,ch in zip(range(1330,1317,-1),b"{3u:1-\\2}11ex"):
-        expected[(954,y)]=(32,ch)
+    for y,ch in zip(range(1330,1317,-1),b"{3u:1- 2}11ex"):
+        if ch!=32: expected[(954,y)]=(32,ch)
     actual={}
     for y,(r,s) in enumerate(zip(a,b)):
         for x,(left,right) in enumerate(zip(r,s)):
             if left!=right:actual[(x,y)]=(left,right)
-    require(expected==actual and len(actual)==15,
+    require(expected==actual and len(actual)==14,
             "stack-stack source byte edits are off the reserved Native corridor")
     return graph.load_source(os.path.join(directory,OUT)),set(expected)
 
@@ -62,7 +62,7 @@ def main(directory):
     require(proof["schema"]=="befunge-stage1-native-stack-stack-arithmetic-v1"
             and proof["status"]=="QA_EXPERIMENT_ONLY_NO_STAGE1_ACCEPTANCE"
             and proof["candidate_sha256"]==CAND_SHA
-            and proof["changed_exact_executable_cells"]==15,
+            and proof["changed_exact_executable_cells"]==14,
             "stack-stack runner proof provenance mismatch")
     cases=proof["seventeen_native_cases"]
     require(len(cases)==17 and
