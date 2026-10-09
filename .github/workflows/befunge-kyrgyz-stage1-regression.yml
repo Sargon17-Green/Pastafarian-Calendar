@@ -738,6 +738,24 @@ jobs:
               timeout --kill-after=5s 450s python -u qa/stage1_native_current_fork_counterfactual_report.py
             '
           echo NATIVE_CURRENT_PRODUCTION_FORK_CAUSALITY_GAP_IS_REPORTED
+          mkdir -p "$RUNNER_TEMP/native-current-fork-routes"
+          python3 -m py_compile qa/stage1_native_current_fork_route_differential.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-current-fork-routes:/fork" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 360s python -u qa/stage1_native_current_fork_route_differential.py
+            '
+          test -s "$RUNNER_TEMP/native-current-fork-routes/current_fork_native_route_differential.json"
+      - name: Retain current-source Native opposite-fork route evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-current-fork-route-differential
+          path: ${{ runner.temp }}/native-current-fork-routes/
+          retention-days: 30
 
   native-advanced-opcode-counterfactual:
     runs-on: ubuntu-latest
