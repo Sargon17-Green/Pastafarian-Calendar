@@ -813,6 +813,13 @@ jobs:
               timeout --kill-after=5s 600s python -u qa/stage1_native_fungespace_put_inventory.py
             '
           test -s "$RUNNER_TEMP/native-writer-inventory/native_fungespace_put_inventory.json"
+      - name: Independently audit exact Native writer events and 7 hostile reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_fungespace_put_inventory_audit.py
+          python3 qa/stage1_native_fungespace_put_inventory_audit.py "$RUNNER_TEMP/native-writer-inventory"
+          test -s "$RUNNER_TEMP/native-writer-inventory/native_fungespace_put_audit.json"
       - name: Retain exact Native execution-time write evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
