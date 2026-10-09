@@ -55,6 +55,8 @@ def main(directory):
             "Native 17-case corpus lost the 11 actual single-run dual-node routes")
     require(totals.get("r",0)>=11,
             "Native reflective reverse operator no longer executes in upper routes")
+    require(totals.get("w",0)>=17 and totals.get("_",0)>=7,
+            "two-valid-w production lost executed Native w/_ arithmetic")
     require(all(totals.get(ch,0)>0 for ch in ("[","]","|","j","k")),
             "promoted Native input-dependent turn/jump/k architecture missing")
     # The native graph's opcode watcher intentionally omits ordinary direction
@@ -86,9 +88,9 @@ def main(directory):
       "self_modifying_execution_minimum":min(
           x["changed_executable_gate_reexecutions"] for x in coverage),
       "current_geometry_gate":"OPEN",
-      "reason":"A real dual node and executed r are now proven in QA production. "
-               "Meaningful executed w/_ and stack-stack { } u, deeper "
-               "entanglement and complete Stage-1 acceptance remain unproved",
+      "reason":"Native two-valid-w and _ arithmetic, r and dual graph nodes "
+               "are proven in QA production. Stack-stack { } u remains "
+               "an isolated candidate; deeper entanglement and final acceptance open",
       "current_functional_gate":"NOT_INFERRED_FROM_GEOMETRY",
       "last_completed_stage":"UNCHANGED_0",
     }

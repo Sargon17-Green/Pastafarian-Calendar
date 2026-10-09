@@ -64,7 +64,7 @@ def main(folder):
     path=os.path.join(folder,"native_two_valid_w_evidence.json")
     with open(path,"r",encoding="utf-8") as f:rec=json.load(f)
     require(rec["schema"]=="befunge-stage1-two-valid-w-native-v2" and
-            rec["status"]=="QA_EXPERIMENT_ONLY_NOT_PROMOTED" and
+            rec["status"]=="QA_PRODUCTION_ONLY_NOT_STAGE1_ACCEPTANCE" and
             rec["candidate_blob"]==SRC_SHA and
             rec["source_exact_changed_cells"]==18 and
             rec["two_valid_w_comparison_outcomes"] is True,

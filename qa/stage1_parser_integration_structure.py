@@ -28,7 +28,10 @@ def require(pred, message):
 
 old = load(OLD)
 new = load("qa/interleaved_work_counts_pre_reflective_production.b98")
-promoted = load(NEW)
+promoted = load("qa/interleaved_work_counts_pre_two_valid_w_production.b98")
+current_qa = load(NEW)
+prior_w = load("qa/interleaved_work_counts_w_data_branch_candidate.b98")
+new_w = load("qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98")
 reflective = load("qa/interleaved_work_counts_reflective_crossing_candidate.b98")
 # QA production must equal the independent ten-case Native-qualified advanced
 # circuit. Frozen prior sources remain separately checked for exact provenance.
@@ -41,6 +44,24 @@ require(new == load("qa/interleaved_work_counts_arithmetic_dependency_j_candidat
 require(promoted == reflective and git_blob_sha(promoted) == "8f2cf8afef61818244747582fe7c20a74ee18943",
         "QA production must be the exact Native-qualified reflective code")
 require(len(promoted)==len(new), "reflective production changed source dimensions")
+require(current_qa == new_w and git_blob_sha(current_qa) == "b6cf50de9ed45376db5fc4ebd003157210dff03b",
+        "current QA production is not the exact Native-qualified two-valid w/_ source")
+require(git_blob_sha(prior_w) == "31807edb2b44b141d2af340555d6e97e63428613", "prior standalone w source blob drift")
+require(len(prior_w)==len(current_qa),"two-valid-w production changed Funge-space extent")
+expected_two_valid={(951,1334):(ord(":"),ord("0")),
+ (951,1333):(ord("0"),ord("^")),(951,1331):(ord(">"),ord("_")),
+ (951,1336):(ord("["),ord("]")),(951,1337):(32,ord("^"))}
+for i,c in enumerate(b"$100903-x"):
+    expected_two_valid[(950-i,1336)]=(32,c)
+for x,c in ((950,ord("0")),(949,ord("8")),(948,ord("6")),(943,ord("x"))):
+    expected_two_valid[(x,1331)]=(32,c)
+observed_two_valid={}
+for y,(former,now) in enumerate(zip(prior_w.split(b"\n"),current_qa.split(b"\n"))):
+    require(len(former)==len(now),"two-valid-w row width changed")
+    for x,(a,b) in enumerate(zip(former,now)):
+        if a!=b:observed_two_valid[(x,y)]=(a,b)
+require(observed_two_valid==expected_two_valid and len(observed_two_valid)==18,
+        "two-valid-w production differs outside 18 Native-qualified cells")
 expected_five = {
     (957,1324):(32,ord("r")),
     (958,1324):(ord("1"),ord("[")),

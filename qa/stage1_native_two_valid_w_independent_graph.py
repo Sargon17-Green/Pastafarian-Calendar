@@ -108,7 +108,7 @@ def main(directory):
     path=os.path.join(directory,"native_two_valid_w_evidence.json")
     with open(path,"r",encoding="utf-8") as stream: proof=json.load(stream)
     require(proof["schema"]=="befunge-stage1-two-valid-w-native-v2"
-            and proof["status"]=="QA_EXPERIMENT_ONLY_NOT_PROMOTED"
+            and proof["status"]=="QA_PRODUCTION_ONLY_NOT_STAGE1_ACCEPTANCE"
             and proof["candidate_blob"]==CAND_BLOB
             and proof["source_exact_changed_cells"]==18
             and proof["two_valid_w_comparison_outcomes"] is True
@@ -218,7 +218,7 @@ def main(directory):
         stream.write("\n")
     print("NATIVE_TWO_VALID_W_INDEPENDENT_REAL_IP_G_P_AUDIT_PASS",
           len(results),"cases")
-    print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; only one unpromoted QA candidate")
+    print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; QA production, final gate open")
 
 if __name__=="__main__":
     require(len(sys.argv)==2,"usage: two_valid_w_independent_graph NativeTraceDir")

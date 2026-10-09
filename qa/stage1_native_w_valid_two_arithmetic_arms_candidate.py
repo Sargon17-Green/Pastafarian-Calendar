@@ -6,7 +6,7 @@ Only PyFunge runs arithmetic and the independent Native Befunge reference.
 The 2D source has 18 audited cell edits, a real two-in/out lower
 junction, signed upper/lower true-valid w outcomes, and preserved original
 IP/opcode/heading/stack suffixes after returning from new computed lanes.
-This is an unpromoted test-only candidate and NOT Stage 1 acceptance.
+This is the Native-qualified QA production only, NOT full Stage 1 acceptance.
 """
 from __future__ import print_function
 import hashlib
@@ -128,6 +128,8 @@ def run_mutant(path,raw):
 def main():
     require(os.path.isdir(OUT),"Native evidence volume missing")
     source_guard()
+    require(blob(open("src/interleaved_work_counts.b98","rb").read())==CAND_BLOB,
+            "running QA production must be exact Native-qualified two-valid w/_ source")
     proof=[];valid_w=set()
     for label,fields,valid in n.CASES:
         raw=" ".join(map(str,fields))+"\n"
@@ -177,7 +179,7 @@ def main():
         print("NATIVE_TWO_VALID_W_SINGLE_BYTE_COUNTERFACTUAL_PASS",
               label,"exit",rc,"result_different",got!=want)
     evidence={"schema":"befunge-stage1-two-valid-w-native-v2",
-        "status":"QA_EXPERIMENT_ONLY_NOT_PROMOTED",
+        "status":"QA_PRODUCTION_ONLY_NOT_STAGE1_ACCEPTANCE",
         "candidate_blob":CAND_BLOB,"source_exact_changed_cells":18,
         "two_valid_w_comparison_outcomes":True,
         "cases":proof,"wide_oracle_cases":len(domain.CASES),
@@ -186,5 +188,5 @@ def main():
         f.write(json.dumps(evidence,sort_keys=True,indent=2)+"\n")
     print("NATIVE_TWO_VALID_W_AND_SEMANTIC_UNDERSCORE_CANDIDATE_PASS",
           len(proof),"traces",len(domain.CASES),"wide cases")
-    print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; QA experiment only")
+    print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; QA production, final gate open")
 if __name__=="__main__":main()
