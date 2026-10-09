@@ -158,7 +158,9 @@ def main():
         stack_b=altered["post_toss"][ib:ib+5]
         require(len(stack_a)==len(stack_b)==5,
                 "incomplete real Native five-step TOSS rejoin "+label)
-        equal_toss=[a==b for a,b in zip(stack_a,stack_b)]
+        # Python 2 list-comprehension variables leak into this scope: do
+        # not clobber a/b, the native gate event dictionaries above.
+        equal_toss=[left==right for left,right in zip(stack_a,stack_b)]
         # Negative control: a forged TOSS snapshot with unchanged native
         # IP motion must not pass the exact stack comparison.
         tampered=list(stack_a)
