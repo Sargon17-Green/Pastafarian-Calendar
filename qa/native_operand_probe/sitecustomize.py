@@ -10,7 +10,7 @@ if os.environ.get("BF98_OPERAND_LOG"):
     _original_execute = _f.Program.execute
     _original_step = _f.Program.execute_step
     _sink = open(os.environ["BF98_OPERAND_LOG"], "w")
-    _watch = frozenset(((132,5),(308,1430),(951,1335),
+    _watch = frozenset(((132,5),(308,1430),(951,1334),(951,1335),(951,1336),
                         (1470,100),(1475,101),(1476,101),
                         (958,1325),(959,1334),(960,1334),
                         (986,1334),(1015,1334),(1027,1334)))

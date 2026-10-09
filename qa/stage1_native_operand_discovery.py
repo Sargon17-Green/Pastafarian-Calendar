@@ -18,7 +18,7 @@ import stage1_native_diverse_geometry as suite
 
 SOURCE = "src/interleaved_work_counts.b98"
 OUT = "/operands"
-EXPECTED_CELLS = ((132,5),(308,1430),(951,1335),
+EXPECTED_CELLS = ((132,5),(308,1430),(951,1334),(951,1335),(951,1336),
                   (1470,100),(1475,101),(1476,101),
                   (958,1325),(959,1334),(960,1334),
                   (986,1334),(1015,1334),(1027,1334))
@@ -111,6 +111,13 @@ def main():
                                   for p,d in sorted(raw_values.items())},
                               "cases":reports},
                              sort_keys=True,indent=2)+"\n")
+    for cell in ((951,1334),(951,1335),(951,1336)):
+        v=raw_values[cell]
+        print("NATIVE_W_FORK_OPERAND_DISCOVERY",str(cell),
+              "top",sorted(v["top"]),"second",sorted(v["second"]))
+    require(sum(bool(raw_values[point]["top"]) for point in
+                ((951,1334),(951,1336))) == 2,
+            "both Native input-dependent branches must have stack evidence")
     for cell in ((958,1325),(959,1334),(960,1334),(986,1334),
                  (1015,1334),(1027,1334)):
         v=raw_values[cell]
