@@ -184,6 +184,9 @@ def native_pre_arithmetic_stack(source_file,raw):
 def main():
     require(os.path.isdir(OUT),"Native /stack evidence destination unavailable")
     data=source()
+    require(open("src/interleaved_work_counts.b98","rb").read()==data and
+            open("qa/interleaved_work_counts_stack_stack_candidate.b98","rb").read()==data,
+            "current QA src or frozen {u} Native production source changed")
     raw_probe="0 0 0 0\n"
     baseline_stack=native_pre_arithmetic_stack(BASE,raw_probe)
     candidate_stack=native_pre_arithmetic_stack(CAND,raw_probe)
@@ -245,7 +248,7 @@ def main():
           "mutant_exit",rc,"output_changed",altered!=ref,
           "same_source_control",sham_out==ref)
     report={"schema":"befunge-stage1-native-stack-stack-arithmetic-v1",
-            "status":"QA_EXPERIMENT_ONLY_NO_STAGE1_ACCEPTANCE",
+            "status":"QA_PRODUCTION_ONLY_NO_STAGE1_ACCEPTANCE",
             "base_blob":BLOB,"candidate_blob":EXPERIMENT_BLOB,
             "candidate_sha256":EXPERIMENT_SHA256,
             "changed_exact_executable_cells":14,

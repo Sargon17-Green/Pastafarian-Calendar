@@ -108,7 +108,7 @@ def main(directory):
     path=os.path.join(directory,"native_two_valid_w_evidence.json")
     with open(path,"r",encoding="utf-8") as stream: proof=json.load(stream)
     require(proof["schema"]=="befunge-stage1-two-valid-w-native-v2"
-            and proof["status"]=="QA_PRODUCTION_ONLY_NOT_STAGE1_ACCEPTANCE"
+            and proof["status"]=="QA_HISTORICAL_PRODUCTION_REPLAY_NOT_STAGE1_ACCEPTANCE"
             and proof["candidate_blob"]==CAND_BLOB
             and proof["source_exact_changed_cells"]==18
             and proof["two_valid_w_comparison_outcomes"] is True

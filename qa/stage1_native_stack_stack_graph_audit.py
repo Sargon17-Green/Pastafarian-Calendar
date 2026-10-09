@@ -108,7 +108,7 @@ def main(directory):
     with open(os.path.join(directory,"native_stack_stack_arithmetic.json"),
               encoding="utf-8") as stream:proof=json.load(stream)
     require(proof["schema"]=="befunge-stage1-native-stack-stack-arithmetic-v1"
-            and proof["status"]=="QA_EXPERIMENT_ONLY_NO_STAGE1_ACCEPTANCE"
+            and proof["status"]=="QA_PRODUCTION_ONLY_NO_STAGE1_ACCEPTANCE"
             and proof["candidate_sha256"]==CAND_SHA
             and proof["changed_exact_executable_cells"]==14,
             "stack-stack runner proof provenance mismatch")

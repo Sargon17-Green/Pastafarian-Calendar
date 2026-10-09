@@ -14,7 +14,7 @@ import stage1_native_fork_counterfactual as old
 import stage1_native_diverse_geometry as suite
 
 SRC="src/interleaved_work_counts.b98"
-EXPECT="b6cf50de9ed45376db5fc4ebd003157210dff03b"
+EXPECT="560d6aa5807a7f766213a33835cce85eab0fa40c"
 data=open(SRC,"rb").read()
 def need(x,s):
     if not x:raise AssertionError(s)

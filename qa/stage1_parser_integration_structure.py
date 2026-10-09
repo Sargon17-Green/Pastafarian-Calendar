@@ -30,6 +30,8 @@ old = load(OLD)
 new = load("qa/interleaved_work_counts_pre_reflective_production.b98")
 promoted = load("qa/interleaved_work_counts_pre_two_valid_w_production.b98")
 current_qa = load(NEW)
+old_qa_w = load("qa/interleaved_work_counts_pre_stack_stack_production.b98")
+stack_qa = load("qa/interleaved_work_counts_stack_stack_candidate.b98")
 prior_w = load("qa/interleaved_work_counts_w_data_branch_candidate.b98")
 new_w = load("qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98")
 reflective = load("qa/interleaved_work_counts_reflective_crossing_candidate.b98")
@@ -44,8 +46,10 @@ require(new == load("qa/interleaved_work_counts_arithmetic_dependency_j_candidat
 require(promoted == reflective and git_blob_sha(promoted) == "8f2cf8afef61818244747582fe7c20a74ee18943",
         "QA production must be the exact Native-qualified reflective code")
 require(len(promoted)==len(new), "reflective production changed source dimensions")
-require(current_qa == new_w and git_blob_sha(current_qa) == "b6cf50de9ed45376db5fc4ebd003157210dff03b",
-        "current QA production is not the exact Native-qualified two-valid w/_ source")
+require(old_qa_w == new_w and git_blob_sha(old_qa_w) == "b6cf50de9ed45376db5fc4ebd003157210dff03b",
+        "frozen historical w/_ source does not match qualified Native bytes")
+require(current_qa == stack_qa and git_blob_sha(current_qa) == "560d6aa5807a7f766213a33835cce85eab0fa40c",
+        "QA production is not exact Native-qualified {u} stack code")
 require(git_blob_sha(prior_w) == "31807edb2b44b141d2af340555d6e97e63428613", "prior standalone w source blob drift")
 require(len(prior_w)==len(current_qa),"two-valid-w production changed Funge-space extent")
 expected_two_valid={(951,1334):(ord(":"),ord("0")),
@@ -56,12 +60,25 @@ for i,c in enumerate(b"$100903-x"):
 for x,c in ((950,ord("0")),(949,ord("8")),(948,ord("6")),(943,ord("x"))):
     expected_two_valid[(x,1331)]=(32,c)
 observed_two_valid={}
-for y,(former,now) in enumerate(zip(prior_w.split(b"\n"),current_qa.split(b"\n"))):
+for y,(former,now) in enumerate(zip(prior_w.split(b"\n"),old_qa_w.split(b"\n"))):
     require(len(former)==len(now),"two-valid-w row width changed")
     for x,(a,b) in enumerate(zip(former,now)):
         if a!=b:observed_two_valid[(x,y)]=(a,b)
 require(observed_two_valid==expected_two_valid and len(observed_two_valid)==18,
         "two-valid-w production differs outside 18 Native-qualified cells")
+stack_edits={(954,1332):(ord("0"),ord("^")),(955,1332):(ord("1"),ord(">"))}
+for y,ch in ((1330,"{"),(1329,"3"),(1328,"u"),(1327,":"),
+ (1326,"1"),(1325,"-"),(1323,"2"),(1322,"}"),
+ (1321,"1"),(1320,"1"),(1319,"e"),(1318,"x")):
+    stack_edits[(954,y)]=(32,ord(ch))
+observed_stack={}
+for yy,(before,after) in enumerate(zip(old_qa_w.split(b"\n"),current_qa.split(b"\n"))):
+    require(len(before)==len(after),"QA stack-stack row width changed")
+    for xx,(left,right) in enumerate(zip(before,after)):
+        if left!=right: observed_stack[(xx,yy)]=(left,right)
+require(observed_stack==stack_edits and len(observed_stack)==14,
+        "QA stack-stack promotion changed cells outside native-qualified 14")
+
 expected_five = {
     (957,1324):(32,ord("r")),
     (958,1324):(ord("1"),ord("[")),
