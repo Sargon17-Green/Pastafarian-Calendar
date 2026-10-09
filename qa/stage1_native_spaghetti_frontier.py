@@ -10,6 +10,7 @@ before this script runs. No source-map-only or decorative opcode is counted.
 import json
 import os
 import sys
+import stage1_native_diverse_geometry_audit as corpus
 
 REQUIRED_EXECUTED = tuple("><^v[]rwx_|jk")
 STACK_STACK = ("{", "}", "u")
@@ -29,10 +30,13 @@ def main(directory):
     require(evidence["status"]=="OBSERVED_GEOMETRY_ONLY_NOT_FULL_SPAGHETTI_PASS",
             "unexpected accept/reject semantics in measured geometry")
     coverage=evidence["coverage"]
-    require(len(coverage)==10 and len({x["case"] for x in coverage})==10,
-            "ten Native traces are mandatory for measuring geometry frontier")
-    require(sum(bool(x["valid"]) for x in coverage)==8,
-            "Native corpus lost valid-case diversity")
+    require(len(coverage)==17 and
+            tuple(x["case"] for x in coverage)==corpus.LABELS and
+            len({x["case"] for x in coverage})==17,
+            "exact seventeen-case audited Native corpus is mandatory")
+    require(sum(bool(x["valid"]) for x in coverage)==14 and
+            sum(not bool(x["valid"]) for x in coverage)==3,
+            "Native corpus lost required valid/invalid-case diversity")
     require(all(x["changed_executable_gate_reexecutions"]>=2 for x in coverage),
             "native self-modifying executable cell lifecycle not demonstrated")
     require(all(x["executed_p"]>1 and x["executed_g"]>1 and x["executed_x"]>30
