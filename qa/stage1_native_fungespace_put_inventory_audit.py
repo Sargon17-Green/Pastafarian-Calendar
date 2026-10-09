@@ -21,6 +21,7 @@ SOURCE=Path("src/interleaved_work_counts.b98")
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
 SCHEMA="befunge-stage1-native-fungespace-put-surface-v1"
 FORBIDDEN="sio=()t"
+SPECIAL_DATA={(43,1702),(47,1703),(53,1704),(61,1706)}
 EXPECTED_SPECIAL={
     (43,1702,40):10,
     (47,1703,40):4,
@@ -61,6 +62,7 @@ def verify(data,rows,source_mutators):
     total=0
     indirect=0
     visits=0
+    g_reads=0
     for pair in range(0,64,2):
         a,b=records[pair:pair+2]
         label=a.get("case")
@@ -92,6 +94,35 @@ def verify(data,rows,source_mutators):
                 "native executable p count differs from real engine .put calls")
         require(record.get("generated_byte_ip_visits")==[],
                 "IP executed a previously dynamically written mutator byte")
+        observed=record.get("direct_g_reads_of_special_cells")
+        require(isinstance(observed,list),
+                "missing native g data-cell observations")
+        for read in observed:
+            point=read.get("target")
+            reader=read.get("ip")
+            tick=read.get("tick")
+            require(isinstance(point,list) and tuple(point) in SPECIAL_DATA and
+                    isinstance(reader,list) and len(reader)==2 and
+                    all(type(v) is int for v in reader) and
+                    type(tick) is int and 0<tick<=record["ticks"] and
+                    type(read.get("before")) is int and
+                    read.get("returned")==read["before"],
+                    "invalid Native g read of stored mutator-looking data")
+            require(0<=reader[1]<len(rows) and
+                    0<=reader[0]<len(rows[reader[1]]) and
+                    rows[reader[1]][reader[0]]==ord("g"),
+                    "Native direct g data-read not executed at original g source")
+            prior=[event for event in record["native_put_events"]
+                   if event["target"]==point and event["tick"]<tick]
+            if prior:
+                expected=prior[-1]["value"]
+            else:
+                x,y=point
+                expected=(rows[y][x] if 0<=y<len(rows) and
+                          0<=x<len(rows[y]) else 32)
+            require(read["before"]==expected,
+                    "Native g read not consistent with physical latest p write")
+        g_reads+=len(observed)
         require(type(record.get("ticks")) is int and
                 record["ticks"]>len(events),
                 "Native writer instruction clock invalid")
@@ -125,6 +156,9 @@ def verify(data,rows,source_mutators):
         total+=len(events)
         indirect+=record["non_p_attributed_puts"]
         visits+=len(record["generated_byte_ip_visits"])
+    require(data.get("direct_g_reads_of_special_cells")==g_reads and
+            data.get("indirect_or_non_g_memory_reads_not_audited") is True,
+            "Native direct-g data read totals and scope drifted")
     require(len(labels)==32 and
             total==data.get("total_space_put_calls")==23488 and
             indirect==data.get("indirect_or_non_p_attributed_put_calls")==0 and
@@ -136,6 +170,7 @@ def verify(data,rows,source_mutators):
     return {"native_runs":64,"cases":32,"write_calls":total,
             "special_numeric_writes":22,
             "actual_generated_instruction_visits":0,
+            "real_direct_g_data_reads":g_reads,
             "other_mutation_apis_excluded":True}
 
 def must_reject(name,source,rows,mutators,mutate):
@@ -180,9 +215,13 @@ def main(folder):
                     .__setitem__("target",[999,1702])),
         must_reject("forged_total",report,rows,mutators,
                     lambda p:p.__setitem__("total_space_put_calls",1)),
+        must_reject("forged_g_data_read",report,rows,mutators,
+                    lambda p:p["records"][0]["direct_g_reads_of_special_cells"]
+                    .append({"tick":1,"ip":[0,0],"target":[43,1702],
+                             "before":40,"returned":40})),
     ]
-    require(len(rejections)==7,"Native write adversaries not fully exercised")
-    output={"schema":"befunge-stage1-native-fungespace-put-audit-v1",
+    require(len(rejections)==8,"Native write adversaries not fully exercised")
+    output={"schema":"befunge-stage1-native-fungespace-put-audit-v2",
             "source_git_blob":PIN,"real_native_records_verified":64,
             "proof_scope":"finite corpus and observable Funge-space.put method",
             "stage1_final_acceptance":False,"verified_counts":result,
@@ -191,7 +230,7 @@ def main(folder):
             "w",encoding="utf-8") as out:
         json.dump(output,out,sort_keys=True,indent=2)
         out.write("\n")
-    print("NATIVE_SPACE_PUT_INDEPENDENT_7_NEGATIVE_REPORTS_PASS")
+    print("NATIVE_SPACE_PUT_INDEPENDENT_8_NEGATIVE_REPORTS_PASS")
 
 if __name__=="__main__":
     require(len(sys.argv)==2,"usage: NATIVE_WRITER_EVIDENCE_DIR")

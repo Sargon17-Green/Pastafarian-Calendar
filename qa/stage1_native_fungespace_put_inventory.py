@@ -21,6 +21,7 @@ import stage1_native_current_fork_route_differential as fork
 SOURCE="src/interleaved_work_counts.b98"
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
 FORBIDDEN="sio=()t"
+SPECIAL_DATA=((43,1702),(47,1703),(53,1704),(61,1706))
 OUT="/writes/native_fungespace_put_inventory.json"
 
 def require(ok,msg):
@@ -42,6 +43,7 @@ def run(src,name,raw,opposite,oracle):
     puts=[]
     generated_live={}
     generated_byte_visits=[]
+    direct_g_data_reads=[]
     direct_p=[]
     gate=[]
     ticks=[0]
@@ -88,7 +90,26 @@ def run(src,name,raw,opposite,oracle):
             gate.append([original,int(bool(ip.stack[0][-1]))])
         if op==ord("p") and not ip.stringmode:
             direct_p.append([int(ip.position[0]),int(ip.position[1]),ticks[0]])
-        return original_step()
+        pending_g=None
+        if op==ord("g") and not ip.stringmode:
+            values=[int(v) for v in list(ip.stack[0])[-2:]]
+            while len(values)<2:values.insert(0,0)
+            target=(values[0]+int(ip.offset[0]),
+                    values[1]+int(ip.offset[1]))
+            if target in SPECIAL_DATA:
+                before=int(self.space.get(ip.position.__class__(target)))
+                pending_g={"tick":ticks[0],"ip":[int(xy[0]),int(xy[1])],
+                           "target":list(target),"before":before}
+        result=original_step()
+        if pending_g is not None:
+            require(self.ips and self.ips[0] is ip and ip.stack[0],
+                    "real Native g of data cell lost IP/stack")
+            returned=int(ip.stack[0][-1])
+            require(returned==pending_g["before"],
+                    "native g returned unexpected stored data byte")
+            pending_g["returned"]=returned
+            direct_g_data_reads.append(pending_g)
+        return result
     try:
         cls.put=spy_put
         program.execute_step=step.__get__(program,program.__class__)
@@ -120,6 +141,7 @@ def run(src,name,raw,opposite,oracle):
             "non_p_attributed_puts":len(non_p),
             "created_other_mutator_cells":len(created),
             "generated_byte_ip_visits":generated_byte_visits,
+            "direct_g_reads_of_special_cells":direct_g_data_reads,
             "native_put_events":puts}
 
 def main():
@@ -144,6 +166,7 @@ def main():
     indirect=sum(r["non_p_attributed_puts"] for r in records)
     generated=sum(r["created_other_mutator_cells"] for r in records)
     generated_visits=sum(len(r["generated_byte_ip_visits"]) for r in records)
+    data_reads=sum(len(r["direct_g_reads_of_special_cells"]) for r in records)
     require(total>64,"Native Funge-space write inventory implausibly empty")
     evidence={"schema":"befunge-stage1-native-fungespace-put-surface-v1",
               "status":"QA_ONLY_NOT_COMPLETE_SEMANTIC_OWNERSHIP",
@@ -154,6 +177,8 @@ def main():
               "indirect_or_non_p_attributed_put_calls":indirect,
               "new_forbidden_mutator_bytes_written":generated,
               "generated_mutator_byte_ip_visits":generated_visits,
+              "direct_g_reads_of_special_cells":data_reads,
+              "indirect_or_non_g_memory_reads_not_audited":True,
               "other_space_mutation_APIs_audited":False,
               "stage1_final_acceptance":False,"records":records}
     with open(OUT,"wb") as f:
@@ -161,7 +186,8 @@ def main():
     print("NATIVE_REAL_FUNGESPACE_PUT_INVENTORY_64_CASE_PASS",
           "total_puts",total,"non_p_attributed",indirect,
           "generated_other_mutators",generated,
-          "generated_byte_ip_visits",generated_visits)
+          "generated_byte_ip_visits",generated_visits,
+          "direct_g_data_reads",data_reads)
     print("STAGE1_SEMANTIC_OWNERSHIP_FINAL_GATE=OPEN")
 
 if __name__=="__main__":
