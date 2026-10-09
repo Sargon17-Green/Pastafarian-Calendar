@@ -19,7 +19,9 @@ import stage1_native_diverse_geometry as suite
 SOURCE = "src/interleaved_work_counts.b98"
 OUT = "/operands"
 EXPECTED_CELLS = ((132,5),(308,1430),(951,1335),
-                  (1470,100),(1475,101),(1476,101))
+                  (1470,100),(1475,101),(1476,101),
+                  (958,1325),(959,1334),(960,1334),
+                  (986,1334),(1015,1334),(1027,1334))
 
 def require(pred,why):
     if not pred:
@@ -52,6 +54,7 @@ def main():
     require(os.path.isdir(OUT),"missing writable /operands evidence directory")
     reports=[]
     overall=collections.defaultdict(lambda:collections.defaultdict(set))
+    raw_values=collections.defaultdict(lambda:collections.defaultdict(set))
     with open(SOURCE,"rb") as src:
         digest=hashlib.sha256(src.read()).hexdigest()
     for label,fields,valid in suite.CASES:
@@ -78,6 +81,8 @@ def main():
                 classes[point]["top"].add(classification(parts[7]))
                 overall[point]["top"].add(classification(parts[7]))
                 overall[point]["second"].add(classification(parts[6]))
+                raw_values[point]["second"].add(parts[6])
+                raw_values[point]["top"].add(parts[7])
                 if len(samples[point])<4:
                     samples[point].append({"opcode":opcode,"depth":depth,
                                            "second":parts[6],"top":parts[7]})
@@ -101,9 +106,17 @@ def main():
                               "cross_input_operand_sign_classes":{
                                   "%d,%d"%p:{k:sorted(v) for k,v in d.items()}
                                   for p,d in sorted(overall.items())},
+                              "observed_raw_values_by_cell":{
+                                  "%d,%d"%p:{k:sorted(v) for k,v in d.items()}
+                                  for p,d in sorted(raw_values.items())},
                               "cases":reports},
                              sort_keys=True,indent=2)+"\n")
-    print("NATIVE_OPERAND_DISCOVERY_10_CASES_PASS",len(reports))
+    for cell in ((958,1325),(959,1334),(960,1334),(986,1334),
+                 (1015,1334),(1027,1334)):
+        v=raw_values[cell]
+        print("NATIVE_POST_J_ARITHMETIC_OPERAND_CLASSES",str(cell),
+              "top",sorted(v["top"]),"second",sorted(v["second"]))
+    print("NATIVE_OPERAND_DISCOVERY_CASES_PASS",len(reports))
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO (no branch inserted or accepted)")
 if __name__=="__main__":
     main()
