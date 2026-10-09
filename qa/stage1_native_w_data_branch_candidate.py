@@ -19,8 +19,11 @@ import subprocess
 import sys
 
 import stage1_native_diverse_geometry as suite
+import stage1_native_reflective_candidate_domain_matrix as wide
 
 BASE="src/interleaved_work_counts.b98"
+FROZEN="qa/interleaved_work_counts_w_data_branch_candidate.b98"
+FROZEN_BLOB="31807edb2b44b141d2af340555d6e97e63428613"
 BASE_BLOB="8f2cf8afef61818244747582fe7c20a74ee18943"
 OUT="/wturn"
 GATE=(951,1335)
@@ -82,6 +85,10 @@ def candidate_source():
     new="\n".join(rows)
     with open(SOURCE_FILE,"wb") as target:
         target.write(new)
+    with open(FROZEN,"rb") as frozen:
+        pinned=frozen.read()
+    require(blob(pinned)==FROZEN_BLOB and pinned==new and len(edits)==28,
+            "committed w candidate differs from generated exact source")
     require(new!=original and byte_at(rows,951,1332)=="w",
             "w candidate did not alter executed source")
     print("NATIVE_W_EXACT_TEST_ONLY_SOURCE_PASS",
@@ -195,6 +202,23 @@ def main():
     require(counts=={"upper":11,"lower":6} and
             modes==set(("straight","right")) and right_case is not None,
             "actual Native data did not exercise both w comparator outcomes")
+    # Wider valid and malformed signed-domain differential uses three independent
+    # Native Befunge reference programs and the unchanged promoted baseline.
+    extended=[]
+    for label,fields,valid in wide.CASES:
+        raw=" ".join(map(str,fields))+"\n"
+        expect=suite.expected_for(*fields) if valid else ["-1"]*7
+        prior=suite.native(BASE,raw)
+        candidate=suite.native(SOURCE_FILE,raw)
+        require(len(expect)==len(prior)==len(candidate)==7 and
+                candidate==prior==expect,
+                "w candidate wider Native Befunge oracle mismatch "+label)
+        extended.append({"case":label,"valid":valid,
+                         "native_reference_equal":True})
+        print("NATIVE_W_EXTENDED_SIGNED_DOMAIN_PASS",label)
+        sys.stdout.flush()
+    require(len(extended)==22 and sum(bool(x["valid"]) for x in extended)==18,
+            "wide valid/invalid domains unexpectedly changed")
     mutant(data,edits)
     label,raw,expected=right_case
     rc,altered,stderr=call_bounded(MUTANT_FILE,raw,8)
@@ -210,7 +234,9 @@ def main():
             "invalid_native_cases":3,"branch_counts":counts,
             "real_native_comparison_modes":sorted(modes),
             "single_executed_w_removal_changes_output":True,
-            "cases":reports}
+            "cases":reports,
+            "extended_signed_domain_cases":extended,
+            "frozen_candidate_git_blob":FROZEN_BLOB}
     with open(os.path.join(OUT,"w_data_candidate_proof.json"),"wb") as sink:
         sink.write(json.dumps(report,sort_keys=True,indent=2)+"\n")
     print("NATIVE_W_DATA_DEPENDENT_ARITHMETIC_QA_PASS",len(reports),
