@@ -52,6 +52,7 @@ def native_run(source,raw,opposite):
     total=[0]
     gate_events=[]
     post=[]
+    post_toss=[]
     def hook(self):
         total[0]+=1
         if total[0]>BOUND:
@@ -76,6 +77,10 @@ def native_run(source,raw,opposite):
                 post.append((int(ip.position[0]),int(ip.position[1]),
                              int(ip.delta[0]),int(ip.delta[1]),
                              len(ip.stack[0])))
+                # Capture actual Native TOSS at every observed post-| IP step.
+                # This is stronger than motion-only reconvergence, but does
+                # not claim equivalence of SOSS, Funge-space or full state.
+                post_toss.append(tuple(str(v) for v in ip.stack[0]))
         return old_step()
     p.execute_step=hook.__get__(p,p.__class__)
     status="normal"
@@ -84,7 +89,8 @@ def native_run(source,raw,opposite):
     finally:del p.execute_step
     return {"status":status,"output":out.getvalue().split(),
             "remaining_ips":len(p.ips),"steps":total[0],
-            "gates":gate_events,"route":post}
+            "gates":gate_events,"route":post,
+            "post_toss":post_toss}
 
 def common_subpath(a,b,length):
     # A common 5-event native directed motion window is stronger than a
@@ -142,6 +148,23 @@ def main():
             require(changed,
                     "frozen formerly causal Native fork became output-inert "+label)
         overlap=common_subpath(unmodified["route"],altered["route"],5)
+        require(overlap is not None,"missing real Native five-motion rejoin "+label)
+        require(len(unmodified["post_toss"])==len(unmodified["route"]) and
+                len(altered["post_toss"])==len(altered["route"]),
+                "Native route/TOSS snapshot counts do not align "+label)
+        ia=overlap["original_offset"]
+        ib=overlap["mutant_offset"]
+        stack_a=unmodified["post_toss"][ia:ia+5]
+        stack_b=altered["post_toss"][ib:ib+5]
+        require(len(stack_a)==len(stack_b)==5,
+                "incomplete real Native five-step TOSS rejoin "+label)
+        equal_toss=[a==b for a,b in zip(stack_a,stack_b)]
+        # Negative control: a forged TOSS snapshot with unchanged native
+        # IP motion must not pass the exact stack comparison.
+        tampered=list(stack_a)
+        tampered[0]=tampered[0]+("__forged_toss__",)
+        require(not all(a==b for a,b in zip(stack_a,tampered)),
+                "rejoin TOSS audit accepted deliberately forged stack content")
         result={"case":label,"gate_observed_nonzero":a["executed"],
                 "gate_forced_nonzero":b["executed"],
                 "native_first_control_vector":first,
@@ -155,14 +178,23 @@ def main():
                 "mutant_step_count":altered["steps"],
                 "captured_native_route_steps":len(unmodified["route"]),
                 "captured_counterfactual_route_steps":len(altered["route"]),
-                "first_common_five_event_motion":overlap}
+                "first_common_five_event_motion":overlap,
+                "first_rejoin_native_toss_equal_each_step":equal_toss,
+                "first_rejoin_native_toss_equal_count":sum(equal_toss),
+                "first_rejoin_native_toss_identical_all_five":all(equal_toss),
+                "first_rejoin_toss_depth_control":[len(s) for s in stack_a],
+                "first_rejoin_toss_depth_forced":[len(s) for s in stack_b],
+                "first_rejoin_toss_sha256_control":[hashlib.sha256(repr(s)).hexdigest() for s in stack_a],
+                "first_rejoin_toss_sha256_forced":[hashlib.sha256(repr(s)).hexdigest() for s in stack_b],
+                "full_semantic_state_equivalence_proven":False}
         report.append(result)
         print("NATIVE_CURRENT_FORK_ROUTE_VS_OUTPUT_MEASURED",
               label,"real_route_changed",True,
               "final_output_causal",changed,
               "first_vector",first[:4],
               "forced_vector",opposite[:4],
-              "common_5_event_motion",overlap is not None)
+              "common_5_event_motion",overlap is not None,
+              "rejoin_toss_equal_steps",sum(equal_toss))
         sys.stdout.flush()
     require(len(report)==32 and sum(z["changed_final_semantics"] for z in report if z["case"] in ("zero_equal","foundation_cross","forward_short","mixed_small"))==2,
             "incomplete or unexpectedly classified Native fork corpus")
@@ -174,7 +206,7 @@ def main():
             "32-case Native fork route/output dependence classification drifted")
     require(all(z["first_common_five_event_motion"] is not None for z in report),
             "expected 32 actual Native five-motion reconvergences missing")
-    data={"schema":"befunge-stage1-current-native-fork-route-differential-v2",
+    data={"schema":"befunge-stage1-current-native-fork-route-differential-v3",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
           "source_git_blob":PIN,"real_PyFunge_runs":64,
           "valid_input_cases":32,
@@ -182,6 +214,10 @@ def main():
           "final_semantics_changed_cases":sum(z["changed_final_semantics"] for z in report),
           "final_semantics_inert_cases":sum(not z["changed_final_semantics"] for z in report),
           "output_causality_not_universal":True,
+          "native_toss_rejoin_snapshots_measured":len(report)*5*2,
+          "native_toss_tamper_negative_controls":len(report),
+          "native_toss_equal_all_five_cases":sum(z["first_rejoin_native_toss_identical_all_five"] for z in report),
+          "full_fungespace_or_soss_equivalence_not_claimed":True,
           "records":report}
     with open(OUT,"wb") as sink:
         sink.write(json.dumps(data,sort_keys=True,indent=2)+"\n")
