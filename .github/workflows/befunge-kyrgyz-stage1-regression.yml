@@ -943,6 +943,9 @@ jobs:
           test -s "$RUNNER_TEMP/native-w-evidence/w_data_candidate_proof.json"
           python3 -m py_compile qa/stage1_native_w_graph_audit.py
           python3 qa/stage1_native_w_graph_audit.py "$RUNNER_TEMP/native-w-evidence"
+          test -s "$RUNNER_TEMP/native-w-evidence/independent_w_native_graph.json"
+          python3 -m py_compile qa/stage1_native_w_graph_audit.py
+          python3 qa/stage1_native_w_graph_audit.py "$RUNNER_TEMP/native-w-evidence"
           test -s "$RUNNER_TEMP/native-w-evidence/w_data_graph_audit.json"
           echo NATIVE_W_DATA_SELECTED_QA_CANDIDATE_NOT_PROMOTED
       - name: Retain real Native w route and rejected one-byte mutant
