@@ -1030,6 +1030,18 @@ jobs:
               timeout --kill-after=5s 800s python -u qa/stage1_native_underscore_w_candidate.py
             '
           test -s "$RUNNER_TEMP/native-underscore-qa/underscore_w_qa_proof.json"
+          python3 -m py_compile qa/stage1_native_underscore_w_graph_audit.py
+          python3 qa/stage1_native_underscore_w_graph_audit.py "$RUNNER_TEMP/native-underscore-qa"
+          test -s "$RUNNER_TEMP/native-underscore-qa/underscore_independent_graph.json"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-underscore-qa:/underscore" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 500s python -u qa/stage1_native_underscore_w_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-underscore-qa/underscore_w_native_fault_reset.json"
           echo NATIVE_UNDERSCORE_W_QA_TEST_ONLY_NOT_PROMOTED
       - name: Retain actual Native underscore branch IP traces and mutant
         if: always()
