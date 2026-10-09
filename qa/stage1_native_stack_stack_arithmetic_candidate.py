@@ -7,7 +7,7 @@ two-valid-w candidate. The original upper arm computes 1,0,1,-1 and
 continues through x/p/g/j. This detour replaces the original literal 0
 with an actual stack-stack transfer of the preceding computed 1:
 
-  0{ 1u : 1- 2}    moves the 1 from SOSS to TOSS, copies, subtracts,
+  0{ 3u : 1- 2}    moves the 1 from SOSS to TOSS, copies, subtracts,
                     and returns original 1 and computed 0 to SOSS.
 
 The independent Python3 auditor checks real PyFunge STEP, READ and WRITE,
@@ -27,8 +27,8 @@ import stage1_native_reflective_candidate_domain_matrix as wide
 
 BASE="qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98"
 BLOB="b6cf50de9ed45376db5fc4ebd003157210dff03b"
-EXPERIMENT_BLOB="60fcda47ef33308056daab5012ffc32261b8204a"
-EXPERIMENT_SHA256="1b3d1b51936638064192e09c8a3bcd07c2a2e6fa07283b16911936cb7a29a222"
+EXPERIMENT_BLOB="6a3316252c9921de97c1c29d2aab95ca8b6417b2"
+EXPERIMENT_SHA256="9d43930d0b94bb740b117470f5765fd96f77e3447fee391458a126fc1c5be4d4"
 OUT="/stack"
 CAND=OUT+"/stack_stack_candidate.b98"
 MUTANT=OUT+"/without_native_u.b98"
@@ -42,7 +42,7 @@ TRANSFER=(954,1328)
 CLOSE=(954,1322)
 JUMP=(954,1318)
 REJOIN=(955,1332)
-STEPS=((1330,"{"),(1329,"1"),(1328,"u"),(1327,":"),
+STEPS=((1330,"{"),(1329,"3"),(1328,"u"),(1327,":"),
        (1326,"1"),(1325,"-"),(1324,"\\"),(1323,"2"),(1322,"}"),
        (1321,"1"),(1320,"1"),(1319,"e"),(1318,"x"))
 
