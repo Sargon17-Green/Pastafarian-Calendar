@@ -820,6 +820,19 @@ jobs:
           python3 -m py_compile qa/stage1_native_fungespace_put_inventory_audit.py
           python3 qa/stage1_native_fungespace_put_inventory_audit.py "$RUNNER_TEMP/native-writer-inventory"
           test -s "$RUNNER_TEMP/native-writer-inventory/native_fungespace_put_audit.json"
+          python3 -m py_compile qa/stage1_native_all_g_lineage.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-writer-inventory:/writes" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 360s python -u qa/stage1_native_all_g_lineage.py
+            '
+          test -s "$RUNNER_TEMP/native-writer-inventory/native_all_g_lineage.json"
+          python3 -m py_compile qa/stage1_native_all_g_lineage_audit.py
+          python3 qa/stage1_native_all_g_lineage_audit.py "$RUNNER_TEMP/native-writer-inventory"
+          test -s "$RUNNER_TEMP/native-writer-inventory/native_all_g_lineage_audit.json"
       - name: Retain exact Native execution-time write evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

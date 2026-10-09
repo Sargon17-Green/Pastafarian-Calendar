@@ -113,3 +113,17 @@ rejects seven deliberately forged observations. This distinguishes the
 early read-site liveness from the already measured post-rejoin deadness.
 Final numeric effects are classified, not presumed, and general Stage-1
 acceptance remains OPEN. Exact-HEAD CI validation is required.
+
+
+## Exhaustive top-level native g data lineage over the fixed 64-route corpus
+
+New QA-only analysis executes all 64 real Native Befunge runs again,
+records every top-level executed g read, its actual returned value, and
+identifies the chronologically latest real p write to that cell, or the
+immutable pinned source cell. Full p traces must match the independent
+instrumented Space.put producer exactly; an independent Python 3 auditor
+reconstructs every data dependency from the other run's engine-write
+evidence and rejects eight falsified reports. This check does not claim
+coverage of nested k-dispatched g, alternative mutation APIs, untested
+input domains, global semantic ownership, or Stage-1 completion. The
+exact-head CI result is required before marking it PASS.
