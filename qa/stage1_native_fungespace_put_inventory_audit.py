@@ -87,7 +87,7 @@ def verify(data,rows,source_mutators):
         events=record.get("native_put_events")
         require(isinstance(events,list) and len(events)>0 and
                 len(events)==record.get("put_calls")==
-                record.get("direct_p_step_count") and
+                record.get("direct_p_steps") and
                 record.get("non_p_attributed_puts")==0,
                 "native executable p count differs from real engine .put calls")
         require(record.get("generated_byte_ip_visits")==[],
