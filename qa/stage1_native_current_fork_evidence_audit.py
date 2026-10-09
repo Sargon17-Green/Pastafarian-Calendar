@@ -263,8 +263,8 @@ def main(folder):
             "QA production Funge source changed since real Native evidence")
     with open(SOURCE,"rb") as source_file:
         rows=source_file.read().split(b"\n")
-    require(len(rows)>1600 and len(rows[1600])>1490 and
-            rows[1600][1490]==32,
+    require(len(rows)>1600 and
+            (len(rows[1600])<=1490 or rows[1600][1490]==32),
             "Native scratch-cell source location was not initially blank")
     with open(os.path.join(folder,"current_fork_native_route_differential.json"),
               "r",encoding="utf-8") as stream:
