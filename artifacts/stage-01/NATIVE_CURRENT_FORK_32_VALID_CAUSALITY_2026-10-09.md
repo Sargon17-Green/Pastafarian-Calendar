@@ -14,13 +14,17 @@
 
 | Actual pre-`|` operand | Number of valid inputs | Opposite branch physically selected | Final output/execution changed |
 |---|---:|---:|---:|
-| Zero | 20 | 20/20 | 0/20 |
-| Nonzero | 12 | 12/12 | 12/12 |
+| Zero | 12 | 12/12 | 12/12 |
+| Nonzero | 20 | 20/20 | 0/20 |
 | **All** | **32** | **32/32** | **12/32** |
 
 Every forced-opposite case chose the opposite vertical Native IP vector. In all 32 comparisons, both measured trajectories also contained a matching five-event motion sequence, within a 512-event observation window.
 
-**Do not overclaim.** Matching motion events do not imply matching full Funge-space, total program state, or numeric results. The strict equivalence between naturally nonzero gate operands and changed final behavior is **only observed for these 32 inputs**; it is not a mathematical proof for every integer. Twenty inputs exhibit genuine branching but output-inert forced inversion.
+**Do not overclaim.** Matching motion events do not imply matching full Funge-space, total program state, or numeric results. The strict equivalence between naturally **zero** gate operands and changed final behavior is **only observed for these 32 inputs**; it is not a mathematical proof for every integer. Twenty **nonzero-operand** inputs exhibit genuine branching but output-inert forced inversion.
+
+## Corrected classification and failure provenance
+
+A later Native job, [37952921013](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37952921013), failed its final 32-case assertion despite all 32 individually logged Native routes passing: its expected `zero=20/inert, nonzero=12/causal` classification had inverted the observed `|` operand classes. The real Funge-98 IP headed down `(0,+1)` for the 12 zero operands and up `(0,-1)` for the 20 nonzero operands. This report corrects the descriptive error; it does not remove the strict 32-case assertion or claim universal causality. A fresh exact-HEAD CI run is required to validate the corrective QA commit.
 
 ## Acceptance boundary
 

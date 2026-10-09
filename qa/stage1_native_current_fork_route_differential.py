@@ -200,9 +200,12 @@ def main():
             "incomplete or unexpectedly classified Native fork corpus")
     zeros=[z for z in report if z["gate_observed_nonzero"]==0]
     ones=[z for z in report if z["gate_observed_nonzero"]==1]
-    require(len(zeros)==20 and len(ones)==12 and
-            all(not z["changed_final_semantics"] for z in zeros) and
-            all(z["changed_final_semantics"] for z in ones),
+    # Befunge-98 | sends zero downward (+y) and nonzero upward (-y).
+    # Native evidence: all 12 zero-operand cases are output-causal,
+    # while all 20 nonzero-operand cases are output-inert under inversion.
+    require(len(zeros)==12 and len(ones)==20 and
+            all(z["changed_final_semantics"] for z in zeros) and
+            all(not z["changed_final_semantics"] for z in ones),
             "32-case Native fork route/output dependence classification drifted")
     require(all(z["first_common_five_event_motion"] is not None for z in report),
             "expected 32 actual Native five-motion reconvergences missing")
@@ -214,6 +217,10 @@ def main():
           "final_semantics_changed_cases":sum(z["changed_final_semantics"] for z in report),
           "final_semantics_inert_cases":sum(not z["changed_final_semantics"] for z in report),
           "output_causality_not_universal":True,
+          "zero_operand_cases":len(zeros),
+          "zero_operand_final_causal_cases":sum(z["changed_final_semantics"] for z in zeros),
+          "nonzero_operand_cases":len(ones),
+          "nonzero_operand_final_inert_cases":sum(not z["changed_final_semantics"] for z in ones),
           "native_toss_rejoin_snapshots_measured":len(report)*5*2,
           "native_toss_tamper_negative_controls":len(report),
           "native_toss_equal_all_five_cases":sum(z["first_rejoin_native_toss_identical_all_five"] for z in report),
