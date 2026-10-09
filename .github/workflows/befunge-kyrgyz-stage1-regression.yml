@@ -826,3 +826,27 @@ jobs:
               timeout --kill-after=5s 430s python -u qa/stage1_native_j_pg_scratch_ownership.py
             '
           echo NATIVE_J_PG_EXPLICIT_SCRATCH_OWNER_QA_ONLY_PASS
+
+  # Fail-closed: two live Native Program instances both write the SAME
+  # numeric Funge scratch coordinates; injected fault may not leak.
+  native-overlapping-pg-fault-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin actual Native source and verify test-only concurrency probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
+          python3 -m py_compile qa/stage1_native_concurrent_pg_fault_isolation.py
+          curl -fsSL "https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz" -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 750s python -u qa/stage1_native_concurrent_pg_fault_isolation.py
+            '
+          echo NATIVE_OVERLAPPING_STATE_OWNER_PROBE_ONLY_NOT_STAGE1_ACCEPTANCE
