@@ -43,6 +43,21 @@ def tupleize_native_snapshot(value):
             "raw native frame/p-cell snapshot contains nonnumeric value")
     return value
 
+def observed_p_modified_cells(raw,label):
+    require(isinstance(raw,list),
+            "native p scratch snapshot missing: "+label)
+    cells={}
+    for item in raw:
+        require(isinstance(item,list) and len(item)==3 and
+                type(item[0]) is int and type(item[1]) is int and
+                isinstance(item[2],str) and item[2].lstrip("-").isdigit(),
+                "invalid real Native p-modified cell: "+label)
+        point=tuple(item[:2])
+        require(point not in cells,
+                "duplicate native p-modified scratch position: "+label)
+        cells[point]=item[2]
+    return cells
+
 def verify(proof):
     require(proof.get("schema")==SCHEMA and
             proof.get("source_git_blob")==PIN and
@@ -135,6 +150,23 @@ def verify(proof):
                      for left,right in zip(raw0,raw1)]==equal_steps,
                     "native full-frame/p-cell snapshot digest/class contradiction: "+
                     label+"/"+prefix)
+        original_p=record["first_rejoin_p_modified_cells_raw_control"]
+        forced_p=record["first_rejoin_p_modified_cells_raw_forced"]
+        for step,(normal,mutant) in enumerate(zip(original_p,forced_p)):
+            cell0=observed_p_modified_cells(normal,label)
+            cell1=observed_p_modified_cells(mutant,label)
+            different={point for point in set(cell0)|set(cell1)
+                       if cell0.get(point)!=cell1.get(point)}
+            require(different=={(1490,1600)} and
+                    cell0.get((1490,1600))==("12" if original==1 else None) and
+                    cell1.get((1490,1600))==("12" if original==0 else None),
+                    "Native changed-p memory diverges beyond exactly one scratch cell: "+
+                    label+"/"+str(step))
+        p_count0=record.get("real_p_write_count_control")
+        p_count1=record.get("real_p_write_count_forced")
+        require(type(p_count0) is int and type(p_count1) is int and
+                p_count0-p_count1==(1 if original==1 else -1),
+                "native additional p write does not explain scratch difference: "+label)
         for prefix in ("frame_count","p_modified_cells_count"):
             cnt0=record.get("first_rejoin_"+prefix+"_control")
             cnt1=record.get("first_rejoin_"+prefix+"_forced")
@@ -229,6 +261,11 @@ def main(folder):
     require(os.path.isdir(folder),"Native fork evidence output folder missing")
     require(source_git_blob(SOURCE)==PIN,
             "QA production Funge source changed since real Native evidence")
+    with open(SOURCE,"rb") as source_file:
+        rows=source_file.read().split(b"\n")
+    require(len(rows)>1600 and len(rows[1600])>1490 and
+            rows[1600][1490]==32,
+            "Native scratch-cell source location was not initially blank")
     with open(os.path.join(folder,"current_fork_native_route_differential.json"),
               "r",encoding="utf-8") as stream:
         data=json.load(stream)
@@ -257,10 +294,15 @@ def main(folder):
             ["first_rejoin_ip_context_raw_forced"][0].__setitem__(1,9)),
         ("forged_input_cursor_flag",lambda p:p["records"][0]
             ["first_rejoin_input_cursor_equal_each_step"].__setitem__(
-                0,not p["records"][0]["first_rejoin_input_cursor_equal_each_step"][0])))
+                0,not p["records"][0]["first_rejoin_input_cursor_equal_each_step"][0])),
+        ("forged_scratch_coordinate",lambda p:p["records"][0]
+            ["first_rejoin_p_modified_cells_raw_control"][0][-1].__setitem__(0,1491)),
+        ("forged_native_p_write_count",lambda p:p["records"][0].__setitem__(
+            "real_p_write_count_control",
+            p["records"][0]["real_p_write_count_control"]+2)))
     refused=[must_reject(name,data,change) for name,change in attempts]
-    require(len(refused)==11,"negative manifest checks incomplete")
-    report={"schema":"befunge-stage1-native-fork-manifest-adversarial-v3",
+    require(len(refused)==13,"negative manifest checks incomplete")
+    report={"schema":"befunge-stage1-native-fork-manifest-adversarial-v4",
             "status":"QA_ONLY_NOT_FINAL_STAGE1_ACCEPTANCE",
             "source_blob":PIN,
             "external_raw_native_trace_replay_claimed":False,
@@ -271,8 +313,8 @@ def main(folder):
               "w",encoding="utf-8") as stream:
         json.dump(report,stream,sort_keys=True,indent=2)
         stream.write("\n")
-    print("NATIVE_FORK_32_MANIFEST_AND_ELEVEN_ADVERSARIES_PASS",
-          32,"positive,11 negative")
+    print("NATIVE_FORK_32_MANIFEST_AND_THIRTEEN_ADVERSARIES_PASS",
+          32,"positive,13 negative")
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; no full-state equivalence asserted")
 
 if __name__=="__main__":
