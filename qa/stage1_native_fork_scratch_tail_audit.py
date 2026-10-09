@@ -53,6 +53,29 @@ def verify(report,prior):
             event1=mutant["event"]
             expected_value=12 if executed else 32
             changed_real=sig(baseline)!=sig(mutant)
+            # The real Native fork source has completed its observed
+            # p -> g transaction *before* this first common checkpoint.
+            # A late scratch flip must have neither a new native reader
+            # nor a numeric effect in this pinned 32-case corpus.
+            scratch_reads=old["native_scratch_g_reads_"+(
+                "forced" if forced else "control")]
+            scratch_writes=old["native_scratch_p_writes_"+(
+                "forced" if forced else "control")]
+            check(len(scratch_reads)==len(scratch_writes)==executed,
+                  "Native pre-rejoin scratch p/g transaction cardinality drifted")
+            if executed:
+                p_tick=scratch_writes[0]["tick"]
+                g_tick=scratch_reads[0]["tick"]
+                check(0<p_tick<g_tick<event0["tick"] and
+                      g_tick-p_tick==29 and event0["tick"]-g_tick==14 and
+                      scratch_reads[0]["returned"]=="12",
+                      "Native scratch p->g->common-motion chronology violated")
+            check(not changed_real,
+                  "post-rejoin one-cell intervention unexpectedly changed final Native result")
+            for trial in (baseline,mutant):
+                check(all(number==0 for number in
+                          trial["post_checkpoint"].values()),
+                      "Native scratch p/g access or executed scratch cell after first common motion")
             check(entry["branch"]==
                   ("forced-opposite" if forced else "natural") and
                   entry["expected_executed_gate_nonzero"]==executed and
@@ -85,8 +108,8 @@ def verify(report,prior):
                           for n in trial["post_checkpoint"].values()),
                       "Native tail-execution or memory-read counters malformed")
             changed+=int(changed_real)
-    check(report["observed_semantic_change_pairs"]==changed,
-          "scrub effect aggregate forged")
+    check(report["observed_semantic_change_pairs"]==changed==0,
+          "scrub effect aggregate forged or newly live scratch tail")
     return changed
 
 def main(folder):
@@ -124,10 +147,19 @@ def main(folder):
                                not p["records"][0]["branches"][0]
                                ["post_rejoin_semantics_changed"])),
         must_fail("incorrect_total",lambda p:p.__setitem__(
-            "observed_semantic_change_pairs",65))
+            "observed_semantic_change_pairs",65)),
+        must_fail("fake_tail_g_read",lambda p:p["records"][0]["branches"][0]
+                  ["native_scratch_flipped"]["post_checkpoint"].__setitem__(
+                      "potential_native_g_reads_of_scratch",1)),
+        must_fail("fake_late_p_write",lambda p:p["records"][0]["branches"][0]
+                  ["native_control"]["post_checkpoint"].__setitem__(
+                      "potential_native_p_writes_of_scratch",1)),
+        must_fail("fake_read_before_rejoin",lambda p:p["records"][0]["branches"][0]
+                  ["native_control"]["event"].__setitem__(
+                      "tick",p["records"][0]["branches"][0]["native_control"]["event"]["tick"]-1))
     ]
-    check(len(rejected)==7,"adversarial tail audit incomplete")
-    out={"schema":"befunge-stage1-native-scratch-tail-audit-v1",
+    check(len(rejected)==10,"adversarial tail audit incomplete")
+    out={"schema":"befunge-stage1-native-scratch-tail-audit-v2",
          "source_git_blob":SOURCE_BLOB,
          "valid_records":32,"branch_pairs":64,
          "adversarial_mutations_rejected":rejected,
@@ -137,7 +169,7 @@ def main(folder):
             "w",encoding="utf-8") as f:
         json.dump(out,f,indent=2,sort_keys=True)
         f.write("\n")
-    print("NATIVE_FORK_SCRATCH_TAIL_7_ADVERSARIAL_AUDIT_PASS")
+    print("NATIVE_FORK_SCRATCH_TAIL_10_ADVERSARIAL_AUDIT_PASS")
 
 if __name__=="__main__":
     check(len(sys.argv)==2,"usage: SCRATCH_EVIDENCE_FOLDER")

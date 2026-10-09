@@ -53,6 +53,15 @@ The actual p operation counts differ by **exactly one per paired run**, with the
 
 **Limit:** this proves a localized divergence of the native *p*-mutated memory, not the entirety of Funge-space, every past write, remaining input, or global semantic-state ownership. The QA evidence checker now enforces the exact-cell, exact-value, write-count and initially-blank invariants, including two new hostile mutations. Its latest exact-HEAD regression must pass before the new guard can be marked complete.
 
+## Exact read-after-write and post-rejoin scratch liveness (32 valid Native inputs)
+
+Verified against the original GitHub Actions artifact `11631119170` from [QA run 37960506587](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37960506587), which completed **31/31 SUCCESS** on commit `77f9a48dc4ae891cbbf47a6fcf2e740b12c2ac76`:
+
+- In each of the 32 actual branches executing `p/g`, Native `p` committed decimal **12** to `(1490,1600)`; Native `g` later read the same value **29 executed instructions after p**, and the first five-motion reconvergence checkpoint followed **14 instructions after g**.
+- The other 32 branch runs did not execute scratch-addressed `p/g` and preserved the implicit-space byte `32` at that coordinate.
+- A separate 128-execution PyFunge intervention corpus observed **64 normal-vs-mutated tail pairs**. Flipping the scratch cell at the first matching directed IP-motion checkpoint caused **0/64** final-output/termination changes. Across baseline and intervention tails alike, the observers recorded **no subsequent scratch-targeted g reads, p writes or IP execution at that location**.
+- This is an input- and checkpoint-bounded proof. It does not cover all Funge-space read/write mechanisms, all input domains, or universal scratch-cell deadness. The follow-up independent tail checker adds strict timing and zero-tail-access invariants plus three new negative mutations; its exact-head CI must pass separately.
+
 ## Acceptance boundary
 
 The upstream `|` universal-output-causality question remains OPEN. The 32-domain diagnostic shows a reproducible branch-dependent asymmetry, not a universal final-output dependence. It neither changes the Befunge algorithm nor begins Stage 2.
