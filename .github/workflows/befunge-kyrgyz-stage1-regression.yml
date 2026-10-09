@@ -941,8 +941,8 @@ jobs:
               timeout --kill-after=5s 720s python -u qa/stage1_native_w_data_branch_candidate.py
             '
           test -s "$RUNNER_TEMP/native-w-evidence/w_data_candidate_proof.json"
-          python3 -m py_compile qa/stage1_native_w_graph_audit.py
-          python3 qa/stage1_native_w_graph_audit.py "$RUNNER_TEMP/native-w-evidence"
+          python3 -m py_compile qa/stage1_native_w_source_ownership_audit.py
+          python3 qa/stage1_native_w_source_ownership_audit.py "$RUNNER_TEMP/native-w-evidence"
           test -s "$RUNNER_TEMP/native-w-evidence/independent_w_native_graph.json"
           python3 -m py_compile qa/stage1_native_w_graph_audit.py
           python3 qa/stage1_native_w_graph_audit.py "$RUNNER_TEMP/native-w-evidence"
