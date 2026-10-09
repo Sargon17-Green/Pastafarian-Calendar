@@ -33,6 +33,16 @@ CASES=[
     ("large_values",     (0,2**127,1,2**127-1),True),
     ("invalid_zero_sign",(1,0,0,0),False),
     ("invalid_big_sign", (2,10,0,10),False),
+    # Additional native boundary and lexical-stress cases. Inputs are only
+    # dispatched to native Befunge oracles; Python never computes a date.
+    ("epoch_forward_one", (0,0,0,1),True),
+    ("epoch_reverse_one", (0,1,0,0),True),
+    ("recent_anchor_equal", (0,2461319,0,2461319),True),
+    ("recent_anchor_next", (0,2461319,0,2461320),True),
+    ("foundation_neighbor_forward", (1,15055671,1,15055670),True),
+    ("foundation_neighbor_reverse", (1,15055670,1,15055671),True),
+    ("invalid_target_zero_sign", (0,0,1,0),False),
+    ("invalid_negative_magnitude", (0,-1,0,0),False),
 ]
 def check(ok,why):
     if not ok:
