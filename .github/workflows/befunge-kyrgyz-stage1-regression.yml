@@ -1160,6 +1160,16 @@ jobs:
           test -s "$RUNNER_TEMP/native-stack-stack-evidence/native_stack_stack_arithmetic.json"
           python3 qa/stage1_native_stack_stack_graph_audit.py "$RUNNER_TEMP/native-stack-stack-evidence"
           test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_independent_graph.json"
+          python3 -m py_compile qa/stage1_native_stack_stack_fault_reset.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-stack-stack-evidence:/stack" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 420s python -u qa/stage1_native_stack_stack_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_native_fault_reset.json"
           echo NATIVE_STACK_STACK_REAL_ARITHMETIC_CANDIDATE_ONLY_STAGE1_OPEN
       - name: Retain raw real PyFunge source arithmetic and g/p traces
         if: always()

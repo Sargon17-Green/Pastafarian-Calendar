@@ -54,6 +54,54 @@ def edge_set(edges,pt):
     return ({tuple(e["from"]) for e in edges if tuple(e["to"])==pt},
             {tuple(e["to"]) for e in edges if tuple(e["from"])==pt})
 
+def assert_native_stack_instruction_trace(trace_path, upper):
+    """Check real interpreter opcode, IP delta, stack depth and order.
+
+    A graph checker that trusts the interpreter's logged depth would not
+    detect an adversarially forged positive stack size. This exact trace
+    audit independently binds each executed stack-stack instruction to
+    the expected original input-family arithmetic stack transition.
+    """
+    watched=[]
+    with open(trace_path,"r",encoding="ascii") as stream:
+        for line in stream:
+            if not line.startswith("STEP\t"):
+                continue
+            fields=line.rstrip("\n").split("\t")
+            require(len(fields)==9,"bad full-width native stack STEP event")
+            tick,ip,x,y,dx,dy,opcode,depth=map(int,fields[1:])
+            if (x==954 and 1318<=y<=1330) or (x,y)==(955,1332):
+                watched.append((tick,ip,x,y,dx,dy,opcode,depth))
+    if not upper:
+        require(not watched,
+                "unselected Native arithmetic branch entered stack-stack cells")
+        return 0
+    expected=(
+        (954,1330,0,-1,ord("{"),2),
+        (954,1329,0,-1,ord("3"),0),
+        (954,1328,0,-1,ord("u"),1),
+        (954,1327,0,-1,ord(":"),3),
+        (954,1326,0,-1,ord("1"),4),
+        (954,1325,0,-1,ord("-"),5),
+        (954,1323,0,-1,ord("2"),4),
+        (954,1322,0,-1,ord("}"),5),
+        (954,1321,0,-1,ord("1"),2),
+        (954,1320,0,-1,ord("1"),3),
+        (954,1319,0,-1,ord("e"),4),
+        (954,1318,0,-1,ord("x"),5),
+        (955,1332,1,14,ord(">"),3))
+    observed=tuple(event[2:] for event in watched
+                   if event[6]!=ord(" "))
+    require(observed==expected,
+            "Native actual stack-stack opcode/IP/velocity/TOSS depth mismatch")
+    ticks=[event[0] for event in watched if event[6]!=ord(" ")]
+    ids={event[1] for event in watched}
+    require(len(ids)==1 and
+            ticks==list(range(ticks[0],ticks[0]+len(expected))),
+            "Native real stack-stack temporal IP sequence incorrect")
+    return len(expected)
+
+
 def main(directory):
     require(os.path.isdir(directory),"missing Native stack-stack directory")
     source,edited=source_check(directory)
@@ -84,6 +132,7 @@ def main(directory):
         require(sha==item["trace_sha256"],
                 "Native stack-stack STEP trace digest mismatch "+label)
         native=graph.analyze(source,path)
+        verified_stack_steps=assert_native_stack_instruction_trace(path,label in CASES_UP)
         stats=native["statistics"]
         ops=native["arithmetic_executed_opcodes"]
         edges=native["observed_directed_edges"]
@@ -117,7 +166,8 @@ def main(directory):
             require(not incoming and not outgoing and
                     item["observed"]["route"]=="bypass",
                     "unselected stack-stack executed on wrong Native family")
-        report.append({"case":label,"executed":upper,
+        report.append({"native_verified_stack_steps":verified_stack_steps,
+                       "case":label,"executed":upper,
                        "native_sha256":sha,"u":ops.get("u",0),
                        "stack_close":ops.get("}",0),
                        "native_p_g_collision_count":0})
