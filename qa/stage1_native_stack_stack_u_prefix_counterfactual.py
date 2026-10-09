@@ -56,7 +56,8 @@ def snapshot(source,raw,coord):
             require(tuple(ip.delta)==(0,-1),
                     "Native stack-stack pre/post-u actual heading mismatch")
             toss=tuple(str(x) for x in list(ip.stack[0]))
-            require(toss,"Native stack-stack boundary TOSS empty")
+            # An empty initial TOSS is legal immediately after native {.
+            # Only the post-u snapshots are required to demonstrate a change.
             observations.append({"xy":list(point),"ip":str(id(ip)),
                                  "tick":ticks[0],"toss":list(toss),
                                  "depth":len(toss)})
