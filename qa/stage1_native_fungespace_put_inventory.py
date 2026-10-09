@@ -40,6 +40,8 @@ def run(src,name,raw,opposite,oracle):
     original_put=cls.put
     original_step=program.execute_step
     puts=[]
+    generated_live={}
+    generated_byte_visits=[]
     direct_p=[]
     gate=[]
     ticks=[0]
@@ -59,6 +61,11 @@ def run(src,name,raw,opposite,oracle):
                 "actual Native put stored a value different from written")
         puts.append({"tick":ticks[0],"ip":position,"opcode":opcode,
                      "target":target,"value":stored})
+        key=tuple(target)
+        if stored in [ord(c) for c in FORBIDDEN]:
+            generated_live[key]=stored
+        else:
+            generated_live.pop(key,None)
         return result
     def step(self):
         ticks[0]+=1
@@ -68,6 +75,10 @@ def run(src,name,raw,opposite,oracle):
         ip=self.ips[0]
         op=int(self.space.get(ip.position))
         xy=tuple(ip.position)
+        if xy in generated_live:
+            generated_byte_visits.append({
+                "tick":ticks[0],"ip":[int(xy[0]),int(xy[1])],
+                "byte":int(op),"stringmode":bool(ip.stringmode)})
         if xy==fork.GATE:
             require(op==ord("|") and len(ip.stack[0])>0,
                     "pin-scoped fork missing during real Native execution")
@@ -108,6 +119,7 @@ def run(src,name,raw,opposite,oracle):
             "put_calls":len(puts),"direct_p_steps":len(direct_p),
             "non_p_attributed_puts":len(non_p),
             "created_other_mutator_cells":len(created),
+            "generated_byte_ip_visits":generated_byte_visits,
             "native_put_events":puts}
 
 def main():
@@ -131,6 +143,7 @@ def main():
     total=sum(r["put_calls"] for r in records)
     indirect=sum(r["non_p_attributed_puts"] for r in records)
     generated=sum(r["created_other_mutator_cells"] for r in records)
+    generated_visits=sum(len(r["generated_byte_ip_visits"]) for r in records)
     require(total>64,"Native Funge-space write inventory implausibly empty")
     evidence={"schema":"befunge-stage1-native-fungespace-put-surface-v1",
               "status":"QA_ONLY_NOT_COMPLETE_SEMANTIC_OWNERSHIP",
@@ -140,13 +153,15 @@ def main():
               "total_space_put_calls":total,
               "indirect_or_non_p_attributed_put_calls":indirect,
               "new_forbidden_mutator_bytes_written":generated,
+              "generated_mutator_byte_ip_visits":generated_visits,
               "other_space_mutation_APIs_audited":False,
               "stage1_final_acceptance":False,"records":records}
     with open(OUT,"wb") as f:
         f.write(json.dumps(evidence,sort_keys=True,indent=2)+"\n")
     print("NATIVE_REAL_FUNGESPACE_PUT_INVENTORY_64_CASE_PASS",
           "total_puts",total,"non_p_attributed",indirect,
-          "generated_other_mutators",generated)
+          "generated_other_mutators",generated,
+          "generated_byte_ip_visits",generated_visits)
     print("STAGE1_SEMANTIC_OWNERSHIP_FINAL_GATE=OPEN")
 
 if __name__=="__main__":
