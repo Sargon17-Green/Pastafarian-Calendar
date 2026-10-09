@@ -62,7 +62,7 @@ def source():
             "arithmetic dependency or source bounds unexpectedly changed")
     changes={(954,1332):("0","^"),(955,1332):("1",">")}
     for y,char in STEPS:changes[(954,y)]=(" ",char)
-    require(len(changes)==15,"wrong isolated stack-stack detour cell count")
+    require(len(changes)==15,"wrong isolated 15-cell stack-stack detour count")
     copy=list(lines)
     for (x,y),(old,new) in changes.items():
         require(copy[y][x]==old,
@@ -74,9 +74,9 @@ def source():
             and sum(a!=b for a,b in zip(data,frozen))==15
             and gitblob(data)==EXPERIMENT_BLOB
             and hashlib.sha256(data).hexdigest()==EXPERIMENT_SHA256,
-            "generated stack-stack source differs from frozen 12-byte contract")
+            "generated stack-stack source differs from frozen 15-byte contract")
     with open(CAND,"wb") as stream:stream.write(data)
-    print("NATIVE_STACK_STACK_EXACT_12_CELL_SOURCE_PASS",EXPERIMENT_BLOB)
+    print("NATIVE_STACK_STACK_EXACT_15_CELL_SOURCE_PASS",EXPERIMENT_BLOB)
     return data
 
 def observed(path,expect_upper):
@@ -102,7 +102,7 @@ def observed(path,expect_upper):
                 "unselected Native stack-stack route was executed")
         return {"route":"bypass"}
     require(len(all_corridor)==13 and
-            [event[2] for event in all_corridor]==[954]*11 and
+            [event[2] for event in all_corridor]==[954]*13 and
             [event[1] for event in all_corridor]==list(range(1330,1317,-1)),
             "Native stack-stack arithmetic detour not actually executed in full")
     require(all(len(watched[k])==1 for k in watched),
