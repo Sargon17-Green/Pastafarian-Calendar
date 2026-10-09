@@ -749,6 +749,9 @@ jobs:
               timeout --kill-after=5s 360s python -u qa/stage1_native_current_fork_route_differential.py
             '
           test -s "$RUNNER_TEMP/native-current-fork-routes/current_fork_native_route_differential.json"
+          python3 -m py_compile qa/stage1_native_current_fork_evidence_audit.py
+          python3 qa/stage1_native_current_fork_evidence_audit.py "$RUNNER_TEMP/native-current-fork-routes"
+          test -s "$RUNNER_TEMP/native-current-fork-routes/native_fork_manifest_adversarial_audit.json"
       - name: Retain current-source Native opposite-fork route evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
