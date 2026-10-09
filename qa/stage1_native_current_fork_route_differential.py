@@ -60,6 +60,9 @@ def native_run(source,raw,opposite):
     rows=source.split("\n")
     modified_p_cells={}
     p_write_events=[0]
+    p_write_history=[]
+    g_read_history=[]
+    scratch_vector=p.ips[0].position.__class__((1490,1600))
     def initial_byte(px,py):
         if 0<=py<len(rows) and 0<=px<len(rows[py]):
             return ord(rows[py][px])
@@ -105,6 +108,7 @@ def native_run(source,raw,opposite):
                     int(bool(ip.queuemode)),
                     int(input_stream.tell())))
         pending_p=None
+        pending_g=None
         if self.ips:
             active=self.ips[0]
             if self.space.get(active.position)==ord("p"):
@@ -114,6 +118,14 @@ def native_run(source,raw,opposite):
                 expected_value,px,py=map(int,list(values)[-3:])
                 point=active.position.__class__((px,py))
                 pending_p=(point,(px,py),expected_value)
+            elif self.space.get(active.position)==ord("g"):
+                values=active.stack[0]
+                require(len(values)>=2,
+                        "Native current fork reached g with too few coordinates")
+                px,py=map(int,list(values)[-2:])
+                point=active.position.__class__((px,py))
+                before=int(self.space.get(point))
+                pending_g=(point,(px,py),before,active)
         result=old_step()
         if pending_p is not None:
             point,coord,expected_value=pending_p
@@ -125,6 +137,23 @@ def native_run(source,raw,opposite):
             else:
                 modified_p_cells[coord]=str(observed_value)
             p_write_events[0]+=1
+            p_write_history.append({
+                "tick":total[0],
+                "coordinate":list(coord),
+                "value":str(observed_value)})
+        if pending_g is not None:
+            point,coord,before,old_ip=pending_g
+            require(self.ips and self.ips[0] is old_ip and
+                    len(old_ip.stack[0])>=1,
+                    "Native g did not retain the reading IP and its stack")
+            actual=int(old_ip.stack[0][-1])
+            require(actual==before,
+                    "Native real g returned a value unequal to physical Funge-space")
+            g_read_history.append({
+                "tick":total[0],
+                "coordinate":list(coord),
+                "read_before":str(before),
+                "returned":str(actual)})
         return result
     p.execute_step=hook.__get__(p,p.__class__)
     status="normal"
@@ -138,7 +167,10 @@ def native_run(source,raw,opposite):
             "post_frames":post_frames,
             "post_modified_p_cells":post_modified_p_cells,
             "post_ip_context":post_ip_context,
-            "observed_native_p_writes":p_write_events[0]}
+            "observed_native_p_writes":p_write_events[0],
+            "native_p_writes_raw":p_write_history,
+            "native_g_reads_raw":g_read_history,
+            "final_scratch_value":str(int(p.space.get(scratch_vector)))}
 
 def common_subpath(a,b,length):
     # A common 5-event native directed motion window is stronger than a
@@ -242,6 +274,35 @@ def main():
         tampered[0]=tampered[0]+("__forged_toss__",)
         require(not all(a==b for a,b in zip(stack_a,tampered)),
                 "rejoin TOSS audit accepted deliberately forged stack content")
+        # The structural isolation suite already proves exact Native p/g
+        # for a few input families. Extend the same *executed* operation
+        # lifecycle check to every valid 32-case opposite-fork pair.
+        def verify_scratch_transaction(observed,should_execute,arm):
+            writes=[event for event in observed["native_p_writes_raw"]
+                    if event["coordinate"]==[1490,1600]]
+            reads=[event for event in observed["native_g_reads_raw"]
+                   if event["coordinate"]==[1490,1600]]
+            require(len(writes)==len(reads)==should_execute,
+                    "Native scratch p/g executed incorrect number of times "+
+                    label+"/"+arm)
+            if should_execute:
+                require(writes[0]["tick"]<reads[0]["tick"] and
+                        writes[0]["value"]=="12" and
+                        reads[0]["read_before"]=="12" and
+                        reads[0]["returned"]=="12" and
+                        observed["final_scratch_value"]=="12",
+                        "Native scratch p/g write-then-read lifecycle mismatch "+
+                        label+"/"+arm)
+            else:
+                require(observed["final_scratch_value"]=="32",
+                        "unselected Native scratch should remain initial blank "+
+                        label+"/"+arm)
+            return writes,reads
+        expected_control=int(a["executed"]==1)
+        normal_writes,normal_reads=verify_scratch_transaction(
+            unmodified,expected_control,"original")
+        forced_writes,forced_reads=verify_scratch_transaction(
+            altered,1-expected_control,"opposite")
         result={"case":label,"gate_observed_nonzero":a["executed"],
                 "gate_forced_nonzero":b["executed"],
                 "native_first_control_vector":first,
@@ -283,6 +344,12 @@ def main():
                 "first_rejoin_ip_context_raw_forced":ip_context_b,
                 "first_rejoin_ip_context_equal_each_step":ip_context_equal,
                 "first_rejoin_input_cursor_equal_each_step":input_cursor_equal,
+                "native_scratch_p_writes_control":normal_writes,
+                "native_scratch_p_writes_forced":forced_writes,
+                "native_scratch_g_reads_control":normal_reads,
+                "native_scratch_g_reads_forced":forced_reads,
+                "final_native_scratch_control":unmodified["final_scratch_value"],
+                "final_native_scratch_forced":altered["final_scratch_value"],
                 "real_p_write_count_control":unmodified["observed_native_p_writes"],
                 "real_p_write_count_forced":altered["observed_native_p_writes"],
                 "all_fungespace_mutators_audited":False,
@@ -323,11 +390,15 @@ def main():
             "output-causal and five-step Native TOSS-rejoin classes collided")
     require(all(z["first_rejoin_p_modified_cells_equal_count"]==0 for z in report),
             "Native p-modified Funge-space unexpectedly reconverged in checked motion")
-    data={"schema":"befunge-stage1-current-native-fork-route-differential-v6",
+    data={"schema":"befunge-stage1-current-native-fork-route-differential-v7",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
           "source_git_blob":PIN,"real_PyFunge_runs":64,
           "valid_input_cases":32,
           "native_route_changed_cases":32,
+          "native_verified_scratch_write_read_transactions":32,
+          "native_scratch_unwritten_control_cases":12,
+          "native_scratch_written_control_cases":20,
+          "native_scratch_final_state_bounded_check":True,
           "final_semantics_changed_cases":sum(z["changed_final_semantics"] for z in report),
           "final_semantics_inert_cases":sum(not z["changed_final_semantics"] for z in report),
           "output_causality_not_universal":True,

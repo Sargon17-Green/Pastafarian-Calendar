@@ -22,7 +22,7 @@ import sys
 
 SOURCE="src/interleaved_work_counts.b98"
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
-SCHEMA="befunge-stage1-current-native-fork-route-differential-v6"
+SCHEMA="befunge-stage1-current-native-fork-route-differential-v7"
 VALID_SHA=re.compile(r"^[0-9a-f]{64}$")
 SPECIAL={"zero_equal":False,"foundation_cross":True,
          "forward_short":False,"mixed_small":True}
@@ -162,6 +162,27 @@ def verify(proof):
                     cell1.get((1490,1600))==("12" if original==0 else None),
                     "Native changed-p memory diverges beyond exactly one scratch cell: "+
                     label+"/"+str(step))
+        def check_scratch_io(path,expected):
+            writes=record.get("native_scratch_p_writes_"+path)
+            reads=record.get("native_scratch_g_reads_"+path)
+            end=record.get("final_native_scratch_"+path)
+            require(isinstance(writes,list) and isinstance(reads,list) and
+                    len(writes)==len(reads)==expected and
+                    end==("12" if expected else "32"),
+                    "Native scratch final state/p-g counts mismatch: "+
+                    label+"/"+path)
+            if expected:
+                w=writes[0];g=reads[0]
+                require(type(w.get("tick")) is int and
+                        type(g.get("tick")) is int and
+                        0<w["tick"]<g["tick"] and
+                        w.get("coordinate")==g.get("coordinate")==[1490,1600] and
+                        w.get("value")=="12" and
+                        g.get("read_before")==g.get("returned")=="12",
+                        "Native actual scratch read-after-write proof broken: "+
+                        label+"/"+path)
+        check_scratch_io("control",int(original==1))
+        check_scratch_io("forced",int(original==0))
         p_count0=record.get("real_p_write_count_control")
         p_count1=record.get("real_p_write_count_forced")
         require(type(p_count0) is int and type(p_count1) is int and
@@ -233,6 +254,11 @@ def verify(proof):
                 all(row["first_rejoin_p_modified_cells_equal_each_step"])
                 for row in cases),
             "reported frame/p-cell Native totals disagree with observed cases")
+    require(proof.get("native_verified_scratch_write_read_transactions")==32 and
+            proof.get("native_scratch_unwritten_control_cases")==12 and
+            proof.get("native_scratch_written_control_cases")==20 and
+            proof.get("native_scratch_final_state_bounded_check") is True,
+            "Native 32-case p/g lifecycle coverage incomplete")
     require(proof.get("zero_operand_cases")==12 and
             proof.get("nonzero_operand_cases")==20 and
             proof.get("zero_operand_final_causal_cases")==12 and
@@ -299,10 +325,15 @@ def main(folder):
             ["first_rejoin_p_modified_cells_raw_control"][0][-1].__setitem__(0,1491)),
         ("forged_native_p_write_count",lambda p:p["records"][0].__setitem__(
             "real_p_write_count_control",
-            p["records"][0]["real_p_write_count_control"]+2)))
+            p["records"][0]["real_p_write_count_control"]+2)),
+        ("forged_g_read_result",lambda p:p["records"][0]
+            ["native_scratch_g_reads_control"][0].__setitem__("returned","13")),
+        ("forged_g_read_time",lambda p:p["records"][0]
+            ["native_scratch_g_reads_control"][0].__setitem__(
+                "tick",p["records"][0]["native_scratch_p_writes_control"][0]["tick"])))
     refused=[must_reject(name,data,change) for name,change in attempts]
-    require(len(refused)==13,"negative manifest checks incomplete")
-    report={"schema":"befunge-stage1-native-fork-manifest-adversarial-v4",
+    require(len(refused)==15,"negative manifest checks incomplete")
+    report={"schema":"befunge-stage1-native-fork-manifest-adversarial-v5",
             "status":"QA_ONLY_NOT_FINAL_STAGE1_ACCEPTANCE",
             "source_blob":PIN,
             "external_raw_native_trace_replay_claimed":False,
@@ -313,8 +344,8 @@ def main(folder):
               "w",encoding="utf-8") as stream:
         json.dump(report,stream,sort_keys=True,indent=2)
         stream.write("\n")
-    print("NATIVE_FORK_32_MANIFEST_AND_THIRTEEN_ADVERSARIES_PASS",
-          32,"positive,13 negative")
+    print("NATIVE_FORK_32_MANIFEST_AND_FIFTEEN_ADVERSARIES_PASS",
+          32,"positive,15 negative")
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; no full-state equivalence asserted")
 
 if __name__=="__main__":
