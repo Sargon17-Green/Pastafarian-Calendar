@@ -20,7 +20,7 @@ import stage1_native_reflective_candidate_domain_matrix as domain
 BASE="qa/interleaved_work_counts_w_data_branch_candidate.b98"
 CAND="qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98"
 BASE_BLOB="31807edb2b44b141d2af340555d6e97e63428613"
-CAND_BLOB="334de6772a59e3623a29eb76c149082b613b2d02"
+CAND_BLOB="1cf3ffa0466ea33465bf8acc632a3d10fa568587"
 OUT="/validw"
 LOWER=frozenset(("foundation_cross","mixed_small","negative_positive",
     "invalid_zero_sign","foundation_neighbor_forward",
@@ -46,9 +46,9 @@ def static_proof():
             if old!=new:changes[(x,y)]=(old,new)
     expected={(951,1334):(":","0"),(951,1333):("0","^"),
         (951,1336):("[","]"),(951,1337):(" ","^"),
-        (950,1336):(" ","8"),(949,1336):(" ","0"),
-        (948,1336):(" ","3"),(947,1336):(" ","-"),
-        (946,1336):(" ","0"),(943,1336):(" ","x")}
+        (950,1336):(" ","0"),(949,1336):(" ","8"),
+        (948,1336):(" ","0"),(947,1336):(" ","3"),
+        (946,1336):(" ","-"),(943,1336):(" ","x")}
     for i,(a,b) in enumerate(zip("$001-#","006-6x")):
         if a!=b:expected[(952+i,1331)]=(a,b)
     must(changes==expected,"changed extra or wrong Native source cells "+repr(changes))
