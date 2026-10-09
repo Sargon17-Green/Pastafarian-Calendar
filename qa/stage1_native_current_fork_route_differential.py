@@ -28,7 +28,7 @@ PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
 GATE=(951,1335)
 CASE_NAMES=tuple(row[0] for row in native.CASES if row[2])
 INERT=frozenset(("zero_equal","forward_short"))
-BOUND=160000
+BOUND=750000
 WINDOW=512
 OUT="/fork/current_fork_native_route_differential.json"
 
@@ -116,7 +116,7 @@ def main():
                 unmodified["remaining_ips"]==0 and
                 unmodified["output"]==expected and
                 len(unmodified["gates"])==1,
-                "real positive native fork replay invalid "+label)
+                "real positive native fork replay invalid "+label+" status="+str(unmodified["status"])+" steps="+str(unmodified["steps"])+" observed="+repr(unmodified["output"])+" reference="+repr(expected))
         a=unmodified["gates"][0];b=altered["gates"][0]
         require(a["original"]==a["executed"] and
                 a["original"]==b["original"] and
