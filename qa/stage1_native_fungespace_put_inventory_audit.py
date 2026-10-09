@@ -174,8 +174,10 @@ def main(folder):
                     .append({"tick":1,"ip":[43,1702],"byte":40,
                              "stringmode":False})),
         must_reject("forged_source_data_target",report,rows,mutators,
-                    lambda p:p["records"][0]["native_put_events"][0]
-                    .__setitem__("target",[43,1702])),
+                    lambda p:next(event for row in p["records"]
+                                  for event in row["native_put_events"]
+                                  if event["value"] in (40,41))
+                    .__setitem__("target",[999,1702])),
         must_reject("forged_total",report,rows,mutators,
                     lambda p:p.__setitem__("total_space_put_calls",1)),
     ]
