@@ -86,3 +86,18 @@ Even unchanged output cannot establish universal dead memory: alternative
 memory instructions, interpreter bounds, untested inputs and later lifecycle
 states are outside the proof. **Stage 1 stays OPEN**, PR #17 stays Draft,
 and no production Befunge source or canonical branch is changed.
+
+
+## Actual Native g-read intervention immediately after p, before rejoin
+
+A new Stage-1 QA check contrasts forty real PyFunge-98 executions on the
+twenty naturally nonzero-fork valid inputs, at the actually executed g
+reading scratch (1490,1600). The control leaves the existing Native p-written
+value 12 intact. The counterfactual changes only that runtime Funge-space
+byte to 32 immediately before g executes and verifies the stack return.
+The unaltered control's complete output remains checked against the three
+independent Befunge reference programs. A separate Python-3 report checker
+rejects seven deliberately forged observations. This distinguishes the
+early read-site liveness from the already measured post-rejoin deadness.
+Final numeric effects are classified, not presumed, and general Stage-1
+acceptance remains OPEN. Exact-HEAD CI validation is required.
