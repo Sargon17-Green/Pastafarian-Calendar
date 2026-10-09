@@ -1033,6 +1033,9 @@ jobs:
           python3 -m py_compile qa/stage1_native_underscore_w_graph_audit.py
           python3 qa/stage1_native_underscore_w_graph_audit.py "$RUNNER_TEMP/native-underscore-qa"
           test -s "$RUNNER_TEMP/native-underscore-qa/underscore_independent_graph.json"
+          python3 -m py_compile qa/stage1_native_underscore_w_negative_controls.py
+          python3 qa/stage1_native_underscore_w_negative_controls.py "$RUNNER_TEMP/native-underscore-qa"
+          test -s "$RUNNER_TEMP/native-underscore-qa/underscore_w_tamper_controls.json"
           docker run --rm -e PYFUNGE_NO_PSYCO=1 \
             -v "$GITHUB_WORKSPACE:/work:ro" \
             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \

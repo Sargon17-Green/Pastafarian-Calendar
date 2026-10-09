@@ -64,6 +64,41 @@ def endpoints(edges,point):
     succ={tuple(x["to"]) for x in edges if tuple(x["from"])==point}
     return pred,succ
 
+def check_native_vectors(path, expected_mode):
+    """Verify actual Native comparator, rejoin and w dx/dy, stack and IP.
+
+    A directed-edge graph without velocity checks cannot distinguish
+    conflicting vectors on otherwise identical executed coordinates.
+    """
+    seen={U:[], JOIN:[], W:[]}
+    with open(path, "r", encoding="ascii") as stream:
+        for line in stream:
+            if line.startswith("STEP\t"):
+                fields=line.rstrip("\n").split("\t")
+                require(len(fields)==9,"malformed Native velocity STEP")
+                tick,ip,x,y,dx,dy,opcode,depth=map(int,fields[1:])
+                if (x,y) in seen:
+                    seen[(x,y)].append((tick,ip,dx,dy,opcode,depth))
+    if expected_mode is None:
+        require(all(not x for x in seen.values()),
+                "Native bypass entered underscore/w corridor")
+        return
+    require(expected_mode in ("east","west") and
+            all(len(x)==1 for x in seen.values()),
+            "Native underscore/w STEP visit cardinality mismatch")
+    comp,join,w=seen[U][0],seen[JOIN][0],seen[W][0]
+    require(comp[2:]==(0,-1,ord("_"),1),
+            "Native underscore comparator velocity/stack mismatch")
+    heading=(-1,0) if expected_mode=="east" else (8,-1)
+    require(join[2:]==(heading[0],heading[1],ord("^"),3),
+            "Native underscore rejoin velocity/stack mismatch")
+    require(w[2:]==(0,-1,ord("w"),3),
+            "Native w entry velocity/stack mismatch")
+    require(comp[1]==join[1]==w[1] and comp[0]<join[0] and
+            join[0]+1==w[0],
+            "Native underscore/w IP and tick continuity mismatch")
+
+
 def main(directory):
     require(os.path.isdir(directory),"Native underscore artifact directory missing")
     source,modified=source_map(directory)
@@ -92,6 +127,7 @@ def main(directory):
         data=graph.analyze(source,path)
         stats=data["statistics"]
         ops=data["arithmetic_executed_opcodes"]
+        check_native_vectors(path,row["mode"])
         edges=data["observed_directed_edges"]
         protected={tuple((c["x"],c["y"])) for c in
                    data["read_targets"]+data["write_targets"]}
