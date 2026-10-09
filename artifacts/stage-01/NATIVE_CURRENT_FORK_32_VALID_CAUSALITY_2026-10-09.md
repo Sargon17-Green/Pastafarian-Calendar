@@ -20,6 +20,19 @@
 
 Every forced-opposite case chose the opposite vertical Native IP vector. In all 32 comparisons, both measured trajectories also contained a matching five-event motion sequence, within a 512-event observation window.
 
+## Stronger observed Native stack-state witness (source unchanged)
+
+A later [exact-PyFunge run 37954028561](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37954028561), focused `native-fork-operand-counterfactual` job SUCCESS on source SHA `560d6aa5807a7f766213a33835cce85eab0fa40c`, also captured the real instruction pointer's **TOSS contents**, not just positions and directions, at both sides' first shared five-event motion window.
+
+| Observed class | Cases | Identical TOSS on all five shared motion steps | Unequal TOSS on all five |
+|---|---:|---:|---:|
+| Natural nonzero `|`, output-inert forced inversion | 20 | 20 | 0 |
+| Natural zero `|`, output-causal forced inversion | 12 | 0 | 12 |
+
+The matching-geometry windows were located from actual Native IP observations. Real TOSS data was compared at those same indices; 32 synthetic one-snapshot TOSS changes were rejected by the local equality check. The supplementary QA guard added after that run now requires exactly these 20/12 relationships and must itself pass an exact-head CI run.
+
+**Interpretation:** There is direct evidence of stack-value reconvergence on the sampled inert paths and stack-value divergence on the sampled causal paths. This explains the observed output asymmetry more concretely than a common IP trajectory alone. These observations still do **not** establish equal SOSS frames, every Funge-space cell, temporal write history, remaining input stream, or full execution state. An output-inert forced fork can be a legitimate redundant path in some input domains; final geometric acceptance cannot require every forced inversion to change output without a separate explicit normative rule.
+
 **Do not overclaim.** Matching motion events do not imply matching full Funge-space, total program state, or numeric results. The strict equivalence between naturally **zero** gate operands and changed final behavior is **only observed for these 32 inputs**; it is not a mathematical proof for every integer. Twenty **nonzero-operand** inputs exhibit genuine branching but output-inert forced inversion.
 
 ## Corrected classification and failure provenance
