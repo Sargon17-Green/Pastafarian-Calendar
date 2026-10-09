@@ -39,6 +39,10 @@ The matching-geometry windows were located from actual Native IP observations. R
 
 A later Native job, [37952921013](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37952921013), failed its final 32-case assertion despite all 32 individually logged Native routes passing: its expected `zero=20/inert, nonzero=12/causal` classification had inverted the observed `|` operand classes. The real Funge-98 IP headed down `(0,+1)` for the 12 zero operands and up `(0,-1)` for the 20 nonzero operands. This report corrects the descriptive error; it does not remove the strict 32-case assertion or claim universal causality. A fresh exact-HEAD CI run is required to validate the corrective QA commit.
 
+## Additional bounded IP-context audit
+
+The next QA replay records the **real PyFunge IP storage offset, string/invert/queue modes, and input cursor** on both executed branches at the five already matched motion checkpoints, covering 32 valid input pairs. The independent evidence checker rejects two extra adversarial mutations to these fields. These are bounded runtime-context observations, **not** an assertion of equal entire Funge-space, all fingerprints, or complete execution state. Exact-commit Native CI is required before accepting the results.
+
 ## Acceptance boundary
 
 The upstream `|` universal-output-causality question remains OPEN. The 32-domain diagnostic shows a reproducible branch-dependent asymmetry, not a universal final-output dependence. It neither changes the Befunge algorithm nor begins Stage 2.

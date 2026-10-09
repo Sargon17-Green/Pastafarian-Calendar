@@ -43,7 +43,8 @@ def blob(data):
 
 def native_run(source,raw,opposite):
     out=StringIO.StringIO()
-    platform=BufferedPlatform([],{},stdin=StringIO.StringIO(raw),stdout=out)
+    input_stream=StringIO.StringIO(raw)
+    platform=BufferedPlatform([],{},stdin=input_stream,stdout=out)
     p=Program(Befunge98,platform=platform)
     p.load_code(source)
     p.create_ip()
@@ -55,6 +56,7 @@ def native_run(source,raw,opposite):
     post_toss=[]
     post_frames=[]
     post_modified_p_cells=[]
+    post_ip_context=[]
     rows=source.split("\n")
     modified_p_cells={}
     p_write_events=[0]
@@ -95,6 +97,13 @@ def native_run(source,raw,opposite):
                 post_modified_p_cells.append(tuple(
                     (point[0],point[1],modified_p_cells[point])
                     for point in sorted(modified_p_cells)))
+                # Native IP/environment fields, not whole-program state.
+                post_ip_context.append((
+                    tuple(int(coord) for coord in ip.offset),
+                    int(bool(ip.stringmode)),
+                    int(bool(ip.invertmode)),
+                    int(bool(ip.queuemode)),
+                    int(input_stream.tell())))
         pending_p=None
         if self.ips:
             active=self.ips[0]
@@ -128,6 +137,7 @@ def native_run(source,raw,opposite):
             "post_toss":post_toss,
             "post_frames":post_frames,
             "post_modified_p_cells":post_modified_p_cells,
+            "post_ip_context":post_ip_context,
             "observed_native_p_writes":p_write_events[0]}
 
 def common_subpath(a,b,length):
@@ -203,6 +213,16 @@ def main():
         frames_b=altered["post_frames"][ib:ib+5]
         changed_a=unmodified["post_modified_p_cells"][ia:ia+5]
         changed_b=altered["post_modified_p_cells"][ib:ib+5]
+        ip_context_a=unmodified["post_ip_context"][ia:ia+5]
+        ip_context_b=altered["post_ip_context"][ib:ib+5]
+        require(len(ip_context_a)==len(ip_context_b)==5 and
+                all(len(row)==5 and len(row[0])==2
+                    for row in ip_context_a+ip_context_b),
+                "Native rejoin IP offset/mode/input-cursor witness incomplete")
+        ip_context_equal=[left==right for left,right in zip(
+            ip_context_a,ip_context_b)]
+        input_cursor_equal=[left[4]==right[4] for left,right in zip(
+            ip_context_a,ip_context_b)]
         require(len(frames_a)==len(frames_b)==len(changed_a)==len(changed_b)==5,
                 "Native stack-frame and p-cell snapshots are incomplete")
         require(all(len(frames)>0 for frames in frames_a+frames_b),
@@ -259,6 +279,10 @@ def main():
                 "first_rejoin_p_modified_cells_sha256_forced":[hashlib.sha256(repr(s)).hexdigest() for s in changed_b],
                 "first_rejoin_p_modified_cells_count_control":[len(s) for s in changed_a],
                 "first_rejoin_p_modified_cells_count_forced":[len(s) for s in changed_b],
+                "first_rejoin_ip_context_raw_control":ip_context_a,
+                "first_rejoin_ip_context_raw_forced":ip_context_b,
+                "first_rejoin_ip_context_equal_each_step":ip_context_equal,
+                "first_rejoin_input_cursor_equal_each_step":input_cursor_equal,
                 "real_p_write_count_control":unmodified["observed_native_p_writes"],
                 "real_p_write_count_forced":altered["observed_native_p_writes"],
                 "all_fungespace_mutators_audited":False,
@@ -272,7 +296,9 @@ def main():
               "common_5_event_motion",overlap is not None,
               "rejoin_toss_equal_steps",sum(equal_toss),
               "rejoin_all_frames_equal_steps",sum(equal_frames),
-              "rejoin_p_modified_cells_equal_steps",sum(equal_modified_p))
+              "rejoin_p_modified_cells_equal_steps",sum(equal_modified_p),
+              "rejoin_ip_context_equal_steps",sum(ip_context_equal),
+              "rejoin_input_cursor_equal_steps",sum(input_cursor_equal))
         sys.stdout.flush()
     require(len(report)==32 and sum(z["changed_final_semantics"] for z in report if z["case"] in ("zero_equal","foundation_cross","forward_short","mixed_small"))==2,
             "incomplete or unexpectedly classified Native fork corpus")
@@ -297,7 +323,7 @@ def main():
             "output-causal and five-step Native TOSS-rejoin classes collided")
     require(all(z["first_rejoin_p_modified_cells_equal_count"]==0 for z in report),
             "Native p-modified Funge-space unexpectedly reconverged in checked motion")
-    data={"schema":"befunge-stage1-current-native-fork-route-differential-v5",
+    data={"schema":"befunge-stage1-current-native-fork-route-differential-v6",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
           "source_git_blob":PIN,"real_PyFunge_runs":64,
           "valid_input_cases":32,
@@ -323,6 +349,11 @@ def main():
               all(z["first_rejoin_p_modified_cells_equal_each_step"]) for z in report),
           "p_modified_cells_unequal_all_five_observed_cases":sum(
               z["first_rejoin_p_modified_cells_equal_count"]==0 for z in report),
+          "native_ip_context_rejoin_snapshots_measured":320,
+          "native_ip_context_equal_five_cases":sum(
+              all(z["first_rejoin_ip_context_equal_each_step"]) for z in report),
+          "native_input_cursor_equal_five_cases":sum(
+              all(z["first_rejoin_input_cursor_equal_each_step"]) for z in report),
           "raw_native_rejoin_frames_and_p_modified_values_retained":True,
           "non_p_fungespace_mutations_excluded_from_proof":True,
           "records":report}

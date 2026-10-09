@@ -22,7 +22,7 @@ import sys
 
 SOURCE="src/interleaved_work_counts.b98"
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
-SCHEMA="befunge-stage1-current-native-fork-route-differential-v5"
+SCHEMA="befunge-stage1-current-native-fork-route-differential-v6"
 VALID_SHA=re.compile(r"^[0-9a-f]{64}$")
 SPECIAL={"zero_equal":False,"foundation_cross":True,
          "forward_short":False,"mixed_small":True}
@@ -143,6 +143,24 @@ def verify(proof):
                         for a in (cnt0,cnt1)),
                     "native stack frame/p-write count shape mismatch: "+
                     label+"/"+prefix)
+        modes_a=record.get("first_rejoin_ip_context_raw_control")
+        modes_b=record.get("first_rejoin_ip_context_raw_forced")
+        modes_equal=record.get("first_rejoin_ip_context_equal_each_step")
+        cursor_equal=record.get("first_rejoin_input_cursor_equal_each_step")
+        require(all(isinstance(row,list) and len(row)==5 for row in
+                    (modes_a,modes_b,modes_equal,cursor_equal)) and
+                all(isinstance(sample,list) and len(sample)==5 and
+                    isinstance(sample[0],list) and
+                    len(sample[0])==2 and
+                    all(type(v) is int for v in sample[0]) and
+                    all(type(v) is int and v in (0,1) for v in sample[1:4]) and
+                    type(sample[4]) is int and sample[4]>=0
+                    for sample in modes_a+modes_b) and
+                all(type(flag) is bool for flag in modes_equal+cursor_equal) and
+                [left==right for left,right in zip(modes_a,modes_b)]==modes_equal and
+                [left[4]==right[4] for left,right in zip(modes_a,modes_b)]==
+                    cursor_equal,
+                "Native rejoin IP mode/offset/input witness contradiction: "+label)
         require(record.get("all_fungespace_mutators_audited") is False,
                 "unsupported claim of full Funge-space state equivalence")
         causal=record.get("changed_final_semantics")
@@ -160,6 +178,14 @@ def verify(proof):
     require(tally=={"zero":12,"nonzero":20,"causal":12,"inert":20,
                     "rejoin_full_toss_equal":20},
             "Native output/branch/TOSS corpus totals changed")
+    require(proof.get("native_ip_context_rejoin_snapshots_measured")==320 and
+            proof.get("native_ip_context_equal_five_cases")==sum(
+                all(row["first_rejoin_ip_context_equal_each_step"])
+                for row in cases) and
+            proof.get("native_input_cursor_equal_five_cases")==sum(
+                all(row["first_rejoin_input_cursor_equal_each_step"])
+                for row in cases),
+            "Native IP mode/input context aggregate evidence mismatch")
     require(proof.get("raw_native_rejoin_frames_and_p_modified_values_retained") is True and
             proof.get("p_modified_cells_unequal_all_five_observed_cases")==32 and
             all(z["first_rejoin_p_modified_cells_equal_count"]==0
@@ -226,10 +252,15 @@ def main(folder):
         ("forged_p_cell_digest",lambda p:p["records"][0]
             ["first_rejoin_p_modified_cells_sha256_forced"].__setitem__(0,"f"*64)),
         ("forged_full_frame_equal_flag",lambda p:p["records"][0]
-            ["first_rejoin_all_stack_frames_equal_each_step"].__setitem__(0,False)))
+            ["first_rejoin_all_stack_frames_equal_each_step"].__setitem__(0,False)),
+        ("forged_ip_mode",lambda p:p["records"][0]
+            ["first_rejoin_ip_context_raw_forced"][0].__setitem__(1,9)),
+        ("forged_input_cursor_flag",lambda p:p["records"][0]
+            ["first_rejoin_input_cursor_equal_each_step"].__setitem__(
+                0,not p["records"][0]["first_rejoin_input_cursor_equal_each_step"][0])))
     refused=[must_reject(name,data,change) for name,change in attempts]
-    require(len(refused)==9,"negative manifest checks incomplete")
-    report={"schema":"befunge-stage1-native-fork-manifest-adversarial-v2",
+    require(len(refused)==11,"negative manifest checks incomplete")
+    report={"schema":"befunge-stage1-native-fork-manifest-adversarial-v3",
             "status":"QA_ONLY_NOT_FINAL_STAGE1_ACCEPTANCE",
             "source_blob":PIN,
             "external_raw_native_trace_replay_claimed":False,
@@ -240,8 +271,8 @@ def main(folder):
               "w",encoding="utf-8") as stream:
         json.dump(report,stream,sort_keys=True,indent=2)
         stream.write("\n")
-    print("NATIVE_FORK_32_MANIFEST_AND_SIX_ADVERSARIES_PASS",
-          32,"positive,9 negative")
+    print("NATIVE_FORK_32_MANIFEST_AND_ELEVEN_ADVERSARIES_PASS",
+          32,"positive,11 negative")
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; no full-state equivalence asserted")
 
 if __name__=="__main__":
