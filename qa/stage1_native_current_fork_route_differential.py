@@ -22,11 +22,12 @@ from funge.program import Program
 from funge.languages.funge98 import Befunge98
 from funge.platform import BufferedPlatform
 import stage1_native_diverse_geometry as native
+import stage1_native_reflective_candidate_domain_matrix as wide
 
 SOURCE="src/interleaved_work_counts.b98"
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
 GATE=(951,1335)
-CASE_NAMES=tuple(row[0] for row in native.CASES if row[2])
+CASE_NAMES=tuple(row[0] for row in native.CASES if row[2])+tuple(row[0] for row in wide.CASES if row[2])
 INERT=frozenset(("zero_equal","forward_short"))
 BOUND=750000
 WINDOW=512
@@ -104,6 +105,7 @@ def main():
     src=open(SOURCE,"rb").read()
     require(blob(src)==PIN,"current-source | diff must match exact QA Git blob")
     labels={z[0]:(z[1],z[2]) for z in native.CASES}
+    labels.update({z[0]:(z[1],z[2]) for z in wide.CASES})
     report=[]
     for label in CASE_NAMES:
         fields,valid=labels[label]
@@ -162,13 +164,13 @@ def main():
               "forced_vector",opposite[:4],
               "common_5_event_motion",overlap is not None)
         sys.stdout.flush()
-    require(len(report)==14 and sum(z["changed_final_semantics"] for z in report if z["case"] in ("zero_equal","foundation_cross","forward_short","mixed_small"))==2,
+    require(len(report)==32 and sum(z["changed_final_semantics"] for z in report if z["case"] in ("zero_equal","foundation_cross","forward_short","mixed_small"))==2,
             "incomplete or unexpectedly classified Native fork corpus")
-    data={"schema":"befunge-stage1-current-native-fork-route-differential-v1",
+    data={"schema":"befunge-stage1-current-native-fork-route-differential-v2",
           "status":"QA_ONLY_UPSTREAM_FORK_CAUSALITY_OPEN",
-          "source_git_blob":PIN,"real_PyFunge_runs":28,
-          "valid_input_cases":14,
-          "native_route_changed_cases":14,
+          "source_git_blob":PIN,"real_PyFunge_runs":64,
+          "valid_input_cases":32,
+          "native_route_changed_cases":32,
           "final_semantics_changed_cases":sum(z["changed_final_semantics"] for z in report),
           "final_semantics_inert_cases":sum(not z["changed_final_semantics"] for z in report),
           "output_causality_not_universal":True,
@@ -176,7 +178,7 @@ def main():
     with open(OUT,"wb") as sink:
         sink.write(json.dumps(data,sort_keys=True,indent=2)+"\n")
     print("NATIVE_CURRENT_UPSTREAM_FORK_ROUTE_VS_OUTPUT_CAUSALITY_PROFILE_PASS",
-          "fourteen_real_branch_changes","mixed_output_causality")
+          "thirty_two_real_branch_changes","mixed_output_causality")
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO STAGE1_OPEN=YES")
 
 if __name__=="__main__":
