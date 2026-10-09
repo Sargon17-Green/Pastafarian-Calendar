@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Test-only Native PyFunge counterfactual for production data-dependent | routing.
+"""Historical Native PyFunge counterfactual for frozen reflective | routing.
 
 Native Befunge-98 performs every arithmetic operation. Python only substitutes
 ONE boolean input operand immediately BEFORE an actually executed native '|'
@@ -18,7 +18,7 @@ from funge.languages.funge98 import Befunge98
 from funge.platform import BufferedPlatform
 import stage1_native_diverse_geometry as suite
 
-SOURCE = "src/interleaved_work_counts.b98"
+SOURCE = "qa/interleaved_work_counts_pre_two_valid_w_production.b98"
 GATE = (951, 1335)
 CASES = ("zero_equal", "foundation_cross", "forward_short", "mixed_small")
 STEP_LIMIT = 160000
@@ -119,7 +119,7 @@ def main():
         sys.stdout.flush()
     require(observed_classes == set((0,1)),
             "Native controls did not exercise both actual conditional arms")
-    print("NATIVE_PRODUCTION_FORK_CONTROLLED_COUNTERFACTUAL_PASS",
+    print("NATIVE_FROZEN_REFLECTIVE_FORK_CONTROLLED_COUNTERFACTUAL_PASS",
           len(CASES), "cases", "both_native_route_classes", "observed")
     print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; controlled Native gate proof only")
 
