@@ -426,7 +426,7 @@ jobs:
           python3 -m py_compile qa/stage1_native_diverse_geometry_audit.py qa/stage1_native_route_graph.py qa/stage1_native_spaghetti_frontier.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
-      - name: Collect eighteen independent native signed-day execution traces
+      - name: Collect seventeen independent native signed-day execution traces
         shell: bash
         run: |
           set -euo pipefail

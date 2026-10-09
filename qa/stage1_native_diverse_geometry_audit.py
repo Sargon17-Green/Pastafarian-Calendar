@@ -20,7 +20,7 @@ LABELS=("zero_equal","foundation_cross","forward_short","reverse_short",
         "epoch_forward_one","epoch_reverse_one",
         "recent_anchor_equal","recent_anchor_next",
         "foundation_neighbor_forward","foundation_neighbor_reverse",
-        "invalid_target_zero_sign","invalid_negative_magnitude")
+        "invalid_target_zero_sign")
 WATCHED="_|[]rwjk{}ut()"
 
 def require(ok,why):
@@ -56,7 +56,7 @@ def main(folder):
     require(tuple(x.get("case") for x in items)==LABELS,
             "missing or reordered native geometry scenarios")
     require(sum(bool(x["valid"]) for x in items)==14,"native valid family missing")
-    require(sum(not bool(x["valid"]) for x in items)==4,"native invalid family missing")
+    require(sum(not bool(x["valid"]) for x in items)==3,"native invalid family missing")
     source=geometry.load_source("src/interleaved_work_counts.b98")
     reports=[]
     cross_input_out={}

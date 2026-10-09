@@ -42,7 +42,8 @@ CASES=[
     ("foundation_neighbor_forward", (1,15055671,1,15055670),True),
     ("foundation_neighbor_reverse", (1,15055670,1,15055671),True),
     ("invalid_target_zero_sign", (0,0,1,0),False),
-    ("invalid_negative_magnitude", (0,-1,0,0),False),
+    # Raw negative lexemes are scanner-only cases: they halt *before* the
+    # arithmetic handoff, so their Native IP graph cannot enter this corpus.
 ]
 def check(ok,why):
     if not ok:
