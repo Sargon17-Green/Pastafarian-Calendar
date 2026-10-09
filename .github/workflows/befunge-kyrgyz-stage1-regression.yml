@@ -947,6 +947,17 @@ jobs:
           python3 -m py_compile qa/stage1_native_w_graph_audit.py
           python3 qa/stage1_native_w_graph_audit.py "$RUNNER_TEMP/native-w-evidence"
           test -s "$RUNNER_TEMP/native-w-evidence/w_data_graph_audit.json"
+          # Same actual Native PyFunge Program ownership and fault recovery,
+          # on the pinned w candidate bytes, not on the QA production source.
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-w-evidence:/wturn" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_w_candidate_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-w-evidence/w_candidate_pg_fault_reset.json"
           echo NATIVE_W_DATA_SELECTED_QA_CANDIDATE_NOT_PROMOTED
       - name: Retain real Native w route and rejected one-byte mutant
         if: always()
