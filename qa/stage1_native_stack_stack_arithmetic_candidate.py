@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Stage-1 QA-only REAL arithmetic using Befunge-98 {, u and } stacks.
 
-Precise single vertical detour on a SHA-frozen, independently qualified
+Precise 14-cell vertical detour on a SHA-frozen, independently qualified
 two-valid-w candidate. The original upper arm computes 1,0,1,-1 and
 continues through x/p/g/j. This detour replaces the original literal 0
 with an actual stack-stack transfer of the preceding computed 1:
@@ -27,8 +27,8 @@ import stage1_native_reflective_candidate_domain_matrix as wide
 
 BASE="qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98"
 BLOB="b6cf50de9ed45376db5fc4ebd003157210dff03b"
-EXPERIMENT_BLOB="a0bc4f3eea920f2f7baab5b528494580dedb3648"
-EXPERIMENT_SHA256="1be1f604526034d27ef2a010c3c55a1cb2f4cb7b2fcc5e208a7bed76fa335c95"
+EXPERIMENT_BLOB="2ec3ff6f5ddcb3ab1c381d4c9b09d960d5b6c438"
+EXPERIMENT_SHA256="b4be66d2ff83c35bb1ef7d4d1e71c6b88cd63c8afa8487dcda6275172394583c"
 OUT="/stack"
 CAND=OUT+"/stack_stack_candidate.b98"
 MUTANT=OUT+"/without_native_u.b98"
@@ -40,11 +40,11 @@ ENTRY=(954,1332)
 BRACE=(954,1330)
 TRANSFER=(954,1328)
 CLOSE=(954,1323)
-JUMP=(954,1320)
+JUMP=(954,1319)
 REJOIN=(955,1332)
 STEPS=((1330,"{"),(1329,"1"),(1328,"u"),(1327,":"),
        (1326,"1"),(1325,"-"),(1324,"2"),(1323,"}"),
-       (1322,"1"),(1321,"c"),(1320,"x"))
+       (1322,"1"),(1321,"1"),(1320,"d"),(1319,"x"))
 
 def require(ok,msg):
     if not ok:raise AssertionError(msg)
@@ -60,9 +60,9 @@ def source():
             and lines[1332][953:957]=="101-" and
             lines[1331][954]=="0",
             "arithmetic dependency or source bounds unexpectedly changed")
-    changes={(954,1332):("0","^")}
+    changes={(954,1332):("0","^"),(955,1332):("1",">")}
     for y,char in STEPS:changes[(954,y)]=(" ",char)
-    require(len(changes)==12,"wrong isolated stack-stack detour cell count")
+    require(len(changes)==14,"wrong isolated stack-stack detour cell count")
     copy=list(lines)
     for (x,y),(old,new) in changes.items():
         require(copy[y][x]==old,
@@ -71,7 +71,7 @@ def source():
     data="\n".join(copy)
     require(len(data)==len(frozen) and
             [len(row) for row in copy]==[len(row) for row in lines]
-            and sum(a!=b for a,b in zip(data,frozen))==12
+            and sum(a!=b for a,b in zip(data,frozen))==14
             and gitblob(data)==EXPERIMENT_BLOB
             and hashlib.sha256(data).hexdigest()==EXPERIMENT_SHA256,
             "generated stack-stack source differs from frozen 12-byte contract")
@@ -91,7 +91,7 @@ def observed(path,expect_upper):
             event=tuple(map(int,parts[1:]))
             tick,ip,x,y,dx,dy,opcode,depth=event
             if (x,y) in watched:watched[(x,y)].append(event)
-            if x==954 and 1320<=y<=1330:
+            if x==954 and 1319<=y<=1330:
                 all_corridor.append((tick,x,y,dx,dy,opcode,depth))
             if (x,y)==REJOIN and expect_upper:
                 require(previous is not None and previous[2:4]==JUMP,
@@ -101,9 +101,9 @@ def observed(path,expect_upper):
         require(not all_corridor and not watched[ENTRY] and not watched[JUMP],
                 "unselected Native stack-stack route was executed")
         return {"route":"bypass"}
-    require(len(all_corridor)==11 and
+    require(len(all_corridor)==12 and
             [event[2] for event in all_corridor]==[954]*11 and
-            [event[1] for event in all_corridor]==list(range(1330,1319,-1)),
+            [event[1] for event in all_corridor]==list(range(1330,1318,-1)),
             "Native stack-stack arithmetic detour not actually executed in full")
     require(all(len(watched[k])==1 for k in watched),
             "stack-stack entry/return visited a wrong number of times")
@@ -112,13 +112,13 @@ def observed(path,expect_upper):
             and watched[TRANSFER][0][4:7]==(0,-1,ord("u"))
             and watched[CLOSE][0][4:7]==(0,-1,ord("}"))
             and watched[JUMP][0][4:7]==(0,-1,ord("x"))
-            and watched[REJOIN][0][4:7]==(1,12,ord("1"))
-            and watched[REJOIN][0][7]==2,
+            and watched[REJOIN][0][4:7]==(1,13,ord(">"))
+            and watched[REJOIN][0][7]==3,
             "real Native stack-stack direction/depth/rejoin differs")
     require(watched[ENTRY][0][0]+1==watched[BRACE][0][0]-1
             and watched[JUMP][0][0]+1==watched[REJOIN][0][0],
             "real Native stack arithmetic instructions are not on a continuous IP path")
-    return {"route":"stack_stack","upper_opcode_count":11,
+    return {"route":"stack_stack","upper_opcode_count":12,
             "native_u_tick":watched[TRANSFER][0][0],
             "after_dynamic_rejoin_stack_depth":watched[REJOIN][0][7]}
 
@@ -188,7 +188,7 @@ def main():
             "status":"QA_EXPERIMENT_ONLY_NO_STAGE1_ACCEPTANCE",
             "base_blob":BLOB,"candidate_blob":EXPERIMENT_BLOB,
             "candidate_sha256":EXPERIMENT_SHA256,
-            "changed_exact_executable_cells":12,
+            "changed_exact_executable_cells":14,
             "seventeen_native_cases":proof,
             "extra_native_signed_cases":extensions,
             "upper_stack_stack_executions":10,"lower_bypasses":7,
