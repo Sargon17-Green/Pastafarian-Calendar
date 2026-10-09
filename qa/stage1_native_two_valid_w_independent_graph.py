@@ -91,7 +91,7 @@ def raw_velocity_probe(path,group):
     turn=positions[LOWER_TURN]
     if group=="lower":
         require(len(turn)==2 and
-                turn[0][2:]==(0,1,ord("]"),2) and
+                turn[0][2:]==(0,1,ord("]"),1) and
                 turn[1][2]==0 and turn[1][3]==-1 and
                 turn[1][4]==ord("]") and
                 turn[0][0]<observed[0]<turn[1][0],
