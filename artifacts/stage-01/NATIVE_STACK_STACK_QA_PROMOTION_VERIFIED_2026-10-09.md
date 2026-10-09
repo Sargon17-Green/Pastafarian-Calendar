@@ -22,3 +22,12 @@
 - `CURRENT_STAGE=1`, `LAST_COMPLETED_STAGE=0`, `FUNCTIONAL_QA_PASS=NO`, `GEOMETRIC_SPAGHETTI_QA_PASS=NO`. PR #17 remains Draft.
 
 The 31/31 result belongs to the **exact tested commit**. Subsequent worktree/QA documentation commits require their own checks; do not treat any prior success as proof on a later HEAD.
+
+## Additional nested-TOSS/SOSS Native fault coverage
+
+A further independent test interrupts the **same real PyFunge Program immediately after executing `u`**, with the nested stack still open, and proves that another live Native Program can continue independently. The exact same faulted Program is then explicitly reset for three different real Native arithmetic/error input families: lower, upper and invalid upper. Each fresh IP stack/Funge-space is proven distinct, while the frozen interrupted state and the other live Program remain unchanged.
+
+- Native test: `qa/stage1_native_stack_stack_nested_fault_reset.py`
+- Result: `NATIVE_STACK_STACK_NESTED_U_OWNERSHIP_AND_3_RESET_PASS`
+- **Full 31/31 GitHub Actions PASS**, exact commit `218f2c7d50e91c34ab88704848ec238019822e3f`, run [37950008918](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37950008918).
+- This strengthens the ownership evidence but is **not** the final Stage-1 semantic-state acceptance gate. The open `|` issue and deeper architectural requirements are unchanged.
