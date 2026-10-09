@@ -16,7 +16,7 @@ data=open(SOURCE,"rb").read()
 sha=hashlib.sha1("blob %d\0%s"%(len(data),data)).hexdigest()
 if sha!=EXPECTED:raise AssertionError("Native two-valid w source Git blob drift")
 old=qualified.CODE.split("\n");new=data.split("\n")
-if len(old)!=len(new)!=2016:raise AssertionError("bad Native source shape")
+if len(old)!=len(new) or len(new)!=2016:raise AssertionError("bad Native source shape")
 for x,y in ((986,1334),(1015,1334),(958,1331),(959,1334),(958,1324)):
     if old[y][x]!=new[y][x]:
         raise AssertionError("Native actual arithmetic j/p/g/reflective cell changed")
