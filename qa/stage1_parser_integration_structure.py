@@ -27,13 +27,34 @@ def require(pred, message):
         raise AssertionError(message)
 
 old = load(OLD)
-new = load(NEW)
+new = load("qa/interleaved_work_counts_pre_reflective_production.b98")
+promoted = load(NEW)
+reflective = load("qa/interleaved_work_counts_reflective_crossing_candidate.b98")
 # QA production must equal the independent ten-case Native-qualified advanced
 # circuit. Frozen prior sources remain separately checked for exact provenance.
 lexical_baseline = load("qa/interleaved_work_counts_lexical_candidate.b98")
 previous_bifurcation = load("qa/interleaved_work_counts_native_bifurcation_candidate.b98")
+require(git_blob_sha(new) == "44c5c33f4fe88ad82b8172235f18ad5d5175e517",
+        "frozen pre-reflective source blob changed")
 require(new == load("qa/interleaved_work_counts_arithmetic_dependency_j_candidate.b98"),
         "QA production differs from Native-qualified arithmetic j/p/g dependency source")
+require(promoted == reflective and git_blob_sha(promoted) == "8f2cf8afef61818244747582fe7c20a74ee18943",
+        "QA production must be the exact Native-qualified reflective code")
+require(len(promoted)==len(new), "reflective production changed source dimensions")
+expected_five = {
+    (957,1324):(32,ord("r")),
+    (958,1324):(ord("1"),ord("[")),
+    (958,1323):(ord("c"),ord("1")),
+    (958,1322):(ord("x"),ord("d")),
+    (958,1321):(32,ord("x"))
+}
+actual_five = {}
+for yy,(before,after) in enumerate(zip(new.split(b"\n"),promoted.split(b"\n"))):
+    require(len(before)==len(after),"reflective promotion changed row width")
+    for xx,(oldbyte,newbyte) in enumerate(zip(before,after)):
+        if oldbyte!=newbyte: actual_five[(xx,yy)]=(oldbyte,newbyte)
+require(actual_five == expected_five,
+        "QA reflective production deviates from five Native-qualified cells")
 lex = load(LEX)
 require(git_blob_sha(old) == BASELINE_GIT_BLOB_SHA,
         "pre-lexical baseline changed since native geometry baseline")
@@ -145,7 +166,7 @@ require(b"~" in newrows[5],
         "new lexical parser must operate at character level")
 print("STAGE1_SCANNER_SOURCE_MAP_STATIC_PASS",
       "same_2d_extent=YES",
-      "original_arithmetic_except_verified_kplus_bifurcation_advanced_and_arithmetic_pg=YES",
+      "frozen_arithmetic_and_exact_five_cell_reflective_promotion=YES",
       "reserved_parser_rows=1..49",
       "legacy_program_sha="+BASELINE_GIT_BLOB_SHA)
 print("STATIC_PROOF_NOT_NATIVE_FUNCTIONAL_OR_STATE_OWNERSHIP_ACCEPTANCE")

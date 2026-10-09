@@ -27,7 +27,7 @@ CASES = [
     # scenario, input case, (x, y), original instruction, substituted instruction
     ("upper_native_turn", "zero_equal", (951,1334), "]", "^"),
     ("lower_native_turn", "foundation_cross", (951,1336), "[", "v"),
-    ("upper_dynamic_rejoin", "zero_equal", (958,1322), "x", "0"),
+    ("upper_dynamic_rejoin", "zero_equal", (958,1321), "x", "0"),
     ("upper_executed_jump", "zero_equal", (958,1331), "j", "0"),
 ]
 NATIVE = suite.COMMAND
@@ -45,7 +45,7 @@ def call_native(path, raw):
     return process.returncode, out.split(), err[-500:]
 
 STACK_CELLS = set(((958,1332),(958,1331),(958,1325),(958,1324),
-                   (958,1323),(958,1322),(959,1334),(960,1334),
+                   (958,1323),(958,1322),(958,1321),(959,1334),(960,1334),
                    (961,1334),(962,1334)))
 def native_operand_stack_probe(raw, expected):
     """Capture *actual* PyFunge operand stacks, without altering instructions."""

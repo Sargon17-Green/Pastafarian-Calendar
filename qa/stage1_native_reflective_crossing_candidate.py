@@ -17,7 +17,7 @@ import sys
 import tempfile
 import stage1_native_diverse_geometry as suite
 
-BASE="src/interleaved_work_counts.b98"
+BASE="qa/interleaved_work_counts_pre_reflective_production.b98"
 CANDIDATE="qa/interleaved_work_counts_reflective_crossing_candidate.b98"
 OUT="/reflective"
 ORIGINAL_BLOB="44c5c33f4fe88ad82b8172235f18ad5d5175e517"
@@ -48,6 +48,8 @@ def verify_byte_map():
     revised=open(CANDIDATE,"rb").read()
     require(blob(original)==ORIGINAL_BLOB,"source baseline Git blob drift")
     require(blob(revised)==CANDIDATE_BLOB,"candidate Git blob drift")
+    require(open("src/interleaved_work_counts.b98","rb").read()==revised,
+            "QA production does not exactly match qualified reflective candidate")
     require(len(original)==len(revised),"source dimensions/bytes changed")
     a=original.split("\n")
     b=revised.split("\n")
@@ -171,8 +173,8 @@ def main():
             "both genuine input-selected Native arithmetic arms must execute")
     controlled_mutant()
     proof={"schema":"befunge-stage1-native-reflective-crossing-candidate-v1",
-           "status":"QA_CANDIDATE_ONLY_NOT_STAGE1_ACCEPTANCE",
-           "candidate_blob":CANDIDATE_BLOB,"production_unchanged":True,
+           "status":"QA_PRODUCTION_ONLY_NOT_STAGE1_ACCEPTANCE",
+           "candidate_blob":CANDIDATE_BLOB,"qa_production_matches_candidate":True,
            "source_changed_cells":5,"native_cases":len(report),
            "upper":upper,"lower":lower,"crossing_coordinate":list(PIVOT),
            "single_run_in_degree":2,"single_run_out_degree":2,
@@ -182,7 +184,7 @@ def main():
     print("NATIVE_REFLECTIVE_CROSSING_CANDIDATE_PASS",
           len(report),"cases",upper,"upper",lower,"lower",
           "dual_merge_and_fork_native_node",PIVOT)
-    print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; test-only, no src promotion")
+    print("GEOMETRIC_SPAGHETTI_QA_PASS=NO; QA production only, no canonical promotion")
 
 if __name__=="__main__":
     main()

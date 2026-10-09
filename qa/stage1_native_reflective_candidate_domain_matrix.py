@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""QA-only wider Native differential for the unpromoted reflective candidate.
+"""QA-only Native differential for the promoted reflective QA candidate.
 
 No calendar arithmetic is implemented in Python. Expected valid outputs are
 computed by three independent Befunge-98 reference programs. The previous
@@ -14,7 +14,7 @@ import os
 import sys
 import stage1_native_diverse_geometry as native
 
-BASE = "src/interleaved_work_counts.b98"
+BASE = "qa/interleaved_work_counts_pre_reflective_production.b98"
 CANDIDATE = "qa/interleaved_work_counts_reflective_crossing_candidate.b98"
 OUT = "/reflective"
 BASE_BLOB = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
@@ -93,7 +93,7 @@ def main():
               "traced",bool(trace_path))
         sys.stdout.flush()
     report={"schema":"befunge-stage1-reflective-wide-domain-native-v1",
-            "status":"QA_CANDIDATE_ONLY_NOT_ACCEPTED",
+            "status":"QA_PRODUCTION_ONLY_NOT_STAGE1_ACCEPTANCE",
             "baseline_blob":BASE_BLOB,"candidate_blob":CANDIDATE_BLOB,
             "total":len(records),"valid":sum(bool(z[2]) for z in CASES),
             "invalid":sum(not z[2] for z in CASES),

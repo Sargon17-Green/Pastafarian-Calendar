@@ -30,6 +30,12 @@ def main(folder):
             "unexpected reflective Native proof schema")
     require(evidence["candidate_blob"]=="8f2cf8afef61818244747582fe7c20a74ee18943",
             "independent source SHA provenance changed")
+    require(evidence.get("qa_production_matches_candidate") is True,
+            "Native evidence was not captured on the promoted QA source")
+    with open(SOURCE,"rb") as reader: candidate_bytes=reader.read()
+    with open("src/interleaved_work_counts.b98","rb") as reader:
+        require(reader.read()==candidate_bytes,
+                "production and independently audited candidate bytes differ")
     records=evidence["results"]
     require(tuple(x["case"] for x in records)==cases.LABELS and
             len(records)==17,"missing reordered or extra Native corpus cases")
@@ -94,14 +100,14 @@ def main(folder):
     report={"schema":"befunge-stage1-reflective-native-graph-audit-v1",
             "scope":"QA-only measured evidence, no final acceptance",
             "case_count":len(reports),"upper_dual_nodes":11,"lower_dual_nodes":0,
-            "candidate_still_unpromoted":True,"cases":reports}
+            "qa_candidate_promoted_only":True,"cases":reports}
     with open(os.path.join(folder,"reflective_graph_audit.json"),
               "w",encoding="utf-8") as out:
         json.dump(report,out,indent=2,sort_keys=True)
         out.write("\n")
     print("NATIVE_REFLECTIVE_INDEPENDENT_GRAPH_AUDIT_PASS",len(reports),
           "real Native byte-verified cases")
-    print("GEOMETRIC_SPAGHETTI_QA_PASS=NO (candidate only)")
+    print("GEOMETRIC_SPAGHETTI_QA_PASS=NO (QA production, not final acceptance)")
 if __name__=="__main__":
     require(len(sys.argv)==2,"usage: independent_graph_audit NATIVE_TRACE_DIR")
     main(sys.argv[1])
