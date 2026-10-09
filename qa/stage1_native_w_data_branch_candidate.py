@@ -64,8 +64,8 @@ def candidate_source():
     # operand and produces the chosen result plus the required -1 value.
     # If w is removed, a one-input follows the zero arm and becomes wrong.
     for y,start,circuit in [
-        (1331,952,"$001-#"), (1331,959,"05-3x"),
-        (1332,952,"$101-#"), (1332,959,"05-2x")
+        (1331,952,"$001-#"), (1331,959,"006-3x"),
+        (1332,952,"$101-#"), (1332,959,"006-2x")
     ]:
         for offset,ch in enumerate(circuit):
             edits[(start+offset,y)]=(" ",ch)
@@ -123,20 +123,20 @@ def route(trace):
     node,nxt=w[0],starts[0]
     require((node[4],node[5],node[6],node[7])==(0,-1,ord("w"),3),
             "Native w operands/entry velocity/stack not as designed")
-    options={(951,1331):("straight",(-5,3),ord(">")),
-             (952,1332):("right",(-5,2),ord("$"))}
+    options={(951,1331):("straight",(-6,3),ord(">")),
+             (952,1332):("right",(-6,2),ord("$"))}
     require((nxt[2],nxt[3]) in options,
             "Native w did not choose either data-dependent input lane")
     mode,vector,next_opcode=options[(nxt[2],nxt[3])]
     require(nxt[0]==node[0]+1 and nxt[6]==next_opcode and nxt[7]==1,
             "w did not consume two branch operands before real arithmetic")
     last,joined=joins[0]
-    require((last[2],last[3])==(963,1331 if mode=="straight" else 1332)
-            and last[6]==ord("x") and last[7]==4 and
+    require((last[2],last[3])==(964,1331 if mode=="straight" else 1332)
+            and last[6]==ord("x") and last[7]==5 and
             last[0]+1==joined[0],
             "input-selected math lane did not execute its vector transfer")
     require((joined[4],joined[5])==vector and
-            joined[6]==ord("^") and joined[7]==2,
+            joined[6]==ord("^") and joined[7]==3,
             "dynamic Native x failed to rejoin unchanged original arithmetic")
     return "upper",mode
 
