@@ -862,6 +862,7 @@ jobs:
           test "$(git hash-object src/interleaved_work_counts.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
           test "$(git hash-object qa/interleaved_work_counts_reflective_crossing_candidate.b98)" = "8f2cf8afef61818244747582fe7c20a74ee18943"
           python3 -m py_compile qa/stage1_native_reflective_crossing_candidate.py
+          python3 -m py_compile qa/stage1_native_reflective_candidate_domain_matrix.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
       - name: Native seventeen-case oracle parity and temporal IP crossing
@@ -876,6 +877,7 @@ jobs:
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=5s 800s python -u qa/stage1_native_reflective_crossing_candidate.py
+              timeout --kill-after=5s 400s python -u qa/stage1_native_reflective_candidate_domain_matrix.py
             '
           test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_candidate_proof.json"
           echo REFLECTIVE_CANDIDATE_NATIVE_PROVEN_NOT_PROMOTED
