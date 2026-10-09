@@ -27,3 +27,11 @@ GitHub Actions evidence: https://github.com/Sargon17-Green/Pastafarian-Calendar/
 An initial 15-cell candidate failed `invalid_big_sign` parity; the corrected 18-cell source retains the historical invalid-upper computation. The initial script also incorrectly used a Python 2 list-comprehension variable that overwrote an index; the source-level Native routing was correct, the harness index was repaired. A second independent auditor's lower turn first-visit stack depth was corrected from 2 to **1**, matching actual Native STEP evidence.
 
 `CURRENT_STAGE=1`, `LAST_COMPLETED_STAGE=0`. Full functional and geometric acceptance remain **OPEN**. Meaningful nested Funge stack-stack `{`, `}`, `u`, additional recursive entanglement and broader state ownership still require proofs. `t` and fingerprint functionality are never treated as proven under disabled interpreter capabilities. No merge to `Befunge+Кыргызча` or `main`.
+
+## Six adversarial raw-Native trace mutations (SHA re-signed)
+
+After the original 17+22 direct Native proof and the two independent graph/memory auditors, six additional adversarial controls were run. Each edits a copied real STEP, READ_AFTER or WRITE_AFTER record and recalculates the corresponding trace SHA-256 in the evidence manifest. All six were rejected for the actual semantic inconsistency, not for an obsolete checksum: executed opcode change, w ingress velocity change, w depth change, g return-value change, p after-image change and lower-junction velocity change.
+
+Native focused job: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37918696634 . The focused two-valid-w test and all six tamper rejections **PASS** on exact commit `674871d75b40029ea82a0363597ff5dea6d81e67`. Full workflow result must be checked separately by exact head, not inferred from the focused job.
+
+Both Stage-1 final gates remain **NO/OPEN**. All HANDOFF packages, if any, remain user-only and are not part of Git history.
