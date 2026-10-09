@@ -1160,6 +1160,9 @@ jobs:
           test -s "$RUNNER_TEMP/native-stack-stack-evidence/native_stack_stack_arithmetic.json"
           python3 qa/stage1_native_stack_stack_graph_audit.py "$RUNNER_TEMP/native-stack-stack-evidence"
           test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_independent_graph.json"
+          python3 -m py_compile qa/stage1_native_stack_stack_negative_controls.py
+          python3 qa/stage1_native_stack_stack_negative_controls.py "$RUNNER_TEMP/native-stack-stack-evidence"
+          test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_adversarial_controls.json"
           python3 -m py_compile qa/stage1_native_stack_stack_fault_reset.py
           docker run --rm -e PYFUNGE_NO_PSYCO=1 \
             -v "$GITHUB_WORKSPACE:/work:ro" \
