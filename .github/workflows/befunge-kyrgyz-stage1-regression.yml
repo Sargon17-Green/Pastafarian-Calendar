@@ -1086,6 +1086,9 @@ jobs:
           python3 -m py_compile qa/stage1_native_two_valid_w_independent_graph.py
           python3 qa/stage1_native_two_valid_w_independent_graph.py "$RUNNER_TEMP/native-valid-w-evidence"
           test -s "$RUNNER_TEMP/native-valid-w-evidence/two_valid_w_independent_graph.json"
+          python3 -m py_compile qa/stage1_native_two_valid_w_negative_controls.py
+          python3 qa/stage1_native_two_valid_w_negative_controls.py "$RUNNER_TEMP/native-valid-w-evidence"
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/two_valid_w_adversarial_controls.json"
           docker run --rm -e PYFUNGE_NO_PSYCO=1 \
             -v "$GITHUB_WORKSPACE:/work:ro" \
             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
