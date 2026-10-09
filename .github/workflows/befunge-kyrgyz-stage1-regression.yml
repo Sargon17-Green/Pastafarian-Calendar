@@ -879,6 +879,25 @@ jobs:
             '
           test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_candidate_proof.json"
           echo REFLECTIVE_CANDIDATE_NATIVE_PROVEN_NOT_PROMOTED
+      - name: Independent Native graph audit of dual merge-fork and mutable code
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_reflective_crossing_graph_audit.py
+          python3 qa/stage1_native_reflective_crossing_graph_audit.py "$RUNNER_TEMP/native-reflective-evidence"
+          test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_graph_audit.json"
+      - name: Candidate same-Program Native p/g fault injection and explicit reset
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_reflective_candidate_reset.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_reflective_candidate_reset.py
+            '
       - name: Retain Native IP source and causal controls
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
