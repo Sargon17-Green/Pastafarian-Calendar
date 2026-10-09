@@ -103,9 +103,9 @@ def trace_route(trace,label):
                 "native underscore not executed with north-bound IP")
         require(following[2:4]==((950,1331) if lower else (952,1331)),
                 "Native underscore did not distinguish lower-VALID vs upper-invalid")
-    v=[i for i,e in enumerate(trace) if e[2:4]==TURN]
+    v=[position for position,e in enumerate(trace) if e[2:4]==TURN]
     if lower:
-        require(len(v)==2 and v[0]<i<v[1],
+        require(len(v)==2 and v[0]<wpos[0]<v[1],
                 "real lower same-cell two-entry geometry not executed")
         require(trace[v[0]][4:7]==(0,1,ord("]"))
                 and trace[v[1]][4:7]==(0,-1,ord("]"))
