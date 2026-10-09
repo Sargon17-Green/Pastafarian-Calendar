@@ -850,3 +850,39 @@ jobs:
               timeout --kill-after=5s 750s python -u qa/stage1_native_concurrent_pg_fault_isolation.py
             '
           echo NATIVE_OVERLAPPING_STATE_OWNER_PROBE_ONLY_NOT_STAGE1_ACCEPTANCE
+  native-reflective-crossing-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pinned native PyFunge and exact five-cell reflective candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
+          test "$(git hash-object qa/interleaved_work_counts_reflective_crossing_candidate.b98)" = "8f2cf8afef61818244747582fe7c20a74ee18943"
+          python3 -m py_compile qa/stage1_native_reflective_crossing_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native seventeen-case oracle parity and temporal IP crossing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-reflective-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-reflective-evidence:/reflective" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 800s python -u qa/stage1_native_reflective_crossing_candidate.py
+            '
+          test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_candidate_proof.json"
+          echo REFLECTIVE_CANDIDATE_NATIVE_PROVEN_NOT_PROMOTED
+      - name: Retain Native IP source and causal controls
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-reflective-crossing-candidate
+          path: ${{ runner.temp }}/native-reflective-evidence/
+          retention-days: 30
