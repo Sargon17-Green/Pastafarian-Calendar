@@ -127,6 +127,16 @@ def write_evidence_copy(root, proof, trace_override=None):
     return directory
 
 
+def swap_reported_branches(proof):
+    """Preserve 11/6 totals; only per-trace graph semantics can reject it."""
+    a, b = proof["results"][0], proof["results"][1]
+    require(a["branch"] == "up" and b["branch"] == "down",
+            "negative control requires Native paths of opposite directions")
+    a["branch"], b["branch"] = b["branch"], a["branch"]
+    require(sum(x["branch"] == "up" for x in proof["results"]) == 11,
+            "adversary unintentionally changed global Native upper-arm count")
+
+
 def main(root):
     require(os.path.isdir(root), "writable Native evidence folder missing")
     proof, original = load_inputs(root)
@@ -175,8 +185,8 @@ def main(root):
         shutil.rmtree(folder)
 
     for label, edit, expected_error in [
-        ("forged_branch_report", lambda p: p["results"][0].update(
-            {"branch": "down"}), "unselected candidate arm contaminated"),
+        ("forged_branch_report", swap_reported_branches,
+         "unselected candidate arm contaminated"),
         ("forged_trace_digest", lambda p: p["results"][0].update(
             {"source_trace_sha256": "0" * 64}), "native IP evidence digest mismatch"),
         ("reordered_case_records", lambda p: p["results"].__setitem__(
