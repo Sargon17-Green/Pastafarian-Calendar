@@ -890,6 +890,9 @@ jobs:
           python3 -m py_compile qa/stage1_native_reflective_crossing_graph_audit.py
           python3 qa/stage1_native_reflective_crossing_graph_audit.py "$RUNNER_TEMP/native-reflective-evidence"
           test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_graph_audit.json"
+          python3 -m py_compile qa/stage1_native_reflective_negative_controls.py
+          python3 qa/stage1_native_reflective_negative_controls.py "$RUNNER_TEMP/native-reflective-evidence"
+          test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_native_negative_controls.json"
       - name: Candidate same-Program Native p/g fault injection and explicit reset
         shell: bash
         run: |
