@@ -58,3 +58,22 @@ The actual p operation counts differ by **exactly one per paired run**, with the
 The upstream `|` universal-output-causality question remains OPEN. The 32-domain diagnostic shows a reproducible branch-dependent asymmetry, not a universal final-output dependence. It neither changes the Befunge algorithm nor begins Stage 2.
 
 `CURRENT_STAGE=1`; `LAST_COMPLETED_STAGE=0`; `FULL_FUNCTIONAL_QA_PASS=NO`; `GEOMETRIC_SPAGHETTI_QA_PASS=NO`. PR #17 remains Draft. Do not merge on the strength of this test alone.
+
+
+## Stage-1 QA: controlled single-cell scratch liveness (pending exact-HEAD Native run)
+
+A separate experiment starts at each *actually measured first common five-step
+IP motion* for the 32 valid inputs and both naturally selected/forced-opposite
+branches. Each branch is replayed unchanged and then again with **only the
+runtime Funge-space cell (1490,1600)** switched between the previously observed
+blank value 32 and written value 12 at the same native IP tick. It records
+subsequent completion, all seven output fields, instruction count, and
+candidate later native g/p accesses to that coordinate.
+
+The reference fields remain computed only by independent Befunge programs.
+The 128 real PyFunge executions and an independent seven-tamper evidence
+audit are QA-only, and classify effects rather than presupposing them.
+Even unchanged output cannot establish universal dead memory: alternative
+memory instructions, interpreter bounds, untested inputs and later lifecycle
+states are outside the proof. **Stage 1 stays OPEN**, PR #17 stays Draft,
+and no production Befunge source or canonical branch is changed.
