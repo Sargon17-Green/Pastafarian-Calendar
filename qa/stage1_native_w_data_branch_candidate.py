@@ -21,7 +21,7 @@ import sys
 import stage1_native_diverse_geometry as suite
 import stage1_native_reflective_candidate_domain_matrix as wide
 
-BASE="src/interleaved_work_counts.b98"
+BASE="qa/interleaved_work_counts_pre_two_valid_w_production.b98"
 FROZEN="qa/interleaved_work_counts_w_data_branch_candidate.b98"
 FROZEN_BLOB="31807edb2b44b141d2af340555d6e97e63428613"
 BASE_BLOB="8f2cf8afef61818244747582fe7c20a74ee18943"

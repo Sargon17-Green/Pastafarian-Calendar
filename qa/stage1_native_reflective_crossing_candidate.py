@@ -48,7 +48,7 @@ def verify_byte_map():
     revised=open(CANDIDATE,"rb").read()
     require(blob(original)==ORIGINAL_BLOB,"source baseline Git blob drift")
     require(blob(revised)==CANDIDATE_BLOB,"candidate Git blob drift")
-    require(open("src/interleaved_work_counts.b98","rb").read()==revised,
+    require(open("qa/interleaved_work_counts_pre_two_valid_w_production.b98","rb").read()==revised,
             "QA production does not exactly match qualified reflective candidate")
     require(len(original)==len(revised),"source dimensions/bytes changed")
     a=original.split("\n")

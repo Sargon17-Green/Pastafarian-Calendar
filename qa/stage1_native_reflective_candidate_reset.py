@@ -21,8 +21,9 @@ if blob(new_code)!="8f2cf8afef61818244747582fe7c20a74ee18943":
 with open("qa/interleaved_work_counts_pre_reflective_production.b98","rb") as historical:
     old=historical.read().split("\n")
 new=new_code.split("\n")
-if native.CODE!=new_code:
-    raise AssertionError("native production must equal promoted candidate bytes")
+with open("qa/interleaved_work_counts_pre_two_valid_w_production.b98","rb") as archived:
+    if archived.read()!=new_code:
+        raise AssertionError("archived Native-qualified reflective source drift")
 for y,x in ((1334,986),(1334,1015),(1331,958),(1334,959)):
     if old[y][x]!=new[y][x]:
         raise AssertionError("reset test p/g/j route source coordinate drift")

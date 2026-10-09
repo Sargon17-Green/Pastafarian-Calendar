@@ -33,9 +33,9 @@ def main(folder):
     require(evidence.get("qa_production_matches_candidate") is True,
             "Native evidence was not captured on the promoted QA source")
     with open(SOURCE,"rb") as reader: candidate_bytes=reader.read()
-    with open("src/interleaved_work_counts.b98","rb") as reader:
+    with open("qa/interleaved_work_counts_pre_two_valid_w_production.b98","rb") as reader:
         require(reader.read()==candidate_bytes,
-                "production and independently audited candidate bytes differ")
+                "archived reflective QA source differs from independently audited candidate")
     records=evidence["results"]
     require(tuple(x["case"] for x in records)==cases.LABELS and
             len(records)==17,"missing reordered or extra Native corpus cases")

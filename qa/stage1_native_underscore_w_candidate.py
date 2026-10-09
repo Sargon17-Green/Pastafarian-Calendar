@@ -19,7 +19,7 @@ import stage1_native_reflective_candidate_domain_matrix as domain
 
 FROZEN="qa/interleaved_work_counts_w_data_branch_candidate.b98"
 FROZEN_BLOB="31807edb2b44b141d2af340555d6e97e63428613"
-PRODUCTION="src/interleaved_work_counts.b98"
+PRODUCTION="qa/interleaved_work_counts_pre_two_valid_w_production.b98"
 PRODUCTION_BLOB="8f2cf8afef61818244747582fe7c20a74ee18943"
 OUT="/underscore"
 SOURCE=OUT+"/underscore_w_candidate.b98"
@@ -42,7 +42,7 @@ def source():
     original=open(FROZEN,"rb").read()
     require(gitblob(original)==FROZEN_BLOB,"Native w candidate changed")
     require(gitblob(open(PRODUCTION,"rb").read())==PRODUCTION_BLOB,
-            "QA production changed; oracle comparison scope shifted")
+            "frozen prior QA reflective source changed; oracle comparison scope shifted")
     rows=original.split("\n")
     require(len(rows)==2016 and max(map(len,rows))==1531,
             "unapproved native source extent")

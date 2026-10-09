@@ -22,7 +22,7 @@ from funge.languages.funge98 import Befunge98
 from funge.platform import BufferedPlatform
 import stage1_native_diverse_geometry as suite
 
-SOURCE = "src/interleaved_work_counts.b98"
+SOURCE = "qa/interleaved_work_counts_pre_two_valid_w_production.b98"
 CASES = [
     # scenario, input case, (x, y), original instruction, substituted instruction
     ("upper_native_turn", "zero_equal", (951,1334), "]", "^"),

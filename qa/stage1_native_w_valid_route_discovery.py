@@ -103,7 +103,7 @@ def main():
     for name,fields,valid in cases:
         input_text=" ".join(map(str,fields))+"\n"
         oracle=suite.expected_for(*fields) if valid else ["-1"]*7
-        old=suite.native("src/interleaved_work_counts.b98",input_text)
+        old=suite.native("qa/interleaved_work_counts_pre_two_valid_w_production.b98",input_text)
         path=os.path.join(OUT,name+".tsv")
         got=suite.native(SOURCE,input_text,trace=path)
         require(len(oracle)==len(old)==len(got)==7 and

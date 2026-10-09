@@ -20,7 +20,7 @@ import stage1_native_route_graph as geometry
 import stage1_native_diverse_geometry_audit as cases
 import stage1_native_reflective_candidate_domain_matrix as wide
 
-BASE="src/interleaved_work_counts.b98"
+BASE="qa/interleaved_work_counts_pre_two_valid_w_production.b98"
 FROZEN="qa/interleaved_work_counts_w_data_branch_candidate.b98"
 PROOF="w_data_candidate_proof.json"
 CANDIDATE="w_data_branch_candidate.b98"

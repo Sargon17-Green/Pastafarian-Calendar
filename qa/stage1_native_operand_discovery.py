@@ -16,7 +16,7 @@ import subprocess
 import sys
 import stage1_native_diverse_geometry as suite
 
-SOURCE = "src/interleaved_work_counts.b98"
+SOURCE = "qa/interleaved_work_counts_pre_two_valid_w_production.b98"
 OUT = "/operands"
 EXPECTED_CELLS = ((132,5),(308,1430),(951,1334),(951,1335),(951,1336),
                   (1470,100),(1475,101),(1476,101),
