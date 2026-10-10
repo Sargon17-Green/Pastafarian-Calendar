@@ -27,7 +27,7 @@ PRODUCTION_PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
 CANDIDATE_PIN="d965ce4bdfa282f2d3b82690808def5a2dde10a8"
 OUT="/candidate-ownership/native_four_cell_candidate_ownership.json"
 PAIRS=(("v0","v1"),("v2","v3"),("v4","i4"),
-       ("i1","v1"),("i0","i3"),("i2","i5"))
+       ("i1","v5"),("i0","i3"),("i2","i5"))
 RESET_SEQUENCE=(("i0","v0"),("i3","v2"),("i4","v4"),
                 ("i1","v1"),("i2","v3"),("i5","v5"))
 ALL_LABELS=tuple("v%d"%i for i in range(6))+tuple("i%d"%i for i in range(6))
