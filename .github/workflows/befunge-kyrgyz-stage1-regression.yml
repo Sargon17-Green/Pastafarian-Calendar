@@ -755,7 +755,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
           python3 -m py_compile qa/stage1_native_no_u_cross_artifact_audit.py
-      - name: Retrieve two independent raw Native artifacts from exactly this GitHub run
+      - name: Retrieve three independent raw Native artifacts from exactly this GitHub run
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
