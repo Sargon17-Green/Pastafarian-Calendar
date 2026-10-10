@@ -33,6 +33,8 @@ def compact_entry(obj):
       "gate_events":obj["gates"],
       "total_p_writes":obj["observed_native_p_writes"],
       "total_g_reads":len(obj["native_g_reads_raw"]),
+      "native_p_history":obj["native_p_writes_raw"],
+      "native_g_history":obj["native_g_reads_raw"],
       "scratch_value":obj["final_scratch_value"],
       "first_5_motion":[list(row) for row in obj["route"][:5]]
     }
@@ -141,7 +143,7 @@ def main():
     check(len(report)==32 and len(zeros)==12 and len(ones)==20,
           "Native fork actual zero/nonzero distribution changed")
     out={
-      "schema":"befunge-stage1-four-cell-native-32-valid-fork-v2",
+      "schema":"befunge-stage1-four-cell-native-32-valid-fork-v3",
       "status":"NATIVE_QA_ONLY_FORK_CAUSALITY_PROFILE_STAGE1_OPEN",
       "source_git_blob":PIN,
       "candidate_git_blob":CANDIDATE_PIN,
@@ -156,6 +158,7 @@ def main():
       "all_native_controls_match_reference":True,
       "all_branch_first_vectors_opposite":True,
       "all_five_motion_rejoins_observed":True,
+      "native_pg_lineage_recorded":True,
       "automatic_promotion":False,"stage1_complete":False,
       "records":report
     }

@@ -4,7 +4,7 @@
 Checks physical four-source-byte difference, 64 actual Native control and
 operand-inverted executions, complete seven-field oracle vectors, actual
 first fork branch direction, five common executed directed motions, raw
-stack/frame/p-space/IP witnesses, effect groups and 16 hostile falsifications.
+stack/frame/p-space/IP witnesses, effect groups, independently replayed p/g lineages, and hostile falsifications.
 No numeric oracle is computed by Python; Stage1 stays OPEN.
 """
 import copy,hashlib,json,sys
@@ -17,8 +17,88 @@ def need(x,msg):
     if not x:raise AssertionError(msg)
 def gitblob(s):
     return hashlib.sha1(b"blob "+str(len(s)).encode()+b"\0"+s).hexdigest()
-def check(d):
-    need(d.get("schema")=="befunge-stage1-four-cell-native-32-valid-fork-v2"
+def canonical_decimal(v):
+    return type(v) is str and (v=="0" or
+        (len(v)>0 and v[0] in "123456789" and v.isdigit()) or
+        (len(v)>2 and v[0]=="-" and v[1] in "123456789" and v[1:].isdigit()))
+
+def replay_native_pg(run,source_rows,gate_step,rejoin_offset,snapshots):
+    """Independently replay physically observed p writes and g returns.
+
+    Verify every reported g against initial BF98 source bytes or the most
+    recent earlier p write. Also reconstruct all five claimed Funge-space
+    snapshots at the shared post-fork directed motions.
+    """
+    writes=run.get("native_p_history");reads=run.get("native_g_history")
+    need(type(writes) is list and type(reads) is list
+         and len(writes)==run["total_p_writes"]
+         and len(reads)==run["total_g_reads"]
+         and len(writes)>0 and len(reads)>0,
+         "Native p/g event counts or raw histories missing")
+    def source_value(coord):
+        x,y=coord
+        if 0<=y<len(source_rows) and 0<=x<len(source_rows[y]):
+            return source_rows[y][x]
+        return 32
+    def parse_event(evt,kind):
+        need(type(evt) is dict
+             and type(evt.get("tick")) is int
+             and 1<=evt["tick"]<=run["steps"]
+             and type(evt.get("coordinate")) is list
+             and len(evt["coordinate"])==2
+             and all(type(x) is int for x in evt["coordinate"]),
+             "Native "+kind+" physical event position or tick invalid")
+        if kind=="p":
+            need(canonical_decimal(evt.get("value")),
+                 "Native p physical write value malformed")
+        else:
+            need(canonical_decimal(evt.get("read_before"))
+                 and canonical_decimal(evt.get("returned"))
+                 and evt["read_before"]==evt["returned"],
+                 "Native g read differs from returned stack value")
+        return (evt["tick"],kind,tuple(evt["coordinate"]),evt)
+    events=[];last_tick=0
+    for evt in writes:
+        item=parse_event(evt,"p")
+        need(item[0]>last_tick,"Native p writes out of execution order")
+        last_tick=item[0];events.append(item)
+    last_tick=0
+    for evt in reads:
+        item=parse_event(evt,"g")
+        need(item[0]>last_tick,"Native g reads out of execution order")
+        last_tick=item[0];events.append(item)
+    events.sort(key=lambda x:x[0])
+    need(len({item[0] for item in events})==len(events),
+         "one Native instruction cannot execute both p and g")
+    cells={};after_write=after_fork=0
+    for tick,kind,coord,evt in events:
+        if kind=="p":
+            cells[coord]=int(evt["value"])
+        else:
+            need(int(evt["returned"])==cells.get(coord,source_value(coord)),
+                 "Native g read violates independently reconstructed p lineage")
+            if coord in cells:after_write+=1
+            if tick>gate_step:after_fork+=1
+    need(type(snapshots) is list and len(snapshots)==5,
+         "five measured Native rejoin snapshots missing")
+    for k in range(5):
+        snapshot_tick=gate_step+1+rejoin_offset+k
+        need(snapshot_tick<=run["steps"],
+             "rejoin snapshot requested beyond Native termination")
+        memory={}
+        for tick,kind,coord,evt in events:
+            if tick>=snapshot_tick:break
+            if kind=="p":
+                value=int(evt["value"])
+                if value==source_value(coord):memory.pop(coord,None)
+                else:memory[coord]=str(value)
+        expected=[[xy[0],xy[1],value] for xy,value in sorted(memory.items())]
+        need(snapshots[k]==expected,
+             "Native post-fork p-memory snapshot mismatches full p lineage")
+    return len(writes),len(reads),after_write,after_fork
+
+def check(d,source_rows):
+    need(d.get("schema")=="befunge-stage1-four-cell-native-32-valid-fork-v3"
          and d.get("status")=="NATIVE_QA_ONLY_FORK_CAUSALITY_PROFILE_STAGE1_OPEN"
          and d.get("source_git_blob")==PIN
          and d.get("candidate_git_blob")==CANDIDATE
@@ -30,6 +110,7 @@ def check(d):
          and d.get("all_native_controls_match_reference") is True
          and d.get("all_branch_first_vectors_opposite") is True
          and d.get("all_five_motion_rejoins_observed") is True
+         and d.get("native_pg_lineage_recorded") is True
          and d.get("automatic_promotion") is False
          and d.get("stage1_complete") is False,
          "native four-cell fork source/evidence scope or Stage-1 flags forged")
@@ -38,6 +119,7 @@ def check(d):
          len({x.get("label") for x in rows})==32,
          "thirty-two genuinely distinct valid Native case records not retained")
     zero=one=zc=oc=0
+    pg_writes=pg_reads=reads_after_p=reads_after_fork=0
     for r in rows:
         fields=r.get("fields")
         ref=r.get("reference_7")
@@ -132,6 +214,16 @@ def check(d):
                  and all(type(z) is bool for z in flags)
                  and flags==[x==y for x,y in zip(aa,bb)],
                  "actual Native "+tag+" equality contradictory to raw runtime values")
+        for run,position,snapshots in (
+                (ctl,off[0],r.get("five_p_mutations_control")),
+                (mut,off[1],r.get("five_p_mutations_forced"))):
+            counts=replay_native_pg(run,source_rows,
+                                    run["gate_events"][0]["step"],
+                                    position,snapshots)
+            pg_writes+=counts[0]
+            pg_reads+=counts[1]
+            reads_after_p+=counts[2]
+            reads_after_fork+=counts[3]
         expected_change=(mut["status"]!="normal" or mut.get("remaining_ips")!=0
                          or mut.get("output")!=ref)
         need(r.get("changed_final_output_or_termination") is expected_change
@@ -145,6 +237,10 @@ def check(d):
     return {"valid_native_inputs":32,"actual_native_executions":64,
             "lower_route_causal":zc,"lower_route_total":zero,
             "upper_route_causal":oc,"upper_route_total":one,
+            "native_p_writes_replayed":pg_writes,
+            "native_g_reads_replayed":pg_reads,
+            "g_reads_after_p":reads_after_p,
+            "g_reads_post_fork":reads_after_fork,
             "source_modified_in_repository":False,"stage1_complete":False}
 
 def main(dirname):
@@ -163,13 +259,13 @@ def main(dirname):
     need(differences==sorted(EDITS,key=lambda z:(z[1],z[0])),
          "candidate modified more or fewer than exact four Funge-space source cells")
     d=json.loads((root/"four_cell_fork_32_control_mutant.json").read_text(encoding="utf-8"))
-    outcome=check(d)
+    outcome=check(d,new_rows)
     print("NATIVE_FOUR_CELL_32_VALID_FORK_INDEPENDENT_AUDIT_PASS",
           json.dumps(outcome,sort_keys=True))
     denied=[]
     def negative(label,mut):
         forged=copy.deepcopy(d);mut(forged)
-        try:check(forged)
+        try:check(forged,new_rows)
         except AssertionError:
             denied.append(label)
             print("NATIVE_FOUR_CELL_FORK_FORGERY_REJECT_PASS",label)
@@ -204,12 +300,22 @@ def main(dirname):
              lambda z:z["records"][0]["first_shared_motion_offsets"].__setitem__(0,507))
     negative("missing_complete_route",
              lambda z:z["records"][0]["complete_motion_forced"].clear())
-    need(len(denied)==20,"Native four-cell fork adversarial suite incomplete")
+    negative("missing_native_p_history",
+             lambda z:z["records"][0]["control"]["native_p_history"].clear())
+    negative("forged_native_p_value",
+             lambda z:z["records"][0]["control"]["native_p_history"][0].__setitem__("value","BAD"))
+    negative("forged_native_g_return",
+             lambda z:z["records"][0]["control"]["native_g_history"][0].__setitem__("returned","123456789"))
+    negative("forged_native_g_tick",
+             lambda z:z["records"][0]["control"]["native_g_history"][0].__setitem__("tick",0))
+    negative("forged_native_p_snapshot",
+             lambda z:z["records"][0]["five_p_mutations_control"][0][0].__setitem__(2,"999999"))
+    need(len(denied)==25,"Native four-cell fork adversarial suite incomplete")
     (root/"four_cell_fork_32_audit.json").write_text(json.dumps(
-      {"schema":"befunge-stage1-four-cell-fork32-audit-v2",
+      {"schema":"befunge-stage1-four-cell-fork32-audit-v3",
        "measured":outcome,"forged_reports_rejected":denied,
        "stage1_final":False},sort_keys=True,indent=2)+"\n",encoding="utf-8")
-    print("NATIVE_FOUR_CELL_FORK_TWENTY_FALSIFIED_REPORTS_REJECTED_PASS")
+    print("NATIVE_FOUR_CELL_FORK_TWENTY_FIVE_FALSIFIED_REPORTS_REJECTED_PASS")
 if __name__=="__main__":
     need(len(sys.argv)==2,"Native QA fork32 artifact path required")
     main(sys.argv[1])
