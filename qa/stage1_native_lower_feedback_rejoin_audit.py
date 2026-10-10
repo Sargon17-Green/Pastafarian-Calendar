@@ -179,9 +179,9 @@ def main(folder):
     reject("no_direction_change",lambda d:d["records"][0]["mutant_gate"].__setitem__(
        "direction_after",d["records"][0]["control_gate"]["direction_after"]))
     reject("bad_index",lambda d:d["records"][0].__setitem__("first_shared_motion_indices",[254,0]))
-    reject("altered_frames",lambda d:d["records"][0]["rejoin_5"][0]["frames_mutant"][0].append("FORGED"))
+    reject("altered_frames",lambda d:d["records"][0]["rejoin_5"][0].__setitem__("frames_mutant",["FORGED"]))
     reject("altered_context",lambda d:d["records"][0]["rejoin_5"][0]["context_mutant"].__setitem__("stdin_cursor",-1))
-    reject("altered_mem",lambda d:d["records"][0]["rejoin_5"][0]["p_modified_mutant"].append([1,1,"99"]))
+    reject("altered_mem",lambda d:d["records"][0]["rejoin_5"][0].__setitem__("p_modified_mutant",[[1,1,99]]))
     reject("false_aggregate",lambda d:d.__setitem__("all_frames_equal_cases",999))
     reject("false_stage1",lambda d:d.__setitem__("stage1_geometry_pass",True))
     need(len(attacks)==14,"Native lower feedback adversarial checks incomplete")
