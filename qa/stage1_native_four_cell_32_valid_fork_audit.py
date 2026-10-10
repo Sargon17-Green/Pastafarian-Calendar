@@ -20,7 +20,14 @@ def gitblob(s):
 def canonical_decimal(v):
     return type(v) is str and (v=="0" or
         (len(v)>0 and v[0] in "123456789" and v.isdigit()) or
-        (len(v)>2 and v[0]=="-" and v[1] in "123456789" and v[1:].isdigit()))
+        (len(v)>1 and v[0]=="-" and v[1] in "123456789" and v[1:].isdigit()))
+
+# PyFunge may write -1..-9 as signed, canonical single-digit integers.
+# This regression would have caught the previous over-restrictive len(v)>2.
+need(canonical_decimal("-1") and canonical_decimal("-9") and
+     canonical_decimal("-10") and canonical_decimal("0") and
+     not canonical_decimal("-0") and not canonical_decimal("01"),
+     "signed Native p/g value grammar regression")
 
 def replay_native_pg(run,source_rows,gate_step,rejoin_offset,snapshots):
     """Independently replay physically observed p writes and g returns.
