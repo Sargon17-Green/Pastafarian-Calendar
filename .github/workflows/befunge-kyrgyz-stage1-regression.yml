@@ -2069,10 +2069,10 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object qa/year5000_integrated_lf_eof_grammar.b98)" = "fb6513605febc92c4cd1b453295253cb1cb49740"
-          test "$(git hash-object qa/year5000_raw_eof_candidate.b98)" = "bd9146c1db2f2bf9978659f86da2349d147594d1"
+          test "$(git hash-object qa/year5000_raw_eof_candidate.b98)" = "c5bd9dd06e227f9f31c8988a51bd114bf67b9af7"
           test "$(git hash-object qa/stage1_native_year5000_raw_eof_candidate.py)" = "d7a272f9c9a38524597e91e4e6a64adef596b702"
           test "$(git hash-object qa/stage1_native_year5000_raw_eof_candidate_audit.py)" = "32ecbb43a420325e1cf3483574cfabd53fdf234c"
-          test "$(git hash-object qa/stage1_native_year5000_raw_eof_source_map.py)" = "3678024e888fc21cbe8b88c46b92e1f512c702ac"
+          test "$(git hash-object qa/stage1_native_year5000_raw_eof_source_map.py)" = "af6297b51cae605c18e02f117806fe97f9940f82"
           python3 -m py_compile qa/stage1_native_year5000_raw_eof_candidate_audit.py qa/stage1_native_year5000_raw_eof_source_map.py
           python3 qa/stage1_native_year5000_raw_eof_source_map.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"

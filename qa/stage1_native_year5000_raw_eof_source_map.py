@@ -16,18 +16,19 @@ def prove(old,new):
             rows[1].index(b">")==945,
             "frozen BF98 control-vector origins changed")
     expect0=rows[0][:28]+b"1"+rows[0][29:30]+b"v"+rows[0][30:]
-    expect1=b" "*30+b">a^"+b" "*(946-33)+b">1.@"
+    lane=b">a46a*2+3a*2+0p9a*4+3a*2+1p3a*5+01-*j"
+    expect1=b" "*30+lane+b" "*(946-30-len(lane))+b">1.@"
     require(new==expect0+b"\n"+expect1+b"\n",
-            "Native EOF candidate edited outside exact 5-point bridge")
+            "Native EOF candidate edited outside exact two-row self-modifying bridge")
     return len(expect0),len(expect1)
 def main():
     x,y=prove(BASE,NEW)
     mutations=(
       ("boot_jump",28,b"0"),("catcher",30,b">"),
       ("read",31,b"&"),("read_body",40,b"x"),
-      ("eof_entry",len(NEW)-950+30,b"<"),
-      ("fake_lf",len(NEW)-950+31,b"9"),
-      ("rejoin",len(NEW)-950+32,b"v"),
+      ("eof_entry",len(NEW)-951+30,b"<"),
+      ("fake_lf",len(NEW)-951+31,b"9"),
+      ("rejoin",len(NEW)-951+32,b"v"),
       ("former_accept",len(NEW)-5,b"<"),
       ("new_accept",len(NEW)-4,b"0"),
       ("source_start",0,b"1")
