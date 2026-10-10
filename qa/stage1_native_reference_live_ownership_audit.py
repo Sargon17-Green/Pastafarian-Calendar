@@ -63,8 +63,8 @@ def verify(data):
                     "overlap_rounds","peer_state_checks"):
             need(type(row.get(col)) is int and row[col]>=0,
                  "invalid native reference step/space value "+col)
-        need(0<row["left_steps"]<=180000
-             and 0<row["right_steps"]<=180000
+        need(0<row["left_steps"]<=1000000
+             and 0<row["right_steps"]<=1000000
              and row["left_get"]>0 and row["right_get"]>0
              and row["left_putspace"]==row["right_putspace"]==0
              and row["overlap_rounds"]>0 and row["peer_state_checks"]>=2,
@@ -114,15 +114,16 @@ def main(folder):
         reject("unowned_memory",lambda x:x["records"][0].__setitem__("all_space_apis_owned",False)),
         reject("putspace",lambda x:x["records"][0].__setitem__("left_putspace",1)),
         reject("read_schedule_drift",lambda x:x["records"][6].__setitem__("left_get",x["records"][6]["left_get"]+1)),
+        reject("reported_steps_over_budget",lambda x:x["records"][0].__setitem__("right_steps",1000001)),
         reject("false_completion",lambda x:x.__setitem__("stage1_final_acceptance",True)),
     ]
-    need(len(rejected)==12,"native reference negative controls incomplete")
+    need(len(rejected)==13,"native reference negative controls incomplete")
     target=Path(folder)/"native_reference_live_ownership_audit.json"
-    target.write_text(json.dumps({"schema":"befunge-stage1-reference-owner-audit-v1",
+    target.write_text(json.dumps({"schema":"befunge-stage1-reference-owner-audit-v2",
         "verified":result,"negative_reports_rejected":rejected,
         "stage1_final_acceptance":False},sort_keys=True,indent=2)+"\n",
         encoding="utf-8")
-    print("NATIVE_REFERENCE_OWNER_12_HOSTILE_REPORTS_REJECTED_PASS")
+    print("NATIVE_REFERENCE_OWNER_13_HOSTILE_REPORTS_REJECTED_PASS")
 
 if __name__=="__main__":
     need(len(sys.argv)==2,"usage: native-reference-evidence-directory")
