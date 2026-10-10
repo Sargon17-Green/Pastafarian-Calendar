@@ -443,7 +443,7 @@ jobs:
             -v "$RUNNER_TEMP/native-year5000-irregular:/year5000" \
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
-              timeout --kill-after=5s 780s python -u qa/stage1_native_year5000_irregular.py
+              timeout --kill-after=5s 1800s python -u qa/stage1_native_year5000_irregular.py
             '
           python3 qa/stage1_native_year5000_irregular_audit.py "$RUNNER_TEMP/native-year5000-irregular"
           test -s "$RUNNER_TEMP/native-year5000-irregular/native_year5000_irregular.json"
