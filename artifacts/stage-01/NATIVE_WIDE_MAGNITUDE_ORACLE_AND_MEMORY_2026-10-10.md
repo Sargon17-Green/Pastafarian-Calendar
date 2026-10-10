@@ -27,3 +27,14 @@ The test is not a proof for all integers, all encoding variants, all
 memory APIs, or full Stage-1 acceptance. It does not modify production
 Funge source, canonical Befunge+Кыргызча, main or draft PR #17 and
 does not start Stage 2. Exact-head CI required before marking PASS.
+
+
+## QA budget adjustment after first measured CI failure
+
+On the first 13-case run, the 10 cases through 155 decimal digits passed.
+The first 240-digit-class case passed all three native-output oracle
+parity layouts but exceeded the old 750,000-step **instrumentation**
+limit. The separate wide-domain sampler now permits up to five million
+actual Native instruction steps per case; this does not increase the
+other Stage-1 test budgets, relax oracle/space/termination assertions,
+or make the acceptance scope universal. Exact-head CI remains required.

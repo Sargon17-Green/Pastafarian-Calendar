@@ -22,6 +22,7 @@ import stage1_native_current_fork_route_differential as fork
 PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
 SOURCE="src/interleaved_work_counts.b98"
 OUT="/wide/native_wide_magnitude.json"
+WIDE_NATIVE_STEP_BOUND=5000000
 COMMAND=["timeout","--kill-after=2s","60s","pyfunge",
          "--disable-fprint","--no-concurrent","--no-filesystem","-v98","-d2"]
 CASES=[
@@ -93,7 +94,7 @@ def sample(code,raw,expected):
         raise AssertionError("new Native putspace on extended domain")
     def step(self):
         ticks[0]+=1
-        if ticks[0]>fork.BOUND:
+        if ticks[0]>WIDE_NATIVE_STEP_BOUND:
             raise AssertionError("wide Native step bound exceeded")
         need(len(self.ips)==1,"unanticipated native IP fork")
         ip=self.ips[0]

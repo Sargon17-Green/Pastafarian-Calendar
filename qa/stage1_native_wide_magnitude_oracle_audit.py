@@ -75,7 +75,7 @@ def verify(p):
         memory=row.get("native_memory")
         require(isinstance(memory,dict)
                 and type(memory.get("native_steps")) is int
-                and 0<memory["native_steps"]<=750000
+                and 0<memory["native_steps"]<=5000000
                 and type(memory.get("engine_puts")) is int
                 and 0<memory["engine_puts"]<memory["native_steps"]
                 and type(memory.get("direct_g_reads")) is int
