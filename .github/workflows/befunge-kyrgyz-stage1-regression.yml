@@ -1939,7 +1939,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
-          test "$(git hash-object qa/stage1_native_eight_live_programs.py)" = "51616a5456c0a7a1f95182b3d8ea920528317c93"
+          test "$(git hash-object qa/stage1_native_eight_live_programs.py)" = "844f0fe647a0dcc939fa95d60866e6bfea5d0b46"
           test "$(git hash-object qa/stage1_native_eight_live_programs_audit.py)" = "4e7eab17f4479ce4ab5458ffdcb3d268ca284195"
           python3 -m py_compile qa/stage1_native_eight_live_programs_audit.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"

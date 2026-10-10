@@ -15,7 +15,7 @@ import hashlib,json,os,sys
 import stage1_native_live_pair_matrix as base
 import stage1_native_invalid_memory_ownership as invalid
 
-PIN="800d6aa5807a7f766213a33835cce85eab0fa40c"
+PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
 ROOT="/octads"
 PROFILES=(
   ("ABCDEFGH_11_7_13_5_3_2_17_19",(11,7,13,5,3,2,17,19),(0,1,2,3,4,5,6,7)),
@@ -141,7 +141,7 @@ def execute(source,group,profile,expected):
             "first_finished_label":first_done,
             "separate_programs_spaces_semantics_io":True,
             "every_get_put_owned_by_active":True,
-            "all_three_peers_frozen_per_quantum":True,
+            "all_seven_peers_frozen_per_quantum":True,
             "all_eight_terminated_reference_equal":True}
 def main():
     need(os.path.isdir(ROOT),"Native octad evidence directory missing")
@@ -181,7 +181,7 @@ def main():
          "Native eight-live independence matrix not exhausted")
     report={"schema":"befunge-stage1-native-eight-live-ownership-v1",
             "source_git_blob":PIN,"status":"FINITE_NATIVE_QA_STAGE1_OPEN",
-            "octadruples":[list(g) for g in GROUPS],
+            "octads":[list(g) for g in GROUPS],
             "schedules":[{"name":x[0],"quanta":list(x[1]),"order":list(x[2])}
                          for x in PROFILES],
             "valid_reference_labels":sorted(x for x in labels if x[0]=="v"),
