@@ -18,7 +18,7 @@ def need(x,msg):
 def gitblob(s):
     return hashlib.sha1(b"blob "+str(len(s)).encode()+b"\0"+s).hexdigest()
 def check(d):
-    need(d.get("schema")=="befunge-stage1-four-cell-native-32-valid-fork-v1"
+    need(d.get("schema")=="befunge-stage1-four-cell-native-32-valid-fork-v2"
          and d.get("status")=="NATIVE_QA_ONLY_FORK_CAUSALITY_PROFILE_STAGE1_OPEN"
          and d.get("source_git_blob")==PIN
          and d.get("candidate_git_blob")==CANDIDATE
@@ -92,6 +92,36 @@ def check(d):
              and all(isinstance(v,list) and len(v)==4 and
                      all(type(n) is int for n in v) for v in trace),
              "five actually executed joint native directed instruction events missing")
+        # Independently reconstruct the earliest five-instruction rejoin
+        # from both complete directed (x,y,dx,dy) Native motion traces.
+        # A self-reported "rejoin" is not sufficient evidence.
+        full_routes=[]
+        for key,first in (
+                ("complete_motion_control",firsta),
+                ("complete_motion_forced",firstb)):
+            sequence=r.get(key)
+            need(isinstance(sequence,list) and 5<=len(sequence)<=512
+                 and all(isinstance(z,list) and len(z)==4
+                         and all(type(t) is int for t in z)
+                         for z in sequence)
+                 and sequence[:5]==[z[:4] for z in first],
+                 "complete directed Native fork route or prefix missing")
+            full_routes.append(sequence)
+        windows={}
+        for i in range(len(full_routes[0])-4):
+            event=tuple(tuple(z) for z in full_routes[0][i:i+5])
+            windows.setdefault(event,i)
+        independently_found=None
+        for j in range(len(full_routes[1])-4):
+            event=tuple(tuple(z) for z in full_routes[1][j:j+5])
+            if event in windows:
+                independently_found=[
+                    windows[event],j,[list(z) for z in event]]
+                break
+        need(independently_found is not None
+             and independently_found[:2]==off
+             and independently_found[2]==trace,
+             "claimed Native five-motion rejoin is not independently reproducible")
         pairs=(("frames","five_frames_control","five_frames_forced","five_equal_frames"),
                ("p_memory","five_p_mutations_control","five_p_mutations_forced","five_equal_p_mutations"),
                ("ip_context","five_context_control","five_context_forced","five_equal_context"))
@@ -166,12 +196,20 @@ def main(dirname):
                    not z["records"][0]["changed_final_output_or_termination"]))
     negative("total_effect",lambda z:z.__setitem__("nonzero_operand_causal",-1))
     negative("premature_stage",lambda z:z.__setitem__("stage1_complete",True))
-    need(len(denied)==16,"Native four-cell fork adversarial suite incomplete")
+    negative("fabricated_shared_event",
+             lambda z:z["records"][0]["five_shared_motion"][0].__setitem__(0,999999))
+    negative("fabricated_route_prefix",
+             lambda z:z["records"][0]["complete_motion_control"][0].__setitem__(0,999999))
+    negative("fabricated_offset",
+             lambda z:z["records"][0]["first_shared_motion_offsets"].__setitem__(0,507))
+    negative("missing_complete_route",
+             lambda z:z["records"][0]["complete_motion_forced"].clear())
+    need(len(denied)==20,"Native four-cell fork adversarial suite incomplete")
     (root/"four_cell_fork_32_audit.json").write_text(json.dumps(
-      {"schema":"befunge-stage1-four-cell-fork32-audit-v1",
+      {"schema":"befunge-stage1-four-cell-fork32-audit-v2",
        "measured":outcome,"forged_reports_rejected":denied,
        "stage1_final":False},sort_keys=True,indent=2)+"\n",encoding="utf-8")
-    print("NATIVE_FOUR_CELL_FORK_SIXTEEN_FALSIFIED_REPORTS_REJECTED_PASS")
+    print("NATIVE_FOUR_CELL_FORK_TWENTY_FALSIFIED_REPORTS_REJECTED_PASS")
 if __name__=="__main__":
     need(len(sys.argv)==2,"Native QA fork32 artifact path required")
     main(sys.argv[1])

@@ -112,6 +112,10 @@ def main():
           "natural_nonzero":ga["original"],
           "forced_nonzero":gb["executed"],
           "first_shared_motion_offsets":[ia,ib],
+          # Complete Native directed traces allow independent replay of the
+          # observed five-event fork rejoin, not just a claimed witness.
+          "complete_motion_control":[list(z) for z in route_motion_a],
+          "complete_motion_forced":[list(z) for z in route_motion_b],
           "five_shared_motion":[list(z) for z in joined["real_motion_sample"]],
           "five_frames_control":frames_a,"five_frames_forced":frames_b,
           "five_p_mutations_control":memory_a,
@@ -137,7 +141,7 @@ def main():
     check(len(report)==32 and len(zeros)==12 and len(ones)==20,
           "Native fork actual zero/nonzero distribution changed")
     out={
-      "schema":"befunge-stage1-four-cell-native-32-valid-fork-v1",
+      "schema":"befunge-stage1-four-cell-native-32-valid-fork-v2",
       "status":"NATIVE_QA_ONLY_FORK_CAUSALITY_PROFILE_STAGE1_OPEN",
       "source_git_blob":PIN,
       "candidate_git_blob":CANDIDATE_PIN,
