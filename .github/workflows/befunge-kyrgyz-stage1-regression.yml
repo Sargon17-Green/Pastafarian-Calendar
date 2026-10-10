@@ -387,13 +387,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-year5000"
           docker run --rm -e PYFUNGE_NO_PSYCO=1 \
             -v "$GITHUB_WORKSPACE:/work:ro" \
             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-year5000:/year5000" \
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=5s 720s python -u qa/stage1_native_structural_corpus.py
+              timeout --kill-after=5s 260s python -u qa/stage1_native_year5000_negative_axis.py
             '
+          python3 qa/stage1_native_year5000_negative_axis_audit.py "$RUNNER_TEMP/native-year5000"
+          test -s "$RUNNER_TEMP/native-year5000/native_year5000_negative_axis_audit.json"
+          echo NATIVE_YEAR5000_SIGNED_AXIS_AUDIT_PASS_STAGE1_OPEN
+      - name: Retain signed Year-5000 Native input/output and tamper audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-signed-axis
+          path: ${{ runner.temp }}/native-year5000/
+          retention-days: 30
 
   native-sauce-choice-composition:
     runs-on: ubuntu-latest
