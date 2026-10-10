@@ -1492,3 +1492,40 @@ jobs:
           name: befunge-kyrgyz-native-full-invalid-live-quantum
           path: ${{ runner.temp }}/native-full-invalid-live/
           retention-days: 30
+
+  native-three-live-programs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Confirm pinned Stage 1 Befunge source and Native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_three_live_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Schedule 50 three-live Native Program trials with independent read/write ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-three-programs"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-three-programs:/triads" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_three_live_programs.py
+            '
+          test -s "$RUNNER_TEMP/native-three-programs/native_three_live_programs.json"
+          python3 qa/stage1_native_three_live_audit.py "$RUNNER_TEMP/native-three-programs"
+          test -s "$RUNNER_TEMP/native-three-programs/native_three_live_programs_audit.json"
+      - name: Retain Native three simultaneous Programs evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-three-live-programs
+          path: ${{ runner.temp }}/native-three-programs/
+          retention-days: 30
