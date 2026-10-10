@@ -2290,6 +2290,8 @@ jobs:
           test -s "$RUNNER_TEMP/native-four-cell-fork-32/four_cell_fork_32_control_mutant.json"
           test -s "$RUNNER_TEMP/native-four-cell-fork-32/four_cell_candidate.b98"
           python3 qa/stage1_native_four_cell_32_valid_fork_audit.py "$RUNNER_TEMP/native-four-cell-fork-32"
+          python3 qa/stage1_native_four_cell_route_diversity_audit.py "$RUNNER_TEMP/native-four-cell-fork-32"
+          test -s "$RUNNER_TEMP/native-four-cell-fork-32/four_cell_route_diversity_audit.json"
           test -s "$RUNNER_TEMP/native-four-cell-fork-32/four_cell_fork_32_audit.json"
           echo REAL_NATIVE_FOUR_CELL_32_VALID_FORK_PROFILE_QA_ONLY_STAGE1_OPEN
       - name: Retain real Native fork32 control/mutant and independent evidence
