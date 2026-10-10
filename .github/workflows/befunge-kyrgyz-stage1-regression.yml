@@ -2080,6 +2080,34 @@ jobs:
           retention-days: 30
 
 
+
+  native-four-fault-versus-clean-owner-equivalence:
+    needs: [native-four-live-private-funge-space-ownership, native-four-live-p-fault-immediate-recovery]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin BF98 source and cross-auditor
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_fault_vs_clean_cross_audit.py
+      - name: Fetch independently measured same-run native execution evidence
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/clean-four" "$RUNNER_TEMP/fault-four"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name befunge-kyrgyz-native-four-live-ownership --dir "$RUNNER_TEMP/clean-four"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name befunge-kyrgyz-native-four-live-p-fault-recovery --dir "$RUNNER_TEMP/fault-four"
+      - name: Compare all 32 real Native fault-recovery and healthy peer signatures with clean four-live runs
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_four_fault_vs_clean_cross_audit.py "$RUNNER_TEMP/clean-four" "$RUNNER_TEMP/fault-four"
+
   native-four-live-p-fault-immediate-recovery:
     runs-on: ubuntu-latest
     timeout-minutes: 18
