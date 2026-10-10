@@ -791,104 +791,104 @@ maxMonths = min(47, floor(L/4))
 )
 ```
 
-`dayInMonth` jindika kemm-il darba dak ix-xahar ikun deher mill-bidu tas-sena sa `t`, inkluż `t` innifsu.
+`dayInMonth` — жылдын башынан `t` күнүнө чейин (анын өзүн кошо эсептегенде) ошол айдын канча жолу кездешкенин билдирет.
 
 ---
 
-# Y. L-Eżistenza u l-Uniċità
+# Y. Бар болушу жана жалгыздыгы
 
-Għal kull par ordnat `(c,t)` jinkiseb riżultat wieħed biss:
+Ар бир иреттелген `(c,t)` жубу үчүн так бир натыйжа алынат:
 
-- kull jum għandu għadd uniku;
-- kull sett ġdid ta’ ġebliet jiġi kkalkulat minn `snapshot` wieħed tal-istat;
-- kull qatra tiddependi biss minn dak li jkun diġà ġie stabbilit;
-- waqt kull pass ta’ tħawwid, is-sitt skutelli kollha jaqraw mill-istess passat;
-- kull sett ta’ possibbiltajiet jitqiegħed f’ordni preskritta;
-- kull medda bejn żewġ xtiebi tkun bejn 42 u 963 jum;
-- kull sena tkun twila bejn 252 u 5778 jum;
-- il-proċess biex tinstab is-sena dejjem jibda mis-sena 5000 u jimxi f’direzzjoni waħda skont fejn jinsab il-Jum Mitlub;
-- l-istruttura tas-sena tiġi kkalkulata minn par fiss ta’ jiem.
+- ар бир күндүн уникалдуу санагы бар;
+- таштардын ар бир жаңы топтому абалдын бир эле `snapshot` көчүрмөсүнөн эсептелет;
+- ар бир тамчы буга чейин аныкталган нерселерге гана көз каранды;
+- ар бир аралаштыруу кадамында алты табак тең бир эле мурунку абалды окуйт;
+- мүмкүнчүлүктөрдүн ар бир топтому белгиленген тартипте жайгаштырылат;
+- ар бир дарбаза аралык 42ден 963 күнгө чейин созулат;
+- ар бир жыл 252ден 5778 күнгө чейин созулат;
+- жылды табуу иши ар дайым 5000-жылдан башталып, суралган күндүн жайгашуусуна жараша бир гана багытта жүрөт;
+- жылдын түзүмү күндөрдүн туруктуу жубунан эсептелет.
 
-Il-magna taż-żmien inbniet b’irqajja’: għal kull ħtieġa li nqalgħet matul ix-xogħol ġiet stabbilita regola, u kull regola saret saff ieħor fil-mekkaniżmu.
+Убакыт машинасы жамаачылардан куралган: иш учурунда жаралган ар бир муктаждык үчүн эреже белгиленип, ар бир эреже механизмдин жаңы катмарына айланган.
 
 ---
 
-# Z. Meta l-Jum Idur
+# Z. Күн качан алмашат
 
-Il-jum lokali jinbidel meta **ċ-ċentru ta’ Venere jilħaq il-kulminazzjoni inferjuri tiegħu fuq il-meridjan lokali**.
+Жергиликтүү күн **Чолпондун борбору жергиликтүү меридианда төмөнкү кульминацияга жеткенде** алмашат.
 
-Din hija r-regola astronomika tal-jum.
+Бул — күндү аныктоонун астрономиялык эрежеси.
 
-Il-qalba tal-Kalendarju taz-Zalza tirċievi żewġ jiem diskreti `c,t` u tipproċessahom fuq l-assi tal-jiem b’mod li r-riżultat jista’ jiġi riprodott għalkollox.
+Соус жылнаамасынын өзөгү дискреттүү `c,t` деген эки күндү кабыл алып, аларды күндөрдүн огу боюнча толук кайра өндүрүүгө мүмкүн болгон натыйжа менен иштетет.
 
-Il-konverżjoni:
+Төмөнкү айландыруу:
 
 ```text
 instant + location -> discrete day
 ```
 
-teħtieġ profil astronomiku numeriku: `ephemeris` u l-verżjoni tiegħu, `timescales`, definizzjoni tal-`Earth orientation`, it-trattament ta’ `ΔT`, koordinati u konvenzjonijiet tal-avveniment. Il-vetturi ta’ konformità tal-qalba huma ddefiniti direttament f’termini ta’ `c,t`, li huma numri diskreti li jirrappreżentaw jiem.
+сандык астрономиялык профилди талап кылат: `ephemeris` жана анын версиясы, `timescales`, `Earth orientation` аныктамасы, `ΔT` менен иштөө тартиби, координаттар жана окуяны аныктоо конвенциялары. Өзөктүн шайкештик векторлору күндөрдү көрсөткөн дискреттүү `c,t` сандары менен түздөн-түз аныкталат.
 
 ---
 
-# AA. Il-Lingwa li Tagħti Ġisem lill-Ismijiet
+# AA. Аталыштарга өң берген тил
 
-Kull implimentazzjoni għandha lingwa waħda ta’ programmar u lingwa naturali waħda li sservi bħala l-lingwa tas-sors.
+Ар бир ишке ашыруунун бир программалоо тили жана баштапкы тил болуп кызмат кылган бир табигый тили бар.
 
-F’`Stage 1` ta’ dik l-implimentazzjoni jinħoloq **`SourceLanguageCatalog` kanoniku u immutabbli**, li jkun fih eżattament:
+Бул ишке ашыруунун `Stage 1` баскычында так төмөнкүлөрдү камтыган канондук жана өзгөрбөс **`SourceLanguageCatalog`** түзүлөт:
 
-- 17-il isem ta’ pulpetti bħala sekwenzi ta’ karattri;
-- 47 isem ta’ xhur bħala sekwenzi ta’ karattri;
-- l-indiċi kanoniku ta’ kull wieħed minnhom.
+- символдор тизмеги түрүндө котлеттердин 17 аталышы;
+- символдор тизмеги түрүндө айлардын 47 аталышы;
+- алардын ар биринин канондук индекси.
 
-Meta isem iġorr tifsira, tintgħażel il-kelma jew l-espressjoni l-aktar naturali biex twassal dik it-tifsira fil-lingwa tas-sors. L-ismijiet proprji, l-ismijiet ta’ postijiet, l-ismijiet ivvintati u s-sekwenzi ta’ ħsejjes mingħajr tifsira lessikali jiġu translitterati skont regola fissa u dokumentata, speċifika għal dik il-lingwa tas-sors.
+Аталыштын мааниси болсо, ал маанини баштапкы тилде табигый туюнткан сөз же сөз айкашы тандалат. Энчилүү, жер-суу жана ойдон чыгарылган аттар, ошондой эле өз алдынча лексикалык мааниси жок тыбыш тизмектери ошол баштапкы тил үчүн атайын белгиленген, туруктуу жана документтештирилген эрежеге ылайык транслитерацияланат.
 
-Wara li l-katalgu jiġi stabbilit fil-forma definittiva tiegħu, ikun hemm korrispondenza unika:
+Каталог акыркы абалына келтирилгенден кийин бирден-бир дал келүү түзүлөт:
 
 ```text
 canonicalIndex -> exactly one source-language string
 ```
 
-Il-katalgu fil-forma definittiva tiegħu jistabbilixxi s-sekwenza unika ta’ karattri għal kull indiċi. Fil-livell semantiku jintuża `canonicalIndex`, u l-forma testwali korrispondenti tiġi ddeterminata fis-saff li jipproduċi r-riżultat. Il-`locales` futuri jkunu traduzzjonijiet tal-katalgu tal-lingwa tas-sors maħsuba għall-wiri, filwaqt li `rank`, `unrank`, il-`cache keys` u l-proċessi tal-għażla jibqgħu jużaw l-indiċijiet kanoniċi.
+Акыркы каталог ар бир индекс үчүн символдордун жалгыз тизмегин аныктайт. Семантикалык деңгээлде `canonicalIndex` колдонулат, ал эми ага тиешелүү жазуу формасы натыйжаны чыгарган катмарда аныкталат. Келечектеги `locales` баштапкы тил каталогунун экранга көрсөтүүгө арналган котормолору болот; `rank`, `unrank`, `cache keys` жана тандоо жол-жоболору канондук индекстерди колдоно берет.
 
 ---
 
-# AB. L-Istruttura tar-Repożitorju u l-Fergħat
+# AB. Репозиторийдин жана бутактардын түзүлүшү
 
-Kull par għandu l-forma:
+Ар бир жуп төмөнкү формада болот:
 
 ```text
 [LANGUAGE] + [NATURAL_LANGUAGE]
 ```
 
-Għal kull par bħal dan tinħoloq implimentazzjoni indipendenti f’fergħa `orphan`; din tinbena mill-bidu nett. Il-kodiċi, il-`tests`, il-`fixtures`, l-`expected outputs`, l-`oracle`, it-tabelli ġġenerati, il-`caches` u d-dejta ta’ validazzjoni tal-fergħa jinħolqu u jitħejjew kollha fi ħdan il-fergħa ta’ dik l-implimentazzjoni, direttament skont l-ispeċifikazzjoni komuni. Il-konformità ta’ kull implimentazzjoni tiġi vverifikata billi l-implimentazzjoni titqabbel mal-`oracle` lokali tagħha u mal-vetturi kanoniċi ta’ konformità.
+Мындай ар бир жуп үчүн өз алдынча ишке ашыруу `orphan` бутагында, нөлдөн баштап түзүлөт. Бутактын коду, `tests`, `fixtures`, `expected outputs`, `oracle`, түзүлгөн таблицалар, `caches` жана текшерүү маалыматтары жалпы спецификацияга түздөн-түз таянып, ошол ишке ашыруу бутагынын ичинде даярдалат. Ар бир ишке ашыруунун шайкештиги анын жергиликтүү `oracle` эталону жана канондук шайкештик векторлору менен салыштыруу аркылуу текшерилет.
 
-Il-fergħa `main` tinkludi dan it-trattat u d-dejta komuni ta’ konformità. Il-fergħat tal-implimentazzjonijiet jinħolqu bħala fergħat `orphan` indipendenti.
+`main` бутагында ушул трактат жана жалпы шайкештик маалыматтары жайгашат. Ишке ашыруу бутактары өз алдынча `orphan` бутактары катары түзүлөт.
 
 ---
 
-# AC. Il-Vetturi Kanoniċi ta’ Konformità
+# AC. Канондук шайкештик векторлору
 
-Il-vetturi ta’ konformità huma dejta komuni li tagħmel parti mill-ispeċifikazzjoni għall-implimentazzjonijiet kollha. Kull implimentazzjoni tużahom bħala parti mit-test ta’ konformità tagħha.
+Шайкештик векторлору — бардык ишке ашыруулар үчүн спецификациянын бир бөлүгү болгон жалпы маалыматтар. Ар бир ишке ашыруу аларды өзүнүн шайкештик сыноосунда колдонот.
 
-Iż-żewġ komponenti tal-isem fil-vetturi jiġu rreġistrati bħala indiċijiet kanoniċi, u għalhekk l-istess sett ta’ vetturi jista’ jintuża mal-lingwi tas-sors kollha:
+Векторлордогу эки аталыш компоненти канондук индекстер түрүндө жазылат. Ошондуктан бир эле векторлор жыйнагын бардык баштапкы тилдер менен колдонууга болот:
 
 ```text
 (yearNumber, cutletCanonicalIndex, dayInCutlet,
  monthCanonicalIndex, dayInMonth)
 ```
 
-Il-valur ta’ `F` huwa:
+`F` мааниси:
 
 ```text
 F = -15,055,671
 ```
 
-## AC.1. Il-Vetturi Kanoniċi tas-Somma Miżmuma
+## AC.1. Сакталган кошунду боюнча канондук векторлор
 
-Din hija **l-unika tabella normattiva ta’ konformità**. Dawn il-valuri joħorġu mill-post-stirs ta’ K, fejn l-istess `S_r = SAVE(sum(oldBowls)+149·r)` jintuża kemm għall-permutazzjoni kif ukoll ġewwa `u`.
+Бул — шайкештиктин **бирден-бир нормативдик таблицасы**. Бул маанилер K бөлүмүндөгү кошумча аралаштыруулардан алынат: бир эле `S_r = SAVE(sum(oldBowls)+149·r)` орун алмаштырууда да, `u` ичинде да колдонулат.
 
-| # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
+| # | `c` | `t` | Жыл | Котлеттин индекси | Котлеттеги күн | Айдын индекси | Айдагы күн |
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 1 | -15,055,671 | -15,055,671 | 5000 | 10 | 503 | 20 | 56 |
 | 2 | -15,055,671 | -15,055,672 | 5000 | 10 | 502 | 32 | 21 |
@@ -901,15 +901,15 @@ Din hija **l-unika tabella normattiva ta’ konformità**. Dawn il-valuri joħor
 | 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 10 | 1 | 45 |
 | 10 | -15,058,171 | -15,053,171 | 5002 | 5 | 288 | 29 | 13 |
 
-Il-vettur 6 jgħaddi lura mis-sena 5000 permezz ta’ `PREVIOUS₁₂`; il-vetturi 7 u 10 jgħaddu ’l quddiem permezz ta’ `NEXT₁₁`.
+6-вектор 5000-жылдан `PREVIOUS₁₂` аркылуу артка өтөт; 7- жана 10-векторлор `NEXT₁₁` аркылуу алдыга өтөт.
 
-## AC.2. HISTORICAL — SUPERSEDED: Il-Vetturi tal-Mutant tas-Somma Mhux Miżmuma
+## AC.2. ТАРЫХЫЙ — АЛМАШТЫРЫЛГАН: сакталбаган кошундунун мутант векторлору
 
-**HISTORICAL — SUPERSEDED. MHUX NORMATTIV.**
+**ТАРЫХЫЙ — АЛМАШТЫРЫЛГАН. НОРМАТИВДИК ЭМЕС.**
 
-It-tabella li ġejja tinżamm biss bħala evidenza storika u bħala materjal ta’ regression biex jiġi maqtul il-mutant li juża `rawBowlSum_r = sum(oldBowls)` ġewwa `u` u jħalli `SAVE(rawBowlSum_r+149·r)` għall-permutazzjoni biss. Dawn il-valuri **ma jistgħux** jintużaw bħala expected outputs ta’ konformità.
+Төмөнкү таблица `u` ичинде `rawBowlSum_r = sum(oldBowls)` колдонуп, `SAVE(rawBowlSum_r+149·r)` маанисин орун алмаштыруу үчүн гана калтырган мутантты жокко чыгарууга арналган тарыхый далил жана регрессиялык материал катары гана сакталат. Бул маанилерди шайкештиктин **күтүлгөн жыйынтыктары катары колдонууга болбойт**.
 
-| # | `c` | `t` | Sena | Indiċi tal-Pulpetta | Jum fil-Pulpetta | Indiċi tax-Xahar | Jum fix-Xahar |
+| # | `c` | `t` | Жыл | Котлеттин индекси | Котлеттеги күн | Айдын индекси | Айдагы күн |
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 1 | -15,055,671 | -15,055,671 | 5000 | 4 | 762 | 12 | 105 |
 | 2 | -15,055,671 | -15,055,672 | 5000 | 4 | 761 | 32 | 114 |
@@ -922,9 +922,9 @@ It-tabella li ġejja tinżamm biss bħala evidenza storika u bħala materjal ta�
 | 9 | -15,054,437 | -15,053,449 | 5000 | 14 | 20 | 14 | 47 |
 | 10 | -15,058,171 | -15,053,171 | 5002 | 9 | 498 | 41 | 10 |
 
-## `checkpoint` dettaljat kanoniku: `c=t=F`
+## Толук канондук `checkpoint`: `c=t=F`
 
-Għall-vettur 1, il-ħames għaddijiet użati fil-kalkolu huma:
+1-вектор үчүн эсептөөдө колдонулган беш санак:
 
 ```text
 Għadd_tal_Kalkolu   = 1
@@ -934,7 +934,7 @@ Għadd_tas_Somma     = 2
 Għadd_tad_Direzzjoni = 2
 ```
 
-Is-seba’ qatriet moħbija wara seba’ passi ta’ tħin:
+Жети майдалоо кадамынан кийинки жети жашыруун тамчы:
 
 ```text
 1: 119390830530032782664128530203002080344
@@ -946,25 +946,25 @@ Is-seba’ qatriet moħbija wara seba’ passi ta’ tħin:
 7: 6164285870955721082771365327359496898
 ```
 
-L-ewwel qatra viżibbli:
+Биринчи көрүнгөн тамчы:
 
 ```text
 56644603826892212324764499696091907135
 ```
 
-Il-qatra viżibbli numru 46:
+46-көрүнгөн тамчы:
 
 ```text
 141872771689426650819909896585756512282
 ```
 
-L-ordni tal-iskutelli tal-qatra 46:
+46-тамчыдагы табактардын ирети:
 
 ```text
 [4, 5, 2, 3, 6, 1]
 ```
 
-Is-sitt skutelli kanoniċi wara t-12-il pass addizzjonali ta’ tħawwid, skont l-identitajiet fissi `1..6`, huma:
+Туруктуу `1..6` идентификаторлору боюнча, кийинки 12 аралаштыруу кадамынан соң алты табактын канондук маанилери:
 
 ```text
 1: 65286679584284972964194865805379907599
@@ -975,32 +975,32 @@ Is-sitt skutelli kanoniċi wara t-12-il pass addizzjonali ta’ tħawwid, skont 
 6: 111207247632761530752404582123499651367
 ```
 
-Il-konfini kanoniċi tas-sena 5000 f’dan l-istess vettur huma:
+Ушул эле вектордогу 5000-жылдын канондук чек аралары:
 
 ```text
 openGate  = -15,057,703
 closeGate = -15,053,459
 ```
 
-Ir-rappreżentazzjoni testwali kanonika fil-katalgu Malti hija:
+Кыргызча канондук каталогдогу тексттик көрсөтүлүшү:
 
 ```text
-5000, Skorpjun, 503, Bir, 56
+5000, чаян, 503, кудук, 56
 ```
 
-Il-komponenti kanoniċi ta’ konformità huma għalhekk:
+Демек, канондук шайкештик компоненттери:
 
 ```text
 (5000, 10, 503, 20, 56)
 ```
 
-## HISTORICAL — SUPERSEDED: checkpoint tal-mutant `rawBowlSum`
+## ТАРЫХЫЙ — АЛМАШТЫРЫЛГАН: `rawBowlSum` мутантынын `checkpoint` маанилери
 
-**HISTORICAL — SUPERSEDED. MHUX NORMATTIV.**
+**ТАРЫХЫЙ — АЛМАШТЫРЫЛГАН. НОРМАТИВДИК ЭМЕС.**
 
-Għall-istess `c=t=F`, il-ħames għaddijiet, is-seba’ qatriet moħbija, l-ewwel qatra viżibbli, il-qatra viżibbli 46 u `orderAt46 = [4,5,2,3,6,1]` jibqgħu l-istess. Id-diverġenza tibda fl-ewwel post-stir, meta l-mutant juża s-somma mhux miżmuma ġewwa `u`.
+Ушул эле `c=t=F` үчүн беш санак, жети жашыруун тамчы, биринчи көрүнгөн тамчы, 46-көрүнгөн тамчы жана `orderAt46 = [4,5,2,3,6,1]` өзгөрбөйт. Айырма биринчи кошумча аралаштыруудан башталат: мутант `u` ичинде сакталбаган кошундуну колдонот.
 
-Is-sitt skutelli finali tal-mutant, skont l-identitajiet fissi `1..6`, huma:
+Мутанттын туруктуу `1..6` идентификаторлору боюнча акыркы алты табагы:
 
 ```text
 1: 67068226522203060890658143482200172502
@@ -1011,58 +1011,58 @@ Is-sitt skutelli finali tal-mutant, skont l-identitajiet fissi `1..6`, huma:
 6: 154633989471499313687998830839607736513
 ```
 
-Il-konfini tas-sena 5000 tal-mutant huma:
+Мутант чыгарган 5000-жылдын чек аралары:
 
 ```text
 openGate  = -15,059,693
 closeGate = -15,055,294
 ```
 
-Ir-rappreżentazzjoni testwali tal-mutant fil-katalgu Malti hija:
+Мутанттын кыргызча каталогдогу тексттик көрсөтүлүшү:
 
 ```text
-5000, Lagaš, 762, Libien, 105
+5000, Лагаш, 762, ладан, 105
 ```
 
-Il-komponenti tiegħu huma:
+Анын компоненттери:
 
 ```text
 (5000, 4, 762, 12, 105)
 ```
 
-Dawn il-valuri jinżammu biss bħala discriminator kontra l-interpretazzjoni żbaljata; implimentazzjoni li tipproduċihom bħala riżultat kanoniku tfalli l-konformità.
+Бул маанилер туура эмес чечмелөөнү айырмалоочу белгилер катары гана сакталат; аларды канондук натыйжа катары чыгарган ишке ашыруу шайкештик текшерүүсүнөн өтпөйт.
 
 ---
 
-# AD. Il-Ħidma tal-Ħolqien
+# AD. Жаратуу иши
 
-Il-Kalendarju taż-Żminijiet huwa l-espressjoni preċiża tal-Ħolqien.
+Мезгилдер жылнаамасы — Жаратуунун так туюнтулушу.
 
-Il-Mostru ħoloq:
+Желмогуз төмөнкүлөрдү жараткан:
 
-- pal fis-sensiela tal-jiem;
-- żewġ ħjut tal-għadd tal-jiem;
-- l-Għadd il-Kbir li fih iż-żero taz-zalza jidher bħala `M`;
-- ħames ġebliet li jiġu aġġornati flimkien;
-- seba’ qatriet moħbija;
-- 46 qatra viżibbli;
-- sitt skutelli li jibdlu l-ordni tagħhom;
-- tliet tferrigħat diretti;
-- tħawwid simultanju;
-- 12-il pass sussegwenti ta’ tħawwid;
-- ħażna fissa tal-ordni tal-qatra 46;
-- siġilli separati;
-- fluss ċirkolari ta’ tweġibiet;
-- Għażla Qasira;
-- Għażla Wiesgħa li l-isem kanoniku tagħha huwa **Għażla Ugwali**;
-- xtiebi fuq iż-żewġ naħat tal-pal;
-- is-sena 5000 bħala kostanta strutturali;
-- żewġ mogħdijiet li jibdew minnha u jimxu f’direzzjonijiet opposti;
-- pulpetti li l-konfini tagħhom jaħbtu max-xtiebi;
-- xhur minsuġa bħal ħjut;
-- ismijiet kanoniċi;
-- u eżattament ħames komponenti fir-riżultat tal-jum.
+- күндөрдүн огундагы казыкты;
+- күн санагынын эки жибин;
+- соустун нөлү `M` болуп көрүнгөн Чоң санды;
+- чогуу жаңылануучу беш ташты;
+- жети жашыруун тамчыны;
+- 46 көрүнгөн тамчыны;
+- иретин өзгөрткөн алты табакты;
+- үч түз куюуну;
+- бир убактагы аралаштырууну;
+- кийинки 12 аралаштыруу кадамын;
+- 46-тамчыдагы иреттин туруктуу сакталышын;
+- өз-өзүнчө мөөрлөрдү;
+- жооптордун айлампа агымын;
+- Кыска тандоону;
+- канондук аталышы **Тең тандоо** болгон Кең тандоону;
+- казыктын эки тарабындагы дарбазаларды;
+- түзүмдүк туруктуу чоңдук болгон 5000-жылды;
+- андан эки карама-каршы багытка кеткен жолду;
+- чек аралары дарбазаларга туш келген котлеттерди;
+- жип сыяктуу өрүлгөн айларды;
+- канондук аталыштарды;
+- жана күндүн натыйжасындагы так беш компонентти.
 
-Hekk huwa rranġat iż-żmien: kull saff jinsab f’postu, u kull riżultat jitnissel mis-saffi li ġew qablu. Il-kalendarju jinqara billi wieħed jimxi mal-liġi u mal-ordni u jwettaq il-kalkolu sal-aħħar.
+Убакыт ушундай уюштурулган: ар бир катмар өз ордунда турат жана ар бир натыйжа мурунку катмарлардан келип чыгат. Жылнаама мыйзам менен белгиленген тартипти сактап, эсептөөнү аягына чейин жүргүзүү менен окулат.
 
-**R’amen.**
+**Р’амен.**
