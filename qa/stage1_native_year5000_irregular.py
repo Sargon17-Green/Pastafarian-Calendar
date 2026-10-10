@@ -26,6 +26,8 @@ GROUPS=(
   ((2,8),(1,7),(1,8))),
 )
 ROWS=[]
+FAMILY_SCOPE=os.environ.get("YEAR5000_FAMILY","all")
+FAMILY_COUNTS={"cross":81,"floor":81,"ceiling":57,"all":219}
 def sm(n):return [int(n<0),abs(n)]
 def fields(g,s,day,rank):
     tokens=sm(s+day)+[0,0,9] # gate INDEX zero, not a second day
@@ -50,7 +52,10 @@ def native(label,family,s,mode,day,rank,gates,expected):
     print("NATIVE_IRREGULAR_YEAR5000_PASS",label)
 def main():
     if not os.path.isdir("/year5000"):raise AssertionError("evidence mount absent")
+    if FAMILY_SCOPE not in FAMILY_COUNTS:
+        raise AssertionError("unknown YEAR5000_FAMILY shard")
     for family,gates,interior,full,opened,after in GROUPS:
+        if FAMILY_SCOPE!="all" and family!=FAMILY_SCOPE:continue
         if len(gates)!=9 or any(not 42<=gates[i+1]-gates[i]<=963
                                 for i in range(8)):
             raise AssertionError("invalid synthetic gate gaps")
@@ -70,13 +75,17 @@ def main():
                 if mode=="interior":
                     native("%s_%s_zero_rank"%(family,s),family,s,mode,
                            day,0,gates,[-1])
-    if len(ROWS)!=219:raise AssertionError("missing Native records: %d"%len(ROWS))
+    if len(ROWS)!=FAMILY_COUNTS[FAMILY_SCOPE]:
+        raise AssertionError("missing Native %s records: %d"%
+                             (FAMILY_SCOPE,len(ROWS)))
     result={"schema":"befunge-stage1-year5000-irregular-native-v1",
             "source_git_blob":PIN,"native_invocations":len(ROWS),
+            "family_scope":FAMILY_SCOPE,
             "scope":"IRREGULAR_GATES_AND_EXACT_5778_LIMIT_STAGE1_OPEN",
             "functional_acceptance":False,"geometric_acceptance":False,
             "last_completed_stage":0,"records":ROWS}
     with open("/year5000/native_year5000_irregular.json","wb") as f:
         f.write(json.dumps(result,sort_keys=True,indent=2)+"\n")
-    print("NATIVE_YEAR5000_IRREGULAR_219_CASES_PASS_STAGE1_OPEN")
+    print("NATIVE_YEAR5000_IRREGULAR_%s_%d_CASES_PASS_STAGE1_OPEN"%
+          (FAMILY_SCOPE,len(ROWS)))
 if __name__=="__main__":main()
