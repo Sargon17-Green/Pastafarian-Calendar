@@ -119,6 +119,9 @@ def trial(source,scenario,expected):
                     require(key==failed_side and fired[0],
                             "test exception escaped wrong live Program")
                     stopped=True
+                    # Native step has ended exceptionally: reset the QA-only
+                    # active-IP sentinel before sampling passive peer state.
+                    active[0]=None
                     require(pre_peer[0]==pair.state(peer),
                             "injected p mutated passive peer IP/stack/I-O")
                     require(pre_peer_cells[0]==snap(
