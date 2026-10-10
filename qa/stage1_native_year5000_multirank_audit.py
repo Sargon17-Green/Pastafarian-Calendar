@@ -75,7 +75,7 @@ def main(path):
         ("wrong index",lambda d:d["records"][1]["output"].__setitem__(2,4)),
         ("wrong shift",lambda d:d["records"][25].__setitem__("shift",0)),
         ("strict open",lambda d:d["records"][65]["output"].__setitem__(0,1)),
-        ("bad sign",lambda d:d["records"][27]["input"].__setitem__(0,0)),
+        ("bad sign",lambda d:d["records"][40]["input"].__setitem__(0,0)),
     ]
     rejected=[]
     for name,change in attacks:
