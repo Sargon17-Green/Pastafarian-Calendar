@@ -88,7 +88,8 @@ def state(item):
                 for ip in p.ips)
     coords = tuple(int(p.space.get(item["point"](xy))) for xy in GUARDS)
     return (ips, coords, tuple(p.space.boundmin), tuple(p.space.boundmax),
-            item["stdin"].tell(), item["stdout"].tell())
+            item["stdin"].tell(), item["stdout"].tell(),
+            item["stdin"].getvalue(), item["stdout"].getvalue())
 
 def tick(item):
     p = item["program"]
