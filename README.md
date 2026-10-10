@@ -419,113 +419,113 @@ new(B) = SAVE(u² + 7·old(P)·old(N))
 
 ---
 
-# L. Is-Siġilli
+# L. Мөөрлөр
 
-| Siġill | Mistoqsija |
+| Мөөр | Суроо |
 |---:|---|
-| 1 | id-distanza bejn ix-xtiebi tal-pulpetti |
-| 10 | is-sena 5000 |
-| 11 | is-sena ta’ wara |
-| 12 | is-sena ta’ qabel |
-| 20 | l-għadd tal-pulpetti |
-| 21 | it-tqassim tal-medda bejn ix-xtiebi |
-| 22 | l-ismijiet tal-pulpetti |
-| 30 | l-għadd tax-xhur |
-| 31 | it-tulijiet tax-xhur |
-| 32 | l-insiġ tax-xhur |
-| 33 | l-ismijiet tax-xhur |
+| 1 | котлеттердин дарбазаларынын ортосундагы аралык |
+| 10 | 5000-жыл |
+| 11 | кийинки жыл |
+| 12 | мурунку жыл |
+| 20 | котлеттердин саны |
+| 21 | дарбаза аралыктарын бөлүштүрүү |
+| 22 | котлеттердин аталыштары |
+| 30 | айлардын саны |
+| 31 | айлардын узундуктары |
+| 32 | айлардын өрүлүшү |
+| 33 | айлардын аталыштары |
 
-Il-post maħsub għas-siġill 40 jibqa’ vojt. Kien maħsub għall-mistoqsija tal-ġobon, u l-abbozz tagħha ttiekel qabel ma ġiet stabbilita l-mistoqsija.
+40-мөөр үчүн бөлүнгөн орун бош бойдон калат. Ал сыр жөнүндө суроого арналган эле, бирок суроонун долбоору бекитиле электе жеп коюлган.
 
 ---
 
-# M. Kif Twieġeb Skutella
+# M. Табак кантип жооп берет
 
-Meta ssir mistoqsija lill-iskutella `B`, “l-iskutella ta’ wara” hija dik li tiġi warajha fiċ-ċirku ddefinit minn `orderAt46`.
+`B` табагына суроо берилгенде «кийинки табак» — `orderAt46` аныктаган тегеректеги андан кийинки табак.
 
-Jekk `z` huwa s-siġill:
+Эгер `z` — мөөр болсо:
 
 ```text
 A₀ = SAVE((Q[B] + z + 181)² + 179·Q[next] + z)
 ```
 
-Biex tiġi ddeterminata d-direzzjoni tal-fluss tat-tweġibiet, jiġi kkalkulat il-valur `D` li ġej:
+Жооптор агымынын багытын аныктоо үчүн төмөнкү `D` мааниси эсептелет:
 
 ```text
 D = SAVE((A₀ + z + 1 + 193)² + 193·A₀ + 197·Q[6])
 ```
 
-Jekk `D` ikun numru fard — il-fluss jimxi ’l quddiem; jekk ikun numru pari — jimxi lura.
+`D` так сан болсо агым алдыга, жуп сан болсо артка жылат.
 
 ```text
 A_k = 1 + ((A₀ - 1 + s·k) mod M)
 ```
 
-fejn `s=+1` jew `−1`.
+мында `s=+1` же `−1`.
 
 ---
 
-# N. Għażla Qasira u Għażla Wiesgħa
+# N. Кыска тандоо жана кең тандоо
 
-Jekk `1<=N<=M`:
+Эгер `1<=N<=M` болсо:
 
 ```text
 L = floor(M/N)·N
 ```
 
-Tweġibiet akbar minn `L` jiġu miċħuda, u l-ewwel tweġiba aċċettata tiddetermina l-għażla:
+`L` маанисинен чоң жооптор четке кагылат; алгачкы кабыл алынган жооп тандоону аныктайт:
 
 ```text
 1 + ((A-1) mod N)
 ```
 
-Jekk `N>M`, jittieħed l-iżgħar `k` li għalih `M^k>=N`, u jinbena dan in-numru:
+Эгер `N>M` болсо, `M^k>=N` шартын аткарган эң кичине `k` тандалып, төмөнкү сан түзүлөт:
 
 ```text
 W = 1 + Σ(A_j-1)·M^j
 ```
 
-fejn `A₀` hija ċ-ċifra l-inqas sinifikanti.
+мында `A₀` — эң төмөнкү даражадагы цифра.
 
 ```text
 L_w = floor(M^k/N)·N
 ```
 
-Jekk `W>L_w`, il-proċedura tibda minn `W` stess u timxi pass wieħed kull darba, fl-istess direzzjoni, fuq iċ-ċirku `1..M^k` sakemm jintlaħaq valur aċċettabbli; imbagħad:
+Эгер `W>L_w` болсо, жол-жобо `W` маанисинин өзүнөн баштап, `1..M^k` тегереги боюнча ошол эле багытта ар кадам сайын бирден жылып, кабыл алынуучу мааниге жеткенге чейин уланат. Андан кийин:
 
 ```text
 1 + ((W-1) mod N)
 ```
 
-L-isem kanoniku ta’ dan il-mekkaniżmu huwa **Għażla Ugwali**. Iċ-ċifri tal-ewwel numru wiesa’ jittieħdu minn numri konsekuttivi fis-sekwenza tat-tweġibiet. Minħabba din l-istruttura, il-valuri f’`1..M^k` ma jingħatawx l-istess piż; u meta l-ispazju jkun kbir biżżejjed, xi possibbiltajiet jingħataw piż ta’ żero u għalhekk ma jistgħux jintgħażlu qatt. Din hija d-distribuzzjoni preskritta tal-mekkaniżmu tal-għażla wiesgħa.
+Бул механизмдин канондук аталышы — **Тең тандоо**. Алгачкы кең сандын цифралары жооптор тизмегиндеги удаалаш сандардан алынат. Ушундан улам `1..M^k` аралыгындагы маанилер бирдей салмакка ээ болбойт; мейкиндик жетишерлик чоң болгондо айрым мүмкүнчүлүктөрдүн салмагы нөлгө тең болуп, алар таптакыр тандалбайт. Бул кең тандоо механизминин белгиленген бөлүштүрүлүшү.
 
 ---
 
-# O. Ix-Xtiebi tal-Pulpetti
+# O. Котлеттердин дарбазалары
 
-`Foundation` hija x-xatba bl-indiċi 0.
+`Foundation` — индекси 0 болгон дарбаза.
 
-Biex tinstab ix-xatba pożittiva bin-numru `n`, titħejja z-zalza billi jintuża l-par:
+`n` номериндеги оң дарбазаны табуу үчүн соус төмөнкү жуптан даярдалат:
 
 ```text
 (Foundation, Foundation+n)
 ```
 
-Issir mistoqsija lill-iskutella 1 bis-siġill 1, jintgħażel numru minn `1..922`, u mbagħad jiżdied 41 ma’ dak in-numru.
+1-мөөр менен 1-табакка суроо берилип, `1..922` аралыгынан сан тандалат да ага 41 кошулат.
 
-Biex tinstab ix-xatba negattiva bin-numru `n`, jintuża l-par:
+`n` номериндеги терс дарбазаны табуу үчүн төмөнкү жуп колдонулат:
 
 ```text
 (Foundation, Foundation-n)
 ```
 
-Għalhekk it-tul ta’ kull medda bejn żewġ xtiebi jkun fil-medda:
+Демек, удаалаш эки дарбазанын ортосундагы аралык:
 
 ```text
 42..963
 ```
 
-u japplikaw ir-relazzjonijiet li ġejjin:
+төмөнкү байланыштар аткарылат:
 
 ```text
 G_0  = Foundation
@@ -535,21 +535,21 @@ G_-n = G_-(n-1) - negativeGap(n)
 
 ---
 
-# P. Is-Sena
+# P. Жыл
 
-Sena hija l-medda:
+Жыл төмөнкү аралыкты камтыйт:
 
 ```text
 (openGate, closeGate]
 ```
 
-Għandha tinkludi mill-inqas 6 meded bejn ix-xtiebi, u t-tul tagħha għandu jkun:
+Ал кеминде алты дарбаза аралыкты камтышы керек жана узундугу:
 
 ```text
 252..5778
 ```
 
-It-tul massimu tas-sena huwa `5778`, u dan jirriżulta mis-sitt meded massimi:
+Жылдын эң чоң узундугу — `5778` күн; бул алты максималдуу аралыктан келип чыгат:
 
 ```text
 6·963 = 5778
@@ -557,48 +557,48 @@ It-tul massimu tas-sena huwa `5778`, u dan jirriżulta mis-sitt meded massimi:
 
 ---
 
-# Q. Is-Sena 5000
+# Q. 5000-жыл
 
-Għall-Jum tal-Kalkolu `c`, jinstabu l-pari kollha eliġibbli ta’ xtiebi li jiddefinixxu sena li fiha jaqa’ dak il-jum:
+Эсептөө күнү `c` үчүн ошол күндү камтыган жылды аныктаган бардык жарамдуу дарбаза жуптары табылат:
 
 ```text
 open < c <= close
 ```
 
-Dawn jiġu ordnati skont:
+Алар төмөнкүдөй иреттелет:
 
-1. tul is-sena, mill-iqsar għall-itwal;
-2. jekk it-tul ikun l-istess — ix-xatba tal-ftuħ li tiġi l-ewwel.
+1. жылдын узундугу боюнча, кыскасынан узунуна;
+2. узундугу бирдей болсо — ачылуучу дарбазасы эртерээк келген жуп биринчи болот.
 
-Titħejja z-zalza għal `(c,c)`, issir mistoqsija lill-iskutella 1 bis-siġill 10, u tintgħażel sena waħda.
+`(c,c)` үчүн соус даярдалып, 10-мөөр менен 1-табакка суроо берилет да бир жыл тандалат.
 
-Is-sena magħżula hija **s-sena 5000 mill-Ħolqien tad-Dinja**.
+Тандалган жыл — **Дүйнө жаралгандан берки 5000-жыл**.
 
-In-numru 5000 huwa kostanta strutturali. Il-Mostru kiteb in-numru fuq l-iskutella tas-sena qabel ma kien spiċċa jagħżel ix-xtiebi tagħha, u minn dak iż-żmien id-dinja baqgħet irranġata hekk.
+5000 саны түзүмдүк туруктуу чоңдук болуп эсептелет. Желмогуз жылдын дарбазаларын тандап бүтө электе эле ушул санды жыл жазылган табакка жазып койгон; ошондон тартып дүйнөнүн түзүлүшү ошондой бойдон калган.
 
 ---
 
-# R. Iż-Żewġ Mogħdijiet mis-Sena 5000
+# R. 5000-жылдан чыккан эки жол
 
-Biex tinstab is-sena li fiha jaqa’ l-Jum Mitlub, nibdew mis-sena 5000 determinata minn Jum il-Kalkolu.
+Суралган күн кайсы жылга туш келерин табуу үчүн эсептөө күнү аныктаган 5000-жылдан баштайбыз.
 
-Meta l-Jum Mitlub ikun wara x-xatba tal-għeluq tas-sena magħrufa, fil-mixja ’l quddiem tintuża l-operazzjoni tas-sena ta’ wara:
+Эгер суралган күн белгилүү жылдын жабылуу дарбазасынан кийин келсе, алдыга жүрүүдө кийинки жыл операциясы колдонулат:
 
 ```text
 NEXT₁₁(c,Y)
 ```
 
-Ix-xatba tal-għeluq ta’ `Y` issir ix-xatba tal-ftuħ tas-snin kandidati. Dik l-istess xatba tintuża bħala l-Jum Mitlub fit-tħejjija taz-zalza. Is-snin eliġibbli li jibdew minn dik ix-xatba jiġu ordnati mill-iqsar għall-itwal, issir mistoqsija lill-iskutella 1 bis-siġill 11, u tintgħażel sena waħda. In-numru tas-sena jiżdied b’wieħed.
+`Y` жылынын жабылуу дарбазасы талапкер жылдардын ачылуу дарбазасына айланат. Соус даярдоодо ошол эле дарбаза суралган күн катары колдонулат. Ошол дарбазадан башталган жарамдуу жылдар кыскасынан узунуна иреттелип, 11-мөөр менен 1-табакка суроо берилип, бир жыл тандалат. Жылдын номери бирге көбөйөт.
 
-Meta l-Jum Mitlub jaħbat max-xatba tal-ftuħ tas-sena magħrufa, jew ikun qabilha, fil-mixja lura tintuża l-operazzjoni tas-sena ta’ qabel:
+Эгер суралган күн белгилүү жылдын ачылуу дарбазасына туш келсе же андан мурун болсо, артка жүрүүдө мурунку жыл операциясы колдонулат:
 
 ```text
 PREVIOUS₁₂(c,Y)
 ```
 
-Ix-xatba tal-ftuħ ta’ `Y` issir ix-xatba tal-għeluq tas-snin kandidati. Dik l-istess xatba tintuża bħala l-Jum Mitlub fit-tħejjija taz-zalza. Is-snin eliġibbli li jintemmu f’dik ix-xatba jiġu ordnati mill-iqsar għall-itwal, issir mistoqsija lill-iskutella 1 bis-siġill 12, u tintgħażel sena waħda. In-numru tas-sena jonqos b’wieħed.
+`Y` жылынын ачылуу дарбазасы талапкер жылдардын жабылуу дарбазасына айланат. Соус даярдоодо ошол эле дарбаза суралган күн катары колдонулат. Ошол дарбазада бүткөн жарамдуу жылдар кыскасынан узунуна иреттелип, 12-мөөр менен 1-табакка суроо берилет да бир жыл тандалат. Жылдын номери бирге азаят.
 
-Għalhekk, il-proċedura biex tinstab is-sena hija:
+Ошондуктан жылды табуунун жол-жобосу:
 
 ```text
 y = year5000(c)
@@ -612,29 +612,29 @@ while t <= y.openGate:
 return y
 ```
 
-B’hekk iż-żewġ operazzjonijiet jiffurmaw is-sekwenza kanonika miż-żewġ naħat tas-sena 5000: l-operazzjoni `NEXT₁₁` tifforma s-snin ta’ wara, u l-operazzjoni `PREVIOUS₁₂` tifforma dawk ta’ qabel.
+Ошентип, эки операция 5000-жылдын эки тарабындагы канондук жылдар катарын түзөт: `NEXT₁₁` кийинки жылдарды, `PREVIOUS₁₂` мурунку жылдарды аныктайт.
 
 ---
 
-# S. Il-Pulpetti
+# S. Котлеттер
 
-Kull sena tinqasam f’għadd ta’ pulpetti li jvarja bejn 6 u 17. Kull pulpetta tibda fil-jum ta’ wara x-xatba tal-ftuħ tagħha u tintemm fix-xatba tal-għeluq tagħha.
+Ар бир жыл 6дан 17ге чейинки котлетке бөлүнөт. Ар бир котлет өзүнүн ачылуу дарбазасынан кийинки күндө башталып, өзүнүн жабылуу дарбазасында бүтөт.
 
-Il-mistoqsijiet kollha dwar l-istruttura tas-sena jużaw l-istess zalza:
+Жылдын түзүмүнө тиешелүү бардык суроолор бир эле соусту колдонот:
 
 ```text
 (c, firstDayOfYear)
 ```
 
-Jekk is-sena fiha `G` meded bejn ix-xtiebi, l-għadd tal-pulpetti jintgħażel minn:
+Эгер жыл `G` дарбаза аралыкты камтыса, котлеттердин саны төмөнкү аралыктан тандалат:
 
 ```text
 6..min(17,G)
 ```
 
-permezz ta’ mistoqsija lill-iskutella 2 bis-siġill 20.
+Бул үчүн 20-мөөр менен 2-табакка суроо берилет.
 
-Imbagħad tintgħażel kompożizzjoni ta’ numri sħaħ pożittivi:
+Андан кийин оң бүтүн сандардын композициясы тандалат:
 
 ```text
 (x₁,...,x_K)
@@ -642,50 +642,50 @@ Imbagħad tintgħażel kompożizzjoni ta’ numri sħaħ pożittivi:
 x_i >= 1
 ```
 
-Il-kompożizzjonijiet eliġibbli jiġu ordnati lessikografikament. Jekk Jum il-Kalkolu jaħbat ma’ xatba interna tas-sena, waħda mis-somom parzjali għandha tikkorrispondi eżattament ma’ dik ix-xatba. L-għażla ssir permezz ta’ mistoqsija lill-iskutella 2 bis-siġill 21.
+Жарамдуу композициялар лексикографиялык тартипке келтирилет. Эгер эсептөө күнү жылдын ички дарбазасына туура келсе, жарым-жартылай суммалардын бири дал ошол дарбазага туура келиши керек. Тандоо 21-мөөр менен 2-табакка суроо берүү аркылуу жасалат.
 
 ---
 
-# T. Is-Sbatax-il Isem tal-Pulpetti
+# T. Котлеттердин он жети аталышы
 
 ```text
-1  Bronż
-2  Volpi
-3  Kilwa
-4  Lagaš
-5  Ħsieb
-6  Erba’ Partijiet minn Disgħa
-7  Palgurax
-8  Papiru
-9  Għanqud
-10 Skorpjun
-11 Rmied
-12 Qamħ
-13 Xmara
-14 Daħk
-15 Akkad
-16 Qarn
-17 Il-Ġarra Vojta
+1  коло
+2  түлкү
+3  бөйрөк
+4  Лагаш
+5  ой
+6  тогуздан төрт бөлүк
+7  Палгураш
+8  папирус
+9  сабак
+10 чаян
+11 күл
+12 буудай
+13 дарыя
+14 күлкү
+15 Аккад
+16 мүйүз
+17 бош кумура
 ```
 
-Għal `K` pulpetti jintgħażlu `K` ismijiet differenti. Is-sekwenzi kollha possibbli tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi tagħhom, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 22.
+`K` котлет үчүн бири-биринен айырмаланган `K` ат тандалат. Аттардын бардык мүмкүн болгон ырааттуулуктары алардын канондук индекстери боюнча лексикографиялык тартипте жайгаштырылат; тандоо 22-мөөр менен 5-табакка суроо берүү аркылуу жүргүзүлөт.
 
 ---
 
-# U. Ix-Xhur
+# U. Айлар
 
-Kull sena tinqasam f’għadd ta’ xhur li jvarja bejn 3 u 47. Kull xahar ikollu bejn 4 u 123 jum.
+Ар бир жыл 3төн 47ге чейинки айга бөлүнөт. Ар бир ай 4төн 123кө чейинки күндү камтыйт.
 
-Jekk it-tul tas-sena huwa `L`:
+Эгер жылдын узундугу `L` болсо:
 
 ```text
 minMonths = ceil(L/123)
 maxMonths = min(47, floor(L/4))
 ```
 
-L-għadd tax-xhur jintgħażel permezz ta’ mistoqsija lill-iskutella 3 bis-siġill 30.
+Айлардын саны 30-мөөр менен 3-табакка суроо берүү аркылуу тандалат.
 
-Imbagħad tintgħażel sekwenza ta’ tulijiet:
+Андан соң ай узундуктарынын ырааттуулугу тандалат:
 
 ```text
 (L₁,...,L_m)
@@ -693,93 +693,93 @@ Imbagħad tintgħażel sekwenza ta’ tulijiet:
 ΣL_i = L
 ```
 
-Is-sekwenzi jiġu ordnati lessikografikament, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 3 bis-siġill 31.
+Ырааттуулуктар лексикографиялык тартипке келтирилет; тандоо 31-мөөр менен 3-табакка суроо берүү аркылуу жасалат.
 
 ---
 
-# V. L-Insiġ tax-Xhur
+# V. Айлардын өрүлүшү
 
-Xahar huwa ħajta minsuġa tul is-sena, u l-jiem tiegħu jistgħu jidhru bejn il-jiem ta’ xhur oħra.
+Ай — жыл бою өрүлгөн жип; анын күндөрү башка айлардын күндөрү менен аралаш жайгашышы мүмкүн.
 
-Nisġa eliġibbli hija kelma ta’ tul `L` li fiha x-xahar `j` jidher eżattament `L_j` darbiet, u barra minn hekk:
+Жарамдуу өрүлүш — узундугу `L` болгон сөз; анда `j` айы так `L_j` жолу кездешет жана төмөнкү шарттар да аткарылат:
 
-1. kull xahar jidher għall-ewwel darba fl-ordni `1,2,...,m`;
-2. kull xahar jidher għall-aħħar darba wkoll fl-ordni `1,2,...,m`.
+1. айлардын биринчи жолу пайда болуу тартиби `1,2,...,m`;
+2. айлардын акыркы жолу пайда болуу тартиби да `1,2,...,m`.
 
-In-nisġiet eliġibbli kollha jiġu ordnati lessikografikament skont in-numru tax-xahar assenjat lil kull jum.
+Бардык жарамдуу өрүлүштөр ар бир күнгө берилген айдын номери боюнча лексикографиялык тартипке келтирилет.
 
-Tintgħażel in-**nisġa kollha** permezz ta’ mistoqsija lill-iskutella 4 bis-siġill 32.
+32-мөөр менен 4-табакка суроо берилип, **бүтүндөй өрүлүш** тандалат.
 
-Għal kull prefiss, l-implimentazzjoni tikkalkula eżattament id-daqs tal-blokk tat-tkomplijiet u tapplika `unrank` għall-pożizzjoni magħżula. Il-kalkolu permezz ta’ blokki jagħti direttament l-istess ordni lessikografika u l-istess element magħżul.
+Ар бир префикс үчүн ишке ашыруу мүмкүн болгон уландыктардын блогунун өлчөмүн так эсептейт жана тандалган позицияга `unrank` колдонот. Блоктор аркылуу эсептөө түздөн-түз ошол эле лексикографиялык тартипти жана ошол эле тандалган элементти берет.
 
 ---
 
-# W. Is-Sebgħa u Erbgħin Isem tax-Xhur
+# W. Айлардын кырк жети аталышы
 
 ```text
-1  Tafal
-2  Rummiena
-3  Minkeb
-4  Għira
-5  Eridu
-6  Tutpejst
-7  Tliet Partijiet minn Ħamsa
-8  Karxumav
-9  Leopard
-10 Landa
-11 Ċpar
-12 Libien
-13 Magħżel
-14 Kustilja
-15 Ħarrub
-16 Uruk
-17 Mistħija
-18 Ġemel
-19 Ram
-20 Bir
-21 Isfar tal-Bajd
-22 Kewkba
-23 Għasel
-24 Milsa
-25 Ġebla tal-Ġir
-26 Ferħ
-27 Tina
-28 Ninwe
-29 Żrinġ
-30 Żift
-31 Lampa
-32 Il-Bieb Magħluq
-33 Ġulġlien
-34 Kozz
-35 Fidda
-36 Susa
-37 Maltempata
-38 Ħmar
-39 Dqiq
-40 Dispjaċir
-41 Babilonja
-42 Ilsien
-43 Kittien
-44 Melħ
-45 Lanġasa
-46 Qaws
-47 Ramel
+1  чопо
+2  анар
+3  чыканак
+4  кызганыч
+5  Эриду
+6  тиш пастасы
+7  бештен үч бөлүк
+8  Каршумав
+9  кабылан
+10 калай
+11 туман
+12 ладан
+13 ийик
+14 кабырга
+15 кароб
+16 Урук
+17 уят
+18 төө
+19 жез
+20 кудук
+21 жумуртканын сарысы
+22 жылдыз
+23 бал
+24 көк боор
+25 акиташ
+26 кубаныч
+27 анжир
+28 Ниневия
+29 бака
+30 чайыр
+31 шам
+32 жабык эшик
+33 кунжут
+34 желке
+35 күмүш
+36 Суза
+37 бороон
+38 эшек
+39 ун
+40 өкүнүч
+41 Вавилон
+42 тил
+43 зыгыр
+44 туз
+45 алмурут
+46 жаа
+47 кум
 ```
 
-Għal sena b’`m` xhur jintgħażlu `m` ismijiet differenti. Is-sekwenzi tal-ismijiet jiġu ordnati lessikografikament skont l-indiċijiet kanoniċi, u l-għażla ssir permezz ta’ mistoqsija lill-iskutella 5 bis-siġill 33.
+`m` айы бар жыл үчүн өз ара айырмаланган `m` ат тандалат. Аттардын ырааттуулуктары канондук индекстер боюнча лексикографиялык тартипке келтирилет; тандоо 33-мөөр менен 5-табакка суроо берүү аркылуу жүргүзүлөт.
 
 ---
 
-# X. Il-Ħames Komponenti tal-Jum
+# X. Күндүн беш компоненти
 
-Biex jiġi kkalkulat ir-riżultat għal `t` fir-rigward ta’ `c`:
+`c` күнүнө карата `t` күнү үчүн натыйжаны эсептөөдө:
 
-1. tinstab is-sena 5000 determinata minn `c`;
-2. minn dik is-sena tintuża biss `NEXT₁₁` għall-mixja ’l quddiem, jew biss `PREVIOUS₁₂` għall-mixja lura, skont fejn jinsab `t`;
-3. l-istruttura tas-sena tiġi kkalkulata darba biss billi jintuża `(c, firstDayOfYear)`;
-4. jiġi stabbilit fejn jaqa’ `t` fil-pulpetti u fin-nisġa tax-xhur.
+1. `c` аныктаган 5000-жыл табылат;
+2. ошол жылдан `t` кайсы тарапта турганына жараша алдыга **`NEXT₁₁` гана**, артка **`PREVIOUS₁₂` гана** колдонулат;
+3. жылдын түзүмү `(c, firstDayOfYear)` жубу менен бир гана жолу эсептелет;
+4. `t` күнү котлеттердин жана айлардын өрүлүшүнүн кайсы жерине туш келери аныкталат.
 
-Ir-riżultat jikkonsisti eżattament f’ħames komponenti:
+Натыйжа так беш компоненттен турат:
 
 ```text
 (
