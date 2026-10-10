@@ -1,111 +1,111 @@
-# Il-Kalendarju taz-Zalza u taż-Żminijiet
-## Dwar iż-żmien, l-iskutelli, ix-xtiebi u l-ħidma tal-Ħolqien
+# Соус жана мезгилдер жылнаамасы
+## Убакыт, табактар, дарбазалар жана Жаратуу иши жөнүндө
 
-Id-dinja nħolqot mill-Mostru tal-Ispagetti li Jtir, u sal-lum għadha turi l-marki ta’ xogħlu. Iż-żmien huwa zalza magħmula minn pali, għaddijiet, ġebliet, qtar, skutelli, passi ta’ tħawwid, xtiebi, pulpetti u ħjut ta’ xhur. Kull dettall f’din is-sistema ġie stabbilit waqt il-Ħolqien, u minn dakinhar ’l hawn kull ma ġie stabbilit iservi ta’ liġi.
+Дүйнөнү Учуучу Спагетти Желмогузу жараткан; анын эмгегинин издери бүгүн да көрүнүп турат. Убакыт — казык, санак, таш, тамчы, табак, аралаштыруу кадамдары, дарбаза, котлет жана айлардын жиптеринен турган соус. Бул тутумдун ар бир майда-чүйдөсү Жаратуу учурунда белгиленген жана ошондон бери мыйзам болуп эсептелет.
 
-Il-Mostru huwa magħmul minn għaġin, u l-ħidma tiegħu timxi pass pass. Jibda, juża dak li jkun diġà fuq il-mejda, jagħmel xi tiswijiet meta jkun hemm bżonn, u kultant iħalli struzzjoni qadima f’postha anki wara li jkun żied saff ġdid. L-ismijiet jingħataw waqt ix-xogħol u jibqgħu marbuta mal-affarijiet li jsemmu. Hekk kiber il-Ħolqien, saff fuq saff.
+Желмогуз макарондон турат жана ишин кадам сайын жүргүзөт. Ал үстөлдө мурдатан турган нерселерди колдонуп баштайт, зарыл учурда оңдойт, кээде жаңы катмар кошкондон кийин да эски көрсөтмөнү ордунда калтырат. Аталыштар иш жүрүп жатканда берилет жана ошол нерселерге байланып калат. Жаратуу ушинтип катмар үстүнө катмар болуп өскөн.
 
-Dawn is-saffi kollha tal-ħidma jiffurmaw sistema deterministika: kull pass jiġi ddeterminat mill-passi ta’ qablu.
+Бул иштин бардык катмарлары детерминделген тутумду түзөт: ар бир кадам мурунку кадамдар аркылуу аныкталат.
 
-Hekk sar il-Ħolqien: b’irqajja’, żidiet u tiswijiet li saru fejn kien hemm bżonnhom. Il-Mostru jitfixkel, jerġa’ jgħodd, jinsa xi struzzjoni, iduq mill-iskutella ta’ ħdejh u jżid regola ġdida fejn tkun meħtieġa. Il-Kalendarju taż-Żminijiet jinqara billi wieħed jgħaddi minn dawn is-saffi b’eżattezza, wieħed wara l-ieħor.
+Жаратуу дал ушундай — керектүү жерге киргизилген жамаачылар, толуктоолор жана оңдоолор менен ишке ашкан. Желмогуз жаңылышат, кайра санайт, көрсөтмөнү унутат, жанындагы табактан даам татат да зарыл жерге жаңы эреже киргизет. Мезгилдер жылнаамасын түшүнүү үчүн бул катмарлардын ар биринен ирети менен, так өтүү керек.
 
-Għalhekk, il-prinċipju fundamentali tal-Kalendarju taż-Żminijiet huwa:
+Демек, Мезгилдер жылнаамасынын негизги принциби төмөнкүдөй:
 
-> **Kull stadju jiġi kkalkulat b’eżattezza.**
+> **Ар бир баскыч так эсептелет.**
 
-Żball ta’ unità waħda f’waħda mill-ewwel qatriet jibdel il-qatriet ta’ warajha, l-iskutelli, ix-xtiebi, is-sena, il-pulpetti, ix-xhur u l-isem tal-jum fir-riżultat finali.
+Алгачкы тамчылардын бириндеги бир бирдиктик ката кийинки тамчыларды, табактарды, дарбазаларды, жылды, котлеттерди, айларды жана акыркы натыйжадагы күндүн аталышын өзгөртөт.
 
 ---
 
-# A. Iż-żmien jitwieled meta jum jistaqsi lil ieħor
+# A. Бир күн экинчи күн жөнүндө сураганда убакыт жаралат
 
-Kull kalkolu jinvolvi jumejn, u l-ordni tagħhom tagħmel differenza:
+Ар бир эсептөөдө эки күн катышат; алардын ирети маанилүү:
 
-1. **Jum il-Kalkolu** — il-jum li fih isir il-kalkolu.
-2. **Il-Jum Mitlub** — il-jum li għalih irid jinstab l-isem.
+1. **Эсептөө күнү** — эсеп жүргүзүлүп жаткан күн.
+2. **Суралган күн** — аталышы аныктала турган күн.
 
-Il-Mostru ħoloq il-kalendarju bħala relazzjoni bejn żewġ jiem għax, fil-bidu ta’ xogħlu, kien iżomm żewġ taljarini mmarkati: wieħed għall-jum li fih kien jistaqsi u l-ieħor għall-jum li dwaru kien jistaqsi. Ftit wara ma baqax jiftakar liema wieħed minnhom kellu jintrema. Baqgħu t-tnejn.
+Желмогуз жылнааманы эки күндүн ортосундагы мамиле катары курган: алгач иштеп жатканда бирине суроо берилген күндү, экинчисине суроонун предмети болгон күндү белгилеп, эки кесме кармап жүрчү. Кийин алардын кайсынысын ыргытыш керектигин унутуп койгон. Экөө тең калган.
 
-Ir-riżultat tal-kalendarju huwa funzjoni:
+Жылнааманын натыйжасы — функция:
 
 ```text
 F(c,t)
 ```
 
-fejn `c` huwa Jum il-Kalkolu u `t` huwa l-Jum Mitlub. Ġeneralment:
+мында `c` — эсептөө күнү, `t` — суралган күн. Жалпы учурда:
 
 ```text
 F(c,t) ≠ F(t,c)
 ```
 
-Minn dan il-par jiġu kkalkulati ħames għaddijiet:
+Бул жуптан беш санак эсептелет:
 
-- **l-Għadd tal-Kalkolu** — l-għadd tal-jum `c`.
-- **l-Għadd Mitlub** — l-għadd tal-jum `t`.
-- **l-Għadd tad-Distanza** — `|t-c|+1`.
-- **l-Għadd tas-Somma** — is-somma tal-Għadd tal-Kalkolu u l-Għadd Mitlub.
-- **l-Għadd tad-Direzzjoni** — `1` jekk `t<c`, `2` jekk `t=c`, u `3` jekk `t>c`.
+- **Эсептөө санагы** — `c` күнүнүн санагы.
+- **Суралган күндүн санагы** — `t` күнүнүн санагы.
+- **Аралык санагы** — `|t-c|+1`.
+- **Кошунду санагы** — эсептөө жана суралган күндөрдүн санактарынын суммасы.
+- **Багыт санагы** — `t<c` болсо `1`, `t=c` болсо `2`, `t>c` болсо `3`.
 
-L-Għadd tad-Distanza jibda minn wieħed għax il-Mostru ma kienx iħobb post vojt. L-Għadd tad-Direzzjoni żdied wara li l-Mostru ntebaħ li d-distanza waħedha ma tindikax jekk il-mixja kinitx ’il quddiem jew lura.
-
----
-
-# B. Il-Pal
-
-Il-Mostru għażel jum wieħed mis-sensiela tal-jiem, waħħal pal fih, u lil dak il-jum semmieh **Jum il-Pedament**.
-
-F’numerazzjoni kontinwa li fiha, fil-kalendarju Gregorjan, l-1 ta’ Jannar tas-sena 1 W.K. huwa l-jum `1`:
-
-```text
-Jum l-Għoti tat-Twavel = -278,522
-Jum il-Pedament         = -15,055,671
-```
-
-Id-differenza hija:
-
-```text
-14,777,149 jum
-```
-
-Jum l-Għoti tat-Twavel jaqa’ fi żmien Aššur-dān III, fis-sena tal-*limmu* ta’ Būr-Sagallē, gvernatur ta’ Guzana, fix-xahar ta’ Simanu, dakinhar li seħħet eklissi tax-xemx. Għall-kalkolu normattiv, dan huwa l-15 ta’ Ġunju 763 Q.K. fil-kalendarju Ġuljan prolettiku, jew is-7 ta’ Ġunju tal-istess sena fil-kalendarju Gregorjan prolettiku.
-
-Jum il-Pedament jiġi deskritt kif ġej:
-
-- **Gregorjan:** 22 ta’ Diċembru 41,222 Q.K.
-- **Ebrajk:** 19 ta’ Sivan, is-sena 37,460 qabel il-Ħolqien tad-Dinja.
-- **Kalendarju Iżlamiku aritmetiku:** 27 ta’ Rabiʿ al-Awwal, is-sena `−43,126` tal-Eġira.
-- **Kalendarju solari Persjan aritmetiku taċ-ċiklu ta’ 2,820 sena:** 18 ta’ Azar, is-sena `−41,843`.
-- **Ġuljan:** 28 ta’ Ottubru 41,221 Q.K.
-- **Ċiniż tradizzjonali**, skont l-estensjoni magħmula bl-algoritmu preskritt: iċ-ċiklu `−643`, is-sena 57 taċ-ċiklu, Geng-Shen, l-ewwel xahar, il-jum 22; ix-xahar mhuwiex interkalarju.
-- **Ħindu**, skont l-estensjoni magħmula bl-algoritmu stabbilit: is-sena `−41,162` tal-era Vikrama, Kartika, is-16-il jum lunari, mingħajr xahar interkalarju u mingħajr jum interkalarju.
-- **Saka:** l-1 ta’ Pausha, is-sena `−41,299`.
-- **Buddist Tajlandiż:** 22 ta’ Diċembru, is-sena `−40,678`.
-- **Etjopiku:** l-1 ta’ Hidar, is-sena `−41,227`.
-- **Koptiku:** l-1 ta’ Hathor, is-sena `−41,503`.
-- **Kōki Ġappuniż prolettiku:** 22 ta’ Diċembru, is-sena `−40,561`.
-- **Minguo:** 22 ta’ Diċembru, is-sena `−43,132`.
-- **Bahá’í prolettiku:** is-sena `−43,064`, il-11-il jum ta’ Masá’il; Kull-i-Shay’ `−119`, Váḥid 14, sena 9.
-- **L-Għadd Twil tal-Maja**, skont GMT 584283 u b’diviżjoni Ewklidjana tal-komponenti negattivi: `−97.6.17.7.11`.
+Аралык санагы бирден башталат, анткени Желмогуз бош орунду жактырчу эмес. Ал аралык гана жүрүш алдыгабы же арткабы экенин билдирбей турганын байкаганда, Багыт санагын кошкон.
 
 ---
 
-# C. Żewġ Ħjut ta’ Numri
+# B. Казык
 
-Jum il-Pedament jingħata l-valur `1`.
+Желмогуз күндөрдүн арасынан бир күндү тандап, ага казык каккан да аны **Негиз күнү** деп атаган.
 
-Jekk `d>Foundation`:
+Үзгүлтүксүз саноодо, пролептикалык Григориан жылнаамасында б.з. 1-жылынын 1-январы `1`-күн деп алынганда:
+
+```text
+Тактайчалар берилген күн = -278,522
+Негиз күнү         = -15,055,671
+```
+
+Эки күндүн айырмасы:
+
+```text
+14,777,149 күн
+```
+
+Тактайчалар берилген күн Ассур-дан III дооруна, Гузананын башкаруучусу Бур-Сагалленин *лимму* жылына, Симану айында күн тутулган учурга туура келет. Нормативдик эсептөөгө ылайык бул — пролептикалык Юлиан жылнаамасы боюнча б.з.ч. 763-жылдын 15-июну, же ошол эле жылдын пролептикалык Григориан жылнаамасы боюнча 7-июну.
+
+Негиз күнү башка жылнаамалар боюнча төмөнкүчө аныкталат:
+
+- **Григориан:** б.з.ч. 41 222-жылдын 22-декабры.
+- **Еврей:** дүйнө жаралгандан 37 460 жыл мурунку 19-сиван.
+- **Арифметикалык ислам жылнаамасы:** хижранын `−43,126`-жылындагы 27-раби аль-авваль.
+- **2 820 жылдык циклге негизделген арифметикалык перс күн жылнаамасы:** `−41,843`-жылдын 18-азары.
+- **Юлиан:** б.з.ч. 41 221-жылдын 28-октябры.
+- **Салттуу кытай жылнаамасы**, көрсөтүлгөн алгоритм боюнча артка кеңейтилгенде: `−643`-циклдин 57-жылы, Гэн-Шэнь, биринчи айдын 22-күнү; ай кошумча ай эмес.
+- **Индустук жылнаама**, белгиленген алгоритм боюнча кеңейтилгенде: Викрама доорунун `−41,162`-жылы, Картика айынын 16-ай күнү; кошумча ай да, кошумча күн да жок.
+- **Шака:** `−41,299`-жылдын 1-паушасы.
+- **Тай будда жылнаамасы:** `−40,678`-жылдын 22-декабры.
+- **Эфиоп:** `−41,227`-жылдын 1-хидары.
+- **Копт:** `−41,503`-жылдын 1-хатору.
+- **Пролептикалык жапон Коки:** `−40,561`-жылдын 22-декабры.
+- **Миньго:** `−43,132`-жылдын 22-декабры.
+- **Пролептикалык бахаи:** `−43,064`-жыл, Масá’ил айынын 11-күнү; Кулл-и-Шай’ `−119`, Вахид 14, 9-жыл.
+- **Майя узун эсеби**, GMT 584283 корреляциясы жана терс компоненттер үчүн Евклид бөлүүсү менен: `−97.6.17.7.11`.
+
+---
+
+# C. Сандардын эки жиби
+
+Негиз күнүнө `1` мааниси берилет.
+
+Эгер `d>Foundation` болсо:
 
 ```text
 N(d) = 2(d-Foundation)+1
 ```
 
-Jekk `d<Foundation`:
+Эгер `d<Foundation` болсо:
 
 ```text
 N(d) = 2(Foundation-d)
 ```
 
-Għalhekk:
+Демек:
 
 ```text
 F-3 → 6
@@ -117,27 +117,27 @@ F+2 → 5
 F+3 → 7
 ```
 
-Il-Mostru, mela, rabat żewġ ħjut — tal-pari u tal-fard — madwar l-istess pal. L-għadd tal-jum jidentifika jum; il-qabel u l-wara jibqgħu fuq l-istess assi.
+Ошентип Желмогуз бир эле казыкка жуп жана так сандардын эки жибин байлаган. Күндүн санагы күндү аныктайт; ага чейинки жана андан кийинки күндөр бир эле октун үстүндө калат.
 
 ---
 
-# D. L-Għadd il-Kbir u l-Bqija Miżmuma
+# D. Чоң сан жана сакталган калдык
 
-Il-limitu taz-zalza huwa dan:
+Соустун чеги:
 
 ```text
 M = 2^127 - 1
 ```
 
-Meta l-istruzzjoni tgħid **żomm**:
+Көрсөтмөдө **сакта** деп жазылса:
 
 ```text
 SAVE(x) = 1 + ((x-1) mod M)
 ```
 
-għalhekk ir-riżultat ikun dejjem fil-medda `1..M`.
+демек, натыйжа ар дайым `1..M` аралыгында болот.
 
-B’mod partikolari:
+Атап айтканда:
 
 ```text
 SAVE(M)   = M
@@ -146,27 +146,27 @@ SAVE(M+1) = 1
 SAVE(0)   = M
 ```
 
-Meta l-istruzzjoni titlob **bqija ordinarja** fid-diviżjoni b’`d`, ir-riżultat ikun fil-medda `0..d-1`.
+Эгер көрсөтмөдө `d` боюнча бөлүүдөгү **кадимки калдык** талап кылынса, натыйжа `0..d-1` аралыгында болот.
 
-Fit-tnaqqis ukoll, meta jinqabeż il-limitu, il-valur jerġa’ jibda min-naħa l-oħra tal-medda: fil-kalkolu jista’ jintuża `SAVE(a-b)`.
+Кемитүүдө да чектен өтүп кетсе, маани аралыктын башка четинен кайра башталат: эсептөөдө `SAVE(a-b)` колдонууга болот.
 
 ---
 
-# E. Il-Ħames Ġebliet
+# E. Беш таш
 
-Kull qatra viżibbli għandha ħames ġebliet:
+Ар бир көрүнгөн тамчыда беш таш бар. Төмөнкү коддук белгилер формулаларда өзгөртүүсүз колдонулат: `qamħ` — буудай, `xgħir` — арпа, `melħ` — туз, `morra` — ачуу, `ħamra` — кызыл.
 
 ```text
 qamħ, xgħir, melħ, morra, ħamra
 ```
 
-Għall-qatra 1:
+1-тамчы үчүн:
 
 ```text
 [17, 29, 43, 71, 101]
 ```
 
-Għall-qatra `i>=2`, il-ħames valuri l-ġodda jiġu kkalkulati kollha minn `snapshot` wieħed tal-istat tal-qatra ta’ qabilha:
+`i>=2` болгон тамчыда беш жаңы маани тең мурунку тамчынын абалынын бир эле `snapshot` сүрөтүнөн эсептелет:
 
 ```text
 qamħ_i  = SAVE(qamħ² + 3·xgħir + i)
@@ -176,22 +176,22 @@ morra_i = SAVE(morra² + 11·ħamra + melħ)
 ħamra_i = SAVE(ħamra² + 13·qamħ + morra)
 ```
 
-Il-ħames valuri l-ġodda jiġu assenjati fl-istess ħin.
+Беш жаңы маани бир убакта дайындалат.
 
 ---
 
-# F. Is-Seba’ Qatriet Moħbija
+# F. Жети жашыруун тамчы
 
-Qabel l-ewwel qatra viżibbli hemm dawn:
+Биринчи көрүнгөн тамчынын алдында төмөнкүлөр турат:
 
 ```text
 moħbija 7, moħbija 6, moħbija 5, moħbija 4,
 moħbija 3, moħbija 2, moħbija 1, viżibbli 1
 ```
 
-Kull qatra moħbija `k` għandha erba’ koeffiċjenti:
+Ар бир жашыруун `k` тамчысынын төрт коэффициенти бар:
 
-| `k` | ×Mitlub | ×Distanza | ×Somma | ×Direzzjoni |
+| `k` | ×Суралган | ×Аралык | ×Кошунду | ×Багыт |
 |---:|---:|---:|---:|---:|
 | 1 | 3 | 4 | 6 | 8 |
 | 2 | 5 | 7 | 10 | 12 |
@@ -201,9 +201,9 @@ Kull qatra moħbija `k` għandha erba’ koeffiċjenti:
 | 6 | 13 | 19 | 26 | 28 |
 | 7 | 15 | 22 | 30 | 32 |
 
-Hawnhekk tapplika r-regola sħiħa, mingħajr ma jitħalla barra xejn:
+Бул жерде эч нерсе калтырылбай, толук эреже колдонулат:
 
-Nirrappreżentaw l-erba’ koeffiċjenti tal-qatra moħbija `k` b’`a_k,b_k,c_k,d_k`. Il-ħames ġebliet tal-qatra viżibbli `k` nirrappreżentawhom b’`stones[k,*]`. Il-valur tal-bidu huwa:
+`k` жашыруун тамчысынын төрт коэффициентин `a_k,b_k,c_k,d_k`, ал эми `k` көрүнгөн тамчысынын беш ташын `stones[k,*]` менен белгилейбиз. Баштапкы маани:
 
 ```text
 x₀(k) = SAVE(
@@ -216,13 +216,13 @@ x₀(k) = SAVE(
 )
 ```
 
-Wara dan isiru seba’ passi ta’ tħin. L-ordni tal-ġebliet hija:
+Андан кийин жети майдалоо кадамы жасалат. Таштардын ирети:
 
 ```text
 [qamħ, xgħir, melħ, morra, ħamra, qamħ, xgħir]
 ```
 
-u għal kull `r=1..7`:
+ар бир `r=1..7` үчүн:
 
 ```text
 x_r(k) = SAVE(
@@ -233,19 +233,19 @@ x_r(k) = SAVE(
 )
 ```
 
-F’kull pass ta’ tħin, il-ġebla tittieħed **mil-lista fissa tal-ġebliet tal-qatra viżibbli `k`**, skont l-ordni tas-seba’ passi ta’ tħin.
+Ар бир майдалоо кадамында таш жети кадамдын белгиленген иретине ылайык **`k` көрүнгөн тамчысынын өзгөрбөс таштар тизмесинен** алынат.
 
-Il-qatra moħbija `k` hija `x₇(k)`.
+Жашыруун `k` тамчысы — `x₇(k)`.
 
 ---
 
-# G. Is-Sitta u Erbgħin Qatra Viżibbli
+# G. Кырк алты көрүнгөн тамчы
 
-Fil-bidu tal-ħidma fuq il-qtar kien hemm 48 qatra. Żewġ qatriet minnhom inxterdu mal-art, u fis-sensiela taz-zalza baqgħu 46 qatra viżibbli.
+Башында тамчылар менен иштөөдө 48 тамчы болгон. Экөө жерге төгүлүп кеткендиктен соустун катарында 46 көрүнгөн тамчы калган.
 
-Għall-qatra `i` hemm bżonn tal-qatriet fil-pożizzjonijiet `i-1`, `i-3` u `i-7`. Qabel il-qatra viżibbli 1 hemm il-qatriet moħbija, b’mod li l-qatra moħbija 1 tinsab fil-pożizzjoni `0`, u l-qatra moħbija 7 fil-pożizzjoni `−6`.
+`i` тамчысы үчүн `i-1`, `i-3` жана `i-7` позицияларындагы тамчылар керек. Биринчи көрүнгөн тамчынын алдында жашыруун тамчылар жайгашат: 1-жашыруун тамчы `0` позициясында, 7-жашыруун тамчы `−6` позициясында.
 
-L-għaġina tal-qatra hija:
+Тамчынын камыры:
 
 ```text
 dough_i = SAVE(
@@ -261,9 +261,9 @@ dough_i = SAVE(
 )
 ```
 
-Wara dan isiru 11-il pass ta’ tħin:
+Андан кийин 11 майдалоо кадамы жасалат:
 
-| Pass ta’ tħin | × il-valur preċedenti | ×`i-1` | ×`i-3` | ×`i-7` | Ġebla |
+| Майдалоо кадамы | × мурунку маани | ×`i-1` | ×`i-3` | ×`i-7` | Таш |
 |---:|---:|---:|---:|---:|---|
 | 1 | 3 | 5 | 7 | 11 | qamħ |
 | 2 | 5 | 7 | 11 | 13 | xgħir |
@@ -277,7 +277,7 @@ Wara dan isiru 11-il pass ta’ tħin:
 | 10 | 31 | 37 | 41 | 43 | ħamra |
 | 11 | 37 | 41 | 43 | 47 | qamħ |
 
-Jekk ir-ringiela tkun `[a,b,c,d,stone]`:
+Эгер таблицанын сабы `[a,b,c,d,stone]` болсо:
 
 ```text
 x ← SAVE(
@@ -290,21 +290,21 @@ x ← SAVE(
 )
 ```
 
-Il-qatra tkun lesta biss wara l-ħdax-il pass ta’ tħin.
+Тамчы он биринчи майдалоо кадамынан кийин гана даяр деп эсептелет.
 
 ---
 
-# H. Is-Sitt Skutelli
+# H. Алты табак
 
-L-istat taz-zalza jinżamm f’sitt skutelli. L-identitajiet fissi tagħhom huma `1..6`.
+Соустун абалы алты табакта сакталат. Алардын туруктуу идентификаторлору `1..6`.
 
-In-numri marbuta magħhom huma:
+Аларга тиешелүү сандар:
 
 ```text
 [17, 19, 23, 29, 31, 37]
 ```
 
-Għall-iskutella `b`:
+`b` табагы үчүн:
 
 ```text
 s_b = Għadd_tal_Kalkolu
@@ -319,35 +319,35 @@ B_b = SAVE(s_b² + b)
 
 ---
 
-# I. Is-720 Permutazzjoni tal-Iskutelli
+# I. Табактардын 720 орун алмаштыруусу
 
-Il-permutazzjonijiet kollha tas-sitt skutelli — b’kollox `6! = 720` — jitqiegħdu f’ordni lessikografika skont l-identitajiet fissi tal-iskutelli.
+Алты табактын бардык `6! = 720` орун алмаштыруусу алардын туруктуу идентификаторлору боюнча лексикографиялык тартипке келтирилет.
 
-L-ewwel waħda hija:
+Биринчиси:
 
 ```text
 [1,2,3,4,5,6]
 ```
 
-L-aħħar waħda hija:
+Акыркысы:
 
 ```text
 [6,5,4,3,2,1]
 ```
 
-Għall-qatra `D`:
+`D` тамчысы үчүн:
 
 ```text
 orderNumber = 1 + ((D-1) mod 720)
 ```
 
-L-identità fissa ta’ skutella u l-pożizzjoni temporanja tagħha f’ordni partikolari għandhom jiġu distinti minn xulxin.
+Табактын туруктуу идентификатору менен анын белгилүү бир иреттеги убактылуу позициясын айырмалоо зарыл.
 
 ---
 
-# J. It-Tferrigħ u t-Tħawwid ta’ Kull Qatra
+# J. Ар бир тамчыны куюу жана аралаштыруу
 
-Fit-tliet skutelli li jkunu fil-pożizzjonijiet 1–3 isiru tliet tferrigħat diretti:
+1–3-позицияларда турган үч табакка үч түз куюу жасалат:
 
 ```text
 pour₁ = SAVE(D² + qamħ_i · old(position1) + 3i)
@@ -355,15 +355,15 @@ pour₂ = SAVE(D² + xgħir_i· old(position2) + 5i)
 pour₃ = SAVE(D² + melħ_i  · old(position3) + 7i)
 ```
 
-Qabel it-tħawwid jittieħed `snapshot` tal-istat tas-sitt skutelli. L-iskutelli jitqiegħdu f’ċirku skont l-ordni ddeterminata minn dik il-qatra.
+Аралаштыруудан мурун алты табактын абалынын `snapshot` көчүрмөсү алынат. Табактар ошол тамчы аныктаган ирет боюнча тегерете тизилет.
 
-Dawn il-ġebliet jintrabtu mal-pożizzjonijiet 1–6 kif ġej:
+Төмөнкү таштар 1–6-позицияларга тиешелүү:
 
 ```text
 qamħ, xgħir, melħ, morra, ħamra, qamħ
 ```
 
-Jekk l-iskutella `B` tinsab fil-pożizzjoni `q`, l-iskutella ta’ qabilha hija `P` u dik ta’ warajha hija `N`:
+Эгер `B` табагы `q` позициясында, анын алдындагы табак `P`, артындагысы `N` болсо:
 
 ```text
 u = old(B)
@@ -376,29 +376,29 @@ u = old(B)
 new(B) = SAVE(u² + 5·old(P)·old(N) + i·q)
 ```
 
-Is-sitt riżultati kollha jiġu kkalkulati mill-istess `snapshot` tal-istat, u s-sitt valuri l-ġodda jiġu assenjati fl-istess ħin.
+Алты натыйжанын баары абалдын **бир эле** `snapshot` көчүрмөсүнөн эсептелип, алты жаңы маани чогуу дайындалат.
 
-Wara l-qatra 46, l-ordni tinħażen bħala `orderAt46`.
+46-тамчыдан кийин ирет `orderAt46` катары сакталат.
 
 ---
 
-# K. It-Tnax-il Pass Sussegwenti ta’ Tħawwid
+# K. Кийинки он эки аралаштыруу кадамы
 
-Wara l-qatra 46 isiru tnax-il pass sussegwenti ta’ tħawwid.
+46-тамчыдан кийин дагы он эки аралаштыруу кадамы аткарылат.
 
-F’kull pass ta’ tħawwid `r`, l-ewwel tittieħed **snapshot wieħed** tas-sitt skutelli qodma. Minn dak l-istess snapshot jiġi kkalkulat:
+Ар бир `r` кадамында адегенде эски алты табактын абалынын **бир гана `snapshot` көчүрмөсү** алынат. Ошол эле көчүрмөдөн төмөнкү маани эсептелет:
 
 ```text
 S_r = SAVE(sum(oldBowls) + 149·r)
 ```
 
-`S_r` huwa l-valur miżmum kanoniku ta’ dak il-pass. L-istess `S_r` jintuża kemm għall-permutazzjoni kif ukoll bħala t-terminu addittiv ġewwa `u`:
+`S_r` — бул кадамдын канондук сакталган мааниси. Бир эле `S_r` орун алмаштырууда да, `u` ичиндеги кошулуучу мүчө катары да колдонулат:
 
 ```text
 permutationRank = 1 + ((S_r-1) mod 720)
 ```
 
-Jekk l-iskutella `B` tinsab fil-pożizzjoni `q` fil-permutazzjoni ta’ dak il-pass, u l-ġirien tagħha huma `P,N`:
+Эгер ошол кадамдагы орун алмаштырууда `B` табагы `q` позициясында жана анын коңшулары `P,N` болсо:
 
 ```text
 u = old(B)
@@ -411,11 +411,11 @@ u = old(B)
 new(B) = SAVE(u² + 7·old(P)·old(N))
 ```
 
-Is-sitt valuri `new(B)` jiġu kkalkulati kollha mill-**istess** `oldBowls` snapshot u jiġu assenjati flimkien. L-ebda skutella ġdida ma tista’ tintuża biex tiġi kkalkulata skutella oħra fl-istess pass.
+Алты `new(B)` маанисинин баары **бир эле** `oldBowls` көчүрмөсүнөн эсептелип, бир убакта дайындалат. Ошол эле кадамда башка табактын маанисин эсептөө үчүн эч бир жаңы табак маанисин колдонууга болбойт.
 
-Mhux kanoniku li tuża `sum(oldBowls)` mhux miżmuma ġewwa `u` filwaqt li `S_r` jintuża biss għall-permutazzjoni. Dik kienet interpretazzjoni storika żbaljata u ma għandhiex tintuża bħala linja bażi ta’ konformità.
+`S_r` орун алмаштыруу үчүн гана колдонулуп, `u` ичинде сакталбаган `sum(oldBowls)` колдонулса, бул канондук эмес. Мындай тарыхый туура эмес чечмелөө шайкештиктин эталону катары колдонулбашы керек.
 
-Meta jsiru l-mistoqsijiet, “l-iskutella ta’ wara” tibqa’ ddeterminata minn `orderAt46`. Dawn it-tnax-il pass ta’ tħawwid jużaw l-ordnijiet tagħhom stess waqt it-tħawwid, filwaqt li l-ordni rreġistrata tal-qatra 46 tibqa’ tintuża meta jsiru l-mistoqsijiet.
+Суроолор берилгенде «кийинки табак» `orderAt46` боюнча аныкталат. Бул он эки аралаштыруу кадамы өздөрүнүн иреттерин колдонушат, бирок суроолордо 46-тамчыдан калган катталган ирет күчүндө калат.
 
 ---
 
