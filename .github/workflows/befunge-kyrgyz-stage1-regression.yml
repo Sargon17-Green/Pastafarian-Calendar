@@ -1948,7 +1948,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
-          python3 -m py_compile qa/stage1_native_lower_feedback_candidate_twelve.py qa/stage1_native_lower_feedback_candidate_twelve_audit.py
+          python3 -m py_compile qa/stage1_native_lower_feedback_candidate_twelve.py qa/stage1_native_lower_feedback_candidate_twelve_audit.py qa/stage1_native_four_cell_stack_lineage_audit.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
       - name: Witness twelve real Native candidate lower-loop dependencies and one preserved error
@@ -1968,6 +1968,8 @@ jobs:
           test -s "$RUNNER_TEMP/native-four-cell-twelve-valid/four_cell_twelve_valid_causality.json"
           python3 qa/stage1_native_lower_feedback_candidate_twelve_audit.py "$RUNNER_TEMP/native-four-cell-twelve-valid"
           test -s "$RUNNER_TEMP/native-four-cell-twelve-valid/four_cell_twelve_valid_causality_audit.json"
+          python3 qa/stage1_native_four_cell_stack_lineage_audit.py "$RUNNER_TEMP/native-four-cell-twelve-valid"
+          test -s "$RUNNER_TEMP/native-four-cell-twelve-valid/four_cell_native_stack_lineage_audit.json"
           echo NATIVE_FOUR_CELL_TWELVE_VALID_CAUSALITY_STILL_QA_ONLY_STAGE1_OPEN
       - name: Retain independent Native 12-valid one-error and hostile evidence
         if: always()
