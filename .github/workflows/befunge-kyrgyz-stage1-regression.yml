@@ -2035,7 +2035,7 @@ jobs:
           test "$(git hash-object qa/year5000_integrated_lf_eof_grammar.b98)" = "fb6513605febc92c4cd1b453295253cb1cb49740"
           test "$(git hash-object qa/stage1_native_year5000_integrated_lf_eof.py)" = "bda70f849bbc850361f747496acac2706e25d1e1"
           test "$(git hash-object qa/stage1_native_year5000_integrated_lf_eof_audit.py)" = "749496fd97df7570050ea80ecf8fed74e1b4b968"
-          test "$(git hash-object qa/stage1_native_year5000_integrated_source_map_audit.py)" = "0644d5c372323c57d45361b87f1138664de4f13e"
+          test "$(git hash-object qa/stage1_native_year5000_integrated_source_map_audit.py)" = "10dddbb2c2ddb4bd1ef46c707441f3f0b1317d25"
           python3 -m py_compile qa/stage1_native_year5000_integrated_lf_eof_audit.py qa/stage1_native_year5000_integrated_source_map_audit.py
           python3 qa/stage1_native_year5000_integrated_source_map_audit.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"

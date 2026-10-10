@@ -17,11 +17,11 @@ def need(pred,reason):
 
 def git_blob(payload):
     import hashlib
-    return hashlib.sha1(b"blob "+str(len(payload)).encode("ascii")+b"\\0"+payload).hexdigest()
+    return hashlib.sha1(b"blob "+str(len(payload)).encode("ascii")+b"\0"+payload).hexdigest()
 
 def verify(original,modified):
     need(git_blob(original)==ORIGINAL_SHA,"immutable LF grammar source changed")
-    need(original.endswith(b"\\n") and original.count(b"\\n")==1,
+    need(original.endswith(b"\n") and original.count(b"\n")==1,
          "original BF98 grammar source is not a single row")
     baseline=original[:-1]
     need(len(baseline)==943 and baseline.endswith(b"01-.@1.@"),
@@ -29,7 +29,7 @@ def verify(original,modified):
     caret=len(baseline)-3+5
     expected_row0=baseline[:-3]+b"   1j^~$01-.@"
     expected_row1=b" "*caret+b">1.@"
-    expected=expected_row0+b"\\n"+expected_row1+b"\\n"
+    expected=expected_row0+b"\n"+expected_row1+b"\n"
     need(modified==expected,
          "integrated BF98 differs outside its exact EOF success splice")
     need(modified[:len(baseline)-3]==original[:len(baseline)-3],
