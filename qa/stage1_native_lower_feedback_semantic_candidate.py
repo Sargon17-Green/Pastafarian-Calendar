@@ -140,7 +140,7 @@ def main():
        "native_lower_causal_trial_pairs":len(trial_rows),
        "native_lower_causal_effect_cases":sum(
            x["native_full_result_or_termination_effect"] for x in trial_rows),
-       "candidate_ready_for_promotion":(references_all_green
+       "candidate_suitable_for_further_qa":(references_all_green
           and len(trial_rows)==6 and all(
              x["native_full_result_or_termination_effect"] for x in trial_rows)),
        "stage1_functional_acceptance":False,
@@ -152,7 +152,7 @@ def main():
     print("NATIVE_LOWER_FEEDBACK_FOUR_CELL_CANDIDATE_MEASURED_PASS",
           "numeric",report["native_oracle_parity_cases"],"of",len(oracle_rows),
           "causal",report["native_lower_causal_effect_cases"],
-          "of",len(trial_rows),"candidate_ready",report["candidate_ready_for_promotion"])
+          "of",len(trial_rows),"further_qa_candidate",report["candidate_suitable_for_further_qa"])
     print("QA_ONLY; GEOMETRIC_SPAGHETTI_QA_PASS=NO, STAGE2_STARTED=NO")
 
 if __name__=="__main__":
