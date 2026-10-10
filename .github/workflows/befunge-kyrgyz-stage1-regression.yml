@@ -2097,7 +2097,7 @@ jobs:
           python3 -m py_compile qa/stage1_native_four_fault_vs_clean_cross_audit.py
       - name: Fetch independently measured same-run native execution evidence
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/clean-four" "$RUNNER_TEMP/fault-four"
