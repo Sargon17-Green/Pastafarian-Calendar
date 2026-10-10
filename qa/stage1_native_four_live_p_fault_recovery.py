@@ -52,7 +52,7 @@ def trial(code,case,profile,oracle):
     active=[None];fired=[False];recovered=[False]
     first_fault_round=[None];live_at_fault=[None]
     old_space=[None];old_io=[None];old_memory=[None];old_vec=[None]
-    aborted_set=[None];initial_fault_ticks=[None];first_recovered_round=[None]
+    abandoned_set=[None];initial_fault_ticks=[None];first_recovered_round=[None]
     counters=[{"get":0,"put":0,"direct_p":0,"putspace":0} for _ in labels]
     dirty_stats=[None];wrote=[set() for _ in labels]
     peer_check=physical_check=abandoned_check=overlap_rounds=rounds=0
