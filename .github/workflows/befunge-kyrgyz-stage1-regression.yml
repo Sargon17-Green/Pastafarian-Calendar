@@ -2107,6 +2107,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 qa/stage1_native_four_fault_vs_clean_cross_audit.py "$RUNNER_TEMP/clean-four" "$RUNNER_TEMP/fault-four"
+          python3 -O qa/stage1_native_four_fault_vs_clean_cross_audit.py "$RUNNER_TEMP/clean-four" "$RUNNER_TEMP/fault-four"
 
   native-four-live-p-fault-immediate-recovery:
     runs-on: ubuntu-latest
