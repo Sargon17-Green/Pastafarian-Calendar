@@ -396,10 +396,13 @@ jobs:
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=5s 720s python -u qa/stage1_native_structural_corpus.py
               timeout --kill-after=5s 260s python -u qa/stage1_native_year5000_negative_axis.py
+              timeout --kill-after=5s 320s python -u qa/stage1_native_year5000_multirank.py
             '
           python3 qa/stage1_native_year5000_negative_axis_audit.py "$RUNNER_TEMP/native-year5000"
           test -s "$RUNNER_TEMP/native-year5000/native_year5000_negative_axis_audit.json"
-          echo NATIVE_YEAR5000_SIGNED_AXIS_AUDIT_PASS_STAGE1_OPEN
+          python3 qa/stage1_native_year5000_multirank_audit.py "$RUNNER_TEMP/native-year5000"
+          test -s "$RUNNER_TEMP/native-year5000/native_year5000_multirank_audit.json"
+          echo NATIVE_YEAR5000_SIGNED_AXIS_AND_MULTIRANK_AUDITS_PASS_STAGE1_OPEN
       - name: Retain signed Year-5000 Native input/output and tamper audit evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
