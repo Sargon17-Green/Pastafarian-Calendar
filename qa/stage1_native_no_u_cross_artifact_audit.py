@@ -17,6 +17,9 @@ ALTERNATES=("foundation_cross","mixed_small","negative_positive",
 CAUSAL=(("foundation_cross",23083,23246,-2),
         ("mixed_small",11323,11486,-1),
         ("negative_positive",24763,24926,-1))
+NEIGHBORS=(("foundation_neighbor_forward",23083,23246,-1),
+           ("foundation_neighbor_reverse",23083,23246,0))
+CAUSAL_ALL=CAUSAL+NEIGHBORS
 CELL=(37,1700)
 def need(v,reason):
     if not v:raise AssertionError(reason)
@@ -75,13 +78,13 @@ def native_trace(path,sha):
       first_p_value=wrote[min(wrote)]["after"] if wrote else None,
       first_g_value=read[min(read)]["after"] if read else None)
 def validate(r):
-    need(r.get("schema")=="befunge-stage1-no-u-two-native-artifacts-v1"
+    need(r.get("schema")=="befunge-stage1-no-u-three-native-artifacts-v2"
          and r.get("source_git_blob")==BLOB
-         and r.get("scope")=="FIVE_NO_U_VALID_THREE_PG_NUMERICAL_COUNTERFACTUALS"
+         and r.get("scope")=="FIVE_NO_U_VALID_FIVE_PG_NUMERICAL_COUNTERFACTUALS"
          and r.get("full_native_trace_inputs")==17
          and r.get("no_u_valid_cases")==list(ALTERNATES)
-         and r.get("real_numerical_alternate_causal_cases")==3
-         and r.get("observational_only_valid_cases")==2
+         and r.get("real_numerical_alternate_causal_cases")==5
+         and r.get("observational_only_valid_cases")==0
          and r.get("stage1_complete") is False
          and r.get("automatic_promotion") is False
          and r.get("full_functional_qa_pass") is False
@@ -98,10 +101,10 @@ def validate(r):
                  and row.get("p",0)>=1 and row.get("g",0)>=1,
                  "Native alternate route lacks required executed physical ops")
     proofs=r.get("causal")
-    need(type(proofs) is list and len(proofs)==3
-         and tuple(q.get("case") for q in proofs)==tuple(c[0] for c in CAUSAL),
+    need(type(proofs) is list and len(proofs)==5
+         and tuple(q.get("case") for q in proofs)==tuple(c[0] for c in CAUSAL_ALL),
          "missing real Native no-u numerical causal evidence")
-    for p,(name,wt,rt,val) in zip(proofs,CAUSAL):
+    for p,(name,wt,rt,val) in zip(proofs,CAUSAL_ALL):
         need(p.get("p_tick")==wt and p.get("g_tick")==rt and
              p.get("native_g_before")==val and p.get("native_g_mutant")==val+1
              and p.get("mutant_terminated_normally") is True
@@ -114,10 +117,10 @@ def validate(r):
              "Native p/g causal numeric output and physical provenance forged")
     return True
 def main():
-    need(len(sys.argv)==3,"usage: audit.py NATIVE_DIVERSE_DIR NATIVE_SCC_DIR")
+    need(len(sys.argv)==4,"usage: audit.py NATIVE_DIVERSE_DIR NATIVE_SCC_DIR NATIVE_NEIGHBOR_DIR")
     need(blob(Path("src/interleaved_work_counts.b98").read_bytes())==BLOB,
          "original Native BF98 production source changed")
-    traces,mutations=map(Path,sys.argv[1:])
+    traces,mutations,neighbors=map(Path,sys.argv[1:])
     manifest=json.loads((traces/"diverse_manifest.json").read_text("utf-8"))
     need(manifest.get("schema")=="befunge-stage1-diverse-native-v1"
          and len(manifest.get("cases",[]))==17
@@ -180,11 +183,45 @@ def main():
           native_original_output=c["output"],native_mutated_output=m["output"],
           control_steps=c["steps"],mutant_steps=m["steps"],
           control_terminated_normally=True,mutant_terminated_normally=True))
-    result=dict(schema="befunge-stage1-no-u-two-native-artifacts-v1",
+    new=json.loads((neighbors/"native_foundation_neighbor_g_causal.json").read_text("utf-8"))
+    audit=json.loads((neighbors/"native_foundation_neighbor_g_causal_audit.json").read_text("utf-8"))
+    need(new.get("schema")=="befunge-stage1-foundation-neighbors-native-g-causal-v1"
+         and new.get("source_git_blob")==BLOB and new.get("native_executions")==4
+         and new.get("stage1_complete") is False
+         and new.get("geometric_spaghetti_qa_pass") is False
+         and audit.get("schema")=="befunge-stage1-foundation-neighbor-g-causal-audit-v1"
+         and audit.get("valid_neighbors_with_changed_seven_field_numeric_output")==2
+         and len(audit.get("falsified_reports_rejected",[]))==12
+         and type(new.get("records")) is list and len(new["records"])==2,
+         "new independently measured Foundation neighbor Native provenance missing")
+    for e,(label,wt,rt,val) in zip(new["records"],NEIGHBORS):
+        n=baseline[label];c=e["original"];m=e["counterfactual"]
+        need(n["u"]==0 and n["w"]==n["x"]==1
+             and n["first_p"]==e["writer_tick"]==wt
+             and n["first_g"]==e["reader_tick"]==rt
+             and n["first_p_value"]==n["first_g_value"]==e["written"]==val
+             and e["mutated_read"]==val+1
+             and c["status"]==m["status"]=="normal"
+             and c["remaining_ips"]==m["remaining_ips"]==0
+             and c["output"]==e["reference_7"]==n["native_output"]
+             and len(m["output"])==7 and m["output"]!=c["output"]
+             and c["actual_g_return"]==val and m["actual_g_return"]==val+1
+             and c["one_cell_intervention"] is False
+             and m["one_cell_intervention"] is True
+             and e["normal_seven_field_numeric_change"] is True
+             and c["steps"]==m["steps"]==n["steps"],
+             "Foundation neighbor real Native numerical g-causality does not "
+             "agree with full independent Native source trace")
+        proofs.append(dict(case=label,p_tick=wt,g_tick=rt,
+          native_g_before=val,native_g_mutant=val+1,
+          native_original_output=c["output"],native_mutated_output=m["output"],
+          control_steps=c["steps"],mutant_steps=m["steps"],
+          control_terminated_normally=True,mutant_terminated_normally=True))
+    result=dict(schema="befunge-stage1-no-u-three-native-artifacts-v2",
       source_git_blob=BLOB,
-      scope="FIVE_NO_U_VALID_THREE_PG_NUMERICAL_COUNTERFACTUALS",
+      scope="FIVE_NO_U_VALID_FIVE_PG_NUMERICAL_COUNTERFACTUALS",
       full_native_trace_inputs=17,no_u_valid_cases=list(ALTERNATES),
-      real_numerical_alternate_causal_cases=3,observational_only_valid_cases=2,
+      real_numerical_alternate_causal_cases=5,observational_only_valid_cases=0,
       causal=proofs,traces=rows,stage1_complete=False,
       automatic_promotion=False,full_functional_qa_pass=False,
       geometric_spaghetti_qa_pass=False)
@@ -204,19 +241,21 @@ def main():
           "native_mutated_output",d["causal"][0]["native_original_output"])),
       ("fake_termination",lambda d:d["causal"][0].__setitem__(
           "mutant_terminated_normally",False))]
+    challenges.append(("neighbor_fake",lambda d:d["causal"][4].__setitem__(
+          "mutant_terminated_normally",False)))
     rejected=[]
     for name,mutate in challenges:
         falsified=copy.deepcopy(result);mutate(falsified)
         try:validate(falsified)
         except (AssertionError,KeyError,TypeError):rejected.append(name)
         else:raise AssertionError("forged Native no-u report accepted "+name)
-    need(len(rejected)==12,"Native no-u hostile report tests incomplete")
+    need(len(rejected)==13,"Native no-u hostile report tests incomplete")
     result["hostile_reports_rejected"]=rejected
     (traces/"native_no_u_cross_artifact_audit.json").write_text(
         json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print("NATIVE_NO_U_FIVE_REAL_ALTERNATE_W_X_PG_PATHS_PASS")
-    print("NATIVE_NO_U_THREE_INDEPENDENT_NUMERICAL_PG_COUNTERFACTUALS_PASS")
-    print("NATIVE_NO_U_TWO_FOUNDATION_NEIGHBORS_OBSERVATIONAL_ONLY")
-    print("NATIVE_NO_U_TWELVE_HOSTILE_REPORTS_REJECT_PASS")
+    print("NATIVE_NO_U_FIVE_INDEPENDENT_NUMERICAL_PG_COUNTERFACTUALS_PASS")
+    print("NATIVE_NO_U_TWO_FOUNDATION_NEIGHBORS_NUMERICALLY_CAUSAL_PASS")
+    print("NATIVE_NO_U_THIRTEEN_HOSTILE_REPORTS_REJECT_PASS")
     print("LAST_COMPLETED_STAGE=0 GEOMETRIC_SPAGHETTI_QA_PASS=NO")
 if __name__=="__main__":main()

@@ -741,7 +741,7 @@ jobs:
 
 
   native-no-u-cross-artifact-causal-paths:
-    needs: [native-diverse-production-geometry, native-scc-physical-g-intervention]
+    needs: [native-diverse-production-geometry, native-scc-physical-g-intervention, native-two-foundation-no-u-neighbor-g-causality]
     runs-on: ubuntu-latest
     timeout-minutes: 8
     permissions:
@@ -761,7 +761,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/no-u-native-traces" "$RUNNER_TEMP/no-u-native-scc"
+          mkdir -p "$RUNNER_TEMP/no-u-native-traces" "$RUNNER_TEMP/no-u-native-scc" "$RUNNER_TEMP/no-u-neighbor-g"
           for attempt in 1 2 3; do
             gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
               --name befunge-kyrgyz-native-diverse-geometry \
@@ -776,6 +776,14 @@ jobs:
             test "$attempt" -lt 3
             sleep 10
           done
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-foundation-neighbor-g-causality \
+              --dir "$RUNNER_TEMP/no-u-neighbor-g" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          test -s "$RUNNER_TEMP/no-u-neighbor-g/native_foundation_neighbor_g_causal.json"
           test -s "$RUNNER_TEMP/no-u-native-traces/diverse_manifest.json"
           test -s "$RUNNER_TEMP/no-u-native-scc/native_scc_g_interventions.json"
       - name: Independently cross-audit no-u physical execution and real numeric g causality
@@ -783,7 +791,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 qa/stage1_native_no_u_cross_artifact_audit.py \
-            "$RUNNER_TEMP/no-u-native-traces" "$RUNNER_TEMP/no-u-native-scc"
+            "$RUNNER_TEMP/no-u-native-traces" "$RUNNER_TEMP/no-u-native-scc" "$RUNNER_TEMP/no-u-neighbor-g"
           test -s "$RUNNER_TEMP/no-u-native-traces/native_no_u_cross_artifact_audit.json"
           echo NATIVE_NO_U_CROSS_ARTIFACT_CAUSAL_STAGE1_OPEN
       - name: Retain verified no-u route cross-artifact report
