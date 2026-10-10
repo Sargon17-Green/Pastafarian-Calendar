@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'Chapel+Українська-мова'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -53,7 +54,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash test/run_stage01_tests.sh 2>&1 | tee chapel-stage01-native.log
+          printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-stage01-native.log
+          bash test/run_stage01_tests.sh 2>&1 | tee -a chapel-stage01-native.log
           grep -Fxq 'STAGE_01_RESULT=PASS' chapel-stage01-native.log
 
       - name: Retain native execution evidence even on failure
