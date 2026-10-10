@@ -26,7 +26,7 @@ def verify(doc):
     need(type(cases) is list and len(cases)==3,"3-case BF98 u-reverse matrix absent")
     totals={"terminated_changed":0,"numerical_output_changed":0,
             "normal_with_changed_output":0,"post128_route_changed":0,
-            "immediate_stack_changed":0}
+            "immediate_stack_changed":0,"exact_dynamic_vector_divergences":0}
     for case,(name,tick,baseline_steps) in zip(cases,CASES):
         a=case.get("baseline");trials=case.get("trials")
         reference=case.get("reference_7")
@@ -70,6 +70,23 @@ def verify(doc):
             normal=b["status"]=="normal" and b["ips"]==0
             numeric=b["output"]!=reference
             stack=q["stacks_after"]!=u["stacks_after"]
+            # The actual Native stack-stack u transfers the slot-0 value
+            # into the subsequent arithmetic IP-vector construction.
+            # Reconstruct the FIRST divergent physical motion, not just
+            # the producer's boolean route-difference claim.
+            control_motion=a["first_128_post_u_route"]
+            mutated_motion=b["first_128_post_u_route"]
+            divergence=next((index for index,(left,right) in enumerate(
+                zip(control_motion,mutated_motion)) if left!=right),None)
+            need(divergence==99
+                 and control_motion[:99]==mutated_motion[:99]
+                 and control_motion[98]==[950,1335,-77,1]
+                 and control_motion[99]==[949,1335,-1,0]
+                 and mutated_motion[98]==[950,1335,-77,1]
+                 and mutated_motion[99]==[
+                     949+delta,1335,-1+delta,0],
+                 "Native u payload did not causally alter the exact "
+                 "post-transfer dynamic IP-vector at event 99")
             motion=b["first_128_post_u_route"]!=a["first_128_post_u_route"]
             need(trial.get("final_output_or_termination_changed") is final
                  and trial.get("terminated_normally") is normal
@@ -82,6 +99,7 @@ def verify(doc):
             totals["normal_with_changed_output"]+=int(normal and numeric)
             totals["post128_route_changed"]+=int(motion)
             totals["immediate_stack_changed"]+=int(stack)
+            totals["exact_dynamic_vector_divergences"]+=int(divergence==99)
     return totals
 def main(folder):
     source=Path("src/interleaved_work_counts.b98").read_bytes()
@@ -100,6 +118,7 @@ def main(folder):
       ("tick",lambda d:d["records"][0]["trials"][0]["run"]["u_event"].__setitem__("tick",1)),
       ("operand",lambda d:d["records"][0]["trials"][0]["run"]["u_event"].__setitem__("first_slot_executed",400)),
       ("stack",lambda d:d["records"][0]["trials"][0]["run"]["u_event"]["stacks_executed"][0].__setitem__(0,"111")),
+      ("vector",lambda d:d["records"][0]["trials"][0]["run"]["first_128_post_u_route"][99].__setitem__(2,-77)),
       ("effect",lambda d:d["records"][0]["trials"][0].__setitem__("final_output_or_termination_changed",
             not d["records"][0]["trials"][0]["final_output_or_termination_changed"]))]
     denied=[]
@@ -108,7 +127,7 @@ def main(folder):
         try:verify(d)
         except (AssertionError,KeyError,TypeError,IndexError):denied.append(name)
         else:raise AssertionError("forged Native u reverse evidence accepted "+name)
-    need(len(denied)==10,"incomplete Native u reverse adversarial checks")
+    need(len(denied)==11,"incomplete Native u reverse adversarial checks")
     result={"schema":"befunge-stage1-native-u-reverse-independent-audit-v1",
             "real_native_programs":9,"measured":values,
             "forged_reports_rejected":denied,
@@ -117,7 +136,7 @@ def main(folder):
         json.dumps(result,sort_keys=True,indent=2)+"\n",encoding="utf-8")
     print("NATIVE_BF98_U_REVERSE_COUNT_INDEPENDENT_AUDIT_PASS",
           json.dumps(values,sort_keys=True))
-    print("NATIVE_BF98_U_REVERSE_TEN_FALSIFIED_REPORTS_REJECT_PASS")
+    print("NATIVE_BF98_U_REVERSE_ELEVEN_FALSIFIED_REPORTS_REJECT_PASS")
 if __name__=="__main__":
     need(len(sys.argv)==2,"Native u reverse evidence directory required")
     main(sys.argv[1])
