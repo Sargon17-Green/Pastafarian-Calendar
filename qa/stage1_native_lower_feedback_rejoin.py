@@ -200,7 +200,14 @@ def main():
             })
         row={
             "case":label,"valid":bool(valid),"input_fields":list(fields),
-            "native_expected":expected,"control_steps":baseline["steps"],
+            "native_expected":expected,
+            "control_output":baseline["output"],
+            "mutant_output":altered["output"],
+            "control_status":baseline["status"],
+            "mutant_status":altered["status"],
+            "control_remaining_ips":baseline["remaining_ips"],
+            "mutant_remaining_ips":altered["remaining_ips"],
+            "control_steps":baseline["steps"],
             "mutant_steps":altered["steps"],
             "saved_steps":baseline["steps"]-altered["steps"],
             "control_gate":baseline["gate"],"mutant_gate":altered["gate"],
