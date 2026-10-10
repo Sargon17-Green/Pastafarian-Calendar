@@ -39,9 +39,16 @@ def execute(code,raw,site,alter):
                          "mutated":bool(alter),"toss_depth":len(ip.stack[0]),
                          "frames":len(ip.stack)}
             if alter:
-                self.space.put(ip.position,ord(":"))
+                # Freeze the physical Funge-space coordinate. old() moves
+                # the IP; restoring at ip.position after the step would
+                # corrupt an unrelated instruction and invalidate causality.
+                point=ip.position.__class__(coord)
+                self.space.put(point,ord(":"))
                 try:return old()
-                finally:self.space.put(ip.position,char)
+                finally:
+                    self.space.put(point,char)
+                    need(int(self.space.get(point))==char,
+                         "Native opcode original cell was not restored")
         return old()
     prog.execute_step=one_step.__get__(prog,prog.__class__)
     status="normal"
