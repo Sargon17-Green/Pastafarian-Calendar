@@ -90,7 +90,7 @@ def validate(d):
              "Native lower-route causal output/termination effect misreported")
         effects+=changed
     need(d.get("native_lower_causal_effect_cases")==effects
-         and d.get("candidate_ready_for_promotion") is
+         and d.get("candidate_suitable_for_further_qa") is
              (pass_count==39 and len(trial)==6 and effects==6),
          "candidate eligibility statement unsupported by finite Native evidence")
     return {"native_differential_cases":39,"oracle_parity":pass_count,
@@ -140,7 +140,7 @@ def main(folder):
     reject("missing_native_report",lambda x:x["oracle_rows"][0].__setitem__(
         "native_cli_complete",None))
     reject("missing_references",lambda x:x.__setitem__("independent_befunge_reference_parity_full",None))
-    reject("fake_ready",lambda x:x.__setitem__("candidate_ready_for_promotion",
+    reject("fake_ready",lambda x:x.__setitem__("candidate_suitable_for_further_qa",
         not x["candidate_ready_for_promotion"]))
     reject("invalid_case",lambda x:x["oracle_rows"][0].__setitem__("valid",None))
     reject("changed_production",lambda x:x.__setitem__("qa_production_modified",True))
