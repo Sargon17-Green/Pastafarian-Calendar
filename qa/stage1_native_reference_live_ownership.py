@@ -40,7 +40,7 @@ PAIRS = (("bc","wc"),("bu","wu"),("y0","wc"),
          ("y1","bu"),("y0","y1"),("bc","bu"))
 SCHEDULES = (("AB_1_1",1,1,False),("BA_3_7",3,7,True))
 OUT = "/refowner/native_reference_live_ownership.json"
-MAX_TICKS = 180000
+MAX_TICKS = 1000000  # bounded native interleave; prior 180000 truncated actual first reference pair
 GUARDS = ((0,0),(1,0),(8,0),(0,20),(4,20),(8,20),
           (0,30),(0,40),(0,50),(1,50),(0,300),(0,352))
 
@@ -140,6 +140,8 @@ def run_pair(cases,reference,left,right,schedule):
              "Native reference putspace escaped owned Funge-space")
         metrics[key]["putspace"]+=1
         return putspace0(self,*args,**kwargs)
+    print("NATIVE_REFERENCE_LIVE_PAIR_BEGIN",name,left,right,"budget",MAX_TICKS)
+    sys.stdout.flush()
     order=(("a",a,qa),("b",b,qb))
     if reverse: order=order[::-1]
     overlap=0
@@ -149,7 +151,7 @@ def run_pair(cases,reference,left,right,schedule):
         cls.get,cls.put,cls.putspace=read,write,writespace
         while a["program"].ips or b["program"].ips:
             rounds+=1
-            need(rounds<=MAX_TICKS,"Native reference pair did not terminate")
+            need(rounds<=MAX_TICKS,"Native reference pair exceeded bound "+name+" "+left+"/"+right+" rounds="+str(rounds)+" ticks="+str((a["steps"],b["steps"]))+" still_live="+str((bool(a["program"].ips),bool(b["program"].ips))))
             if a["program"].ips and b["program"].ips:overlap+=1
             for key,item,quantum in order:
                 peer=b if key=="a" else a
