@@ -2015,3 +2015,41 @@ jobs:
           name: befunge-kyrgyz-native-four-cell-1024bit-oracle
           path: ${{ runner.temp }}/native-four-cell-bigint/
           retention-days: 30
+
+  native-integer-signed-lexeme-transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check immutable Year5000 source and actual PyFunge integer opcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
+          python3 -m py_compile qa/stage1_native_signed_integer_input_probe.py qa/stage1_native_signed_integer_input_probe_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Measure real Native '&' integer input of raw negative sign tokens
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-signed-integer"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-signed-integer:/sign-probe" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 400s python -u qa/stage1_native_signed_integer_input_probe.py
+            '
+          test -s "$RUNNER_TEMP/native-signed-integer/native_pyfunge_signed_lexeme_probe.json"
+          python3 qa/stage1_native_signed_integer_input_probe_audit.py "$RUNNER_TEMP/native-signed-integer"
+          test -s "$RUNNER_TEMP/native-signed-integer/native_pyfunge_signed_lexeme_probe_audit.json"
+          echo NATIVE_SIGNED_INPUT_PARSER_DIAGNOSTIC_IS_NOT_STAGE1_ACCEPTANCE
+      - name: Retain exact native integer parsing and Year5000 bug evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-integer-sign-transport
+          path: ${{ runner.temp }}/native-signed-integer/
+          retention-days: 30
