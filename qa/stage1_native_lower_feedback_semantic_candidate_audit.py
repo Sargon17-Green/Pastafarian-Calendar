@@ -141,7 +141,7 @@ def main(folder):
         "native_cli_complete",None))
     reject("missing_references",lambda x:x.__setitem__("independent_befunge_reference_parity_full",None))
     reject("fake_ready",lambda x:x.__setitem__("candidate_suitable_for_further_qa",
-        not x["candidate_ready_for_promotion"]))
+        not x["candidate_suitable_for_further_qa"]))
     reject("invalid_case",lambda x:x["oracle_rows"][0].__setitem__("valid",None))
     reject("changed_production",lambda x:x.__setitem__("qa_production_modified",True))
     reject("changed_canonical",lambda x:x.__setitem__("canonical_branch_modified",True))
