@@ -2022,6 +2022,47 @@ jobs:
           path: ${{ runner.temp }}/native-four-cell-bigint/
           retention-days: 30
 
+  native-year5000-integrated-24token-lf-eof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin unchanged 24-token grammar and direct BF98 EOF splice
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_exact_line_grammar.b98)" = "0c7d996a3969adb47e8d58cff27c315a3af8145d"
+          test "$(git hash-object qa/year5000_integrated_lf_eof_grammar.b98)" = "fb6513605febc92c4cd1b453295253cb1cb49740"
+          test "$(git hash-object qa/stage1_native_year5000_integrated_lf_eof.py)" = "bda70f849bbc850361f747496acac2706e25d1e1"
+          test "$(git hash-object qa/stage1_native_year5000_integrated_lf_eof_audit.py)" = "749496fd97df7570050ea80ecf8fed74e1b4b968"
+          python3 -m py_compile qa/stage1_native_year5000_integrated_lf_eof_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Run integrated LF grammar and real EOF reflection in single native BF98 program
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-integrated-lf-eof"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-integrated-lf-eof:/year5000-integrated" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 240s python -u qa/stage1_native_year5000_integrated_lf_eof.py
+            '
+          python3 qa/stage1_native_year5000_integrated_lf_eof_audit.py "$RUNNER_TEMP/native-integrated-lf-eof"
+          test -s "$RUNNER_TEMP/native-integrated-lf-eof/native_year5000_integrated_lf_eof.json"
+          test -s "$RUNNER_TEMP/native-integrated-lf-eof/native_year5000_integrated_lf_eof_audit.json"
+          echo NATIVE_SINGLE_BF98_INTEGRATED_LF_EOF_SCOPE_STAGE1_OPEN
+      - name: Retain single-program LF EOF grammar Native witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-integrated-lf-eof
+          path: ${{ runner.temp }}/native-integrated-lf-eof/
+          retention-days: 30
+
   native-year5000-eof-full-stream-guard:
     runs-on: ubuntu-latest
     timeout-minutes: 8
