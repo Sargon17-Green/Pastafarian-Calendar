@@ -2032,7 +2032,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
-          test "$(git hash-object qa/year5000_raw_lexeme_guard.b98)" = "18f633c0d31d9409fcf87b9142f157ece943f02a"
+          test "$(git hash-object qa/year5000_raw_lexeme_guard.b98)" = "2474cd0232e1947bca37f96ec7419433fa23151f"
           test "$(git hash-object qa/stage1_native_year5000_raw_lexeme.py)" = "f2dc1140a55bceb9019f0e9061e7cbaf45d5c7c1"
           test "$(git hash-object qa/stage1_native_year5000_raw_lexeme_audit.py)" = "15405f9f62bc885473a6089cba507d259ae3887b"
           python3 -m py_compile qa/stage1_native_year5000_raw_lexeme_audit.py
