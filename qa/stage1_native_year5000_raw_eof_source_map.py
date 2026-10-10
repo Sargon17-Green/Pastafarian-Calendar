@@ -5,19 +5,19 @@ from pathlib import Path
 BASE=Path("qa/year5000_integrated_lf_eof_grammar.b98").read_bytes()
 NEW=Path("qa/year5000_raw_eof_candidate.b98").read_bytes()
 IMMUTABLE="fb6513605febc92c4cd1b453295253cb1cb49740"
-def gh(b):return hashlib.sha1(b"blob "+str(len(b)).encode("ascii")+b"\\0"+b).hexdigest()
+def gh(b):return hashlib.sha1(b"blob "+str(len(b)).encode("ascii")+b"\0"+b).hexdigest()
 def require(v,m):
     if not v:raise AssertionError(m)
 def prove(old,new):
     require(gh(old)==IMMUTABLE,"prior Native qualified integrated BF98 changed")
-    rows=old.split(b"\\n")
+    rows=old.split(b"\n")
     require(len(rows)==3 and rows[2]==b"" and len(rows[0])==953 and
             rows[0][28:31]==b"0j~" and len(rows[1])==949 and
             rows[1].index(b">")==945,
             "frozen BF98 control-vector origins changed")
     expect0=rows[0][:28]+b"1"+rows[0][29:30]+b"v"+rows[0][30:]
     expect1=b" "*30+b">a^"+b" "*(946-33)+b">1.@"
-    require(new==expect0+b"\\n"+expect1+b"\\n",
+    require(new==expect0+b"\n"+expect1+b"\n",
             "Native EOF candidate edited outside exact 5-point bridge")
     return len(expect0),len(expect1)
 def main():
