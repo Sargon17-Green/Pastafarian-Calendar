@@ -480,6 +480,43 @@ jobs:
               timeout --kill-after=5s 1000s python -u qa/stage1_native_sauce_choice_composition.py
             '
 
+  native-real-u-three-payload-slots-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original real BF98 source and interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_real_u_payload_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Twelve Native BF98 u real-stack slot perturbations and oracle checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-u-payload"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-u-payload:/u-payload" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_real_u_payload.py
+            '
+          python3 qa/stage1_native_real_u_payload_audit.py "$RUNNER_TEMP/native-u-payload"
+          test -s "$RUNNER_TEMP/native-u-payload/native_u_payload_audit.json"
+          echo NATIVE_REAL_BF98_U_PAYLOAD_CAUSAL_WITNESS_STAGE1_OPEN
+      - name: Retain real Native u payload and independent audit witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-u-payload-matrix
+          path: ${{ runner.temp }}/native-u-payload/
+          retention-days: 30
+
   native-real-u-stack-transfer-operand-causality:
     runs-on: ubuntu-latest
     timeout-minutes: 12
