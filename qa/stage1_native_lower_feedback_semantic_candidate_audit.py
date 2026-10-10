@@ -69,8 +69,9 @@ def validate(d):
          "QA candidate first Native numeric gate not enforced")
     effects=0
     for z,label in zip(trial,LOWER):
-        need(z.get("case")==label and type(z.get("valid")) is bool,
-             "Native feedback trial input class changed")
+        need(z.get("case")==label and
+             z.get("valid") is (label!="invalid_zero_sign"),
+             "Native feedback valid/invalid trial class changed")
         c=z.get("original")
         m=z.get("inverted_turn")
         need(isinstance(c,dict) and isinstance(m,dict)
@@ -91,7 +92,10 @@ def validate(d):
         effects+=changed
     need(d.get("native_lower_causal_effect_cases")==effects
          and d.get("candidate_suitable_for_further_qa") is
-             (pass_count==39 and len(trial)==6 and effects==6),
+             (pass_count==39 and len(trial)==6 and effects==5
+              and all(z["native_full_result_or_termination_effect"] is
+                      (label!="invalid_zero_sign")
+                      for z,label in zip(trial,LOWER))),
          "candidate eligibility statement unsupported by finite Native evidence")
     return {"native_differential_cases":39,"oracle_parity":pass_count,
             "causal_pairs":len(trial),"observed_effect_pairs":effects,
