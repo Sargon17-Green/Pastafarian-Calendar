@@ -432,7 +432,7 @@ jobs:
           test "$(git hash-object qa/stage1_native_year5000_irregular_audit.py)" = "994963475b8928a777c5256517045298817f48e3"
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
-      - name: Replay Native irregular Year5000 family: ${{ matrix.family }}
+      - name: "Replay Native irregular Year5000 family - ${{ matrix.family }}"
         shell: bash
         run: |
           set -euo pipefail
