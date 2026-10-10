@@ -1882,6 +1882,53 @@ jobs:
           retention-days: 30
 
 
+
+  native-cross-three-four-live-ownership-equivalence:
+    needs: [native-three-live-programs, native-four-live-private-funge-space-ownership]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pinned Native BF98 production and independent two-cohort audit syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_three_four_cohort_compare.py
+      - name: Download two independently run Native cohort artifacts from this exact CI run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cohort-three" "$RUNNER_TEMP/cohort-four"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name befunge-kyrgyz-native-three-live-programs \
+            --dir "$RUNNER_TEMP/cohort-three"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name befunge-kyrgyz-native-four-live-ownership \
+            --dir "$RUNNER_TEMP/cohort-four"
+          test -s "$RUNNER_TEMP/cohort-three/native_three_live_programs_audit.json"
+          test -s "$RUNNER_TEMP/cohort-four/native_four_live_programs_audit.json"
+      - name: Fail-closed independent cross-cohort ownership comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_three_four_cohort_compare.py \
+            "$RUNNER_TEMP/cohort-three" "$RUNNER_TEMP/cohort-four"
+          test -s "$RUNNER_TEMP/cohort-four/native_three_four_cross_audit.json"
+          echo NATIVE_THREE_TO_FOUR_PROGRAMS_OWNER_AGREEMENT_STAGE1_OPEN
+      - name: Preserve independent three-to-four Native cohort evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-three-four-owner-cross-checked
+          path: ${{ runner.temp }}/cohort-four/native_three_four_cross_audit.json
+          retention-days: 30
+
   native-four-live-private-funge-space-ownership:
     runs-on: ubuntu-latest
     timeout-minutes: 14
