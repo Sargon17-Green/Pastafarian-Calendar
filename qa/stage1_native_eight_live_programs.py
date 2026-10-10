@@ -3,7 +3,7 @@
 """Real Native BF98 eight simultaneously live owned Funge-space Programs.
 
 Eight separate PyFunge-98 Program instances execute unchanged pinned production
-source, same writable physical coordinates but PRIVATE memory. All 4 overlap.
+source, same writable physical coordinates but PRIVATE memory. All eight overlap.
 Two unequal quantum/order profiles must preserve isolated outputs and
 per-program exact instruction/get/put signatures. Every peer is snapshot-
 checked after each quantum, with full prior-written peer cells sampled too.
@@ -25,8 +25,8 @@ GROUPS=(
   ("v0","v1","v2","v3","v4","v5","i0","i1"),
   ("v2","v3","i2","i3","i4","i5","i6","i7"),
   ("v0","v4","i8","i9","i10","i11","i12","i13"),
-  ("v1","v5","i10","i15","i16","i17","i18","i19"),
-  ("v0","v3","v4","v5","i20","i1","i8","i10"),
+  ("v1","v5","i14","i15","i16","i17","i18","i19"),
+  ("v0","v3","v4","v5","i20","i1","i8","i14"),
 )
 MAX_ROUNDS=250000
 def need(ok,why):
