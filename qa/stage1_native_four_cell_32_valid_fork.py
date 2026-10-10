@@ -75,7 +75,14 @@ def main():
               control["route"][0][3]==-forced["route"][0][3] and
               control["route"][0][3]!=0,
               "Native candidate actual first branch motion not opposite "+label)
-        joined=fork.common_subpath(control["route"],forced["route"],5)
+        # Compare executed directed Funge-space motion (x,y,dx,dy), NOT
+        # TOSS depth. This candidate deliberately changes stack contents
+        # and sometimes depth at an identical physical rejoin: including
+        # stack depth in geometry would incorrectly reject the very
+        # causal divergence this experiment is designed to measure.
+        route_motion_a=[tuple(z[:4]) for z in control["route"]]
+        route_motion_b=[tuple(z[:4]) for z in forced["route"]]
+        joined=fork.common_subpath(route_motion_a,route_motion_b,5)
         check(joined is not None,
               "real Native opposite fork routes did not rejoin in 512 trace steps "+
               label)
