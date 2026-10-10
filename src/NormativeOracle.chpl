@@ -123,18 +123,18 @@ module NormativeOracle {
 
   proc workCounts(const ref calculationDay: bigint,
                   const ref targetDay: bigint): WorkCounts {
-    var out: WorkCounts;
-    out.action = dayCount(calculationDay);
-    out.target = dayCount(targetDay);
-    out.distance = absBig(targetDay - calculationDay) + 1;
-    out.connection = out.action + out.target;
+    var resultValue: WorkCounts;
+    resultValue.action = dayCount(calculationDay);
+    resultValue.target = dayCount(targetDay);
+    resultValue.distance = absBig(targetDay - calculationDay) + 1;
+    resultValue.connection = resultValue.action + resultValue.target;
     if targetDay < calculationDay then
-      out.direction = 1;
+      resultValue.direction = 1;
     else if targetDay == calculationDay then
-      out.direction = 2;
+      resultValue.direction = 2;
     else
-      out.direction = 3;
-    return out;
+      resultValue.direction = 3;
+    return resultValue;
   }
 
   proc buildStones() {
@@ -228,9 +228,9 @@ module NormativeOracle {
   }
 
   proc factorialInt(n: int): int {
-    var out = 1;
-    for i in 2..n do out *= i;
-    return out;
+    var resultValue = 1;
+    for i in 2..n do resultValue *= i;
+    return resultValue;
   }
 
   proc permutationUnrank1(rank1: int) {
@@ -346,10 +346,10 @@ module NormativeOracle {
     const bowls0 = initialBowls(counts);
     const (afterDrops, orderAt46) = applyVisibleDropsToBowls(bowls0, visible, stones);
     const finalBowls = postStir12(afterDrops);
-    var out: SauceResult;
-    out.bowls = finalBowls;
-    out.orderAtDrop46 = orderAt46;
-    return out;
+    var resultValue: SauceResult;
+    resultValue.bowls = finalBowls;
+    resultValue.orderAtDrop46 = orderAt46;
+    return resultValue;
   }
 
   proc nextBowlInDrop46Order(const ref sauceResult: SauceResult,
@@ -369,11 +369,11 @@ module NormativeOracle {
     const directionNumber = save(square(first + seal + 1 + 193)
                                + 193 * first
                                + 197 * sauceResult.bowls[6]);
-    var out: AnswerStream;
-    out.first = first;
-    if regularMod(directionNumber, 2) == 1 then out.directionStep = 1;
-    else out.directionStep = -1;
-    return out;
+    var resultValue: AnswerStream;
+    resultValue.first = first;
+    if regularMod(directionNumber, 2) == 1 then resultValue.directionStep = 1;
+    else resultValue.directionStep = -1;
+    return resultValue;
   }
 
   proc answerAt(const ref stream: AnswerStream, k: bigint): bigint {
@@ -442,9 +442,9 @@ module NormativeOracle {
       initialized = true;
     }
 
-    proc ref setGate(index: int, const ref day: bigint) {
-      if gates.contains(index) then gates[index] = day;
-      else gates.add(index, day);
+    proc ref setGate(gateIndex: int, const ref day: bigint) {
+      if gates.contains(gateIndex) then gates[gateIndex] = day;
+      else gates.add(gateIndex, day);
     }
 
     proc ref positiveGateGap(n: int): int {
@@ -511,9 +511,9 @@ module NormativeOracle {
       return i + 1;
     }
 
-    proc ref exactGateIndex(const ref day: bigint, out index: int): bool {
+    proc ref exactGateIndex(const ref day: bigint, out gateIndex: int): bool {
       const i = gateIndexAtOrBefore(day);
-      index = i;
+      gateIndex = i;
       return gates[i] == day;
     }
 
@@ -677,7 +677,7 @@ module NormativeOracle {
       var slots = slotsTotal;
       var cumulative = 0;
       var hit = false;
-      var out = new list(int);
+      var resultValue = new list(int);
 
       while slots > 0 {
         const maxX = rem - (slots - 1);
@@ -695,7 +695,7 @@ module NormativeOracle {
           if r > block then
             r -= block;
           else {
-            out.pushBack(x);
+            resultValue.pushBack(x);
             rem -= x;
             slots -= 1;
             cumulative = nextCumulative;
@@ -706,7 +706,7 @@ module NormativeOracle {
         }
         if !selected then halt("Не вдалося відкрити ранг розбиття котлет.");
       }
-      return out;
+      return resultValue;
     }
   }
 
@@ -745,7 +745,7 @@ module NormativeOracle {
       var r = rank1;
       var rem = totalValue;
       var slots = slotsTotal;
-      var out = new list(int);
+      var resultValue = new list(int);
 
       while slots > 0 {
         var selected = false;
@@ -754,7 +754,7 @@ module NormativeOracle {
           if r > block then
             r -= block;
           else {
-            out.pushBack(x);
+            resultValue.pushBack(x);
             rem -= x;
             slots -= 1;
             selected = true;
@@ -763,7 +763,7 @@ module NormativeOracle {
         }
         if !selected then halt("Не вдалося відкрити ранг обмеженої композиції.");
       }
-      return out;
+      return resultValue;
     }
   }
 
@@ -773,7 +773,7 @@ module NormativeOracle {
     if rank1 < 1 || rank1 > total then halt("Ранг набору різних назв поза межами сімейства.");
     var remaining = new list(int);
     for i in 1..masterCount do remaining.pushBack(i);
-    var out = new list(int);
+    var resultValue = new list(int);
     var r = rank1;
 
     for position in 1..k {
@@ -789,10 +789,10 @@ module NormativeOracle {
         }
       }
       if chosenPosition < 0 then halt("Не вдалося відкрити ранг різних назв.");
-      out.pushBack(remaining[chosenPosition]);
+      resultValue.pushBack(remaining[chosenPosition]);
       remaining.getAndRemove(chosenPosition);
     }
-    return out;
+    return resultValue;
   }
 
   proc chooseCutletCount(const ref structureSauce: SauceResult,
@@ -839,7 +839,7 @@ module NormativeOracle {
                           const ref partition: list(int),
                           const ref nameIndices: list(int)): list(Cutlet) {
     if partition.size != nameIndices.size then halt("Кількість меж котлет і назв не збігається.");
-    var out = new list(Cutlet);
+    var resultValue = new list(Cutlet);
     var cursorGate = year.openGateIndex;
     for i in partition.indices {
       const openIndex = cursorGate;
@@ -847,10 +847,10 @@ module NormativeOracle {
       const c = new Cutlet(nameIndices[i], openIndex, closeIndex,
                            gates.ensureGateIndex(openIndex) + 1,
                            gates.ensureGateIndex(closeIndex));
-      out.pushBack(c);
+      resultValue.pushBack(c);
       cursorGate = closeIndex;
     }
-    return out;
+    return resultValue;
   }
 
   proc chooseMonthCount(const ref structureSauce: SauceResult,
@@ -937,11 +937,11 @@ module NormativeOracle {
       var openedUpTo = 0;
       var closedUpTo = 0;
       var r = rank1;
-      var out = new list(int);
+      var resultValue = new list(int);
       var targetLength = 0;
       for x in lengths do targetLength += x;
 
-      while out.size < targetLength {
+      while resultValue.size < targetLength {
         var selected = false;
         for monthId in 1..lengths.size {
           if !legalMove(remaining, openedUpTo, closedUpTo, monthId) then continue;
@@ -956,7 +956,7 @@ module NormativeOracle {
           if r > block then
             r -= block;
           else {
-            out.pushBack(monthId);
+            resultValue.pushBack(monthId);
             remaining = nextRemaining;
             openedUpTo = nextOpened;
             closedUpTo = nextClosed;
@@ -966,7 +966,7 @@ module NormativeOracle {
         }
         if !selected then halt("Не вдалося відкрити ранг шитва місяців.");
       }
-      return out;
+      return resultValue;
     }
   }
 
@@ -990,16 +990,16 @@ module NormativeOracle {
                           const ref year: Year): YearStructure {
     const firstDay = year.openGateDay + 1;
     const r = sauce(calculationDay, firstDay);
-    var out: YearStructure;
-    out.cutletCount = chooseCutletCount(r, year);
-    out.cutletPartition = chooseCutletPartition(gates, calculationDay, r, year, out.cutletCount);
-    out.cutletNameIndices = chooseCutletNameIndices(r, out.cutletCount);
-    out.cutlets = materializeCutlets(gates, year, out.cutletPartition, out.cutletNameIndices);
-    out.monthCount = chooseMonthCount(r, year);
-    out.monthLengths = chooseMonthLengths(r, year, out.monthCount);
-    out.monthWeaving = chooseMonthWeaving(r, out.monthLengths);
-    out.monthNameIndices = chooseMonthNameIndices(r, out.monthCount);
-    return out;
+    var resultValue: YearStructure;
+    resultValue.cutletCount = chooseCutletCount(r, year);
+    resultValue.cutletPartition = chooseCutletPartition(gates, calculationDay, r, year, resultValue.cutletCount);
+    resultValue.cutletNameIndices = chooseCutletNameIndices(r, resultValue.cutletCount);
+    resultValue.cutlets = materializeCutlets(gates, year, resultValue.cutletPartition, resultValue.cutletNameIndices);
+    resultValue.monthCount = chooseMonthCount(r, year);
+    resultValue.monthLengths = chooseMonthLengths(r, year, resultValue.monthCount);
+    resultValue.monthWeaving = chooseMonthWeaving(r, resultValue.monthLengths);
+    resultValue.monthNameIndices = chooseMonthNameIndices(r, resultValue.monthCount);
+    return resultValue;
   }
 
   proc calendarDate(ref gates: GateOracle,
