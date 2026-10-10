@@ -2022,6 +2022,46 @@ jobs:
           path: ${{ runner.temp }}/native-four-cell-bigint/
           retention-days: 30
 
+  native-year5000-raw-lexeme-character-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin pure BF98 raw scanner and independent reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
+          test "$(git hash-object qa/year5000_raw_lexeme_guard.b98)" = "18f633c0d31d9409fcf87b9142f157ece943f02a"
+          test "$(git hash-object qa/stage1_native_year5000_raw_lexeme.py)" = "7eb4f5298014c81e14fb61768fcda319f7d56bed"
+          test "$(git hash-object qa/stage1_native_year5000_raw_lexeme_audit.py)" = "15405f9f62bc885473a6089cba507d259ae3887b"
+          python3 -m py_compile qa/stage1_native_year5000_raw_lexeme_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute 44 raw lexical character records in native BF98
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-raw-lexeme"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-raw-lexeme:/raw-lexeme-guard" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 240s python -u qa/stage1_native_year5000_raw_lexeme.py
+            '
+          python3 qa/stage1_native_year5000_raw_lexeme_audit.py "$RUNNER_TEMP/native-raw-lexeme"
+          test -s "$RUNNER_TEMP/native-raw-lexeme/native_year5000_raw_lexeme_audit.json"
+          echo NATIVE_RAW_SIGN_GUARD_CHAR_ONLY_NOT_FULL_GRAMMAR_STAGE1_OPEN
+      - name: Retain raw lexical scanner and unguarded native bypass witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-year5000-native-raw-lexeme
+          path: ${{ runner.temp }}/native-raw-lexeme/
+          retention-days: 30
+
   native-integer-signed-lexeme-transport:
     runs-on: ubuntu-latest
     timeout-minutes: 8
