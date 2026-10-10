@@ -397,7 +397,10 @@ jobs:
               timeout --kill-after=5s 720s python -u qa/stage1_native_structural_corpus.py
               timeout --kill-after=5s 260s python -u qa/stage1_native_year5000_negative_axis.py
               timeout --kill-after=5s 320s python -u qa/stage1_native_year5000_multirank.py
+              timeout --kill-after=5s 420s python -u qa/stage1_native_year5000_irregular.py
             '
+          python3 qa/stage1_native_year5000_irregular_audit.py "$RUNNER_TEMP/native-year5000"
+          test -s "$RUNNER_TEMP/native-year5000/native_year5000_irregular_audit.json"
           python3 qa/stage1_native_year5000_negative_axis_audit.py "$RUNNER_TEMP/native-year5000"
           test -s "$RUNNER_TEMP/native-year5000/native_year5000_negative_axis_audit.json"
           python3 qa/stage1_native_year5000_multirank_audit.py "$RUNNER_TEMP/native-year5000"
