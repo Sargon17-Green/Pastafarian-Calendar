@@ -73,7 +73,9 @@ def run(source,raw,delta,restore_x,control_x=None):
                     for k,(va,vb) in enumerate(zip(a,b)):
                         if va!=vb:diffs.append((j,k,va,vb))
                 need(len(diffs)==1,
-                     "Expected exactly one u-mediated x argument difference")
+                     "Expected one u-mediated x argument difference; observed "
+                     +repr(diffs[:20])+"\nNative mutant x pre="+repr(before)
+                     +"\nNative control x pre="+repr(want))
                 j,k,actual,expected=diffs[0]
                 need(j==len(ip.stack)-1 and
                      k>=len(ip.stack[j])-2,
