@@ -2022,6 +2022,47 @@ jobs:
           path: ${{ runner.temp }}/native-four-cell-bigint/
           retention-days: 30
 
+  native-year5000-all-256-trailing-octets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin exactly qualified integrated BF98 parser and octet harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_integrated_lf_eof_grammar.b98)" = "fb6513605febc92c4cd1b453295253cb1cb49740"
+          test "$(git hash-object qa/year5000_exact_line_grammar.b98)" = "0c7d996a3969adb47e8d58cff27c315a3af8145d"
+          test "$(git hash-object qa/stage1_native_year5000_trailing_octets.py)" = "ddff0bf25b4791c5f2afeeaf80b81e86ef1ada1d"
+          test "$(git hash-object qa/stage1_native_year5000_trailing_octets_audit.py)" = "94d63b29b0dec971747b65a5897ab2d276352362"
+          python3 -m py_compile qa/stage1_native_year5000_trailing_octets_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay all 256 possible trailing octets after valid LF in BF98
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-trailing-octets"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-trailing-octets:/year5000-octets" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 240s python -u qa/stage1_native_year5000_trailing_octets.py
+            '
+          python3 qa/stage1_native_year5000_trailing_octets_audit.py "$RUNNER_TEMP/native-trailing-octets"
+          test -s "$RUNNER_TEMP/native-trailing-octets/native_all_256_trailing_octets.json"
+          test -s "$RUNNER_TEMP/native-trailing-octets/native_all_256_trailing_octets_audit.json"
+          echo NATIVE_SINGLE_BF98_ALL_TRAILING_OCTETS_NOT_NO_LF_STAGE1_OPEN
+      - name: Retain binary NUL to 0xFF native LF EOF proofs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-all-trailing-octets
+          path: ${{ runner.temp }}/native-trailing-octets/
+          retention-days: 30
+
   native-year5000-integrated-24token-lf-eof:
     runs-on: ubuntu-latest
     timeout-minutes: 8
