@@ -2035,7 +2035,9 @@ jobs:
           test "$(git hash-object qa/year5000_integrated_lf_eof_grammar.b98)" = "fb6513605febc92c4cd1b453295253cb1cb49740"
           test "$(git hash-object qa/stage1_native_year5000_integrated_lf_eof.py)" = "bda70f849bbc850361f747496acac2706e25d1e1"
           test "$(git hash-object qa/stage1_native_year5000_integrated_lf_eof_audit.py)" = "749496fd97df7570050ea80ecf8fed74e1b4b968"
-          python3 -m py_compile qa/stage1_native_year5000_integrated_lf_eof_audit.py
+          test "$(git hash-object qa/stage1_native_year5000_integrated_source_map_audit.py)" = "0644d5c372323c57d45361b87f1138664de4f13e"
+          python3 -m py_compile qa/stage1_native_year5000_integrated_lf_eof_audit.py qa/stage1_native_year5000_integrated_source_map_audit.py
+          python3 qa/stage1_native_year5000_integrated_source_map_audit.py
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
       - name: Run integrated LF grammar and real EOF reflection in single native BF98 program
