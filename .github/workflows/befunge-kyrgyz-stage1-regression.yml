@@ -739,6 +739,61 @@ jobs:
           path: ${{ runner.temp }}/native-scc-causality/
           retention-days: 30
 
+
+  native-no-u-cross-artifact-causal-paths:
+    needs: [native-diverse-production-geometry, native-scc-physical-g-intervention]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify original Native BF98 source and independent audit syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_no_u_cross_artifact_audit.py
+      - name: Retrieve two independent raw Native artifacts from exactly this GitHub run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/no-u-native-traces" "$RUNNER_TEMP/no-u-native-scc"
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-diverse-geometry \
+              --dir "$RUNNER_TEMP/no-u-native-traces" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-scc-physical-g-intervention \
+              --dir "$RUNNER_TEMP/no-u-native-scc" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          test -s "$RUNNER_TEMP/no-u-native-traces/diverse_manifest.json"
+          test -s "$RUNNER_TEMP/no-u-native-scc/native_scc_g_interventions.json"
+      - name: Independently cross-audit no-u physical execution and real numeric g causality
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_no_u_cross_artifact_audit.py \
+            "$RUNNER_TEMP/no-u-native-traces" "$RUNNER_TEMP/no-u-native-scc"
+          test -s "$RUNNER_TEMP/no-u-native-traces/native_no_u_cross_artifact_audit.json"
+          echo NATIVE_NO_U_CROSS_ARTIFACT_CAUSAL_STAGE1_OPEN
+      - name: Retain verified no-u route cross-artifact report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-no-u-cross-artifact-proof
+          path: ${{ runner.temp }}/no-u-native-traces/native_no_u_cross_artifact_audit.json
+          retention-days: 30
+
   native-diverse-production-geometry:
     runs-on: ubuntu-latest
     timeout-minutes: 19
