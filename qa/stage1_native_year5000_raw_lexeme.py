@@ -47,6 +47,17 @@ def one(label,raw,want_guard,want_reference=None):
     print("NATIVE_YEAR5000_RAW_LEXEME_GUARD_PASS",label)
 def main():
     if not os.path.isdir(ROOT):raise AssertionError("missing evidence mount")
+    # DIAGNOSTIC-ONLY copy: print the actual failing ASCII byte rather than
+    # the -1 sentinel. Replacing equal-length cells preserves all BF98 jumps.
+    raw_source=open(GUARD,"rb").read()
+    assert raw_source.count("$01-.@")==1
+    debug_path=ROOT+"/native_ascii_rejection_probe.b98"
+    with open(debug_path,"wb") as stream:
+        stream.write(raw_source.replace("$01-.@",".@...."))
+    for example in ("0","0 100","0 100 0 0 9",
+                    "0 100 0 0 9 0 0","-1","0 +1"):
+        print("NATIVE_RAW_ASCII_REJECTION_PROBE",repr(example),
+              native(debug_path,example))
     base=vector()
     answer=[0,5000,0,6,0,252]
     one("base"," ".join(base),1,answer)
