@@ -141,8 +141,12 @@ def main():
        "native_lower_causal_effect_cases":sum(
            x["native_full_result_or_termination_effect"] for x in trial_rows),
        "candidate_suitable_for_further_qa":(references_all_green
-          and len(trial_rows)==6 and all(
-             x["native_full_result_or_termination_effect"] for x in trial_rows)),
+          and len(trial_rows)==6
+          and sum(bool(x["valid"]) for x in trial_rows)==5
+          and all((x["native_full_result_or_termination_effect"]
+                   if x["valid"] else
+                   not x["native_full_result_or_termination_effect"])
+                  for x in trial_rows)),
        "stage1_functional_acceptance":False,
        "stage1_geometric_acceptance":False,
        "qa_production_modified":False,"canonical_branch_modified":False,
