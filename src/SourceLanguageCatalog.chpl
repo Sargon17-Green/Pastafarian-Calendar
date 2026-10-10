@@ -75,15 +75,15 @@ module SourceLanguageCatalog {
     "пісок"
   ];
 
-  proc cutletNameByCanonicalIndex(index: int): string {
-    if index < CUTLET_DOMAIN.low || index > CUTLET_DOMAIN.high then
+  proc cutletNameByCanonicalIndex(canonicalIndex: int): string {
+    if canonicalIndex < CUTLET_DOMAIN.low || canonicalIndex > CUTLET_DOMAIN.high then
       halt("Некоректний canonicalIndex котлети.");
-    return CUTLET_NAMES_UK[index];
+    return CUTLET_NAMES_UK[canonicalIndex];
   }
 
-  proc monthNameByCanonicalIndex(index: int): string {
-    if index < MONTH_DOMAIN.low || index > MONTH_DOMAIN.high then
+  proc monthNameByCanonicalIndex(canonicalIndex: int): string {
+    if canonicalIndex < MONTH_DOMAIN.low || canonicalIndex > MONTH_DOMAIN.high then
       halt("Некоректний canonicalIndex місяця.");
-    return MONTH_NAMES_UK[index];
+    return MONTH_NAMES_UK[canonicalIndex];
   }
 }

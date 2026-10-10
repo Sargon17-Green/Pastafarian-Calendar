@@ -51,15 +51,15 @@ module ExactMath {
 
   proc factorialBig(n: int): bigint {
     if n < 0 then halt("Факторіал від’ємного числа не визначено.");
-    var out = new bigint(1);
-    for i in 2..n do out *= i;
-    return out;
+    var outputValue = new bigint(1);
+    for i in 2..n do outputValue *= i;
+    return outputValue;
   }
 
   proc fallingFactorialBig(n: int, k: int): bigint {
     if k < 0 || k > n then return new bigint(0);
-    var out = new bigint(1);
-    for j in 0..<k do out *= (n - j);
-    return out;
+    var outputValue = new bigint(1);
+    for j in 0..<k do outputValue *= (n - j);
+    return outputValue;
   }
 }

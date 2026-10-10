@@ -9,13 +9,13 @@ use BootstrapFixtures;
 var failures = 0;
 var checks = 0;
 
-proc check(condition: bool, label: string) {
+proc check(condition: bool, description: string) {
   checks += 1;
   if condition then
-    writeln("ГАРАЗД: ", label);
+    writeln("ГАРАЗД: ", description);
   else {
     failures += 1;
-    writeln("ПОМИЛКА: ", label);
+    writeln("ПОМИЛКА: ", description);
   }
 }
 
