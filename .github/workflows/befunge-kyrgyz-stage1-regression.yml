@@ -2096,6 +2096,46 @@ jobs:
           path: ${{ runner.temp }}/native-four-cell-bigint/
           retention-days: 30
 
+  native-year5000-raw-eof-all-512-binary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin already qualified BF98 raw EOF candidate and binary harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_raw_eof_candidate.b98)" = "c5bd9dd06e227f9f31c8988a51bd114bf67b9af7"
+          test "$(git hash-object qa/stage1_native_year5000_raw_eof_binary_512.py)" = "412cb73d2b0f5f13266d5b10afac6b788f3020a4"
+          test "$(git hash-object qa/stage1_native_year5000_raw_eof_binary_512_audit.py)" = "0e5ee8ad76268df1a314f7dddbd3a737837dbb88"
+          python3 -m py_compile qa/stage1_native_year5000_raw_eof_binary_512_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay 512 Native binary LF and raw EOF inputs with PyFunge
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-raw-binary"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-raw-binary:/year5000-raw-binary" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 480s python -u qa/stage1_native_year5000_raw_eof_binary_512.py
+            '
+          python3 qa/stage1_native_year5000_raw_eof_binary_512_audit.py "$RUNNER_TEMP/native-raw-binary"
+          test -s "$RUNNER_TEMP/native-raw-binary/native_year5000_512_raw_binary.json"
+          test -s "$RUNNER_TEMP/native-raw-binary/native_year5000_512_raw_binary_audit.json"
+          echo NATIVE_YEAR5000_RAW_EOF_BINARY_512_STAGE1_OPEN
+      - name: Retain Native 512 binary stream and hostile audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-raw-eof-binary-512
+          path: ${{ runner.temp }}/native-raw-binary/
+          retention-days: 30
+
   native-year5000-test-only-no-lf-bridge:
     runs-on: ubuntu-latest
     timeout-minutes: 9
