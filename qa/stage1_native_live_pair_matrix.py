@@ -207,11 +207,41 @@ def pair(source, left, right, schedule, expected):
             "private_spaces": True, "private_semantics": True,
             "private_io": True, "cross_program_state_unchanged": True}
 
+def peer_stream_negative_controls(source):
+    # Real Native BF98 step while peer stays passive; prove that two same-
+    # cursor stream byte mutations are visible to the ownership snapshot.
+    for key,letter in (("stdin","9"),("stdout","X")):
+        active=make(source,"v0")
+        peer=make(source,"v1")
+        before=state(peer)
+        need(len(before)==8,"Native peer state lacks stream contents")
+        tick(active)
+        need(active["steps"]==1 and state(peer)==before,
+             "Native BF98 step changed passive peer state")
+        stream=peer[key]
+        position=stream.tell()
+        original=stream.getvalue()
+        stream.seek(0)
+        stream.write(letter)
+        stream.seek(position)
+        after=state(peer)
+        need(stream.tell()==position and stream.getvalue()!=original,
+             "stream mutation did not preserve cursor while changing bytes")
+        need(after!=before and after[:-2]==before[:-2],
+             "peer snapshot missed content-only mutation")
+        index=6 if key=="stdin" else 7
+        need(after[index]!=before[index] and
+             after[13-index]==before[13-index],
+             "wrong stream changed in Native peer snapshot")
+        print("NATIVE_BF98_SAME_CURSOR_PEER_STREAM_MUTATION_REJECT_PASS",key)
+    sys.stdout.flush()
+
 def main():
     need(os.path.isdir("/pairs"), "Native live-pair evidence directory missing")
     source = open(SOURCE, "rb").read()
     got = hashlib.sha1("blob %d\0%s" % (len(source), source)).hexdigest()
     need(got == PIN, "source Git blob not pinned to QA production")
+    peer_stream_negative_controls(source)
     expected = {}
     for i in range(6):
         label = "v%d" % i
