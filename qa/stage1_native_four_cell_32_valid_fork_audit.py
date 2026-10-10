@@ -89,7 +89,8 @@ def check(d):
         need(isinstance(off,list) and len(off)==2 and
              all(type(v) is int and 0<=v<=507 for v in off)
              and isinstance(trace,list) and len(trace)==5
-             and all(isinstance(v,list) and len(v)==5 for v in trace),
+             and all(isinstance(v,list) and len(v)==4 and
+                     all(type(n) is int for n in v) for v in trace),
              "five actually executed joint native directed instruction events missing")
         pairs=(("frames","five_frames_control","five_frames_forced","five_equal_frames"),
                ("p_memory","five_p_mutations_control","five_p_mutations_forced","five_equal_p_mutations"),
