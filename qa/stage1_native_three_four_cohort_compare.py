@@ -79,9 +79,9 @@ def main():
     # and retain limited QA scope. Do not trust success text alone.
     tri_audit=json.loads((tri_dir/"native_three_live_programs_audit.json").read_text("utf-8"))
     quad_audit=json.loads((quad_dir/"native_four_live_programs_audit.json").read_text("utf-8"))
-    need(tri_audit.get("schema")=="befunge-stage1-three-live-independent-audit-v1"
+    need(tri_audit.get("schema")=="befunge-stage1-native-three-live-audit-v1"
          and tri_audit.get("stage1_final_acceptance") is False
-         and len(tri_audit.get("negative_reports_rejected",[]))==16,
+         and len(tri_audit.get("rejected_adversaries",[]))==16,
          "original triad independent audit artifact not pinned")
     need(quad_audit.get("schema")=="befunge-stage1-four-live-owner-independent-audit-v1"
          and quad_audit.get("stage1_accepted") is False
