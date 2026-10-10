@@ -12,7 +12,7 @@ BLOB="c70f15354979aafdd0ea0c83045ef2a54dd996f9"
 INDEX_ORIGINS=(0,-1,-7,-8,1,7,-((1<<129)+13),1<<129)
 DAY_SHIFTS=(0,-((1<<130)+57))
 RANKS_9=((1,(0,6)),(3,(2,8)),(6,(0,8)),(0,None),(7,None))
-BAD_INDICES=((1,0),(2,0),(2,1),(-1,3))
+BAD_INDICES=((1,0),(2,0),(2,1),(3,3))
 ROWS=[]
 def sm(x):return [int(x<0),abs(x)]
 def input_tokens(origin,shift,count,rank,malformed=None):
