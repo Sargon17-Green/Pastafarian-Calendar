@@ -1930,6 +1930,61 @@ jobs:
           retention-days: 30
 
 
+
+  native-three-eight-full-corpus-owner-equivalence:
+    needs: [native-three-live-programs, native-eight-live-private-funge-space-ownership]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify exact Native BF98 and independent 27-case cross-auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_three_eight_cohort_compare.py
+      - name: Fetch independently executed three- and eight-live Native reports from this run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cohort-three" "$RUNNER_TEMP/cohort-eight"
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-three-live-programs \
+              --dir "$RUNNER_TEMP/cohort-three" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-eight-live-ownership \
+              --dir "$RUNNER_TEMP/cohort-eight" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          test -s "$RUNNER_TEMP/cohort-three/native_three_live_programs_audit.json"
+          test -s "$RUNNER_TEMP/cohort-eight/native_eight_live_programs_audit.json"
+      - name: Independently cross-certify all 27 original source input signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_three_eight_cohort_compare.py \
+            "$RUNNER_TEMP/cohort-three" "$RUNNER_TEMP/cohort-eight"
+          test -s "$RUNNER_TEMP/cohort-eight/native_three_eight_owner_cross_audit.json"
+          echo NATIVE_BF98_THREE_EIGHT_FULL_CORPUS_QA_PASS_STAGE1_STILL_OPEN
+      - name: Preserve independently checked three-vs-eight complete-corpus witness
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-three-eight-owner-cross-checked
+          path: ${{ runner.temp }}/cohort-eight/native_three_eight_owner_cross_audit.json
+          retention-days: 30
+
   native-four-eight-cross-cohort-ownership-equivalence:
     needs: [native-four-live-private-funge-space-ownership, native-eight-live-private-funge-space-ownership]
     runs-on: ubuntu-latest
