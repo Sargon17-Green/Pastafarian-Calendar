@@ -1,0 +1,237 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""QA-only real PyFunge-98 inventory of execution-time Funge-space.put.
+
+Runs exact Git-blob-pinned QA production for 32 valid domain inputs,
+normal and forced-opposite real | branch. Monitors all native .space.put
+calls at the engine level, not only explicitly visited p instructions.
+This detects potentially indirect writes through k. Source bytes are
+unchanged and every arithmetic result is computed by Befunge itself.
+"""
+from __future__ import print_function
+import json
+import os
+import StringIO
+import sys
+from funge.program import Program
+from funge.languages.funge98 import Befunge98
+from funge.platform import BufferedPlatform
+import stage1_native_current_fork_route_differential as fork
+
+SOURCE="src/interleaved_work_counts.b98"
+PIN="560d6aa5807a7f766213a33835cce85eab0fa40c"
+FORBIDDEN="sio=()t"
+GENERATED_WATCHED="sio=()tk"
+SPECIAL_DATA=((43,1702),(47,1703),(53,1704),(61,1706))
+OUT="/writes/native_fungespace_put_inventory.json"
+
+def require(ok,msg):
+    if not ok:raise AssertionError(msg)
+
+class Limit(Exception):pass
+
+def run(src,name,raw,opposite,oracle):
+    stdout=StringIO.StringIO()
+    program=Program(Befunge98,platform=BufferedPlatform(
+        [],{},stdin=StringIO.StringIO(raw),stdout=stdout))
+    program.load_code(src)
+    program.create_ip()
+    require(len(program.ips)==1,"native p inventory one IP precondition")
+    space=program.space
+    cls=type(space)
+    original_put=cls.put
+    original_putspace=cls.putspace
+    original_step=program.execute_step
+    puts=[]
+    putspace_calls=[]
+    generated_live={}
+    generated_byte_visits=[]
+    direct_g_data_reads=[]
+    repeat_k_events=[]
+    direct_p=[]
+    gate=[]
+    ticks=[0]
+    def spy_put(self,*args,**kwargs):
+        require(self is space and len(args)>=2,
+                "Native Funge-space.put spy intercepted unexpected call")
+        address,val=args[:2]
+        require(len(program.ips)==1,
+                "Funge-space.put called without the original Native IP")
+        ip=program.ips[0]
+        position=[int(ip.position[0]),int(ip.position[1])]
+        opcode=int(self.get(ip.position))
+        target=[int(address[0]),int(address[1])]
+        result=original_put(self,*args,**kwargs)
+        stored=int(self.get(address))
+        require(stored==int(val),
+                "actual Native put stored a value different from written")
+        puts.append({"tick":ticks[0],"ip":position,"opcode":opcode,
+                     "target":target,"value":stored})
+        key=tuple(target)
+        if stored in [ord(c) for c in GENERATED_WATCHED]:
+            generated_live[key]=stored
+        else:
+            generated_live.pop(key,None)
+        return result
+    def spy_putspace(self,*args,**kwargs):
+        require(self is space,
+                "real Native putspace invoked on unexpected Funge-space")
+        # Program.load_code finished BEFORE hooks were installed.
+        # This catches only true execution-time alternative writes.
+        putspace_calls.append({
+            "tick":ticks[0],"argument_count":len(args),
+            "ip":[int(program.ips[0].position[0]),
+                  int(program.ips[0].position[1])] if program.ips else None})
+        return original_putspace(self,*args,**kwargs)
+    def step(self):
+        ticks[0]+=1
+        if ticks[0]>fork.BOUND:
+            raise Limit()
+        require(len(self.ips)==1,"unexpected concurrent Native IP")
+        ip=self.ips[0]
+        op=int(self.space.get(ip.position))
+        xy=tuple(ip.position)
+        if xy in generated_live:
+            generated_byte_visits.append({
+                "tick":ticks[0],"ip":[int(xy[0]),int(xy[1])],
+                "byte":int(op),"stringmode":bool(ip.stringmode)})
+        if xy==fork.GATE:
+            require(op==ord("|") and len(ip.stack[0])>0,
+                    "pin-scoped fork missing during real Native execution")
+            original=int(bool(ip.stack[0][-1]))
+            if opposite:
+                ip.stack[0][-1]=0 if original else 1
+            gate.append([original,int(bool(ip.stack[0][-1]))])
+        if op==ord("k") and not ip.stringmode:
+            require(len(ip.stack[0])>0,
+                    "Native k was executed without data stack operand")
+            direction=(int(ip.delta[0]),int(ip.delta[1]))
+            target=(int(xy[0])+direction[0],int(xy[1])+direction[1])
+            target_byte=int(self.space.get(ip.position.__class__(target)))
+            repeat_k_events.append({
+                "tick":ticks[0],
+                "ip":[int(xy[0]),int(xy[1])],
+                "direction":list(direction),
+                "target":list(target),
+                "target_byte":target_byte,
+                "stack_top_before_k":str(ip.stack[0][-1])})
+            require(tuple(xy)==(1475,101) and
+                    target==(1476,101) and target_byte==ord("+"),
+                    "Native executed k target unexpectedly differs from plus")
+        if op==ord("p") and not ip.stringmode:
+            direct_p.append([int(ip.position[0]),int(ip.position[1]),ticks[0]])
+        pending_g=None
+        if op==ord("g") and not ip.stringmode:
+            values=[int(v) for v in list(ip.stack[0])[-2:]]
+            while len(values)<2:values.insert(0,0)
+            target=(values[0]+int(ip.offset[0]),
+                    values[1]+int(ip.offset[1]))
+            if target in SPECIAL_DATA:
+                before=int(self.space.get(ip.position.__class__(target)))
+                pending_g={"tick":ticks[0],"ip":[int(xy[0]),int(xy[1])],
+                           "target":list(target),"before":before}
+        result=original_step()
+        if pending_g is not None:
+            require(self.ips and self.ips[0] is ip and ip.stack[0],
+                    "real Native g of data cell lost IP/stack")
+            returned=int(ip.stack[0][-1])
+            require(returned==pending_g["before"],
+                    "native g returned unexpected stored data byte")
+            pending_g["returned"]=returned
+            direct_g_data_reads.append(pending_g)
+        return result
+    try:
+        cls.put=spy_put
+        cls.putspace=spy_putspace
+        program.execute_step=step.__get__(program,program.__class__)
+        status="normal"
+        try:program.execute()
+        except Limit:status="step-limit"
+    finally:
+        if "execute_step" in program.__dict__:
+            del program.execute_step
+        cls.put=original_put
+        cls.putspace=original_putspace
+    require(len(gate)==1 and len(puts)>0,
+            "Native real fork/space-put observation incomplete")
+    expected=oracle==stdout.getvalue().split()
+    if not opposite:
+        require(status=="normal" and not program.ips and expected,
+                "Unmodified QA production diverged from independent Befunge oracle "+
+                name)
+    non_p=[e for e in puts if e["opcode"]!=ord("p")]
+    created=[e for e in puts if e["value"] in [ord(c) for c in FORBIDDEN]]
+    print("NATIVE_PUT_INVENTORY_CASE",name,"opposite",opposite,
+          "puts",len(puts),"direct_p",len(direct_p),
+          "indirect",len(non_p),"created_mutators",len(created),
+          "status",status)
+    sys.stdout.flush()
+    return {"case":name,"opposite":bool(opposite),"gate":gate[0],
+            "status":status,"remaining_ips":len(program.ips),
+            "oracle_correct":expected,"ticks":ticks[0],
+            "put_calls":len(puts),"direct_p_steps":len(direct_p),
+            "non_p_attributed_puts":len(non_p),
+            "created_other_mutator_cells":len(created),
+            "generated_byte_ip_visits":generated_byte_visits,
+            "direct_g_reads_of_special_cells":direct_g_data_reads,
+            "real_native_k_repeat_targets":repeat_k_events,
+            "native_runtime_putspace_calls":putspace_calls,
+            "native_put_events":puts}
+
+def main():
+    require(os.path.isdir("/writes"),"Native writer output folder absent")
+    src=open(SOURCE,"rb").read()
+    require(fork.blob(src)==PIN,"QA current source Git blob not pinned")
+    absent={c:src.count(c) for c in FORBIDDEN}
+    require(all(count==0 for count in absent.values()),
+            "static source includes non-p Funge mutator opcode")
+    families={row[0]:(row[1],row[2]) for row in fork.native.CASES}
+    families.update({row[0]:(row[1],row[2]) for row in fork.wide.CASES})
+    records=[]
+    for name in fork.CASE_NAMES:
+        fields,valid=families[name]
+        require(valid,"only valid Native domain inputs are in writer scope")
+        raw=" ".join(str(field) for field in fields)+"\n"
+        oracle=fork.native.expected_for(*fields)
+        records.append(run(src,name,raw,False,oracle))
+        records.append(run(src,name,raw,True,oracle))
+    require(len(records)==64,"64 real Native writer replays not completed")
+    total=sum(r["put_calls"] for r in records)
+    indirect=sum(r["non_p_attributed_puts"] for r in records)
+    generated=sum(r["created_other_mutator_cells"] for r in records)
+    generated_visits=sum(len(r["generated_byte_ip_visits"]) for r in records)
+    data_reads=sum(len(r["direct_g_reads_of_special_cells"]) for r in records)
+    k_visits=sum(len(r["real_native_k_repeat_targets"]) for r in records)
+    runtime_putspace=sum(len(r["native_runtime_putspace_calls"]) for r in records)
+    require(total>64,"Native Funge-space write inventory implausibly empty")
+    evidence={"schema":"befunge-stage1-native-fungespace-put-surface-v1",
+              "status":"QA_ONLY_NOT_COMPLETE_SEMANTIC_OWNERSHIP",
+              "production_git_blob":PIN,"valid_inputs":32,
+              "real_native_program_runs":64,
+              "source_forbidden_mutator_count":absent,
+              "total_space_put_calls":total,
+              "indirect_or_non_p_attributed_put_calls":indirect,
+              "new_forbidden_mutator_bytes_written":generated,
+              "generated_mutator_byte_ip_visits":generated_visits,
+              "direct_g_reads_of_special_cells":data_reads,
+              "real_native_k_repeat_visits":k_visits,
+              "real_native_runtime_putspace_invocations":runtime_putspace,
+              "putspace_instrumented_after_source_load":True,
+              "real_native_k_repeat_target_not_p_or_g":True,
+              "generated_mutator_or_k_byte_executions":generated_visits,
+              "indirect_or_non_g_memory_reads_not_audited":True,
+              "other_space_mutation_APIs_audited":False,
+              "stage1_final_acceptance":False,"records":records}
+    with open(OUT,"wb") as f:
+        f.write(json.dumps(evidence,sort_keys=True,indent=2)+"\n")
+    print("NATIVE_REAL_FUNGESPACE_PUT_INVENTORY_64_CASE_PASS",
+          "total_puts",total,"non_p_attributed",indirect,
+          "generated_other_mutators",generated,
+          "generated_byte_ip_visits",generated_visits,
+          "direct_g_data_reads",data_reads,
+          "native_k_visits",k_visits,
+          "runtime_putspace_calls",runtime_putspace)
+    print("STAGE1_SEMANTIC_OWNERSHIP_FINAL_GATE=OPEN")
+
+if __name__=="__main__":
+    main()

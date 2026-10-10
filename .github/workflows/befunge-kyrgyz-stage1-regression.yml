@@ -16,6 +16,27 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin QA stack-stack production and archived historical Native sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_lexical_candidate.b98)" = "e2b39b066d1d47bcb8ce4f234b093fca94cb21d1"
+          test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
+          test "$(git hash-object src/day_count.b98)" = "4f25f514f7b6362105dfff77db6f36769efe36c3"
+          test "$(git hash-object src/save.b98)" = "dd6f10aa196e3a9523ee786e4ba41a91f303d199"
+          test "$(git hash-object README.md)" = "74c424b44eadd4ece3f29072ddbf873236557604"
+          test "$(git hash-object qa/interleaved_work_counts_pre_reflective_production.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
+          test "$(git hash-object qa/interleaved_work_counts_pre_two_valid_w_production.b98)" = "8f2cf8afef61818244747582fe7c20a74ee18943"
+          test "$(git hash-object qa/interleaved_work_counts_pre_stack_stack_production.b98)" = "b6cf50de9ed45376db5fc4ebd003157210dff03b"
+          test "$(git hash-object qa/interleaved_work_counts_stack_stack_candidate.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_w_data_branch_candidate.b98)" = "31807edb2b44b141d2af340555d6e97e63428613"
+          test "$(git hash-object qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98)" = "b6cf50de9ed45376db5fc4ebd003157210dff03b"
+          echo NATIVE_STAGE1_PINNED_SOURCE_SHA_PASS
+          python3 qa/stage1_parser_integration_structure.py
+          python3 qa/stage1_full_execution_geometry_sim.py
+          python3 qa/stage1_native_trace_auditor_selftest.py
+          python3 qa/stage1_native_route_graph.py --selftest
       - name: Verify pinned PyFunge-98 package
         shell: bash
         run: |
@@ -111,4 +132,3075 @@ jobs:
                 "0 5000 0 6 0 252".split())
           print("STAGE1_TARGETED_NATIVE_REGRESSION_PASS total_invocations="+str(n))
           PY
+              python qa/stage1_native_process_isolation.py
             '
+
+  native-write-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned PyFunge-98 for native Funge-space trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native IP, exact p writes and subsequent executable gate reads
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-befunge-traces"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-befunge-traces:/traces" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              export PYTHONPATH=/work/qa
+              export BF98_TRACE_LOG=/traces/valid.tsv
+              printf "1 15055672 1 15055670\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 qa/interleaved_work_counts_pre_lexical_baseline.b98 > /traces/valid.out
+              export BF98_TRACE_LOG=/traces/invalid.tsv
+              printf "2 10 0 10\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 qa/interleaved_work_counts_pre_lexical_baseline.b98 > /traces/invalid.out
+              export BF98_TRACE_LOG=/traces/candidate_valid.tsv
+              printf "1 15055672 1 15055670\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/interleaved_work_counts.b98 > /traces/candidate_valid.out
+              export BF98_TRACE_LOG=/traces/candidate_invalid.tsv
+              printf "2 10 0 10\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/interleaved_work_counts.b98 > /traces/candidate_invalid.out
+               # Independently retain the byte-identical native scanner parity
+              export BF98_TRACE_LOG=/traces/scanner_valid.tsv
+              printf "1 15055672 1 15055670\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 qa/interleaved_work_counts_lexical_candidate.b98 > /traces/scanner_valid.out
+              export BF98_TRACE_LOG=/traces/scanner_invalid.tsv
+              printf "2 10 0 10\n" | timeout --kill-after=2s 50s pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 qa/interleaved_work_counts_lexical_candidate.b98 > /traces/scanner_invalid.out
+            '
+          test "$(wc -w < "$RUNNER_TEMP/native-befunge-traces/valid.out")" -eq 7
+          test "$(tr -s '[:space:]' ' ' < "$RUNNER_TEMP/native-befunge-traces/invalid.out" | xargs)" = "-1 -1 -1 -1 -1 -1 -1"
+          python3 qa/stage1_native_write_audit.py \
+            "$RUNNER_TEMP/native-befunge-traces/valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.tsv"
+          python3 qa/stage1_native_write_audit.py \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.tsv"
+          cmp "$RUNNER_TEMP/native-befunge-traces/valid.out" "$RUNNER_TEMP/native-befunge-traces/candidate_valid.out"
+          cmp "$RUNNER_TEMP/native-befunge-traces/invalid.out" "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.out"
+           cmp "$RUNNER_TEMP/native-befunge-traces/valid.out" "$RUNNER_TEMP/native-befunge-traces/scanner_valid.out"
+           cmp "$RUNNER_TEMP/native-befunge-traces/invalid.out" "$RUNNER_TEMP/native-befunge-traces/scanner_invalid.out"
+          python3 qa/stage1_native_posthandoff_parity.py \
+            "$RUNNER_TEMP/native-befunge-traces/valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/scanner_valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/scanner_invalid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/valid.out" \
+            "$RUNNER_TEMP/native-befunge-traces/scanner_valid.out" \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.out" \
+            "$RUNNER_TEMP/native-befunge-traces/scanner_invalid.out"
+          python3 qa/stage1_native_route_graph.py \
+            qa/interleaved_work_counts_pre_lexical_baseline.b98 \
+            "$RUNNER_TEMP/native-befunge-traces/valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/valid.graph.json"
+          python3 qa/stage1_native_route_graph.py \
+            qa/interleaved_work_counts_pre_lexical_baseline.b98 \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/invalid.graph.json"
+          python3 qa/stage1_native_route_graph.py \
+            src/interleaved_work_counts.b98 \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_valid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_valid.graph.json"
+          python3 qa/stage1_native_route_graph.py \
+            src/interleaved_work_counts.b98 \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.tsv" \
+            "$RUNNER_TEMP/native-befunge-traces/candidate_invalid.graph.json"
+          echo NATIVE_STAGE1_DIRECTED_ROUTE_GRAPHS_CREATED
+          python3 -m py_compile qa/stage1_native_geometry_evidence.py
+          python3 qa/stage1_native_geometry_evidence.py "$RUNNER_TEMP/native-befunge-traces"
+          test -s "$RUNNER_TEMP/native-befunge-traces/geometry_evidence.json"
+          test -s "$RUNNER_TEMP/native-befunge-traces/candidate_valid_native_route.svg"
+          test -s "$RUNNER_TEMP/native-befunge-traces/candidate_invalid_native_route.svg"
+          echo NATIVE_OBSERVED_GEOMETRY_AND_EVIDENCE_ARTIFACTS_PASS
+          echo NATIVE_FROZEN_SCANNER_TRACE_PARITY_AND_PROMOTED_KPLUS_OUTPUT_PARITY_PASS
+          sha256sum src/interleaved_work_counts.b98
+
+      - name: Save raw native execution trace and exact write evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-write-audit
+          path: ${{ runner.temp }}/native-befunge-traces/
+          retention-days: 30
+
+  native-lexical-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned PyFunge-98 interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Reject raw negative lexical sign in all four tokens
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              python qa/stage1_native_lexical_rejection.py
+            '
+
+  native-lexical-parser-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned interpreter for Befunge-native parser qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Verify test-only Funge-98 character parser candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              python qa/stage1_native_lexical_candidate.py
+            '
+
+  native-integrated-lexical-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned native interpreter for full scanner plus workCounts
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Independent native reference differential for integrated 2D candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              python qa/stage1_native_integrated_lexical.py
+            '
+
+  native-same-interpreter-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned native PyFunge package for in-process Program API
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay fresh and overlapping native Program instances in one Python interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_same_interpreter_isolation.py
+            '
+
+  native-exact-program-object-reset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin promoted QA 2D source, original baseline and PyFunge-98 interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native same-Program-object reset, repeat, source-switch and buffer independence
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 240s python -u qa/stage1_native_same_program_reset.py
+            '
+
+  native-structural-reference-properties:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify native PyFunge package checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native bounded families and weaving count/unrank property checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 850s python -u qa/stage1_native_structural_properties.py
+            '
+
+  native-stage1-structural-corpus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin independent Befunge structural references
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reference/count_weavings.b98)" = "d57ef8da12e7cae7e62153407214f9f903eca280"
+          test "$(git hash-object reference/unrank_weaving.b98)" = "a48359619ab5391b156e6eefdd6d36a5e500611a"
+          test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
+          test "$(git hash-object reference/falling_factorial.b98)" = "d20317d31740e633e8696302faaee6d63639e080"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native weaving rank coverage and Year5000 translation/boundary invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-year5000"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-year5000:/year5000" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 720s python -u qa/stage1_native_structural_corpus.py
+              timeout --kill-after=5s 260s python -u qa/stage1_native_year5000_negative_axis.py
+              timeout --kill-after=5s 320s python -u qa/stage1_native_year5000_multirank.py
+              timeout --kill-after=5s 240s python -u qa/stage1_native_year5000_signed_gate_index.py
+            '
+          python3 qa/stage1_native_year5000_signed_gate_index_audit.py "$RUNNER_TEMP/native-year5000"
+          test -s "$RUNNER_TEMP/native-year5000/native_year5000_signed_gate_index_audit.json"
+          python3 qa/stage1_native_year5000_negative_axis_audit.py "$RUNNER_TEMP/native-year5000"
+          test -s "$RUNNER_TEMP/native-year5000/native_year5000_negative_axis_audit.json"
+          python3 qa/stage1_native_year5000_multirank_audit.py "$RUNNER_TEMP/native-year5000"
+          test -s "$RUNNER_TEMP/native-year5000/native_year5000_multirank_audit.json"
+          echo NATIVE_YEAR5000_SIGNED_AXIS_AND_MULTIRANK_AUDITS_PASS_STAGE1_OPEN
+      - name: Retain signed Year-5000 Native input/output and tamper audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-signed-axis
+          path: ${{ runner.temp }}/native-year5000/
+          retention-days: 30
+
+  native-stage1-year5000-irregular-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [cross, floor, ceiling]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin the native Year5000 Befunge oracle and PyFunge archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
+          test "$(git hash-object qa/stage1_native_year5000_irregular.py)" = "30b58b75b1b7f5a67e839e2df858e6b8b8fb89d6"
+          test "$(git hash-object qa/stage1_native_year5000_irregular_audit.py)" = "994963475b8928a777c5256517045298817f48e3"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: "Replay Native irregular Year5000 family - ${{ matrix.family }}"
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-year5000-irregular"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e YEAR5000_FAMILY="${{ matrix.family }}" \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-year5000-irregular:/year5000" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1800s python -u qa/stage1_native_year5000_irregular.py
+            '
+          python3 qa/stage1_native_year5000_irregular_audit.py "$RUNNER_TEMP/native-year5000-irregular"
+          test -s "$RUNNER_TEMP/native-year5000-irregular/native_year5000_irregular.json"
+          test -s "$RUNNER_TEMP/native-year5000-irregular/native_year5000_irregular_audit.json"
+          echo "NATIVE_YEAR5000_IRREGULAR_${{ matrix.family }}_HOSTILE_AUDIT_PASS_STAGE1_OPEN"
+      - name: Retain standalone irregular Year5000 native evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-irregular-${{ matrix.family }}
+          path: ${{ runner.temp }}/native-year5000-irregular/
+          retention-days: 30
+
+  native-sauce-choice-composition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify exact interpreter archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Compare native Sauce to two independent Befunge Choice compositions
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1000s python -u qa/stage1_native_sauce_choice_composition.py
+            '
+
+  native-expanded-six-valid-u-to-x-stack-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original Native BF98 source, native program interpreter, and audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_real_u_x_expanded_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native BF98 six new valid families with forty-two independent real runtime programs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/expanded-u-x"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/expanded-u-x:/expanded-u-x" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 660s python -u qa/stage1_native_real_u_x_expanded.py
+            '
+          python3 qa/stage1_native_real_u_x_expanded_audit.py "$RUNNER_TEMP/expanded-u-x"
+          test -s "$RUNNER_TEMP/expanded-u-x/expanded_u_x_native_audit.json"
+          echo NATIVE_BF98_EXPANDED_SIX_CASE_U_X_CAUSAL_QA_ONLY_STAGE1_OPEN
+      - name: Retain six-family actual Native BF98 causal evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-six-family-u-x-mediation
+          path: ${{ runner.temp }}/expanded-u-x/
+          retention-days: 30
+
+  native-real-u-to-x-vector-mediation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Exact BF98 source and PyFunge pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_real_u_x_mediation_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native BF98 twenty-one actual programs measure u-x stack-channel mediation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-u-x-mediation"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-u-x-mediation:/u-x-mediation" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_real_u_x_mediation.py
+            '
+          python3 qa/stage1_native_real_u_x_mediation_audit.py "$RUNNER_TEMP/native-u-x-mediation"
+          test -s "$RUNNER_TEMP/native-u-x-mediation/native_real_u_x_mediation_audit.json"
+          echo NATIVE_BF98_U_X_MEDIATION_EVIDENCE_STAGE1_OPEN
+      - name: Retain Native BF98 causal mediation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-u-x-mediation
+          path: ${{ runner.temp }}/native-u-x-mediation/
+          retention-days: 30
+
+  native-real-u-reverse-count-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin real Native BF98 production source and interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_real_u_reverse_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native BF98 u first-slot reverse count causal experiment
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-u-reverse"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-u-reverse:/u-reverse" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_real_u_reverse.py
+            '
+          python3 qa/stage1_native_real_u_reverse_audit.py "$RUNNER_TEMP/native-u-reverse"
+          test -s "$RUNNER_TEMP/native-u-reverse/u_reverse_native_audit.json"
+          echo NATIVE_REAL_BF98_U_REVERSE_CAUSAL_QA_ONLY_STAGE1_OPEN
+      - name: Preserve Native u reverse-count measured evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-u-reverse-count-causality
+          path: ${{ runner.temp }}/native-u-reverse/
+          retention-days: 30
+
+  native-real-u-three-payload-slots-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original real BF98 source and interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_real_u_payload_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Twelve Native BF98 u real-stack slot perturbations and oracle checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-u-payload"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-u-payload:/u-payload" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_real_u_payload.py
+            '
+          python3 qa/stage1_native_real_u_payload_audit.py "$RUNNER_TEMP/native-u-payload"
+          test -s "$RUNNER_TEMP/native-u-payload/native_u_payload_audit.json"
+          echo NATIVE_REAL_BF98_U_PAYLOAD_CAUSAL_WITNESS_STAGE1_OPEN
+      - name: Retain real Native u payload and independent audit witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-u-payload-matrix
+          path: ${{ runner.temp }}/native-u-payload/
+          retention-days: 30
+
+  native-real-u-stack-transfer-operand-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original BF98 production source and native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_real_u_operand_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute nine original Native BF98 programs with six real u-operand interventions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-u-transfer"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-u-transfer:/u-operand" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_real_u_operand.py
+            '
+          python3 qa/stage1_native_real_u_operand_audit.py "$RUNNER_TEMP/native-u-transfer"
+          test -s "$RUNNER_TEMP/native-u-transfer/u_operand_native_audit.json"
+          echo NATIVE_U_STACK_TRANSFER_CAUSAL_WITNESS_STAGE1_OPEN
+      - name: Retain Native u stack transfer and falsification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-real-u-stack-transfer
+          path: ${{ runner.temp }}/native-u-transfer/
+          retention-days: 30
+
+  native-executed-spaghetti-operator-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned BF98 and interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_executed_opcode_causal_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Real Native BF98 four executed opcode substitutions across three valid inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-opcode-causal"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-opcode-causal:/opcode-causal" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 660s python -u qa/stage1_native_executed_opcode_causal.py
+            '
+          python3 qa/stage1_native_executed_opcode_causal_audit.py "$RUNNER_TEMP/native-opcode-causal"
+          test -s "$RUNNER_TEMP/native-opcode-causal/opcode_causal_audit.json"
+          echo NATIVE_OPCODE_RUNTIME_CAUSAL_EXPERIMENT_STAGE1_OPEN
+      - name: Retain user-visible Native opcode causal evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-opcode-causality
+          path: ${{ runner.temp }}/native-opcode-causal/
+          retention-days: 30
+
+  native-arithmetic-scc-pg-read-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin BF98 source and PyFunge native implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_scc_pg_read_causality_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute actual Native BF98 p/g read-site intervention
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-scc-causality"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-scc-causality:/scc-causality" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 600s python -u qa/stage1_native_scc_pg_read_causality.py
+            '
+          python3 qa/stage1_native_scc_pg_read_causality_audit.py "$RUNNER_TEMP/native-scc-causality"
+          test -s "$RUNNER_TEMP/native-scc-causality/native_scc_real_pg_causal_audit.json"
+          echo NATIVE_SCC_READ_CAUSAL_QA_ONLY_STAGE1_OPEN
+      - name: Retain Native SCC causal experiment evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-scc-pg-read-causality
+          path: ${{ runner.temp }}/native-scc-causality/
+          retention-days: 30
+
+
+  native-no-u-cross-artifact-causal-paths:
+    needs: [native-diverse-production-geometry, native-scc-physical-g-intervention, native-two-foundation-no-u-neighbor-g-causality]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify original Native BF98 source and independent audit syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_no_u_cross_artifact_audit.py
+      - name: Retrieve three independent raw Native artifacts from exactly this GitHub run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/no-u-native-traces" "$RUNNER_TEMP/no-u-native-scc" "$RUNNER_TEMP/no-u-neighbor-g"
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-diverse-geometry \
+              --dir "$RUNNER_TEMP/no-u-native-traces" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-scc-physical-g-intervention \
+              --dir "$RUNNER_TEMP/no-u-native-scc" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-foundation-neighbor-g-causality \
+              --dir "$RUNNER_TEMP/no-u-neighbor-g" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          test -s "$RUNNER_TEMP/no-u-neighbor-g/native_foundation_neighbor_g_causal.json"
+          test -s "$RUNNER_TEMP/no-u-native-traces/diverse_manifest.json"
+          test -s "$RUNNER_TEMP/no-u-native-scc/native_scc_g_interventions.json"
+      - name: Independently cross-audit no-u physical execution and real numeric g causality
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_no_u_cross_artifact_audit.py \
+            "$RUNNER_TEMP/no-u-native-traces" "$RUNNER_TEMP/no-u-native-scc" "$RUNNER_TEMP/no-u-neighbor-g"
+          test -s "$RUNNER_TEMP/no-u-native-traces/native_no_u_cross_artifact_audit.json"
+          echo NATIVE_NO_U_CROSS_ARTIFACT_CAUSAL_STAGE1_OPEN
+      - name: Retain verified no-u route cross-artifact report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-no-u-cross-artifact-proof
+          path: ${{ runner.temp }}/no-u-native-traces/native_no_u_cross_artifact_audit.json
+          retention-days: 30
+
+  native-diverse-production-geometry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin native-qualified production and reference interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
+          python3 -m py_compile qa/stage1_native_diverse_geometry_audit.py qa/stage1_native_route_graph.py qa/stage1_native_spaghetti_frontier.py qa/stage1_native_scc_pg_dataflow.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Collect seventeen independent native signed-day execution traces
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-diverse-traces"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-diverse-traces:/diverse" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 800s python -u qa/stage1_native_diverse_geometry.py
+            '
+      - name: Audit native executed code versions, directed routes and input diversity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_diverse_geometry_audit.py "$RUNNER_TEMP/native-diverse-traces"
+          # Independent, measured-gap analysis on the EXACT audited Native
+          # traces. It cannot mark Stage 1 complete or turn zero counts green.
+          python3 qa/stage1_native_spaghetti_frontier.py "$RUNNER_TEMP/native-diverse-traces"
+          # Independent strongly connected executed instruction cycles plus
+          # physical p->g lineage INSIDE the same arithmetic SCC.
+          python3 qa/stage1_native_scc_pg_dataflow.py "$RUNNER_TEMP/native-diverse-traces"
+          test -s "$RUNNER_TEMP/native-diverse-traces/native_scc_pg_dataflow.json"
+          test -s "$RUNNER_TEMP/native-diverse-traces/native_spaghetti_frontier.json"
+          test -s "$RUNNER_TEMP/native-diverse-traces/diverse_geometry_evidence.json"
+          echo NATIVE_DIVERSE_PRODUCTION_GEOMETRY_CORPUS_RECORDED_NOT_FULL_STAGE1_ACCEPTANCE
+      - name: Preserve measured native geometry corpus and fail-closed evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-diverse-geometry
+          path: ${{ runner.temp }}/native-diverse-traces/
+          retention-days: 30
+  
+  native-adversarial-rank-domains:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin exact Native PyFunge archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Verify signed and oversized rank rejection with independent native family counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              python -u qa/stage1_weaving_rank_ip_probe.py
+              python -u qa/stage1_native_distinct_rank_ip_probe.py
+              timeout --kill-after=5s 650s python -u qa/stage1_native_adversarial_rank_domains.py
+            '
+
+
+  native-executable-gate-counterfactual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin native production code and exact interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute native counterfactual against written-and-executed 2D gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-gate-counterfactual"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-gate-counterfactual:/counterfactual" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=2s 130s python -u qa/stage1_native_gate_counterfactual.py
+            '
+          test -s "$RUNNER_TEMP/native-gate-counterfactual/executed_gate_counterfactual.json"
+          echo NATIVE_GATE_COUNTERFACTUAL_EVIDENCE_RECORDED_NOT_FINAL_GEOMETRY_ACCEPTANCE
+      - name: Preserve native executable-gate mutation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-gate-counterfactual
+          path: ${{ runner.temp }}/native-gate-counterfactual/
+          retention-days: 30
+
+  native-same-program-fault-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin qualified native production and PyFunge runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native g/p failure injection and same Program object explicit recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 420s python -u qa/stage1_native_fault_recovery.py
+            '
+          echo NATIVE_SAME_PROGRAM_FAULT_RECOVERY_JOB_PASS
+
+  # Diagnostic only: standalone native opcode microprograms, NOT proof of
+  # production spaghetti execution or final Stage-1 geometry acceptance.
+  native-spaghetti-opcode-capabilities:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned native interpreter and execute advanced opcode capability probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_opcode_capabilities.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 100s python -u qa/stage1_native_opcode_capabilities.py
+            '
+          echo NATIVE_ADVANCED_OPCODE_CAPABILITY_PROBE_ONLY_NO_STAGE1_ACCEPTANCE
+
+  # Candidate isolated from src/. This gate must not elevate full production
+  # GEOMETRIC_SPAGHETTI_QA_PASS or replace the independent Befunge oracles.
+  native-kplus-2d-arithmetic-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin candidate and reference and execute native k-plus arithmetic trace differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_kplus_2d_candidate.b98)" = "76642dd04022f294cdd036bf0ad1f86455edbd95"
+          python3 -m py_compile qa/stage1_native_kplus_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 720s python -u qa/stage1_native_kplus_candidate.py
+            '
+          echo NATIVE_KPLUS_2D_ARITHMETIC_QA_PRODUCTION_ONLY_CANONICAL_UNCHANGED
+
+  # Native read-only stack evidence for designing genuine input-dependent
+  # arithmetic forks; discovery is NOT final geometric acceptance.
+  native-operand-telemetry-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify interpreter and execute 10 native operand telemetry probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_operand_discovery.py qa/native_operand_probe/sitecustomize.py
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/native-operand-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-operand-evidence:/operands" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 730s python -u qa/stage1_native_operand_discovery.py
+            '
+          test -s "$RUNNER_TEMP/native-operand-evidence/native_operand_discovery.json"
+          echo NATIVE_OBSERVATIONAL_OPERAND_EVIDENCE_ONLY_NOT_GEOMETRY_ACCEPTANCE
+      - name: Preserve exact native operand evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-operand-telemetry
+          path: ${{ runner.temp }}/native-operand-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+  # A real native conditional arithmetic fork on measured variable operands.
+  # Keep separate from production until native differential and route proof.
+  native-conditional-bifurcation-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify exact two-arm Befunge candidate and execute Native oracle differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_native_bifurcation_candidate.b98)" = "93a2e88ce01dec54fcbc079f3eb3dd94326c6432"
+          python3 -m py_compile qa/stage1_native_bifurcation_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/native-bifurcation-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-bifurcation-evidence:/bifurcation" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 750s python -u qa/stage1_native_bifurcation_candidate.py
+            '
+          test -s "$RUNNER_TEMP/native-bifurcation-evidence/native_bifurcation_evidence.json"
+          echo NATIVE_BIFURCATION_CANDIDATE_NOT_PROMOTED
+      - name: Preserve actual Native bifurcation traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-conditional-fork
+          path: ${{ runner.temp }}/native-bifurcation-evidence/
+          retention-days: 30
+          if-no-files-found: error
+
+  # Native proof of both directional turns plus a non-inert stack-driven jump.
+  native-advanced-turn-jump-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Execute ten independent Native oracle parity and directional route proofs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_advanced_turn_jump_candidate.b98)" = "20ff8d38011017fa9182147e864347be4ca9a79c"
+          python3 -m py_compile qa/stage1_native_advanced_turn_jump_candidate.py
+          curl -fsSL "https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz" -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/native-advanced-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-advanced-evidence:/advanced" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 750s python -u qa/stage1_native_advanced_turn_jump_candidate.py
+            '
+          test -s "$RUNNER_TEMP/native-advanced-evidence/advanced_native_route_proof.json"
+          echo NATIVE_ADVANCED_CANDIDATE_REMAINS_TEST_ONLY
+      - name: Preserve actual Native advanced route traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-advanced-turn-jump
+          path: ${{ runner.temp }}/native-advanced-evidence/
+          retention-days: 30
+          if-no-files-found: error
+
+  native-fork-operand-counterfactual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify native production and interpreter package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_pre_two_valid_w_production.b98)" = "8f2cf8afef61818244747582fe7c20a74ee18943"
+          python3 -m py_compile qa/stage1_native_fork_counterfactual.py qa/stage1_native_current_fork_counterfactual_report.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Force opposite conditional operand only at actually executed native fork
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 450s python -u qa/stage1_native_fork_counterfactual.py
+            '
+          echo NATIVE_FROZEN_REFLECTIVE_FORK_CAUSALITY_HISTORICAL_PASS
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 450s python -u qa/stage1_native_current_fork_counterfactual_report.py
+            '
+          echo NATIVE_CURRENT_PRODUCTION_FORK_CAUSALITY_GAP_IS_REPORTED
+          mkdir -p "$RUNNER_TEMP/native-current-fork-routes"
+          python3 -m py_compile qa/stage1_native_current_fork_route_differential.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-current-fork-routes:/fork" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 360s python -u qa/stage1_native_current_fork_route_differential.py
+            '
+          test -s "$RUNNER_TEMP/native-current-fork-routes/current_fork_native_route_differential.json"
+          python3 -m py_compile qa/stage1_native_current_fork_evidence_audit.py
+          python3 qa/stage1_native_current_fork_evidence_audit.py "$RUNNER_TEMP/native-current-fork-routes"
+          test -s "$RUNNER_TEMP/native-current-fork-routes/native_fork_manifest_adversarial_audit.json"
+          python3 -m py_compile qa/stage1_native_fork_scratch_tail_counterfactual.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-current-fork-routes:/fork" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 420s python -u qa/stage1_native_fork_scratch_tail_counterfactual.py
+            '
+          test -s "$RUNNER_TEMP/native-current-fork-routes/native_fork_scratch_tail_counterfactual.json"
+          python3 -m py_compile qa/stage1_native_fork_scratch_tail_audit.py
+          python3 qa/stage1_native_fork_scratch_tail_audit.py "$RUNNER_TEMP/native-current-fork-routes"
+          test -s "$RUNNER_TEMP/native-current-fork-routes/native_fork_scratch_tail_audit.json"
+          python3 -m py_compile qa/stage1_native_pre_g_scratch_intervention.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-current-fork-routes:/fork" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 300s python -u qa/stage1_native_pre_g_scratch_intervention.py
+            '
+          test -s "$RUNNER_TEMP/native-current-fork-routes/native_pre_g_scratch_intervention.json"
+          python3 -m py_compile qa/stage1_native_pre_g_scratch_audit.py
+          python3 qa/stage1_native_pre_g_scratch_audit.py "$RUNNER_TEMP/native-current-fork-routes"
+          test -s "$RUNNER_TEMP/native-current-fork-routes/native_pre_g_scratch_audit.json"
+      - name: Retain current-source Native opposite-fork route evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-current-fork-route-differential
+          path: ${{ runner.temp }}/native-current-fork-routes/
+          retention-days: 30
+
+  native-fungespace-put-writer-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin QA production and real interpreter source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_fungespace_put_inventory.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Trace every actual execution-time Funge-space put invocation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-writer-inventory"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-writer-inventory:/writes" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 600s python -u qa/stage1_native_fungespace_put_inventory.py
+            '
+          test -s "$RUNNER_TEMP/native-writer-inventory/native_fungespace_put_inventory.json"
+      - name: Independently audit exact Native writer events and 7 hostile reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_fungespace_put_inventory_audit.py
+          python3 qa/stage1_native_fungespace_put_inventory_audit.py "$RUNNER_TEMP/native-writer-inventory"
+          test -s "$RUNNER_TEMP/native-writer-inventory/native_fungespace_put_audit.json"
+          python3 -m py_compile qa/stage1_native_all_g_lineage.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-writer-inventory:/writes" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 360s python -u qa/stage1_native_all_g_lineage.py
+            '
+          test -s "$RUNNER_TEMP/native-writer-inventory/native_all_g_lineage.json"
+          python3 -m py_compile qa/stage1_native_all_g_lineage_audit.py
+          python3 qa/stage1_native_all_g_lineage_audit.py "$RUNNER_TEMP/native-writer-inventory"
+          test -s "$RUNNER_TEMP/native-writer-inventory/native_all_g_lineage_audit.json"
+      - name: Retain exact Native execution-time write evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-fungespace-writer-inventory
+          path: ${{ runner.temp }}/native-writer-inventory/
+          retention-days: 30
+
+  native-advanced-opcode-counterfactual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin advanced source and Native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_advanced_opcode_counterfactual.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native one-cell advanced direction and jump counterfactuals
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 450s python -u qa/stage1_native_advanced_opcode_counterfactual.py
+            '
+          echo NATIVE_ADVANCED_OPCODE_COUNTERFACTUAL_QA_ONLY
+
+  # Native candidate proves the executed j bypasses an actual reflect gate.
+  # Controls and mutants run under the real PyFunge interpreter only.
+  native-guarded-jump-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Native guarded 10-case differential and causal opcode mutation checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_advanced_guarded_jump_candidate.b98)" = "f1a9ce836c5717600f0e3355dcd430500248ec69"
+          python3 -m py_compile qa/stage1_native_guarded_jump_candidate.py
+          curl -fsSL "https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz" -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 800s python -u qa/stage1_native_guarded_jump_candidate.py
+            '
+          echo NATIVE_GUARDED_JUMP_CANDIDATE_NOT_PROMOTED
+
+  native-stack-sensitive-j-dependency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin non-production native arithmetic stack-sensitive jump candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/interleaved_work_counts_arithmetic_dependency_j_candidate.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
+          python3 -m py_compile qa/stage1_native_arithmetic_jump_dependency_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute candidate in actual Befunge-98 and demand j non-inertness
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 700s python -u qa/stage1_native_arithmetic_jump_dependency_candidate.py
+            '
+          echo NATIVE_STACK_SENSITIVE_J_CANDIDATE_NOT_PROMOTED
+
+  native-j-pg-scratch-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin native arithmetic source and fault/owner probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_j_pg_scratch_ownership.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Verify Native p/g scratch ownership and same Program explicit rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 430s python -u qa/stage1_native_j_pg_scratch_ownership.py
+            '
+          echo NATIVE_J_PG_EXPLICIT_SCRATCH_OWNER_QA_ONLY_PASS
+
+  # Fail-closed: two live Native Program instances both write the SAME
+  # numeric Funge scratch coordinates; injected fault may not leak.
+  native-overlapping-pg-fault-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin actual Native source and verify test-only concurrency probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_concurrent_pg_fault_isolation.py
+          curl -fsSL "https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz" -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 750s python -u qa/stage1_native_concurrent_pg_fault_isolation.py
+            '
+          echo NATIVE_OVERLAPPING_STATE_OWNER_PROBE_ONLY_NOT_STAGE1_ACCEPTANCE
+  native-reflective-crossing-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pinned native PyFunge and exact five-cell reflective candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_reflective_crossing_candidate.b98)" = "8f2cf8afef61818244747582fe7c20a74ee18943"
+          test "$(git hash-object qa/interleaved_work_counts_pre_reflective_production.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
+          python3 -m py_compile qa/stage1_native_reflective_crossing_candidate.py
+          python3 -m py_compile qa/stage1_native_reflective_candidate_domain_matrix.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native seventeen-case oracle parity and temporal IP crossing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-reflective-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-reflective-evidence:/reflective" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 800s python -u qa/stage1_native_reflective_crossing_candidate.py
+              timeout --kill-after=5s 400s python -u qa/stage1_native_reflective_candidate_domain_matrix.py
+            '
+          test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_candidate_proof.json"
+          echo REFLECTIVE_CANDIDATE_NATIVE_PROMOTED_QA_ONLY_NOT_STAGE1_ACCEPTANCE
+      - name: Independent Native graph audit of dual merge-fork and mutable code
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_reflective_crossing_graph_audit.py
+          python3 qa/stage1_native_reflective_crossing_graph_audit.py "$RUNNER_TEMP/native-reflective-evidence"
+          test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_graph_audit.json"
+          python3 -m py_compile qa/stage1_native_reflective_negative_controls.py
+          python3 qa/stage1_native_reflective_negative_controls.py "$RUNNER_TEMP/native-reflective-evidence"
+          test -s "$RUNNER_TEMP/native-reflective-evidence/reflective_native_negative_controls.json"
+      - name: Candidate same-Program Native p/g fault injection and explicit reset
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_reflective_candidate_reset.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_reflective_candidate_reset.py
+            '
+      - name: Retain Native IP source and causal controls
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-reflective-crossing-candidate
+          path: ${{ runner.temp }}/native-reflective-evidence/
+          retention-days: 30
+
+  native-w-data-dependent-arithmetic-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin actual QA source and frozen experimental native w corridor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_w_data_branch_candidate.b98)" = "31807edb2b44b141d2af340555d6e97e63428613"
+          python3 -m py_compile qa/stage1_native_w_data_branch_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Actual Native w input-selected arithmetic vs independent Befunge references
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-w-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-w-evidence:/wturn" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 720s python -u qa/stage1_native_w_data_branch_candidate.py
+            '
+          test -s "$RUNNER_TEMP/native-w-evidence/w_data_candidate_proof.json"
+          python3 -m py_compile qa/stage1_native_w_source_ownership_audit.py
+          python3 qa/stage1_native_w_source_ownership_audit.py "$RUNNER_TEMP/native-w-evidence"
+          test -s "$RUNNER_TEMP/native-w-evidence/independent_w_native_graph.json"
+          python3 -m py_compile qa/stage1_native_w_graph_audit.py
+          python3 qa/stage1_native_w_graph_audit.py "$RUNNER_TEMP/native-w-evidence"
+          test -s "$RUNNER_TEMP/native-w-evidence/w_data_graph_audit.json"
+          # Same actual Native PyFunge Program ownership and fault recovery,
+          # on the pinned w candidate bytes, not on the QA production source.
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-w-evidence:/wturn" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_w_candidate_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-w-evidence/w_candidate_pg_fault_reset.json"
+          echo NATIVE_W_DATA_SELECTED_QA_CANDIDATE_NOT_PROMOTED
+      - name: Retain real Native w route and rejected one-byte mutant
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-w-data-candidate
+          path: ${{ runner.temp }}/native-w-evidence/
+          retention-days: 30
+
+  native-w-valid-input-branch-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin w Native candidate and discovery-only input corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/interleaved_work_counts_w_data_branch_candidate.b98)" = "31807edb2b44b141d2af340555d6e97e63428613"
+          python3 -m py_compile qa/stage1_native_w_valid_route_discovery.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native signed-domain w route discovery, preserve unresolved gaps
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-w-valid-discovery"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-w-valid-discovery:/wvalid" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 700s python -u qa/stage1_native_w_valid_route_discovery.py
+            '
+          test -s "$RUNNER_TEMP/native-w-valid-discovery/w_valid_branch_discovery.json"
+          echo NATIVE_W_VALID_DOMAIN_DISCOVERY_ONLY_NO_STAGE1_ACCEPTANCE
+      - name: Retain Native per-input branch traces and discovery evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-w-valid-route-discovery
+          path: \${{ runner.temp }}/native-w-valid-discovery/
+          retention-days: 30
+
+  native-underscore-w-two-axis-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify frozen w candidate and test-only underscore QA source generator
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/interleaved_work_counts_w_data_branch_candidate.b98)" = "31807edb2b44b141d2af340555d6e97e63428613"
+          python3 -m py_compile qa/stage1_native_underscore_w_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Real Native underscore paths must preserve w arithmetic and seven-value oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-underscore-qa"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-underscore-qa:/underscore" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 800s python -u qa/stage1_native_underscore_w_candidate.py
+            '
+          test -s "$RUNNER_TEMP/native-underscore-qa/underscore_w_qa_proof.json"
+          python3 -m py_compile qa/stage1_native_underscore_w_graph_audit.py
+          python3 qa/stage1_native_underscore_w_graph_audit.py "$RUNNER_TEMP/native-underscore-qa"
+          test -s "$RUNNER_TEMP/native-underscore-qa/underscore_independent_graph.json"
+          python3 -m py_compile qa/stage1_native_underscore_w_negative_controls.py
+          python3 qa/stage1_native_underscore_w_negative_controls.py "$RUNNER_TEMP/native-underscore-qa"
+          test -s "$RUNNER_TEMP/native-underscore-qa/underscore_w_tamper_controls.json"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-underscore-qa:/underscore" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 500s python -u qa/stage1_native_underscore_w_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-underscore-qa/underscore_w_native_fault_reset.json"
+          echo NATIVE_UNDERSCORE_W_QA_TEST_ONLY_NOT_PROMOTED
+      - name: Retain actual Native underscore branch IP traces and mutant
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-underscore-w-candidate
+          path: \${{ runner.temp }}/native-underscore-qa/
+          retention-days: 30
+
+  native-w-two-valid-arithmetic-arms-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin exact 2D Native w sources and interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/interleaved_work_counts_w_data_branch_candidate.b98)" = "31807edb2b44b141d2af340555d6e97e63428613"
+          test "$(git hash-object qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98)" = "b6cf50de9ed45376db5fc4ebd003157210dff03b"
+          python3 -m py_compile qa/stage1_native_w_valid_two_arithmetic_arms_candidate.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Run Native valid input comparator on both historical arithmetic paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-valid-w-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-valid-w-evidence:/validw" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 850s python -u qa/stage1_native_w_valid_two_arithmetic_arms_candidate.py
+            '
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/native_two_valid_w_evidence.json"
+          python3 -m py_compile qa/stage1_native_two_valid_w_independent_graph.py
+          python3 qa/stage1_native_two_valid_w_independent_graph.py "$RUNNER_TEMP/native-valid-w-evidence"
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/two_valid_w_independent_graph.json"
+          python3 -m py_compile qa/stage1_native_two_valid_w_negative_controls.py
+          python3 qa/stage1_native_two_valid_w_negative_controls.py "$RUNNER_TEMP/native-valid-w-evidence"
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/two_valid_w_adversarial_controls.json"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-valid-w-evidence:/validw" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 420s python -u qa/stage1_native_two_valid_w_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/two_valid_w_fault_reset.json"
+          python3 -m py_compile qa/stage1_native_w_valid_two_arithmetic_arms_graph_audit.py
+          python3 qa/stage1_native_w_valid_two_arithmetic_arms_graph_audit.py "$RUNNER_TEMP/native-valid-w-evidence"
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/native_two_valid_w_graph_audit.json"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-valid-w-evidence:/validw" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_w_valid_two_arithmetic_arms_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-valid-w-evidence/native_two_valid_w_fault_reset.json"
+          echo NATIVE_TWO_VALID_W_CANDIDATE_ONLY_STAGE1_STILL_OPEN
+      - name: Retain exact Native real execution evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-two-valid-w-branch-qa
+          path: ${{ runner.temp }}/native-valid-w-evidence/
+          retention-days: 30
+
+  native-stack-stack-arithmetic-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin qualified two-valid-w source and Native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/interleaved_work_counts_w_valid_two_arithmetic_arms_candidate.b98)" = "b6cf50de9ed45376db5fc4ebd003157210dff03b"
+          python3 -m py_compile qa/stage1_native_stack_stack_arithmetic_candidate.py qa/stage1_native_stack_stack_graph_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Real native stack-stack arithmetic and independent reference replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-stack-stack-evidence"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-stack-stack-evidence:/stack" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1000s python -u qa/stage1_native_stack_stack_arithmetic_candidate.py
+            '
+          test -s "$RUNNER_TEMP/native-stack-stack-evidence/native_stack_stack_arithmetic.json"
+          python3 -m py_compile qa/stage1_native_stack_stack_u_prefix_counterfactual.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-stack-stack-evidence:/stack" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 120s python -u qa/stage1_native_stack_stack_u_prefix_counterfactual.py
+            '
+          test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_native_u_prefix_causality.json"
+          python3 qa/stage1_native_stack_stack_graph_audit.py "$RUNNER_TEMP/native-stack-stack-evidence"
+          test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_independent_graph.json"
+          python3 -m py_compile qa/stage1_native_stack_stack_negative_controls.py
+          python3 qa/stage1_native_stack_stack_negative_controls.py "$RUNNER_TEMP/native-stack-stack-evidence"
+          test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_adversarial_controls.json"
+          python3 -m py_compile qa/stage1_native_stack_stack_fault_reset.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-stack-stack-evidence:/stack" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 420s python -u qa/stage1_native_stack_stack_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_native_fault_reset.json"
+          python3 -m py_compile qa/stage1_native_stack_stack_nested_fault_reset.py
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-stack-stack-evidence:/stack" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 420s python -u qa/stage1_native_stack_stack_nested_fault_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-stack-stack-evidence/stack_stack_nested_u_fault_reset.json"
+          echo NATIVE_STACK_STACK_ARITHMETIC_QA_PRODUCTION_ONLY_STAGE1_OPEN
+      - name: Retain raw real PyFunge source arithmetic and g/p traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-stack-stack-arithmetic
+          path: ${{ runner.temp }}/native-stack-stack-evidence/
+          retention-days: 30
+
+  native-invalid-memory-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned Stage-1 QA source and PyFunge
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_invalid_memory_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Observe 21 actual malformed-input memory ownership paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-invalid-memory"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-invalid-memory:/invalid" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 450s python -u qa/stage1_native_invalid_memory_ownership.py
+            '
+          test -s "$RUNNER_TEMP/native-invalid-memory/native_invalid_memory.json"
+          python3 qa/stage1_native_invalid_memory_audit.py "$RUNNER_TEMP/native-invalid-memory"
+          test -s "$RUNNER_TEMP/native-invalid-memory/native_invalid_memory_audit.json"
+      - name: Retain Native invalid-input memory ownership traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-invalid-memory-ownership
+          path: ${{ runner.temp }}/native-invalid-memory/
+          retention-days: 30
+
+  native-invalid-valid-same-object-reset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify exact Stage-1 production and pinned Native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_invalid_valid_reset_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Alternate 21 real invalid inputs with 21 reference-verified valid recoveries in exact same Program object
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-invalid-valid-reset"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-invalid-valid-reset:/reset" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 450s python -u qa/stage1_native_invalid_valid_same_object_reset.py
+            '
+          test -s "$RUNNER_TEMP/native-invalid-valid-reset/native_invalid_valid_same_program_reset.json"
+          python3 qa/stage1_native_invalid_valid_reset_audit.py "$RUNNER_TEMP/native-invalid-valid-reset"
+          test -s "$RUNNER_TEMP/native-invalid-valid-reset/native_invalid_valid_reset_audit.json"
+      - name: Retain Native invalid-to-valid same-object reset evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-invalid-valid-same-object-reset
+          path: ${{ runner.temp }}/native-invalid-valid-reset/
+          retention-days: 30
+
+  native-live-pair-interleaving:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify SHA-pinned Stage-1 source and PyFunge distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_live_pair_matrix.py qa/stage1_native_live_pair_matrix_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute 24 paired Native Befunge programs with opposite step ordering
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-live-pairs"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-live-pairs:/pairs" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 780s python -u qa/stage1_native_live_pair_matrix.py
+            '
+          test -s "$RUNNER_TEMP/native-live-pairs/native_live_pair_matrix.json"
+          python3 qa/stage1_native_live_pair_matrix_audit.py "$RUNNER_TEMP/native-live-pairs"
+          test -s "$RUNNER_TEMP/native-live-pairs/native_live_pair_matrix_audit.json"
+          echo STAGE1_SEMANTIC_OWNERSHIP_FINAL_GATE_OPEN
+      - name: Retain Native live-pair traces and independently checked controls
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-stage1-native-live-pairs
+          path: ${{ runner.temp }}/native-live-pairs/
+          retention-days: 30
+
+  native-variable-quantum-interleaving:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify exact Stage-1 source and Native runtime distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_variable_quantum_pairs.py qa/stage1_native_variable_quantum_pairs_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Run 36 real Native live pairs under three unequal quantum schedules
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-variable-quantum"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-variable-quantum:/quantum" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 780s python -u qa/stage1_native_variable_quantum_pairs.py
+            '
+          test -s "$RUNNER_TEMP/native-variable-quantum/native_quantum_pair_matrix.json"
+          python3 qa/stage1_native_variable_quantum_pairs_audit.py "$RUNNER_TEMP/native-variable-quantum"
+          test -s "$RUNNER_TEMP/native-variable-quantum/native_quantum_pair_matrix_audit.json"
+          echo STAGE1_FINAL_SEMANTIC_OWNERSHIP_GATE_OPEN
+      - name: Retain real Native variable-quantum pair traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-variable-quantum-pairs
+          path: ${{ runner.temp }}/native-variable-quantum/
+          retention-days: 30
+
+  native-all-invalid-live-quantum:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin Stage-1 native source, independent audit and interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_all_invalid_live_quantum_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native variable-quantum interleave all 21 invalid input forms with valid and invalid peers
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-full-invalid-live"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-full-invalid-live:/allinvalid" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 850s python -u qa/stage1_native_all_invalid_live_quantum.py
+            '
+          test -s "$RUNNER_TEMP/native-full-invalid-live/native_full_invalid_live_quantum.json"
+          python3 qa/stage1_native_all_invalid_live_quantum_audit.py "$RUNNER_TEMP/native-full-invalid-live"
+          test -s "$RUNNER_TEMP/native-full-invalid-live/native_full_invalid_live_quantum_audit.json"
+      - name: Preserve Native 21-invalid 64-pair concurrent evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-full-invalid-live-quantum
+          path: ${{ runner.temp }}/native-full-invalid-live/
+          retention-days: 30
+
+
+
+  native-cross-three-four-live-ownership-equivalence:
+    needs: [native-three-live-programs, native-four-live-private-funge-space-ownership]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pinned Native BF98 production and independent two-cohort audit syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_three_four_cohort_compare.py
+      - name: Download two independently run Native cohort artifacts from this exact CI run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cohort-three" "$RUNNER_TEMP/cohort-four"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name befunge-kyrgyz-native-three-live-programs \
+            --dir "$RUNNER_TEMP/cohort-three"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name befunge-kyrgyz-native-four-live-ownership \
+            --dir "$RUNNER_TEMP/cohort-four"
+          test -s "$RUNNER_TEMP/cohort-three/native_three_live_programs_audit.json"
+          test -s "$RUNNER_TEMP/cohort-four/native_four_live_programs_audit.json"
+      - name: Fail-closed independent cross-cohort ownership comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_three_four_cohort_compare.py \
+            "$RUNNER_TEMP/cohort-three" "$RUNNER_TEMP/cohort-four"
+          test -s "$RUNNER_TEMP/cohort-four/native_three_four_cross_audit.json"
+          echo NATIVE_THREE_TO_FOUR_PROGRAMS_OWNER_AGREEMENT_STAGE1_OPEN
+      - name: Preserve independent three-to-four Native cohort evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-three-four-owner-cross-checked
+          path: ${{ runner.temp }}/cohort-four/native_three_four_cross_audit.json
+          retention-days: 30
+
+
+
+  native-three-eight-full-corpus-owner-equivalence:
+    needs: [native-three-live-programs, native-eight-live-private-funge-space-ownership]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify exact Native BF98 and independent 27-case cross-auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_three_eight_cohort_compare.py
+      - name: Fetch independently executed three- and eight-live Native reports from this run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cohort-three" "$RUNNER_TEMP/cohort-eight"
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-three-live-programs \
+              --dir "$RUNNER_TEMP/cohort-three" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-eight-live-ownership \
+              --dir "$RUNNER_TEMP/cohort-eight" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          test -s "$RUNNER_TEMP/cohort-three/native_three_live_programs_audit.json"
+          test -s "$RUNNER_TEMP/cohort-eight/native_eight_live_programs_audit.json"
+      - name: Independently cross-certify all 27 original source input signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_three_eight_cohort_compare.py \
+            "$RUNNER_TEMP/cohort-three" "$RUNNER_TEMP/cohort-eight"
+          test -s "$RUNNER_TEMP/cohort-eight/native_three_eight_owner_cross_audit.json"
+          echo NATIVE_BF98_THREE_EIGHT_FULL_CORPUS_QA_PASS_STAGE1_STILL_OPEN
+      - name: Preserve independently checked three-vs-eight complete-corpus witness
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-three-eight-owner-cross-checked
+          path: ${{ runner.temp }}/cohort-eight/native_three_eight_owner_cross_audit.json
+          retention-days: 30
+
+  native-four-eight-cross-cohort-ownership-equivalence:
+    needs: [native-four-live-private-funge-space-ownership, native-eight-live-private-funge-space-ownership]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin native BF98 and independent four-eight cross-check syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_eight_cohort_compare.py
+      - name: Retrieve exactly this CI run's two independently executed native cohorts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cohort-four" "$RUNNER_TEMP/cohort-eight"
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-four-live-ownership \
+              --dir "$RUNNER_TEMP/cohort-four" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          for attempt in 1 2 3; do
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name befunge-kyrgyz-native-eight-live-ownership \
+              --dir "$RUNNER_TEMP/cohort-eight" && break
+            test "$attempt" -lt 3
+            sleep 10
+          done
+          test -s "$RUNNER_TEMP/cohort-four/native_four_live_programs_audit.json"
+          test -s "$RUNNER_TEMP/cohort-eight/native_eight_live_programs_audit.json"
+      - name: Cross-audit 19 exact BF98 four-vs-eight input signatures and 17 tamper reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_four_eight_cohort_compare.py \
+            "$RUNNER_TEMP/cohort-four" "$RUNNER_TEMP/cohort-eight"
+          test -s "$RUNNER_TEMP/cohort-eight/native_four_eight_owner_cross_audit.json"
+          echo NATIVE_BF98_FOUR_EIGHT_PEER_OWNER_EQUIVALENCE_STAGE1_OPEN
+      - name: Retain Native four-versus-eight independent cross-cohort witness
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-four-eight-owner-cross-checked
+          path: ${{ runner.temp }}/cohort-eight/native_four_eight_owner_cross_audit.json
+          retention-days: 30
+
+  native-eight-live-private-funge-space-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin native BF98 source and independent octad QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/stage1_native_eight_live_programs.py)" = "f322c0e5f836a3f56cf4e237bbf42ec3549596b5"
+          test "$(git hash-object qa/stage1_native_eight_live_programs_audit.py)" = "4e7eab17f4479ce4ab5458ffdcb3d268ca284195"
+          python3 -m py_compile qa/stage1_native_eight_live_programs_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute 80 real native BF98 Programs across 10 eight-live ownership sessions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-eight-live"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-eight-live:/octads" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1800s python -u qa/stage1_native_eight_live_programs.py
+            '
+          test -s "$RUNNER_TEMP/native-eight-live/native_eight_live_programs.json"
+          python3 qa/stage1_native_eight_live_programs_audit.py "$RUNNER_TEMP/native-eight-live"
+          test -s "$RUNNER_TEMP/native-eight-live/native_eight_live_programs_audit.json"
+          echo NATIVE_EIGHT_LIVE_FUNGESPACE_OWNER_QA_STAGE1_FINAL_GATE_OPEN
+      - name: Retain eight-simultaneous Native owners and hostile controls
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-eight-live-ownership
+          path: ${{ runner.temp }}/native-eight-live/
+          retention-days: 30
+
+
+
+  native-four-fault-versus-clean-owner-equivalence:
+    needs: [native-four-live-private-funge-space-ownership, native-four-live-p-fault-immediate-recovery]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin BF98 source and cross-auditor
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_fault_vs_clean_cross_audit.py
+      - name: Fetch independently measured same-run native execution evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/clean-four" "$RUNNER_TEMP/fault-four"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name befunge-kyrgyz-native-four-live-ownership --dir "$RUNNER_TEMP/clean-four"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name befunge-kyrgyz-native-four-live-p-fault-recovery --dir "$RUNNER_TEMP/fault-four"
+      - name: Compare all 32 real Native fault-recovery and healthy peer signatures with clean four-live runs
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_native_four_fault_vs_clean_cross_audit.py "$RUNNER_TEMP/clean-four" "$RUNNER_TEMP/fault-four"
+
+  native-four-live-p-fault-immediate-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify unchanged BF98 source and independent Python3 auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_live_p_fault_recovery_audit.py
+          test "$(git hash-object qa/stage1_native_four_live_fault_binding_preflight.py)" = "06d44b5a471e096817c20d4e8ff6d64006c4c5c5"
+          python3 qa/stage1_native_four_live_fault_binding_preflight.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute eight real Native four-live sessions with immediate one-Program p fault and reset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-quad-fault"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-quad-fault:/quad-fault" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1020s python -u qa/stage1_native_four_live_p_fault_recovery.py
+            '
+          python3 qa/stage1_native_four_live_p_fault_recovery_audit.py "$RUNNER_TEMP/native-quad-fault"
+          test -s "$RUNNER_TEMP/native-quad-fault/native_quad_fault_recovery_audit.json"
+          echo NATIVE_FOUR_LIVE_IMMEDIATE_P_FAULT_RECOVERY_STAGE1_OPEN
+      - name: Preserve exact real Native four-live fault recovery report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-four-live-p-fault-recovery
+          path: ${{ runner.temp }}/native-quad-fault/
+          retention-days: 30
+
+  native-four-live-private-funge-space-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original native BF98 source and independent audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_live_programs_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute 56 actual Native BF98 programs in 14 simultaneous four-program sessions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-four-live"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-four-live:/quads" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 770s python -u qa/stage1_native_four_live_programs.py
+            '
+          test -s "$RUNNER_TEMP/native-four-live/native_four_live_programs.json"
+          python3 qa/stage1_native_four_live_programs_audit.py "$RUNNER_TEMP/native-four-live"
+          test -s "$RUNNER_TEMP/native-four-live/native_four_live_programs_audit.json"
+          echo FOUR_LIVE_NATIVE_OWNERSHIP_MEASURED_STAGE1_STILL_OPEN
+      - name: Preserve Native four-program ownership and tamper rejection evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-four-live-ownership
+          path: ${{ runner.temp }}/native-four-live/
+          retention-days: 30
+
+  native-three-live-programs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Confirm pinned Stage 1 Befunge source and Native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_three_live_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Schedule 50 three-live Native Program trials with independent read/write ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-three-programs"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-three-programs:/triads" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_three_live_programs.py
+            '
+          test -s "$RUNNER_TEMP/native-three-programs/native_three_live_programs.json"
+          python3 qa/stage1_native_three_live_audit.py "$RUNNER_TEMP/native-three-programs"
+          test -s "$RUNNER_TEMP/native-three-programs/native_three_live_programs_audit.json"
+      - name: Retain Native three simultaneous Programs evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-three-live-programs
+          path: ${{ runner.temp }}/native-three-programs/
+          retention-days: 30
+
+  native-reference-live-state-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin native Stage-1 reference programs and PyFunge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_native_reference_live_ownership.py qa/stage1_native_reference_live_ownership_audit.py
+          test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
+          test "$(git hash-object reference/count_weavings.b98)" = "d57ef8da12e7cae7e62153407214f9f903eca280"
+          test "$(git hash-object reference/unrank_weaving.b98)" = "a48359619ab5391b156e6eefdd6d36a5e500611a"
+          test "$(git hash-object reference/count_bounded_compositions.b98)" = "90c0c45205cc6efca418367f02b6ee3116bcb2d7"
+          test "$(git hash-object reference/unrank_bounded_composition.b98)" = "f6ebb3980d3eecb4e159e42b2a01499323257dc6"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native interleaved Year5000 weaving and bounded composition reference ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-reference-owner"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-reference-owner:/refowner" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 780s python -u qa/stage1_native_reference_live_ownership.py
+            '
+          test -s "$RUNNER_TEMP/native-reference-owner/native_reference_live_ownership.json"
+          python3 qa/stage1_native_reference_live_ownership_audit.py "$RUNNER_TEMP/native-reference-owner"
+          test -s "$RUNNER_TEMP/native-reference-owner/native_reference_live_ownership_audit.json"
+          echo STAGE1_REFERENCE_OWNER_FINITE_CORPUS_ONLY
+      - name: Retain Stage-1 reference ownership native evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-reference-live-state
+          path: ${{ runner.temp }}/native-reference-owner/
+          retention-days: 30
+
+  native-injected-peer-failure-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin unchanged Stage-1 Befunge source and PyFunge interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_live_peer_fault_survival_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native two-Program live failure and same-object recovery with independent reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-fault-peer"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-fault-peer:/faultpair" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 480s python -u qa/stage1_native_live_peer_fault_survival.py
+            '
+          test -s "$RUNNER_TEMP/native-fault-peer/native_faulting_peer_survival.json"
+          python3 qa/stage1_native_live_peer_fault_survival_audit.py "$RUNNER_TEMP/native-fault-peer"
+          test -s "$RUNNER_TEMP/native-fault-peer/native_faulting_peer_survival_audit.json"
+      - name: Retain Native failed-Program peer survival evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-injected-peer-failure
+          path: ${{ runner.temp }}/native-fault-peer/
+          retention-days: 30
+
+  native-two-foundation-no-u-neighbor-g-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin source and real PyFunge interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_foundation_neighbors_g_causal_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute two real p/g Native Foundation-neighbor differential pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-foundation-neighbor-g"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-foundation-neighbor-g:/foundation-neighbor-g" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 510s python -u qa/stage1_native_foundation_neighbors_g_causal.py
+            '
+          python3 qa/stage1_native_foundation_neighbors_g_causal_audit.py "$RUNNER_TEMP/native-foundation-neighbor-g"
+          test -s "$RUNNER_TEMP/native-foundation-neighbor-g/native_foundation_neighbor_g_causal_audit.json"
+          echo NATIVE_FOUNDATION_NEIGHBOR_G_CAUSAL_QA_ONLY_STAGE1_OPEN
+      - name: Retain raw Native Foundation-neighbor causal witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-foundation-neighbor-g-causality
+          path: ${{ runner.temp }}/native-foundation-neighbor-g/
+          retention-days: 30
+
+  native-scc-physical-g-intervention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin exact Native production source and PyFunge interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_scc_g_intervention.py qa/stage1_native_scc_g_intervention_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Intervene at actually executed native SCC physical g after pinned p write
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-scc-intervention"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-scc-intervention:/scc-intervention" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 750s python -u qa/stage1_native_scc_g_intervention.py
+            '
+          test -s "$RUNNER_TEMP/native-scc-intervention/native_scc_g_interventions.json"
+          python3 qa/stage1_native_scc_g_intervention_audit.py "$RUNNER_TEMP/native-scc-intervention"
+          test -s "$RUNNER_TEMP/native-scc-intervention/native_scc_g_interventions_audit.json"
+          echo SCC_NATIVE_G_STACK_INTERVENTION_ONLY_NOT_FULL_GEOMETRIC_ACCEPTANCE
+      - name: Retain real Native SCC causal intervention evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-scc-physical-g-intervention
+          path: ${{ runner.temp }}/native-scc-intervention/
+          retention-days: 30
+
+
+  native-wide-magnitude-physical-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Source and real PyFunge runtime exact pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_wide_magnitude_oracle_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native wide 255/256/257/512/1024-bit domains and all physical g-p writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-wide"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-wide:/wide" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 900s python -u qa/stage1_native_wide_magnitude_oracle.py
+            '
+          test -s "$RUNNER_TEMP/native-wide/native_wide_magnitude.json"
+          python3 qa/stage1_native_wide_magnitude_oracle_audit.py "$RUNNER_TEMP/native-wide"
+          test -s "$RUNNER_TEMP/native-wide/native_wide_magnitude_audit.json"
+      - name: Retain Native wide-magnitude executable evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-wide-magnitude
+          path: ${{ runner.temp }}/native-wide/
+          retention-days: 30
+
+  native-scc-multisite-g-intervention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin exact 2D Befunge arithmetic and real PyFunge interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_scc_multisite_interventions.py qa/stage1_native_scc_multisite_interventions_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Run 36 real Native Befunge programs at two further p/g SCC physical memory cells
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-scc-multisite"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-scc-multisite:/scc-multisite" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 850s python -u qa/stage1_native_scc_multisite_interventions.py
+            '
+          test -s "$RUNNER_TEMP/native-scc-multisite/native_scc_multisite_interventions.json"
+          python3 qa/stage1_native_scc_multisite_interventions_audit.py "$RUNNER_TEMP/native-scc-multisite"
+          test -s "$RUNNER_TEMP/native-scc-multisite/native_scc_multisite_interventions_audit.json"
+          echo NATIVE_TWO_FURTHER_SCC_DATA_DEPENDENCE_ONLY_NOT_FULL_STAGE1_ACCEPTANCE
+      - name: Retain Native SCC two-cell causal intervention evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-scc-multisite-g-intervention
+          path: ${{ runner.temp }}/native-scc-multisite/
+          retention-days: 30
+
+  native-cycle-one-step-feedback-causality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin exact Native production and PyFunge runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_cycle_turn_intervention.py qa/stage1_native_cycle_turn_intervention_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native one-instruction SCC cycle feedback versus independent Befunge reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-cycle-one-step"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-cycle-one-step:/turn-cycle" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 850s python -u qa/stage1_native_cycle_turn_intervention.py
+            '
+          test -s "$RUNNER_TEMP/native-cycle-one-step/native_cycle_turn_interventions.json"
+          python3 qa/stage1_native_cycle_turn_intervention_audit.py "$RUNNER_TEMP/native-cycle-one-step"
+          test -s "$RUNNER_TEMP/native-cycle-one-step/native_cycle_turn_interventions_audit.json"
+          echo FINITE_NATIVE_SCC_TURN_DEPENDENCE_NOT_FINAL_GEOMETRY_ACCEPTANCE
+      - name: Retain physical Native feedback control/mutant evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-one-step-feedback-causality
+          path: ${{ runner.temp }}/native-cycle-one-step/
+          retention-days: 30
+
+  native-lower-feedback-five-step-rejoin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin Native BF98 production source and PyFunge engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_lower_feedback_rejoin.py qa/stage1_native_lower_feedback_rejoin_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Compare six native lower-route five-step IP stack/memory rejoin states
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-lower-rejoin"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-lower-rejoin:/lower-rejoin" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 850s python -u qa/stage1_native_lower_feedback_rejoin.py
+            '
+          test -s "$RUNNER_TEMP/native-lower-rejoin/native_lower_feedback_rejoin.json"
+          python3 qa/stage1_native_lower_feedback_rejoin_audit.py "$RUNNER_TEMP/native-lower-rejoin"
+          test -s "$RUNNER_TEMP/native-lower-rejoin/native_lower_feedback_rejoin_audit.json"
+          echo NATIVE_LOWER_FEEDBACK_STATE_REJOIN_MEASURED_STAGE1_OPEN
+      - name: Preserve Native lower route state rejoin and hostile evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-lower-feedback-five-step-rejoin
+          path: ${{ runner.temp }}/native-lower-rejoin/
+          retention-days: 30
+
+  native-lower-feedback-twelve-valid-rejoin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin real Native interpreter and immutable Befunge source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_lower_feedback_twelve_valid.py qa/stage1_native_lower_feedback_twelve_valid_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Test twelve real lower-route valid inputs and exact five-step state rejoin
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-lower-wide-rejoin"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-lower-wide-rejoin:/lower-wide" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 850s python -u qa/stage1_native_lower_feedback_twelve_valid.py
+            '
+          test -s "$RUNNER_TEMP/native-lower-wide-rejoin/native_lower_wide_rejoin.json"
+          python3 qa/stage1_native_lower_feedback_twelve_valid_audit.py "$RUNNER_TEMP/native-lower-wide-rejoin"
+          test -s "$RUNNER_TEMP/native-lower-wide-rejoin/native_lower_wide_rejoin_audit.json"
+          echo NATIVE_LOWER_VALID_12_INPUT_UNCHANGED_FULL_REJOIN_STATE_STAGE1_STILL_OPEN
+      - name: Retain 24 Native executions and independent hostile evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-lower-feedback-twelve-valid-rejoin
+          path: ${{ runner.temp }}/native-lower-wide-rejoin/
+          retention-days: 30
+
+  native-lower-feedback-four-cell-semantic-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin exact native production and PyFunge engine for QA-only candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_lower_feedback_semantic_candidate.py qa/stage1_native_lower_feedback_semantic_candidate_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Generate exact 4-cell test-only BF98 variant and 39-case real native differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-lower-candidate"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-lower-candidate:/lower-candidate" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1050s python -u qa/stage1_native_lower_feedback_semantic_candidate.py
+            '
+          test -s "$RUNNER_TEMP/native-lower-candidate/lower_feedback_semantic_candidate.b98"
+          test -s "$RUNNER_TEMP/native-lower-candidate/lower_feedback_candidate_experiment.json"
+          python3 qa/stage1_native_lower_feedback_semantic_candidate_audit.py "$RUNNER_TEMP/native-lower-candidate"
+          test -s "$RUNNER_TEMP/native-lower-candidate/lower_feedback_candidate_audit.json"
+          echo NATIVE_QA_ONLY_SEMANTIC_CANDIDATE_MEASURED_NEVER_AUTO_PROMOTED
+      - name: Retain four-cell candidate program and real PyFunge evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-lower-four-cell-qa-candidate
+          path: ${{ runner.temp }}/native-lower-candidate/
+          retention-days: 30
+
+  native-lower-feedback-four-cell-twelve-valid:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Lock original Befunge native source and PyFunge release
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_lower_feedback_candidate_twelve.py qa/stage1_native_lower_feedback_candidate_twelve_audit.py qa/stage1_native_four_cell_stack_lineage_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Witness twelve real Native candidate lower-loop dependencies and one preserved error
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-four-cell-twelve-valid"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-four-cell-twelve-valid:/candidate-wide" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 850s python -u qa/stage1_native_lower_feedback_candidate_twelve.py
+            '
+          test -s "$RUNNER_TEMP/native-four-cell-twelve-valid/four_cell_candidate.b98"
+          test -s "$RUNNER_TEMP/native-four-cell-twelve-valid/four_cell_twelve_valid_causality.json"
+          python3 qa/stage1_native_lower_feedback_candidate_twelve_audit.py "$RUNNER_TEMP/native-four-cell-twelve-valid"
+          test -s "$RUNNER_TEMP/native-four-cell-twelve-valid/four_cell_twelve_valid_causality_audit.json"
+          python3 qa/stage1_native_four_cell_stack_lineage_audit.py "$RUNNER_TEMP/native-four-cell-twelve-valid"
+          test -s "$RUNNER_TEMP/native-four-cell-twelve-valid/four_cell_native_stack_lineage_audit.json"
+          echo NATIVE_FOUR_CELL_TWELVE_VALID_CAUSALITY_STILL_QA_ONLY_STAGE1_OPEN
+      - name: Retain independent Native 12-valid one-error and hostile evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-four-cell-twelve-valid
+          path: ${{ runner.temp }}/native-four-cell-twelve-valid/
+          retention-days: 30
+
+  native-four-cell-candidate-1024bit-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin test-only four-cell original Native Funge source and PyFunge
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_lower_feedback_candidate_bigint.py qa/stage1_native_lower_feedback_candidate_bigint_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay independent Native oracle against 13 giant 255-1024-bit signed cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-four-cell-bigint"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-four-cell-bigint:/candidate-bigint" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1080s python -u qa/stage1_native_lower_feedback_candidate_bigint.py
+            '
+          test -s "$RUNNER_TEMP/native-four-cell-bigint/four_cell_wide_native_oracle.json"
+          test -s "$RUNNER_TEMP/native-four-cell-bigint/four_cell_candidate.b98"
+          python3 qa/stage1_native_lower_feedback_candidate_bigint_audit.py "$RUNNER_TEMP/native-four-cell-bigint"
+          test -s "$RUNNER_TEMP/native-four-cell-bigint/four_cell_wide_native_oracle_audit.json"
+          echo NATIVE_QA_ONLY_FOUR_CELL_BIGINT_NOT_PRODUCTION_STAGE1_STILL_OPEN
+      - name: Retain Native four-cell 1024-bit reference and tamper results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-four-cell-1024bit-oracle
+          path: ${{ runner.temp }}/native-four-cell-bigint/
+          retention-days: 30
+
+  native-year5000-separator-1536-octets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin immutable native BF98 2D scanner and field-gap audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_raw_eof_candidate.b98)" = "c5bd9dd06e227f9f31c8988a51bd114bf67b9af7"
+          test "$(git hash-object qa/stage1_native_year5000_separator_octets.py)" = "4dca5723a76b9cda7265254cc1bd46a81a173626"
+          test "$(git hash-object qa/stage1_native_year5000_separator_octets_audit.py)" = "c2d7b1224303035d7b2dd732cc96a26c3e632ed9"
+          python3 -m py_compile qa/stage1_native_year5000_separator_octets_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay Native BF98 three field boundaries with all 256 bytes and two EOF modes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-separators"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-separators:/native-separators" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 480s python -u qa/stage1_native_year5000_separator_octets.py
+            '
+          python3 qa/stage1_native_year5000_separator_octets_audit.py "$RUNNER_TEMP/native-separators"
+          test -s "$RUNNER_TEMP/native-separators/native_separator_octets.json"
+          test -s "$RUNNER_TEMP/native-separators/native_separator_octets_audit.json"
+          echo NATIVE_YEAR5000_SEPARATOR_1536_BINARY_QA_ONLY_STAGE1_OPEN
+      - name: Retain native separator binary evidence and hostile audit
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-separator-1536
+          path: ${{ runner.temp }}/native-separators/
+          retention-days: 30
+
+  native-year5000-infield-1536-octets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin 2D BF98 raw EOF scanner and separate in-field audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_raw_eof_candidate.b98)" = "c5bd9dd06e227f9f31c8988a51bd114bf67b9af7"
+          test "$(git hash-object qa/stage1_native_year5000_infield_all_octets.py)" = "8f7c54a248f9128714b596751b1b8c4c0d3e21fd"
+          test "$(git hash-object qa/stage1_native_year5000_infield_all_octets_audit.py)" = "9ea985425bcfdd09ef0abe84a68afe398cd93023"
+          python3 -m py_compile qa/stage1_native_year5000_infield_all_octets_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay 1536 in-field native binary LF/raw-EOF inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-infield"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-infield:/native-infield" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 480s python -u qa/stage1_native_year5000_infield_all_octets.py
+            '
+          python3 qa/stage1_native_year5000_infield_all_octets_audit.py "$RUNNER_TEMP/native-infield"
+          test -s "$RUNNER_TEMP/native-infield/native_infield_all_octets.json"
+          test -s "$RUNNER_TEMP/native-infield/native_infield_all_octets_audit.json"
+          echo NATIVE_YEAR5000_1536_INFIELD_BINARY_QA_ONLY_STAGE1_OPEN
+      - name: Retain all BF98 in-field binary and adversarial evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-infield-1536
+          path: ${{ runner.temp }}/native-infield/
+          retention-days: 30
+
+  native-year5000-raw-eof-all-512-binary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin already qualified BF98 raw EOF candidate and binary harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_raw_eof_candidate.b98)" = "c5bd9dd06e227f9f31c8988a51bd114bf67b9af7"
+          test "$(git hash-object qa/stage1_native_year5000_raw_eof_binary_512.py)" = "412cb73d2b0f5f13266d5b10afac6b788f3020a4"
+          test "$(git hash-object qa/stage1_native_year5000_raw_eof_binary_512_audit.py)" = "0e5ee8ad76268df1a314f7dddbd3a737837dbb88"
+          python3 -m py_compile qa/stage1_native_year5000_raw_eof_binary_512_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay 512 Native binary LF and raw EOF inputs with PyFunge
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-raw-binary"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-raw-binary:/year5000-raw-binary" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 480s python -u qa/stage1_native_year5000_raw_eof_binary_512.py
+            '
+          python3 qa/stage1_native_year5000_raw_eof_binary_512_audit.py "$RUNNER_TEMP/native-raw-binary"
+          test -s "$RUNNER_TEMP/native-raw-binary/native_year5000_512_raw_binary.json"
+          test -s "$RUNNER_TEMP/native-raw-binary/native_year5000_512_raw_binary_audit.json"
+          echo NATIVE_YEAR5000_RAW_EOF_BINARY_512_STAGE1_OPEN
+      - name: Retain Native 512 binary stream and hostile audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-raw-eof-binary-512
+          path: ${{ runner.temp }}/native-raw-binary/
+          retention-days: 30
+
+  native-year5000-test-only-no-lf-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin BF98 no-LF EOF bridge and unchanged Native baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_integrated_lf_eof_grammar.b98)" = "fb6513605febc92c4cd1b453295253cb1cb49740"
+          test "$(git hash-object qa/year5000_raw_eof_candidate.b98)" = "c5bd9dd06e227f9f31c8988a51bd114bf67b9af7"
+          test "$(git hash-object qa/stage1_native_year5000_raw_eof_candidate.py)" = "d7a272f9c9a38524597e91e4e6a64adef596b702"
+          test "$(git hash-object qa/stage1_native_year5000_raw_eof_candidate_audit.py)" = "32ecbb43a420325e1cf3483574cfabd53fdf234c"
+          test "$(git hash-object qa/stage1_native_year5000_raw_eof_source_map.py)" = "af6297b51cae605c18e02f117806fe97f9940f82"
+          python3 -m py_compile qa/stage1_native_year5000_raw_eof_candidate_audit.py qa/stage1_native_year5000_raw_eof_source_map.py
+          python3 qa/stage1_native_year5000_raw_eof_source_map.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay 163 line corpora with and without LF in native BF98
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-no-lf"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-no-lf:/year5000-raw-eof" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 420s python -u qa/stage1_native_year5000_raw_eof_candidate.py
+            '
+          python3 qa/stage1_native_year5000_raw_eof_candidate_audit.py "$RUNNER_TEMP/native-no-lf"
+          test -s "$RUNNER_TEMP/native-no-lf/year5000_raw_eof_candidate_audit.json"
+          echo NATIVE_YEAR5000_NO_LF_QA_CANDIDATE_NOT_PRODUCTION_STAGE1_OPEN
+      - name: Retain no-LF BF98 Native candidate evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-no-lf-bridge
+          path: ${{ runner.temp }}/native-no-lf/
+          retention-days: 30
+
+  native-year5000-all-256-trailing-octets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin exactly qualified integrated BF98 parser and octet harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_integrated_lf_eof_grammar.b98)" = "fb6513605febc92c4cd1b453295253cb1cb49740"
+          test "$(git hash-object qa/year5000_exact_line_grammar.b98)" = "0c7d996a3969adb47e8d58cff27c315a3af8145d"
+          test "$(git hash-object qa/stage1_native_year5000_trailing_octets.py)" = "ddff0bf25b4791c5f2afeeaf80b81e86ef1ada1d"
+          test "$(git hash-object qa/stage1_native_year5000_trailing_octets_audit.py)" = "94d63b29b0dec971747b65a5897ab2d276352362"
+          python3 -m py_compile qa/stage1_native_year5000_trailing_octets_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay all 256 possible trailing octets after valid LF in BF98
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-trailing-octets"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-trailing-octets:/year5000-octets" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 240s python -u qa/stage1_native_year5000_trailing_octets.py
+            '
+          python3 qa/stage1_native_year5000_trailing_octets_audit.py "$RUNNER_TEMP/native-trailing-octets"
+          test -s "$RUNNER_TEMP/native-trailing-octets/native_all_256_trailing_octets.json"
+          test -s "$RUNNER_TEMP/native-trailing-octets/native_all_256_trailing_octets_audit.json"
+          echo NATIVE_SINGLE_BF98_ALL_TRAILING_OCTETS_NOT_NO_LF_STAGE1_OPEN
+      - name: Retain binary NUL to 0xFF native LF EOF proofs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-all-trailing-octets
+          path: ${{ runner.temp }}/native-trailing-octets/
+          retention-days: 30
+
+  native-year5000-integrated-24token-lf-eof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin unchanged 24-token grammar and direct BF98 EOF splice
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_exact_line_grammar.b98)" = "0c7d996a3969adb47e8d58cff27c315a3af8145d"
+          test "$(git hash-object qa/year5000_integrated_lf_eof_grammar.b98)" = "fb6513605febc92c4cd1b453295253cb1cb49740"
+          test "$(git hash-object qa/stage1_native_year5000_integrated_lf_eof.py)" = "bda70f849bbc850361f747496acac2706e25d1e1"
+          test "$(git hash-object qa/stage1_native_year5000_integrated_lf_eof_audit.py)" = "749496fd97df7570050ea80ecf8fed74e1b4b968"
+          test "$(git hash-object qa/stage1_native_year5000_integrated_source_map_audit.py)" = "10dddbb2c2ddb4bd1ef46c707441f3f0b1317d25"
+          python3 -m py_compile qa/stage1_native_year5000_integrated_lf_eof_audit.py qa/stage1_native_year5000_integrated_source_map_audit.py
+          python3 qa/stage1_native_year5000_integrated_source_map_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Run integrated LF grammar and real EOF reflection in single native BF98 program
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-integrated-lf-eof"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-integrated-lf-eof:/year5000-integrated" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 240s python -u qa/stage1_native_year5000_integrated_lf_eof.py
+            '
+          python3 qa/stage1_native_year5000_integrated_lf_eof_audit.py "$RUNNER_TEMP/native-integrated-lf-eof"
+          test -s "$RUNNER_TEMP/native-integrated-lf-eof/native_year5000_integrated_lf_eof.json"
+          test -s "$RUNNER_TEMP/native-integrated-lf-eof/native_year5000_integrated_lf_eof_audit.json"
+          echo NATIVE_SINGLE_BF98_INTEGRATED_LF_EOF_SCOPE_STAGE1_OPEN
+      - name: Retain single-program LF EOF grammar Native witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-integrated-lf-eof
+          path: ${{ runner.temp }}/native-integrated-lf-eof/
+          retention-days: 30
+
+  native-year5000-eof-full-stream-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin immutable two-row BF98 EOF reflector and 24-token proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_exact_line_grammar.b98)" = "0c7d996a3969adb47e8d58cff27c315a3af8145d"
+          test "$(git hash-object qa/year5000_raw_eof_guard.b98)" = "ee2adeba561be2232173a54f03fcb0e7d90f410e"
+          test "$(git hash-object qa/stage1_native_year5000_eof_full_stream.py)" = "fdd7bd68f72c5c1042e9f9c7ba65383c87bcfa0c"
+          test "$(git hash-object qa/stage1_native_year5000_eof_full_stream_audit.py)" = "e351069cfc185fa671799b862eeeae7381f9d784"
+          python3 -m py_compile qa/stage1_native_year5000_eof_full_stream_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay exact EOF, valid line, and poisoned trailing-line Native cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-eof"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-eof:/year5000-eof" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 260s python -u qa/stage1_native_year5000_eof_full_stream.py
+            '
+          python3 qa/stage1_native_year5000_eof_full_stream_audit.py "$RUNNER_TEMP/native-eof"
+          test -s "$RUNNER_TEMP/native-eof/native_eof_full_stream.json"
+          test -s "$RUNNER_TEMP/native-eof/native_eof_full_stream_audit.json"
+          echo NATIVE_BF98_EOF_REFLECTION_AND_24TOKEN_COMPOSITION_STAGE1_OPEN
+      - name: Retain Native post-newline EOF reflection and tamper evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-eof
+          path: ${{ runner.temp }}/native-eof/
+          retention-days: 30
+
+  native-year5000-24token-line-grammar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin BF98 exact one-line grammar and its Native harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/year5000_exact_line_grammar.b98)" = "0c7d996a3969adb47e8d58cff27c315a3af8145d"
+          test "$(git hash-object qa/stage1_native_year5000_24token_grammar.py)" = "73fcc64308bdb803da235673103a50865ac9fe9b"
+          test "$(git hash-object qa/stage1_native_year5000_24token_grammar_audit.py)" = "f881cd84d4f6e71d4760ac6472867138a4575ce7"
+          python3 -m py_compile qa/stage1_native_year5000_24token_grammar_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute exact 24-token grammar in unmodified PyFunge 98
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/grammar-24"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/grammar-24:/year5000-grammar" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 240s python -u qa/stage1_native_year5000_24token_grammar.py
+            '
+          python3 qa/stage1_native_year5000_24token_grammar_audit.py "$RUNNER_TEMP/grammar-24"
+          test -s "$RUNNER_TEMP/grammar-24/native_year5000_24token_grammar_audit.json"
+          echo NATIVE_YEAR5000_ONE_LINE_GRAMMAR_SCOPE_NOT_EOF_PASS_STAGE1_OPEN
+      - name: Retain BF98 exact 24-token line grammar witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-year5000-line-grammar
+          path: ${{ runner.temp }}/grammar-24/
+          retention-days: 30
+
+  native-year5000-raw-lexeme-character-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin pure BF98 raw scanner and independent reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
+          test "$(git hash-object qa/year5000_raw_lexeme_guard.b98)" = "2474cd0232e1947bca37f96ec7419433fa23151f"
+          test "$(git hash-object qa/stage1_native_year5000_raw_lexeme.py)" = "f2dc1140a55bceb9019f0e9061e7cbaf45d5c7c1"
+          test "$(git hash-object qa/stage1_native_year5000_raw_lexeme_audit.py)" = "15405f9f62bc885473a6089cba507d259ae3887b"
+          python3 -m py_compile qa/stage1_native_year5000_raw_lexeme_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute 44 raw lexical character records in native BF98
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-raw-lexeme"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-raw-lexeme:/raw-lexeme-guard" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 240s python -u qa/stage1_native_year5000_raw_lexeme.py
+            '
+          python3 qa/stage1_native_year5000_raw_lexeme_audit.py "$RUNNER_TEMP/native-raw-lexeme"
+          test -s "$RUNNER_TEMP/native-raw-lexeme/native_year5000_raw_lexeme_audit.json"
+          echo NATIVE_RAW_SIGN_GUARD_CHAR_ONLY_NOT_FULL_GRAMMAR_STAGE1_OPEN
+      - name: Retain raw lexical scanner and unguarded native bypass witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-year5000-native-raw-lexeme
+          path: ${{ runner.temp }}/native-raw-lexeme/
+          retention-days: 30
+
+  native-integer-signed-lexeme-transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check immutable Year5000 source and actual PyFunge integer opcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reference/year5000_from_gates_rank.b98)" = "c70f15354979aafdd0ea0c83045ef2a54dd996f9"
+          python3 -m py_compile qa/stage1_native_signed_integer_input_probe.py qa/stage1_native_signed_integer_input_probe_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Measure real Native '&' integer input of raw negative sign tokens
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-signed-integer"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-signed-integer:/sign-probe" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 400s python -u qa/stage1_native_signed_integer_input_probe.py
+            '
+          test -s "$RUNNER_TEMP/native-signed-integer/native_pyfunge_signed_lexeme_probe.json"
+          python3 qa/stage1_native_signed_integer_input_probe_audit.py "$RUNNER_TEMP/native-signed-integer"
+          test -s "$RUNNER_TEMP/native-signed-integer/native_pyfunge_signed_lexeme_probe_audit.json"
+          echo NATIVE_SIGNED_INPUT_PARSER_DIAGNOSTIC_IS_NOT_STAGE1_ACCEPTANCE
+      - name: Retain exact native integer parsing and Year5000 bug evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-integer-sign-transport
+          path: ${{ runner.temp }}/native-signed-integer/
+          retention-days: 30
+
+  native-four-cell-candidate-live-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original production and four-cell candidate Native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_cell_candidate_state_ownership.py qa/stage1_native_four_cell_candidate_state_ownership_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Run 12 Native candidate peer pairs and 12 exact Program resets with live memory guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-four-cell-ownership"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-four-cell-ownership:/candidate-ownership" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1150s python -u qa/stage1_native_four_cell_candidate_state_ownership.py
+            '
+          test -s "$RUNNER_TEMP/native-four-cell-ownership/native_four_cell_candidate_ownership.json"
+          python3 qa/stage1_native_four_cell_candidate_state_ownership_audit.py "$RUNNER_TEMP/native-four-cell-ownership"
+          test -s "$RUNNER_TEMP/native-four-cell-ownership/native_four_cell_candidate_ownership_audit.json"
+          echo NATIVE_CANDIDATE_OWNERSHIP_FINITE_12_PAIRS_12_RESETS_STAGE1_OPEN
+      - name: Retain isolated four-cell candidate ownership and hostile evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-four-cell-candidate-native-ownership
+          path: ${{ runner.temp }}/native-four-cell-ownership/
+          retention-days: 30
+
+  native-four-cell-full-postfork-four-pairs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original BF98 source and full-postfork Native witness code
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_cell_full_postfork_trace.py qa/stage1_native_four_cell_full_postfork_trace_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute Native BF98 complete trajectories and independent dynamic opcode replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-full-postfork"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-full-postfork:/full-postfork" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 720s python -u qa/stage1_native_four_cell_full_postfork_trace.py
+            '
+          python3 qa/stage1_native_four_cell_full_postfork_trace_audit.py "$RUNNER_TEMP/native-full-postfork"
+          test -s "$RUNNER_TEMP/native-full-postfork/full_postfork_independent_audit.json"
+          echo NATIVE_EIGHT_COMPLETE_POSTFORK_BF98_TRAJECTORIES_QA_ONLY_STAGE1_OPEN
+      - name: Retain full-postfork Native source lifecycle witnesses
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-four-cell-full-postfork
+          path: ${{ runner.temp }}/native-full-postfork/
+          retention-days: 30
+
+  native-four-cell-fork-32-valid-counterfactual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Lock real Native source and tested interpreter release
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_cell_32_valid_fork.py qa/stage1_native_four_cell_32_valid_fork_audit.py
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Native 32 valid-input control and forced opposite fork paths on candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-four-cell-fork-32"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/native-four-cell-fork-32:/four-cell-fork" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1200s python -u qa/stage1_native_four_cell_32_valid_fork.py
+            '
+          test -s "$RUNNER_TEMP/native-four-cell-fork-32/four_cell_fork_32_control_mutant.json"
+          test -s "$RUNNER_TEMP/native-four-cell-fork-32/four_cell_candidate.b98"
+          python3 qa/stage1_native_four_cell_32_valid_fork_audit.py "$RUNNER_TEMP/native-four-cell-fork-32"
+          python3 qa/stage1_native_four_cell_route_diversity_audit.py "$RUNNER_TEMP/native-four-cell-fork-32"
+          test -s "$RUNNER_TEMP/native-four-cell-fork-32/four_cell_route_diversity_audit.json"
+          test -s "$RUNNER_TEMP/native-four-cell-fork-32/four_cell_fork_32_audit.json"
+          echo REAL_NATIVE_FOUR_CELL_32_VALID_FORK_PROFILE_QA_ONLY_STAGE1_OPEN
+      - name: Retain real Native fork32 control/mutant and independent evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-native-four-cell-fork-32-valid
+          path: ${{ runner.temp }}/native-four-cell-fork-32/
+          retention-days: 30
