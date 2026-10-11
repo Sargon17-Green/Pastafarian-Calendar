@@ -530,6 +530,35 @@ sub makeCutletPartitionFamily ($G, $K, $required = undef) {
     return { count => $count_all, unrank1 => $unrank };
 }
 
+# 若所有月份都已首次出現，剩下的唯一順序條件是
+# 各月份最後出現的次序須遞增。最後一個符號必為最大月份，
+# 移除它的其餘出現位置有 C(N-1,c_m-1) 種；遞迴刪除月份
+# m,m-1,... 即得完全整數的二項係數乘積，無須探索 DP 子樹。
+sub _binomial_exact ($n, $k) {
+    die "二項係數參數超出範圍\n" if $n < 0 || $k < 0 || $k > $n;
+    $k = $n-$k if $k > $n-$k;
+    my $result = Math::BigInt->bone;
+    for my $i (1 .. $k) {
+        $result->bmul($n-$k+$i);
+        $result->bdiv($i);
+    }
+    return $result;
+}
+
+sub _remaining_last_order_count ($remaining, $closed) {
+    my $m = scalar @$remaining;
+    my $total = 0;
+    $total += $_ for @$remaining;
+    my $count = Math::BigInt->bone;
+    for (my $j = $m; $j > $closed + 1; $j--) {
+        my $size = $remaining->[$j-1];
+        die "月份最後出現次序的狀態無效\n" if $size <= 0;
+        $count->bmul(_binomial_exact($total - 1, $size - 1));
+        $total -= $size;
+    }
+    return $count;
+}
+
 sub _weave_counter ($lengths) {
     my $m = scalar @$lengths;
     my %memo;
@@ -586,6 +615,15 @@ sub _weave_counter ($lengths) {
                 }
                 if ($done) {
                     $memo{$key} = Math::BigInt->bone;
+                    pop @stack;
+                    next;
+                }
+
+                # 全部月份都已開啟：利用最後出現次序閉式計數。
+                if ($frame->{opened} == $m) {
+                    $memo{$key} = _remaining_last_order_count(
+                        $frame->{remaining}, $frame->{closed}
+                    );
                     pop @stack;
                     next;
                 }
