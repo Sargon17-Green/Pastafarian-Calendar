@@ -8,3 +8,4 @@ export * from "./discovery03LegacyDistance.ts";
 export * from "./discovery03Handler.ts";
 export * from "./patch03Distance.ts";
 export * from "./discovery04LegacyStones.ts";
+export * from "./patch04Stones.ts";
