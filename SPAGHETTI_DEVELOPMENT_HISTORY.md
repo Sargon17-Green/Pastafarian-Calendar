@@ -460,4 +460,14 @@ anticipare la futura PATCH 05.
 Helper, handler, fase, cinque campi di stato semantico,
 validation, report, metriche e test di confine
 e finestre storiche. Le quattro patch precedenti
-restano disponibili. Certificazione nativa in attesa.
+restano disponibili. ### Verifica nativa compiuta
+
+La run GitHub Actions 38161316033, sul commit
+`d462d2afbb4f80eb17a61489b377e9fa3f97ff7b`,
+ha concluso con SUCCESS tutti gli undici job.
+Stage10 registra 15 PASS e tre divergenze deliberatamente
+RED per le gocce 1, 7 e 47. Le patch 01–04 sono rimaste
+verdi e gli stadi di discovery conservano le firme storiche.
+Una svista di sintassi della lambda Scala nel test BigInt
+è stata corretta dopo la prima esecuzione e prima della
+certificazione finale; l'adattatore legacy non è cambiato.

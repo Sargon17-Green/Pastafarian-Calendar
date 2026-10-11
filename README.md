@@ -330,3 +330,19 @@ lettura normativa prior7 delle gocce 1, 7 e 47. Il test
 controlla anche tutte le 47 finestre sintetiche, BigInt
 giganti, input incompleti, ownership e PATCH 01–04.
 Nessuna correzione anticipata dello stadio 11.
+
+### Certificazione nativa dello stadio 10
+
+La [run GitHub Actions 38161316033](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161316033)
+si è conclusa con SUCCESS sul commit
+`d462d2afbb4f80eb17a61489b377e9fa3f97ff7b`.
+Tutti gli undici job sono riusciti: catalogo canonico, Stage01
+18 PASS, Stage02 7 PASS/3 FAIL deliberati, Stage03 12 PASS,
+Stage04 14 PASS/3 FAIL deliberati, Stage05 18 PASS,
+Stage06 15 PASS/3 FAIL deliberati, Stage07 20 PASS,
+Stage08 19 PASS/3 FAIL deliberati, Stage09 26 PASS,
+Stage10 15 PASS/3 FAIL deliberati.
+
+Il compile iniziale aveva individuato un errore lessicale
+nella lambda di un test BigInt, corretto prima della
+certificazione senza cambiare il calcolo legacy.
