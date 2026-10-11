@@ -671,7 +671,7 @@ package body Normative_Oracle is
               and then Gate_At (G, I) < Calculation_Day
               and then Calculation_Day <= Gate_At (G, J)
             then
-               Candidates.Append ((Open_Index => I, Close_Index => J));
+               Candidates.Append (Pair_Record'(Open_Index => I, Close_Index => J));
             end if;
             J := J + B (1);
          end loop;
