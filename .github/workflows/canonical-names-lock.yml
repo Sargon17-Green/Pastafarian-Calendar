@@ -24,3 +24,25 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+
+  verify_csharp_ar_discovery_01:
+    name: تحقق مستقل من إخفاق الحفظ المتوقع
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/C#+العربية-الفصحى' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: جلب المصدر
+        uses: actions/checkout@v5
+      - name: تثبيت .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: إعادة اختبارات التأسيس
+        run: dotnet run --project tests/PastafarianCalendar.Stage01Tests/PastafarianCalendar.Stage01Tests.csproj --configuration Release
+      - name: تشغيل اختبار التباعد الأحمر
+        id: discovery_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage02Tests/PastafarianCalendar.Stage02Tests.csproj --configuration Release
+      - name: تحقق من أن الفروق الخمسة هي وحدها المتوقعة
+        if: always()
+        run: dotnet run --project tests/PastafarianCalendar.Stage02Tests/PastafarianCalendar.Stage02Tests.csproj --configuration Release -- --verify-expected-red
+

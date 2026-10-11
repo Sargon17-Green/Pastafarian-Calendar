@@ -6,49 +6,77 @@ namespace PastafarianCalendar.Stage02Tests;
 
 internal static class Program
 {
-    private static int _passed;
-    private static int _failed;
+    private sealed record Case(BigInteger Input, string Name, bool ExpectedDivergence);
 
-    private static void Check(BigInteger input, string name)
+    private static readonly Case[] Cases =
     {
-        var expected = NormativeScroll.Save(input);
-        var actual = CalendarDateSpaghetti.EvaluateLegacySave(
-            NormativeScroll.FoundationDay,
-            NormativeScroll.FoundationDay,
-            input);
+        new(BigInteger.One, "حفظ الواحد", false),
+        new(NormativeScroll.M - 1, "قبل المنتهى", false),
+        new(NormativeScroll.M, "المنتهى", true),
+        new(2 * NormativeScroll.M, "ضعف المنتهى", true),
+        new(3 * NormativeScroll.M, "ثلاثة أمثال المنتهى", true),
+        new(NormativeScroll.M + 1, "بعد المنتهى", false),
+        new(BigInteger.Zero, "الصفر", true),
+        new(-NormativeScroll.M, "سالب المنتهى", true),
+        new(-BigInteger.One, "سالب الواحد", false)
+    };
 
-        if (actual == expected)
-        {
-            _passed++;
-            Console.WriteLine("نجح: " + name);
-        }
-        else
-        {
-            _failed++;
-            Console.WriteLine(
-                "فشل متوقع في الاكتشاف: " + name
-                + " | المرجع=" + expected
-                + " | المسار القديم=" + actual);
-        }
-    }
-
-    private static int Main()
+    private static int Main(string[] args)
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
+        var verifyExpectedRed = args.Length == 1 && args[0] == "--verify-expected-red";
+        if (args.Length > 0 && !verifyExpectedRed)
+        {
+            Console.Error.WriteLine("وسيط تشغيل غير معروف.");
+            return 2;
+        }
 
-        // اختبارات الضبط تمر، بينما تكشف مضاعفات المنتهى عن الباقي الصفري.
-        Check(BigInteger.One, "حفظ الواحد");
-        Check(NormativeScroll.M - 1, "قبل المنتهى");
-        Check(NormativeScroll.M, "المنتهى");
-        Check(2 * NormativeScroll.M, "ضعف المنتهى");
-        Check(3 * NormativeScroll.M, "ثلاثة أمثال المنتهى");
-        Check(NormativeScroll.M + 1, "بعد المنتهى");
-        Check(BigInteger.Zero, "الصفر");
-        Check(-NormativeScroll.M, "سالب المنتهى");
-        Check(-BigInteger.One, "سالب الواحد");
+        var matches = 0;
+        var divergences = 0;
+        var unexpected = 0;
 
-        Console.WriteLine("الاختبارات الناجحة: " + _passed);
-        Console.WriteLine("الاختبارات الفاشلة: " + _failed);
-        return _failed == 0 ? 0 : 1;
+        foreach (var item in Cases)
+        {
+            var expected = NormativeScroll.Save(item.Input);
+            var actual = CalendarDateSpaghetti.EvaluateLegacySave(
+                NormativeScroll.FoundationDay,
+                NormativeScroll.FoundationDay,
+                item.Input);
+
+            var differs = expected != actual;
+            if (differs) divergences++; else matches++;
+
+            var correctClassification = differs == item.ExpectedDivergence;
+            var correctSignature = !differs || (expected == NormativeScroll.M && actual.IsZero);
+            if (verifyExpectedRed && (!correctClassification || !correctSignature))
+                unexpected++;
+
+            Console.WriteLine(
+                (differs ? "فشل متوقع في الاكتشاف: " : "نجح: ")
+                + item.Name
+                + " | المرجع=" + expected
+                + " | المسار القديم=" + actual);
+
+            if (verifyExpectedRed && (!correctClassification || !correctSignature))
+                Console.WriteLine("انحراف غير متوقع عن توقيع الاكتشاف: " + item.Name);
+        }
+
+        Console.WriteLine("التطابقات: " + matches);
+        Console.WriteLine("الاختلافات: " + divergences);
+        Console.WriteLine("الاختلافات غير المتوقعة: " + unexpected);
+
+        if (verifyExpectedRed)
+        {
+            if (matches == 4 && divergences == 5 && unexpected == 0)
+            {
+                Console.WriteLine("تحقق توقيع الاكتشاف: PASS; الاختبار الاعتيادي يظل أحمر.");
+                return 0;
+            }
+
+            Console.WriteLine("تحقق توقيع الاكتشاف: FAIL");
+            return 1;
+        }
+
+        return divergences == 0 ? 0 : 1;
     }
 }
