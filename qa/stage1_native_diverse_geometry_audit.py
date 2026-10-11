@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import sys
+import tempfile
 import stage1_native_route_graph as geometry
 
 LABELS=("zero_equal","foundation_cross","forward_short","reverse_short",
@@ -37,9 +38,13 @@ def read_arithmetic_edges(path):
                 continue
             fields=line.rstrip("\n").split("\t")
             require(len(fields)==9,"invalid native IP graph STEP")
-            now=(int(fields[3]),int(fields[4]))
+            # Exact Native arithmetic handoff requires IP position AND
+            # execution direction. A scanner pass through x=5,y=0 with an
+            # unrelated velocity must never seed the arithmetic route graph.
+            native_entry=tuple(int(fields[i]) for i in (3,4,5,6))
+            now=native_entry[:2]
             if not entered:
-                if now!=(5,0):
+                if native_entry!=(5,0,1,0):
                     continue
                 entered=True
             if previous is not None:
@@ -47,7 +52,36 @@ def read_arithmetic_edges(path):
             previous=now
     require(entered,"missing arithmetic handoff in native graph")
 
+def handoff_edge_selftest():
+    """Synthetic parser controls: not an actual Befunge result."""
+    rows=[
+        "STEP\t1\t1\t4\t0\t1\t0\t32\t0",
+        "STEP\t2\t1\t5\t0\t-1\t0\t60\t0",
+        "STEP\t3\t1\t7\t0\t1\t0\t32\t0",
+        "STEP\t4\t1\t5\t0\t1\t0\t32\t0",
+        "STEP\t5\t1\t6\t0\t1\t0\t49\t0",
+        "STEP\t6\t1\t7\t0\t1\t0\t48\t0",
+    ]
+    with tempfile.TemporaryDirectory(prefix="native-handoff-selftest-") as tmp:
+        path=os.path.join(tmp,"fake_native_route.tsv")
+        def run(lines):
+            with open(path,"w",encoding="ascii") as f:
+                f.write("\n".join(lines)+"\n")
+            return list(read_arithmetic_edges(path))
+        edges=run(rows)
+        require(edges==[((5,0),(6,0)),((6,0),(7,0))],
+                "scanner x=5,y=0 without correct velocity polluted arithmetic edges")
+        try:
+            run(rows[:3])
+        except AssertionError as err:
+            require("missing arithmetic handoff" in str(err),
+                    "false Native handoff rejected for unexpected reason")
+        else:
+            raise AssertionError("x=5,y=0 with wrong velocity falsely began arithmetic")
+    print("NATIVE_ARITHMETIC_HANDOFF_VECTOR_2_SYNTHETIC_CONTROLS_PASS")
+
 def main(folder):
+    handoff_edge_selftest()
     with open(os.path.join(folder,"diverse_manifest.json"),"r",encoding="utf-8") as src:
         manifest=json.load(src)
     require(manifest.get("schema")=="befunge-stage1-diverse-native-v1",
