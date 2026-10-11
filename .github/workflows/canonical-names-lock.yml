@@ -50,3 +50,5 @@ jobs:
         run: sh run_stage02_families_tests.sh
       - name: Stage 02 signed gate cache
         run: sh run_stage02_gates_tests.sh
+      - name: Stage 02 year traversal
+        run: sh run_stage02_years_tests.sh

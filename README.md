@@ -90,3 +90,9 @@ ni'o lo `Stage02FamiliesTests` cu cipra lo tcadu barda cmene .e lo mutce barda m
 ni'o lo `MonsterGates` cu zbasu lo se namcu vorme fi lo se benji `MonsterSauceBowls`. ro se jicmu `MonsterGates` cu ralte lo pa ke cnino vorme liste gi'e ralte lo barda namcu be lo nu vorme. lo se sisku cu pilno lo binario sisku fi lo se pagbu vorme. lo `snapshot` cu cpacu lo na se galfi datni papri.
 
 ni'o lo `Stage02GateTests` cu cipra lo ni'o se sruri .e lo nu minra lo cizyjavni. ko benji `sh run_stage02_gates_tests.sh`. lo remoi stadi cu na mulno.
+
+## lo remoi stadi — lo nanca ciste
+
+ni'o lo `MonsterYears` cu zbasu lo pamoi nanca poi se namcu li 5000 .e lo balvi nanca .e lo purci nanca. lo `MonsterGates` cu vasru lo te jicmu vorme. lo nu cuxna lo nanca cu pilno lo te jicmu lenku .e lo lo ranki fi lo `MonsterSelectors`.
+
+ni'o lo `Stage02YearTests` cu cipra lo nanca li 5000 .e lo go'i co'a nanca tezu'e lo nu lo detri cu se tolcri. ko benji `sh run_stage02_years_tests.sh`. lo remoi stadi cu na mulno.
