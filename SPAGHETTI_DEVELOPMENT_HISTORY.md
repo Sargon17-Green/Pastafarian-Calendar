@@ -113,3 +113,7 @@ ni'o lo te jicmu be lo fanmo masti cu se namcu fi lo re binomio se cilre namcu .
 ### lo porsi se xruti ranki
 
 ni'o lo `rank1` cu jalge lo lexicographic ranki fi lo se benji masti porsi .i lo `rank1(unrank1(r))` cu se cipra lo pa .e lo fanmo ranki .e lo midju ranki fi lo ro se jimte porsi.
+
+### lo fanmo binomio se namcu .e lo ranki se xruti — PASS
+
+ni'o lo `MonsterWeavingEndpointDP` cu se galfi fi lo `terminalInsertTotal` .i lo `rank1` cu se jmina .i lo GitHub Actions run `38162079095` cu se cipra snada .i lo se jmite pe lo 2048 detri count .e lo 384 detri unrank cu se srana lo narmanci cipra .i lo 5778 detri nanca cu za'o na se mulno.

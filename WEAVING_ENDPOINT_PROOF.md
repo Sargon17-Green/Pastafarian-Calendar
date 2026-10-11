@@ -37,4 +37,31 @@ ni'o lo se stika porsi cu se cuxna fi lo `unrank1` .i ro se cuxna judri cu se na
 
 ni'o lo se namcu be lo stika `D` cu zenba fi lo `O(m*D^2)` BigInteger se pilno te jicmu, poi `D` cu du lo detri se namcu. lo spisa se ralte cu zenba fi lo `O(D^2)` porsi judri .i lo BigInteger se bitni se namcu cu zenba fi lo mutce barda se namcu, i sena'i lo `O(D^2)` cu naljavni lo mutce barda mutce slabu memori.
 
-ni'o ca ti lo count cu se jimte li 1024 detri .i lo `unrank1` cu se jimte li 256 detri, ki'u lo nu ro cuxna cu sarcu lo balvi se namcu krefu. lo 5778 detri nanca cu na se cipra lo mulno .i lo remoi stadi cu ca'o se zbasu gi'e na se tcita lo mulno.
+ni'o ca ti lo count cu se jimte li 2048 detri .i lo `unrank1` cu se jimte li 384 detri, ki'u lo nu ro cuxna cu sarcu lo balvi se namcu krefu. lo 5778 detri nanca cu na se cipra lo mulno .i lo remoi stadi cu ca'o se zbasu gi'e na se tcita lo mulno.
+
+## lo fanmo masti binomio te javni
+
+ni'o lo `N` cu du lo purci detri se namcu .i lo `q` cu du lo fanmo cnino masti detri se namcu .i lo `F` .e lo `L` cu du lo pamoi .e lo fanmo judri be lo purci fanmo masti.
+
+```text
+firstOrder:
+T(N,q,F,L) = C(N+q-F,q) - C(L+q-1-F,q)
+
+alreadyOpened:
+T(N,q,L) = C(N+q,q) - C(L+q-1,q)
+
+C(n,k) = 0 when n < k
+terminalTotal = sum { D_old(F,L) * T(N,q,F,L) }
+```
+
+ni'o lo `N+q` detri judri cu kakne lo nu se cuxna `q` cnino detri. lo pamoi narmanci javni cu sarcu lo nu lo cnino masti pamoi detri cu balvi lo `F` moi purci detri .i seni'i lo se cuxna se namcu cu du `C(N+q-F,q)`. lo fanmo narmanci javni cu sarcu lo nu lo cnino masti fanmo detri cu balvi lo `L` moi purci detri .i lo na se snada be lo fanmo javni cu se namcu `C(L+q-1-F,q)`. lo se namcu be lo drani se cuxna cu du lo nu vimcu lo na se snada fi lo ro se cuxna.
+
+ni'o va'o lo nu lo cnino masti cu pu se pamoi se viska, lo pamoi javni cu na sarcu .i lo `F` cu se banzu lo nu du li no .i lo fanmo javni cu za'o sarcu. seni'i lo `alreadyOpened` se namcu cu drani.
+
+ni'o lo fanmo masti te jicmu cu na se zbasu ca lo `terminalInsertTotal` cu se pilno. lo `EndpointTable` cu ralte lo trene se judri po'o gi'e pilno lo se binomio `BigInteger` .i lo 2048 detri count .e lo 384 detri rank cu se cipra fi lo GitHub Actions run `38162079095`.
+
+## lo ranki se xruti
+
+ni'o lo `rank1` cu cfari fi li pa .i ro `k` poi prami lo se cuxna masti `j` cu se namcu fi lo `countSuffix` .i lo se namcu be ro drata masti poi me lo pamoi porsi gi'e se cmima lo drani balvi se porsi cu se jmina lo ranki. lo `unrank1` cu vimcu lo sa'u te cuxna ranki gi'e cuxna lo pamoi pagbu poi drani. seni'i lo re sampla cu se xruti fi lo porsi se ranki poi drani.
+
+ni'o lo ro porsi se ranki cu te sarcu lo `BigInteger` .i lo 5778 detri nanca cu za'o na se cipra .i lo du'o mutce barda so'i masti cu za'o nitcu lo balvi se sruri datni javni.

@@ -127,24 +127,20 @@ ni'o lo `MonsterCalendarResolver` cu benji lo detri se namcu be lo nanca .e lo k
 
 ni'o lo `MonsterCalendarResolver` cu se benji lo narmanci `selectedWeaving` fi lo drata ciste. lo nu se cuxna lo drani `selectedWeaving` fi lo `MonsterSelectors` .e lo `MonsterFamilies.WeavingFamily` cu se nitcu lo mutce barda matematik cipra fi lo mulno nanca. lo `WeavingFamily` cu pilno lo se sruri se banzu te jicmu `Map` .i lo ro 47 masti .e lo barda namcu be lo detri cu kakne lo nu mutce zenba lo se sruri datni se namcu. lo ti jimte na se jdice lo ka lo narmanci javni cu drani .i no mulno stadi tcita cu se jmina ca lo se cuxna ciste na se zbasu.
 
-## lo masti porsi pe lo pamoi .e lo fanmo
+## lo masti porsi be lo pamoi .e lo fanmo
 
-ni'o lo `MonsterWeavingEndpointDP` cu pilno lo pamoi .e lo fanmo se namcu fi lo balvi masti poi se jmina. lo se namcu te jicmu cu du lo porsi be lo pamoi detri .e lo fanmo detri be lo fanmo masti. ri na ralte lo ro masti se stika namcu po'o. lo se cipra cu pilno lo `NormativeOracle` poi se pilno lo cipra po'o. lo se namcu cu se ralte lo BigInteger pe la Java .i lo se banzu jimte cu du li 512 lo se namcu detri .e li 96 lo unrank detri, tezu'e lo nu lo se pilno ciste na jebni lo se sruri datni. ti na se sarcu lo nu facki lo 5778 detri nanca gi'e na se tcita lo mulno stadi.
+ni'o lo `MonsterWeavingEndpointDP` cu namcu lo drani porsi fi lo `BigInteger` .i lo pamoi detri .e lo fanmo detri be lo fanmo masti cu se ralte fi lo te jicmu porsi .i lo `EndpointTable` cu ralte lo drani trene judri po'o. lo `terminalInsertTotal` cu jmina lo binomio namcu fi lo fanmo masti gi'e na zbasu lo fanmo endpoint te jicmu.
 
-ni'o lo `MonsterWeavingEndpointDP` cu te cipra lo binomio du'u ro re masti porsi .e lo Catalan namcu du'u ro masti cu se du lo re detri. lo se jimte cu du li 512 lo count .e li 96 lo unrank. lo 5778 detri nanca se selnitcu lo balvi se sruri datni javni.
+ni'o lo `unrank1` cu cuxna lo porsi fi lo ranki be lo pamoi .i lo `rank1` cu xruti lo ranki fi lo drani porsi .i lo cipra cu se snada lo ka `rank1(unrank1(r))=r` .i lo `NormativeOracle.WeavingFamily` cu se pilno po'o lo cipra.
 
-ni'o lo se narmanci te javni be lo `MonsterWeavingEndpointDP` cu se ciska fi `WEAVING_ENDPOINT_PROOF.md`. lo jicmu se narmanci srana lo pamoi .e lo fanmo se namcu .e lo `BigInteger` jimte cu se jarco fi ra.
+## lo cuxna be lo narmanci masti
 
-ni'o lo endpoint te jicmu cu ralte lo pagbu poi se jalge fi lo drani judri po'o gi'e pilno lo ro binomio namcu pe lo cnino masti pamoi. lo count jimte cu du li 768 detri .i lo unrank jimte cu du li 160 detri .i lo mutce barda detri be li 5778 cu za'o te zbasu.
+ni'o lo `MonsterCanonicalWeaving` cu cuxna lo drani masti porsi fi lo vo moi kabri .e lo 32 moi tcita be lo `MonsterSauceBowls`. lo `MonsterSelectors` cu te cuxna lo ranki fi lo traji barda `BigInteger` .i lo `MonsterCalendarResolver` cu facki lo detri be lo nanca .e lo kecti .e lo masti ca lo nu lo se cuxna `weaving` cu se benji.
 
-ni'o lo pamoi masti porsi te jicmu cu se cipra so'i detri pe li 984 gi'e benji lo jimte be li 1024 detri. lo `unrank1` cu se cipra lo 180 detri gi'e ralte lo jimte be li 192 detri. ro drata mulno nanca 5778 detri cu za'o na se zbasu.
+## lo 2026-10-11 jimte
 
-ni'o lo `unrank1` se jimte cu zenba co li 256 detri .i lo minli be lo nanca be li 252 detri cu se cipra fi lo ci masti be li 84 detri .i lo mulno 5778 detri cu za'o na se zbasu.
+ni'o lo `MonsterWeavingEndpointDP.MAX_COUNT_DAYS` cu du li 2048 .i lo `MonsterWeavingEndpointDP.MAX_UNRANK_DAYS` cu du li 384 .i lo `rank1` cu se jimte li 384 detri .i lo 1968 detri se namcu cu se cipra .i lo 384 detri porsi unrank cu se cipra .i lo 252 detri se xruti ranki cu se cipra.
 
-## lo se cuxna be lo vo moi kabri
+ni'o lo nanca cu kakne lo nu ralte li 5778 detri .i lo ti jimte cu na se banzu lo ro nanca .i lo remoi stadi cu na se mulno .i lo `LAST_COMPLETED_STAGE` cu du li pa.
 
-ni'o lo `MonsterCanonicalWeaving` cu jorne lo `MonsterSelectors` .e lo `MonsterSauceBowls` be lo vo moi kabri .e lo 32 moi tcita .e lo `MonsterWeavingEndpointDP`. lo se cuxna cu se jimte li 256 detri .i lo mutce barda detri se cuxna cu za'o na se zbasu. ko benji `sh run_stage02_canonical_weaving_tests.sh`.
-
-ni'o lo `MonsterWeavingEndpointDP` cu pilno lo fanmo masti binomio count be ro purci endpoint te jicmu fi pa se jmina .i lo count jimte cu du li 2048 detri .i lo unrank jimte cu du li 384 detri. lo 5778 detri cu na se te narmanci ca ti.
-
-ni'o lo `MonsterWeavingEndpointDP.rank1` cu cmima lo drani se jmina porsi tezu'e lo nu se xruti lo ranki fi lo masti porsi. lo te cipra cu snada lo nu `rank1(unrank1(r))=r` .i lo se jimte cu du lo sa'e nu unrank1.
+ni'o ko benji `sh run_stage02_endpoint_weaving_tests.sh` .e `sh run_stage02_canonical_weaving_tests.sh` tezu'e lo nu cipra lo masti porsi .i lo se narmanci javni cu se ciska fi `WEAVING_ENDPOINT_PROOF.md`.
