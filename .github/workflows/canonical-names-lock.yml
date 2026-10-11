@@ -62,3 +62,5 @@ jobs:
         run: sh run_stage02_month_index_tests.sh
       - name: Stage 02 complete date with supplied weaving
         run: sh run_stage02_calendar_resolver_tests.sh
+      - name: Stage 02 polynomial endpoint weaving
+        run: sh run_stage02_endpoint_weaving_tests.sh

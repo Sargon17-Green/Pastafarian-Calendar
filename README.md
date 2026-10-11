@@ -126,3 +126,7 @@ ni'o lo `MonsterCalendarResolver` cu benji lo detri se namcu be lo nanca .e lo k
 ## lo balvi nitcu: lo mulno nanca se jorne
 
 ni'o lo `MonsterCalendarResolver` cu se benji lo narmanci `selectedWeaving` fi lo drata ciste. lo nu se cuxna lo drani `selectedWeaving` fi lo `MonsterSelectors` .e lo `MonsterFamilies.WeavingFamily` cu se nitcu lo mutce barda matematik cipra fi lo mulno nanca. lo `WeavingFamily` cu pilno lo se sruri se banzu te jicmu `Map` .i lo ro 47 masti .e lo barda namcu be lo detri cu kakne lo nu mutce zenba lo se sruri datni se namcu. lo ti jimte na se jdice lo ka lo narmanci javni cu drani .i no mulno stadi tcita cu se jmina ca lo se cuxna ciste na se zbasu.
+
+## lo masti porsi pe lo pamoi .e lo fanmo
+
+ni'o lo `MonsterWeavingEndpointDP` cu pilno lo pamoi .e lo fanmo se namcu fi lo balvi masti poi se jmina. lo se namcu te jicmu cu du lo porsi be lo pamoi detri .e lo fanmo detri be lo fanmo masti. ri na ralte lo ro masti se stika namcu po'o. lo se cipra cu pilno lo `NormativeOracle` poi se pilno lo cipra po'o. lo se namcu cu se ralte lo BigInteger pe la Java .i lo se banzu jimte cu du li 512 lo se namcu detri .e li 96 lo unrank detri, tezu'e lo nu lo se pilno ciste na jebni lo se sruri datni. ti na se sarcu lo nu facki lo 5778 detri nanca gi'e na se tcita lo mulno stadi.

@@ -77,3 +77,7 @@ ni'o lo `MonsterMonthIndex` cu se zbasu tezu'e lo nu facki lo masti detri fi lo 
 ### lo detri jalge be lo se cuxna masti porsi
 
 ni'o lo `MonsterCalendarResolver` cu jorne lo `MonsterYearBlueprint` .e lo `MonsterMonthIndex` .i ri na cuxna lo `selectedWeaving` .i lo mulno narmanci detri fanva cu nitcu lo balvi se cuxna javni.
+
+### lo porsi te jicmu poi du lo pamoi .e lo fanmo
+
+ni'o lo cnino `MonsterWeavingEndpointDP` cu facki lo porsi se namcu fi lo pamoi .e lo fanmo. ri na zbasu lo so'i se stika namcu liste poi se jmina lo mutce barda masti porsi. lo ciste cu pilno lo se jimte nunjavni tezu'e lo nu na ca'o pilno lo mutce barda vreji. lo balvi cipra cu se nitcu lo 5778 detri masti javni.
