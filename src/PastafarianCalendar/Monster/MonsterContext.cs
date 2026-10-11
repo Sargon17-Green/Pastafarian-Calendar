@@ -42,6 +42,9 @@ public sealed class MonsterContext
     // صفوف الرقعة الرابعة مستقلة عن صفوف الطفرة التاريخية وعن سائر السياقات.
     public BigInteger[][]? PatchedStoneRows { get; set; }
 
+    // ترتيب القطرات المخفية القديم معكوس ويملك كل استدعاء مصفوفتَه الخاصة.
+    public BigInteger[]? LegacyHiddenReversed { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

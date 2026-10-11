@@ -131,6 +131,7 @@ public sealed class MonsterDispatcher
     private readonly PatchedCounts _patchedCounts;
     private readonly LegacyStonesPhaseHandler _legacyStones;
     private readonly StonePatchWrapper _stonePatch;
+    private readonly LegacyHiddenDropsPhaseHandler _legacyHiddenDrops;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -144,6 +145,7 @@ public sealed class MonsterDispatcher
         _patchedCounts = new PatchedCounts();
         _legacyStones = new LegacyStonesPhaseHandler();
         _stonePatch = new StonePatchWrapper();
+        _legacyHiddenDrops = new LegacyHiddenDropsPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -278,6 +280,21 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "stone.patch.dispatch");
         context.Status = "STONE_PATCH_COMPLETE";
         context.Phase = "STONE_PATCH_COMPLETE";
+    }
+
+    public void DispatchLegacyHiddenDrops(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("يتطلب تخزين القطرات المقلوب سياقاً جديداً جاهزاً.");
+        if (context.LegacyHiddenReversed is not null)
+            throw new MonsterValidationException("لا يجوز بناء القطرات التاريخية مرتين.");
+
+        context.Phase = "LEGACY_HIDDEN_REVERSED";
+        context.BranchTrace.Add("LEGACY_HIDDEN_REVERSED");
+        _legacyHiddenDrops.Handle(context);
+        _metrics.Bump(context, "legacy.hidden.reversed.dispatch");
+        context.Status = "LEGACY_HIDDEN_REVERSED_COMPLETE";
+        context.Phase = "LEGACY_HIDDEN_REVERSED_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -422,6 +439,20 @@ public sealed class MonsterManager
         var context = ExecutePatchedStones(calculationDay, targetDay);
         return context.PatchedStoneRows
             ?? throw new MonsterValidationException("لم تُثبت صفوف الأحجار في الرقعة الرابعة.");
+    }
+
+    public MonsterContext ExecuteLegacyHiddenDrops(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        _dispatcher.DispatchLegacyHiddenDrops(context);
+        return context;
+    }
+
+    public BigInteger[] EvaluateLegacyHiddenDrops(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = ExecuteLegacyHiddenDrops(calculationDay, targetDay);
+        return context.LegacyHiddenReversed
+            ?? throw new MonsterValidationException("لم تُثبَّت القطرات التاريخية المعكوسة.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

@@ -81,3 +81,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage08Tests/PastafarianCalendar.Stage08Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ رقعة الأحجار الرابعة مع المرجع وحفظ الطفرة القديمة
         run: dotnet run --project tests/PastafarianCalendar.Stage09Tests/PastafarianCalendar.Stage09Tests.csproj --configuration Release
+      - name: تشغيل اختبار ترتيب القطرات المخفية التاريخي الأحمر
+        id: discovery_hidden_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage10Tests/PastafarianCalendar.Stage10Tests.csproj --configuration Release
+      - name: إثبات توقيع انقلاب تخزين القطرات ورفض الأحمر الزائف
+        if: always()
+        run: |
+          test "${{ steps.discovery_hidden_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage10Tests/PastafarianCalendar.Stage10Tests.csproj --configuration Release -- --verify-expected-red

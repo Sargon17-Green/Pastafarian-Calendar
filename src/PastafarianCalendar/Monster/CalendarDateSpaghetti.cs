@@ -59,6 +59,13 @@ public static class CalendarDateSpaghetti
         return manager.EvaluatePatchedStones(calculationDay, targetDay);
     }
 
+    // المسار التاريخي الخامس يترك القطرات المخفية محفوظة بالترتيب المعكوس.
+    public static BigInteger[] EvaluateLegacyHiddenDrops(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateLegacyHiddenDrops(calculationDay, targetDay);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
