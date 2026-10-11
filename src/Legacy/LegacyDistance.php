@@ -4,20 +4,26 @@ declare(strict_types=1);
 namespace Pastafari\Stage01\Legacy;
 
 use Pastafari\Stage01\BigInt;
+use Pastafari\Stage01\Patches\FoundationScarPatch02;
 
 /**
- * Pengiraan jarak sejarah mengira langkah di antara dua hari tetapi
- * terlupa bahawa kedua-dua hujung termasuk dalam bilangan normatif.
- * Perbezaan ini sengaja belum ditampal pada Stage 6.
+ * Andaian lama yang salah: jarak dua tag hari disamakan dengan jarak hari.
+ * Kekalkan pengiraan tag ini sebagai parut sejarah; jangan betulkan di sini.
  */
 final class LegacyDistance
 {
+    private FoundationScarPatch02 $tag;
+
+    public function __construct(?FoundationScarPatch02 $tag = null)
+    {
+        $this->tag = $tag ?? new FoundationScarPatch02(new LegacyDayTag());
+    }
+
     public function oldDistance(int $calculationDay, int $targetDay): BigInt
     {
-        // Jangan menolak int mesin secara terus: hujung julat boleh melimpah.
-        $action = BigInt::fromInt($calculationDay);
-        $target = BigInt::fromInt($targetDay);
-        return $target->sub($action)->abs();
+        $actionTag = $this->tag->dayTagWithFoundationScar($calculationDay);
+        $targetTag = $this->tag->dayTagWithFoundationScar($targetDay);
+        return $actionTag->sub($targetTag)->abs();
     }
 
     public function calculateWithoutPatch(int $calculationDay, int $targetDay): BigInt

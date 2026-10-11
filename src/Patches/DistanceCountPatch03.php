@@ -7,9 +7,9 @@ use Pastafari\Stage01\BigInt;
 use Pastafari\Stage01\Legacy\LegacyDistance;
 
 /**
- * Tampalan ketiga tidak mengubah fungsi lama: ia hanya menambah hari hujung
- * yang dahulu tertinggal daripada pengiraan jarak langkah.
- * Tiada rujukan kepada oracle, metrik atau pembolehubah keadaan global.
+ * Tampalan sejarah ketiga: baca jarak antara tag lama dahulu, semak arah
+ * kronologi sebenar, lencongkan hanya apabila nilainya tidak sama.
+ * Cabang penggantian wajib kekal sebagai parut walaupun hasil akhirnya betul.
  */
 final class DistanceCountPatch03
 {
@@ -19,7 +19,13 @@ final class DistanceCountPatch03
 
     public function distanceCountPatch03(int $calculationDay, int $targetDay): BigInt
     {
-        $steps = $this->legacy->oldDistance($calculationDay, $targetDay);
-        return $steps->add(BigInt::one());
+        $distanceByTags = $this->legacy->oldDistance($calculationDay, $targetDay);
+        $chronological = BigInt::fromInt($targetDay)->sub(BigInt::fromInt($calculationDay))->abs();
+
+        if (!$distanceByTags->equals($chronological)) {
+            $distanceByTags = $chronological;
+        }
+
+        return $distanceByTags->add(BigInt::one());
     }
 }

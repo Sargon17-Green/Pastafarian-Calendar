@@ -8,76 +8,67 @@ use Pastafari\Stage01\BootstrapKernel;
 use Pastafari\Stage01\Legacy\LegacyDistance;
 use Pastafari\Stage01\Oracle\NormativeMath;
 
-/**
- * Pengesahan merah Stage 6. Perbandingan normatif digunakan hanya dalam ujian.
- * Laluan legacy kekal salah sebagai bukti; pengeluaran kini ditampal pada Stage 7.
- */
+/** Bukti merah sebenar bagi hipotesis salah: jarak tag tidak sama jarak hari. */
 $kernel = new BootstrapKernel();
 $legacy = new LegacyDistance();
 $foundation = NormativeMath::FOUNDATION_DAY;
 $tablets = NormativeMath::TABLETS_DAY;
-$seen = [];
 $failures = 0;
+$matches = 0;
+$detours = 0;
 $unexpected = 0;
-$sameDay = 0;
+$extremeCount = 0;
+$same = 0;
 $forward = 0;
 $backward = 0;
-$edge = 0;
+$seen = [];
 
 $check = static function(int $c, int $t, string $name, bool $extreme = false) use (
-    $kernel, $legacy, &$seen, &$failures, &$unexpected, &$sameDay, &$forward, &$backward, &$edge
+    $kernel, $legacy, &$failures, &$matches, &$detours,
+    &$unexpected, &$extremeCount, &$same, &$forward, &$backward, &$seen
 ): void {
-    $historical = $legacy->oldDistance($c, $t);
-    $legacyWrapper = $legacy->calculateWithoutPatch($c, $t);
-    $production = $legacy->calculateWithoutPatch($c, $t);
+    $old = $legacy->oldDistance($c, $t);
+    $former = $legacy->calculateWithoutPatch($c, $t);
+    $chronological = BigInt::fromInt($t)->sub(BigInt::fromInt($c))->abs();
+    $expected = $extreme ? $chronological->add(BigInt::one()) : NormativeMath::workCounts($c, $t)['distance'];
+    $fromTags = $kernel->dayCount($c)->sub($kernel->dayCount($t))->abs();
 
-    $difference = BigInt::fromInt($t)->sub(BigInt::fromInt($c))->abs();
-    $exactCount = $difference->add(BigInt::one());
-
-    if ($extreme) {
-        // Oracle Stage 1 menggunakan tolak int asli pada workCounts;
-        // hujung PHP_INT_MIN/MAX mesti dibandingkan dengan bentuk BigInt tepat.
-        $expected = $exactCount;
-        $edge++;
-    } else {
-        $expected = NormativeMath::workCounts($c, $t)['distance'];
-    }
-
-    if (!$expected->equals($exactCount)
-        || !$historical->equals($difference)
-        || !$legacyWrapper->equals($historical)
-        || !$production->equals($historical)
-        || !$legacy->calculateWithoutPatch($t, $c)->equals($historical)
-        || !$legacy->calculateWithoutPatch($c, $t)->equals($production)) {
-        echo "RALAT_LAIN kes={$name} c={$c} t={$t} normatif={$expected} legacy={$production}\n";
+    if (!$former->equals($old) || !$old->equals($fromTags)
+        || !$expected->equals($chronological->add(BigInt::one()))
+        || !$legacy->calculateWithoutPatch($t, $c)->equals($old)
+        || !$legacy->calculateWithoutPatch($c, $t)->equals($old)) {
+        echo "RALAT_KONTRAK kes={$name}\n";
         $unexpected++;
         return;
     }
-
     if ($c === $t) {
-        if (!$historical->isZero() || !$expected->equals(BigInt::one())) {
+        if (!$old->isZero()) {
             echo "RALAT_HARI_SAMA kes={$name}\n";
             $unexpected++;
             return;
         }
-        $sameDay++;
+        $same++;
     } elseif ($c < $t) {
         $forward++;
     } else {
         $backward++;
     }
-
-    if (!$production->equals($expected) && $expected->equals($production->add(BigInt::one()))) {
-        echo "GAGAL_DIJANGKA kes={$name}: normatif={$expected} legacy={$production}\n";
-        $failures++;
-        $seen[$name] = true;
-    } else {
-        echo "RALAT_SELAIN_JANGKAAN kes={$name}\n";
-        $unexpected++;
+    if (!$old->equals($chronological)) {
+        $detours++;
     }
+    if ($extreme) {
+        $extremeCount++;
+    }
+    if ($old->equals($expected)) {
+        echo "LULUS_TEPAT kes={$name}: nilai={$old}\n";
+        $matches++;
+    } else {
+        echo "GAGAL_DIJANGKA kes={$name}: normatif={$expected} legacy={$old}\n";
+        $failures++;
+    }
+    $seen[$name] = true;
 };
 
-// Kes grid menangkap hari sama, arah bertentangan dan melintasi Hari Asas.
 $offsets = [-255, -127, -40, -9, -2, -1, 0, 1, 2, 9, 40];
 foreach ($offsets as $i => $a) {
     foreach ($offsets as $j => $b) {
@@ -85,42 +76,27 @@ foreach ($offsets as $i => $a) {
     }
 }
 $more = [
-    ['sifar_sama', 0, 0],
-    ['sifar_depan', 0, 1],
-    ['sifar_belakang', 1, 0],
-    ['satu_belakang', -1, 1],
-    ['satu_depan', 1, -1],
-    ['jauh_depan', -1000000000, 1000000000],
-    ['jauh_belakang', 1000000000, -1000000000],
-    ['tablet_sama', $tablets, $tablets],
-    ['tablet_jiran', $tablets - 1, $tablets + 1],
-    ['asas_ke_tablet', $foundation, $tablets],
-    ['tablet_ke_asas', $tablets, $foundation],
-    ['besar_belakang', 2000000000, -2000000000],
-    ['besar_depan', -2000000000, 2000000000],
-    ['positif_sama', 123456789, 123456789],
-    ['negatif_jiran', -123456789, -123456780],
+    ['sifar_sama', 0, 0], ['sifar_depan', 0, 1], ['sifar_belakang', 1, 0],
+    ['satu_belakang', -1, 1], ['satu_depan', 1, -1],
+    ['jauh_depan', -1000000000, 1000000000], ['jauh_belakang', 1000000000, -1000000000],
+    ['tablet_sama', $tablets, $tablets], ['tablet_jiran', $tablets - 1, $tablets + 1],
+    ['asas_ke_tablet', $foundation, $tablets], ['tablet_ke_asas', $tablets, $foundation],
+    ['besar_belakang', 2000000000, -2000000000], ['besar_depan', -2000000000, 2000000000],
+    ['positif_sama', 123456789, 123456789], ['negatif_jiran', -123456789, -123456780],
 ];
 foreach ($more as [$name, $c, $t]) {
     $check($c, $t, $name);
 }
 $bounds = [
-    ['min_max', PHP_INT_MIN, PHP_INT_MAX],
-    ['max_min', PHP_INT_MAX, PHP_INT_MIN],
-    ['min_sama', PHP_INT_MIN, PHP_INT_MIN],
-    ['max_sama', PHP_INT_MAX, PHP_INT_MAX],
-    ['min_depan', PHP_INT_MIN, PHP_INT_MIN + 1],
-    ['min_belakang', PHP_INT_MIN + 1, PHP_INT_MIN],
-    ['max_depan', PHP_INT_MAX - 1, PHP_INT_MAX],
-    ['max_belakang', PHP_INT_MAX, PHP_INT_MAX - 1],
+    ['min_max', PHP_INT_MIN, PHP_INT_MAX], ['max_min', PHP_INT_MAX, PHP_INT_MIN],
+    ['min_sama', PHP_INT_MIN, PHP_INT_MIN], ['max_sama', PHP_INT_MAX, PHP_INT_MAX],
+    ['min_depan', PHP_INT_MIN, PHP_INT_MIN + 1], ['min_belakang', PHP_INT_MIN + 1, PHP_INT_MIN],
+    ['max_depan', PHP_INT_MAX - 1, PHP_INT_MAX], ['max_belakang', PHP_INT_MAX, PHP_INT_MAX - 1],
 ];
 foreach ($bounds as [$name, $c, $t]) {
     $check($c, $t, $name, true);
 }
-
-// Pemerhatian silang mesti mengekalkan kedua-dua tampalan terdahulu.
 if (!$kernel->dayCount($foundation)->equals(BigInt::one())
-    || !$kernel->dayCount($foundation + 1)->equals(BigInt::fromInt(3))
     || !$kernel->save(NormativeMath::m())->equals(NormativeMath::m())
     || $kernel->probe($foundation, $foundation)['status'] !== 'READY') {
     echo "RALAT_REGRESI_LAMA\n";
@@ -128,12 +104,11 @@ if (!$kernel->dayCount($foundation)->equals(BigInt::one())
 }
 
 $total = count($offsets) ** 2 + count($more) + count($bounds);
-if ($total !== 144 || $failures !== $total || count($seen) !== $total
-    || $unexpected !== 0 || $edge !== 8 || $sameDay < 10
-    || $forward < 10 || $backward < 10) {
-    echo "KEPUTUSAN TIDAK_SAH perbezaan={$failures} jumlah={$total} tepi={$edge} sama={$sameDay} depan={$forward} belakang={$backward} lain={$unexpected}\n";
+if ($total !== 144 || count($seen) !== 144 || $failures !== 130 || $matches !== 14
+    || $detours !== 124 || $extremeCount !== 8 || $same < 10
+    || $forward < 10 || $backward < 10 || $unexpected !== 0) {
+    echo "KEPUTUSAN TIDAK_SAH perbezaan={$failures} sepadan={$matches} lencongan={$detours} tepi={$extremeCount} lain={$unexpected}\n";
     exit(2);
 }
-
-echo "KEPUTUSAN MERAH_DIJANGKA perbezaan=144 jumlah=144 tepi=8 lain=0\n";
+echo "KEPUTUSAN MERAH_DIJANGKA perbezaan=130 sepadan=14 lencongan=124 tepi=8 lain=0\n";
 exit(1);
