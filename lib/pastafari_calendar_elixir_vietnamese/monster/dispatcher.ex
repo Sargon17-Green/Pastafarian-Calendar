@@ -1,9 +1,12 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   @moduledoc """
-  Bộ phân phối trung tính của giai đoạn 1. Nó chỉ đi qua kiểm tra đầu vào và không chứa logic của bất kỳ bản vá tương lai nào.
+  Bộ phân phối cơ sở bắt đầu mang nhánh SAVE lịch sử từ giai đoạn 2.
+
+  Đường ngày lịch đầy đủ chưa được tích hợp. Nhánh SAVE được thực thi thật
+  thông qua điểm vào sản xuất riêng để kiểm chứng sai lệch đầu tiên.
   """
 
-  alias PastafariCalendarElixirVietnamese.Monster.{Context, Metrics, Validator}
+  alias PastafariCalendarElixirVietnamese.Monster.{Context, Metrics, SaveManager, Validator}
 
   def bootstrap(calculation_day, target_day) do
     Validator.require_integer_day!(calculation_day)
@@ -19,4 +22,6 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       logs: [{:bootstrap, calculation_day, target_day}]
     }
   end
+
+  def save_value(value), do: SaveManager.calculate(value)
 end
