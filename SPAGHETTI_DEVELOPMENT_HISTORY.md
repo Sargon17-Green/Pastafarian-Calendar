@@ -171,3 +171,26 @@ chuyển sang đúng nhánh, thêm ca khác cho nhánh sửa rồi chạy
 toàn bộ kiểm thử xanh. Không đổi bốn hồi quy chuẩn từ phát hiện 03,
 không thay `LegacyDistance` và không xóa các lớp vá cũ.
 Giai đoạn 7 đã đóng GREEN.
+
+## Giai đoạn 8 — Phát hiện 04: nhiễm bản cập nhật đá nối tiếp
+
+**Giả định cũ:** Có thể tính hàng tiếp theo bằng cách cập nhật từng ô
+trên cùng một vùng lưu. Ngay sau khi lúa mì mới được ghi, lúa mạch
+đọc lúa mì mới; muối đọc lúa mạch mới; thịt đọc muối mới; cơm
+đọc cả lúa mì và thịt mới.
+
+**Điều đã phát hiện:** Các công thức chuẩn phải đọc tất cả năm giá trị
+từ hàng cũ. Dùng tuple trung gian đã thay đổi kết quả ngay từ vị trí
+lúa mạch của hàng thứ hai. Giá trị lúa mì hàng 2 vẫn đúng vì nó
+được tính trước mọi ô khác, nhưng sai số lan sang các hàng tiếp theo.
+
+**Đường thực thi thật:** `bootstrap_context → Dispatcher.bootstrap →
+StoneManager.build_table → LegacyStoneMutation.mutate_stones_wrong →
+SaveManager.calculate → SavePatch → LegacyRemainder`.
+Ngoài ra, cả `stones_table_spaghetti` và `stone_row_spaghetti`
+đều đi qua `StoneManager`, không gọi oracle chuẩn.
+
+**Giới hạn:** Không thêm bản chụp hàng cũ, không gọi legacy trên clone,
+không ghi đè giá trị sai bằng kết quả chuẩn. Những việc đó chỉ thuộc
+giai đoạn 9 PATCH 04. Giữ nguyên các bản vá 01/02/03 và 65
+kiểm thử nòng cốt đã được xác minh.

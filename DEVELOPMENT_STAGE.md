@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=7
-CURRENT_KIND=PATCH
-CURRENT_PATCH=03
+CURRENT_STAGE=8
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=04
 LAST_COMPLETED_STAGE=7
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyDistance sai; DistancePatch gọi hàm lịch sử rồi đối chiếu với abs(t-c), chỉ sửa khác biệt, cuối cùng cộng 1; DistanceManager và context dùng kết quả đã vá.
+MONSTER_ARCHITECTURE_GROWTH=Giữ ba lớp vá 01/02/03; thêm LegacyStoneMutation ghi tuần tự vào tuple trung gian, StoneManager dựng 46 hàng, tích hợp bảng sai vào bootstrap_context; chưa có snapshot sửa đá.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_07_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_08_PENDING
+GIT_HISTORY_MUTATED=STAGE_08_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=65
-CI_FAILURES=0
+CI_TESTS=STAGE_08_PENDING
+CI_FAILURES=STAGE_08_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -104,3 +104,10 @@ Bốn hồi quy chuẩn từ giai đoạn 6 và ba lớp hàm lịch sử đư�
 Kiểm thử: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155925314
 Khóa tên chuẩn: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155925331
 Giai đoạn 7 kết thúc ở GREEN, giai đoạn 8 tiếp theo là DISCOVERY 04.
+
+Giai đoạn 8 đưa bảng đá 46 hàng vào đường sản xuất thật.
+LegacyStoneMutation cố ý đọc giá trị vừa cập nhật trong cùng một hàng.
+Hàng đầu và giá trị lúa mì hàng thứ hai vẫn đúng làm đối chứng.
+Bốn hồi quy chuẩn dự kiến đỏ: hàng 2 vị trí 2/3, hàng 3 vị trí 1,
+và cả hàng 46. 12 kiểm thử mới; tổng 77 kiểm thử, dự kiến 4 thất bại.
+Không thêm bản vá 04; LAST_COMPLETED_STAGE vẫn là 7 trước xác minh CI.

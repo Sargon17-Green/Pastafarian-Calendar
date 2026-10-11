@@ -2,9 +2,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   @moduledoc """
   Bộ phân phối sản xuất duy trì các nhánh SAVE và nhãn ngày đã được vá.
 
-  Hai nhãn ngày đã được vá. Khoảng cách đi qua DistancePatch,
-  vẫn thực thi LegacyDistance sai trước khi đối chiếu trục thời gian.
-  Không tích hợp ngày lịch cuối cùng.
+  Hai nhãn ngày đã được vá. Khoảng cách đi qua DistancePatch. Bảng đá được tính trong cùng
+  ngữ cảnh bằng LegacyStoneMutation sai của lần phát hiện 04.
+  Không có bản vá 04 hay ngày lịch cuối cùng.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
@@ -13,6 +13,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     DistanceManager,
     Metrics,
     SaveManager,
+    StoneManager,
     Validator
   }
 
@@ -23,6 +24,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     calculation_tag = DayCountManager.tag(calculation_day)
     target_tag = DayCountManager.tag(target_day)
     corrected_distance = DistanceManager.calculate(calculation_day, target_day)
+    stones_table = StoneManager.build_table()
 
     %Context{
       calculation_day: calculation_day,
@@ -30,6 +32,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       calculation_day_tag: calculation_tag,
       target_day_tag: target_tag,
       distance_count: corrected_distance,
+      stones_table: stones_table,
       phase: :bootstrap,
       status: :validated,
       branch_trace: [:entry, :validated, :legacy_day_count, :day_tag_patch_02],
@@ -46,4 +49,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def day_count(day), do: DayCountManager.tag(day)
   def distance(calculation_day, target_day),
     do: DistanceManager.calculate(calculation_day, target_day)
+
+  def stones_table, do: StoneManager.build_table()
+  def stone_row(index), do: StoneManager.row_at(index)
 end

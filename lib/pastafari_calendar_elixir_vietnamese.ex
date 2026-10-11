@@ -2,8 +2,8 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 7 bọc phép tính khoảng cách sai bằng bản vá 03.
-  Các bản vá 01/02 vẫn hoạt động; ngày lịch cuối chưa tích hợp.
+  Giai đoạn 8 đưa phép cập nhật đá nối tiếp sai vào đường sản xuất.
+  Các bản vá 01/02/03 không đổi; ngày lịch cuối chưa tích hợp.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}
@@ -22,6 +22,14 @@ defmodule PastafariCalendarElixirVietnamese do
 
   def distance_spaghetti(calculation_day, target_day) do
     Dispatcher.distance(calculation_day, target_day)
+  end
+
+  def stones_table_spaghetti do
+    Dispatcher.stones_table()
+  end
+
+  def stone_row_spaghetti(index) do
+    Dispatcher.stone_row(index)
   end
 
   def calendar_date_spaghetti(calculation_day, target_day) do

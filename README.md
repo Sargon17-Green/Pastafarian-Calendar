@@ -187,3 +187,24 @@ cho nhánh sửa. Không sửa mã sản xuất hoặc hồi quy chuẩn.
 
 Giai đoạn 7/55 đã đóng ở trạng thái `GREEN`. Giai đoạn 8/55 sẽ
 là `DISCOVERY 04`; chưa khởi động và chưa thêm bản vá 04.
+
+## Giai đoạn 8 — Phát hiện 04: cập nhật đá nối tiếp
+
+Mỗi hàng đá có năm giá trị: lúa mì, lúa mạch, muối, thịt và cơm.
+Hàng đầu cố định: `{17, 29, 43, 71, 101}`.
+`StoneManager.build_table` dựng 46 hàng, mỗi hàng sau dùng hàm
+`LegacyStoneMutation.mutate_stones_wrong` thực thi thực tế.
+
+Lỗi lịch sử: khi tính giá trị thứ hai đến thứ năm, các công thức
+đọc lại giá trị của các ô trước đã cập nhật trong cùng một hàng.
+Điều đó tương đương cập nhật `in-place` dù Elixir dùng tuple bất biến.
+Phép chuẩn lại yêu cầu mọi công thức dùng riêng năm giá trị của
+hàng trước, không bị pha trộn với hàng đang xây dựng.
+
+Hai đường sản xuất: `stones_table_spaghetti / stone_row_spaghetti`
+và trường `stones_table` của `bootstrap_context`.
+Tất cả tiếp tục gọi SAVE đã vá đúng và không dựa vào oracle kiểm thử.
+
+Bốn hồi quy chuẩn cố ý đỏ tại hàng 2, hàng 3 và hàng cuối 46.
+Hàng đầu và giá trị đầu tiên của hàng 2 là đối chứng vẫn khớp.
+Bản vá 04 dùng snapshot hàng cũ chỉ được thêm vào giai đoạn 9.
