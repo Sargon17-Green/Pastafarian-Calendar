@@ -108,3 +108,14 @@ Llwyddodd profion cwmpas Cam 2/3, gan gynnwys 195 achos cyfnodol,
 Mae'r rhediad gyda'r pum blob Cam 1 gwreiddiol a'r mopheth normadol llawn
 **heb ei gynnal eto**. Nid oes hawl marcio Cam 3 COMPLETE cyn hynny.
 Mae canfyddiad annibynnol Long.MIN_VALUE yn aros heb newid.
+
+
+### Cam 3 — archwiliad dilynol (v002; heb gau'r cam eto)
+
+Cafodd holl ffeiliau PATCH 01 y llwythiad `98e65d7` eu cymharu yn ôl eu
+hashiau Git, a gwiriwyd `ExactInt.kt` gwreiddiol yn union. Roedd y tri
+gwahaniaeth hanesyddol yn Cam 2 yn dal yn bresennol, a phasiodd Cam 3
+gydag 0 gwahaniaeth a 921 prawf BigInteger annibynnol ychwanegol, hyd at
+2048 did. Cedwir y profion JVM ychwanegol dan `src/test/` yn unig.
+Ni newidiodd y cod cynhyrchu. Ni ddylid dechrau Cam 4 cyn PASS llawn gyda'r
+oracl a'r 66 prawf Cam 1 gwreiddiol.

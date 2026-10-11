@@ -56,3 +56,21 @@ ymadael fod yn sero. Hyd hynny: `LAST_COMPLETED_STAGE=2`.
 
 **Heb ei gynnwys:** y canfyddiad ar wahân ar `ExactInt.toLongExact()`
 gydag `Long.MIN_VALUE`. Ni ddylid ei guddio o fewn Patch 01.
+
+
+## Archwiliad ychwanegol — 921 achos annibynnol (v002)
+
+Mae `Stage03ExtendedTests.kt` yn defnyddio `java.math.BigInteger` **yn y profion yn unig**
+i gyfrifo'r gwerth disgwyliedig, heb newid gweithrediad Kotlin `ExactInt` na'r cod cynhyrchu.
+Profwyd 405 cyfuniad o luosrifau −40..40 o `M` â gwrthbwysau −2..2; 480 o werthoedd
+hap-hadau pennodedig o 1 i 2048 did; a 36 gwerth yn ymyl pwerau dau.
+Cyfanswm: **921** achos. Mae'r llwybr etifeddol yn cyfateb i `x.mod(M)` ac mae'r
+llwybr wedi'i gywiro'n cyfateb i `1 + (x−1).mod(M)` ym mhob achos. Gwiriwyd hefyd
+annibyniaeth y cyd-destunau, olion y llwybr a'r metrigau.
+
+Ar y copi lleol, roedd hash Git `ExactInt.kt` yn union
+`3c567e1bb7ad0a5d96b48edbee0d0a4163c05ce8` — yr un â GitHub.
+Pasiodd profion Cam 2 a Cham 3 ar y cod cynhyrchu gwirioneddol, ond defnyddiwyd
+**cyfeirnod SAVE byr at ddiben y prawf yn unig**. Nid yw hyn yn ail-redeg y
+66 prawf Cam 1 na'r oracl calendr cyfan. Felly erys `LAST_COMPLETED_STAGE=2`
+nes bydd `sh run-stage03-tests.sh` yn pasio gyda'r ffynonellau Cam 1 gwreiddiol.

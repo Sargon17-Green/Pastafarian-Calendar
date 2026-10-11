@@ -35,6 +35,7 @@ if ! kotlinc \
     src/test/kotlin/pastafari/NormativeCore.kt \
     src/test/kotlin/pastafari/NormativeCalendar.kt \
     src/test/kotlin/pastafari/Stage03Tests.kt \
+    src/test/kotlin/pastafari/Stage03ExtendedTests.kt \
     -include-runtime -d "$build_dir/stage03.jar"; then
     echo 'E_PATCH01_COMPILE' >&2
     exit 1
@@ -63,4 +64,16 @@ do
         exit 1
     fi
 done
+extended_log="$build_dir/extended.log"
+if ! kotlin -classpath "$build_dir/stage03.jar" pastafari.Stage03ExtendedTests > "$extended_log" 2>&1; then
+    cat "$extended_log" >&2
+    echo 'E_PATCH01_EXTENDED_EXECUTION' >&2
+    exit 1
+fi
+cat "$extended_log"
+if ! grep -Fxq 'STAGE03_EXTENDED_BIGINT_GREEN_921' "$extended_log"; then
+    echo 'E_PATCH01_EXTENDED_MARKER_MISSING' >&2
+    exit 1
+fi
+printf '%s\n' 'STAGE03_EXTENDED_NATIVE_GREEN'
 printf '%s\n' 'STAGE03_NATIVE_GREEN'
