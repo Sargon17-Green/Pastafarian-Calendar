@@ -276,20 +276,37 @@ object Stage12Tests {
       finally stream.close()
       truth(!sources.contains("NormativeOracle"), "Oracolo test-only")
       truth(sources.contains("GRIND_TABLE_WITH_SENTINEL"), "Cicatrice assente")
-      truth(!sources.contains("grindPatch"), "PATCH 06 anticipata")
+      val st = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current = st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("Stadio corrente non dichiarato"))
+      if (current == 12)
+        truth(!sources.contains("grindPatch"), "PATCH 06 anticipata")
+      else
+        truth(sources.contains("LegacyGrindTableAdapter.legacyGrind("),
+          "La cicatrice deve essere attraversata dalla PATCH 06")
     }
 
     check("metadati dello stadio 12 dichiarano discovery intenzionalmente RED") {
       val st = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=12"), "Stadio")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"), "Tipo")
-      truth(st.contains("CURRENT_PATCH=05"), "Patch precedente")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Rosso atteso")
+      val current = st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("Stadio corrente non dichiarato"))
+      truth(current >= 12, "Stadio")
+      if (current == 12) {
+        truth(st.contains("CURRENT_KIND=DISCOVERY"), "Tipo")
+        truth(st.contains("CURRENT_PATCH=05"), "Patch precedente")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Rosso atteso")
+      } else {
+        truth(st.contains("STAGE_12_NATIVE_VERIFICATION=PASS_EXPECTED_RED_22_PASS_3_FAIL"),
+          "Firma storica RED Stage 12 preservata")
+      }
       val completed = st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE assente"))
-      truth(completed == 11 || completed == 12, "Nessuna certificazione prematura")
+      truth(completed >= 11 && completed <= current, "Nessuna certificazione prematura")
     }
 
     val manager = new BaseMonsterManager

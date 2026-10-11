@@ -39,7 +39,10 @@ final case class BaseMonsterContext(
   var grindPrev7Input: Option[BigInt] = None,
   var grindStonesInput: Option[Vector[BigInt]] = None,
   var legacyGrindRuleOutput: Option[LegacyGrindRule] = None,
-  var legacyGrindOutput: Option[BigInt] = None
+  var legacyGrindOutput: Option[BigInt] = None,
+  var patchedGrindRuleOutput: Option[LegacyGrindRule] = None,
+  var patchedGrindOutput: Option[BigInt] = None,
+  var patch06Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -59,6 +62,42 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requirePatch06Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_06_GRIND" || ctx.status != "PATCH_06_READY" ||
+        ctx.grindStepInput.isEmpty || ctx.grindValueInput.isEmpty ||
+        ctx.grindPrev1Input.isEmpty || ctx.grindPrev3Input.isEmpty ||
+        ctx.grindPrev7Input.isEmpty || ctx.grindStonesInput.isEmpty ||
+        ctx.legacyGrindRuleOutput.isEmpty || ctx.legacyGrindOutput.isEmpty ||
+        ctx.patchedGrindRuleOutput.isEmpty || ctx.patchedGrindOutput.isEmpty ||
+        !ctx.patch06Applied ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_06_GRIND", "PATCH_06_GRIND")) {
+      throw new IllegalStateException("La PATCH 06 richiede la discovery nello stesso contesto.")
+    }
+    val step = ctx.grindStepInput.get
+    val stones = ctx.grindStonesInput.get
+    if (step < 1 || step > 11 || stones.length != 5)
+      throw new IllegalStateException("Parametri di macinatura PATCH 06 non validi.")
+    val table = LegacyGrindTableAdapter.GRIND_TABLE_WITH_SENTINEL
+    if (table.length != 12 ||
+        ctx.legacyGrindRuleOutput.get != table(step - 1) ||
+        ctx.patchedGrindRuleOutput.get != table(step))
+      throw new IllegalStateException("Letture di macinatura legacy e patched incoerenti.")
+
+    def evaluate(rule: LegacyGrindRule): BigInt =
+      Patch01SaveWrapper.savePatch(
+        ctx.grindValueInput.get * ctx.grindValueInput.get +
+          rule.a * ctx.grindValueInput.get +
+          rule.b * ctx.grindPrev1Input.get +
+          rule.c * ctx.grindPrev3Input.get +
+          rule.d * ctx.grindPrev7Input.get + stones(rule.stoneKind)
+      )
+
+    if (ctx.legacyGrindOutput.get != evaluate(table(step - 1)) ||
+        ctx.patchedGrindOutput.get != evaluate(table(step))) {
+      throw new IllegalStateException("Risultato di macinatura falsificato o non normativo.")
     }
   }
 
@@ -287,7 +326,8 @@ final class BaseMonsterManager {
     new Patch04StonesHandler(metrics),
     new Discovery05PriorHandler(metrics),
     new Patch05PriorHandler(metrics),
-    new Discovery06GrindHandler(metrics)
+    new Discovery06GrindHandler(metrics),
+    new Patch06GrindHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -558,6 +598,40 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("discovery06", e)
+    }
+  }
+
+  def patch06Grind(
+    calculationDay: BigInt, targetDay: BigInt, step: Int,
+    oldValue: BigInt, previous1: BigInt, previous3: BigInt,
+    previous7: BigInt, stones: Vector[BigInt]
+  ): Patch06GrindReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.grindStepInput = Some(step)
+    ctx.grindValueInput = Some(oldValue)
+    ctx.grindPrev1Input = Some(previous1)
+    ctx.grindPrev3Input = Some(previous3)
+    ctx.grindPrev7Input = Some(previous7)
+    ctx.grindStonesInput = Some(stones)
+    ctx.phase = "DISCOVERY_06_GRIND"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery06Ready(ctx)
+      ctx.phase = "PATCH_06_GRIND"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch06Ready(ctx)
+      Patch06GrindReport(
+        calculationDay = ctx.calculationDay, targetDay = ctx.targetDay,
+        step = ctx.grindStepInput.get, oldValue = ctx.grindValueInput.get,
+        previous1 = ctx.grindPrev1Input.get, previous3 = ctx.grindPrev3Input.get,
+        previous7 = ctx.grindPrev7Input.get, stones = ctx.grindStonesInput.get,
+        legacyRule = ctx.legacyGrindRuleOutput.get, legacyValue = ctx.legacyGrindOutput.get,
+        patchedRule = ctx.patchedGrindRuleOutput.get, patchedValue = ctx.patchedGrindOutput.get,
+        patchApplied = ctx.patch06Applied,
+        phase = ctx.phase, status = ctx.status, trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("patch06", e)
     }
   }
 

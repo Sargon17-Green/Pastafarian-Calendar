@@ -445,3 +445,29 @@ macinatura 1 `422 → 68`;
 macinatura 6 `1188 → 1002`;
 macinatura 11 `2136 → 1974`.
 Non è stata introdotta PATCH 06.
+
+## Stadio 13 — PATCH 06: correzione dell'indice del sentinel
+
+La tabella storica `GRIND_TABLE_WITH_SENTINEL` conserva il sentinel
+alla posizione zero. `LegacyGrindTableAdapter.legacyGrindRule(step)`
+continua deliberatamente ad usare `step-1`: la cicatrice di Stage12
+non viene riscritta. La nuova `Patch06GrindWrapper.grindPatch`
+attraversa realmente `legacyGrind`, seleziona la regola in
+`GRIND_TABLE_WITH_SENTINEL(step)` e ricalcola il valore con
+`Patch01SaveWrapper.savePatch`.
+
+Il percorso `BaseMonsterManager.patch06Grind` attraversa
+`BOOT → DISCOVERY_06_GRIND → PATCH_06_GRIND` nello
+stesso contesto. Il report e la validazione indipendente conservano
+entrambe le regole e i rispettivi risultati. I controlli
+del test verificano tutti gli undici passi contro regole
+normative test-only, casi signed, 512 campioni deterministici,
+BigInt oltre 16.000 bit, metrica, ownership e cinque patch precedenti.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage13Tests'
+```
+
+Firma attesa: `26 PASS, 0 FAIL`. La suite storica
+Stage12 resta `22 PASS, 3 FAIL` intenzionali, mentre il
+CI controlla automaticamente anche tutte le regressioni 1–11.

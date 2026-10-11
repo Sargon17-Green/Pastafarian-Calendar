@@ -192,3 +192,21 @@ con input/output propri dell'invocazione, controllo
 della regola selezionata, report immutabile e metrica.
 Il riferimento normativo delle undici regole compare
 nei test, non nell'adattatore di produzione.
+
+## PATCH 06 — ripristino dell'indice dopo il sentinel
+
+La patch non muta `GRIND_TABLE_WITH_SENTINEL` e non modifica
+`legacyGrindRule(step)`. Il wrapper attraversa realmente
+`LegacyGrindTableAdapter.legacyGrind` e poi usa
+`GRIND_TABLE_WITH_SENTINEL(step)`, il successore della
+regola errata letta in `step-1`.
+Il handler richiede la precedente `DISCOVERY_06_GRIND`
+nello stesso contesto; mantiene `legacyGrindRuleOutput` e
+`legacyGrindOutput` e aggiunge due snapshot propri della PATCH 06.
+
+`requirePatch06Ready` convalida sequenza del dispatcher,
+tutti gli input, il flag, entrambe le regole e i
+risultati quadratici con SAVE, senza alcun riferimento
+normativo di produzione. Report e metriche non influiscono
+sulla scelta della regola; il catalogo sorgente italiano
+rimane congelato.

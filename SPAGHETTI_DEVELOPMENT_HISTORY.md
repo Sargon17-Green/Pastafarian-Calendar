@@ -594,3 +594,51 @@ rispettivamente per i passi 1, 6 e 11. Il risultato
 della discovery è stato osservato dal vero manager e
 dal dispatcher; le cinque patch precedenti continuano
 a funzionare. Nessuna correzione è stata anticipata.
+
+## Stadio 13 — PATCH 06: il sentinel resta, l'indice torna esatto
+
+### Che cosa si pensava
+
+La tabella a dodici record aggiungeva una sentinella
+prima delle undici macinature, ma il helper storico
+continuava a leggere l'indice `step-1`.
+Rimuovere il sentinel o riscrivere la lookup originaria
+avrebbe distrutto la traccia della DISCOVERY 06.
+
+### Che cosa si è scoperto
+
+Tutte le undici regole normative sono già memorizzate
+alla posizione `step`, mentre `legacyGrindRule`
+legge `step-1`. La formula quadratica e SAVE
+funzionano correttamente; si deve correggere
+soltanto la selezione del record usato nel calcolo.
+
+### Che cosa è stato aggirato
+
+Il wrapper `Patch06GrindWrapper.grindPatch` esegue
+il vero helper `legacyGrind`, ottiene poi la
+regola `GRIND_TABLE_WITH_SENTINEL(step)` e
+ricalcola l'uscita. Il manager attraversa
+DISCOVERY 06 e PATCH 06 nella medesima invocazione,
+conservando il report legacy e il report patched.
+
+### Perché è normativamente equivalente
+
+Per ogni `step ∈ [1,11]`, il record di indice
+`step` contiene esattamente i coefficienti e
+la pietra normativi. Il wrapper usa la stessa
+espressione quadratica e la stessa rappresentazione
+SAVE verificata in PATCH 01. I test confrontano
+tutti gli undici passi, campioni signed, valori
+oltre 16.000 bit e bordi con la tabella test-only.
+
+### Strato di mostruosità aggiunto
+
+Wrapper, handler, flag, due output del contesto,
+report immutabile a quattro valori, metrica
+separata e validadore indipendente con le due
+formule. Restano osservabili tutte le sei
+cicatrici precedenti, le cinque patch già concluse
+e il sentinel originale.
+
+La certificazione nativa deve essere acquisita dal CI.
