@@ -16,4 +16,12 @@ Appendix A नुसार 11 grind rows, (g=1..11), प्रत्येका
 
 index 0 sentinel row किंवा reindex patch Stage 15 च्या आधी जोडायची नाही. `src/discovery07LegacyGrind.ts` मधील चुकीचे indexing ऐतिहासिक पुरावा म्हणून जतन करायचे. Stages 1–13 च्या हिरव्या regression, सहा जुने intentionally-red पुरावे, SourceLanguageCatalog lock आणि Stage 54 ची सीमा बदलू नका.
 
-स्थिती: GitHub Actions पडताळणी बाकी; पुरावा मिळाल्यावरच पूर्ण घोषित करावे.
+स्थिती: **पडताळणी यशस्वी — DISCOVERY चा अपेक्षित लाल पुरावा कायम**. Implementation commit `e5a6dd6db96f24a2282c40bfd3a61bfe2c15cfc0` साठी [GitHub Actions run 38170583590](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38170583590) मध्ये `verify` आणि `stage14-typescript-marathi` दोन्ही jobs `success`. TypeScript typecheck, सर्व Stage 1–14 guard/property checks आणि सात archival intentionally-red proofs यशस्वी झाले.
+
+```text
+STAGE_14_DISCOVERY_07_GUARDS_PASS mismatches=11 matches=0 missing=1 shifted=10
+STAGE_14_DISCOVERY_07_PROPERTIES_PASS cases=2816 shifted=2560 missing=256 differences=2816 giantCases=22 giantValues=20
+DISCOVERY_07_EXPECTED_RED mismatches=11 matches=0 missing=1
+```
+
+यांपैकी शेवटचा `DISCOVERY_07_EXPECTED_RED` हा नेहमीच्या shell आदेशात nonzero exit देतो; workflow ने हे अपयश **अपेक्षित** म्हणून वेगळे तपासून यशस्वी ठरवले. Stage 15 मधील sentinel-row patch लागू केलेला नाही. पुढे टप्पा 15 = PATCH 07.
