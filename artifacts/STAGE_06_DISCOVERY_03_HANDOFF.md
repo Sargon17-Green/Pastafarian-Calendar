@@ -45,3 +45,7 @@ Jalankan juga penjanaan semula fixture dan sahkan tiada `git diff`. Pengesah akh
 ## Henti kerja dan langkah seterusnya
 
 Jangan mula Stage 7 tanpa arahan baharu. PATCH 03 yang akan datang perlu membalut operasi lama dengan pembetulan bilangan hujung, tanpa memadamkan `oldDistance`. Catat hasil CI yang sebenar setelah tersedia.
+
+## Keputusan CI yang disahkan
+
+Run `38156102411` untuk commit `b0454905c875cde627a45319638ea0cb912bd52e` berjaya bagi kedua-dua kerja `verify` dan `audit_php_bahasa_melayu`. Bukti spesifik: `perbezaan=144 jumlah=144 tepi=8 lain=0`, manakala semua ujian Stage 1–5, regenerasi fixture dan semakan sintaks kekal lulus. Nilai dua hujung integer mesin mengesahkan jarak normatif `18446744073709551616` berbanding jarak legacy `18446744073709551615`. Laluan pengeluaran masih sengaja menggunakan `DISTANCE_LEGACY`; jangan memasukkan tampalan ketiga sebelum arahan baharu.

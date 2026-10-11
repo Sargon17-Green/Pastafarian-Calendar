@@ -121,3 +121,7 @@ Pereka pengiraan lama menyangka bilangan jarak antara hari pengiraan dan hari sa
 ### Batasan penemuan
 
 Tiada `distanceCountPatch03`, tiada penghala `DISTANCE_PATCH_03`, dan tiada tambahan satu dalam pengeluaran pada Stage 6. Hanya Stage 7 boleh melaksanakan PATCH 03 sambil mengekalkan `LegacyDistance::oldDistance` seperti dahulu. Keputusan CI akan direkodkan selepas ia diuji.
+
+### Bukti CI sebenar — 11 Oktober 2026
+
+Aliran kerja `Canonical Names Lock`, run `38156102411`, tamat dengan **success** bagi kedua-dua kerja `verify` dan `audit_php_bahasa_melayu`. Log menunjukkan 15/15 ujian Stage 1 lulus, 1,014 ujian pembahagian bersama lapan ujian tambahan lulus, fixture dijana semula tanpa perubahan, penemuan 01 kekal tiga penyimpangan dijangka, 94 kes PATCH 01 lulus, penemuan 02 kekal 65 penyimpangan dan 64 padanan, serta 4,618 kes PATCH 02 lulus. Penemuan 03 menunjukkan `KEPUTUSAN MERAH_DIJANGKA perbezaan=144 jumlah=144 tepi=8 lain=0` dan pembalut `LULUS kontrak merah khusus 03; laluan legacy kekal tidak ditampal`. Pada pasangan `PHP_INT_MIN` dan `PHP_INT_MAX`, bilangan normatif ialah `18446744073709551616` dan nilai legacy ialah `18446744073709551615`. Ini bukan pelaksanaan PATCH 03; status akhir Stage 6 kekal `EXPECTED_RED` dengan pengesah CI hijau.
