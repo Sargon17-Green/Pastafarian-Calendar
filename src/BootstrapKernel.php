@@ -28,6 +28,18 @@ final class BootstrapKernel
                 'monthCount' => count(SourceLanguageCatalog::months()),
             ];
         });
+        $this->dispatcher->register('SAVE_LEGACY', function(BootstrapContext $context): BigInt {
+            $operand = $context->semanticState['operand'] ?? null;
+            if (!$operand instanceof BigInt) {
+                throw new \RuntimeException('LEGACY_SAVE_OPERAND');
+            }
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyRemainder();
+            $result = $legacy->calculateWithoutPatch($operand);
+            $context->semanticState['legacyResult'] = $result;
+            $context->status = 'LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.save.calls');
+            return $result;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -37,6 +49,20 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('BOOTSTRAP_VALIDATE', $context)
+        );
+    }
+    /**
+     * Laluan pengeluaran sementara yang sengaja mendedahkan baki lama.
+     * Medan hari sifar dalam konteks tidak dibaca oleh operasi aritmetik ini.
+     */
+    public function save(BigInt $value): BigInt
+    {
+        $context = new BootstrapContext(0, 0);
+        $context->phase = 'SAVE_LEGACY';
+        $context->semanticState['operand'] = $value;
+        return $this->boundary->run(
+            $context,
+            fn(): BigInt => $this->dispatcher->dispatch('SAVE_LEGACY', $context)
         );
     }
 }

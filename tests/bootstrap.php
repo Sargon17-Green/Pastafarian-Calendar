@@ -5,6 +5,7 @@ $root = dirname(__DIR__);
 require_once $root . '/src/BigInt.php';
 require_once $root . '/src/SourceLanguageCatalog.php';
 require_once $root . '/src/BootstrapInfrastructure.php';
+require_once $root . '/src/Legacy/LegacyRemainder.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';

@@ -46,3 +46,5 @@ jobs:
         run: |
           php -d memory_limit=512M tools/generate_stage01_fixtures.php
           git diff --exit-code -- tests/fixtures_stage01.json
+      - name: Penemuan 01 — semak merah yang dijangka
+        run: php -d memory_limit=512M tests/verify_stage02_discovery01.php
