@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  native-stage06-kotlin-cymraeg:
+  native-stage07-kotlin-cymraeg:
     if: github.event_name == 'push' && github.ref == 'refs/heads/Kotlin+Cymraeg'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -50,11 +50,12 @@ jobs:
           unzip -q "$RUNNER_TEMP/kotlin-compiler-1.9.0.zip" -d "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/kotlinc/bin/kotlinc" -version
-      - name: Verify Stage 01 through Stage 06 with original oracle
+      - name: Verify Stage 01 through Stage 07 with original oracle
         shell: bash
         run: |
           set -euo pipefail
           test "$(git symbolic-ref --short HEAD)" = 'Kotlin+Cymraeg'
-          sh run-stage06-tests.sh 2>&1 | tee "$RUNNER_TEMP/stage06-native.log"
-          grep -Fx 'STAGE05_NATIVE_GREEN' "$RUNNER_TEMP/stage06-native.log"
-          grep -Fx 'STAGE06_NATIVE_EXPECTED_RED_COMPLETE' "$RUNNER_TEMP/stage06-native.log"
+          sh run-stage07-tests.sh 2>&1 | tee "$RUNNER_TEMP/stage07-native.log"
+          grep -Fx 'STAGE05_NATIVE_GREEN' "$RUNNER_TEMP/stage07-native.log"
+          grep -Fx 'STAGE06_NATIVE_EXPECTED_RED_COMPLETE' "$RUNNER_TEMP/stage07-native.log"
+          grep -Fx 'STAGE07_NATIVE_GREEN' "$RUNNER_TEMP/stage07-native.log"

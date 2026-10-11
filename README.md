@@ -232,3 +232,10 @@ Mae `LegacyDistanceAdapter.oldDistance(c,t)` yn cyfrifo gwahaniaeth absoliwt y t
 Ceir 441 prawf matrics a 549 prawf `BigInteger` annibynnol, gwarchodion cyd-destun a methiant strict disgwyliedig. Dylid ail-redeg `sh run-stage06-tests.sh` gyda'r holl ffynonellau gwreiddiol. Ni weithredwyd PATCH 03. Arhosir am dystysgrif brodorol cyn newid `LAST_COMPLETED_STAGE=5`.
 
 **Ardystiad Cam 6:** llwyddodd yr holl atchweliadau Camau 1–6 ar GitHub Actions gyda Kotlin 1.9.0/JDK 21 a'r oracl Cam 1 gwreiddiol. Cadarnhawyd pob un o'r 21 marc prawf, gan gynnwys pum gwahaniaeth disgwyliedig a thair cyfatebiaeth. Rhediad: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38178119854 . Mae `LAST_COMPLETED_STAGE=6`. PATCH 03 yw'r cam nesaf.
+
+
+## Cam 7 — PATCH 03: pellter cronolegol cynhwysol
+
+Cadwyd `LegacyDistanceAdapter.oldDistance` o Gam 6 heb ei newid. Mae'r llwybr `BOOT → PATCH_03` yn galw'r hen gyfrifiad yn gyntaf, yna'n cyfrifo `abs(target-calculation)` ac yn disodli'r hen sail **dim ond os yw'n wahanol**. Ychwanegir `+1` yn derfynol bob tro, hyd yn oed pan na chafwyd disodli. Cedwir y ddwy sail, y faner disodli a'r canlyniad mewn cyd-destun sy'n eiddo i'r galwad.
+
+Mae wyth tyst, 441 achos matrics, 549 prawf `BigInteger` annibynnol, ac amddiffyniadau ail-alw/BOOT wedi pasio mewn prawf JVM wedi'i ynysu. **Rhaid** i `sh run-stage07-tests.sh` basio ar y gangen wreiddiol cyn datgan Cam 7 wedi'i gwblhau. `LAST_COMPLETED_STAGE=6` hyd nes hynny. Ni ddechreuwyd Cam 8.

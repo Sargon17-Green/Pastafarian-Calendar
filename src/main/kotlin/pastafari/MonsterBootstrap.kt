@@ -19,7 +19,14 @@ data class BaseMonsterContext(
     var patch02Output: ExactInt? = null,
     var discovery03CalculationDay: ExactInt? = null,
     var discovery03TargetDay: ExactInt? = null,
-    var discovery03Output: ExactInt? = null
+    var discovery03Output: ExactInt? = null,
+    var patch03CalculationDay: ExactInt? = null,
+    var patch03TargetDay: ExactInt? = null,
+    var patch03LegacyOutput: ExactInt? = null,
+    var patch03ChronologicalBase: ExactInt? = null,
+    var patch03SelectedBase: ExactInt? = null,
+    var patch03ReplacementApplied: Boolean? = null,
+    var patch03Output: ExactInt? = null
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -74,7 +81,8 @@ class MonsterBootstrapManager(
     val savePatchWrapper: SavePatchWrapper = SavePatchWrapper(),
     val legacyDayTagAdapter: LegacyDayTagAdapter = LegacyDayTagAdapter(),
     val dayTagPatchWrapper: DayTagPatchWrapper = DayTagPatchWrapper(),
-    val legacyDistanceAdapter: LegacyDistanceAdapter = LegacyDistanceAdapter()
+    val legacyDistanceAdapter: LegacyDistanceAdapter = LegacyDistanceAdapter(),
+    val distancePatchWrapper: DistancePatchWrapper = DistancePatchWrapper()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -126,6 +134,32 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_03_LEGACY_TAG_DISTANCE")
             context.status = "LEGACY_DISTANCE_OBSERVED"
             metrics.bump("discovery03.legacy")
+        }
+        dispatcher.register("PATCH_03") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_PATCH03_CONTEXT_NOT_READY")
+            val calculation = context.patch03CalculationDay
+                ?: throw MonsterValidationException("E_PATCH03_NO_CALCULATION_DAY")
+            val target = context.patch03TargetDay
+                ?: throw MonsterValidationException("E_PATCH03_NO_TARGET_DAY")
+            if (calculation != context.calculationDay || target != context.targetDay) {
+                throw MonsterValidationException("E_PATCH03_CONTEXT_MISMATCH")
+            }
+            // Cam 7: galw'r union graith cyn unrhyw gywiriad.
+            val legacy = legacyDistanceAdapter.oldDistance(calculation, target)
+            val outcome = distancePatchWrapper.patchDistance(calculation, target, legacy)
+            // Dim ymrwymiad cyn bod yr holl gyfrifiad wedi llwyddo.
+            context.patch03LegacyOutput = legacy
+            context.patch03ChronologicalBase = outcome.chronologicalBase
+            context.patch03SelectedBase = outcome.selectedBase
+            context.patch03ReplacementApplied = outcome.replacedLegacyBase
+            context.patch03Output = outcome.inclusiveDistance
+            context.branchTrace.add("PATCH_03")
+            context.diagnostics.add("PATCH_03_CHRONOLOGICAL_INCLUSIVE_SCAR")
+            context.status = "PATCHED_DISTANCE"
+            metrics.bump("patch03.legacy.calls")
+            metrics.bump("patch03.applied")
+            if (outcome.replacedLegacyBase) metrics.bump("patch03.replaced")
         }
         dispatcher.register("PATCH_02") { context ->
             validation.requireBootstrapContext(context)
@@ -229,6 +263,22 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY03_WRAP", e)
+        }
+    }
+
+    /** Cam 7: BOOT, yr hen bellter, yna'r pellter cronolegol cynhwysol. */
+    fun applyDistancePatch(calculationDay: ExactInt, targetDay: ExactInt): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.patch03CalculationDay = calculationDay
+        context.patch03TargetDay = targetDay
+        context.phase = "PATCH_03"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH03_WRAP", e)
         }
     }
 

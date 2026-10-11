@@ -244,3 +244,8 @@ Cadwyd PATCH 02 ac oldDayTag heb eu newid. Mae `oldDistance` yn cyfrifo `abs(pat
 ### Ardystiad brodorol Cam 6 — PASS
 
 Ar commit `fd32a7f795943683275dc19838bfa2b3287c2661`, llwyddodd GitHub Actions (`38178119854`, swydd `114584731224`) i redeg `run-stage06-tests.sh` yn llawn gyda Kotlin 1.9.0 a JDK 21. Cafwyd `STAGE01_PASS_66`, holl lwybrau Camau 2–5, `STAGE06_EXPECTED_RED_5`, `STAGE06_MATCH_3`, `STAGE06_MATRIX_PASS_441`, `STAGE06_BIGINT_INDEPENDENT_PASS_549`, `STAGE06_STRICT_RED_CONFIRMED` a `STAGE06_NATIVE_EXPECTED_RED_COMPLETE`. Mae Cam 6 wedi'i gwblhau; nid yw PATCH 03 wedi'i ddechrau.
+
+
+## Cam 7 — PATCH 03: ail-basio'r pellter drwy'r graith
+
+Mae `oldDistance` yn aros yn alwadadwy ac yn cynhyrchu'r un pum anghysondeb Cam 6. Mae'r handler `PATCH_03` yn ei alw'n wirioneddol, yn cofnodi ei sail, ac yn defnyddio `DistancePatchWrapper` i gymharu â `abs(t-c)`. Dim ond os yw'r sail yn wahanol y caiff ei newid, ac ychwanegir `+1` cynhwysol ym mhob achos. Mae wyth tyst wedi troi'n sero anghysondeb PATCH; 441 prawf matrics a 549 prawf BigInteger annibynnol wedi pasio yn y cam cyntaf. Mae'r prawf brodorol llawn gan GitHub Actions eto i'w gwblhau.
