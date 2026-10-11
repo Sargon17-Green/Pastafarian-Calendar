@@ -140,3 +140,11 @@ GitHub Actions run `38160880004`: TypeScript typecheck, सर्व Stage 1–1
 GitHub Actions run `38163510684` ने Stage 01–11 regressions, TypeScript typecheck, पाच historical expected-red चाचण्या आणि canonical names lock सर्व PASS केले. 105 oracle cases / 735 slots: `630` old differences पण `0` corrected mismatches. 2,062 इतर property cases / 14,434 slots: `12,330` old differences आणि `2,104` coincidental matches.
 
 तपशील `docs/STAGE11_PATCH05_VERIFICATION.md`; पुढील काम `HANDOFF_STAGE_11.md` मध्ये आहे. Stage 12 मध्ये hidden history slots न ओळखणारा `legacyPrior` याचा फक्त DISCOVERY 06 करावा; त्याचा PATCH 06 Stage 13 पर्यंत करू नये.
+
+## टप्पा 12/55 — DISCOVERY 06 (पूर्ण)
+
+`src/discovery06LegacyPrior.ts` मध्ये जुना visible-history reader `legacyPrior(dropStore,i,back)` प्रत्यक्ष `dropStore[i-back]` एवढाच वाचतो. शून्य/ऋण history slot वर hidden थेंब पाहण्याची त्याला क्षमता नाही; `discoverLegacyPrior` स्वतंत्र context, immutable visible snapshot, branchTrace, metrics आणि `undefined` legacy result जतन करतो. पुढील PATCH 06 चा hidden fallback या टप्प्यात **नाही**.
+
+`test/discovery06.ts` ने प्रत्यक्ष normative hidden/visible oracle मधून 15 boundary witnesses तपासून `11 mismatches / 4 matches` सिद्ध केले. `test/discovery06Properties.ts` ने 16 स्वतंत्र दिवस-जोड्यांवर 46 थेंब × तीन history distances = 2,208 calls तपासल्या; `176` hidden history misses आणि `2,032` visible history matches. Stage 1–11 regressions आणि सहा archive expected-red proofs अखंड.
+
+GitHub Actions run `38165814846`: TypeScript typecheck, `stage12-typescript-marathi`, `verify` दोन्ही PASS. पुरावा `docs/STAGE12_DISCOVERY06_VERIFICATION.md` आणि पुढील `HANDOFF_STAGE_12.md` मध्ये. Stage 13 = PATCH 06; त्यापूर्वी जुन्या reader मध्ये दुरुस्ती करू नये.

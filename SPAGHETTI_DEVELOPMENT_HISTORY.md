@@ -83,3 +83,11 @@ GitHub Actions run `38160880004` (commit `1fa1054a2ba4dbd3106baf9458657614c26419
 पहिल्या CI run `38163412867` मध्ये sparse array वर `Array.some` holes skip करत असल्याचा QA निष्कर्ष मिळाला. केवळ नवीन reader आणि handler मध्ये सातही index तपासल्यामुळे तो दोष दुरुस्त झाला; Stage 10 च्या ऐतिहासिक adapter ला स्पर्श नाही. Commit `4892dae7211ac4d2a70ca5aa7ab9953fe5ea1486` आणि run `38163510684` वर दोन्ही GitHub Actions jobs PASS.
 
 Oracle साठी 105 जोड्या / 735 slots: जुने 630 फरक, corrected 0 mismatches; properties साठी 2,062 cases / 14,434 slots, जुने 12,330 फरक / 2,104 accidental matches. Stage 1–10 आणि 5 ऐतिहासिक expected-red पुरावे हिरवे. Stage 11/55 पूर्ण. Stage 12 = फक्त DISCOVERY 06 (`legacyPrior` hidden-history slot); Stage 13 पूर्वी patch करू नये.
+
+## टप्पा 12 — DISCOVERY 06: hidden इतिहास न ओळखणारा visible reader
+
+`LegacyVisiblePriorAdapter.legacyPrior(dropStore,i,back)` मध्ये मूळ `dropStore[i-back]` हाच दोषयुक्त history expression ठेवला. `Discovery06PriorHandler` ने 1-based visible `1..46`, मागील अंतर `1,3,7`, visible store snapshot, स्वतंत्र संदर्भ, metrics आणि 0/ऋण slot वर hidden history न शोधणारी branch स्पष्ट केली. `Patch06` अजून लागू नाही.
+
+नियमाधारित `test/normativeOracle.ts` मधील `buildHiddenDrops` व `buildVisibleDrops` च्या साहाय्याने 15 boundary cases: 11 hidden mismatches, 4 visible matches. 16 दिवस-जोड्या × 46 visible × 3 history = 2,208 calls: 176 missing hidden आणि 2,032 योग्य visible. आवाहनांचे ownership, invalid input, sparse visible slots, मोठे `bigint`, Stage 1–11 regressions आणि `calendarDateSpaghetti` ची Stage 54 सीमा तपासली.
+
+GitHub Actions run `38165814846` (commit `a727c9af88a3d576653d8db104c2a69fdb5c04eb`) मध्ये TypeScript typecheck, `verify`, `stage12-typescript-marathi`, तसेच सर्व सहा historical expected-red साक्षी PASS. Stage 12/55 पूर्ण. पुढील Stage 13 — PATCH 06: positive slot साठी legacy call आणि nonpositive slot साठी Stage 11 corrected hidden mapping; Stage 14 अजून सुरू नाही.
