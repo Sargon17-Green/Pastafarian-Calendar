@@ -2,8 +2,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
   @moduledoc """
   Ngữ cảnh riêng cho một lần gọi, không dùng trạng thái ngữ nghĩa toàn cục.
 
-  Nhãn ngày đã đi qua bản vá 02; khoảng cách thô từ nhãn ngày vẫn
-  sai ở giai đoạn phát hiện 03. Mỗi ngữ cảnh sở hữu giá trị riêng.
+  Nhãn ngày qua bản vá 02; khoảng cách qua bản vá 03 nhưng vẫn
+  đi qua phép tính lịch sử sai. Mỗi ngữ cảnh có giá trị riêng.
   """
 
   defstruct calculation_day: nil,

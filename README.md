@@ -153,3 +153,19 @@ Giai đoạn 6/55 khép ở trạng thái `EXPECTED_RED` đã xác minh.
 Giai đoạn 7/55 là `PATCH 03`: giữ `old_distance`, chỉ khi
 khác khoảng cách theo ngày thời gian mới thay giá trị; sau đó
 cộng một. Không sửa các hồi quy chuẩn của giai đoạn phát hiện.
+
+## Giai đoạn 7 — Bản vá 03: điều chỉnh khoảng cách
+
+`LegacyDistance.old_distance(c,t)` từ phát hiện 03 vẫn tồn tại và
+tiếp tục chạy. Lớp `DistancePatch` lấy giá trị cũ, tính
+`chronological = abs(t-c)`; chỉ nếu hai số khác nhau mới chọn
+`chronological` làm khoảng cách cơ sở. Cuối cùng cộng một.
+`DistanceManager`, `distance_spaghetti` và
+`bootstrap_context` đều đi qua lớp vá này.
+
+Bốn hồi quy chuẩn của giai đoạn 6 không thay đổi. Các kiểm thử
+chỉ kiểm tra dây nối sai từ giai đoạn khám phá được điều chỉnh:
+chúng xác nhận thuật toán cũ vẫn sai nhưng đầu ra công khai đã đúng.
+Mười kiểm thử giai đoạn 7 kiểm soát hai nhánh điều kiện, số nguyên rất
+lớn, lưới quanh Ngày Nền, tính đối xứng, sự cô lập khi chạy đồng thời
+và không hồi quy các bản vá 01/02.

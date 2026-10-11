@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=6
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=7
+CURRENT_KIND=PATCH
 CURRENT_PATCH=03
 LAST_COMPLETED_STAGE=6
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá SAVE và nhãn ngày; thêm LegacyDistance lấy hiệu tuyệt đối giữa hai day-tag qua DayCountManager và DistanceManager chuyển nguyên kết quả sai vào context.
+MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyDistance sai; DistancePatch gọi hàm lịch sử rồi đối chiếu với abs(t-c), chỉ sửa khác biệt, cuối cùng cộng 1; DistanceManager và context dùng kết quả đã vá.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_06_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_07_PENDING
+GIT_HISTORY_MUTATED=STAGE_07_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=55
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=STAGE_07_PENDING
+CI_FAILURES=STAGE_07_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -87,3 +87,10 @@ Không có lỗi biên dịch hay thất bại ngoài dự kiến. Khóa tên ch
 Bằng chứng: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154864908
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154864891
 Giai đoạn 6 hoàn tất ở EXPECTED_RED đã xác minh; tiếp theo là giai đoạn 7, PATCH 03.
+
+Giai đoạn 7 bổ sung DistancePatch và định tuyến qua DistanceManager.
+Giữ nguyên bốn hồi quy chuẩn đã đỏ ở giai đoạn 6; chỉ kiểm thử nối dây
+từng xác nhận đầu ra sai được cập nhật để kiểm toán lớp vá mới.
+Không thêm thành phần của giai đoạn 8 và không thay đổi main.
+LAST_COMPLETED_STAGE vẫn bằng 6 cho đến khi CI giai đoạn 7 thành công.
+Mục tiêu: 65 kiểm thử đạt, 0 lỗi, khóa tên chuẩn đạt.

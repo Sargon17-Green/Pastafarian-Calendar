@@ -138,3 +138,26 @@ Bản vá 03 không được phép xuất hiện trước giai đoạn 7.
 51 kiểm thử còn lại đạt, bao gồm toàn bộ 45 kiểm thử trước đó.
 Khóa tên chuẩn đạt độc lập. Giai đoạn 6 đóng ở EXPECTED_RED,
 không thêm lớp sửa của giai đoạn 7.
+
+## Giai đoạn 7 — Bản vá 03: vòng tránh hiệu nhãn ngày sai
+
+**Cách bọc:** Giữ `LegacyDistance.old_distance` đúng nguyên trạng.
+`DistancePatch` gọi hàm đó trước, lấy
+`chronological = abs(target_day - calculation_day)`, rồi dùng
+nhánh `if legacy != chronological` để chỉ thay khác biệt.
+Kết quả cuối cùng bằng khoảng cách cơ sở sau lựa chọn cộng một.
+
+**Giải thích đúng:** Dù hiệu nhãn sai hay tình cờ bằng khoảng cách
+thời gian, sau nhánh so sánh cơ sở luôn đúng bằng `abs(t-c)`.
+Vì vậy cộng một luôn cho `abs(t-c)+1` với mọi cặp ngày nguyên,
+kể cả ngày trùng, đảo thứ tự và ngày nằm hai phía Ngày Nền.
+
+**Vết lịch sử:** Hàm sai vẫn được thực thi trên đường công khai;
+không được tối ưu bỏ qua lần gọi hoặc thay trực tiếp thuật toán
+cũ bằng lời gọi tham chiếu thử nghiệm. Các lớp vá SAVE và
+nhãn ngày vẫn giữ nguyên hành vi.
+
+**Kiểm thử:** Bốn hồi quy chuẩn từ giai đoạn 6 không sửa.
+Các kiểm thử nối dây đòi kết quả sai được cập nhật để xác minh
+lỗi lịch sử còn tồn tại bên dưới lớp vá. Mười kiểm thử độc lập mới
+được bổ sung, không khởi động giai đoạn 8.

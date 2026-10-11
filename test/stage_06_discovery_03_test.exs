@@ -12,7 +12,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage06Discovery03Test do
 
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
-  test "phép tính khoảng cách lịch sử đã được nối vào ngữ cảnh thật" do
+  test "lớp lỗi cũ tồn tại nhưng ngữ cảnh đã dùng bản vá 03" do
     f = Ref.foundation_day()
     calculation_day = f - 1
     target_day = f + 1
@@ -20,11 +20,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage06Discovery03Test do
 
     assert context.calculation_day_tag == 2
     assert context.target_day_tag == 3
-    assert context.distance_count == 1
-    assert context.distance_count == LegacyDistance.old_distance(calculation_day, target_day)
+    assert LegacyDistance.old_distance(calculation_day, target_day) == 1
+    assert context.distance_count == Ref.work_counts(calculation_day, target_day).distance
+    refute context.distance_count == LegacyDistance.old_distance(calculation_day, target_day)
     assert context.metrics[:legacy_distance_calls] == 1
-    assert DistanceManager.calculate(calculation_day, target_day) == 1
-    assert Calendar.distance_spaghetti(calculation_day, target_day) == 1
+    assert context.metrics[:distance_patch_03_calls] == 1
+    assert DistanceManager.calculate(calculation_day, target_day) == 3
+    assert Calendar.distance_spaghetti(calculation_day, target_day) == 3
   end
 
   test "hai đối chứng tình cờ đúng ở hai phía Ngày Nền" do
@@ -54,9 +56,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage06Discovery03Test do
             DayCountManager.tag(target_day)
         )
 
-      assert Calendar.distance_spaghetti(calculation_day, target_day) == expected
-      assert Calendar.distance_spaghetti(target_day, calculation_day) == expected
-      assert Calendar.bootstrap_context(calculation_day, target_day).distance_count == expected
+      assert LegacyDistance.old_distance(calculation_day, target_day) == expected
+      corrected = Ref.work_counts(calculation_day, target_day).distance
+      assert Calendar.distance_spaghetti(calculation_day, target_day) == corrected
+      assert Calendar.distance_spaghetti(target_day, calculation_day) == corrected
+      assert Calendar.bootstrap_context(calculation_day, target_day).distance_count == corrected
     end
   end
 
@@ -76,8 +80,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage06Discovery03Test do
     |> Enum.each(fn {{c, t}, context} ->
       assert context.calculation_day == c
       assert context.target_day == t
-      assert context.distance_count == abs(Ref.day_count(c) - Ref.day_count(t))
+      assert LegacyDistance.old_distance(c, t) == abs(Ref.day_count(c) - Ref.day_count(t))
+      assert context.distance_count == Ref.work_counts(c, t).distance
       assert context.metrics[:legacy_distance_calls] == 1
+      assert context.metrics[:distance_patch_03_calls] == 1
     end)
   end
 
@@ -104,16 +110,19 @@ defmodule PastafariCalendarElixirVietnamese.Stage06Discovery03Test do
     end
   end
 
-  test "cấu trúc giữ sai lệch cũ và chưa có lớp vá 03" do
+  test "cấu trúc giữ sai lệch cũ dưới lớp vá 03" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     distance_source = Path.join(root, "legacy_distance.ex") |> File.read!()
     manager_source = Path.join(root, "distance_manager.ex") |> File.read!()
+    patch_source = Path.join(root, "distance_patch.ex") |> File.read!()
     dispatcher_source = Path.join(root, "dispatcher.ex") |> File.read!()
     day_patch_source = Path.join(root, "day_tag_patch.ex") |> File.read!()
 
     assert distance_source =~ "DayCountManager.tag(calculation_day)"
     assert distance_source =~ "DayCountManager.tag(target_day)"
-    assert manager_source =~ "LegacyDistance.old_distance(calculation_day, target_day)"
+    assert manager_source =~ "DistancePatch.distance_patch(calculation_day, target_day)"
+    assert patch_source =~ "LegacyDistance.old_distance(calculation_day, target_day)"
+    assert patch_source =~ "chronological = abs(target_day - calculation_day)"
     assert dispatcher_source =~ "DistanceManager.calculate(calculation_day, target_day)"
     assert day_patch_source =~ "LegacyDayTag.old_day_tag(day)"
     refute distance_source =~ "NormativeReference"

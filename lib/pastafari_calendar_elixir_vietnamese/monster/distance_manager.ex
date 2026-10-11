@@ -1,16 +1,14 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.DistanceManager do
   @moduledoc """
-  Bộ quản lý khoảng cách của lần phát hiện thứ ba.
-
-  Xác thực ngày nguyên chính xác rồi thực thi phép tính sai lịch sử.
-  Bản vá sửa khoảng cách theo thứ tự thời gian chỉ thuộc giai đoạn 7.
+  Bộ quản lý khoảng cách giữ lại nhánh cũ nhưng dẫn qua bản vá 03.
+  Xác thực đầu vào trước khi gọi bản vá lịch sử.
   """
 
-  alias PastafariCalendarElixirVietnamese.Monster.{LegacyDistance, Validator}
+  alias PastafariCalendarElixirVietnamese.Monster.{DistancePatch, Validator}
 
   def calculate(calculation_day, target_day) do
     Validator.require_integer_day!(calculation_day)
     Validator.require_integer_day!(target_day)
-    LegacyDistance.old_distance(calculation_day, target_day)
+    DistancePatch.distance_patch(calculation_day, target_day)
   end
 end
