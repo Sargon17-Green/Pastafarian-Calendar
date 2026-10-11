@@ -145,3 +145,7 @@ ni'o lo `PrefixRankedYear` cu zgana lo se stali ranki se steci lo pamoi pagbu gi
 ### lo mulno ranki pe lo nanca pamoi .e romoi pagbu
 
 ni'o lo `BoundaryBlock` cu se zbasu fi lo pamoi .e lo romoi se jorne porsi. lo pamoi pagbu ranki cu co'a li pa .i lo romoi pagbu ranki cu fanmo lo te jicmu namcu. lo se steci ranki cu pilno lo pagbu porsi ranki fi lo mulno ranki. lo pagbu pe lo drata porsi cu na se te cuxna ca lo ba'e ro se cumki ranki.
+
+### lo se xanri pagbu pe lo mulno nanca ranki
+
+ni'o lo `globalBlockForPrefix` cu jmina lo namcu be ro lo prenu pagbu fi lo pamoi ranki be lo se steci pagbu. lo `BoundaryBlock` cu cpacu lo pamoi ranki .e lo romoi ranki. lo pagbu poi na du lo pamoi .a lo romoi pagbu cu kakne lo nu se jicmu ranki fi lo mulno nanca be li 5778 djedi. lo se jimte nu te cacra cu se stodi fi lo nanca te derxi pagbu be li 512 djedi .e lo mutce namcu se xanri pagbu poi na zmadu li 64.

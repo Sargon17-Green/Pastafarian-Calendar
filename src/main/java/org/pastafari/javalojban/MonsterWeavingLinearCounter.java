@@ -7,6 +7,7 @@ public final class MonsterWeavingLinearCounter {
     public static final int MAX_DAYS = 5778;
     public static final int MAX_UNRANK_DAYS = 512;
     public static final int MAX_EDGE_DISTANCE = 8;
+    public static final int MAX_GLOBAL_PREFIX_BRANCH_COUNTS = 64;
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
 
@@ -376,6 +377,54 @@ public final class MonsterWeavingLinearCounter {
         BigInteger possible = countAfterPrefix(prefix);
         BigInteger start = latest ? count().subtract(possible).add(ONE) : ONE;
         return new BoundaryBlock(prefix, start, start.add(possible).subtract(ONE));
+    }
+
+
+    public BoundaryBlock globalBlockForPrefix(int[] fixedPrefix) {
+        State state = afterPrefix(fixedPrefix);
+        BigInteger size = fixedPrefix.length == 0 ? count() : countSuffix(state);
+        if (sharesPrefix(lexFirst(), fixedPrefix)) {
+            return new BoundaryBlock(fixedPrefix, ONE, size);
+        }
+        if (sharesPrefix(lexLast(), fixedPrefix)) {
+            BigInteger start = count().subtract(size).add(ONE);
+            return new BoundaryBlock(fixedPrefix, start, start.add(size).subtract(ONE));
+        }
+        state = new State(lengths);
+        BigInteger firstRank = ONE;
+        int examinedBranches = 0;
+        for (int chosenId : fixedPrefix) {
+            int chosen = chosenId - 1;
+            if (!state.canTake(chosen, lengths)) {
+                throw new IllegalArgumentException("E_WEAVE_PREFIX");
+            }
+            for (int candidate = state.closed; candidate < chosen; candidate++) {
+                if (!state.canTake(candidate, lengths)) continue;
+                if (++examinedBranches > MAX_GLOBAL_PREFIX_BRANCH_COUNTS) {
+                    throw new IllegalArgumentException("E_WEAVE_GLOBAL_BUDGET");
+                }
+                State earlier = new State(state);
+                earlier.take(candidate, lengths);
+                firstRank = firstRank.add(countSuffix(earlier));
+            }
+            state.take(chosen, lengths);
+        }
+        return new BoundaryBlock(fixedPrefix, firstRank,
+            firstRank.add(size).subtract(ONE));
+    }
+
+    public int[] unrankGlobalWithinPrefix(int[] fixedPrefix, BigInteger globalRank) {
+        BoundaryBlock block = globalBlockForPrefix(fixedPrefix);
+        if (!block.contains(globalRank)) {
+            throw new IllegalArgumentException("E_WEAVE_GLOBAL_RANK");
+        }
+        return unrankAfterPrefix(fixedPrefix,
+            globalRank.subtract(block.lowerRank()).add(ONE));
+    }
+
+    public BigInteger rankGlobalWithinPrefix(int[] fixedPrefix, int[] weaving) {
+        BoundaryBlock block = globalBlockForPrefix(fixedPrefix);
+        return block.lowerRank().subtract(ONE).add(rankAfterPrefix(fixedPrefix, weaving));
     }
 
     private synchronized BoundaryBlock defaultBoundary(boolean latest) {

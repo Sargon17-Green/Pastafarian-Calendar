@@ -73,6 +73,35 @@ public final class MonsterCalendarResolver {
         public CalendarDate atDay(BigInteger targetDay) { return resolved.atDay(targetDay); }
     }
 
+
+    public static final class GlobalPrefixRankedYear {
+        private final ResolvedYear resolved;
+        private final int[] fixedPrefix;
+        private final BigInteger globalRank;
+        private final BigInteger lowerRank;
+        private final BigInteger upperRank;
+
+        private GlobalPrefixRankedYear(ResolvedYear resolved, int[] fixedPrefix,
+                BigInteger globalRank, BigInteger lowerRank, BigInteger upperRank) {
+            this.resolved = resolved;
+            this.fixedPrefix = fixedPrefix.clone();
+            this.globalRank = globalRank;
+            this.lowerRank = lowerRank;
+            this.upperRank = upperRank;
+        }
+
+        public BigInteger yearNumber() { return resolved.yearNumber(); }
+        public BigInteger openGateDay() { return resolved.openGateDay(); }
+        public BigInteger closeGateDay() { return resolved.closeGateDay(); }
+        public int length() { return resolved.length(); }
+        public int[] fixedPrefixCopy() { return fixedPrefix.clone(); }
+        public int[] weavingCopy() { return resolved.monthIndex.weavingCopy(); }
+        public BigInteger globalRank() { return globalRank; }
+        public BigInteger blockFirstRank() { return lowerRank; }
+        public BigInteger blockLastRank() { return upperRank; }
+        public CalendarDate atDay(BigInteger targetDay) { return resolved.atDay(targetDay); }
+    }
+
     private MonsterCalendarResolver() {}
 
     public static ResolvedYear fromBlueprint(MonsterYearBlueprint blueprint,
@@ -96,6 +125,33 @@ public final class MonsterCalendarResolver {
         BigInteger localPossibilities = family.countAfterPrefix(fixedPrefix);
         return new PrefixRankedYear(fromBlueprint(blueprint, selected), fixedPrefix,
             localRank, localPossibilities);
+    }
+
+    public static GlobalPrefixRankedYear fromBlueprintWithGlobalPrefixRank(
+            MonsterYearBlueprint blueprint, int[] fixedPrefix, BigInteger globalRank) {
+        if (blueprint == null) throw new IllegalArgumentException("E_NULL_BLUEPRINT");
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(blueprint.monthLengths());
+        MonsterWeavingLinearCounter.BoundaryBlock block =
+            family.globalBlockForPrefix(fixedPrefix);
+        if (!block.contains(globalRank)) {
+            throw new IllegalArgumentException("E_WEAVE_GLOBAL_RANK");
+        }
+        int[] weaving = family.unrankAfterPrefix(fixedPrefix,
+            globalRank.subtract(block.lowerRank()).add(BigInteger.ONE));
+        return new GlobalPrefixRankedYear(fromBlueprint(blueprint, weaving),
+            fixedPrefix, globalRank, block.lowerRank(), block.upperRank());
+    }
+
+    public static GlobalPrefixRankedYear forTargetWithGlobalPrefixRank(
+            BigInteger calculationDay, BigInteger targetDay,
+            int[] fixedPrefix, BigInteger globalRank) {
+        if (calculationDay == null || targetDay == null) {
+            throw new IllegalArgumentException("E_NULL_DAY");
+        }
+        MonsterYears.Year year = new MonsterYears().findTargetYear(calculationDay, targetDay);
+        return fromBlueprintWithGlobalPrefixRank(
+            MonsterYearBlueprint.build(calculationDay, year), fixedPrefix, globalRank);
     }
 
     public static PrefixRankedYear forTargetWithPrefixRank(

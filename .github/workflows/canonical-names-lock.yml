@@ -80,3 +80,5 @@ jobs:
         run: sh run_stage02_prefix_calendar_tests.sh
       - name: Stage 02 exact global boundary rank intervals
         run: sh run_stage02_boundary_blocks_tests.sh
+      - name: Stage 02 exact internal global prefix blocks
+        run: sh run_stage02_internal_global_blocks_tests.sh

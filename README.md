@@ -184,3 +184,7 @@ ni'o lo `MonsterCalendarResolver.fromBlueprintWithPrefixRank` cu zbasu lo mulno 
 ## lo mulno nanca porsi ranki fi lo pamoi .e lo romoi pagbu
 
 ni'o lo se steci pamoi pagbu be lo pamoi se jorne porsi cu se steci lo mulno nanca ranki poi co'a li 1. lo se steci pamoi pagbu be lo romoi se jorne porsi cu se steci lo mulno nanca ranki poi fanmo lo se cumki namcu. lo `BoundaryBlock` cu stodi lo pamoi ranki .e lo romoi ranki .e lo pagbu. lo `MonsterWeavingLinearCounter` cu pilno lo drani mu'oi ranki be lo nanca be li 5778 djedi fi lo pagbu poi se stali li 512 djedi. lo drata barda se steci ranki cu se jimte. ko benji `sh run_stage02_boundary_blocks_tests.sh`.
+
+## lo se steci pamoi pagbu fi lo mulno nanca ranki
+
+ni'o lo `globalBlockForPrefix` cu facki lo mulno nanca ranki pe lo drani pagbu fi lo nu jmina lo ranki be ro lo se xanri pagbu poi prenu pagbu. lo `unrankGlobalWithinPrefix` .e lo `rankGlobalWithinPrefix` cu pilno lo stodi ranki fi lo se steci pagbu. lo `MAX_GLOBAL_PREFIX_BRANCH_COUNTS` cu du li 64 tezu'e lo nu curmi lo nu na se bai mutce barda mumymgu'i. lo `GlobalPrefixRankedYear` cu ralte lo se jicmu ranki .e lo selstura nanca detri. lo nu facki lo se steci pagbu fi lo se pilno mulno ranki cu na mulno. ko benji `sh run_stage02_internal_global_blocks_tests.sh`.
