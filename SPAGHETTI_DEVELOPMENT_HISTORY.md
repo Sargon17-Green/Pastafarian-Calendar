@@ -258,3 +258,40 @@ I sette job sono tutti SUCCESS: Stage01 18 PASS, Stage02
 15 PASS/3 FAIL deliberati. Le tre discrepanze della distanza
 sono state riscontrate su date identiche, contigue e distanti
 oltre 16.000 bit. Non è stata introdotta alcuna PATCH 03.
+
+## Stadio 7 — PATCH 03: distanza inclusiva sopra il numero di intervalli
+
+### Che cosa si pensava
+
+Il helper antico era adatto agli intervalli ma non al conteggio
+inclusivo. Sostituirlo direttamente cancellerebbe la cicatrice.
+
+### Che cosa si è scoperto
+
+Per tutti gli interi `c,t`, il helper storico produce
+`abs(t-c)` e la norma produce `abs(t-c)+1`.
+Lo scarto è quindi sempre uno, anche per giorni identici,
+giorni contigui, numeri negativi e interi enormi.
+
+### Che cosa è stato aggirato
+
+Il nuovo wrapper `Patch03DistanceWrapper.distancePatch`
+richiama `LegacyDistanceAdapter.oldDistance` senza modificarlo.
+Il manager esegue DISCOVERY 03 e PATCH 03 in ordine nello
+stesso contesto e produce un report con i due output.
+
+### Perché è normativamente equivalente
+
+Il wrapper aggiunge l'unità mancante alla vera funzione
+legacy; l'identità risultante è `abs(t-c)+1` per ogni coppia.
+La suite test-only verifica l'equivalenza su 66.049 coppie,
+1.024 campioni deterministici e interi oltre 16.000 bit.
+
+### Strato di mostruosità aggiunto
+
+Fase, handler, wrapper, due campi del contesto, readiness,
+validazione indipendente del delta, metrica e doppio report.
+Le cicatrici precedenti restano direttamente osservabili;
+nessun codice dello stadio 8 è introdotto.
+
+Certificazione nativa da acquisire prima di chiudere lo stadio.

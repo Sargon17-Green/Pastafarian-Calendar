@@ -98,3 +98,16 @@ il report è uno snapshot immutabile. La metrica resta osservativa.
 
 L'intero percorso è deliberatamente RED contro il conteggio inclusivo
 normativo; la correzione non sarà introdotta prima di PATCH 03.
+
+## PATCH 03: lo stesso percorso legacy con un giorno incluso
+
+Il manager esegue Bootstrap e la vera DISCOVERY 03 prima di
+PATCH 03, usando il medesimo `BaseMonsterContext`. Lo
+`Patch03DistanceWrapper.distancePatch` chiama
+`LegacyDistanceAdapter.oldDistance` e restituisce il risultato +1.
+
+`patchedDistanceOutput` e `patch03Applied` sono locali
+all'invocazione. `requirePatch03Ready` controlla l'intera
+traccia e `patchedDistance = legacyDistance + 1`, senza
+chiamare l'oracolo. I due output sono restituiti in uno
+snapshot immutabile; le metriche non alterano la semantica.

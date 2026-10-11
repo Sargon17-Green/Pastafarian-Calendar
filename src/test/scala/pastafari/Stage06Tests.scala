@@ -183,19 +183,32 @@ object Stage06Tests {
       finally stream.close()
       truth(!code.contains("NormativeOracle"), "Oracolo non ammesso in produzione")
       truth(code.contains("(targetDay - calculationDay).abs"), "Formula legacy mancante")
-      truth(!code.contains("distancePatch"), "La PATCH 03 non può essere anticipata")
+      val metadata = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val currentStage = metadata.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      if (currentStage < 7)
+        truth(!code.contains("distancePatch"), "PATCH 03 prematura")
+      else
+        truth(code.contains("distancePatch"), "PATCH 03 deve essere presente")
     }
 
     check("metadati dello stadio 6 dichiarano EXPECTED_RED") {
       val stage = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(stage.contains("CURRENT_STAGE=6"), "Stadio inesatto")
-      truth(stage.contains("CURRENT_KIND=DISCOVERY"), "Tipo inesatto")
-      truth(stage.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Discovery deve essere RED")
+      val currentStage = stage.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      truth(currentStage >= 6, "La discovery deve restare disponibile")
+      if (currentStage == 6) {
+        truth(stage.contains("CURRENT_KIND=DISCOVERY"), "Tipo inesatto")
+        truth(stage.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Discovery RED")
+      }
       val last = stage.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE mancante"))
-      truth(last==5 || last==6, "Nessun completamento anticipato dello stadio 7")
+      truth(last >= 5 && last <= currentStage, "La storia non deve anticipare lo stadio corrente")
     }
 
     val manager = new BaseMonsterManager

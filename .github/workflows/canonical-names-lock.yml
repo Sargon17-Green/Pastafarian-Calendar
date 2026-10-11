@@ -158,3 +158,23 @@ jobs:
           for label in 'stesso giorno' 'giorni contigui' 'intervallo enorme'; do
             grep -Fq "FAIL — equivalenza normativa distanza ${label} — Scarto storico" stage06.log
           done
+
+  native-stage07-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 7 inclusive distance patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage07Tests' 2>&1 | tee stage07.log
+          grep -Fq 'RISULTATO STADIO 7: 20 PASS, 0 FAIL' stage07.log
+          test "$(grep -Fc 'PASS — ' stage07.log)" -eq 20
+          test "$(grep -Fc 'FAIL — ' stage07.log)" -eq 0

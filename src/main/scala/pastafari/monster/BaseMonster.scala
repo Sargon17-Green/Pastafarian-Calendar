@@ -19,7 +19,9 @@ final case class BaseMonsterContext(
   var legacyDayTagOutput: Option[BigInt] = None,
   var patchedDayTagOutput: Option[BigInt] = None,
   var patch02Applied: Boolean = false,
-  var legacyDistanceOutput: Option[BigInt] = None
+  var legacyDistanceOutput: Option[BigInt] = None,
+  var patchedDistanceOutput: Option[BigInt] = None,
+  var patch03Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -39,6 +41,21 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requirePatch03Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_03_DISTANCE" ||
+        ctx.status != "PATCH_03_READY" ||
+        ctx.legacyDistanceOutput.isEmpty ||
+        ctx.patchedDistanceOutput.isEmpty ||
+        !ctx.patch03Applied ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_03_DISTANCE", "PATCH_03_DISTANCE")) {
+      throw new IllegalStateException("La distanza PATCH 03 non è pronta.")
+    }
+    if (ctx.legacyDistanceOutput.get < 0 ||
+        ctx.patchedDistanceOutput.get != ctx.legacyDistanceOutput.get + 1) {
+      throw new IllegalStateException("PATCH 03 deve aggiungere esattamente un giorno.")
     }
   }
 
@@ -151,7 +168,8 @@ final class BaseMonsterManager {
     new Patch01SaveHandler(metrics),
     new Discovery02DayTagHandler(metrics),
     new Patch02DayTagHandler(metrics),
-    new Discovery03DistanceHandler(metrics)
+    new Discovery03DistanceHandler(metrics),
+    new Patch03DistanceHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -270,6 +288,30 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("discovery03", e)
+    }
+  }
+
+  def patch03Distance(calculationDay: BigInt, targetDay: BigInt): Patch03DistanceReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.phase = "DISCOVERY_03_DISTANCE"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery03Ready(ctx)
+      ctx.phase = "PATCH_03_DISTANCE"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch03Ready(ctx)
+      Patch03DistanceReport(
+        calculationDay = ctx.calculationDay,
+        targetDay = ctx.targetDay,
+        legacyDistance = ctx.legacyDistanceOutput.get,
+        patchedDistance = ctx.patchedDistanceOutput.get,
+        patchApplied = ctx.patch03Applied,
+        phase = ctx.phase,
+        status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("patch03", e)
     }
   }
 

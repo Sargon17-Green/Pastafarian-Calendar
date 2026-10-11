@@ -192,3 +192,21 @@ Stage04 14 PASS/3 FAIL attesi, Stage05 18 PASS e Stage06
 15 PASS/3 FAIL attesi. La firma della DISCOVERY 03 è esattamente
 quella inclusiva: stesso giorno, giorni contigui, intervallo enorme.
 Non è stata introdotta la riparazione dello stadio 7.
+
+## Stadio 7 — PATCH 03: distanza inclusiva
+
+`Patch03DistanceWrapper.distancePatch(c,t)` richiama realmente
+`LegacyDistanceAdapter.oldDistance(c,t)` e aggiunge uno;
+la funzione legacy non viene modificata. Il manager attraversa
+`BOOT → DISCOVERY_03_DISTANCE → PATCH_03_DISTANCE` nello stesso
+contesto e conserva in uno snapshot entrambe le uscite.
+La diagnostica `discover03Distance` continua a esporre il difetto.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage07Tests'
+```
+
+Attesi `20 PASS, 0 FAIL`; copertura: 66.049 coppie esaustive,
+1.024 coppie deterministiche, oltre 16.000 bit, simmetria,
+traslazione, isolamento e precondizioni. Le regressioni degli
+stadi 1–6 restano attive, compresa la firma rossa storica di Stage06.
