@@ -1,6 +1,6 @@
 # Correctio saved-sum — testimonium simiae quae se ipsam rescribit
 
-Status huius fasciculi: **correctio praeparata; integra arbor ramificationis hic non compilata est**.
+Status historicus ante auditum GitHub: **correctio praeparata; integra arbor ramificationis hic non compilata est**. Haec sententia est cicatrix temporis prioris, non sententia praesentis; vide additamentum CI infra.
 
 ## Auctoritas semantica
 
@@ -39,7 +39,7 @@ Mutans raw-sum:
 3565,3740,5518,1695,8365,7674
 ```
 
-## Adhuc requirit executionem in checkout vero
+## Probationes olim pendentes (index historicus ante CI)
 
 - compile `src/monster.cpp` post applicationem;
 - compile/run `tests/stage_56_saved_sum_self_monkey_patch_tests.cpp`;
@@ -48,3 +48,33 @@ Mutans raw-sum:
 - regressiones historicas, cache/retry/ownership et cold/warm.
 
 Nullus PASS pro his probationibus hic fingitur.
+
+## Additamentum canonicum — probatio GitHub die III Octobris MMXXVI
+
+Haec additamenta cicatrices supra non delent. Per GitHub Actions in commit
+`23bf229dc24c022d5eccf8c81037e74aa635861c`, cursus
+[`37150617182`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37150617182)
+omnia officia complevit cum conclusione `success`.
+Sententia finalis `VIGILIA_SOAK=PASS` et `STATUS_POST_RUN=SOAK_GREEN`
+in logis ipsis inventa est.
+
+- Compilatores: `g++` et `clang++` cum `-O1`, `-O2` et `-O3`: sex officia PASS.
+- Testis simiae self-eating, audit staticus et quinque casus E2E canonicorum: PASS.
+- Differentia decem parium: `10/10 PASS` pro utroque compilatore.
+- Regressiones historicae Graduum 1–54: quattuor partes PASS.
+- Audit Gradus 55 cum processibus isolatis: PASS.
+- Sanitatores AddressSanitizer et UndefinedBehaviorSanitizer: PASS.
+- Vigilia iterata: octo circuitus PASS.
+
+Testis E2E de Foundation nunc reddit tuple canonicum `(5000,10,503,20,56)`.
+Testimonia raw-sum olim relata in hoc documento non sunt auctoritates
+semanticae, ut iam in fasciculis historicis notatum est.
+
+Post hoc testimonium, die XI Octobris MMXXVI, additus est testis
+`tests/stage_56_dispatch_concurrency_tests.cpp`:
+24 fila, 16 circuitus cuique filo, 12 post-commotiones cuique circuitui.
+Testis in sex viis compilatoris et postea in via ASan/UBSan inseritur.
+**Nullus PASS huius additamenti concurrentiae praedicatur** donec nova
+GitHub Actions probatio in commit novissimo compleatur.
+
+Vide `STAGE_56_CANONICAL_CI_REPLAY_LEDGER.md` ad provenance et discrimina.

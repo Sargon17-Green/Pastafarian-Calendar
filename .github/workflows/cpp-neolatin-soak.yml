@@ -659,6 +659,11 @@ jobs:
             tests/stage_56_e2e_worker.cpp \
             build_soak/san/monster.o build_soak/san/reference.o \
             -o build_soak/san/e2e
+          # DETOUR: etiam concurrentia primitiva sub ASan et UBSan currit.
+          clang++ $CXXSTD $flags $COMMON_WARNINGS $COMMON_INCLUDES -pthread \
+            tests/stage_56_dispatch_concurrency_tests.cpp \
+            build_soak/san/monster.o \
+            -o build_soak/san/concurrent
           clang++ --version | head -1 | tee soak-logs/compiler.log
 
       - name: Currere sanitatores
@@ -666,6 +671,7 @@ jobs:
         run: |
           set -euo pipefail
           timeout 40m build_soak/san/core 2>&1 | tee soak-logs/sanitizer-core.log
+          timeout 40m build_soak/san/concurrent 2>&1 | tee soak-logs/sanitizer-concurrent.log
           {
             timeout 20m build_soak/san/e2e -15055671 -15055671
             timeout 20m build_soak/san/e2e -15048173 -15048173
