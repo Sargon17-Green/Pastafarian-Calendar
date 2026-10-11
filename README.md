@@ -132,3 +132,11 @@ npm run test:discovery04:red
 Normative oracle मधील 9 दिवस-जोड्यांवर `54 mismatches / 9 matches` दिसले. इतर 1,030 property cases, 7,210 slots मध्ये `6,168 mismatches / 1,042 matches`. `DISCOVERY_05_EXPECTED_RED mismatches=6 matches=1` हा नवीन हेतुपुरस्सर लाल पुरावा इतर चार पुराव्यांबरोबर जतन झाला.
 
 GitHub Actions run `38160880004`: TypeScript typecheck, सर्व Stage 1–10 guards, पाच ऐतिहासिक expected-red आणि canonical name lock PASS. तपशील `docs/STAGE10_DISCOVERY05_VERIFICATION.md`; पुढील मार्ग `HANDOFF_STAGE_10.md` मध्ये.
+
+## टप्पा 11/55 — PATCH 05 (पूर्ण)
+
+`src/patch05Hidden.ts` मधील `patch05HiddenDrops` जुने `hidden7..hidden1` storage आणि `oldHiddenAt(stored,k)=stored[k-1]` ही ऐतिहासिक चूक बदलत नाही. प्रत्यक्ष जुन्या calls चा `legacyReads` पुरावा जतन करतो आणि वेगळ्या corrected reader ने **zero-based `7-k`** अर्थात one-based `8-k` slot वरून योग्य सात `correctedReads` काढतो. Frozen input/result, context ownership, trace, metrics, अवैध index आणि sparse सात-स्थान arrays यांची खात्री केली.
+
+GitHub Actions run `38163510684` ने Stage 01–11 regressions, TypeScript typecheck, पाच historical expected-red चाचण्या आणि canonical names lock सर्व PASS केले. 105 oracle cases / 735 slots: `630` old differences पण `0` corrected mismatches. 2,062 इतर property cases / 14,434 slots: `12,330` old differences आणि `2,104` coincidental matches.
+
+तपशील `docs/STAGE11_PATCH05_VERIFICATION.md`; पुढील काम `HANDOFF_STAGE_11.md` मध्ये आहे. Stage 12 मध्ये hidden history slots न ओळखणारा `legacyPrior` याचा फक्त DISCOVERY 06 करावा; त्याचा PATCH 06 Stage 13 पर्यंत करू नये.

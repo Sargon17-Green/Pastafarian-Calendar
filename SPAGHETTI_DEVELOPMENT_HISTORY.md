@@ -75,3 +75,11 @@ Commit `e4581720a00c09ec1f7a16ff1fb70d0c05879a6e` वरील GitHub Actions ru
 `test/discovery05.ts` ने test-only oracle चे 9 दिवस-जोड खरे hidden drops वापरून `54 mismatches / 9 matches` सिद्ध केले. `test/discovery05Properties.ts` ने 1,030 cases / 7,210 slots (`6,168 mismatches / 1,042 matches`), reverse-array semantics, giant BigInt, palindrome, malformed input आणि instance isolation तपासले. `test/discovery05Red.ts` हा पाचवा archive expected-red पुरावा (`6 mismatches / 1 match`) आहे.
 
 GitHub Actions run `38160880004` (commit `1fa1054a2ba4dbd3106baf9458657614c26419ca`) मध्ये stages 1–10, TypeScript typecheck, पाच archive reds आणि canonical names lock सर्व PASS. Stage 10/55 पूर्ण. पुढील Stage 11 = PATCH 05, storage न बदलता reader मध्ये योग्य `8-k` slot वापरायचा.
+
+## टप्पा 11 — PATCH 05: उलट hidden storage वर योग्य वाचन
+
+`Patch05HiddenHandler` आणि `patch05HiddenDrops` उत्पादनात जोडले. सात थेंबांचा जुना `hidden7..hidden1` storage आणि `oldHiddenAt` या दोन्ही जुन्या पद्धती अविकृत आहेत. जुन्या सात reads खऱ्या legacy adapter मधून जतन होतात. सुधारित वाचन `stored[7-k]`, म्हणजे one-based `8-k`, सातही वेळा करते; `correctedSlotsOneBased`, `mismatchesRepaired`, frozen values, वैध lifecycle आणि metrics बाहेर उपलब्ध आहेत.
+
+पहिल्या CI run `38163412867` मध्ये sparse array वर `Array.some` holes skip करत असल्याचा QA निष्कर्ष मिळाला. केवळ नवीन reader आणि handler मध्ये सातही index तपासल्यामुळे तो दोष दुरुस्त झाला; Stage 10 च्या ऐतिहासिक adapter ला स्पर्श नाही. Commit `4892dae7211ac4d2a70ca5aa7ab9953fe5ea1486` आणि run `38163510684` वर दोन्ही GitHub Actions jobs PASS.
+
+Oracle साठी 105 जोड्या / 735 slots: जुने 630 फरक, corrected 0 mismatches; properties साठी 2,062 cases / 14,434 slots, जुने 12,330 फरक / 2,104 accidental matches. Stage 1–10 आणि 5 ऐतिहासिक expected-red पुरावे हिरवे. Stage 11/55 पूर्ण. Stage 12 = फक्त DISCOVERY 06 (`legacyPrior` hidden-history slot); Stage 13 पूर्वी patch करू नये.
