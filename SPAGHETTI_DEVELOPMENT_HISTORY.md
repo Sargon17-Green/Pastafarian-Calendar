@@ -97,3 +97,7 @@ ni'o lo `EndpointTable` cu ralte lo drani te jicmu judri be lo pamoi .e lo fanmo
 ### lo barda masti te cipra
 
 ni'o lo 984 detri be lo bi masti poi ro masti cu ralte 123 detri cu se cipra fi lo `BigInteger` .i lo 180 detri be lo vo masti cu se cipra fi lo `unrank1`. lo se jmite cu se galfi fi li 1024 .e li 192.
+
+### lo nanca be li 252 detri
+
+ni'o lo minli nanca be li 252 detri cu se cipra fi lo `unrank1` .e lo `MonsterMonthIndex`. lo 1024 detri se namcu jimte cu drani fi lo run `38158983131`. lo `unrank1` cu ca'o se galfi fi lo 256 detri jimte.

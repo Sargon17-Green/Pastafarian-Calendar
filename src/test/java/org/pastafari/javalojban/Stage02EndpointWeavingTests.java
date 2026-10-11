@@ -16,6 +16,7 @@ public final class Stage02EndpointWeavingTests {
         testBinomialAndCatalanIdentities();
         testNearLimitDomain();
         testHigherBoundCountAndUnrank();
+        testMinimumYearUnrank();
         testBoundsAndOwnership();
         System.out.println("STAGE_02_ENDPOINT_WEAVING_PASS checks=" + checks);
     }
@@ -186,6 +187,39 @@ public final class Stage02EndpointWeavingTests {
         }
     }
 
+
+    private static void testMinimumYearUnrank() {
+        int[] lengths = {84, 84, 84};
+        MonsterWeavingEndpointDP family = new MonsterWeavingEndpointDP(lengths);
+        BigInteger total = family.count();
+        ok(total.compareTo(BigInteger.ONE) > 0, "E_MIN_YEAR_RANK_SPACE");
+        int[] names = {1, 2, 3};
+        for (BigInteger rank : new BigInteger[]{
+                BigInteger.ONE, total.add(BigInteger.ONE).divide(BigInteger.TWO), total}) {
+            int[] sequence = family.unrank1(rank);
+            eq(252, sequence.length, "E_MIN_YEAR_DURATION");
+            eq(BigInteger.ONE, family.countAfterPrefix(sequence), "E_MIN_YEAR_SUFFIX");
+            MonsterMonthIndex index = new MonsterMonthIndex(lengths, names, sequence);
+            int[] monthly = new int[3];
+            int[] opened = new int[]{-1, -1, -1};
+            int[] closed = new int[3];
+            for (int day = 0; day < index.length(); day++) {
+                MonsterMonthIndex.MonthDate result = index.atOffset(day);
+                int month = sequence[day] - 1;
+                eq(month + 1, result.monthOrdinal(), "E_MIN_YEAR_MONTH");
+                if (opened[month] < 0) opened[month] = day;
+                closed[month] = day;
+                monthly[month]++;
+                eq(monthly[month], result.dayInMonth(), "E_MIN_YEAR_DAY");
+            }
+            arr(lengths, monthly, "E_MIN_YEAR_COUNTS");
+            ok(opened[0] < opened[1] && opened[1] < opened[2],
+                "E_MIN_YEAR_OPEN_ORDER");
+            ok(closed[0] < closed[1] && closed[1] < closed[2],
+                "E_MIN_YEAR_CLOSE_ORDER");
+        }
+    }
+
     private static void testBoundsAndOwnership() {
         int[] lengths = {4, 5, 6};
         MonsterWeavingEndpointDP dp = new MonsterWeavingEndpointDP(lengths);
@@ -199,7 +233,7 @@ public final class Stage02EndpointWeavingTests {
         Arrays.fill(longSet, 22);
         fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(longSet));
         fails("E_WEAVE_UNRANK_LIMIT", () -> new MonsterWeavingEndpointDP(
-            new int[]{65, 64, 64}).unrank1(BigInteger.ONE));
+            new int[]{86, 85, 86}).unrank1(BigInteger.ONE));
         fails("E_WEAVE_RANK", () -> dp.unrank1(BigInteger.ZERO));
         fails("E_WEAVE_RANK", () -> dp.unrank1(dp.count().add(BigInteger.ONE)));
         fails("E_WEAVE_PREFIX", () -> dp.countAfterPrefix(new int[]{2}));

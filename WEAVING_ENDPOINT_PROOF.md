@@ -37,4 +37,4 @@ ni'o lo se stika porsi cu se cuxna fi lo `unrank1` .i ro se cuxna judri cu se na
 
 ni'o lo se namcu be lo stika `D` cu zenba fi lo `O(m*D^2)` BigInteger se pilno te jicmu, poi `D` cu du lo detri se namcu. lo spisa se ralte cu zenba fi lo `O(D^2)` porsi judri .i lo BigInteger se bitni se namcu cu zenba fi lo mutce barda se namcu, i sena'i lo `O(D^2)` cu naljavni lo mutce barda mutce slabu memori.
 
-ni'o ca ti lo count cu se jimte li 1024 detri .i lo `unrank1` cu se jimte li 192 detri, ki'u lo nu ro cuxna cu sarcu lo balvi se namcu krefu. lo 5778 detri nanca cu na se cipra lo mulno .i lo remoi stadi cu ca'o se zbasu gi'e na se tcita lo mulno.
+ni'o ca ti lo count cu se jimte li 1024 detri .i lo `unrank1` cu se jimte li 256 detri, ki'u lo nu ro cuxna cu sarcu lo balvi se namcu krefu. lo 5778 detri nanca cu na se cipra lo mulno .i lo remoi stadi cu ca'o se zbasu gi'e na se tcita lo mulno.

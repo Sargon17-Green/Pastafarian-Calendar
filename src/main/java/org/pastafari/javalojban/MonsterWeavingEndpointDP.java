@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public final class MonsterWeavingEndpointDP {
     public static final int MAX_COUNT_DAYS = 1024;
-    public static final int MAX_UNRANK_DAYS = 192;
+    public static final int MAX_UNRANK_DAYS = 256;
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
 

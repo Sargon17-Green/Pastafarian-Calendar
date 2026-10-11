@@ -138,3 +138,5 @@ ni'o lo se narmanci te javni be lo `MonsterWeavingEndpointDP` cu se ciska fi `WE
 ni'o lo endpoint te jicmu cu ralte lo pagbu poi se jalge fi lo drani judri po'o gi'e pilno lo ro binomio namcu pe lo cnino masti pamoi. lo count jimte cu du li 768 detri .i lo unrank jimte cu du li 160 detri .i lo mutce barda detri be li 5778 cu za'o te zbasu.
 
 ni'o lo pamoi masti porsi te jicmu cu se cipra so'i detri pe li 984 gi'e benji lo jimte be li 1024 detri. lo `unrank1` cu se cipra lo 180 detri gi'e ralte lo jimte be li 192 detri. ro drata mulno nanca 5778 detri cu za'o na se zbasu.
+
+ni'o lo `unrank1` se jimte cu zenba co li 256 detri .i lo minli be lo nanca be li 252 detri cu se cipra fi lo ci masti be li 84 detri .i lo mulno 5778 detri cu za'o na se zbasu.
