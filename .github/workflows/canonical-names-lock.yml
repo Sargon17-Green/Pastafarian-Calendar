@@ -51,6 +51,13 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
+      - name: Native V formatting diagnosis — temporary
+        shell: bash
+        run: |
+          set -euo pipefail
+          v fmt -w ./pastafari/discovery05_expected_red_test.v
+          v fmt -w ./pastafari/legacy_hidden.v
+          git --no-pager diff -- ./pastafari/discovery05_expected_red_test.v ./pastafari/legacy_hidden.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
