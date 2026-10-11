@@ -223,3 +223,10 @@ Tystiolaeth: [GitHub Actions — rhediad 38173345431](https://github.com/Sargon1
 commit gwreiddiol `b832b6430fb6b2beea09234a97f06e3a07f09a18`.
 **`LAST_COMPLETED_STAGE=5`; y cam nesaf yw Cam 6 / DISCOVERY 03.**
 Ni newidiwyd cod y llwybr etifeddol na dechrau Cam 6.
+
+
+## Cam 6 — DISCOVERY 03: pellter o wahaniaeth dau dag dydd
+
+Mae `LegacyDistanceAdapter.oldDistance(c,t)` yn cyfrifo gwahaniaeth absoliwt y tagiau dydd o PATCH 02. Nid yw'n defnyddio pellter cronolegol cynhwysol. Mae'r nam hanesyddol yn dal yn weithredol: ymhlith wyth tyst canonaidd ceir 5 `EXPECTED_RED` a 3 `MATCH`.
+
+Ceir 441 prawf matrics a 549 prawf `BigInteger` annibynnol, gwarchodion cyd-destun a methiant strict disgwyliedig. Dylid ail-redeg `sh run-stage06-tests.sh` gyda'r holl ffynonellau gwreiddiol. Ni weithredwyd PATCH 03. Arhosir am dystysgrif brodorol cyn newid `LAST_COMPLETED_STAGE=5`.

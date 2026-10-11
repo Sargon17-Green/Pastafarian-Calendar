@@ -16,7 +16,10 @@ data class BaseMonsterContext(
     var discovery02Output: ExactInt? = null,
     var patch02Input: ExactInt? = null,
     var patch02LegacyOutput: ExactInt? = null,
-    var patch02Output: ExactInt? = null
+    var patch02Output: ExactInt? = null,
+    var discovery03CalculationDay: ExactInt? = null,
+    var discovery03TargetDay: ExactInt? = null,
+    var discovery03Output: ExactInt? = null
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -70,7 +73,8 @@ class MonsterBootstrapManager(
     val legacyRemainderAdapter: LegacyRemainderAdapter = LegacyRemainderAdapter(),
     val savePatchWrapper: SavePatchWrapper = SavePatchWrapper(),
     val legacyDayTagAdapter: LegacyDayTagAdapter = LegacyDayTagAdapter(),
-    val dayTagPatchWrapper: DayTagPatchWrapper = DayTagPatchWrapper()
+    val dayTagPatchWrapper: DayTagPatchWrapper = DayTagPatchWrapper(),
+    val legacyDistanceAdapter: LegacyDistanceAdapter = LegacyDistanceAdapter()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -104,6 +108,24 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_02_LEGACY_DAY_TAG")
             context.status = "LEGACY_DAY_TAG_OBSERVED"
             metrics.bump("discovery02.legacy")
+        }
+        dispatcher.register("DISCOVERY_03") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_DISCOVERY03_CONTEXT_NOT_READY")
+            val calculation = context.discovery03CalculationDay
+                ?: throw MonsterValidationException("E_DISCOVERY03_NO_CALCULATION_DAY")
+            val target = context.discovery03TargetDay
+                ?: throw MonsterValidationException("E_DISCOVERY03_NO_TARGET_DAY")
+            if (calculation != context.calculationDay || target != context.targetDay) {
+                throw MonsterValidationException("E_DISCOVERY03_CONTEXT_MISMATCH")
+            }
+            // Galw'r graith mewn cynhyrchu. Dim oracl, dim PATCH 03.
+            val legacy = legacyDistanceAdapter.oldDistance(calculation, target)
+            context.discovery03Output = legacy
+            context.branchTrace.add("DISCOVERY_03")
+            context.diagnostics.add("DISCOVERY_03_LEGACY_TAG_DISTANCE")
+            context.status = "LEGACY_DISTANCE_OBSERVED"
+            metrics.bump("discovery03.legacy")
         }
         dispatcher.register("PATCH_02") { context ->
             validation.requireBootstrapContext(context)
@@ -191,6 +213,22 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY02_WRAP", e)
+        }
+    }
+
+    /** Cam 6: BOOT, yna pellter diffygiol o dagiau PATCH 02. */
+    fun observeLegacyDistance(calculationDay: ExactInt, targetDay: ExactInt): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.discovery03CalculationDay = calculationDay
+        context.discovery03TargetDay = targetDay
+        context.phase = "DISCOVERY_03"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY03_WRAP", e)
         }
     }
 

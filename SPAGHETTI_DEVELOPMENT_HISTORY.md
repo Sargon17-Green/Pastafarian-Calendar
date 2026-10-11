@@ -234,3 +234,8 @@ Mae rhediad GitHub Actions `38173345431` yn SUCCESS a
 wedi'i gwblhau** (`LAST_COMPLETED_STAGE=5`). Nid oes unrhyw waith
 Cam 6 wedi dechrau, ac nid yw'r dystiolaeth hon yn newid y craith
 hanesyddol.
+
+
+## Cam 6 — DISCOVERY 03: gwall pellter o dagiau dydd
+
+Cadwyd PATCH 02 ac oldDayTag heb eu newid. Mae `oldDistance` yn cyfrifo `abs(patchedTag(c)-patchedTag(t))` gan alw'r addasydd a'r deunydd lapio cynhyrchu go iawn. Mae `BOOT → DISCOVERY_03` yn cadw'r mewnbynnau a'r canlyniad mewn cyd-destun preifat. O wyth tyst, mae 5 yn `EXPECTED_RED` a 3 yn `MATCH`. Ni chyflwynwyd PATCH 03. Mae'r prawf JVM brodorol llawn yn aros am CI.
