@@ -697,5 +697,15 @@ Decomposizione fattoriale legacy, handler di discovery,
 fase del dispatcher, due campi nuovi del contesto,
 validazione, report immutabile e contatore;
 nessuna mutazione del catalogo delle lingue.
-La certificazione nativa verrà acquisita solo
-dopo GitHub Actions.
+### Verifica nativa compiuta
+
+La run 38166231716, sul commit
+`209bd05ce484eb1b128e26a0959a8c80a3c3c832`,
+è SUCCESS in tutti i quindici job Scala e blocco nomi.
+Stage14 registra 20 PASS e 3 FAIL voluti: i ranghi
+1, 2 e 720 non coincidono con la norma. La suite
+ha controllato esaustivamente l'insieme delle 720
+permutazioni e 1.024 campioni deterministici, mentre
+le sei patch precedenti e tutte le firme storiche
+delle discovery sono rimaste integre.
+Nessuna PATCH 07 è stata introdotta.

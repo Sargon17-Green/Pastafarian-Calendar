@@ -513,3 +513,22 @@ provano unicità, classi di 120 per primo elemento,
 determinismo, rango non valido, integrità di stato,
 grandi giorni BigInt e continuità delle patch 01–06.
 Non viene introdotta alcuna PATCH 07.
+
+### Certificazione nativa dello stadio 14
+
+La [GitHub Actions run 38166231716](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38166231716)
+è terminata con SUCCESS sul commit
+`209bd05ce484eb1b128e26a0959a8c80a3c3c832`.
+Tutti i quindici job sono riusciti: lock dei nomi;
+Stage01 18 PASS; Stage02 7 PASS/3 FAIL attesi;
+Stage03 12 PASS; Stage04 14 PASS/3 FAIL attesi;
+Stage05 18 PASS; Stage06 15 PASS/3 FAIL attesi;
+Stage07 20 PASS; Stage08 19 PASS/3 FAIL attesi;
+Stage09 26 PASS; Stage10 15 PASS/3 FAIL attesi;
+Stage11 27 PASS; Stage12 22 PASS/3 FAIL attesi;
+Stage13 26 PASS; Stage14 20 PASS/3 FAIL deliberati.
+
+I fallimenti della discovery sono esattamente i ranghi
+`1`, `2` e `720`. Le 720 permutazioni sono tutte
+presenti una sola volta; l'associazione ai ranghi è
+storicamente traslata di uno. PATCH 07 non introdotta.
