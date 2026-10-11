@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage02_native_v:
-    name: V 0.5.2 — historical remainder expected RED
+  stage03_native_v:
+    name: V 0.5.2 — PATCH 01 verified GREEN
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -61,28 +61,23 @@ jobs:
         run: v test ./pastafari/normative_oracle_test.v
       - name: Discovery 01 — legacy behavior witnesses
         run: v test ./pastafari/discovery01_witness_test.v
-      - name: Discovery 01 — typechecked expected RED
+      - name: PATCH 01 — formerly RED regression now GREEN
         shell: bash
         run: |
           set -euo pipefail
           v -check ./pastafari/discovery01_expected_red_test.v
-          set +e
-          v test ./pastafari/discovery01_expected_red_test.v 2>&1 | tee stage02_expected_red.log
-          exitcode=${PIPESTATUS[0]}
-          set -e
-          if [ "$exitcode" -eq 0 ]; then
-            echo '::error::The intended discovery regression unexpectedly passed'
-            exit 1
-          fi
-          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage02_expected_red.log; then
-            echo '::error::Nonzero exit without an assertion-failure diagnostic'
-            exit 1
-          fi
-          echo 'DISCOVERY 01 — validated EXPECTED_RED with compiled V test'
-      - name: Save native test evidence
+          v test ./pastafari/discovery01_expected_red_test.v
+      - name: PATCH 01 — signed and oversized integer boundaries
+        run: v test ./pastafari/patch01_test.v
+      - name: Stage 03 — complete native V test suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          v test ./pastafari 2>&1 | tee stage03_green.log
+      - name: Save stage 03 native evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage02-red-evidence
-          path: stage02_expected_red.log
+          name: v-amharic-stage03-green-evidence
+          path: stage03_green.log
           if-no-files-found: ignore

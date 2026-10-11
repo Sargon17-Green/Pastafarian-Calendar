@@ -32,3 +32,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 2 — DISCOVERY 01
 
 የታሪካዊው `old_remainder` ጉድለት ከ`LegacyRemainderAdapter` እና ከproduction dispatcher ጋር ተገናኝቷል። የሙሉ ቀን ልወጣ ገና የለም። በM፣ 2M እና 3M የሚኖረው የታሰበ RED በ`pastafari/discovery01_expected_red_test.v` ውስጥ ተለይቶ ተጻፈ። ለመሥራት እና ለማረጋገጥ `docs/STAGE02_DISCOVERY01.md` ይመልከቱ። ደረጃ 2 በV 0.5.2 (7647ce1) በGitHub Actions run 38153202920 ተረጋግጧል፤ M, 2M, 3M ሆን ተብሎ RED ሲሆኑ ሌሎች ሙከራዎች GREEN ናቸው።
+
+## ደረጃ 3 — PATCH 01
+
+የታሪካዊው `old_remainder` ተጠብቋል፣ ከእሱም በላይ ራሱን የቻለ `SavePatch01` ተጨምሯል። `calendar_save_spaghetti` የተጠገነውን ምርጫ ያገኛል። የደረጃ 2 የRED ሙከራዎች ያለ `assert` ለውጥ GREEN መሆን አለባቸው። በV 0.5.2 እውነተኛ ማረጋገጫ እስካሁን አልተካሄደም፤ `LAST_COMPLETED_STAGE=2` ይቆያል።

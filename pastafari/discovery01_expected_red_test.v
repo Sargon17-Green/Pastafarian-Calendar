@@ -1,7 +1,7 @@
 module pastafari
 
-// ሆን ተብሎ RED የሚሆን ኖርማቲቭ ንጽጽር።
-// ይህንን አለመሳካት በደረጃ 2 አትጠግኑ፤ PATCH 01 ደረጃ 3 ነው።
+// ደረጃ 2 ላይ እነዚህ ሶስት ሙከራዎች RED ነበሩ።
+// ደረጃ 3 PATCH 01 በኋላ ያለ የassert ለውጥ GREEN መሆን አለባቸው።
 fn test_discovery01_expected_red_at_m() {
 	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
 	assert big_eq(calendar_save_spaghetti(m), m)

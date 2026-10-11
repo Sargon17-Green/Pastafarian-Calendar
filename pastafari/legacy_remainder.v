@@ -21,8 +21,8 @@ pub fn (_ BaseDispatcher) dispatch_legacy_save(x BigInt) BigInt {
 	return adapter.save(x)
 }
 
-// በproduction የdispatcher መንገድ የሚገኝ ታሪካዊ SAVE።
+// ደረጃ 3፦ production መግቢያ PATCH 01 ይጠራል። የlegacy ስህተቱ አልተለወጠም።
 pub fn calendar_save_spaghetti(x BigInt) BigInt {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_save(x)
+	return dispatcher.dispatch_save_patch01(x)
 }

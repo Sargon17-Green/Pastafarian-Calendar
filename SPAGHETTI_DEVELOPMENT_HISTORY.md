@@ -27,3 +27,9 @@ V 0.5.2 (`7647ce1`) በአካባቢው ተጭኖ የደረጃ 1 ኮድ በቀጥ
 `old_remainder(x)` የ`regularMod(x, M)` ታሪካዊ ስህተትን ያስቀምጣል። `LegacyRemainderAdapter` ከ`BaseDispatcher` ጋር ተያይዟል። `calendar_save_spaghetti` የproduction ውጤትን በግልጽ ያሳያል፤ `calendar_date_spaghetti` ደግሞ ይህን መንገድ ይጠራል፣ ነገር ግን የሙሉ ቀን ውጤት አይፈጥርም።
 
 በM፣ 2M እና 3M የlegacy ውጤት 0 ነው፣ ኖርማቲቩ M ነው፤ በM+1 ሁለቱም 1 ናቸው። ለብቻው የሚያልፍ witness ሙከራ እና ሆን ተብሎ RED የሚሆን regression ተጨምረዋል። ደረጃ 2 በV 0.5.2 (7647ce1) በActions run 38153202920 ተፈትኗል። ቅርጸት፣ የደረጃ 1 ኦራክል፣ 5 የlegacy witness ሙከራዎች እና የኖርማቲቭ ተቃራኒ ሙከራው የታሰበ RED ሁሉ ተረጋግጠዋል። የPATCH 01 መጠገኛ አልተጨመረም።
+
+## ደረጃ 3 — PATCH 01 (በማረጋገጫ ላይ)
+
+የደረጃ 2 መዝጊያ፦ `e23a7af`፤ የV 0.5.2 የተሳካው ታሪካዊ EXPECTED_RED run `38153202920`።
+
+`old_remainder` እና `LegacyRemainderAdapter` አልተጠገኑም። `SavePatch01` የlegacy ውጤት 0 ብቻ ወደ M ይቀይራል፤ የውስጥ ቀሪ ስሌት ይቀራል። የdispatcher አዲስ መስመር እሱን ይጠራል። የተሟላው የቀን ልወጣ አልተገነባም።
