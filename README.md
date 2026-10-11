@@ -122,3 +122,7 @@ ni'o lo `MonsterMonthIndex` cu facki lo masti se namcu .e lo detri be lo masti .
 ## lo detri jalge fi lo se benji porsi
 
 ni'o lo `MonsterCalendarResolver` cu benji lo detri se namcu be lo nanca .e lo kecti .e lo masti va'o lo nu lo `selectedWeaving` cu se benji. lo `ResolvedYear` cu cilre lo nanca prenu datni pa mai gi'e facki lo se srana detri so'i roi. lo `selectedWeaving` cu se nitcu .i ti na se cuxna ra .i lo ti ciste na se mulno narmanci detri fanva. ko benji `sh run_stage02_calendar_resolver_tests.sh`.
+
+## lo balvi nitcu: lo mulno nanca se jorne
+
+ni'o lo `MonsterCalendarResolver` cu se benji lo narmanci `selectedWeaving` fi lo drata ciste. lo nu se cuxna lo drani `selectedWeaving` fi lo `MonsterSelectors` .e lo `MonsterFamilies.WeavingFamily` cu se nitcu lo mutce barda matematik cipra fi lo mulno nanca. lo `WeavingFamily` cu pilno lo se sruri se banzu te jicmu `Map` .i lo ro 47 masti .e lo barda namcu be lo detri cu kakne lo nu mutce zenba lo se sruri datni se namcu. lo ti jimte na se jdice lo ka lo narmanci javni cu drani .i no mulno stadi tcita cu se jmina ca lo se cuxna ciste na se zbasu.
