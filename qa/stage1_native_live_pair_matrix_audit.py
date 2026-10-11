@@ -33,10 +33,13 @@ def verify(data):
          and data.get("source_git_blob") == PIN
          and data.get("status") == "QA_ONLY_STAGE1_OPEN"
          and data.get("interpreter") == "PyFunge-0.5-rc2"
-         and data.get("native_pair_runs") == 24
+         and type(data.get("native_pair_runs")) is int
+         and data["native_pair_runs"] == 24
          and data.get("api_ownership_trace_instrumented") is True
-         and data.get("native_program_executions") == 48
-         and data.get("independent_native_oracle_calls") == 18
+         and type(data.get("native_program_executions")) is int
+         and data["native_program_executions"] == 48
+         and type(data.get("independent_native_oracle_calls")) is int
+         and data["independent_native_oracle_calls"] == 18
          and data.get("stage1_final_acceptance") is False,
          "schema/source/bounded scope or provisional Stage 1 status forged")
     e = data.get("expected_by_label")
@@ -75,9 +78,14 @@ def verify(data):
                       "cross_program_checks"):
             need(type(row.get(field)) is int and 0 < row[field] <= 250000,
                  "invalid exact native execution counter")
-        need(row["cross_program_checks"] >= 16 and
-             row["overlap_rounds"] <= min(row["left_steps"], row["right_steps"]),
-             "live parallel overlap or cross-program observations missing")
+        # Each still-live Program executes one tick per round. The producer
+        # snapshots peers in rounds 1..8 and every 211st round.
+        expected_overlap = min(row["left_steps"], row["right_steps"])
+        expected_checks = sum(min(8, ticks) + ticks // 211
+                              for ticks in (row["left_steps"], row["right_steps"]))
+        need(row["overlap_rounds"] == expected_overlap and
+             row["cross_program_checks"] == expected_checks,
+             "Native overlap/snapshot counters inconsistent with actual ticks")
         if ix >= 12:
             prior = rows[ix - 12]
             need(row["left_output"] == prior["left_output"] and
@@ -146,8 +154,17 @@ def main(folder):
                  d["records"][ix]["right"] == "i0",
                  "coordinated peer-dependence control lost its input pair")
             d["records"][ix]["left_steps"] += 1
+    def forge_pair_overlap(d):
+        for ix in (0, 12):
+            d["records"][ix]["overlap_rounds"] -= 1
+    def forge_pair_snapshots(d):
+        for ix in (0, 12):
+            d["records"][ix]["cross_program_checks"] += 1
     attacks = [
         reject("wrong_source", lambda d: d.__setitem__("source_git_blob", "0"*40)),
+        reject("float_native_pair_count", lambda d: d.__setitem__("native_pair_runs", 24.0)),
+        reject("float_native_execution_count", lambda d: d.__setitem__("native_program_executions", 48.0)),
+        reject("float_native_oracle_count", lambda d: d.__setitem__("independent_native_oracle_calls", 18.0)),
         reject("missing_pair", lambda d: d["records"].pop()),
         reject("swapped_schedule", lambda d: d["records"][0].__setitem__("schedule", "BA")),
         reject("swapped_label", lambda d: d["records"][2].__setitem__("right", "i1")),
@@ -158,6 +175,8 @@ def main(folder):
         reject("absent_cross_checks", lambda d: d["records"][0].__setitem__("cross_program_checks", 0)),
         reject("forged_native_steps", lambda d: d["records"][12].__setitem__("left_steps", 1)),
         reject("peer_dependent_steps_both_schedules", forge_peer_dependent_steps),
+        reject("peer_overlap_both_schedules", forge_pair_overlap),
+        reject("peer_snapshots_both_schedules", forge_pair_snapshots),
         reject("forged_invalid_oracle", lambda d: d["expected_by_label"]["i0"].__setitem__(0, "0")),
         reject("unowned_memory_api", lambda d: d["records"][0].__setitem__("every_api_read_write_owned_by_active_program", False)),
         reject("forged_memory_put", lambda d: d["records"][0].__setitem__("left_memory_puts", 0)),
@@ -168,14 +187,14 @@ def main(folder):
         reject("memory_reads_nondeterministic", lambda d: d["records"][12].__setitem__("left_memory_gets", d["records"][12]["left_memory_gets"] + 1)),
         reject("premature_completion", lambda d: d.__setitem__("stage1_final_acceptance", True)),
     ]
-    need(len(attacks) == 20, "missing adversarial audit cases")
+    need(len(attacks) == 25, "missing adversarial audit cases")
     report = {"schema": "befunge-stage1-live-pair-matrix-audit-v2",
               "source_git_blob": PIN, "verified": outcome,
               "negative_reports_rejected": attacks,
               "stage1_final_acceptance": False}
     output = Path(folder) / "native_live_pair_matrix_audit.json"
     output.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    print("NATIVE_LIVE_PAIR_MATRIX_20_HOSTILE_REPORTS_REJECTED_PASS")
+    print("NATIVE_LIVE_PAIR_MATRIX_25_HOSTILE_REPORTS_REJECTED_PASS")
 
 if __name__ == "__main__":
     need(len(sys.argv) == 2, "usage: native live-pair evidence folder")
