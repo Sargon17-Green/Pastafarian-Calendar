@@ -41,3 +41,7 @@ ni'o lo `MonsterSelectors` cu se zbasu fi la Java po'o gi'e cipra lo barda namcu
 ### lo se benji se ponse
 
 ni'o lo `MonsterManager` cu benji lo `MonsterEvaluation` poi stodi. lo `MonsterDispatcher` cu cipra lo cfari se benji datni gi'e benji lo `MonsterSauceBowls` gi'e zbasu lo narmanci pe lo samymo'i jicmu. lo `Stage02IntegrationTests` cu cipra lo se benji se ponse .e lo se jorne se sruri .e lo se cuxna javni. lo remoi stadi cu na mulno.
+
+### lo selcmima porsi stura
+
+ni'o lo `MonsterFamilies` cu zbasu lo `fallingFactorial` .e lo `unrankDistinctIndices` .e lo `BoundedCompositionFamily` .e lo `CutletPartitionFamily` .e lo `WeavingFamily`. lo pamoi se zbasu cu na tcidu lo `NormativeOracle` gi'e se cipra fi ra po'o. lo remoi stadi cu na mulno.

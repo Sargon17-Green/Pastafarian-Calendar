@@ -78,3 +78,9 @@ ni'o lo `MonsterSelectors` cu se zbasu gi'e srana lo `chooseShort` .e lo `choose
 ni'o lo `MonsterManager.runSauce` cu benji lo cnino `MonsterEvaluation` fi ro se benji. lo `MonsterEvaluation` cu ralte lo stodi `branchTrace` .e lo `metrics` .e lo `SauceResult`. lo `choose` cu cuxna lo ranki fi lo djacu bliku .e lo seal .e lo se cuxna se namcu. ko benji `sh run_stage02_integration_tests.sh`.
 
 ni'o lo remoi stadi cu na se mulno. lo balvi pagbu cu nitcu lo selcmima porsi .e lo vorme .e lo nanca .e lo kecti .e lo masti .e lo mulno detri jalge.
+
+## lo remoi stadi — lo selcmima porsi
+
+ni'o lo `MonsterFamilies` cu zbasu lo binomio namcu .e lo frica cmene porsi .e lo se jimte so'i pagbu kompozicio .e lo kecti pagbu kompozicio poi nitcu lo vorme .e lo masti se jorne porsi. lo `BigInteger` cu rinka lo nu no namcu bancu jimte cu pagre. lo `BoundedCompositionFamily` cu pilno lo drata platu perma'i pe lo namcu se jimte. lo `CutletPartitionFamily` cu pilno lo binomio frinu fi lo nu jmina lo jimte vorme.
+
+ni'o lo `Stage02FamiliesTests` cu cipra lo tcadu barda cmene .e lo mutce barda masti .e lo kecti .e lo se jorne porsi. ko benji `sh run_stage02_families_tests.sh`. lo narmanci `NormativeOracle` cu cipra po'o. lo remoi stadi na se mulno.

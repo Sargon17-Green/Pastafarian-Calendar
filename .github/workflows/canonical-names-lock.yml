@@ -46,3 +46,5 @@ jobs:
         run: sh run_stage02_selectors_tests.sh
       - name: Stage 02 manager integration
         run: sh run_stage02_integration_tests.sh
+      - name: Stage 02 combinatorial families
+        run: sh run_stage02_families_tests.sh
