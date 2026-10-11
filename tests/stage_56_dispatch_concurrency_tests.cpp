@@ -55,8 +55,11 @@ BowlState facCrateres(int worker, int round) {
     const Integer magnitudo = Integer{1} << (129 + worker % 5);
     for (int i = 0; i < 6; ++i) {
         const Integer delta = Integer{worker * 151 + round * 37 + i * 11 + 1};
-        bowls[static_cast<std::size_t>(i)] =
-            (worker % 3 == 0 ? -magnitudo : magnitudo) + delta;
+        if (worker % 3 == 0) {
+            bowls[static_cast<std::size_t>(i)] = -magnitudo + delta;
+        } else {
+            bowls[static_cast<std::size_t>(i)] = magnitudo + delta;
+        }
     }
     return bowls;
 }
