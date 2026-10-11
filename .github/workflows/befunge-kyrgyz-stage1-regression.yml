@@ -1793,7 +1793,7 @@ jobs:
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=5s 780s python -u qa/stage1_native_live_pair_matrix.py
-              python -c 'compile(open("qa/stage1_native_second_oracle_live_pair.py", "rb").read(), "qa/stage1_native_second_oracle_live_pair.py", "exec")'
+              python -c "compile(open(\"qa/stage1_native_second_oracle_live_pair.py\", \"rb\").read(), \"qa/stage1_native_second_oracle_live_pair.py\", \"exec\")"
               timeout --kill-after=5s 120s python -u qa/stage1_native_second_oracle_live_pair.py
             '
           test -s "$RUNNER_TEMP/native-live-pairs/native_live_pair_matrix.json"
