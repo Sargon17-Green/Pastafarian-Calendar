@@ -4,6 +4,7 @@ use utf8;
 use strict;
 use warnings;
 use Exporter 'import';
+use Scalar::Util qw(blessed);
 
 our @EXPORT_OK = qw(
     source_language catalog_version cutlet_entries month_entries
@@ -93,14 +94,26 @@ sub _copy_entries ($entries) {
 sub cutlet_entries { return _copy_entries(\@CUTLETS) }
 sub month_entries  { return _copy_entries(\@MONTHS) }
 
+sub _checked_index ($index, $limit, $error) {
+    die $error if !defined($index);
+    die $error if ref($index) && !(blessed($index) && $index->isa('Math::BigInt'));
+    my $digits = "$index";
+    die $error if $digits !~ /\A[0-9]+\z/;
+    $digits =~ s/\A0+//;
+    die $error if !length($digits)
+        || length($digits) > length("$limit")
+        || (length($digits) == length("$limit") && $digits gt "$limit");
+    return 0 + $digits;
+}
+
 sub cutlet_name_by_index ($index) {
-    die "肉排名稱索引超出範圍\n" if $index < 1 || $index > scalar @CUTLETS;
-    return $CUTLETS[$index - 1]{source};
+    my $position = _checked_index($index, scalar(@CUTLETS), "肉排名稱索引超出範圍\n");
+    return $CUTLETS[$position - 1]{source};
 }
 
 sub month_name_by_index ($index) {
-    die "月份名稱索引超出範圍\n" if $index < 1 || $index > scalar @MONTHS;
-    return $MONTHS[$index - 1]{source};
+    my $position = _checked_index($index, scalar(@MONTHS), "月份名稱索引超出範圍\n");
+    return $MONTHS[$position - 1]{source};
 }
 
 1;
