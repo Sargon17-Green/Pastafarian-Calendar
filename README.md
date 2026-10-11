@@ -108,3 +108,9 @@ ni'o lo masti se jorne porsi cu na se zbasu ca lo platu stadi. lo `MonsterYearBl
 ni'o lo `MonsterCutletCalendar.convert` cu zbasu lo nanca .e lo kecti cmene .e lo kecti se namcu .e lo djedi be lo kecti, sepi'o lo `MonsterYears` .e lo `MonsterYearBlueprint`. lo `MonsterManager.cutletDate` cu zbasu lo cnino se benji. ko benji `sh run_stage02_cutlet_date_tests.sh` tezu'e lo nu cipra lo kecti detri .e lo `NormativeOracle`.
 
 ni'o lo ti jalge na vasru lo masti detri .i lo `MonsterCutletCalendar` na smuni lo mulno kalendri se detri. lo masti se jorne javni .e lo mulno detri cu nitcu lo balvi zbasu.
+
+## lo masti se jorne porsi cipra
+
+ni'o lo `Stage02WeavingDomainTests` cu cipra lo masti se jorne porsi poi masti cu vasru vo .a za'u vo djedi, gi'e srana lo narmanci `NormativeOracle`. lo cipra cu pilno lo rangaji `4` .e `123` tezu'e lo nu cipra lo jimte masti. ko benji `sh run_stage02_weaving_domain_tests.sh`.
+
+ni'o lo ti cipra na se du lo mulno se benji kalendri. lo masti se jorne porsi pe lo mutce so'i masti .e lo mutce so'i djedi cu nitcu lo balvi frica cipra .e lo nu stodi lo memori .e lo temci.

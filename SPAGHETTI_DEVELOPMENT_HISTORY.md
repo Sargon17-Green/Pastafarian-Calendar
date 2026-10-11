@@ -59,3 +59,7 @@ ni'o lo `MonsterYearBlueprint` cu zbasu lo kecti pagbu .e lo kecti cmene .e lo m
 ### lo kecti detri se benji
 
 ni'o lo `MonsterCutletCalendar` cu zbasu lo nanca .e lo kecti .e lo djedi se namcu fi lo se benji detri. lo masti detri cu na se zbasu fi ti. lo `Stage02CutletDateTests` cu cipra lo se cuxna fi lo normativi `NormativeOracle` pe lo cipra po'o.
+
+### lo masti se jorne te cipra
+
+ni'o lo `Stage02WeavingDomainTests` cu cipra lo masti be vo .a za'u vo djedi .e lo masti be 123 djedi, lo pamoi .e lo fanmo porsi, .e lo `NormativeOracle` se du'u. lo ro barda nanca se jorne cu na se cipra ca ti. lo remoi stadi cu na mulno.

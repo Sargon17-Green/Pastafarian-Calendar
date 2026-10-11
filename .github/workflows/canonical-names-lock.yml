@@ -56,3 +56,5 @@ jobs:
         run: sh run_stage02_blueprint_tests.sh
       - name: Stage 02 cutlet date integration
         run: sh run_stage02_cutlet_date_tests.sh
+      - name: Stage 02 month weaving domain
+        run: sh run_stage02_weaving_domain_tests.sh
