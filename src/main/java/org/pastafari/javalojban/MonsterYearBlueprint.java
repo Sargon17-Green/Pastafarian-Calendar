@@ -54,10 +54,13 @@ public final class MonsterYearBlueprint {
         ).intValueExact() - 1;
 
         Integer required = null;
-        BigInteger exact = gates.exactGate(calculationDay);
-        if (exact != null && exact.compareTo(year.openGateIndex()) > 0
-                && exact.compareTo(year.closeGateIndex()) < 0) {
-            required = exact.subtract(year.openGateIndex()).intValueExact();
+        if (calculationDay.compareTo(year.openGateDay()) > 0
+                && calculationDay.compareTo(year.closeGateDay()) < 0) {
+            BigInteger exact = gates.exactGate(calculationDay);
+            if (exact != null && exact.compareTo(year.openGateIndex()) > 0
+                    && exact.compareTo(year.closeGateIndex()) < 0) {
+                required = exact.subtract(year.openGateIndex()).intValueExact();
+            }
         }
         MonsterFamilies.CutletPartitionFamily cuts =
             new MonsterFamilies.CutletPartitionFamily(gaps, numberOfCutlets, required);

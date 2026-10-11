@@ -17,6 +17,10 @@ public final class Stage02BlueprintTests {
             MonsterYears.Year year = generator.year5000(calculation);
             compare(calculation, year);
         }
+        MonsterYears traversal = new MonsterYears();
+        MonsterYears.Year anchor = traversal.year5000(foundation);
+        compare(foundation, traversal.nextYear(foundation, anchor));
+        compare(foundation, traversal.previousYear(foundation, anchor));
         testOwnership();
         testInputValidation();
         System.out.println("STAGE_02_BLUEPRINT_PASS checks=" + checks);
@@ -25,7 +29,8 @@ public final class Stage02BlueprintTests {
     private static void compare(BigInteger calculation, MonsterYears.Year year) {
         MonsterYearBlueprint actual = MonsterYearBlueprint.build(calculation, year);
         NormativeOracle oracle = new NormativeOracle();
-        NormativeOracle.Year referenceYear = oracle.year5000(calculation);
+        NormativeOracle.Year referenceYear = oracle.findTargetYear(
+            calculation, year.closeGateDay());
         eq(referenceYear.openGateDay(), year.openGateDay(), "E_YEAR_OPEN");
         eq(referenceYear.closeGateDay(), year.closeGateDay(), "E_YEAR_CLOSE");
         NormativeOracle.SauceResult sauce = NormativeOracle.sauce(
@@ -36,7 +41,7 @@ public final class Stage02BlueprintTests {
             BigInteger.valueOf(Math.min(17, gaps) - 5L)).intValueExact() - 1;
         eq(cutletCount, actual.cutletCount(), "E_CUTLET_COUNT");
         Integer required = null;
-        for (var e : generatorGateMap(oracle, calculation, year).entrySet()) {
+        for (var e : oracle.generatedGateSnapshot().entrySet()) {
             if (e.getValue().equals(calculation)
                 && e.getKey().compareTo(year.openGateIndex()) > 0
                 && e.getKey().compareTo(year.closeGateIndex()) < 0) {
@@ -87,12 +92,6 @@ public final class Stage02BlueprintTests {
         }
         eq(year.closeGateDay(), last, "E_CUTLET_LAST_DAY");
         eq(year.number(), actual.year().number(), "E_YEAR_NUMBER");
-    }
-
-    private static java.util.Map<BigInteger, BigInteger> generatorGateMap(
-            NormativeOracle oracle, BigInteger calculation, MonsterYears.Year year) {
-        oracle.year5000(calculation);
-        return oracle.generatedGateSnapshot();
     }
 
     private static void testOwnership() {
