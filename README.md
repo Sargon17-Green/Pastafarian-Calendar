@@ -88,3 +88,11 @@ npm run test:discovery02:red
 ```
 
 पहिले दोन आदेश PASS; शेवटचे दोन historical proof म्हणून मुद्दाम exit 1 देतात. CI त्यांच्या अचूक failure markers तपासतो. पूर्ण दिनांक-अंमलबजावणी अजून लागू नाही. पुढील Stage 6 मध्ये फक्त **DISCOVERY 03**, मूळ करार तपासल्यावरच करायचा; PATCH 03 Stage 7 मध्येच.
+
+## टप्पे 6–7/55 — अंतराची तिसरी ऐतिहासिक चूक आणि PATCH 03
+
+टप्पा 6 मध्ये `oldDistance(c,t)=abs(patchedDayTag(c)-patchedDayTag(t))` हा सदोष मार्ग, त्याचे `4 mismatches / 1 match` साक्षी आणि अपेक्षित लाल चाचणी जतन केली. टप्पा 7 मधील स्वतंत्र `patch03Distance(c,t)` आता जुना परिणाम खऱ्या `abs(t-c)` शी तुलना करतो; फरक असल्यासच दुरुस्ती करतो आणि शेवटी `+1` लावतो. जुना दोष जतन केला आहे; `calendarDateSpaghetti` अजून पुढील Stage 54 पर्यंत अनुपलब्ध आहे.
+
+Stage 7 GitHub Actions run `38156511209`: `STAGE_07_PATCH_03_PASS pairs=1243 overridden=1214 preserved=29 mismatches=0`. TypeScript typecheck, Stage 1–6 चाचण्या, Stage 6 lifecycle QA, तीन historical expected-red आणि Canonical Names Lock सर्व PASS. तांत्रिक तपशील `docs/STAGE07_PATCH03_VERIFICATION.md` मध्ये.
+
+पुढील टप्पा 8 — `DISCOVERY 04`: दगडांची sequential in-place legacy mutation शोधायची. PATCH 04 किंवा अंतिम integration अजून करू नये.

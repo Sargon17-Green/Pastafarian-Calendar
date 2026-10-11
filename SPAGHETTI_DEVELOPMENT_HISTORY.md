@@ -43,3 +43,11 @@ GitHub Actions run 38152040485 मधील commit 24a4fe867db8fd273a9d016b6d1a9
 `src/patch02DayTag.ts` मधील `Patch02DayTagHandler` जुना `LegacyDayTagAdapter` वापरतो; आधी `day>=FOUNDATION_DAY` साठी `+1`, आणि त्यानंतर ऐतिहासिक निष्प्रभावी `day===FOUNDATION_DAY && n!==1` ही स्वतंत्र अट ठेवतो. दोन्ही दिवसांसाठी स्वतंत्र गणना, `bigint` अचूकता, lifecycle संरक्षण, immutable result आणि observability आहेत. `src/discovery02LegacyDayTag.ts` आणि दोन्ही लाल साक्षी यांत बदल केलेला नाही.
 
 GitHub Actions run `38153654056` (commit `7ff46fb0de35e1bf5aa837d56a3cde0d692630ca`) मधील TypeScript typecheck, Stages 01–04 regression, PATCH 01 साठी 672 साक्षी/0 फरक आणि PATCH 02 साठी **1099** दिवस-जोड्या/**2198** दिवस/0 फरक उत्तीर्ण झाले. `plusOne=1079`, `scarChecks=18`, `scarForces=0`. Canonical Names Lock व दोन्ही expected-red ऐतिहासिक चाचण्या PASS. टप्पा 5/55 पूर्ण. पुढे Stage 6 — DISCOVERY 03; Stage 7 ची PATCH 03 दुरुस्ती अद्याप नाही.
+
+## टप्पा 7 — PATCH 03: खरे कालक्रम अंतर (प्रमाणित)
+
+`src/patch03Distance.ts` मध्ये `Patch03DistanceHandler` आणि `patch03Distance` समाविष्ट केले. Stage 6 मधील `oldDistance` कायम ठेवून त्याची `abs(t-c)` शी तुलना केली जाते; फरक असल्यास कालक्रम मूल्य वापरले जाते; नंतर नेहमी `+1`. दोन शाखांचे स्पष्ट trace/metrics आणि प्रत्येक आवाहनाची स्वतंत्र context स्थिती जतन केली. मूळ `DISCOVERY_03_EXPECTED_RED mismatches=4 matches=1` प्रमाणित पुरावा बदललेला नाही.
+
+QA मध्ये `Discovery03DistanceHandler` ला explicit status, invalid-context rejection आणि पुनर्वापर प्रतिबंध दिला; ऐतिहासिक गणित जसेच्या तसे राहिले. `test/discovery03Lifecycle.ts` ने हा गुण तपासला.
+
+GitHub Actions run `38156511209` (commit `27f3d682b1ea40a5751af1fabefc092ab03f1b68`) मध्ये Stage 01–06, historical red #1–#3, TypeScript typecheck आणि canonical names lock PASS. PATCH 03 साठी **1243** जोड्या, **1214** replacements, **29** preserved, **0** mismatches मिळाले. त्यामुळे Stage 7/55 पूर्ण. पुढील Stage 8 = DISCOVERY 04; Stage 9 ची दुरुस्ती आताच केलेली नाही.
