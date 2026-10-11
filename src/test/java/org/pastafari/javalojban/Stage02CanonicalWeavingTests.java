@@ -9,6 +9,7 @@ public final class Stage02CanonicalWeavingTests {
     public static void main(String[] args) {
         testOracleSelections();
         testWideSelectorAndMinimumYear();
+        testLargeCanonicalSelection();
         testDefensiveCopiesAndFailures();
         System.out.println("STAGE_02_CANONICAL_WEAVING_PASS checks=" + checks);
     }
@@ -67,6 +68,43 @@ public final class Stage02CanonicalWeavingTests {
         }
     }
 
+
+    private static void testLargeCanonicalSelection() {
+        BigInteger foundation = MonsterArithmetic.FOUNDATION_DAY;
+        MonsterSauceBowls.SauceResult sauce =
+            MonsterSauceBowls.evaluate(foundation, foundation);
+        NormativeOracle.SauceResult oracleSauce =
+            NormativeOracle.sauce(foundation, foundation);
+        for (int[] lengths : new int[][]{
+                {123, 123, 123, 123},
+                {123, 123, 123, 123, 20}
+        }) {
+            MonsterCanonicalWeaving.Selection chosen =
+                MonsterCanonicalWeaving.fromSauce(sauce, lengths);
+            MonsterWeavingLinearCounter family = new MonsterWeavingLinearCounter(lengths);
+            BigInteger count = family.count();
+            BigInteger rank = NormativeOracle.chooseRank(
+                NormativeOracle.askBowl(oracleSauce, 4, 32), count);
+            eq(count, chosen.possibilities(), "E_LARGE_CANONICAL_COUNT");
+            eq(rank, chosen.rank(), "E_LARGE_CANONICAL_RANK");
+            eq(rank, family.rank1(chosen.weavingCopy()), "E_LARGE_INVERSE_RANK");
+            eq(Arrays.stream(lengths).sum(), chosen.length(), "E_LARGE_SELECTED_DAYS");
+            int[] names = new int[lengths.length];
+            for (int i = 0; i < names.length; i++) names[i] = i + 1;
+            MonsterMonthIndex index = new MonsterMonthIndex(
+                lengths, names, chosen.weavingCopy());
+            int[] perMonth = new int[lengths.length];
+            int[] weaving = chosen.weavingCopy();
+            for (int day = 0; day < chosen.length(); day++) {
+                MonsterMonthIndex.MonthDate month = index.atOffset(day);
+                eq(weaving[day], month.monthOrdinal(), "E_LARGE_MONTH_LOOKUP");
+                eq(++perMonth[weaving[day] - 1], month.dayInMonth(),
+                    "E_LARGE_MONTH_DAY");
+            }
+            arr(lengths, perMonth, "E_LARGE_MONTH_COUNTS");
+        }
+    }
+
     private static void testDefensiveCopiesAndFailures() {
         BigInteger foundation = MonsterArithmetic.FOUNDATION_DAY;
         MonsterSauceBowls.SauceResult sauce =
@@ -84,7 +122,7 @@ public final class Stage02CanonicalWeavingTests {
         fails("E_WEAVE_EMPTY", () -> MonsterCanonicalWeaving.fromSauce(sauce, new int[0]));
         fails("E_WEAVE_LENGTH", () -> MonsterCanonicalWeaving.fromSauce(sauce, new int[]{0}));
         fails("E_WEAVE_UNRANK_LIMIT", () -> MonsterCanonicalWeaving.fromSauce(
-            sauce, new int[]{123, 123, 123, 16}));
+            sauce, new int[]{123, 123, 123, 123, 21}));
         fails("E_NULL_DAY", () -> MonsterCanonicalWeaving.fromDays(
             null, foundation, new int[]{4}));
     }

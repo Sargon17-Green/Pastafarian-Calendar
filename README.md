@@ -158,3 +158,5 @@ ni'o lo ti sampla cu se pilno lo count .e lo countAfterPrefix po'o .i lo 5778 de
 ni'o lo pa se stika masti namcu te javni cu se ciska fi `WEAVING_LINEAR_PROOF.md`. lo se namcu be lo 5778 djedi cu se cipra fi lo 256 MiB Java Heap .i lo mulno se cuxna masti porsi cu za'o nitcu lo balvi cipra .e lo balvi narmanci javni.
 
 ni'o lo `MonsterWeavingLinearCounter.unrank1` .e lo `rank1` cu se pilno fi lo drani se jmite porsi be li 512 djedi .i lo 5778 djedi count cu za'o drani .i lo drata ranki be lo mulno nanca cu za'o nitcu lo balvi se zbasu.
+
+ni'o lo `MonsterCanonicalWeaving` cu pilno lo `MonsterWeavingLinearCounter` fi lo 512 djedi cuxna .i lo vo moi kabri .e lo 32 moi tcita cu se stodi .i lo mutce barda nanca cuxna cu za'o nitcu lo balvi cipra.

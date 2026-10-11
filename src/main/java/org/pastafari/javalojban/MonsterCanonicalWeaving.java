@@ -27,10 +27,10 @@ public final class MonsterCanonicalWeaving {
 
     public static Selection fromSauce(MonsterSauceBowls.SauceResult sauce, int[] lengths) {
         if (sauce == null) throw new IllegalArgumentException("E_NULL_SAUCE");
-        MonsterWeavingEndpointDP family = new MonsterWeavingEndpointDP(lengths);
+        MonsterWeavingLinearCounter family = new MonsterWeavingLinearCounter(lengths);
         int days = 0;
         for (int length : lengths) days += length;
-        if (days > MonsterWeavingEndpointDP.MAX_UNRANK_DAYS) {
+        if (days > MonsterWeavingLinearCounter.MAX_UNRANK_DAYS) {
             throw new IllegalArgumentException("E_WEAVE_UNRANK_LIMIT");
         }
         BigInteger choices = family.count();
