@@ -424,6 +424,23 @@ public final class MonsterWeavingLinearCounter {
                 || globalRank.compareTo(total) > 0) {
             throw new IllegalArgumentException("E_WEAVE_RANK");
         }
+        if (totalDays > MAX_UNRANK_DAYS
+                && targetSuffixDays == MAX_UNRANK_DAYS) {
+            BoundaryBlock first = defaultBoundary(false);
+            if (first.contains(globalRank)) {
+                int[] prefix = first.fixedPrefixCopy();
+                return new RankRoute(this, afterPrefix(prefix), prefix,
+                    globalRank, first.lowerRank(), first.upperRank(),
+                    targetSuffixDays, 0);
+            }
+            BoundaryBlock last = defaultBoundary(true);
+            if (last.contains(globalRank)) {
+                int[] prefix = last.fixedPrefixCopy();
+                return new RankRoute(this, afterPrefix(prefix), prefix,
+                    globalRank, last.lowerRank(), last.upperRank(),
+                    targetSuffixDays, 0);
+            }
+        }
         return new RankRoute(this, new State(lengths), new int[0],
             globalRank, ONE, total, targetSuffixDays, 0);
     }

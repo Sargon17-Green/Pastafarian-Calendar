@@ -86,3 +86,5 @@ jobs:
         run: sh run_stage02_global_routing_tests.sh
       - name: Stage 02 completed global route calendar integration
         run: sh run_stage02_route_calendar_tests.sh
+      - name: Stage 02 automatic full-year boundary route dates
+        run: sh run_stage02_automatic_boundary_route_tests.sh

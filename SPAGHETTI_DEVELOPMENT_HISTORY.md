@@ -161,3 +161,7 @@ ni'o lo `RankRoute` cu ralte lo se steci pamoi pagbu .e lo ranki girzu .e lo se 
 ### lo se mulno ranki pluta cu detri
 
 ni'o lo `beginGlobalRankRouteWithinPrefix` cu cpacu lo ranki pluta poi se jicmu fi lo pamoi pagbu .i lo `fromBlueprintWithCompletedGlobalRoute` cu zbasu lo detri fi lo mulno se cuxna ranki .e lo nanca stura. lo se stodi te jmina be lo mu'oi stadi cu na se te cuxna ro ranki pe li 5778 djedi ca lo se jimte.
+
+### lo mulno nanca pamoi .e romoi ranki detri
+
+ni'o lo se cuxna te javni cu kakne lo nu zbasu lo detri fi lo ranki po'o ca lo nu lo ranki cu stuzi lo pamoi .a lo romoi pagbu. lo drata ranki cu za'o nitcu lo se jimte se xanri pagbu pluta. lo stadi 2 cu za'o na mulno.

@@ -35,6 +35,13 @@ public final class MonsterManager {
                 calculationDay, targetDay, fixedPrefix, localRank));
     }
 
+    public MonsterCalendarResolver.GlobalPrefixRankedYear calendarWithAutomaticBoundaryRank(
+            BigInteger calculationDay, BigInteger targetDay, BigInteger globalRank) {
+        return errorBoundary.execute(() ->
+            MonsterCalendarResolver.forTargetWithAutomaticBoundaryRank(
+                calculationDay, targetDay, globalRank));
+    }
+
     public MonsterCalendarResolver.GlobalPrefixRankedYear calendarWithGlobalPrefixRank(
             BigInteger calculationDay, BigInteger targetDay,
             int[] fixedPrefix, BigInteger globalRank) {

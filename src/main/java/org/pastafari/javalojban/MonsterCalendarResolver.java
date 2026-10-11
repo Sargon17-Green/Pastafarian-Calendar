@@ -155,6 +155,23 @@ public final class MonsterCalendarResolver {
             route.lowerRank(), route.upperRank());
     }
 
+    public static GlobalPrefixRankedYear forTargetWithAutomaticBoundaryRank(
+            BigInteger calculationDay, BigInteger targetDay, BigInteger globalRank) {
+        if (calculationDay == null || targetDay == null) {
+            throw new IllegalArgumentException("E_NULL_DAY");
+        }
+        MonsterYears.Year year = new MonsterYears().findTargetYear(
+            calculationDay, targetDay);
+        MonsterYearBlueprint blueprint = MonsterYearBlueprint.build(calculationDay, year);
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(blueprint.monthLengths());
+        MonsterWeavingLinearCounter.RankRoute route =
+            family.beginGlobalRankRoute(globalRank,
+                Math.min(MonsterWeavingLinearCounter.MAX_UNRANK_DAYS,
+                    blueprint.year().length().intValueExact()));
+        return fromBlueprintWithCompletedGlobalRoute(blueprint, family, route);
+    }
+
     public static GlobalPrefixRankedYear forTargetWithGlobalPrefixRank(
             BigInteger calculationDay, BigInteger targetDay,
             int[] fixedPrefix, BigInteger globalRank) {

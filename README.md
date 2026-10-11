@@ -200,3 +200,7 @@ ni'o lo `beginGlobalRankRoute` cu cfari lo ranki pluta fi lo mulno nanca ranki p
 ## lo mulno se pagbu ranki detri
 
 ni'o lo `beginGlobalRankRouteWithinPrefix` cu cfari lo ranki pluta fi lo drani pamoi pagbu .e lo mulno nanca ranki. lo `MonsterCalendarResolver.fromBlueprintWithCompletedGlobalRoute` cu zbasu lo detri fi lo te drani nanca ranki te pagbu poi mulno. lo `RankRoute.complete` cu se jmina tezu'e lo nu lo se stali djedi cu na zmadu lo se jimte. lo pamoi pagbu cu na sarcu lo nu du lo nanca pamoi pagbu .i ro lo se benji detri cu stodi fi lo `SourceLanguageCatalog`. ko benji `sh run_stage02_route_calendar_tests.sh`.
+
+## lo nanca ranki se xusra fi lo pamoi .e romoi pagbu
+
+ni'o lo `beginGlobalRankRoute` cu facki lo pagbu pe lo pamoi .e lo romoi se jorne ranki fi lo mulno nanca be li 5778 djedi. lo `MonsterCalendarResolver.forTargetWithAutomaticBoundaryRank` cu zbasu lo detri fi lo mulno ranki po'o ca lo nu lo ranki cu pagbu lo pamoi .a lo romoi te cuxna. lo `MonsterManager.calendarWithAutomaticBoundaryRank` cu pilno lo te benji. lo drata ranki cu za'o na mulno. ko benji `sh run_stage02_automatic_boundary_route_tests.sh`.
