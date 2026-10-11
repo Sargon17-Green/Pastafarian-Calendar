@@ -22,6 +22,7 @@ t/06_normative_small_space_audit.t
 t/07_bootstrap_integrity.t
 t/08_rank_domain_and_state.t
 t/09_gate_year_invariants.t
+t/10_rank_ring_bigint.t
 t/lib/Pastafari/NormativeScroll.pm
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml
