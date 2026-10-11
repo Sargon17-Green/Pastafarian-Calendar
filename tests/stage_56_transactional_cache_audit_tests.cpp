@@ -1,7 +1,9 @@
 #include "pastafari/monster.hpp"
 #include "pastafari/source_language_catalog.hpp"
 
+#include <algorithm>
 #include <array>
+#include <cstddef>
 
 #include <iostream>
 #include <map>
