@@ -57,3 +57,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38156647121` ተፈትኗል፤ `v fm
 ## ደረጃ 6 — DISCOVERY 03 (የሚጠበቅ RED)
 
 የካሌንደር አሮጌ ርቀት `old_distance(c,t)` ከ`calendar_day_tag_spaghetti` የሚመጡትን የተጠገኑ tag ውጤቶች አንጻር ይቆጥራል፦ `abs(tag(c)-tag(t))`። ይህ የክሮኖሎጂ የቀን ርቀት `abs(t-c)+1` አይደለም። `LegacyDistanceAdapter` እና የproduction መግቢያ `calendar_distance_spaghetti` ተጨምረዋል፤ በ`calendar_date_spaghetti` ስህተት መልዕክት የታሪካዊ መንገድ ውጤት በግልጽ ይታያል። `old_day_tag`፣ `DayTagPatch02` እና `SavePatch01` ሳይለወጡ ቀርተዋል። `PATCH 03` ወደ ደረጃ 7 ብቻ ይገባል።
+
+### የደረጃ 6 መዝጊያ — EXPECTED_RED
+
+V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅርጸት፣ የደረጃ 1 ኦራክል፣ ቀድሞ የተጠገኑ የPATCH 01 እና PATCH 02 የሙከራ ፋይሎች፣ የሦስተኛው ታሪካዊ ስህተት witness ተሳክተዋል። `discovery03_expected_red_test.v` ከመጀመሪያው የV typecheck PASS በኋላ አራት የታሰቡ assertions በተናጠል RED አሳይቷል። የማስረጃ ቅርስ `11708791583` ተቀምጧል። `old_distance` አልተጠገነም፣ `PATCH 03` አልተጨመረም። ደረጃ 6 COMPLETE / EXPECTED_RED ነው።

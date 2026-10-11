@@ -49,4 +49,4 @@ v fmt -verify ./pastafari
 
 ## ደረጃ 6 — DISCOVERY 03
 
-ሦስተኛው የታሪካዊ ስህተት `old_distance(c,t) = abs(dayTag(c)-dayTag(t))` ተጨምሯል። ትክክለኛው የቀን ርቀት `abs(t-c)+1` ነው። በአንድ ቀን፣ በሁለት ቀናት፣ በFOUNDATION ሁለት ጎኖች እና ከ256 ቢት በላይ ርቀት ሆን ተብሎ RED ሙከራዎች ተጨምረዋል። `PATCH 03` አልተጨመረም። የV 0.5.2 የCI ማረጋገጫ እስካሁን አልተካሄደም፤ `LAST_COMPLETED_STAGE=5` ነው። ዝርዝር፦ `docs/STAGE06_DISCOVERY03.md`።
+ሦስተኛው የታሪካዊ ስህተት `old_distance(c,t) = abs(dayTag(c)-dayTag(t))` ተጨምሯል። ትክክለኛው የቀን ርቀት `abs(t-c)+1` ነው። በአንድ ቀን፣ በሁለት ቀናት፣ በFOUNDATION ሁለት ጎኖች እና ከ256 ቢት በላይ ርቀት ሆን ተብሎ RED ሙከራዎች ተጨምረዋል። `PATCH 03` አልተጨመረም። V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል፤ 8 የቀድሞ/አዲስ GREEN የሙከራ ፋይሎች PASS ናቸው፤ አራቱ የታሰቡ RED assertions በስም ተረጋግጠዋል። `LAST_COMPLETED_STAGE=6` ነው። ዝርዝር፦ `docs/STAGE06_DISCOVERY03.md`።

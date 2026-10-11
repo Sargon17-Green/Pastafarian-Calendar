@@ -1,4 +1,4 @@
-# ደረጃ 6/55 — DISCOVERY 03 (EXPECTED_RED)
+# ደረጃ 6/55 — DISCOVERY 03 (COMPLETE / EXPECTED_RED)
 
 ## የማይቀየረው የሂሳብ ሕግ
 
@@ -41,6 +41,16 @@ v -check ./pastafari/discovery03_expected_red_test.v
 v test ./pastafari/discovery03_expected_red_test.v
 ```
 
-የመጨረሻው `v test` ብቻ በሆን ተብሎ RED መሆን አለበት፤ በሎጉ ውስጥ አራቱ ሙከራዎች በስም መታየት አለባቸው። የCI መስመር `.github/workflows/canonical-names-lock.yml` ነው። እውነተኛው የV ማረጋገጫ እስኪሳካ `LAST_COMPLETED_STAGE=5` ይቆያል።
+የመጨረሻው `v test` ብቻ በሆን ተብሎ RED መሆን አለበት፤ በሎጉ ውስጥ አራቱ ሙከራዎች በስም መታየት አለባቸው። የCI መስመር `.github/workflows/canonical-names-lock.yml` ነው። የV 0.5.2 እውነተኛ የEXPECTED_RED ማረጋገጫ ተሳክቷል፤ `LAST_COMPLETED_STAGE=6` ነው።
 
 በዚህ ደረጃ `PATCH 03` አይጨመርም፤ በደረጃ 7 ብቻ `chronological=abs(t-c)` መንገድ ይመጣል።
+
+## የተረጋገጠ መዝጊያ
+
+- የተፈተነ commit፦ `88a2d86d29cb72635b44b9d0f18bdc8fb787f0e0`
+- የV ስሪት፦ `V 0.5.2 7647ce1`
+- የGitHub Actions ሩጫ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157358354
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157358354/artifacts/11708791583
+- `v fmt -verify` PASS፤ 7 ቀዳሚ የሙከራ ፋይሎች PASS፤ አዲሱ witness PASS።
+- `v -check ./pastafari/discovery03_expected_red_test.v` PASS፤ 4 የታሰቡ RED assertions በተናጠል ተረጋግጠዋል።
+- `PATCH 03` አልተጨመረም፤ ደረጃ 7 ከዚህ የተለየ ነው።
