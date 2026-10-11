@@ -827,6 +827,7 @@ jobs:
             -v "$RUNNER_TEMP/native-diverse-traces:/diverse" \
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=3s 25s python -u qa/stage1_native_trace_hook_selftest.py
               timeout --kill-after=5s 800s python -u qa/stage1_native_diverse_geometry.py
             '
       - name: Audit native executed code versions, directed routes and input diversity

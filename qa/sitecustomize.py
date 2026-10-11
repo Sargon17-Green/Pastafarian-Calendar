@@ -23,27 +23,39 @@ if os.environ.get("BF98_TRACE_LOG"):
                 "STEP\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n" %
                 (tick, ip.id, position[0], position[1],
                  direction[0], direction[1], opcode, depth))
-            if opcode == ord("g"):
+            if opcode == ord("g") and not ip.stringmode:
                 stack = list(ip.stack[_bfmod.TOSS])
                 if len(stack) < 2:
                     _bf_log.write("INSUFFICIENT_G_STACK\t%d\t%d\n" %
                                   (tick, len(stack)))
                 else:
                     px, py = stack[-2:]
-                    point = ip.position.__class__((px, py))
+                    # Funge-98 g/p coordinates are relative to the active IP's
+                    # storage offset, which may be changed by { and }.
+                    # All trace coordinates must name the physical Space cell.
+                    point = ip.position.__class__((
+                        int(px) + int(ip.offset[0]),
+                        int(py) + int(ip.offset[1])))
+                    px, py = tuple(point)
                     before = self.space.get(point)
                     _bf_log.write(
                         "READ_BEFORE\t%d\t%d\t%d\t%d\n" %
                         (tick, px, py, before))
                     pending_reads.append((tick, px, py, before, ip))
-            if opcode == ord("p"):
+            if opcode == ord("p") and not ip.stringmode:
                 stack = list(ip.stack[_bfmod.TOSS])
                 if len(stack) < 3:
                     _bf_log.write("INSUFFICIENT_P_STACK\t%d\t%d\n" %
                                   (tick, len(stack)))
                 else:
                     value, px, py = stack[-3:]
-                    point = ip.position.__class__((px, py))
+                    # Funge-98 g/p coordinates are relative to the active IP's
+                    # storage offset, which may be changed by { and }.
+                    # All trace coordinates must name the physical Space cell.
+                    point = ip.position.__class__((
+                        int(px) + int(ip.offset[0]),
+                        int(py) + int(ip.offset[1])))
+                    px, py = tuple(point)
                     before = self.space.get(point)
                     _bf_log.write(
                         "WRITE_BEFORE\t%d\t%d\t%d\t%d\t%d\n" %
