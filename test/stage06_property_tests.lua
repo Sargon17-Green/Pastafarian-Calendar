@@ -16,7 +16,7 @@ local function check(c, t, label, checkOracle)
     local chronological = B.add(B.abs(B.sub(B.from(t), B.from(c))), 1)
     assert(B.compare(old, direct) == 0 and B.compare(old, tagDifference) == 0,
            label .. ": move diferans tag yo")
-    assert(B.compare(public, old) == 0, label .. ": wout pwodiksyon an pa pase nan legacy")
+    assert(B.compare(public, chronological) == 0, label .. ": wout pwodiksyon an pa korije")
     assert(B.compare(old, 0) >= 0, label .. ": distans negatif")
     assert(ctx.commitToken == 1 and ctx.status == "LEGACY_DISTANCE_RETURNED")
     assert(ctx.pendingSemanticState == nil and ctx.rollbackSnapshot == nil)
@@ -53,7 +53,7 @@ for index = 1, 256 do
     local c = F + nextOffset()
     local t = F + nextOffset()
     local first = check(c, t, "echantiyon " .. index, true)
-    assert(B.compare(first, S.distanceSpaghetti(t, c)) == 0,
+    assert(B.compare(first, S.legacyDistanceProbe(t, c)) == 0,
            "Diferans absoli a pa simetrik")
 end
 

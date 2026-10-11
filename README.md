@@ -133,4 +133,22 @@ texlua test/stage06_expected_red_audit.lua .
 texlua test/stage06_tests.lua .
 ```
 
-Dènye kòmand lan dwe fini ak echèk **`EXPECTED_RED Stage 6 DISCOVERY 03`**; lòt tès yo dwe fini avèk `PASS`. Nou pa fè koreksyon Stage 7 la: pa gen `chronological = abs(t-c)`, pa gen konparezon ki ranplase rezilta legacy a, epi pa gen `+1` sou distans la nan kòd pwodiksyon. `oldRemainder`, `oldDayTag`, `savePatch` ak `dayTagWithFoundationScar` rete san okenn chanjman.
+Nan checkpoint Stage 6 la, dènye kòmand lan te fini ak **`EXPECTED_RED Stage 6 DISCOVERY 03`**. Apre PATCH 03, regresyon pwodiksyon an pase; odit la toujou egzije menm senk diferans istorik yo atravè `legacyDistanceProbe`. Nan checkpoint Stage 6 la, te gen ni kalkil `chronological = abs(t-c)`, ni konparezon ki ranplase legacy a, ni adisyon `+1` nan chemen pwodiksyon an; se Stage 7 sèlman ki ajoute etap sa yo. `oldRemainder`, `oldDayTag`, `savePatch` ak `dayTagWithFoundationScar` rete san okenn chanjman.
+
+## Stage 7 — PATCH 03: distans kwonolojik enklizif
+
+Nou kite `src/legacy_distance.lua` **san okenn chanjman**. Nou ajoute `src/distance_patch.lua`: li rele `LegacyDistance.execute(c,t)` ak tout chemen `DAY_TAG_PATCH` la, li kalkile `chronological = abs(t-c)` an BigInt, li konpare rezilta istorik la ak valè kwonolojik la, epi li ranplase ansyen valè a **sèlman si de valè yo diferan**. Finalman, li ajoute `1` pou jwenn distans enklizif `abs(t-c)+1`. Nou kenbe branch kote de valè yo deja egal, menm si li ka sanble redondan; li fè pati kontra istorik PATCH 03 la.
+
+Fonksyon `distanceSpaghetti(c,t)` pase nan nouvo `DISTANCE_PATCH` handler la. `distancePatchProbe(c,t)` bay rezilta korije a ak kontèks ki konsève `LEGACY_DISTANCE` ak `DISTANCE_PATCH`, de tranzaksyon ki fini, de kontèks tag ki deja korije, metrik ak dyagnostik. `legacyDistanceProbe(c,t)` kontinye bay ansyen distans ki mal la pou analiz. Pa gen okenn oracle normatif nan kòd pwodiksyon, pa gen okenn pyès Stage 8 oswa Stage 9.
+
+Depi Stage 7, regresyon `test/stage06_regression_tests.lua` vin **GREEN**, men `test/stage06_expected_red_audit.lua` kontinye verifye egzakteman senk ansyen diferans yo sou `test/stage06_legacy_regression_tests.lua`. `test/stage06_trace_tests.lua` ak `test/stage06_property_tests.lua` kontinye egzamine ansyen konpòtman an via `legacyDistanceProbe`, epi yo egzije pwodiksyon korije a. Sa konsève eksperyans Discovery 03 la.
+
+Tès patch yo kouvri **2,665 pè jou**: mayaj 49 × 49 bò Fondasyon an, 256 pè detèminis, ak 8 limit Lua, ki gen ladan `math.mininteger` ak `math.maxinteger`. Yo verifye tou simetri, apèl repete, branch rekonsilyasyon kont branch san ranplasman, de handler, metrik, dyagnostik ak izolasyon kontèks.
+
+Pou kouri tout etap 1 rive 7 yo ak Lua 5.3:
+
+```text
+texlua test/stage07_tests.lua .
+```
+
+Tout tès yo dwe pase epi GitHub Actions dwe rapòte `GREEN`. Pou konpare ak ansyen defo a, sèlman `test/stage06_legacy_regression_tests.lua` dwe toujou echwe entansyonèlman; runner prensipal la pa kouri li kòm tès vèt.

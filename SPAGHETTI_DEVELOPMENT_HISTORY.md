@@ -125,3 +125,19 @@ Nou ajoute `LEGACY_DISTANCE` nan dispatcher la, ak yon nouvo kontèks, metrik, y
 Nou teste sèt tras nonmen, yon kadriyaj 1369 pè jou, 256 lòt pè ak uit pè ekstremal: 1633 pè an tout. Gen 1539 divergences nan seri sa a, epi yon regresyon endepandan bay egzakteman senk ka ki obligatwa pou prèv Discovery 03. Odit separe a refize tout lòt echèk kòm yon fo wouj. Tès ak kontra Stage 1–5 yo rete aktif ak vèt.
 
 Pa gen `PATCH 03` nan etap sa a. Pou Stage 7 sèlman, nou pral konpare ansyen distans la ak `abs(t-c)`, korije si yo pa egal, epi ajoute inite final la. Nou pa pre-enkode metòd sa a nan pwodiksyon.
+
+## Stage 7 — PATCH 03: ranplase diferans tag la sèlman lè li pa kwonolojik
+
+### Sipozisyon ak rezilta ki soti nan Discovery 03
+
+Ansyen `oldDistance(c,t)` la te pran diferans absoli ant de tag jou ki te deja korije nan Stage 5. Nou te jwenn egzanp kote rezilta a te `0` pou menm jou a, `1` olye de `3` atravè Fondasyon an, epi `6` olye de `4` sou menm bò a. Gen lòt pè kote diferans tag la egal aksidantèlman ak diferans jou kwonolojik la. Se poutèt sa senpleman ajoute `1` sou `oldDistance` pa ta sifi.
+
+### Kouch PATCH 03 a
+
+Nou pa chanje `src/legacy_distance.lua`. Nou ajoute yon kouch `distancePatch` ki rele `LegacyDistance.execute(c,t)` nan chemen pwodiksyon an. Apre li resevwa valè istorik la, li kalkile `chronological = abs(t-c)` ak BigInt, li konpare valè yo, li ranplase valè istorik la sèlman lè yo diferan, epi li fè `distance = reconciled + 1`. Toude branch yo rete vizib nan eta semantik ak nan dyagnostik. Nou pa retounen oracle tès la; se yon koreksyon lokal ki defini nan kontra a.
+
+Handler `DISTANCE_PATCH` la ajoute yon dezyèm tranzaksyon nan menm kontèks `LEGACY_DISTANCE` lan: li kenbe tag orijinal yo, diferans legacy a, distans kwonolojik la, valè apre rekonsilyasyon an, ak distans enklizif final la. Li ajoute metrik `distance.patch.calls`, `distance.patch.reconciliations` ak `distance.patch.inclusiveUnits`. De kontèks tag pitit yo rete disponib; chak deja gen de etap `LEGACY_DAY_TAG` ak `DAY_TAG_PATCH`. Sa ogmante achitekti monstr lan san li pa kache ansyen erè a.
+
+### Regrèsyon ak sa ki rete pou pita
+
+Regresyon normatif Stage 6 la vin vèt. Nou kreye `stage06_legacy_regression_tests.lua` pou kenbe mesaj `EXPECTED_RED` orijinal la egzak, pandan odit Stage 6 la kouri sou chemen legacy a. Nou ajiste tès tras ak pwopriyete yo pou yo konpare legacy ak legacy, epi wout piblik la ak règ enklizif la. Nou egzamine 2,665 pè, limite debòdman Lua ak BigInt, epi teste reentrancy ak diferan branch rekonsilyasyon. Stage 8 ak defo ki vin apre yo pa enkli.

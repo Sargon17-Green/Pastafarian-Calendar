@@ -1,10 +1,10 @@
 local root = arg[1] or "."
 local previousArg = arg
 arg = {root}
-local chunk = assert(loadfile(root .. "/test/stage06_regression_tests.lua"))
+local chunk = assert(loadfile(root .. "/test/stage06_legacy_regression_tests.lua"))
 local ok, message = pcall(chunk)
 arg = previousArg
-assert(not ok, "Discovery 03 pa montre okenn diferans distans istorik")
+assert(not ok, "Ansyen chemen Discovery 03 pa montre okenn diferans distans istorik")
 assert(type(message) == "string", "Regresyon an pa bay yon mesaj verifyab")
 local expected = "EXPECTED_RED Stage 6 DISCOVERY 03: 5 ka distance pa ekivalan: " ..
     "SELF: legacy=0 normative=1; " ..

@@ -19,7 +19,8 @@ for _, item in ipairs(checks) do
     local name, c, t, expected, firstTag, lastTag = table.unpack(item)
     local result, ctx = S.legacyDistanceProbe(c, t)
     assert(tostring(result) == expected, name .. ": move distans istorik la")
-    assert(tostring(S.distanceSpaghetti(c, t)) == expected, name .. ": wout pwodiksyon pa aktive")
+    assert(tostring(S.distanceSpaghetti(c, t)) == tostring(B.add(B.abs(B.sub(B.from(t), B.from(c))), 1)),
+           name .. ": wout PATCH 03 pa aktive")
     assert(ctx.phase == "LEGACY_DISTANCE" and ctx.mode == "STAGE_06_DISCOVERY_03")
     assert(ctx.status == "LEGACY_DISTANCE_RETURNED" and ctx.currentHandler == "LEGACY_DISTANCE")
     assert(ctx.commitToken == 1 and ctx.pendingSemanticState == nil and ctx.rollbackSnapshot == nil)
