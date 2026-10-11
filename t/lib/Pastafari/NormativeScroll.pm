@@ -526,30 +526,90 @@ sub makeCutletPartitionFamily ($G, $K, $required = undef) {
 sub _weave_counter ($lengths) {
     my $m = scalar @$lengths;
     my %memo;
-    my $count;
-    $count = sub ($remaining,$opened,$closed) {
-        my $done = 1;
-        for my $v (@$remaining) { if ($v != 0) { $done = 0; last } }
-        return Math::BigInt->bone if $done;
-        my $key = join(',',@$remaining) . "|$opened|$closed";
-        return $memo{$key}->copy if exists $memo{$key};
-        my $sum = Math::BigInt->bzero;
-        for my $j (1 .. $m) {
-            next if $remaining->[$j-1] == 0;
-            my $alreadyOpened = $remaining->[$j-1] < $lengths->[$j-1];
-            next if !$alreadyOpened && $j != $opened + 1;
-            my $willClose = $remaining->[$j-1] == 1;
-            next if $willClose && $j != $closed + 1;
-            my @next = @$remaining;
-            my $nextOpened = $opened;
-            my $nextClosed = $closed;
-            $nextOpened = $j if $next[$j-1] == $lengths->[$j-1];
-            $next[$j-1]--;
-            $nextClosed = $j if $next[$j-1] == 0;
-            $sum->badd($count->(\@next,$nextOpened,$nextClosed));
+
+    # 明確的堆疊取代自我呼叫，既避免過深的 Perl 呼叫堆疊，
+    # 也避免以閉包捕捉自己而形成無法釋放的參照循環。
+    my $count = sub ($remaining, $opened, $closed) {
+        my $root_key = join(',', @$remaining) . "|$opened|$closed";
+        return $memo{$root_key}->copy if exists $memo{$root_key};
+
+        my @stack = ({
+            remaining => [@$remaining],
+            opened => $opened,
+            closed => $closed,
+            key => $root_key,
+            children => undef,
+            nextChild => 0,
+        });
+
+        while (@stack) {
+            my $frame = $stack[-1];
+            my $key = $frame->{key};
+            if (exists $memo{$key}) {
+                pop @stack;
+                next;
+            }
+
+            if (!defined $frame->{children}) {
+                my $done = 1;
+                for my $v (@{ $frame->{remaining} }) {
+                    if ($v != 0) {
+                        $done = 0;
+                        last;
+                    }
+                }
+                if ($done) {
+                    $memo{$key} = Math::BigInt->bone;
+                    pop @stack;
+                    next;
+                }
+
+                my @children;
+                for my $j (1 .. $m) {
+                    next if $frame->{remaining}[$j-1] == 0;
+                    my $alreadyOpened =
+                        $frame->{remaining}[$j-1] < $lengths->[$j-1];
+                    next if !$alreadyOpened && $j != $frame->{opened} + 1;
+                    my $willClose = $frame->{remaining}[$j-1] == 1;
+                    next if $willClose && $j != $frame->{closed} + 1;
+
+                    my @next = @{ $frame->{remaining} };
+                    my $nextOpened = $frame->{opened};
+                    my $nextClosed = $frame->{closed};
+                    $nextOpened = $j if $next[$j-1] == $lengths->[$j-1];
+                    $next[$j-1]--;
+                    $nextClosed = $j if $next[$j-1] == 0;
+                    push @children, {
+                        remaining => \@next,
+                        opened => $nextOpened,
+                        closed => $nextClosed,
+                        key => join(',', @next) . "|$nextOpened|$nextClosed",
+                        children => undef,
+                        nextChild => 0,
+                    };
+                }
+                $frame->{children} = \@children;
+            }
+
+            my $children = $frame->{children};
+            my $pending;
+            for (my $n = $frame->{nextChild}; $n < @$children; $n++) {
+                next if exists $memo{ $children->[$n]{key} };
+                $pending = $children->[$n];
+                $frame->{nextChild} = $n + 1;
+                last;
+            }
+            if ($pending) {
+                push @stack, $pending;
+                next;
+            }
+
+            my $sum = Math::BigInt->bzero;
+            $sum->badd($memo{ $_->{key} }) for @$children;
+            $memo{$key} = $sum;
+            pop @stack;
         }
-        $memo{$key} = $sum->copy;
-        return $sum;
+        return $memo{$root_key}->copy;
     };
     return $count;
 }

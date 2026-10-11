@@ -74,20 +74,25 @@ for my $lengths (
 
 # 兩個非空月份：首日只能屬於月份 1，末日只能屬於月份 2。
 # 中間位置自由交織，總數為 C(a+b-2,a-1)，不必建構任何 DP。
-for my $pair ([4,4], [4,123], [123,4], [123,123]) {
-    my ($a,$b) = @$pair;
-    my $expected = binomial($a+$b-2,$a-1);
-    my $count = countWeavings($pair);
-    is("$count","$expected","兩個合法月份 $a/$b 的組合數獨立公式");
-    my $first = unrankWeaving($pair,1);
-    my $last = unrankWeaving($pair,$count);
-    is_deeply($first, [(1)x$a, (2)x$b],
-        "兩個合法月份 $a/$b 的最小字典序列");
-    is_deeply($last, [1,(2)x($b-1),(1)x($a-1),2],
-        "兩個合法月份 $a/$b 的最大字典序列");
-    my @actual_counts=(0,0);
-    $actual_counts[$_-1]++ for @$last;
-    is_deeply(\@actual_counts,[$a,$b],
-        "兩個月份 $a/$b 的大排名保留全部日數");
+my $long_weaving_warnings = '';
+{
+    local $SIG{__WARN__} = sub { $long_weaving_warnings .= shift };
+    for my $pair ([4,4], [4,123], [123,4], [123,123]) {
+        my ($a,$b) = @$pair;
+        my $expected = binomial($a+$b-2,$a-1);
+        my $count = countWeavings($pair);
+        is("$count","$expected","兩個合法月份 $a/$b 的組合數獨立公式");
+        my $first = unrankWeaving($pair,1);
+        my $last = unrankWeaving($pair,$count);
+        is_deeply($first, [(1)x$a, (2)x$b],
+            "兩個合法月份 $a/$b 的最小字典序列");
+        is_deeply($last, [1,(2)x($b-1),(1)x($a-1),2],
+            "兩個合法月份 $a/$b 的最大字典序列");
+        my @actual_counts=(0,0);
+        $actual_counts[$_-1]++ for @$last;
+        is_deeply(\@actual_counts,[$a,$b],
+            "兩個月份 $a/$b 的大排名保留全部日數");
+    }
 }
+is($long_weaving_warnings, '', '合法長月份之計數與反排名不產生遞迴或其他警告');
 done_testing;
