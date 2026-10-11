@@ -425,3 +425,23 @@ Tutti i coefficienti corretti rimangono fisicamente
 nella tabella. I test verificano limiti, aritmetica BigInt,
 SAVE, riproducibilità e tutte le patch precedenti.
 Non viene anticipata la correzione di Stage13.
+
+### Certificazione nativa dello stadio 12
+
+La [run GitHub Actions 38164763029](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38164763029)
+ha concluso SUCCESS sul commit
+`58caeee944b2987f344bbb69db93c236e39b5a0f`.
+Tutti i tredici job sono riusciti: blocco dei nomi,
+Stage01 18 PASS; Stage02 7 PASS/3 FAIL attesi;
+Stage03 12 PASS; Stage04 14 PASS/3 FAIL attesi;
+Stage05 18 PASS; Stage06 15 PASS/3 FAIL attesi;
+Stage07 20 PASS; Stage08 19 PASS/3 FAIL attesi;
+Stage09 26 PASS; Stage10 15 PASS/3 FAIL attesi;
+Stage11 27 PASS; Stage12 22 PASS/3 FAIL deliberati.
+
+Tre discrepanze calcolate con il medesimo input e
+la ricorrenza di SAVE:
+macinatura 1 `422 → 68`;
+macinatura 6 `1188 → 1002`;
+macinatura 11 `2136 → 1974`.
+Non è stata introdotta PATCH 06.

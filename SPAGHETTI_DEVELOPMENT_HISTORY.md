@@ -575,4 +575,22 @@ di lookup sbagliata, calcolo legacy reale, handler,
 otto campi del contesto, validazione e report,
 metrica specifica e suite di regressione.
 Le cinque patch precedenti restano invariate.
-Certificazione nativa da acquisire.
+### Verifica nativa compiuta
+
+La run GitHub Actions 38164763029 ha compilato ed eseguito
+Scala nativo sul commit
+`58caeee944b2987f344bbb69db93c236e39b5a0f`.
+Tutti i tredici job sono SUCCESS: Stage01 18 PASS;
+Stage02 7 PASS/3 FAIL deliberati; Stage03 12 PASS;
+Stage04 14 PASS/3 FAIL deliberati; Stage05 18 PASS;
+Stage06 15 PASS/3 FAIL deliberati; Stage07 20 PASS;
+Stage08 19 PASS/3 FAIL deliberati; Stage09 26 PASS;
+Stage10 15 PASS/3 FAIL deliberati; Stage11 27 PASS;
+Stage12 22 PASS/3 FAIL deliberati.
+
+Le tre divergenze della formula di macinatura sono
+`422 → 68`, `1188 → 1002` e `2136 → 1974`,
+rispettivamente per i passi 1, 6 e 11. Il risultato
+della discovery è stato osservato dal vero manager e
+dal dispatcher; le cinque patch precedenti continuano
+a funzionare. Nessuna correzione è stata anticipata.
