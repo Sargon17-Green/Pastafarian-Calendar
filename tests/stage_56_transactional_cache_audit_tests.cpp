@@ -1,6 +1,7 @@
 #include "pastafari/monster.hpp"
 
 #include <iostream>
+#include <map>
 #include <stdexcept>
 #include <string>
 
@@ -41,6 +42,56 @@ void exigeRecuperationem(const Stage54IntegrationReport& r,
     exige(r.recoverySnapshotRestoredExactly == (defectus != 0),
           "snapshot recuperationis non exacte restitutum est");
 }
+void exigeRepetitionemContextus() {
+    pastafari::BaseMonsterContext contextus;
+    std::map<Integer, pastafari::FinalStructureCacheEntry> cache;
+    const pastafari::FinalIntegrationHandler handler;
+    const pastafari::BaseValidationManager validator;
+    const pastafari::BaseMetricsShell metrics;
+    const Integer c0 = pastafari::FOUNDATION_DAY_OLD;
+    const Integer c1 = c0 + 1;
+
+    const auto invoca = [&](const Integer& c) {
+        contextus.calculationDay = c;
+        contextus.targetDay = c;
+        contextus.stage56CorrectiveRequested = true;
+        handler.handle(contextus, cache, validator, metrics);
+        exige(contextus.status == "GREEN", "contextus iteratus non viridis");
+    };
+
+    invoca(c0);
+    exige(!contextus.finalGuardedCacheHit &&
+          contextus.stage56AppliedCount == 12,
+          "contextus primus non computavit XII commotiones");
+    const SpaghettiDateFive primus = contextus.resultFive;
+
+    invoca(c0);
+    exige(contextus.finalGuardedCacheHit,
+          "contextus reusus cache calidum non cognovit");
+    exige(contextus.stage56AppliedCount == 0,
+          "cache calidus cicatrices veteris invocationis retinuit");
+    exige(eademDies(primus, contextus.resultFive),
+          "contextus reusus cache calido exitum corrupit");
+
+    invoca(c1);
+    exige(!contextus.finalGuardedCacheHit && contextus.finalGuardedCacheRejected,
+          "contextus reusus flag cache-hit veterem ad novum c transtulit");
+    exige(contextus.stage56AppliedFlag &&
+          contextus.stage56LegacyScarCallCount == 12 &&
+          contextus.stage56AppliedCount == 12,
+          "contextus reusus XII cicatrices post cache rejectum non reexercuit");
+    const SpaghettiDateFive recens =
+        pastafari::calendarDateSpaghetti(c1, c1);
+    exige(eademDies(recens, contextus.resultFive),
+          "contextus reusus exitum contra novam invocationem discrepavit");
+
+    invoca(c1);
+    exige(contextus.finalGuardedCacheHit && !contextus.finalGuardedCacheRejected,
+          "contextus reusus flag cache-rejection vetus retinuit");
+    exige(contextus.stage56AppliedCount == 0,
+          "cache secundum calidum cicatrices novas simulavit");
+}
+
 } // namespace
 
 int main() {
@@ -150,11 +201,13 @@ int main() {
         exige(eademDies(publicus, p0.result),
               "API publica et manager Stage 56 discrepant");
 
+        exigeRepetitionemContextus();
+
         std::cout << "GRADUS56_CACHE_RECOVERY_TRANSIIT: "
                      "cache frigidus/calidus, reiectio fingerprint, "
                      "duae instantiae, retry 0/1/2, injectio 40/50, "
                      "exhaustio sine commit, cache historicus separatus, "
-                     "API publica congruens\n";
+                     "API publica et contextus reusus congruentes\n";
         return 0;
     } catch (const std::exception& e) {
         std::cerr << "GRADUS56_CACHE_RECOVERY_DEFECIT: "
