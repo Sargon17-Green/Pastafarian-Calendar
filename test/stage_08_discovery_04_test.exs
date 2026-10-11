@@ -16,17 +16,17 @@ defmodule PastafariCalendarElixirVietnamese.Stage08Discovery04Test do
     assert elem(table[2], 0) == elem(oracle[2], 0)
   end
 
-  test "hàng thứ hai lộ thứ tự ghi nối tiếp thực sự" do
+  test "hàng thứ hai chứng minh hàm nối tiếp sai còn nguyên dưới lớp vá" do
     initial = {17, 29, 43, 71, 101}
     row = LegacyStoneMutation.mutate_stones_wrong(initial, 2)
 
     assert row == {378, 1434, 3780, 9932, 25047}
-    assert StoneManager.row_at(2) == row
-    assert Calendar.stone_row_spaghetti(2) == row
     refute row == Ref.build_stones()[2]
+    assert StoneManager.row_at(2) == Ref.build_stones()[2]
+    assert Calendar.stone_row_spaghetti(2) == Ref.build_stones()[2]
   end
 
-  test "bảng đá phát hiện được tính ở đường bootstrap sản xuất" do
+  test "bảng đá đã vá được tính ở đường bootstrap sản xuất" do
     f = Ref.foundation_day()
     context = Calendar.bootstrap_context(f - 5, f + 8)
 
@@ -37,19 +37,23 @@ defmodule PastafariCalendarElixirVietnamese.Stage08Discovery04Test do
     assert context.distance_count == Ref.work_counts(f - 5, f + 8).distance
   end
 
-  test "46 hàng đều lấy trực tiếp hàng trước và nằm trong miền SAVE" do
+  test "46 hàng đều lấy trực tiếp hàng trước thông qua lớp vá" do
     table = StoneManager.build_table()
+    oracle = Ref.build_stones()
     m = Ref.m()
 
+    assert map_size(table) == 46
+
     Enum.each(2..46, fn index ->
-      expected = LegacyStoneMutation.mutate_stones_wrong(Map.fetch!(table, index - 1), index)
-      assert Map.fetch!(table, index) == expected
+      assert Map.fetch!(table, index) == Map.fetch!(oracle, index)
 
       table
       |> Map.fetch!(index)
       |> Tuple.to_list()
       |> Enum.each(fn value -> assert is_integer(value) and value >= 1 and value <= m end)
     end)
+
+    refute LegacyStoneMutation.mutate_stones_wrong(table[1], 2) == table[2]
   end
 
   test "ngữ cảnh có sở hữu bảng đá riêng và không thể làm hỏng kết quả lần gọi sau" do
@@ -97,9 +101,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage08Discovery04Test do
     assert Calendar.stone_row_spaghetti(46) == Calendar.stones_table_spaghetti()[46]
   end
 
-  test "mô-đun lịch sử viết nối tiếp và chưa có bản vá chụp hàng cũ" do
+  test "mô-đun lịch sử viết nối tiếp còn nguyên bên dưới bản vá 04" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     old_source = Path.join(root, "legacy_stone_mutation.ex") |> File.read!()
+    patch_source = Path.join(root, "stone_patch.ex") |> File.read!()
     manager_source = Path.join(root, "stone_manager.ex") |> File.read!()
     dispatcher_source = Path.join(root, "dispatcher.ex") |> File.read!()
 
@@ -109,10 +114,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage08Discovery04Test do
     assert old_source =~ "elem(updated_s, 2)"
     assert old_source =~ "elem(updated_m, 0)"
     assert old_source =~ "elem(updated_m, 3)"
-    assert manager_source =~ "LegacyStoneMutation.mutate_stones_wrong(previous_row, index)"
+    assert patch_source =~ "LegacyStoneMutation.mutate_stones_wrong(legacy_clone, index)"
+    assert manager_source =~ "StonePatch.patch_row(previous_row, index)"
     assert dispatcher_source =~ "StoneManager.build_table()"
     refute old_source =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "stone_patch.ex"))
+    assert File.exists?(Path.join(root, "stone_patch.ex"))
   end
 
   test "hồi quy chuẩn tại đá thứ hai, vị trí lúa mạch: cố ý đỏ cho phát hiện 04" do
