@@ -51,6 +51,7 @@ jobs:
           grep -Fq 'STAGE_06_DISCOVERY_03_PROPERTIES_PASS pairs=225' stage07-results.log
           grep -Fq 'STAGE_06_DISCOVERY_03_LARGE_AND_ISOLATION_PASS' stage07-results.log
           grep -Fq 'STAGE_06_DISCOVERY_03_ERRORS_PASS' stage07-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_LIFECYCLE_PASS' stage07-results.log
           grep -Eq 'STAGE_07_PATCH_03_PASS pairs=[0-9]+ overridden=[1-9][0-9]* preserved=[1-9][0-9]* mismatches=0' stage07-results.log
       - name: Verify intentional expected-red regression
         shell: bash

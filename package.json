@@ -14,7 +14,7 @@
     "test:discovery02": "node --experimental-strip-types test/discovery02.ts",
     "test:discovery02:red": "node --experimental-strip-types test/discovery02Red.ts",
     "test:patch02": "node --experimental-strip-types test/patch02.ts",
-    "test:discovery03": "node --experimental-strip-types test/discovery03.ts && node --experimental-strip-types test/discovery03Properties.ts && node --experimental-strip-types test/discovery03Large.ts && node --experimental-strip-types test/discovery03Errors.ts",
+    "test:discovery03": "node --experimental-strip-types test/discovery03.ts && node --experimental-strip-types test/discovery03Properties.ts && node --experimental-strip-types test/discovery03Large.ts && node --experimental-strip-types test/discovery03Errors.ts && node --experimental-strip-types test/discovery03Lifecycle.ts",
     "test:discovery03:red": "node --experimental-strip-types test/discovery03Red.ts",
     "test:patch03": "node --experimental-strip-types test/patch03.ts"
   },
