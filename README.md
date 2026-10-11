@@ -602,3 +602,22 @@ l'ordine inverso e la goccia 46. Sono inclusi tutti i
 720 ranghi, 256 campioni deterministici, interi oltre
 8192 bit e sette patch precedenti. Non è stata introdotta
 la PATCH 08.
+
+### Certificazione nativa dello stadio 16
+
+La [run GitHub Actions 38170838806](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38170838806)
+è terminata con SUCCESS sul commit
+`1e2ffa32651f1f280853e1592f8aaa16086040ad`.
+Tutti i 17 job sono riusciti: lock dei nomi,
+Stage01 18 PASS; Stage02 7 PASS/3 FAIL intenzionali;
+Stage03 12 PASS; Stage04 14 PASS/3 FAIL intenzionali;
+Stage05 18 PASS; Stage06 15 PASS/3 FAIL intenzionali;
+Stage07 20 PASS; Stage08 19 PASS/3 FAIL intenzionali;
+Stage09 26 PASS; Stage10 15 PASS/3 FAIL intenzionali;
+Stage11 27 PASS; Stage12 22 PASS/3 FAIL intenzionali;
+Stage13 26 PASS; Stage14 20 PASS/3 FAIL intenzionali;
+Stage15 31 PASS; Stage16 25 PASS/3 FAIL intenzionali.
+
+I tre confronti di Stage16 divergono esclusivamente
+per ordine diretto, ordine inverso e goccia 46.
+La PATCH 08 non è stata introdotta.

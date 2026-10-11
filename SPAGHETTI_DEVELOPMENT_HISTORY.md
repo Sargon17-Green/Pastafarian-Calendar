@@ -808,3 +808,20 @@ nuova fase nel dispatcher, otto campi del contesto,
 handler e metrica, report e suite di regressione.
 Tutte e sette le patch già certificate rimangono.
 Non è ancora introdotta la futura PATCH 08.
+
+### Verifica nativa compiuta
+
+La run GitHub Actions 38170838806, sul commit
+`1e2ffa32651f1f280853e1592f8aaa16086040ad`,
+è terminata con SUCCESS in tutti i 17 job.
+Stage16 ha registrato 25 PASS e precisamente tre FAIL
+deliberati per i tre confronti normativi: ordine
+diretto, ordine inverso e goccia 46.
+
+Il test ha verificato anche tutti i 720 ranghi
+dell'ordine delle ciotole con la PATCH 07 attiva,
+256 simulazioni storiche indipendenti, BigInt signed,
+input non validi, report isolati, metriche e
+le sette patch precedenti. Le firme storiche
+degli stadi 1–15 rimangono invariate e non è
+stata introdotta la PATCH 08.
