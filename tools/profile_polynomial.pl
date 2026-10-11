@@ -15,12 +15,16 @@ use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 # 的正式月份界限者另行標示；兩日月份只用於獨立 Catalan 數核對。
 my $seconds = 90;
 my $rss_limit_kib = 262144;
-GetOptions('seconds=i' => \$seconds, 'rss-kib=i' => \$rss_limit_kib)
+my $profile = 'baseline';
+GetOptions('seconds=i' => \$seconds, 'rss-kib=i' => \$rss_limit_kib,
+           'profile=s' => \$profile)
     or die "效能量測參數不正確\n";
 die "秒數限額必須在 1..180\n" if $seconds < 1 || $seconds > 180;
 die "RSS 必須在 32768..1048576 KiB\n"
     if $rss_limit_kib < 32768 || $rss_limit_kib > 1048576;
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
+die "只支援 baseline 或 year-min\n"
+    if $profile ne 'baseline' && $profile ne 'year-min';
 $| = 1;
 
 sub rss_kib ($pid) {
@@ -44,10 +48,24 @@ sub independent_catalan ($n) {
     }
     return $answer->bdiv($n+1);
 }
-my @cases=(
-    { label=>'47x2-Catalan-非規範', lengths=>[(2)x47], catalan=>1 },
-    { label=>'47x4-合法月份長度', lengths=>[(4)x47], catalan=>0 },
-);
+my @cases;
+if ($profile eq 'baseline') {
+    @cases = (
+        { label=>'47x2-Catalan-非規範', lengths=>[(2)x47], catalan=>1 },
+        { label=>'47x4-合法月份長度', lengths=>[(4)x47], catalan=>0 },
+    );
+} else {
+    @cases = (
+        { label=>'47-months-252-first-long', lengths=>[68,(4)x46], catalan=>0 },
+        { label=>'47-months-252-last-long', lengths=>[(4)x46,68], catalan=>0 },
+        { label=>'47-months-252-balanced', lengths=>[(6)x17,(5)x30], catalan=>0 },
+    );
+    die "年度下限案例總日數錯誤\n"
+        if grep {
+            my $sum=0; $sum += $_ for @{$_->{lengths}};
+            $sum != 252 || @{$_->{lengths}} != 47;
+        } @cases;
+}
 for my $case (@cases) {
     my $pid=fork();
     die "無法啟動量測子程序: $!\n" if !defined $pid;

@@ -41,6 +41,7 @@ t/19_preopen_suffix_exhaustive.t
 t/20_weaving_diagnostics.t
 t/21_preopen_state_formula.t
 t/22_polynomial_weaving.t
+t/23_polynomial_catalan.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 tools/profile_weaving.pl
