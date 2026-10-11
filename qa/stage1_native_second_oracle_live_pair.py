@@ -110,6 +110,12 @@ def main():
                  native("reference/save.b98", a + " " + b + "\n") +
                  native("reference/save.b98", c + " " + d + "\n"))
         need(len(words) == 7, "fresh BF98 seven numeric fields missing")
+        # Re-execute the actual integrated producer in a separate Native CLI.
+        # A report and its reference oracles may agree while the production
+        # BF98 program has regressed; the second oracle must bind both sides.
+        integrated = native("src/interleaved_work_counts.b98", line + "\n")
+        need(integrated == words,
+             "fresh integrated BF98 mismatches independent Native reference: v%d" % i)
         replay["v%d" % i] = words
     for i, line in enumerate(INVALID):
         words = native("src/interleaved_work_counts.b98", line + "\n")
@@ -167,6 +173,8 @@ def main():
         "source_git_blobs": PINS,
         "native_reference_invocations": 18,
         "native_production_invalid_invocations": 6,
+        "native_production_valid_invocations": 6,
+        "native_integrated_reference_parity_cases": 6,
         "independent_valid_vectors": 6,
         "fresh_invalid_rejection_vectors": 6,
         "paired_program_outputs_checked": 48,
@@ -177,7 +185,7 @@ def main():
     }
     with open(ROOT + "/native_second_oracle_live_pair.json", "wb") as out:
         out.write((json.dumps(result, sort_keys=True, indent=2) + "\n").encode("utf-8"))
-    print("NATIVE_BF98_SECOND_ORACLE_18_REFERENCE_6_INVALID_PRODUCTION_48_OUTPUTS_PASS")
+    print("NATIVE_BF98_SECOND_ORACLE_18_REFERENCE_6_VALID_6_INVALID_PRODUCTION_48_OUTPUTS_PASS")
     print("NATIVE_BF98_TWELVE_COORDINATED_REPORT_CHANGES_REJECTED_PASS")
     print("NATIVE_BF98_THREE_REPORT_INTEGRITY_MUTATIONS_REJECTED_PASS")
     print("STAGE1_FINAL_ACCEPTANCE=OPEN")
