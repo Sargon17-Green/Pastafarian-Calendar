@@ -45,3 +45,9 @@ ni'o lo `MonsterManager` cu benji lo `MonsterEvaluation` poi stodi. lo `MonsterD
 ### lo selcmima porsi stura
 
 ni'o lo `MonsterFamilies` cu zbasu lo `fallingFactorial` .e lo `unrankDistinctIndices` .e lo `BoundedCompositionFamily` .e lo `CutletPartitionFamily` .e lo `WeavingFamily`. lo pamoi se zbasu cu na tcidu lo `NormativeOracle` gi'e se cipra fi ra po'o. lo remoi stadi cu na mulno.
+
+### lo vorme .e lo nanca stodi cipra
+
+ni'o lo `MonsterGates` cu zbasu lo se jicmu vorme fi lo jicmu djacu bliku gi'e benji lo fa'u je na se galfi vorme vreji. lo `MonsterYears` cu zbasu lo nanca li 5000 .e lo balvi nanca .e lo purci nanca .e lo nu facki lo se srana nanca. lo `Stage02GateTests` .e lo `Stage02YearTests` cu srana lo `NormativeOracle` poi cipra po'o.
+
+ni'o lo nanca cipra ca lo 11 moi masti be lo 2026 moi nanca cu te jalge lo drani fi lo GitHub Actions run `38154400008`. lo balvi javni cu nitcu lo kecti .e lo masti .e lo mulno detri jalge. lo `LAST_COMPLETED_STAGE` cu du li pa.
