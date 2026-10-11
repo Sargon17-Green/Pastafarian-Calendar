@@ -10599,6 +10599,35 @@ void FinalIntegrationHandler::handle(
         throw BaseValidationError("gradus injectionis recovery debet esse 40 aut 50");
     }
 
+    // Cicatrix contextus invocationalis: campi finalis cursus non possunt
+    // superesse ad alteram invocationem eiusdem contextus. Solus cache
+    // verificatus in argumento externo inter invocationes manere potest.
+    // Sine hac purgatione vetus hit potest verificationem XII commotionum
+    // perperam praeterire, et indices cicatricum vetus eventum simulare.
+    ctx.finalYear5000 = {};
+    ctx.finalCurrentYear = {};
+    ctx.finalStructure = {};
+    ctx.resultFive = {};
+    ctx.finalGuardedCacheHit = false;
+    ctx.finalGuardedCacheRejected = false;
+    ctx.finalLegacyStructureSauceGhostExecuted = false;
+    ctx.finalLegacyCutletPartitionExecuted = false;
+    ctx.finalLegacyCutletNamesExecuted = false;
+    ctx.finalLegacyMonthLengthListContractExecuted = false;
+    ctx.finalLegacyMonthWeavingExecuted = false;
+    ctx.finalLegacyMonthNamesExecuted = false;
+    ctx.finalLegacyContiguousMonthDayExecuted = false;
+    ctx.finalExactFiveFieldReturn = false;
+    ctx.finalIntegrationReady = false;
+    ctx.stage56PostStirOldResult = {};
+    ctx.stage56PostStirCorrectedResult = {};
+    ctx.stage56RawBowlSum = 0;
+    ctx.stage56SavedOrderNumber = 0;
+    ctx.stage56StirIndex = 0;
+    ctx.stage56LegacyScarCallCount = 0;
+    ctx.stage56AppliedCount = 0;
+    ctx.stage56AppliedFlag = false;
+
     ctx.mode = "AUTHORITATIVE_SPAGHETTI";
     ctx.status = "NEW";
     ctx.retryBudget = faultPlan.retryBudget;
