@@ -45,4 +45,4 @@ v fmt -verify ./pastafari
 
 ## ደረጃ 5 — PATCH 02
 
-`old_day_tag` የቀድሞውን `2*abs(day-FOUNDATION)` ስህተት እንዳለ ይይዛል። አዲሱ `DayTagPatch02` በታሪካዊው dispatcher በኋላ ይጠራል፣ ከFOUNDATION ጀምሮ አንድ ይጨምራል እና የFOUNDATION መከላከያ ሁለተኛውን ቅርንጫፍ አያስወግድም። በደረጃ 4 የነበሩት አራት RED assertions አልተለወጡም፤ አሁን GREEN ሊሆኑ ይገባል። የV CI መዝጊያ ገና ይጠበቃል፣ ስለዚህ `LAST_COMPLETED_STAGE=4` ነው። ዝርዝር፦ `docs/STAGE05_PATCH02.md`።
+`old_day_tag` የቀድሞውን `2*abs(day-FOUNDATION)` ስህተት እንዳለ ይይዛል። አዲሱ `DayTagPatch02` በታሪካዊው dispatcher በኋላ ይጠራል፣ ከFOUNDATION ጀምሮ አንድ ይጨምራል እና የFOUNDATION መከላከያ ሁለተኛውን ቅርንጫፍ አያስወግድም። በደረጃ 4 የነበሩት አራት RED assertions አልተለወጡም፤ አሁን GREEN ሊሆኑ ይገባል። በV 0.5.2 (`7647ce1`) የGitHub Actions run `38156647121` ማረጋገጫ ተሳክቷል። `v test ./pastafari`: 7/7 PASS፤ የደረጃ 4 አራት RED assertions ያለ ለውጥ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=5` ነው። ዝርዝር፦ `docs/STAGE05_PATCH02.md`።

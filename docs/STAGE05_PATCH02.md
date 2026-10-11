@@ -1,4 +1,4 @@
-# ደረጃ 5/55 — PATCH 02 (GREEN ማረጋገጫ ይጠበቃል)
+# ደረጃ 5/55 — PATCH 02 (COMPLETE / GREEN)
 
 ## የሚጠበቀው የታሪክ ስርዓት
 
@@ -42,6 +42,17 @@ v test ./pastafari/patch02_test.v
 v test ./pastafari
 ```
 
-እዚህ ሁሉም `exit=0` መመለስ አለባቸው። በ`.github/workflows/canonical-names-lock.yml` ውስጥ `stage05_native_v` የV ተረጋገጠ 0.5.2 (`7647ce1`) ይጠቀማል። የCI እውነተኛ ውጤት ሳይታይ `LAST_COMPLETED_STAGE=4` ይቆያል። ደረጃ 6 በዚህ ስራ አይጀመርም።
+እዚህ ሁሉም `exit=0` መመለስ አለባቸው። በ`.github/workflows/canonical-names-lock.yml` ውስጥ `stage05_native_v` የV ተረጋገጠ 0.5.2 (`7647ce1`) ይጠቀማል። የCI እውነተኛ ውጤት PASS ነው፤ `LAST_COMPLETED_STAGE=5` ሆኗል። ደረጃ 6 በዚህ ስራ አይጀመርም።
 
 የደረጃ 4 የRED ማስረጃ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155338854
+
+## የV አገርኛ መዝጊያ ማስረጃ
+
+- የተፈተነው commit፦ `58129f33917f7e848b57c2799cf7ae9b066641c5`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38156647121
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38156647121/artifacts/11709045238
+- `V 0.5.2 7647ce1`፤ `v fmt -verify` PASS፤ የሙሉ ሙከራዎች 7/7 PASS።
+- አራቱ የደረጃ 4 የኖርማቲቭ assertions ሳይቀየሩ GREEN ሆነዋል።
+- `old_day_tag` አልተጠገነም፤ `DayTagPatch02` በእውነተኛው የproduction ንዑስ መስመር ላይ ተፈትኗል።
+
+**ደረጃ 5 COMPLETE / GREEN ነው። ደረጃ 6 የተለየ DISCOVERY 03 ሥራ ነው።**
