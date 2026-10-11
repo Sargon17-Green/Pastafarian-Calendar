@@ -35,24 +35,28 @@ $valid = $exit === 1
     && str_contains($stdout, 'KEPUTUSAN MERAH_DIJANGKA perbezaan=65 sepadan=64 tepi=2 lain=0')
     && !str_contains($stdout, 'RALAT_');
 
-// Belum boleh mengandungi pembetulan Stage 5.
+// Selepas Stage 5, ujian ini mesti mengekalkan kecacatan lama serta wujudnya pembetul yang berasingan.
 $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator(dirname(__DIR__) . '/src', FilesystemIterator::SKIP_DOTS)
 );
 $legacyExists = false;
+$patchExists = false;
 foreach ($iterator as $file) {
     if (strtolower($file->getExtension()) !== 'php') {
         continue;
     }
     $contents = (string)file_get_contents($file->getPathname());
-    if (str_contains($contents, 'dayTagWithFoundationScar')) {
-        $valid = false;
+    if (str_contains($contents, 'function dayTagWithFoundationScar(')) {
+        $patchExists = true;
+        if (basename($file->getPathname()) !== 'FoundationScarPatch02.php') {
+            $valid = false;
+        }
     }
     if (str_contains($contents, 'function oldDayTag(')) {
         $legacyExists = true;
     }
 }
-$valid = $valid && $legacyExists;
+$valid = $valid && $legacyExists && $patchExists;
 
 if (!$valid) {
     fwrite(STDERR, "GAGAL: corak merah penemuan 02 atau pemisahan tampalan salah\n");

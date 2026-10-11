@@ -88,8 +88,8 @@ foreach ($iterator as $file) {
     }
     $contents = (string)file_get_contents($file->getPathname());
     sah(!str_contains($contents, 'NormativeMath'), 'ORACLE_DALAM_PRODUKSI');
-    // Penemuan 02 dibenarkan mulai Stage 4; pembetulannya masih dilarang.
-    sah(!str_contains($contents, 'dayTagWithFoundationScar'), 'TAMPALAN_02_TERLALU_AWAL');
+    // Parut dan tampalan kedua dibenarkan; penemuan ketiga belum dibenarkan.
+    sah(!str_contains($contents, 'oldDistance'), 'PENEMUAN_03_TERLALU_AWAL');
 }
 
 echo "LULUS Stage 3 PATCH 01 kes={$jumlah} baki_sifar={$bilanganNol} warisan=3\n";

@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 3 (PATCH 01)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 5 (PATCH 02)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -76,3 +76,15 @@ php -d memory_limit=512M tests/verify_stage04_discovery02.php
 ```
 
 Arahan pertama mesti keluar dengan kod `1`, menunjukkan 65 perbezaan dijangka dan 64 padanan normatif di sekeliling Hari Asas. Arahan kedua mesti keluar dengan kod `0`, mengesahkan corak merah khusus itu, dua semakan sempadan int dan ketiadaan tampalan Stage 5.
+
+
+## Stage 5 — PATCH 02: Nombor hari sah tanpa menghapuskan kecacatan lama
+
+`oldDayTag` dan laluan dispatcher `DAY_TAG_LEGACY` sengaja dikekalkan. `FoundationScarPatch02::dayTagWithFoundationScar` memanggil pengiraan lama, menambah satu pada Hari Asas serta selepasnya dan membiarkan cabang pemeriksaan sejarah tambahan pada Hari Asas. Dispatcher `DAY_TAG_PATCH_02` kini ialah laluan pengeluaran `BootstrapKernel::dayCount`. Tiada pembetulan Stage 6 dimulakan.
+
+```text
+php -d memory_limit=512M tests/verify_stage04_discovery02.php
+php -d memory_limit=512M tests/stage05_patch02_tests.php
+```
+
+Pengujian sejarah yang dijalankan secara terus di `stage04_discovery02_tests.php` **masih keluar dengan kod 1 seperti yang dijangka**. Kedua-dua arahan di atas mesti keluar dengan kod 0. Ujian baharu meliputi kedua-dua sisi Hari Asas, sempadan integer mesin, perubahan ganjil/genap, dan kestabilan tampalan SAVE terdahulu.

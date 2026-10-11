@@ -80,3 +80,22 @@ Bagi 64 hari sebelum Asas, hasil legacy dan rujukan normatif bersetuju. Tepat pa
 ### Belum ditampal
 
 Pembetulan `dayTagWithFoundationScar` atau tambahan satu pada pihak hari lewat sama sekali tidak dilaksanakan dalam Stage 4. Kegagalan yang dikehendaki oleh `stage04_discovery02_tests.php` mesti mempunyai kod keluar `1` secara sengaja; pengesah `verify_stage04_discovery02.php` menerima hanya kegagalan tepat tersebut, tanpa sebarang kegagalan Stage 1–3. Keputusan CI direkodkan selepas disahkan.
+
+
+## Stage 5 — PATCH 02: Parut Hari Asas di atas kiraan hari lama
+
+### Apa yang dipintas
+
+Kod `LegacyDayTag::oldDayTag` dan `calculateWithoutPatch` tidak dipinda dan masih memulangkan sifar pada Hari Asas serta nombor genap selepasnya. Dispatcher `DAY_TAG_LEGACY` kekal didaftarkan bagi mengekalkan parut sejarah. `FoundationScarPatch02` memanggil kaedah lama dahulu, kemudian menambah satu tepat apabila `day >= FOUNDATION`, dan mengekalkan semakan sejarah yang memaksa `1` sekiranya hasil pada Hari Asas masih tidak sama dengan `1`.
+
+### Mengapa tampalan ini tepat
+
+Sebelum Hari Asas, nilai legacy `2*abs(day-FOUNDATION)` sudah sama dengan oracle. Pada dan selepas Hari Asas, menambah satu menghasilkan nombor ganjil `2*abs(day-FOUNDATION)+1`. Syarat parut tambahan selepas langkah itu ialah pengesahan sejarah yang tidak mengubah hasil. Semua pengiraan beza hari menggunakan BigInt dalam kelas lama, jadi sempadan `PHP_INT_MIN/MAX` tidak melimpahi integer mesin.
+
+### Lapisan raksasa dan pemilik keadaan
+
+Laluan awam `BootstrapKernel::dayCount` menubuhkan konteks baharu dan memilih dispatcher `DAY_TAG_PATCH_02`; dispatcher membina komponen legacy serta adapter dan menyimpan satu hasil ke dalam keadaan semantik konteks setempat. Metrik pemerhatian dan status tidak menjadi input matematik. Fasa `SAVE_PATCH_01` dan semua peraturan Stage 1–3 masih wujud.
+
+### Bukti regresi
+
+`stage04_discovery02_tests.php` tetap keluar dengan kod `1` untuk 65 perbezaan bersejarah pada legacy sahaja; pembalut Stage 4 mengesahkan corak tersebut dan kewujudan tampalan dalam kelas yang berasingan. `stage05_patch02_tests.php` membandingkan nilai pengeluaran dengan oracle PHP bagi ribuan hari sekitar Asas, menguji integer ekstrem melalui formula BigInt tepat, perubahan ganjil/genap, determinisme, panggilan berulang, SAVE, probe, ketiadaan oracle di pengeluaran dan ketiadaan kecacatan Stage 6. Hasil CI sebenar perlu disahkan sebelum peringkat ini dinyatakan lulus.

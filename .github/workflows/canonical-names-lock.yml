@@ -50,5 +50,7 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage02_discovery01.php
       - name: Tampalan 01 — regresi setara normatif
         run: php -d memory_limit=512M tests/stage03_patch01_tests.php
-      - name: Penemuan 02 — sahkan kegagalan merah yang dijangka
+      - name: Penemuan 02 — sahkan parut sejarah kekal terdedah
         run: php -d memory_limit=512M tests/verify_stage04_discovery02.php
+      - name: Tampalan 02 — kesetaraan normatif bagi nombor hari
+        run: php -d memory_limit=512M tests/stage05_patch02_tests.php

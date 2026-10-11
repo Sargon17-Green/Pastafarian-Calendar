@@ -8,6 +8,7 @@ require_once $root . '/src/BootstrapInfrastructure.php';
 require_once $root . '/src/Legacy/LegacyRemainder.php';
 require_once $root . '/src/Legacy/LegacyDayTag.php';
 require_once $root . '/src/Patches/SavePatch01.php';
+require_once $root . '/src/Patches/FoundationScarPatch02.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';
