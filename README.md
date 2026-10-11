@@ -471,3 +471,17 @@ sbt -batch 'Test / runMain pastafari.Stage13Tests'
 Firma attesa: `26 PASS, 0 FAIL`. La suite storica
 Stage12 resta `22 PASS, 3 FAIL` intenzionali, mentre il
 CI controlla automaticamente anche tutte le regressioni 1–11.
+
+### Certificazione nativa dello stadio 13
+
+La [GitHub Actions run 38165345584](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165345584)
+ha concluso SUCCESS sul commit
+`53f35b0bd633cd77b9efd2c9bad052fbf24d78b2`.
+Tutti i quattordici job sono riusciti: blocco dei nomi canonici,
+Stage01 18 PASS; Stage02 7 PASS/3 FAIL intenzionali;
+Stage03 12 PASS; Stage04 14 PASS/3 FAIL intenzionali;
+Stage05 18 PASS; Stage06 15 PASS/3 FAIL intenzionali;
+Stage07 20 PASS; Stage08 19 PASS/3 FAIL intenzionali;
+Stage09 26 PASS; Stage10 15 PASS/3 FAIL intenzionali;
+Stage11 27 PASS; Stage12 22 PASS/3 FAIL intenzionali;
+Stage13 26 PASS, 0 FAIL. Stage14 non è stato iniziato.

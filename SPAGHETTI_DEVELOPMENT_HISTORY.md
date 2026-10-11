@@ -641,4 +641,19 @@ formule. Restano osservabili tutte le sei
 cicatrici precedenti, le cinque patch già concluse
 e il sentinel originale.
 
-La certificazione nativa deve essere acquisita dal CI.
+### Verifica nativa compiuta
+
+La GitHub Actions run 38165345584, commit
+`53f35b0bd633cd77b9efd2c9bad052fbf24d78b2`,
+è conclusa con SUCCESS per tutti i quattordici job.
+Stage13 ha superato 26 controlli senza errori.
+Stage12 mantiene esattamente 22 PASS e 3 FAIL intenzionali;
+tutte le regressioni storiche dal primo stadio sono verdi
+rispetto alle proprie firme previste.
+
+Sono stati confrontati tutti gli undici record corretti,
+più di 2600 piccoli input signed, 512 campioni
+deterministici, interi oltre 16.000 bit, gli invarianti
+di stato e l'accesso diagnostico reale alla cicatrice.
+L'oracolo non entra nel codice di produzione.
+
