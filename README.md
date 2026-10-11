@@ -144,3 +144,7 @@ ni'o lo `MonsterWeavingEndpointDP.MAX_COUNT_DAYS` cu du li 2048 .i lo `MonsterWe
 ni'o lo nanca cu kakne lo nu ralte li 5778 detri .i lo ti jimte cu na se banzu lo ro nanca .i lo remoi stadi cu na se mulno .i lo `LAST_COMPLETED_STAGE` cu du li pa.
 
 ni'o ko benji `sh run_stage02_endpoint_weaving_tests.sh` .e `sh run_stage02_canonical_weaving_tests.sh` tezu'e lo nu cipra lo masti porsi .i lo se narmanci javni cu se ciska fi `WEAVING_ENDPOINT_PROOF.md`.
+
+## lo memori jimte te cipra
+
+ni'o lo `run_stage02_weaving_heap_tests.sh` cu cipra lo narmanci `MonsterWeavingEndpointDP` fi lo Java Heap be li 256 MiB pe lo 984 detri nanca .e lo 512 MiB pe lo 1968 detri nanca .i lo Heap cu se jimte fi lo `-Xmx` .i lo te cipra cu se snada po'o ca lo GitHub Actions cu benji lo `PASS`. lo drani javni be li 5778 detri cu za'o nitcu lo balvi se zbasu.

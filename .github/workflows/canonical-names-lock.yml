@@ -66,3 +66,5 @@ jobs:
         run: sh run_stage02_endpoint_weaving_tests.sh
       - name: Stage 02 bounded canonical month selection
         run: sh run_stage02_canonical_weaving_tests.sh
+      - name: Stage 02 heap-bounded month counting
+        run: sh run_stage02_weaving_heap_tests.sh
