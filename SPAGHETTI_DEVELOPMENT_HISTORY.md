@@ -105,3 +105,23 @@ Yon handler `DAY_TAG_PATCH` vin apre `LEGACY_DAY_TAG` nan menm kontèks, ak de c
 ### Prèv ak sa nou pa fè
 
 Regresyon normatif Stage 4 la vin vèt; yon nouvo regresyon endepandan sou chemen legacy a kontinye echwe egzakteman sou kat jou Discovery 02 a, epi odit la verifye tèks erè sa a. Tout tès Stage 1–4 yo rete aktif. Yon seri 2,325 jou ak limit Lua yo egzamine parite, presizyon, dispatcher, metrik ak pwopriyetè eta. Nou pa entwodui okenn eleman `oldDistance` oswa patch pou etap ki vin apre yo.
+
+## Stage 6 — DISCOVERY 03: `oldDistance`
+
+### Sa nou te kwè
+
+Paske nou te deja korije tag jou yo nan Stage 5, ansyen chemen distans lan te sipoze diferans absoli de tag sa yo t ap egal distans ant de jou yo. Nou te ekri `oldDistance(c,t) = abs(dayTag(c)-dayTag(t))` epi nou te pase nan chemen tag aktyèl la, pa nan yon kopi nan tès yo.
+
+### Sa nou dekouvri
+
+Pou menm jou a, diferans tag yo se zewo men distans normatif la se youn. Pou de jou ki travèse Fondasyon an, lòd ak parite tag yo ka fè diferans la twò piti; pou de jou ki lwen sou menm bò a, faktè de nan tag yo ka fè li twò gwo. Gen kèk pè youn apre lòt ki rive egal pa aza. Se poutèt sa erè a pa sèlman yon erè `+1` sou tout rezilta yo: ansyen baz kalkil la menm pa kwonolojik.
+
+### Kouch monstè ki grandi
+
+Nou ajoute `LEGACY_DISTANCE` nan dispatcher la, ak yon nouvo kontèks, metrik, yon tranzaksyon semantik, dyagnostik epi de kontèks pitit ki sòti nan `LEGACY_DAY_TAG -> DAY_TAG_PATCH`. Rezilta tag ki korije yo tounen antre kalkil erè `oldDistance` la, pandan fonksyon piblik `distanceSpaghetti` reyèlman ekspoze rezilta sa a. Antre ak sòti semantik yo se chèn desimal egzak; nou pa fè soustraksyon natif Lua ki ta debòde sou `math.mininteger` ak `math.maxinteger`.
+
+### Prèv ak limit etapa a
+
+Nou teste sèt tras nonmen, yon kadriyaj 1369 pè jou, 256 lòt pè ak uit pè ekstremal: 1633 pè an tout. Gen 1539 divergences nan seri sa a, epi yon regresyon endepandan bay egzakteman senk ka ki obligatwa pou prèv Discovery 03. Odit separe a refize tout lòt echèk kòm yon fo wouj. Tès ak kontra Stage 1–5 yo rete aktif ak vèt.
+
+Pa gen `PATCH 03` nan etap sa a. Pou Stage 7 sèlman, nou pral konpare ansyen distans la ak `abs(t-c)`, korije si yo pa egal, epi ajoute inite final la. Nou pa pre-enkode metòd sa a nan pwodiksyon.

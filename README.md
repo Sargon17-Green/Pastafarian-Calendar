@@ -116,3 +116,21 @@ texlua test/stage05_tests.lua .
 ```
 
 Tout tès yo dwe pase (`GREEN`). Nou pa ajoute `oldDistance` ni okenn lòt eleman Stage 6 oswa Stage 7.
+
+## Stage 6 — DISCOVERY 03: move distans ant tag jou yo
+
+Nou ajoute `src/legacy_distance.lua` ak erè istorik `oldDistance(c,t) = abs(dayTag(c)-dayTag(t))`. Pou jwenn **tag** yo, kòd la rele `DayTagPatch.execute` ki soti nan Stage 5 pou chak jou. Konsa sa se yon chemen pwodiksyon reyèl, pa yon tès ki fè kòm si dispatcher la mache. `distanceSpaghetti(c,t)` retounen valè legacy ki mal la; `legacyDistanceProbe(c,t)` retounen valè a ak kontèks dyagnostik la. Yon nouvo handler `LEGACY_DISTANCE` kenbe antre, toude tag yo, repons lan ak de kontèks entèmedyè yo, avèk yon commit eta semantik apa.
+
+Distans normatif la se `abs(t-c)+1`, epi li pa egal diferans tag yo an jeneral. Pou menm jou Fondasyon an kòm kalkil ak sib, legacy a bay `0` men distans normatif la se `1`. Pou `FOUNDATION-1` rive `FOUNDATION+1`, legacy a bay `1` men règ normatif la bay `3`. Gen ka vwazen kote ansyen kalkil la rive bay repons ki kòrèk la pa aza; se pou sa tès yo kouvri toude rezilta.
+
+Tès pwopriyete yo kouvri yon kadriyaj `37 x 37`, 256 pè detèminis ak uit pè sou limit antye Lua; yo verifye ekivalans ak diferans tag yo, simetri, epi izolasyon eta. Odit `EXPECTED_RED` la egzije *sèlman* senk divergences `SELF`, `ACROSS`, `LONG_BEFORE`, `LONG_AFTER`, `REVERSE_CROSS`. Tout tès yo nan Stage 1–5 rete vèt.
+
+```text
+texlua test/stage06_trace_tests.lua .
+texlua test/stage06_property_tests.lua .
+texlua test/stage06_scope_tests.lua .
+texlua test/stage06_expected_red_audit.lua .
+texlua test/stage06_tests.lua .
+```
+
+Dènye kòmand lan dwe fini ak echèk **`EXPECTED_RED Stage 6 DISCOVERY 03`**; lòt tès yo dwe fini avèk `PASS`. Nou pa fè koreksyon Stage 7 la: pa gen `chronological = abs(t-c)`, pa gen konparezon ki ranplase rezilta legacy a, epi pa gen `+1` sou distans la nan kòd pwodiksyon. `oldRemainder`, `oldDayTag`, `savePatch` ak `dayTagWithFoundationScar` rete san okenn chanjman.

@@ -3,6 +3,7 @@ local LegacySave = require("legacy_save")
 local SavePatch = require("save_patch")
 local LegacyDayTag = require("legacy_day_tag")
 local DayTagPatch = require("day_tag_patch")
+local LegacyDistance = require("legacy_distance")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -43,8 +44,19 @@ function S.legacyDayTagProbe(day)
     return LegacyDayTag.execute(day)
 end
 
+-- DISCOVERY 03 pase nan diferans ant tag yo menm si se move distans la.
+function S.distanceSpaghetti(calculationDay, targetDay)
+    local wrong = LegacyDistance.execute(calculationDay, targetDay)
+    return wrong
+end
+
+-- Dyagnostik la rann ansyen valè a ak tras de chemen tag yo.
+function S.legacyDistanceProbe(calculationDay, targetDay)
+    return LegacyDistance.execute(calculationDay, targetDay)
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 5", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 6", 0)
 end
 
 return S
