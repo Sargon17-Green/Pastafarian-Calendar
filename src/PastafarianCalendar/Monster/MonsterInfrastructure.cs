@@ -190,6 +190,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyHiddenDropsPhaseHandler _legacyHiddenDrops;
     private readonly LegacyPriorPhaseHandler _legacyPrior;
     private readonly PriorAccessWrapper _priorAccess;
+    private readonly LegacyVisibleGrindPhaseHandler _legacyGrind;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -206,6 +207,7 @@ public sealed class MonsterDispatcher
         _legacyHiddenDrops = new LegacyHiddenDropsPhaseHandler();
         _legacyPrior = new LegacyPriorPhaseHandler();
         _priorAccess = new PriorAccessWrapper();
+        _legacyGrind = new LegacyVisibleGrindPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -442,6 +444,25 @@ public sealed class MonsterDispatcher
         context.Phase = "PRIOR_ACCESS_PATCH_COMPLETE";
     }
 
+    public void DispatchLegacyVisibleGrind(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("لا يجوز بدء الطحن التاريخي قبل اكتمال التأسيس.");
+        if (context.LegacyGrindOrdinal is not int ordinal || ordinal is < 1 or > 11)
+            throw new MonsterValidationException("رقم الطحن التاريخي خارج المجال من واحد إلى أحد عشر.");
+        if (context.LegacyGrindResult.HasValue || context.LegacyGrindDirectIndex.HasValue)
+            throw new MonsterValidationException("لا تُنفّذ قراءة الطحن التاريخي مرتين في السياق.");
+
+        // قد ترمي القراءة فهرساً خارج الحدود عند الطحن 11؛ لا تسجيل ولا التزام قبلها.
+        var pending = _legacyGrind.Handle(context);
+        context.LegacyGrindDirectIndex = ordinal;
+        context.LegacyGrindResult = pending;
+        context.BranchTrace.Add("LEGACY_VISIBLE_GRIND");
+        _metrics.Bump(context, "legacy.visible.grind.dispatch");
+        context.Status = "LEGACY_VISIBLE_GRIND_COMPLETE";
+        context.Phase = "LEGACY_VISIBLE_GRIND_COMPLETE";
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -667,6 +688,25 @@ public sealed class MonsterManager
         var context = ExecutePatchedPrior(calculationDay, targetDay, dropStore, i, back);
         return context.PatchedPriorResult
             ?? throw new MonsterValidationException("لم تُثبت نتيجة الرجوع المصححة.");
+    }
+
+    public MonsterContext ExecuteLegacyVisibleGrind(
+        BigInteger calculationDay, BigInteger targetDay, int ordinal)
+    {
+        if (ordinal is < 1 or > 11)
+            throw new MonsterValidationException("الطحن المطلوب خارج الأرقام الإحدى عشرة.");
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacyGrindOrdinal = ordinal;
+        _dispatcher.DispatchLegacyVisibleGrind(context);
+        return context;
+    }
+
+    public LegacyGrindRow EvaluateLegacyVisibleGrind(
+        BigInteger calculationDay, BigInteger targetDay, int ordinal)
+    {
+        var context = ExecuteLegacyVisibleGrind(calculationDay, targetDay, ordinal);
+        return context.LegacyGrindResult
+            ?? throw new MonsterValidationException("لم يُنتج مسار الطحن القديم صفّاً.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

@@ -103,3 +103,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage12Tests/PastafarianCalendar.Stage12Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ رقعة استرجاع القطرات السابقة مع المرجع وحفظ القديم
         run: dotnet run --project tests/PastafarianCalendar.Stage13Tests/PastafarianCalendar.Stage13Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لفهرسة طحْن القطرات الظاهرة
+        id: discovery_visible_grind_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage14Tests/PastafarianCalendar.Stage14Tests.csproj --configuration Release
+      - name: إثبات هبوط الفهرسة صفّاً واحداً وغياب صفّ الحارس
+        if: always()
+        run: |
+          test "${{ steps.discovery_visible_grind_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage14Tests/PastafarianCalendar.Stage14Tests.csproj --configuration Release -- --verify-expected-red

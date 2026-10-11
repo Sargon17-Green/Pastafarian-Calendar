@@ -57,6 +57,11 @@ public sealed class MonsterContext
     // تُثبت نتيجة الرجوع المصححة منفصلة عن أثر القراءة القديمة إن وجد.
     public BigInteger? PatchedPriorResult { get; set; }
 
+    // يحتفظ هذا السياق برقم الطحن القديم والصفّ المقروء، دون أي حارس للطاحونة.
+    public int? LegacyGrindOrdinal { get; set; }
+    public int? LegacyGrindDirectIndex { get; set; }
+    public LegacyGrindRow? LegacyGrindResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

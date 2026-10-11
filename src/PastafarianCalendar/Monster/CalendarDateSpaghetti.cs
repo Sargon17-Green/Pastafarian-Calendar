@@ -91,6 +91,15 @@ public static class CalendarDateSpaghetti
         return manager.EvaluatePrior(calculationDay, targetDay, dropStore, i, back);
     }
 
+    // يمرّ الاستعلام القديم للطحينات المرئية بالمدير والموزّع والمعالج الفعلي.
+    // لا يحتوي هذا المدخل على صفّ الحارس الذي لا يظهر إلا في الرقعة السابعة.
+    public static LegacyGrindRow EvaluateLegacyVisibleGrind(
+        BigInteger calculationDay, BigInteger targetDay, int ordinal)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateLegacyVisibleGrind(calculationDay, targetDay, ordinal);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
