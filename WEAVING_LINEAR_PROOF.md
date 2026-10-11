@@ -54,7 +54,7 @@ ni'o lo 47 masti cu ralte lo 5778 djedi fi lo `46*123+120` .i lo GitHub Actions 
 
 ## lo to'e se zbasu se cuxna
 
-ni'o lo `count` cu na se du lo `unrank1`. lo `MonsterWeavingLinearCounter` cu na fanva lo ranki fi lo mulno 5778 djedi. lo `MonsterCanonicalWeaving` cu za'o se jimte li 384 djedi .i lo `MonsterCalendarResolver` cu nitcu lo se cuxna `weaving`. seni'i lo remoi stadi cu za'o na se mulno.
+ni'o lo `count` cu na se du lo `unrank1`. lo `MonsterWeavingLinearCounter` cu na fanva lo ranki fi lo mulno 5778 djedi. lo `MonsterCanonicalWeaving` cu za'o se jimte li 512 djedi .i lo `MonsterCalendarResolver` cu nitcu lo se cuxna `weaving`. seni'i lo remoi stadi cu za'o na se mulno.
 
 ## lo lexicographic ranki se cuxna
 
