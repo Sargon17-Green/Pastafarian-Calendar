@@ -84,7 +84,7 @@ public final class Stage02CanonicalWeavingTests {
         fails("E_WEAVE_EMPTY", () -> MonsterCanonicalWeaving.fromSauce(sauce, new int[0]));
         fails("E_WEAVE_LENGTH", () -> MonsterCanonicalWeaving.fromSauce(sauce, new int[]{0}));
         fails("E_WEAVE_UNRANK_LIMIT", () -> MonsterCanonicalWeaving.fromSauce(
-            sauce, new int[]{86, 85, 86}));
+            sauce, new int[]{123, 123, 123, 16}));
         fails("E_NULL_DAY", () -> MonsterCanonicalWeaving.fromDays(
             null, foundation, new int[]{4}));
     }
