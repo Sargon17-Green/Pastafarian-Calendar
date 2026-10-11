@@ -53,3 +53,7 @@ V 0.5.2 (`7647ce1`) በእውነተኛ GitHub Actions run `38153910238` ሁሉ�
 ### የደረጃ 5 መዝጊያ — GREEN
 
 V 0.5.2 (`7647ce1`) በGitHub Actions run `38156647121` ተፈትኗል፤ `v fmt -verify` እና ሙሉ `v test ./pastafari` 7/7 PASS ናቸው። በደረጃ 4 የነበሩት አራት RED assertions ሳይለወጡ GREEN ሆነዋል። `old_day_tag` አሁንም FOUNDATION ላይ 0 ይመልሳል፣ `calendar_day_tag_spaghetti` 1 ይመልሳል። የFOUNDATION ሁለተኛው መከላከያ ተጠብቋል፤ `PATCH 01` አልተለወጠም። ማስረጃ artifact `11709045238` በCI ተቀምጧል። ደረጃ 5 COMPLETE / GREEN ነው።
+
+## ደረጃ 6 — DISCOVERY 03 (የሚጠበቅ RED)
+
+የካሌንደር አሮጌ ርቀት `old_distance(c,t)` ከ`calendar_day_tag_spaghetti` የሚመጡትን የተጠገኑ tag ውጤቶች አንጻር ይቆጥራል፦ `abs(tag(c)-tag(t))`። ይህ የክሮኖሎጂ የቀን ርቀት `abs(t-c)+1` አይደለም። `LegacyDistanceAdapter` እና የproduction መግቢያ `calendar_distance_spaghetti` ተጨምረዋል፤ በ`calendar_date_spaghetti` ስህተት መልዕክት የታሪካዊ መንገድ ውጤት በግልጽ ይታያል። `old_day_tag`፣ `DayTagPatch02` እና `SavePatch01` ሳይለወጡ ቀርተዋል። `PATCH 03` ወደ ደረጃ 7 ብቻ ይገባል።

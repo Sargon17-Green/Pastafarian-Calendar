@@ -46,3 +46,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 5 — PATCH 02
 
 `old_day_tag` የቀድሞውን `2*abs(day-FOUNDATION)` ስህተት እንዳለ ይይዛል። አዲሱ `DayTagPatch02` በታሪካዊው dispatcher በኋላ ይጠራል፣ ከFOUNDATION ጀምሮ አንድ ይጨምራል እና የFOUNDATION መከላከያ ሁለተኛውን ቅርንጫፍ አያስወግድም። በደረጃ 4 የነበሩት አራት RED assertions አልተለወጡም፤ አሁን GREEN ሊሆኑ ይገባል። በV 0.5.2 (`7647ce1`) የGitHub Actions run `38156647121` ማረጋገጫ ተሳክቷል። `v test ./pastafari`: 7/7 PASS፤ የደረጃ 4 አራት RED assertions ያለ ለውጥ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=5` ነው። ዝርዝር፦ `docs/STAGE05_PATCH02.md`።
+
+## ደረጃ 6 — DISCOVERY 03
+
+ሦስተኛው የታሪካዊ ስህተት `old_distance(c,t) = abs(dayTag(c)-dayTag(t))` ተጨምሯል። ትክክለኛው የቀን ርቀት `abs(t-c)+1` ነው። በአንድ ቀን፣ በሁለት ቀናት፣ በFOUNDATION ሁለት ጎኖች እና ከ256 ቢት በላይ ርቀት ሆን ተብሎ RED ሙከራዎች ተጨምረዋል። `PATCH 03` አልተጨመረም። የV 0.5.2 የCI ማረጋገጫ እስካሁን አልተካሄደም፤ `LAST_COMPLETED_STAGE=5` ነው። ዝርዝር፦ `docs/STAGE06_DISCOVERY03.md`።
