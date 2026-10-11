@@ -18,7 +18,8 @@ final case class BaseMonsterContext(
   var legacyDayTagInput: Option[BigInt] = None,
   var legacyDayTagOutput: Option[BigInt] = None,
   var patchedDayTagOutput: Option[BigInt] = None,
-  var patch02Applied: Boolean = false
+  var patch02Applied: Boolean = false,
+  var legacyDistanceOutput: Option[BigInt] = None
 )
 
 final class BaseMetricsShell {
@@ -38,6 +39,15 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requireDiscovery03Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_03_DISTANCE" ||
+        ctx.status != "LEGACY_DISTANCE_READY" ||
+        ctx.legacyDistanceOutput.isEmpty ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_03_DISTANCE")) {
+      throw new IllegalStateException("La distanza legacy non è pronta nel contesto corrente.")
     }
   }
 
@@ -140,7 +150,8 @@ final class BaseMonsterManager {
     new Discovery01RemainderHandler(metrics),
     new Patch01SaveHandler(metrics),
     new Discovery02DayTagHandler(metrics),
-    new Patch02DayTagHandler(metrics)
+    new Patch02DayTagHandler(metrics),
+    new Discovery03DistanceHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -240,6 +251,25 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("patch02", e)
+    }
+  }
+
+  def discover03Distance(calculationDay: BigInt, targetDay: BigInt): Discovery03DistanceReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.phase = "DISCOVERY_03_DISTANCE"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery03Ready(ctx)
+      Discovery03DistanceReport(
+        calculationDay = ctx.calculationDay,
+        targetDay = ctx.targetDay,
+        legacyDistance = ctx.legacyDistanceOutput.get,
+        phase = ctx.phase,
+        status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("discovery03", e)
     }
   }
 

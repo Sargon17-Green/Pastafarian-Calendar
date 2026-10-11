@@ -237,20 +237,33 @@ object Stage05Tests {
       truth(!sources.contains("NormativeOracle"), "Oracle vietato in produzione")
       truth(sources.contains("LegacyDayTagAdapter.oldDayTag(day)"),
         "Il wrapper deve eseguire il vero legacy helper")
-      truth(!sources.contains("oldDistance"), "DISCOVERY 03 non può comparire prima del tempo")
+      val state = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val currentStage = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      if (currentStage < 6)
+        truth(!sources.contains("oldDistance"), "DISCOVERY 03 non può comparire prima del tempo")
+      else
+        truth(sources.contains("oldDistance"), "DISCOVERY 03 deve conservare la sua cicatrice")
     }
 
     check("stadio 5 corretto, senza certificazione anticipata") {
       val state = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(state.contains("CURRENT_STAGE=5"), "Stadio corrente")
-      truth(state.contains("CURRENT_KIND=PATCH"), "Tipo")
-      truth(state.contains("CURRENT_PATCH=02"), "Numero PATCH")
-      truth(state.contains("EXPECTED_REPOSITORY_STATE=GREEN"), "Verde normativo")
+      val currentStage = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      truth(currentStage >= 5, "La PATCH 02 richiede almeno lo stadio 5")
+      if (currentStage == 5) {
+        truth(state.contains("CURRENT_KIND=PATCH"), "Tipo")
+        truth(state.contains("CURRENT_PATCH=02"), "Numero PATCH")
+        truth(state.contains("EXPECTED_REPOSITORY_STATE=GREEN"), "Verde normativo")
+      }
       val last = state.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("Stadio precedente assente"))
-      truth(last >= 4 && last <= 5, "Conclusione non deve anticipare PATCH 02")
+      truth(last >= 4 && last <= currentStage, "La storia deve conservare PATCH 02 senza anticipare il futuro")
     }
 
     println("\nRISULTATO STADIO 5: " + passed + " PASS, " + failed + " FAIL")

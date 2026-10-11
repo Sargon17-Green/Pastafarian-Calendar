@@ -84,3 +84,17 @@ stato, sequenza della traccia e incremento consentito `0/1`
 senza utilizzare il riferimento normativo di test. Il report finale
 è immutabile; le metriche sono osservabilità non semantica.
 Il vecchio percorso rimane direttamente invocabile e deliberatamente RED.
+
+## DISCOVERY 03: distanza legacy esclusiva (non corretta)
+
+`BaseMonsterContext` riceve il nuovo campo `legacyDistanceOutput`.
+Il manager `discover03Distance` inizializza la stessa invocazione
+con Bootstrap e inoltra `DISCOVERY_03_DISTANCE` al relativo handler.
+Quest'ultimo legge direttamente `calculationDay` e `targetDay`
+già propri del contesto, e richiama `LegacyDistanceAdapter.oldDistance`
+per calcolare il numero degli intervalli, senza aggiungere il giorno
+iniziale. La validazione richiede un output e una traccia coerenti;
+il report è uno snapshot immutabile. La metrica resta osservativa.
+
+L'intero percorso è deliberatamente RED contro il conteggio inclusivo
+normativo; la correzione non sarà introdotta prima di PATCH 03.

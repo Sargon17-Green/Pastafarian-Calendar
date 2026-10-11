@@ -131,3 +131,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 5: 18 PASS, 0 FAIL' stage05.log
           test "$(grep -Fc 'PASS — ' stage05.log)" -eq 18
           test "$(grep -Fc 'FAIL — ' stage05.log)" -eq 0
+
+  native-stage06-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify the Stage 6 intentional-red distance signature
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage06Tests' > stage06.log 2>&1
+          rc=$?
+          set -e
+          cat stage06.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 6: 15 PASS, 3 FAIL' stage06.log
+          test "$(grep -Fc 'PASS — ' stage06.log)" -eq 15
+          test "$(grep -Fc 'FAIL — ' stage06.log)" -eq 3
+          for label in 'stesso giorno' 'giorni contigui' 'intervallo enorme'; do
+            grep -Fq "FAIL — equivalenza normativa distanza ${label} — Scarto storico" stage06.log
+          done

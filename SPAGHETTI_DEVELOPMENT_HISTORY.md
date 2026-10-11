@@ -208,3 +208,44 @@ La suite di Stage05 ha verificato 8193 giorni contigui,
 512 giorni casuali deterministici, valori oltre 16.000 bit,
 stato per invocazione, validazione del delta e la presenza
 reale delle cicatrici legacy. Nessun codice Stage06 è presente.
+
+## Stadio 6 — DISCOVERY 03: distanza che perde un giorno
+
+### Che cosa si pensava
+
+La distanza ordinaria fra due giorni `abs(target-calculation)`
+sembrava sufficiente per calcolare il contatore di lavoro.
+In realtà la funzione conta gli intervalli separatori,
+non i giorni inclusi dall'intervallo richiesto.
+
+### Che cosa si è scoperto
+
+La norma `workCounts(c,t).distance` definisce
+`abs(t-c)+1`. Per `c=t` deve dare 1, mentre il
+helper legacy dà 0; per giorni contigui il risultato
+normativo è 2 contro 1; per intervalli giganti
+il difetto continua a essere esattamente 1.
+Non si tratta di overflow né di scelta della direzione.
+
+### Che cosa è stato aggirato
+
+Nulla. `LegacyDistanceAdapter.oldDistance` restituisce il
+valore non corretto intatto, dal manager attraverso un vero
+handler del dispatcher. Il test normativo deve fallire
+esattamente in tre scenari; non è presente `distancePatch`.
+
+### Perché non è ancora normativamente equivalente
+
+Per ogni coppia di interi `c,t`, il helper legacy
+produce uno meno del conteggio normativo inclusivo.
+Il difetto è universale e non dipende dal segno dei giorni,
+dalla Fondazione o dalla quantità di bit.
+
+### Strato di mostruosità aggiunto
+
+Un adattatore di distanza legacy, handler dedicato,
+campo semantico per invocazione, validazione di readiness,
+report immutabile, metrica di discovery, test RED di
+simmetria, ordine, monotonia, BigInt e regressioni passate.
+
+La certificazione nativa non è ancora stata acquisita.

@@ -157,3 +157,27 @@ Tutti i sei job sono riusciti: blocco dei nomi canonici, Stage01
 18 PASS, Stage02 7 PASS con 3 divergenze intenzionali, Stage03
 12 PASS, Stage04 14 PASS con 3 divergenze intenzionali e Stage05
 18 PASS senza errori. Lo stadio 6 non è stato iniziato.
+
+## Stadio 6 — DISCOVERY 03: distanza esclusiva invece di inclusiva
+
+Il modulo legacy `LegacyDistanceAdapter.oldDistance(c,t)` calcola
+`abs(t-c)`: conta gli intervalli fra i due giorni e omette il
+primo estremo. La distanza normativa è `abs(t-c)+1`, perché
+include entrambi i giorni. Il difetto produce una differenza
+di uno per ogni coppia, compresi i giorni coincidenti.
+
+Il manager `discover03Distance(c,t)` percorre
+`BOOT → DISCOVERY_03_DISTANCE` nello stesso contesto, passando
+per il dispatcher e l'handler dedicato. Il valore legacy viene
+restituito senza normalizzazione, con traccia e metriche.
+Nessuna patch di distanza è presente in questo stadio.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage06Tests'
+```
+
+La firma RED attesa è `15 PASS, 3 FAIL`, con gli unici confronti
+normativi volutamente rossi per giorno identico, giorni contigui
+e intervallo gigantesco. Il job CI controlla esattamente le tre
+etichette oltre al codice d'uscita e al riepilogo. I job 1–5
+continuano a funzionare senza modificare i percorsi storici.
