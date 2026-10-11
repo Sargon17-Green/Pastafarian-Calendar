@@ -164,3 +164,7 @@ ni'o lo `MonsterCanonicalWeaving` cu pilno lo `MonsterWeavingLinearCounter` fi l
 ## lo remoi stadi se jmite pe lo ca detri
 
 ni'o lo narmanci count be lo 5778 djedi cu se zbasu .i lo `MonsterCanonicalWeaving` cu cuxna lo drani ranki fi lo 512 djedi po'o, sepi'o lo vo moi kabri .e lo 32 moi tcita. lo `MonsterCalendarResolver` cu nitcu lo se cuxna masti porsi. lo mulno nanca se cuxna cu na se zbasu ca ti .i lo `CURRENT_STAGE` cu du li re .i lo `LAST_COMPLETED_STAGE` cu du li pa.
+
+## lo remoi stadi — lo pamoi .e lo romoi porsi
+
+ni'o lo `MonsterWeavingLinearCounter` cu djuno lo pamoi porsi .e lo romoi porsi fi lo nanca be li 5778 djedi. ro se zbasu porsi cu pilno lo se jimte te jorne poi snada lo pamoi .e lo romoi datni. lo drata ranki be lo nanca poi zmadu li 512 djedi na kakne ca lo bartu cipra. lo `Stage02ExtremalWeavingTests` cu cipra fi lo te drani `NormativeOracle` .e lo li 5778 djedi pe lo na zmadu li 256 mebibaiti. ko benji `sh run_stage02_extremal_weaving_tests.sh`. lo remoi stadi cu na mulno.

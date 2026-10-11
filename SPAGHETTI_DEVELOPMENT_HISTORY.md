@@ -125,3 +125,7 @@ ni'o lo `MonsterWeavingLinearCounter` cu facki lo drani se jorna porsi se namcu 
 ### lo se cuxna masti porsi be li 512 djedi — PASS
 
 ni'o lo `MonsterWeavingLinearCounter` cu zbasu lo `rank1` .e lo `unrank1` be li 512 djedi .i lo `MonsterCanonicalWeaving` cu benji lo vo moi kabri .e lo 32 moi tcita fi lo pa se stika sampla .i lo run `38164930943` .e lo run `38165113120` cu drani .i lo 5778 djedi se namcu cu drani .i lo mulno cuxna be li 5778 djedi cu za'o na drani.
+
+### lo pamoi .e lo romoi te jorne porsi
+
+ni'o lo pamoi porsi cu stidi lo cmalu se cumki sumti. lo romoi porsi cu stidi lo barda se cumki sumti. ro se cumki sumti cu kakne lo nu se jmina fi lo drata mebu porsi. lo `MonsterWeavingLinearCounter` cu tezu'e lo nu kakne lo pamoi .e lo romoi se jorne porsi fi lo nanca pe li 5778 djedi; lo se rajro'i ranki cu se jimte li 512 djedi. lo `Stage02ExtremalWeavingTests` cu cipra lo drani .e lo se srana nu na galfi.

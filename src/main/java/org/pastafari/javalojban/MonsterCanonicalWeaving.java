@@ -28,12 +28,7 @@ public final class MonsterCanonicalWeaving {
     public static Selection fromSauce(MonsterSauceBowls.SauceResult sauce, int[] lengths) {
         if (sauce == null) throw new IllegalArgumentException("E_NULL_SAUCE");
         MonsterWeavingLinearCounter family = new MonsterWeavingLinearCounter(lengths);
-        int days = 0;
-        for (int length : lengths) days += length;
-        if (days > MonsterWeavingLinearCounter.MAX_UNRANK_DAYS) {
-            throw new IllegalArgumentException("E_WEAVE_UNRANK_LIMIT");
-        }
-        BigInteger choices = family.count();
+         BigInteger choices = family.count();
         BigInteger rank = MonsterSelectors.choose(
             MonsterSauceBowls.ask(sauce, BOWL, SEAL), choices);
         return new Selection(rank, choices, family.unrank1(rank));

@@ -127,8 +127,49 @@ public final class MonsterWeavingLinearCounter {
         for (int id : prefix) state.take(id - 1, lengths);
         return countSuffix(state);
     }
+
+    private int[] extremeWeaving(boolean latest) {
+        State state = new State(lengths);
+        int[] order = new int[totalDays];
+        for (int position = 0; position < totalDays; position++) {
+            boolean found = false;
+            if (latest) {
+                for (int month = lengths.length - 1; month >= state.closed; month--) {
+                    if (state.canTake(month, lengths)) {
+                        state.take(month, lengths);
+                        order[position] = month + 1;
+                        found = true;
+                        break;
+                    }
+                }
+            } else {
+                for (int month = state.closed; month < lengths.length; month++) {
+                    if (state.canTake(month, lengths)) {
+                        state.take(month, lengths);
+                        order[position] = month + 1;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (!found) throw new IllegalStateException("E_WEAVE_EXTREME");
+        }
+        return order;
+    }
+
+    public int[] lexFirst() {
+        return extremeWeaving(false);
+    }
+
+    public int[] lexLast() {
+        return extremeWeaving(true);
+    }
+
     public int[] unrank1(BigInteger rank) {
         if (totalDays > MAX_UNRANK_DAYS) {
+            BigInteger total = count();
+            if (ONE.equals(rank)) return lexFirst();
+            if (total.equals(rank)) return lexLast();
             throw new IllegalArgumentException("E_WEAVE_UNRANK_LIMIT");
         }
         BigInteger total = count();
@@ -161,6 +202,10 @@ public final class MonsterWeavingLinearCounter {
 
     public BigInteger rank1(int[] weaving) {
         if (totalDays > MAX_UNRANK_DAYS) {
+            if (weaving != null && weaving.length == totalDays) {
+                if (Arrays.equals(weaving, lexFirst())) return ONE;
+                if (Arrays.equals(weaving, lexLast())) return count();
+            }
             throw new IllegalArgumentException("E_WEAVE_RANK_LIMIT");
         }
         if (weaving == null || weaving.length != totalDays) {
