@@ -95,6 +95,57 @@ void exigeRepetitionemContextus() {
 }
 
 
+void exigeMetamorphosinDieiCalculationis() {
+    // Tantum dies calculationis mutatur: dies quaesitus invariabilis.
+    // Cache utitur yearNumber pro clave, sed fingerprint diei calculationis
+    // partem identitatis semanticae servare debet.
+    const Integer c0 = pastafari::FOUNDATION_DAY_OLD;
+    const Integer c1 = c0 + 1;
+    const Integer t = c0;
+    BaseMonsterManager reusus;
+
+    const Stage54IntegrationReport ante =
+        reusus.executeFinalIntegrationStage56(c0, t);
+    exigeViridem(ante);
+    exige(!ante.guardedCacheHit && !ante.guardedCacheRejected,
+          "cache primum dies calculationis non frigidus est");
+
+    const Stage54IntegrationReport alternus =
+        reusus.executeFinalIntegrationStage56(c1, t);
+    const Stage54IntegrationReport recens =
+        BaseMonsterManager{}.executeFinalIntegrationStage56(c1, t);
+    exigeViridem(alternus);
+    exigeViridem(recens);
+    exige(alternus.targetYear.number == ante.targetYear.number,
+          "prova fingerprint eundem annum non tenuit");
+    exige(alternus.guardedCacheRejected && !alternus.guardedCacheHit,
+          "mutatio calculationDay solo fingerprint vetus non reiecit");
+    exige(!recens.guardedCacheHit,
+          "novus manager cache frigidum non habuit");
+    exige(eademDies(alternus.result, recens.result),
+          "mutatio calculationDay solo exitum contra fresh corrupit");
+    exige(reusus.stage56FinalStructureCacheSizeDiagnostic() == 1,
+          "mutatio calculationDay falso plures annos cumulavit");
+
+    const Stage54IntegrationReport calidus =
+        reusus.executeFinalIntegrationStage56(c1, t);
+    exigeViridem(calidus);
+    exige(calidus.guardedCacheHit && !calidus.guardedCacheRejected,
+          "eadem calculationDay post reiectionem cache non calefecit");
+    exige(eademDies(calidus.result, recens.result),
+          "cache calidus post reiectionem output corrupit");
+
+    const Stage54IntegrationReport reversus =
+        reusus.executeFinalIntegrationStage56(c0, t);
+    exigeViridem(reversus);
+    exige(reversus.guardedCacheRejected && !reversus.guardedCacheHit,
+          "reditus ad diem calculationis primum fingerprint non reiecit");
+    exige(eademDies(reversus.result, ante.result),
+          "reditus calculationis output primum non restituit");
+    exige(reusus.stage56FinalStructureCacheSizeDiagnostic() == 1,
+          "repetita fingerprint reiectio incrementum cache spurium creavit");
+}
+
 void exigeMetamorphosinDieiQuaesiti() {
     // Unum diem calculationis retinemus; dies interrogatus intra annum,
     // deinde trans utrumque terminum, mutatur. Structura per annum
@@ -285,6 +336,7 @@ int main() {
 
         exigeRepetitionemContextus();
         exigeMetamorphosinDieiQuaesiti();
+        exigeMetamorphosinDieiCalculationis();
 
         std::cout << "GRADUS56_CACHE_RECOVERY_TRANSIIT: "
                      "cache frigidus/calidus, reiectio fingerprint, "
