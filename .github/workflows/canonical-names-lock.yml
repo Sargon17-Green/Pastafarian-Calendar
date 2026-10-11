@@ -54,3 +54,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage04_discovery02.php
       - name: Tampalan 02 — kesetaraan normatif bagi nombor hari
         run: php -d memory_limit=512M tests/stage05_patch02_tests.php
+      - name: Penemuan 03 — sahkan merah khusus jarak sejarah
+        run: php -d memory_limit=512M tests/verify_stage06_discovery03.php

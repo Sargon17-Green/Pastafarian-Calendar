@@ -7,6 +7,7 @@ require_once $root . '/src/SourceLanguageCatalog.php';
 require_once $root . '/src/BootstrapInfrastructure.php';
 require_once $root . '/src/Legacy/LegacyRemainder.php';
 require_once $root . '/src/Legacy/LegacyDayTag.php';
+require_once $root . '/src/Legacy/LegacyDistance.php';
 require_once $root . '/src/Patches/SavePatch01.php';
 require_once $root . '/src/Patches/FoundationScarPatch02.php';
 require_once $root . '/src/BootstrapKernel.php';

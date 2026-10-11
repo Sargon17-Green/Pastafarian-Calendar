@@ -103,3 +103,21 @@ Laluan awam `BootstrapKernel::dayCount` menubuhkan konteks baharu dan memilih di
 ### Bukti CI sebenar selepas pelaksanaan Stage 5
 
 Pada 11 Oktober 2026, aliran kerja `Canonical Names Lock` run `38155098345` lulus kedua-dua kerja: `verify` dan `audit_php_bahasa_melayu`. Log menunjukkan 15 daripada 15 ujian asas lulus, 1,014 kes pembahagian dan lapan kes sempadan lulus, fixture dijana semula tanpa perubahan, kegagalan sejarah SAVE kekal tiga kes yang dijangka, 94 ujian Stage 3 lulus, serta ujian penemuan hari lama menunjukkan 65 perbezaan dan 64 padanan yang dijangka. Ujian Stage 5 berjaya dalam 4,618 kes, termasuk 2,305 kes sebelum Hari Asas, 2,311 kes pada atau selepasnya, satu pemeriksaan Hari Asas dan dua kes had integer. Laporan ini dicatat pada akhir Stage 5, bukan permulaan tahap baharu.
+
+## Stage 6 — DISCOVERY 03: Jarak langkah bukan bilangan hari
+
+### Andaian yang gagal
+
+Pereka pengiraan lama menyangka bilangan jarak antara hari pengiraan dan hari sasaran ialah jarak langkah mutlak sahaja: `oldDistance(c,t) = abs(t-c)`. Ini mengabaikan aturan normatif bahawa hari di kedua-dua hujung diambil kira: `distance(c,t) = abs(t-c)+1`. Hari yang sama mesti mempunyai jarak `1`, bukannya `0`.
+
+### Bagaimana penyelewengan dibuktikan
+
+`stage06_discovery03_tests.php` menggunakan `NormativeMath::workCounts` sebagai oracle tempatan untuk 136 pasangan selamat, termasuk matriks hari sekitar Hari Asas, hari sama, jarak negatif/positif pada paksi, Hari Loh, dan pasangan yang diterbalikkan. Untuk lapan pasangan di sempadan `PHP_INT_MIN/MAX`, pengiraan normatif `abs(t-c)+1` dilakukan dengan BigInt tepat bagi mengelakkan limpahan yang boleh berlaku dalam oracle Stage 1 apabila ia menolak int asli. Semua 144 pasangan mesti mendedahkan penyelewengan tepat satu. Ujian terus keluar dengan kod `1` secara sengaja, dan pemeriksa `verify_stage06_discovery03.php` menerima hanya 144 kegagalan itu dan tiada ralat sampingan.
+
+### Lapisan raksasa yang ditambah
+
+`LegacyDistance` memegang pengiraan yang salah sebagai kaedah tersendiri. Panggilan `BootstrapKernel::distance` mewujudkan `BootstrapContext` khusus, melalui dispatcher `DISTANCE_LEGACY` dan sempadan ralat, mengembalikan keputusan lama tanpa mengubahnya. Pemilik keadaan semantik ialah konteks panggilan; status dan metrik kekal pemerhatian sahaja. Kiraan hari dari PATCH 02 dan pembetulan SAVE dari PATCH 01 tidak berubah.
+
+### Batasan penemuan
+
+Tiada `distanceCountPatch03`, tiada penghala `DISTANCE_PATCH_03`, dan tiada tambahan satu dalam pengeluaran pada Stage 6. Hanya Stage 7 boleh melaksanakan PATCH 03 sambil mengekalkan `LegacyDistance::oldDistance` seperti dahulu. Keputusan CI akan direkodkan selepas ia diuji.

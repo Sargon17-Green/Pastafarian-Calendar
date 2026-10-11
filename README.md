@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 5 (PATCH 02)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 6 (DISCOVERY 03)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -88,3 +88,14 @@ php -d memory_limit=512M tests/stage05_patch02_tests.php
 ```
 
 Pengujian sejarah yang dijalankan secara terus di `stage04_discovery02_tests.php` **masih keluar dengan kod 1 seperti yang dijangka**. Kedua-dua arahan di atas mesti keluar dengan kod 0. Ujian baharu meliputi kedua-dua sisi Hari Asas, sempadan integer mesin, perubahan ganjil/genap, dan kestabilan tampalan SAVE terdahulu.
+
+## Stage 6 — DISCOVERY 03: Jarak hari sengaja kurang satu
+
+Laluan `BootstrapKernel::distance(int $calculationDay, int $targetDay)` menggunakan `LegacyDistance::oldDistance` melalui dispatcher `DISTANCE_LEGACY`. Fungsi lama mengira `abs(t-c)`, tetapi bilangan jarak normatif ialah `abs(t-c)+1` kerana kedua-dua hari hujung termasuk dalam kiraan. Pengiraan jarak langkah menggunakan BigInt sepenuhnya agar pasangan ekstrem `PHP_INT_MIN/MAX` tidak melimpahi integer PHP. Penyelewengan ini sengaja tidak dibetulkan pada Stage 6; pembetulannya milik Stage 7.
+
+```text
+php -d memory_limit=512M tests/stage06_discovery03_tests.php
+php -d memory_limit=512M tests/verify_stage06_discovery03.php
+```
+
+Arahan pertama **mesti** keluar dengan kod `1` dan tepat 144 perbezaan berlabel. Arahan kedua mesti keluar dengan kod `0` selepas mengesahkan corak khusus tersebut, ketiadaan tampalan jarak lebih awal, dan tiada ralat lain. Semua ujian Stage 1–5 terus perlu lulus.

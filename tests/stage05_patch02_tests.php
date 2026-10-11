@@ -100,7 +100,7 @@ foreach ([$m, $m->mulSmall(2), $m->add(BigInt::one()), BigInt::fromInt(-1)] as $
 }
 sahHari($kernel->probe($foundation, $foundation)['status'] === 'READY', 'PROBE_KEKAL');
 
-// Oracle tidak boleh masuk ke pengeluaran, dan kecacatan seterusnya belum boleh wujud.
+// Oracle tidak boleh masuk ke pengeluaran, dan tampalan berikutnya belum boleh wujud.
 $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator(dirname(__DIR__) . '/src', FilesystemIterator::SKIP_DOTS)
 );
@@ -110,7 +110,7 @@ foreach ($iterator as $file) {
     }
     $content = (string)file_get_contents($file->getPathname());
     sahHari(!str_contains($content, 'NormativeMath'), 'ORACLE_DALAM_PRODUKSI');
-    sahHari(!str_contains($content, 'oldDistance'), 'PENEMUAN_KETIGA_TERLALU_AWAL');
+    sahHari(!str_contains($content, 'distanceCountPatch03'), 'TAMPALAN_KETIGA_TERLALU_AWAL');
 }
 
 // Pastikan pemilik keadaan laluan produksi benar-benar menghala ke tampalan 02.
