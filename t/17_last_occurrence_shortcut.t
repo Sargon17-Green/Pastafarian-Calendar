@@ -83,4 +83,28 @@ for my $lengths ([1,1,1],[2,2,2],[4,4,4],[4,123,4]) {
     my $last = unrankWeaving($lengths,$total);
     is(scalar(@$first),scalar(@$last),'首末排名輸出的總長度一致');
 }
+
+# 所有月份剩餘日數相等時，各種「最後一次出現」的相對排序
+# 透過月份標籤置換形成等勢集合；完整排列數正好平均分成 m! 類。
+# 此為獨立的對稱性證明，而非受測二項係數乘積的重寫。
+sub factorial ($n) {
+    my $result = Math::BigInt->bone;
+    $result->bmul($_) for 2 .. $n;
+    return $result;
+}
+for my $months (3,5,17,47) {
+    my @lengths = (4) x $months;
+    my @remaining = (3) x $months;
+    my $expected = factorial(3*$months);
+    my $divisor = Math::BigInt->new(6)->bpow($months);
+    $divisor->bmul(factorial($months));
+    my $remainder = $expected->copy->bmod($divisor);
+    is("$remainder", '0', "月份數 $months：對稱性推導有整數商");
+    $expected->bdiv($divisor);
+    my $counter = Pastafari::NormativeScroll::_weave_counter(\@lengths);
+    my $actual = $counter->(\@remaining, $months, 0);
+    is("$actual", "$expected",
+        "月份數 $months：所有月份已開啟時，計數符合多重集合排列的對稱性");
+}
+
 done_testing;
