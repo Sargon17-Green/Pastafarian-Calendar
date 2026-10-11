@@ -13,6 +13,8 @@ public final class Stage02EndpointWeavingTests {
         testOracleUnrank();
         testConditionalPrefixes();
         testLongerMonthFamilies();
+        testBinomialAndCatalanIdentities();
+        testNearLimitDomain();
         testBoundsAndOwnership();
         System.out.println("STAGE_02_ENDPOINT_WEAVING_PASS checks=" + checks);
     }
@@ -107,6 +109,51 @@ public final class Stage02EndpointWeavingTests {
         Arrays.fill(fortySeven, 4);
         BigInteger exact = new MonsterWeavingEndpointDP(fortySeven).count();
         ok(exact.signum() > 0, "E_47_MONTHS_COUNT");
+    }
+
+
+    private static BigInteger binomial(int n, int k) {
+        BigInteger result = BigInteger.ONE;
+        for (int j = 1; j <= k; j++) {
+            result = result.multiply(BigInteger.valueOf(n - j + 1))
+                .divide(BigInteger.valueOf(j));
+        }
+        return result;
+    }
+
+    private static void testBinomialAndCatalanIdentities() {
+        for (int first : new int[]{2, 3, 4, 7, 17, 64, 123}) {
+            for (int last : new int[]{2, 3, 4, 7, 17, 64, 123}) {
+                int[] lengths = {first, last};
+                BigInteger expected = binomial(first + last - 2, first - 1);
+                eq(expected, new MonsterWeavingEndpointDP(lengths).count(),
+                    "E_TWO_MONTH_BINOMIAL");
+            }
+        }
+        for (int months = 1; months <= 47; months++) {
+            int[] pairs = new int[months];
+            int[] singletons = new int[months];
+            Arrays.fill(pairs, 2);
+            Arrays.fill(singletons, 1);
+            BigInteger catalan = binomial(2 * months, months)
+                .divide(BigInteger.valueOf(months + 1));
+            eq(catalan, new MonsterWeavingEndpointDP(pairs).count(),
+                "E_CATALAN_TWO_DAY_MONTHS");
+            eq(BigInteger.ONE, new MonsterWeavingEndpointDP(singletons).count(),
+                "E_SINGLETON_ORDER");
+        }
+    }
+
+    private static void testNearLimitDomain() {
+        int[] lengths = {123, 123, 123, 123};
+        MonsterWeavingEndpointDP family = new MonsterWeavingEndpointDP(lengths);
+        BigInteger count = family.count();
+        ok(count.signum() > 0, "E_492_DAY_DOMAIN");
+        ok(count.bitLength() > 100, "E_492_DAY_PRECISION");
+        eq(count, family.countAfterPrefix(new int[0]),
+            "E_492_DAY_EMPTY_PREFIX");
+        eq(count, family.countAfterPrefix(new int[]{1}),
+            "E_492_DAY_FIRST_MONTH");
     }
 
     private static void testBoundsAndOwnership() {

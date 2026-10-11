@@ -81,3 +81,7 @@ ni'o lo `MonsterCalendarResolver` cu jorne lo `MonsterYearBlueprint` .e lo `Mons
 ### lo porsi te jicmu poi du lo pamoi .e lo fanmo
 
 ni'o lo cnino `MonsterWeavingEndpointDP` cu facki lo porsi se namcu fi lo pamoi .e lo fanmo. ri na zbasu lo so'i se stika namcu liste poi se jmina lo mutce barda masti porsi. lo ciste cu pilno lo se jimte nunjavni tezu'e lo nu na ca'o pilno lo mutce barda vreji. lo balvi cipra cu se nitcu lo 5778 detri masti javni.
+
+### lo prula'i sipna te cipra
+
+ni'o lo barda namcu cipra cu te jalge lo drani fi lo GitHub Actions run `38157687854`. lo `MonsterWeavingEndpointDP` cu ralte lo re masti binomio javni .e lo Catalan javni pe lo nanca to'e so'i detri. lo se jmite be lo 512 detri cu na se galfi ca ti.
