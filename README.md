@@ -156,3 +156,9 @@ GitHub Actions run `38165814846`: TypeScript typecheck, `stage12-typescript-mara
 `npm run test:patch06` ने 15 मूलभूत साक्षी, 16 वास्तविक दिवस-जोड्या × 46 visible drops × 3 history offsets, 16,384-bit signed इनपुट, शाखेचा प्रत्यक्ष legacy call, sparse storage व lifecycle तपासावेत. `npm test` सर्व जुन्या हिरव्या चाचण्या व PATCH 06 तपासते. अंतिम कालदिनांक API Stage 54 पूर्वी अनुपलब्ध.
 
 Stage 13 यशस्वी पडताळणी: [GitHub Actions 38167061333](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38167061333) वर `STAGE_13_PATCH_06_GUARDS_PASS` व `STAGE_13_PATCH_06_PROPERTIES_PASS`, सर्व जुन्या चाचण्या आणि सहा historical expected-red पुरावे PASS. पुढील टप्पा 14/55 — DISCOVERY 07; पुढील grind table indexing दोषाचा शोध; दुरुस्ती stage 15 पर्यंत नाही.
+
+## टप्पा 14/55 — DISCOVERY 07
+
+सातव्या ऐतिहासिक दोषासाठी `LegacyGrindTableAdapter` मध्ये 11 वास्तविक grind rows, पण मुद्दाम चुकीचे `legacyRow(g) = table[g]` ठेवले. (g=1..10) येथे पुढची ओळ वाचली जाते आणि (g=11) येथे `undefined` येते. `discoverLegacyGrind` हा स्वतंत्र production observation मार्ग प्रत्येक चुकीच्या index चा आणि प्रत्यक्ष गणिती परिणामाचा पुरावा ठेवतो. नियमाधारित 11-row संदर्भ फक्त `test/discovery07Fixtures.ts` मध्ये आहे; production त्याला आयात करत नाही.
+
+`npm run test:discovery07` हा guard/property चाचण्यांचा यशस्वी आदेश आहे. `npm run test:discovery07:red` हा स्वतंत्र historical expected-red साठी मुद्दाम nonzero exit देतो. Stage 15 ची index 0 sentinel row दुरुस्ती अजून **नाही**. आधीचे सर्व टप्पे आणि Stage 54 चे अद्याप unavailable अंतिम दिनांक मार्ग अबाधित.

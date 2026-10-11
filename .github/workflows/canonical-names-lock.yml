@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage13-typescript-marathi:
+  stage14-typescript-marathi:
     if: github.ref == 'refs/heads/TypeScript+मराठी'
     runs-on: ubuntu-latest
     steps:
@@ -37,34 +37,36 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript typecheck
         run: npm run typecheck
-      - name: Stages 01-13 regressions and corrected sixth history reader
+      - name: Stages 01-14 regressions and seventh historical table discovery
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee stage13-results.log
-          grep -Fq 'STAGE_01_PASS' stage13-results.log
-          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage13-results.log
-          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage13-results.log
-          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage13-results.log
-          grep -Eq 'STAGE_05_PATCH_02_PASS pairs=[0-9]+ days=[0-9]+ plusOne=[1-9][0-9]* scarChecks=[1-9][0-9]* scarForces=0 mismatches=0' stage13-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_GUARDS_PASS mismatches=4 matches=1' stage13-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_PROPERTIES_PASS pairs=225' stage13-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_LARGE_AND_ISOLATION_PASS' stage13-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_ERRORS_PASS' stage13-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_LIFECYCLE_PASS' stage13-results.log
-          grep -Eq 'STAGE_07_PATCH_03_PASS pairs=[0-9]+ overridden=[1-9][0-9]* preserved=[1-9][0-9]* mismatches=0' stage13-results.log
-          grep -Fq 'STAGE_08_DISCOVERY_04_GUARDS_PASS mismatches=4 matches=1 divergentSteps=45' stage13-results.log
-          grep -Fq 'STAGE_08_DISCOVERY_04_PROPERTIES_PASS cases=516 values=2580' stage13-results.log
-          grep -Eq 'STAGE_09_PATCH_04_PASS cases=1076 cells=5380 legacyCalls=1076 overwritten=[1-9][0-9]* mismatches=0' stage13-results.log
-          grep -Eq 'STAGE_09_PATCH_04_METAMORPHIC_PASS comparisons=301 cells=1505 historicalDifferences=[1-9][0-9]*' stage13-results.log
-          grep -Eq 'STAGE_10_DISCOVERY_05_GUARDS_PASS firstMismatches=6 firstMatches=1 oracleCases=9 oracleMismatches=[1-9][0-9]* oracleMatches=[1-9][0-9]*' stage13-results.log
-          grep -Eq 'STAGE_10_DISCOVERY_05_PROPERTIES_PASS cases=1030 slots=7210 mismatches=[1-9][0-9]* matches=[1-9][0-9]*' stage13-results.log
-          grep -Eq 'STAGE_11_PATCH_05_ORACLE_PASS cases=105 slots=735 legacyDifferences=[1-9][0-9]* legacyMatches=[1-9][0-9]* mismatches=0' stage13-results.log
-          grep -Eq 'STAGE_11_PATCH_05_PROPERTIES_PASS cases=2062 slots=14434 legacyDifferences=[1-9][0-9]* legacyMatches=[1-9][0-9]*' stage13-results.log
-          grep -Fq 'STAGE_12_DISCOVERY_06_GUARDS_PASS mismatches=11 matches=4 hidden=11 visible=4' stage13-results.log
-          grep -Fq 'STAGE_12_DISCOVERY_06_PROPERTIES_PASS days=16 cases=2208 hiddenMisses=176 visibleMatches=2032' stage13-results.log
-          grep -Fq 'STAGE_13_PATCH_06_GUARDS_PASS cases=15 hidden=11 visible=4 mismatches=0' stage13-results.log
-          grep -Fq 'STAGE_13_PATCH_06_PROPERTIES_PASS days=16 cases=2208 hidden=176 visible=2032 mismatches=0 giantCases=138 giantMismatches=0' stage13-results.log
+          npm test | tee stage14-results.log
+          grep -Fq 'STAGE_01_PASS' stage14-results.log
+          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage14-results.log
+          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage14-results.log
+          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage14-results.log
+          grep -Eq 'STAGE_05_PATCH_02_PASS pairs=[0-9]+ days=[0-9]+ plusOne=[1-9][0-9]* scarChecks=[1-9][0-9]* scarForces=0 mismatches=0' stage14-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_GUARDS_PASS mismatches=4 matches=1' stage14-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_PROPERTIES_PASS pairs=225' stage14-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_LARGE_AND_ISOLATION_PASS' stage14-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_ERRORS_PASS' stage14-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_LIFECYCLE_PASS' stage14-results.log
+          grep -Eq 'STAGE_07_PATCH_03_PASS pairs=[0-9]+ overridden=[1-9][0-9]* preserved=[1-9][0-9]* mismatches=0' stage14-results.log
+          grep -Fq 'STAGE_08_DISCOVERY_04_GUARDS_PASS mismatches=4 matches=1 divergentSteps=45' stage14-results.log
+          grep -Fq 'STAGE_08_DISCOVERY_04_PROPERTIES_PASS cases=516 values=2580' stage14-results.log
+          grep -Eq 'STAGE_09_PATCH_04_PASS cases=1076 cells=5380 legacyCalls=1076 overwritten=[1-9][0-9]* mismatches=0' stage14-results.log
+          grep -Eq 'STAGE_09_PATCH_04_METAMORPHIC_PASS comparisons=301 cells=1505 historicalDifferences=[1-9][0-9]*' stage14-results.log
+          grep -Eq 'STAGE_10_DISCOVERY_05_GUARDS_PASS firstMismatches=6 firstMatches=1 oracleCases=9 oracleMismatches=[1-9][0-9]* oracleMatches=[1-9][0-9]*' stage14-results.log
+          grep -Eq 'STAGE_10_DISCOVERY_05_PROPERTIES_PASS cases=1030 slots=7210 mismatches=[1-9][0-9]* matches=[1-9][0-9]*' stage14-results.log
+          grep -Eq 'STAGE_11_PATCH_05_ORACLE_PASS cases=105 slots=735 legacyDifferences=[1-9][0-9]* legacyMatches=[1-9][0-9]* mismatches=0' stage14-results.log
+          grep -Eq 'STAGE_11_PATCH_05_PROPERTIES_PASS cases=2062 slots=14434 legacyDifferences=[1-9][0-9]* legacyMatches=[1-9][0-9]*' stage14-results.log
+          grep -Fq 'STAGE_12_DISCOVERY_06_GUARDS_PASS mismatches=11 matches=4 hidden=11 visible=4' stage14-results.log
+          grep -Fq 'STAGE_12_DISCOVERY_06_PROPERTIES_PASS days=16 cases=2208 hiddenMisses=176 visibleMatches=2032' stage14-results.log
+          grep -Fq 'STAGE_13_PATCH_06_GUARDS_PASS cases=15 hidden=11 visible=4 mismatches=0' stage14-results.log
+          grep -Fq 'STAGE_13_PATCH_06_PROPERTIES_PASS days=16 cases=2208 hidden=176 visible=2032 mismatches=0 giantCases=138 giantMismatches=0' stage14-results.log
+          grep -Fq 'STAGE_14_DISCOVERY_07_GUARDS_PASS mismatches=11 matches=0 missing=1 shifted=10' stage14-results.log
+          grep -Fq 'STAGE_14_DISCOVERY_07_PROPERTIES_PASS cases=2816 shifted=2560 missing=256 differences=2816 giantCases=22 giantValues=20' stage14-results.log
       - name: Verify intentional expected-red regression
         shell: bash
         run: |
@@ -143,3 +145,17 @@ jobs:
             exit 1
           fi
           grep -Fq 'DISCOVERY_06_EXPECTED_RED mismatches=11 matches=4' discovery06-red.log
+
+      - name: Verify DISCOVERY 07 intentional expected-red
+        shell: bash
+        run: |
+          set +e
+          npm run test:discovery07:red > discovery07-red.log 2>&1
+          result=$?
+          set -e
+          cat discovery07-red.log
+          if [ "$result" -eq 0 ]; then
+            echo "::error::Historical DISCOVERY 07 unexpectedly passed"
+            exit 1
+          fi
+          grep -Fq 'DISCOVERY_07_EXPECTED_RED mismatches=11 matches=0 missing=1' discovery07-red.log
