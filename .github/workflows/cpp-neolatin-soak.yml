@@ -568,6 +568,11 @@ jobs:
             tests/stage_56_e2e_worker.cpp \
             build_soak/differential/monster.o build_soak/differential/reference.o \
             -o build_soak/differential/e2e
+          # DETOUR: tota structura anni contra oracle saved-sum comparatur.
+          "$CXX" $CXXSTD -O2 $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_structure_reference_tests.cpp \
+            build_soak/differential/monster.o build_soak/differential/reference.o \
+            -o build_soak/differential/structure
           "$CXX" --version | head -1 | tee soak-logs/compiler.log
 
       - name: Currere eadem X paria differentialia
@@ -596,6 +601,8 @@ jobs:
           done < soak-logs/pairs.tsv
           test "$numerus" -eq 10
           echo 'DIFFERENTIA_DECEM_PARIA=10/10_PASS'
+          timeout 20m build_soak/differential/structure \
+            2>&1 | tee soak-logs/structure-reference.log
 
       - name: Servare logs differentialia
         if: always()
