@@ -16,5 +16,5 @@ jobs:
         with:
           otp-version: '27'
           elixir-version: '1.18'
-      - name: Chạy kiểm thử giai đoạn 1
+      - name: Chạy kiểm thử phát triển
         run: mix test

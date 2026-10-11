@@ -33,3 +33,17 @@ Giai đoạn 2: phơi bày sai lệch phần dư SAVE đầu tiên
 Thêm đường SAVE lịch sử chạy thật và ba hồi quy chuẩn cố ý đỏ.
 Giữ nguyên nguồn tham chiếu thử nghiệm, các kiểm thử nền và danh mục đã đóng băng.
 Không thêm bất kỳ lớp vá nào trước giai đoạn 3.
+
+## Kết quả kiểm chứng thực tế
+
+Lần chạy: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38150668369
+
+- Môi trường: Elixir 1.18.5; Erlang/OTP 27.
+- 22 kiểm thử đã thực thi, 3 thất bại đúng kỳ vọng, 19 đạt.
+- M: kết quả thực tế 0, kết quả chuẩn 170141183460469231731687303715884105727.
+- 2M: kết quả thực tế 0, kết quả chuẩn 170141183460469231731687303715884105727.
+- 3M: kết quả thực tế 0, kết quả chuẩn 170141183460469231731687303715884105727.
+- Không có lỗi biên dịch hay thất bại ngoài ba hồi quy nêu trên.
+- Khóa tên chuẩn: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38150668429 — đạt.
+
+Trạng thái khép giai đoạn: EXPECTED_RED đã xác minh. Chưa thực hiện PATCH 01.

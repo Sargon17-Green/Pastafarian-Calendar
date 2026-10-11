@@ -29,3 +29,12 @@ mix test
 ```
 
 Bước kế tiếp sau khi xác minh giai đoạn 2 là giai đoạn 3/55, `PATCH 01`. Ở bước đó mới được thêm lớp vá chuyển phần dư 0 thành M, đồng thời giữ nguyên `old_remainder` như một dấu vết lịch sử.
+
+## Bằng chứng khép giai đoạn 2
+
+GitHub Actions chạy Elixir 1.18.5 với OTP 27 và xác nhận 22 kiểm thử,
+3 thất bại đúng tại M, 2M, 3M; 19 kiểm thử còn lại thành công.
+Không có lỗi biên dịch hay sai lệch kiểm thử ngoài dự kiến.
+
+- [Nhật ký kiểm thử dự kiến đỏ](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38150668369)
+- [Kiểm tra khóa tên chuẩn đã đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38150668429)
