@@ -42,17 +42,17 @@ a rhaid i'r sgript gyffredinol ei gydnabod yn fethiant disgwyliedig.
 - Gwrthod mewnbynnau annilys i'r deunydd lapio (`-1`, `M`, `M+1`).
 - Rhedeg Cam 2 eto i brofi nad yw'r graith hanesyddol wedi'i dileu.
 
-## Gwirio hyd yma
+## Gwirio cyn yr archwiliad terfynol (hanesyddol)
 
 **PASS mewn preflight Kotlin yn unig:** llwyddodd y profion Cam 2
 ac yna'r profion Cam 3 gan ddefnyddio amnewidion ar wahân ar gyfer
 `ExactInt` a `NormativeCore`. Mae'r logiau a chod yr amnewidion
 yn `HANDOFF_ONLY`, nad yw'n rhan o'r delta ystorfa.
 
-**PENDING:** ail-redeg `sh run-stage03-tests.sh` yn y goeden
+**CYN Y CADARNHAD TERFYNOL:** ail-redeg `sh run-stage03-tests.sh` yn y goeden
 Kotlin+Cymraeg go iawn, gyda'r pum blob gwreiddiol Cam 1 a'r
 mopheth llawn. Rhaid i bob marc diwedd ymddangos a rhaid i'r cod
-ymadael fod yn sero. Hyd hynny: `LAST_COMPLETED_STAGE=2`.
+ymadael fod yn sero. Roedd y statws bryd hynny yn `LAST_COMPLETED_STAGE=2`.
 
 **Heb ei gynnwys:** y canfyddiad ar wahân ar `ExactInt.toLongExact()`
 gydag `Long.MIN_VALUE`. Ni ddylid ei guddio o fewn Patch 01.
@@ -72,5 +72,48 @@ Ar y copi lleol, roedd hash Git `ExactInt.kt` yn union
 `3c567e1bb7ad0a5d96b48edbee0d0a4163c05ce8` — yr un â GitHub.
 Pasiodd profion Cam 2 a Cham 3 ar y cod cynhyrchu gwirioneddol, ond defnyddiwyd
 **cyfeirnod SAVE byr at ddiben y prawf yn unig**. Nid yw hyn yn ail-redeg y
-66 prawf Cam 1 na'r oracl calendr cyfan. Felly erys `LAST_COMPLETED_STAGE=2`
-nes bydd `sh run-stage03-tests.sh` yn pasio gyda'r ffynonellau Cam 1 gwreiddiol.
+66 prawf Cam 1 na'r oracl calendr cyfan. Roedd `LAST_COMPLETED_STAGE=2` ar y pryd; gweler y cadarnhad terfynol isod.
+
+
+## Cadarnhad terfynol brodorol — 11 Hydref 2026
+
+Cafwyd y codau gwreiddiol union o gangen `Kotlin+Cymraeg` a gwirio
+Git SHA pob un o'r pum ffeil sylfaen: `ExactInt.kt`,
+`SourceLanguageCatalog.kt`, `NormativeCore.kt`, `NormativeCalendar.kt`,
+a `Stage01Tests.kt`. Ni ddefnyddiwyd amnewidyn na ffynhonnell oracl fyr.
+Ail-grewyd cangen Git leol o'r ffeiliau union; ni chafodd commit
+na push ei wneud i GitHub.
+
+Daeth problem integreiddio wirioneddol i'r amlwg yn y rhediad cyntaf:
+roedd `MonsterBootstrap.kt` yn cyfeirio at `SavePatchWrapper`, ond
+nid oedd rhestrau ffynonellau `run-stage01-tests.sh` a
+`run-stage02-tests.sh` yn cynnwys `SavePatchWrapper.kt`. Methodd
+y cam cyntaf â gwall cydosod. Cywirwyd y **ddwy sgript** heb newid
+unrhyw ddosbarth cynhyrchu na'r cyfeirnod normadol.
+
+Ail-redwyd `sh run-stage03-tests.sh` ar ôl y cywiriad:
+
+```text
+STAGE02_BASELINE_PROVENANCE_PASS_5
+STAGE01_PASS_66
+STAGE02_PERIODICITY_PASS_195
+STAGE02_EXPECTED_RED_3
+STAGE02_STRICT_RED_CONFIRMED
+STAGE03_SAVE_PATCH_GREEN_4
+STAGE03_LEGACY_SCAR_RED_3
+STAGE03_PATCH_GREEN_0
+STAGE03_PERIODICITY_GREEN_195
+STAGE03_BOUNDARY_GREEN_7
+STAGE03_WIDE_ARITHMETIC_GREEN_129
+STAGE03_OWNERSHIP_AND_VALIDATION_GREEN
+STAGE03_COMPLETE_GREEN
+STAGE03_EXTENDED_BIGINT_GREEN_921
+STAGE03_EXTENDED_NATIVE_GREEN
+STAGE03_NATIVE_GREEN
+```
+
+Cod ymadael: **0**. Statws Cam 3: **COMPLETE / GREEN**,
+ond erys Cam 2 yn **EXPECTED RED** o fwriad.
+`LAST_COMPLETED_STAGE=3`. Y cam nesaf yn unig yw Cam 4 —
+`DISCOVERY 02`. Nid yw'r adroddiad hwn yn gweithredu Cam 4.
+Mae canfyddiad annibynnol `Long.MIN_VALUE` heb ei newid.

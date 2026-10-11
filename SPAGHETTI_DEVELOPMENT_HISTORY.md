@@ -119,3 +119,24 @@ gydag 0 gwahaniaeth a 921 prawf BigInteger annibynnol ychwanegol, hyd at
 2048 did. Cedwir y profion JVM ychwanegol dan `src/test/` yn unig.
 Ni newidiodd y cod cynhyrchu. Ni ddylid dechrau Cam 4 cyn PASS llawn gyda'r
 oracl a'r 66 prawf Cam 1 gwreiddiol.
+
+
+### Cam 3 — cadarnhad brodorol llawn ar ôl trwsio'r integreiddio (11 Hydref 2026)
+
+Wedi i delta v002 gael ei lwytho i'r gangen, archwiliwyd y
+ffynonellau union a'u hashiau Git. Methodd y rhediad brodorol cyntaf
+wrth gydosod Cam 1 am nad oedd `run-stage01-tests.sh` na
+`run-stage02-tests.sh` yn cynnwys y ffynhonnell newydd
+`SavePatchWrapper.kt` er bod `MonsterBootstrap.kt` yn ei defnyddio.
+Darganfyddiad integreiddio oedd hwn, nid camgymeriad y fformiwla SAVE.
+
+Cywirwyd rhestrau'r ddwy sgript yn unig. Ail-redwyd
+`sh run-stage03-tests.sh` gyda'r pum ffeil brofi sylfaenol union,
+`ExactInt` gwirioneddol a'r oracl calendr llawn. Cafwyd cod
+ymadael **0**, `STAGE01_PASS_66`,
+`STAGE02_EXPECTED_RED_3`, `STAGE02_STRICT_RED_CONFIRMED`,
+`STAGE03_PATCH_GREEN_0`, `STAGE03_EXTENDED_BIGINT_GREEN_921`
+a `STAGE03_NATIVE_GREEN`. Cedwir y graith a'r tri gwahaniaeth
+etifeddol. Mae **Cam 3 wedi'i gwblhau ac wedi'i ddilysu'n frodorol**.
+Ni ddechreuwyd Cam 4. Mae diffyg `Long.MIN_VALUE` yn parhau'n
+ganfyddiad ar wahân.

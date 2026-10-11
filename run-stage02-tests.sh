@@ -60,6 +60,7 @@ if ! kotlinc \
     src/main/kotlin/pastafari/ExactInt.kt \
     src/main/kotlin/pastafari/SourceLanguageCatalog.kt \
     src/main/kotlin/pastafari/LegacyRemainderAdapter.kt \
+    src/main/kotlin/pastafari/SavePatchWrapper.kt \
     src/main/kotlin/pastafari/MonsterBootstrap.kt \
     src/test/kotlin/pastafari/NormativeCore.kt \
     src/test/kotlin/pastafari/NormativeCalendar.kt \

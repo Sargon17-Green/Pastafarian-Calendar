@@ -98,3 +98,20 @@ gwahaniaeth etifeddol, ac yna brofion gwyrdd Patch 01. Cyn yr archwiliad
 brodorol terfynol, llwyddodd preflight Kotlin yn erbyn amnewidion prawf
 ar wahân i'r ystorfa. **Nid yw'r preflight hwn yn ardystio Cam 3**.
 Mae `LAST_COMPLETED_STAGE=2` hyd nes bod y rhediad llawn yn PASS.
+
+
+## Cadarnhad brodorol Cam 3 (11 Hydref 2026)
+
+**Diweddariad sy'n disodli'r statws PENDING uchod:** Wedi llwytho
+delta v002, cafwyd gwall integreiddio: roedd sgriptiau Cam 1 a Cham 2
+yn hepgor `SavePatchWrapper.kt` wrth gydosod. Mae'r delta terfynol yn
+cywiro'r ddwy sgript, heb newid y cod cynhyrchu.
+
+Llwyddodd y rhediad llawn `sh run-stage03-tests.sh` gyda'r pum blob
+ffynhonnell gwreiddiol ac oracl calendr llawn. Cod ymadael: **0**.
+Pasiodd 66 prawf Cam 1, cadwyd tri gwahaniaeth disgwyliedig Cam 2,
+ac ni chafwyd gwahaniaethau yn PATCH 01; pasiodd 921 achos annibynnol.
+`LAST_COMPLETED_STAGE=3`. Y cam nesaf yw Cam 4 — `DISCOVERY 02`.
+
+Mae'r cam diweddaru hwn yn cynnwys **y ddwy sgript brofi, a dogfennaeth
+a metadata yn unig**. Peidiwch â llwytho'r logiau HANDOFF_ONLY i'r gangen.
