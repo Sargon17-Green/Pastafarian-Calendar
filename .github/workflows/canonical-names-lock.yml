@@ -47,3 +47,39 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage01_tests.lua .
+
+  lua_stage02_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye tras legacy Stage 2 a
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage02_trace_tests.lua .
+      - name: Verifye kontra API ak limit yo
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage02_contract_tests.lua .
+          lua5.3 test/stage02_boundary_tests.lua .
+          lua5.3 test/stage02_property_tests.lua .
+          lua5.3 test/stage02_scope_tests.lua .
+      - name: Verifye echèk la se diferans ki espere yo
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage02_expected_red_audit.lua .
+      - name: Dekouvri diferans SAVE a — echèk espere
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage02_regression_tests.lua .
