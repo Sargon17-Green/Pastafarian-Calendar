@@ -160,8 +160,12 @@ public final class Stage02LinearWeavingTests {
         fails("E_WEAVE_SEQUENCE", () -> stable.rank1(new int[]{1, 2, 3}));
         MonsterWeavingLinearCounter longRange = new MonsterWeavingLinearCounter(
             new int[]{123, 123, 123, 123, 21});
-        fails("E_WEAVE_UNRANK_LIMIT", () -> longRange.unrank1(
-            longRange.count().add(BigInteger.ONE).divide(BigInteger.TWO)));
+        BigInteger middle513 = longRange.count().add(BigInteger.ONE)
+            .divide(BigInteger.TWO);
+        int[] middleWeaving = longRange.unrank1(middle513);
+        arr(longRange.unrankAfterPrefix(new int[]{1}, middle513),
+            middleWeaving, "E_ALL_513_RANKS_AVAILABLE");
+        eq(middle513, longRange.rank1(middleWeaving), "E_513_GLOBAL_INVERSE");
         fails("E_WEAVE_RANK_LIMIT", () -> longRange.rank1(new int[0]));
     }
 

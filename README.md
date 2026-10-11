@@ -180,3 +180,7 @@ ni'o lo `unrankAfterPrefix` .e lo `rankAfterPrefix` cu ciksi lo porsi ranki se s
 ## lo nanca detri pe lo se steci pamoi pagbu
 
 ni'o lo `MonsterCalendarResolver.fromBlueprintWithPrefixRank` cu zbasu lo mulno nanca detri fi lo se stodi nanca stura .e lo se jmina porsi ranki fi lo se steci pamoi pagbu. lo `PrefixRankedYear` cu stodi lo pamoi pagbu .e lo ranki be lo se stali pagbu .e lo se stali pagbu namcu. lo `forTargetWithPrefixRank` cu nanca sisku gi'e zbasu lo te detri. lo ranki na du lo mulno nanca kanoniko ranki. lo `Stage02PrefixCalendarTests` cu cipra lo drani nanca .e lo djedi pe lo masti .e lo kecti .e lo `NormativeOracle` fi lo 256 mebibaiti te jimte. ko benji `sh run_stage02_prefix_calendar_tests.sh`.
+
+## lo mulno nanca porsi ranki fi lo pamoi .e lo romoi pagbu
+
+ni'o lo se steci pamoi pagbu be lo pamoi se jorne porsi cu se steci lo mulno nanca ranki poi co'a li 1. lo se steci pamoi pagbu be lo romoi se jorne porsi cu se steci lo mulno nanca ranki poi fanmo lo se cumki namcu. lo `BoundaryBlock` cu stodi lo pamoi ranki .e lo romoi ranki .e lo pagbu. lo `MonsterWeavingLinearCounter` cu pilno lo drani mu'oi ranki be lo nanca be li 5778 djedi fi lo pagbu poi se stali li 512 djedi. lo drata barda se steci ranki cu se jimte. ko benji `sh run_stage02_boundary_blocks_tests.sh`.

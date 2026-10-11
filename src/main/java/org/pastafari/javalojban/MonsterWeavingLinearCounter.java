@@ -13,6 +13,29 @@ public final class MonsterWeavingLinearCounter {
     private final int[] lengths;
     private final int totalDays;
     private BigInteger rootCount;
+    private BoundaryBlock cachedFirstBlock;
+    private BoundaryBlock cachedLastBlock;
+
+    public static final class BoundaryBlock {
+        private final int[] prefix;
+        private final BigInteger lowerRank;
+        private final BigInteger upperRank;
+
+        private BoundaryBlock(int[] prefix, BigInteger lowerRank, BigInteger upperRank) {
+            this.prefix = prefix.clone();
+            this.lowerRank = lowerRank;
+            this.upperRank = upperRank;
+        }
+
+        public int[] fixedPrefixCopy() { return prefix.clone(); }
+        public BigInteger lowerRank() { return lowerRank; }
+        public BigInteger upperRank() { return upperRank; }
+        public BigInteger size() { return upperRank.subtract(lowerRank).add(ONE); }
+        public boolean contains(BigInteger rank) {
+            return rank != null && lowerRank.compareTo(rank) <= 0
+                && rank.compareTo(upperRank) <= 0;
+        }
+    }
 
     private static final class State {
         final int[] remaining;
@@ -343,10 +366,53 @@ public final class MonsterWeavingLinearCounter {
         return extremeWeaving(true);
     }
 
+
+    public BoundaryBlock boundaryBlock(boolean latest, int suffixDays) {
+        if (suffixDays < 0 || suffixDays > MAX_UNRANK_DAYS || suffixDays > totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_SUFFIX_LIMIT");
+        }
+        int[] full = latest ? lexLast() : lexFirst();
+        int[] prefix = Arrays.copyOf(full, totalDays - suffixDays);
+        BigInteger possible = countAfterPrefix(prefix);
+        BigInteger start = latest ? count().subtract(possible).add(ONE) : ONE;
+        return new BoundaryBlock(prefix, start, start.add(possible).subtract(ONE));
+    }
+
+    private synchronized BoundaryBlock defaultBoundary(boolean latest) {
+        if (latest) {
+            if (cachedLastBlock == null) {
+                cachedLastBlock = boundaryBlock(true, MAX_UNRANK_DAYS);
+            }
+            return cachedLastBlock;
+        }
+        if (cachedFirstBlock == null) {
+            cachedFirstBlock = boundaryBlock(false, MAX_UNRANK_DAYS);
+        }
+        return cachedFirstBlock;
+    }
+
+    private static boolean sharesPrefix(int[] sequence, int[] prefix) {
+        if (sequence == null || sequence.length < prefix.length) return false;
+        for (int i = 0; i < prefix.length; i++) {
+            if (sequence[i] != prefix[i]) return false;
+        }
+        return true;
+    }
+
     public int[] unrank1(BigInteger rank) {
         if (totalDays > MAX_UNRANK_DAYS) {
             BigInteger total = count();
             if (rank != null && rank.signum() > 0 && rank.compareTo(total) <= 0) {
+                BoundaryBlock first = defaultBoundary(false);
+                if (first.contains(rank)) {
+                    return unrankAfterPrefix(first.fixedPrefixCopy(),
+                        rank.subtract(first.lowerRank()).add(ONE));
+                }
+                BoundaryBlock last = defaultBoundary(true);
+                if (last.contains(rank)) {
+                    return unrankAfterPrefix(last.fixedPrefixCopy(),
+                        rank.subtract(last.lowerRank()).add(ONE));
+                }
                 BigInteger edge = BigInteger.valueOf(1L + MAX_EDGE_DISTANCE);
                 if (rank.compareTo(edge) <= 0
                     || total.subtract(rank).compareTo(BigInteger.valueOf(MAX_EDGE_DISTANCE)) <= 0) {
@@ -385,6 +451,20 @@ public final class MonsterWeavingLinearCounter {
 
     public BigInteger rank1(int[] weaving) {
         if (totalDays > MAX_UNRANK_DAYS) {
+            if (weaving != null && weaving.length == totalDays) {
+                BoundaryBlock first = defaultBoundary(false);
+                int[] prefix = first.fixedPrefixCopy();
+                if (sharesPrefix(weaving, prefix)) {
+                    return first.lowerRank().subtract(ONE).add(
+                        rankAfterPrefix(prefix, weaving));
+                }
+                BoundaryBlock last = defaultBoundary(true);
+                prefix = last.fixedPrefixCopy();
+                if (sharesPrefix(weaving, prefix)) {
+                    return last.lowerRank().subtract(ONE).add(
+                        rankAfterPrefix(prefix, weaving));
+                }
+            }
             return edgeRank(weaving);
         }
         if (weaving == null || weaving.length != totalDays) {

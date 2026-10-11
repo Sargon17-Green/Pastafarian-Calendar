@@ -141,3 +141,7 @@ ni'o lo nu xamgu lo se steci ranki cu pilno lo nu facki lo drani pamoi porsi .e 
 ### lo se steci pamoi pagbu be lo nanca detri
 
 ni'o lo `PrefixRankedYear` cu zgana lo se stali ranki se steci lo pamoi pagbu gi'e pilno lo `MonsterMonthIndex` fi lo te detri. lo nu se jmina lo drani pamoi pagbu cu na mulno lo kanoniko jmina porsi te cuxna fi lo mulno nanca. lo `Stage02PrefixCalendarTests` cu cipra lo se stodi nanca be lo mutce barda nu djedi.
+
+### lo mulno ranki pe lo nanca pamoi .e romoi pagbu
+
+ni'o lo `BoundaryBlock` cu se zbasu fi lo pamoi .e lo romoi se jorne porsi. lo pamoi pagbu ranki cu co'a li pa .i lo romoi pagbu ranki cu fanmo lo te jicmu namcu. lo se steci ranki cu pilno lo pagbu porsi ranki fi lo mulno ranki. lo pagbu pe lo drata porsi cu na se te cuxna ca lo ba'e ro se cumki ranki.

@@ -61,6 +61,13 @@ public final class Stage02PrefixCalendarTests {
                 int[] weaving = converted.weavingCopy();
                 array(prefix, Arrays.copyOf(weaving, prefix.length), "E_PREFIX_FIXED");
                 eq(rank, family.rankAfterPrefix(prefix, weaving), "E_RANK_INVERSION");
+                BigInteger canonicalGlobalRank = prefix.length == duration - 480
+                    && Arrays.equals(prefix, Arrays.copyOf(family.lexFirst(), prefix.length))
+                    ? rank
+                    : family.count().subtract(total).add(rank);
+                eq(canonicalGlobalRank, family.rank1(weaving), "E_GLOBAL_BOUNDARY_RANK");
+                array(weaving, family.unrank1(canonicalGlobalRank),
+                    "E_GLOBAL_BOUNDARY_UNRANK");
                 validateIndependentDates(blueprint, normativeNames, converted);
                 explored++;
             }

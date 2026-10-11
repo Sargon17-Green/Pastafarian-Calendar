@@ -78,3 +78,5 @@ jobs:
         run: sh run_stage02_prefix_ranking_tests.sh
       - name: Stage 02 real-year prefix-ranked calendar
         run: sh run_stage02_prefix_calendar_tests.sh
+      - name: Stage 02 exact global boundary rank intervals
+        run: sh run_stage02_boundary_blocks_tests.sh

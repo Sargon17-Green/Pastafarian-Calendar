@@ -74,7 +74,7 @@ public final class Stage02EdgeWeavingTests {
                 eq(Arrays.stream(lengths).sum(), last.length, "E_WIDE_DURATION_END");
             }
             fails("E_WEAVE_UNRANK_LIMIT", () ->
-                linear.unrank1(BigInteger.valueOf(10)));
+                linear.unrank1(total.add(BigInteger.ONE).divide(BigInteger.TWO)));
         }
     }
 
@@ -102,9 +102,8 @@ public final class Stage02EdgeWeavingTests {
             array(lengths, occurrenceA, "E_FULL_FIRST_MULTIPLICITIES");
             array(lengths, occurrenceB, "E_FULL_LAST_MULTIPLICITIES");
         }
-        fails("E_WEAVE_UNRANK_LIMIT", () -> full.unrank1(BigInteger.valueOf(10)));
         fails("E_WEAVE_UNRANK_LIMIT", () ->
-            full.unrank1(total.subtract(BigInteger.valueOf(9))));
+            full.unrank1(total.add(BigInteger.ONE).divide(BigInteger.TWO)));
     }
 
     private static void testValidationAndCopyOwnership() {

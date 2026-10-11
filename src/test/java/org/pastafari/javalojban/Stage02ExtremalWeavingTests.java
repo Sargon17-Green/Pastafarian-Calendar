@@ -86,9 +86,8 @@ public final class Stage02ExtremalWeavingTests {
         fails("E_WEAVE_UNRANK_LIMIT", () ->
             family.unrank1(total.add(BigInteger.ONE).divide(BigInteger.TWO)));
         int[] interior = first.clone();
-        for (int i = 0; i <= MonsterWeavingLinearCounter.MAX_EDGE_DISTANCE; i++) {
-            interior = family.lexNext(interior);
-        }
+        interior[lengths[0] - 1] = 2;
+        interior[lengths[0]] = 1;
         final int[] interiorRank = interior;
         fails("E_WEAVE_RANK_LIMIT", () -> family.rank1(interiorRank));
         array(first, family.unrank1(BigInteger.ONE), "E_REENTRANT_FIRST");
