@@ -294,4 +294,16 @@ validazione indipendente del delta, metrica e doppio report.
 Le cicatrici precedenti restano direttamente osservabili;
 nessun codice dello stadio 8 è introdotto.
 
-Certificazione nativa da acquisire prima di chiudere lo stadio.
+### Verifica nativa compiuta
+
+La run GitHub Actions 38155941165 ha compilato ed eseguito
+Scala 2.13.18 sul commit
+`ba789b7d536091494f4f9000a533dd04344e4bf1`.
+Tutti gli otto job sono SUCCESS: Stage01 18 PASS,
+Stage02 7 PASS/3 FAIL storici, Stage03 12 PASS,
+Stage04 14 PASS/3 FAIL storici, Stage05 18 PASS,
+Stage06 15 PASS/3 FAIL storici e Stage07 20 PASS/0 FAIL.
+La suite Stage07 ha verificato il percorso reale della patch,
+66.049 coppie, 1.024 coppie deterministiche, grandi BigInt,
+isolamento e tutte le cicatrici precedenti.
+Nessuna logica dello stadio 8 è presente.

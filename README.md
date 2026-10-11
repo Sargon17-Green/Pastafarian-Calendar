@@ -210,3 +210,14 @@ Attesi `20 PASS, 0 FAIL`; copertura: 66.049 coppie esaustive,
 1.024 coppie deterministiche, oltre 16.000 bit, simmetria,
 traslazione, isolamento e precondizioni. Le regressioni degli
 stadi 1–6 restano attive, compresa la firma rossa storica di Stage06.
+
+### Certificazione nativa dello stadio 7
+
+La [GitHub Actions run 38155941165](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155941165)
+è conclusa con SUCCESS sul commit
+`ba789b7d536091494f4f9000a533dd04344e4bf1`.
+Otto job riusciti: blocco nomi, Stage01 18 PASS/0 FAIL,
+Stage02 7 PASS/3 FAIL attesi, Stage03 12 PASS/0 FAIL,
+Stage04 14 PASS/3 FAIL attesi, Stage05 18 PASS/0 FAIL,
+Stage06 15 PASS/3 FAIL attesi e Stage07 20 PASS/0 FAIL.
+Lo stadio 8 non è iniziato.
