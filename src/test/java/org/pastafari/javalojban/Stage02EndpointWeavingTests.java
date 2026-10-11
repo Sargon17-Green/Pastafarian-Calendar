@@ -159,16 +159,17 @@ public final class Stage02EndpointWeavingTests {
 
 
     private static void testHigherBoundCountAndUnrank() {
-        int[] nearLimit = {123, 123, 123, 123, 123, 123};
+        int[] nearLimit = {123, 123, 123, 123, 123, 123, 123, 123};
         MonsterWeavingEndpointDP large = new MonsterWeavingEndpointDP(nearLimit);
         BigInteger count = large.count();
-        ok(count.signum() > 0, "E_738_DAY_POSITIVE");
-        ok(count.bitLength() > 1000, "E_738_DAY_BIGINTEGER");
-        eq(count, large.countAfterPrefix(new int[]{1}), "E_738_DAY_PREFIX");
+        ok(count.signum() > 0, "E_984_DAY_POSITIVE");
+        ok(count.bitLength() > 1000, "E_984_DAY_BIGINTEGER");
+        eq(count, large.countAfterPrefix(new int[]{1}), "E_984_DAY_PREFIX");
         for (int[] lengths : new int[][]{
                 {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
                  4, 4, 4, 4, 4},
-                {36, 36, 36, 36}
+                {36, 36, 36, 36},
+                {45, 45, 45, 45}
         }) {
             MonsterWeavingEndpointDP family = new MonsterWeavingEndpointDP(lengths);
             BigInteger top = family.count();
@@ -193,12 +194,12 @@ public final class Stage02EndpointWeavingTests {
         eq(first, dp.count(), "E_COPY_INPUT");
         fails("E_WEAVE_EMPTY", () -> new MonsterWeavingEndpointDP(new int[0]));
         fails("E_WEAVE_LENGTH", () -> new MonsterWeavingEndpointDP(new int[]{0, 5}));
-        fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(new int[]{769}));
+        fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(new int[]{1025}));
         int[] longSet = new int[47];
-        Arrays.fill(longSet, 17);
+        Arrays.fill(longSet, 22);
         fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(longSet));
         fails("E_WEAVE_UNRANK_LIMIT", () -> new MonsterWeavingEndpointDP(
-            new int[]{54, 54, 53}).unrank1(BigInteger.ONE));
+            new int[]{65, 64, 64}).unrank1(BigInteger.ONE));
         fails("E_WEAVE_RANK", () -> dp.unrank1(BigInteger.ZERO));
         fails("E_WEAVE_RANK", () -> dp.unrank1(dp.count().add(BigInteger.ONE)));
         fails("E_WEAVE_PREFIX", () -> dp.countAfterPrefix(new int[]{2}));
