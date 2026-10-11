@@ -38,6 +38,40 @@ def straight_motion_witness(point,delta,opcode,quoted,source_height,source_width
             32<=y+dy<source_height-32)
 
 
+def check_straight_transition(rows,changed,prev_point,prev_delta,
+                              prev_opcode,prev_quoted,point,
+                              source_height,source_width):
+    """Return witnessed distance, or None outside this conservative domain.
+
+    PyFunge's IP advance may coalesce a contiguous run of blank Funge-space
+    cells into one execute_step transition. An observed edge need not be
+    adjacent, but it must follow the previous unit vector, and every skipped
+    cell must have been blank in the *current*, versioned Funge-space.
+    """
+    if not straight_motion_witness(prev_point,prev_delta,prev_opcode,
+                                   prev_quoted,source_height,source_width):
+        return None
+    x,y=point
+    # No claim about wrapping, exterior cells or dynamically enlarged space.
+    if not (32<=x<source_width-32 and 32<=y<source_height-32):
+        return None
+    px,py=prev_point
+    dx,dy=prev_delta
+    distance=(x-px)*dx+(y-py)*dy
+    require(distance>=1 and
+            (x,y)==(px+distance*dx,py+distance*dy),
+            "impossible straight-line Native IP movement: "
+            "from %r along %r to %r" % (prev_point,prev_delta,point))
+    for step in range(1,distance):
+        skipped=(px+step*dx,py+step*dy)
+        byte=changed.get(skipped,initial_byte(rows,*skipped))
+        require(byte==32,
+                "impossible straight-line Native IP movement: "
+                "skipped nonblank Funge-space cell %r byte=%d" %
+                (skipped,byte))
+    return distance
+
+
 def require(ok, message):
     if not ok:
         raise AssertionError(message)
@@ -139,16 +173,12 @@ def analyze(rows,trace_path):
                 point=(x,y)
                 if previous_motion is not None:
                     prev_point,prev_delta,prev_op,prev_quoted=previous_motion
-                    if straight_motion_witness(prev_point,prev_delta,prev_op,
-                                               prev_quoted,source_height,
-                                               source_width):
+                    distance=check_straight_transition(
+                        rows,changed,prev_point,prev_delta,prev_op,
+                        prev_quoted,point,source_height,source_width)
+                    if distance is not None:
                         stats["native_straight_edges_checked"]+=1
-                        expected_point=(prev_point[0]+prev_delta[0],
-                                        prev_point[1]+prev_delta[1])
-                        require(point==expected_point,
-                                "impossible straight-line Native IP movement "
-                                "after ordinary opcode, from %r expected %r got %r"%
-                                (prev_point,expected_point,point))
+                        stats["native_straight_blank_cells_skipped"]+=distance-1
                 actual=changed.get(point,initial_byte(rows,x,y))
                 require(opcode==actual,
                         "executed memory-byte mismatch tick=%d (%d,%d) actual=%d logged=%d" %
@@ -432,18 +462,44 @@ def selftest():
             "READ_AFTER\t7\t4000\t4000\t32"])
         reject_trace("literal_g_not_executed",forged_literal_read,source,
                      "READ event not bound")
-        # Change one *blank* ordinary STEP coordinate: source-map opcode,
-        # p/g event pairs, visit count and step numbering remain plausible,
-        # but the preceding literal 1 must advance to x=601, not 605.
-        altered_motion=[line.replace(
+        # PyFunge may legitimately coalesce blank cells between two STEP
+        # events. A +4 forward hop over blanks is accepted.
+        blank_skip=[line.replace(
             "STEP\t510\t1\t601\t100\t1\t0\t32\t0",
             "STEP\t510\t1\t605\t100\t1\t0\t32\t0")
             for line in trace_lines]
-        require(altered_motion!=trace_lines,
-                "synthetic route forgery failed to alter the actual trace")
-        reject_trace("forged_straight_ip_jump",altered_motion,source,
+        require(blank_skip!=trace_lines,
+                "synthetic blank-skip witness did not alter the trace")
+        accepted_skip=check_records(blank_skip,source)
+        require(accepted_skip["statistics"]["native_straight_blank_cells_skipped"]>=4,
+                "legal PyFunge blank-cell skip was not witnessed")
+        # The same forward hop becomes illegal if a nonblank instruction
+        # occurs in the gap. A later source mismatch must not mask this.
+        blocked_source=list(source)
+        blocked_source[100]=" "*600+"1"+" "*3+"2"+" "*696
+        reject_trace("forged_skip_over_nonblank",blank_skip,blocked_source,
+                     "skipped nonblank Funge-space cell")
+        # A sideways jump is invalid even if both endpoints are blank.
+        lateral_jump=[line.replace(
+            "STEP\t510\t1\t601\t100\t1\t0\t32\t0",
+            "STEP\t510\t1\t601\t101\t1\t0\t32\t0")
+            for line in trace_lines]
+        reject_trace("forged_lateral_jump",lateral_jump,source,
                      "impossible straight-line Native IP movement")
-        print("NATIVE_ROUTE_GRAPH_G_P_EVENT_BINDING_7_NEGATIVE_CONTROLS_PASS")
+        # A prior p write changes the ray's memory version. Skipping over
+        # that newly executable cell must fail even if source was blank.
+        check_straight_transition(source,{},(600,100),(1,0),ord("1"),
+                                  False,(605,100),len(source),len(source[100]))
+        try:
+            check_straight_transition(source,{(604,100):ord("2")},
+                                      (600,100),(1,0),ord("1"),False,
+                                      (605,100),len(source),len(source[100]))
+        except AssertionError as err:
+            require("skipped nonblank Funge-space cell" in str(err),
+                    "versioned dynamic obstacle rejected for wrong reason")
+        else:
+            raise AssertionError("dynamic p-written ray obstacle was ignored")
+        print("NATIVE_ROUTE_GRAPH_G_P_EVENT_BINDING_9_NEGATIVE_CONTROLS_PASS")
     print("NATIVE_ROUTE_GRAPH_ZERO_VELOCITY_NEGATIVE_CONTROL_PASS")
     print("NATIVE_ROUTE_GRAPH_SELFTEST_PASS")
 
