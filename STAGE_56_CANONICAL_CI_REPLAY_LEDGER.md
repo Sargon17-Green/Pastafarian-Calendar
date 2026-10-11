@@ -77,3 +77,46 @@ non initium Gradus 57. Clausurae novae probationis requiruntur:
 matricula GCC/Clang, audit staticus, differentia, regressiones,
 ASan/UBSan, concurrentia cold-start atque nova sententia `SOAK_GREEN`.
 Mutationes tantum in ramo `C++&Latina` fiant.
+
+## Testimonium auctoritatis die XI Octobris MMXXVI — cursus viridis novissimus
+
+Probatio canonicam summam **servatam**, non veterem summam crudam, sequitur.
+
+- Ramus probatus: `C++&Latina`.
+- Commit **code et probationum exacte probatus**: `1978447c1f526e4acc88c58c2d131c41e44316a8`.
+- [Cursus integrae vigiliae 38154480466](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154480466): `success`, die 2026-10-11 UTC, **20/20 officia `success`**.
+- Log vigiliae: `SOAK_REPETITUM=8/8_PASS`.
+- Log sententiae finalis: `VIGILIA_SOAK=PASS`; `STATUS_POST_RUN=SOAK_GREEN`.
+- [Praevolatus 38154480379](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154480379): `success`, compilatio C++20, simia se ipsam rescribens, concurrentia `24 × 16 × 12 + 1 = 4609` et recuperatio cache.
+- [Custodia nominum 38154480301](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154480301): `success`.
+
+| Custodia | Probatio in commit `1978447` |
+|---|---|
+| Sex viae `gcc/clang × O1/O2/O3` | 6/6 `success` |
+| Formula saved-sum, cicatrices XII, audit staticus | PASS |
+| `E2E_CANONICA_SAVED_SUM_STAGE56` | `5/5_PASS` per quamque viam |
+| `DIFFERENTIA_DECEM_PARIA` | `10/10_PASS` in GCC et Clang |
+| Gradus 1–54, quattuor partes historicae | 4/4 PASS |
+| Gradus 55, processus separati | PASS |
+| ASan + UBSan atque concurrentia | PASS |
+| Cache frigidus/calidus, reiectio fingerprint, retry 0/1/2, injectio 40/50 et contextus reusus | PASS |
+| Limites annorum longinquorum `1, 0, -1` adversus `NormativeOracle(false)` | 2/2 + 2/2 + 2/2 = **6/6 PASS** |
+| Octo circuitus soak | 8/8 PASS |
+| Sententia finalis | `SOAK_GREEN` |
+
+Testimonium finium annorum (axis dierum, `calculationDay=-15055671`):
+
+```text
+YEAR=-1 FIRST=-36387500 LAST=-36383648 LENGTH=3853  2/2_PASS
+YEAR= 0 FIRST=-36383647 LAST=-36378305 LENGTH=5343  2/2_PASS
+YEAR= 1 FIRST=-36378304 LAST=-36373688 LENGTH=4617  2/2_PASS
+```
+
+Quilibet annus longitudine 252–5778 continetur; intervalla in ordinibus
+`[-1,0]` et `[0,1]` contigua sunt sine lacuna et sine superpositione.
+
+**Discrimen status**: haec pagina et `DEVELOPMENT_STAGE.md` documenta sunt
+post eventum. Commit documentorum sequens non est ipse commit supra probatus;
+`success` ex `38154480466` soli SHA `1978447c1f526e4acc88c58c2d131c41e44316a8` attribuitur.
+Eventualis nova mutatio probationem novam requirit; Gradus 55 historicus
+non reaperitur nec Gradus 57 incipitur.

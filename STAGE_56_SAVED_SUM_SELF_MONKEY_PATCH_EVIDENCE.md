@@ -78,3 +78,18 @@ Testis in sex viis compilatoris et postea in via ASan/UBSan inseritur.
 GitHub Actions probatio in commit novissimo compleatur.
 
 Vide `STAGE_56_CANONICAL_CI_REPLAY_LEDGER.md` ad provenance et discrimina.
+
+## Clausura verificationis posterioris — XI Octobris MMXXVI
+
+Monitum vetus `Nullus PASS` supra ad tempus ante cursus novos pertinet.
+Iam cursus `38154480466`, in commit `1978447c1f526e4acc88c58c2d131c41e44316a8`,
+omnia **20/20 officia** perfecit cum `success`:
+`SOAK_REPETITUM=8/8_PASS`, `VIGILIA_SOAK=PASS` et
+`STATUS_POST_RUN=SOAK_GREEN`. Testis concurrentiae viginti quattuor filorum
+et quattuor milium sescentarum novem invocationum in via rapida
+`38154480379` atque via plena et in ASan/UBSan transiit.
+Testis independentis ordinis permutationum productionis functionibus
+`savePatch`, `regularMod` et `oldPermutationUnrank0` non utitur.
+Tres anni longinqui `1,0,-1` singuli limites primum et ultimum
+adversus `NormativeOracle(false)` probaverunt: **6/6 PASS**.
+Vide registrum `STAGE_56_CANONICAL_CI_REPLAY_LEDGER.md`.
