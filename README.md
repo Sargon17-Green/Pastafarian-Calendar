@@ -176,3 +176,7 @@ ni'o lo `lexNext` .e lo `lexPrevious` cu sisku lo lamji porsi fi lo nanca te jor
 ## lo drata se pagbu porsi
 
 ni'o lo `unrankAfterPrefix` .e lo `rankAfterPrefix` cu ciksi lo porsi ranki se steci lo drani pamoi pagbu. lo ranki cu jmina lo se pagbu porsi gi'e na se steci lo mulno nanca ranki. lo nu lo se stali djedi cu na zmadu li 512 cu curmi lo nu zbasu lo porsi pe lo mulno nanca be li 5778 djedi. lo `Stage02PrefixRankingTests` cu cipra lo `NormativeOracle` .e lo so'i drata barda nanca pagbu fi lo 256 mebibaiti te jimte. ko benji `sh run_stage02_prefix_ranking_tests.sh`.
+
+## lo nanca detri pe lo se steci pamoi pagbu
+
+ni'o lo `MonsterCalendarResolver.fromBlueprintWithPrefixRank` cu zbasu lo mulno nanca detri fi lo se stodi nanca stura .e lo se jmina porsi ranki fi lo se steci pamoi pagbu. lo `PrefixRankedYear` cu stodi lo pamoi pagbu .e lo ranki be lo se stali pagbu .e lo se stali pagbu namcu. lo `forTargetWithPrefixRank` cu nanca sisku gi'e zbasu lo te detri. lo ranki na du lo mulno nanca kanoniko ranki. lo `Stage02PrefixCalendarTests` cu cipra lo drani nanca .e lo djedi pe lo masti .e lo kecti .e lo `NormativeOracle` fi lo 256 mebibaiti te jimte. ko benji `sh run_stage02_prefix_calendar_tests.sh`.

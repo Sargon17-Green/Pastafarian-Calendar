@@ -137,3 +137,7 @@ ni'o lo `lexNext` .e lo `lexPrevious` cu se zbasu fi lo nu sisku lo romoi selstu
 ### lo nanca porsi se pagbu ranki
 
 ni'o lo nu xamgu lo se steci ranki cu pilno lo nu facki lo drani pamoi porsi .e lo su'o lo se stali ranki fi lo nanca be li 5778 djedi. lo pamoi pagbu cu se stali .i lo ranki be lo se stali pagbu cu na du lo mulno ranki. lo nu lo se stali djedi cu na zmadu li 512 cu se jimte.
+
+### lo se steci pamoi pagbu be lo nanca detri
+
+ni'o lo `PrefixRankedYear` cu zgana lo se stali ranki se steci lo pamoi pagbu gi'e pilno lo `MonsterMonthIndex` fi lo te detri. lo nu se jmina lo drani pamoi pagbu cu na mulno lo kanoniko jmina porsi te cuxna fi lo mulno nanca. lo `Stage02PrefixCalendarTests` cu cipra lo se stodi nanca be lo mutce barda nu djedi.
