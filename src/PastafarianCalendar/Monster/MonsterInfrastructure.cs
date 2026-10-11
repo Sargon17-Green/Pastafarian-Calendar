@@ -47,6 +47,7 @@ public sealed class MonsterDispatcher
     private readonly MonsterMetricsManager _metrics;
     private readonly LegacySavePhaseHandler _legacySave;
     private readonly SavePatchWrapper _savePatch;
+    private readonly LegacyDayTagPhaseHandler _legacyDayTag;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -54,6 +55,7 @@ public sealed class MonsterDispatcher
         _metrics = metrics;
         _legacySave = new LegacySavePhaseHandler();
         _savePatch = new SavePatchWrapper();
+        _legacyDayTag = new LegacyDayTagPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -77,6 +79,23 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "legacy.save.dispatch");
         context.Status = "LEGACY_SAVE_COMPLETE";
         context.Phase = "LEGACY_SAVE_COMPLETE";
+    }
+
+    public void DispatchLegacyDayTag(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("يتطلب عدّ اليوم القديم سياقاً جديداً أتمّ التأسيس.");
+        if (context.LegacyDayInput is null)
+            throw new MonsterValidationException("يجب تقديم اليوم قبل إرسال معالج العدّ القديم.");
+        if (context.LegacyDayTagResult.HasValue)
+            throw new MonsterValidationException("سُجِّل عدّ قديم في هذا السياق من قبل.");
+
+        context.Phase = "LEGACY_DAY_TAG";
+        context.BranchTrace.Add("LEGACY_DAY_TAG");
+        _legacyDayTag.Handle(context);
+        _metrics.Bump(context, "legacy.day.tag.dispatch");
+        context.Status = "LEGACY_DAY_TAG_COMPLETE";
+        context.Phase = "LEGACY_DAY_TAG_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -135,6 +154,21 @@ public sealed class MonsterManager
         context.LegacySaveInput = value;
         _dispatcher.DispatchSavePatched(context);
         return context;
+    }
+
+    public MonsterContext ExecuteLegacyDayTag(BigInteger calculationDay, BigInteger targetDay, BigInteger day)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacyDayInput = day;
+        _dispatcher.DispatchLegacyDayTag(context);
+        return context;
+    }
+
+    public BigInteger EvaluateLegacyDayTag(BigInteger calculationDay, BigInteger targetDay, BigInteger day)
+    {
+        var context = ExecuteLegacyDayTag(calculationDay, targetDay, day);
+        return context.LegacyDayTagResult
+            ?? throw new MonsterValidationException("لم يُنتج مسار اليوم القديم عدّاً.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

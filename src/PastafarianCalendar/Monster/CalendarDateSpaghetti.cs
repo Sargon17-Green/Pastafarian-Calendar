@@ -17,6 +17,13 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateLegacySave(calculationDay, targetDay, value);
     }
 
+    // واجهة التنفيذ التاريخي لعدّ اليوم؛ تُظهر الخلل قبل إضافة الرقعة الثانية.
+    public static BigInteger EvaluateLegacyDayTag(BigInteger calculationDay, BigInteger targetDay, BigInteger day)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateLegacyDayTag(calculationDay, targetDay, day);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

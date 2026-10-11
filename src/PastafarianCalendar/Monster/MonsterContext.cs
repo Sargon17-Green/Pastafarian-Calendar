@@ -23,6 +23,10 @@ public sealed class MonsterContext
     // تُثبت النتيجة المصححة بعد فحصها؛ وتبقى النتيجة القديمة شاهداً مستقلاً.
     public BigInteger? PatchedSaveResult { get; set; }
 
+    // حالة منفصلة لمسار العدّ التاريخي للطور الرابع؛ لا تَصحيح لنتيجته بعد.
+    public BigInteger? LegacyDayInput { get; set; }
+    public BigInteger? LegacyDayTagResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
