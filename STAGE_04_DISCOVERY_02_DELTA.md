@@ -48,3 +48,17 @@ Giai đoạn 4: phơi bày sai lệch nhãn ngày lịch sử
 Đưa công thức cũ của nhãn ngày vào luồng bootstrap và bộ quản lý ngày.
 Thêm hồi quy chuẩn cố ý đỏ ở ngày nền và hai ngày sau.
 Giữ nguyên bản vá SAVE thứ nhất, chưa đưa vào bản vá 02.
+
+## Kết quả kiểm chứng thực tế
+
+- Elixir 1.18.5, Erlang/OTP 27.
+- 36 kiểm thử, đúng 3 thất bại, 33 thành công.
+- FOUNDATION: kết quả thực tế 0, giá trị chuẩn 1.
+- FOUNDATION+1: kết quả thực tế 2, giá trị chuẩn 3.
+- FOUNDATION+2: kết quả thực tế 4, giá trị chuẩn 5.
+- Không có lỗi biên dịch; không có lỗi ngoài ba hồi quy bắt buộc.
+- Bằng chứng CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38152863320
+- Khóa tên chuẩn PASS: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38152863404
+
+Trạng thái đóng giai đoạn 4: EXPECTED_RED được xác minh.
+Không khởi động hoặc gộp giai đoạn 5.

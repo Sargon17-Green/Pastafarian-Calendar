@@ -76,3 +76,16 @@ Ba kiểm thử hồi quy chuẩn của giai đoạn 4 cố ý yêu cầu nhãn 
 mong đợi ở pha khám phá là `EXPECTED_RED`. Lớp vá thứ hai chỉ được
 đưa vào ở giai đoạn 5. Lớp vá SAVE thứ nhất và các kiểm thử cũ
 vẫn phải hoạt động không thay đổi.
+
+## Xác minh hoàn tất giai đoạn 4
+
+GitHub Actions với Elixir 1.18.5 và Erlang/OTP 27 xác nhận 36 kiểm thử,
+3 thất bại có chủ đích chỉ tại ngày nền và hai ngày tiếp theo, 33 đạt.
+Khóa tên chuẩn độc lập đạt. Không có lỗi biên dịch.
+Đây là trạng thái `EXPECTED_RED` đã được xác minh, không phải hỏng hóc mới.
+
+- [Nhật ký kiểm thử phát hiện 02](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38152863320)
+- [Kiểm tra khóa tên chuẩn](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38152863404)
+
+Bước kế tiếp là giai đoạn 5/55, `PATCH 02`: giữ `old_day_tag`
+và thêm lớp sửa theo đúng quy tắc đã xác định, không xóa vết lịch sử.

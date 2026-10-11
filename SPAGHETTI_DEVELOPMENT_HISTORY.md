@@ -68,3 +68,10 @@ sau đó mỗi ngày được gửi qua `DayCountManager.tag` đến
 Ba hồi quy chuẩn tại ngày nền và hai ngày ngay sau đó được viết để
 thất bại trong giai đoạn phát hiện. Không thêm bản vá hoặc nhánh tự
 điều chỉnh ở giai đoạn 4; không thay đổi chức năng SAVE đã vá.
+
+**Xác minh phát hiện:** Quy trình CI với Elixir 1.18.5 và OTP 27 đã
+chạy 36 kiểm thử, đúng ba lỗi kỳ vọng: ngày nền (0 so với 1), ngày
+nền cộng một (2 so với 3), ngày nền cộng hai (4 so với 5).
+Ba mươi ba kiểm thử còn lại, gồm toàn bộ kiểm thử từ các giai đoạn
+trước, đã đạt. Khóa tên chuẩn đạt độc lập. Không có bản vá thứ hai
+trong commit này; giai đoạn 4 khép với trạng thái EXPECTED_RED.
