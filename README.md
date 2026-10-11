@@ -1,6 +1,6 @@
 # تقويم الباستافاريين — خطّ C# بالعربية الكلاسيكية
 
-هذا الخط تنفيذ تاريخي متدرّج من خمسة وخمسين طورًا. أُنشئ من شجرة خالية دون استعارة كود أو جداول متوقعة من تنفيذ آخر. اكتملت الأطوار الثلاثة عشر الأولى: التأسيس، وستة أخطاء تاريخية ورقعها، حتى رقعة استرجاع القطرات السابقة بما فيها المخفيات. المرحلة التالية `DISCOVERY 07` في الطور الرابع عشر، ولم تبدأ بعد.
+هذا الخط تنفيذ تاريخي متدرّج من خمسة وخمسين طورًا. أُنشئ من شجرة خالية دون استعارة كود أو جداول متوقعة من تنفيذ آخر. اكتملت الأطوار الأربعة عشر الأولى: التأسيس، وستة عيوب تاريخية ورقعها، ثم اكتشاف الخلل السابع في فهرسة الطحْن الظاهر. المرحلة التالية `PATCH 07` في الطور الخامس عشر، ولم تبدأ بعد.
 
 ## الحدود الحالية للمكتبة
 
@@ -29,7 +29,7 @@
 باستخدام .NET SDK 10، ومن جذر المستودع:
 
 ```text
-dotnet build tests/PastafarianCalendar.Stage13Tests/PastafarianCalendar.Stage13Tests.csproj -c Release
+dotnet build tests/PastafarianCalendar.Stage14Tests/PastafarianCalendar.Stage14Tests.csproj -c Release
 dotnet run --project tests/PastafarianCalendar.Stage01Tests/PastafarianCalendar.Stage01Tests.csproj -c Release
 dotnet run --project tests/PastafarianCalendar.Stage02Tests/PastafarianCalendar.Stage02Tests.csproj -c Release -- --verify-expected-red
 dotnet run --project tests/PastafarianCalendar.Stage03Tests/PastafarianCalendar.Stage03Tests.csproj -c Release
@@ -76,3 +76,5 @@ dotnet run --project tests/PastafarianCalendar.Stage13Tests/PastafarianCalendar.
 ```text
 dotnet run --project tests/PastafarianCalendar.Stage14Tests/PastafarianCalendar.Stage14Tests.csproj -c Release -- --verify-expected-red
 ```
+
+أثبت تشغيل CI رقم `38167482737` أن الطور الرابع عشر يعيد `60` صفّاً تاريخياً منزاحاً و`6` استثناءات متوقعة من `66` قراءة، دون أي تباعد آخر؛ واجتازت كلّ المجموعات السابقة وقفل الأسماء الاختبارات. يظل المصحّح `sentinel` مؤجلاً إلى الطور الخامس عشر.
