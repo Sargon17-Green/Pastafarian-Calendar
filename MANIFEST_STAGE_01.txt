@@ -9,6 +9,7 @@ docs/STAGE_01_AUDIT_ROUND2_2026-10-11.md
 docs/STAGE_01_AUDIT_ROUND3_2026-10-11.md
 docs/STAGE_01_AUDIT_ROUND4_2026-10-11.md
 docs/STAGE_01_PACKED_WEAVING_KEYS_2026-10-11.md
+docs/STAGE_01_AUDIT_ROUND5_2026-10-11.md
 lib/Pastafari/Monster/BaseContext.pm
 lib/Pastafari/Monster/BaseDispatcher.pm
 lib/Pastafari/Monster/BaseErrorBoundary.pm
