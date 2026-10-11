@@ -62,3 +62,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 9 — PATCH 04
 
 የታሪካዊው `mutate_stones_wrong` ያለ ለውጥ ተጠብቋል። አዲሱ `StonePatch04` መጀመሪያ የአምስት ድንጋዮችን snapshot ይወስዳል፣ በclone ላይ `mutate_stones_wrong` በእውነት ይጠራል፣ ከዚያም `w,b,s,m,r` ሙሉ ውጤትን በsnapshot እሴቶች ይደርሳል። `get_stone_table_through_legacy_builder` 46 የተጠገኑ ድንጋዮችን ይሰራል፤ የታሪካዊው `get_legacy_stone_table` አሁንም ይኖራል። የደረጃ 8 የRED ፈተናዎች ሳይለወጡ GREEN መሆን አለባቸው። V 0.5.2 (`7647ce1`) በGitHub Actions run `38162967481` ተረጋግጧል፤ `v fmt -verify` PASS እና `v test ./pastafari` 13/13 PASS። የደረጃ 8 አራት RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=9` ነው። ዝርዝር፦ `docs/STAGE09_PATCH04.md`።
+
+## ደረጃ 10 — DISCOVERY 05
+
+ሰባቱ የተሰወሩ ጠብታዎች በትክክል ይሰላሉ፣ ግን `build_hidden_with_backward_storage` በአካላዊ ማከማቻ ውስጥ `hidden7, hidden6, …, hidden1` ብሎ በተቃራኒው ያስቀምጣቸዋል። `old_hidden_slot` እና `calendar_hidden_by_nearness` በዚህ ደረጃ ከማከማቻው በቀጥታ ያነባሉ፤ ስለዚህ ከመካከለኛው `hidden4` በስተቀር የቅርበት ትርጉም ስህተት አለ። አራት `EXPECTED_RED` ፈተናዎች ተጨምረዋል። `PATCH 05` አልተጨመረም፤ እውነተኛ የV CI ማረጋገጫ እስኪሳካ `LAST_COMPLETED_STAGE=9` ነው። ዝርዝር፦ `docs/STAGE10_DISCOVERY05.md`።
