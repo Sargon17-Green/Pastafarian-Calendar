@@ -1,6 +1,6 @@
 {
   "name": "pastafari-calendar-typescript-marathi",
-  "version": "0.5.0-stage.5",
+  "version": "0.6.0-stage.6",
   "private": true,
   "type": "module",
   "description": "मगिलत हाएतिमच्या नियमाधारित दिनदर्शिकेसाठी स्वतंत्र TypeScript आणि मराठी अंमलबजावणी मार्ग",
@@ -9,11 +9,13 @@
     "test:stage01": "node --experimental-strip-types test/run.ts",
     "test:discovery01": "node --experimental-strip-types test/discovery01.ts",
     "test:discovery01:red": "node --experimental-strip-types test/discovery01Red.ts",
-    "test": "npm run test:stage01 && npm run test:discovery01 && npm run test:patch01 && npm run test:discovery02 && npm run test:patch02",
+    "test": "npm run test:stage01 && npm run test:discovery01 && npm run test:patch01 && npm run test:discovery02 && npm run test:patch02 && npm run test:discovery03",
     "test:patch01": "node --experimental-strip-types test/patch01.ts",
     "test:discovery02": "node --experimental-strip-types test/discovery02.ts",
     "test:discovery02:red": "node --experimental-strip-types test/discovery02Red.ts",
-    "test:patch02": "node --experimental-strip-types test/patch02.ts"
+    "test:patch02": "node --experimental-strip-types test/patch02.ts",
+    "test:discovery03": "node --experimental-strip-types test/discovery03.ts && node --experimental-strip-types test/discovery03Properties.ts && node --experimental-strip-types test/discovery03Large.ts && node --experimental-strip-types test/discovery03Errors.ts",
+    "test:discovery03:red": "node --experimental-strip-types test/discovery03Red.ts"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

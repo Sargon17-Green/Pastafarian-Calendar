@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage05-typescript-marathi:
+  stage06-typescript-marathi:
     if: github.ref == 'refs/heads/TypeScript+मराठी'
     runs-on: ubuntu-latest
     steps:
@@ -37,16 +37,19 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript typecheck
         run: npm run typecheck
-      - name: Stages 01-05 guards and PATCH 01 / PATCH 02 regressions
+      - name: Stages 01-06 regressions and historical discovery
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee stage05-results.log
-          grep -Fq 'STAGE_01_PASS' stage05-results.log
-          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage05-results.log
-          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage05-results.log
-          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage05-results.log
-          grep -Eq 'STAGE_05_PATCH_02_PASS pairs=[0-9]+ days=[0-9]+ plusOne=[1-9][0-9]* scarChecks=[1-9][0-9]* scarForces=0 mismatches=0' stage05-results.log
+          npm test | tee stage06-results.log
+          grep -Fq 'STAGE_01_PASS' stage06-results.log
+          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage06-results.log
+          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage06-results.log
+          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage06-results.log
+          grep -Eq 'STAGE_05_PATCH_02_PASS pairs=[0-9]+ days=[0-9]+ plusOne=[1-9][0-9]* scarChecks=[1-9][0-9]* scarForces=0 mismatches=0' stage06-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_GUARDS_PASS mismatches=4 matches=1' stage06-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_PROPERTIES_PASS pairs=225' stage06-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_LARGE_AND_ISOLATION_PASS' stage06-results.log
       - name: Verify intentional expected-red regression
         shell: bash
         run: |
@@ -73,3 +76,16 @@ jobs:
             exit 1
           fi
           grep -Fq 'DISCOVERY_02_EXPECTED_RED mismatches=3 matches=2' discovery02-red.log
+      - name: Verify Stage 06 historical expected-red
+        shell: bash
+        run: |
+          set +e
+          npm run test:discovery03:red > discovery03-red.log 2>&1
+          result=$?
+          set -e
+          cat discovery03-red.log
+          if [ "$result" -eq 0 ]; then
+            echo "::error::Historical Discovery 03 unexpectedly passed"
+            exit 1
+          fi
+          grep -Fq 'DISCOVERY_03_EXPECTED_RED mismatches=4 matches=1' discovery03-red.log
