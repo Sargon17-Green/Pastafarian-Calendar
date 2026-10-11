@@ -50,3 +50,13 @@ Il job `native-stage02-discovery` tratta *solo questa precisa firma*
 come discovery attesa, non accetta errori di compilazione o guasti inattesi.
 Il test del Bootstrap continua a dover passare autonomamente.
 Nessun `savePatch` è presente in produzione.
+
+## Prova nativa verificata
+
+Lo stadio 2 è stato compilato ed eseguito su GitHub Actions con Java 17
+e Scala 2.13.18, commit `4cb63f84d20bebb8a58934b5b2211811276bffc0`.
+La [run 38151729014](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151729014)
+è conclusa con successo: `native-stage01` 18 PASS, 0 FAIL;
+`native-stage02-discovery` 7 PASS, 3 FAIL intenzionali;
+`verify` PASS. Il job di discovery controlla la firma degli errori
+invece di scambiare il rosso normativo per un guasto accidentale.

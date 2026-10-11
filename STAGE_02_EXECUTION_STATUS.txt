@@ -1,0 +1,22 @@
+STATO_ESECUZIONE=PASS_EXPECTED_RED_NATIVE_SCALA
+STADIO=2
+TIPO=DISCOVERY_01
+TEST_BOOTSTRAP=18_PASS_0_FAIL
+TEST_DISCOVERY=7_PASS_3_FAIL_INTENTIONAL
+DIVERGENZE_ATTESE=SAVE(M),SAVE(2M),SAVE(3M)
+CASO_CONCORDE=SAVE(M+1)
+CORREZIONE_PATCH_01_PRESENTE=NO
+COMANDO_BOOTSTRAP=sbt -batch 'Test / runMain pastafari.Stage01Tests'
+COMANDO_DISCOVERY=sbt -batch 'Test / runMain pastafari.Stage02Tests'
+NATIVE_DISCOVERY_EXIT=NONZERO_EXPECTED
+GITHUB_ACTIONS_RUN=38151729014
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151729014
+GITHUB_ACTIONS_HEAD_SHA=4cb63f84d20bebb8a58934b5b2211811276bffc0
+GITHUB_ACTIONS_WORKFLOW=Canonical Names Lock
+GITHUB_ACTIONS_JOBS=verify,native-stage01,native-stage02-discovery
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+DATA_VERIFICA=2026-10-11
+
+Lo stato RED è un risultato matematico della discovery, non un guasto CI.
+Il job attesta una firma precisa di fallimento test contro SAVE, e fallisce
+se compilazione, test bootstrap o forma delle divergenze non sono conformi.

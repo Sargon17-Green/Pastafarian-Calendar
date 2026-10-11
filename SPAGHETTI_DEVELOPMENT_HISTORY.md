@@ -57,5 +57,12 @@ un handler dedicato, validazione di readiness, uno snapshot di output e
 una metrica puramente osservativa. La regressione precedente rimane
 separata e lo stesso contesto attraversa Bootstrap e Discovery 01.
 
-La verifica nativa deve confermare la firma esatta di tre fallimenti
-deliberati; l'esecuzione non è ancora certificata da questa registrazione.
+### Verifica nativa compiuta
+
+La run GitHub Actions 38151729014, su commit
+`4cb63f84d20bebb8a58934b5b2211811276bffc0`, è conclusa
+con successo. Scala 2.13.18 ha compilato sia produzione sia test.
+I 18 controlli di Bootstrap sono tutti passati. La regressione dedicata
+ha registrato esattamente sette PASS e tre FAIL deliberati su M, 2M, 3M,
+mentre M+1 è passato. Il job controlla anche il codice d'uscita non nullo
+del test rosso. Nessun codice dello stadio 3 è stato introdotto.
