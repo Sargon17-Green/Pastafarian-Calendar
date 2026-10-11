@@ -24,3 +24,50 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+
+  stage02_native_v:
+    name: V 0.5.2 — historical remainder expected RED
+    if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned V 0.5.2
+        uses: vlang/setup-v@v1.7
+        with:
+          version: '7647ce1'
+      - name: Verify V version and source formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          v version
+          v fmt -verify ./pastafari
+      - name: Stage 1 — normative reference
+        run: v test ./pastafari/normative_oracle_test.v
+      - name: Discovery 01 — legacy behavior witnesses
+        run: v test ./pastafari/discovery01_witness_test.v
+      - name: Discovery 01 — typechecked expected RED
+        shell: bash
+        run: |
+          set -euo pipefail
+          v -check ./pastafari/discovery01_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery01_expected_red_test.v 2>&1 | tee stage02_expected_red.log
+          exitcode=${PIPESTATUS[0]}
+          set -e
+          if [ "$exitcode" -eq 0 ]; then
+            echo '::error::The intended discovery regression unexpectedly passed'
+            exit 1
+          fi
+          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage02_expected_red.log; then
+            echo '::error::Nonzero exit without an assertion-failure diagnostic'
+            exit 1
+          fi
+          echo 'DISCOVERY 01 — validated EXPECTED_RED with compiled V test'
+      - name: Save native test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v-amharic-stage02-red-evidence
+          path: stage02_expected_red.log
+          if-no-files-found: ignore
