@@ -8,7 +8,10 @@ data class BaseMonsterContext(
     val branchTrace: MutableList<String> = mutableListOf(),
     val diagnostics: MutableList<String> = mutableListOf(),
     var discovery01Input: ExactInt? = null,
-    var discovery01Output: ExactInt? = null
+    var discovery01Output: ExactInt? = null,
+    var patch01Input: ExactInt? = null,
+    var patch01LegacyOutput: ExactInt? = null,
+    var patch01Output: ExactInt? = null
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -59,7 +62,8 @@ class MonsterBootstrapManager(
     val validation: BaseValidationManager = BaseValidationManager(),
     val metrics: BaseMetricsManager = BaseMetricsManager(),
     val errors: BaseErrorWrapper = BaseErrorWrapper(),
-    val legacyRemainderAdapter: LegacyRemainderAdapter = LegacyRemainderAdapter()
+    val legacyRemainderAdapter: LegacyRemainderAdapter = LegacyRemainderAdapter(),
+    val savePatchWrapper: SavePatchWrapper = SavePatchWrapper()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -80,6 +84,23 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_01_LEGACY_REMAINDER")
             context.status = "LEGACY_REMAINDER_OBSERVED"
             metrics.bump("discovery01.legacy")
+        }
+        dispatcher.register("PATCH_01") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_PATCH01_CONTEXT_NOT_READY")
+            val input = context.patch01Input
+                ?: throw MonsterValidationException("E_PATCH01_NO_INPUT")
+            // Mae'r graith yn parhau'n fyw: galw'r hen addasydd yn gyntaf.
+            val legacy = legacyRemainderAdapter.oldRemainder(input)
+            val patched = savePatchWrapper.savePatch(legacy)
+            // Ymrwymo'r canlyniadau gyda'i gilydd ar ôl cyfrifiad llwyddiannus.
+            context.patch01LegacyOutput = legacy
+            context.patch01Output = patched
+            context.branchTrace.add("PATCH_01")
+            context.diagnostics.add("PATCH_01_SAVE_WRAPPER")
+            context.status = "PATCHED"
+            metrics.bump("patch01.legacy.calls")
+            metrics.bump("patch01.applied")
         }
     }
 
@@ -114,6 +135,25 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY01_WRAP", e)
+        }
+    }
+
+    /** Galwad cynhyrchu Patch 01: BOOT, y graith, yna'r deunydd lapio SAVE. */
+    fun applySavePatch(
+        calculationDay: ExactInt,
+        targetDay: ExactInt,
+        value: ExactInt
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.patch01Input = value
+        context.phase = "PATCH_01"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH01_WRAP", e)
         }
     }
 }

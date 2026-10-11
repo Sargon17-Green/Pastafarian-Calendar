@@ -1,6 +1,6 @@
 # Calendr Pastaffaraidd — Kotlin + Cymraeg
 
-Mae'r goeden hon yn cynnwys Cam 1 wedi'i gwblhau a delta Cam 2 (`DISCOVERY 01`) o linell weithredu annibynnol `Kotlin + Cymraeg`.
+Mae'r goeden hon yn cynnwys Camau 1–2 wedi'u cwblhau a gwaith Cam 3 (`PATCH 01`) sy'n aros am ardystiad brodorol terfynol, o linell weithredu annibynnol `Kotlin + Cymraeg`.
 
 Dechreuwyd y llinell hon o sero. Ni chafodd cod, profion, gosodiadau, allbynnau disgwyliedig, tablau a gynhyrchwyd, logiau, cipluniau na hashnodau eu benthyca o unrhyw weithrediad arall. Mae'r cyfeirnod normadol prawf-yn-unig wedi'i ysgrifennu o'r newydd yn Kotlin ar sail Atodiad A y fanyleb a roddwyd ar gyfer y llinell hon.
 
@@ -76,3 +76,25 @@ lanlwytho na'i commitio i'r ystorfa bell.
 Mae canfyddiad ar wahân ynghylch `ExactInt.toLongExact` ar `Long.MIN_VALUE`
 yn dal ar agor; nid yw'n rhan o Patch 01 ac ni chafodd ei guddio.
 Y cam nesaf yw Cam 3 — PATCH 01 yn unig.
+
+
+## Cam 3 — Patch 01: lapio'r weddill etifeddol
+
+Mae'r handler newydd `PATCH_01` yn galw `LegacyRemainderAdapter.oldRemainder`
+**yn gyntaf**, ac yna'n pasio'r gweddill hwnnw i
+`SavePatchWrapper.savePatch`: os yw'r gweddill yn `0`, dychwelir `M`;
+fel arall caiff y gwerth ei gadw. Mae hyn yn gweithredu SAVE ar gyfer
+unrhyw fewnbwn cyfanrif, gan gynnwys rhifau negatif a gwerthoedd pell.
+Nid yw'r gweithrediad etifeddol na'r llwybr `DISCOVERY_01` wedi'u
+newid. Cedwir mewnbwn, gwerth etifeddol a gwerth cywir mewn cyd-destun
+galwad newydd ar wahân.
+
+```text
+sh run-stage03-tests.sh
+```
+
+Mae'r sgript yn rhedeg Cam 1 a Cham 2 yn gyntaf, gan fynnu'r tri
+gwahaniaeth etifeddol, ac yna brofion gwyrdd Patch 01. Cyn yr archwiliad
+brodorol terfynol, llwyddodd preflight Kotlin yn erbyn amnewidion prawf
+ar wahân i'r ystorfa. **Nid yw'r preflight hwn yn ardystio Cam 3**.
+Mae `LAST_COMPLETED_STAGE=2` hyd nes bod y rhediad llawn yn PASS.

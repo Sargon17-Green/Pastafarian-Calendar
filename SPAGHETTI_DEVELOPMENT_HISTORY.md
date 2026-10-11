@@ -74,3 +74,37 @@ Mae'r tri gwahaniaeth yn parhau yn weithredol. Nid oes
 `savePatch`, nid oes trosiad `0` i `M`, ac nid oes cod Cam 3.
 Mae Cam 2 wedi'i ardystio'n **COMPLETE / EXPECTED_RED** gan y profion
 brodorol; mae'r cam nesaf yn Cam 3 / PATCH 01, ar wahân.
+
+
+## Cam 3 — Patch 01: SAVE drwy lapio'r graith etifeddol
+
+### Pam y mae angen y darn hwn
+
+Cadwyd tystiolaeth Cam 2: mae'r hen wreiddiad `oldRemainder`
+yn dal i ddychwelyd `0` ar `M`, `2M` a `3M`.
+Nid yw diffinio'r swyddogaeth hanesyddol o'r newydd yn ganiataol.
+
+### Newid mewn cynhyrchu
+
+Ychwanegwyd `SavePatchWrapper.savePatch` a handler `PATCH_01`.
+Mae'r handler yn galw `oldRemainder` unwaith, yn cadw'r gweddill
+a gafwyd, yna'n mapio `0` i `M`, gan adael gweddillion eraill heb eu newid.
+Dim ond ar ôl cwblhau'r ddau gyfrifiad y caiff y gwerthoedd eu cofnodi
+yn y cyd-destun. Mae'r dosbarthwr yn gwrthod galwad cyn BOOT ac yn
+gwrthod galwad heb fewnbwn.
+
+### Cadw'r llwybr coch
+
+Nid yw `LegacyRemainderAdapter.kt` wedi'i newid. Mae `DISCOVERY_01`
+yn dal yn hygyrch drwy `observeLegacyRemainder`. Disgwylir tri
+gwahaniaeth yn y llwybr hwn, ond dim un yn `applySavePatch`.
+
+### Dilysu a'r terfyn presennol
+
+Cafwyd preflight PASS yn Kotlin ar 11 Hydref 2026 gyda dau amnewidyn
+prawf dros dro (rhifyddeg BigInteger a SAVE); ni chânt eu lanlwytho.
+Llwyddodd profion cwmpas Cam 2/3, gan gynnwys 195 achos cyfnodol,
+129 prawf llydan, perchnogaeth cyflwr a gwarchod llwybr BOOT.
+Mae'r rhediad gyda'r pum blob Cam 1 gwreiddiol a'r mopheth normadol llawn
+**heb ei gynnal eto**. Nid oes hawl marcio Cam 3 COMPLETE cyn hynny.
+Mae canfyddiad annibynnol Long.MIN_VALUE yn aros heb newid.
