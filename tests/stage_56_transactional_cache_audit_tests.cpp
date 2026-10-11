@@ -154,11 +154,11 @@ int main() {
                      "cache frigidus/calidus, reiectio fingerprint, "
                      "duae instantiae, retry 0/1/2, injectio 40/50, "
                      "exhaustio sine commit, cache historicus separatus, "
-                     "API publica congruens\\n";
+                     "API publica congruens\n";
         return 0;
     } catch (const std::exception& e) {
         std::cerr << "GRADUS56_CACHE_RECOVERY_DEFECIT: "
-                  << e.what() << '\\n';
+                  << e.what() << '\n';
         return 1;
     }
 }
