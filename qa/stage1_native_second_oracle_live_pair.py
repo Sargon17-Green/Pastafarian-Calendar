@@ -3,13 +3,14 @@
 """Second Native BF98 numeric oracle for the existing 24 live-pair records.
 
 Independent PyFunge CLI subprocesses re-execute 18 valid-case reference
-programs and six invalid-case production programs. They check numeric outputs
+programs, six valid-case production programs and six invalid-case production
+programs. They check numeric outputs
 against both the report oracle and each record, and prove that coordinated
 report-only changes are caught by fresh native replay.
 No Python calendar arithmetic; QA only, Stage 1 remains open.
 """
 from __future__ import print_function
-import copy, hashlib, json, os, subprocess, sys
+import copy, hashlib, json, os, re, subprocess, sys
 
 ROOT = "/pairs"
 PINS = {
@@ -46,15 +47,46 @@ def pin(path):
     return hashlib.sha1("blob %d\0%s" % (len(raw), raw)).hexdigest()
 
 
+# Native Befunge decimal output must be lexically canonical, not merely
+# coercible to an integer: str.lstrip("-").isdigit() incorrectly accepts
+# "--1", "---1", "-0" and zero-padded output.
+DECIMAL = re.compile(r"^(?:0|-?[1-9][0-9]*)\\Z")
+
+
+def canonical_words(words):
+    need(bool(words) and all(DECIMAL.match(w) is not None for w in words),
+         "fresh BF98 noncanonical decimal output")
+    return words
+
+
+def lexical_negative_controls():
+    for word in ("--1", "---1", "-0", "00", "01", "-01", "1.0", "1e3", "-"):
+        try:
+            canonical_words([word])
+        except AssertionError as error:
+            need(str(error) == "fresh BF98 noncanonical decimal output",
+                 "Native decimal negative control rejected for wrong reason")
+        else:
+            need(False, "Native decimal validator accepted malformed token: " + word)
+    try:
+        canonical_words([])
+    except AssertionError as error:
+        need(str(error) == "fresh BF98 noncanonical decimal output",
+             "Native empty output negative control rejected for wrong reason")
+    else:
+        need(False, "Native decimal validator accepted empty output")
+    for word in ("0", "1", "-1", "123", "-123", "170141183460469231731687303715884105727"):
+        need(canonical_words([word]) == [word],
+             "Native decimal validator rejected canonical integer")
+    return 10
+
+
 def native(path, stdin):
     p = subprocess.Popen(CLI + [path], stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate(stdin)
     need(p.returncode == 0, "fresh BF98 CLI error: " + path + repr(stderr[-200:]))
-    words = stdout.split()
-    need(len(words) > 0 and all(w.lstrip("-").isdigit() for w in words),
-         "fresh BF98 nonnumeric output: " + path)
-    return words
+    return canonical_words(stdout.split())
 
 
 def consistent(doc):
@@ -100,6 +132,7 @@ def reject_control(mutant, replay, expected_reason):
 
 
 def main():
+    lexical_controls = lexical_negative_controls()
     need(os.path.isdir(ROOT), "pair evidence directory missing")
     for path, sha in PINS.items():
         need(pin(path) == sha, "BF98 source changed: " + path)
@@ -175,6 +208,7 @@ def main():
         "native_production_invalid_invocations": 6,
         "native_production_valid_invocations": 6,
         "native_integrated_reference_parity_cases": 6,
+        "noncanonical_decimal_controls_rejected": lexical_controls,
         "independent_valid_vectors": 6,
         "fresh_invalid_rejection_vectors": 6,
         "paired_program_outputs_checked": 48,
@@ -186,6 +220,7 @@ def main():
     with open(ROOT + "/native_second_oracle_live_pair.json", "wb") as out:
         out.write((json.dumps(result, sort_keys=True, indent=2) + "\n").encode("utf-8"))
     print("NATIVE_BF98_SECOND_ORACLE_18_REFERENCE_6_VALID_6_INVALID_PRODUCTION_48_OUTPUTS_PASS")
+    print("NATIVE_BF98_TEN_NONCANONICAL_DECIMAL_OUTPUTS_REJECTED_PASS")
     print("NATIVE_BF98_TWELVE_COORDINATED_REPORT_CHANGES_REJECTED_PASS")
     print("NATIVE_BF98_THREE_REPORT_INTEGRITY_MUTATIONS_REJECTED_PASS")
     print("STAGE1_FINAL_ACCEPTANCE=OPEN")
