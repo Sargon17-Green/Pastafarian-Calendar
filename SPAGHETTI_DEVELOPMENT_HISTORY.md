@@ -934,3 +934,44 @@ verdi e precisamente tre confronti rossi intenzionali
 le firme storiche da Stage01 a Stage17; il catalogo
 canonico è rimasto bloccato e nessuna PATCH 09
 è stata anticipata.
+
+## Stadio 19 — PATCH 09: il caveau ricorda il giro precedente
+
+### Che cosa si pensava
+
+Il vecchio caveau doveva restare disponibile
+come traccia diagnostica, ma il suo Vector
+veniva riutilizzato in tutte le dodici
+mescolature finali. L'assenza di un avanzamento
+temporale non è un semplice errore d'indice.
+
+### Che cosa si è scoperto
+
+Il primo giro è corretto e perciò può trarre
+in inganno. Nei giri 2..12 cambia la somma SAVE,
+e da essa possono cambiare anche rango, ordine
+delle sei ciotole e tutte le uscite.
+
+### Che cosa è stato aggirato
+
+Il wrapper attraversa la cicatrice originale,
+archivia tutti e dodici i record legacy e
+ricomputa dodici record normativi usando
+l'uscita completa del giro precedente.
+
+### Perché è normativamente equivalente
+
+La somma al giro N usa le sei ciotole del giro
+N-1; il ranghi sono quelli normativi PATCH 07,
+SAVE resta quello della PATCH 01 e ogni giro
+calcola le sei equazioni da una sola istantanea,
+come PATCH 08. Un validator indipendente
+certifica ciascun record e l'ultimo vettore.
+
+### Strato di mostruosità aggiunto
+
+Wrapper, report doppio da ventiquattro righe,
+handler, nuova fase, tre campi del contesto,
+metrica, validator e suite dedicata. La
+DISCOVERY 09 continua ad esibire esattamente
+tre FAIL intenzionali; nessun Stage20 anticipato.

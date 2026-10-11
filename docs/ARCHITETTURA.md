@@ -305,3 +305,25 @@ validator verifica traccia, ownership, dominio
 SAVE e tutta la sequenza storica. Un calcolatore
 rolling separato vive esclusivamente nei test.
 La fase PATCH 09 rimane futura.
+
+## PATCH 09 — dodici registri concatenati e diagnostica storica
+
+Il wrapper `Patch09VaultWrapper.vaultPatch`
+esegue davvero `LegacyVaultAdapter.vaultOld`
+prima della correzione, custodendone il risultato.
+Poi, per ogni `stir` da 1 a 12, legge il
+`Vector[BigInt]` della generazione precedente,
+calcola SAVE della somma, rango di permutazione
+1-based e sei uscite simultanee. Solo alla fine
+del giro sostituisce `snapshot` con il nuovo
+vettore immutabile.
+
+Il validatore `requirePatch09Ready` costruisce
+autonomamente tutte e dodici le prove normative
+con una implementazione diversa (ordinamento
+degli ID fisici delle ciotole) e confronta
+l'intera sequenza, non soltanto il risultato finale.
+Convalida inoltre la cicatrice storica, la
+traccia BOOT/DISCOVERY/PATCH e il possesso del
+contesto da parte dell'invocazione. L'oracolo
+completo vive soltanto nei test.

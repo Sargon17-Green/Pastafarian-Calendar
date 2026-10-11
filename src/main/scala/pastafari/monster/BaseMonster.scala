@@ -59,7 +59,10 @@ final case class BaseMonsterContext(
   var patch08Applied: Boolean = false,
   var postStirInput: Option[Vector[BigInt]] = None,
   var legacyVaultRounds: Option[Vector[LegacyVaultRound]] = None,
-  var legacyVaultOutput: Option[Vector[BigInt]] = None
+  var legacyVaultOutput: Option[Vector[BigInt]] = None,
+  var patchedVaultRounds: Option[Vector[LegacyVaultRound]] = None,
+  var patchedVaultOutput: Option[Vector[BigInt]] = None,
+  var patch09Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -82,6 +85,66 @@ final class BaseValidationManager {
     }
   }
 
+
+  def requirePatch09Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_09_VAULT_ROLL" ||
+        ctx.status != "PATCH_09_READY" ||
+        ctx.branchTrace.toVector != Vector(
+          "BOOT", "DISCOVERY_09_VAULT", "PATCH_09_VAULT_ROLL") ||
+        ctx.postStirInput.isEmpty ||
+        ctx.legacyVaultRounds.isEmpty || ctx.legacyVaultOutput.isEmpty ||
+        ctx.patchedVaultRounds.isEmpty || ctx.patchedVaultOutput.isEmpty ||
+        !ctx.patch09Applied) {
+      throw new IllegalStateException(
+        "PATCH 09 richiede lo storico completo nella stessa invocazione.")
+    }
+    val initial = ctx.postStirInput.get
+    val historical = ctx.legacyVaultRounds.get
+    val historicalOutput = ctx.legacyVaultOutput.get
+    val patched = ctx.patchedVaultRounds.get
+    val published = ctx.patchedVaultOutput.get
+    if (initial.length != 6 || historical.length != 12 ||
+        patched.length != 12 || published.length != 6 ||
+        published != patched.last.bowls ||
+        patched.map(_.step) != (1 to 12).toVector ||
+        patched.exists(r => r.bowls.length != 6 ||
+          r.order.sorted != Vector(1,2,3,4,5,6) ||
+          r.bowls.exists(x=>x<1||x>((BigInt(1)<<127)-1)))) {
+      throw new IllegalStateException(
+        "Registro e risultati della PATCH 09 malformati.")
+    }
+
+    // Validator indipendente: ricalcola ogni giro dalla fotografia
+    // del giro precedente, senza richiamare il wrapper.
+    var snapshot = initial
+    val verified = Vector.newBuilder[LegacyVaultRound]
+    for (step <- 1 to 12) {
+      val saved = Patch01SaveWrapper.savePatch(snapshot.sum + 149*step)
+      val rank = ((saved-1)%720+1).toInt
+      val order = Patch07PermutationWrapper.permutationPatch(rank)
+      val next = Vector.newBuilder[(Int,BigInt)]
+      for (position <- 1 to 6) {
+        val at = order(position-1)-1
+        val prev = order((position+4)%6)-1
+        val following = order(position%6)-1
+        val x = snapshot(at)+3*snapshot(prev)+5*snapshot(following)+
+          saved+step+position*position
+        val value = Patch01SaveWrapper.savePatch(
+          x*x+7*snapshot(prev)*snapshot(following))
+        next += (at->value)
+      }
+      val calculated = next.result().sortBy(_._1).map(_._2)
+      verified += LegacyVaultRound(step,saved,rank,order,calculated)
+      snapshot = calculated
+    }
+    val original = LegacyVaultAdapter.vaultOld(initial)
+    if (original.rounds != historical ||
+        original.bowls != historicalOutput ||
+        verified.result() != patched || snapshot != published) {
+      throw new IllegalStateException(
+        "PATCH 09 non normativa o cicatrice storica alterata.")
+    }
+  }
 
   def requireDiscovery09Ready(ctx: BaseMonsterContext): Unit = {
     if (ctx.phase != "DISCOVERY_09_VAULT" ||
@@ -524,7 +587,8 @@ final class BaseMonsterManager {
     new Patch07PermutationHandler(metrics),
     new Discovery08BowlAliasHandler(metrics),
     new Patch08BowlHandler(metrics),
-    new Discovery09VaultHandler(metrics)
+    new Discovery09VaultHandler(metrics),
+    new Patch09VaultHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -957,6 +1021,30 @@ final class BaseMonsterManager {
       )
     } catch {
       case error: Throwable => throw BaseErrorWrapper.wrap("discovery09",error)
+    }
+  }
+
+  def patch09Vault(
+    calculationDay: BigInt, targetDay: BigInt,
+    bowlsAfterDrops: Vector[BigInt]
+  ): Patch09VaultReport = {
+    val ctx = bootstrap(calculationDay,targetDay)
+    ctx.postStirInput = Some(bowlsAfterDrops)
+    ctx.phase = "DISCOVERY_09_VAULT"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery09Ready(ctx)
+      ctx.phase = "PATCH_09_VAULT_ROLL"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch09Ready(ctx)
+      Patch09VaultReport(
+        ctx.calculationDay,ctx.targetDay,ctx.postStirInput.get,
+        ctx.legacyVaultRounds.get,ctx.legacyVaultOutput.get,
+        ctx.patchedVaultRounds.get,ctx.patchedVaultOutput.get,
+        ctx.patch09Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("patch09",error)
     }
   }
 

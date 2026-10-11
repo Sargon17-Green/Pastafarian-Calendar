@@ -282,21 +282,36 @@ object Stage18Tests {
       finally stream.close()
       truth(!src.contains("NormativeOracle"),"Oracolo test-only")
       truth(src.contains("val old = vaultOld"),"Lettura obsoleta reale")
-      truth(!src.contains("vaultPatch"),"PATCH 09 anticipata")
+      val state = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if (current < 19)
+        truth(!src.contains("vaultPatch"),"PATCH 09 anticipata")
+      else
+        truth(src.contains("LegacyVaultAdapter.vaultOld(initial)"),
+          "Il wrapper attraversa veramente lo storico")
       truth(!src.contains("orderAt46Latch"),"Logica del prossimo stadio")
     }
     check("metadati dello stadio 18 sono intenzionalmente RED") {
       val text=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(text.contains("CURRENT_STAGE=18"),"Stadio")
-      truth(text.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(text.contains("CURRENT_PATCH=08"),"Patch precedente")
-      truth(text.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      val current = text.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=18,"Discovery 09 preservata")
+      if (current==18) {
+        truth(text.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(text.contains("CURRENT_PATCH=08"),"Patch precedente")
+        truth(text.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      } else {
+        truth(text.contains("STAGE_18_NATIVE_VERIFICATION=PASS_EXPECTED_RED_27_PASS_3_FAIL"),
+          "Firma rossa storica certificata")
+      }
       truth(text.contains("STAGE_17_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_31_PASS_0_FAIL"),
         "Precedente certificazione intatta")
       val completed=text.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed==17 || completed==18,"Ordine certificazioni")
+      truth(completed>=17 && completed<=current,"Ordine certificazioni")
     }
 
     val manager=new BaseMonsterManager

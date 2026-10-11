@@ -714,3 +714,36 @@ intenzionali**, limitati ai tre confronti
 `ordinario`, `simmetrico` e `signed`.
 Tutte le firme storiche degli stadi precedenti
 sono rimaste invarianti. La PATCH 09 non è introdotta.
+
+## Stadio 19 — PATCH 09: il caveau avanza a ogni giro
+
+La DISCOVERY 09 conserva il difetto storico:
+`LegacyVaultAdapter.vaultOld` rilegge sempre le sei
+ciotole iniziali per ciascuna delle dodici mescolature.
+La nuova `Patch09VaultWrapper.vaultPatch` attraversa
+davvero quel codice storico, ma esegue poi dodici
+mescolature consecutive, aggiornando la fotografia
+`snapshot` solo dopo aver calcolato tutte le sei
+nuove ciotole. Il report rende confrontabili
+**tutte e dodici le righe storiche e normative**,
+senza mutare l'helper legacy.
+
+`BaseMonsterManager.patch09Vault` gestisce
+`BOOT → DISCOVERY_09_VAULT → PATCH_09_VAULT_ROLL`
+nello stesso contesto e valida ogni giro
+indipendentemente dal wrapper, ricontrollando
+anche tutte le prove storiche. La produzione
+non dipende dall'oracolo di test.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage19Tests'
+```
+
+Firma GREEN prevista: **37 PASS, 0 FAIL**.
+La suite include 720 ranghi testati su 12 giri,
+512 campioni signed deterministici, BigInt oltre
+16.384 bit, input invalidi, prove di integrità
+di ogni giro, isolation e le otto patch precedenti.
+La firma Stage18 **27 PASS / 3 FAIL** resta
+volutamente invariata. Non è introdotta la
+futura logica dello Stage20.

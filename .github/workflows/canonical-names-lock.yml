@@ -440,3 +440,23 @@ jobs:
           for label in 'ordinario' 'simmetrico' 'signed'; do
             grep -Fq "FAIL — equivalenza normativa caveau ${label} — Caveau vecchio non aggiornato" stage18.log
           done
+
+  native-stage19-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 19 consecutive frozen-vault PATCH 09
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage19Tests' 2>&1 | tee stage19.log
+          grep -Fq 'RISULTATO STADIO 19: 37 PASS, 0 FAIL' stage19.log
+          test "$(grep -Fc 'PASS — ' stage19.log)" -eq 37
+          test "$(grep -Fc 'FAIL — ' stage19.log)" -eq 0
