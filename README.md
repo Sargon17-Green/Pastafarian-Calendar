@@ -20,7 +20,7 @@ Giai đoạn 2 chủ ý làm lộ sai lệch đầu tiên: `old_remainder(value)
 
 Có thể đi qua đường sản xuất chưa vá bằng `PastafariCalendarElixirVietnamese.save_value_spaghetti(value)`. Hàm trả kết quả sai tại M, 2M và 3M; điều này được kiểm chứng bằng các hồi quy chuẩn cố ý thất bại. Tại M+1 hàm trả 1 như chuẩn.
 
-Đây là trạng thái `EXPECTED_RED` được yêu cầu cho pha khám phá; không được làm cho kiểm thử hồi quy thành công bằng cách sửa kỳ vọng. Hàm tính ngày lịch đầy đủ vẫn chưa được tích hợp.
+Đó là trạng thái `EXPECTED_RED` lịch sử của giai đoạn khám phá; các hồi quy chỉ được chuyển thành đạt ở giai đoạn 3 nhờ lớp vá thực tế, không phải bằng cách đổi kỳ vọng. Hàm tính ngày lịch đầy đủ vẫn chưa được tích hợp.
 
 Chạy tại gốc kho:
 
@@ -28,7 +28,7 @@ Chạy tại gốc kho:
 mix test
 ```
 
-Bước kế tiếp sau khi xác minh giai đoạn 2 là giai đoạn 3/55, `PATCH 01`. Ở bước đó mới được thêm lớp vá chuyển phần dư 0 thành M, đồng thời giữ nguyên `old_remainder` như một dấu vết lịch sử.
+Bước lịch sử tiếp theo sau giai đoạn 2 là giai đoạn 3/55, `PATCH 01`. Bước này hiện đã hoàn tất với lớp vá chuyển phần dư 0 thành M, còn `old_remainder` được giữ nguyên làm dấu vết lịch sử.
 
 ## Bằng chứng khép giai đoạn 2
 
@@ -49,3 +49,17 @@ Ba hồi quy chuẩn của giai đoạn 2 không bị sửa hoặc xóa và ph�
 Các kiểm thử mở rộng gồm phần dư âm, số 0, số nguyên lớn hơn 1024 bit,
 tính chu kỳ, nhiều yêu cầu đồng thời và kiểm tra đường gọi lịch sử.
 Hàm ngày lịch đầy đủ vẫn bị chặn cho đến giai đoạn tích hợp bắt buộc.
+
+## Xác minh hoàn tất giai đoạn 3
+
+Quy trình GitHub Actions dùng Elixir 1.18.5 và Erlang/OTP 27 đã chạy
+`mix test` với 29 kiểm thử, 0 lỗi. Cả ba hồi quy chuẩn của giai đoạn 2
+đã chuyển thành đạt mà không đổi các kỳ vọng. Quy trình khóa tên chuẩn
+hoàn tất thành công; mô-đun `LegacyRemainder` vẫn nguyên trạng.
+
+- [Kiểm thử Elixir — đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151138352)
+- [Khóa tên chuẩn — đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151138317)
+
+Giai đoạn 3/55 đã được đóng với trạng thái `GREEN`.
+Bước lịch sử tiếp theo là giai đoạn 4/55: `DISCOVERY 02`, không được
+đưa bản vá thứ hai vào cùng bước khám phá.

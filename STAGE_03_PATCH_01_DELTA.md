@@ -2,22 +2,22 @@
 
 ## Cơ sở
 
-Bắt đầu từ commit đóng giai đoạn 2 \`dcef0ef26ca8fb705577812c888b6b6ae7e4b68f\`,
+Bắt đầu từ commit đóng giai đoạn 2 `dcef0ef26ca8fb705577812c888b6b6ae7e4b68f`,
 đã xác minh 22 kiểm thử, đúng ba sai lệch dự kiến tại M, 2M, 3M.
 Không đưa mã từ nhánh khác; giữ nguyên danh mục tên và tài liệu tham chiếu thử nghiệm.
 
 ## Cách vá bắt buộc
 
-\`\`\`text
+```text
 savePatch(x):
     r = oldRemainder(x)
     if r == 0:
         r = M
     return r
-\`\`\`
+```
 
-Dòng sản xuất vẫn thực thi \`old_remainder\` sai; \`SavePatch\` chỉ bổ sung
-nhánh đổi 0 thành M. Không thay đổi \`LegacyRemainder\`.
+Dòng sản xuất vẫn thực thi `old_remainder` sai; `SavePatch` chỉ bổ sung
+nhánh đổi 0 thành M. Không thay đổi `LegacyRemainder`.
 
 ## Kiểm thử dự định
 
@@ -45,3 +45,16 @@ Giai đoạn 3: bọc phần dư SAVE lịch sử bằng bản vá 01
 Giữ nguyên phép dư sai và đặt lớp SavePatch có nhánh chuyển 0 thành M.
 Nối vào đường sản xuất, xác minh số nguyên âm, biên và đồng thời.
 Bảo toàn tất cả hồi quy chuẩn của giai đoạn phát hiện trước.
+
+## Bằng chứng kiểm chứng thực tế
+
+- Elixir: 1.18.5; Erlang/OTP: 27.
+- 29 kiểm thử, 0 thất bại, không có cảnh báo biên dịch.
+- Ba hồi quy chuẩn cũ M, 2M, 3M chuyển thành đạt mà không đổi kỳ vọng.
+- Khóa tên chuẩn: PASS.
+- SHA của `legacy_remainder.ex` không thay đổi: `1fe8f5b5b572e1dc55368f180972bf4ad79c1cdc`.
+- Kiểm thử: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151138352
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151138317
+
+Kết thúc giai đoạn 3: GREEN. Giai đoạn 4 phải là DISCOVERY 02 độc lập,
+không được gộp với bản vá 02.

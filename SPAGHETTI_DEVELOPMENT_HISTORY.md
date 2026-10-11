@@ -43,3 +43,9 @@ Không thêm bất kỳ bản vá nào thuộc các giai đoạn tương lai.
 **Điều chỉnh kiểm thử:** Kiểm thử nối dây của giai đoạn 2 từng đòi đầu ra
 công khai bằng kết quả sai. Chỉ xác nhận nối dây được cập nhật để chứng minh
 hàm lịch sử còn sai nhưng đầu ra được sửa. Ba hồi quy chuẩn không thay đổi.
+
+**Bằng chứng hoàn tất:** Với Elixir 1.18.5 và OTP 27, quy trình
+`mix test` chạy 29 kiểm thử, 0 lỗi. Khóa tên chuẩn đạt ở quy trình độc lập.
+Hàm `LegacyRemainder.old_remainder` giữ nguyên nội dung trước và sau
+bản vá; ba hồi quy chuẩn của giai đoạn 2 giữ nguyên kỳ vọng. Trạng thái
+giai đoạn 3 đã được xác minh là GREEN.
