@@ -21,3 +21,7 @@ ni'o lo ti ciste na jdice lo narmanci detri jalge. lo te merli vreji .e lo nabmi
 ### lo balvi se na zbasu
 
 ni'o no balvi se srana pluta .e no balvi se srana tcita .e no balvi se srana datni cu se jmina ca lo pamoi stadi.
+
+## stadi 2 — lo namcu jicmu poi se zbasu
+
+ni'o lo `MonsterArithmetic` cu se zbasu fi lo cnino Java se pilno samselpla gi'e na tcidu lo `NormativeOracle`. ri se pilno lo `BigInteger` .e lo `record WorkCounts` tezu'e lo nu stodi lo seljdima. lo `Stage02Tests` cu cipra lo pamoi detri .e lo mutce barda namcu .e lo frinu .e lo mod .e lo bidju namcu .e lo mutce barda se pilno namcu. lo balvi stadi pagbu cu na za'o mulno.

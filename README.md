@@ -25,7 +25,7 @@ lo mulno cmene liste cu zvati `SOURCE_LANGUAGE_CATALOG.md`.
 ko fi lo stura rinka lo `run_stage01_tests.sh` lo nu se benji. lo drani se jalge cu du:
 
 ```text
-STAGE_01_PASS checks=245
+STAGE_01_PASS checks=249
 ```
 
 lo zbasu .e lo cipra cu pilno `javac` .e `java`. no drata samselpla bangu cu se pilno lo te javni .a lo cipra .a lo datni zbasu.
@@ -35,3 +35,14 @@ lo zbasu .e lo cipra cu pilno `javac` .e `java`. no drata samselpla bangu cu se 
 lo se pilno ciste ca lo pamoi stadi cu vasru `MonsterContext`, `MonsterDispatcher`, `MonsterValidationManager`, `MonsterErrorBoundary`, `MonsterMetrics`, .e `MonsterManager`. no balvi se srana pluta cu se jmina ca ti.
 
 lo `MonsterContext` cu se zbasu pa mai ro se benji. lo te merli vreji .e lo nabmi catlu vreji cu na se tcidu fi lo narmanci te jdice. lo se smuni datni poi se jmina ca ti cu se ponse lo sama se benji po'o.
+
+## lo remoi stadi — lo prula'i namcu javni
+
+ni'o lo `MonsterArithmetic` cu se zbasu fi la Java po'o. ri se pilno lo `BigInteger` tezu'e lo nu se jarco lo mutce barda namcu. ri vasru lo detri pamoi poi se jicmu lo `FOUNDATION_DAY`, lo frinu boi mod javni, lo `save`, lo `wrap1`, lo `ceilDiv`, .e lo `WorkCounts`.
+
+ni'o lo remoi stadi ca se zbasu gi'e na se tcita lo mulno stadi. lo `Stage02Tests` cu cipra lo cnino te javni gi'e srana lo `NormativeOracle` poi vasru lo cipra po'o. ko benji:
+```sh
+sh run_stage01_tests.sh
+sh run_stage02_tests.sh
+```
+ni'o lo remoi stadi cu nitcu lo balvi zbasu be lo slabu narmanci se jicmu. lo `LAST_COMPLETED_STAGE` cu du li pa.
