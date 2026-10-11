@@ -44,9 +44,11 @@ t/21_preopen_state_formula.t
 t/22_polynomial_weaving.t
 t/23_polynomial_catalan.t
 t/24_polynomial_suffix.t
+t/25_polynomial_unranking.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingSuffix.pm
+t/lib/Pastafari/WeavingUnrank.pm
 tools/profile_weaving.pl
 tools/profile_polynomial.pl
 CANONICAL_NAMES_LOCK.sha256
