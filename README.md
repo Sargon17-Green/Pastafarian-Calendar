@@ -169,3 +169,21 @@ chúng xác nhận thuật toán cũ vẫn sai nhưng đầu ra công khai đã 
 Mười kiểm thử giai đoạn 7 kiểm soát hai nhánh điều kiện, số nguyên rất
 lớn, lưới quanh Ngày Nền, tính đối xứng, sự cô lập khi chạy đồng thời
 và không hồi quy các bản vá 01/02.
+
+## Xác minh đóng giai đoạn 7
+
+Trên GitHub Actions, Elixir 1.18.5 cùng Erlang/OTP 27 đã chạy 65
+kiểm thử và không có lỗi hay cảnh báo biên dịch. Cả bốn hồi quy
+của giai đoạn 6 đã đạt mà không đổi kỳ vọng chuẩn. Phép tính sai
+LegacyDistance và hai bản vá cũ không bị sửa. Khóa tên chuẩn đạt.
+
+- [Kiểm thử 65/65 đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155925314)
+- [Khóa tên chuẩn đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155925331)
+
+Lần chạy đầu lộ một ca thử mới bị phân loại sai: hai ngày giống
+nhau là nhánh giữ vì cả hai khoảng cách cơ sở đều bằng 0.
+Ca thử đã được chuyển sang nhánh giữ, một đối chứng khác được dùng
+cho nhánh sửa. Không sửa mã sản xuất hoặc hồi quy chuẩn.
+
+Giai đoạn 7/55 đã đóng ở trạng thái `GREEN`. Giai đoạn 8/55 sẽ
+là `DISCOVERY 04`; chưa khởi động và chưa thêm bản vá 04.

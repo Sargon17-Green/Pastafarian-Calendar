@@ -161,3 +161,13 @@ nhãn ngày vẫn giữ nguyên hành vi.
 Các kiểm thử nối dây đòi kết quả sai được cập nhật để xác minh
 lỗi lịch sử còn tồn tại bên dưới lớp vá. Mười kiểm thử độc lập mới
 được bổ sung, không khởi động giai đoạn 8.
+
+**Bằng chứng hoàn tất:** GitHub Actions xác nhận 65 kiểm thử, 0 lỗi
+với Elixir 1.18.5 và OTP 27; khóa tên chuẩn đạt độc lập.
+Lần kiểm thử đầu có một lỗi ở ca thử mới phân loại sai nhánh,
+không phải do thuật toán sản xuất. Cặp ngày giống nhau có
+`legacy == chronological == 0`, thuộc nhánh giữ; ca này được
+chuyển sang đúng nhánh, thêm ca khác cho nhánh sửa rồi chạy
+toàn bộ kiểm thử xanh. Không đổi bốn hồi quy chuẩn từ phát hiện 03,
+không thay `LegacyDistance` và không xóa các lớp vá cũ.
+Giai đoạn 7 đã đóng GREEN.
