@@ -19,6 +19,7 @@ public final class Stage02EndpointWeavingTests {
         testMinimumYearUnrank();
         testTerminalFoldAndExtendedDomains();
         testRankUnrankInversion();
+        testSuffixConservation();
         testBoundsAndOwnership();
         System.out.println("STAGE_02_ENDPOINT_WEAVING_PASS checks=" + checks);
     }
@@ -303,6 +304,40 @@ public final class Stage02EndpointWeavingTests {
             new int[]{123, 123, 123, 16});
         fails("E_WEAVE_RANK_LIMIT", () -> tooLarge.rank1(
             new int[]{1}));
+    }
+
+    private static void testSuffixConservation() {
+        for (int[] lengths : new int[][]{
+                {1, 1, 1, 1}, {2, 3, 2, 4}, {4, 5, 6},
+                {4, 4, 4, 4, 4}, {9, 7, 5, 4}
+        }) {
+            MonsterWeavingEndpointDP family = new MonsterWeavingEndpointDP(lengths);
+            BigInteger total = family.count();
+            for (BigInteger rank : sampled(total)) {
+                int[] sequence = family.unrank1(rank);
+                for (int prefixLength = 0;
+                        prefixLength < Math.min(sequence.length, 12); prefixLength++) {
+                    int[] prefix = Arrays.copyOf(sequence, prefixLength);
+                    BigInteger currentCount = family.countAfterPrefix(prefix);
+                    BigInteger branches = BigInteger.ZERO;
+                    int valid = 0;
+                    for (int month = 1; month <= lengths.length; month++) {
+                        int[] trial = Arrays.copyOf(prefix, prefix.length + 1);
+                        trial[prefix.length] = month;
+                        try {
+                            branches = branches.add(family.countAfterPrefix(trial));
+                            valid++;
+                        } catch (IllegalArgumentException ex) {
+                            if (!"E_WEAVE_PREFIX".equals(ex.getMessage())) {
+                                throw ex;
+                            }
+                        }
+                    }
+                    ok(valid > 0, "E_SUFFIX_HAS_NEXT");
+                    eq(currentCount, branches, "E_SUFFIX_CONSERVATION");
+                }
+            }
+        }
     }
 
     private static void testBoundsAndOwnership() {

@@ -74,9 +74,9 @@ public final class MonsterWeavingEndpointDP {
     }
 
     private static final class EndpointTable {
-        private final int days;
-        private final int newestMonthLength;
-        private final BigInteger[][] rows;
+        private int days;
+        private int newestMonthLength;
+        private BigInteger[][] rows;
 
         EndpointTable(int olderDays, int newMonthLength) {
             this.days = olderDays + newMonthLength;
@@ -99,6 +99,19 @@ public final class MonsterWeavingEndpointDP {
                 if (row[j] != null) {
                     int last = lastStart + j;
                     columns[last] = columns[last].add(row[j]);
+                }
+            }
+        }
+
+        void subtractColumnSums(int first, BigInteger[] columns) {
+            if (first < 1 || first >= rows.length) return;
+            BigInteger[] row = rows[first];
+            if (row == null) return;
+            int lastStart = first + newestMonthLength - 1;
+            for (int j = 0; j < row.length; j++) {
+                if (row[j] != null) {
+                    int last = lastStart + j;
+                    columns[last] = columns[last].subtract(row[j]);
                 }
             }
         }
@@ -133,48 +146,53 @@ public final class MonsterWeavingEndpointDP {
         return column;
     }
 
-    private static EndpointTable insert(EndpointTable previous, int oldLength,
+    private static EndpointTable insert(EndpointTable table, int oldLength,
                                         int add, boolean enforceFirstOrder) {
-        EndpointTable next = new EndpointTable(oldLength, add);
         int currentLength = oldLength + add;
         BigInteger[] columns = new BigInteger[oldLength + 1];
         Arrays.fill(columns, ZERO);
-
-        if (!enforceFirstOrder || add == 1) {
-            for (int first = 1; first < previous.rows.length; first++) {
-                previous.addColumnSums(first, columns);
-            }
+        for (int first = 1; first < table.rows.length; first++) {
+            table.addColumnSums(first, columns);
         }
+        table.rows = Arrays.copyOf(table.rows, oldLength + 2);
         if (add == 1) {
+            BigInteger[] prefixSums = new BigInteger[oldLength + 2];
             BigInteger cumulative = ZERO;
-            int included = 0;
-            for (int first = 1; first <= oldLength + 1; first++) {
-                int boundary = Math.min(first - 1, oldLength);
-                while (included < boundary) {
-                    cumulative = cumulative.add(columns[++included]);
-                }
-                if (cumulative.signum() > 0) next.rows[first][0] = cumulative;
+            prefixSums[1] = ZERO;
+            for (int first = 2; first <= oldLength + 1; first++) {
+                cumulative = cumulative.add(columns[first - 1]);
+                prefixSums[first] = cumulative;
             }
-            return next;
-        }
-        BigInteger[] binomial = fixedBinomialColumn(currentLength, add - 2);
-        for (int first = 1; first <= oldLength + 1; first++) {
-            if (enforceFirstOrder) previous.addColumnSums(first - 1, columns);
-            BigInteger cumulative = ZERO;
-            int included = 0;
-            BigInteger[] row = next.rows[first];
-            int lastStart = first + add - 1;
-            for (int last = lastStart; last <= currentLength; last++) {
-                int boundary = Math.min(last - add, oldLength);
-                while (included < boundary) {
-                    cumulative = cumulative.add(columns[++included]);
+            for (int first = oldLength + 1; first >= 1; first--) {
+                table.rows[first] = new BigInteger[]{prefixSums[first].signum() == 0
+                    ? null : prefixSums[first]};
+            }
+        } else {
+            BigInteger[] binomial = fixedBinomialColumn(currentLength, add - 2);
+            for (int first = oldLength + 1; first >= 1; first--) {
+                BigInteger cumulative = ZERO;
+                int included = 0;
+                int lastStart = first + add - 1;
+                BigInteger[] result = new BigInteger[currentLength - lastStart + 1];
+                for (int last = lastStart; last <= currentLength; last++) {
+                    int boundary = Math.min(last - add, oldLength);
+                    while (included < boundary) {
+                        cumulative = cumulative.add(columns[++included]);
+                    }
+                    if (cumulative.signum() > 0) {
+                        result[last - lastStart] = cumulative.multiply(
+                            binomial[last - first - 1]);
+                    }
                 }
-                if (cumulative.signum() > 0) {
-                    row[last - lastStart] = cumulative.multiply(binomial[last - first - 1]);
+                table.rows[first] = result;
+                if (enforceFirstOrder) {
+                    table.subtractColumnSums(first - 1, columns);
                 }
             }
         }
-        return next;
+        table.days = currentLength;
+        table.newestMonthLength = add;
+        return table;
     }
 
     private static BigInteger terminalInsertTotal(EndpointTable previous,
