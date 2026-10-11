@@ -72,6 +72,11 @@ def analyze(rows,trace_path):
     executed_changed=0
     executed_written=0
     event_log_count=0
+    # Expected sitecustomize.py g/p event pair for the current STEP.
+    # A STEP cannot silently omit a witnessed write/read, nor may an
+    # unrelated opcode fabricate a p/g memory event.
+    expected_event=None
+    event_seen=False
 
     with open(trace_path,"r",encoding="utf-8") as stream:
         for line_no,line in enumerate(stream,1):
@@ -88,7 +93,14 @@ def analyze(rows,trace_path):
             event_log_count+=1
 
             if tag=="STEP":
+                require(not pending_reads and not pending_writes,
+                        "native g/p AFTER event missing before next STEP")
+                require(expected_event is None or event_seen,
+                        "missing native g/p event pair for preceding STEP")
                 tick,ip,x,y,dx,dy,opcode,depth=vals
+                expected_event=("READ" if opcode==ord("g") and depth>=2 else
+                                "WRITE" if opcode==ord("p") and depth>=3 else None)
+                event_seen=False
                 current_step+=1
                 require(tick==current_step,"nonsequential native STEP tick")
                 require(depth>=0,"negative native stack depth")
@@ -142,6 +154,8 @@ def analyze(rows,trace_path):
                     "native read/write event detached from current STEP")
             require(previous_step is not None,"native event without STEP")
             if tag=="READ_BEFORE":
+                require(expected_event=="READ" and not event_seen,
+                        "READ event not bound to an executed g opcode")
                 _,x,y,logged=vals
                 point=(x,y)
                 expected=changed.get(point,initial_byte(rows,x,y))
@@ -158,7 +172,10 @@ def analyze(rows,trace_path):
                 require(point==(x,y) and expected==actual,
                         "g returned unexpected cell value at tick=%d" % tick)
                 stats["reads_completed"]+=1
+                event_seen=True
             elif tag=="WRITE_BEFORE":
+                require(expected_event=="WRITE" and not event_seen,
+                        "WRITE event not bound to an executed p opcode")
                 _,x,y,before,value=vals
                 point=(x,y)
                 expected=changed.get(point,initial_byte(rows,x,y))
@@ -184,9 +201,12 @@ def analyze(rows,trace_path):
                     "later_executed_tick":None,
                     "overwritten_before_execution":False})
                 stats["writes_completed"]+=1
+                event_seen=True
                 if old!=actual:stats["effective_changes"]+=1
 
     require(not pending_reads and not pending_writes,"unpaired native g/p records")
+    require(expected_event is None or event_seen,
+            "missing native g/p event pair at final STEP")
     require(len(ip_ids)==1,"multi-IP trace needs explicit per-IP edge separation")
     require(stats["reads"]==stats["reads_completed"],"incomplete g pair")
     require(stats["writes"]==stats["writes_completed"],"incomplete p pair")
@@ -282,6 +302,69 @@ def selftest():
                     "stationary native IP did not trip its exact guard")
         else:
             raise AssertionError("native zero-velocity IP falsely passed audit")
+        # Full synthetic trace that satisfies geometry gates. It confirms
+        # that matching p/g lifecycle evidence survives the stronger audit,
+        # while coordinated fake and missing events are rejected even when
+        # all geometric summary thresholds would otherwise pass.
+        source=[""]*11
+        source[10]=" "*10+"pg"
+        trace_lines=[
+            "STEP\t1\t1\t5\t0\t1\t0\t32\t0",
+            "STEP\t2\t1\t10\t10\t1\t0\t112\t3",
+            "WRITE_BEFORE\t2\t2000\t2000\t32\t49",
+            "WRITE_AFTER\t2\t2000\t2000\t49",
+            "STEP\t3\t1\t2000\t2000\t1\t0\t49\t0",
+            "STEP\t4\t1\t11\t10\t1\t0\t103\t2",
+            "READ_BEFORE\t4\t2000\t2000\t49",
+            "READ_AFTER\t4\t2000\t2000\t49"
+        ]
+        for n in range(1001):
+            trace_lines.append("STEP\t%d\t1\t%d\t12\t1\t0\t32\t0" %
+                               (n+5,n+100))
+        trace_lines.append("STEP\t1006\t1\t5\t0\t1\t0\t32\t0")
+        def check_records(records,source_rows):
+            with open(trace,"w",encoding="utf-8") as stream:
+                stream.write("\n".join(records)+"\n")
+            return analyze(source_rows,trace)
+        passed=check_records(trace_lines,source)
+        require(passed["statistics"]["executed_content_changing_gate_writes"]==1
+                and passed["statistics"]["reads"]==1
+                and passed["statistics"]["writes"]==1,
+                "legitimate synthetic p/g source-version trace was rejected")
+        def reject_trace(name,records,source_rows,fragment):
+            try:
+                check_records(records,source_rows)
+            except AssertionError as err:
+                require(fragment in str(err),
+                        "wrong event-binding failure %s: %s" % (name,err))
+            else:
+                raise AssertionError("forged p/g trace accepted: "+name)
+        no_read=[line for line in trace_lines
+                 if not line.startswith(("READ_BEFORE","READ_AFTER"))]
+        reject_trace("omitted_g_events",no_read,source,"missing native g/p")
+        fake_read=[line.replace(
+            "STEP\t4\t1\t11\t10\t1\t0\t103\t2",
+            "STEP\t4\t1\t11\t10\t1\t0\t32\t2")
+            for line in trace_lines]
+        altered_source=list(source)
+        altered_source[10]=" "*10+"p "
+        reject_trace("read_attached_to_non_g",fake_read,altered_source,
+                     "READ event not bound")
+        fake_write=list(trace_lines)
+        fake_write[9:9]=[
+            "WRITE_BEFORE\t5\t3000\t3000\t32\t50",
+            "WRITE_AFTER\t5\t3000\t3000\t50"]
+        reject_trace("write_attached_to_non_p",fake_write,source,
+                     "WRITE event not bound")
+        omitted_write=list(trace_lines)
+        idx=next(i for i,line in enumerate(omitted_write)
+                 if line.startswith("STEP\t5\t"))
+        omitted_write[idx]="STEP\t5\t1\t12\t10\t1\t0\t112\t3"
+        extra_p_source=list(source)
+        extra_p_source[10]=" "*10+"pgp"
+        reject_trace("omitted_p_events",omitted_write,extra_p_source,
+                     "missing native g/p")
+        print("NATIVE_ROUTE_GRAPH_G_P_EVENT_BINDING_4_NEGATIVE_CONTROLS_PASS")
     print("NATIVE_ROUTE_GRAPH_ZERO_VELOCITY_NEGATIVE_CONTROL_PASS")
     print("NATIVE_ROUTE_GRAPH_SELFTEST_PASS")
 
