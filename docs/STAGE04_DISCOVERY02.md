@@ -42,6 +42,16 @@ v test ./pastafari/discovery02_expected_red_test.v
 
 ከመጨረሻው ትእዛዝ በስተቀር ሁሉም `exit=0` መመለስ አለባቸው። የመጨረሻው ትእዛዝ አራት የታሰቡ assertion ውድቀቶችን በስም መስጠት አለበት። `FOUNDATION-1` እና PATCH 01 ያለ ውድቀት መቆየት አለባቸው።
 
-የGitHub Actions ሥራ፦ `.github/workflows/canonical-names-lock.yml` ውስጥ `stage04_native_v`። ከታሰበው RED ማረጋገጫ በፊት `LAST_COMPLETED_STAGE=3` እንዳለ ይቆያል።
+የGitHub Actions ሥራ፦ `.github/workflows/canonical-names-lock.yml` ውስጥ `stage04_native_v`። የታሰበው RED በV 0.5.2 ቀጥተኛ CI ተረጋግጧል፤ `LAST_COMPLETED_STAGE=4` ነው።
 
 **ደረጃ 5 PATCH 02 አይጀመርም።** የታሪካዊ `old_day_tag` በደረጃ 5 ደግሞ ሳይቀየር መቆየት አለበት።
+
+## የተረጋገጠ የመዝጊያ ማስረጃ
+
+- የተፈተነው commit፦ `f268cbc15a421077df59e569a1b1d2e4ef12fcb8`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155338854
+- የRED ማስረጃ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155338854/artifacts/11708217428
+- ተግባራዊ V ስሪት፦ `V 0.5.2 7647ce1`
+- `v fmt -verify` PASS፤ 5 አስፈላጊ GREEN የሙከራ ፋይሎች PASS፤ 4 በተናጠል የታሰቡ assertions RED።
+- `FOUNDATION-1` እና `PATCH 01` የመቆጣጠሪያ ሙከራዎች GREEN።
+- `PATCH 02` አልተጨመረም፤ የደረጃ 5 ሥራ ገና አልተጀመረም።

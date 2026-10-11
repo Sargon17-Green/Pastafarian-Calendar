@@ -14,7 +14,7 @@
 
 የታሪካዊ 26 ጉድለቶች እና መጠገኛዎቻቸው በዚህ ደረጃ አልተጨመሩም። ዋናው `calendar_date_spaghetti` በዚህ ደረጃ የሚሰራ የመጨረሻ ካሌንደር መንገድ አይደለም፤ የታሪካዊ ግንባታው ሳይጀምር በግልጽ ስህተት ይቆማል።
 
-## የሙከራ ትእዛዝ
+## የደረጃ 1 የታሪክ ማረጋገጫ ትእዛዝ
 
 ```text
 v test ./pastafari
@@ -40,3 +40,5 @@ v fmt -verify ./pastafari
 ## ደረጃ 4 — DISCOVERY 02
 
 ሁለተኛው የታሪካዊ ስህተት `old_day_tag(day) = 2*abs(day-FOUNDATION)` በV ተጨምሯል። ከFOUNDATION ጀምሮ የአንድ የምንጠብቀው ልዩነት በሆን ተብሎ RED ሙከራዎች ተመዝግቧል። PATCH 01 ተጠብቋል፤ PATCH 02 ገና አልተጨመረም። ዝርዝር፦ `docs/STAGE04_DISCOVERY02.md`።
+
+ደረጃ 4 በ`V 0.5.2 7647ce1` በGitHub Actions run `38155338854` ሙሉ የታሰበ `EXPECTED_RED` ማረጋገጫ አልፏል። 5 የአሮጌ/አዲስ GREEN የሙከራ ፋይሎች PASS ናቸው። የአራቱ የተጠበቁ ውድቀቶች ማስረጃ ተቀምጧል፤ `LAST_COMPLETED_STAGE=4`። አሁን `v test ./pastafari` ሙሉ በሙሉ GREEN መሆን የለበትም፤ የደረጃ 4 የታሰበው RED የፕሮጀክቱ ህጋዊ ሁኔታ ነው።

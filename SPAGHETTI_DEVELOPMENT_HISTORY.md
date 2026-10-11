@@ -41,3 +41,7 @@ V 0.5.2 (`7647ce1`) በእውነተኛ GitHub Actions run `38153910238` ሁሉ�
 ## ደረጃ 4 — DISCOVERY 02 (በታሪካዊ ማረጋገጫ ላይ)
 
 `old_day_tag` በሆነ ስህተት `2*abs(day-FOUNDATION)` ይቆጥራል። `LegacyDayTagAdapter` በproduction dispatcher እውነተኛ መንገድ ላይ ተገናኝቷል። የPATCH 01 የSAVE መንገድ አልተለወጠም፣ ኖርማቲቭ oracle በproduction አይጠቀምም። በFOUNDATION፣ FOUNDATION+1፣ FOUNDATION+2 እና በትልቅ ወደፊት ቀን የሚታየውን የታሰበ RED ለማረጋገጥ የV 0.5.2 CI ተዘጋጅቷል። የPATCH 02 መጠገኛ በዚህ ደረጃ አልተጨመረም።
+
+### የደረጃ 4 መዝጊያ — EXPECTED_RED
+
+በGitHub Actions run `38155338854` የV 0.5.2 (`7647ce1`) ቀጥተኛ ፈተና PASS ሆኗል። `v fmt -verify`፣ የደረጃ 1 ኦራክል፣ የደረጃ 2 አሮጌ witness፣ የደረጃ 3 PATCH 01 እና የደረጃ 4 አሮጌ witness ሁሉ PASS ናቸው። አራቱ የኖርማቲቭ RED assertions በተናጠል ወድቀዋል፤ ማስረጃ artifact `11708217428` ተቀምጧል። `old_day_tag` ገና በታሪካዊ ስህተቱ ይሰራል። ደረጃ 4 COMPLETE / EXPECTED_RED ነው።
