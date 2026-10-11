@@ -50,7 +50,7 @@ def pin(path):
 # Native Befunge decimal output must be lexically canonical, not merely
 # coercible to an integer: str.lstrip("-").isdigit() incorrectly accepts
 # "--1", "---1", "-0" and zero-padded output.
-DECIMAL = re.compile(r"^(?:0|-?[1-9][0-9]*)\\Z")
+DECIMAL = re.compile(r"^(?:0|-?[1-9][0-9]*)\Z")
 
 
 def canonical_words(words):
