@@ -75,7 +75,7 @@ final class BootstrapKernel
         $context->semanticState['operand'] = $value;
         return $this->boundary->run(
             $context,
-            fn(): BigInt => $this->dispatcher->dispatch('SAVE_LEGACY', $context)
+            fn(): BigInt => $this->dispatcher->dispatch('SAVE_PATCH_01', $context)
         );
     }
 }
