@@ -29,3 +29,7 @@ v test ./pastafari/discovery01_expected_red_test.v
 የመጀመሪያዎቹ ሦስት ትእዛዞች `exit=0` ሊመልሱ ይገባል። የመጨረሻው ትእዛዝ ሶስት የተጠበቁ የassert ውድቀቶችን ማሳየት እና `exit!=0` መሆን አለበት። እዚህ ያለው ማረጋገጫ ገና በአገርኛው V መሳሪያ አልተሠራም።
 
 በደረጃ 3 ብቻ ከታሪካዊው መንገድ በላይ `savePatch` ይጨመራል፤ `old_remainder` አይሰረዝም፣ በቦታውም አይስተካከልም።
+
+## GitHub Actions
+
+`.github/workflows/v-amharic-stage02.yml` በዚህ ቅርንጫፍ ላይ ብቻ V `7647ce1` በመጠቀም የformat፣ የደረጃ 1፣ የwitness እና የEXPECTED_RED ፈተናዎችን ያስኬዳል። የRED መመለስ ብቻ አይበቃም፤ የV `-check` ማረጋገጫ መጀመሪያ ማለፍ አለበት። የCI ማስረጃ ካልተገኘ `LAST_COMPLETED_STAGE=1` እንዳለ ይቆያል።
