@@ -82,6 +82,15 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateLegacyPrior(calculationDay, targetDay, dropStore, i, back);
     }
 
+    // المسار المعتمد للرجوع إلى القطرات السابقة مع بقاء استرجاع القديم كما هو.
+    public static BigInteger EvaluatePrior(
+        BigInteger calculationDay, BigInteger targetDay,
+        BigInteger[] dropStore, int i, int back)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluatePrior(calculationDay, targetDay, dropStore, i, back);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

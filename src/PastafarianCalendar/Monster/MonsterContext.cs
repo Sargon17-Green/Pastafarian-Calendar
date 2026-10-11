@@ -54,6 +54,9 @@ public sealed class MonsterContext
     public int? LegacyPriorBack { get; set; }
     public BigInteger? LegacyPriorResult { get; set; }
 
+    // تُثبت نتيجة الرجوع المصححة منفصلة عن أثر القراءة القديمة إن وجد.
+    public BigInteger? PatchedPriorResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

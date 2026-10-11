@@ -101,3 +101,5 @@ jobs:
         run: |
           test "${{ steps.discovery_prior_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage12Tests/PastafarianCalendar.Stage12Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ رقعة استرجاع القطرات السابقة مع المرجع وحفظ القديم
+        run: dotnet run --project tests/PastafarianCalendar.Stage13Tests/PastafarianCalendar.Stage13Tests.csproj --configuration Release

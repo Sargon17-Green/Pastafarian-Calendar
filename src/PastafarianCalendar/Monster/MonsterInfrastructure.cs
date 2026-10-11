@@ -93,6 +93,45 @@ public sealed class MonsterValidationManager
                 throw new MonsterValidationException("انقلب المخزن نفسه عوضاً عن إصلاح مؤشر القراءة.");
     }
 
+    // يتحقق من التزام الرقعة السادسة من دون استعمال مرجع الاختبار.
+    public void ValidatePatchedPrior(MonsterContext context, BigInteger candidate)
+    {
+        if (context.PatchedPriorResult.HasValue)
+            throw new MonsterValidationException("لا يجوز تثبيت نتيجة الرجوع المصححة مرتين.");
+        if (context.LegacyPriorDropStore is not BigInteger[] store ||
+            context.LegacyPriorVisibleIndex is not int i ||
+            context.LegacyPriorBack is not int back)
+            throw new MonsterValidationException("لم تُقدَّم مدخلات الرجوع إلى التحقق.");
+        if (store.Length != 47 || store[0] != BigInteger.Zero ||
+            i is < 1 or > 46 || back is not (1 or 3 or 7))
+            throw new MonsterValidationException("مخزن الرجوع أو فهارسه غير صالحة.");
+
+        var slot = i - back;
+        BigInteger expected;
+        if (slot >= 1)
+        {
+            if (context.LegacyPriorResult is not BigInteger historical ||
+                context.LegacyHiddenReversed is not null ||
+                context.PatchedHiddenAccess is not null)
+                throw new MonsterValidationException("لم تُحفظ نتيجة القديم المنفردة للموضع الموجب.");
+            expected = LegacyPrior.Read(store, i, back);
+            if (historical != expected)
+                throw new MonsterValidationException("نتيجة القراءة التاريخية تغيّرت أثناء الرقعة.");
+        }
+        else
+        {
+            if (context.LegacyPriorResult is not null ||
+                context.LegacyHiddenReversed is not BigInteger[] storage ||
+                context.PatchedHiddenAccess is not HiddenNearnessWrapper hidden ||
+                !hidden.UsesUnchangedLegacyStorage(storage))
+                throw new MonsterValidationException("يستلزم الرجوع غير الموجب تخزين القطرات الخفية نفسه.");
+            expected = hidden.HiddenByNearness(1 - slot);
+        }
+
+        if (candidate != expected)
+            throw new MonsterValidationException("نتيجة الرقعة السادسة لا توافق فرع القراءة الصحيح.");
+    }
+
     // هذا الحارس لا يعيد إنتاج المرجع المعياري: يفحص الملكية والمدى وبنية الصفوف فقط.
     public void ValidatePatchedStones(MonsterContext context, BigInteger[][] candidate)
     {
@@ -150,6 +189,7 @@ public sealed class MonsterDispatcher
     private readonly StonePatchWrapper _stonePatch;
     private readonly LegacyHiddenDropsPhaseHandler _legacyHiddenDrops;
     private readonly LegacyPriorPhaseHandler _legacyPrior;
+    private readonly PriorAccessWrapper _priorAccess;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -165,6 +205,7 @@ public sealed class MonsterDispatcher
         _stonePatch = new StonePatchWrapper();
         _legacyHiddenDrops = new LegacyHiddenDropsPhaseHandler();
         _legacyPrior = new LegacyPriorPhaseHandler();
+        _priorAccess = new PriorAccessWrapper();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -358,6 +399,47 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "legacy.prior.dispatch");
         context.Status = "LEGACY_PRIOR_COMPLETE";
         context.Phase = "LEGACY_PRIOR_COMPLETE";
+    }
+
+    public void DispatchPatchedPrior(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("تتطلب الرقعة السادسة سياقاً جديداً مؤسساً.");
+        if (context.PatchedPriorResult.HasValue || context.LegacyPriorResult.HasValue ||
+            context.LegacyHiddenReversed is not null || context.PatchedHiddenAccess is not null)
+            throw new MonsterValidationException("لا يجوز استعارة نتيجة سابقة من استدعاء آخر.");
+
+        if (context.LegacyPriorDropStore is not BigInteger[] store ||
+            context.LegacyPriorVisibleIndex is not int i ||
+            context.LegacyPriorBack is not int back ||
+            store.Length != 47 || store[0] != BigInteger.Zero ||
+            i is < 1 or > 46 || back is not (1 or 3 or 7))
+            throw new MonsterValidationException("مدخلات الرقعة السادسة غير سليمة.");
+
+        var slot = i - back;
+        if (slot >= 1)
+        {
+            // حفظ شاهد مسار القراءة القديم أولاً؛ يستدعي الغلاف القديم فعلياً أيضاً.
+            DispatchLegacyPrior(context);
+        }
+        else
+        {
+            // يتعذر على القديم أن يقرأ الخفية؛ تُنشأ عبر المسار التاريخي الخامس.
+            DispatchLegacyHiddenDrops(context);
+            var access = new HiddenNearnessWrapper(context.LegacyHiddenReversed!);
+            _validation.ValidateHiddenNearnessWrapper(context, access);
+            context.PatchedHiddenAccess = access;
+        }
+
+        context.Phase = "PRIOR_ACCESS_PATCH_VALIDATION";
+        var pending = _priorAccess.Read(store, context.PatchedHiddenAccess, i, back);
+        _validation.ValidatePatchedPrior(context, pending);
+        context.PatchedPriorResult = pending;
+
+        context.BranchTrace.Add("PRIOR_ACCESS_PATCH");
+        _metrics.Bump(context, "prior.access.patch.dispatch");
+        context.Status = "PRIOR_ACCESS_PATCH_COMPLETE";
+        context.Phase = "PRIOR_ACCESS_PATCH_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -559,6 +641,32 @@ public sealed class MonsterManager
         var context = ExecuteLegacyPrior(calculationDay, targetDay, dropStore, i, back);
         return context.LegacyPriorResult
             ?? throw new MonsterValidationException("لم تُنتج القراءة التاريخية قيمة قطرة.");
+    }
+
+    public MonsterContext ExecutePatchedPrior(
+        BigInteger calculationDay, BigInteger targetDay,
+        BigInteger[] dropStore, int i, int back)
+    {
+        if (dropStore is null || dropStore.Length != 47 ||
+            dropStore[0] != BigInteger.Zero ||
+            i is < 1 or > 46 || back is not (1 or 3 or 7))
+            throw new MonsterValidationException("مدخلات الرجوع إلى القطرة غير صحيحة.");
+
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacyPriorDropStore = (BigInteger[])dropStore.Clone();
+        context.LegacyPriorVisibleIndex = i;
+        context.LegacyPriorBack = back;
+        _dispatcher.DispatchPatchedPrior(context);
+        return context;
+    }
+
+    public BigInteger EvaluatePrior(
+        BigInteger calculationDay, BigInteger targetDay,
+        BigInteger[] dropStore, int i, int back)
+    {
+        var context = ExecutePatchedPrior(calculationDay, targetDay, dropStore, i, back);
+        return context.PatchedPriorResult
+            ?? throw new MonsterValidationException("لم تُثبت نتيجة الرجوع المصححة.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
