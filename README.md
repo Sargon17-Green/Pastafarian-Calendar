@@ -157,11 +157,11 @@ Tout tès yo dwe pase epi GitHub Actions dwe rapòte `GREEN`. Pou konpare ak ans
 
 Nou ajoute `src/legacy_stones.lua` avèk premye fonksyon istorik `mutateStonesWrong(i, S)`. Li ekri senk nouvo valè yo nan **menm tablo `S` a**, youn apre lòt, nan lòd `w → b → s → m → r`. Li toujou rele `SavePatch.savePatch`, ki te deja korije nan Stage 3, men li li nouvo `w`, `b`, `s`, ak `m` yo twò bonè. Nou pa ajoute okenn snapshot reparatè ni okenn koreksyon Stage 9.
 
-Fonksyon piblik `stoneSpaghetti(i, stones)` ak `legacyStoneProbe(i, stones)` pase atravè handler `LEGACY_STONES` nan dispatcher pwodiksyon an. Chak invocation posede kopi done li yo, yon eta semantik tranzaksyonèl, tras, metrik, ak dyagnostik. Wout `stoneTableSpaghetti()` bati tout 46 ranje depi `{w=17,b=29,s=43,m=71,r=101}` atravè menm dispatcher legacy a. Referans odit yo rete sèlman nan `test/`; kòd pwodiksyon an pa enpòte yo.
+Nan checkpoint Stage 8 la, `stoneSpaghetti(i, stones)` ak `legacyStoneProbe(i, stones)` te pase atravè handler `LEGACY_STONES` la. Depi Stage 9, `stoneSpaghetti` pase nan nouvo `STONE_PATCH`, pandan `legacyStoneProbe` kontinye sou chemen istorik la. Chak invocation posede kopi done li yo, yon eta semantik tranzaksyonèl, tras, metrik, ak dyagnostik. Wout `stoneTableSpaghetti()` bati tout 46 ranje depi `{w=17,b=29,s=43,m=71,r=101}` atravè menm dispatcher legacy a. Referans odit yo rete sèlman nan `test/`; kòd pwodiksyon an pa enpòte yo.
 
 Nan ranje 2, wòch `w` se `378` sou toude chemen yo. Men rès rezilta legacy yo se `b=1434`, `s=3780`, `m=9932`, `r=25047`, kont valè snapshot normatif `b=1073`, `s=2375`, `m=6195`, `r=10493`. Kat diferans sa yo fòme prèv egzak `EXPECTED_RED Stage 8 DISCOVERY 04`; odit separe a refize nenpòt lòt mesaj erè.
 
-Tès pwopriyete yo valide 410 tranzisyon: 45 ranje tab aktyèl la, 125 konbinezon baryè, epi 240 gwo antye detèminis ki rive pi lwen pase 256 bit. Yo verifye valè legacy yo kont yon referans test-only endepandan, kantite ranje yo, izolasyon done yo, ak lefèt ke pwodiksyon an toujou retounen erè istorik la. Yo verifye tou ke tout senk rezilta yo rete nan entèval `[1,M]`.
+Tès pwopriyete yo valide 410 tranzisyon: 45 ranje tab aktyèl la, 125 konbinezon baryè, epi 240 gwo antye detèminis ki rive pi lwen pase 256 bit. Yo verifye valè legacy yo kont yon referans test-only endepandan, kantite ranje yo ak izolasyon done yo. Depi Stage 9, yo verifye se pwodiksyon korije a ki matche ak snapshot normatif la. Yo verifye tou ke tout senk rezilta yo rete nan entèval `[1,M]`.
 
 ```text
 texlua test/stage08_trace_tests.lua .
@@ -171,4 +171,22 @@ texlua test/stage08_expected_red_audit.lua .
 texlua test/stage08_tests.lua .
 ```
 
-Kat premye kòmand yo dwe pase; dènye a dwe fini ak `EXPECTED_RED Stage 8 DISCOVERY 04`, apre tout tès Stage 1–7 yo fin pase. Nan GitHub Actions, sèl etap wouj entansyonèl la se regresyon Stage 8 la. PATCH 04 ki pou Stage 9 la ap fè yon snapshot `old`, rele fonksyon legacy a sou yon clone pou konsève tras istorik li, epi ranplase tout senk rezilta yo avèk fòmil ki li `old` sèlman. Nou pa antisipe patch sa a.
+Nan checkpoint Stage 8 la, dènye kòmand lan te fini ak `EXPECTED_RED Stage 8 DISCOVERY 04`. Depi PATCH 04, tout kòmand yo dwe pase. Odit istorik la rele `stage08_legacy_regression_tests.lua` atravè `legacyStoneProbe` pou konsève egzakteman kat diferans orijinal yo.
+
+
+## Stage 9 — PATCH 04: senk wòch soti nan yon sèl snapshot
+
+Nou kite `src/legacy_stones.lua` ak `mutateStonesWrong` **san chanjman**.
+Nou ajoute `src/stone_patch.lua` ki fè twa operasyon obligatwa, nan lòd:
+pran yon snapshot posede `old`, fè yon apèl **reyèl** bay fonksyon legacy a sou yon clone pou jwenn `garbage`, epi **ranplase tout senk rezilta** nan `garbage` ak fòmil ki li sèlman `old`.
+`SavePatch.savePatch` rete operasyon modulo korije a; oracle normatif la rete sèlman nan `test/`.
+
+`stoneSpaghetti(i,S)` itilize `STONE_PATCH` atravè dispatcher la. `stonePatchProbe(i,S)` retounen valè ak kontèks de handler yo, `LEGACY_STONES` apre `STONE_PATCH`. Nou toujou ekspoze `legacyStoneProbe` pou mezire erè istorik la. De komèt eta semantik, de tras, metrik, dyagnostik, ak rezilta legacy anvan ranplasman rete vizib nan chak kontèks. `stoneTableSpaghetti()` konstwi tout 46 ranje yo avèk patch la: li pa sote premye fonksyon legacy a ni li pa sèvi ak yon tab prepare davans.
+
+Regresyon `test/stage08_regression_tests.lua` kounye a dwe vèt. `test/stage08_legacy_regression_tests.lua` rete wouj entansyonèlman, epi `test/stage08_expected_red_audit.lua` kontinye egzije mesaj kat diferans yo san okenn tolerans pou lòt echèk. Yon seri test Stage 9 ajoute 455 tranzisyon sou tab la, baryè modil, gwo antye, ak tout index legal yo; tès Stage 8 yo rete aktif.
+
+```text
+texlua test/stage09_tests.lua .
+```
+
+Rezilta obligatwa a se `GREEN` pou tout tès ak travay GitHub Actions. Pa gen okenn defo oswa patch Stage 10 oswa pita ki antre nan branch sa a.

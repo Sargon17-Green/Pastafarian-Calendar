@@ -42,7 +42,7 @@ local function verify(i, input, label)
     local sequential = sequentialStep(i, untouched)
     local normative = snapshotStep(i, untouched)
     assert(same(wrong, sequential), label .. ": move rezilta mutation sekan")
-    assert(same(public, sequential), label .. ": wout piblik pa pase nan legacy")
+    assert(same(public, normative), label .. ": wout piblik la pa korije")
     assert(B.compare(wrong.w, normative.w) == 0, label .. ": premye wòch")
     assert(ctx.commitToken == 1 and ctx.status == "LEGACY_STONES_RETURNED")
     assert(ctx.pendingSemanticState == nil and ctx.rollbackSnapshot == nil)
@@ -58,21 +58,24 @@ end
 
 -- Tout 45 tranzisyon ki devlope tablo pwodiksyon an reyèlman.
 local tableStones = S.stoneTableSpaghetti()
+local legacyTable = L.buildLegacyTable()
 assert(#tableStones == 46)
 local starting = L.seed()
 assert(same(tableStones[1], starting))
+assert(same(legacyTable[1], starting))
 local oldNormative = L.copy(starting)
 for i = 2, 46 do
-    verify(i, tableStones[i-1], "ranje tablo " .. i)
-    local expected = sequentialStep(i, tableStones[i-1])
-    assert(same(tableStones[i], expected), "Tablo 46 ranje a sèvi ak lòt fòmil")
+    verify(i, legacyTable[i-1], "ranje legacy " .. i)
+    local legacyExpected = sequentialStep(i, legacyTable[i-1])
+    assert(same(legacyTable[i], legacyExpected), "Tablo legacy pa swiv mutasyon an")
     oldNormative = snapshotStep(i, oldNormative)
+    assert(same(tableStones[i], oldNormative), "Tablo production pa swiv snapshot la")
 end
-assert(not same(tableStones[2], snapshotStep(2, starting)))
-assert(not same(tableStones[46], oldNormative))
+assert(not same(legacyTable[2], snapshotStep(2, starting)))
+assert(not same(legacyTable[46], oldNormative))
 local another = S.stoneTableSpaghetti()
 tableStones[2].w = B.from(999)
-assert(same(another[2], sequentialStep(2, starting)), "Kach oswa alias tab wòch yo")
+assert(same(another[2], snapshotStep(2, starting)), "Kach oswa alias tab wòch yo")
 
 -- Gri 5 x 5 x 5: modil ak siy diferan sou senk kote yo.
 local sample = {"0", "1", "-1", "170141183460469231731687303715884105727",

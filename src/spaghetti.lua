@@ -6,6 +6,7 @@ local DayTagPatch = require("day_tag_patch")
 local LegacyDistance = require("legacy_distance")
 local DistancePatch = require("distance_patch")
 local LegacyStones = require("legacy_stones")
+local StonePatch = require("stone_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -62,24 +63,29 @@ function S.legacyDistanceProbe(calculationDay, targetDay)
     return LegacyDistance.execute(calculationDay, targetDay)
 end
 
--- DISCOVERY 04: aplikasyon an sèvi ak aktyalizasyon wòch youn apre lòt.
+-- PATCH 04 ajoute snapshot ak ranplasman sou kalkil istorik la.
 function S.stoneSpaghetti(index, stones)
-    local wrong = LegacyStones.execute(index, stones)
-    return wrong
+    local corrected = StonePatch.execute(index, stones)
+    return corrected
 end
 
 -- Kontèks dyagnostik pou obsève defo istorik chèn wòch la.
+function S.stonePatchProbe(index, stones)
+    return StonePatch.execute(index, stones)
+end
+
+-- Wout istorik la kontinye montre ansyen chèn mutation an.
 function S.legacyStoneProbe(index, stones)
     return LegacyStones.execute(index, stones)
 end
 
--- Tablo pwodiksyon 46 wòch la fèt atravè dispatcher legacy a.
+-- Tablo pwodiksyon 46 wòch la fè yon apèl legacy chak ranje, epi li repare li.
 function S.stoneTableSpaghetti()
-    return LegacyStones.buildLegacyTable()
+    return StonePatch.buildPatchedTable()
 end
 
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 8", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 9", 0)
 end
 
 return S

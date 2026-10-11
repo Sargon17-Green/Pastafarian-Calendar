@@ -159,3 +159,22 @@ Nou kreye `LEGACY_STONES` nan dispatcher ak metrik, kontèks semantik ki posede 
 ### Prèv, limit ak sa ki rete
 
 Nou konpare 410 tranzisyon, ladan yo 240 gwo antye detèminis, ak yon referans lokal ki sèvi ak oracle test-only `SAVE` la. Odit `EXPECTED_RED` la egzije kat non ak valè presi, san tolere echèk ki pa gen rapò ak mutation an. Tès ansyen etap yo rete vèt. Nou pa mete snapshot korektif nan production: **Stage 9 — PATCH 04** sèlman ap klone valè `old` yo, rele legacy sou yon clone pou konsève erè a, epi ranplase tout senk rezilta yo ak fòmil ki sèvi ak `old` sèlman.
+
+
+## Stage 9 — PATCH 04: snapshot anvan tout senk wòch yo
+
+### Ki erè n ap konsève
+
+Nan Stage 8, `mutateStonesWrong` te mete ajou `w`, `b`, `s`, `m`, ak `r` youn apre lòt, konsa chak nouvo valè te antre nan pwochen fòmil la. Nou pa netwaye fonksyon sa a ni retire apèl li yo. Li toujou ekri in-place epi li rete disponib nan `legacyStoneProbe`.
+
+### Kouch koreksyon an
+
+Nou ajoute `stonePatch(i,S)`: li klone tout senk ansyen wòch yo, li rele **vrè** `mutateStonesWrong` sou yon lòt clone pou pwodui garbage istorik la, epi li ranplase `garbage.w`, `garbage.b`, `garbage.s`, `garbage.m`, ak `garbage.r` ak senk fòmil `SAVE` ki pran done **sèlman** nan snapshot `old`. Nou pa ranplase algoritm legacy a ak yon apèl oracle, ni nou pa bati yon tablo normatif ki sote sa ki te ekri anvan.
+
+Nan chemen dispatcher pwodiksyon an, `LegacyStones.execute` fè apèl istorik la, apre sa `STONE_PATCH` fè ranplasman an. Kontèks la konsève ansyen rezilta garbage yo, senk rezilta korije yo, de commit, metrik, dyagnostik, ak tras handler ki montre kisa ki te fèt.
+
+### Regrèsyon ak mezi
+
+Nou kenbe yon regresyon legacy endepandan ki kontinye echwe sou kat valè `b`, `s`, `m`, `r` nan ranje 2, epi yon odit ki refize nenpòt lòt erè kòm fo prèv. Regresyon piblik la vin vèt; menm bagay la pou tablo 46 ranje yo. Tès Stage 9 yo egzamine 455 tranzisyon, gwo antye, imutabilite antre, branch istorik ak devlopman eta tranzaksyonèl, pandan ansyen tès yo kouri ankò.
+
+Stage 10 ak tout etap ki vini apre yo poko antre.
