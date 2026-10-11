@@ -12,6 +12,7 @@ docs/STAGE_01_PACKED_WEAVING_KEYS_2026-10-11.md
 docs/STAGE_01_AUDIT_ROUND5_2026-10-11.md
 docs/STAGE_01_AUDIT_ROUND6_2026-10-11.md
 docs/STAGE_01_AUDIT_ROUND7_2026-10-11.md
+docs/STAGE_01_AUDIT_ROUND8_2026-10-11.md
 lib/Pastafari/Monster/BaseContext.pm
 lib/Pastafari/Monster/BaseDispatcher.pm
 lib/Pastafari/Monster/BaseErrorBoundary.pm
@@ -45,6 +46,7 @@ t/22_polynomial_weaving.t
 t/23_polynomial_catalan.t
 t/24_polynomial_suffix.t
 t/25_polynomial_unranking.t
+t/26_suffix_partition.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingSuffix.pm
