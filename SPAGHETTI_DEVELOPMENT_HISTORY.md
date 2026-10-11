@@ -107,3 +107,27 @@ bị thiếu, GitHub Actions đã biên dịch mã sản xuất và thực thi
 giai đoạn 4 giữ nguyên kỳ vọng và đã chuyển thành xanh.
 Khóa tên chuẩn đạt độc lập. Không sửa `LegacyDayTag.old_day_tag`,
 không thêm thành phần tương lai. Giai đoạn 5 khép với trạng thái GREEN.
+
+## Giai đoạn 6 — Phát hiện 03: hiểu sai hai nhãn thành khoảng cách
+
+**Giả định lịch sử:** Do mỗi ngày đã có một nhãn được chuẩn hóa bởi
+bản vá 02, lấy trị tuyệt đối hiệu hai nhãn là đủ:
+`old_distance(c,t) = abs(day_tag(c) - day_tag(t))`.
+
+**Sai lệch:** Nhãn ngày không phải trục thời gian tuyến tính đơn vị.
+Vì thế cùng một ngày trả 0 thay vì khoảng cách chuẩn 1; trong
+một số khoảng hai ngày cùng phía Ngày Nền, độ chênh nhãn gấp đôi
+độ chênh thời gian; khi băng qua Ngày Nền, hiệu nhãn có thể thu nhỏ
+khoảng cách thật. Có cả các đối chứng khớp tình cờ.
+
+**Đường thực thi:** `distance_spaghetti → Dispatcher.distance →
+DistanceManager.calculate → LegacyDistance.old_distance →
+DayCountManager.tag → DayTagPatch.day_tag_patch → LegacyDayTag.old_day_tag`.
+Cùng một tuyến được gọi trong `bootstrap_context`, giá trị thô được
+lưu vào `distance_count`. Mỗi lần gọi có context và metric riêng.
+
+**Hồi quy:** Thêm bốn kiểm thử đối chiếu chuẩn cố ý đỏ và sáu
+kiểm thử bảo vệ về đường chạy thực, tính đối xứng, số nguyên lớn,
+đầu vào sai, tính độc lập song song và hồi quy các lớp vá đã hoàn tất.
+Không thay đổi bất kỳ hồi quy chuẩn nào thuộc giai đoạn cũ.
+Bản vá 03 không được phép xuất hiện trước giai đoạn 7.

@@ -120,3 +120,21 @@ kiểm chứng xanh. Không thay đổi mã sản xuất trong bản sửa cú p
 Giai đoạn 5/55 được đóng với trạng thái `GREEN`.
 Bước tiếp theo là giai đoạn 6/55, `DISCOVERY 03` với lỗi lịch sử
 về khoảng cách giữa nhãn ngày; chưa thêm bản vá 03.
+
+## Giai đoạn 6 — Phát hiện 03: khoảng cách giữa nhãn ngày
+
+Bổ sung `LegacyDistance.old_distance(calculation_day, target_day)`,
+lấy giá trị tuyệt đối giữa hai nhãn ngày đã đi qua bản vá 02. Đây là
+một giả định lịch sử sai: khoảng cách chuẩn phải dựa trên hai ngày
+theo thứ tự thời gian và cộng thêm 1. Giai đoạn phát hiện **không**
+được tính khoảng cách chuẩn trong mã sản xuất.
+
+Đường sản xuất `distance_spaghetti` và `bootstrap_context` đi qua
+`DistanceManager → LegacyDistance → DayCountManager → DayTagPatch`.
+Context có trường riêng `distance_count` để lưu giá trị thô sai.
+Không chỉnh các kiểm thử nòng cốt từ giai đoạn 1–5.
+
+Bốn hồi quy chuẩn cố ý đỏ: cùng một ngày, hai ngày cùng phía trước
+Ngày Nền, hai ngày cùng phía sau Ngày Nền và một cặp vượt Ngày Nền.
+Hai đối chứng đi qua đúng khi sai số tình cờ triệt tiêu.
+Bản vá 03 bắt buộc thuộc giai đoạn 7 và chưa được thêm ở đây.

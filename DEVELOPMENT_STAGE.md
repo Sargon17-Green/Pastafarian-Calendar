@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=5
-CURRENT_KIND=PATCH
-CURRENT_PATCH=02
+CURRENT_STAGE=6
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=03
 LAST_COMPLETED_STAGE=5
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyDayTag sai, thêm DayTagPatch với nhánh tăng một và điều kiện bảo vệ thừa riêng Ngày Nền; DayCountManager định tuyến qua lớp vá và context ghi vết vá 02.
+MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá SAVE và nhãn ngày; thêm LegacyDistance lấy hiệu tuyệt đối giữa hai day-tag qua DayCountManager và DistanceManager chuyển nguyên kết quả sai vào context.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_05_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_06_PENDING
+GIT_HISTORY_MUTATED=STAGE_06_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=45
-CI_FAILURES=0
+CI_TESTS=STAGE_06_PENDING
+CI_FAILURES=STAGE_06_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -72,3 +72,10 @@ lỗi cú pháp đã được sửa ở commit riêng trước khi xác minh cu�
 Bằng chứng: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154035832
 Khóa tên chuẩn: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154035856
 Trạng thái đóng giai đoạn 5: GREEN. Giai đoạn 6 tiếp theo là DISCOVERY 03.
+
+Giai đoạn 6 thêm old_distance(c,t) = abs(day_tag(c)-day_tag(t)), không cộng 1.
+Lỗi lộ ở cùng ngày, hai trường hợp cùng phía và trường hợp qua Ngày Nền.
+Hai đối chứng vô tình đúng; các bản vá 01/02 vẫn hoạt động.
+Không thêm kiểm tra chronological của bản vá 03 trước giai đoạn 7.
+LAST_COMPLETED_STAGE vẫn bằng 5 cho tới khi xác minh CI giai đoạn 6.
+Dự kiến 55 kiểm thử, đúng 4 thất bại có chủ đích, 51 đạt.
