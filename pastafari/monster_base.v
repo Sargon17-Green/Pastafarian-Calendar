@@ -126,5 +126,8 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	stone_details := before_stones + legacy_stone.b.str() + '; PATCH_04 stoneB='
 	hidden := calendar_hidden_spaghetti(calculation_day, target_day)
 	hidden_details := stone_details + patched_stone.b.str() + '; DISCOVERY_05 oldHidden1='
-	return error(hidden_details + old_hidden_slot(hidden, 1).str())
+	legacy_hidden_one := old_hidden_slot(hidden, 1)
+	patched_hidden_one := calendar_hidden_by_nearness(hidden, 1)
+	final_details := hidden_details + legacy_hidden_one.str() + '; PATCH_05 hidden1='
+	return error(final_details + patched_hidden_one.str())
 }

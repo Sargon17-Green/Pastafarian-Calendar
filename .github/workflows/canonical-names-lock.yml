@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage10_native_v:
-    name: V 0.5.2 — DISCOVERY 05 EXPECTED_RED
+  stage11_native_v:
+    name: V 0.5.2 — PATCH 05 validated GREEN
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -101,38 +101,23 @@ jobs:
         run: v test ./pastafari/patch04_test.v
       - name: DISCOVERY 05 — seven hidden drops with historical reversed positions
         run: v test ./pastafari/discovery05_witness_test.v
-      - name: DISCOVERY 05 — four intentional RED lookup failures
+      - name: PATCH 05 — prior four RED assertions now GREEN
         shell: bash
         run: |
           set -euo pipefail
           v -check ./pastafari/discovery05_expected_red_test.v
-          set +e
-          v test ./pastafari/discovery05_expected_red_test.v 2>&1 | tee stage10_expected_red.log
-          code=${PIPESTATUS[0]}
-          set -e
-          if [ "$code" -eq 0 ]; then
-            echo '::error::DISCOVERY 05 unexpectedly GREEN before PATCH 05'
-            exit 1
-          fi
-          for test_name in \
-            test_discovery05_expected_red_nearest_hidden_one \
-            test_discovery05_expected_red_hidden_two \
-            test_discovery05_expected_red_hidden_three \
-            test_discovery05_expected_red_farthest_hidden_seven; do
-            if ! grep -Fq "$test_name" stage10_expected_red.log; then
-              echo "::error::Missing intended RED assertion: $test_name"
-              exit 1
-            fi
-          done
-          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage10_expected_red.log; then
-            echo '::error::A nonzero exit without asserted failure is not an expected RED'
-            exit 1
-          fi
-          echo 'DISCOVERY 05 — four intentional RED cases verified'
-      - name: Preserve stage 10 expected RED evidence
+          v test ./pastafari/discovery05_expected_red_test.v
+      - name: PATCH 05 — 8-minus-k indexing and original backward storage
+        run: v test ./pastafari/patch05_test.v
+      - name: Stage 11 — complete native V regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          v test ./pastafari 2>&1 | tee stage11_green.log
+      - name: Preserve stage 11 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage10-red-evidence
-          path: stage10_expected_red.log
+          name: v-amharic-stage11-green-evidence
+          path: stage11_green.log
           if-no-files-found: ignore

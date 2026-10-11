@@ -93,3 +93,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ### የደረጃ 10 መዝጊያ — EXPECTED_RED
 
 የመጀመሪያው የV ሙከራ በሁለት የቅርጸት ስህተቶች ቆሟል። ከV 0.5.2 (`7647ce1`) የቅርጸት ምርመራ የተገኙ ልዩነቶች ተፈጽመዋል፤ ጊዜያዊ የምርመራ እርምጃው ከCI ተወግዷል። በcommit `e1487442a3a2e93d0477584301a855e977f4fe50` ላይ የGitHub Actions run `38165059747` ሁሉንም 14 የቀድሞ እና አዲስ የGREEN ፈተና ፋይሎች PASS አድርጓል። `discovery05_expected_red_test.v` በV ይተረጎማል፣ በተለዩ አራት assertions ግን በሆን ተብሎ RED ነው። የማስረጃ ቅርስ `11711703085` ተቀምጧል። ሰባቱ የተለያዩ የhidden እሴቶች የማስቀመጫ ቅደም ተከተል ብቻ ተቃራኒ መሆኑ ተረጋግጧል፤ `PATCH 05` አልተጨመረም። ደረጃ 10 COMPLETE / EXPECTED_RED ነው።
+
+## ደረጃ 11 — PATCH 05 (እየተረጋገጠ)
+
+የታሪካዊው ስውር ጠብታ ሰንጠረዥ በ`build_hidden_with_backward_storage` ተገላቢጦሽ `hidden7, hidden6, hidden5, hidden4, hidden3, hidden2, hidden1` ሆኖ ይጠበቃል። `old_hidden_slot` እንደነበረው ከአካላዊ k ሰልፍ ያነባል። ማከማቻውን ሳንገለብጥ `HiddenPatch05.by_nearness` ከ`BaseDispatcher.dispatch_hidden_patch05` በኋላ `backward[7-k]` ያነባል። የ`calendar_date_spaghetti` የምርመራ መልዕክት ሁለቱንም `DISCOVERY_05 oldHidden1` እና `PATCH_05 hidden1` ያሳያል። ይህ ገና የመጨረሻ የቀን ልወጣ አይደለም፤ የ`PATCH 06` ወይም የደረጃ 12 ስራ አልተጀመረም።

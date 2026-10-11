@@ -98,9 +98,10 @@ pub fn old_hidden_slot(backward []BigInt, k int) BigInt {
 	return backward[k - 1]
 }
 
-// ደረጃ 10፦ የproduction የንባብ መግቢያም ገና የቀድሞውን ስህተት ይጠቀማል።
+// ደረጃ 11፦ የproduction ንባብ በPATCH 05 መተርጎሚያ ያልፋል።
 pub fn calendar_hidden_by_nearness(backward []BigInt, k int) BigInt {
-	return old_hidden_slot(backward, k)
+	dispatcher := new_base_dispatcher()
+	return dispatcher.dispatch_hidden_patch05(backward, k)
 }
 
 pub struct LegacyHiddenAdapter {}

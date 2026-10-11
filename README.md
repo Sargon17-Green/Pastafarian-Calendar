@@ -66,3 +66,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 10 — DISCOVERY 05
 
 ሰባቱ የተሰወሩ ጠብታዎች በትክክል ይሰላሉ፣ ግን `build_hidden_with_backward_storage` በአካላዊ ማከማቻ ውስጥ `hidden7, hidden6, …, hidden1` ብሎ በተቃራኒው ያስቀምጣቸዋል። `old_hidden_slot` እና `calendar_hidden_by_nearness` በዚህ ደረጃ ከማከማቻው በቀጥታ ያነባሉ፤ ስለዚህ ከመካከለኛው `hidden4` በስተቀር የቅርበት ትርጉም ስህተት አለ። አራት `EXPECTED_RED` ፈተናዎች ተጨምረዋል። `PATCH 05` አልተጨመረም። V 0.5.2 (`7647ce1`) በGitHub Actions run `38165059747` የቅርጸት ምርመራን፣ 14 የGREEN ሙከራ ፋይሎችን እና 4 የታሰቡ RED assertions በስም አረጋግጧል። `LAST_COMPLETED_STAGE=10` ነው። ዝርዝር፦ `docs/STAGE10_DISCOVERY05.md`።
+
+## ደረጃ 11 — PATCH 05
+
+ሰባቱ የhidden ጠብታዎች በታሪካዊው `hidden7 … hidden1` የማከማቻ ቅደም ተከተል እንዳሉ ይቀራሉ። `old_hidden_slot(backward,k)` የቀድሞውን `backward[k-1]` ስህተት ይይዛል። አዲሱ `HiddenPatch05` የቅርበት መጠይቅን በአንድ-መሠረት `8-k`፣ በV ዜሮ-መሠረት `7-k` ወደ የታሪክ ማከማቻ ቦታ ይለውጣል። የproduction `calendar_hidden_by_nearness` ከdispatcher በኩል ይሄዳል፣ የቀድሞ አራት RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። `LAST_COMPLETED_STAGE=10` የV CI ማረጋገጫ እስኪጠናቀቅ ይቆያል። ዝርዝር፦ `docs/STAGE11_PATCH05.md`።
