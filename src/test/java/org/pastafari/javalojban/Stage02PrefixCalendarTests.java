@@ -134,7 +134,7 @@ public final class Stage02PrefixCalendarTests {
                 new int[]{2}, BigInteger.ONE));
         fails("E_WEAVE_SUFFIX_LIMIT", () ->
             MonsterCalendarResolver.fromBlueprintWithPrefixRank(bp,
-                Arrays.copyOf(prefix, days - 513), BigInteger.ONE));
+                Arrays.copyOf(family.lexFirst(), days - 513), BigInteger.ONE));
         fails("E_WEAVE_RANK", () ->
             MonsterCalendarResolver.fromBlueprintWithPrefixRank(bp, prefix,
                 BigInteger.ZERO));
