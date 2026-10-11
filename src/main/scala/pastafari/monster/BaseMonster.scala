@@ -14,7 +14,9 @@ final case class BaseMonsterContext(
   var legacyRemainderInput: Option[BigInt] = None,
   var legacyRemainderOutput: Option[BigInt] = None,
   var patchedSaveOutput: Option[BigInt] = None,
-  var patch01Applied: Boolean = false
+  var patch01Applied: Boolean = false,
+  var legacyDayTagInput: Option[BigInt] = None,
+  var legacyDayTagOutput: Option[BigInt] = None
 )
 
 final class BaseMetricsShell {
@@ -34,6 +36,16 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requireDiscovery02Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_02_DAY_TAG" ||
+        ctx.status != "LEGACY_DAY_TAG_READY" ||
+        ctx.legacyDayTagInput.isEmpty ||
+        ctx.legacyDayTagOutput.isEmpty ||
+        ctx.branchTrace.lastOption != Some("DISCOVERY_02_DAY_TAG")) {
+      throw new IllegalStateException("La nota del giorno legacy non è pronta.")
     }
   }
 
@@ -106,7 +118,8 @@ final class BaseMonsterManager {
   private val dispatcher = new BaseMonsterDispatcher(Vector(
     new BaseBootstrapHandler(metrics),
     new Discovery01RemainderHandler(metrics),
-    new Patch01SaveHandler(metrics)
+    new Patch01SaveHandler(metrics),
+    new Discovery02DayTagHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -162,6 +175,25 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("patch01", e)
+    }
+  }
+
+  def discover02DayTag(calculationDay: BigInt, targetDay: BigInt, day: BigInt): Discovery02DayTagReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.legacyDayTagInput = Some(day)
+    ctx.phase = "DISCOVERY_02_DAY_TAG"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery02Ready(ctx)
+      Discovery02DayTagReport(
+        queriedDay = ctx.legacyDayTagInput.get,
+        legacyTag = ctx.legacyDayTagOutput.get,
+        phase = ctx.phase,
+        status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("discovery02", e)
     }
   }
 

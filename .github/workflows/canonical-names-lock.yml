@@ -82,3 +82,32 @@ jobs:
           set -euo pipefail
           sbt -batch 'Test / runMain pastafari.Stage03Tests' 2>&1 | tee stage03.log
           grep -Fq 'RISULTATO STADIO 3: 12 PASS, 0 FAIL' stage03.log
+
+  native-stage04-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify the Stage 4 intentional-red signature
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage04Tests' > stage04.log 2>&1
+          rc=$?
+          set -e
+          cat stage04.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 4: 14 PASS, 3 FAIL' stage04.log
+          test "$(grep -Fc 'PASS — ' stage04.log)" -eq 14
+          test "$(grep -Fc 'FAIL — ' stage04.log)" -eq 3
+          grep -Fq 'PASS — equivalenza normativa giorno Fondazione-2' stage04.log
+          grep -Fq 'PASS — equivalenza normativa giorno Fondazione-1' stage04.log
+          for offset in '' '+1' '+2'; do
+            grep -Fq "FAIL — equivalenza normativa giorno Fondazione${offset}" stage04.log
+          done

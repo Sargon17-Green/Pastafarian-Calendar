@@ -188,12 +188,25 @@ object Stage03Tests {
       truth(!content.contains("NormativeOracle"), "Oracle test-only nel codice di produzione")
       truth(content.contains("LegacyArithmeticAdapter.oldRemainder(x)"),
         "Il wrapper deve eseguire il vero residuo legacy")
-      truth(!content.contains("oldDayTag"), "Nessun codice di DISCOVERY 02 futuro")
+      val currentText = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val currentStage = currentText.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      if (currentStage < 4) {
+        truth(!content.contains("oldDayTag"), "Nessun codice di DISCOVERY 02 prematuro")
+      } else {
+        truth(content.contains("oldDayTag"), "DISCOVERY 02 deve essere presente")
+      }
       val status = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(status.contains("CURRENT_STAGE=3"), "Stadio corrente dichiarato")
-      truth(status.contains("CURRENT_PATCH=01"), "Patch corrente dichiarata")
-      truth(status.contains("EXPECTED_REPOSITORY_STATE=GREEN"), "Lo stadio deve essere verde")
+      truth(currentStage >= 3, "PATCH 01 richiede uno stadio almeno 3")
+      if (currentStage == 3) {
+        truth(status.contains("CURRENT_PATCH=01"), "Patch corrente dichiarata")
+        truth(status.contains("EXPECTED_REPOSITORY_STATE=GREEN"), "Stadio PATCH verde")
+      } else {
+        truth(status.contains("LAST_COMPLETED_STAGE="), "La storia degli stadi deve essere preservata")
+      }
     }
 
     println("\nRISULTATO STADIO 3: " + passed + " PASS, " + failed + " FAIL")

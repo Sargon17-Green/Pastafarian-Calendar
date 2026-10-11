@@ -116,3 +116,32 @@ La suite Stage01 ha fornito 18 PASS, 0 FAIL; Stage02 ha conservato
 Stage03 ha fornito 12 PASS, 0 FAIL. Anche la verifica del
 catalogo canonico è passata. La funzione legacy è rimasta immutata.
 Nessuno stadio 4 è stato iniziato.
+
+## Stadio 4 — DISCOVERY 02: il vecchio tag ignora il lato temporale
+
+### Che cosa si pensava
+La distanza assoluta da Fondazione, moltiplicata per due, appariva una
+numerazione sufficiente. Il modulo legacy calcola esattamente
+`oldDayTag(day) = 2*abs(day-FoundationDayOld)`.
+
+### Che cosa si è scoperto
+La funzione normativa conta Fondazione come 1, poi il passato in
+2,4,... e il futuro in 3,5,... . Il helper antico dà 0 alla Fondazione
+e 2,4,... anche al futuro. La regressione distingue due casi anteriori
+concordi da tre casi errati `F,F+1,F+2`.
+
+### Che cosa è stato aggirato
+Nulla. Nessun wrapper di riparazione è stato introdotto. Il percorso
+manager → dispatcher → handler → adapter legge veramente il risultato
+storico e lo espone come uscita semantica volutamente RED.
+
+### Perché non è ancora normativamente equivalente
+Per ogni giorno alla Fondazione o successivo, l'output è uno meno
+dell'etichetta normativa; inoltre i giorni simmetrici collidono.
+La riparazione appartiene allo stadio 5 e non può essere anticipata.
+
+### Strato di mostruosità aggiunto
+Nuovo adattatore, handler, stato semantico per invocazione, metrica,
+validazione, snapshot e regressione RED dedicata. PATCH 01 resta verde,
+la sua cicatrice resta osservabile. La certificazione della nuova run
+nativa è ancora da acquisire.

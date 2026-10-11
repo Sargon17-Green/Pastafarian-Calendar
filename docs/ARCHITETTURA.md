@@ -59,3 +59,13 @@ Si mantengono in parallelo il percorso diagnostico storico con errore
 osservabile e il percorso patched normativamente equivalente.
 Le prove coprono residui nulli/non nulli, interi negativi,
 numeri oltre 256 bit e controllo deterministico delle chiamate.
+
+## DISCOVERY 02: tag del giorno simmetrico ed errato
+
+Un nuovo handler registrato nel `BaseMonsterDispatcher` espone
+la cicatrice `oldDayTag(day) = 2*abs(day-Foundation)`. Un
+`BaseMonsterContext` nuovo conserva per invocazione `legacyDayTagInput`
+e `legacyDayTagOutput`; validazione e metrica non influenzano l'output.
+Il report copia valori e tracciato immutabili. Il calcolo non chiama
+l'oracolo né una correzione futura. Il percorso PATCH 01 e le regressioni
+storiche degli stadi 1–3 non vengono riscritti.

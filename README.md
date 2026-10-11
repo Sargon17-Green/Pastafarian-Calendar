@@ -94,3 +94,21 @@ con `success`: Stage01 18 PASS/0 FAIL, Stage02 7 PASS/3 FAIL storici
 previsti, Stage03 12 PASS/0 FAIL, blocco dei nomi canonici PASS.
 La modifica della sola documentazione successiva conserva la prova
 sul commit di produzione testato; le prove rimangono eseguibili in CI.
+
+## Stadio 4 — DISCOVERY 02 (giorno legacy non corretto)
+
+`LegacyDayTagAdapter.oldDayTag(day)` restituisce `2 * abs(day - F)`,
+con `F = -15055671`. Produce lo stesso numero pari sui due lati
+di Fondazione, ignorando la distinzione normativa.
+Il percorso `BaseMonsterManager.discover02DayTag` → dispatcher →
+handler → adapter espone l'uscita errata senza modificarla.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage04Tests'
+```
+
+Firma attesa: `14 PASS, 3 FAIL`, precisamente le divergenze
+`F`, `F+1`, `F+2` (i due giorni anteriori concordano con la norma).
+Il job `native-stage04-discovery` convalida il conteggio e le etichette;
+tutti i job preesistenti restano attivi.
+Il prossimo stadio introdurrà PATCH 02; qui nessuna correzione è applicata.
