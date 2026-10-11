@@ -7,6 +7,8 @@ use Test::More;
 use lib 'lib', 't/lib';
 use Pastafari::NormativeScroll qw(countWeavings unrankWeaving);
 
+# _weave_counter 的內部狀態介面只接受合法可達的狀態；
+# 因此先以完整獨立列舉驗證所選前綴存在有效延伸。
 # 以完全枚舉所有「剩餘日數」的多重集合排列作為獨立參考。
 # 逐一把既定前綴加回後，才檢查所有月份的首次與末次出現順序。
 # 此模型不使用 DP 的轉移、快取或二項式公式。
@@ -68,13 +70,14 @@ for my $case (
     { lengths => [1,1,1,1,1],
       prefixes => [ [],[1],[1,2],[1,2,3],[1,2,3,4] ] },
     { lengths => [2,1,2,1,2],
-      prefixes => [ [],[1],[1,2],[1,2,3],[1,2,3,4] ] },
+      prefixes => [ [],[1],[1,1,2],[1,1,2,3],[1,1,2,3,3,4] ] },
 ) {
     my $lengths = $case->{lengths};
     my $counter = Pastafari::NormativeScroll::_weave_counter($lengths);
     for my $prefix (@{$case->{prefixes}}) {
         my ($remaining,$opened,$closed) = state_from_prefix($lengths,$prefix);
         my $expected = brute_suffix($lengths,$prefix);
+        ok($expected > 0, '所選前綴至少有一個有效的延伸');
         my $actual = $counter->($remaining,$opened,$closed);
         is(''.$actual, "$expected",
             '尚有未開啟月份時，DP 與完整獨立列舉一致：'
