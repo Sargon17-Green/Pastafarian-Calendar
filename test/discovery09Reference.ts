@@ -7,6 +7,13 @@ export function normativeThreePours(i:number,d:bigint,b:readonly bigint[],s:read
     throw new RangeError("अवैध pour input");
   }
   const order=bowlOrderFromDrop(d);
-  return Object.freeze([3n,5n,7n].map((w,k)=>
-    SAVE(d*d+s[k]!*b[order[k]!-1]!+w*BigInt(i))));
+  const coefficients = [3n,5n,7n] as const;
+  const result: bigint[] = [];
+  for(let k=0;k<3;k++){
+    const selectedBowlId: number = order[k]!;
+    const stoneContribution: bigint = s[k]! * b[selectedBowlId-1]!;
+    const ordinalContribution: bigint = coefficients[k]! * BigInt(i);
+    result.push(SAVE(d*d + stoneContribution + ordinalContribution));
+  }
+  return Object.freeze(result);
 }
