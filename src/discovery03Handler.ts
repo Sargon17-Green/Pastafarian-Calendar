@@ -6,6 +6,5 @@ export function discoverLegacyDistance(c: bigint, t: bigint) {
   const legacyDistance = oldDistance(c,t);
   context.branchTrace.push("DISCOVERY_03_TAG_DISTANCE");
   context.metrics.set("discovery03.calls",1n);
-  context.status = "DISCOVERY_03_RECORDED";
   return Object.freeze({calculationDay:c,targetDay:t,legacyDistance,context});
 }
