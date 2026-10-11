@@ -114,3 +114,7 @@ ni'o lo ti jalge na vasru lo masti detri .i lo `MonsterCutletCalendar` na smuni 
 ni'o lo `Stage02WeavingDomainTests` cu cipra lo masti se jorne porsi poi masti cu vasru vo .a za'u vo djedi, gi'e srana lo narmanci `NormativeOracle`. lo cipra cu pilno lo rangaji `4` .e `123` tezu'e lo nu cipra lo jimte masti. ko benji `sh run_stage02_weaving_domain_tests.sh`.
 
 ni'o lo ti cipra na se du lo mulno se benji kalendri. lo masti se jorne porsi pe lo mutce so'i masti .e lo mutce so'i djedi cu nitcu lo balvi frica cipra .e lo nu stodi lo memori .e lo temci.
+
+## lo masti detri te stika
+
+ni'o lo `MonsterMonthIndex` cu facki lo masti se namcu .e lo detri be lo masti .e lo stodi cmene fi lo se benji masti porsi. ri verifai lo to'e se snada porsi .e lo masti namcu .e lo pagbu se namcu .e lo te porsi be lo cfari .e lo fanmo. lo se pilno `weaving` cu se benji fi lo zunle ciste gi'e na se zbasu ti. lo `Stage02MonthIndexTests` cu cipra lo te facki fa'u lo narmanci `WeavingFamily` .e lo mulno nanca papri. ko benji `sh run_stage02_month_index_tests.sh`.

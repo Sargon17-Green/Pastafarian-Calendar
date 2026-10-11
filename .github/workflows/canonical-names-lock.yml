@@ -58,3 +58,5 @@ jobs:
         run: sh run_stage02_cutlet_date_tests.sh
       - name: Stage 02 month weaving domain
         run: sh run_stage02_weaving_domain_tests.sh
+      - name: Stage 02 canonical month position lookup
+        run: sh run_stage02_month_index_tests.sh
