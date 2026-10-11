@@ -38,3 +38,29 @@ jobs:
       - uses: sbt/setup-sbt@v1
       - name: Run Stage 1 Scala tests
         run: sbt -batch 'Test / runMain pastafari.Stage01Tests'
+
+  native-stage02-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Compile and confirm the three expected SAVE divergences
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage02Tests' > stage02.log 2>&1
+          rc=$?
+          set -e
+          cat stage02.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 2: 7 PASS, 3 FAIL' stage02.log
+          for operand in M 2M 3M; do
+            grep -Fq "FAIL — equivalenza normativa SAVE(${operand})" stage02.log
+          done
+          grep -Fq 'PASS — equivalenza normativa SAVE(M+1)' stage02.log

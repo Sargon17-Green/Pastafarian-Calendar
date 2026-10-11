@@ -28,3 +28,25 @@ sbt "Test / run"
 ```
 
 In alternativa si possono compilare i file Scala con `scalac` e avviare `pastafari.Stage01Tests` con `scala`.
+
+## Stadio 2 — DISCOVERY 01 (non corretto)
+
+L'adattatore aritmetico di produzione introduce volutamente `oldRemainder(x)`,
+residuo euclideo ordinario modulo `2^127-1`. Questo residuo restituisce zero
+sui multipli del modulo, mentre il `SAVE` normativo restituisce il modulo stesso.
+Il percorso attivo è `BaseMonsterManager.discover01Remainder` →
+`BaseMonsterDispatcher` → `Discovery01RemainderHandler` →
+`LegacyArithmeticAdapter`. Ogni invocazione ha uno stato autonomo.
+
+Per verificare la regressione volutamente rossa:
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage02Tests'
+```
+
+L'esito corretto dello stadio è `7 PASS, 3 FAIL`, con processo non-zero per
+`SAVE(M)`, `SAVE(2M)`, `SAVE(3M)`; `SAVE(M+1)` deve passare.
+Il job `native-stage02-discovery` tratta *solo questa precisa firma*
+come discovery attesa, non accetta errori di compilazione o guasti inattesi.
+Il test del Bootstrap continua a dover passare autonomamente.
+Nessun `savePatch` è presente in produzione.

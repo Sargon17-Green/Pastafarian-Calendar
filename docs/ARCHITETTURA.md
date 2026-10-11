@@ -23,3 +23,20 @@ Il catalogo contiene 17 nomi di cotolette e 47 nomi di mesi. Ogni voce ha un `ca
 ## Regola di traslitterazione
 
 Per i nomi propri o inventati senza significato lessicale si conserva la sequenza fonetica fornita dalla fonte. Le consonanti non italiane sono rese con grafemi latini stabili: il suono `sh` resta `sh`, le occlusive sonore restano `g`, `d`, `b`, e le vocali esplicite sono conservate. La stessa forma viene usata in ogni occorrenza. Non si inventa una traduzione semantica per un nome privo di significato.
+
+## DISCOVERY 01: una cicatrice aritmetica non corretta
+
+Il manager mantiene un contesto nuovo per ogni chiamata a
+`discover01Remainder(calculationDay, targetDay, input)`.
+Il Bootstrap viene eseguito e registrato prima che il dispatcher
+invochi `Discovery01RemainderHandler` sullo stesso contesto.
+L'adattatore `LegacyArithmeticAdapter.oldRemainder` calcola soltanto
+un residuo euclideo non negativo; non conosce l'oracolo normativo.
+
+`legacyRemainderInput` e `legacyRemainderOutput` appartengono al contesto
+della singola invocazione. Il report restituito è uno snapshot immutabile.
+Le metriche registrano soltanto le chiamate e non decidono il risultato.
+La validazione verifica lo stato pronto e non sostituisce mai un valore errato.
+
+La regressione autonoma dello stadio 2 conserva tre discrepanze obbligatorie
+rispetto a `SAVE`; non è una patch e non anticipa il suo stadio futuro.

@@ -188,17 +188,22 @@ object Stage01Tests {
       equal(manager.metricsSnapshot.getOrElse("base.bootstrap.calls", BigInt(0)), BigInt(2), "metrica osservativa")
     }
 
-    check("assenza di codice di patch futuro nel percorso di produzione") {
+    check("assenza di codice di fasi future nel percorso di produzione") {
       val root = projectRoot()
+      val stageStatus = read(root.resolve("DEVELOPMENT_STAGE.md"))
+      val currentStage = stageStatus.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE non dichiarato."))
       val mainRoot = root.resolve("src/main/scala")
       val content = textFiles(mainRoot).map(read).mkString("\n")
       val forbidden = Vector(
-        "oldRemainder", "savePatch", "oldDayTag", "oldDistance", "mutateStonesWrong",
+        "savePatch", "oldDayTag", "oldDistance", "mutateStonesWrong",
         "legacyPrior", "GRIND_TABLE_WITH_SENTINEL", "oldPermutationUnrank0", "bowlAlias",
         "vaultOld", "orderAt46Latch", "biasedLegacyPick", "LEGACY_YEAR_MAX",
         "oldJumpGuess", "VirtualLegacyList", "legacyChooseEachDaySeparately", "oldContiguousMonthDayGuess"
       )
-      val present = forbidden.filter(content.contains)
+      val phaseSpecific = if (currentStage < 2) Vector("oldRemainder") else Vector.empty[String]
+      val present = (forbidden ++ phaseSpecific).filter(content.contains)
       equal(present, Vector.empty[String], "simboli futuri trovati")
     }
 

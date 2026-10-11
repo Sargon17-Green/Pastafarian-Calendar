@@ -10,7 +10,9 @@ final case class BaseMonsterContext(
   var mode: String = "BASE",
   var status: String = "NEW",
   branchTrace: mutable.ArrayBuffer[String] = mutable.ArrayBuffer.empty[String],
-  diagnostics: mutable.ArrayBuffer[String] = mutable.ArrayBuffer.empty[String]
+  diagnostics: mutable.ArrayBuffer[String] = mutable.ArrayBuffer.empty[String],
+  var legacyRemainderInput: Option[BigInt] = None,
+  var legacyRemainderOutput: Option[BigInt] = None
 )
 
 final class BaseMetricsShell {
@@ -30,6 +32,15 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requireDiscovery01Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_01_REMAINDER" ||
+        ctx.status != "LEGACY_REMAINDER_READY" ||
+        ctx.legacyRemainderInput.isEmpty ||
+        ctx.legacyRemainderOutput.isEmpty) {
+      throw new IllegalStateException("Il residuo legacy non è pronto nel contesto corrente.")
     }
   }
 }
@@ -78,7 +89,10 @@ final class BaseBootstrapHandler(metrics: BaseMetricsShell) extends BasePhaseHan
 final class BaseMonsterManager {
   private val metrics = new BaseMetricsShell
   private val validation = new BaseValidationManager
-  private val dispatcher = new BaseMonsterDispatcher(Vector(new BaseBootstrapHandler(metrics)))
+  private val dispatcher = new BaseMonsterDispatcher(Vector(
+    new BaseBootstrapHandler(metrics),
+    new Discovery01RemainderHandler(metrics)
+  ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
     val ctx = BaseMonsterContext(calculationDay, targetDay)
@@ -88,6 +102,26 @@ final class BaseMonsterManager {
       ctx
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("bootstrap", e)
+    }
+  }
+
+  def discover01Remainder(calculationDay: BigInt, targetDay: BigInt, input: BigInt): Discovery01Report = {
+    // La stessa invocazione possiede sia lo stato BOOT sia quello DISCOVERY 01.
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.legacyRemainderInput = Some(input)
+    ctx.phase = "DISCOVERY_01_REMAINDER"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery01Ready(ctx)
+      Discovery01Report(
+        input = ctx.legacyRemainderInput.get,
+        legacyOutput = ctx.legacyRemainderOutput.get,
+        phase = ctx.phase,
+        status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("discovery01", e)
     }
   }
 
