@@ -194,3 +194,15 @@ Ngoài ra, cả `stones_table_spaghetti` và `stone_row_spaghetti`
 không ghi đè giá trị sai bằng kết quả chuẩn. Những việc đó chỉ thuộc
 giai đoạn 9 PATCH 04. Giữ nguyên các bản vá 01/02/03 và 65
 kiểm thử nòng cốt đã được xác minh.
+
+**Xác minh phát hiện:** GitHub Actions với Elixir 1.18.5 và OTP 27
+chạy 77 kiểm thử; đúng bốn hồi quy chuẩn của giai đoạn 8 thất bại:
+1434/1073 và 3780/2375 ở hàng 2, 147189/146106 ở ô đầu
+hàng 3, và toàn bộ tuple của hàng 46. Bảy mươi ba kiểm thử
+còn lại đạt, gồm đủ 65 kiểm thử nòng cốt trước đó.
+
+Lần chạy đầu có một cảnh báo import Bitwise thừa trong kiểm thử mới;
+xóa import mà không thay mã sản xuất hay kết quả chuẩn. Lần xác minh
+sau không có cảnh báo và khóa tên chuẩn độc lập PASS.
+Không có bản vá chụp dữ liệu hay sửa đầu ra ở giai đoạn này.
+Trạng thái đóng giai đoạn 8 là EXPECTED_RED.

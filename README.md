@@ -208,3 +208,23 @@ Tất cả tiếp tục gọi SAVE đã vá đúng và không dựa vào oracle 
 Bốn hồi quy chuẩn cố ý đỏ tại hàng 2, hàng 3 và hàng cuối 46.
 Hàng đầu và giá trị đầu tiên của hàng 2 là đối chứng vẫn khớp.
 Bản vá 04 dùng snapshot hàng cũ chỉ được thêm vào giai đoạn 9.
+
+## Xác minh hoàn tất giai đoạn 8
+
+GitHub Actions đã chạy Elixir 1.18.5 trên Erlang/OTP 27 với 77 kiểm thử.
+Đúng bốn kiểm thử chuẩn phát hiện 04 thất bại: hai vị trí của hàng 2,
+giá trị lúa mì hàng 3 và cả hàng 46. 73 kiểm thử còn lại đạt.
+Cả 65 kiểm thử cũ đều đạt. Không có lỗi biên dịch hoặc cảnh báo
+trong lần xác minh cuối, và khóa tên chuẩn đạt độc lập.
+
+- [Kiểm thử phát hiện 04: 77 kiểm thử, 4 sai lệch dự kiến](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157396943)
+- [Khóa tên chuẩn đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157396924)
+
+Lần chạy đầu có cảnh báo import `Bitwise` không dùng trong kiểm thử mới.
+Một commit riêng đã xóa import thừa, không sửa bất kỳ công thức
+lịch sử hay kỳ vọng chuẩn nào.
+
+Giai đoạn 8/55 được đóng với trạng thái `EXPECTED_RED`.
+Giai đoạn 9/55 là `PATCH 04`: giữ phép cập nhật nối tiếp sai,
+thực sự gọi legacy trên bản sao, nhận garbage rồi ghi đè đủ năm
+kết quả từ snapshot của hàng cũ.

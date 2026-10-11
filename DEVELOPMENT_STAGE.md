@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=8
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=04
-LAST_COMPLETED_STAGE=7
+LAST_COMPLETED_STAGE=8
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ ba lớp vá 01/02/03; thêm LegacyStoneMutation ghi tuần tự vào tuple trung gian, StoneManager dựng 46 hàng, tích hợp bảng sai vào bootstrap_context; chưa có snapshot sửa đá.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_08_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_08_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_08_PENDING
-CI_FAILURES=STAGE_08_PENDING
+CI_TESTS=77
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -110,4 +110,15 @@ LegacyStoneMutation cố ý đọc giá trị vừa cập nhật trong cùng m�
 Hàng đầu và giá trị lúa mì hàng thứ hai vẫn đúng làm đối chứng.
 Bốn hồi quy chuẩn dự kiến đỏ: hàng 2 vị trí 2/3, hàng 3 vị trí 1,
 và cả hàng 46. 12 kiểm thử mới; tổng 77 kiểm thử, dự kiến 4 thất bại.
-Không thêm bản vá 04; LAST_COMPLETED_STAGE vẫn là 7 trước xác minh CI.
+Không thêm bản vá 04; LAST_COMPLETED_STAGE đã nâng lên 8 sau xác minh CI.
+
+Giai đoạn 8 hoàn tất EXPECTED_RED theo hợp đồng: Elixir 1.18.5, OTP 27.
+77 kiểm thử, đúng 4 sai lệch chuẩn ở hàng 2 ô 2/3, hàng 3 ô 1,
+và toàn bộ hàng 46. 73 kiểm thử còn lại đạt, không lỗi ngoài dự kiến.
+Lần chạy đầu có cảnh báo import Bitwise không dùng ở tệp kiểm thử mới.
+Import thừa đã được xóa trong commit riêng, không thay đổi mã sản xuất
+hoặc kết quả bốn hồi quy chuẩn; lần chạy sau không có cảnh báo.
+Khóa tên chuẩn PASS.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157396943
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157396924
+Giai đoạn tiếp theo là 9, PATCH 04, chưa bắt đầu.

@@ -77,3 +77,26 @@ Giai đoạn 8: phát hiện cập nhật đá nối tiếp sai
 Đưa LegacyStoneMutation vào đường xây bảng đá 46 hàng và
 bootstrap. Thêm các đối chứng hợp lệ và bốn hồi quy chuẩn cố ý
 thất bại; giữ ba lớp vá trước và không khởi động PATCH 04.
+
+## Kết quả kiểm chứng thực tế
+
+- Công cụ: Elixir 1.18.5, Erlang/OTP 27, GitHub Actions.
+- 77 kiểm thử, đúng 4 thất bại có chủ đích, 73 kiểm thử thành công.
+- Hàng 2 ô lúa mạch: 1434 (lịch sử) khác 1073 (chuẩn).
+- Hàng 2 ô muối: 3780 (lịch sử) khác 2375 (chuẩn).
+- Hàng 3 ô lúa mì: 147189 (lịch sử) khác 146106 (chuẩn).
+- Hàng 46: cả tuple khác chuẩn.
+- Cả 65 kiểm thử cũ đều đạt; không thay kỳ vọng chuẩn.
+- Lần chạy đầu có cảnh báo unused import Bitwise; đã bỏ import
+  trong một commit riêng, không sửa mã sản xuất.
+- Lần xác minh sau không có cảnh báo; khóa tên chuẩn PASS.
+- Không thêm snapshot hoặc bản vá 04.
+
+Commit triển khai: `6470187e3ee5e7300097e4bb6b7f6af097626812`.
+Commit bỏ import thừa: `6661e0ee1ab3912b033a59e3bca9a4ced3d0a490`.
+
+Kiểm thử: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157396943
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157396924
+
+Trạng thái cuối giai đoạn 8: EXPECTED_RED được xác minh.
+Giai đoạn 9 chưa được khởi động.
