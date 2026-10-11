@@ -117,3 +117,7 @@ ni'o lo `rank1` cu jalge lo lexicographic ranki fi lo se benji masti porsi .i lo
 ### lo fanmo binomio se namcu .e lo ranki se xruti — PASS
 
 ni'o lo `MonsterWeavingEndpointDP` cu se galfi fi lo `terminalInsertTotal` .i lo `rank1` cu se jmina .i lo GitHub Actions run `38162079095` cu se cipra snada .i lo se jmite pe lo 2048 detri count .e lo 384 detri unrank cu se srana lo narmanci cipra .i lo 5778 detri nanca cu za'o na se mulno.
+
+### lo 5778 djedi se namcu — PASS
+
+ni'o lo `MonsterWeavingLinearCounter` cu facki lo drani se jorna porsi se namcu fi lo pa judri se jicmu .i lo 47 masti be lo 5778 djedi cu snada lo te cipra fi lo Java `-Xmx256m` .i lo GitHub Actions run `38164523435` cu benji lo `STAGE_02_LINEAR_WEAVING_PASS` .i lo remoi stadi cu za'o na mulno ki'u lo nu lo ranki se cuxna cu za'o se jimte.

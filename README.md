@@ -154,3 +154,5 @@ ni'o lo `run_stage02_weaving_heap_tests.sh` cu cipra lo narmanci `MonsterWeaving
 ni'o lo `MonsterWeavingLinearCounter` cu pilno lo nu lo fanmo se viska be lo fanmo masti cu rinka lo fanmo judri be lo mulno porsi .i seni'i lo endpoint te jicmu cu se vimcu fi lo fanmo judri .i lo se namcu be lo te jicmu cu zenba fi lo se pamoi judri po'o. lo `BigInteger` cu ralte lo drani ranki .i lo 5778 detri count cu se cipra fi lo Java Heap be li 256 MiB.
 
 ni'o lo ti sampla cu se pilno lo count .e lo countAfterPrefix po'o .i lo 5778 detri unrank cu za'o na se zbasu .i lo `MonsterWeavingEndpointDP` .e lo `MonsterCanonicalWeaving` cu za'o ralte lo 384 detri jimte.
+
+ni'o lo pa se stika masti namcu te javni cu se ciska fi `WEAVING_LINEAR_PROOF.md`. lo se namcu be lo 5778 djedi cu se cipra fi lo 256 MiB Java Heap .i lo mulno se cuxna masti porsi cu za'o nitcu lo balvi cipra .e lo balvi narmanci javni.
