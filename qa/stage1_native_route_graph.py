@@ -22,6 +22,21 @@ import tempfile
 
 FIELDS={"STEP":8,"READ_BEFORE":4,"READ_AFTER":4,
         "WRITE_BEFORE":5,"WRITE_AFTER":4}
+# Only instructions that cannot change the current IP's velocity or skip
+# cells: a bounded straight-edge witness, NOT a complete Funge path solver.
+STRAIGHT_OPS=frozenset(map(ord, "0123456789+-*/%`!:\\$.,gp"))
+
+def straight_motion_witness(point,delta,opcode,quoted,source_height,source_width):
+    x,y=point
+    dx,dy=delta
+    # Restrict to interior, unit-cardinal velocities. Wrapping, long jumps,
+    # string literals and all vector-modifying operations are excluded.
+    return (not quoted and opcode in STRAIGHT_OPS and
+            abs(dx)+abs(dy)==1 and
+            32<=x<source_width-32 and 32<=y<source_height-32 and
+            32<=x+dx<source_width-32 and
+            32<=y+dy<source_height-32)
+
 
 def require(ok, message):
     if not ok:
@@ -53,6 +68,9 @@ def analyze(rows,trace_path):
     ip_ids=set()
     current_step=0
     previous_step=None
+    previous_motion=None
+    source_height=len(rows)
+    source_width=max(map(len,rows))
     handoff=False
     incoming=collections.defaultdict(set)
     outgoing=collections.defaultdict(set)
@@ -119,6 +137,18 @@ def analyze(rows,trace_path):
                         (tick,x,y))
                 ip_ids.add(ip)
                 point=(x,y)
+                if previous_motion is not None:
+                    prev_point,prev_delta,prev_op,prev_quoted=previous_motion
+                    if straight_motion_witness(prev_point,prev_delta,prev_op,
+                                               prev_quoted,source_height,
+                                               source_width):
+                        stats["native_straight_edges_checked"]+=1
+                        expected_point=(prev_point[0]+prev_delta[0],
+                                        prev_point[1]+prev_delta[1])
+                        require(point==expected_point,
+                                "impossible straight-line Native IP movement "
+                                "after ordinary opcode, from %r expected %r got %r"%
+                                (prev_point,expected_point,point))
                 actual=changed.get(point,initial_byte(rows,x,y))
                 require(opcode==actual,
                         "executed memory-byte mismatch tick=%d (%d,%d) actual=%d logged=%d" %
@@ -148,6 +178,7 @@ def analyze(rows,trace_path):
                 previous_step=(tick,point,handoff)
                 if opcode==ord('"'):
                     in_string_mode=not in_string_mode
+                previous_motion=(point,(dx,dy),opcode,was_string_mode)
                 if point in latest_written:
                     index=latest_written.pop(point)
                     record=write_history[index]
@@ -261,6 +292,8 @@ def analyze(rows,trace_path):
             "no later-executed changed executable cells")
     require(stats["arithmetic_unique_coordinates"]>1000,
             "arithmetic path too small for existing 2D geometry contract")
+    require(stats["native_straight_edges_checked"]>0,
+            "native graph has no independently checkable ordinary IP movement")
     return {
         "schema":"befunge-native-route-graph-v1",
         "source_height":len(rows),
@@ -316,9 +349,11 @@ def selftest():
         # that matching p/g lifecycle evidence survives the stronger audit,
         # while coordinated fake and missing events are rejected even when
         # all geometric summary thresholds would otherwise pass.
-        source=[""]*12
+        source=[""]*200
         source[10]=" "*10+"pg"
         source[11]='"pg"'
+        # Independent interior, unit-cardinal movement witness.
+        source[100]=" "*600+"1"+" "*700
         trace_lines=[
             "STEP\t1\t1\t5\t0\t1\t0\t32\t0",
             "STEP\t2\t1\t10\t10\t1\t0\t112\t0",
@@ -334,8 +369,9 @@ def selftest():
             "STEP\t8\t1\t3\t11\t1\t0\t34\t5"
         ]
         for n in range(1001):
-            trace_lines.append("STEP\t%d\t1\t%d\t12\t1\t0\t32\t0" %
-                               (n+9,n+100))
+            cell_x=n+100
+            trace_lines.append("STEP\t%d\t1\t%d\t100\t1\t0\t%d\t0" %
+                               (n+9,cell_x,49 if cell_x==600 else 32))
         trace_lines.append("STEP\t1010\t1\t5\t0\t1\t0\t32\t0")
         def check_records(records,source_rows):
             with open(trace,"w",encoding="utf-8") as stream:
@@ -346,8 +382,9 @@ def selftest():
                 and passed["statistics"]["reads"]==1
                 and passed["statistics"]["writes"]==1 and
                 passed["arithmetic_executed_opcodes"].get("p")==1 and
-                passed["arithmetic_executed_opcodes"].get("g")==1,
-                "underflow or stringmode p/g synthetic trace rejected or miscounted")
+                passed["arithmetic_executed_opcodes"].get("g")==1 and
+                passed["statistics"]["native_straight_edges_checked"]>=1,
+                "synthetic trace omitted legal straight edge or counted literals")
         def reject_trace(name,records,source_rows,fragment):
             try:
                 check_records(records,source_rows)
@@ -395,7 +432,18 @@ def selftest():
             "READ_AFTER\t7\t4000\t4000\t32"])
         reject_trace("literal_g_not_executed",forged_literal_read,source,
                      "READ event not bound")
-        print("NATIVE_ROUTE_GRAPH_G_P_EVENT_BINDING_6_NEGATIVE_CONTROLS_PASS")
+        # Change one *blank* ordinary STEP coordinate: source-map opcode,
+        # p/g event pairs, visit count and step numbering remain plausible,
+        # but the preceding literal 1 must advance to x=601, not 605.
+        altered_motion=[line.replace(
+            "STEP\t510\t1\t601\t100\t1\t0\t32\t0",
+            "STEP\t510\t1\t605\t100\t1\t0\t32\t0")
+            for line in trace_lines]
+        require(altered_motion!=trace_lines,
+                "synthetic route forgery failed to alter the actual trace")
+        reject_trace("forged_straight_ip_jump",altered_motion,source,
+                     "impossible straight-line Native IP movement")
+        print("NATIVE_ROUTE_GRAPH_G_P_EVENT_BINDING_7_NEGATIVE_CONTROLS_PASS")
     print("NATIVE_ROUTE_GRAPH_ZERO_VELOCITY_NEGATIVE_CONTROL_PASS")
     print("NATIVE_ROUTE_GRAPH_SELFTEST_PASS")
 
