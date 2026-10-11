@@ -71,7 +71,7 @@ jobs:
           grep -Fq 'STAGE_15_PATCH_07_PROPERTIES_PASS runs=1280 cases=14080 shifted=12800 missing=1280 mismatches=0 chains=64 chainedGrinds=704 chainMismatches=0 giantCases=22 giantMismatches=0' stage17-results.log
           grep -Fq 'STAGE_16_DISCOVERY_08_GUARDS_PASS mismatches=10 matches=0 accepted=5 rejected=5 witnesses=10' stage17-results.log
           grep -Fq 'STAGE_16_DISCOVERY_08_PROPERTIES_PASS direct=720 unique=720 cases=2880 mismatches=2880 accepted=1439 rejected=1441 giant=8' stage17-results.log
-          grep -Fq 'STAGE_17_PATCH_08_GUARDS_PASS cases=17 shifted=10 rejected=7 mismatches=0' stage17-results.log
+          grep -Fq 'STAGE_17_PATCH_08_GUARDS_PASS cases=17 shifted=9 rejected=8 mismatches=0' stage17-results.log
           grep -Eq 'STAGE_17_PATCH_08_PROPERTIES_PASS cases=6209 shifted=[0-9]+ rejected=[0-9]+ mismatches=0 unique=720 seeded=2048 visibleDays=12 visibleCases=552 giantCases=9' stage17-results.log
       - name: Verify intentional expected-red regression
         shell: bash

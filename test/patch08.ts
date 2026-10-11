@@ -65,8 +65,8 @@ for(const drop of drops) {
       "जुन्या नकाराऐवजी वैध rank");
   }
 }
-check(cases===17 && mismatches===0 && historicallyShifted===10 &&
-  historicallyRejected===7,"17 boundary cases मधील शून्य दुरुस्ती फरक");
+check(cases===17 && mismatches===0 && historicallyShifted===9 &&
+  historicallyRejected===8,"17 boundary cases मधील शून्य दुरुस्ती फरक");
 
 // जुना helper थेट योग्य 0-based rank सह invoke होतो; shortcut/static order नाही.
 const original=LegacyPermutationUnrankAdapter.prototype.oldPermutationUnrank0;

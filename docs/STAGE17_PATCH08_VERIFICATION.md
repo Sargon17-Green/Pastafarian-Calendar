@@ -6,7 +6,7 @@
 
 ## Verification goals
 
-- `STAGE_17_PATCH_08_GUARDS_PASS cases=17 shifted=10 rejected=7 mismatches=0`.
+- `STAGE_17_PATCH_08_GUARDS_PASS cases=17 shifted=9 rejected=8 mismatches=0`.
 - `STAGE_17_PATCH_08_PROPERTIES_PASS cases=6209 shifted=... rejected=... mismatches=0 unique=720 seeded=2048 visibleDays=12 visibleCases=552 giantCases=9`.
 - 3600 wraparound, 2048 seeded signed, 552 actual 46-drop sequences, 9 huge signed numbers, all corrected 0 mismatches.
 - 8 archived expected-red failures, Stage 1–16 regressions, TypeScript typecheck, frozen Marathi names lock intact.
