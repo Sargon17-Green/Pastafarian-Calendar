@@ -44,7 +44,9 @@ final case class BaseMonsterContext(
   var patchedGrindOutput: Option[BigInt] = None,
   var patch06Applied: Boolean = false,
   var permutationRankInput: Option[Int] = None,
-  var legacyPermutationOutput: Option[Vector[Int]] = None
+  var legacyPermutationOutput: Option[Vector[Int]] = None,
+  var patchedPermutationOutput: Option[Vector[Int]] = None,
+  var patch07Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -64,6 +66,45 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requirePatch07Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_07_PERMUTATION" ||
+        ctx.status != "PATCH_07_READY" ||
+        ctx.permutationRankInput.isEmpty ||
+        ctx.legacyPermutationOutput.isEmpty ||
+        ctx.patchedPermutationOutput.isEmpty ||
+        !ctx.patch07Applied ||
+        ctx.branchTrace.toVector != Vector(
+          "BOOT", "DISCOVERY_07_PERMUTATION", "PATCH_07_PERMUTATION")) {
+      throw new IllegalStateException(
+        "PATCH 07 richiede la discovery e il risultato nello stesso contesto.")
+    }
+    val rank = ctx.permutationRankInput.get
+    if (rank < 1 || rank > 720 ||
+        ctx.legacyPermutationOutput.get !=
+          LegacyPermutationAdapter.oldPermutationUnrank0(rank)) {
+      throw new IllegalStateException("La prova della permutazione legacy è incoerente.")
+    }
+
+    // Validazione indipendente dalla formula del wrapper: unranking 1-based
+    // sul sistema fattoriale, con rango ridotto a zero UNA SOLA volta.
+    var rest = rank - 1
+    val factorials = Vector(1, 1, 2, 6, 24, 120, 720)
+    val remaining = scala.collection.mutable.ArrayBuffer(1, 2, 3, 4, 5, 6)
+    val answer = Vector.newBuilder[Int]
+    for (slots <- 6 to 1 by -1) {
+      val block = factorials(slots - 1)
+      val index = rest / block
+      rest = rest % block
+      answer += remaining.remove(index)
+    }
+    val normative = answer.result()
+    if (remaining.nonEmpty || rest != 0 ||
+        ctx.patchedPermutationOutput.get != normative ||
+        normative.sorted != Vector(1, 2, 3, 4, 5, 6)) {
+      throw new IllegalStateException("Permutazione PATCH 07 alterata o non normativa.")
     }
   }
 
@@ -347,7 +388,8 @@ final class BaseMonsterManager {
     new Patch05PriorHandler(metrics),
     new Discovery06GrindHandler(metrics),
     new Patch06GrindHandler(metrics),
-    new Discovery07PermutationHandler(metrics)
+    new Discovery07PermutationHandler(metrics),
+    new Patch07PermutationHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -674,6 +716,33 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("discovery07", e)
+    }
+  }
+
+  def patch07Permutation(
+    calculationDay: BigInt, targetDay: BigInt, rank1: Int
+  ): Patch07PermutationReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.permutationRankInput = Some(rank1)
+    ctx.phase = "DISCOVERY_07_PERMUTATION"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery07Ready(ctx)
+      ctx.phase = "PATCH_07_PERMUTATION"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch07Ready(ctx)
+      Patch07PermutationReport(
+        calculationDay = ctx.calculationDay,
+        targetDay = ctx.targetDay,
+        requestedRank1 = ctx.permutationRankInput.get,
+        legacyPermutation = ctx.legacyPermutationOutput.get,
+        patchedPermutation = ctx.patchedPermutationOutput.get,
+        patchApplied = ctx.patch07Applied,
+        phase = ctx.phase, status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("patch07", e)
     }
   }
 

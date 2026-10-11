@@ -227,3 +227,21 @@ contesto, scrive un output, una trace e una metrica.
 Il manager espone lo storico senza normalizzarlo;
 il validatore controlla forma, rango e corrispondenza
 al vero helper legacy. L'oracolo fattoriale è test-only.
+
+## PATCH 07 — riavvolgimento normativo della base del rango
+
+Il nuovo wrapper non modifica il helper storico di
+unranking. Dopo avere attraversato il percorso legacy
+con il rango richiesto, usa il medesimo helper con
+`rank-1`, sostituendo zero con l'ingresso storico 720.
+Questa corrispondenza elimina l'errore di base senza
+duplicare la generazione delle 720 permutazioni.
+
+Il dispatcher registra `Patch07PermutationHandler`;
+il manager lo esegue dopo la fase `DISCOVERY_07_PERMUTATION`
+nello stesso contesto. Due output distinti, un flag,
+una metrica e un report immutabile impediscono di
+cancellare la cicatrice. Il validator ricalcola unranking
+fattoriale 1-based in un algoritmo separato, verifica
+la trace e confronta l'output storico al helper original.
+L'oracolo normativo rimane nei test, non nella produzione.

@@ -709,3 +709,45 @@ permutazioni e 1.024 campioni deterministici, mentre
 le sei patch precedenti e tutte le firme storiche
 delle discovery sono rimaste integre.
 Nessuna PATCH 07 è stata introdotta.
+
+## Stadio 15 — PATCH 07: il rango riacquista la prima posizione
+
+### Che cosa si pensava
+
+Il helper storico riceve un rango fra 1 e 720 e
+ne calcola la permutazione trattandolo come indice
+zero-based. Correggere direttamente `oldPermutationUnrank0`
+avrebbe annullato la prova della DISCOVERY 07.
+
+### Che cosa si è scoperto
+
+Le 720 permutazioni sono già costruite correttamente.
+L'unico errore è la corrispondenza dal rango all'indice:
+per l'ingresso storico `r` esce la permutazione
+normativa `r+1`, con ciclo all'ultimo rango.
+
+### Che cosa è stato aggirato
+
+La PATCH 07 chiama il vero algoritmo storico e
+poi lo usa nuovamente con rango `r-1`, oppure 720
+se il rango chiesto è 1. Vengono preservati
+l'output vecchio, l'output patched, il flag e la
+traccia delle tre fasi nel medesimo contesto.
+
+### Perché è normativamente equivalente
+
+Per ogni rango in `1..720`, la mappa corretta
+del wrapper richiede esattamente l'indice `r-1`,
+quindi il helper produce la permutazione desiderata.
+La suite verifica la famiglia completa, i bordi,
+l'inversione indipendente dei ranghi, 2048 campioni
+deterministici e tutte le sei patch precedenti.
+
+### Strato di mostruosità aggiunto
+
+Un wrapper, un handler, due campi nel contesto,
+un report doppio, una metrica, validazione fattoriale
+autonoma e la suite nativa dello stadio 15.
+La cicatrice di Stage14 conserva la propria firma
+`20 PASS, 3 FAIL` intenzionali. La logica di
+Stage16 non è stata introdotta.

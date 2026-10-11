@@ -219,23 +219,40 @@ object Stage14Tests {
       finally stream.close()
       truth(!code.contains("NormativeOracle"), "Oracolo nei sorgenti di produzione")
       truth(code.contains("oldPermutationUnrank0"), "Cicatrice assente")
-      truth(!code.contains("permutationPatch"), "PATCH 07 anticipata")
+      val st = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current = st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE assente"))
+      if (current == 14)
+        truth(!code.contains("permutationPatch"), "PATCH 07 anticipata")
+      else
+        truth(code.contains("LegacyPermutationAdapter.oldPermutationUnrank0("),
+          "La cicatrice originale deve restare percorribile")
       truth(!code.contains("bowlAlias"), "Stadio futuro anticipato")
     }
 
     check("metadati discovery 07 dopo lo stadio 13 certificato") {
       val st = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=14"), "Stadio")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"), "Tipo")
-      truth(st.contains("CURRENT_PATCH=06"), "Ultima patch")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "RED atteso")
+      val current = st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE assente"))
+      truth(current >= 14, "Stadio")
+      if (current == 14) {
+        truth(st.contains("CURRENT_KIND=DISCOVERY"), "Tipo")
+        truth(st.contains("CURRENT_PATCH=06"), "Ultima patch")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "RED atteso")
+      } else {
+        truth(st.contains("STAGE_14_NATIVE_VERIFICATION=PASS_EXPECTED_RED_20_PASS_3_FAIL"),
+          "Firma storica RED conservata")
+      }
       truth(st.contains("STAGE_13_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_26_PASS_0_FAIL"),
         "Stage13 storico conservato")
       val completed = st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE assente"))
-      truth(completed == 13 || completed == 14, "Nessuno stadio futuro certificato")
+      truth(completed >= 13 && completed <= current, "Ordine di certificazione")
     }
 
     val m = new BaseMonsterManager

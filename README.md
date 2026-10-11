@@ -532,3 +532,31 @@ I fallimenti della discovery sono esattamente i ranghi
 `1`, `2` e `720`. Le 720 permutazioni sono tutte
 presenti una sola volta; l'associazione ai ranghi è
 storicamente traslata di uno. PATCH 07 non introdotta.
+
+## Stadio 15 — PATCH 07: la base del rango delle permutazioni
+
+L'algoritmo legacy `oldPermutationUnrank0(rank1)` conserva
+la cicatrice di Stage14: ogni rango seleziona la permutazione
+successiva, e il rango 720 ritorna alla prima. Il wrapper
+`Patch07PermutationWrapper.permutationPatch` attraversa
+il vero helper storico prima di chiedere il rango `r-1`,
+con riavvolgimento corretto all'ingresso 720 per `r=1`.
+Non viene copiata né sostituita la decomposizione fattoriale.
+
+`BaseMonsterManager.patch07Permutation` esegue
+`BOOT → DISCOVERY_07_PERMUTATION → PATCH_07_PERMUTATION`
+nello stesso contesto. Il report contiene sia la
+permutazione errata sia quella corretta; il validator
+controlla in modo indipendente il rango con la
+decomposizione fattoriale 1-based, non attraverso il wrapper.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage15Tests'
+```
+
+Firma prevista: `31 PASS, 0 FAIL`. La suite prova
+esaustivamente tutti i 720 ranghi del riferimento,
+l'inversione del rango, tutti gli input illegali,
+2.048 campioni casuali deterministici, la semantica
+delle metriche, i report isolati e tutte e sei le
+patch precedenti. Stage14 rimane RED per i soli ranghi 1, 2 e 720.

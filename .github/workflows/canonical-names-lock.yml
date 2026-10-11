@@ -346,3 +346,23 @@ jobs:
           for label in 'rango primo' 'rango secondo' 'rango settecentoventi'; do
             grep -Fq "FAIL — equivalenza normativa permutazione ${label} — Errore di base del rango" stage14.log
           done
+
+  native-stage15-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 15 corrected one-based permutation PATCH 07
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage15Tests' 2>&1 | tee stage15.log
+          grep -Fq 'RISULTATO STADIO 15: 31 PASS, 0 FAIL' stage15.log
+          test "$(grep -Fc 'PASS — ' stage15.log)" -eq 31
+          test "$(grep -Fc 'FAIL — ' stage15.log)" -eq 0
