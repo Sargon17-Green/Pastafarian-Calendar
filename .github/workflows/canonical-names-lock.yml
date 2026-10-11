@@ -79,3 +79,5 @@ jobs:
         run: |
           test "${{ steps.discovery_stones_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage08Tests/PastafarianCalendar.Stage08Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ رقعة الأحجار الرابعة مع المرجع وحفظ الطفرة القديمة
+        run: dotnet run --project tests/PastafarianCalendar.Stage09Tests/PastafarianCalendar.Stage09Tests.csproj --configuration Release

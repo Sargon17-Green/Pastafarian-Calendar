@@ -39,6 +39,9 @@ public sealed class MonsterContext
     // صفوف الأحجار المتعاقبة القديمة يملكها هذا الاستدعاء وحده.
     public BigInteger[][]? LegacyStoneRows { get; set; }
 
+    // صفوف الرقعة الرابعة مستقلة عن صفوف الطفرة التاريخية وعن سائر السياقات.
+    public BigInteger[][]? PatchedStoneRows { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

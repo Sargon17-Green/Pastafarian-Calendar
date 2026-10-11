@@ -52,6 +52,13 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateLegacyStones(calculationDay, targetDay);
     }
 
+    // مسار إنتاج الرقعة الرابعة: يحفظ الطفرة التاريخية ويعيد الصفوف المصححة منفصلةً.
+    public static BigInteger[][] EvaluatePatchedStones(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluatePatchedStones(calculationDay, targetDay);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

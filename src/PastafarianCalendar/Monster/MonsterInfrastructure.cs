@@ -75,6 +75,39 @@ public sealed class MonsterValidationManager
         if (candidate.Distance < BigInteger.One || candidate.Direction is < 1 or > 3)
             throw new MonsterValidationException("أنتجت رقعة المسافة عدّاً خارج النطاق.");
     }
+
+    // هذا الحارس لا يعيد إنتاج المرجع المعياري: يفحص الملكية والمدى وبنية الصفوف فقط.
+    public void ValidatePatchedStones(MonsterContext context, BigInteger[][] candidate)
+    {
+        if (context.LegacyStoneRows is not BigInteger[][] historical)
+            throw new MonsterValidationException("يجب تشغيل معالج الأحجار القديم قبل الرقعة.");
+        if (context.PatchedStoneRows is not null)
+            throw new MonsterValidationException("لا يُسمح بتثبيت صفوف الأحجار المصححة مرتين.");
+        if (candidate is null || candidate.Length != 47 || historical.Length != 47)
+            throw new MonsterValidationException("جدول الأحجار لا يحوي الصفوف الستة والأربعين.");
+        if (candidate[0] is not null)
+            throw new MonsterValidationException("فهرس الصفر محجوز خارج جدول الأحجار.");
+
+        var initial = LegacyStones.InitialStones();
+        if (candidate[1] is null || !candidate[1].SequenceEqual(initial) ||
+            historical[1] is null || !historical[1].SequenceEqual(initial))
+            throw new MonsterValidationException("بذرة الأحجار غير صحيحة.");
+        var modulus = (BigInteger.One << 127) - BigInteger.One;
+        for (var row = 1; row <= 46; row++)
+        {
+            if (candidate[row] is not BigInteger[] current || current.Length != 6 ||
+                historical[row] is not BigInteger[] previous || previous.Length != 6)
+                throw new MonsterValidationException("صف أحجار ناقص أو غير صالح.");
+            if (ReferenceEquals(current, previous) ||
+                (row > 1 && ReferenceEquals(current, candidate[row - 1])))
+                throw new MonsterValidationException("تسرّب ملكية مصفوفة الأحجار بين الصفوف.");
+            if (current[0] != BigInteger.Zero)
+                throw new MonsterValidationException("يجب أن يظل فهرس الصفر بلا حجر.");
+            for (var kind = 1; kind <= 5; kind++)
+                if (current[kind] < BigInteger.One || current[kind] > modulus)
+                    throw new MonsterValidationException("قيمة حجر مصحح خارج المجال.");
+        }
+    }
 }
 
 public sealed class MonsterMetricsManager
@@ -97,6 +130,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyDistancePhaseHandler _legacyDistance;
     private readonly PatchedCounts _patchedCounts;
     private readonly LegacyStonesPhaseHandler _legacyStones;
+    private readonly StonePatchWrapper _stonePatch;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -109,6 +143,7 @@ public sealed class MonsterDispatcher
         _legacyDistance = new LegacyDistancePhaseHandler();
         _patchedCounts = new PatchedCounts();
         _legacyStones = new LegacyStonesPhaseHandler();
+        _stonePatch = new StonePatchWrapper();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -222,6 +257,27 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "legacy.stones.mutation.dispatch");
         context.Status = "LEGACY_STONES_COMPLETE";
         context.Phase = "LEGACY_STONES_COMPLETE";
+    }
+
+    public void DispatchPatchedStones(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("تتطلب الرقعة الرابعة سياقاً مستعداً جديداً.");
+        if (context.LegacyStoneRows is not null || context.PatchedStoneRows is not null)
+            throw new MonsterValidationException("لا يجوز استعارة صفوف أحجار ملتزم بها من قبل.");
+
+        // يبقى مسار الخطأ التاريخي دليلاً منفصلاً في هذا السياق.
+        DispatchLegacyStones(context);
+
+        context.Phase = "STONE_PATCH_VALIDATION";
+        var pending = _stonePatch.BuildPatchedRows();
+        _validation.ValidatePatchedStones(context, pending);
+        context.PatchedStoneRows = pending;
+
+        context.BranchTrace.Add("STONE_PATCH");
+        _metrics.Bump(context, "stone.patch.dispatch");
+        context.Status = "STONE_PATCH_COMPLETE";
+        context.Phase = "STONE_PATCH_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -352,6 +408,20 @@ public sealed class MonsterManager
         var context = ExecuteLegacyStones(calculationDay, targetDay);
         return context.LegacyStoneRows
             ?? throw new MonsterValidationException("لم يُنتج المسار التاريخي صفوف الأحجار.");
+    }
+
+    public MonsterContext ExecutePatchedStones(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        _dispatcher.DispatchPatchedStones(context);
+        return context;
+    }
+
+    public BigInteger[][] EvaluatePatchedStones(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = ExecutePatchedStones(calculationDay, targetDay);
+        return context.PatchedStoneRows
+            ?? throw new MonsterValidationException("لم تُثبت صفوف الأحجار في الرقعة الرابعة.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
