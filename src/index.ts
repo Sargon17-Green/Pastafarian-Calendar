@@ -17,3 +17,4 @@ export * from "./discovery07LegacyGrind.ts";
 export * from "./patch07Grind.ts";
 export * from "./discovery08LegacyPermutation.ts";
 export * from "./patch08Permutation.ts";
+export * from "./discovery09LegacyFixedPours.ts";
