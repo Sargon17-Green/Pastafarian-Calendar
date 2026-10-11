@@ -7,6 +7,7 @@ local LegacyDistance = require("legacy_distance")
 local DistancePatch = require("distance_patch")
 local LegacyStones = require("legacy_stones")
 local StonePatch = require("stone_patch")
+local LegacyHidden = require("legacy_hidden")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -84,8 +85,25 @@ function S.stoneTableSpaghetti()
     return StonePatch.buildPatchedTable()
 end
 
+-- DISCOVERY 05: hidden[k] ekspoze depo fizik envèse a, san konvèsyon.
+function S.hiddenDropsSpaghetti(calculationDay, targetDay)
+    local storage = LegacyHidden.execute(calculationDay, targetDay)
+    return storage
+end
+
+function S.hiddenDropSpaghetti(calculationDay, targetDay, k)
+    assert(type(k) == "number" and math.type(k) == "integer" and k >= 1 and k <= 7,
+           "Endis gout kache a dwe ant 1 ak 7")
+    local storage = LegacyHidden.execute(calculationDay, targetDay)
+    return LegacyHidden.oldHiddenAt(storage, k)
+end
+
+function S.legacyHiddenProbe(calculationDay, targetDay)
+    return LegacyHidden.execute(calculationDay, targetDay)
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 9", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 10", 0)
 end
 
 return S

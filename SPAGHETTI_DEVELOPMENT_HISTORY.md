@@ -178,3 +178,34 @@ Nan chemen dispatcher pwodiksyon an, `LegacyStones.execute` fè apèl istorik la
 Nou kenbe yon regresyon legacy endepandan ki kontinye echwe sou kat valè `b`, `s`, `m`, `r` nan ranje 2, epi yon odit ki refize nenpòt lòt erè kòm fo prèv. Regresyon piblik la vin vèt; menm bagay la pou tablo 46 ranje yo. Tès Stage 9 yo egzamine 455 tranzisyon, gwo antye, imutabilite antre, branch istorik ak devlopman eta tranzaksyonèl, pandan ansyen tès yo kouri ankò.
 
 Stage 10 ak tout etap ki vini apre yo poko antre.
+
+
+## Stage 10 — DISCOVERY 05: depo sèt gout kache yo ranvèse
+
+### Sa nou te sipoze
+
+Ansyen konstriksyon gout kache yo te mete sèt valè yo nan yon tablo kote
+gout nimewo 7 te vini an premye epi gout nimewo 1 te vini an dènye. Pita,
+chemen aksè a te aji tankou premye plas la te gout nimewo 1.
+
+### Sa nou verifye
+
+Sèt fòmil yo, ansanm ak sèt seri tounaj yo, sèvi ak bon koefisyan ak bon
+wòch yo; pa gen erè matematik nan valè yo. Men kote done yo ye pa konpatib
+ak endis ki nan lekti a. `storage[k]` reprezante `hidden(8-k)`. Se sèlman
+mityèm gout la, `hidden4`, ki pa bouje. Tout lòt sis pozisyon ka pa kòrèk.
+Nou fè tès endepandan kont oracle test-only la, epi nou egzije egzakteman
+sis pozisyon sa yo kòm `EXPECTED_RED`.
+
+### Yon lòt kouch monstr
+
+Nou ajoute `LEGACY_HIDDEN` avèk yon dispatcher, yon eta semantik ki posede,
+tras, metrik ak dyagnostik sou plas fizik yo. Kalkil gout yo konsome
+vrè rezilta `DAY_TAG_PATCH`, `DISTANCE_PATCH`, `STONE_PATCH`, ak `SAVE_PATCH`.
+Nou pwoteje done retounen yo kont alias ak kontèks lòt invocation.
+
+### Sa nou pa korije
+
+Nan Stage 10, nou kite chemen lekti a san tradiksyon endis. **Stage 11 —
+PATCH 05** pral ajoute aksè `8-k` men li p ap ranvèse tablo fizik la ni
+retire chemen istorik la. Nou pa fè travay Stage 12 oswa pita.

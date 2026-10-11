@@ -190,3 +190,39 @@ texlua test/stage09_tests.lua .
 ```
 
 Rezilta obligatwa a se `GREEN` pou tout tès ak travay GitHub Actions. Pa gen okenn defo oswa patch Stage 10 oswa pita ki antre nan branch sa a.
+
+
+## Stage 10 — DISCOVERY 05: sèt gout kache yo estoke nan move sans
+
+Nan etap sa a nou mete yon chemen pwodiksyon reyèl pou sèt gout kache yo.
+`src/legacy_hidden.lua` pran konte jou nan kouch `DAY_TAG_PATCH` ak `DISTANCE_PATCH`,
+li bati sèt premye ranje wòch yo nan `STONE_PATCH`, epi li kalkile chak gout ak
+koefisyan kanonik yo, sèt tounaj yo ak `SavePatch.savePatch`.
+
+**Erè istorik la konsène depo a, pa kalkil gout la.** Chak gout lojik `k`
+ale nan plas fizik `8-k`, konsa tablo a gen `hidden7, hidden6, ..., hidden1`.
+Chemen piblik `hiddenDropsSpaghetti(c,t)` retounen depo sa a, epi
+`hiddenDropSpaghetti(c,t,k)` li plas `k` san tradiksyon. Se yon vrè divèjans
+ak referans normatif la. Yon kontèks `LEGACY_HIDDEN` kenbe sèt plas fizik yo,
+tranzaksyon, metrik, tras, dyagnostik ak prèv izolasyon ant invocation.
+
+Tès yo verifye endepandamman, atravè `test/normative_oracle.lua`, ke tout sèt
+**valè** yo kòrèk men sis **pozisyon** yo mal; pozisyon 4 la pa deplase lè
+yon lis sèt eleman ranvèse. Tès espesyal sou Fondasyon an kouvri sèt rezilta
+egzak; tès pwopriyete yo kouvri senk koup jou diferan. Tout etap 1–9 rete
+vèt.
+
+```text
+texlua test/stage10_trace_tests.lua .
+texlua test/stage10_property_tests.lua .
+texlua test/stage10_scope_tests.lua .
+texlua test/stage10_expected_red_audit.lua .
+texlua test/stage10_tests.lua .
+```
+
+Kat premye tès yo dwe pase; dènye a dwe fini ak
+`EXPECTED_RED Stage 10 DISCOVERY 05: 6 hidden drops nan move plas: 1,2,3,5,6,7`.
+Tès pou tout etap anvan yo dwe rete vèt.
+
+**Pa gen PATCH 05.** Nou pa sèvi ak koreksyon endis `8-k` sou lekti, nou pa
+ranvèse tablo ki deja ekri a, epi nou pa entwodui okenn fonksyon ki pou Stage 11.
