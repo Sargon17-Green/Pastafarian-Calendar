@@ -186,3 +186,9 @@ npm run test:patch07
 Stage 17 ची `oneBased=regularMod(drop-1,720)+1`, `legacyRank0=oneBased-1`, `oldPermutationUnrank0(legacyRank0)` ही ऐतिहासिक दुरुस्ती आज लागू केलेली नाही.
 
 **Stage 16 पडताळणी पूर्ण:** [GitHub Actions 38180418412](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38180418412), implementation commit `e3a8b9307815a717001630e85dd1f3312c87c921`, दोन्ही jobs PASS. `STAGE_16_DISCOVERY_08_GUARDS_PASS mismatches=10 matches=0 accepted=5 rejected=5 witnesses=10`; `STAGE_16_DISCOVERY_08_PROPERTIES_PASS direct=720 unique=720 cases=2880 mismatches=2880 accepted=1439 rejected=1441 giant=8`. आठ ऐतिहासिक expected-red पुरावे राखले, जुन्या 1–15 सर्व हरित tests व Canonical Names Lock PASS. पुढील एकमेव काम Stage 17 — PATCH 08; `HANDOFF_STAGE_16.md` पहा.
+
+## टप्पा 17/55 — PATCH 08
+
+`patch08Permutation(calculationDay,targetDay,dropValue)` हा आठव्या historical permutation-rank दोषासाठी स्वतंत्र corrected entrypoint आहे. मूळ `oldPermutationUnrank0(rank0)` आणि चुकीचा `discoverLegacyPermutation` यांना स्पर्श नाही. तीन चरण जाणीवपूर्वक स्वतंत्र आहेत: `oneBased=regularMod(drop-1,720)+1` → `legacyRank0=oneBased-1` → `oldPermutationUnrank0(legacyRank0)`. त्यांची branch trace, metrics, frozen order व per-call state स्वतंत्र साठवली जाते.
+
+`npm run test:patch08` मध्ये 17 canonical boundaries, पूर्ण 720 permutations, 3600 wraparound, 2048 seeded signed drops, 12 day-pairs मधील 552 नियमाधारित वास्तविक visible drops व विशाल bigint आहेत. आठही historical deliberately-red regressions अजून जपलेल्या आहेत. Stage 18 ची bowl alias दुरुस्ती **नाही**.
