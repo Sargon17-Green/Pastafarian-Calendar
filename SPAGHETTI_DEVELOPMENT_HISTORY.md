@@ -25,3 +25,7 @@ ni'o no balvi se srana pluta .e no balvi se srana tcita .e no balvi se srana dat
 ## stadi 2 — lo namcu jicmu poi se zbasu
 
 ni'o lo `MonsterArithmetic` cu se zbasu fi lo cnino Java se pilno samselpla gi'e na tcidu lo `NormativeOracle`. ri se pilno lo `BigInteger` .e lo `record WorkCounts` tezu'e lo nu stodi lo seljdima. lo `Stage02Tests` cu cipra lo pamoi detri .e lo mutce barda namcu .e lo frinu .e lo mod .e lo bidju namcu .e lo mutce barda se pilno namcu. lo balvi stadi pagbu cu na za'o mulno.
+
+### lo 46 rokci .e lo djacu drata
+
+ni'o lo `MonsterSauceDrops` cu se zbasu fi la Java po'o gi'e zbasu lo 46 rokci porsi .e lo 7 mipri djacu drata .e lo 46 se viska djacu drata. lo `Drops` cu stodi gi'e na se galfi sepi'o lo drata se benji. lo `Stage02DropsTests` cu srana lo `NormativeOracle` poi cipra po'o. lo ka lo se pilno ciste na tcidu lo normativi cipra cu se ralte. lo remoi stadi cu na se mulno.

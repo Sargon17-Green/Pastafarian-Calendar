@@ -38,3 +38,5 @@ jobs:
         run: sh run_stage01_tests.sh
       - name: Stage 02 arithmetic
         run: sh run_stage02_tests.sh
+      - name: Stage 02 stones and drops
+        run: sh run_stage02_drops_tests.sh

@@ -46,3 +46,15 @@ sh run_stage01_tests.sh
 sh run_stage02_tests.sh
 ```
 ni'o lo remoi stadi cu nitcu lo balvi zbasu be lo slabu narmanci se jicmu. lo `LAST_COMPLETED_STAGE` cu du li pa.
+
+## lo remoi stadi — lo rokci .e lo djacu drata
+
+ni'o lo `MonsterSauceDrops` cu zbasu lo 46 rokci porsi .e lo 7 mipri djacu drata .e lo 46 se viska djacu drata. lo se pilno stura cu pilno lo stodi `BigInteger` .e lo se sruri papri kopij. lo `prepare` cu cpacu lo se benji detri remei gi'e benji lo cnino `Drops` se ralte.
+
+ni'o lo `Stage02DropsTests` cu cipra ro rokci se namcu .e lo 7 mipri djacu drata .e lo 46 se viska djacu drata gi'e simsa lo `NormativeOracle` poi cipra po'o. ri cipra lo mutce barda namcu .e lo se benji se jorne .e lo frica se benji se ralte .e lo mutce so'i se benji ca lo pa mentu.
+
+```sh
+sh run_stage02_drops_tests.sh
+```
+
+ni'o lo remoi stadi na se mulno. lo djacu bliku .e lo selcu'a javni cu nitcu lo balvi zbasu.
