@@ -26,4 +26,20 @@ public final class MonsterManager {
         return errorBoundary.execute(() ->
             MonsterCutletCalendar.convert(calculationDay, targetDay));
     }
+
+    public MonsterCalendarResolver.PrefixRankedYear calendarWithPrefixRank(
+            BigInteger calculationDay, BigInteger targetDay,
+            int[] fixedPrefix, BigInteger localRank) {
+        return errorBoundary.execute(() ->
+            MonsterCalendarResolver.forTargetWithPrefixRank(
+                calculationDay, targetDay, fixedPrefix, localRank));
+    }
+
+    public MonsterCalendarResolver.GlobalPrefixRankedYear calendarWithGlobalPrefixRank(
+            BigInteger calculationDay, BigInteger targetDay,
+            int[] fixedPrefix, BigInteger globalRank) {
+        return errorBoundary.execute(() ->
+            MonsterCalendarResolver.forTargetWithGlobalPrefixRank(
+                calculationDay, targetDay, fixedPrefix, globalRank));
+    }
 }

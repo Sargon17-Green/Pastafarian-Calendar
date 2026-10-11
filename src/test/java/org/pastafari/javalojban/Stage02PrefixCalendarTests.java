@@ -130,6 +130,9 @@ public final class Stage02PrefixCalendarTests {
             eq(y.number(), selected.yearNumber(), "E_FOR_TARGET_YEAR");
             eq(MonsterCalendarResolver.fromBlueprintWithPrefixRank(bp, prefix, rank)
                     .atDay(t), selected.atDay(t), "E_FOR_TARGET_DATE");
+            MonsterCalendarResolver.PrefixRankedYear manager =
+                new MonsterManager().calendarWithPrefixRank(f, t, prefix, rank);
+            eq(selected.atDay(t), manager.atDay(t), "E_MANAGER_PREFIX_DATE");
         }
 
         fails("E_NULL_BLUEPRINT", () ->

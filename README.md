@@ -188,3 +188,7 @@ ni'o lo se steci pamoi pagbu be lo pamoi se jorne porsi cu se steci lo mulno nan
 ## lo se steci pamoi pagbu fi lo mulno nanca ranki
 
 ni'o lo `globalBlockForPrefix` cu facki lo mulno nanca ranki pe lo drani pagbu fi lo nu jmina lo ranki be ro lo se xanri pagbu poi prenu pagbu. lo `unrankGlobalWithinPrefix` .e lo `rankGlobalWithinPrefix` cu pilno lo stodi ranki fi lo se steci pagbu. lo `MAX_GLOBAL_PREFIX_BRANCH_COUNTS` cu du li 64 tezu'e lo nu curmi lo nu na se bai mutce barda mumymgu'i. lo `GlobalPrefixRankedYear` cu ralte lo se jicmu ranki .e lo selstura nanca detri. lo nu facki lo se steci pagbu fi lo se pilno mulno ranki cu na mulno. ko benji `sh run_stage02_internal_global_blocks_tests.sh`.
+
+## lo te benji jatna be lo se jmina nanca detri
+
+ni'o lo `MonsterManager.calendarWithPrefixRank` .e lo `MonsterManager.calendarWithGlobalPrefixRank` cu benji lo detri jalge fi lo `MonsterCalendarResolver` gi'e pagre lo `MonsterErrorBoundary`. lo mulno nanca te jicmu ranki cu se cuxna fi lo drani pagbu po'o; lo cnino samselpla na curmi lo nu lo mutce drata ranki cu se cuxna ro roi.

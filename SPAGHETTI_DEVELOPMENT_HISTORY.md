@@ -149,3 +149,7 @@ ni'o lo `BoundaryBlock` cu se zbasu fi lo pamoi .e lo romoi se jorne porsi. lo p
 ### lo se xanri pagbu pe lo mulno nanca ranki
 
 ni'o lo `globalBlockForPrefix` cu jmina lo namcu be ro lo prenu pagbu fi lo pamoi ranki be lo se steci pagbu. lo `BoundaryBlock` cu cpacu lo pamoi ranki .e lo romoi ranki. lo pagbu poi na du lo pamoi .a lo romoi pagbu cu kakne lo nu se jicmu ranki fi lo mulno nanca be li 5778 djedi. lo se jimte nu te cacra cu se stodi fi lo nanca te derxi pagbu be li 512 djedi .e lo mutce namcu se xanri pagbu poi na zmadu li 64.
+
+### lo nanca te benji ciste
+
+ni'o lo `MonsterManager` cu benji lo se steci pamoi pagbu ranki .e lo mulno nanca ranki fi lo se pilno `MonsterCalendarResolver`. lo `MonsterErrorBoundary` cu se pilno gi'e na zmadu lo se jmite te javni. lo `Stage02PrefixCalendarTests` .e lo `Stage02InternalGlobalBlocksTests` cu cipra lo manager te benji.

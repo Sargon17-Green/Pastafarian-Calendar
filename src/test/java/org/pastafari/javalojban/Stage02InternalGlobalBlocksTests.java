@@ -151,6 +151,11 @@ public final class Stage02InternalGlobalBlocksTests {
                 MonsterCalendarResolver.forTargetWithGlobalPrefixRank(
                     calc, day, prefix, globalRank);
             eq(resolved.atDay(day), viaTarget.atDay(day), "E_VIA_TARGET");
+            MonsterCalendarResolver.GlobalPrefixRankedYear viaManager =
+                new MonsterManager().calendarWithGlobalPrefixRank(
+                    calc, day, prefix, globalRank);
+            eq(viaTarget.atDay(day), viaManager.atDay(day), "E_MANAGER_GLOBAL_DATE");
+            eq(globalRank, viaManager.globalRank(), "E_MANAGER_GLOBAL_RANK");
         }
         int[] originalPrefix = resolved.fixedPrefixCopy();
         prefix[0] = 0;
