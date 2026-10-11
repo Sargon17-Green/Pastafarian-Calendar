@@ -147,3 +147,13 @@ interi oltre 16.000 bit, campioni deterministici, precondizioni del manager,
 isolamento tra invocazioni e cicatrici precedenti. Il CI esegue anche tutti
 i test nativi dei primi quattro stadi: Stage02 e Stage04 restano RED soltanto
 nei tre casi storici previsti per ciascuno.
+
+### Certificazione nativa dello stadio 5
+
+La [GitHub Actions run 38154485765](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154485765)
+è conclusa con SUCCESS sul commit
+`0e533d9f91929a01d7da4d44c31501d841bf992e`.
+Tutti i sei job sono riusciti: blocco dei nomi canonici, Stage01
+18 PASS, Stage02 7 PASS con 3 divergenze intenzionali, Stage03
+12 PASS, Stage04 14 PASS con 3 divergenze intenzionali e Stage05
+18 PASS senza errori. Lo stadio 6 non è stato iniziato.

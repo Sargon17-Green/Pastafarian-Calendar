@@ -197,4 +197,14 @@ di delta, snapshot immutabile, metrica propria e due percorsi
 indipendenti (diagnostico storico e patch verde). Nessuna correzione
 futura viene anticipata; PATCH 01 resta intatta.
 
-La prova nativa deve ancora essere certificata dal nuovo commit.
+### Verifica nativa compiuta
+
+GitHub Actions run 38154485765, commit
+`0e533d9f91929a01d7da4d44c31501d841bf992e`:
+tutti i sei job conclusi con SUCCESS. Stage01 18 PASS/0 FAIL;
+Stage02 7 PASS/3 FAIL deliberati; Stage03 12 PASS/0 FAIL;
+Stage04 14 PASS/3 FAIL deliberati; Stage05 18 PASS/0 FAIL.
+La suite di Stage05 ha verificato 8193 giorni contigui,
+512 giorni casuali deterministici, valori oltre 16.000 bit,
+stato per invocazione, validazione del delta e la presenza
+reale delle cicatrici legacy. Nessun codice Stage06 è presente.
