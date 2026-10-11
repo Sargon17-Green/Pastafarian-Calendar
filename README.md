@@ -596,7 +596,7 @@ funzionale indipendente dell'alias storico.
 sbt -batch 'Test / runMain pastafari.Stage16Tests'
 ```
 
-Firma intenzionalmente RED: `23 PASS, 3 FAIL`;
+Firma intenzionalmente RED: `25 PASS, 3 FAIL`;
 i soli tre confronti errati sono l'ordine diretto,
 l'ordine inverso e la goccia 46. Sono inclusi tutti i
 720 ranghi, 256 campioni deterministici, interi oltre

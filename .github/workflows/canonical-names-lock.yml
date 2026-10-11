@@ -387,8 +387,8 @@ jobs:
           set -e
           cat stage16.log
           test "$rc" -ne 0
-          grep -Fq 'RISULTATO STADIO 16: 23 PASS, 3 FAIL' stage16.log
-          test "$(grep -Fc 'PASS — ' stage16.log)" -eq 23
+          grep -Fq 'RISULTATO STADIO 16: 25 PASS, 3 FAIL' stage16.log
+          test "$(grep -Fc 'PASS — ' stage16.log)" -eq 25
           test "$(grep -Fc 'FAIL — ' stage16.log)" -eq 3
           for label in 'ordine diretto' 'ordine inverso' 'goccia quarantasei'; do
             grep -Fq "FAIL — equivalenza normativa mescolatura ${label} — Alias muta" stage16.log
