@@ -796,6 +796,58 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  audit-remotorum-gradus-56:
+    name: Annus remotus saved-sum Gradus 56 — ${{ matrix.annus }}
+    needs: custodia-arboris
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        annus: ['1', '0', '-1']
+    steps:
+      - name: Excerpere repository
+        uses: actions/checkout@v5
+      - name: Praeparare Boost
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+      - name: Compilare audit annorum remotorum
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build_stage56_far soak-logs
+          g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude -Itests -I. \
+            -c src/monster.cpp -o build_stage56_far/monster.o \
+            2>&1 | tee soak-logs/far-monster-build.log
+          g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude -Itests -I. \
+            -c tests/reference/normative_reference.cpp -o build_stage56_far/reference.o \
+            2>&1 | tee soak-logs/far-reference-build.log
+          g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude -Itests -I. \
+            tests/stage_56_far_year_saved_sum_worker.cpp \
+            build_stage56_far/monster.o build_stage56_far/reference.o \
+            -o build_stage56_far/worker \
+            2>&1 | tee soak-logs/far-worker-build.log
+      - name: Comparare primum et extremum diem
+        shell: bash
+        env:
+          ANNUS: ${{ matrix.annus }}
+        run: |
+          set -euo pipefail
+          timeout 80m build_stage56_far/worker "$ANNUS" \
+            2>&1 | tee "soak-logs/stage56-far-year-$ANNUS.log"
+      - name: Servare evidentiam
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cpp-latina-stage56-far-${{ matrix.annus }}
+          path: soak-logs/
+          if-no-files-found: warn
+          retention-days: 30
+
   sententia-finalis:
     name: Sententia finalis vigiliae
     if: always()
@@ -807,6 +859,7 @@ jobs:
       - differential-decemplum
       - sanitatores
       - soak-repetitionis
+      - audit-remotorum-gradus-56
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -822,6 +875,7 @@ jobs:
           differential-decemplum=${{ needs.differential-decemplum.result }}
           sanitatores=${{ needs.sanitatores.result }}
           soak-repetitionis=${{ needs.soak-repetitionis.result }}
+          audit-remotorum-gradus-56=${{ needs.audit-remotorum-gradus-56.result }}
           EOF
 
           for status in \
@@ -831,7 +885,8 @@ jobs:
             '${{ needs.matrix-gradus-56.result }}' \
             '${{ needs.differential-decemplum.result }}' \
             '${{ needs.sanitatores.result }}' \
-            '${{ needs.soak-repetitionis.result }}'; do
+            '${{ needs.soak-repetitionis.result }}' \
+            '${{ needs.audit-remotorum-gradus-56.result }}'; do
             [[ "$status" == 'success' ]] || {
               echo 'VIGILIA_SOAK=DEFECIT'
               exit 1
