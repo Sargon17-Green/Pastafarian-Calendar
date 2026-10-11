@@ -21,7 +21,7 @@ for _, x in ipairs(checks) do
     local public = S.dayTagSpaghetti(day)
     local normative = B.from(O.dayCount(day))
     assert(tostring(observed) == wrong, name .. ": rès istorik la")
-    assert(B.compare(observed, public) == 0, name .. ": dispatcher pa aktive")
+    assert(B.compare(public, normative) == 0, name .. ": PATCH 02 pa aktive")
     assert((B.compare(observed, normative) ~= 0) == differs, name .. ": move diferans la")
     assert(context.phase == "LEGACY_DAY_TAG" and context.mode == "STAGE_04_DISCOVERY_02")
     assert(context.status == "LEGACY_DAY_TAG_RETURNED")

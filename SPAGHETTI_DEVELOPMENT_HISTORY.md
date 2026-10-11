@@ -89,3 +89,19 @@ Nou ajoute yon dispatcher handler `LEGACY_DAY_TAG`, ak nouvo kontèks tranzaksyo
 ### Prèv ak etap ki manke
 
 Tès yo egzamine 631 antre, simetri ansyen fòmil la, izolasyon ant invocation, API ak tras dispatcher, epi yo egzije egzakteman kat divergences nan regresyon wouj la. Tout tès Stage 1–3 dwe toujou pase. Nou pa ajoute koreksyon +1 pou jou Fondasyon an ak apre li, ni guard espesyal sa a: de kouch sa yo fè pati **Stage 5 — PATCH 02** sèlman.
+
+## Stage 5 — PATCH 02: nimewo jou yo reprann parite normatif la
+
+### Sa nou korije
+
+Ansyen `oldDayTag` la te retounen de fwa valè absoli distans ak jou Fondasyon an, ki kreye nimewo pè sou toude bò Fondasyon an. Li te bay `0` sou Fondasyon an, alòske nimewo normatif la se `1`; pou tout jou apre Fondasyon an, li te manke yon inite. Nou pa efase ni chanje ansyen fonksyon sa a.
+
+### Kouch reparasyon an
+
+Nou ajoute `dayTagWithFoundationScar(day)` ki rele `LegacyDayTag.oldDayTag(day)`, ajoute `1` lè jou a nan Fondasyon an oswa apre li, epi *kenbe yon guard adisyonèl* lè `day == FOUNDATION` epi valè a pa `1`. Guard la redondan apre adisyon an, men li se yon chikatris istorik obligatwa. Nou sèvi ak BigInt egzak pou pa melanje debòdman Lua ak erè sa a.
+
+Yon handler `DAY_TAG_PATCH` vin apre `LEGACY_DAY_TAG` nan menm kontèks, ak de commit tranzaksyon, etap tras diferan, estatistik pou koreksyon parite, estatistik pou verifikasyon guard la, ak dyagnostik ki montre ansyen ak nouvo valè. Nou kenbe `legacyDayTagProbe` ak `dayTagPatchProbe` apa. Fonksyon `dayTagSpaghetti` la kounye a bay valè ki korije a.
+
+### Prèv ak sa nou pa fè
+
+Regresyon normatif Stage 4 la vin vèt; yon nouvo regresyon endepandan sou chemen legacy a kontinye echwe egzakteman sou kat jou Discovery 02 a, epi odit la verifye tèks erè sa a. Tout tès Stage 1–4 yo rete aktif. Yon seri 2,325 jou ak limit Lua yo egzamine parite, presizyon, dispatcher, metrik ak pwopriyetè eta. Nou pa entwodui okenn eleman `oldDistance` oswa patch pou etap ki vin apre yo.

@@ -15,7 +15,8 @@ local function verify(day, label, useOracle)
     local distance = B.abs(B.sub(B.from(day), FB))
     local twice = B.mulSmall(distance, 2)
     assert(B.compare(result, twice) == 0, label .. ": kalkil legacy a")
-    assert(B.compare(public, twice) == 0, label .. ": wout pwodiksyon an")
+    assert(B.compare(public, day >= F and twice + B.from(1) or twice) == 0,
+           label .. ": wout pwodiksyon ki korije a")
     assert(B.compare(direct, twice) == 0, label .. ": kalkil dirèk la")
     assert(B.compare(result, 0) >= 0, label .. ": rezilta negatif")
     assert(B.mod(result, 2):isZero(), label .. ": legacy a pa pè")
@@ -24,6 +25,7 @@ local function verify(day, label, useOracle)
         local expected = B.from(O.dayCount(day))
         local divergent = B.compare(result, expected) ~= 0
         assert(divergent == (day >= F), label .. ": plas divèjans la")
+        assert(B.compare(expected, public) == 0, label .. ": PATCH 02 pa bay rezilta normatif la")
         assert(B.compare(expected, day >= F and result+B.from(1) or result) == 0,
                label .. ": diferans la pa egzakteman youn")
         if divergent then divergences = divergences + 1 end
@@ -48,8 +50,8 @@ end
 
 -- Verifye simetri legacy a toutotou Fondasyon an.
 for offset = 0, 64 do
-    local left = S.dayTagSpaghetti(F - offset)
-    local right = S.dayTagSpaghetti(F + offset)
+    local left = S.legacyDayTagProbe(F - offset)
+    local right = S.legacyDayTagProbe(F + offset)
     assert(B.compare(left, right) == 0, "Distans legacy a pèdi simetri li")
 end
 

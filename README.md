@@ -101,4 +101,18 @@ texlua test/stage04_expected_red_audit.lua .
 
 Tès pwopriyete yo kouvri 631 jou egzak, ladan yo 501 jou ozalantou Fondasyon an, 128 jou detèminis, ak de valè ekstremal antye Lua; yo verifye tou 65 pè simetrik. Yo pèmèt detekte erè presizyon, eta ki koule ak koreksyon prematire.
 
-Nan eta Discovery 02 sa a, `texlua test/stage04_tests.lua .` oubyen `texlua test/stage04_regression_tests.lua .` dwe fini ak `EXPECTED_RED Stage 4 DISCOVERY 02` ki nonmen egzakteman kat ka: `FOUNDATION`, `AFTER_1`, `AFTER_2`, `AFTER_20`. Echèk la obligatwa jiskaske PATCH 02 rive nan Stage 5. CI a rapòte wouj entansyonèl sèlman nan travay `lua_stage04_discovery`; tès tout etap anvan yo rete vèt.
+Nan eta Discovery 02 sa a, `texlua test/stage04_tests.lua .` oubyen `texlua test/stage04_regression_tests.lua .` dwe fini ak `EXPECTED_RED Stage 4 DISCOVERY 02` ki nonmen egzakteman kat ka: `FOUNDATION`, `AFTER_1`, `AFTER_2`, `AFTER_20`. Echèk la obligatwa jiskaske PATCH 02 rive nan Stage 5. Nan checkpoint Stage 4 la, CI te rapòte wouj entansyonèl nan travay `lua_stage04_discovery`; depi PATCH 02, tout travay CI yo dwe vèt epi odit istorik legacy a rete disponib.
+
+## Stage 5 — PATCH 02: parite nimewo jou yo
+
+Nou kite `src/legacy_day_tag.lua` san okenn chanjman. Nou ajoute `src/day_tag_patch.lua` pou aplike *egzakteman* koreksyon preskri a: pran `oldDayTag(day)`, ajoute yon inite si `day >= FOUNDATION`, epi tcheke yon **dezyèm guard istorik** sou jou Fondasyon an; si rezilta a pa `1`, fòse li tounen `1`. Guard sa a rete nan kòd la menm si premye kondisyon an deja fè li retounen `1`.
+
+`dayTagSpaghetti(day)` kounye a retounen tag normatif la. `dayTagPatchProbe(day)` kenbe rezilta koreksyon an ak kontèks, epi `legacyDayTagProbe(day)` kontinye bay ansyen rezilta pè a. Dispatcher la anrejistre `LEGACY_DAY_TAG` anvan `DAY_TAG_PATCH`, epi li itilize de komèt eta semantik ki posede separeman, metrik ak dyagnostik diferan. Nou pa itilize oracle tès la nan production. PATCH 01 pou `SAVE` rete entak.
+
+Nou adapte tès Stage 4 yo pou fè regresyon pwodiksyon an vèt, pandan odit `EXPECTED_RED` la toujou verifye kat diferan rezilta istorik yo lè li rele **chemen legacy a**. Sa konsève prèv Discovery 02 la san li pa bloke Stage 5. Tès Stage 5 la egzamine 2,001 jou youn apre lòt sou baryè Fondasyon an, 320 lòt jou repwodiktib ak kat valè toupre limit antye Lua; li verifye de tras dispatcher, guard la, izolasyon, parite ak egalite ak oracle test-only la.
+
+```text
+texlua test/stage05_tests.lua .
+```
+
+Tout tès yo dwe pase (`GREEN`). Nou pa ajoute `oldDistance` ni okenn lòt eleman Stage 6 oswa Stage 7.

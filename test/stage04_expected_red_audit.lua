@@ -2,10 +2,10 @@ local root = arg[1] or "."
 package.path = root .. "/src/?.lua;" .. root .. "/test/?.lua;" .. package.path
 local previousArg = arg
 arg = {root}
-local chunk = assert(loadfile(root .. "/test/stage04_regression_tests.lua"))
+local chunk = assert(loadfile(root .. "/test/stage04_legacy_regression_tests.lua"))
 local ok, message = pcall(chunk)
 arg = previousArg
-assert(not ok, "Discovery 02 pa montre diferans istorik ki obligatwa yo")
+assert(not ok, "Ansyen chemen Discovery 02 pa montre diferans istorik yo ankò")
 assert(type(message) == "string")
 local expected = "EXPECTED_RED Stage 4 DISCOVERY 02: 4 ka dayTag pa ekivalan: " ..
                  "FOUNDATION: legacy=0 normative=1; " ..

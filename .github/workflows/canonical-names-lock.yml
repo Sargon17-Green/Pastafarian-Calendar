@@ -58,7 +58,7 @@ jobs:
           set -euo pipefail
           lua5.3 test/stage03_tests.lua .
 
-  lua_stage04_discovery:
+  lua_stage05_patch:
     if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -70,16 +70,15 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y lua5.3
-      - name: Verifye tras ak pwopriyete Discovery 02
+      - name: Verifye sentaks Lua ak kadna legacy yo
         shell: bash
         run: |
           set -euo pipefail
-          lua5.3 test/stage04_trace_tests.lua .
-          lua5.3 test/stage04_property_tests.lua .
-          lua5.3 test/stage04_scope_tests.lua .
-          lua5.3 test/stage04_expected_red_audit.lua .
-      - name: Regresyon nimewo jou a — echèk istorik espere
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_day_tag.lua)" = ccf1111ea51ec059ee3214a53a14e201e602ddfd
+          test "$(git hash-object src/legacy_save.lua)" = 86d8bee9f0976c6f0394de96bf0d23d31c505ecd
+      - name: Kouri tout tès Stage 1 rive Stage 5
         shell: bash
         run: |
           set -euo pipefail
-          lua5.3 test/stage04_regression_tests.lua .
+          lua5.3 test/stage05_tests.lua .
