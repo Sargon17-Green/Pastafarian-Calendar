@@ -55,3 +55,11 @@ ni'o lo 47 masti cu ralte lo 5778 djedi fi lo `46*123+120` .i lo GitHub Actions 
 ## lo to'e se zbasu se cuxna
 
 ni'o lo `count` cu na se du lo `unrank1`. lo `MonsterWeavingLinearCounter` cu na fanva lo ranki fi lo mulno 5778 djedi. lo `MonsterCanonicalWeaving` cu za'o se jimte li 384 djedi .i lo `MonsterCalendarResolver` cu nitcu lo se cuxna `weaving`. seni'i lo remoi stadi cu za'o na se mulno.
+
+## lo lexicographic ranki se cuxna
+
+ni'o lo `unrank1` cu cfari fi lo `count` .e lo `rank`. ro `id` poi te porsi fi lo cmalu `id` cu se cipra fi lo `countSuffix` va'o lo nu lo `id` cu se jmina lo se cuxna prefix. lo ranki cu se vimcu lo se namcu be lo na se cuxna pagbu, gi'e cuxna lo pamoi pagbu poi vasru lo ranki.
+
+ni'o lo `rank1` cu cfari fi li pa .i ri cu jmina lo se namcu be ro pagbu poi se te porsi purci lo se cuxna `id`. seni'i lo se xruti ranki cu du lo cfari ranki fi lo drani `unrank1` .i lo drani prefix cu se facki fi lo `opened` .e lo `closed` se jicmu.
+
+ni'o lo `MAX_UNRANK_DAYS` cu du li 512 .i lo `MAX_DAYS` be lo `count` cu du li 5778 .i lo GitHub Actions run `38164930943` cu se cipra lo lexicographic ranki .i lo run `38165113120` cu se cipra lo vo moi kabri .e lo 32 moi tcita, lo 492 .e lo 512 djedi se namcu. lo 5778 djedi unrank cu za'o na se zbasu.

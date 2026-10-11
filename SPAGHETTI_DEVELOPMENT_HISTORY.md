@@ -121,3 +121,7 @@ ni'o lo `MonsterWeavingEndpointDP` cu se galfi fi lo `terminalInsertTotal` .i lo
 ### lo 5778 djedi se namcu — PASS
 
 ni'o lo `MonsterWeavingLinearCounter` cu facki lo drani se jorna porsi se namcu fi lo pa judri se jicmu .i lo 47 masti be lo 5778 djedi cu snada lo te cipra fi lo Java `-Xmx256m` .i lo GitHub Actions run `38164523435` cu benji lo `STAGE_02_LINEAR_WEAVING_PASS` .i lo remoi stadi cu za'o na mulno ki'u lo nu lo ranki se cuxna cu za'o se jimte.
+
+### lo se cuxna masti porsi be li 512 djedi — PASS
+
+ni'o lo `MonsterWeavingLinearCounter` cu zbasu lo `rank1` .e lo `unrank1` be li 512 djedi .i lo `MonsterCanonicalWeaving` cu benji lo vo moi kabri .e lo 32 moi tcita fi lo pa se stika sampla .i lo run `38164930943` .e lo run `38165113120` cu drani .i lo 5778 djedi se namcu cu drani .i lo mulno cuxna be li 5778 djedi cu za'o na drani.

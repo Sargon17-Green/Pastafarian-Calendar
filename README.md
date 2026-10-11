@@ -160,3 +160,7 @@ ni'o lo pa se stika masti namcu te javni cu se ciska fi `WEAVING_LINEAR_PROOF.md
 ni'o lo `MonsterWeavingLinearCounter.unrank1` .e lo `rank1` cu se pilno fi lo drani se jmite porsi be li 512 djedi .i lo 5778 djedi count cu za'o drani .i lo drata ranki be lo mulno nanca cu za'o nitcu lo balvi se zbasu.
 
 ni'o lo `MonsterCanonicalWeaving` cu pilno lo `MonsterWeavingLinearCounter` fi lo 512 djedi cuxna .i lo vo moi kabri .e lo 32 moi tcita cu se stodi .i lo mutce barda nanca cuxna cu za'o nitcu lo balvi cipra.
+
+## lo remoi stadi se jmite pe lo ca detri
+
+ni'o lo narmanci count be lo 5778 djedi cu se zbasu .i lo `MonsterCanonicalWeaving` cu cuxna lo drani ranki fi lo 512 djedi po'o, sepi'o lo vo moi kabri .e lo 32 moi tcita. lo `MonsterCalendarResolver` cu nitcu lo se cuxna masti porsi. lo mulno nanca se cuxna cu na se zbasu ca ti .i lo `CURRENT_STAGE` cu du li re .i lo `LAST_COMPLETED_STAGE` cu du li pa.
