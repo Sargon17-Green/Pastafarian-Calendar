@@ -32,10 +32,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install pinned V 0.5.2
+      - name: Install released V 0.5.2 (tag 7647ce1)
         uses: vlang/setup-v@v1.7
         with:
-          version: '7647ce1'
+          version: '0.5.2'
       - name: Verify V version and source formatting
         shell: bash
         run: |
