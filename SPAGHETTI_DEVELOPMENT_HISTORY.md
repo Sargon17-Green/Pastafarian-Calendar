@@ -407,4 +407,18 @@ campi nel contesto, validazione deterministica di output,
 report a due tabelle, metrica di PATCH 04, diagnostica
 storica e regressioni specifiche per proprietà dello stato.
 
-Certificazione nativa da acquisire; Stage10 non iniziato.
+### Verifica nativa compiuta
+
+La run GitHub Actions 38158857156 ha compilato ed eseguito
+Scala nativo sul commit
+`bbe7759af121e08f81b18d2b8c0de243741266e7`.
+Tutti i dieci job sono SUCCESS: Stage01 18 PASS;
+Stage02 7 PASS/3 FAIL deliberati; Stage03 12 PASS;
+Stage04 14 PASS/3 FAIL deliberati; Stage05 18 PASS;
+Stage06 15 PASS/3 FAIL deliberati; Stage07 20 PASS;
+Stage08 19 PASS/3 FAIL deliberati; Stage09 26 PASS/0 FAIL.
+
+La suite Stage09 confronta tutte le 230 pietre con l'oracolo,
+dimostra che il wrapper non prende le righe successive
+dalla tabella errata, e protegge isolamento, metriche
+e percorso del dispatcher. Non è stato avviato lo stadio 10.

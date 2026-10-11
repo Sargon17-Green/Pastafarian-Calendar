@@ -288,3 +288,19 @@ Sono attesi `26 PASS, 0 FAIL`: confronto integrale di 230
 pietre con l'oracolo test-only, ricorrenza di ogni riga,
 resistenza alla corruzione delle righe legacy successive,
 isolamento, precondizioni e regressioni dei primi otto stadi.
+
+### Certificazione nativa dello stadio 9
+
+La [GitHub Actions run 38158857156](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38158857156)
+si è conclusa con SUCCESS sul commit
+`bbe7759af121e08f81b18d2b8c0de243741266e7`.
+Tutti e dieci i job sono riusciti: blocco del catalogo;
+Stage01 18 PASS; Stage02 7 PASS/3 FAIL attesi;
+Stage03 12 PASS; Stage04 14 PASS/3 FAIL attesi;
+Stage05 18 PASS; Stage06 15 PASS/3 FAIL attesi;
+Stage07 20 PASS; Stage08 19 PASS/3 FAIL attesi;
+Stage09 26 PASS/0 FAIL.
+
+Sono state verificate tutte le 230 pietre nelle 46 righe.
+L'adattatore storico rimane inalterato e il risultato non corretto
+resta percorribile nel suo diagnostico. Lo stadio 10 non è iniziato.
