@@ -2,15 +2,16 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   @moduledoc """
   Bộ phân phối sản xuất duy trì các nhánh SAVE và nhãn ngày đã được vá.
 
-  Hai nhãn ngày đã được vá. Khoảng cách đi qua DistancePatch. Bảng đá được tính trong cùng
-  ngữ cảnh bằng LegacyStoneMutation sai của lần phát hiện 04.
-  Không có bản vá 04 hay ngày lịch cuối cùng.
+  Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
+  Bảy giọt ẩn được tính đúng nhưng lưu theo thứ tự đảo ngược;
+  bản vá 05 và việc tích hợp ngày lịch chưa được triển khai.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     Context,
     DayCountManager,
     DistanceManager,
+    HiddenDropManager,
     Metrics,
     SaveManager,
     StoneManager,
@@ -25,6 +26,15 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     target_tag = DayCountManager.tag(target_day)
     corrected_distance = DistanceManager.calculate(calculation_day, target_day)
     stones_table = StoneManager.build_table()
+    hidden_storage =
+      HiddenDropManager.build_storage(
+        calculation_day,
+        target_day,
+        calculation_tag,
+        target_tag,
+        corrected_distance,
+        stones_table
+      )
 
     %Context{
       calculation_day: calculation_day,
@@ -33,6 +43,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       target_day_tag: target_tag,
       distance_count: corrected_distance,
       stones_table: stones_table,
+      hidden_drops_storage: hidden_storage,
       phase: :bootstrap,
       status: :validated,
       branch_trace: [:entry, :validated, :legacy_day_count, :day_tag_patch_02],
@@ -52,4 +63,13 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   def stones_table, do: StoneManager.build_table()
   def stone_row(index), do: StoneManager.row_at(index)
+
+  def hidden_drops(calculation_day, target_day) do
+    bootstrap(calculation_day, target_day).hidden_drops_storage
+  end
+
+  def hidden_drop(calculation_day, target_day, number) do
+    storage = hidden_drops(calculation_day, target_day)
+    HiddenDropManager.read(storage, number)
+  end
 end

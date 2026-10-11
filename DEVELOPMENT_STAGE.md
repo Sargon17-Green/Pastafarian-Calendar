@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=9
-CURRENT_KIND=PATCH
-CURRENT_PATCH=04
+CURRENT_STAGE=10
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=05
 LAST_COMPLETED_STAGE=9
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyStoneMutation sai. StonePatch chụp hàng cũ, chạy legacy trên clone, rồi ghi đè cả năm ô từ snapshot; StoneManager đưa kết quả vá vào đường sản xuất.
+MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-04; thêm HiddenDropCalculator tính đúng 7 giọt ẩn, LegacyHiddenStorage lưu tuple từ hidden7 đến hidden1; đường truy cập trực tiếp theo số giọt cố ý sai.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_09_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_10_PENDING
+GIT_HISTORY_MUTATED=STAGE_10_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=88
-CI_FAILURES=0
+CI_TESTS=STAGE_10_PENDING
+CI_FAILURES=STAGE_10_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -140,3 +140,12 @@ Bốn tệp triển khai và kiểm thử đã đối chiếu khớp bản bàn 
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38159415842
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38159415828
 Giai đoạn 9 đóng GREEN; tiếp theo là giai đoạn 10, DISCOVERY 05.
+
+Giai đoạn 10 tính bảy giọt ẩn chính xác bằng các tham số theo ngày,
+bảng đá 46 hàng đã vá, hệ số ẩn và bảy lần nghiền.
+LegacyHiddenStorage lưu chúng theo thứ tự hidden7 đến hidden1,
+nhưng đọc trực tiếp theo vị trí mà chưa áp dụng ánh xạ 8-k.
+Giọt số 4 tình cờ khớp chuẩn; bốn hồi quy số 1, 2, 3, 7
+dự kiến cố ý đỏ. 13 kiểm thử mới, tổng 101, đúng 4 thất bại.
+Không thêm bản vá 05 thuộc giai đoạn 11.
+LAST_COMPLETED_STAGE giữ 9 cho tới khi bằng chứng CI hoàn tất.

@@ -256,3 +256,27 @@ Mã `LegacyStoneMutation` của giai đoạn 8 giữ nguyên blob SHA.
 Trạng thái giai đoạn 9/55: `GREEN` đã xác minh.
 Giai đoạn 10/55 kế tiếp: `DISCOVERY 05`, cách lưu bảy giọt
 ẩn theo thứ tự đảo ngược. Không đưa bản vá 05 vào giai đoạn 9.
+
+## Giai đoạn 10 — Phát hiện 05: lưu ngược bảy giọt ẩn
+
+Bảy giọt ẩn được tính từ năm bộ đếm công việc, bảng đá đã vá,
+bảy hàng hệ số và bảy phép nghiền. `HiddenDropCalculator` dùng
+đúng số học và lớp SAVE đã hoàn thành. Các giá trị được tính
+bằng mã sản xuất riêng, không dùng bộ tham chiếu kiểm thử.
+
+Lỗi lịch sử của lần phát hiện 05 thuộc `LegacyHiddenStorage`:
+tuple lưu theo thứ tự `hidden7, hidden6, ..., hidden1`, nhưng
+`read_as_if_forward(storage, k)` vẫn đọc vị trí `k` thay vì
+địa chỉ tương ứng với tên giọt. Sai lệch xảy ra ở giọt 1, 2, 3,
+5, 6 và 7. Giọt số 4 là đối chứng vô tình đúng.
+
+Đường công khai `hidden_drop_spaghetti(c,t,k)` đi qua
+`HiddenDropManager` và `LegacyHiddenStorage`. Đồng thời
+`bootstrap_context(c,t)` lưu tuple thô trong
+`hidden_drops_storage`. Chưa dùng các giọt này để điều phối
+46 giọt nhìn thấy hoặc lịch cuối cùng.
+
+Bốn hồi quy chuẩn của giai đoạn khám phá thử các giọt 1, 2, 3, 7
+và cố ý thất bại, trong khi kiểm thử độc lập xác nhận cả bảy
+giá trị của tuple theo đúng thứ tự đảo. **Không thêm bản vá 05**:
+phép ánh xạ truy cập `8-k` thuộc riêng giai đoạn 11.

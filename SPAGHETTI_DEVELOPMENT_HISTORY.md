@@ -234,3 +234,36 @@ không cảnh báo biên dịch, khóa tên chuẩn PASS độc lập.
 `LegacyStoneMutation` giữ blob SHA
 `91260b89961571e9c96a0f0e563c27115c1aa697`.
 Giai đoạn 9 khép GREEN.
+
+## Giai đoạn 10 — Phát hiện 05: đảo thứ tự lưu trữ giọt ẩn
+
+**Điều từng được tin:** Bộ lưu trữ bảy giọt dùng tuple theo
+thứ tự `hidden7, hidden6, ..., hidden1`, nhưng phần đọc cũ
+lại giả định `hidden1` nằm ở ô đầu. Hàm cũ đọc ô `k` cho
+giọt ẩn mang tên `k`.
+
+**Giá trị đúng và chỗ sai:** `HiddenDropCalculator` tự tính
+chính xác bảy giọt, dùng năm đếm công việc, hệ số riêng cho
+mỗi giọt, bảy lần nghiền cùng các giá trị đá từ bảng chuẩn.
+Không phải lỗi tính số. Sai số xuất hiện khi
+`LegacyHiddenStorage.store_reversed` đưa hidden7 vào ô 1
+và `read_as_if_forward` đọc trực tiếp ô đó như hidden1.
+Ô giữa dành cho hidden4 là đối chứng khớp tình cờ.
+
+**Đường thực thi sản xuất:** `hidden_drop_spaghetti →
+Dispatcher.hidden_drop → HiddenDropManager.read →
+LegacyHiddenStorage.read_as_if_forward`. Bảng ban đầu được
+xây qua `HiddenDropManager.build_storage →
+HiddenDropCalculator.calculate → SaveManager.calculate`
+và sau đó được đảo trong `LegacyHiddenStorage.store_reversed`.
+`bootstrap_context` tự sở hữu bản tuple cho mỗi lần gọi.
+
+**Giới hạn lịch sử:** Giữ nguyên việc lưu đảo ngược và việc
+đọc sai. Không xây bộ truy cập vá địa chỉ 8-k; việc sửa thuộc
+giai đoạn 11. Không mở nhánh lỗi đọc lịch sử ẩn/hiện của
+giai đoạn 12 trước hạn.
+
+**Kiểm thử:** Thêm 13 kiểm thử mới, bốn hồi quy chuẩn mong đợi
+đỏ tại giọt 1, 2, 3 và 7. Kiểm thử kiểm soát xác minh số học
+đúng, thứ tự đảo, giọt giữa đúng, tính độc lập của context,
+số nguyên rất lớn, lỗi đầu vào và các bản vá 01-04.
