@@ -376,3 +376,20 @@ i tre casi RED storici, BigInt oltre 16.000 bit,
 512 campioni deterministici, input invalidi,
 isolamento e le quattro patch precedenti. Stage10
 resta volutamente RED. Non è anticipato lo stadio 12.
+
+### Certificazione nativa dello stadio 11
+
+La [GitHub Actions run 38162946752](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38162946752)
+è conclusa con SUCCESS sul commit
+`47c2d8673650270c4bfec543f50cdd7405460bcd`.
+Tutti i dodici job sono riusciti: blocco del catalogo,
+Stage01 18 PASS; Stage02 7 PASS/3 FAIL attesi;
+Stage03 12 PASS; Stage04 14 PASS/3 FAIL attesi;
+Stage05 18 PASS; Stage06 15 PASS/3 FAIL attesi;
+Stage07 20 PASS; Stage08 19 PASS/3 FAIL attesi;
+Stage09 26 PASS; Stage10 15 PASS/3 FAIL attesi;
+Stage11 27 PASS/0 FAIL.
+
+Lo stesso risultato è stato verificato contro 47 finestre
+e tre ritardi, con 512 campioni deterministici. Il codice
+del helper storico non è stato alterato; Stage12 non iniziato.

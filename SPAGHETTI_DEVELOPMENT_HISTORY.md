@@ -513,5 +513,21 @@ Wrapper, handler, fase, due campi nel contesto,
 validator indipendente per i due output, report
 doppio e metrica di patch. Tutte le cicatrici e
 le patch precedenti restano osservabili.
-La certificazione nativa deve essere acquisita
-prima di chiudere lo stadio.
+### Verifica nativa compiuta
+
+La run GitHub Actions 38162946752 ha compilato ed eseguito
+Scala nativo sul commit
+`47c2d8673650270c4bfec543f50cdd7405460bcd`.
+Tutti i dodici job sono SUCCESS: Stage01 18 PASS,
+Stage02 7 PASS/3 FAIL deliberati, Stage03 12 PASS,
+Stage04 14 PASS/3 FAIL deliberati, Stage05 18 PASS,
+Stage06 15 PASS/3 FAIL deliberati, Stage07 20 PASS,
+Stage08 19 PASS/3 FAIL deliberati, Stage09 26 PASS,
+Stage10 15 PASS/3 FAIL deliberati e Stage11
+27 PASS senza errori.
+
+Sono stati verificati sia il vero percorso legacy sia
+il PATCH 05, tutte le 47 finestre dei tre ritardi,
+512 campioni deterministici, grandi interi, invarianti
+di ownership e validazione indipendente. Il helper
+`legacyPrior` rimane immutato.
