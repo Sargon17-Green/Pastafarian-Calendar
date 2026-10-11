@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace PastafarianCalendar.Monster;
 
 public sealed class MonsterValidationException : Exception
@@ -29,11 +31,13 @@ public sealed class MonsterDispatcher
 {
     private readonly MonsterValidationManager _validation;
     private readonly MonsterMetricsManager _metrics;
+    private readonly LegacySavePhaseHandler _legacySave;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
         _validation = validation;
         _metrics = metrics;
+        _legacySave = new LegacySavePhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -44,6 +48,19 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "bootstrap.dispatch");
         context.Status = "BOOTSTRAP_READY";
         context.Phase = "BOOTSTRAP_READY";
+    }
+
+    public void DispatchLegacySave(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("لم يكتمل تأسيس السياق قبل الحفظ القديم.");
+
+        context.Phase = "LEGACY_SAVE";
+        context.BranchTrace.Add("LEGACY_SAVE");
+        _legacySave.Handle(context);
+        _metrics.Bump(context, "legacy.save.dispatch");
+        context.Status = "LEGACY_SAVE_COMPLETE";
+        context.Phase = "LEGACY_SAVE_COMPLETE";
     }
 }
 
@@ -58,10 +75,19 @@ public sealed class MonsterManager
         _dispatcher = new MonsterDispatcher(validation, metrics);
     }
 
-    public MonsterContext Prepare(System.Numerics.BigInteger calculationDay, System.Numerics.BigInteger targetDay)
+    public MonsterContext Prepare(BigInteger calculationDay, BigInteger targetDay)
     {
         var context = new MonsterContext(calculationDay, targetDay) { RetryBudget = 0 };
         _dispatcher.DispatchBootstrap(context);
         return context;
+    }
+
+    public BigInteger EvaluateLegacySave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacySaveInput = value;
+        _dispatcher.DispatchLegacySave(context);
+        return context.LegacySaveResult
+            ?? throw new MonsterValidationException("لم يُنتج مسار الحفظ القديم قيمة.");
     }
 }

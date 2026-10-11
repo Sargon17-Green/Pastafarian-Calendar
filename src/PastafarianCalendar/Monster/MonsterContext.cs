@@ -1,9 +1,11 @@
+using System.Numerics;
+
 namespace PastafarianCalendar.Monster;
 
 public sealed class MonsterContext
 {
-    public System.Numerics.BigInteger CalculationDay { get; init; }
-    public System.Numerics.BigInteger TargetDay { get; init; }
+    public BigInteger CalculationDay { get; init; }
+    public BigInteger TargetDay { get; init; }
     public string Phase { get; set; } = "BOOT";
     public string Status { get; set; } = "NEW";
     public int RetryBudget { get; set; }
@@ -14,7 +16,11 @@ public sealed class MonsterContext
     public List<string> Diagnostics { get; } = new();
     public List<string> ValidationFailures { get; } = new();
 
-    public MonsterContext(System.Numerics.BigInteger calculationDay, System.Numerics.BigInteger targetDay)
+    // تنتمي القيمتان إلى استدعاء واحد، ولا تمثلان سجلًا مشتركًا بين الاستدعاءات.
+    public BigInteger? LegacySaveInput { get; set; }
+    public BigInteger? LegacySaveResult { get; set; }
+
+    public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
         TargetDay = targetDay;

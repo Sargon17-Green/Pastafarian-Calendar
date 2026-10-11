@@ -1,0 +1,21 @@
+name: اكتشاف الخلل الأول في الحفظ
+
+on:
+  push:
+    branches:
+      - 'C#+العربية-الفصحى'
+  workflow_dispatch:
+
+jobs:
+  discovery_01:
+    name: فروق الحفظ المتوقعة في الطور الثاني
+    runs-on: ubuntu-latest
+    steps:
+      - name: جلب المصدر
+        uses: actions/checkout@v5
+      - name: تثبيت بيئة دوت نت
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: تشغيل اختبارات الاكتشاف دون إخفاء إخفاقها
+        run: dotnet run --project tests/PastafarianCalendar.Stage02Tests/PastafarianCalendar.Stage02Tests.csproj --configuration Release
