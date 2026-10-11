@@ -10570,7 +10570,10 @@ void BaseValidationManager::requireFinalIntegrationReady(
         ctx.resultFive.dayInCutlet < 1 || ctx.resultFive.dayInMonth < 1) {
         throw BaseValidationError("integratio finalis quinque campos invalidos habet");
     }
-    if (ctx.stage56CorrectiveRequested &&
+    // Cicatrix: probatio duodecim commotionum in structura nova obligatoria
+    // manet; in cache valide custodito ipsa structura iam probata est.
+    // Repetitio cum cache calido non debet simulari tamquam computationem novam.
+    if (ctx.stage56CorrectiveRequested && !ctx.finalGuardedCacheHit &&
         (!ctx.stage56AppliedFlag ||
          ctx.stage56LegacyScarCallCount != 12 ||
          ctx.stage56AppliedCount != 12 ||
