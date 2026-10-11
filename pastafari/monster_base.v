@@ -112,5 +112,6 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	_ = bootstrap_validate(calculation_day, target_day)!
 	// ደረጃ 2፦ የታሪካዊው ስህተት መንገድ በእውነተኛው የproduction መግቢያ ይጠራል።
 	legacy_probe := calendar_save_spaghetti(calculation_day)
-	return error('ዋናው የስፓጌቲ ቀን መንገድ ገና አልተገነባም፤ DISCOVERY_01 oldRemainder=' + legacy_probe.str())
+	message := 'ዋናው የስፓጌቲ ቀን መንገድ ገና አልተገነባም፤ DISCOVERY_01 oldRemainder='
+	return error(message + legacy_probe.str())
 }
