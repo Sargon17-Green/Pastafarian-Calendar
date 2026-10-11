@@ -1,6 +1,6 @@
 # تقويم الباستافاريين — خطّ C# بالعربية الكلاسيكية
 
-هذا الخط تنفيذ تاريخي متدرّج من خمسة وخمسين طورًا. أُنشئ من شجرة خالية دون استعارة كود أو جداول متوقعة من تنفيذ آخر. اكتملت الأطوار العشرة الأولى: التأسيس، وأربعة أخطاء تاريخية ورقعها، ثم اكتشاف الخطأ الخامس في تخزين القطرات المخفية بعكس ترتيب قربها. الطور القادم هو `PATCH 05` في الطور الحادي عشر، ولم يبدأ تنفيذه.
+هذا الخط تنفيذ تاريخي متدرّج من خمسة وخمسين طورًا. أُنشئ من شجرة خالية دون استعارة كود أو جداول متوقعة من تنفيذ آخر. اكتملت الأطوار الأحد عشر الأولى: التأسيس، وخمسة أخطاء تاريخية ورقعها، بما فيها رقعة الوصول إلى القطرات المخفية برتبة قربها من غير تغيير التخزين المعكوس. الطور القادم هو `DISCOVERY 06` في الطور الثاني عشر، ولم يبدأ تنفيذه.
 
 ## الحدود الحالية للمكتبة
 
@@ -14,7 +14,7 @@
 
 في الطور الثامن أُدخل `LegacyStones.MutateStonesWrong`، وهي تُغيّر الأحجار الخمسة في موضعها واحداً بعد الآخر، فتقرأ الأحجار المتأخرة نتائج الأحجار التي تغيّرت في الدورة نفسها. تدخل العملية في مسار الإنتاج `CalendarDateSpaghetti.EvaluateLegacyStones` الذي يحفظ `46` صفاً من النتائج، لكل استدعاء نسخ مستقلة. يبقى المسار التاريخي خاطئاً عمداً، لكن `CalendarDateSpaghetti.EvaluatePatchedStones` يسلك مساراً منفصلاً: يحفظ الجدول القديم أولاً، ثم يستدعي `StonePatchWrapper` الذي يُجمّد صورة الأحجار ويُنفّذ `mutateStonesWrong` فعلياً على نسخة ثم يستبدل جميع النواتج الخمسة. أثبت الاختبار تكافؤ الصفوف الستة والأربعين مع المرجع المعياري، دون محو نتائج التاريخ.
 
-أُدخل في الطور العاشر `CalendarDateSpaghetti.EvaluateLegacyHiddenDrops(c,t)`؛ ويُنتج القطرات السبع من عدّ العمل وصفوف الأحجار المصححة، لكنه يحفظها في الذاكرة التاريخية بترتيب `hidden7, hidden6, …, hidden1`. هذه هي الندبة التاريخية الخامسة: القراءة البسيطة `storage[k]` لا تعني القطرة رقم `k`. لم تُضف بعدُ رقعة `hiddenByNearness` ولا جدول فهارس مصحح؛ فالطور الحادي عشر وحده مسؤول عن ذلك.
+أُدخل في الطور العاشر `CalendarDateSpaghetti.EvaluateLegacyHiddenDrops(c,t)`؛ ويُنتج القطرات السبع من عدّ العمل وصفوف الأحجار المصححة، لكنه يحفظها في الذاكرة التاريخية بترتيب `hidden7, hidden6, …, hidden1`. هذه هي الندبة التاريخية الخامسة: القراءة البسيطة `storage[k]` لا تعني القطرة رقم `k`. بقي التخزين التاريخي معكوساً، لكن الرقعة الخامسة `HiddenNearnessWrapper.HiddenByNearness(k)` تحسب موضع القراءة `8-k` من المصفوفة القديمة نفسها، بلا قلب أو نسخ. تستدعي `CalendarDateSpaghetti.EvaluateHiddenDrop(c,t,k)` المسار القديم قبل تثبيت غلاف القراءة، وتحرس الملكية والمدى والتحقق قبل الالتزام.
 
 لا تحسب المكتبة بعدُ التاريخ الباستافاري النهائي؛ سيُنشأ هذا المسار تدريجيًّا في الأطوار اللاحقة، دون استباق عيوبها أو ترقيعاتها.
 
@@ -27,7 +27,7 @@
 باستخدام .NET SDK 10، ومن جذر المستودع:
 
 ```text
-dotnet build tests/PastafarianCalendar.Stage10Tests/PastafarianCalendar.Stage10Tests.csproj -c Release
+dotnet build tests/PastafarianCalendar.Stage11Tests/PastafarianCalendar.Stage11Tests.csproj -c Release
 dotnet run --project tests/PastafarianCalendar.Stage01Tests/PastafarianCalendar.Stage01Tests.csproj -c Release
 dotnet run --project tests/PastafarianCalendar.Stage02Tests/PastafarianCalendar.Stage02Tests.csproj -c Release -- --verify-expected-red
 dotnet run --project tests/PastafarianCalendar.Stage03Tests/PastafarianCalendar.Stage03Tests.csproj -c Release
@@ -38,6 +38,7 @@ dotnet run --project tests/PastafarianCalendar.Stage07Tests/PastafarianCalendar.
 dotnet run --project tests/PastafarianCalendar.Stage08Tests/PastafarianCalendar.Stage08Tests.csproj -c Release -- --verify-expected-red
 dotnet run --project tests/PastafarianCalendar.Stage09Tests/PastafarianCalendar.Stage09Tests.csproj -c Release
 dotnet run --project tests/PastafarianCalendar.Stage10Tests/PastafarianCalendar.Stage10Tests.csproj -c Release -- --verify-expected-red
+dotnet run --project tests/PastafarianCalendar.Stage11Tests/PastafarianCalendar.Stage11Tests.csproj -c Release
 ```
 
 التشغيل المباشر لاختبار الطور الثاني، **دون** `--verify-expected-red`، يُفترض أن ينتهي بخروج `1` بسبب خمسة اختلافات تاريخية مقصودة. لا يعني ذلك فشل رقعة الطور الثالث.
@@ -55,3 +56,5 @@ dotnet run --project tests/PastafarianCalendar.Stage10Tests/PastafarianCalendar.
 أكّد تشغيل CI رقم `38159020955` نجاح `1429/1429` فحصاً للرقعة الرابعة، بينها مقارنات `230` خانة أحجار مع المرجع المعياري و`54` حالة إدخال مستقلة. بقي `224` اختلافاً تاريخياً متوقعاً في مسار التحوير القديم، وصفر اختلاف غير متوقع. لا يتضمن هذا الطور أخطاء تخزين القطرات المخفية ولا إصلاحاتها اللاحقة.
 
 أثبت CI رقم `38161153559` توقيع تخزين القطرات التاريخي في `42` موضعاً: `6` مطابقات و`36` اختلافاً مقصوداً وصفر مخالفة غير متوقعة. بقيت مجموعة الاكتشاف الخامسة حمراء في التشغيل المباشر وخضراء في مدقق التوقيع المستقل، مع نجاح كل مجموعات الأطوار التسعة السابقة.
+
+نجح اختبار الرقعة الخامسة في GitHub Actions رقم `38163487926`: فُحصت `413` قطرة خفية عبر `59` زوجاً من الأيام ونجح `2069/2069` تحققاً، مع `354` اختلافاً تاريخياً أبقاها الغلاف مرئية في المخزن المعكوس. نجحت جميع مجموعات المراحل الأقدم؛ ولم يُبدأ بعدُ اكتشاف `legacyPrior` أو إصلاحه.
