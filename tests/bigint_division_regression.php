@@ -53,6 +53,9 @@ semak(BigInt::fromInt(-123)->modSmall($max) === $max - 123, 'MOD_SMALL_BESAR_NEG
 semak(BigInt::fromInt(123)->modSmall($max) === 123, 'MOD_SMALL_BESAR_POSITIF');
 semak($besar->modSmall($max) === $besar->mod(BigInt::fromInt($max))->toIntExact(), 'MOD_SMALL_BESAR_LIMB');
 semak(BigInt::fromInt(PHP_INT_MIN)->toIntExact() === PHP_INT_MIN, 'INT_MIN_TEPAT');
+semak(BigInt::fromInt(PHP_INT_MIN)->modSmall($max) === $max - 1, 'MOD_SMALL_INT_MIN');
+semak(BigInt::fromInt(-$max)->modSmall($max) === 0, 'MOD_SMALL_NEGATIF_TEPat');
+semak($besar->modSmall(999999999) === $besar->mod(BigInt::fromInt(999999999))->toIntExact(), 'MOD_SMALL_SEMPADAN');
 
 try {
     BigInt::one()->divMod(BigInt::zero());
@@ -61,4 +64,4 @@ try {
     semak($e->getMessage() === 'DIVISION_BY_ZERO', 'KOD_BAHAGI_SIFAR');
 }
 
-echo "LULUS bigint_division_regression kes={$tested} tambahan=5\n";
+echo "LULUS bigint_division_regression kes={$tested} tambahan=8\n";
