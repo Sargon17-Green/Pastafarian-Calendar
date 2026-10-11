@@ -53,3 +53,8 @@ jobs:
         run: |
           set -euo pipefail
           prove -Ilib -It/lib -lr t
+      - name: 量測交織演算法資源
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 75s perl -Ilib -It/lib tools/profile_weaving.pl --profile smoke --seconds 15 --rss-kib 262144

@@ -19,3 +19,15 @@
 ```text
 prove -Ilib -It/lib -lr t
 ```
+
+## 第 1 階段：受控資源量測
+
+原生 CI 在完整測試完成後會用獨立子程序進行月份交織小型效能量測，記錄經過時間與 Linux VmHWM/RSS。父程序監看每個案例的時間與 RSS，超限便終止測試子程序。使用者也可在 Linux 手動執行：
+
+`perl -Ilib -It/lib tools/profile_weaving.pl --profile smoke --seconds 15 --rss-kib 262144`
+
+擴充組別（不在一般 CI 裡）：
+
+`perl -Ilib -It/lib tools/profile_weaving.pl --profile extended --seconds 60 --rss-kib 524288`
+
+RSS 取樣不能取代作業系統的硬限制，測試也未驗證最大 47 個月與 5,778 日的資源需求。量測結果不可用作規範日曆答案。
