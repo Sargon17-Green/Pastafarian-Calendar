@@ -148,3 +148,9 @@ ni'o ko benji `sh run_stage02_endpoint_weaving_tests.sh` .e `sh run_stage02_cano
 ## lo memori jimte te cipra
 
 ni'o lo `run_stage02_weaving_heap_tests.sh` cu cipra lo narmanci `MonsterWeavingEndpointDP` fi lo Java Heap be li 256 MiB pe lo 984 detri nanca .e lo 512 MiB pe lo 1968 detri nanca .i lo Heap cu se jimte fi lo `-Xmx` .i lo te cipra cu se snada po'o ca lo GitHub Actions cu benji lo `PASS`. lo drani javni be li 5778 detri cu za'o nitcu lo balvi se zbasu.
+
+## lo pa se stika jimte be lo fanmo masti
+
+ni'o lo `MonsterWeavingLinearCounter` cu pilno lo nu lo fanmo se viska be lo fanmo masti cu rinka lo fanmo judri be lo mulno porsi .i seni'i lo endpoint te jicmu cu se vimcu fi lo fanmo judri .i lo se namcu be lo te jicmu cu zenba fi lo se pamoi judri po'o. lo `BigInteger` cu ralte lo drani ranki .i lo 5778 detri count cu se cipra fi lo Java Heap be li 256 MiB.
+
+ni'o lo ti sampla cu se pilno lo count .e lo countAfterPrefix po'o .i lo 5778 detri unrank cu za'o na se zbasu .i lo `MonsterWeavingEndpointDP` .e lo `MonsterCanonicalWeaving` cu za'o ralte lo 384 detri jimte.

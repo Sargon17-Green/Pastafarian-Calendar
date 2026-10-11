@@ -68,3 +68,5 @@ jobs:
         run: sh run_stage02_canonical_weaving_tests.sh
       - name: Stage 02 heap-bounded month counting
         run: sh run_stage02_weaving_heap_tests.sh
+      - name: Stage 02 linear-memory canonical weaving count
+        run: sh run_stage02_linear_weaving_tests.sh
