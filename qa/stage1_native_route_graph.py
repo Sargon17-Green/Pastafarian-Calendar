@@ -77,6 +77,9 @@ def analyze(rows,trace_path):
     # unrelated opcode fabricate a p/g memory event.
     expected_event=None
     event_seen=False
+    # Reconstruct one Native IP's string mode from executed quotes.
+    # Literal g/p bytes in strings perform no Funge-space operation.
+    in_string_mode=False
 
     with open(trace_path,"r",encoding="utf-8") as stream:
         for line_no,line in enumerate(stream,1):
@@ -98,8 +101,11 @@ def analyze(rows,trace_path):
                 require(expected_event is None or event_seen,
                         "missing native g/p event pair for preceding STEP")
                 tick,ip,x,y,dx,dy,opcode,depth=vals
-                expected_event=("READ" if opcode==ord("g") and depth>=2 else
-                                "WRITE" if opcode==ord("p") and depth>=3 else None)
+                was_string_mode=in_string_mode
+                # Funge-98 implicitly supplies zero on stack underflow.
+                expected_event=(None if was_string_mode else
+                                "READ" if opcode==ord("g") else
+                                "WRITE" if opcode==ord("p") else None)
                 event_seen=False
                 current_step+=1
                 require(tick==current_step,"nonsequential native STEP tick")
@@ -120,14 +126,16 @@ def analyze(rows,trace_path):
                 stats["steps"]+=1
                 visits[point]+=1
                 direction_by_position[point].add((dx,dy))
-                opcodes[opcode]+=1
+                if not was_string_mode:
+                    opcodes[opcode]+=1
                 compass.add((dx,dy))
                 if point==(5,0) and (dx,dy)==(1,0) and not handoff:
                     handoff=True
                 if handoff:
                     stats["arithmetic_steps"]+=1
                     arith_points.add(point)
-                    arithmetic_opcodes[opcode]+=1
+                    if not was_string_mode:
+                        arithmetic_opcodes[opcode]+=1
                     arith_compass.add((dx,dy))
                 if previous_step is not None:
                     prev_tick,prev_pt,prev_handoff=previous_step
@@ -138,6 +146,8 @@ def analyze(rows,trace_path):
                     if prev_handoff and handoff:
                         arith_edges.add(edge)
                 previous_step=(tick,point,handoff)
+                if opcode==ord('"'):
+                    in_string_mode=not in_string_mode
                 if point in latest_written:
                     index=latest_written.pop(point)
                     record=write_history[index]
@@ -306,22 +316,27 @@ def selftest():
         # that matching p/g lifecycle evidence survives the stronger audit,
         # while coordinated fake and missing events are rejected even when
         # all geometric summary thresholds would otherwise pass.
-        source=[""]*11
+        source=[""]*12
         source[10]=" "*10+"pg"
+        source[11]='"pg"'
         trace_lines=[
             "STEP\t1\t1\t5\t0\t1\t0\t32\t0",
-            "STEP\t2\t1\t10\t10\t1\t0\t112\t3",
+            "STEP\t2\t1\t10\t10\t1\t0\t112\t0",
             "WRITE_BEFORE\t2\t2000\t2000\t32\t49",
             "WRITE_AFTER\t2\t2000\t2000\t49",
             "STEP\t3\t1\t2000\t2000\t1\t0\t49\t0",
-            "STEP\t4\t1\t11\t10\t1\t0\t103\t2",
+            "STEP\t4\t1\t11\t10\t1\t0\t103\t0",
             "READ_BEFORE\t4\t2000\t2000\t49",
-            "READ_AFTER\t4\t2000\t2000\t49"
+            "READ_AFTER\t4\t2000\t2000\t49",
+            "STEP\t5\t1\t0\t11\t1\t0\t34\t3",
+            "STEP\t6\t1\t1\t11\t1\t0\t112\t3",
+            "STEP\t7\t1\t2\t11\t1\t0\t103\t4",
+            "STEP\t8\t1\t3\t11\t1\t0\t34\t5"
         ]
         for n in range(1001):
             trace_lines.append("STEP\t%d\t1\t%d\t12\t1\t0\t32\t0" %
-                               (n+5,n+100))
-        trace_lines.append("STEP\t1006\t1\t5\t0\t1\t0\t32\t0")
+                               (n+9,n+100))
+        trace_lines.append("STEP\t1010\t1\t5\t0\t1\t0\t32\t0")
         def check_records(records,source_rows):
             with open(trace,"w",encoding="utf-8") as stream:
                 stream.write("\n".join(records)+"\n")
@@ -329,8 +344,10 @@ def selftest():
         passed=check_records(trace_lines,source)
         require(passed["statistics"]["executed_content_changing_gate_writes"]==1
                 and passed["statistics"]["reads"]==1
-                and passed["statistics"]["writes"]==1,
-                "legitimate synthetic p/g source-version trace was rejected")
+                and passed["statistics"]["writes"]==1 and
+                passed["arithmetic_executed_opcodes"].get("p")==1 and
+                passed["arithmetic_executed_opcodes"].get("g")==1,
+                "underflow or stringmode p/g synthetic trace rejected or miscounted")
         def reject_trace(name,records,source_rows,fragment):
             try:
                 check_records(records,source_rows)
@@ -364,7 +381,21 @@ def selftest():
         extra_p_source[10]=" "*10+"pgp"
         reject_trace("omitted_p_events",omitted_write,extra_p_source,
                      "missing native g/p")
-        print("NATIVE_ROUTE_GRAPH_G_P_EVENT_BINDING_4_NEGATIVE_CONTROLS_PASS")
+        def inject_after(tick,event):
+            ix=next(i for i,line in enumerate(trace_lines)
+                    if line.startswith("STEP\t%d\t" % tick))
+            return trace_lines[:ix+1]+event+trace_lines[ix+1:]
+        forged_literal_write=inject_after(6,[
+            "WRITE_BEFORE\t6\t4000\t4000\t32\t1",
+            "WRITE_AFTER\t6\t4000\t4000\t1"])
+        reject_trace("literal_p_not_executed",forged_literal_write,source,
+                     "WRITE event not bound")
+        forged_literal_read=inject_after(7,[
+            "READ_BEFORE\t7\t4000\t4000\t32",
+            "READ_AFTER\t7\t4000\t4000\t32"])
+        reject_trace("literal_g_not_executed",forged_literal_read,source,
+                     "READ event not bound")
+        print("NATIVE_ROUTE_GRAPH_G_P_EVENT_BINDING_6_NEGATIVE_CONTROLS_PASS")
     print("NATIVE_ROUTE_GRAPH_ZERO_VELOCITY_NEGATIVE_CONTROL_PASS")
     print("NATIVE_ROUTE_GRAPH_SELFTEST_PASS")
 

@@ -76,6 +76,8 @@ def observe(path):
     # self-modifying code may later execute a different opcode at that cell.
     expected_event = None
     event_completed = False
+    in_string_mode = False
+    ip_identity = None
     reads, writes = [], []
     handoff, previous, last_step, steps = False, None, 0, 0
     with path.open(encoding="ascii") as stream:
@@ -95,6 +97,13 @@ def observe(path):
                      "noncontiguous physical Native instruction trace")
                 last_step = v[0]
                 tick, ip, x, y, dx, dy, op, depth = v
+                if ip_identity is None:
+                    ip_identity=ip
+                need(ip == ip_identity,
+                     "Native SCC parser requires one IP for quote-state ownership")
+                was_string_mode=in_string_mode
+                if op==ord('"'):
+                    in_string_mode=not in_string_mode
                 if not handoff:
                     if (x, y, dx, dy) != (5, 0, 1, 0): continue
                     handoff = True
@@ -102,10 +111,12 @@ def observe(path):
                      "non-progressing Native instruction")
                 p = (x,y)
                 positions[tick] = p
-                expected_event=("READ" if op==ord("g") and depth>=2 else
-                                "WRITE" if op==ord("p") and depth>=3 else None)
+                expected_event=(None if was_string_mode else
+                                "READ" if op==ord("g") else
+                                "WRITE" if op==ord("p") else None)
                 event_completed=False
-                opcode_counts[p][chr(op) if 32 <= op <= 126 else "?"] += 1
+                if not was_string_mode:
+                    opcode_counts[p][chr(op) if 32 <= op <= 126 else "?"] += 1
                 if previous is not None: edges[previous].add(p)
                 previous = p
                 steps += 1
@@ -229,18 +240,22 @@ def trace_binding_selftest():
     """Synthetic trace controls for this auditor, NOT Native arithmetic."""
     lines=[
         "STEP\t1\t1\t5\t0\t1\t0\t32\t0",
-        "STEP\t2\t1\t10\t10\t1\t0\t103\t2",
+        "STEP\t2\t1\t10\t10\t1\t0\t103\t0",
         "READ_BEFORE\t2\t30\t40\t32",
         "READ_AFTER\t2\t30\t40\t32",
-        "STEP\t3\t1\t11\t10\t1\t0\t112\t3",
+        "STEP\t3\t1\t11\t10\t1\t0\t112\t0",
         "WRITE_BEFORE\t3\t30\t40\t32\t49",
         "WRITE_AFTER\t3\t30\t40\t49",
         "STEP\t4\t1\t10\t10\t1\t0\t32\t2",
         "STEP\t5\t1\t11\t10\t1\t0\t32\t3",
+        "STEP\t6\t1\t0\t11\t1\t0\t34\t3",
+        "STEP\t7\t1\t1\t11\t1\t0\t112\t3",
+        "STEP\t8\t1\t2\t11\t1\t0\t103\t4",
+        "STEP\t9\t1\t3\t11\t1\t0\t34\t5",
     ]
     # A coordinate that executed g/p in a prior step cannot authorize
     # a memory event on a *later* non-g/non-p STEP at the same coordinate.
-    for t in range(6,7002):
+    for t in range(10,7006):
         lines.append("STEP\t%d\t1\t%d\t12\t1\t0\t32\t0" %
                      (t,t+20))
     with tempfile.TemporaryDirectory() as scratch:
@@ -249,8 +264,9 @@ def trace_binding_selftest():
             path.write_text("\n".join(records)+"\n",encoding="ascii")
             return observe(path)
         adj,op,reads,writes,steps=run(lines)
-        need(steps>=7000 and len(reads)==1 and len(writes)==1,
-             "clean synthetic g/p trace rejected")
+        need(steps>=7000 and len(reads)==1 and len(writes)==1 and
+             op[(1,11)]["p"]==0 and op[(2,11)]["g"]==0,
+             "underflow/quoted g/p SCC evidence rejected or miscounted")
         def reject(name,records,why):
             try:
                 run(records)
@@ -273,7 +289,19 @@ def trace_binding_selftest():
         no_write=[r for r in lines
                   if not r.startswith(("WRITE_BEFORE","WRITE_AFTER"))]
         reject("missing_p_event_pair",no_write,"missing native g/p event pair")
-    print("NATIVE_SCC_STEP_BOUND_G_P_FOUR_SYNTHETIC_NEGATIVES_PASS")
+        def inject_after(tick,events):
+            ix=next(i for i,line in enumerate(lines)
+                    if line.startswith("STEP\t%d\t" % tick))
+            return lines[:ix+1]+events+lines[ix+1:]
+        fake_literal_p=inject_after(7,[
+            "WRITE_BEFORE\t7\t30\t40\t49\t50",
+            "WRITE_AFTER\t7\t30\t40\t50"])
+        reject("quoted_p_not_write",fake_literal_p,"non-p STEP")
+        fake_literal_g=inject_after(8,[
+            "READ_BEFORE\t8\t30\t40\t49",
+            "READ_AFTER\t8\t30\t40\t49"])
+        reject("quoted_g_not_read",fake_literal_g,"non-g STEP")
+    print("NATIVE_SCC_STEP_BOUND_G_P_SIX_SYNTHETIC_NEGATIVES_PASS")
 
 def main(root):
     trace_binding_selftest()
