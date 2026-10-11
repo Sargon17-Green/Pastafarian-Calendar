@@ -1,0 +1,50 @@
+name: V Amharic Stage 02 discovery regression
+
+on:
+  push:
+    branches:
+      - 'V+አማርኛ'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage02-native:
+    name: V 0.5.2 — DISCOVERY 01
+    runs-on: ubuntu-latest
+    steps:
+      - name: የጽሑፍ ምንጭን ማምጣት
+        uses: actions/checkout@v4
+
+      - name: V 0.5.2 መጫን
+        uses: vlang/setup-v@v1.7
+        with:
+          version: '7647ce1'
+
+      - name: የቅርጸት ማረጋገጫ
+        run: |
+          v version
+          v fmt -verify ./pastafari
+
+      - name: የደረጃ 1 ኖርማቲቭ ሙከራ
+        run: v test ./pastafari/normative_oracle_test.v
+
+      - name: የታሪካዊው ስህተት witness
+        run: v test ./pastafari/discovery01_witness_test.v
+
+      - name: የሚጠበቀው RED በእውነተኛው V
+        shell: bash
+        run: |
+          set -euo pipefail
+          # A compile/type error is not an acceptable historical red.
+          v -check ./pastafari/discovery01_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery01_expected_red_test.v
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo 'ERROR: DISCOVERY 01 should be RED before PATCH 01'
+            exit 1
+          fi
+          echo 'DISCOVERY 01 expected-red regression returned nonzero after a successful V type check'
