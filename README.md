@@ -103,3 +103,20 @@ Ba hồi quy của giai đoạn 4 giữ nguyên kỳ vọng chuẩn và phải c
 thành đạt. Các kiểm thử mới bao gồm biên, số nguyên cực lớn, hai
 phía ngày nền, đồng thời, tính độc lập của context và bất biến của
 SAVE. Ngày lịch đầy đủ chưa được tích hợp.
+
+## Xác minh hoàn tất giai đoạn 5
+
+GitHub Actions đã chạy 45 kiểm thử trên Elixir 1.18.5 và Erlang/OTP 27
+với không lỗi và không có cảnh báo biên dịch. Ba hồi quy chuẩn của
+giai đoạn 4 nay đạt mà không đổi kỳ vọng. Khóa tên chuẩn cũng đạt.
+
+- [Kết quả kiểm thử xanh của giai đoạn 5](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154035832)
+- [Kết quả khóa tên chuẩn](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154035856)
+
+Lần chạy đầu của giai đoạn 5 không đến phần thực thi kiểm thử vì thiếu
+`end` ở cuối mô-đun kiểm thử mới; lỗi cú pháp đó được sửa trước khi
+kiểm chứng xanh. Không thay đổi mã sản xuất trong bản sửa cú pháp.
+
+Giai đoạn 5/55 được đóng với trạng thái `GREEN`.
+Bước tiếp theo là giai đoạn 6/55, `DISCOVERY 03` với lỗi lịch sử
+về khoảng cách giữa nhãn ngày; chưa thêm bản vá 03.

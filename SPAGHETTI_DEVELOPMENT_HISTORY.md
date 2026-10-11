@@ -100,3 +100,10 @@ Ngữ cảnh vẫn bất biến và giữ hai nhãn độc lập. Vết nhánh
 Chỉ kiểm thử dây nối từng giả định nhãn đích sai 14 được chỉnh để
 xác nhận hàm cũ vẫn trả 14, còn đầu ra đã vá trả 15.
 Không thay đổi công thức sai hoặc bộ tham chiếu chuẩn.
+
+**Kiểm chứng thực tế:** Sau khi sửa dấu kết thúc mô-đun kiểm thử
+bị thiếu, GitHub Actions đã biên dịch mã sản xuất và thực thi
+45 kiểm thử, 0 lỗi, không có cảnh báo. Ba hồi quy chuẩn của
+giai đoạn 4 giữ nguyên kỳ vọng và đã chuyển thành xanh.
+Khóa tên chuẩn đạt độc lập. Không sửa `LegacyDayTag.old_day_tag`,
+không thêm thành phần tương lai. Giai đoạn 5 khép với trạng thái GREEN.

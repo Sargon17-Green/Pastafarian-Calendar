@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=5
 CURRENT_KIND=PATCH
 CURRENT_PATCH=02
-LAST_COMPLETED_STAGE=4
+LAST_COMPLETED_STAGE=5
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyDayTag sai, thêm DayTagPatch với nhánh tăng một và điều kiện bảo vệ thừa riêng Ngày Nền; DayCountManager định tuyến qua lớp vá và context ghi vết vá 02.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_05_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_05_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_05_PENDING
-CI_FAILURES=STAGE_05_PENDING
+CI_TESTS=45
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -61,5 +61,14 @@ Bước lịch sử tiếp theo là giai đoạn 5, PATCH 02.
 
 Bản vá 02 đã được đưa vào luồng sản xuất và giữ nguyên hàm sai cũ.
 Điều kiện bảo vệ riêng ở Ngày Nền vẫn hiện diện dù không cần thiết.
-LAST_COMPLETED_STAGE chỉ được nâng lên 5 sau khi xác minh CI thành công.
-Dự kiến 45 kiểm thử, 0 thất bại, không thay đổi main.
+LAST_COMPLETED_STAGE đã nâng lên 5 sau kiểm chứng CI xanh.
+Kết quả thực tế: 45 kiểm thử, 0 thất bại, không thay đổi main.
+
+Giai đoạn 5 được kiểm chứng bằng GitHub Actions, Elixir 1.18.5 và OTP 27.
+45 kiểm thử, 0 lỗi, không có cảnh báo biên dịch.
+Khóa tên chuẩn hoàn thành; LegacyDayTag cũ không thay đổi.
+Trong lần chạy đầu, mô-đun kiểm thử mới thiếu từ khóa end và chưa chạy được;
+lỗi cú pháp đã được sửa ở commit riêng trước khi xác minh cuối cùng.
+Bằng chứng: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154035832
+Khóa tên chuẩn: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154035856
+Trạng thái đóng giai đoạn 5: GREEN. Giai đoạn 6 tiếp theo là DISCOVERY 03.

@@ -45,3 +45,19 @@ Giai đoạn 5: vá nhãn ngày trên phép tính lịch sử
 Giữ nguyên old_day_tag sai và thêm DayTagPatch có hai điều kiện bắt buộc,
 kể cả lớp bảo vệ thừa. Sửa đầu ra qua DayCountManager, giữ các hồi quy
 chuẩn, bổ sung kiểm thử biên và bảo toàn trạng thái riêng mỗi lần gọi.
+
+## Bằng chứng kiểm chứng cuối cùng
+
+- Commit triển khai: `c8f96cd0d797008ccb0005660e08f322fd32116d`.
+- Commit sửa cú pháp kiểm thử: `4a3e1f9615847c681394ee00a026728d511988fb`.
+- Lần chạy đầu dừng ở lỗi thiếu `end` của mô-đun kiểm thử mới,
+  không phải lỗi kết quả thuật toán.
+- Lần chạy sau: 45 kiểm thử, 0 lỗi, 0 cảnh báo biên dịch.
+- Môi trường: Elixir 1.18.5; Erlang/OTP 27.
+- Ba hồi quy ngày ở giai đoạn 4 đạt mà không đổi kỳ vọng chuẩn.
+- Bộ kiểm thử tên chuẩn độc lập đạt.
+
+Kiểm thử: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154035832
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154035856
+
+Giai đoạn 5: GREEN đã được xác minh. Giai đoạn 6 chưa khởi động.
