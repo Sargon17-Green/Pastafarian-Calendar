@@ -865,3 +865,19 @@ Wrapper, handler, fase, due campi di contesto,
 report doppio, metrica e validator frozen indipendente.
 La cicatrice di Stage16 e le sette patch precedenti
 rimangono osservabili. Stage18 non è iniziato.
+
+### Verifica nativa compiuta
+
+La run GitHub Actions 38171645454, commit
+`993e96370f2e2f236efd0346edbbb4ff1a8d74bc`,
+è terminata con SUCCESS per tutti e diciotto i job.
+Stage17 ha ottenuto 31 PASS senza errori, verificando
+la mescolatura normativamente corretta per tutti i
+720 ordini, le 46 gocce concatenate, 512 campioni
+deterministici signed, grandi interi, input malformati,
+ownership e validazione indipendente.
+
+Stage16 mantiene esattamente 25 PASS e tre FAIL
+intenzionali: ordine diretto, ordine inverso e
+goccia 46. Le sette patch precedenti restano
+intatte e non si è anticipato lo Stage18.

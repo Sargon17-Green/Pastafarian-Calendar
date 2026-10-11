@@ -649,3 +649,24 @@ concatenate, 512 campioni signed deterministici,
 BigInt oltre 16.000 bit, difese dei contesti e sette
 patch precedenti. Stage16 mantiene `25 PASS, 3 FAIL`
 intenzionali, senza cancellare la cicatrice.
+
+### Certificazione nativa dello stadio 17
+
+La [GitHub Actions run 38171645454](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38171645454)
+ha concluso SUCCESS sul commit
+`993e96370f2e2f236efd0346edbbb4ff1a8d74bc`.
+Tutti i diciotto job sono riusciti: nomi canonici,
+Stage01 18 PASS; Stage02 7 PASS/3 FAIL intenzionali;
+Stage03 12 PASS; Stage04 14 PASS/3 FAIL intenzionali;
+Stage05 18 PASS; Stage06 15 PASS/3 FAIL intenzionali;
+Stage07 20 PASS; Stage08 19 PASS/3 FAIL intenzionali;
+Stage09 26 PASS; Stage10 15 PASS/3 FAIL intenzionali;
+Stage11 27 PASS; Stage12 22 PASS/3 FAIL intenzionali;
+Stage13 26 PASS; Stage14 20 PASS/3 FAIL intenzionali;
+Stage15 31 PASS; Stage16 25 PASS/3 FAIL intenzionali;
+Stage17 31 PASS/0 FAIL.
+
+Il vecchio array condiviso continua a produrre i
+tre fallimenti previsti nello Stage16. La PATCH 08
+supera il confronto delle sei ciotole con istantanee
+congelate senza introdurre logica del prossimo stadio.
