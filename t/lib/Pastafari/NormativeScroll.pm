@@ -555,21 +555,45 @@ sub _weave_counter ($lengths) {
     # 精確的 Pascal 三角形按需要逐列建立，每一次計數器都有
     # 自己獨立的儲存區。避免對同一 (n,k) 反覆執行高成本除法，
     # 但不把跨呼叫的可變快取引入任何規範決策。
+    # 全域 5,778 日上限下，若對所有 n 建立完整 Pascal 三角形，
+    # 將累積約 1,670 萬個 Math::BigInt 物件。這裡只為小 n 建表；
+    # 大 n 依精確乘除公式按需計算，配合固定數量的呼叫私有快取。
+    # 快取採簡單 FIFO，數量而非位元組上限；僅保證項數有界。
+    my $pascal_limit = 256;
+    my $sparse_limit = 128;
     my @choose_rows = ([Math::BigInt->bone]);
+    my (%sparse, @fifo);
     my $choose = sub ($n, $k) {
         die "二項係數參數超出範圍\n" if $n < 0 || $k < 0 || $k > $n;
-        for (my $row = scalar @choose_rows; $row <= $n; $row++) {
-            my $previous = $choose_rows[$row-1];
-            my @values = (Math::BigInt->bone);
-            for my $column (1 .. $row-1) {
-                push @values, $previous->[$column-1]->copy->badd(
-                    $previous->[$column]
-                );
+        $k = $n - $k if $k > $n - $k;
+        if ($n <= $pascal_limit) {
+            for (my $row = scalar @choose_rows; $row <= $n; $row++) {
+                my $previous = $choose_rows[$row-1];
+                my @values = (Math::BigInt->bone);
+                for my $column (1 .. $row-1) {
+                    push @values, $previous->[$column-1]->copy->badd(
+                        $previous->[$column]
+                    );
+                }
+                push @values, Math::BigInt->bone;
+                $choose_rows[$row] = \@values;
             }
-            push @values, Math::BigInt->bone;
-            $choose_rows[$row] = \@values;
+            return $choose_rows[$n][$k]->copy;
         }
-        return $choose_rows[$n][$k]->copy;
+
+        my $key = "$n,$k";
+        return $sparse{$key}->copy if exists $sparse{$key};
+        my $result = Math::BigInt->bone;
+        for my $i (1 .. $k) {
+            $result->bmul($n - $k + $i)->bdiv($i);
+        }
+        if (@fifo >= $sparse_limit) {
+            my $victim = shift @fifo;
+            delete $sparse{$victim};
+        }
+        $sparse{$key} = $result->copy;
+        push @fifo, $key;
+        return $result;
     };
 
     # 在所有月份長度與索引皆可用單一位元組表示時，把 DP 鍵
