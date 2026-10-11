@@ -25,42 +25,36 @@ if os.environ.get("BF98_TRACE_LOG"):
                  direction[0], direction[1], opcode, depth))
             if opcode == ord("g") and not ip.stringmode:
                 stack = list(ip.stack[_bfmod.TOSS])
-                if len(stack) < 2:
-                    _bf_log.write("INSUFFICIENT_G_STACK\t%d\t%d\n" %
-                                  (tick, len(stack)))
-                else:
-                    px, py = stack[-2:]
-                    # Funge-98 g/p coordinates are relative to the active IP's
-                    # storage offset, which may be changed by { and }.
-                    # All trace coordinates must name the physical Space cell.
-                    point = ip.position.__class__((
-                        int(px) + int(ip.offset[0]),
-                        int(py) + int(ip.offset[1])))
-                    px, py = tuple(point)
-                    before = self.space.get(point)
-                    _bf_log.write(
-                        "READ_BEFORE\t%d\t%d\t%d\t%d\n" %
-                        (tick, px, py, before))
-                    pending_reads.append((tick, px, py, before, ip))
+                # Underflow in Funge-98 acts as implicit zero pops.
+                px, py = ([0] * max(0, 2 - len(stack)) + stack[-2:])
+                # Funge-98 g/p coordinates are relative to the active IP's
+                # storage offset, which may be changed by { and }.
+                # All trace coordinates must name the physical Space cell.
+                point = ip.position.__class__((
+                    int(px) + int(ip.offset[0]),
+                    int(py) + int(ip.offset[1])))
+                px, py = tuple(point)
+                before = self.space.get(point)
+                _bf_log.write(
+                    "READ_BEFORE\t%d\t%d\t%d\t%d\n" %
+                    (tick, px, py, before))
+                pending_reads.append((tick, px, py, before, ip))
             if opcode == ord("p") and not ip.stringmode:
                 stack = list(ip.stack[_bfmod.TOSS])
-                if len(stack) < 3:
-                    _bf_log.write("INSUFFICIENT_P_STACK\t%d\t%d\n" %
-                                  (tick, len(stack)))
-                else:
-                    value, px, py = stack[-3:]
-                    # Funge-98 g/p coordinates are relative to the active IP's
-                    # storage offset, which may be changed by { and }.
-                    # All trace coordinates must name the physical Space cell.
-                    point = ip.position.__class__((
-                        int(px) + int(ip.offset[0]),
-                        int(py) + int(ip.offset[1])))
-                    px, py = tuple(point)
-                    before = self.space.get(point)
-                    _bf_log.write(
-                        "WRITE_BEFORE\t%d\t%d\t%d\t%d\t%d\n" %
-                        (tick, px, py, before, value))
-                    pending.append((tick, px, py, value, point))
+                # Pad absent bottom operands with implicit zeros.
+                value, px, py = ([0] * max(0, 3 - len(stack)) + stack[-3:])
+                # Funge-98 g/p coordinates are relative to the active IP's
+                # storage offset, which may be changed by { and }.
+                # All trace coordinates must name the physical Space cell.
+                point = ip.position.__class__((
+                    int(px) + int(ip.offset[0]),
+                    int(py) + int(ip.offset[1])))
+                px, py = tuple(point)
+                before = self.space.get(point)
+                _bf_log.write(
+                    "WRITE_BEFORE\t%d\t%d\t%d\t%d\t%d\n" %
+                    (tick, px, py, before, value))
+                pending.append((tick, px, py, value, point))
         result = _bf_original_step(self)
         for tick, px, py, value, point in pending:
             actual = self.space.get(point)

@@ -25,12 +25,14 @@ def child(kind):
     output = StringIO.StringIO()
     program = Program(Befunge98, platform=BufferedPlatform(
         [], {}, stdin=StringIO.StringIO(""), stdout=output))
-    code = '812p12g.@' if kind == 'offset' else '123"pg"n@'
+    source = {'offset': '812p12g.@', 'quoted': '123"pg"n@',
+              'underflow_g': 'g.@', 'underflow_p': 'p@'}
+    code = source[kind]
     program.load_code(code)
     program.create_ip()
     need(len(program.ips) == 1, "missing real native instruction pointer")
     ip = program.ips[0]
-    if kind == 'offset':
+    if kind != 'quoted':
         ip.offset = ip.position.__class__((7, 9))
     program.execute()
     need(not program.ips, "native synthetic source failed to terminate")
@@ -42,6 +44,14 @@ def child(kind):
         need(int(program.space.get(point)) == 8 and
              int(program.space.get(raw)) == 32,
              "native p did not use the physical offset target")
+    elif kind == "underflow_g":
+        need(output.getvalue().split() == ["32"],
+             "native empty-stack g did not fetch physical blank cell")
+    elif kind == "underflow_p":
+        point = ip.position.__class__((7, 9))
+        need(output.getvalue() == "" and
+             int(program.space.get(point)) == 0,
+             "native empty-stack p did not store implicit zero at offset")
     else:
         need(output.getvalue() == "",
              "quoted g/p synthetic program produced unexpected output")
@@ -64,7 +74,7 @@ def owned_temporary_directory():
 def parent():
     with owned_temporary_directory() as tmp:
         evidence = {}
-        for kind in ('offset', 'quoted'):
+        for kind in ('offset', 'quoted', 'underflow_g', 'underflow_p'):
             filename = os.path.join(tmp, kind + '.tsv')
             environ = os.environ.copy()
             environ['BF98_TRACE_LOG'] = filename
@@ -88,6 +98,18 @@ def parent():
              by_tag['READ_BEFORE'][0][4:] == ['8'] and
              by_tag['READ_AFTER'][0][4:] == ['8'],
              "physical Native write/read memory contents are incorrect")
+        for kind, tag, before, after in (
+            ('underflow_g', 'READ_', ['32'], ['32']),
+            ('underflow_p', 'WRITE_', ['32', '0'], ['0'])):
+            events = [row for row in evidence[kind]
+                      if row[0].startswith(('READ_', 'WRITE_'))]
+            need(len(events) == 2 and
+                 events[0][0] == tag + 'BEFORE' and
+                 events[1][0] == tag + 'AFTER' and
+                 events[0][2:4] == ['7', '9'] and
+                 events[1][2:4] == ['7', '9'] and
+                 events[0][4:] == before and events[1][4:] == after,
+                 'Native underflow g/p trace violates implicit-zero rule')
         need(not any(row[0].startswith(('READ_', 'WRITE_'))
                      for row in evidence['quoted']),
              "quoted g/p emitted spurious physical memory events")
@@ -96,13 +118,13 @@ def parent():
              any(row[7] == str(ord('p')) for row in evidence['quoted']
                  if row[0] == 'STEP'),
              "quoted Native g/p instruction cells were never executed")
-    print("NATIVE_BF98_TRACE_HOOK_OFFSET_AND_STRINGMODE_PASS")
+    print("NATIVE_BF98_TRACE_HOOK_OFFSET_STRINGMODE_UNDERFLOW_PASS")
     print("STAGE1_FUNCTIONAL_AND_GEOMETRIC_FINAL_GATES_OPEN")
 
 if __name__ == '__main__':
     need((len(sys.argv) == 1) or
          (len(sys.argv) == 3 and sys.argv[1] == '--child' and
-          sys.argv[2] in ('offset', 'quoted')),
+          sys.argv[2] in ('offset', 'quoted', 'underflow_g', 'underflow_p')),
          "usage: native trace hook test [--child offset|quoted]")
     if len(sys.argv) == 1:
         parent()
