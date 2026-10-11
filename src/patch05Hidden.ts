@@ -23,7 +23,7 @@ export class Patch05HiddenHandler {
 
   correctedHiddenAt(backwardStored: readonly bigint[], hiddenK: number): bigint {
     if (!Array.isArray(backwardStored) || backwardStored.length !== 7 ||
-        backwardStored.some(value => typeof value !== "bigint")) {
+        Array.from({length:7}, (_,j) => typeof backwardStored[j] !== "bigint").some(Boolean)) {
       throw new MonsterValidationError("सात अचूक bigint थेंबांचे उलटे storage आवश्यक आहे");
     }
     if (!Number.isInteger(hiddenK) || hiddenK < 1 || hiddenK > 7) {
@@ -40,7 +40,7 @@ export class Patch05HiddenHandler {
       throw new MonsterValidationError("दोन्ही दिवस अचूक bigint असले पाहिजेत");
     }
     if (!Array.isArray(canonicalHidden) || canonicalHidden.length !== 7 ||
-        canonicalHidden.some(value => typeof value !== "bigint")) {
+        Array.from({length:7}, (_,j) => typeof canonicalHidden[j] !== "bigint").some(Boolean)) {
       throw new MonsterValidationError("नेमके सात bigint लपलेले थेंब आवश्यक आहेत");
     }
 
