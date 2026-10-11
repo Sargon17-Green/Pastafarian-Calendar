@@ -64,3 +64,28 @@ Ni ellir newid `LAST_COMPLETED_STAGE=6` nes bod
 
 Ar ôl PASS brodorol, dogfennir commit y prawf, ID y job ac URL yr
 archwiliad. Nid yw Cam 8 wedi'i ddechrau yma.
+
+
+## Ardystiad GitHub Actions — COMPLETE
+
+**Mae'r adran hon yn disodli'r cymhwyster PENDING uchod.**
+
+Llwyddodd y gadwyn gyfan, gan gynnwys yr oracl normadol gwreiddiol,
+ar commit `3daa6b0e5e3fac8a6c2868e8bae19d7220ffa38d` o gangen
+`Kotlin+Cymraeg`:
+
+- Rhediad: `38180495340`; swydd: `114591831816`.
+- Kotlin 1.9.0, JDK 21, `run-stage07-tests.sh`, cod ymadael 0.
+- Dilyswyd 28 marc yn uniongyrchol o'r log swydd.
+- Camau 1–6: PASS, gan gadw'r canlyniadau EXPECTED_RED hanesyddol.
+- Cam 7: `STAGE07_WITNESSES_GREEN_8`, `STAGE07_PRESERVED_DISCOVERY03_RED_5`,
+  `STAGE07_MATRIX_GREEN_441`, `STAGE07_CONDITIONAL_WRAPPER_PASS`,
+  `STAGE07_OWNERSHIP_AND_GUARDS_PASS`, `STAGE07_EARLIER_ROUTES_PASS`,
+  `STAGE07_PATCH_GREEN_0`, `STAGE07_BIGINT_INDEPENDENT_GREEN_549`,
+  `STAGE07_BIGINT_PRESERVED_LEGACY_RED_546` a `STAGE07_NATIVE_GREEN`.
+- Ni newidiwyd `LegacyDistanceAdapter.oldDistance` na'r oracl gwreiddiol.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38180495340
+
+**Dyfarniad:** Cam 7 wedi'i gwblhau a'i ardystio. `LAST_COMPLETED_STAGE=7`.
+Cam 8 (`DISCOVERY 04`) yw'r cam nesaf; nid yw wedi'i ddechrau.

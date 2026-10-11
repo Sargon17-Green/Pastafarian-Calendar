@@ -249,3 +249,8 @@ Ar commit `fd32a7f795943683275dc19838bfa2b3287c2661`, llwyddodd GitHub Actions (
 ## Cam 7 — PATCH 03: ail-basio'r pellter drwy'r graith
 
 Mae `oldDistance` yn aros yn alwadadwy ac yn cynhyrchu'r un pum anghysondeb Cam 6. Mae'r handler `PATCH_03` yn ei alw'n wirioneddol, yn cofnodi ei sail, ac yn defnyddio `DistancePatchWrapper` i gymharu â `abs(t-c)`. Dim ond os yw'r sail yn wahanol y caiff ei newid, ac ychwanegir `+1` cynhwysol ym mhob achos. Mae wyth tyst wedi troi'n sero anghysondeb PATCH; 441 prawf matrics a 549 prawf BigInteger annibynnol wedi pasio yn y cam cyntaf. Mae'r prawf brodorol llawn gan GitHub Actions eto i'w gwblhau.
+
+
+### Cam 7 — ardystiad brodorol cyflawn
+
+Ar commit `3daa6b0e5e3fac8a6c2868e8bae19d7220ffa38d` llwyddodd swydd CI Kotlin (`114591831816`, rhediad `38180495340`) ar Kotlin 1.9.0/JDK 21. Cadarnhawyd 28 marc log: holl atchweliadau Camau 1–6, 8 tyst PATCH 03 gwyrdd, 441 prawf matrics a 549 prawf BigInteger annibynnol. Mae'r graith oldDistance yn dal yn alwadadwy gyda 5 EXPECTED_RED, tra bo PATCH 03 â 0 anghysondeb. `LAST_COMPLETED_STAGE=7`; ni ddechreuwyd Cam 8.
