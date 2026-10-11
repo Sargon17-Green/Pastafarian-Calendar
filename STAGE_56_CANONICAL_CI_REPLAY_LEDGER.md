@@ -120,3 +120,17 @@ post eventum. Commit documentorum sequens non est ipse commit supra probatus;
 `success` ex `38154480466` soli SHA `1978447c1f526e4acc88c58c2d131c41e44316a8` attribuitur.
 Eventualis nova mutatio probationem novam requirit; Gradus 55 historicus
 non reaperitur nec Gradus 57 incipitur.
+
+## Recentissima revisio probata: 37e2eba (11 Octobris 2026)
+
+- Commit exactus: 37e2eba2ae1d7ccb4b854d7339746454682b5c95.
+- Vigilia plena: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38171251194 — 20/20 officia success.
+- Praevolatus: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38171251187 — success.
+- Custodia nominum: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38171251168 — success.
+- Ultimum testimonium logi: VIGILIA_SOAK=PASS; STATUS_POST_RUN=SOAK_GREEN.
+- Tota structura contra oraculum saved-sum separatum: 7/7 casus, 5/5 structurae, GCC et Clang; etiam praevia GCC.
+- Inclusa: 6/6 matrix, ASan/UBSan, 4/4 regressiones veteres, Gradus 55, 8/8 soak, annos -1/0/1.
+
+Clausula exactitudinis: SHA huius relationis verificatum est 37e2eba tantum.
+Additamentum ulteriorum limitum mensium et segmentorum in commit novo nondum verificatum est.
+Gradus 57 non incipitur; main non mutatur.
