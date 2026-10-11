@@ -80,6 +80,7 @@ jobs:
             tests/stage_56_raw_bowl_sum_corrective_tests.cpp \
             tests/stage_56_saved_sum_self_monkey_patch_tests.cpp \
             tests/stage_56_dispatch_concurrency_tests.cpp \
+            tests/stage_56_transactional_cache_audit_tests.cpp \
             tests/stage_56_final_static_audit_tests.cpp \
             tests/stage_56_e2e_worker.cpp \
             tests/stage_56_historical_path_compat.hpp \
@@ -463,6 +464,11 @@ jobs:
             tests/stage_56_dispatch_concurrency_tests.cpp \
             build_soak/stage56/monster.o \
             -o build_soak/stage56/concurrent
+          # DETOUR: etiam cache Gradus 56 et transactiones retry probantur.
+          "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES \
+            tests/stage_56_transactional_cache_audit_tests.cpp \
+            build_soak/stage56/monster.o \
+            -o build_soak/stage56/cache-recovery
           "$CXX" $CXXSTD "$OPT" $COMMON_WARNINGS $COMMON_INCLUDES \
             tests/stage_56_e2e_worker.cpp \
             build_soak/stage56/monster.o build_soak/stage56/reference.o \
@@ -474,6 +480,7 @@ jobs:
           set -euo pipefail
           timeout 5m build_soak/stage56/monkey 2>&1 | tee soak-logs/monkey.log
           timeout 5m build_soak/stage56/concurrent 2>&1 | tee soak-logs/concurrent.log
+          timeout 15m build_soak/stage56/cache-recovery 2>&1 | tee soak-logs/cache-recovery.log
           timeout 30m build_soak/stage56/core 2>&1 | tee soak-logs/core.log
           timeout 5m build_soak/stage56/static 2>&1 | tee soak-logs/static.log
 
