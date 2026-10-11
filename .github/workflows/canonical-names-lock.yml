@@ -52,3 +52,5 @@ jobs:
         run: sh run_stage02_gates_tests.sh
       - name: Stage 02 year traversal
         run: sh run_stage02_years_tests.sh
+      - name: Stage 02 cutlet and month blueprint
+        run: sh run_stage02_blueprint_tests.sh

@@ -51,3 +51,7 @@ ni'o lo `MonsterFamilies` cu zbasu lo `fallingFactorial` .e lo `unrankDistinctIn
 ni'o lo `MonsterGates` cu zbasu lo se jicmu vorme fi lo jicmu djacu bliku gi'e benji lo fa'u je na se galfi vorme vreji. lo `MonsterYears` cu zbasu lo nanca li 5000 .e lo balvi nanca .e lo purci nanca .e lo nu facki lo se srana nanca. lo `Stage02GateTests` .e lo `Stage02YearTests` cu srana lo `NormativeOracle` poi cipra po'o.
 
 ni'o lo nanca cipra ca lo 11 moi masti be lo 2026 moi nanca cu te jalge lo drani fi lo GitHub Actions run `38154400008`. lo balvi javni cu nitcu lo kecti .e lo masti .e lo mulno detri jalge. lo `LAST_COMPLETED_STAGE` cu du li pa.
+
+### lo kecti .e lo masti platu poi na se mulno
+
+ni'o lo `MonsterYearBlueprint` cu zbasu lo kecti pagbu .e lo kecti cmene .e lo masti se jimte .e lo masti cmene, tezu'e lo nu se cipra fi lo `NormativeOracle` poi cipra po'o. lo masti se jorne porsi cu na se zbasu ca ti. lo se benji result cu stodi gi'e se sruri lo se galfi.

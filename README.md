@@ -96,3 +96,9 @@ ni'o lo `Stage02GateTests` cu cipra lo ni'o se sruri .e lo nu minra lo cizyjavni
 ni'o lo `MonsterYears` cu zbasu lo pamoi nanca poi se namcu li 5000 .e lo balvi nanca .e lo purci nanca. lo `MonsterGates` cu vasru lo te jicmu vorme. lo nu cuxna lo nanca cu pilno lo te jicmu lenku .e lo lo ranki fi lo `MonsterSelectors`.
 
 ni'o lo `Stage02YearTests` cu cipra lo nanca li 5000 .e lo go'i co'a nanca tezu'e lo nu lo detri cu se tolcri. ko benji `sh run_stage02_years_tests.sh`. lo remoi stadi cu na mulno.
+
+## lo remoi stadi — lo kecti .e lo masti platu
+
+ni'o lo `MonsterYearBlueprint` cu se zbasu fi la Java gi'e cuxna lo kecti se namcu .e lo kecti pagbu .e lo kecti cmene .e lo masti se namcu .e lo masti se jimte .e lo masti cmene. lo na se galfi `cutletPartition` .e lo `monthLengths` cu se cpacu fi lo kopij. lo `cutletAt` cu facki lo kecti fi lo se cuxna detri.
+
+ni'o lo masti se jorne porsi cu na se zbasu ca lo platu stadi. lo `MonsterYearBlueprint` na se smuni lo mulno `YearStructure`. ko benji `sh run_stage02_blueprint_tests.sh` tezu'e lo nu cipra lo platu. lo remoi stadi cu na mulno.
