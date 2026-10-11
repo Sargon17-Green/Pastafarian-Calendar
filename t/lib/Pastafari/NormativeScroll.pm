@@ -13,7 +13,8 @@ our @EXPORT_OK = qw(
     buildHiddenDrops buildVisibleDrops initialBowls applyVisibleDropsToBowls postStir12 sauce
     bowlOrderFromDrop nextBowlInDrop46Order askBowl answerAt chooseRankShort chooseRankWide chooseRank
     fallingFactorial unrankDistinctIndices makeBoundedCompositionFamily makeCutletPartitionFamily
-    countWeavings unrankWeaving resetGateCache ensureGateIndex exactGateIndex
+    countWeavings unrankWeaving weavingPreopenStateCount
+    resetGateCache ensureGateIndex exactGateIndex
     positiveGateGap negativeGateGap year5000 nextYear previousYear findTargetYear buildYearStructure calendarDate
 );
 
@@ -534,6 +535,36 @@ sub makeCutletPartitionFamily ($G, $K, $required = undef) {
 # 各月份最後出現的次序須遞增。最後一個符號必為最大月份，
 # 移除它的其餘出現位置有 C(N-1,c_m-1) 種；遞迴刪除月份
 # m,m-1,... 即得完全整數的二項係數乘積，無須探索 DP 子樹。
+# 在最後一個月份首次出現之前，各已開啟月份的剩餘日數向量
+# 等價於「已按次序關閉的零值前綴」和「正數未關閉的連續區間」。
+# 令 B_p 是 opened=p、尚未全數開啟時的非零區間形狀數：
+# B_0=0; B_p=(L_p-1)*(1+B_{p-1})。
+# 因而初始狀態及每個 p=1..m-1 的 1+B_p 個可達狀態合計：
+# S = 1 + Σ_{p=1}^{m-1}(1+B_p)。只使用精確整數，無需執行 DP。
+sub weavingPreopenStateCount ($lengths) {
+    die "月份長度必須是陣列參照\n" if ref($lengths) ne 'ARRAY';
+    my $m = scalar @$lengths;
+    return Math::BigInt->bzero if !$m;
+
+    my @validated;
+    for my $value (@$lengths) {
+        die "月份長度必須是正整數\n"
+            if !defined($value)
+            || (ref($value) && !(blessed($value) && $value->isa('Math::BigInt')))
+            || "$value" !~ /\A[0-9]+\z/;
+        my $length = Math::BigInt->new("$value");
+        die "月份長度必須是正整數\n" if $length < 1;
+        push @validated, $length;
+    }
+    my $branch = Math::BigInt->bzero;
+    my $total = Math::BigInt->bone;
+    for my $p (0 .. $m-2) {
+        $branch->badd(1)->bmul($validated[$p]->copy->bsub(1));
+        $total->badd(1)->badd($branch);
+    }
+    return $total;
+}
+
 sub _remaining_last_order_count ($remaining, $closed, $choose) {
     my $m = scalar @$remaining;
     my $total = 0;

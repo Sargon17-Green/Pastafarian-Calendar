@@ -8,7 +8,7 @@ use Time::HiRes qw(time sleep);
 use POSIX qw(WNOHANG);
 use Getopt::Long qw(GetOptions);
 use lib 'lib', 't/lib';
-use Pastafari::NormativeScroll qw(countWeavings unrankWeaving);
+use Pastafari::NormativeScroll qw(countWeavings unrankWeaving weavingPreopenStateCount);
 
 # Linux 資源量測器：每個案例在獨立子程序執行。
 # RSS 採樣並非硬性記憶體限制；必須另加作業系統層級的上限。
@@ -73,6 +73,9 @@ sub run_child ($lengths) {
     die "交織計數不得為零\n" if $count < 1;
     die "交織診斷狀態數不守恆\n"
         if $stats{states} != $stats{preopen_states} + $stats{fully_open_states};
+    my $analytic = weavingPreopenStateCount($lengths);
+    die "交織前期 DP 狀態數與精確解析式不一致\n"
+        if $analytic != $stats{preopen_states};
     my $first = unrankWeaving($lengths, 1);
     my $last = unrankWeaving($lengths, $count);
     verify_word($first, $lengths);
@@ -90,6 +93,7 @@ sub run_child ($lengths) {
         $label, $total, length("$count"), time()-$start, peak_kib();
     printf "DP統計=%s preopen=%d fullyopen=%d states=%d transitions=%d valid=%d max_stack=%d Pascal_n=%d sparse_peak=%d\n",
         $label, @stats{qw(preopen_states fully_open_states states visited_transitions valid_transitions max_stack pascal_max_n sparse_peak)};
+    print "前期狀態解析式=$label count=$analytic 一致=PASS\n";
     return 1;
 }
 
