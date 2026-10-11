@@ -112,3 +112,14 @@ Firma attesa: `14 PASS, 3 FAIL`, precisamente le divergenze
 Il job `native-stage04-discovery` convalida il conteggio e le etichette;
 tutti i job preesistenti restano attivi.
 Il prossimo stadio introdurrà PATCH 02; qui nessuna correzione è applicata.
+
+### Certificazione della DISCOVERY 02
+
+La [GitHub Actions run 38153510206](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38153510206)
+ha compilato ed eseguito in Scala nativo tutte le regressioni:
+18/18 del Bootstrap, 7 PASS e 3 FAIL intenzionali di DISCOVERY 01,
+12/12 di PATCH 01 e 14 PASS con 3 FAIL intenzionali di DISCOVERY 02.
+Il commit di codice verificato è
+`46b58a474899028d686e23f50cf2aa6191a29db4`.
+La suite di DISCOVERY 02 resta RED per progettazione: è una
+prova dell'errore preservato, non un difetto della CI.

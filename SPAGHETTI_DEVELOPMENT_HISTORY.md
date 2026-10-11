@@ -143,5 +143,15 @@ La riparazione appartiene allo stadio 5 e non può essere anticipata.
 ### Strato di mostruosità aggiunto
 Nuovo adattatore, handler, stato semantico per invocazione, metrica,
 validazione, snapshot e regressione RED dedicata. PATCH 01 resta verde,
-la sua cicatrice resta osservabile. La certificazione della nuova run
-nativa è ancora da acquisire.
+la sua cicatrice resta osservabile. ### Verifica nativa compiuta
+
+La run GitHub Actions 38153510206 sul commit
+`46b58a474899028d686e23f50cf2aa6191a29db4`
+è conclusa con SUCCESS. Stage01 18 PASS/0 FAIL;
+Stage02 7 PASS/3 FAIL storici intenzionali;
+Stage03 12 PASS/0 FAIL;
+Stage04 14 PASS/3 FAIL intenzionali.
+La regressione DISCOVERY 02 ha mostrato esattamente
+`F:1→0`, `F+1:3→2`, `F+2:5→4`,
+con due confronti anteriori PASS. Il catalogo canonico resta
+bloccato e lo stadio 5 non è stato anticipato.

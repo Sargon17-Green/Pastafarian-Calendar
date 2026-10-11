@@ -158,7 +158,11 @@ object Stage04Tests {
       truth(text.contains("CURRENT_STAGE=4"), "Fase")
       truth(text.contains("CURRENT_KIND=DISCOVERY"), "Tipologia")
       truth(text.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Rosso atteso")
-      truth(text.contains("LAST_COMPLETED_STAGE=3"), "Stadio 3 completo")
+      val lastCompleted = text.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
+        .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE assente"))
+      truth(lastCompleted >= 3 && lastCompleted <= 4,
+        "La storia deve preservare lo stadio 3 e non anticipare lo stadio 5")
     }
 
     val manager = new BaseMonsterManager
