@@ -1,5 +1,6 @@
 #include "pastafari/monster.hpp"
 
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <exception>
@@ -22,17 +23,35 @@ void exige(bool ok, const char* message) {
     if (!ok) throw std::runtime_error(message);
 }
 
+// Referentia non invocat productionis savePatch, regularMod, nec
+// oldPermutationUnrank0: his erroribus communibus resistendum est.
+Integer servaIndependenter(const Integer& x) {
+    const Integer modulus = (Integer{1} << 127) - 1;
+    Integer r = x % modulus;
+    if (r < 0) r += modulus;
+    return (r == 0) ? modulus : r;
+}
+
+PermutationOrder ordoIndependens(const Integer& saved) {
+    Integer rest = (saved - 1) % Integer{720};
+    if (rest < 0) rest += Integer{720};
+    const int rank0 = rest.convert_to<int>();
+    PermutationOrder order{{1, 2, 3, 4, 5, 6}};
+    for (int rank = 0; rank < rank0; ++rank) {
+        exige(std::next_permutation(order.begin(), order.end()),
+              "permutatio independentis consumpta est");
+    }
+    return order;
+}
+
 // Referentia invocationis non communicat statum cum dispatch atomico.
 BowlState calculusIndependentis(const BowlState& original, int stir,
                                Integer& summaCruda, Integer& numerusServatus,
                                PermutationOrder& ordo) {
     summaCruda = 0;
     for (const Integer& b : original) summaCruda += b;
-    numerusServatus = pastafari::savePatch(summaCruda + 149 * stir);
-    const int numerus =
-        (pastafari::regularMod(numerusServatus - 1, Integer{720}) + 1)
-            .convert_to<int>();
-    ordo = pastafari::oldPermutationUnrank0(numerus - 1);
+    numerusServatus = servaIndependenter(summaCruda + 149 * stir);
+    ordo = ordoIndependens(numerusServatus);
 
     BowlState output = original;
     for (int position = 1; position <= 6; ++position) {
@@ -43,7 +62,7 @@ BowlState calculusIndependentis(const BowlState& original, int stir,
             + 3 * original[static_cast<std::size_t>(p)]
             + 5 * original[static_cast<std::size_t>(n)]
             + numerusServatus + stir + position * position;
-        output[static_cast<std::size_t>(b)] = pastafari::savePatch(
+        output[static_cast<std::size_t>(b)] = servaIndependenter(
             u * u + 7 * original[static_cast<std::size_t>(p)]
                     * original[static_cast<std::size_t>(n)]);
     }
