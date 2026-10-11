@@ -4,6 +4,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public final class Stage02EndpointWeavingTests {
     private static int checks;
@@ -20,6 +24,7 @@ public final class Stage02EndpointWeavingTests {
         testTerminalFoldAndExtendedDomains();
         testRankUnrankInversion();
         testSuffixConservation();
+        testScopedRootCountConcurrency();
         testBoundsAndOwnership();
         System.out.println("STAGE_02_ENDPOINT_WEAVING_PASS checks=" + checks);
     }
@@ -337,6 +342,34 @@ public final class Stage02EndpointWeavingTests {
                     eq(currentCount, branches, "E_SUFFIX_CONSERVATION");
                 }
             }
+        }
+    }
+
+    private static void testScopedRootCountConcurrency() {
+        MonsterWeavingEndpointDP shared = new MonsterWeavingEndpointDP(
+            new int[]{7, 8, 9, 10, 11});
+        BigInteger expected = shared.count();
+        ExecutorService executor = Executors.newFixedThreadPool(6);
+        try {
+            List<Callable<BigInteger>> tasks = new ArrayList<>();
+            for (int k = 0; k < 24; k++) {
+                final int index = k;
+                tasks.add(() -> index % 2 == 0
+                    ? shared.count() : shared.countAfterPrefix(new int[0]));
+            }
+            for (Future<BigInteger> result : executor.invokeAll(tasks)) {
+                eq(expected, result.get(), "E_ROOT_CACHE_CONCURRENT");
+            }
+            eq(expected, new MonsterWeavingEndpointDP(new int[]{7, 8, 9, 10, 11})
+                .count(), "E_ROOT_CACHE_INSTANCE_ISOLATION");
+            fails("E_WEAVE_PREFIX", () -> shared.countAfterPrefix(null));
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError("E_ROOT_CACHE_INTERRUPTED", ex);
+        } catch (java.util.concurrent.ExecutionException ex) {
+            throw new AssertionError("E_ROOT_CACHE_WORKER", ex);
+        } finally {
+            executor.shutdownNow();
         }
     }
 

@@ -11,6 +11,7 @@ public final class MonsterWeavingEndpointDP {
 
     private final int[] lengths;
     private final int totalDays;
+    private BigInteger cachedRootCount;
 
     public MonsterWeavingEndpointDP(int[] lengths) {
         if (lengths == null || lengths.length == 0) {
@@ -65,11 +66,16 @@ public final class MonsterWeavingEndpointDP {
         return state;
     }
 
-    public BigInteger count() {
-        return countSuffix(new State(lengths));
+    public synchronized BigInteger count() {
+        if (cachedRootCount == null) {
+            cachedRootCount = countSuffix(new State(lengths));
+        }
+        return cachedRootCount;
     }
 
     public BigInteger countAfterPrefix(int[] prefix) {
+        if (prefix == null) throw new IllegalArgumentException("E_WEAVE_PREFIX");
+        if (prefix.length == 0) return count();
         return countSuffix(afterPrefix(prefix));
     }
 
