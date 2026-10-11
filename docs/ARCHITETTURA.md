@@ -284,3 +284,24 @@ immutabile e incrementa una metrica separata.
 frozen senza richiamare il wrapper, controllando
 sia l'ordine di PATCH07 sia la cicatrice storica.
 L'oracolo test-only resta escluso dalla produzione.
+
+## DISCOVERY 09 — il caveau precedente rimane obsoleto
+
+`LegacyVaultAdapter.vaultOld` riceve sei ciotole
+dopo l'ultima goccia. Per dodici giri esegue
+`saved=SAVE(sum(old)+149*stir)`, sceglie una
+permutazione 1-based di sei ID, e calcola sei
+nuovi valori con i pesi normativi 3,5,7 e
+`stir+position²`. L'errore è un'unica
+variabile di stato: `old` resta sempre
+il Vector d'ingresso invece del risultato del
+giro precedente. Si producono comunque dodici
+record osservabili con il loro rango, ordine,
+somma SAVE e sei uscite.
+
+Handler, dispatcher, contesto e manager sono
+limitati alla fase `DISCOVERY_09_VAULT`; il
+validator verifica traccia, ownership, dominio
+SAVE e tutta la sequenza storica. Un calcolatore
+rolling separato vive esclusivamente nei test.
+La fase PATCH 09 rimane futura.

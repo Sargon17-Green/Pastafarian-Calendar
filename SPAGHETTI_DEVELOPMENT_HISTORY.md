@@ -881,3 +881,44 @@ Stage16 mantiene esattamente 25 PASS e tre FAIL
 intenzionali: ordine diretto, ordine inverso e
 goccia 46. Le sette patch precedenti restano
 intatte e non si è anticipato lo Stage18.
+
+## Stadio 18 — DISCOVERY 09: dodici giri sul caveau del passato
+
+### Che cosa si pensava
+
+Il caveau originale delle sei ciotole veniva
+conservato per il controllo diagnostico. Il ciclo
+di dodici mescolature leggeva però sempre proprio
+questo caveau iniziale, dimenticando di usare
+l'uscita pubblicata dal giro precedente.
+
+### Che cosa si è scoperto
+
+Il primo giro è normativo: stesso SAVE, stessa
+permutazione e stesse sei equazioni. Dal secondo
+giro le somme, i ranghi e tutte le uscite
+seguono un riferimento temporale obsoleto.
+Questo errore è distinto dal vecchio aliasing
+della DISCOVERY 08, già corretto dalla PATCH 08.
+
+### Che cosa è stato aggirato
+
+Nulla. L'helper storico conserva espressamente
+`val vaultOld = initial` e legge quell'istantanea
+in ognuno dei dodici giri. Dispatcher e manager
+lo eseguono veramente, archiviando tutte le
+istantanee per la diagnosi.
+
+### Perché non è normativamente equivalente
+
+Il riferimento normativo aggiorna il vecchio
+caveau dopo ogni mescolatura. Tre confronti
+separati, con sei ciotole ordinarie, uguali
+e signed, devono fallire intenzionalmente.
+
+### Strato di mostruosità aggiunto
+
+Dodici record immutabili, ciclo di mescolatura
+completo, handler, dispatcher, campi nel contesto,
+metrica, validatore, report e suite RED dedicata.
+Le otto patch precedenti restano verificabili.

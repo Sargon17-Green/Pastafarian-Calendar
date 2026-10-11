@@ -670,3 +670,34 @@ Il vecchio array condiviso continua a produrre i
 tre fallimenti previsti nello Stage16. La PATCH 08
 supera il confronto delle sei ciotole con istantanee
 congelate senza introdurre logica del prossimo stadio.
+
+## Stadio 18 — DISCOVERY 09: dodici giri con un caveau obsoleto
+
+Dopo le 46 gocce, la norma richiede dodici mescolature
+finali. Ogni giro deve rileggere il risultato del precedente.
+Il nuovo adattatore storico `LegacyVaultAdapter.vaultOld`
+conserva per errore il **Vector originale** e lo riusa
+come `old` in tutti i dodici giri. Il calcolo di un
+singolo giro è corretto: SAVE della PATCH 01,
+permutazione della PATCH 07 e sei aggiornamenti
+simultanei come PATCH 08. Il solo difetto è il
+mancato avanzamento del vecchio caveau.
+
+`BaseMonsterManager.discover09Vault` attraversa
+`BOOT → DISCOVERY_09_VAULT` nello stesso contesto;
+il report immutabile espone tutte le dodici tracce
+(`savedSum`, rango, ordine e sei uscite) e il valore
+finale. Il validator confronta l'intero registro
+alla vera elaborazione legacy. La formula normativa
+sui dodici giri consecutivi è test-only.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage18Tests'
+```
+
+Firma RED prevista: `25 PASS, 3 FAIL` per
+i vettori ordinario, simmetrico e signed.
+La suite verifica 720 permutazioni del primo giro,
+256 campioni deterministici, BigInt signed oltre
+16.000 bit, ownership e tutte le otto patch
+precedenti. Nessuna PATCH 09 è introdotta.

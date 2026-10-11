@@ -343,20 +343,34 @@ object Stage17Tests {
       truth(src.contains("val next = register"),"Cicatrice cancellata")
       truth(src.contains("LegacyBowlAliasAdapter.bowlAlias(initial,drop,stones,step,rank1)"),
         "Il wrapper deve attraversare realmente il legacy")
-      truth(!src.contains("vaultOld"),"Stage18 anticipato")
+      val st = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current = st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current < 18)
+        truth(!src.contains("vaultOld"),"Stage18 anticipato")
+      else
+        truth(src.contains("LegacyVaultAdapter.vaultOld("),"Discovery 09 disponibile")
     }
     check("metadati Stage17 verdi preservano la firma RED di Stage16") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=17"),"Stage17")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=08"),"Patch")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      val current = st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=17,"Stage17 disponibile")
+      if(current==17) {
+        truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=08"),"Patch")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      } else {
+        truth(st.contains("STAGE_17_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_31_PASS_0_FAIL"),
+          "Certificazione storica Stage17")
+      }
       truth(st.contains("STAGE_16_NATIVE_VERIFICATION=PASS_EXPECTED_RED_25_PASS_3_FAIL"),
         "Firma di Stage16")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed>=16 && completed<=17,"Certificazione non anticipata")
+      truth(completed>=16 && completed<=current,"Certificazione non anticipata")
     }
     println("\nRISULTATO STADIO 17: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)

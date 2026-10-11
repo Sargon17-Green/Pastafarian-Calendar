@@ -334,7 +334,10 @@ object Stage16Tests {
       else
         truth(sources.contains("LegacyBowlAliasAdapter.bowlAlias("),
           "Cicatrice reale ancora percorribile")
-      truth(!sources.contains("vaultOld"),"Logica dello stadio futuro")
+      if(current < 18)
+        truth(!sources.contains("vaultOld"),"Logica dello stadio futuro")
+      else
+        truth(sources.contains("LegacyVaultAdapter"),"La discovery storica deve restare")
     }
     check("metadati Stage16 RED senza certificazione anticipata") {
       val state=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),

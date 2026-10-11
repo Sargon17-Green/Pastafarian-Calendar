@@ -56,7 +56,10 @@ final case class BaseMonsterContext(
   var legacyBowlPoursOutput: Option[Vector[BigInt]] = None,
   var legacyBowlOutput: Option[Vector[BigInt]] = None,
   var patchedBowlOutput: Option[Vector[BigInt]] = None,
-  var patch08Applied: Boolean = false
+  var patch08Applied: Boolean = false,
+  var postStirInput: Option[Vector[BigInt]] = None,
+  var legacyVaultRounds: Option[Vector[LegacyVaultRound]] = None,
+  var legacyVaultOutput: Option[Vector[BigInt]] = None
 )
 
 final class BaseMetricsShell {
@@ -76,6 +79,34 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+
+  def requireDiscovery09Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_09_VAULT" ||
+        ctx.status != "LEGACY_VAULT_READY" ||
+        ctx.branchTrace.toVector != Vector("BOOT","DISCOVERY_09_VAULT") ||
+        ctx.postStirInput.isEmpty || ctx.legacyVaultRounds.isEmpty ||
+        ctx.legacyVaultOutput.isEmpty) {
+      throw new IllegalStateException("DISCOVERY 09 richiede dodici giri completi.")
+    }
+    val initial = ctx.postStirInput.get
+    val rounds = ctx.legacyVaultRounds.get
+    val output = ctx.legacyVaultOutput.get
+    if (initial.length != 6 || rounds.length != 12 ||
+        output.length != 6 || output != rounds.last.bowls ||
+        rounds.map(_.step) != (1 to 12).toVector ||
+        rounds.exists(r => r.bowls.length != 6 ||
+          r.order.sorted != Vector(1,2,3,4,5,6) ||
+          r.bowls.exists(x => x < 1 || x > ((BigInt(1)<<127)-1)))) {
+      throw new IllegalStateException("Registro storico incompleto o incoerente.")
+    }
+    // La validazione conferma tutte le dodici istantanee diagnostiche;
+    // la corrispondenza normativa è verificata solo nei test.
+    val rebuilt = LegacyVaultAdapter.vaultOld(initial)
+    if (rebuilt.rounds != rounds || rebuilt.bowls != output) {
+      throw new IllegalStateException("Le tracce del caveau storico sono contraffatte.")
     }
   }
 
@@ -492,7 +523,8 @@ final class BaseMonsterManager {
     new Discovery07PermutationHandler(metrics),
     new Patch07PermutationHandler(metrics),
     new Discovery08BowlAliasHandler(metrics),
-    new Patch08BowlHandler(metrics)
+    new Patch08BowlHandler(metrics),
+    new Discovery09VaultHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -904,6 +936,27 @@ final class BaseMonsterManager {
       )
     } catch {
       case error: Throwable => throw BaseErrorWrapper.wrap("patch08",error)
+    }
+  }
+
+
+  def discover09Vault(
+    calculationDay: BigInt, targetDay: BigInt,
+    bowlsAfterDrops: Vector[BigInt]
+  ): Discovery09VaultReport = {
+    val ctx = bootstrap(calculationDay,targetDay)
+    ctx.postStirInput = Some(bowlsAfterDrops)
+    ctx.phase = "DISCOVERY_09_VAULT"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery09Ready(ctx)
+      Discovery09VaultReport(
+        ctx.calculationDay,ctx.targetDay,ctx.postStirInput.get,
+        ctx.legacyVaultRounds.get,ctx.legacyVaultOutput.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("discovery09",error)
     }
   }
 

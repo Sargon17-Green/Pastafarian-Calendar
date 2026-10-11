@@ -197,7 +197,7 @@ object Stage01Tests {
       val mainRoot = root.resolve("src/main/scala")
       val content = textFiles(mainRoot).map(read).mkString("\n")
       val forbidden = Vector(
-        "vaultOld", "orderAt46Latch", "biasedLegacyPick", "LEGACY_YEAR_MAX",
+        "orderAt46Latch", "biasedLegacyPick", "LEGACY_YEAR_MAX",
         "oldJumpGuess", "VirtualLegacyList", "legacyChooseEachDaySeparately", "oldContiguousMonthDayGuess"
       )
       val phaseSpecific = (if (currentStage < 2) Vector("oldRemainder") else Vector.empty[String]) ++
@@ -214,7 +214,9 @@ object Stage01Tests {
         (if (currentStage < 14) Vector("oldPermutationUnrank0") else Vector.empty[String]) ++
         (if (currentStage < 15) Vector("permutationPatch") else Vector.empty[String]) ++
         (if (currentStage < 16) Vector("bowlAlias") else Vector.empty[String]) ++
-        (if (currentStage < 17) Vector("bowlPatch") else Vector.empty[String])
+        (if (currentStage < 17) Vector("bowlPatch") else Vector.empty[String]) ++
+        (if (currentStage < 18) Vector("vaultOld") else Vector.empty[String]) ++
+        (if (currentStage < 19) Vector("vaultPatch") else Vector.empty[String])
       val present = (forbidden ++ phaseSpecific).filter(content.contains)
       equal(present, Vector.empty[String], "simboli futuri trovati")
     }
