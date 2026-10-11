@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=11
 CURRENT_KIND=PATCH
 CURRENT_PATCH=05
-LAST_COMPLETED_STAGE=10
+LAST_COMPLETED_STAGE=11
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyHiddenStorage đảo từ hidden7 đến hidden1; HiddenStoragePatch sửa vị trí đọc 8-k qua hàm legacy, không đảo kho; giữ các bản vá 01-04 và ngữ cảnh riêng.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_11_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_11_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_11_PENDING
-CI_FAILURES=STAGE_11_PENDING
+CI_TESTS=111
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -168,5 +168,17 @@ LegacyHiddenStorage.store_reversed và read_as_if_forward không đổi.
 Bốn hồi quy chuẩn của giai đoạn 10 giữ nguyên kỳ vọng.
 Các kiểm thử dây nối cũ được sửa để kiểm tra legacy vẫn sai,
 còn đường công khai đã đúng. Mười bài kiểm thử độc lập được thêm.
-Dự kiến 111 kiểm thử, 0 lỗi; LAST_COMPLETED_STAGE vẫn 10
-cho đến khi cả CI và khóa tên chuẩn xác nhận GREEN.
+CI xác nhận 111 kiểm thử, 0 lỗi; LAST_COMPLETED_STAGE đã nâng lên 11
+sau khi cả kiểm thử và khóa tên chuẩn xác nhận GREEN.
+
+Giai đoạn 11 đã được kiểm chứng bằng Elixir 1.18.5, Erlang/OTP 27.
+111 kiểm thử đạt, không có lỗi hoặc cảnh báo biên dịch.
+Bốn hồi quy chuẩn từ phát hiện 05 vẫn giữ nguyên kỳ vọng và đều đạt.
+Cả mười bài kiểm thử mới của PATCH 05 đạt; khóa tên chuẩn PASS.
+LegacyHiddenStorage giữ nguyên blob SHA:
+cb00f07e880368cf3aa4be81546944bd09bfa4c1.
+HiddenDropCalculator giữ nguyên blob SHA:
+5afcaf5cff02a84fbbd92398b134adc34a08c885.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38163456728
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38163456763
+Giai đoạn 11 đóng GREEN; tiếp theo là giai đoạn 12, DISCOVERY 06.

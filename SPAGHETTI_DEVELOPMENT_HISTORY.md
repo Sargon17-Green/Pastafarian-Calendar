@@ -304,3 +304,13 @@ phát hiện 05; sửa riêng các khẳng định dây nối từng
 qua lớp vá đúng, không thay đổi trạng thái giữa các lần gọi,
 và bảo toàn các bản vá 01–04. Không bắt đầu phát hiện 06
 của giai đoạn 12.
+
+**Kiểm chứng thực tế:** GitHub Actions đã biên dịch 23 tệp sản xuất
+trong Elixir 1.18.5, OTP 27, chạy **111 kiểm thử, 0 thất bại**
+và không cảnh báo biên dịch. Mười bài mới đều đạt; bốn hồi quy
+chuẩn của phát hiện 05 đã chuyển thành đạt với kỳ vọng không đổi.
+Kho `LegacyHiddenStorage` giữ nguyên blob SHA
+`cb00f07e880368cf3aa4be81546944bd09bfa4c1`.
+Bộ tính `HiddenDropCalculator` giữ nguyên blob SHA
+`5afcaf5cff02a84fbbd92398b134adc34a08c885`.
+Khóa tên chuẩn đạt độc lập. Giai đoạn 11 kết thúc GREEN.

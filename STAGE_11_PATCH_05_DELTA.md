@@ -63,3 +63,21 @@ Giai đoạn 11: vá truy cập giọt ẩn qua ánh xạ 8-k
 
 Giữ nguyên kho lưu đảo ngược, thực thi phép đọc legacy
 qua địa chỉ đã ánh xạ; bốn hồi quy chuẩn chuyển sang xanh.
+
+## Kết quả xác minh thực tế
+
+- Commit triển khai: `37c258f0a842dd6ec77535eda84fcfede59ad55c`.
+- Elixir 1.18.5, Erlang/OTP 27.
+- 111 kiểm thử, 0 lỗi, 0 cảnh báo biên dịch.
+- Bốn hồi quy chuẩn của giai đoạn 10 giữ nguyên, chuyển sang đạt.
+- Mười kiểm thử mới đạt, bao gồm truy cập đủ bảy giọt, bảy
+  vị trí đảo, số nguyên 2048 bit, đồng thời và đầu vào lỗi.
+- Khóa tên chuẩn độc lập PASS.
+- LegacyHiddenStorage và HiddenDropCalculator vẫn nguyên blob SHA.
+- Không đảo ngược lại tuple và không khởi động DISCOVERY 06.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38163456728
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38163456763
+
+Trạng thái cuối giai đoạn 11: GREEN, đã kiểm chứng.
+Giai đoạn 12, DISCOVERY 06, chưa bắt đầu.

@@ -323,3 +323,19 @@ kho và hàm đọc legacy còn sai, trong khi lớp truy cập công khai
 ngày, số nguyên tùy ý, kho độc lập trong context, đồng thời,
 kiểm tra nguồn và tính bất biến của các bản vá trước.
 Chưa thêm cơ chế lấy giọt lịch sử của giai đoạn 12.
+
+## Xác minh hoàn tất giai đoạn 11
+
+CI trên Elixir 1.18.5 và Erlang/OTP 27 xác nhận **111 kiểm thử,
+0 lỗi, không có cảnh báo biên dịch**. Bốn hồi quy chuẩn thuộc phát hiện
+05 đã chuyển thành đạt mà không đổi kỳ vọng. Mười bài kiểm thử mới
+đều đạt; khóa tên chuẩn độc lập PASS.
+
+- [Kiểm thử xanh của giai đoạn 11](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38163456728)
+- [Khóa tên chuẩn đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38163456763)
+
+LegacyHiddenStorage và HiddenDropCalculator không thay đổi.
+Giai đoạn 11/55 được đóng GREEN. Bước tiếp theo là
+giai đoạn 12/55, `DISCOVERY 06`: lỗi giả định mọi giọt
+quá khứ đều nằm trong kho các giọt nhìn thấy. Chưa thêm
+bản vá 06 trong giai đoạn này.
