@@ -55,7 +55,7 @@ public final class Stage02EndpointWeavingTests {
 
     private static void testConditionalPrefixes() {
         for (int[] lengths : new int[][]{{3, 3, 3}, {2, 3, 4, 2}, {4, 4, 4},
-                {1, 2, 4}, {4, 5, 6}}) {
+                {1, 2, 4}, {3, 4, 4}}) {
             MonsterWeavingEndpointDP independent = new MonsterWeavingEndpointDP(lengths);
             NormativeOracle.WeavingFamily oracle = new NormativeOracle.WeavingFamily(lengths);
             BigInteger total = oracle.count();

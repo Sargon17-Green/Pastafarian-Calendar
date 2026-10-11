@@ -86,7 +86,7 @@ public final class MonsterWeavingEndpointDP {
         BigInteger[] columns = new BigInteger[oldLength + 1];
         Arrays.fill(columns, ZERO);
 
-        if (!enforceFirstOrder) {
+        if (!enforceFirstOrder || add == 1) {
             for (int first = 1; first <= oldLength; first++) {
                 for (int last = first; last <= oldLength; last++) {
                     BigInteger value = previous[first][last];
@@ -98,12 +98,6 @@ public final class MonsterWeavingEndpointDP {
             BigInteger cumulative = ZERO;
             int included = 0;
             for (int first = 1; first <= currentLength; first++) {
-                if (enforceFirstOrder && first - 1 >= 1 && first - 1 <= oldLength) {
-                    for (int last = first - 1; last <= oldLength; last++) {
-                        BigInteger value = previous[first - 1][last];
-                        if (value != null) columns[last] = columns[last].add(value);
-                    }
-                }
                 int boundary = Math.min(first - 1, oldLength);
                 while (included < boundary) {
                     included++;
