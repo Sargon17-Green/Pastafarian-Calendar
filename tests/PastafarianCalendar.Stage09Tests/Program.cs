@@ -108,7 +108,7 @@ internal static class Program
             new BigInteger[] { 0, 0, 0, 0, 0, 0 },
             new BigInteger[] { 0, 1, 1, 1, 1, 1 },
             new BigInteger[] { 0, boundary, boundary, boundary, boundary, boundary },
-            new BigInteger[] { 0, boundary - 1, boundary + 1, 2 * boundary, -boundary },
+            new BigInteger[] { 0, boundary - 1, boundary + 1, 2 * boundary, -boundary, -2 * boundary },
             new BigInteger[] { 0, -1, -2, -3, -4, -5 },
             new BigInteger[] { 0, huge, huge + 1, huge + 2, huge + 3, huge + 4 },
             new BigInteger[] { 0, -huge, -huge - 1, huge, huge * 2, huge * 3 },
