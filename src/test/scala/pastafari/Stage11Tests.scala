@@ -331,16 +331,25 @@ object Stage11Tests {
     check("oracolo solo nel test e Stage11 verde senza Stage12") {
       val status=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(status.contains("CURRENT_STAGE=11"),"Stadio")
-      truth(status.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(status.contains("CURRENT_PATCH=05"),"Patch")
-      truth(status.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      val currentStage = status.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      truth(currentStage >= 11,"PATCH 05 resta disponibile")
+      if (currentStage == 11) {
+        truth(status.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(status.contains("CURRENT_PATCH=05"),"Patch")
+        truth(status.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      } else {
+        truth(status.contains("STAGE_11_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_27_PASS_0_FAIL"),
+          "Certificazione dello stadio 11 preservata")
+      }
       truth(status.contains("STAGE_10_NATIVE_VERIFICATION=PASS_EXPECTED_RED_15_PASS_3_FAIL"),
         "Firma RED storica")
       val completed=status.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE assente"))
-      truth(completed==10 || completed==11,"Certificazione anticipata")
+      truth(completed >= 10 && completed <= currentStage,
+        "Ordine di certificazione storico conservato")
       val stream=Files.walk(root().resolve("src/main/scala"))
       val sources=try stream.iterator().asScala
         .filter(p=>Files.isRegularFile(p)&&p.toString.endsWith(".scala"))
@@ -350,7 +359,10 @@ object Stage11Tests {
       truth(!sources.contains("NormativeOracle"),"Oracolo nel prodotto")
       truth(sources.contains("LegacyPriorAdapter.legacyPrior(hidden, visible, index, lag)"),
         "Wrapper deve usare veramente il helper legacy")
-      truth(!sources.contains("GRIND_TABLE_WITH_SENTINEL"),"Stage12 anticipato")
+      if (currentStage < 12)
+        truth(!sources.contains("GRIND_TABLE_WITH_SENTINEL"),"Stage12 anticipato")
+      else
+        truth(sources.contains("GRIND_TABLE_WITH_SENTINEL"),"La cicatrice Stage12 deve essere presente")
     }
 
     println("\nRISULTATO STADIO 11: "+passed+" PASS, "+failed+" FAIL")

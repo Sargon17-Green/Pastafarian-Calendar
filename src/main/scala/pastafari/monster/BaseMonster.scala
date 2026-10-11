@@ -31,7 +31,15 @@ final case class BaseMonsterContext(
   var priorLagInput: Option[Int] = None,
   var legacyPriorOutput: Option[BigInt] = None,
   var patchedPriorOutput: Option[BigInt] = None,
-  var patch05Applied: Boolean = false
+  var patch05Applied: Boolean = false,
+  var grindStepInput: Option[Int] = None,
+  var grindValueInput: Option[BigInt] = None,
+  var grindPrev1Input: Option[BigInt] = None,
+  var grindPrev3Input: Option[BigInt] = None,
+  var grindPrev7Input: Option[BigInt] = None,
+  var grindStonesInput: Option[Vector[BigInt]] = None,
+  var legacyGrindRuleOutput: Option[LegacyGrindRule] = None,
+  var legacyGrindOutput: Option[BigInt] = None
 )
 
 final class BaseMetricsShell {
@@ -51,6 +59,23 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requireDiscovery06Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_06_GRIND" ||
+        ctx.status != "LEGACY_GRIND_READY" ||
+        ctx.grindStepInput.isEmpty || ctx.grindValueInput.isEmpty ||
+        ctx.grindPrev1Input.isEmpty || ctx.grindPrev3Input.isEmpty ||
+        ctx.grindPrev7Input.isEmpty || ctx.grindStonesInput.isEmpty ||
+        ctx.legacyGrindRuleOutput.isEmpty || ctx.legacyGrindOutput.isEmpty ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_06_GRIND")) {
+      throw new IllegalStateException("La macinatura legacy non è pronta.")
+    }
+    val step = ctx.grindStepInput.get
+    if (step < 1 || step > 11 || ctx.grindStonesInput.get.length != 5 ||
+        ctx.legacyGrindRuleOutput.get != LegacyGrindTableAdapter.legacyGrindRule(step)) {
+      throw new IllegalStateException("Catalogo dei macinamenti legacy incoerente.")
     }
   }
 
@@ -261,7 +286,8 @@ final class BaseMonsterManager {
     new Discovery04StonesHandler(metrics),
     new Patch04StonesHandler(metrics),
     new Discovery05PriorHandler(metrics),
-    new Patch05PriorHandler(metrics)
+    new Patch05PriorHandler(metrics),
+    new Discovery06GrindHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -503,6 +529,35 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("patch05", e)
+    }
+  }
+
+  def discover06Grind(
+    calculationDay: BigInt, targetDay: BigInt, step: Int,
+    oldValue: BigInt, previous1: BigInt, previous3: BigInt,
+    previous7: BigInt, stones: Vector[BigInt]
+  ): Discovery06GrindReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.grindStepInput = Some(step)
+    ctx.grindValueInput = Some(oldValue)
+    ctx.grindPrev1Input = Some(previous1)
+    ctx.grindPrev3Input = Some(previous3)
+    ctx.grindPrev7Input = Some(previous7)
+    ctx.grindStonesInput = Some(stones)
+    ctx.phase = "DISCOVERY_06_GRIND"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery06Ready(ctx)
+      Discovery06GrindReport(
+        calculationDay = ctx.calculationDay, targetDay = ctx.targetDay,
+        step = ctx.grindStepInput.get, oldValue = ctx.grindValueInput.get,
+        previous1 = ctx.grindPrev1Input.get, previous3 = ctx.grindPrev3Input.get,
+        previous7 = ctx.grindPrev7Input.get, stones = ctx.grindStonesInput.get,
+        legacyRule = ctx.legacyGrindRuleOutput.get, legacyValue = ctx.legacyGrindOutput.get,
+        phase = ctx.phase, status = ctx.status, trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("discovery06", e)
     }
   }
 

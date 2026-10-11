@@ -175,3 +175,20 @@ la traccia completa e l'uguaglianza di ciascun
 output alla propria formula. La logica non importa
 l'oracolo test-only e non avvia la costruzione
 completa delle gocce dei futuri stadi.
+
+## DISCOVERY 06 — tabella a dodici record per undici macinature
+
+La struttura `GRIND_TABLE_WITH_SENTINEL` contiene
+il sentinel iniziale `(0,0,0,0,0)` e undici regole
+normative. `legacyGrindRule(step)` sbaglia l'indice
+`step-1`: l'indice corretto sarebbe `step`.
+`legacyGrind` applica effettivamente la regola letta
+alla formula con `oldValue²`, tre valori precedenti
+e la pietra determinata dalla regola, quindi usa
+il wrapper SAVE di Stage03.
+
+Il manager esegue `DISCOVERY_06_GRIND` dopo Bootstrap,
+con input/output propri dell'invocazione, controllo
+della regola selezionata, report immutabile e metrica.
+Il riferimento normativo delle undici regole compare
+nei test, non nell'adattatore di produzione.

@@ -531,3 +531,48 @@ il PATCH 05, tutte le 47 finestre dei tre ritardi,
 512 campioni deterministici, grandi interi, invarianti
 di ownership e validazione indipendente. Il helper
 `legacyPrior` rimane immutato.
+
+## Stadio 12 — DISCOVERY 06: un sentinel davanti alle undici macinature
+
+### Che cosa si pensava
+
+Aggiungere un record iniziale di sentinella a una
+tabella di undici regole sembrava innocuo. Il lettore
+continuava però a tradurre il numero di macinatura
+nell'indice `step-1`, valido soltanto senza sentinel.
+
+### Che cosa si è scoperto
+
+La prima macinatura legge coefficienti tutti zero
+invece della regola `(3,5,7,11,Wheat)`.
+Ogni passo successivo usa la regola precedente;
+l'undicesima regola corretta non è mai letta.
+Con dati di prova `oldValue=7`, precedenti
+`11,13,17` e pietre `19,23,29,31,37`,
+il primo calcolo dà 68 anziché 422.
+
+### Che cosa è stato aggirato
+
+Nulla. `LegacyGrindTableAdapter.legacyGrind`
+usa realmente il catalogo con sentinel ed esegue
+l'aritmetica, mentre il dispatcher e l'handler
+conservano regola e risultato nel report.
+Non è presente un wrapper che corregga l'indice.
+
+### Perché non è normativamente equivalente
+
+Per la macinatura numerata `step` la norma
+usa la regola al posto `step` della tabella con
+sentinel, ma l'implementazione legacy legge
+il posto `step-1`. La differenza è evidente
+nei tre confronti normativi intenzionalmente RED
+ai passi 1, 6 e 11.
+
+### Strato di mostruosità aggiunto
+
+Catalogo di dodici record con sentinel, funzione
+di lookup sbagliata, calcolo legacy reale, handler,
+otto campi del contesto, validazione e report,
+metrica specifica e suite di regressione.
+Le cinque patch precedenti restano invariate.
+Certificazione nativa da acquisire.

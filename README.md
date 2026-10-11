@@ -393,3 +393,35 @@ Stage11 27 PASS/0 FAIL.
 Lo stesso risultato è stato verificato contro 47 finestre
 e tre ritardi, con 512 campioni deterministici. Il codice
 del helper storico non è stato alterato; Stage12 non iniziato.
+
+## Stadio 12 — DISCOVERY 06: la tabella con sentinel sposta le macinature
+
+Il contratto normativo del ciclo visibile descrive undici
+passaggi, numerati da 1 a 11; ognuno porta quattro
+coefficienti e un indice di pietra. Il vecchio modulo
+`LegacyGrindTableAdapter` conserva tutte le undici regole
+ma ne antepone una dodicesima, il sentinel
+`(0,0,0,0,0)`. La lettura legacy usa ancora
+`GRIND_TABLE_WITH_SENTINEL(step - 1)`, perciò
+la macinatura 1 usa il sentinel e le altre macinature
+leggono la regola precedente. Non manca alcuna riga:
+l'errore è l'indice di lettura.
+
+Il manager `discover06Grind` passa attraverso
+`BOOT → DISCOVERY_06_GRIND`, con handler e validazione
+dedicati. Vengono acquisiti numero di passaggio, valore
+precedente, tre gocce precedenti e cinque pietre.
+Il helper applica realmente il calcolo quadratico usando
+la vecchia regola, con SAVE già corretto da PATCH 01;
+non ci si limita a mostrare una tabella statica.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage12Tests'
+```
+
+Firma deliberatamente RED: `22 PASS, 3 FAIL`,
+corrispondente esclusivamente alle macinature 1, 6 e 11.
+Tutti i coefficienti corretti rimangono fisicamente
+nella tabella. I test verificano limiti, aritmetica BigInt,
+SAVE, riproducibilità e tutte le patch precedenti.
+Non viene anticipata la correzione di Stage13.
