@@ -34,9 +34,11 @@ function checkDrop(drop:bigint,c=F,t=F):void{
     check(actual.legacyAccepted && actual.legacyOrder!==null &&
       actual.legacyRejection===null && Object.isFrozen(actual.legacyOrder),
       "legacy helper ने वैध rank स्वीकारला पाहिजे");
-    check(actual.legacyOrder.every((v,j)=>v===adapter.oldPermutationUnrank0(drop)[j]),
+    const order=actual.legacyOrder;
+    if(order===null)throw new Error("वैध rank साठी legacy permutation मिळाली नाही");
+    check(order.every((v,j)=>v===adapter.oldPermutationUnrank0(drop)[j]),
       "खरा oldPermutationUnrank0 helper return");
-    if(actual.legacyOrder.join(",")!==expected.join(","))mismatches++;
+    if(order.join(",")!==expected.join(","))mismatches++;
   }else{
     rejected++;
     check(!actual.legacyAccepted && actual.legacyOrder===null &&

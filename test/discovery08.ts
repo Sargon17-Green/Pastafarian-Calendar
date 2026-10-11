@@ -56,12 +56,14 @@ for(const drop of witnesses) {
 
   if(legal) {
     accepted++;
-    check(observed.legacyOrder!==null && observed.legacyRejection===null &&
-      observed.legacyOrder===null?false:true,"legacy result आवश्यक");
-    check(observed.legacyOrder!==null && Object.isFrozen(observed.legacyOrder) &&
-      observed.legacyOrder.every((v,i)=>v===adapter.oldPermutationUnrank0(drop)[i]),
+    check(observed.legacyOrder!==null && observed.legacyRejection===null,
+      "legacy result आवश्यक");
+    const order=observed.legacyOrder;
+    if(order===null)throw new Error("वैध zero-based rank साठी permutation मिळाली नाही");
+    check(Object.isFrozen(order) &&
+      order.every((v,i)=>v===adapter.oldPermutationUnrank0(drop)[i]),
       "मूळ helper चा actual zero-based क्रमचय");
-    if(observed.legacyOrder.join(",")===expected.join(","))matches++;else mismatches++;
+    if(order.join(",")===expected.join(","))matches++;else mismatches++;
   }else {
     rejections++;
     check(observed.legacyOrder===null && observed.legacyRejection==="OUT_OF_RANGE",
