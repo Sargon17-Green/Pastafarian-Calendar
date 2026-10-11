@@ -58,3 +58,9 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 75s perl -Ilib -It/lib tools/profile_weaving.pl --profile smoke --seconds 15 --rss-kib 262144
+      - name: 只在明確標記的提交執行擴充交織量測
+        if: contains(github.event.head_commit.message, '[weaving-extended]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 240s perl -Ilib -It/lib tools/profile_weaving.pl --profile extended --seconds 45 --rss-kib 393216
