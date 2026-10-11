@@ -79,7 +79,7 @@ object Stage10Tests {
     check("valori BigInt oltre sedicimila bit restano esatti") {
       val big=(BigInt(1)<<16384)+13
       val h=Vector.tabulate[BigInt](7)(i=>big+i)
-      val v=Vector.tabulate[BigInt](46)(i=>-big-i)
+      val v=Vector.tabulate[BigInt](46)(i => -big - i)
       eqv(LegacyPriorAdapter.legacyPrior(h,v.take(18),19,7),v(12),"Grande lag7")
       eqv(LegacyPriorAdapter.legacyPrior(h,v.take(18),19,3),v(15),"Grande lag3")
     }
