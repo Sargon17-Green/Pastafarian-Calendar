@@ -31,6 +31,13 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateDayTag(calculationDay, targetDay, day);
     }
 
+    // يُظهر المسار التاريخي الثالث فرق العدّادين، دون إضافة تصحيح المسافة.
+    public static BigInteger EvaluateLegacyDistance(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateLegacyDistance(calculationDay, targetDay);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

@@ -30,6 +30,9 @@ public sealed class MonsterContext
     // تُضاف النتيجة المصححة من دون مسح شاهِد الخطأ التاريخي.
     public BigInteger? PatchedDayTagResult { get; set; }
 
+    // ناتج المسافة التاريخية مستقل لكل استدعاء، وتبقى الرقعة الثالثة غير موجودة.
+    public BigInteger? LegacyDistanceResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

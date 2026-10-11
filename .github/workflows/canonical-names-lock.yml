@@ -59,3 +59,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage04Tests/PastafarianCalendar.Stage04Tests.csproj --configuration Release -- --verify-expected-red
       - name: تحقق من تكافؤ رقعة عدّ اليوم مع المرجع
         run: dotnet run --project tests/PastafarianCalendar.Stage05Tests/PastafarianCalendar.Stage05Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لمسافة اليومين
+        id: discovery_distance_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage06Tests/PastafarianCalendar.Stage06Tests.csproj --configuration Release
+      - name: إثبات توقيع فروق المسافة دون رقعتها
+        if: always()
+        run: |
+          test "${{ steps.discovery_distance_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage06Tests/PastafarianCalendar.Stage06Tests.csproj --configuration Release -- --verify-expected-red

@@ -68,6 +68,7 @@ public sealed class MonsterDispatcher
     private readonly SavePatchWrapper _savePatch;
     private readonly LegacyDayTagPhaseHandler _legacyDayTag;
     private readonly DayTagPatchWrapper _dayTagPatch;
+    private readonly LegacyDistancePhaseHandler _legacyDistance;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -77,6 +78,7 @@ public sealed class MonsterDispatcher
         _savePatch = new SavePatchWrapper();
         _legacyDayTag = new LegacyDayTagPhaseHandler();
         _dayTagPatch = new DayTagPatchWrapper();
+        _legacyDistance = new LegacyDistancePhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -139,6 +141,21 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "day.tag.patch.dispatch");
         context.Status = "DAY_TAG_PATCH_COMPLETE";
         context.Phase = "DAY_TAG_PATCH_COMPLETE";
+    }
+
+    public void DispatchLegacyDistance(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("يتطلب حساب المسافة القديم سياقاً مستعداً جديداً.");
+        if (context.LegacyDistanceResult.HasValue)
+            throw new MonsterValidationException("لا يجوز حساب مسافة تاريخية ثانية في السياق نفسه.");
+
+        context.Phase = "LEGACY_DISTANCE";
+        context.BranchTrace.Add("LEGACY_DISTANCE");
+        _legacyDistance.Handle(context);
+        _metrics.Bump(context, "legacy.distance.dispatch");
+        context.Status = "LEGACY_DISTANCE_COMPLETE";
+        context.Phase = "LEGACY_DISTANCE_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -227,6 +244,20 @@ public sealed class MonsterManager
         var context = ExecuteDayTagPatched(calculationDay, targetDay, day);
         return context.PatchedDayTagResult
             ?? throw new MonsterValidationException("لم تُنتج رقعة عدّ اليوم قيمةً.");
+    }
+
+    public MonsterContext ExecuteLegacyDistance(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        _dispatcher.DispatchLegacyDistance(context);
+        return context;
+    }
+
+    public BigInteger EvaluateLegacyDistance(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = ExecuteLegacyDistance(calculationDay, targetDay);
+        return context.LegacyDistanceResult
+            ?? throw new MonsterValidationException("لم يُنتج المسار التاريخي مسافةً.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
