@@ -64,3 +64,5 @@ jobs:
         run: sh run_stage02_calendar_resolver_tests.sh
       - name: Stage 02 polynomial endpoint weaving
         run: sh run_stage02_endpoint_weaving_tests.sh
+      - name: Stage 02 bounded canonical month selection
+        run: sh run_stage02_canonical_weaving_tests.sh

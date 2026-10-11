@@ -140,3 +140,7 @@ ni'o lo endpoint te jicmu cu ralte lo pagbu poi se jalge fi lo drani judri po'o 
 ni'o lo pamoi masti porsi te jicmu cu se cipra so'i detri pe li 984 gi'e benji lo jimte be li 1024 detri. lo `unrank1` cu se cipra lo 180 detri gi'e ralte lo jimte be li 192 detri. ro drata mulno nanca 5778 detri cu za'o na se zbasu.
 
 ni'o lo `unrank1` se jimte cu zenba co li 256 detri .i lo minli be lo nanca be li 252 detri cu se cipra fi lo ci masti be li 84 detri .i lo mulno 5778 detri cu za'o na se zbasu.
+
+## lo se cuxna be lo vo moi kabri
+
+ni'o lo `MonsterCanonicalWeaving` cu jorne lo `MonsterSelectors` .e lo `MonsterSauceBowls` be lo vo moi kabri .e lo 32 moi tcita .e lo `MonsterWeavingEndpointDP`. lo se cuxna cu se jimte li 256 detri .i lo mutce barda detri se cuxna cu za'o na se zbasu. ko benji `sh run_stage02_canonical_weaving_tests.sh`.
