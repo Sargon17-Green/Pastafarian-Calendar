@@ -33,3 +33,7 @@ ni'o lo `MonsterSauceDrops` cu se zbasu fi la Java po'o gi'e zbasu lo 46 rokci p
 ### lo xa djacu bliku .e lo 12 muvdu rimni
 
 ni'o lo `MonsterSauceBowls` cu se zbasu fi la Java po'o. ri zbasu lo 720 se cuxna porsi .e lo 46 se jarco porsi .e lo 12 fanmo muvdu rimni .e lo `AnswerStream`. lo `Stage02BowlsTests` cu cipra lo datni srana lo `NormativeOracle` pe lo cipra po'o. lo remoi stadi cu na se mulno.
+
+### lo cmicu'a ranki
+
+ni'o lo `MonsterSelectors` cu se zbasu fi la Java po'o gi'e cipra lo barda namcu .e lo pamoi se curmi ranki. lo remoi stadi cu na mulno.
