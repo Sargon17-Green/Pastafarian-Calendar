@@ -107,5 +107,12 @@ readiness del contesto, metrica separata, e due percorsi indipendenti:
 `patch01Save` per l'uscita corretta. Stato condiviso fra invocazioni:
 nessuno. Correzione futura introdotta: nessuna.
 
-L'esito nativo verrà certificato soltanto dopo il completamento
-della CI del nuovo commit.
+### Verifica nativa compiuta
+
+La GitHub Actions run 38152588729 è conclusa con esito SUCCESS sul commit
+`6b87eface71a93b19d5c98b30da7bc3b670d9bff`.
+La suite Stage01 ha fornito 18 PASS, 0 FAIL; Stage02 ha conservato
+7 PASS, 3 FAIL storici intenzionali, riconosciuti dal job di discovery;
+Stage03 ha fornito 12 PASS, 0 FAIL. Anche la verifica del
+catalogo canonico è passata. La funzione legacy è rimasta immutata.
+Nessuno stadio 4 è stato iniziato.

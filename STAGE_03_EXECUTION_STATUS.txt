@@ -1,0 +1,27 @@
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
+STADIO=3
+TIPO=PATCH_01
+RISULTATO_ATTESO=GREEN
+RISULTATO_REALE=12_PASS_0_FAIL
+REGRESSIONE_BOOTSTRAP=18_PASS_0_FAIL
+REGRESSIONE_DISCOVERY_01=7_PASS_3_FAIL_INTENTIONAL
+REGRESSIONE_PATCH_01=12_PASS_0_FAIL
+CANONICAL_NAMES_LOCK=PASS
+PATCH_01_WRAPPER=Patch01SaveWrapper.savePatch
+LEGACY_FUNCTION_UNCHANGED=YES
+LEGACY_DIAGNOSTIC_PRESERVED=YES
+FUTURE_PATCHES_INTRODUCED=NO
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage03Tests'
+GITHUB_ACTIONS_RUN=38152588729
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38152588729
+GITHUB_ACTIONS_HEAD_SHA=6b87eface71a93b19d5c98b30da7bc3b670d9bff
+GITHUB_ACTIONS_WORKFLOW=Canonical Names Lock
+GITHUB_ACTIONS_JOBS=verify,native-stage01,native-stage02-discovery,native-stage03-patch
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+DATA_VERIFICA=2026-10-11
+
+Scala 2.13.18 su runner GitHub Actions con Java 17.
+La funzione savePatch richiama l'adattatore legacy e converte solo
+il suo output zero in M. Il percorso manager espone le due uscite
+sullo stesso contesto; Stage02 resta RED solo intenzionalmente,
+mentre Stage03 è GREEN.

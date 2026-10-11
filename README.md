@@ -85,3 +85,12 @@ La regressione storica Stage02 continua a produrre esattamente
 `7 PASS, 3 FAIL` intenzionali. Stage03 deve produrre `12 PASS, 0 FAIL`.
 Il job CI Stage02 riconosce solo la firma storica corretta; Stage03
 richiede uscita zero. Il job Stage01 resta indipendente.
+
+### Verifica nativa dello stadio 3
+
+La [run 38152588729](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38152588729),
+commit `6b87eface71a93b19d5c98b30da7bc3b670d9bff`, si è conclusa
+con `success`: Stage01 18 PASS/0 FAIL, Stage02 7 PASS/3 FAIL storici
+previsti, Stage03 12 PASS/0 FAIL, blocco dei nomi canonici PASS.
+La modifica della sola documentazione successiva conserva la prova
+sul commit di produzione testato; le prove rimangono eseguibili in CI.
