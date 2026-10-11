@@ -67,3 +67,21 @@ Giai đoạn 10: phát hiện lưu bảy giọt ẩn theo thứ tự đảo
 Tính bảy giọt ẩn trong đường Elixir thực, lưu đảo từ hidden7
 đến hidden1 và đọc sai theo chỉ số cũ. Bổ sung bốn hồi quy
 chuẩn cố ý đỏ, không thực hiện ánh xạ vá 8-k trước giai đoạn 11.
+
+## Bằng chứng CI và kết luận
+
+- Commit triển khai: `e1b38258e7b008dfcdfa3a42f4746bedc17f9754`.
+- Commit tăng đối chứng số học: `3f9d695490561701aab6a3d0a6c0cfb31609d02d`.
+- Elixir 1.18.5 và Erlang/OTP 27.
+- **101 kiểm thử, đúng 4 hồi quy chuẩn cố ý đỏ**, 97 bài đạt.
+- Các ca đỏ chỉ ở giọt 1, 2, 3, 7; giọt 4 và lưu đảo đạt.
+- Toàn bộ 88 kiểm thử giai đoạn 1-9 không hồi quy.
+- Không cảnh báo biên dịch sau khi dùng alias trong kiểm thử độc lập.
+- Khóa tên chuẩn hoàn tất thành công.
+- Không sửa mã sản xuất khi làm sạch cảnh báo; không thêm PATCH 05.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161317725
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161317727
+
+Trạng thái cuối giai đoạn 10: EXPECTED_RED đã xác minh.
+Tiếp theo: giai đoạn 11, PATCH 05, chưa bắt đầu.

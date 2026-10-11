@@ -267,3 +267,13 @@ giai đoạn 12 trước hạn.
 đỏ tại giọt 1, 2, 3 và 7. Kiểm thử kiểm soát xác minh số học
 đúng, thứ tự đảo, giọt giữa đúng, tính độc lập của context,
 số nguyên rất lớn, lỗi đầu vào và các bản vá 01-04.
+
+**Kiểm chứng thực tế:** GitHub Actions biên dịch 22 tệp Elixir,
+chạy 101 kiểm thử; đúng bốn hồi quy chuẩn của phát hiện 05 thất bại
+tại hidden1, hidden2, hidden3, hidden7. 97 kiểm thử còn lại đạt.
+Kiểm thử riêng xác nhận `HiddenDropCalculator` tạo cả bảy giá trị
+đúng bằng oracle và tuple lưu thứ tự đảo. Hidden4 là đối chứng xanh.
+Đã bổ sung trực tiếp hai phép thử mô-đun sản xuất để hết cảnh báo
+alias chưa dùng; không sửa mã sản xuất hoặc kỳ vọng chuẩn.
+Kết quả cuối không có cảnh báo biên dịch, khóa tên chuẩn PASS.
+Giai đoạn 10 khép EXPECTED_RED; chưa có lớp vá 05.

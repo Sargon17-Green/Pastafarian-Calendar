@@ -280,3 +280,24 @@ Bốn hồi quy chuẩn của giai đoạn khám phá thử các giọt 1, 2, 3,
 và cố ý thất bại, trong khi kiểm thử độc lập xác nhận cả bảy
 giá trị của tuple theo đúng thứ tự đảo. **Không thêm bản vá 05**:
 phép ánh xạ truy cập `8-k` thuộc riêng giai đoạn 11.
+
+## Kiểm chứng kết thúc giai đoạn 10
+
+CI chạy trên Elixir 1.18.5, Erlang/OTP 27: 101 kiểm thử,
+**đúng bốn thất bại có chủ đích** ở giọt ẩn 1, 2, 3 và 7.
+97 kiểm thử đạt; toàn bộ 88 kiểm thử từ các giai đoạn 1-9 vẫn xanh.
+Không có cảnh báo biên dịch, khóa tên chuẩn hoàn tất.
+
+Bộ tính sản xuất `HiddenDropCalculator` đã được đối chiếu với
+oracle cho toàn bộ bảy giọt trước khi lưu. Sai lệch chỉ xuất hiện
+khi đọc tuple đảo ngược theo số hiệu trực tiếp. Giọt thứ tư
+vẫn khớp chuẩn, làm đối chứng của lỗi địa chỉ chứ không phải
+lỗi công thức.
+
+- [CI phát hiện 05: 101 kiểm thử, 4 sai lệch dự kiến](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161317725)
+- [Khóa tên chuẩn đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161317727)
+
+Giai đoạn 10/55 khép ở `EXPECTED_RED` đã kiểm chứng.
+Giai đoạn 11/55 là `PATCH 05`: giữ tuple đảo ngược,
+thực hiện mọi lần đọc hidden k qua địa chỉ `8-k`;
+không đảo lại tuple hoặc xóa cách lưu cũ.

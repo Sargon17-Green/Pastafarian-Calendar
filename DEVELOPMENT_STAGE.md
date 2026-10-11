@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=10
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=05
-LAST_COMPLETED_STAGE=9
+LAST_COMPLETED_STAGE=10
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-04; thêm HiddenDropCalculator tính đúng 7 giọt ẩn, LegacyHiddenStorage lưu tuple từ hidden7 đến hidden1; đường truy cập trực tiếp theo số giọt cố ý sai.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_10_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_10_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_10_PENDING
-CI_FAILURES=STAGE_10_PENDING
+CI_TESTS=101
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -148,4 +148,16 @@ nhưng đọc trực tiếp theo vị trí mà chưa áp dụng ánh xạ 8-k.
 Giọt số 4 tình cờ khớp chuẩn; bốn hồi quy số 1, 2, 3, 7
 dự kiến cố ý đỏ. 13 kiểm thử mới, tổng 101, đúng 4 thất bại.
 Không thêm bản vá 05 thuộc giai đoạn 11.
-LAST_COMPLETED_STAGE giữ 9 cho tới khi bằng chứng CI hoàn tất.
+LAST_COMPLETED_STAGE đã nâng lên 10 sau kiểm chứng CI và khóa tên.
+
+Giai đoạn 10 được kiểm chứng trên Elixir 1.18.5, Erlang/OTP 27:
+101 kiểm thử, đúng bốn sai lệch chuẩn ở giọt ẩn số 1, 2, 3, 7;
+97 kiểm thử khác đạt, bao gồm 88 bài cũ. Không cảnh báo biên dịch.
+Cả bảy giá trị số học khớp oracle trước khi lưu ngược.
+Khóa tên chuẩn đạt độc lập.
+Lần CI đầu tiên có hai cảnh báo alias chưa dùng trong kiểm thử mới;
+đã bổ sung đối chứng trực tiếp bằng hai mô-đun ấy và chạy lại sạch.
+Mã sản xuất không đổi, bốn kỳ vọng chuẩn không đổi.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161317725
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161317727
+Trạng thái đóng: EXPECTED_RED. Tiếp theo là giai đoạn 11, PATCH 05.
