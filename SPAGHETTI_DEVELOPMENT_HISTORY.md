@@ -85,3 +85,7 @@ ni'o lo cnino `MonsterWeavingEndpointDP` cu facki lo porsi se namcu fi lo pamoi 
 ### lo prula'i sipna te cipra
 
 ni'o lo barda namcu cipra cu te jalge lo drani fi lo GitHub Actions run `38157687854`. lo `MonsterWeavingEndpointDP` cu ralte lo re masti binomio javni .e lo Catalan javni pe lo nanca to'e so'i detri. lo se jmite be lo 512 detri cu na se galfi ca ti.
+
+### lo masti porsi binomio .e lo Catalan
+
+ni'o lo 47 masti poi ro masti cu ralte re detri cu te cipra lo Catalan te javni. lo re masti poi se nmau fi li 123 detri cu te cipra lo binomio te javni .i lo 492 detri be lo vo masti cu se cipra fi lo 512 jimte. lo se jalge cu drani fi lo GitHub Actions run `38157924109`.
