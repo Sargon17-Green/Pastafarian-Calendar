@@ -118,3 +118,7 @@ ni'o lo ti cipra na se du lo mulno se benji kalendri. lo masti se jorne porsi pe
 ## lo masti detri te stika
 
 ni'o lo `MonsterMonthIndex` cu facki lo masti se namcu .e lo detri be lo masti .e lo stodi cmene fi lo se benji masti porsi. ri verifai lo to'e se snada porsi .e lo masti namcu .e lo pagbu se namcu .e lo te porsi be lo cfari .e lo fanmo. lo se pilno `weaving` cu se benji fi lo zunle ciste gi'e na se zbasu ti. lo `Stage02MonthIndexTests` cu cipra lo te facki fa'u lo narmanci `WeavingFamily` .e lo mulno nanca papri. ko benji `sh run_stage02_month_index_tests.sh`.
+
+## lo detri jalge fi lo se benji porsi
+
+ni'o lo `MonsterCalendarResolver` cu benji lo detri se namcu be lo nanca .e lo kecti .e lo masti va'o lo nu lo `selectedWeaving` cu se benji. lo `ResolvedYear` cu cilre lo nanca prenu datni pa mai gi'e facki lo se srana detri so'i roi. lo `selectedWeaving` cu se nitcu .i ti na se cuxna ra .i lo ti ciste na se mulno narmanci detri fanva. ko benji `sh run_stage02_calendar_resolver_tests.sh`.

@@ -60,3 +60,5 @@ jobs:
         run: sh run_stage02_weaving_domain_tests.sh
       - name: Stage 02 canonical month position lookup
         run: sh run_stage02_month_index_tests.sh
+      - name: Stage 02 complete date with supplied weaving
+        run: sh run_stage02_calendar_resolver_tests.sh

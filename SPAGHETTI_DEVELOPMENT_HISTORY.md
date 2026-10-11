@@ -73,3 +73,7 @@ ni'o lo `Stage02WeavingDomainTests` cu cipra lo masti se jorne porsi ca lo jimte
 ### lo masti detri te facki
 
 ni'o lo `MonsterMonthIndex` cu se zbasu tezu'e lo nu facki lo masti detri fi lo se cuxna masti porsi poi se benji. ri se cipra lo drani cmene judri .e lo se sruri datni .e lo se jicmu seljavni be lo cfari .e lo fanmo. lo se cuxna narmanci porsi na se srana lo ti pagbu .i lo remoi stadi na za'o mulno.
+
+### lo detri jalge be lo se cuxna masti porsi
+
+ni'o lo `MonsterCalendarResolver` cu jorne lo `MonsterYearBlueprint` .e lo `MonsterMonthIndex` .i ri na cuxna lo `selectedWeaving` .i lo mulno narmanci detri fanva cu nitcu lo balvi se cuxna javni.
