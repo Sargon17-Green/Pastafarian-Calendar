@@ -1,6 +1,6 @@
 # تقويم الباستافاريين — خطّ C# بالعربية الكلاسيكية
 
-هذا الخط تنفيذ تاريخي متدرّج من خمسة وخمسين طورًا. أُنشئ من شجرة خالية دون استعارة كود أو جداول متوقعة من تنفيذ آخر. اكتملت الأطوار الاثنا عشر الأولى: التأسيس، وخمسة أخطاء تاريخية ورقعها، ثم اكتشاف الخطأ السادس في استرجاع القطرات السابقة دون معرفة المواضع الخفية. المرحلة التالية `PATCH 06` في الطور الثالث عشر، ولم تبدأ بعد.
+هذا الخط تنفيذ تاريخي متدرّج من خمسة وخمسين طورًا. أُنشئ من شجرة خالية دون استعارة كود أو جداول متوقعة من تنفيذ آخر. اكتملت الأطوار الثلاثة عشر الأولى: التأسيس، وستة أخطاء تاريخية ورقعها، حتى رقعة استرجاع القطرات السابقة بما فيها المخفيات. المرحلة التالية `DISCOVERY 07` في الطور الرابع عشر، ولم تبدأ بعد.
 
 ## الحدود الحالية للمكتبة
 
@@ -16,7 +16,7 @@
 
 أُدخل في الطور العاشر `CalendarDateSpaghetti.EvaluateLegacyHiddenDrops(c,t)`؛ ويُنتج القطرات السبع من عدّ العمل وصفوف الأحجار المصححة، لكنه يحفظها في الذاكرة التاريخية بترتيب `hidden7, hidden6, …, hidden1`. هذه هي الندبة التاريخية الخامسة: القراءة البسيطة `storage[k]` لا تعني القطرة رقم `k`. بقي التخزين التاريخي معكوساً، لكن الرقعة الخامسة `HiddenNearnessWrapper.HiddenByNearness(k)` تحسب موضع القراءة `8-k` من المصفوفة القديمة نفسها، بلا قلب أو نسخ. تستدعي `CalendarDateSpaghetti.EvaluateHiddenDrop(c,t,k)` المسار القديم قبل تثبيت غلاف القراءة، وتحرس الملكية والمدى والتحقق قبل الالتزام.
 
-دخل `LegacyPrior.Read(dropStore,i,back)` المسار الإنتاجي في الطور الثاني عشر عبر `CalendarDateSpaghetti.EvaluateLegacyPrior`. تقرأ هذه الدالة `dropStore[i-back]` فحسب، ولذلك تُرجع صفراً عند `i-back=0`، وترمي `IndexOutOfRangeException` عند الموضع السالب. يدخل إليها جدول القطرات الظاهرة بوصفه مدخلاً مستقلاً مملوكاً للاستدعاء؛ لا يُحسب جدول كامل في الإنتاج قبل طور بنائه، ولا تُستعار بيانات من مرجع الاختبار. سيُصلح `PriorPatch` مواضع القطرات الخفية في الطور الثالث عشر، من غير حذف الدالة القديمة.
+دخل `LegacyPrior.Read(dropStore,i,back)` المسار الإنتاجي في الطور الثاني عشر عبر `CalendarDateSpaghetti.EvaluateLegacyPrior`. تقرأ هذه الدالة `dropStore[i-back]` فحسب، ولذلك تُرجع صفراً عند `i-back=0`، وترمي `IndexOutOfRangeException` عند الموضع السالب. يدخل إليها جدول القطرات الظاهرة بوصفه مدخلاً مستقلاً مملوكاً للاستدعاء؛ لا يُحسب جدول كامل في الإنتاج قبل طور بنائه، ولا تُستعار بيانات من مرجع الاختبار. أُصلحت هذه المواضع في الطور الثالث عشر بواسطة `PriorAccessWrapper.Read`: الموضع الموجب يستدعي `LegacyPrior.Read` فعلياً ويحفظ شاهده، والموضع غير الموجب يستعمل `hiddenK=1-(i-back)` من خلال `HiddenNearnessWrapper`. لا تُقلَب مصفوفة القطرات التاريخية ولا تتغير دالة `LegacyPrior` القديمة.
 
 لا تحسب المكتبة بعدُ التاريخ الباستافاري النهائي؛ سيُنشأ هذا المسار تدريجيًّا في الأطوار اللاحقة، دون استباق عيوبها أو ترقيعاتها.
 
@@ -29,7 +29,7 @@
 باستخدام .NET SDK 10، ومن جذر المستودع:
 
 ```text
-dotnet build tests/PastafarianCalendar.Stage12Tests/PastafarianCalendar.Stage12Tests.csproj -c Release
+dotnet build tests/PastafarianCalendar.Stage13Tests/PastafarianCalendar.Stage13Tests.csproj -c Release
 dotnet run --project tests/PastafarianCalendar.Stage01Tests/PastafarianCalendar.Stage01Tests.csproj -c Release
 dotnet run --project tests/PastafarianCalendar.Stage02Tests/PastafarianCalendar.Stage02Tests.csproj -c Release -- --verify-expected-red
 dotnet run --project tests/PastafarianCalendar.Stage03Tests/PastafarianCalendar.Stage03Tests.csproj -c Release
@@ -42,6 +42,7 @@ dotnet run --project tests/PastafarianCalendar.Stage09Tests/PastafarianCalendar.
 dotnet run --project tests/PastafarianCalendar.Stage10Tests/PastafarianCalendar.Stage10Tests.csproj -c Release -- --verify-expected-red
 dotnet run --project tests/PastafarianCalendar.Stage11Tests/PastafarianCalendar.Stage11Tests.csproj -c Release
 dotnet run --project tests/PastafarianCalendar.Stage12Tests/PastafarianCalendar.Stage12Tests.csproj -c Release -- --verify-expected-red
+dotnet run --project tests/PastafarianCalendar.Stage13Tests/PastafarianCalendar.Stage13Tests.csproj -c Release
 ```
 
 التشغيل المباشر لاختبار الطور الثاني، **دون** `--verify-expected-red`، يُفترض أن ينتهي بخروج `1` بسبب خمسة اختلافات تاريخية مقصودة. لا يعني ذلك فشل رقعة الطور الثالث.
@@ -63,3 +64,5 @@ dotnet run --project tests/PastafarianCalendar.Stage12Tests/PastafarianCalendar.
 نجح اختبار الرقعة الخامسة في GitHub Actions رقم `38163487926`: فُحصت `413` قطرة خفية عبر `59` زوجاً من الأيام ونجح `2069/2069` تحققاً، مع `354` اختلافاً تاريخياً أبقاها الغلاف مرئية في المخزن المعكوس. نجحت جميع مجموعات المراحل الأقدم، ولم يُبدأ آنذاك اكتشاف `legacyPrior` الذي نُفِّذ لاحقاً في الطور الثاني عشر.
 
 نجح مدقق الاكتشاف السادس في تشغيل CI رقم `38165168004`: فُحصت `828` قراءة، منها `762` موضعاً موجباً مطابقاً للمرجع، و`18` صفراً خاطئاً متوقعاً، و`48` استثناء فهرسة سالبة تاريخياً، دون أي اختلاف خارج هذا التوقيع. ظل الاختبار المباشر أحمر عمداً، وبقيت الرقعات الخضراء الخمس واكتشافاتها القديمة ناجحة.
+
+أكّد GitHub Actions رقم `38166751011` تكافؤ `1380` قراءة سابقة مع المرجع في عشرة أزواج من الأيام، منها `1270` قراءة ظاهرة عبر القديم و`110` قراءة خفية مصححة، ونجاح `13842/13842` تحققاً. ظل التوقيع التاريخي الأحمر للطور الثاني عشر ثابتاً على `18` صفراً و`48` استثناءً في ستة أزواج، ولم تُفتح بعدُ أخطاء الطحن الظاهر.
