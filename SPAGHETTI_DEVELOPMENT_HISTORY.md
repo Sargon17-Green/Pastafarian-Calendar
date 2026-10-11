@@ -19,3 +19,11 @@ Appendix A वरून TypeScript मध्ये स्वतंत्र च�
 PATCH 01 ची 0→M दुरुस्ती, नंतरचे ऐतिहासिक दोष, स्वच्छ उत्पादन-अल्गोरिदम किंवा अंतिम monster integration अजून घातलेले नाही.
 
 GitHub Actions run 38150967363 (commit 61c345fb17b29a2113dab495928a0bc1570a077c) मध्ये TypeScript typecheck, संपूर्ण टप्पा 1 चाचण्या (`STAGE_01_PASS`), टप्पा 2 guard चाचण्या (`STAGE_02_DISCOVERY_01_GUARDS_PASS`) आणि नेमक्या तीन अपेक्षित फरकांची स्वतंत्र लाल चाचणी या सर्व पडताळण्या यशस्वी झाल्या. पुढील टप्पा 3 — PATCH 01; तो अजून सुरू केलेला नाही.
+
+## टप्पा 3 — PATCH 01: शून्य-अवशेषाची एकमेव दुरुस्ती
+
+`src/patch01Save.ts` मध्ये स्वतंत्र `Patch01SaveHandler` तयार केला. तो `LegacyRemainderAdapter` मधून नेहमीचा शेष घेतो; `legacyValue === 0n` हाच एकमेव सुधारणा-नियम आहे: `savedValue = M`. उर्वरित शेष, काल-दिवसांचे इनपुट आणि इतर सर्व व्यवहार तसेच ठेवले. वैध `bigint` शिवाय इतर अंक नाकारले जातात; एका context वर handler दुसऱ्यांदा चालत नाही. दुरुस्तीचे निरीक्षण `patch01.zero_repaired`, `patch01.calls` आणि `branchTrace` मधून नियमाधारित उत्तरापासून वेगळे होते.
+
+मूळ `Discovery01RemainderHandler` आणि `test/discovery01Red.ts` बदललेले नाहीत. त्यांची मुद्दाम लाल चाचणी historical proof म्हणून CI मध्ये राखली आहे. याउलट `test/patch01.ts` चाचणीतील सर्व गणिती साक्षींनी स्वच्छ चाचणी-मात्र oracle शी जुळले पाहिजे. पोटमोजणी/भारी संख्येच्या चाचण्या आणि context विलगीकरण यामुळे पुढील टप्प्यातील बदलांनी या दुरुस्तीत चूक येऊ नये.
+
+Stage 54 integration अजून झालेला नाही; `calendarDateSpaghetti` आता देखील `MonsterStageError` देतो.

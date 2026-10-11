@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage02-typescript-marathi:
+  stage03-typescript-marathi:
     if: github.ref == 'refs/heads/TypeScript+मराठी'
     runs-on: ubuntu-latest
     steps:
@@ -37,8 +37,14 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript typecheck
         run: npm run typecheck
-      - name: Prior stage and discovery guards
-        run: npm test
+      - name: Stage 01, historical discovery and PATCH 01 regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test | tee stage03-results.log
+          grep -Fq 'STAGE_01_PASS' stage03-results.log
+          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage03-results.log
+          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage03-results.log
       - name: Verify intentional expected-red regression
         shell: bash
         run: |

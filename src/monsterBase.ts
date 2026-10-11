@@ -1,5 +1,5 @@
 export type MonsterPhase = "BOOTSTRAP" | "READY" | "FAILED";
-export type MonsterStatus = "NEW" | "VALIDATED" | "NOT_INTEGRATED" | "DISCOVERY_01_RECORDED";
+export type MonsterStatus = "NEW" | "VALIDATED" | "NOT_INTEGRATED" | "DISCOVERY_01_RECORDED" | "PATCH_01_APPLIED";
 
 export type MonsterContext = {
   readonly calculationDay: bigint;
