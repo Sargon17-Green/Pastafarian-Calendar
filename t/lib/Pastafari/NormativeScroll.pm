@@ -662,7 +662,11 @@ sub _weave_counter ($lengths) {
                 }
 
                 my @children;
-                for my $j (1 .. $m) {
+                # 尚未開啟的月份只能依次開啟下一個。
+                # 不必掃描剩下的所有未開啟月份。
+                my $candidate_limit = $frame->{opened} < $m
+                    ? $frame->{opened} + 1 : $m;
+                for my $j (1 .. $candidate_limit) {
                     next if $frame->{remaining}[$j-1] == 0;
                     my $alreadyOpened =
                         $frame->{remaining}[$j-1] < $lengths->[$j-1];
@@ -726,7 +730,8 @@ sub unrankWeaving ($lengths, $rank1) {
     my @out;
     my $total = 0; $total += $_ for @$lengths;
     while (@out < $total) {
-        for my $j (1 .. $m) {
+        my $candidate_limit = $opened < $m ? $opened + 1 : $m;
+        for my $j (1 .. $candidate_limit) {
             next if $remaining[$j-1] == 0;
             my $alreadyOpened = $remaining[$j-1] < $lengths->[$j-1];
             next if !$alreadyOpened && $j != $opened + 1;
