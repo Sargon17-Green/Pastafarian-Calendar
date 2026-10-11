@@ -1,9 +1,19 @@
-STATO_ESECUZIONE=BLOCKED_NO_SCALA_TOOLCHAIN
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
 STADIO=1
 TIPO=BOOTSTRAP
-COMPILAZIONE_ESEGUITA=NO
-TEST_SCALA_ESEGUITI=NO
+COMPILAZIONE_ESEGUITA=YES
+TEST_SCALA_ESEGUITI=YES
 RISULTATO_ATTESO=GREEN
-RISULTATO_REALE=NON_VERIFICATO
+RISULTATO_REALE=18_PASS_0_FAIL
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage01Tests'
+GITHUB_ACTIONS_RUN=38119685379
+GITHUB_ACTIONS_WORKFLOW=Canonical Names Lock
+GITHUB_ACTIONS_JOB=native-stage01
+DATA_VERIFICA=2026-10-11
 
-La preparazione del Bootstrap è completa a livello di sorgenti e audit statico. Nell'ambiente di lavoro non sono disponibili scala, scalac o sbt. Il computer remoto autorizzato risulta offline. Non è quindi corretto dichiarare lo stadio completato o verde prima di una vera compilazione ed esecuzione Scala.
+I test nativi del primo stadio sono stati compilati ed eseguiti con Scala 2.13.18, sbt 1.11.7 e Java 17 nel runner GitHub Actions sul ramo Scala+Italiano.
+Risultato nel log: RISULTATO STADIO 1: 18 PASS, 0 FAIL.
+Il controllo delle denominazioni canoniche (job verify) è anch'esso riuscito.
+Non è stato avviato lo stadio 2 e il codice di produzione non è stato modificato.
+Le avvertenze del compilatore relative a un import e a una variabile locale inutilizzati non hanno causato errori.
+Prova: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38119685379
