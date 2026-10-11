@@ -400,9 +400,12 @@ sub fallingFactorial ($n, $k) {
 }
 
 sub unrankDistinctIndices ($n, $k, $rank1) {
+    die "名稱排列參數超出範圍\n" if $n < 0 || $k < 0 || $k > $n;
+    my $r = _bi($rank1);
+    my $total = fallingFactorial($n, $k);
+    die "名稱排列排名超出範圍\n" if $r < 1 || $r > $total;
     my @remaining = (1 .. $n);
     my @out;
-    my $r = _bi($rank1);
     for my $position (1 .. $k) {
         my $suffix = $k - $position;
         my $block = fallingFactorial(scalar(@remaining)-1,$suffix);
@@ -437,6 +440,8 @@ sub makeBoundedCompositionFamily ($total, $slots, $lo, $hi) {
     my $count_all = sub { return $count->($total,$slots) };
     my $unrank = sub ($rank1) {
         my $r = _bi($rank1);
+        my $total_ranks = $count_all->();
+        die "有界組成排名超出範圍\n" if $r < 1 || $r > $total_ranks;
         my ($rem,$k) = ($total,$slots);
         my @out;
         for my $position (1 .. $slots) {
@@ -487,6 +492,8 @@ sub makeCutletPartitionFamily ($G, $K, $required = undef) {
     my $count_all = sub { return $count->($G,$K,0,0) };
     my $unrank = sub ($rank1) {
         my $r = _bi($rank1);
+        my $total_ranks = $count_all->();
+        die "肉排分割排名超出範圍\n" if $r < 1 || $r > $total_ranks;
         my ($rem,$slots,$cum,$hit) = ($G,$K,0,0);
         my @out;
         while ($slots > 0) {
@@ -555,9 +562,11 @@ sub countWeavings ($lengths) {
 sub unrankWeaving ($lengths, $rank1) {
     my $m = scalar @$lengths;
     my $counter = _weave_counter($lengths);
+    my $r = _bi($rank1);
+    my $total_ranks = $counter->([@$lengths],0,0);
+    die "月份交織排名超出範圍\n" if $r < 1 || $r > $total_ranks;
     my @remaining = @$lengths;
     my ($opened,$closed) = (0,0);
-    my $r = _bi($rank1);
     my @out;
     my $total = 0; $total += $_ for @$lengths;
     while (@out < $total) {

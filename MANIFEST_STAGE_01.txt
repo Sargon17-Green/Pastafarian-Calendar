@@ -20,6 +20,8 @@ t/04_normative_families_and_year.t
 t/05_language_and_isolation_audit.t
 t/06_normative_small_space_audit.t
 t/07_bootstrap_integrity.t
+t/08_rank_domain_and_state.t
+t/09_gate_year_invariants.t
 t/lib/Pastafari/NormativeScroll.pm
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml

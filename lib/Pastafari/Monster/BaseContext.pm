@@ -2,6 +2,7 @@ package Pastafari::Monster::BaseContext;
 use v5.40;
 use strict;
 use warnings;
+use Storable qw(dclone);
 
 sub new ($class, %args) {
     my $self = {
@@ -19,7 +20,7 @@ sub new ($class, %args) {
 }
 
 sub semantic_snapshot ($self) {
-    return { %{ $self->{semanticState} } };
+    return dclone($self->{semanticState});
 }
 
 1;

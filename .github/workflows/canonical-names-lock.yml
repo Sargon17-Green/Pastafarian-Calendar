@@ -26,6 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   perl-stage01:
+    timeout-minutes: 10
     if: github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語'
     runs-on: ubuntu-latest
     steps:
