@@ -43,7 +43,8 @@ fn test_discovery05_control_middle_hidden_four() {
 	counts := hidden_counts_spaghetti(foundation, foundation)
 	stones := get_stone_table_through_legacy_builder()
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
-	assert big_eq(calendar_hidden_by_nearness(hidden, 4), make_hidden_drop_spaghetti(4, counts, stones))
+	assert big_eq(calendar_hidden_by_nearness(hidden, 4), make_hidden_drop_spaghetti(4, counts,
+		stones))
 }
 
 fn test_discovery05_control_all_seven_hidden_drops_are_present() {
