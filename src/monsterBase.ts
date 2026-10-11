@@ -1,5 +1,5 @@
 export type MonsterPhase = "BOOTSTRAP" | "READY" | "FAILED";
-export type MonsterStatus = "NEW" | "VALIDATED" | "NOT_INTEGRATED";
+export type MonsterStatus = "NEW" | "VALIDATED" | "NOT_INTEGRATED" | "DISCOVERY_01_RECORDED";
 
 export type MonsterContext = {
   readonly calculationDay: bigint;
@@ -77,5 +77,5 @@ export function bootstrapMonster(calculationDay: bigint, targetDay: bigint): Mon
 export function calendarDateSpaghetti(calculationDay: bigint, targetDay: bigint): never {
   const ctx = bootstrapMonster(calculationDay, targetDay);
   ctx.status = "NOT_INTEGRATED";
-  throw new MonsterStageError("पहिल्या टप्प्यात अंतिम स्पॅगेटी दिनांक मार्ग अद्याप जोडलेला नाही");
+  throw new MonsterStageError("अंतिम स्पॅगेटी दिनांक मार्ग अद्याप जोडलेला नाही");
 }

@@ -1,0 +1,38 @@
+name: TypeScript Marathi Discovery
+
+on:
+  push:
+    branches: ["TypeScript+मराठी"]
+  pull_request:
+    branches: ["TypeScript+मराठी"]
+
+permissions:
+  contents: read
+
+jobs:
+  stage01-and-discovery01:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript typecheck
+        run: npm run typecheck
+      - name: Prior stage and discovery guards
+        run: npm test
+      - name: Verify intentional expected-red regression
+        shell: bash
+        run: |
+          set +e
+          npm run test:discovery01:red > discovery01-red.log 2>&1
+          result=$?
+          set -e
+          cat discovery01-red.log
+          if [ "$result" -eq 0 ]; then
+            echo "::error::Expected-red regression unexpectedly passed"
+            exit 1
+          fi
+          grep -Fq 'DISCOVERY_01_EXPECTED_RED mismatches=3 matches=1' discovery01-red.log
