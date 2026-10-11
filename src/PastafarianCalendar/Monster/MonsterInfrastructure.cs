@@ -76,6 +76,23 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("أنتجت رقعة المسافة عدّاً خارج النطاق.");
     }
 
+    // لا يتحقق هذا الحارس بواسطة المرجع الاختباري أو قلب المصفوفة القديمة.
+    public void ValidateHiddenNearnessWrapper(MonsterContext context, HiddenNearnessWrapper candidate)
+    {
+        if (context.LegacyHiddenReversed is not BigInteger[] legacy)
+            throw new MonsterValidationException("لم يُشغّل مخزن القطرات التاريخي قبل الرقعة الخامسة.");
+        if (context.PatchedHiddenAccess is not null)
+            throw new MonsterValidationException("لا يجوز تثبيت غلاف القطرات مرتين.");
+        if (candidate is null || !candidate.UsesUnchangedLegacyStorage(legacy))
+            throw new MonsterValidationException("لا تقبل الرقعة مخزناً غير المخزن التاريخي نفسه.");
+        if (legacy.Length != 8 || legacy[0] != BigInteger.Zero)
+            throw new MonsterValidationException("ترتيب الخانات التاريخية غير صالح.");
+
+        for (var k = 1; k <= 7; k++)
+            if (candidate.HiddenByNearness(k) != legacy[8 - k])
+                throw new MonsterValidationException("انقلب المخزن نفسه عوضاً عن إصلاح مؤشر القراءة.");
+    }
+
     // هذا الحارس لا يعيد إنتاج المرجع المعياري: يفحص الملكية والمدى وبنية الصفوف فقط.
     public void ValidatePatchedStones(MonsterContext context, BigInteger[][] candidate)
     {
@@ -297,6 +314,27 @@ public sealed class MonsterDispatcher
         context.Phase = "LEGACY_HIDDEN_REVERSED_COMPLETE";
     }
 
+    public void DispatchPatchedHiddenAccess(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("تتطلب رقعة الفهرس الخامسة سياقاً جاهزاً جديداً.");
+        if (context.LegacyHiddenReversed is not null || context.PatchedHiddenAccess is not null)
+            throw new MonsterValidationException("لا يجوز استعارة مخزن قطرات من سياق التزم بالفعل.");
+
+        // يُشغَّل المسار القديم كاملاً أولاً، لا يُعاد ترتيب نتائجه.
+        DispatchLegacyHiddenDrops(context);
+
+        context.Phase = "HIDDEN_INDEX_PATCH_VALIDATION";
+        var pending = new HiddenNearnessWrapper(context.LegacyHiddenReversed!);
+        _validation.ValidateHiddenNearnessWrapper(context, pending);
+        context.PatchedHiddenAccess = pending;
+
+        context.BranchTrace.Add("HIDDEN_INDEX_PATCH");
+        _metrics.Bump(context, "hidden.index.patch.dispatch");
+        context.Status = "HIDDEN_INDEX_PATCH_COMPLETE";
+        context.Phase = "HIDDEN_INDEX_PATCH_COMPLETE";
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -453,6 +491,22 @@ public sealed class MonsterManager
         var context = ExecuteLegacyHiddenDrops(calculationDay, targetDay);
         return context.LegacyHiddenReversed
             ?? throw new MonsterValidationException("لم تُثبَّت القطرات التاريخية المعكوسة.");
+    }
+
+    public MonsterContext ExecutePatchedHiddenAccess(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        _dispatcher.DispatchPatchedHiddenAccess(context);
+        return context;
+    }
+
+    public BigInteger EvaluateHiddenDrop(BigInteger calculationDay, BigInteger targetDay, int k)
+    {
+        if (k is < 1 or > 7)
+            throw new MonsterValidationException("رتبة قرب القطرة المطلوبة خارج المجال.");
+        var context = ExecutePatchedHiddenAccess(calculationDay, targetDay);
+        return context.PatchedHiddenAccess?.HiddenByNearness(k)
+            ?? throw new MonsterValidationException("لم تُثبَّت رقعة الوصول إلى القطرات الخفية.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

@@ -90,3 +90,5 @@ jobs:
         run: |
           test "${{ steps.discovery_hidden_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage10Tests/PastafarianCalendar.Stage10Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تحقق من فهرسة قرب القطرات الخفية دون قلب تخزينها
+        run: dotnet run --project tests/PastafarianCalendar.Stage11Tests/PastafarianCalendar.Stage11Tests.csproj --configuration Release

@@ -45,6 +45,9 @@ public sealed class MonsterContext
     // ترتيب القطرات المخفية القديم معكوس ويملك كل استدعاء مصفوفتَه الخاصة.
     public BigInteger[]? LegacyHiddenReversed { get; set; }
 
+    // لا تُنسخ القطرات ولا تُقلب؛ يحتفظ غلاف القراءة بمخزنها القديم نفسه.
+    public HiddenNearnessWrapper? PatchedHiddenAccess { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

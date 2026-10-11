@@ -66,6 +66,13 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateLegacyHiddenDrops(calculationDay, targetDay);
     }
 
+    // قراءة القطرة الخفية برتبة قربها؛ المخزن القديم باقٍ بالعكس دون أي قلب فعلي.
+    public static BigInteger EvaluateHiddenDrop(BigInteger calculationDay, BigInteger targetDay, int k)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateHiddenDrop(calculationDay, targetDay, k);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
