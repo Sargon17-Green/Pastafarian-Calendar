@@ -41,7 +41,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage12Discovery06Test do
     for index <- 1..7 do
       for back <- [1, 3, 7] do
         slot = index - back
-        actual = LegacyPrior.legacy_prior(Map.take(visible, 1..(index - 1)), index, back)
+        actual = LegacyPrior.legacy_prior(Map.filter(visible, fn {number, _value} -> number < index end), index, back)
 
         if slot <= 0 do
           hidden_number = 1 - slot
