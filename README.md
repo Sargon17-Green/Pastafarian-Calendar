@@ -124,3 +124,11 @@ npm run test:discovery04:red
 ```
 
 शेवटची ऐतिहासिक चाचणी हेतुपुरस्सर exit 1 देते आणि CI त्याच अपेक्षित fail marker ला स्वीकारतो. तांत्रिक पुरावा `docs/STAGE09_PATCH04_VERIFICATION.md`, पुढील हस्तांतरण `HANDOFF_STAGE_09.md` मध्ये आहे. Stage 10 मध्ये फक्त उलट क्रमाने साठवलेल्या hidden drops चा DISCOVERY 05 करावा; त्याची PATCH 05 दुरुस्ती Stage 11 पर्यंत करू नये.
+
+## टप्पा 10/55 — DISCOVERY 05 (पूर्ण)
+
+`src/discovery05LegacyHidden.ts` मध्ये `hidden7..hidden1` या जुन्या उलट hidden storage आणि न दुरुस्त केलेला `LegacyBackwardHiddenAdapter.oldHiddenAt` reader असलेला स्वतंत्र उत्पादन-मार्ग जोडला. `discoverLegacyHiddenStorage` प्रत्येक आवाहनासाठी स्वतंत्र context, immutable input/storage/readings, trace आणि metrics तयार करते. अजून `8-k` slot सुधारणे लागू नाही; ते Stage 11 मध्येच होईल.
+
+Normative oracle मधील 9 दिवस-जोड्यांवर `54 mismatches / 9 matches` दिसले. इतर 1,030 property cases, 7,210 slots मध्ये `6,168 mismatches / 1,042 matches`. `DISCOVERY_05_EXPECTED_RED mismatches=6 matches=1` हा नवीन हेतुपुरस्सर लाल पुरावा इतर चार पुराव्यांबरोबर जतन झाला.
+
+GitHub Actions run `38160880004`: TypeScript typecheck, सर्व Stage 1–10 guards, पाच ऐतिहासिक expected-red आणि canonical name lock PASS. तपशील `docs/STAGE10_DISCOVERY05_VERIFICATION.md`; पुढील मार्ग `HANDOFF_STAGE_10.md` मध्ये.

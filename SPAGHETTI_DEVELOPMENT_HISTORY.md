@@ -67,3 +67,11 @@ GitHub Actions run `38157981487` (commit `0d765f251e1ecf976d461e1180d7dc54f9361b
 Commit `e4581720a00c09ec1f7a16ff1fb70d0c05879a6e` वरील GitHub Actions run `38159106148` मध्ये सर्व jobs PASS. `test/patch04.ts` मधून 1076 cases, 5380 cells, 1076 खऱ्या legacy calls, 4304 garbage/योग्य फरक आणि oracle विरुद्ध 0 mismatches. `test/patch04Metamorphic.ts`: 301 तुलना, 1505 cells, 1204 इतिहासातील दोषांची साक्ष. आधीच्या 1–8 stages, चार historical expected-red पुरावे व canonical names lock सर्व कायम आणि पडताळलेले. म्हणून Stage 9/55 पूर्ण.
 
 पुढे Stage 10 — DISCOVERY 05: hidden7..hidden1 या उलट साठवण क्रमाचा जुना दोष. Stage 11 मधील `hidden k` साठी `8-k` हा दुरुस्ती नियम Stage 10 मध्ये अकाली लागू करू नये.
+
+## टप्पा 10 — DISCOVERY 05: उलट hidden storage चा ऐतिहासिक दोष
+
+`LegacyBackwardHiddenAdapter.storeBackward` सात hidden drops `hidden7,hidden6,...,hidden1` मध्ये ठेवतो; `oldHiddenAt(stored,k)` अजून सदोष सामान्य `k-1` slot वाचतो. यात Stage 11 ची `8-k` दुरुस्ती मिसळलेली नाही. `Discovery05HiddenHandler` मध्ये स्वतंत्र validation, lifecycle, immutable observation आणि context metrics जोडले.
+
+`test/discovery05.ts` ने test-only oracle चे 9 दिवस-जोड खरे hidden drops वापरून `54 mismatches / 9 matches` सिद्ध केले. `test/discovery05Properties.ts` ने 1,030 cases / 7,210 slots (`6,168 mismatches / 1,042 matches`), reverse-array semantics, giant BigInt, palindrome, malformed input आणि instance isolation तपासले. `test/discovery05Red.ts` हा पाचवा archive expected-red पुरावा (`6 mismatches / 1 match`) आहे.
+
+GitHub Actions run `38160880004` (commit `1fa1054a2ba4dbd3106baf9458657614c26419ca`) मध्ये stages 1–10, TypeScript typecheck, पाच archive reds आणि canonical names lock सर्व PASS. Stage 10/55 पूर्ण. पुढील Stage 11 = PATCH 05, storage न बदलता reader मध्ये योग्य `8-k` slot वापरायचा.
