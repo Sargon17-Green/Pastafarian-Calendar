@@ -259,3 +259,8 @@ Ar commit `3daa6b0e5e3fac8a6c2868e8bae19d7220ffa38d` llwyddodd swydd CI Kotlin (
 ## Cam 8 — DISCOVERY 04: nam dilyniannol y pum carreg
 
 Mae'r adeiladwr hen ffasiwn yn newid yr un cofnod mewn trefn benodol: gwenith, barlys, halen, chwerw, coch. Mae pob fformiwla ddilynol yn darllen y gwerthoedd sydd eisoes wedi newid, er y dylai ddefnyddio ciplun cyfan o'r hen res. Cedwir rhes 1 fel oedd; mae rhesi 2–46 yn dangos 224 gwahaniaeth mewn 225 cydran. Mae'r llwybr cynhyrchu ar wahân yn cofnodi'r tabl fesul galwad. Nid yw cam atgyweirio'r cerrig wedi'i ddechrau. Disgwylir prawf llawn CI cyn newid marc cwblhau'r cam.
+
+
+### Cam 8 — ardystiad JVM brodorol llawn
+
+Ar commit `051a928af4cc5166fc5884f80db48c530b5c5931` llwyddodd swydd GitHub Actions `114600034894` (rhediad `38183229336`) gyda Kotlin 1.9.0/JDK 21 a'r oracl gwreiddiol. Cadarnhawyd 30 marc, gan gynnwys atchweliadau Camau 1–7, 224 `EXPECTED_RED` mewn 225 cydran, 230 gwirio BigInteger annibynnol, cadw rhes 1, perchnogaeth a gwarchod ail-anfon, a'r methiant strict disgwyliedig. Mae Cam 8 yn gyflawn; ni ddechreuwyd PATCH 04.
