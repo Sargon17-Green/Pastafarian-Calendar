@@ -58,3 +58,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 8 — DISCOVERY 04
 
 `mutate_stones_wrong` አምስቱን ድንጋዮች በቅደም ተከተል `w,b,s,m,r` ያሻሽላል። የመጀመሪያው እሴት `17,29,43,71,101` ነው። ከድንጋይ 2 በኋላ የlegacy ውጤት `378,1434,3780,9932,25047` ነው። ከአሮጌው የጋራ snapshot የሚመጡ አራት የሙከራ ግምቶች በሆን ተብሎ RED ሆነው ይቆያሉ። `LegacyStonesAdapter` እና የታሪካዊው 46 ድንጋዮች ገንቢ ተጨምረዋል። `PATCH 04` አልተጨመረም። በV 0.5.2 (`7647ce1`) የGitHub Actions run `38160751813` የቅርጸት ፈተና፣ 11 የቀድሞ እና አዲስ GREEN የሙከራ ፋይሎች፣ እና በተለይ 4 የተጠበቁ RED assertions ተረጋግጠዋል። `LAST_COMPLETED_STAGE=8` ነው። ዝርዝር፦ `docs/STAGE08_DISCOVERY04.md`።
+
+## ደረጃ 9 — PATCH 04
+
+የታሪካዊው `mutate_stones_wrong` ያለ ለውጥ ተጠብቋል። አዲሱ `StonePatch04` መጀመሪያ የአምስት ድንጋዮችን snapshot ይወስዳል፣ በclone ላይ `mutate_stones_wrong` በእውነት ይጠራል፣ ከዚያም `w,b,s,m,r` ሙሉ ውጤትን በsnapshot እሴቶች ይደርሳል። `get_stone_table_through_legacy_builder` 46 የተጠገኑ ድንጋዮችን ይሰራል፤ የታሪካዊው `get_legacy_stone_table` አሁንም ይኖራል። የደረጃ 8 የRED ፈተናዎች ሳይለወጡ GREEN መሆን አለባቸው። `LAST_COMPLETED_STAGE=8` እስከ እውነተኛ V ማረጋገጫ ይቆያል። ዝርዝር፦ `docs/STAGE09_PATCH04.md`።

@@ -2,7 +2,7 @@ module pastafari
 
 fn test_discovery04_exact_sequential_stone_values_at_two() {
 	initial := initial_stones()
-	got := calendar_stones_spaghetti(2, initial)
+	got := new_base_dispatcher().dispatch_legacy_stones(2, initial)
 	assert got.w.str() == '378'
 	assert got.b.str() == '1434'
 	assert got.s.str() == '3780'
@@ -17,7 +17,7 @@ fn test_discovery04_exact_sequential_stone_values_at_two() {
 
 fn test_discovery04_legacy_reads_new_wheat_in_barley() {
 	initial := initial_stones()
-	got := calendar_stones_spaghetti(2, initial)
+	got := new_base_dispatcher().dispatch_legacy_stones(2, initial)
 	legacy_barley := calendar_save_spaghetti(big_add(big_add(big_square(initial.b),
 		big_mul_small(initial.s, 5)), got.w))
 	assert big_eq(got.b, legacy_barley)
@@ -26,7 +26,7 @@ fn test_discovery04_legacy_reads_new_wheat_in_barley() {
 
 fn test_discovery04_legacy_cascades_new_values_to_last_stone() {
 	initial := initial_stones()
-	got := calendar_stones_spaghetti(2, initial)
+	got := new_base_dispatcher().dispatch_legacy_stones(2, initial)
 	salt := calendar_save_spaghetti(big_add(big_add(big_square(initial.s),
 		big_mul_small(initial.m, 7)), got.b))
 	bitter := calendar_save_spaghetti(big_add(big_add(big_square(initial.m),
@@ -61,7 +61,7 @@ fn test_discovery04_legacy_builds_full_table_without_state_leaks() {
 
 fn test_discovery04_previous_patches_and_entrypoint_are_unchanged() {
 	initial := initial_stones()
-	stone := calendar_stones_spaghetti(2, initial)
+	stone := new_base_dispatcher().dispatch_legacy_stones(2, initial)
 	assert stone.b.str() == '1434'
 	foundation := big_from_i64(-15_055_671)
 	modulus := big_sub(big_pow_small(big_from_int(2), 127), big_one())
@@ -77,5 +77,6 @@ fn test_discovery04_previous_patches_and_entrypoint_are_unchanged() {
 		CalendarResult{}
 	}
 	assert diagnostic.contains('DISCOVERY_04 oldStoneB=1434')
+	assert diagnostic.contains('PATCH_04 stoneB=1073')
 	assert diagnostic.contains('PATCH_03 distance=1')
 }

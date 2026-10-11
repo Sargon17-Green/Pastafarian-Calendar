@@ -64,10 +64,10 @@ pub fn (_ BaseDispatcher) dispatch_legacy_stones(i int, stones Stones) Stones {
 	return adapter.mutate(i, stones)
 }
 
-// የproduction ንዑስ መግቢያ፤ ገና PATCH 04 አይጠቀምም።
+// ደረጃ 9፦ የproduction መስመሩ የሚጠራው PATCH 04 ነው።
 pub fn calendar_stones_spaghetti(i int, stones Stones) Stones {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_stones(i, stones)
+	return dispatcher.dispatch_stones_patch04(i, stones)
 }
 
 // የታሪካዊው ገንቢ የ1..46 ሰንጠረዥ በlegacy መንገድ ያዘጋጃል።

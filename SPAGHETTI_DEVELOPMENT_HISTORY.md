@@ -77,3 +77,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ### የደረጃ 8 መዝጊያ — EXPECTED_RED
 
 በመጀመሪያው የV CI ሙከራ የwitness ቅርጸት ስህተት ተገኝቷል። ቀጣዩ በእውነተኛው የV 0.5.2 ኮምፓይለር የ`Stones` አምስት መስኮች `pub mut:` ያስፈልጋሉ ብሎ አመልክቷል። ሁለቱም የV ቅርጸት እና የተለዋዋጭ መስክ ጉዳዮች ተስተካክለዋል፤ ሂሳባዊ የlegacy ስህተቱ አልተለወጠም። በcommit `74e100a03ab1aa2530e674c7746178a24f0a0b92` ላይ የGitHub Actions run `38160751813` በV 0.5.2 (`7647ce1`) ሙሉ የተጠበቀው ሁኔታ PASS ሆኗል፤ 11 GREEN የሙከራ ፋይሎች አልፈዋል፣ 4 RED assertions በስም ተረጋግጠዋል። የማስረጃ ቅርስ `11710830257` ተቀምጧል። `PATCH 04` አልተጨመረም። ደረጃ 8 COMPLETE / EXPECTED_RED ነው።
+
+## ደረጃ 9 — PATCH 04 (በV ማረጋገጫ ላይ)
+
+የታሪካዊው ስህተት `mutate_stones_wrong(i,S)` እንደነበረ ቆይቷል። `StonePatch04.apply` በ`old = stones.deep_clone()` የድንጋዮችን አምስት የቀድሞ እሴቶች ያስቀምጣል፤ ከዚያ `mutate_stones_wrong` በተለየ clone ላይ በእውነት ይጠራል። ሁሉም አምስት `garbage` መስኮች `old` ብቻ በሚያነቡ መጠገኛ ቀመሮች ይተካሉ። `calendar_stones_spaghetti` የPATCH 04 አዲሱን መስመር ይጠራል፤ `BaseDispatcher.dispatch_legacy_stones` ለየታሪካዊ witness አለ። ለ46 ድንጋዮች ትክክለኛ የsnapshot ገንቢ ተጨምሯል። የካሌንደር የመጨረሻ ቀን ልወጣ ገና የለም።
