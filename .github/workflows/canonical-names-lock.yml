@@ -24,3 +24,25 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+
+  audit_php_bahasa_melayu:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semak runtime PHP 64-bit
+        shell: bash
+        run: |
+          php -v
+          php -r 'if (PHP_INT_SIZE !== 8) { fwrite(STDERR, "PHP 64-bit diperlukan\n"); exit(1); }'
+      - name: Semak sintaks PHP
+        run: find src tests tools -name '*.php' -type f -print0 | xargs -0 -n 1 php -l
+      - name: Ujian normatif Stage 1
+        run: php -d memory_limit=512M tests/stage01_tests.php
+      - name: Regresi integer tepat
+        run: php -d memory_limit=512M tests/bigint_division_regression.php
+      - name: Fixture tempatan deterministik
+        run: |
+          php -d memory_limit=512M tools/generate_stage01_fixtures.php
+          git diff --exit-code -- tests/fixtures_stage01.json
