@@ -33,6 +33,9 @@ public sealed class MonsterContext
     // ناتج المسافة التاريخية مستقل لكل استدعاء، وتبقى الرقعة الثالثة غير موجودة.
     public BigInteger? LegacyDistanceResult { get; set; }
 
+    // تبقى المسافة التاريخية محفوظة، وتضاف الخماسية الحسابية المصححة في موضع مستقل.
+    public MonsterWorkCounts? PatchedCountsResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

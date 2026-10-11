@@ -38,6 +38,13 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateLegacyDistance(calculationDay, targetDay);
     }
 
+    // خماسية العدّ المصححة في الرقعة الثالثة، مع المحافظة على أثر المسافة القديمة.
+    public static MonsterWorkCounts EvaluateWorkCounts(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateWorkCounts(calculationDay, targetDay);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

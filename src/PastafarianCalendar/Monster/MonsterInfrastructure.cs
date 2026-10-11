@@ -49,6 +49,32 @@ public sealed class MonsterValidationManager
         if (day == foundation && candidate != BigInteger.One)
             throw new MonsterValidationException("حارس التأسيس لم يثبت الواحد.");
     }
+
+    // فحص نطاق التزام الرقعة الثالثة قبل كتابة الخماسية الحسابية في السياق.
+    public void ValidatePatchedCounts(MonsterContext context, MonsterWorkCounts candidate)
+    {
+        if (context.LegacyDistanceResult is not BigInteger historical)
+            throw new MonsterValidationException("لم يُشغّل مسار المسافة القديم قبل الرقعة الثالثة.");
+        if (context.PatchedCountsResult is not null)
+            throw new MonsterValidationException("لا يجوز تثبيت عدّ العمل المصحح مرتين.");
+        if (historical != LegacyDistance.OldDistance(context.CalculationDay, context.TargetDay))
+            throw new MonsterValidationException("تغيّرت قيمة المسافة القديمة بين مرحلتين.");
+
+        var action = new DayTagPatchWrapper().Patch(context.CalculationDay);
+        var target = new DayTagPatchWrapper().Patch(context.TargetDay);
+        var chronological = BigInteger.Abs(context.TargetDay - context.CalculationDay);
+        var expectedDistance = (historical != chronological ? chronological : historical) + BigInteger.One;
+        var expectedDirection = context.TargetDay < context.CalculationDay ? 1 :
+            context.TargetDay > context.CalculationDay ? 3 : 2;
+
+        if (candidate.Action != action || candidate.Target != target ||
+            candidate.Distance != expectedDistance || candidate.Connection != action + target ||
+            candidate.Direction != expectedDirection)
+            throw new MonsterValidationException("لا تطابق رقعة العدّ الثالثة مع مقادير السياق.");
+
+        if (candidate.Distance < BigInteger.One || candidate.Direction is < 1 or > 3)
+            throw new MonsterValidationException("أنتجت رقعة المسافة عدّاً خارج النطاق.");
+    }
 }
 
 public sealed class MonsterMetricsManager
@@ -69,6 +95,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyDayTagPhaseHandler _legacyDayTag;
     private readonly DayTagPatchWrapper _dayTagPatch;
     private readonly LegacyDistancePhaseHandler _legacyDistance;
+    private readonly PatchedCounts _patchedCounts;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -79,6 +106,7 @@ public sealed class MonsterDispatcher
         _legacyDayTag = new LegacyDayTagPhaseHandler();
         _dayTagPatch = new DayTagPatchWrapper();
         _legacyDistance = new LegacyDistancePhaseHandler();
+        _patchedCounts = new PatchedCounts();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -156,6 +184,27 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "legacy.distance.dispatch");
         context.Status = "LEGACY_DISTANCE_COMPLETE";
         context.Phase = "LEGACY_DISTANCE_COMPLETE";
+    }
+
+    public void DispatchPatchedCounts(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("تتطلب رقعة المسافة سياقاً جاهزاً جديداً.");
+        if (context.LegacyDistanceResult.HasValue || context.PatchedCountsResult is not null)
+            throw new MonsterValidationException("لا يجوز إعادة ربط مسافة قديمة بسياق مصحح.");
+
+        // تلتزم الندبة القديمة أولاً، ولا تُمحى إذا اختار الغلاف القيمة الزمنية.
+        DispatchLegacyDistance(context);
+
+        context.Phase = "COUNTS_PATCH_VALIDATION";
+        var pending = _patchedCounts.Calculate(context.CalculationDay, context.TargetDay);
+        _validation.ValidatePatchedCounts(context, pending);
+        context.PatchedCountsResult = pending;
+
+        context.BranchTrace.Add("COUNTS_PATCH");
+        _metrics.Bump(context, "counts.patch.dispatch");
+        context.Status = "COUNTS_PATCH_COMPLETE";
+        context.Phase = "COUNTS_PATCH_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -258,6 +307,20 @@ public sealed class MonsterManager
         var context = ExecuteLegacyDistance(calculationDay, targetDay);
         return context.LegacyDistanceResult
             ?? throw new MonsterValidationException("لم يُنتج المسار التاريخي مسافةً.");
+    }
+
+    public MonsterContext ExecutePatchedCounts(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        _dispatcher.DispatchPatchedCounts(context);
+        return context;
+    }
+
+    public MonsterWorkCounts EvaluateWorkCounts(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = ExecutePatchedCounts(calculationDay, targetDay);
+        return context.PatchedCountsResult
+            ?? throw new MonsterValidationException("لم تُثبت رقعة المسافة خماسية حساب.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

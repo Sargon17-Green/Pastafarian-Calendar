@@ -68,3 +68,5 @@ jobs:
         run: |
           test "${{ steps.discovery_distance_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage06Tests/PastafarianCalendar.Stage06Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تحقق من تصحيح المسافة وعلامات العمل في الرقعة الثالثة
+        run: dotnet run --project tests/PastafarianCalendar.Stage07Tests/PastafarianCalendar.Stage07Tests.csproj --configuration Release
