@@ -747,3 +747,19 @@ di ogni giro, isolation e le otto patch precedenti.
 La firma Stage18 **27 PASS / 3 FAIL** resta
 volutamente invariata. Non è introdotta la
 futura logica dello Stage20.
+
+### Certificazione nativa dello Stadio 19
+
+La [GitHub Actions run 38181781612](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38181781612)
+ha terminato **SUCCESS in tutti i 20 job**
+sul commit `06d290255c849ad15069606d6e65fd9c31c58112`.
+Stage19 ha eseguito **37 PASS / 0 FAIL**:
+720 ingressi coperti su dodici giri, 512 campioni
+deterministici signed, numeri oltre 16.384 bit,
+validazione indipendente dei record intermedi,
+provenienza del vecchio codice e separazione
+dell'ownership. Stage18 conserva **27 PASS / 3 FAIL**
+intenzionali, e tutte le suite Stage01–Stage17
+mantengono la firma storica originaria.
+Il catalogo dei nomi è bloccato; Stage20 non è
+iniziato.

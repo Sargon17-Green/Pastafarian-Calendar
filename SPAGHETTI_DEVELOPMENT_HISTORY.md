@@ -975,3 +975,14 @@ handler, nuova fase, tre campi del contesto,
 metrica, validator e suite dedicata. La
 DISCOVERY 09 continua ad esibire esattamente
 tre FAIL intenzionali; nessun Stage20 anticipato.
+
+### Certificazione nativa compiuta
+
+La run GitHub Actions 38181781612, sul commit
+`06d290255c849ad15069606d6e65fd9c31c58112`,
+ha concluso SUCCESS nei 20 job. La PATCH 09
+ha 37 PASS e zero FAIL; i dodici giri consecutivi
+coincidono con il riferimento normativo indipendente.
+La cicatrice originale dello Stage18 continua
+a generare i tre FAIL intenzionali previsti,
+senza alterare le altre otto patch storiche.
