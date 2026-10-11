@@ -140,3 +140,20 @@ Il validatore controlla la traccia completa, le dimensioni,
 il flag e l'uguaglianza alla ricostruzione deterministica
 dalla stessa prima riga. Le due tabelle sono istantanee
 immutabili nel report; nessun dato di test entra nel prodotto.
+
+## DISCOVERY 05 — accessor del registro temporale legacy
+
+La storia delle sette gocce nascoste si dispone sulle
+posizioni `0,-1,...,-6`; la visibile 1 occupa la
+posizione 1. `legacyPrior(hidden,visible,index,lag)`
+esige esattamente `index-1` visibili già note e
+ritardi appartenenti a `{1,3,7}`. Il difetto,
+intenzionale, è localizzato soltanto nella lettura
+`index-6` richiesta per ritardo 7. Non è un problema
+di aritmetica modulare.
+
+`DISCOVERY_05_PRIOR` ha un handler registrato nel dispatcher,
+input e output locali al contesto, validazione di readiness,
+report congelato e metrica osservativa. Il riferimento
+normativo è importato esclusivamente nei test, non nel
+codice di produzione.

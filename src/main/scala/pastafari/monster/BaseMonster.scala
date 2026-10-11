@@ -24,7 +24,12 @@ final case class BaseMonsterContext(
   var patch03Applied: Boolean = false,
   var legacyStoneRowsOutput: Option[Vector[Vector[BigInt]]] = None,
   var patchedStoneRowsOutput: Option[Vector[Vector[BigInt]]] = None,
-  var patch04Applied: Boolean = false
+  var patch04Applied: Boolean = false,
+  var priorHiddenInput: Option[Vector[BigInt]] = None,
+  var priorVisibleInput: Option[Vector[BigInt]] = None,
+  var priorIndexInput: Option[Int] = None,
+  var priorLagInput: Option[Int] = None,
+  var legacyPriorOutput: Option[BigInt] = None
 )
 
 final class BaseMetricsShell {
@@ -44,6 +49,23 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requireDiscovery05Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_05_PRIOR" ||
+        ctx.status != "LEGACY_PRIOR_READY" ||
+        ctx.priorHiddenInput.isEmpty || ctx.priorVisibleInput.isEmpty ||
+        ctx.priorIndexInput.isEmpty || ctx.priorLagInput.isEmpty ||
+        ctx.legacyPriorOutput.isEmpty ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_05_PRIOR")) {
+      throw new IllegalStateException("Registro temporale legacy non pronto.")
+    }
+    if (ctx.priorHiddenInput.get.length != 7 ||
+        ctx.priorIndexInput.get < 1 || ctx.priorIndexInput.get > 47 ||
+        ctx.priorVisibleInput.get.length != ctx.priorIndexInput.get - 1 ||
+        !Set(1, 3, 7).contains(ctx.priorLagInput.get)) {
+      throw new IllegalStateException("Dati temporali della discovery incoerenti.")
     }
   }
 
@@ -207,7 +229,8 @@ final class BaseMonsterManager {
     new Discovery03DistanceHandler(metrics),
     new Patch03DistanceHandler(metrics),
     new Discovery04StonesHandler(metrics),
-    new Patch04StonesHandler(metrics)
+    new Patch04StonesHandler(metrics),
+    new Discovery05PriorHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -393,6 +416,32 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("patch04", e)
+    }
+  }
+
+  def discover05Prior(
+    calculationDay: BigInt, targetDay: BigInt,
+    hiddenDrops: Vector[BigInt], visibleDropsSoFar: Vector[BigInt],
+    index: Int, lag: Int
+  ): Discovery05PriorReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.priorHiddenInput = Some(hiddenDrops)
+    ctx.priorVisibleInput = Some(visibleDropsSoFar)
+    ctx.priorIndexInput = Some(index)
+    ctx.priorLagInput = Some(lag)
+    ctx.phase = "DISCOVERY_05_PRIOR"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery05Ready(ctx)
+      Discovery05PriorReport(
+        ctx.calculationDay, ctx.targetDay,
+        ctx.priorHiddenInput.get, ctx.priorVisibleInput.get,
+        ctx.priorIndexInput.get, ctx.priorLagInput.get,
+        ctx.legacyPriorOutput.get, ctx.phase, ctx.status,
+        ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("discovery05", e)
     }
   }
 

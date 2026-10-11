@@ -287,22 +287,38 @@ object Stage09Tests {
         "Il helper storico deve restare eseguito")
       truth(sources.contains("Patch04StonesWrapper.stonesPatch("),
         "La correzione deve essere separata")
-      truth(!sources.contains("legacyPrior"),"Non anticipare DISCOVERY 05")
+      val state = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val currentStage = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      if (currentStage < 10)
+        truth(!sources.contains("legacyPrior"),"DISCOVERY 05 anticipata")
+      else
+        truth(sources.contains("legacyPrior"),"DISCOVERY 05 mancante")
     }
 
     check("metadati dello stadio 9 verdi e certificazioni conservate") {
       val state=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(state.contains("CURRENT_STAGE=9"),"Stadio corrente")
-      truth(state.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(state.contains("CURRENT_PATCH=04"),"Patch corrente")
-      truth(state.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"Stato GREEN")
+      val currentStage = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      truth(currentStage >= 9,"PATCH 04 deve essere disponibile")
+      if (currentStage == 9) {
+        truth(state.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(state.contains("CURRENT_PATCH=04"),"Patch corrente")
+        truth(state.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"Stato GREEN")
+      } else {
+        truth(state.contains("STAGE_09_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_26_PASS_0_FAIL"),
+          "Certificazione storica PATCH 04 mancante")
+      }
       truth(state.contains("STAGE_08_NATIVE_VERIFICATION=PASS_EXPECTED_RED_19_PASS_3_FAIL"),
         "DISCOVERY 04 storica conservata")
       val completed=state.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE assente"))
-      truth(completed==8 || completed==9,"Certificazione non anticipata")
+      truth(completed >= 8 && completed <= currentStage,"Ordine storico non valido")
     }
 
     println("\nRISULTATO STADIO 9: "+passed+" PASS, "+failed+" FAIL")

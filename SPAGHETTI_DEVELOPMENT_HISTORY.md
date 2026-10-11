@@ -422,3 +422,42 @@ La suite Stage09 confronta tutte le 230 pietre con l'oracolo,
 dimostra che il wrapper non prende le righe successive
 dalla tabella errata, e protegge isolamento, metriche
 e percorso del dispatcher. Non è stato avviato lo stadio 10.
+
+## Stadio 10 — DISCOVERY 05: una goccia troppo vicina
+
+### Che cosa si pensava
+
+I ritardi 1, 3 e 7 potevano condividere un accessor,
+ma la distanza sette è stata erroneamente risolta
+come distanza sei.
+
+### Che cosa si è scoperto
+
+Il primo campione visibile legge normativamente, a
+ritardo sette, la goccia nascosta nella posizione -6.
+La cicatrice legge -5. Al campione 7 la norma torna
+al primo nascosto, mentre la cicatrice legge il primo
+visibile. Anche dopo la 46esima goccia permane
+lo slittamento.
+
+### Che cosa è stato aggirato
+
+Nessuna correzione è introdotta. L'handler delega
+all'autentico `legacyPrior`, conserva il valore
+storico in uno snapshot e permette di compararlo
+con l'accesso normativo solo nel codice di test.
+
+### Perché non è normativamente equivalente
+
+Per `lag=7` l'indice del risultato è sempre
+`i-6`, diverso dall'indice prescritto `i-7`.
+I test RED confrontano valori realmente distinti
+della sequenza normativa delle gocce, senza
+anticipare la futura PATCH 05.
+
+### Strato di mostruosità aggiunto
+
+Helper, handler, fase, cinque campi di stato semantico,
+validation, report, metriche e test di confine
+e finestre storiche. Le quattro patch precedenti
+restano disponibili. Certificazione nativa in attesa.

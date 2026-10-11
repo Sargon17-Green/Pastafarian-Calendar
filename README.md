@@ -304,3 +304,29 @@ Stage09 26 PASS/0 FAIL.
 Sono state verificate tutte le 230 pietre nelle 46 righe.
 L'adattatore storico rimane inalterato e il risultato non corretto
 resta percorribile nel suo diagnostico. Lo stadio 10 non è iniziato.
+
+## Stadio 10 — DISCOVERY 05: il settimo precedente è indicizzato male
+
+Nel riferimento normativo la goccia visibile `i` consulta
+`i-1`, `i-3` e `i-7`. Le sette gocce nascoste
+occupano gli indici `0,-1,...,-6`. Il helper storico
+`LegacyPriorAdapter.legacyPrior` sbaglia solo la terza
+lettura: per `lag=7` consulta la posizione `i-6`.
+
+Il manager `discover05Prior` attraversa davvero
+`BOOT → DISCOVERY_05_PRIOR`, con stato di proprietà
+della singola chiamata, report immutabile e metrica
+non semantica. Riceve la finestra hidden e le sole visibili
+già esistenti: è una diagnostica dei precedenti,
+**non** una pretesa implementazione completa delle 46 gocce.
+Le letture lag 1 e lag 3 continuano a essere normative.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage10Tests'
+```
+
+Firma RED attesa: `15 PASS, 3 FAIL`, solo per la
+lettura normativa prior7 delle gocce 1, 7 e 47. Il test
+controlla anche tutte le 47 finestre sintetiche, BigInt
+giganti, input incompleti, ownership e PATCH 01–04.
+Nessuna correzione anticipata dello stadio 11.
