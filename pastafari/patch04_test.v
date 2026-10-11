@@ -17,8 +17,8 @@ fn patch04_reference(i int, before Stones) Stones {
 }
 
 fn patch04_stones_equal(a Stones, b Stones) bool {
-	return big_eq(a.w, b.w) && big_eq(a.b, b.b) && big_eq(a.s, b.s)
-		&& big_eq(a.m, b.m) && big_eq(a.r, b.r)
+	return big_eq(a.w, b.w) && big_eq(a.b, b.b) && big_eq(a.s, b.s) && big_eq(a.m, b.m)
+		&& big_eq(a.r, b.r)
 }
 
 fn test_patch04_restores_five_snapshot_values_at_two() {
