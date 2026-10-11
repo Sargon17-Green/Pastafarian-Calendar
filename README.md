@@ -38,3 +38,14 @@ Không có lỗi biên dịch hay sai lệch kiểm thử ngoài dự kiến.
 
 - [Nhật ký kiểm thử dự kiến đỏ](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38150668369)
 - [Kiểm tra khóa tên chuẩn đã đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38150668429)
+
+## Giai đoạn 3 — Bản vá 01
+
+Vẫn giữ nguyên hàm lịch sử `LegacyRemainder.old_remainder` trả 0
+đối với các bội số của M. Lớp `SavePatch` gọi chính hàm đó, rồi
+chỉ thay kết quả 0 bằng M. `SaveManager` tiếp tục qua lớp vá này.
+Ba hồi quy chuẩn của giai đoạn 2 không bị sửa hoặc xóa và phải chuyển sang đạt.
+
+Các kiểm thử mở rộng gồm phần dư âm, số 0, số nguyên lớn hơn 1024 bit,
+tính chu kỳ, nhiều yêu cầu đồng thời và kiểm tra đường gọi lịch sử.
+Hàm ngày lịch đầy đủ vẫn bị chặn cho đến giai đoạn tích hợp bắt buộc.

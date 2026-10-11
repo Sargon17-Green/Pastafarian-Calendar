@@ -23,3 +23,23 @@ Việc xác minh đóng cuối cùng đã chạy thành công trên GitHub Actio
 Các kiểm thử chuẩn cố ý giữ nguyên kỳ vọng đúng. Trong giai đoạn khám phá, ba kiểm thử M, 2M và 3M dự kiến thất bại; các kiểm thử còn lại phải đạt. Không đưa vào điều kiện sửa giá trị 0 thành M. Bản vá thuộc giai đoạn 3.
 
 **Xác minh thực tế:** GitHub Actions với Elixir 1.18.5 và OTP 27 đã chạy 22 kiểm thử. Đúng ba hồi quy M, 2M, 3M thất bại với phần dư thực tế 0 thay vì M = 170141183460469231731687303715884105727. Mười chín kiểm thử còn lại đạt. Khóa tên chuẩn độc lập đạt. Giai đoạn 2 được khép ở trạng thái EXPECTED_RED; không lén đưa vào bản vá.
+
+## Giai đoạn 3 — Bản vá 01: bọc phép dư lịch sử
+
+**Điều được đi vòng:** Thay vì sửa `old_remainder`, thêm lớp `SavePatch`
+bên trên để kiểm tra đúng một trường hợp: nếu phần dư bằng 0, trả M.
+Đường đi: `save_value_spaghetti → Dispatcher.save_value → SaveManager.calculate
+→ SavePatch.save_patch → LegacyRemainder.old_remainder`.
+
+**Vì sao tương đương:** Phần dư nguyên không âm theo M luôn nằm trong 0..M−1.
+Với phần dư r khác 0, r là kết quả SAVE chuẩn; riêng khi r bằng 0,
+giá trị chuẩn là M. Bằng chứng đúng cho mọi số nguyên, kể cả số âm và
+số nguyên có độ dài tùy ý.
+
+**Vì sao giữ vết cũ:** Hàm lỗi vẫn được gọi trên tuyến sản xuất thực tế;
+tầng bọc thêm nhánh xử lý để hệ thống phát triển theo lịch sử spaghetti.
+Không thêm bất kỳ bản vá nào thuộc các giai đoạn tương lai.
+
+**Điều chỉnh kiểm thử:** Kiểm thử nối dây của giai đoạn 2 từng đòi đầu ra
+công khai bằng kết quả sai. Chỉ xác nhận nối dây được cập nhật để chứng minh
+hàm lịch sử còn sai nhưng đầu ra được sửa. Ba hồi quy chuẩn không thay đổi.

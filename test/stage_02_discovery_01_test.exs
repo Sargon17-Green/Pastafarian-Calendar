@@ -5,12 +5,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage02Discovery01Test do
   alias PastafariCalendarElixirVietnamese.Monster.LegacyRemainder
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
-  test "phần dư lịch sử thực sự được nối vào đường sản xuất" do
+  test "phần dư lịch sử vẫn tồn tại dưới lớp vá và đầu ra công khai được sửa" do
     m = Ref.m()
 
     assert LegacyRemainder.modulus() == m
     assert LegacyRemainder.old_remainder(m) == 0
-    assert Calendar.save_value_spaghetti(m) == LegacyRemainder.old_remainder(m)
+    assert Calendar.save_value_spaghetti(m) == Ref.save(m)
+    refute Calendar.save_value_spaghetti(m) == LegacyRemainder.old_remainder(m)
   end
 
   test "đối chứng M cộng một vẫn khớp với phép SAVE chuẩn" do

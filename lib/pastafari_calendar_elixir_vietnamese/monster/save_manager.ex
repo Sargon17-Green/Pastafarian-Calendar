@@ -1,15 +1,15 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.SaveManager do
   @moduledoc """
-  Tầng điều phối phép SAVE hình thành ở giai đoạn khám phá thứ nhất.
+  Tầng điều phối phép SAVE bắt nguồn từ lần phát hiện thứ nhất.
 
-  Tầng này đang ủy quyền trực tiếp cho phép dư lịch sử sai.
-  Không có lớp sửa sai, đường dự phòng hoặc bộ tham chiếu kiểm thử.
+  Không thay thế thiết kế lịch sử: chuyển yêu cầu qua lớp vá 01,
+  còn phép dư sai được giữ lại và thực thi ở bên dưới lớp vá đó.
   """
 
-  alias PastafariCalendarElixirVietnamese.Monster.{LegacyRemainder, Validator}
+  alias PastafariCalendarElixirVietnamese.Monster.{SavePatch, Validator}
 
   def calculate(value) do
     Validator.require_integer_value!(value)
-    LegacyRemainder.old_remainder(value)
+    SavePatch.save_patch(value)
   end
 end

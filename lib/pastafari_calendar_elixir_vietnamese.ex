@@ -2,7 +2,7 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất của dòng triển khai Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 2 phơi bày nhánh SAVE lịch sử sai để kiểm chứng hồi quy.
+  Giai đoạn 3 bổ sung lớp vá SAVE bên trên phần dư lịch sử của giai đoạn 2.
   Hàm ngày lịch đầy đủ vẫn chưa được tích hợp và không gọi bộ tham chiếu kiểm thử.
   """
 
