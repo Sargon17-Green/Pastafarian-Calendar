@@ -12,3 +12,4 @@ export * from "./patch04Stones.ts";
 export * from "./discovery05LegacyHidden.ts";
 export * from "./patch05Hidden.ts";
 export * from "./discovery06LegacyPrior.ts";
+export * from "./patch06Prior.ts";

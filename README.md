@@ -148,3 +148,9 @@ GitHub Actions run `38163510684` ने Stage 01–11 regressions, TypeScript ty
 `test/discovery06.ts` ने प्रत्यक्ष normative hidden/visible oracle मधून 15 boundary witnesses तपासून `11 mismatches / 4 matches` सिद्ध केले. `test/discovery06Properties.ts` ने 16 स्वतंत्र दिवस-जोड्यांवर 46 थेंब × तीन history distances = 2,208 calls तपासल्या; `176` hidden history misses आणि `2,032` visible history matches. Stage 1–11 regressions आणि सहा archive expected-red proofs अखंड.
 
 GitHub Actions run `38165814846`: TypeScript typecheck, `stage12-typescript-marathi`, `verify` दोन्ही PASS. पुरावा `docs/STAGE12_DISCOVERY06_VERIFICATION.md` आणि पुढील `HANDOFF_STAGE_12.md` मध्ये. Stage 13 = PATCH 06; त्यापूर्वी जुन्या reader मध्ये दुरुस्ती करू नये.
+
+## टप्पा 13/55 — PATCH 06
+
+`src/patch06Prior.ts` मध्ये नवीन `patch06Prior(c,t,visibleStore,backwardHidden,i,back)` प्रत्यक्ष दोन स्वतंत्र मार्गांवर काम करते. `slot=i-back` सकारात्मक असेल तर `LegacyVisiblePriorAdapter.legacyPrior` खऱ्या call ने वाचतो. `slot<=0` असेल तर `hiddenK=1-slot` साठी Stage 11 चा `Patch05HiddenHandler.correctedHiddenAt` वापरून `backwardStored[7-hiddenK]` मिळते. जुना visible reader, उलट hidden storage, सहा archived red आणि अजून न आलेले Stage 14 बदललेले नाहीत.
+
+`npm run test:patch06` ने 15 मूलभूत साक्षी, 16 वास्तविक दिवस-जोड्या × 46 visible drops × 3 history offsets, 16,384-bit signed इनपुट, शाखेचा प्रत्यक्ष legacy call, sparse storage व lifecycle तपासावेत. `npm test` सर्व जुन्या हिरव्या चाचण्या व PATCH 06 तपासते. अंतिम कालदिनांक API Stage 54 पूर्वी अनुपलब्ध.

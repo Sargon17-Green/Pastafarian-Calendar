@@ -91,3 +91,9 @@ Oracle साठी 105 जोड्या / 735 slots: जुने 630 फर�
 नियमाधारित `test/normativeOracle.ts` मधील `buildHiddenDrops` व `buildVisibleDrops` च्या साहाय्याने 15 boundary cases: 11 hidden mismatches, 4 visible matches. 16 दिवस-जोड्या × 46 visible × 3 history = 2,208 calls: 176 missing hidden आणि 2,032 योग्य visible. आवाहनांचे ownership, invalid input, sparse visible slots, मोठे `bigint`, Stage 1–11 regressions आणि `calendarDateSpaghetti` ची Stage 54 सीमा तपासली.
 
 GitHub Actions run `38165814846` (commit `a727c9af88a3d576653d8db104c2a69fdb5c04eb`) मध्ये TypeScript typecheck, `verify`, `stage12-typescript-marathi`, तसेच सर्व सहा historical expected-red साक्षी PASS. Stage 12/55 पूर्ण. पुढील Stage 13 — PATCH 06: positive slot साठी legacy call आणि nonpositive slot साठी Stage 11 corrected hidden mapping; Stage 14 अजून सुरू नाही.
+
+## टप्पा 13 — PATCH 06: दिसणाऱ्या थेंबांपासून मागे जाऊन लपवलेला इतिहास वाचणे
+
+`LegacyVisiblePriorAdapter.legacyPrior(dropStore,i,back)` आणि `DISCOVERY_06_EXPECTED_RED` काहीही बदललेले नाहीत. `Patch06PriorHandler` मध्ये `slot>=1` असेल तेव्हा थेट खऱ्या legacy helper ची call होते; अन्यथा `hiddenK=1-slot` काढून Stage 11 च्या `correctedHiddenAt(backwardStored,hiddenK)` मधून वाचतो. `hidden7..hidden1` backward storage कायम आहे. स्वतंत्र frozen visible व hidden snapshots, semantic status, branchTrace, metrics, lifecycle व malformed input guards जोडले.
+
+हे केवळ सहाव्या दोषासाठी आहे; पुढील grind indexing, अंतिम दिनांक किंवा Stage 54 बदललेले नाहीत. GitHub Actions ने PASS घोषित करण्यापूर्वी हे stage परीक्षणाधीन मानावे.
