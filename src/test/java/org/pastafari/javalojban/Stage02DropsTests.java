@@ -76,7 +76,6 @@ public final class Stage02DropsTests {
 
     private static void testDateMatrix() {
         BigInteger f = MonsterArithmetic.FOUNDATION_DAY;
-        BigInteger[] positions = {-6000, -2500, -46, -7, -1, 0, 1, 7, 46, 2500, 6000};
         for (int c : new int[]{-46, -7, -1, 0, 1, 7, 46}) {
             for (int t : new int[]{-46, -7, -1, 0, 1, 7, 46}) {
                 compareDates(f.add(BigInteger.valueOf(c)), f.add(BigInteger.valueOf(t)));
