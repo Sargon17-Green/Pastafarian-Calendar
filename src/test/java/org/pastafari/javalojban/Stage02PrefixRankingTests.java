@@ -124,8 +124,10 @@ public final class Stage02PrefixRankingTests {
         fails("E_WEAVE_PREFIX", () -> linear.unrankAfterPrefix(null, BigInteger.ONE));
         fails("E_WEAVE_PREFIX", () ->
             linear.unrankAfterPrefix(new int[]{2}, BigInteger.ONE));
-        fails("E_WEAVE_RANK", () ->
+        fails("E_WEAVE_SUFFIX_LIMIT", () ->
             linear.unrankAfterPrefix(new int[]{1}, BigInteger.ZERO));
+        fails("E_WEAVE_RANK", () ->
+            linear.unrankAfterPrefix(Arrays.copyOf(original, 103), BigInteger.ZERO));
         fails("E_WEAVE_RANK", () ->
             linear.unrankAfterPrefix(Arrays.copyOf(original, original.length),
                 BigInteger.valueOf(2)));
