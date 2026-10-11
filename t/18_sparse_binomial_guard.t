@@ -19,6 +19,8 @@ sub choose_exact ($n, $k) {
 }
 
 # 全部月份已經首次開啟，且最後出現次序固定。
+# 最後一日必屬月份 2，其他 b-1 日從前 a+b-1 個位置挑選；
+# 與從尚未開啟兩個月份開始的 C(a+b-2,a-1) 不同。
 # 以下呼叫刻意使用 _weave_counter 的測試專用狀態介面。
 for my $pair (
     [4,4],
@@ -30,7 +32,7 @@ for my $pair (
     my ($a,$b) = @$pair;
     my $lengths = [$a+1,$b+1];
     my $counter = Pastafari::NormativeScroll::_weave_counter($lengths);
-    my $expected = choose_exact($a+$b-2,$a-1);
+    my $expected = choose_exact($a+$b-1,$b-1);
     my $actual = $counter->([$a,$b],2,0);
     is("$actual","$expected", "大整數及快取邊界的精確計數：$a/$b");
     my $first = "$actual";
