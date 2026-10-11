@@ -61,3 +61,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38156647121` ተፈትኗል፤ `v fm
 ### የደረጃ 6 መዝጊያ — EXPECTED_RED
 
 V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅርጸት፣ የደረጃ 1 ኦራክል፣ ቀድሞ የተጠገኑ የPATCH 01 እና PATCH 02 የሙከራ ፋይሎች፣ የሦስተኛው ታሪካዊ ስህተት witness ተሳክተዋል። `discovery03_expected_red_test.v` ከመጀመሪያው የV typecheck PASS በኋላ አራት የታሰቡ assertions በተናጠል RED አሳይቷል። የማስረጃ ቅርስ `11708791583` ተቀምጧል። `old_distance` አልተጠገነም፣ `PATCH 03` አልተጨመረም። ደረጃ 6 COMPLETE / EXPECTED_RED ነው።
+
+## ደረጃ 7 — PATCH 03 (የCI ማረጋገጫ ይጠበቃል)
+
+`old_distance` ውስጥ ያለው `abs(dayTag(c)-dayTag(t))` ታሪካዊ ጉድለት አልተለወጠም። `DistancePatch03` ከአሮጌው dispatcher በእውነት የተገኘ እሴትን ተቀብሎ `chronological=abs(t-c)` ያሰላል። የlegacy ልዩነቱን ሲያይ ይተካዋል፣ ካልተለየ እንዳለ ያቆየዋል፣ ከዚያ 1 ይጨምራል። የእርምት አጠቃቀም በ`calendar_distance_spaghetti` እና `calendar_date_spaghetti` ውስጥ ተገናኝቷል። ሙሉ የቀን ልወጣ ገና የለም።

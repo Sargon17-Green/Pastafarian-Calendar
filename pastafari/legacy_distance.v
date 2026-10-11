@@ -20,8 +20,8 @@ pub fn (_ BaseDispatcher) dispatch_legacy_distance(calculation_day BigInt, targe
 	return adapter.distance(calculation_day, target_day)
 }
 
-// የproduction መግቢያ፤ በደረጃ 6 እውነተኛ የታሪክ ስህተት ነው።
+// ደረጃ 7፦ production የታሪካዊ ውጤትን በPATCH 03 ያሳልፋል።
 pub fn calendar_distance_spaghetti(calculation_day BigInt, target_day BigInt) BigInt {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_distance(calculation_day, target_day)
+	return dispatcher.dispatch_distance_patch03(calculation_day, target_day)
 }

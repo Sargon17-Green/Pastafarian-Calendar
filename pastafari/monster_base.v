@@ -113,9 +113,12 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	// ደረጃ 3፦ የታሪካዊውን adapter ተከትሎ PATCH 01 ይጠራል።
 	patched_probe := calendar_save_spaghetti(calculation_day)
 	patched_day_tag := calendar_day_tag_spaghetti(target_day)
-	legacy_distance := calendar_distance_spaghetti(calculation_day, target_day)
+	dispatcher := new_base_dispatcher()
+	legacy_distance := dispatcher.dispatch_legacy_distance(calculation_day, target_day)
+	patched_distance := calendar_distance_spaghetti(calculation_day, target_day)
 	message := 'ዋናው የስፓጌቲ ቀን መንገድ ገና አልተገነባም፤ PATCH_01 SAVE='
 	prefix := message + patched_probe.str() + '; PATCH_02 dayTag='
 	details := prefix + patched_day_tag.str() + '; DISCOVERY_03 oldDistance='
-	return error(details + legacy_distance.str())
+	full := details + legacy_distance.str() + '; PATCH_03 distance='
+	return error(full + patched_distance.str())
 }

@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage06_native_v:
-    name: V 0.5.2 — DISCOVERY 03 EXPECTED_RED
+  stage07_native_v:
+    name: V 0.5.2 — PATCH 03 validated GREEN
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -79,40 +79,25 @@ jobs:
           v test ./pastafari/discovery02_expected_red_test.v
       - name: PATCH 02 — boundary, scar and arbitrary precision
         run: v test ./pastafari/patch02_test.v
-      - name: DISCOVERY 03 — historical tag-distance witnesses
+      - name: DISCOVERY 03 — preserve legacy tag-distance witnesses
         run: v test ./pastafari/discovery03_witness_test.v
-      - name: DISCOVERY 03 — compiled expected RED
+      - name: PATCH 03 — formerly RED assertions now GREEN
         shell: bash
         run: |
           set -euo pipefail
           v -check ./pastafari/discovery03_expected_red_test.v
-          set +e
-          v test ./pastafari/discovery03_expected_red_test.v 2>&1 | tee stage06_expected_red.log
-          status=${PIPESTATUS[0]}
-          set -e
-          if [ "$status" -eq 0 ]; then
-            echo '::error::DISCOVERY 03 expected RED before PATCH 03'
-            exit 1
-          fi
-          for witness in \
-            test_discovery03_expected_red_same_day \
-            test_discovery03_expected_red_two_days_after_foundation \
-            test_discovery03_expected_red_cross_foundation \
-            test_discovery03_expected_red_far_cross_foundation; do
-            if ! grep -Fq "$witness" stage06_expected_red.log; then
-              echo "::error::Missing named expected-red assertion: $witness"
-              exit 1
-            fi
-          done
-          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage06_expected_red.log; then
-            echo '::error::Nonzero result lacks an assertion failure'
-            exit 1
-          fi
-          echo 'DISCOVERY 03: four intentional RED cases independently verified'
-      - name: Preserve stage 06 V evidence
+          v test ./pastafari/discovery03_expected_red_test.v
+      - name: PATCH 03 — comparison scar, signed boundaries, big integers
+        run: v test ./pastafari/patch03_test.v
+      - name: Stage 07 — complete native V suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          v test ./pastafari 2>&1 | tee stage07_green.log
+      - name: Preserve stage 07 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage06-red-evidence
-          path: stage06_expected_red.log
+          name: v-amharic-stage07-green-evidence
+          path: stage07_green.log
           if-no-files-found: ignore
