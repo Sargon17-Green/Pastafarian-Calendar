@@ -18,6 +18,7 @@ public final class Stage02EndpointWeavingTests {
         testHigherBoundCountAndUnrank();
         testMinimumYearUnrank();
         testTerminalFoldAndExtendedDomains();
+        testRankUnrankInversion();
         testBoundsAndOwnership();
         System.out.println("STAGE_02_ENDPOINT_WEAVING_PASS checks=" + checks);
     }
@@ -274,6 +275,34 @@ public final class Stage02EndpointWeavingTests {
             throw new IllegalStateException("E_TOO_MANY_PREFIXES");
         }
         return oraclePrefixCount(oracle, total, prefix);
+    }
+
+    private static void testRankUnrankInversion() {
+        for (int[] lengths : new int[][]{
+                {1}, {1, 1, 1}, {2, 2, 2, 2}, {3, 2, 4},
+                {4, 5, 6}, {7, 6, 5, 4}, {4, 4, 4, 4, 4},
+                {84, 84, 84}
+        }) {
+            MonsterWeavingEndpointDP family = new MonsterWeavingEndpointDP(lengths);
+            BigInteger count = family.count();
+            for (BigInteger rank : sampled(count)) {
+                int[] sequence = family.unrank1(rank);
+                eq(rank, family.rank1(sequence), "E_RANK_INVERSE");
+                arr(sequence, family.unrank1(family.rank1(sequence)),
+                    "E_UNRANK_INVERSE");
+            }
+        }
+        MonsterWeavingEndpointDP test = new MonsterWeavingEndpointDP(
+            new int[]{4, 5, 6});
+        fails("E_WEAVE_SEQUENCE", () -> test.rank1(null));
+        fails("E_WEAVE_SEQUENCE", () -> test.rank1(new int[]{1, 2, 3}));
+        int[] invalid = test.unrank1(BigInteger.ONE);
+        invalid[0] = 2;
+        fails("E_WEAVE_SEQUENCE", () -> test.rank1(invalid));
+        MonsterWeavingEndpointDP tooLarge = new MonsterWeavingEndpointDP(
+            new int[]{123, 123, 123, 16});
+        fails("E_WEAVE_RANK_LIMIT", () -> tooLarge.rank1(
+            new int[]{1}));
     }
 
     private static void testBoundsAndOwnership() {

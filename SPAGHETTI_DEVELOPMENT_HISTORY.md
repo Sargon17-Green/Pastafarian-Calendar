@@ -109,3 +109,7 @@ ni'o lo `MonsterCanonicalWeaving` cu benji lo drani ranki fi lo vo moi kabri .e 
 ### lo fanmo masti binomio se jmina
 
 ni'o lo te jicmu be lo fanmo masti cu se namcu fi lo re binomio se cilre namcu .i lo count te jicmu cu na sarcu lo fanmo se ralte judri bliku. lo 1968 detri count .e lo 384 detri unrank cu se cipra. lo drani se jdice po'o fi lo GitHub Actions.
+
+### lo porsi se xruti ranki
+
+ni'o lo `rank1` cu jalge lo lexicographic ranki fi lo se benji masti porsi .i lo `rank1(unrank1(r))` cu se cipra lo pa .e lo fanmo ranki .e lo midju ranki fi lo ro se jimte porsi.

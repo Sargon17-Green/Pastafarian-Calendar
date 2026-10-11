@@ -223,6 +223,34 @@ public final class MonsterWeavingEndpointDP {
         return table.sum();
     }
 
+    public BigInteger rank1(int[] weaving) {
+        if (totalDays > MAX_UNRANK_DAYS) {
+            throw new IllegalArgumentException("E_WEAVE_RANK_LIMIT");
+        }
+        if (weaving == null || weaving.length != totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+        }
+        State current = new State(lengths);
+        BigInteger rank = ONE;
+        for (int requested : weaving) {
+            int chosen = requested - 1;
+            if (chosen < 0 || chosen >= lengths.length ||
+                    !current.canTake(chosen, lengths)) {
+                throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+            }
+            for (int alternative = current.closed; alternative < chosen; alternative++) {
+                if (!current.canTake(alternative, lengths)) continue;
+                State probe = new State(current.remaining);
+                probe.opened = current.opened;
+                probe.closed = current.closed;
+                probe.take(alternative, lengths);
+                rank = rank.add(countSuffix(probe));
+            }
+            current.take(chosen, lengths);
+        }
+        return rank;
+    }
+
     public int[] unrank1(BigInteger rank) {
         if (totalDays > MAX_UNRANK_DAYS) {
             throw new IllegalArgumentException("E_WEAVE_UNRANK_LIMIT");
