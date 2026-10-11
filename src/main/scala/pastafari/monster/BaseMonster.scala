@@ -29,7 +29,9 @@ final case class BaseMonsterContext(
   var priorVisibleInput: Option[Vector[BigInt]] = None,
   var priorIndexInput: Option[Int] = None,
   var priorLagInput: Option[Int] = None,
-  var legacyPriorOutput: Option[BigInt] = None
+  var legacyPriorOutput: Option[BigInt] = None,
+  var patchedPriorOutput: Option[BigInt] = None,
+  var patch05Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -49,6 +51,34 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requirePatch05Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_05_PRIOR" ||
+        ctx.status != "PATCH_05_READY" ||
+        ctx.priorHiddenInput.isEmpty || ctx.priorVisibleInput.isEmpty ||
+        ctx.priorIndexInput.isEmpty || ctx.priorLagInput.isEmpty ||
+        ctx.legacyPriorOutput.isEmpty || ctx.patchedPriorOutput.isEmpty ||
+        !ctx.patch05Applied ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_05_PRIOR", "PATCH_05_PRIOR")) {
+      throw new IllegalStateException("La PATCH 05 non è pronta nella stessa invocazione.")
+    }
+    val hidden = ctx.priorHiddenInput.get
+    val visible = ctx.priorVisibleInput.get
+    val index = ctx.priorIndexInput.get
+    val lag = ctx.priorLagInput.get
+    if (hidden.length != 7 || index < 1 || index > 47 ||
+        visible.length != index - 1 || !Set(1, 3, 7).contains(lag)) {
+      throw new IllegalStateException("Finestra temporale PATCH 05 non valida.")
+    }
+    val expectedPosition = index - lag
+    val expected =
+      if (expectedPosition <= 0) hidden(-expectedPosition)
+      else visible(expectedPosition - 1)
+    if (ctx.patchedPriorOutput.get != expected ||
+        ctx.legacyPriorOutput.get != LegacyPriorAdapter.legacyPrior(hidden, visible, index, lag)) {
+      throw new IllegalStateException("La PATCH 05 non corrisponde alle due letture attese.")
     }
   }
 
@@ -230,7 +260,8 @@ final class BaseMonsterManager {
     new Patch03DistanceHandler(metrics),
     new Discovery04StonesHandler(metrics),
     new Patch04StonesHandler(metrics),
-    new Discovery05PriorHandler(metrics)
+    new Discovery05PriorHandler(metrics),
+    new Patch05PriorHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -442,6 +473,36 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("discovery05", e)
+    }
+  }
+
+  def patch05Prior(
+    calculationDay: BigInt, targetDay: BigInt,
+    hiddenDrops: Vector[BigInt], visibleDropsSoFar: Vector[BigInt],
+    index: Int, lag: Int
+  ): Patch05PriorReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.priorHiddenInput = Some(hiddenDrops)
+    ctx.priorVisibleInput = Some(visibleDropsSoFar)
+    ctx.priorIndexInput = Some(index)
+    ctx.priorLagInput = Some(lag)
+    ctx.phase = "DISCOVERY_05_PRIOR"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery05Ready(ctx)
+      ctx.phase = "PATCH_05_PRIOR"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch05Ready(ctx)
+      Patch05PriorReport(
+        ctx.calculationDay, ctx.targetDay,
+        ctx.priorHiddenInput.get, ctx.priorVisibleInput.get,
+        ctx.priorIndexInput.get, ctx.priorLagInput.get,
+        ctx.legacyPriorOutput.get, ctx.patchedPriorOutput.get,
+        ctx.patch05Applied, ctx.phase, ctx.status,
+        ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("patch05", e)
     }
   }
 

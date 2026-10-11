@@ -157,3 +157,21 @@ input e output locali al contesto, validazione di readiness,
 report congelato e metrica osservativa. Il riferimento
 normativo è importato esclusivamente nei test, non nel
 codice di produzione.
+
+## PATCH 05 — accessor corretto dei precedenti
+
+Il dispatcher chiama prima `Discovery05PriorHandler` e
+poi `Patch05PriorHandler` nello stesso
+`BaseMonsterContext`. `priorPatch` attraversa
+davvero l'adattatore legacy, ma solo per `lag=7`
+sostituisce il risultato con la posizione `index-7`.
+Il valore precedente e il corretto sono entrambi
+presenti nel report immutabile e protetti dal
+validator.
+
+`requirePatch05Ready` controlla in modo indipendente
+gli input della finestra, l'indice, i ritardi,
+la traccia completa e l'uguaglianza di ciascun
+output alla propria formula. La logica non importa
+l'oracolo test-only e non avvia la costruzione
+completa delle gocce dei futuri stadi.

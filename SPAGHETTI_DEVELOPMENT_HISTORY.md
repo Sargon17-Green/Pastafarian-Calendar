@@ -471,3 +471,47 @@ verdi e gli stadi di discovery conservano le firme storiche.
 Una svista di sintassi della lambda Scala nel test BigInt
 è stata corretta dopo la prima esecuzione e prima della
 certificazione finale; l'adattatore legacy non è cambiato.
+
+## Stadio 11 — PATCH 05: la settima goccia ritorna alla posizione giusta
+
+### Che cosa si pensava
+
+La lettura storica del precedente settimo
+prendeva `i-6` per un errore di indice. Sovrascrivere
+`legacyPrior` avrebbe distrutto la prova di DISCOVERY 05.
+
+### Che cosa si è scoperto
+
+Gli indici dei precedenti sono definiti dai ritardi
+`1,3,7`: per il ritardo 7 servono la posizione
+`i-7` e i sette valori nascosti iniziali alle
+posizioni `0,-1,...,-6`. Gli altri due ritardi
+erano già normativi.
+
+### Che cosa è stato aggirato
+
+`Patch05PriorWrapper.priorPatch` chiama l'accessor
+storico e ne preserva il risultato per i ritardi
+1 e 3. Soltanto per il ritardo 7 legge il valore
+normativo, senza modificare l'accessor originale.
+Il manager fa eseguire entrambi gli handler e
+conserva entrambi gli output.
+
+### Perché è normativamente equivalente
+
+Per `lag=1,3`, il helper legacy coincide già
+con il riferimento e il wrapper non lo cambia.
+Per `lag=7` il wrapper consulta l'indice
+`i-7` esplicitamente. Questi sono tutti i
+ritardi ammessi e coprono ogni `i ∈ [1,47]`.
+Le prove di test comparano le letture con le
+finestre normative e con campioni interi enormi.
+
+### Strato di mostruosità aggiunto
+
+Wrapper, handler, fase, due campi nel contesto,
+validator indipendente per i due output, report
+doppio e metrica di patch. Tutte le cicatrici e
+le patch precedenti restano osservabili.
+La certificazione nativa deve essere acquisita
+prima di chiudere lo stadio.

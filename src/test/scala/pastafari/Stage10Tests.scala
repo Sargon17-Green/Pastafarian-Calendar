@@ -157,16 +157,27 @@ object Stage10Tests {
     check("stadio 10 rosso e nessuna patch futura") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=10"),"Stadio")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"Stato")
+      val currentStage = st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      truth(currentStage >= 10,"La DISCOVERY 05 deve essere disponibile")
+      if (currentStage == 10) {
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"Stato")
+      } else {
+        truth(st.contains("STAGE_10_NATIVE_VERIFICATION=PASS_EXPECTED_RED_15_PASS_3_FAIL"),
+          "La firma RED storica deve rimanere certificata")
+      }
       val in=Files.walk(root().resolve("src/main/scala"))
       val content=try in.iterator().asScala.filter(Files.isRegularFile(_))
         .map(p=>new String(Files.readAllBytes(p),StandardCharsets.UTF_8)).mkString("\n")
       finally in.close()
       truth(!content.contains("NormativeOracle"),"Oracolo nel prodotto")
       truth(content.contains("LegacyPriorAdapter.legacyPrior("),"Helper reale")
-      truth(!content.contains("priorPatch"),"PATCH 05 anticipata")
+      if (currentStage < 11)
+        truth(!content.contains("priorPatch"),"PATCH 05 anticipata")
+      else
+        truth(content.contains("priorPatch"),"PATCH 05 deve essere presente")
     }
 
     val counts=NormativeOracle.workCounts(F,F+1)

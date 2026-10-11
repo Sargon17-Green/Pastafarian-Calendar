@@ -346,3 +346,33 @@ Stage10 15 PASS/3 FAIL deliberati.
 Il compile iniziale aveva individuato un errore lessicale
 nella lambda di un test BigInt, corretto prima della
 certificazione senza cambiare il calcolo legacy.
+
+## Stadio 11 — PATCH 05: precedente settimo corretto
+
+`Patch05PriorWrapper.priorPatch` chiama realmente il helper
+`LegacyPriorAdapter.legacyPrior`. Ai ritardi 1 e 3
+restituisce l'uscita legacy senza modificarla; al ritardo
+7 ricava la goccia in `i-7` dalle sette nascoste
+o dalla porzione visibile già disponibile. La cicatrice
+storica `i-6` resta intatta e verificabile da
+`discover05Prior`.
+
+Il percorso `BaseMonsterManager.patch05Prior` attraversa
+`BOOT → DISCOVERY_05_PRIOR → PATCH_05_PRIOR` nella
+stessa invocazione. Il report immutabile conserva sia
+`legacyValue` sia `patchedValue`; il validatore
+confronta autonomamente l'indice normativo e quello
+legacy con i due valori presenti, oltre a traccia,
+ownership e precondizioni.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage11Tests'
+```
+
+Firma attesa: `27 PASS, 0 FAIL`. La suite verifica
+tutti e tre i ritardi sulle 47 finestre sintetiche,
+tutti e tre sui valori reali delle gocce normative,
+i tre casi RED storici, BigInt oltre 16.000 bit,
+512 campioni deterministici, input invalidi,
+isolamento e le quattro patch precedenti. Stage10
+resta volutamente RED. Non è anticipato lo stadio 12.

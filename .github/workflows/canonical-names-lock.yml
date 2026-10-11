@@ -252,3 +252,23 @@ jobs:
           for label in 'goccia 1' 'goccia 7' 'goccia 47'; do
             grep -Fq "FAIL — equivalenza normativa prior7 ${label} — Cicatrice" stage10.log
           done
+
+  native-stage11-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 11 corrected prior7 PATCH 05
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage11Tests' 2>&1 | tee stage11.log
+          grep -Fq 'RISULTATO STADIO 11: 27 PASS, 0 FAIL' stage11.log
+          test "$(grep -Fc 'PASS — ' stage11.log)" -eq 27
+          test "$(grep -Fc 'FAIL — ' stage11.log)" -eq 0
