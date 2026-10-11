@@ -24,6 +24,18 @@ defmodule PastafariCalendarElixirVietnamese.Stage10Discovery05Test do
       normative = oracle(c, t)
       storage = Calendar.hidden_drops_storage_spaghetti(c, t)
 
+      computed =
+        HiddenDropCalculator.calculate(
+          c,
+          t,
+          Ref.day_count(c),
+          Ref.day_count(t),
+          Ref.work_counts(c, t).distance,
+          Ref.build_stones()
+        )
+
+      assert computed == normative
+      assert HiddenDropManager.read(storage, 1) == Map.fetch!(normative, 7)
       assert tuple_size(storage) == 7
       assert storage == List.to_tuple(Enum.map(7..1//-1, &Map.fetch!(normative, &1)))
 
