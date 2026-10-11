@@ -31,8 +31,8 @@ fn test_discovery04_legacy_cascades_new_values_to_last_stone() {
 		big_mul_small(initial.m, 7)), got.b))
 	bitter := calendar_save_spaghetti(big_add(big_add(big_square(initial.m),
 		big_mul_small(initial.r, 11)), got.s))
-	red := calendar_save_spaghetti(big_add(big_add(big_square(initial.r),
-		big_mul_small(got.w, 13)), got.m))
+	red := calendar_save_spaghetti(big_add(big_add(big_square(initial.r), big_mul_small(got.w, 13)),
+		got.m))
 	assert big_eq(got.s, salt)
 	assert big_eq(got.m, bitter)
 	assert big_eq(got.r, red)

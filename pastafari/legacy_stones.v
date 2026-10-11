@@ -2,7 +2,7 @@ module pastafari
 
 // ደረጃ 8 — DISCOVERY 04፤ አምስቱ ድንጋዮች በተከታታይ ይቀየራሉ።
 pub struct Stones {
-pub:
+pub mut:
 	w BigInt
 	b BigInt
 	s BigInt
