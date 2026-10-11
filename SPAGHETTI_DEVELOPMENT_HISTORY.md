@@ -239,3 +239,8 @@ hanesyddol.
 ## Cam 6 — DISCOVERY 03: gwall pellter o dagiau dydd
 
 Cadwyd PATCH 02 ac oldDayTag heb eu newid. Mae `oldDistance` yn cyfrifo `abs(patchedTag(c)-patchedTag(t))` gan alw'r addasydd a'r deunydd lapio cynhyrchu go iawn. Mae `BOOT → DISCOVERY_03` yn cadw'r mewnbynnau a'r canlyniad mewn cyd-destun preifat. O wyth tyst, mae 5 yn `EXPECTED_RED` a 3 yn `MATCH`. Ni chyflwynwyd PATCH 03. Mae'r prawf JVM brodorol llawn yn aros am CI.
+
+
+### Ardystiad brodorol Cam 6 — PASS
+
+Ar commit `fd32a7f795943683275dc19838bfa2b3287c2661`, llwyddodd GitHub Actions (`38178119854`, swydd `114584731224`) i redeg `run-stage06-tests.sh` yn llawn gyda Kotlin 1.9.0 a JDK 21. Cafwyd `STAGE01_PASS_66`, holl lwybrau Camau 2–5, `STAGE06_EXPECTED_RED_5`, `STAGE06_MATCH_3`, `STAGE06_MATRIX_PASS_441`, `STAGE06_BIGINT_INDEPENDENT_PASS_549`, `STAGE06_STRICT_RED_CONFIRMED` a `STAGE06_NATIVE_EXPECTED_RED_COMPLETE`. Mae Cam 6 wedi'i gwblhau; nid yw PATCH 03 wedi'i ddechrau.

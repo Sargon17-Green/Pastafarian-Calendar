@@ -230,3 +230,5 @@ Ni newidiwyd cod y llwybr etifeddol na dechrau Cam 6.
 Mae `LegacyDistanceAdapter.oldDistance(c,t)` yn cyfrifo gwahaniaeth absoliwt y tagiau dydd o PATCH 02. Nid yw'n defnyddio pellter cronolegol cynhwysol. Mae'r nam hanesyddol yn dal yn weithredol: ymhlith wyth tyst canonaidd ceir 5 `EXPECTED_RED` a 3 `MATCH`.
 
 Ceir 441 prawf matrics a 549 prawf `BigInteger` annibynnol, gwarchodion cyd-destun a methiant strict disgwyliedig. Dylid ail-redeg `sh run-stage06-tests.sh` gyda'r holl ffynonellau gwreiddiol. Ni weithredwyd PATCH 03. Arhosir am dystysgrif brodorol cyn newid `LAST_COMPLETED_STAGE=5`.
+
+**Ardystiad Cam 6:** llwyddodd yr holl atchweliadau Camau 1–6 ar GitHub Actions gyda Kotlin 1.9.0/JDK 21 a'r oracl Cam 1 gwreiddiol. Cadarnhawyd pob un o'r 21 marc prawf, gan gynnwys pum gwahaniaeth disgwyliedig a thair cyfatebiaeth. Rhediad: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38178119854 . Mae `LAST_COMPLETED_STAGE=6`. PATCH 03 yw'r cam nesaf.

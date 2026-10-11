@@ -39,3 +39,25 @@ Mae `run-stage06-tests.sh` yn ail-redeg Camau 1–5 a'r oracl gwreiddiol
 cyn Cam 6. Dylai CI gynhyrchu `STAGE06_NATIVE_EXPECTED_RED_COMPLETE`.
 Cyn cael PASS brodorol y gangen, nid yw'r cam hwn wedi'i ardystio:
 `LAST_COMPLETED_STAGE=5` yw'r statws hyd nes y dilysiad llawn.
+
+
+## Ardystiad CI brodorol — COMPLETE
+
+Mae'r adran hon yn disodli'r nodyn PENDING uchod. Defnyddiwyd y
+ffynonellau gwirioneddol o gangen `Kotlin+Cymraeg`, commit
+`fd32a7f795943683275dc19838bfa2b3287c2661`, ynghyd â Kotlin
+1.9.0, JDK 21 a'r oracl gwreiddiol. Gorffennodd swydd GitHub Actions
+`114584731224` (rhediad `38178119854`) â **SUCCESS**.
+
+Gwiriwyd 21 marc uniongyrchol yn log y swydd, gan gynnwys
+`STAGE06_EXPECTED_RED_5`, `STAGE06_MATCH_3`, `STAGE06_MATRIX_PASS_441`,
+`STAGE06_OWNERSHIP_GUARDS_PASS`, `STAGE06_BIGINT_INDEPENDENT_PASS_549`,
+`STAGE06_BIGINT_EXPECTED_RED_546_MATCH_3`,
+`STAGE06_STRICT_RED_CONFIRMED`,
+`STAGE06_NATIVE_EXPECTED_RED_COMPLETE` a holl farciau Camau 1–5.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38178119854
+
+**Dyfarniad:** Cam 6 yn gyflawn fel `EXPECTED_RED`.
+`LAST_COMPLETED_STAGE=6`; mae'r craith yn parhau'n alwadadwy.
+Nid oes PATCH 03, nac unrhyw god o Gam 7, wedi'i gynnwys.
