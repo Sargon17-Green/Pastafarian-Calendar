@@ -44,5 +44,6 @@ t/22_polynomial_weaving.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 tools/profile_weaving.pl
+tools/profile_polynomial.pl
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml

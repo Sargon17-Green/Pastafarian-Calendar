@@ -64,3 +64,9 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 240s perl -Ilib -It/lib tools/profile_weaving.pl --profile extended --seconds 45 --rss-kib 393216
+      - name: 只在明確標記時執行 47 月份獨立多項式計數
+        if: contains(github.event.head_commit.message, '[weaving-polynomial]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 240s perl -Ilib -It/lib tools/profile_polynomial.pl --seconds 90 --rss-kib 262144
