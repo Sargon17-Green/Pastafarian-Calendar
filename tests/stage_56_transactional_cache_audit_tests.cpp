@@ -1,5 +1,7 @@
 #include "pastafari/monster.hpp"
 
+#include <array>
+
 #include <iostream>
 #include <map>
 #include <stdexcept>
@@ -90,6 +92,86 @@ void exigeRepetitionemContextus() {
           "contextus reusus flag cache-rejection vetus retinuit");
     exige(contextus.stage56AppliedCount == 0,
           "cache secundum calidum cicatrices novas simulavit");
+}
+
+
+void exigeMetamorphosinDieiQuaesiti() {
+    // Unum diem calculationis retinemus; dies interrogatus intra annum,
+    // deinde trans utrumque terminum, mutatur. Structura per annum
+    // servata numquam resultatum diei interrogati veteris restituere debet.
+    const Integer c = pastafari::FOUNDATION_DAY_OLD;
+    BaseMonsterManager reusus;
+    const Stage54IntegrationReport initium =
+        reusus.executeFinalIntegrationStage56(c, c);
+    exigeViridem(initium);
+    const auto& annus = initium.targetYear;
+    exige(annus.openGateDay < c && c <= annus.closeGateDay,
+          "dies calculationis extra annum initialem est");
+    exige(annus.closeGateDay - annus.openGateDay >= 252,
+          "annus initialis brevior minimo legali est");
+    exige(reusus.stage56FinalStructureCacheSizeDiagnostic() == 1,
+          "cache initii non unum annum continet");
+
+    const Integer primus = annus.openGateDay + 1;
+    const Integer medius = primus +
+        (annus.closeGateDay - primus) / 2;
+    const Integer ultimus = annus.closeGateDay;
+    const std::array<Integer, 3> intra{{primus, medius, ultimus}};
+    for (const Integer& t : intra) {
+        const Stage54IntegrationReport calidus =
+            reusus.executeFinalIntegrationStage56(c, t);
+        const Stage54IntegrationReport frigidus =
+            BaseMonsterManager{}.executeFinalIntegrationStage56(c, t);
+        exigeViridem(calidus);
+        exigeViridem(frigidus);
+        exige(calidus.guardedCacheHit && !calidus.guardedCacheRejected,
+              "mutatio targetDay intra annum cache validum non adhibuit");
+        exige(!frigidus.guardedCacheHit,
+              "instantia nova cache frigidum non habet");
+        exige(calidus.targetYear.number == annus.number &&
+              frigidus.targetYear.number == annus.number,
+              "mutatio intra annum numerum anni corrupit");
+        exige(eademDies(calidus.result, frigidus.result),
+              "cache calidus in diverso targetDay quinque campos corrupit");
+        exige(reusus.stage56FinalStructureCacheSizeDiagnostic() == 1,
+              "mutatio targetDay intra annum numerum entry cache auxit");
+    }
+
+    // Intervalla sunt (openGate,closeGate]: openGate est ultimus dies
+    // anni praecedentis, closeGate+1 primus dies anni sequentis.
+    const std::array<Integer, 2> extra{{
+        annus.openGateDay, annus.closeGateDay + 1
+    }};
+    const std::array<Integer, 2> anni{{
+        annus.number - 1, annus.number + 1
+    }};
+    for (std::size_t i = 0; i < extra.size(); ++i) {
+        const Stage54IntegrationReport motus =
+            reusus.executeFinalIntegrationStage56(c, extra[i]);
+        const Stage54IntegrationReport novus =
+            BaseMonsterManager{}.executeFinalIntegrationStage56(c, extra[i]);
+        exigeViridem(motus);
+        exigeViridem(novus);
+        exige(!motus.guardedCacheHit && !motus.guardedCacheRejected,
+              "annus vicinus falso cache hit vel fingerprint rejectum tulit");
+        exige(motus.targetYear.number == anni[i] &&
+              novus.targetYear.number == anni[i],
+              "finis anni contigui falsum numerum anni dedit");
+        exige(eademDies(motus.result, novus.result),
+              "annus vicinus cache reuso contra instantiam novam discrepavit");
+        exige(reusus.stage56FinalStructureCacheSizeDiagnostic() == i + 2,
+              "cache annorum vicinorum non singulos entries constituit");
+    }
+
+    const Stage54IntegrationReport regressus =
+        reusus.executeFinalIntegrationStage56(c, c);
+    exigeViridem(regressus);
+    exige(regressus.guardedCacheHit && !regressus.guardedCacheRejected,
+          "reditus ad annum initialem cache calidum non invenit");
+    exige(eademDies(regressus.result, initium.result),
+          "transitus annorum exitum diei initialis corrupit");
+    exige(reusus.stage56FinalStructureCacheSizeDiagnostic() == 3,
+          "reditus ad annum initialem cache vicinorum delevit");
 }
 
 } // namespace
@@ -202,6 +284,7 @@ int main() {
               "API publica et manager Stage 56 discrepant");
 
         exigeRepetitionemContextus();
+        exigeMetamorphosinDieiQuaesiti();
 
         std::cout << "GRADUS56_CACHE_RECOVERY_TRANSIIT: "
                      "cache frigidus/calidus, reiectio fingerprint, "
