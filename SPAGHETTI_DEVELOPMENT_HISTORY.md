@@ -33,3 +33,7 @@ V 0.5.2 (`7647ce1`) በአካባቢው ተጭኖ የደረጃ 1 ኮድ በቀጥ
 የደረጃ 2 መዝጊያ፦ `e23a7af`፤ የV 0.5.2 የተሳካው ታሪካዊ EXPECTED_RED run `38153202920`።
 
 `old_remainder` እና `LegacyRemainderAdapter` አልተጠገኑም። `SavePatch01` የlegacy ውጤት 0 ብቻ ወደ M ይቀይራል፤ የውስጥ ቀሪ ስሌት ይቀራል። የdispatcher አዲስ መስመር እሱን ይጠራል። የተሟላው የቀን ልወጣ አልተገነባም።
+
+### የደረጃ 3 መዝጊያ — GREEN
+
+V 0.5.2 (`7647ce1`) በእውነተኛ GitHub Actions run `38153910238` ሁሉንም የቀድሞ እና አዲስ ፈተናዎች አልፏል። የኖርማቲቭ ኦራክል PASS፣ ታሪካዊ witness PASS፣ በደረጃ 2 RED የነበሩት ሶስት assertions GREEN፣ PATCH 01 ምልክት እና ትላልቅ ኢንቲጀሮች PASS። `v test ./pastafari`: 4/4 PASS። `old_remainder` አልተቀየረም። ደረጃ 3 COMPLETE ነው።

@@ -1,4 +1,4 @@
-# ደረጃ 3/55 — PATCH 01 (የV እውነተኛ ማረጋገጫ ይጠበቃል)
+# ደረጃ 3/55 — PATCH 01 (COMPLETE / GREEN)
 
 የደረጃ 2 እውነተኛ የV `EXPECTED_RED` ማስረጃ በ[run 38153202920](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38153202920) እና commit `7bad2b66cb4ccb8bb25daec79d8600cf547800f8` ተይዟል።
 
@@ -30,4 +30,12 @@ v test ./pastafari
 
 ሁሉም 0 መመለስ አለባቸው። በደረጃ 2 RED የነበሩት ሶስቱ `assert` ሙከራዎች በደረጃ 3 ያለ አካል ለውጥ GREEN መሆን አለባቸው። የ`old_remainder` ታሪካዊ ስህተት አሁንም በwitness ሙከራ ይታያል።
 
-የV 0.5.2 ቀጥተኛ CI፦ `.github/workflows/canonical-names-lock.yml` ውስጥ የ`stage03_native_v` job። ማረጋገጫ ከመሳካቱ በፊት `LAST_COMPLETED_STAGE=2` ይቆያል።
+የV 0.5.2 ቀጥተኛ CI፦ `.github/workflows/canonical-names-lock.yml` ውስጥ የ`stage03_native_v` job። የV እውነተኛ ማረጋገጫ ተሳክቷል፤ `LAST_COMPLETED_STAGE=3` ነው።
+
+## የመዝጊያ ማስረጃ
+
+- የተፈተነው commit፦ `0c38ec151c2d8cfd3cc7a3bfca86e40bdf304fc2`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38153910238
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38153910238/artifacts/11707742043
+- `V 0.5.2 7647ce1`፣ `v fmt -verify` PASS፣ `v test ./pastafari` 4/4 PASS።
+- `old_remainder` በM ዜሮ መመለሱን ቀጥሏል፤ የpatched መግቢያው M ይመልሳል።
