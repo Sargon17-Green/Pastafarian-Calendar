@@ -28,7 +28,7 @@ die "此量測器需使用 Linux /proc\n" if !-r '/proc/self/status';
 $| = 1;
 
 my @cases = ([4,4,4], [8,8,8], [4,123,4], [4,4,4,4]);
-push @cases, [12,12,12], [24,24,24], [123,123,4]
+push @cases, [12,12,12], [24,24,24], [123,123,4], [123,123,6]
     if $profile eq 'extended';
 
 sub rss_kib ($pid) {
