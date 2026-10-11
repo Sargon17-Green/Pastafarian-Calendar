@@ -37,3 +37,7 @@ ni'o lo `MonsterSauceBowls` cu se zbasu fi la Java po'o. ri zbasu lo 720 se cuxn
 ### lo cmicu'a ranki
 
 ni'o lo `MonsterSelectors` cu se zbasu fi la Java po'o gi'e cipra lo barda namcu .e lo pamoi se curmi ranki. lo remoi stadi cu na mulno.
+
+### lo se benji se ponse
+
+ni'o lo `MonsterManager` cu benji lo `MonsterEvaluation` poi stodi. lo `MonsterDispatcher` cu cipra lo cfari se benji datni gi'e benji lo `MonsterSauceBowls` gi'e zbasu lo narmanci pe lo samymo'i jicmu. lo `Stage02IntegrationTests` cu cipra lo se benji se ponse .e lo se jorne se sruri .e lo se cuxna javni. lo remoi stadi cu na mulno.

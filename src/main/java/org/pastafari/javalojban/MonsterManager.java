@@ -17,4 +17,8 @@ public final class MonsterManager {
         MonsterContext context = new MonsterContext(calculationDay, targetDay);
         return errorBoundary.execute(() -> dispatcher.dispatchBootstrap(context));
     }
+    public MonsterEvaluation runSauce(BigInteger calculationDay, BigInteger targetDay) {
+        MonsterContext context = new MonsterContext(calculationDay, targetDay);
+        return errorBoundary.execute(() -> dispatcher.dispatchSauce(context));
+    }
 }

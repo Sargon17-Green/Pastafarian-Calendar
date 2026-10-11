@@ -23,4 +23,18 @@ public final class MonsterDispatcher {
         context.status = "READY";
         return context;
     }
+    public MonsterEvaluation dispatchSauce(MonsterContext context) {
+        dispatchBootstrap(context);
+        context.phase = "SAUCE_EVALUATION";
+        context.status = "RUNNING";
+        context.branchTrace.add("SAUCE_EVALUATION");
+        metrics.bump(context, "sauce.started");
+        MonsterSauceBowls.SauceResult sauce = MonsterSauceBowls.evaluate(
+            context.calculationDay, context.targetDay);
+        context.phase = "SAUCE_COMPLETE";
+        context.status = "COMPLETE";
+        context.branchTrace.add("SAUCE_COMPLETE");
+        metrics.bump(context, "sauce.completed");
+        return new MonsterEvaluation(context, sauce);
+    }
 }

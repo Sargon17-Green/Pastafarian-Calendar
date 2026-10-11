@@ -44,3 +44,5 @@ jobs:
         run: sh run_stage02_bowls_tests.sh
       - name: Stage 02 rank selectors
         run: sh run_stage02_selectors_tests.sh
+      - name: Stage 02 manager integration
+        run: sh run_stage02_integration_tests.sh

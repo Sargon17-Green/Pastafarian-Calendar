@@ -25,7 +25,7 @@ lo mulno cmene liste cu zvati `SOURCE_LANGUAGE_CATALOG.md`.
 ko fi lo stura rinka lo `run_stage01_tests.sh` lo nu se benji. lo drani se jalge cu du:
 
 ```text
-STAGE_01_PASS checks=249
+STAGE_01_PASS checks=<N>
 ```
 
 lo zbasu .e lo cipra cu pilno `javac` .e `java`. no drata samselpla bangu cu se pilno lo te javni .a lo cipra .a lo datni zbasu.
@@ -64,3 +64,9 @@ ni'o lo remoi stadi na se mulno. lo djacu bliku .e lo selcu'a javni cu nitcu lo 
 ni'o lo `MonsterSauceBowls` cu zbasu lo xa djacu bliku .e lo 46 djacu drata porsi .e lo 12 se jarco muvdu rimni. lo `unrankPermutation` cu zbasu lo lexikografike porsi fi lo 720 se cuxna. lo `ask` .e lo `answerAt` cu zbasu lo se cuxna datni.
 
 ni'o lo `Stage02BowlsTests` cu cipra lo ro 720 se cuxna porsi .e lo mulno djacu bliku .e lo selcuxna .e lo detri farvi .e lo se ralte mebyjavni. ko benji `sh run_stage02_bowls_tests.sh`. lo `NormativeOracle` cu vasru lo cipra po'o. lo `LAST_COMPLETED_STAGE` cu du li pa.
+
+## lo remoi stadi — lo se benji be lo barda ciste
+
+ni'o lo `MonsterManager.runSauce` cu benji lo cnino `MonsterContext` fi ro se benji. lo `MonsterDispatcher` cu pilno lo `MonsterSauceBowls` tezu'e lo nu benji lo `MonsterEvaluation` poi stodi gi'e na se galfi lo branch trace .e lo metrics.
+
+ni'o lo `MonsterEvaluation.choose` cu pilno lo `MonsterSelectors` tezu'e lo nu cpacu lo ranki fi lo djacu bliku .e lo seal .e lo se cuxna namcu. lo `Stage02IntegrationTests` cu cipra lo mutce so'i se benji .e lo narmanci jalge .e lo se brivla frica. ko benji `sh run_stage02_integration_tests.sh`. lo remoi stadi cu na se mulno.
