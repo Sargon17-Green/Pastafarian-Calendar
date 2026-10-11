@@ -534,18 +534,7 @@ sub makeCutletPartitionFamily ($G, $K, $required = undef) {
 # 各月份最後出現的次序須遞增。最後一個符號必為最大月份，
 # 移除它的其餘出現位置有 C(N-1,c_m-1) 種；遞迴刪除月份
 # m,m-1,... 即得完全整數的二項係數乘積，無須探索 DP 子樹。
-sub _binomial_exact ($n, $k) {
-    die "二項係數參數超出範圍\n" if $n < 0 || $k < 0 || $k > $n;
-    $k = $n-$k if $k > $n-$k;
-    my $result = Math::BigInt->bone;
-    for my $i (1 .. $k) {
-        $result->bmul($n-$k+$i);
-        $result->bdiv($i);
-    }
-    return $result;
-}
-
-sub _remaining_last_order_count ($remaining, $closed) {
+sub _remaining_last_order_count ($remaining, $closed, $choose) {
     my $m = scalar @$remaining;
     my $total = 0;
     $total += $_ for @$remaining;
@@ -553,7 +542,7 @@ sub _remaining_last_order_count ($remaining, $closed) {
     for (my $j = $m; $j > $closed + 1; $j--) {
         my $size = $remaining->[$j-1];
         die "月份最後出現次序的狀態無效\n" if $size <= 0;
-        $count->bmul(_binomial_exact($total - 1, $size - 1));
+        $count->bmul($choose->($total - 1, $size - 1));
         $total -= $size;
     }
     return $count;
@@ -562,6 +551,26 @@ sub _remaining_last_order_count ($remaining, $closed) {
 sub _weave_counter ($lengths) {
     my $m = scalar @$lengths;
     my %memo;
+
+    # 精確的 Pascal 三角形按需要逐列建立，每一次計數器都有
+    # 自己獨立的儲存區。避免對同一 (n,k) 反覆執行高成本除法，
+    # 但不把跨呼叫的可變快取引入任何規範決策。
+    my @choose_rows = ([Math::BigInt->bone]);
+    my $choose = sub ($n, $k) {
+        die "二項係數參數超出範圍\n" if $n < 0 || $k < 0 || $k > $n;
+        for (my $row = scalar @choose_rows; $row <= $n; $row++) {
+            my $previous = $choose_rows[$row-1];
+            my @values = (Math::BigInt->bone);
+            for my $column (1 .. $row-1) {
+                push @values, $previous->[$column-1]->copy->badd(
+                    $previous->[$column]
+                );
+            }
+            push @values, Math::BigInt->bone;
+            $choose_rows[$row] = \@values;
+        }
+        return $choose_rows[$n][$k]->copy;
+    };
 
     # 在所有月份長度與索引皆可用單一位元組表示時，把 DP 鍵
     # 壓縮成二進位向量。必須保留 opened/closed，因為此計數器
@@ -622,7 +631,7 @@ sub _weave_counter ($lengths) {
                 # 全部月份都已開啟：利用最後出現次序閉式計數。
                 if ($frame->{opened} == $m) {
                     $memo{$key} = _remaining_last_order_count(
-                        $frame->{remaining}, $frame->{closed}
+                        $frame->{remaining}, $frame->{closed}, $choose
                     );
                     pop @stack;
                     next;
