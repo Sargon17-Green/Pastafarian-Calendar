@@ -6,3 +6,4 @@ export * from "./discovery02LegacyDayTag.ts";
 export * from "./patch02DayTag.ts";
 export * from "./discovery03LegacyDistance.ts";
 export * from "./discovery03Handler.ts";
+export * from "./patch03Distance.ts";

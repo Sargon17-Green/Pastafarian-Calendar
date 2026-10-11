@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage06-typescript-marathi:
+  stage07-typescript-marathi:
     if: github.ref == 'refs/heads/TypeScript+मराठी'
     runs-on: ubuntu-latest
     steps:
@@ -37,19 +37,21 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript typecheck
         run: npm run typecheck
-      - name: Stages 01-06 regressions and historical discovery
+      - name: Stages 01-07 regressions and PATCH 03
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee stage06-results.log
-          grep -Fq 'STAGE_01_PASS' stage06-results.log
-          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage06-results.log
-          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage06-results.log
-          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage06-results.log
-          grep -Eq 'STAGE_05_PATCH_02_PASS pairs=[0-9]+ days=[0-9]+ plusOne=[1-9][0-9]* scarChecks=[1-9][0-9]* scarForces=0 mismatches=0' stage06-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_GUARDS_PASS mismatches=4 matches=1' stage06-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_PROPERTIES_PASS pairs=225' stage06-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_LARGE_AND_ISOLATION_PASS' stage06-results.log
+          npm test | tee stage07-results.log
+          grep -Fq 'STAGE_01_PASS' stage07-results.log
+          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage07-results.log
+          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage07-results.log
+          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage07-results.log
+          grep -Eq 'STAGE_05_PATCH_02_PASS pairs=[0-9]+ days=[0-9]+ plusOne=[1-9][0-9]* scarChecks=[1-9][0-9]* scarForces=0 mismatches=0' stage07-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_GUARDS_PASS mismatches=4 matches=1' stage07-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_PROPERTIES_PASS pairs=225' stage07-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_LARGE_AND_ISOLATION_PASS' stage07-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_ERRORS_PASS' stage07-results.log
+          grep -Eq 'STAGE_07_PATCH_03_PASS pairs=[0-9]+ overridden=[1-9][0-9]* preserved=[1-9][0-9]* mismatches=0' stage07-results.log
       - name: Verify intentional expected-red regression
         shell: bash
         run: |
