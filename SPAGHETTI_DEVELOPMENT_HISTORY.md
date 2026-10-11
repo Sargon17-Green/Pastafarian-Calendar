@@ -97,3 +97,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ## ደረጃ 11 — PATCH 05 (እየተረጋገጠ)
 
 የታሪካዊው ስውር ጠብታ ሰንጠረዥ በ`build_hidden_with_backward_storage` ተገላቢጦሽ `hidden7, hidden6, hidden5, hidden4, hidden3, hidden2, hidden1` ሆኖ ይጠበቃል። `old_hidden_slot` እንደነበረው ከአካላዊ k ሰልፍ ያነባል። ማከማቻውን ሳንገለብጥ `HiddenPatch05.by_nearness` ከ`BaseDispatcher.dispatch_hidden_patch05` በኋላ `backward[7-k]` ያነባል። የ`calendar_date_spaghetti` የምርመራ መልዕክት ሁለቱንም `DISCOVERY_05 oldHidden1` እና `PATCH_05 hidden1` ያሳያል። ይህ ገና የመጨረሻ የቀን ልወጣ አይደለም፤ የ`PATCH 06` ወይም የደረጃ 12 ስራ አልተጀመረም።
+
+### የደረጃ 11 መዝጊያ — GREEN
+
+V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017b153641a36bd0e55b2c1deaf82f` ላይ በቀጥታ ተሳክቷል። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` 16/16 PASS። የደረጃ 10 አራቱ የኖርማቲቭ የRED assertions ያለ ለውጥ GREEN ሆነዋል። `old_hidden_slot` ያለውን ታሪካዊ የተሳሳተ ንባብ አልጣለም፤ የሰባቱ ጠብታዎች `hidden7 … hidden1` ማከማቻ አልተገለበጠም። `HiddenPatch05` በV የዜሮ-መሠረት `backward[7-k]` በኩል ሎጂካዊ ቅርበት ይመልሳል። ሁለቱ የGitHub Actions ሥራዎች PASS ናቸው፤ የማስረጃ ቅርስ `11712298133` ተቀምጧል። ደረጃ 11 COMPLETE / GREEN ነው።

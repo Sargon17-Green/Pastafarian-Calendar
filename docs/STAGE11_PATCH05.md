@@ -1,4 +1,4 @@
-# ደረጃ 11/55 — PATCH 05 (የGREEN ማረጋገጫ ይጠበቃል)
+# ደረጃ 11/55 — PATCH 05 (COMPLETE / GREEN)
 
 ## የታሪካዊው የማከማቻ ቅደም ተከተል
 
@@ -40,4 +40,18 @@ v test ./pastafari/patch05_test.v
 v test ./pastafari
 ```
 
-የሙሉ ስብስብ መመዘኛ 16/16 PASS ነው። የV ማረጋገጫ እስኪሳካ `LAST_COMPLETED_STAGE=10` ይቆያል። ደረጃ 12 ወደ ሌላ ውይይት ብቻ ይቀጥላል።
+የሙሉ ስብስብ መመዘኛ 16/16 PASS ነው። የV ማረጋገጫ PASS ነው፤ `LAST_COMPLETED_STAGE=11` ሆኗል። ደረጃ 12 ወደ ሌላ ውይይት ብቻ ይቀጥላል።
+
+## የV የመጨረሻ ማረጋገጫ
+
+- የተፈተነው commit፦ `a48d1c7920017b153641a36bd0e55b2c1deaf82f`
+- የGitHub Actions ውጤት፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38166616826
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38166616826/artifacts/11712298133
+- የተጠቀመው ኮምፓይለር፦ `V 0.5.2 7647ce1`።
+- `v fmt -verify ./pastafari`: PASS።
+- `v test ./pastafari`: **16/16 PASS**።
+- `discovery05_expected_red_test.v` ያሉት አራት RED assertions እንደነበሩ ተጠብቀው GREEN ሆነዋል።
+- `old_hidden_slot` እና የተገላቢጦሽ ማከማቻ አልተለወጡም።
+- ደረጃ 12 አልተጀመረም።
+
+**ደረጃ 11 COMPLETE / GREEN።**

@@ -69,4 +69,4 @@ v fmt -verify ./pastafari
 
 ## ደረጃ 11 — PATCH 05
 
-ሰባቱ የhidden ጠብታዎች በታሪካዊው `hidden7 … hidden1` የማከማቻ ቅደም ተከተል እንዳሉ ይቀራሉ። `old_hidden_slot(backward,k)` የቀድሞውን `backward[k-1]` ስህተት ይይዛል። አዲሱ `HiddenPatch05` የቅርበት መጠይቅን በአንድ-መሠረት `8-k`፣ በV ዜሮ-መሠረት `7-k` ወደ የታሪክ ማከማቻ ቦታ ይለውጣል። የproduction `calendar_hidden_by_nearness` ከdispatcher በኩል ይሄዳል፣ የቀድሞ አራት RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። `LAST_COMPLETED_STAGE=10` የV CI ማረጋገጫ እስኪጠናቀቅ ይቆያል። ዝርዝር፦ `docs/STAGE11_PATCH05.md`።
+ሰባቱ የhidden ጠብታዎች በታሪካዊው `hidden7 … hidden1` የማከማቻ ቅደም ተከተል እንዳሉ ይቀራሉ። `old_hidden_slot(backward,k)` የቀድሞውን `backward[k-1]` ስህተት ይይዛል። አዲሱ `HiddenPatch05` የቅርበት መጠይቅን በአንድ-መሠረት `8-k`፣ በV ዜሮ-መሠረት `7-k` ወደ የታሪክ ማከማቻ ቦታ ይለውጣል። የproduction `calendar_hidden_by_nearness` ከdispatcher በኩል ይሄዳል፣ የቀድሞ አራት RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` ተረጋግጧል፤ `v fmt -verify` PASS፣ `v test ./pastafari` 16/16 PASS። የደረጃ 10 አራት RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=11` ነው። ዝርዝር፦ `docs/STAGE11_PATCH05.md`።
