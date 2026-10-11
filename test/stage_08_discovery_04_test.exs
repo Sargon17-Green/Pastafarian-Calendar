@@ -1,6 +1,5 @@
 defmodule PastafariCalendarElixirVietnamese.Stage08Discovery04Test do
   use ExUnit.Case, async: true
-  import Bitwise
 
   alias PastafariCalendarElixirVietnamese, as: Calendar
   alias PastafariCalendarElixirVietnamese.Monster.{LegacyStoneMutation, StoneManager}
