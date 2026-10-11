@@ -40,6 +40,19 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'legacy.save.calls');
             return $result;
         });
+        $this->dispatcher->register('SAVE_PATCH_01', function(BootstrapContext $context): BigInt {
+            $operand = $context->semanticState['operand'] ?? null;
+            if (!$operand instanceof BigInt) {
+                throw new \RuntimeException('SAVE_PATCH_01_OPERAND');
+            }
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyRemainder();
+            $patch = new \Pastafari\Stage01\Patches\SavePatch01($legacy);
+            $result = $patch->savePatch($operand);
+            $context->semanticState['savePatchResult'] = $result;
+            $context->status = 'PATCH_01_RETURNED';
+            $this->metrics->bump($context, 'save.patch01.calls');
+            return $result;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -52,13 +65,13 @@ final class BootstrapKernel
         );
     }
     /**
-     * Laluan pengeluaran sementara yang sengaja mendedahkan baki lama.
+     * Laluan sah menggunakan pembetul di atas baki legacy yang masih tersedia.
      * Medan hari sifar dalam konteks tidak dibaca oleh operasi aritmetik ini.
      */
     public function save(BigInt $value): BigInt
     {
         $context = new BootstrapContext(0, 0);
-        $context->phase = 'SAVE_LEGACY';
+        $context->phase = 'SAVE_PATCH_01';
         $context->semanticState['operand'] = $value;
         return $this->boundary->run(
             $context,

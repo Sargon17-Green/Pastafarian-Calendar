@@ -4,11 +4,10 @@ declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
 use Pastafari\Stage01\BigInt;
-use Pastafari\Stage01\BootstrapKernel;
 use Pastafari\Stage01\Legacy\LegacyRemainder;
 use Pastafari\Stage01\Oracle\NormativeMath;
 
-// Ujian ini mesti keluar dengan kod 1 hanya apabila penyimpangan yang dijangka berlaku.
+// Arkib ujian kegagalan asal: baki legacy kekal salah walaupun laluan pengeluaran telah ditampal.
 $m = NormativeMath::m();
 $cases = [
     'M' => $m,
@@ -17,7 +16,6 @@ $cases = [
     'M+1' => $m->add(BigInt::one()),
 ];
 
-$kernel = new BootstrapKernel();
 $rawLegacy = new LegacyRemainder();
 $divergences = 0;
 $matching = 0;
@@ -25,7 +23,7 @@ $unexpected = 0;
 
 foreach ($cases as $name => $operand) {
     $expected = NormativeMath::save($operand);
-    $actual = $kernel->save($operand);
+    $actual = $rawLegacy->calculateWithoutPatch($operand);
     $raw = $rawLegacy->oldRemainder($operand);
     $mustDiffer = $name !== 'M+1';
     $same = $actual->equals($expected);

@@ -35,17 +35,14 @@ if (!$valid) {
     fwrite(STDERR, "GAGAL: keadaan merah tidak memenuhi kontrak penemuan pertama\n");
     exit(1);
 }
-// Kod tampalan sejarah yang belum dibenarkan tidak boleh berada dalam pengeluaran.
-$iterator = new RecursiveIteratorIterator(
-    new RecursiveDirectoryIterator(dirname(__DIR__) . '/src', FilesystemIterator::SKIP_DOTS)
-);
-foreach ($iterator as $file) {
-    if (strtolower($file->getExtension()) !== 'php') {
-        continue;
-    }
-    if (str_contains((string)file_get_contents($file->getPathname()), 'savePatch')) {
-        fwrite(STDERR, "GAGAL: tampalan masa hadapan hadir\n");
-        exit(1);
-    }
+// Semak bahawa kecacatan lama masih wujud sebagai bukti sejarah.
+$fail = false;
+$legacySource = dirname(__DIR__) . '/src/Legacy/LegacyRemainder.php';
+if (!is_file($legacySource) || !str_contains((string)file_get_contents($legacySource), 'function oldRemainder(')) {
+    $fail = true;
 }
-echo "LULUS kontrak merah yang dijangka; tampalan masa hadapan tiada\n";
+if ($fail) {
+    fwrite(STDERR, "GAGAL: laluan sejarah sudah hilang\n");
+    exit(1);
+}
+echo "LULUS kontrak penemuan lama masih merah dalam legacy sahaja\n";
