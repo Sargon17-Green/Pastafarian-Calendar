@@ -226,6 +226,78 @@ void exigeProiectionesFinium(
               << " ANNI=" << anni << " CASUS=" << casus << '\n';
 }
 
+
+void exigeOrdinemInvocationumNeutrum(
+    const std::vector<std::pair<Big, Big>>& casus,
+    const std::map<std::pair<Big, Big>, Exspectatio>& references) {
+    // Eaedem interrogationes in ordine recto et inverso a duobus
+    // manageribus independentibus: cache annuum quaestionum priorum
+    // ordinem in valores canonicos inflectere numquam licet.
+    exige(casus.size() == 7, "ordo metamorphicus VII casus requirit");
+    BaseMonsterManager rectus;
+    BaseMonsterManager inversus;
+    std::vector<SpaghettiDateFive> testimonia(casus.size());
+
+    const auto verifica = [&](BaseMonsterManager& m,
+                             const std::pair<Big, Big>& par,
+                             std::size_t index,
+                             const std::string& titulus) {
+        const Exspectatio* expected = nullptr;
+        for (const auto& [key, v] : references) {
+            if (key.first == par.first &&
+                v.annus.openGateDay < par.second &&
+                par.second <= v.annus.closeGateDay) {
+                exige(expected == nullptr,
+                      titulus + ": multiplex annus pro eodem die");
+                expected = &v;
+            }
+        }
+        exige(expected != nullptr, titulus + ": reference non inventa");
+        const auto actual = m.executeFinalIntegrationStage56(
+            par.first, par.second);
+        exige(actual.ready && actual.status == "GREEN",
+              titulus + ": manager non viridis");
+        comparaStructuram(actual, *expected, titulus);
+        comparaDiem(actual.result,
+                    diesExReference(*expected, par.second), titulus);
+        comparaDiem(actual.result, testimonia.at(index), titulus);
+    };
+
+    // Primum recte: testimonia definimus a reference prius independenti.
+    for (std::size_t i = 0; i < casus.size(); ++i) {
+        const auto& par = casus[i];
+        const Exspectatio* expected = nullptr;
+        for (const auto& [key, v] : references) {
+            if (key.first == par.first &&
+                v.annus.openGateDay < par.second &&
+                par.second <= v.annus.closeGateDay) {
+                exige(expected == nullptr,
+                      "recto ordine plures annos eadem die invenit");
+                expected = &v;
+            }
+        }
+        exige(expected != nullptr, "recto ordine reference deest");
+        testimonia[i] = diesExReference(*expected, par.second);
+        verifica(rectus, par, i, "ordo rectus frigidus");
+    }
+    for (std::size_t i = casus.size(); i-- > 0;) {
+        verifica(inversus, casus[i], i, "ordo inversus frigidus");
+    }
+
+    // Nunc idem manager, sed ordine contrario calidus/reiectus.
+    for (std::size_t i = casus.size(); i-- > 0;) {
+        verifica(rectus, casus[i], i, "ordo rectus conversus");
+    }
+    for (std::size_t i = 0; i < casus.size(); ++i) {
+        verifica(inversus, casus[i], i, "ordo inversus conversus");
+    }
+    exige(rectus.stage56FinalStructureCacheSizeDiagnostic() == 3 &&
+          inversus.stage56FinalStructureCacheSizeDiagnostic() == 3,
+          "cache non tria numeri annorum continet post permutationem");
+    std::cout << "GRADUS56_ORDO_INVOCATIONUM=28/28_PASS"
+              << " CONTEXTUS=2 CACHE_ANNI=3\n";
+}
+
 } // namespace
 
 int main() {
@@ -276,6 +348,7 @@ int main() {
         exige(numerus == 7 && referencePerAnnum.size() == 5,
               "coverage septem casuum et quinque structuram defecit");
         exigeProiectionesFinium(manager, referencePerAnnum);
+        exigeOrdinemInvocationumNeutrum(casus, referencePerAnnum);
         std::cout << "GRADUS56_STRUCTURA_REFERENCE=7/7_PASS"
                   << " STRUCTURAE=5/5_PASS\n";
         return 0;
