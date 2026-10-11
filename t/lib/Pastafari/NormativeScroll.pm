@@ -534,10 +534,29 @@ sub _weave_counter ($lengths) {
     my $m = scalar @$lengths;
     my %memo;
 
+    # 在所有月份長度與索引皆可用單一位元組表示時，把 DP 鍵
+    # 壓縮成二進位向量。必須保留 opened/closed，因為此計數器
+    # 亦可從合法路徑推導，但明確保留可避免更改狀態身分的契約。
+    # 大於 255 日的非規範測試輸入沿用無損文字表示，絕不截斷。
+    my $compact = $m <= 255;
+    for my $length (@$lengths) {
+        if (!defined($length) || "$length" !~ /\A[0-9]+\z/ || $length > 255) {
+            $compact = 0;
+            last;
+        }
+    }
+    my $key_of = $compact
+        ? sub ($remaining, $opened, $closed) {
+            return pack('C*', @$remaining, $opened, $closed);
+        }
+        : sub ($remaining, $opened, $closed) {
+            return join(',', @$remaining) . "|$opened|$closed";
+        };
+
     # 明確的堆疊取代自我呼叫，既避免過深的 Perl 呼叫堆疊，
     # 也避免以閉包捕捉自己而形成無法釋放的參照循環。
     my $count = sub ($remaining, $opened, $closed) {
-        my $root_key = join(',', @$remaining) . "|$opened|$closed";
+        my $root_key = $key_of->($remaining, $opened, $closed);
         return $memo{$root_key}->copy if exists $memo{$root_key};
 
         my @stack = ({
@@ -590,7 +609,7 @@ sub _weave_counter ($lengths) {
                         remaining => \@next,
                         opened => $nextOpened,
                         closed => $nextClosed,
-                        key => join(',', @next) . "|$nextOpened|$nextClosed",
+                        key => $key_of->(\@next, $nextOpened, $nextClosed),
                         children => undef,
                         nextChild => 0,
                     };

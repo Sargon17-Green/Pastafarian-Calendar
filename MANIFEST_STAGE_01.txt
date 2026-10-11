@@ -31,6 +31,7 @@ t/12_gate_cache_order.t
 t/13_weaving_scale.t
 t/14_malformed_ranks.t
 t/15_three_month_closed_form.t
+t/16_packed_weaving_cache.t
 t/lib/Pastafari/NormativeScroll.pm
 tools/profile_weaving.pl
 CANONICAL_NAMES_LOCK.sha256
