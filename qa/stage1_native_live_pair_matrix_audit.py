@@ -11,6 +11,11 @@ import sys
 from pathlib import Path
 
 PIN = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+# Pinned SHA-256 of the six valid and six invalid independent Native reference
+# outputs captured in the existing Stage-1 live-pair evidence. This detects
+# coordinated edits to expected_by_label and every matching record. It is an
+# evidence-integrity pin, NOT a substitute for a fresh independent Native run.
+NATIVE_REFERENCE_SHA256 = "fe6fe26b32bcda6f2744df0b99f24ba8824f1f4a7288dff0f01f0a35d4860170"
 PAIRS = [
     ("v0", "v1"), ("v2", "v3"), ("v4", "v5"),
     ("v0", "i0"), ("v2", "i3"), ("v4", "i4"),
@@ -53,6 +58,13 @@ def verify(data):
         if label[0] == "i":
             need(values == ["-1"] * 7,
                  "rejected input oracle contains a non-sentinel")
+    # Stable JSON serialization, independent of dict insertion order and
+    # whitespace in the report. Pin the independent Native oracle witness;
+    # AB/BA consistency alone does not prevent coordinated valid-case forgery.
+    native_reference = json.dumps(e, sort_keys=True, separators=(",", ":"),
+                                  ensure_ascii=True).encode("ascii")
+    need(hashlib.sha256(native_reference).hexdigest() == NATIVE_REFERENCE_SHA256,
+         "independent Native reference outputs differ from pinned evidence")
     rows = data.get("records")
     need(isinstance(rows, list) and len(rows) == 24,
          "native live-pair execution evidence incomplete")
@@ -154,6 +166,23 @@ def main(folder):
                  d["records"][ix]["right"] == "i0",
                  "coordinated peer-dependence control lost its input pair")
             d["records"][ix]["left_steps"] += 1
+    def forge_coordinated_valid_reference(d):
+        # Forge both the independent reference and *every* matching Native
+        # pair record for v0, preserving AB/BA and all pairwise comparisons.
+        # Without the reference digest pin this report is incorrectly accepted.
+        label = "v0"
+        original = d["expected_by_label"][label][0]
+        forged = str(int(original) + 1)
+        d["expected_by_label"][label][0] = forged
+        hits = 0
+        for row in d["records"]:
+            for side in ("left", "right"):
+                if row[side] == label:
+                    need(row[side + "_output"][0] == original,
+                         "coordinated reference control lost its original output")
+                    row[side + "_output"][0] = forged
+                    hits += 1
+        need(hits == 4, "coordinated reference control lost expected 4 records")
     def forge_pair_overlap(d):
         for ix in (0, 12):
             d["records"][ix]["overlap_rounds"] -= 1
@@ -178,6 +207,7 @@ def main(folder):
         reject("peer_overlap_both_schedules", forge_pair_overlap),
         reject("peer_snapshots_both_schedules", forge_pair_snapshots),
         reject("forged_invalid_oracle", lambda d: d["expected_by_label"]["i0"].__setitem__(0, "0")),
+        reject("coordinated_valid_reference_all_records", forge_coordinated_valid_reference),
         reject("unowned_memory_api", lambda d: d["records"][0].__setitem__("every_api_read_write_owned_by_active_program", False)),
         reject("forged_memory_put", lambda d: d["records"][0].__setitem__("left_memory_puts", 0)),
         reject("float_direct_p_count", lambda d: d["records"][0].__setitem__("left_direct_p_steps", float(d["records"][0]["left_direct_p_steps"]))),
@@ -187,14 +217,14 @@ def main(folder):
         reject("memory_reads_nondeterministic", lambda d: d["records"][12].__setitem__("left_memory_gets", d["records"][12]["left_memory_gets"] + 1)),
         reject("premature_completion", lambda d: d.__setitem__("stage1_final_acceptance", True)),
     ]
-    need(len(attacks) == 25, "missing adversarial audit cases")
+    need(len(attacks) == 26, "missing adversarial audit cases")
     report = {"schema": "befunge-stage1-live-pair-matrix-audit-v2",
               "source_git_blob": PIN, "verified": outcome,
               "negative_reports_rejected": attacks,
               "stage1_final_acceptance": False}
     output = Path(folder) / "native_live_pair_matrix_audit.json"
     output.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    print("NATIVE_LIVE_PAIR_MATRIX_25_HOSTILE_REPORTS_REJECTED_PASS")
+    print("NATIVE_LIVE_PAIR_MATRIX_26_HOSTILE_REPORTS_REJECTED_PASS")
 
 if __name__ == "__main__":
     need(len(sys.argv) == 2, "usage: native live-pair evidence folder")
