@@ -101,3 +101,7 @@ ni'o lo 984 detri be lo bi masti poi ro masti cu ralte 123 detri cu se cipra fi 
 ### lo nanca be li 252 detri
 
 ni'o lo minli nanca be li 252 detri cu se cipra fi lo `unrank1` .e lo `MonsterMonthIndex`. lo 1024 detri se namcu jimte cu drani fi lo run `38158983131`. lo `unrank1` cu ca'o se galfi fi lo 256 detri jimte.
+
+### lo vo moi kabri .e lo 32 moi tcita te cipra
+
+ni'o lo `MonsterCanonicalWeaving` cu benji lo drani ranki fi lo vo moi kabri .e lo 32 moi tcita. lo `NormativeOracle` cu srana lo te cipra .i lo GitHub Actions run `38159401829` cu se cipra se snada fi lo rexa cipra pagbu. lo 256 detri jimte cu za'o te cinmo .i lo 5778 detri te cipra na za'o mulno.
