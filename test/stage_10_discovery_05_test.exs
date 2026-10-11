@@ -35,7 +35,9 @@ defmodule PastafariCalendarElixirVietnamese.Stage10Discovery05Test do
         )
 
       assert computed == normative
-      assert HiddenDropManager.read(storage, 1) == Map.fetch!(normative, 7)
+      assert HiddenDropManager.read(storage, 1) == Map.fetch!(normative, 1)
+      assert LegacyHiddenStorage.read_as_if_forward(storage, 1) ==
+               Map.fetch!(normative, 7)
       assert tuple_size(storage) == 7
       assert storage == List.to_tuple(Enum.map(7..1//-1, &Map.fetch!(normative, &1)))
 
@@ -144,11 +146,12 @@ defmodule PastafariCalendarElixirVietnamese.Stage10Discovery05Test do
     end
   end
 
-  test "đường mã nguồn vẫn giữ storage đảo và chưa có bản vá truy cập 05" do
+  test "đường mã nguồn giữ storage đảo và thực thi bản vá truy cập 05" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     calculator = Path.join(root, "hidden_drop_calculator.ex") |> File.read!()
     legacy = Path.join(root, "legacy_hidden_storage.ex") |> File.read!()
     manager = Path.join(root, "hidden_drop_manager.ex") |> File.read!()
+    patch = Path.join(root, "hidden_storage_patch.ex") |> File.read!()
     dispatcher = Path.join(root, "dispatcher.ex") |> File.read!()
 
     assert calculator =~ "Enum.reduce(1..7, %{}, fn hidden_number, acc ->"
@@ -156,11 +159,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage10Discovery05Test do
     assert legacy =~ "7..1//-1"
     assert legacy =~ "elem(storage, number - 1)"
     assert manager =~ "LegacyHiddenStorage.store_reversed()"
-    assert manager =~ "LegacyHiddenStorage.read_as_if_forward(storage, number)"
+    assert manager =~ "HiddenStoragePatch.read_hidden(storage, number)"
+    assert patch =~ "legacy_position = 8 - number"
+    assert patch =~ "LegacyHiddenStorage.read_as_if_forward(storage, legacy_position)"
     assert dispatcher =~ "HiddenDropManager.build_storage("
     refute calculator =~ "NormativeReference"
     refute manager =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "hidden_storage_patch.ex"))
+    assert File.exists?(Path.join(root, "hidden_storage_patch.ex"))
   end
 
   test "hồi quy các bản vá cũ và ranh giới lịch chưa tích hợp" do

@@ -277,3 +277,30 @@ Kiểm thử riêng xác nhận `HiddenDropCalculator` tạo cả bảy giá tr�
 alias chưa dùng; không sửa mã sản xuất hoặc kỳ vọng chuẩn.
 Kết quả cuối không có cảnh báo biên dịch, khóa tên chuẩn PASS.
 Giai đoạn 10 khép EXPECTED_RED; chưa có lớp vá 05.
+
+## Giai đoạn 11 — Bản vá 05: sửa địa chỉ đọc giọt ẩn
+
+**Lỗi không bị xóa:** `LegacyHiddenStorage.store_reversed`
+vẫn lưu `hidden7` ở ô 1 và `hidden1` ở ô 7; hàm cũ
+`read_as_if_forward(storage,k)` vẫn đọc trực tiếp ô `k`,
+nên sai với sáu tên giọt ngoài giọt thứ tư.
+
+**Cách đi vòng:** Tầng `HiddenStoragePatch.read_hidden`
+dùng `legacy_position = 8-k` để định vị giọt số k,
+sau đó gọi lại `LegacyHiddenStorage.read_as_if_forward`
+ở vị trí đã ánh xạ. Nhờ đó không cần và không được
+đảo tuple đang lưu. Bộ tính `HiddenDropCalculator`
+không thay đổi và tiếp tục dùng các bản vá trước.
+
+**Lý do đúng:** Phần tử ở vị trí p của kho đảo tương ứng
+với giọt số `8-p`. Khi thay `p=8-k`, phần tử đó
+tương ứng đúng với giọt k. Đẳng thức đúng cho cả bảy
+giá trị, kể cả giọt 4 có địa chỉ đối xứng.
+
+**Kiểm thử:** Giữ nguyên cả bốn hồi quy chuẩn của
+phát hiện 05; sửa riêng các khẳng định dây nối từng
+đòi kết quả công khai sai. Bổ sung mười bài kiểm thử
+để chứng minh kho vẫn đảo, hàm cũ vẫn sai, truy cập
+qua lớp vá đúng, không thay đổi trạng thái giữa các lần gọi,
+và bảo toàn các bản vá 01–04. Không bắt đầu phát hiện 06
+của giai đoạn 12.

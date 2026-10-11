@@ -301,3 +301,25 @@ Giai đoạn 10/55 khép ở `EXPECTED_RED` đã kiểm chứng.
 Giai đoạn 11/55 là `PATCH 05`: giữ tuple đảo ngược,
 thực hiện mọi lần đọc hidden k qua địa chỉ `8-k`;
 không đảo lại tuple hoặc xóa cách lưu cũ.
+
+## Giai đoạn 11 — Bản vá 05 cho kho bảy giọt ẩn
+
+`LegacyHiddenStorage` tiếp tục cất giá trị theo thứ tự
+`hidden7, hidden6, ..., hidden1`; cả hai hàm
+`store_reversed` và `read_as_if_forward` đều giữ nguyên.
+
+`HiddenStoragePatch.read_hidden(storage,k)` chỉ chuyển địa chỉ
+đọc sang vị trí `8-k` và gọi chính hàm lịch sử
+`LegacyHiddenStorage.read_as_if_forward(storage, 8-k)`.
+Không đảo tuple, không thay vị trí các giá trị đang lưu, không
+sử dụng bộ tham chiếu chuẩn trong đường sản xuất.
+`HiddenDropManager.read` đi qua lớp vá, do đó
+`hidden_drop_spaghetti` nhận đúng giọt được yêu cầu.
+
+Bốn hồi quy chuẩn ở phát hiện 05 không thay đổi kỳ vọng và
+phải chuyển sang đạt. Kiểm thử nối dây giữ hai bằng chứng riêng:
+kho và hàm đọc legacy còn sai, trong khi lớp truy cập công khai
+đã đúng. Mười bài kiểm thử mới so sánh bảy giọt qua nhiều cặp
+ngày, số nguyên tùy ý, kho độc lập trong context, đồng thời,
+kiểm tra nguồn và tính bất biến của các bản vá trước.
+Chưa thêm cơ chế lấy giọt lịch sử của giai đoạn 12.

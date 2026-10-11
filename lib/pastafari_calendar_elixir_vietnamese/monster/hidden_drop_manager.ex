@@ -1,13 +1,14 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.HiddenDropManager do
   @moduledoc """
-  Tạo các giọt ẩn đúng về số học, nhưng lưu và đọc bằng cách cũ sai.
+  Bộ quản lý giọt ẩn giữ kho lịch sử đảo ngược qua bản vá 05.
 
-  Không đảo lại tuple và không thêm hàm truy cập vá 05 trong giai đoạn
-  khám phá này. Trạng thái tính riêng cho mỗi lời gọi.
+  Tính toán và cách lưu của phát hiện 05 không thay đổi.
+  Chỉ mọi lần đọc giọt theo số k mới đi qua ánh xạ địa chỉ 8-k.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     HiddenDropCalculator,
+    HiddenStoragePatch,
     LegacyHiddenStorage
   }
 
@@ -23,5 +24,5 @@ defmodule PastafariCalendarElixirVietnamese.Monster.HiddenDropManager do
     |> LegacyHiddenStorage.store_reversed()
   end
 
-  def read(storage, number), do: LegacyHiddenStorage.read_as_if_forward(storage, number)
+  def read(storage, number), do: HiddenStoragePatch.read_hidden(storage, number)
 end

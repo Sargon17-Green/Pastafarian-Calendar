@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=10
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=11
+CURRENT_KIND=PATCH
 CURRENT_PATCH=05
 LAST_COMPLETED_STAGE=10
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-04; thêm HiddenDropCalculator tính đúng 7 giọt ẩn, LegacyHiddenStorage lưu tuple từ hidden7 đến hidden1; đường truy cập trực tiếp theo số giọt cố ý sai.
+MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyHiddenStorage đảo từ hidden7 đến hidden1; HiddenStoragePatch sửa vị trí đọc 8-k qua hàm legacy, không đảo kho; giữ các bản vá 01-04 và ngữ cảnh riêng.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_10_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_11_PENDING
+GIT_HISTORY_MUTATED=STAGE_11_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=101
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=STAGE_11_PENDING
+CI_FAILURES=STAGE_11_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -161,3 +161,12 @@ Mã sản xuất không đổi, bốn kỳ vọng chuẩn không đổi.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161317725
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38161317727
 Trạng thái đóng: EXPECTED_RED. Tiếp theo là giai đoạn 11, PATCH 05.
+
+Giai đoạn 11 thêm HiddenStoragePatch đọc hidden k tại vị trí 8-k
+trong tuple đảo lịch sử. Mọi lần đọc công khai đều đi qua lớp vá;
+LegacyHiddenStorage.store_reversed và read_as_if_forward không đổi.
+Bốn hồi quy chuẩn của giai đoạn 10 giữ nguyên kỳ vọng.
+Các kiểm thử dây nối cũ được sửa để kiểm tra legacy vẫn sai,
+còn đường công khai đã đúng. Mười bài kiểm thử độc lập được thêm.
+Dự kiến 111 kiểm thử, 0 lỗi; LAST_COMPLETED_STAGE vẫn 10
+cho đến khi cả CI và khóa tên chuẩn xác nhận GREEN.
