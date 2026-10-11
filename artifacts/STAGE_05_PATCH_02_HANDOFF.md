@@ -28,3 +28,7 @@ Kekalkan pengiraan lama `oldDayTag(day) = 2 * abs(day - FOUNDATION)` dalam `Lega
 Semua ujian sebelum ini perlu lulus, bukti merah legacy kekal disahkan oleh pembalut hijau, dan `tests/stage05_patch02_tests.php` mesti hijau. Penjanaan fixture mestilah tidak mengubah fail. Tiada kod pembetulan Stage 6 dibenarkan.
 
 **Tahap seterusnya:** DISCOVERY 03, Stage 6 — belum dimulakan.
+
+## Bukti daripada larian CI pertama
+
+Run `38155098345` berjaya bagi `verify` dan `audit_php_bahasa_melayu`. Ringkasan sebenar ujian `Stage 5 PATCH 02`: `kes=4618 sebelum=2305 pada_atau_selepas=2311 asas=1 tepi=2`. Semua 15 ujian Stage 1 dan 1,014+8 ujian pembahagian lulus, dan bukti kegagalan legacy kedua-dua tampalan kekal menurut kontrak. Pembetulan selepas larian ini hanya menambah rekod audit dan membetulkan satu perkataan komen kepada Bahasa Melayu; semantik pengeluaran, oracle dan ujian kes tidak berubah.

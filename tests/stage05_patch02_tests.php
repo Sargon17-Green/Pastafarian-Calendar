@@ -93,7 +93,7 @@ sahHari($legacy->oldDayTag($foundation + 1)->equals(BigInt::fromInt(2)), 'PARUT_
 sahHari($scarTriggered === 1, 'JALUR_ASAS_TIDAK_TERPANGGIL');
 sahHari($before > 2000 && $onOrAfter > 2000, 'LIPUTAN_KEDUA_SISI');
 
-// Keadaan terdahulu, including penyelamat SAVE, tidak terjejas oleh patch hari.
+// Keadaan terdahulu, termasuk fungsi penyelamat SAVE, tidak terjejas oleh patch hari.
 $m = NormativeMath::m();
 foreach ([$m, $m->mulSmall(2), $m->add(BigInt::one()), BigInt::fromInt(-1)] as $x) {
     sahHari($kernel->save($x)->equals(NormativeMath::save($x)), 'SAVE_KEKAL');
