@@ -3,7 +3,9 @@ module pastafari
 fn test_discovery03_historical_distance_is_zero_on_identical_days() {
 	foundation := big_from_i64(-15_055_671)
 	assert old_distance(foundation, foundation).str() == '0'
-	assert old_distance(foundation, foundation).str() == '0'
+	dispatcher := new_base_dispatcher()
+	legacy := dispatcher.dispatch_legacy_distance(foundation, foundation)
+	assert legacy.str() == '0'
 }
 
 fn test_discovery03_historical_distance_uses_tag_gap_not_day_gap() {
@@ -39,8 +41,10 @@ fn test_discovery03_legacy_adapter_retains_original_result() {
 	before := big_sub(foundation, big_one())
 	after := big_add(foundation, big_one())
 	dispatcher := new_base_dispatcher()
-	assert big_eq(dispatcher.dispatch_legacy_distance(before, after), old_distance(before, after))
-	assert big_eq(new_base_dispatcher().dispatch_legacy_distance(before, after), old_distance(before, after))
+	legacy := dispatcher.dispatch_legacy_distance(before, after)
+	assert big_eq(legacy, old_distance(before, after))
+	assert legacy.str() == '1'
+	assert calendar_distance_spaghetti(before, after).str() == '3'
 	mut diagnostic := ''
 	_ = calendar_date_spaghetti(before, after) or {
 		diagnostic = err.msg()
