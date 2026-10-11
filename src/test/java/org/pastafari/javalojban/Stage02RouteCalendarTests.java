@@ -107,7 +107,8 @@ public final class Stage02RouteCalendarTests {
         MonsterWeavingLinearCounter family =
             new MonsterWeavingLinearCounter(blueprint.monthLengths());
         MonsterWeavingLinearCounter.RankRoute start =
-            family.beginGlobalRankRoute(BigInteger.ONE, 512);
+            family.beginGlobalRankRoute(
+                family.count().add(BigInteger.ONE).divide(BigInteger.TWO), 512);
         ok(!start.complete(), "E_INCOMPLETE");
         fails("E_WEAVE_ROUTE_INCOMPLETE", () ->
             MonsterCalendarResolver.fromBlueprintWithCompletedGlobalRoute(

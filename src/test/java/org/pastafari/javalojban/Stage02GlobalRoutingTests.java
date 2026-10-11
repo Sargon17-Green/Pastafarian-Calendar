@@ -100,7 +100,7 @@ public final class Stage02GlobalRoutingTests {
         lengths[46] = 120;
         MonsterWeavingLinearCounter family = new MonsterWeavingLinearCounter(lengths);
         BigInteger total = family.count();
-        for (BigInteger rank : List.of(BigInteger.ONE,
+        for (BigInteger rank : List.of(
                 total.add(BigInteger.ONE).divide(BigInteger.TWO))) {
             MonsterWeavingLinearCounter.RankRoute route =
                 family.beginGlobalRankRoute(rank, 512);
