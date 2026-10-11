@@ -15,6 +15,7 @@ public final class Stage02EndpointWeavingTests {
         testLongerMonthFamilies();
         testBinomialAndCatalanIdentities();
         testNearLimitDomain();
+        testHigherBoundCountAndUnrank();
         testBoundsAndOwnership();
         System.out.println("STAGE_02_ENDPOINT_WEAVING_PASS checks=" + checks);
     }
@@ -156,6 +157,34 @@ public final class Stage02EndpointWeavingTests {
             "E_492_DAY_FIRST_MONTH");
     }
 
+
+    private static void testHigherBoundCountAndUnrank() {
+        int[] nearLimit = {123, 123, 123, 123, 123, 123};
+        MonsterWeavingEndpointDP large = new MonsterWeavingEndpointDP(nearLimit);
+        BigInteger count = large.count();
+        ok(count.signum() > 0, "E_738_DAY_POSITIVE");
+        ok(count.bitLength() > 1000, "E_738_DAY_BIGINTEGER");
+        eq(count, large.countAfterPrefix(new int[]{1}), "E_738_DAY_PREFIX");
+        for (int[] lengths : new int[][]{
+                {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+                 4, 4, 4, 4, 4},
+                {36, 36, 36, 36}
+        }) {
+            MonsterWeavingEndpointDP family = new MonsterWeavingEndpointDP(lengths);
+            BigInteger top = family.count();
+            int[] first = family.unrank1(BigInteger.ONE);
+            int[] last = family.unrank1(top);
+            int[] frequencies = new int[lengths.length];
+            for (int value : first) frequencies[value - 1]++;
+            arr(lengths, frequencies, "E_UNRANK_LONG_FIRST");
+            Arrays.fill(frequencies, 0);
+            for (int value : last) frequencies[value - 1]++;
+            arr(lengths, frequencies, "E_UNRANK_LONG_LAST");
+            eq(BigInteger.ONE, family.countAfterPrefix(first), "E_LONG_FIRST_COMPLETES");
+            eq(BigInteger.ONE, family.countAfterPrefix(last), "E_LONG_LAST_COMPLETES");
+        }
+    }
+
     private static void testBoundsAndOwnership() {
         int[] lengths = {4, 5, 6};
         MonsterWeavingEndpointDP dp = new MonsterWeavingEndpointDP(lengths);
@@ -164,12 +193,12 @@ public final class Stage02EndpointWeavingTests {
         eq(first, dp.count(), "E_COPY_INPUT");
         fails("E_WEAVE_EMPTY", () -> new MonsterWeavingEndpointDP(new int[0]));
         fails("E_WEAVE_LENGTH", () -> new MonsterWeavingEndpointDP(new int[]{0, 5}));
-        fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(new int[]{513}));
+        fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(new int[]{769}));
         int[] longSet = new int[47];
-        Arrays.fill(longSet, 11);
+        Arrays.fill(longSet, 17);
         fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(longSet));
         fails("E_WEAVE_UNRANK_LIMIT", () -> new MonsterWeavingEndpointDP(
-            new int[]{33, 33, 33}).unrank1(BigInteger.ONE));
+            new int[]{54, 54, 53}).unrank1(BigInteger.ONE));
         fails("E_WEAVE_RANK", () -> dp.unrank1(BigInteger.ZERO));
         fails("E_WEAVE_RANK", () -> dp.unrank1(dp.count().add(BigInteger.ONE)));
         fails("E_WEAVE_PREFIX", () -> dp.countAfterPrefix(new int[]{2}));

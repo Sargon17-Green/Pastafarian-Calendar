@@ -134,3 +134,5 @@ ni'o lo `MonsterWeavingEndpointDP` cu pilno lo pamoi .e lo fanmo se namcu fi lo 
 ni'o lo `MonsterWeavingEndpointDP` cu te cipra lo binomio du'u ro re masti porsi .e lo Catalan namcu du'u ro masti cu se du lo re detri. lo se jimte cu du li 512 lo count .e li 96 lo unrank. lo 5778 detri nanca se selnitcu lo balvi se sruri datni javni.
 
 ni'o lo se narmanci te javni be lo `MonsterWeavingEndpointDP` cu se ciska fi `WEAVING_ENDPOINT_PROOF.md`. lo jicmu se narmanci srana lo pamoi .e lo fanmo se namcu .e lo `BigInteger` jimte cu se jarco fi ra.
+
+ni'o lo endpoint te jicmu cu ralte lo pagbu poi se jalge fi lo drani judri po'o gi'e pilno lo ro binomio namcu pe lo cnino masti pamoi. lo count jimte cu du li 768 detri .i lo unrank jimte cu du li 160 detri .i lo mutce barda detri be li 5778 cu za'o te zbasu.

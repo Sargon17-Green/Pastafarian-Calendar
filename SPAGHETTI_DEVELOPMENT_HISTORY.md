@@ -89,3 +89,7 @@ ni'o lo barda namcu cipra cu te jalge lo drani fi lo GitHub Actions run `3815768
 ### lo masti porsi binomio .e lo Catalan
 
 ni'o lo 47 masti poi ro masti cu ralte re detri cu te cipra lo Catalan te javni. lo re masti poi se nmau fi li 123 detri cu te cipra lo binomio te javni .i lo 492 detri be lo vo masti cu se cipra fi lo 512 jimte. lo se jalge cu drani fi lo GitHub Actions run `38157924109`.
+
+### lo trene jorne endpoint te jicmu
+
+ni'o lo `EndpointTable` cu ralte lo drani te jicmu judri be lo pamoi .e lo fanmo masti .i lo binomio namcu cu se samcpli gi'e na se krefu ro judri. lo te cipra be lo 738 detri .e lo unrank be lo 144 detri cu se benji fi lo GitHub Actions.

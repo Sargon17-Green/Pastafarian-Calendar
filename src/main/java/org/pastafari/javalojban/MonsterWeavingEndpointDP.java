@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 public final class MonsterWeavingEndpointDP {
-    public static final int MAX_COUNT_DAYS = 512;
-    public static final int MAX_UNRANK_DAYS = 96;
+    public static final int MAX_COUNT_DAYS = 768;
+    public static final int MAX_UNRANK_DAYS = 160;
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
 
@@ -73,64 +73,104 @@ public final class MonsterWeavingEndpointDP {
         return countSuffix(afterPrefix(prefix));
     }
 
-    private static BigInteger[][] initialTable(int count) {
-        BigInteger[][] table = new BigInteger[count + 1][count + 1];
-        table[1][count] = ONE;
-        return table;
+    private static final class EndpointTable {
+        private final int days;
+        private final int newestMonthLength;
+        private final BigInteger[][] rows;
+
+        EndpointTable(int olderDays, int newMonthLength) {
+            this.days = olderDays + newMonthLength;
+            this.newestMonthLength = newMonthLength;
+            this.rows = new BigInteger[olderDays + 2][];
+            for (int first = 1; first <= olderDays + 1; first++) {
+                int lastStart = first + newMonthLength - 1;
+                if (lastStart <= days) {
+                    rows[first] = new BigInteger[days - lastStart + 1];
+                }
+            }
+        }
+
+        void addColumnSums(int first, BigInteger[] columns) {
+            if (first < 1 || first >= rows.length) return;
+            BigInteger[] row = rows[first];
+            if (row == null) return;
+            int lastStart = first + newestMonthLength - 1;
+            for (int j = 0; j < row.length; j++) {
+                if (row[j] != null) {
+                    int last = lastStart + j;
+                    columns[last] = columns[last].add(row[j]);
+                }
+            }
+        }
+
+        BigInteger sum() {
+            BigInteger total = ZERO;
+            for (BigInteger[] row : rows) {
+                if (row == null) continue;
+                for (BigInteger value : row) {
+                    if (value != null) total = total.add(value);
+                }
+            }
+            return total;
+        }
     }
 
-    private static BigInteger[][] insert(BigInteger[][] previous, int oldLength,
-                                         int add, boolean enforceFirstOrder) {
+    private static EndpointTable initialTable(int length) {
+        EndpointTable first = new EndpointTable(0, length);
+        first.rows[1][0] = ONE;
+        return first;
+    }
+
+    private static BigInteger[] fixedBinomialColumn(int days, int width) {
+        BigInteger[] column = new BigInteger[days + 1];
+        BigInteger running = ONE;
+        column[width] = running;
+        for (int n = width + 1; n <= days; n++) {
+            running = running.multiply(BigInteger.valueOf(n))
+                .divide(BigInteger.valueOf(n - width));
+            column[n] = running;
+        }
+        return column;
+    }
+
+    private static EndpointTable insert(EndpointTable previous, int oldLength,
+                                        int add, boolean enforceFirstOrder) {
+        EndpointTable next = new EndpointTable(oldLength, add);
         int currentLength = oldLength + add;
-        BigInteger[][] next = new BigInteger[currentLength + 1][currentLength + 1];
         BigInteger[] columns = new BigInteger[oldLength + 1];
         Arrays.fill(columns, ZERO);
 
         if (!enforceFirstOrder || add == 1) {
-            for (int first = 1; first <= oldLength; first++) {
-                for (int last = first; last <= oldLength; last++) {
-                    BigInteger value = previous[first][last];
-                    if (value != null) columns[last] = columns[last].add(value);
-                }
+            for (int first = 1; first < previous.rows.length; first++) {
+                previous.addColumnSums(first, columns);
             }
         }
         if (add == 1) {
             BigInteger cumulative = ZERO;
             int included = 0;
-            for (int first = 1; first <= currentLength; first++) {
+            for (int first = 1; first <= oldLength + 1; first++) {
                 int boundary = Math.min(first - 1, oldLength);
                 while (included < boundary) {
-                    included++;
-                    cumulative = cumulative.add(columns[included]);
+                    cumulative = cumulative.add(columns[++included]);
                 }
-                if (cumulative.signum() > 0) next[first][first] = cumulative;
+                if (cumulative.signum() > 0) next.rows[first][0] = cumulative;
             }
             return next;
         }
+        BigInteger[] binomial = fixedBinomialColumn(currentLength, add - 2);
         for (int first = 1; first <= oldLength + 1; first++) {
-            if (enforceFirstOrder && first - 1 >= 1 && first - 1 <= oldLength) {
-                for (int last = first - 1; last <= oldLength; last++) {
-                    BigInteger value = previous[first - 1][last];
-                    if (value != null) columns[last] = columns[last].add(value);
-                }
-            }
+            if (enforceFirstOrder) previous.addColumnSums(first - 1, columns);
             BigInteger cumulative = ZERO;
             int included = 0;
-            BigInteger interleavings = ONE;
-            for (int last = first + add - 1; last <= currentLength; last++) {
+            BigInteger[] row = next.rows[first];
+            int lastStart = first + add - 1;
+            for (int last = lastStart; last <= currentLength; last++) {
                 int boundary = Math.min(last - add, oldLength);
                 while (included < boundary) {
-                    included++;
-                    cumulative = cumulative.add(columns[included]);
+                    cumulative = cumulative.add(columns[++included]);
                 }
                 if (cumulative.signum() > 0) {
-                    next[first][last] = cumulative.multiply(interleavings);
-                }
-                if (last != currentLength) {
-                    long top = last - first;
-                    long bottom = last - first - add + 2L;
-                    interleavings = interleavings.multiply(BigInteger.valueOf(top))
-                        .divide(BigInteger.valueOf(bottom));
+                    row[last - lastStart] = cumulative.multiply(binomial[last - first - 1]);
                 }
             }
         }
@@ -142,7 +182,7 @@ public final class MonsterWeavingEndpointDP {
         if (firstUnclosed == lengths.length) return ONE;
         int earliest = firstUnclosed;
         int oldLength = state.remaining[earliest];
-        BigInteger[][] table = initialTable(oldLength);
+        EndpointTable table = initialTable(oldLength);
         for (int index = earliest + 1; index < lengths.length; index++) {
             int additional = state.remaining[index];
             if (additional <= 0) throw new IllegalStateException("E_WEAVE_STATE");
@@ -150,13 +190,7 @@ public final class MonsterWeavingEndpointDP {
             table = insert(table, oldLength, additional, enforceFirstOrder);
             oldLength += additional;
         }
-        BigInteger total = ZERO;
-        for (int first = 1; first <= oldLength; first++) {
-            for (int last = first; last <= oldLength; last++) {
-                if (table[first][last] != null) total = total.add(table[first][last]);
-            }
-        }
-        return total;
+        return table.sum();
     }
 
     public int[] unrank1(BigInteger rank) {
