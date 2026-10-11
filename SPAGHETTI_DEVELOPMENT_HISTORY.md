@@ -37,3 +37,9 @@ GitHub Actions run `38151476087` ने commit `885645e013b2a28e08cd55fcec359434
 `FOUNDATION_DAY-2,-1,0,+1,+2` या साक्षींत legacy `[4,2,0,2,4]` आणि नियमानुसार `[4,2,1,3,5]` हाच फरक अपेक्षित आहे. `test/discovery02Red.ts` मध्ये 3 expected mismatches व 2 matches मिळाल्यावरच लाल चाचणी अपेक्षित आहे. मागील stages 1–3 हिरवे राहणे आवश्यक. ऐतिहासिक PATCH 02 पुढील टप्प्यातच यावा.
 
 GitHub Actions run 38152040485 मधील commit 24a4fe867db8fd273a9d016b6d1a9e7daa33b500 साठी canonical names lock, TypeScript typecheck, Stage 01, Stage 02 guards, Stage 03 PATCH 01 (672 साक्षी; 0 भिन्नता) आणि Stage 04 guards सर्व PASS झाले. दुसऱ्या historical comparison मध्ये अचूक `DISCOVERY_02_EXPECTED_RED mismatches=3 matches=2` मिळाले; पहिला expected-red पुरावाही टिकला. यानंतरच Stage 04 पूर्ण घोषित केला. पुढील Stage 05 मध्येच PATCH 02 करायचा.
+
+## टप्पा 5 — PATCH 02: पाया-दिवस दुरुस्ती (पडताळलेले)
+
+`src/patch02DayTag.ts` मधील `Patch02DayTagHandler` जुना `LegacyDayTagAdapter` वापरतो; आधी `day>=FOUNDATION_DAY` साठी `+1`, आणि त्यानंतर ऐतिहासिक निष्प्रभावी `day===FOUNDATION_DAY && n!==1` ही स्वतंत्र अट ठेवतो. दोन्ही दिवसांसाठी स्वतंत्र गणना, `bigint` अचूकता, lifecycle संरक्षण, immutable result आणि observability आहेत. `src/discovery02LegacyDayTag.ts` आणि दोन्ही लाल साक्षी यांत बदल केलेला नाही.
+
+GitHub Actions run `38153654056` (commit `7ff46fb0de35e1bf5aa837d56a3cde0d692630ca`) मधील TypeScript typecheck, Stages 01–04 regression, PATCH 01 साठी 672 साक्षी/0 फरक आणि PATCH 02 साठी **1099** दिवस-जोड्या/**2198** दिवस/0 फरक उत्तीर्ण झाले. `plusOne=1079`, `scarChecks=18`, `scarForces=0`. Canonical Names Lock व दोन्ही expected-red ऐतिहासिक चाचण्या PASS. टप्पा 5/55 पूर्ण. पुढे Stage 6 — DISCOVERY 03; Stage 7 ची PATCH 03 दुरुस्ती अद्याप नाही.
