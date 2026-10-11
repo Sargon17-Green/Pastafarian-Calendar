@@ -27,6 +27,9 @@ public sealed class MonsterContext
     public BigInteger? LegacyDayInput { get; set; }
     public BigInteger? LegacyDayTagResult { get; set; }
 
+    // تُضاف النتيجة المصححة من دون مسح شاهِد الخطأ التاريخي.
+    public BigInteger? PatchedDayTagResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

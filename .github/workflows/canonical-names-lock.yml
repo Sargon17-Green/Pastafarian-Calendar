@@ -57,3 +57,5 @@ jobs:
         run: |
           test "${{ steps.discovery_day_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage04Tests/PastafarianCalendar.Stage04Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تحقق من تكافؤ رقعة عدّ اليوم مع المرجع
+        run: dotnet run --project tests/PastafarianCalendar.Stage05Tests/PastafarianCalendar.Stage05Tests.csproj --configuration Release

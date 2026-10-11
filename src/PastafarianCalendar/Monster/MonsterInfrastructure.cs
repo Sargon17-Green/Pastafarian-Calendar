@@ -30,6 +30,25 @@ public sealed class MonsterValidationManager
         if (candidate != (legacy.IsZero ? modulus : legacy))
             throw new MonsterValidationException("نتيجة الرقعة لا توافق تحويل الباقي القديم.");
     }
+
+    // لا يستعير هذا التحقق النتيجة من المرجع الاختباري؛ يختبر الالتزام بمعنى الرقعة المحلية.
+    public void ValidateDayTagPatchResult(MonsterContext context, BigInteger candidate)
+    {
+        if (context.LegacyDayInput is not BigInteger day ||
+            context.LegacyDayTagResult is not BigInteger legacy)
+            throw new MonsterValidationException("لم يكتمل العدّ التاريخي قبل التحقق من الرقعة.");
+        if (context.PatchedDayTagResult.HasValue)
+            throw new MonsterValidationException("لا يجوز تثبيت عدّ اليوم المصحح مرتين.");
+
+        var foundation = new BigInteger(-15055671);
+        if (legacy < 0)
+            throw new MonsterValidationException("العدّ التاريخي غير صالح.");
+        var expected = day >= foundation ? legacy + BigInteger.One : legacy;
+        if (candidate != expected)
+            throw new MonsterValidationException("رقعة عدّ اليوم لا توافق فارق العدّ التاريخي.");
+        if (day == foundation && candidate != BigInteger.One)
+            throw new MonsterValidationException("حارس التأسيس لم يثبت الواحد.");
+    }
 }
 
 public sealed class MonsterMetricsManager
@@ -48,6 +67,7 @@ public sealed class MonsterDispatcher
     private readonly LegacySavePhaseHandler _legacySave;
     private readonly SavePatchWrapper _savePatch;
     private readonly LegacyDayTagPhaseHandler _legacyDayTag;
+    private readonly DayTagPatchWrapper _dayTagPatch;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -56,6 +76,7 @@ public sealed class MonsterDispatcher
         _legacySave = new LegacySavePhaseHandler();
         _savePatch = new SavePatchWrapper();
         _legacyDayTag = new LegacyDayTagPhaseHandler();
+        _dayTagPatch = new DayTagPatchWrapper();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -96,6 +117,28 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "legacy.day.tag.dispatch");
         context.Status = "LEGACY_DAY_TAG_COMPLETE";
         context.Phase = "LEGACY_DAY_TAG_COMPLETE";
+    }
+
+    public void DispatchDayTagPatched(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("تتطلب الرقعة الثانية سياقاً جديداً أتمّ تأسيسه.");
+        if (context.LegacyDayInput is not BigInteger day)
+            throw new MonsterValidationException("لم يُقدَّم اليوم إلى الرقعة الثانية.");
+
+        // يستمر استدعاء المعالج القديم؛ وتبقى قيمته الخاطئة مرئية في السياق.
+        DispatchLegacyDayTag(context);
+
+        // لا تلتزم الرقعة بنتيجة حتى تفحصها طبقة التحقق بعد الحساب.
+        context.Phase = "DAY_TAG_PATCH_VALIDATION";
+        var pending = _dayTagPatch.Patch(day);
+        _validation.ValidateDayTagPatchResult(context, pending);
+        context.PatchedDayTagResult = pending;
+
+        context.BranchTrace.Add("DAY_TAG_PATCH");
+        _metrics.Bump(context, "day.tag.patch.dispatch");
+        context.Status = "DAY_TAG_PATCH_COMPLETE";
+        context.Phase = "DAY_TAG_PATCH_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -169,6 +212,21 @@ public sealed class MonsterManager
         var context = ExecuteLegacyDayTag(calculationDay, targetDay, day);
         return context.LegacyDayTagResult
             ?? throw new MonsterValidationException("لم يُنتج مسار اليوم القديم عدّاً.");
+    }
+
+    public MonsterContext ExecuteDayTagPatched(BigInteger calculationDay, BigInteger targetDay, BigInteger day)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacyDayInput = day;
+        _dispatcher.DispatchDayTagPatched(context);
+        return context;
+    }
+
+    public BigInteger EvaluateDayTag(BigInteger calculationDay, BigInteger targetDay, BigInteger day)
+    {
+        var context = ExecuteDayTagPatched(calculationDay, targetDay, day);
+        return context.PatchedDayTagResult
+            ?? throw new MonsterValidationException("لم تُنتج رقعة عدّ اليوم قيمةً.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
