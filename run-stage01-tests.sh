@@ -2,5 +2,5 @@
 set -eu
 # Cedwir y rhyngwyneb gwreiddiol; gall Cam 2 bennu lleoliad dros dro i'r JAR.
 artifact=${STAGE01_OUTPUT_JAR:-stage01-tests.jar}
-kotlinc src/main/kotlin/pastafari/ExactInt.kt src/main/kotlin/pastafari/SourceLanguageCatalog.kt src/main/kotlin/pastafari/LegacyRemainderAdapter.kt src/main/kotlin/pastafari/SavePatchWrapper.kt src/main/kotlin/pastafari/MonsterBootstrap.kt src/test/kotlin/pastafari/NormativeCore.kt src/test/kotlin/pastafari/NormativeCalendar.kt src/test/kotlin/pastafari/Stage01Tests.kt -include-runtime -d "$artifact"
+kotlinc src/main/kotlin/pastafari/ExactInt.kt src/main/kotlin/pastafari/SourceLanguageCatalog.kt src/main/kotlin/pastafari/LegacyRemainderAdapter.kt src/main/kotlin/pastafari/SavePatchWrapper.kt src/main/kotlin/pastafari/LegacyDayTagAdapter.kt src/main/kotlin/pastafari/MonsterBootstrap.kt src/test/kotlin/pastafari/NormativeCore.kt src/test/kotlin/pastafari/NormativeCalendar.kt src/test/kotlin/pastafari/Stage01Tests.kt -include-runtime -d "$artifact"
 kotlin -classpath "$artifact" pastafari.Stage01Tests

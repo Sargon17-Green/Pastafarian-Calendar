@@ -140,3 +140,62 @@ a `STAGE03_NATIVE_GREEN`. Cedwir y graith a'r tri gwahaniaeth
 etifeddol. Mae **Cam 3 wedi'i gwblhau ac wedi'i ddilysu'n frodorol**.
 Ni ddechreuwyd Cam 4. Mae diffyg `Long.MIN_VALUE` yn parhau'n
 ganfyddiad ar wahân.
+
+
+## Cam 4 — Darganfod 02: tag dydd heb +1 wedi'r Sylfaen
+
+Cyflwynwyd `LegacyDayTagAdapter.oldDayTag`, gyda chysonyn
+`F = -15055671` annibynnol ar y cyfeirnod prawf. Mae'r hen gyfrifiad
+`2*abs(day-F)` yn cofnodi'r camgymeriad bwriadol: ar ochr negatif y
+Sylfaen mae'r gwerthoedd yn gywir, ond o'r Sylfaen ymlaen maent yn un
+yn rhy fach. Mae `MonsterBootstrapManager.observeLegacyDayTag` yn gyrru'r
+llwybr cynhyrchu `BOOT -> DISCOVERY_02`; mae'r handler yn cofnodi'r
+allbwn anghywir a'r olrhain mewn cyd-destun ar wahân fesul galwad.
+
+Cymharwyd y pum tyst `F-2,F-1,F,F+1,F+2` â `NormativeCore.dayCount`
+(test-only). Gwelwyd union dri gwahaniaeth bwriadol a dau gyfatebiad.
+Gwirir hefyd ystod 331 o ddiwrnodau, arwyddion positif/negyddol,
+cyfanrifau pell, perchnogaeth cyd-destun, gwarchod y cyfnod BOOT a
+chysondeb holl lwybrau Cam 2 a Cam 3. Mae'r prawf strict yn methu yn
+fwriadol dim ond wrth ganfod y tri gwahaniaeth dynodedig.
+
+Ni weithredwyd PATCH 02; ni newidiwyd `oldRemainder` na `savePatch`.
+Disgwylir i Cam 4 orffen yn `EXPECTED_RED`; dim ond Cam 5 — PATCH 02 —
+all lapio'r graith hwn yn nes ymlaen. Mae diffyg annibynnol
+`ExactInt.toLongExact(Long.MIN_VALUE)` yn aros heb ei drwsio.
+
+
+### Cadarnhad Cam 4: PASS brodorol, EXPECTED_RED
+
+Ail-redwyd yr holl gadwyn regressions ar y fersiwn derfynol, gyda'r pum
+blob prawf union a `ExactInt` gwreiddiol. Cod ymadael `0`:
+`STAGE01_PASS_66`, `STAGE02_EXPECTED_RED_3`,
+`STAGE03_EXTENDED_BIGINT_GREEN_921` a `STAGE04_EXPECTED_RED_3`.
+Mae'r tri thyst coch yn fwriadol; mae'r prawf strict yn methu yn ôl y
+contract ac mae'r sgript gyffredinol yn ei dderbyn yn briodol.
+`LAST_COMPLETED_STAGE=4`. Dim PATCH 02 eto.
+
+
+### Cam 4 / gwarchodaeth atchwanegol v002
+
+Cyn lanlwytho'r cam, estynnwyd yr oracl profion gyda 60 achos mawr,
+cydbwysedd dwy ochr y Sylfaen, a gwrthod ail-anfon yr un cyd-destun.
+Ni newidiwyd hen `oldDayTag`, na'r llwybr cynhyrchu, na'r wybodaeth
+normadol, ac ni ddechreuwyd Cam 5. Mae'r hen dri gwahaniaeth
+bwriadol yn parhau'n dystiolaeth hanesyddol.
+
+
+### Cam 4 / prawf BigInteger annibynnol v003
+
+Ychwanegwyd oracl cyfrifiadol Java **yn y profion Kotlin yn unig**.
+Mae 409 galwad drwy'r handler cynhyrchu `DISCOVERY_02` yn cadarnhau'r
+cyfrifiad hanesyddol `2*abs(day-F)` yn annibynnol ar `ExactInt`:
+204 MATCH cyn y Sylfaen, 205 EXPECTED_RED ar y Sylfaen ac ar ei hôl.
+Cadwyd y pum tyst gwreiddiol, y llwybr PATCH 01 a'r ffin gamau.
+
+
+### Cam 4 / cadarnhad v003
+
+Ail-redwyd y cod terfynol gyda'r oracl gwreiddiol a 409 prawf
+BigInteger annibynnol. Cod ymadael `0`, ac mae'r graith
+`oldDayTag` yn parhau'n alwadadwy ac yn fwriadol wallus.

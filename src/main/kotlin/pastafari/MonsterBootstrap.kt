@@ -11,7 +11,9 @@ data class BaseMonsterContext(
     var discovery01Output: ExactInt? = null,
     var patch01Input: ExactInt? = null,
     var patch01LegacyOutput: ExactInt? = null,
-    var patch01Output: ExactInt? = null
+    var patch01Output: ExactInt? = null,
+    var discovery02Input: ExactInt? = null,
+    var discovery02Output: ExactInt? = null
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -63,7 +65,8 @@ class MonsterBootstrapManager(
     val metrics: BaseMetricsManager = BaseMetricsManager(),
     val errors: BaseErrorWrapper = BaseErrorWrapper(),
     val legacyRemainderAdapter: LegacyRemainderAdapter = LegacyRemainderAdapter(),
-    val savePatchWrapper: SavePatchWrapper = SavePatchWrapper()
+    val savePatchWrapper: SavePatchWrapper = SavePatchWrapper(),
+    val legacyDayTagAdapter: LegacyDayTagAdapter = LegacyDayTagAdapter()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -84,6 +87,19 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_01_LEGACY_REMAINDER")
             context.status = "LEGACY_REMAINDER_OBSERVED"
             metrics.bump("discovery01.legacy")
+        }
+        dispatcher.register("DISCOVERY_02") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_DISCOVERY02_CONTEXT_NOT_READY")
+            val input = context.discovery02Input
+                ?: throw MonsterValidationException("E_DISCOVERY02_NO_INPUT")
+            // Galw'r hen dag yn union; rhaid cadw'r anghysondeb yn weithredol.
+            val legacy = legacyDayTagAdapter.oldDayTag(input)
+            context.discovery02Output = legacy
+            context.branchTrace.add("DISCOVERY_02")
+            context.diagnostics.add("DISCOVERY_02_LEGACY_DAY_TAG")
+            context.status = "LEGACY_DAY_TAG_OBSERVED"
+            metrics.bump("discovery02.legacy")
         }
         dispatcher.register("PATCH_01") { context ->
             validation.requireBootstrapContext(context)
@@ -135,6 +151,25 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY01_WRAP", e)
+        }
+    }
+
+    /** Llwybr cynhyrchu Cam 4, heb weithredu PATCH 02. */
+    fun observeLegacyDayTag(
+        calculationDay: ExactInt,
+        targetDay: ExactInt,
+        day: ExactInt
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.discovery02Input = day
+        context.phase = "DISCOVERY_02"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY02_WRAP", e)
         }
     }
 
