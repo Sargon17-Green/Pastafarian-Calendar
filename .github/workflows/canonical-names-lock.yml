@@ -51,6 +51,12 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
+      - name: Diagnose V 0.5.2 formatting only — temporary
+        shell: bash
+        run: |
+          set -euo pipefail
+          v fmt -w ./pastafari/discovery04_witness_test.v
+          git --no-pager diff -- ./pastafari/discovery04_witness_test.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
