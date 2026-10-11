@@ -339,3 +339,28 @@ Giai đoạn 11/55 được đóng GREEN. Bước tiếp theo là
 giai đoạn 12/55, `DISCOVERY 06`: lỗi giả định mọi giọt
 quá khứ đều nằm trong kho các giọt nhìn thấy. Chưa thêm
 bản vá 06 trong giai đoạn này.
+
+## Giai đoạn 12 — Phát hiện 06: lịch sử giọt không biết kho giọt ẩn
+
+Theo hợp đồng số học, 46 giọt nhìn thấy được tạo theo thứ tự.
+Mỗi giọt `i` cần ba giá trị trước đó tại vị trí `i-1`,
+`i-3`, `i-7`, kể cả những vị trí 0 đến -6 thuộc bảy
+giọt ẩn đã tính ở giai đoạn 10.
+
+Sai lầm lịch sử thứ sáu: `LegacyPrior.legacy_prior(visible_store,i,back)`
+chỉ đọc `visible_store[i-back]`. Vì kho giọt nhìn thấy
+không có phần tử tại các địa chỉ 0 đến -6, hàm cũ thay ô thiếu
+bằng **0**, không đi đến kho giọt ẩn. Các ô dương đã tồn tại
+vẫn được đọc đúng. Chưa có phép phân nhánh giữa giọt nhìn thấy
+và giọt ẩn; bản vá 06 thuộc giai đoạn 13.
+
+`VisibleDropCalculator` thực thi đầy đủ 11 lần nghiền đối với
+từng giọt, dùng bảng đá đã vá, năm bộ đếm và SAVE chuẩn.
+`VisibleDropManager` tạo đúng 46 ô trong kho nhìn thấy,
+nhưng các giá trị bị lệch từ giọt đầu do lịch sử vắng.
+Cả `visible_drops_spaghetti` và `bootstrap_context.visible_drops`
+đều chạy trên đường sản xuất thực.
+
+Bốn hồi quy chuẩn mới tại giọt nhìn thấy 1, 2, 7, 46 phải
+đỏ có chủ đích. Các kiểm thử bảo vệ khẳng định giọt ẩn
+không bị hỏng, thứ tự các ô và tính độc lập của các lần gọi.

@@ -3,8 +3,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   Bộ phân phối sản xuất duy trì các nhánh SAVE và nhãn ngày đã được vá.
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
-  Bảy giọt ẩn được tính đúng nhưng lưu theo thứ tự đảo ngược;
-  bản vá 05 và việc tích hợp ngày lịch chưa được triển khai.
+  Bảy giọt ẩn được đọc đúng qua bản vá 05; giọt nhìn thấy ở
+  giai đoạn 12 chỉ đọc kho nhìn thấy và bỏ sót giọt ẩn.
+  Chưa tích hợp ngày lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
@@ -15,7 +16,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     Metrics,
     SaveManager,
     StoneManager,
-    Validator
+    Validator,
+    VisibleDropManager
   }
 
   def bootstrap(calculation_day, target_day) do
@@ -36,6 +38,16 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
         stones_table
       )
 
+    visible_drops =
+      VisibleDropManager.build(
+        calculation_day,
+        target_day,
+        calculation_tag,
+        target_tag,
+        corrected_distance,
+        stones_table
+      )
+
     %Context{
       calculation_day: calculation_day,
       target_day: target_day,
@@ -44,6 +56,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       distance_count: corrected_distance,
       stones_table: stones_table,
       hidden_drops_storage: hidden_storage,
+      visible_drops: visible_drops,
       phase: :bootstrap,
       status: :validated,
       branch_trace: [:entry, :validated, :legacy_day_count, :day_tag_patch_02],
@@ -71,5 +84,14 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def hidden_drop(calculation_day, target_day, number) do
     storage = hidden_drops(calculation_day, target_day)
     HiddenDropManager.read(storage, number)
+  end
+
+  def visible_drops(calculation_day, target_day) do
+    bootstrap(calculation_day, target_day).visible_drops
+  end
+
+  def visible_drop(calculation_day, target_day, index) do
+    visible_drops(calculation_day, target_day)
+    |> VisibleDropManager.read(index)
   end
 end

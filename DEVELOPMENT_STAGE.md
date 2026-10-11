@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=11
-CURRENT_KIND=PATCH
-CURRENT_PATCH=05
+CURRENT_STAGE=12
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=06
 LAST_COMPLETED_STAGE=11
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyHiddenStorage đảo từ hidden7 đến hidden1; HiddenStoragePatch sửa vị trí đọc 8-k qua hàm legacy, không đảo kho; giữ các bản vá 01-04 và ngữ cảnh riêng.
+MONSTER_ARCHITECTURE_GROWTH=Giữ năm bản vá cũ, thêm LegacyPrior chỉ đọc visible_store[index-back], ô trống dùng 0; VisibleDropCalculator tạo 46 giọt mà chưa liên hệ bảy giọt ẩn, context giữ hai kho riêng.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_11_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_12_PENDING
+GIT_HISTORY_MUTATED=STAGE_12_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=111
-CI_FAILURES=0
+CI_TESTS=STAGE_12_PENDING
+CI_FAILURES=STAGE_12_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -182,3 +182,12 @@ HiddenDropCalculator giữ nguyên blob SHA:
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38163456728
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38163456763
 Giai đoạn 11 đóng GREEN; tiếp theo là giai đoạn 12, DISCOVERY 06.
+
+Giai đoạn 12 đưa 46 giọt nhìn thấy vào đường sản xuất qua VisibleDropManager.
+LegacyPrior.legacy_prior chỉ đọc kho nhìn thấy ở vị trí index-back,
+không biết địa chỉ âm của bảy giọt ẩn và dùng 0 khi thiếu vị trí.
+Bảng đá đã vá, giọt ẩn đã vá và SAVE vẫn hoạt động đúng.
+Bốn hồi quy chuẩn mới kiểm các giọt 1, 2, 7, 46; cố ý đỏ.
+Mười một kiểm thử kiểm soát và bốn hồi quy: tổng 126 kiểm thử,
+dự kiến đúng bốn thất bại. Không có bản vá 06 của giai đoạn 13.
+LAST_COMPLETED_STAGE giữ 11 trước khi xác minh CI.

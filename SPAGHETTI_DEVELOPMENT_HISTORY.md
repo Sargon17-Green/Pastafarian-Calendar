@@ -314,3 +314,35 @@ Kho `LegacyHiddenStorage` giữ nguyên blob SHA
 Bộ tính `HiddenDropCalculator` giữ nguyên blob SHA
 `5afcaf5cff02a84fbbd92398b134adc34a08c885`.
 Khóa tên chuẩn đạt độc lập. Giai đoạn 11 kết thúc GREEN.
+
+## Giai đoạn 12 — Phát hiện 06: đọc lịch sử chỉ trong kho nhìn thấy
+
+**Giả định lịch sử sai:** Một giọt nhìn thấy được tính từ
+các giọt trước đó bằng cách đọc trực tiếp `visible_store[i-back]`
+với `back` bằng 1, 3 hoặc 7. Chưa phân biệt những ô trước
+giọt số 1 thuộc bảy giọt ẩn, vốn lưu riêng.
+
+**Tình trạng trong lần phát hiện:** `LegacyPrior.legacy_prior`
+chỉ tra kho giọt nhìn thấy và dùng số 0 cho ô không có.
+Các vị trí 0 đến -6 thiếu tại các bước đầu nên sai số
+đi vào công thức ngay từ giọt 1, sau đó lan qua 46 giọt.
+Ở giọt 8 trở đi, tất cả ba vị trí trước đều thuộc kho
+nhìn thấy và bản thân lookup cũ hoạt động đúng, nhưng
+các giá trị đã được xây từ lịch sử sai.
+
+**Đường thực thi:** `visible_drop_spaghetti →
+Dispatcher.visible_drop → VisibleDropManager.read`.
+Kho được tạo trong `Dispatcher.bootstrap` qua
+`VisibleDropManager.build → VisibleDropCalculator.calculate →
+LegacyPrior.legacy_prior`. Nhánh giọt ẩn vẫn tồn tại và
+đọc đúng qua PATCH 05, nhưng không được dùng trong lookup này.
+
+**Giới hạn:** Không thêm nhánh `slot>=1` hay ánh xạ
+`hidden_number=1-slot` của PATCH 06 vào mã sản xuất.
+Không tích hợp phép nghiền với bát, thứ tự hoán vị
+hoặc lịch cuối trước giai đoạn riêng.
+
+**Kiểm thử:** Bốn hồi quy chuẩn cố ý đỏ ở giọt 1, 2, 7, 46;
+mười một bài kiểm soát xác nhận lookup cũ, 46 ô,
+số nguyên lớn, bảng đá và kho giọt ẩn còn đúng,
+thực thi song song, kiểm tra nguồn và bảo vệ ranh giới.
