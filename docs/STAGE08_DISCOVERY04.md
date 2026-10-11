@@ -1,4 +1,4 @@
-# ደረጃ 8/55 — DISCOVERY 04 (EXPECTED_RED)
+# ደረጃ 8/55 — DISCOVERY 04 (COMPLETE / EXPECTED_RED)
 
 ## የአምስት ድንጋዮች ታሪካዊ ስህተት
 
@@ -49,4 +49,14 @@ v -check ./pastafari/discovery04_expected_red_test.v
 v test ./pastafari/discovery04_expected_red_test.v
 ```
 
-መጨረሻው `v test` ብቻ በሆን ተብሎ 4 የassertion ውድቀቶችን ማሳየት አለበት። ከእሱ በፊት ያሉት 11 የሙከራ ፋይሎች PASS መሆን አለባቸው። `PATCH 04` አይጨመርም፣ ደረጃ 9 አይጀመርም። የV እውነተኛ CI ከተረጋገጠ በኋላ ብቻ `LAST_COMPLETED_STAGE=8` ይሆናል።
+መጨረሻው `v test` ብቻ በሆን ተብሎ 4 የassertion ውድቀቶችን ማሳየት አለበት። ከእሱ በፊት ያሉት 11 የሙከራ ፋይሎች PASS መሆን አለባቸው። `PATCH 04` አይጨመርም፣ ደረጃ 9 አይጀመርም። V 0.5.2 የተጠበቀውን RED አረጋግጧል፤ `LAST_COMPLETED_STAGE=8` ነው።
+
+## የV ስሪት ማረጋገጫ
+
+- የተፈተነ commit፦ `74e100a03ab1aa2530e674c7746178a24f0a0b92`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38160751813
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38160751813/artifacts/11710830257
+- `V 0.5.2 7647ce1`፤ `v fmt -verify ./pastafari` PASS።
+- 11 የቀድሞ እና አዲስ witness `_test.v` ፋይሎች PASS፣ 4 በተለዩ `EXPECTED_RED` assertions ተረጋግጠዋል።
+- `get_legacy_stone_table` 46 የታሪክ ድንጋዮችን ይሰራል።
+- `PATCH 04` አልተጨመረም፣ ደረጃ 9 አልተጀመረም።

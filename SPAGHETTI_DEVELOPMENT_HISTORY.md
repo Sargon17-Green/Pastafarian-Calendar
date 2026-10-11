@@ -73,3 +73,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ## ደረጃ 8 — DISCOVERY 04 (EXPECTED_RED እየተፈተነ)
 
 የአራተኛው ታሪካዊ ስህተት `mutate_stones_wrong` የአምስት ድንጋዮችን የክብ ሂሳብ በተከታታይ ይጽፋል፣ ይህም አዲሱ `w` በ`b` እና በ`r`፣ አዲሱ `b` በ`s`፣ አዲሱ `s` በ`m`፣ አዲሱ `m` በ`r` የስህተት ንባብ ይፈጥራል። አዲሱ `LegacyStonesAdapter` እና `BaseDispatcher.dispatch_legacy_stones` በproduction ንዑስ መግቢያ ተያይዘዋል፤ `calendar_date_spaghetti` ውስጥ የታሪካዊ ድንጋይ ውጤት ምርመራ አለ። የተጠገኑ `PATCH 01`፣ `PATCH 02`፣ `PATCH 03` አልተለወጡም፣ የ`PATCH 04` snapshot ገና አልተጨመረም።
+
+### የደረጃ 8 መዝጊያ — EXPECTED_RED
+
+በመጀመሪያው የV CI ሙከራ የwitness ቅርጸት ስህተት ተገኝቷል። ቀጣዩ በእውነተኛው የV 0.5.2 ኮምፓይለር የ`Stones` አምስት መስኮች `pub mut:` ያስፈልጋሉ ብሎ አመልክቷል። ሁለቱም የV ቅርጸት እና የተለዋዋጭ መስክ ጉዳዮች ተስተካክለዋል፤ ሂሳባዊ የlegacy ስህተቱ አልተለወጠም። በcommit `74e100a03ab1aa2530e674c7746178a24f0a0b92` ላይ የGitHub Actions run `38160751813` በV 0.5.2 (`7647ce1`) ሙሉ የተጠበቀው ሁኔታ PASS ሆኗል፤ 11 GREEN የሙከራ ፋይሎች አልፈዋል፣ 4 RED assertions በስም ተረጋግጠዋል። የማስረጃ ቅርስ `11710830257` ተቀምጧል። `PATCH 04` አልተጨመረም። ደረጃ 8 COMPLETE / EXPECTED_RED ነው።
