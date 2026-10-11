@@ -27,8 +27,8 @@ v fmt -verify ./pastafari
 ```
 
 
-ደረጃ 1 በV 0.5.2 (`7647ce1`) ተረጋግጧል። `v fmt -verify ./pastafari` እና `v test ./pastafari` ሁለቱም በውጤት 0 አልፈዋል፤ የሙከራው ማጠቃለያ 1 ከ1 ሙከራ እንዳለፈ ያሳያል። ደረጃ 2 አልተከፈተም።
+ደረጃ 1 በV 0.5.2 (`7647ce1`) ተረጋግጧል። `v fmt -verify ./pastafari` እና `v test ./pastafari` ሁለቱም በውጤት 0 አልፈዋል፤ የሙከራው ማጠቃለያ 1 ከ1 ሙከራ እንዳለፈ ያሳያል። ይህ በደረጃ 1 መጨረሻ የነበረውን ሁኔታ ይገልጻል።
 
 ## ደረጃ 2 — DISCOVERY 01
 
-የታሪካዊው `old_remainder` ጉድለት ከ`LegacyRemainderAdapter` እና ከproduction dispatcher ጋር ተገናኝቷል። የሙሉ ቀን ልወጣ ገና የለም። በM፣ 2M እና 3M የሚኖረው የታሰበ RED በ`pastafari/discovery01_expected_red_test.v` ውስጥ ተለይቶ ተጻፈ። ለመሥራት እና ለማረጋገጥ `docs/STAGE02_DISCOVERY01.md` ይመልከቱ። የV ቀጥተኛ ማረጋገጫ ገና አልተካሄደም።
+የታሪካዊው `old_remainder` ጉድለት ከ`LegacyRemainderAdapter` እና ከproduction dispatcher ጋር ተገናኝቷል። የሙሉ ቀን ልወጣ ገና የለም። በM፣ 2M እና 3M የሚኖረው የታሰበ RED በ`pastafari/discovery01_expected_red_test.v` ውስጥ ተለይቶ ተጻፈ። ለመሥራት እና ለማረጋገጥ `docs/STAGE02_DISCOVERY01.md` ይመልከቱ። ደረጃ 2 በV 0.5.2 (7647ce1) በGitHub Actions run 38153202920 ተረጋግጧል፤ M, 2M, 3M ሆን ተብሎ RED ሲሆኑ ሌሎች ሙከራዎች GREEN ናቸው።

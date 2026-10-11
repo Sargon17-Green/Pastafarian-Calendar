@@ -26,10 +26,23 @@ v test ./pastafari/discovery01_witness_test.v
 v test ./pastafari/discovery01_expected_red_test.v
 ```
 
-የመጀመሪያዎቹ ሦስት ትእዛዞች `exit=0` ሊመልሱ ይገባል። የመጨረሻው ትእዛዝ ሶስት የተጠበቁ የassert ውድቀቶችን ማሳየት እና `exit!=0` መሆን አለበት። እዚህ ያለው ማረጋገጫ ገና በአገርኛው V መሳሪያ አልተሠራም።
+የመጀመሪያዎቹ ሦስት ትእዛዞች `exit=0` ሊመልሱ ይገባል። የመጨረሻው ትእዛዝ ሶስት የተጠበቁ የassert ውድቀቶችን ማሳየት እና `exit!=0` መሆን አለበት። ይህ የኖርማቲቭ ንጽጽር ውድቀት በV 0.5.2 (7647ce1) በቀጥታ ተረጋግጧል።
 
 በደረጃ 3 ብቻ ከታሪካዊው መንገድ በላይ `savePatch` ይጨመራል፤ `old_remainder` አይሰረዝም፣ በቦታውም አይስተካከልም።
 
-## GitHub Actions
+## የV ማረጋገጫ ማስረጃ (የደረጃ 2 መዝጊያ)
 
-`.github/workflows/v-amharic-stage02.yml` በዚህ ቅርንጫፍ ላይ ብቻ V `7647ce1` በመጠቀም የformat፣ የደረጃ 1፣ የwitness እና የEXPECTED_RED ፈተናዎችን ያስኬዳል። የRED መመለስ ብቻ አይበቃም፤ የV `-check` ማረጋገጫ መጀመሪያ ማለፍ አለበት። የCI ማስረጃ ካልተገኘ `LAST_COMPLETED_STAGE=1` እንዳለ ይቆያል።
+- መስመር፦ `V+አማርኛ`
+- የተፈተነ commit፦ `7bad2b66cb4ccb8bb25daec79d8600cf547800f8`
+- የV ትክክለኛ ስሪት፦ `V 0.5.2 7647ce1`
+- የCI ሩጫ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38153202920
+- የRED የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38153202920/artifacts/11707283164
+- `v fmt -verify ./pastafari`፦ PASS
+- `v test ./pastafari/normative_oracle_test.v`፦ PASS
+- `v test ./pastafari/discovery01_witness_test.v`፦ PASS
+- `v -check ./pastafari/discovery01_expected_red_test.v`፦ PASS
+- `v test ./pastafari/discovery01_expected_red_test.v`፦ EXPECTED RED። በM፣ 2M፣ 3M የሚገኙት 3 የassert ውድቀቶች በሎጉ ውስጥ በተናጠል አሉ፤ የM+1 ማረጋገጫ አልወደቀም።
+
+ተመሳሳይ የV ማረጋገጫ በዚህ ቅርንጫፍ `.github/workflows/canonical-names-lock.yml` ውስጥ ከነባሩ የስም መቆለፊያ ሥራ በተለየ job ይሠራል። በGitHub Actions ያልተጀመረው ልዩ `v-amharic-stage02.yml` ተደጋጋሚነትን ለማስወገድ ተወግዷል።
+
+ደረጃ 2 **COMPLETE / EXPECTED_RED** ነው። የመጠገኛው እርምጃ በደረጃ 3 ብቻ ይገባል።
