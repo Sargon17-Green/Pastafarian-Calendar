@@ -22,7 +22,9 @@ final case class BaseMonsterContext(
   var legacyDistanceOutput: Option[BigInt] = None,
   var patchedDistanceOutput: Option[BigInt] = None,
   var patch03Applied: Boolean = false,
-  var legacyStoneRowsOutput: Option[Vector[Vector[BigInt]]] = None
+  var legacyStoneRowsOutput: Option[Vector[Vector[BigInt]]] = None,
+  var patchedStoneRowsOutput: Option[Vector[Vector[BigInt]]] = None,
+  var patch04Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -42,6 +44,26 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requirePatch04Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_04_STONES" ||
+        ctx.status != "PATCH_04_READY" ||
+        ctx.legacyStoneRowsOutput.isEmpty ||
+        ctx.patchedStoneRowsOutput.isEmpty ||
+        !ctx.patch04Applied ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_04_STONES", "PATCH_04_STONES")) {
+      throw new IllegalStateException("La PATCH 04 delle pietre non è pronta.")
+    }
+    val legacy = ctx.legacyStoneRowsOutput.get
+    val corrected = ctx.patchedStoneRowsOutput.get
+    if (legacy.length != 46 || legacy.exists(_.length != 5) ||
+        corrected.length != 46 || corrected.exists(_.length != 5) ||
+        corrected != Patch04StonesWrapper.stonesPatch(legacy)) {
+      throw new IllegalStateException(
+        "La PATCH 04 deve ricostruire le righe dallo snapshot precedente."
+      )
     }
   }
 
@@ -184,7 +206,8 @@ final class BaseMonsterManager {
     new Patch02DayTagHandler(metrics),
     new Discovery03DistanceHandler(metrics),
     new Patch03DistanceHandler(metrics),
-    new Discovery04StonesHandler(metrics)
+    new Discovery04StonesHandler(metrics),
+    new Patch04StonesHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -346,6 +369,30 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("discovery04", e)
+    }
+  }
+
+  def patch04Stones(calculationDay: BigInt, targetDay: BigInt): Patch04StonesReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.phase = "DISCOVERY_04_STONES"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery04Ready(ctx)
+      ctx.phase = "PATCH_04_STONES"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch04Ready(ctx)
+      Patch04StonesReport(
+        calculationDay = ctx.calculationDay,
+        targetDay = ctx.targetDay,
+        legacyStoneRows = ctx.legacyStoneRowsOutput.get,
+        patchedStoneRows = ctx.patchedStoneRowsOutput.get,
+        patchApplied = ctx.patch04Applied,
+        phase = ctx.phase,
+        status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("patch04", e)
     }
   }
 

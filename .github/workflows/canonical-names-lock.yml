@@ -205,3 +205,23 @@ jobs:
           for label in 'riga02 orzo' 'riga02 sale' 'riga03 frumento'; do
             grep -Fq "FAIL — equivalenza normativa pietra ${label} — Divergenza storica" stage08.log
           done
+
+  native-stage09-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 9 frozen previous-row PATCH 04
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage09Tests' 2>&1 | tee stage09.log
+          grep -Fq 'RISULTATO STADIO 9: 26 PASS, 0 FAIL' stage09.log
+          test "$(grep -Fc 'PASS — ' stage09.log)" -eq 26
+          test "$(grep -Fc 'FAIL — ' stage09.log)" -eq 0

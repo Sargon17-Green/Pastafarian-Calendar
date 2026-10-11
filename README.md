@@ -263,3 +263,28 @@ riga 2 orzo `1073 → 1434`, riga 2 sale `2375 → 3780`,
 riga 3 frumento `146106 → 147189`.
 È stata resa compatibile con gli stadi successivi anche la
 regressione di metadata di Stage07. Nessuna PATCH 04 introdotta.
+
+## Stadio 9 — PATCH 04: cinque pietre dalla riga precedente congelata
+
+Il modulo `LegacyStoneMutationAdapter.mutateStonesWrong` resta
+immutato e continua a produrre le discrepanze di DISCOVERY 04.
+`Patch04StonesWrapper.stonesPatch` riceve il risultato legacy,
+ne preserva la riga iniziale e costruisce 46 righe con
+tutti e cinque i componenti letti da un'unica riga precedente
+immutabile. Le righe legacy successive non entrano nel calcolo
+corretto; rimangono invece nel report per la diagnosi storica.
+
+Il manager esegue realmente
+`BOOT → DISCOVERY_04_STONES → PATCH_04_STONES`.
+La validazione ricostruisce indipendentemente la tabella patched
+e verifica traccia, forme, flag e output. Report e metriche
+rimangono di proprietà della singola invocazione.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage09Tests'
+```
+
+Sono attesi `26 PASS, 0 FAIL`: confronto integrale di 230
+pietre con l'oracolo test-only, ricorrenza di ogni riga,
+resistenza alla corruzione delle righe legacy successive,
+isolamento, precondizioni e regressioni dei primi otto stadi.

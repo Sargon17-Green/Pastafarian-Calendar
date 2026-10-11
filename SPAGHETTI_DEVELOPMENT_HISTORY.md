@@ -366,3 +366,45 @@ La verifica è stata corretta per continuare a convalidare
 la certificazione storica negli stadi successivi,
 senza cambiare l'algoritmo del PATCH 03.
 Non è stata avviata PATCH 04.
+
+## Stadio 9 — PATCH 04: una riga congelata contro la mutazione sequenziale
+
+### Che cosa si pensava
+
+L'algoritmo legacy aggiornava i cinque registri durante
+la costruzione della nuova riga. Le pietre successive
+leggevano valori già cambiati e la divergenza aumentava
+con ogni nuova riga.
+
+### Che cosa si è scoperto
+
+Il seme comune è `[17,29,43,71,101]`. Il frumento
+della seconda riga è uguale in entrambi i percorsi,
+ma la sequenza sbagliata usa quel frumento nuovo per
+calcolare l'orzo. La norma richiede di usare, per
+tutte e cinque le pietre, la riga precedente congelata.
+
+### Che cosa è stato aggirato
+
+`Patch04StonesWrapper.stonesPatch` parte dal vero
+risultato di DISCOVERY 04 ma usa solo la sua riga
+iniziale e ricostruisce autonomamente ogni riga corretta.
+Il percorso diagnostico `discover04Stones` e l'uscita
+legacy del percorso `patch04Stones` non vengono modificati.
+
+### Perché è normativamente equivalente
+
+Per induzione sulle 46 righe: la riga 1 coincide col seme
+normativo; se la riga precedente coincide, le cinque
+formule successive leggono gli stessi valori e usano lo
+stesso SAVE, quindi coincidono anch'esse. La verifica
+test-only confronta tutti i 230 elementi con l'oracolo.
+
+### Strato di mostruosità aggiunto
+
+Un wrapper di ricostruzione, handler e fase, due nuovi
+campi nel contesto, validazione deterministica di output,
+report a due tabelle, metrica di PATCH 04, diagnostica
+storica e regressioni specifiche per proprietà dello stato.
+
+Certificazione nativa da acquisire; Stage10 non iniziato.

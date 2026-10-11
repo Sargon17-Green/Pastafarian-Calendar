@@ -199,20 +199,36 @@ object Stage08Tests {
       finally stream.close()
       truth(text.contains("mutateStonesWrong"),"Legacy in produzione")
       truth(!text.contains("NormativeOracle"),"Oracolo non ammesso nel prodotto")
-      truth(!text.contains("stonesPatch"),"PATCH 04 non anticipata")
+      val state = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val currentStage = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      if (currentStage < 9)
+        truth(!text.contains("stonesPatch"),"PATCH 04 prematura")
+      else
+        truth(text.contains("stonesPatch"),"PATCH 04 deve essere disponibile")
     }
 
     check("metadati dello stadio 8 coerenti con EXPECTED_RED") {
       val status = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(status.contains("CURRENT_STAGE=8"),"Stadio")
-      truth(status.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(status.contains("CURRENT_PATCH=03"),"Ultima patch precedente")
-      truth(status.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"Rosso deliberato")
+      val currentStage = status.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE mancante"))
+      truth(currentStage >= 8,"DISCOVERY 04 non deve scomparire")
+      if (currentStage == 8) {
+        truth(status.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(status.contains("CURRENT_PATCH=03"),"Ultima patch precedente")
+        truth(status.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"Rosso deliberato")
+      } else {
+        truth(status.contains("STAGE_08_NATIVE_VERIFICATION=PASS_EXPECTED_RED_19_PASS_3_FAIL"),
+          "Certificazione storica di DISCOVERY 04 mancante")
+      }
       val last = status.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("Ultimo stadio assente"))
-      truth(last==7 || last==8,"Nessuna anticipazione dello stadio 9")
+      truth(last >= 7 && last <= currentStage,"Ordine di completamento coerente")
     }
 
     val manager = new BaseMonsterManager

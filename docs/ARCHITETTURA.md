@@ -126,3 +126,17 @@ dal dispatcher dopo Bootstrap e registra un output di 46×5
 e una metrica, senza correggere i valori. Il manager restituisce
 uno snapshot della singola invocazione; il validatore verifica
 traccia e forma. Non esiste PATCH 04 a questo stadio.
+
+## PATCH 04: ricostruzione della tabella su righe congelate
+
+Il manager `patch04Stones` esegue la vera DISCOVERY 04 nel
+medesimo contesto e conserva l'intera tabella errata. Il
+nuovo handler PATCH 04 richiama `stonesPatch` sulla tabella
+legacy: usa esclusivamente la prima riga iniziale, dopodiché
+legge tutte le cinque componenti da `previous` senza
+mutazioni in-place e pubblica `next` solo a fine riga.
+
+Il validatore controlla la traccia completa, le dimensioni,
+il flag e l'uguaglianza alla ricostruzione deterministica
+dalla stessa prima riga. Le due tabelle sono istantanee
+immutabili nel report; nessun dato di test entra nel prodotto.

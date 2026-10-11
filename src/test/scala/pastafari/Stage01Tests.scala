@@ -206,7 +206,8 @@ object Stage01Tests {
         (if (currentStage < 4) Vector("oldDayTag") else Vector.empty[String]) ++
         (if (currentStage < 6) Vector("oldDistance") else Vector.empty[String]) ++
         (if (currentStage < 7) Vector("distancePatch") else Vector.empty[String]) ++
-        (if (currentStage < 8) Vector("mutateStonesWrong") else Vector.empty[String])
+        (if (currentStage < 8) Vector("mutateStonesWrong") else Vector.empty[String]) ++
+        (if (currentStage < 9) Vector("stonesPatch") else Vector.empty[String])
       val present = (forbidden ++ phaseSpecific).filter(content.contains)
       equal(present, Vector.empty[String], "simboli futuri trovati")
     }
