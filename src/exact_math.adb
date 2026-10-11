@@ -1,4 +1,5 @@
 with Ada.Numerics.Big_Numbers.Big_Integers;
+with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
 
 package body Exact_Math is
    use Ada.Numerics.Big_Numbers.Big_Integers;
@@ -6,7 +7,7 @@ package body Exact_Math is
    function Regular_Mod (X, D : Big_Integer) return Big_Integer is
    begin
       if D < To_Big_Integer (1) then
-         raise Constraint_Error with "భాజకం కనీసం ఒకటి కావాలి";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("భాజకం కనీసం ఒకటి కావాలి");
       end if;
       return X mod D;
    end Regular_Mod;
@@ -24,7 +25,7 @@ package body Exact_Math is
    function Floor_Div (A, B : Big_Integer) return Big_Integer is
    begin
       if B < To_Big_Integer (1) then
-         raise Constraint_Error with "ధన భాజకం అవసరం";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("ధన భాజకం అవసరం");
       end if;
       return (A - Regular_Mod (A, B)) / B;
    end Floor_Div;
@@ -32,7 +33,7 @@ package body Exact_Math is
    function Ceil_Div (A, B : Big_Integer) return Big_Integer is
    begin
       if A < To_Big_Integer (0) or else B < To_Big_Integer (1) then
-         raise Constraint_Error with "శూన్యం లేదా ధన లబ్ధి మరియు ధన భాజకం అవసరం";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("శూన్యం లేదా ధన లబ్ధి మరియు ధన భాజకం అవసరం");
       end if;
       return Floor_Div (A + B - To_Big_Integer (1), B);
    end Ceil_Div;
@@ -50,7 +51,7 @@ package body Exact_Math is
       Y : Big_Integer := X;
    begin
       if Y < To_Big_Integer (0) or else Y > To_Big_Integer (Integer (Maximum)) then
-         raise Constraint_Error with "పరిమిత సహజ సంఖ్య పరిధి దాటింది";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("పరిమిత సహజ సంఖ్య పరిధి దాటింది");
       end if;
       while Y > To_Big_Integer (0) loop
          Y := Y - To_Big_Integer (1);
