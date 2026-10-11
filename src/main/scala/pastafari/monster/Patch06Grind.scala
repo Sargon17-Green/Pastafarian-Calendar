@@ -3,7 +3,7 @@ package pastafari.monster
 /**
  * PATCH 06: il sentinel storico sopravvive e il helper legacy viene davvero eseguito.
  * L'unica correzione di indice è da (step - 1) a step per la regola attiva.
- * Il test-only NormativeOracle non è importato nel prodotto.
+ * Il riferimento normativo resta esclusivamente nei test e non entra nel prodotto.
  */
 object Patch06GrindWrapper {
   def rulePatch(step: Int): LegacyGrindRule = {
