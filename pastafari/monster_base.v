@@ -112,6 +112,8 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	_ = bootstrap_validate(calculation_day, target_day)!
 	// ደረጃ 3፦ የታሪካዊውን adapter ተከትሎ PATCH 01 ይጠራል።
 	patched_probe := calendar_save_spaghetti(calculation_day)
+	legacy_day_tag := calendar_day_tag_spaghetti(target_day)
 	message := 'ዋናው የስፓጌቲ ቀን መንገድ ገና አልተገነባም፤ PATCH_01 SAVE='
-	return error(message + patched_probe.str())
+	details := message + patched_probe.str() + '; DISCOVERY_02 oldDayTag='
+	return error(details + legacy_day_tag.str())
 }

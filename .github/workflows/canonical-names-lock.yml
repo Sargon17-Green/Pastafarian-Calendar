@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage03_native_v:
-    name: V 0.5.2 — PATCH 01 verified GREEN
+  stage04_native_v:
+    name: V 0.5.2 — DISCOVERY 02 expected RED
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -69,15 +69,40 @@ jobs:
           v test ./pastafari/discovery01_expected_red_test.v
       - name: PATCH 01 — signed and oversized integer boundaries
         run: v test ./pastafari/patch01_test.v
-      - name: Stage 03 — complete native V test suite
+      - name: DISCOVERY 02 — historical day tag witnesses
+        run: v test ./pastafari/discovery02_witness_test.v
+      - name: DISCOVERY 02 — typechecked historical expected RED
         shell: bash
         run: |
           set -euo pipefail
-          v test ./pastafari 2>&1 | tee stage03_green.log
-      - name: Save stage 03 native evidence
+          v -check ./pastafari/discovery02_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery02_expected_red_test.v 2>&1 | tee stage04_expected_red.log
+          exitcode=${PIPESTATUS[0]}
+          set -e
+          if [ "$exitcode" -eq 0 ]; then
+            echo '::error::DISCOVERY 02 unexpectedly passed before PATCH 02'
+            exit 1
+          fi
+          for witness in \
+            test_discovery02_expected_red_at_foundation \
+            test_discovery02_expected_red_at_foundation_plus_one \
+            test_discovery02_expected_red_at_foundation_plus_two \
+            test_discovery02_expected_red_far_future; do
+            if ! grep -Fq "$witness" stage04_expected_red.log; then
+              echo "::error::Missing expected historical witness: $witness"
+              exit 1
+            fi
+          done
+          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage04_expected_red.log; then
+            echo '::error::Nonzero result lacks assertion-failure evidence'
+            exit 1
+          fi
+          echo 'DISCOVERY 02 — verified four expected RED cases under native V'
+      - name: Preserve stage 04 native evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage03-green-evidence
-          path: stage03_green.log
+          name: v-amharic-stage04-red-evidence
+          path: stage04_expected_red.log
           if-no-files-found: ignore

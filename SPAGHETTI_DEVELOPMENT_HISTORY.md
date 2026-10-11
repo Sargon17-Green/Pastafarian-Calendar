@@ -37,3 +37,7 @@ V 0.5.2 (`7647ce1`) በአካባቢው ተጭኖ የደረጃ 1 ኮድ በቀጥ
 ### የደረጃ 3 መዝጊያ — GREEN
 
 V 0.5.2 (`7647ce1`) በእውነተኛ GitHub Actions run `38153910238` ሁሉንም የቀድሞ እና አዲስ ፈተናዎች አልፏል። የኖርማቲቭ ኦራክል PASS፣ ታሪካዊ witness PASS፣ በደረጃ 2 RED የነበሩት ሶስት assertions GREEN፣ PATCH 01 ምልክት እና ትላልቅ ኢንቲጀሮች PASS። `v test ./pastafari`: 4/4 PASS። `old_remainder` አልተቀየረም። ደረጃ 3 COMPLETE ነው።
+
+## ደረጃ 4 — DISCOVERY 02 (በታሪካዊ ማረጋገጫ ላይ)
+
+`old_day_tag` በሆነ ስህተት `2*abs(day-FOUNDATION)` ይቆጥራል። `LegacyDayTagAdapter` በproduction dispatcher እውነተኛ መንገድ ላይ ተገናኝቷል። የPATCH 01 የSAVE መንገድ አልተለወጠም፣ ኖርማቲቭ oracle በproduction አይጠቀምም። በFOUNDATION፣ FOUNDATION+1፣ FOUNDATION+2 እና በትልቅ ወደፊት ቀን የሚታየውን የታሰበ RED ለማረጋገጥ የV 0.5.2 CI ተዘጋጅቷል። የPATCH 02 መጠገኛ በዚህ ደረጃ አልተጨመረም።

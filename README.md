@@ -36,3 +36,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 3 — PATCH 01
 
 የታሪካዊው `old_remainder` ተጠብቋል፣ ከእሱም በላይ ራሱን የቻለ `SavePatch01` ተጨምሯል። `calendar_save_spaghetti` የተጠገነውን ምርጫ ያገኛል። የደረጃ 2 የRED ሙከራዎች ያለ `assert` ለውጥ GREEN መሆን አለባቸው። በV 0.5.2 (`7647ce1`) የrun `38153910238` ማረጋገጫ ተጠናቋል። የታሪካዊው witness፣ ቀድሞ RED የነበሩት assertions እና የተጨመሩ የPATCH 01 ፈተናዎች ሁሉ PASS ሆነዋል። ሙሉ የ`v test ./pastafari` ውጤት 4/4 PASS ነው፤ `LAST_COMPLETED_STAGE=3`።
+
+## ደረጃ 4 — DISCOVERY 02
+
+ሁለተኛው የታሪካዊ ስህተት `old_day_tag(day) = 2*abs(day-FOUNDATION)` በV ተጨምሯል። ከFOUNDATION ጀምሮ የአንድ የምንጠብቀው ልዩነት በሆን ተብሎ RED ሙከራዎች ተመዝግቧል። PATCH 01 ተጠብቋል፤ PATCH 02 ገና አልተጨመረም። ዝርዝር፦ `docs/STAGE04_DISCOVERY02.md`።
