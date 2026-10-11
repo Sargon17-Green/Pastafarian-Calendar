@@ -23,4 +23,12 @@ end
 for i = 1, 47 do assert(seen[i]) end
 local ok = pcall(function() C.someNewField = 1 end)
 assert(not ok)
+local originalFunction = C.cutlet
+local originalName = C.cutlet(1)
+assert(not pcall(function() C.cutlet = function() return "chanje" end end))
+assert(not pcall(function() C.version = function() return "chanje" end end))
+assert(C.cutlet == originalFunction and C.cutlet(1) == originalName)
+local entry = C.cutletEntry(1)
+entry.sourceString = "chanje"
+assert(C.cutlet(1) == originalName)
 print("PASS catalog")
