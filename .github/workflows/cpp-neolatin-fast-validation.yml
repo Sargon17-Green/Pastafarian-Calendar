@@ -1,0 +1,73 @@
+name: Praevolatus Gradus 56 — concurrentia et cache
+
+on:
+  push:
+    branches:
+      - 'C\+\+&Latina'
+    paths:
+      - 'src/monster.cpp'
+      - 'include/pastafari/monster.hpp'
+      - 'tests/stage_56_dispatch_concurrency_tests.cpp'
+      - 'tests/stage_56_transactional_cache_audit_tests.cpp'
+      - '.github/workflows/cpp-neolatin-fast-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  praevolatus:
+    name: Praevolatus C++20 novarum probationum
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Excerpere fontem
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et compilatorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          g++ --version | head -1
+
+      - name: Compilare probationes C++20
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build_stage56_praeflight logs_stage56_praeflight
+          flags=(-std=c++20 -O2 -Wall -Wextra -Wpedantic -pthread -Iinclude -Itests -I.)
+          g++ "${flags[@]}" -c src/monster.cpp -o build_stage56_praeflight/monster.o 2>&1 |
+            tee logs_stage56_praeflight/monster-compile.log
+          for nomen in \
+            stage_56_saved_sum_self_monkey_patch_tests \
+            stage_56_dispatch_concurrency_tests \
+            stage_56_transactional_cache_audit_tests; do
+            g++ "${flags[@]}" "tests/${nomen}.cpp" \
+              build_stage56_praeflight/monster.o \
+              -o "build_stage56_praeflight/${nomen}" \
+              2>&1 | tee "logs_stage56_praeflight/${nomen}-compile.log"
+          done
+
+      - name: Currere probationes cum evidentia
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 3m build_stage56_praeflight/stage_56_saved_sum_self_monkey_patch_tests \
+            2>&1 | tee logs_stage56_praeflight/monkey.log
+          timeout 5m build_stage56_praeflight/stage_56_dispatch_concurrency_tests \
+            2>&1 | tee logs_stage56_praeflight/concurrency.log
+          timeout 20m build_stage56_praeflight/stage_56_transactional_cache_audit_tests \
+            2>&1 | tee logs_stage56_praeflight/cache-recovery.log
+          echo 'PRAEVOLATUS_GRADUS56=PASS'
+
+      - name: Servare evidentiam etiam in defectu
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cpp-latina-stage56-praeflight
+          path: logs_stage56_praeflight/
+          if-no-files-found: warn
+          retention-days: 30
