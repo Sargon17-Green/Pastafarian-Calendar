@@ -61,3 +61,22 @@ Dispatcher menambah fasa `SAVE_PATCH_01` yang membina pengurus lama, adapter tam
 ### Ujian dan sejarah kegagalan
 
 Ujian penemuan Stage 2 kekal merah **pada laluan lama sahaja**; pemeriksa sejarah menganggap merah itu sebagai bukti yang dijangka. Ujian baharu `stage03_patch01_tests.php` menyemak perbandingan dengan oracle tempatan, semua jiran bagi gandaan negatif/positif `M`, sempadan integer mesin, angka besar, idempoten, periodik, determinisme, serta ketiadaan laluan oracle dalam pengeluaran. Laluan produksi kini dikehendaki hijau. Keputusan sebenar daripada pemeriksaan CI dicatat setelah tersedia.
+
+
+## Stage 4 — DISCOVERY 02: Nombor hari kehilangan keanehan
+
+### Apa yang disangka
+
+Pereka dahulu menganggap kedudukan hari diukur oleh jarak mutlak daripada Hari Asas, didarab dua. Oleh itu kaedah `oldDayTag(day)` disimpan sebagai `2 * abs(day - FOUNDATION)`. Pengiraan dibuat dengan BigInt agar tiada limpahan int mesin menutupi kesilapan sejarah yang sebenar.
+
+### Apa yang ditemui
+
+Bagi 64 hari sebelum Asas, hasil legacy dan rujukan normatif bersetuju. Tepat pada Hari Asas, legacy memberi `0` sedangkan rujukan memberi `1`. Bagi 64 hari selepasnya, legacy memberikan nombor genap sedangkan rujukan memberikan nombor ganjil yang lebih satu. Maka ujian penemuan menghendaki 65 perbezaan dan 64 padanan, serta dua ujian ketepatan integer di had `PHP_INT_MIN` dan `PHP_INT_MAX`.
+
+### Lapisan yang ditambah dan sempadan semantik
+
+`LegacyDayTag` menerima hari dan mengira jarak tanpa sebarang keadaan global. `BootstrapKernel::dayCount` mencipta `BootstrapContext` tersendiri, melalui sempadan ralat dan fasa dispatcher `DAY_TAG_LEGACY`. Nilai diletakkan hanya dalam state konteks milik panggilan; metrik tidak pernah menjadi input keputusan. Laluan `SAVE_PATCH_01` dari Stage 3 dan parut `oldRemainder` tidak berubah.
+
+### Belum ditampal
+
+Pembetulan `dayTagWithFoundationScar` atau tambahan satu pada pihak hari lewat sama sekali tidak dilaksanakan dalam Stage 4. Kegagalan yang dikehendaki oleh `stage04_discovery02_tests.php` mesti mempunyai kod keluar `1` secara sengaja; pengesah `verify_stage04_discovery02.php` menerima hanya kegagalan tepat tersebut, tanpa sebarang kegagalan Stage 1–3. Keputusan CI direkodkan selepas disahkan.

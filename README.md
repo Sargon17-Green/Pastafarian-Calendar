@@ -64,3 +64,15 @@ php -d memory_limit=512M tests/stage03_patch01_tests.php
 ```
 
 Ujian sejarah terus membuktikan kegagalan legacy yang dijangka. Ujian Stage 3 membuktikan bahawa laluan baharu sepadan dengan `SAVE` normatif bagi integer positif, negatif, sifar, gandaan M, sempadan mesin dan integer besar. Kedua-dua perintah di atas mesti keluar dengan kod `0`. Jangan mulakan penemuan kedua sebelum tahap ini disahkan.
+
+
+## Stage 4 — DISCOVERY 02: Nombor hari legacy sengaja tersilap
+
+Laluan `BootstrapKernel::dayCount(int)` kini menggunakan `LegacyDayTag::oldDayTag` melalui dispatcher `DAY_TAG_LEGACY`. Ia mengira `2 * abs(day - FOUNDATION)` dengan integer tepat, tetapi tertinggal tambahan satu pada Hari Asas dan semua hari selepasnya. Laluan SAVE yang dibetulkan dalam Stage 3 tidak disentuh. Jangan menambah pembetulan untuk kecacatan hari sehingga Stage 5.
+
+```text
+php -d memory_limit=512M tests/stage04_discovery02_tests.php
+php -d memory_limit=512M tests/verify_stage04_discovery02.php
+```
+
+Arahan pertama mesti keluar dengan kod `1`, menunjukkan 65 perbezaan dijangka dan 64 padanan normatif di sekeliling Hari Asas. Arahan kedua mesti keluar dengan kod `0`, mengesahkan corak merah khusus itu, dua semakan sempadan int dan ketiadaan tampalan Stage 5.

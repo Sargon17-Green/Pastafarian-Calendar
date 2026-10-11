@@ -53,6 +53,14 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'save.patch01.calls');
             return $result;
         });
+        $this->dispatcher->register('DAY_TAG_LEGACY', function(BootstrapContext $context): BigInt {
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyDayTag();
+            $result = $legacy->calculateWithoutPatch($context->targetDay);
+            $context->semanticState['legacyDayTagResult'] = $result;
+            $context->status = 'DAY_TAG_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.day_tag.calls');
+            return $result;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -76,6 +84,20 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): BigInt => $this->dispatcher->dispatch('SAVE_PATCH_01', $context)
+        );
+    }
+
+    /**
+     * Laluan sejarah bagi nombor hari. Hasil belum dibetulkan pada peringkat ini.
+     * Keadaan semantik dimiliki oleh konteks panggilan sahaja.
+     */
+    public function dayCount(int $day): BigInt
+    {
+        $context = new BootstrapContext($day, $day);
+        $context->phase = 'DAY_TAG_LEGACY';
+        return $this->boundary->run(
+            $context,
+            fn(): BigInt => $this->dispatcher->dispatch('DAY_TAG_LEGACY', $context)
         );
     }
 }
