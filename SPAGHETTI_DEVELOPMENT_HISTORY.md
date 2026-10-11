@@ -153,3 +153,7 @@ ni'o lo `globalBlockForPrefix` cu jmina lo namcu be ro lo prenu pagbu fi lo pamo
 ### lo nanca te benji ciste
 
 ni'o lo `MonsterManager` cu benji lo se steci pamoi pagbu ranki .e lo mulno nanca ranki fi lo se pilno `MonsterCalendarResolver`. lo `MonsterErrorBoundary` cu se pilno gi'e na zmadu lo se jmite te javni. lo `Stage02PrefixCalendarTests` .e lo `Stage02InternalGlobalBlocksTests` cu cipra lo manager te benji.
+
+### lo ranki pluta be lo mulno nanca
+
+ni'o lo `RankRoute` cu ralte lo se steci pamoi pagbu .e lo ranki girzu .e lo se stali djedi. lo `advanceGlobalRankRoute` cu benji lo ranki cuxna fi lo drani xekri be li 512 djedi .e lo ranki te cacra be li 64 selstura namcu. lo `Stage02GlobalRoutingTests` cu cipra lo `NormativeOracle` .e lo se stodi porsi .e lo mutce barda nanca ranki. lo stadi 2 cu za'o na mulno.

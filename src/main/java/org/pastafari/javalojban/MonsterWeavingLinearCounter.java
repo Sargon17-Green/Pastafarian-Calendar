@@ -8,6 +8,8 @@ public final class MonsterWeavingLinearCounter {
     public static final int MAX_UNRANK_DAYS = 512;
     public static final int MAX_EDGE_DISTANCE = 8;
     public static final int MAX_GLOBAL_PREFIX_BRANCH_COUNTS = 64;
+    public static final int MAX_ROUTE_STEPS_PER_CALL = 512;
+    public static final int MAX_ROUTE_BRANCH_COUNTS_PER_CALL = 64;
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
 
@@ -367,6 +369,131 @@ public final class MonsterWeavingLinearCounter {
         return extremeWeaving(true);
     }
 
+
+
+    public static final class RankRoute {
+        private final MonsterWeavingLinearCounter owner;
+        private final State state;
+        private final int[] prefix;
+        private final BigInteger globalRank;
+        private final BigInteger lower;
+        private final BigInteger upper;
+        private final int suffixTargetDays;
+        private final int lastCountCalls;
+
+        private RankRoute(MonsterWeavingLinearCounter owner, State state,
+                int[] prefix, BigInteger globalRank, BigInteger lower,
+                BigInteger upper, int suffixTargetDays, int lastCountCalls) {
+            this.owner = owner;
+            this.state = new State(state);
+            this.prefix = prefix.clone();
+            this.globalRank = globalRank;
+            this.lower = lower;
+            this.upper = upper;
+            this.suffixTargetDays = suffixTargetDays;
+            this.lastCountCalls = lastCountCalls;
+        }
+
+        public int[] fixedPrefixCopy() { return prefix.clone(); }
+        public BigInteger globalRank() { return globalRank; }
+        public BigInteger lowerRank() { return lower; }
+        public BigInteger upperRank() { return upper; }
+        public BigInteger localRank() { return globalRank.subtract(lower).add(ONE); }
+        public BigInteger remainingChoices() { return upper.subtract(lower).add(ONE); }
+        public int remainingDays() { return owner.totalDays - prefix.length; }
+        public int stepsCompleted() { return prefix.length; }
+        public int suffixTargetDays() { return suffixTargetDays; }
+        public int lastCountCalls() { return lastCountCalls; }
+        public boolean complete() { return remainingDays() <= suffixTargetDays; }
+    }
+
+    private static void validateRouteBudgets(int steps, int counts) {
+        if (steps < 0 || steps > MAX_ROUTE_STEPS_PER_CALL
+                || counts < 0 || counts > MAX_ROUTE_BRANCH_COUNTS_PER_CALL) {
+            throw new IllegalArgumentException("E_WEAVE_ROUTE_BUDGET");
+        }
+    }
+
+    public RankRoute beginGlobalRankRoute(BigInteger globalRank, int targetSuffixDays) {
+        if (targetSuffixDays < 0 || targetSuffixDays > MAX_UNRANK_DAYS
+                || targetSuffixDays > totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_ROUTE_TARGET");
+        }
+        BigInteger total = count();
+        if (globalRank == null || globalRank.signum() <= 0
+                || globalRank.compareTo(total) > 0) {
+            throw new IllegalArgumentException("E_WEAVE_RANK");
+        }
+        return new RankRoute(this, new State(lengths), new int[0],
+            globalRank, ONE, total, targetSuffixDays, 0);
+    }
+
+    public RankRoute advanceGlobalRankRoute(RankRoute previous,
+            int maximumSteps, int maximumBranchCounts) {
+        if (previous == null || previous.owner != this) {
+            throw new IllegalArgumentException("E_WEAVE_ROUTE_OWNER");
+        }
+        validateRouteBudgets(maximumSteps, maximumBranchCounts);
+        State state = new State(previous.state);
+        int[] prefix = Arrays.copyOf(previous.prefix,
+            Math.min(totalDays, previous.prefix.length + maximumSteps));
+        int size = previous.prefix.length;
+        BigInteger lower = previous.lower;
+        BigInteger blockSize = previous.upper.subtract(previous.lower).add(ONE);
+        int countCalls = 0;
+        int advanced = 0;
+        while (totalDays - size > previous.suffixTargetDays
+                && advanced < maximumSteps) {
+            int[] eligible = new int[lengths.length];
+            int options = 0;
+            for (int month = state.closed; month < lengths.length; month++) {
+                if (state.canTake(month, lengths)) eligible[options++] = month;
+            }
+            if (options == 0) throw new IllegalStateException("E_WEAVE_ROUTE_STATE");
+            if (options - 1 > maximumBranchCounts - countCalls) break;
+            BigInteger skipped = ZERO;
+            boolean selected = false;
+            for (int i = 0; i < options; i++) {
+                int month = eligible[i];
+                State trial = new State(state);
+                trial.take(month, lengths);
+                BigInteger sizeOfBranch;
+                if (i == options - 1) {
+                    sizeOfBranch = blockSize.subtract(skipped);
+                } else {
+                    sizeOfBranch = countSuffix(trial);
+                    countCalls++;
+                }
+                BigInteger start = lower.add(skipped);
+                BigInteger end = start.add(sizeOfBranch);
+                if (previous.globalRank.compareTo(end) < 0) {
+                    lower = start;
+                    blockSize = sizeOfBranch;
+                    state = trial;
+                    prefix[size] = month + 1;
+                    size++;
+                    advanced++;
+                    selected = true;
+                    break;
+                }
+                skipped = skipped.add(sizeOfBranch);
+            }
+            if (!selected) throw new IllegalStateException("E_WEAVE_ROUTE_RANK");
+        }
+        return new RankRoute(this, state, Arrays.copyOf(prefix, size),
+            previous.globalRank, lower, lower.add(blockSize).subtract(ONE),
+            previous.suffixTargetDays, countCalls);
+    }
+
+    public int[] finishGlobalRankRoute(RankRoute route) {
+        if (route == null || route.owner != this) {
+            throw new IllegalArgumentException("E_WEAVE_ROUTE_OWNER");
+        }
+        if (!route.complete()) {
+            throw new IllegalArgumentException("E_WEAVE_ROUTE_INCOMPLETE");
+        }
+        return unrankAfterPrefix(route.fixedPrefixCopy(), route.localRank());
+    }
 
     public BoundaryBlock boundaryBlock(boolean latest, int suffixDays) {
         if (suffixDays < 0 || suffixDays > MAX_UNRANK_DAYS || suffixDays > totalDays) {

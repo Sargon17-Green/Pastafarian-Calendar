@@ -192,3 +192,7 @@ ni'o lo `globalBlockForPrefix` cu facki lo mulno nanca ranki pe lo drani pagbu f
 ## lo te benji jatna be lo se jmina nanca detri
 
 ni'o lo `MonsterManager.calendarWithPrefixRank` .e lo `MonsterManager.calendarWithGlobalPrefixRank` cu benji lo detri jalge fi lo `MonsterCalendarResolver` gi'e pagre lo `MonsterErrorBoundary`. lo mulno nanca te jicmu ranki cu se cuxna fi lo drani pagbu po'o; lo cnino samselpla na curmi lo nu lo mutce drata ranki cu se cuxna ro roi.
+
+## lo mulno nanca ranki se cuxna se pagbu
+
+ni'o lo `beginGlobalRankRoute` cu cfari lo ranki pluta fi lo mulno nanca ranki po'o. lo `advanceGlobalRankRoute` cu cuxna lo se steci pamoi pagbu fi lo namcu pe lo pagbu poi prenu lo se cuxna. lo se cuxna porsi cu se ralte lo `RankRoute` .i lo `finishGlobalRankRoute` cu zbasu lo mulno porsi ca lo nu lo se stali djedi cu na zmadu lo se jmite. lo te pagbu pi'o `MAX_ROUTE_STEPS_PER_CALL` .e lo `MAX_ROUTE_BRANCH_COUNTS_PER_CALL` cu se jimte tezu'e lo nu na mutce drata xekri. lo ro ranki be lo nanca pe li 5778 djedi cu za'o na se snada fi lo frili temci. ko benji `sh run_stage02_global_routing_tests.sh`.
