@@ -1,4 +1,4 @@
-# ደረጃ 10/55 — DISCOVERY 05 (EXPECTED_RED)
+# ደረጃ 10/55 — DISCOVERY 05 (COMPLETE / EXPECTED_RED)
 
 ## የማይቀየር ታሪካዊ አስተዳደር
 
@@ -37,3 +37,14 @@ v test ./pastafari/discovery05_expected_red_test.v
 ```
 
 የመጨረሻው የRED ሙከራ ፋይል ብቻ መውደቅ አለበት። 14 የቀድሞ እና አዲስ የታሪካዊ ፈተና ፋይሎች GREEN እንዲሆኑ አስፈላጊ ነው። `PATCH 05` በደረጃ 11 ብቻ ይገባል፤ በደረጃ 10 አይጨመርም።
+
+## የV 0.5.2 የተረጋገጠ መዝጊያ
+
+- የተፈተነ commit፦ `e1487442a3a2e93d0477584301a855e977f4fe50`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165059747
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165059747/artifacts/11711703085
+- `V 0.5.2 7647ce1`፣ `v fmt -verify` PASS፣ 14 GREEN ፋይሎች PASS፣ 4 የታሰቡ RED assertions በተናጠል ተረጋግጠዋል።
+- `calendar_hidden_by_nearness` አሁንም የታሪካዊውን `old_hidden_slot` ይጠራል።
+- `PATCH 05` አልተጨመረም፤ ቀጣዩ ደረጃ 11 — `PATCH 05` ነው።
+
+**ደረጃ 10 COMPLETE / EXPECTED_RED።**

@@ -65,4 +65,4 @@ v fmt -verify ./pastafari
 
 ## ደረጃ 10 — DISCOVERY 05
 
-ሰባቱ የተሰወሩ ጠብታዎች በትክክል ይሰላሉ፣ ግን `build_hidden_with_backward_storage` በአካላዊ ማከማቻ ውስጥ `hidden7, hidden6, …, hidden1` ብሎ በተቃራኒው ያስቀምጣቸዋል። `old_hidden_slot` እና `calendar_hidden_by_nearness` በዚህ ደረጃ ከማከማቻው በቀጥታ ያነባሉ፤ ስለዚህ ከመካከለኛው `hidden4` በስተቀር የቅርበት ትርጉም ስህተት አለ። አራት `EXPECTED_RED` ፈተናዎች ተጨምረዋል። `PATCH 05` አልተጨመረም፤ እውነተኛ የV CI ማረጋገጫ እስኪሳካ `LAST_COMPLETED_STAGE=9` ነው። ዝርዝር፦ `docs/STAGE10_DISCOVERY05.md`።
+ሰባቱ የተሰወሩ ጠብታዎች በትክክል ይሰላሉ፣ ግን `build_hidden_with_backward_storage` በአካላዊ ማከማቻ ውስጥ `hidden7, hidden6, …, hidden1` ብሎ በተቃራኒው ያስቀምጣቸዋል። `old_hidden_slot` እና `calendar_hidden_by_nearness` በዚህ ደረጃ ከማከማቻው በቀጥታ ያነባሉ፤ ስለዚህ ከመካከለኛው `hidden4` በስተቀር የቅርበት ትርጉም ስህተት አለ። አራት `EXPECTED_RED` ፈተናዎች ተጨምረዋል። `PATCH 05` አልተጨመረም። V 0.5.2 (`7647ce1`) በGitHub Actions run `38165059747` የቅርጸት ምርመራን፣ 14 የGREEN ሙከራ ፋይሎችን እና 4 የታሰቡ RED assertions በስም አረጋግጧል። `LAST_COMPLETED_STAGE=10` ነው። ዝርዝር፦ `docs/STAGE10_DISCOVERY05.md`።

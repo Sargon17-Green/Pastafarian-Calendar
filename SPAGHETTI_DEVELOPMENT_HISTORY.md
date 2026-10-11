@@ -89,3 +89,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ## ደረጃ 10 — DISCOVERY 05 (EXPECTED_RED በማረጋገጫ ላይ)
 
 የታሪካዊው `legacy_hidden_coefficients_reversed` ሰንጠረዥ በተገላቢጦሽ ነው። `make_hidden_drop_spaghetti` የ7 ጠብታዎችን ትክክለኛ ሂሳብ በቀድሞው `StonePatch04` ሰንጠረዥ፣ በPATCH 03 የርቀት ሒሳብ እና በPATCH 01 የSAVE ስሌት ይገነባል። ነገር ግን `build_hidden_with_backward_storage` አካላዊ ማከማቻውን `hidden7 … hidden1` ያደርጋል። `old_hidden_slot` እና `calendar_hidden_by_nearness` በተቃራኒው የቅርበት ትርጉም ያነባሉ። የማከማቻ ስርዓት አልተቀየረም፤ የPATCH 05 የ`8-k` አገልግሎት አልተጨመረም።
+
+### የደረጃ 10 መዝጊያ — EXPECTED_RED
+
+የመጀመሪያው የV ሙከራ በሁለት የቅርጸት ስህተቶች ቆሟል። ከV 0.5.2 (`7647ce1`) የቅርጸት ምርመራ የተገኙ ልዩነቶች ተፈጽመዋል፤ ጊዜያዊ የምርመራ እርምጃው ከCI ተወግዷል። በcommit `e1487442a3a2e93d0477584301a855e977f4fe50` ላይ የGitHub Actions run `38165059747` ሁሉንም 14 የቀድሞ እና አዲስ የGREEN ፈተና ፋይሎች PASS አድርጓል። `discovery05_expected_red_test.v` በV ይተረጎማል፣ በተለዩ አራት assertions ግን በሆን ተብሎ RED ነው። የማስረጃ ቅርስ `11711703085` ተቀምጧል። ሰባቱ የተለያዩ የhidden እሴቶች የማስቀመጫ ቅደም ተከተል ብቻ ተቃራኒ መሆኑ ተረጋግጧል፤ `PATCH 05` አልተጨመረም። ደረጃ 10 COMPLETE / EXPECTED_RED ነው።
