@@ -84,3 +84,9 @@ ni'o lo remoi stadi cu na se mulno. lo balvi pagbu cu nitcu lo selcmima porsi .e
 ni'o lo `MonsterFamilies` cu zbasu lo binomio namcu .e lo frica cmene porsi .e lo se jimte so'i pagbu kompozicio .e lo kecti pagbu kompozicio poi nitcu lo vorme .e lo masti se jorne porsi. lo `BigInteger` cu rinka lo nu no namcu bancu jimte cu pagre. lo `BoundedCompositionFamily` cu pilno lo drata platu perma'i pe lo namcu se jimte. lo `CutletPartitionFamily` cu pilno lo binomio frinu fi lo nu jmina lo jimte vorme.
 
 ni'o lo `Stage02FamiliesTests` cu cipra lo tcadu barda cmene .e lo mutce barda masti .e lo kecti .e lo se jorne porsi. ko benji `sh run_stage02_families_tests.sh`. lo narmanci `NormativeOracle` cu cipra po'o. lo remoi stadi na se mulno.
+
+## lo remoi stadi — lo vorme
+
+ni'o lo `MonsterGates` cu zbasu lo se namcu vorme fi lo se benji `MonsterSauceBowls`. ro se jicmu `MonsterGates` cu ralte lo pa ke cnino vorme liste gi'e ralte lo barda namcu be lo nu vorme. lo se sisku cu pilno lo binario sisku fi lo se pagbu vorme. lo `snapshot` cu cpacu lo na se galfi datni papri.
+
+ni'o lo `Stage02GateTests` cu cipra lo ni'o se sruri .e lo nu minra lo cizyjavni. ko benji `sh run_stage02_gates_tests.sh`. lo remoi stadi cu na mulno.

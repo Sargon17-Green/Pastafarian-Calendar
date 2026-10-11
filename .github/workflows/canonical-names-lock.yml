@@ -48,3 +48,5 @@ jobs:
         run: sh run_stage02_integration_tests.sh
       - name: Stage 02 combinatorial families
         run: sh run_stage02_families_tests.sh
+      - name: Stage 02 signed gate cache
+        run: sh run_stage02_gates_tests.sh
