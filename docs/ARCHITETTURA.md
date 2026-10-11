@@ -111,3 +111,18 @@ all'invocazione. `requirePatch03Ready` controlla l'intera
 traccia e `patchedDistance = legacyDistance + 1`, senza
 chiamare l'oracolo. I due output sono restituiti in uno
 snapshot immutabile; le metriche non alterano la semantica.
+
+## DISCOVERY 04: mutazione sequenziale delle cinque pietre
+
+La ricorrenza normativa di `buildStones` legge ogni nuovo
+componente interamente da una riga precedente immutabile.
+L'adattatore storico `mutateStonesWrong` invece mantiene
+un `Array[BigInt]` locale e aggiorna in ordine i registri,
+facendo leggere ai passi successivi i risultati già mutati.
+
+Il risultato viene congelato riga per riga in una struttura
+immutabile. Lo handler `DISCOVERY_04_STONES` viene eseguito
+dal dispatcher dopo Bootstrap e registra un output di 46×5
+e una metrica, senza correggere i valori. Il manager restituisce
+uno snapshot della singola invocazione; il validatore verifica
+traccia e forma. Non esiste PATCH 04 a questo stadio.

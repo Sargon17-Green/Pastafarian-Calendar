@@ -21,7 +21,8 @@ final case class BaseMonsterContext(
   var patch02Applied: Boolean = false,
   var legacyDistanceOutput: Option[BigInt] = None,
   var patchedDistanceOutput: Option[BigInt] = None,
-  var patch03Applied: Boolean = false
+  var patch03Applied: Boolean = false,
+  var legacyStoneRowsOutput: Option[Vector[Vector[BigInt]]] = None
 )
 
 final class BaseMetricsShell {
@@ -41,6 +42,19 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requireDiscovery04Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_04_STONES" ||
+        ctx.status != "LEGACY_STONES_READY" ||
+        ctx.legacyStoneRowsOutput.isEmpty ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_04_STONES")) {
+      throw new IllegalStateException("La tabella legacy delle pietre non è pronta.")
+    }
+    val rows = ctx.legacyStoneRowsOutput.get
+    if (rows.length != 46 || rows.exists(_.length != 5)) {
+      throw new IllegalStateException("Forma della tabella legacy delle pietre non valida.")
     }
   }
 
@@ -169,7 +183,8 @@ final class BaseMonsterManager {
     new Discovery02DayTagHandler(metrics),
     new Patch02DayTagHandler(metrics),
     new Discovery03DistanceHandler(metrics),
-    new Patch03DistanceHandler(metrics)
+    new Patch03DistanceHandler(metrics),
+    new Discovery04StonesHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -312,6 +327,25 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("patch03", e)
+    }
+  }
+
+  def discover04Stones(calculationDay: BigInt, targetDay: BigInt): Discovery04StonesReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.phase = "DISCOVERY_04_STONES"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery04Ready(ctx)
+      Discovery04StonesReport(
+        calculationDay = ctx.calculationDay,
+        targetDay = ctx.targetDay,
+        legacyStoneRows = ctx.legacyStoneRowsOutput.get,
+        phase = ctx.phase,
+        status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("discovery04", e)
     }
   }
 

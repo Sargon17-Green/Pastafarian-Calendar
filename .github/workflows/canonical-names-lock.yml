@@ -178,3 +178,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 7: 20 PASS, 0 FAIL' stage07.log
           test "$(grep -Fc 'PASS — ' stage07.log)" -eq 20
           test "$(grep -Fc 'FAIL — ' stage07.log)" -eq 0
+
+  native-stage08-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify the Stage 8 intentional-red mutable stones signature
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage08Tests' > stage08.log 2>&1
+          rc=$?
+          set -e
+          cat stage08.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 8: 19 PASS, 3 FAIL' stage08.log
+          test "$(grep -Fc 'PASS — ' stage08.log)" -eq 19
+          test "$(grep -Fc 'FAIL — ' stage08.log)" -eq 3
+          for label in 'riga02 orzo' 'riga02 sale' 'riga03 frumento'; do
+            grep -Fq "FAIL — equivalenza normativa pietra ${label} — Divergenza storica" stage08.log
+          done

@@ -244,7 +244,15 @@ object Stage07Tests {
       truth(!code.contains("NormativeOracle"),"Oracolo test-only")
       truth(code.contains("LegacyDistanceAdapter.oldDistance(calculationDay, targetDay) + 1"),
         "Il wrapper deve usare il legacy reale")
-      truth(!code.contains("mutateStonesWrong"),"DISCOVERY 04 futura")
+      val state = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val currentStage = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE assente"))
+      if (currentStage < 8)
+        truth(!code.contains("mutateStonesWrong"),"DISCOVERY 04 prematura")
+      else
+        truth(code.contains("mutateStonesWrong"),"DISCOVERY 04 deve essere presente")
     }
 
     check("metadati PATCH 03 verdi e ordine dei certificati") {

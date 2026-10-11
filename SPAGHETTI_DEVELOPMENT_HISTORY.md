@@ -307,3 +307,43 @@ La suite Stage07 ha verificato il percorso reale della patch,
 66.049 coppie, 1.024 coppie deterministiche, grandi BigInt,
 isolamento e tutte le cicatrici precedenti.
 Nessuna logica dello stadio 8 è presente.
+
+## Stadio 8 — DISCOVERY 04: le pietre cambiano mentre vengono lette
+
+### Che cosa si pensava
+
+Aggiornare cinque registri uno dopo l'altro sembrava equivalente
+a costruire una nuova riga da quella precedente. Il risultato
+si discosta invece dalla norma non appena il secondo registro
+legge il primo già aggiornato.
+
+### Che cosa si è scoperto
+
+La norma calcola simultaneamente frumento, orzo, sale, amaro
+e rosso sulla base della riga precedente. La ricorrenza
+legacy aggiorna i registri in-place: il frumento della riga 2
+resta 378, ma l'orzo diventa 1434 anziché 1073 e il sale 3780
+anziché 2375. Le differenze si propagano alla riga 3.
+
+### Che cosa è stato aggirato
+
+Nulla. La tabella errata è utilizzata dal vero adattatore,
+dal dispatcher e dal manager; gli output non vengono
+normalizzati. Nessun wrapper PATCH 04 viene introdotto.
+
+### Perché non è ancora normativamente equivalente
+
+Per la seconda componente della riga 2, la formula legacy usa
+il frumento nuovo (378), ma la norma usa quello vecchio (17).
+La divergenza non dipende dal modulo, che nei due percorsi
+è il medesimo SAVE: nasce dalla proprietà dello stato.
+
+### Strato di mostruosità aggiunto
+
+Un adattatore con registri mutabili locali, handler dedicato,
+campo semantico, validazione, report immutabile, metrica e
+regressione RED con tre valori normativi esatti. La tabella
+storica di 46 righe viene costruita e restituita per invocazione,
+conservando tutte le cicatrici e patch precedenti.
+
+La certificazione nativa deve ancora essere acquisita.

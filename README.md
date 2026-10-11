@@ -221,3 +221,28 @@ Stage02 7 PASS/3 FAIL attesi, Stage03 12 PASS/0 FAIL,
 Stage04 14 PASS/3 FAIL attesi, Stage05 18 PASS/0 FAIL,
 Stage06 15 PASS/3 FAIL attesi e Stage07 20 PASS/0 FAIL.
 Lo stadio 8 non è iniziato.
+
+## Stadio 8 — DISCOVERY 04: mutazione delle pietre nella stessa riga
+
+L'adattatore `LegacyStoneMutationAdapter.mutateStonesWrong`
+parte dalle cinque pietre iniziali `[17,29,43,71,101]`.
+Per ognuna delle righe 2–46 aggiorna i cinque registri
+**uno dopo l'altro**: per l'orzo usa il frumento già aggiornato,
+per il sale l'orzo nuovo e così via. La norma richiede invece
+che ogni componente usi la precedente riga congelata.
+
+L'operazione esegue il vero percorso
+`BaseMonsterManager.discover04Stones → dispatcher → handler →
+LegacyStoneMutationAdapter`. Ogni chiamata ha un array locale,
+ma il risultato è congelato in `Vector[Vector[BigInt]]`.
+La cicatrice è intenzionale e non viene riparata.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage08Tests'
+```
+
+Attesa una firma RED esatta `19 PASS, 3 FAIL`, soltanto sui
+confronti normativi della riga 2 (orzo, sale) e riga 3
+(frumento). Le altre verifiche controllano la ricorrenza
+errata, 46 righe, modulo SAVE, assenza di alias, isolamento,
+disponibilità delle patch precedenti e mancanza di PATCH 04.
