@@ -3,3 +3,4 @@ export * from "./sourceLanguageCatalog.ts";
 export * from "./discovery01LegacyRemainder.ts";
 export * from "./patch01Save.ts";
 export * from "./discovery02LegacyDayTag.ts";
+export * from "./patch02DayTag.ts";
