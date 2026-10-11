@@ -1,13 +1,17 @@
 STAGE=1
 KIND=BOOTSTRAP
 EXPECTED_RESULT=GREEN
-ACTUAL_RESULT=NOT_EXECUTED
-LAST_COMPLETED_STAGE=0
+ACTUAL_RESULT=PASS_NATIVE_ADA
+LAST_COMPLETED_STAGE=1
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-NATIVE_ADA_EXECUTION=NOT_EXECUTED
+NATIVE_ADA_EXECUTION=PASS
 
 తెలుగు గమనిక:
-Stage 1 అమలు పని మరియు semantic-state ownership source audit పూర్తయ్యాయి. Package-level mutable semantic state కనబడలేదు; invocation isolation, failure-history isolation, catalog-copy isolation మరియు oracle interleaving regressions చేర్చబడ్డాయి.
-
-ప్రస్తుత runtime లో gprbuild, gnatmake, gnatbind మరియు gnat1 అందుబాటులో లేవు. అందువల్ల native Ada build/test ఇంకా జరగలేదు. విజయవంతమైన native run వరకు LAST_COMPLETED_STAGE=0 గానే ఉంటుంది.
+2026-10-11 న GitHub Actions లో GNAT 13 మరియు GPRbuild ఉపయోగించి ./run_stage01.sh ద్వారా Stage 1 మూల పరీక్షలను compile, bind, link చేసి విజయవంతంగా అమలు చేశారు.
+కంపైలర్‌లో కొన్ని నిరోధించని హెచ్చరికలు ఉన్నాయి; పరీక్షల విఫలం లేదు. Stage 2 ప్రారంభించబడలేదు.
+GITHUB_ACTIONS_RUN=38151109408
+GITHUB_ACTIONS_JOB=native-stage01
+GITHUB_ACTIONS_VERIFY=SUCCESS
+GITHUB_ACTIONS_NATIVE=SUCCESS
+EVIDENCE_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151109408
