@@ -32,10 +32,25 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install released V 0.5.2 (tag 7647ce1)
-        uses: vlang/setup-v@v1.7
-        with:
-          version: '0.5.2'
+      - name: Install immutable V 0.5.2 release binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/v-release"
+          curl --fail --location --show-error --silent --retry 3 --retry-delay 2 \
+            --output "$RUNNER_TEMP/v_linux.zip" \
+            https://github.com/vlang/v/releases/download/0.5.2/v_linux.zip
+          unzip -q "$RUNNER_TEMP/v_linux.zip" -d "$RUNNER_TEMP/v-release"
+          v_bin="$(find "$RUNNER_TEMP/v-release" -type f -name v -print -quit)"
+          test -n "$v_bin"
+          chmod +x "$v_bin"
+          version="$("$v_bin" version)"
+          echo "Installed: $version"
+          if [ "$version" != 'V 0.5.2 7647ce1' ]; then
+            echo "::error::Unexpected V compiler identity: $version"
+            exit 1
+          fi
+          echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
       - name: Verify V version and source formatting
         shell: bash
         run: |
