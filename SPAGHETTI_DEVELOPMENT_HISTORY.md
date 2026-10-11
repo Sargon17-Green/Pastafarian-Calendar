@@ -148,3 +148,7 @@ Ujian `stage07_patch03_tests.php` diwajibkan hijau dan merangkumi 16,668 pasanga
 ### Had peringkat dan penerimaan
 
 Pengujian sejarah Stage 6 masih mesti keluar dengan kod 1 untuk tepat 144 penyimpangan lama; pemeriksa sejarah mesti keluar dengan kod 0. Pengeluaran Stage 7 kini mesti hijau sepenuhnya. Penemuan keempat atau `mutateStonesWrong` tidak dilaksanakan sebelum Stage 8. Keputusan CI sebenar dicatat setelah diperiksa.
+
+### Bukti CI sebenar pada 11 Oktober 2026
+
+Run `38157374399` bagi commit `3b2984b29f2881a960e2df4b643f2726f7521c25` selesai dengan **success** dalam kedua-dua kerja `verify` dan `audit_php_bahasa_melayu`. Ujian sintaks dan kunci nama kanonik lulus; 15/15 ujian Stage 1 lulus; regresi pembahagian `kes=1014 tambahan=8` lulus dan fixture dijana tanpa diff. Pengesah sejarah masih melaporkan tiga penyimpangan SAVE, 65 penyimpangan bagi nombor hari, dan 144 penyimpangan legacy jarak yang dijangka; pengesah bagi setiap peringkat menerima corak itu. Ujian Stage 3 mencatat 94 kes lulus, Stage 5 mencatat 4,618 kes lulus, dan Stage 7 menghasilkan `LULUS Stage 7 PATCH 03 kes=16668 oracle=16656 tepi=12 simetri=16668 anjakan=1285`. Oleh itu tahap ini GREEN, tetapi kesilapan `oldDistance` masih wujud sebagai bukti sejarah.

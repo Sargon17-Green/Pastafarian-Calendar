@@ -47,3 +47,21 @@ Pemeriksaan sintaks semua PHP, regenerasi fixture tanpa diff dan kunci nama kano
 ## Tajuk commit dicadangkan
 
 `stage07(php-ms): betulkan jarak inklusif melalui pembalut warisan`
+
+## Bukti pemeriksaan CI yang benar-benar dijalankan
+
+Aliran `Canonical Names Lock` run `38157374399` untuk commit `3b2984b29f2881a960e2df4b643f2726f7521c25` telah **lulus sepenuhnya**: kedua-dua kerja `verify` dan `audit_php_bahasa_melayu` berstatus `success`. Bukti utama:
+
+```text
+RINGKASAN lulus=15 gagal=0
+LULUS bigint_division_regression kes=1014 tambahan=8
+KEPUTUSAN MERAH_DIJANGKA perbezaan=3 sepadan=1 lain=0
+LULUS Stage 3 PATCH 01 kes=94 baki_sifar=21 warisan=3
+KEPUTUSAN MERAH_DIJANGKA perbezaan=65 sepadan=64 tepi=2 lain=0
+LULUS Stage 5 PATCH 02 kes=4618 sebelum=2305 pada_atau_selepas=2311 asas=1 tepi=2
+KEPUTUSAN MERAH_DIJANGKA perbezaan=144 jumlah=144 tepi=8 lain=0
+LULUS kontrak merah khusus 03; legacy kekal salah dan produksi ditampal
+LULUS Stage 7 PATCH 03 kes=16668 oracle=16656 tepi=12 simetri=16668 anjakan=1285
+```
+
+Kemas kini ini hanya menambah bukti ke dokumen serahan. Kod produksi dan semua ujian tidak diubah. Peringkat berikutnya ialah Stage 8 — DISCOVERY 04 dan belum dimulakan.
