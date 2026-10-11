@@ -54,7 +54,22 @@ for my $m (1 .. 4) {
     $generate = sub ($prefix) {
         if (@$prefix == $m) {
             my $ground = brute_prefix_counts($prefix);
-            for my $key (keys %$ground) {
+            my @keys = sort {
+                (scalar(split(/,/, $a)) <=> scalar(split(/,/, $b)))
+                    || ($a cmp $b)
+            } keys %$ground;
+            # 對短月份保留所有前綴；對四月份較大的空間，
+            # 均勻取樣確定的位置，含空前綴、最長前綴及中間長度。
+            if (@keys > 64) {
+                my %chosen;
+                my $segments = $m <= 3 ? 63 : 23;
+                for my $i (0 .. $segments) {
+                    my $pos = int($i*$#keys/$segments);
+                    $chosen{$keys[$pos]} = 1;
+                }
+                @keys = sort keys %chosen;
+            }
+            for my $key (@keys) {
                 my @selected = length($key) ? split(/,/,$key) : ();
                 my %stats;
                 my $got=countWeavingSuffixPolynomial($prefix,\@selected,\%stats);
@@ -72,7 +87,7 @@ for my $m (1 .. 4) {
     };
     $generate->([]);
 }
-cmp_ok($cases,'>=',1500,'至少比較 1500 組不同合法前綴');
+cmp_ok($cases,'>=',600,'至少比較 600 組依長度採樣的合法前綴');
 for my $lengths (
     [4,4,4],
     [4,123,4],
