@@ -231,7 +231,7 @@ public final class Stage02EndpointWeavingTests {
             NormativeOracle.WeavingFamily oracle = new NormativeOracle.WeavingFamily(values);
             eq(oracle.count(), optimized.count(), "E_TERMINAL_FOLD_ORACLE");
             BigInteger count = oracle.count();
-            if (values.length <= 5 && Arrays.stream(values).sum() <= 32) {
+            if (count.compareTo(BigInteger.valueOf(15000)) <= 0) {
                 for (BigInteger rank : sampled(count)) {
                     int[] result = oracle.unrank1(rank);
                     arr(result, optimized.unrank1(rank), "E_TERMINAL_FOLD_RANK");
