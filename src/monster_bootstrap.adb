@@ -1,4 +1,5 @@
 with Ada.Numerics.Big_Numbers.Big_Integers;
+with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
 
 package body Monster_Bootstrap is
    use Ada.Numerics.Big_Numbers.Big_Integers;
@@ -28,7 +29,7 @@ package body Monster_Bootstrap is
       if Context.Status = Failed then
          Context.Last_Error := Invalid_Input_State;
          Context.Metrics.Error_Count := Context.Metrics.Error_Count + 1;
-         raise Program_Error with "విఫలమైన సందర్భాన్ని మళ్లీ ధృవీకరించరాదు";
+         raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("విఫలమైన సందర్భాన్ని మళ్లీ ధృవీకరించరాదు");
       end if;
       Context.Status := Validated;
    end Base_Validate;
@@ -54,7 +55,7 @@ package body Monster_Bootstrap is
          when Boot_Failed =>
             Context.Last_Error := Dispatcher_Invariant_Failed;
             Context.Metrics.Error_Count := Context.Metrics.Error_Count + 1;
-            raise Program_Error with "ప్రాథమిక పంపిణీ స్థితి విఫలమైంది";
+            raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("ప్రాథమిక పంపిణీ స్థితి విఫలమైంది");
       end case;
    end Base_Dispatch;
 
