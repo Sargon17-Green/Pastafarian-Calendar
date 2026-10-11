@@ -10,6 +10,8 @@ import os
 import subprocess
 import sys
 import tempfile
+import contextlib
+import shutil
 import StringIO
 from funge.program import Program
 from funge.languages.funge98 import Befunge98
@@ -51,8 +53,16 @@ def trace_events(path):
     need(any(x[0] == 'STEP' for x in rows), "missing hooked Native STEP events")
     return rows
 
+@contextlib.contextmanager
+def owned_temporary_directory():
+    path = tempfile.mkdtemp(prefix='native-bf98-trace-')
+    try:
+        yield path
+    finally:
+        shutil.rmtree(path)
+
 def parent():
-    with tempfile.TemporaryDirectory() as tmp:
+    with owned_temporary_directory() as tmp:
         evidence = {}
         for kind in ('offset', 'quoted'):
             filename = os.path.join(tmp, kind + '.tsv')
