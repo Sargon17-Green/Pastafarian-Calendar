@@ -4,6 +4,7 @@ use utf8;
 use strict;
 use warnings;
 use Math::BigInt;
+use Scalar::Util qw(blessed);
 use Exporter 'import';
 use Pastafari::SourceLanguageCatalog qw(cutlet_name_by_index month_name_by_index);
 
@@ -46,6 +47,17 @@ my $M_CONST = Math::BigInt->new(2)->bpow(127)->bsub(1);
 sub _bi ($x) {
     return $x->copy if ref($x) && eval { $x->isa('Math::BigInt') };
     return Math::BigInt->new("$x");
+}
+
+sub _rank_in_range ($value, $total, $error) {
+    die $error if !defined($value);
+    die $error if ref($value)
+        && !(blessed($value) && $value->isa('Math::BigInt'));
+    my $digits = "$value";
+    die $error if $digits !~ /\A[0-9]+\z/;
+    my $rank = Math::BigInt->new($digits);
+    die $error if $rank < 1 || $rank > $total;
+    return $rank;
 }
 
 sub M { return $M_CONST->copy }
@@ -401,9 +413,8 @@ sub fallingFactorial ($n, $k) {
 
 sub unrankDistinctIndices ($n, $k, $rank1) {
     die "名稱排列參數超出範圍\n" if $n < 0 || $k < 0 || $k > $n;
-    my $r = _bi($rank1);
     my $total = fallingFactorial($n, $k);
-    die "名稱排列排名超出範圍\n" if $r < 1 || $r > $total;
+    my $r = _rank_in_range($rank1, $total, "名稱排列排名超出範圍\n");
     my @remaining = (1 .. $n);
     my @out;
     for my $position (1 .. $k) {
@@ -439,9 +450,7 @@ sub makeBoundedCompositionFamily ($total, $slots, $lo, $hi) {
     };
     my $count_all = sub { return $count->($total,$slots) };
     my $unrank = sub ($rank1) {
-        my $r = _bi($rank1);
-        my $total_ranks = $count_all->();
-        die "有界組成排名超出範圍\n" if $r < 1 || $r > $total_ranks;
+        my $r = _rank_in_range($rank1, $count_all->(), "有界組成排名超出範圍\n");
         my ($rem,$k) = ($total,$slots);
         my @out;
         for my $position (1 .. $slots) {
@@ -491,9 +500,7 @@ sub makeCutletPartitionFamily ($G, $K, $required = undef) {
     };
     my $count_all = sub { return $count->($G,$K,0,0) };
     my $unrank = sub ($rank1) {
-        my $r = _bi($rank1);
-        my $total_ranks = $count_all->();
-        die "肉排分割排名超出範圍\n" if $r < 1 || $r > $total_ranks;
+        my $r = _rank_in_range($rank1, $count_all->(), "肉排分割排名超出範圍\n");
         my ($rem,$slots,$cum,$hit) = ($G,$K,0,0);
         my @out;
         while ($slots > 0) {
@@ -622,9 +629,8 @@ sub countWeavings ($lengths) {
 sub unrankWeaving ($lengths, $rank1) {
     my $m = scalar @$lengths;
     my $counter = _weave_counter($lengths);
-    my $r = _bi($rank1);
     my $total_ranks = $counter->([@$lengths],0,0);
-    die "月份交織排名超出範圍\n" if $r < 1 || $r > $total_ranks;
+    my $r = _rank_in_range($rank1, $total_ranks, "月份交織排名超出範圍\n");
     my @remaining = @$lengths;
     my ($opened,$closed) = (0,0);
     my @out;
