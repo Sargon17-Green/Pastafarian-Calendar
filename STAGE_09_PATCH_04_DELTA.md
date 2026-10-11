@@ -82,3 +82,23 @@ Giai đoạn 9: vá cập nhật đá bằng ảnh chụp hàng cũ
 Giữ nguyên phép cập nhật nối tiếp lịch sử, thực sự gọi nó trên
 một bản sao rồi ghi đè năm giá trị từ snapshot. Giữ bốn hồi quy
 chuẩn không đổi, bổ sung kiểm thử biên, số lớn và quyền sở hữu ngữ nghĩa.
+
+## Kết quả thực tế được kiểm chứng
+
+- Commit triển khai `75d703a08cd4ed44c4beeb13713cb6a973f1c8dc`.
+- 88 kiểm thử, 0 lỗi, 0 cảnh báo biên dịch.
+- Môi trường: Elixir 1.18.5, Erlang/OTP 27.
+- Cả bốn hồi quy chuẩn từ giai đoạn 8 vẫn giữ nguyên và nay đạt.
+- 11 kiểm thử mới đã đạt, bao gồm số nguyên 2048 bit,
+  tính độc lập song song và đối chiếu đủ 46 hàng.
+- Khóa tên chuẩn PASS.
+- `LegacyStoneMutation` giữ nguyên blob SHA
+  `91260b89961571e9c96a0f0e563c27115c1aa697`.
+- Bốn tệp mã và kiểm thử khớp với bản bàn giao đã chuẩn bị.
+- Không thay đổi main, không đưa lỗi giai đoạn 10 vào trước.
+
+Kiểm thử: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38159415842
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38159415828
+
+Trạng thái kết thúc giai đoạn 9: GREEN đã được xác minh.
+Điểm tiếp theo: giai đoạn 10, DISCOVERY 05, chưa được khởi động.

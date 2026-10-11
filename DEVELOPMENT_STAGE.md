@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=9
 CURRENT_KIND=PATCH
 CURRENT_PATCH=04
-LAST_COMPLETED_STAGE=8
+LAST_COMPLETED_STAGE=9
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyStoneMutation sai. StonePatch chụp hàng cũ, chạy legacy trên clone, rồi ghi đè cả năm ô từ snapshot; StoneManager đưa kết quả vá vào đường sản xuất.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_09_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_09_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_09_PENDING
-CI_FAILURES=STAGE_09_PENDING
+CI_TESTS=88
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -128,5 +128,15 @@ Giai đoạn 9 đưa StonePatch vào đường xây bảng 46 hàng thực.
 Kết quả trung gian của LegacyStoneMutation được ghi đè đủ năm ô.
 Bốn hồi quy chuẩn giai đoạn 8 vẫn giữ nguyên kết quả kỳ vọng.
 Các kiểm thử nối dây cũ được sửa để phân biệt legacy sai và đường công khai đúng.
-Dự kiến 88 kiểm thử, 0 lỗi; chưa đánh dấu hoàn tất khi chưa có CI.
-LAST_COMPLETED_STAGE vẫn là 8 cho tới khi xác minh cả kiểm thử và khóa tên.
+Kết quả: 88 kiểm thử đạt, 0 lỗi; khóa tên chuẩn đã đạt.
+LAST_COMPLETED_STAGE đã nâng lên 9 sau xác minh cả kiểm thử và khóa tên.
+
+Giai đoạn 9 được xác minh bằng GitHub Actions: Elixir 1.18.5, OTP 27.
+88 kiểm thử, 0 lỗi và không có cảnh báo biên dịch. Khóa tên chuẩn đạt.
+Cả bốn hồi quy chuẩn từ phát hiện 04 được giữ nguyên và chuyển thành xanh.
+Hàm lịch sử LegacyStoneMutation có blob SHA không đổi:
+91260b89961571e9c96a0f0e563c27115c1aa697.
+Bốn tệp triển khai và kiểm thử đã đối chiếu khớp bản bàn giao.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38159415842
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38159415828
+Giai đoạn 9 đóng GREEN; tiếp theo là giai đoạn 10, DISCOVERY 05.

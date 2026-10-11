@@ -228,3 +228,31 @@ Giai đoạn 8/55 được đóng với trạng thái `EXPECTED_RED`.
 Giai đoạn 9/55 là `PATCH 04`: giữ phép cập nhật nối tiếp sai,
 thực sự gọi legacy trên bản sao, nhận garbage rồi ghi đè đủ năm
 kết quả từ snapshot của hàng cũ.
+
+## Giai đoạn 9 — Bản vá 04 cho bảng đá
+
+`StonePatch.patch_row/2` lưu ảnh chụp của hàng cũ, tạo bản sao
+`legacy_clone`, thực thi thật `LegacyStoneMutation.mutate_stones_wrong/2`
+trên bản sao và nhận năm kết quả trung gian sai. Sau đó bản vá ghi đè
+cả năm giá trị từ công thức chỉ đọc ảnh chụp hàng cũ.
+`StoneManager.build_table`, `stone_row_spaghetti` và
+`bootstrap_context` đều đi qua bản vá này.
+
+Bốn hồi quy chuẩn của giai đoạn 8 không được sửa và hiện đã đạt.
+Những kiểm thử cấu trúc từng đòi kết quả công khai sai được điều chỉnh
+để chứng minh hàm legacy vẫn sai, còn bảng sản xuất đã chính xác.
+11 kiểm thử bổ sung kiểm toán 46 hàng, số nguyên rất lớn,
+các công thức độc lập, quyền sở hữu và thực thi đồng thời.
+
+## Kiểm chứng đóng giai đoạn 9
+
+GitHub Actions với Elixir 1.18.5 và OTP 27: **88 kiểm thử, 0 lỗi**,
+không cảnh báo biên dịch. Khóa tên chuẩn độc lập đạt.
+Mã `LegacyStoneMutation` của giai đoạn 8 giữ nguyên blob SHA.
+
+- [Kiểm thử Elixir 88/88 đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38159415842)
+- [Khóa tên chuẩn đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38159415828)
+
+Trạng thái giai đoạn 9/55: `GREEN` đã xác minh.
+Giai đoạn 10/55 kế tiếp: `DISCOVERY 05`, cách lưu bảy giọt
+ẩn theo thứ tự đảo ngược. Không đưa bản vá 05 vào giai đoạn 9.

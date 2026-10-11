@@ -206,3 +206,31 @@ xóa import mà không thay mã sản xuất hay kết quả chuẩn. Lần xác
 sau không có cảnh báo và khóa tên chuẩn độc lập PASS.
 Không có bản vá chụp dữ liệu hay sửa đầu ra ở giai đoạn này.
 Trạng thái đóng giai đoạn 8 là EXPECTED_RED.
+
+## Giai đoạn 9 — Bản vá 04: chụp lại hàng cũ trước khi cập nhật đá
+
+**Giữ lỗi lịch sử:** `LegacyStoneMutation.mutate_stones_wrong`
+vẫn cập nhật năm vị trí nối tiếp, đọc lại các ô vừa ghi. Không sửa
+tệp legacy và không loại bỏ lời gọi của nó.
+
+**Bọc lỗi:** `StonePatch.patch_row` chụp `old_snapshot`,
+tạo `legacy_clone` từ năm giá trị, gọi thật hàm lịch sử để
+nhận `garbage` rồi ghi đè cả năm ô trên tuple ấy, mỗi phép tính
+chỉ đọc năm giá trị của `old_snapshot`. `StoneManager`
+dùng lớp bọc này cho tất cả hàng từ 2 đến 46.
+
+**Vì sao đúng:** Cả năm công thức chuẩn chỉ phụ thuộc hàng trước.
+Vì mọi ô được ghi đè bằng chính công thức ấy, hàng 2 khớp chuẩn;
+theo quy nạp, cả 46 hàng khớp bộ tham chiếu, mà hàm lịch sử
+vẫn được thực thi thật trong cùng đường sản xuất.
+
+**Kiểm thử:** Giữ nguyên bốn kỳ vọng hồi quy chuẩn của giai đoạn 8;
+điều chỉnh chỉ các kiểm thử dây nối dựa vào kết quả sai công khai.
+Thêm 11 kiểm thử về công thức, điều kiện biên, số nguyên tùy ý,
+độc lập context và song song. Không khởi động giai đoạn 10.
+
+**Bằng chứng đóng:** GitHub Actions chạy 88 kiểm thử, 0 lỗi,
+không cảnh báo biên dịch, khóa tên chuẩn PASS độc lập.
+`LegacyStoneMutation` giữ blob SHA
+`91260b89961571e9c96a0f0e563c27115c1aa697`.
+Giai đoạn 9 khép GREEN.
