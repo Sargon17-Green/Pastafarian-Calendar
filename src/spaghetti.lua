@@ -1,6 +1,7 @@
 local Base = require("monster_base")
 local LegacySave = require("legacy_save")
 local SavePatch = require("save_patch")
+local LegacyDayTag = require("legacy_day_tag")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -25,8 +26,19 @@ function S.legacySaveProbe(value)
     return LegacySave.execute(value)
 end
 
+-- Wout aktif Discovery 02 a kenbe erè nimewo jou istorik la.
+function S.dayTagSpaghetti(day)
+    local wrong = LegacyDayTag.execute(day)
+    return wrong
+end
+
+-- Dyagnostik la retounen ansyen rezilta a ak kontèks dispatcher li.
+function S.legacyDayTagProbe(day)
+    return LegacyDayTag.execute(day)
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 3", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 4", 0)
 end
 
 return S

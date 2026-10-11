@@ -71,3 +71,21 @@ Nou fè menm `MonsterContext` pase nan de handler dispatcher: `LEGACY_SAVE`, apr
 Tès ekivalans ki te wouj la vin vèt san modifye konparezon normatif li. Pou prèv Discovery 01 la pa disparèt, `stage02_expected_red_audit.lua` kounye a kouri yon regresyon **espesifik pou chemen legacy a**, ki kontinye pwodwi egzakteman twa diferans `M`, `2M`, `3M`; odit la dwe pase. Tès tras, limit ak pwopriyete Stage 2 yo toujou verifye ansyen rès la, men egzije kounye a yon rezilta piblik korije. Nou ajoute tès pozitif sou 903 ka limit, 8 ka espesyal, antre gwo, izolasyon eta, sekans dispatcher, metrik ak pwopriyetè eta.
 
 Se sèl premye patch la nou fè. Lòt defo istorik yo rete pou etap ki vin apre yo.
+
+## Stage 4 — DISCOVERY 02: `oldDayTag`
+
+### Sa nou te kwè
+
+Premye lide pou nimewo jou a te pran de fwa distans ant jou kesyon an ak Jou Fondasyon an: `2 * abs(day - FOUNDATION)`. Nou te sipoze yon nimewo pè konstan t ap sifi sou toude bò Fondasyon an.
+
+### Sa nou dekouvri
+
+Pou yon jou anvan Fondasyon an, fòmil la koresponn ak règ normatif la. Men pou jou Fondasyon an menm, legacy a bay `0` olye de `1`; pou jou ki vin apre yo, li manke inite `1` la epi li toujou pè. Se yon chanjman parite egzak, pa yon erè `SAVE`, pa yon erè tradiksyon, epi pa yon debòdman antye.
+
+### Kouch monstr ki grandi
+
+Nou ajoute yon dispatcher handler `LEGACY_DAY_TAG`, ak nouvo kontèks tranzaksyon lokal pou chak invocation, antre ak sòti desimal, metrik `legacy.daytag.calls`, tras ak dyagnostik. Li pase nan `dayTagSpaghetti`, yon pwen antre reyèl ki retounen rezilta legacy ki mal la. `legacyDayTagProbe` fè tras yo disponib. Nou pa enpòte oracle tès la nan pwodiksyon. Nou itilize `BigInt` sou distans jou a pou konsève kalkil orijinal la pou `math.mininteger` ak `math.maxinteger`.
+
+### Prèv ak etap ki manke
+
+Tès yo egzamine 631 antre, simetri ansyen fòmil la, izolasyon ant invocation, API ak tras dispatcher, epi yo egzije egzakteman kat divergences nan regresyon wouj la. Tout tès Stage 1–3 dwe toujou pase. Nou pa ajoute koreksyon +1 pou jou Fondasyon an ak apre li, ni guard espesyal sa a: de kouch sa yo fè pati **Stage 5 — PATCH 02** sèlman.

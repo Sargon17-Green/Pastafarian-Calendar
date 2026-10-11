@@ -57,3 +57,29 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage03_tests.lua .
+
+  lua_stage04_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye tras ak pwopriyete Discovery 02
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage04_trace_tests.lua .
+          lua5.3 test/stage04_property_tests.lua .
+          lua5.3 test/stage04_scope_tests.lua .
+          lua5.3 test/stage04_expected_red_audit.lua .
+      - name: Regresyon nimewo jou a — echèk istorik espere
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage04_regression_tests.lua .
