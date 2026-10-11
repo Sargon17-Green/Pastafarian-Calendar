@@ -29,3 +29,9 @@ GitHub Actions run 38150967363 (commit 61c345fb17b29a2113dab495928a0bc1570a077c)
 Stage 54 integration अजून झालेला नाही; `calendarDateSpaghetti` आता देखील `MonsterStageError` देतो.
 
 GitHub Actions run `38151476087` ने commit `885645e013b2a28e08cd55fcec359434cdf04fc0` साठी `STAGE_03_PATCH_01_PASS cases=672 repairs=16 unchanged=656 mismatches=0` नोंदवले. `STAGE_01_PASS`, `STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1`, ऐतिहासिक मुद्दाम लाल साक्षी आणि SourceLanguageCatalog चा लॉकही उत्तीर्ण झाले. त्यामुळे टप्पा 3/55 पूर्ण; टप्पा 4 (PATCH 02 DISCOVERY) अद्याप सुरू नाही.
+
+## टप्पा 4 — DISCOVERY 02: पाया-दिवस मोजणीचा ऐतिहासिक दोष
+
+`src/discovery02LegacyDayTag.ts` मध्ये `oldDayTag(day) = 2 * abs(day - FOUNDATION_DAY)` हे नियमाधारित `dayCount` पेक्षा वेगळे, जाणीवपूर्वक चुकीचे गणित जोडले. वास्तविक उत्पादन-मार्गात स्वतंत्र `Discovery02DayTagHandler` दोन्ही दिवसांसाठी जुन्या मोजण्या करतो; संदर्भ, branchTrace आणि metrics प्रत्येक आवाहनाचे स्वतंत्र असतात. अपवादांपूर्वी context बदलू नये म्हणून पूर्वपडताळणी आहे.
+
+`FOUNDATION_DAY-2,-1,0,+1,+2` या साक्षींत legacy `[4,2,0,2,4]` आणि नियमानुसार `[4,2,1,3,5]` हाच फरक अपेक्षित आहे. `test/discovery02Red.ts` मध्ये 3 expected mismatches व 2 matches मिळाल्यावरच लाल चाचणी अपेक्षित आहे. मागील stages 1–3 हिरवे राहणे आवश्यक. ऐतिहासिक PATCH 02 पुढील टप्प्यातच यावा.

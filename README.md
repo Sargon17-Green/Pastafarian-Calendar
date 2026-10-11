@@ -61,3 +61,15 @@ npm run test:discovery01:red
 पहिले तीन आदेश यशस्वी झाले पाहिजेत; चौथा आदेश वेगळा चालविल्यास केवळ ऐतिहासिक दोषाच्या पुष्टीसाठी मुद्दाम exit 1 असतो. GitHub Actions मध्ये चौथ्या आदेशाची अपेक्षित अपयशी अवस्था स्पष्टपणे तपासली जाते. अंतिम दिनांक-मूल्य `calendarDateSpaghetti` पुढील टप्प्यांसाठी अद्याप अनुपलब्ध आहे.
 
 **पडताळणी:** GitHub Actions run `38151476087` (commit `885645e013b2a28e08cd55fcec359434cdf04fc0`) मधील TypeScript typecheck, stage 1, stage 2, stage 3, अपेक्षित historical red आणि canonical names lock सर्व job निष्पन्ने `success` आहेत. पुढील कार्य टप्पा 4/55 — PATCH 02 DISCOVERY, त्याआधी इतर दोषाची दुरुस्ती घालू नये.
+
+## टप्पा 4/55 — DISCOVERY 02
+
+ऐतिहासिक `oldDayTag(day) = 2 * abs(day - FOUNDATION_DAY)` हा सदोष दिवस-मोजणी मार्ग आता उत्पादन स्रोत-कोडमध्ये आहे. `discoverLegacyDayTags(calculationDay, targetDay)` वास्तविक dispatcher आणि handler वापरतो. दोन पाया-दिवसापूर्वीच्या साक्षी जुळतात; पाया-दिवशी आणि त्यापुढील तीन साक्षी `test/normativeOracle.ts` मधील `dayCount` पेक्षा 1 ने कमी येतात. PATCH 02 चा `+1` नियम **अद्याप लागू केलेला नाही**.
+
+```text
+npm run typecheck
+npm test
+npm run test:discovery02:red
+```
+
+पहिले दोन आदेश यशस्वी, तिसऱ्यात `DISCOVERY_02_EXPECTED_RED mismatches=3 matches=2` व मुद्दाम exit 1 अपेक्षित आहे. पहिल्या PATCH 01 ला आणि मूळ historical red पुराव्यांना स्पर्श केलेला नाही. पुढील पूर्ण दुरुस्तीचा टप्पा 5 आहे.

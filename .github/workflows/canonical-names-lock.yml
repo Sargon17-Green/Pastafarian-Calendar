@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage03-typescript-marathi:
+  stage04-typescript-marathi:
     if: github.ref == 'refs/heads/TypeScript+मराठी'
     runs-on: ubuntu-latest
     steps:
@@ -37,14 +37,15 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript typecheck
         run: npm run typecheck
-      - name: Stage 01, historical discovery and PATCH 01 regression
+      - name: Stages 01-04 guards and PATCH 01 regression
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee stage03-results.log
-          grep -Fq 'STAGE_01_PASS' stage03-results.log
-          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage03-results.log
-          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage03-results.log
+          npm test | tee stage04-results.log
+          grep -Fq 'STAGE_01_PASS' stage04-results.log
+          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage04-results.log
+          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage04-results.log
+          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage04-results.log
       - name: Verify intentional expected-red regression
         shell: bash
         run: |
@@ -58,3 +59,16 @@ jobs:
             exit 1
           fi
           grep -Fq 'DISCOVERY_01_EXPECTED_RED mismatches=3 matches=1' discovery01-red.log
+      - name: Verify DISCOVERY 02 intentional expected-red regression
+        shell: bash
+        run: |
+          set +e
+          npm run test:discovery02:red > discovery02-red.log 2>&1
+          result=$?
+          set -e
+          cat discovery02-red.log
+          if [ "$result" -eq 0 ]; then
+            echo "::error::DISCOVERY 02 expected-red unexpectedly passed"
+            exit 1
+          fi
+          grep -Fq 'DISCOVERY_02_EXPECTED_RED mismatches=3 matches=2' discovery02-red.log
