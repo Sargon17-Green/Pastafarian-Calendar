@@ -2,7 +2,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=1
 CURRENT_KIND=BOOTSTRAP
 CURRENT_PATCH=none
-LAST_COMPLETED_STAGE=0
+LAST_COMPLETED_STAGE=1
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -14,8 +14,11 @@ NATURAL_LANGUAGE=Italiano
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Contesto base, dispatcher neutrale, validazione, involucro errori e metriche senza logica di patch.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=NO
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 
-Nota di esecuzione: lo stato finale di completamento viene aggiornato solo dopo una compilazione e una prova Scala riuscite.
+Verifica nativa dello stadio 1: GitHub Actions run 38119685379, jobs native-stage01 e verify riusciti.
+Comando eseguito: sbt -batch 'Test / runMain pastafari.Stage01Tests'
+Risultato verificato nel log: RISULTATO STADIO 1: 18 PASS, 0 FAIL.
+La linea rimane allo stadio 1 completato; lo stadio 2 non è stato iniziato.
