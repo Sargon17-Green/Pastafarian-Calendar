@@ -63,3 +63,9 @@ ni'o lo `MonsterCutletCalendar` cu zbasu lo nanca .e lo kecti .e lo djedi se nam
 ### lo masti se jorne te cipra
 
 ni'o lo `Stage02WeavingDomainTests` cu cipra lo masti be vo .a za'u vo djedi .e lo masti be 123 djedi, lo pamoi .e lo fanmo porsi, .e lo `NormativeOracle` se du'u. lo ro barda nanca se jorne cu na se cipra ca ti. lo remoi stadi cu na mulno.
+
+### lo kecti detri .e lo jimte masti se jorne cipra
+
+ni'o lo `MonsterCutletCalendar` cu se cipra fi lo stodi `NormativeOracle` tezu'e lo nu facki lo nanca .e lo kecti cmene .e lo djedi be lo kecti. lo se benji `MonsterManager.cutletDate` cu zbasu lo stodi se benji result.
+
+ni'o lo `Stage02WeavingDomainTests` cu cipra lo masti se jorne porsi ca lo jimte vo .e 123 djedi. lo 12 cipra pavlinji cu fanmo fi lo `38155403540` GitHub Actions run gi'e te jalge lo drani. lo mulno nanca masti se jorne porsi cu na se cipra ca ti .i lo remoi stadi cu na mulno.
