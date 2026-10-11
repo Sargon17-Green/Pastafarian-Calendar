@@ -123,3 +123,27 @@ Il commit di codice verificato è
 `46b58a474899028d686e23f50cf2aa6191a29db4`.
 La suite di DISCOVERY 02 resta RED per progettazione: è una
 prova dell'errore preservato, non un difetto della CI.
+
+## Stadio 5 — PATCH 02: ripristino della numerazione del giorno
+
+Il helper `LegacyDayTagAdapter.oldDayTag(day)` non viene modificato.
+La funzione `Patch02DayTagWrapper.dayTagPatch(day)` lo chiama realmente,
+e aggiunge **esattamente 1** quando `day >= FoundationDay`, altrimenti
+restituisce il valore legacy inalterato.
+
+Il percorso `BaseMonsterManager.patch02DayTag` attraversa
+`BOOT → DISCOVERY_02_DAY_TAG → PATCH_02_DAY_TAG` nello stesso contesto.
+Il report conserva `legacyTag`, `patchedTag` e la traccia;
+`discover02DayTag` continua a esporre il difetto senza correzioni.
+Il validatore verifica una seconda volta il delta ammesso senza chiamare
+l'oracolo di test.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage05Tests'
+```
+
+Stage05 richiede 18 PASS, 0 FAIL e testa 8193 giorni intorno alla Fondazione,
+interi oltre 16.000 bit, campioni deterministici, precondizioni del manager,
+isolamento tra invocazioni e cicatrici precedenti. Il CI esegue anche tutti
+i test nativi dei primi quattro stadi: Stage02 e Stage04 restano RED soltanto
+nei tre casi storici previsti per ciascuno.

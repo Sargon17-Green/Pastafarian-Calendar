@@ -69,3 +69,18 @@ e `legacyDayTagOutput`; validazione e metrica non influenzano l'output.
 Il report copia valori e tracciato immutabili. Il calcolo non chiama
 l'oracolo né una correzione futura. Il percorso PATCH 01 e le regressioni
 storiche degli stadi 1–3 non vengono riscritti.
+
+## PATCH 02: correzione additiva sopra il vecchio day tag
+
+Il manager esegue in ordine il Bootstrap, l'handler di DISCOVERY 02 e
+l'handler di PATCH 02 nello stesso contesto; non simula la chiamata legacy.
+`Patch02DayTagWrapper.dayTagPatch` chiama `oldDayTag` e introduce
+una sola biforcazione su `day >= FoundationDay`.
+Lo stato semantico nuovo (`patchedDayTagOutput`, `patch02Applied`)
+appartiene al singolo `BaseMonsterContext`.
+
+`BaseValidationManager.requirePatch02Ready` controlla presenza,
+stato, sequenza della traccia e incremento consentito `0/1`
+senza utilizzare il riferimento normativo di test. Il report finale
+è immutabile; le metriche sono osservabilità non semantica.
+Il vecchio percorso rimane direttamente invocabile e deliberatamente RED.

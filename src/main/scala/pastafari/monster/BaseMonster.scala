@@ -16,7 +16,9 @@ final case class BaseMonsterContext(
   var patchedSaveOutput: Option[BigInt] = None,
   var patch01Applied: Boolean = false,
   var legacyDayTagInput: Option[BigInt] = None,
-  var legacyDayTagOutput: Option[BigInt] = None
+  var legacyDayTagOutput: Option[BigInt] = None,
+  var patchedDayTagOutput: Option[BigInt] = None,
+  var patch02Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -36,6 +38,24 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requirePatch02Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_02_DAY_TAG" ||
+        ctx.status != "PATCH_02_READY" ||
+        ctx.legacyDayTagInput.isEmpty ||
+        ctx.legacyDayTagOutput.isEmpty ||
+        ctx.patchedDayTagOutput.isEmpty ||
+        !ctx.patch02Applied ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_02_DAY_TAG", "PATCH_02_DAY_TAG")) {
+      throw new IllegalStateException("Il PATCH 02 non è pronto nel contesto corrente.")
+    }
+    // Convalida indipendente del delta locale, senza usare l'oracolo di test.
+    val expectedIncrement =
+      if (ctx.legacyDayTagInput.get >= BigInt(-15055671)) BigInt(1) else BigInt(0)
+    if (ctx.patchedDayTagOutput.get != ctx.legacyDayTagOutput.get + expectedIncrement) {
+      throw new IllegalStateException("Il PATCH 02 ha alterato la cicatrice in modo non consentito.")
     }
   }
 
@@ -119,7 +139,8 @@ final class BaseMonsterManager {
     new BaseBootstrapHandler(metrics),
     new Discovery01RemainderHandler(metrics),
     new Patch01SaveHandler(metrics),
-    new Discovery02DayTagHandler(metrics)
+    new Discovery02DayTagHandler(metrics),
+    new Patch02DayTagHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -194,6 +215,31 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("discovery02", e)
+    }
+  }
+
+  def patch02DayTag(calculationDay: BigInt, targetDay: BigInt, day: BigInt): Patch02DayTagReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.legacyDayTagInput = Some(day)
+    ctx.phase = "DISCOVERY_02_DAY_TAG"
+    try {
+      // Stessa invocazione: la cicatrice storica deve essere osservata prima della patch.
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery02Ready(ctx)
+      ctx.phase = "PATCH_02_DAY_TAG"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch02Ready(ctx)
+      Patch02DayTagReport(
+        queriedDay = ctx.legacyDayTagInput.get,
+        legacyTag = ctx.legacyDayTagOutput.get,
+        patchedTag = ctx.patchedDayTagOutput.get,
+        patchApplied = ctx.patch02Applied,
+        phase = ctx.phase,
+        status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("patch02", e)
     }
   }
 

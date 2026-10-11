@@ -143,7 +143,9 @@ La riparazione appartiene allo stadio 5 e non può essere anticipata.
 ### Strato di mostruosità aggiunto
 Nuovo adattatore, handler, stato semantico per invocazione, metrica,
 validazione, snapshot e regressione RED dedicata. PATCH 01 resta verde,
-la sua cicatrice resta osservabile. ### Verifica nativa compiuta
+la sua cicatrice resta osservabile.
+
+### Verifica nativa compiuta
 
 La run GitHub Actions 38153510206 sul commit
 `46b58a474899028d686e23f50cf2aa6191a29db4`
@@ -155,3 +157,44 @@ La regressione DISCOVERY 02 ha mostrato esattamente
 `F:1→0`, `F+1:3→2`, `F+2:5→4`,
 con due confronti anteriori PASS. Il catalogo canonico resta
 bloccato e lo stadio 5 non è stato anticipato.
+
+## Stadio 5 — PATCH 02: correzione additiva del lato temporale
+
+### Che cosa si pensava
+
+Il helper `oldDayTag` già calcolava correttamente la distanza assoluta,
+ma perdeva l'informazione del lato temporale. Annullarne la cicatrice
+cambiando la formula interna distruggerebbe il percorso di DISCOVERY 02.
+
+### Che cosa si è scoperto
+
+Per `d < F`, il tag legacy vale `2(F-d)`, già uguale a `dayCount(d)`.
+Per `d >= F`, il tag legacy vale `2(d-F)`, mentre `dayCount(d)`
+vale `2(d-F)+1`. La distanza fra i due risultati è quindi esattamente
+0 nel passato e 1 dalla Fondazione in avanti, senza altri casi.
+
+### Che cosa è stato aggirato
+
+Il nuovo `Patch02DayTagWrapper.dayTagPatch` chiama
+`LegacyDayTagAdapter.oldDayTag` e aggiunge uno solo nel secondo
+ramo. `Patch02DayTagHandler` richiede prima la vera uscita legacy
+nello stesso contesto. La via diagnostica di Stage04 resta invariata
+e il vecchio valore viene conservato nello snapshot finale.
+
+### Perché è normativamente equivalente
+
+Gli interi sono partizionati in `d<F` e `d>=F`.
+In ciascuna parte la formula patched coincide algebricamente
+con la definizione normativa di `dayCount`. La dimostrazione
+non dipende da limiti di bit; in Scala `BigInt` è illimitato.
+La suite test-only confronta il risultato con il riferimento normativo
+su bordi, finestre esaustive, campioni deterministici e interi enormi.
+
+### Strato di mostruosità aggiunto
+
+Un wrapper, un handler, due nuovi campi del contesto, un validator
+di delta, snapshot immutabile, metrica propria e due percorsi
+indipendenti (diagnostico storico e patch verde). Nessuna correzione
+futura viene anticipata; PATCH 01 resta intatta.
+
+La prova nativa deve ancora essere certificata dal nuovo commit.

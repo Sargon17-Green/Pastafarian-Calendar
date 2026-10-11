@@ -111,3 +111,23 @@ jobs:
           for offset in '' '+1' '+2'; do
             grep -Fq "FAIL — equivalenza normativa giorno Fondazione${offset}" stage04.log
           done
+
+  native-stage05-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify the Stage 5 normative patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage05Tests' 2>&1 | tee stage05.log
+          grep -Fq 'RISULTATO STADIO 5: 18 PASS, 0 FAIL' stage05.log
+          test "$(grep -Fc 'PASS — ' stage05.log)" -eq 18
+          test "$(grep -Fc 'FAIL — ' stage05.log)" -eq 0

@@ -148,21 +148,35 @@ object Stage04Tests {
         .mkString("\n")
       finally stream.close()
       truth(!code.contains("NormativeOracle"), "Oracle vietato in produzione")
-      truth(!code.contains("oldDayTagPatch"), "PATCH 02 non deve esistere")
+      val state = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val currentStage = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("Stadio corrente assente"))
+      if (currentStage == 4) {
+        truth(!code.contains("Patch02DayTagWrapper"), "PATCH 02 non può essere anticipata")
+      } else {
+        truth(code.contains("Patch02DayTagWrapper"), "La PATCH 02 deve essere presente dagli stadi successivi")
+      }
       truth(code.contains("BigInt(2) * (day - FoundationDayOld).abs"), "Formula legacy")
     }
 
     check("metadati dello stadio dichiarano EXPECTED_RED") {
       val text = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(text.contains("CURRENT_STAGE=4"), "Fase")
-      truth(text.contains("CURRENT_KIND=DISCOVERY"), "Tipologia")
-      truth(text.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Rosso atteso")
+      val currentStage = text.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("Stadio corrente assente"))
+      truth(currentStage >= 4, "La prova storica richiede lo stadio 4")
+      if (currentStage == 4) {
+        truth(text.contains("CURRENT_KIND=DISCOVERY"), "Tipologia")
+        truth(text.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Rosso atteso")
+      }
       val lastCompleted = text.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE assente"))
-      truth(lastCompleted >= 3 && lastCompleted <= 4,
-        "La storia deve preservare lo stadio 3 e non anticipare lo stadio 5")
+      truth(lastCompleted >= 3 && lastCompleted <= currentStage,
+        "La storia deve preservare lo stadio 3 senza anticipare il corrente")
     }
 
     val manager = new BaseMonsterManager
