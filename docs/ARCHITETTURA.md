@@ -210,3 +210,20 @@ risultati quadratici con SAVE, senza alcun riferimento
 normativo di produzione. Report e metriche non influiscono
 sulla scelta della regola; il catalogo sorgente italiano
 rimane congelato.
+
+## DISCOVERY 07 — rango di permutazione spostato di uno
+
+`oldPermutationUnrank0(rank1)` verifica il rango 1..720,
+ma usa `rank1 % 720` come indice fattoriale zero-based,
+anziché `rank1 - 1`. Ne segue l'ordine lessicografico
+successivo e, all'ultimo rango, un ritorno improprio al
+primo. Il calcolo è realizzato nel codice Scala di
+produzione usando una lista mutabile **locale**, poi
+congelata in un `Vector[Int]` immutabile.
+
+`Discovery07PermutationHandler` richiede un Bootstrap
+fresco, legge il rango semanticamente posseduto dal
+contesto, scrive un output, una trace e una metrica.
+Il manager espone lo storico senza normalizzarlo;
+il validatore controlla forma, rango e corrispondenza
+al vero helper legacy. L'oracolo fattoriale è test-only.

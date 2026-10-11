@@ -319,3 +319,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 13: 26 PASS, 0 FAIL' stage13.log
           test "$(grep -Fc 'PASS — ' stage13.log)" -eq 26
           test "$(grep -Fc 'FAIL — ' stage13.log)" -eq 0
+
+  native-stage14-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 14 intentional-red zero-based permutation signature
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage14Tests' > stage14.log 2>&1
+          rc=$?
+          set -e
+          cat stage14.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 14: 20 PASS, 3 FAIL' stage14.log
+          test "$(grep -Fc 'PASS — ' stage14.log)" -eq 20
+          test "$(grep -Fc 'FAIL — ' stage14.log)" -eq 3
+          for label in 'rango primo' 'rango secondo' 'rango settecentoventi'; do
+            grep -Fq "FAIL — equivalenza normativa permutazione ${label} — Errore di base del rango" stage14.log
+          done

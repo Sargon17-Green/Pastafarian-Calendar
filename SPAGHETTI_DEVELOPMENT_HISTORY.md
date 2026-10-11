@@ -657,3 +657,45 @@ deterministici, interi oltre 16.000 bit, gli invarianti
 di stato e l'accesso diagnostico reale alla cicatrice.
 L'oracolo non entra nel codice di produzione.
 
+
+## Stadio 14 — DISCOVERY 07: il rango diventa un indice
+
+### Che cosa si pensava
+
+L'algoritmo riceveva un rango numerato da uno ma
+lo trattava come indice di un elenco numerato da zero.
+Applicando `rank % 720`, tutti gli ordini vengono
+ciclati di una posizione.
+
+### Che cosa si è scoperto
+
+Il rango normativo 1 dà `[1,2,3,4,5,6]`,
+mentre la cicatrice dà `[1,2,3,4,6,5]`.
+Il rango normativo 720 dà `[6,5,4,3,2,1]`,
+mentre il legacy riavvolge a `[1,2,3,4,5,6]`.
+La tabella delle permutazioni non perde elementi,
+ma è mappata ai ranghi sbagliati.
+
+### Che cosa è stato aggirato
+
+Nulla. Il vecchio algoritmo fattoriale è scritto
+in produzione e chiamato realmente da un handler,
+tramite dispatcher e manager. Gli output errati
+restano diagnostici; la PATCH 07 non è anticipata.
+
+### Perché non è normativamente equivalente
+
+Per ogni `r` in `1..720`, il percorso legacy
+sceglie l'indice `r mod 720` dove la norma
+richiede `r-1`. I 720 ranghi sono tutti verificati
+contro l'oracolo test-only, e tre confronti
+indipendenti ne costituiscono la firma RED.
+
+### Strato di mostruosità aggiunto
+
+Decomposizione fattoriale legacy, handler di discovery,
+fase del dispatcher, due campi nuovi del contesto,
+validazione, report immutabile e contatore;
+nessuna mutazione del catalogo delle lingue.
+La certificazione nativa verrà acquisita solo
+dopo GitHub Actions.

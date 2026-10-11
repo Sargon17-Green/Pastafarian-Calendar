@@ -42,7 +42,9 @@ final case class BaseMonsterContext(
   var legacyGrindOutput: Option[BigInt] = None,
   var patchedGrindRuleOutput: Option[LegacyGrindRule] = None,
   var patchedGrindOutput: Option[BigInt] = None,
-  var patch06Applied: Boolean = false
+  var patch06Applied: Boolean = false,
+  var permutationRankInput: Option[Int] = None,
+  var legacyPermutationOutput: Option[Vector[Int]] = None
 )
 
 final class BaseMetricsShell {
@@ -62,6 +64,23 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requireDiscovery07Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_07_PERMUTATION" ||
+        ctx.status != "LEGACY_PERMUTATION_READY" ||
+        ctx.permutationRankInput.isEmpty ||
+        ctx.legacyPermutationOutput.isEmpty ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_07_PERMUTATION")) {
+      throw new IllegalStateException("La permutazione legacy non è pronta.")
+    }
+    val rank = ctx.permutationRankInput.get
+    val out = ctx.legacyPermutationOutput.get
+    if (rank < 1 || rank > 720 || out.length != 6 ||
+        out.sorted != Vector(1, 2, 3, 4, 5, 6) ||
+        out != LegacyPermutationAdapter.oldPermutationUnrank0(rank)) {
+      throw new IllegalStateException("La permutazione legacy non corrisponde al suo rango.")
     }
   }
 
@@ -327,7 +346,8 @@ final class BaseMonsterManager {
     new Discovery05PriorHandler(metrics),
     new Patch05PriorHandler(metrics),
     new Discovery06GrindHandler(metrics),
-    new Patch06GrindHandler(metrics)
+    new Patch06GrindHandler(metrics),
+    new Discovery07PermutationHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -632,6 +652,28 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("patch06", e)
+    }
+  }
+
+  def discover07Permutation(
+    calculationDay: BigInt, targetDay: BigInt, rank1: Int
+  ): Discovery07PermutationReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.permutationRankInput = Some(rank1)
+    ctx.phase = "DISCOVERY_07_PERMUTATION"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery07Ready(ctx)
+      Discovery07PermutationReport(
+        calculationDay = ctx.calculationDay,
+        targetDay = ctx.targetDay,
+        requestedRank1 = ctx.permutationRankInput.get,
+        legacyPermutation = ctx.legacyPermutationOutput.get,
+        phase = ctx.phase, status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("discovery07", e)
     }
   }
 

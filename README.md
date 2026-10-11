@@ -485,3 +485,31 @@ Stage07 20 PASS; Stage08 19 PASS/3 FAIL intenzionali;
 Stage09 26 PASS; Stage10 15 PASS/3 FAIL intenzionali;
 Stage11 27 PASS; Stage12 22 PASS/3 FAIL intenzionali;
 Stage13 26 PASS, 0 FAIL. Stage14 non è stato iniziato.
+
+## Stadio 14 — DISCOVERY 07: il rango delle permutazioni parte dalla base sbagliata
+
+Il repertorio normativo ordina le 720 permutazioni delle
+sei ciotole con ranghi **da 1 a 720**. Il vecchio adattatore
+`LegacyPermutationAdapter.oldPermutationUnrank0` riceve
+un rango di quella famiglia ma lo interpreta come indice
+iniziale **da zero**, facendo avanzare ogni scelta di un posto.
+Per il rango 720 il vecchio algoritmo applica il riavvolgimento
+modulo 720 e restituisce la prima permutazione invece dell'ultima.
+
+La cicatrice è nel vero helper Scala: esso svolge la
+decomposizione fattoriale con una lista temporanea dei sei
+identificatori e non richiama il test-only oracle. Il manager
+esegue `BOOT → DISCOVERY_07_PERMUTATION`, con contesto,
+report immutabile, validazione e metrica per invocazione.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage14Tests'
+```
+
+Firma rossa prevista: `20 PASS, 3 FAIL`, sulle
+equivalenze normative dei ranghi 1, 2 e 720.
+Gli altri test esauriscono tutte le 720 permutazioni,
+provano unicità, classi di 120 per primo elemento,
+determinismo, rango non valido, integrità di stato,
+grandi giorni BigInt e continuità delle patch 01–06.
+Non viene introdotta alcuna PATCH 07.

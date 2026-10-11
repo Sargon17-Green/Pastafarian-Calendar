@@ -339,20 +339,28 @@ object Stage13Tests {
         "Il wrapper deve attraversare la cicatrice vera")
       truth(sources.contains("GRIND_TABLE_WITH_SENTINEL(step)"),
         "Il wrapper usa la regola dopo il sentinel")
-      truth(!sources.contains("bowlAlias"),"Logica Stage14 anticipata")
+      truth(!sources.contains("bowlAlias"),"Logica futura delle alias bowl anticipata")
     }
 
     check("metadati Stage13 veritieri e non certificati anticipatamente") {
       val text=new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(text.contains("CURRENT_STAGE=13"),"Stage 13")
-      truth(text.contains("CURRENT_KIND=PATCH"),"Patch")
-      truth(text.contains("CURRENT_PATCH=06"),"Patch 06")
-      truth(text.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"Green")
+      val currentStage = text.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE assente"))
+      truth(currentStage >= 13,"PATCH 06 deve restare disponibile")
+      if (currentStage == 13) {
+        truth(text.contains("CURRENT_KIND=PATCH"),"Patch")
+        truth(text.contains("CURRENT_PATCH=06"),"Patch 06")
+        truth(text.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"Green")
+      } else {
+        truth(text.contains("STAGE_13_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_26_PASS_0_FAIL"),
+          "Certificazione storica Stage13 conservata")
+      }
       val completed=text.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE mancante"))
-      truth(completed>=12 && completed<=13,"Fase non certificata prematuramente")
+      truth(completed>=12 && completed<=currentStage,"Ordine certificati storico")
     }
 
     println("\nRISULTATO STADIO 13: "+passed+" PASS, "+failed+" FAIL")
