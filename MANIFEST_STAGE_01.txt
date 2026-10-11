@@ -22,4 +22,3 @@ t/07_bootstrap_integrity.t
 t/lib/Pastafari/NormativeScroll.pm
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml
-.github/workflows/stage-01-perl.yml
