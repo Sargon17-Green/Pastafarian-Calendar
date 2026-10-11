@@ -45,3 +45,7 @@ V 0.5.2 (`7647ce1`) በእውነተኛ GitHub Actions run `38153910238` ሁሉ�
 ### የደረጃ 4 መዝጊያ — EXPECTED_RED
 
 በGitHub Actions run `38155338854` የV 0.5.2 (`7647ce1`) ቀጥተኛ ፈተና PASS ሆኗል። `v fmt -verify`፣ የደረጃ 1 ኦራክል፣ የደረጃ 2 አሮጌ witness፣ የደረጃ 3 PATCH 01 እና የደረጃ 4 አሮጌ witness ሁሉ PASS ናቸው። አራቱ የኖርማቲቭ RED assertions በተናጠል ወድቀዋል፤ ማስረጃ artifact `11708217428` ተቀምጧል። `old_day_tag` ገና በታሪካዊ ስህተቱ ይሰራል። ደረጃ 4 COMPLETE / EXPECTED_RED ነው።
+
+## ደረጃ 5 — PATCH 02 (የV ማረጋገጫ ይጠበቃል)
+
+`old_day_tag` ስህተቱን እንዳለ ያስቀምጣል። `DayTagPatch02` ከ`BaseDispatcher.dispatch_legacy_day_tag` በኋላ የሚጠራው ራሱን የቻለ ንብርብር ነው። በFOUNDATION እና በኋላ 1 ይጨምራል፣ ተጨማሪ `if day == FOUNDATION and n != 1` የታሪክ ጠባሳን ያስቀምጣል። ከአማርኛ ውጭ የምንጭ ቃላት አልተጨመሩም፣ የtest-only ኦራክል ወደ production አልገባም።

@@ -42,3 +42,7 @@ v fmt -verify ./pastafari
 ሁለተኛው የታሪካዊ ስህተት `old_day_tag(day) = 2*abs(day-FOUNDATION)` በV ተጨምሯል። ከFOUNDATION ጀምሮ የአንድ የምንጠብቀው ልዩነት በሆን ተብሎ RED ሙከራዎች ተመዝግቧል። PATCH 01 ተጠብቋል፤ PATCH 02 ገና አልተጨመረም። ዝርዝር፦ `docs/STAGE04_DISCOVERY02.md`።
 
 ደረጃ 4 በ`V 0.5.2 7647ce1` በGitHub Actions run `38155338854` ሙሉ የታሰበ `EXPECTED_RED` ማረጋገጫ አልፏል። 5 የአሮጌ/አዲስ GREEN የሙከራ ፋይሎች PASS ናቸው። የአራቱ የተጠበቁ ውድቀቶች ማስረጃ ተቀምጧል፤ `LAST_COMPLETED_STAGE=4`። አሁን `v test ./pastafari` ሙሉ በሙሉ GREEN መሆን የለበትም፤ የደረጃ 4 የታሰበው RED የፕሮጀክቱ ህጋዊ ሁኔታ ነው።
+
+## ደረጃ 5 — PATCH 02
+
+`old_day_tag` የቀድሞውን `2*abs(day-FOUNDATION)` ስህተት እንዳለ ይይዛል። አዲሱ `DayTagPatch02` በታሪካዊው dispatcher በኋላ ይጠራል፣ ከFOUNDATION ጀምሮ አንድ ይጨምራል እና የFOUNDATION መከላከያ ሁለተኛውን ቅርንጫፍ አያስወግድም። በደረጃ 4 የነበሩት አራት RED assertions አልተለወጡም፤ አሁን GREEN ሊሆኑ ይገባል። የV CI መዝጊያ ገና ይጠበቃል፣ ስለዚህ `LAST_COMPLETED_STAGE=4` ነው። ዝርዝር፦ `docs/STAGE05_PATCH02.md`።

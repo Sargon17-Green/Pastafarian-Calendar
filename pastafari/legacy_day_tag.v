@@ -22,8 +22,8 @@ pub fn (_ BaseDispatcher) dispatch_legacy_day_tag(day BigInt) BigInt {
 	return adapter.day_tag(day)
 }
 
-// የታሪካዊ ስህተቱን ከproduction dispatcher ያሳያል።
+// ደረጃ 5፦ የproduction መስመሩ የlegacy ውጤትን በPATCH 02 ያልፋል።
 pub fn calendar_day_tag_spaghetti(day BigInt) BigInt {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_day_tag(day)
+	return dispatcher.dispatch_day_tag_patch02(day)
 }
