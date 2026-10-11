@@ -16,6 +16,20 @@ public sealed class MonsterValidationManager
         if (!string.Equals(context.Status, "NEW", StringComparison.Ordinal))
             throw new MonsterValidationException("حالة البدء غير صحيحة.");
     }
+
+    public void ValidateSavePatchResult(MonsterContext context, BigInteger candidate)
+    {
+        if (context.LegacySaveInput is null || context.LegacySaveResult is not BigInteger legacy)
+            throw new MonsterValidationException("لم يكتمل المسار القديم قبل فحص رقعة الحفظ.");
+        if (context.PatchedSaveResult.HasValue)
+            throw new MonsterValidationException("لا يُسمح بتثبيت الحفظ المصحح مرتين.");
+
+        var modulus = (BigInteger.One << 127) - BigInteger.One;
+        if (legacy < 0 || legacy >= modulus)
+            throw new MonsterValidationException("باقي الحفظ القديم خارج المجال المحدد.");
+        if (candidate != (legacy.IsZero ? modulus : legacy))
+            throw new MonsterValidationException("نتيجة الرقعة لا توافق تحويل الباقي القديم.");
+    }
 }
 
 public sealed class MonsterMetricsManager
@@ -32,12 +46,14 @@ public sealed class MonsterDispatcher
     private readonly MonsterValidationManager _validation;
     private readonly MonsterMetricsManager _metrics;
     private readonly LegacySavePhaseHandler _legacySave;
+    private readonly SavePatchWrapper _savePatch;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
         _validation = validation;
         _metrics = metrics;
         _legacySave = new LegacySavePhaseHandler();
+        _savePatch = new SavePatchWrapper();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -61,6 +77,28 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "legacy.save.dispatch");
         context.Status = "LEGACY_SAVE_COMPLETE";
         context.Phase = "LEGACY_SAVE_COMPLETE";
+    }
+
+    public void DispatchSavePatched(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("يتطلب مسار الرقعة سياقاً جديداً أتمّ التأسيس.");
+        if (context.LegacySaveInput is not BigInteger input)
+            throw new MonsterValidationException("لم تُقدَّم قيمة لحفظ الرقعة.");
+
+        // يستمر المعالج القديم في العمل الفعلي، ولا تُمحى نتيجته الخاطئة.
+        DispatchLegacySave(context);
+
+        // تُحسب القيمة المرشحة وتُفحص قبل تثبيتها في الحالة الدلالية.
+        context.Phase = "SAVE_PATCH_VALIDATION";
+        var pending = _savePatch.SavePatch(input);
+        _validation.ValidateSavePatchResult(context, pending);
+        context.PatchedSaveResult = pending;
+
+        context.BranchTrace.Add("SAVE_PATCH");
+        _metrics.Bump(context, "save.patch.dispatch");
+        context.Status = "SAVE_PATCH_COMPLETE";
+        context.Phase = "SAVE_PATCH_COMPLETE";
     }
 }
 
@@ -89,5 +127,20 @@ public sealed class MonsterManager
         _dispatcher.DispatchLegacySave(context);
         return context.LegacySaveResult
             ?? throw new MonsterValidationException("لم يُنتج مسار الحفظ القديم قيمة.");
+    }
+
+    public MonsterContext ExecuteSavePatched(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacySaveInput = value;
+        _dispatcher.DispatchSavePatched(context);
+        return context;
+    }
+
+    public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
+    {
+        var context = ExecuteSavePatched(calculationDay, targetDay, value);
+        return context.PatchedSaveResult
+            ?? throw new MonsterValidationException("لم يُنتج مسار الرقعة قيمة محفوظة.");
     }
 }

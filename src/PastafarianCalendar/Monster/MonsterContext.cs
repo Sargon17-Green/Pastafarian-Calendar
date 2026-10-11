@@ -20,6 +20,9 @@ public sealed class MonsterContext
     public BigInteger? LegacySaveInput { get; set; }
     public BigInteger? LegacySaveResult { get; set; }
 
+    // تُثبت النتيجة المصححة بعد فحصها؛ وتبقى النتيجة القديمة شاهداً مستقلاً.
+    public BigInteger? PatchedSaveResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

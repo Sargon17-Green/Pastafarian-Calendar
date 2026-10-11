@@ -16,4 +16,11 @@ public static class CalendarDateSpaghetti
         var manager = new MonsterManager();
         return manager.EvaluateLegacySave(calculationDay, targetDay, value);
     }
+
+    // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
+    public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateSave(calculationDay, targetDay, value);
+    }
 }

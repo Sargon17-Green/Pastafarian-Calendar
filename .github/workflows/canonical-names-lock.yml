@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   verify_csharp_ar_discovery_01:
-    name: تحقق مستقل من إخفاق الحفظ المتوقع
+    name: تحقق مستقل من الاكتشاف والرقعة الأولى
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/C#+العربية-الفصحى' }}
     runs-on: ubuntu-latest
     steps:
@@ -46,3 +46,5 @@ jobs:
         if: always()
         run: dotnet run --project tests/PastafarianCalendar.Stage02Tests/PastafarianCalendar.Stage02Tests.csproj --configuration Release -- --verify-expected-red
 
+      - name: تحقق من تكافؤ الرقعة الأولى مع المرجع
+        run: dotnet run --project tests/PastafarianCalendar.Stage03Tests/PastafarianCalendar.Stage03Tests.csproj --configuration Release
