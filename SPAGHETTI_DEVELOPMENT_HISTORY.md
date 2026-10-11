@@ -219,3 +219,18 @@ lwybrau. **Nid yw'r prawf hwn yn dystysgrif regressions Cam 1–5 eto.**
 
 Rhaid rhedeg `run-stage05-tests.sh` yn erbyn y gangen lawn cyn newid
 `LAST_COMPLETED_STAGE=5`. Nid oes PATCH 03 na DISCOVERY 03 yn y pecyn.
+
+
+### Cam 5 — ardystiad JVM llawn ar GitHub Actions
+
+Yn dilyn y prawf lleol yn erbyn `ExactInt.kt` gwreiddiol, gweithredwyd
+y gadwyn Camau 1–5 **gyfan** mewn swydd CI frodorol ar y gangen, gyda
+Kotlin 1.9.0 a JDK 21. Cadarnhawyd PASS y 66 prawf Cam 1 a phob marc
+cywir o Gamau 2–5, gan gynnwys y tri gwahaniaeth disgwyliedig yn y
+ddau lwybr DISCOVERY a sero gwahaniaethau yn `PATCH_02`.
+
+Mae rhediad GitHub Actions `38173345431` yn SUCCESS a
+`STAGE05_NATIVE_GREEN` yn bresennol yn log y swydd. Felly **Cam 5
+wedi'i gwblhau** (`LAST_COMPLETED_STAGE=5`). Nid oes unrhyw waith
+Cam 6 wedi dechrau, ac nid yw'r dystiolaeth hon yn newid y craith
+hanesyddol.

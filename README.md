@@ -202,3 +202,24 @@ Cam 5 wedi pasio gyda'r union `ExactInt.kt` gwreiddiol. Nid yw hyn yn
 disodli rhedeg holl oracl Cam 1 a'r gadwyn Camau 1–5; cadwir
 `LAST_COMPLETED_STAGE=4` nes bod `STAGE05_NATIVE_GREEN` yn pasio
 ar y gangen lawn. Ni weithredwyd unrhyw beth o Gam 6.
+
+
+### Cadarnhad brodorol terfynol Cam 5 — GitHub Actions
+
+**Mae'r cofnod hwn yn disodli'r statws PENDING uchod.** Llwyddodd swydd
+`native-stage05-kotlin-cymraeg` yn llif gwaith presennol
+`canonical-names-lock.yml` ar y gangen `Kotlin+Cymraeg` gyda Kotlin 1.9.0
+a JDK 21. Defnyddiwyd y pum ffeil ffynhonnell/oracl gwreiddiol heb
+amnewidion, ac ail-redwyd `sh run-stage05-tests.sh` o wraidd yr ystorfa.
+
+Cadarnhawyd cod ymadael 0 a'r marc `STAGE05_NATIVE_GREEN`, ynghyd â
+`STAGE01_PASS_66`, `STAGE02_EXPECTED_RED_3`,
+`STAGE03_EXTENDED_BIGINT_GREEN_921`, `STAGE04_EXPECTED_RED_3`,
+`STAGE04_BIGINT_INDEPENDENT_PASS_409`, `STAGE05_PATCH_GREEN_0` a
+`STAGE05_BIGINT_INDEPENDENT_PASS_418`. Mae'r ddau brawf strict yn methu
+**yn fwriadol** ac mae eu methiannau disgwyliedig wedi'u dilysu.
+
+Tystiolaeth: [GitHub Actions — rhediad 38173345431](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38173345431),
+commit gwreiddiol `b832b6430fb6b2beea09234a97f06e3a07f09a18`.
+**`LAST_COMPLETED_STAGE=5`; y cam nesaf yw Cam 6 / DISCOVERY 03.**
+Ni newidiwyd cod y llwybr etifeddol na dechrau Cam 6.

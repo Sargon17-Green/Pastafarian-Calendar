@@ -58,3 +58,32 @@ Mae llwybrau `DISCOVERY_01` a `PATCH_01` yn aros yn weithredol hefyd.
 `run-stage05-tests.sh` ei rhedeg yn llawn ar holl ffynonellau
 Camau 1–5 yn y pecyn gwaith hwn. Felly cadwir `LAST_COMPLETED_STAGE=4`.
 Nid oes hawliad am PASS llawn na newid GitHub.
+
+
+## Ardystiad CI brodorol — cwblhawyd Cam 5
+
+**Mae'r adran hon yn disodli'r cymhwyster PENDING uchod.**
+Ailadeiladwyd y gangen gyfan gan swydd
+`native-stage05-kotlin-cymraeg` yn GitHub Actions:
+
+- Gangen: `Kotlin+Cymraeg`, commit
+  `b832b6430fb6b2beea09234a97f06e3a07f09a18`.
+- Kotlin 1.9.0, JDK 21, ffynonellau ac oracl normadol Cam 1 gwreiddiol.
+- `sh run-stage05-tests.sh`: cod ymadael 0.
+- Cam 1: `STAGE01_PASS_66`.
+- Cam 2: `STAGE02_EXPECTED_RED_3`, `STAGE02_STRICT_RED_CONFIRMED`.
+- Cam 3: `STAGE03_PATCH_GREEN_0`, `STAGE03_EXTENDED_BIGINT_GREEN_921`.
+- Cam 4: `STAGE04_EXPECTED_RED_3`,
+  `STAGE04_BIGINT_INDEPENDENT_PASS_409`, `STAGE04_STRICT_RED_CONFIRMED`.
+- Cam 5: `STAGE05_PATCH_GREEN_0`, `STAGE05_DISCOVERY02_SCAR_RED_3`,
+  `STAGE05_RANGE_GREEN_331`, `STAGE05_WIDE_GREEN_60`,
+  `STAGE05_BIGINT_INDEPENDENT_PASS_418` a `STAGE05_NATIVE_GREEN`.
+- Dilyswyd y marciau hyn yn uniongyrchol o log swydd CI, nid yn unig
+  o ganlyniad cyffredinol y rhediad.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38173345431
+
+**Canlyniad:** `LAST_COMPLETED_STAGE=5`; `CURRENT_STAGE=5`;
+`EXPECTED_REPOSITORY_STATE=GREEN`. Cedwir y llwybr
+`DISCOVERY_02` gyda thri anghysondeb disgwyliedig, ac mae
+`PATCH_02` yn rhoi sero anghysondeb. Dim cod Cam 6 yn y commit hwn.
