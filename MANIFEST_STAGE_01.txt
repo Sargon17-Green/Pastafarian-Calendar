@@ -4,6 +4,7 @@ SPAGHETTI_DEVELOPMENT_HISTORY.md
 STAGE_01_TEST_LOG.txt
 docs/ARCHITECTURE.md
 docs/SOURCE_LANGUAGE_CATALOG.md
+docs/STAGE_01_REVALIDATION_2026-10-11.md
 lib/Pastafari/Monster/BaseContext.pm
 lib/Pastafari/Monster/BaseDispatcher.pm
 lib/Pastafari/Monster/BaseErrorBoundary.pm
