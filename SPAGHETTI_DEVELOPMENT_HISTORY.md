@@ -69,3 +69,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ### የደረጃ 7 መዝጊያ — GREEN
 
 የመጀመሪያው የGitHub Actions ሙከራ በአንድ የታሪካዊ witness ፋይል የV ቅርጸት ምርመራ ቆሟል። ተደጋጋሚ assertion ተወግዶ የቅርጸት ልዩነቱ ተስተካክሏል፤ የሂሳብ ስሌት አልተለወጠም። በቀጣዩ commit `0755353e8cd776480d538261b777b2a2289b571d` ላይ የV 0.5.2 (`7647ce1`) ቀጥተኛ ሙከራ በGitHub Actions run `38158404538` ሙሉ PASS ነው። `v fmt -verify`፣ የቀድሞ 8 የሙከራ ፋይሎች፣ የደረጃ 6 የRED assertions እና የPATCH 03 አዲስ ፈተናዎች ሁሉ PASS ናቸው። `v test ./pastafari`: 10/10 PASS። የማስረጃ ቅርስ `11709132166` ተቀምጧል። `old_distance` አልተቀየረም፣ `PATCH 03` በproduction እውነተኛ መስመር ተገናኝቷል። ደረጃ 7 COMPLETE / GREEN ነው።
+
+## ደረጃ 8 — DISCOVERY 04 (EXPECTED_RED እየተፈተነ)
+
+የአራተኛው ታሪካዊ ስህተት `mutate_stones_wrong` የአምስት ድንጋዮችን የክብ ሂሳብ በተከታታይ ይጽፋል፣ ይህም አዲሱ `w` በ`b` እና በ`r`፣ አዲሱ `b` በ`s`፣ አዲሱ `s` በ`m`፣ አዲሱ `m` በ`r` የስህተት ንባብ ይፈጥራል። አዲሱ `LegacyStonesAdapter` እና `BaseDispatcher.dispatch_legacy_stones` በproduction ንዑስ መግቢያ ተያይዘዋል፤ `calendar_date_spaghetti` ውስጥ የታሪካዊ ድንጋይ ውጤት ምርመራ አለ። የተጠገኑ `PATCH 01`፣ `PATCH 02`፣ `PATCH 03` አልተለወጡም፣ የ`PATCH 04` snapshot ገና አልተጨመረም።

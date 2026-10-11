@@ -120,5 +120,7 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	prefix := message + patched_probe.str() + '; PATCH_02 dayTag='
 	details := prefix + patched_day_tag.str() + '; DISCOVERY_03 oldDistance='
 	full := details + legacy_distance.str() + '; PATCH_03 distance='
-	return error(full + patched_distance.str())
+	legacy_stone := calendar_stones_spaghetti(2, initial_stones())
+	before_stones := full + patched_distance.str() + '; DISCOVERY_04 oldStoneB='
+	return error(before_stones + legacy_stone.b.str())
 }
