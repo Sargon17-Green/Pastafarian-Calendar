@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 6 (DISCOVERY 03)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 7 (PATCH 03)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -99,3 +99,15 @@ php -d memory_limit=512M tests/verify_stage06_discovery03.php
 ```
 
 Arahan pertama **mesti** keluar dengan kod `1` dan tepat 144 perbezaan berlabel. Arahan kedua mesti keluar dengan kod `0` selepas mengesahkan corak khusus tersebut, ketiadaan tampalan jarak lebih awal, dan tiada ralat lain. Semua ujian Stage 1–5 terus perlu lulus.
+
+
+## Stage 7 — PATCH 03: Jarak sebenar tanpa memadamkan sejarah
+
+`LegacyDistance::oldDistance` terus sengaja mengira `abs(t-c)` dan dispatcher `DISTANCE_LEGACY` tidak dibuang. Adapter `DistanceCountPatch03::distanceCountPatch03` menambah satu kepada hasil lama. Laluan pengeluaran `BootstrapKernel::distance` kini menggunakan `DISTANCE_PATCH_03`, iaitu `abs(t-c)+1` untuk semua pasangan hari tanpa limpahan integer mesin.
+
+```text
+php -d memory_limit=512M tests/verify_stage06_discovery03.php
+php -d memory_limit=512M tests/stage07_patch03_tests.php
+```
+
+Ujian sejarah langsung `stage06_discovery03_tests.php` masih sengaja keluar dengan kod `1` untuk 144 penyimpangan; kedua-dua arahan di atas mesti keluar dengan kod `0`. Ujian baharu merangkumi 16,668 pasangan dan 1,285 semakan anjakan, termasuk hujung `PHP_INT_MIN/MAX`. Semua ujian terdahulu, fixture dan katalog nama mesti kekal hijau. Jangan mulakan DISCOVERY 04 sebelum diminta.

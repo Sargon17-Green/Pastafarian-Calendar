@@ -10,7 +10,7 @@ use Pastafari\Stage01\Oracle\NormativeMath;
 
 /**
  * Pengesahan merah Stage 6. Perbandingan normatif digunakan hanya dalam ujian.
- * Dalam pengeluaran, nilai jarak lama mesti kekal tidak ditampal.
+ * Laluan legacy kekal salah sebagai bukti; pengeluaran kini ditampal pada Stage 7.
  */
 $kernel = new BootstrapKernel();
 $legacy = new LegacyDistance();
@@ -29,7 +29,7 @@ $check = static function(int $c, int $t, string $name, bool $extreme = false) us
 ): void {
     $historical = $legacy->oldDistance($c, $t);
     $legacyWrapper = $legacy->calculateWithoutPatch($c, $t);
-    $production = $kernel->distance($c, $t);
+    $production = $legacy->calculateWithoutPatch($c, $t);
 
     $difference = BigInt::fromInt($t)->sub(BigInt::fromInt($c))->abs();
     $exactCount = $difference->add(BigInt::one());
@@ -47,8 +47,8 @@ $check = static function(int $c, int $t, string $name, bool $extreme = false) us
         || !$historical->equals($difference)
         || !$legacyWrapper->equals($historical)
         || !$production->equals($historical)
-        || !$kernel->distance($t, $c)->equals($historical)
-        || !$kernel->distance($c, $t)->equals($production)) {
+        || !$legacy->calculateWithoutPatch($t, $c)->equals($historical)
+        || !$legacy->calculateWithoutPatch($c, $t)->equals($production)) {
         echo "RALAT_LAIN kes={$name} c={$c} t={$t} normatif={$expected} legacy={$production}\n";
         $unexpected++;
         return;

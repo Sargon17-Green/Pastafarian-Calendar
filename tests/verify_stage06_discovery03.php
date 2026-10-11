@@ -37,13 +37,17 @@ $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)
 );
 $legacyLocated = false;
+$patchLocated = false;
 foreach ($iterator as $file) {
     if (strtolower($file->getExtension()) !== 'php') {
         continue;
     }
     $body = (string)file_get_contents($file->getPathname());
-    if (str_contains($body, 'distanceCountPatch03')) {
-        $valid = false;
+    if (str_contains($body, 'function distanceCountPatch03(')) {
+        $patchLocated = $patchLocated || $file->getFilename() === 'DistanceCountPatch03.php';
+        if ($file->getFilename() !== 'DistanceCountPatch03.php') {
+            $valid = false;
+        }
     }
     if (str_contains($body, 'function oldDistance(')) {
         $legacyLocated = $legacyLocated || $file->getFilename() === 'LegacyDistance.php';
@@ -56,12 +60,12 @@ foreach ($iterator as $file) {
     }
 }
 $kernel = (string)file_get_contents($root . '/BootstrapKernel.php');
-$valid = $valid && $legacyLocated
-    && str_contains($kernel, "dispatch('DISTANCE_LEGACY', " . '$context)')
-    && !str_contains($kernel, "dispatch('DISTANCE_PATCH_03', " . '$context)');
+$valid = $valid && $legacyLocated && $patchLocated
+    && str_contains($kernel, "register('DISTANCE_LEGACY'")
+    && str_contains($kernel, "dispatch('DISTANCE_PATCH_03', " . '$context)');
 
 if (!$valid) {
-    fwrite(STDERR, "GAGAL: penemuan jarak bukan merah yang tepat atau tampalan awal dikesan\n");
+    fwrite(STDERR, "GAGAL: bukti jarak sejarah atau pemisahan tampalan tidak sah\n");
     exit(1);
 }
-echo "LULUS kontrak merah khusus 03; laluan legacy kekal tidak ditampal\n";
+echo "LULUS kontrak merah khusus 03; legacy kekal salah dan produksi ditampal\n";

@@ -125,3 +125,26 @@ Tiada `distanceCountPatch03`, tiada penghala `DISTANCE_PATCH_03`, dan tiada tamb
 ### Bukti CI sebenar — 11 Oktober 2026
 
 Aliran kerja `Canonical Names Lock`, run `38156102411`, tamat dengan **success** bagi kedua-dua kerja `verify` dan `audit_php_bahasa_melayu`. Log menunjukkan 15/15 ujian Stage 1 lulus, 1,014 ujian pembahagian bersama lapan ujian tambahan lulus, fixture dijana semula tanpa perubahan, penemuan 01 kekal tiga penyimpangan dijangka, 94 kes PATCH 01 lulus, penemuan 02 kekal 65 penyimpangan dan 64 padanan, serta 4,618 kes PATCH 02 lulus. Penemuan 03 menunjukkan `KEPUTUSAN MERAH_DIJANGKA perbezaan=144 jumlah=144 tepi=8 lain=0` dan pembalut `LULUS kontrak merah khusus 03; laluan legacy kekal tidak ditampal`. Pada pasangan `PHP_INT_MIN` dan `PHP_INT_MAX`, bilangan normatif ialah `18446744073709551616` dan nilai legacy ialah `18446744073709551615`. Ini bukan pelaksanaan PATCH 03; status akhir Stage 6 kekal `EXPECTED_RED` dengan pengesah CI hijau.
+
+
+## Stage 7 — PATCH 03: Jarak inklusif di atas kesilapan warisan
+
+### Kesilapan sejarah yang terus dikekalkan
+
+`LegacyDistance::oldDistance(c,t)` **tidak diubah** dan terus memulangkan `abs(t-c)`. Kaedah `calculateWithoutPatch` serta pendaftaran dispatcher `DISTANCE_LEGACY` juga kekal. Penemuan Stage 6 boleh menunjukkan semula 144 penyimpangan yang sama dengan memanggil kaedah legacy secara langsung, bukannya memalsukan hasil pengeluaran.
+
+### Pembetulan normatif dan mengapa ia sah
+
+`DistanceCountPatch03::distanceCountPatch03(c,t)` memanggil `oldDistance(c,t)` terlebih dahulu, kemudian menambah `BigInt::one()`. Untuk setiap pasangan hari bertanda dalam julat integer PHP, ini sama dengan bilangan normatif `abs(t-c)+1`, termasuk dua hujung ekstrem, hari sama, gerak ke hadapan dan gerak ke belakang. Tiada operasi pengiraan jarak menggunakan penolakan int mesin; bezanya dibina melalui BigInt dalam kaedah sejarah yang tidak diubah.
+
+### Pertambahan lapisan raksasa yang neutral
+
+`BootstrapKernel::distance` mengarahkan permintaan kepada dispatcher `DISTANCE_PATCH_03` yang membina adapter tampalan di atas objek `LegacyDistance`. Hasil dan status disimpan dalam `BootstrapContext` khusus bagi panggilan. Statistik hanya diubah selepas pengiraan dan tidak pernah dibaca sebagai input matematik. Tiada cache merentas panggilan atau oracle dalam pengeluaran.
+
+### Bukti regresi baharu
+
+Ujian `stage07_patch03_tests.php` diwajibkan hijau dan merangkumi 16,668 pasangan teras: matriks 127×127 sekitar Hari Asas, 15 pasangan khas, 512 pasangan terserak, dan 12 kes sempadan integer mesin. Setiap pasangan menegaskan ketepatan, pembalut langsung, parut sejarah, simetri, ulangan, serta kebebasan instance. Tambahan 1,285 semakan anjakan dan 200 semakan additiviti jarak dilakukan. Oracle PHP Stage 1 digunakan hanya bagi julat selamat; nilai ekstrem dibandingkan dengan formula BigInt bebas daripada overflow.
+
+### Had peringkat dan penerimaan
+
+Pengujian sejarah Stage 6 masih mesti keluar dengan kod 1 untuk tepat 144 penyimpangan lama; pemeriksa sejarah mesti keluar dengan kod 0. Pengeluaran Stage 7 kini mesti hijau sepenuhnya. Penemuan keempat atau `mutateStonesWrong` tidak dilaksanakan sebelum Stage 8. Keputusan CI sebenar dicatat setelah diperiksa.

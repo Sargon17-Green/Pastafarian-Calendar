@@ -78,6 +78,15 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'legacy.distance.calls');
             return $result;
         });
+        $this->dispatcher->register('DISTANCE_PATCH_03', function(BootstrapContext $context): BigInt {
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyDistance();
+            $patch = new \Pastafari\Stage01\Patches\DistanceCountPatch03($legacy);
+            $result = $patch->distanceCountPatch03($context->calculationDay, $context->targetDay);
+            $context->semanticState['correctedDistanceResult'] = $result;
+            $context->status = 'DISTANCE_PATCH_03_RETURNED';
+            $this->metrics->bump($context, 'distance.patch03.calls');
+            return $result;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -119,16 +128,16 @@ final class BootstrapKernel
     }
 
     /**
-     * Bilangan jarak lama sengaja belum memasukkan kedua-dua hari hujung.
+     * Laluan jarak sah membalut operasi sejarah tanpa membuang kesilapan lama.
      * Konteks baharu memastikan pemilikan keadaan tidak merentas panggilan.
      */
     public function distance(int $calculationDay, int $targetDay): BigInt
     {
         $context = new BootstrapContext($calculationDay, $targetDay);
-        $context->phase = 'DISTANCE_LEGACY';
+        $context->phase = 'DISTANCE_PATCH_03';
         return $this->boundary->run(
             $context,
-            fn(): BigInt => $this->dispatcher->dispatch('DISTANCE_LEGACY', $context)
+            fn(): BigInt => $this->dispatcher->dispatch('DISTANCE_PATCH_03', $context)
         );
     }
 }

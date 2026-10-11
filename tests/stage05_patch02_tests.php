@@ -110,7 +110,7 @@ foreach ($iterator as $file) {
     }
     $content = (string)file_get_contents($file->getPathname());
     sahHari(!str_contains($content, 'NormativeMath'), 'ORACLE_DALAM_PRODUKSI');
-    sahHari(!str_contains($content, 'distanceCountPatch03'), 'TAMPALAN_KETIGA_TERLALU_AWAL');
+    sahHari(!str_contains($content, 'mutateStonesWrong'), 'PENEMUAN_KEEMPAT_TERLALU_AWAL');
 }
 
 // Pastikan pemilik keadaan laluan produksi benar-benar menghala ke tampalan 02.
