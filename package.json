@@ -1,6 +1,6 @@
 {
   "name": "pastafari-calendar-typescript-marathi",
-  "version": "0.10.0-stage.10",
+  "version": "0.11.0-stage.11",
   "private": true,
   "type": "module",
   "description": "मगिलत हाएतिमच्या नियमाधारित दिनदर्शिकेसाठी स्वतंत्र TypeScript आणि मराठी अंमलबजावणी मार्ग",
@@ -9,7 +9,7 @@
     "test:stage01": "node --experimental-strip-types test/run.ts",
     "test:discovery01": "node --experimental-strip-types test/discovery01.ts",
     "test:discovery01:red": "node --experimental-strip-types test/discovery01Red.ts",
-    "test": "npm run test:stage01 && npm run test:discovery01 && npm run test:patch01 && npm run test:discovery02 && npm run test:patch02 && npm run test:discovery03 && npm run test:patch03 && npm run test:discovery04 && npm run test:patch04 && npm run test:discovery05",
+    "test": "npm run test:stage01 && npm run test:discovery01 && npm run test:patch01 && npm run test:discovery02 && npm run test:patch02 && npm run test:discovery03 && npm run test:patch03 && npm run test:discovery04 && npm run test:patch04 && npm run test:discovery05 && npm run test:patch05",
     "test:patch01": "node --experimental-strip-types test/patch01.ts",
     "test:discovery02": "node --experimental-strip-types test/discovery02.ts",
     "test:discovery02:red": "node --experimental-strip-types test/discovery02Red.ts",
@@ -21,7 +21,8 @@
     "test:discovery04:red": "node --experimental-strip-types test/discovery04Red.ts",
     "test:patch04": "node --experimental-strip-types test/patch04.ts && node --experimental-strip-types test/patch04Metamorphic.ts",
     "test:discovery05": "node --experimental-strip-types test/discovery05.ts && node --experimental-strip-types test/discovery05Properties.ts",
-    "test:discovery05:red": "node --experimental-strip-types test/discovery05Red.ts"
+    "test:discovery05:red": "node --experimental-strip-types test/discovery05Red.ts",
+    "test:patch05": "node --experimental-strip-types test/patch05.ts && node --experimental-strip-types test/patch05Properties.ts"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
