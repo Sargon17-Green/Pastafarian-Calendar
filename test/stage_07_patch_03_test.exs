@@ -9,7 +9,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage07Patch03Test do
   test "nhánh giữ nguyên chạy khi hai khoảng cách cơ sở trùng nhau" do
     f = Ref.foundation_day()
 
-    for {c, t} <- [{f - 1, f + 2}, {f - 2, f + 5}, {f - 3, f + 8}] do
+    for {c, t} <- [{f, f}, {f - 1, f + 2}, {f - 2, f + 5}, {f - 3, f + 8}] do
       raw = LegacyDistance.old_distance(c, t)
       chronological = abs(t - c)
 
@@ -22,7 +22,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage07Patch03Test do
   test "nhánh sửa thực sự thay khoảng cách lịch sử khác chuẩn" do
     f = Ref.foundation_day()
 
-    for {c, t} <- [{f, f}, {f - 3, f - 1}, {f + 1, f + 3}, {f - 1, f + 1}] do
+    for {c, t} <- [{f - 2, f}, {f - 3, f - 1}, {f + 1, f + 3}, {f - 1, f + 1}] do
       raw = LegacyDistance.old_distance(c, t)
       chronological = abs(t - c)
 
