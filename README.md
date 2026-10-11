@@ -70,3 +70,11 @@ ni'o lo `Stage02BowlsTests` cu cipra lo ro 720 se cuxna porsi .e lo mulno djacu 
 ni'o lo `MonsterManager.runSauce` cu benji lo cnino `MonsterContext` fi ro se benji. lo `MonsterDispatcher` cu pilno lo `MonsterSauceBowls` tezu'e lo nu benji lo `MonsterEvaluation` poi stodi gi'e na se galfi lo branch trace .e lo metrics.
 
 ni'o lo `MonsterEvaluation.choose` cu pilno lo `MonsterSelectors` tezu'e lo nu cpacu lo ranki fi lo djacu bliku .e lo seal .e lo se cuxna namcu. lo `Stage02IntegrationTests` cu cipra lo mutce so'i se benji .e lo narmanci jalge .e lo se brivla frica. ko benji `sh run_stage02_integration_tests.sh`. lo remoi stadi cu na se mulno.
+
+## lo se cipra farvi pagbu pe lo remoi stadi
+
+ni'o lo `MonsterSelectors` cu se zbasu gi'e srana lo `chooseShort` .e lo `chooseWide` .e lo `choose`. ri pilno lo pamoi se curmi ranki be lo se cuxna se jimte .e lo barda namcu. ko benji `sh run_stage02_selectors_tests.sh`.
+
+ni'o lo `MonsterManager.runSauce` cu benji lo cnino `MonsterEvaluation` fi ro se benji. lo `MonsterEvaluation` cu ralte lo stodi `branchTrace` .e lo `metrics` .e lo `SauceResult`. lo `choose` cu cuxna lo ranki fi lo djacu bliku .e lo seal .e lo se cuxna se namcu. ko benji `sh run_stage02_integration_tests.sh`.
+
+ni'o lo remoi stadi cu na se mulno. lo balvi pagbu cu nitcu lo selcmima porsi .e lo vorme .e lo nanca .e lo kecti .e lo masti .e lo mulno detri jalge.
