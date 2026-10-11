@@ -202,20 +202,17 @@ final class BigInt
         $a = $this->abs();
         [$qAbs, $rAbs] = self::divModPositive($a, $d);
 
-        if ($this->sign >= 0) {
-            $q = $divisor->sign > 0 ? $qAbs : $qAbs->neg();
-            return [$q, $rAbs];
-        }
+        // Bahagi lantai: a = divisor * quotient + remainder.
+        // Baki sifar atau mempunyai tanda yang sama dengan pembahagi.
+        $berlainanTanda = ($this->sign < 0) !== ($divisor->sign < 0);
+        $quotient = $berlainanTanda ? $qAbs->neg() : $qAbs;
+        $remainder = $this->sign < 0 ? $rAbs->neg() : $rAbs;
 
-        if ($rAbs->isZero()) {
-            $q = $divisor->sign > 0 ? $qAbs->neg() : $qAbs;
-            return [$q, self::zero()];
+        if ($berlainanTanda && !$rAbs->isZero()) {
+            $quotient = $quotient->sub(self::one());
+            $remainder = $remainder->add($divisor);
         }
-
-        $qFloorAbs = $qAbs->add(self::one());
-        $q = $divisor->sign > 0 ? $qFloorAbs->neg() : $qFloorAbs;
-        $r = $d->sub($rAbs);
-        return [$q, $r];
+        return [$quotient, $remainder];
     }
 
     public function floorDiv(self $divisor): self
@@ -225,17 +222,17 @@ final class BigInt
 
     public function mod(self $divisor): self
     {
-        $r = $this->divMod($divisor)[1];
-        if ($divisor->sign < 0 && !$r->isZero()) {
-            return $r->neg();
-        }
-        return $r;
+        return $this->divMod($divisor)[1];
     }
 
     public function modSmall(int $divisor): int
     {
         if ($divisor <= 0) {
             throw new InvalidArgumentException('MOD_SMALL_DIVISOR');
+        }
+        // Elakkan limpahan integer apabila baki * BASE melebihi PHP_INT_MAX.
+        if ($divisor >= self::BASE) {
+            return $this->mod(self::fromInt($divisor))->toIntExact();
         }
         $r = 0;
         for ($i = count($this->limbs) - 1; $i >= 0; $i--) {

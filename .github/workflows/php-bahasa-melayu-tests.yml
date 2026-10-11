@@ -1,0 +1,30 @@
+name: PHP Bahasa Melayu — audit aritmetik
+on:
+  push:
+    branches:
+      - 'PHP+Bahasa-Melayu'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sahkan-php:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semak persekitaran
+        run: |
+          php -v
+          php -r 'if (PHP_INT_SIZE !== 8) { fwrite(STDERR, "Perlu PHP 64-bit\n"); exit(1); }'
+      - name: Semak sintaks semua fail PHP
+        run: find src tests tools -name '*.php' -type f -print0 | xargs -0 -n 1 php -l
+      - name: Uji bootstrap normatif Stage 1
+        run: php -d memory_limit=512M tests/stage01_tests.php
+      - name: Uji pembahagian dan baki tepat
+        run: php -d memory_limit=512M tests/bigint_division_regression.php
+      - name: Sahkan ketetapan fixture tempatan
+        run: |
+          php -d memory_limit=512M tools/generate_stage01_fixtures.php
+          git diff --exit-code -- tests/fixtures_stage01.json

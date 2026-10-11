@@ -32,3 +32,13 @@ Fixture hanya boleh dijana daripada oracle PHP dalam garis pelaksanaan ini. Ia t
 ## Had Stage 1
 
 Stage 1 sengaja tidak memasukkan kecacatan legacy atau tampalan 01–26. Laluan production pada tahap ini hanyalah rangka bootstrap neutral. Oracle ujian sudah mempunyai definisi normatif penuh yang diperlukan untuk perbandingan pada tahap-tahap berikutnya.
+
+## Audit ketepatan integer (selepas Stage 1)
+
+Ujian tambahan menegaskan semantik pembahagian lantai untuk pembahagi positif **dan negatif**: `a = b*q + r`, `|r| < |b|`, dan tanda baki mengikut pembahagi. Laluan `modSmall` untuk pembahagi besar tidak boleh mendarab baki dengan asas limb sehingga melimpahi integer 64-bit.
+
+```text
+php -d memory_limit=512M tests/bigint_division_regression.php
+```
+
+Aliran CI khusus cabang ini menjalankan sintaks PHP, 15 ujian Stage 1, ujian regresi pembahagian, dan penjanaan semula fixture secara deterministik. Audit ini tidak memperkenalkan tampalan legacy Stage 2.
