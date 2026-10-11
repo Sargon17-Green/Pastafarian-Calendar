@@ -110,5 +110,7 @@ pub fn bootstrap_validate(calculation_day BigInt, target_day BigInt) !MonsterCon
 
 pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !CalendarResult {
 	_ = bootstrap_validate(calculation_day, target_day)!
-	return error('ዋናው የስፓጌቲ መንገድ በታሪካዊ ደረጃዎቹ ገና አልተገነባም')
+	// ደረጃ 2፦ የታሪካዊው ስህተት መንገድ በእውነተኛው የproduction መግቢያ ይጠራል።
+	legacy_probe := calendar_save_spaghetti(calculation_day)
+	return error('ዋናው የስፓጌቲ ቀን መንገድ ገና አልተገነባም፤ DISCOVERY_01 oldRemainder=' + legacy_probe.str())
 }
