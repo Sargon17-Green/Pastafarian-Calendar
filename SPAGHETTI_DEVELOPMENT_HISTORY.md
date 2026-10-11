@@ -59,3 +59,11 @@ GitHub Actions run `38156511209` (commit `27f3d682b1ea40a5751af1fabefc092ab03f1b
 प्रारंभ `[17,29,43,71,101]` पासून `i=2` येथे जुना परिणाम `[378,1434,3780,9932,25047]`; नियमाधारित परिणाम `[378,1073,2375,6195,10493]`. यामुळे नेमक्या चार expected mismatches आणि एक match सिद्ध झाले. संपूर्ण 45-टप्प्यांच्या ऐतिहासिक श्रृंखलेतील प्रत्येक पायरी वेगळी आहे.
 
 GitHub Actions run `38157981487` (commit `0d765f251e1ecf976d461e1180d7dc54f9361b05`) ने TypeScript typecheck, Stages 1–8 guards, 516 properties cases व 2580 values, चार historical expected-red पुरावे आणि canonical names lock सर्व PASS पुष्टी केले. Stage 8/55 पूर्ण. पुढे Stage 9 = PATCH 04; legacy call clone वर ठेवत old snapshot मधून पाच दुरुस्त मूल्ये मोजायची, परंतु हे आज केलेले नाही.
+
+## टप्पा 9 — PATCH 04: snapshot आणि ऐतिहासिक clone mutation (प्रमाणित)
+
+`src/patch04Stones.ts` मध्ये `Patch04StoneHandler` जोडला. `old` snapshot व mutable clone वेगळे आहेत. `LegacySequentialStoneAdapter.mutateStonesWrong` ची प्रत्यक्ष in-place call **clone वर** होते, परिणाम `legacyGarbage` म्हणून जतन होतो, आणि नंतर सर्व पाच योग्य नवे मूल्य फक्त `old` वरून मोजले जाते. जुन्या Stage 8 च्या कार्यपद्धतीत बदल नाही. Immutable result, status `PATCH_04_APPLIED`, trace, metrics, invalid input व lifecycle guards समाविष्ट केले.
+
+Commit `e4581720a00c09ec1f7a16ff1fb70d0c05879a6e` वरील GitHub Actions run `38159106148` मध्ये सर्व jobs PASS. `test/patch04.ts` मधून 1076 cases, 5380 cells, 1076 खऱ्या legacy calls, 4304 garbage/योग्य फरक आणि oracle विरुद्ध 0 mismatches. `test/patch04Metamorphic.ts`: 301 तुलना, 1505 cells, 1204 इतिहासातील दोषांची साक्ष. आधीच्या 1–8 stages, चार historical expected-red पुरावे व canonical names lock सर्व कायम आणि पडताळलेले. म्हणून Stage 9/55 पूर्ण.
+
+पुढे Stage 10 — DISCOVERY 05: hidden7..hidden1 या उलट साठवण क्रमाचा जुना दोष. Stage 11 मधील `hidden k` साठी `8-k` हा दुरुस्ती नियम Stage 10 मध्ये अकाली लागू करू नये.

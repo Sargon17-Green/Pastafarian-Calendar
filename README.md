@@ -110,3 +110,17 @@ npm run test:discovery04:red
 ```
 
 तिसरी चाचणी हेतुपुरस्सर exit 1 देते आणि CI तिचा अचूक पुरावा तपासते. Stage 9 मध्येच old snapshot घेऊन legacy call clone वर चालवून नवी पाच मूल्ये फक्त old पासून स्वतंत्र मोजावीत. येथे ती दुरुस्ती लागू केलेली नाही. तपशील `docs/STAGE08_DISCOVERY04_VERIFICATION.md` मध्ये.
+
+## टप्पा 9/55 — PATCH 04 (पूर्ण)
+
+`patch04Stones(calculationDay,targetDay,index,inputStone)` ही स्वतंत्र TypeScript उत्पादन-क्रिया जुनी `mutateStonesWrong` काढून टाकत नाही. ती प्रथम `old` snapshot जतन करते, `clone` वर प्रत्यक्ष जुनी क्रमिक mutation चालवते, `legacyGarbage` जतन करते आणि मग `old` मधील पाच मूल्यांवरून पाच स्वतंत्र नियमाधारित `correctedStone` परिणाम तयार करते. मूलभूत `SAVE` Stage 3 च्याच `patch01Save` वरून येते; test-only oracle उत्पादन-कोडमध्ये नाही.
+
+GitHub Actions run `38159106148` मध्ये Node 22 TypeScript typecheck, संपूर्ण Stage 01–09 regressions आणि चार ऐतिहासिक expected-red चाचण्या उत्तीर्ण झाल्या. `STAGE_09_PATCH_04_PASS cases=1076 cells=5380 legacyCalls=1076 overwritten=4304 mismatches=0`. स्वतंत्र 301 metamorphic तुलना देखील PASS.
+
+```text
+npm run typecheck
+npm test
+npm run test:discovery04:red
+```
+
+शेवटची ऐतिहासिक चाचणी हेतुपुरस्सर exit 1 देते आणि CI त्याच अपेक्षित fail marker ला स्वीकारतो. तांत्रिक पुरावा `docs/STAGE09_PATCH04_VERIFICATION.md`, पुढील हस्तांतरण `HANDOFF_STAGE_09.md` मध्ये आहे. Stage 10 मध्ये फक्त उलट क्रमाने साठवलेल्या hidden drops चा DISCOVERY 05 करावा; त्याची PATCH 05 दुरुस्ती Stage 11 पर्यंत करू नये.
