@@ -72,6 +72,33 @@ def consistent(doc):
     return True
 
 
+def verify_report(doc, replay):
+    """The same full numeric/identity verifier must reject original and mutated evidence."""
+    need(doc.get("schema") == "befunge-stage1-live-pair-matrix-v1"
+         and doc.get("source_git_blob") == PINS["src/interleaved_work_counts.b98"]
+         and doc.get("stage1_final_acceptance") is False,
+         "live pair report identity or stage status changed")
+    need(consistent(doc), "original Native pair records inconsistent")
+    need(doc["expected_by_label"] == replay,
+         "reported expected values differ from freshly executed Native BF98")
+    for i, row in enumerate(doc["records"]):
+        a, b = PAIRS[i % 12]
+        need(row["left_output"] == replay[a] and
+             row["right_output"] == replay[b],
+             "Native pair output differs from second Native reference")
+
+
+def reject_control(mutant, replay, expected_reason):
+    """A forged document must be rejected by verify_report itself, at the right gate."""
+    try:
+        verify_report(mutant, replay)
+    except AssertionError as error:
+        need(str(error) == expected_reason,
+             "mutant rejected by wrong gate: " + repr(error))
+        return
+    need(False, "mutant was accepted by full native evidence verifier")
+
+
 def main():
     need(os.path.isdir(ROOT), "pair evidence directory missing")
     for path, sha in PINS.items():
@@ -90,18 +117,7 @@ def main():
              "fresh Native BF98 invalid-case rejection failed: i%d" % i)
         replay["i%d" % i] = words
     doc = json.load(open(ROOT + "/native_live_pair_matrix.json", "rb"))
-    need(doc.get("schema") == "befunge-stage1-live-pair-matrix-v1"
-         and doc.get("source_git_blob") == PINS["src/interleaved_work_counts.b98"]
-         and doc.get("stage1_final_acceptance") is False,
-         "live pair report identity or stage status changed")
-    need(consistent(doc), "original Native pair records inconsistent")
-    need(doc["expected_by_label"] == replay,
-         "reported expected values differ from freshly executed Native BF98")
-    for i, row in enumerate(doc["records"]):
-        a, b = PAIRS[i % 12]
-        need(row["left_output"] == replay[a] and
-             row["right_output"] == replay[b],
-             "Native pair output differs from second Native reference")
+    verify_report(doc, replay)
     controls = []
     for label in ("v%d" % i for i in range(6)):
         mutant = copy.deepcopy(doc)
@@ -114,8 +130,8 @@ def main():
                     row[side + "_output"][0] = new
         need(consistent(mutant),
              "coordinated control did not preserve internal report consistency")
-        need(mutant["expected_by_label"] != replay,
-             "fresh Native reference failed to detect coordinated output change")
+        reject_control(mutant, replay,
+                       "reported expected values differ from freshly executed Native BF98")
         controls.append(label)
     for label in ("i%d" % i for i in range(6)):
         mutant = copy.deepcopy(doc)
@@ -127,10 +143,25 @@ def main():
                     row[side + "_output"][0] = new
         need(consistent(mutant),
              "invalid-case coordinated control lost internal consistency")
-        need(mutant["expected_by_label"] != replay,
-             "fresh Native rejection replay missed coordinated invalid mutation")
+        reject_control(mutant, replay,
+                       "reported expected values differ from freshly executed Native BF98")
         controls.append(label)
     need(len(controls) == 12, "coordinated report controls incomplete")
+    integrity = []
+    for label, field, val, reason in (
+            ("source", "source_git_blob", "0" * 40,
+             "live pair report identity or stage status changed"),
+            ("stage", "stage1_final_acceptance", True,
+             "live pair report identity or stage status changed")):
+        mutant = copy.deepcopy(doc)
+        mutant[field] = val
+        reject_control(mutant, replay, reason)
+        integrity.append(label)
+    mutant = copy.deepcopy(doc)
+    mutant["records"][0]["schedule"] = "BA"
+    reject_control(mutant, replay, "original Native pair records inconsistent")
+    integrity.append("pair_schedule")
+    need(len(integrity) == 3, "report integrity controls incomplete")
     result = {
         "schema": "befunge-stage1-native-second-oracle-live-pair-v1",
         "source_git_blobs": PINS,
@@ -140,6 +171,7 @@ def main():
         "fresh_invalid_rejection_vectors": 6,
         "paired_program_outputs_checked": 48,
         "coordinated_output_controls_rejected": controls,
+        "report_integrity_controls_rejected": integrity,
         "replayed_seven_field_oracles": replay,
         "stage1_final_acceptance": False
     }
@@ -147,6 +179,7 @@ def main():
         out.write((json.dumps(result, sort_keys=True, indent=2) + "\n").encode("utf-8"))
     print("NATIVE_BF98_SECOND_ORACLE_18_REFERENCE_6_INVALID_PRODUCTION_48_OUTPUTS_PASS")
     print("NATIVE_BF98_TWELVE_COORDINATED_REPORT_CHANGES_REJECTED_PASS")
+    print("NATIVE_BF98_THREE_REPORT_INTEGRITY_MUTATIONS_REJECTED_PASS")
     print("STAGE1_FINAL_ACCEPTANCE=OPEN")
 
 
