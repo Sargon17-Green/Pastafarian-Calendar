@@ -1,4 +1,5 @@
 with Ada.Containers;
+with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
 with Ada.Containers.Ordered_Maps;
 with Ada.Containers.Vectors;
 with Ada.Numerics.Big_Numbers.Big_Integers;
@@ -228,7 +229,7 @@ package body Normative_Oracle is
       Result : Bowl_Order;
    begin
       if Order_Number > 720 then
-         raise Constraint_Error with "కుండల క్రమ సంఖ్య 1 నుండి 720 మధ్య ఉండాలి";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("కుండల క్రమ సంఖ్య 1 నుండి 720 మధ్య ఉండాలి");
       end if;
 
       for Position in 1 .. 6 loop
@@ -381,7 +382,7 @@ package body Normative_Oracle is
       Step : Integer range -1 .. 1 := -1;
    begin
       if Queried_Bowl_Id > 6 then
-         raise Constraint_Error with "కుండ గుర్తింపు 1 నుండి 6 మధ్య ఉండాలి";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("కుండ గుర్తింపు 1 నుండి 6 మధ్య ఉండాలి");
       end if;
       while R.Order_At_Drop_46 (Position) /= Queried_Bowl_Id loop
          Position := Position + 1;
@@ -403,7 +404,7 @@ package body Normative_Oracle is
    function Answer_At (Stream : Answer_Stream; K : Big_Integer) return Big_Integer is
    begin
       if K < B (0) then
-         raise Constraint_Error with "సమాధాన స్థానము ఋణం కాకూడదు";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("సమాధాన స్థానము ఋణం కాకూడదు");
       end if;
       return B (1) + Regular_Mod
         (Stream.First - B (1) + B (Stream.Direction_Step) * K, M);
@@ -459,7 +460,7 @@ package body Normative_Oracle is
    is
    begin
       if N < B (1) then
-         raise Constraint_Error with "ఎంపిక కుటుంబం ఖాళీగా ఉండకూడదు";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("ఎంపిక కుటుంబం ఖాళీగా ఉండకూడదు");
       end if;
       if N <= M then
          return Choose_Rank_Short (Stream, N);
@@ -532,7 +533,7 @@ package body Normative_Oracle is
    is
    begin
       if Low_Day > High_Day then
-         raise Constraint_Error with "దిన పరిధి క్రమం తప్పింది";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("దిన పరిధి క్రమం తప్పింది");
       end if;
       while Gate_At (G, G.Min_Index) > Low_Day loop
          Ensure_Gate_Index (G, G.Min_Index - B (1));
@@ -678,7 +679,7 @@ package body Normative_Oracle is
       end loop;
 
       if Candidates.Is_Empty then
-         raise Program_Error with "5000 సంవత్సరానికి అభ్యర్థి దొరకలేదు";
+         raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("5000 సంవత్సరానికి అభ్యర్థి దొరకలేదు");
       end if;
       Sort_Pairs (G, Candidates);
       declare
@@ -762,7 +763,7 @@ package body Normative_Oracle is
          J := J + B (1);
       end loop;
       if Candidates.Is_Empty then
-         raise Program_Error with "తదుపరి సంవత్సరానికి అభ్యర్థి లేదు";
+         raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("తదుపరి సంవత్సరానికి అభ్యర్థి లేదు");
       end if;
       Sort_Close_Indices (G, Open_Index, Candidates);
       declare
@@ -796,7 +797,7 @@ package body Normative_Oracle is
          I := I - B (1);
       end loop;
       if Candidates.Is_Empty then
-         raise Program_Error with "మునుపటి సంవత్సరానికి అభ్యర్థి లేదు";
+         raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("మునుపటి సంవత్సరానికి అభ్యర్థి లేదు");
       end if;
       Sort_Open_Indices (G, Close_Index, Candidates);
       declare
@@ -1219,7 +1220,7 @@ package body Normative_Oracle is
             end loop;
 
             if Day_In_Cutlet = B (0) then
-               raise Program_Error with "లక్ష్య దినానికి కట్లెట్ దొరకలేదు";
+               raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("లక్ష్య దినానికి కట్లెట్ దొరకలేదు");
             end if;
 
             for P in 1 .. Offset_0 + 1 loop
