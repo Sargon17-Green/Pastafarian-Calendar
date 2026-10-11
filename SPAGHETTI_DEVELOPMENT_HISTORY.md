@@ -248,4 +248,13 @@ campo semantico per invocazione, validazione di readiness,
 report immutabile, metrica di discovery, test RED di
 simmetria, ordine, monotonia, BigInt e regressioni passate.
 
-La certificazione nativa non è ancora stata acquisita.
+### Verifica nativa compiuta
+
+La GitHub Actions run 38155138650 ha eseguito Scala nativo sul
+commit `c322aa6c8d9de01cf8ec4163ca04c32fe6e30722`.
+I sette job sono tutti SUCCESS: Stage01 18 PASS, Stage02
+7 PASS/3 FAIL deliberati, Stage03 12 PASS, Stage04
+14 PASS/3 FAIL deliberati, Stage05 18 PASS e Stage06
+15 PASS/3 FAIL deliberati. Le tre discrepanze della distanza
+sono state riscontrate su date identiche, contigue e distanti
+oltre 16.000 bit. Non è stata introdotta alcuna PATCH 03.

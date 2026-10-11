@@ -181,3 +181,14 @@ normativi volutamente rossi per giorno identico, giorni contigui
 e intervallo gigantesco. Il job CI controlla esattamente le tre
 etichette oltre al codice d'uscita e al riepilogo. I job 1–5
 continuano a funzionare senza modificare i percorsi storici.
+
+### Certificazione nativa dello stadio 6
+
+La [run 38155138650](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38155138650)
+sul commit `c322aa6c8d9de01cf8ec4163ca04c32fe6e30722`
+è conclusa con SUCCESS su sette job: blocco del catalogo, Stage01
+18 PASS, Stage02 7 PASS/3 FAIL attesi, Stage03 12 PASS,
+Stage04 14 PASS/3 FAIL attesi, Stage05 18 PASS e Stage06
+15 PASS/3 FAIL attesi. La firma della DISCOVERY 03 è esattamente
+quella inclusiva: stesso giorno, giorni contigui, intervallo enorme.
+Non è stata introdotta la riparazione dello stadio 7.
