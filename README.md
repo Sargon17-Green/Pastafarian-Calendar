@@ -164,3 +164,15 @@ Stage 13 यशस्वी पडताळणी: [GitHub Actions 38167061333](
 `npm run test:discovery07` हा guard/property चाचण्यांचा यशस्वी आदेश आहे. `npm run test:discovery07:red` हा स्वतंत्र historical expected-red साठी मुद्दाम nonzero exit देतो. Stage 15 ची index 0 sentinel row दुरुस्ती अजून **नाही**. आधीचे सर्व टप्पे आणि Stage 54 चे अद्याप unavailable अंतिम दिनांक मार्ग अबाधित.
 
 **टप्पा 14 पडताळणी:** [GitHub Actions 38170583590](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38170583590) वर typecheck, Stage 1–14 tests, सात archival intentional expected-red regressions आणि canonical names lock सर्व PASS. `STAGE_14_DISCOVERY_07_GUARDS_PASS mismatches=11 matches=0 missing=1 shifted=10`; `STAGE_14_DISCOVERY_07_PROPERTIES_PASS cases=2816 shifted=2560 missing=256 differences=2816 giantCases=22 giantValues=20`. Stage 15 च्या sentinel index दुरुस्तीसाठी `HANDOFF_STAGE_14.md` पहा.
+
+## टप्पा 15/55 — PATCH 07
+
+नवीन `patch07Grind(calculationDay,targetDay,grind,x,p1,p3,p7,stone)` हा सातव्या historical indexing दोषाचा दुरुस्त केलेला मार्ग आहे. `GRIND_TABLE_WITH_SENTINEL` मध्ये पहिली immutable `[0,0,0,0,NONE]` नोंद आहे; `g=1..11` याच **जुन्या one-based indexing** सूत्राने आता अचूक row मिळते. मूळ sentinel-विरहित `LEGACY_GRIND_TABLE` व `discoverLegacyGrind` अजिबात बदललेले नाहीत; त्यांचे ऐतिहासिक intentionally-red regression अजून चालते.
+
+```text
+npm run typecheck
+npm test
+npm run test:patch07
+```
+
+नव्या property चाचणीमध्ये सर्व 11 rows, deterministic signed bigint, मोठे पूर्णांक, ग्राइंडची 11-पदरी सलग साखळी, स्वतंत्र context, frozen snapshots, जुना shadow call व सर्व आधीचे patches राखले जातील. सातवे archival `test:discovery07:red` वेगळे चालविल्यास जाणीवपूर्वक nonzero exit देणे हाच अपेक्षित इतिहास-पुरावा आहे.
