@@ -25,6 +25,8 @@ t/08_rank_domain_and_state.t
 t/09_gate_year_invariants.t
 t/10_rank_ring_bigint.t
 t/11_catalog_boundaries.t
+t/12_gate_cache_order.t
+t/13_weaving_scale.t
 t/lib/Pastafari/NormativeScroll.pm
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml
