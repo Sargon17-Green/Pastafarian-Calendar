@@ -73,6 +73,15 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateHiddenDrop(calculationDay, targetDay, k);
     }
 
+    // مسترجع القطرات السابق التاريخي، لا يصلح الفهارس غير الموجبة في هذا الطور.
+    public static BigInteger EvaluateLegacyPrior(
+        BigInteger calculationDay, BigInteger targetDay,
+        BigInteger[] dropStore, int i, int back)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateLegacyPrior(calculationDay, targetDay, dropStore, i, back);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

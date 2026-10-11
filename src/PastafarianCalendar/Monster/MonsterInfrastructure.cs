@@ -149,6 +149,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyStonesPhaseHandler _legacyStones;
     private readonly StonePatchWrapper _stonePatch;
     private readonly LegacyHiddenDropsPhaseHandler _legacyHiddenDrops;
+    private readonly LegacyPriorPhaseHandler _legacyPrior;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -163,6 +164,7 @@ public sealed class MonsterDispatcher
         _legacyStones = new LegacyStonesPhaseHandler();
         _stonePatch = new StonePatchWrapper();
         _legacyHiddenDrops = new LegacyHiddenDropsPhaseHandler();
+        _legacyPrior = new LegacyPriorPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -333,6 +335,29 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "hidden.index.patch.dispatch");
         context.Status = "HIDDEN_INDEX_PATCH_COMPLETE";
         context.Phase = "HIDDEN_INDEX_PATCH_COMPLETE";
+    }
+
+    public void DispatchLegacyPrior(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("لا يقرأ المسار القديم القطرات قبل تأسيس السياق.");
+        if (context.LegacyPriorResult.HasValue)
+            throw new MonsterValidationException("لا يجوز تثبيت قراءة تاريخية ثانية.");
+        if (context.LegacyPriorDropStore is not BigInteger[] store ||
+            store.Length != 47 || store[0] != BigInteger.Zero)
+            throw new MonsterValidationException("مخزن القطرات الظاهرة ليس في البنية التاريخية المطلوبة.");
+        if (context.LegacyPriorVisibleIndex is not int row || row is < 1 or > 46 ||
+            context.LegacyPriorBack is not int back || back is not (1 or 3 or 7))
+            throw new MonsterValidationException("رقم القطرة أو مقدار الرجوع خارج العقد القديم.");
+
+        // القراءة التاريخية نفسها مباشرة؛ سلبية الفهرس ترمي استثناء المصفوفة.
+        // لا نغيّر سجلات الحالة ولا نلتزم بقيمة إن تعثرت تلك القراءة.
+        var result = _legacyPrior.Handle(context);
+        context.LegacyPriorResult = result;
+        context.BranchTrace.Add("LEGACY_PRIOR");
+        _metrics.Bump(context, "legacy.prior.dispatch");
+        context.Status = "LEGACY_PRIOR_COMPLETE";
+        context.Phase = "LEGACY_PRIOR_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -507,6 +532,33 @@ public sealed class MonsterManager
         var context = ExecutePatchedHiddenAccess(calculationDay, targetDay);
         return context.PatchedHiddenAccess?.HiddenByNearness(k)
             ?? throw new MonsterValidationException("لم تُثبَّت رقعة الوصول إلى القطرات الخفية.");
+    }
+
+    public MonsterContext ExecuteLegacyPrior(
+        BigInteger calculationDay, BigInteger targetDay,
+        BigInteger[] dropStore, int i, int back)
+    {
+        if (dropStore is null || dropStore.Length != 47 ||
+            dropStore[0] != BigInteger.Zero)
+            throw new MonsterValidationException("مخزن القطرات الظاهرة المطلوب غير صالح.");
+        if (i is < 1 or > 46 || back is not (1 or 3 or 7))
+            throw new MonsterValidationException("رقم القطرة أو الرجوع غير صالح.");
+
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacyPriorDropStore = (BigInteger[])dropStore.Clone();
+        context.LegacyPriorVisibleIndex = i;
+        context.LegacyPriorBack = back;
+        _dispatcher.DispatchLegacyPrior(context);
+        return context;
+    }
+
+    public BigInteger EvaluateLegacyPrior(
+        BigInteger calculationDay, BigInteger targetDay,
+        BigInteger[] dropStore, int i, int back)
+    {
+        var context = ExecuteLegacyPrior(calculationDay, targetDay, dropStore, i, back);
+        return context.LegacyPriorResult
+            ?? throw new MonsterValidationException("لم تُنتج القراءة التاريخية قيمة قطرة.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

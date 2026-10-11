@@ -48,6 +48,12 @@ public sealed class MonsterContext
     // لا تُنسخ القطرات ولا تُقلب؛ يحتفظ غلاف القراءة بمخزنها القديم نفسه.
     public HiddenNearnessWrapper? PatchedHiddenAccess { get; set; }
 
+    // تظل هذه البيانات مملوكة للاستدعاء، ولا تتضمن مواضع القطرة الخفية.
+    public BigInteger[]? LegacyPriorDropStore { get; set; }
+    public int? LegacyPriorVisibleIndex { get; set; }
+    public int? LegacyPriorBack { get; set; }
+    public BigInteger? LegacyPriorResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
