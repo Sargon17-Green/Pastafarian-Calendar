@@ -51,3 +51,11 @@ GitHub Actions run `38153654056` (commit `7ff46fb0de35e1bf5aa837d56a3cde0d692630
 QA मध्ये `Discovery03DistanceHandler` ला explicit status, invalid-context rejection आणि पुनर्वापर प्रतिबंध दिला; ऐतिहासिक गणित जसेच्या तसे राहिले. `test/discovery03Lifecycle.ts` ने हा गुण तपासला.
 
 GitHub Actions run `38156511209` (commit `27f3d682b1ea40a5751af1fabefc092ab03f1b68`) मध्ये Stage 01–06, historical red #1–#3, TypeScript typecheck आणि canonical names lock PASS. PATCH 03 साठी **1243** जोड्या, **1214** replacements, **29** preserved, **0** mismatches मिळाले. त्यामुळे Stage 7/55 पूर्ण. पुढील Stage 8 = DISCOVERY 04; Stage 9 ची दुरुस्ती आताच केलेली नाही.
+
+## टप्पा 8 — DISCOVERY 04: अनुक्रमिक in-place दगडांचा ऐतिहासिक दोष
+
+`src/discovery04LegacyStones.ts` मध्ये `LegacySequentialStoneAdapter.mutateStonesWrong` ही पाच दगडांची जुनी in-place क्रिया प्रत्यक्ष लिहिली. क्रम `w,b,s,m,r`; प्रत्येक पुढील गणना चालू आवाहनात आधीच बदललेल्या दगडांवर अवलंबते. `SAVE` साठी आधीची `patch01Save` उत्पादन अंमलबजावणी वापरली, test-only oracle आयात केला नाही. `Discovery04StoneHandler` मध्ये स्वतंत्र input clone, status, trace, metrics व अपवादांसाठी पूर्वपडताळणी जोडली.
+
+प्रारंभ `[17,29,43,71,101]` पासून `i=2` येथे जुना परिणाम `[378,1434,3780,9932,25047]`; नियमाधारित परिणाम `[378,1073,2375,6195,10493]`. यामुळे नेमक्या चार expected mismatches आणि एक match सिद्ध झाले. संपूर्ण 45-टप्प्यांच्या ऐतिहासिक श्रृंखलेतील प्रत्येक पायरी वेगळी आहे.
+
+GitHub Actions run `38157981487` (commit `0d765f251e1ecf976d461e1180d7dc54f9361b05`) ने TypeScript typecheck, Stages 1–8 guards, 516 properties cases व 2580 values, चार historical expected-red पुरावे आणि canonical names lock सर्व PASS पुष्टी केले. Stage 8/55 पूर्ण. पुढे Stage 9 = PATCH 04; legacy call clone वर ठेवत old snapshot मधून पाच दुरुस्त मूल्ये मोजायची, परंतु हे आज केलेले नाही.

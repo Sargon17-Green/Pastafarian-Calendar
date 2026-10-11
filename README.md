@@ -96,3 +96,17 @@ npm run test:discovery02:red
 Stage 7 GitHub Actions run `38156511209`: `STAGE_07_PATCH_03_PASS pairs=1243 overridden=1214 preserved=29 mismatches=0`. TypeScript typecheck, Stage 1–6 चाचण्या, Stage 6 lifecycle QA, तीन historical expected-red आणि Canonical Names Lock सर्व PASS. तांत्रिक तपशील `docs/STAGE07_PATCH03_VERIFICATION.md` मध्ये.
 
 पुढील टप्पा 8 — `DISCOVERY 04`: दगडांची sequential in-place legacy mutation शोधायची. PATCH 04 किंवा अंतिम integration अजून करू नये.
+
+## टप्पा 8/55 — DISCOVERY 04 (पूर्ण)
+
+मूळ `mutateStonesWrong` ही पाच दगडांची in-place, अनुक्रमिक mutation आता स्वतंत्र उत्पादन-मार्गात जतन आहे. `w` अद्ययावत केल्यावर लगेच `b` च्या गणनेत नवे `w` जाते; उरलेली मूल्येही अशाच क्रमाने बदलतात. नियमाधारित `test/normativeOracle.ts` मधील snapshot-आधारित परिणामापेक्षा यामुळे `i=2` येथे चार फरक दिसतात: `DISCOVERY_04_EXPECTED_RED mismatches=4 matches=1`.
+
+`discoverLegacyStoneMutation` प्रत्येक आवाहनाची स्वतंत्र context, immutable observation, trace आणि metrics जतन करते. 45 ऐतिहासिक पायऱ्या आणि 516 स्वतंत्र properties test cases प्रमाणित. Stage 1–7 आणि चार historical expected-red पुरावे GitHub Actions run `38157981487` मध्ये PASS आहेत.
+
+```text
+npm run typecheck
+npm test
+npm run test:discovery04:red
+```
+
+तिसरी चाचणी हेतुपुरस्सर exit 1 देते आणि CI तिचा अचूक पुरावा तपासते. Stage 9 मध्येच old snapshot घेऊन legacy call clone वर चालवून नवी पाच मूल्ये फक्त old पासून स्वतंत्र मोजावीत. येथे ती दुरुस्ती लागू केलेली नाही. तपशील `docs/STAGE08_DISCOVERY04_VERIFICATION.md` मध्ये.
