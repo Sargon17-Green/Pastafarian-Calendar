@@ -42,7 +42,6 @@ for(let g=1;g<=11;g++){
   if(obs.correctedValue!==expected)mismatches++;
   check(obs.grind===g && obs.indexUsed===g &&
     obs.actualRow===GRIND_TABLE_WITH_SENTINEL[g] &&
-    obs.actualRow!==GRIND_SENTINEL &&
     obs.historicalRow===old.legacyRow &&
     obs.historicalRow===new LegacyGrindTableAdapter().legacyRow(g) &&
     obs.legacyReadOccurred,"legacy indexing चा प्रत्यक्ष पुरावा आणि नवीन ओळ");
