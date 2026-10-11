@@ -70,3 +70,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage06Tests/PastafarianCalendar.Stage06Tests.csproj --configuration Release -- --verify-expected-red
       - name: تحقق من تصحيح المسافة وعلامات العمل في الرقعة الثالثة
         run: dotnet run --project tests/PastafarianCalendar.Stage07Tests/PastafarianCalendar.Stage07Tests.csproj --configuration Release
+      - name: تشغيل اختبار الأحجار التاريخية الأحمر
+        id: discovery_stones_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage08Tests/PastafarianCalendar.Stage08Tests.csproj --configuration Release
+      - name: إثبات توقيع عيب التحوير المتسلسل دون ترقيعه
+        if: always()
+        run: |
+          test "${{ steps.discovery_stones_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage08Tests/PastafarianCalendar.Stage08Tests.csproj --configuration Release -- --verify-expected-red

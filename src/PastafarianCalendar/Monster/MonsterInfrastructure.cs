@@ -96,6 +96,7 @@ public sealed class MonsterDispatcher
     private readonly DayTagPatchWrapper _dayTagPatch;
     private readonly LegacyDistancePhaseHandler _legacyDistance;
     private readonly PatchedCounts _patchedCounts;
+    private readonly LegacyStonesPhaseHandler _legacyStones;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -107,6 +108,7 @@ public sealed class MonsterDispatcher
         _dayTagPatch = new DayTagPatchWrapper();
         _legacyDistance = new LegacyDistancePhaseHandler();
         _patchedCounts = new PatchedCounts();
+        _legacyStones = new LegacyStonesPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -205,6 +207,21 @@ public sealed class MonsterDispatcher
         _metrics.Bump(context, "counts.patch.dispatch");
         context.Status = "COUNTS_PATCH_COMPLETE";
         context.Phase = "COUNTS_PATCH_COMPLETE";
+    }
+
+    public void DispatchLegacyStones(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("يتطلب التحول القديم للأحجار سياقاً جديداً أُنجز تأسيسه.");
+        if (context.LegacyStoneRows is not null)
+            throw new MonsterValidationException("لا يجوز إعادة بناء الأحجار في هذا السياق.");
+
+        context.Phase = "LEGACY_STONES_MUTATION";
+        context.BranchTrace.Add("LEGACY_STONES_MUTATION");
+        _legacyStones.Handle(context);
+        _metrics.Bump(context, "legacy.stones.mutation.dispatch");
+        context.Status = "LEGACY_STONES_COMPLETE";
+        context.Phase = "LEGACY_STONES_COMPLETE";
     }
 
     public void DispatchSavePatched(MonsterContext context)
@@ -321,6 +338,20 @@ public sealed class MonsterManager
         var context = ExecutePatchedCounts(calculationDay, targetDay);
         return context.PatchedCountsResult
             ?? throw new MonsterValidationException("لم تُثبت رقعة المسافة خماسية حساب.");
+    }
+
+    public MonsterContext ExecuteLegacyStones(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        _dispatcher.DispatchLegacyStones(context);
+        return context;
+    }
+
+    public BigInteger[][] EvaluateLegacyStones(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = ExecuteLegacyStones(calculationDay, targetDay);
+        return context.LegacyStoneRows
+            ?? throw new MonsterValidationException("لم يُنتج المسار التاريخي صفوف الأحجار.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

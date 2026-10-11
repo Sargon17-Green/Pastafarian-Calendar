@@ -45,6 +45,13 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateWorkCounts(calculationDay, targetDay);
     }
 
+    // المسار الإنتاجي للاكتشاف الرابع؛ يُبقي التحوير المتسلسل الخاطئ بلا تصحيح.
+    public static BigInteger[][] EvaluateLegacyStones(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateLegacyStones(calculationDay, targetDay);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

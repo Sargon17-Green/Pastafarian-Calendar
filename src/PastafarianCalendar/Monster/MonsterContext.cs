@@ -36,6 +36,9 @@ public sealed class MonsterContext
     // تبقى المسافة التاريخية محفوظة، وتضاف الخماسية الحسابية المصححة في موضع مستقل.
     public MonsterWorkCounts? PatchedCountsResult { get; set; }
 
+    // صفوف الأحجار المتعاقبة القديمة يملكها هذا الاستدعاء وحده.
+    public BigInteger[][]? LegacyStoneRows { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
