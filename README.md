@@ -11,10 +11,12 @@ npm run typecheck
 npm test
 ```
 
-अपेक्षित अंतिम चाचणी-संकेत:
+अपेक्षित तीन यशस्वी चाचणी-संकेत:
 
 ```text
 STAGE_01_PASS
+STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1
+STAGE_03_PATCH_01_PASS cases=672 repairs=16 unchanged=656 mismatches=0
 ```
 
 ## स्रोत-भाषा
@@ -57,3 +59,5 @@ npm run test:discovery01:red
 ```
 
 पहिले तीन आदेश यशस्वी झाले पाहिजेत; चौथा आदेश वेगळा चालविल्यास केवळ ऐतिहासिक दोषाच्या पुष्टीसाठी मुद्दाम exit 1 असतो. GitHub Actions मध्ये चौथ्या आदेशाची अपेक्षित अपयशी अवस्था स्पष्टपणे तपासली जाते. अंतिम दिनांक-मूल्य `calendarDateSpaghetti` पुढील टप्प्यांसाठी अद्याप अनुपलब्ध आहे.
+
+**पडताळणी:** GitHub Actions run `38151476087` (commit `885645e013b2a28e08cd55fcec359434cdf04fc0`) मधील TypeScript typecheck, stage 1, stage 2, stage 3, अपेक्षित historical red आणि canonical names lock सर्व job निष्पन्ने `success` आहेत. पुढील कार्य टप्पा 4/55 — PATCH 02 DISCOVERY, त्याआधी इतर दोषाची दुरुस्ती घालू नये.
