@@ -53,4 +53,4 @@ v fmt -verify ./pastafari
 
 ## ደረጃ 7 — PATCH 03
 
-የስህተት መደበኛው ቅርጽ `old_distance(c,t) = abs(dayTag(c)-dayTag(t))` እንዳለ ተጠብቋል። አዲሱ `DistancePatch03` ከlegacy dispatcher የሚመጣውን እሴት ከ`abs(t-c)` ጋር ያወዳድራል፤ ሲለያዩ ብቻ ይተካዋል ከዚያም 1 ይጨምራል። በደረጃ 6 የነበሩት አራት RED assertions ሳይለወጡ GREEN መሆን አለባቸው። የV አገርኛ ማረጋገጫ እስኪፈጸም `LAST_COMPLETED_STAGE=6` ይቆያል። ዝርዝር፦ `docs/STAGE07_PATCH03.md`።
+የስህተት መደበኛው ቅርጽ `old_distance(c,t) = abs(dayTag(c)-dayTag(t))` እንዳለ ተጠብቋል። አዲሱ `DistancePatch03` ከlegacy dispatcher የሚመጣውን እሴት ከ`abs(t-c)` ጋር ያወዳድራል፤ ሲለያዩ ብቻ ይተካዋል ከዚያም 1 ይጨምራል። በደረጃ 6 የነበሩት አራት RED assertions ሳይለወጡ GREEN መሆን አለባቸው። V 0.5.2 (`7647ce1`) በGitHub Actions run `38158404538` ተረጋግጧል፤ `v fmt -verify` PASS፣ ሙሉ `v test ./pastafari` 10/10 PASS። የደረጃ 6 አራት RED assertions ያለ ለውጥ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=7` ነው። ዝርዝር፦ `docs/STAGE07_PATCH03.md`።

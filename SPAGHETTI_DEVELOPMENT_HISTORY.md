@@ -65,3 +65,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ## ደረጃ 7 — PATCH 03 (የCI ማረጋገጫ ይጠበቃል)
 
 `old_distance` ውስጥ ያለው `abs(dayTag(c)-dayTag(t))` ታሪካዊ ጉድለት አልተለወጠም። `DistancePatch03` ከአሮጌው dispatcher በእውነት የተገኘ እሴትን ተቀብሎ `chronological=abs(t-c)` ያሰላል። የlegacy ልዩነቱን ሲያይ ይተካዋል፣ ካልተለየ እንዳለ ያቆየዋል፣ ከዚያ 1 ይጨምራል። የእርምት አጠቃቀም በ`calendar_distance_spaghetti` እና `calendar_date_spaghetti` ውስጥ ተገናኝቷል። ሙሉ የቀን ልወጣ ገና የለም።
+
+### የደረጃ 7 መዝጊያ — GREEN
+
+የመጀመሪያው የGitHub Actions ሙከራ በአንድ የታሪካዊ witness ፋይል የV ቅርጸት ምርመራ ቆሟል። ተደጋጋሚ assertion ተወግዶ የቅርጸት ልዩነቱ ተስተካክሏል፤ የሂሳብ ስሌት አልተለወጠም። በቀጣዩ commit `0755353e8cd776480d538261b777b2a2289b571d` ላይ የV 0.5.2 (`7647ce1`) ቀጥተኛ ሙከራ በGitHub Actions run `38158404538` ሙሉ PASS ነው። `v fmt -verify`፣ የቀድሞ 8 የሙከራ ፋይሎች፣ የደረጃ 6 የRED assertions እና የPATCH 03 አዲስ ፈተናዎች ሁሉ PASS ናቸው። `v test ./pastafari`: 10/10 PASS። የማስረጃ ቅርስ `11709132166` ተቀምጧል። `old_distance` አልተቀየረም፣ `PATCH 03` በproduction እውነተኛ መስመር ተገናኝቷል። ደረጃ 7 COMPLETE / GREEN ነው።
