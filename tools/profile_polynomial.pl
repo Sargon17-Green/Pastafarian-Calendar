@@ -112,4 +112,5 @@ for my $case (@cases) {
     die "FAILED label=$case->{label} exit=$status\n" if $status!=0;
     print "OBSERVED label=$case->{label} RSS_KiB=$observed\n";
 }
-print "PASS: 兩組獨立 47 月份多項式計數量測完成；未驗證反排名。\n";
+my $size = scalar @cases;
+print "PASS: $size 組獨立 47 月份多項式計數量測完成；未驗證反排名。\n";

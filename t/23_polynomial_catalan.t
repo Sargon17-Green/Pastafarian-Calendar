@@ -1,5 +1,6 @@
 use v5.40;
 use utf8;
+use open qw(:std :encoding(UTF-8));
 use strict;
 use warnings;
 use Test::More;
