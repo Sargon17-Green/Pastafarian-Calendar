@@ -95,6 +95,83 @@ void exigeRepetitionemContextus() {
 }
 
 
+void exigeTresCustodesCacheSeparatim() {
+    // Iniectio test-only in cache structurae. Singulus custodum triplicis
+    // identitatis corrumpitur, sine immutatione diei interrogati.
+    // Corruptio structurae adiuncta semper reparari debet post rejectum.
+    const Integer c = pastafari::FOUNDATION_DAY_OLD;
+    const Integer t = c;
+    pastafari::BaseMonsterContext ctx;
+    std::map<Integer, pastafari::FinalStructureCacheEntry> cache;
+    const pastafari::FinalIntegrationHandler handler;
+    const pastafari::BaseValidationManager validator;
+    const pastafari::BaseMetricsShell metrics;
+    ctx.calculationDay = c;
+    ctx.targetDay = t;
+    ctx.stage56CorrectiveRequested = true;
+
+    const auto invoca = [&] {
+        handler.handle(ctx, cache, validator, metrics);
+        exige(ctx.status == "GREEN" && ctx.finalIntegrationReady,
+              "audit triplicis cache non viridis");
+    };
+
+    invoca();
+    const SpaghettiDateFive expected = ctx.resultFive;
+    exige(!ctx.finalGuardedCacheHit && !ctx.finalGuardedCacheRejected,
+          "prima invocatio cache non frigida est");
+    exige(cache.size() == 1, "prima invocatio cache unicum non produxit");
+    const Integer annus = ctx.finalCurrentYear.number;
+    exige(cache.contains(annus),
+          "clavis anni initialis in cache absens est");
+    const pastafari::FinalStructureCacheEntry vera = cache.at(annus);
+    exige(vera.calculationDayFingerprint == c &&
+          vera.openGate == ctx.finalCurrentYear.openGateDay &&
+          vera.closeGate == ctx.finalCurrentYear.closeGateDay,
+          "initio tres custodes cache incorrecti sunt");
+
+    for (int quae = 0; quae < 3; ++quae) {
+        // Custodem unum tantum adulteramus et body invalidum reponimus.
+        auto& entry = cache.at(annus);
+        entry = vera;
+        if (quae == 0) {
+            ++entry.calculationDayFingerprint;
+        } else if (quae == 1) {
+            --entry.openGate;
+        } else {
+            ++entry.closeGate;
+        }
+        entry.value.cutlets.clear();
+        entry.value.monthWeaving.clear();
+
+        invoca();
+        exige(ctx.finalGuardedCacheRejected && !ctx.finalGuardedCacheHit,
+              "cache adulteratus non repudiatus est");
+        exige(ctx.stage56AppliedFlag &&
+              ctx.stage56LegacyScarCallCount == 12 &&
+              ctx.stage56AppliedCount == 12,
+              "cache corruptus novam computationem XII commotionum omisit");
+        exige(eademDies(ctx.resultFive, expected),
+              "reconstructio post cache corruptum quinque campos mutavit");
+        exige(cache.size() == 1, "reconstructio cache duplicem annum inseruit");
+        const auto& novus = cache.at(annus);
+        exige(novus.calculationDayFingerprint == vera.calculationDayFingerprint &&
+              novus.openGate == vera.openGate &&
+              novus.closeGate == vera.closeGate &&
+              !novus.value.cutlets.empty() &&
+              !novus.value.monthWeaving.empty(),
+              "custodes et structura post rejectum non reparati sunt");
+
+        invoca();
+        exige(ctx.finalGuardedCacheHit && !ctx.finalGuardedCacheRejected,
+              "cache reparatus secunda invocatione non calidus est");
+        exige(ctx.stage56AppliedCount == 0,
+              "cache reparatus computationem redundantem simulavit");
+        exige(eademDies(ctx.resultFive, expected),
+              "cache reparatus output quinque camporum mutavit");
+    }
+}
+
 void exigeMetamorphosinDieiCalculationis() {
     // Tantum dies calculationis mutatur: dies quaesitus invariabilis.
     // Cache utitur yearNumber pro clave, sed fingerprint diei calculationis
@@ -337,6 +414,7 @@ int main() {
         exigeRepetitionemContextus();
         exigeMetamorphosinDieiQuaesiti();
         exigeMetamorphosinDieiCalculationis();
+        exigeTresCustodesCacheSeparatim();
 
         std::cout << "GRADUS56_CACHE_RECOVERY_TRANSIIT: "
                      "cache frigidus/calidus, reiectio fingerprint, "
