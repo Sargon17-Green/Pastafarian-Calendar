@@ -560,3 +560,18 @@ l'inversione del rango, tutti gli input illegali,
 2.048 campioni casuali deterministici, la semantica
 delle metriche, i report isolati e tutte e sei le
 patch precedenti. Stage14 rimane RED per i soli ranghi 1, 2 e 720.
+
+### Certificazione nativa dello stadio 15
+
+La [GitHub Actions run 38166893216](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38166893216)
+ha concluso SUCCESS sul commit
+`2ad0799b04fb9f5598d962882050c44d1d9abd5a`.
+Tutti i sedici job sono riusciti: blocco dei nomi,
+Stage01 18 PASS, Stage02 7 PASS/3 FAIL intenzionali,
+Stage03 12 PASS, Stage04 14 PASS/3 FAIL intenzionali,
+Stage05 18 PASS, Stage06 15 PASS/3 FAIL intenzionali,
+Stage07 20 PASS, Stage08 19 PASS/3 FAIL intenzionali,
+Stage09 26 PASS, Stage10 15 PASS/3 FAIL intenzionali,
+Stage11 27 PASS, Stage12 22 PASS/3 FAIL intenzionali,
+Stage13 26 PASS, Stage14 20 PASS/3 FAIL intenzionali,
+Stage15 31 PASS/0 FAIL. Nessuna logica di Stage16 anticipata.

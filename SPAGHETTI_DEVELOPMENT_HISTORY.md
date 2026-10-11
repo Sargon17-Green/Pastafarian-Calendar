@@ -751,3 +751,21 @@ autonoma e la suite nativa dello stadio 15.
 La cicatrice di Stage14 conserva la propria firma
 `20 PASS, 3 FAIL` intenzionali. La logica di
 Stage16 non è stata introdotta.
+
+### Verifica nativa compiuta
+
+La GitHub Actions run 38166893216, commit
+`2ad0799b04fb9f5598d962882050c44d1d9abd5a`,
+ha completato con SUCCESS i sedici job. Stage15
+ha ottenuto 31 PASS e zero FAIL. Il riferimento
+normativo è stato controllato contro la PATCH
+per tutti i 720 ranghi, con verifica anche del rango
+inverso, delle transizioni lessicografiche, di 2048
+campioni deterministici, di giorni BigInt enormi e
+dell'ownership delle invocazioni.
+
+Stage14 conserva la cicatrice: 20 PASS e tre FAIL
+voluti per i ranghi 1, 2, 720. Gli altri
+stadi storici hanno mantenuto ciascuno la
+propria firma predefinita. Nessun codice di
+Stage16 è stato introdotto.
