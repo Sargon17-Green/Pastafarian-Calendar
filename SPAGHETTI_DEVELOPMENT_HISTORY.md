@@ -81,3 +81,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ## ደረጃ 9 — PATCH 04 (በV ማረጋገጫ ላይ)
 
 የታሪካዊው ስህተት `mutate_stones_wrong(i,S)` እንደነበረ ቆይቷል። `StonePatch04.apply` በ`old = stones.deep_clone()` የድንጋዮችን አምስት የቀድሞ እሴቶች ያስቀምጣል፤ ከዚያ `mutate_stones_wrong` በተለየ clone ላይ በእውነት ይጠራል። ሁሉም አምስት `garbage` መስኮች `old` ብቻ በሚያነቡ መጠገኛ ቀመሮች ይተካሉ። `calendar_stones_spaghetti` የPATCH 04 አዲሱን መስመር ይጠራል፤ `BaseDispatcher.dispatch_legacy_stones` ለየታሪካዊ witness አለ። ለ46 ድንጋዮች ትክክለኛ የsnapshot ገንቢ ተጨምሯል። የካሌንደር የመጨረሻ ቀን ልወጣ ገና የለም።
+
+### የደረጃ 9 መዝጊያ — GREEN
+
+በመጀመሪያው የCI ሙከራ `patch04_test.v` ውስጥ አንድ የቅርጸት ልዩነት ነበረ። ይህን በV 0.5.2 (`7647ce1`) የformatter ውጤት መሠረት ተስተካክሏል፣ የሙከራ ይዘት አልተቀየረም። በcommit `0d2a08d992944ec5db2b76da6e745703db686cf7` ላይ የGitHub Actions run `38162967481` በቀጥታ አልፏል። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` 13/13 PASS። የደረጃ 8 አራቱ RED እንደነበሩ በ`discovery04_expected_red_test.v` ሳይቀየሩ GREEN ሆነዋል። የታሪካዊው `mutate_stones_wrong` አልተለወጠም፤ እውነተኛ ጥሪው በ`StonePatch04` በኋላ በold snapshot ይተካል። የማስረጃ ቅርስ `11711370337` ተቀምጧል። ደረጃ 9 COMPLETE / GREEN ነው።

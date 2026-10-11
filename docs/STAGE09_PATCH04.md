@@ -1,4 +1,4 @@
-# ደረጃ 9/55 — PATCH 04 (የGREEN ማረጋገጫ ይጠበቃል)
+# ደረጃ 9/55 — PATCH 04 (COMPLETE / GREEN)
 
 ## የታሪክ ጠባሳ መጠበቅ
 
@@ -42,6 +42,18 @@ v test ./pastafari/patch04_test.v
 v test ./pastafari
 ```
 
-ሙሉ `v test ./pastafari` 13/13 PASS መሆን አለበት። የCI መስመር `.github/workflows/canonical-names-lock.yml` ውስጥ `stage09_native_v` ነው። የማረጋገጫ ማስረጃ እስኪመጣ `LAST_COMPLETED_STAGE=8` ነው።
+ሙሉ `v test ./pastafari` 13/13 PASS መሆን አለበት። የCI መስመር `.github/workflows/canonical-names-lock.yml` ውስጥ `stage09_native_v` ነው። የV 0.5.2 የCI ማረጋገጫ PASS ነው፤ `LAST_COMPLETED_STAGE=9`።
 
 **ደረጃ 10 የDISCOVERY 05 ነው፤ እዚህ አይጀመርም።**
+
+## የተረጋገጠ የመጨረሻ ማስረጃ
+
+- የተፈተነ commit፦ `0d2a08d992944ec5db2b76da6e745703db686cf7`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38162967481
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38162967481/artifacts/11711370337
+- `V 0.5.2 7647ce1`፤ `v fmt -verify ./pastafari` PASS፤ `v test ./pastafari` 13/13 PASS።
+- አራቱ የደረጃ 8 ኖርማቲቭ assertions በማንኛውም ለውጥ ሳይጋለጡ GREEN ሆነዋል።
+- `mutate_stones_wrong` እና የlegacy 46-ድንጋይ ሰንጠረዥ እንዳሉ ተጠብቀዋል።
+- `PATCH 05` አልተጨመረም፣ ደረጃ 10 አልተጀመረም።
+
+**ደረጃ 9 COMPLETE / GREEN ነው።**

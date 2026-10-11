@@ -61,4 +61,4 @@ v fmt -verify ./pastafari
 
 ## ደረጃ 9 — PATCH 04
 
-የታሪካዊው `mutate_stones_wrong` ያለ ለውጥ ተጠብቋል። አዲሱ `StonePatch04` መጀመሪያ የአምስት ድንጋዮችን snapshot ይወስዳል፣ በclone ላይ `mutate_stones_wrong` በእውነት ይጠራል፣ ከዚያም `w,b,s,m,r` ሙሉ ውጤትን በsnapshot እሴቶች ይደርሳል። `get_stone_table_through_legacy_builder` 46 የተጠገኑ ድንጋዮችን ይሰራል፤ የታሪካዊው `get_legacy_stone_table` አሁንም ይኖራል። የደረጃ 8 የRED ፈተናዎች ሳይለወጡ GREEN መሆን አለባቸው። `LAST_COMPLETED_STAGE=8` እስከ እውነተኛ V ማረጋገጫ ይቆያል። ዝርዝር፦ `docs/STAGE09_PATCH04.md`።
+የታሪካዊው `mutate_stones_wrong` ያለ ለውጥ ተጠብቋል። አዲሱ `StonePatch04` መጀመሪያ የአምስት ድንጋዮችን snapshot ይወስዳል፣ በclone ላይ `mutate_stones_wrong` በእውነት ይጠራል፣ ከዚያም `w,b,s,m,r` ሙሉ ውጤትን በsnapshot እሴቶች ይደርሳል። `get_stone_table_through_legacy_builder` 46 የተጠገኑ ድንጋዮችን ይሰራል፤ የታሪካዊው `get_legacy_stone_table` አሁንም ይኖራል። የደረጃ 8 የRED ፈተናዎች ሳይለወጡ GREEN መሆን አለባቸው። V 0.5.2 (`7647ce1`) በGitHub Actions run `38162967481` ተረጋግጧል፤ `v fmt -verify` PASS እና `v test ./pastafari` 13/13 PASS። የደረጃ 8 አራት RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=9` ነው። ዝርዝር፦ `docs/STAGE09_PATCH04.md`።
