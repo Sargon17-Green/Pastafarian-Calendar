@@ -246,3 +246,20 @@ confronti normativi della riga 2 (orzo, sale) e riga 3
 (frumento). Le altre verifiche controllano la ricorrenza
 errata, 46 righe, modulo SAVE, assenza di alias, isolamento,
 disponibilità delle patch precedenti e mancanza di PATCH 04.
+
+### Certificazione nativa di DISCOVERY 04
+
+La [GitHub Actions run 38157155909](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38157155909)
+è conclusa con SUCCESS sul commit
+`4b4d5b6c11c4d9dc9300fd1cbad84c9def7a0248`.
+Nove job riusciti: controllo del catalogo, Stage01 18 PASS,
+Stage02 7 PASS/3 FAIL attesi, Stage03 12 PASS,
+Stage04 14 PASS/3 FAIL attesi, Stage05 18 PASS,
+Stage06 15 PASS/3 FAIL attesi, Stage07 20 PASS e
+Stage08 19 PASS/3 FAIL intenzionali.
+
+Valori osservati per le differenze previste:
+riga 2 orzo `1073 → 1434`, riga 2 sale `2375 → 3780`,
+riga 3 frumento `146106 → 147189`.
+È stata resa compatibile con gli stadi successivi anche la
+regressione di metadata di Stage07. Nessuna PATCH 04 introdotta.

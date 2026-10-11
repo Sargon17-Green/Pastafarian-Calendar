@@ -346,4 +346,23 @@ regressione RED con tre valori normativi esatti. La tabella
 storica di 46 righe viene costruita e restituita per invocazione,
 conservando tutte le cicatrici e patch precedenti.
 
-La certificazione nativa deve ancora essere acquisita.
+### Verifica nativa compiuta
+
+La GitHub Actions run 38157155909 ha compilato ed eseguito
+Scala nativo sul commit
+`4b4d5b6c11c4d9dc9300fd1cbad84c9def7a0248`.
+I nove job sono SUCCESS: Stage01 18 PASS, Stage02 7 PASS/3 FAIL
+deliberati, Stage03 12 PASS, Stage04 14 PASS/3 FAIL deliberati,
+Stage05 18 PASS, Stage06 15 PASS/3 FAIL deliberati,
+Stage07 20 PASS e Stage08 19 PASS/3 FAIL deliberati.
+
+Le tre divergenze sono esattamente:
+riga 2, orzo `1073 → 1434`;
+riga 2, sale `2375 → 3780`;
+riga 3, frumento `146106 → 147189`.
+L'audit ha inoltre rilevato che una verifica di metadata della
+regressione Stage07 richiedeva ancora `CURRENT_STAGE=7`.
+La verifica è stata corretta per continuare a convalidare
+la certificazione storica negli stadi successivi,
+senza cambiare l'algoritmo del PATCH 03.
+Non è stata avviata PATCH 04.
