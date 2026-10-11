@@ -29,3 +29,7 @@ ni'o lo `MonsterArithmetic` cu se zbasu fi lo cnino Java se pilno samselpla gi'e
 ### lo 46 rokci .e lo djacu drata
 
 ni'o lo `MonsterSauceDrops` cu se zbasu fi la Java po'o gi'e zbasu lo 46 rokci porsi .e lo 7 mipri djacu drata .e lo 46 se viska djacu drata. lo `Drops` cu stodi gi'e na se galfi sepi'o lo drata se benji. lo `Stage02DropsTests` cu srana lo `NormativeOracle` poi cipra po'o. lo ka lo se pilno ciste na tcidu lo normativi cipra cu se ralte. lo remoi stadi cu na se mulno.
+
+### lo xa djacu bliku .e lo 12 muvdu rimni
+
+ni'o lo `MonsterSauceBowls` cu se zbasu fi la Java po'o. ri zbasu lo 720 se cuxna porsi .e lo 46 se jarco porsi .e lo 12 fanmo muvdu rimni .e lo `AnswerStream`. lo `Stage02BowlsTests` cu cipra lo datni srana lo `NormativeOracle` pe lo cipra po'o. lo remoi stadi cu na se mulno.

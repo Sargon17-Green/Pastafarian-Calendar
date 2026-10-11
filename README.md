@@ -58,3 +58,9 @@ sh run_stage02_drops_tests.sh
 ```
 
 ni'o lo remoi stadi na se mulno. lo djacu bliku .e lo selcu'a javni cu nitcu lo balvi zbasu.
+
+## lo remoi stadi — lo xa djacu bliku
+
+ni'o lo `MonsterSauceBowls` cu zbasu lo xa djacu bliku .e lo 46 djacu drata porsi .e lo 12 se jarco muvdu rimni. lo `unrankPermutation` cu zbasu lo lexikografike porsi fi lo 720 se cuxna. lo `ask` .e lo `answerAt` cu zbasu lo se cuxna datni.
+
+ni'o lo `Stage02BowlsTests` cu cipra lo ro 720 se cuxna porsi .e lo mulno djacu bliku .e lo selcuxna .e lo detri farvi .e lo se ralte mebyjavni. ko benji `sh run_stage02_bowls_tests.sh`. lo `NormativeOracle` cu vasru lo cipra po'o. lo `LAST_COMPLETED_STAGE` cu du li pa.
