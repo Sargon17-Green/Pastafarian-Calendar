@@ -132,8 +132,7 @@ function Catalog.iterMonths()
     end
 end
 
-return setmetatable({}, {
-    __index = Catalog,
+return setmetatable(Catalog, {
     __newindex = function()
         error("SourceLanguageCatalog la jele depi Stage 1")
     end,
