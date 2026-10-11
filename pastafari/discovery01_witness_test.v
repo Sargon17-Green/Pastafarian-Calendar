@@ -20,3 +20,24 @@ fn test_discovery01_witness_negative_multiple() {
 	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
 	assert calendar_save_spaghetti(big_neg(m)).str() == '0'
 }
+
+fn test_discovery01_calendar_entrypoint_reaches_legacy_adapter() {
+	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
+	mut error_text := ''
+	_ = calendar_date_spaghetti(m, m) or {
+		error_text = err.msg()
+		CalendarResult{}
+	}
+	assert error_text.contains('DISCOVERY_01 oldRemainder=0')
+}
+
+fn test_discovery01_calendar_entrypoint_control_m_plus_one() {
+	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
+	x := big_add(m, big_one())
+	mut error_text := ''
+	_ = calendar_date_spaghetti(x, x) or {
+		error_text = err.msg()
+		CalendarResult{}
+	}
+	assert error_text.contains('DISCOVERY_01 oldRemainder=1')
+}
