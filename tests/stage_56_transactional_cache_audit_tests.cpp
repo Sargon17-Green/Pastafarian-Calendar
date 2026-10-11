@@ -1,9 +1,12 @@
 #include "pastafari/monster.hpp"
+#include "pastafari/source_language_catalog.hpp"
 
 #include <array>
 
 #include <iostream>
 #include <map>
+#include <numeric>
+#include <set>
 #include <stdexcept>
 #include <string>
 
@@ -94,6 +97,137 @@ void exigeRepetitionemContextus() {
           "cache secundum calidum cicatrices novas simulavit");
 }
 
+
+
+void exigeTexturamEtTerminosExStructuraIndependenter() {
+    // Oraculum internum post fabricationem anni: hic neque adapter
+    // PATCH25 neque cache output productionis in exspectatione adhibetur.
+    const Integer c = pastafari::FOUNDATION_DAY_OLD;
+    BaseMonsterManager reusus;
+    const auto prima = reusus.executeFinalIntegrationStage56(c, c);
+    exigeViridem(prima);
+    const auto& s = prima.structure;
+    const auto& year = prima.targetYear;
+    const Integer n = year.closeGateDay - year.openGateDay;
+
+    exige(s.cutletCount >= 6 && s.cutletCount <= 17,
+          "numerus segmentorum non legalis");
+    exige(static_cast<int>(s.cutlets.size()) == s.cutletCount &&
+          static_cast<int>(s.cutletPartition.size()) == s.cutletCount &&
+          static_cast<int>(s.cutletNameIndices.size()) == s.cutletCount,
+          "magnitudines segmentorum non concordant");
+    exige(s.monthCount >= 3 && s.monthCount <= 47 &&
+          static_cast<int>(s.monthLengths.size()) == s.monthCount &&
+          static_cast<int>(s.monthNameIndices.size()) == s.monthCount,
+          "magnitudines mensium non concordant");
+    exige(Integer{s.monthWeaving.size()} == n,
+          "texturae longitudo ab anno discrepat");
+
+    std::set<Integer> targets;
+    targets.insert(year.openGateDay + 1);
+    targets.insert(year.closeGateDay);
+    targets.insert(year.openGateDay + (n + 1) / 2);
+    Integer nextCutletFirst = year.openGateDay + 1;
+    for (int k = 0; k < s.cutletCount; ++k) {
+        const auto& x = s.cutlets[static_cast<std::size_t>(k)];
+        exige(x.firstDay == nextCutletFirst && x.lastDay >= x.firstDay,
+              "segmenta non contigua sunt");
+        exige(x.canonicalIndex == s.cutletNameIndices[static_cast<std::size_t>(k)] &&
+              x.canonicalIndex >= 1 && x.canonicalIndex <= 17,
+              "index nominis segmenti invalidus");
+        nextCutletFirst = x.lastDay + 1;
+    }
+    exige(nextCutletFirst == year.closeGateDay + 1,
+          "segmenta usque ad ultimum diem non perveniunt");
+
+    // Ambae partes primi et ultimi termini segmenti, etiam si mutationes
+    // menses cum iis non congruunt.
+    for (const auto* x : {&s.cutlets.front(), &s.cutlets.back()}) {
+        targets.insert(x->firstDay);
+        targets.insert(x->lastDay);
+    }
+    if (s.cutlets.size() > 1) {
+        targets.insert(s.cutlets[0].lastDay);
+        targets.insert(s.cutlets[1].firstDay);
+    }
+
+    std::vector<int> remaining = s.monthLengths;
+    std::vector<std::size_t> primaOcc(
+        static_cast<std::size_t>(s.monthCount), s.monthWeaving.size());
+    std::vector<std::size_t> ultimaOcc(
+        static_cast<std::size_t>(s.monthCount), s.monthWeaving.size());
+    int aperti = 0;
+    int clausi = 0;
+    for (std::size_t pos = 0; pos < s.monthWeaving.size(); ++pos) {
+        const int monthId = s.monthWeaving[pos];
+        exige(monthId >= 1 && monthId <= s.monthCount,
+              "textura mensis indicem extra fines habet");
+        const std::size_t k = static_cast<std::size_t>(monthId - 1);
+        exige(remaining[k] > 0, "mensis plures dies quam definiti recepit");
+        if (remaining[k] == s.monthLengths[k]) {
+            exige(monthId == aperti + 1,
+                  "ordo primae apparitionis mensium non legalis");
+            aperti = monthId;
+            primaOcc[k] = pos;
+        }
+        --remaining[k];
+        if (remaining[k] == 0) {
+            exige(monthId == clausi + 1,
+                  "ordo ultimae apparitionis mensium non legalis");
+            clausi = monthId;
+            ultimaOcc[k] = pos;
+        }
+    }
+    exige(aperti == s.monthCount && clausi == s.monthCount &&
+          std::all_of(remaining.begin(), remaining.end(),
+                      [](int count) { return count == 0; }),
+          "textura omnes menses non aperuit et clausit");
+    for (int name : s.monthNameIndices) {
+        exige(name >= 1 && name <= 47, "index nominis mensis invalidus");
+    }
+    // Testantur initium/finem mensis primi, secundi et ultimi;
+    // maximo duodecim puncta ad tempus CI moderatum.
+    for (int k : {0, 1, s.monthCount - 1}) {
+        targets.insert(year.openGateDay + 1 +
+                       Integer{primaOcc[static_cast<std::size_t>(k)]});
+        targets.insert(year.openGateDay + 1 +
+                       Integer{ultimaOcc[static_cast<std::size_t>(k)]});
+    }
+
+    for (const Integer& t : targets) {
+        const auto actual = reusus.executeFinalIntegrationStage56(c, t);
+        exigeViridem(actual);
+        exige(actual.guardedCacheHit && !actual.guardedCacheRejected,
+              "sample intra annum debet cache calidum uti");
+        const auto* segmentum = static_cast<const pastafari::SpaghettiCutletRecord*>(nullptr);
+        for (const auto& x : s.cutlets) {
+            if (x.firstDay <= t && t <= x.lastDay) {
+                segmentum = &x;
+                break;
+            }
+        }
+        exige(segmentum != nullptr, "sample sine segmento");
+        const std::size_t p = (t - year.openGateDay - 1).convert_to<std::size_t>();
+        const int monthId = s.monthWeaving.at(p);
+        const int occ = static_cast<int>(std::count(
+            s.monthWeaving.begin(), s.monthWeaving.begin() +
+                static_cast<std::ptrdiff_t>(p + 1), monthId));
+        const SpaghettiDateFive expected{
+            year.number,
+            std::string(pastafari::cutletSourceName(
+                static_cast<std::size_t>(segmentum->canonicalIndex))),
+            t - segmentum->firstDay + 1,
+            std::string(pastafari::monthSourceName(
+                static_cast<std::size_t>(
+                    s.monthNameIndices.at(static_cast<std::size_t>(monthId - 1))))),
+            Integer{occ}
+        };
+        exige(eademDies(actual.result, expected),
+              "sample terminalis structuram versus API mutavit");
+    }
+    exige(targets.size() >= 8,
+          "sample structurale fines diversos non exercuit");
+}
 
 void exigeTresCustodesCacheSeparatim() {
     // Iniectio test-only in cache structurae. Singulus custodum triplicis
@@ -415,6 +549,7 @@ int main() {
         exigeMetamorphosinDieiQuaesiti();
         exigeMetamorphosinDieiCalculationis();
         exigeTresCustodesCacheSeparatim();
+        exigeTexturamEtTerminosExStructuraIndependenter();
 
         std::cout << "GRADUS56_CACHE_RECOVERY_TRANSIIT: "
                      "cache frigidus/calidus, reiectio fingerprint, "
