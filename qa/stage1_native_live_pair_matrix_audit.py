@@ -55,6 +55,7 @@ def verify(data):
          "native live-pair execution evidence incomplete")
     cross = overlap = steps = gets = puts = 0
     by_label = {}
+    by_label_steps = {}
     for ix, row in enumerate(rows):
         schedule = "AB" if ix < 12 else "BA"
         l, r = PAIRS[ix % 12]
@@ -85,13 +86,24 @@ def verify(data):
                  row["right_steps"] == prior["right_steps"],
                  "alternating order unexpectedly changed Native semantics or ticks")
         for label, side in ((l, "left"), (r, "right")):
+            # A live program must execute the same number of Native steps
+            # regardless of which *other* input runs beside it. AB/BA
+            # parity alone cannot catch a coordinated two-schedule forgery.
+            own_steps = row[side + "_steps"]
+            if label in by_label_steps:
+                need(by_label_steps[label] == own_steps,
+                     "Native Program step count changed with schedule/peer")
+            else:
+                by_label_steps[label] = own_steps
             nget = row.get(side + "_memory_gets")
             nput = row.get(side + "_memory_puts")
             ndirect = row.get(side + "_direct_p_steps")
             nspace = row.get(side + "_runtime_putspace")
             need(type(nget) is int and nget > 0 and
                  type(nput) is int and nput > 0 and
-                 nput == ndirect and nspace == 0,
+                 type(ndirect) is int and ndirect > 0 and
+                 type(nspace) is int and nspace == 0 and
+                 nput == ndirect,
                  "Native live pair memory API write/read ownership invalid")
             if label in by_label:
                 need(by_label[label] == (nget, nput),
@@ -125,6 +137,15 @@ def main(folder):
             print("NATIVE_LIVE_PAIR_TAMPER_REJECT_PASS", name)
             return name
         raise AssertionError("independent audit accepted forged native evidence: " + name)
+    def forge_peer_dependent_steps(d):
+        # Keep AB/BA equality intact for one pair while forging a different
+        # step count for v0 with another peer. The new per-label check must
+        # reject this otherwise internally consistent report.
+        for ix in (3, 15):
+            need(d["records"][ix]["left"] == "v0" and
+                 d["records"][ix]["right"] == "i0",
+                 "coordinated peer-dependence control lost its input pair")
+            d["records"][ix]["left_steps"] += 1
     attacks = [
         reject("wrong_source", lambda d: d.__setitem__("source_git_blob", "0"*40)),
         reject("missing_pair", lambda d: d["records"].pop()),
@@ -136,21 +157,25 @@ def main(folder):
         reject("cross_mutation", lambda d: d["records"][0].__setitem__("cross_program_state_unchanged", False)),
         reject("absent_cross_checks", lambda d: d["records"][0].__setitem__("cross_program_checks", 0)),
         reject("forged_native_steps", lambda d: d["records"][12].__setitem__("left_steps", 1)),
+        reject("peer_dependent_steps_both_schedules", forge_peer_dependent_steps),
         reject("forged_invalid_oracle", lambda d: d["expected_by_label"]["i0"].__setitem__(0, "0")),
         reject("unowned_memory_api", lambda d: d["records"][0].__setitem__("every_api_read_write_owned_by_active_program", False)),
         reject("forged_memory_put", lambda d: d["records"][0].__setitem__("left_memory_puts", 0)),
+        reject("float_direct_p_count", lambda d: d["records"][0].__setitem__("left_direct_p_steps", float(d["records"][0]["left_direct_p_steps"]))),
+        reject("bool_putspace_count", lambda d: d["records"][0].__setitem__("right_runtime_putspace", False)),
+        reject("float_putspace_count", lambda d: d["records"][0].__setitem__("right_runtime_putspace", 0.0)),
         reject("putspace_writes", lambda d: d["records"][0].__setitem__("right_runtime_putspace", 1)),
         reject("memory_reads_nondeterministic", lambda d: d["records"][12].__setitem__("left_memory_gets", d["records"][12]["left_memory_gets"] + 1)),
         reject("premature_completion", lambda d: d.__setitem__("stage1_final_acceptance", True)),
     ]
-    need(len(attacks) == 16, "missing adversarial audit cases")
+    need(len(attacks) == 20, "missing adversarial audit cases")
     report = {"schema": "befunge-stage1-live-pair-matrix-audit-v2",
               "source_git_blob": PIN, "verified": outcome,
               "negative_reports_rejected": attacks,
               "stage1_final_acceptance": False}
     output = Path(folder) / "native_live_pair_matrix_audit.json"
     output.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    print("NATIVE_LIVE_PAIR_MATRIX_16_HOSTILE_REPORTS_REJECTED_PASS")
+    print("NATIVE_LIVE_PAIR_MATRIX_20_HOSTILE_REPORTS_REJECTED_PASS")
 
 if __name__ == "__main__":
     need(len(sys.argv) == 2, "usage: native live-pair evidence folder")
