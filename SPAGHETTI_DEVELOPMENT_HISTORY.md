@@ -922,3 +922,15 @@ Dodici record immutabili, ciclo di mescolatura
 completo, handler, dispatcher, campi nel contesto,
 metrica, validatore, report e suite RED dedicata.
 Le otto patch precedenti restano verificabili.
+
+### Certificazione nativa della discovery
+
+GitHub Actions run 38180656627 è terminata
+con SUCCESS per tutti i diciannove job sul commit
+`7b2c7892873ed7a986ea7fbbfa8572763cfccd91`.
+La prova Scala Stage18 ha eseguito 27 controlli
+verdi e precisamente tre confronti rossi intenzionali
+(ordinario, simmetrico, signed). Sono conservate tutte
+le firme storiche da Stage01 a Stage17; il catalogo
+canonico è rimasto bloccato e nessuna PATCH 09
+è stata anticipata.

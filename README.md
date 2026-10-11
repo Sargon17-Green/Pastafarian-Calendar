@@ -701,3 +701,16 @@ La suite verifica 720 permutazioni del primo giro,
 256 campioni deterministici, BigInt signed oltre
 16.000 bit, ownership e tutte le otto patch
 precedenti. Nessuna PATCH 09 è introdotta.
+
+### Certificazione nativa della DISCOVERY 09
+
+La [GitHub Actions run 38180656627](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38180656627)
+ha concluso SUCCESS su
+`7b2c7892873ed7a986ea7fbbfa8572763cfccd91`.
+Sono riusciti **19 job su 19**: lock del catalogo
+e tutte le suite native Stage01–Stage18.
+Stage18 ha la firma storica **27 PASS, 3 FAIL
+intenzionali**, limitati ai tre confronti
+`ordinario`, `simmetrico` e `signed`.
+Tutte le firme storiche degli stadi precedenti
+sono rimaste invarianti. La PATCH 09 non è introdotta.
