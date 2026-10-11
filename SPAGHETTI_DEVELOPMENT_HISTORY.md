@@ -141,3 +141,21 @@ Handler `DISTANCE_PATCH` la ajoute yon dezyèm tranzaksyon nan menm kontèks `LE
 ### Regrèsyon ak sa ki rete pou pita
 
 Regresyon normatif Stage 6 la vin vèt. Nou kreye `stage06_legacy_regression_tests.lua` pou kenbe mesaj `EXPECTED_RED` orijinal la egzak, pandan odit Stage 6 la kouri sou chemen legacy a. Nou ajiste tès tras ak pwopriyete yo pou yo konpare legacy ak legacy, epi wout piblik la ak règ enklizif la. Nou egzamine 2,665 pè, limite debòdman Lua ak BigInt, epi teste reentrancy ak diferan branch rekonsilyasyon. Stage 8 ak defo ki vin apre yo pa enkli.
+
+## Stage 8 — DISCOVERY 04: `mutateStonesWrong`
+
+### Sa nou te kwè
+
+Nan premye konstriksyon tab 46 wòch yo, nou te sipoze nou te ka kalkile senk nouvo valè yo youn apre lòt nan menm tablo a. Fòmil yo te sanble respekte `SAVE`, paske chak apèl te sèvi ak `SavePatch.savePatch`, men yo pa t respekte kondisyon ki mande pou **tout senk wòch yo soti nan menm eta anvan an**.
+
+### Sa nou dekouvri
+
+Sou ranje 2 a, valè ble `w=378` la bon, paske li sèlman itilize `w` ak `b` ansyen yo. Lè n ap kalkile `b`, nou itilize `w=378` ki deja chanje, olye de `w=17`: rezilta a vin `1434` olye de `1073`. Apre sa, `s` itilize `b` ki deja chanje, `m` itilize `s` ki deja chanje, epi `r` itilize `w` ak `m` ki deja chanje. Rezilta yo se `3780/9932/25047` olye de `2375/6195/10493`. Se yon erè depandans tanporèl, pa yon erè BigInt oswa modil SAVE.
+
+### Kouch monstr ki grandi
+
+Nou kreye `LEGACY_STONES` nan dispatcher ak metrik, kontèks semantik ki posede apa, dyagnostik `SEQUENTIAL_REUSE_OF_NEW_STONES` ak tras pou chak apèl. Fonksyon `mutateStonesWrong` la li menm toujou ekri **in-place** sou tablo ki resevwa li, jan kontra istorik la mande. Yon adapter `execute` pwoteje antre apèl piblik la epi pwouve tranzaksyon commit li. Bati 46 ranje yo mande 45 apèl reyèl nan chemen legacy a; pa gen tablo prekwit ki soti nan yon lòt branch.
+
+### Prèv, limit ak sa ki rete
+
+Nou konpare 410 tranzisyon, ladan yo 240 gwo antye detèminis, ak yon referans lokal ki sèvi ak oracle test-only `SAVE` la. Odit `EXPECTED_RED` la egzije kat non ak valè presi, san tolere echèk ki pa gen rapò ak mutation an. Tès ansyen etap yo rete vèt. Nou pa mete snapshot korektif nan production: **Stage 9 — PATCH 04** sèlman ap klone valè `old` yo, rele legacy sou yon clone pou konsève erè a, epi ranplase tout senk rezilta yo ak fòmil ki sèvi ak `old` sèlman.
