@@ -575,3 +575,30 @@ Stage09 26 PASS, Stage10 15 PASS/3 FAIL intenzionali,
 Stage11 27 PASS, Stage12 22 PASS/3 FAIL intenzionali,
 Stage13 26 PASS, Stage14 20 PASS/3 FAIL intenzionali,
 Stage15 31 PASS/0 FAIL. Nessuna logica di Stage16 anticipata.
+
+## Stadio 16 — DISCOVERY 08: registro delle ciotole in alias
+
+Il calcolo normativo di una mescolatura visibile usa tutte le
+sei ciotole precedenti come istantanea immutabile. Il vecchio
+`LegacyBowlAliasAdapter.bowlAlias` calcola prima i getti e
+sceglie l'ordine dalla PATCH 07, ma fa coincidere `old` e
+`next` con lo stesso `Array[BigInt]`. Le posizioni successive
+leggono ciotole già modificate. L'errore rimane solo nella
+mescolatura; il rango e SAVE sono corretti.
+
+Il manager attraversa `BOOT → DISCOVERY_08_BOWL_ALIAS`,
+e il report conserva gli input, l'ordine, i getti e le
+uscite storiche. Il test confronta i risultati con una
+formula su istantanea congelata e con una ricostruzione
+funzionale indipendente dell'alias storico.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage16Tests'
+```
+
+Firma intenzionalmente RED: `23 PASS, 3 FAIL`;
+i soli tre confronti errati sono l'ordine diretto,
+l'ordine inverso e la goccia 46. Sono inclusi tutti i
+720 ranghi, 256 campioni deterministici, interi oltre
+8192 bit e sette patch precedenti. Non è stata introdotta
+la PATCH 08.

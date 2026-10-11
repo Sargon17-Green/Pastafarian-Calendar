@@ -229,7 +229,10 @@ object Stage14Tests {
       else
         truth(code.contains("LegacyPermutationAdapter.oldPermutationUnrank0("),
           "La cicatrice originale deve restare percorribile")
-      truth(!code.contains("bowlAlias"), "Stadio futuro anticipato")
+      if(current < 16)
+        truth(!code.contains("bowlAlias"), "Stadio futuro anticipato")
+      else
+        truth(code.contains("LegacyBowlAliasAdapter"), "Cicatrice della discovery presente")
     }
 
     check("metadati discovery 07 dopo lo stadio 13 certificato") {

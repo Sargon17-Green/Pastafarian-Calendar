@@ -46,7 +46,15 @@ final case class BaseMonsterContext(
   var permutationRankInput: Option[Int] = None,
   var legacyPermutationOutput: Option[Vector[Int]] = None,
   var patchedPermutationOutput: Option[Vector[Int]] = None,
-  var patch07Applied: Boolean = false
+  var patch07Applied: Boolean = false,
+  var bowlStepInput: Option[Int] = None,
+  var bowlRankInput: Option[Int] = None,
+  var bowlInput: Option[Vector[BigInt]] = None,
+  var bowlDropInput: Option[BigInt] = None,
+  var bowlStonesInput: Option[Vector[BigInt]] = None,
+  var legacyBowlOrderOutput: Option[Vector[Int]] = None,
+  var legacyBowlPoursOutput: Option[Vector[BigInt]] = None,
+  var legacyBowlOutput: Option[Vector[BigInt]] = None
 )
 
 final class BaseMetricsShell {
@@ -66,6 +74,39 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requireDiscovery08Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_08_BOWL_ALIAS" ||
+        ctx.status != "LEGACY_BOWL_ALIAS_READY" ||
+        ctx.branchTrace.toVector != Vector("BOOT", "DISCOVERY_08_BOWL_ALIAS") ||
+        ctx.bowlStepInput.isEmpty || ctx.bowlRankInput.isEmpty ||
+        ctx.bowlInput.isEmpty || ctx.bowlDropInput.isEmpty ||
+        ctx.bowlStonesInput.isEmpty || ctx.legacyBowlOrderOutput.isEmpty ||
+        ctx.legacyBowlPoursOutput.isEmpty || ctx.legacyBowlOutput.isEmpty) {
+      throw new IllegalStateException("La mescolatura legacy non è pronta.")
+    }
+    val step = ctx.bowlStepInput.get
+    val rank = ctx.bowlRankInput.get
+    val original = ctx.bowlInput.get
+    val stones = ctx.bowlStonesInput.get
+    val order = ctx.legacyBowlOrderOutput.get
+    val pours = ctx.legacyBowlPoursOutput.get
+    val result = ctx.legacyBowlOutput.get
+    if (step < 1 || step > 46 || rank < 1 || rank > 720 ||
+        original.length != 6 || stones.length != 5 ||
+        order.length != 6 || order.sorted != Vector(1,2,3,4,5,6) ||
+        pours.length != 6 || result.length != 6 ||
+        result.exists(x => x < 1 || x > ((BigInt(1) << 127)-1)) ||
+        order != Patch07PermutationWrapper.permutationPatch(rank)) {
+      throw new IllegalStateException("Parametri o rango della mescolatura incoerenti.")
+    }
+    val expected = LegacyBowlAliasAdapter.bowlAlias(
+      original, ctx.bowlDropInput.get, stones, step, rank)
+    if (expected.order != order || expected.pours != pours ||
+        expected.bowls != result) {
+      throw new IllegalStateException("Risultato o getti della mescolatura falsificati.")
     }
   }
 
@@ -389,7 +430,8 @@ final class BaseMonsterManager {
     new Discovery06GrindHandler(metrics),
     new Patch06GrindHandler(metrics),
     new Discovery07PermutationHandler(metrics),
-    new Patch07PermutationHandler(metrics)
+    new Patch07PermutationHandler(metrics),
+    new Discovery08BowlAliasHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -743,6 +785,33 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("patch07", e)
+    }
+  }
+
+  def discover08BowlAlias(
+    calculationDay: BigInt, targetDay: BigInt,
+    initial: Vector[BigInt], drop: BigInt,
+    stones: Vector[BigInt], step: Int, rank1: Int
+  ): Discovery08BowlAliasReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.bowlInput = Some(initial)
+    ctx.bowlDropInput = Some(drop)
+    ctx.bowlStonesInput = Some(stones)
+    ctx.bowlStepInput = Some(step)
+    ctx.bowlRankInput = Some(rank1)
+    ctx.phase = "DISCOVERY_08_BOWL_ALIAS"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery08Ready(ctx)
+      Discovery08BowlAliasReport(
+        ctx.calculationDay,ctx.targetDay,ctx.bowlInput.get,
+        ctx.bowlDropInput.get,ctx.bowlStonesInput.get,ctx.bowlStepInput.get,
+        ctx.bowlRankInput.get,ctx.legacyBowlOrderOutput.get,
+        ctx.legacyBowlPoursOutput.get,ctx.legacyBowlOutput.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("discovery08",error)
     }
   }
 

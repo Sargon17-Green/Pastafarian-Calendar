@@ -366,3 +366,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 15: 31 PASS, 0 FAIL' stage15.log
           test "$(grep -Fc 'PASS — ' stage15.log)" -eq 31
           test "$(grep -Fc 'FAIL — ' stage15.log)" -eq 0
+
+  native-stage16-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 16 intentional RED bowl state aliasing
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage16Tests' > stage16.log 2>&1
+          rc=$?
+          set -e
+          cat stage16.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 16: 23 PASS, 3 FAIL' stage16.log
+          test "$(grep -Fc 'PASS — ' stage16.log)" -eq 23
+          test "$(grep -Fc 'FAIL — ' stage16.log)" -eq 3
+          for label in 'ordine diretto' 'ordine inverso' 'goccia quarantasei'; do
+            grep -Fq "FAIL — equivalenza normativa mescolatura ${label} — Alias muta" stage16.log
+          done

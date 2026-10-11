@@ -769,3 +769,42 @@ voluti per i ranghi 1, 2, 720. Gli altri
 stadi storici hanno mantenuto ciascuno la
 propria firma predefinita. Nessun codice di
 Stage16 è stato introdotto.
+
+## Stadio 16 — DISCOVERY 08: sei ciotole, un solo array
+
+### Che cosa si pensava
+
+Risparmiare una copia del registro di sei ciotole
+sembrava innocuo perché i getti erano già pronti.
+Tuttavia le sei equazioni normative devono leggere
+tutte la stessa istantanea dei valori precedenti.
+
+### Che cosa si è scoperto
+
+L'errore non è nella permutazione (già riparata
+in PATCH 07) né in SAVE (PATCH 01): il ciclo
+assegna `old` e `next` alla stessa memoria.
+Dopo ogni posizione, le seguenti leggono
+parte dei valori già aggiornati.
+
+### Che cosa è stato aggirato
+
+Nulla. Il helper storico rimane intenzionalmente
+difettoso; manager, handler, validator e report
+mostrano il percorso reale e i valori legacy.
+
+### Perché non è normativamente equivalente
+
+La formula delle sei nuove ciotole deve usare
+esclusivamente sei valori congelati. L'alias
+trasforma la ricorrenza simultanea in una
+sequenziale dipendente dall'ordine. Sono registrati
+tre fallimenti intenzionali in ordini e passi distinti.
+
+### Strato di mostruosità aggiunto
+
+Array mutabile locale alias, output immutabili,
+nuova fase nel dispatcher, otto campi del contesto,
+handler e metrica, report e suite di regressione.
+Tutte e sette le patch già certificate rimangono.
+Non è ancora introdotta la futura PATCH 08.

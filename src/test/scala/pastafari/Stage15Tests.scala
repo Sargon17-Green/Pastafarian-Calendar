@@ -317,21 +317,34 @@ object Stage15Tests {
       truth(!sources.contains("NormativeOracle"),"Oracolo test-only")
       truth(sources.contains("LegacyPermutationAdapter.oldPermutationUnrank0(rank1)"),
         "Il wrapper deve usare realmente l'algoritmo storico")
-      truth(!sources.contains("bowlAlias"),"Funzione futura anticipata")
+      val stage = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8).linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(stage < 16)
+        truth(!sources.contains("bowlAlias"),"Funzione futura anticipata")
+      else
+        truth(sources.contains("LegacyBowlAliasAdapter"),"Cicatrice del nuovo stadio")
     }
     check("metadati dichiarano Stage15 verde e patch sette") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=15"),"Stadio 15")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Fase")
-      truth(st.contains("CURRENT_PATCH=07"),"Patch")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=15,"Stadio corrente")
+      if(current == 15) {
+        truth(st.contains("CURRENT_KIND=PATCH"),"Fase")
+        truth(st.contains("CURRENT_PATCH=07"),"Patch")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      } else {
+        truth(st.contains("STAGE_15_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_31_PASS_0_FAIL"),
+          "Certificazione Stage15")
+      }
       truth(st.contains("STAGE_14_NATIVE_VERIFICATION=PASS_EXPECTED_RED_20_PASS_3_FAIL"),
         "Firma RED stadio 14 preservata")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("LAST_COMPLETED_STAGE assente"))
-      truth(completed>=14 && completed<=15,"Certificazione non anticipata")
+      truth(completed>=14 && completed<=current,"Certificazione non anticipata")
     }
     println("\nRISULTATO STADIO 15: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0) sys.exit(1)

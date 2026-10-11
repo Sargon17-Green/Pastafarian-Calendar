@@ -245,3 +245,23 @@ cancellare la cicatrice. Il validator ricalcola unranking
 fattoriale 1-based in un algoritmo separato, verifica
 la trace e confronta l'output storico al helper original.
 L'oracolo normativo rimane nei test, non nella produzione.
+
+## DISCOVERY 08 — alias nel registro delle sei ciotole
+
+Il helper `LegacyBowlAliasAdapter.bowlAlias` riceve sei
+valori precedenti, una goccia, cinque pietre, un indice
+visibile 1..46 e il rango dell'ordine 1..720. L'ordine
+è sempre normalizzato dalla PATCH 07; i tre getti
+vengono calcolati prima di qualsiasi mutazione.
+Il codice storico usa `old = register` e
+`next = register`, condividendo lo stesso array:
+le nuove scritture contaminano le letture seguenti.
+L'array resta confinato al helper e il risultato
+viene congelato in `Vector[BigInt]`.
+
+Il dispatcher esegue `Discovery08BowlAliasHandler`
+su un contesto nuovo; il validatore controlla trace,
+input, rango, dominio SAVE, getti e riproduzione della
+diagnostica. Il test-only oracle confronta separatamente
+la formula normativa con input congelati; non è stata
+introdotta la PATCH 08.

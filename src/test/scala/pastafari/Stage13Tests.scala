@@ -339,7 +339,13 @@ object Stage13Tests {
         "Il wrapper deve attraversare la cicatrice vera")
       truth(sources.contains("GRIND_TABLE_WITH_SENTINEL(step)"),
         "Il wrapper usa la regola dopo il sentinel")
-      truth(!sources.contains("bowlAlias"),"Logica futura delle alias bowl anticipata")
+      val stage = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8).linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(stage < 16)
+        truth(!sources.contains("bowlAlias"),"Logica futura delle alias bowl anticipata")
+      else
+        truth(sources.contains("LegacyBowlAliasAdapter"),"Cicatrice del successivo stadio")
     }
 
     check("metadati Stage13 veritieri e non certificati anticipatamente") {
