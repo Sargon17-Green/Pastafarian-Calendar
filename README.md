@@ -177,3 +177,28 @@ bwriadol. **Dim PATCH 02.**
 ffeiliau gwreiddiol â chod ymadael `0`, gan gynnwys yr holl farciau
 Camau 1–3 a'r 409 prawf BigInteger annibynnol. Y cam nesaf yw
 Cam 5 yn unig ar ôl lanlwytho Cam 4.
+
+
+## Cam 5 — Patch 02: tag diwrnod y Sylfaen
+
+Mae `DayTagPatchWrapper.kt` yn cywiro'r tag dydd **ar ôl** galw'r
+hen `LegacyDayTagAdapter.oldDayTag` yn union unwaith drwy'r dosbarthwr.
+Cedwir `oldDayTag` heb newid ac mae `DISCOVERY_02` yn dal i gofnodi
+tri anghysondeb disgwyliedig. Mae'r llwybr `PATCH_02` yn cadw
+`patch02Input`, `patch02LegacyOutput` a `patch02Output` ar bob cyd-destun.
+Mae'r gard `day == foundationDay` yn ddiangen yn fathemategol ond yn
+fwriadol bresennol yn y patch hanesyddol.
+
+Ar gyfer `F−2,F−1,F,F+1,F+2`, mae'r llwybr newydd yn dychwelyd
+`4,2,1,3,5`. Mae'r hen lwybr yn aros yn `4,2,0,2,4`.
+
+Defnyddiwch `sh run-stage05-tests.sh` o wreiddyn y gangen i ailbrofi
+Camau 1–4 ac yna Cam 5. Mae'r profion newydd yn cynnwys 331 diwrnod,
+60 achos mawr a 418 achos annibynnol `BigInteger` hyd at 2,048 did.
+Ni ddefnyddir `BigInteger` mewn cod cynhyrchu.
+
+**Statws y pecyn hwn:** mae'r cod Kotlin wedi'i lunio a'r profion
+Cam 5 wedi pasio gyda'r union `ExactInt.kt` gwreiddiol. Nid yw hyn yn
+disodli rhedeg holl oracl Cam 1 a'r gadwyn Camau 1–5; cadwir
+`LAST_COMPLETED_STAGE=4` nes bod `STAGE05_NATIVE_GREEN` yn pasio
+ar y gangen lawn. Ni weithredwyd unrhyw beth o Gam 6.

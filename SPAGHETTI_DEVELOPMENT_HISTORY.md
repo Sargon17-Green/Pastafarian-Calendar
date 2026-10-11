@@ -199,3 +199,23 @@ Cadwyd y pum tyst gwreiddiol, y llwybr PATCH 01 a'r ffin gamau.
 Ail-redwyd y cod terfynol gyda'r oracl gwreiddiol a 409 prawf
 BigInteger annibynnol. Cod ymadael `0`, ac mae'r graith
 `oldDayTag` yn parhau'n alwadadwy ac yn fwriadol wallus.
+
+
+## Cam 5 — PATCH 02: gwarchod graith tag y Sylfaen
+
+Cafodd `LegacyDayTagAdapter.oldDayTag` ei gadw fel yr oedd. Mae llwybr
+cynhyrchu `BOOT → PATCH_02` yn cyfrifo'r hen dag yn gyntaf ac yn
+cofnodi ei werth ar gyd-destun y galwad. Dim ond wedyn y mae'r
+`DayTagPatchWrapper` yn ychwanegu un ar ddiwrnod y Sylfaen ac ar bob
+diwrnod diweddarach. Cedwir prawf penodol `day == foundationDay`
+sy'n ddiangen oherwydd `day >= foundationDay`: craith fwriadol y patch.
+
+Roedd y pum tyst `F−2,F−1,F,F+1,F+2` yn `4,2,0,2,4` ar y llwybr
+etifeddol a `4,2,1,3,5` ar y llwybr wedi'i drwsio. Llwyddodd
+profion mewn Kotlin go iawn gyda'r union `ExactInt.kt` gwreiddiol:
+5 tyst, 331 diwrnod, 60 achos mawr, 418 prawf `BigInteger` annibynnol,
+perchnogaeth cyd-destun, ail-anfon, gwarchodaeth ac ailwirio'r hen
+lwybrau. **Nid yw'r prawf hwn yn dystysgrif regressions Cam 1–5 eto.**
+
+Rhaid rhedeg `run-stage05-tests.sh` yn erbyn y gangen lawn cyn newid
+`LAST_COMPLETED_STAGE=5`. Nid oes PATCH 03 na DISCOVERY 03 yn y pecyn.

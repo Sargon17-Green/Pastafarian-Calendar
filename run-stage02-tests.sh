@@ -62,6 +62,7 @@ if ! kotlinc \
     src/main/kotlin/pastafari/LegacyRemainderAdapter.kt \
     src/main/kotlin/pastafari/SavePatchWrapper.kt \
     src/main/kotlin/pastafari/LegacyDayTagAdapter.kt \
+    src/main/kotlin/pastafari/DayTagPatchWrapper.kt \
     src/main/kotlin/pastafari/MonsterBootstrap.kt \
     src/test/kotlin/pastafari/NormativeCore.kt \
     src/test/kotlin/pastafari/NormativeCalendar.kt \

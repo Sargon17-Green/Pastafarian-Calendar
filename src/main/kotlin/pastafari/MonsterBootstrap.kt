@@ -13,7 +13,10 @@ data class BaseMonsterContext(
     var patch01LegacyOutput: ExactInt? = null,
     var patch01Output: ExactInt? = null,
     var discovery02Input: ExactInt? = null,
-    var discovery02Output: ExactInt? = null
+    var discovery02Output: ExactInt? = null,
+    var patch02Input: ExactInt? = null,
+    var patch02LegacyOutput: ExactInt? = null,
+    var patch02Output: ExactInt? = null
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -66,7 +69,8 @@ class MonsterBootstrapManager(
     val errors: BaseErrorWrapper = BaseErrorWrapper(),
     val legacyRemainderAdapter: LegacyRemainderAdapter = LegacyRemainderAdapter(),
     val savePatchWrapper: SavePatchWrapper = SavePatchWrapper(),
-    val legacyDayTagAdapter: LegacyDayTagAdapter = LegacyDayTagAdapter()
+    val legacyDayTagAdapter: LegacyDayTagAdapter = LegacyDayTagAdapter(),
+    val dayTagPatchWrapper: DayTagPatchWrapper = DayTagPatchWrapper()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -100,6 +104,23 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_02_LEGACY_DAY_TAG")
             context.status = "LEGACY_DAY_TAG_OBSERVED"
             metrics.bump("discovery02.legacy")
+        }
+        dispatcher.register("PATCH_02") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_PATCH02_CONTEXT_NOT_READY")
+            val input = context.patch02Input
+                ?: throw MonsterValidationException("E_PATCH02_NO_INPUT")
+            // Y graith gyntaf; ni ddylai'r patch alw'r oracl normadol.
+            val legacy = legacyDayTagAdapter.oldDayTag(input)
+            val patched = dayTagPatchWrapper.dayTagWithFoundationScar(input, legacy)
+            // Ymrwymo atomig ar ôl i'r cyfrifiad cyfan lwyddo.
+            context.patch02LegacyOutput = legacy
+            context.patch02Output = patched
+            context.branchTrace.add("PATCH_02")
+            context.diagnostics.add("PATCH_02_FOUNDATION_SCAR_WRAPPER")
+            context.status = "PATCHED_DAY_TAG"
+            metrics.bump("patch02.legacy.calls")
+            metrics.bump("patch02.applied")
         }
         dispatcher.register("PATCH_01") { context ->
             validation.requireBootstrapContext(context)
@@ -170,6 +191,25 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY02_WRAP", e)
+        }
+    }
+
+    /** PATCH 02: BOOT, oldDayTag unwaith, yna'r amod Sylfaen. */
+    fun applyDayTagPatch(
+        calculationDay: ExactInt,
+        targetDay: ExactInt,
+        day: ExactInt
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.patch02Input = day
+        context.phase = "PATCH_02"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH02_WRAP", e)
         }
     }
 
