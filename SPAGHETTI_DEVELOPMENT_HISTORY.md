@@ -254,3 +254,8 @@ Mae `oldDistance` yn aros yn alwadadwy ac yn cynhyrchu'r un pum anghysondeb Cam 
 ### Cam 7 — ardystiad brodorol cyflawn
 
 Ar commit `3daa6b0e5e3fac8a6c2868e8bae19d7220ffa38d` llwyddodd swydd CI Kotlin (`114591831816`, rhediad `38180495340`) ar Kotlin 1.9.0/JDK 21. Cadarnhawyd 28 marc log: holl atchweliadau Camau 1–6, 8 tyst PATCH 03 gwyrdd, 441 prawf matrics a 549 prawf BigInteger annibynnol. Mae'r graith oldDistance yn dal yn alwadadwy gyda 5 EXPECTED_RED, tra bo PATCH 03 â 0 anghysondeb. `LAST_COMPLETED_STAGE=7`; ni ddechreuwyd Cam 8.
+
+
+## Cam 8 — DISCOVERY 04: nam dilyniannol y pum carreg
+
+Mae'r adeiladwr hen ffasiwn yn newid yr un cofnod mewn trefn benodol: gwenith, barlys, halen, chwerw, coch. Mae pob fformiwla ddilynol yn darllen y gwerthoedd sydd eisoes wedi newid, er y dylai ddefnyddio ciplun cyfan o'r hen res. Cedwir rhes 1 fel oedd; mae rhesi 2–46 yn dangos 224 gwahaniaeth mewn 225 cydran. Mae'r llwybr cynhyrchu ar wahân yn cofnodi'r tabl fesul galwad. Nid yw cam atgyweirio'r cerrig wedi'i ddechrau. Disgwylir prawf llawn CI cyn newid marc cwblhau'r cam.

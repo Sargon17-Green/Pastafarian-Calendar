@@ -35,6 +35,7 @@ if ! kotlinc \
     src/main/kotlin/pastafari/DayTagPatchWrapper.kt \
     src/main/kotlin/pastafari/LegacyDistanceAdapter.kt \
     src/main/kotlin/pastafari/DistancePatchWrapper.kt \
+    src/main/kotlin/pastafari/LegacyStoneBuilder.kt \
     src/main/kotlin/pastafari/MonsterBootstrap.kt \
     src/test/kotlin/pastafari/NormativeCore.kt \
     src/test/kotlin/pastafari/NormativeCalendar.kt \

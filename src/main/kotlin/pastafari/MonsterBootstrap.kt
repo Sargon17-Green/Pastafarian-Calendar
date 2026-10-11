@@ -26,7 +26,9 @@ data class BaseMonsterContext(
     var patch03ChronologicalBase: ExactInt? = null,
     var patch03SelectedBase: ExactInt? = null,
     var patch03ReplacementApplied: Boolean? = null,
-    var patch03Output: ExactInt? = null
+    var patch03Output: ExactInt? = null,
+    var discovery04LegacyStoneRows: List<MutableStoneRow>? = null,
+    var discovery04BuiltRows: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -82,7 +84,8 @@ class MonsterBootstrapManager(
     val legacyDayTagAdapter: LegacyDayTagAdapter = LegacyDayTagAdapter(),
     val dayTagPatchWrapper: DayTagPatchWrapper = DayTagPatchWrapper(),
     val legacyDistanceAdapter: LegacyDistanceAdapter = LegacyDistanceAdapter(),
-    val distancePatchWrapper: DistancePatchWrapper = DistancePatchWrapper()
+    val distancePatchWrapper: DistancePatchWrapper = DistancePatchWrapper(),
+    val legacyStoneBuilder: LegacyStoneBuilder = LegacyStoneBuilder()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -134,6 +137,20 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_03_LEGACY_TAG_DISTANCE")
             context.status = "LEGACY_DISTANCE_OBSERVED"
             metrics.bump("discovery03.legacy")
+        }
+        dispatcher.register("DISCOVERY_04") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_DISCOVERY04_CONTEXT_NOT_READY")
+            // Galw'r adeiladwr diffygiol mewn cynhyrchu; dim oracl yma.
+            val rows = legacyStoneBuilder.buildLegacyRows()
+            check(rows.size == 47) { "E_DISCOVERY04_BUILDER_ROWS" }
+            // Ymrwymo gyda'i gilydd ar ôl llwyddiant pob un o'r 46 rhes.
+            context.discovery04LegacyStoneRows = rows
+            context.discovery04BuiltRows = 46
+            context.branchTrace.add("DISCOVERY_04")
+            context.diagnostics.add("DISCOVERY_04_LEGACY_SEQUENTIAL_STONES")
+            context.status = "LEGACY_STONES_OBSERVED"
+            metrics.bump("discovery04.legacy.builds")
         }
         dispatcher.register("PATCH_03") { context ->
             validation.requireBootstrapContext(context)
@@ -279,6 +296,20 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_PATCH03_WRAP", e)
+        }
+    }
+
+    /** Cam 8: BOOT, yna'r adeiladwr cerrig hanesyddol. */
+    fun observeLegacyStones(calculationDay: ExactInt, targetDay: ExactInt): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.phase = "DISCOVERY_04"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY04_WRAP", e)
         }
     }
 

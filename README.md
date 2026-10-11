@@ -241,3 +241,10 @@ Cadwyd `LegacyDistanceAdapter.oldDistance` o Gam 6 heb ei newid. Mae'r llwybr `B
 Mae wyth tyst, 441 achos matrics, 549 prawf `BigInteger` annibynnol, ac amddiffyniadau ail-alw/BOOT wedi pasio mewn prawf JVM wedi'i ynysu. **Rhaid** i `sh run-stage07-tests.sh` basio ar y gangen wreiddiol cyn datgan Cam 7 wedi'i gwblhau. `LAST_COMPLETED_STAGE=6` hyd nes hynny. Ni ddechreuwyd Cam 8.
 
 **Ardystiad terfynol Cam 7:** llwyddodd `run-stage07-tests.sh` yn gyfan gwbl o fewn GitHub Actions gyda'r ffynonellau gwreiddiol, yr oracl normadol gwreiddiol, Kotlin 1.9.0 a JDK 21. Cadarnhawyd `STAGE07_NATIVE_GREEN`, wyth tyst gwyrdd, 441 achos matrics a 549 prawf BigInteger annibynnol. Mae'r hen bump anghysondeb Cam 6 wedi'u cadw; cafwyd sero anghysondeb PATCH 03. Mae **`LAST_COMPLETED_STAGE=7`** ac mae Cam 8 / DISCOVERY 04 yn nesaf. Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38180495340
+
+
+## Cam 8 — DISCOVERY 04: cerrig wedi'u diwygio fesul maes
+
+Y graith fwriadol yw `LegacyStoneBuilder.mutateStonesWrong`: diweddarir gwenith, barlys, halen, chwerw a choch **yn yr un gwrthrych byw**, a bydd y fformiwlâu olaf yn gweld gwerthoedd newydd yn lle ciplun o'r hen res. Mae rhes 1 yn gywir (`17,29,43,71,101`), ond mae 224 o 225 cydran rhesi 2–46 yn anghydweddu â'r oracl.
+
+Mae `BOOT → DISCOVERY_04` yn ymrwymo 46 rhes i gyd-destun pob galwad ar wahân. Mae `run-stage08-tests.sh` yn cynnwys prawf strict sy'n methu yn fwriadol a 230 cydran wedi'u gwirio'n annibynnol gan `BigInteger`. Mae'r prawf llawn GitHub Actions yn aros; nid yw Cam 9 / PATCH 04 wedi'i weithredu, ac mae `LAST_COMPLETED_STAGE=7` hyd nes ardystiad llawn.
