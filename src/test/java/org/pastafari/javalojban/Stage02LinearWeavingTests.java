@@ -12,6 +12,8 @@ public final class Stage02LinearWeavingTests {
         testIndependentOracle();
         testSmallSuffixes();
         testMediumDifferential();
+        testRankAgainstOracleAndExisting();
+        testLongRankInversion();
         testFullYearCapacity();
         testFailuresAndOwnership();
         System.out.println("STAGE_02_LINEAR_WEAVING_PASS checks=" + checks);
@@ -84,6 +86,49 @@ public final class Stage02LinearWeavingTests {
         }
     }
 
+
+    private static void testRankAgainstOracleAndExisting() {
+        for (int[] lengths : new int[][]{
+                {1, 1, 1}, {2, 2, 2}, {2, 3, 4, 2},
+                {4, 5, 6}, {7, 8, 9}, {84, 84, 84},
+                {96, 96, 96, 96}
+        }) {
+            MonsterWeavingLinearCounter linear = new MonsterWeavingLinearCounter(lengths);
+            MonsterWeavingEndpointDP established = new MonsterWeavingEndpointDP(lengths);
+            BigInteger total = linear.count();
+            for (BigInteger rank : new BigInteger[]{
+                    BigInteger.ONE, total.add(BigInteger.ONE).divide(BigInteger.TWO), total}) {
+                int[] result = linear.unrank1(rank);
+                arr(established.unrank1(rank), result, "E_EXISTING_UNRANK");
+                eq(rank, linear.rank1(result), "E_EXISTING_RANK");
+                if (Arrays.stream(lengths).sum() <= 16) {
+                    arr(new NormativeOracle.WeavingFamily(lengths).unrank1(rank),
+                        result, "E_ORACLE_RANK");
+                }
+            }
+        }
+    }
+
+    private static void testLongRankInversion() {
+        for (int[] lengths : new int[][]{
+                {123, 123, 123, 123},
+                {100, 100, 100, 100, 100},
+                {123, 123, 123, 123, 20}
+        }) {
+            MonsterWeavingLinearCounter linear = new MonsterWeavingLinearCounter(lengths);
+            BigInteger total = linear.count();
+            for (BigInteger rank : new BigInteger[]{
+                    BigInteger.ONE, total.add(BigInteger.ONE).divide(BigInteger.TWO), total}) {
+                int[] sequence = linear.unrank1(rank);
+                eq(Arrays.stream(lengths).sum(), sequence.length, "E_LONG_RANK_LENGTH");
+                eq(rank, linear.rank1(sequence), "E_LONG_RANK_INVERSION");
+                int[] seen = new int[lengths.length];
+                for (int month : sequence) seen[month - 1]++;
+                arr(lengths, seen, "E_LONG_RANK_COUNTS");
+            }
+        }
+    }
+
     private static void testFullYearCapacity() {
         int[] lengths = new int[47];
         Arrays.fill(lengths, 123);
@@ -110,6 +155,20 @@ public final class Stage02LinearWeavingTests {
         fails("E_WEAVE_PREFIX", () -> stable.countAfterPrefix(null));
         fails("E_WEAVE_PREFIX", () -> stable.countAfterPrefix(new int[]{2}));
         fails("E_WEAVE_PREFIX", () -> stable.countAfterPrefix(new int[]{1, 1, 1, 1}));
+        fails("E_WEAVE_RANK", () -> stable.unrank1(BigInteger.ZERO));
+        fails("E_WEAVE_RANK", () -> stable.unrank1(stable.count().add(BigInteger.ONE)));
+        fails("E_WEAVE_SEQUENCE", () -> stable.rank1(new int[]{1, 2, 3}));
+        MonsterWeavingLinearCounter longRange = new MonsterWeavingLinearCounter(
+            new int[]{123, 123, 123, 123, 21});
+        fails("E_WEAVE_UNRANK_LIMIT", () -> longRange.unrank1(BigInteger.ONE));
+        fails("E_WEAVE_RANK_LIMIT", () -> longRange.rank1(new int[0]));
+    }
+
+    private static void arr(int[] expected, int[] actual, String code) {
+        checks++;
+        if (!Arrays.equals(expected, actual)) {
+            throw new AssertionError(code);
+        }
     }
 
     private static void eq(Object expected, Object actual, String code) {

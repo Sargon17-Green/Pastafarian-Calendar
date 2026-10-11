@@ -5,10 +5,12 @@ import java.util.Arrays;
 
 public final class MonsterWeavingLinearCounter {
     public static final int MAX_DAYS = 5778;
+    public static final int MAX_UNRANK_DAYS = 512;
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
 
     private final int[] lengths;
+    private final int totalDays;
     private BigInteger rootCount;
 
     private static final class State {
@@ -20,10 +22,21 @@ public final class MonsterWeavingLinearCounter {
             remaining = original.clone();
         }
 
+        State(State previous) {
+            remaining = previous.remaining.clone();
+            opened = previous.opened;
+            closed = previous.closed;
+        }
+
+        boolean canTake(int month, int[] original) {
+            return month >= 0 && month < original.length
+                && remaining[month] > 0
+                && (remaining[month] != original[month] || month == opened)
+                && (remaining[month] != 1 || month == closed);
+        }
+
         void take(int month, int[] original) {
-            if (month < 0 || month >= original.length || remaining[month] == 0
-                    || remaining[month] == original[month] && month != opened
-                    || remaining[month] == 1 && month != closed) {
+            if (!canTake(month, original)) {
                 throw new IllegalArgumentException("E_WEAVE_PREFIX");
             }
             boolean first = remaining[month] == original[month];
@@ -46,6 +59,7 @@ public final class MonsterWeavingLinearCounter {
             days += value;
         }
         lengths = values.clone();
+        totalDays = days;
     }
 
     private static BigInteger[] chooseColumn(int total, int width) {
@@ -113,4 +127,61 @@ public final class MonsterWeavingLinearCounter {
         for (int id : prefix) state.take(id - 1, lengths);
         return countSuffix(state);
     }
+    public int[] unrank1(BigInteger rank) {
+        if (totalDays > MAX_UNRANK_DAYS) {
+            throw new IllegalArgumentException("E_WEAVE_UNRANK_LIMIT");
+        }
+        BigInteger total = count();
+        if (rank == null || rank.signum() <= 0 || rank.compareTo(total) > 0) {
+            throw new IllegalArgumentException("E_WEAVE_RANK");
+        }
+        State state = new State(lengths);
+        int[] weaving = new int[totalDays];
+        BigInteger remainingRank = rank;
+        for (int position = 0; position < totalDays; position++) {
+            boolean chosen = false;
+            for (int month = state.closed; month < lengths.length; month++) {
+                if (!state.canTake(month, lengths)) continue;
+                State possible = new State(state);
+                possible.take(month, lengths);
+                BigInteger possibilities = countSuffix(possible);
+                if (remainingRank.compareTo(possibilities) > 0) {
+                    remainingRank = remainingRank.subtract(possibilities);
+                } else {
+                    state = possible;
+                    weaving[position] = month + 1;
+                    chosen = true;
+                    break;
+                }
+            }
+            if (!chosen) throw new IllegalStateException("E_WEAVE_UNRANK");
+        }
+        return weaving;
+    }
+
+    public BigInteger rank1(int[] weaving) {
+        if (totalDays > MAX_UNRANK_DAYS) {
+            throw new IllegalArgumentException("E_WEAVE_RANK_LIMIT");
+        }
+        if (weaving == null || weaving.length != totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+        }
+        State state = new State(lengths);
+        BigInteger rank = ONE;
+        for (int id : weaving) {
+            int month = id - 1;
+            if (!state.canTake(month, lengths)) {
+                throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+            }
+            for (int earlier = state.closed; earlier < month; earlier++) {
+                if (!state.canTake(earlier, lengths)) continue;
+                State alternative = new State(state);
+                alternative.take(earlier, lengths);
+                rank = rank.add(countSuffix(alternative));
+            }
+            state.take(month, lengths);
+        }
+        return rank;
+    }
+
 }
