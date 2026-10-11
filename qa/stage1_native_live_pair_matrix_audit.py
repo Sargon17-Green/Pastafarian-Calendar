@@ -71,6 +71,7 @@ def verify(data):
     cross = overlap = steps = gets = puts = 0
     by_label = {}
     by_label_steps = {}
+    by_label_written = {}
     for ix, row in enumerate(rows):
         schedule = "AB" if ix < 12 else "BA"
         l, r = PAIRS[ix % 12]
@@ -90,6 +91,13 @@ def verify(data):
                       "cross_program_checks"):
             need(type(row.get(field)) is int and 0 < row[field] <= 250000,
                  "invalid exact native execution counter")
+        for side in ("left", "right"):
+            written = row.get(side + "_written_coordinates")
+            need(type(written) is int and written > 0,
+                 "missing Native written-coordinate ownership coverage")
+        need(type(row.get("write_coordinate_checks")) is int and
+             row["write_coordinate_checks"] > 0,
+             "missing prior-written-coordinate peer snapshots")
         # Each still-live Program executes one tick per round. The producer
         # snapshots peers in rounds 1..8 and every 211st round.
         expected_overlap = min(row["left_steps"], row["right_steps"])
@@ -125,6 +133,14 @@ def verify(data):
                  type(nspace) is int and nspace == 0 and
                  nput == ndirect,
                  "Native live pair memory API write/read ownership invalid")
+            written = row[side + "_written_coordinates"]
+            need(written <= nput,
+                 "unique written coordinates exceed Native p-write events")
+            if label in by_label_written:
+                need(by_label_written[label] == written,
+                     "Native p-write destinations changed with peer/schedule")
+            else:
+                by_label_written[label] = written
             if label in by_label:
                 need(by_label[label] == (nget, nput),
                      "Native Program memory API counts changed with schedule/peer")
@@ -210,6 +226,9 @@ def main(folder):
         reject("coordinated_valid_reference_all_records", forge_coordinated_valid_reference),
         reject("unowned_memory_api", lambda d: d["records"][0].__setitem__("every_api_read_write_owned_by_active_program", False)),
         reject("forged_memory_put", lambda d: d["records"][0].__setitem__("left_memory_puts", 0)),
+        reject("no_written_coordinate_witness", lambda d: d["records"][0].__setitem__("write_coordinate_checks", 0)),
+        reject("boolean_written_coordinates", lambda d: d["records"][0].__setitem__("left_written_coordinates", True)),
+        reject("impossible_written_coordinate_count", lambda d: d["records"][0].__setitem__("right_written_coordinates", d["records"][0]["right_memory_puts"] + 1)),
         reject("float_direct_p_count", lambda d: d["records"][0].__setitem__("left_direct_p_steps", float(d["records"][0]["left_direct_p_steps"]))),
         reject("bool_putspace_count", lambda d: d["records"][0].__setitem__("right_runtime_putspace", False)),
         reject("float_putspace_count", lambda d: d["records"][0].__setitem__("right_runtime_putspace", 0.0)),
@@ -217,14 +236,14 @@ def main(folder):
         reject("memory_reads_nondeterministic", lambda d: d["records"][12].__setitem__("left_memory_gets", d["records"][12]["left_memory_gets"] + 1)),
         reject("premature_completion", lambda d: d.__setitem__("stage1_final_acceptance", True)),
     ]
-    need(len(attacks) == 26, "missing adversarial audit cases")
+    need(len(attacks) == 29, "missing adversarial audit cases")
     report = {"schema": "befunge-stage1-live-pair-matrix-audit-v2",
               "source_git_blob": PIN, "verified": outcome,
               "negative_reports_rejected": attacks,
               "stage1_final_acceptance": False}
     output = Path(folder) / "native_live_pair_matrix_audit.json"
     output.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    print("NATIVE_LIVE_PAIR_MATRIX_26_HOSTILE_REPORTS_REJECTED_PASS")
+    print("NATIVE_LIVE_PAIR_MATRIX_29_HOSTILE_REPORTS_REJECTED_PASS")
 
 if __name__ == "__main__":
     need(len(sys.argv) == 2, "usage: native live-pair evidence folder")

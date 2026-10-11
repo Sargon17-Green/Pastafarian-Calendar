@@ -91,6 +91,16 @@ def state(item):
             item["stdin"].tell(), item["stdout"].tell(),
             item["stdin"].getvalue(), item["stdout"].getvalue())
 
+def state_with_written_coords(item, targets, uninstrumented_get):
+    # Fixed GUARDS cannot witness foreign writes to arbitrary Funge-space
+    # cells. Sample every coordinate previously written by this Program.
+    # Use the original get API so audits do not inflate Native read counts.
+    space = item["program"].space
+    point = item["point"]
+    written = tuple((xy, int(uninstrumented_get(space, point(xy))))
+                    for xy in sorted(targets))
+    return (state(item), written)
+
 def tick(item):
     p = item["program"]
     if not p.ips:
@@ -139,6 +149,7 @@ def pair(source, left, right, schedule, expected):
         need(int(get_orig(self, args[0])) == int(args[1]),
              "Native Space.put did not persist its written value")
         counters[current["label"]]["put"] += 1
+        destinations[current["label"]].add(tuple(int(v) for v in args[0]))
         return result
     def guarded_putspace(self, *args, **kwargs):
         current = active[0]
@@ -146,7 +157,8 @@ def pair(source, left, right, schedule, expected):
              "Native Space.putspace escaped its own Program")
         counters[current["label"]]["putspace"] += 1
         return putspace_orig(self, *args, **kwargs)
-    overlap = checks = rounds = 0
+    destinations = {left: set(), right: set()}
+    overlap = checks = rounds = written_target_checks = 0
     order = (a, b) if schedule == "AB" else (b, a)
     try:
         cls.get, cls.put, cls.putspace = (
@@ -159,7 +171,9 @@ def pair(source, left, right, schedule, expected):
                 if not current["program"].ips:
                     continue
                 witness = rounds <= 8 or rounds % 211 == 0
-                before = state(other) if witness else None
+                before = (state_with_written_coords(
+                    other, destinations[other["label"]], get_orig)
+                    if witness else None)
                 p = current["program"]
                 ip = p.ips[0]
                 direct_opcode = int(get_orig(p.space, ip.position))
@@ -171,8 +185,11 @@ def pair(source, left, right, schedule, expected):
                 finally:
                     active[0] = None
                 if witness:
-                    need(state(other) == before,
-                         "one Native Program step mutated another live Program")
+                    need(state_with_written_coords(
+                         other, destinations[other["label"]], get_orig) == before,
+                         "one Native Program step mutated another live Program"
+                         " (including prior p-write destinations)")
+                    written_target_checks += len(destinations[other["label"]])
                     checks += 1
             need(rounds <= BUDGET, "native pair scheduling exceeded budget")
     finally:
@@ -181,8 +198,8 @@ def pair(source, left, right, schedule, expected):
             get_orig, put_orig, putspace_orig)
     got_a = a["stdout"].getvalue().split()
     got_b = b["stdout"].getvalue().split()
-    need(overlap > 0 and checks >= 16,
-         "native pair insufficiently interleaved or insufficient snapshots")
+    need(overlap > 0 and checks >= 16 and written_target_checks > 0,
+         "native pair insufficiently interleaved or written-target snapshots missing")
     need(got_a == expected[left] and got_b == expected[right],
          "live pair Native outputs differ from independent Befunge references")
     for label in (left, right):
@@ -195,6 +212,9 @@ def pair(source, left, right, schedule, expected):
             "left_steps": a["steps"], "right_steps": b["steps"],
             "left_memory_gets": counters[left]["get"],
             "right_memory_gets": counters[right]["get"],
+            "left_written_coordinates": len(destinations[left]),
+            "right_written_coordinates": len(destinations[right]),
+            "write_coordinate_checks": written_target_checks,
             "left_memory_puts": counters[left]["put"],
             "right_memory_puts": counters[right]["put"],
             "left_direct_p_steps": counters[left]["direct_p"],
@@ -236,12 +256,37 @@ def peer_stream_negative_controls(source):
         print("NATIVE_BF98_SAME_CURSOR_PEER_STREAM_MUTATION_REJECT_PASS",key)
     sys.stdout.flush()
 
+def peer_written_coordinate_negative_control(source):
+    # Inject one real Space.put into a passive peer at an interior non-GUARD
+    # cell. Fixed GUARDS must miss it; the new written-target witness rejects.
+    active = make(source, "v0")
+    peer = make(source, "v1")
+    target = (100, 100)
+    need(target not in GUARDS, "written-coordinate control target is guarded")
+    space = peer["program"].space
+    cls = type(space)
+    cell = peer["point"](target)
+    original = int(cls.get(space, cell))
+    fixed_before = state(peer)
+    full_before = state_with_written_coords(peer, {target}, cls.get)
+    tick(active)
+    need(state(peer) == fixed_before and
+         state_with_written_coords(peer, {target}, cls.get) == full_before,
+         "Native step modified the passive peer before injected corruption")
+    cls.put(space, cell, original + 1)
+    need(state(peer) == fixed_before,
+         "negative-control change unexpectedly altered a legacy guard")
+    need(state_with_written_coords(peer, {target}, cls.get) != full_before,
+         "written-coordinate witness missed unguarded peer corruption")
+    print("NATIVE_BF98_UNGUARDED_WRITTEN_PEER_CELL_MUTATION_REJECT_PASS")
+
 def main():
     need(os.path.isdir("/pairs"), "Native live-pair evidence directory missing")
     source = open(SOURCE, "rb").read()
     got = hashlib.sha1("blob %d\0%s" % (len(source), source)).hexdigest()
     need(got == PIN, "source Git blob not pinned to QA production")
     peer_stream_negative_controls(source)
+    peer_written_coordinate_negative_control(source)
     expected = {}
     for i in range(6):
         label = "v%d" % i
@@ -268,6 +313,7 @@ def main():
               "expected_by_label": expected, "records": results}
     with open(OUT, "wb") as fh:
         fh.write(json.dumps(report, sort_keys=True, indent=2) + "\n")
+    print("NATIVE_LIVE_PAIR_DYNAMIC_WRITTEN_COORDINATE_WITNESS_24_PAIRS_PASS")
     print("NATIVE_LIVE_PAIR_MEMORY_API_OWNER_24_PAIRS_PASS")
     print("NATIVE_LIVE_PAIR_MATRIX_24_REAL_PAIRS_PASS")
     print("STAGE1_SEMANTIC_OWNERSHIP_FINAL_GATE=OPEN")
