@@ -129,3 +129,7 @@ ni'o lo `MonsterWeavingLinearCounter` cu zbasu lo `rank1` .e lo `unrank1` be li 
 ### lo pamoi .e lo romoi te jorne porsi
 
 ni'o lo pamoi porsi cu stidi lo cmalu se cumki sumti. lo romoi porsi cu stidi lo barda se cumki sumti. ro se cumki sumti cu kakne lo nu se jmina fi lo drata mebu porsi. lo `MonsterWeavingLinearCounter` cu tezu'e lo nu kakne lo pamoi .e lo romoi se jorne porsi fi lo nanca pe li 5778 djedi; lo se rajro'i ranki cu se jimte li 512 djedi. lo `Stage02ExtremalWeavingTests` cu cipra lo drani .e lo se srana nu na galfi.
+
+### lo lamji porsi paji
+
+ni'o lo `lexNext` .e lo `lexPrevious` cu se zbasu fi lo nu sisku lo romoi selstu fi lo porsi te jorne. lo selstu cu frili na'i .i lo jmina cu pilno lo pamoi porsi .e lo romoi porsi lo nu facki lo ranki pe lo lamji porsi. lo drata ranki poi zmadu lo jimte li 512 djedi cu na se snada.

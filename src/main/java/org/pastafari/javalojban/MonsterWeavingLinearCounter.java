@@ -6,6 +6,7 @@ import java.util.Arrays;
 public final class MonsterWeavingLinearCounter {
     public static final int MAX_DAYS = 5778;
     public static final int MAX_UNRANK_DAYS = 512;
+    public static final int MAX_EDGE_DISTANCE = 8;
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
 
@@ -157,6 +158,104 @@ public final class MonsterWeavingLinearCounter {
         return order;
     }
 
+
+    private State[] prefixStates(int[] weaving) {
+        if (weaving == null || weaving.length != totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+        }
+        State[] before = new State[totalDays];
+        State current = new State(lengths);
+        for (int i = 0; i < totalDays; i++) {
+            int month = weaving[i] - 1;
+            if (!current.canTake(month, lengths)) {
+                throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+            }
+            before[i] = new State(current);
+            current.take(month, lengths);
+        }
+        return before;
+    }
+
+    private int[] neighbor(int[] weaving, boolean forward) {
+        State[] before = prefixStates(weaving);
+        for (int pivot = totalDays - 1; pivot >= 0; pivot--) {
+            State current = before[pivot];
+            int begin = weaving[pivot] - 1 + (forward ? 1 : -1);
+            int stop = forward ? lengths.length : -1;
+            int step = forward ? 1 : -1;
+            for (int month = begin; month != stop; month += step) {
+                if (!current.canTake(month, lengths)) continue;
+                int[] result = weaving.clone();
+                result[pivot] = month + 1;
+                current.take(month, lengths);
+                for (int pos = pivot + 1; pos < totalDays; pos++) {
+                    boolean selected = false;
+                    if (forward) {
+                        for (int next = current.closed; next < lengths.length; next++) {
+                            if (!current.canTake(next, lengths)) continue;
+                            result[pos] = next + 1;
+                            current.take(next, lengths);
+                            selected = true;
+                            break;
+                        }
+                    } else {
+                        for (int next = lengths.length - 1; next >= current.closed; next--) {
+                            if (!current.canTake(next, lengths)) continue;
+                            result[pos] = next + 1;
+                            current.take(next, lengths);
+                            selected = true;
+                            break;
+                        }
+                    }
+                    if (!selected) throw new IllegalStateException("E_WEAVE_NEIGHBOR");
+                }
+                return result;
+            }
+        }
+        return null;
+    }
+
+    public int[] lexNext(int[] weaving) {
+        return neighbor(weaving, true);
+    }
+
+    public int[] lexPrevious(int[] weaving) {
+        return neighbor(weaving, false);
+    }
+
+    private int[] edgeUnrank(BigInteger rank, BigInteger total) {
+        BigInteger firstLimit = BigInteger.valueOf(1L + MAX_EDGE_DISTANCE);
+        boolean fromStart = rank.compareTo(firstLimit) <= 0;
+        int steps = (fromStart ? rank.subtract(ONE) : total.subtract(rank)).intValueExact();
+        int[] current = fromStart ? lexFirst() : lexLast();
+        for (int i = 0; i < steps; i++) {
+            current = neighbor(current, fromStart);
+            if (current == null) throw new IllegalStateException("E_WEAVE_EDGE_SPACE");
+        }
+        return current;
+    }
+
+    private BigInteger edgeRank(int[] weaving) {
+        if (weaving == null || weaving.length != totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_RANK_LIMIT");
+        }
+        BigInteger total = count();
+        int[] low = lexFirst();
+        int[] high = lexLast();
+        for (int distance = 0; distance <= MAX_EDGE_DISTANCE; distance++) {
+            if (Arrays.equals(weaving, low)) return BigInteger.valueOf(1L + distance);
+            if (Arrays.equals(weaving, high)) {
+                return total.subtract(BigInteger.valueOf(distance));
+            }
+            if (distance != MAX_EDGE_DISTANCE) {
+                low = neighbor(low, true);
+                high = neighbor(high, false);
+                if (low == null || high == null) break;
+            }
+        }
+        throw new IllegalArgumentException("E_WEAVE_RANK_LIMIT");
+    }
+
     public int[] lexFirst() {
         return extremeWeaving(false);
     }
@@ -168,8 +267,13 @@ public final class MonsterWeavingLinearCounter {
     public int[] unrank1(BigInteger rank) {
         if (totalDays > MAX_UNRANK_DAYS) {
             BigInteger total = count();
-            if (ONE.equals(rank)) return lexFirst();
-            if (total.equals(rank)) return lexLast();
+            if (rank != null && rank.signum() > 0 && rank.compareTo(total) <= 0) {
+                BigInteger edge = BigInteger.valueOf(1L + MAX_EDGE_DISTANCE);
+                if (rank.compareTo(edge) <= 0
+                    || total.subtract(rank).compareTo(BigInteger.valueOf(MAX_EDGE_DISTANCE)) <= 0) {
+                    return edgeUnrank(rank, total);
+                }
+            }
             throw new IllegalArgumentException("E_WEAVE_UNRANK_LIMIT");
         }
         BigInteger total = count();
@@ -202,11 +306,7 @@ public final class MonsterWeavingLinearCounter {
 
     public BigInteger rank1(int[] weaving) {
         if (totalDays > MAX_UNRANK_DAYS) {
-            if (weaving != null && weaving.length == totalDays) {
-                if (Arrays.equals(weaving, lexFirst())) return ONE;
-                if (Arrays.equals(weaving, lexLast())) return count();
-            }
-            throw new IllegalArgumentException("E_WEAVE_RANK_LIMIT");
+            return edgeRank(weaving);
         }
         if (weaving == null || weaving.length != totalDays) {
             throw new IllegalArgumentException("E_WEAVE_SEQUENCE");

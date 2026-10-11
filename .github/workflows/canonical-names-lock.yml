@@ -72,3 +72,5 @@ jobs:
         run: sh run_stage02_linear_weaving_tests.sh
       - name: Stage 02 exact full-year lexicographic endpoints
         run: sh run_stage02_extremal_weaving_tests.sh
+      - name: Stage 02 full-year lexicographic neighbors
+        run: sh run_stage02_edge_weaving_tests.sh
