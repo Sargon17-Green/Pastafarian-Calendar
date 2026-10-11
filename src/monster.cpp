@@ -1097,6 +1097,12 @@ Stage56PostStirDetourWitness stage56RawSumSacrificeNobodyMayReturn(
 Stage56PostStirDetourWitness stage56FirstCallEatsBugPatchesSlotAndCallsItselfAgain(
     const BowlState& oldBowls,
     int stirIndex) {
+    // Argumentum invalidum numquam slot globalem mutare debet: alias
+    // prima vocatio falsa cicatricem sacrificii semel exsequendi consumit.
+    if (stirIndex < 1 || stirIndex > 12) {
+        throw BaseValidationError(
+            "Gradus 56 post-commotionem inter 1 et 12 requirit");
+    }
     auto& slot = stage56SelfEatingDispatchSlot();
 
     const Stage56SelfEatingPostStirFn whatWasHereBeforeTheMonkeyAteIt =

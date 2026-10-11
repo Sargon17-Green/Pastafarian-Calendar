@@ -82,6 +82,25 @@ int main() {
         require(rawGhost.find("+ rawBowlSum") != std::string::npos,
                 "mutans raw-sum historicus physice deletus est");
 
+        // Praevalidatio in bootstrap ante mutationem atomici slot necesse est.
+        const auto initDecl = cpp.find(
+            "Stage56PostStirDetourWitness "
+            "stage56FirstCallEatsBugPatchesSlotAndCallsItselfAgain(");
+        require(initDecl != std::string::npos, "declaratio bootstrap deest");
+        const auto initBody = cpp.find(
+            "Stage56PostStirDetourWitness "
+            "stage56FirstCallEatsBugPatchesSlotAndCallsItselfAgain(",
+            initDecl + 1);
+        require(initBody != std::string::npos, "corpus bootstrap deest");
+        const auto invalidGuard = cpp.find(
+            "if (stirIndex < 1 || stirIndex > 12)", initBody);
+        const auto firstExchange = cpp.find("slot.exchange(", initBody);
+        require(invalidGuard != std::string::npos &&
+                firstExchange != std::string::npos &&
+                invalidGuard > initBody && invalidGuard < firstExchange &&
+                invalidGuard - initBody < 500,
+                "bootstrap slot ante validationem indicis mutat");
+
         require(cpp.find("out.legacyScarCallCount == 12 && out.appliedCount == 12")
                     != std::string::npos,
                 "guard call-count 12/12 deest");

@@ -67,6 +67,18 @@ void requirePhysicalMonkeyScar() {
 int main() {
     try {
         const BowlState discriminator{{Integer{1},Integer{2},Integer{3},Integer{4},Integer{5},Integer{6}}};
+        // In processu adhuc frigido, indices illegitimi non debent
+        // mutationem slot vel sacrificium semel debitum absumere.
+        for (const int stirInvalidus : std::array<int, 2>{{0, 13}}) {
+            bool reiectus = false;
+            try {
+                (void)pastafari::stage56RawBowlSumPostStirDetour(
+                    discriminator, stirInvalidus);
+            } catch (const pastafari::BaseValidationError&) {
+                reiectus = true;
+            }
+            require(reiectus, "index invalidus in cold-start non reiectus est");
+        }
         Integer raw{}, saved{}; PermutationOrder order{};
         const BowlState canonical = formula(discriminator,1,false,raw,saved,order);
         Integer raw2{}, saved2{}; PermutationOrder order2{};
@@ -88,7 +100,8 @@ int main() {
         require(second.correctedResult != rawSumMutant, "secunda vocatio ad raw-sum regressa est");
         requirePhysicalMonkeyScar();
 
-        std::cout << "PASS self-eating saved-sum monkey patch\n"
+        std::cout << "COLD_START_INVALID_INDICES=2/2_PASS\n"
+                  << "PASS self-eating saved-sum monkey patch\n"
                   << "S=21 R=170\n"
                   << "canonical=[43348,43821,49771,36114,57684,55801]\n"
                   << "rawSumMutant=[3565,3740,5518,1695,8365,7674]\n";
