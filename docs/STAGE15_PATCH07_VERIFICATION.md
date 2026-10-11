@@ -17,4 +17,13 @@
 
 Stage 16 = **DISCOVERY 08**: ऐतिहासिक 0-based permutation rank; त्या दोषाचे समाधान Stage 17 आधी करायचे नाही. Stage 54 पर्यंत संपूर्ण calendar API unavailable.
 
-स्थिती: **GitHub Actions ची पुष्टी अपेक्षित**; शेवटच्या run व commit च्या पुराव्याशिवाय stage पूर्ण घोषित करू नका.
+स्थिती: **PASS**. Implementation commit `e408e87ef6e2b72733e0bccfef9e345d8bb940b3` साठी [GitHub Actions run 38171643757](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38171643757) मध्ये `verify` आणि `stage15-typescript-marathi` दोन्ही jobs यशस्वी; TypeScript typecheck आणि सर्व Stage 1–15 tests PASS.
+
+```text
+STAGE_15_PATCH_07_GUARDS_PASS rows=11 shifted=10 missing=1 mismatches=0
+STAGE_15_PATCH_07_PROPERTIES_PASS runs=1280 cases=14080 shifted=12800 missing=1280 mismatches=0 chains=64 chainedGrinds=704 chainMismatches=0 giantCases=22 giantMismatches=0
+```
+
+सातही `DISCOVERY_01_EXPECTED_RED` ते `DISCOVERY_07_EXPECTED_RED` हे स्वतंत्र nonzero exit tests workflow मध्ये अपेक्षित लाल इतिहास-पूरावा म्हणून PASS. Source-language catalog lock PASS.
+
+पूर्वीच्या run 38171604091 मध्ये केवळ `test/patch07.ts` मधील type-level disjoint `actualRow !== GRIND_SENTINEL` तुलना `TS2367` मुळे typecheck अपयशी झाले; redundant तुलना काढली, मूळ logic न बदलता संपूर्ण CI पुन्हा चालवून यशस्वी झाले. पुढचा Stage 16 = DISCOVERY 08.

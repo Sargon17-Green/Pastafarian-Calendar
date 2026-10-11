@@ -176,3 +176,5 @@ npm run test:patch07
 ```
 
 नव्या property चाचणीमध्ये सर्व 11 rows, deterministic signed bigint, मोठे पूर्णांक, ग्राइंडची 11-पदरी सलग साखळी, स्वतंत्र context, frozen snapshots, जुना shadow call व सर्व आधीचे patches राखले जातील. सातवे archival `test:discovery07:red` वेगळे चालविल्यास जाणीवपूर्वक nonzero exit देणे हाच अपेक्षित इतिहास-पुरावा आहे.
+
+**Stage 15 प्रमाणित:** [GitHub Actions 38171643757](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38171643757), implementation commit `e408e87ef6e2b72733e0bccfef9e345d8bb940b3`. `STAGE_15_PATCH_07_GUARDS_PASS rows=11 shifted=10 missing=1 mismatches=0` आणि `STAGE_15_PATCH_07_PROPERTIES_PASS runs=1280 cases=14080 shifted=12800 missing=1280 mismatches=0 chains=64 chainedGrinds=704 chainMismatches=0 giantCases=22 giantMismatches=0`; आधीचे सर्व 14 टप्पे, सात archival expected-red पुरावे, frozen names lock यशस्वी. पुढे Stage 16 — फक्त DISCOVERY 08, permutation rank चा जुना दोष.
