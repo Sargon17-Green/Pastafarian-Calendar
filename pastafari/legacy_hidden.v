@@ -3,11 +3,11 @@ module pastafari
 // ደረጃ 10 — DISCOVERY 05፦ ሰባቱ ስውር ጠብታዎች በተገላቢጦሽ ተከማችተዋል።
 pub struct HiddenCounts {
 pub:
-	action BigInt
-	target BigInt
-	distance BigInt
+	action     BigInt
+	target     BigInt
+	distance   BigInt
 	connection BigInt
-	direction int
+	direction  int
 }
 
 // ከተጠገኑት ቀን-ቆጣሪዎች ብቻ የሚመጣ የሥራ ሁኔታ።
@@ -23,11 +23,11 @@ pub fn hidden_counts_spaghetti(calculation_day BigInt, target_day BigInt) Hidden
 		3
 	}
 	return HiddenCounts{
-		action: action
-		target: target
-		distance: distance
+		action:     action
+		target:     target
+		distance:   distance
 		connection: big_add(action, target)
-		direction: direction
+		direction:  direction
 	}
 }
 
@@ -97,7 +97,6 @@ pub fn build_hidden_with_backward_storage(counts HiddenCounts, stones []Stones) 
 pub fn old_hidden_slot(backward []BigInt, k int) BigInt {
 	return backward[k - 1]
 }
-
 
 // ደረጃ 10፦ የproduction የንባብ መግቢያም ገና የቀድሞውን ስህተት ይጠቀማል።
 pub fn calendar_hidden_by_nearness(backward []BigInt, k int) BigInt {

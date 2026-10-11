@@ -7,7 +7,8 @@ fn test_discovery05_expected_red_nearest_hidden_one() {
 	counts := hidden_counts_spaghetti(foundation, foundation)
 	stones := get_stone_table_through_legacy_builder()
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
-	assert big_eq(calendar_hidden_by_nearness(hidden, 1), make_hidden_drop_spaghetti(1, counts, stones))
+	assert big_eq(calendar_hidden_by_nearness(hidden, 1), make_hidden_drop_spaghetti(1, counts,
+		stones))
 }
 
 fn test_discovery05_expected_red_hidden_two() {
@@ -15,7 +16,8 @@ fn test_discovery05_expected_red_hidden_two() {
 	counts := hidden_counts_spaghetti(foundation, foundation)
 	stones := get_stone_table_through_legacy_builder()
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
-	assert big_eq(calendar_hidden_by_nearness(hidden, 2), make_hidden_drop_spaghetti(2, counts, stones))
+	assert big_eq(calendar_hidden_by_nearness(hidden, 2), make_hidden_drop_spaghetti(2, counts,
+		stones))
 }
 
 fn test_discovery05_expected_red_hidden_three() {
@@ -23,7 +25,8 @@ fn test_discovery05_expected_red_hidden_three() {
 	counts := hidden_counts_spaghetti(foundation, foundation)
 	stones := get_stone_table_through_legacy_builder()
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
-	assert big_eq(calendar_hidden_by_nearness(hidden, 3), make_hidden_drop_spaghetti(3, counts, stones))
+	assert big_eq(calendar_hidden_by_nearness(hidden, 3), make_hidden_drop_spaghetti(3, counts,
+		stones))
 }
 
 fn test_discovery05_expected_red_farthest_hidden_seven() {
@@ -31,7 +34,8 @@ fn test_discovery05_expected_red_farthest_hidden_seven() {
 	counts := hidden_counts_spaghetti(foundation, foundation)
 	stones := get_stone_table_through_legacy_builder()
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
-	assert big_eq(calendar_hidden_by_nearness(hidden, 7), make_hidden_drop_spaghetti(7, counts, stones))
+	assert big_eq(calendar_hidden_by_nearness(hidden, 7), make_hidden_drop_spaghetti(7, counts,
+		stones))
 }
 
 fn test_discovery05_control_middle_hidden_four() {
