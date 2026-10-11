@@ -1,4 +1,4 @@
-name: Praevolatus Gradus 56 — concurrentia et cache
+name: Praevolatus Gradus 56 — concurrentia, cache et structura
 
 on:
   push:
@@ -9,6 +9,10 @@ on:
       - 'include/pastafari/monster.hpp'
       - 'tests/stage_56_dispatch_concurrency_tests.cpp'
       - 'tests/stage_56_transactional_cache_audit_tests.cpp'
+      - 'tests/stage_56_structure_reference_tests.cpp'
+      - 'tests/reference/normative_reference.cpp'
+      - 'tests/reference/normative_reference.hpp'
+      - 'tests/stage_55_fast_reference.hpp'
       - '.github/workflows/cpp-neolatin-fast-validation.yml'
   workflow_dispatch:
 
@@ -19,7 +23,7 @@ jobs:
   praevolatus:
     name: Praevolatus C++20 novarum probationum
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 65
     steps:
       - name: Excerpere fontem
         uses: actions/checkout@v5
@@ -50,6 +54,15 @@ jobs:
               -o "build_stage56_praeflight/${nomen}" \
               2>&1 | tee "logs_stage56_praeflight/${nomen}-compile.log"
           done
+          # Testis totius structurae opus habet oraculo separato test-only.
+          g++ "${flags[@]}" -c tests/reference/normative_reference.cpp \
+            -o build_stage56_praeflight/reference.o \
+            2>&1 | tee logs_stage56_praeflight/reference-compile.log
+          g++ "${flags[@]}" tests/stage_56_structure_reference_tests.cpp \
+            build_stage56_praeflight/monster.o \
+            build_stage56_praeflight/reference.o \
+            -o build_stage56_praeflight/stage_56_structure_reference_tests \
+            2>&1 | tee logs_stage56_praeflight/structure-compile.log
 
       - name: Currere probationes cum evidentia
         shell: bash
@@ -61,6 +74,10 @@ jobs:
             2>&1 | tee logs_stage56_praeflight/concurrency.log
           timeout 20m build_stage56_praeflight/stage_56_transactional_cache_audit_tests \
             2>&1 | tee logs_stage56_praeflight/cache-recovery.log
+          timeout 20m build_stage56_praeflight/stage_56_structure_reference_tests \
+            2>&1 | tee logs_stage56_praeflight/structure-reference.log
+          grep -Fx 'GRADUS56_STRUCTURA_REFERENCE=7/7_PASS STRUCTURAE=5/5_PASS' \
+            logs_stage56_praeflight/structure-reference.log
           echo 'PRAEVOLATUS_GRADUS56=PASS'
 
       - name: Servare evidentiam etiam in defectu
