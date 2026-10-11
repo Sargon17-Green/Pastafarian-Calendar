@@ -144,3 +144,5 @@ ni'o lo `unrank1` se jimte cu zenba co li 256 detri .i lo minli be lo nanca be l
 ## lo se cuxna be lo vo moi kabri
 
 ni'o lo `MonsterCanonicalWeaving` cu jorne lo `MonsterSelectors` .e lo `MonsterSauceBowls` be lo vo moi kabri .e lo 32 moi tcita .e lo `MonsterWeavingEndpointDP`. lo se cuxna cu se jimte li 256 detri .i lo mutce barda detri se cuxna cu za'o na se zbasu. ko benji `sh run_stage02_canonical_weaving_tests.sh`.
+
+ni'o lo `MonsterWeavingEndpointDP` cu pilno lo fanmo masti binomio count be ro purci endpoint te jicmu fi pa se jmina .i lo count jimte cu du li 2048 detri .i lo unrank jimte cu du li 384 detri. lo 5778 detri cu na se te narmanci ca ti.

@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 public final class MonsterWeavingEndpointDP {
-    public static final int MAX_COUNT_DAYS = 1024;
-    public static final int MAX_UNRANK_DAYS = 256;
+    public static final int MAX_COUNT_DAYS = 2048;
+    public static final int MAX_UNRANK_DAYS = 384;
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
 
@@ -177,6 +177,32 @@ public final class MonsterWeavingEndpointDP {
         return next;
     }
 
+    private static BigInteger terminalInsertTotal(EndpointTable previous,
+                                                   int oldLength, int add,
+                                                   boolean enforceFirstOrder) {
+        BigInteger[] combinations = fixedBinomialColumn(oldLength + add, add);
+        for (int n = 0; n < add; n++) combinations[n] = ZERO;
+        BigInteger total = ZERO;
+        BigInteger unrestricted = combinations[oldLength + add];
+        for (int first = 1; first < previous.rows.length; first++) {
+            BigInteger[] row = previous.rows[first];
+            if (row == null) continue;
+            int shift = enforceFirstOrder ? first : 0;
+            BigInteger choices = enforceFirstOrder
+                ? combinations[oldLength + add - shift] : unrestricted;
+            int lastStart = first + previous.newestMonthLength - 1;
+            for (int i = 0; i < row.length; i++) {
+                BigInteger ways = row[i];
+                if (ways == null) continue;
+                int lastOld = lastStart + i;
+                BigInteger prohibited = combinations[lastOld + add - 1 - shift];
+                BigInteger accepted = choices.subtract(prohibited);
+                total = total.add(ways.multiply(accepted));
+            }
+        }
+        return total;
+    }
+
     private BigInteger countSuffix(State state) {
         int firstUnclosed = state.closed;
         if (firstUnclosed == lengths.length) return ONE;
@@ -187,6 +213,10 @@ public final class MonsterWeavingEndpointDP {
             int additional = state.remaining[index];
             if (additional <= 0) throw new IllegalStateException("E_WEAVE_STATE");
             boolean enforceFirstOrder = index - 1 >= state.opened;
+            if (index == lengths.length - 1) {
+                return terminalInsertTotal(table, oldLength, additional,
+                                           enforceFirstOrder);
+            }
             table = insert(table, oldLength, additional, enforceFirstOrder);
             oldLength += additional;
         }

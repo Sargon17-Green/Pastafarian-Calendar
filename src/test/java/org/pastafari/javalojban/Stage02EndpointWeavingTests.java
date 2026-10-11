@@ -17,6 +17,7 @@ public final class Stage02EndpointWeavingTests {
         testNearLimitDomain();
         testHigherBoundCountAndUnrank();
         testMinimumYearUnrank();
+        testTerminalFoldAndExtendedDomains();
         testBoundsAndOwnership();
         System.out.println("STAGE_02_ENDPOINT_WEAVING_PASS checks=" + checks);
     }
@@ -220,6 +221,61 @@ public final class Stage02EndpointWeavingTests {
         }
     }
 
+    private static void testTerminalFoldAndExtendedDomains() {
+        for (int[] values : new int[][]{
+                {1, 1, 1, 1, 1, 1}, {1, 2, 3, 1, 2}, {4, 5, 6, 7},
+                {4, 123, 4, 5}, {12, 10, 12, 10, 11},
+                {30, 30, 30, 30, 30}
+        }) {
+            MonsterWeavingEndpointDP optimized = new MonsterWeavingEndpointDP(values);
+            NormativeOracle.WeavingFamily oracle = new NormativeOracle.WeavingFamily(values);
+            eq(oracle.count(), optimized.count(), "E_TERMINAL_FOLD_ORACLE");
+            BigInteger count = oracle.count();
+            if (values.length <= 5 && Arrays.stream(values).sum() <= 32) {
+                for (BigInteger rank : sampled(count)) {
+                    int[] result = oracle.unrank1(rank);
+                    arr(result, optimized.unrank1(rank), "E_TERMINAL_FOLD_RANK");
+                    for (int p = 0; p <= result.length; p++) {
+                        int[] prefix = Arrays.copyOf(result, p);
+                        BigInteger expected = oraclePrefixCountDirect(values, prefix);
+                        eq(expected, optimized.countAfterPrefix(prefix),
+                            "E_TERMINAL_FOLD_PREFIX");
+                    }
+                }
+            }
+        }
+        int[] big = new int[16];
+        Arrays.fill(big, 123);
+        MonsterWeavingEndpointDP large = new MonsterWeavingEndpointDP(big);
+        BigInteger total = large.count();
+        ok(total.signum() > 0, "E_1968_DAY_COUNT");
+        ok(total.bitLength() > 1000, "E_1968_BIGINT");
+        eq(total, large.countAfterPrefix(new int[]{1}),
+           "E_1968_FIRST_MONTH");
+        for (int[] values : new int[][]{{96, 96, 96, 96}, {123, 123, 123}}) {
+            MonsterWeavingEndpointDP family = new MonsterWeavingEndpointDP(values);
+            BigInteger max = family.count();
+            for (BigInteger rank : sampled(max)) {
+                int[] weaving = family.unrank1(rank);
+                eq(Arrays.stream(values).sum(), weaving.length, "E_384_UNRANK_LENGTH");
+                eq(BigInteger.ONE, family.countAfterPrefix(weaving),
+                    "E_384_SUFFIX_UNIQUE");
+                int[] counts = new int[values.length];
+                for (int id : weaving) counts[id - 1]++;
+                arr(values, counts, "E_384_UNRANK_MULTIPLICITY");
+            }
+        }
+    }
+
+    private static BigInteger oraclePrefixCountDirect(int[] values, int[] prefix) {
+        NormativeOracle.WeavingFamily oracle = new NormativeOracle.WeavingFamily(values);
+        BigInteger total = oracle.count();
+        if (total.compareTo(BigInteger.valueOf(15000)) > 0) {
+            throw new IllegalStateException("E_TOO_MANY_PREFIXES");
+        }
+        return oraclePrefixCount(oracle, total, prefix);
+    }
+
     private static void testBoundsAndOwnership() {
         int[] lengths = {4, 5, 6};
         MonsterWeavingEndpointDP dp = new MonsterWeavingEndpointDP(lengths);
@@ -228,12 +284,12 @@ public final class Stage02EndpointWeavingTests {
         eq(first, dp.count(), "E_COPY_INPUT");
         fails("E_WEAVE_EMPTY", () -> new MonsterWeavingEndpointDP(new int[0]));
         fails("E_WEAVE_LENGTH", () -> new MonsterWeavingEndpointDP(new int[]{0, 5}));
-        fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(new int[]{1025}));
+        fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(new int[]{2049}));
         int[] longSet = new int[47];
-        Arrays.fill(longSet, 22);
+        Arrays.fill(longSet, 44);
         fails("E_WEAVE_LIMIT", () -> new MonsterWeavingEndpointDP(longSet));
         fails("E_WEAVE_UNRANK_LIMIT", () -> new MonsterWeavingEndpointDP(
-            new int[]{86, 85, 86}).unrank1(BigInteger.ONE));
+            new int[]{128, 128, 129}).unrank1(BigInteger.ONE));
         fails("E_WEAVE_RANK", () -> dp.unrank1(BigInteger.ZERO));
         fails("E_WEAVE_RANK", () -> dp.unrank1(dp.count().add(BigInteger.ONE)));
         fails("E_WEAVE_PREFIX", () -> dp.countAfterPrefix(new int[]{2}));

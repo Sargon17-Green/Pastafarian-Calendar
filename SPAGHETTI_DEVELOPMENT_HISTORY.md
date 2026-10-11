@@ -105,3 +105,7 @@ ni'o lo minli nanca be li 252 detri cu se cipra fi lo `unrank1` .e lo `MonsterMo
 ### lo vo moi kabri .e lo 32 moi tcita te cipra
 
 ni'o lo `MonsterCanonicalWeaving` cu benji lo drani ranki fi lo vo moi kabri .e lo 32 moi tcita. lo `NormativeOracle` cu srana lo te cipra .i lo GitHub Actions run `38159401829` cu se cipra se snada fi lo rexa cipra pagbu. lo 256 detri jimte cu za'o te cinmo .i lo 5778 detri te cipra na za'o mulno.
+
+### lo fanmo masti binomio se jmina
+
+ni'o lo te jicmu be lo fanmo masti cu se namcu fi lo re binomio se cilre namcu .i lo count te jicmu cu na sarcu lo fanmo se ralte judri bliku. lo 1968 detri count .e lo 384 detri unrank cu se cipra. lo drani se jdice po'o fi lo GitHub Actions.
