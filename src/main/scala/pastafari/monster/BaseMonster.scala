@@ -54,7 +54,9 @@ final case class BaseMonsterContext(
   var bowlStonesInput: Option[Vector[BigInt]] = None,
   var legacyBowlOrderOutput: Option[Vector[Int]] = None,
   var legacyBowlPoursOutput: Option[Vector[BigInt]] = None,
-  var legacyBowlOutput: Option[Vector[BigInt]] = None
+  var legacyBowlOutput: Option[Vector[BigInt]] = None,
+  var patchedBowlOutput: Option[Vector[BigInt]] = None,
+  var patch08Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -75,6 +77,64 @@ final class BaseValidationManager {
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
     }
+  }
+
+  def requirePatch08Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_08_BOWL_FREEZE" ||
+        ctx.status != "PATCH_08_READY" ||
+        ctx.branchTrace.toVector != Vector(
+          "BOOT", "DISCOVERY_08_BOWL_ALIAS", "PATCH_08_BOWL_FREEZE") ||
+        ctx.bowlStepInput.isEmpty || ctx.bowlRankInput.isEmpty ||
+        ctx.bowlInput.isEmpty || ctx.bowlDropInput.isEmpty ||
+        ctx.bowlStonesInput.isEmpty || ctx.legacyBowlOrderOutput.isEmpty ||
+        ctx.legacyBowlPoursOutput.isEmpty || ctx.legacyBowlOutput.isEmpty ||
+        ctx.patchedBowlOutput.isEmpty || !ctx.patch08Applied) {
+      throw new IllegalStateException("PATCH 08 richiede la discovery nella stessa invocazione.")
+    }
+    val step = ctx.bowlStepInput.get
+    val rank = ctx.bowlRankInput.get
+    val old = ctx.bowlInput.get
+    val stones = ctx.bowlStonesInput.get
+    val drop = ctx.bowlDropInput.get
+    val order = ctx.legacyBowlOrderOutput.get
+    val pours = ctx.legacyBowlPoursOutput.get
+    val legacy = ctx.legacyBowlOutput.get
+    val patched = ctx.patchedBowlOutput.get
+    if (step < 1 || step > 46 || rank < 1 || rank > 720 ||
+        old.length != 6 || stones.length != 5 || pours.length != 6 ||
+        order.length != 6 || order.sorted != Vector(1,2,3,4,5,6) ||
+        legacy.length != 6 || patched.length != 6) {
+      throw new IllegalStateException("Dimensione, indice o ordine PATCH 08 non valido.")
+    }
+    // Verifica fattoriale, getti e ricorrenza indipendente dal wrapper.
+    val expectedOrder = Patch07PermutationWrapper.permutationPatch(rank)
+    if (order != expectedOrder)
+      throw new IllegalStateException("Ordine delle ciotole manomesso.")
+    val expectedPours = Vector.tabulate[BigInt](6) { index =>
+      if (index >= 3) BigInt(0)
+      else Patch01SaveWrapper.savePatch(
+        drop*drop + stones(index)*old(order(index)-1) +
+        (3 + 2*index)*step)
+    }
+    if (pours != expectedPours)
+      throw new IllegalStateException("I getti non vengono dall'istantanea vecchia.")
+    val stoneKinds = Vector(0,1,2,3,4,0)
+    val values = Vector.newBuilder[(Int,BigInt)]
+    for (position <- 1 to 6) {
+      val current = order(position-1)-1
+      val previous = order((position+4)%6)-1
+      val following = order(position%6)-1
+      val sum = old(current) + 2*old(previous) + 3*old(following) +
+        pours(position-1) + drop + stones(stoneKinds(position-1))
+      val value = Patch01SaveWrapper.savePatch(
+        sum*sum + 5*old(previous)*old(following) + step*position)
+      values += ((current,value))
+    }
+    val frozen = values.result().sortBy(_._1).map(_._2)
+    val historical = LegacyBowlAliasAdapter.bowlAlias(old,drop,stones,step,rank)
+    if (frozen != patched || historical.order != order ||
+        historical.pours != pours || historical.bowls != legacy)
+      throw new IllegalStateException("Output normativo o cicatrice storica falsificati.")
   }
 
   def requireDiscovery08Ready(ctx: BaseMonsterContext): Unit = {
@@ -431,7 +491,8 @@ final class BaseMonsterManager {
     new Patch06GrindHandler(metrics),
     new Discovery07PermutationHandler(metrics),
     new Patch07PermutationHandler(metrics),
-    new Discovery08BowlAliasHandler(metrics)
+    new Discovery08BowlAliasHandler(metrics),
+    new Patch08BowlHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -812,6 +873,37 @@ final class BaseMonsterManager {
       )
     } catch {
       case error: Throwable => throw BaseErrorWrapper.wrap("discovery08",error)
+    }
+  }
+
+  def patch08Bowls(
+    calculationDay: BigInt, targetDay: BigInt,
+    initial: Vector[BigInt], drop: BigInt,
+    stones: Vector[BigInt], step: Int, rank1: Int
+  ): Patch08BowlReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.bowlInput = Some(initial)
+    ctx.bowlDropInput = Some(drop)
+    ctx.bowlStonesInput = Some(stones)
+    ctx.bowlStepInput = Some(step)
+    ctx.bowlRankInput = Some(rank1)
+    ctx.phase = "DISCOVERY_08_BOWL_ALIAS"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery08Ready(ctx)
+      ctx.phase = "PATCH_08_BOWL_FREEZE"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch08Ready(ctx)
+      Patch08BowlReport(
+        ctx.calculationDay,ctx.targetDay,ctx.bowlInput.get,
+        ctx.bowlDropInput.get,ctx.bowlStonesInput.get,
+        ctx.bowlStepInput.get,ctx.bowlRankInput.get,
+        ctx.legacyBowlOrderOutput.get,ctx.legacyBowlPoursOutput.get,
+        ctx.legacyBowlOutput.get,ctx.patchedBowlOutput.get,
+        ctx.patch08Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("patch08",error)
     }
   }
 

@@ -265,3 +265,22 @@ input, rango, dominio SAVE, getti e riproduzione della
 diagnostica. Il test-only oracle confronta separatamente
 la formula normativa con input congelati; non è stata
 introdotta la PATCH 08.
+
+## PATCH 08 — due registri indipendenti per sei ciotole
+
+`Patch08BowlWrapper.bowlPatch` richiama l'autentico
+`LegacyBowlAliasAdapter.bowlAlias`; poi riusa esclusivamente
+i suoi getti e l'ordine, già corretti. Il vettore di
+ingresso resta immutabile; il nuovo `Array[BigInt]`
+contiene solo le sei uscite, pubblicate simultaneamente
+come `Vector[BigInt]`. Il primo registro non può essere
+contaminato dalle scritture del secondo.
+
+`Patch08BowlHandler` richiede la vera fase
+`DISCOVERY_08_BOWL_ALIAS` nella stessa invocazione.
+Il manager conserva entrambi i risultati in un report
+immutabile e incrementa una metrica separata.
+`requirePatch08Ready` ricostruisce le sei equazioni
+frozen senza richiamare il wrapper, controllando
+sia l'ordine di PATCH07 sia la cicatrice storica.
+L'oracolo test-only resta escluso dalla produzione.

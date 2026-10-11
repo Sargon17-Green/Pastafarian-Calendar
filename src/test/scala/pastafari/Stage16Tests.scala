@@ -325,21 +325,36 @@ object Stage16Tests {
       truth(sources.contains("val next = register"),"Aliasing storico assente")
       truth(sources.contains("Patch07PermutationWrapper.permutationPatch(rank1)"),
         "La selezione deve usare la PATCH 07")
-      truth(!sources.contains("bowlPatch"),"PATCH 08 anticipata")
+      val st = new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current = st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if (current < 17)
+        truth(!sources.contains("bowlPatch"),"PATCH 08 anticipata")
+      else
+        truth(sources.contains("LegacyBowlAliasAdapter.bowlAlias("),
+          "Cicatrice reale ancora percorribile")
       truth(!sources.contains("vaultOld"),"Logica dello stadio futuro")
     }
     check("metadati Stage16 RED senza certificazione anticipata") {
       val state=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(state.contains("CURRENT_STAGE=16"),"Stage")
-      truth(state.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(state.contains("CURRENT_PATCH=07"),"Ultima patch")
-      truth(state.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"Rosso previsto")
+      val current = state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current >= 16,"Stage16 resta disponibile")
+      if (current == 16) {
+        truth(state.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(state.contains("CURRENT_PATCH=07"),"Ultima patch")
+        truth(state.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"Rosso previsto")
+      } else {
+        truth(state.contains("STAGE_16_NATIVE_VERIFICATION=PASS_EXPECTED_RED_25_PASS_3_FAIL"),
+          "Firma RED storica invariata")
+      }
       truth(state.contains("STAGE_15_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_31_PASS_0_FAIL"),
         "Stage 15 rimane certificato")
       val completed=state.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed==15 || completed==16,"Certificazioni cronologiche")
+      truth(completed>=15 && completed<=current,"Certificazioni cronologiche")
     }
 
     val manager=new BaseMonsterManager

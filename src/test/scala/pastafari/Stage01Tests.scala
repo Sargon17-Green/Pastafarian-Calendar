@@ -213,7 +213,8 @@ object Stage01Tests {
         (if (currentStage < 13) Vector("grindPatch") else Vector.empty[String]) ++
         (if (currentStage < 14) Vector("oldPermutationUnrank0") else Vector.empty[String]) ++
         (if (currentStage < 15) Vector("permutationPatch") else Vector.empty[String]) ++
-        (if (currentStage < 16) Vector("bowlAlias") else Vector.empty[String])
+        (if (currentStage < 16) Vector("bowlAlias") else Vector.empty[String]) ++
+        (if (currentStage < 17) Vector("bowlPatch") else Vector.empty[String])
       val present = (forbidden ++ phaseSpecific).filter(content.contains)
       equal(present, Vector.empty[String], "simboli futuri trovati")
     }

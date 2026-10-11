@@ -621,3 +621,31 @@ Stage15 31 PASS; Stage16 25 PASS/3 FAIL intenzionali.
 I tre confronti di Stage16 divergono esclusivamente
 per ordine diretto, ordine inverso e goccia 46.
 La PATCH 08 non è stata introdotta.
+
+## Stadio 17 — PATCH 08: mescolatura da istantanea immutata
+
+La cicatrice dello stadio 16 (`LegacyBowlAliasAdapter.bowlAlias`)
+continua a usare lo stesso array per `old` e `next`;
+non viene riscritta. La nuova `Patch08BowlWrapper.bowlPatch`
+esegue realmente il helper storico e conserva l'ordine
+normativo da PATCH 07 e i getti precalcolati. Calcola poi
+le sei nuove ciotole in un registro **separato**, leggendo
+sempre dai sei valori immutabili dell'ingresso.
+
+Il manager attraversa `BOOT → DISCOVERY_08_BOWL_ALIAS →
+PATCH_08_BOWL_FREEZE` nello stesso contesto. Il report
+immutabile custodisce entrambe le uscite. Il validator
+ricalcola autonomamente le sei equazioni, i getti e il
+risultato storico, invece di considerare il wrapper
+come prova di se stesso.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage17Tests'
+```
+
+Firma prevista: `31 PASS, 0 FAIL`. Copertura:
+720 ranghi per la norma e per il validator, 46 gocce
+concatenate, 512 campioni signed deterministici,
+BigInt oltre 16.000 bit, difese dei contesti e sette
+patch precedenti. Stage16 mantiene `25 PASS, 3 FAIL`
+intenzionali, senza cancellare la cicatrice.

@@ -825,3 +825,43 @@ input non validi, report isolati, metriche e
 le sette patch precedenti. Le firme storiche
 degli stadi 1–15 rimangono invariate e non è
 stata introdotta la PATCH 08.
+
+## Stadio 17 — PATCH 08: il vecchio registro non cambia più
+
+### Che cosa si pensava
+
+Le sei equazioni di mescolatura sembravano poter
+condividere un registro in memoria. Ma la semantica
+normativa è simultanea: ogni nuova ciotola dipende
+soltanto dalle sei vecchie, mai da una nuova.
+
+### Che cosa si è scoperto
+
+Il codice legacy e i suoi getti erano già diagnostici
+e i ranghi erano stati corretti in PATCH 07. Il solo
+difetto da aggirare era la sovrascrittura in-place.
+
+### Che cosa è stato aggirato
+
+Il wrapper attraversa davvero il helper legacy,
+poi scrive i risultati in un registro separato,
+leggendo esclusivamente dal Vector originale.
+Il manager conserva sia l'uscita alias sia
+l'uscita congelata nello stesso report.
+
+### Perché è normativamente equivalente
+
+Le sei equazioni usano ciascuna `old` della stessa
+istantanea, i getti precedenti alla mutazione,
+lo stesso rango normativo e SAVE corretto.
+Il validator calcola la ricorrenza in modo
+indipendente e la suite copre 720 ranghi,
+46 gocce concatenate, 512 campioni casuali
+e BigInt oltre 16.000 bit.
+
+### Strato di mostruosità aggiunto
+
+Wrapper, handler, fase, due campi di contesto,
+report doppio, metrica e validator frozen indipendente.
+La cicatrice di Stage16 e le sette patch precedenti
+rimangono osservabili. Stage18 non è iniziato.

@@ -393,3 +393,23 @@ jobs:
           for label in 'ordine diretto' 'ordine inverso' 'goccia quarantasei'; do
             grep -Fq "FAIL — equivalenza normativa mescolatura ${label} — Alias muta" stage16.log
           done
+
+  native-stage17-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 17 immutable bowl state PATCH 08
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage17Tests' 2>&1 | tee stage17.log
+          grep -Fq 'RISULTATO STADIO 17: 31 PASS, 0 FAIL' stage17.log
+          test "$(grep -Fc 'PASS — ' stage17.log)" -eq 31
+          test "$(grep -Fc 'FAIL — ' stage17.log)" -eq 0
