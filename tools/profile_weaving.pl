@@ -27,8 +27,8 @@ die "RSS 限額必須在 32768..1048576 KiB\n"
 die "此量測器需使用 Linux /proc\n" if !-r '/proc/self/status';
 $| = 1;
 
-my @cases = ([4,4,4], [8,8,8], [4,123,4], [4,4,4,4]);
-push @cases, [12,12,12], [24,24,24], [123,123,4], [123,123,6]
+my @cases = ([4,4,4], [8,8,8], [4,123,4], [4,4,4,4], [(4)x6]);
+push @cases, [(4)x8], [12,12,12], [24,24,24], [123,123,4], [123,123,6]
     if $profile eq 'extended';
 
 sub rss_kib ($pid) {
@@ -68,8 +68,11 @@ sub verify_word ($word, $lengths) {
 sub run_child ($lengths) {
     my $label = join('-', @$lengths);
     my $start = time();
-    my $count = countWeavings($lengths);
+    my %stats;
+    my $count = countWeavings($lengths, \%stats);
     die "交織計數不得為零\n" if $count < 1;
+    die "交織診斷狀態數不守恆\n"
+        if $stats{states} != $stats{preopen_states} + $stats{fully_open_states};
     my $first = unrankWeaving($lengths, 1);
     my $last = unrankWeaving($lengths, $count);
     verify_word($first, $lengths);
@@ -85,6 +88,8 @@ sub run_child ($lengths) {
         if join(',', @$first) ne join(',', @lex_first);
     printf "案例=%s 日數=%d 計數位數=%d 用時=%.3f秒 VmHWM=%dKiB 結果=PASS\n",
         $label, $total, length("$count"), time()-$start, peak_kib();
+    printf "DP統計=%s preopen=%d fullyopen=%d states=%d transitions=%d valid=%d max_stack=%d Pascal_n=%d sparse_peak=%d\n",
+        $label, @stats{qw(preopen_states fully_open_states states visited_transitions valid_transitions max_stack pascal_max_n sparse_peak)};
     return 1;
 }
 

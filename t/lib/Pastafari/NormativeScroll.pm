@@ -548,9 +548,18 @@ sub _remaining_last_order_count ($remaining, $closed, $choose) {
     return $count;
 }
 
-sub _weave_counter ($lengths) {
+sub _weave_counter ($lengths, $stats = undef) {
+    die "交織診斷記錄必須是雜湊參照\n" if defined($stats) && ref($stats) ne 'HASH';
     my $m = scalar @$lengths;
     my %memo;
+    if (defined $stats) {
+        %$stats = map { $_ => 0 } qw(
+            states preopen_states fully_open_states terminal_states
+            visited_transitions valid_transitions max_stack
+            pascal_max_n sparse_peak
+        );
+    }
+    # 每次 counter 有獨立狀態與統計；避免帶入規範演算結果。
 
     # 精確的 Pascal 三角形按需要逐列建立，每一次計數器都有
     # 自己獨立的儲存區。避免對同一 (n,k) 反覆執行高成本除法，
@@ -577,6 +586,7 @@ sub _weave_counter ($lengths) {
                 }
                 push @values, Math::BigInt->bone;
                 $choose_rows[$row] = \@values;
+            $stats->{pascal_max_n} = $row if defined $stats;
             }
             return $choose_rows[$n][$k]->copy;
         }
@@ -593,6 +603,9 @@ sub _weave_counter ($lengths) {
         }
         $sparse{$key} = $result->copy;
         push @fifo, $key;
+        if (defined $stats && scalar(@fifo) > $stats->{sparse_peak}) {
+            $stats->{sparse_peak} = scalar @fifo;
+        }
         return $result;
     };
 
@@ -615,6 +628,16 @@ sub _weave_counter ($lengths) {
             return join(',', @$remaining) . "|$opened|$closed";
         };
 
+    # 只有測試量測器會傳入 stats；一般呼叫不保留任何統計結果。
+    my $store = sub ($frame, $value) {
+        $memo{$frame->{key}} = $value;
+        if (defined $stats) {
+            $stats->{states}++;
+            if ($frame->{opened} == $m) { $stats->{fully_open_states}++ }
+            else { $stats->{preopen_states}++ }
+        }
+    };
+
     # 明確的堆疊取代自我呼叫，既避免過深的 Perl 呼叫堆疊，
     # 也避免以閉包捕捉自己而形成無法釋放的參照循環。
     my $count = sub ($remaining, $opened, $closed) {
@@ -629,6 +652,7 @@ sub _weave_counter ($lengths) {
             children => undef,
             nextChild => 0,
         });
+        $stats->{max_stack} = 1 if defined($stats) && $stats->{max_stack} < 1;
 
         while (@stack) {
             my $frame = $stack[-1];
@@ -647,16 +671,17 @@ sub _weave_counter ($lengths) {
                     }
                 }
                 if ($done) {
-                    $memo{$key} = Math::BigInt->bone;
+                    $store->($frame, Math::BigInt->bone);
+                    $stats->{terminal_states}++ if defined $stats;
                     pop @stack;
                     next;
                 }
 
                 # 全部月份都已開啟：利用最後出現次序閉式計數。
                 if ($frame->{opened} == $m) {
-                    $memo{$key} = _remaining_last_order_count(
+                    $store->($frame, _remaining_last_order_count(
                         $frame->{remaining}, $frame->{closed}, $choose
-                    );
+                    ));
                     pop @stack;
                     next;
                 }
@@ -667,6 +692,7 @@ sub _weave_counter ($lengths) {
                 my $candidate_limit = $frame->{opened} < $m
                     ? $frame->{opened} + 1 : $m;
                 for my $j (1 .. $candidate_limit) {
+                    $stats->{visited_transitions}++ if defined $stats;
                     next if $frame->{remaining}[$j-1] == 0;
                     my $alreadyOpened =
                         $frame->{remaining}[$j-1] < $lengths->[$j-1];
@@ -680,6 +706,7 @@ sub _weave_counter ($lengths) {
                     $nextOpened = $j if $next[$j-1] == $lengths->[$j-1];
                     $next[$j-1]--;
                     $nextClosed = $j if $next[$j-1] == 0;
+                    $stats->{valid_transitions}++ if defined $stats;
                     push @children, {
                         remaining => \@next,
                         opened => $nextOpened,
@@ -702,12 +729,15 @@ sub _weave_counter ($lengths) {
             }
             if ($pending) {
                 push @stack, $pending;
+                if (defined($stats) && @stack > $stats->{max_stack}) {
+                    $stats->{max_stack} = scalar @stack;
+                }
                 next;
             }
 
             my $sum = Math::BigInt->bzero;
             $sum->badd($memo{ $_->{key} }) for @$children;
-            $memo{$key} = $sum;
+            $store->($frame, $sum);
             pop @stack;
         }
         return $memo{$root_key}->copy;
@@ -715,8 +745,8 @@ sub _weave_counter ($lengths) {
     return $count;
 }
 
-sub countWeavings ($lengths) {
-    my $counter = _weave_counter($lengths);
+sub countWeavings ($lengths, $stats = undef) {
+    my $counter = _weave_counter($lengths, $stats);
     return $counter->([@$lengths],0,0);
 }
 

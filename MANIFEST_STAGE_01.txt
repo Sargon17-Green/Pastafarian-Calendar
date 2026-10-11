@@ -38,6 +38,7 @@ t/16_packed_weaving_cache.t
 t/17_last_occurrence_shortcut.t
 t/18_sparse_binomial_guard.t
 t/19_preopen_suffix_exhaustive.t
+t/20_weaving_diagnostics.t
 t/lib/Pastafari/NormativeScroll.pm
 tools/profile_weaving.pl
 CANONICAL_NAMES_LOCK.sha256
