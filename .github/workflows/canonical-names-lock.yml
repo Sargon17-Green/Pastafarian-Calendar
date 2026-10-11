@@ -64,3 +64,21 @@ jobs:
             grep -Fq "FAIL — equivalenza normativa SAVE(${operand})" stage02.log
           done
           grep -Fq 'PASS — equivalenza normativa SAVE(M+1)' stage02.log
+
+  native-stage03-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Run Stage 3 Scala PATCH 01 tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage03Tests' 2>&1 | tee stage03.log
+          grep -Fq 'RISULTATO STADIO 3: 12 PASS, 0 FAIL' stage03.log

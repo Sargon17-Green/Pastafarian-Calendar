@@ -12,7 +12,9 @@ final case class BaseMonsterContext(
   branchTrace: mutable.ArrayBuffer[String] = mutable.ArrayBuffer.empty[String],
   diagnostics: mutable.ArrayBuffer[String] = mutable.ArrayBuffer.empty[String],
   var legacyRemainderInput: Option[BigInt] = None,
-  var legacyRemainderOutput: Option[BigInt] = None
+  var legacyRemainderOutput: Option[BigInt] = None,
+  var patchedSaveOutput: Option[BigInt] = None,
+  var patch01Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -32,6 +34,18 @@ final class BaseValidationManager {
     }
     if (ctx.branchTrace.nonEmpty) {
       throw new IllegalStateException("La traccia di un contesto nuovo deve essere vuota.")
+    }
+  }
+
+  def requirePatch01Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_01_SAVE" ||
+        ctx.status != "PATCH_01_READY" ||
+        ctx.legacyRemainderInput.isEmpty ||
+        ctx.legacyRemainderOutput.isEmpty ||
+        ctx.patchedSaveOutput.isEmpty ||
+        !ctx.patch01Applied ||
+        ctx.branchTrace.lastOption != Some("PATCH_01_SAVE")) {
+      throw new IllegalStateException("Il PATCH 01 non è pronto nel contesto corrente.")
     }
   }
 
@@ -91,7 +105,8 @@ final class BaseMonsterManager {
   private val validation = new BaseValidationManager
   private val dispatcher = new BaseMonsterDispatcher(Vector(
     new BaseBootstrapHandler(metrics),
-    new Discovery01RemainderHandler(metrics)
+    new Discovery01RemainderHandler(metrics),
+    new Patch01SaveHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -122,6 +137,31 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("discovery01", e)
+    }
+  }
+
+  def patch01Save(calculationDay: BigInt, targetDay: BigInt, input: BigInt): Patch01SaveReport = {
+    val ctx = bootstrap(calculationDay, targetDay)
+    ctx.legacyRemainderInput = Some(input)
+    ctx.phase = "DISCOVERY_01_REMAINDER"
+    try {
+      // La cicatrice storica viene percorsa davvero prima del wrapper PATCH 01.
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery01Ready(ctx)
+      ctx.phase = "PATCH_01_SAVE"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch01Ready(ctx)
+      Patch01SaveReport(
+        input = ctx.legacyRemainderInput.get,
+        legacyOutput = ctx.legacyRemainderOutput.get,
+        patchedOutput = ctx.patchedSaveOutput.get,
+        patchApplied = ctx.patch01Applied,
+        phase = ctx.phase,
+        status = ctx.status,
+        trace = ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("patch01", e)
     }
   }
 

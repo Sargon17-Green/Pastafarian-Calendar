@@ -9,7 +9,7 @@ Questo albero nasce da zero per la linea indipendente `Scala + italiano`. Il pri
 - Il codice di produzione non chiama mai il riferimento normativo.
 - Nessun risultato, fixture, hash, tabella o log di un'altra implementazione è usato come fonte di verità.
 - Il catalogo italiano è indicizzato da `canonicalIndex`; il testo localizzato non partecipa a ranking, unranking, chiavi semantiche o ordinamento normativo.
-- In questo stadio non esiste alcuna cicatrice legacy e non esiste codice di patch futuro.
+- Nel primo stadio non esisteva alcuna cicatrice legacy né alcuna patch; gli stadi successivi accumulano le cicatrici storiche in ordine.
 
 ## Struttura
 
@@ -49,7 +49,7 @@ L'esito corretto dello stadio è `7 PASS, 3 FAIL`, con processo non-zero per
 Il job `native-stage02-discovery` tratta *solo questa precisa firma*
 come discovery attesa, non accetta errori di compilazione o guasti inattesi.
 Il test del Bootstrap continua a dover passare autonomamente.
-Nessun `savePatch` è presente in produzione.
+Nello stadio 2 non era presente alcun `savePatch`; dopo lo stadio 3 il diagnostico storico continua a esporre il valore zero.
 
 ## Prova nativa verificata
 
@@ -60,3 +60,28 @@ La [run 38151729014](https://github.com/Sargon17-Green/Pastafarian-Calendar/acti
 `native-stage02-discovery` 7 PASS, 3 FAIL intenzionali;
 `verify` PASS. Il job di discovery controlla la firma degli errori
 invece di scambiare il rosso normativo per un guasto accidentale.
+
+## Stadio 3 — PATCH 01 (SAVE sopra il residuo legacy)
+
+La cicatrice `LegacyArithmeticAdapter.oldRemainder` resta immutata.
+`Patch01SaveWrapper.savePatch` la richiama direttamente, conserva ogni
+residuo non nullo e converte soltanto lo zero in `M = 2^127-1`.
+
+Il percorso semantico `BaseMonsterManager.patch01Save` attraversa
+`BOOT → DISCOVERY_01_REMAINDER → PATCH_01_SAVE` nel medesimo contesto.
+Il report conserva simultaneamente il risultato legacy, il valore patched e
+la traccia dei due handler. `discover01Remainder` resta una diagnosi reale
+del comportamento vecchio, non una simulazione.
+
+Comandi autonomi:
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage01Tests'
+sbt -batch 'Test / runMain pastafari.Stage02Tests'
+sbt -batch 'Test / runMain pastafari.Stage03Tests'
+```
+
+La regressione storica Stage02 continua a produrre esattamente
+`7 PASS, 3 FAIL` intenzionali. Stage03 deve produrre `12 PASS, 0 FAIL`.
+Il job CI Stage02 riconosce solo la firma storica corretta; Stage03
+richiede uscita zero. Il job Stage01 resta indipendente.

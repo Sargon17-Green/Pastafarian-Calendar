@@ -40,3 +40,22 @@ La validazione verifica lo stato pronto e non sostituisce mai un valore errato.
 
 La regressione autonoma dello stadio 2 conserva tre discrepanze obbligatorie
 rispetto a `SAVE`; non è una patch e non anticipa il suo stadio futuro.
+
+## PATCH 01: correttore sopra la cicatrice
+
+`BaseMonsterManager.patch01Save` avvia Bootstrap, esegue il vero handler
+`DISCOVERY_01_REMAINDER` e ne convalida lo stato, poi esegue
+`PATCH_01_SAVE` nello stesso `BaseMonsterContext`.
+`Patch01SaveWrapper.savePatch` richiama effettivamente
+`LegacyArithmeticAdapter.oldRemainder`: il suo unico ramo condizionale
+sostituisce zero con `M`. Nessuna funzione legacy è stata riscritta.
+
+`patchedSaveOutput` e `patch01Applied` sono proprietà del contesto di
+invocazione, non variabili globali. I report sono snapshot immutabili.
+Il validatore controlla la fase, lo stato, il flag e la presenza di entrambi
+gli output; le metriche non guidano decisioni semantiche.
+
+Si mantengono in parallelo il percorso diagnostico storico con errore
+osservabile e il percorso patched normativamente equivalente.
+Le prove coprono residui nulli/non nulli, interi negativi,
+numeri oltre 256 bit e controllo deterministico delle chiamate.

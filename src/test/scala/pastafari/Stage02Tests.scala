@@ -95,15 +95,31 @@ object Stage02Tests {
         .mkString("\n")
       finally stream.close()
       truth(!sources.contains("NormativeOracle"), "L'oracolo non può entrare in produzione")
-      truth(!sources.contains("savePatch"), "PATCH 01 non può essere anticipato")
+      val metadata = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val stage = metadata.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE assente"))
+      if (stage == 2) {
+        truth(!sources.contains("savePatch"), "PATCH 01 non può essere anticipato")
+      } else {
+        truth(sources.contains("savePatch"), "PATCH 01 deve esistere dagli stadi successivi")
+      }
     }
 
     check("stadio 2 dichiarato senza completamento prematuro") {
       val text = new String(Files.readAllBytes(projectRoot().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(text.contains("CURRENT_STAGE=2"), "Stadio corrente inesatto")
-      truth(text.contains("CURRENT_KIND=DISCOVERY"), "Tipo di stadio inesatto")
-      truth(text.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Deve essere rosso")
+      val stage = text.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE assente"))
+      truth(stage >= 2, "La prova storica richiede uno stadio >= 2")
+      if (stage == 2) {
+        truth(text.contains("CURRENT_KIND=DISCOVERY"), "Tipo di stadio inesatto")
+        truth(text.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"), "Deve essere rosso")
+      } else {
+        truth(text.contains("LAST_COMPLETED_STAGE="), "Manca la storia degli stadi")
+      }
     }
 
     val manager = new BaseMonsterManager

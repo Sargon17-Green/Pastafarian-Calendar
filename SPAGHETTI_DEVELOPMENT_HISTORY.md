@@ -66,3 +66,46 @@ I 18 controlli di Bootstrap sono tutti passati. La regressione dedicata
 ha registrato esattamente sette PASS e tre FAIL deliberati su M, 2M, 3M,
 mentre M+1 è passato. Il job controlla anche il codice d'uscita non nullo
 del test rosso. Nessun codice dello stadio 3 è stato introdotto.
+
+## Stadio 3 — PATCH 01: SAVE sopra il residuo storico
+
+### Che cosa si pensava
+
+Il residuo ordinario introdotto in DISCOVERY 01 poteva essere riutilizzato
+separando l'identità della classe di congruenza dalla rappresentazione.
+La cicatrice `oldRemainder` non deve scomparire.
+
+### Che cosa si è scoperto
+
+`oldRemainder(x)` restituisce sempre l'unico rappresentante `r`
+nell'intervallo `0 ≤ r < M`. Il SAVE normativo rappresenta la stessa
+classe nell'intervallo `1..M`. Se `r != 0`, i rappresentanti coincidono;
+se `r == 0`, il SAVE restituisce necessariamente `M`.
+Non occorrono cambiamenti di algoritmo o interpolazioni.
+
+### Che cosa è stato aggirato
+
+Aggiunto `Patch01SaveWrapper.savePatch(x)`: chiama davvero
+`LegacyArithmeticAdapter.oldRemainder(x)` e sostituisce soltanto
+l'uscita zero con `M`. Il manager esegue la discovery originale
+prima della patch nello stesso contesto, registrando entrambi gli
+output senza cambiare la funzione legacy.
+
+### Perché è normativamente equivalente
+
+Per ogni intero, incluso uno negativo o arbitrariamente grande,
+il residuo euclideo è `r ∈ [0,M-1]`. Se non nullo vale già
+`SAVE(x)=r`; se nullo `SAVE(x)=M`. Sono casi esaustivi.
+Il test dello stadio 3 confronta il percorso corretto con
+l'oracolo test-only su bordi, cicli, interi grandi e campioni deterministici.
+
+### Strato di mostruosità aggiunto
+
+Nuovo wrapper, handler PATCH dedicato, snapshot a doppia uscita,
+readiness del contesto, metrica separata, e due percorsi indipendenti:
+`discover01Remainder` per il difetto storico ancora osservabile,
+`patch01Save` per l'uscita corretta. Stato condiviso fra invocazioni:
+nessuno. Correzione futura introdotta: nessuna.
+
+L'esito nativo verrà certificato soltanto dopo il completamento
+della CI del nuovo commit.
