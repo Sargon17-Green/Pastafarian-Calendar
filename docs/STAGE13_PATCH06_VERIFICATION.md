@@ -17,4 +17,9 @@ STAGE_13_PATCH_06_PROPERTIES_PASS days=16 cases=2208 hidden=176 visible=2032 mis
 
 याव्यतिरिक्त सर्व Stage 1–12 चाचण्या हिरव्या राहाव्यात. `DISCOVERY_01_EXPECTED_RED` ते `DISCOVERY_06_EXPECTED_RED` सहा स्वतंत्र इतिहास पुरावे अपेक्षित nonzero exit ने पडताळले पाहिजेत. `CANONICAL_NAMES_LOCK.sha256` बदलू नये.
 
-स्थिती: **GitHub Actions अंतिम पडताळणी येण्याची वाट पाहत आहे**. योग्य run व commit क्रमांक पडताळल्यानंतरच याला अंतिम PASS म्हणावे.
+स्थिती: **PASS**. प्रत्यक्ष implementation commit `f4e4d260135c9bec75af5ebdcdc48b5d0da2704b` साठी GitHub Actions [run 38167061333](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38167061333) मधील `verify` आणि `stage13-typescript-marathi` हे दोन्ही jobs यशस्वी. TypeScript typecheck, Stage 01–13 regression, सहा archive expected-red proofs आणि canonical names lock सर्व पुष्टी.
+
+- `STAGE_13_PATCH_06_GUARDS_PASS cases=15 hidden=11 visible=4 mismatches=0`.
+- `STAGE_13_PATCH_06_PROPERTIES_PASS days=16 cases=2208 hidden=176 visible=2032 mismatches=0 giantCases=138 giantMismatches=0`.
+- मागील Stage 12 चे `2208` diagnosis calls व 11/4 historical boundary पुरावे अविकृत.
+- पुढील Stage 14 = **DISCOVERY 07**, पुढील जुना दोष शोधायचा; Stage 15 ची दुरुस्ती आताच जोडायची नाही.
