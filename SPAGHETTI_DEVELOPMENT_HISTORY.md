@@ -75,3 +75,28 @@ nền cộng một (2 so với 3), ngày nền cộng hai (4 so với 5).
 Ba mươi ba kiểm thử còn lại, gồm toàn bộ kiểm thử từ các giai đoạn
 trước, đã đạt. Khóa tên chuẩn đạt độc lập. Không có bản vá thứ hai
 trong commit này; giai đoạn 4 khép với trạng thái EXPECTED_RED.
+
+## Giai đoạn 5 — Bản vá 02: nhãn ngày có nhánh thừa
+
+**Điều được đi vòng:** `LegacyDayTag.old_day_tag` vẫn trả
+`2 * abs(day - FOUNDATION)`. Lớp `DayTagPatch` gọi hàm sai này
+trên đường sản xuất, cộng thêm một khi `day >= FOUNDATION`, rồi
+kiểm tra thêm: nếu `day == FOUNDATION` và nhãn chưa bằng một,
+ép nhãn về một. Nhánh sau là dư thừa nhưng bắt buộc giữ lại.
+
+**Vì sao tương đương:** Với `day < FOUNDATION`, chuẩn là
+`2 * (FOUNDATION - day)`, trùng đầu ra cũ. Với `day >= FOUNDATION`,
+chuẩn là `2 * (day - FOUNDATION) + 1`, đúng bằng đầu ra cũ cộng
+một. Tại ngày nền, nhánh cộng một đã biến 0 thành 1, nên điều kiện
+bảo vệ không bao giờ phải sửa lại giá trị khi hàm cũ vận hành đúng
+theo giả định lịch sử.
+
+**Đường đi:** `day_count_spaghetti / bootstrap_context →
+Dispatcher → DayCountManager → DayTagPatch → LegacyDayTag`.
+Ngữ cảnh vẫn bất biến và giữ hai nhãn độc lập. Vết nhánh
+`:day_tag_patch_02` được thêm sau `:legacy_day_count`.
+
+**Kiểm thử cũ:** Ba hồi quy chuẩn ở giai đoạn 4 giữ nguyên.
+Chỉ kiểm thử dây nối từng giả định nhãn đích sai 14 được chỉnh để
+xác nhận hàm cũ vẫn trả 14, còn đầu ra đã vá trả 15.
+Không thay đổi công thức sai hoặc bộ tham chiếu chuẩn.

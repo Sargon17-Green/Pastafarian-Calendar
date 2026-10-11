@@ -6,16 +6,18 @@ defmodule PastafariCalendarElixirVietnamese.Stage04Discovery02Test do
   alias PastafariCalendarElixirVietnamese.Monster.{DayCountManager, LegacyDayTag}
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
-  test "lớp đánh số lịch sử thực sự chạy trong ngữ cảnh sản xuất" do
+  test "nhãn ngày lịch sử còn sai nhưng ngữ cảnh sản xuất đi qua lớp vá" do
     f = Ref.foundation_day()
     left = Calendar.bootstrap_context(f - 3, f + 7)
     right = Calendar.bootstrap_context(f - 3, f + 7)
 
     assert LegacyDayTag.foundation_day() == f
-    assert left.calculation_day_tag == LegacyDayTag.old_day_tag(f - 3)
-    assert left.target_day_tag == LegacyDayTag.old_day_tag(f + 7)
-    assert left.branch_trace == [:entry, :validated, :legacy_day_count]
-    assert left.logs == [{:bootstrap, f - 3, f + 7}, {:day_tags, 6, 14}]
+    assert LegacyDayTag.old_day_tag(f - 3) == 6
+    assert LegacyDayTag.old_day_tag(f + 7) == 14
+    assert left.calculation_day_tag == Ref.day_count(f - 3)
+    assert left.target_day_tag == Ref.day_count(f + 7)
+    assert left.branch_trace == [:entry, :validated, :legacy_day_count, :day_tag_patch_02]
+    assert left.logs == [{:bootstrap, f - 3, f + 7}, {:day_tags, 6, 15}]
     assert right == left
     assert DayCountManager.tag(f + 7) == left.target_day_tag
     assert Calendar.day_count_spaghetti(f + 7) == left.target_day_tag

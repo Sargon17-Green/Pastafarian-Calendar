@@ -89,3 +89,17 @@ Khóa tên chuẩn độc lập đạt. Không có lỗi biên dịch.
 
 Bước kế tiếp là giai đoạn 5/55, `PATCH 02`: giữ `old_day_tag`
 và thêm lớp sửa theo đúng quy tắc đã xác định, không xóa vết lịch sử.
+
+## Giai đoạn 5 — Bản vá 02 của nhãn ngày
+
+Hàm `LegacyDayTag.old_day_tag` của giai đoạn 4 tiếp tục giữ nguyên
+công thức sai. Lớp `DayTagPatch` gọi nó rồi cộng một nếu ngày không
+trước Ngày Nền. Một điều kiện kiểm tra thừa tại chính Ngày Nền cũng
+được giữ nguyên như dấu vết phát triển, không được xóa hoặc tối ưu hóa.
+
+`DayCountManager`, `day_count_spaghetti` và hai nhãn trong
+`bootstrap_context` đều sử dụng lớp vá này.
+Ba hồi quy của giai đoạn 4 giữ nguyên kỳ vọng chuẩn và phải chuyển
+thành đạt. Các kiểm thử mới bao gồm biên, số nguyên cực lớn, hai
+phía ngày nền, đồng thời, tính độc lập của context và bất biến của
+SAVE. Ngày lịch đầy đủ chưa được tích hợp.

@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=4
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=5
+CURRENT_KIND=PATCH
 CURRENT_PATCH=02
 LAST_COMPLETED_STAGE=4
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ nhánh SAVE có vá từ giai đoạn 3, thêm LegacyDayTag và DayCountManager ở giai đoạn 4; bootstrap lưu các nhãn ngày lịch sử sai trong context riêng từng lần gọi.
+MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyDayTag sai, thêm DayTagPatch với nhánh tăng một và điều kiện bảo vệ thừa riêng Ngày Nền; DayCountManager định tuyến qua lớp vá và context ghi vết vá 02.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_04_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_05_PENDING
+GIT_HISTORY_MUTATED=STAGE_05_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=36
-CI_FAILURES=3_EXPECTED_ONLY
+CI_TESTS=STAGE_05_PENDING
+CI_FAILURES=STAGE_05_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -58,3 +58,8 @@ Không có lỗi biên dịch, cảnh báo từ bộ mã nguồn hoặc sai lệ
 Bằng chứng: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38152863320
 Khóa tên chuẩn: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38152863404
 Bước lịch sử tiếp theo là giai đoạn 5, PATCH 02.
+
+Bản vá 02 đã được đưa vào luồng sản xuất và giữ nguyên hàm sai cũ.
+Điều kiện bảo vệ riêng ở Ngày Nền vẫn hiện diện dù không cần thiết.
+LAST_COMPLETED_STAGE chỉ được nâng lên 5 sau khi xác minh CI thành công.
+Dự kiến 45 kiểm thử, 0 thất bại, không thay đổi main.

@@ -1,9 +1,9 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   @moduledoc """
-  Bộ phân phối sản xuất duy trì nhánh SAVE đã vá và nhánh nhãn ngày lịch sử.
+  Bộ phân phối sản xuất duy trì các nhánh SAVE và nhãn ngày đã được vá.
 
-  Việc tạo ngữ cảnh thực sự dùng bộ quản lý ngày sai ở giai đoạn 4.
-  Chưa đưa vào lớp vá 02 hay việc tích hợp ngày lịch hoàn chỉnh.
+  Hai nhãn ngày trong ngữ cảnh đều đi qua DayCountManager rồi đến
+  DayTagPatch và phép tính lịch sử; chưa tích hợp ngày lịch cuối cùng.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
@@ -28,7 +28,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       target_day_tag: target_tag,
       phase: :bootstrap,
       status: :validated,
-      branch_trace: [:entry, :validated, :legacy_day_count],
+      branch_trace: [:entry, :validated, :legacy_day_count, :day_tag_patch_02],
       metrics: Metrics.bump(%{}, :bootstrap_calls),
       logs: [{:bootstrap, calculation_day, target_day}, {:day_tags, calculation_tag, target_tag}]
     }

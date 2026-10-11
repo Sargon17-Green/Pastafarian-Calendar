@@ -1,9 +1,9 @@
 defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
-  Điểm vào sản xuất của dòng triển khai Elixir với tiếng Việt là ngôn ngữ nguồn.
+  Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 4 cố ý mang nhãn ngày lịch sử sai vào ngữ cảnh thực thi.
-  Lớp vá SAVE từ giai đoạn 3 vẫn hoạt động; ngày lịch đầy đủ chưa tích hợp.
+  Giai đoạn 5 thêm lớp vá nhãn ngày mà vẫn thực thi hàm lịch sử sai.
+  Lớp vá SAVE từ giai đoạn 3 không đổi; ngày lịch đầy đủ chưa tích hợp.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}
