@@ -194,3 +194,9 @@ Stage 17 ची `oneBased=regularMod(drop-1,720)+1`, `legacyRank0=oneBased-1`, `
 `npm run test:patch08` मध्ये 17 canonical boundaries, पूर्ण 720 permutations, 3600 wraparound, 2048 seeded signed drops, 12 day-pairs मधील 552 नियमाधारित वास्तविक visible drops व विशाल bigint आहेत. आठही historical deliberately-red regressions अजून जपलेल्या आहेत. Stage 18 ची bowl alias दुरुस्ती **नाही**.
 
 **टप्पा 17 प्रमाणित:** [GitHub Actions 38181219879](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38181219879) या implementation commit `1859d3823fcf51b80ee43a7368235271317bd722` साठी दोन्ही jobs PASS. `STAGE_17_PATCH_08_GUARDS_PASS cases=17 shifted=9 rejected=8 mismatches=0`; `STAGE_17_PATCH_08_PROPERTIES_PASS cases=6209 shifted=720 rejected=5489 mismatches=0 unique=720 seeded=2048 visibleDays=12 visibleCases=552 giantCases=9`. Stage 1–16 tests, आठ archival intentional-red proofs आणि Canonical Names Lock PASS. पुढील काम `HANDOFF_STAGE_17.md` मध्ये — Stage 18 फक्त DISCOVERY 09.
+
+## टप्पा 18/55 — DISCOVERY 09 प्रमाणित
+
+`LegacyFixedBowlPoursAdapter.legacyFixedPours` मध्ये जुन्या तीन pours साठी fixed bowls 1,2,3 वाचले जातात, जरी Stage 17 चा योग्य क्रम वेगळा असेल. सुधारित bowl alias अजून लावलेले नाही. `discoverLegacyFixedPours` मध्ये per-call frozen snapshots, trace/metrics व हा ऐतिहासिक दोष जतन केला. `test/discovery09Red.ts` हा नववा archived intentional expected-red आहे.
+
+[GitHub Actions 38182044313](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38182044313): दोन्ही jobs PASS; पूर्ण 720 orders ×3 = 2160 comparisons, 1800 जुने mismatches/360 accidental matches; 12 day-pairs ×46 actual drops वर 1383 mismatches/273 matches; 8 giant bigint साक्षी. Stage 1–17 regressions, 9 historical expected-red आणि names lock PASS. तपशील `docs/STAGE18_DISCOVERY09_VERIFICATION.md`, पुढील `HANDOFF_STAGE_18.md`. Stage 19 च्या `bowlAlias[position]=order[position]` दुरुस्तीला आगाऊ हात घातला नाही.
