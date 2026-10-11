@@ -1,10 +1,15 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.Context do
   @moduledoc """
-  Ngữ cảnh cơ sở của một lần gọi. Mỗi lần gọi sở hữu một giá trị riêng và không chia sẻ trạng thái ngữ nghĩa có thể thay đổi.
+  Ngữ cảnh riêng cho một lần gọi, không dùng trạng thái ngữ nghĩa toàn cục.
+
+  Từ giai đoạn 4, ngữ cảnh còn giữ hai nhãn ngày từ bộ đánh số lịch sử;
+  đây là dữ liệu phát sinh trên đường sản xuất, chưa được sửa sai.
   """
 
   defstruct calculation_day: nil,
             target_day: nil,
+            calculation_day_tag: nil,
+            target_day_tag: nil,
             phase: :bootstrap,
             sub_phase: 0,
             mode: :authoritative_bootstrap,

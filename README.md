@@ -63,3 +63,16 @@ hoàn tất thành công; mô-đun `LegacyRemainder` vẫn nguyên trạng.
 Giai đoạn 3/55 đã được đóng với trạng thái `GREEN`.
 Bước lịch sử tiếp theo là giai đoạn 4/55: `DISCOVERY 02`, không được
 đưa bản vá thứ hai vào cùng bước khám phá.
+
+## Giai đoạn 4 — Phát hiện 02: sai số nhãn ngày
+
+Bộ đánh số ngày mới được nối vào đường sản xuất thông qua
+`day_count_spaghetti(day)` và hai nhãn riêng trong `bootstrap_context`.
+Công thức lịch sử `2 * abs(day - FOUNDATION)` bị sai tại ngày nền
+và tất cả các ngày sau đó; trước ngày nền nó trùng quy tắc chuẩn.
+
+Ba kiểm thử hồi quy chuẩn của giai đoạn 4 cố ý yêu cầu nhãn đúng ở
+`FOUNDATION`, `FOUNDATION+1`, `FOUNDATION+2`; do đó trạng thái
+mong đợi ở pha khám phá là `EXPECTED_RED`. Lớp vá thứ hai chỉ được
+đưa vào ở giai đoạn 5. Lớp vá SAVE thứ nhất và các kiểm thử cũ
+vẫn phải hoạt động không thay đổi.

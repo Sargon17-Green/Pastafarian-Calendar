@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=3
-CURRENT_KIND=PATCH
-CURRENT_PATCH=01
+CURRENT_STAGE=4
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=02
 LAST_COMPLETED_STAGE=3
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyRemainder sai từ giai đoạn 2 và thêm SavePatch phía trên nó; SaveManager chuyển yêu cầu qua lớp vá, không viết lại thuật toán cũ.
+MONSTER_ARCHITECTURE_GROWTH=Giữ nhánh SAVE có vá từ giai đoạn 3, thêm LegacyDayTag và DayCountManager ở giai đoạn 4; bootstrap lưu các nhãn ngày lịch sử sai trong context riêng từng lần gọi.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_03_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_04_PENDING
+GIT_HISTORY_MUTATED=STAGE_04_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=29
-CI_FAILURES=0
+CI_TESTS=STAGE_04_PENDING
+CI_FAILURES=STAGE_04_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -46,3 +46,8 @@ Kết quả xác nhận: 29 kiểm thử, 0 lỗi, khóa tên chuẩn đạt, kh
 Bằng chứng kiểm thử giai đoạn 3: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151138352
 Bằng chứng khóa tên chuẩn: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38151138317
 Chốt giai đoạn 3: GREEN; giai đoạn tiếp theo là 4, DISCOVERY 02.
+
+Giai đoạn 4 bổ sung giả định cũ `old_day_tag(day) = 2 * abs(day - FOUNDATION)`.
+Ba hồi quy mới tại FOUNDATION, FOUNDATION+1, FOUNDATION+2 phải thất bại.
+Các bài kiểm tra trước đó phải tiếp tục đạt. Chưa có bản vá 02.
+LAST_COMPLETED_STAGE giữ ở 3 cho đến khi xác minh xong giai đoạn khám phá 4.

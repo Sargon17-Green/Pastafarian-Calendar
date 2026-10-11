@@ -49,3 +49,22 @@ hàm lịch sử còn sai nhưng đầu ra được sửa. Ba hồi quy chuẩn 
 Hàm `LegacyRemainder.old_remainder` giữ nguyên nội dung trước và sau
 bản vá; ba hồi quy chuẩn của giai đoạn 2 giữ nguyên kỳ vọng. Trạng thái
 giai đoạn 3 đã được xác minh là GREEN.
+
+## Giai đoạn 4 — Phát hiện 02: nhãn ngày thiếu độ lệch
+
+**Điều từng được tin:** Nhãn ngày chỉ là gấp đôi khoảng cách tuyệt đối
+đến ngày nền, nên dùng `old_day_tag(day) = 2 * abs(day - FOUNDATION)`.
+
+**Điều được phát hiện:** Trước ngày nền, các nhãn chẵn là chính xác.
+Tại ngày nền, nhãn chuẩn là 1 thay vì 0; sau ngày nền, các nhãn lẻ
+là 3, 5, 7... thay vì 2, 4, 6...
+
+**Đường sản xuất thực sự:** `bootstrap_context` gọi `Dispatcher.bootstrap`,
+sau đó mỗi ngày được gửi qua `DayCountManager.tag` đến
+`LegacyDayTag.old_day_tag`; kết quả nằm trong hai trường riêng
+`calculation_day_tag` và `target_day_tag` của context. API
+`day_count_spaghetti` cũng đi qua tuyến quản lý này.
+
+Ba hồi quy chuẩn tại ngày nền và hai ngày ngay sau đó được viết để
+thất bại trong giai đoạn phát hiện. Không thêm bản vá hoặc nhánh tự
+điều chỉnh ở giai đoạn 4; không thay đổi chức năng SAVE đã vá.
