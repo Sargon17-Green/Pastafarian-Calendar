@@ -434,8 +434,8 @@ jobs:
           set -e
           cat stage18.log
           test "$rc" -ne 0
-          grep -Fq 'RISULTATO STADIO 18: 25 PASS, 3 FAIL' stage18.log
-          test "$(grep -Fc 'PASS — ' stage18.log)" -eq 25
+          grep -Fq 'RISULTATO STADIO 18: 27 PASS, 3 FAIL' stage18.log
+          test "$(grep -Fc 'PASS — ' stage18.log)" -eq 27
           test "$(grep -Fc 'FAIL — ' stage18.log)" -eq 3
           for label in 'ordinario' 'simmetrico' 'signed'; do
             grep -Fq "FAIL — equivalenza normativa caveau ${label} — Caveau vecchio non aggiornato" stage18.log

@@ -695,7 +695,7 @@ sui dodici giri consecutivi è test-only.
 sbt -batch 'Test / runMain pastafari.Stage18Tests'
 ```
 
-Firma RED prevista: `25 PASS, 3 FAIL` per
+Firma RED prevista: `27 PASS, 3 FAIL` per
 i vettori ordinario, simmetrico e signed.
 La suite verifica 720 permutazioni del primo giro,
 256 campioni deterministici, BigInt signed oltre
