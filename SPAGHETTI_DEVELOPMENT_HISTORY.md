@@ -157,3 +157,7 @@ ni'o lo `MonsterManager` cu benji lo se steci pamoi pagbu ranki .e lo mulno nanc
 ### lo ranki pluta be lo mulno nanca
 
 ni'o lo `RankRoute` cu ralte lo se steci pamoi pagbu .e lo ranki girzu .e lo se stali djedi. lo `advanceGlobalRankRoute` cu benji lo ranki cuxna fi lo drani xekri be li 512 djedi .e lo ranki te cacra be li 64 selstura namcu. lo `Stage02GlobalRoutingTests` cu cipra lo `NormativeOracle` .e lo se stodi porsi .e lo mutce barda nanca ranki. lo stadi 2 cu za'o na mulno.
+
+### lo se mulno ranki pluta cu detri
+
+ni'o lo `beginGlobalRankRouteWithinPrefix` cu cpacu lo ranki pluta poi se jicmu fi lo pamoi pagbu .i lo `fromBlueprintWithCompletedGlobalRoute` cu zbasu lo detri fi lo mulno se cuxna ranki .e lo nanca stura. lo se stodi te jmina be lo mu'oi stadi cu na se te cuxna ro ranki pe li 5778 djedi ca lo se jimte.

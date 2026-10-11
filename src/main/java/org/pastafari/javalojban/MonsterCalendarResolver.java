@@ -143,6 +143,18 @@ public final class MonsterCalendarResolver {
             fixedPrefix, globalRank, block.lowerRank(), block.upperRank());
     }
 
+
+    public static GlobalPrefixRankedYear fromBlueprintWithCompletedGlobalRoute(
+            MonsterYearBlueprint blueprint, MonsterWeavingLinearCounter family,
+            MonsterWeavingLinearCounter.RankRoute route) {
+        if (blueprint == null) throw new IllegalArgumentException("E_NULL_BLUEPRINT");
+        if (family == null) throw new IllegalArgumentException("E_NULL_WEAVING_FAMILY");
+        int[] weaving = family.finishGlobalRankRoute(route);
+        return new GlobalPrefixRankedYear(fromBlueprint(blueprint, weaving),
+            route.fixedPrefixCopy(), route.globalRank(),
+            route.lowerRank(), route.upperRank());
+    }
+
     public static GlobalPrefixRankedYear forTargetWithGlobalPrefixRank(
             BigInteger calculationDay, BigInteger targetDay,
             int[] fixedPrefix, BigInteger globalRank) {

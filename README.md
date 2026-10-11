@@ -196,3 +196,7 @@ ni'o lo `MonsterManager.calendarWithPrefixRank` .e lo `MonsterManager.calendarWi
 ## lo mulno nanca ranki se cuxna se pagbu
 
 ni'o lo `beginGlobalRankRoute` cu cfari lo ranki pluta fi lo mulno nanca ranki po'o. lo `advanceGlobalRankRoute` cu cuxna lo se steci pamoi pagbu fi lo namcu pe lo pagbu poi prenu lo se cuxna. lo se cuxna porsi cu se ralte lo `RankRoute` .i lo `finishGlobalRankRoute` cu zbasu lo mulno porsi ca lo nu lo se stali djedi cu na zmadu lo se jmite. lo te pagbu pi'o `MAX_ROUTE_STEPS_PER_CALL` .e lo `MAX_ROUTE_BRANCH_COUNTS_PER_CALL` cu se jimte tezu'e lo nu na mutce drata xekri. lo ro ranki be lo nanca pe li 5778 djedi cu za'o na se snada fi lo frili temci. ko benji `sh run_stage02_global_routing_tests.sh`.
+
+## lo mulno se pagbu ranki detri
+
+ni'o lo `beginGlobalRankRouteWithinPrefix` cu cfari lo ranki pluta fi lo drani pamoi pagbu .e lo mulno nanca ranki. lo `MonsterCalendarResolver.fromBlueprintWithCompletedGlobalRoute` cu zbasu lo detri fi lo te drani nanca ranki te pagbu poi mulno. lo `RankRoute.complete` cu se jmina tezu'e lo nu lo se stali djedi cu na zmadu lo se jimte. lo pamoi pagbu cu na sarcu lo nu du lo nanca pamoi pagbu .i ro lo se benji detri cu stodi fi lo `SourceLanguageCatalog`. ko benji `sh run_stage02_route_calendar_tests.sh`.

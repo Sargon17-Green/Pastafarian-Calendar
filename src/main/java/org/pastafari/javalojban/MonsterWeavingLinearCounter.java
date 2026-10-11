@@ -428,6 +428,21 @@ public final class MonsterWeavingLinearCounter {
             globalRank, ONE, total, targetSuffixDays, 0);
     }
 
+
+    public RankRoute beginGlobalRankRouteWithinPrefix(
+            int[] fixedPrefix, BigInteger globalRank, int targetSuffixDays) {
+        if (targetSuffixDays < 0 || targetSuffixDays > MAX_UNRANK_DAYS
+                || targetSuffixDays > totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_ROUTE_TARGET");
+        }
+        BoundaryBlock block = globalBlockForPrefix(fixedPrefix);
+        if (!block.contains(globalRank)) {
+            throw new IllegalArgumentException("E_WEAVE_GLOBAL_RANK");
+        }
+        return new RankRoute(this, afterPrefix(fixedPrefix), fixedPrefix,
+            globalRank, block.lowerRank(), block.upperRank(), targetSuffixDays, 0);
+    }
+
     public RankRoute advanceGlobalRankRoute(RankRoute previous,
             int maximumSteps, int maximumBranchCounts) {
         if (previous == null || previous.owner != this) {
