@@ -33,6 +33,7 @@ function BigInt.from(x)
         assert(math.type(x) == "integer", "BigInt mande yon nonb antye")
         if x == 0 then return new(0, {}) end
         local sign = x < 0 and -1 or 1
+        if x == math.mininteger then return BigInt.from(tostring(x)) end
         if x < 0 then x = -x end
         local d = {}
         while x > 0 do
@@ -141,6 +142,9 @@ function BigInt.mulSmall(a, n)
     assert(type(n) == "number" and math.type(n) == "integer", "Miltiplikatè a dwe antye")
     if a.s == 0 or n == 0 then return new(0, {}) end
     local sign = a.s
+    if n > math.maxinteger // BASE or n < -(math.maxinteger // BASE) then
+        return BigInt.mul(a, BigInt.from(n))
+    end
     if n < 0 then sign, n = -sign, -n end
     local d, carry = {}, 0
     for i = 1, #a.d do
@@ -262,6 +266,9 @@ end
 
 function BigInt.toNumber(a)
     a = BigInt.from(a)
+    if a.s < 0 and tostring(a) == tostring(math.mininteger) then
+        return math.mininteger
+    end
     local n = 0
     for i = #a.d, 1, -1 do
         if n > (math.maxinteger - a.d[i]) // BASE then

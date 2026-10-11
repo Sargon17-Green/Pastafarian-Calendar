@@ -19,3 +19,7 @@ Koki production Stage 1 la pa kalkile dat kalandriye a ankò. Enfrastrikti a sè
 ### Sa nou poko fè
 
 Nou pa ekri davans okenn nan 26 defo legacy yo. Nou pa ekri okenn patch ki pou Stage 2 oswa apre. Premye defo istorik la dwe antre sèlman lè Stage 2 rive.
+
+### Verifikasyon korektif pou baz Stage 1
+
+Yon enspeksyon endepandan te jwenn ke tès fòm lang lan t ap chèche yon fichye HANDOFF ki pa fè pati pyebwa GitHub la; fichye livrezon sa yo rezève pou itilizatè a. Tès la kounye a egzamine sèlman dokiman ki nan depo a. Anplis, konvèsyon antye Lua ki pi piti a, gwo miltiplikatè yo, ak retou nan antye Lua jwenn tès limit egzak. Katalòg la sèvi ak yon tab pwoteksyon pou entèdi chanjman nan fonksyon ki deja egziste. Kopi eta semantik yo kounye a posede sou-tab yo tou, konsa yon referans kandida pa ka modifye tranzaksyon an apre kòmansman li. Koreksyon sa yo pa entwodui okenn defo istorik ni okenn patch Stage 2.

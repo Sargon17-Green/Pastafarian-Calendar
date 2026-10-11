@@ -1,6 +1,6 @@
 local root=arg[1] or "."
 local proseFiles={
-  "README.md","SOURCE_LANGUAGE_CATALOG.md","SPAGHETTI_DEVELOPMENT_HISTORY.md","HANDOFF_STAGE_01.md","DEVELOPMENT_STAGE.md"
+  "README.md","SOURCE_LANGUAGE_CATALOG.md","SPAGHETTI_DEVELOPMENT_HISTORY.md","DEVELOPMENT_STAGE.md"
 }
 local function hasHebrew(text)
   for _,cp in utf8.codes(text) do

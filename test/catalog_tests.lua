@@ -23,4 +23,9 @@ end
 for i = 1, 47 do assert(seen[i]) end
 local ok = pcall(function() C.someNewField = 1 end)
 assert(not ok)
+local oldName = C.cutlet(1)
+local oldFunction = C.cutlet
+assert(not pcall(function() C.cutlet = function() return "move" end end))
+assert(not pcall(function() C.version = function() return "move" end end))
+assert(C.cutlet == oldFunction and C.cutlet(1) == oldName)
 print("PASS catalog")

@@ -17,6 +17,20 @@ assert(ctx.semanticState.x==3 and ctx.commitToken==1)
 ctx:beginSemanticUpdate({x=4})
 ctx:rollbackSemanticUpdate()
 assert(ctx.semanticState.x==3 and ctx.pendingSemanticState==nil)
+local candidate={nested={value=9}}
+ctx:beginSemanticUpdate(candidate)
+candidate.nested.value=111
+assert(ctx.pendingSemanticState.nested.value==9)
+local oldPending=ctx.pendingSemanticState
+ctx:commitSemanticUpdate()
+oldPending.nested.value=222
+assert(ctx.semanticState.nested.value==9)
+ctx:beginSemanticUpdate({nested={value=10}})
+ctx.semanticState.nested.value=333
+ctx:rollbackSemanticUpdate()
+assert(ctx.semanticState.nested.value==9)
+assert(not pcall(function() ctx:beginSemanticUpdate(nil) end))
+assert(ctx.pendingSemanticState==nil)
 local ok=pcall(S.calendarDateSpaghetti)
 assert(not ok)
 print("PASS baz production")

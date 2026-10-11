@@ -1,8 +1,14 @@
 local Base = {}
 
-local function cloneFlat(source)
+local function cloneOwned(source, seen)
+    if type(source) ~= "table" then return source end
+    seen = seen or {}
+    if seen[source] ~= nil then return seen[source] end
     local out = {}
-    if source then for k,v in pairs(source) do out[k] = v end end
+    seen[source] = out
+    for k, v in pairs(source) do
+        out[cloneOwned(k, seen)] = cloneOwned(v, seen)
+    end
     return out
 end
 
@@ -39,13 +45,14 @@ end
 
 function MonsterContext:beginSemanticUpdate(candidate)
     assert(self.pendingSemanticState == nil, "Gen yon eta semantik annatant deja")
-    self.rollbackSnapshot = cloneFlat(self.semanticState)
-    self.pendingSemanticState = cloneFlat(candidate)
+    assert(type(candidate) == "table", "Eta semantik kandida a dwe yon tablo")
+    self.rollbackSnapshot = cloneOwned(self.semanticState)
+    self.pendingSemanticState = cloneOwned(candidate)
 end
 
 function MonsterContext:commitSemanticUpdate()
     assert(self.pendingSemanticState ~= nil, "Pa gen eta semantik pou valide epi komèt")
-    self.semanticState = self.pendingSemanticState
+    self.semanticState = cloneOwned(self.pendingSemanticState)
     self.pendingSemanticState = nil
     self.rollbackSnapshot = nil
     self.commitToken = self.commitToken + 1
