@@ -360,8 +360,8 @@ def selftest():
                  if not line.startswith(("READ_BEFORE","READ_AFTER"))]
         reject_trace("omitted_g_events",no_read,source,"missing native g/p")
         fake_read=[line.replace(
-            "STEP\t4\t1\t11\t10\t1\t0\t103\t2",
-            "STEP\t4\t1\t11\t10\t1\t0\t32\t2")
+            "STEP\t4\t1\t11\t10\t1\t0\t103\t0",
+            "STEP\t4\t1\t11\t10\t1\t0\t32\t0")
             for line in trace_lines]
         altered_source=list(source)
         altered_source[10]=" "*10+"p "
