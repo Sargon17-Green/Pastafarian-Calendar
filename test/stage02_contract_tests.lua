@@ -28,7 +28,7 @@ earlierContext.metrics["legacy.save.calls"] = 42
 assert(laterContext.semanticState.resultDecimal == "1")
 assert(laterContext.diagnostics[1].code == "REGULAR_MOD_INSTEAD_OF_SAVE")
 assert(laterContext.metrics["legacy.save.calls"] == 1)
-assert(tostring(S.saveSpaghetti(M)) == "0")
+assert(tostring(S.saveSpaghetti(M)) == tostring(M))
 
 -- Erè nan valè antre pa dwe lakòz okenn retou pasyèl.
 for _, bad in ipairs({"", "1.2", "pa-yon-antye", {}, true, 0.5}) do

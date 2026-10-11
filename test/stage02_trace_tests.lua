@@ -19,7 +19,7 @@ for _, case in ipairs(cases) do
     local wrong, context = S.legacySaveProbe(case.value)
     local authoritative = S.saveSpaghetti(case.value)
     local norm = O.SAVE(case.value)
-    assert(B.compare(authoritative, wrong) == 0, "Stage 2 dwe pase nan legacy a")
+    assert(B.compare(authoritative, norm) == 0, "PATCH 01 dwe korije wout otoritè a")
     assert(tostring(wrong) == case.expectedWrong, case.name .. ": move rès legacy a")
     assert((B.compare(wrong, norm) ~= 0) == case.mustDiffer, case.name .. ": move diferans lan")
     assert(context.status == "LEGACY_RETURNED")

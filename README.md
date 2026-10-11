@@ -54,7 +54,7 @@ Pou tcheke tès tout Stage 1 yo, apre sa tras la epi echèk ekivalans ki obligat
 texlua test/stage02_tests.lua .
 ```
 
-Dezyèm kòmand lan dwe fini ak `EXPECTED_RED Stage 2 DISCOVERY 01`, apre tout tès vèt yo fin pase. Pa konsidere rezilta sa a kòm yon patch ki manke: nan Discovery 01, echèk sa a se prèv defo istorik nou gen pou korije nan Stage 3. Pa aplike patch la davans.
+Nan checkpoint Stage 2 a, dezyèm kòmand lan te fini ak `EXPECTED_RED Stage 2 DISCOVERY 01`. Depi PATCH 01 nan Stage 3, li dwe pase: tès ekivalans `saveSpaghetti` la kounye a vèt, men odit `stage02_expected_red_audit.lua` toujou verifye menm twa diferans istorik yo sou `legacySaveProbe`. Konsa nou konsève prèv dekouvèt la san nou pa kite tès prensipal yo wouj.
 
 ## Yon lòt revizyon pwopriyete pou Stage 2
 
@@ -64,3 +64,19 @@ Dezyèm kòmand lan dwe fini ak `EXPECTED_RED Stage 2 DISCOVERY 01`, apre tout t
 texlua test/stage02_property_tests.lua .
 texlua test/stage02_scope_tests.lua .
 ```
+
+## Stage 3 — PATCH 01: reparasyon SAVE a
+
+`src/save_patch.lua` mete yon kouch ki rele `savePatch(x)` sou ansyen `oldRemainder(x)`: si rès la se zewo, kouch la retounen `M`; sinon li retounen rès la san chanjman. **`src/legacy_save.lua` rete idantik** ak vèsyon Discovery 01 la, epi `legacySaveProbe` kontinye montre ansyen defo a.
+
+`saveSpaghetti` pase nan kouch patch la, pandan `savePatchProbe` retounen valè korije a ak kontèks de etap yo. Dispatcher la kenbe `LEGACY_SAVE` anvan `SAVE_PATCH`, de commit eta semantik, metrik apa, ak dyagnostik ki prezève ansyen rezilta a. Oracle normatif la rete sèlman nan `test/`.
+
+Pou kouri tout etap ki deja ekri yo ansanm, sou Lua 5.3:
+
+```text
+texlua test/stage03_tests.lua .
+```
+
+Tès sa a kouri tout regresyon Stage 1 ak Stage 2, odit diferans legacy istorik la, ak tès PATCH 01 yo. Tout dwe pase; eta depo a se `GREEN`. Tès Stage 3 la kouvri 903 ka bò kote miltip `M`, 8 ka espesyal, 131 ranplasman zewo, eta ak tras, epi valè ki depase presizyon Lua natif la.
+
+Pa entwodui okenn lòt defo istorik, ni koreksyon ki pou Stage 4 oswa apre.

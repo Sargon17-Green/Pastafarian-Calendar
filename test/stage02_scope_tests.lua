@@ -1,5 +1,5 @@
 local root = arg[1] or "."
-local productionFiles = {"src/legacy_save.lua", "src/spaghetti.lua"}
+local productionFiles = {"src/legacy_save.lua"}
 local forbidden = {
     "normative_oracle", "savePatch", "SAVE_CORRECTION", "correctedRemainder",
     "LEGACY_YEAR_MAX", "oldDayTag", "oldDistance", "mutateStonesWrong",
@@ -19,4 +19,4 @@ local legacySource = moduleFile:read("*a")
 moduleFile:close()
 assert(legacySource:find("function LegacySave.oldRemainder(value)", 1, true))
 assert(legacySource:find("return BigInt.mod(BigInt.from(value), M)", 1, true))
-print("PASS limit istorik Stage 2: pa gen patch ni import oracle")
+print("PASS limit istorik Stage 2: ansyen kòd la pa gen patch ni oracle")

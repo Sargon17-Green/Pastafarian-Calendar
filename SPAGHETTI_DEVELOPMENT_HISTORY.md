@@ -53,3 +53,21 @@ Pa gen okenn koreksyon SAVE, okenn import oracle nan production, ni okenn chanjm
 ### Odit pwopriyete repwodiktib la
 
 Nan menm etap Discovery 01 la, nou ogmante sijè tès yo pou kouvri 575 antre egzak. Nou teste idantite `x=qM+r` ak `0<=r<M`, nonmodifikasyon rès la lè nou ajoute oswa retire yon miltip `M`, ak izolasyon chak tranzaksyon. Nan mayaj sou miltip `M` yo, se 65 ka rès zewo ki bay diferans atann ant rès òdinè ak SAVE. Nou mete yon tès limit istorik ki refize kode patch 01 nan production. Sa pa chanje algoritim nan, tras la, ni defo a; tès ekivalans lan rete wouj entansyonèlman.
+
+## Stage 3 — PATCH 01: kouch ki repare `SAVE`
+
+### Sa nou te bezwen korije
+
+Discovery 01 te pwouve ke modulo òdinè a bay zewo lè antre a se yon miltip egzak de `M`, pandan `SAVE` normatif la dwe bay `M`. Li pa nesesè pou ranplase algoritm BigInt la ni pou chanje nenpòt lòt rès.
+
+### Kijan nou korije li san nou pa efase erè a
+
+Nou kite `src/legacy_save.lua` ak `oldRemainder` idantik ak vèsyon Stage 2 a. Nou ajoute `savePatch(x)`: li rele `oldRemainder(x)`; si rezilta a se zewo, li retounen `M`, sinon li retounen ansyen rès la. `saveSpaghetti` kounye a rele kouch patch la; `legacySaveProbe` pa chanje.
+
+Nou fè menm `MonsterContext` pase nan de handler dispatcher: `LEGACY_SAVE`, apre sa `SAVE_PATCH`. Premye commit la toujou kenbe rès ki mal la, dezyèm lan konsève antre a, ansyen rès la, rezilta korije a ak rezon koreksyon an. Metrik, tras ak dyagnostik yo pèmèt yon odit san melanje eta de invocation diferan. Pa gen okenn import oracle normatif nan production.
+
+### Regrèsyon ak prèv istorik
+
+Tès ekivalans ki te wouj la vin vèt san modifye konparezon normatif li. Pou prèv Discovery 01 la pa disparèt, `stage02_expected_red_audit.lua` kounye a kouri yon regresyon **espesifik pou chemen legacy a**, ki kontinye pwodwi egzakteman twa diferans `M`, `2M`, `3M`; odit la dwe pase. Tès tras, limit ak pwopriyete Stage 2 yo toujou verifye ansyen rès la, men egzije kounye a yon rezilta piblik korije. Nou ajoute tès pozitif sou 903 ka limit, 8 ka espesyal, antre gwo, izolasyon eta, sekans dispatcher, metrik ak pwopriyetè eta.
+
+Se sèl premye patch la nou fè. Lòt defo istorik yo rete pou etap ki vin apre yo.

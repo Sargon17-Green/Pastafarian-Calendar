@@ -14,7 +14,7 @@ local function check(value, label)
     local norm = O.SAVE(x)
     local quotient, remainder = B.divmodFloor(x, M)
     assert(B.compare(actual, remainder) == 0, label .. ": move rès la")
-    assert(B.compare(public, remainder) == 0, label .. ": move rezilta piblik la")
+    assert(B.compare(public, norm) == 0, label .. ": chemen pwodiksyon an pa korije")
     assert(B.compare(remainder, B.from(0)) >= 0, label .. ": rès negatif")
     assert(B.compare(remainder, M) < 0, label .. ": rès depase modil la")
     assert(B.compare(B.mul(quotient, M) + remainder, x) == 0,
@@ -63,9 +63,11 @@ for index = 1, 96 do
         local shift = M * B.from(11)
         local a = check(x + shift, "translasyon pozitif " .. index)
         local b = check(x - shift, "translasyon negatif " .. index)
-        local original = S.saveSpaghetti(x)
+        local original = S.legacySaveProbe(x)
         assert(B.compare(a, original) == 0 and B.compare(b, original) == 0,
             "Translasyon pa yon miltip M chanje rès legacy a")
+        assert(B.compare(S.saveSpaghetti(x + shift), S.saveSpaghetti(x)) == 0)
+        assert(B.compare(S.saveSpaghetti(x - shift), S.saveSpaghetti(x)) == 0)
     end
 end
 

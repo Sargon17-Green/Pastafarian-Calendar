@@ -19,7 +19,7 @@ for multiplier = -12, 12 do
         local public = S.saveSpaghetti(input)
         assert(tostring(wrong) == tostring(expectedRemainder),
             "Rès legacy la pa mache pou " .. multiplier .. "M" .. offset)
-        assert(tostring(public) == tostring(expectedRemainder))
+        assert(tostring(public) == tostring(offset == 0 and M or expectedRemainder))
         assert(context.semanticState.inputDecimal == tostring(input))
         assert(context.semanticState.resultDecimal == tostring(expectedRemainder))
         assert(context.commitToken == 1 and context.status == "LEGACY_RETURNED")
@@ -42,10 +42,10 @@ local hugeValues = {
 }
 for _, input in ipairs(hugeValues) do
     local actual = S.saveSpaghetti(input)
-    assert(B.compare(actual, 0) >= 0 and B.compare(actual, M) < 0)
+    assert(B.compare(actual, 1) >= 0 and B.compare(actual, M) <= 0)
     local quotient, rem = B.divmodFloor(input, M)
     assert(tostring(input) == tostring(B.mul(quotient, M) + rem),
         "Pèt presizyon nan divizyon antye gwo")
-    assert(tostring(actual) == tostring(rem))
+    assert(tostring(actual) == tostring(rem:isZero() and M or rem))
 end
 print("PASS limit Stage 2: 125 ka toupre miltip M, 6 antre gwo")

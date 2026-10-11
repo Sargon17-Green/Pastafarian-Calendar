@@ -1,0 +1,59 @@
+name: Canonical Names Lock
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verifye kadna non kanonik yo
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r expected path; do
+            [ -n "$expected" ] || continue
+            actual="$(git cat-file blob "HEAD:$path" | sha256sum | cut -d' ' -f1)"
+            if [ "$actual" != "$expected" ]; then
+              echo "::error file=$path::Non kanonik yo pa koresponn ak kadna a"
+              exit 1
+            fi
+          done < CANONICAL_NAMES_LOCK.sha256
+
+  lua_stage03_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye sentaks Lua
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+      - name: Verifye ansyen kòd legacy a pa chanje
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected=86d8bee9f0976c6f0394de96bf0d23d31c505ecd
+          actual="$(git hash-object src/legacy_save.lua)"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error file=src/legacy_save.lua::Kòd Discovery 01 la te chanje"
+            exit 1
+          fi
+      - name: Kouri tout tès Stage 1, Stage 2 ak PATCH 01
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage03_tests.lua .
