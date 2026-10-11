@@ -55,3 +55,7 @@ ni'o lo nanca cipra ca lo 11 moi masti be lo 2026 moi nanca cu te jalge lo drani
 ### lo kecti .e lo masti platu poi na se mulno
 
 ni'o lo `MonsterYearBlueprint` cu zbasu lo kecti pagbu .e lo kecti cmene .e lo masti se jimte .e lo masti cmene, tezu'e lo nu se cipra fi lo `NormativeOracle` poi cipra po'o. lo masti se jorne porsi cu na se zbasu ca ti. lo se benji result cu stodi gi'e se sruri lo se galfi.
+
+### lo kecti detri se benji
+
+ni'o lo `MonsterCutletCalendar` cu zbasu lo nanca .e lo kecti .e lo djedi se namcu fi lo se benji detri. lo masti detri cu na se zbasu fi ti. lo `Stage02CutletDateTests` cu cipra lo se cuxna fi lo normativi `NormativeOracle` pe lo cipra po'o.

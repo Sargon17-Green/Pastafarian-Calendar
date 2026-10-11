@@ -22,6 +22,7 @@ public final class Stage02BlueprintTests {
         compare(foundation, traversal.nextYear(foundation, anchor));
         compare(foundation, traversal.previousYear(foundation, anchor));
         testOwnership();
+        testDistantCalculationWithoutGateExplosion();
         testInputValidation();
         System.out.println("STAGE_02_BLUEPRINT_PASS checks=" + checks);
     }
@@ -111,6 +112,17 @@ public final class Stage02BlueprintTests {
         failsUnsupported(() -> a.cutlets().clear());
         ok(a != b, "E_BLUEPRINT_PER_REQUEST");
         arr(a.cutletPartition(), b.cutletPartition(), "E_BLUEPRINT_DETERMINISM");
+    }
+
+    private static void testDistantCalculationWithoutGateExplosion() {
+        BigInteger f = MonsterArithmetic.FOUNDATION_DAY;
+        MonsterYears.Year localYear = new MonsterYears().year5000(f);
+        BigInteger distantCalculation = BigInteger.ONE.shiftLeft(180);
+        MonsterYearBlueprint result = MonsterYearBlueprint.build(distantCalculation, localYear);
+        eq(localYear.length().intValueExact(), Arrays.stream(result.monthLengths()).sum(),
+            "E_DISTANT_MONTH_COVERAGE");
+        eq(localYear.closeGateDay(), result.cutlets().get(result.cutletCount() - 1).lastDay(),
+            "E_DISTANT_CUTLET_COVERAGE");
     }
 
     private static void testInputValidation() {

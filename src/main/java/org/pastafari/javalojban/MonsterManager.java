@@ -21,4 +21,9 @@ public final class MonsterManager {
         MonsterContext context = new MonsterContext(calculationDay, targetDay);
         return errorBoundary.execute(() -> dispatcher.dispatchSauce(context));
     }
+    public MonsterCutletCalendar.CutletDate cutletDate(
+            BigInteger calculationDay, BigInteger targetDay) {
+        return errorBoundary.execute(() ->
+            MonsterCutletCalendar.convert(calculationDay, targetDay));
+    }
 }
