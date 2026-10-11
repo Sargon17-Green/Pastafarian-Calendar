@@ -8431,7 +8431,25 @@ LegacyWideSelectionReport BaseMonsterManager::executeUnpatchedWideSelectionDiagn
         ctx.phase,
         ctx.status,
         ctx.currentHandler,
-        ctx.branchTrace.size()
+        ctx.branchTrace.size(),
+        // Nomina posteriora ad Patch 14 pertinent.  In via unpatched
+        // intentione absentia manent; omnia expresse initia sunt, ne
+        // compiler aliud significet quam valorum default vacuitatem.
+        false,                   // legacyOutputAvailableBeforePatch
+        Integer{},               // legacyOutputBeforePatch
+        false,                   // legacyShortFailureBeforePatch
+        std::string{},           // legacyFailureBeforePatch
+        false,                   // patch14Applied
+        false,                   // usedShortPath
+        false,                   // usedWideDetour
+        0,                       // widePlaces
+        Integer{},               // wideSpace
+        std::vector<Integer>{},  // wideDigits
+        0,                       // wideDigitReadCount
+        Integer{},               // wideInitialValue
+        Integer{},               // wideAcceptanceLimit
+        Integer{},               // wideAcceptedValue
+        Integer{}                // wideRejectionSteps
     };
 }
 
