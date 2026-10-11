@@ -172,3 +172,7 @@ ni'o lo `MonsterWeavingLinearCounter` cu djuno lo pamoi porsi .e lo romoi porsi 
 ## lo te jorne porsi pe lo lamji
 
 ni'o lo `lexNext` .e lo `lexPrevious` cu sisku lo lamji porsi fi lo nanca te jorne. lo `MonsterWeavingLinearCounter` cu kakne lo pamoi ranki 1..9 .e lo romoi ranki be lo se jmina lo 0..8 fi lo nanca be li 5778 djedi. lo drata barda nanca ranki cu na se danfu. lo `Stage02EdgeWeavingTests` cu cipra lo drani porsi fi lo `NormativeOracle` .e lo 256 mebibaiti te jimte. ko benji `sh run_stage02_edge_weaving_tests.sh`.
+
+## lo drata se pagbu porsi
+
+ni'o lo `unrankAfterPrefix` .e lo `rankAfterPrefix` cu ciksi lo porsi ranki se steci lo drani pamoi pagbu. lo ranki cu jmina lo se pagbu porsi gi'e na se steci lo mulno nanca ranki. lo nu lo se stali djedi cu na zmadu li 512 cu curmi lo nu zbasu lo porsi pe lo mulno nanca be li 5778 djedi. lo `Stage02PrefixRankingTests` cu cipra lo `NormativeOracle` .e lo so'i drata barda nanca pagbu fi lo 256 mebibaiti te jimte. ko benji `sh run_stage02_prefix_ranking_tests.sh`.

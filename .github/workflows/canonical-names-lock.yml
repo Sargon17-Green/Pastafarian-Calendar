@@ -74,3 +74,5 @@ jobs:
         run: sh run_stage02_extremal_weaving_tests.sh
       - name: Stage 02 full-year lexicographic neighbors
         run: sh run_stage02_edge_weaving_tests.sh
+      - name: Stage 02 full-year prefix-relative interior ranking
+        run: sh run_stage02_prefix_ranking_tests.sh

@@ -133,3 +133,7 @@ ni'o lo pamoi porsi cu stidi lo cmalu se cumki sumti. lo romoi porsi cu stidi lo
 ### lo lamji porsi paji
 
 ni'o lo `lexNext` .e lo `lexPrevious` cu se zbasu fi lo nu sisku lo romoi selstu fi lo porsi te jorne. lo selstu cu frili na'i .i lo jmina cu pilno lo pamoi porsi .e lo romoi porsi lo nu facki lo ranki pe lo lamji porsi. lo drata ranki poi zmadu lo jimte li 512 djedi cu na se snada.
+
+### lo nanca porsi se pagbu ranki
+
+ni'o lo nu xamgu lo se steci ranki cu pilno lo nu facki lo drani pamoi porsi .e lo su'o lo se stali ranki fi lo nanca be li 5778 djedi. lo pamoi pagbu cu se stali .i lo ranki be lo se stali pagbu cu na du lo mulno ranki. lo nu lo se stali djedi cu na zmadu li 512 cu se jimte.

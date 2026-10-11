@@ -122,11 +122,90 @@ public final class MonsterWeavingLinearCounter {
     }
 
     public BigInteger countAfterPrefix(int[] prefix) {
-        if (prefix == null) throw new IllegalArgumentException("E_WEAVE_PREFIX");
+        State state = afterPrefix(prefix);
         if (prefix.length == 0) return count();
+        return countSuffix(state);
+    }
+
+
+    private State afterPrefix(int[] prefix) {
+        if (prefix == null || prefix.length > totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_PREFIX");
+        }
         State state = new State(lengths);
         for (int id : prefix) state.take(id - 1, lengths);
-        return countSuffix(state);
+        return state;
+    }
+
+    private int daysRemaining(State state) {
+        int days = 0;
+        for (int n : state.remaining) days += n;
+        return days;
+    }
+
+    public int[] unrankAfterPrefix(int[] prefix, BigInteger localRank) {
+        State state = afterPrefix(prefix);
+        int suffixDays = daysRemaining(state);
+        if (suffixDays > MAX_UNRANK_DAYS) {
+            throw new IllegalArgumentException("E_WEAVE_SUFFIX_LIMIT");
+        }
+        BigInteger choices = prefix.length == 0 ? count() : countSuffix(state);
+        if (localRank == null || localRank.signum() <= 0
+                || localRank.compareTo(choices) > 0) {
+            throw new IllegalArgumentException("E_WEAVE_RANK");
+        }
+        int[] sequence = new int[totalDays];
+        System.arraycopy(prefix, 0, sequence, 0, prefix.length);
+        BigInteger remainingRank = localRank;
+        for (int pos = prefix.length; pos < totalDays; pos++) {
+            boolean chosen = false;
+            for (int month = state.closed; month < lengths.length; month++) {
+                if (!state.canTake(month, lengths)) continue;
+                State trial = new State(state);
+                trial.take(month, lengths);
+                BigInteger block = countSuffix(trial);
+                if (remainingRank.compareTo(block) > 0) {
+                    remainingRank = remainingRank.subtract(block);
+                } else {
+                    state = trial;
+                    sequence[pos] = month + 1;
+                    chosen = true;
+                    break;
+                }
+            }
+            if (!chosen) throw new IllegalStateException("E_WEAVE_UNRANK");
+        }
+        return sequence;
+    }
+
+    public BigInteger rankAfterPrefix(int[] prefix, int[] completeWeaving) {
+        State state = afterPrefix(prefix);
+        if (completeWeaving == null || completeWeaving.length != totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+        }
+        for (int i = 0; i < prefix.length; i++) {
+            if (completeWeaving[i] != prefix[i]) {
+                throw new IllegalArgumentException("E_WEAVE_PREFIX_MISMATCH");
+            }
+        }
+        if (daysRemaining(state) > MAX_UNRANK_DAYS) {
+            throw new IllegalArgumentException("E_WEAVE_SUFFIX_LIMIT");
+        }
+        BigInteger rank = ONE;
+        for (int pos = prefix.length; pos < totalDays; pos++) {
+            int month = completeWeaving[pos] - 1;
+            if (!state.canTake(month, lengths)) {
+                throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+            }
+            for (int earlier = state.closed; earlier < month; earlier++) {
+                if (!state.canTake(earlier, lengths)) continue;
+                State alternative = new State(state);
+                alternative.take(earlier, lengths);
+                rank = rank.add(countSuffix(alternative));
+            }
+            state.take(month, lengths);
+        }
+        return rank;
     }
 
     private int[] extremeWeaving(boolean latest) {
