@@ -1,0 +1,40 @@
+name: Perl 第一階段完整驗證
+
+on:
+  push:
+    branches:
+      - 'Perl+國語'
+  pull_request:
+    branches:
+      - 'Perl+國語'
+
+permissions:
+  contents: read
+
+jobs:
+  stage01:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對 Perl 執行環境
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -e 'die "需要 Perl 5.40 以上\n" if $] < 5.040; print "$^V\n"'
+      - name: 檢查生產及參考模組的語法
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            perl -Ilib -It/lib -c "$file"
+          done < <(find lib t/lib -name '*.pm' -type f -print0 | sort -z)
+      - name: 執行完整第一階段測試
+        shell: bash
+        run: |
+          set -euo pipefail
+          prove -Ilib -It/lib -lr t

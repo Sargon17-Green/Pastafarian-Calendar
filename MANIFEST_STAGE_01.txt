@@ -1,5 +1,4 @@
 DEVELOPMENT_STAGE.md
-HANDOFF_STAGE_01.md
 README.md
 SPAGHETTI_DEVELOPMENT_HISTORY.md
 STAGE_01_TEST_LOG.txt
@@ -18,4 +17,9 @@ t/02_normative_helpers.t
 t/03_normative_sauce.t
 t/04_normative_families_and_year.t
 t/05_language_and_isolation_audit.t
+t/06_normative_small_space_audit.t
+t/07_bootstrap_integrity.t
 t/lib/Pastafari/NormativeScroll.pm
+CANONICAL_NAMES_LOCK.sha256
+.github/workflows/canonical-names-lock.yml
+.github/workflows/stage-01-perl.yml
