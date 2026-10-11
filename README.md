@@ -364,3 +364,24 @@ Cả `visible_drops_spaghetti` và `bootstrap_context.visible_drops`
 Bốn hồi quy chuẩn mới tại giọt nhìn thấy 1, 2, 7, 46 phải
 đỏ có chủ đích. Các kiểm thử bảo vệ khẳng định giọt ẩn
 không bị hỏng, thứ tự các ô và tính độc lập của các lần gọi.
+
+## Xác minh đóng giai đoạn 12
+
+GitHub Actions chạy Elixir 1.18.5, Erlang/OTP 27 với
+**126 kiểm thử, đúng 4 hồi quy chuẩn cố ý đỏ**, 122 bài đạt,
+không cảnh báo biên dịch. Cả 111 bài kiểm thử từ giai đoạn
+1 đến 11 vẫn đạt và khóa tên chuẩn độc lập PASS.
+
+Bốn hồi quy đỏ ở giọt nhìn thấy 1, 2, 7, 46 chứng minh
+lookup lịch sử không đọc được bảy giọt ẩn. Mã tính 46 giọt
+và kho giọt ẩn vẫn được giữ riêng trong context.
+Một cảnh báo deprecation của Range trong kiểm thử mới
+được sửa bằng `Map.filter`, không thay mã sản xuất.
+
+- [CI với bốn hồi quy đỏ dự kiến](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165148360)
+- [Khóa tên chuẩn đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165148358)
+
+Giai đoạn 12/55 khép ở trạng thái `EXPECTED_RED` đã xác minh.
+Giai đoạn 13/55, `PATCH 06`, sẽ giữ `LegacyPrior` để đọc
+những vị trí dương, còn vị trí 0 đến -6 phải được ánh xạ về
+giọt ẩn số `1-slot`. Không thêm phần sửa này ở giai đoạn 12.

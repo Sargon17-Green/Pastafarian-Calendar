@@ -346,3 +346,14 @@ hoặc lịch cuối trước giai đoạn riêng.
 mười một bài kiểm soát xác nhận lookup cũ, 46 ô,
 số nguyên lớn, bảng đá và kho giọt ẩn còn đúng,
 thực thi song song, kiểm tra nguồn và bảo vệ ranh giới.
+
+**Bằng chứng thực tế:** GitHub Actions trên Elixir 1.18.5
+và OTP 27 đã biên dịch 26 tệp nguồn, chạy 126 kiểm thử.
+Đúng bốn hồi quy chuẩn từ lần phát hiện 06 thất bại ở
+giọt nhìn thấy 1, 2, 7 và 46; 122 kiểm thử khác đạt,
+bao gồm đủ 111 bài cũ. Khóa tên chuẩn PASS.
+Lần chạy ban đầu cảnh báo việc dùng `Map.take` với Range
+trong kiểm thử mới. Chỉ điều chỉnh kiểm thử sang `Map.filter`,
+không sửa mã sản xuất hoặc kỳ vọng chuẩn. Lần kiểm chứng cuối
+không cảnh báo biên dịch. Giai đoạn 12 khép EXPECTED_RED;
+bản vá đọc giọt ẩn của giai đoạn 13 chưa được thêm.

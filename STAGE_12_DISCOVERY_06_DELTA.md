@@ -88,3 +88,22 @@ PATCH 06 phải giữ `LegacyPrior.legacy_prior`, chỉ dùng
 nó cho `slot >= 1`; với `slot <= 0` dùng giọt ẩn
 `hidden_number=1-slot` qua `HiddenDropManager.read`.
 Không mở sớm bản vá này.
+
+## Kết quả kiểm chứng thực tế
+
+- Commit triển khai: `f101b8e6694aadcebe1ded8fc5363237787cc2aa`.
+- Commit làm sạch cảnh báo kiểm thử: `4a8092dd68f8978716cc102326044968a95efd13`.
+- Elixir 1.18.5, Erlang/OTP 27; 26 tệp nguồn được biên dịch.
+- **126 kiểm thử, đúng 4 hồi quy chuẩn đỏ có chủ đích**, 122 đạt.
+- Bốn ca đỏ: giọt nhìn thấy 1, 2, 7 và 46.
+- Toàn bộ 111 kiểm thử giai đoạn 1-11 đều đạt.
+- Lần CI cuối không có cảnh báo biên dịch.
+- Khóa tên chuẩn độc lập PASS.
+- Không thay mã sản xuất khi sửa cảnh báo trong kiểm thử mới.
+- Không thêm nhánh vá truy cập giọt ẩn vào `LegacyPrior`.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165148360
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165148358
+
+Trạng thái cuối giai đoạn 12: EXPECTED_RED đã xác minh.
+Điểm tiếp theo: giai đoạn 13 PATCH 06, chưa bắt đầu.

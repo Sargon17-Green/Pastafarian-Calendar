@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=12
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=06
-LAST_COMPLETED_STAGE=11
+LAST_COMPLETED_STAGE=12
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ năm bản vá cũ, thêm LegacyPrior chỉ đọc visible_store[index-back], ô trống dùng 0; VisibleDropCalculator tạo 46 giọt mà chưa liên hệ bảy giọt ẩn, context giữ hai kho riêng.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_12_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_12_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_12_PENDING
-CI_FAILURES=STAGE_12_PENDING
+CI_TESTS=126
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -190,4 +190,17 @@ Bảng đá đã vá, giọt ẩn đã vá và SAVE vẫn hoạt động đúng.
 Bốn hồi quy chuẩn mới kiểm các giọt 1, 2, 7, 46; cố ý đỏ.
 Mười một kiểm thử kiểm soát và bốn hồi quy: tổng 126 kiểm thử,
 dự kiến đúng bốn thất bại. Không có bản vá 06 của giai đoạn 13.
-LAST_COMPLETED_STAGE giữ 11 trước khi xác minh CI.
+LAST_COMPLETED_STAGE đã nâng lên 12 sau xác minh CI và khóa tên.
+
+Giai đoạn 12 hoàn tất theo hợp đồng EXPECTED_RED trên Elixir 1.18.5,
+Erlang/OTP 27. Có 126 kiểm thử, đúng bốn hồi quy chuẩn cố ý đỏ:
+giọt nhìn thấy 1, 2, 7, 46. 122 bài khác đạt, bao gồm
+toàn bộ 111 kiểm thử đã hoàn tất ở giai đoạn 11.
+Không có cảnh báo biên dịch trong lần kiểm chứng cuối.
+Lần CI đầu sinh cảnh báo từ Map.take với Range trong một
+kiểm thử mới. Đã thay bằng Map.filter, không sửa mã sản xuất,
+không sửa hồi quy chuẩn hoặc bốn sai lệch dự kiến.
+Khóa tên chuẩn độc lập PASS.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165148360
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165148358
+Giai đoạn 12 đóng EXPECTED_RED. Giai đoạn 13 là PATCH 06.
