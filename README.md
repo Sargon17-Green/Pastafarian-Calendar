@@ -138,3 +138,18 @@ Bốn hồi quy chuẩn cố ý đỏ: cùng một ngày, hai ngày cùng phía 
 Ngày Nền, hai ngày cùng phía sau Ngày Nền và một cặp vượt Ngày Nền.
 Hai đối chứng đi qua đúng khi sai số tình cờ triệt tiêu.
 Bản vá 03 bắt buộc thuộc giai đoạn 7 và chưa được thêm ở đây.
+
+## Xác minh hoàn tất giai đoạn 6
+
+CI dùng Elixir 1.18.5, OTP 27 đã thực thi 55 kiểm thử:
+51 đạt, đúng 4 thất bại có chủ đích thuộc phát hiện 03.
+Không có lỗi biên dịch và không có thất bại của các kiểm thử trước.
+Khóa tên chuẩn độc lập đạt.
+
+- [Nhật ký phát hiện 03 có bốn hồi quy đỏ](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154864908)
+- [Khóa tên chuẩn đã đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154864891)
+
+Giai đoạn 6/55 khép ở trạng thái `EXPECTED_RED` đã xác minh.
+Giai đoạn 7/55 là `PATCH 03`: giữ `old_distance`, chỉ khi
+khác khoảng cách theo ngày thời gian mới thay giá trị; sau đó
+cộng một. Không sửa các hồi quy chuẩn của giai đoạn phát hiện.

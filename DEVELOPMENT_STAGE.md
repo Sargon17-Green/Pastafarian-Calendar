@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=6
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=03
-LAST_COMPLETED_STAGE=5
+LAST_COMPLETED_STAGE=6
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá SAVE và nhãn ngày; thêm LegacyDistance lấy hiệu tuyệt đối giữa hai day-tag qua DayCountManager và DistanceManager chuyển nguyên kết quả sai vào context.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_06_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_06_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_06_PENDING
-CI_FAILURES=STAGE_06_PENDING
+CI_TESTS=55
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -77,5 +77,13 @@ Giai đoạn 6 thêm old_distance(c,t) = abs(day_tag(c)-day_tag(t)), không cộ
 Lỗi lộ ở cùng ngày, hai trường hợp cùng phía và trường hợp qua Ngày Nền.
 Hai đối chứng vô tình đúng; các bản vá 01/02 vẫn hoạt động.
 Không thêm kiểm tra chronological của bản vá 03 trước giai đoạn 7.
-LAST_COMPLETED_STAGE vẫn bằng 5 cho tới khi xác minh CI giai đoạn 6.
-Dự kiến 55 kiểm thử, đúng 4 thất bại có chủ đích, 51 đạt.
+LAST_COMPLETED_STAGE đã nâng lên 6 sau xác minh CI giai đoạn 6.
+Kết quả thực tế: 55 kiểm thử, đúng 4 thất bại có chủ đích, 51 đạt.
+
+Giai đoạn 6 được kiểm chứng bằng GitHub Actions: Elixir 1.18.5, OTP 27.
+55 kiểm thử, đúng bốn thất bại dự kiến: cùng ngày, hai ngày bên trái,
+hai ngày bên phải và một cặp qua Ngày Nền. 51 kiểm thử còn lại đạt.
+Không có lỗi biên dịch hay thất bại ngoài dự kiến. Khóa tên chuẩn đạt.
+Bằng chứng: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154864908
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154864891
+Giai đoạn 6 hoàn tất ở EXPECTED_RED đã xác minh; tiếp theo là giai đoạn 7, PATCH 03.

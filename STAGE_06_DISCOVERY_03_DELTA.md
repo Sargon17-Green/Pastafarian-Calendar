@@ -53,3 +53,20 @@ Giai đoạn 6: phơi bày sai lệch khoảng cách giữa nhãn ngày
 Đưa phép trừ hai nhãn ngày vào đường thực thi và context.
 Giữ bản vá SAVE và ngày đã hoàn thành, bổ sung bốn hồi quy
 chuẩn cố ý đỏ, chưa thêm sửa khoảng cách theo thứ tự thời gian.
+
+## Kết quả thực tế đã kiểm chứng
+
+- Môi trường: Elixir 1.18.5, Erlang/OTP 27.
+- 55 kiểm thử, đúng 4 thất bại có chủ đích, 51 đạt.
+- Cùng ngày: thực tế 0, chuẩn 1.
+- Hai ngày trước Ngày Nền: thực tế 4, chuẩn 3.
+- Hai ngày sau Ngày Nền: thực tế 4, chuẩn 3.
+- Đi qua Ngày Nền: thực tế 1, chuẩn 3.
+- Không có lỗi biên dịch, không sửa kỳ vọng chuẩn.
+- Khóa tên chuẩn PASS.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154864908
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38154864891
+
+Trạng thái cuối giai đoạn 6: EXPECTED_RED đã được xác minh.
+Bản vá 03 chỉ được bắt đầu ở giai đoạn 7.

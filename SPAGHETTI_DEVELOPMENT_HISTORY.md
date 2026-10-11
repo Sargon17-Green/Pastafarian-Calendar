@@ -131,3 +131,10 @@ kiểm thử bảo vệ về đường chạy thực, tính đối xứng, số 
 đầu vào sai, tính độc lập song song và hồi quy các lớp vá đã hoàn tất.
 Không thay đổi bất kỳ hồi quy chuẩn nào thuộc giai đoạn cũ.
 Bản vá 03 không được phép xuất hiện trước giai đoạn 7.
+
+**Kiểm chứng phát hiện thực tế:** GitHub Actions chạy 55 kiểm thử;
+đúng bốn hồi quy thuộc phát hiện 03 thất bại: 0/1 khi cùng ngày,
+4/3 ở mỗi phía Ngày Nền, 1/3 khi băng qua Ngày Nền.
+51 kiểm thử còn lại đạt, bao gồm toàn bộ 45 kiểm thử trước đó.
+Khóa tên chuẩn đạt độc lập. Giai đoạn 6 đóng ở EXPECTED_RED,
+không thêm lớp sửa của giai đoạn 7.
