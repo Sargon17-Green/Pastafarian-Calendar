@@ -258,14 +258,22 @@ object Stage07Tests {
     check("metadati PATCH 03 verdi e ordine dei certificati") {
       val stage=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(stage.contains("CURRENT_STAGE=7"),"Stadio")
-      truth(stage.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(stage.contains("CURRENT_PATCH=03"),"Patch")
-      truth(stage.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"Stato")
+      val currentStage = stage.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt)
+        .getOrElse(throw new IllegalStateException("CURRENT_STAGE assente"))
+      truth(currentStage >= 7,"PATCH 03 deve esistere dagli stadi successivi")
+      if (currentStage == 7) {
+        truth(stage.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(stage.contains("CURRENT_PATCH=03"),"Patch")
+        truth(stage.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"Stato")
+      } else {
+        truth(stage.contains("STAGE_07_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_20_PASS_0_FAIL"),
+          "Certificazione storica della PATCH 03 conservata")
+      }
       val last=stage.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt)
         .getOrElse(throw new IllegalStateException("Ultimo stadio non dichiarato"))
-      truth(last==6||last==7,"Nessun completamento anticipato")
+      truth(last >= 6 && last <= currentStage,"Ordine di completamento preservato")
     }
 
     println("\nRISULTATO STADIO 7: "+passed+" PASS, "+failed+" FAIL")
