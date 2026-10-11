@@ -24,3 +24,17 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+
+  native-stage01:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Run Stage 1 Scala tests
+        run: sbt -batch 'Test / runMain pastafari.Stage01Tests'
