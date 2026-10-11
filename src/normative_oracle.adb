@@ -830,13 +830,13 @@ package body Normative_Oracle is
    end Find_Target_Year;
 
    type Cutlet_Key is record
-      Rem, Slots, Cumulative : Natural;
+      Remaining, Slots, Cumulative : Natural;
       Hit : Boolean;
    end record;
 
    function "<" (A, C : Cutlet_Key) return Boolean is
    begin
-      if A.Rem /= C.Rem then return A.Rem < C.Rem; end if;
+      if A.Remaining /= C.Remaining then return A.Remaining < C.Remaining; end if;
       if A.Slots /= C.Slots then return A.Slots < C.Slots; end if;
       if A.Cumulative /= C.Cumulative then return A.Cumulative < C.Cumulative; end if;
       return (not A.Hit) and C.Hit;
@@ -859,20 +859,20 @@ package body Normative_Oracle is
       Memo : Cutlet_Memo_Maps.Map;
 
       function Count
-        (Rem, Slots, Cumulative : Natural; Hit : Boolean) return Big_Integer
+        (Remaining, Slots, Cumulative : Natural; Hit : Boolean) return Big_Integer
       is
-         Key : constant Cutlet_Key := (Rem, Slots, Cumulative, Hit);
+         Key : constant Cutlet_Key := (Remaining, Slots, Cumulative, Hit);
          Total : Big_Integer := B (0);
       begin
          if Slots = 0 then
-            if Rem /= 0 then return B (0); end if;
+            if Remaining /= 0 then return B (0); end if;
             if Required = 0 or else Hit then return B (1); end if;
             return B (0);
          end if;
-         if Rem < Slots then return B (0); end if;
+         if Remaining < Slots then return B (0); end if;
          if Memo.Contains (Key) then return Memo.Element (Key); end if;
 
-         for X in 1 .. Rem - (Slots - 1) loop
+         for X in 1 .. Remaining - (Slots - 1) loop
             declare
                Next_Cumulative : constant Natural := Cumulative + X;
                Next_Hit : Boolean := Hit;
@@ -884,7 +884,7 @@ package body Normative_Oracle is
                      goto Skip_X;
                   end if;
                end if;
-               Total := Total + Count (Rem - X, Slots - 1, Next_Cumulative, Next_Hit);
+               Total := Total + Count (Remaining - X, Slots - 1, Next_Cumulative, Next_Hit);
                <<Skip_X>>
                null;
             end;
@@ -897,7 +897,7 @@ package body Normative_Oracle is
       Stream : Answer_Stream;
       Rank : Big_Integer;
       Result : Natural_Array (1 .. K);
-      Rem : Natural := Gaps;
+      Remaining : Natural := Gaps;
       Slots : Natural := K;
       Cumulative : Natural := 0;
       Hit : Boolean := False;
@@ -910,7 +910,7 @@ package body Normative_Oracle is
       Rank := Choose_Rank (Stream, Count_All);
 
       for Position in 1 .. K loop
-         for X in 1 .. Rem - (Slots - 1) loop
+         for X in 1 .. Remaining - (Slots - 1) loop
             declare
                Next_Cumulative : constant Natural := Cumulative + X;
                Next_Hit : Boolean := Hit;
@@ -923,12 +923,12 @@ package body Normative_Oracle is
                      goto Skip_Unrank_X;
                   end if;
                end if;
-               Block := Count (Rem - X, Slots - 1, Next_Cumulative, Next_Hit);
+               Block := Count (Remaining - X, Slots - 1, Next_Cumulative, Next_Hit);
                if Rank > Block then
                   Rank := Rank - Block;
                else
                   Result (Position) := X;
-                  Rem := Rem - X;
+                  Remaining := Remaining - X;
                   Slots := Slots - 1;
                   Cumulative := Next_Cumulative;
                   Hit := Next_Hit;
@@ -978,11 +978,11 @@ package body Normative_Oracle is
    end Unrank_Distinct;
 
    type Bounded_Key is record
-      Rem, Slots : Natural;
+      Remaining, Slots : Natural;
    end record;
    function "<" (A, C : Bounded_Key) return Boolean is
    begin
-      return A.Rem < C.Rem or else (A.Rem = C.Rem and then A.Slots < C.Slots);
+      return A.Remaining < C.Remaining or else (A.Remaining = C.Remaining and then A.Slots < C.Slots);
    end "<";
    package Bounded_Memo_Maps is new Ada.Containers.Ordered_Maps
      (Key_Type => Bounded_Key, Element_Type => Big_Integer);
@@ -993,18 +993,18 @@ package body Normative_Oracle is
       Lengths : out Natural_Array)
    is
       Memo : Bounded_Memo_Maps.Map;
-      function Count (Rem, K : Natural) return Big_Integer is
-         Key : constant Bounded_Key := (Rem, K);
+      function Count (Remaining, K : Natural) return Big_Integer is
+         Key : constant Bounded_Key := (Remaining, K);
          Sum : Big_Integer := B (0);
       begin
          if K = 0 then
-            return (if Rem = 0 then B (1) else B (0));
+            return (if Remaining = 0 then B (1) else B (0));
          end if;
-         if Rem < K * 4 or else Rem > K * 123 then return B (0); end if;
+         if Remaining < K * 4 or else Remaining > K * 123 then return B (0); end if;
          if Memo.Contains (Key) then return Memo.Element (Key); end if;
          for X in 4 .. 123 loop
-            if X <= Rem then
-               Sum := Sum + Count (Rem - X, K - 1);
+            if X <= Remaining then
+               Sum := Sum + Count (Remaining - X, K - 1);
             end if;
          end loop;
          Memo.Insert (Key, Sum);
@@ -1013,20 +1013,20 @@ package body Normative_Oracle is
 
       Rank : Big_Integer := Choose_Rank
         (Ask_Bowl (Structure_R, 3, Seal_Month_Lengths), Count (Total, Slots));
-      Rem : Natural := Total;
+      Remaining : Natural := Total;
       K : Natural := Slots;
    begin
       for Position in Lengths'Range loop
          for X in 4 .. 123 loop
-            if X <= Rem then
+            if X <= Remaining then
                declare
-                  Block : constant Big_Integer := Count (Rem - X, K - 1);
+                  Block : constant Big_Integer := Count (Remaining - X, K - 1);
                begin
                   if Rank > Block then
                      Rank := Rank - Block;
                   else
                      Lengths (Position) := X;
-                     Rem := Rem - X;
+                     Remaining := Remaining - X;
                      K := K - 1;
                      exit;
                   end if;
