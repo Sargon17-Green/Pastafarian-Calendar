@@ -669,8 +669,8 @@ jobs:
           set -e
           cat stage28.log
           test "$rc" -ne 0
-          grep -Fq 'RISULTATO STADIO 28: 39 PASS, 3 FAIL' stage28.log
-          test "$(grep -Fc 'PASS — ' stage28.log)" -eq 39
+          grep -Fq 'RISULTATO STADIO 28: 41 PASS, 3 FAIL' stage28.log
+          test "$(grep -Fc 'PASS — ' stage28.log)" -eq 41
           test "$(grep -Fc 'FAIL — ' stage28.log)" -eq 3
           for rank in 2147483648 4294967296 18446744073709551617; do
             grep -Fq "FAIL — equivalenza normativa lista virtuale rango ${rank} — Troncamento Int cambia il candidato: rango ${rank}" stage28.log

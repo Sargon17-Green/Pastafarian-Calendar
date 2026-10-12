@@ -1113,5 +1113,5 @@ né avvia la PATCH 14.
 
 Comando nativo: `sbt -batch 'Test / runMain pastafari.Stage28Tests'`.
 
-Firma prevista: 39 PASS e 3 FAIL intenzionali; tutti i job
+Firma prevista: 41 PASS e 3 FAIL intenzionali; tutti i job
 storici rimangono necessari per certificare il nuovo commit.
