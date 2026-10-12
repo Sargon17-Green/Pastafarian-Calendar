@@ -505,3 +505,13 @@ pase syntax, scope, tout suite pozitif, injection, reentrance ak odit,
 men li bay sèl echèk normatif istorik la nan dènye step la. Sa
 pwouve 3 gout yo toujou vide sou bòl 1,2,3 olye order permutation.
 Nou make LAST_COMPLETED_STAGE=18. Pa gen okenn PATCH 09.
+
+## Stage 19 — PATCH 09: koreksyon id bòl yo
+
+Kòd `legacy_fixed_pours.lua` rete san chanjman. Nan nouvo kouch la,
+nou rele chemen legacy a an premye, verifye tras ak lòd PATCH 08 la,
+apre sa vide nan bòl `order[1]`, `order[2]`, `order[3]`.
+Yon nouvo handler `BOWL_ORDER_POUR_PATCH` komèt eta koreksyon an
+san detwi prèv id fizik 1, 2, 3. Chemen piblik premye gout la
+fè koreksyon sa a, tandiske probe istorik la rete disponib.
+Pa gen melanj bòl oswa operasyon etap pita.

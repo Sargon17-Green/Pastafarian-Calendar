@@ -28,6 +28,6 @@ for p=1,3 do
     if B.compare(fixed[p],correct)~=0 then mismatches=mismatches+1 end
 end
 assert(mismatches==3,"Premye gout fondasyon an pa montre twa defo yo")
-local public=S.openingPoursSpaghetti(c,t)
-for p=1,3 do assert(B.compare(fixed[p],public[p])==0) end
+local repeated=S.openingPoursProbe(c,t)
+for p=1,3 do assert(B.compare(fixed[p],repeated[p])==0) end
 print("PASS entegrasyon Stage 18: gout vizib reyèl i=1, 11 grind, 3 vide kòripsyon")

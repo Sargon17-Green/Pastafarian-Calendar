@@ -602,3 +602,18 @@ te pase: 48 bòl inisyal, 3 gout vizib premye yo, 16 piki erè ak
 16 rekiperasyon, 8 apèl nested. Mesaj erè egzak la rete:
 `EXPECTED_RED Stage 18 DISCOVERY 09: 3 gout, vide id fiks kont lòd korije`.
 Etap 18 fini kòm EXPECTED_RED; Stage 19 pa kòmanse.
+
+## Stage 19 — PATCH 09: vide dapre lòd sis bòl yo
+
+`src/pour_patch.lua` rele `LegacyFixedPours.execute` **an premye**,
+san modifye `src/legacy_fixed_pours.lua`. Li itilize id bòl nan
+twa premye pozisyon lòd PATCH 08 la epi li rekalkile twa vide yo ak
+`Save.savePatch`, men li kite resi istorik yo ak de handler, de commit,
+métrik ak dyagnostik apa nan menm kontèks la. Nou pa brase okenn bòl.
+
+`fixedBowlPoursSpaghetti` ak `openingPoursSpaghetti` pase sou
+koreksyon an; `legacyFixedBowlPoursProbe` ak `openingPoursProbe`
+toujou montre erè istorik Stage 18. Tès Stage 18 la kontinye pwouve
+`EXPECTED_RED` sou chemen sa a; nan CI li pase atravè odit ki
+egzije mesaj istorik egzak la. Stage 19 mande tès natif konplè
+anvan LAST_COMPLETED_STAGE vin 19.
