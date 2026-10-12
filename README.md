@@ -302,3 +302,38 @@ regresyon an, apre tout tès Stage 1–11 ak odit Stage 12 yo fin pase.
 
 **Pa mete PATCH 06 nan Stage 12.** Li rezève pou Stage 13: si slot >= 1,
 rele legacy; sinon k=1-slot epi li gout hidden k nan kouch PATCH 05 la.
+
+## Stage 13 — PATCH 06: history jwenn gout kache yo san efase legacy a
+
+Nou kenbe `src/legacy_prior.lua` orijinal la byte-pou-byte: fonksyon
+`LegacyPrior.legacyPrior(dropStore,i,back)` la toujou li sèlman
+`dropStore[i-back]`. Nan nouvo `src/prior_patch.lua`, wout prodiksyon an
+premye fè yon **apèl reyèl** nan `LegacyPrior.execute`, ki li history
+ansyen an epi ki deja rele `HIDDEN_PATCH` pou sèt gout yo. Lè sa a, nou
+ajoute handler `PRIOR_PATCH` sou **menm kontèks** la ak yon dezyèm commit.
+
+Pou `slot=i-back >= 1`, patch la rele fonksyon legacy a toutbon epi li
+kenbe valè vizib la. Pou `slot <= 0`, patch la kalkile `hiddenK=1-slot`,
+li rekonstwi sèt plas **fizik** yo nan eta `nestedHiddenContext` ki te
+sòti nan premye apèl la, epi li rele
+`HiddenPatch.hiddenByNearness(physical, hiddenK)`. Sa sèvi ak koreksyon
+`8-k` ki te deja egziste nan Stage 11; pa gen envèsyon tab fizik la,
+pa gen doub oracle oswa rekalkil pa yon lòt lang, epi pa gen chanjman
+nan kòd istorik la.
+
+`priorSpaghetti` kounye a sèvi ak `PRIOR_PATCH`; `priorPatchProbe`
+retounen repons lan ansanm ak kontèks pou de handler yo. Ansyen
+`legacyPriorProbe` la rete pou teste sèt mank history orijinal yo.
+`stage12_legacy_regression_tests.lua` toujou bay sèt pozisyon manke,
+men `stage12_regression_tests.lua` vin **GREEN**: li konpare tout sèt
+pozisyon yo ak oracle test-only la. Odit EXPECTED_RED la toujou egzije
+menm mesaj istorik la sou **chemen legacy apa** a.
+
+Tès Stage 13 yo egzamine 1,344 lekti nan 24 koup jou (672 hidden ak
+672 vizib), gwo antye >256 bit, modifikasyon done nan yon kontèks,
+plas ki manke, validasyon, de commit ak 22 echèk izole ki gen
+15 rekiperasyon. Tès sa yo pase lokalman avèk doublon depandans;
+`lua5.3 test/stage13_tests.lua .` nan GitHub Actions dwe pase tout
+etap 1 rive 13 sou runtime Lua natif la.
+
+**Pa kòmanse Stage 14 la.** Okenn tab grind sentinel pa antre nan branch sa a.

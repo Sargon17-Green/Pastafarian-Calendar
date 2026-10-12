@@ -1,7 +1,7 @@
 local root = arg[1] or "."
 local previous = arg
 arg = {root}
-local chunk = assert(loadfile(root .. "/test/stage12_regression_tests.lua"))
+local chunk = assert(loadfile(root .. "/test/stage12_legacy_regression_tests.lua"))
 local ok, message = pcall(chunk)
 arg = previous
 assert(not ok,"DISCOVERY 06 pa montre erè history a")

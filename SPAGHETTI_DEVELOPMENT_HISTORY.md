@@ -276,3 +276,34 @@ erè `EXPECTED_RED Stage 12 DISCOVERY 06` nan regresyon nouvo a.
 Menas ki ta chanje fonksyon legacy a oswa ki ta ranje hidden yo twò bonè
 fè tès scope ak trace yo echwe. Tout etap 1–11 dwe rete vèt.
 Stage 13 sèlman ap mete mapping `hiddenK=1-slot` pou history.
+
+## Stage 13 — PATCH 06: sèt plas history kache yo te jwenn
+
+### Pwoblèm nou jwenn nan Stage 12
+
+Ansyen `legacyPrior` la te kontinye gade nan yon sèl depo gout vizib,
+`dropStore[i-back]`. Pou `i=1`, sèt valè back yo mande slot 0,-1,...,-6;
+rezilta legacy yo se `nil`, menm si Stage 11 te deja kalkile tout hidden yo.
+Nou **pa efase oswa repare** fonksyon legacy sa a.
+
+### Koreksyon an kòm yon lòt kouch moun ka swiv
+
+Nou ajoute `priorPatch` apre apèl orijinal la ak yon nouvo handler
+`PRIOR_PATCH` sou menm kontèks tranzyonèl la. Pou slot pozitif,
+fonksyon legacy a sèvi kòm sous la; pou slot ki pa pozitif,
+`hiddenK=1-slot`, epi `hiddenByNearness` tradui nan plas fizik `8-hiddenK`.
+Premye kalkil hidden la deja nan `nestedHiddenContext` orijinal la:
+nou pran sèt fisèl `physical1..physical7` li te anrejistre epi nou
+konvèti yo an BigInt posede, san rekalkile ni ranvèse tablo a.
+
+De tras, de commit, de dyagnostik ak metrik history ki ansyen/koreksyon
+rete vizib. Lè history a mande yon plas vizib ki pa egziste,
+rezilta a toujou `nil`, pa yon BigInt fo. Lè yon lòt invocation kòmanse,
+li pa resevwa eta kontèks anvan an.
+
+### Verifikasyon ak delè istorik la
+
+Nou kenbe regresyon wouj Stage 12 la kòm yon prèv legacy separe ki
+egzije egzakteman sèt plas ki manke yo. Regresyon pwodiksyon an ak
+tès 24 koup jou yo vin vèt; yon suite nouvo ajoute 22 erè piki.
+`GRIND_TABLE_WITH_SENTINEL` ak tout etap Stage 14 yo poko antre.
