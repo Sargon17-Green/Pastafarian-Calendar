@@ -313,7 +313,11 @@ object Stage24Tests {
       else
         truth(source.contains("LegacyYearCeilingAdapter.legacyYearMax(gaps)"),
           "Il wrapper deve attraversare davvero il legacy")
-      truth(!source.contains("oldJumpGuess"),"Stadio futuro anticipato")
+      if(currentStage<26)
+        truth(!source.contains("oldJumpGuess"),"Stadio futuro anticipato")
+      else
+        truth(source.contains("LegacyYearJumpAdapter.oldJumpGuess("),
+          "La cicatrice della navigazione deve esistere")
     }
     check("metadati Stage24 RED preservano Stage23 GREEN") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),

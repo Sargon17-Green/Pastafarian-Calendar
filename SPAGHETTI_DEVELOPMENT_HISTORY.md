@@ -1296,3 +1296,43 @@ senza mutare il vecchio giudizio 5777.
 Lo Stage24 rimane RED esattamente con tre
 divergenze intenzionali e nessun'altra
 regressione; il catalogo resta bloccato.
+
+## Stadio 26 — DISCOVERY 13: un salto lungo quanto l'anno massimo
+
+### Che cosa si pensava
+
+Un anno poteva essere raggiunto a partire
+dall'ancora moltiplicando il numero di anni
+per la durata massima nota, 5778 giorni.
+
+### Che cosa si è scoperto
+
+Il limite massimo non è una durata costante:
+una successione di anni validi può durare
+600, 700, 800 giorni e così via. Un salto
+calcolato senza visitare i veri confini
+attribuisce a un anno il giorno di un altro,
+sia verso il futuro sia verso il passato.
+
+### Che cosa è stato aggirato
+
+Nulla nella discovery: `oldJumpGuess`
+continua a usare l'ampiezza fissa. Le
+finestre diagnostiche sono sintetiche e
+non sostituiscono il procedimento canonico
+dell'anno 5000.
+
+### Perché non è normativamente equivalente
+
+Gli intervalli `(open,close]` devono essere
+costruiti sommando le durate effettive;
+tre target su porte diverse mostrano
+offset errati. Anni di lunghezza esattamente
+5778 restano un controllo positivo.
+
+### Strato di mostruosità aggiunto
+
+Helper storico, report, handler, stato
+per invocazione, validator indipendente,
+metrica e suite con prove BigInt.
+La PATCH 13 non è anticipata.

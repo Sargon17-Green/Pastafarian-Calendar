@@ -449,3 +449,23 @@ decisioni, verifica la traccia
 BOOT/DISCOVERY/PATCH e rifiuta manipolazioni
 del risultato. Nessun oracle test-only entra
 nel codice di produzione.
+
+## DISCOVERY 13 — il salto approssimato tra anni
+
+La ricerca canonica avanza dall'anno 5000 secondo
+i cancelli selezionati e percorre i confini
+contigui `(open, close]`. Il vecchio percorso
+`LegacyYearJumpAdapter.oldJumpGuess` stima invece
+la posizione usando la divisione del numero di
+giorni per **5778**, il solo limite superiore
+(normativo) della durata di un anno. Il quoziente
+negativo è arrotondato verso meno infinito, dunque
+il difetto non nasce dal segno di BigInt ma
+dall'assunzione di durate fisse.
+
+Il validator ricostruisce la stima con un algoritmo
+indipendente, verifica le durate sintetiche, il
+bootstrap, la traccia e la pubblicazione dei confini.
+La ricerca sequenziale della norma appare soltanto
+nei test e non corregge il codice legacy di questa
+DISCOVERY.

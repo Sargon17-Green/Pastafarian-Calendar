@@ -88,7 +88,13 @@ final case class BaseMonsterContext(
   var legacyYearMaxOutput: Option[Int] = None,
   var patchedYearAcceptedOutput: Option[Boolean] = None,
   var patchedYearMaxOutput: Option[Int] = None,
-  var patch12Applied: Boolean = false
+  var patch12Applied: Boolean = false,
+  var jumpAnchorOpenDay: Option[BigInt] = None,
+  var jumpBeforeLengths: Option[Vector[Int]] = None,
+  var jumpFromAnchorLengths: Option[Vector[Int]] = None,
+  var legacyJumpOffset: Option[BigInt] = None,
+  var legacyJumpOpenDay: Option[BigInt] = None,
+  var legacyJumpCloseDay: Option[BigInt] = None
 )
 
 final class BaseMetricsShell {
@@ -111,6 +117,49 @@ final class BaseValidationManager {
     }
   }
 
+
+  def requireDiscovery13Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_13_YEAR_JUMP" ||
+        ctx.status != "LEGACY_YEAR_JUMP_READY" ||
+        ctx.branchTrace.toVector != Vector("BOOT","DISCOVERY_13_YEAR_JUMP") ||
+        ctx.jumpAnchorOpenDay.isEmpty ||
+        ctx.jumpBeforeLengths.isEmpty ||
+        ctx.jumpFromAnchorLengths.isEmpty ||
+        ctx.legacyJumpOffset.isEmpty ||
+        ctx.legacyJumpOpenDay.isEmpty ||
+        ctx.legacyJumpCloseDay.isEmpty) {
+      throw new IllegalStateException(
+        "DISCOVERY 13 richiede un salto storico completo.")
+    }
+    val before=ctx.jumpBeforeLengths.get
+    val after=ctx.jumpFromAnchorLengths.get
+    if (before.isEmpty || after.isEmpty ||
+        (before++after).exists(x=>x<252 || x>5778)) {
+      throw new IllegalStateException("Durate degli anni fuori dal dominio.")
+    }
+    val anchor=ctx.jumpAnchorOpenDay.get
+    val guessedOffset=ctx.legacyJumpOffset.get
+    val guessedOpen=ctx.legacyJumpOpenDay.get
+    val guessedClose=ctx.legacyJumpCloseDay.get
+    // Prova indipendente della divisione matematica verso meno infinito.
+    val relative=ctx.targetDay-anchor-BigInt(1)
+    val width=BigInt(5778)
+    val quotient=relative/width
+    val remainder=relative%width
+    val expectedOffset=if(relative<0 && remainder!=0)quotient-1 else quotient
+    if (guessedOffset!=expectedOffset ||
+        guessedOpen!=anchor+width*expectedOffset ||
+        guessedClose!=guessedOpen+width) {
+      throw new IllegalStateException("Il salto storico è stato falsificato.")
+    }
+    val original=LegacyYearJumpAdapter.oldJumpGuess(
+      anchor,before,after,ctx.targetDay)
+    if (original.guessedOffset!=guessedOffset ||
+        original.guessedOpenDay!=guessedOpen ||
+        original.guessedCloseDay!=guessedClose) {
+      throw new IllegalStateException("La cicatrice storica non è riproducibile.")
+    }
+  }
 
   def requirePatch12Ready(ctx: BaseMonsterContext): Unit = {
     if (ctx.phase != "PATCH_12_YEAR_CEILING" ||
@@ -869,7 +918,8 @@ final class BaseMonsterManager {
     new Discovery11BiasedPickHandler(metrics),
     new Patch11ShortPickHandler(metrics),
     new Discovery12YearCeilingHandler(metrics),
-    new Patch12YearCeilingHandler(metrics)
+    new Patch12YearCeilingHandler(metrics),
+    new Discovery13YearJumpHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1482,6 +1532,31 @@ final class BaseMonsterManager {
       )
     } catch {
       case err: Throwable => throw BaseErrorWrapper.wrap("patch12",err)
+    }
+  }
+
+  def discover13YearJump(
+    calculationDay: BigInt, targetDay: BigInt,
+    anchorOpenDay: BigInt,
+    yearsBefore: Vector[Int], yearsFromAnchor: Vector[Int]
+  ): Discovery13YearJumpReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.jumpAnchorOpenDay=Some(anchorOpenDay)
+    ctx.jumpBeforeLengths=Some(yearsBefore)
+    ctx.jumpFromAnchorLengths=Some(yearsFromAnchor)
+    ctx.phase="DISCOVERY_13_YEAR_JUMP"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery13Ready(ctx)
+      Discovery13YearJumpReport(
+        ctx.calculationDay,ctx.targetDay,ctx.jumpAnchorOpenDay.get,
+        ctx.jumpBeforeLengths.get,ctx.jumpFromAnchorLengths.get,
+        ctx.legacyJumpOffset.get,ctx.legacyJumpOpenDay.get,
+        ctx.legacyJumpCloseDay.get,ctx.phase,ctx.status,
+        ctx.branchTrace.toVector
+      )
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("discovery13",error)
     }
   }
 

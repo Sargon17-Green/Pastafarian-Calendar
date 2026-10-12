@@ -1025,3 +1025,32 @@ Stage01–Stage23 rimangono invariate.
 La cicatrice dell'anno 5777 è riproducibile,
 ma il giudizio normativo include 5778.
 Non è stata anticipata DISCOVERY 13.
+
+## Stadio 26 — DISCOVERY 13: il salto annuale prende una scorciatoia
+
+`LegacyYearJumpAdapter.oldJumpGuess` riproduce un difetto
+storico del percorso di ricerca annuale: calcola l'anno
+ipotizzando blocchi consecutivi sempre di **5778 giorni**,
+senza attraversare gli anni di lunghezza variabile.
+Il contratto canonico, invece, sposta l'anno 5000
+attraverso i successivi anni determinati dai veri
+cancelli, con intervalli `(open, close]`.
+
+Per non anticipare la PATCH 13, l'adapter opera su
+una finestra **sintetica** di durate annuali valide
+(252–5778 giorni), e conserva sia la finestra
+sia l'offset/inizio/fine inventati dal salto.
+La produzione non utilizza l'oracolo del calendario.
+`BaseMonsterManager.discover13YearJump` espone la
+cicatrice dopo `BOOT → DISCOVERY_13_YEAR_JUMP`.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage26Tests'
+```
+
+Firma RED attesa: **38 PASS / 3 FAIL**
+intenzionali in avanti, indietro e sul confine di
+un cancello sintetico. La suite confronta la ricerca
+corretta sequenziale test-only, date assolute BigInt,
+2.048 vettori deterministici, 1.024 offset e tutte
+le dodici patch storiche. Nessuna PATCH 13 anticipata.

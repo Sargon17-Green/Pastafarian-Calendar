@@ -358,20 +358,35 @@ object Stage25Tests {
       truth(source.contains("LegacyYearCeilingAdapter.legacyYearMax(gaps)"),
         "Wrapper attraversa cicatrice")
       truth(source.contains("val canonicalMaximum=5778"),"Valore canonico")
-      truth(!source.contains("oldJumpGuess"),"Stage26 anticipato")
+      val state=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<26)
+        truth(!source.contains("oldJumpGuess"),"Stage26 anticipato")
+      else
+        truth(source.contains("LegacyYearJumpAdapter.oldJumpGuess("),
+          "La cicatrice di navigazione deve essere disponibile")
     }
     check("metadati dello Stage25 GREEN conservano Stage24 RED") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=25"),"Stadio")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=12"),"Patch")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=25,"Stage25 certificato")
+      if(current==25) {
+        truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=12"),"Patch")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      } else {
+        truth(st.contains("STAGE_25_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_42_PASS_0_FAIL"),
+          "Certificazione Stage25 preservata")
+      }
       truth(st.contains("STAGE_24_NATIVE_VERIFICATION=PASS_EXPECTED_RED_33_PASS_3_FAIL"),
         "Firma storica Stage24")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed>=24 && completed<=25,"Ordine certificazioni")
+      truth(completed>=24 && completed<=current,"Ordine certificazioni")
     }
     println("\nRISULTATO STADIO 25: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)
