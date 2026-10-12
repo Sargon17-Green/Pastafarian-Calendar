@@ -692,3 +692,19 @@ Commit cuối áp dụng sáu giá trị đồng thời. Quy nạp
 qua 46 giọt cho sáu bát đúng, không sửa lỗi từ các
 giai đoạn khác. Giữ nguyên hồi quy cũ, thêm 14 bài.
 Chưa bắt đầu DISCOVERY 11.
+
+**Kiểm chứng Stage21:** CI 253 kiểm thử, tất cả xanh,
+0 cảnh báo, khóa tên chuẩn PASS. Bốn hồi quy Stage20,
+sáu hồi quy Stage18 và bốn hồi quy Stage19 đều xanh
+với khẳng định oracle cũ không đổi. 14 kiểm thử Stage21
+mới đạt. Lần đầu có warning unused alias trong kiểm thử
+kiểm soát; đã dùng alias trong kiểm tra vault trực tiếp,
+không cần đổi production và chạy lại CI 0 warning.
+
+`LegacyInPlaceStir` giữ nguyên blob SHA
+`49554b37e329adb05e4f2ee77b8f51a69e944d4b`.
+Oracle test-only giữ nguyên blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Bản vá dùng cùng vaultOld cho sáu kết quả pending,
+chỉ sau đó áp dụng Map.merge. Kết thúc Stage21 GREEN,
+chưa mở Stage22.

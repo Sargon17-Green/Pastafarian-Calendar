@@ -76,3 +76,26 @@ sau đó gọi `BowlVaultPatch.run`; đường 46 giọt, SAVE,
 ## Tên commit
 
 Giai đoạn 21: giữ vaultOld và commit sáu bát cùng lúc
+
+## Kết quả CI và bằng chứng đã xác minh
+
+- Commit triển khai: `f6e69f22f2f36f9dc77cc0fa326e88c517215d11`.
+- Commit kiểm thử bỏ cảnh báo:
+  `c64cf74b1276d113fa62b073c0ec01300c5f5487`.
+- Elixir 1.18.5 / Erlang OTP 27; 36 tệp .ex được biên dịch.
+- 253 kiểm thử, 0 thất bại, 0 cảnh báo (CI sau commit kiểm thử).
+- Bốn hồi quy chuẩn Stage20, sáu Stage18 và bốn Stage19
+  đều đạt mà không thay biểu thức assert của oracle.
+- 14 bài Stage21 mới đạt, 720 hoán vị được đối chiếu.
+- Khóa tên chuẩn độc lập PASS.
+- LegacyInPlaceStir giữ nguyên blob SHA
+  `49554b37e329adb05e4f2ee77b8f51a69e944d4b`.
+- Oracle giữ nguyên blob SHA
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- Không sửa main, không mở Stage22, không khuấy 12 lượt sau 46 giọt.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38254477457
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38254477452
+
+Trạng thái cuối Stage21: GREEN đã được xác minh.
+Giai đoạn tiếp theo: 22/55 DISCOVERY 11.

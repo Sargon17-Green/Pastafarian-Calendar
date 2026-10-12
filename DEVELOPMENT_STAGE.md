@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=21
 CURRENT_KIND=PATCH
 CURRENT_PATCH=10
-LAST_COMPLETED_STAGE=20
+LAST_COMPLETED_STAGE=21
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyInPlaceStir.run ghi đè tuần tự; BowlVaultPatch sử dụng LegacyInPlaceStir.compute_one với một vault_old cố định và tích lũy sáu kết quả vào pending, Map.merge một lần sau cùng. Giữ PATCH 01..09.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_21_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_21_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_21_PENDING
-CI_FAILURES=STAGE_21_PENDING
+CI_TESTS=253
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -406,5 +406,26 @@ Mười hồi quy chuẩn Stage18-19 giữ nguyên assert,
 đều phải trở lại xanh. Mười hai điều khiển Stage20 tiếp tục
 chứng minh legacy sai nếu gọi trực tiếp, production đã sửa.
 Thêm 14 kiểm thử Stage21, tổng dự kiến 253 kiểm thử GREEN.
-LAST_COMPLETED_STAGE giữ 20 trước khi CI được xác minh.
+LAST_COMPLETED_STAGE đã nâng lên 21 sau khi CI và khóa tên PASS.
 Không mở giai đoạn 22 hay phần khuấy sau 46 giọt.
+
+Giai đoạn 21 được xác minh trên Elixir 1.18.5 / Erlang OTP 27:
+253 kiểm thử, 0 thất bại, 0 cảnh báo.
+14 hồi quy chuẩn đã đỏ ở DISCOVERY 10 (4 Stage20,
+6 Stage18, 4 Stage19) đều xanh mà không sửa kỳ vọng.
+14 bài kiểm thử Stage21 mới PASS. Kiểm toán 720 hoán vị,
+46 giọt, đại số số nguyên 2048 bit, chạy song song,
+quyền sở hữu snapshot và đường legacy trực tiếp đều đạt.
+Lần CI đầu đạt 253/253 nhưng có một warning unused alias
+BowlVaultPatch trong test Stage20; commit kiểm thử sau đó
+dùng alias để đối chiếu trực tiếp module vault với oracle,
+CI chạy lại 253/253 và 0 warning. Không sửa mã sản xuất.
+LegacyInPlaceStir vẫn giữ nguyên blob SHA
+49554b37e329adb05e4f2ee77b8f51a69e944d4b.
+Oracle test-only vẫn giữ nguyên blob SHA
+be1638f46b2190d617af0378a61b077bda10bf32.
+Khóa tên chuẩn PASS độc lập.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38254477457
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38254477452
+Giai đoạn 21 đóng GREEN; tiếp theo giai đoạn 22 DISCOVERY 11,
+chưa bắt đầu.

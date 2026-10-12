@@ -770,3 +770,29 @@ Stage18-19 được giữ nguyên để chứng minh sửa tận gốc.
 Bổ sung 14 bài kiểm thử về 720 hoán vị sáu bát,
 tính đồng thời, số nguyên rất lớn, giới hạn và bất biến
 snapshot; chưa tích hợp 12 lần khuấy cuối và lịch.
+
+## Kiểm chứng đóng giai đoạn 21
+
+CI Elixir 1.18.5 / OTP 27 xác nhận **253 kiểm thử,
+0 thất bại và 0 cảnh báo**, khóa tên chuẩn độc lập PASS.
+14 hồi quy chuẩn đã đỏ trong phát hiện 10 trở lại đạt,
+không thay kỳ vọng. 14 bài kiểm thử Stage21 mới đều PASS,
+bao gồm đủ 720 hoán vị và các thời điểm có số nguyên lớn.
+
+Module `LegacyInPlaceStir` và oracle test-only không đổi.
+Lời gọi trực tiếp `LegacyInPlaceStir.run` vẫn tái hiện lỗi
+lịch sử; đường production dùng `BowlVaultPatch.run`,
+tính sáu `LegacyInPlaceStir.compute_one(vault_old,...)`
+trên một nguồn và commit kết quả `pending` sau cùng.
+
+Trong lần kiểm đầu phát sinh warning unused alias trong
+kiểm thử kiểm soát Stage20; một commit kiểm thử riêng đã
+thêm khẳng định trực tiếp với alias đó. CI chạy lại
+không cảnh báo, không sửa production.
+
+- [CI Stage21 253/253](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38254477457)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38254477452)
+
+Giai đoạn 21/55 kết thúc `GREEN`. Tiếp theo giai đoạn
+22/55 `DISCOVERY 11`; chưa tích hợp 12 lần khuấy sau
+46 giọt hoặc tính lịch hoàn chỉnh.
