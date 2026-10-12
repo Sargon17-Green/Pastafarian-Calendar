@@ -77,7 +77,7 @@ check(localWork.join(",")===first.legacyBowls.join(",")&&
   b.every((v,j)=>v===[101n,211n,307n,401n,503n,601n][j]),
   "legacy method really mutates provided array, not user-owned input");
 const original=LegacyInPlaceBowlStirAdapter.prototype.stirInPlace;
-const calls:bigint[][]=[];
+const calls:(readonly bigint[])[]=[];
 try{
  LegacyInPlaceBowlStirAdapter.prototype.stirInPlace=function(...args){
    calls.push(args[6]);
