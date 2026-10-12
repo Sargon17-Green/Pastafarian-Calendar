@@ -109,8 +109,8 @@ object Stage34Tests {
       eqv(legacy(3,48).legacyCanonicalNameIndices,
         Vector(1,2,1),"Riporto")
     }
-    check("il rango 2209 porta un riporto nella prima posizione"){
-      eqv(legacy(3,2209).legacyCanonicalNameIndices,
+    check("il rango 2210 porta un riporto nella prima posizione"){
+      eqv(legacy(3,2210).legacyCanonicalNameIndices,
         Vector(2,1,1),"Riporto superiore")
     }
     check("spazio con rimpiazzo per tre mesi e' 47^3"){
