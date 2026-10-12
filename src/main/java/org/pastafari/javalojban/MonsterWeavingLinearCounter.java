@@ -406,6 +406,7 @@ public final class MonsterWeavingLinearCounter {
     private long siblingPrefixDotNanos;
     private long siblingPrefixDotCalls;
     private long siblingPrefixMonthTransitions;
+    private long siblingPrefixClosedFormTransitions;
 
     long tailFunctionalReuseHitCount() {
         synchronized (tailFunctionalLock) {
@@ -440,6 +441,12 @@ public final class MonsterWeavingLinearCounter {
     long siblingPrefixMonthTransitionCount() {
         synchronized (tailFunctionalLock) {
             return siblingPrefixMonthTransitions;
+        }
+    }
+
+    long siblingPrefixClosedFormTransitionCount() {
+        synchronized (tailFunctionalLock) {
+            return siblingPrefixClosedFormTransitions;
         }
     }
 
@@ -496,6 +503,7 @@ public final class MonsterWeavingLinearCounter {
             TailFunctional coefficient) {
         long started = System.nanoTime();
         long monthTransitions = 0;
+        long closedFormTransitions = 0;
         int days = child.remaining[child.closed];
         BigInteger[] previous = new BigInteger[days + 2];
         previous[1] = ONE;
@@ -504,13 +512,22 @@ public final class MonsterWeavingLinearCounter {
             monthTransitions++;
             int additional = child.remaining[month];
             int newDays = days + additional;
+            boolean enforceOpen = month - 1 >= child.opened;
+            boolean nextNeedsDistribution =
+                month == cut - 1 || month >= child.opened;
+            if (!enforceOpen && !nextNeedsDistribution) {
+                previousTotal = previousTotal.multiply(
+                    combinations(newDays - 1, additional - 1));
+                days = newDays;
+                closedFormTransitions++;
+                continue;
+            }
             BigInteger[] next = new BigInteger[newDays + 2];
             BigInteger newTotal = ZERO;
             if (additional == 1) {
                 next[days + 1] = previousTotal;
                 newTotal = previousTotal;
             } else {
-                boolean enforceOpen = month - 1 >= child.opened;
                 BigInteger[] binomial = chooseColumn(newDays, additional - 2);
                 BigInteger eligible = enforceOpen ? ZERO : previousTotal;
                 for (int first = 1; first <= days + 1; first++) {
@@ -544,6 +561,7 @@ public final class MonsterWeavingLinearCounter {
             siblingPrefixDotCalls++;
             siblingPrefixDotNanos += System.nanoTime() - started;
             siblingPrefixMonthTransitions += monthTransitions;
+            siblingPrefixClosedFormTransitions += closedFormTransitions;
         }
         return total;
     }

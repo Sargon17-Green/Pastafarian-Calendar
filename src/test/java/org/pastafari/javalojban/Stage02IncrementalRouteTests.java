@@ -17,6 +17,7 @@ public final class Stage02IncrementalRouteTests {
     public static void main(String[] args) {
         exhaustiveOracleUnderSingleCountBudget();
         siblingBackwardFunctionalOracleDifferential();
+        siblingForwardClosedFormOracleDifferential();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
         normalizedTailDepthGrowthAndConcurrentParents();
@@ -185,6 +186,40 @@ public final class Stage02IncrementalRouteTests {
             "E_TAIL_CONCURRENT_BUILD");
     }
 
+    private static void siblingForwardClosedFormOracleDifferential() {
+        int[][] families = {{2, 2, 2, 2}, {2, 3, 2, 2}};
+        for (int[] lengths : families) {
+            MonsterWeavingLinearCounter family =
+                new MonsterWeavingLinearCounter(lengths);
+            NormativeOracle.WeavingFamily oracle =
+                new NormativeOracle.WeavingFamily(lengths);
+            int[] prefix = {1, 2, 3, 4};
+            BigInteger[] actual = family.countSiblingBranchSizes(prefix);
+            ok(family.siblingPrefixClosedFormTransitionCount() > 0,
+                "E_SIBLING_CLOSED_FORM_USED");
+            BigInteger[] expected = new BigInteger[lengths.length];
+            Arrays.fill(expected, BigInteger.ZERO);
+            int count = oracle.count().intValueExact();
+            for (int rank = 1; rank <= count; rank++) {
+                int[] weaving =
+                    oracle.unrank1(BigInteger.valueOf(rank));
+                if (!Arrays.equals(prefix,
+                        Arrays.copyOf(weaving, prefix.length))) {
+                    continue;
+                }
+                int nextMonth = weaving[prefix.length] - 1;
+                expected[nextMonth] = expected[nextMonth].add(BigInteger.ONE);
+            }
+            for (int i = 0; i < lengths.length; i++) {
+                eq(expected[i], actual[i],
+                    "E_SIBLING_CLOSED_FORM_ORACLE_BRANCH");
+            }
+            eq(Arrays.asList(expected), Arrays.asList(
+                family.countSiblingBranchSizes(prefix)),
+                "E_SIBLING_CLOSED_FORM_REPEAT_NEUTRALITY");
+        }
+    }
+
     private static void siblingBackwardFunctionalOracleDifferential() {
         for (int[] lengths : new int[][] {
                 {2, 2, 2}, {2, 3, 2}, {3, 3, 3}, {2, 3, 3, 2}
@@ -314,6 +349,8 @@ public final class Stage02IncrementalRouteTests {
         long forwardCallsBaseline = family.siblingPrefixDotCallCount();
         long forwardTransitionsBaseline =
             family.siblingPrefixMonthTransitionCount();
+        long closedFormBaseline =
+            family.siblingPrefixClosedFormTransitionCount();
         long usedHeapStart = Runtime.getRuntime().totalMemory()
             - Runtime.getRuntime().freeMemory();
         long previousSegmentNanos = start;
@@ -323,6 +360,7 @@ public final class Stage02IncrementalRouteTests {
         long previousForwardNanos = 0;
         long previousForwardCalls = 0;
         long previousForwardTransitions = 0;
+        long previousClosedFormTransitions = 0;
         int previousOpened = 0;
         int previousClosed = 0;
         for (int call = 1; call <= 24; call++) {
@@ -369,6 +407,9 @@ public final class Stage02IncrementalRouteTests {
                 long forwardTransitions =
                     family.siblingPrefixMonthTransitionCount()
                     - forwardTransitionsBaseline;
+                long closedFormTransitions =
+                    family.siblingPrefixClosedFormTransitionCount()
+                    - closedFormBaseline;
                 ok(backwardNanos >= previousBackwardNanos
                         && forwardNanos >= previousForwardNanos,
                     "E_SHARED_TIMING_MONOTONE");
@@ -390,12 +431,15 @@ public final class Stage02IncrementalRouteTests {
                     + " forward_calls=" + (forwardCalls
                         - previousForwardCalls)
                     + " forward_month_transitions=" + (forwardTransitions
-                        - previousForwardTransitions));
+                        - previousForwardTransitions)
+                    + " forward_closed_form_skips=" + (closedFormTransitions
+                        - previousClosedFormTransitions));
                 previousSegmentNanos = now;
                 previousBackwardNanos = backwardNanos;
                 previousForwardNanos = forwardNanos;
                 previousForwardCalls = forwardCalls;
                 previousForwardTransitions = forwardTransitions;
+                previousClosedFormTransitions = closedFormTransitions;
                 previousSegmentHits = hits;
                 previousSegmentBuilds = builds;
                 previousOpened = opened;
@@ -437,6 +481,9 @@ public final class Stage02IncrementalRouteTests {
         ok(family.siblingPrefixMonthTransitionCount()
                 > forwardTransitionsBaseline,
             "E_SHARED_FORWARD_TRANSITIONS_RECORDED");
+        ok(family.siblingPrefixClosedFormTransitionCount()
+                > closedFormBaseline,
+            "E_SHARED_FORWARD_CLOSED_FORM_ACTIVE");
         eq(48, route.stepsCompleted(),
             "E_SHARED_EXTENDED_48_PREFIX_DAYS");
         eq(route.remainingChoices(),
