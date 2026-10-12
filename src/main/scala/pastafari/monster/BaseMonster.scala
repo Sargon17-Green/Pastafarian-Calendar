@@ -113,7 +113,11 @@ final case class BaseMonsterContext(
   var daywiseOffset: Option[Int] = None,
   var daywiseInputSnapshot: Option[(Vector[Vector[Int]],BigInt,Int)] = None,
   var legacyDaywiseRank1: Option[BigInt] = None,
-  var legacyDaywiseMonthId: Option[Int] = None
+  var legacyDaywiseMonthId: Option[Int] = None,
+  var patchedAnnualWeaving: Option[Vector[Int]] = None,
+  var patchedMonthId: Option[Int] = None,
+  var patchedDayInMonth: Option[Int] = None,
+  var patch15Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -145,6 +149,62 @@ final class BaseValidationManager {
    * selected-first == stride*(rank-1).
    */
   /** Prova indipendente dell'errore storico: giorno per giorno, mai PATCH15. */
+  /** Verifica autonoma della tessitura annuale fissa e del giorno mensile. */
+  def requirePatch15Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_15_DAYWISE_WEAVING" ||
+       ctx.status!="PATCH_15_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_15_DAYWISE_WEAVING","PATCH_15_DAYWISE_WEAVING") ||
+       ctx.daywiseCandidateWeavings.isEmpty || ctx.daywiseYearRank1.isEmpty ||
+       ctx.daywiseOffset.isEmpty || ctx.daywiseInputSnapshot.isEmpty ||
+       ctx.legacyDaywiseRank1.isEmpty || ctx.legacyDaywiseMonthId.isEmpty ||
+       ctx.patchedAnnualWeaving.isEmpty || ctx.patchedMonthId.isEmpty ||
+       ctx.patchedDayInMonth.isEmpty || !ctx.patch15Applied)
+      throw new IllegalStateException("PATCH 15 non completa.")
+
+    val all=ctx.daywiseCandidateWeavings.get
+    val rank=ctx.daywiseYearRank1.get
+    val day=ctx.daywiseOffset.get
+    if(ctx.daywiseInputSnapshot.get!=(all,rank,day))
+      throw new IllegalStateException(
+        "Fotografia dei candidati o del rango annuale contraffatta.")
+    try LegacyDaywiseWeavingAdapter.validateCandidates(all)
+    catch {
+      case ex:IllegalArgumentException=>
+        throw new IllegalStateException("Famiglia annuale invalida.",ex)
+    }
+    if(rank<1 || rank>all.length || day<0 || day>=all.head.length)
+      throw new IllegalStateException("Rango o giorno invalido.")
+
+    // Controllo indipendente: non richiama il wrapper corretto.
+    val offset=(rank-BigInt(1)).toInt
+    val annual=all(offset)
+    val legacyShift=(offset.toLong+day.toLong)%all.length.toLong
+    val oldRank=BigInt(legacyShift+1)
+    val oldMonth=all(legacyShift.toInt)(day)
+    if(ctx.legacyDaywiseRank1.get!=oldRank ||
+       ctx.legacyDaywiseMonthId.get!=oldMonth)
+      throw new IllegalStateException("Il percorso storico e' cambiato.")
+    val original=LegacyDaywiseWeavingAdapter.legacyChooseEachDaySeparately(
+      all,rank,day)
+    if(original.dayRank1!=ctx.legacyDaywiseRank1.get ||
+       original.monthId!=ctx.legacyDaywiseMonthId.get)
+      throw new IllegalStateException("La cicatrice non e' riproducibile.")
+
+    val expectedMonth=annual(day)
+    var elapsed=0
+    var pos=0
+    while(pos<=day){
+      if(annual(pos)==expectedMonth)elapsed+=1
+      pos+=1
+    }
+    if(ctx.patchedAnnualWeaving.get!=annual ||
+       ctx.patchedMonthId.get!=expectedMonth ||
+       ctx.patchedDayInMonth.get!=elapsed)
+      throw new IllegalStateException(
+        "La tessitura annuale, il mese o il giorno del mese sono falsificati.")
+  }
+
   def requireDiscovery15Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_15_DAYWISE_WEAVING" ||
        ctx.status!="LEGACY_DAYWISE_WEAVING_READY" ||
@@ -1131,7 +1191,8 @@ final class BaseMonsterManager {
     new Patch13YearJumpHandler(metrics),
     new Discovery14VirtualGateListHandler(metrics),
     new Patch14VirtualGateHandler(metrics),
-    new Discovery15DaywiseWeavingHandler(metrics)
+    new Discovery15DaywiseWeavingHandler(metrics),
+    new Patch15MonthWeavingHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1886,6 +1947,37 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("discovery15",error)
+    }
+  }
+
+  def patch15DaywiseWeaving(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    candidates: Vector[Vector[Int]],
+    yearRank1: BigInt,
+    dayOffset: Int
+  ): Patch15MonthWeavingReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.daywiseCandidateWeavings=Some(candidates)
+    ctx.daywiseYearRank1=Some(yearRank1)
+    ctx.daywiseOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_15_DAYWISE_WEAVING"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery15Ready(ctx)
+      ctx.phase="PATCH_15_DAYWISE_WEAVING"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch15Ready(ctx)
+      Patch15MonthWeavingReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.daywiseCandidateWeavings.get,ctx.daywiseYearRank1.get,
+        ctx.daywiseOffset.get,ctx.legacyDaywiseRank1.get,
+        ctx.legacyDaywiseMonthId.get,ctx.patchedAnnualWeaving.get,
+        ctx.patchedMonthId.get,ctx.patchedDayInMonth.get,
+        ctx.patch15Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("patch15",error)
     }
   }
 

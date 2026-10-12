@@ -383,21 +383,35 @@ object Stage30Tests {
       finally walk.close()
       truth(!source.contains("NormativeOracle"),"Oracolo")
       truth(source.contains("def legacyChooseEachDaySeparately("),"Cicatrice")
-      truth(!source.contains("def daywiseWeavingPatch("),"PATCH 15 anticipata")
+      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<31)
+        truth(!source.contains("def daywiseWeavingPatch("),"PATCH 15 anticipata")
+      else
+        truth(source.contains("def daywiseWeavingPatch("),
+          "PATCH 15 successiva disponibile")
       truth(!source.contains("oldContiguousMonthDayGuess"),"Stage32 anticipato")
     }
     check("metadati Stage30 conservano i certificati di Stage29"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=30"),"Stadio")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=14"),"Patch precedente")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=30,"Stadio")
+      if(current==30){
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=14"),"Patch precedente")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      } else
+        truth(st.contains("STAGE_30_NATIVE_VERIFICATION=PASS_EXPECTED_RED_53_PASS_3_FAIL"),
+          "DISCOVERY 15 storica certificata")
       truth(st.contains("STAGE_29_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_55_PASS_0_FAIL"),
         "Certificazione P14")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed==29 || completed==30,"Ordine cronologico")
+      truth(completed>=29 && completed<=current,"Ordine cronologico")
     }
 
     Vector(
