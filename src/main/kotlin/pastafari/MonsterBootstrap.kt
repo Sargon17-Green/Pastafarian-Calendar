@@ -57,7 +57,20 @@ data class BaseMonsterContext(
     var discovery06HiddenStorage: List<ExactInt>? = null,
     var discovery06Patch05HiddenOne: ExactInt? = null,
     var discovery06ErrorId: String? = null,
-    var discovery06InvocationCount: Int = 0
+    var discovery06InvocationCount: Int = 0,
+    var patch06PriorI: Int? = null,
+    var patch06PriorBack: Int? = null,
+    var patch06Slot: Int? = null,
+    var patch06HiddenK: Int? = null,
+    var patch06Source: String? = null,
+    var patch06LegacyPriorCalled: Boolean? = null,
+    var patch06Output: ExactInt? = null,
+    var patch06VisibleStore: List<ExactInt?>? = null,
+    var patch06HiddenStorage: List<ExactInt>? = null,
+    var patch06Patch05HiddenOne: ExactInt? = null,
+    var patch06StoneLegacyCalls: Int = 0,
+    var patch06Applied: Boolean = false,
+    var patch06InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -118,7 +131,8 @@ class MonsterBootstrapManager(
     val stonePatchWrapper: StonePatchWrapper = StonePatchWrapper(),
     val legacyHiddenDropAdapter: LegacyHiddenDropAdapter = LegacyHiddenDropAdapter(),
     val hiddenNearnessPatchWrapper: HiddenNearnessPatchWrapper = HiddenNearnessPatchWrapper(legacyHiddenDropAdapter),
-    val legacyPriorAdapter: LegacyPriorAdapter = LegacyPriorAdapter()
+    val legacyPriorAdapter: LegacyPriorAdapter = LegacyPriorAdapter(),
+    val priorPatchWrapper: PriorPatchWrapper = PriorPatchWrapper(legacyPriorAdapter, hiddenNearnessPatchWrapper)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -269,6 +283,55 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_06_VISIBLE_ONLY_LEGACY_PRIOR")
             context.status = "LEGACY_PRIOR_OBSERVED"
             metrics.bump("discovery06.legacy.prior.calls")
+        }
+        dispatcher.register("PATCH_06") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_PATCH06_CONTEXT_NOT_READY")
+            val i = context.patch06PriorI ?: throw MonsterValidationException("E_PATCH06_NO_I")
+            val back = context.patch06PriorBack ?: throw MonsterValidationException("E_PATCH06_NO_BACK")
+            if (i < 1 || back !in 1..7) throw MonsterValidationException("E_PATCH06_INVALID_HISTORY")
+            // Defnyddio'r un 5 patch blaenorol yn y llwybr cynhyrchu.
+            val c = context.calculationDay
+            val t = context.targetDay
+            val actionTag = dayTagPatchWrapper.dayTagWithFoundationScar(
+                c, legacyDayTagAdapter.oldDayTag(c))
+            val targetTag = dayTagPatchWrapper.dayTagWithFoundationScar(
+                t, legacyDayTagAdapter.oldDayTag(t))
+            val distance = distancePatchWrapper.patchDistance(
+                c, t, legacyDistanceAdapter.oldDistance(c, t)).inclusiveDistance
+            val direction = ExactInt.of(when {
+                t < c -> 1L
+                t == c -> 2L
+                else -> 3L
+            })
+            val counts = HiddenWorkCounts(
+                actionTag, targetTag, distance, actionTag + targetTag, direction)
+            val stoneTable = stonePatchWrapper.buildPatchedRows()
+            val physical = legacyHiddenDropAdapter.buildBackwardStorage(counts, stoneTable.rows)
+            val hiddenOne = hiddenNearnessPatchWrapper.patch(physical, 1).correctedValue
+            // Storfa weledig PROFI yn unig: nid yw Cam 13 yn adeiladu
+            // diferion gweledig nac yn dechrau Cam 14.
+            val visibleProbe = listOf<ExactInt?>(null, hiddenOne)
+            val result = priorPatchWrapper.priorPatch(visibleProbe, physical, i, back)
+            check(stoneTable.legacyCalls == 45) { "E_PATCH06_STONE_CALL_COUNT" }
+            // Cyflwr atomig sy'n perthyn i'r cyd-destun presennol yn unig.
+            context.patch06Slot = result.slot
+            context.patch06HiddenK = result.hiddenK
+            context.patch06Source = result.source
+            context.patch06LegacyPriorCalled = result.legacyPriorCalled
+            context.patch06Output = result.correctedValue
+            context.patch06VisibleStore = visibleProbe
+            context.patch06HiddenStorage = physical
+            context.patch06Patch05HiddenOne = hiddenOne
+            context.patch06StoneLegacyCalls = stoneTable.legacyCalls
+            context.patch06Applied = true
+            context.patch06InvocationCount = 1
+            context.branchTrace.add("PATCH_06")
+            context.diagnostics.add("PATCH_06_PRIOR_VISIBLE_OR_HIDDEN")
+            context.status = "PATCHED_PRIOR"
+            metrics.bump("patch06.applied")
+            if (result.legacyPriorCalled) metrics.bump("patch06.legacy.prior.calls")
+            else metrics.bump("patch06.hidden.nearness.calls")
         }
         dispatcher.register("PATCH_05") { context ->
             validation.requireBootstrapContext(context)
@@ -514,6 +577,25 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY05_WRAP", e)
+        }
+    }
+
+    /** Cam 13: cadw'r helper raw ar slot positif; hiddenByNearness ar slot<=0. */
+    fun applyPriorPatch(
+        calculationDay: ExactInt, targetDay: ExactInt, i: Int = 2, back: Int = 1
+    ): BaseMonsterContext {
+        require(i >= 1 && back in 1..7) { "E_PATCH06_PRIOR_RANGE" }
+        val context = prepare(calculationDay, targetDay)
+        context.patch06PriorI = i
+        context.patch06PriorBack = back
+        context.phase = "PATCH_06"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH06_WRAP", e)
         }
     }
 

@@ -304,3 +304,8 @@ Mae'r helper hanesyddol yn darllen `dropStore[i-back]` o storfa weledig yn unig.
 ### Cam 12 — ardystiad JVM brodorol llawn
 
 Ar commit `7fac959fc06edb8c59d0b7f0105fbf91151da87b` llwyddodd swydd GitHub Actions `114729897099` (rhediad `38224902493`) gyda Kotlin 1.9.0 a JDK 21. Gwiriwyd 30 marc o log y swydd: yr holl atchweliadau Camau 1–11, tri slot hanes cudd anghywir `0,-2,-6`, profi positif slot 1, 35 cyfrifiad BigInteger annibynnol, 175 cydran carreg, 15 tyst coll ar bum pâr diwrnod a methiant strict disgwyliedig. `LAST_COMPLETED_STAGE=12`; ni ddechreuwyd Cam 13.
+
+
+## Cam 13 — PATCH 06: priorPatch ar gyfer slotiau negyddol
+
+Mae'r helper visible-only yn parhau'n alwadadwy heb ei newid. Mae'r lapio newydd yn gwahaniaethu yn union wrth `slot=i-back`: ar slot positif mae'n galw'r hen prior go iawn; ar slot di-bositif mae'n defnyddio `hiddenK=1-slot` drwy gyfieithydd hiddenByNearness PATCH 05, heb alw'r hen prior. Mae'r llwybr PATCH 06 newydd yn cadw tystiolaeth y gangen a'r allbwn yn annibynnol ar bob galwad. Mae'r hen dri achos EXPECTED_RED o Gam 12 i aros yn RED ar y llwybr DISCOVERY 06, tra bo pob un o'r saith safle cudd yn GREEN ar y llwybr cywiriedig. Arhosir am dystysgrif JVM brodorol cyn cau Cam 13.

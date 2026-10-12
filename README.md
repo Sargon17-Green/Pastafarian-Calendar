@@ -286,3 +286,10 @@ Mae `LegacyPriorAdapter.legacyPrior(visibleStore,i,back)` yn cyfrifo `i-back`, o
 Mae'r profion yn gwirio camau 1–11, 15 diffyg hanes cudd dros bum pâr diwrnod, 35 gwerth BigInteger annibynnol, 175 cydran carreg, guardiau a methiant strict bwriadol. Mae `LAST_COMPLETED_STAGE=11` tan ardystiad brodorol. Ni ddechreuwyd `priorPatch` na Cham 13.
 
 **Ardystiad Cam 12:** llwyddodd `run-stage12-tests.sh` gyda'r cod a'r oracl gwreiddiol ar Kotlin 1.9.0/JDK 21, commit `7fac959fc06edb8c59d0b7f0105fbf91151da87b`. Gwiriwyd 30 marc yn uniongyrchol yn y log, gan gynnwys tri `EXPECTED_RED`, 15 tyst BigInteger coll, 35 cyfrifiad cudd, 175 cydran carreg, methiant strict bwriadol a holl atchweliadau Camau 1–11. **`LAST_COMPLETED_STAGE=12`**, y cam nesaf yw Cam 13 (`PATCH 06`). Ni weithredwyd `priorPatch`. Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38224902493
+
+
+## Cam 13 — PATCH 06: hanes gweledig a hanes cudd
+
+Cyfrifir `slot=i-back` gan `PriorPatchWrapper.priorPatch`. Pan fo'r slot yn bositif, **galwir yr hen `LegacyPriorAdapter.legacyPrior`**, heb ddibyniaeth ar storfa gudd. Pan fo `slot<=0`, cyfrifir `hiddenK=1-slot` a darllenir y diferyn cywir drwy `HiddenNearnessPatchWrapper.hiddenByNearness`. Nid yw'r gangen gudd yn galw'r helper raw; cedwir diffygion Cam 12 yn weladwy. Mae'r llwybr cynhyrchu `BOOT → PATCH_06` yn cofnodi'r slot, y gangen, y gwerth wedi'i gywiro a'i ddata mewn cyd-destun unigol.
+
+Bydd `run-stage13-tests.sh` yn ail-redeg Camau 1–12 a gwirio pob un o saith `hiddenK`, y gangen bositif, 35 cyfrifiad BigInteger annibynnol a phum darlleniad positif, gan gadw'r 15 `EXPECTED_RED` hen. Mae `LAST_COMPLETED_STAGE=12` tan PASS y CI brodorol. Ni ddechreuwyd Cam 14.
