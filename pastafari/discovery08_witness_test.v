@@ -37,12 +37,15 @@ fn test_discovery08_all_720_legacy_permutations_are_unique_and_valid() {
 fn test_discovery08_historical_caller_uses_one_based_as_rank0() {
 	assert (calendar_bowl_order_spaghetti(big_one()) or { []int{} }) == [1, 2, 3, 4, 6, 5]
 	assert (calendar_bowl_order_spaghetti(big_from_int(2)) or { []int{} }) == [1, 2, 3, 5, 4, 6]
-	assert (calendar_bowl_order_spaghetti(big_from_int(719)) or { []int{} }) == [6, 5, 4, 3, 2, 1]
-	assert (calendar_bowl_order_spaghetti(big_from_int(721)) or { []int{} }) == [1, 2, 3, 4, 6, 5]
+	assert (calendar_bowl_order_spaghetti(big_from_int(719)) or { []int{} }) == [6, 5, 4, 3, 2,
+		1]
+	assert (calendar_bowl_order_spaghetti(big_from_int(721)) or { []int{} }) == [1, 2, 3, 4, 6,
+		5]
 }
 
 fn test_discovery08_historical_drop_720_rejects_one_based_rank_720() {
-	for drop in [big_zero(), big_from_int(720), big_from_int(1440), big_from_int(-720)] {
+	for drop in [big_zero(), big_from_int(720), big_from_int(1440),
+		big_from_int(-720)] {
 		mut rejected := false
 		_ = calendar_bowl_order_spaghetti(drop) or {
 			rejected = true

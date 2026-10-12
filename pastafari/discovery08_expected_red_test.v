@@ -34,6 +34,5 @@ fn test_discovery08_control_grind_and_hidden_remain_correct() {
 	foundation := big_from_i64(-15_055_671)
 	assert (calendar_grind_row_spaghetti(11) or { []int{} }) == [37, 41, 43, 47, 1]
 	assert calendar_distance_spaghetti(foundation, foundation).str() == '1'
-	assert calendar_hidden_by_nearness(calendar_hidden_spaghetti(foundation, foundation),
-		1).str() == '119390830530032782664128530203002080344'
+	assert calendar_hidden_by_nearness(calendar_hidden_spaghetti(foundation, foundation), 1).str() == '119390830530032782664128530203002080344'
 }
