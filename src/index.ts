@@ -22,3 +22,4 @@ export * from "./patch09BowlAlias.ts";
 export * from "./discovery10LegacyInPlaceStir.ts";
 export * from "./patch10SnapshotStir.ts";
 export * from "./discovery11LegacyOrderMemory.ts";
+export * from "./patch11OrderLatch.ts";
