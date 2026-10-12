@@ -34,3 +34,19 @@ Dự kiến 413 bài, đúng bốn lỗi đỏ và tất cả 393 bài cũ xanh.
 Kiểm chứng CI Elixir 1.18.5 / OTP 27 và Canonical Names Lock;
 nếu có thêm sai lệch ngoài bốn cổng âm, không đóng giai đoạn.
 Không sửa nhánh main, không commit HANDOFF_*.
+
+## Kết quả CI được xác minh
+
+Giai đoạn 30 DISCOVERY 15 đã được xác minh qua GitHub Actions Elixir 1.18.5 / OTP 27.
+413 kiểm thử: 409 PASS, đúng bốn sai lệch normative đỏ tại cổng -1,-2,-3,-4.
+Không có cảnh báo biên dịch Elixir; Canonical Names Lock PASS.
+Bốn kết quả legacy và oracle lần lượt:
+-1: -15056016 / -15056174;
+-2: -15056834 / -15056615;
+-3: -15057665 / -15056944;
+-4: -15057883 / -15057703.
+16 điều khiển Stage30 và 393 bài cũ đều đạt.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38289526828
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38289526872
+Không sửa main, không sửa oracle hoặc các lớp lỗi cũ.
+Đóng Stage30 EXPECTED_RED; tiếp theo Stage31 PATCH 15 chưa bắt đầu.

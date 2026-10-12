@@ -1028,3 +1028,26 @@ từ checkout@v4 là cảnh báo nền tảng workflow, không phải biên dị
 
 Stage29 hoàn tất, NEXT=Stage30/55 DISCOVERY 15.
 Không sửa nhánh main, không tích hợp lịch đầy đủ tại Stage29.
+
+## Giai đoạn 30/55 — DISCOVERY 15: lỗi phản chiếu cổng âm
+
+Đã thêm GateGapManager và GateTimelineManager cho chỉ số cổng nguyên âm/dương
+từ neo 0 tại FOUNDATION=-15_055_671. Cổng dương dùng câu hỏi
+sauce(FOUNDATION,FOUNDATION+n), bát 1, chốt 1, chọn hạng 922 và cộng 41.
+Cổng âm lịch sử dùng nhầm cùng ngày hỏi FOUNDATION+n thay vì FOUNDATION-n,
+nên dãy âm bị phản chiếu, mặc dù vẫn giảm nghiêm ngặt.
+
+LegacyMirroredNegativeGateGap được gọi thật qua đường production.
+Không có NegativeGateGapPatch ở giai đoạn 30. Toàn bộ 14 bản vá
+đã hoàn thành còn nguyên, không khởi động bộ tìm năm hay ngày lịch cuối.
+
+CI Elixir 1.18.5 / OTP 27 xác minh **413 kiểm thử,
+đúng bốn hồi quy normative cố ý đỏ**, 409 đạt, không cảnh báo
+biên dịch; **Canonical Names Lock PASS**. Bốn sai lệch nằm duy nhất
+ở chỉ số cổng -1..-4. 393 bài cũ và 16 điều khiển mới đều đạt.
+- [CI Stage30 EXPECTED_RED](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38289526828)
+- [Canonical Names Lock PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38289526872)
+
+Stage30 đóng EXPECTED_RED. Bước kế tiếp là Stage31 PATCH 15:
+giữ LegacyMirroredNegativeGateGap nguyên vẹn, thêm lớp sửa riêng,
+và chuyển bốn hồi quy trở lại xanh mà không thay expected.

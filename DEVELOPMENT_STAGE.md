@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=30
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=15
-LAST_COMPLETED_STAGE=29
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=30
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..14 đúng; Stage30 giới thiệu GateGapManager, GateTimelineManager, LegacyMirroredNegativeGateGap. Cổng phía dương dùng FOUNDATION+n chuẩn; phía âm cố ý đọc FOUNDATION+n thay vì FOUNDATION-n. Năm và lịch hoàn chỉnh chưa tích hợp.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_30_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_30_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=413
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -724,3 +724,17 @@ GateTimelineManager dùng state bất biến có chỉ số cổng âm/dương v
 Giữ mọi PATCH 01..14; không thực hiện NegativeGateGapPatch của Stage31.
 Dự kiến 413 kiểm thử, bốn sai lệch có chủ đích. Chỉ đóng sau khi
 CI kiểm chứng đúng bốn sai lệch và Canonical Names Lock PASS.
+
+Giai đoạn 30 DISCOVERY 15 đã được xác minh qua GitHub Actions Elixir 1.18.5 / OTP 27.
+413 kiểm thử: 409 PASS, đúng bốn sai lệch normative đỏ tại cổng -1,-2,-3,-4.
+Không có cảnh báo biên dịch Elixir; Canonical Names Lock PASS.
+Bốn kết quả legacy và oracle lần lượt:
+-1: -15056016 / -15056174;
+-2: -15056834 / -15056615;
+-3: -15057665 / -15056944;
+-4: -15057883 / -15057703.
+16 điều khiển Stage30 và 393 bài cũ đều đạt.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38289526828
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38289526872
+Không sửa main, không sửa oracle hoặc các lớp lỗi cũ.
+Đóng Stage30 EXPECTED_RED; tiếp theo Stage31 PATCH 15 chưa bắt đầu.
