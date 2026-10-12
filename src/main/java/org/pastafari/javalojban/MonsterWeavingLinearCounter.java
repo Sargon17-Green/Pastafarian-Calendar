@@ -2,6 +2,8 @@ package org.pastafari.javalojban;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.ArrayDeque;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -74,6 +76,85 @@ public final class MonsterWeavingLinearCounter {
     int suffixCacheEntryCount() {
         synchronized (suffixCounts) {
             return suffixCounts.size();
+        }
+    }
+
+    private static final int MAX_PARTIAL_DP_CACHE_ENTRIES = 4;
+    private static final int MAX_PARTIAL_DP_DAYS = 2048;
+    private final ArrayDeque<PartialDP> partialDps = new ArrayDeque<>();
+    private long partialDpReuseHits;
+
+    private static final class PartialDP {
+        final int[] originalRemaining;
+        final int opened;
+        final int closed;
+        final int lastMonth;
+        final int days;
+        final BigInteger[] previous;
+        final BigInteger previousTotal;
+
+        PartialDP(State state, int lastMonth, int days,
+                BigInteger[] previous, BigInteger previousTotal) {
+            originalRemaining = state.remaining.clone();
+            opened = state.opened;
+            closed = state.closed;
+            this.lastMonth = lastMonth;
+            this.days = days;
+            this.previous = previous;
+            this.previousTotal = previousTotal;
+        }
+
+        boolean matches(State state) {
+            if (opened != state.opened || closed != state.closed) return false;
+            for (int month = closed; month <= lastMonth; month++) {
+                if (originalRemaining[month] != state.remaining[month]) return false;
+            }
+            return true;
+        }
+    }
+
+    private PartialDP cachedPartial(State state) {
+        synchronized (partialDps) {
+            PartialDP selected = null;
+            for (PartialDP entry : partialDps) {
+                if (entry.matches(state) && (selected == null
+                        || entry.lastMonth > selected.lastMonth)) {
+                    selected = entry;
+                }
+            }
+            if (selected != null) {
+                partialDps.remove(selected);
+                partialDps.addLast(selected);
+                partialDpReuseHits++;
+            }
+            return selected;
+        }
+    }
+
+    private void keepPartial(State state, int month, int days,
+            BigInteger[] previous, BigInteger previousTotal) {
+        if (days > MAX_PARTIAL_DP_DAYS
+                || (month != state.closed + 7 && month != state.closed + 15)) {
+            return;
+        }
+        synchronized (partialDps) {
+            if (partialDps.size() == MAX_PARTIAL_DP_CACHE_ENTRIES) {
+                partialDps.removeFirst();
+            }
+            partialDps.addLast(new PartialDP(
+                state, month, days, previous, previousTotal));
+        }
+    }
+
+    long partialDpReuseHitCount() {
+        synchronized (partialDps) {
+            return partialDpReuseHits;
+        }
+    }
+
+    int partialDpCacheEntryCount() {
+        synchronized (partialDps) {
+            return partialDps.size();
         }
     }
 
@@ -191,12 +272,25 @@ public final class MonsterWeavingLinearCounter {
     }
 
     private BigInteger countSuffixUncached(State state) {
-        int days = state.remaining[state.closed];
-        BigInteger[] previous = new BigInteger[days + 2];
-        previous[1] = ONE;
-        BigInteger previousTotal = ONE;
+        PartialDP partial = cachedPartial(state);
+        int days;
+        BigInteger[] previous;
+        BigInteger previousTotal;
+        int nextMonth;
+        if (partial == null) {
+            days = state.remaining[state.closed];
+            previous = new BigInteger[days + 2];
+            previous[1] = ONE;
+            previousTotal = ONE;
+            nextMonth = state.closed + 1;
+        } else {
+            days = partial.days;
+            previous = partial.previous;
+            previousTotal = partial.previousTotal;
+            nextMonth = partial.lastMonth + 1;
+        }
 
-        for (int month = state.closed + 1; month < lengths.length; month++) {
+        for (int month = nextMonth; month < lengths.length; month++) {
             int additional = state.remaining[month];
             if (additional < 1) throw new IllegalStateException("E_WEAVE_STATE");
             int newDays = days + additional;
@@ -226,6 +320,7 @@ public final class MonsterWeavingLinearCounter {
             previous = next;
             previousTotal = newTotal;
             days = newDays;
+            keepPartial(state, month, days, previous, previousTotal);
         }
         return previousTotal;
     }

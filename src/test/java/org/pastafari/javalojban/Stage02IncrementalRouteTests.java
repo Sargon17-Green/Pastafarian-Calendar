@@ -16,6 +16,7 @@ public final class Stage02IncrementalRouteTests {
         progressInFullYearInterior();
         binomialCacheCallOrderNeutrality();
         suffixCountCacheReuseAndEviction();
+        partialDpReuseAcrossDistinctSuffixStates();
         concurrentSuffixCountNeutrality();
         multiCallFullYearInteriorWithOneCountPerCall();
         zeroBudgetDoesNotLoseSavedWork();
@@ -307,6 +308,37 @@ public final class Stage02IncrementalRouteTests {
             "E_SUFFIX_REINSERT_STILL_BOUNDED");
         eq(0L, isolated.suffixCacheHitCount(),
             "E_SUFFIX_OTHER_INSTANCE_UNTOUCHED");
+    }
+
+    private static void partialDpReuseAcrossDistinctSuffixStates() {
+        int[] lengths = new int[12];
+        Arrays.fill(lengths, 48);
+        MonsterWeavingLinearCounter shared =
+            new MonsterWeavingLinearCounter(lengths);
+        MonsterWeavingLinearCounter independent =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] first = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        int[] second = {1, 2, 3, 4, 5, 6, 7, 8, 9, 9};
+        BigInteger expectedFirst = independent.countAfterPrefix(first);
+        BigInteger actualFirst = shared.countAfterPrefix(first);
+        eq(expectedFirst, actualFirst, "E_PARTIAL_DP_FIRST_EXACT");
+        ok(shared.partialDpCacheEntryCount() > 0,
+            "E_PARTIAL_DP_SNAPSHOT_CREATED");
+        long hits = shared.partialDpReuseHitCount();
+        long completeHits = shared.suffixCacheHitCount();
+        BigInteger expectedSecond = independent.countAfterPrefix(second);
+        BigInteger actualSecond = shared.countAfterPrefix(second);
+        eq(expectedSecond, actualSecond, "E_PARTIAL_DP_SECOND_EXACT");
+        ok(shared.partialDpReuseHitCount() > hits,
+            "E_PARTIAL_DP_DISTINCT_STATE_REUSE");
+        eq(completeHits, shared.suffixCacheHitCount(),
+            "E_PARTIAL_DP_NOT_EXACT_STATE_HIT");
+        ok(shared.partialDpCacheEntryCount() <= 4,
+            "E_PARTIAL_DP_BOUNDED");
+        eq(expectedFirst, shared.countAfterPrefix(first),
+            "E_PARTIAL_DP_OLD_STATE_NEUTRAL");
+        eq(0L, independent.partialDpReuseHitCount(),
+            "E_PARTIAL_DP_INSTANCE_INDEPENDENCE");
     }
 
     private static void concurrentSuffixCountNeutrality() {
