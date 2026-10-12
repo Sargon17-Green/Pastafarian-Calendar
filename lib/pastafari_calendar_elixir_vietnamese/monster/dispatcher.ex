@@ -4,10 +4,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 28 giữ phép chọn hạng ngắn đã vá ở Stage27.
-  Đường chọn hạng tổng quát khi n>M cố ý dùng hàm lịch sử
-  một chữ số, không xây số rộng nhiều chữ số từ answer ring.
-  Các bản vá trước vẫn đúng; chưa tích hợp lịch.
+  Giai đoạn 29 đã vá chọn hạng rộng nhiều chữ số trên cùng
+  answer ring. Giai đoạn 30 đưa dãy cổng hai chiều vào
+  production; phía âm cố ý phản chiếu ngày tính độ dài cổng
+  qua Ngày Nền, chờ PATCH 15. Chưa tích hợp năm hoặc lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
@@ -18,6 +18,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     Context,
     DayCountManager,
     DistanceManager,
+    GateGapManager,
+    GateTimelineManager,
     HiddenDropManager,
     Metrics,
     NextBowlPatchWrapper,
@@ -199,4 +201,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     answer_stream(calculation_day, target_day, queried_bowl_id, seal)
     |> AnswerStreamManager.choose_rank(n)
   end
+
+  def positive_gate_gap(n), do: GateGapManager.positive_gap(n)
+  def negative_gate_gap(n), do: GateGapManager.negative_gap(n)
+  def gate_day(index), do: GateTimelineManager.gate_day(index)
+  def gate_state(index), do: GateTimelineManager.ensure_index(GateTimelineManager.new(), index)
 end
