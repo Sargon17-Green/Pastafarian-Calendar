@@ -155,3 +155,26 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 235s perl -Ilib -It/lib tools/profile_canonical_month_selection.pl --seconds 180 --rss-kib 393216
+
+  canonical-four-months:
+    name: 真實年份四月份 240 日精確雙向排名（獨立資源監督）
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-canonical-four]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 驗證四月份稽核腳本的原生語法
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_four_months.pl
+      - name: 有界時間與 RSS 的獨立四月份精確核對
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_four_months.pl --seconds 185 --rss-kib 393216

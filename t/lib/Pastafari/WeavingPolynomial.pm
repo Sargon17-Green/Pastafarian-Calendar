@@ -4,7 +4,7 @@ use utf8;
 use strict;
 use warnings;
 use Math::BigInt;
-use Scalar::Util qw(blessed);
+use Scalar::Util qw(blessed refaddr);
 use Exporter 'import';
 
 our @EXPORT_OK = qw(countWeavingsPolynomial);
@@ -30,6 +30,8 @@ sub countWeavingsPolynomial ($lengths, $stats = undef,
         if defined($stats) && ref($stats) ne 'HASH';
     die "每階段首次位置分布必須是陣列參照\n"
         if defined($first_histories) && ref($first_histories) ne 'ARRAY';
+    die "月份長度輸入與位置分布輸出不可共用同一陣列參照\n"
+        if defined($first_histories) && refaddr($lengths)==refaddr($first_histories);
     @$first_histories=() if defined $first_histories;
     my @sizes;
     my $total = 0;

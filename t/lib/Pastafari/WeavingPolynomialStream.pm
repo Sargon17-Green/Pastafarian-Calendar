@@ -4,7 +4,7 @@ use utf8;
 use strict;
 use warnings;
 use Math::BigInt;
-use Scalar::Util qw(blessed);
+use Scalar::Util qw(blessed refaddr);
 use File::Temp;
 use Storable qw(store_fd fd_retrieve);
 use Exporter 'import';
@@ -40,6 +40,8 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
         if defined($stats) && ref($stats) ne 'HASH';
     die "每階段首次位置分布必須是陣列參照\n"
         if defined($first_histories) && ref($first_histories) ne 'ARRAY';
+    die "月份長度輸入與位置分布輸出不可共用同一陣列參照\n"
+        if defined($first_histories) && refaddr($lengths)==refaddr($first_histories);
     die "磁碟預算選項必須是雜湊參照\n"
         if defined($options) && ref($options) ne 'HASH';
     $options //= {};
