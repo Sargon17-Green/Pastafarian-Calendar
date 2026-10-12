@@ -366,7 +366,7 @@ object Stage22Tests {
     check("equivalenza normativa scelta negativa") {
       val old=new BaseMonsterManager().discover11BiasedPick(0,0,M,-1,3)
       eqv(old.legacyRank,oracle(M,-1,3),
-        "Campione respinto ignorato: negativo")
+        "Campione respinto ignorato: negativa")
     }
     check("equivalenza normativa scelta soglia") {
       val old=new BaseMonsterManager().discover11BiasedPick(0,0,M-1,-1,5)
