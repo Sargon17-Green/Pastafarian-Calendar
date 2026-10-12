@@ -15,3 +15,14 @@ The alternate multi-opening candidate bounds used to expose length ties are expl
 `test/patch17Properties.ts` tests 256 disjoint 2-run six-candidate families with old/corrected comparator independently compared against a two-key oracle defined **only in test**, 8 giant signed opening gate cases, 12 genuine signed gate anchors ±1..±6 and real Stage33/34/35 Sauce calls, plus 792 explicitly noncanonical injected year-question variants (64 varied, eight giant signed, 720 distinct DROP46 order IDs), with independent post-stir bowl/answer stream replay. Expected in property suite: 99 full real predecessor paths on 12 genuine signed anchors plus 3168 full paths on the 792 injected cases, total **3267 genuine production predecessor executions, 189486 true shared writes**. Stage35 introduces no Stage36 code. Keep all previous 17 historical expected-RED scripts untouched, verified by existing `npm test`.
 
 For closure, native TypeScript compilation and full test suite plus the independent frozen SourceLanguageCatalog/hash verification must pass in BOTH GitHub Actions jobs. Only after these checks are green may `LAST_COMPLETED_STAGE` change from 34 to 35.
+
+## Native CI verification — 2026-10-12
+
+[Implementation commit d54c221](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/d54c221a6c5c7a1b84240f21116d5af853c99b32) and [GitHub Actions 38288810264](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38288810264): BOTH `verify` and legacy-named `stage27-typescript-marathi` jobs SUCCESS. Native TypeScript `tsc`, full Stage1–35 npm test including 17 deliberately failing historic scripts verified by child runners, and frozen names lock passed.
+
+```text
+STAGE_35_PATCH_17_GUARDS_PASS multiRuns=2 tiedMembers=6 moved=6 oldSortSpy=1 oldComparatorSpy=6 signedAnchors=4 positive=2 negative=2 correctedWrong=0 oldWrong=0 rankWrong=0 precedingCalls=17 fullCalls=21 sharedWrites=1218 historicalSortCalls=2 historicalComparatorCalls=2 actualSelectors=5 originalPredicateCalls=3 faultCases=5
+STAGE_35_PATCH_17_PROPERTIES_PASS directFamilies=256 directOldWrong=256 directCorrectedWrong=0 directRuns=512 directMoved=1280 directTieMembers=1536 directOldComparatorCalls=1280 giantOpenDays=8 realGates=12 positive=6 negative=6 canonicalWrong=0 historicWrong=12 rankWrong=0 originalGateCalls=63 realYearSelectors=36 historicalSortCalls=24 realPredecessors=99 realWrites=5742 varied=64 giantSources=8 ranks=720 unique=720 variants=792 variantPredecessors=3168 variantWrites=183744 totalPredecessors=3267 totalWrites=189486 streamWrong=0 selectorWrong=0 correctedWrong=0 oldWrong=792
+```
+
+LAST_COMPLETED_STAGE=35. The old historical comparator and sorted/wrong output remain unchanged and physically executed; only maximal equal-length runs are repaired. Candidate alternate-gate coordinates are synthetic while signed opening-gate calculations and Sauce selection are genuine. Stage36 not started.
