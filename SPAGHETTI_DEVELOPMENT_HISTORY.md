@@ -562,3 +562,14 @@ nan 9 gout reyèl, 15/15 rekiperasyon ak 8 apèl nested PASS.
 Legacy Stage 20 konsève; chemen piblik ale nan
 `STIR_SNAPSHOT_PATCH`. `LAST_COMPLETED_STAGE=21`.
 Etap 22 pa lanse.
+
+## Stage 22 — DISCOVERY 11: bòl inisyal yo reaplike sou chak gout
+
+Apre PATCH 10, yon sèl brase ak snapshot bay bon rezilta.
+Nou ajoute `LEGACY_BOWL_STATE_RESET`: chak gout nouvo rele
+`StirPatch.execute(drop,i,initialBowls,stones[i])`, olye
+konte sou six bowls ki soti nan gout anvan an. Sous
+`INITIAL_BOWLS_REUSED_AT_EVERY_VISIBLE_DROP` rete yon
+nouvo branch/commit, epi context kenbe childContexts natif,
+perDrop tras, metrik ak diagnostik. Stage 23 ap korije
+transmisyon eta a. Pa gen `postStir12` oubyen seleksyon.

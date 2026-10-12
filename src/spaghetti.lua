@@ -20,6 +20,7 @@ local LegacyFixedPours = require("legacy_fixed_pours")
 local PourPatch = require("pour_patch")
 local LegacyAliasedStir = require("legacy_aliased_stir")
 local StirPatch = require("stir_patch")
+local LegacyResetChain = require("legacy_reset_chain")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -265,8 +266,47 @@ function S.openingStirSpaghetti(calculationDay,targetDay)
     return result
 end
 
+-- DISCOVERY 11: premye brase a kòrèk, men chak gout apre sa
+-- rdemare sou sis bòl inisyal yo olye rezilta gout anvan an.
+function S.resetBowlsSpaghetti(drops,stoneRows,initialBowls)
+    local result=LegacyResetChain.execute(drops,stoneRows,initialBowls)
+    return result
+end
+
+function S.legacyResetBowlsProbe(drops,stoneRows,initialBowls)
+    return LegacyResetChain.execute(drops,stoneRows,initialBowls)
+end
+
+function S.visibleResetChainProbe(calculationDay,targetDay,count)
+    assert(type(count)=="number" and math.type(count)=="integer"
+        and count>=1 and count<=46,"Kantite gout vizib dwe 1..46")
+    local bowls=LegacyFixedPours.initialBowls(calculationDay,targetDay)
+    local stoneTable=StonePatch.buildPatchedTable()
+    local drops,stones,dropStore,visibleContexts={},{},{},{}
+    for i=1,count do
+        local drop,ctx=S.visibleDropSpaghetti(calculationDay,targetDay,i,dropStore)
+        assert(ctx.status=="PATCH_VISIBLE_COMPLETE"
+           and ctx.completedGrinds==11,
+           "Gout vizib PATCH 07 pa konplè")
+        drops[i]=BigInt.from(drop)
+        dropStore[i]=BigInt.from(drop)
+        stones[i]=stoneTable[i]
+        visibleContexts[i]=ctx
+    end
+    local result,context=LegacyResetChain.execute(drops,stones,bowls)
+    context.visibleContexts=visibleContexts
+    context.visibleDropCount=count
+    context.metrics["discovery11.visible.calls"]=1
+    return result,context
+end
+
+function S.visibleResetChainSpaghetti(calculationDay,targetDay,count)
+    local result=S.visibleResetChainProbe(calculationDay,targetDay,count)
+    return result
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 21", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 22", 0)
 end
 
 return S

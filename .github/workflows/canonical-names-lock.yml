@@ -436,3 +436,56 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage21_tests.lua .
+
+  lua_stage22_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye sentaks ak gad eritaj
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/stir_patch.lua)" = $(git hash-object src/stir_patch.lua)
+          test "$(git hash-object src/legacy_aliased_stir.lua)" = b799a09f68cf68f4a7710694daa522d57e04a179
+          lua5.3 test/stage22_scope_tests.lua .
+      - name: Kouri suite Stage 1 rive Stage 22
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage22_tests.lua .
+      - name: Regression normatif DISCOVERY 11 — EXPECTED_RED sèl
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage22_regression_tests.lua .
+
+  lua_stage22_smoke:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye 46 gout ak BigInt san ralanti tout suite la
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage22_scope_tests.lua .
+          lua5.3 test/stage22_synthetic_tests.lua .
+          lua5.3 test/stage22_bigint_tests.lua .
+          lua5.3 test/stage22_fault_tests.lua .
+          lua5.3 test/stage22_expected_red_audit.lua .

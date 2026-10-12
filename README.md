@@ -698,3 +698,24 @@ Kontra eritaj Stage 20 rete `EXPECTED_RED` nan audit pozitif li.
 Nou pa touche `src/legacy_aliased_stir.lua`; li toujou fè
 move alias la. PATCH 10 sèlman korije etap yon sèl brase sis bòl.
 `LAST_COMPLETED_STAGE=21`, repo GREEN.
+
+## Stage 22 — DISCOVERY 11: kontinwite bòl yo kase ant gout yo
+
+`src/legacy_reset_chain.lua` kouri PATCH 10 otantik pou chak
+gout vizib ak pwòp tablo wòch li. Men vèsyon istorik la
+**rdemare chak gout ak sis bòl inisyal yo**, menm lè gout i-1
+te deja bay sis nouvo bòl. Sa pa chanje kalkil chak gout
+endividyèl: se transmisyon eta ant gout yo ki kraze.
+
+`resetBowlsSpaghetti` ekspoze rezilta istorik sa a.
+`visibleResetChainProbe(c,t,count)` kouri gout vizib reyèl yo
+ak istwa gout (PATCH 01–10), epi bay context, eta inisyal,
+sous/rezilta chak gout, tras kat commit chak PATCH 10, mezi ak
+dyagnostik. `visibleResetChainSpaghetti` bay sis bòl istorik.
+Tout bagay rete ak copies BigInt posede; okenn tablo antre pa
+modifye pa alias entèn.
+
+Tès normatif endepandan dwe rete `EXPECTED_RED` pou gout 2+;
+gout 1 dwe matche. Koreksyon `PATCH 11` ap pase bòl ki soti
+nan gout i-1 pou brase gout i, nan Stage 23. Nou pa fè
+`postStir12`, ni latching lòd nan gout 46, ni seleksyon bòl.
