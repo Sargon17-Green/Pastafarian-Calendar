@@ -316,3 +316,18 @@ rhes 1..11 yn gywir heb drosysgrifo'r tabl ffisegol. Mae
 yr allbwn cywir a pherchnogaeth pob galwad. Nid yw Cam 15 yn adeiladu
 diferion gweledig. Mae'r ardystiad Kotlin/JVM brodorol yn aros am CI;
 cedwir `LAST_COMPLETED_STAGE=14` hyd at hynny.
+
+
+## Ardystiad brodorol Cam 15 — COMPLETE
+
+Ar commit `40bf4f7c9e3b4395a03a055f8ae5d5a5a4850714` llwyddodd rhediad GitHub Actions
+[`38244045455`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38244045455),
+swydd Kotlin `114793412444`, gyda Kotlin 1.9.0 a JDK 21.
+Gwiriwyd 23 marc allweddol yn uniongyrchol o'r log (a phob un o'r
+11 marc grind unigol): Camau 1–14, 11 cyfieithiad cywir,
+11 graith etifeddol RED, 66 prawf BigInteger cywir, 60 hen wall rhifol
+a 6 hen achos undefined, gwarchodion BOOT/replay, perchnogaeth,
+a holl lwybrau blaenorol. Gwelwyd `STAGE15_FULL_NATIVE_GREEN`;
+gorffennodd y swydd frodorol a swydd cloi enwau gyda `SUCCESS`.
+**`LAST_COMPLETED_STAGE=15`**. Cam 16 (`DISCOVERY 08`) yw'r nesaf,
+heb ei ddechrau. Nid yw'r adeiladwr diferion gweledig wedi'i weithredu.
