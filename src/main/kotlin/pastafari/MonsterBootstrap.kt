@@ -32,7 +32,13 @@ data class BaseMonsterContext(
     var patch04StoneRows: List<MutableStoneRow>? = null,
     var patch04LegacyGarbageRows: List<MutableStoneRow>? = null,
     var patch04BuiltRows: Int = 0,
-    var patch04LegacyCalls: Int = 0
+    var patch04LegacyCalls: Int = 0,
+    var discovery05PatchedStoneRows: List<MutableStoneRow>? = null,
+    var discovery05Patch04LegacyCalls: Int = 0,
+    var discovery05BackwardStorage: List<ExactInt>? = null,
+    var discovery05HiddenCount: Int = 0,
+    var discovery05RequestedK: Int? = null,
+    var discovery05Actual: ExactInt? = null
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -90,7 +96,8 @@ class MonsterBootstrapManager(
     val legacyDistanceAdapter: LegacyDistanceAdapter = LegacyDistanceAdapter(),
     val distancePatchWrapper: DistancePatchWrapper = DistancePatchWrapper(),
     val legacyStoneBuilder: LegacyStoneBuilder = LegacyStoneBuilder(),
-    val stonePatchWrapper: StonePatchWrapper = StonePatchWrapper()
+    val stonePatchWrapper: StonePatchWrapper = StonePatchWrapper(),
+    val legacyHiddenDropAdapter: LegacyHiddenDropAdapter = LegacyHiddenDropAdapter()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -156,6 +163,45 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_04_LEGACY_SEQUENTIAL_STONES")
             context.status = "LEGACY_STONES_OBSERVED"
             metrics.bump("discovery04.legacy.builds")
+        }
+        dispatcher.register("DISCOVERY_05") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_DISCOVERY05_CONTEXT_NOT_READY")
+            val k = context.discovery05RequestedK
+                ?: throw MonsterValidationException("E_DISCOVERY05_NO_REQUESTED_K")
+            if (k !in 1..7) throw MonsterValidationException("E_DISCOVERY05_INVALID_K")
+            // Mae'r pedwar patch blaenorol yn cael eu defnyddio mewn cynhyrchu;
+            // ni cheir galwad at yr oracl prawf yn y llwybr hwn.
+            val c = context.calculationDay
+            val t = context.targetDay
+            val actionTag = dayTagPatchWrapper.dayTagWithFoundationScar(
+                c, legacyDayTagAdapter.oldDayTag(c))
+            val targetTag = dayTagPatchWrapper.dayTagWithFoundationScar(
+                t, legacyDayTagAdapter.oldDayTag(t))
+            val distance = distancePatchWrapper.patchDistance(
+                c, t, legacyDistanceAdapter.oldDistance(c, t)).inclusiveDistance
+            val direction = ExactInt.of(when {
+                t < c -> 1L
+                t == c -> 2L
+                else -> 3L
+            })
+            val counts = HiddenWorkCounts(
+                actionTag, targetTag, distance, actionTag + targetTag, direction)
+            val stoneTable = stonePatchWrapper.buildPatchedRows()
+            val physical = legacyHiddenDropAdapter.buildBackwardStorage(
+                counts, stoneTable.rows)
+            val wrongRead = legacyHiddenDropAdapter.legacyHiddenDirectByAssumedNearness(physical, k)
+            // Cyflwyno'r cyflwr yn atomig dim ond ar ôl llwyddiant pob cam.
+            context.discovery05PatchedStoneRows = stoneTable.rows
+            context.discovery05Patch04LegacyCalls = stoneTable.legacyCalls
+            context.discovery05BackwardStorage = physical
+            context.discovery05HiddenCount = 7
+            context.discovery05Actual = wrongRead
+            context.branchTrace.add("DISCOVERY_05")
+            context.diagnostics.add("DISCOVERY_05_BACKWARD_HIDDEN_DIRECT_ACCESS")
+            context.status = "LEGACY_HIDDEN_OBSERVED"
+            metrics.bump("discovery05.builds")
+            metrics.bump("discovery05.legacy.direct.read")
         }
         dispatcher.register("PATCH_04") { context ->
             validation.requireBootstrapContext(context)
@@ -337,6 +383,24 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY04_WRAP", e)
+        }
+    }
+
+    /** Cam 10: adeiladu hidden7 ... hidden1 a darllen y slot anghywir yn uniongyrchol. */
+    fun observeLegacyHiddenDrop(
+        calculationDay: ExactInt, targetDay: ExactInt, k: Int = 1
+    ): BaseMonsterContext {
+        require(k in 1..7) { "E_DISCOVERY05_K_RANGE" }
+        val context = prepare(calculationDay, targetDay)
+        context.discovery05RequestedK = k
+        context.phase = "DISCOVERY_05"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY05_WRAP", e)
         }
     }
 

@@ -259,3 +259,10 @@ Mae `StonePatchWrapper.stonePatch` yn cadw ciplun o'r hen res, yn galw'n wirione
 Mae `run-stage09-tests.sh` yn cynnwys atchweliadau Camau 1–8, pob un o'r 230 cydran gywir, cadw 224 anghysondeb DISCOVERY 04, prawf BigInteger annibynnol a gwarchodion perchnogaeth. Arhosir am PASS brodorol ar Kotlin 1.9.0/JDK 21 cyn newid `LAST_COMPLETED_STAGE=8`. Ni ddechreuwyd Cam 10.
 
 **Ardystiad Cam 9:** llwyddodd `sh run-stage09-tests.sh` ar gangen `Kotlin+Cymraeg` gyda Kotlin 1.9.0, JDK 21 a'r oracl normadol gwreiddiol. Cafwyd `STAGE09_PATCH_GREEN_0`, `STAGE09_WHOLE_TABLE_GREEN_230`, `STAGE09_BIGINT_INDEPENDENT_GREEN_230`, `STAGE09_PRESERVED_DISCOVERY04_RED_224` a `STAGE09_NATIVE_GREEN`, gyda holl atchweliadau Camau 1–8 yn PASS. **`LAST_COMPLETED_STAGE=9`**. Cam 10 (`DISCOVERY 05`) sydd nesaf; nid yw wedi dechrau. Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38186462459
+
+
+## Cam 10 — DISCOVERY 05: storio diferion cudd yn ôl
+
+Mae `LegacyHiddenDropAdapter` yn cyfrifo'r saith diferyn cudd drwy'r cyfrifon diwrnod a'r cerrig a gywirwyd eisoes. Mae'r tabl cyfernodau corfforol yn y drefn wrthdro, ond defnyddir cyfernod cywir y diferyn wrth ei gyfrifo. Cedwir y canlyniadau'n gorfforol fel `hidden7,hidden6,hidden5,hidden4,hidden3,hidden2,hidden1`. Mae'r hen ddarllenydd `legacyHiddenDirectByAssumedNearness` yn dychwelyd slot `k` fel petai'r storfa'n rhedeg ymlaen: ceir pedwar anghysondeb ar `k=1,2,6,7` ac un cyfatebiaeth ar `k=4`.
+
+Mae `BOOT → DISCOVERY_05` yn rhedeg PATCH 02/03/04 cyn y cam storio, yn cadw'r rhesi cerrig, y storfa gudd a'r darlleniad anghywir mewn cyd-destun ar wahân. Ceir prawf annibynnol BigInteger dros bum pâr o ddiwrnodau (35 gwerth cudd, 175 cydran carreg), gwarchodion a methiant strict bwriadol. Mae'r prawf brodorol llawn yn aros am GitHub Actions; **`LAST_COMPLETED_STAGE=9`** nes hynny. Ni weithredwyd PATCH 05.

@@ -274,3 +274,8 @@ Ni newidiwyd `mutateStonesWrong`. Cyn pob rhes newydd, cedwir ciplun o'r pum car
 ### Cam 9 — ardystiad brodorol PASS
 
 Llwyddodd y swydd `native-stage09-kotlin-cymraeg` (rhediad GitHub Actions `38186462459`, swydd `114609724515`) gyda'r oracl gwreiddiol ar Kotlin 1.9.0/JDK 21. Cadarnhawyd pob un o 19 marc a ddewiswyd o'r log swydd, gan gynnwys pob atchweliad Camau 1–8, 230 cydran wedi'u trwsio heb anghysondeb, 230 prawf BigInteger annibynnol, 45 galwad i'r mutator hanesyddol, a'r 224 anghysondeb DISCOVERY_04 a gadwyd. Mae Cam 9 wedi'i gwblhau; ni ddechreuwyd Cam 10.
+
+
+## Cam 10 — DISCOVERY 05: darllen cudd wedi'i wrthdroi
+
+Defnyddir y cerrig PATCH 04 cywir a'r cyfrifon PATCH 02/03 i greu saith gwerth cudd heb ymgynghori â'r oracl prawf. Yn fwriadol, mae'r storfa gorfforol yn trefnu hidden7 ... hidden1. Mae `legacyHiddenDirectByAssumedNearness` yn dychwelyd y slot k yn union, er mai hidden(8-k) sydd yno. Mae'r canolbwynt k=4 yn gywir trwy gyd-ddigwyddiad, a disgwylir pedwar gwahaniaeth ar k=1,2,6,7. Cedwir y cyflwr fesul galwad; nid yw cyfieithydd na chywiriad PATCH 05 yn bodoli. Bydd CI yn gwirio pob cam cyn ardystio Cam 10.
