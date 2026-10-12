@@ -12,7 +12,7 @@ public sealed record LegacyOverwrittenSauceCandidate(
 // المسار التاريخي يبني جميع القطرات والمزائج، لكنه يفقد ترتيب آخر قطرة.
 public sealed class LegacyOverwrittenDrop46Sauce
 {
-    private readonly VisibleDropsPatchPhaseHandler _visible=new();
+    private readonly VisibleDropPatchPhaseHandler _visible=new();
     private readonly LegacyBowlFactory _factory=new();
     private readonly BowlOrderPatchWrapper _order=new();
     private readonly BowlAliasPatchWrapper _alias=new();
