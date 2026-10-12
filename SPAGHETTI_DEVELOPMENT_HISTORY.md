@@ -535,3 +535,14 @@ do đó nhận hoán vị cuối thay vì hoán vị đầu.
 vết legacy và kết quả mới. Thêm 14 bài bao phủ 720 thứ tự,
 lịch 46 giọt, biên bội 720, số nguyên 2048 bit,
 chạy song song và chưa rót bát. Không bắt đầu giai đoạn 18.
+
+**Kiểm chứng thực tế:** CI trên Elixir 1.18.5 / Erlang/OTP 27
+hoàn tất 193 kiểm thử, 0 lỗi, không có cảnh báo biên dịch.
+Bốn hồi quy chuẩn giai đoạn 16 đều đạt với kỳ vọng nguyên vẹn;
+14 kiểm thử mới đạt; khóa tên chuẩn PASS độc lập.
+
+Hàm lịch sử giữ nguyên blob SHA
+`d553b2a637e54ca74eb7d6e90b8aab437ed7fc13`.
+Oracle test-only giữ nguyên blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Bản vá 08 kết thúc GREEN. Chưa bắt đầu DISCOVERY 09.

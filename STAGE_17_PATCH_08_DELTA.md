@@ -61,3 +61,24 @@ Không sửa `test/support/normative_reference.ex`.
 ## Tên commit
 
 Giai đoạn 17: vá hạng hoán vị trước khi gọi legacy
+
+## Kết quả CI đã xác minh
+
+- Commit triển khai: `d2c783c8e7d9819cdb9e9e433776e9a74b8331db`.
+- Elixir 1.18.5, Erlang/OTP 27; 30 tệp nguồn biên dịch.
+- 193 kiểm thử, 0 lỗi, 0 cảnh báo biên dịch.
+- Bốn hồi quy chuẩn Stage16 giữ nguyên và chuyển sang xanh.
+- 14 kiểm thử Stage17 mới đều đạt; 720 hoán vị chuẩn đầy đủ.
+- Khóa tên chuẩn độc lập PASS.
+- LegacyPermutationUnrank0 không đổi, blob SHA
+  `d553b2a637e54ca74eb7d6e90b8aab437ed7fc13`.
+- Oracle test-only không đổi, blob SHA
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- Giữ 46 thứ tự riêng trong context, chưa rót vào sáu bát.
+- Không thay main và chưa bắt đầu giai đoạn 18.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235528620
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235528637
+
+Kết thúc giai đoạn 17: GREEN đã xác minh.
+Điểm tiếp theo: giai đoạn 18 DISCOVERY 09 chưa bắt đầu.

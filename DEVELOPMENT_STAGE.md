@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=17
 CURRENT_KIND=PATCH
 CURRENT_PATCH=08
-LAST_COMPLETED_STAGE=16
+LAST_COMPLETED_STAGE=17
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyPermutationUnrank0 nguyên vẹn; BowlOrderManager chuyển one_based=rem(drop-1,720)+1 thành legacy_rank0=one_based-1 trước khi gọi hàm mở hạng cũ, giữ riêng 46 thứ tự trong context.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_17_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_17_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_17_PENDING
-CI_FAILURES=STAGE_17_PENDING
+CI_TESTS=193
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -303,5 +303,18 @@ Bốn hồi quy chuẩn của giai đoạn 16 giữ nguyên. Các bài
 kiểm soát chứng minh sai lệch cũ được chuyển sang xác minh
 legacy vẫn sai khi gọi trực tiếp nhưng đường sản xuất đúng.
 14 bài kiểm thử Stage17 bổ sung; tổng dự kiến 193 bài GREEN,
-không lỗi. LAST_COMPLETED_STAGE giữ 16 trước CI xác minh.
+không lỗi. LAST_COMPLETED_STAGE đã nâng lên 17 sau khi CI và khóa tên xác minh PASS.
 Không tiến tới giai đoạn 18 về vị trí rót bát.
+
+Giai đoạn 17 được xác minh trên Elixir 1.18.5, Erlang/OTP 27:
+193 kiểm thử, 0 thất bại, không có cảnh báo biên dịch.
+Bốn hồi quy chuẩn từ phát hiện 08 giữ nguyên kỳ vọng
+và đều đạt. 14 bài kiểm thử mới đều đạt.
+Khóa tên chuẩn độc lập PASS.
+Hàm LegacyPermutationUnrank0 giữ nguyên blob SHA:
+d553b2a637e54ca74eb7d6e90b8aab437ed7fc13.
+Oracle test-only giữ nguyên blob SHA:
+be1638f46b2190d617af0378a61b077bda10bf32.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235528620
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235528637
+Giai đoạn 17 đóng GREEN; tiếp theo giai đoạn 18 DISCOVERY 09.

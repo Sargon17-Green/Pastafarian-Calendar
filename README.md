@@ -586,3 +586,24 @@ legacy thô vẫn lệch một hạng. Thêm 14 bài kiểm thử mới
 các bội 720, số nguyên lớn, không trạng thái dùng chung
 và các bản vá trước. Không triển khai phép rót bát của
 DISCOVERY 09.
+
+## Kiểm chứng đóng giai đoạn 17
+
+GitHub Actions trên Elixir 1.18.5 / Erlang/OTP 27 xác nhận
+**193 kiểm thử, 0 thất bại và 0 cảnh báo biên dịch**.
+Bốn hồi quy chuẩn giai đoạn 16 đều chuyển sang đạt
+mà không đổi kỳ vọng; 14 bài kiểm thử mới đều đạt.
+Khóa tên chuẩn độc lập PASS.
+
+Hàm `LegacyPermutationUnrank0` không thay đổi so với
+giai đoạn 16; oracle test-only không thay đổi. Các hoán vị
+tính qua bản vá từ toàn bộ 720 hạng, cả hạng 1 và hạng 720,
+đều trùng với oracle.
+
+- [CI Stage17 193/193](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235528620)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235528637)
+
+Giai đoạn 17/55 kết thúc `GREEN`. Điểm tiếp theo là
+giai đoạn 18/55, `DISCOVERY 09`: lỗi các lần rót
+tham chiếu đến vị trí cũ thay vì danh tính bát cố định.
+Chưa bắt đầu giai đoạn 18.
