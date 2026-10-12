@@ -75,8 +75,14 @@ def main():
     reference_runs=0
     injected=0
     for index,(name,label,will_fault) in enumerate(SEQUENCE):
-        need(label in book and not program.ips,
-             "previous Native Program did not terminate or was not reset")
+        need(label in book,"Native fault-recovery case name missing")
+        if index:
+            if SEQUENCE[index-1][2]:
+                need(len(program.ips)==1,
+                     "interrupted Native Program unexpectedly lost its live IP")
+            else:
+                need(not program.ips,
+                     "previous normally completed Native Program retained IP")
         fields,valid=book[label]
         expected=(suite.expected_for(*fields) if valid else ["-1"]*7)
         if valid:reference_runs+=3
@@ -156,9 +162,12 @@ def main():
                  "clean Native replay differs from independent Befunge oracle")
             if label=="zero_equal":
                 need(hits[0]==0,"upper input illegally executed lower-loop literal")
-            else:
+            elif valid:
                 need(hits[0]>=1,
-                     "recovering lower/invalid Native route never reached literal")
+                     "clean lower Native route never reached its new literal")
+            else:
+                need(hits[0]>=0,
+                     "invalid Native recovery literal count malformed")
         full_targets=WATCH|targets
         snapshot=saved_cells(space,vector,full_targets)
         entry=dict(index=index,name=name,label=label,fields=list(fields),

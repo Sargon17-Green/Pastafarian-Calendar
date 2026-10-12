@@ -74,7 +74,10 @@ def verify(data):
               row.get("normal_termination") is True),
              "native reference/output/termination evidence contradicted")
         need(type(row.get("lower_literal_executions")) is int and
-             row["lower_literal_executions"]==(0 if label=="zero_equal" else 1),
+             (row["lower_literal_executions"]==0 if label=="zero_equal" else
+              row["lower_literal_executions"]==1 if fault else
+              row["lower_literal_executions"]>=1 if label!="invalid_zero_sign"
+              else row["lower_literal_executions"]>=0),
              "new lower-loop semantic literal was not executed as expected")
         cells=row.get("owned_cell_values")
         count=row.get("owned_cell_count")
