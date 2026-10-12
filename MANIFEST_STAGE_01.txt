@@ -19,6 +19,7 @@ docs/STAGE_01_AUDIT_ROUND11_2026-10-12.md
 docs/STAGE_01_AUDIT_ROUND12_2026-10-12.md
 docs/STAGE_01_AUDIT_ROUND13_2026-10-12.md
 docs/STAGE_01_AUDIT_ROUND14_2026-10-12.md
+docs/STAGE_01_AUDIT_ROUND15_2026-10-12.md
 lib/Pastafari/Monster/BaseContext.pm
 lib/Pastafari/Monster/BaseDispatcher.pm
 lib/Pastafari/Monster/BaseErrorBoundary.pm

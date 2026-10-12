@@ -48,6 +48,10 @@ jobs:
           while IFS= read -r -d '' file; do
             perl -Ilib -It/lib -c "$file"
           done < <(find lib t/lib -name '*.pm' -type f -print0 | sort -z)
+          # 在昂貴的全量跑測試之前先抓出頂層 .t 的編譯錯誤。
+          while IFS= read -r -d '' file; do
+            perl -Ilib -It/lib -c "$file"
+          done < <(find t -maxdepth 1 -name '*.t' -type f -print0 | sort -z)
       - name: 執行完整第一階段測試
         shell: bash
         run: |
