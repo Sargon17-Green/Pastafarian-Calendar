@@ -789,7 +789,7 @@ La PATCH 10 non viene introdotta.
 sbt -batch 'Test / runMain pastafari.Stage20Tests'
 ```
 
-Firma attesa RED: **24 PASS, 3 FAIL**
+Firma attesa RED: **26 PASS, 3 FAIL**
 per tre confronti normativi sul successore.
 720 ranghi, sei ciotole, 1.024 coppie signed
 deterministiche, BigInt di oltre 16.000 bit,

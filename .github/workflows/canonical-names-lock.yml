@@ -481,8 +481,8 @@ jobs:
           set -e
           cat stage20.log
           test "$rc" -ne 0
-          grep -Fq 'RISULTATO STADIO 20: 24 PASS, 3 FAIL' stage20.log
-          test "$(grep -Fc 'PASS — ' stage20.log)" -eq 24
+          grep -Fq 'RISULTATO STADIO 20: 26 PASS, 3 FAIL' stage20.log
+          test "$(grep -Fc 'PASS — ' stage20.log)" -eq 26
           test "$(grep -Fc 'FAIL — ' stage20.log)" -eq 3
           for label in 'ordine diretto' 'ordine inverso' 'giro finale'; do
             grep -Fq "FAIL — equivalenza normativa latch ${label} — Latch conserva ordine della goccia 45" stage20.log
