@@ -134,7 +134,21 @@ data class BaseMonsterContext(
     var discovery10LegacyPourCalls: Int = 0,
     var discovery10PermutationPatchCalls: Int = 0,
     var discovery10InPlaceWrites: Int = 0,
-    var discovery10InvocationCount: Int = 0
+    var discovery10InvocationCount: Int = 0,
+    var patch10InitialBowls: List<ExactInt>? = null,
+    var patch10VisibleDrops: List<ExactInt>? = null,
+    var patch10Steps: List<SnapshotBowlPatchOutcome>? = null,
+    var patch10FinalBowls: List<ExactInt>? = null,
+    var patch10OrderAt46: List<Int>? = null,
+    var patch10LegacyMutatorCalls: Int = 0,
+    var patch10CorrectedSnapshotCalls: Int = 0,
+    var patch10PatchedPourCalls: Int = 0,
+    var patch10FixedPourCalls: Int = 0,
+    var patch10PermutationPatchCalls: Int = 0,
+    var patch10LegacyWrites: Int = 0,
+    var patch10CorrectedWrites: Int = 0,
+    var patch10Applied: Boolean = false,
+    var patch10InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -207,7 +221,9 @@ class MonsterBootstrapManager(
     val pourPatchWrapper: PourPatchWrapper =
         PourPatchWrapper(legacyFixedPourAdapter),
     val legacyInPlaceBowlAdapter: LegacyInPlaceBowlAdapter =
-        LegacyInPlaceBowlAdapter(pourPatchWrapper)
+        LegacyInPlaceBowlAdapter(pourPatchWrapper),
+    val bowlSnapshotPatchWrapper: BowlSnapshotPatchWrapper =
+        BowlSnapshotPatchWrapper(legacyInPlaceBowlAdapter)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -381,6 +397,53 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("PATCH_10") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_PATCH10_CONTEXT_NOT_READY")
+            val initial = context.patch10InitialBowls
+                ?: throw MonsterValidationException("E_PATCH10_NO_INITIAL")
+            val visible = context.patch10VisibleDrops
+                ?: throw MonsterValidationException("E_PATCH10_NO_VISIBLE")
+            // Y mutator hanesyddol yn gyntaf ar glôn; snapshot wedyn.
+            val result = bowlSnapshotPatchWrapper.runPatchedSnapshots(
+                initial,visible)
+            check(result.steps.size == 46 &&
+                result.finalBowls.size == 7 &&
+                result.orderAt46.sorted() == listOf(1,2,3,4,5,6) &&
+                result.legacyMutatorCalls == 46 &&
+                result.correctedSnapshotCalls == 46 &&
+                result.patchedPourCalls == 46 &&
+                result.preservedFixedPourCalls == 46 &&
+                result.permutationPatchCalls == 46 &&
+                result.preservedLegacyWrites == 276 &&
+                result.correctedWrites == 276 &&
+                result.steps.all { step ->
+                    step.correctedWrites.map { it.position } == (1..6).toList() &&
+                    step.legacyStep.writes.size == 6 &&
+                    step.legacyStep.pourPatch.sourceIdsByPosition ==
+                        step.legacyStep.pourPatch.order.take(3)
+                }) { "E_PATCH10_RUN_SHAPE" }
+            // Dylai'r context aros yn wag tan llwyddiant pob cam.
+            context.patch10Steps = result.steps.toList()
+            context.patch10FinalBowls = result.finalBowls.toList()
+            context.patch10OrderAt46 = result.orderAt46.toList()
+            context.patch10LegacyMutatorCalls = result.legacyMutatorCalls
+            context.patch10CorrectedSnapshotCalls = result.correctedSnapshotCalls
+            context.patch10PatchedPourCalls = result.patchedPourCalls
+            context.patch10FixedPourCalls = result.preservedFixedPourCalls
+            context.patch10PermutationPatchCalls = result.permutationPatchCalls
+            context.patch10LegacyWrites = result.preservedLegacyWrites
+            context.patch10CorrectedWrites = result.correctedWrites
+            context.patch10Applied = true
+            context.patch10InvocationCount = 1
+            context.branchTrace.add("PATCH_10")
+            context.diagnostics.add("PATCH_10_ALL_SIX_FROM_SAME_SNAPSHOT")
+            context.status = "PATCHED_BOWL_SNAPSHOT"
+            metrics.bump("patch10.legacy.inplace.calls")
+            metrics.bump("patch10.corrected.snapshot.calls")
+            metrics.bump("patch10.applied")
         }
         dispatcher.register("DISCOVERY_10") { context ->
             validation.requireBootstrapContext(context)
@@ -888,6 +951,25 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 21: cywiro chwe bowl ar snapshot, cadw mutator byw ar glôn. */
+    fun applyBowlSnapshotPatch(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        initialBowls: List<ExactInt>, visibleDrops: List<ExactInt>
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.patch10InitialBowls = initialBowls.toList()
+        context.patch10VisibleDrops = visibleDrops.toList()
+        context.phase = "PATCH_10"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH10_WRAP", e)
         }
     }
 

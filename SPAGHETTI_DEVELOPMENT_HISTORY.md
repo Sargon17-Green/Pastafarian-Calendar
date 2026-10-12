@@ -522,3 +522,22 @@ a llwyddodd y swydd Kotlin a swydd cloi enwau.
 yw'r nesaf, heb ei ddechrau; rhaid cadw'r mutator
 etifeddol anghywir yn fyw. Ni adeiladwyd diferion
 gweledig cynhyrchu o fewn Cam 20.
+
+
+## Cam 21 — PATCH 10: clôn legacy a chwe darlleniad snapshot
+
+Mae `BowlSnapshotPatchWrapper.patch` yn galw'r hen
+`mutateBowlsWrong` yn wirioneddol ar glôn, gan gadw
+chwe ysgrifen a'r graith darlleniadau byw. Wedyn mae'n
+ailddefnyddio'r pours PATCH 09 cywir o'r un graith ac yn
+cyfrifo pob un o'r chwe bowl o'r **un hen snapshot**,
+gan ysgrifennu i restr newydd ar wahân.
+
+Mae `BOOT → PATCH_10` yn prosesu 46 diferion, gyda 46
+galwad legacy a 276 ysgrifen gywir. Mae'r profion yn
+mynnu 720/720 GREEN, 720/720 RED legacy wedi'u cadw,
+4,320 BigInteger GREEN, 21,600 hen ysgrifen anghywir
+a holl atchweliadau Camau 1–20. Nid oes adeiladwr
+diferion gweledig cynhyrchu o hyd.
+
+`LAST_COMPLETED_STAGE=20` nes PASS Kotlin brodorol.
