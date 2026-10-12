@@ -29,12 +29,12 @@ for g=1,11 do
  if g<=10 then
   assert(same(row,expected[g+1]),"Ranje legacy a pa deplase nan "..g)
   assert(not same(row,expected[g]),"Ranje legacy a korije twò bonè nan "..g)
-  assert(same(public,expected[g+1]))
+  assert(same(public,expected[g]))
   assert(ctx.status=="LEGACY_GRIND_RETURNED" and ctx.semanticState.missing==false)
   assert(ctx.diagnostics[1].code=="GRIND_ROW_SHIFTED_BY_ONE")
   assert(ctx.metrics["legacy.grind.missingTail"]==nil)
  else
-  assert(row==nil and public==nil)
+  assert(row==nil and same(public,expected[g]))
   assert(ctx.status=="LEGACY_GRIND_MISSING" and ctx.semanticState.missing==true)
   assert(ctx.diagnostics[1].code=="GRIND_11_ROW_MISSING")
   assert(ctx.metrics["legacy.grind.missingTail"]==1)

@@ -389,3 +389,31 @@ dwe rete vèt.
 **Pa gen PATCH 07 nan Stage 14.** Stage 15 sèlman pral kreye yon
 tab ak sentinel fizik nan endis 0 epi onz tounaj reyèl 1..11,
 san efase fonksyon legacy a ni sa li te fè.
+
+
+## Stage 15 — PATCH 07: sentinel nan plas 0, onz grind nan plas 1..11
+
+Nou pa modifye src/legacy_grinds.lua: oldGrindRow(g) kontinye mande move ranje
+nan depo istorik 0..10 epi li pa jwenn ranje 11. Kouch src/grind_patch.lua
+rele fonksyon legacy a reyèlman anvan koreksyon. Li bati buildWithSentinel()
+ak yon ranje {0,0,0,0,NONE} nan endis 0 ak onz ranje reyèl endis 1..11.
+Chak nouvo ranje g soti nan LegacyGrinds.originalPhysicalRow(g-1), san
+efase ni reekri tablo istorik la.
+
+grindRowSpaghetti ak grindPatchProbe itilize GRIND_PATCH. Kontèks la
+kenbe de komit, de tras, done istorik, done korije, metrik ak dyagnostik.
+legacyGrindProbe rete sou chemen orijinal la.
+
+visibleDropSpaghetti itilize PRIOR_PATCH, STONE_PATCH ak SAVE_PATCH ansanm
+ak onz grind korije yo. legacyVisibleDropProbe rete disponib pou
+montre mank onzyèm grind istorik la.
+
+Regresyon Stage 14 la vin vèt pou tout onz ranje yo. Nou kenbe
+stage14_legacy_regression_tests.lua ki toujou bay onz diferans istorik
+ak odit EXPECTED_RED egzak. Tès Stage 15 verifye 11 ranje, de tranzaksyon,
+izolasyon, endis ilegal ak nèf gout vizib sou twa pè jou kont oracle
+test-only la (99 grind nan total).
+
+Kòmand suite konplè: lua5.3 test/stage15_tests.lua .
+Rezilta espere: GREEN. Pa gen kòd Stage 16 ni permutation ranking.
+

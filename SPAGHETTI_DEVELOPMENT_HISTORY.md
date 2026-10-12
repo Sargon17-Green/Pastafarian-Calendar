@@ -347,3 +347,21 @@ Nan Stage 15 sèlman nou pral mete yon ranje sentinel nan plas fizik
 0 epi onz vrè ranje yo nan plas 1..11, pandan n ap konsève fonksyon
 indexing legacy a ak dyagnostik li. Pa entwodui fonksyon
 permutation Stage 16 oswa lòt travay ki vini pita.
+
+
+## Stage 15 — PATCH 07: kouch sentinel ki kenbe move endis istorik la
+
+Nan Stage 14, tab 0..10 la te sèvi mal pou 11 grind yo. Nou pa efase
+konpòtman sa a. Nou konstwi yon nouvo depo ak sentinel fizik nan plas 0,
+ak ranje reyèl 1..11, chak ranje sòti nan kopi ranje fizik legacy a.
+
+GRIND_PATCH rele LEGACY_GRIND_INDEX anvan li konsome tablo korije a.
+De komit semantik, de tras, metrik ak dyagnostik konsève aksè erone
+ansyen an ak rezilta konpetan nouvo a. Wout gout vizib la sèvi ak
+fòmil p1/p3/p7 atravè PATCH 06, wòch atravè PATCH 04, SAVE atravè
+PATCH 01 epi onz grind sa yo nan bon lòd.
+
+Prèv obligatwa yo enkli onz ranje korije, onz divèjans legacy,
+konpetisyon test-only kont nèf gout vizib ak 99 tounaj, ak regression
+tout etap 1..15. Tout travay Stage 16 rete entèdi nan patch sa a.
+

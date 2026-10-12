@@ -13,6 +13,7 @@ local HiddenPatch = require("hidden_patch")
 local LegacyPrior = require("legacy_prior")
 local PriorPatch = require("prior_patch")
 local LegacyGrinds = require("legacy_grinds")
+local GrindPatch = require("grind_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -131,8 +132,12 @@ end
 
 -- DISCOVERY 07: aksè sa yo li tab zero-based la ak endis 1..11 ki pa anfòm.
 function S.grindRowSpaghetti(grind)
-    local row = LegacyGrinds.execute(grind)
+    local row = GrindPatch.execute(grind)
     return row
+end
+
+function S.grindPatchProbe(grind)
+    return GrindPatch.execute(grind)
 end
 
 function S.legacyGrindProbe(grind)
@@ -141,11 +146,16 @@ end
 
 -- Wout gout vizib la rive jiska onzyèm tounaj kote tablo istorik la manke.
 function S.visibleDropSpaghetti(calculationDay, targetDay, visibleIndex, dropStore)
+    return GrindPatch.visibleDropPatched(calculationDay, targetDay, visibleIndex, dropStore)
+end
+
+-- Chemen istorik la kontinye ekspoze mank grind 11 pou odit separe.
+function S.legacyVisibleDropProbe(calculationDay, targetDay, visibleIndex, dropStore)
     return LegacyGrinds.visibleDropLegacy(calculationDay, targetDay, visibleIndex, dropStore)
 end
 
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 14", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 15", 0)
 end
 
 return S

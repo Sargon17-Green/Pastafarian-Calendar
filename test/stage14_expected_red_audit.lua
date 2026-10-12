@@ -1,7 +1,7 @@
 local root=arg[1] or "."
 local before=arg
 arg={root}
-local chunk=assert(loadfile(root.."/test/stage14_regression_tests.lua"))
+local chunk=assert(loadfile(root.."/test/stage14_legacy_regression_tests.lua"))
 local ok,message=pcall(chunk)
 arg=before
 assert(not ok,"Discovery 07 pa montre shift ranje grind yo")

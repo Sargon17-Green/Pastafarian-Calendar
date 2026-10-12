@@ -16,10 +16,11 @@ assert(s:find("PriorPatch.execute(dropStore,c,t,i,3)",1,true))
 assert(s:find("PriorPatch.execute(dropStore,c,t,i,7)",1,true))
 local facade=read("src/spaghetti.lua")
 assert(facade:find('local LegacyGrinds = require("legacy_grinds")',1,true))
+assert(facade:find('local GrindPatch = require("grind_patch")',1,true))
 assert(facade:find("function S.grindRowSpaghetti(grind)",1,true))
 assert(facade:find("function S.legacyGrindProbe(grind)",1,true))
 assert(facade:find("function S.visibleDropSpaghetti(calculationDay, targetDay, visibleIndex, dropStore)",1,true))
-for _,path in ipairs({"src/legacy_grinds.lua","src/spaghetti.lua"}) do
+for _,path in ipairs({"src/legacy_grinds.lua"}) do
  local code=read(path)
  for _,forbidden in ipairs({"normative_oracle","GRIND_TABLE_WITH_SENTINEL","GrindPatch",
     "oldPermutationUnrank0","oldNextBowlFixedName","bowlAlias","vaultOld"}) do

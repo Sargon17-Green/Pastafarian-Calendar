@@ -3,7 +3,7 @@ package.path=root.."/src/?.lua;"..root.."/test/?.lua;"..package.path
 local S=require("spaghetti")
 local O=require("normative_oracle")
 local c=O.FOUNDATION_DAY
-local result,report=S.visibleDropSpaghetti(c,c,1,{})
+local result,report=S.legacyVisibleDropProbe(c,c,1,{})
 assert(result==nil and report.status=="LEGACY_VISIBLE_INCOMPLETE")
 assert(report.missingGrind==11 and report.completedGrinds==10)
 assert(report.visibleIndex==1 and #report.trace==11)
