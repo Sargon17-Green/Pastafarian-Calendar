@@ -183,3 +183,7 @@ Corrected rejection-sampling rank selection short/wide दोन्ही domain
 ## Stage 28 DISCOVERY 14 — verified and closed
 
 Historical short-only choice assumes N<=M. The actual old method handles N<=M by invoking Stage27 short rejection, but for N>M it records blocked/invalid rank zero instead of hanging at zero acceptance bound. Full Stage27 production chain and old Stage26 modulo scar remain real and unchanged. Tests cover short and wide boundary discrepancies and preserve prior 13 historical reds; new 14th expected-red runs through a standalone verifier in npm test. GitHub Actions 38256920590 दोन्ही jobs SUCCESS. 2560 short cases all correct; 30 wide direct cases all blocked; 804 full runtime sequences with 238 wide blocked, 46,632 genuine shared writes. Fourteenth intentional-red verified via npm test. LAST_COMPLETED_STAGE=28; Stage29 not started.
+
+## Stage 29 PATCH 14 — CI submission
+
+Stage28 short-only historical zero rank for N>M remains unchanged and actually invoked. Production dispatcher reuses the real old short result when N<=M, and for N>M physically calls the already verified Stage27 M-adic Wide Choice on the saved answer ring. It does not recompute answer digits while rejecting full composite values. Canonical independent oracle, 2560 direct short, 30 wide boundary, 804 full historical 58-write traces, fault-injected rollback and 14 archived intentional-red tests. Stage30 not started. Native CI pending.
