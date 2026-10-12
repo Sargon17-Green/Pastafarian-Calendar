@@ -260,11 +260,13 @@ object Stage31Tests {
       eqv(r.correctedMonthId,47,"Mese")
       eqv(r.correctedDayInMonth,6,"Contatore")
     }
-    check("un anno lungo con mesi al limite resta corretto"){
-      val w=(1 to 47).flatMap(x=>Vector.fill(123)(x)).toVector
-      val r=patched(1,5780,Vector(w))
+    check("un anno lungo con 5778 giorni e' esattamente al limite"){
+      val w=(1 to 46).flatMap(x=>Vector.fill(123)(x)).toVector++
+        Vector.fill(120)(47)
+      val r=patched(1,5777,Vector(w))
+      eqv(w.length,5778,"Massimo normativo")
       eqv(r.correctedMonthId,47,"Mese")
-      eqv(r.correctedDayInMonth,123,"Giorno")
+      eqv(r.correctedDayInMonth,120,"Giorno")
     }
     check("la famiglia vuota viene respinta senza pubblicazione"){
       rejectArg("Vuota"){patched(1,0,Vector.empty)}
