@@ -56,12 +56,6 @@ jobs:
         run: |
           set -euo pipefail
           v version
-          v fmt -w ./pastafari/short_rejection_patch13.v
-          v fmt -w ./pastafari/patch13_test.v
-          v fmt -w ./pastafari/discovery13_witness_test.v
-          echo '=== STAGE27 V FORMAT DIFF START ==='
-          git diff -- ./pastafari/short_rejection_patch13.v ./pastafari/patch13_test.v ./pastafari/discovery13_witness_test.v
-          echo '=== STAGE27 V FORMAT DIFF END ==='
           v fmt -verify ./pastafari
       - name: Stage 1 — normative reference
         run: v test ./pastafari/normative_oracle_test.v

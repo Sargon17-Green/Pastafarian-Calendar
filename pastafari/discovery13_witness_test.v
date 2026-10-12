@@ -77,9 +77,7 @@ fn test_discovery13_modulo_bias_witness_and_legacy_dispatch() {
 	legacy := new_base_dispatcher().dispatch_legacy_biased_pick(m, n) or { panic(err.msg()) }
 	assert big_eq(legacy, big_sub(n, big_one()))
 	// የታሪኩ modulo ስህተት ይቀራል፤ ሆኖም production ትክክለኛ ነው።
-	patched := calendar_choose_rank_short_spaghetti(discovery13_stream(m, 1), n) or {
-		big_zero()
-	}
+	patched := calendar_choose_rank_short_spaghetti(discovery13_stream(m, 1), n) or { big_zero() }
 	assert big_eq(patched, big_one())
 	assert !big_eq(patched, legacy)
 }

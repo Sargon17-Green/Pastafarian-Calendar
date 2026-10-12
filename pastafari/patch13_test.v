@@ -19,8 +19,7 @@ fn patch13_reference(first BigInt, step int, n BigInt) (BigInt, BigInt, BigInt) 
 	mut k := big_zero()
 	for attempt in 0 .. 110 {
 		delta := if step == 1 { k } else { big_neg(k) }
-		x := big_add(big_one(), big_regular_mod(big_add(big_sub(first, big_one()),
-			delta), m))
+		x := big_add(big_one(), big_regular_mod(big_add(big_sub(first, big_one()), delta), m))
 		if big_cmp(x, limit) <= 0 {
 			return big_add(big_one(), big_regular_mod(big_sub(x, big_one()), n)), x, k
 		}
@@ -38,8 +37,9 @@ fn test_patch13_four_original_expected_red_boundaries() {
 	ranges := [half, half, near, near]
 	expected := [big_one(), big_one(), near, big_one()]
 	for i in 0 .. 4 {
-		got := calendar_choose_rank_short_spaghetti(patch13_stream(firsts[i], steps[i]),
-			ranges[i]) or { big_zero() }
+		got := calendar_choose_rank_short_spaghetti(patch13_stream(firsts[i], steps[i]), ranges[i]) or {
+			big_zero()
+		}
 		assert big_eq(got, expected[i])
 	}
 }
@@ -53,8 +53,9 @@ fn test_patch13_rejection_count_and_accepted_x() {
 	ranges := [half, half, near, near]
 	expected_rejected := [1, 2, 3, 1]
 	for i in 0 .. 4 {
-		result := ShortRejectionPatch13{}.choose(patch13_stream(firsts[i], steps[i]),
-			ranges[i]) or { panic(err.msg()) }
+		result := ShortRejectionPatch13{}.choose(patch13_stream(firsts[i], steps[i]), ranges[i]) or {
+			panic(err.msg())
+		}
 		rank, x, k := patch13_reference(firsts[i], steps[i], ranges[i])
 		assert big_eq(result.rank, rank)
 		assert big_eq(result.accepted_x, x)
@@ -86,20 +87,23 @@ fn test_patch13_hundred_rejections_backward_but_one_forward() {
 	m := patch13_m()
 	n := big_sub(m, big_from_int(100))
 	for step in [-1, 1] {
-		got := ShortRejectionPatch13{}.choose(patch13_stream(m, step), n) or {
-			panic(err.msg())
-		}
+		got := ShortRejectionPatch13{}.choose(patch13_stream(m, step), n) or { panic(err.msg()) }
 		rank, x, k := patch13_reference(m, step, n)
 		assert big_eq(got.rank, rank)
 		assert big_eq(got.accepted_x, x)
 		assert big_eq(got.rejected_count, k)
-		assert got.rejected_count.str() == (if step == -1 { '100' } else { '1' })
+		assert got.rejected_count.str() == (if step == -1 {
+			'100'
+		} else {
+			'1'
+		})
 	}
 }
 
 fn test_patch13_short_small_n_independently_matches_reference() {
 	m := patch13_m()
-	for n in [big_from_int(3), big_from_int(7), big_from_int(11), big_from_int(19)] {
+	for n in [big_from_int(3), big_from_int(7), big_from_int(11),
+		big_from_int(19)] {
 		for first in [big_one(), big_from_int(2), big_sub(m, big_one()), m] {
 			for step in [-1, 1] {
 				expected, x, count := patch13_reference(first, step, n)
@@ -120,12 +124,8 @@ fn test_patch13_preserves_the_original_legacy_error() {
 	n := big_add(big_floor_div(m, big_from_int(2)), big_one())
 	wrong := big_sub(n, big_one())
 	assert big_eq(old_biased_pick(m, n) or { big_zero() }, wrong)
-	assert big_eq(new_base_dispatcher().dispatch_legacy_biased_pick(m, n) or {
-		big_zero()
-	}, wrong)
-	assert (calendar_choose_rank_short_spaghetti(patch13_stream(m, 1), n) or {
-		big_zero()
-	}).str() == '1'
+	assert big_eq(new_base_dispatcher().dispatch_legacy_biased_pick(m, n) or { big_zero() }, wrong)
+	assert (calendar_choose_rank_short_spaghetti(patch13_stream(m, 1), n) or { big_zero() }).str() == '1'
 }
 
 fn test_patch13_direct_dispatcher_and_public_selection_agree() {
@@ -180,19 +180,20 @@ fn test_patch13_repeated_interleaving_does_not_change_streams() {
 }
 
 fn test_patch13_real_post_stir_query_keeps_input_immutable() {
-	bowls := [big_zero(), big_from_int(10), big_from_int(20), big_from_int(30),
-		big_from_int(40), big_from_int(50), big_from_int(60)]
+	bowls := [big_zero(), big_from_int(10), big_from_int(20),
+		big_from_int(30), big_from_int(40), big_from_int(50),
+		big_from_int(60)]
 	order := [6, 5, 4, 3, 2, 1]
 	after := calendar_post_stir12_spaghetti(bowls, order) or { panic(err.msg()) }
-	from_chain := calendar_post_stir_answer_stream_spaghetti(bowls, order, 6,
-		big_from_int(21)) or { panic(err.msg()) }
+	from_chain := calendar_post_stir_answer_stream_spaghetti(bowls, order, 6, big_from_int(21)) or {
+		panic(err.msg())
+	}
 	direct := calendar_answer_stream_spaghetti(after.bowls, after.order_for_query, 6,
 		big_from_int(21)) or { panic(err.msg()) }
 	assert big_eq(from_chain.first, direct.first)
 	assert from_chain.step == direct.step
-	assert big_eq(calendar_choose_rank_short_spaghetti(from_chain, patch13_m()) or {
-		big_zero()
-	}, from_chain.first)
+	assert big_eq(calendar_choose_rank_short_spaghetti(from_chain, patch13_m()) or { big_zero() },
+		from_chain.first)
 	assert bowls[6].str() == '60'
 	assert order == [6, 5, 4, 3, 2, 1]
 }
