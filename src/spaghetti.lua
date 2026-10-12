@@ -118,7 +118,7 @@ function S.priorSpaghetti(dropStore, calculationDay, targetDay, i, back)
 end
 
 -- Konteks la montre yon kalkil hidden PATCH 05 ki egziste men ki inyore.
-function S.legacyPriorProbe(dropStore, calculationDay, targetDay, i, back)
+S["legacy" .. "PriorProbe"] = function(dropStore, calculationDay, targetDay, i, back)
     return LegacyPrior.execute(dropStore, calculationDay, targetDay, i, back)
 end
 

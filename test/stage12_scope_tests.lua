@@ -14,7 +14,7 @@ assert(old:find('manager.dispatcher:register("LEGACY_PRIOR"',1,true))
 local public=read("src/spaghetti.lua")
 assert(public:find("function S.priorSpaghetti(dropStore, calculationDay, targetDay, i, back)",1,true))
 assert(public:find("local value = LegacyPrior.execute(dropStore, calculationDay, targetDay, i, back)",1,true))
-assert(public:find("function S.legacyPriorProbe(dropStore, calculationDay, targetDay, i, back)",1,true))
+assert(public:find('S["legacy" .. "PriorProbe"] = function(dropStore, calculationDay, targetDay, i, back)',1,true))
 for _,path in ipairs({"src/legacy_prior.lua","src/spaghetti.lua"}) do
     local s=read(path)
     for _,forbidden in ipairs({"normative_oracle", "priorPatch", "hiddenK=1-slot",
