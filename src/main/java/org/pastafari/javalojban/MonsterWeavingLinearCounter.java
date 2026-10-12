@@ -407,6 +407,7 @@ public final class MonsterWeavingLinearCounter {
     private long siblingPrefixDotCalls;
     private long siblingPrefixMonthTransitions;
     private long siblingPrefixClosedFormTransitions;
+    private long siblingPrefixSharedWeightHits;
 
     long tailFunctionalReuseHitCount() {
         synchronized (tailFunctionalLock) {
@@ -448,6 +449,25 @@ public final class MonsterWeavingLinearCounter {
         synchronized (tailFunctionalLock) {
             return siblingPrefixClosedFormTransitions;
         }
+    }
+
+    long siblingPrefixSharedWeightHitCount() {
+        synchronized (tailFunctionalLock) {
+            return siblingPrefixSharedWeightHits;
+        }
+    }
+
+    private BigInteger unconstrainedPrefixTotal(State child, int cut) {
+        int days = child.remaining[child.closed];
+        BigInteger total = ONE;
+        for (int month = child.closed + 1; month < cut; month++) {
+            int additional = child.remaining[month];
+            int newDays = days + additional;
+            total = total.multiply(
+                combinations(newDays - 1, additional - 1));
+            days = newDays;
+        }
+        return total;
     }
 
     private TailFunctional commonSiblingTail(State parent,
@@ -580,12 +600,36 @@ public final class MonsterWeavingLinearCounter {
             prefixDays += parent.remaining[month];
         }
         TailFunctional coefficient = commonSiblingTail(parent, cut, prefixDays);
+        BigInteger sharedWeight = null;
         for (int month = parent.closed; month < lengths.length; month++) {
             if (!parent.canTake(month, lengths)) continue;
             State child = new State(parent);
             child.take(month, lengths);
-            branchSizes[month] = child.closed == lengths.length ? ONE
-                : siblingPrefixDot(child, cut, coefficient);
+            if (child.closed == lengths.length) {
+                branchSizes[month] = ONE;
+            } else if (month < parent.opened) {
+                BigInteger scalar = unconstrainedPrefixTotal(
+                    child, parent.opened);
+                if (sharedWeight == null) {
+                    BigInteger direct =
+                        siblingPrefixDot(child, cut, coefficient);
+                    BigInteger[] quotient = direct.divideAndRemainder(scalar);
+                    if (quotient[1].signum() != 0) {
+                        throw new IllegalStateException(
+                            "E_WEAVE_SIBLING_SHARED_RATIO");
+                    }
+                    sharedWeight = quotient[0];
+                    branchSizes[month] = direct;
+                } else {
+                    branchSizes[month] = sharedWeight.multiply(scalar);
+                    synchronized (tailFunctionalLock) {
+                        siblingPrefixSharedWeightHits++;
+                    }
+                }
+            } else {
+                branchSizes[month] =
+                    siblingPrefixDot(child, cut, coefficient);
+            }
         }
         return branchSizes;
     }
