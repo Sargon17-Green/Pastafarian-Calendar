@@ -44,3 +44,24 @@ Dim ond os bydd `STAGE18_FULL_NATIVE_EXPECTED_RED_COMPLETE`
 gyda Kotlin 1.9.0/JDK 21 a GitHub Actions SUCCESS y caiff
 `LAST_COMPLETED_STAGE` newid i 18. Y cam nesaf: 19 PATCH 09
 — `bowlAlias[position] = order[position]`, heb gyffwrdd â'r graith.
+
+
+## Ardystiad brodorol Cam 18 — COMPLETE
+
+Ar commit `3831f1aa90d8fbb422cd64b4c8041240ad3254c0`, llwyddodd GitHub Actions
+[`38256135742`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38256135742),
+swydd `native-stage18-kotlin-cymraeg` `114834585726`, ar
+Kotlin 1.9.0/JDK 21 gyda'r oracl git gwreiddiol.
+Gwelwyd **38 marc** gwirio yng nghynnwys gwirioneddol y log:
+PASS holl Gamau 1–17; 714/720 RED, 6 MATCH damweiniol a
+1,800 arllwys anghywir; 46 cylch gwrthdroad RED, hunaniaeth
+MATCH, a mewnbwn naturiol yr oracl RED; 4,320 tyst BigInteger
+gyda 4,284 RED, 36 MATCH, 10,800 cell anghywir; strict
+RED bwriadol, BOOT, replay, ownership, ac atchweliadau.
+Gwelwyd `STAGE18_FULL_NATIVE_EXPECTED_RED_COMPLETE`; llwyddodd
+y swydd Kotlin a'r clo enwau (SUCCESS). Yr unig rybudd gweithredu
+oedd rhybudd Node.js 20 GitHub Actions digyswllt â'r mathemateg.
+
+**`LAST_COMPLETED_STAGE=18`** a `EXPECTED_REPOSITORY_STATE=EXPECTED_RED`,
+fel y dylai fod i gam DISCOVERY. Cam 19 (`PATCH 09`) yw'r nesaf,
+heb ei ddechrau. Nid yw'r graith etifeddol wedi'i dileu.
