@@ -199,6 +199,12 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyUnsealedBowlQuestion(
             calculationDay,targetDay,queriedBowlId,seal);
 
+    // الرقعة الثالثة عشرة: الجواب الأول والاتجاه مع الحاتم داخل المربع الصحيح.
+    public static LegacyBowlQuestionResult EvaluateBowlQuestion(
+        BigInteger calculationDay,BigInteger targetDay,int queriedBowlId,int seal)
+        => new MonsterManager().EvaluateBowlQuestion(
+            calculationDay,targetDay,queriedBowlId,seal);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

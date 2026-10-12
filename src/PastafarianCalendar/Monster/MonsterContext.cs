@@ -122,6 +122,9 @@ public sealed class MonsterContext
     public int? LegacyBowlQuestionSeal { get; set; }
     public LegacyBowlQuestionResult? LegacyUnsealedBowlQuestionResult { get; set; }
 
+    // الرقعة الثالثة عشرة: الجواب المختوم الصحيح منفصل عن الشاهد القديم.
+    public LegacyBowlQuestionResult? PatchedBowlQuestionResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

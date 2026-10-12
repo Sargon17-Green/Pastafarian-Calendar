@@ -542,6 +542,38 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("تغيّر شاهد الخطأ في سؤال الصلصة.");
     }
 
+
+    // يُقارن المرشح بمسار الرقعة المحلي بعد إثبات صحة جميع الطبقات القديمة.
+    // لا تُستخدم أبداً صيغة المرجع الاختباري داخل الإنتاج.
+    public void ValidatePatchedBowlQuestion(
+        MonsterContext context, PatchedBowlQuestionCandidate candidate)
+    {
+        if (context is null ||
+            context.PatchedBowlQuestionResult is not null ||
+            context.LegacyUnsealedBowlQuestionResult is not null ||
+            context.LegacyFixedNextBowlResult.HasValue ||
+            context.PatchedNextBowlResult.HasValue ||
+            context.PatchedSauceFinalBowls is not null ||
+            context.PatchedVisibleDrops is not null ||
+            context.LegacyQueriedBowlId is not int queried || queried is < 1 or > 6 ||
+            context.LegacyBowlQuestionSeal is not int seal || seal is not (21 or 31) ||
+            candidate is null || candidate.Historical is null ||
+            candidate.Answer is null ||
+            candidate.Answer.First < 1 ||
+            candidate.Answer.DirectionStep is not (1 or -1))
+            throw new MonsterValidationException("مرشح رقعة السؤال مختل أو السياق مشغول.");
+
+        // حفاظاً على العيب القديم، يُرفض تصحيح الشاهد القديم نفسه.
+        ValidateLegacyUnsealedBowlQuestion(context,candidate.Historical);
+        var historical=candidate.Historical;
+        var sauce=historical.Historical.Historical.Sauce.Patched;
+        var next=historical.Historical.NextBowlId;
+        var correct=new BowlQuestionSealPatchWrapper().Patch(
+            sauce.FinalBowls,queried,next,seal);
+        if (candidate.Answer != correct)
+            throw new MonsterValidationException("جواب الرقعة لا يطابق حاتم السؤال وترتيب الأوعية.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -648,6 +680,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyFixedNextBowlPhaseHandler _legacyFixedNextBowl;
     private readonly PatchedNextBowlPhaseHandler _patchedNextBowl;
     private readonly LegacyUnsealedBowlQuestionPhaseHandler _legacyUnsealedQuestion;
+    private readonly PatchedBowlQuestionPhaseHandler _patchedBowlQuestion;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -677,6 +710,7 @@ public sealed class MonsterDispatcher
         _legacyFixedNextBowl = new LegacyFixedNextBowlPhaseHandler();
         _patchedNextBowl = new PatchedNextBowlPhaseHandler();
         _legacyUnsealedQuestion = new LegacyUnsealedBowlQuestionPhaseHandler();
+        _patchedBowlQuestion = new PatchedBowlQuestionPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -1425,6 +1459,71 @@ public sealed class MonsterDispatcher
         context.Phase=context.Status;
     }
 
+
+    public void DispatchPatchedBowlQuestion(MonsterContext context)
+    {
+        if (context is null ||
+            !string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("رقعة السؤال تتطلب تأسيس السياق.");
+        if (context.LegacyQueriedBowlId is not int id || id is < 1 or > 6 ||
+            context.LegacyBowlQuestionSeal is not int seal || seal is not (21 or 31) ||
+            context.PatchedBowlQuestionResult is not null ||
+            context.LegacyUnsealedBowlQuestionResult is not null ||
+            context.LegacyFixedNextBowlResult.HasValue ||
+            context.PatchedNextBowlResult.HasValue ||
+            context.LegacySauceFinalBowls is not null ||
+            context.PatchedSauceFinalBowls is not null ||
+            context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سؤال الرقعة الثالثة عشرة غير صالح أو مكرر.");
+
+        var candidate=_patchedBowlQuestion.Handle(context);
+        var questionOld=candidate.Historical;
+        var nextPatched=questionOld.Historical;
+        var nextOld=nextPatched.Historical;
+        var source=nextOld.Sauce.Historical.Source;
+        var sauceOld=nextOld.Sauce.Historical;
+        var sauceCorrect=nextOld.Sauce.Patched;
+
+        _validation.ValidateVisibleDropPatch(context,source);
+        _validation.ValidateLegacyOverwrittenSauce(context,sauceOld);
+        _validation.ValidateProtectedDrop46Sauce(context,nextOld.Sauce);
+        _validation.ValidateLegacyFixedNextBowl(context,nextOld);
+        _validation.ValidatePatchedNextBowl(context,nextPatched);
+        _validation.ValidateLegacyUnsealedBowlQuestion(context,questionOld);
+        _validation.ValidatePatchedBowlQuestion(context,candidate);
+
+        // كل المعالجة قبل الالتزام. يتحول السياق في خطوة واحدة إلى نتيجة الرقعة.
+        context.PatchedCountsResult=source.Counts;
+        context.PatchedStoneRows=source.Stones;
+        context.LegacyHiddenReversed=source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess=source.HiddenAccessor;
+        context.PatchedVisibleDrops=source.Visible;
+        context.LegacyDiagnosticDrop46Order=sauceOld.DiagnosticDrop46Order;
+        context.LegacyOverwrittenQueryOrder=sauceOld.OverwrittenQueryOrder;
+        context.LegacyPostStirOrders=sauceOld.PostStirOrders;
+        context.LegacySauceBowlsAfterDrops=sauceOld.BowlsAfterDrops;
+        context.LegacySauceFinalBowls=sauceOld.FinalBowls;
+        context.PatchedOrderAt46Latch=sauceCorrect.OrderAt46Latch;
+        context.PatchedSauceBowlsAfterDrops=sauceCorrect.BowlsAfterDrops;
+        context.PatchedSauceFinalBowls=sauceCorrect.FinalBowls;
+        context.PatchedPostStirOrders=sauceCorrect.PostStirOrders;
+        context.LegacyFixedNextBowlResult=nextOld.LegacyNextBowlId;
+        context.PatchedNextBowlResult=nextPatched.NextBowlId;
+        context.LegacyUnsealedBowlQuestionResult=questionOld.Answer;
+        context.PatchedBowlQuestionResult=candidate.Answer;
+
+        context.BranchTrace.Add("LEGACY_OVERWRITTEN_DROP46_ORDER_WITNESS");
+        context.BranchTrace.Add("PROTECTED_DROP46_ORDER_LATCH_WITNESS");
+        context.BranchTrace.Add("LEGACY_FIXED_NEXT_BOWL_WITNESS");
+        context.BranchTrace.Add("PATCHED_NEXT_BOWL_ORDER_WITNESS");
+        context.BranchTrace.Add("LEGACY_UNSEALED_BOWL_QUESTION_WITNESS");
+        context.BranchTrace.Add("PATCHED_SEALED_BOWL_QUESTION");
+        _metrics.Bump(context,"legacy.unsealed.bowl.question.witness");
+        _metrics.Bump(context,"patched.sealed.bowl.question.dispatch");
+        context.Status="PATCHED_SEALED_BOWL_QUESTION_COMPLETE";
+        context.Phase=context.Status;
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -1938,6 +2037,25 @@ public sealed class MonsterManager
             calculationDay,targetDay,queriedBowlId,seal)
             .LegacyUnsealedBowlQuestionResult ??
             throw new MonsterValidationException("لم يكتمل سؤال الصلصة التاريخي.");
+
+
+    public MonsterContext ExecutePatchedBowlQuestion(
+        BigInteger calculationDay,BigInteger targetDay,int queriedBowlId,int seal)
+    {
+        if (queriedBowlId is < 1 or > 6 || seal is not (21 or 31))
+            throw new MonsterValidationException("رقم الوعاء أو حاتم السؤال غير صالح.");
+        var context=Prepare(calculationDay,targetDay);
+        context.LegacyQueriedBowlId=queriedBowlId;
+        context.LegacyBowlQuestionSeal=seal;
+        _dispatcher.DispatchPatchedBowlQuestion(context);
+        return context;
+    }
+
+    public LegacyBowlQuestionResult EvaluateBowlQuestion(
+        BigInteger calculationDay,BigInteger targetDay,int queriedBowlId,int seal)
+        => ExecutePatchedBowlQuestion(calculationDay,targetDay,queriedBowlId,seal)
+            .PatchedBowlQuestionResult ??
+            throw new MonsterValidationException("لم يكتمل جواب سؤال الصلصة المصحح.");
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

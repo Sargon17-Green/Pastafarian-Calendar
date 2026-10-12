@@ -180,3 +180,5 @@ jobs:
         run: |
           test "${{ steps.discovery_unsealed_question_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage26Tests/PastafarianCalendar.Stage26Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ رقعة حاتم سؤال الصلصة الثالثة عشرة مع المرجع وحفظ ندبة القديم
+        run: dotnet run --project tests/PastafarianCalendar.Stage27Tests/PastafarianCalendar.Stage27Tests.csproj --configuration Release
