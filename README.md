@@ -551,7 +551,7 @@ epi kite tout erè depandans pwopaje. Li pa ajoute okenn operasyon
 pou vide, melanje oubyen tounen bòl yo.
 
 Suite `test/stage17_tests.lua` teste prèv legacy a, 720 rank, 237 antre
-BigInt laj oubyen negatif, 15 piki erè, ak 9 gout vizib reyèl.
+BigInt laj oubyen negatif, 15 piki erè, 9 gout vizib reyèl, 180 ka entèlasman ak 8 apèl nested.
 Nan CI, odit EXPECTED_RED Stage 16 la tounen yon verifikasyon pozitif
 ki egzije menm mesaj echèk istorik la. Stage 17 pa dwe vin COMPLETE
 anvan tout travay natif CI yo pase.
