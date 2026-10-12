@@ -469,7 +469,11 @@ object Stage29Tests {
       val current=text.linesIterator.find(_.startsWith("CURRENT_STAGE="))
         .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
       truth(current>=29,"Stage29")
-      truth(text.contains("CURRENT_PATCH=14"),"PATCH 14")
+      if(current==29)
+        truth(text.contains("CURRENT_PATCH=14"),"PATCH 14 attiva")
+      else
+        truth(text.contains("STAGE_29_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_55_PASS_0_FAIL"),
+          "PATCH 14 storica certificata")
       truth(text.contains("STAGE_28_NATIVE_VERIFICATION=PASS_EXPECTED_RED_41_PASS_3_FAIL"),
         "Stage28")
       truth(text.contains("STAGE_29_NATIVE_VERIFICATION="),"Stato")
