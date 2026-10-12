@@ -19,4 +19,16 @@
 - `test/discovery10Red.ts`: `DISCOVERY_10_EXPECTED_RED mismatches=40 matches=8 witnesses=8 positions=48` हा दहावा स्वतंत्र intentional expected-red पुरावा, process nonzero exit.
 - Stage 1–19 tests, सर्व नऊ जुने intentionally-red archive tests, TypeScript native typecheck आणि canonical name lock अद्याप तपासले जातील.
 
-सध्याची स्थिती: **GitHub Actions verification प्रलंबित.** Stage 20 पूर्ण म्हणून नोंद फक्त actual CI SUCCESS नंतर; Stage 21 चे source code नाही.
+सध्याची स्थिती: **GitHub Actions पूर्ण PASS**, तसेच स्वतंत्र intentionally-red इतिहास प्रमाणित. Verified implementation commit `57deea966018d29384ea2ad954e100f7d66a0fb5`, [run 38214265315](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38214265315), `verify` व `stage20-typescript-marathi` jobs SUCCESS; TypeScript typecheck, Stages 1–20 regressions, सर्व दहा historical expected-red scripts व canonical lock PASS.
+
+```text
+STAGE_20_DISCOVERY_10_GUARDS_PASS witnesses=8 positions=48 mismatches=40 matches=8 overwrittenReads=48 contaminatedPositions=40
+STAGE_20_DISCOVERY_10_PROPERTIES_PASS orders=720 rankCells=4320 rankMismatches=3600 rankMatches=720 cases=2304 cells=13824 mismatches=11520 matches=2304 overwritten=13824 realPairs=12 realDrops=552 realErrors=2760 evolvingPairs=12 evolvingDrops=552 evolvingMismatches=72 seeded=1024 giant=8
+DISCOVERY_10_EXPECTED_RED mismatches=40 matches=8 witnesses=8 positions=48
+```
+
+आठ boundary witnesses साठी 40 जुन्या divergent values, 8 first-position matches. सर्व 720 order ranks मध्ये 3600 चुकीचे व 720 matches. 552 वास्तविक reference drops वर 2760 जुने divergent values. 12 पूर्णपणे विकसित होणाऱ्या 46-drop दिवस-जोड्यांच्या bowl states मध्ये **72 final divergences (प्रत्येक वेळी सहाही bowls वेगळे)**. Test-only evolving reference हा `applyVisibleDropsToBowls` शी देखील जुळतो. 1024 seeded आणि 8 giant signed cases सह exact bigint प्रमाण.
+
+पहिला CI run `38213861079` test-only दोन TypeScript typing errors मुळे अयशस्वी झाला; test-only readonly instrumentation व independent bigint reference सुस्पष्ट केले. दुसरा `38214091054` मध्ये test instrumentation ची चुकीची seventh-vs-eighth argument index चूक होती; `test/discovery10.ts` मध्ये argument index दुरुस्त केल्यावर `38214265315` पूर्ण PASS. Production `src/discovery10LegacyInPlaceStir.ts` मध्ये या दुरुस्त्यांदरम्यान कोणताही बदल नाही.
+
+**Stage 21 PATCH 10** पूर्वी उत्पादनात `vaultOld` / `pending` shadow writes बसवलेले नाहीत.

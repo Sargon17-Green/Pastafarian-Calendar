@@ -210,3 +210,11 @@ Stage 17 ची `oneBased=regularMod(drop-1,720)+1`, `legacyRank0=oneBased-1`, `
 **Stage 19 verified:** [GitHub Actions 38212645315](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38212645315), commit `616df1cad4f24a4bd596955759dc1a488cdd1a3d`, दोन्ही jobs PASS. `STAGE_19_PATCH_09_GUARDS_PASS witnesses=8 cells=24 mismatches=0 historicalWrong=16 historicalMatches=8 aliases=6 originalCalls=2`; `STAGE_19_PATCH_09_PROPERTIES_PASS cases=3328 cells=9984 mismatches=0 rankOrders=720 rankWrong=1800 rankMatches=360 realPairs=12 realDrops=552 realWrong=1383 realMatches=273 seeded=2048 giant=8`.
 
 पुढील एकमेव टप्पा **20 — DISCOVERY 10**, जुन्या in-place bowl stir contamination चा स्वतंत्र historical error demonstration. Stage 21 मध्येच vaultOld/pending clone fix लावावा. `HANDOFF_STAGE_19.md` पहा.
+
+## टप्पा 20/55 — DISCOVERY 10: जुनी in-place bowl contamination
+
+`src/discovery10LegacyInPlaceStir.ts` मध्ये `LegacyInPlaceBowlStirAdapter.stirInPlace` हा जुनाच दोष दाखवणारा source मार्ग आहे: सहा positions मधून गणना करताना तो `workingBowls[id-1]` लगेच overwrite करतो आणि पुढचे `prev`/`next` reads आधीच्या writes चे बदललेले values पाहतात. त्याआधीची Stage 19 corrected pours वापरल्यामुळे या stage मध्ये मूळ in-place दोष स्वतंत्रपणे तपासता येतो. Source मध्ये Stage 21 `vaultOld`/`pending` patch अजून **नाही**.
+
+`npm run test:discovery10` मध्ये 8 boundary witnesses, 720 permutation orders, 12 canonical day-pairs × 46 drops, अतिरिक्त 12 पूर्ण evolving 46-drop histories, 1024 seeded signed cases व 8 giant signed bigint cases आहेत. Test-only `normativeSingleStir` सर्व positions एकाच जुन्या bowl state वरून reference म्हणून मोजतो. `npm run test:discovery10:red` हे दहावे deliberately-red history script असून CI त्याचा nonzero exit अपेक्षित मानते.
+
+**Verified:** [GitHub Actions 38214265315](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38214265315), implementation commit `57deea966018d29384ea2ad954e100f7d66a0fb5`, दोन्ही jobs PASS. 720 permutations ×6 = 4320 rows मधून 3600 historical mismatches आणि 720 योगायोगचे matches; 2304 calls ×6 = 13824 positions मध्ये 11520 mismatches, 2304 matches; 12 पूर्ण evolving sequences मध्ये 72 final bowl mismatches. दहा archived expected-red पुरावे कायम. पुढे Stage 21 PATCH 10; `HANDOFF_STAGE_20.md` वाचा.
