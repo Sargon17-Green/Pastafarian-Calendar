@@ -584,3 +584,10 @@ La validazione indipendente ricostruisce entrambi, protegge
 snapshot e report, senza usare l'oracolo dei test in produzione.
 L'input è un vettore sintetico legale già preparato, non la
 famiglia completa derivata dalla salsa.
+
+La run GitHub Actions 38273709294 sul commit
+e9b998203355ac6f2df50a39d8c2ff106d0cd1f6 ha
+confermato 34/34 job; il wrapper corretto produce
+65 PASS/0 FAIL. La certificazione riguarda la tessitura
+annuale sintetica già fornita, non il calcolo normativo completo
+della salsa e della selezione delle famiglie annuali.

@@ -1292,3 +1292,18 @@ con esattamente tre divergenze; Stage33 è GREEN.
 Come le fasi vicine, lo scenario è sintetico e usa sequenze
 annuali già selezionate. L'integrazione completa della salsa
 e della famiglia canonica non è dichiarata finita.
+
+### Certificazione nativa dello Stage33
+
+La [run GitHub Actions 38273709294](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38273709294)
+sul commit `e9b998203355ac6f2df50a39d8c2ff106d0cd1f6`
+si è conclusa **SUCCESS in 34/34 job**, con **65 PASS e 0 FAIL**
+nella suite PATCH16. La DISCOVERY16 mantiene la firma
+**58 PASS e 3 FAIL intenzionali**, mentre Stage31 conserva
+66 PASS/0 FAIL e tutte le suite pregresse le proprie firme.
+
+I tre guasti storici sono riprodotti nei risultati legacy,
+non corretti a posteriori. Il contatore vero usa l'occorrenza
+dell'ID nel prefisso annuale senza ipotizzare mesi contigui.
+Questa verifica riguarda una tessitura sintetica valida già
+selezionata e non rivendica l'integrazione della salsa normativa.

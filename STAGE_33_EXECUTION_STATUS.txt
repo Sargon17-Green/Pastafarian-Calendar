@@ -1,0 +1,41 @@
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
+STADIO=33
+TIPO=PATCH_16
+RISULTATO_ATTESO=GREEN
+RISULTATO_REALE=65_PASS_0_FAIL
+PATCH_WRAPPER=Patch16ContiguousMonthDayWrapper.contiguousMonthDayPatch
+DISCOVERY_16_LEGACY_PRESERVED=YES
+LEGACY_CONTIGUOUS_GUESS_PRESERVED=YES
+PATCH_01_TO_15_PRESERVED=YES
+STAGE34_INTRODUCED=NO
+MONTH_DAY_PREFIX_COUNT=PASS
+MONTH_IDS_INTERLEAVED=PASS
+MAX_YEAR_DAYS=5778
+MAX_MONTH_COUNT=47
+MONTH_DAYS_RANGE=4_TO_123
+DETERMINISTIC_VECTORS=4096
+FULL_YEAR_252_DAY_CHECKS=PASS
+VALIDATOR_INDEPENDENT=PASS
+INPUT_SNAPSHOT=PASS
+ORACOLO_NORMATIVO=TEST_ONLY
+DOMAIN=SYNTHETIC_ALREADY_SELECTED_ANNUAL_WEAVES
+GITHUB_ACTIONS_RUN=38273709294
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38273709294
+GITHUB_ACTIONS_HEAD_SHA=e9b998203355ac6f2df50a39d8c2ff106d0cd1f6
+GITHUB_ACTIONS_JOBS=34
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage33Tests'
+VERIFIED_ON=2026-10-12
+REGRESSIONE_STAGE01_TO_32=PASS_PREVIOUS_SIGNATURES
+REGRESSIONE_STAGE31=66_PASS_0_FAIL
+REGRESSIONE_STAGE32=58_PASS_3_FAIL_INTENTIONAL
+REGRESSIONE_STAGE33=65_PASS_0_FAIL
+
+PATCH16 invoca veramente la formula legacy e preserva la sua uscita,
+anche se e' negativa, mentre il mese e il giorno canonico sono
+ottenuti dalla tessitura annuale gia' selezionata e dal prefisso
+dei suoi ID. Il validator indipendente ricostruisce entrambi gli
+output senza richiamare il wrapper PATCH16 e verifica snapshot,
+traccia, ownership e assenza di contaminazione fra richieste.
+Lo stadio usa candidati annuali sintetici legali, non genera
+ancora la salsa o tutte le tessiture normative reali.

@@ -1469,3 +1469,13 @@ Una snapshot dell'input e un validator autonomo impediscono
 manomissioni tra discovery e patch. I test comprendono
 giorni intercalati, mesi da 123 giorni, 47 mesi e la soglia
 inclusiva di 5778 giorni. Nessuna Stage34 anticipata.
+
+### Certificazione Stage33 PATCH16
+
+Il commit e9b998203355ac6f2df50a39d8c2ff106d0cd1f6
+ha superato 34/34 job nella run GitHub Actions 38273709294.
+Stage33: 65 PASS/0 FAIL, Stage32: 58 PASS/3 FAIL intenzionali.
+La selezione del mese resta stabile per l'anno e il giorno
+nel mese è contato nel prefisso, anche per mesi intrecciati.
+Il legacy contiguo e le PATCH01–15 sono preservati.
+Stage34 non è stata anticipata.
