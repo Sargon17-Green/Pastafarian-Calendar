@@ -2,9 +2,9 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 26 bổ sung vòng đáp án chuẩn và nhánh chọn hạng
-  ngắn dùng ngay phép dư legacy thiên lệch khi chưa loại bỏ.
-  Các bản vá trước đều còn nguyên.
+  Giai đoạn 28 giữ lựa chọn hạng ngắn đã vá ở Stage27,
+  nhưng miền hạng rộng n>M còn chọn sai bằng một chữ số
+  legacy đầu tiên. Các bản vá trước đều còn nguyên.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}
@@ -95,6 +95,10 @@ defmodule PastafariCalendarElixirVietnamese do
 
   def choose_rank_short_spaghetti(calculation_day, target_day, queried_bowl_id, seal, n) do
     Dispatcher.choose_rank_short(calculation_day, target_day, queried_bowl_id, seal, n)
+  end
+
+  def choose_rank_spaghetti(calculation_day, target_day, queried_bowl_id, seal, n) do
+    Dispatcher.choose_rank(calculation_day, target_day, queried_bowl_id, seal, n)
   end
 
   def calendar_date_spaghetti(calculation_day, target_day) do

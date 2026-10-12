@@ -4,9 +4,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 26 tính vòng đáp án đúng từ sáu bát, ID kế cận
-  chuẩn và dấu hỏi, nhưng lựa chọn hạng ngắn còn gọi ngay
-  LegacyBiasedPick không loại bỏ giá trị vượt ngưỡng.
+  Giai đoạn 28 giữ phép chọn hạng ngắn đã vá ở Stage27.
+  Đường chọn hạng tổng quát khi n>M cố ý dùng hàm lịch sử
+  một chữ số, không xây số rộng nhiều chữ số từ answer ring.
   Các bản vá trước vẫn đúng; chưa tích hợp lịch.
   """
 
@@ -193,5 +193,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def choose_rank_short(calculation_day, target_day, queried_bowl_id, seal, n) do
     answer_stream(calculation_day, target_day, queried_bowl_id, seal)
     |> AnswerStreamManager.choose_rank_short_biased(n)
+  end
+
+  def choose_rank(calculation_day, target_day, queried_bowl_id, seal, n) do
+    answer_stream(calculation_day, target_day, queried_bowl_id, seal)
+    |> AnswerStreamManager.choose_rank(n)
   end
 end

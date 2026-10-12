@@ -3,15 +3,16 @@ defmodule PastafariCalendarElixirVietnamese.Monster.AnswerStreamManager do
   Xây dựng vòng đáp án từ sáu bát đúng và ID kế cận đã vá.
 
   Công thức first, hướng chạy và từng phần tử vòng đều chuẩn.
-  Bản vá 13 sửa thứ tự xử lý lựa chọn hạng ngắn:
-  ShortRejectionPatch tiến trên cùng vòng khi x vượt
-  ngưỡng, sau đó mới gọi thật LegacyBiasedPick cũ.
-  Vòng, hướng và hạt đáp án không bị thay đổi.
+  Bản vá 13 vẫn xử lý đúng hạng ngắn n<=M. Trong
+  phát hiện 14, khi n>M đường chọn hạng tổng quát
+  dùng LegacySingleDigitWidePick sai vì chỉ lấy một
+  phần tử answer_at(0) thay vì ghép nhiều chữ số.
   """
 
   import Bitwise
 
   alias PastafariCalendarElixirVietnamese.Monster.{
+    LegacySingleDigitWidePick,
     SaveManager,
     ShortRejectionPatch
   }
@@ -67,5 +68,19 @@ defmodule PastafariCalendarElixirVietnamese.Monster.AnswerStreamManager do
 
   def choose_rank_short_biased(_stream, _n) do
     raise ArgumentError, "miền chọn ngắn phải thuộc 1..M"
+  end
+
+  def choose_rank(%__MODULE__{} = stream, n)
+      when is_integer(n) and n >= 1 and n <= @m do
+    ShortRejectionPatch.choose_rank_short(stream, n)
+  end
+
+  def choose_rank(%__MODULE__{} = stream, n)
+      when is_integer(n) and n > @m do
+    LegacySingleDigitWidePick.choose_rank(stream, n)
+  end
+
+  def choose_rank(_stream, _n) do
+    raise ArgumentError, "miền chọn phải là số nguyên dương"
   end
 end

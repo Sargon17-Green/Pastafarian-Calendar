@@ -1140,3 +1140,31 @@ SAVE, ID kế cận và 12 lần khuấy cuối đều giữ nguyên.
 Giai đoạn 27/55 kết thúc `GREEN`. Bước tiếp theo
 là Stage28/55 `DISCOVERY 14` của lựa chọn miền
 rộng n>M; chưa triển khai trong Stage27.
+
+## Giai đoạn 28 — Phát hiện 14: hạng rộng chỉ dùng một chữ số
+
+Đường sản xuất `choose_rank_spaghetti` mới chấp nhận
+n nguyên dương, nhưng có hai nhánh. Với `n<=M`,
+đường short vẫn đi qua `ShortRejectionPatch`,
+dùng rejection trên cùng answer ring chính xác như
+PATCH 13. Với `n>M`, lịch sử dùng
+`LegacySingleDigitWidePick.choose_rank`: đọc duy
+nhất `answer_at(stream,0)` rồi gọi
+`LegacyBiasedPick.biased_legacy_pick(x,n)`.
+Vì x luôn thuộc 1..M nên hạng trả về cũng không thể
+vượt M, dù n có thể lớn hơn M nhiều bậc.
+
+Phương pháp chuẩn cho n>M phải lấy số chữ số tối
+thiểu k sao cho `M^k>=n`, ghép k phần tử liên tiếp
+trên cùng answer ring thành số một-based theo cơ số M
+với chữ số đầu là bậc thấp nhất, sau đó mới tiến
+và bác bỏ nếu vượt giới hạn đều. Chưa có mã này
+trong DISCOVERY 14; `wideDetour` dành riêng Stage29.
+
+Thêm 20 kiểm thử Stage28: 16 kiểm soát giữ nguyên
+lựa chọn short và toàn bộ các công thức, kiểm thử
+wide legacy thiếu phạm vi, kết quả từ ngày thật,
+vòng đáp án 2048 bit và nhiều task song song;
+bốn hồi quy chuẩn đỏ ở n=M+1, M², M²+1 và M³+1
+với vòng tổng hợp first=1,step=+1. Không sửa oracle
+test-only hoặc các bản vá 01..13. Không tạo lịch cuối.

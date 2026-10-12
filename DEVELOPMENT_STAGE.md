@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=27
-CURRENT_KIND=PATCH
-CURRENT_PATCH=13
+CURRENT_STAGE=28
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=14
 LAST_COMPLETED_STAGE=27
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyBiasedPick nguyên dạng; ShortRejectionPatch tính limit=floor(M/n)*n rồi duyệt AnswerStreamManager.answer_at(stream,k) với k tăng trên cùng vòng; chỉ khi x<=limit mới gọi LegacyBiasedPick. AnswerStreamManager giữ API cũ nhưng định tuyến sang patch. Giữ PATCH 01..12.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..13 và ShortRejectionPatch đúng với n<=M; thêm LegacySingleDigitWidePick đọc answer_at(stream,0) duy nhất và gọi LegacyBiasedPick ngay cho n>M; AnswerStreamManager.choose_rank phân nhánh đúng short hoặc wide legacy, chưa có wideDetour nhiều chữ số.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_27_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_28_PENDING
+GIT_HISTORY_MUTATED=STAGE_28_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=354
-CI_FAILURES=0
+CI_TESTS=STAGE_28_PENDING
+CI_FAILURES=STAGE_28_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -663,3 +663,24 @@ và chỉ sau đó gọi LegacyBiasedPick; không dùng rộng n>M.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280022089
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280022253
 Giai đoạn 27 đóng GREEN; giai đoạn 28 DISCOVERY 14 chưa mở.
+
+Giai đoạn 28 DISCOVERY 14 giới thiệu lựa chọn tổng quát
+cho mọi n>=1, giữ nguyên phép chọn ngắn đã qua PATCH 13.
+Khi n<=M, AnswerStreamManager.choose_rank chuyển tới
+ShortRejectionPatch. Khi n>M, đường thực gọi
+LegacySingleDigitWidePick.choose_rank, chỉ đọc x=
+AnswerStreamManager.answer_at(stream,0), sau đó gọi
+LegacyBiasedPick.biased_legacy_pick(x,n). Vì x<=M<n,
+kết quả nằm trong 1..M, không thể lấy các hạng M+1..n.
+Sai lệch duy nhất là thiếu xây số k chữ số cơ số M
+cho miền n>M, k là lũy thừa tối thiểu M^k>=n.
+Giữ toàn bộ công thức stream và mọi bản vá 01..13.
+Thêm 20 bài Stage28, 16 bài kiểm soát, 4 hồi quy
+normative mới cố ý đỏ với first=1,step=+1,
+n=M+1, M², M²+1 và M³+1. Các kỳ vọng oracle
+dùng Ref.choose_rank trên vòng cùng seed/hướng,
+không chỉnh oracle. Dự kiến tổng 374 bài, đúng 4
+sai lệch mới; CI xác định kết quả thực tế.
+Không triển khai wideDetour hoặc wide rejection
+cho các hạng rộng trước PATCH 14 giai đoạn 29.
+LAST_COMPLETED_STAGE giữ 27 trước CI.

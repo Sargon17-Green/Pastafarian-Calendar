@@ -965,3 +965,33 @@ oracle test-only blob SHA
 `be1638f46b2190d617af0378a61b077bda10bf32`.
 Không đổi main, không có wideDetour, chưa mở Stage28.
 Đóng Stage27 GREEN.
+
+## Giai đoạn 28 — Phát hiện 14: bộ chọn một chữ số cho miền rộng
+
+**Phần đúng:** Vòng đáp án sau 46 giọt và 12 lượt
+khuấy không đổi, hạt/hướng theo SAVE chuẩn; n<=M
+tiếp tục dùng ShortRejectionPatch với rejection đúng.
+Không sửa bát, ID kế, memory latch, đá hoặc nguồn rót.
+
+**Di sản lỗi mới:** Với n>M, `LegacySingleDigitWidePick`
+đọc chỉ `answer_at(0)` và gọi legacy modulo.
+Vì n lớn hơn mọi số có thể nằm trong answer ring,
+kết quả luôn bằng x đầu (1..M), làm mất các hạng
+cao M+1..n. `AnswerStreamManager.choose_rank` và
+`Dispatcher.choose_rank` dùng hàm lịch sử này
+trong đường production thật, không chỉ ở kiểm thử.
+
+**Bằng chứng:** Khi first=1 và step=+1, câu trả
+lời đầu là 1, kế là 2. Số rộng một-based cho hai
+chữ số phải bắt đầu ở M+1, không phải 1.
+Hạng n=M+1 hoặc M² đều cần hai chữ số; M²+1 cần
+ba; M³+1 cần bốn. Bốn hồi quy oracle chuẩn được
+giữ đỏ cố ý. 16 điều khiển khác giữ các bản vá trước.
+
+**Giai đoạn 29:** Giữ LegacySingleDigitWidePick
+không sửa để tái hiện lỗi, đưa wideDetour vào
+đường production: lấy k chữ số theo cùng answer
+ring (cơ số M, chữ số đầu ít trọng số nhất),
+dùng bước +/-1 trên không gian rộng M^k khi
+giá trị lớn hơn giới hạn chia đều. Chưa làm
+bước vá ở DISCOVERY 14.
