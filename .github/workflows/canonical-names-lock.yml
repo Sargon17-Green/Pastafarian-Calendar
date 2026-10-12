@@ -88,3 +88,9 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 210s perl -Ilib -It/lib tools/profile_unrank_middle.pl --seconds 75 --rss-kib 262144
+      - name: 限定提交檢驗 47 月份 252 日中位排名雙向還原
+        if: contains(github.event.head_commit.message, '[weaving-rank-roundtrip-252]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 165s perl -Ilib -It/lib tools/profile_rank_roundtrip.pl --seconds 130 --rss-kib 262144
