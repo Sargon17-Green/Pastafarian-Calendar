@@ -18,6 +18,8 @@ public final class Stage02IncrementalRouteTests {
         exhaustiveOracleUnderSingleCountBudget();
         siblingBackwardFunctionalOracleDifferential();
         siblingBackwardFunctionalFullYearProbe();
+        sharedGlobalRankRouteSmallOracle();
+        sharedGlobalRankRouteFullYearInterior();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
         binomialCacheCallOrderNeutrality();
@@ -103,6 +105,91 @@ public final class Stage02IncrementalRouteTests {
         }
         System.out.println("STAGE_02_SIBLING_BACKWARD_PASS days=5778"
             + " prefix_days=5 branches=6 shared_ms=" + sharedMillis);
+    }
+
+
+    private static void sharedGlobalRankRouteSmallOracle() {
+        for (int[] lengths : new int[][] {
+                {2, 2, 2}, {2, 3, 2}, {3, 3, 3}, {2, 3, 3, 2}
+        }) {
+            MonsterWeavingLinearCounter family =
+                new MonsterWeavingLinearCounter(lengths);
+            NormativeOracle.WeavingFamily oracle =
+                new NormativeOracle.WeavingFamily(lengths);
+            int count = oracle.count().intValueExact();
+            for (int r = 1; r <= count; r++) {
+                BigInteger rank = BigInteger.valueOf(r);
+                MonsterWeavingLinearCounter.RankRoute current =
+                    family.beginGlobalRankRoute(rank, 0);
+                int calls = 0;
+                while (!current.complete()) {
+                    MonsterWeavingLinearCounter.RankRoute previous = current;
+                    current = family.advanceGlobalRankRouteShared(
+                        previous, 2, 1);
+                    ok(current.lastSharedBatchCalls() <= 1,
+                        "E_SHARED_ROUTE_BATCH_BUDGET");
+                    eq(0, current.lastCountCalls(),
+                        "E_SHARED_ROUTE_NO_ORDINARY_COUNTS");
+                    eq(rank, current.globalRank(),
+                        "E_SHARED_ROUTE_GLOBAL_RANK_STABLE");
+                    ok(current.stepsCompleted() > previous.stepsCompleted(),
+                        "E_SHARED_ROUTE_PROGRESS");
+                    ok(current.lowerRank().compareTo(rank) <= 0
+                            && current.upperRank().compareTo(rank) >= 0,
+                        "E_SHARED_ROUTE_INTERVAL");
+                    calls++;
+                    ok(calls <= 100, "E_SHARED_ROUTE_TERMINATION");
+                }
+                array(oracle.unrank1(rank),
+                    family.finishGlobalRankRoute(current),
+                    "E_SHARED_ROUTE_ORACLE");
+            }
+        }
+    }
+
+    private static void sharedGlobalRankRouteFullYearInterior() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger rank = family.count().add(BigInteger.ONE)
+            .divide(BigInteger.TWO);
+        MonsterWeavingLinearCounter.RankRoute first =
+            family.beginGlobalRankRoute(rank, 512);
+        MonsterWeavingLinearCounter.RankRoute route = first;
+        long start = System.nanoTime();
+        int batches = 0;
+        for (int call = 0; call < 12; call++) {
+            MonsterWeavingLinearCounter.RankRoute before = route;
+            route = family.advanceGlobalRankRouteShared(route, 8, 2);
+            ok(route.lastSharedBatchCalls() <= 2,
+                "E_SHARED_5778_BATCH_BUDGET");
+            eq(0, route.lastCountCalls(),
+                "E_SHARED_5778_NO_LEGACY_COUNTS");
+            ok(route.lowerRank().compareTo(rank) <= 0
+                    && route.upperRank().compareTo(rank) >= 0,
+                "E_SHARED_5778_RANK_CONTAINED");
+            ok(route.stepsCompleted() >= before.stepsCompleted(),
+                "E_SHARED_5778_PREFIX_MONOTONE");
+            ok(route.lowerRank().compareTo(before.lowerRank()) >= 0
+                    && route.upperRank().compareTo(before.upperRank()) <= 0,
+                "E_SHARED_5778_INTERVAL_NESTED");
+            batches += route.lastSharedBatchCalls();
+        }
+        long routingNanos = System.nanoTime() - start;
+        eq(24, batches, "E_SHARED_5778_TOTAL_BATCH_BUDGET");
+        eq(24, route.stepsCompleted(), "E_SHARED_5778_PREFIX_DAYS");
+        eq(route.remainingChoices(),
+            family.countAfterPrefix(route.fixedPrefixCopy()),
+            "E_SHARED_5778_EXACT_SUFFIX");
+        eq(0, first.stepsCompleted(), "E_SHARED_5778_ROUTE_OWNERSHIP");
+        ok(!route.complete(), "E_SHARED_5778_NOT_FALSE_COMPLETION");
+        System.out.println("STAGE_02_SHARED_MIDDLE_ROUTE_PASS"
+            + " days=5778 calls=12 batches=" + batches
+            + " prefix_days=" + route.stepsCompleted()
+            + " routing_ms=" + routingNanos / 1000000
+            + " total_ms=" + (System.nanoTime() - start) / 1000000);
     }
 
     private static void exhaustiveOracleUnderSingleCountBudget() {

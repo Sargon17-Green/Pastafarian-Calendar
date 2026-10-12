@@ -449,7 +449,10 @@ public final class MonsterWeavingLinearCounter {
     }
 
     BigInteger[] countSiblingBranchSizes(int[] prefix) {
-        State parent = afterPrefix(prefix);
+        return countSiblingBranchSizes(afterPrefix(prefix));
+    }
+
+    private BigInteger[] countSiblingBranchSizes(State parent) {
         BigInteger[] branchSizes = new BigInteger[lengths.length];
         Arrays.fill(branchSizes, ZERO);
         if (parent.closed == lengths.length) return branchSizes;
@@ -702,6 +705,7 @@ public final class MonsterWeavingLinearCounter {
         private final BigInteger upper;
         private final int suffixTargetDays;
         private final int lastCountCalls;
+        private final int lastSharedBatchCalls;
         private final int probedBranches;
         private final BigInteger skippedChoices;
 
@@ -716,6 +720,16 @@ public final class MonsterWeavingLinearCounter {
                 int[] prefix, BigInteger globalRank, BigInteger lower,
                 BigInteger upper, int suffixTargetDays, int lastCountCalls,
                 int probedBranches, BigInteger skippedChoices) {
+            this(owner, state, prefix, globalRank, lower, upper,
+                suffixTargetDays, lastCountCalls, probedBranches,
+                skippedChoices, 0);
+        }
+
+        private RankRoute(MonsterWeavingLinearCounter owner, State state,
+                int[] prefix, BigInteger globalRank, BigInteger lower,
+                BigInteger upper, int suffixTargetDays, int lastCountCalls,
+                int probedBranches, BigInteger skippedChoices,
+                int lastSharedBatchCalls) {
             this.owner = owner;
             this.state = new State(state);
             this.prefix = prefix.clone();
@@ -724,6 +738,7 @@ public final class MonsterWeavingLinearCounter {
             this.upper = upper;
             this.suffixTargetDays = suffixTargetDays;
             this.lastCountCalls = lastCountCalls;
+            this.lastSharedBatchCalls = lastSharedBatchCalls;
             this.probedBranches = probedBranches;
             this.skippedChoices = skippedChoices;
         }
@@ -738,6 +753,7 @@ public final class MonsterWeavingLinearCounter {
         public int stepsCompleted() { return prefix.length; }
         public int suffixTargetDays() { return suffixTargetDays; }
         public int lastCountCalls() { return lastCountCalls; }
+        public int lastSharedBatchCalls() { return lastSharedBatchCalls; }
         public int probedBranches() { return probedBranches; }
         public BigInteger skippedChoices() { return skippedChoices; }
         public boolean complete() { return remainingDays() <= suffixTargetDays; }
@@ -865,6 +881,72 @@ public final class MonsterWeavingLinearCounter {
         }
         return new RankRoute(this, state, chosenPrefix, route.globalRank,
             lower, upper, route.suffixTargetDays, 1);
+    }
+
+
+    public RankRoute advanceGlobalRankRouteShared(RankRoute previous,
+            int maximumSteps, int maximumSharedBatches) {
+        if (previous == null || previous.owner != this) {
+            throw new IllegalArgumentException("E_WEAVE_ROUTE_OWNER");
+        }
+        validateRouteBudgets(maximumSteps, maximumSharedBatches);
+        State state = new State(previous.state);
+        int[] prefix = Arrays.copyOf(previous.prefix,
+            Math.min(totalDays, previous.prefix.length + maximumSteps));
+        int size = previous.prefix.length;
+        BigInteger lower = previous.lower;
+        BigInteger blockSize = previous.upper.subtract(previous.lower).add(ONE);
+        int probed = previous.probedBranches;
+        BigInteger skipped = previous.skippedChoices;
+        int batches = 0;
+        int advanced = 0;
+        while (totalDays - size > previous.suffixTargetDays
+                && advanced < maximumSteps && batches < maximumSharedBatches) {
+            BigInteger[] sizes = countSiblingBranchSizes(state);
+            batches++;
+            int[] eligible = new int[lengths.length];
+            int options = 0;
+            BigInteger partition = ZERO;
+            for (int month = state.closed; month < lengths.length; month++) {
+                if (!state.canTake(month, lengths)) continue;
+                eligible[options++] = month;
+                partition = partition.add(sizes[month]);
+            }
+            if (options == 0 || probed >= options
+                    || !partition.equals(blockSize)) {
+                throw new IllegalStateException("E_WEAVE_ROUTE_SHARED_PARTITION");
+            }
+            boolean chosen = false;
+            for (int i = probed; i < options; i++) {
+                int month = eligible[i];
+                BigInteger possibilities = sizes[month];
+                if (possibilities.signum() <= 0) {
+                    throw new IllegalStateException("E_WEAVE_ROUTE_SHARED_BRANCH");
+                }
+                BigInteger start = lower.add(skipped);
+                BigInteger end = start.add(possibilities);
+                if (previous.globalRank.compareTo(end) < 0) {
+                    State candidate = new State(state);
+                    candidate.take(month, lengths);
+                    state = candidate;
+                    prefix[size++] = month + 1;
+                    lower = start;
+                    blockSize = possibilities;
+                    probed = 0;
+                    skipped = ZERO;
+                    advanced++;
+                    chosen = true;
+                    break;
+                }
+                skipped = skipped.add(possibilities);
+            }
+            if (!chosen) {
+                throw new IllegalStateException("E_WEAVE_ROUTE_SHARED_RANK");
+            }
+        }
+        return new RankRoute(this, state, Arrays.copyOf(prefix, size),
+            previous.globalRank, lower, lower.add(blockSize).subtract(ONE),
+            previous.suffixTargetDays, 0, probed, skipped, batches);
     }
 
     public RankRoute advanceGlobalRankRoute(RankRoute previous,
