@@ -25,6 +25,7 @@ public final class Stage02IncrementalRouteTests {
         sharedGlobalRankRouteSmallOracle();
         sharedGlobalRankRouteFullYearInterior();
         sharedGlobalRankRouteExtendedResourceProfile();
+        sharedGlobalRankRoute96PrefixProof();
         sharedGlobalRankRouteInteroperabilityAndBudgets();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
@@ -366,6 +367,74 @@ public final class Stage02IncrementalRouteTests {
         }
     }
 
+
+    private static void sharedGlobalRankRoute96PrefixProof() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger rank = family.count().add(BigInteger.ONE)
+            .divide(BigInteger.TWO);
+        MonsterWeavingLinearCounter.RankRoute route =
+            family.beginGlobalRankRoute(rank, 512);
+        long start = System.nanoTime();
+        long baselineShared = family.siblingPrefixSharedWeightHitCount();
+        long baselineTailHits = family.tailFunctionalReuseHitCount();
+        long baselineTailBuilds = family.tailFunctionalBuildCount();
+        int batches = 0;
+        int opened = 0;
+        int lastOpened = 0;
+        for (int call = 1; call <= 48; call++) {
+            MonsterWeavingLinearCounter.RankRoute prior = route;
+            route = family.advanceGlobalRankRouteShared(route, 16, 2);
+            batches += route.lastSharedBatchCalls();
+            ok(route.lastSharedBatchCalls() <= 2,
+                "E_SHARED_96_BATCH_BUDGET");
+            eq(0, route.lastCountCalls(),
+                "E_SHARED_96_LEGACY_BUDGET_NEUTRAL");
+            ok(route.lowerRank().compareTo(rank) <= 0
+                    && route.upperRank().compareTo(rank) >= 0,
+                "E_SHARED_96_RANK_CONTAINED");
+            ok(route.lowerRank().compareTo(prior.lowerRank()) >= 0
+                    && route.upperRank().compareTo(prior.upperRank()) <= 0,
+                "E_SHARED_96_INTERVAL_NESTED");
+            ok(route.stepsCompleted() >= prior.stepsCompleted(),
+                "E_SHARED_96_STEPS_MONOTONE");
+            if (call == 24 || call == 48) {
+                opened = 0;
+                for (int month : route.fixedPrefixCopy()) {
+                    opened = Math.max(opened, month);
+                }
+                ok(opened >= lastOpened,
+                    "E_SHARED_96_MONTHS_MONOTONE");
+                lastOpened = opened;
+                System.out.println("STAGE_02_SHARED_96_PREFIX_CHECKPOINT_PASS"
+                    + " calls=" + call
+                    + " prefix_days=" + route.stepsCompleted()
+                    + " opened_months=" + opened
+                    + " batches=" + batches
+                    + " shared_weight_hits="
+                    + (family.siblingPrefixSharedWeightHitCount()
+                        - baselineShared)
+                    + " tail_hits="
+                    + (family.tailFunctionalReuseHitCount()
+                        - baselineTailHits)
+                    + " tail_builds="
+                    + (family.tailFunctionalBuildCount()
+                        - baselineTailBuilds)
+                    + " route_ms="
+                    + (System.nanoTime() - start) / 1000000);
+            }
+        }
+        eq(96, batches, "E_SHARED_96_TOTAL_BATCHES");
+        eq(96, route.stepsCompleted(),
+            "E_SHARED_96_TOTAL_PREFIX_DAYS");
+        eq(route.remainingChoices(),
+            family.countAfterPrefix(route.fixedPrefixCopy()),
+            "E_SHARED_96_FINAL_SUFFIX_DIFFERENTIAL");
+        ok(!route.complete(), "E_SHARED_96_NOT_FALSE_COMPLETE");
+    }
 
     private static void sharedGlobalRankRouteExtendedResourceProfile() {
         int[] lengths = new int[47];
