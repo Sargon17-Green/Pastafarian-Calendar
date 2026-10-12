@@ -169,3 +169,7 @@ ni'o lo se cuxna te javni cu kakne lo nu zbasu lo detri fi lo ranki po'o ca lo n
 ### lo lamji ranki pluta be lo se jimte te namcu
 
 ni'o lo nu lo ranki se lamji lo pamoi .a lo romoi pagbu cu curmi lo pa `countSuffix` pe lo pluta se jmina. lo `RankRoute` cu ralte lo drani jicmu ranki .e lo se stali ranki girzu. lo `Stage02NearEdgeRoutingTests` cu cipra lo so'i narmanci namcu .e lo barda nanca pe li 5778 djedi fi lo 256 mebibaiti te jimte.
+
+### lo mulno nanca ranki pluta fi lo kunti pamoi pagbu
+
+ni'o lo nanca be li 5778 djedi cu se cipra fi lo mulno ranki po'o .i lo so'i `RankRoute` se jmina cu te fanmo lo porsi. lo pamoi ranki .a lo romoi ranki lamji ranki cu se cipra .i lo ro drata mutce se xanri ranki cu za'o na se snada ca ti.

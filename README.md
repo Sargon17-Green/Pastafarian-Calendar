@@ -208,3 +208,7 @@ ni'o lo `beginGlobalRankRoute` cu facki lo pagbu pe lo pamoi .e lo romoi se jorn
 ## lo ranki pluta pe lo lamji porsi
 
 ni'o lo `advanceGlobalRankRoute` cu se platu fi lo ranki poi se lamji lo pamoi .a lo romoi ranki be lo se steci pagbu. lo `lexNext` .e lo `lexPrevious` cu facki lo se cuxna porsi fi lo se jimte be li 8 porsi. lo pa nu `countSuffix` cu facki lo se stali pagbu namcu fi lo pa pluta se jmina. lo se stodi se pagbu ranki cu za'o drani .i lo mutce barda ranki poi na lamji cu za'o nitcu lo balvi te cipra. ko benji `sh run_stage02_near_edge_routing_tests.sh`.
+
+## lo mulno nanca ranki pluta te fanmo
+
+ni'o lo `Stage02FullRouteCompletionTests` cu zbasu lo se jmina porsi fi lo mulno ranki po'o .i lo pamoi pagbu cu kunti .i lo porsi be li 5778 djedi cu se benji fi lo so'i `RankRoute` se jmina pe li 512 djedi .i ro lo se jmina cu te namcu pamei lo se stali porsi. lo jalge cu se cipra fi lo `unrank1` .e lo se stodi `MonsterCalendarResolver` .i lo midju ranki cu za'o nitcu lo drata balvi cipra.

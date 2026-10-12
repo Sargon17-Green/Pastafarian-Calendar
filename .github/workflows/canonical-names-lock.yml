@@ -90,3 +90,5 @@ jobs:
         run: sh run_stage02_automatic_boundary_route_tests.sh
       - name: Stage 02 amortized near-edge global routing
         run: sh run_stage02_near_edge_routing_tests.sh
+      - name: Stage 02 full-length global near-edge route completion
+        run: sh run_stage02_full_route_completion_tests.sh
