@@ -37,7 +37,7 @@ assert(ctx.metrics["discovery11.visible.calls"]==1
     and ctx.visibleDropCount==3
     and #ctx.visibleContexts==3
     and ctx.visibleContexts[3].status=="PATCH_VISIBLE_COMPLETE")
-local api=S.visibleResetChainSpaghetti(F,F,3)
+local api=S.visibleResetChainProbe(F,F,3)
 for id=1,6 do assert(B.compare(first[id],api[id])==0) end
 assert(completed==3 and differing>=3)
 print("PASS Stage 22 real: 3 jou, 9 gout, 3 kaskad istorik")

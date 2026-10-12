@@ -462,11 +462,11 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage22_tests.lua .
-      - name: Regression normatif DISCOVERY 11 — EXPECTED_RED sèl
+      - name: Verifye scar istorik DISCOVERY 11 nan odit ki pase
         shell: bash
         run: |
           set -euo pipefail
-          lua5.3 test/stage22_regression_tests.lua .
+          lua5.3 test/stage22_expected_red_audit.lua .
 
   lua_stage22_smoke:
     if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
@@ -489,3 +489,28 @@ jobs:
           lua5.3 test/stage22_bigint_tests.lua .
           lua5.3 test/stage22_fault_tests.lua .
           lua5.3 test/stage22_expected_red_audit.lua .
+
+  lua_stage23_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye sentaks ak imutabilite eritaj Stage 22
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_reset_chain.lua)" = 2d21fec732551c7947fc3feb2e8a1131ff908bb3
+          lua5.3 test/stage23_scope_tests.lua .
+      - name: Kouri suite natif Stage 1 rive 23
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage23_tests.lua .

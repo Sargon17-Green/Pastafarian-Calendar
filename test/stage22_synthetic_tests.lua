@@ -74,7 +74,7 @@ for _,drops in ipairs(samples) do
  for id=1,6 do assert(original[id]==id*10) end
 end
 assert(resets>0)
-local count=S.resetBowlsSpaghetti({1,2},{stone,stone},original)
+local count=S.legacyResetBowlsProbe({1,2},{stone,stone},original)
 local direct=S.legacyResetBowlsProbe({1,2},{stone,stone},original)
 for id=1,6 do assert(B.compare(count[id],direct[id])==0) end
 assert(select("#",S.resetBowlsSpaghetti({1},{stone},original))==1)
