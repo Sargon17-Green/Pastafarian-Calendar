@@ -304,21 +304,36 @@ object Stage24Tests {
       truth(!source.contains("NormativeOracle"),"Oracolo in produzione")
       truth(source.contains("private val LEGACY_YEAR_MAX: Int = 5777"),
         "La cicatrice del limite vecchio")
-      truth(!source.contains("yearMaxPatch"),"PATCH 12 anticipata")
+      val currentStage=new String(Files.readAllBytes(root().resolve(
+        "DEVELOPMENT_STAGE.md")),StandardCharsets.UTF_8)
+        .linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(currentStage<25)
+        truth(!source.contains("yearMaxPatch"),"PATCH 12 anticipata")
+      else
+        truth(source.contains("LegacyYearCeilingAdapter.legacyYearMax(gaps)"),
+          "Il wrapper deve attraversare davvero il legacy")
       truth(!source.contains("oldJumpGuess"),"Stadio futuro anticipato")
     }
     check("metadati Stage24 RED preservano Stage23 GREEN") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=24"),"Stadio")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=11"),"Patch precedente")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"Stato atteso")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=24,"Discovery 12 storica")
+      if(current==24) {
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=11"),"Patch precedente")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"Stato atteso")
+      } else {
+        truth(st.contains("STAGE_24_NATIVE_VERIFICATION=PASS_EXPECTED_RED_33_PASS_3_FAIL"),
+          "Firma storica certificata di Stage24")
+      }
       truth(st.contains("STAGE_23_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_42_PASS_0_FAIL"),
         "Certificazione Stage23")
       val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(done==23||done==24,"Ordine certificazione")
+      truth(done>=23&&done<=current,"Ordine certificazione")
     }
 
     check("equivalenza normativa limite sei divari") {

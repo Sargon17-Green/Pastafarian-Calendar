@@ -1245,3 +1245,43 @@ limitati ai tre casi di confine da 5778 giorni.
 Il vecchio limite 5777 è effettivamente
 attraversato e tutte le firme degli stadi
 precedenti rimangono intatte.
+
+## Stadio 25 — PATCH 12: un giorno restituito all'anno
+
+### Che cosa si pensava
+
+La vecchia soglia 5777 era troppo stretta;
+escludeva candidati di durata esattamente
+5778 giorni perfettamente validi.
+
+### Che cosa si è scoperto
+
+L'errore non era nella somma dei cancelli:
+sei intervalli di 963 giorni, sette intervalli
+e otto intervalli opportunamente composti
+totalizzano 5778. L'unica differenza è il
+confronto inclusivo con il limite superiore.
+
+### Che cosa è stato aggirato
+
+Il wrapper continua a eseguire veramente
+il vecchio predicato 5777 e lo conserva
+come cicatrice diagnostica. Il giudizio
+corretto usa la soglia 5778 senza
+sostituire il precedente.
+
+### Perché è normativamente equivalente
+
+Il validator indipendente ricalcola la somma
+BigInt, verifica almeno sei divari da 42..963
+e il confine inclusivo 252..5778. Le prove
+di sei, sette e otto divari tornano verdi.
+Lo Stage24 resta RED secondo la sua firma
+storica immutata.
+
+### Strato di mostruosità aggiunto
+
+Un wrapper, handler, doppio report,
+validator, tre campi nel contesto,
+metrica e suite nativa dedicata, senza
+anticipare la futura DISCOVERY 13.

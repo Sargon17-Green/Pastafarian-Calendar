@@ -85,7 +85,10 @@ final case class BaseMonsterContext(
   var legacyYearGapsInput: Option[Vector[Int]] = None,
   var legacyYearLengthOutput: Option[BigInt] = None,
   var legacyYearAcceptedOutput: Option[Boolean] = None,
-  var legacyYearMaxOutput: Option[Int] = None
+  var legacyYearMaxOutput: Option[Int] = None,
+  var patchedYearAcceptedOutput: Option[Boolean] = None,
+  var patchedYearMaxOutput: Option[Int] = None,
+  var patch12Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -108,6 +111,42 @@ final class BaseValidationManager {
     }
   }
 
+
+  def requirePatch12Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_12_YEAR_CEILING" ||
+        ctx.status != "PATCH_12_READY" ||
+        ctx.branchTrace.toVector != Vector(
+          "BOOT","DISCOVERY_12_YEAR_CEILING","PATCH_12_YEAR_CEILING") ||
+        ctx.legacyYearGapsInput.isEmpty || ctx.legacyYearLengthOutput.isEmpty ||
+        ctx.legacyYearAcceptedOutput.isEmpty || ctx.legacyYearMaxOutput.isEmpty ||
+        ctx.patchedYearAcceptedOutput.isEmpty ||
+        ctx.patchedYearMaxOutput.isEmpty || !ctx.patch12Applied) {
+      throw new IllegalStateException(
+        "PATCH 12 richiede la DISCOVERY 12 completa nella stessa invocazione.")
+    }
+    val gaps = ctx.legacyYearGapsInput.get
+    if (gaps.isEmpty || gaps.exists(g=>g<42 || g>963))
+      throw new IllegalStateException("Divari non normativi.")
+    val length = gaps.foldLeft(BigInt(0))((acc,g)=>acc+BigInt(g))
+    val historical = gaps.length>=6 && length>=252 && length<=5777
+    val normative = gaps.length>=6 && length>=252 && length<=5778
+    if (ctx.legacyYearLengthOutput.get!=length ||
+        ctx.legacyYearMaxOutput.get!=5777 ||
+        ctx.legacyYearAcceptedOutput.get!=historical ||
+        ctx.patchedYearMaxOutput.get!=5778 ||
+        ctx.patchedYearAcceptedOutput.get!=normative) {
+      throw new IllegalStateException(
+        "La PATCH 12 o la cicatrice storica sono state contraffatte.")
+    }
+    val original=LegacyYearCeilingAdapter.legacyYearMax(gaps)
+    if (original.gateGaps!=gaps ||
+        original.yearLength!=length ||
+        original.oldMaximum!=ctx.legacyYearMaxOutput.get ||
+        original.accepted!=ctx.legacyYearAcceptedOutput.get) {
+      throw new IllegalStateException(
+        "La PATCH 12 deve conservare il percorso legacy reale.")
+    }
+  }
 
   def requireDiscovery12Ready(ctx: BaseMonsterContext): Unit = {
     if (ctx.phase != "DISCOVERY_12_YEAR_CEILING" ||
@@ -829,7 +868,8 @@ final class BaseMonsterManager {
     new Patch10Order46Handler(metrics),
     new Discovery11BiasedPickHandler(metrics),
     new Patch11ShortPickHandler(metrics),
-    new Discovery12YearCeilingHandler(metrics)
+    new Discovery12YearCeilingHandler(metrics),
+    new Patch12YearCeilingHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1417,6 +1457,31 @@ final class BaseMonsterManager {
       )
     } catch {
       case err: Throwable => throw BaseErrorWrapper.wrap("discovery12",err)
+    }
+  }
+
+  def patch12YearCeiling(
+    calculationDay: BigInt, targetDay: BigInt,
+    gateGaps: Vector[Int]
+  ): Patch12YearCeilingReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.legacyYearGapsInput=Some(gateGaps)
+    ctx.phase="DISCOVERY_12_YEAR_CEILING"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery12Ready(ctx)
+      ctx.phase="PATCH_12_YEAR_CEILING"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch12Ready(ctx)
+      Patch12YearCeilingReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.legacyYearGapsInput.get,ctx.legacyYearLengthOutput.get,
+        ctx.legacyYearAcceptedOutput.get,ctx.legacyYearMaxOutput.get,
+        ctx.patchedYearAcceptedOutput.get,ctx.patchedYearMaxOutput.get,
+        ctx.patch12Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case err: Throwable => throw BaseErrorWrapper.wrap("patch12",err)
     }
   }
 

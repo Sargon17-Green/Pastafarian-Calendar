@@ -979,3 +979,37 @@ La firma Stage24 è **33 PASS / 3 FAIL intenzionali**
 tutte le firme Stage01–Stage23 restano invariate.
 Il codice di produzione non consulta l'oracolo;
 PATCH 12 non è anticipata.
+
+## Stadio 25 — PATCH 12: il confine annuale comprende 5778
+
+La DISCOVERY 12 conserva il vecchio limite
+`LEGACY_YEAR_MAX = 5777`; l'adapter storico
+viene attraversato realmente dalla
+`Patch12YearCeilingWrapper.yearMaxPatch`.
+Il percorso corretto include un anno di
+**5778 giorni**, se formato da almeno sei
+divari validi 42..963 e con durata non
+inferiore a 252 giorni. Il report pubblica
+separatamente i giudizi legacy e normativo,
+senza sovrascrivere la cicatrice storica.
+
+Il manager esegue
+`BOOT → DISCOVERY_12_YEAR_CEILING → PATCH_12_YEAR_CEILING`.
+Il validator indipendente ricostruisce la
+somma BigInt e i due predicati di accettazione
+su ciascuna invocazione. La stessa prova
+controlla le candidate di sei, sette e otto
+divari sommate a 5778 giorni.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage25Tests'
+```
+
+Firma GREEN attesa: **42 PASS, 0 FAIL**.
+La suite copre 922 valori del divario, 1.024
+vettori riproducibili, 4.096 vettori aggiuntivi,
+rifiuto di input invalidi, intarsi BigInt,
+falsificazione dello stato, regressione delle
+undici patch precedenti e il confine annuale.
+La firma storica dello Stage24 rimane
+**33 PASS e 3 FAIL intenzionali**.

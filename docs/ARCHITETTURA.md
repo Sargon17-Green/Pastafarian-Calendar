@@ -430,3 +430,22 @@ sintetiche e non pretendono di essere
 sequenze di cancelli realmente generate
 dalla salsa; misurano il predicato
 locale di ammissibilità.
+
+## PATCH 12 — confine inclusivo dell'anno con prova storica
+
+`Patch12YearCeilingWrapper.yearMaxPatch` esegue
+l'adapter `LegacyYearCeilingAdapter.legacyYearMax`
+con il suo originale limite 5777, poi applica
+la norma inclusiva `length <= 5778` insieme
+alla condizione di almeno sei divari. Ogni
+divario deve appartenere a 42..963 giorni,
+con somma calcolata nel dominio BigInt.
+
+Il manager conserva vettore dei divari,
+somma, vecchia decisione e nuovo giudizio
+in campi distinti del contesto. Un validator
+indipendente ricostruisce entrambe le
+decisioni, verifica la traccia
+BOOT/DISCOVERY/PATCH e rifiuta manipolazioni
+del risultato. Nessun oracle test-only entra
+nel codice di produzione.
