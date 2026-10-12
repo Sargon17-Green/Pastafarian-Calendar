@@ -1,4 +1,4 @@
-# Stage 27 PATCH 13 — CI verification submission
+# Stage 27 PATCH 13 — GitHub Actions verified PASS
 
 ## Normative semantics and production independence
 
@@ -16,4 +16,13 @@
 - `test/patch13Properties.ts`: 256 short sizes × five boundary first answers × two directions =2560 direct comparisons to test-only normative oracle; finite miniature M bases (2..12) exhaustive independent brute-force answer enumeration to prove skip; M^k, 16K-bit family size, 804 authentic full histories (12+64+8+720) with 46632 true shared-memory writes and separate correct oracle.
 - `.github/workflows/canonical-names-lock.yml`: Stage1–27 native regression + all **13** archived expected-red proofs, canonical names lock, stage-specific grep; 10-minute timeout.
 
-**Status:** implementation submitted, no claim of CI success yet. Keep LAST_COMPLETED_STAGE=26 until BOTH CI jobs pass. Stage28 DISCOVERY14 not started.
+## GitHub Actions verified results
+
+Implementation [commit 2b348599](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/2b3485995f97e6f0efa2013f0e2db44d893be194); [GitHub Actions run 38253073014](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38253073014): `verify` and `stage27-typescript-marathi` both **SUCCESS**. Native TypeScript typecheck PASS, full Stage1–27 regression suite PASS, all 13 archived historical expected-red scripts nonzero with exact expected markers, frozen catalog/name lock PASS.
+
+```text
+STAGE_27_PATCH_13_GUARDS_PASS dayPairs=12 cells=72 mismatches=0 oldWrong=16 oldMatches=56 wide=16 boundaries=13 legacyCalls=2 correctedCalls=2 predecessorCalls=2 injectedFailures=3
+STAGE_27_PATCH_13_PROPERTIES_PASS shortSizes=256 shortCells=2560 shortMismatches=0 shortOldWrong=1365 shortOldMatches=1195 shortRejected=1402 shortWraps=701 surrogateCases=13926 surrogateRejected=2466 surrogateWide=12628 surrogateWrap=1290 powerCases=10 powerDigits=154 giantWideGaps=2 realPairs=12 varied=64 giant=8 ranks=720 unique=720 histories=804 sharedWrites=46632 streamMismatches=0 fullMismatches=0 fullOldWrong=177 fullOldMatches=627
+```
+
+**LAST_COMPLETED_STAGE=27**, Stage28 DISCOVERY14 is not started. These results are from the completed job logs, not projected counts.
