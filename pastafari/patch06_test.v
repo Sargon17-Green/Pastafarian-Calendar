@@ -82,6 +82,5 @@ fn test_patch06_diagnostic_and_previous_patches() {
 		CalendarResult{}
 	}
 	assert diagnostic.contains('DISCOVERY_06 oldPriorSlot0=ERROR')
-	assert diagnostic.contains('PATCH_06 priorSlot0=' +
-		calendar_hidden_by_nearness(hidden, 1).str())
+	assert diagnostic.contains('PATCH_06 priorSlot0=' + calendar_hidden_by_nearness(hidden, 1).str())
 }
