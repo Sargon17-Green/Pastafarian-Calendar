@@ -1082,3 +1082,16 @@ Wrapper, handler, report storico/corretto,
 validator autonomo, metrica, tre campi nel
 contesto e nuovo passaggio di fase. Nessun
 codice Stage22 viene anticipato.
+
+### Certificazione eseguita
+
+La run 38222151847 del commit
+`3b3c6f7d4a6d8d861f18d293582a63ae6d2f79c1`
+si è conclusa con SUCCESS per 22 job su 22.
+La PATCH 10 ha superato 40 controlli senza
+alcun errore: i successori calcolati dal vero
+ordine 46 sono normativi, mentre il vecchio
+latch della goccia 45 resta eseguito e
+diagnosticato. Lo Stage20 continua ad avere
+esattamente tre confronti rossi intenzionali
+e tutte le firme precedenti sono invariate.

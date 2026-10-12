@@ -839,3 +839,14 @@ contesti, falsificazioni e le nove patch
 precedenti. La firma Stage20 (26 PASS, tre FAIL
 intenzionali) rimane invariata; Stage22 non
 viene anticipato.
+
+### Certificazione nativa di Stage21
+
+La [run GitHub Actions 38222151847](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38222151847)
+ha terminato con **SUCCESS nei 22 job**, sul commit
+`3b3c6f7d4a6d8d861f18d293582a63ae6d2f79c1`.
+Stage21 riporta **40 PASS / 0 FAIL**; Stage20
+mantiene la firma storica **26 PASS / 3 FAIL
+intenzionali**, mentre Stage01–Stage19 preservano
+tutte le firme precedenti. L'oracolo resta
+test-only; non è stato introdotto lo Stage22.
