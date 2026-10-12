@@ -15,8 +15,6 @@ public final class MonsterWeavingLinearCounter {
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
 
-    // Immutable binomial columns are shared across suffix counts of this family.
-    // The access-ordered bound prevents unbounded growth for heterogeneous months.
     private static final int MAX_CACHED_BINOMIAL_COLUMNS = 8;
     private final Map<Integer, BigInteger[]> binomialColumns =
         new LinkedHashMap<Integer, BigInteger[]>(16, 0.75f, true) {

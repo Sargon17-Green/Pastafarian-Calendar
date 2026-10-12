@@ -229,8 +229,6 @@ public final class Stage02IncrementalRouteTests {
         int[] firstPrefix = Arrays.copyOf(first, 7);
         int[] lastPrefix = Arrays.copyOf(last, 7);
 
-        // Exercise both cache-warming orders and repeated lookups. The other
-        // instance supplies independently computed cold-cache results.
         BigInteger expectedFirst = cold.countAfterPrefix(firstPrefix);
         BigInteger expectedLast = cold.countAfterPrefix(lastPrefix);
         eq(expectedFirst, warm.countAfterPrefix(firstPrefix),
